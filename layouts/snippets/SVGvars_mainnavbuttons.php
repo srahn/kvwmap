@@ -86,7 +86,7 @@ else {
              style="stroke-linecap:round;fill:none;stroke:rgb(0,0,0);stroke-width:2"/>
           <circle cx="23" cy="26" r="6" style="fill:none;stroke:rgb(0,0,0);stroke-width:2"/>
         </g>
-        <rect id="zoomin0" onmouseover="show_tooltip(\''.$strZoomIn.'\',evt.clientX,evt.clientY)" onmousedown="zoomin();highlight(evt);noMeasuring();" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;opacity:0.25"/>
+        <rect id="zoomin0" onmouseover="show_tooltip(\''.$strZoomIn.'\',evt.clientX,evt.clientY)" onmousedown="zoomin();highlight(evt);" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;opacity:0.25"/>
       </g>';
     $last_x += 26;
   	return $zoomin;
@@ -110,7 +110,7 @@ else {
              style="stroke-linecap:round;fill:none;stroke:rgb(0,0,0);stroke-width:2"/>
           <circle cx="23" cy="26" r="6" style="fill:none;stroke:rgb(0,0,0);stroke-width:2"/>
         </g>
-        <rect id="zoomout0" onmouseover="show_tooltip(\''.$strZoomOut.'\',evt.clientX,evt.clientY)" onmousedown="zoomout();highlight(evt);noMeasuring();" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;opacity:0.25"/>
+        <rect id="zoomout0" onmouseover="show_tooltip(\''.$strZoomOut.'\',evt.clientX,evt.clientY)" onmousedown="zoomout();highlight(evt);" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;opacity:0.25"/>
       </g>';
     $last_x += 26;
   	return $zoomout;
