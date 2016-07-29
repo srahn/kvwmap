@@ -52,6 +52,8 @@ function save_selection(){
 		if(document.GUI.grundbuchbezirkname != undefined && document.GUI.grundbuchbezirkname.checked == true){attributes = attributes+'grundbuchbezirkname|'}
 		if(document.GUI.grundbuchbezirkschl != undefined && document.GUI.grundbuchbezirkschl.checked == true){attributes = attributes+'grundbuchbezirkschl|'}
 		if(document.GUI.klassifizierung != undefined && document.GUI.klassifizierung.checked == true){attributes = attributes+'klassifizierung|'}
+		if(document.GUI.baubodenrecht != undefined && document.GUI.baubodenrecht.checked == true){attributes = attributes+'baubodenrecht|'}
+		if(document.GUI.abweichenderrechtszustand != undefined && document.GUI.abweichenderrechtszustand.checked == true){attributes = attributes+'abweichenderrechtszustand|'}		
 		document.GUI.attributes.value = attributes;
 		document.GUI.go_plus.value = 'Auswahl_speichern';
 		document.GUI.submit();
@@ -121,6 +123,7 @@ function delete_selection(){
           if($privileg['forstname']){ echo '<input  name="forstname" type="checkbox" '; if($this->formvars['forstname'] == 'true') echo 'checked'; echo '>Forstamtname<br>';}
 			    if($privileg['forstschluessel']){ echo '<input  name="forstschluessel" type="checkbox" '; if($this->formvars['forstschluessel'] == 'true') echo 'checked'; echo '>Forstamtschlüssel<br>';}
 			    if($privileg['letzff']){ echo '<input  name="letzff" type="checkbox" '; if($this->formvars['letzff'] == 'true') echo 'checked'; echo '>Fortführung<br>';}
+					if($privileg['festlegungen']){ echo '<input  name="abweichenderrechtszustand" type="checkbox" '; if($this->formvars['abweichenderrechtszustand'] == 'true') echo 'checked'; echo '>abweichender Rechtszustand<br>';}
 			    ?>
           </td>
           <td valign="top">
@@ -143,6 +146,7 @@ function delete_selection(){
 			    if($privileg['status']){ echo '<input  name="status" type="checkbox" '; if($this->formvars['status'] == 'true') echo 'checked'; echo '>Status<br>';}
 			    if($privileg['verfahren']){ echo '<input  name="verfahren" type="checkbox" '; if($this->formvars['verfahren'] == 'true') echo 'checked'; echo '>Verfahren<br>';}
 			    if($privileg['vorgaenger']){ echo '<input  name="vorgaenger" type="checkbox" '; if($this->formvars['vorgaenger'] == 'true') echo 'checked'; echo '>Vorgänger<br>';}			    
+					if($privileg['festlegungen']){ echo '<input  name="baubodenrecht" type="checkbox" '; if($this->formvars['baubodenrecht'] == 'true') echo 'checked'; echo '>Bauraum/Bodenordnungsrecht<br>';}
 			    ?>
           </td>
         </tr>

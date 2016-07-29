@@ -177,7 +177,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 			}else echo $bgcolor;
             ?>
 			"> 
-          <td><div align="center"> 
+          <td align="left"> 
               <input type="checkbox" name="id[<?php echo $this->nachweis->Dokumente[$i]['id']; ?>]" value="<?php echo $this->nachweis->Dokumente[$i]['id']; ?>"<?php 
         # Püfen ob das Dokument markiert werden soll
                 
@@ -192,8 +192,11 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
             ?> checked<?php 
           }
         }
-        ?>>
-            </div></td>
+        ?>>	
+				<? if($this->nachweis->Dokumente[$i]['bemerkungen'] != ''){ ?>
+					<img src="<? echo GRAPHICSPATH.'emblem-important.png'; ?>" title="Bemerkungen: <? echo $this->nachweis->Dokumente[$i]['bemerkungen']; ?>">
+				<? } ?>
+          </td>
           <td><?php echo $this->formvars['id']=$this->nachweis->Dokumente[$i]['id']; ?></td>
           <td><div align="center"><?php echo $this->formvars['flurid']=$this->nachweis->Dokumente[$i]['flurid']; ?></div></td>
           <? if(NACHWEIS_PRIMARY_ATTRIBUTE != 'rissnummer'){ ?>  

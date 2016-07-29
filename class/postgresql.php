@@ -60,9 +60,14 @@ class pgdatabase {
   function open() {
   	if($this->port == '') $this->port = 5432;
     #$this->debug->write("<br>Datenbankverbindung öffnen: Datenbank: ".$this->dbName." User: ".$this->user,4);
-		$connect_string = 'dbname='.$this->dbName.' port='.$this->port.' user='.$this->user.' password='.$this->passwd;
-		if($this->host != 'localhost' AND $this->host != '127.0.0.1')$connect_string .= ' host='.$this->host;		// das beschleunigt den Connect extrem
-    $this->dbConn=pg_connect($connect_string);
+		$this->connect_string = '' .
+      'dbname='. $this->dbName .
+      ' port=' . $this->port .
+      ' user=' . $this->user .
+      ' password=' . $this->passwd;
+		if($this->host != 'localhost' AND $this->host != '127.0.0.1')
+      $this->connect_string .= ' host=' . $this->host; // das beschleunigt den Connect extrem
+    $this->dbConn = pg_connect($this->connect_string);
     $this->debug->write("Datenbank mit Connection_ID: ".$this->dbConn." geöffnet.",4);
     # $this->version = pg_version($this->dbConn); geht erst mit PHP 5
     $this->version = POSTGRESVERSION;
@@ -83,7 +88,7 @@ class pgdatabase {
 	
 	function read_epsg_codes($order = true){
     global $supportedSRIDs;
-    $sql ="SELECT spatial_ref_sys.srid, coalesce(alias, substr(srtext, 9)) as srtext, minx, miny, maxx, maxy FROM spatial_ref_sys ";
+    $sql ="SELECT spatial_ref_sys.srid, coalesce(alias, substr(srtext, 9, 35)) as srtext, minx, miny, maxx, maxy FROM spatial_ref_sys ";
     $sql.="LEFT JOIN spatial_ref_sys_alias ON spatial_ref_sys_alias.srid = spatial_ref_sys.srid";
     # Wenn zu unterstützende SRIDs angegeben sind, ist die Abfrage diesbezüglich eingeschränkt
     $anzSupportedSRIDs = count($supportedSRIDs);
@@ -96,9 +101,6 @@ class pgdatabase {
     if($ret[0]==0){
 			$i = 0;
       while($row = pg_fetch_assoc($ret[1])){
-      	if(strlen($row['srtext']) > 30){
-					$row['srtext'] = substr($row['srtext'], 0, 30);
-				}				
 				$epsg_codes[$row['srid']] = $row;
 				$i++;
       }
@@ -116,7 +118,7 @@ class pgdatabase {
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
-      $rs=pg_fetch_array($ret[1]);
+      $rs=pg_fetch_assoc($ret[1]);
       $curExtent->minx=$rs['minx'];
       $curExtent->miny=$rs['miny'];
       $curExtent->maxx=$rs['maxx'];
@@ -215,7 +217,7 @@ class pgdatabase {
     $sql ="SELECT st_astext(st_transform(st_geomfromtext('".$polygon."', ".$curSRID."), ".$newSRID."))";
     $ret=$this->execSQL($sql, 4, 0);
     if($ret[0] == 0){
-      $rs=pg_fetch_array($ret[1]);
+      $rs=pg_fetch_row($ret[1]);
     }
     return $rs[0];
   }
@@ -225,7 +227,7 @@ class pgdatabase {
     $sql.=" FROM (SELECT st_transform(st_geomfromtext('POINT(".$point.")',".$curSRID."),".$newSRID.") AS point) AS foo";
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
-      $rs=pg_fetch_array($ret[1]);
+      $rs=pg_fetch_assoc($ret[1]);
       if($coordtype != 'dec' AND $rs['x'] < 361){
 				switch ($coordtype) {
 					case 'dms' :
@@ -685,7 +687,7 @@ class pgdatabase {
 	    $sql.= " AND pg_class.oid = pg_constraint.conrelid AND pg_class.relname = '".$table."'";
 	    $ret = $this->execSQL($sql, 4, 0);
 	    if($ret[0]==0){
-	      while($row = pg_fetch_array($ret[1])){
+	      while($row = pg_fetch_assoc($ret[1])){
 	        $constraints[] = $row['consrc'];
 	      }
 	    }
@@ -737,7 +739,7 @@ class pgdatabase {
     $sql = 'SELECT st_transform(the_geom, '.$srid.') from u_polygon WHERE id = '.$poly_id;
     $ret = $this->execSQL($sql, 4, 0);
     if($ret[0]==0){
-      $poly = pg_fetch_array($ret[1]);
+      $poly = pg_fetch_row($ret[1]);
     }
     return $poly[0];
   }
@@ -756,7 +758,7 @@ class pgdatabase {
       # Erzeugen eines RectObject
       $rect= ms_newRectObj();
       # Abfragen und zuordnen der Koordinaten der Box
-      $rs=pg_fetch_array($ret[1]);
+      $rs=pg_fetch_assoc($ret[1]);
       if ($rs['maxx']-$rs['minx']==0) {
         $rs['maxx']=$rs['maxx']+1;
         $rs['minx']=$rs['minx']-1;
@@ -778,7 +780,7 @@ class pgdatabase {
     $ret=$this->execSQL($sql,4, 0);
     if($ret[0] == 0){
       $rect= ms_newRectObj();
-      $rs=pg_fetch_array($ret[1]);
+      $rs=pg_fetch_assoc($ret[1]);
       $rect->minx=$rs['minx']-30; 
 			$rect->miny=$rs['miny']-30;
       $rect->maxx=$rs['maxx']+30; 
@@ -803,7 +805,7 @@ class pgdatabase {
     }
     else {
       if (pg_num_rows($ret[1])>0) {
-        $ret[1]=pg_fetch_array($ret[1]);
+        $ret[1]=pg_fetch_assoc($ret[1]);
       }
     }
     return $ret;
@@ -828,7 +830,7 @@ class pgdatabase {
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    while($rs=pg_fetch_array($ret[1])) {
+    while($rs=pg_fetch_assoc($ret[1])) {
       $Grundbuch[]=$rs;
     }
     $ret[1]=$Grundbuch;
@@ -879,7 +881,7 @@ class pgdatabase {
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    while($rs=pg_fetch_array($ret[1])) {
+    while($rs=pg_fetch_assoc($ret[1])) {
       $Buchung[]=$rs;
     }
     $ret[1]=$Buchung;
@@ -904,7 +906,7 @@ class pgdatabase {
     #echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    while ($rs=pg_fetch_array($queryret[1])) {
+    while ($rs=pg_fetch_assoc($queryret[1])) {
       $Liste['GemkgID'][]=$rs['gemkgid'];
       $Liste['Name'][]=$rs['name'];
       $Liste['gemeinde'][]=$rs['gemeinde'];
@@ -924,7 +926,7 @@ class pgdatabase {
     #echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    while ($rs=pg_fetch_array($ret[1])) {
+    while ($rs=pg_fetch_assoc($ret[1])) {
       $GemeindeListe['ID'][]=$rs['id'];
       $GemeindeListe['Name'][]=$rs['name'];
     }
@@ -961,7 +963,7 @@ class pgdatabase {
 		}
     #echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
-    while ($rs=pg_fetch_array($queryret[1])) {
+    while ($rs=pg_fetch_assoc($queryret[1])) {
       $Liste['FlstID'][]=$rs['flurstkennz'];
       $FlstNr=intval($rs['zaehler']);
       if ($rs['nenner']!='') { $FlstNr.="/".intval($rs['nenner']); }
@@ -1005,7 +1007,7 @@ class pgdatabase {
     #echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
-      while($rs=pg_fetch_array($ret[1])) {
+      while($rs=pg_fetch_assoc($ret[1])) {
         $FlurstKennz[]=$rs['flurstkennz'];
       }
       $ret[1]=$FlurstKennz;
@@ -1024,7 +1026,7 @@ class pgdatabase {
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
-      while($rs=pg_fetch_array($ret[1])) {
+      while($rs=pg_fetch_assoc($ret[1])) {
         $FlurstKennz[]=$rs['flurstkennz'];
       }
       $ret[1]=$FlurstKennz;
@@ -1033,7 +1035,7 @@ class pgdatabase {
   }
   
   function getALBData($FlurstKennz, $without_temporal_filter = false){		
-		$sql ="SELECT distinct f.gml_id, 0 as hist_alb, lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, f.abweichenderrechtszustand, zaehler, nenner, k.schluesselgesamt AS kreisid, k.bezeichnung as kreisname, gem.schluesselgesamt as gemkgschl, gem.bezeichnung as gemkgname, g.schluesselgesamt as gemeinde, g.bezeichnung as gemeindename,d.stelle as finanzamt, d.bezeichnung AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp ";
+		$sql ="SELECT distinct f.gml_id, 0 as hist_alb, lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, CASE WHEN f.abweichenderrechtszustand = 'true' THEN 'ja' ELSE 'nein' END AS abweichenderrechtszustand, zaehler, nenner, k.schluesselgesamt AS kreisid, k.bezeichnung as kreisname, gem.schluesselgesamt as gemkgschl, gem.bezeichnung as gemkgname, g.schluesselgesamt as gemeinde, g.bezeichnung as gemeindename,d.stelle as finanzamt, d.bezeichnung AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp ";
 		$sql.="FROM alkis.ax_kreisregion AS k, alkis.ax_gemeinde as g, alkis.ax_gemarkung AS gem, alkis.ax_flurstueck AS f ";
 		$sql.="LEFT JOIN alkis.ax_dienststelle as d ON d.stellenart = 1200 AND d.stelle::integer = ANY(f.stelle) ";
 		$sql.="WHERE f.gemarkungsnummer=gem.gemarkungsnummer AND f.land = gem.land AND f.kreis = g.kreis AND f.gemeinde = g.gemeinde AND f.kreis = k.kreis AND f.flurstueckskennzeichen='".$FlurstKennz."'";
@@ -1055,7 +1057,7 @@ class pgdatabase {
       $ret[1]=$queryret[1];
     }
     else{
-			$rs=pg_fetch_array($queryret[1]);
+			$rs=pg_fetch_assoc($queryret[1]);
 			$ret[0]=0;
       $ret[1]=$rs;
     }
@@ -1099,7 +1101,7 @@ class pgdatabase {
       $this->debug->write("<br>Abbruch in postgresql.php getFlurstuecksKennzByGemeindeIDs Zeile: ".__LINE__."<br>sql: ".$sql,4);
       return $ret;
     }
-    while($rs=pg_fetch_array($query)) {
+    while($rs=pg_fetch_assoc($query)) {
       $ret[1][]=$rs["flurstkennz"];
     }
     return $ret;
@@ -1120,7 +1122,7 @@ class pgdatabase {
     }
     else {
       $ret[0]=0;
-      while($rs=pg_fetch_array($queryret[1])) {
+      while($rs=pg_fetch_assoc($queryret[1])) {
         $Strassen[]=$rs;
       }
       $ret[1]=$Strassen;
@@ -1138,7 +1140,7 @@ class pgdatabase {
     }
     else {
       $ret[0]=0;
-      $rs=pg_fetch_array($queryret[1]);
+      $rs=pg_fetch_row($queryret[1]);
       $StrID=$rs[0];
       $ret[1]=$StrID;
     }
@@ -1160,7 +1162,7 @@ class pgdatabase {
     }
     else {
       $ret[0]=0;
-      while($rs=pg_fetch_array($queryret[1])) {
+      while($rs=pg_fetch_row($queryret[1])) {
         $HausNr[]=$rs[0];
       }
       $ret[1]=$HausNr;
@@ -1185,7 +1187,7 @@ class pgdatabase {
     else {
       $ret[0]=0;
       if (pg_num_rows($queryret[1])>0) {
-        while($rs=pg_fetch_array($queryret[1])) {
+        while($rs=pg_fetch_assoc($queryret[1])) {
           $Lage[]= $rs['unverschluesselt'].$rs['bezeichnung'];
         }
       }
@@ -1195,7 +1197,7 @@ class pgdatabase {
   }
   
   function getNutzung($FlurstKennz) {
-    $sql ="SELECT round((st_area_utm(st_intersection(n.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")::numeric * amtlicheflaeche / st_area_utm(f.wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID."))::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche, nas.nutzungsartengruppe::text||nas.nutzungsart::text||nas.untergliederung1::text||nas.untergliederung2::text as nutzungskennz, nag.gruppe||' '||coalesce(na.nutzungsart, '')||' '||coalesce(nu1.untergliederung1, '')||' '||coalesce(nu2.untergliederung2, '') as bezeichnung, n.info, n.zustand, n.name, amtlicheflaeche";
+    $sql ="SELECT round((st_area_utm(st_intersection(n.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")::numeric * amtlicheflaeche / st_area_utm(f.wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID."))::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche, nas.nutzungsartengruppe::text||nas.nutzungsart::text||nas.untergliederung1::text||nas.untergliederung2::text as nutzungskennz, nag.gruppe||' '||coalesce(na.nutzungsart, '')||' '||coalesce(nu1.untergliederung1, '')||' '||coalesce(nu2.untergliederung2, '') as bezeichnung, nag.bereich, nag.gruppe, na.nutzungsart, nu1.untergliederung1, nu2.untergliederung2, n.info, n.zustand, n.name, amtlicheflaeche";
 		$sql.=" FROM alkis.ax_flurstueck f, alkis.n_nutzung n";
 		$sql.=" left join alkis.n_nutzungsartenschluessel nas on n.nutzungsartengruppe = nas.nutzungsartengruppe and n.werteart1 = nas.werteart1 and n.werteart2 = nas.werteart2";
 		$sql.=" left join alkis.n_nutzungsartengruppe nag on nas.nutzungsartengruppe = nag.schluessel";
@@ -1206,6 +1208,7 @@ class pgdatabase {
 		$sql.=" AND st_area_utm(st_intersection(n.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.") > 0.001";
 		$sql.=" AND f.flurstueckskennzeichen = '".$FlurstKennz."'";
 		$sql.= $this->build_temporal_filter(array('f','n'));
+		$sql.=" ORDER BY nutzungskennz";
 		#echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret[0] OR pg_num_rows($queryret[1])==0) {
@@ -1215,7 +1218,7 @@ class pgdatabase {
     $summe = 0;
 		$groesste = 0;
 		$i = 0;
-    while($rs=pg_fetch_array($queryret[1])) {
+    while($rs=pg_fetch_assoc($queryret[1])) {
 			$summe += $rs['flaeche'];
 			if($groesste < $rs['flaeche']){
 				$groesste = $rs['flaeche'];
@@ -1241,7 +1244,7 @@ class pgdatabase {
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
     if (pg_num_rows($ret[1])>0) {
-      while($rs=pg_fetch_array($ret[1])) {
+      while($rs=pg_fetch_assoc($ret[1])) {
         $Sonstigesrecht[]=$rs;
       }
     }
@@ -1260,7 +1263,7 @@ class pgdatabase {
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
     if (pg_num_rows($ret[1])>0) {
-      while($rs=pg_fetch_array($ret[1])) {
+      while($rs=pg_fetch_assoc($ret[1])) {
         $Denkmalschutzrecht[]=$rs;
       }
     }
@@ -1279,7 +1282,7 @@ class pgdatabase {
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
     if (pg_num_rows($ret[1])>0) {
-      while($rs=pg_fetch_array($ret[1])) {
+      while($rs=pg_fetch_assoc($ret[1])) {
         $BauBodenrecht[]=$rs;
       }
     }
@@ -1297,7 +1300,7 @@ class pgdatabase {
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
     if (pg_num_rows($ret[1])>0) {
-      while($rs=pg_fetch_array($ret[1])) {
+      while($rs=pg_fetch_assoc($ret[1])) {
         $NaturUmweltrecht[]=$rs;
       }
     }
@@ -1318,7 +1321,7 @@ class pgdatabase {
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
     if (pg_num_rows($ret[1])>0) {
-      while($rs=pg_fetch_array($ret[1])) {
+      while($rs=pg_fetch_assoc($ret[1])) {
         $Schutzgebiet[]=$rs;
       }
     }
@@ -1342,7 +1345,7 @@ class pgdatabase {
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
     if (pg_num_rows($ret[1])>0) {
-      while($rs=pg_fetch_array($ret[1])) {
+      while($rs=pg_fetch_assoc($ret[1])) {
         $Strassenrecht[]=$rs;
       }
     }
@@ -1360,7 +1363,7 @@ class pgdatabase {
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
     if (pg_num_rows($ret[1])>0) {
-      while($rs=pg_fetch_array($ret[1])) {
+      while($rs=pg_fetch_assoc($ret[1])) {
         $Strassenrecht[]=$rs;
       }
     }
@@ -1379,7 +1382,7 @@ class pgdatabase {
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
     if (pg_num_rows($ret[1])>0) {
-      while($rs=pg_fetch_array($ret[1])) {
+      while($rs=pg_fetch_assoc($ret[1])) {
         $Forstrecht[]=$rs;
       }
     }
@@ -1397,7 +1400,7 @@ class pgdatabase {
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
     if (pg_num_rows($ret[1])>0) {
-      while($rs=pg_fetch_array($ret[1])) {
+      while($rs=pg_fetch_assoc($ret[1])) {
         $strittigeGrenze[]=$rs;
       }
     }
@@ -1426,7 +1429,7 @@ class pgdatabase {
 			$summe_geom = 0;
 			$groesste = 0;
 			$i = 0;
-      while($rs=pg_fetch_array($ret[1])){
+      while($rs=pg_fetch_assoc($ret[1])){
 				$summe_amt += $rs['flaeche'];
 				$summe_geom += $rs['fl_geom'];
 				if($groesste < $rs['fl_geom']){
@@ -1462,12 +1465,12 @@ class pgdatabase {
 				$sql.= "LEFT JOIN alkis.ax_flurstueck c ON c.flurstueckskennzeichen = nachfolger ";			# falls ein Nachfolger in ALKIS historisch ist (endet IS NOT NULL)
 				$sql.= "GROUP BY nachfolger ORDER BY nachfolger";																														# damit aber immer nur die jüngste Version eines Flurstücks gefunden wird
 				$queryret=$this->execSQL($sql, 4, 0);	
-				while($rs=pg_fetch_array($queryret[1])){
+				while($rs=pg_fetch_assoc($queryret[1])){
 					$Nachfolger[]=$rs;
 				}
 			}
 			else{
-				while($rs=pg_fetch_array($queryret[1])){
+				while($rs=pg_fetch_assoc($queryret[1])){
 					$Nachfolger[]=$rs;
 				}
 			}
@@ -1488,12 +1491,12 @@ class pgdatabase {
 			if(pg_num_rows($queryret[1]) == 0){			# kein Vorgänger unter ALKIS -> Suche in ALB-Historie
 				$sql = "SELECT flurstueckskennzeichen as vorgaenger, TRUE as hist_alb FROM alkis.ax_historischesflurstueckohneraumbezug WHERE ARRAY['".$FlurstKennz."'::varchar] <@ nachfolgerflurstueckskennzeichen ORDER BY vorgaenger";
 				$queryret=$this->execSQL($sql, 4, 0);
-				while($rs=pg_fetch_array($queryret[1])) {
+				while($rs=pg_fetch_assoc($queryret[1])) {
 					$Vorgaenger[]=$rs;
 				}
 			}
 			else{
-				while($rs=pg_fetch_array($queryret[1])) {
+				while($rs=pg_fetch_assoc($queryret[1])) {
 					$Vorgaenger[]=$rs;
 				}
 			}
@@ -1503,8 +1506,13 @@ class pgdatabase {
     return $ret;
   }
 	
-	function getVersionen($table, $gml_ids){
-		$sql = "SELECT beginnt::timestamp, endet::timestamp, bezeichner as anlass, '".$table."' as table FROM alkis.".$table." LEFT JOIN alkis.ax_fortfuehrungsanlaesse ON wert = NULLIF(anlass, '')::integer WHERE gml_id IN ('".implode("','", $gml_ids)."') ORDER BY beginnt";
+	function getVersionen($table, $gml_ids, $start){
+		$versionen = array();
+		$sql = "SELECT beginnt::timestamp, endet::timestamp, bezeichner as anlass, '".$table."' as table ";
+		$sql.= "FROM alkis.".$table." LEFT JOIN alkis.ax_fortfuehrungsanlaesse ON wert = NULLIF(anlass, '')::integer ";
+		$sql.= "WHERE gml_id IN ('".implode("','", $gml_ids)."') ";
+		if($start)$sql.= "AND beginnt::timestamp > '".$start."' ";
+		$sql.= "ORDER BY beginnt";
 		$queryret=$this->execSQL($sql, 4, 0);
 		while($rs=pg_fetch_assoc($queryret[1])) {
 			$versionen[]=$rs;
@@ -1513,7 +1521,7 @@ class pgdatabase {
 	}
   
   function getEigentuemerliste($FlurstKennz,$Bezirk,$Blatt,$BVNR, $without_temporal_filter = false) {
-    $sql = "SELECT distinct case when bestehtausrechtsverhaeltnissenzu is not null or n.beschriebderrechtsgemeinschaft is not null or n.artderrechtsgemeinschaft is not null then true else false end as order1, coalesce(n.laufendenummernachdin1421, lpad(split_part(n.nummer, '.', 1), 4, '0')||'.'||lpad(split_part(n.nummer, '.', 2), 2, '0')||'.'||lpad(split_part(n.nummer, '.', 3), 2, '0')||'.'||lpad(split_part(n.nummer, '.', 4), 2, '0'), '0') as order2, CASE WHEN n.beschriebderrechtsgemeinschaft is null and n.artderrechtsgemeinschaft is null THEN n.laufendenummernachdin1421 ELSE NULL END AS namensnr, n.gml_id as n_gml_id, p.gml_id, p.nachnameoderfirma, p.vorname, p.akademischergrad, p.namensbestandteil, p.geburtsname, p.geburtsdatum::date, anschrift.gml_id as anschrift_gml_id, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, 'OT '||anschrift.ortsteil as ortsteil, anschrift.bestimmungsland, w.bezeichner as Art, n.zaehler||'/'||n.nenner as anteil, coalesce(NULLIF(n.beschriebderrechtsgemeinschaft, ''),adrg.artderrechtsgemeinschaft) as zusatz_eigentuemer ";
+    $sql = "SELECT distinct case when bestehtausrechtsverhaeltnissenzu is not null or n.beschriebderrechtsgemeinschaft is not null or n.artderrechtsgemeinschaft is not null then true else false end as order1, CASE WHEN n.laufendenummernachdin1421 IS NULL THEN n.gml_id ELSE bestehtausrechtsverhaeltnissenzu END as order2, coalesce(n.laufendenummernachdin1421, '0') as order3, CASE WHEN n.beschriebderrechtsgemeinschaft is null and n.artderrechtsgemeinschaft is null THEN n.laufendenummernachdin1421 ELSE NULL END AS namensnr, n.gml_id as n_gml_id, p.gml_id, p.nachnameoderfirma, p.vorname, p.akademischergrad, p.namensbestandteil, p.geburtsname, p.geburtsdatum::date, anschrift.gml_id as anschrift_gml_id, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, 'OT '||anschrift.ortsteil as ortsteil, anschrift.bestimmungsland, w.bezeichner as Art, n.zaehler||'/'||n.nenner as anteil, coalesce(NULLIF(n.beschriebderrechtsgemeinschaft, ''),adrg.artderrechtsgemeinschaft) as zusatz_eigentuemer ";
 		$sql.= "FROM alkis.ax_buchungsstelle s ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
@@ -1534,11 +1542,11 @@ class pgdatabase {
       $sql.=" AND s.laufendenummer='".$BVNR."'";
     }
 		if(!$without_temporal_filter)$sql.= $this->build_temporal_filter(array('s', 'g', 'b', 'n', 'p'));
-    $sql.= " ORDER BY order1, order2;";
+    $sql.= " ORDER BY order1, order2, order3;";
     #echo $sql.'<br><br>';
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0] OR pg_num_rows($ret[1])==0) { return; }
-    while ($rs=pg_fetch_array($ret[1])) {
+    while ($rs=pg_fetch_assoc($ret[1])) {
       $Grundbuch = new grundbuch("","",$this->debug);
       
 			$newparts = array();
@@ -1667,7 +1675,7 @@ class pgdatabase {
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
     	$i = 0;
-      while($rs=pg_fetch_array($ret[1])) {
+      while($rs=pg_fetch_assoc($ret[1])) {
       	$namen[$i]=$rs;
 	      $namen[$i]['name1'] = $rs['nachnameoderfirma'];
 	      if($rs['vorname'] != '')$namen[$i]['name1'] .= ', '.$rs['vorname']; 
@@ -1697,7 +1705,7 @@ class pgdatabase {
     else {
       $ret[0]=0;
       if (pg_num_rows($queryret[1])>0) {
-        $rs=pg_fetch_array($queryret[1]);
+        $rs=pg_fetch_assoc($queryret[1]);
         $Forstamt=$rs;
       }
       else {
@@ -1721,7 +1729,7 @@ class pgdatabase {
     }
     else {
       $ret[0]=0;
-      $ret[1]=pg_fetch_array($queryret[1]);
+      $ret[1]=pg_fetch_assoc($queryret[1]);
     }
     return $ret;
 	}
@@ -1737,7 +1745,7 @@ class pgdatabase {
     }
     else {
       $ret[0]=0;
-      $rs=pg_fetch_array($queryret[1]);
+      $rs=pg_fetch_assoc($queryret[1]);
       $ret[1]=$rs['gemkgname'];
     }
     return $ret;
@@ -1749,7 +1757,7 @@ class pgdatabase {
 		$sql.= " ORDER BY rtrim(ltrim(buchungsblattnummermitbuchstabenerweiterung,'PF0'),'ABCDEFGHIJKLMNOPQRSTUVWXYZ')::integer";
 		$ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
-    	while($rs=pg_fetch_array($ret[1])){
+    	while($rs=pg_fetch_assoc($ret[1])){
       	$liste['blatt'][]=$rs['blatt'];
     	}
     }
@@ -1776,7 +1784,7 @@ class pgdatabase {
 		#echo $sql;
 		$ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
-    	while($rs=pg_fetch_array($ret[1])){
+    	while($rs=pg_fetch_assoc($ret[1])){
       	$liste['blatt'][]=$rs['blatt'];
     	}
     }
@@ -1788,7 +1796,7 @@ class pgdatabase {
 		$sql.= $this->build_temporal_filter(array('ax_buchungsblattbezirk'));
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
-    	while($rs=pg_fetch_array($ret[1])){
+    	while($rs=pg_fetch_assoc($ret[1])){
       	$liste['schluessel'][]=$rs['grundbuchbezschl'];
       	$liste['bezeichnung'][]=$rs['bezeichnung'];
       	$liste['beides'][]=$rs['bezeichnung'].' ('.$rs['grundbuchbezschl'].')';
@@ -1818,7 +1826,7 @@ class pgdatabase {
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
-    	while($rs=pg_fetch_array($ret[1])){
+    	while($rs=pg_fetch_assoc($ret[1])){
       	$liste['schluessel'][]=$rs['grundbuchbezschl'];
       	$liste['bezeichnung'][]=$rs['bezeichnung'];
       	$liste['beides'][]=$rs['bezeichnung'].' ('.$rs['grundbuchbezschl'].')';
@@ -1846,7 +1854,7 @@ class pgdatabase {
       $Bezirk['schluessel']="0";
     }
     else{
-      $Bezirk=pg_fetch_array($ret[1]);
+      $Bezirk=pg_fetch_assoc($ret[1]);
     }
     return $Bezirk;
   }
@@ -1874,7 +1882,7 @@ class pgdatabase {
     #echo $sql;
     $this->debug->write("<p>postgres getHausNrListe Abfragen der Strassendaten:<br>".$sql,4);
     $queryret=$this->execSQL($sql, 4, 0);
-    while ($rs=pg_fetch_array($queryret[1])) {
+    while ($rs=pg_fetch_assoc($queryret[1])) {
       $Liste['HausID'][]=$rs['id'];
       $Liste['HausNr'][]=$rs['nrtext'];
     }
@@ -1903,7 +1911,7 @@ class pgdatabase {
     $this->debug->write("<p>postgres getStrassenListe Abfragen der Strassendaten:<br>".$sql,4);
     $queryret=$this->execSQL($sql, 4, 0);
     $i = 0;
-    while ($rs=pg_fetch_array($queryret[1])) {
+    while ($rs=pg_fetch_assoc($queryret[1])) {
     	if($namen[$i-1] == $rs['strassenname'] AND $Liste['StrID'][$i-1] == $rs['strasse']){
     		# Strasse doppelt drin -> ï¿½berspringen
     		$i = $i-1;
@@ -1952,7 +1960,7 @@ class pgdatabase {
 		}
     #echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
-    while ($rs=pg_fetch_array($queryret[1])) {
+    while ($rs=pg_fetch_assoc($queryret[1])) {
       $Liste['FlurID'][]=$rs['flurid'];
       $Liste['Name'][]=intval($rs['name']);
       $Liste['GemFlurID'][]=$rs['gemflurid'];
@@ -1981,7 +1989,7 @@ class pgdatabase {
       $ret[1]='Fehler beim Abfragen des Umschlieï¿½enden Rechtecks um die Gemeinde.<br>'.$ret[1];
     }
     else {
-      $rs=pg_fetch_array($ret[1]);
+      $rs=pg_fetch_assoc($ret[1]);
       $ret[1]=$rs;
     }
     return $ret;
@@ -1999,7 +2007,7 @@ class pgdatabase {
       $ret[1]='Fehler beim Abfragen des Umschliessenden Rechtecks um die Gemeinde.<br>'.$ret[1];
     }
     else {
-      $rs=pg_fetch_array($ret[1]);
+      $rs=pg_fetch_assoc($ret[1]);
       if ($rs['minx']==0) {
         $ret[0]=1;
         $ret[1]='Gemeinde nicht in Datenbank '.$this->dbName.' vorhanden.';
@@ -2023,7 +2031,7 @@ class pgdatabase {
       $ret[1]='Fehler beim Abfragen des Umschliessenden Rechtecks um die Gemarkung.<br>'.$ret[1];
     }
     else {
-      $rs=pg_fetch_array($ret[1]);
+      $rs=pg_fetch_assoc($ret[1]);
       if ($rs['minx']==0) {
         $ret[0]=1;
         $ret[1]='Gemarkung nicht in Datenbank '.$this->dbName.' vorhanden.';
@@ -2048,7 +2056,7 @@ class pgdatabase {
       $ret[1]='Fehler beim Abfragen des Umschliessenden Rechtecks um die Flur.<br>'.$ret[1];
     }
     else {
-      $rs=pg_fetch_array($ret[1]);
+      $rs=pg_fetch_assoc($ret[1]);
       if ($rs['minx']==0) {
         $ret[0]=1;
         $ret[1]='Flur nicht in Datenbank '.$this->dbName.' vorhanden.';
@@ -2081,7 +2089,7 @@ class pgdatabase {
       $ret[1]='Fehler beim Abfragen des Umschliessenden Rechtecks um die Flurstücke.<br>'.$ret[1];
     }
     else {
-      $rs=pg_fetch_array($ret[1]);
+      $rs=pg_fetch_assoc($ret[1]);
       if ($rs['minx']==0) {
         $ret[0]=1;
         $ret[1]='Flurstïück nicht in Postgres Datenbank '.$this->dbName.' vorhanden.';
@@ -2120,7 +2128,7 @@ class pgdatabase {
       $ret[1]='Fehler beim Abfragen des Umschliessenden Rechtecks um die Gebäude.<br>'.$ret[1];
     }
     else {
-      $rs=pg_fetch_array($ret[1]);
+      $rs=pg_fetch_assoc($ret[1]);
       if ($rs['minx']==0) {
         $ret[0]=1;
         $ret[1]='Geb&auml;ude nicht in Postgres Datenbank '.$this->dbName.' vorhanden.';
@@ -2261,7 +2269,7 @@ class pgdatabase {
     }
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
-      while($rs=pg_fetch_array($ret[1])) {
+      while($rs=pg_fetch_assoc($ret[1])) {
         # Abfragen und Zuweisen der Keywortbezeichnungen
         $theme=$this->getKeywords('','','theme','',$rs['id'],'keyword');
         $themes=$theme[1]['keyword'];
@@ -2316,7 +2324,7 @@ class pgdatabase {
       $ret[1]='\nAuf Grund eines Datenbankfehlers konnten die Schlagwï¿½rter nicht abgefragt werden!\n'.$ret[1];
     }
     else {
-      while($rs=pg_fetch_array($ret[1])) {
+      while($rs=pg_fetch_assoc($ret[1])) {
         $keywords['id'][]=$rs['id'];
         $keywords['keyword'][]=$rs['keyword'];
       }

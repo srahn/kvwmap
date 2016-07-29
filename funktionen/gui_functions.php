@@ -425,6 +425,54 @@ function zoomToMaxLayerExtent(zoom_layer_id){
 	overlay_submit(currentform);
 }
 
+function getLayerOptions(layer_id){
+	if(document.GUI.layer_options_open.value != '')closeLayerOptions(document.GUI.layer_options_open.value);
+	ahah('index.php', 'go=getLayerOptions&layer_id='+layer_id, new Array(document.getElementById('options_'+layer_id), ''), new Array('sethtml', 'execute_function'));
+	document.GUI.layer_options_open.value = layer_id;
+}
+
+function closeLayerOptions(layer_id){
+	document.GUI.layer_options_open.value = '';
+	document.getElementById('options_'+layer_id).innerHTML=' ';
+}
+
+function saveLayerOptions(layer_id){	
+	document.GUI.go.value = 'saveLayerOptions';
+	document.GUI.submit();
+}
+
+function resetLayerOptions(layer_id){	
+	document.GUI.go.value = 'resetLayerOptions';
+	document.GUI.submit();
+}
+
+function scrollLayerOptions(){
+	layer_id = document.GUI.layer_options_open.value;
+	if(layer_id != ''){
+		legend_posy = document.getElementById('legenddiv').getBoundingClientRect().top;
+		posy = document.getElementById('options_'+layer_id).getBoundingClientRect().top - (13+legend_posy);
+		if(posy > 70 && posy < document.GUI.browserheight.value-220)document.getElementById('options_content_'+layer_id).style.top = posy;
+	}
+}
+
+function activateAllClasses(class_ids){
+	var classids = class_ids.split(",");
+	for(i = 0; i < classids.length; i++){
+		selClass = document.getElementsByName("class"+classids[i])[0];
+		if(selClass != undefined)selClass.value = 1;
+	}
+	overlay_submit(currentform);
+}
+
+function deactivateAllClasses(class_ids){
+	var classids = class_ids.split(",");
+	for(i = 0; i < classids.length; i++){
+		selClass = document.getElementsByName("class"+classids[i])[0];
+		if(selClass != undefined)selClass.value = 0;
+	}
+	overlay_submit(currentform);
+}
+
 /*Anne*/
 function changeClassStatus(classid,imgsrc,instantreload){
 	selClass = document.getElementsByName("class"+classid)[0];

@@ -2,6 +2,7 @@
  $strTitle="Layereigenschaften stellenbezogen";
  $strTask=" of the Task";
  $strQueryable="Queryable";
+ $strGeomUsable="Geometry Usable";
  $strMinScale="Min scale";
  $strMaxScale="Max scale";
  $strOffSite="Offsite";

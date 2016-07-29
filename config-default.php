@@ -5,7 +5,7 @@
 #                                                                  #
 ####################################################################
 # aktuelle Versionsnummer
-define('VERSION','2.3');
+define('VERSION','2.4');
 define('APPLVERSION','kvwmap/');
 # Bezeichnung der MySQL-Datenbank mit den Benutzerdaten
 $dbname='kvwmapdb';
@@ -121,6 +121,9 @@ define('CHECK_CLIENT_IP',true);                               # Version 1.6.9 Se
 
 # maximale Länge der Passwörter
 define('PASSWORD_MAXLENGTH', 16);		# Version 2.1
+
+# minimale Länge der Passwörter
+define('PASSWORD_MINLENGTH', 6);		# Version 2.4
 
 # Prüfung neues Passwort
 # Auskommentiert, wenn das Passwort vom Admin auf "unendlichen" Zeitraum vergeben wird

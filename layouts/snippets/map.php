@@ -155,6 +155,7 @@ if($this->formvars['gps_follow'] == ''){
 						<input type="hidden" name="svghelp" id="svghelp">
 						<input type="hidden" name="activated_vertex" value="0">
 						<input type="hidden" name="measured_distance" value="<? echo $this->formvars['measured_distance']; ?>">						
+						<input type="hidden" name="layer_options_open" value="">
     <?php
         include(LAYOUTPATH.'snippets/SVG_map.php');
     ?>
@@ -287,7 +288,7 @@ if($this->formvars['gps_follow'] == ''){
 								<a href="index.php?go=reset_querys"><img src="graphics/tool_info.png" border="0" alt="<? echo $strInfoQuery; ?>" title="<? echo $strInfoQuery.' | '.$strClearAllQuerys; ?>" width="17"></a>
 								<a href="index.php?go=reset_layers"><img src="graphics/layer.png" border="0" alt="<? echo $strLayerControl; ?>" title="<? echo $strLayerControl.' | '.$strDeactivateAllLayer; ?>" width="20" height="20"></a><br>
 							</div>
-						<div id="scrolldiv" onscroll="document.GUI.scrollposition.value = this.scrollTop;" style="height:<?php echo $legendheight; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
+						<div id="scrolldiv" onscroll="document.GUI.scrollposition.value = this.scrollTop; scrollLayerOptions();" style="height:<?php echo $legendheight; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
 							<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
 							<div onclick="document.GUI.legendtouched.value = 1;" id="legend">
 								<? echo $this->legende; ?>

@@ -78,6 +78,7 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
     	}
     }
 		$index = 0;
+		$rowspan = array();
 		$rowspan[$index] = 0;
 		for($i=0;$i<$anzObj;$i++){
 			if($this->buchungen[$index]['bvnr'] == $this->buchungen[$i]['bvnr']){
@@ -95,7 +96,7 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 			<? echo $this->buchungen[0]['bvnr'];
 			if($this->Stelle->funktionen['MV0600']['erlaubt']){ ?>&nbsp;<a href="index.php?go=ALKIS_Auszug&formnummer=MV0600&Buchungsstelle=<? echo $this->buchungen[0]['gml_id'] ?>" target="_blank">Grundstücksnachweis</a>&nbsp;<? } ?>
 			</td>
-      <td valign="top" align="center"><?php echo '&nbsp;'.$this->buchungen[0]['erbbaurechtshinw'];?></td>
+      <td valign="top" align="center"><? if(in_array($this->buchungen[0]['buchungsart'], array(2101, 2203, 2303)))echo 'belastet mit Erbbaurecht'; if(in_array($this->buchungen[0]['buchungsart'], array(2103)))echo 'belastet mit Nutzungsrecht'; ?></td>
       <td style="width:250px" valign="top" rowspan="<? echo $anzObj; ?>">
       	<table>
       		<? echo $Eigentuemer; ?>
@@ -143,7 +144,7 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 					if($this->Stelle->funktionen['MV0600']['erlaubt']){ ?>&nbsp;<a href="index.php?go=ALKIS_Auszug&formnummer=MV0600&Buchungsstelle=<? echo $this->buchungen[$i]['gml_id'] ?>" target="_blank">Grundstücksnachweis</a>&nbsp;<? } ?>
 				</td>
 				<? } ?>
-	      <td valign="top" align="center"><?php echo '&nbsp;'.$this->buchungen[$i]['erbbaurechtshinw'];?></td>
+	      <td valign="top" align="center"><? if(in_array($this->buchungen[$i]['buchungsart'], array(2101, 2203, 2303)))echo 'belastet mit Erbbaurecht'; if(in_array($this->buchungen[$i]['buchungsart'], array(2103)))echo 'belastet mit Nutzungsrecht'; ?></td>
 	    	<td valign="top"><? echo $Adressbezeichnung.'&nbsp;'; ?></td>
 	    	<td valign="top"><? echo $Nutzunglangtext.'&nbsp;'; ?></td>
 	      <td valign="top" align="center"><?php echo $this->buchungen[$i]['gemkgname']; ?></td>

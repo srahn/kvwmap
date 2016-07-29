@@ -363,6 +363,7 @@ function startup(){';
 	}
 	get_polygon_path();	
 	redrawPolygon();
+	if(doing == "polygonquery"){polygonarea()};
 	set_suchkreis();
 	eval(doing+"()");	
   document.getElementById(doing+"0").style.setProperty("fill",highlighted,"");
@@ -421,6 +422,12 @@ function mousewheelzoom(){
 }
 
 function mousewheelchange(evt){
+	if(doing == "polygonquery"){
+		save_polygon_path();
+	}
+	if(doing == "measure"){
+		save_measure_path();
+	}
 	deactivate_vertices();
 	if(!evt)evt = window.event; // For IE
 	if(top.document.GUI.stopnavigation.value == 0){
@@ -565,12 +572,24 @@ function recentre(){
 }
 
 function zoomin(){
+	if(doing == "polygonquery"){
+		save_polygon_path();
+	}
+	if(doing == "measure"){
+		save_measure_path();
+	}
   doing = "zoomin";
 	top.document.GUI.last_button.value = doing = "zoomin";
   document.getElementById("canvas").setAttribute("cursor", "crosshair");
 }
 
 function zoomout(){
+	if(doing == "polygonquery"){
+		save_polygon_path();
+	}
+	if(doing == "measure"){
+		save_measure_path();
+	}
   doing = "zoomout";
 	top.document.GUI.last_button.value = doing = "zoomout";
   document.getElementById("canvas").setAttribute("cursor", "crosshair");
@@ -1064,7 +1083,7 @@ function addpolypoint(evt){
   	polypathy.push(client_y);
   }
   redrawPolygon();
-  if(doing == "polygonquery"){polygonarea(evt)};
+  if(doing == "polygonquery"){polygonarea()};
 }
 	
 function deletepolygon(){
@@ -1074,6 +1093,7 @@ function deletepolygon(){
   	polypathy.pop();
 	}
 	document.getElementById("polygon").setAttribute("points", "");
+	document.getElementById("polygon_label").textContent = "";
 }			
 		
 function redrawPolygon(){
@@ -1105,7 +1125,7 @@ function redrawPolygon(){
 //---------------- Flaeche messen --------------------
 
 		
-function polygonarea(evt){
+function polygonarea(){
   // Flaecheninhalt eines Polygons nach Gauss
   var area = 0,parts = 0;
 	if(polypathx.length > 2){
@@ -1115,10 +1135,13 @@ function polygonarea(evt){
 		parts = parts + (polypathx[polypathx.length-1]*(polypathy[0]-polypathy[polypathx.length-2])) + (polypathx[0]*(polypathy[1]-polypathy[polypathx.length-1]));
 		area	= 0.5 * Math.sqrt(parts*parts);
 		k = calculate_reduction(polypathx, polypathy[0]);
-		area = area / (k * k);
-		hidetooltip(evt);	
+		area = area / (k * k);	
 		area = top.format_number(area, false, true, false);
-		show_tooltip("Fl"+unescape("%E4")+"cheninhalt: "+area+" m"+unescape("%B2")+" "+unescape("%A0"),  evt.clientX, evt.clientY);
+		label = document.getElementById("polygon_label");
+		var bbox = document.getElementById("polygon").getBBox();
+		label.setAttribute("x", Math.floor(bbox.x + bbox.width/2.0) - 50);
+		label.setAttribute("y", -1 * (Math.floor(bbox.y + bbox.height/2.0)));		
+		label.textContent = "Fl"+unescape("%E4")+"cheninhalt: "+area+" m"+unescape("%B2")+" "+unescape("%A0");
 		return;
 	}
 }
@@ -1314,7 +1337,7 @@ function add_vertex(evt){
   	polypathx.push(parseFloat(vertex.getAttribute("x")));
   	polypathy.push(parseFloat(vertex.getAttribute("y")));
 		redrawPolygon();
-		polygonarea(evt);
+		polygonarea();
 		vertex.setAttribute("opacity", "0.8");
 	}
 	if(doing == "showcoords"){
@@ -1616,6 +1639,7 @@ function highlight(evt){
     <image id="mapimg" xlink:href="'.$bg_pic.'" height="100%" width="100%" y="0" x="0"/>
     <g id="cartesian" transform="translate(0,'.$res_y.') scale(1,-1)">
       <polygon points="" id="polygon" style="opacity:0.25;fill:yellow;stroke:black;stroke-width:2"/>
+			<text x="-1000" y="-1000" id="polygon_label" transform="scale(1, -1)" style="text-anchor:start;fill:rgb(0,0,0);stroke:none;font-size:12px;font-family:Arial;font-weight:bold"></text>
 			<path d="" id="highlight" style="fill:none;stroke:blue;stroke-width:2"/>
       <polyline points="" id="polyline" style="fill:none;stroke-dasharray:2,2;stroke:black;stroke-width:4"/>
       <circle id="suchkreis" cx="-100" cy="-100" r="'.$radius.'" style="fill-opacity:0.25;fill:yellow;stroke:grey;stroke-width:2"/>
@@ -1656,7 +1680,7 @@ $svg.='
 			<circle id="kreis" cx="-500" cy="-500" r="7" opacity="0.1" onmouseover="activate_vertex(evt)" onmouseout="deactivate_vertex(evt)" onmousedown="add_vertex(evt)" />
 			<line stroke="#111" stroke-width="14" id="linie" x1="-5000" y1="-5000" x2="-5001" y2="-5001" opacity="0.8" onmouseover="activate_line(evt)" onmousemove="activate_line(evt)" />
 		</g>
-    <g id="buttons" onmouseout="hide_tooltip()" onmousemove="get_bbox();" onmousedown="hide_tooltip()" cursor="pointer">
+    <g id="buttons" onmouseout="hide_tooltip()" onmousemove="get_bbox();" onmousedown="hide_tooltip()" cursor="pointer" transform="scale(1.1)">
 '.$SVGvars_mainnavbuttons.'
     </g>
 		<g id="tooltipgroup" onmouseover="prevent=1;" onmouseout="prevent=0;">
