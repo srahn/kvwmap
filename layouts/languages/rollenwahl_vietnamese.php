@@ -19,4 +19,7 @@
   $strPlatt="Lower German";
   $strSearchColor="Result-Color";
   $strPolish="Polish";
+	$strMenuAutoClose="Đóng menu tự động";
+	$strVisuallyImpaired="Đơn giản hóa trong chế độ đọc";
+	$strHintVisuallyImpaired="Nếu bạn chọn tùy chọn này, các bề mặt và công việc sẽ được đơn giản hóa trong chế độ đọc. Thiết lập này đặc biệt thích hợp cho những người có khiếm thị. Nó, tuy nhiên, một số chức năng ẩn.";
 ?>  
