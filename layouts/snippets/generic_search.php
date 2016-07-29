@@ -222,110 +222,15 @@ function add_searchmask(layer_id){
   
 //-->
 </script>
-<br><h2><? if($this->titel != '')echo $this->titel;else echo $strLayerSearch; ?></h2>
-<table border="0" cellpadding="5" cellspacing="2" bgcolor="<? echo $bgcolor; ?>">
-  <tr>
-    <td></td>
-  </tr>
+<br><h2><? if($this->titel != '')echo $this->titel;else echo $strLayerSearch; ?></h2><?php
+	if (!$this->user->rolle->visually_impaired) {
+		include(SNIPPETS.'/generic_search_layer_selector.php');
+	}
+
+?><table border="0" cellpadding="5" cellspacing="2" bgcolor="<? echo $bgcolor; ?>"><?php
+	if($this->selected_search != ''){echo '<script type="text/javascript">showsearches();</script>';} ?>
   <tr> 
-    <td style="border-top:1px solid #C3C7C3;border-left:1px solid #C3C7C3;border-right:1px solid #C3C7C3" colspan="5"><? echo $strGroups; ?></td>
-  </tr>
-  <tr> 
-    <td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3" colspan="5"> 
-      <select style="width:250px" size="1"  name="selected_group_id" onchange="document.GUI.selected_layer_id.value='';document.GUI.submit();" <? if(count($this->layergruppen['ID'])==0){ echo 'disabled';}?>>
-        <option value="">  -- <? echo $this->strPleaseSelect; ?> --  </option>
-        <?
-        for($i = 0; $i < count($this->layergruppen['ID']); $i++){         
-          echo '<option';
-          if($this->layergruppen['ID'][$i] == $this->formvars['selected_group_id']){
-            echo ' selected';
-          }
-          echo ' value="'.$this->layergruppen['ID'][$i].'">'.$this->layergruppen['Bezeichnung'][$i].'</option>';
-        }
-      ?>
-      </select>
-  	</td>
-  </tr>
-  <tr> 
-    <td style="border-top:1px solid #C3C7C3;border-left:1px solid #C3C7C3;border-right:1px solid #C3C7C3" colspan="5"><? echo $strLayers; ?></td>
-  </tr>
-  <tr> 
-    <td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3" colspan="5"> 
-      <select style="width:250px" size="1"  name="selected_layer_id" onchange="document.GUI.searchmask_count.value=0;document.GUI.submit();" <? if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
-        <option value="">  -- <? echo $this->strPleaseSelect; ?> --  </option>
-        <?
-        for($i = 0; $i < count($this->layerdaten['ID']); $i++){         
-          echo '<option';
-          if($this->layerdaten['ID'][$i] == $this->formvars['selected_layer_id']){
-            echo ' selected';
-          }
-          echo ' value="'.$this->layerdaten['ID'][$i].'">'.$this->layerdaten['Bezeichnung'][$i].'</option>';
-        }
-      ?>
-      </select>
-  	</td>
-  </tr>
-  <tr>
-    <td id="searches1"><? if($this->formvars['selected_layer_id'] != ''){ ?><a href="javascript:showsearches();"><? echo $strSearches; ?></a><? if(count($this->searchset) > 0)echo ' ('.count($this->searchset).')';} ?>&nbsp;</td>
-  </tr>
-  <tr id="searches2" style="display:none"> 
-    <td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3">
-    	<table border="0" cellspacing="0" cellpadding="1">
-    		<tr align="center"> 
-			    <td colspan="2"  align="right">
-			    	<? echo $this->strName; ?>:&nbsp;<input type="text" name="search_name" value="<? echo $this->formvars['searches']; ?>">
-			    	<input class="button" type="button" style="width:74px" name="speichern" value="<? echo $this->strSave; ?>" onclick="save_search();">
-			    </td>
-			  </tr>
-    		<tr>
-			  	<td align="right"  colspan="2">
-			  		<input class="button" type="button" style="width:74px" name="delete" value="<? echo $this->strDelete; ?>" onclick="delete_search();">
-			  		<select name="searches">
-			  			<option value="">  -- <? echo $this->strPleaseSelect; ?> --  </option>
-			  			<?
-			  				for($i = 0; $i < count($this->searchset); $i++){
-			  					echo '<option value="'.$this->searchset[$i]['name'].'" ';
-			  					if($this->selected_search[0]['name'] == $this->searchset[$i]['name']){echo 'selected ';}
-			  					echo '>'.$this->searchset[$i]['name'].'</option>';
-			  				}
-			  			?>
-			  		</select>
-			  		<input class="button" type="button" style="width:74px" name="laden" value="<? echo $this->strLoad; ?>" onclick="document.GUI.submit();">
-			    </td>
-			  </tr>
-    	</table>
-    </td>
-  </tr>
-  
-  <? if($this->formvars['columnname'] != ''){ ?>
-  <tr>
-    <td id="map1" <? if($this->formvars['map_flag'] != ''){echo 'style="border-top: 1px solid #C3C7C3;border-left: 1px solid #C3C7C3;border-right: 1px solid #C3C7C3"';} ?>><a href="javascript:showmap();"><? echo $strSpatialFiltering; ?></a>&nbsp;</td>
-  </tr>
-  <? if($this->formvars['map_flag'] != ''){ ?>
-  <tr id="map2"> 
-    <td align="right" style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3">
-			<input type="checkbox" name="within" value="1" <? if($this->formvars['within'] == 1)echo 'checked'; ?>>
-			<? echo $strWithin; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    	<? echo $this->strUseGeometryOf; ?>: 
-  		<select name="layer_id" onchange="document.GUI.submit();">
-  			<?
-  				for($i = 0; $i < count($this->queryable_vector_layers['ID']); $i++){
-  					echo '<option';
-  					if($this->formvars['layer_id'] == $this->queryable_vector_layers['ID'][$i]){echo ' selected';}
-  					echo ' value="'.$this->queryable_vector_layers['ID'][$i].'">'.$this->queryable_vector_layers['Bezeichnung'][$i].'</option>';
-  				}
-  			?>
-  		</select>
-  		<?
-				include(LAYOUTPATH.'snippets/SVG_polygon_query_area.php')
-			?>
-    </td>
-  </tr>
-  <? }} ?>
-  
-  <? if($this->selected_search != ''){echo '<script type="text/javascript">showsearches();</script>';} ?>
-  <tr> 
-    <td colspan="5" id="searchmasks">
+    <td id="searchmasks">
 
 <? if(count($this->attributes) > 0){
 		for($m = 0; $m <= $this->formvars['searchmask_count']; $m++){ 
@@ -340,42 +245,49 @@ function add_searchmask(layer_id){
 	<tr> 
     <td colspan="5">
 <? if(count($this->attributes) > 0){ ?>
-						
-			<table width="100%" align="center" border="0" cellspacing="0" cellpadding="3">			
+			<table width="100%" align="center" border="0" cellspacing="0" cellpadding="3">
+<?php if ($this->user->rolle->visually_impaired) { ?>
+					<tr>
+						<td align="center"><br>
+							<input class="button" type="button" name="suchen" onclick="suche();" value="<? echo $this->strSearch; ?>">
+						</td>
+					</tr>
+<?php } ?>
 			<? if($this->layerset[0]['connectiontype'] == MS_POSTGIS){ ?>
 					<tr>
 						<td><a href="javascript:add_searchmask(<? echo $this->formvars['selected_layer_id']; ?>);"><? echo $strAndOr; ?></a></td>
 					</tr>
 			<? } ?>
 					<tr>
-						<td colspan="5"><br><? echo $strLimit; ?>&nbsp;<input size="2" onkeyup="checknumbers(this, 'int2', '', '');" type="text" name="anzahl" value="<? echo $this->formvars['anzahl']; ?>"></td>
+						<td><br><? echo $strLimit; ?>&nbsp;<input size="2" onkeyup="checknumbers(this, 'int2', '', '');" type="text" name="anzahl" value="<? echo $this->formvars['anzahl']; ?>"></td>
 					</tr>
 					<tr>
-						<td colspan="5"><br><em><? echo $strLikeSearchHint; ?></em></td>
+						<td><br><em><? echo $strLikeSearchHint; ?></em></td>
 					</tr>
 					<tr>
-						<td colspan="5"><br><em><? echo $strDateHint; ?></em></td>
+						<td><br><em><? echo $strDateHint; ?></em></td>
 					</tr>
-					<tr>                
-						<td align="center" colspan="5"><br>
+<?php if (!$this->user->rolle->visually_impaired) { ?>
+					<tr>
+						<td align="center"><br>
 							<input class="button" type="button" name="suchen" onclick="suche();" value="<? echo $this->strSearch; ?>">
 						</td>
 					</tr>
+<?php } ?>
 					<tr>
-						<td height="30" valign="bottom" align="center" colspan="5" id="loader" style="display:none"><img id="loaderimg" src="graphics/ajax-loader.gif"></td>
+						<td height="30" valign="bottom" align="center" id="loader" style="display:none"><img id="loaderimg" src="graphics/ajax-loader.gif"></td>
 					</tr>
 				</table><?
       }
       ?>
 		</td>
   </tr>
-  <tr> 
-    <td colspan="5">&nbsp;</td>
-  </tr>
-  <tr> 
-    <td colspan="5" >&nbsp;</td>
-  </tr>
 </table>
+<?php
+	if ($this->user->rolle->visually_impaired) {
+		include(SNIPPETS.'/generic_search_layer_selector.php');
+	}
+ ?>
 <input type="hidden" name="go_plus" value="">
 <input type="hidden" name="go" value="Layer-Suche">
 <input type="hidden" name="titel" value="<? echo $this->formvars['titel'] ?>">
