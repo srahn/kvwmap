@@ -304,9 +304,8 @@ Text_histtimestamp=["<? echo $strHelp; ?>:","<? echo $strHinthist_timestamp; ?>"
 				<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_highlight, Style[0], document.getElementById('Tip19'))" onmouseout="htm()">
 				<div id="Tip19" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 			</td>
-		</tr>
-		<? if($this->Stelle->hist_timestamp){ ?>
-		<tr>		
+		</tr>		
+		<tr <? if(!$this->Stelle->hist_timestamp)echo 'style="display:none"'; ?> >		
 			<td align="left" style="padding: 8px; padding-top: 0px"><? echo $strhist_timestamp; ?>:&nbsp;<a href="javascript:;" onclick="new CalendarJS().init('hist_timestamp');"><img title="TT.MM.JJJJ hh:mm:ss" src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar" style="bottom:100px"><input type="hidden" id="calendar_hist_timestamp"></div></td>
 			<td style="padding: 8px; padding-top: 0px">
 				<input onchange="if(this.value.length == 10)this.value = this.value + ' 06:00:00'" id="hist_timestamp" name="hist_timestamp" type="text" value="<? echo $this->user->rolle->hist_timestamp; ?>" size="16">
@@ -314,7 +313,6 @@ Text_histtimestamp=["<? echo $strHelp; ?>:","<? echo $strHinthist_timestamp; ?>"
 				<div id="Tip20" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 			</td>			
 		</tr>
-		<? } ?>
 	</table>
 </div>
 <table>

@@ -71,7 +71,7 @@ function show(){
 	else{ ?> 
   <tr>
 		<td>
-	<? if(count($this->data_import_export->columns) > 2){ ?>
+	<? if(count($this->data_import_export->columns) > 1){ ?>
 			<table width="100%">
 				<tr>
 					<td>Es wurden <? echo count($this->data_import_export->columns); ?> Spalten erkannt.<br>Sie können nun festlegen, welche Spalten als Koordinaten und welche als Beschriftung verwendet werden sollen.</td>

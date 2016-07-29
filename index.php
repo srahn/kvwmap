@@ -40,20 +40,21 @@ ob_start ();    // Ausgabepufferung starten
 $go = $_REQUEST['go'];
 if($_REQUEST['go_plus'] != '')$go = $go.'_'.$_REQUEST['go_plus'];
 
-#########################################################################################################
-define(CASE_COMPRESS, false);																																						#
-#																																																				#
-# 	navMap_ajax: 		- unter 1:10 zoomen																																	#
-#										- ein räumlich gefilterter Layer muss an sein																				#
-#										- man muss einen anderen EPSG-Code als den der Ref-Karte (2398) eingestellt haben		#
-# 	tooltip_query:	- ein Datensatz mit Bild muss abgefragt werden																			#
-#										- getRollenLayer() reinkopieren																											#
-#																																																				#
-#		alle:						- die Stelle muss die IP checken  																									#
-#																																																				#
-#########################################################################################################
+###########################################################################################################
+define(CASE_COMPRESS, false);																																						  #
+#																																																				  #
+# 	navMap_ajax: 		  - unter 1:10 zoomen																																	#
+#										  - ein räumlich gefilterter Layer muss an sein																				#
+#										  - man muss einen anderen EPSG-Code als den der Ref-Karte (2398) eingestellt haben		#
+# 	tooltip_query:	  - ein Datensatz mit Bild muss agefragt werden																			  #
+#										  - getRollenLayer() reinkopieren																										  #
+#   getLayerOptions:  - getRollenLayer() reinkopieren																											#
+#																																																				  #
+#		ALLE:						  - die Stelle muss die IP checken  																								  #
+#																																																				  #
+###########################################################################################################
 
-$non_spatial_cases = array('changemenue_with_ajax', 'get_select_list');		// für non-spatial cases wird in start.php keine Verbindung zur PostgreSQL aufgebaut usw.
+$non_spatial_cases = array('getLayerOptions', 'get_select_list');		// für non-spatial cases wird in start.php keine Verbindung zur PostgreSQL aufgebaut usw.
 $spatial_cases = array('navMap_ajax', 'tooltip_query', 'get_group_legend');
 $fast_loading_cases = array_merge($spatial_cases, $non_spatial_cases);
 
@@ -133,6 +134,28 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
       $GUI->mime_type='map_ajax';
       $GUI->output();
 		}break;
+				
+		case 'getLayerOptions' : {
+			$GUI->getLayerOptions();
+	  } break;
+		
+		case 'saveLayerOptions' : {
+			$GUI->saveLayerOptions();
+			$GUI->neuLaden();
+			$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+			$GUI->drawMap();
+			$GUI->saveMap('');
+			$GUI->output();
+	  } break;
+		
+		case 'resetLayerOptions' : {
+			$GUI->resetLayerOptions();
+			$GUI->neuLaden();
+			$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+			$GUI->drawMap();
+			$GUI->saveMap('');
+			$GUI->output();
+	  } break;
 				
 		case 'switch_gle_view' : {
 			$GUI->switch_gle_view();
@@ -313,6 +336,7 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  # neuen Style hinzufügen
 	  case 'add_style' : {
 		$GUI->add_style();
+		$GUI->get_styles();
 	  } break;
 	  
 	  # Style in der Drawingorder nach oben verschieben
@@ -975,16 +999,6 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 		case 'Punktliste_Anzeigen_Anzeigen' : {
 			$GUI->create_point_rollenlayer_import();
 	  } break;
-
-	  case 'simple_SHP_Import' : {
-			$GUI->checkCaseAllowed('simple_SHP_Import');
-			$GUI->simple_shp_import();
-	  } break;
-
-	  case 'simple_SHP_Import_speichern' : {
-			$GUI->checkCaseAllowed('simple_SHP_Import');
-			$GUI->simple_shp_import_speichern();
-	  } break;
 	  
 	  case 'SHP_Import' : {
 			$GUI->checkCaseAllowed('SHP_Import');
@@ -1132,27 +1146,29 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  } break;
 
 	  case 'Layereditor' : {
-			$GUI->checkCaseAllowed('Layer_Anzeigen');
+			$GUI->checkCaseAllowed('Layereditor');
 			$GUI->Layereditor();
 	  } break;
 
 	  case 'Layereditor_Klasse_Löschen' : {
-			$GUI->checkCaseAllowed('Layer_Anzeigen');
+			$GUI->checkCaseAllowed('Layereditor');
 			$GUI->Layereditor_KlasseLoeschen();
 	  } break;
 
 	  case 'Layereditor_Klasse_Hinzufügen' : {
-			$GUI->checkCaseAllowed('Layer_Anzeigen');
-			$GUI->Layereditor_KlasseHinzufuegen();    
+			$GUI->checkCaseAllowed('Layereditor');
+			$GUI->Layereditor_KlasseHinzufuegen();
+			$GUI->Layereditor();
 	  } break;
 
 	  case 'Layereditor_Als neuen Layer eintragen' : {
-			$GUI->checkCaseAllowed('Layer_Anzeigen');
+			$GUI->checkCaseAllowed('Layereditor');
 			$GUI->LayerAnlegen();
+			$GUI->Layereditor();
 	  } break;
 
 	  case 'Layereditor_Ändern' : {
-			$GUI->checkCaseAllowed('Layer_Anzeigen');
+			$GUI->checkCaseAllowed('Layereditor');
 			$GUI->LayerAendern();
 	  } break;
 
@@ -1183,6 +1199,7 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  case 'Layer_Löschen' : {    
 			$GUI->checkCaseAllowed('Layer_Anzeigen');
 			$GUI->LayerLoeschen();
+			$GUI->LayerAnzeigen();
 	  } break;
 
 	  case 'Layer2Stelle_Reihenfolge' : {

@@ -704,7 +704,7 @@ class Nachweis {
     return $errmsg;
   }
   
-  function getNachweise($id,$polygon,$gemarkung,$stammnr,$rissnr,$fortf,$art_einblenden,$richtung,$abfrage_art,$order,$antr_nr, $datum = NULL, $VermStelle = NULL, $gueltigkeit = NULL, $datum2 = NULL, $flur = NULL, $flur_thematisch = NULL, $andere_art = NULL) {
+  function getNachweise($id,$polygon,$gemarkung,$stammnr,$rissnr,$fortf,$art_einblenden,$richtung,$abfrage_art,$order,$antr_nr, $datum = NULL, $VermStelle = NULL, $gueltigkeit = NULL, $datum2 = NULL, $flur = NULL, $flur_thematisch = NULL, $andere_art = NULL, $suchbemerkung = NULL) {
 		$explosion = explode('~', $antr_nr);
 		$antr_nr = $explosion[0];
 		$stelle_id = $explosion[1];
@@ -827,7 +827,9 @@ class Nachweis {
           $sql.=")";
 					if($andere_art)$sql.=" AND d.id IN (".$andere_art.")";
         }
-
+				if($suchbemerkung != ''){
+          $sql.=" AND n.bemerkungen LIKE '%".$suchbemerkung."%'";
+        }				
         if ($order=='') {
           $order="flurid, stammnr, datum";
         }
@@ -926,7 +928,9 @@ class Nachweis {
             $sql.=")";
 						if($andere_art)$sql.=" AND d.id IN (".$andere_art.")";
           }
-
+					if($suchbemerkung != ''){
+						$sql.=" AND n.bemerkungen LIKE '%".$suchbemerkung."%'";
+					}
           if ($order=='') {
             $order="flurid, stammnr, datum";
           }

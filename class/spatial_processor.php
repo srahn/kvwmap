@@ -116,6 +116,18 @@ class spatial_processor {
     }
     return $rs;
   }
+	
+	function reverse($geom){
+  	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom,0,8) as svg FROM (SELECT st_reverse(st_geomfromtext('".$geom."')) as geom) as foo";
+  	$ret = $this->pgdatabase->execSQL($sql,4, 0);
+    if ($ret[0]) {
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
+    }
+    else {
+    	$rs = pg_fetch_array($ret[1]);
+    }
+    return $rs;
+  }	
   
   function process_query($formvars){
 		$formvars['fromwhere'] = str_replace("''", "'", $formvars['fromwhere']);
@@ -205,6 +217,13 @@ class spatial_processor {
 				$result .= $rs['wkt'];
 			}break;
 			
+			case 'reverse':{
+				$rs = $this->reverse($polywkt1);
+				$result = $rs['svg'];
+				$result .= '||';
+				$result .= $rs['wkt'];
+			}break;
+			
 			case 'buffer':{
 				if($formvars['width'] == ''){$formvars['width'] = 50;}
 				$rs = $this->buffer($polywkt1, $formvars['width']);
@@ -281,7 +300,7 @@ class spatial_processor {
 					break;
 				}
 				if($polywkt1 == ''){
-					$polywkt1 = $querygeometryWKT;
+					$polywkt1 = 'POINT EMPTY';
 				}
 				$rs = $this->union($polywkt1, $querygeometryWKT);
 				$result = $rs['svg'];

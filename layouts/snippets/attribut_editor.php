@@ -65,6 +65,10 @@
 						<td>&nbsp;</td>
 						<td align="center"><span class="fett">Gruppe</span></td>
 						<td>&nbsp;</td>
+						<td align="center"><span class="fett">Anordnung</span></td>
+						<td>&nbsp;&nbsp;</td>
+						<td align="center"><span class="fett">Beschriftung</span></td>
+						<td>&nbsp;&nbsp;</td>
 						<td align="center"><span class="fett">sichtbar im Rastertemplate</span></td>
 						<td>&nbsp;</td>
 						<td align="center"><span class="fett">Suche-Pflicht</span></td>';
@@ -191,6 +195,27 @@
 				  <td>&nbsp;</td>
 				  <td align="left" valign="top">
 				  	<input name="group_'.$this->attributes['name'][$i].'" type="text" value="'.$this->attributes['group'][$i].'">
+				  </td>
+					<td>&nbsp;</td>';
+					if($this->attributes['arrangement'][$i] == 1)$bgcolor = '#faef1e';else $bgcolor = 'white';
+					echo '
+					<td align="center" valign="top">
+				  	<select style="outline: 1px solid lightgrey; border: none; width: 59px; height: 18px; background-color: '.$bgcolor.'" onchange="this.setAttribute(\'style\', \'outline: 1px solid lightgrey; border: none; width: 59px; height: 18px;\'+this.options[this.selectedIndex].getAttribute(\'style\'));" name="arrangement_'.$this->attributes['name'][$i].'">
+							<option style="background-color: white" value="0"';if($this->attributes['arrangement'][$i] == 0) echo ' selected="true" ';echo '>unter &nbsp;dem vorigen</option>
+							<option style="background-color: #faef1e" value="1"';if($this->attributes['arrangement'][$i] == 1) echo ' selected="true" ';echo '>neben dem vorigen</option>
+						</select>
+				  </td>
+					<td>&nbsp;</td>';
+					if($this->attributes['labeling'][$i] == 0)$bgcolor = 'white';
+					if($this->attributes['labeling'][$i] == 1)$bgcolor = '#faef1e';
+					if($this->attributes['labeling'][$i] == 2)$bgcolor = '#ff6600';
+					echo '
+					<td align="center" valign="top">
+				  	<select style="outline: 1px solid lightgrey; border: none; width: 53px; height: 18px; background-color: '.$bgcolor.'" onchange="this.setAttribute(\'style\', \'outline: 1px solid lightgrey; border: none; width: 59px; height: 18px;\'+this.options[this.selectedIndex].getAttribute(\'style\'));" name="labeling_'.$this->attributes['name'][$i].'">
+							<option style="background-color: white" value="0"';if($this->attributes['labeling'][$i] == 0) echo ' selected="true" ';echo '>links neben dem Attribut</option>
+							<option style="background-color: #faef1e" value="1"';if($this->attributes['labeling'][$i] == 1) echo ' selected="true" ';echo '>über &nbsp;dem Attribut</option>
+							<option style="background-color: #ff6600" value="2"';if($this->attributes['labeling'][$i] == 2) echo ' selected="true" ';echo '>ohne</option>
+						</select>
 				  </td>
 					<td>&nbsp;</td>
 					<td align="center" valign="top">
