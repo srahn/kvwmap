@@ -4057,6 +4057,26 @@ class GUI {
     $this->output();
   }
 
+	function get_rect_by_buffer($x, $y, $rand) {
+		$rect = ms_newRectObj();
+		$rect->minx = $x - $rand;
+		$rect->maxx = $x + $rand;
+		$rect->miny = $y - $rand;
+		$rect->maxy = $y + $rand;
+		return $rect;
+	}
+
+	function get_rect_by_scale($x, $y, $scale) {
+		$rect = ms_newRectObj();
+		$width_rand  = 0.02535 / 96 * $this->user->rolle->nImageWidth  * $scale / 2;
+		$height_rand = 0.02535 / 96 * $this->user->rolle->nImageHeight * $scale / 2;
+		$rect->minx = $x - $width_rand;
+		$rect->maxx = $x + $width_rand;
+		$rect->miny = $y - $height_rand;
+		$rect->maxy = $y + $height_rand;
+		return $rect;
+	}
+
   function zoom_toPoint(){
 		include_(CLASSPATH.'pointeditor.php');
     $dbmap = new db_mapObj($this->Stelle->id,$this->user->id);
@@ -4065,14 +4085,28 @@ class GUI {
     $pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
     if($this->formvars['oid'] != '') {
       $this->point = $pointeditor->getpoint($this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname']);
-      $rect = ms_newRectObj();
-			if(defined('ZOOMBUFFER') AND ZOOMBUFFER > 0)$rand = ZOOMBUFFER;
-			else $rand = 100;
-			if($this->user->rolle->epsg_code == 4326)$rand = $rand/10000;
-      $rect->minx = $this->point['pointx']-$rand;
-      $rect->maxx = $this->point['pointx']+$rand;
-      $rect->miny = $this->point['pointy']-$rand;
-      $rect->maxy = $this->point['pointy']+$rand;
+
+			if (defined('ZOOMBUFFER') AND ZOOMBUFFER > 0)
+				$rand = ZOOMBUFFER;
+			else
+				$rand = 100;
+
+			if (defined(ZOOMUNIT) AND !in_array(ZOOMUNIT, array('meter', 'scale')))
+				$unit = ZOOMUNIT;
+			else
+				$unit = 'meter';
+
+			switch (ZOOMUNIT) {
+				case 'meter' : {
+					if ($this->user->rolle->epsg_code == 4326)
+						$rand = $rand / 10000;
+					$rect = $this->get_rect_by_buffer($this->point['pointx'], $this->point['pointy'], $rand);
+				} break;
+				case 'scale' : {
+					$rect = $this->get_rect_by_scale($this->point['pointx'], $this->point['pointy'], $rand);
+				} break;
+			}
+
 			if($this->formvars['selektieren'] != 'zoomonly'){
 				$this->createZoomRollenlayer($dbmap, $layerdb, $layerset);
 			}
