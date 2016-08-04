@@ -29,7 +29,12 @@
 		$upload_file = basename($_FILES["file"]["tmp_name"] . "." . $pathinfo["extension"]);
 
 		# copiere die temporäre Datei in den upload ordner
-		if (!@copy($_FILES["file"]["tmp_name"], BAUMFAELLANTRAG_UPLOAD_PATH . $upload_file))
+		$copy_to_upload_path = @copy($_FILES["file"]["tmp_name"], BAUMFAELLANTRAG_UPLOAD_PATH . $upload_file);
+		# erzeuge thumb in temp ordner
+		$command = IMAGEMAGICKPATH . 'convert '. $_FILES["file"]["tmp_name"] .' -quality 75 -background white -flatten -resize 128x128\> ' . IMAGEPATH . $upload_file . '_thumb.jpg';
+		exec($command, $ausgabe, $ret);
+		if($ret == 1) $copy_to_temp_path = true;
+		if (!$copy_to_upload_path OR !$copy_to_temp_path)
 			return array("success" => 0, "error_message" => "Fehler: Die hochgeladene Datei konnte nicht auf dem Server gespeichert werden. Beim Kopieren vom temporären Uploadverzeichnis in das Uploadverzeichnis der Anwendung trat ein Fehler auf. Wahrscheinlich fehlen die Schreibrechte im Uploadverzeichnins für den WebServer-Nutzer.");
 
 		# sende den Namen der temporären Datei zurück
