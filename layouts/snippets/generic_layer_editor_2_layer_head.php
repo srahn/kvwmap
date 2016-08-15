@@ -35,5 +35,5 @@
     </tr>
   </table>
   </th>
-  <? if (!$this->user->rolle->visually_impaired) { ?><thead class="gle"><? } ?>
+  <? if (!$this->user->rolle->visually_impaired) { ?></thead><? } ?>
 <? } ?>
