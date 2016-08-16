@@ -6,15 +6,18 @@
 class Konvertierung extends PgObject {
 
   static $STATUS = array(
-    'IN_ERSTELLUNG'     => 'in Erstellung',
-    'ERSTELLT'          => 'erstellt',
-    'IN_VALIDIERUNG'    => 'in Validierung',
-    'VALIDIERUNG_ERR'   => 'Validierung fehlgeschlagen',
-    'VALIDIERUNG_OK'    => 'validiert',
-    'IN_KONVERTIERUNG'  => 'in Konvertierung',
-    'KONVERTIERUNG_OK'  => 'Konvertierung abgeschlossen',
-    'KONVERTIERUNG_ERR' => 'Konvertierung abgebrochen'
-	);
+    'IN_ERSTELLUNG'      => 'in Erstellung',
+    'ERSTELLT'           => 'erstellt',
+//    'IN_VALIDIERUNG'     => 'in Validierung',
+//    'VALIDIERUNG_ERR'    => 'Validierung fehlgeschlagen',
+//    'VALIDIERUNG_OK'     => 'validiert',
+    'IN_KONVERTIERUNG'   => 'in Konvertierung',
+    'KONVERTIERUNG_OK'   => 'Konvertierung abgeschlossen',
+    'KONVERTIERUNG_ERR'  => 'Konvertierung abgebrochen',
+    'IN_GML_ERSTELLUNG'  => 'in GML-Erstellung',
+    'GML_ERSTELLUNG_OK'  => 'GML-Erstellung abgeschlossen',
+    'GML_ERSTELLUNG_ERR' => 'GML-Erstellung abgebrochen'
+  );
 
   function Konvertierung($gui, $schema, $tableName) {
     $this->PgObject($gui, $schema, $tableName);
