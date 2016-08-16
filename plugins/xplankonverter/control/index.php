@@ -174,8 +174,7 @@ switch($this->go){
           }
 
           # unzip and copy files to upload folder
-          $uploaded_files = xplankonverter_unzip_and_copy($_FILES['shape_files'], $upload_path);
-
+          $uploaded_files = xplankonverter_unzip_and_check_and_copy($_FILES['shape_files'], $upload_path);
           # get layerGroupId or create a group if not exists
           $layer_group_id = $this->konvertierung->get('layer_group_id');
           if (empty($layer_group_id))
@@ -436,10 +435,41 @@ function isInStelleAllowed($guiStelleId, $requestStelleId) {
 }
 
 /*
+* extract zip files if necessary, check completeness and copy files to upload folder
+*/
+function xplankonverter_unzip_and_check_and_copy($shape_files, $dest_dir) {
+  # extract zip files if necessary and extract info
+  $temp_files = xplankonverter_unzip($shape_files, $dest_dir);
+  # group uploaded files to triples according to their basename
+  $check = array('shp' => false, 'shx' => false, 'dbf' => false);
+  $check_list = array();
+  array_walk($temp_files, function($file_item) use ($check, &$check_list){
+    if (!$check_list[$file_item['filename']]) $check_list[$file_item['filename']] = $check;
+    $check_list[$file_item['filename']][$file_item['extension']] = $file_item;
+  });
+
+  $incomplete = array();
+  $complete_files = array();
+  array_walk($check_list, function($check_list_item) use (&$incomplete, &$complete_files){
+    if ($check_list_item['dbf'] && $check_list_item['shx'] && $check_list_item['shp']) {
+      $complete_files[] = $check_list_item['dbf'];
+      $complete_files[] = $check_list_item['shp'];
+      $complete_files[] = $check_list_item['shx'];
+    } else $incomplete = $check_list_item;
+  });
+
+  # copy temp shape files to destination
+  $uploaded_files = array();
+  foreach($complete_files AS $file) {
+    $uploaded_files[] = xplankonverter_copy_uploaded_shp_file($file, $dest_dir);
+  }
+  return $uploaded_files;
+}
+/*
 * extract zip files if necessary and copy files to upload folder
 */
-function xplankonverter_unzip_and_copy($shape_files, $dest_dir) {
-  $uploaded_files = array();
+function xplankonverter_unzip($shape_files, $dest_dir) {
+  $temp_files = array();
   # extract zip files if necessary and copy files to upload folder
   foreach($shape_files['name'] AS $i => $shape_file_name) {
     $path_parts = pathinfo($shape_file_name);
@@ -451,23 +481,16 @@ function xplankonverter_unzip_and_copy($shape_files, $dest_dir) {
     else {
       # set data from single file
       $path_parts = pathinfo($shape_file_name);
-      $temp_files = array(
-        array(
-          'basename' => $path_parts['basename'],
-          'filename' => $path_parts['filename'],
-          'extension' => strtolower($path_parts['extension']),
-          'tmp_name' => $shape_files['tmp_name'][$i],
-          'unziped' => false
-        )
+      $temp_files[] = array(
+        'basename' => $path_parts['basename'],
+        'filename' => $path_parts['filename'],
+        'extension' => strtolower($path_parts['extension']),
+        'tmp_name' => $shape_files['tmp_name'][$i],
+        'unziped' => false
       );
     }
-
-    # copy temp shape files to destination
-    foreach($temp_files AS $temp_file) {
-      $uploaded_files[] = xplankonverter_copy_uploaded_shp_file($temp_file, $dest_dir);
-    }
   }
-  return $uploaded_files;
+  return $temp_files;
 }
 
 /*
