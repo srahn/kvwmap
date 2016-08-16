@@ -113,9 +113,16 @@
       disableFrag = ' disabled" onclick="return false';
     output = '<span class="btn-group" role="group" konvertierung_id="' + value + '">';
     // enabled by status of konvertierung
+    // Bearbeiten
     funcIsDisabled = row.status == "<?php echo Konvertierung::$STATUS['IN_GML_ERSTELLUNG']; ?>"
                   || row.status == "<?php echo Konvertierung::$STATUS['IN_KONVERTIERUNG']; ?>";
     output += '<a title="Konvertierung bearbeiten" class="btn btn-link btn-xs xpk-func-btn' + (funcIsDisabled ? disableFrag : '') + '" href="index.php?go=Layer-Suche_Suchen&selected_layer_id=8&operator_konvertierung_id==&value_konvertierung_id=' + value + '"><i class="fa fa-lg fa-pencil"></i></a>';
+
+    // Shapefile upload
+    funcIsDisabled = row.status != "<?php echo Konvertierung::$STATUS['ERSTELLT']; ?>";
+    output += '<a title="Shapefiles bearbeiten" class="btn btn-link btn-xs  xpk-func-btn' + (funcIsDisabled ? disableFrag : '') + '" href="index.php?go=xplankonverter_shapefiles_index&konvertierung_id=' + value + '"><i class="fa fa-lg fa-upload"></i></a>';
+
+    // Konvertieren und validieren
     funcIsDisabled = row.status == "<?php echo Konvertierung::$STATUS['IN_GML_ERSTELLUNG']; ?>"
                   || row.status == "<?php echo Konvertierung::$STATUS['IN_KONVERTIERUNG']; ?>";
     funcIsDisabled = row.status == "<?php echo Konvertierung::$STATUS['IN_ERSTELLUNG']; ?>"
@@ -124,15 +131,22 @@
                   || row.status == "<?php echo Konvertierung::$STATUS['IN_GML_ERSTELLUNG']; ?>";
     funcIsInProgress = row.status == "<?php echo Konvertierung::$STATUS['IN_KONVERTIERUNG']; ?>";
     output += '<a title="Konvertierung durchführen & validieren" class="btn btn-link btn-xs xpk-func-btn xpk-func-convert' + (funcIsDisabled ? disableFrag : '') + '" href="#"><i class="' + (funcIsInProgress ? 'fa fa-spinner fa-pulse fa-fw' : 'fa fa-lg fa-cogs') + '"></i></a>';
+
+    // GML-Erzeugen
     funcIsDisabled = row.status != "<?php echo Konvertierung::$STATUS['KONVERTIERUNG_OK']; ?>"
                   && row.status != "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_OK']; ?>";
     funcIsInProgress = row.status == "<?php echo Konvertierung::$STATUS['IN_GML_ERSTELLUNG']; ?>";
     output += '<a title="GML-Datei ausgeben" class="btn btn-link btn-xs xpk-func-btn xpk-func-generate-gml' + (funcIsDisabled ? disableFrag : '') + '" href="#"><i class="' + (funcIsInProgress ? 'fa fa-spinner fa-pulse fa-fw' : 'fa fa-lg fa-code') + '"></i></a>';
+
+    // GML-Download
     funcIsDisabled = row.status != "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_OK']; ?>";
     output += '<a title="GML-Datei herunterladen" class="btn btn-link btn-xs xpk-func-btn xpk-func-download-gml' + (funcIsDisabled ? disableFrag : '') + '" href="<?php echo XPLANKONVERTER_SHAPE_PATH;?>' + value + '/xplan_' + value + '.gml"><i class="fa fa-lg fa-download"></i></a>';
+
+    // Konvertierung Löschen
     funcIsDisabled = row.status == "<?php echo Konvertierung::$STATUS['IN_GML_ERSTELLUNG']; ?>"
                   || row.status == "<?php echo Konvertierung::$STATUS['IN_KONVERTIERUNG']; ?>";
     output += '<a title="Konvertierung l&ouml;schen" class="btn btn-link btn-xs xpk-func-btn xpk-func-del-konvertierung' + (funcIsDisabled ? disableFrag : '') + '" href="#"><i class="fa fa-lg fa-trash"></i></a>';
+
     output += '</span>';
     return output;
   }
