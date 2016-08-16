@@ -6,15 +6,18 @@
 class Konvertierung extends PgObject {
 
   static $STATUS = array(
-    'IN_ERSTELLUNG'     => 'in Erstellung',
-    'ERSTELLT'          => 'erstellt',
-    'IN_VALIDIERUNG'    => 'in Validierung',
-    'VALIDIERUNG_ERR'   => 'Validierung fehlgeschlagen',
-    'VALIDIERUNG_OK'    => 'validiert',
-    'IN_KONVERTIERUNG'  => 'in Konvertierung',
-    'KONVERTIERUNG_OK'  => 'Konvertierung abgeschlossen',
-    'KONVERTIERUNG_ERR' => 'Konvertierung abgebrochen'
-	);
+    'IN_ERSTELLUNG'      => 'in Erstellung',
+    'ERSTELLT'           => 'erstellt',
+//    'IN_VALIDIERUNG'     => 'in Validierung',
+//    'VALIDIERUNG_ERR'    => 'Validierung fehlgeschlagen',
+//    'VALIDIERUNG_OK'     => 'validiert',
+    'IN_KONVERTIERUNG'   => 'in Konvertierung',
+    'KONVERTIERUNG_OK'   => 'Konvertierung abgeschlossen',
+    'KONVERTIERUNG_ERR'  => 'Konvertierung abgebrochen',
+    'IN_GML_ERSTELLUNG'  => 'in GML-Erstellung',
+    'GML_ERSTELLUNG_OK'  => 'GML-Erstellung abgeschlossen',
+    'GML_ERSTELLUNG_ERR' => 'GML-Erstellung abgebrochen'
+  );
 
   function Konvertierung($gui, $schema, $tableName) {
     $this->PgObject($gui, $schema, $tableName);
@@ -54,6 +57,8 @@ class Konvertierung extends PgObject {
   * abgebildet werden. Das kann zu einem oder mehreren Bereichen
   * in n:m Beziehung sein rp_bereich2rp_object oder zur Konvertierung
   * (gml_id des documentes oder konvertierung_id)
+  * Derzeit umgesetzt in index.php xplankonverter_regeln_anwenden
+  * $this->converter->regeln_anwenden($this->formvars['konvertierung_id']);
   */
   function mapping() {
     # finde alle regeln, die direkt der Konvertierung zugeordnet wurden
@@ -61,6 +66,11 @@ class Konvertierung extends PgObject {
     foreach($regeln AS $regel) {
       $regel->convert($this->get('id'));
     }
+  }
+
+  function getRegeln() {
+    $regel = new Regel($this->gui, $this->schema);
+    return $regel->find_where('konvertierung_id = ' . $this->get('id'));
   }
 
 }

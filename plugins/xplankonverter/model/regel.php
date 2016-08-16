@@ -5,8 +5,8 @@
 
 class Regel extends PgObject {
 
-  function Regel($gui, $schema, $tableName) {
-    $this->PgObject($gui, $schema, $tableName);
+  function Regel($gui, $schema) {
+    $this->PgObject($gui, $schema, 'regeln');
   }
 
   /*

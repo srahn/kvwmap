@@ -12,7 +12,7 @@
 <table
   id="shapefiles_table"
   data-toggle="table"
-  data-url="index.php?go=Layer-Suche_Suchen&selected_layer_id=<?php echo XPLANKONVERTER_SHAPEFILES_LAYER_ID; ?>&mime_type=formatter&format=json"
+  data-url="index.php?go=Layer-Suche_Suchen&selected_layer_id=<?php echo XPLANKONVERTER_SHAPEFILES_LAYER_ID; ?>&anzahl=1000&operator_konvertierung_id==&value_konvertierung_id=<?php echo $this->formvars['konvertierung_id']; ?>&mime_type=formatter&format=json"
   data-height="100%"
   data-click-to-select="false"
   data-sort-name="filename"
