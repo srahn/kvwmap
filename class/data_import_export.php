@@ -90,7 +90,7 @@ class data_import_export {
 		$this->formvars['user_id'] = $user->id;
 		$this->formvars['stelle_id'] = $stelle->id;
 		$this->formvars['aktivStatus'] = 1;
-		$this->formvars['Name'] = $file." (".date('d.m. H:i',time()).")".str_repeat(' ', $custom_table['datatype']);
+		$this->formvars['Name'] = $layername;
 		$this->formvars['Gruppe'] = $groupid;
 		$this->formvars['Typ'] = 'import';
 		$this->formvars['Datentyp'] = $custom_table['datatype'];
