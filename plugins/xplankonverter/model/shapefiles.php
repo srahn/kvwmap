@@ -37,9 +37,14 @@ class ShapeFile extends PgObject {
   * representing this shape file
   */
   function deleteLayer() {
-    $this->debug('<p>Delete Layer in mysql db: ' . $this->dataTableName());
-    $this->gui->formvars['selected_layer_id'] = $this->get('layer_id');
-    $this->gui->LayerLoeschen();
+    if ($this->get('layer_id') != '') {
+      $this->debug('<p>Delete Layer in mysql db: ' . $this->dataTableName());
+      $this->gui->formvars['selected_layer_id'] = $this->get('layer_id');
+      $this->gui->LayerLoeschen();
+    }
+    else {
+      $this->debug('<p>Shapefile hat keine Layer-ID');
+    }
   }
 
   /*
@@ -68,7 +73,9 @@ class ShapeFile extends PgObject {
 
     foreach(array('shp', 'shx', 'dbf', 'sql') AS $extension) {
       $this->debug('<br>Delete file: ' . $this->uploadShapeFileName() . '.' . $extension);
-      unlink(XPLANKONVERTER_SHAPE_PATH . $this->get('konvertierung_id') . '/' . $this->get('filename') . '.' . $extension);
+      $shapefile = XPLANKONVERTER_SHAPE_PATH . $this->get('konvertierung_id') . '/' . $this->get('filename') . '.' . $extension;
+      if (is_file($shapefile))
+        unlink($shapefile);
     }
   }
 
