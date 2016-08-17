@@ -3140,9 +3140,9 @@ class GUI {
 				$this->param['str1'].= 'Layer: '.$layer['Name'].'<br>';
 				echo 'Layer: '.$layer['Name'].'<br>';
 				$layerdb = $mapDB->getlayerdatabase($layer['Layer_ID'], $this->Stelle->pgdbhost);
-	    	$attributes = $mapDB->load_attributes($layerdb, $layer['pfad']);
-	    	$mapDB->save_postgis_attributes($layer['Layer_ID'], $attributes, '', '');
-	    	$mapDB->delete_old_attributes($layer['Layer_ID'], $attributes);
+				$attributes = $mapDB->load_attributes($layerdb, $layer['pfad']);
+				$mapDB->save_postgis_attributes($layer['Layer_ID'], $attributes, '', '');
+				$mapDB->delete_old_attributes($layer['Layer_ID'], $attributes);
 			}
 		}
 	}
@@ -14214,61 +14214,61 @@ class db_mapObj{
     return $attributes;
   }
   
-  function save_postgis_attributes($layer_id, $attributes, $maintable, $schema){
-    	for($i = 0; $i < count($attributes['name']); $i++){
-    		$sql = "INSERT INTO layer_attributes SET ";
-  	  	$sql.= "layer_id = ".$layer_id.", ";
-  	  	$sql.= "name = '".$attributes['name'][$i]."', ";
-  	  	$sql.= "real_name = '".$attributes['real_name'][$attributes['name'][$i]]."', ";
-  	  	$sql.= "tablename = '".$attributes['table_name'][$i]."', ";
-  	  	$sql.= "table_alias_name = '".$attributes['table_alias_name'][$attributes['name'][$i]]."', ";
-  	  	$sql.= "type = '".$attributes['type'][$i]."', ";
-  	  	$sql.= "geometrytype = '".$attributes['geomtype'][$attributes['name'][$i]]."', ";
-  	  	$sql.= "constraints = '".addslashes($attributes['constraints'][$i])."', ";
-  	  	$sql.= "nullable = ".$attributes['nullable'][$i].", ";
-  	  	$sql.= "length = ".$attributes['length'][$i].", ";
-  	  	$sql.= "decimal_length = ".$attributes['decimal_length'][$i].", ";
-  	  	$sql.= "`default` = '".addslashes($attributes['default'][$i])."', ";
-  	  	$sql.= "`order` = ".$i;
-  	  	$sql.= " ON DUPLICATE KEY UPDATE ";
-  	  	$sql.= "real_name = '".$attributes['real_name'][$attributes['name'][$i]]."', ";
-  	  	$sql.= "tablename = '".$attributes['table_name'][$i]."', ";
-  	  	$sql.= "table_alias_name = '".$attributes['table_alias_name'][$attributes['name'][$i]]."', ";
-  	  	$sql.= "type = '".$attributes['type'][$i]."', ";
-  	  	$sql.= "geometrytype = '".$attributes['geomtype'][$attributes['name'][$i]]."', ";
-  	  	$sql.= "constraints = '".addslashes($attributes['constraints'][$i])."', ";
-  	  	$sql.= "nullable = ".$attributes['nullable'][$i].", ";
-  	  	$sql.= "length = ".$attributes['length'][$i].", ";
-  	  	$sql.= "decimal_length = ".$attributes['decimal_length'][$i].", ";
-  	  	$sql.= "`default` = '".addslashes($attributes['default'][$i])."', ";
-  	  	$sql.= "`order` = ".$i;
-  	  	$this->debug->write("<p>file:kvwmap class:db_mapObj->save_postgis_attributes - Speichern der Layerattribute:<br>".$sql,4);
-  	    $query=mysql_query($sql);
-  	    if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
-    	}
-    	
-    	if($maintable == ''){
-				$maintable = $attributes['all_table_names'][0];
-    		$sql = "UPDATE layer SET maintable = '".$maintable."' WHERE (maintable IS NULL OR maintable = '') AND Layer_ID = ".$layer_id;
-    		$this->debug->write("<p>file:kvwmap class:db_mapObj->save_postgis_attributes - Speichern der Layerattribute:<br>".$sql,4);
-  	    $query=mysql_query($sql);
-  	    if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
-    	}
-			
-			$sql = "select 1 from information_schema.views WHERE table_name = '".$maintable."' AND table_schema = '".$schema."'";
-			$query = pg_query($sql);
-			$is_view = pg_num_rows($query);
-			$sql = "UPDATE layer SET maintable_is_view = ".$is_view." WHERE Layer_ID = ".$layer_id;
+	function save_postgis_attributes($layer_id, $attributes, $maintable, $schema){
+		for($i = 0; $i < count($attributes['name']); $i++){
+			$sql = "INSERT INTO layer_attributes SET ";
+			$sql.= "layer_id = ".$layer_id.", ";
+			$sql.= "name = '".$attributes['name'][$i]."', ";
+			$sql.= "real_name = '".$attributes['real_name'][$attributes['name'][$i]]."', ";
+			$sql.= "tablename = '".$attributes['table_name'][$i]."', ";
+			$sql.= "table_alias_name = '".$attributes['table_alias_name'][$attributes['name'][$i]]."', ";
+			$sql.= "type = '".$attributes['type'][$i]."', ";
+			$sql.= "geometrytype = '".$attributes['geomtype'][$attributes['name'][$i]]."', ";
+			$sql.= "constraints = '".addslashes($attributes['constraints'][$i])."', ";
+			$sql.= "nullable = ".$attributes['nullable'][$i].", ";
+			$sql.= "length = ".$attributes['length'][$i].", ";
+			$sql.= "decimal_length = ".$attributes['decimal_length'][$i].", ";
+			$sql.= "`default` = '".addslashes($attributes['default'][$i])."', ";
+			$sql.= "`order` = ".$i;
+			$sql.= " ON DUPLICATE KEY UPDATE ";
+			$sql.= "real_name = '".$attributes['real_name'][$attributes['name'][$i]]."', ";
+			$sql.= "tablename = '".$attributes['table_name'][$i]."', ";
+			$sql.= "table_alias_name = '".$attributes['table_alias_name'][$attributes['name'][$i]]."', ";
+			$sql.= "type = '".$attributes['type'][$i]."', ";
+			$sql.= "geometrytype = '".$attributes['geomtype'][$attributes['name'][$i]]."', ";
+			$sql.= "constraints = '".addslashes($attributes['constraints'][$i])."', ";
+			$sql.= "nullable = ".$attributes['nullable'][$i].", ";
+			$sql.= "length = ".$attributes['length'][$i].", ";
+			$sql.= "decimal_length = ".$attributes['decimal_length'][$i].", ";
+			$sql.= "`default` = '".addslashes($attributes['default'][$i])."', ";
+			$sql.= "`order` = ".$i;
 			$this->debug->write("<p>file:kvwmap class:db_mapObj->save_postgis_attributes - Speichern der Layerattribute:<br>".$sql,4);
 			$query=mysql_query($sql);
 			if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+		}
     	
-    	# den PRIMARY KEY constraint rausnehmen, falls der tablename nicht der maintable entspricht
-    	$sql = "UPDATE layer_attributes, layer SET constraints = '' WHERE layer_attributes.layer_id = ".$layer_id." AND layer.Layer_ID = ".$layer_id." AND constraints = 'PRIMARY KEY' AND tablename != maintable";
-    	$this->debug->write("<p>file:kvwmap class:db_mapObj->save_postgis_attributes - Speichern der Layerattribute:<br>".$sql,4);
-  	  $query=mysql_query($sql);
-  	  if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }	
-  }
+		if($maintable == ''){
+			$maintable = $attributes['all_table_names'][0];
+			$sql = "UPDATE layer SET maintable = '".$maintable."' WHERE (maintable IS NULL OR maintable = '') AND Layer_ID = ".$layer_id;
+			$this->debug->write("<p>file:kvwmap class:db_mapObj->save_postgis_attributes - Speichern der Layerattribute:<br>".$sql,4);
+			$query=mysql_query($sql);
+			if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+		}
+			
+		$sql = "select 1 from information_schema.views WHERE table_name = '".$maintable."' AND table_schema = '".$schema."'";
+		$query = pg_query($sql);
+		$is_view = pg_num_rows($query);
+		$sql = "UPDATE layer SET maintable_is_view = ".$is_view." WHERE Layer_ID = ".$layer_id;
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->save_postgis_attributes - Speichern der Layerattribute:<br>".$sql,4);
+		$query=mysql_query($sql);
+		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+    	
+		# den PRIMARY KEY constraint rausnehmen, falls der tablename nicht der maintable entspricht
+		$sql = "UPDATE layer_attributes, layer SET constraints = '' WHERE layer_attributes.layer_id = ".$layer_id." AND layer.Layer_ID = ".$layer_id." AND constraints = 'PRIMARY KEY' AND tablename != maintable";
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->save_postgis_attributes - Speichern der Layerattribute:<br>".$sql,4);
+		$query=mysql_query($sql);
+		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }	
+	}
   
   function delete_old_attributes($layer_id, $attributes){
   	$sql = "DELETE FROM layer_attributes WHERE layer_id = ".$layer_id;
