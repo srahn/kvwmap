@@ -4096,7 +4096,7 @@ class GUI {
 			else
 				$unit = 'meter';
 
-			switch (ZOOMUNIT) {
+			switch ($unit) {
 				case 'meter' : {
 					if ($this->user->rolle->epsg_code == 4326)
 						$rand = $rand / 10000;
