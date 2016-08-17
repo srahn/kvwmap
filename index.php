@@ -1177,30 +1177,35 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->Attributeditor();
 	  } break;
 
-	  case 'Attributeditor' : {
+		case 'Attributeditor' : {
 			$GUI->checkCaseAllowed('Attributeditor');
 			$GUI->Attributeditor();
-	  } break;
+		} break;
 
-	  case 'Attributeditor_speichern' : {    
+		case 'Attributeditor_speichern' : {    
 			$GUI->checkCaseAllowed('Attributeditor');
 			$GUI->Attributeditor_speichern();
-	  } break;
+		} break;
 
-	  case 'Layer_Anzeigen' : {
+		case 'Datentypen_Anzeigen' : {
+			$GUI->checkCaseAllowed($go);
+			$GUI->DatentypenAnzeigen();
+		} break;
+
+		case 'Layer_Anzeigen' : {
 			$GUI->checkCaseAllowed($go);
 			$GUI->LayerAnzeigen();
-	  } break;
-	  
+		} break;
+
 	  case 'Layer_Uebersicht' : {
 			$GUI->LayerUebersicht();
-	  } break;
+		} break;
 
-	  case 'Layer_Löschen' : {    
+		case 'Layer_Löschen' : {    
 			$GUI->checkCaseAllowed('Layer_Anzeigen');
 			$GUI->LayerLoeschen();
 			$GUI->LayerAnzeigen();
-	  } break;
+		} break;
 
 	  case 'Layer2Stelle_Reihenfolge' : {
 			$GUI->checkCaseAllowed('Stellen_Anzeigen');

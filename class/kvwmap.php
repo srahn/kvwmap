@@ -6562,37 +6562,49 @@ class GUI {
     return $stellen_ids;
   }
 
-  function LayerLoeschen(){
-    $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-    $mapDB->deleteLayer($this->formvars['selected_layer_id']);
-    # auch die Klassen löschen
-    $this->classes = $mapDB->read_Classes($this->formvars['selected_layer_id']);
-    for($i = 0; $i < count($this->classes); $i++){
-      $mapDB->delete_Class($this->classes[$i]['Class_ID']);
-    }
-    # layer_attributes löschen
-    $mapDB->delete_layer_attributes($this->formvars['selected_layer_id']);
-    $mapDB->delete_layer_attributes2stelle($this->formvars['selected_layer_id'], $this->Stelle->id);
-    # Filter löschen
-    $mapDB->delete_layer_filterattributes($this->formvars['selected_layer_id']);
+	function LayerLoeschen(){
+		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$mapDB->deleteLayer($this->formvars['selected_layer_id']);
+		# auch die Klassen löschen
+		$this->classes = $mapDB->read_Classes($this->formvars['selected_layer_id']);
+		for($i = 0; $i < count($this->classes); $i++){
+			$mapDB->delete_Class($this->classes[$i]['Class_ID']);
+		}
+		# layer_attributes löschen
+		$mapDB->delete_layer_attributes($this->formvars['selected_layer_id']);
+		$mapDB->delete_layer_attributes2stelle($this->formvars['selected_layer_id'], $this->Stelle->id);
+		# Filter löschen
+		$mapDB->delete_layer_filterattributes($this->formvars['selected_layer_id']);
 
-    $layer[] = $this->formvars['selected_layer_id'];
-    $stelle[] = $this->Stelle->id;
-    $this->Stelle->deleteLayer($layer, $this->pgdatabase);
-    $this->user->rolle->deleteLayer('', $stelle, $layer);
-  }
+		$layer[] = $this->formvars['selected_layer_id'];
+		$stelle[] = $this->Stelle->id;
+		$this->Stelle->deleteLayer($layer, $this->pgdatabase);
+		$this->user->rolle->deleteLayer('', $stelle, $layer);
+	}
 
-  function LayerAnzeigen() {
-    # Abfragen aller Layer
-    $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+  function DatentypenAnzeigen() {
+    # Abfragen aller in mysql registrierten Datentypen
+    $mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
     if($this->formvars['order'] == ''){
-      $this->formvars['order'] = 'Name';
+      $this->formvars['order'] = 'name';
     }
-    $this->layerdaten = $mapDB->getall_Layer($this->formvars['order']);
-    $this->titel='Layerdaten';
-    $this->main='layerdaten.php';
+    $this->datatypes = $mapDB->getall_Datatypes($this->formvars['order']);
+    $this->titel='Datentypen';
+    $this->main='datatype_list.php';
     $this->output();
   }
+
+	function LayerAnzeigen() {
+		# Abfragen aller Layer
+		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		if($this->formvars['order'] == ''){
+			$this->formvars['order'] = 'Name';
+		}
+		$this->layerdaten = $mapDB->getall_Layer($this->formvars['order']);
+		$this->titel='Layerdaten';
+		$this->main='layerdaten.php';
+		$this->output();
+	}
 
   function GenerischeSuche_Suchen(){
 		if($this->last_query != ''){
@@ -14829,9 +14841,31 @@ class db_mapObj{
 		return $attributes;
   }
 
-  function getall_Layer($order) {
+	function getall_Datatypes($order) {
+		$order_sql = ($order != '') ? "ORDER BY " . $order : '';
+		$sql = "
+			SELECT
+				`id`,
+				`name`,
+				`schema`
+			FROM
+				datatypes
+			" . $order_sql;
+
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->getall_Datatypes - Lesen aller Datentypen:<br>" . $sql , 4);
+		$query = mysql_query($sql);
+		if ($query == 0) { echo "<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>" . INFO1; return 0; }
+		while($rs = mysql_fetch_array($query)) {
+			$datatypes['id'][]=$rs['id'];
+			$datatypes['name'][]=$rs['name'];
+			$datatypes['schema'][]=$rs['schema'];
+		}
+		return $datatypes;
+	}
+
+	function getall_Layer($order) {
 		global $language;
-    $sql ='SELECT ';
+		$sql ='SELECT ';
 		if($language != 'german') {
 			$sql.='CASE WHEN `Name_'.$language.'` != "" THEN `Name_'.$language.'` ELSE `Name` END AS ';
 		}
@@ -14840,30 +14874,30 @@ class db_mapObj{
 			$sql.='CASE WHEN `Gruppenname_'.$language.'` != "" THEN `Gruppenname_'.$language.'` ELSE `Gruppenname` END AS ';
 		}
 		$sql.='Gruppenname FROM layer, u_groups';
-    $sql.=' WHERE layer.Gruppe = u_groups.id';
-    if($order != ''){$sql .= ' ORDER BY '.$order;}
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->getall_Layer - Lesen aller Layer:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
-    while($rs=mysql_fetch_array($query)) {
-          $layer['ID'][]=$rs['Layer_ID'];
-          $layer['Bezeichnung'][]=$rs['Name'];
-          $layer['Gruppe'][]=$rs['Gruppenname'];
-					$layer['GruppeID'][]=$rs['Gruppe'];
-          $layer['Kurzbeschreibung'][]=$rs['kurzbeschreibung'];
-          $layer['Datenherr'][]=$rs['datenherr'];
-          $layer['alias'][]=$rs['alias'];
-      }
-    if($order == 'Bezeichnung'){
-      // Sortieren der Layer unter Berücksichtigung von Umlauten
-      $sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);
-      $layer['ID'] = $sorted_arrays['second_array'];
+		$sql.=' WHERE layer.Gruppe = u_groups.id';
+		if($order != ''){$sql .= ' ORDER BY '.$order;}
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->getall_Layer - Lesen aller Layer:<br>".$sql,4);
+		$query=mysql_query($sql);
+		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+		while($rs=mysql_fetch_array($query)) {
+			$layer['ID'][]=$rs['Layer_ID'];
+			$layer['Bezeichnung'][]=$rs['Name'];
+			$layer['Gruppe'][]=$rs['Gruppenname'];
+			$layer['GruppeID'][]=$rs['Gruppe'];
+			$layer['Kurzbeschreibung'][]=$rs['kurzbeschreibung'];
+			$layer['Datenherr'][]=$rs['datenherr'];
+			$layer['alias'][]=$rs['alias'];
+		}
+		if($order == 'Bezeichnung'){
+			// Sortieren der Layer unter Berücksichtigung von Umlauten
+			$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);
+			$layer['ID'] = $sorted_arrays['second_array'];
 			$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['GruppeID']);
 			$layer['Bezeichnung'] = $sorted_arrays['array'];
 			$layer['GruppeID'] = $sorted_arrays['second_array'];
-    }
-    return $layer;
-  }
+		}
+		return $layer;
+	}
   
   function get_stellen_from_layer($layer_id){
     $sql = 'SELECT ID, Bezeichnung FROM stelle, used_layer WHERE used_layer.Stelle_ID = stelle.ID AND used_layer.Layer_ID = '.$layer_id.' ORDER BY Bezeichnung';
