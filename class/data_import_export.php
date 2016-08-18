@@ -206,7 +206,7 @@ class data_import_export {
 		$sql.= "CREATE INDEX ".$tablename."_gist_idx ON ".CUSTOM_SHAPE_SCHEMA.".".$tablename." USING gist (the_geom );";
 		$i = 0;
 		foreach($rows as $row){
-			if($headlines AND $i == 0){$i++;continue;}				// Überschriftenzeile auslassen
+			if($headlines AND $i == 0 OR trim($row, $formvars['delimiter']."\n\r") == ''){$i++;continue;}				// Überschriftenzeile und Leerzeilen auslassen
 			$columns = explode($formvars['delimiter'], $row);
 			$sql.= "INSERT INTO ".CUSTOM_SHAPE_SCHEMA.".".$tablename." VALUES(";
 			$komma = false;
@@ -220,8 +220,11 @@ class data_import_export {
 					$$formvars['column'.$i] = $columns[$i];			# Hier werden $x und $y gesetzt (nicht das doppelte $ wegnehmen!)
 				}
 			}
+			$x = str_replace(',', '.', $x);
+			$y = str_replace(',', '.', $y);
 			if($komma)$sql.= ", ";
-			$sql.= "st_geomfromtext('POINT(".$x." ".$y.")', ".$formvars['epsg']."));";
+			if(!is_numeric($x) OR !is_numeric($y))$sql.= "NULL);";
+			else $sql.= "st_geomfromtext('POINT(".$x." ".$y.")', ".$formvars['epsg']."));";
 			$i++;
 		}
 		#echo $sql;
