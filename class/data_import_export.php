@@ -167,7 +167,7 @@ class data_import_export {
 		if($_files['file1']['name']){
 			$this->pointfile = UPLOADPATH.$_files['file1']['name'];
 			if(move_uploaded_file($_files['file1']['tmp_name'], $this->pointfile)){
-				$rows = file($this->pointfile);
+				$rows = file($this->pointfile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 				while(count($this->delimiters) > 0 AND count($this->columns) < 2){
 					$this->delimiter = array_shift($this->delimiters);
 					$this->columns = explode($this->delimiter, utf8_encode($rows[0]));
@@ -177,7 +177,7 @@ class data_import_export {
 	}
 	
 	function import_custom_pointlist($formvars, $pgdatabase){
-		$rows = file($formvars['file1']);
+		$rows = file($formvars['file1'], FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 		$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($formvars['file1']), 0, 15))).rand(1,1000000);
 		$columns = explode($formvars['delimiter'], $rows[0]);
 		for($i = 0; $i < count($columns); $i++){
