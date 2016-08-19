@@ -8,12 +8,16 @@
 				<tr>
 					<th align="left">Id</th>
 					<th align="left">Name</th>
+					<th align="left">Datenbankname</th>
+					<th align="left">Datenbankschema</th>
 				</tr>
 			<?php
-			for ($i=0; $i<count($this->datatypes['id']);$i++) { ?>
+			for ($i=0; $i<count($this->datatypes);$i++) { ?>
 				<tr>
-					<td align="right"><?php echo $this->datatypes['id'][$i]; ?></td>
-					<td align="left"><?php echo $this->datatypes['name'][$i]; ?></td>
+					<td align="right"><?php echo $this->datatypes[$i]['id']; ?></td>
+					<td align="left"><?php echo $this->datatypes[$i]['name']; ?></td>
+					<td align="right"><?php echo $this->datatypes[$i]['pgdbname']; ?></td>
+					<td align="right"><?php echo $this->datatypes[$i]['pgschema']; ?></td>
 				</tr><?php
 			} ?>
 			</table>
