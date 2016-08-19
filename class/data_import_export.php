@@ -170,7 +170,11 @@ class data_import_export {
 				$rows = file($this->pointfile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 				while(count($this->delimiters) > 0 AND count($this->columns) < 2){
 					$this->delimiter = array_shift($this->delimiters);
-					$this->columns = explode($this->delimiter, utf8_encode($rows[0]));
+					$i = 0;
+					while(trim($rows[$i], $this->delimiter."\n\r") == ''){	// Leerzeilen überspringen bis zur ersten Zeile mit Inhalt
+						$i++;
+					}
+					$this->columns = explode($this->delimiter, utf8_encode($rows[$i]));
 				}
 			}
 		}
@@ -179,7 +183,11 @@ class data_import_export {
 	function import_custom_pointlist($formvars, $pgdatabase){
 		$rows = file($formvars['file1'], FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 		$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($formvars['file1']), 0, 15))).rand(1,1000000);
-		$columns = explode($formvars['delimiter'], $rows[0]);
+		$i = 0;
+		while(trim($rows[$i], $formvars['delimiter']."\n\r") == ''){	// Leerzeilen überspringen bis zur ersten Zeile mit Inhalt
+			$i++;
+		}
+		$columns = explode($formvars['delimiter'], $rows[$i]);
 		for($i = 0; $i < count($columns); $i++){
 			if($formvars['column'.$i] == 'x' AND !is_numeric(str_replace(',', '.', $columns[$i])))$headlines = true;		// die erste Zeile enthält die Spaltenüberschriften
 		}
