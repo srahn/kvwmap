@@ -181,7 +181,7 @@ class data_import_export {
 		$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($formvars['file1']), 0, 15))).rand(1,1000000);
 		$columns = explode($formvars['delimiter'], $rows[0]);
 		for($i = 0; $i < count($columns); $i++){
-			if($formvars['column'.$i] == 'x' AND !is_numeric($columns[$i]))$headlines = true;		// die erste Zeile enthält die Spaltenüberschriften
+			if($formvars['column'.$i] == 'x' AND !is_numeric(str_replace(',', '.', $columns[$i])))$headlines = true;		// die erste Zeile enthält die Spaltenüberschriften
 		}
 		$sql = "CREATE TABLE ".CUSTOM_SHAPE_SCHEMA.".".$tablename." (";
 		$komma = false;
