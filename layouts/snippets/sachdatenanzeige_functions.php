@@ -288,6 +288,13 @@ include('funktionen/input_check_functions.php');
 		}
 		ahah("index.php", "go=auto_generate&layer_id="+layer_id+"&attribute="+attribute+"&attributenames="+attributenames+"&attributevalues="+attributevalues, new Array(document.getElementById(attribute+'_'+k)), new Array("setvalue"));
 	}
+	
+	openCustomSubform = function(layer_id, attribute, field_id){
+		document.getElementById('sperrdiv').style.background = 'rgba(200,200,200,0.8)';
+		document.getElementById('sperrdiv').style.width = '100%';
+		document.getElementById('sperrdiv').innerHTML= '<iframe id="customSubform" style="margin: 30px;width:95%; height:90%" src=""></iframe>';
+		ahah("index.php", "go=openCustomSubform&layer_id="+layer_id+"&attribute="+attribute+"&field_id="+field_id, new Array(document.getElementById('customSubform')), new Array("src"));
+	}
 	 
 	update_buttons = function(all, layer_id){
 		merk_link = document.getElementById('merk_link_'+layer_id);
