@@ -85,7 +85,16 @@ function suche(){
 					$this->attributes['alias'][$i] = $this->attributes['name'][$i];
 				}		?>
 				if(document.GUI.value_<? echo $this->attributes['name'][$i]; ?>.value == ''){
-					nogo = 'Das Feld <? echo $this->attributes['alias'][$i]; ?> ist ein Such-Pflichtfeld und muss ausgefüllt werden.';
+					if('<? echo $this->attributes['form_element_type'][$i]; ?>' != 'Autovervollständigungsfeld'
+					|| (document.GUI.value_<? echo $this->attributes['name'][$i]; ?>[0].value == '' && document.GUI.value_<? echo $this->attributes['name'][$i]; ?>[0].disabled == false)
+					|| (document.GUI.value_<? echo $this->attributes['name'][$i]; ?>[1].value == '' && document.GUI.value_<? echo $this->attributes['name'][$i]; ?>[1].disabled == false)
+					){
+						console.log(document.GUI.value_<? echo $this->attributes['name'][$i]; ?>[0].value);
+						console.log(document.GUI.value_<? echo $this->attributes['name'][$i]; ?>[0].disabled);
+						console.log(document.GUI.value_<? echo $this->attributes['name'][$i]; ?>[1].value);
+						console.log(document.GUI.value_<? echo $this->attributes['name'][$i]; ?>[1].disabled);
+						nogo = 'Das Feld <? echo $this->attributes['alias'][$i]; ?> ist ein Such-Pflichtfeld und muss ausgefüllt werden.';
+					}
 				}
 	<?	} ?>
 			test = document.GUI.value_<? echo $this->attributes['name'][$i]; ?>.value + '';
