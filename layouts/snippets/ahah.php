@@ -51,7 +51,6 @@ function ahahDone(url, targets, req, actions) {
 						eval(responsevalues[i]);
 					break;
 					case "src":
-						console.log(responsevalues[i]);
 						targets[i].src = responsevalues[i];
 					break;
 					case "xlink:href":

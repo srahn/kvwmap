@@ -292,8 +292,19 @@ include('funktionen/input_check_functions.php');
 	openCustomSubform = function(layer_id, attribute, field_id){
 		document.getElementById('sperrdiv').style.background = 'rgba(200,200,200,0.8)';
 		document.getElementById('sperrdiv').style.width = '100%';
-		document.getElementById('sperrdiv').innerHTML= '<iframe id="customSubform" style="margin: 30px;width:95%; height:90%" src=""></iframe>';
+		subformWidth = document.GUI.browserwidth.value-70;
+		subform = '<div style="position:relative; margin: 30px;width:'+subformWidth+'px; height:90%">';
+		subform += '<div style="position: absolute;top: 2px;right: -2px"><a href="javascript:closeCustomSubform();" title="Schlie&szlig;en"><img style="border:none" src="<? echo GRAPHICSPATH.'exit2.png'; ?>"></img></a></div>';
+		subform += '<iframe id="customSubform" style="width:100%; height:100%" src=""></iframe>';
+		subform += '</div>';
+		document.getElementById('sperrdiv').innerHTML= subform;
 		ahah("index.php", "go=openCustomSubform&layer_id="+layer_id+"&attribute="+attribute+"&field_id="+field_id, new Array(document.getElementById('customSubform')), new Array("src"));
+	}
+	
+	closeCustomSubform = function(){
+		document.getElementById('sperrdiv').style.background = 'rgba(200,200,200,0.3)';
+		document.getElementById('sperrdiv').style.width = '0%';
+		document.getElementById('sperrdiv').innerHTML = '';
 	}
 	 
 	update_buttons = function(all, layer_id){
