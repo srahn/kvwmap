@@ -378,8 +378,12 @@ define('MINSCALE', 100);                                                        
 # Maßstab ab dem bei einem Koordinatensprung auch gezoomt wird
 define('COORD_ZOOM_SCALE', 50000);																							# Version 2.4
 
-# Puffer (in Metern) der beim Zoom auf ein Objekt hinzugegeben wird
-define('ZOOMBUFFER', 100);                                                        # Version 2.1
+# Puffer in der Einheit (ZOOMUNIT) der beim Zoom auf ein Objekt hinzugegeben wird
+define('ZOOMBUFFER', 100);                                                 # Version 2.1 geändert in Version 2.5
+
+# Einheit des Puffer der beim Zoom auf ein Objekt hinzugegeben wird
+# 'meter' oder 'scale'
+define('ZOOMUNIT', 'meter');                                               # Version 2.5
 
 # URL zum Authentifizieren am CSW-Metadatensystem
 define('METADATA_AUTH_LINK', 'http://berg.preagro.de:8088/geonetwork/srv/en/xml.user.login?username=admin&password=!admin!');		# Version 1.7.5

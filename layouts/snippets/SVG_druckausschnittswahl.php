@@ -570,6 +570,7 @@ function deletelast(evt) {
 			</g>
 		</g>
 	</g>
+	<g id="buttons" cursor="pointer" transform="scale(1.1)">
   <g id="buttons_NAV" cursor="pointer" onmouseout="hide_tooltip()" onmousedown="focus_NAV();hide_tooltip()">
 '.$SVGvars_navbuttons.'
 		</g>
@@ -614,6 +615,7 @@ function deletelast(evt) {
 				<rect id="refpoint0" onmouseover="show_tooltip(\''.$strSetRefPoint.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="1" ry="1" width="25" height="25" fill="white" opacity="0.2"/>
 	    </g>
 	    
+		</g>
 		</g>
       
 '.$SVGvars_tooltipblank.'

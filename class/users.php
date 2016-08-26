@@ -935,6 +935,7 @@ class user {
 			else $sql.=',instant_reload="0"';
 			if($formvars['menu_auto_close'] != '') $sql.=',menu_auto_close="1"';
 			else $sql.=',menu_auto_close="0"';
+			$sql .= ', visually_impaired=' . (($formvars['visually_impaired'] != '') ? '"1"' : '"0"');
 			if($formvars['querymode'] != '') $sql.=',querymode="1"';
 			else $sql.=',querymode="0", overlayx=400, overlayy=150';
 			$sql.=',geom_edit_first="'.$formvars['geom_edit_first'].'"';
@@ -1473,6 +1474,7 @@ class rolle {
 			$this->overlayy=$rs['overlayy'];
 			$this->instant_reload=$rs['instant_reload'];
 			$this->menu_auto_close=$rs['menu_auto_close'];
+			$this->visually_impaired = $rs['visually_impaired'];
 			if($rs['hist_timestamp'] != ''){
 				$this->hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');			# der wird zur Anzeige des Timestamps benutzt
 				rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');	# der hat die Form, wie der timestamp in der PG-DB steht und wird für die Abfragen benutzt
@@ -3336,12 +3338,14 @@ class stelle {
 		$sql .=' WHERE stelle_id = '.$this->id;
 		$sql .=' AND layer.Gruppe = u_groups.id AND (layer.connectiontype = 6 OR layer.connectiontype = 9)';
 		$sql .=' AND layer.Layer_ID = used_layer.Layer_ID';
-		$sql .=' AND used_layer.queryable = \'1\'';
-		if($privileg != NULL){
-			$sql .=' AND used_layer.privileg >= "'.$privileg.'"';
-		}
 		if($use_geom != NULL){
 			$sql .=' AND used_layer.use_geom = 1';
+		}
+		else{
+			$sql .=' AND used_layer.queryable = \'1\'';
+		}
+		if($privileg != NULL){
+			$sql .=' AND used_layer.privileg >= "'.$privileg.'"';
 		}		
 		if($group_id != NULL){
 			$sql .=' AND u_groups.id = '.$group_id;

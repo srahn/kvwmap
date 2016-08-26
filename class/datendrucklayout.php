@@ -68,7 +68,7 @@ class ddl {
 				if($this->layout['type'] == 0)$this->page_overflow_by_sublayout = false;			# if ???							
 			}
 			# der Freitext wurde noch nicht geschrieben und ist entweder ein fester Freitext oder ein fortlaufender oder einer, der auf jeder Seite erscheinen soll
-    	if(in_array($this->layout['texts'][$j]['id'], $this->remaining_freetexts) AND $this->layout['texts'][$j]['posy'] > 0){	# nur Freitexte mit einem y-Wert werden geschrieben
+    	if(in_array($this->layout['texts'][$j]['id'], $this->remaining_freetexts) AND $this->layout['texts'][$j]['posy'] != ''){	# nur Freitexte mit einem y-Wert werden geschrieben
 				if(($type == 'fixed' AND $this->layout['texts'][$j]['type'] != 2 AND ($this->layout['type'] == 0 OR $this->layout['texts'][$j]['type'] == 1)) 
 				OR ($type == 'running' AND $this->layout['type'] != 0 AND $this->layout['texts'][$j]['type'] == 0)
 				OR ($type == 'everypage' AND $this->layout['texts'][$j]['type'] == 2)){									
@@ -488,7 +488,8 @@ class ddl {
 				$this->add_static_elements($offsetx);
     	}
 			$this->yoffset_onpage = $this->maxy - $this->miny[$lastpage];			# der Offset mit dem die Elemente beim Untereinander-Typ nach unten versetzt werden
-			if($this->layout['type'] != 0 AND $this->miny[$lastpage] < 80){		# neue Seite beim Untereinander-Typ oder eingebettet-Typ und Seitenüberlauf
+			if($this->i_on_page > 0)$average_dataset_height = $this->yoffset_onpage/$this->i_on_page;
+			if($this->layout['type'] != 0 AND $this->miny[$lastpage] < $average_dataset_height+60){		# neue Seite beim Untereinander-Typ oder eingebettet-Typ und Seitenüberlauf
 				$this->i_on_page = 0;
 				#$this->maxy = 0;
 				if(!$this->initial_yoffset)$this->initial_yoffset = 780-$this->maxy;			# der Offset von oben gesehen, mit dem das erste fortlaufende Element auf der ersten Seite beginnt; wird benutzt, um die fortlaufenden Elemente ab der 2. Seite oben beginnen zu lassen

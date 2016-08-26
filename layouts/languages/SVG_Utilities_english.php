@@ -12,4 +12,5 @@
 	$strBufferedLine="add buffered line";
 	$strParallelPolygon="add parallel polygon";
 	$strMoveGeometry="move geometry";
+	$strReverse="change line orientation";
 ?>  
