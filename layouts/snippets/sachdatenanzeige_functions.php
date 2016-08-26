@@ -33,6 +33,31 @@ include('funktionen/input_check_functions.php');
 		}
 	}
 	
+	buildArrayValue = function(fieldname, k){
+		elements = document.getElementsByName(fieldname);
+		array_values = new Array();
+		for(i = 0; i < elements.length; i++){
+			if(elements[i].value != '')array_values.push(elements[i].value);
+		}
+		array_value = '{'+array_values.join()+'}';
+		document.getElementById(fieldname+'_'+k).value = array_value;
+	}
+	
+	addArrayElement = function(fieldname){
+		outer_div = document.getElementById(fieldname+'_elements');
+		first_element = document.getElementById('div_'+fieldname+'_-1');
+		new_element = first_element.cloneNode(true);
+		new_element.childNodes[0].value = '';
+		new_element.style = 'display: block';
+		outer_div.appendChild(new_element);
+	}
+	
+	removeArrayElement = function(fieldname, remove_element, k){
+		outer_div = document.getElementById(fieldname+'_elements');
+		outer_div.removeChild(remove_element);
+		buildArrayValue(fieldname, k);
+	}
+	
 	nextdatasets = function(offset){
 		currentform.target = '';
 		if(currentform.go_backup.value != ''){
@@ -287,6 +312,24 @@ include('funktionen/input_check_functions.php');
 			}
 		}
 		ahah("index.php", "go=auto_generate&layer_id="+layer_id+"&attribute="+attribute+"&attributenames="+attributenames+"&attributevalues="+attributevalues, new Array(document.getElementById(attribute+'_'+k)), new Array("setvalue"));
+	}
+	
+	openCustomSubform = function(layer_id, attribute, field_id){
+		document.getElementById('sperrdiv').style.background = 'rgba(200,200,200,0.8)';
+		document.getElementById('sperrdiv').style.width = '100%';
+		subformWidth = document.GUI.browserwidth.value-70;
+		subform = '<div style="position:relative; margin: 30px;width:'+subformWidth+'px; height:90%">';
+		subform += '<div style="position: absolute;top: 2px;right: -2px"><a href="javascript:closeCustomSubform();" title="Schlie&szlig;en"><img style="border:none" src="<? echo GRAPHICSPATH.'exit2.png'; ?>"></img></a></div>';
+		subform += '<iframe id="customSubform" style="width:100%; height:100%" src=""></iframe>';
+		subform += '</div>';
+		document.getElementById('sperrdiv').innerHTML= subform;
+		ahah("index.php", "go=openCustomSubform&layer_id="+layer_id+"&attribute="+attribute+"&field_id="+field_id, new Array(document.getElementById('customSubform')), new Array("src"));
+	}
+	
+	closeCustomSubform = function(){
+		document.getElementById('sperrdiv').style.background = 'rgba(200,200,200,0.3)';
+		document.getElementById('sperrdiv').style.width = '0%';
+		document.getElementById('sperrdiv').innerHTML = '';
 	}
 	 
 	update_buttons = function(all, layer_id){

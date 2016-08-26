@@ -134,7 +134,11 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
       $GUI->mime_type='map_ajax';
       $GUI->output();
 		}break;
-				
+			
+		case 'openCustomSubform' : {
+			$GUI->openCustomSubform();
+	  } break;
+		
 		case 'getLayerOptions' : {
 			$GUI->getLayerOptions();
 	  } break;

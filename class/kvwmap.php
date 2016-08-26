@@ -106,6 +106,15 @@ class GUI {
     }
 	}
 	
+	function openCustomSubform(){
+		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+    $layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+    $layerdb->setClientEncoding();
+    $attributenames[0] = $this->formvars['attribute'];
+    $attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
+		echo $attributes['options'][0].'?field_id='.$this->formvars['field_id'];
+	}
+	
 	function getLayerOptions(){
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		if($this->formvars['layer_id'] > 0)$layer = $this->user->rolle->getLayer($this->formvars['layer_id']);
