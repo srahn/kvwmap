@@ -33,6 +33,31 @@ include('funktionen/input_check_functions.php');
 		}
 	}
 	
+	buildArrayValue = function(fieldname, k){
+		elements = document.getElementsByName(fieldname);
+		array_values = new Array();
+		for(i = 0; i < elements.length; i++){
+			if(elements[i].value != '')array_values.push(elements[i].value);
+		}
+		array_value = '{'+array_values.join()+'}';
+		document.getElementById(fieldname+'_'+k).value = array_value;
+	}
+	
+	addArrayElement = function(fieldname){
+		outer_div = document.getElementById(fieldname+'_elements');
+		first_element = document.getElementById('div_'+fieldname+'_-1');
+		new_element = first_element.cloneNode(true);
+		new_element.childNodes[0].value = '';
+		new_element.style = 'display: block';
+		outer_div.appendChild(new_element);
+	}
+	
+	removeArrayElement = function(fieldname, remove_element, k){
+		outer_div = document.getElementById(fieldname+'_elements');
+		outer_div.removeChild(remove_element);
+		buildArrayValue(fieldname, k);
+	}
+	
 	nextdatasets = function(offset){
 		currentform.target = '';
 		if(currentform.go_backup.value != ''){
