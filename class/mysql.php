@@ -155,6 +155,112 @@ class database {
     return $ret;
   }
 
+	function generate_layer($schema, $table, $epsg = 25832) {
+		$sql = "
+-- Create layer {$table['name']}
+INSERT INTO layer (
+	`Name`,
+	`Datentyp`,
+	`Gruppe`,
+	`pfad`,
+	`maintable`,
+	`Data`,
+	`schema`,
+	`connection`,
+	`connectiontype`,
+	`tolerance`,
+	`toleranceunits`,
+	`epsg_code`,
+	`queryable`,
+	`transparency`,
+	`ows_srs`,
+	`wms_name`,
+	`wms_server_version`,
+	`wms_format`,
+	`wms_connectiontimeout`,
+	`querymap`,
+	`kurzbeschreibung`,
+	`privileg`
+)
+VALUES (
+	'{$table['name']}',
+	'5',
+	@group_id,
+	'SELECT * FROM {$table['name']} WHERE 1=1',
+	'{$table['name']}', -- maintable
+	'geom from (select oid, position AS geom FROM {$schema}.{$table['name']}) as foo using unique oid using srid={$epsg}', -- Data
+	'{$schema}', -- schema
+	@connection, -- connection
+	'6', -- connectiontype
+	'3',
+	'pixels',
+	'{$epsg}',
+	'1',
+	'60',
+	'EPSG:{$epsg}',
+	'{$table['name']}', -- wms_name
+	'1.1.0',
+	'image/png',
+	'60',
+	'1',
+	'Diese Tabelle enthält alle Objekte aus der Tabelle {$table['name']}.',
+	'2');
+	SET @last_layer_id_{$table['oid']} = LAST_INSERT_ID();
+";
+		return $sql;
+	}
+
+	function generate_layer_attributes($table, $attribute) {
+		$sql .= "
+-- Create layer_attribute {$attribute['column_name']} for layer {$table['name']}
+INSERT INTO layer_attributes (
+	`layer_id`,
+	`name`,
+	`real_name`,
+	`tablename`,
+	`table_alias_name`,
+	`type`,
+	`geometrytype`,
+	`constraints`,
+	`nullable`,
+	`length`,
+	`decimal_length`,
+	`default`,
+	`form_element_type`,
+	`options`,
+	`group`,
+	`raster_visibility`,
+	`mandatory`,
+	`order`,
+	`privileg`,
+	`query_tooltip`
+)
+VALUES (
+	@last_layer_id_{$table['oid']},
+	'{$attribute['column_name']}',
+	'{$attribute['column_name']}', -- real_name
+	'{$table['name']}',
+	'{$table['name']}', -- table_alias_name
+	'{$attribute['udt_name']}', -- type
+	'', -- geometrytype
+	'', -- constraints
+	" . (($attribute['is_nullable'] == 'YES') ? 'TRUE' : 'FALSE') . ",
+	'{$attribute['character_maximum_length']}', -- length
+	'{$attribute['numeric_precision']}', -- decimal_length
+	'{$attribute['column_default']}', -- default
+	'text', -- form_element_type
+	'', -- options
+	'', -- group
+	NULL, -- raster_visibility
+	" . (($attribute['is_nullable'] == 'NO') ? 'TRUE' : 'NULL') . ", -- mandatory
+	'{$attributes['ordinal_position']}', -- order
+	'1',
+	'0'
+);
+";
+		return $sql;
+	}
+
 	function create_insert_dump($table, $extra, $sql){
 		# Funktion liefert das Ergebnis einer SQL-Abfrage als INSERT-Dump für die Tabelle "$table" 
 		# über $extra kann ein Feld angegeben werden, welches nicht mit in das INSERT aufgenommen wird

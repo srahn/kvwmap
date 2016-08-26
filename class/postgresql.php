@@ -85,7 +85,119 @@ class pgdatabase {
     $this->debug->write("<br>PostgreSQL Verbindung mit ID: ".$this->dbConn." schließen.",4);
     return pg_close($this->dbConn);
   }
-	
+
+	function get_tables($schema) {
+		$tables = array();
+		$sql = "
+			SELECT
+			  ('{$schema}.' || table_name)::regclass::oid AS oid,
+			  table_name AS name
+			FROM
+			  information_schema.tables
+			WHERE
+			  table_schema = '{$schema}' AND
+				table_name NOT LIKE 'enum_%'
+			ORDER BY table_name
+		";
+
+		$msg = '<br>Get Tables from Schema: ' . $schema;
+		$msg .= '<br>' . $sql;
+		$this->debug->write($msg, 4);
+
+		$ret = $this->execSQL($sql, 4, 0);
+		if($ret[0]==0){
+			while($row = pg_fetch_assoc($ret[1])){
+				$tables[] = $row;
+			}
+		}
+		return $tables;
+	}
+
+	function get_table_attributes($schema, $table) {
+		$table_attributes = array();
+		$sql = "
+			SELECT
+			  t.table_name,
+			  c.column_name,
+			  c.ordinal_position,
+			  c.column_default,
+			  c.is_nullable,
+			  c.udt_schema,
+			  c.udt_name,
+			  c.data_type,
+			  c.character_maximum_length,
+				c.numeric_precision
+			FROM 
+			  information_schema.tables t JOIN
+			  information_schema.columns c ON c.table_name = t.table_name AND c.table_schema = t.table_schema
+			WHERE
+			  t.table_schema = '{$schema}' AND
+			  t.table_name = '{$table}'
+			ORDER BY t.table_name, ordinal_position
+		";
+		#echo '<br>' . $sql;
+		$ret = $this->execSQL($sql, 4, 0);
+		if($ret[0]==0){
+			while($row = pg_fetch_assoc($ret[1])){
+				$table_attributes[] = $row;
+			}
+		}
+		return $table_attributes;
+	}
+
+	function get_datatypes($schema) {
+		$datatypes = array();
+		$sql = "
+			SELECT
+			  ('{$schema}.' || user_defined_type_name)::regclass::oid AS datatype_oid,
+			  user_defined_type_name
+			FROM 
+			  information_schema.user_defined_types udt
+			WHERE
+			  udt.user_defined_type_schema = '{$schema}'
+			ORDER BY user_defined_type_name
+		";
+		$ret = $this->execSQL($sql, 4, 0);
+		if($ret[0]==0){
+			while($row = pg_fetch_assoc($ret[1])){
+				$datatypes[] = $row;
+			}
+		}
+		return $datatypes;
+	}
+
+	function get_datatype_attributes($schema, $datatype) {
+		$datatype_attributes = array();
+		$sql = "
+			SELECT
+				udt.user_defined_type_name,
+				a.attribute_name,
+				a.ordinal_position,
+				a.attribute_default,
+				a.is_nullable,
+				a.attribute_udt_schema,
+				a.attribute_udt_name,
+				a.data_type,
+				a.character_maximum_length
+			FROM
+				information_schema.user_defined_types udt JOIN
+				information_schema.attributes a ON a.udt_name = udt.user_defined_type_name AND a.udt_schema = udt.user_defined_type_schema
+			WHERE
+				udt.user_defined_type_schema = '{$schema}' AND
+				udt.user_defined_type_name = '{$datatype}'
+			ORDER BY
+				udt.user_defined_type_name,
+				ordinal_position
+		";
+		$ret = $this->execSQL($sql, 4, 0);
+		if($ret[0]==0){
+			while($row = pg_fetch_assoc($ret[1])){
+				$datatype_attributes[] = $row;
+			}
+		}
+		return $datatype_attributes;
+	}
+
 	function read_epsg_codes($order = true){
     global $supportedSRIDs;
     $sql ="SELECT spatial_ref_sys.srid, coalesce(alias, substr(srtext, 9, 35)) as srtext, minx, miny, maxx, maxy FROM spatial_ref_sys ";
