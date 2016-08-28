@@ -375,11 +375,11 @@ INSERT IGNORE INTO u_rolle2used_layer (
 	`showclasses`,
 	`logconsume`,
 	`transparency`
-)
+) 
 SELECT
-	1, used_layer.Stelle_ID, used_layer.Layer_ID, "1", "0", NULL, "1", NULL, NULL
+	1, used_layer.Stelle_ID, used_layer.Layer_ID, "1", "0", NULL, "1", NULL, NULL 
 FROM
-	`used_layer`
+	`used_layer` 
 WHERE
 	used_layer.Stelle_ID = 1;
 
