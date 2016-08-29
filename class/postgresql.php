@@ -125,6 +125,7 @@ class pgdatabase {
 				trim('''' from split_part(ad.adsrc, '::', 1)) AS attribute_default,
 				t.typname AS type_name,
 				CASE WHEN t.typarray = 0 THEN eat.typname ELSE t.typname END AS type,
+				t.oid AS attribute_type_oid,
 				t.typtype AS type_type,
 				case when t.typarray = 0 THEN true ELSE false END AS is_array,
 				eat.typname AS array_element_type_name,
@@ -228,25 +229,36 @@ FROM
 		$datatype_attributes = array();
 		$sql = "
 			SELECT
-				udt.user_defined_type_name,
-				a.attribute_name,
-				a.ordinal_position,
-				a.attribute_default,
-				a.is_nullable,
-				a.attribute_udt_schema,
-				a.attribute_udt_name,
-				a.data_type,
-				a.character_maximum_length
+				ns.nspname,
+				c.oid AS datatype_oid,
+				c.relname AS table_name,
+				a.attname AS name,
+				a.attnotnull AS attribute_not_null,
+				a.attnum AS ordinal_position,
+				trim('''' from split_part(ad.adsrc, '::', 1)) AS attribute_default,
+				t.oid AS attribute_type_oid,
+				t.typname AS type_name,
+				CASE WHEN t.typarray = 0 THEN eat.typname ELSE t.typname END AS type,
+				t.typtype AS type_type,
+				case when t.typarray = 0 THEN true ELSE false END AS is_array,
+				eat.typname AS array_element_type_name,
+				ic.character_maximum_length,
+				ic.numeric_precision
 			FROM
-				information_schema.user_defined_types udt JOIN
-				information_schema.attributes a ON a.udt_name = udt.user_defined_type_name AND a.udt_schema = udt.user_defined_type_schema
+				pg_catalog.pg_class c JOIN
+				pg_catalog.pg_attribute a ON (c.oid = a.attrelid) JOIN
+				pg_catalog.pg_namespace ns ON (c.relnamespace = ns.oid) JOIN
+				information_schema.columns ic ON (ic.table_schema = ns.nspname AND ic.table_name = c.relname AND ic.column_name = a.attname) JOIN
+				pg_catalog.pg_type t ON (a.atttypid = t.oid) LEFT JOIN
+				pg_catalog.pg_type eat ON (t.typelem = eat.oid) LEFT JOIN
+				pg_catalog.pg_attrdef ad ON (a.attrelid = ad.adrelid)
 			WHERE
-				udt.user_defined_type_schema = '{$schema}' AND
-				udt.user_defined_type_name = '{$datatype}'
-			ORDER BY
-				udt.user_defined_type_name,
-				ordinal_position
+				ns.nspname = '{$schema}' AND
+				c.relname = '{$datatype}' AND
+				a.attnum > 0
+			ORDER BY a.attnum
 		";
+		#echo '<br><textarea cols="50" rows="2">' . $sql . '</textarea>';
 		$ret = $this->execSQL($sql, 4, 0);
 		if($ret[0]==0){
 			while($row = pg_fetch_assoc($ret[1])){

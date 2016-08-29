@@ -156,6 +156,7 @@ class database {
   }
 
 	function generate_layer($schema, $table, $epsg = 25832) {
+		#echo '<br>Create Layer: ' . $table['name'];
 		$sql = "
 -- Create layer {$table['name']}
 INSERT INTO layer (
@@ -211,9 +212,10 @@ SET @last_layer_id_{$table['oid']} = LAST_INSERT_ID();
 		return $sql;
 	}
 
-	function generate_layer_attribute($table, $attribute, $options) {
-		$sql .= "
--- Create layer_attribute {$attribute['column_name']} for layer {$table['name']}
+	function generate_layer_attribute($attribute, $options) {
+		#echo '<br>Create Layerattribute: ' . $attribute['name'];
+		$sql = "
+-- Create layer_attribute {$attribute['name']} for layer {$attribute['table_name']}
 INSERT INTO layer_attributes (
 	`layer_id`,
 	`name`,
@@ -240,8 +242,117 @@ VALUES (
 	@last_layer_id_{$table['oid']},
 	'{$attribute['name']}',
 	'{$attribute['name']}', -- real_name
-	'{$table['name']}',
-	'{$table['name']}', -- table_alias_name
+	'{$attribute['table_name']}',
+	'{$attribute['table_name']}', -- table_alias_name
+	'{$attribute['type_name']}', -- type
+	'', -- geometrytype
+	'{$options['constraint']}', -- constraints
+	" . (($attribute['is_nullable'] == 't') ? 'TRUE' : 'FALSE') . ",
+	'{$attribute['character_maximum_length']}', -- length
+	'{$attribute['numeric_precision']}', -- decimal_length
+	'{$attribute['attribute_default']}', -- default
+	'text', -- form_element_type
+	'{$options['option']}', -- options
+	'', -- group
+	NULL, -- raster_visibility
+	" . (($attribute['is_nullable'] == 'NO') ? 'TRUE' : 'NULL') . ", -- mandatory
+	'{$attributes['ordinal_position']}', -- order
+	'1',
+	'0'
+);
+";
+		return $sql;
+	}
+
+	function generate_datatype($schema, $datatype, $epsg = 25832) {
+		#echo '<br>Create Datatype: ' . $datatype['type'] . ' for attribute ' . $datatype['name'];
+		$sql = "
+-- Create datatype {$datatype['name']}
+INSERT INTO datatype (
+	`Name`,
+	`Datentyp`,
+	`Gruppe`,
+	`pfad`,
+	`maintable`,
+	`Data`,
+	`schema`,
+	`connection`,
+	`connectiontype`,
+	`tolerance`,
+	`toleranceunits`,
+	`epsg_code`,
+	`queryable`,
+	`transparency`,
+	`ows_srs`,
+	`wms_name`,
+	`wms_server_version`,
+	`wms_format`,
+	`wms_connectiontimeout`,
+	`querymap`,
+	`kurzbeschreibung`,
+	`privileg`
+)
+VALUES (
+	'{$datatype['type']}',
+	'5',
+	@group_id,
+	'SELECT * FROM {$datatype['type']} WHERE 1=1',
+	'{$datatype['type']}', -- maintable
+	'geom from (select oid, position AS geom FROM {$schema}.{$datatype['type']}) as foo using unique oid using srid={$epsg}', -- Data
+	'{$schema}', -- schema
+	@connection, -- connection
+	'6', -- connectiontype
+	'3',
+	'pixels',
+	'{$epsg}',
+	'1',
+	'60',
+	'EPSG:{$epsg}',
+	'{$table['name']}', -- wms_name
+	'1.1.0',
+	'image/png',
+	'60',
+	'1',
+	'Diese Tabelle enthält alle Objekte aus der Tabelle {$datatype['type']}.',
+	'2'
+);
+SET @last_database_id_{$datatype['attribute_type_oid']} = LAST_INSERT_ID();
+";
+		return $sql;
+	}
+
+	function generate_datatype_attribute($attribute, $options) {
+		#echo '<br>Create Datatypeattribute: ' . $attribute['name'] . ' für Datentyp: ' . $attribute['table_name'];
+		$sql = "
+--Create datatype_attribute {$attribute['name']} for datatype {$attribute['table_name']}
+INSERT INTO datatype_attributes (
+	`layer_id`,
+	`name`,
+	`real_name`,
+	`tablename`,
+	`table_alias_name`,
+	`type`,
+	`geometrytype`,
+	`constraints`,
+	`nullable`,
+	`length`,
+	`decimal_length`,
+	`default`,
+	`form_element_type`,
+	`options`,
+	`group`,
+	`raster_visibility`,
+	`mandatory`,
+	`order`,
+	`privileg`,
+	`query_tooltip`
+)
+VALUES (
+	@last_layer_id_{$attribute['datatype_oid']},
+	'{$attribute['name']}',
+	'{$attribute['name']}', -- real_name
+	'{$attribute['table_name']}',
+	'{$attribute['table_name']}', -- table_alias_name
 	'{$attribute['type_name']}', -- type
 	'', -- geometrytype
 	'{$options['constraint']}', -- constraints
