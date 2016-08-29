@@ -211,7 +211,7 @@ SET @last_layer_id_{$table['oid']} = LAST_INSERT_ID();
 		return $sql;
 	}
 
-	function generate_layer_attributes($table, $attribute) {
+	function generate_layer_attribute($table, $attribute, $options) {
 		$sql .= "
 -- Create layer_attribute {$attribute['column_name']} for layer {$table['name']}
 INSERT INTO layer_attributes (
@@ -238,19 +238,19 @@ INSERT INTO layer_attributes (
 )
 VALUES (
 	@last_layer_id_{$table['oid']},
-	'{$attribute['column_name']}',
-	'{$attribute['column_name']}', -- real_name
+	'{$attribute['name']}',
+	'{$attribute['name']}', -- real_name
 	'{$table['name']}',
 	'{$table['name']}', -- table_alias_name
-	'{$attribute['udt_name']}', -- type
+	'{$attribute['type_name']}', -- type
 	'', -- geometrytype
-	'', -- constraints
-	" . (($attribute['is_nullable'] == 'YES') ? 'TRUE' : 'FALSE') . ",
+	'{$options['constraint']}', -- constraints
+	" . (($attribute['is_nullable'] == 't') ? 'TRUE' : 'FALSE') . ",
 	'{$attribute['character_maximum_length']}', -- length
 	'{$attribute['numeric_precision']}', -- decimal_length
-	'{$attribute['column_default']}', -- default
+	'{$attribute['attribute_default']}', -- default
 	'text', -- form_element_type
-	'', -- options
+	'{$options['option']}', -- options
 	'', -- group
 	NULL, -- raster_visibility
 	" . (($attribute['is_nullable'] == 'NO') ? 'TRUE' : 'NULL') . ", -- mandatory

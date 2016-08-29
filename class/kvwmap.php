@@ -6380,7 +6380,7 @@ class GUI {
 		$this->output();
 	}
 
-	function layer_generator_erzeugen($group_id) {
+	function layer_generator_erzeugen() {
 		$group_id = ($this->formvars['group_id'] == '') ? 1 : $this->formvars['group_id']; 
 		$pg_schema = $this->formvars['pg_schema'];
 		$this->sql = "
@@ -6394,7 +6394,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				$this->sql .= $this->database->generate_layer($pg_schema, $table);
 				$table_attributes = $this->pgdatabase->get_table_attributes($pg_schema, $table['name']);
 				foreach ($table_attributes AS $table_attribute) {
-					$this->sql .= $this->database->generate_layer_attributes($table, $table_attribute);
+					$enum_options = ($table_attribute['type_type'] == 'e') ? $this->pgdatabase->get_enum_options($pg_schema, $table_attribute) : array('option' => '', 'constraint' => '');
+					$this->sql .= $this->database->generate_layer_attribute($table, $table_attribute, $enum_options);
 				}
 				$this->sql .= $this->database->generate_classes($table);
 				$this->sql .= $this->database->generate_styles();
