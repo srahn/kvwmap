@@ -65,47 +65,69 @@ COMMENT ON COLUMN xplankonverter.shapefiles.konvertierung_id IS 'Id der Konverti
 COMMENT ON COLUMN xplankonverter.shapefiles.stelle_id IS 'Id der Stelle in kvwmap zu der die Shape Datei gehört.';
 COMMENT ON COLUMN xplankonverter.shapefiles.layer_id IS 'Id des Layers in den die Shape Datei eingelesen wurde.';
 
-CREATE TABLE gml_classes.xp_plan (
-  gml_id uuid NOT NULL DEFAULT uuid_generate_v1mc(),
-  aendert uuid, -- DataType XP_VerbundenerPlan
-  beschreibung text,
-  bezugshoehe text,
-  erstellungsmassstab text,
-  genehmigungsdatum text,
-  hatgenerattribut uuid, -- DataType XP_GenerAttribut
-  informell uuid, -- DataType XP_ExterneReferenz
-  internalid text,
-  kommentar text,
-  name text,
-  nummer text,
-  raeumlichergeltungsbereich geometry, -- Union XP_Flaechengeometrie
-  rechtsverbindlich uuid, -- DataType XP_ExterneReferenz
-  refbegruendung uuid, -- DataType XP_ExterneReferenz
-  refbeschreibung uuid, -- DataType XP_ExterneReferenz
-  refexternalcodelist uuid, -- DataType XP_ExterneReferenz
-  reflegende uuid, -- DataType XP_ExterneReferenz
-  refplangrundlage uuid, -- DataType XP_ExterneReferenz
-  refrechtsplan uuid, -- DataType XP_ExterneReferenz
-  technherstelldatum text,
-  untergangsdatum text,
-  verfahrensmerkmale uuid, -- DataType XP_VerfahrensMerkmal
-  wurdegeaendertvon uuid, -- DataType XP_VerbundenerPlan
-  xplangmlversion text DEFAULT '4.1'::text,
-  CONSTRAINT xp_plan_pkey PRIMARY KEY (gml_id)
-)
-WITH ( OIDS=FALSE);
-COMMENT ON TABLE gml_classes.xp_plan IS 'Tabelle XP_Plan';
-COMMENT ON COLUMN gml_classes.xp_plan.aendert IS 'DataType XP_VerbundenerPlan';
-COMMENT ON COLUMN gml_classes.xp_plan.hatgenerattribut IS 'DataType XP_GenerAttribut';
-COMMENT ON COLUMN gml_classes.xp_plan.informell IS 'DataType XP_ExterneReferenz';
-COMMENT ON COLUMN gml_classes.xp_plan.raeumlichergeltungsbereich IS 'Union XP_Flaechengeometrie';
-COMMENT ON COLUMN gml_classes.xp_plan.rechtsverbindlich IS 'DataType XP_ExterneReferenz';
-COMMENT ON COLUMN gml_classes.xp_plan.refbegruendung IS 'DataType XP_ExterneReferenz';
-COMMENT ON COLUMN gml_classes.xp_plan.refbeschreibung IS 'DataType XP_ExterneReferenz';
-COMMENT ON COLUMN gml_classes.xp_plan.refexternalcodelist IS 'DataType XP_ExterneReferenz';
-COMMENT ON COLUMN gml_classes.xp_plan.reflegende IS 'DataType XP_ExterneReferenz';
-COMMENT ON COLUMN gml_classes.xp_plan.refplangrundlage IS 'DataType XP_ExterneReferenz';
-COMMENT ON COLUMN gml_classes.xp_plan.refrechtsplan IS 'DataType XP_ExterneReferenz';
-COMMENT ON COLUMN gml_classes.xp_plan.verfahrensmerkmale IS 'DataType XP_VerfahrensMerkmal';
-COMMENT ON COLUMN gml_classes.xp_plan.wurdegeaendertvon IS 'DataType XP_VerbundenerPlan';
+-- Function: xplankonverter.update_konvertierung_state()
+
+-- DROP FUNCTION xplankonverter.update_konvertierung_state();
+
+CREATE OR REPLACE FUNCTION xplankonverter.update_konvertierung_state()
+  RETURNS trigger AS
+$BODY$
+DECLARE
+  konvertierung_id integer;
+  plan_or_regel_assigned BOOLEAN;
+  old_state character varying;
+  new_state Character varying;
+BEGIN
+  IF (TG_OP = 'INSERT') THEN
+    konvertierung_id := NEW.konvertierung_id;
+    RAISE NOTICE 'update_konvertierung_state nach insert';
+  ELSIF (TG_OP = 'DELETE') THEN
+    konvertierung_id := OLD.konvertierung_id;
+    RAISE NOTICE 'update_konvertierung_state nach delete';
+  END IF;
+  RAISE NOTICE 'for konvertierung_id: %', konvertierung_id;
+
+  SELECT
+    status
+  FROM
+    konvertierungen
+  WHERE
+    id = konvertierung_id
+  INTO
+    old_state;
+
+  SELECT distinct
+    case WHEN p.gml_id IS NOT NULL OR r.id IS NOT NULL THEN true ELSE false END AS plan_or_regel_assigned
+  FROM
+    konvertierungen k LEFT JOIN
+    xplan_gml.rp_plan p ON k.id = p.konvertierung_id LEFT JOIN
+    regeln r ON k.id = r.konvertierung_id
+  WHERE
+    k.id = konvertierung_id
+  INTO
+    plan_or_regel_assigned;
+
+  RAISE NOTICE 'Mindestens ein Plan oder Regel ist zugeordnet: %', plan_or_regel_assigned;
+  RAISE NOTICE 'Alter Konvertierungsstatus: %', old_state;
+  new_state := old_state;
+  IF (plan_or_regel_assigned) THEN
+    IF (old_state = 'in Erstellung') THEN
+      new_state := 'erstellt';
+    END IF;
+  ELSE
+    new_state := 'in Erstellung';
+  END IF;
+  RAISE NOTICE 'Neuer Konvertierungsstatus: %', new_state;
+  UPDATE
+    konvertierungen
+  SET
+    status = new_state::enum_konvertierungsstatus
+  WHERE
+    id = konvertierung_id;
+
+RETURN NULL;
+END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
 

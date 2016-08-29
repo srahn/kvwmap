@@ -23,14 +23,17 @@ class Konvertierung extends PgObject {
     $this->PgObject($gui, $schema, $tableName);
   }
 
-  function createLayerGroup() {
-		$layerGroup = new MyObject($this->gui->database, 'u_groups');
-    $layerGroup->create(array(
-      'Gruppenname' => $this->get('bezeichnung')
-    ));
-    $this->set('layer_group_id', $layerGroup->get('id'));
-    $this->update();
-    return $this->get('layer_group_id');
+  function createLayerGroup($postfix) {
+    $layer_group_id = $this->get($type . '_layer_group_id');
+    if (empty($layer_group_id) {
+      $layerGroup = new MyObject($this->gui->database, 'u_groups');
+      $layerGroup->create(array(
+        'Gruppenname' => $this->get('bezeichnung') . ' ' . $type
+      ));
+      $this->set($type . '_layer_group_id', $layerGroup->get('id'));
+      $this->update();
+    }
+    return $this->get($type . 'layer_group_id');
   }
 
   /*

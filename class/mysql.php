@@ -204,8 +204,9 @@ VALUES (
 	'60',
 	'1',
 	'Diese Tabelle enthält alle Objekte aus der Tabelle {$table['name']}.',
-	'2');
-	SET @last_layer_id_{$table['oid']} = LAST_INSERT_ID();
+	'2'
+);
+SET @last_layer_id_{$table['oid']} = LAST_INSERT_ID();
 ";
 		return $sql;
 	}
@@ -256,6 +257,83 @@ VALUES (
 	'{$attributes['ordinal_position']}', -- order
 	'1',
 	'0'
+);
+";
+		return $sql;
+	}
+
+	function generate_classes($table) {
+		$sql = "
+-- Create class for layer {$table['name']}
+INSERT INTO classes (
+	`Name`,
+	`Layer_ID`,
+	`Expression`,
+	`drawingorder`,
+	`text`
+)
+VALUES(
+	'alle',
+	@last_layer_id_{$table['oid']},
+	'(1 = 1)',
+	'1',
+	''
+);
+SET @last_class_id = LAST_INSERT_ID();
+";
+		return $sql;
+	}
+
+	function generate_styles() {
+		$sql = "
+INSERT INTO styles (
+	`symbol`,
+	`symbolname`,
+	`size`,
+	`color`,
+	`backgroundcolor`,
+	`outlinecolor`,
+	`minsize`,
+	`maxsize`,
+	`angle`,
+	`angleitem`,
+	`antialias`,
+	`width`,
+	`minwidth`,
+	`maxwidth`,
+	`sizeitem`
+) VALUES (
+	NULL,
+	'',
+	'1',
+	'0 189 231',
+	'',
+	'22 97 113',
+	NULL,
+	'1',
+	'360',
+	'',
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	''
+);
+SET @last_style_id = LAST_INSERT_ID();
+";
+		return $sql;
+	}
+
+	function generate_style2classes() {
+		$sql = "
+INSERT INTO u_styles2classes (
+	style_id,
+	class_id,
+	drawingorder
+) VALUES (
+	@last_style_id,
+	@last_class_id,
+	0
 );
 ";
 		return $sql;

@@ -1152,6 +1152,7 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 		case 'Layer_Generator_Erzeugen' : {
 			$GUI->checkCaseAllowed('Layer_Generator');
 			$GUI->layer_generator_erzeugen();
+			$GUI->layer_generator();
 		} break;
 
 		case 'Style_Label_Editor' : {
