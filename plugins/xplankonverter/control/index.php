@@ -133,7 +133,7 @@ switch($this->go){
           # get layerGroupId or create a group if not exists
           $layer_group_id = $this->konvertierung->get('layer_group_id');
           if (empty($layer_group_id))
-            $layer_group_id = $this->konvertierung->createLayerGroup();
+            $layer_group_id = $this->konvertierung->createLayerGroup('Shapes');
           foreach($uploaded_files AS $uploaded_file) {
             if ($uploaded_file['extension'] == 'dbf' and $uploaded_file['state'] != 'ignoriert') {
 
@@ -373,6 +373,12 @@ sleep(5);
           // Status setzen
           $this->konvertierung->set('status', Konvertierung::$STATUS['GML_ERSTELLUNG_OK']);
           $this->konvertierung->update();
+
+          // Erzeuge Layergruppe, falls noch nicht vorhanden
+          $layer_group_id = $this->konvertierung->createLayerGroup('GML');
+          // vorhandene Layer dieser Konvertierung löschen
+          // Neue Layer erzeugen
+          $this->layer_generator_erzeugen($layer_group_id); # Funktion aus kvwmap.php
 
           $response['success'] = true;
           $response['msg'] = 'GML-Datei erfolgreich erstellt.';

@@ -365,7 +365,23 @@ INSERT INTO `u_groups` (`id`, `Gruppenname`, `order`) VALUES (9, 'Administration
 INSERT INTO layer (`Name`, `alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `printconnection`, `connectiontype`, `classitem`, `filteritem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`) VALUES('ORKa-MV (OSM)', '', '3', '1', NULL, NULL, NULL, NULL, NULL, '', '', '', '', NULL, NULL, '', 'http://www.orka-mv.de/geodienste/orkamv/wms?VERSION=1.1.1&LAYERS=orkamv&STYLES=&FORMAT=image/jpeg', '', 7, '', '', 3, 'pixels', '25833', '', '0', NULL, NULL, NULL, NULL, '', 'EPSG:25833', 'stadtplan', '1.1.1', 'image/png', 60, '', '', '', 'radio', '0', '', '', '', '');
 INSERT IGNORE INTO used_layer ( `Stelle_ID` , `Layer_ID` , `queryable` , `drawingorder` , `minscale` , `maxscale` , `offsite` , `transparency`, `Filter` , `template` , `header` , `footer` , `symbolscale`, `privileg` )VALUES ('1', '1', '0', '', '', '', '' , NULL, NULL,'' , NULL , NULL , NULL, '0');
 INSERT IGNORE INTO u_groups2rolle SELECT DISTINCT 1, 1, u_groups.id, 1 FROM (SELECT @id AS id, @id := IF(@id IS NOT NULL, (SELECT obergruppe FROM u_groups WHERE id = @id), NULL) AS obergruppe FROM u_groups, (SELECT @id := (SELECT Gruppe FROM layer where layer.Layer_ID = 1)) AS vars WHERE @id IS NOT NULL	 ) AS dat	JOIN u_groups ON dat.id = u_groups.id;
-INSERT IGNORE INTO u_rolle2used_layer SELECT 1, used_layer.Stelle_ID, used_layer.Layer_ID, "1", "0", NULL, "1", NULL FROM `used_layer` WHERE used_layer.Stelle_ID = 1;
+INSERT IGNORE INTO u_rolle2used_layer (
+	`user_id`,
+	`stelle_id`,
+	`layer_id`,
+	`aktivStatus`,
+	`queryStatus`,
+	`gle_view`,
+	`showclasses`,
+	`logconsume`,
+	`transparency`
+) 
+SELECT
+	1, used_layer.Stelle_ID, used_layer.Layer_ID, "1", "0", NULL, "1", NULL, NULL 
+FROM
+	`used_layer` 
+WHERE
+	used_layer.Stelle_ID = 1;
 
 # Einen ersten Druckrahmen erzeugen
 INSERT INTO `druckrahmen` (`Name`, `headsrc`, `headposx`, `headposy`, `headwidth`, `headheight`, `mapposx`, `mapposy`, `mapwidth`, `mapheight`, `refmapsrc`, `refmapfile`, `refmapposx`, `refmapposy`, `refmapwidth`, `refmapheight`, `refposx`, `refposy`, `refwidth`, `refheight`, `refzoom`, `dateposx`, `dateposy`, `datesize`, `scaleposx`, `scaleposy`, `scalesize`, `oscaleposx`, `oscaleposy`, `oscalesize`, `gemarkungposx`, `gemarkungposy`, `gemarkungsize`, `flurposx`, `flurposy`, `flursize`, `legendposx`, `legendposy`, `legendsize`, `arrowposx`, `arrowposy`, `arrowlength`, `userposx`, `userposy`, `usersize`, `watermarkposx`, `watermarkposy`, `watermark`, `watermarksize`, `watermarkangle`, `watermarktransparency`, `format`, `preis`, `font_date`, `font_scale`, `font_gemarkung`, `font_flur`, `font_oscale`, `font_legend`, `font_watermark`, `font_user`) VALUES

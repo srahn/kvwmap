@@ -85,7 +85,187 @@ class pgdatabase {
     $this->debug->write("<br>PostgreSQL Verbindung mit ID: ".$this->dbConn." schließen.",4);
     return pg_close($this->dbConn);
   }
-	
+
+	function get_tables($schema) {
+		$tables = array();
+		$sql = "
+			SELECT
+			  ('{$schema}.' || table_name)::regclass::oid AS oid,
+			  table_name AS name
+			FROM
+			  information_schema.tables
+			WHERE
+			  table_schema = '{$schema}' AND
+				table_name NOT LIKE 'enum_%'
+			ORDER BY table_name
+		";
+
+		$msg = '<br>Get Tables from Schema: ' . $schema;
+		$msg .= '<br>' . $sql;
+		$this->debug->write($msg, 4);
+
+		$ret = $this->execSQL($sql, 4, 0);
+		if($ret[0]==0){
+			while($row = pg_fetch_assoc($ret[1])){
+				$tables[] = $row;
+			}
+		}
+		return $tables;
+	}
+
+	function get_table_attributes($schema, $table) {
+		$table_attributes = array();
+		$sql = "
+			SELECT
+				ns.nspname,
+				c.relname AS table_name,
+				a.attname AS name,
+				a.attnotnull AS attribute_not_null,
+				a.attnum AS ordinal_position,
+				'SELECT ' || ic.column_default attribute_default,
+				t.typname AS type_name,
+				CASE WHEN t.typarray = 0 THEN eat.typname ELSE t.typname END AS type,
+				t.oid AS attribute_type_oid,
+				t.typtype AS type_type,
+				case when t.typarray = 0 THEN true ELSE false END AS is_array,
+				eat.typname AS array_element_type_name,
+				ic.character_maximum_length,
+				ic.numeric_precision
+			FROM
+				pg_catalog.pg_class c JOIN
+				pg_catalog.pg_attribute a ON (c.oid = a.attrelid) JOIN
+				pg_catalog.pg_namespace ns ON (c.relnamespace = ns.oid) JOIN
+				information_schema.columns ic ON (ic.table_schema = ns.nspname AND ic.table_name = c.relname AND ic.column_name = a.attname) JOIN
+				pg_catalog.pg_type t ON (a.atttypid = t.oid) LEFT JOIN
+				pg_catalog.pg_type eat ON (t.typelem = eat.oid)
+			WHERE
+				ns.nspname = '{$schema}' AND
+				c.relname = '{$table}' AND
+				a.attnum > 0
+			ORDER BY a.attnum
+		";
+		#echo '<br>' . $sql;
+		$ret = $this->execSQL($sql, 4, 0);
+		if($ret[0]==0){
+			while($row = pg_fetch_assoc($ret[1])){
+				$table_attributes[] = $row;
+			}
+		}
+		return $table_attributes;
+	}
+
+	function table_exists($schema, $table) {
+		$table_exists = false;
+		$sql = "
+SELECT EXISTS (
+	SELECT
+		1 AS exists
+	FROM
+		information_schema.tables 
+	WHERE
+		table_schema = '{$schema}' AND
+		table_name = '{$table}'
+)";
+		#echo '<br>' . $sql;
+		$ret = $this->execSQL($sql, 4, 0);
+		if($ret[0]==0) {
+			$row = pg_fetch_assoc($ret[1]);
+			if ($row['exists'] == 't') $table_exists = true;
+		}
+		return $table_exists;
+	}
+
+	function get_enum_options($schema, $attribute) {
+		if ($this->table_exists($schema, 'enum_' . $attribute['type'])) {
+			$options = "
+SELECT
+	wert AS value,
+	beschreibung AS output
+FROM
+	{$schema}.enum_{$attribute['table_name']}
+";
+		}
+		else {
+			$options = '';
+		}
+		$enum_values = array();
+		$sql = "
+			SELECT unnest(enum_range(NULL::{$schema}.{$attribute['type']}) ) AS value
+		";
+		#echo '<br>' . $sql;
+		$ret = $this->execSQL($sql, 4, 0);
+		if($ret[0]==0){
+			while($row = pg_fetch_assoc($ret[1])){
+				$enum_values[] = $row['value'];
+			}
+		}
+		$constraints = "\'" . implode("\', \'", $enum_values) . "\'";
+		return array('option' => $options, 'constraint' => $constraints);
+	}
+
+	function get_datatypes($schema) {
+		$datatypes = array();
+		$sql = "
+			SELECT
+			  ('{$schema}.' || user_defined_type_name)::regclass::oid AS datatype_oid,
+			  user_defined_type_name
+			FROM 
+			  information_schema.user_defined_types udt
+			WHERE
+			  udt.user_defined_type_schema = '{$schema}'
+			ORDER BY user_defined_type_name
+		";
+		$ret = $this->execSQL($sql, 4, 0);
+		if($ret[0]==0){
+			while($row = pg_fetch_assoc($ret[1])){
+				$datatypes[] = $row;
+			}
+		}
+		return $datatypes;
+	}
+
+	function get_datatype_attributes($schema, $datatype) {
+		$datatype_attributes = array();
+		$sql = "
+			SELECT
+				ns.nspname,
+				c.oid AS datatype_oid,
+				c.relname AS table_name,
+				a.attname AS name,
+				a.attnotnull AS attribute_not_null,
+				a.attnum AS ordinal_position,
+				'SELECT ' || ic.column_default attribute_default,
+				t.oid AS attribute_type_oid,
+				t.typname AS type_name,
+				CASE WHEN t.typarray = 0 THEN eat.typname ELSE t.typname END AS type,
+				t.typtype AS type_type,
+				case when t.typarray = 0 THEN true ELSE false END AS is_array,
+				eat.typname AS array_element_type_name,
+				ic.character_maximum_length,
+				ic.numeric_precision
+			FROM
+				pg_catalog.pg_class c JOIN
+				pg_catalog.pg_attribute a ON (c.oid = a.attrelid) JOIN
+				pg_catalog.pg_namespace ns ON (c.relnamespace = ns.oid) JOIN
+				information_schema.columns ic ON (ic.table_schema = ns.nspname AND ic.table_name = c.relname AND ic.column_name = a.attname) JOIN
+				pg_catalog.pg_type t ON (a.atttypid = t.oid) LEFT JOIN
+				pg_catalog.pg_type eat ON (t.typelem = eat.oid)
+			WHERE
+				ns.nspname = '{$schema}' AND
+				c.relname = '{$datatype}' AND
+				a.attnum > 0
+			ORDER BY a.attnum
+		";
+		#echo '<br><textarea cols="50" rows="2">' . $sql . '</textarea>';
+		$ret = $this->execSQL($sql, 4, 0);
+		if($ret[0]==0){
+			while($row = pg_fetch_assoc($ret[1])){
+				$datatype_attributes[] = $row;
+			}
+		}
+		return $datatype_attributes;
+	}
+
 	function read_epsg_codes($order = true){
     global $supportedSRIDs;
     $sql ="SELECT spatial_ref_sys.srid, coalesce(alias, substr(srtext, 9, 35)) as srtext, minx, miny, maxx, maxy FROM spatial_ref_sys ";
