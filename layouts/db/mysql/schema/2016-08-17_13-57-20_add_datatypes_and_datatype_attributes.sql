@@ -37,13 +37,4 @@ CREATE TABLE datatype_attributes (
 	PRIMARY KEY  (datatype_id,`name`)
 );
 
-CREATE TABLE `datatype_attributes2stelle` (
-	`datatype_id` INT( 11 ) NOT NULL ,
-	`attributename` VARCHAR( 255 ) NOT NULL ,
-	`stelle_id` INT( 11 ) NOT NULL ,
-	`privileg` BOOL NOT NULL ,
-	`tooltip` BOOL NULL DEFAULT '0',
-	PRIMARY KEY ( `datatype_id` , `attributename` , `stelle_id` )
-);
-
 COMMIT;

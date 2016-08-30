@@ -42,7 +42,7 @@ function submitDatatypeSelector() {
     	?>
       </select>
 		</td>
-    <td style="border:1px solid #C3C7C3;">
+    <td style="border:1px solid #C3C7C3;<? if(count($this->datatypes) == 0)echo 'display: none'; ?>">
 			<?php echo $strDatatype;?><br>
       <select id="selected_datatype_id" style="width:250px" size="1"  name="selected_datatype_id" onchange="submitDatatypeSelector();" <?php if(count($this->datatypes)==0){ echo 'disabled';}?>>
       <option value=""><?php echo $strPleaseSelect; ?></option>

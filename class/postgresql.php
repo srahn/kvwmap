@@ -332,7 +332,13 @@ class pgdatabase {
         }
 
         # Attributtyp
+				$custom_type = array();
         $fieldtype = pg_field_type($ret[1], $i);
+				if(!in_array(ltrim($fieldtype, '_'), array('bool', 'date', 'float4', 'float8', 'geometry', 'int2', 'int4', 'int8', 'numeric', 'oid', 'text', 'timestamp', 'timestampz', 'unknown', 'varchar'))){
+					$oid = pg_field_type_oid($ret[1], $i);
+					$custom_type = $this->getCustomType($oid);
+					if($custom_type != NULL)$fieldtype = $custom_type['type'];
+				}
 				if($name_pair != '' AND $name_pair['no_real_attribute']) $fieldtype = 'not_saveable';
         $fields['type'][] = $fieldtype;
         # Geometrietyp
@@ -342,8 +348,9 @@ class pgdatabase {
         }
         
         # Constraints
+				if($custom_type['typtype'] == 'enum')$constraintstring = $this->getEnumElements($custom_type['schema'], $custom_type['typname']);
+				else $constraintstring = '';
         $constraints = $this->pg_table_constraints($tablename);
-        $constraintstring = '';
 	      if($fieldtype != 'geometry'){
 	        # testen ob es für ein Attribut ein constraint gibt, das wie enum wirkt
 	        for($j = 0; $j < count($constraints); $j++){
@@ -442,7 +449,93 @@ class pgdatabase {
   	}
   	return $attr_info;
   }
-
+	
+	function getCustomType($oid){		
+		$sql = "SELECT	t.typname,
+										CASE WHEN t.typtype = 'c' THEN 'datatype' WHEN t.typtype = 'e' THEN 'enum' WHEN t.typtype = 'b' THEN 'base' END AS typtype,
+										ns.nspname as schema
+						FROM		pg_type t JOIN
+										pg_namespace ns ON (t.typnamespace = ns.oid)
+						WHERE		ns.nspname != 'pg_catalog'
+						AND t.oid = ".$oid;
+		$ret1 = $this->execSQL($sql, 4, 0);
+	  if($ret1[0]==0 AND $custom_type = pg_fetch_assoc($ret1[1])){
+			if(substr($custom_type['typname'], 0, 1) == '_'){					# Array
+				$custom_type['typname'] = substr($custom_type['typname'], 1);
+				$prefix = '_'; 
+			}
+			if($custom_type['typtype'] == 'enum'){										# enum
+				$custom_type['type'] = $prefix.'text';
+			}
+			else{																											# custom datatype
+				$datatype_id = $this->getDatatypeId($custom_type['typname'], $custom_type['schema'], $this->dbName, $this->host, $this->port);
+				$this->writeDatatypeAttributes($datatype_id, $custom_type['typname'], $custom_type['schema']);
+				$custom_type['type'] = $prefix.$datatype_id;
+			}
+			return $custom_type;
+		}
+	}
+	
+	function getDatatypeId($typname, $schema, $dbname, $host, $port){
+		$sql = "SELECT id FROM datatypes WHERE ";
+		$sql.= "name = '".$typname."' AND `schema` = '".$schema."' AND dbname = '".$dbname."' AND host = '".$host."' AND port = ".$port;
+		$query=mysql_query($sql);
+		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+		$rs=mysql_fetch_assoc($query);
+		if($rs == NULL){
+			$sql = "INSERT INTO datatypes (name, `schema`, dbname, host, port) VALUES ('".$typname."', '".$schema."', '".$dbname."', '".$host."', ".$port.")";
+			$query=mysql_query($sql);
+			$datatype_id = mysql_insert_id();
+		}
+		else{	
+			$datatype_id = $rs['id'];
+		}
+		return $datatype_id;
+	}
+	
+	function getEnumElements($schema, $name){
+		$sql = "SELECT array_to_string(array_agg(''''||e.enumlabel||''''), ',') as enum_string ";
+		$sql.= "FROM pg_enum e ";
+		$sql.= "JOIN pg_type t ON e.enumtypid = t.oid ";
+		$sql.= "JOIN pg_namespace ns ON (t.typnamespace = ns.oid) ";
+		$sql.= "WHERE t.typname = '".$name."' ";
+		$sql.= "AND ns.nspname = '".$schema."'";
+		$ret1 = $this->execSQL($sql, 4, 0);
+		if($ret1[0]==0){
+			$result = pg_fetch_assoc($ret1[1]);
+		}
+		return $result['enum_string'];
+	}
+	
+	function writeDatatypeAttributes($datatype_id, $typname, $schema){
+		$sql = "select attname, 
+						t2.typname,
+						t2.oid,
+						CASE WHEN attnotnull THEN 1 ELSE 0 END as nullable
+						from pg_type t, 
+								 pg_type t2,
+						pg_attribute a,
+						pg_namespace ns
+						where a.attrelid = t.typrelid 
+						AND t.typnamespace = ns.oid
+						AND a.atttypid = t2.oid
+						AND a.attnum > 0 
+						AND ns.nspname = '".$schema."'
+						AND t.typname = '".$typname."'";
+		$ret1 = $this->execSQL($sql, 4, 0);
+		if($ret1[0]==0){
+			while($rs = pg_fetch_assoc($ret1[1])){				
+				$custom_type = array();
+				if(!in_array($rs['typname'], array('bool', 'date', 'float4', 'float8', 'geometry', 'int2', 'int4', 'int8', 'numeric', 'oid', 'text', 'timestamp', 'timestampz', 'unknown', 'varchar'))){
+					$custom_type = $this->getCustomType($rs['oid']);
+					if($custom_type != NULL)$rs['typname'] = $custom_type['type'];
+				}
+				$sql = "REPLACE INTO datatype_attributes SET datatype_id = ".$datatype_id.", name = '".$rs['attname']."', type = '".$rs['typname']."', nullable = ".$rs['nullable'];
+				$query=mysql_query($sql);
+				if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+			}
+		}
+	}
 
   function get_geom_type($geomcolumn, $tablename){
   	if($geomcolumn != '' AND $tablename != ''){
