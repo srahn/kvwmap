@@ -8844,16 +8844,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			# weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
 			#$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, NULL, true);
 		}
-		if ($this->formvars['selected_datatype_name']) {			# ???
-			$datatype_name = $this->formvars['selected_datatype_name'];
-			$selected_datatype_id = reset(array_filter(
-				$this->datatypes,
-				function($datatype) use ($datatype_name) {
-					return ($datatype['name'] == $datatype_name);
-				}
-			));
-			$this->formvars['selected_datatype_id'] = $selected_datatype_id['id'];
-		}
 		if ($this->formvars['selected_datatype_id']) {
 			$datatypedb = $mapdb->getdatatypedatabase($this->formvars['selected_datatype_id'], $this->datatypes, $this->pgdatabase);
 			$this->attributes = $mapdb->read_datatype_attributes($this->formvars['selected_datatype_id'], $datatypedb, NULL, true);
