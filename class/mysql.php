@@ -267,7 +267,7 @@ VALUES (
 	function generate_datatype($schema, $datatype, $epsg = 25832) {
 		#echo '<br>Create Datatype: ' . $datatype['type'] . ' for attribute ' . $datatype['name'];
 		$sql = "
--- Create datatype {$datatype['name']}
+-- Create datatype {$datatype['type_name']}
 INSERT INTO datatype (
 	`Name`,
 	`Datentyp`,
