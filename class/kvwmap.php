@@ -6410,7 +6410,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	*/
 	function generate_layer($schema, $table) {
 		$sql = $this->database->generate_layer($schema, $table);
-		$table_attributes = $this->pgdatabase->get_table_attributes($schema, $table['name']);
+		$table_attributes = $this->pgdatabase->get_attribute_information($schema, $table['name']);
 		$sql .= $this->generate_layer_attributes($schema, $table_attributes);
 		return $sql;
 	}
@@ -6451,7 +6451,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$sql .= $this->database->generate_datatype($schema, $table_attribute);
 
 		# generate datatypes attributes
-		$datatype_attributes = $this->pgdatabase->get_table_attributes($schema, $table_attribute['type']);
+		$datatype_attributes = $this->pgdatabase->get_attribute_information($schema, $table_attribute['type']);
 		$sql .= $this->generate_datatype_attributes($schema, $datatype_attributes);
 		return $sql;
 	}
@@ -8844,7 +8844,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			# weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
 			#$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, NULL, true);
 		}
-		if ($this->formvars['selected_datatype_name']) {
+		if ($this->formvars['selected_datatype_name']) {			# ???
 			$datatype_name = $this->formvars['selected_datatype_name'];
 			$selected_datatype_id = reset(array_filter(
 				$this->datatypes,
@@ -14417,32 +14417,35 @@ class db_mapObj{
   }
   
 	function save_postgis_attributes($layer_id, $attributes, $maintable, $schema){
-		for($i = 0; $i < count($attributes['name']); $i++){
+		for($i = 0; $i < count($attributes); $i++){
+			if($attributes[$i]['nullable'] == '')$attributes[$i]['nullable'] = 'NULL';
+			if($attributes[$i]['length'] == '')$attributes[$i]['length'] = 'NULL';
+			if($attributes[$i]['decimal_length'] == '')$attributes[$i]['decimal_length'] = 'NULL';
 			$sql = "INSERT INTO layer_attributes SET ";
 			$sql.= "layer_id = ".$layer_id.", ";
-			$sql.= "name = '".$attributes['name'][$i]."', ";
-			$sql.= "real_name = '".$attributes['real_name'][$attributes['name'][$i]]."', ";
-			$sql.= "tablename = '".$attributes['table_name'][$i]."', ";
-			$sql.= "table_alias_name = '".$attributes['table_alias_name'][$attributes['name'][$i]]."', ";
-			$sql.= "type = '".$attributes['type'][$i]."', ";
-			$sql.= "geometrytype = '".$attributes['geomtype'][$attributes['name'][$i]]."', ";
-			$sql.= "constraints = '".addslashes($attributes['constraints'][$i])."', ";
-			$sql.= "nullable = ".$attributes['nullable'][$i].", ";
-			$sql.= "length = ".$attributes['length'][$i].", ";
-			$sql.= "decimal_length = ".$attributes['decimal_length'][$i].", ";
-			$sql.= "`default` = '".addslashes($attributes['default'][$i])."', ";
+			$sql.= "name = '".$attributes[$i]['name']."', ";
+			$sql.= "real_name = '".$attributes[$i]['real_name']."', ";
+			$sql.= "tablename = '".$attributes[$i]['table_name']."', ";
+			$sql.= "table_alias_name = '".$attributes[$i]['table_alias_name']."', ";
+			$sql.= "type = '".$attributes[$i]['type']."', ";
+			$sql.= "geometrytype = '".$attributes[$i]['geomtype']."', ";
+			$sql.= "constraints = '".addslashes($attributes[$i]['constraints'])."', ";
+			$sql.= "nullable = ".$attributes[$i]['nullable'].", ";
+			$sql.= "length = ".$attributes[$i]['length'].", ";			
+			$sql.= "decimal_length = ".$attributes[$i]['decimal_length'].", ";
+			$sql.= "`default` = '".addslashes($attributes[$i]['default'])."', ";
 			$sql.= "`order` = ".$i;
 			$sql.= " ON DUPLICATE KEY UPDATE ";
-			$sql.= "real_name = '".$attributes['real_name'][$attributes['name'][$i]]."', ";
-			$sql.= "tablename = '".$attributes['table_name'][$i]."', ";
-			$sql.= "table_alias_name = '".$attributes['table_alias_name'][$attributes['name'][$i]]."', ";
-			$sql.= "type = '".$attributes['type'][$i]."', ";
-			$sql.= "geometrytype = '".$attributes['geomtype'][$attributes['name'][$i]]."', ";
-			$sql.= "constraints = '".addslashes($attributes['constraints'][$i])."', ";
-			$sql.= "nullable = ".$attributes['nullable'][$i].", ";
-			$sql.= "length = ".$attributes['length'][$i].", ";
-			$sql.= "decimal_length = ".$attributes['decimal_length'][$i].", ";
-			$sql.= "`default` = '".addslashes($attributes['default'][$i])."', ";
+			$sql.= "real_name = '".$attributes[$i]['real_name']."', ";
+			$sql.= "tablename = '".$attributes[$i]['table_name']."', ";
+			$sql.= "table_alias_name = '".$attributes[$i]['table_alias_name']."', ";
+			$sql.= "type = '".$attributes[$i]['type']."', ";
+			$sql.= "geometrytype = '".$attributes[$i]['geomtype']."', ";
+			$sql.= "constraints = '".addslashes($attributes[$i]['constraints'])."', ";
+			$sql.= "nullable = ".$attributes[$i]['nullable'].", ";
+			$sql.= "length = ".$attributes[$i]['length'].", ";
+			$sql.= "decimal_length = ".$attributes[$i]['decimal_length'].", ";
+			$sql.= "`default` = '".addslashes($attributes[$i]['default'])."', ";
 			$sql.= "`order` = ".$i;
 			$this->debug->write("<p>file:kvwmap class:db_mapObj->save_postgis_attributes - Speichern der Layerattribute:<br>".$sql,4);
 			$query=mysql_query($sql);
@@ -14450,7 +14453,7 @@ class db_mapObj{
 		}
     	
 		if($maintable == ''){
-			$maintable = $attributes['all_table_names'][0];
+			$maintable = $attributes[0]['table_name'];
 			$sql = "UPDATE layer SET maintable = '".$maintable."' WHERE (maintable IS NULL OR maintable = '') AND Layer_ID = ".$layer_id;
 			$this->debug->write("<p>file:kvwmap class:db_mapObj->save_postgis_attributes - Speichern der Layerattribute:<br>".$sql,4);
 			$query=mysql_query($sql);
@@ -14476,8 +14479,8 @@ class db_mapObj{
   	$sql = "DELETE FROM layer_attributes WHERE layer_id = ".$layer_id;
   	if($attributes){
   		$sql.= " AND name NOT IN (";
-	  	for($i = 0; $i < count($attributes['name']); $i++){
-	  		$sql .= "'".$attributes['name'][$i]."',";
+	  	for($i = 0; $i < count($attributes); $i++){
+	  		$sql .= "'".$attributes[$i]['name']."',";
 	  	}
 	  	$sql = substr($sql, 0, -1);
 	  	$sql .=")";
@@ -14990,7 +14993,7 @@ class db_mapObj{
 		if(!$all_languages AND $language != 'german') {
 			$sql.='CASE WHEN `alias_'.$language.'` != "" THEN `alias_'.$language.'` ELSE `alias` END AS ';
 		}
-		$sql.='alias, `alias_low-german`, alias_english, alias_polish, alias_vietnamese, datatype_id, name, real_name, tablename, table_alias_name, type, geometrytype, constraints, nullable, length, decimal_length, `default`, form_element_type, options, tooltip, `group`, arrangement, labeling, raster_visibility, mandatory, quicksearch, `order`, privileg, query_tooltip FROM datatype_attributes WHERE datatype_id = '.$datatype_id.$einschr.' ORDER BY `order`';
+		$sql.='alias, `alias_low-german`, alias_english, alias_polish, alias_vietnamese, datatype_id, name, real_name, tablename, table_alias_name, type, geometrytype, constraints, nullable, length, decimal_length, `default`, form_element_type, options, tooltip, `group`, raster_visibility, mandatory, quicksearch, `order`, privileg, query_tooltip FROM datatype_attributes WHERE datatype_id = '.$datatype_id.$einschr.' ORDER BY `order`';
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_datatype_attributes:<br>".$sql,4);
 		$query=mysql_query($sql);
 		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }

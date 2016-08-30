@@ -114,12 +114,9 @@ function submitDatatypeSelector() {
 				  </td>
 				  <td>&nbsp;</td>
 				  <td align="left" valign="top">
-					<?php
-						if (
-							strpos($this->attributes['type'][$i], 'xp_') !== false ||
-							strpos($this->attributes['type'][$i], 'rp_') !== false
-						) { ?>
-							<a href="index.php?go=Attributeditor&selected_datatype_name=<?php echo $this->attributes['type'][$i]; ?>"><?php echo $this->attributes['type'][$i]; ?></a><?php
+				<?	$type = ltrim($this->attributes['type'][$i], '_');
+						if(is_numeric($type)){ ?>
+							<a href="index.php?go=Attributeditor&selected_datatype_id=<?php echo $type; ?>"><?php echo $this->attributes['type'][$i]; ?></a><?php
 						}
 						else {
 							echo '
