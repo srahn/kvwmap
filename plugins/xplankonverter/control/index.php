@@ -1,6 +1,7 @@
 <?php
 $this->goNotExecutedInPlugins = false;
 
+include(PLUGINS . 'xplankonverter/model/kvwmap.php');
 include_once(CLASSPATH . 'PgObject.php');
 include_once(CLASSPATH . 'MyObject.php');
 include_once(CLASSPATH . 'LayerGroup.php');
@@ -425,9 +426,13 @@ sleep(5);
 		echo json_encode($response);
 	} break;
 
-	case 'home' : {
+	case 'trigger_test' : {
 		// Einbindung des Views
-		$this->main=PLUGINS . 'xplankonverter/view/home.php';
+		$this->main = PLUGINS . 'xplankonverter/view/test.php';
+		$trigger_function = 'delete_gml_layer';
+		$params = json_decode('{"gml_layer_group_id":1000}');
+		$this->exec_trigger_function($trigger_function, $params);
+
 		$this->output();
 	} break;
 

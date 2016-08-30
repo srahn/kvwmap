@@ -1267,37 +1267,74 @@ class rolle {
 
   function getLayer($LayerName) {
 		global $language;
-    # Abfragen der Layer in der Rolle
-		$sql ='SELECT ';
+
+		# Abfragen der Layer in der Rolle
 		if($language != 'german') {
-			$sql.='CASE WHEN `Name_'.$language.'` != "" THEN `Name_'.$language.'` ELSE `Name` END AS ';
+			$name = "CASE WHEN `Name_{$language}` != '' THEN `Name_{$language}` ELSE `Name` END";
 		}
-		$sql.='Name, l.Layer_ID, alias, Datentyp, Gruppe, pfad, maintable, maintable_is_view, Data, `schema`, document_path, labelitem, connection, printconnection, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs, wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, ul.`queryable`, ul.`drawingorder`, ul.`minscale`, ul.`maxscale`, ul.`offsite`, coalesce(r2ul.transparency, ul.transparency, 100) as transparency, ul.`postlabelcache`, `Filter`, CASE r2ul.gle_view WHEN \'0\' THEN \'generic_layer_editor.php\' ELSE ul.`template` END as template, `header`, `footer`, ul.`symbolscale`, ul.`logconsume`, ul.`requires`, ul.`privileg`, ul.`export_privileg`, `start_aktiv`, r2ul.showclasses FROM layer AS l, used_layer AS ul, u_rolle2used_layer as r2ul';
-    $sql.=' WHERE l.Layer_ID=ul.Layer_ID AND r2ul.Stelle_ID=ul.Stelle_ID AND r2ul.Layer_ID=ul.Layer_ID AND ul.Stelle_ID='.$this->stelle_id.' AND r2ul.User_ID='.$this->user_id;
-    if ($LayerName!='') {
-      $sql.=' AND (l.Name LIKE "'.$LayerName.'" ';
-      if(is_numeric($LayerName)){
-        $sql.='OR l.Layer_ID = "'.$LayerName.'")';
-      }
-      else{
-        $sql.=')';
-      }
-    }
-		$sql.=' ORDER BY ul.drawingorder desc';
-    #echo $sql.'<br>';
-    $this->debug->write("<p>file:users.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
-    if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		else {
+			$name = 'name';
+		}
+
+		if ($LayerName != '') {
+			$where_name = " AND (l.Name LIKE '{$LayerName}'";
+			if(is_numeric($LayerName)) {
+				$where_name .= " OR l.Layer_ID = {$LayerName}";
+			}
+			$where_name .= ")";
+		}
+
+		$sql = "
+			SELECT
+				{$name} AS NAME,
+				l.Layer_ID,
+				alias, Datentyp, Gruppe, pfad, maintable, maintable_is_view, Data, `schema`, document_path, labelitem, connection,
+				printconnection, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password,
+				wms_server_version, ows_srs, wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink,
+				status,
+				trigger_fired,
+				trigger_event,
+				trigger_function,
+				trigger_function_params,
+				ul.`queryable`, ul.`drawingorder`, ul.`minscale`, ul.`maxscale`, ul.`offsite`,
+				coalesce(r2ul.transparency, ul.transparency, 100) as transparency,
+				ul.`postlabelcache`, `Filter`,
+				CASE r2ul.gle_view WHEN '0' THEN 'generic_layer_editor.php' ELSE ul.`template` END as template,
+				`header`,
+				`footer`,
+				ul.`symbolscale`,
+				ul.`logconsume`,
+				ul.`requires`,
+				ul.`privileg`,
+				ul.`export_privileg`,
+				`start_aktiv`,
+				r2ul.showclasses
+			FROM
+				layer AS l,
+				used_layer AS ul,
+				u_rolle2used_layer as r2ul
+			WHERE
+				l.Layer_ID = ul.Layer_ID AND
+				r2ul.Stelle_ID = ul.Stelle_ID AND
+				r2ul.Layer_ID = ul.Layer_ID AND
+				ul.Stelle_ID = {$this->stelle_id} AND
+				r2ul.User_ID={$this->user_id}
+				{$where_name}
+			ORDER BY ul.drawingorder desc
+		";
+		#echo $sql.'<br>';
+		$this->debug->write("<p>file:users.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>".$sql,4);
+		$query=mysql_query($sql,$this->database->dbConn);
+		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		$i = 0;
-    while ($rs=mysql_fetch_assoc($query)) {
-      $layer[$i]=$rs;
+		while ($rs=mysql_fetch_assoc($query)) {
+			$layer[$i]=$rs;
 			$layer['layer_ids'][$rs['Layer_ID']] =& $layer[$i];
 			$layer['layer_ids'][$layer[$i]['requires']]['required'] = $rs['Layer_ID'];
 			$i++;
-    }
-    return $layer;
-  }
-	
+		}
+		return $layer;
+	}
 
   # 2006-02-11 pk
   function getAktivLayer($aktivStatus,$queryStatus,$logconsume) {
