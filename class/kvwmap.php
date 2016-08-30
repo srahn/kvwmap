@@ -6451,7 +6451,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$sql .= $this->database->generate_datatype($schema, $table_attribute);
 
 		# generate datatypes attributes
-		$datatype_attributes = $this->pgdatabase->get_datatype_attributes($schema, $table_attribute['type']);
+		$datatype_attributes = $this->pgdatabase->get_table_attributes($schema, $table_attribute['type']);
 		$sql .= $this->generate_datatype_attributes($schema, $datatype_attributes);
 		return $sql;
 	}

@@ -122,7 +122,7 @@ class pgdatabase {
 				a.attname AS name,
 				a.attnotnull AS attribute_not_null,
 				a.attnum AS ordinal_position,
-				trim('''' from split_part(ad.adsrc, '::', 1)) AS attribute_default,
+				'SELECT ' || ic.column_default attribute_default,
 				t.typname AS type_name,
 				CASE WHEN t.typarray = 0 THEN eat.typname ELSE t.typname END AS type,
 				t.oid AS attribute_type_oid,
@@ -137,8 +137,7 @@ class pgdatabase {
 				pg_catalog.pg_namespace ns ON (c.relnamespace = ns.oid) JOIN
 				information_schema.columns ic ON (ic.table_schema = ns.nspname AND ic.table_name = c.relname AND ic.column_name = a.attname) JOIN
 				pg_catalog.pg_type t ON (a.atttypid = t.oid) LEFT JOIN
-				pg_catalog.pg_type eat ON (t.typelem = eat.oid) LEFT JOIN
-				pg_catalog.pg_attrdef ad ON (a.attrelid = ad.adrelid)
+				pg_catalog.pg_type eat ON (t.typelem = eat.oid)
 			WHERE
 				ns.nspname = '{$schema}' AND
 				c.relname = '{$table}' AND
@@ -235,7 +234,7 @@ FROM
 				a.attname AS name,
 				a.attnotnull AS attribute_not_null,
 				a.attnum AS ordinal_position,
-				trim('''' from split_part(ad.adsrc, '::', 1)) AS attribute_default,
+				'SELECT ' || ic.column_default attribute_default,
 				t.oid AS attribute_type_oid,
 				t.typname AS type_name,
 				CASE WHEN t.typarray = 0 THEN eat.typname ELSE t.typname END AS type,
@@ -250,8 +249,7 @@ FROM
 				pg_catalog.pg_namespace ns ON (c.relnamespace = ns.oid) JOIN
 				information_schema.columns ic ON (ic.table_schema = ns.nspname AND ic.table_name = c.relname AND ic.column_name = a.attname) JOIN
 				pg_catalog.pg_type t ON (a.atttypid = t.oid) LEFT JOIN
-				pg_catalog.pg_type eat ON (t.typelem = eat.oid) LEFT JOIN
-				pg_catalog.pg_attrdef ad ON (a.attrelid = ad.adrelid)
+				pg_catalog.pg_type eat ON (t.typelem = eat.oid)
 			WHERE
 				ns.nspname = '{$schema}' AND
 				c.relname = '{$datatype}' AND
