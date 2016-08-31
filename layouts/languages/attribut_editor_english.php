@@ -1,5 +1,5 @@
 ﻿<?php
- $strLayer="Layer";
- $strPleaseSelect="--------Please select---------";
-  
+	$strLayer = "Layer";
+	$strPleaseSelect = "--------Please select---------";
+	$strDatatype = "Datatypes";
 ?>  

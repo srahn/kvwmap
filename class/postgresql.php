@@ -113,47 +113,6 @@ class pgdatabase {
 		return $tables;
 	}
 
-	function get_table_attributes($schema, $table) {
-		$table_attributes = array();
-		$sql = "
-			SELECT
-				ns.nspname,
-				c.relname AS table_name,
-				a.attname AS name,
-				a.attnotnull AS attribute_not_null,
-				a.attnum AS ordinal_position,
-				'SELECT ' || ic.column_default attribute_default,
-				t.typname AS type_name,
-				CASE WHEN t.typarray = 0 THEN eat.typname ELSE t.typname END AS type,
-				t.oid AS attribute_type_oid,
-				t.typtype AS type_type,
-				case when t.typarray = 0 THEN true ELSE false END AS is_array,
-				eat.typname AS array_element_type_name,
-				ic.character_maximum_length,
-				ic.numeric_precision
-			FROM
-				pg_catalog.pg_class c JOIN
-				pg_catalog.pg_attribute a ON (c.oid = a.attrelid) JOIN
-				pg_catalog.pg_namespace ns ON (c.relnamespace = ns.oid) JOIN
-				information_schema.columns ic ON (ic.table_schema = ns.nspname AND ic.table_name = c.relname AND ic.column_name = a.attname) JOIN
-				pg_catalog.pg_type t ON (a.atttypid = t.oid) LEFT JOIN
-				pg_catalog.pg_type eat ON (t.typelem = eat.oid)
-			WHERE
-				ns.nspname = '{$schema}' AND
-				c.relname = '{$table}' AND
-				a.attnum > 0
-			ORDER BY a.attnum
-		";
-		#echo '<br>' . $sql;
-		$ret = $this->execSQL($sql, 4, 0);
-		if($ret[0]==0){
-			while($row = pg_fetch_assoc($ret[1])){
-				$table_attributes[] = $row;
-			}
-		}
-		return $table_attributes;
-	}
-
 	function table_exists($schema, $table) {
 		$table_exists = false;
 		$sql = "
@@ -222,48 +181,6 @@ FROM
 			}
 		}
 		return $datatypes;
-	}
-
-	function get_datatype_attributes($schema, $datatype) {
-		$datatype_attributes = array();
-		$sql = "
-			SELECT
-				ns.nspname,
-				c.oid AS datatype_oid,
-				c.relname AS table_name,
-				a.attname AS name,
-				a.attnotnull AS attribute_not_null,
-				a.attnum AS ordinal_position,
-				'SELECT ' || ic.column_default attribute_default,
-				t.oid AS attribute_type_oid,
-				t.typname AS type_name,
-				CASE WHEN t.typarray = 0 THEN eat.typname ELSE t.typname END AS type,
-				t.typtype AS type_type,
-				case when t.typarray = 0 THEN true ELSE false END AS is_array,
-				eat.typname AS array_element_type_name,
-				ic.character_maximum_length,
-				ic.numeric_precision
-			FROM
-				pg_catalog.pg_class c JOIN
-				pg_catalog.pg_attribute a ON (c.oid = a.attrelid) JOIN
-				pg_catalog.pg_namespace ns ON (c.relnamespace = ns.oid) JOIN
-				information_schema.columns ic ON (ic.table_schema = ns.nspname AND ic.table_name = c.relname AND ic.column_name = a.attname) JOIN
-				pg_catalog.pg_type t ON (a.atttypid = t.oid) LEFT JOIN
-				pg_catalog.pg_type eat ON (t.typelem = eat.oid)
-			WHERE
-				ns.nspname = '{$schema}' AND
-				c.relname = '{$datatype}' AND
-				a.attnum > 0
-			ORDER BY a.attnum
-		";
-		#echo '<br><textarea cols="50" rows="2">' . $sql . '</textarea>';
-		$ret = $this->execSQL($sql, 4, 0);
-		if($ret[0]==0){
-			while($row = pg_fetch_assoc($ret[1])){
-				$datatype_attributes[] = $row;
-			}
-		}
-		return $datatype_attributes;
 	}
 
 	function read_epsg_codes($order = true){
@@ -472,15 +389,15 @@ FROM
       for($i = 0; $i < pg_num_fields($ret[1]); $i++){
         # Attributname
         $fieldname = pg_field_name($ret[1], $i);
-        $fields['name'][] = $fieldname;
+        $fields[$i]['name'] = $fieldname;
 
         # "richtiger" Name in der Tabelle
         $name_pair = $this->check_real_attribute_name($fieldstring[$i], $fieldname);
         if($name_pair != ''){
-          $fields['real_name'][$name_pair['name']] = $name_pair['real_name'];
+          $fields[$i]['real_name'] = $name_pair['real_name'];
         }
         else{
-          $fields['real_name'][$fieldname] = $fieldname;
+          $fields[$i]['real_name'] = $fieldname;
         }
 
         # Tabellenname des Attributs
@@ -499,131 +416,232 @@ FROM
         if($tablename != NULL){
           $all_table_names[] = $tablename;
         }
-        $fields['table_name'][] = $tablename;
-        $fields['table_name'][$fieldname] = $tablename;
+        $fields[$i]['table_name'] = $tablename;
+        #$fields['table_name'][$fieldname] = $tablename;		todo
         if($table['alias'] == ''){
         	$table['alias'] = $this->get_table_alias($tablename, $fromposition, $withoutwhere);
         }
         if($table['alias']){
-        	$fields['table_alias_name'][$fieldname] = $table['alias'];
+        	$fields[$i]['table_alias_name'] = $table['alias'];
         }
         else{
-        	$fields['table_alias_name'][$fieldname] = $tablename;
+        	$fields[$i]['table_alias_name'] = $tablename;
         }
 
-        # Attributtyp
-        $fieldtype = pg_field_type($ret[1], $i);
+        # Attributeigenschaften
+				if($fields[$i]['real_name'] != ''){
+					$constraintstring = '';
+					$attr_info = $this->get_attribute_information($this->schema, $tablename, $fields[$i]['real_name']);
+					$fieldtype = $attr_info[0]['type_name'];
+					$fields[$i]['nullable'] = $attr_info[0]['nullable']; 
+					$fields[$i]['length'] = $attr_info[0]['length'];
+					$fields[$i]['decimal_length'] = $attr_info[0]['decimal_length'];
+					$fields[$i]['default'] = $attr_info[0]['default'];					
+					if($attr_info[0]['is_array'] == 't')$prefix = '_'; else $prefix = '';
+					if($attr_info[0]['type_type'] == 'c'){		# custom datatype
+						$datatype_id = $this->writeCustomType($attr_info[0]['type'], $attr_info[0]['type_schema']);
+						$fieldtype = $prefix.$datatype_id; 
+					}
+					if($attr_info[0]['type_type'] == 'e'){		# enum
+						$fieldtype = $prefix.'text';
+						$constraintstring = $this->getEnumElements($attr_info[0]['type'], $attr_info[0]['type_schema']);
+					}
+					if($attr_info[0]['indisunique'] == 't')$constraintstring = 'UNIQUE';
+					if($attr_info[0]['indisprimary'] == 't')$constraintstring = 'PRIMARY KEY';
+					$constraints = $this->pg_table_constraints($tablename);		# todo
+					if($fieldtype != 'geometry'){
+						# testen ob es für ein Attribut ein constraint gibt, das wie enum wirkt
+						for($j = 0; $j < count($constraints); $j++){
+							if(strpos($constraints[$j], '('.$fieldname.')')){
+								$options = explode("'", $constraints[$j]);
+								for($k = 0; $k < count($options); $k++){
+									if($k%2 == 1){
+										if($k > 1){
+											$constraintstring.= ",";
+										}
+										$constraintstring.= "'".$options[$k]."'";
+									}
+								}
+							}
+						}
+					}
+					$fields[$i]['constraints'] = $constraintstring;
+				}
 				if($name_pair != '' AND $name_pair['no_real_attribute']) $fieldtype = 'not_saveable';
-        $fields['type'][] = $fieldtype;
+        $fields[$i]['type'] = $fieldtype;
+				
         # Geometrietyp
         if($fieldtype == 'geometry'){
-          $fields['geomtype'][$fieldname] = $this->get_geom_type($fields['real_name'][$fieldname], $tablename);
-          $fields['the_geom'] = $fieldname;
-        }
-        
-        # Constraints
-        $constraints = $this->pg_table_constraints($tablename);
-        $constraintstring = '';
-	      if($fieldtype != 'geometry'){
-	        # testen ob es für ein Attribut ein constraint gibt, das wie enum wirkt
-	        for($j = 0; $j < count($constraints); $j++){
-	          if(strpos($constraints[$j], '('.$fieldname.')')){
-	            $options = explode("'", $constraints[$j]);
-	            for($k = 0; $k < count($options); $k++){
-	              if($k%2 == 1){
-	                if($k > 1){
-	                  $constraintstring.= ",";
-	                }
-	                $constraintstring.= "'".$options[$k]."'";
-	              }
-	            }
-	          }
-	        }
-	      }
-	              
-        $attr_info = $this->get_attribute_information($tablename, $fields['real_name'][$fieldname]);
-        # nullable
-        $fields['nullable'][] = $attr_info['is_nullable']; 
-        
-        # Länge des Feldes
-        if($attr_info['numeric_precision'] != ''){
-        	$fields['length'][] = $attr_info['numeric_precision'];
-        }
-        else{
-        	$fields['length'][] = $attr_info['character_maximum_length'];
-      	}        
-        
-        # Länge des Dezimalteils eines numeric-Feldes
-        $fields['decimal_length'][] = $attr_info['numeric_scale'];
-        
-        # Default-Wert
-        $fields['default'][] = $attr_info['column_default'];
-				
-				# Unique
-				if($attr_info['indisunique'] == 't'){
-        	$constraintstring = 'UNIQUE';
-        }
-				
-				# Primary Key
-        if($attr_info['indisprimary'] == 't'){
-        	$constraintstring = 'PRIMARY KEY';
-        }
-        
-        $fields['constraints'][] = $constraintstring;
-        
+          $fields[$i]['geomtype'] = $this->get_geom_type($fields[$i]['real_name'], $tablename);
+          #$fields['the_geom'] = $fieldname;		todo
+        }				
       }
       
-      if($all_table_names != NULL){   
-	      $all_table_names = array_unique($all_table_names);
-	      foreach($all_table_names as $tablename){
-	        $fields['oids'][] = $this->check_oid($tablename);   # testen ob Tabelle oid hat
-	        //$fields['all_alias_table_names'][] = $this->get_table_alias($tablename, $fromposition, $withoutwhere);
-	      }
-	      $fields['all_table_names'] = $all_table_names;
-      }
+      // if($all_table_names != NULL){   	todo
+	      // $all_table_names = array_unique($all_table_names);
+	      // foreach($all_table_names as $tablename){
+	        // $fields['oids'][] = $this->check_oid($tablename);   # testen ob Tabelle oid hat
+	      // }
+	      // $fields['all_table_names'] = $all_table_names;
+      // }
             
       return $fields;
     }
     else return NULL;
   }
-     
-  function get_attribute_information($tablename, $columnname){
-  	if($columnname != '' AND $tablename != ''){
-  		$sql = "SELECT is_nullable, character_maximum_length, column_default, numeric_precision, numeric_scale, bool_or(indisunique) as indisunique, bool_or(indisprimary) as indisprimary, pg_get_serial_sequence('".$tablename."', '".$columnname."') as serial ";
-  		$sql.= "FROM information_schema.columns LEFT JOIN pg_class LEFT JOIN pg_index ON indrelid = pg_class.oid LEFT JOIN pg_attribute ON pg_attribute.attrelid = pg_class.oid ON pg_class.oid = table_name::regclass AND pg_attribute.attnum = any(pg_index.indkey) AND attname = column_name ";
-  		$sql.= "WHERE column_name = '".$columnname."' AND table_name = '".$tablename."' AND table_schema = '".$this->schema."' ";
-			$sql.= "GROUP BY is_nullable, character_maximum_length, column_default, numeric_precision, numeric_scale";
-			#echo $sql.'<br>';
-  		$ret1 = $this->execSQL($sql, 4, 0);
-	  	if($ret1[0]==0){
-	      $attr_info = pg_fetch_assoc($ret1[1]);
-	      if($attr_info['is_nullable'] == 'NO' AND $attr_info['serial'] == '' AND substr($attr_info['column_default'], 0, 7) != 'nextval'){$attr_info['is_nullable'] = '0';}else{$attr_info['is_nullable'] = '1';}
-	      if($attr_info['character_maximum_length'] == NULL){$attr_info['character_maximum_length'] = 'NULL';}
-	      if($attr_info['numeric_scale'] == ''){$attr_info['numeric_scale'] = 'NULL';}	      
-	      if($attr_info['column_default'] != '' AND $attr_info['serial'] == '' AND substr($attr_info['column_default'], 0, 7) != 'nextval'){
-		      $attr_info['column_default'] = 'SELECT '.$attr_info['column_default'];
-		     	#echo $sql.'<br>';
-	  			#$ret1 = $this->execSQL($sql, 4, 0);
-	  			#if($ret1[0]==0){
-	      		#$defaultvalue = pg_fetch_row($ret1[1]);
-	      		#$attr_info['column_default'] = $defaultvalue[0];
-	  			#}
-	  		}
-	  		else{
-	  			$attr_info['column_default'] = '';
-	  		}
-	    }
-  	}
-  	else{
-  		$attr_info['is_nullable'] = 'NULL';
-  		$attr_info['character_maximum_length'] = 'NULL';
-  		$attr_info['column_default'] = '';
-  		$attr_info['numeric_scale'] = 'NULL';
-  	}
-  	return $attr_info;
-  }
-
-
+	
+	function get_attribute_information($schema, $table, $column = NULL) {
+		if($column != NULL)$and_column = "a.attname = '".$column."' AND ";
+		$attributes = array();
+		$sql = "
+			SELECT
+				ns.nspname as schema,
+				c.relname AS table_name,
+				a.attname AS name,
+				NOT a.attnotnull AS nullable,
+				a.attnum AS ordinal_position,
+				ad.adsrc as default,
+				t.typname AS type_name,
+				tns.nspname as type_schema,
+				CASE WHEN t.typarray = 0 THEN eat.typname ELSE t.typname END AS type,
+				t.oid AS attribute_type_oid,
+				coalesce(eat.typtype, t.typtype) as type_type,
+				case when t.typarray = 0 THEN true ELSE false END AS is_array,
+				CASE WHEN t.typname = 'varchar' AND a.atttypmod > 0 THEN a.atttypmod - 4 ELSE NULL END as character_maximum_length,
+				CASE a.atttypid
+				 WHEN 21 /*int2*/ THEN 16
+				 WHEN 23 /*int4*/ THEN 32
+				 WHEN 20 /*int8*/ THEN 64
+				 WHEN 1700 /*numeric*/ THEN
+				      CASE WHEN atttypmod = -1
+					   THEN null
+					   ELSE ((atttypmod - 4) >> 16) & 65535
+					   END
+				 WHEN 700 /*float4*/ THEN 24 /*FLT_MANT_DIG*/
+				 WHEN 701 /*float8*/ THEN 53 /*DBL_MANT_DIG*/
+				 ELSE null
+				END   AS numeric_precision,
+				CASE 
+				    WHEN atttypid IN (21, 23, 20) THEN 0
+				    WHEN atttypid IN (1700) THEN            
+					CASE 
+					    WHEN atttypmod = -1 THEN null       
+					    ELSE (atttypmod - 4) & 65535
+					END
+				       ELSE null
+				  END AS decimal_length,
+				i.indisunique,
+				i.indisprimary
+			FROM
+				pg_catalog.pg_class c JOIN
+				pg_catalog.pg_attribute a ON (c.oid = a.attrelid) JOIN
+				pg_catalog.pg_namespace ns ON (c.relnamespace = ns.oid) JOIN
+				pg_catalog.pg_type t ON (a.atttypid = t.oid) LEFT JOIN
+				pg_catalog.pg_namespace tns ON (t.typnamespace = tns.oid) LEFT JOIN
+				pg_catalog.pg_type eat ON (t.typelem = eat.oid) LEFT JOIN 
+				pg_index i ON i.indrelid = c.oid AND a.attnum = ANY(i.indkey)	LEFT JOIN 
+				pg_catalog.pg_attrdef ad ON a.attrelid = ad.adrelid AND ad.adnum = a.attnum
+			WHERE
+				ns.nspname = '".$schema."' AND
+				c.relname = '".$table."' AND
+				".$and_column."
+				a.attnum > 0
+			ORDER BY a.attnum
+		";
+		#echo '<br><br>' . $sql;
+		$ret = $this->execSQL($sql, 4, 0);
+		if($ret[0]==0){
+			while($attr_info = pg_fetch_assoc($ret[1])){
+				if($attr_info['nullable'] == 'f' AND substr($attr_info['default'], 0, 7) != 'nextval'){$attr_info['nullable'] = '0';}else{$attr_info['nullable'] = '1';}
+        if($attr_info['numeric_precision'] != '')$attr_info['length'] = $attr_info['numeric_precision'];
+        else $attr_info['length'] = $attr_info['character_maximum_length'];
+	      if($attr_info['decimal_length'] == ''){$attr_info['decimal_length'] = 'NULL';}	      
+	      if($attr_info['default'] != '' AND substr($attr_info['default'], 0, 7) != 'nextval')$attr_info['default'] = 'SELECT '.$attr_info['default'];
+	  		else $attr_info['default'] = '';
+				$attributes[] = $attr_info;
+			}
+		}
+		return $attributes;
+	}
+     	
+	function writeCustomType($typname, $schema){		
+		$datatype_id = $this->getDatatypeId($typname, $schema, $this->dbName, $this->host, $this->port);
+		$this->writeDatatypeAttributes($datatype_id, $typname, $schema);
+		return $datatype_id;
+	}
+	
+	function getDatatypeId($typname, $schema, $dbname, $host, $port){
+		$sql = "SELECT id FROM datatypes WHERE ";
+		$sql.= "name = '".$typname."' AND `schema` = '".$schema."' AND dbname = '".$dbname."' AND host = '".$host."' AND port = ".$port;
+		$query=mysql_query($sql);
+		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+		$rs=mysql_fetch_assoc($query);
+		if($rs == NULL){
+			$sql = "INSERT INTO datatypes (name, `schema`, dbname, host, port) VALUES ('".$typname."', '".$schema."', '".$dbname."', '".$host."', ".$port.")";
+			$query=mysql_query($sql);
+			$datatype_id = mysql_insert_id();
+		}
+		else{	
+			$datatype_id = $rs['id'];
+		}
+		return $datatype_id;
+	}
+	
+	function getEnumElements($name, $schema){
+		$sql = "SELECT array_to_string(array_agg(''''||e.enumlabel||''''), ',') as enum_string ";
+		$sql.= "FROM pg_enum e ";
+		$sql.= "JOIN pg_type t ON e.enumtypid = t.oid ";
+		$sql.= "JOIN pg_namespace ns ON (t.typnamespace = ns.oid) ";
+		$sql.= "WHERE t.typname = '".$name."' ";
+		$sql.= "AND ns.nspname = '".$schema."'";
+		$ret1 = $this->execSQL($sql, 4, 0);
+		if($ret1[0]==0){
+			$result = pg_fetch_assoc($ret1[1]);
+		}
+		return $result['enum_string'];
+	}
+	
+	function writeDatatypeAttributes($datatype_id, $typname, $schema){
+		$attr_info = $this->get_attribute_information($schema, $typname);
+		for($i = 0; $i < count($attr_info); $i++){
+			$fields[$i]['real_name'] = $attr_info[$i]['name'];
+			$fields[$i]['name'] = $attr_info[$i]['name'];
+			$fieldtype = $attr_info[$i]['type_name'];
+			$fields[$i]['nullable'] = $attr_info[$i]['nullable']; 
+			$fields[$i]['length'] = $attr_info[$i]['length'];
+			$fields[$i]['decimal_length'] = $attr_info[$i]['decimal_length'];
+			$fields[$i]['default'] = $attr_info[$i]['default'];					
+			if($attr_info[$i]['is_array'] == 't')$prefix = '_'; else $prefix = '';
+			if($attr_info[$i]['type_type'] == 'c'){		# custom datatype
+				$sub_datatype_id = $this->writeCustomType($attr_info[$i]['type'], $attr_info[$i]['type_schema']);
+				$fieldtype = $prefix.$sub_datatype_id; 
+			}
+			if($attr_info[$i]['type_type'] == 'e'){		# enum
+				$fieldtype = $prefix.'text';
+				$constraintstring = $this->getEnumElements($attr_info[$i]['type'], $attr_info[$i]['type_schema']);
+			}
+			$fields[$i]['constraints'] = $constraintstring;
+			$fields[$i]['type'] = $fieldtype;
+			if($fields[$i]['nullable'] == '')$fields[$i]['nullable'] = 'NULL';
+			if($fields[$i]['length'] == '')$fields[$i]['length'] = 'NULL';
+			if($fields[$i]['decimal_length'] == '')$fields[$i]['decimal_length'] = 'NULL';
+			$sql = "REPLACE INTO datatype_attributes SET ";
+			$sql.= "datatype_id = ".$datatype_id.", ";
+			$sql.= "name = '".$fields[$i]['name']."', ";
+			$sql.= "real_name = '".$fields[$i]['real_name']."', ";
+			$sql.= "type = '".$fields[$i]['type']."', ";
+			//$sql.= "geometrytype = '".$fields[$i]['geomtype']."', ";	# todo
+			$sql.= "constraints = '".addslashes($fields[$i]['constraints'])."', ";
+			$sql.= "nullable = ".$fields[$i]['nullable'].", ";
+			$sql.= "length = ".$fields[$i]['length'].", ";			
+			$sql.= "decimal_length = ".$fields[$i]['decimal_length'].", ";
+			$sql.= "`default` = '".addslashes($fields[$i]['default'])."', ";
+			$sql.= "`order` = ".$i;
+			$query=mysql_query($sql);
+			if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+		}
+	}
+	
   function get_geom_type($geomcolumn, $tablename){
   	if($geomcolumn != '' AND $tablename != ''){
 	    $sql = "SELECT GeometryType(".$geomcolumn.") FROM ".$tablename." WHERE ".$geomcolumn." IS NOT NULL LIMIT 1";

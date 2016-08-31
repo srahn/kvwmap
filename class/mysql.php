@@ -214,6 +214,9 @@ SET @last_layer_id_{$table['oid']} = LAST_INSERT_ID();
 
 	function generate_layer_attribute($attribute, $options) {
 		#echo '<br>Create Layerattribute: ' . $attribute['name'];
+		if($attribute['nullable'] == '')$attribute['nullable'] = 'NULL';
+		if($attribute['length'] == '')$attribute['length'] = 'NULL';
+		if($attribute['decimal_length'] == '')$attribute['decimal_length'] = 'NULL';
 		$sql = "
 -- Create layer_attribute {$attribute['name']} for layer {$attribute['table_name']}
 INSERT INTO layer_attributes (
@@ -247,15 +250,15 @@ VALUES (
 	'{$attribute['type_name']}', -- type
 	'', -- geometrytype
 	'{$options['constraint']}', -- constraints
-	" . (($attribute['is_nullable'] == 't') ? 'TRUE' : 'FALSE') . ",
-	'{$attribute['character_maximum_length']}', -- length
-	'{$attribute['numeric_precision']}', -- decimal_length
-	'{$attribute['attribute_default']}', -- default
+	'{$attribute['nullable']}',
+	'{$attribute['length']}', -- length
+	'{$attribute['decimal_length']}', -- decimal_length
+	'{$attribute['default']}', -- default
 	'text', -- form_element_type
 	'{$options['option']}', -- options
 	'', -- group
 	NULL, -- raster_visibility
-	" . (($attribute['is_nullable'] == 'NO') ? 'TRUE' : 'NULL') . ", -- mandatory
+	NULL -- mandatory
 	'{$attributes['ordinal_position']}', -- order
 	'1',
 	'0'
