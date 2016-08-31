@@ -1079,14 +1079,14 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->dokument_loeschen();
 	  } break;
 
-	  case 'neuer_Layer_Datensatz' : {			
+		case 'neuer_Layer_Datensatz' : {
 			$GUI->neuer_Layer_Datensatz();
-	  } break;
+		} break;
 
-	  case 'neuer_Layer_Datensatz_speichern' : {
+		case 'neuer_Layer_Datensatz_speichern' : {
 			$GUI->neuer_Layer_Datensatz_speichern();
-	  } break;
-	  
+		} break;
+
 	  case 'generisches_sachdaten_diagramm' : {
 			$GUI->generisches_sachdaten_diagramm($GUI->formvars['width']);
 	  } break;

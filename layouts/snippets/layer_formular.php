@@ -1,6 +1,7 @@
 <?php
 	global $supportedLanguages;
   include(LAYOUTPATH.'languages/layer_formular_'.$this->user->rolle->language.'.php');
+  include(WWWROOT . APPLVERSION . 'funktionen/radio_fields.php');
  ?><script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <script src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
@@ -333,60 +334,13 @@ else {
 				<tr>
 					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTriggerFired; ?></th>
 					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
-						<?php $trigger_fired_options = array('BEFORE', 'AFTER', 'INSTEAD OF'); ?>
-						<?php
-							$options_checked = implode(
-								' || ',
-								array_map(
-									function ($option) {
-										return "document.getElementById('trigger_fired_option_{$option}').checked";
-									},
-									$trigger_fired_options
-								)
-							);
-						?>
-						<fieldset style="border: none;"><?php
-							foreach($trigger_fired_options AS $trigger_fired_option) {
-								$checked = $this->layerdata['trigger_fired'] == $trigger_fired_option ? 'checked' : ''; ?>
-								<input
-									type = "radio"
-									id = "trigger_fired_option_<?php echo $trigger_fired_option; ?>"
-									name = "trigger_fired"
-									value = "<?php echo $trigger_fired_option; ?>"
-									onchange = "document.getElementById('trigger_fired_option_closer').style='display:' + <?php echo $options_checked; ?> ? 'true' : 'false'"
-									<?php echo $checked; ?>
-								>
-								<label for="trigger_fired_option_<?php echo $trigger_fired_option; ?>"><?php echo $trigger_fired_option; ?></label><?php
-							} ?>
-							<i id = "trigger_fired_option_closer"
-								 class = "fa fa-times"
-								 onclick ="<?php
-									foreach($trigger_fired_options AS $trigger_fired_option) { ?>
-										document.getElementById('trigger_fired_option_<?php echo $trigger_fired_option; ?>').checked = false;<?php
-									} ?> this.style='display:none';"
-								style="<?php if ($this->layerdata['trigger_fired'] == '') echo "display:none"; ?>"
-							>
-							</i>
-						</fieldset>
+						<?php echo radio_fields('trigger_fired', $this->layerdata['trigger_fired'], array('BEFORE', 'AFTER', 'INSTEAD OF')); ?>
 					</td>
 				</tr>
 				<tr>
 					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTriggerEvent; ?></th>
 					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
-						<?php $trigger_event_options = array('INSERT', 'UPDATE', 'DELETE', 'TRUNCATE'); ?>
-						<fieldset style="border: none;"><?php
-							foreach($trigger_event_options AS $trigger_event_option) {
-								$checked = $this->layerdata['trigger_event'] == $trigger_event_option ? 'checked' : ''; ?>
-								<input
-									type="radio"
-									id="trigger_event_option_<?php echo $trigger_event_option; ?>"
-									name="trigger_event"
-									value="<?php echo $trigger_event_option; ?>"
-									<?php echo $checked; ?>
-								>
-								<label for="trigger_event_option_<?php echo $trigger_event_option; ?>"><?php echo $trigger_event_option; ?></label><?php
-							} ?>
-						</fieldset>
+						<?php echo radio_fields('trigger_event', $this->layerdata['trigger_event'], array('INSERT', 'UPDATE', 'DELETE')); ?>
 					</td>
 				</tr>
 				<tr>
