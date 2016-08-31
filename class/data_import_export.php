@@ -33,7 +33,7 @@ class data_import_export {
   function data_import_export() {
     global $debug;
     $this->debug=$debug;
-		$this->delimiters = array(';', ' ', ',', "\t");		# erlaubte Trennzeichen
+		$this->delimiters = array("\t", ';', ' ', ',');		# erlaubte Trennzeichen
   }
 
 ################# Import #################
@@ -90,7 +90,7 @@ class data_import_export {
 		$this->formvars['user_id'] = $user->id;
 		$this->formvars['stelle_id'] = $stelle->id;
 		$this->formvars['aktivStatus'] = 1;
-		$this->formvars['Name'] = $file." (".date('d.m. H:i',time()).")".str_repeat(' ', $custom_table['datatype']);
+		$this->formvars['Name'] = $layername;
 		$this->formvars['Gruppe'] = $groupid;
 		$this->formvars['Typ'] = 'import';
 		$this->formvars['Datentyp'] = $custom_table['datatype'];
@@ -167,21 +167,31 @@ class data_import_export {
 		if($_files['file1']['name']){
 			$this->pointfile = UPLOADPATH.$_files['file1']['name'];
 			if(move_uploaded_file($_files['file1']['tmp_name'], $this->pointfile)){
-				$rows = file($this->pointfile);
+				$rows = file($this->pointfile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+				$delimiters = implode($this->delimiters);
 				while(count($this->delimiters) > 0 AND count($this->columns) < 2){
 					$this->delimiter = array_shift($this->delimiters);
-					$this->columns = explode($this->delimiter, utf8_encode($rows[0]));
+					$i = 0;
+					while(trim($rows[$i], "$delimiters\n\r") == ''){	// Leerzeilen überspringen bis zur ersten Zeile mit Inhalt
+						$i++;
+					}					
+					$this->columns = explode($this->delimiter, utf8_encode($rows[$i]));
+					echo '<br>';
 				}
 			}
 		}
 	}
 	
 	function import_custom_pointlist($formvars, $pgdatabase){
-		$rows = file($formvars['file1']);
+		$rows = file($formvars['file1'], FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 		$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($formvars['file1']), 0, 15))).rand(1,1000000);
-		$columns = explode($formvars['delimiter'], $rows[0]);
+		$i = 0;
+		while(trim($rows[$i], $formvars['delimiter']."\n\r") == ''){	// Leerzeilen überspringen bis zur ersten Zeile mit Inhalt
+			$i++;
+		}
+		$columns = explode($formvars['delimiter'], $rows[$i]);
 		for($i = 0; $i < count($columns); $i++){
-			if($formvars['column'.$i] == 'x' AND !is_numeric($columns[$i]))$headlines = true;		// die erste Zeile enthält die Spaltenüberschriften
+			if($formvars['column'.$i] == 'x' AND !is_numeric(str_replace(',', '.', $columns[$i])))$headlines = true;		// die erste Zeile enthält die Spaltenüberschriften
 		}
 		$sql = "CREATE TABLE ".CUSTOM_SHAPE_SCHEMA.".".$tablename." (";
 		$komma = false;
@@ -206,7 +216,7 @@ class data_import_export {
 		$sql.= "CREATE INDEX ".$tablename."_gist_idx ON ".CUSTOM_SHAPE_SCHEMA.".".$tablename." USING gist (the_geom );";
 		$i = 0;
 		foreach($rows as $row){
-			if($headlines AND $i == 0){$i++;continue;}				// Überschriftenzeile auslassen
+			if($headlines AND $i == 0 OR trim($row, $formvars['delimiter']."\n\r") == ''){$i++;continue;}				// Überschriftenzeile und Leerzeilen auslassen
 			$columns = explode($formvars['delimiter'], $row);
 			$sql.= "INSERT INTO ".CUSTOM_SHAPE_SCHEMA.".".$tablename." VALUES(";
 			$komma = false;
@@ -220,8 +230,11 @@ class data_import_export {
 					$$formvars['column'.$i] = $columns[$i];			# Hier werden $x und $y gesetzt (nicht das doppelte $ wegnehmen!)
 				}
 			}
+			$x = str_replace(',', '.', $x);
+			$y = str_replace(',', '.', $y);
 			if($komma)$sql.= ", ";
-			$sql.= "st_geomfromtext('POINT(".$x." ".$y.")', ".$formvars['epsg']."));";
+			if(!is_numeric($x) OR !is_numeric($y))$sql.= "NULL);";
+			else $sql.= "st_geomfromtext('POINT(".$x." ".$y.")', ".$formvars['epsg']."));";
 			$i++;
 		}
 		#echo $sql;

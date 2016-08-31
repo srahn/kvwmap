@@ -705,7 +705,6 @@ function umlaute_sortieren($array, $second_array){
 }
 
 function umlaute_umwandeln($name){
-  $name = utf8_decode($name);
   $name = str_replace('ä', 'ae', $name);
   $name = str_replace('ü', 'ue', $name);
   $name = str_replace('ö', 'oe', $name);

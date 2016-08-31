@@ -134,7 +134,11 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
       $GUI->mime_type='map_ajax';
       $GUI->output();
 		}break;
-				
+			
+		case 'openCustomSubform' : {
+			$GUI->openCustomSubform();
+	  } break;
+		
 		case 'getLayerOptions' : {
 			$GUI->getLayerOptions();
 	  } break;
@@ -1139,6 +1143,17 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->checkCaseAllowed('Layer_Export');
 			$GUI->layer_export_exportieren();
 	  } break;
+
+		case 'Layer_Generator' : {
+			$GUI->checkCaseAllowed($go);
+			$GUI->layer_generator();
+		} break;
+
+		case 'Layer_Generator_Erzeugen' : {
+			$GUI->checkCaseAllowed('Layer_Generator');
+			$GUI->layer_generator_erzeugen();
+			$GUI->layer_generator();
+		} break;
 
 		case 'Style_Label_Editor' : {
 			$GUI->checkCaseAllowed($go);

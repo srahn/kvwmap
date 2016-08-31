@@ -44,7 +44,7 @@
 	$strHintColor="Wählen Sie die Farbe aus, mit der Suchergebnisse hervorgehoben werden sollen.";
 	$strHintInstantReload="Wenn Sie diese Option auswählen, wird bei jeder Aktivierung oder Deaktivierung eines Layers die Karte sofort neu geladen.";
 	$strHintMenuAutoClose="Wenn Sie diese Option auswählen, ist auf der linken Seite immer nur ein Obermenü geöffnet.";
-	$strHintVisuallyImpaired="Wenn Sie diese Option auswählen, wird die Oberfläche und das Arbeiten im Vorlesemodus vereinfacht. Diese Einstellung ist besonders für Menschen mit Seebehinderungen geeignet. Es werden allerdings auch einige Funktionen ausgeblendet.";
+	$strHintVisuallyImpaired="Wenn Sie diese Option auswählen, wird die Oberfläche und das Arbeiten im Vorlesemodus vereinfacht. Diese Einstellung ist besonders für Menschen mit Sehbehinderungen geeignet. Es werden allerdings auch einige Funktionen ausgeblendet.";
 	$strHintZoomFactor="Wählen Sie den Faktor, mit dem Plus- und Minuslupe hinein bzw. heraus zoomen.";
 	$strHintMapSize="Wählen Sie die Größe der Karte, wenn die automatisch berechnete Größe nicht passt.";
 	$strHintMapExtent="Die Koordinaten der Eckpunkte unten links und oben rechts in der ausgewählten 1. Kartenprojektion.";

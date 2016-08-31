@@ -158,8 +158,8 @@ Text_histtimestamp=["<? echo $strHelp; ?>:","<? echo $strHinthist_timestamp; ?>"
 			<td align="left" style="padding: 8px; padding-top: 0px"><? echo $strVisuallyImpaired; ?>:&nbsp;</td>
 			<td style="padding: 8px; padding-top: 0px">
 				<input name="visually_impaired" type="checkbox" value="1" <? if($this->user->rolle->visually_impaired == '1') { echo 'checked="true"';} ?> >
-				<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_visuallyimpaired, Style[0], document.getElementById('Tip7'))" onmouseout="htm()">
-				<div id="Tip7" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+				<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_visuallyimpaired, Style[0], document.getElementById('Tip8'))" onmouseout="htm()">
+				<div id="Tip8" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 			</td>
 		</tr>
 	</table>
