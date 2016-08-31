@@ -4717,7 +4717,9 @@ class GUI {
     for($i = 0; $i < count($layerset); $i++){
       if($layerset[$i]['aktivStatus'] != 0){
         if(($layerset[$i]['minscale'] < $scale OR $layerset[$i]['minscale'] == 0) AND ($layerset[$i]['maxscale'] > $scale OR $layerset[$i]['maxscale'] == 0)){
-          $layer = $this->map->getLayerByName($layerset[$i]['Name']);
+					if($layerset[$i]['alias'] != '')$name = $layerset[$i]['alias'];
+					else $name = $layerset[$i]['Name'];
+          $layer = $this->map->getLayerByName($name);
           if($layerset[$i]['showclasses']){
             for($j = 0; $j < $layer->numclasses; $j++){
               $class = $layer->getClass($j);
