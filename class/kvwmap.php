@@ -8841,8 +8841,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		if($this->formvars['selected_layer_id']){
 			$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 			$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL, true);
-			# weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
-			#$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, NULL, true);
 		}
 		if ($this->formvars['selected_datatype_id']) {
 			$datatypedb = $mapdb->getdatatypedatabase($this->formvars['selected_datatype_id'], $this->datatypes, $this->pgdatabase);
@@ -14975,7 +14973,7 @@ class db_mapObj{
   function read_datatype_attributes($datatype_id, $datatypedb, $attributenames, $all_languages = false){
 		global $language;
 		if($attributenames != NULL){
-			$einschr = ' AND name IN (\'';
+			$einschr = ' AND a.name IN (\'';
 			$einschr.= implode('\', \'', $attributenames);
 			$einschr.= '\')';
 		}
@@ -14983,7 +14981,10 @@ class db_mapObj{
 		if(!$all_languages AND $language != 'german') {
 			$sql.='CASE WHEN `alias_'.$language.'` != "" THEN `alias_'.$language.'` ELSE `alias` END AS ';
 		}
-		$sql.='alias, `alias_low-german`, alias_english, alias_polish, alias_vietnamese, datatype_id, name, real_name, tablename, table_alias_name, type, geometrytype, constraints, nullable, length, decimal_length, `default`, form_element_type, options, tooltip, `group`, raster_visibility, mandatory, quicksearch, `order`, privileg, query_tooltip FROM datatype_attributes WHERE datatype_id = '.$datatype_id.$einschr.' ORDER BY `order`';
+		$sql.='alias, `alias_low-german`, alias_english, alias_polish, alias_vietnamese, datatype_id, a.name, real_name, tablename, table_alias_name, type, d.name as typename, geometrytype, constraints, nullable, length, decimal_length, `default`, form_element_type, options, tooltip, `group`, raster_visibility, mandatory, quicksearch, `order`, privileg, query_tooltip ';
+		$sql.='FROM datatype_attributes as a ';
+		$sql.='LEFT JOIN datatypes as d ON d.id = REPLACE(type, \'_\', \'\') ';
+		$sql.='WHERE datatype_id = '.$datatype_id.$einschr.' ORDER BY `order`';
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_datatype_attributes:<br>".$sql,4);
 		$query=mysql_query($sql);
 		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
@@ -15005,6 +15006,7 @@ class db_mapObj{
 			if($rs['table_alias_name'])$attributes['table_alias_name'][$rs['name']]= $rs['table_alias_name'];
 			$attributes['table_alias_name'][$rs['tablename']]= $rs['table_alias_name'];
 			$attributes['type'][$i]= $rs['type'];
+			$attributes['typename'][$i]= $rs['typename'];
 			if($rs['type'] == 'geometry'){
 				$attributes['the_geom'] = $rs['name'];
 			}
@@ -15064,7 +15066,7 @@ class db_mapObj{
   function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false){
 		global $language;
 		if($attributenames != NULL){
-			$einschr = ' AND name IN (\'';
+			$einschr = ' AND a.name IN (\'';
 			$einschr.= implode('\', \'', $attributenames);
 			$einschr.= '\')';
 		}
@@ -15072,7 +15074,10 @@ class db_mapObj{
 		if(!$all_languages AND $language != 'german') {
 			$sql.='CASE WHEN `alias_'.$language.'` != "" THEN `alias_'.$language.'` ELSE `alias` END AS ';
 		}
-		$sql.='alias, `alias_low-german`, alias_english, alias_polish, alias_vietnamese, layer_id, name, real_name, tablename, table_alias_name, type, geometrytype, constraints, nullable, length, decimal_length, `default`, form_element_type, options, tooltip, `group`, arrangement, labeling, raster_visibility, mandatory, quicksearch, `order`, privileg, query_tooltip FROM layer_attributes WHERE layer_id = '.$layer_id.$einschr.' ORDER BY `order`';
+		$sql.='alias, `alias_low-german`, alias_english, alias_polish, alias_vietnamese, layer_id, a.name, real_name, tablename, table_alias_name, type, d.name as typename, geometrytype, constraints, nullable, length, decimal_length, `default`, form_element_type, options, tooltip, `group`, arrangement, labeling, raster_visibility, mandatory, quicksearch, `order`, privileg, query_tooltip ';
+		$sql.='FROM layer_attributes as a ';
+		$sql.='LEFT JOIN datatypes as d ON d.id = REPLACE(type, \'_\', \'\') ';
+		$sql.='WHERE layer_id = '.$layer_id.$einschr.' ORDER BY `order`';
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_layer_attributes:<br>".$sql,4);
 		$query=mysql_query($sql);
 		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
@@ -15094,6 +15099,7 @@ class db_mapObj{
 			if($rs['table_alias_name'])$attributes['table_alias_name'][$rs['name']]= $rs['table_alias_name'];
 			$attributes['table_alias_name'][$rs['tablename']]= $rs['table_alias_name'];
 			$attributes['type'][$i]= $rs['type'];
+			$attributes['typename'][$i]= $rs['typename'];
 			if($rs['type'] == 'geometry'){
 				$attributes['the_geom'] = $rs['name'];
 			}
