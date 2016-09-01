@@ -4,9 +4,17 @@
 #############################
 
 class Regel extends PgObject {
+	
+	static $schema = 'xplankonverter';
+	static $tableName = 'regeln';
 
-	function Regel($gui, $schema) {
-		$this->PgObject($gui, $schema, 'regeln');
+	function Regel($gui) {
+		$this->PgObject($gui, Regel::$schema, Regel::$tableName);
+	}
+
+public static	function find_by_id($gui, $id) {
+		$regel = new Regel($gui);
+		return $regel->find_by('id', $id);
 	}
 
 	/*

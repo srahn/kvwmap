@@ -41,21 +41,23 @@ class PgObject {
     $this->qualifiedTableName = $schema . '.' . $tableName;
     $this->data = array();
     $this->debug = false;
+		$this->select = '*';
   }
 
-  function find_by($attribute, $value) {
-    $sql = "
-      SELECT
-        *
-      FROM
-        \"" . $this->schema . "\".\"" . $this->tableName . "\"
-      WHERE
-        \"" . $attribute . "\" = '" . $value . "'
-    ";
-    $this->debug('<p>find_by sql: ' . $sql);
-    $query = pg_query($this->database->dbConn, $sql);
-    $this->data = pg_fetch_assoc($query);
-  }
+public static function find_by($attribute, $value) {
+	$sql = "
+		SELECT
+			{$this->select}
+		FROM
+			\"{$this->schema}\".\"{$this->tableName}\"
+		WHERE
+			\"{$attribute}\" = '{$value}'
+	";
+	$this->debug('<p>find_by sql: ' . $sql);
+	$query = pg_query($this->database->dbConn, $sql);
+	$this->data = pg_fetch_assoc($query);
+	return $this;
+}
 
   /*
   * Search for an record in the database by the given where clause
@@ -132,6 +134,7 @@ class PgObject {
       WHERE
         id = " . $this->get('id') . "
     ";
+		echo 'update: ' . $sql;
     $this->debug('<p>Update in pg table sql: ' . $sql);
     $query = pg_query($this->database->dbConn, $sql);
   }

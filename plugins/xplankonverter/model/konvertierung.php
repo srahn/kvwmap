@@ -5,6 +5,8 @@
 
 class Konvertierung extends PgObject {
 
+	static $schema = 'xplankonverter';
+	static $tableName = 'konvertierungen';
 	static $STATUS = array(
 		'IN_ERSTELLUNG'      => 'in Erstellung',
 		'ERSTELLT'           => 'erstellt',
@@ -19,9 +21,14 @@ class Konvertierung extends PgObject {
 		'GML_ERSTELLUNG_ERR' => 'GML-Erstellung abgebrochen'
 	);
 
-	function Konvertierung($gui, $schema, $tableName) {
-		$this->PgObject($gui, $schema, $tableName);
+	function Konvertierung($gui) {
+		$this->PgObject($gui, Konvertierung::$schema, Konvertierung::$tableName);
 	}
+
+	public static	function find_by_id($gui, $id) {
+			$regel = new Regel($gui);
+			return $regel->find_by('id', $id);
+		}
 
 	function createLayerGroup($postfix) {
 		$layer_group_id = $this->get($type . '_layer_group_id');
@@ -72,7 +79,7 @@ class Konvertierung extends PgObject {
 	}
 
 	function getRegeln() {
-		$regel = new Regel($this->gui, $this->schema);
+		$regel = new Regel($this->gui);
 		return $regel->find_where('konvertierung_id = ' . $this->get('id'));
 	}
 

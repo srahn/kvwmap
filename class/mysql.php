@@ -155,8 +155,17 @@ class database {
     return $ret;
   }
 
-	function generate_layer($schema, $table, $epsg = 25832) {
+	/**
+	* Legt Layer in mysql Datenbank an
+	*
+	* @params $geometrie_column, Name des Attributes der Tabelle, die abgefragt wird, die Geometrie beinhaltet.
+	* @params $geometrietyp String, Name des Attributes des Datentyps der Geometriespalte, welches die Geometrie beinhalten soll.
+	* @params $layertyp Integer, 0 point, 1 line, 2 polygon, 5 query
+	*
+	*/
+	function generate_layer($schema, $table, $epsg = 25832, $geometrie_column = 'the_geom', $geometrietyp = '', $layertyp = '2') {
 		#echo '<br>Create Layer: ' . $table['name'];
+		if ($geometrietyp != '') $geometrie_column = "({$geometrie_column}).{$geometrietyp}";
 		$sql = "
 -- Create layer {$table['name']}
 INSERT INTO layer (
@@ -185,21 +194,21 @@ INSERT INTO layer (
 )
 VALUES (
 	'{$table['name']}',
-	'5',
+	'{$layertyp}',
 	@group_id,
 	'SELECT * FROM {$table['name']} WHERE 1=1',
-	'{$table['name']}', -- maintable
-	'geom from (select oid, position AS geom FROM {$schema}.{$table['name']}) as foo using unique oid using srid={$epsg}', -- Data
-	'{$schema}', -- schema
-	@connection, -- connection
-	'6', -- connectiontype
+	'{$table['name']}',
+	'geom from (select oid, {$geometrie_column} AS geom FROM {$schema}.{$table['name']}) as foo using unique oid using srid={$epsg}',
+	'{$schema}',
+	@connection,
+	'6',
 	'3',
 	'pixels',
 	'{$epsg}',
 	'1',
 	'60',
 	'EPSG:{$epsg}',
-	'{$table['name']}', -- wms_name
+	'{$table['name']}',
 	'1.1.0',
 	'image/png',
 	'60',
