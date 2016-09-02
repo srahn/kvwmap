@@ -1286,7 +1286,7 @@ class rolle {
 
 		$sql = "
 			SELECT
-				{$name} AS NAME,
+				{$name} AS Name,
 				l.Layer_ID,
 				alias, Datentyp, Gruppe, pfad, maintable, maintable_is_view, Data, `schema`, document_path, labelitem, connection,
 				printconnection, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password,

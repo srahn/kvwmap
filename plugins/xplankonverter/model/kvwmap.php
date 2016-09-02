@@ -2,61 +2,36 @@
 	$GUI = $this;
 
 	/**
-	* Löscht alle GML-Layer, die zu der Konvertierung gehören, dessen id in dataset übergeben wird.
+	* Trigger für Konvertierungen
 	*/
-	$this->trigger_functions['handle_gml_layer'] = function($fired, $event, $params, $dataset) use ($GUI) {
+	$this->trigger_functions['handle_konvertierung'] = function($fired, $event, $dataset, $layer = '', $layerdb, $table, $oid = 0) use ($GUI) {
+		$konvertierung = Konvertierung::find_by_id($this, $dataset['id']);
+
 		switch(true) {
 			case ($fired == 'AFTER' AND $event == 'INSERT') : {
-				$this->create_gml_layer($dataset['id']);
+				$konvertierung->create_layer_group('GML');
 			} break;
 			case ($fired == 'BEFORE' AND $event == 'DELETE') : {
-				$this->delete_gml_layer($dataset['layer_id']);
+				$konvertierung->delete_regeln();
+				$konvertierung->delete_layer_group('GML');
 			}
 		}
 	};
 
-	$this->create_gml_layer = function($regel_id) use ($GUI) {
-		# create gml layer with konvertierung_id, name and geometrytype if not exists
-		$regel = Regel::find_by_id($this, 614);
-		$konvertierung = Konvertierung::find_by_id($this, $regel->get(konvertierung_id));
-
-		# Erzeuge Layer mit Attributen und Datentypen
-		$layertyp = 2; # default Polygon Layer
-		if (strpos($regel->get('geometrietyp'), 'Punkt') !== false) $layertyp = 0;
-		if (strpos($regel->get('geometrietyp'), 'Linie') !== false) $layertyp = 1;
-
-		$sql = $this->generate_layer(
-			'xplan_gml',
-			array('name' => strtolower($regel->get('class_name'))),
-			$konvertierung->get('output_epsg'),
-			'position',
-			$regel->get('geometrietyp'),
-			$layertyp
-		);
-
-		echo $sql;
-		# sql Ausführen
-		# id vom Layer abfragen
-		$layer_id = 1;
-
-		# Assign layer_id to Konvertierung
-		$konvertierung->set('gml_layer_id', $layer_id);
-		$konvertierung->update();
-
-	};
-
-	$this->delete_gml_layer = function($layer_id) use ($GUI) {
-		# delete gml layer by konvertierung_id, name and geometrytype
-		echo 'Delete gml layer with layer_id: ' . $layer_id;
-
-		# Lösche Layer, wenn von keiner anderen Regel mehr verwendet
-		$this->formvars['selected_layer_id'] = $layer_id;
-		$this->LayerLoeschen();
-
-		# Lösche Datatypes, wenn von keinem anderen mehr verwendet
-
-		# Lösche Gruppe, wenn kein anderer Layer mehr drin ist
-
-
+	/**
+	* Trigger für Regeln
+	* @params $layer Array mit Angben des Layers aus der MySQL-Datenbank
+	*/
+	$this->trigger_functions['handle_regel'] = function($fired, $event, $layer, $oid = 0) use ($GUI) {
+		switch(true) {
+			case ($fired == 'AFTER' AND $event == 'INSERT') : {
+				$regel = Regel::find_by_id($this, 'oid', $oid);
+				$regel->create_gml_layer();
+			} break;
+			case ($fired == 'BEFORE' AND $event == 'DELETE') : {
+			#	$regel = Regel::find_by_id($this, 'oid', $oid);
+		#		$regel->delete_gml_layer($oid);
+			} break;
+		}
 	};
 ?>

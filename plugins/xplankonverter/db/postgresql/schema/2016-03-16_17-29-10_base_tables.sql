@@ -1,42 +1,77 @@
 BEGIN;
 
-CREATE TYPE xplankonverter.enum_konvertierungsstatus AS ENUM ('erstellt','Angaben vollständig','validiert','in Arbeit','fertig');
-CREATE TYPE xplankonverter.enum_geometrietyp AS ENUM ('Point','Line','Polygon');
-CREATE TYPE xplankonverter.enum_factory AS ENUM ('sql','form','default');
+CREATE TYPE xplankonverter.enum_factory AS ENUM
+   ('sql',
+    'form',
+    'default');
+CREATE TYPE xplankonverter.enum_konvertierungsstatus AS ENUM
+   ('in Erstellung',
+    'erstellt',
+    'Angaben vollständig',
+    'in Konvertierung',
+    'Konvertierung abgeschlossen',
+    'Konvertierung abgebrochen',
+    'in GML-Erstellung',
+    'GML-Erstellung abgeschlossen',
+    'GML-Erstellung abgebrochen');
+CREATE TYPE xplankonverter.geometrietyp AS ENUM
+   ('Punkt',
+    'MultiPunkt',
+    'Linie',
+    'MultiLinie',
+    'Flaeche',
+    'MultiFlaeche');
+CREATE TYPE xplankonverter.output_epsg AS ENUM
+   ('25832',
+    '25833');
 
 CREATE TABLE xplankonverter.konvertierungen
 (
   id serial NOT NULL,
-  bezeichnung character varying,
+  bezeichnung character varying, -- Bezeichnung der Konvertierung. (Freitext)
+  status xplankonverter.enum_konvertierungsstatus NOT NULL DEFAULT 'in Erstellung'::xplankonverter.enum_konvertierungsstatus, -- Status der Konvertierung. Enthält ein Wert vom Typ konvertierungsstatus.
+  stelle_id integer, -- Die Id der Stelle in der die Konvertierung angelegt wurde und genutzt wird.
   beschreibung text,
-  status xplankonverter.enum_konvertierungsstatus NOT NULL DEFAULT 'erstellt',
-  stelle_id integer,
-  layer_group_id integer,
+  shape_layer_group_id integer,
+  created_at timestamp without time zone NOT NULL DEFAULT now(),
+  updated_at timestamp without time zone NOT NULL DEFAULT now(),
+  user_id integer, -- Id des Nutzers, der den Datensatz angelegt hat. Dieser Wert solle automatisch vom System kvwmap beim Anlegen des Datensatzes erzeugt werden und ein Wert aus der MySQL-Tabelle users der kvwmap Karten- und Nutzerdatenbank kvwmapsp sein.
+  output_epsg xplankonverter.output_epsg NOT NULL DEFAULT '25832'::xplankonverter.output_epsg,
+  geom_precision integer NOT NULL DEFAULT 3,
+  gml_layer_group_id integer,
   CONSTRAINT konvertierungen_id_pkey PRIMARY KEY (id)
-) WITH ( OIDS=TRUE );
+)
+WITH (
+  OIDS=TRUE
+);
 COMMENT ON COLUMN xplankonverter.konvertierungen.bezeichnung IS 'Bezeichnung der Konvertierung. (Freitext)';
-COMMENT ON COLUMN xplankonverter.konvertierungen.bescheibung IS 'Nähere Angaben zur Konvertierung, bzw. zum Plan, der mit den dazugehörigen Regeln konvertiert werden soll. (Freitext)';
 COMMENT ON COLUMN xplankonverter.konvertierungen.status IS 'Status der Konvertierung. Enthält ein Wert vom Typ konvertierungsstatus.';
 COMMENT ON COLUMN xplankonverter.konvertierungen.stelle_id IS 'Die Id der Stelle in der die Konvertierung angelegt wurde und genutzt wird.';
+COMMENT ON COLUMN xplankonverter.konvertierungen.user_id IS 'Id des Nutzers, der den Datensatz angelegt hat. Dieser Wert solle automatisch vom System kvwmap beim Anlegen des Datensatzes erzeugt werden und ein Wert aus der MySQL-Tabelle users der kvwmap Karten- und Nutzerdatenbank kvwmapsp sein.';
 
 CREATE TABLE xplankonverter.regeln
 (
-  id serial NOT NULL,
-  class_name character varying,
-  factory xplankonverter.enum_factory NOT NULL DEFAULT 'sql',
-  sql text,
-  name character varying,
-  beschreibung text,
-  geometrietyp xplankonverter.enum_geometrietyp,
-  epsg_code integer,
-  konvertierung_id integer,
-  stelle_id integer,
-	layer_id integer,
+  class_name character varying NOT NULL, -- Name der Klassse im XPlan-Datenmodell, die mit dieser Regel befüllt werden soll.
+  factory xplankonverter.enum_factory NOT NULL DEFAULT 'sql'::xplankonverter.enum_factory, -- Art der Befüllung der Klasse mit Werten. SQL ... Daten werden über ein SQL-Statement abgefragt. form ... Daten werden über ein Web-Formular vom Nutzer eingegeben. default ... Daten werden aus einer Tabelle mit Default-Werten übernommen.
+  sql text, -- Das SQL-Statement mit dem die Objekte der Klasse bestückt werden sollen.
+  name character varying NOT NULL DEFAULT 'Konvertierungsregel'::character varying, -- Name der Regel.
+  beschreibung text, -- Beschreibung der Regel.
+  geometrietyp xplankonverter.geometrietyp NOT NULL, -- Typ der Geometrie, die zur Klasse gehört. Point, Line, Polyline
+  epsg_code integer, -- EPSG-Code in dem die Geometrien für diese Klasse vorliegen.
+  konvertierung_id integer NOT NULL, -- Id der Konvertierung zu dem diese Regel gehört.
+  stelle_id integer, -- Id der Stelle in der die Konvertierungsregel erstellt und angewendet werden kann.
   created_at timestamp without time zone NOT NULL DEFAULT (now())::timestamp without time zone,
   updated_at timestamp without time zone NOT NULL DEFAULT (now())::timestamp without time zone,
-  CONSTRAINT regeln_id_pkey PRIMARY KEY (id)
-) WITH ( OIDS=TRUE );
-COMMENT ON COLUMN xplankonverter.regeln.id IS 'Id der Konvertierungsregel.';
+  bereich_gml_id uuid,
+  id integer NOT NULL DEFAULT nextval('xplankonverter.regeln_regel_id_seq'::regclass),
+  layer_id integer,
+  CONSTRAINT regeln_pkey PRIMARY KEY (id)
+)
+WITH (
+  OIDS=TRUE
+);
+ALTER TABLE xplankonverter.regeln
+  OWNER TO pgadmin;
 COMMENT ON COLUMN xplankonverter.regeln.class_name IS 'Name der Klassse im XPlan-Datenmodell, die mit dieser Regel befüllt werden soll.';
 COMMENT ON COLUMN xplankonverter.regeln.factory IS 'Art der Befüllung der Klasse mit Werten. SQL ... Daten werden über ein SQL-Statement abgefragt. form ... Daten werden über ein Web-Formular vom Nutzer eingegeben. default ... Daten werden aus einer Tabelle mit Default-Werten übernommen.';
 COMMENT ON COLUMN xplankonverter.regeln.sql IS 'Das SQL-Statement mit dem die Objekte der Klasse bestückt werden sollen.';
@@ -46,11 +81,10 @@ COMMENT ON COLUMN xplankonverter.regeln.geometrietyp IS 'Typ der Geometrie, die 
 COMMENT ON COLUMN xplankonverter.regeln.epsg_code IS 'EPSG-Code in dem die Geometrien für diese Klasse vorliegen.';
 COMMENT ON COLUMN xplankonverter.regeln.konvertierung_id IS 'Id der Konvertierung zu dem diese Regel gehört.';
 COMMENT ON COLUMN xplankonverter.regeln.stelle_id IS 'Id der Stelle in der die Konvertierungsregel erstellt und angewendet werden kann.';
-COMMIT;
 
 CREATE TABLE xplankonverter.shapefiles
 (
-  id serial NOT NULL,
+  id integer NOT NULL DEFAULT nextval('xplankonverter.shapes_id_seq'::regclass),
   filename character varying,
   konvertierung_id integer,
   stelle_id integer,
@@ -59,13 +93,9 @@ CREATE TABLE xplankonverter.shapefiles
   datatype smallint,
   CONSTRAINT shapes_pkey PRIMARY KEY (id)
 )
-WITH ( OIDS=TRUE );
-COMMENT ON COLUMN xplankonverter.shapefiles.id IS 'Id der Shape Datei.';
-COMMENT ON COLUMN xplankonverter.shapefiles.filename IS 'Dateiname der Shape Datei.';
-COMMENT ON COLUMN xplankonverter.shapefiles.konvertierung_id IS 'Id der Konvertierung zu der die Shape Datei gehört.';
-COMMENT ON COLUMN xplankonverter.shapefiles.stelle_id IS 'Id der Stelle in kvwmap zu der die Shape Datei gehört.';
-COMMENT ON COLUMN xplankonverter.shapefiles.layer_id IS 'Id des Layers in den die Shape Datei eingelesen wurde.';
-
+WITH (
+  OIDS=TRUE
+);
 -- Function: xplankonverter.update_konvertierung_state()
 
 -- DROP FUNCTION xplankonverter.update_konvertierung_state();
@@ -271,3 +301,5 @@ INSERT INTO layer_colors (name, geometrietyp, color) VALUES ('rp_planungsraum', 
 INSERT INTO layer_colors (name, geometrietyp, color) VALUES ('rp_generischesobjekt', 'point', '255 255 0');
 INSERT INTO layer_colors (name, geometrietyp, color) VALUES ('rp_generischesobjekt', 'line', '255 255 0');
 INSERT INTO layer_colors (name, geometrietyp, color) VALUES ('rp_generischesobjekt', 'polygon', '255 255 0');
+
+COMMIT;
