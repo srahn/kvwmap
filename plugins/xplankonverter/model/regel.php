@@ -70,10 +70,11 @@ public static	function find_by_id($gui, $by, $id) {
 
 	function create_gml_layer() {
 		if (!$this->gml_layer_exists()) {
-			echo '<br>Erzeuge Layer ' . $this->get('class_name') . ' in Gruppe' . $this->konvertierung->get('bezeichnung') . ' layertyp ' . $this->layertyp;
+			#echo '<br>Erzeuge Layer ' . $this->get('class_name') . ' in Gruppe' . $this->konvertierung->get('bezeichnung') . ' layertyp ' . $this->layertyp;
 			$layertyp = $this->get_layertyp();
 
-			$this->gui->formvars = array(
+			$formvars_before = $this->gui->formvars;
+			$this->gui->formvars = array_merge($this->gui->formvars, array(
 				'Name' => $this->get('class_name') . ' ' . $this->layertypen[$layertyp],
 				'schema' => 'xplan_gml',
 				'Datentyp' => $this->layertyp,
@@ -87,14 +88,12 @@ public static	function find_by_id($gui, $by, $id) {
 				'queryable' => 1,
 				'transparency' => 60,
 				'drawingorder' => 100
-			);
+			));
 
 			$this->gui->LayerAnlegen();
 
-
 			# id vom Layer abfragen
 			$layer_id = $this->gui->formvars['selected_layer_id'];
-			# Klasse vom Layer anlegen
 
 			$stellen = $this->gui->Stellenzuweisung(
 				array($layer_id),
@@ -104,6 +103,8 @@ public static	function find_by_id($gui, $by, $id) {
 			# Assign layer_id to Konvertierung
 			$this->set('layer_id', $layer_id);
 			$this->update();
+
+			$this->gui->formvars = $formvars_before;
 		}
 
 	}
