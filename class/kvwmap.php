@@ -6535,6 +6535,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
   }
 	
   function LayerAnlegen(){
+		echo 'layeranlegen';
 		global $supportedLanguages;
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 	  if (trim($this->formvars['id'])!='' and $mapDB->id_exists('layer',$this->formvars['id'])) {

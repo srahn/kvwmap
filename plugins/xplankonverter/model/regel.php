@@ -11,6 +11,11 @@ class Regel extends PgObject {
 	function Regel($gui) {
 		#echo '<br>Create new Object Regel';
 		$this->PgObject($gui, Regel::$schema, Regel::$tableName);
+		$this->layertypen = array(
+			'Punkte',
+			'Linien',
+			'Flächen'
+		);
 	}
 
 public static	function find_by_id($gui, $by, $id) {
@@ -65,12 +70,13 @@ public static	function find_by_id($gui, $by, $id) {
 
 	function create_gml_layer() {
 		if (!$this->gml_layer_exists()) {
-			# Erzeuge Layer mit konvertierungs_id, class_name und layertyp
+			echo '<br>Erzeuge Layer ' . $this->get('class_name') . ' in Gruppe' . $this->konvertierung->get('bezeichnung') . ' layertyp ' . $this->layertyp;
+			$layertyp = $this->get_layertyp();
 
 			$this->gui->formvars = array(
-				'Name' => $this->get('class_name'),
+				'Name' => $this->get('class_name') . ' ' . $this->layertypen[$layertyp],
 				'schema' => 'xplan_gml',
-				'Datentyp' => $this->get_layertyp(),
+				'Datentyp' => $this->layertyp,
 				'Gruppe' => $this->konvertierung->get('gml_layer_group_id'),
 				'connectiontype' => 6,
 				'connection' => $this->gui->pgdatabase->connect_string,
@@ -85,9 +91,15 @@ public static	function find_by_id($gui, $by, $id) {
 
 			$this->gui->LayerAnlegen();
 
+
 			# id vom Layer abfragen
-			$layer_id = 9999;
+			$layer_id = $this->gui->formvars['selected_layer_id'];
 			# Klasse vom Layer anlegen
+
+			$stellen = $this->gui->Stellenzuweisung(
+				array($layer_id),
+				array($this->gui->Stelle->id)
+			);
 
 			# Assign layer_id to Konvertierung
 			$this->set('layer_id', $layer_id);
