@@ -98,6 +98,7 @@ class GUI {
     # mime_type html, pdf
     if (isset ($mime_type)) $this->mime_type=$mime_type;
 		$this->scaleUnitSwitchScale = 239210;
+		$trigger_functions = array();
   }
 	
 	public function __call($method, $arguments){
@@ -105,7 +106,24 @@ class GUI {
 			return call_user_func_array($this->{$method}, $arguments);
     }
 	}
-	
+
+	function exec_trigger_function($layer, $layerdb, $table = '', $oid = '', $dataset = array()) {
+		if (!empty($table) AND !empty($oid)) {
+			$sql = "
+				SELECT
+					*
+				FROM
+					{$table}
+				WHERE
+					oid = {$oid}
+			";
+			#echo 'sql: ' . $sql;
+			$ret = $layerdb->execSQL($sql, 4, 1);
+			$dataset = pg_fetch_assoc($ret[1]);
+		}
+		$this->trigger_functions[$layer['trigger_function']]($layer['trigger_function_params'], $dataset);
+	}
+
 	function openCustomSubform(){
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
@@ -7441,34 +7459,57 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->sachdaten_speichern();
 	}
 
-  function layer_Datensaetze_loeschen($output = true){
-    $success = true;
-    $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
-    $layerdb = $mapdb->getlayerdatabase($this->formvars['chosen_layer_id'], $this->Stelle->pgdbhost);
-    $checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
-    for($i = 0; $i < count($checkbox_names); $i++){
-      if($this->formvars[$checkbox_names[$i]] == 'on'){
-        $element = explode(';', $checkbox_names[$i]);     #  check;table_alias;table;oid
-        $sql = "DELETE FROM ".$element[2]." WHERE oid = ".$element[3];
-        $oids[] = $element[3];
-        #echo $sql.'<br>';
-        $ret = $layerdb->execSQL($sql,4, 1);
-        if ($ret[0]) {
-         $success = false;
-        }
-      }
-    }
-    # Dokumente auch löschen
-    $form_fields = explode('|', $this->formvars['form_field_names']);
-    for($i = 0; $i < count($form_fields); $i++){
-      if($form_fields[$i] != ''){
-        $element = explode(';', $form_fields[$i]);
-        if($element[4] == 'Dokument' AND in_array($element[3], $oids)){
-        	$this->deleteDokument($this->formvars[str_replace(';Dokument;', ';Dokument_alt;', $form_fields[$i])]);
-        }
-      }
-    }
-    if ($output) {
+  function layer_Datensaetze_loeschen($output = true) {
+		$layer = $this->user->rolle->getLayer($this->formvars['chosen_layer_id'])[0];
+		$mapdb = new db_mapObj($this->Stelle->id, $this->user->id);
+		$layerdb = $mapdb->getlayerdatabase($this->formvars['chosen_layer_id'], $this->Stelle->pgdbhost);
+
+		$success = true;
+		$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
+		for($i = 0; $i < count($checkbox_names); $i++){
+			if($this->formvars[$checkbox_names[$i]] == 'on') {
+				$element = explode(';', $checkbox_names[$i]);     #  check;table_alias;table;oid
+
+				# Before Delete trigger
+				if ($layer['trigger_fired'] == 'BEFORE' AND $layer['trigger_event'] == 'DELETE') {
+					$this->exec_trigger_function($layer, $layerdb, $element[2], $element[3]);
+				}
+
+				# Instead of Delete trigger
+				if ($layer['trigger_fired'] == 'INSTEAD OF' AND $layer['trigger_event'] == 'DELETE') {
+					$this->exec_trigger_function($layer, $layerdb, $element[2], $element[3]);
+				}
+				else {
+					# Delete the object in database
+					$sql = "DELETE FROM ".$element[2]." WHERE oid = ".$element[3];
+					$oids[] = $element[3];
+					#echo $sql.'<br>';
+					$ret = $layerdb->execSQL($sql,4, 1);
+				}
+
+				# After delete trigger
+				# Derzeit steht der gelöschte Datensatz für after trigger nicht zur Verfügung.
+				# Wollte man das, müsste man den Datensatz vor dem Löschen abfragen und hier im 5. Parameter übergeben.
+				if ($layer['trigger_fired'] == 'AFTER' AND $layer['trigger_event'] == 'DELETE') {
+					$this->exec_trigger_function($layer, $layerdb);
+				};
+
+				if ($ret[0]) {
+					$success = false;
+				}
+			}
+		}
+		# Dokumente auch löschen
+		$form_fields = explode('|', $this->formvars['form_field_names']);
+		for($i = 0; $i < count($form_fields); $i++){
+			if($form_fields[$i] != ''){
+				$element = explode(';', $form_fields[$i]);
+				if($element[4] == 'Dokument' AND in_array($element[3], $oids)){
+					$this->deleteDokument($this->formvars[str_replace(';Dokument;', ';Dokument_alt;', $form_fields[$i])]);
+				}
+			}
+		}
+		if ($output) {
 			if($this->formvars['embedded'] == ''){
 				if($success == false){
 					showAlert('Löschen fehlgeschlagen');
@@ -7498,6 +7539,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				}
 			}
 		}
+
 		return $success;
 	}
 
@@ -7661,6 +7703,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
         #echo $sql.'<br>';
         if($execute == true){
+					# Before Insert trigger
+					if ($layerset[0]['trigger_fired'] == 'BEFORE' AND $layerset[0]['trigger_event'] == 'INSERT') {
+						$this->exec_trigger_function($layerset[0], $layerdb);
+					}
+
           $this->debug->write("<p>file:kvwmap class:neuer_Layer_Datensatz_speichern :",4);
           if($this->formvars['embedded'] == ''){
             $ret = $layerdb->execSQL($sql,4, 1);
@@ -7668,6 +7715,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							$result = pg_fetch_row($ret[1]);
             	if(pg_affected_rows($ret[1]) > 0){
               	$this->formvars['value_'.$table['tablename'].'_oid'] = pg_last_oid($ret[1]);
+								$oid = $this->formvars['value_'.$table['tablename'].'_oid'];
             	}
             	else{            		
             		$ret[0] = 1;
@@ -7678,12 +7726,20 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
             $ret = $layerdb->execSQL($sql,4, 1);
             if(!$ret[0]){
               $last_oid = pg_last_oid($ret[1]);
+							$oid = $last_oid;
             }
           }
 
           if ($ret[0]) {
             $success = false;
           }
+					else {
+						# After Insert trigger
+						if ($layerset[0]['trigger_fired'] == 'AFTER' AND $layerset[0]['trigger_event'] == 'INSERT') {
+							$this->exec_trigger_function($layerset[0], $layerdb, $table['tablename'], $oid);
+						}
+					}
+
         }
       }
     }
@@ -14680,7 +14736,11 @@ class db_mapObj{
     $sql .= "kurzbeschreibung = '".$formvars['kurzbeschreibung']."',";
     $sql .= "datenherr = '".$formvars['datenherr']."',";
     $sql .= "metalink = '".$formvars['metalink']."', ";
-		$sql .= "status = '".$formvars['status']."'";
+		$sql .= "status = '".$formvars['status']."', ";
+		$sql .= "trigger_fired = '" . $formvars['trigger_fired'] . "', ";
+		$sql .= "trigger_event = '" . $formvars['trigger_event'] . "', ";
+		$sql .= "trigger_function = '" . $formvars['trigger_function'] . "', ";
+		$sql .= "trigger_function_params = '" . $formvars['trigger_function_params'] . "'";
     $sql .= " WHERE Layer_ID = ".$formvars['selected_layer_id'];
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->updateLayer - Aktualisieren eines Layers:<br>".$sql,4);

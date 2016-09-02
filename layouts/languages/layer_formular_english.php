@@ -69,14 +69,9 @@
 	$strPostlabelcache="Postlabelcache";
 	$strrequires="Requires";
 	$strClusterMaxdistance="Cluster:Maxdistance";
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+	$strTrigger="Trigger functions";
+	$strTriggerFired="Fired";
+	$strTriggerEvent="Event";
+	$strTriggerFunction="Function name";
+	$strTriggerFunctionParams="Function parameters";
 ?>  
