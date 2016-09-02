@@ -683,6 +683,12 @@ tbody.gle tr:hover {
     border: 1px solid grey;
 }
 
+.gle_datatype_table{
+	border: 1px solid grey;
+	border-collapse: collapse;
+	margin: 2px 2px 2px 0;
+}
+
 
 #calendar { /* Fuer IE <= 6 */
 	text-align: center;

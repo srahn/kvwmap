@@ -6742,9 +6742,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         #$path = $layerset[0]['pfad'];
 				$path = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[0]['pfad']);
 				$path = str_replace('$language', $this->user->rolle->language, $path);
-        $privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
-        $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
-        $attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
+        $privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);        
+        $attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames'], false, true);
+				$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges, $attributes);
 		    # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
 		   	# $attributes = $mapDB->add_attribute_values($attributes, $layerdb, NULL, true); kann weg, weils weiter unten steht
 
@@ -8842,9 +8842,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 			$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL, true);
 		}
-		if ($this->formvars['selected_datatype_id']) {
-			$datatypedb = $mapdb->getdatatypedatabase($this->formvars['selected_datatype_id'], $this->datatypes, $this->pgdatabase);
-			$this->attributes = $mapdb->read_datatype_attributes($this->formvars['selected_datatype_id'], $datatypedb, NULL, true);
+		if($this->formvars['selected_datatype_id']){
+			$this->attributes = $mapdb->read_datatype_attributes($this->formvars['selected_datatype_id'], NULL, NULL, true);
 		}
 		$this->output();
 	}
@@ -8874,12 +8873,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	function Datentypattribute_speichern() {
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
 		$path = $mapdb->getPath($this->formvars['selected_datatype_id']);
-		$datatypedb = $mapdb->getdatatypedatabase(
-			$this->formvars['selected_datatype_id'],
-			$mapdb->getall_Datatypes('name'),
-			$this->pgdatabase
-		);
-		$this->attributes = $mapdb->read_datatype_attributes($this->formvars['selected_datatype_id'], $datatypedb, NULL, true);
+		$this->attributes = $mapdb->read_datatype_attributes($this->formvars['selected_datatype_id'], NULL, NULL, true);
 		$mapdb->save_datatype_attributes($this->attributes, $this->database, $this->formvars);
 		$this->Attributeditor();
 	}
@@ -10938,6 +10932,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
               if($tablename AND $formtype != 'Text_not_saveable' AND $formtype != 'Auswahlfeld_not_saveable' AND $formtype != 'SubFormPK' AND $formtype != 'SubFormFK' AND $formtype != 'SubFormEmbeddedPK' AND $attributname != 'the_geom'){
               	if(in_array($datatype, array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))){
               		$this->formvars[$form_fields[$i]] = str_replace(' ', '', $this->formvars[$form_fields[$i]]);		# bei Zahlen das Leerzeichen (Tausendertrenner) entfernen
+              	}								
+								if(substr($datatype, 0, 1) == '_' OR is_numeric($datatype)){
+              		$this->formvars[$form_fields[$i]] = JSON_to_PG(json_decode($this->formvars[$form_fields[$i]]));		# bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln									
               	}
                 if($this->formvars[$form_fields[$i]] == ''){
 									$eintrag = 'NULL';
@@ -11209,7 +11206,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							$path = str_replace('$language', $this->user->rolle->language, $path);
 							$privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
 							$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
-							$layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames']);
+							$layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames'], false, true);
 							# weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)  ---> steht weiter unten
 
 							# order by rausnehmen
@@ -14064,34 +14061,6 @@ class db_mapObj{
     return $doc_path;
   }
 
-	function getdatatypedatabase($datatype_id, $datatypes, $projectdb) {
-		$datatypedb = new pgdatabase();
-		$datatype = reset(array_filter(
-			$datatypes,
-			function($datatype) use ($datatype_id) {
-				return ($datatype['id'] == $datatype_id);
-			}
-		));
-
-		$datatypedb->host = (empty($datatype['pghost'])) ? $projectdb->host : $datatype['pghost'];
-		$datatypedb->port = (empty($datatype['pgport'])) ? $projectdb->port : $datatype['pgport'];
-		$datatypedb->user = (empty($datatype['pguser'])) ? $projectdb->user : $datatype['pguser'];
-		$datatypedb->passwd = (empty($datatype['pgpasswd'])) ? $projectdb->passwd : $datatype['pgpasswd'];
-		$datatypedb->dbName = (empty($datatype['pgdbname'])) ? $projectdb->dbName : $datatype['pgdbname'];
-		$datatypedb->schema = (empty($datatype['pgschema'])) ? $projectdb->schema : $datatype['pgschema'];
-
-		if (!$datatypedb->open()) {
-			echo "Die Verbindung zur PostGIS-Datenbank mit dem Datentyp {$datatype['name']} konnte mit folgenden Verbindugnsdaten nicht hergestellt werden:";
-			echo "<br>Host: {$datatypedb->host}";
-			echo "<br>Port: {$datatypedb->port}";
-			echo "<br>User: {$datatypedb->user}";
-			echo "<br>Datenbank: {$datatypedb->dbname}";
-			exit;
-		}
-
-		return $datatypedb;
-	}
-
 	function getlayerdatabase($layer_id, $host){
 		if($layer_id < 0){	# Rollenlayer
 			$sql ='SELECT `connection`, "'.CUSTOM_SHAPE_SCHEMA.'" as `schema` FROM rollenlayer WHERE -id = '.$layer_id.' AND connectiontype = 6';
@@ -14885,8 +14854,6 @@ class db_mapObj{
       $sql.= "options = '".$formvars['options_'.$attributes['name'][$i]]."', ";
       $sql.= 'tooltip = "'.$formvars['tooltip_'.$attributes['name'][$i]].'", ';
       $sql.= '`group` = "'.$formvars['group_'.$attributes['name'][$i]].'", ';
-			$sql.= 'arrangement = '.$formvars['arrangement_'.$attributes['name'][$i]].', ';
-			$sql.= 'labeling = '.$formvars['labeling_'.$attributes['name'][$i]].', ';
 			if($formvars['raster_visibility_'.$attributes['name'][$i]] == '')$formvars['raster_visibility_'.$attributes['name'][$i]] = 'NULL';
       $sql.= 'raster_visibility = '.$formvars['raster_visibility_'.$attributes['name'][$i]].', ';
       if($formvars['mandatory_'.$attributes['name'][$i]] == '')$formvars['mandatory_'.$attributes['name'][$i]] = 'NULL';
@@ -14899,7 +14866,7 @@ class db_mapObj{
 			}
 			if($formvars['quicksearch_'.$attributes['name'][$i]] == '')$formvars['quicksearch_'.$attributes['name'][$i]] = 'NULL';
 			$sql.= 'quicksearch = '.$formvars['quicksearch_'.$attributes['name'][$i]];
-      $sql.= " ON DUPLICATE KEY UPDATE name = '".$attributes['name'][$i]."', form_element_type = '".$formvars['form_element_'.$attributes['name'][$i]]."', options = '".$formvars['options_'.$attributes['name'][$i]]."', tooltip = '".$formvars['tooltip_'.$attributes['name'][$i]]."', `group` = '".$formvars['group_'.$attributes['name'][$i]]."', arrangement = ".$formvars['arrangement_'.$attributes['name'][$i]].", labeling = ".$formvars['labeling_'.$attributes['name'][$i]].", alias = '".$formvars['alias_'.$attributes['name'][$i]]."', ";
+      $sql.= " ON DUPLICATE KEY UPDATE name = '".$attributes['name'][$i]."', form_element_type = '".$formvars['form_element_'.$attributes['name'][$i]]."', options = '".$formvars['options_'.$attributes['name'][$i]]."', tooltip = '".$formvars['tooltip_'.$attributes['name'][$i]]."', `group` = '".$formvars['group_'.$attributes['name'][$i]]."', alias = '".$formvars['alias_'.$attributes['name'][$i]]."', ";
 			foreach($supportedLanguages as $language){
 				if($language != 'german'){
 					$sql.= '`alias_'.$language.'` = "'.$formvars['alias_'.$language.'_'.$attributes['name'][$i]].'", ';
@@ -14970,7 +14937,7 @@ class db_mapObj{
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
   }
 
-  function read_datatype_attributes($datatype_id, $datatypedb, $attributenames, $all_languages = false){
+  function read_datatype_attributes($datatype_id, $datatypedb, $attributenames, $all_languages = false, $recursive = false){
 		global $language;
 		if($attributenames != NULL){
 			$einschr = ' AND a.name IN (\'';
@@ -15007,6 +14974,10 @@ class db_mapObj{
 			$attributes['table_alias_name'][$rs['tablename']]= $rs['table_alias_name'];
 			$attributes['type'][$i]= $rs['type'];
 			$attributes['typename'][$i]= $rs['typename'];
+			$type = ltrim($rs['type'], '_');
+			if($recursive AND is_numeric($type)){
+				$attributes['type_attributes'][$i] = $this->read_datatype_attributes($type, $layerdb, NULL, $all_languages, true);
+			}
 			if($rs['type'] == 'geometry'){
 				$attributes['the_geom'] = $rs['name'];
 			}
@@ -15017,15 +14988,16 @@ class db_mapObj{
 			$attributes['nullable'][$i]= $rs['nullable'];
 			$attributes['length'][$i]= $rs['length'];
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
-		
-			if(substr($rs['default'], 0, 6) == 'SELECT'){					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
-				$ret1 = $datatypedb->execSQL($rs['default'], 4, 0);					
-				if($ret1[0]==0){
-					$attributes['default'][$i] = array_pop(pg_fetch_row($ret1[1]));
+			if($datatypedb != NULL){
+				if(substr($rs['default'], 0, 6) == 'SELECT'){					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
+					$ret1 = $datatypedb->execSQL($rs['default'], 4, 0);					
+					if($ret1[0]==0){
+						$attributes['default'][$i] = array_pop(pg_fetch_row($ret1[1]));
+					}
 				}
-			}
-			else{															# das sind die alten Defaultwerte ohne 'SELECT ' davor, ab Version 1.13 haben Defaultwerte immer ein SELECT, wenn man den datatype in dieser Version einmal gespeichert hat
-				$attributes['default'][$i]= $rs['default'];
+				else{															# das sind die alten Defaultwerte ohne 'SELECT ' davor, ab Version 1.13 haben Defaultwerte immer ein SELECT, wenn man den datatype in dieser Version einmal gespeichert hat
+					$attributes['default'][$i]= $rs['default'];
+				}
 			}
 			$attributes['form_element_type'][$i]= $rs['form_element_type'];
 			$attributes['form_element_type'][$rs['name']]= $rs['form_element_type'];
@@ -15050,20 +15022,10 @@ class db_mapObj{
 			$attributes['query_tooltip'][$i]= $rs['query_tooltip'];
 			$i++;
 		}
-		if($attributes['table_name'] != NULL){   
-			$attributes['all_table_names'] = array_unique($attributes['table_name']);
-			//$attributes['all_alias_table_names'] = array_values(array_unique($attributes['table_alias_name']));
-			foreach($attributes['all_table_names'] as $tablename){
-				$attributes['oids'][] = $datatypedb->check_oid($tablename);   # testen ob Tabelle oid hat
-			}
-		}
-		else{
-			$attributes['all_table_names'] = array();
-		}
 		return $attributes;
   }
   
-  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false){
+  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false){
 		global $language;
 		if($attributenames != NULL){
 			$einschr = ' AND a.name IN (\'';
@@ -15100,6 +15062,10 @@ class db_mapObj{
 			$attributes['table_alias_name'][$rs['tablename']]= $rs['table_alias_name'];
 			$attributes['type'][$i]= $rs['type'];
 			$attributes['typename'][$i]= $rs['typename'];
+			$type = ltrim($rs['type'], '_');
+			if($recursive AND is_numeric($type)){
+				$attributes['type_attributes'][$i] = $this->read_datatype_attributes($type, $layerdb, NULL, $all_languages, true);
+			}
 			if($rs['type'] == 'geometry'){
 				$attributes['the_geom'] = $rs['name'];
 			}
