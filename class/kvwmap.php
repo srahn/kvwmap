@@ -7460,7 +7460,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	}
 
   function layer_Datensaetze_loeschen($output = true) {
-		$layer = $this->user->rolle->getLayer($this->formvars['chosen_layer_id'])[0];
+		$layers = $this->user->rolle->getLayer($this->formvars['chosen_layer_id']);
+		$layer = $layers[0];
 		$mapdb = new db_mapObj($this->Stelle->id, $this->user->id);
 		$layerdb = $mapdb->getlayerdatabase($this->formvars['chosen_layer_id'], $this->Stelle->pgdbhost);
 
