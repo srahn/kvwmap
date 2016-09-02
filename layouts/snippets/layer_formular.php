@@ -1,7 +1,6 @@
 <?php
 	global $supportedLanguages;
   include(LAYOUTPATH.'languages/layer_formular_'.$this->user->rolle->language.'.php');
-  include(WWWROOT . APPLVERSION . 'funktionen/radio_fields.php');
  ?><script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <script src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
@@ -324,35 +323,10 @@ else {
 		      		<input name="status" type="text" value="<?php echo $this->layerdata['status']; ?>" size="25" maxlength="255">
 		  		</td>
 		  	</tr>
-		 	</table>
-			<br>
-
-			<table border="0" cellspacing="0" cellpadding="3" style="border:1px solid <?php echo BG_DEFAULT ?>">
-				<tr align="center">
-					<th class="fetter" bgcolor="<?php echo BG_DEFAULT ?>" width="670" style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strTrigger; ?></th>
-				</tr>
-				<tr>
-					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTriggerFired; ?></th>
-					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
-						<?php echo radio_fields('trigger_fired', $this->layerdata['trigger_fired'], array('BEFORE', 'AFTER', 'INSTEAD OF')); ?>
-					</td>
-				</tr>
-				<tr>
-					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTriggerEvent; ?></th>
-					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
-						<?php echo radio_fields('trigger_event', $this->layerdata['trigger_event'], array('INSERT', 'UPDATE', 'DELETE')); ?>
-					</td>
-				</tr>
 				<tr>
 					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTriggerFunction; ?></th>
 					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<input name="trigger_function" type="text" value="<?php echo $this->layerdata['trigger_function']; ?>" size="25" maxlength="100">
-					</td>
-				</tr>
-				<tr>
-					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTriggerFunctionParams; ?></th>
-					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="trigger_function_params" type="text" value="<?php echo $this->layerdata['trigger_function_params']; ?>" size="25" maxlength="100">
 					</td>
 				</tr>
 			</table>

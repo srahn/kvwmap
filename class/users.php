@@ -1286,16 +1286,13 @@ class rolle {
 
 		$sql = "
 			SELECT
-				{$name} AS NAME,
+				{$name} AS Name,
 				l.Layer_ID,
 				alias, Datentyp, Gruppe, pfad, maintable, maintable_is_view, Data, `schema`, document_path, labelitem, connection,
 				printconnection, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password,
 				wms_server_version, ows_srs, wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink,
 				status,
-				trigger_fired,
-				trigger_event,
 				trigger_function,
-				trigger_function_params,
 				ul.`queryable`, ul.`drawingorder`, ul.`minscale`, ul.`maxscale`, ul.`offsite`,
 				coalesce(r2ul.transparency, ul.transparency, 100) as transparency,
 				ul.`postlabelcache`, `Filter`,

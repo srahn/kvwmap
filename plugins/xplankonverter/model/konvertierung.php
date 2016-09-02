@@ -5,6 +5,8 @@
 
 class Konvertierung extends PgObject {
 
+	static $schema = 'xplankonverter';
+	static $tableName = 'konvertierungen';
 	static $STATUS = array(
 		'IN_ERSTELLUNG'      => 'in Erstellung',
 		'ERSTELLT'           => 'erstellt',
@@ -19,12 +21,23 @@ class Konvertierung extends PgObject {
 		'GML_ERSTELLUNG_ERR' => 'GML-Erstellung abgebrochen'
 	);
 
-	function Konvertierung($gui, $schema, $tableName) {
-		$this->PgObject($gui, $schema, $tableName);
+	function Konvertierung($gui) {
+		$this->PgObject($gui, Konvertierung::$schema, Konvertierung::$tableName);
 	}
 
-	function createLayerGroup($postfix) {
-		$layer_group_id = $this->get($type . '_layer_group_id');
+	public static	function find_by_id($gui, $by, $id) {
+			$konvertierung = new Konvertierung($gui);
+			$konvertierung->find_by($by, $id);
+			return $konvertierung;
+		}
+
+	/**
+	* Erzeugt eine Layergruppe vom Typ GML oder Shape und trägt die dazugehörige
+	* gml_layer_group_id oder shape_layer_group_id in PG-Tabelle konvertierung ein.
+	*
+	*/
+	function create_layer_group($layer_type) {
+		$layer_group_id = $this->get(strtolower($layer_type) . '_layer_group_id');
 		if (empty($layer_group_id)) {
 			$layerGroup = new MyObject($this->gui->database, 'u_groups');
 			$layerGroup->create(array(
@@ -72,7 +85,7 @@ class Konvertierung extends PgObject {
 	}
 
 	function getRegeln() {
-		$regel = new Regel($this->gui, $this->schema);
+		$regel = new Regel($this->gui);
 		return $regel->find_where('konvertierung_id = ' . $this->get('id'));
 	}
 

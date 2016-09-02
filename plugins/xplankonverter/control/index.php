@@ -116,7 +116,7 @@ switch($this->go){
 			$this->main = 'Hinweis.php';
 		}
 		else {
-			$this->konvertierung = new Konvertierung($this, 'xplankonverter', 'konvertierungen');
+			$this->konvertierung = new Konvertierung($this);
 			$this->konvertierung->find_by('id', $this->formvars['konvertierung_id']);
 			if (isInStelleAllowed($this->Stelle->id, $this->konvertierung->get('stelle_id'))) {
 				if (isset($_FILES['shape_files']) and $_FILES['shape_files']['name'][0] != '') {
@@ -134,7 +134,7 @@ switch($this->go){
 					# get layerGroupId or create a group if not exists
 					$layer_group_id = $this->konvertierung->get('layer_group_id');
 					if (empty($layer_group_id))
-						$layer_group_id = $this->konvertierung->createLayerGroup('Shapes');
+						$layer_group_id = $this->konvertierung->create_layer_group('Shapes');
 					foreach($uploaded_files AS $uploaded_file) {
 						if ($uploaded_file['extension'] == 'dbf' and $uploaded_file['state'] != 'ignoriert') {
 
@@ -264,7 +264,7 @@ switch($this->go){
 			echo json_encode($response);
 			return;
 		}
-		$this->konvertierung = new Konvertierung($this, 'xplankonverter', 'konvertierungen');
+		$this->konvertierung = new Konvertierung($this);
 		$this->konvertierung->find_by('id', $this->formvars['konvertierung_id']);
 		if (!isInStelleAllowed($this->Stelle->id, $this->konvertierung->get('stelle_id'))) return;
 		$this->konvertierung->set('status', $this->formvars['status']);
@@ -285,7 +285,7 @@ sleep(5);
 			echo json_encode($response);
 			return;
 		}
-		$this->konvertierung = new Konvertierung($this, 'xplankonverter', 'konvertierungen');
+		$this->konvertierung = new Konvertierung($this);
 		$this->konvertierung->find_by('id', $this->formvars['konvertierung_id']);
 
 		if (!isInStelleAllowed($this->Stelle->id, $this->konvertierung->get('stelle_id')))
@@ -324,7 +324,7 @@ sleep(5);
 			echo json_encode($response);
 			return;
 		}
-		$this->konvertierung = new Konvertierung($this, 'xplankonverter', 'konvertierungen');
+		$this->konvertierung = new Konvertierung($this);
 		$this->konvertierung->find_by('id', $this->formvars['konvertierung_id']);
 
 		if (!isInStelleAllowed($this->Stelle->id, $this->konvertierung->get('stelle_id')))
@@ -349,7 +349,7 @@ sleep(5);
 			$response['msg'] = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
 		}
 		else {
-			$this->konvertierung = new Konvertierung($this, 'xplankonverter', 'konvertierungen');
+			$this->konvertierung = new Konvertierung($this);
 			$this->konvertierung->find_by('id', $this->formvars['konvertierung_id']);
 			if (isInStelleAllowed($this->Stelle->id, $this->konvertierung->get('stelle_id'))) {
 				if ($this->konvertierung->get('status') == Konvertierung::$STATUS['KONVERTIERUNG_OK']
@@ -362,13 +362,12 @@ sleep(5);
 
 					// XPlan-GML ausgeben
 					$this->gml_builder = new Gml_builder($this->pgdatabase);
-					$this->plan = new RP_Plan($this);
-					$this->plan->find_by('konvertierung_id', $this->konvertierung->get('id'));
+					$plan = RP_Plan::find_by('konvertierung_id', $this->konvertierung->get('id'));
 					//$bereiche = new RP_Bereich($this);
 					//$bereiche->find_by('gehoertzuplan', $this->plan->get('gml_id'));
 					//$this->plan->bereiche = $bereiche;
 
-					$this->gml_builder->build_gml($this->konvertierung, $this->plan);
+					$this->gml_builder->build_gml($this->konvertierung, $plan);
 					$this->gml_builder->save(XPLANKONVERTER_SHAPE_PATH . $this->konvertierung->get('id') . '/xplan_' . $this->konvertierung->get('id') . '.gml');
 
 					// Status setzen
@@ -376,7 +375,7 @@ sleep(5);
 					$this->konvertierung->update();
 
 					// Erzeuge Layergruppe, falls noch nicht vorhanden
-					$layer_group_id = $this->konvertierung->createLayerGroup('GML');
+					$layer_group_id = $this->konvertierung->create_layer_group('GML');
 					// vorhandene Layer dieser Konvertierung löschen
 					// Neue Layer erzeugen
 					$this->layer_generator_erzeugen($layer_group_id); # Funktion aus kvwmap.php
@@ -394,7 +393,7 @@ sleep(5);
 	} break;
 
 	case 'xplankonverter_konvertierung_loeschen' : {
-		$konvertierung = new Konvertierung($this, 'xplankonverter', 'konvertierungen');
+		$konvertierung = new Konvertierung($this);
 		$konvertierung->find_by('id', $this->formvars['konvertierung_id']);
 		# Lösche gml-Datei
 		$gml_file = new gml_file(XPLANKONVERTER_SHAPE_PATH . $konvertierung->get('id') . '/xplan_' . $konvertierung->get('id') . '.gml');

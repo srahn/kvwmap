@@ -2,16 +2,36 @@
 	$GUI = $this;
 
 	/**
-	* Löscht alle GML-Layer, die zu der Konvertierung gehören, dessen id in dataset übergeben wird.
+	* Trigger für Konvertierungen
 	*/
-	$this->trigger_functions['delete_gml_layer'] = function($params, $dataset) use ($GUI) {
-		# delete gml layer by konvertierung_id, name and geometrytype
-		echo 'Delete gml layer with konvertierung_id: ' . $dataset['konvertierung_id'] . ' featuretype: ' . $dataset['class_name'] . ' und geometrietyp: ' . $dataset['geometrytyp'];
+	$this->trigger_functions['handle_konvertierung'] = function($fired, $event, $dataset, $layer = '', $layerdb, $table, $oid = 0) use ($GUI) {
+		$konvertierung = Konvertierung::find_by_id($this, $dataset['id']);
+
+		switch(true) {
+			case ($fired == 'AFTER' AND $event == 'INSERT') : {
+				$konvertierung->create_layer_group('GML');
+			} break;
+			case ($fired == 'BEFORE' AND $event == 'DELETE') : {
+				$konvertierung->delete_regeln();
+				$konvertierung->delete_layer_group('GML');
+			}
+		}
 	};
 
-	$this->trigger_functions['create_gml_layer'] = function($params, $dataset) use ($GUI) {
-		# create gml layer with konvertierung_id, name and geometrytype if not exists
-		echo 'Create gml layer for konvertierung_id: ' . $dataset['konvertierung_id'] . ' featuretype: ' . $dataset['class_name'] . ' und geometrietyp: ' . $dataset['geometrytyp'];
+	/**
+	* Trigger für Regeln
+	* @params $layer Array mit Angben des Layers aus der MySQL-Datenbank
+	*/
+	$this->trigger_functions['handle_regel'] = function($fired, $event, $layer, $oid = 0) use ($GUI) {
+		switch(true) {
+			case ($fired == 'AFTER' AND $event == 'INSERT') : {
+				$regel = Regel::find_by_id($this, 'oid', $oid);
+				$regel->create_gml_layer();
+			} break;
+			case ($fired == 'BEFORE' AND $event == 'DELETE') : {
+			#	$regel = Regel::find_by_id($this, 'oid', $oid);
+		#		$regel->delete_gml_layer($oid);
+			} break;
+		}
 	};
-
 ?>

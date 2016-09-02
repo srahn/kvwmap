@@ -3,23 +3,23 @@
 # kvwmap - Kartenserver für Kreisverwaltungen                     #
 ###################################################################
 # Lizenz                                                          #
-#                                                                 # 
+#                                                                 #
 # Copyright (C) 2004  Peter Korduan                               #
-#                                                                 # 
+#                                                                 #
 # This program is free software; you can redistribute it and/or   #
-# modify it under the terms of the GNU General Public License as  # 
-# published by the Free Software Foundation; either version 2 of  # 
-# the License, or (at your option) any later version.             # 
-#                                                                 #   
-# This program is distributed in the hope that it will be useful, #  
+# modify it under the terms of the GNU General Public License as  #
+# published by the Free Software Foundation; either version 2 of  #
+# the License, or (at your option) any later version.             #
+#                                                                 #
+# This program is distributed in the hope that it will be useful, #
 # but WITHOUT ANY WARRANTY; without even the implied warranty of  #
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the    #
 # GNU General Public License for more details.                    #
-#                                                                 #  
+#                                                                 #
 # You should have received a copy of the GNU General Public       #
 # License along with this program; if not, write to the Free      #
-# Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,  # 
-# MA 02111-1307, USA.                                             # 
+# Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,  #
+# MA 02111-1307, USA.                                             #
 #                                                                 #
 # Kontakt:                                                        #
 # peter.korduan@gdi-service.de                                    #
@@ -30,8 +30,15 @@
 #############################
 
 class PgObject {
-  
+	/*
+	* Durch die Übergabe von gui besitzt das Object beide Datenbankverbindungen
+	*	$this->database Postgres Datenbank
+	* $this->gui->pgdatabase PostgresDatenbank
+	* $this->gui->database MySQL Datenbank
+	*
+	*/
   function PgObject($gui, $schema, $tableName) {
+		#echo '<br>Create new Object PgObject with schema ' . $schema . ' table ' . $tableName;
     global $debug;
     $this->debug=$debug;
     $this->gui = $gui;
@@ -41,21 +48,24 @@ class PgObject {
     $this->qualifiedTableName = $schema . '.' . $tableName;
     $this->data = array();
     $this->debug = false;
+		$this->select = '*';
   }
 
-  function find_by($attribute, $value) {
-    $sql = "
-      SELECT
-        *
-      FROM
-        \"" . $this->schema . "\".\"" . $this->tableName . "\"
-      WHERE
-        \"" . $attribute . "\" = '" . $value . "'
-    ";
-    $this->debug('<p>find_by sql: ' . $sql);
-    $query = pg_query($this->database->dbConn, $sql);
-    $this->data = pg_fetch_assoc($query);
-  }
+	function find_by($attribute, $value) {
+		#echo '<br>find by attribute ' . $attribute . ' with value ' . $value;
+		$sql = "
+			SELECT
+				{$this->select}
+			FROM
+				\"{$this->schema}\".\"{$this->tableName}\"
+			WHERE
+				\"{$attribute}\" = '{$value}'
+		";
+		$this->debug('<p>find_by sql: ' . $sql);
+		$query = pg_query($this->database->dbConn, $sql);
+		$this->data = pg_fetch_assoc($query);
+		return $this;
+	}
 
   /*
   * Search for an record in the database by the given where clause
@@ -90,7 +100,7 @@ class PgObject {
   function getKVP() {
     $kvp = array();
     foreach($this->data AS $key => $value) {
-      $kvp[] = "\"" . $key . "\" = '" . $value . "'";
+      $kvp[] = "\"" . $key . "\" = " . ((''.$value) == '' ? "NULL" : "'$value'") . "";
     }
     return $kvp;
   }

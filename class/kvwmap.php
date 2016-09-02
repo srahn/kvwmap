@@ -36,8 +36,6 @@
 # GUI - Das Programm
 # debugfile - Klasse für die Debugdatei
 # LogFile
-# FormObj
-# selectFormObject extends FormObject
 # db_MapObj
 # Menue
 ########################################
@@ -107,21 +105,19 @@ class GUI {
     }
 	}
 
-	function exec_trigger_function($layer, $layerdb, $table = '', $oid = '', $dataset = array()) {
-		if (!empty($table) AND !empty($oid)) {
-			$sql = "
-				SELECT
-					*
-				FROM
-					{$table}
-				WHERE
-					oid = {$oid}
-			";
-			#echo 'sql: ' . $sql;
-			$ret = $layerdb->execSQL($sql, 4, 1);
-			$dataset = pg_fetch_assoc($ret[1]);
+	/**
+	*
+	* @params $layer Array mit Angben des Layers aus der MySQL-Datenbank
+	*/
+	function exec_trigger_function($fired, $event, $layer, $oid = '') {
+		if (array_key_exists($layer['trigger_function'], $this->trigger_functions)) {
+			$this->trigger_functions[$layer['trigger_function']](
+				$fired,
+				$event,
+				$layer,
+				$oid
+			);
 		}
-		$this->trigger_functions[$layer['trigger_function']]($layer['trigger_function_params'], $dataset);
 	}
 
 	function openCustomSubform(){
@@ -6427,9 +6423,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	/**
 	* This function generate sql for a layer in mysql with all its attributes and
 	* if they are from type datatype the datatypes and there attribtes.
+	* @params $table associatives Array mit Attribut name.
 	*/
-	function generate_layer($schema, $table) {
-		$sql = $this->database->generate_layer($schema, $table);
+	function generate_layer($schema, $table, $group_id = 0, $connection = '', $epsg_code = '25832', $geometrie_column = '', $geometrietyp = '', $layertyp = '') {
+		#echo "schema: $schema, table: {$table['name']}, group_id: {$group_id}, connection: {$connection}, epsg_code: {$epsg_code}, geometrie_column: $geometrie_column, geometrietype: $geometrietyp, layertype: $layertype";
+		$sql = $this->database->generate_layer($schema, $table, $group_id, $connection, $epsg_code, $geometrie_column, $geometrietyp, $layertyp);
 		$table_attributes = $this->pgdatabase->get_attribute_information($schema, $table['name']);
 		$sql .= $this->generate_layer_attributes($schema, $table_attributes);
 		return $sql;
@@ -7473,27 +7471,21 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				$element = explode(';', $checkbox_names[$i]);     #  check;table_alias;table;oid
 
 				# Before Delete trigger
-				if ($layer['trigger_fired'] == 'BEFORE' AND $layer['trigger_event'] == 'DELETE') {
-					$this->exec_trigger_function($layer, $layerdb, $element[2], $element[3]);
+				if (!empty($layer['trigger_function'])) {
+					$this->exec_trigger_function('BEFORE', 'DELETE', $layer, $element[3]);
 				}
 
-				# Instead of Delete trigger
-				if ($layer['trigger_fired'] == 'INSTEAD OF' AND $layer['trigger_event'] == 'DELETE') {
-					$this->exec_trigger_function($layer, $layerdb, $element[2], $element[3]);
-				}
-				else {
-					# Delete the object in database
-					$sql = "DELETE FROM ".$element[2]." WHERE oid = ".$element[3];
-					$oids[] = $element[3];
-					#echo $sql.'<br>';
-					$ret = $layerdb->execSQL($sql,4, 1);
-				}
+				# Delete the object in database
+				$sql = "DELETE FROM ".$element[2]." WHERE oid = ".$element[3];
+				$oids[] = $element[3];
+				#echo $sql.'<br>';
+				$ret = $layerdb->execSQL($sql,4, 1);
 
 				# After delete trigger
 				# Derzeit steht der gelöschte Datensatz für after trigger nicht zur Verfügung.
 				# Wollte man das, müsste man den Datensatz vor dem Löschen abfragen und hier im 5. Parameter übergeben.
-				if ($layer['trigger_fired'] == 'AFTER' AND $layer['trigger_event'] == 'DELETE') {
-					$this->exec_trigger_function($layer, $layerdb);
+				if (!empty($layer['trigger_function'])) {
+					$this->exec_trigger_function('AFTER', 'DELETE', $layer);
 				};
 
 				if ($ret[0]) {
@@ -7703,11 +7695,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         $sql = substr($sql, 0, strlen($sql)-2);
         $sql.= ")";
 
-        #echo $sql.'<br>';
         if($execute == true){
 					# Before Insert trigger
-					if ($layerset[0]['trigger_fired'] == 'BEFORE' AND $layerset[0]['trigger_event'] == 'INSERT') {
-						$this->exec_trigger_function($layerset[0], $layerdb);
+					if (!empty($layerset[0]['trigger_function'])) {
+						$this->exec_trigger_function('BEFORE', 'INSERT', $layerset[0]);
 					}
 
           $this->debug->write("<p>file:kvwmap class:neuer_Layer_Datensatz_speichern :",4);
@@ -7719,7 +7710,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
               	$this->formvars['value_'.$table['tablename'].'_oid'] = pg_last_oid($ret[1]);
 								$oid = $this->formvars['value_'.$table['tablename'].'_oid'];
             	}
-            	else{            		
+            	else {
             		$ret[0] = 1;
             	}
             }
@@ -7737,8 +7728,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
           }
 					else {
 						# After Insert trigger
-						if ($layerset[0]['trigger_fired'] == 'AFTER' AND $layerset[0]['trigger_event'] == 'INSERT') {
-							$this->exec_trigger_function($layerset[0], $layerdb, $table['tablename'], $oid);
+						if (!empty($layerset[0]['trigger_function'])) {
+							$this->exec_trigger_function('AFTER', 'INSERT', $layerset[0], $oid);
 						}
 					}
 
@@ -13467,213 +13458,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 } # end of class GUI
 
-
-########################################################
-# Klasse zum dynamischen Erzeugen von Formularobjekten #
-########################################################
-# Klasse FormObject #
-#####################
-
-class FormObject {
-  var $type;
-  var $html;
-  var $selected;
-  var $select;
-  var $hidden;
-  var $text;
-  var $anzValues;
-
-  ###################### Liste der Funktionen ####################################
-  #
-  # function FormObject($name,$type,$value,$selectedValue,$label,$size,$maxlenght,$multiple) - Construktor
-  # function addOption($value,$selected,$label)
-  # function changeSize($size)
-  # function insertOption($value,$selected,$label,$insertafter)
-  # function outputHTML()
-  #
-  ################################################################################
-
-  function FormObject($name,$type,$value,$selectedValue,$label,$size,$maxlenght,$multiple, $width, $disabled = NULL) {
-    if (!is_array($selectedValue)) { $selectedValue=array($selectedValue); }
-    $this->type=$type;
-    $this->width=$width;
-		$this->disabled=$disabled;
-    switch ($type) {
-      case "select" : {
-        if($value){
-          $this->AnzValues=count($value);
-        }
-        $this->select['name']=$name;
-        if ($size=='Anzahl Werte') {
-          $this->select['size']=$this->AnzValues;
-        }
-        else {
-          $this->select['size']=$size;
-        }
-        $this->select['multiple']=$multiple;
-        for ($i=0;$i<$this->AnzValues;$i++) {
-          $this->select['option'][$i]['value']=$value[$i];
-          for ($j=0;$j<count($selectedValue);$j++) {
-            if ($selectedValue[$j]==$value[$i]) {
-              $this->selected=1;
-              $this->select['option'][$i]['selected']=1;
-            }
-          }
-          $this->select['option'][$i]['label']=$label[$i];
-        }
-      } break;
-      case "text" : {
-        $this->text['name']=$name;
-        $this->text['value']=$value[0];
-        $this->text['size']=$size;
-        $this->text['maxlength']=$maxlength;
-      } break;
-      default : { # type hidden
-        $this->hidden['name']=$name;
-        $this->hidden['value']=$value[0];
-      }
-    } # ende switch type
-    $this->outputHTML();
-  } # ende constructor
-
-  function addJavaScript($event,$script){
-    $this->JavaScript.=' '.$event.'="'.$script.'"';
-  }
-
-  function addOption($value,$selected,$label) {
-    $anzOption=count($this->select['option']);
-    $this->select[option][$anzOption]['value']=$value;
-    $this->select[option][$anzOption]['selected']=$selected;
-    $this->select[option][$anzOption]['label']=$label;
-  }
-
-  function insertOption($value,$selected,$label,$insertafter) {
-    # insertafter ist die Nummer der Option, nach der die neue Option eingefügt werden soll
-    # die Zählung beginnt mit 1. Wenn z.B. eine Option an den Anfang gestellt werden soll
-    # muss insertafter = 0 sein.
-    $anzOption=count($this->select['option']);
-    $oldvalue=$value;
-    $oldselected=$selected;
-    $oldlabel=$label;
-    for($i=$insertafter;$i<$anzOption;$i++) {
-      $tmpvalue=$this->select['option'][$i]['value'];
-      $tmpselected=$this->select['option'][$i]['selected'];
-      $tmplabel=$this->select['option'][$i]['label'];
-      $this->select['option'][$i]['value']=$oldvalue;
-      $this->select['option'][$i]['selected']=$oldselected;
-      $this->select['option'][$i]['label']=$oldlabel;
-      $oldvalue=$tmpvalue;
-      $oldselected=$tmpselected;
-      $oldlabel=$tmplabel;
-    }
-    $this->select['option'][$anzOption]['value']=$oldvalue;
-    $this->select['option'][$anzOption]['selected']=$oldselected;
-    $this->select['option'][$anzOption]['label']=$oldlabel;
-  }
-
-  function changeSize($size) {
-    switch ($this->type) {
-      case 'select' : {
-        $this->select['size']=$size;
-      } break;
-      case 'text' : {
-        $this->text['size']=$size;
-      } break;
-    }
-  }
-
-  function outputHTML() {
-    #2005-11-29_pk
-    switch ($this->type) {
-      case "select" : {
-        $this->html ="<select name='".$this->select["name"]."' size='".$this->select["size"]."' ";
-        if($this->width > 0){
-          $this->html.="style='width:".$this->width."px'";
-        }
-				if($this->disabled){
-          $this->html.=' disabled="true" ';
-        }
-        if ($this->select["multiple"]) {
-          $this->html.=" multiple";
-        }
-        if ($this->JavaScript!='') {
-          $this->html.=$this->JavaScript;
-        }
-        $this->html.=">\n";
-        for ($i=0;$i<count($this->select[option]);$i++) {
-          $this->html.="<option value='".$this->select["option"][$i]["value"]."'";
-          if ($this->select["option"][$i]["selected"]) {
-            $this->html.=" selected";
-          }
-          $this->html.=">".$this->select["option"][$i]["label"]."</option>\n";
-        }
-        $this->html.="</select>";
-      } break;
-      case "text" : {
-        $this->html ="<input type='text' name='".$this->text["name"]."' value='".$this->text["value"]."'";
-        $this->html.=" size='".$this->text["size"]."' maxlength='".$this->text["size"]."'>";
-      } break;
-      case "hidden" : {
-        $this->html ="<input type='hidden' name='".$this->hidden["name"]."' value='".$this->hidden["value"]."'";
-      }
-    }
-  }
-} # end of Classe FormObject
-
-
-##########################################################################################
-# Classe zum dynamischen Erzeugen von Formularobjekten mit automatischem Abschicken nach #
-# des Formulars nach Änderung der Auswahl über                                           #
-# Java Script Funktionen (onchange='...' Erweiterung von Classe FormObject               #
-##########################################################################################
-# Klasse selectFormObject #
-###########################
-
-class selectFormObject extends FormObject{
-
-  ###################### Liste der Funktionen ####################################
-  #
-  # function outputHTML()
-  #
-  ################################################################################
-
-  function outputHTML() {
-    $this->onchange=$onchange;
-    switch ($this->type) {
-      case 'select' : {
-        $this->html ="<select name=\"".$this->select['name']."\" size=\"".$this->select['size']."\"";
-        if ($this->select['multiple']) {
-          $this->html.=' multiple';
-        }
-        if ($this->JavaScript!='') {
-          $this->html.=$this->JavaScript;
-        }
-        if($this->nochange != true){
-          $this->html.=" onchange=\"document.GUI.submit()\">\n";
-        }
-        for ($i=0;$i<count($this->select[option]);$i++) {
-          $this->html.="<option value=\"".$this->select['option'][$i]['value']."\"";
-          if ($this->select['option'][$i]['selected']) {
-            $this->html.=' selected';
-          }
-          $this->html.=">".$this->select['option'][$i]['label']."</option>\n";
-        }
-        $this->html.="</select>\n";
-      } break;
-
-      case 'text' : {
-        $this->html ='<input type="text" name="'.$this->text['name'].'" value="'.$this->text['value'].'"';
-        $this->html.=' size="'.$this->text['size'].'" maxlength="'.$this->text['size'].'">';
-      } break;
-
-      case 'hidden' : {
-        $this->html ='<input type="hidden" name="'.$this->hidden['name'].'" value="'.$this->hidden['value'].'"';
-      }
-    }
-  }
-}
-
-
 ##############################################################
 # Klasse MapObject zum laden der Map-Daten aus der Datenbank #
 ##############################################################
@@ -14770,10 +14554,7 @@ class db_mapObj{
     $sql .= "datenherr = '".$formvars['datenherr']."',";
     $sql .= "metalink = '".$formvars['metalink']."', ";
 		$sql .= "status = '".$formvars['status']."', ";
-		$sql .= "trigger_fired = '" . $formvars['trigger_fired'] . "', ";
-		$sql .= "trigger_event = '" . $formvars['trigger_event'] . "', ";
-		$sql .= "trigger_function = '" . $formvars['trigger_function'] . "', ";
-		$sql .= "trigger_function_params = '" . $formvars['trigger_function_params'] . "'";
+		$sql .= "trigger_function = '" . $formvars['trigger_function'] . "'";
     $sql .= " WHERE Layer_ID = ".$formvars['selected_layer_id'];
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->updateLayer - Aktualisieren eines Layers:<br>".$sql,4);
