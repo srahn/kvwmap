@@ -30,8 +30,16 @@
 #############################
 
 class PgObject {
-  
+ 
+	/*
+	* Durch die Übergabe von gui besitzt das Object beide Datenbankverbindungen
+	*	$this->database Postgres Datenbank
+	* $this->gui->pgdatabase PostgresDatenbank
+	* $this->gui->database MySQL Datenbank
+	*
+	*/
   function PgObject($gui, $schema, $tableName) {
+		#echo '<br>Create new Object PgObject with schema ' . $schema . ' table ' . $tableName;
     global $debug;
     $this->debug=$debug;
     $this->gui = $gui;
@@ -44,20 +52,21 @@ class PgObject {
 		$this->select = '*';
   }
 
-public static function find_by($attribute, $value) {
-	$sql = "
-		SELECT
-			{$this->select}
-		FROM
-			\"{$this->schema}\".\"{$this->tableName}\"
-		WHERE
-			\"{$attribute}\" = '{$value}'
-	";
-	$this->debug('<p>find_by sql: ' . $sql);
-	$query = pg_query($this->database->dbConn, $sql);
-	$this->data = pg_fetch_assoc($query);
-	return $this;
-}
+	function find_by($attribute, $value) {
+		#echo '<br>find by attribute ' . $attribute . ' with value ' . $value;
+		$sql = "
+			SELECT
+				{$this->select}
+			FROM
+				\"{$this->schema}\".\"{$this->tableName}\"
+			WHERE
+				\"{$attribute}\" = '{$value}'
+		";
+		$this->debug('<p>find_by sql: ' . $sql);
+		$query = pg_query($this->database->dbConn, $sql);
+		$this->data = pg_fetch_assoc($query);
+		return $this;
+	}
 
   /*
   * Search for an record in the database by the given where clause

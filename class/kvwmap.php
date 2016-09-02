@@ -105,25 +105,17 @@ class GUI {
     }
 	}
 
-	function exec_trigger_function($fired, $event, $layer, $layerdb, $table = '', $oid = '', $dataset = array()) {
+	/**
+	*
+	* @params $layer Array mit Angben des Layers aus der MySQL-Datenbank
+	*/
+	function exec_trigger_function($fired, $event, $layer, $oid = '') {
 		if (array_key_exists($layer['trigger_function'], $this->trigger_functions)) {
-			if (!empty($table) AND !empty($oid)) {
-				$sql = "
-					SELECT
-						*
-					FROM
-						{$table}
-					WHERE
-						oid = {$oid}
-				";
-				$ret = $layerdb->execSQL($sql, 4, 1);
-				$dataset = pg_fetch_assoc($ret[1]);
-			}
 			$this->trigger_functions[$layer['trigger_function']](
 				$fired,
 				$event,
-				$layer['trigger_function_params'],
-				$dataset
+				$layer,
+				$oid
 			);
 		}
 	}
@@ -6431,9 +6423,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	* if they are from type datatype the datatypes and there attribtes.
 	* @params $table associatives Array mit Attribut name.
 	*/
-	function generate_layer($schema, $table, $epsg_code = '25832', $geometrie_column = '', $geometrietyp = '', $layertyp = '') {
-		echo "schema: $schema, table: {$table['name']}, geometrie_column: $geometrie_column, geometrietype: $geometrietyp, layertype: $layertype";
-		$sql = $this->database->generate_layer($schema, $table, $epsg_code, $geometrie_column, $geometrietyp, $layertyp);
+	function generate_layer($schema, $table, $group_id = 0, $connection = '', $epsg_code = '25832', $geometrie_column = '', $geometrietyp = '', $layertyp = '') {
+		echo "schema: $schema, table: {$table['name']}, group_id: {$group_id}, connection: {$connection}, epsg_code: {$epsg_code}, geometrie_column: $geometrie_column, geometrietype: $geometrietyp, layertype: $layertype";
+		$sql = $this->database->generate_layer($schema, $table, $group_id, $connection, $epsg_code, $geometrie_column, $geometrietyp, $layertyp);
 		$table_attributes = $this->pgdatabase->get_table_attributes($schema, $table['name']);
 		$sql .= $this->generate_layer_attributes($schema, $table_attributes);
 		return $sql;
@@ -7466,7 +7458,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 				# Before Delete trigger
 				if (!empty($layer['trigger_function'])) {
-					$this->exec_trigger_function('BEFORE', 'DELETE', $layer, $layerdb, $element[2], $element[3]);
+					$this->exec_trigger_function('BEFORE', 'DELETE', $layer, $element[3]);
 				}
 
 				# Delete the object in database
@@ -7479,7 +7471,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				# Derzeit steht der gelöschte Datensatz für after trigger nicht zur Verfügung.
 				# Wollte man das, müsste man den Datensatz vor dem Löschen abfragen und hier im 5. Parameter übergeben.
 				if (!empty($layer['trigger_function'])) {
-					$this->exec_trigger_function('AFTER', 'DELETE', $layer, $layerdb);
+					$this->exec_trigger_function('AFTER', 'DELETE', $layer);
 				};
 
 				if ($ret[0]) {
@@ -7689,11 +7681,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         $sql = substr($sql, 0, strlen($sql)-2);
         $sql.= ")";
 
-        #echo $sql.'<br>';
         if($execute == true){
 					# Before Insert trigger
 					if (!empty($layerset[0]['trigger_function'])) {
-						$this->exec_trigger_function('BEFORE', 'INSERT', $layerset[0], $layerdb);
+						$this->exec_trigger_function('BEFORE', 'INSERT', $layerset[0]);
 					}
 
           $this->debug->write("<p>file:kvwmap class:neuer_Layer_Datensatz_speichern :",4);
@@ -7705,7 +7696,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
               	$this->formvars['value_'.$table['tablename'].'_oid'] = pg_last_oid($ret[1]);
 								$oid = $this->formvars['value_'.$table['tablename'].'_oid'];
             	}
-            	else{            		
+            	else {
             		$ret[0] = 1;
             	}
             }
@@ -7724,7 +7715,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					else {
 						# After Insert trigger
 						if (!empty($layerset[0]['trigger_function'])) {
-							$this->exec_trigger_function('AFTER', 'INSERT', $layerset[0], $layerdb, $table['tablename'], $oid);
+							$this->exec_trigger_function('AFTER', 'INSERT', $layerset[0], $oid);
 						}
 					}
 

@@ -9,12 +9,16 @@ class Regel extends PgObject {
 	static $tableName = 'regeln';
 
 	function Regel($gui) {
+		#echo '<br>Create new Object Regel';
 		$this->PgObject($gui, Regel::$schema, Regel::$tableName);
 	}
 
-public static	function find_by_id($gui, $id) {
+public static	function find_by_id($gui, $by, $id) {
+		#echo '<br>Class Regel function find_by ' . $by . ' ' . $id;
 		$regel = new Regel($gui);
-		return $regel->find_by('id', $id);
+		$regel->find_by($by, $id);
+		$regel->konvertierung = Konvertierung::find_by_id($gui, 'id', $regel->get('konvertierung_id'));
+		return $regel;
 	}
 
 	/*
@@ -39,6 +43,71 @@ public static	function find_by_id($gui, $id) {
 				rp_bereich_gml_id = '" . $bereich_gml_id . "'
 				";
 			}
+		}
+	}
+
+	function gml_layer_exists() {
+		$layer = new MyObject($this->gui->database, 'layer');
+		$layer = $layer->find_where("
+			`Gruppe` = " . (empty($this->konvertierung->get('gml_layer_group_id')) ? 0 : $this->konvertierung->get('gml_layer_group_id')) . " AND
+			`Name` = '" . $this->get('class_name') . "' AND
+			`Datentyp`= " . $this->get_layertyp() . "
+		");
+		return is_array($layer);
+	}
+
+	function get_layertyp() {
+		$layertyp = 2; # default Polygon Layer
+		if (strpos($this->get('geometrietyp'), 'Punkt') !== false) $layertyp = 0;
+		if (strpos($this->get('geometrietyp'), 'Linie') !== false) $layertyp = 1;
+		return $layertyp;
+	}
+
+	function create_gml_layer() {
+		if (!$this->gml_layer_exists()) {
+			# Erzeuge Layer mit konvertierungs_id, class_name und layertyp
+
+			$this->gui->formvars = array(
+				'Name' => $this->get('class_name'),
+				'schema' => 'xplan_gml',
+				'Datentyp' => $this->get_layertyp(),
+				'Gruppe' => $this->konvertierung->get('gml_layer_group_id'),
+				'connectiontype' => 6,
+				'connection' => $this->gui->pgdatabase->connect_string,
+				'epsg_code' => $this->konvertierung->get('output_epsg'),
+				'pfad' => "SELECT * FROM " . $this->get('class_name') . " WHERE 1=1",
+				'Data' => "geom from (select oid, (position)." . $this->get('geometrietyp') . " AS geom FROM xplan_gml." . strtolower($this->get('class_name')) . ") as foo using unique oid using srid=" . $this->konvertierung->get('output_epsg'),
+				'querymap' => 1,
+				'queryable' => 1,
+				'transparency' => 60,
+				'drawingorder' => 100
+			);
+
+			$this->gui->LayerAnlegen();
+
+			# id vom Layer abfragen
+			$layer_id = 9999;
+			# Klasse vom Layer anlegen
+
+			# Assign layer_id to Konvertierung
+			$this->set('layer_id', $layer_id);
+			$this->update();
+		}
+
+	}
+
+	function delete_gml_layer() {
+		if (!empty($this->layer_id)) {
+			# delete gml layer by konvertierung_id, name and geometrytype
+			echo 'Delete gml layer with layer_id: ' . $this->layer_id;
+
+			# Lösche Layer, wenn von keiner anderen Regel mehr verwendet
+			$this->gui->formvars['selected_layer_id'] = $layer_id;
+			$this->gui->LayerLoeschen();
+
+			# Lösche Datatypes, wenn von keinem anderen mehr verwendet
+
+			# Lösche Gruppe, wenn kein anderer Layer mehr drin ist
 		}
 	}
 }

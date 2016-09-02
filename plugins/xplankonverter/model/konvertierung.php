@@ -25,13 +25,19 @@ class Konvertierung extends PgObject {
 		$this->PgObject($gui, Konvertierung::$schema, Konvertierung::$tableName);
 	}
 
-	public static	function find_by_id($gui, $id) {
-			$regel = new Regel($gui);
-			return $regel->find_by('id', $id);
+	public static	function find_by_id($gui, $by, $id) {
+			$konvertierung = new Konvertierung($gui);
+			$konvertierung->find_by($by, $id);
+			return $konvertierung;
 		}
 
-	function createLayerGroup($postfix) {
-		$layer_group_id = $this->get($type . '_layer_group_id');
+	/**
+	* Erzeugt eine Layergruppe vom Typ GML oder Shape und trägt die dazugehörige
+	* gml_layer_group_id oder shape_layer_group_id in PG-Tabelle konvertierung ein.
+	*
+	*/
+	function create_layer_group($layer_type) {
+		$layer_group_id = $this->get(strtolower($layer_type) . '_layer_group_id');
 		if (empty($layer_group_id)) {
 			$layerGroup = new MyObject($this->gui->database, 'u_groups');
 			$layerGroup->create(array(
