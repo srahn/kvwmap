@@ -3526,7 +3526,7 @@ class stelle {
 		return $privileges;
 	}
 
-	function parse_path($database, $path, $privileges){
+	function parse_path($database, $path, $privileges, $attributes = NULL){
 		$distinctpos = strpos(strtolower($path), 'distinct');
 		if($distinctpos !== false && $distinctpos < 10){
 			$offset = $distinctpos+8;
@@ -3567,7 +3567,9 @@ class stelle {
 					$attributename = trim($explosion[count($explosion)-1]);
 				}
 				if($privileges[$attributename] != ''){
-					$newattributesstring .= $fieldstring[$i].', ';
+					$type = $attributes['type'][$attributes['indizes'][$attributename]];
+					if(substr($type, 0, 1) == '_' OR is_numeric($type))$newattributesstring .= 'to_json('.$fieldstring[$i].') as '.$attributename.', ';		# Array oder Datentyp
+					else $newattributesstring .= $fieldstring[$i].', ';																																			# normal
 				}
 				if(substr_count($fieldstring[$i], '(') - substr_count($fieldstring[$i], ')') > 0){
 					$fieldstring[$i+1] = $fieldstring[$i].','.$fieldstring[$i+1];
