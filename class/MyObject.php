@@ -43,7 +43,6 @@ class MyObject {
       WHERE
         " . $where . "
     ";
-		echo '<br>' . $sql; #pk
     $this->debug('<p>sql: ' . $sql);
     $query = mysql_query($sql, $this->database->dbConn);
     $this->data = mysql_fetch_assoc($query);

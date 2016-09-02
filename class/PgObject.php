@@ -142,7 +142,6 @@ class PgObject {
       WHERE
         id = " . $this->get('id') . "
     ";
-		echo 'update: ' . $sql;
     $this->debug('<p>Update in pg table sql: ' . $sql);
     $query = pg_query($this->database->dbConn, $sql);
   }
