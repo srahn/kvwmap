@@ -41,12 +41,12 @@ class Konvertierung extends PgObject {
 		if (empty($layer_group_id)) {
 			$layerGroup = new MyObject($this->gui->database, 'u_groups');
 			$layerGroup->create(array(
-				'Gruppenname' => $this->get('bezeichnung') . ' ' . $type
+				'Gruppenname' => $this->get('bezeichnung') . ' ' . $layer_type
 			));
-			$this->set($type . '_layer_group_id', $layerGroup->get('id'));
+			$this->set(strtolower($layer_type) . '_layer_group_id', $layerGroup->get('id'));
 			$this->update();
 		}
-		return $this->get($type . 'layer_group_id');
+		return $this->get(strtolower($layer_type) . 'layer_group_id');
 	}
 
 	/*

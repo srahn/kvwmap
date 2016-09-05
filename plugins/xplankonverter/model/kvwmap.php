@@ -5,13 +5,13 @@
 	* Trigger für Konvertierungen
 	*/
 	$this->trigger_functions['handle_konvertierung'] = function($fired, $event, $layer = '', $oid = 0) use ($GUI) {
-		$konvertierung = Konvertierung::find_by_id($this, 'oid', $oid);
-
 		switch(true) {
 			case ($fired == 'AFTER' AND $event == 'INSERT') : {
+				$konvertierung = Konvertierung::find_by_id($this, 'oid', $oid);
 				$konvertierung->create_layer_group('GML');
 			} break;
 			case ($fired == 'BEFORE' AND $event == 'DELETE') : {
+				$konvertierung = Konvertierung::find_by_id($this, 'oid', $oid);
 				$konvertierung->delete_regeln();
 				$konvertierung->delete_layer_group('GML');
 			}
