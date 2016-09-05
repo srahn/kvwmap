@@ -64,6 +64,7 @@ include('funktionen/input_check_functions.php');
 		new_element.innerHTML = new_element.innerHTML.replace(regex, fieldname+'_'+new_id);
 		new_element.style = 'display: block';
 		outer_div.appendChild(new_element);
+		buildJSONString(fieldname, true);
 	}
 	
 	removeArrayElement = function(fieldname, remove_element_id){
