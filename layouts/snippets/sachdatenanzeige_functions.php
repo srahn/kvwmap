@@ -56,14 +56,19 @@ include('funktionen/input_check_functions.php');
 		outer_div = document.getElementById(fieldname+'_elements');
 		first_element = document.getElementById('div_'+fieldname+'_-1');
 		new_element = first_element.cloneNode(true);
-		var regex = new RegExp(fieldname+'__-1', "g");
-		new_element.innerHTML = new_element.innerHTML.replace(regex, fieldname+'__'+outer_div.children.length);
+		last_id = outer_div.lastChild.id;
+		parts = last_id.split('div_'+fieldname+'_');
+		new_id = parseInt(parts[1])+1;
+		new_element.id = 'div_'+fieldname+'_'+new_id;
+		var regex = new RegExp(fieldname+'_-1', "g");
+		new_element.innerHTML = new_element.innerHTML.replace(regex, fieldname+'_'+new_id);
 		new_element.style = 'display: block';
 		outer_div.appendChild(new_element);
 	}
 	
-	removeArrayElement = function(fieldname, remove_element, k){
+	removeArrayElement = function(fieldname, remove_element_id){
 		outer_div = document.getElementById(fieldname+'_elements');
+		remove_element = document.getElementById(remove_element_id);
 		outer_div.removeChild(remove_element);
 		buildJSONString(fieldname);
 	}

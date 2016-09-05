@@ -95,7 +95,7 @@
 				$dataset2[$attributes2['name'][$j]] = $elements[$e];
 				$datapart .= '<div id="div_'.$id.'_'.$e.'" style="display: '.($e==-1 ? 'none' : 'block').'"><table cellpadding="0" cellspacing="0"><tr><td>';
 				$datapart .= attribute_value($gui, $layer_id, $attributes2, $j, $e, $dataset2, $size, $select_width, $fontsize, $change_all, $onchange2, $elements_fieldname);
-				$datapart .= '</td><td valign="top"><a href="#" onclick="removeArrayElement(\''.$id.'\', this.parentNode, '.$k.');'.$onchange2.'return false;"><img style="width: 18px" src="'.GRAPHICSPATH.'datensatz_loeschen.png"></a></td></tr></table>';
+				$datapart .= '</td><td valign="top"><a href="#" onclick="removeArrayElement(\''.$id.'\', \'div_'.$id.'_'.$e.'\');'.$onchange2.'return false;"><img style="width: 18px" src="'.GRAPHICSPATH.'datensatz_loeschen.png"></a></td></tr></table>';
 				$datapart .= '</div>';
 			}
 			$datapart .= '</div>';
@@ -105,7 +105,7 @@
 		
 		###### Nutzer-Datentyp #####
 		if(is_numeric($attributes['type'][$j])){
-			if($field_name != NULL)$id = $field_name.'_'.$name.'_'.$k;		# wenn field_name übergeben wurde (nicht die oberste Ebene)
+			if($field_name != NULL)$id = $field_name.'_'.($name == '' ? '' : $name.'_').$k;		# wenn field_name übergeben wurde (nicht die oberste Ebene)
 			else $id = $k.'_'.$name;	# oberste Ebene
 			$datapart .= '<input type="hidden" title="'.$alias.'" name="'.$fieldname.'" id="'.$id.'" onchange="'.$onchange.'" value="'.htmlspecialchars($value).'">';
 			$type_attributes = $attributes['type_attributes'][$j];
