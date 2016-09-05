@@ -105,7 +105,7 @@
 		
 		###### Nutzer-Datentyp #####
 		if(is_numeric($attributes['type'][$j])){
-			if($field_name != NULL)$id = $field_name.'_'.$name.'_'.$k;		# wenn field_name übergeben wurde (nicht die oberste Ebene)
+			if($field_name != NULL)$id = $field_name.'_'.($name == '' ? '' : $name.'_').$k;		# wenn field_name übergeben wurde (nicht die oberste Ebene)
 			else $id = $k.'_'.$name;	# oberste Ebene
 			$datapart .= '<input type="hidden" title="'.$alias.'" name="'.$fieldname.'" id="'.$id.'" onchange="'.$onchange.'" value="'.htmlspecialchars($value).'">';
 			$type_attributes = $attributes['type_attributes'][$j];
