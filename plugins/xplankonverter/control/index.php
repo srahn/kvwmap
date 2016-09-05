@@ -417,8 +417,7 @@ sleep(5);
 		# Lösche Bereiche
 		# Lösche Plan
 		$plan = RP_Plan::find_by_id($this, 'konvertierung_id', $konvertierung->get('id'));
-		var_dump($plan);
-		$msg .= "\nLösche RP Plan: ". $plan->name;
+		$msg .= "\nRP Plan " . $plan->get('name') . ' gelöscht.';
 		$plan->delete();
 		# Lösche Regel
 

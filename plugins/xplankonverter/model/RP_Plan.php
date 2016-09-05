@@ -5,7 +5,7 @@
 
 class RP_Plan extends PgObject {
 
-	static $schema = 'gml_classes';
+	static $schema = 'xplan_gml';
 	static $tableName = 'rp_plan';
 
 	function RP_Plan($gui, $select = '*') {
@@ -13,6 +13,7 @@ class RP_Plan extends PgObject {
 		$this->bereiche = array();
 		$this->select = $select;
 		$this->identifier = 'gml_id';
+		$this->identifier_type = 'text';
 	}
 
 	public static	function find_by_id($gui, $by, $id) {

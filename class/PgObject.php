@@ -50,6 +50,7 @@ class PgObject {
     $this->debug = false;
 		$this->select = '*';
 		$this->identifier = 'id';
+		$this->identifier_type = 'integer';
   }
 
 	function find_by($attribute, $value) {
@@ -62,6 +63,7 @@ class PgObject {
 			WHERE
 				\"{$attribute}\" = '{$value}'
 		";
+		#echo 'select query: ' . $sql;
 		$this->debug('<p>find_by sql: ' . $sql);
 		$query = pg_query($this->database->dbConn, $sql);
 		$this->data = pg_fetch_assoc($query);
@@ -148,13 +150,15 @@ class PgObject {
   }
 
   function delete() {
+		$quote = ($this->identifier_type == 'text') ? "'" : "";
     $sql = "
       DELETE
       FROM
         " . $this->qualifiedTableName . "
       WHERE
-        " . $this->identifier . " = " . $this->get($this->identifier) . "
+        " . $this->identifier . " = {$quote}" . $this->get($this->identifier) . "{$quote}
     ";
+		#echo $sql;
     $this->debug('<p>Delete in pg table sql: ' . $sql);
     $result = pg_query($this->database->dbConn, $sql);
     return $result;
