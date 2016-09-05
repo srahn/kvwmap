@@ -33,29 +33,45 @@ include('funktionen/input_check_functions.php');
 		}
 	}
 	
-	buildArrayValue = function(fieldname, k){
-		elements = document.getElementsByName(fieldname);
-		array_values = new Array();
+	buildJSONString = function(id, is_array = false){
+		var field = document.getElementById(id);		
+		values = new Array();
+		elements = document.getElementsByName(id);
 		for(i = 0; i < elements.length; i++){
-			if(elements[i].value != '')array_values.push(elements[i].value);
+			value = elements[i].value;
+			if(!is_array){
+				if(value == '')value = 'null';
+				else if(value.substring(0,1) != '{')value = '"'+value+'"';
+				values.push('"'+elements[i].title+'":'+value);
+			}			
+			else if(i > 0 && value != '')values.push(value);		// bei Arrays ist das erste Element ein Dummy
 		}
-		array_value = '{'+array_values.join()+'}';
-		document.getElementById(fieldname+'_'+k).value = array_value;
+		if(!is_array)json = '{'+values.join()+'}';
+		else json = '['+values.join()+']';
+		field.value = json;		
+		if(field.onchange)field.onchange();
 	}
 	
 	addArrayElement = function(fieldname){
 		outer_div = document.getElementById(fieldname+'_elements');
 		first_element = document.getElementById('div_'+fieldname+'_-1');
 		new_element = first_element.cloneNode(true);
-		new_element.childNodes[0].value = '';
+		last_id = outer_div.lastChild.id;
+		parts = last_id.split('div_'+fieldname+'_');
+		new_id = parseInt(parts[1])+1;
+		new_element.id = 'div_'+fieldname+'_'+new_id;
+		var regex = new RegExp(fieldname+'_-1', "g");
+		new_element.innerHTML = new_element.innerHTML.replace(regex, fieldname+'_'+new_id);
 		new_element.style = 'display: block';
 		outer_div.appendChild(new_element);
+		buildJSONString(fieldname, true);
 	}
 	
-	removeArrayElement = function(fieldname, remove_element, k){
+	removeArrayElement = function(fieldname, remove_element_id){
 		outer_div = document.getElementById(fieldname+'_elements');
+		remove_element = document.getElementById(remove_element_id);
 		outer_div.removeChild(remove_element);
-		buildArrayValue(fieldname, k);
+		buildJSONString(fieldname);
 	}
 	
 	nextdatasets = function(offset){

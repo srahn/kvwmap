@@ -211,6 +211,7 @@
         data-field="status"
         data-visible="true"
         data-sortable="true"
+				class="col-md-2"
       >Status</th>
       <th
         data-field="beschreibung"
@@ -221,7 +222,7 @@
         data-visible="true"
         data-formatter="konvertierungFunctionsFormatter"
         data-switchable="false"
-        class="text-right"
+        class="col-md-4"
       >Funktionen</th>
     </tr>
   </thead>

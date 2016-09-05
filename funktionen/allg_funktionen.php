@@ -17,6 +17,27 @@ function MapserverErrorHandler($errno, $errstr, $errfile, $errline){
 	return true;
 }
 
+function JSON_to_PG($json, $quote = ''){
+	if(is_array($json)){
+		for($i = 0; $i < count($json); $i++){
+			$elems[] = JSON_to_PG($json[$i], '"');
+		}
+		$pg = '{'.@implode(',', $elems).'}';
+	}
+	elseif(is_object($json)){
+		if($quote == '')$new_quote = '"';
+		else $new_quote = '\\'.$quote;
+		foreach($json as $elem){
+			$elems[] = JSON_to_PG($elem, $new_quote);
+		}
+		$pg = $quote.'('.implode(',', $elems).')'.$quote;
+	}
+	else{
+		$pg = $json;
+	}
+	return $pg;
+}
+
 function strip_pg_escape_string($string){
 	$string = str_replace("''", "'", $string);
 	return $string;

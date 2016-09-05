@@ -323,15 +323,9 @@ else {
 		      		<input name="status" type="text" value="<?php echo $this->layerdata['status']; ?>" size="25" maxlength="255">
 		  		</td>
 		  	</tr>
-				<tr>
-					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTriggerFunction; ?></th>
-					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="trigger_function" type="text" value="<?php echo $this->layerdata['trigger_function']; ?>" size="25" maxlength="100">
-					</td>
-				</tr>
-			</table>
-			<br>
-
+		 	</table>
+		  <br>
+		  	
 		  <table border="0" cellspacing="0" cellpadding="3" style="border:1px solid <?php echo BG_DEFAULT ?>">
 		  	<tr align="center">
 		  		<th class="fetter" bgcolor="<?php echo BG_DEFAULT ?>" width="670" style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strDefaultValues; ?></th>

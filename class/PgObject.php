@@ -30,8 +30,15 @@
 #############################
 
 class PgObject {
-
+	/*
+	* Durch die Übergabe von gui besitzt das Object beide Datenbankverbindungen
+	*	$this->database Postgres Datenbank
+	* $this->gui->pgdatabase PostgresDatenbank
+	* $this->gui->database MySQL Datenbank
+	*
+	*/
   function PgObject($gui, $schema, $tableName) {
+		#echo '<br>Create new Object PgObject with schema ' . $schema . ' table ' . $tableName;
     global $debug;
     $this->debug=$debug;
     $this->gui = $gui;
@@ -41,21 +48,27 @@ class PgObject {
     $this->qualifiedTableName = $schema . '.' . $tableName;
     $this->data = array();
     $this->debug = false;
+		$this->select = '*';
+		$this->identifier = 'id';
+		$this->identifier_type = 'integer';
   }
 
-  function find_by($attribute, $value) {
-    $sql = "
-      SELECT
-        *
-      FROM
-        \"" . $this->schema . "\".\"" . $this->tableName . "\"
-      WHERE
-        \"" . $attribute . "\" = '" . $value . "'
-    ";
-    $this->debug('<p>find_by sql: ' . $sql);
-    $query = pg_query($this->database->dbConn, $sql);
-    $this->data = pg_fetch_assoc($query);
-  }
+	function find_by($attribute, $value) {
+		#echo '<br>find by attribute ' . $attribute . ' with value ' . $value;
+		$sql = "
+			SELECT
+				{$this->select}
+			FROM
+				\"{$this->schema}\".\"{$this->tableName}\"
+			WHERE
+				\"{$attribute}\" = '{$value}'
+		";
+		#echo 'select query: ' . $sql;
+		$this->debug('<p>find_by sql: ' . $sql);
+		$query = pg_query($this->database->dbConn, $sql);
+		$this->data = pg_fetch_assoc($query);
+		return $this;
+	}
 
   /*
   * Search for an record in the database by the given where clause
@@ -137,13 +150,15 @@ class PgObject {
   }
 
   function delete() {
+		$quote = ($this->identifier_type == 'text') ? "'" : "";
     $sql = "
       DELETE
       FROM
         " . $this->qualifiedTableName . "
       WHERE
-        id = " . $this->get('id') . "
+        " . $this->identifier . " = {$quote}" . $this->get($this->identifier) . "{$quote}
     ";
+		#echo $sql;
     $this->debug('<p>Delete in pg table sql: ' . $sql);
     $result = pg_query($this->database->dbConn, $sql);
     return $result;
