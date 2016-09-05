@@ -416,6 +416,10 @@ sleep(5);
 		#$shapeFile->delete();
 		# Lösche Bereiche
 		# Lösche Plan
+		$plan = RP_Plan::find_by_id($this, 'konvertierung_id', $konvertierung->get('id'));
+		var_dump($plan);
+		$msg .= "\nLösche RP Plan: ". $plan->name;
+		$plan->delete();
 		# Lösche Regel
 
 		# Lösche Konvertierung

@@ -49,6 +49,7 @@ class PgObject {
     $this->data = array();
     $this->debug = false;
 		$this->select = '*';
+		$this->identifier = 'id';
   }
 
 	function find_by($attribute, $value) {
@@ -152,7 +153,7 @@ class PgObject {
       FROM
         " . $this->qualifiedTableName . "
       WHERE
-        id = " . $this->get('id') . "
+        " . $this->identifier . " = " . $this->get($this->identifier) . "
     ";
     $this->debug('<p>Delete in pg table sql: ' . $sql);
     $result = pg_query($this->database->dbConn, $sql);
