@@ -616,6 +616,7 @@ FROM
 				$sub_datatype_id = $this->writeCustomType($attr_info[$i]['type'], $attr_info[$i]['type_schema']);
 				$fieldtype = $prefix.$sub_datatype_id; 
 			}
+			$constraintstring = '';
 			if($attr_info[$i]['type_type'] == 'e'){		# enum
 				$fieldtype = $prefix.'text';
 				$constraintstring = $this->getEnumElements($attr_info[$i]['type'], $attr_info[$i]['type_schema']);

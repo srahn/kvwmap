@@ -7681,6 +7681,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	          if($table['type'][$i] == 'Checkbox' AND $this->formvars[$table['formfield'][$i]] == ''){                       # Typ "Checkbox"
 	          	$this->formvars[$table['formfield'][$i]] = 'f';
 	          }
+						if(substr($table['type'][$i], 0, 1) == '_' OR is_numeric($table['type'][$i])){
+							$this->formvars[$table['formfield'][$i]] = JSON_to_PG(json_decode($this->formvars[$table['formfield'][$i]]));		# bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln									
+						}
             $sql.= "'".$this->formvars[$table['formfield'][$i]]."', ";      # Typ "normal"
           }
           elseif($table['type'][$i] == 'Geometrie'){                    # Typ "Geometrie"
