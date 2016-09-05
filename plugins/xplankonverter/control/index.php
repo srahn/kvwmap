@@ -397,8 +397,11 @@ sleep(5);
 		$konvertierung->find_by('id', $this->formvars['konvertierung_id']);
 		# Lösche gml-Datei
 		$gml_file = new gml_file(XPLANKONVERTER_SHAPE_PATH . $konvertierung->get('id') . '/xplan_' . $konvertierung->get('id') . '.gml');
-		$msg = "\nLösche gml file: ". $gml_file->filename;
-		$gml_file->delete();
+
+		if ($gml_file->exists()) {
+			$msg = "\nLösche gml file: ". $gml_file->filename;
+			$gml_file->delete();
+		}
 
 		# Lösche Regeln
 		$regeln = $konvertierung->getRegeln();
