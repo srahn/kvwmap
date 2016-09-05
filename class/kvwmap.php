@@ -14032,7 +14032,7 @@ class db_mapObj{
 			if(is_numeric($type)){
 				$attributes['type_attributes'][$i] = $this->add_attribute_values($attributes['type_attributes'][$i], $database, $query_result, $withvalues, $stelle_id, $only_current_enums);
 			}
-			if($attributes['constraints'][$i] != '' AND !in_array($attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))){  # das sind die Auswahlmöglichkeiten, die durch die Tabellendefinition in Postgres fest vorgegeben sind
+			if($attributes['options'][$i] == '' AND $attributes['constraints'][$i] != '' AND !in_array($attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))){  # das sind die Auswahlmöglichkeiten, die durch die Tabellendefinition in Postgres fest vorgegeben sind
       	$attributes['enum_value'][$i] = explode(',', str_replace("'", "", $attributes['constraints'][$i]));
       	$attributes['enum_output'][$i] = $attributes['enum_value'][$i];
       }
