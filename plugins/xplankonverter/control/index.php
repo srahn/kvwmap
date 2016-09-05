@@ -118,7 +118,7 @@ switch($this->go){
 		else {
 			$this->konvertierung = new Konvertierung($this);
 			$this->konvertierung->find_by('id', $this->formvars['konvertierung_id']);
-			if (isInStelleAllowed($this->Stelle->id, $this->konvertierung->get('stelle_id'))) {
+			if (isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) {
 				if (isset($_FILES['shape_files']) and $_FILES['shape_files']['name'][0] != '') {
 					$upload_path = XPLANKONVERTER_SHAPE_PATH . $this->formvars['konvertierung_id'] . '/';
 
@@ -234,7 +234,7 @@ switch($this->go){
 		else {
 			$shapefile = new Shapefile($this, 'xplankonverter', 'shapefiles');
 			$shapefile->find_by('id', $this->formvars['shapefile_id']);
-			if (isInStelleAllowed($this->Stelle->id, $shapefile->get('stelle_id'))) {
+			if (isInStelleAllowed($this->Stelle, $shapefile->get('stelle_id'))) {
 				# Delete the layerdefinition in mysql (rolleneinstellungen, layer, classes, styles, etc.)
 				$shapefile->deleteLayer();
 				# Delete the postgis data table that hold the data of the shape file
@@ -266,7 +266,7 @@ switch($this->go){
 		}
 		$this->konvertierung = new Konvertierung($this);
 		$this->konvertierung->find_by('id', $this->formvars['konvertierung_id']);
-		if (!isInStelleAllowed($this->Stelle->id, $this->konvertierung->get('stelle_id'))) return;
+		if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) return;
 		$this->konvertierung->set('status', $this->formvars['status']);
 		$this->konvertierung->update();
 		$response['success'] = true;
@@ -288,7 +288,7 @@ sleep(5);
 		$this->konvertierung = new Konvertierung($this);
 		$this->konvertierung->find_by('id', $this->formvars['konvertierung_id']);
 
-		if (!isInStelleAllowed($this->Stelle->id, $this->konvertierung->get('stelle_id')))
+		if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id')))
 			return;
 
 		// do the validation
@@ -327,7 +327,7 @@ sleep(5);
 		$this->konvertierung = new Konvertierung($this);
 		$this->konvertierung->find_by('id', $this->formvars['konvertierung_id']);
 
-		if (!isInStelleAllowed($this->Stelle->id, $this->konvertierung->get('stelle_id')))
+		if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id')))
 			return;
 
 		// do apply the rule set
@@ -351,7 +351,7 @@ sleep(5);
 		else {
 			$this->konvertierung = new Konvertierung($this);
 			$this->konvertierung->find_by('id', $this->formvars['konvertierung_id']);
-			if (isInStelleAllowed($this->Stelle->id, $this->konvertierung->get('stelle_id'))) {
+			if (isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) {
 				if ($this->konvertierung->get('status') == Konvertierung::$STATUS['KONVERTIERUNG_OK']
 				 || $this->konvertierung->get('status') == Konvertierung::$STATUS['IN_GML_ERSTELLUNG']
 				 || $this->konvertierung->get('status') == Konvertierung::$STATUS['GML_ERSTELLUNG_OK']) {
@@ -442,10 +442,10 @@ sleep(5);
 }
 
 function isInStelleAllowed($guiStelleId, $requestStelleId) {
-	if ($guiStelleId == $requestStelleId)
+	if ($stelle->id == $requestStelleId)
 		return true;
 	else {
-		echo '<br>(Diese Aktion kann nur von der Stelle ' . $this->Stelle->Bezeichnung . ' aus aufgerufen werden';
+		echo '<br>(Diese Aktion kann nur von der Stelle ' . $stelle->Bezeichnung . ' aus aufgerufen werden';
 		return false;
 	}
 }
