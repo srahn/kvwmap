@@ -70,8 +70,7 @@ CREATE TABLE xplankonverter.regeln
 WITH (
   OIDS=TRUE
 );
-ALTER TABLE xplankonverter.regeln
-  OWNER TO pgadmin;
+
 COMMENT ON COLUMN xplankonverter.regeln.class_name IS 'Name der Klassse im XPlan-Datenmodell, die mit dieser Regel befüllt werden soll.';
 COMMENT ON COLUMN xplankonverter.regeln.factory IS 'Art der Befüllung der Klasse mit Werten. SQL ... Daten werden über ein SQL-Statement abgefragt. form ... Daten werden über ein Web-Formular vom Nutzer eingegeben. default ... Daten werden aus einer Tabelle mit Default-Werten übernommen.';
 COMMENT ON COLUMN xplankonverter.regeln.sql IS 'Das SQL-Statement mit dem die Objekte der Klasse bestückt werden sollen.';
@@ -100,67 +99,86 @@ WITH (
 
 -- DROP FUNCTION xplankonverter.update_konvertierung_state();
 
-CREATE OR REPLACE FUNCTION xplankonverter.update_konvertierung_state()
-  RETURNS trigger AS
-$BODY$
-DECLARE
-  konvertierung_id integer;
-  plan_or_regel_assigned BOOLEAN;
-  old_state character varying;
-  new_state Character varying;
-BEGIN
-  IF (TG_OP = 'INSERT') THEN
-    konvertierung_id := NEW.konvertierung_id;
-    RAISE NOTICE 'update_konvertierung_state nach insert';
-  ELSIF (TG_OP = 'DELETE') THEN
-    konvertierung_id := OLD.konvertierung_id;
-    RAISE NOTICE 'update_konvertierung_state nach delete';
-  END IF;
-  RAISE NOTICE 'for konvertierung_id: %', konvertierung_id;
+	-- Function: xplankonverter.update_konvertierung_state()
 
-  SELECT
-    status
-  FROM
-    konvertierungen
-  WHERE
-    id = konvertierung_id
-  INTO
-    old_state;
+	-- DROP FUNCTION xplankonverter.update_konvertierung_state();
 
-  SELECT distinct
-    case WHEN p.gml_id IS NOT NULL OR r.id IS NOT NULL THEN true ELSE false END AS plan_or_regel_assigned
-  FROM
-    konvertierungen k LEFT JOIN
-    xplan_gml.rp_plan p ON k.id = p.konvertierung_id LEFT JOIN
-    regeln r ON k.id = r.konvertierung_id
-  WHERE
-    k.id = konvertierung_id
-  INTO
-    plan_or_regel_assigned;
+	CREATE OR REPLACE FUNCTION xplankonverter.update_konvertierung_state()
+	  RETURNS trigger AS
+	$BODY$
+	DECLARE
+	  _konvertierung_id integer;
+	  plan_or_regel_assigned BOOLEAN;
+	  old_state character varying;
+	  new_state Character varying;
+	BEGIN
+	  IF (TG_OP = 'INSERT') THEN
+	    _konvertierung_id := NEW.konvertierung_id;
+	    RAISE NOTICE 'update_konvertierung_state nach insert';
+	  ELSIF (TG_OP = 'DELETE') THEN
+	    _konvertierung_id := OLD.konvertierung_id;
+	    RAISE NOTICE 'update_konvertierung_state nach delete';
+	  END IF;
+	  RAISE NOTICE 'for konvertierung_id: %', _konvertierung_id;
 
-  RAISE NOTICE 'Mindestens ein Plan oder Regel ist zugeordnet: %', plan_or_regel_assigned;
-  RAISE NOTICE 'Alter Konvertierungsstatus: %', old_state;
-  new_state := old_state;
-  IF (plan_or_regel_assigned) THEN
-    IF (old_state = 'in Erstellung') THEN
-      new_state := 'erstellt';
-    END IF;
-  ELSE
-    new_state := 'in Erstellung';
-  END IF;
-  RAISE NOTICE 'Neuer Konvertierungsstatus: %', new_state;
-  UPDATE
-    konvertierungen
-  SET
-    status = new_state::enum_konvertierungsstatus
-  WHERE
-    id = konvertierung_id;
+	  SELECT
+	    status
+	  FROM
+	    xplankonverter.konvertierungen
+	  WHERE
+	    id = _konvertierung_id
+	  INTO
+	    old_state;
 
-RETURN NULL;
-END;
-$BODY$
-  LANGUAGE plpgsql VOLATILE
-  COST 100;
+	  SELECT distinct
+	    case WHEN p.gml_id IS NOT NULL OR r.id IS NOT NULL THEN true ELSE false END AS plan_or_regel_assigned
+	  FROM
+	    xplankonverter.konvertierungen k LEFT JOIN
+	    xplan_gml.rp_plan p ON k.id = p.konvertierung_id LEFT JOIN
+	    xplankonverter.regeln r ON k.id = r.konvertierung_id
+	  WHERE
+	    k.id = _konvertierung_id
+	  INTO
+	    plan_or_regel_assigned;
+
+	  RAISE NOTICE 'Mindestens ein Plan oder Regel ist zugeordnet: %', plan_or_regel_assigned;
+	  RAISE NOTICE 'Alter Konvertierungsstatus: %', old_state;
+	  new_state := old_state;
+	  IF (plan_or_regel_assigned) THEN
+	    IF (old_state = 'in Erstellung') THEN
+	      new_state := 'erstellt';
+	    END IF;
+	  ELSE
+	    new_state := 'in Erstellung';
+	  END IF;
+	  RAISE NOTICE 'Neuer Konvertierungsstatus: %', new_state;
+	  UPDATE
+	    xplankonverter.konvertierungen
+	  SET
+	    status = new_state::xplankonverter.enum_konvertierungsstatus
+	  WHERE
+	    id = _konvertierung_id;
+
+	RETURN NULL;
+	END;
+	$BODY$
+	  LANGUAGE plpgsql VOLATILE
+	  COST 100;
+	ALTER FUNCTION xplankonverter.update_konvertierung_state()
+	  OWNER TO pgadmin;
+
+
+CREATE TRIGGER update_konvertierung_state
+	AFTER INSERT OR DELETE
+	ON xplankonverter.regeln
+	FOR EACH ROW
+	EXECUTE PROCEDURE xplankonverter.update_konvertierung_state();
+
+CREATE TRIGGER update_konvertierung_state
+	AFTER INSERT OR DELETE
+	ON xplan_gml.rp_plan
+	FOR EACH ROW
+	EXECUTE PROCEDURE xplankonverter.update_konvertierung_state();
 
 CREATE TABLE xplankonverter.layer_colors (
   name text NOT NULL,
