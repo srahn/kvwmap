@@ -38,6 +38,7 @@ class Gml_builder {
   );
 
   static $STRUCTURE_SCHEMA = 'xplan_uml';
+  static $CONTENT_SCHEMA = 'xplan_gml';
 
   function Gml_builder($database) {
     global $debug;
@@ -53,7 +54,7 @@ class Gml_builder {
   }
 
   function _findRPPlanByKonvertierung($konvertierung) {
-    $sql = "SELECT gml_id FROM gml_classes.rp_plan WHERE konvertierung_id = " . $konvertierung->get('id');
+    $sql = "SELECT gml_id FROM xplan_gml.rp_plan WHERE konvertierung_id = " . $konvertierung->get('id');
     $result = pg_query($this->database->dbConn, $sql);
     return pg_fetch_assoc($result)['gml_id'];
   }
@@ -76,8 +77,8 @@ class Gml_builder {
     # clear tempfile
     ftruncate($this->tmpFile, 0);
 
-    $contentScheme   = "gml_classes";
-    $structure_schema = "xplan_uml";
+    $contentScheme   = "xplan_gml";
+    $structureScheme = "xplan_uml";
 
     // plan muss nochmal abgerufen werden, weil die select-Anweisung nochmal ergänzt werden musste
     $plan->select = "
@@ -139,19 +140,20 @@ class Gml_builder {
         SELECT
           b.*,
           ST_AsGML(
-              ST_Reverse(ST_Transform(
-                b.geltungsbereich,
-                {$konvertierung->get('output_epsg')})),
+            ST_Reverse(ST_Transform(
+              COALESCE ((b.geltungsbereich).flaeche,(b.geltungsbereich).multiflaeche),
+              {$konvertierung->get('output_epsg')})),
               {$konvertierung->get('geom_precision')}) AS gml_geltungsbereich,
           ST_AsGML(
             3,
             ST_Transform(
-              b.geltungsbereich,
+              COALESCE ((b.geltungsbereich).flaeche,(b.geltungsbereich).multiflaeche),
               {$konvertierung->get('output_epsg')}),
-            {$konvertierung->get('geom_precision')},
-            32) AS envelope
+              {$konvertierung->get('geom_precision')},
+              32) AS envelope
         FROM $contentScheme.rp_bereich b
         WHERE b.gehoertzuplan = '" . $plan->get('gml_id') . "'";
+    echo $sql."<br>";
     $bereiche = pg_query($this->database->dbConn, $sql);
 
     // fetch complete list of attributes and their properties from UML-structure
@@ -188,7 +190,7 @@ class Gml_builder {
           SELECT b2o.rp_objekt_gml_id AS gml_id
           FROM
             $contentScheme.rp_bereich AS b JOIN
-            $contentScheme.rp_bereich2rp_objekt AS b2o ON b.gml_id = b2o.rp_bereich_gml_id
+            $contentScheme.rp_bereich_zu_rp_objekt AS b2o ON b.gml_id = b2o.rp_bereich_gml_id
           WHERE b.gml_id = '" . $bereich['gml_id'] ."'";
       $rp_objekte = pg_query($this->database->dbConn, $sql);
       # complete RP_Bereich element by iteratively inserting
@@ -205,19 +207,33 @@ class Gml_builder {
               cl.*,
               ST_AsGML(
                   ST_Reverse(ST_Transform(
-                    cl.position,
+                    COALESCE(
+                      (cl.position).punkt,
+                      (cl.position).multipunkt,
+                      (cl.position).linie,
+                      (cl.position).multilinie,
+                      (cl.position).flaeche,
+                      (cl.position).multiflaeche
+                      ),
                     {$konvertierung->get('output_epsg')})),
                   {$konvertierung->get('geom_precision')}) AS gml_position,
               ST_AsGML(
                 3,
                 ST_Transform(
-                  cl.position,
+                    COALESCE(
+                      (cl.position).punkt,
+                      (cl.position).multipunkt,
+                      (cl.position).linie,
+                      (cl.position).multilinie,
+                      (cl.position).flaeche,
+                      (cl.position).multiflaeche
+                      ),
                   {$konvertierung->get('output_epsg')}),
                 {$konvertierung->get('geom_precision')},
                 32) AS envelope
             FROM
               $contentScheme.rp_bereich AS b JOIN
-              $contentScheme.rp_bereich2rp_objekt AS b2o ON b.gml_id = b2o.rp_bereich_gml_id JOIN
+              $contentScheme.rp_bereich_zu_rp_objekt AS b2o ON b.gml_id = b2o.rp_bereich_gml_id JOIN
               $contentScheme.$gml_className AS cl ON b2o.rp_objekt_gml_id = cl.gml_id
             WHERE b.gml_id = '" . $bereich['gml_id'] ."'";
         $gml_objects = pg_query($this->database->dbConn, $sql);

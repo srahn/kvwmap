@@ -39,6 +39,10 @@
         status: "<?php echo Konvertierung::$STATUS['IN_KONVERTIERUNG']; ?>"
       },
       success: function(response) {
+        if (!response.success){
+          result.text(response.msg);
+          return;
+        }
         $('#konvertierungen_table').bootstrapTable('refresh');
         // konvertiere wenn Status gesetzt
         $.ajax({
@@ -51,6 +55,7 @@
           },
           success: function(response) {
             result.text(response.msg);
+            if (!response.success) return;
             // validiere, wenn Konvertierung erfolgreich
             $.ajax({
               url: 'index.php?go=xplankonverter_konvertierung_validate',
