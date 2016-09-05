@@ -196,9 +196,9 @@ function submitDatatypeSelector() {
 				  </td>
 				  <td>&nbsp;</td>
 				  <td align="left" valign="top"><?php
-				  if($this->attributes['constraints'][$i] != '' AND !in_array($this->attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))){
+				  if($this->attributes['options'][$i] == '' AND $this->attributes['constraints'][$i] != '' AND !in_array($this->attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))){
 				  	echo '
-				  	<input disabled style="width:180px" name="options_'.$this->attributes['name'][$i].'" type="text" value="'.$this->attributes['constraints'][$i].'">';
+				  	<input style="width:180px" name="options_'.$this->attributes['name'][$i].'" type="text" value="'.$this->attributes['constraints'][$i].'">';
 				  }
 				  else{
 				  	echo '
