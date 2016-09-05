@@ -11045,8 +11045,15 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							#if($filter != ''){							# erstmal wieder rausgenommen, weil der Filter sich auf Attribute beziehen kann, die zu anderen Tabellen gehören
 							#  $sql .= " AND ".$filter;
 							#}
+
+							# Before Update trigger
+							if (!empty($layer['trigger_function'])) {
+								$this->exec_trigger_function('BEFORE', 'UPDATE', $layerset[$layer_id], $oid);
+							}
+
 							$this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
-							$ret = $layerdb[$layer_id]->execSQL($sql,4, 1);			
+							$ret = $layerdb[$layer_id]->execSQL($sql,4, 1);
+
 							if(!$ret[0]){
 								$result = pg_fetch_row($ret[1]);
 								if(pg_affected_rows($ret[1]) == 0){
@@ -11054,6 +11061,13 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 									$success = false;
 								}
 							}
+							else {
+								# After Update trigger
+								if (!empty($layer['trigger_function'])) {
+									$this->exec_trigger_function('AFTER', 'UPDATE', $layerset[$layer_id], $oid);
+								}
+							}
+
 						}
 					}
 				}
