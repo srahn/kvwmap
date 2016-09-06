@@ -116,8 +116,7 @@ switch($this->go){
 			$this->main = 'Hinweis.php';
 		}
 		else {
-			$this->konvertierung = new Konvertierung($this);
-			$this->konvertierung->find_by('id', $this->formvars['konvertierung_id']);
+			$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
 			if (isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) {
 				if (isset($_FILES['shape_files']) and $_FILES['shape_files']['name'][0] != '') {
 					$upload_path = XPLANKONVERTER_SHAPE_PATH . $this->formvars['konvertierung_id'] . '/';
@@ -134,7 +133,7 @@ switch($this->go){
 					# get layerGroupId or create a group if not exists
 					$layer_group_id = $this->konvertierung->get('layer_group_id');
 					if (empty($layer_group_id))
-						$layer_group_id = $this->konvertierung->create_layer_group('Shapes');
+						$layer_group_id = $this->konvertierung->create_layer_group('Shape');
 					foreach($uploaded_files AS $uploaded_file) {
 						if ($uploaded_file['extension'] == 'dbf' and $uploaded_file['state'] != 'ignoriert') {
 
@@ -393,6 +392,9 @@ sleep(5);
 	} break;
 
 	case 'xplankonverter_konvertierung_loeschen' : {
+		# Dieser ganze case kann durchgeführt werden durch das Löschen der Konvertierung mit den GLE Funktionen und
+		# dem after delete Trigger. (siehe trigger_function handle_konvertierung in control/kvwmap.php)
+		
 		$konvertierung = new Konvertierung($this);
 		$konvertierung->find_by('id', $this->formvars['konvertierung_id']);
 		# Lösche gml-Datei
@@ -409,20 +411,24 @@ sleep(5);
 		}
 		# Lösche Layer
 		# Lösche gml Layer
+		# Lösche gml Layer Gruppe
 		# Lösche shape Layer
 
 		# Lösche Shapes
 		#$shapeFile->deleteDataTable();
 		#$shapeFile->delete();
+		# Lösche Shape Layer Gruppe
+
 		# Lösche Bereiche
 		# Lösche Plan
 		$plan = RP_Plan::find_by_id($this, 'konvertierung_id', $konvertierung->get('id'));
 		$msg .= "\nRP Plan " . $plan->get('name') . ' gelöscht.';
 		$plan->delete();
-		# Lösche Regel
 
 		# Lösche Konvertierung
 		$konvertierung->delete();
+
+
 		$response = array(
 				'success' => true,
 				'msg' => 'Konvertierung erfolgreich gelöscht. ' . $msg
@@ -431,27 +437,17 @@ sleep(5);
 		echo json_encode($response);
 	} break;
 
-	case 'trigger_test' : {
-		// Einbindung des Views
-		$this->main = PLUGINS . 'xplankonverter/view/test.php';
-		$trigger_function = 'delete_gml_layer';
-		$params = json_decode('{"gml_layer_group_id":1000}');
-		$this->exec_trigger_function($trigger_function, $params);
-
-		$this->output();
-	} break;
-
 	default : {
 		$this->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
 	}
 
 }
 
-function isInStelleAllowed($guiStelleId, $requestStelleId) {
+function isInStelleAllowed($stelle, $requestStelleId) {
 	if ($stelle->id == $requestStelleId)
 		return true;
 	else {
-		echo '<br>(Diese Aktion kann nur von der Stelle ' . $stelle->Bezeichnung . ' aus aufgerufen werden';
+		echo '<br>(Diese Aktion kann nur von der Stelle ' . $stelle->Bezeichnung . ' aus aufgerufen werden.)';
 		return false;
 	}
 }
