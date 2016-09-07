@@ -2,6 +2,7 @@
 	$GUI = $this;
 	
 	$this->bodenRichtWertErfassung = function() use ($GUI){
+		include_once(CLASSPATH.'FormObject.php');
     if ($GUI->formvars['oid']=='') {
       $GUI->titel='Bodenrichtwerterfassung';
     }
@@ -206,6 +207,7 @@
   };
 	
 	$this->waehleBodenwertStichtagToCopy = function() use ($GUI){
+		include_once(CLASSPATH.'FormObject.php');
     $GUI->main = PLUGINS.'bodenrichtwerte/view/waehlebodenwertstichtagtocopy.php';
     $GUI->titel='Kopieren von Bodenrichtwertzonen auf einen neuen Stichtag';
     # Bodenrichtwertzonenobjekt erzeugen

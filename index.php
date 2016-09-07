@@ -99,7 +99,6 @@ if(!CASE_COMPRESS AND FAST_CASE){
 else{
 	include_(WWWROOT.APPLVERSION.'funktionen/allg_funktionen.php');	
 	if($userDb == NULL)include_(CLASSPATH.'mysql.php');
-	include_(CLASSPATH.'FormObject.php');
 	include_(CLASSPATH.'kvwmap.php');
 	include_(CLASSPATH.'kataster.php');
 	include_(CLASSPATH.'postgresql.php');

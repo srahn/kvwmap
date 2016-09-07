@@ -82,6 +82,7 @@
   };
 
 	$this->nachweisAenderungsformular = function() use ($GUI){
+		include_once(CLASSPATH.'FormObject.php');
     #2005-11-25_pk
     # Anzeige des Formulars zum Eintragen neuer/Ändern vorhandener Metadaten zu einem Nachweisdokument
     # (FFR, KVZ oder GN)
@@ -694,6 +695,7 @@
 	};
 
 	$this->nachweisFormAnzeige = function($nachweis = NULL) use ($GUI){
+		include_once(CLASSPATH.'FormObject.php');
 		if($GUI->formvars['reset_layers'])$GUI->reset_layers(NULL);
 
     # Wenn eine oid in formvars übergeben wurde ist es eine Änderung, sonst Neueingabe
@@ -942,6 +944,7 @@
   };
 	
 	$this->rechercheFormAnzeigen = function() use ($GUI){
+		include_once(CLASSPATH.'FormObject.php');
 		# Speichern einer neuen Dokumentauswahl
 		if($GUI->formvars['go_plus'] == 'Dokumentauswahl_speichern'){
 			$GUI->formvars['dokauswahlen'] = $GUI->save_Dokumentauswahl($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars);
@@ -1575,6 +1578,7 @@
   };
 	
 	$this->getFormObjVermStelle = function($name, $VermStelle) use ($GUI){
+		include_once(CLASSPATH.'FormObject.php');
     $VermStObj = new Vermessungsstelle($GUI->pgdatabase);
     $back=$VermStObj->getVermStelleListe();
     if ($back[0]=='') {
@@ -1588,6 +1592,7 @@
   };
 
 	$this->getFormObjVermArt = function($verm_art) use ($GUI){
+		include_once(CLASSPATH.'FormObject.php');
     $VermArtObj = new Vermessungsart($GUI->pgdatabase);
     $back=$VermArtObj->getVermArtListe();
     if ($back[0]=='') {
@@ -1601,6 +1606,7 @@
   };
 
 	$this->getFormObjAntr_nr = function($antr_nr) use ($GUI){
+		include_once(CLASSPATH.'FormObject.php');
     $Antrag = new Antrag($antr_nr,$GUI->Stelle->id,$GUI->pgdatabase);
     $back=$Antrag->getAntragsnr_Liste($GUI->Stelle->id);
     if ($back[0]=='') {

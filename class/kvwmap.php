@@ -5261,6 +5261,7 @@ class GUI {
 
   function metadateneingabe() {
     include_once (CLASSPATH.'metadaten.php');
+		include_once(CLASSPATH.'FormObject.php');
     $metadatensatz=new metadatensatz($this->formvars['oid'],$this->pgdatabase);
     if ($this->formvars['oid']!='') {
       # Es handelt sich um eine Änderung eines Datensatzes
@@ -5336,6 +5337,7 @@ class GUI {
   }
 
 	function nutzungWahl(){
+		include_once(CLASSPATH.'FormObject.php');
     if ($this->formvars['anzahl'] == 0) {
       $this->formvars['anzahl'] = 10;
     }
@@ -5402,6 +5404,7 @@ class GUI {
   }
 		
 	 function namenWahl() {
+		include_once(CLASSPATH.'FormObject.php');
     if ($this->formvars['anzahl']==0) {
       $this->formvars['anzahl']=10;
     }
@@ -10645,6 +10648,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
   }
 
   function rollenwahl($Stelle_ID) {
+		include_once(CLASSPATH.'FormObject.php');
     $this->user->Stellen=$this->user->getStellen(0);
     $this->Hinweis.='Aktuelle Stellen_ID: '.$Stelle_ID;
     $StellenFormObj=new FormObject("Stelle_ID","select",$this->user->Stellen['ID'],$Stelle_ID,$this->user->Stellen['Bezeichnung'],'Anzahl Werte',"","",NULL);
@@ -13162,6 +13166,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
   # Flurstücksauswahl
   function flurstwahl() {
+		include_once(CLASSPATH.'FormObject.php');
     if($this->formvars['historical'] == 1){
       $this->titel='historische Flurstückssuche';
 			$this->formvars['without_temporal_filter'] = 1;
@@ -13276,6 +13281,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
   # adressenauswahl
   function adresswahl() {
+		include_once(CLASSPATH.'FormObject.php');
     $Adresse=new adresse('','','',$this->pgdatabase);
     $this->main='adresssuche.php';
     if($this->formvars['ALK_Suche'] == 1){
