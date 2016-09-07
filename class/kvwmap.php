@@ -96,7 +96,7 @@ class GUI {
     # mime_type html, pdf
     if (isset ($mime_type)) $this->mime_type=$mime_type;
 		$this->scaleUnitSwitchScale = 239210;
-		$trigger_functions = array();
+		$this->trigger_functions = array();
   }
 	
 	public function __call($method, $arguments){
