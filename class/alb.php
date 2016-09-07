@@ -160,7 +160,7 @@ class ALB {
 	}
 
   function export_klassifizierung_csv($flurstuecke, $formvars){
-  if($formvars['flurstkennz']){ $csv .= 'FlstKZ;';}
+		if($formvars['flurstkennz']){ $csv .= 'FlstKZ;';}
   	if($formvars['flurstkennz']){ $csv .= 'FlstKZ_kurz;';}
     if($formvars['gemkgname']){ $csv .= 'Gemkg-Name;';}
     if($formvars['gemkgschl']){ $csv .= 'Gemkg-Schl.;';}
@@ -285,8 +285,9 @@ class ALB {
 					$csv .= $emz;
 					$flst->emz = true;
 				}
+				elseif($kl != $limit-2) $csv .= ';;';
 				
-				if($kl == $limit-2){              
+				if($kl == $limit-2){
 					if($nichtgeschaetzt>0){
 						$csv .= utf8_encode('nicht geschätzt: ;'.$nichtgeschaetzt.';');
 					}
@@ -295,8 +296,7 @@ class ALB {
 					}
 				}
 				$csv .= ';';
-				if($kl == $limit-1){              
-					$csv .= ';';
+				if($kl == $limit-1){
 					if($emzges_222 > 0){
 						$BWZ_222 = round($emzges_222/$flaeche_222*100);
 						$csv .= ' Ackerland gesamt: EMZ '.$emzges_222.' , BWZ '.$BWZ_222." ";
