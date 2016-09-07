@@ -3554,7 +3554,7 @@ class GUI {
     }
 		
 		if($this->formvars['no_query'] != true){
-			$this->last_query = $this->user->rolle->get_last_query();
+			$this->last_query = $this->user->rolle->get_last_query($this->formvars['chosen_layer_id']);
 			#if($this->formvars['search']){        # man kam von der Suche   -> nochmal suchen
 				$this->formvars['embedded_dataPDF'] = true;		# damit der Aufruf von output() verhindert wird
 				$this->GenerischeSuche_Suchen();
