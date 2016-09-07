@@ -112,7 +112,7 @@
 			$elements = json_decode($value);	# diese Funktion decodiert immer den kommpletten String
 			$tsize = 20;
 			$datapart .= '<table class="gle_datatype_table">';
-			$onchange2 = 'buildJSONString(\''.$id.'\');';
+			$onchange2 = 'buildJSONString(\''.$id.'\', false);';
 			$elements_fieldname = $id;
 			for($e = 0; $e < count($type_attributes['name']); $e++){
 				if($elements != NULL){

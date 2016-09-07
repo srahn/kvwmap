@@ -33,7 +33,7 @@ include('funktionen/input_check_functions.php');
 		}
 	}
 	
-	buildJSONString = function(id, is_array = false){
+	buildJSONString = function(id, is_array){
 		var field = document.getElementById(id);		
 		values = new Array();
 		elements = document.getElementsByName(id);
@@ -71,7 +71,7 @@ include('funktionen/input_check_functions.php');
 		outer_div = document.getElementById(fieldname+'_elements');
 		remove_element = document.getElementById(remove_element_id);
 		outer_div.removeChild(remove_element);
-		buildJSONString(fieldname);
+		buildJSONString(fieldname, false);
 	}
 	
 	nextdatasets = function(offset){
