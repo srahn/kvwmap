@@ -164,7 +164,7 @@
 							$datapart .= '&nbsp;<a title="automatisch generieren" href="javascript:auto_generate(new Array(\''.implode($attributes['name'], "','").'\'), \''.$attributes['the_geom'].'\', \''.$name.'\', '.$k.', '.$layer_id.');set_changed_flag(currentform.changed_'.$layer_id.'_'.$oid.')"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
 						}
 						else{
-							$datapart .= '&nbsp;<a title="Eingabewerkzeug verwenden" href="javascript:openCustomSubform('.$layer_id.', \''.$name.'\', \''.$name.'_'.$k.'\');"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
+							$datapart .= '&nbsp;<a title="Eingabewerkzeug verwenden" href="javascript:openCustomSubform('.$layer_id.', \''.$name.'\', new Array(\''.implode($attributes['name'], "','").'\'), \''.$name.'_'.$k.'\', '.$k.');"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
 						}
 					}
 				}break;
@@ -554,7 +554,7 @@
 							$datapart .= '&nbsp;<a title="automatisch generieren" href="javascript:auto_generate(new Array(\''.implode($attributes['name'], "','").'\'), \''.$attributes['the_geom'].'\', \''.$name.'\', '.$k.', '.$layer_id.');set_changed_flag(currentform.changed_'.$layer_id.'_'.$oid.')"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
 						}
 						else{
-							$datapart .= '&nbsp;<a title="Eingabewerkzeug verwenden" href="javascript:openCustomSubform('.$layer_id.', \''.$name.'\', \''.$name.'_'.$k.'\');"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
+							$datapart .= '&nbsp;<a title="Eingabewerkzeug verwenden" href="javascript:openCustomSubform('.$layer_id.', \''.$name.'\', new Array(\''.implode($attributes['name'], "','").'\'), \''.$name.'_'.$k.'\', '.$k.');"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
 						}
 					}
 				}

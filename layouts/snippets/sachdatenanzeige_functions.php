@@ -303,8 +303,8 @@ include('funktionen/input_check_functions.php');
 			document.getElementById(field_id).value = '';
 		}
 	}
-	 
-	auto_generate = function(attributenamesarray, geom_attribute, attribute, k, layer_id){
+	
+	get_current_attribute_values = function(attributenamesarray, geom_attribute, k){
 		var attributenames = '';
 		var attributevalues = '';
 		var geom = '';
@@ -327,10 +327,16 @@ include('funktionen/input_check_functions.php');
 				else attributevalues += 'POINT EMPTY|';		// leere Geometrie zurückliefern
 			}
 		}
-		ahah("index.php", "go=auto_generate&layer_id="+layer_id+"&attribute="+attribute+"&attributenames="+attributenames+"&attributevalues="+attributevalues, new Array(document.getElementById(attribute+'_'+k)), new Array("setvalue"));
+		return new Array(attributenames, attributevalues);
 	}
 	
-	openCustomSubform = function(layer_id, attribute, field_id){
+	auto_generate = function(attributenamesarray, geom_attribute, attribute, k, layer_id){
+		names_values = get_current_attribute_values(attributenamesarray, geom_attribute, k);
+		ahah("index.php", "go=auto_generate&layer_id="+layer_id+"&attribute="+attribute+"&attributenames="+names_values[0]+"&attributevalues="+names_values[1], new Array(document.getElementById(attribute+'_'+k)), new Array("setvalue"));
+	}
+	
+	openCustomSubform = function(layer_id, attribute, attributenamesarray, field_id, k){
+		names_values = get_current_attribute_values(attributenamesarray, '', k);
 		document.getElementById('sperrdiv').style.background = 'rgba(200,200,200,0.8)';
 		document.getElementById('sperrdiv').style.width = '100%';
 		subformWidth = document.GUI.browserwidth.value-70;
@@ -339,7 +345,7 @@ include('funktionen/input_check_functions.php');
 		subform += '<iframe id="customSubform" style="width:100%; height:100%" src=""></iframe>';
 		subform += '</div>';
 		document.getElementById('sperrdiv').innerHTML= subform;
-		ahah("index.php", "go=openCustomSubform&layer_id="+layer_id+"&attribute="+attribute+"&field_id="+field_id, new Array(document.getElementById('customSubform')), new Array("src"));
+		ahah("index.php", "go=openCustomSubform&layer_id="+layer_id+"&attribute="+attribute+"&attributenames="+names_values[0]+"&attributevalues="+names_values[1]+"&field_id="+field_id, new Array(document.getElementById('customSubform')), new Array("src"));
 	}
 	
 	closeCustomSubform = function(){
