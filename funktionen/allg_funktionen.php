@@ -17,6 +17,10 @@ function MapserverErrorHandler($errno, $errstr, $errfile, $errline){
 	return true;
 }
 
+function compare_names($a, $b){
+	return strcmp($a['name'], $b['name']);
+}
+
 function JSON_to_PG($json, $quote = ''){
 	if(is_array($json)){
 		for($i = 0; $i < count($json); $i++){
