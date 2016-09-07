@@ -128,8 +128,6 @@
     output += '<a title="Shapefiles bearbeiten" class="btn btn-link btn-xs  xpk-func-btn' + (funcIsDisabled ? disableFrag : '') + '" href="index.php?go=xplankonverter_shapefiles_index&konvertierung_id=' + value + '"><i class="fa fa-lg fa-upload"></i></a>';
 
     // Konvertieren und validieren
-    funcIsDisabled = row.status == "<?php echo Konvertierung::$STATUS['IN_GML_ERSTELLUNG']; ?>"
-                  || row.status == "<?php echo Konvertierung::$STATUS['IN_KONVERTIERUNG']; ?>";
     funcIsDisabled = row.status == "<?php echo Konvertierung::$STATUS['IN_ERSTELLUNG']; ?>"
                   || row.status == "<?php echo Konvertierung::$STATUS['IN_KONVERTIERUNG']; ?>"
                   || row.status == "<?php echo Konvertierung::$STATUS['KONVERTIERUNG_ERR']; ?>"

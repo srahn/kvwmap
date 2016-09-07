@@ -85,13 +85,13 @@ class Gml_builder {
       *,
       ST_AsGML(
           ST_Reverse(ST_Transform(
-            raeumlichergeltungsbereich,
+            COALESCE((raeumlichergeltungsbereich).flaeche, (raeumlichergeltungsbereich).multiflaeche),
             {$konvertierung->get('output_epsg')})),
           {$konvertierung->get('geom_precision')}) AS gml_raeumlichergeltungsbereich,
       ST_AsGML(
         3,
         ST_Transform(
-          raeumlichergeltungsbereich,
+            COALESCE((raeumlichergeltungsbereich).flaeche, (raeumlichergeltungsbereich).multiflaeche),
           {$konvertierung->get('output_epsg')}),
         {$konvertierung->get('geom_precision')},
         32) AS envelope";
@@ -153,7 +153,7 @@ class Gml_builder {
               32) AS envelope
         FROM $contentScheme.rp_bereich b
         WHERE b.gehoertzuplan = '" . $plan->get('gml_id') . "'";
-    echo $sql."<br>";
+    #echo $sql."<br>";
     $bereiche = pg_query($this->database->dbConn, $sql);
 
     // fetch complete list of attributes and their properties from UML-structure

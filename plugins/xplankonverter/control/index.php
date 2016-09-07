@@ -265,11 +265,10 @@ switch($this->go){
       return;
     }
     // now get konvertierung
-    $this->konvertierung = new Konvertierung($this);
-    $this->konvertierung->find_by('id', $this->formvars['konvertierung_id']);
+    $this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
 
     // check stelle
-    if (!isInStelleAllowed($this->Stelle->id, $this->konvertierung->get('stelle_id'))) return;
+    if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) return;
 
     // check applicability of status for external invokation
     $statusToSet = $this->formvars['status'];
@@ -415,8 +414,7 @@ sleep(5);
 			$response['msg'] = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
 		}
 		else {
-			$this->konvertierung = new Konvertierung($this);
-			$this->konvertierung->find_by('id', $this->formvars['konvertierung_id']);
+			$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
 			if (isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) {
 				if ($this->konvertierung->get('status') == Konvertierung::$STATUS['KONVERTIERUNG_OK']
 				 || $this->konvertierung->get('status') == Konvertierung::$STATUS['IN_GML_ERSTELLUNG']
@@ -428,7 +426,7 @@ sleep(5);
 
 					// XPlan-GML ausgeben
 					$this->gml_builder = new Gml_builder($this->pgdatabase);
-					$plan = RP_Plan::find_by('konvertierung_id', $this->konvertierung->get('id'));
+					$plan = RP_Plan::find_by_id($this,'konvertierung_id', $this->konvertierung->get('id'));
 					//$bereiche = new RP_Bereich($this);
 					//$bereiche->find_by('gehoertzuplan', $this->plan->get('gml_id'));
 					//$this->plan->bereiche = $bereiche;
@@ -459,8 +457,7 @@ sleep(5);
 	} break;
 
 	case 'xplankonverter_konvertierung_loeschen' : {
-		$konvertierung = new Konvertierung($this);
-		$konvertierung->find_by('id', $this->formvars['konvertierung_id']);
+		$konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
 		# Lösche gml-Datei
 		$gml_file = new gml_file(XPLANKONVERTER_SHAPE_PATH . $konvertierung->get('id') . '/xplan_' . $konvertierung->get('id') . '.gml');
 		if ($gml_file->exists()) {
@@ -513,7 +510,7 @@ sleep(5);
 
 }
 
-function isInStelleAllowed($guiStelleId, $requestStelleId) {
+function isInStelleAllowed($stelle, $requestStelleId) {
 	if ($stelle->id == $requestStelleId)
 		return true;
 	else {
