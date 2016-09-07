@@ -486,7 +486,7 @@ else {
 		      		<select name="wms_format">
 		      			<option value=""><?php echo $this->strPleaseSelect; ?></option>
 		      			<option <? if($this->layerdata['wms_format'] == 'image/png'){echo 'selected';} ?> value="image/png">image/png</option>
-		      			<option <? if($this->layerdata['wms_format'] == 'image/jpg'){echo 'selected';} ?> value="image/jpg">image/jpg</option>
+		      			<option <? if($this->layerdata['wms_format'] == 'image/jpeg'){echo 'selected';} ?> value="image/jpeg">image/jpeg</option>
 		      			<option <? if($this->layerdata['wms_format'] == 'image/gif'){echo 'selected';} ?> value="image/gif">image/gif</option>		      			
 		      		</select>
 		  		</td>
