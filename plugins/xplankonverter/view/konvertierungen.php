@@ -39,6 +39,10 @@
         status: "<?php echo Konvertierung::$STATUS['IN_KONVERTIERUNG']; ?>"
       },
       success: function(response) {
+        if (!response.success){
+          result.text(response.msg);
+          return;
+        }
         $('#konvertierungen_table').bootstrapTable('refresh');
         // konvertiere wenn Status gesetzt
         $.ajax({
@@ -51,6 +55,7 @@
           },
           success: function(response) {
             result.text(response.msg);
+            if (!response.success) return;
             // validiere, wenn Konvertierung erfolgreich
             $.ajax({
               url: 'index.php?go=xplankonverter_konvertierung_validate',
@@ -123,8 +128,6 @@
     output += '<a title="Shapefiles bearbeiten" class="btn btn-link btn-xs  xpk-func-btn' + (funcIsDisabled ? disableFrag : '') + '" href="index.php?go=xplankonverter_shapefiles_index&konvertierung_id=' + value + '"><i class="fa fa-lg fa-upload"></i></a>';
 
     // Konvertieren und validieren
-    funcIsDisabled = row.status == "<?php echo Konvertierung::$STATUS['IN_GML_ERSTELLUNG']; ?>"
-                  || row.status == "<?php echo Konvertierung::$STATUS['IN_KONVERTIERUNG']; ?>";
     funcIsDisabled = row.status == "<?php echo Konvertierung::$STATUS['IN_ERSTELLUNG']; ?>"
                   || row.status == "<?php echo Konvertierung::$STATUS['IN_KONVERTIERUNG']; ?>"
                   || row.status == "<?php echo Konvertierung::$STATUS['KONVERTIERUNG_ERR']; ?>"
@@ -206,6 +209,7 @@
         data-field="status"
         data-visible="true"
         data-sortable="true"
+				class="col-md-2"
       >Status</th>
       <th
         data-field="beschreibung"
@@ -216,7 +220,7 @@
         data-visible="true"
         data-formatter="konvertierungFunctionsFormatter"
         data-switchable="false"
-        class="text-right"
+        class="col-md-4"
       >Funktionen</th>
     </tr>
   </thead>

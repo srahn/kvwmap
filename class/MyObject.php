@@ -24,7 +24,7 @@ class MyObject {
         `" . $attribute . "` = '" . $value . "'
     ";
     $this->debug('<p>sql: ' . $sql);
-    $query = mysql_query($this->database->dbConn, $sql);
+    $query = mysql_query($sql, $this->database->dbConn);
     $this->data = mysql_fetch_assoc($query);
     return $this;
   }
@@ -44,7 +44,7 @@ class MyObject {
         " . $where . "
     ";
     $this->debug('<p>sql: ' . $sql);
-    $query = mysql_query($this->database->dbConn, $sql);
+    $query = mysql_query($sql, $this->database->dbConn);
     $this->data = mysql_fetch_assoc($query);
     return $this;
   }

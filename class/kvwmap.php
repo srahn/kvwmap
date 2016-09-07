@@ -36,8 +36,6 @@
 # GUI - Das Programm
 # debugfile - Klasse für die Debugdatei
 # LogFile
-# FormObj
-# selectFormObject extends FormObject
 # db_MapObj
 # Menue
 ########################################
@@ -98,6 +96,7 @@ class GUI {
     # mime_type html, pdf
     if (isset ($mime_type)) $this->mime_type=$mime_type;
 		$this->scaleUnitSwitchScale = 239210;
+		$trigger_functions = array();
   }
 	
 	public function __call($method, $arguments){
@@ -105,7 +104,22 @@ class GUI {
 			return call_user_func_array($this->{$method}, $arguments);
     }
 	}
-	
+
+	/**
+	*
+	* @params $layer Array mit Angben des Layers aus der MySQL-Datenbank
+	*/
+	function exec_trigger_function($fired, $event, $layer, $oid = '') {
+		if (array_key_exists($layer['trigger_function'], $this->trigger_functions)) {
+			$this->trigger_functions[$layer['trigger_function']](
+				$fired,
+				$event,
+				$layer,
+				$oid
+			);
+		}
+	}
+
 	function openCustomSubform(){
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
@@ -3149,9 +3163,9 @@ class GUI {
 				$this->param['str1'].= 'Layer: '.$layer['Name'].'<br>';
 				echo 'Layer: '.$layer['Name'].'<br>';
 				$layerdb = $mapDB->getlayerdatabase($layer['Layer_ID'], $this->Stelle->pgdbhost);
-	    	$attributes = $mapDB->load_attributes($layerdb, $layer['pfad']);
-	    	$mapDB->save_postgis_attributes($layer['Layer_ID'], $attributes, '', '');
-	    	$mapDB->delete_old_attributes($layer['Layer_ID'], $attributes);
+				$attributes = $mapDB->load_attributes($layerdb, $layer['pfad']);
+				$mapDB->save_postgis_attributes($layer['Layer_ID'], $attributes, '', '');
+				$mapDB->delete_old_attributes($layer['Layer_ID'], $attributes);
 			}
 		}
 	}
@@ -6409,10 +6423,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	/**
 	* This function generate sql for a layer in mysql with all its attributes and
 	* if they are from type datatype the datatypes and there attribtes.
+	* @params $table associatives Array mit Attribut name.
 	*/
-	function generate_layer($schema, $table) {
-		$sql = $this->database->generate_layer($schema, $table);
-		$table_attributes = $this->pgdatabase->get_table_attributes($schema, $table['name']);
+	function generate_layer($schema, $table, $group_id = 0, $connection = '', $epsg_code = '25832', $geometrie_column = '', $geometrietyp = '', $layertyp = '') {
+		#echo "schema: $schema, table: {$table['name']}, group_id: {$group_id}, connection: {$connection}, epsg_code: {$epsg_code}, geometrie_column: $geometrie_column, geometrietype: $geometrietyp, layertype: $layertype";
+		$sql = $this->database->generate_layer($schema, $table, $group_id, $connection, $epsg_code, $geometrie_column, $geometrietyp, $layertyp);
+		$table_attributes = $this->pgdatabase->get_attribute_information($schema, $table['name']);
 		$sql .= $this->generate_layer_attributes($schema, $table_attributes);
 		return $sql;
 	}
@@ -6453,7 +6469,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$sql .= $this->database->generate_datatype($schema, $table_attribute);
 
 		# generate datatypes attributes
-		$datatype_attributes = $this->pgdatabase->get_table_attributes($schema, $table_attribute['type']);
+		$datatype_attributes = $this->pgdatabase->get_attribute_information($schema, $table_attribute['type']);
 		$sql .= $this->generate_datatype_attributes($schema, $datatype_attributes);
 		return $sql;
 	}
@@ -6685,37 +6701,49 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     return $stellen_ids;
   }
 
-  function LayerLoeschen(){
-    $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-    $mapDB->deleteLayer($this->formvars['selected_layer_id']);
-    # auch die Klassen löschen
-    $this->classes = $mapDB->read_Classes($this->formvars['selected_layer_id']);
-    for($i = 0; $i < count($this->classes); $i++){
-      $mapDB->delete_Class($this->classes[$i]['Class_ID']);
-    }
-    # layer_attributes löschen
-    $mapDB->delete_layer_attributes($this->formvars['selected_layer_id']);
-    $mapDB->delete_layer_attributes2stelle($this->formvars['selected_layer_id'], $this->Stelle->id);
-    # Filter löschen
-    $mapDB->delete_layer_filterattributes($this->formvars['selected_layer_id']);
+	function LayerLoeschen(){
+		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$mapDB->deleteLayer($this->formvars['selected_layer_id']);
+		# auch die Klassen löschen
+		$this->classes = $mapDB->read_Classes($this->formvars['selected_layer_id']);
+		for($i = 0; $i < count($this->classes); $i++){
+			$mapDB->delete_Class($this->classes[$i]['Class_ID']);
+		}
+		# layer_attributes löschen
+		$mapDB->delete_layer_attributes($this->formvars['selected_layer_id']);
+		$mapDB->delete_layer_attributes2stelle($this->formvars['selected_layer_id'], $this->Stelle->id);
+		# Filter löschen
+		$mapDB->delete_layer_filterattributes($this->formvars['selected_layer_id']);
 
-    $layer[] = $this->formvars['selected_layer_id'];
-    $stelle[] = $this->Stelle->id;
-    $this->Stelle->deleteLayer($layer, $this->pgdatabase);
-    $this->user->rolle->deleteLayer('', $stelle, $layer);
-  }
+		$layer[] = $this->formvars['selected_layer_id'];
+		$stelle[] = $this->Stelle->id;
+		$this->Stelle->deleteLayer($layer, $this->pgdatabase);
+		$this->user->rolle->deleteLayer('', $stelle, $layer);
+	}
 
-  function LayerAnzeigen() {
-    # Abfragen aller Layer
-    $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+  function DatentypenAnzeigen() {
+    # Abfragen aller in mysql registrierten Datentypen
+    $mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
     if($this->formvars['order'] == ''){
-      $this->formvars['order'] = 'Name';
+      $this->formvars['order'] = 'name';
     }
-    $this->layerdaten = $mapDB->getall_Layer($this->formvars['order']);
-    $this->titel='Layerdaten';
-    $this->main='layerdaten.php';
+    $this->datatypes = $mapDB->getall_Datatypes($this->formvars['order']);
+    $this->titel='Datentypen';
+    $this->main='datatype_list.php';
     $this->output();
   }
+
+	function LayerAnzeigen() {
+		# Abfragen aller Layer
+		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		if($this->formvars['order'] == ''){
+			$this->formvars['order'] = 'Name';
+		}
+		$this->layerdaten = $mapDB->getall_Layer($this->formvars['order']);
+		$this->titel='Layerdaten';
+		$this->main='layerdaten.php';
+		$this->output();
+	}
 
   function GenerischeSuche_Suchen(){
 		if($this->last_query != ''){
@@ -6732,9 +6760,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         #$path = $layerset[0]['pfad'];
 				$path = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[0]['pfad']);
 				$path = str_replace('$language', $this->user->rolle->language, $path);
-        $privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
-        $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
-        $attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
+        $privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);        
+        $attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames'], false, true);
+				$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges, $attributes);
 		    # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
 		   	# $attributes = $mapDB->add_attribute_values($attributes, $layerdb, NULL, true); kann weg, weils weiter unten steht
 
@@ -7431,34 +7459,52 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->sachdaten_speichern();
 	}
 
-  function layer_Datensaetze_loeschen($output = true){
-    $success = true;
-    $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
-    $layerdb = $mapdb->getlayerdatabase($this->formvars['chosen_layer_id'], $this->Stelle->pgdbhost);
-    $checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
-    for($i = 0; $i < count($checkbox_names); $i++){
-      if($this->formvars[$checkbox_names[$i]] == 'on'){
-        $element = explode(';', $checkbox_names[$i]);     #  check;table_alias;table;oid
-        $sql = "DELETE FROM ".$element[2]." WHERE oid = ".$element[3];
-        $oids[] = $element[3];
-        #echo $sql.'<br>';
-        $ret = $layerdb->execSQL($sql,4, 1);
-        if ($ret[0]) {
-         $success = false;
-        }
-      }
-    }
-    # Dokumente auch löschen
-    $form_fields = explode('|', $this->formvars['form_field_names']);
-    for($i = 0; $i < count($form_fields); $i++){
-      if($form_fields[$i] != ''){
-        $element = explode(';', $form_fields[$i]);
-        if($element[4] == 'Dokument' AND in_array($element[3], $oids)){
-        	$this->deleteDokument($this->formvars[str_replace(';Dokument;', ';Dokument_alt;', $form_fields[$i])]);
-        }
-      }
-    }
-    if ($output) {
+  function layer_Datensaetze_loeschen($output = true) {
+		$layers = $this->user->rolle->getLayer($this->formvars['chosen_layer_id']);
+		$layer = $layers[0];
+		$mapdb = new db_mapObj($this->Stelle->id, $this->user->id);
+		$layerdb = $mapdb->getlayerdatabase($this->formvars['chosen_layer_id'], $this->Stelle->pgdbhost);
+
+		$success = true;
+		$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
+		for($i = 0; $i < count($checkbox_names); $i++){
+			if($this->formvars[$checkbox_names[$i]] == 'on') {
+				$element = explode(';', $checkbox_names[$i]);     #  check;table_alias;table;oid
+
+				# Before Delete trigger
+				if (!empty($layer['trigger_function'])) {
+					$this->exec_trigger_function('BEFORE', 'DELETE', $layer, $element[3]);
+				}
+
+				# Delete the object in database
+				$sql = "DELETE FROM ".$element[2]." WHERE oid = ".$element[3];
+				$oids[] = $element[3];
+				#echo $sql.'<br>';
+				$ret = $layerdb->execSQL($sql,4, 1);
+
+				# After delete trigger
+				# Derzeit steht der gelöschte Datensatz für after trigger nicht zur Verfügung.
+				# Wollte man das, müsste man den Datensatz vor dem Löschen abfragen und hier im 5. Parameter übergeben.
+				if (!empty($layer['trigger_function'])) {
+					$this->exec_trigger_function('AFTER', 'DELETE', $layer);
+				};
+
+				if ($ret[0]) {
+					$success = false;
+				}
+			}
+		}
+		# Dokumente auch löschen
+		$form_fields = explode('|', $this->formvars['form_field_names']);
+		for($i = 0; $i < count($form_fields); $i++){
+			if($form_fields[$i] != ''){
+				$element = explode(';', $form_fields[$i]);
+				if($element[4] == 'Dokument' AND in_array($element[3], $oids)){
+					$this->deleteDokument($this->formvars[str_replace(';Dokument;', ';Dokument_alt;', $form_fields[$i])]);
+				}
+			}
+		}
+		if ($output) {
 			if($this->formvars['embedded'] == ''){
 				if($success == false){
 					showAlert('Löschen fehlgeschlagen');
@@ -7488,12 +7534,13 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				}
 			}
 		}
+
 		return $success;
 	}
 
   function neuer_Layer_Datensatz_speichern(){
   	$_files = $_FILES;
-    $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
+    $mapdb = new db_mapObj($this->Stelle->id, $this->user->id);
     $layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
     $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
     $layerdb->setClientEncoding();
@@ -7510,6 +7557,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				$attributevalues[] = $this->formvars[$form_fields[$i]];
 				if($this->formvars['embedded'] != '')$formfieldstring .= '&'.$form_fields[$i].'='.$this->formvars[$form_fields[$i]];
         $tablename[$element[2]]['type'][] = $element[4];
+				$tablename[$element[2]]['datatype'][] = $element[6];
         $tablename[$element[2]]['formfield'][] = $form_fields[$i];
         # Dokumente sammeln
         if($element[4] == 'Dokument'){
@@ -7627,7 +7675,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	          }
 	          if($table['type'][$i] == 'Checkbox' AND $this->formvars[$table['formfield'][$i]] == ''){                       # Typ "Checkbox"
 	          	$this->formvars[$table['formfield'][$i]] = 'f';
-	          }
+	          }						
+						if(substr($table['datatype'][$i], 0, 1) == '_' OR is_numeric($table['datatype'][$i])){
+							$this->formvars[$table['formfield'][$i]] = JSON_to_PG(json_decode($this->formvars[$table['formfield'][$i]]));		# bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln									
+						}
             $sql.= "'".$this->formvars[$table['formfield'][$i]]."', ";      # Typ "normal"
           }
           elseif($table['type'][$i] == 'Geometrie'){                    # Typ "Geometrie"
@@ -7649,8 +7700,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         $sql = substr($sql, 0, strlen($sql)-2);
         $sql.= ")";
 
-        #echo $sql.'<br>';
         if($execute == true){
+					# Before Insert trigger
+					if (!empty($layerset[0]['trigger_function'])) {
+						$this->exec_trigger_function('BEFORE', 'INSERT', $layerset[0]);
+					}
+
           $this->debug->write("<p>file:kvwmap class:neuer_Layer_Datensatz_speichern :",4);
           if($this->formvars['embedded'] == ''){
             $ret = $layerdb->execSQL($sql,4, 1);
@@ -7658,8 +7713,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							$result = pg_fetch_row($ret[1]);
             	if(pg_affected_rows($ret[1]) > 0){
               	$this->formvars['value_'.$table['tablename'].'_oid'] = pg_last_oid($ret[1]);
+								$oid = $this->formvars['value_'.$table['tablename'].'_oid'];
             	}
-            	else{            		
+            	else {
             		$ret[0] = 1;
             	}
             }
@@ -7668,12 +7724,20 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
             $ret = $layerdb->execSQL($sql,4, 1);
             if(!$ret[0]){
               $last_oid = pg_last_oid($ret[1]);
+							$oid = $last_oid;
             }
           }
 
           if ($ret[0]) {
             $success = false;
           }
+					else {
+						# After Insert trigger
+						if (!empty($layerset[0]['trigger_function'])) {
+							$this->exec_trigger_function('AFTER', 'INSERT', $layerset[0], $oid);
+						}
+					}
+
         }
       }
     }
@@ -7765,7 +7829,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
         $layerdb->setClientEncoding();
         $privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
-        $layerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
+        $layerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames'], false, true);
         
         ######### für neuen Datensatz verwenden -> von der Sachdatenanzeige übergebene Formvars #######
 	      if($this->formvars['chosen_layer_id']){			
@@ -8822,28 +8886,51 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->daten_export();
   }
 
-  function Attributeditor(){
-    $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
-    $this->titel='Attribut-Editor';
-    $this->main='attribut_editor.php';
-    $this->layerdaten = $mapdb->get_postgis_layers('Name');
-    if($this->formvars['selected_layer_id']){
-      $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-      $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL, true);
-      # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
-			#$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, NULL, true);
-    }
-    $this->output();
-  }
+	function Attributeditor(){
+		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
+		$this->titel='Attribut-Editor';
+		$this->main='attribut_editor.php';
+		$this->layerdaten = $mapdb->get_postgis_layers('Name');
+		$this->datatypes = $mapdb->getall_Datatypes('name');
+		if($this->formvars['selected_layer_id']){
+			$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+			$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL, true);
+		}
+		if($this->formvars['selected_datatype_id']){
+			$this->attributes = $mapdb->read_datatype_attributes($this->formvars['selected_datatype_id'], NULL, NULL, true);
+		}
+		$this->output();
+	}
 
-  function Attributeditor_speichern(){
-    $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
-    $path = $mapdb->getPath($this->formvars['selected_layer_id']);
-    $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-    $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL, true);
-    $mapdb->save_attributes($this->attributes, $this->database, $this->formvars);
-    $this->Attributeditor();
-  }
+	function Attributeditor_speichern(){
+		switch (true) {
+			case (!empty($this->formvars['selected_layer_id']) && empty($this->formvars['selected_datatype_id'])) :
+				$this->Layerattribute_speichern();
+				break;
+			case (empty($this->formvars['selected_layer_id']) && !empty($this->formvars['selected_datatype_id'])) :
+				$this->Datentypattribute_speichern();
+				break;
+			default :
+				$this->Attributeditor();
+		}
+	}
+
+	function Layerattribute_speichern() {
+		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
+		$path = $mapdb->getPath($this->formvars['selected_layer_id']);
+		$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+		$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL, true);
+		$mapdb->save_layer_attributes($this->attributes, $this->database, $this->formvars);
+		$this->Attributeditor();
+	}
+
+	function Datentypattribute_speichern() {
+		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
+		$path = $mapdb->getPath($this->formvars['selected_datatype_id']);
+		$this->attributes = $mapdb->read_datatype_attributes($this->formvars['selected_datatype_id'], NULL, NULL, true);
+		$mapdb->save_datatype_attributes($this->attributes, $this->database, $this->formvars);
+		$this->Attributeditor();
+	}
 
   function layer_attributes_privileges(){
     $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
@@ -9221,20 +9308,16 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         for($i = 1; $i < count($this->selected_layers); $i++){
           $layerdb = $this->mapDB->getlayerdatabase($this->selected_layers[$i], $this->Stelle->pgdbhost);
           $attributes = $this->mapDB->getDataAttributes($layerdb, $this->selected_layers[$i]);
-          $this->attributes['name'] = array_intersect($this->attributes['name'], $attributes['name']);
+          $this->attributes = array_values(array_uintersect($this->attributes, $attributes, "compare_names"));
           $next_poly_id = $this->mapDB->getPolygonID($this->formvars['stelle'],$this->selected_layers[$i]);
           if($poly_id != $next_poly_id){
             $showpolygon = false;
           }
           $poly_id = $next_poly_id;
         }
-        $keys = array_keys($this->attributes['name']);
-        $lastindex = $keys[count($keys)-1];
-        for($i = 0; $i < $lastindex+1; $i++){
-          if(array_key_exists($i, $this->attributes['name'])){
-            $this->formvars['operator_'.$this->attributes['name'][$i]] = '';
-            $this->formvars['value_'.$this->attributes['name'][$i]] = '';
-          }
+				for($i = 0; $i < count($this->attributes); $i++){
+					$this->formvars['operator_'.$this->attributes[$i]['name']] = '';
+					$this->formvars['value_'.$this->attributes[$i]['name']] = '';
         }
         for($j = 0; $j < count($this->selected_layers); $j++){
           $filter = $this->mapDB->readAttributeFilter($this->formvars['stelle'], $this->selected_layers[$j]);
@@ -9302,86 +9385,82 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $this->selected_layers = explode(', ', $formvars['selected_layers']);
       $layerdb = $mapDB->getlayerdatabase($this->selected_layers[0], $this->Stelle->pgdbhost);
       $this->attributes = $mapDB->getDataAttributes($layerdb, $this->selected_layers[0]);
-      for($i = 1; $i < count($this->selected_layers); $i++){
-        $layerdb = $mapDB->getlayerdatabase($this->selected_layers[$i], $this->Stelle->pgdbhost);
-        $attributes = $mapDB->getDataAttributes($layerdb, $this->selected_layers[$i]);
-        $this->attributes['name'] = array_intersect($this->attributes['name'], $attributes['name']);
-      }
-      $keys = array_keys($this->attributes['name']);
-      $lastindex = $keys[count($keys)-1];
-      for($i = 0; $i < $lastindex+1; $i++){
-        if(array_key_exists($i, $this->attributes['name'])){
-          if($this->attributes['type'][$i] != 'geometry'){
-            //---------- normales Attribut -------------//
-            if($formvars['value_'.$this->attributes['name'][$i]] != '' AND $formvars['value_'.$this->attributes['name'][$i]] != '---- verschieden ----'){
-              //---------------- einfügen --------------//
-              $formvars['attributname'] = $this->attributes['name'][$i];
-              $formvars['attributvalue'] = $formvars['value_'.$this->attributes['name'][$i]];
-              $formvars['operator'] = $formvars['operator_'.$this->attributes['name'][$i]];
-              $formvars['type'] = $this->attributes['type'][$i];
-              for($j = 0; $j < count($this->selected_layers); $j++){
-                $formvars['layer'] = $this->selected_layers[$j];
-                $mapDB->saveAttributeFilter($formvars);
-              }
-            }
-            elseif($formvars['value_'.$this->attributes['name'][$i]] != '---- verschieden ----'){
-              //--------------- löschen ----------------//
-              for($j = 0; $j < count($this->selected_layers); $j++){
-                $mapDB->deleteFilter($formvars['stelle'], $this->selected_layers[$j], $this->attributes['name'][$i]);
-              }
-            }
-          }
-          else{   //---------- the_geom -------------//
-            if($this->formvars['check_'.$this->attributes['name'][$i]] != ''){
-              $polygonWeltkoordinaten = $this->formvars['newpathwkt'];
-              if(strpos($polygonWeltkoordinaten,'P') == 0){
-                $polygonWeltkoordinaten = str_replace('POLYGON((', 'MULTIPOLYGON(((', $polygonWeltkoordinaten);
-                $polygonWeltkoordinaten .= ')';
-              }
-              if($this->formvars['value_'.$this->attributes['name'][$i]] != '' AND $this->formvars['value_'.$this->attributes['name'][$i]] != '---- verschieden ----'){
-                //-------------- update -----------------//
-                $this->pgdatabase->updatepolygon($polygonWeltkoordinaten, $this->user->rolle->epsg_code, $this->formvars['value_'.$this->attributes['name'][$i]]);
-                $formvars['attributname'] = $this->attributes['name'][$i];
-                $formvars['attributvalue'] = $this->formvars['value_'.$this->attributes['name'][$i]];
-                $formvars['operator'] = $formvars['operator_'.$this->attributes['name'][$i]];
-                $formvars['type'] = $this->attributes['type'][$i];
-                for($j = 0; $j < count($this->selected_layers); $j++){
-                  $formvars['layer'] = $this->selected_layers[$j];
-                  $mapDB->saveAttributeFilter($formvars);
-                }
-              }
-              else{
-                //-------------- neu einfügen -----------------//
-                $poly_id = $this->pgdatabase->insertpolygon($polygonWeltkoordinaten, $this->user->rolle->epsg_code);
-                $formvars['attributname'] = $this->attributes['name'][$i];
-                $formvars['attributvalue'] = $poly_id;
-                $formvars['operator'] = $formvars['operator_'.$this->attributes['name'][$i]];
-                $formvars['type'] = $this->attributes['type'][$i];
-                for($j = 0; $j < count($this->selected_layers); $j++){
-                  //-------------- wenn vorhanden, alte Polygone löschen ----------//
-                  $poly_id = $mapDB->getPolygonID($this->formvars['stelle'],$this->selected_layers[$j]);
-                  if($poly_id != NULL){
-                    $this->pgdatabase->deletepolygon($poly_id);
-                  }
-                  $formvars['layer'] = $this->selected_layers[$j];
-                  $mapDB->saveAttributeFilter($formvars);
-                }
-              }
-            }
-            elseif($this->formvars['value_'.$this->attributes['name'][$i]] != '' AND $formvars['value_'.$this->attributes['name'][$i]] != '---- verschieden ----'){
-              //-------------- löschen -----------------//
-              for($j = 0; $j < count($this->selected_layers); $j++){
-                $mapDB->deleteFilter($formvars['stelle'], $this->selected_layers[$j], $this->attributes['name'][$i]);
-              }
-              if($mapDB->checkPolygon($this->formvars['value_'.$this->attributes['name'][$i]]) == false){
-                $this->pgdatabase->deletepolygon($this->formvars['value_'.$this->attributes['name'][$i]]);
-              }
-              $this->formvars['newpath'] = NULL;
-              $this->formvars['pathwkt'] = NULL;
-              $this->formvars['newpathwkt'] = NULL;
-              $this->formvars['result'] = NULL;
-            }
-          }
+			for($i = 1; $i < count($this->selected_layers); $i++){
+				$layerdb = $mapDB->getlayerdatabase($this->selected_layers[$i], $this->Stelle->pgdbhost);
+				$attributes = $mapDB->getDataAttributes($layerdb, $this->selected_layers[$i]);
+				$this->attributes = array_values(array_uintersect($this->attributes, $attributes, "compare_names"));
+			}
+			for($i = 0; $i < count($this->attributes); $i++){
+				if($this->attributes[$i]['type'] != 'geometry'){
+					//---------- normales Attribut -------------//
+					if($formvars['value_'.$this->attributes[$i]['name']] != '' AND $formvars['value_'.$this->attributes[$i]['name']] != '---- verschieden ----'){
+						//---------------- einfügen --------------//
+						$formvars['attributname'] = $this->attributes[$i]['name'];
+						$formvars['attributvalue'] = $formvars['value_'.$this->attributes[$i]['name']];
+						$formvars['operator'] = $formvars['operator_'.$this->attributes[$i]['name']];
+						$formvars['type'] = $this->attributes[$i]['type'];
+						for($j = 0; $j < count($this->selected_layers); $j++){
+							$formvars['layer'] = $this->selected_layers[$j];
+							$mapDB->saveAttributeFilter($formvars);
+						}
+					}
+					elseif($formvars['value_'.$this->attributes[$i]['name']] != '---- verschieden ----'){
+						//--------------- löschen ----------------//
+						for($j = 0; $j < count($this->selected_layers); $j++){
+							$mapDB->deleteFilter($formvars['stelle'], $this->selected_layers[$j], $this->attributes[$i]['name']);
+						}
+					}
+				}
+				else{   //---------- the_geom -------------//
+					if($this->formvars['check_'.$this->attributes[$i]['name']] != ''){
+						$polygonWeltkoordinaten = $this->formvars['newpathwkt'];
+						if(strpos($polygonWeltkoordinaten,'P') == 0){
+							$polygonWeltkoordinaten = str_replace('POLYGON((', 'MULTIPOLYGON(((', $polygonWeltkoordinaten);
+							$polygonWeltkoordinaten .= ')';
+						}
+						if($this->formvars['value_'.$this->attributes[$i]['name']] != '' AND $this->formvars['value_'.$this->attributes[$i]['name']] != '---- verschieden ----'){
+							//-------------- update -----------------//
+							$this->pgdatabase->updatepolygon($polygonWeltkoordinaten, $this->user->rolle->epsg_code, $this->formvars['value_'.$this->attributes[$i]['name']]);
+							$formvars['attributname'] = $this->attributes[$i]['name'];
+							$formvars['attributvalue'] = $this->formvars['value_'.$this->attributes[$i]['name']];
+							$formvars['operator'] = $formvars['operator_'.$this->attributes[$i]['name']];
+							$formvars['type'] = $this->attributes[$i]['type'];
+							for($j = 0; $j < count($this->selected_layers); $j++){
+								$formvars['layer'] = $this->selected_layers[$j];
+								$mapDB->saveAttributeFilter($formvars);
+							}
+						}
+						else{
+							//-------------- neu einfügen -----------------//
+							$poly_id = $this->pgdatabase->insertpolygon($polygonWeltkoordinaten, $this->user->rolle->epsg_code);
+							$formvars['attributname'] = $this->attributes[$i]['name'];
+							$formvars['attributvalue'] = $poly_id;
+							$formvars['operator'] = $formvars['operator_'.$this->attributes[$i]['name']];
+							$formvars['type'] = $this->attributes[$i]['type'];
+							for($j = 0; $j < count($this->selected_layers); $j++){
+								//-------------- wenn vorhanden, alte Polygone löschen ----------//
+								$poly_id = $mapDB->getPolygonID($this->formvars['stelle'],$this->selected_layers[$j]);
+								if($poly_id != NULL){
+									$this->pgdatabase->deletepolygon($poly_id);
+								}
+								$formvars['layer'] = $this->selected_layers[$j];
+								$mapDB->saveAttributeFilter($formvars);
+							}
+						}
+					}
+					elseif($this->formvars['value_'.$this->attributes[$i]['name']] != '' AND $formvars['value_'.$this->attributes[$i]['name']] != '---- verschieden ----'){
+						//-------------- löschen -----------------//
+						for($j = 0; $j < count($this->selected_layers); $j++){
+							$mapDB->deleteFilter($formvars['stelle'], $this->selected_layers[$j], $this->attributes[$i]['name']);
+						}
+						if($mapDB->checkPolygon($this->formvars['value_'.$this->attributes[$i]['name']]) == false){
+							$this->pgdatabase->deletepolygon($this->formvars['value_'.$this->attributes[$i]['name']]);
+						}
+						$this->formvars['newpath'] = NULL;
+						$this->formvars['pathwkt'] = NULL;
+						$this->formvars['newpathwkt'] = NULL;
+						$this->formvars['result'] = NULL;
+					}
         }
       }
     }
@@ -10899,6 +10978,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
               if($tablename AND $formtype != 'Text_not_saveable' AND $formtype != 'Auswahlfeld_not_saveable' AND $formtype != 'SubFormPK' AND $formtype != 'SubFormFK' AND $formtype != 'SubFormEmbeddedPK' AND $attributname != 'the_geom'){
               	if(in_array($datatype, array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))){
               		$this->formvars[$form_fields[$i]] = str_replace(' ', '', $this->formvars[$form_fields[$i]]);		# bei Zahlen das Leerzeichen (Tausendertrenner) entfernen
+              	}								
+								if(substr($datatype, 0, 1) == '_' OR is_numeric($datatype)){
+              		$this->formvars[$form_fields[$i]] = JSON_to_PG(json_decode($this->formvars[$form_fields[$i]]));		# bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln									
               	}
                 if($this->formvars[$form_fields[$i]] == ''){
 									$eintrag = 'NULL';
@@ -10959,8 +11041,15 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							#if($filter != ''){							# erstmal wieder rausgenommen, weil der Filter sich auf Attribute beziehen kann, die zu anderen Tabellen gehören
 							#  $sql .= " AND ".$filter;
 							#}
+
+							# Before Update trigger
+							if (!empty($layer['trigger_function'])) {
+								$this->exec_trigger_function('BEFORE', 'UPDATE', $layerset[$layer_id], $oid);
+							}
+
 							$this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
-							$ret = $layerdb[$layer_id]->execSQL($sql,4, 1);			
+							$ret = $layerdb[$layer_id]->execSQL($sql,4, 1);
+
 							if(!$ret[0]){
 								$result = pg_fetch_row($ret[1]);
 								if(pg_affected_rows($ret[1]) == 0){
@@ -10968,6 +11057,13 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 									$success = false;
 								}
 							}
+							else {
+								# After Update trigger
+								if (!empty($layer['trigger_function'])) {
+									$this->exec_trigger_function('AFTER', 'UPDATE', $layerset[$layer_id], $oid);
+								}
+							}
+
 						}
 					}
 				}
@@ -11169,8 +11265,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							$path = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[$i]['pfad']);
 							$path = str_replace('$language', $this->user->rolle->language, $path);
 							$privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
-							$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
-							$layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames']);
+							$layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames'], false, true);
+							$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges, $layerset[$i]['attributes']);
+							
 							# weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)  ---> steht weiter unten
 
 							# order by rausnehmen
@@ -13370,213 +13467,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 } # end of class GUI
 
-
-########################################################
-# Klasse zum dynamischen Erzeugen von Formularobjekten #
-########################################################
-# Klasse FormObject #
-#####################
-
-class FormObject {
-  var $type;
-  var $html;
-  var $selected;
-  var $select;
-  var $hidden;
-  var $text;
-  var $anzValues;
-
-  ###################### Liste der Funktionen ####################################
-  #
-  # function FormObject($name,$type,$value,$selectedValue,$label,$size,$maxlenght,$multiple) - Construktor
-  # function addOption($value,$selected,$label)
-  # function changeSize($size)
-  # function insertOption($value,$selected,$label,$insertafter)
-  # function outputHTML()
-  #
-  ################################################################################
-
-  function FormObject($name,$type,$value,$selectedValue,$label,$size,$maxlenght,$multiple, $width, $disabled = NULL) {
-    if (!is_array($selectedValue)) { $selectedValue=array($selectedValue); }
-    $this->type=$type;
-    $this->width=$width;
-		$this->disabled=$disabled;
-    switch ($type) {
-      case "select" : {
-        if($value){
-          $this->AnzValues=count($value);
-        }
-        $this->select['name']=$name;
-        if ($size=='Anzahl Werte') {
-          $this->select['size']=$this->AnzValues;
-        }
-        else {
-          $this->select['size']=$size;
-        }
-        $this->select['multiple']=$multiple;
-        for ($i=0;$i<$this->AnzValues;$i++) {
-          $this->select['option'][$i]['value']=$value[$i];
-          for ($j=0;$j<count($selectedValue);$j++) {
-            if ($selectedValue[$j]==$value[$i]) {
-              $this->selected=1;
-              $this->select['option'][$i]['selected']=1;
-            }
-          }
-          $this->select['option'][$i]['label']=$label[$i];
-        }
-      } break;
-      case "text" : {
-        $this->text['name']=$name;
-        $this->text['value']=$value[0];
-        $this->text['size']=$size;
-        $this->text['maxlength']=$maxlength;
-      } break;
-      default : { # type hidden
-        $this->hidden['name']=$name;
-        $this->hidden['value']=$value[0];
-      }
-    } # ende switch type
-    $this->outputHTML();
-  } # ende constructor
-
-  function addJavaScript($event,$script){
-    $this->JavaScript.=' '.$event.'="'.$script.'"';
-  }
-
-  function addOption($value,$selected,$label) {
-    $anzOption=count($this->select['option']);
-    $this->select[option][$anzOption]['value']=$value;
-    $this->select[option][$anzOption]['selected']=$selected;
-    $this->select[option][$anzOption]['label']=$label;
-  }
-
-  function insertOption($value,$selected,$label,$insertafter) {
-    # insertafter ist die Nummer der Option, nach der die neue Option eingefügt werden soll
-    # die Zählung beginnt mit 1. Wenn z.B. eine Option an den Anfang gestellt werden soll
-    # muss insertafter = 0 sein.
-    $anzOption=count($this->select['option']);
-    $oldvalue=$value;
-    $oldselected=$selected;
-    $oldlabel=$label;
-    for($i=$insertafter;$i<$anzOption;$i++) {
-      $tmpvalue=$this->select['option'][$i]['value'];
-      $tmpselected=$this->select['option'][$i]['selected'];
-      $tmplabel=$this->select['option'][$i]['label'];
-      $this->select['option'][$i]['value']=$oldvalue;
-      $this->select['option'][$i]['selected']=$oldselected;
-      $this->select['option'][$i]['label']=$oldlabel;
-      $oldvalue=$tmpvalue;
-      $oldselected=$tmpselected;
-      $oldlabel=$tmplabel;
-    }
-    $this->select['option'][$anzOption]['value']=$oldvalue;
-    $this->select['option'][$anzOption]['selected']=$oldselected;
-    $this->select['option'][$anzOption]['label']=$oldlabel;
-  }
-
-  function changeSize($size) {
-    switch ($this->type) {
-      case 'select' : {
-        $this->select['size']=$size;
-      } break;
-      case 'text' : {
-        $this->text['size']=$size;
-      } break;
-    }
-  }
-
-  function outputHTML() {
-    #2005-11-29_pk
-    switch ($this->type) {
-      case "select" : {
-        $this->html ="<select name='".$this->select["name"]."' size='".$this->select["size"]."' ";
-        if($this->width > 0){
-          $this->html.="style='width:".$this->width."px'";
-        }
-				if($this->disabled){
-          $this->html.=' disabled="true" ';
-        }
-        if ($this->select["multiple"]) {
-          $this->html.=" multiple";
-        }
-        if ($this->JavaScript!='') {
-          $this->html.=$this->JavaScript;
-        }
-        $this->html.=">\n";
-        for ($i=0;$i<count($this->select[option]);$i++) {
-          $this->html.="<option value='".$this->select["option"][$i]["value"]."'";
-          if ($this->select["option"][$i]["selected"]) {
-            $this->html.=" selected";
-          }
-          $this->html.=">".$this->select["option"][$i]["label"]."</option>\n";
-        }
-        $this->html.="</select>";
-      } break;
-      case "text" : {
-        $this->html ="<input type='text' name='".$this->text["name"]."' value='".$this->text["value"]."'";
-        $this->html.=" size='".$this->text["size"]."' maxlength='".$this->text["size"]."'>";
-      } break;
-      case "hidden" : {
-        $this->html ="<input type='hidden' name='".$this->hidden["name"]."' value='".$this->hidden["value"]."'";
-      }
-    }
-  }
-} # end of Classe FormObject
-
-
-##########################################################################################
-# Classe zum dynamischen Erzeugen von Formularobjekten mit automatischem Abschicken nach #
-# des Formulars nach Änderung der Auswahl über                                           #
-# Java Script Funktionen (onchange='...' Erweiterung von Classe FormObject               #
-##########################################################################################
-# Klasse selectFormObject #
-###########################
-
-class selectFormObject extends FormObject{
-
-  ###################### Liste der Funktionen ####################################
-  #
-  # function outputHTML()
-  #
-  ################################################################################
-
-  function outputHTML() {
-    $this->onchange=$onchange;
-    switch ($this->type) {
-      case 'select' : {
-        $this->html ="<select name=\"".$this->select['name']."\" size=\"".$this->select['size']."\"";
-        if ($this->select['multiple']) {
-          $this->html.=' multiple';
-        }
-        if ($this->JavaScript!='') {
-          $this->html.=$this->JavaScript;
-        }
-        if($this->nochange != true){
-          $this->html.=" onchange=\"document.GUI.submit()\">\n";
-        }
-        for ($i=0;$i<count($this->select[option]);$i++) {
-          $this->html.="<option value=\"".$this->select['option'][$i]['value']."\"";
-          if ($this->select['option'][$i]['selected']) {
-            $this->html.=' selected';
-          }
-          $this->html.=">".$this->select['option'][$i]['label']."</option>\n";
-        }
-        $this->html.="</select>\n";
-      } break;
-
-      case 'text' : {
-        $this->html ='<input type="text" name="'.$this->text['name'].'" value="'.$this->text['value'].'"';
-        $this->html.=' size="'.$this->text['size'].'" maxlength="'.$this->text['size'].'">';
-      } break;
-
-      case 'hidden' : {
-        $this->html ='<input type="hidden" name="'.$this->hidden['name'].'" value="'.$this->hidden['value'].'"';
-      }
-    }
-  }
-}
-
-
 ##############################################################
 # Klasse MapObject zum laden der Map-Daten aus der Datenbank #
 ##############################################################
@@ -14025,59 +13915,59 @@ class db_mapObj{
     return $doc_path;
   }
 
-  function getlayerdatabase($layer_id, $host){
-  	if($layer_id < 0){	# Rollenlayer
-  		$sql ='SELECT `connection`, "'.CUSTOM_SHAPE_SCHEMA.'" as `schema` FROM rollenlayer WHERE -id = '.$layer_id.' AND connectiontype = 6';
-  	}
-  	else{
-    	$sql ='SELECT `connection`, `schema` FROM layer WHERE Layer_ID = '.$layer_id.' AND connectiontype = 6';
-  	}
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->getlayerdatabase - Lesen des connection-Strings des Layers:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs = mysql_fetch_array($query);
-    $connectionstring = $rs[0];
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->getlayerdatabase - Gefundener Connection String des Layers:<br>".$connectionstring, 4);
-    if($connectionstring != ''){
-      $layerdb = new pgdatabase();
-      if($rs[1] == ''){
-      	$rs[1] = 'public';
-      }
-      $layerdb->schema = $rs[1];
-      $connection = explode(' ', trim($connectionstring));
-      for($j = 0; $j < count($connection); $j++){
-        if($connection[$j] != ''){
-          $value = explode('=', $connection[$j]);
-          if(strtolower($value[0]) == 'user'){
-            $layerdb->user = $value[1];
-          }
-          if(strtolower($value[0]) == 'dbname'){
-            $layerdb->dbName = $value[1];
-          }
-          if(strtolower($value[0]) == 'password'){
-            $layerdb->passwd = $value[1];
-          }
-          if(strtolower($value[0]) == 'host'){
-            $layerdb->host = $value[1];
-          }
-          if(strtolower($value[0]) == 'port'){
-            $layerdb->port = $value[1];
-          }
-        }
-      }
-      if (!isset($layerdb->host)) {
-        $layerdb->host = $host;
-      }
-      if (!$layerdb->open()) {
-        echo 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden:';
-        echo '<br>Host: '.$layerdb->host;
-        echo '<br>User: '.$layerdb->user;
-        echo '<br>Datenbankname: '.$layerdb->dbName;
-        exit;
-      }
-    }
-    return $layerdb;
-  }
+	function getlayerdatabase($layer_id, $host){
+		if($layer_id < 0){	# Rollenlayer
+			$sql ='SELECT `connection`, "'.CUSTOM_SHAPE_SCHEMA.'" as `schema` FROM rollenlayer WHERE -id = '.$layer_id.' AND connectiontype = 6';
+		}
+		else{
+			$sql ='SELECT `connection`, `schema` FROM layer WHERE Layer_ID = '.$layer_id.' AND connectiontype = 6';
+		}
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->getlayerdatabase - Lesen des connection-Strings des Layers:<br>".$sql,4);
+		$query=mysql_query($sql);
+		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+		$rs = mysql_fetch_array($query);
+		$connectionstring = $rs[0];
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->getlayerdatabase - Gefundener Connection String des Layers:<br>".$connectionstring, 4);
+		if($connectionstring != ''){
+			$layerdb = new pgdatabase();
+			if($rs[1] == ''){
+				$rs[1] = 'public';
+			}
+			$layerdb->schema = $rs[1];
+			$connection = explode(' ', trim($connectionstring));
+			for($j = 0; $j < count($connection); $j++){
+				if($connection[$j] != ''){
+					$value = explode('=', $connection[$j]);
+					if(strtolower($value[0]) == 'user'){
+						$layerdb->user = $value[1];
+					}
+					if(strtolower($value[0]) == 'dbname'){
+						$layerdb->dbName = $value[1];
+					}
+					if(strtolower($value[0]) == 'password'){
+						$layerdb->passwd = $value[1];
+					}
+					if(strtolower($value[0]) == 'host'){
+						$layerdb->host = $value[1];
+					}
+					if(strtolower($value[0]) == 'port'){
+						$layerdb->port = $value[1];
+					}
+				}
+			}
+			if (!isset($layerdb->host)) {
+				$layerdb->host = $host;
+			}
+			if (!$layerdb->open()) {
+				echo 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden:';
+				echo '<br>Host: '.$layerdb->host;
+				echo '<br>User: '.$layerdb->user;
+				echo '<br>Datenbankname: '.$layerdb->dbName;
+				exit;
+			}
+		}
+		return $layerdb;
+	}
 
   function getSelectFromData($data){
     if(strpos($data, '(') === false){
@@ -14125,7 +14015,11 @@ class db_mapObj{
   function add_attribute_values($attributes, $database, $query_result, $withvalues = true, $stelle_id, $only_current_enums = false){
     # Diese Funktion fügt den Attributen je nach Attributtyp zusätzliche Werte hinzu. Z.B. bei Auswahlfeldern die Auswahlmöglichkeiten.
     for($i = 0; $i < count($attributes['name']); $i++){
-			if($attributes['constraints'][$i] != '' AND !in_array($attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))){  # das sind die Auswahlmöglichkeiten, die durch die Tabellendefinition in Postgres fest vorgegeben sind
+			$type = ltrim($attributes['type'][$i], '_');
+			if(is_numeric($type)){
+				$attributes['type_attributes'][$i] = $this->add_attribute_values($attributes['type_attributes'][$i], $database, $query_result, $withvalues, $stelle_id, $only_current_enums);
+			}
+			if($attributes['options'][$i] == '' AND $attributes['constraints'][$i] != '' AND !in_array($attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))){  # das sind die Auswahlmöglichkeiten, die durch die Tabellendefinition in Postgres fest vorgegeben sind
       	$attributes['enum_value'][$i] = explode(',', str_replace("'", "", $attributes['constraints'][$i]));
       	$attributes['enum_output'][$i] = $attributes['enum_value'][$i];
       }
@@ -14337,68 +14231,71 @@ class db_mapObj{
     return $attributes;
   }
   
-  function save_postgis_attributes($layer_id, $attributes, $maintable, $schema){
-    	for($i = 0; $i < count($attributes['name']); $i++){
-    		$sql = "INSERT INTO layer_attributes SET ";
-  	  	$sql.= "layer_id = ".$layer_id.", ";
-  	  	$sql.= "name = '".$attributes['name'][$i]."', ";
-  	  	$sql.= "real_name = '".$attributes['real_name'][$attributes['name'][$i]]."', ";
-  	  	$sql.= "tablename = '".$attributes['table_name'][$i]."', ";
-  	  	$sql.= "table_alias_name = '".$attributes['table_alias_name'][$attributes['name'][$i]]."', ";
-  	  	$sql.= "type = '".$attributes['type'][$i]."', ";
-  	  	$sql.= "geometrytype = '".$attributes['geomtype'][$attributes['name'][$i]]."', ";
-  	  	$sql.= "constraints = '".addslashes($attributes['constraints'][$i])."', ";
-  	  	$sql.= "nullable = ".$attributes['nullable'][$i].", ";
-  	  	$sql.= "length = ".$attributes['length'][$i].", ";
-  	  	$sql.= "decimal_length = ".$attributes['decimal_length'][$i].", ";
-  	  	$sql.= "`default` = '".addslashes($attributes['default'][$i])."', ";
-  	  	$sql.= "`order` = ".$i;
-  	  	$sql.= " ON DUPLICATE KEY UPDATE ";
-  	  	$sql.= "real_name = '".$attributes['real_name'][$attributes['name'][$i]]."', ";
-  	  	$sql.= "tablename = '".$attributes['table_name'][$i]."', ";
-  	  	$sql.= "table_alias_name = '".$attributes['table_alias_name'][$attributes['name'][$i]]."', ";
-  	  	$sql.= "type = '".$attributes['type'][$i]."', ";
-  	  	$sql.= "geometrytype = '".$attributes['geomtype'][$attributes['name'][$i]]."', ";
-  	  	$sql.= "constraints = '".addslashes($attributes['constraints'][$i])."', ";
-  	  	$sql.= "nullable = ".$attributes['nullable'][$i].", ";
-  	  	$sql.= "length = ".$attributes['length'][$i].", ";
-  	  	$sql.= "decimal_length = ".$attributes['decimal_length'][$i].", ";
-  	  	$sql.= "`default` = '".addslashes($attributes['default'][$i])."', ";
-  	  	$sql.= "`order` = ".$i;
-  	  	$this->debug->write("<p>file:kvwmap class:db_mapObj->save_postgis_attributes - Speichern der Layerattribute:<br>".$sql,4);
-  	    $query=mysql_query($sql);
-  	    if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
-    	}
-    	
-    	if($maintable == ''){
-				$maintable = $attributes['all_table_names'][0];
-    		$sql = "UPDATE layer SET maintable = '".$maintable."' WHERE (maintable IS NULL OR maintable = '') AND Layer_ID = ".$layer_id;
-    		$this->debug->write("<p>file:kvwmap class:db_mapObj->save_postgis_attributes - Speichern der Layerattribute:<br>".$sql,4);
-  	    $query=mysql_query($sql);
-  	    if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
-    	}
-			
-			$sql = "select 1 from information_schema.views WHERE table_name = '".$maintable."' AND table_schema = '".$schema."'";
-			$query = pg_query($sql);
-			$is_view = pg_num_rows($query);
-			$sql = "UPDATE layer SET maintable_is_view = ".$is_view." WHERE Layer_ID = ".$layer_id;
+	function save_postgis_attributes($layer_id, $attributes, $maintable, $schema){
+		for($i = 0; $i < count($attributes); $i++){
+			if($attributes[$i]['nullable'] == '')$attributes[$i]['nullable'] = 'NULL';
+			if($attributes[$i]['length'] == '')$attributes[$i]['length'] = 'NULL';
+			if($attributes[$i]['decimal_length'] == '')$attributes[$i]['decimal_length'] = 'NULL';
+			$sql = "INSERT INTO layer_attributes SET ";
+			$sql.= "layer_id = ".$layer_id.", ";
+			$sql.= "name = '".$attributes[$i]['name']."', ";
+			$sql.= "real_name = '".$attributes[$i]['real_name']."', ";
+			$sql.= "tablename = '".$attributes[$i]['table_name']."', ";
+			$sql.= "table_alias_name = '".$attributes[$i]['table_alias_name']."', ";
+			$sql.= "type = '".$attributes[$i]['type']."', ";
+			$sql.= "geometrytype = '".$attributes[$i]['geomtype']."', ";
+			$sql.= "constraints = '".addslashes($attributes[$i]['constraints'])."', ";
+			$sql.= "nullable = ".$attributes[$i]['nullable'].", ";
+			$sql.= "length = ".$attributes[$i]['length'].", ";			
+			$sql.= "decimal_length = ".$attributes[$i]['decimal_length'].", ";
+			$sql.= "`default` = '".addslashes($attributes[$i]['default'])."', ";
+			$sql.= "`order` = ".$i;
+			$sql.= " ON DUPLICATE KEY UPDATE ";
+			$sql.= "real_name = '".$attributes[$i]['real_name']."', ";
+			$sql.= "tablename = '".$attributes[$i]['table_name']."', ";
+			$sql.= "table_alias_name = '".$attributes[$i]['table_alias_name']."', ";
+			$sql.= "type = '".$attributes[$i]['type']."', ";
+			$sql.= "geometrytype = '".$attributes[$i]['geomtype']."', ";
+			$sql.= "constraints = '".addslashes($attributes[$i]['constraints'])."', ";
+			$sql.= "nullable = ".$attributes[$i]['nullable'].", ";
+			$sql.= "length = ".$attributes[$i]['length'].", ";
+			$sql.= "decimal_length = ".$attributes[$i]['decimal_length'].", ";
+			$sql.= "`default` = '".addslashes($attributes[$i]['default'])."', ";
+			$sql.= "`order` = ".$i;
 			$this->debug->write("<p>file:kvwmap class:db_mapObj->save_postgis_attributes - Speichern der Layerattribute:<br>".$sql,4);
 			$query=mysql_query($sql);
 			if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+		}
     	
-    	# den PRIMARY KEY constraint rausnehmen, falls der tablename nicht der maintable entspricht
-    	$sql = "UPDATE layer_attributes, layer SET constraints = '' WHERE layer_attributes.layer_id = ".$layer_id." AND layer.Layer_ID = ".$layer_id." AND constraints = 'PRIMARY KEY' AND tablename != maintable";
-    	$this->debug->write("<p>file:kvwmap class:db_mapObj->save_postgis_attributes - Speichern der Layerattribute:<br>".$sql,4);
-  	  $query=mysql_query($sql);
-  	  if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }	
-  }
+		if($maintable == ''){
+			$maintable = $attributes[0]['table_name'];
+			$sql = "UPDATE layer SET maintable = '".$maintable."' WHERE (maintable IS NULL OR maintable = '') AND Layer_ID = ".$layer_id;
+			$this->debug->write("<p>file:kvwmap class:db_mapObj->save_postgis_attributes - Speichern der Layerattribute:<br>".$sql,4);
+			$query=mysql_query($sql);
+			if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+		}
+			
+		$sql = "select 1 from information_schema.views WHERE table_name = '".$maintable."' AND table_schema = '".$schema."'";
+		$query = pg_query($sql);
+		$is_view = pg_num_rows($query);
+		$sql = "UPDATE layer SET maintable_is_view = ".$is_view." WHERE Layer_ID = ".$layer_id;
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->save_postgis_attributes - Speichern der Layerattribute:<br>".$sql,4);
+		$query=mysql_query($sql);
+		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+    	
+		# den PRIMARY KEY constraint rausnehmen, falls der tablename nicht der maintable entspricht
+		$sql = "UPDATE layer_attributes, layer SET constraints = '' WHERE layer_attributes.layer_id = ".$layer_id." AND layer.Layer_ID = ".$layer_id." AND constraints = 'PRIMARY KEY' AND tablename != maintable";
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->save_postgis_attributes - Speichern der Layerattribute:<br>".$sql,4);
+		$query=mysql_query($sql);
+		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }	
+	}
   
   function delete_old_attributes($layer_id, $attributes){
   	$sql = "DELETE FROM layer_attributes WHERE layer_id = ".$layer_id;
   	if($attributes){
   		$sql.= " AND name NOT IN (";
-	  	for($i = 0; $i < count($attributes['name']); $i++){
-	  		$sql .= "'".$attributes['name'][$i]."',";
+	  	for($i = 0; $i < count($attributes); $i++){
+	  		$sql .= "'".$attributes[$i]['name']."',";
 	  	}
 	  	$sql = substr($sql, 0, -1);
 	  	$sql .=")";
@@ -14641,7 +14538,8 @@ class db_mapObj{
     $sql .= "kurzbeschreibung = '".$formvars['kurzbeschreibung']."',";
     $sql .= "datenherr = '".$formvars['datenherr']."',";
     $sql .= "metalink = '".$formvars['metalink']."', ";
-		$sql .= "status = '".$formvars['status']."'";
+		$sql .= "status = '".$formvars['status']."', ";
+		$sql .= "trigger_function = '" . $formvars['trigger_function'] . "'";
     $sql .= " WHERE Layer_ID = ".$formvars['selected_layer_id'];
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->updateLayer - Aktualisieren eines Layers:<br>".$sql,4);
@@ -14805,7 +14703,42 @@ class db_mapObj{
     return mysql_insert_id();
   }
 
-  function save_attributes($attributes, $database, $formvars){
+  function save_datatype_attributes($attributes, $database, $formvars){
+		global $supportedLanguages;
+    for($i = 0; $i < count($attributes['name']); $i++){
+      $sql = 'INSERT INTO datatype_attributes SET ';
+      $sql.= 'datatype_id = '.$formvars['selected_datatype_id'].', ';
+      $sql.= 'name = "'.$attributes['name'][$i].'", ';
+      $sql.= 'form_element_type = "'.$formvars['form_element_'.$attributes['name'][$i]].'", ';
+      $sql.= "options = '".$formvars['options_'.$attributes['name'][$i]]."', ";
+      $sql.= 'tooltip = "'.$formvars['tooltip_'.$attributes['name'][$i]].'", ';
+      $sql.= '`group` = "'.$formvars['group_'.$attributes['name'][$i]].'", ';
+			if($formvars['raster_visibility_'.$attributes['name'][$i]] == '')$formvars['raster_visibility_'.$attributes['name'][$i]] = 'NULL';
+      $sql.= 'raster_visibility = '.$formvars['raster_visibility_'.$attributes['name'][$i]].', ';
+      if($formvars['mandatory_'.$attributes['name'][$i]] == '')$formvars['mandatory_'.$attributes['name'][$i]] = 'NULL';
+      $sql.= 'mandatory = '.$formvars['mandatory_'.$attributes['name'][$i]].', ';
+      $sql.= 'alias = "'.$formvars['alias_'.$attributes['name'][$i]].'", ';
+			foreach($supportedLanguages as $language){
+				if($language != 'german'){
+					$sql.= '`alias_'.$language.'` = "'.$formvars['alias_'.$language.'_'.$attributes['name'][$i]].'", ';
+				}
+			}
+			if($formvars['quicksearch_'.$attributes['name'][$i]] == '')$formvars['quicksearch_'.$attributes['name'][$i]] = 'NULL';
+			$sql.= 'quicksearch = '.$formvars['quicksearch_'.$attributes['name'][$i]];
+      $sql.= " ON DUPLICATE KEY UPDATE name = '".$attributes['name'][$i]."', form_element_type = '".$formvars['form_element_'.$attributes['name'][$i]]."', options = '".$formvars['options_'.$attributes['name'][$i]]."', tooltip = '".$formvars['tooltip_'.$attributes['name'][$i]]."', `group` = '".$formvars['group_'.$attributes['name'][$i]]."', alias = '".$formvars['alias_'.$attributes['name'][$i]]."', ";
+			foreach($supportedLanguages as $language){
+				if($language != 'german'){
+					$sql.= '`alias_'.$language.'` = "'.$formvars['alias_'.$language.'_'.$attributes['name'][$i]].'", ';
+				}
+			}
+			$sql.= ' raster_visibility = '.$formvars['raster_visibility_'.$attributes['name'][$i]].', mandatory = '.$formvars['mandatory_'.$attributes['name'][$i]].' , quicksearch = '.$formvars['quicksearch_'.$attributes['name'][$i]];
+			#echo '<br>' . $sql;
+      $this->debug->write("<p>file:kvwmap class:Document->save_datatype_attributes :",4);
+      $database->execSQL($sql,4, 1);
+    }
+  }
+
+  function save_layer_attributes($attributes, $database, $formvars){
 		global $supportedLanguages;
     for($i = 0; $i < count($attributes['name']); $i++){
       $sql = 'INSERT INTO layer_attributes SET ';
@@ -14836,8 +14769,8 @@ class db_mapObj{
 				}
 			}
 			$sql.= ' raster_visibility = '.$formvars['raster_visibility_'.$attributes['name'][$i]].', mandatory = '.$formvars['mandatory_'.$attributes['name'][$i]].' , quicksearch = '.$formvars['quicksearch_'.$attributes['name'][$i]];
-			#echo $sql;
-      $this->debug->write("<p>file:kvwmap class:Document->save_attributes :",4);
+			#echo '<br>' . $sql;
+      $this->debug->write("<p>file:kvwmap class:Document->save_layer_attributes :",4);
       $database->execSQL($sql,4, 1);
     }
   }
@@ -14862,11 +14795,11 @@ class db_mapObj{
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
   }
-  
-  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false){
+
+  function read_datatype_attributes($datatype_id, $datatypedb, $attributenames, $all_languages = false, $recursive = false){
 		global $language;
 		if($attributenames != NULL){
-			$einschr = ' AND name IN (\'';
+			$einschr = ' AND a.name IN (\'';
 			$einschr.= implode('\', \'', $attributenames);
 			$einschr.= '\')';
 		}
@@ -14874,7 +14807,98 @@ class db_mapObj{
 		if(!$all_languages AND $language != 'german') {
 			$sql.='CASE WHEN `alias_'.$language.'` != "" THEN `alias_'.$language.'` ELSE `alias` END AS ';
 		}
-		$sql.='alias, `alias_low-german`, alias_english, alias_polish, alias_vietnamese, layer_id, name, real_name, tablename, table_alias_name, type, geometrytype, constraints, nullable, length, decimal_length, `default`, form_element_type, options, tooltip, `group`, arrangement, labeling, raster_visibility, mandatory, quicksearch, `order`, privileg, query_tooltip FROM layer_attributes WHERE layer_id = '.$layer_id.$einschr.' ORDER BY `order`';
+		$sql.='alias, `alias_low-german`, alias_english, alias_polish, alias_vietnamese, datatype_id, a.name, real_name, tablename, table_alias_name, type, d.name as typename, geometrytype, constraints, nullable, length, decimal_length, `default`, form_element_type, options, tooltip, `group`, raster_visibility, mandatory, quicksearch, `order`, privileg, query_tooltip ';
+		$sql.='FROM datatype_attributes as a ';
+		$sql.='LEFT JOIN datatypes as d ON d.id = REPLACE(type, \'_\', \'\') ';
+		$sql.='WHERE datatype_id = '.$datatype_id.$einschr.' ORDER BY `order`';
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_datatype_attributes:<br>".$sql,4);
+		$query=mysql_query($sql);
+		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+		$i = 0;
+		while($rs=mysql_fetch_array($query)){
+			$attributes['name'][$i]= $rs['name'];
+			$attributes['indizes'][$rs['name']] = $i;
+			$attributes['real_name'][$rs['name']]= $rs['real_name'];
+			if($rs['tablename']){
+				if(strpos($rs['tablename'], '.') !== false){
+					$explosion = explode('.', $rs['tablename']);
+					$rs['tablename'] = $explosion[1];		# Tabellenname ohne Schema
+					$attributes['schema_name'][$rs['tablename']] = $explosion[0];
+				}
+				$attributes['table_name'][$i]= $rs['tablename'];
+				$attributes['table_name'][$rs['name']] = $rs['tablename']; 
+			}
+			if($rs['table_alias_name'])$attributes['table_alias_name'][$i]= $rs['table_alias_name'];
+			if($rs['table_alias_name'])$attributes['table_alias_name'][$rs['name']]= $rs['table_alias_name'];
+			$attributes['table_alias_name'][$rs['tablename']]= $rs['table_alias_name'];
+			$attributes['type'][$i]= $rs['type'];
+			$attributes['typename'][$i]= $rs['typename'];
+			$type = ltrim($rs['type'], '_');
+			if($recursive AND is_numeric($type)){
+				$attributes['type_attributes'][$i] = $this->read_datatype_attributes($type, $layerdb, NULL, $all_languages, true);
+			}
+			if($rs['type'] == 'geometry'){
+				$attributes['the_geom'] = $rs['name'];
+			}
+			$attributes['geomtype'][$i]= $rs['geometrytype'];
+			$attributes['geomtype'][$rs['name']]= $rs['geometrytype'];
+			$attributes['constraints'][$i]= $rs['constraints'];
+			$attributes['constraints'][$rs['real_name']]= $rs['constraints'];
+			$attributes['nullable'][$i]= $rs['nullable'];
+			$attributes['length'][$i]= $rs['length'];
+			$attributes['decimal_length'][$i]= $rs['decimal_length'];
+			if($datatypedb != NULL){
+				if(substr($rs['default'], 0, 6) == 'SELECT'){					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
+					$ret1 = $datatypedb->execSQL($rs['default'], 4, 0);					
+					if($ret1[0]==0){
+						$attributes['default'][$i] = array_pop(pg_fetch_row($ret1[1]));
+					}
+				}
+				else{															# das sind die alten Defaultwerte ohne 'SELECT ' davor, ab Version 1.13 haben Defaultwerte immer ein SELECT, wenn man den datatype in dieser Version einmal gespeichert hat
+					$attributes['default'][$i]= $rs['default'];
+				}
+			}
+			$attributes['form_element_type'][$i]= $rs['form_element_type'];
+			$attributes['form_element_type'][$rs['name']]= $rs['form_element_type'];
+			$rs['options'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $rs['options']);
+			$rs['options'] = str_replace('$language', $this->user->rolle->language, $rs['options']);
+			$attributes['options'][$i]= $rs['options'];
+			$attributes['options'][$rs['name']]= $rs['options'];
+			$attributes['alias'][$i]= $rs['alias'];
+			$attributes['alias'][$attributes['name'][$i]]= $rs['alias'];
+			$attributes['alias_low-german'][$i]= $rs['alias_low-german'];
+			$attributes['alias_english'][$i]= $rs['alias_english'];
+			$attributes['alias_polish'][$i]= $rs['alias_polish'];
+			$attributes['alias_vietnamese'][$i]= $rs['alias_vietnamese'];
+			$attributes['tooltip'][$i]= $rs['tooltip'];
+			$attributes['group'][$i]= $rs['group'];
+			$attributes['arrangement'][$i]= $rs['arrangement'];
+			$attributes['labeling'][$i]= $rs['labeling'];
+			$attributes['raster_visibility'][$i]= $rs['raster_visibility'];
+			$attributes['mandatory'][$i]= $rs['mandatory'];
+			$attributes['quicksearch'][$i]= $rs['quicksearch'];
+			$attributes['privileg'][$i]= $rs['privileg'];
+			$attributes['query_tooltip'][$i]= $rs['query_tooltip'];
+			$i++;
+		}
+		return $attributes;
+  }
+  
+  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false){
+		global $language;
+		if($attributenames != NULL){
+			$einschr = ' AND a.name IN (\'';
+			$einschr.= implode('\', \'', $attributenames);
+			$einschr.= '\')';
+		}
+		$sql = 'SELECT ';
+		if(!$all_languages AND $language != 'german') {
+			$sql.='CASE WHEN `alias_'.$language.'` != "" THEN `alias_'.$language.'` ELSE `alias` END AS ';
+		}
+		$sql.='alias, `alias_low-german`, alias_english, alias_polish, alias_vietnamese, layer_id, a.name, real_name, tablename, table_alias_name, type, d.name as typename, geometrytype, constraints, nullable, length, decimal_length, `default`, form_element_type, options, tooltip, `group`, arrangement, labeling, raster_visibility, mandatory, quicksearch, `order`, privileg, query_tooltip ';
+		$sql.='FROM layer_attributes as a ';
+		$sql.='LEFT JOIN datatypes as d ON d.id = REPLACE(type, \'_\', \'\') ';
+		$sql.='WHERE layer_id = '.$layer_id.$einschr.' ORDER BY `order`';
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_layer_attributes:<br>".$sql,4);
 		$query=mysql_query($sql);
 		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
@@ -14896,6 +14920,11 @@ class db_mapObj{
 			if($rs['table_alias_name'])$attributes['table_alias_name'][$rs['name']]= $rs['table_alias_name'];
 			$attributes['table_alias_name'][$rs['tablename']]= $rs['table_alias_name'];
 			$attributes['type'][$i]= $rs['type'];
+			$attributes['typename'][$i]= $rs['typename'];
+			$type = ltrim($rs['type'], '_');
+			if($recursive AND is_numeric($type)){
+				$attributes['type_attributes'][$i] = $this->read_datatype_attributes($type, $layerdb, NULL, $all_languages, true);
+			}
 			if($rs['type'] == 'geometry'){
 				$attributes['the_geom'] = $rs['name'];
 			}
@@ -14952,9 +14981,35 @@ class db_mapObj{
 		return $attributes;
   }
 
-  function getall_Layer($order) {
+	function getall_Datatypes($order) {
+		$datatypes = array();
+		$order_sql = ($order != '') ? "ORDER BY " . $order : '';
+		$sql = "
+			SELECT
+				*
+			FROM
+				datatypes
+			" . $order_sql;
+
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->getall_Datatypes - Lesen aller Datentypen:<br>" . $sql , 4);
+		$query = mysql_query($sql);
+		if ($query == 0) {
+			echo "<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>" . INFO1; return 0;
+		}
+		while($rs = mysql_fetch_assoc($query)) {
+			/*
+			foreach($rs AS $key => $value) {
+				$datatypes[$key][] = $value;
+			}
+			*/
+			$datatypes[] = $rs;
+		}
+		return $datatypes;
+	}
+
+	function getall_Layer($order) {
 		global $language;
-    $sql ='SELECT ';
+		$sql ='SELECT ';
 		if($language != 'german') {
 			$sql.='CASE WHEN `Name_'.$language.'` != "" THEN `Name_'.$language.'` ELSE `Name` END AS ';
 		}
@@ -14963,30 +15018,30 @@ class db_mapObj{
 			$sql.='CASE WHEN `Gruppenname_'.$language.'` != "" THEN `Gruppenname_'.$language.'` ELSE `Gruppenname` END AS ';
 		}
 		$sql.='Gruppenname FROM layer, u_groups';
-    $sql.=' WHERE layer.Gruppe = u_groups.id';
-    if($order != ''){$sql .= ' ORDER BY '.$order;}
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->getall_Layer - Lesen aller Layer:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
-    while($rs=mysql_fetch_array($query)) {
-          $layer['ID'][]=$rs['Layer_ID'];
-          $layer['Bezeichnung'][]=$rs['Name'];
-          $layer['Gruppe'][]=$rs['Gruppenname'];
-					$layer['GruppeID'][]=$rs['Gruppe'];
-          $layer['Kurzbeschreibung'][]=$rs['kurzbeschreibung'];
-          $layer['Datenherr'][]=$rs['datenherr'];
-          $layer['alias'][]=$rs['alias'];
-      }
-    if($order == 'Bezeichnung'){
-      // Sortieren der Layer unter Berücksichtigung von Umlauten
-      $sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);
-      $layer['ID'] = $sorted_arrays['second_array'];
+		$sql.=' WHERE layer.Gruppe = u_groups.id';
+		if($order != ''){$sql .= ' ORDER BY '.$order;}
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->getall_Layer - Lesen aller Layer:<br>".$sql,4);
+		$query=mysql_query($sql);
+		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+		while($rs=mysql_fetch_array($query)) {
+			$layer['ID'][]=$rs['Layer_ID'];
+			$layer['Bezeichnung'][]=$rs['Name'];
+			$layer['Gruppe'][]=$rs['Gruppenname'];
+			$layer['GruppeID'][]=$rs['Gruppe'];
+			$layer['Kurzbeschreibung'][]=$rs['kurzbeschreibung'];
+			$layer['Datenherr'][]=$rs['datenherr'];
+			$layer['alias'][]=$rs['alias'];
+		}
+		if($order == 'Bezeichnung'){
+			// Sortieren der Layer unter Berücksichtigung von Umlauten
+			$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);
+			$layer['ID'] = $sorted_arrays['second_array'];
 			$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['GruppeID']);
 			$layer['Bezeichnung'] = $sorted_arrays['array'];
 			$layer['GruppeID'] = $sorted_arrays['second_array'];
-    }
-    return $layer;
-  }
+		}
+		return $layer;
+	}
   
   function get_stellen_from_layer($layer_id){
     $sql = 'SELECT ID, Bezeichnung FROM stelle, used_layer WHERE used_layer.Stelle_ID = stelle.ID AND used_layer.Layer_ID = '.$layer_id.' ORDER BY Bezeichnung';

@@ -38,7 +38,7 @@
 		return $datapart;
 	}
 
-	function attribute_value(&$gui, $layer_id, $attributes, $j, $k, $dataset, $size, $select_width, $fontsize, $change_all = false, $onchange = NULL, $fieldname = NULL){
+	function attribute_value(&$gui, $layer_id, $attributes, $j, $k, $dataset, $size, $select_width, $fontsize, $change_all = false, $onchange = NULL, $field_name = NULL){
 		global $strShowPK;
 		global $strNewPK;
 		global $strShowFK;
@@ -52,7 +52,8 @@
 		$tablename = $attributes['table_name'][$name];									# der Tabellenname des Attributs
 		$oid = $dataset[$tablename.'_oid'];															# die oid des Datensatzes
 		$attribute_privileg = $attributes['privileg'][$j];							# das Recht des Attributs
-		if($fieldname == NULL)$fieldname = $layer_id.';'.$attributes['real_name'][$name].';'.$tablename.';'.$oid.';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j];
+		if($field_name == NULL)$fieldname = $layer_id.';'.$attributes['real_name'][$name].';'.$tablename.';'.$oid.';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j];
+		else $fieldname = $field_name;
 				
 		if(!$change_all){
 			$onchange .= 'set_changed_flag(currentform.changed_'.$layer_id.'_'.$oid.');';
@@ -75,36 +76,68 @@
 			$select_width = 'width: '.$sw.'px;';
 		}
 		
-		if(substr($attributes['type'][$j], 0, 1) == '_'){		# Array-Typ
-			$datapart .= '<input type="hidden" name="'.$fieldname.'" id="'.$name.'_'.$k.'" value="'.htmlspecialchars($value).'">';
-			$datapart .= '<div id="'.$name.'_elements" style="">';
-			$elements = explode(',', trim($value, '{}'));
+		###### Array-Typ #####
+		if(substr($attributes['type'][$j], 0, 1) == '_'){
+			if($field_name != NULL)$id = $field_name.'_'.$k;		# wenn field_name übergeben wurde (nicht die oberste Ebene)
+			else $id = $k.'_'.$name;	# oberste Ebene
+			$datapart .= '<input type="hidden" title="'.$alias.'" name="'.$fieldname.'" id="'.$id.'" onchange="'.$onchange.'" value="'.htmlspecialchars($value).'">';
+			$datapart .= '<div id="'.$id.'_elements" style="">';
+			$elements = json_decode($value);		# diese Funktion decodiert immer den kommpletten String
 			$attributes2 = $attributes;
-			$attributes2['name'][$j] = $name.'_';
+			$attributes2['name'][$j] = '';
 			$attributes2['table_name'][$attributes2['name'][$j]] = $tablename;
 			$attributes2['type'][$j] = substr($attributes['type'][$j], 1);			
 			$dataset2[$tablename.'_oid'] = $oid;
-			$onchange2 = 'buildArrayValue(\''.$name.'\', '.$k.');';
-			$fieldname = $name;
+			$elements_fieldname = $id;
+			$onchange2 = 'buildJSONString(\''.$id.'\', true);';
 			for($e = -1; $e < count($elements); $e++){
+				if(is_array($elements[$e]) OR is_object($elements[$e]))$elements[$e] = json_encode($elements[$e]);		# ist ein Array oder Objekt (also entweder ein Array-Typ oder ein Datentyp) und wird zur Übertragung wieder encodiert
 				$dataset2[$attributes2['name'][$j]] = $elements[$e];
-				$datapart .= '<div id="div_'.$name.'_'.$e.'" style="display: '.($e==-1 ? 'none' : 'block').'">';
-				$datapart .= attribute_value($gui, $layer_id, $attributes2, $j, 0, $dataset2, $size, $select_width, $fontsize, $change_all, $onchange2, $fieldname);
-				if($e != 0)$datapart .= '<a href="#" onclick="removeArrayElement(\''.$name.'\', this.parentNode, '.$k.');'.$onchange.'return false;"><img style="width: 18px" src="'.GRAPHICSPATH.'datensatz_loeschen.png"></a>';
+				$datapart .= '<div id="div_'.$id.'_'.$e.'" style="display: '.($e==-1 ? 'none' : 'block').'"><table cellpadding="0" cellspacing="0"><tr><td>';
+				$datapart .= attribute_value($gui, $layer_id, $attributes2, $j, $e, $dataset2, $size, $select_width, $fontsize, $change_all, $onchange2, $elements_fieldname);
+				$datapart .= '</td><td valign="top"><a href="#" onclick="removeArrayElement(\''.$id.'\', \'div_'.$id.'_'.$e.'\');'.$onchange2.'return false;"><img style="width: 18px" src="'.GRAPHICSPATH.'datensatz_loeschen.png"></a></td></tr></table>';
 				$datapart .= '</div>';
 			}
 			$datapart .= '</div>';
-			$datapart .= '<div style="padding: 3px 10px 3px 3px;float: right"><a href="javascript:addArrayElement(\''.$name.'\')" class="buttonlink"><span>'.$strNewEmbeddedPK.'</span></a></div>';
+			$datapart .= '<div style="padding: 3px 10px 3px 3px;float: right"><a href="javascript:addArrayElement(\''.$id.'\')" class="buttonlink"><span>'.$strNewEmbeddedPK.'</span></a></div>';
 			return $datapart;
 		}
 		
+		###### Nutzer-Datentyp #####
+		if(is_numeric($attributes['type'][$j])){
+			if($field_name != NULL)$id = $field_name.'_'.($name == '' ? '' : $name.'_').$k;		# wenn field_name übergeben wurde (nicht die oberste Ebene)
+			else $id = $k.'_'.$name;	# oberste Ebene
+			$datapart .= '<input type="hidden" title="'.$alias.'" name="'.$fieldname.'" id="'.$id.'" onchange="'.$onchange.'" value="'.htmlspecialchars($value).'">';
+			$type_attributes = $attributes['type_attributes'][$j];
+			$elements = json_decode($value);	# diese Funktion decodiert immer den kommpletten String
+			$tsize = 20;
+			$datapart .= '<table class="gle_datatype_table">';
+			$onchange2 = 'buildJSONString(\''.$id.'\', false);';
+			$elements_fieldname = $id;
+			for($e = 0; $e < count($type_attributes['name']); $e++){
+				if($elements != NULL){
+					$elem_value = current($elements);
+					next($elements);
+				}
+				if(is_array($elem_value) OR is_object($elem_value))$elem_value = json_encode($elem_value);		# ist ein Array oder Objekt (also entweder ein Array-Typ oder ein Datentyp) und wird zur Übertragung wieder encodiert
+				$dataset2[$type_attributes['name'][$e]] = $elem_value;
+				$type_attributes['privileg'][$e] = 1;
+				if($type_attributes['alias'][$e] == '')$type_attributes['alias'][$e] = $type_attributes['name'][$e];
+				$datapart .= '<tr><td valign="top" class="gle_attribute_name">'.$type_attributes['alias'][$e].'</td>';
+				$datapart .= '<td>'.attribute_value($gui, $layer_id, $type_attributes, $e, NULL, $dataset2, $tsize, $select_width, $fontsize, $change_all, $onchange2, $elements_fieldname).'</td></tr>';
+			}
+			$datapart .= '</tr></table>';
+			return $datapart;
+		}
+		
+		###### normal #####
 		if($attributes['constraints'][$j] != '' AND !in_array($attributes['constraints'][$j], array('PRIMARY KEY', 'UNIQUE'))){
 			if($attributes['privileg'][$j] == '0' OR $lock[$k]){
 				$size1 = 1.3*strlen($dataset[$attributes['name'][$j]]);
-				$datapart .= '<input readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;" size="'.$size1.'" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$dataset[$attributes['name'][$j]].'">';
+				$datapart .= '<input readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;" size="'.$size1.'" type="text" name="'.$fieldname.'" value="'.$value.'">';
 			}
 			else{
-				$datapart .= '<select id="'.$attributes['name'][$j].'_'.$k.'" onchange="'.$onchange.'" title="'.$attributes['alias'][$j].'"  style="'.$select_width.'font-size: '.$fontsize.'px" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'">';
+				$datapart .= '<select id="'.$attributes['name'][$j].'_'.$k.'" onchange="'.$onchange.'" title="'.$attributes['alias'][$j].'"  style="'.$select_width.'font-size: '.$fontsize.'px" name="'.$fieldname.'">';
 				for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
 					$datapart .= '<option ';
 					if($attributes['enum_value'][$j][$e] == $dataset[$attributes['name'][$j]]){
@@ -497,7 +530,7 @@
 						$datapart .= ' readonly style="display:none;"';
 					}
 					else{
-						$datapart .= ' style="font-size: '.$fontsize.'px;"';
+						$datapart .= ' style="width: 100%; font-size: '.$fontsize.'px;"';
 					}
 					if($name == 'lock'){
 						$datapart .= ' type="hidden"';

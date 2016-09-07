@@ -1,5 +1,4 @@
 <?
- 
 	include(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->language.'.php');
 	
 	$checkbox_names = '';

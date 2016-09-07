@@ -99,12 +99,13 @@ if(!CASE_COMPRESS AND FAST_CASE){
 else{
 	include_(WWWROOT.APPLVERSION.'funktionen/allg_funktionen.php');	
 	if($userDb == NULL)include_(CLASSPATH.'mysql.php');
-	include_(CLASSPATH.'kvwmap.php');	
+	include_(CLASSPATH.'FormObject.php');
+	include_(CLASSPATH.'kvwmap.php');
 	include_(CLASSPATH.'kataster.php');
-	include_(CLASSPATH.'postgresql.php');																										
+	include_(CLASSPATH.'postgresql.php');
 	include_(CLASSPATH.'users.php');
-	include_(CLASSPATH.'bauleitplanung.php');           
-}																						
+	include_(CLASSPATH.'bauleitplanung.php');
+}
 
 include(WWWROOT.APPLVERSION.'start.php');
 
@@ -1079,14 +1080,14 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->dokument_loeschen();
 	  } break;
 
-	  case 'neuer_Layer_Datensatz' : {			
+		case 'neuer_Layer_Datensatz' : {
 			$GUI->neuer_Layer_Datensatz();
-	  } break;
+		} break;
 
-	  case 'neuer_Layer_Datensatz_speichern' : {
+		case 'neuer_Layer_Datensatz_speichern' : {
 			$GUI->neuer_Layer_Datensatz_speichern();
-	  } break;
-	  
+		} break;
+
 	  case 'generisches_sachdaten_diagramm' : {
 			$GUI->generisches_sachdaten_diagramm($GUI->formvars['width']);
 	  } break;
@@ -1192,30 +1193,35 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->Attributeditor();
 	  } break;
 
-	  case 'Attributeditor' : {
+		case 'Attributeditor' : {
 			$GUI->checkCaseAllowed('Attributeditor');
 			$GUI->Attributeditor();
-	  } break;
+		} break;
 
-	  case 'Attributeditor_speichern' : {    
+		case 'Attributeditor_speichern' : {    
 			$GUI->checkCaseAllowed('Attributeditor');
 			$GUI->Attributeditor_speichern();
-	  } break;
+		} break;
 
-	  case 'Layer_Anzeigen' : {
+		case 'Datentypen_Anzeigen' : {
+			$GUI->checkCaseAllowed($go);
+			$GUI->DatentypenAnzeigen();
+		} break;
+
+		case 'Layer_Anzeigen' : {
 			$GUI->checkCaseAllowed($go);
 			$GUI->LayerAnzeigen();
-	  } break;
-	  
+		} break;
+
 	  case 'Layer_Uebersicht' : {
 			$GUI->LayerUebersicht();
-	  } break;
+		} break;
 
-	  case 'Layer_Löschen' : {    
+		case 'Layer_Löschen' : {    
 			$GUI->checkCaseAllowed('Layer_Anzeigen');
 			$GUI->LayerLoeschen();
 			$GUI->LayerAnzeigen();
-	  } break;
+		} break;
 
 	  case 'Layer2Stelle_Reihenfolge' : {
 			$GUI->checkCaseAllowed('Stellen_Anzeigen');

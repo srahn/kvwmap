@@ -156,7 +156,7 @@ $num_colspan = ($this->user->rolle->visually_impaired) ? 3 : 5;
 									echo '<div id="'.$prefix.'_avf_'.$this->attributes['name'][$i].'" style="';
 									if(in_array($operator, array('LIKE', 'NOT LIKE')))echo 'display:none';
 									echo '">';
-										echo Autovervollstaendigungsfeld($this->formvars['selected_layer_id'], $this->attributes['name'][$i], $i, $this->attributes['alias'][$i], $prefix.'value_'.$this->attributes['name'][$i], $this->formvars[$prefix.'value_'.$this->attributes['name'][$i]], $this->attributes['enum_output'][$i][0], 1, $prefix, NULL, NULL, NULL, NULL, false, 15, false, 40);
+										echo Autovervollstaendigungsfeld($this->formvars['selected_layer_id'], $this->attributes['name'][$i], $i, $this->attributes['alias'][$i], $prefix.'value_'.$this->attributes['name'][$i], $this->formvars[$prefix.'value_'.$this->attributes['name'][$i]], $this->attributes['enum_output'][$i][0], 1, $prefix, NULL, NULL, NULL, NULL, false, 15, false, 40, NULL);
 									echo '</div>';
 									echo '<div id="'.$prefix.'_text_'.$this->attributes['name'][$i].'" style="';
 									if(!in_array($operator, array('LIKE', 'NOT LIKE')))echo 'display:none';

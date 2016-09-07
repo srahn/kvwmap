@@ -40,6 +40,10 @@ class gml_file {
     if (is_file($this->file_name))
       unlink($this->file_name);
   }
+
+	function exists() {
+		return file_exists($this->filename);
+	}
 }
 
 ?>
