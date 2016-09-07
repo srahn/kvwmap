@@ -248,32 +248,97 @@ switch($this->go){
 		$this->output();
 	} break;
 
-	case 'xplankonverter_konvertierung_status': {
-		header('Content-Type: application/json');
-		$response = array();
-		if ($this->formvars['konvertierung_id'] == '') {
-			$response['success'] = false;
-			$response['msg'] = 'Konvertierung wurde nicht angegeben';
-			return;
-		}
-		if ($this->formvars['status'] == '') {
-			$this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn ein Status angegeben ist.';
-			$response['success'] = false;
-				$response['msg'] = 'Status wurde nicht angegeben';
-			echo json_encode($response);
-			return;
-		}
-		$this->konvertierung = new Konvertierung($this);
-		$this->konvertierung->find_by('id', $this->formvars['konvertierung_id']);
-		if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) return;
-		$this->konvertierung->set('status', $this->formvars['status']);
-		$this->konvertierung->update();
-		$response['success'] = true;
-		$response['msg'] = 'Status wurde gesetzt';
-		echo json_encode($response);
-	} break;
+  case 'xplankonverter_konvertierung_status': {
+    header('Content-Type: application/json');
+    $response = array();
+    if ($this->formvars['konvertierung_id'] == '') {
+      $response['success'] = false;
+      $response['msg'] = 'Konvertierung wurde nicht angegeben';
+      return;
+    }
+    if ($this->formvars['status'] == '') {
+      $this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn ein Status angegeben ist.';
+      $response['success'] = false;
+      $response['msg'] = 'Status wurde nicht angegeben';
+      echo json_encode($response);
+      return;
+    }
+    // now get konvertierung
+    $this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
 
-	case 'xplankonverter_konvertierung_validate': {
+    // check stelle
+    if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) return;
+
+    // check applicability of status for external invokation
+    $statusToSet = $this->formvars['status'];
+    $isApplicable = false;
+    $applicableStates = array(
+        Konvertierung::$STATUS['IN_ERSTELLUNG'],
+        Konvertierung::$STATUS['IN_KONVERTIERUNG'],
+        Konvertierung::$STATUS['IN_GML_ERSTELLUNG']
+    );
+    array_walk(
+      $applicableStates,
+      function($pattern) use ($statusToSet,&$isApplicable) {
+        $isApplicable |= $statusToSet == $pattern;
+      }
+    );
+    if (!$isApplicable) {
+      $this->Hinweis = "Der Status '$statusToSet' kann nicht explizit gesetzt werden.";
+      $response['success'] = false;
+      $response['msg'] = "Status '$statusToSet' kann nicht explizit gesetzt werden";
+      echo json_encode($response);
+      return;
+    }
+    // check validity of status
+    $isValid = false;
+    $validPredecessorStates = array();
+    switch($statusToSet){
+      case Konvertierung::$STATUS['IN_ERSTELLUNG']:
+        $validPredecessorStates = array(
+          Konvertierung::$STATUS['ERSTELLT'],
+          Konvertierung::$STATUS['KONVERTIERUNG_OK'],
+          Konvertierung::$STATUS['KONVERTIERUNG_ERR'],
+          Konvertierung::$STATUS['GML_ERSTELLUNG_OK'],
+          Konvertierung::$STATUS['GML_ERSTELLUNG_ERR']
+        );
+        break;
+      case Konvertierung::$STATUS['IN_KONVERTIERUNG']:
+        $validPredecessorStates = array(
+          Konvertierung::$STATUS['ERSTELLT'],
+          Konvertierung::$STATUS['KONVERTIERUNG_OK'],
+          Konvertierung::$STATUS['GML_ERSTELLUNG_OK']
+        );
+        break;
+      case Konvertierung::$STATUS['IN_GML_ERSTELLUNG']:
+        $validPredecessorStates = array(
+          Konvertierung::$STATUS['KONVERTIERUNG_OK'],
+          Konvertierung::$STATUS['GML_ERSTELLUNG_OK']
+        );
+        break;
+    }
+    $currStatus = $this->konvertierung->get('status');
+    $isValid = array_reduce(
+        $validPredecessorStates,
+        function($isValid,$predStatus) use ($currStatus) {
+          return isValid || ($predStatus == $currStatus);
+    }, $isValid);
+    if (!$isValid) {
+      $response['success'] = false;
+      $response['msg'] = "Status '$statusToSet' ist kein gueltiger Folgestatus von '$currStatus'";
+      echo json_encode($response);
+      return;
+    }
+
+    // status is valid to be set
+    $this->konvertierung->set('status', $statusToSet);
+    $this->konvertierung->update();
+    $response['success'] = true;
+    $response['msg'] = 'Status wurde gesetzt';
+    echo json_encode($response);
+  } break;
+
+  case 'xplankonverter_konvertierung_validate': {
 // TODO: remove
 sleep(5);
 		$response = array();
@@ -348,8 +413,7 @@ sleep(5);
 			$response['msg'] = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
 		}
 		else {
-			$this->konvertierung = new Konvertierung($this);
-			$this->konvertierung->find_by('id', $this->formvars['konvertierung_id']);
+			$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
 			if (isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) {
 				if ($this->konvertierung->get('status') == Konvertierung::$STATUS['KONVERTIERUNG_OK']
 				 || $this->konvertierung->get('status') == Konvertierung::$STATUS['IN_GML_ERSTELLUNG']
@@ -361,7 +425,7 @@ sleep(5);
 
 					// XPlan-GML ausgeben
 					$this->gml_builder = new Gml_builder($this->pgdatabase);
-					$plan = RP_Plan::find_by('konvertierung_id', $this->konvertierung->get('id'));
+					$plan = RP_Plan::find_by_id($this,'konvertierung_id', $this->konvertierung->get('id'));
 					//$bereiche = new RP_Bereich($this);
 					//$bereiche->find_by('gehoertzuplan', $this->plan->get('gml_id'));
 					//$this->plan->bereiche = $bereiche;
@@ -394,9 +458,8 @@ sleep(5);
 	case 'xplankonverter_konvertierung_loeschen' : {
 		# Dieser ganze case kann durchgeführt werden durch das Löschen der Konvertierung mit den GLE Funktionen und
 		# dem after delete Trigger. (siehe trigger_function handle_konvertierung in control/kvwmap.php)
-		
-		$konvertierung = new Konvertierung($this);
-		$konvertierung->find_by('id', $this->formvars['konvertierung_id']);
+		$konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
+
 		# Lösche gml-Datei
 		$gml_file = new gml_file(XPLANKONVERTER_SHAPE_PATH . $konvertierung->get('id') . '/xplan_' . $konvertierung->get('id') . '.gml');
 		if ($gml_file->exists()) {
