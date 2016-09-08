@@ -197,12 +197,18 @@
 				}break;
 
 				case 'SubFormPK' : {
-					$datapart .= '<input style="font-size: '.$fontsize.'px"';
-					if($attribute_privileg == '0' OR $lock[$k]){
-						$datapart .= ' readonly style="background-color:#e8e3da;"';
+					$datapart .= '<table width="98%" cellspacing="0" cellpadding="0"><tr><td>';
+					if($size == 12){		// spaltenweise
+						$datapart .= htmlspecialchars($value);
 					}
-					$datapart .= ' size="40" type="text" name="'.$fieldname.'" value="'.$value.'">';
+					else{								// zeilenweise
+						$maxwidth = $size * 8;
+						$minwidth = $size * 4;
+						$datapart .= '<div style="padding: 0 0 0 3; min-width: '.$minwidth.'px; max-width:'.$maxwidth.'px; font-size: '.$fontsize.'px;">'.htmlspecialchars($value).'</div>';
+					}
+					$datapart .= '</td>';
 					if($gui->new_entry != true){
+						$datapart .= '<td width="100%" align="right">';
 						if($value != ''){
 							$datapart .= '&nbsp;<a href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
 							for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
@@ -227,11 +233,13 @@
 							}
 							$datapart .= 	' class="buttonlink"><span>'.$strNewPK.'</span></a>&nbsp;';
 						}
+						$datapart .= '</td>';
 					}
+					$datapart .= '</tr></table>';
 				}break;
 
 				case 'SubFormFK' : {
-					$datapart .= '<table width="100%" cellpadding="0" cellspacing="0"><tr><td>';
+					$datapart .= '<table width="98%" cellpadding="0" cellspacing="0"><tr><td>';
 					$attribute_foreign_keys = $attributes['subform_fkeys'][$j];	# die FKeys des aktuellen Attributes
 					for($f = 0; $f < count($attribute_foreign_keys); $f++){											
 						$name_ = $attribute_foreign_keys[$f];
@@ -244,7 +252,6 @@
 							case 'Autovervollständigungsfeld' : {
 								if($attributes['subform_layer_privileg'][$index] != '0')$gui->editable = $layer_id;
 								$datapart .= Autovervollstaendigungsfeld($layer_id, $name_, $index, $attributes['alias'][$name_], $fieldname_[$f], $dataset[$name_], $attributes['enum_output'][$index][$k], $attributes['privileg'][$name_], $k, $oid, $attributes['subform_layer_id'][$index], $attributes['subform_layer_privileg'][$index], $attributes['embedded'][$index], $lock[$k], $fontsize, $change_all, $size, $onchange);
-								$datapart .= '</td><td align="right" valign="top">';
 							}break;
 							case 'Auswahlfeld' : {
 								if($attributes['subform_layer_privileg'][$index] != '0')$gui->editable = $layer_id;
@@ -258,7 +265,6 @@
 								}
 								if($attributes['nullable'][$index] != '0')$strPleaseSelect = $gui->strPleaseSelect;
 								$datapart .= Auswahlfeld($layer_id, $name_, $j, $attributes['alias'][$name_], $fieldname_[$f], $dataset[$name_], $enum_value, $enum_output, $attributes['req_by'][$index], $attributes['name'], $attributes['privileg'][$name_], $k, $oid, $attributes['subform_layer_id'][$index], $attributes['subform_layer_privileg'][$index], $attributes['embedded'][$index], $lock[$k], $select_width, $fontsize, $strPleaseSelect, $change_all, $onchange);
-								$datapart .= '</td><td align="right">';
 							}break;
 							default : {
 								$datapart .= '<input style="font-size: '.(0.9*$fontsize).'px';
@@ -273,7 +279,15 @@
 						}
 						$gui->form_field_names .= $fieldname_[$f].'|';
 					}
-					$datapart .= $value.' ';
+					if($size == 12){		// spaltenweise
+						$datapart .= htmlspecialchars($value);
+					}
+					else{								// zeilenweise
+						$maxwidth = $size * 8;
+						$minwidth = $size * 4;
+						$datapart .= '<div style="padding: 0 0 0 3; min-width: '.$minwidth.'px; max-width:'.$maxwidth.'px; font-size: '.$fontsize.'px;">'.htmlspecialchars($value).'</div>';
+					}
+					$datapart .= '</td><td align="right" valign="top">';
 					if($gui->new_entry != true){
 						if($value != ''){
 							$datapart .= '<a class="buttonlink" href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
