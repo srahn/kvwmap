@@ -4480,7 +4480,7 @@ class GUI {
     else{
       $this->loadMap($loadmapsource);
     }
-		if($_SERVER['REQUEST_METHOD'] == 'GET')$this->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
+		if($saved_scale != NULL)$this->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
 		# zoomToMaxLayerExtent
 		if($this->formvars['zoom_layer_id'] != '')$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
 		# Kartendrucklayouts laden
@@ -7260,7 +7260,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	    	################# Map ###############################################
 				$saved_scale = $this->reduce_mapwidth(10);
 				$this->loadMap('DataBase');
-				if($this->formvars['CMD']=='')$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
+				if($this->formvars['CMD']=='' AND $saved_scale != NULL)$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
 		    $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
 		    # Geometrie-Übernahme-Layer:
 		    # Spaltenname und from-where abfragen
@@ -7907,7 +7907,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					else{
 						$this->loadMap('DataBase');
 					}											
-					if($_SERVER['REQUEST_METHOD'] == 'GET')$this->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist          
+					if($saved_scale != NULL)$this->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
 					# zoomToMaxLayerExtent
 					if($this->formvars['zoom_layer_id'] != '')$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
 					# evtl. Zoom auf "Mutter-Layer"
@@ -8823,7 +8823,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->main='data_export.php';
     $saved_scale = $this->reduce_mapwidth(10);
 		$this->loadMap('DataBase');
-		if($_SERVER['REQUEST_METHOD'] == 'GET')$this->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
+		if($saved_scale != NULL)$this->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
     $this->epsg_codes = read_epsg_codes($this->pgdatabase);
 		$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
     $this->data_import_export = new data_import_export();
@@ -10450,19 +10450,24 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	function reduce_mapwidth($reduction){
 		# Diese Funktion reduziert die aktuelle Kartenbildbreite um $reduction Pixel, damit das Kartenbild in Fachschalen nicht zu groß erscheint. 
 		# Diese reduzierte Breite wird aber nicht in der Datenbank gespeichert, sondern gilt nur für den aktuellen Anwendungsfall.
-		# Außerdem wird der aktuelle Maßstab berechnet und zurückgeliefert (er wird berechnet, weil ein loadmap() ja noch nicht aufgerufen wurde). 
-		# Mit diesem Maßstab kann dann einmal beim ersten Aufruf der Fachschale nach dem loadmap() der Extent wieder so angepasst werden, dass der ursprüngliche Maßstab erhalten bleibt.
-		# Dieser Extent wird wiederum in der Datenbank gespeichert, deswegen darf das auch nur einmal gemacht werden.
+		# Außerdem wird bei Bedarf der aktuelle Maßstab berechnet und zurückgeliefert (er wird berechnet, weil ein loadmap() ja noch nicht aufgerufen wurde). 
+		# Mit diesem Maßstab kann dann einmal beim ersten Aufruf der Fachschale von der Hauptkarte aus nach dem loadmap() der Extent wieder so angepasst werden, dass der ursprüngliche Maßstab erhalten bleibt.
+		# Dieser verkleinerte Extent wird wiederum in der Datenbank gespeichert. In der Datenbank steht dann also weiterhin die ursprüngliche Kartenbildgröße und der (dazu eigentlich nicht passende) in der Breite verkleinerte Extent.
+		# Damit der Extent aber nur dann angepasst wird, wenn es notwendig ist (nämlich wenn man von der Hauptkarte kommt), wird der Maßstab nur berechnet, wenn Kartenbildgröße und Extent zusammenpassen.
+		# Am "Nichtzusammenpassen" von Kartenbildgröße und Extent wird also erkannt, dass der Extent schon einmal verkleinert wurde.
 		$width = $this->user->rolle->nImageWidth;
-		#$pixelsize = ($this->user->rolle->oGeorefExt->maxx - $this->user->rolle->oGeorefExt->minx)/($width-1);		# das width - 1 kommt daher, weil der Mapserver das auch so macht
-		#$scale = $pixelsize * 96 / 0.0254;
-
-		$center_y = ($this->user->rolle->oGeorefExt->maxy + $this->user->rolle->oGeorefExt->miny) / 2;
-		if($this->user->rolle->epsg_code == 4326){$unit = MS_DD;} else {$unit = MS_METERS;}
-		$md = ($width-1)/(96 * InchesPerUnit($unit, $center_y));
-		$gd = $this->user->rolle->oGeorefExt->maxx - $this->user->rolle->oGeorefExt->minx;
-		$scale = $gd/$md;
-		
+		$height = $this->user->rolle->nImageHeight;
+		$extentwidth = $this->user->rolle->oGeorefExt->maxx - $this->user->rolle->oGeorefExt->minx;
+		$extentheight = $this->user->rolle->oGeorefExt->maxy - $this->user->rolle->oGeorefExt->miny;
+		$ratio_image = round($width/$height, 2);
+		$ratio_extent = round($extentwidth/$extentheight, 2);
+		if($ratio_image == $ratio_extent){
+			$center_y = ($this->user->rolle->oGeorefExt->maxy + $this->user->rolle->oGeorefExt->miny) / 2;
+			if($this->user->rolle->epsg_code == 4326){$unit = MS_DD;} else {$unit = MS_METERS;}
+			$md = ($width-1)/(96 * InchesPerUnit($unit, $center_y));
+			$gd = $this->user->rolle->oGeorefExt->maxx - $this->user->rolle->oGeorefExt->minx;
+			$scale = $gd/$md;
+		}			
 		$width = $width - $reduction;
 		if($this->user->rolle->hideMenue == 1){$width = $width - 195;}
 		if($this->user->rolle->hideLegend == 1){$width = $width - 254;}

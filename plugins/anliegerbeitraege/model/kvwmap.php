@@ -8,7 +8,7 @@
     # aktuellen Kartenausschnitt laden + zeichnen!
 		$saved_scale = $GUI->reduce_mapwidth(100);
     $GUI->loadMap('DataBase');
-		if($_SERVER['REQUEST_METHOD'] == 'GET')$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
+		if($saved_scale != NULL)$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
     if ($GUI->formvars['CMD']!='') {
       $GUI->navMap($GUI->formvars['CMD']);
       $GUI->user->rolle->saveDrawmode($GUI->formvars['always_draw']);
