@@ -1760,8 +1760,9 @@ class rolle {
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
 	
-	function get_last_query(){
+	function get_last_query($layer_id = NULL){
 		$sql = "SELECT * FROM rolle_last_query WHERE user_id = ".$this->user_id." AND stelle_id = ".$this->stelle_id;
+		if($layer_id != NULL)$sql .= " AND layer_id = ".$layer_id;
 		$this->debug->write("<p>file:users.php class:rolle->get_last_query - Abfragen der letzten Abfrage:<br>".$sql,4);
 		$query=mysql_query($sql,$this->database->dbConn);
 		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }

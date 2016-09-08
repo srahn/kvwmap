@@ -96,7 +96,7 @@ class GUI {
     # mime_type html, pdf
     if (isset ($mime_type)) $this->mime_type=$mime_type;
 		$this->scaleUnitSwitchScale = 239210;
-		$trigger_functions = array();
+		$this->trigger_functions = array();
   }
 	
 	public function __call($method, $arguments){
@@ -118,15 +118,6 @@ class GUI {
 				$oid
 			);
 		}
-	}
-
-	function openCustomSubform(){
-		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-    $layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-    $layerdb->setClientEncoding();
-    $attributenames[0] = $this->formvars['attribute'];
-    $attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
-		echo $attributes['options'][0].'?field_id='.$this->formvars['field_id'];
 	}
 	
 	function getLayerOptions(){
@@ -2542,6 +2533,21 @@ class GUI {
 		$rs = pg_fetch_array($ret[1]);
 		echo $rs[0];
   }
+	
+	function openCustomSubform(){
+		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+    $layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+    $layerdb->setClientEncoding();
+    $attributenames[0] = $this->formvars['attribute'];
+    $attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
+		$attributenames = explode('|', $this->formvars['attributenames']);
+		$attributevalues = explode('|', $this->formvars['attributevalues']);
+		$url = $attributes['options'][0];
+		for($i = 0; $i < count($attributenames); $i++){
+			$url = str_replace('$'.$attributenames[$i], $attributevalues[$i], $url);
+		}
+		echo $url.'&field_id='.$this->formvars['field_id'];
+	}
 
   function showMapImage(){
   	$this->loadMap('DataBase');
@@ -3655,7 +3661,7 @@ class GUI {
     }
 		
 		if($this->formvars['no_query'] != true){
-			$this->last_query = $this->user->rolle->get_last_query();
+			$this->last_query = $this->user->rolle->get_last_query($this->formvars['chosen_layer_id']);
 			#if($this->formvars['search']){        # man kam von der Suche   -> nochmal suchen
 				$this->formvars['embedded_dataPDF'] = true;		# damit der Aufruf von output() verhindert wird
 				$this->GenerischeSuche_Suchen();
@@ -5261,6 +5267,7 @@ class GUI {
 
   function metadateneingabe() {
     include_once (CLASSPATH.'metadaten.php');
+		include_once(CLASSPATH.'FormObject.php');
     $metadatensatz=new metadatensatz($this->formvars['oid'],$this->pgdatabase);
     if ($this->formvars['oid']!='') {
       # Es handelt sich um eine Änderung eines Datensatzes
@@ -5336,6 +5343,7 @@ class GUI {
   }
 
 	function nutzungWahl(){
+		include_once(CLASSPATH.'FormObject.php');
     if ($this->formvars['anzahl'] == 0) {
       $this->formvars['anzahl'] = 10;
     }
@@ -5402,6 +5410,7 @@ class GUI {
   }
 		
 	 function namenWahl() {
+		include_once(CLASSPATH.'FormObject.php');
     if ($this->formvars['anzahl']==0) {
       $this->formvars['anzahl']=10;
     }
@@ -7540,7 +7549,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
   function neuer_Layer_Datensatz_speichern(){
   	$_files = $_FILES;
-    $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
+    $mapdb = new db_mapObj($this->Stelle->id, $this->user->id);
     $layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
     $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
     $layerdb->setClientEncoding();
@@ -9305,24 +9314,16 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         $layerdb = $this->mapDB->getlayerdatabase($this->selected_layers[0], $this->Stelle->pgdbhost);
         $this->attributes = $this->mapDB->getDataAttributes($layerdb, $this->selected_layers[0]);
         $poly_id = $this->mapDB->getPolygonID($this->formvars['stelle'],$this->selected_layers[0]);
-        // for($i = 1; $i < count($this->selected_layers); $i++){
-          // $layerdb = $this->mapDB->getlayerdatabase($this->selected_layers[$i], $this->Stelle->pgdbhost);
-          // $attributes = $this->mapDB->getDataAttributes($layerdb, $this->selected_layers[$i]);
-          // $this->attributes['name'] = array_intersect($this->attributes['name'], $attributes['name']);
-          // $next_poly_id = $this->mapDB->getPolygonID($this->formvars['stelle'],$this->selected_layers[$i]);
-          // if($poly_id != $next_poly_id){
-            // $showpolygon = false;
-          // }
-          // $poly_id = $next_poly_id;
-        // }
-        // $keys = array_keys($this->attributes['name']);
-        // $lastindex = $keys[count($keys)-1];
-        // for($i = 0; $i < $lastindex+1; $i++){
-          // if(array_key_exists($i, $this->attributes['name'])){
-            // $this->formvars['operator_'.$this->attributes['name'][$i]] = '';
-            // $this->formvars['value_'.$this->attributes['name'][$i]] = '';
-          // }
-        // }
+        for($i = 1; $i < count($this->selected_layers); $i++){
+          $layerdb = $this->mapDB->getlayerdatabase($this->selected_layers[$i], $this->Stelle->pgdbhost);
+          $attributes = $this->mapDB->getDataAttributes($layerdb, $this->selected_layers[$i]);
+          $this->attributes = array_values(array_uintersect($this->attributes, $attributes, "compare_names"));
+          $next_poly_id = $this->mapDB->getPolygonID($this->formvars['stelle'],$this->selected_layers[$i]);
+          if($poly_id != $next_poly_id){
+            $showpolygon = false;
+          }
+          $poly_id = $next_poly_id;
+        }
 				for($i = 0; $i < count($this->attributes); $i++){
 					$this->formvars['operator_'.$this->attributes[$i]['name']] = '';
 					$this->formvars['value_'.$this->attributes[$i]['name']] = '';
@@ -9393,87 +9394,82 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $this->selected_layers = explode(', ', $formvars['selected_layers']);
       $layerdb = $mapDB->getlayerdatabase($this->selected_layers[0], $this->Stelle->pgdbhost);
       $this->attributes = $mapDB->getDataAttributes($layerdb, $this->selected_layers[0]);
-      // for($i = 1; $i < count($this->selected_layers); $i++){
-        // $layerdb = $mapDB->getlayerdatabase($this->selected_layers[$i], $this->Stelle->pgdbhost);
-        // $attributes = $mapDB->getDataAttributes($layerdb, $this->selected_layers[$i]);
-        // $this->attributes['name'] = array_intersect($this->attributes['name'], $attributes['name']);
-      // }
-      // $keys = array_keys($this->attributes['name']);
-      // $lastindex = $keys[count($keys)-1];
-      // for($i = 0; $i < $lastindex+1; $i++){
+			for($i = 1; $i < count($this->selected_layers); $i++){
+				$layerdb = $mapDB->getlayerdatabase($this->selected_layers[$i], $this->Stelle->pgdbhost);
+				$attributes = $mapDB->getDataAttributes($layerdb, $this->selected_layers[$i]);
+				$this->attributes = array_values(array_uintersect($this->attributes, $attributes, "compare_names"));
+			}
 			for($i = 0; $i < count($this->attributes); $i++){
-        //if(array_key_exists($i, $this->attributes['name'])){
-          if($this->attributes[$i]['type'] != 'geometry'){
-            //---------- normales Attribut -------------//
-            if($formvars['value_'.$this->attributes[$i]['name']] != '' AND $formvars['value_'.$this->attributes[$i]['name']] != '---- verschieden ----'){
-              //---------------- einfügen --------------//
-              $formvars['attributname'] = $this->attributes[$i]['name'];
-              $formvars['attributvalue'] = $formvars['value_'.$this->attributes[$i]['name']];
-              $formvars['operator'] = $formvars['operator_'.$this->attributes[$i]['name']];
-              $formvars['type'] = $this->attributes[$i]['type'];
-              for($j = 0; $j < count($this->selected_layers); $j++){
-                $formvars['layer'] = $this->selected_layers[$j];
-                $mapDB->saveAttributeFilter($formvars);
-              }
-            }
-            elseif($formvars['value_'.$this->attributes[$i]['name']] != '---- verschieden ----'){
-              //--------------- löschen ----------------//
-              for($j = 0; $j < count($this->selected_layers); $j++){
-                $mapDB->deleteFilter($formvars['stelle'], $this->selected_layers[$j], $this->attributes[$i]['name']);
-              }
-            }
-          }
-          else{   //---------- the_geom -------------//
-            if($this->formvars['check_'.$this->attributes[$i]['name']] != ''){
-              $polygonWeltkoordinaten = $this->formvars['newpathwkt'];
-              if(strpos($polygonWeltkoordinaten,'P') == 0){
-                $polygonWeltkoordinaten = str_replace('POLYGON((', 'MULTIPOLYGON(((', $polygonWeltkoordinaten);
-                $polygonWeltkoordinaten .= ')';
-              }
-              if($this->formvars['value_'.$this->attributes[$i]['name']] != '' AND $this->formvars['value_'.$this->attributes[$i]['name']] != '---- verschieden ----'){
-                //-------------- update -----------------//
-                $this->pgdatabase->updatepolygon($polygonWeltkoordinaten, $this->user->rolle->epsg_code, $this->formvars['value_'.$this->attributes[$i]['name']]);
-                $formvars['attributname'] = $this->attributes[$i]['name'];
-                $formvars['attributvalue'] = $this->formvars['value_'.$this->attributes[$i]['name']];
-                $formvars['operator'] = $formvars['operator_'.$this->attributes[$i]['name']];
-                $formvars['type'] = $this->attributes[$i]['type'];
-                for($j = 0; $j < count($this->selected_layers); $j++){
-                  $formvars['layer'] = $this->selected_layers[$j];
-                  $mapDB->saveAttributeFilter($formvars);
-                }
-              }
-              else{
-                //-------------- neu einfügen -----------------//
-                $poly_id = $this->pgdatabase->insertpolygon($polygonWeltkoordinaten, $this->user->rolle->epsg_code);
-                $formvars['attributname'] = $this->attributes[$i]['name'];
-                $formvars['attributvalue'] = $poly_id;
-                $formvars['operator'] = $formvars['operator_'.$this->attributes[$i]['name']];
-                $formvars['type'] = $this->attributes[$i]['type'];
-                for($j = 0; $j < count($this->selected_layers); $j++){
-                  //-------------- wenn vorhanden, alte Polygone löschen ----------//
-                  $poly_id = $mapDB->getPolygonID($this->formvars['stelle'],$this->selected_layers[$j]);
-                  if($poly_id != NULL){
-                    $this->pgdatabase->deletepolygon($poly_id);
-                  }
-                  $formvars['layer'] = $this->selected_layers[$j];
-                  $mapDB->saveAttributeFilter($formvars);
-                }
-              }
-            }
-            elseif($this->formvars['value_'.$this->attributes[$i]['name']] != '' AND $formvars['value_'.$this->attributes[$i]['name']] != '---- verschieden ----'){
-              //-------------- löschen -----------------//
-              for($j = 0; $j < count($this->selected_layers); $j++){
-                $mapDB->deleteFilter($formvars['stelle'], $this->selected_layers[$j], $this->attributes[$i]['name']);
-              }
-              if($mapDB->checkPolygon($this->formvars['value_'.$this->attributes[$i]['name']]) == false){
-                $this->pgdatabase->deletepolygon($this->formvars['value_'.$this->attributes[$i]['name']]);
-              }
-              $this->formvars['newpath'] = NULL;
-              $this->formvars['pathwkt'] = NULL;
-              $this->formvars['newpathwkt'] = NULL;
-              $this->formvars['result'] = NULL;
-            }
-          //}
+				if($this->attributes[$i]['type'] != 'geometry'){
+					//---------- normales Attribut -------------//
+					if($formvars['value_'.$this->attributes[$i]['name']] != '' AND $formvars['value_'.$this->attributes[$i]['name']] != '---- verschieden ----'){
+						//---------------- einfügen --------------//
+						$formvars['attributname'] = $this->attributes[$i]['name'];
+						$formvars['attributvalue'] = $formvars['value_'.$this->attributes[$i]['name']];
+						$formvars['operator'] = $formvars['operator_'.$this->attributes[$i]['name']];
+						$formvars['type'] = $this->attributes[$i]['type'];
+						for($j = 0; $j < count($this->selected_layers); $j++){
+							$formvars['layer'] = $this->selected_layers[$j];
+							$mapDB->saveAttributeFilter($formvars);
+						}
+					}
+					elseif($formvars['value_'.$this->attributes[$i]['name']] != '---- verschieden ----'){
+						//--------------- löschen ----------------//
+						for($j = 0; $j < count($this->selected_layers); $j++){
+							$mapDB->deleteFilter($formvars['stelle'], $this->selected_layers[$j], $this->attributes[$i]['name']);
+						}
+					}
+				}
+				else{   //---------- the_geom -------------//
+					if($this->formvars['check_'.$this->attributes[$i]['name']] != ''){
+						$polygonWeltkoordinaten = $this->formvars['newpathwkt'];
+						if(strpos($polygonWeltkoordinaten,'P') == 0){
+							$polygonWeltkoordinaten = str_replace('POLYGON((', 'MULTIPOLYGON(((', $polygonWeltkoordinaten);
+							$polygonWeltkoordinaten .= ')';
+						}
+						if($this->formvars['value_'.$this->attributes[$i]['name']] != '' AND $this->formvars['value_'.$this->attributes[$i]['name']] != '---- verschieden ----'){
+							//-------------- update -----------------//
+							$this->pgdatabase->updatepolygon($polygonWeltkoordinaten, $this->user->rolle->epsg_code, $this->formvars['value_'.$this->attributes[$i]['name']]);
+							$formvars['attributname'] = $this->attributes[$i]['name'];
+							$formvars['attributvalue'] = $this->formvars['value_'.$this->attributes[$i]['name']];
+							$formvars['operator'] = $formvars['operator_'.$this->attributes[$i]['name']];
+							$formvars['type'] = $this->attributes[$i]['type'];
+							for($j = 0; $j < count($this->selected_layers); $j++){
+								$formvars['layer'] = $this->selected_layers[$j];
+								$mapDB->saveAttributeFilter($formvars);
+							}
+						}
+						else{
+							//-------------- neu einfügen -----------------//
+							$poly_id = $this->pgdatabase->insertpolygon($polygonWeltkoordinaten, $this->user->rolle->epsg_code);
+							$formvars['attributname'] = $this->attributes[$i]['name'];
+							$formvars['attributvalue'] = $poly_id;
+							$formvars['operator'] = $formvars['operator_'.$this->attributes[$i]['name']];
+							$formvars['type'] = $this->attributes[$i]['type'];
+							for($j = 0; $j < count($this->selected_layers); $j++){
+								//-------------- wenn vorhanden, alte Polygone löschen ----------//
+								$poly_id = $mapDB->getPolygonID($this->formvars['stelle'],$this->selected_layers[$j]);
+								if($poly_id != NULL){
+									$this->pgdatabase->deletepolygon($poly_id);
+								}
+								$formvars['layer'] = $this->selected_layers[$j];
+								$mapDB->saveAttributeFilter($formvars);
+							}
+						}
+					}
+					elseif($this->formvars['value_'.$this->attributes[$i]['name']] != '' AND $formvars['value_'.$this->attributes[$i]['name']] != '---- verschieden ----'){
+						//-------------- löschen -----------------//
+						for($j = 0; $j < count($this->selected_layers); $j++){
+							$mapDB->deleteFilter($formvars['stelle'], $this->selected_layers[$j], $this->attributes[$i]['name']);
+						}
+						if($mapDB->checkPolygon($this->formvars['value_'.$this->attributes[$i]['name']]) == false){
+							$this->pgdatabase->deletepolygon($this->formvars['value_'.$this->attributes[$i]['name']]);
+						}
+						$this->formvars['newpath'] = NULL;
+						$this->formvars['pathwkt'] = NULL;
+						$this->formvars['newpathwkt'] = NULL;
+						$this->formvars['result'] = NULL;
+					}
         }
       }
     }
@@ -10658,6 +10654,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
   }
 
   function rollenwahl($Stelle_ID) {
+		include_once(CLASSPATH.'FormObject.php');
     $this->user->Stellen=$this->user->getStellen(0);
     $this->Hinweis.='Aktuelle Stellen_ID: '.$Stelle_ID;
     $StellenFormObj=new FormObject("Stelle_ID","select",$this->user->Stellen['ID'],$Stelle_ID,$this->user->Stellen['Bezeichnung'],'Anzahl Werte',"","",NULL);
@@ -13175,6 +13172,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
   # Flurstücksauswahl
   function flurstwahl() {
+		include_once(CLASSPATH.'FormObject.php');
     if($this->formvars['historical'] == 1){
       $this->titel='historische Flurstückssuche';
 			$this->formvars['without_temporal_filter'] = 1;
@@ -13289,6 +13287,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
   # adressenauswahl
   function adresswahl() {
+		include_once(CLASSPATH.'FormObject.php');
     $Adresse=new adresse('','','',$this->pgdatabase);
     $this->main='adresssuche.php';
     if($this->formvars['ALK_Suche'] == 1){

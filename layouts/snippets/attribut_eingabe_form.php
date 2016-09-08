@@ -152,52 +152,46 @@ function setlayers(selected_options){
 						</td>
 					</tr>
 			';
-			// durch das intersecten der Arrays kann es sein, dass einige Schlüssel nicht mehr im Array existieren
-			// diese werden einfach ausgelassen
-			//$keys = array_keys($this->attributes['name']);
-			//$lastindex = $keys[count($keys)-1]; 
     	for($i = 0; $i < count($this->attributes); $i++){
-  //  		if(array_key_exists($i, $this->attributes['name'])){
-	    		if($this->attributes[$i]['type'] != 'geometry'){
-						echo '
-						<tr>
-						  <td align="center">
-						  	<input type="text" name="attribute_'.$this->attributes[$i]['name'].'" value="'.$this->attributes[$i]['name'].'" readonly>
-						  </td>
-						  <td align="center">
-						  	<select  style="width:90px" name="operator_'.$this->attributes[$i]['name'].'">
-						  		<option value="=" ';
-						  		if($this->formvars['operator_'.$this->attributes[$i]['name']] == '='){echo 'selected';}
-						  		echo ' >=</option>
-									<option value="!=" ';
-						  		if($this->formvars['operator_'.$this->attributes[$i]['name']] == '!='){echo 'selected';}
-						  		echo ' >!=</option>
-						  		<option value="<" ';
-						  		if($this->formvars['operator_'.$this->attributes[$i]['name']] == '<'){echo 'selected';}
-						  		echo ' ><</option>
-						  		<option value=">" ';
-						  		if($this->formvars['operator_'.$this->attributes[$i]['name']] == '>'){echo 'selected';}
-						  		echo ' >></option>
-						  		<option value="like" ';
-						  		if($this->formvars['operator_'.$this->attributes[$i]['name']] == 'like'){echo 'selected';}
-									echo ' >like</option>
-									<option value="IS" ';
-						  		if($this->formvars['operator_'.$this->attributes[$i]['name']] == 'IS'){echo 'selected';}
-									echo ' >IS</option>
-									<option value="IN" ';
-						  		if($this->formvars['operator_'.$this->attributes[$i]['name']] == 'IN'){echo 'selected';}
-									echo ' >IN</option>
-						  	</select>
-						  </td>
-						  <td align="center">
-						  	<input name="value_'.$this->attributes[$i]['name'].'" type="text" value="'.$this->formvars['value_'.$this->attributes[$i]['name']].'">
-						  </td>
-		        </tr>';
-	    		}
-	    		else{
-	    			$the_geom_index[] = $i;
-	    		}
-  //  		}
+				if($this->attributes[$i]['type'] != 'geometry'){
+					echo '
+					<tr>
+						<td align="center">
+							<input type="text" name="attribute_'.$this->attributes[$i]['name'].'" value="'.$this->attributes[$i]['name'].'" readonly>
+						</td>
+						<td align="center">
+							<select  style="width:90px" name="operator_'.$this->attributes[$i]['name'].'">
+								<option value="=" ';
+								if($this->formvars['operator_'.$this->attributes[$i]['name']] == '='){echo 'selected';}
+								echo ' >=</option>
+								<option value="!=" ';
+								if($this->formvars['operator_'.$this->attributes[$i]['name']] == '!='){echo 'selected';}
+								echo ' >!=</option>
+								<option value="<" ';
+								if($this->formvars['operator_'.$this->attributes[$i]['name']] == '<'){echo 'selected';}
+								echo ' ><</option>
+								<option value=">" ';
+								if($this->formvars['operator_'.$this->attributes[$i]['name']] == '>'){echo 'selected';}
+								echo ' >></option>
+								<option value="like" ';
+								if($this->formvars['operator_'.$this->attributes[$i]['name']] == 'like'){echo 'selected';}
+								echo ' >like</option>
+								<option value="IS" ';
+								if($this->formvars['operator_'.$this->attributes[$i]['name']] == 'IS'){echo 'selected';}
+								echo ' >IS</option>
+								<option value="IN" ';
+								if($this->formvars['operator_'.$this->attributes[$i]['name']] == 'IN'){echo 'selected';}
+								echo ' >IN</option>
+							</select>
+						</td>
+						<td align="center">
+							<input name="value_'.$this->attributes[$i]['name'].'" type="text" value="'.$this->formvars['value_'.$this->attributes[$i]['name']].'">
+						</td>
+					</tr>';
+				}
+				else{
+					$the_geom_index[] = $i;
+				}
     	}
     	for($i = 0; $i < count($the_geom_index); $i++){
 	    	echo '
