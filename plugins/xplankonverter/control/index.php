@@ -456,6 +456,19 @@ sleep(5);
 		echo json_encode($response);
 	} break;
 
+	case 'xplankonverter_gml_ausliefern' : {
+		if ($this->formvars['konvertierung_id'] == '') {
+		  echo 'Diese Link kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
+		  return;
+		}
+		$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
+		if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) return;
+
+		$filename = XPLANKONVERTER_SHAPE_PATH . $this->formvars['konvertierung_id'] . '/xplan_' . $this->formvars['konvertierung_id'] . '.gml';
+		header('Content-Type: text/xml; subtype="gml/3.3"');
+    echo fread(fopen($filename, "r"), filesize($filename));
+	} break;
+
 	case 'xplankonverter_konvertierung_loeschen' : {
 		$konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
 		# Lösche gml-Datei
@@ -514,7 +527,7 @@ function isInStelleAllowed($stelle, $requestStelleId) {
 	if ($stelle->id == $requestStelleId)
 		return true;
 	else {
-		echo '<br>(Diese Aktion kann nur von der Stelle ' . $stelle->Bezeichnung . ' aus aufgerufen werden';
+		echo '<br>Diese Aktion kann nicht von der Stelle ' . $stelle->Bezeichnung . ' aus aufgerufen werden.';
 		return false;
 	}
 }
