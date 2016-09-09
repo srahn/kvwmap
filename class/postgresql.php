@@ -770,6 +770,7 @@ FROM
       $tableexplosion = explode(' ', trim($tables[$i]));
       if(count($tableexplosion) > 1){
 	      for($j = 0; $j < count($tableexplosion); $j++){
+					if($found)return $tablealias;
 	      	if($tablename == $tableexplosion[$j]){
 	      		if(strtolower($tableexplosion[$j+1]) == 'as'){			# Umbenennung mit AS
 	      			$found = true;
