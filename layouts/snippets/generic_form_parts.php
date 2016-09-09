@@ -95,11 +95,17 @@
 				$dataset2[$attributes2['name'][$j]] = $elements[$e];
 				$datapart .= '<div id="div_'.$id.'_'.$e.'" style="display: '.($e==-1 ? 'none' : 'block').'"><table cellpadding="0" cellspacing="0"><tr><td>';
 				$datapart .= attribute_value($gui, $layer_id, $attributes2, $j, $e, $dataset2, $size, $select_width, $fontsize, $change_all, $onchange2, $elements_fieldname);
-				$datapart .= '</td><td valign="top"><a href="#" onclick="removeArrayElement(\''.$id.'\', \'div_'.$id.'_'.$e.'\');'.$onchange2.'return false;"><img style="width: 18px" src="'.GRAPHICSPATH.'datensatz_loeschen.png"></a></td></tr></table>';
+				$datapart .= '</td>';
+				if($attributes['privileg'][$j] == '1' AND !$lock[$k]){
+					$datapart .= '<td valign="top"><a href="#" onclick="removeArrayElement(\''.$id.'\', \'div_'.$id.'_'.$e.'\');'.$onchange2.'return false;"><img style="width: 18px" src="'.GRAPHICSPATH.'datensatz_loeschen.png"></a></td>';
+				}
+				$datapart .= '</tr></table>';
 				$datapart .= '</div>';
 			}
 			$datapart .= '</div>';
-			$datapart .= '<div style="padding: 3px 10px 3px 3px;float: right"><a href="javascript:addArrayElement(\''.$id.'\')" class="buttonlink"><span>'.$strNewEmbeddedPK.'</span></a></div>';
+			if($attributes['privileg'][$j] == '1' AND !$lock[$k]){
+				$datapart .= '<div style="padding: 3px 10px 3px 3px;float: right"><a href="javascript:addArrayElement(\''.$id.'\')" class="buttonlink"><span>'.$strNewEmbeddedPK.'</span></a></div>';
+			}
 			return $datapart;
 		}
 		
@@ -111,7 +117,7 @@
 			$type_attributes = $attributes['type_attributes'][$j];
 			$elements = json_decode($value);	# diese Funktion decodiert immer den kommpletten String
 			$tsize = 20;
-			$datapart .= '<table class="gle_datatype_table">';
+			$datapart .= '<table border="2" class="gle_datatype_table">';
 			$onchange2 = 'buildJSONString(\''.$id.'\', false);';
 			$elements_fieldname = $id;
 			for($e = 0; $e < count($type_attributes['name']); $e++){
@@ -121,10 +127,10 @@
 				}
 				if(is_array($elem_value) OR is_object($elem_value))$elem_value = json_encode($elem_value);		# ist ein Array oder Objekt (also entweder ein Array-Typ oder ein Datentyp) und wird zur Übertragung wieder encodiert
 				$dataset2[$type_attributes['name'][$e]] = $elem_value;
-				$type_attributes['privileg'][$e] = 1;
+				$type_attributes['privileg'][$e] = $attributes['privileg'][$j];
 				if($type_attributes['alias'][$e] == '')$type_attributes['alias'][$e] = $type_attributes['name'][$e];
-				$datapart .= '<tr><td valign="top" class="gle_attribute_name">'.$type_attributes['alias'][$e].'</td>';
-				$datapart .= '<td>'.attribute_value($gui, $layer_id, $type_attributes, $e, NULL, $dataset2, $tsize, $select_width, $fontsize, $change_all, $onchange2, $elements_fieldname).'</td></tr>';
+				$datapart .= '<tr><td valign="top" class="gle_attribute_name"><table><tr><td>'.$type_attributes['alias'][$e].'</td></tr></table></td>';
+				$datapart .= '<td class="gle_attribute_value">'.attribute_value($gui, $layer_id, $type_attributes, $e, NULL, $dataset2, $tsize, $select_width, $fontsize, $change_all, $onchange2, $elements_fieldname).'</td></tr>';
 			}
 			$datapart .= '</tr></table>';
 			return $datapart;
