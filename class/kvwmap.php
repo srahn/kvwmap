@@ -10677,8 +10677,7 @@ class GUI {
             } # end of default case
           } # end of switch for type
 					if($eintrag !== NULL){
-						$updates[$layer_id][$tablename][$oid]['eintrag'][] = $eintrag;
-						$updates[$layer_id][$tablename][$oid]['attributename'][] = $attributname;
+						$updates[$layer_id][$tablename][$oid][$attributname] = $eintrag;
 					}          
         }
       }
@@ -10701,8 +10700,7 @@ class GUI {
 					if ($old != '' AND $old != $eintrag) {
 						$this->deleteDokument($old);
 					}
-					$updates[$attr_oid['layer_id']][$attr_oid['tablename']][$attr_oid['oid']]['eintrag'][] = $eintrag;
-					$updates[$attr_oid['layer_id']][$attr_oid['tablename']][$attr_oid['oid']]['attributename'][] = $attr_oid['attributename'];
+					$updates[$attr_oid['layer_id']][$attr_oid['tablename']][$attr_oid['oid']][$attr_oid['attributename']] = $eintrag;
 				} # ende von Datei wurde erfolgreich in Datenverzeichnis kopiert
 				else {
 					echo '<br>Datei: '.$_files[$form_fields[$i]]['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
@@ -10712,15 +10710,17 @@ class GUI {
 		if($updates != NULL){
 			foreach($updates as $layer_id => $layer){
 				foreach($layer as $tablename => $table){
-					foreach($table as $oid => $row){
-						if(count($row['attributename']) > 0){
+					foreach($table as $oid => $attributes){
+						if(count($attributes) > 0){
 							if(!$layerset[$layer_id][0]['maintable_is_view'])$sql = "LOCK TABLE ".$tablename." IN SHARE ROW EXCLUSIVE MODE;";
 							$sql .= "UPDATE ".$tablename." SET ";
-							for($i = 0; $i < count($row['attributename']); $i++){
+							$i = 0;
+							foreach($attributes as $attribute => $value){
 								if($i > 0)$sql .= ', ';
-								$sql .= $row['attributename'][$i]." = ";
-								if($row['eintrag'][$i] == 'NULL')$sql .= 'NULL';
-								else $sql .= "'".$row['eintrag'][$i]."'";
+								$sql .= $attribute." = ";
+								if($value == 'NULL')$sql .= 'NULL';
+								else $sql .= "'".$value."'";
+								$i++;
 							}
 							$sql .= " WHERE oid = ".$oid;
 							#if($filter != ''){							# erstmal wieder rausgenommen, weil der Filter sich auf Attribute beziehen kann, die zu anderen Tabellen gehören
