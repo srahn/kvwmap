@@ -744,7 +744,7 @@ FROM
 	      }
 	      else{ # 'irgendein String' as ...
 	        $fieldname = explode('.', $explosion[0]);
-	        if(strpos($fieldname[count($fieldname)-1], "'") !== false){
+					if(strtolower($explosion[0]) == 'case' OR strpos($fieldname[count($fieldname)-1], "'") !== false){
 	          $name_pair['no_real_attribute'] = true;
 	        }
 	        else{		# tabellenname.attributname

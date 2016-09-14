@@ -2525,7 +2525,7 @@ class GUI {
 		$attributevalues = explode('|', $this->formvars['attributevalues']);
 		$sql = $attributes['options'][0];
 		for($i = 0; $i < count($attributenames); $i++){
-			$sql = str_replace('$'.$attributenames[$i], $attributevalues[$i], $sql);
+			if($attributenames[$i] != '')$sql = str_replace('$'.$attributenames[$i], $attributevalues[$i], $sql);
 		}
 		#echo $sql;
 		$ret=$layerdb->execSQL($sql,4,0);
@@ -13915,7 +13915,7 @@ class db_mapObj{
 		if(strtolower(substr($option, 0, 6)) == 'select'){		// ist im Optionenfeld eine SQL-Abfrage definiert, diese ausführen und mit dem Ergebnis den Dokumentenpfad erweitern
 			$sql = $option;
 			for($a = 0; $a < count($attributenames); $a++){
-				$sql = str_replace('$'.$attributenames[$a], $attributevalues[$a], $sql);
+				if($attributenames[$a] != '')$sql = str_replace('$'.$attributenames[$a], $attributevalues[$a], $sql);
 			}
 			$ret = $layerdb->execSQL($sql,4, 1);
 			$dynamic_path = pg_fetch_row($ret[1]);
