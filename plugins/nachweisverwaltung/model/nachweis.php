@@ -794,9 +794,9 @@ class Nachweis {
 				$sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS andere_art, d.art AS andere_art_name";
 				$sql.=" FROM nachweisverwaltung.n_nachweise AS n";
 				$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
-				$sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d"; 
+				$sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id"; 
 				$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n2d.dokumentart_id = d.id";
-				$sql.=" ON n2d.nachweis_id = n.id";
+				if($andere_art)$sql.=" AND d.id IN (".$andere_art.")";
         $sql.=" WHERE ";
 				if($gueltigkeit != NULL)$sql.=" gueltigkeit = ".$gueltigkeit." AND ";
         if ($idselected[0]!=0) {
@@ -825,7 +825,6 @@ class Nachweis {
             $sql.=",'".$art[$i]."'";
           }
           $sql.=")";
-					if($andere_art)$sql.=" AND d.id IN (".$andere_art.")";
         }
 
         if ($order=='') {
@@ -870,9 +869,9 @@ class Nachweis {
 					}
 					$sql.=" nachweisverwaltung.n_nachweise AS n";
 					$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
-          $sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d"; 
+          $sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id"; 
 					$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n2d.dokumentart_id = d.id";
-					$sql.=" ON n2d.nachweis_id = n.id";
+					if($andere_art)$sql.=" AND d.id IN (".$andere_art.")";
           $sql.=" WHERE 1=1 ";
 					if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
           if ($idselected[0]!=0) {
@@ -924,7 +923,6 @@ class Nachweis {
               $sql.=",'".$art[$i]."'";
             }
             $sql.=")";
-						if($andere_art)$sql.=" AND d.id IN (".$andere_art.")";
           }
 
           if ($order=='') {
@@ -966,9 +964,9 @@ class Nachweis {
           $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS andere_art, d.art AS andere_art_name";
           $sql.=" FROM nachweisverwaltung.n_nachweise AS n";
 					$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
-          $sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d"; 
+          $sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id"; 
 					$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n2d.dokumentart_id = d.id";
-					$sql.=" ON n2d.nachweis_id = n.id";
+					if($andere_art)$sql.=" AND d.id IN (".$andere_art.")";
  					$sql.=" WHERE 1=1";
           $sql.=" AND st_intersects(st_transform(st_geometryfromtext('".$polygon."',".$this->client_epsg."), (select srid from geometry_columns where f_table_name = 'n_nachweise')),the_geom)";
 		  if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
@@ -982,8 +980,7 @@ class Nachweis {
             for ($i=1;$i<count($art);$i++) {
               $sql.=",'".$art[$i]."'";
             }
-            $sql.=")";
-						if($andere_art)$sql.=" AND d.id IN (".$andere_art.")";
+            $sql.=")";						
           }
           if ($order=='') {
             $order="flurid, stammnr, datum";
@@ -1015,9 +1012,9 @@ class Nachweis {
 				$sql ="SELECT distinct n.*,v.name AS vermst, n2d.dokumentart_id AS andere_art, d.art AS andere_art_name";
         $sql.=" FROM nachweisverwaltung.n_nachweise2antraege AS n2a, nachweisverwaltung.n_nachweise AS n";
 				$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
-        $sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d"; 
+        $sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id"; 
 				$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n2d.dokumentart_id = d.id";
-				$sql.=" ON n2d.nachweis_id = n.id";
+				if($andere_art)$sql.=" AND d.id IN (".$andere_art.")";
         $sql.=" WHERE n.id=n2a.nachweis_id";
         $sql.=" AND n2a.antrag_id='".$antr_nr."'";				
 				if($stelle_id == '')$sql.=" AND stelle_id IS NULL";
@@ -1033,7 +1030,6 @@ class Nachweis {
             $sql.=",'".$art[$i]."'";
           }
           $sql.=")";
-					if($andere_art)$sql.=" AND d.id IN (".$andere_art.")";
         }
         if ($order=='') {
           $order="flurid, stammnr, datum";
