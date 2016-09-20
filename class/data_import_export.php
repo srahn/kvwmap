@@ -852,6 +852,7 @@ class data_import_export {
 		foreach($this->attributes['all_table_names'] as $tablename){
 			if(($tablename == $layerset[0]['maintable']) AND $this->attributes['oids'][$j]){		# hat Haupttabelle oids?
 				$pfad = $this->attributes['table_alias_name'][$tablename].'.oid AS '.$tablename.'_oid, '.$pfad;
+				if($groupby != '')$groupby .= ','.$this->attributes['table_alias_name'][$tablename].'.oid';
 			}
 			$j++;
 		}
@@ -874,7 +875,7 @@ class data_import_export {
     	$sql.= " AND ST_INTERSECTS(".$this->attributes['the_geom'].", st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code']."))";
     }
     $sql.= $orderby;
-		#echo $sql;
+		echo $sql;
 		
     $temp_table = 'shp_export_'.rand(1, 10000);
     $sql = 'CREATE TABLE public.'.$temp_table.' AS '.$sql;		# temporäre Tabelle erzeugen, damit das/die Schema/ta berücksichtigt werden
@@ -999,13 +1000,13 @@ class data_import_export {
       $ret = $layerdb->execSQL($sql,4, 0);
     	if($this->formvars['export_format'] != 'CSV')$user->rolle->setConsumeShape($currenttime,$this->formvars['selected_layer_id'],$count);
 			
-	    ob_end_clean();
-			header('Content-type: '.$contenttype);
-			header("Content-disposition:  attachment; filename=".basename($exportfile));
-			header("Content-Length: ".filesize($exportfile));
-			header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-			header('Pragma: public');
-			readfile($exportfile);
+	    // ob_end_clean();
+			// header('Content-type: '.$contenttype);
+			// header("Content-disposition:  attachment; filename=".basename($exportfile));
+			// header("Content-Length: ".filesize($exportfile));
+			// header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+			// header('Pragma: public');
+			// readfile($exportfile);
     }
     else{
       showAlert('Abfrage fehlgeschlagen.');
