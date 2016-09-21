@@ -720,6 +720,9 @@ class data_import_export {
 							}
 						}
 					}
+					if($attributes['form_element_type'][$j] == 'Autovervollständigungsfeld'){
+						$value = $attributes['enum_output'][$j][$i];
+					}
 					if(in_array($attributes['type'][$j], array('numeric', 'float4', 'float8'))){
 						$value = str_replace('.', ",", $value);			# Excel-Datumsproblem
 					}
