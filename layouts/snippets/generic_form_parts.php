@@ -270,6 +270,7 @@
 									$enum_output = $attributes['enum_output'][$index];
 								}
 								if($attributes['nullable'][$index] != '0')$strPleaseSelect = $gui->strPleaseSelect;
+								$onchange = 'set_changed_flag(currentform.changed_'.$layer_id.'_'.$oid.');';
 								$datapart .= Auswahlfeld($layer_id, $name_, $j, $attributes['alias'][$name_], $fieldname_[$f], $dataset[$name_], $enum_value, $enum_output, $attributes['req_by'][$index], $attributes['name'], $attributes['privileg'][$name_], $k, $oid, $attributes['subform_layer_id'][$index], $attributes['subform_layer_privileg'][$index], $attributes['embedded'][$index], $lock[$k], $select_width, $fontsize, $strPleaseSelect, $change_all, $onchange);
 							}break;
 							default : {
