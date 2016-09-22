@@ -1230,8 +1230,8 @@
 							$legend .= ' ></td><td valign="middle">';							
 							$legend .= '<a oncontextmenu="getLayerOptions('.$layer['Layer_ID'].');return false;"';
 							if($layer['metalink'] != '' AND substr($layer['metalink'], 0, 10) != 'javascript')$legend .= 'target="_blank"';
-							if($layer['metalink'] != '')$legend .= ' class="metalink" href="'.$layer['metalink'].'">';
-							else $legend .= ' class="visiblelayerlink" href="javascript:void(0)"';
+							if($layer['metalink'] != '')$legend .= ' class="metalink boldhover" href="'.$layer['metalink'].'">';
+							else $legend .= ' class="visiblelayerlink boldhover" href="javascript:void(0)"';
 							$legend .= '<span ';
 							if($layer['minscale'] != -1 AND $layer['maxscale'] > 0){
 								$legend .= 'title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
@@ -1361,7 +1361,7 @@
 							$legend .=  'checked="true" ';
 						}
 						$legend .= 'id="thema_'.$layer['Layer_ID'].'" name="thema'.$layer['Layer_ID'].'" disabled="true"></td><td>';
-						$legend .= '<a oncontextmenu="getLayerOptions('.$layer['Layer_ID'].');return false;" class="invisiblelayerlink" href="javascript:void(0)"';
+						$legend .= '<a oncontextmenu="getLayerOptions('.$layer['Layer_ID'].');return false;" class="invisiblelayerlink boldhover" href="javascript:void(0)"';
 						$legend .= '<span class="legend_layer_hidden" ';
 						if($layer['minscale'] != -1 AND $layer['maxscale'] != -1){
 							$legend .= 'title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';

@@ -201,14 +201,20 @@ a.metalink {
 }
 
 a.visiblelayerlink {
-	color: black; 
+	color: black;
+	cursor: context-menu;
+}
+
+a.boldhover:hover{
+	text-shadow: 0px 0.3px 0 rgba(0,0,0,0.2), 0px -0.3px 0 rgba(0,0,0,0.2), 0.3px 0px 0 rgba(0,0,0,0.2), -0.3px 0px 0 rgba(0,0,0,0.2);
 }
 
 a.invisiblelayerlink {
 	color: gray;
+	cursor: context-menu;
 }
 
-a.invisiblelayerlink hover{
+a.invisiblelayerlink:hover{
 	color: gray;
 }
 
