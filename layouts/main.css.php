@@ -200,6 +200,18 @@ a.metalink {
 	color: black; 
 }
 
+a.visiblelayerlink {
+	color: black; 
+}
+
+a.invisiblelayerlink {
+	color: gray;
+}
+
+a.invisiblelayerlink hover{
+	color: gray;
+}
+
 
 .buttonlink{
 	height: 13px;
