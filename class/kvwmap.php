@@ -7486,15 +7486,20 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				#echo $sql.'<br>';
 				$ret = $layerdb->execSQL($sql,4, 1);
 
-				# After delete trigger
-				# Derzeit steht der gelöschte Datensatz für after trigger nicht zur Verfügung.
-				# Wollte man das, müsste man den Datensatz vor dem Löschen abfragen und hier im 5. Parameter übergeben.
-				if (!empty($layer['trigger_function'])) {
-					$this->exec_trigger_function('AFTER', 'DELETE', $layer);
-				};
-
-				if ($ret[0]) {
-					$success = false;
+				if(!$ret[0]){
+					$result = pg_fetch_row($ret[1]);
+					if(pg_affected_rows($ret[1]) == 0){
+						$ret[0] = 1;
+						$success = false;
+					}
+					else{
+						# After delete trigger
+						# Derzeit steht der gelöschte Datensatz für after trigger nicht zur Verfügung.
+						# Wollte man das, müsste man den Datensatz vor dem Löschen abfragen und hier im 5. Parameter übergeben.
+						if (!empty($layer['trigger_function'])) {
+							$this->exec_trigger_function('AFTER', 'DELETE', $layer);
+						};
+					}
 				}
 			}
 		}
@@ -7511,7 +7516,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		if ($output) {
 			if($this->formvars['embedded'] == ''){
 				if($success == false){
-					showAlert('Löschen fehlgeschlagen');
+					showAlert('Löschen fehlgeschlagen.\n'.$result[0]);
 				}
 				else{
 					showAlert('Löschen erfolgreich');
@@ -11066,14 +11071,13 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 									$ret[0] = 1;
 									$success = false;
 								}
-							}
-							else {
-								# After Update trigger
-								if (!empty($layer['trigger_function'])) {
-									$this->exec_trigger_function('AFTER', 'UPDATE', $layerset[$layer_id], $oid);
+								else{
+									# After Update trigger
+									if (!empty($layer['trigger_function'])){
+										$this->exec_trigger_function('AFTER', 'UPDATE', $layerset[$layer_id], $oid);
+									}
 								}
 							}
-
 						}
 					}
 				}
