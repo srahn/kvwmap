@@ -206,7 +206,7 @@ a.visiblelayerlink {
 }
 
 a.boldhover:hover{
-	text-shadow: 0px 0.3px 0 rgba(0,0,0,0.2), 0px -0.3px 0 rgba(0,0,0,0.2), 0.3px 0px 0 rgba(0,0,0,0.2), -0.3px 0px 0 rgba(0,0,0,0.2);
+	text-shadow: 0 0 0 rgba(0,0,0,0.8);
 }
 
 a.invisiblelayerlink {
