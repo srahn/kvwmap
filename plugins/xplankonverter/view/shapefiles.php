@@ -62,13 +62,10 @@
   <input type="hidden" name="konvertierung_id" value="<?php echo $this->formvars['konvertierung_id']; ?>">
   <div class="file-upload">
     <input type="file" name="shape_files[]" multiple>
-    <select name="epsg_code">
-      <option value="25832" selected>25832</option>
-      <option value="25833">25833</option>
-      <option value="35833">35833</option>
-      <option value="31467">31467</option>
-      <option value="31468">31468</option>
-      <option value="31469">31469</option>
+		<select name="epsg_code"><?php
+			foreach($this->konvertierung->get_input_epgs_codes() AS $epsg_code) {
+				echo "<option value=\"{$epsg_code}\"" . ($this->konvertierung->get('input_epsg') == $epsg_code ? ' selected' : '') . ">{$epsg_code}</option>";
+			}?>
     </select>
     <input type="submit" value="Upload">
   </div>

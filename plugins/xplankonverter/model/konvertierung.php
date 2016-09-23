@@ -31,6 +31,20 @@ class Konvertierung extends PgObject {
 			return $konvertierung;
 		}
 
+	function get_input_epgs_codes() {
+		$sql = "
+			SELECT
+				unnest(enum_range(NULL::xplankonverter.epsg_codes)) AS epsg_code
+		";
+		$input_codes = array();
+		$query = pg_query($this->database->dbConn, $sql);
+		while ($rs = pg_fetch_assoc($query)) {
+			$input_codes[] = $rs['epsg_code'];
+		}
+		$this->set('input_epgs_codes', $input_codes);
+		return $input_codes;
+	}
+
 	/**
 	* Erzeugt eine Layergruppe vom Typ GML oder Shape und trägt die dazugehörige
 	* gml_layer_group_id oder shape_layer_group_id in PG-Tabelle konvertierung ein.
@@ -46,7 +60,7 @@ class Konvertierung extends PgObject {
 			$this->set(strtolower($layer_type) . '_layer_group_id', $layerGroup->get('id'));
 			$this->update();
 		}
-		return $this->get(strtolower($layer_type) . 'layer_group_id');
+		return $this->get(strtolower($layer_type) . '_layer_group_id');
 	}
 
 	/*
