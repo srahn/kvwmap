@@ -7,13 +7,24 @@ CREATE TYPE xplankonverter.enum_factory AS ENUM ('sql','form','default');
 CREATE TABLE xplankonverter.konvertierungen
 (
   id serial NOT NULL,
-  bezeichnung character varying,
+  bezeichnung character varying, -- Bezeichnung der Konvertierung. (Freitext)
+  status xplankonverter.enum_konvertierungsstatus NOT NULL DEFAULT 'in Erstellung'::xplankonverter.enum_konvertierungsstatus, -- Status der Konvertierung. Enthält ein Wert vom Typ konvertierungsstatus.
+  stelle_id integer, -- Die Id der Stelle in der die Konvertierung angelegt wurde und genutzt wird.
   beschreibung text,
-  status xplankonverter.enum_konvertierungsstatus NOT NULL DEFAULT 'erstellt',
-  stelle_id integer,
-  layer_group_id integer,
+  shape_layer_group_id integer,
+  created_at timestamp without time zone NOT NULL DEFAULT now(),
+  updated_at timestamp without time zone NOT NULL DEFAULT now(),
+  user_id integer, -- Id des Nutzers, der den Datensatz angelegt hat. Dieser Wert solle automatisch vom System kvwmap beim Anlegen des Datensatzes erzeugt werden und ein Wert aus der MySQL-Tabelle users der kvwmap Karten- und Nutzerdatenbank kvwmapsp sein.
+  geom_precision integer NOT NULL DEFAULT 3,
+  gml_layer_group_id integer,
+  epsg xplankonverter.epsg_codes,
+  output_epsg xplankonverter.epsg_codes NOT NULL DEFAULT '25832'::xplankonverter.epsg_codes,
+  input_epsg xplankonverter.epsg_codes,
   CONSTRAINT konvertierungen_id_pkey PRIMARY KEY (id)
-) WITH ( OIDS=TRUE );
+)
+WITH (
+  OIDS=TRUE
+);
 COMMENT ON COLUMN xplankonverter.konvertierungen.bezeichnung IS 'Bezeichnung der Konvertierung. (Freitext)';
 COMMENT ON COLUMN xplankonverter.konvertierungen.bescheibung IS 'Nähere Angaben zur Konvertierung, bzw. zum Plan, der mit den dazugehörigen Regeln konvertiert werden soll. (Freitext)';
 COMMENT ON COLUMN xplankonverter.konvertierungen.status IS 'Status der Konvertierung. Enthält ein Wert vom Typ konvertierungsstatus.';
