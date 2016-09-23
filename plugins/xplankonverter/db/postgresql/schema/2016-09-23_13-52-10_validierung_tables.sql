@@ -1,8 +1,13 @@
 BEGIN;
 
+CREATE TYPE xplankonverter.validierungsstatus  AS ENUM (
+	'Erfolg',
+	'Warung',
+	'Fehler');
+
 CREATE TABLE xplankonverter.validierungen
 (
-  id integer NOT NULL DEFAULT nextval('xplankonverter.validierung_id_seq'::regclass),
+  id serial,
   name character varying NOT NULL,
   beschreibung text,
   functionsname character varying,
@@ -18,7 +23,7 @@ WITH (
 
 CREATE TABLE xplankonverter.validierungsergebnisse
 (
-  id serial NOT NULL,
+  id serial,
   konvertierung_id integer,
   validierung_id integer,
   status xplankonverter.validierungsstatus,
@@ -30,4 +35,5 @@ CREATE TABLE xplankonverter.validierungsergebnisse
 WITH (
   OIDS=TRUE
 );
+
 COMMIT;
