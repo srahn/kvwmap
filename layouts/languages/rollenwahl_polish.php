@@ -18,7 +18,7 @@
   $strFontSizeGLE="rozmiar tekstu GLE"; 
   $strHighlight="suwak jasno&#347;ci"; 
   $strPlatt="dialekt dolnoniemiecki"; 
-  $strSearchColor="wynik - kolor"; 
-  
-  
+  $strSearchColor="wynik - kolor";
+	$strVisuallyImpaired="Uproszczenia w trybie odczytu";
+	$strHintVisuallyImpaired="W przypadku wybrania tej opcji, powierzchnia, a prace zostaną uproszczone w trybie odczytu. Ustawienie to nadaje się w szczególności dla osób niedowidzących. Jest jednak pewne funkcje są ukryte.";
 ?>

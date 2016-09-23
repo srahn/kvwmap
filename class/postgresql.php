@@ -85,7 +85,104 @@ class pgdatabase {
     $this->debug->write("<br>PostgreSQL Verbindung mit ID: ".$this->dbConn." schließen.",4);
     return pg_close($this->dbConn);
   }
-	
+
+	function get_tables($schema) {
+		$tables = array();
+		$sql = "
+			SELECT
+			  ('{$schema}.' || table_name)::regclass::oid AS oid,
+			  table_name AS name
+			FROM
+			  information_schema.tables
+			WHERE
+			  table_schema = '{$schema}' AND
+				table_name NOT LIKE 'enum_%'
+			ORDER BY table_name
+		";
+
+		$msg = '<br>Get Tables from Schema: ' . $schema;
+		$msg .= '<br>' . $sql;
+		$this->debug->write($msg, 4);
+
+		$ret = $this->execSQL($sql, 4, 0);
+		if($ret[0]==0){
+			while($row = pg_fetch_assoc($ret[1])){
+				$tables[] = $row;
+			}
+		}
+		return $tables;
+	}
+
+	function table_exists($schema, $table) {
+		$table_exists = false;
+		$sql = "
+SELECT EXISTS (
+	SELECT
+		1 AS exists
+	FROM
+		information_schema.tables 
+	WHERE
+		table_schema = '{$schema}' AND
+		table_name = '{$table}'
+)";
+		#echo '<br>' . $sql;
+		$ret = $this->execSQL($sql, 4, 0);
+		if($ret[0]==0) {
+			$row = pg_fetch_assoc($ret[1]);
+			if ($row['exists'] == 't') $table_exists = true;
+		}
+		return $table_exists;
+	}
+
+	function get_enum_options($schema, $attribute) {
+		if ($this->table_exists($schema, 'enum_' . $attribute['type'])) {
+			$options = "
+SELECT
+	wert AS value,
+	beschreibung AS output
+FROM
+	{$schema}.enum_{$attribute['table_name']}
+";
+		}
+		else {
+			$options = '';
+		}
+		$enum_values = array();
+		$sql = "
+			SELECT unnest(enum_range(NULL::{$schema}.{$attribute['type']}) ) AS value
+		";
+		#echo '<br>' . $sql;
+		$ret = $this->execSQL($sql, 4, 0);
+		if($ret[0]==0){
+			while($row = pg_fetch_assoc($ret[1])){
+				$enum_values[] = $row['value'];
+			}
+		}
+		$constraints = "\'" . implode("\', \'", $enum_values) . "\'";
+		return array('option' => $options, 'constraint' => $constraints);
+	}
+
+	function get_datatypes($schema) {
+		$datatypes = array();
+		$sql = "
+			SELECT
+			  ('{$schema}.' || user_defined_type_name)::regclass::oid AS datatype_oid,
+			  user_defined_type_name
+			FROM 
+			  information_schema.user_defined_types udt
+			WHERE
+			  udt.user_defined_type_schema = '{$schema}'
+			ORDER BY user_defined_type_name
+		";
+		$ret = $this->execSQL($sql, 4, 0);
+		if($ret[0]==0){
+			while($row = pg_fetch_assoc($ret[1])){
+				$datatypes[] = $row;
+			}
+		}
+		return $datatypes;
+	}
+
 	function read_epsg_codes($order = true){
     global $supportedSRIDs;
     $sql ="SELECT spatial_ref_sys.srid, coalesce(alias, substr(srtext, 9, 35)) as srtext, minx, miny, maxx, maxy FROM spatial_ref_sys ";
@@ -118,7 +215,7 @@ class pgdatabase {
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
-      $rs=pg_fetch_array($ret[1]);
+      $rs=pg_fetch_assoc($ret[1]);
       $curExtent->minx=$rs['minx'];
       $curExtent->miny=$rs['miny'];
       $curExtent->maxx=$rs['maxx'];
@@ -217,7 +314,7 @@ class pgdatabase {
     $sql ="SELECT st_astext(st_transform(st_geomfromtext('".$polygon."', ".$curSRID."), ".$newSRID."))";
     $ret=$this->execSQL($sql, 4, 0);
     if($ret[0] == 0){
-      $rs=pg_fetch_array($ret[1]);
+      $rs=pg_fetch_row($ret[1]);
     }
     return $rs[0];
   }
@@ -227,7 +324,7 @@ class pgdatabase {
     $sql.=" FROM (SELECT st_transform(st_geomfromtext('POINT(".$point.")',".$curSRID."),".$newSRID.") AS point) AS foo";
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
-      $rs=pg_fetch_array($ret[1]);
+      $rs=pg_fetch_assoc($ret[1]);
       if($coordtype != 'dec' AND $rs['x'] < 361){
 				switch ($coordtype) {
 					case 'dms' :
@@ -292,15 +389,15 @@ class pgdatabase {
       for($i = 0; $i < pg_num_fields($ret[1]); $i++){
         # Attributname
         $fieldname = pg_field_name($ret[1], $i);
-        $fields['name'][] = $fieldname;
+        $fields[$i]['name'] = $fieldname;
 
         # "richtiger" Name in der Tabelle
         $name_pair = $this->check_real_attribute_name($fieldstring[$i], $fieldname);
         if($name_pair != ''){
-          $fields['real_name'][$name_pair['name']] = $name_pair['real_name'];
+          $fields[$i]['real_name'] = $name_pair['real_name'];
         }
         else{
-          $fields['real_name'][$fieldname] = $fieldname;
+          $fields[$i]['real_name'] = $fieldname;
         }
 
         # Tabellenname des Attributs
@@ -319,131 +416,233 @@ class pgdatabase {
         if($tablename != NULL){
           $all_table_names[] = $tablename;
         }
-        $fields['table_name'][] = $tablename;
-        $fields['table_name'][$fieldname] = $tablename;
+        $fields[$i]['table_name'] = $tablename;
+        #$fields['table_name'][$fieldname] = $tablename;		todo
         if($table['alias'] == ''){
         	$table['alias'] = $this->get_table_alias($tablename, $fromposition, $withoutwhere);
         }
         if($table['alias']){
-        	$fields['table_alias_name'][$fieldname] = $table['alias'];
+        	$fields[$i]['table_alias_name'] = $table['alias'];
         }
         else{
-        	$fields['table_alias_name'][$fieldname] = $tablename;
+        	$fields[$i]['table_alias_name'] = $tablename;
         }
 
-        # Attributtyp
-        $fieldtype = pg_field_type($ret[1], $i);
+        # Attributeigenschaften
+				if($fields[$i]['real_name'] != ''){
+					$constraintstring = '';
+					$attr_info = $this->get_attribute_information($this->schema, $tablename, $fields[$i]['real_name']);
+					$fieldtype = $attr_info[0]['type_name'];
+					$fields[$i]['nullable'] = $attr_info[0]['nullable']; 
+					$fields[$i]['length'] = $attr_info[0]['length'];
+					$fields[$i]['decimal_length'] = $attr_info[0]['decimal_length'];
+					$fields[$i]['default'] = $attr_info[0]['default'];					
+					if($attr_info[0]['is_array'] == 't')$prefix = '_'; else $prefix = '';
+					if($attr_info[0]['type_type'] == 'c'){		# custom datatype
+						$datatype_id = $this->writeCustomType($attr_info[0]['type'], $attr_info[0]['type_schema']);
+						$fieldtype = $prefix.$datatype_id; 
+					}
+					if($attr_info[0]['type_type'] == 'e'){		# enum
+						$fieldtype = $prefix.'text';
+						$constraintstring = $this->getEnumElements($attr_info[0]['type'], $attr_info[0]['type_schema']);
+					}
+					if($attr_info[0]['indisunique'] == 't')$constraintstring = 'UNIQUE';
+					if($attr_info[0]['indisprimary'] == 't')$constraintstring = 'PRIMARY KEY';
+					$constraints = $this->pg_table_constraints($tablename);		# todo
+					if($fieldtype != 'geometry'){
+						# testen ob es für ein Attribut ein constraint gibt, das wie enum wirkt
+						for($j = 0; $j < count($constraints); $j++){
+							if(strpos($constraints[$j], '('.$fieldname.')')){
+								$options = explode("'", $constraints[$j]);
+								for($k = 0; $k < count($options); $k++){
+									if($k%2 == 1){
+										if($k > 1){
+											$constraintstring.= ",";
+										}
+										$constraintstring.= "'".$options[$k]."'";
+									}
+								}
+							}
+						}
+					}
+					$fields[$i]['constraints'] = $constraintstring;
+				}
 				if($name_pair != '' AND $name_pair['no_real_attribute']) $fieldtype = 'not_saveable';
-        $fields['type'][] = $fieldtype;
+        $fields[$i]['type'] = $fieldtype;
+				
         # Geometrietyp
         if($fieldtype == 'geometry'){
-          $fields['geomtype'][$fieldname] = $this->get_geom_type($fields['real_name'][$fieldname], $tablename);
-          $fields['the_geom'] = $fieldname;
-        }
-        
-        # Constraints
-        $constraints = $this->pg_table_constraints($tablename);
-        $constraintstring = '';
-	      if($fieldtype != 'geometry'){
-	        # testen ob es für ein Attribut ein constraint gibt, das wie enum wirkt
-	        for($j = 0; $j < count($constraints); $j++){
-	          if(strpos($constraints[$j], '('.$fieldname.')')){
-	            $options = explode("'", $constraints[$j]);
-	            for($k = 0; $k < count($options); $k++){
-	              if($k%2 == 1){
-	                if($k > 1){
-	                  $constraintstring.= ",";
-	                }
-	                $constraintstring.= "'".$options[$k]."'";
-	              }
-	            }
-	          }
-	        }
-	      }
-	              
-        $attr_info = $this->get_attribute_information($tablename, $fields['real_name'][$fieldname]);
-        # nullable
-        $fields['nullable'][] = $attr_info['is_nullable']; 
-        
-        # Länge des Feldes
-        if($attr_info['numeric_precision'] != ''){
-        	$fields['length'][] = $attr_info['numeric_precision'];
-        }
-        else{
-        	$fields['length'][] = $attr_info['character_maximum_length'];
-      	}        
-        
-        # Länge des Dezimalteils eines numeric-Feldes
-        $fields['decimal_length'][] = $attr_info['numeric_scale'];
-        
-        # Default-Wert
-        $fields['default'][] = $attr_info['column_default'];
-				
-				# Unique
-				if($attr_info['indisunique'] == 't'){
-        	$constraintstring = 'UNIQUE';
-        }
-				
-				# Primary Key
-        if($attr_info['indisprimary'] == 't'){
-        	$constraintstring = 'PRIMARY KEY';
-        }
-        
-        $fields['constraints'][] = $constraintstring;
-        
+          $fields[$i]['geomtype'] = $this->get_geom_type($fields[$i]['real_name'], $tablename);
+          #$fields['the_geom'] = $fieldname;		todo
+        }				
       }
       
-      if($all_table_names != NULL){   
-	      $all_table_names = array_unique($all_table_names);
-	      foreach($all_table_names as $tablename){
-	        $fields['oids'][] = $this->check_oid($tablename);   # testen ob Tabelle oid hat
-	        //$fields['all_alias_table_names'][] = $this->get_table_alias($tablename, $fromposition, $withoutwhere);
-	      }
-	      $fields['all_table_names'] = $all_table_names;
-      }
+      // if($all_table_names != NULL){   	todo
+	      // $all_table_names = array_unique($all_table_names);
+	      // foreach($all_table_names as $tablename){
+	        // $fields['oids'][] = $this->check_oid($tablename);   # testen ob Tabelle oid hat
+	      // }
+	      // $fields['all_table_names'] = $all_table_names;
+      // }
             
       return $fields;
     }
     else return NULL;
   }
-     
-  function get_attribute_information($tablename, $columnname){
-  	if($columnname != '' AND $tablename != ''){
-  		$sql = "SELECT is_nullable, character_maximum_length, column_default, numeric_precision, numeric_scale, bool_or(indisunique) as indisunique, bool_or(indisprimary) as indisprimary, pg_get_serial_sequence('".$tablename."', '".$columnname."') as serial ";
-  		$sql.= "FROM information_schema.columns LEFT JOIN pg_class LEFT JOIN pg_index ON indrelid = pg_class.oid LEFT JOIN pg_attribute ON pg_attribute.attrelid = pg_class.oid ON pg_class.oid = table_name::regclass AND pg_attribute.attnum = any(pg_index.indkey) AND attname = column_name ";
-  		$sql.= "WHERE column_name = '".$columnname."' AND table_name = '".$tablename."' AND table_schema = '".$this->schema."' ";
-			$sql.= "GROUP BY is_nullable, character_maximum_length, column_default, numeric_precision, numeric_scale";
-			#echo $sql.'<br>';
-  		$ret1 = $this->execSQL($sql, 4, 0);
-	  	if($ret1[0]==0){
-	      $attr_info = pg_fetch_assoc($ret1[1]);
-	      if($attr_info['is_nullable'] == 'NO' AND $attr_info['serial'] == '' AND substr($attr_info['column_default'], 0, 7) != 'nextval'){$attr_info['is_nullable'] = '0';}else{$attr_info['is_nullable'] = '1';}
-	      if($attr_info['character_maximum_length'] == NULL){$attr_info['character_maximum_length'] = 'NULL';}
-	      if($attr_info['numeric_scale'] == ''){$attr_info['numeric_scale'] = 'NULL';}	      
-	      if($attr_info['column_default'] != '' AND $attr_info['serial'] == '' AND substr($attr_info['column_default'], 0, 7) != 'nextval'){
-		      $attr_info['column_default'] = 'SELECT '.$attr_info['column_default'];
-		     	#echo $sql.'<br>';
-	  			#$ret1 = $this->execSQL($sql, 4, 0);
-	  			#if($ret1[0]==0){
-	      		#$defaultvalue = pg_fetch_row($ret1[1]);
-	      		#$attr_info['column_default'] = $defaultvalue[0];
-	  			#}
-	  		}
-	  		else{
-	  			$attr_info['column_default'] = '';
-	  		}
-	    }
-  	}
-  	else{
-  		$attr_info['is_nullable'] = 'NULL';
-  		$attr_info['character_maximum_length'] = 'NULL';
-  		$attr_info['column_default'] = '';
-  		$attr_info['numeric_scale'] = 'NULL';
-  	}
-  	return $attr_info;
-  }
-
-
+	
+	function get_attribute_information($schema, $table, $column = NULL) {
+		if($column != NULL)$and_column = "a.attname = '".$column."' AND ";
+		$attributes = array();
+		$sql = "
+			SELECT
+				ns.nspname as schema,
+				c.relname AS table_name,
+				a.attname AS name,
+				NOT a.attnotnull AS nullable,
+				a.attnum AS ordinal_position,
+				ad.adsrc as default,
+				t.typname AS type_name,
+				tns.nspname as type_schema,
+				CASE WHEN t.typarray = 0 THEN eat.typname ELSE t.typname END AS type,
+				t.oid AS attribute_type_oid,
+				coalesce(eat.typtype, t.typtype) as type_type,
+				case when t.typarray = 0 THEN true ELSE false END AS is_array,
+				CASE WHEN t.typname = 'varchar' AND a.atttypmod > 0 THEN a.atttypmod - 4 ELSE NULL END as character_maximum_length,
+				CASE a.atttypid
+				 WHEN 21 /*int2*/ THEN 16
+				 WHEN 23 /*int4*/ THEN 32
+				 WHEN 20 /*int8*/ THEN 64
+				 WHEN 1700 /*numeric*/ THEN
+				      CASE WHEN atttypmod = -1
+					   THEN null
+					   ELSE ((atttypmod - 4) >> 16) & 65535
+					   END
+				 WHEN 700 /*float4*/ THEN 24 /*FLT_MANT_DIG*/
+				 WHEN 701 /*float8*/ THEN 53 /*DBL_MANT_DIG*/
+				 ELSE null
+				END   AS numeric_precision,
+				CASE 
+				    WHEN atttypid IN (21, 23, 20) THEN 0
+				    WHEN atttypid IN (1700) THEN            
+					CASE 
+					    WHEN atttypmod = -1 THEN null       
+					    ELSE (atttypmod - 4) & 65535
+					END
+				       ELSE null
+				  END AS decimal_length,
+				i.indisunique,
+				i.indisprimary
+			FROM
+				pg_catalog.pg_class c JOIN
+				pg_catalog.pg_attribute a ON (c.oid = a.attrelid) JOIN
+				pg_catalog.pg_namespace ns ON (c.relnamespace = ns.oid) JOIN
+				pg_catalog.pg_type t ON (a.atttypid = t.oid) LEFT JOIN
+				pg_catalog.pg_namespace tns ON (t.typnamespace = tns.oid) LEFT JOIN
+				pg_catalog.pg_type eat ON (t.typelem = eat.oid) LEFT JOIN 
+				pg_index i ON i.indrelid = c.oid AND a.attnum = ANY(i.indkey)	LEFT JOIN 
+				pg_catalog.pg_attrdef ad ON a.attrelid = ad.adrelid AND ad.adnum = a.attnum
+			WHERE
+				ns.nspname = '".$schema."' AND
+				c.relname = '".$table."' AND
+				".$and_column."
+				a.attnum > 0
+			ORDER BY a.attnum
+		";
+		#echo '<br><br>' . $sql;
+		$ret = $this->execSQL($sql, 4, 0);
+		if($ret[0]==0){
+			while($attr_info = pg_fetch_assoc($ret[1])){
+				if($attr_info['nullable'] == 'f' AND substr($attr_info['default'], 0, 7) != 'nextval'){$attr_info['nullable'] = '0';}else{$attr_info['nullable'] = '1';}
+        if($attr_info['numeric_precision'] != '')$attr_info['length'] = $attr_info['numeric_precision'];
+        else $attr_info['length'] = $attr_info['character_maximum_length'];
+	      if($attr_info['decimal_length'] == ''){$attr_info['decimal_length'] = 'NULL';}	      
+	      if($attr_info['default'] != '' AND substr($attr_info['default'], 0, 7) != 'nextval')$attr_info['default'] = 'SELECT '.$attr_info['default'];
+	  		else $attr_info['default'] = '';
+				$attributes[] = $attr_info;
+			}
+		}
+		return $attributes;
+	}
+     	
+	function writeCustomType($typname, $schema){		
+		$datatype_id = $this->getDatatypeId($typname, $schema, $this->dbName, $this->host, $this->port);
+		$this->writeDatatypeAttributes($datatype_id, $typname, $schema);
+		return $datatype_id;
+	}
+	
+	function getDatatypeId($typname, $schema, $dbname, $host, $port){
+		$sql = "SELECT id FROM datatypes WHERE ";
+		$sql.= "name = '".$typname."' AND `schema` = '".$schema."' AND dbname = '".$dbname."' AND host = '".$host."' AND port = ".$port;
+		$query=mysql_query($sql);
+		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+		$rs=mysql_fetch_assoc($query);
+		if($rs == NULL){
+			$sql = "INSERT INTO datatypes (name, `schema`, dbname, host, port) VALUES ('".$typname."', '".$schema."', '".$dbname."', '".$host."', ".$port.")";
+			$query=mysql_query($sql);
+			$datatype_id = mysql_insert_id();
+		}
+		else{	
+			$datatype_id = $rs['id'];
+		}
+		return $datatype_id;
+	}
+	
+	function getEnumElements($name, $schema){
+		$sql = "SELECT array_to_string(array_agg(''''||e.enumlabel||''''), ',') as enum_string ";
+		$sql.= "FROM pg_enum e ";
+		$sql.= "JOIN pg_type t ON e.enumtypid = t.oid ";
+		$sql.= "JOIN pg_namespace ns ON (t.typnamespace = ns.oid) ";
+		$sql.= "WHERE t.typname = '".$name."' ";
+		$sql.= "AND ns.nspname = '".$schema."'";
+		$ret1 = $this->execSQL($sql, 4, 0);
+		if($ret1[0]==0){
+			$result = pg_fetch_assoc($ret1[1]);
+		}
+		return $result['enum_string'];
+	}
+	
+	function writeDatatypeAttributes($datatype_id, $typname, $schema){
+		$attr_info = $this->get_attribute_information($schema, $typname);
+		for($i = 0; $i < count($attr_info); $i++){
+			$fields[$i]['real_name'] = $attr_info[$i]['name'];
+			$fields[$i]['name'] = $attr_info[$i]['name'];
+			$fieldtype = $attr_info[$i]['type_name'];
+			$fields[$i]['nullable'] = $attr_info[$i]['nullable']; 
+			$fields[$i]['length'] = $attr_info[$i]['length'];
+			$fields[$i]['decimal_length'] = $attr_info[$i]['decimal_length'];
+			$fields[$i]['default'] = $attr_info[$i]['default'];					
+			if($attr_info[$i]['is_array'] == 't')$prefix = '_'; else $prefix = '';
+			if($attr_info[$i]['type_type'] == 'c'){		# custom datatype
+				$sub_datatype_id = $this->writeCustomType($attr_info[$i]['type'], $attr_info[$i]['type_schema']);
+				$fieldtype = $prefix.$sub_datatype_id; 
+			}
+			$constraintstring = '';
+			if($attr_info[$i]['type_type'] == 'e'){		# enum
+				$fieldtype = $prefix.'text';
+				$constraintstring = $this->getEnumElements($attr_info[$i]['type'], $attr_info[$i]['type_schema']);
+			}
+			$fields[$i]['constraints'] = $constraintstring;
+			$fields[$i]['type'] = $fieldtype;
+			if($fields[$i]['nullable'] == '')$fields[$i]['nullable'] = 'NULL';
+			if($fields[$i]['length'] == '')$fields[$i]['length'] = 'NULL';
+			if($fields[$i]['decimal_length'] == '')$fields[$i]['decimal_length'] = 'NULL';
+			$sql = "REPLACE INTO datatype_attributes SET ";
+			$sql.= "datatype_id = ".$datatype_id.", ";
+			$sql.= "name = '".$fields[$i]['name']."', ";
+			$sql.= "real_name = '".$fields[$i]['real_name']."', ";
+			$sql.= "type = '".$fields[$i]['type']."', ";
+			//$sql.= "geometrytype = '".$fields[$i]['geomtype']."', ";	# todo
+			$sql.= "constraints = '".addslashes($fields[$i]['constraints'])."', ";
+			$sql.= "nullable = ".$fields[$i]['nullable'].", ";
+			$sql.= "length = ".$fields[$i]['length'].", ";			
+			$sql.= "decimal_length = ".$fields[$i]['decimal_length'].", ";
+			$sql.= "`default` = '".addslashes($fields[$i]['default'])."', ";
+			$sql.= "`order` = ".$i;
+			$query=mysql_query($sql);
+			if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+		}
+	}
+	
   function get_geom_type($geomcolumn, $tablename){
   	if($geomcolumn != '' AND $tablename != ''){
 	    $sql = "SELECT GeometryType(".$geomcolumn.") FROM ".$tablename." WHERE ".$geomcolumn." IS NOT NULL LIMIT 1";
@@ -687,7 +886,7 @@ class pgdatabase {
 	    $sql.= " AND pg_class.oid = pg_constraint.conrelid AND pg_class.relname = '".$table."'";
 	    $ret = $this->execSQL($sql, 4, 0);
 	    if($ret[0]==0){
-	      while($row = pg_fetch_array($ret[1])){
+	      while($row = pg_fetch_assoc($ret[1])){
 	        $constraints[] = $row['consrc'];
 	      }
 	    }
@@ -739,7 +938,7 @@ class pgdatabase {
     $sql = 'SELECT st_transform(the_geom, '.$srid.') from u_polygon WHERE id = '.$poly_id;
     $ret = $this->execSQL($sql, 4, 0);
     if($ret[0]==0){
-      $poly = pg_fetch_array($ret[1]);
+      $poly = pg_fetch_row($ret[1]);
     }
     return $poly[0];
   }
@@ -758,7 +957,7 @@ class pgdatabase {
       # Erzeugen eines RectObject
       $rect= ms_newRectObj();
       # Abfragen und zuordnen der Koordinaten der Box
-      $rs=pg_fetch_array($ret[1]);
+      $rs=pg_fetch_assoc($ret[1]);
       if ($rs['maxx']-$rs['minx']==0) {
         $rs['maxx']=$rs['maxx']+1;
         $rs['minx']=$rs['minx']-1;
@@ -780,7 +979,7 @@ class pgdatabase {
     $ret=$this->execSQL($sql,4, 0);
     if($ret[0] == 0){
       $rect= ms_newRectObj();
-      $rs=pg_fetch_array($ret[1]);
+      $rs=pg_fetch_assoc($ret[1]);
       $rect->minx=$rs['minx']-30; 
 			$rect->miny=$rs['miny']-30;
       $rect->maxx=$rs['maxx']+30; 
@@ -805,7 +1004,7 @@ class pgdatabase {
     }
     else {
       if (pg_num_rows($ret[1])>0) {
-        $ret[1]=pg_fetch_array($ret[1]);
+        $ret[1]=pg_fetch_assoc($ret[1]);
       }
     }
     return $ret;
@@ -830,7 +1029,7 @@ class pgdatabase {
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    while($rs=pg_fetch_array($ret[1])) {
+    while($rs=pg_fetch_assoc($ret[1])) {
       $Grundbuch[]=$rs;
     }
     $ret[1]=$Grundbuch;
@@ -881,7 +1080,7 @@ class pgdatabase {
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    while($rs=pg_fetch_array($ret[1])) {
+    while($rs=pg_fetch_assoc($ret[1])) {
       $Buchung[]=$rs;
     }
     $ret[1]=$Buchung;
@@ -906,7 +1105,7 @@ class pgdatabase {
     #echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    while ($rs=pg_fetch_array($queryret[1])) {
+    while ($rs=pg_fetch_assoc($queryret[1])) {
       $Liste['GemkgID'][]=$rs['gemkgid'];
       $Liste['Name'][]=$rs['name'];
       $Liste['gemeinde'][]=$rs['gemeinde'];
@@ -926,7 +1125,7 @@ class pgdatabase {
     #echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    while ($rs=pg_fetch_array($ret[1])) {
+    while ($rs=pg_fetch_assoc($ret[1])) {
       $GemeindeListe['ID'][]=$rs['id'];
       $GemeindeListe['Name'][]=$rs['name'];
     }
@@ -963,7 +1162,7 @@ class pgdatabase {
 		}
     #echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
-    while ($rs=pg_fetch_array($queryret[1])) {
+    while ($rs=pg_fetch_assoc($queryret[1])) {
       $Liste['FlstID'][]=$rs['flurstkennz'];
       $FlstNr=intval($rs['zaehler']);
       if ($rs['nenner']!='') { $FlstNr.="/".intval($rs['nenner']); }
@@ -1007,7 +1206,7 @@ class pgdatabase {
     #echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
-      while($rs=pg_fetch_array($ret[1])) {
+      while($rs=pg_fetch_assoc($ret[1])) {
         $FlurstKennz[]=$rs['flurstkennz'];
       }
       $ret[1]=$FlurstKennz;
@@ -1026,7 +1225,7 @@ class pgdatabase {
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
-      while($rs=pg_fetch_array($ret[1])) {
+      while($rs=pg_fetch_assoc($ret[1])) {
         $FlurstKennz[]=$rs['flurstkennz'];
       }
       $ret[1]=$FlurstKennz;
@@ -1035,7 +1234,7 @@ class pgdatabase {
   }
   
   function getALBData($FlurstKennz, $without_temporal_filter = false){		
-		$sql ="SELECT distinct f.gml_id, 0 as hist_alb, lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, f.abweichenderrechtszustand, zaehler, nenner, k.schluesselgesamt AS kreisid, k.bezeichnung as kreisname, gem.schluesselgesamt as gemkgschl, gem.bezeichnung as gemkgname, g.schluesselgesamt as gemeinde, g.bezeichnung as gemeindename,d.stelle as finanzamt, d.bezeichnung AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp ";
+		$sql ="SELECT distinct f.gml_id, 0 as hist_alb, lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, CASE WHEN f.abweichenderrechtszustand = 'true' THEN 'ja' ELSE 'nein' END AS abweichenderrechtszustand, zaehler, nenner, k.schluesselgesamt AS kreisid, k.bezeichnung as kreisname, gem.schluesselgesamt as gemkgschl, gem.bezeichnung as gemkgname, g.schluesselgesamt as gemeinde, g.bezeichnung as gemeindename,d.stelle as finanzamt, d.bezeichnung AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp ";
 		$sql.="FROM alkis.ax_kreisregion AS k, alkis.ax_gemeinde as g, alkis.ax_gemarkung AS gem, alkis.ax_flurstueck AS f ";
 		$sql.="LEFT JOIN alkis.ax_dienststelle as d ON d.stellenart = 1200 AND d.stelle::integer = ANY(f.stelle) ";
 		$sql.="WHERE f.gemarkungsnummer=gem.gemarkungsnummer AND f.land = gem.land AND f.kreis = g.kreis AND f.gemeinde = g.gemeinde AND f.kreis = k.kreis AND f.flurstueckskennzeichen='".$FlurstKennz."'";
@@ -1057,7 +1256,7 @@ class pgdatabase {
       $ret[1]=$queryret[1];
     }
     else{
-			$rs=pg_fetch_array($queryret[1]);
+			$rs=pg_fetch_assoc($queryret[1]);
 			$ret[0]=0;
       $ret[1]=$rs;
     }
@@ -1101,7 +1300,7 @@ class pgdatabase {
       $this->debug->write("<br>Abbruch in postgresql.php getFlurstuecksKennzByGemeindeIDs Zeile: ".__LINE__."<br>sql: ".$sql,4);
       return $ret;
     }
-    while($rs=pg_fetch_array($query)) {
+    while($rs=pg_fetch_assoc($query)) {
       $ret[1][]=$rs["flurstkennz"];
     }
     return $ret;
@@ -1122,7 +1321,7 @@ class pgdatabase {
     }
     else {
       $ret[0]=0;
-      while($rs=pg_fetch_array($queryret[1])) {
+      while($rs=pg_fetch_assoc($queryret[1])) {
         $Strassen[]=$rs;
       }
       $ret[1]=$Strassen;
@@ -1140,7 +1339,7 @@ class pgdatabase {
     }
     else {
       $ret[0]=0;
-      $rs=pg_fetch_array($queryret[1]);
+      $rs=pg_fetch_row($queryret[1]);
       $StrID=$rs[0];
       $ret[1]=$StrID;
     }
@@ -1162,7 +1361,7 @@ class pgdatabase {
     }
     else {
       $ret[0]=0;
-      while($rs=pg_fetch_array($queryret[1])) {
+      while($rs=pg_fetch_row($queryret[1])) {
         $HausNr[]=$rs[0];
       }
       $ret[1]=$HausNr;
@@ -1187,7 +1386,7 @@ class pgdatabase {
     else {
       $ret[0]=0;
       if (pg_num_rows($queryret[1])>0) {
-        while($rs=pg_fetch_array($queryret[1])) {
+        while($rs=pg_fetch_assoc($queryret[1])) {
           $Lage[]= $rs['unverschluesselt'].$rs['bezeichnung'];
         }
       }
@@ -1218,7 +1417,7 @@ class pgdatabase {
     $summe = 0;
 		$groesste = 0;
 		$i = 0;
-    while($rs=pg_fetch_array($queryret[1])) {
+    while($rs=pg_fetch_assoc($queryret[1])) {
 			$summe += $rs['flaeche'];
 			if($groesste < $rs['flaeche']){
 				$groesste = $rs['flaeche'];
@@ -1244,7 +1443,7 @@ class pgdatabase {
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
     if (pg_num_rows($ret[1])>0) {
-      while($rs=pg_fetch_array($ret[1])) {
+      while($rs=pg_fetch_assoc($ret[1])) {
         $Sonstigesrecht[]=$rs;
       }
     }
@@ -1263,7 +1462,7 @@ class pgdatabase {
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
     if (pg_num_rows($ret[1])>0) {
-      while($rs=pg_fetch_array($ret[1])) {
+      while($rs=pg_fetch_assoc($ret[1])) {
         $Denkmalschutzrecht[]=$rs;
       }
     }
@@ -1282,7 +1481,7 @@ class pgdatabase {
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
     if (pg_num_rows($ret[1])>0) {
-      while($rs=pg_fetch_array($ret[1])) {
+      while($rs=pg_fetch_assoc($ret[1])) {
         $BauBodenrecht[]=$rs;
       }
     }
@@ -1300,7 +1499,7 @@ class pgdatabase {
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
     if (pg_num_rows($ret[1])>0) {
-      while($rs=pg_fetch_array($ret[1])) {
+      while($rs=pg_fetch_assoc($ret[1])) {
         $NaturUmweltrecht[]=$rs;
       }
     }
@@ -1321,7 +1520,7 @@ class pgdatabase {
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
     if (pg_num_rows($ret[1])>0) {
-      while($rs=pg_fetch_array($ret[1])) {
+      while($rs=pg_fetch_assoc($ret[1])) {
         $Schutzgebiet[]=$rs;
       }
     }
@@ -1345,7 +1544,7 @@ class pgdatabase {
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
     if (pg_num_rows($ret[1])>0) {
-      while($rs=pg_fetch_array($ret[1])) {
+      while($rs=pg_fetch_assoc($ret[1])) {
         $Strassenrecht[]=$rs;
       }
     }
@@ -1363,7 +1562,7 @@ class pgdatabase {
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
     if (pg_num_rows($ret[1])>0) {
-      while($rs=pg_fetch_array($ret[1])) {
+      while($rs=pg_fetch_assoc($ret[1])) {
         $Strassenrecht[]=$rs;
       }
     }
@@ -1382,7 +1581,7 @@ class pgdatabase {
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
     if (pg_num_rows($ret[1])>0) {
-      while($rs=pg_fetch_array($ret[1])) {
+      while($rs=pg_fetch_assoc($ret[1])) {
         $Forstrecht[]=$rs;
       }
     }
@@ -1400,7 +1599,7 @@ class pgdatabase {
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
     if (pg_num_rows($ret[1])>0) {
-      while($rs=pg_fetch_array($ret[1])) {
+      while($rs=pg_fetch_assoc($ret[1])) {
         $strittigeGrenze[]=$rs;
       }
     }
@@ -1429,7 +1628,7 @@ class pgdatabase {
 			$summe_geom = 0;
 			$groesste = 0;
 			$i = 0;
-      while($rs=pg_fetch_array($ret[1])){
+      while($rs=pg_fetch_assoc($ret[1])){
 				$summe_amt += $rs['flaeche'];
 				$summe_geom += $rs['fl_geom'];
 				if($groesste < $rs['fl_geom']){
@@ -1465,12 +1664,12 @@ class pgdatabase {
 				$sql.= "LEFT JOIN alkis.ax_flurstueck c ON c.flurstueckskennzeichen = nachfolger ";			# falls ein Nachfolger in ALKIS historisch ist (endet IS NOT NULL)
 				$sql.= "GROUP BY nachfolger ORDER BY nachfolger";																														# damit aber immer nur die jüngste Version eines Flurstücks gefunden wird
 				$queryret=$this->execSQL($sql, 4, 0);	
-				while($rs=pg_fetch_array($queryret[1])){
+				while($rs=pg_fetch_assoc($queryret[1])){
 					$Nachfolger[]=$rs;
 				}
 			}
 			else{
-				while($rs=pg_fetch_array($queryret[1])){
+				while($rs=pg_fetch_assoc($queryret[1])){
 					$Nachfolger[]=$rs;
 				}
 			}
@@ -1491,12 +1690,12 @@ class pgdatabase {
 			if(pg_num_rows($queryret[1]) == 0){			# kein Vorgänger unter ALKIS -> Suche in ALB-Historie
 				$sql = "SELECT flurstueckskennzeichen as vorgaenger, TRUE as hist_alb FROM alkis.ax_historischesflurstueckohneraumbezug WHERE ARRAY['".$FlurstKennz."'::varchar] <@ nachfolgerflurstueckskennzeichen ORDER BY vorgaenger";
 				$queryret=$this->execSQL($sql, 4, 0);
-				while($rs=pg_fetch_array($queryret[1])) {
+				while($rs=pg_fetch_assoc($queryret[1])) {
 					$Vorgaenger[]=$rs;
 				}
 			}
 			else{
-				while($rs=pg_fetch_array($queryret[1])) {
+				while($rs=pg_fetch_assoc($queryret[1])) {
 					$Vorgaenger[]=$rs;
 				}
 			}
@@ -1521,7 +1720,7 @@ class pgdatabase {
 	}
   
   function getEigentuemerliste($FlurstKennz,$Bezirk,$Blatt,$BVNR, $without_temporal_filter = false) {
-    $sql = "SELECT distinct case when bestehtausrechtsverhaeltnissenzu is not null or n.beschriebderrechtsgemeinschaft is not null or n.artderrechtsgemeinschaft is not null then true else false end as order1, coalesce(n.laufendenummernachdin1421, lpad(split_part(n.nummer, '.', 1), 4, '0')||'.'||lpad(split_part(n.nummer, '.', 2), 2, '0')||'.'||lpad(split_part(n.nummer, '.', 3), 2, '0')||'.'||lpad(split_part(n.nummer, '.', 4), 2, '0'), '0') as order2, CASE WHEN n.beschriebderrechtsgemeinschaft is null and n.artderrechtsgemeinschaft is null THEN n.laufendenummernachdin1421 ELSE NULL END AS namensnr, n.gml_id as n_gml_id, p.gml_id, p.nachnameoderfirma, p.vorname, p.akademischergrad, p.namensbestandteil, p.geburtsname, p.geburtsdatum::date, anschrift.gml_id as anschrift_gml_id, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, 'OT '||anschrift.ortsteil as ortsteil, anschrift.bestimmungsland, w.bezeichner as Art, n.zaehler||'/'||n.nenner as anteil, coalesce(NULLIF(n.beschriebderrechtsgemeinschaft, ''),adrg.artderrechtsgemeinschaft) as zusatz_eigentuemer ";
+    $sql = "SELECT distinct case when bestehtausrechtsverhaeltnissenzu is not null or n.beschriebderrechtsgemeinschaft is not null or n.artderrechtsgemeinschaft is not null then true else false end as order1, CASE WHEN n.laufendenummernachdin1421 IS NULL THEN n.gml_id ELSE bestehtausrechtsverhaeltnissenzu END as order2, coalesce(n.laufendenummernachdin1421, '0') as order3, CASE WHEN n.beschriebderrechtsgemeinschaft is null and n.artderrechtsgemeinschaft is null THEN n.laufendenummernachdin1421 ELSE NULL END AS namensnr, n.gml_id as n_gml_id, p.gml_id, p.nachnameoderfirma, p.vorname, p.akademischergrad, p.namensbestandteil, p.geburtsname, p.geburtsdatum::date, anschrift.gml_id as anschrift_gml_id, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, 'OT '||anschrift.ortsteil as ortsteil, anschrift.bestimmungsland, w.bezeichner as Art, n.zaehler||'/'||n.nenner as anteil, coalesce(NULLIF(n.beschriebderrechtsgemeinschaft, ''),adrg.artderrechtsgemeinschaft) as zusatz_eigentuemer ";
 		$sql.= "FROM alkis.ax_buchungsstelle s ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
@@ -1542,11 +1741,11 @@ class pgdatabase {
       $sql.=" AND s.laufendenummer='".$BVNR."'";
     }
 		if(!$without_temporal_filter)$sql.= $this->build_temporal_filter(array('s', 'g', 'b', 'n', 'p'));
-    $sql.= " ORDER BY order1, order2;";
+    $sql.= " ORDER BY order1, order2, order3;";
     #echo $sql.'<br><br>';
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0] OR pg_num_rows($ret[1])==0) { return; }
-    while ($rs=pg_fetch_array($ret[1])) {
+    while ($rs=pg_fetch_assoc($ret[1])) {
       $Grundbuch = new grundbuch("","",$this->debug);
       
 			$newparts = array();
@@ -1675,7 +1874,7 @@ class pgdatabase {
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
     	$i = 0;
-      while($rs=pg_fetch_array($ret[1])) {
+      while($rs=pg_fetch_assoc($ret[1])) {
       	$namen[$i]=$rs;
 	      $namen[$i]['name1'] = $rs['nachnameoderfirma'];
 	      if($rs['vorname'] != '')$namen[$i]['name1'] .= ', '.$rs['vorname']; 
@@ -1705,7 +1904,7 @@ class pgdatabase {
     else {
       $ret[0]=0;
       if (pg_num_rows($queryret[1])>0) {
-        $rs=pg_fetch_array($queryret[1]);
+        $rs=pg_fetch_assoc($queryret[1]);
         $Forstamt=$rs;
       }
       else {
@@ -1729,7 +1928,7 @@ class pgdatabase {
     }
     else {
       $ret[0]=0;
-      $ret[1]=pg_fetch_array($queryret[1]);
+      $ret[1]=pg_fetch_assoc($queryret[1]);
     }
     return $ret;
 	}
@@ -1745,7 +1944,7 @@ class pgdatabase {
     }
     else {
       $ret[0]=0;
-      $rs=pg_fetch_array($queryret[1]);
+      $rs=pg_fetch_assoc($queryret[1]);
       $ret[1]=$rs['gemkgname'];
     }
     return $ret;
@@ -1757,7 +1956,7 @@ class pgdatabase {
 		$sql.= " ORDER BY rtrim(ltrim(buchungsblattnummermitbuchstabenerweiterung,'PF0'),'ABCDEFGHIJKLMNOPQRSTUVWXYZ')::integer";
 		$ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
-    	while($rs=pg_fetch_array($ret[1])){
+    	while($rs=pg_fetch_assoc($ret[1])){
       	$liste['blatt'][]=$rs['blatt'];
     	}
     }
@@ -1784,7 +1983,7 @@ class pgdatabase {
 		#echo $sql;
 		$ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
-    	while($rs=pg_fetch_array($ret[1])){
+    	while($rs=pg_fetch_assoc($ret[1])){
       	$liste['blatt'][]=$rs['blatt'];
     	}
     }
@@ -1796,7 +1995,7 @@ class pgdatabase {
 		$sql.= $this->build_temporal_filter(array('ax_buchungsblattbezirk'));
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
-    	while($rs=pg_fetch_array($ret[1])){
+    	while($rs=pg_fetch_assoc($ret[1])){
       	$liste['schluessel'][]=$rs['grundbuchbezschl'];
       	$liste['bezeichnung'][]=$rs['bezeichnung'];
       	$liste['beides'][]=$rs['bezeichnung'].' ('.$rs['grundbuchbezschl'].')';
@@ -1826,7 +2025,7 @@ class pgdatabase {
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
-    	while($rs=pg_fetch_array($ret[1])){
+    	while($rs=pg_fetch_assoc($ret[1])){
       	$liste['schluessel'][]=$rs['grundbuchbezschl'];
       	$liste['bezeichnung'][]=$rs['bezeichnung'];
       	$liste['beides'][]=$rs['bezeichnung'].' ('.$rs['grundbuchbezschl'].')';
@@ -1854,7 +2053,7 @@ class pgdatabase {
       $Bezirk['schluessel']="0";
     }
     else{
-      $Bezirk=pg_fetch_array($ret[1]);
+      $Bezirk=pg_fetch_assoc($ret[1]);
     }
     return $Bezirk;
   }
@@ -1882,7 +2081,7 @@ class pgdatabase {
     #echo $sql;
     $this->debug->write("<p>postgres getHausNrListe Abfragen der Strassendaten:<br>".$sql,4);
     $queryret=$this->execSQL($sql, 4, 0);
-    while ($rs=pg_fetch_array($queryret[1])) {
+    while ($rs=pg_fetch_assoc($queryret[1])) {
       $Liste['HausID'][]=$rs['id'];
       $Liste['HausNr'][]=$rs['nrtext'];
     }
@@ -1911,7 +2110,7 @@ class pgdatabase {
     $this->debug->write("<p>postgres getStrassenListe Abfragen der Strassendaten:<br>".$sql,4);
     $queryret=$this->execSQL($sql, 4, 0);
     $i = 0;
-    while ($rs=pg_fetch_array($queryret[1])) {
+    while ($rs=pg_fetch_assoc($queryret[1])) {
     	if($namen[$i-1] == $rs['strassenname'] AND $Liste['StrID'][$i-1] == $rs['strasse']){
     		# Strasse doppelt drin -> ï¿½berspringen
     		$i = $i-1;
@@ -1960,7 +2159,7 @@ class pgdatabase {
 		}
     #echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
-    while ($rs=pg_fetch_array($queryret[1])) {
+    while ($rs=pg_fetch_assoc($queryret[1])) {
       $Liste['FlurID'][]=$rs['flurid'];
       $Liste['Name'][]=intval($rs['name']);
       $Liste['GemFlurID'][]=$rs['gemflurid'];
@@ -1989,7 +2188,7 @@ class pgdatabase {
       $ret[1]='Fehler beim Abfragen des Umschlieï¿½enden Rechtecks um die Gemeinde.<br>'.$ret[1];
     }
     else {
-      $rs=pg_fetch_array($ret[1]);
+      $rs=pg_fetch_assoc($ret[1]);
       $ret[1]=$rs;
     }
     return $ret;
@@ -2007,7 +2206,7 @@ class pgdatabase {
       $ret[1]='Fehler beim Abfragen des Umschliessenden Rechtecks um die Gemeinde.<br>'.$ret[1];
     }
     else {
-      $rs=pg_fetch_array($ret[1]);
+      $rs=pg_fetch_assoc($ret[1]);
       if ($rs['minx']==0) {
         $ret[0]=1;
         $ret[1]='Gemeinde nicht in Datenbank '.$this->dbName.' vorhanden.';
@@ -2031,7 +2230,7 @@ class pgdatabase {
       $ret[1]='Fehler beim Abfragen des Umschliessenden Rechtecks um die Gemarkung.<br>'.$ret[1];
     }
     else {
-      $rs=pg_fetch_array($ret[1]);
+      $rs=pg_fetch_assoc($ret[1]);
       if ($rs['minx']==0) {
         $ret[0]=1;
         $ret[1]='Gemarkung nicht in Datenbank '.$this->dbName.' vorhanden.';
@@ -2056,7 +2255,7 @@ class pgdatabase {
       $ret[1]='Fehler beim Abfragen des Umschliessenden Rechtecks um die Flur.<br>'.$ret[1];
     }
     else {
-      $rs=pg_fetch_array($ret[1]);
+      $rs=pg_fetch_assoc($ret[1]);
       if ($rs['minx']==0) {
         $ret[0]=1;
         $ret[1]='Flur nicht in Datenbank '.$this->dbName.' vorhanden.';
@@ -2089,7 +2288,7 @@ class pgdatabase {
       $ret[1]='Fehler beim Abfragen des Umschliessenden Rechtecks um die Flurstücke.<br>'.$ret[1];
     }
     else {
-      $rs=pg_fetch_array($ret[1]);
+      $rs=pg_fetch_assoc($ret[1]);
       if ($rs['minx']==0) {
         $ret[0]=1;
         $ret[1]='Flurstïück nicht in Postgres Datenbank '.$this->dbName.' vorhanden.';
@@ -2128,7 +2327,7 @@ class pgdatabase {
       $ret[1]='Fehler beim Abfragen des Umschliessenden Rechtecks um die Gebäude.<br>'.$ret[1];
     }
     else {
-      $rs=pg_fetch_array($ret[1]);
+      $rs=pg_fetch_assoc($ret[1]);
       if ($rs['minx']==0) {
         $ret[0]=1;
         $ret[1]='Geb&auml;ude nicht in Postgres Datenbank '.$this->dbName.' vorhanden.';
@@ -2269,7 +2468,7 @@ class pgdatabase {
     }
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
-      while($rs=pg_fetch_array($ret[1])) {
+      while($rs=pg_fetch_assoc($ret[1])) {
         # Abfragen und Zuweisen der Keywortbezeichnungen
         $theme=$this->getKeywords('','','theme','',$rs['id'],'keyword');
         $themes=$theme[1]['keyword'];
@@ -2324,7 +2523,7 @@ class pgdatabase {
       $ret[1]='\nAuf Grund eines Datenbankfehlers konnten die Schlagwï¿½rter nicht abgefragt werden!\n'.$ret[1];
     }
     else {
-      while($rs=pg_fetch_array($ret[1])) {
+      while($rs=pg_fetch_assoc($ret[1])) {
         $keywords['id'][]=$rs['id'];
         $keywords['keyword'][]=$rs['keyword'];
       }

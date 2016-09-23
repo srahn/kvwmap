@@ -534,7 +534,7 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 .raster_record a{font-size: 0.0001px;transition: all 0.25s ease;}
 /* Attribute, die ausgeblendet werden sollen: */
 .raster_record .tr_hide{visibility:collapse;}
-.raster_record .tr_hide td{line-height: 0.0001px;padding: 0.0001px !important;transition: all 0.25s ease;}
+.raster_record .tr_hide td{font-size: 0.0001px;line-height: 0.0001px;padding: 0.0001px !important;transition: all 0.25s ease;}
 .raster_record .tr_hide select{font-size: 0.0001px !important;width:0.0001px;transition: all 0.25s ease;}
 .raster_record .tr_hide select:focus{display:none;width:0.0001px;transition: all 0.25s ease;}
 .raster_record .tr_hide input{width:0.0001px;font-size: 0.0001px;height:0.0001px;transition: all 0.25s ease;}
@@ -681,6 +681,12 @@ tbody.gle tr:hover {
 
 .gle1_table>tbody>tr>td{
     border: 1px solid grey;
+}
+
+.gle_datatype_table{
+	border: 1px solid grey;
+	border-collapse: collapse;
+	margin: 2px 2px 2px 0;
 }
 
 

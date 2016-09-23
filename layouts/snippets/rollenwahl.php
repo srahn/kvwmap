@@ -14,6 +14,7 @@ Text_buttons=["<? echo $strHelp; ?>:","<? echo $strHintButtons; ?>"];
 Text_color=["<? echo $strHelp; ?>:","<? echo $strHintColor; ?>"];
 Text_instantreload=["<? echo $strHelp; ?>:","<? echo $strHintInstantReload; ?>"];
 Text_menueautoclose=["<? echo $strHelp; ?>:","<? echo $strHintMenuAutoClose; ?>"];
+Text_visuallyimpaired=["<? echo $strHelp; ?>:","<? echo $strHintVisuallyImpaired; ?>"];
 Text_zoomfactor=["<? echo $strHelp; ?>:","<? echo $strHintZoomFactor; ?>"];
 Text_mapsize=["<? echo $strHelp; ?>:","<? echo $strHintMapSize; ?>"];
 Text_mapextent=["<? echo $strHelp; ?>:","<? echo $strHintMapExtent; ?>"];
@@ -151,6 +152,14 @@ Text_histtimestamp=["<? echo $strHelp; ?>:","<? echo $strHinthist_timestamp; ?>"
 				<input name="menu_auto_close" type="checkbox" value="1" <? if($this->user->rolle->menu_auto_close == '1'){echo 'checked="true"';} ?> >
 				<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_menueautoclose, Style[0], document.getElementById('Tip7'))" onmouseout="htm()">
 				<div id="Tip7" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+			</td>
+		</tr>
+		<tr>
+			<td align="left" style="padding: 8px; padding-top: 0px"><? echo $strVisuallyImpaired; ?>:&nbsp;</td>
+			<td style="padding: 8px; padding-top: 0px">
+				<input name="visually_impaired" type="checkbox" value="1" <? if($this->user->rolle->visually_impaired == '1') { echo 'checked="true"';} ?> >
+				<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_visuallyimpaired, Style[0], document.getElementById('Tip8'))" onmouseout="htm()">
+				<div id="Tip8" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 			</td>
 		</tr>
 	</table>

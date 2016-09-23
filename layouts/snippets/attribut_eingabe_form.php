@@ -152,52 +152,46 @@ function setlayers(selected_options){
 						</td>
 					</tr>
 			';
-			// durch das intersecten der Arrays kann es sein, dass einige Schlüssel nicht mehr im Array existieren
-			// diese werden einfach ausgelassen
-			$keys = array_keys($this->attributes['name']);
-			$lastindex = $keys[count($keys)-1]; 
-    	for($i = 0; $i < $lastindex+1; $i++){
-    		if(array_key_exists($i, $this->attributes['name'])){
-	    		if($this->attributes['type'][$i] != 'geometry'){
-						echo '
-						<tr>
-						  <td align="center">
-						  	<input type="text" name="attribute_'.$this->attributes['name'][$i].'" value="'.$this->attributes['name'][$i].'" readonly>
-						  </td>
-						  <td align="center">
-						  	<select  style="width:90px" name="operator_'.$this->attributes['name'][$i].'">
-						  		<option value="=" ';
-						  		if($this->formvars['operator_'.$this->attributes['name'][$i]] == '='){echo 'selected';}
-						  		echo ' >=</option>
-									<option value="!=" ';
-						  		if($this->formvars['operator_'.$this->attributes['name'][$i]] == '!='){echo 'selected';}
-						  		echo ' >!=</option>
-						  		<option value="<" ';
-						  		if($this->formvars['operator_'.$this->attributes['name'][$i]] == '<'){echo 'selected';}
-						  		echo ' ><</option>
-						  		<option value=">" ';
-						  		if($this->formvars['operator_'.$this->attributes['name'][$i]] == '>'){echo 'selected';}
-						  		echo ' >></option>
-						  		<option value="like" ';
-						  		if($this->formvars['operator_'.$this->attributes['name'][$i]] == 'like'){echo 'selected';}
-									echo ' >like</option>
-									<option value="IS" ';
-						  		if($this->formvars['operator_'.$this->attributes['name'][$i]] == 'IS'){echo 'selected';}
-									echo ' >IS</option>
-									<option value="IN" ';
-						  		if($this->formvars['operator_'.$this->attributes['name'][$i]] == 'IN'){echo 'selected';}
-									echo ' >IN</option>
-						  	</select>
-						  </td>
-						  <td align="center">
-						  	<input name="value_'.$this->attributes['name'][$i].'" type="text" value="'.$this->formvars['value_'.$this->attributes['name'][$i]].'">
-						  </td>
-		        </tr>';
-	    		}
-	    		else{
-	    			$the_geom_index[] = $i;
-	    		}
-    		}
+    	for($i = 0; $i < count($this->attributes); $i++){
+				if($this->attributes[$i]['type'] != 'geometry'){
+					echo '
+					<tr>
+						<td align="center">
+							<input type="text" name="attribute_'.$this->attributes[$i]['name'].'" value="'.$this->attributes[$i]['name'].'" readonly>
+						</td>
+						<td align="center">
+							<select  style="width:90px" name="operator_'.$this->attributes[$i]['name'].'">
+								<option value="=" ';
+								if($this->formvars['operator_'.$this->attributes[$i]['name']] == '='){echo 'selected';}
+								echo ' >=</option>
+								<option value="!=" ';
+								if($this->formvars['operator_'.$this->attributes[$i]['name']] == '!='){echo 'selected';}
+								echo ' >!=</option>
+								<option value="<" ';
+								if($this->formvars['operator_'.$this->attributes[$i]['name']] == '<'){echo 'selected';}
+								echo ' ><</option>
+								<option value=">" ';
+								if($this->formvars['operator_'.$this->attributes[$i]['name']] == '>'){echo 'selected';}
+								echo ' >></option>
+								<option value="like" ';
+								if($this->formvars['operator_'.$this->attributes[$i]['name']] == 'like'){echo 'selected';}
+								echo ' >like</option>
+								<option value="IS" ';
+								if($this->formvars['operator_'.$this->attributes[$i]['name']] == 'IS'){echo 'selected';}
+								echo ' >IS</option>
+								<option value="IN" ';
+								if($this->formvars['operator_'.$this->attributes[$i]['name']] == 'IN'){echo 'selected';}
+								echo ' >IN</option>
+							</select>
+						</td>
+						<td align="center">
+							<input name="value_'.$this->attributes[$i]['name'].'" type="text" value="'.$this->formvars['value_'.$this->attributes[$i]['name']].'">
+						</td>
+					</tr>';
+				}
+				else{
+					$the_geom_index[] = $i;
+				}
     	}
     	for($i = 0; $i < count($the_geom_index); $i++){
 	    	echo '
@@ -206,26 +200,26 @@ function setlayers(selected_options){
 	    		</tr>
 					<tr>
 					  <td align="center">
-					  	<input type="text" name="attribute_'.$this->attributes['name'][$the_geom_index[$i]].'" value="'.$this->attributes['name'][$the_geom_index[$i]].'" readonly>
+					  	<input type="text" name="attribute_'.$this->attributes[$the_geom_index[$i]]['name'].'" value="'.$this->attributes[$the_geom_index[$i]]['name'].'" readonly>
 					  </td>
 					  <td align="center">
-					  	<select  style="width:90px" name="operator_'.$this->attributes['name'][$the_geom_index[$i]].'">
+					  	<select  style="width:90px" name="operator_'.$this->attributes[$the_geom_index[$i]]['name'].'">
 					  		<option value="st_intersects" ';
-					  		if($this->formvars['operator_'.$this->attributes['name'][$the_geom_index[$i]]] == 'st_intersects'){echo 'selected';}
+					  		if($this->formvars['operator_'.$this->attributes[$the_geom_index[$i]]['name']] == 'st_intersects'){echo 'selected';}
 					  		echo ' >Intersects</option>
 								<option value="st_within" ';
-					  		if($this->formvars['operator_'.$this->attributes['name'][$the_geom_index[$i]]] == 'st_within'){echo 'selected';}
+					  		if($this->formvars['operator_'.$this->attributes[$the_geom_index[$i]]['name']] == 'st_within'){echo 'selected';}
 								echo ' >Within</option>
 					  	</select>
 					  </td>
 					  <td align="center">
-					  	<input type="hidden" name="value_'.$this->attributes['name'][$the_geom_index[$i]].'" value="'.$this->formvars['value_'.$this->attributes['name'][$the_geom_index[$i]]].'">
-					  	<input name="check_'.$this->attributes['name'][$the_geom_index[$i]].'" type="checkbox" ';
-					  	if($this->formvars['value_'.$this->attributes['name'][$the_geom_index[$i]]] != '' AND $this->formvars['value_'.$this->attributes['name'][$the_geom_index[$i]]] != '---- verschieden ----'){
+					  	<input type="hidden" name="value_'.$this->attributes[$the_geom_index[$i]]['name'].'" value="'.$this->formvars['value_'.$this->attributes[$the_geom_index[$i]]['name']].'">
+					  	<input name="check_'.$this->attributes[$the_geom_index[$i]]['name'].'" type="checkbox" ';
+					  	if($this->formvars['value_'.$this->attributes[$the_geom_index[$i]]['name']] != '' AND $this->formvars['value_'.$this->attributes[$the_geom_index[$i]]['name']] != '---- verschieden ----'){
 					  		echo 'checked';
 					  	}
 					  	echo' value="egal"> Polygon';
-					  	if($this->formvars['value_'.$this->attributes['name'][$the_geom_index[$i]]] == '---- verschieden ----'){
+					  	if($this->formvars['value_'.$this->attributes[$the_geom_index[$i]]['name']] == '---- verschieden ----'){
 					  		echo ' <br>(verschiedene)';
 					  	}
 					  	echo '

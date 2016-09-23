@@ -935,6 +935,7 @@ class user {
 			else $sql.=',instant_reload="0"';
 			if($formvars['menu_auto_close'] != '') $sql.=',menu_auto_close="1"';
 			else $sql.=',menu_auto_close="0"';
+			$sql .= ', visually_impaired=' . (($formvars['visually_impaired'] != '') ? '"1"' : '"0"');
 			if($formvars['querymode'] != '') $sql.=',querymode="1"';
 			else $sql.=',querymode="0", overlayx=400, overlayy=150';
 			$sql.=',geom_edit_first="'.$formvars['geom_edit_first'].'"';
@@ -1266,37 +1267,71 @@ class rolle {
 
   function getLayer($LayerName) {
 		global $language;
-    # Abfragen der Layer in der Rolle
-		$sql ='SELECT ';
+
+		# Abfragen der Layer in der Rolle
 		if($language != 'german') {
-			$sql.='CASE WHEN `Name_'.$language.'` != "" THEN `Name_'.$language.'` ELSE `Name` END AS ';
+			$name = "CASE WHEN `Name_{$language}` != '' THEN `Name_{$language}` ELSE `Name` END";
 		}
-		$sql.='Name, l.Layer_ID, alias, Datentyp, Gruppe, pfad, maintable, maintable_is_view, Data, `schema`, document_path, labelitem, connection, printconnection, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs, wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, ul.`queryable`, ul.`drawingorder`, ul.`minscale`, ul.`maxscale`, ul.`offsite`, coalesce(r2ul.transparency, ul.transparency, 100) as transparency, ul.`postlabelcache`, `Filter`, CASE r2ul.gle_view WHEN \'0\' THEN \'generic_layer_editor.php\' ELSE ul.`template` END as template, `header`, `footer`, ul.`symbolscale`, ul.`logconsume`, ul.`requires`, ul.`privileg`, ul.`export_privileg`, `start_aktiv`, r2ul.showclasses FROM layer AS l, used_layer AS ul, u_rolle2used_layer as r2ul';
-    $sql.=' WHERE l.Layer_ID=ul.Layer_ID AND r2ul.Stelle_ID=ul.Stelle_ID AND r2ul.Layer_ID=ul.Layer_ID AND ul.Stelle_ID='.$this->stelle_id.' AND r2ul.User_ID='.$this->user_id;
-    if ($LayerName!='') {
-      $sql.=' AND (l.Name LIKE "'.$LayerName.'" ';
-      if(is_numeric($LayerName)){
-        $sql.='OR l.Layer_ID = "'.$LayerName.'")';
-      }
-      else{
-        $sql.=')';
-      }
-    }
-		$sql.=' ORDER BY ul.drawingorder desc';
-    #echo $sql.'<br>';
-    $this->debug->write("<p>file:users.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
-    if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		else {
+			$name = 'name';
+		}
+
+		if ($LayerName != '') {
+			$where_name = " AND (l.Name LIKE '{$LayerName}'";
+			if(is_numeric($LayerName)) {
+				$where_name .= " OR l.Layer_ID = {$LayerName}";
+			}
+			$where_name .= ")";
+		}
+
+		$sql = "
+			SELECT
+				{$name} AS Name,
+				l.Layer_ID,
+				alias, Datentyp, Gruppe, pfad, maintable, maintable_is_view, Data, `schema`, document_path, labelitem, connection,
+				printconnection, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password,
+				wms_server_version, ows_srs, wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink,
+				status,
+				trigger_function,
+				ul.`queryable`, ul.`drawingorder`, ul.`minscale`, ul.`maxscale`, ul.`offsite`,
+				coalesce(r2ul.transparency, ul.transparency, 100) as transparency,
+				ul.`postlabelcache`, `Filter`,
+				CASE r2ul.gle_view WHEN '0' THEN 'generic_layer_editor.php' ELSE ul.`template` END as template,
+				`header`,
+				`footer`,
+				ul.`symbolscale`,
+				ul.`logconsume`,
+				ul.`requires`,
+				ul.`privileg`,
+				ul.`export_privileg`,
+				`start_aktiv`,
+				r2ul.showclasses
+			FROM
+				layer AS l,
+				used_layer AS ul,
+				u_rolle2used_layer as r2ul
+			WHERE
+				l.Layer_ID = ul.Layer_ID AND
+				r2ul.Stelle_ID = ul.Stelle_ID AND
+				r2ul.Layer_ID = ul.Layer_ID AND
+				ul.Stelle_ID = {$this->stelle_id} AND
+				r2ul.User_ID={$this->user_id}
+				{$where_name}
+			ORDER BY ul.drawingorder desc
+		";
+		#echo $sql.'<br>';
+		$this->debug->write("<p>file:users.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>".$sql,4);
+		$query=mysql_query($sql,$this->database->dbConn);
+		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		$i = 0;
-    while ($rs=mysql_fetch_assoc($query)) {
-      $layer[$i]=$rs;
+		while ($rs=mysql_fetch_assoc($query)) {
+			$layer[$i]=$rs;
 			$layer['layer_ids'][$rs['Layer_ID']] =& $layer[$i];
 			$layer['layer_ids'][$layer[$i]['requires']]['required'] = $rs['Layer_ID'];
 			$i++;
-    }
-    return $layer;
-  }
-	
+		}
+		return $layer;
+	}
 
   # 2006-02-11 pk
   function getAktivLayer($aktivStatus,$queryStatus,$logconsume) {
@@ -1473,6 +1508,7 @@ class rolle {
 			$this->overlayy=$rs['overlayy'];
 			$this->instant_reload=$rs['instant_reload'];
 			$this->menu_auto_close=$rs['menu_auto_close'];
+			$this->visually_impaired = $rs['visually_impaired'];
 			if($rs['hist_timestamp'] != ''){
 				$this->hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');			# der wird zur Anzeige des Timestamps benutzt
 				rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');	# der hat die Form, wie der timestamp in der PG-DB steht und wird für die Abfragen benutzt
@@ -1724,8 +1760,9 @@ class rolle {
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
 	
-	function get_last_query(){
+	function get_last_query($layer_id = NULL){
 		$sql = "SELECT * FROM rolle_last_query WHERE user_id = ".$this->user_id." AND stelle_id = ".$this->stelle_id;
+		if($layer_id != NULL)$sql .= " AND layer_id = ".$layer_id;
 		$this->debug->write("<p>file:users.php class:rolle->get_last_query - Abfragen der letzten Abfrage:<br>".$sql,4);
 		$query=mysql_query($sql,$this->database->dbConn);
 		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
@@ -3336,12 +3373,14 @@ class stelle {
 		$sql .=' WHERE stelle_id = '.$this->id;
 		$sql .=' AND layer.Gruppe = u_groups.id AND (layer.connectiontype = 6 OR layer.connectiontype = 9)';
 		$sql .=' AND layer.Layer_ID = used_layer.Layer_ID';
-		$sql .=' AND used_layer.queryable = \'1\'';
-		if($privileg != NULL){
-			$sql .=' AND used_layer.privileg >= "'.$privileg.'"';
-		}
 		if($use_geom != NULL){
 			$sql .=' AND used_layer.use_geom = 1';
+		}
+		else{
+			$sql .=' AND used_layer.queryable = \'1\'';
+		}
+		if($privileg != NULL){
+			$sql .=' AND used_layer.privileg >= "'.$privileg.'"';
 		}		
 		if($group_id != NULL){
 			$sql .=' AND u_groups.id = '.$group_id;
@@ -3488,7 +3527,7 @@ class stelle {
 		return $privileges;
 	}
 
-	function parse_path($database, $path, $privileges){
+	function parse_path($database, $path, $privileges, $attributes = NULL){
 		$distinctpos = strpos(strtolower($path), 'distinct');
 		if($distinctpos !== false && $distinctpos < 10){
 			$offset = $distinctpos+8;
@@ -3529,7 +3568,9 @@ class stelle {
 					$attributename = trim($explosion[count($explosion)-1]);
 				}
 				if($privileges[$attributename] != ''){
-					$newattributesstring .= $fieldstring[$i].', ';
+					$type = $attributes['type'][$attributes['indizes'][$attributename]];
+					if(substr($type, 0, 1) == '_' OR is_numeric($type))$newattributesstring .= 'to_json('.$fieldstring[$i].') as '.$attributename.', ';		# Array oder Datentyp
+					else $newattributesstring .= $fieldstring[$i].', ';																																			# normal
 				}
 				if(substr_count($fieldstring[$i], '(') - substr_count($fieldstring[$i], ')') > 0){
 					$fieldstring[$i+1] = $fieldstring[$i].','.$fieldstring[$i+1];

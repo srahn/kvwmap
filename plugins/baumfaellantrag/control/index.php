@@ -97,11 +97,8 @@
 		case 'upload_temp_file' : {
 			$this->checkCaseAllowed($this->go);
 			include(PLUGINS.'baumfaellantrag/model/kvwmap.php');
-			$this->qlayerset[0]['shape'][0] = $this->uploadTempFile(); 
-			$this->mime_type = "formatter";
-			if ($this->formvars['format'] == '') $this->formvars['format'] = "json";
-			if ($this->formvars['content_type'] == '') $this->formvars['content_type'] = "text/html";
-			$this->output();
+			header('Content-Type: application/json; charset=utf-8');
+			echo utf8_decode(json_encode($this->uploadTempFile()));
 		} break;
 
 		case 'pack_and_mail' : {

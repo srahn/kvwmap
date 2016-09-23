@@ -33,6 +33,47 @@ include('funktionen/input_check_functions.php');
 		}
 	}
 	
+	buildJSONString = function(id, is_array){
+		var field = document.getElementById(id);		
+		values = new Array();
+		elements = document.getElementsByName(id);
+		for(i = 0; i < elements.length; i++){
+			value = elements[i].value;
+			if(!is_array){
+				if(value == '')value = 'null';
+				else if(value.substring(0,1) != '{')value = '"'+value+'"';
+				values.push('"'+elements[i].title+'":'+value);
+			}			
+			else if(i > 0 && value != '')values.push(value);		// bei Arrays ist das erste Element ein Dummy
+		}
+		if(!is_array)json = '{'+values.join()+'}';
+		else json = '['+values.join()+']';
+		field.value = json;		
+		if(field.onchange)field.onchange();
+	}
+	
+	addArrayElement = function(fieldname){
+		outer_div = document.getElementById(fieldname+'_elements');
+		first_element = document.getElementById('div_'+fieldname+'_-1');
+		new_element = first_element.cloneNode(true);
+		last_id = outer_div.lastChild.id;
+		parts = last_id.split('div_'+fieldname+'_');
+		new_id = parseInt(parts[1])+1;
+		new_element.id = 'div_'+fieldname+'_'+new_id;
+		var regex = new RegExp(fieldname+'_-1', "g");
+		new_element.innerHTML = new_element.innerHTML.replace(regex, fieldname+'_'+new_id);
+		new_element.style = 'display: block';
+		outer_div.appendChild(new_element);
+		buildJSONString(fieldname, true);
+	}
+	
+	removeArrayElement = function(fieldname, remove_element_id){
+		outer_div = document.getElementById(fieldname+'_elements');
+		remove_element = document.getElementById(remove_element_id);
+		outer_div.removeChild(remove_element);
+		buildJSONString(fieldname, false);
+	}
+	
 	nextdatasets = function(offset){
 		currentform.target = '';
 		if(currentform.go_backup.value != ''){
@@ -262,8 +303,8 @@ include('funktionen/input_check_functions.php');
 			document.getElementById(field_id).value = '';
 		}
 	}
-	 
-	auto_generate = function(attributenamesarray, geom_attribute, attribute, k, layer_id){
+	
+	get_current_attribute_values = function(attributenamesarray, geom_attribute, k){
 		var attributenames = '';
 		var attributevalues = '';
 		var geom = '';
@@ -286,7 +327,31 @@ include('funktionen/input_check_functions.php');
 				else attributevalues += 'POINT EMPTY|';		// leere Geometrie zurückliefern
 			}
 		}
-		ahah("index.php", "go=auto_generate&layer_id="+layer_id+"&attribute="+attribute+"&attributenames="+attributenames+"&attributevalues="+attributevalues, new Array(document.getElementById(attribute+'_'+k)), new Array("setvalue"));
+		return new Array(attributenames, attributevalues);
+	}
+	
+	auto_generate = function(attributenamesarray, geom_attribute, attribute, k, layer_id){
+		names_values = get_current_attribute_values(attributenamesarray, geom_attribute, k);
+		ahah("index.php", "go=auto_generate&layer_id="+layer_id+"&attribute="+attribute+"&attributenames="+names_values[0]+"&attributevalues="+names_values[1], new Array(document.getElementById(attribute+'_'+k)), new Array("setvalue"));
+	}
+	
+	openCustomSubform = function(layer_id, attribute, attributenamesarray, field_id, k){
+		names_values = get_current_attribute_values(attributenamesarray, '', k);
+		document.getElementById('sperrdiv').style.background = 'rgba(200,200,200,0.8)';
+		document.getElementById('sperrdiv').style.width = '100%';
+		subformWidth = document.GUI.browserwidth.value-70;
+		subform = '<div style="position:relative; margin: 30px;width:'+subformWidth+'px; height:90%">';
+		subform += '<div style="position: absolute;top: 2px;right: -2px"><a href="javascript:closeCustomSubform();" title="Schlie&szlig;en"><img style="border:none" src="<? echo GRAPHICSPATH.'exit2.png'; ?>"></img></a></div>';
+		subform += '<iframe id="customSubform" style="width:100%; height:100%" src=""></iframe>';
+		subform += '</div>';
+		document.getElementById('sperrdiv').innerHTML= subform;
+		ahah("index.php", "go=openCustomSubform&layer_id="+layer_id+"&attribute="+attribute+"&attributenames="+names_values[0]+"&attributevalues="+names_values[1]+"&field_id="+field_id, new Array(document.getElementById('customSubform')), new Array("src"));
+	}
+	
+	closeCustomSubform = function(){
+		document.getElementById('sperrdiv').style.background = 'rgba(200,200,200,0.3)';
+		document.getElementById('sperrdiv').style.width = '0%';
+		document.getElementById('sperrdiv').innerHTML = '';
 	}
 	 
 	update_buttons = function(all, layer_id){

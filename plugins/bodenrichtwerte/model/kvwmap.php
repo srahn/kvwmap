@@ -2,6 +2,7 @@
 	$GUI = $this;
 	
 	$this->bodenRichtWertErfassung = function() use ($GUI){
+		include_once(CLASSPATH.'FormObject.php');
     if ($GUI->formvars['oid']=='') {
       $GUI->titel='Bodenrichtwerterfassung';
     }
@@ -29,7 +30,7 @@
     $bodenrichtwertzone=new bodenrichtwertzone($GUI->pgdatabase, $layer[0]['epsg_code'], $GUI->user->rolle->epsg_code);
     # Formularobjekt für Gemeinde bilden
     $GemObj=new gemeinde(0,$GUI->pgdatabase);
-  	$Gemeindeliste=$GemObj->getGemeindeListe(array());
+  	$Gemeindeliste=$GemObj->getGemeindeListe(NULL);
     $GUI->GemFormObj=new FormObject("gemeinde","select",$Gemeindeliste["ID"],$GUI->formvars['gemeinde'],$Gemeindeliste["Name"],1,0,0,158);
     $GUI->GemFormObj->addJavaScript('onchange', "update_require_attribute('gemarkung', ".$GUI->formvars['boris_layer_id'].", this.value);");
     # Formularobjekt für Gemarkung bilden
@@ -206,6 +207,7 @@
   };
 	
 	$this->waehleBodenwertStichtagToCopy = function() use ($GUI){
+		include_once(CLASSPATH.'FormObject.php');
     $GUI->main = PLUGINS.'bodenrichtwerte/view/waehlebodenwertstichtagtocopy.php';
     $GUI->titel='Kopieren von Bodenrichtwertzonen auf einen neuen Stichtag';
     # Bodenrichtwertzonenobjekt erzeugen
