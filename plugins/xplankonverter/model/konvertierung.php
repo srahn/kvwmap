@@ -78,9 +78,9 @@ class Konvertierung extends PgObject {
 	*/
 	function mapping() {
 		# finde alle regeln, die direkt der Konvertierung zugeordnet wurden
-		$regeln = $this->find_by('konvertierung_id', $this->get('id'));
+		$regeln = $this->getRegeln();
 		foreach($regeln AS $regel) {
-			$regel->convert($this->get('id'));
+			$regel->convert();
 		}
 	}
 
