@@ -242,6 +242,7 @@ switch($this->go){
 				$shapefile->deleteUploadFiles();
 				# Delete the record in postgres shapefile table (unregister for konverter)
 				$shapefile->delete();
+				$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
 				$this->main = '../../plugins/xplankonverter/view/shapefiles.php';
 			}
 		}
@@ -453,6 +454,19 @@ sleep(5);
 		}
 		header('Content-Type: application/json');
 		echo json_encode($response);
+	} break;
+
+	case 'xplankonverter_gml_ausliefern' : {
+		if ($this->formvars['konvertierung_id'] == '') {
+		  echo 'Diese Link kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
+		  return;
+		}
+		$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
+		if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) return;
+
+		$filename = XPLANKONVERTER_SHAPE_PATH . $this->formvars['konvertierung_id'] . '/xplan_' . $this->formvars['konvertierung_id'] . '.gml';
+		header('Content-Type: text/xml; subtype="gml/3.3"');
+    echo fread(fopen($filename, "r"), filesize($filename));
 	} break;
 
 	case 'xplankonverter_konvertierung_loeschen' : {

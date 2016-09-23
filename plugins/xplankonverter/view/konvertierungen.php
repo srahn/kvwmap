@@ -143,7 +143,7 @@
 
     // GML-Download
     funcIsDisabled = row.status != "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_OK']; ?>";
-    output += '<a title="GML-Datei herunterladen" class="btn btn-link btn-xs xpk-func-btn xpk-func-download-gml' + (funcIsDisabled ? disableFrag : '') + '" href="<?php echo XPLANKONVERTER_SHAPE_PATH;?>' + value + '/xplan_' + value + '.gml"><i class="fa fa-lg fa-download"></i></a>';
+    output += '<a title="GML-Datei herunterladen" class="btn btn-link btn-xs xpk-func-btn xpk-func-download-gml' + (funcIsDisabled ? disableFrag : '') + '" href="index.php?go=xplankonverter_gml_ausliefern&konvertierung_id=' + value + '" download="xplan_' + value + '.gml"><i class="fa fa-lg fa-download"></i></a>';
 
     // Konvertierung Löschen
     funcIsDisabled = row.status == "<?php echo Konvertierung::$STATUS['IN_GML_ERSTELLUNG']; ?>"
