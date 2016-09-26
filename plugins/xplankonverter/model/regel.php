@@ -36,9 +36,15 @@ public static	function find_by_id($gui, $by, $id) {
 	* XPlan GML Objekte eingetragen.
 	*/
 	function convert() {
-		$sql = $this->get('sql');
-    $query = pg_query($this->database->dbConn, $sql);
+		$sql = "
+			SET search_path=xplan_gml, xplan_shapes_51;
+			{$this->get('sql')}
+		";
+		#echo '<p>Name: '. $this->get('name') . ', class: ' . $this->get('class_name') . '<br>' . $sql;
 
+		$query = pg_query($this->database->dbConn, $sql);
+
+		/*
 		foreach(pg_fetch_all($query) AS $object_gml_id) {
 			if ($this->get('bereich_gml_id') != '') {
 				$sql = "
@@ -49,7 +55,7 @@ public static	function find_by_id($gui, $by, $id) {
 						rp_bereich_gml_id = '" . $this->get('bereich_gml_id') . "'
 				";
 			}
-		}
+		}*/
 	}
 
 	function gml_layer_exists() {

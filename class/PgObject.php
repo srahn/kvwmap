@@ -92,6 +92,20 @@ class PgObject {
     return $result;
   }
 
+	function delete_by($attribute, $value) {
+		#echo '<br>delete by attribute ' . $attribute . ' with value ' . $value;
+		$sql = "
+			DELETE FROM
+				\"{$this->schema}\".\"{$this->tableName}\"
+			WHERE
+				\"{$attribute}\" = '{$value}'
+		";
+		#echo 'delete query: ' . $sql;
+		$this->debug('<p>delete_by sql: ' . $sql);
+		$query = pg_query($this->database->dbConn, $sql);
+		return $query;
+	}
+
   function getAttributes() {
     return array_keys($this->data);
   }
