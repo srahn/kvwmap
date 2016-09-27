@@ -16,7 +16,7 @@ if ($this->Fehlermeldung!='') {
   data-url="index.php?go=Layer-Suche_Suchen&selected_layer_id=<?php echo XPLANKONVERTER_VALIDIERUNGSERGEBNISSE_LAYER_ID; ?>&anzahl=1000&operator_konvertierung_id==&value_konvertierung_id=<?php echo $this->formvars['konvertierung_id']; ?>&mime_type=formatter&format=json"
   data-height="100%"
   data-click-to-select="false"
-  data-sort-name="filename"
+  data-sort-name="validierungsergebnis_id"
   data-sort-order="asc"
   data-search="false"
   data-show-refresh="false"
@@ -33,19 +33,30 @@ if ($this->Fehlermeldung!='') {
       <th
         data-field="validierungsergebnis_id"
         data-visible="true"
-        data-switchable="false"
+        data-switchable="true"
+        data-sortable="true"
         class="text-right"
       >ID</th>
       <th
-        data-field="status"
+        data-field="validierung_name"
         data-visible="true"
         data-switchable="true"
-        class="text-right"
+        data-sortable="true"
+        class="text-left"
+      >Validierung</th>
+      <th
+        data-field="ergebnis_status"
+        data-visible="true"
+        data-switchable="true"
+        data-sortable="true"
+        class="text-left"
       >Status</th>
       <th
-        data-field="msg"
-        data-sortable="true"
+        data-field="ergebnis_msg"
         data-visible="true"
+        data-switchable="true"
+        data-sortable="true"
+        class="text-left"
       >Meldung</th>
     </tr>
   </thead>

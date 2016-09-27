@@ -63,7 +63,7 @@ class PgObject {
 			WHERE
 				\"{$attribute}\" = '{$value}'
 		";
-		#echo 'select query: ' . $sql;
+		#echo '<p>find_by: ' . $sql;
 		$this->debug('<p>find_by sql: ' . $sql);
 		$query = pg_query($this->database->dbConn, $sql);
 		$this->data = pg_fetch_assoc($query);
@@ -84,6 +84,7 @@ class PgObject {
         " . $where . "
     ";
     $this->debug('<p>sql: ' . $sql);
+		#echo '<p>find_where: ' . $sql;
     $query = pg_query($this->database->dbConn, $sql);
 		$result = array();
 		while($this->data = pg_fetch_assoc($query)) {
@@ -143,6 +144,7 @@ class PgObject {
       )
       RETURNING id
     ";
+		#echo '<p>Create Postgres Datensatz: ' . $sql;
     $this->debug('<p>Insert into pg table sql: ' . $sql);
     $query = pg_query($this->database->dbConn, $sql);
     $row = pg_fetch_assoc($query);

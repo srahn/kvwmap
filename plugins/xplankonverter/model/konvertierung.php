@@ -46,18 +46,21 @@ class Konvertierung extends PgObject {
 	}
 
 	function get_regeln() {
+		#echo '<p>get_regeln';
 		$regeln = array();
 		$regel = new Regel($this->gui);
-		$konvertierung_regeln = $regel->find_where("
+		$regeln = $regel->find_where("
 			konvertierung_id = {$this->get('id')} AND
 			bereich_gml_id IS NULL
 		");
+
 		foreach($this->get_bereiche() AS $bereich) {
 			$regeln = array_merge(
-				$konvertierung_regeln,
+				$regeln,
 				$regel->find_where("bereich_gml_id = '{$bereich->get('gml_id')}'")
 			);
 		}
+
 		return $regeln;
 	}
 
@@ -121,7 +124,7 @@ class Konvertierung extends PgObject {
 		$validierung->regel_existiert($regeln);
 
 		foreach($regeln AS $regel) {
-			$regel->convert();
+			$regel->convert($this->get('id'));
 		}
 	}
 

@@ -58,9 +58,24 @@ class Validierung extends PgObject {
 			array(
 				'konvertierung_id' => $this->konvertierung_id,
 				'validierung_id' => $this->get('id'),
-				'status' => ($num_regeln == 0 ? 'Warung' : 'Erfolg')
+				'status' => ($num_regeln == 0 ? 'Warung' : 'Erfolg'),
+				'msg' => 'Es sind Regeln zur Konvertierung vorhanden.'
 			)
 		);
+	}
+
+	function sql_ausfuehrbar($result) {
+		if (!$result) {
+			$validierungsergebnis = new Validierungsergebnis($this->gui);
+			$validierungsergebnis->create(
+				array(
+					'konvertierung_id' => $this->konvertierung_id,
+					'validierung_id' => $this->get('id'),
+					'status' => 'Fehler',
+					'msg' => @pg_last_error($this->database->dbConn)
+				)
+			);
+		}
 	}
 
   function doValidate($konvertierung) {
