@@ -94,7 +94,7 @@
 				if(is_array($elements[$e]) OR is_object($elements[$e]))$elements[$e] = json_encode($elements[$e]);		# ist ein Array oder Objekt (also entweder ein Array-Typ oder ein Datentyp) und wird zur Übertragung wieder encodiert
 				$dataset2[$attributes2['name'][$j]] = $elements[$e];
 				$datapart .= '<div id="div_'.$id.'_'.$e.'" style="display: '.($e==-1 ? 'none' : 'block').'"><table cellpadding="0" cellspacing="0"><tr><td>';
-				$datapart .= attribute_value($gui, $layer_id, $attributes2, $j, $e, $dataset2, $size, $select_width, $fontsize, $change_all, $onchange2, $elements_fieldname);
+				$datapart .= attribute_value($gui, $layer_id, $attributes2, $j, $k, $dataset2, $size, $select_width, $fontsize, $change_all, $onchange2, $elements_fieldname);
 				$datapart .= '</td>';
 				if($attributes['privileg'][$j] == '1' AND !$lock[$k]){
 					$datapart .= '<td valign="top"><a href="#" onclick="removeArrayElement(\''.$id.'\', \'div_'.$id.'_'.$e.'\');'.$onchange2.'return false;"><img style="width: 18px" src="'.GRAPHICSPATH.'datensatz_loeschen.png"></a></td>';
