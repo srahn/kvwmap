@@ -407,6 +407,7 @@ sleep(5);
 
 	case 'xplankonverter_gml_generieren' : {
 		include(PLUGINS . 'xplankonverter/model/build_gml.php');
+		include(PLUGINS . 'xplankonverter/model/TypeInfo.php');
 		$response = array();
 		if ($this->formvars['konvertierung_id'] == '') {
 			$response['success'] = false;
@@ -429,8 +430,18 @@ sleep(5);
 					//$bereiche = new RP_Bereich($this);
 					//$bereiche->find_by('gehoertzuplan', $this->plan->get('gml_id'));
 					//$this->plan->bereiche = $bereiche;
+//					$this->gml_builder->build_gml($this->konvertierung, $plan);
+if (!$this->gml_builder->build_gml($this->konvertierung, $plan)){
+					// Status setzen
+					$this->konvertierung->set('status', Konvertierung::$STATUS['GML_ERSTELLUNG_ERR']);
+					$this->konvertierung->update();
 
-					$this->gml_builder->build_gml($this->konvertierung, $plan);
+					$response['success'] = false;
+					$response['msg'] = 'Bei der GML-Generierung ist ein Fehler aufgetreten.';
+      		header('Content-Type: application/json');
+      		echo json_encode($response);
+      		break;
+}
 					$this->gml_builder->save(XPLANKONVERTER_SHAPE_PATH . $this->konvertierung->get('id') . '/xplan_' . $this->konvertierung->get('id') . '.gml');
 
 					// Status setzen

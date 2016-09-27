@@ -44,6 +44,8 @@ class Gml_builder {
     global $debug;
     $this->debug = $debug;
     $this->database = $database;
+    $this->typeInfo = new TypeInfo($database);
+
     $this->tmpFile = tmpfile();
     // use the DOMDocument functionality to format XML output
     $this->formatter = new DOMDocument('1.0', 'utf-8');
@@ -77,21 +79,25 @@ class Gml_builder {
     # clear tempfile
     ftruncate($this->tmpFile, 0);
 
-    $contentScheme   = "xplan_gml";
-    $structureScheme = "xplan_uml";
+    $contentScheme   = CONTENT_SCHEME;
+    $structureScheme = STRUCTURE_SCHEME;
+
+    $xplan_ns_prefix = XPLAN_NS_PREFIX ? XPLAN_NS_PREFIX.':' : '';
 
     // plan muss nochmal abgerufen werden, weil die select-Anweisung nochmal ergänzt werden musste
     $plan->select = "
       *,
       ST_AsGML(
           ST_Reverse(ST_Transform(
-            COALESCE((raeumlichergeltungsbereich).flaeche, (raeumlichergeltungsbereich).multiflaeche),
+            raeumlichergeltungsbereich,
+--            COALESCE((raeumlichergeltungsbereich).flaeche, (raeumlichergeltungsbereich).multiflaeche),
             {$konvertierung->get('output_epsg')})),
           {$konvertierung->get('geom_precision')}) AS gml_raeumlichergeltungsbereich,
       ST_AsGML(
         3,
         ST_Transform(
-            COALESCE((raeumlichergeltungsbereich).flaeche, (raeumlichergeltungsbereich).multiflaeche),
+          raeumlichergeltungsbereich,
+--          COALESCE((raeumlichergeltungsbereich).flaeche, (raeumlichergeltungsbereich).multiflaeche),
           {$konvertierung->get('output_epsg')}),
         {$konvertierung->get('geom_precision')},
         32) AS envelope";
@@ -100,43 +106,31 @@ class Gml_builder {
     # XPlan XSD's sind derzeit unter: http://xplan-raumordnung.de/devk/model/2016-05-06_XSD/ hinterlegt
     fwrite($this->tmpFile,
       "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>\n".
-      "<XPlanAuszug\n".
+      "<XPlanAuszug xmlns=\"{XPLAN_NS_URI}\"\n".
       "  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n".
       "  xmlns:wfs=\"http://www.opengis.net/wfs\"\n".
       "  xmlns:gml=\"http://www.opengis.net/gml\"\n".
       "  xmlns:xlink=\"http://www.w3.org/1999/xlink\"\n".
-      "  xmlns:xplan=\"http://xplan-raumordnung.de/model/xplangml/raumordnungsmodell\"\n".
-      "  xmlns=\"http://xplan-raumordnung.de/model/xplangml/raumordnungsmodell\"\n".
-      "  xsi:schemaLocation=\"http://xplan-raumordnung.de/model/xplangml/raumordnungsmodell/../../Schema/XPlanung-Operationen.xsd\"\n".
+      XPLAN_NS_PREFIX==""?"":
+      "  xmlns:".XPLAN_NS_PREFIX."=\"{XPLAN_NS_URI}\"\n".
+      "  xmlns:".RPLAN_NS_PREFIX."=\"http://xplan-raumordnung.de/model/xplangml/raumordnungsmodell\"\n".
+      "  xsi:schemaLocation=\"{XPLAN_NS_URI} {XPLAN_NS_SCHEMA_LOCATION}\"\n".
       ">\n".
 
-      # TODO: <boundedBy> sollte für jeden Plan definiert oder festgehalten werden,
-      # z.B. über Informationen in XP_Plan:raeumlicherGeltungsbereich oder eine
-      # Erfassung vor der Konvertierung.
-      $this->formatXML($this->wrapWithElement('gml:boundedBy', $plan->get('envelope'))));
+    # TODO: <boundedBy> sollte für jeden Plan definiert oder festgehalten werden,
+    # z.B. über Informationen in XP_Plan:raeumlicherGeltungsbereich oder eine
+    # Erfassung vor der Konvertierung.
+    $this->formatXML($this->wrapWithElement('gml:boundedBy', $plan->get('envelope'))));
 
     // das RP_Plan Element anlegen
     $gmlElemInner = "";
-    $gmlElemOpenTag = "<RP_Plan";
+    $gmlElemOpenTag = "<{$xplan_ns_prefix}RP_Plan";
     $gmlElemOpenTag .= " gml:id=\"GML_{$plan->data['gml_id']}\"";
 
-    // fetch complete list of attributes and their properties from UML-structure
-    $uml_attributes = $this->fetchAttributesForFeatureMember('rp_plan');
+    // fetch information about attributes and their properties
+    //$typeInfo = new TypeInfo($this->database);
+    $plan_attribs = $this->typeInfo->getInfo('rp_plan');
 
-      // fetch attribute information for all attributes of rp_bereich and build look-up table
-    $attribInfo = $this->database->get_attribute_information($contentScheme, 'rp_plan');
-
-    $attribInfo = array_combine(array_column($attribInfo,'name'), $attribInfo);
-    $plan_attribs = array();
-    foreach ($uml_attributes as $uml_attrib) {
-      $lowercaseName = strtolower($uml_attrib['name']);
-      $plan_attribs[] = array(
-          'uml_name'  => $uml_attrib['name'],
-          'col_name'  => $attribInfo[$lowercaseName]['name'],
-          'type'      => $attribInfo[$lowercaseName]['type'],
-          'type_type' => $attribInfo[$lowercaseName]['type_type']
-      );
-    }
     // alle Attribute von RP_Plan ausgeben
     $gmlElemInner .= $this->generateGmlForAttributes($plan->data, $plan_attribs);
 
@@ -146,24 +140,20 @@ class Gml_builder {
     // TODO: Ist es sinnvoller die Bereiche abzufragen, die dem RP_Plan
     // zugeordnet sind, oder ist es sauberer die Bereiche nach Ihrer
     // Zugehörigkeit zur Konvertierung auszuwählen?
-    // Eigentliche Fragestellungen sind:
-    //    Kann es für einen Plan mehrere Konvertierungen geben?
-    //    Kann es Bereiche eines Plans geben, die nicht Bestandteil
-    //      der Konvertierung sind?
-    //    Und können diese (nicht konvertierten) Bereiche dann überhaupt
-    //      im xplan_gml Schema enthalten sein?
     $sql = "
         SELECT
           b.*,
           ST_AsGML(
             ST_Reverse(ST_Transform(
-              COALESCE ((b.geltungsbereich).flaeche,(b.geltungsbereich).multiflaeche),
+              b.geltungsbereich,
+--              COALESCE ((b.geltungsbereich).flaeche,(b.geltungsbereich).multiflaeche),
               {$konvertierung->get('output_epsg')})),
               {$konvertierung->get('geom_precision')}) AS gml_geltungsbereich,
           ST_AsGML(
             3,
             ST_Transform(
-              COALESCE ((b.geltungsbereich).flaeche,(b.geltungsbereich).multiflaeche),
+              b.geltungsbereich,
+--              COALESCE ((b.geltungsbereich).flaeche,(b.geltungsbereich).multiflaeche),
               {$konvertierung->get('output_epsg')}),
               {$konvertierung->get('geom_precision')},
               32) AS envelope
@@ -172,40 +162,25 @@ class Gml_builder {
     #echo $sql."<br>";
     $bereiche = pg_query($this->database->dbConn, $sql);
 
-    // fetch complete list of attributes and their properties from UML-structure
-    $uml_attributes = $this->fetchAttributesForFeatureMember('rp_bereich');
-
-    // fetch attribute information for all attributes of rp_bereich and build look-up table
-    $attribInfo = $this->database->get_attribute_information($contentScheme, 'rp_bereich');
-
-    $attribInfo = array_combine(array_column($attribInfo,'name'), $attribInfo);
-    $bereich_attribs = array();
-    foreach ($uml_attributes as $uml_attrib) {
-      $lowercaseName = strtolower($uml_attrib['name']);
-      $bereich_attribs[] = array(
-        'uml_name'  => $uml_attrib['name'],
-        'col_name'  => $attribInfo[$lowercaseName]['name'],
-        'type'      => $attribInfo[$lowercaseName]['type'],
-        'type_type' => $attribInfo[$lowercaseName]['type_type']
-      );
-    }
+    // fetch information about attributes and their properties
+    $bereich_attribs = $this->typeInfo->getInfo('rp_bereich');
 
     # iterating bereiche in two passes:
     # first pass: complete RP_Plan element by iteratively inserting
     # xlink-references to each RP_Bereich element
     while ($bereich = pg_fetch_array($bereiche, NULL, PGSQL_ASSOC)) {
-      $rp_plan .= "<xplan:bereich xlink:href=\"#GML_" . $bereich['gml_id'] . "\"/>";
+      $rp_plan .= "<{$xplan_ns_prefix}bereich xlink:href=\"#GML_" . $bereich['gml_id'] . "\"/>";
     }
     # close and write RP_Plan element
-    fwrite($this->tmpFile, $this->formatXML($this->wrapWithFeatureMember($rp_plan . "</RP_Plan>")));
+    fwrite($this->tmpFile, $this->formatXML($this->wrapWithFeatureMember($rp_plan . "</{$xplan_ns_prefix}RP_Plan>")));
     # second pass: iteratively building and writing gml for each RP_Bereich element
     pg_result_seek($bereiche, 0);
     while ($bereich = pg_fetch_array($bereiche, NULL, PGSQL_ASSOC)) {
-      $gmlElemOpenTag = "<RP_Bereich";
+      $gmlElemOpenTag = "<{$xplan_ns_prefix}RP_Bereich";
       $gmlElemOpenTag .= " gml:id=\"GML_{$bereich['gml_id']}\"";
 
       // Rueckbezug zu RP_Plan
-      $gmlElemInner = "<xplan:gehoertZuPlan xlink:href=\"#GML_{$bereich['gehoertzuplan']}\"/>";
+      $gmlElemInner = "<{$xplan_ns_prefix}gehoertZuPlan xlink:href=\"#GML_{$bereich['gehoertzuplan']}\"/>";
 
       // alle uebrigen Attribute ausgeben
       $gmlElemInner .= $this->generateGmlForAttributes($bereich, $bereich_attribs);
@@ -214,6 +189,10 @@ class Gml_builder {
 
       // alle gml_ids von RP_Objekten finden die mit dem Bereich verknüpft sind
       // und im RP_Bereich Element verlinken
+      $_sql = "
+          SELECT gml_id
+          FROM $contentScheme.rp_bereich
+          WHERE ANY(gehoertZuRP_Bereich) = {$bereich['gml_id']}";
       $sql = "
           SELECT b2o.rp_objekt_gml_id AS gml_id
           FROM
@@ -224,10 +203,10 @@ class Gml_builder {
       # complete RP_Bereich element by iteratively inserting
       # xlink-references to each associated RP_Objekt element
       while ($rp_objekt = pg_fetch_array($rp_objekte, NULL, PGSQL_ASSOC)) {
-        $rp_bereich .= "<xplan:inhaltRPlan xlink:href=\"#GML_" . $rp_objekt['gml_id'] . "\"/>";
+        $rp_bereich .= "<{$xplan_ns_prefix}inhaltRPlan xlink:href=\"#GML_" . $rp_objekt['gml_id'] . "\"/>";
       }
       # close and write RP_Bereich element
-      fwrite($this->tmpFile, "\n" . $this->formatXML($this->wrapWithFeatureMember($rp_bereich . "</RP_Bereich>")));
+      fwrite($this->tmpFile, "\n" . $this->formatXML($this->wrapWithFeatureMember($rp_bereich . "</{$xplan_ns_prefix}RP_Bereich>")));
     }
     // und nun alle RP_Objekte generieren
     // dazu alle RP_Objektklassen finden die mit der Konvertierung verknüpft sind
@@ -238,33 +217,54 @@ class Gml_builder {
     $classNameSet = pg_query($this->database->dbConn, $sql);
     // zu jeder RP_Objektklassse die Objekte holen, die mit der Konvertierung verknüpft sind
     while ($gml_className = pg_fetch_array($classNameSet)[0]) {
+      $_sql = "
+          SELECT
+            *,
+            gehoertZuRP_Bereich AS bereiche_gml_ids,
+            ST_AsGML(
+                ST_Reverse(ST_Transform(
+                  position,
+                  {$konvertierung->get('output_epsg')})),
+                {$konvertierung->get('geom_precision')}) AS gml_position,
+            ST_AsGML(
+              3,
+              ST_Transform(
+                position,
+                {$konvertierung->get('output_epsg')}),
+              {$konvertierung->get('geom_precision')},
+              32) AS envelope
+          FROM
+            $contentScheme.$gml_className AS ft JOIN
+          WHERE konvertierung_id = {$konvertierung->get('id')}";
       $sql = "
           SELECT
             bereiche_gml_ids,
             ft.*,
             ST_AsGML(
                 ST_Reverse(ST_Transform(
-                  COALESCE(
-                    (ft.position).punkt,
-                    (ft.position).multipunkt,
-                    (ft.position).linie,
-                    (ft.position).multilinie,
-                    (ft.position).flaeche,
-                    (ft.position).multiflaeche
-                    ),
+                  ft.position,
+--                  COALESCE(
+--                    (ft.position).punkt,
+--                    (ft.position).multipunkt,
+--                    (ft.position).linie,
+--                    (ft.position).multilinie,
+--                    (ft.position).flaeche,
+--                    (ft.position).multiflaeche
+--                    ),
                   {$konvertierung->get('output_epsg')})),
                 {$konvertierung->get('geom_precision')}) AS gml_position,
             ST_AsGML(
               3,
               ST_Transform(
-                  COALESCE(
-                    (ft.position).punkt,
-                    (ft.position).multipunkt,
-                    (ft.position).linie,
-                    (ft.position).multilinie,
-                    (ft.position).flaeche,
-                    (ft.position).multiflaeche
-                    ),
+                ft.position,
+--                  COALESCE(
+--                    (ft.position).punkt,
+--                    (ft.position).multipunkt,
+--                    (ft.position).linie,
+--                    (ft.position).multilinie,
+--                    (ft.position).flaeche,
+--                    (ft.position).multiflaeche
+--                    ),
                 {$konvertierung->get('output_epsg')}),
               {$konvertierung->get('geom_precision')},
               32) AS envelope
@@ -281,49 +281,35 @@ class Gml_builder {
               WHERE o.konvertierung_id = {$konvertierung->get('id')}
               GROUP BY o.gml_id
             ) AS agg ON ft.gml_id = agg.gml_id";
-          $gml_objects = pg_query($this->database->dbConn, $sql);
+      $gml_objects = pg_query($this->database->dbConn, $sql);
 
-      // fetch complete list of attributes and their properties from UML-structure
-      $uml_attributes = $this->fetchAttributesForFeatureMember($gml_className);
-
-      // fetch attribute information for all attributes of rp_bereich and build look-up table
-      $attribInfo = $this->database->get_attribute_information($contentScheme, strtolower($gml_className));
-
-      $attribInfo = array_combine(array_column($attribInfo,'name'), $attribInfo);
-      $objekt_attribs = array();
-      foreach ($uml_attributes as $uml_attrib) {
-        $lowercaseName = strtolower($uml_attrib['name']);
-        $objekt_attribs[] = array(
-            'uml_name'  => $uml_attrib['name'],
-            'col_name'  => $attribInfo[$lowercaseName]['name'],
-            'type'      => $attribInfo[$lowercaseName]['type'],
-            'type_type' => $attribInfo[$lowercaseName]['type_type']
-        );
-      }
+      // fetch information about attributes and their properties
+      $objekt_attribs = $this->typeInfo->getInfo($gml_className);
 
       while ($gml_object = pg_fetch_array($gml_objects, NULL, PGSQL_ASSOC)) {
         // elment anlegen und gml_id als attribut eintragen
-        $objekt_gml = "<$gml_className gml:id=\"GML_{$gml_object['gml_id']}\">";
+        $objekt_gml = "<{$xplan_ns_prefix}{$gml_className} gml:id=\"GML_{$gml_object['gml_id']}\">";
 
         // Rueckverweise auf etwaige Bereiche hinzufügen
         $aggregated_bereich_gml_ids = explode(',',substr($gml_object['bereiche_gml_ids'], 1, -1));
         foreach ($aggregated_bereich_gml_ids as $bereich_gml_id){
-          $objekt_gml .= "<xplan:gehoertZuRP_Bereich xlink:href=\"#GML_{$bereich_gml_id}\"/>";
+          $objekt_gml .= "<{$xplan_ns_prefix}gehoertZuRP_Bereich xlink:href=\"#GML_{$bereich_gml_id}\"/>";
         }
 
         // alle uebrigen Attribute ausgeben
         $objekt_gml .= $this->generateGmlForAttributes($gml_object, $objekt_attribs);
         # close and write FeatureMember
-        $objekt_gml .= "</{$gml_className}>";
+        $objekt_gml .= "</{$xplan_ns_prefix}{$gml_className}>";
 
         fwrite($this->tmpFile, "\n" . $this->formatXML($this->wrapWithFeatureMember($objekt_gml)));
       }
     }
-    # close XPlan
+    # close XPlanAuszug
     fwrite($this->tmpFile, "\n</XPlanAuszug>");
 
     # reset internal string encoding
     mb_internal_encoding($old_encoding);
+    return true;
   }
 
   function wrapWithElement($tag,$inner) {
@@ -334,42 +320,14 @@ class Gml_builder {
     return $this->wrapWithElement("gml:featureMember",$inner);
   }
 
-  function fetchAttributesForFeatureMember($featureMember) {
-    $structure_schema = Gml_builder::$STRUCTURE_SCHEMA;
-    $sql = "
-      WITH RECURSIVE inheritance AS (
-          SELECT xmi_id::text AS xmi_id FROM $structure_schema.uml_classes WHERE name ILIKE '$featureMember'
-          UNION
-          SELECT inner_inh.parent_id AS xmi_id
-            FROM $structure_schema.class_generalizations inner_inh
-            INNER JOIN inheritance ON inheritance.xmi_id = inner_inh.child_id
-      )
-      SELECT uc.name AS origin, ua.name AS name, ua.datatype AS stype, uc2.name AS ctype, dt.name AS dtype, tv.datavalue AS sequence, inheritance.order
-          FROM (SELECT *, row_number() OVER () AS order FROM inheritance) AS inheritance
-            INNER JOIN $structure_schema.uml_classes uc ON uc.xmi_id = inheritance.xmi_id
-            INNER JOIN $structure_schema.uml_attributes ua ON ua.uml_class_id = uc.id
-            INNER JOIN $structure_schema.taggedvalues tv ON ua.id = tv.attribute_id
-            INNER JOIN $structure_schema.tagdefinitions td ON td.xmi_id = tv.type
-            LEFT JOIN $structure_schema.uml_classes uc2 ON ua.classifier = uc2.xmi_id
-            LEFT JOIN $structure_schema.datatypes dt ON ua.classifier = dt.xmi_id
-          WHERE td.name = 'sequenceNumber'
-          ORDER BY inheritance.order DESC, tv.datavalue ASC
-    ";
-    $uml_attributes = pg_query($this->database->dbConn, $sql);
-    return pg_fetch_all($uml_attributes);
-  }
-
   function generateGmlForAttributes($gml_object, $uml_attribute_info) {
+    $xplan_ns_prefix = XPLAN_NS_PREFIX ? XPLAN_NS_PREFIX.':' : '';
     $gmlStr = '';
     foreach ($uml_attribute_info as  $uml_attribute) {
+      // leere Felder auslassen
+      if (strlen($gml_object[$uml_attribute['col_name']]) == 0) continue;
+
       $lowercaseName = strtolower($uml_attribute['name']);
-//TODO: Korrekte Bestimmung der Zugehörigkeit eines jeden
-// Attributs zum jeweiligen XML-Namespace.
-// Idee: get_attibute_information() bestimmt ja im
-// wesentlichen nur Datenbank-bezogene Eigenschaften.
-// Vielleicht brauchen wir noch eine Funktion, die die
-// UML-relevanten Eigenschaften der Attribute bestimmt.
-$attributeNamespace = 'xplan:';
       switch ($uml_attribute['type_type']) {
         case 'c': // custom datatype
           // geometrie attribute
@@ -380,56 +338,48 @@ $attributeNamespace = 'xplan:';
               "xp_variablegeometrie"
           ))) {
             $gml_value = $gml_object['gml_'.$uml_attribute['col_name']];
-            // leere Felder auslassen
-            if (strlen($gml_value) == 0) continue;
-            $gmlStr .= $this->wrapWithElement("xplan:{$uml_attribute['uml_name']}", $gml_value);
+            $gmlStr .= $this->wrapWithElement("{$xplan_ns_prefix}{$uml_attribute['uml_name']}", $gml_value);
           } else {
             // andere custom type attribute
-            $stereotype = $this->getStereotype($uml_attribute['type']);
-            #echo $uml_attribute['type'] . ' ==> ' .$stereotype ."\n";
-            switch ($stereotype){
+            switch ($uml_attribute['stereotype']){
+              case NULL:
+                break;
               case "CodeList":
-                // leere Felder auslassen
-                if (!$gml_object[$uml_attribute['col_name']]) continue;
                 $gml_value = $gml_object[$uml_attribute['col_name']]['id'];
                 $codeSpaceUri = $gml_object[$uml_attribute['col_name']]['codespace'];
-                $gmlStr .= "<xplan:{$uml_attribute['uml_name']} codeSpace=\"$codeSpaceUri\">$gml_value</xplan:{$uml_attribute['uml_name']}>";
+                $gmlStr .= "<{$xplan_ns_prefix}{$uml_attribute['uml_name']} codeSpace=\"$codeSpaceUri\">$gml_value</{$xplan_ns_prefix}{$uml_attribute['uml_name']}>";
                 break;
               case "DataType":
+                // fetch information about attributes and their properties
+                $datatype_attribs = $this->typeInfo->getInfo($uml_attribute['type']);
+                $gmlStr .= "<{$xplan_ns_prefix}{$uml_attribute['uml_name']}>";
+                $gml_value_array = explode(',',substr($gml_object[$uml_attribute['col_name']], 1, -1));
+                foreach ($datatype_attribs as $dt_attrib){
+                  $gmlStr .= $this->wrapWithElement(
+                    "{$xplan_ns_prefix}{$dt_attrib['uml_name']}",
+                    $gml_value_array[$dt_attrib['sequence']]);
+                }
+                $gmlStr .= "</{$xplan_ns_prefix}{$uml_attribute['uml_name']}>";
               default:
             }
           }
           break;
         case 'e': // enum type
-          if (substr_compare($uml_attribute['type'],"xp_",0,3)) $attributeNamespace = 'xplan:';
         case 'b': // built-in datatype
         default:
           // TODO: Datumsangaben formatieren nach ISO 8601
           $gml_value = trim($gml_object[$uml_attribute['col_name']]);
-          // leere Felder auslassen
-          if (strlen($gml_value) == 0) continue;
           // check for array values
           if ($gml_value[0] == '{' && substr($gml_value,-1) == '}') {
             $gml_value_array = explode(',',substr($gml_value, 1, -1));
             for ($j = 0; $j < count($gml_value_array); $j++){
-              $gmlStr .= $this->wrapWithElement("$attributeNamespace{$uml_attribute['uml_name']}",htmlentities($gml_value_array[$j]));
+              $gmlStr .= $this->wrapWithElement("{$xplan_ns_prefix}{$uml_attribute['uml_name']}",htmlentities($gml_value_array[$j]));
             }
           } else
-          $gmlStr .= $this->wrapWithElement("$attributeNamespace{$uml_attribute['uml_name']}",htmlentities($gml_value));
+          $gmlStr .= $this->wrapWithElement("{$xplan_ns_prefix}{$uml_attribute['uml_name']}",htmlentities($gml_value));
       }
     }
     return $gmlStr;
-  }
-
-  function getStereotype($attributName){
-    $sql = "
-      SELECT st.name
-        FROM xplan_uml.uml_classes c
-          JOIN xplan_uml.stereotypes st ON c. stereotype_id = st.xmi_id
-        WHERE c.name ILIKE '$attributName';
-    ";
-    $result = pg_query($this->database->dbConn, $sql);
-    return pg_fetch_array($result, NULL, PGSQL_ASSOC)['name'];
   }
 
   /*
