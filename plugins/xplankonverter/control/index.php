@@ -242,6 +242,7 @@ switch($this->go){
 				$shapefile->deleteUploadFiles();
 				# Delete the record in postgres shapefile table (unregister for konverter)
 				$shapefile->delete();
+				$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
 				$this->main = '../../plugins/xplankonverter/view/shapefiles.php';
 			}
 		}

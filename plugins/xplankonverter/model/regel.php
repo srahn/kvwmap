@@ -29,23 +29,24 @@ public static	function find_by_id($gui, $by, $id) {
 	/*
 	* Führt die in der Regel definierten SQL-Statements aus um
 	* Daten aus Shapefiles in die Tabellen der XPlan GML Datentabellen
-	* zu schreiben. Dabei wird jedem neu erzeugtem XPlan GML
-	* Objekt die Id der Konvertierung mitgegeben.
-	* Optional wird eine gml_id eines Bereiches mitgegeben, die in der
+	* zu schreiben. Dabei wird die im sql angegebene Id der Konvertierung
+	* für jedes RP_Objekt gesetzt.
+	* Wenn die Regel auch eine Bereich Id hat, wird diese in der
 	* Tabelle rp_breich2rp_objekt zusammen mit den gml_id's der erzeugten
-	* XPlan GML Objekte eingetragen wird.
+	* XPlan GML Objekte eingetragen.
 	*/
-	function convert($konvertierung_id, $bereich_gml_id = null) {
+	function convert() {
 		$sql = $this->get('sql');
-		$features = $this->getSQLResults($sql);
-		foreach($features AS $feature) {
-			if ($bereich_gml_id != '') {
+    $query = pg_query($this->database->dbConn, $sql);
+
+		foreach(pg_fetch_all($query) AS $object_gml_id) {
+			if ($this->get('bereich_gml_id') != '') {
 				$sql = "
 					INSERT INTO
-				gml_classes.rp_object2rp_bereich
-				SET
-				rp_object_gml_id = '" . $feature->get('gml_id') . "',
-				rp_bereich_gml_id = '" . $bereich_gml_id . "'
+						gml_classes.rp_object2rp_bereich
+					SET
+						rp_object_gml_id = '" . $object_gml_id . "',
+						rp_bereich_gml_id = '" . $this->get('bereich_gml_id') . "'
 				";
 			}
 		}
