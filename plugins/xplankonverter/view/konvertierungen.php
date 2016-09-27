@@ -4,11 +4,21 @@
 <script language="javascript" type="text/javascript">
   $(function () {
     result = $('#eventsResult');
+    result.success = function(text){
+      result.text(text);
+      result.removeClass('alert-danger');
+      result.addClass('alert-success');
+    };
+    result.error = function(text){
+      result.text(text);
+      result.removeClass('alert-success');
+      result.addClass('alert-danger');
+    };
 
     // event handler
     $('#konvertierungen_table')
     .one('load-success.bs.table', function (e, data) {
-      result.text('Tabelle erfolgreich geladen.');
+      result.success('Tabelle erfolgreich geladen.');
     })
     .on('load-success.bs.table', function (e, data) {
       $('.xpk-func-convert').click(
@@ -22,7 +32,7 @@
       );
     })
     .on('load-error.bs.table', function (e, status) {
-      result.text('Event: load-error.bs.table');
+      result.error('Event: load-error.bs.table');
     });
     // more examples for register events on data tables: http://jsfiddle.net/wenyi/e3nk137y/36/
   });
@@ -30,7 +40,7 @@
   // functions
   starteKonvertierung = function(e) {
     var konvertierung_id = $(e.target).parent().parent().attr('konvertierung_id');
-    result.text('Starte Konvertierung und Validierung für Konvertierung-Id: ' + konvertierung_id);
+    result.success('Starte Konvertierung und Validierung für Konvertierung-Id: ' + konvertierung_id);
     // set status to 'IN_KONVERTIERUNG'
     $.ajax({
       url: 'index.php?go=xplankonverter_konvertierung_status',
@@ -40,7 +50,7 @@
       },
       success: function(response) {
         if (!response.success){
-          result.text(response.msg);
+          result.success(response.msg);
           return;
         }
         $('#konvertierungen_table').bootstrapTable('refresh');
@@ -51,10 +61,10 @@
             konvertierung_id: konvertierung_id
           },
           error: function(response) {
-            result.text(response.msg);
+            result.error(response.msg);
           },
           success: function(response) {
-            result.text(response.msg);
+            result.success(response.msg);
             if (!response.success) return;
             // validiere, wenn Konvertierung erfolgreich
             $.ajax({
@@ -63,11 +73,11 @@
                 konvertierung_id: konvertierung_id
               },
               error: function(response) {
-                result.text(response.msg);
+                result.error(response.msg);
               },
               success: function(response) {
                 $('#konvertierungen_table').one('load-success.bs.table', function () {
-                  result.text(response.msg);
+                  result.success(response.msg);
                 });
                 $('#konvertierungen_table').bootstrapTable('refresh');
               }
@@ -80,7 +90,7 @@
 
   starteGmlAusgabe = function(e) {
     var konvertierung_id = $(e.target).parent().parent().attr('konvertierung_id');
-    result.text('Starte GML-Ausgabe für Konvertierung-Id: ' + konvertierung_id);
+    result.success('Starte GML-Ausgabe für Konvertierung-Id: ' + konvertierung_id);
     // set status to 'IN_GML_ERSTELLUNG'
     $.ajax({
       url: 'index.php?go=xplankonverter_konvertierung_status',
@@ -89,21 +99,29 @@
         status: "<?php echo Konvertierung::$STATUS['IN_GML_ERSTELLUNG']; ?>"
       },
       error: function(response) {
+        result.error('Fehler beim Starten der GML-Erstellung für Konvertierung-Id: ' + konvertierung_id);
+        return;
       },
       success: function(response) {
         $('#konvertierungen_table').bootstrapTable('refresh');
-        // konvertiere wenn Status gesetzt
+        // gml-erzeugung starten
         $.ajax({
           url: 'index.php?go=xplankonverter_gml_generieren',
           data: {
             konvertierung_id: konvertierung_id
           },
           error: function(response) {
-            result.text(response.msg);
+            $('#konvertierungen_table').bootstrapTable('refresh');
+            result.error('Fehler bei der GML-Erstellung für Konvertierung-Id: ' + konvertierung_id);
+            console.error(response.responseText);
           },
           success: function(response) {
+            if (!response.success){
+              result.error(response.msg);
+              return;
+            }
             $('#konvertierungen_table').one('load-success.bs.table', function () {
-              result.text(response.msg);
+              result.success(response.msg);
             });
             $('#konvertierungen_table').bootstrapTable('refresh');
           }
