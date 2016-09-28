@@ -339,8 +339,13 @@ switch($this->go){
     echo json_encode($response);
   } break;
 
+  case 'xplankonverter_konvertierung_konvertieren': {
+		$this->main = '../../plugins/xplankonverter/view/validation_result.php';
+		$this->output();
+  } break;
+
   case 'xplankonverter_konvertierung_validate': {
-// TODO: remove
+  // TODO: remove
 sleep(5);
 		$response = array();
 		header('Content-Type: application/json');
