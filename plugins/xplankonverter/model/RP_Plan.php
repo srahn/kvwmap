@@ -21,6 +21,5 @@ class RP_Plan extends PgObject {
 		$rp_plan->find_by($by, $id);
 		return $rp_plan;
 	}
-
 }
 ?>

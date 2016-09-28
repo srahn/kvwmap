@@ -64,7 +64,7 @@ class Validierung extends PgObject {
 		);
 	}
 
-	function sql_ausfuehrbar($result) {
+	function sql_ausfuehrbar($result, $regel_id) {
 		if (!$result) {
 			$validierungsergebnis = new Validierungsergebnis($this->gui);
 			$validierungsergebnis->create(
@@ -72,7 +72,8 @@ class Validierung extends PgObject {
 					'konvertierung_id' => $this->konvertierung_id,
 					'validierung_id' => $this->get('id'),
 					'status' => 'Fehler',
-					'msg' => @pg_last_error($this->database->dbConn)
+					'msg' => @pg_last_error($this->database->dbConn),
+					'regel_id' => $regel_id
 				)
 			);
 		}

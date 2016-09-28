@@ -9,6 +9,13 @@ if ($this->Fehlermeldung!='') {
 </div>
 <br>
 <script language="javascript" type="text/javascript">
+// formatter functions
+function validierung_msg_correcture_formatter(value, row) {
+	output = row.validierung_msg_correcture;
+	if (row.regel_id)
+		output += ' <a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=9&operator_id==&value_id=' + row.regel_id + '"><i class="fa fa-lg fa-pencil"></i></a>';
+	return output;
+}
 </script>
 <table
   id="validierungsergebnis_table"
@@ -32,7 +39,7 @@ if ($this->Fehlermeldung!='') {
     <tr>
       <th
         data-field="validierungsergebnis_id"
-        data-visible="true"
+        data-visible="false"
         data-switchable="true"
         data-sortable="true"
         class="text-right"
@@ -58,6 +65,27 @@ if ($this->Fehlermeldung!='') {
         data-sortable="true"
         class="text-left"
       >Meldung</th>
+      <th
+        data-field="regel_sql"
+        data-visible="false"
+        data-switchable="true"
+        data-sortable="false"
+        class="text-left"
+      >Regel SQL</th>
+      <th
+        data-field="validierung_msg_correcture"
+				data-formatter="validierung_msg_correcture_formatter"
+        data-visible="false"
+        data-switchable="true"
+        data-sortable="true"
+        class="text-left"
+      >Korrekturhinweis</th>
+      <th
+        data-field="regel_id"
+        data-visible="false"
+        data-switchable="false"
+        class="text-right"
+      >Regel_id</th>
     </tr>
   </thead>
 </table>
