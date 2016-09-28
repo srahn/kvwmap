@@ -109,13 +109,14 @@ class GUI {
 	*
 	* @params $layer Array mit Angben des Layers aus der MySQL-Datenbank
 	*/
-	function exec_trigger_function($fired, $event, $layer, $oid = '') {
+	function exec_trigger_function($fired, $event, $layer, $oid = '', $old_dataset = array()) {
 		if (array_key_exists($layer['trigger_function'], $this->trigger_functions)) {
 			$this->trigger_functions[$layer['trigger_function']](
 				$fired,
 				$event,
 				$layer,
-				$oid
+				$oid,
+				$old_dataset
 			);
 		}
 	}
@@ -7483,6 +7484,17 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				# Before Delete trigger
 				if (!empty($layer['trigger_function'])) {
 					$this->exec_trigger_function('BEFORE', 'DELETE', $layer, $element[3]);
+					$sql = "
+						SELECT
+							oid, *
+						FROM
+							{$element[2]}
+						WHERE
+							oid = {$element[3]}
+					";
+					#echo '<br>sql before delete: ' . $sql; #pk
+					$ret = $layerdb->execSQL($sql, 4, 1);
+					$old_dataset = ($ret[0] == 0 ? pg_fetch_assoc($ret[1]) : array());
 				}
 
 				# Delete the object in database
@@ -7495,7 +7507,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				# Derzeit steht der gelöschte Datensatz für after trigger nicht zur Verfügung.
 				# Wollte man das, müsste man den Datensatz vor dem Löschen abfragen und hier im 5. Parameter übergeben.
 				if (!empty($layer['trigger_function'])) {
-					$this->exec_trigger_function('AFTER', 'DELETE', $layer);
+					$this->exec_trigger_function('AFTER', 'DELETE', $layer, '', $old_dataset);
 				};
 
 				if ($ret[0]) {
