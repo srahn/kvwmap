@@ -53,8 +53,10 @@ class Konvertierung extends PgObject {
 			konvertierung_id = {$this->get('id')} AND
 			bereich_gml_id IS NULL
 		");
+		
+		$plan = $this->get_plan();
 
-		foreach($this->get_bereiche() AS $bereich) {
+		foreach($this->get_bereiche($plan->get('gml_id')) AS $bereich) {
 			$regeln = array_merge(
 				$regeln,
 				$regel->find_where("bereich_gml_id = '{$bereich->get('gml_id')}'")
@@ -64,10 +66,16 @@ class Konvertierung extends PgObject {
 		return $regeln;
 	}
 
-	function get_bereiche() {
-		#echo 'get_bereiche in konvertierung';
+	function get_plan() {
+		$plan = new RP_Plan($this->gui);
+		$plan = $plan->find_where('konvertierung_id = ' . $this->get('id'));
+		return (count($plan) > 0 ? $plan[0] : array());
+	}
+
+	function get_bereiche($plan_id) {
+		#echo 'get_bereiche';
 		$bereich = new RP_Bereich($this->gui);
-		return $bereich->find_where('konvertierung_id = ' . $this->get('id'));
+		return $bereich->find_where("gehoertzuplan = '{$plan_id}'");
 	}
 
 	/**
