@@ -2,7 +2,7 @@
 
 	checknumbers = function(input, type, length, decimal_length){
 		if(type == 'numeric' || type == 'float4' || type == 'float8'){
-			var val = input.value.replace(/[a-zA-Z]/g, '');
+			var val = input.value.replace(/[^0-9]/g, '');
 			val = val.replace(/,/g, '.');
 			if(parseInt(decimal_length) == 0 && val.search(/\./) > 0){
 				alert(unescape('F%FCr dieses Feld sind keine Nachkommastellen erlaubt.'));
@@ -29,7 +29,7 @@
 			}
 		}
 		if(type == 'int2' || type == 'int4' || type == 'int8'){
-			var val = input.value.replace(/[a-zA-Z]/g, '');
+			var val = input.value.replace(/[^0-9]/g, '');
 			if(input.value.search(/,/g) != -1 || input.value.search(/\./g) != -1){
 				alert('Es sind nur ganzzahlige Angaben erlaubt!');
 				val = val.replace(/,/g, '');
