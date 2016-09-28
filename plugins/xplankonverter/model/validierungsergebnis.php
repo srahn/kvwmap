@@ -26,39 +26,25 @@
 # stefan.rahn@gdi-service.de                                      #
 ###################################################################
 #############################
-# Klasse Validator #
+# Klasse Validierungsergebnis #
 #############################
 
-class Validator {
+class Validierungsergebnis extends PgObject {
 
-  function Validator() {
-  }
+	
+	static $schema = 'xplankonverter';
+	static $tableName = 'validierungsergebnisse';
 
-  function doValidate($konvertierung) {
-    // validate here
-    if (true)
-      return array('success' => 'OK');
-    else
-      return array('success' => 'ERROR', 'error' => 'Validierung fehlgeschlagen');
-  }
+	function Validierungsergebnis($gui) {
+		#echo '<br>Create new Object Validierungsergebnis';
+		$this->PgObject($gui, Validierungsergebnis::$schema, Validierungsergebnis::$tableName);
+		$this->konvertierung_id = 0;
+	}
 
-  function validateKonvertierung($konvertierung,$success,$failure) {
-    $result = $this->doValidate($konvertierung);
-    if ($result['success'] == 'OK') {
-      // status setzen
-      $konvertierung->set('status', Konvertierung::$STATUS['KONVERTIERUNG_OK']);
-      $konvertierung->update();
-      // success callback ausführen
-     $success();
-    } else {
-      // status setzen
-      $konvertierung->set('status', Konvertierung::$STATUS['KONVERTIERUNG_ERR']);
-      $konvertierung->update();
-      // error callback ausfuehren
-     $failure($result['error']);
-    }
-    return;
-  }
+	public static function delete_by_id($gui, $by, $id) {
+		$validierung = new Validierungsergebnis($gui);
+		$validierung->delete_by($by, $id);
+	}
 }
 
 ?>

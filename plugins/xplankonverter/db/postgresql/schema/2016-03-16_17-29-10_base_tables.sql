@@ -36,8 +36,10 @@ CREATE TABLE xplankonverter.konvertierungen
   created_at timestamp without time zone NOT NULL DEFAULT now(),
   updated_at timestamp without time zone NOT NULL DEFAULT now(),
   user_id integer, -- Id des Nutzers, der den Datensatz angelegt hat. Dieser Wert solle automatisch vom System kvwmap beim Anlegen des Datensatzes erzeugt werden und ein Wert aus der MySQL-Tabelle users der kvwmap Karten- und Nutzerdatenbank kvwmapsp sein.
-  output_epsg xplankonverter.output_epsg NOT NULL DEFAULT '25832'::xplankonverter.output_epsg,
   geom_precision integer NOT NULL DEFAULT 3,
+  gml_layer_group_id integer,
+  output_epsg xplankonverter.epsg_codes NOT NULL DEFAULT '25832'::xplankonverter.epsg_codes,
+  input_epsg xplankonverter.epsg_codes,
   gml_layer_group_id integer,
   CONSTRAINT konvertierungen_id_pkey PRIMARY KEY (id)
 )
