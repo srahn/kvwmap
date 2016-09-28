@@ -113,7 +113,7 @@
 			else{
 				$GUI->loadMap('DataBase');
 			}
-			if($_SERVER['REQUEST_METHOD'] == 'GET')$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
+			if($saved_scale != NULL)$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
       # zoomToMaxLayerExtent
 			if($GUI->formvars['zoom_layer_id'] != '')$GUI->zoomToMaxLayerExtent($GUI->formvars['zoom_layer_id']);
       $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true);
@@ -714,7 +714,7 @@
     else{
       $GUI->loadMap('DataBase');
     }
-		if($_SERVER['REQUEST_METHOD'] == 'GET')$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
+		if($saved_scale != NULL)$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
     $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true);
   	if(!$GUI->formvars['layer_id']){
       $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
@@ -1004,7 +1004,7 @@
     # aktuellen Kartenausschnitt laden + zeichnen!
     $saved_scale = $GUI->reduce_mapwidth(200);
 		$GUI->loadMap('DataBase');
-		if($_SERVER['REQUEST_METHOD'] == 'GET' AND !isset($GUI->formvars['datum']))$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
+		if($saved_scale != NULL AND !isset($GUI->formvars['datum']))$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
     if ($GUI->formvars['CMD']!='') {
       # Nur Navigieren
       $GUI->navMap($GUI->formvars['CMD']);

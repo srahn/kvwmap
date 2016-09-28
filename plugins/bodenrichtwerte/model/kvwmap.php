@@ -18,7 +18,7 @@
     $GUI->main = PLUGINS."bodenrichtwerte/view/bodenrichtwerterfassung_vboris.php";
     $saved_scale = $GUI->reduce_mapwidth(100);
 		$GUI->loadMap('DataBase');
-		if($_SERVER['REQUEST_METHOD'] == 'GET')$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
+		if($saved_scale != NULL)$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
     $GUI->Lagebezeichnung = $GUI->getLagebezeichnung($GUI->user->rolle->epsg_code);
     if($GUI->formvars['gemeinde'] == ''){
     	$GUI->formvars['gemeinde'] = $GUI->Lagebezeichnung['gemeinde'];
