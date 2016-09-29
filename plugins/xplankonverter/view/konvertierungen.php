@@ -142,7 +142,7 @@
     output += '<a title="Konvertierung bearbeiten" class="btn btn-link btn-xs xpk-func-btn' + (funcIsDisabled ? disableFrag : '') + '" href="index.php?go=Layer-Suche_Suchen&selected_layer_id=8&operator_konvertierung_id==&value_konvertierung_id=' + value + '"><i class="fa fa-lg fa-pencil"></i></a>';
 
     // Shapefile upload
-    funcIsDisabled = row.status != "<?php echo Konvertierung::$STATUS['ERSTELLT']; ?>";
+    funcIsDisabled = false; //row.status != "<?php echo Konvertierung::$STATUS['ERSTELLT']; ?>";
     output += '<a title="Shapefiles bearbeiten" class="btn btn-link btn-xs  xpk-func-btn' + (funcIsDisabled ? disableFrag : '') + '" href="index.php?go=xplankonverter_shapefiles_index&konvertierung_id=' + value + '"><i class="fa fa-lg fa-upload"></i></a>';
 
     // Konvertieren und validieren
