@@ -79,6 +79,74 @@ class Konvertierung extends PgObject {
 	}
 
 	/**
+	* Fragt die unique class names ab, die in der Konvertierung verwendet wurden.
+	*/
+	function get_class_names() {
+		$sql = "
+			SELECT DISTINCT
+			  lower(r.class_name) AS class_name
+			FROM
+			  xplankonverter.regeln r LEFT JOIN
+			  xplan_gml.rp_bereich b ON r.bereich_gml_id = b.gml_id
+			WHERE
+			  b.konvertierung_id = {$this->get('id')} OR
+			  r.konvertierung_id = {$this->get('id')}
+		";
+		#echo '<br>get_class_names in konvertierung: ' . $sql;
+		$class_names = array_map(
+			function($row) {
+				return 'xplan_gml.' . $row['class_name'];
+			},
+			pg_fetch_all(
+				pg_query($this->database->dbConn, $sql)
+			)
+		);
+		#echo '<br>';
+		#var_dump($class_names);
+		return $class_names;
+	}
+
+	function set_status() {
+		$sql = "
+			SELECT DISTINCT
+				CASE
+					WHEN p.gml_id IS NOT NULL OR r.id IS NOT NULL THEN true
+					ELSE false
+				END AS plan_or_regel_assigned
+			FROM
+				xplankonverter.konvertierungen k LEFT JOIN
+				xplan_gml.rp_plan p ON k.id = p.konvertierung_id LEFT JOIN
+				xplankonverter.regeln r ON k.id = r.konvertierung_id
+			WHERE
+				k.id = {$this->get('id')}
+		";
+		$query = pg_query($this->database->dbConn, $sql);
+		$result = pg_fetch_assoc($query);
+		$plan_or_regel_assigned = $result['plan_or_regel_assigned'];
+
+		$new_status = $this->get('status');
+		if ($plan_or_regel_assigned == 't') {
+			if ($this->get('status') == 'in Erstellung') {
+				$new_status = 'erstellt';
+			}
+		}
+		else {
+			$new_status = 'in Erstellung';
+		}
+
+		$this->set('status', $new_status);
+		$this->update();
+		/*
+			UPDATE
+				xplankonverter.konvertierungen
+			SET
+				status = new_state::xplankonverter.enum_konvertierungsstatus
+			WHERE
+				id = _konvertierung_id;
+		*/
+	}
+
+	/**
 	* Erzeugt eine Layergruppe vom Typ GML oder Shape und trägt die dazugehörige
 	* gml_layer_group_id oder shape_layer_group_id in PG-Tabelle konvertierung ein.
 	*
@@ -134,34 +202,6 @@ class Konvertierung extends PgObject {
 		foreach($regeln AS $regel) {
 			$regel->convert($this->get('id'));
 		}
-	}
-
-	/**
-	* Fragt die unique class names ab, die in der Konvertierung verwendet wurden.
-	*/
-	function get_class_names() {
-		$sql = "
-			SELECT DISTINCT
-			  lower(r.class_name) AS class_name
-			FROM
-			  xplankonverter.regeln r LEFT JOIN
-			  xplan_gml.rp_bereich b ON r.bereich_gml_id = b.gml_id
-			WHERE
-			  b.konvertierung_id = {$this->get('id')} OR
-			  r.konvertierung_id = {$this->get('id')}
-		";
-		#echo '<br>get_class_names in konvertierung: ' . $sql;
-		$class_names = array_map(
-			function($row) {
-				return 'xplan_gml.' . $row['class_name'];
-			},
-			pg_fetch_all(
-				pg_query($this->database->dbConn, $sql)
-			)
-		);
-		#echo '<br>';
-		#var_dump($class_names);
-		return $class_names;
 	}
 }
 
