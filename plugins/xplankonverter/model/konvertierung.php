@@ -45,6 +45,39 @@ class Konvertierung extends PgObject {
 		return $input_codes;
 	}
 
+	function get_regeln() {
+		#echo '<p>get_regeln';
+		$regeln = array();
+		$regel = new Regel($this->gui);
+		$regeln = $regel->find_where("
+			konvertierung_id = {$this->get('id')} AND
+			bereich_gml_id IS NULL
+		");
+		
+		$plan = $this->get_plan();
+
+		foreach($this->get_bereiche($plan->get('gml_id')) AS $bereich) {
+			$regeln = array_merge(
+				$regeln,
+				$regel->find_where("bereich_gml_id = '{$bereich->get('gml_id')}'")
+			);
+		}
+
+		return $regeln;
+	}
+
+	function get_plan() {
+		$plan = new RP_Plan($this->gui);
+		$plan = $plan->find_where('konvertierung_id = ' . $this->get('id'));
+		return (count($plan) > 0 ? $plan[0] : array());
+	}
+
+	function get_bereiche($plan_id) {
+		#echo 'get_bereiche';
+		$bereich = new RP_Bereich($this->gui);
+		return $bereich->find_where("gehoertzuplan = '{$plan_id}'");
+	}
+
 	/**
 	* Erzeugt eine Layergruppe vom Typ GML oder Shape und trägt die dazugehörige
 	* gml_layer_group_id oder shape_layer_group_id in PG-Tabelle konvertierung ein.
@@ -65,17 +98,18 @@ class Konvertierung extends PgObject {
 
 	/*
 	* Diese Funktion löscht alle zuvor für diese Konvertierung angelegten
-	* XPlan GML Datensätze und Beziehungen im Schema gml_classes
+	* XPlan GML Datensätze, Beziehungen und Validierungsergebnisse
 	*/
-	function resetMapping() {
-		#    $tables = get all table names of xplan gml feature types
-		foreach($tables AS $table) {
+	function reset_mapping() {
+		Validierungsergebnis::delete_by_id($this->gui, 'konvertierung_id', $this->get('id'));
+		foreach($this->get_class_names() AS $class_name) {
 			$sql = "
 				DELETE FROM
-			" . $table . "
-			WHERE
-			konvertierung_id = " . $this->get('id') . "
+					{$class_name}
+				WHERE
+					konvertierung_id = {$this->get('id')}
 			";
+			$query = pg_query($this->database->dbConn, $sql);
 		}
 	}
 
@@ -91,18 +125,44 @@ class Konvertierung extends PgObject {
 	* $this->converter->regeln_anwenden($this->formvars['konvertierung_id']);
 	*/
 	function mapping() {
-		# finde alle regeln, die direkt der Konvertierung zugeordnet wurden
-		$regeln = $this->getRegeln();
+		$regeln = $this->get_regeln();
+
+		$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'regel_existiert');
+		$validierung->konvertierung_id = $this->get('id');
+		$validierung->regel_existiert($regeln);
+
 		foreach($regeln AS $regel) {
-			$regel->convert();
+			$regel->convert($this->get('id'));
 		}
 	}
 
-	function getRegeln() {
-		$regel = new Regel($this->gui);
-		return $regel->find_where('konvertierung_id = ' . $this->get('id'));
+	/**
+	* Fragt die unique class names ab, die in der Konvertierung verwendet wurden.
+	*/
+	function get_class_names() {
+		$sql = "
+			SELECT DISTINCT
+			  lower(r.class_name) AS class_name
+			FROM
+			  xplankonverter.regeln r LEFT JOIN
+			  xplan_gml.rp_bereich b ON r.bereich_gml_id = b.gml_id
+			WHERE
+			  b.konvertierung_id = {$this->get('id')} OR
+			  r.konvertierung_id = {$this->get('id')}
+		";
+		#echo '<br>get_class_names in konvertierung: ' . $sql;
+		$class_names = array_map(
+			function($row) {
+				return 'xplan_gml.' . $row['class_name'];
+			},
+			pg_fetch_all(
+				pg_query($this->database->dbConn, $sql)
+			)
+		);
+		#echo '<br>';
+		#var_dump($class_names);
+		return $class_names;
 	}
-
 }
 
 ?>

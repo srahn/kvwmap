@@ -63,7 +63,7 @@ class PgObject {
 			WHERE
 				\"{$attribute}\" = '{$value}'
 		";
-		#echo 'select query: ' . $sql;
+		#echo '<p>find_by: ' . $sql;
 		$this->debug('<p>find_by sql: ' . $sql);
 		$query = pg_query($this->database->dbConn, $sql);
 		$this->data = pg_fetch_assoc($query);
@@ -84,6 +84,7 @@ class PgObject {
         " . $where . "
     ";
     $this->debug('<p>sql: ' . $sql);
+		#echo '<p>find_where: ' . $sql;
     $query = pg_query($this->database->dbConn, $sql);
 		$result = array();
 		while($this->data = pg_fetch_assoc($query)) {
@@ -91,6 +92,20 @@ class PgObject {
 		}
     return $result;
   }
+
+	function delete_by($attribute, $value) {
+		#echo '<br>delete by attribute ' . $attribute . ' with value ' . $value;
+		$sql = "
+			DELETE FROM
+				\"{$this->schema}\".\"{$this->tableName}\"
+			WHERE
+				\"{$attribute}\" = '{$value}'
+		";
+		#echo 'delete query: ' . $sql;
+		$this->debug('<p>delete_by sql: ' . $sql);
+		$query = pg_query($this->database->dbConn, $sql);
+		return $query;
+	}
 
   function getAttributes() {
     return array_keys($this->data);
@@ -129,6 +144,7 @@ class PgObject {
       )
       RETURNING id
     ";
+		#echo '<p>Create Postgres Datensatz: ' . $sql;
     $this->debug('<p>Insert into pg table sql: ' . $sql);
     $query = pg_query($this->database->dbConn, $sql);
     $row = pg_fetch_assoc($query);

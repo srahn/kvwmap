@@ -350,26 +350,19 @@ class GUI {
 								$legend .=  ' title="'.$this->activatelayer.'"'; 
 							}
 							$legend .= ' ></td><td valign="middle">';							
-							if($layer['metalink'] != ''){
-								$legend .= '<a ';
-								if(substr($layer['metalink'], 0, 10) != 'javascript'){
-									$legend .= 'target="_blank"';
-								}
-								$legend .= ' class="metalink" href="'.$layer['metalink'].'">';
-							}
+							$legend .= '<a oncontextmenu="getLayerOptions('.$layer['Layer_ID'].');return false;"';
+							if($layer['metalink'] != '' AND substr($layer['metalink'], 0, 10) != 'javascript')$legend .= 'target="_blank"';
+							if($layer['metalink'] != '')$legend .= ' class="metalink boldhover" href="'.$layer['metalink'].'">';
+							else $legend .= ' class="visiblelayerlink boldhover" href="javascript:void(0)"';
 							$legend .= '<span ';
 							if($layer['minscale'] != -1 AND $layer['maxscale'] > 0){
 								$legend .= 'title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
 							}			  
 							$legend .=' class="legend_layer">'.html_umlaute($layer['alias']).'</span>';
-							if($layer['metalink'] != ''){
-								$legend .= '</a>';
-							}
-							# Bei eingeschalteten Layern kann man auf die maximale Ausdehnung des Layers zoomen
-							if($layer['aktivStatus'] == 1){
-								$legend.='&nbsp;<a href="javascript:getLayerOptions('.$layer['Layer_ID'].')"><img src="graphics/rows.png" border="0" title="'.$this->layerOptions.'"></a>';
-								$legend.='<div style="position:static" id="options_'.$layer['Layer_ID'].'"> </div>';
-							}
+							$legend .= '</a>';
+							# Bei eingeschalteten Layern ist ein Optionen-Button sichtbar
+							if($layer['aktivStatus'] == 1)$legend.='&nbsp;<a href="javascript:getLayerOptions('.$layer['Layer_ID'].')"><img src="graphics/rows.png" border="0" title="'.$this->layerOptions.'"></a>';
+							$legend.='<div style="position:static" id="options_'.$layer['Layer_ID'].'"> </div>';
 						}
 						if($layer['aktivStatus'] == 1 AND $layer['Class'][0]['Name'] != ''){
 							if($layer['requires'] == '' AND $layer['Layer_ID'] > 0){
@@ -490,12 +483,14 @@ class GUI {
 						if($layer['aktivStatus'] == 1){
 							$legend .=  'checked="true" ';
 						}
-						$legend .= 'id="thema_'.$layer['Layer_ID'].'" name="thema'.$layer['Layer_ID'].'" disabled="true"></td><td>
-						<span class="legend_layer_hidden" ';
+						$legend .= 'id="thema_'.$layer['Layer_ID'].'" name="thema'.$layer['Layer_ID'].'" disabled="true"></td><td>';
+						$legend .= '<a oncontextmenu="getLayerOptions('.$layer['Layer_ID'].');return false;" class="invisiblelayerlink boldhover" href="javascript:void(0)"';
+						$legend .= '<span class="legend_layer_hidden" ';
 						if($layer['minscale'] != -1 AND $layer['maxscale'] != -1){
 							$legend .= 'title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
 						}
-						$legend .= ' >'.html_umlaute($layer['alias']).'</span>';
+						$legend .= ' >'.html_umlaute($layer['alias']).'</span></a>';
+						$legend.='<div style="position:static" id="options_'.$layer['Layer_ID'].'"> </div>';
 						if($layer['status'] != ''){
 							$legend .= '&nbsp;<img title="Thema nicht verfügbar: '.$layer['status'].'" src="'.GRAPHICSPATH.'warning.png">';
 						}
@@ -2525,7 +2520,7 @@ class GUI {
 		$attributevalues = explode('|', $this->formvars['attributevalues']);
 		$sql = $attributes['options'][0];
 		for($i = 0; $i < count($attributenames); $i++){
-			$sql = str_replace('$'.$attributenames[$i], $attributevalues[$i], $sql);
+			if($attributenames[$i] != '')$sql = str_replace('$'.$attributenames[$i], $attributevalues[$i], $sql);
 		}
 		#echo $sql;
 		$ret=$layerdb->execSQL($sql,4,0);
@@ -4480,7 +4475,7 @@ class GUI {
     else{
       $this->loadMap($loadmapsource);
     }
-		if($_SERVER['REQUEST_METHOD'] == 'GET')$this->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
+		if($saved_scale != NULL)$this->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
 		# zoomToMaxLayerExtent
 		if($this->formvars['zoom_layer_id'] != '')$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
 		# Kartendrucklayouts laden
@@ -7260,7 +7255,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	    	################# Map ###############################################
 				$saved_scale = $this->reduce_mapwidth(10);
 				$this->loadMap('DataBase');
-				if($this->formvars['CMD']=='')$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
+				if($this->formvars['CMD']=='' AND $saved_scale != NULL)$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
 		    $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
 		    # Geometrie-Übernahme-Layer:
 		    # Spaltenname und from-where abfragen
@@ -7491,15 +7486,20 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				#echo $sql.'<br>';
 				$ret = $layerdb->execSQL($sql,4, 1);
 
-				# After delete trigger
-				# Derzeit steht der gelöschte Datensatz für after trigger nicht zur Verfügung.
-				# Wollte man das, müsste man den Datensatz vor dem Löschen abfragen und hier im 5. Parameter übergeben.
-				if (!empty($layer['trigger_function'])) {
-					$this->exec_trigger_function('AFTER', 'DELETE', $layer);
-				};
-
-				if ($ret[0]) {
-					$success = false;
+				if(!$ret[0]){
+					$result = pg_fetch_row($ret[1]);
+					if(pg_affected_rows($ret[1]) == 0){
+						$ret[0] = 1;
+						$success = false;
+					}
+					else{
+						# After delete trigger
+						# Derzeit steht der gelöschte Datensatz für after trigger nicht zur Verfügung.
+						# Wollte man das, müsste man den Datensatz vor dem Löschen abfragen und hier im 5. Parameter übergeben.
+						if (!empty($layer['trigger_function'])) {
+							$this->exec_trigger_function('AFTER', 'DELETE', $layer);
+						};
+					}
 				}
 			}
 		}
@@ -7516,7 +7516,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		if ($output) {
 			if($this->formvars['embedded'] == ''){
 				if($success == false){
-					showAlert('Löschen fehlgeschlagen');
+					showAlert('Löschen fehlgeschlagen.\n'.$result[0]);
 				}
 				else{
 					showAlert('Löschen erfolgreich');
@@ -7907,7 +7907,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					else{
 						$this->loadMap('DataBase');
 					}											
-					if($_SERVER['REQUEST_METHOD'] == 'GET')$this->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist          
+					if($saved_scale != NULL)$this->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
 					# zoomToMaxLayerExtent
 					if($this->formvars['zoom_layer_id'] != '')$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
 					# evtl. Zoom auf "Mutter-Layer"
@@ -8823,7 +8823,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->main='data_export.php';
     $saved_scale = $this->reduce_mapwidth(10);
 		$this->loadMap('DataBase');
-		if($_SERVER['REQUEST_METHOD'] == 'GET')$this->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
+		if($saved_scale != NULL)$this->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
     $this->epsg_codes = read_epsg_codes($this->pgdatabase);
 		$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
     $this->data_import_export = new data_import_export();
@@ -10450,19 +10450,24 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	function reduce_mapwidth($reduction){
 		# Diese Funktion reduziert die aktuelle Kartenbildbreite um $reduction Pixel, damit das Kartenbild in Fachschalen nicht zu groß erscheint. 
 		# Diese reduzierte Breite wird aber nicht in der Datenbank gespeichert, sondern gilt nur für den aktuellen Anwendungsfall.
-		# Außerdem wird der aktuelle Maßstab berechnet und zurückgeliefert (er wird berechnet, weil ein loadmap() ja noch nicht aufgerufen wurde). 
-		# Mit diesem Maßstab kann dann einmal beim ersten Aufruf der Fachschale nach dem loadmap() der Extent wieder so angepasst werden, dass der ursprüngliche Maßstab erhalten bleibt.
-		# Dieser Extent wird wiederum in der Datenbank gespeichert, deswegen darf das auch nur einmal gemacht werden.
+		# Außerdem wird bei Bedarf der aktuelle Maßstab berechnet und zurückgeliefert (er wird berechnet, weil ein loadmap() ja noch nicht aufgerufen wurde). 
+		# Mit diesem Maßstab kann dann einmal beim ersten Aufruf der Fachschale von der Hauptkarte aus nach dem loadmap() der Extent wieder so angepasst werden, dass der ursprüngliche Maßstab erhalten bleibt.
+		# Dieser verkleinerte Extent wird wiederum in der Datenbank gespeichert. In der Datenbank steht dann also weiterhin die ursprüngliche Kartenbildgröße und der (dazu eigentlich nicht passende) in der Breite verkleinerte Extent.
+		# Damit der Extent aber nur dann angepasst wird, wenn es notwendig ist (nämlich wenn man von der Hauptkarte kommt), wird der Maßstab nur berechnet, wenn Kartenbildgröße und Extent zusammenpassen.
+		# Am "Nichtzusammenpassen" von Kartenbildgröße und Extent wird also erkannt, dass der Extent schon einmal verkleinert wurde.
 		$width = $this->user->rolle->nImageWidth;
-		#$pixelsize = ($this->user->rolle->oGeorefExt->maxx - $this->user->rolle->oGeorefExt->minx)/($width-1);		# das width - 1 kommt daher, weil der Mapserver das auch so macht
-		#$scale = $pixelsize * 96 / 0.0254;
-
-		$center_y = ($this->user->rolle->oGeorefExt->maxy + $this->user->rolle->oGeorefExt->miny) / 2;
-		if($this->user->rolle->epsg_code == 4326){$unit = MS_DD;} else {$unit = MS_METERS;}
-		$md = ($width-1)/(96 * InchesPerUnit($unit, $center_y));
-		$gd = $this->user->rolle->oGeorefExt->maxx - $this->user->rolle->oGeorefExt->minx;
-		$scale = $gd/$md;
-		
+		$height = $this->user->rolle->nImageHeight;
+		$extentwidth = $this->user->rolle->oGeorefExt->maxx - $this->user->rolle->oGeorefExt->minx;
+		$extentheight = $this->user->rolle->oGeorefExt->maxy - $this->user->rolle->oGeorefExt->miny;
+		$ratio_image = round($width/$height, 2);
+		$ratio_extent = round($extentwidth/$extentheight, 2);
+		if($ratio_image == $ratio_extent){
+			$center_y = ($this->user->rolle->oGeorefExt->maxy + $this->user->rolle->oGeorefExt->miny) / 2;
+			if($this->user->rolle->epsg_code == 4326){$unit = MS_DD;} else {$unit = MS_METERS;}
+			$md = ($width-1)/(96 * InchesPerUnit($unit, $center_y));
+			$gd = $this->user->rolle->oGeorefExt->maxx - $this->user->rolle->oGeorefExt->minx;
+			$scale = $gd/$md;
+		}			
 		$width = $width - $reduction;
 		if($this->user->rolle->hideMenue == 1){$width = $width - 195;}
 		if($this->user->rolle->hideLegend == 1){$width = $width - 254;}
@@ -11002,8 +11007,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
             } # end of default case
           } # end of switch for type
 					if($eintrag !== NULL){
-						$updates[$layer_id][$tablename][$oid]['eintrag'][] = $eintrag;
-						$updates[$layer_id][$tablename][$oid]['attributename'][] = $attributname;
+						$updates[$layer_id][$tablename][$oid][$attributname] = $eintrag;
 					}          
         }
       }
@@ -11026,8 +11030,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					if ($old != '' AND $old != $eintrag) {
 						$this->deleteDokument($old);
 					}
-					$updates[$attr_oid['layer_id']][$attr_oid['tablename']][$attr_oid['oid']]['eintrag'][] = $eintrag;
-					$updates[$attr_oid['layer_id']][$attr_oid['tablename']][$attr_oid['oid']]['attributename'][] = $attr_oid['attributename'];
+					$updates[$attr_oid['layer_id']][$attr_oid['tablename']][$attr_oid['oid']][$attr_oid['attributename']] = $eintrag;
 				} # ende von Datei wurde erfolgreich in Datenverzeichnis kopiert
 				else {
 					echo '<br>Datei: '.$_files[$form_fields[$i]]['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
@@ -11037,15 +11040,17 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		if($updates != NULL){
 			foreach($updates as $layer_id => $layer){
 				foreach($layer as $tablename => $table){
-					foreach($table as $oid => $row){
-						if(count($row['attributename']) > 0){
+					foreach($table as $oid => $attributes){
+						if(count($attributes) > 0){
 							if(!$layerset[$layer_id][0]['maintable_is_view'])$sql = "LOCK TABLE ".$tablename." IN SHARE ROW EXCLUSIVE MODE;";
 							$sql .= "UPDATE ".$tablename." SET ";
-							for($i = 0; $i < count($row['attributename']); $i++){
+							$i = 0;
+							foreach($attributes as $attribute => $value){
 								if($i > 0)$sql .= ', ';
-								$sql .= $row['attributename'][$i]." = ";
-								if($row['eintrag'][$i] == 'NULL')$sql .= 'NULL';
-								else $sql .= "'".$row['eintrag'][$i]."'";
+								$sql .= $attribute." = ";
+								if($value == 'NULL')$sql .= 'NULL';
+								else $sql .= "'".$value."'";
+								$i++;
 							}
 							$sql .= " WHERE oid = ".$oid;
 							#if($filter != ''){							# erstmal wieder rausgenommen, weil der Filter sich auf Attribute beziehen kann, die zu anderen Tabellen gehören
@@ -11066,14 +11071,13 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 									$ret[0] = 1;
 									$success = false;
 								}
-							}
-							else {
-								# After Update trigger
-								if (!empty($layer['trigger_function'])) {
-									$this->exec_trigger_function('AFTER', 'UPDATE', $layerset[$layer_id], $oid);
+								else{
+									# After Update trigger
+									if (!empty($layer['trigger_function'])){
+										$this->exec_trigger_function('AFTER', 'UPDATE', $layerset[$layer_id], $oid);
+									}
 								}
 							}
-
 						}
 					}
 				}
@@ -13910,7 +13914,7 @@ class db_mapObj{
 		if(strtolower(substr($option, 0, 6)) == 'select'){		// ist im Optionenfeld eine SQL-Abfrage definiert, diese ausführen und mit dem Ergebnis den Dokumentenpfad erweitern
 			$sql = $option;
 			for($a = 0; $a < count($attributenames); $a++){
-				$sql = str_replace('$'.$attributenames[$a], $attributevalues[$a], $sql);
+				if($attributenames[$a] != '')$sql = str_replace('$'.$attributenames[$a], $attributevalues[$a], $sql);
 			}
 			$ret = $layerdb->execSQL($sql,4, 1);
 			$dynamic_path = pg_fetch_row($ret[1]);

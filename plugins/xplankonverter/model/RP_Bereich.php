@@ -5,7 +5,7 @@
 
 class RP_Bereich extends PgObject {
 
-  static $schema = 'gml_classes';
+  static $schema = 'xplan_gml';
   static $tableName = 'rp_bereich';
 
   function RP_Bereich($gui) {

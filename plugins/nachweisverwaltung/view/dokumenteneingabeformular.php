@@ -2,8 +2,12 @@
 <script type="text/javascript">
 <!--
 
-function save(){
+function save(){	
 	document.GUI.result2.value = '';
+	if(document.getElementsByName('art')[3].checked==true && document.GUI.andere_art.value == ''){
+		alert('Keine Dokumentart ausgewählt.');
+		return;
+	}
 	if(document.GUI.newpathwkt.value == ''){
 		if(document.GUI.newpath.value == ''){
 			alert('Geben Sie ein Polygon an.');

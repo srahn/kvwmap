@@ -35,10 +35,16 @@ public static	function find_by_id($gui, $by, $id) {
 	* Tabelle rp_breich2rp_objekt zusammen mit den gml_id's der erzeugten
 	* XPlan GML Objekte eingetragen.
 	*/
-	function convert() {
-		$sql = $this->get('sql');
-    $query = pg_query($this->database->dbConn, $sql);
+	function convert($konvertierung_id) {
+		$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'sql_ausfuehrbar');
+		$validierung->konvertierung_id = $konvertierung_id;
+		$result = @pg_query(
+			$this->database->dbConn,
+			$this->get_convert_sql($konvertierung_id)
+		);
+		$validierung->sql_ausfuehrbar($result, $this->get('id'));
 
+		/*
 		foreach(pg_fetch_all($query) AS $object_gml_id) {
 			if ($this->get('bereich_gml_id') != '') {
 				$sql = "
@@ -49,7 +55,49 @@ public static	function find_by_id($gui, $by, $id) {
 						rp_bereich_gml_id = '" . $this->get('bereich_gml_id') . "'
 				";
 			}
+		}*/
+	}
+
+	function get_convert_sql($konvertierung_id) {
+		if ($this->debug) echo '<p>Konvertiere sql: ' . $this->get('sql');
+		$sql = strtolower($this->get('sql'));
+		if ($this->debug) echo '<p>sql0: ' . $sql;
+		$sql = substr_replace(
+			$sql,
+			'(konvertierung_id, ',
+			strpos($sql, '('),
+			strlen('(')
+		);
+		if ($this->debug) echo '<p>sql1: ' . $sql;
+		
+		$sql = str_replace(
+			'select',
+			"select {$konvertierung_id},",
+			$sql
+		);
+		if ($this->debug) echo '<p>sql2: ' . $sql;
+
+		if ($this->get('bereiche') != '') {
+			$sql = substr_replace(
+				$sql,
+				' (gehoertzurp_bereich, ',
+				strpos($sql, ' ('),
+				strlen(' (')
+			);
+			if ($this->debug) echo '<p>sql3: ' . $sql;
+			
+			$sql = str_replace(
+				'select',
+				"select '{$this->get('bereiche')}',",
+				$sql
+			);
+			if ($this->debug) echo '<p>sql4: ' . $sql;
 		}
+
+		$sql = "SET search_path=xplan_gml, xplan_shapes_{$konvertierung_id}; {$sql}";
+
+		if ($this->debug) echo '<br>nach sql: ' . $sql;
+		return $sql;
 	}
 
 	function gml_layer_exists() {

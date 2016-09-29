@@ -12,9 +12,21 @@ include(PLUGINS . 'xplankonverter/model/RP_Bereich.php');
 include(PLUGINS . 'xplankonverter/model/konvertierung.php');
 include(PLUGINS . 'xplankonverter/model/regel.php');
 include(PLUGINS . 'xplankonverter/model/shapefiles.php');
-include(PLUGINS . 'xplankonverter/model/validator.php');
+include(PLUGINS . 'xplankonverter/model/validierung.php');
+include(PLUGINS . 'xplankonverter/model/validierungsergebnis.php');
 include(PLUGINS . 'xplankonverter/model/xplan.php');
 
+/**
+* Anwendungsfälle
+* show_elements
+* xplankonverter_shapefiles_index
+* xplankonverter_shapefiles_delete
+* xplankonverter_konvertierung_status
+* xplankonverter_konvertierung
+* xplankonverter_gml_generierenxplan
+* konverter_gml_ausliefernxplan
+* konverter_konvertierung_loeschen
+*/
 switch($this->go){
 
 	case 'show_elements':
@@ -339,53 +351,50 @@ switch($this->go){
     echo json_encode($response);
   } break;
 
-  case 'xplankonverter_konvertierung_konvertieren': {
-		$this->main = '../../plugins/xplankonverter/view/validation_result.php';
-		$this->output();
-  } break;
-
-  case 'xplankonverter_konvertierung_validate': {
-  // TODO: remove
-sleep(5);
-		$response = array();
-		header('Content-Type: application/json');
+  case 'xplankonverter_konvertierung': {
 		if ($this->formvars['konvertierung_id'] == '') {
-			$response['success'] = false;
-			$response['msg'] = 'Konvertierung wurde nicht angegeben';
-			echo json_encode($response);
-			return;
+			$this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
+			$this->main = 'Hinweis.php';
 		}
-		$this->konvertierung = new Konvertierung($this);
-		$this->konvertierung->find_by('id', $this->formvars['konvertierung_id']);
+		else {
+			$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
+			if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) {
+				$this->Fehlermeldung = "Der Zugriff auf den Anwendungsfall ist nicht erlaubt.<br>
+					Die Konvertierung mit der ID={$this->konvertierung->get('id')} gehört zur Stelle ID= {$this->konvertierung->get('stelle_id')}<br>
+					Sie befinden sich aber in Stelle ID= {$this->Stelle->id}<br>
+					Melden Sie sich mit einem anderen Benutzer an.";
+			}
+			else {
+				$this->konvertierung->reset_mapping();
+				$this->konvertierung->mapping();
+				# Validierungsergebnisse anzeigen.
+				$this->main = '../../plugins/xplankonverter/view/validierungsergebnisse.php';
+			}
+		}
+		$this->output();
+		/*
+			$this->converter = new Converter($this->pgdatabase, $this->pgdatabase);
+			$this->converter->gmlfeatures_loeschen($this->formvars['konvertierung_id']);
+			$this->converter->regeln_anwenden($this->formvars['konvertierung_id']);
 
-		if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id')))
-			return;
-
-		// do the validation
-		$validator = new Validator();
-		$validator->validateKonvertierung(
-				$this->konvertierung,
-				function() { // Validation successful
-					$this->konvertierung->set('status', Konvertierung::$STATUS['KONVERTIERUNG_OK']);
-					$this->konvertierung->update();
-					$response['success'] = true;
-					$response['msg'] = 'Konvertierung erfolgreich ausgeführt.';
-					echo json_encode($response);
-				},
-				function($error) { // Validation failed
-					$this->konvertierung->set('status', Konvertierung::$STATUS['KONVERTIERUNG_ERR']);
-					$this->konvertierung->update();
-					$response['success'] = false;
-					$response['msg'] = 'Bei der Validierung ist ein Fehler aufgetreten: '.$error;
-					echo json_encode($response);
-				}
-		);
-	} break;
-
-	case 'xplankonverter_regeln_anwenden': {
-		include(PLUGINS . 'xplankonverter/model/converter.php');
-// TODO: remove
-sleep(5);
+				$validator = new Validator();
+				$validator->validateKonvertierung(
+						$this->konvertierung,
+						function() { // Validation successful
+							$this->konvertierung->set('status', Konvertierung::$STATUS['KONVERTIERUNG_OK']);
+							$this->konvertierung->update();
+							$response['success'] = true;
+							$response['msg'] = 'Konvertierung erfolgreich ausgeführt.';
+							echo json_encode($response);
+						},
+						function($error) { // Validation failed
+							$this->konvertierung->set('status', Konvertierung::$STATUS['KONVERTIERUNG_ERR']);
+							$this->konvertierung->update();
+							$response['success'] = false;
+							$response['msg'] = 'Bei der Validierung ist ein Fehler aufgetreten: '.$error;
+							echo json_encode($response);
+						}
+				);
 		$response = array();
 		header('Content-Type: application/json');
 		if ($this->formvars['konvertierung_id'] == '') {
@@ -409,6 +418,8 @@ sleep(5);
 		$response['msg'] = 'Regeln erfolgreich angewendet.';
 		header('Content-Type: application/json');
 		echo json_encode($response);
+	} break;
+				*/
 	} break;
 
 	case 'xplankonverter_gml_generieren' : {

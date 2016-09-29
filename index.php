@@ -5,7 +5,7 @@ session_start();
 # kvwmap - Kartenserver für die Verwaltung raumbezogener Daten.   #
 # Lizenz                                                          #
 #                                                                 #
-# Copyright (C) 2008  Peter Korduan                               # 
+# Copyright (C) 2016  Peter Korduan                               # 
 #                                                                 #
 # This program is free software; you can redistribute it and/or   #
 # modify it under the terms of the GNU General Public License as  #

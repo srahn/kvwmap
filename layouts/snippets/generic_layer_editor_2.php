@@ -113,7 +113,7 @@
 							if($nl AND $attributes['labeling'][$j] != 1)$next_line .= $td; else $datapart .= $td;
 						}
 						if($attributes['labeling'][$j] == 1)$nl = true;										# Attributname soll oben stehen -> alle weiteren tds für die nächste Zeile aufsammeln
-						$td = '	<td class="gle_attribute_value"'; if($attributes['arrangement'][$j+1] != 1)$td .= 'colspan="20"'; $td .= '>';												
+						$td = '	<td width="20%" class="gle_attribute_value"'; if($attributes['arrangement'][$j+1] != 1)$td .= 'colspan="20"'; $td .= '>';												
 						$td.= 			attribute_value($this, $layer['Layer_ID'], $attributes, $j, $k, $layer['shape'][$k], $size, $select_width, $this->user->rolle->fontsize_gle);
 						$td.= '	</td>';
 						if($nl)$next_line .= $td; else $datapart .= $td;
