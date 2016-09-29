@@ -352,6 +352,7 @@ switch($this->go){
   } break;
 
   case 'xplankonverter_konvertierung': {
+    // TODO: Stati setzen
 		if ($this->formvars['konvertierung_id'] == '') {
 			$this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
 			$this->main = 'Hinweis.php';
@@ -372,54 +373,6 @@ switch($this->go){
 			}
 		}
 		$this->output();
-		/*
-			$this->converter = new Converter($this->pgdatabase, $this->pgdatabase);
-			$this->converter->gmlfeatures_loeschen($this->formvars['konvertierung_id']);
-			$this->converter->regeln_anwenden($this->formvars['konvertierung_id']);
-
-				$validator = new Validator();
-				$validator->validateKonvertierung(
-						$this->konvertierung,
-						function() { // Validation successful
-							$this->konvertierung->set('status', Konvertierung::$STATUS['KONVERTIERUNG_OK']);
-							$this->konvertierung->update();
-							$response['success'] = true;
-							$response['msg'] = 'Konvertierung erfolgreich ausgeführt.';
-							echo json_encode($response);
-						},
-						function($error) { // Validation failed
-							$this->konvertierung->set('status', Konvertierung::$STATUS['KONVERTIERUNG_ERR']);
-							$this->konvertierung->update();
-							$response['success'] = false;
-							$response['msg'] = 'Bei der Validierung ist ein Fehler aufgetreten: '.$error;
-							echo json_encode($response);
-						}
-				);
-		$response = array();
-		header('Content-Type: application/json');
-		if ($this->formvars['konvertierung_id'] == '') {
-			$response['success'] = false;
-			$response['msg'] = 'Konvertierung wurde nicht angegeben';
-			echo json_encode($response);
-			return;
-		}
-		$this->konvertierung = new Konvertierung($this);
-		$this->konvertierung->find_by('id', $this->formvars['konvertierung_id']);
-
-		if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id')))
-			return;
-
-		// do apply the rule set
-		$this->converter = new Converter($this->pgdatabase, $this->pgdatabase);
-		$this->converter->gmlfeatures_loeschen($this->formvars['konvertierung_id']);
-		$this->converter->regeln_anwenden($this->formvars['konvertierung_id']);
-
-		$response['success'] = true;
-		$response['msg'] = 'Regeln erfolgreich angewendet.';
-		header('Content-Type: application/json');
-		echo json_encode($response);
-	} break;
-				*/
 	} break;
 
 	case 'xplankonverter_gml_generieren' : {
@@ -444,21 +397,18 @@ switch($this->go){
 					// XPlan-GML ausgeben
 					$this->gml_builder = new Gml_builder($this->pgdatabase);
 					$plan = RP_Plan::find_by_id($this,'konvertierung_id', $this->konvertierung->get('id'));
-					//$bereiche = new RP_Bereich($this);
-					//$bereiche->find_by('gehoertzuplan', $this->plan->get('gml_id'));
-					//$this->plan->bereiche = $bereiche;
-//					$this->gml_builder->build_gml($this->konvertierung, $plan);
-if (!$this->gml_builder->build_gml($this->konvertierung, $plan)){
-					// Status setzen
-					$this->konvertierung->set('status', Konvertierung::$STATUS['GML_ERSTELLUNG_ERR']);
-					$this->konvertierung->update();
 
-					$response['success'] = false;
-					$response['msg'] = 'Bei der GML-Generierung ist ein Fehler aufgetreten.';
-      		header('Content-Type: application/json');
-      		echo json_encode($response);
-      		break;
-}
+					if (!$this->gml_builder->build_gml($this->konvertierung, $plan)){
+  					// Status setzen
+  					$this->konvertierung->set('status', Konvertierung::$STATUS['GML_ERSTELLUNG_ERR']);
+  					$this->konvertierung->update();
+  					// Antwort absenden und case beenden
+  					$response['success'] = false;
+  					$response['msg'] = 'Bei der GML-Generierung ist ein Fehler aufgetreten.';
+        		header('Content-Type: application/json');
+        		echo json_encode($response);
+        		break;
+					}
 					$this->gml_builder->save(XPLANKONVERTER_SHAPE_PATH . $this->konvertierung->get('id') . '/xplan_' . $this->konvertierung->get('id') . '.gml');
 
 					// Status setzen
