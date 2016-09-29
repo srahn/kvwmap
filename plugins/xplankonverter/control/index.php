@@ -367,59 +367,14 @@ switch($this->go){
 			else {
 				$this->konvertierung->reset_mapping();
 				$this->konvertierung->mapping();
+				$this->konvertierung->set_status(
+					($this->konvertierung->validierung_erfolgreich() ? 'Konvertierung abgeschlossen' : 'Konvertierung abgebrochen')
+				);
 				# Validierungsergebnisse anzeigen.
 				$this->main = '../../plugins/xplankonverter/view/validierungsergebnisse.php';
 			}
 		}
 		$this->output();
-		/*
-			$this->converter = new Converter($this->pgdatabase, $this->pgdatabase);
-			$this->converter->gmlfeatures_loeschen($this->formvars['konvertierung_id']);
-			$this->converter->regeln_anwenden($this->formvars['konvertierung_id']);
-
-				$validator = new Validator();
-				$validator->validateKonvertierung(
-						$this->konvertierung,
-						function() { // Validation successful
-							$this->konvertierung->set('status', Konvertierung::$STATUS['KONVERTIERUNG_OK']);
-							$this->konvertierung->update();
-							$response['success'] = true;
-							$response['msg'] = 'Konvertierung erfolgreich ausgeführt.';
-							echo json_encode($response);
-						},
-						function($error) { // Validation failed
-							$this->konvertierung->set('status', Konvertierung::$STATUS['KONVERTIERUNG_ERR']);
-							$this->konvertierung->update();
-							$response['success'] = false;
-							$response['msg'] = 'Bei der Validierung ist ein Fehler aufgetreten: '.$error;
-							echo json_encode($response);
-						}
-				);
-		$response = array();
-		header('Content-Type: application/json');
-		if ($this->formvars['konvertierung_id'] == '') {
-			$response['success'] = false;
-			$response['msg'] = 'Konvertierung wurde nicht angegeben';
-			echo json_encode($response);
-			return;
-		}
-		$this->konvertierung = new Konvertierung($this);
-		$this->konvertierung->find_by('id', $this->formvars['konvertierung_id']);
-
-		if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id')))
-			return;
-
-		// do apply the rule set
-		$this->converter = new Converter($this->pgdatabase, $this->pgdatabase);
-		$this->converter->gmlfeatures_loeschen($this->formvars['konvertierung_id']);
-		$this->converter->regeln_anwenden($this->formvars['konvertierung_id']);
-
-		$response['success'] = true;
-		$response['msg'] = 'Regeln erfolgreich angewendet.';
-		header('Content-Type: application/json');
-		echo json_encode($response);
-	} break;
-				*/
 	} break;
 
 	case 'xplankonverter_gml_generieren' : {

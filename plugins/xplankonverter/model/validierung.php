@@ -52,13 +52,13 @@ class Validierung extends PgObject {
 		$validierung->delete_by($by, $id);
 	}
 
-	function regel_existiert($num_regeln) {
+	function regel_existiert($regeln) {
 		$validierungsergebnis = new Validierungsergebnis($this->gui);
 		$validierungsergebnis->create(
 			array(
 				'konvertierung_id' => $this->konvertierung_id,
 				'validierung_id' => $this->get('id'),
-				'status' => ($num_regeln == 0 ? 'Warung' : 'Erfolg'),
+				'status' => (count($regeln) == 0 ? 'Warung' : 'Erfolg'),
 				'msg' => 'Es sind Regeln zur Konvertierung vorhanden.'
 			)
 		);

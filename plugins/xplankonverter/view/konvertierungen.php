@@ -150,7 +150,7 @@
                   || row.status == "<?php echo Konvertierung::$STATUS['IN_KONVERTIERUNG']; ?>"
                   || row.status == "<?php echo Konvertierung::$STATUS['KONVERTIERUNG_ERR']; ?>"
                   || row.status == "<?php echo Konvertierung::$STATUS['IN_GML_ERSTELLUNG']; ?>";
-    output += '<a title="Konvertierung durchführen & validieren" class="btn btn-link btn-xs xpk-func-btn' + (funcIsDisabled ? disableFrag : '') + '" href="index.php?go=xplankonverter_konvertierung_konvertieren&konvertierung_id=' + value + '"><i class="fa fa-lg fa-cogs"></i></a>';
+    output += '<a title="Konvertierung durchführen & validieren" class="btn btn-link btn-xs xpk-func-btn' + (funcIsDisabled ? disableFrag : '') + '" href="index.php?go=xplankonverter_konvertierung&konvertierung_id=' + value + '"><i class="fa fa-lg fa-cogs"></i></a>';
 
     // GML-Erzeugen
     funcIsDisabled = row.status != "<?php echo Konvertierung::$STATUS['KONVERTIERUNG_OK']; ?>"
