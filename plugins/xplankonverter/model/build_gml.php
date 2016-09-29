@@ -106,15 +106,15 @@ class Gml_builder {
     # XPlan XSD's sind derzeit unter: http://xplan-raumordnung.de/devk/model/2016-05-06_XSD/ hinterlegt
     fwrite($this->tmpFile,
       "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>\n".
-      "<XPlanAuszug xmlns=\"{XPLAN_NS_URI}\"\n".
+      "<XPlanAuszug xmlns=\"".XPLAN_NS_URI."\"\n".
       "  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n".
       "  xmlns:wfs=\"http://www.opengis.net/wfs\"\n".
       "  xmlns:gml=\"http://www.opengis.net/gml\"\n".
       "  xmlns:xlink=\"http://www.w3.org/1999/xlink\"\n".
-      XPLAN_NS_PREFIX==""?"":
-      "  xmlns:".XPLAN_NS_PREFIX."=\"{XPLAN_NS_URI}\"\n".
-      "  xmlns:".RPLAN_NS_PREFIX."=\"http://xplan-raumordnung.de/model/xplangml/raumordnungsmodell\"\n".
-      "  xsi:schemaLocation=\"{XPLAN_NS_URI} {XPLAN_NS_SCHEMA_LOCATION}\"\n".
+      (XPLAN_NS_PREFIX==""
+          ? ""
+          : "  xmlns:".XPLAN_NS_PREFIX."=\"".XPLAN_NS_URI."\"\n").
+      "  xsi:schemaLocation=\"".XPLAN_NS_URI." ".XPLAN_NS_SCHEMA_LOCATION."\"\n".
       ">\n".
 
     # TODO: <boundedBy> sollte für jeden Plan definiert oder festgehalten werden,
