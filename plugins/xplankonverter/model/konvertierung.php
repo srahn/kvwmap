@@ -225,6 +225,47 @@ class Konvertierung extends PgObject {
 		";
 		return pg_num_rows(pg_query($this->database->dbConn, $sql)) == 0;
 	}
+
+	/*
+	* Entfernt alles was mit der Konvertierung zusammenhängt und
+	* löscht sich am Ende selbst.
+	*/
+	function destroy() {
+		# Lösche gml-Datei
+		$gml_file = new gml_file(XPLANKONVERTER_SHAPE_PATH . $this->get('id') . '/xplan_' . $this->get('id') . '.gml');
+		if ($gml_file->exists()) {
+			$msg = "\nLösche gml file: ". $gml_file->filename;
+			$gml_file->delete();
+		}
+
+		# Lösche Regeln, die direkt zur Konvertierung gehören
+		$regeln = array();
+		$regel = new Regel($this->gui);
+		$regeln = $regel->find_where("
+			konvertierung_id = {$this->get('id')} AND
+			bereich_gml_id IS NULL
+		");
+		foreach($regeln AS $regel) {
+			$regel->destroy();
+		}
+
+		# Lösche Plan der Konvertierung
+		# Lösche Plan
+		$plan = $konvertierung->get_plan();
+		$msg .= "\nRP Plan " . $plan->get('name') . ' gelöscht.';
+		$plan->destroy();
+
+		# Lösche GML-Layer Gruppe
+		$konvertierung->delete_layer_group('GML');
+	
+		# Lösche Shapes
+		#$shapeFile->deleteDataTable();
+		#$shapeFile->delete();
+
+		# Lösche Shape Layer Gruppe
+	}
+
+
 }
 
 ?>

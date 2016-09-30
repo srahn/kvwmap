@@ -523,9 +523,9 @@ FROM
 				END   AS numeric_precision,
 				CASE 
 				    WHEN atttypid IN (21, 23, 20) THEN 0
-				    WHEN atttypid IN (1700) THEN            
+				    WHEN atttypid IN (1700) THEN
 					CASE 
-					    WHEN atttypmod = -1 THEN null       
+					    WHEN atttypmod = -1 THEN null
 					    ELSE (atttypmod - 4) & 65535
 					END
 				       ELSE null
@@ -542,7 +542,7 @@ FROM
 				pg_index i ON i.indrelid = c.oid AND a.attnum = ANY(i.indkey)	LEFT JOIN 
 				pg_catalog.pg_attrdef ad ON a.attrelid = ad.adrelid AND ad.adnum = a.attnum
 			WHERE
-				ns.nspname = '".$schema."' AND
+				ns.nspname IN ('" .  implode("','", array_map(function($schema) { return trim($schema); }, explode(',', $schema)))  .  "') AND
 				c.relname = '".$table."' AND
 				".$and_column."
 				a.attnum > 0

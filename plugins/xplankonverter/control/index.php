@@ -452,45 +452,9 @@ if (!$this->gml_builder->build_gml($this->konvertierung, $plan)){
 	} break;
 
 	case 'xplankonverter_konvertierung_loeschen' : {
-		# Dieser ganze case kann durchgeführt werden durch das Löschen der Konvertierung mit den GLE Funktionen und
-		# dem after delete Trigger. (siehe trigger_function handle_konvertierung in control/kvwmap.php)
-		$konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
-
-		# Lösche gml-Datei
-		$gml_file = new gml_file(XPLANKONVERTER_SHAPE_PATH . $konvertierung->get('id') . '/xplan_' . $konvertierung->get('id') . '.gml');
-		if ($gml_file->exists()) {
-			$msg = "\nLösche gml file: ". $gml_file->filename;
-			$gml_file->delete();
-		}
-
-		# Lösche Regeln
-		$regeln = $konvertierung->getRegeln();
-		foreach($regeln AS $regel) {
-			$msg .= "\nLösche Regel ". $regel->get('name') . ' für Klasse ' . $regel->get('class_name');
-		}
-		# Lösche Layer
-		# Lösche gml Layer
-		# Lösche gml Layer Gruppe
-		# Lösche shape Layer
-
-		# Lösche Shapes
-		#$shapeFile->deleteDataTable();
-		#$shapeFile->delete();
-		# Lösche Shape Layer Gruppe
-
-		# Lösche Bereiche
-		# Lösche Plan
-		$plan = RP_Plan::find_by_id($this, 'konvertierung_id', $konvertierung->get('id'));
-		$msg .= "\nRP Plan " . $plan->get('name') . ' gelöscht.';
-		$plan->delete();
-
-		# Lösche Konvertierung
-		$konvertierung->delete();
-
-
 		$response = array(
-				'success' => true,
-				'msg' => 'Konvertierung erfolgreich gelöscht. ' . $msg
+			'success' => $this->layer_Datensaetze_loeschen(false),
+			'msg' => 'Konvertierung erfolgreich gelöscht. ' . $msg
 		);
 		header('Content-Type: application/json');
 		echo json_encode($response);
