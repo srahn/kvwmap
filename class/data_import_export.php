@@ -720,6 +720,9 @@ class data_import_export {
 							}
 						}
 					}
+					if($attributes['form_element_type'][$j] == 'Autovervollständigungsfeld'){
+						$value = $attributes['enum_output'][$j][$i];
+					}
 					if(in_array($attributes['type'][$j], array('numeric', 'float4', 'float8'))){
 						$value = str_replace('.', ",", $value);			# Excel-Datumsproblem
 					}
@@ -852,6 +855,7 @@ class data_import_export {
 		foreach($this->attributes['all_table_names'] as $tablename){
 			if(($tablename == $layerset[0]['maintable']) AND $this->attributes['oids'][$j]){		# hat Haupttabelle oids?
 				$pfad = $this->attributes['table_alias_name'][$tablename].'.oid AS '.$tablename.'_oid, '.$pfad;
+				if($groupby != '')$groupby .= ','.$this->attributes['table_alias_name'][$tablename].'.oid';
 			}
 			$j++;
 		}

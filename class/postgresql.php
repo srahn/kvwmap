@@ -744,7 +744,7 @@ FROM
 	      }
 	      else{ # 'irgendein String' as ...
 	        $fieldname = explode('.', $explosion[0]);
-	        if(strpos($fieldname[count($fieldname)-1], "'") !== false){
+					if(strtolower($explosion[0]) == 'case' OR strpos($fieldname[count($fieldname)-1], "'") !== false){
 	          $name_pair['no_real_attribute'] = true;
 	        }
 	        else{		# tabellenname.attributname
@@ -770,6 +770,7 @@ FROM
       $tableexplosion = explode(' ', trim($tables[$i]));
       if(count($tableexplosion) > 1){
 	      for($j = 0; $j < count($tableexplosion); $j++){
+					if($found)return $tablealias;
 	      	if($tablename == $tableexplosion[$j]){
 	      		if(strtolower($tableexplosion[$j+1]) == 'as'){			# Umbenennung mit AS
 	      			$found = true;

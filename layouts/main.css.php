@@ -200,6 +200,24 @@ a.metalink {
 	color: black; 
 }
 
+a.visiblelayerlink {
+	color: black;
+	cursor: context-menu;
+}
+
+a.boldhover:hover{
+	text-shadow: 0 0 0 rgba(0,0,0,0.8);
+}
+
+a.invisiblelayerlink {
+	color: gray;
+	cursor: context-menu;
+}
+
+a.invisiblelayerlink:hover{
+	color: gray;
+}
+
 
 .buttonlink{
 	height: 13px;
