@@ -153,6 +153,7 @@ function setlayers(selected_options){
 					</tr>
 			';
     	for($i = 0; $i < count($this->attributes); $i++){
+				if($this->attributes[$i] == NULL)continue;
 				if($this->attributes[$i]['type'] != 'geometry'){
 					echo '
 					<tr>

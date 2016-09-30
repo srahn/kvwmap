@@ -14249,6 +14249,7 @@ class db_mapObj{
   
 	function save_postgis_attributes($layer_id, $attributes, $maintable, $schema){
 		for($i = 0; $i < count($attributes); $i++){
+			if($attributes[$i] == NULL)continue;
 			if($attributes[$i]['nullable'] == '')$attributes[$i]['nullable'] = 'NULL';
 			if($attributes[$i]['length'] == '')$attributes[$i]['length'] = 'NULL';
 			if($attributes[$i]['decimal_length'] == '')$attributes[$i]['decimal_length'] = 'NULL';
