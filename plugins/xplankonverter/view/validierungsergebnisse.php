@@ -16,6 +16,23 @@ function validierung_msg_correcture_formatter(value, row) {
 		output += ' <a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=9&operator_id==&value_id=' + row.regel_id + '"><i class="fa fa-lg fa-pencil"></i></a>';
 	return output;
 }
+
+var styleMap = {
+  "Erfolg"      : "success",
+  "Warnung"     : "warning",
+  "Fehler"      : "danger",
+  "Information" : "info"
+}
+function validierungsergebnisseRowStyle(row, index){
+  return {
+    classes: styleMap[row.ergebnis_status]
+  };
+}
+function validierungsergebnisseRowAttribs(row, index){
+  return {
+    title : row.validierung_beschreibung
+  };
+}
 </script>
 <table
   id="validierungsergebnis_table"
@@ -33,6 +50,8 @@ function validierung_msg_correcture_formatter(value, row) {
   data-pagination="true"
   data-page-size="25"
   data-show-export="false"
+  data-row-style="validierungsergebnisseRowStyle"
+  data-row-attributes="validierungsergebnisseRowAttribs"
   data-export_types=['json', 'xml', 'csv', 'txt', 'sql', 'excel']
 >
   <thead>
