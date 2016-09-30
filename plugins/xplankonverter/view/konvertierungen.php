@@ -132,7 +132,7 @@
 
   // formatter functions
   function konvertierungFunctionsFormatter(value, row) {
-    var funcIsDisabled, funcIsInProgress
+    var funcIsDisabled, funcIsInProgress,
       disableFrag = ' disabled" onclick="return false';
     output = '<span class="btn-group" role="group" konvertierung_id="' + value + '">';
     // enabled by status of konvertierung

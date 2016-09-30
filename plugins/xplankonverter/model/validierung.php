@@ -31,7 +31,7 @@
 
 class Validierung extends PgObject {
 
-	
+
 	static $schema = 'xplankonverter';
 	static $tableName = 'validierungen';
 
@@ -72,7 +72,7 @@ class Validierung extends PgObject {
 					'konvertierung_id' => $this->konvertierung_id,
 					'validierung_id' => $this->get('id'),
 					'status' => 'Fehler',
-					'msg' => @pg_last_error($this->database->dbConn),
+					'msg' => str_replace("'","''",@pg_last_error($this->database->dbConn)),
 					'regel_id' => $regel_id
 				)
 			);

@@ -1,10 +1,10 @@
 <?php
 #############################
-# Klasse Konvertierung #
+# Klasse Regel #
 #############################
 
 class Regel extends PgObject {
-	
+
 	static $schema = 'xplankonverter';
 	static $tableName = 'regeln';
 
@@ -16,6 +16,7 @@ class Regel extends PgObject {
 			'Linien',
 			'Flächen'
 		);
+		#$this->debug = true;
 	}
 
 public static	function find_by_id($gui, $by, $id) {
@@ -69,7 +70,7 @@ public static	function find_by_id($gui, $by, $id) {
 			strlen('(')
 		);
 		if ($this->debug) echo '<p>sql1: ' . $sql;
-		
+
 		$sql = str_replace(
 			'select',
 			"select {$konvertierung_id},",
@@ -85,7 +86,7 @@ public static	function find_by_id($gui, $by, $id) {
 				strlen(' (')
 			);
 			if ($this->debug) echo '<p>sql3: ' . $sql;
-			
+
 			$sql = str_replace(
 				'select',
 				"select '{$this->get('bereiche')}',",
