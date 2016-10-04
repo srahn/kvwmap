@@ -720,20 +720,22 @@ class data_import_export {
 							}
 						}
 					}
-					if($attributes['form_element_type'][$j] == 'Autovervollständigungsfeld'){
-						$value = $attributes['enum_output'][$j][$i];
-					}
-					if(in_array($attributes['type'][$j], array('numeric', 'float4', 'float8'))){
-						$value = str_replace('.', ",", $value);			# Excel-Datumsproblem
-					}
-					if($attributes['type'][$j] == 'bool'){
-						$value = str_replace('t', "ja", $value);	
-						$value = str_replace('f', "nein", $value);
-					}
-					$value = str_replace(';', ",", $value);
-					if(strpos($value, '/') !== false OR strpos($value, chr(10)) !== false OR strpos($value, chr(13)) !== false){		# Excel-Datumsproblem oder Zeilenumbruch
-						$value = str_replace('"', "'", $value);
-						$value = '"'.$value.'"';
+					else{
+						if($attributes['form_element_type'][$j] == 'Autovervollständigungsfeld'){
+							$value = $attributes['enum_output'][$j][$i];
+						}
+						if(in_array($attributes['type'][$j], array('numeric', 'float4', 'float8'))){
+							$value = str_replace('.', ",", $value);			# Excel-Datumsproblem
+						}
+						if($attributes['type'][$j] == 'bool'){
+							$value = str_replace('t', "ja", $value);	
+							$value = str_replace('f', "nein", $value);
+						}
+						$value = str_replace(';', ",", $value);
+						if(strpos($value, '/') !== false OR strpos($value, chr(10)) !== false OR strpos($value, chr(13)) !== false){		# Excel-Datumsproblem oder Zeilenumbruch
+							$value = str_replace('"', "'", $value);
+							$value = '"'.$value.'"';
+						}
 					}
 	        $csv .= $value.';';
       	}
