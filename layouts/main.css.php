@@ -947,4 +947,5 @@ tbody.gle tr:hover {
 	vertical-align: top;
 	min-width: 85px;
 	max-width: 350px;
+	padding-right: 5px;
 }
