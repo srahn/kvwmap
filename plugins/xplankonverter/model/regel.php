@@ -173,6 +173,15 @@ public static	function find_by_id($gui, $by, $id) {
 			# Lösche Gruppe, wenn kein anderer Layer mehr drin ist
 		}
 	}
+
+	function destroy() {
+		echo 'destroy regel';
+		echo 'Lösche Layer';
+
+		# Frage ab ob es in der Gruppe der gml Layer einen Layer von class_name gibt
+		# der ansonsten von keiner anderen Regel verwendet wird und lösche diesen
+	}
+
 }
 
 ?>

@@ -134,7 +134,7 @@
   function konvertierungFunctionsFormatter(value, row) {
     var funcIsDisabled, funcIsInProgress,
       disableFrag = ' disabled" onclick="return false';
-    output = '<span class="btn-group" role="group" konvertierung_id="' + value + '">';
+    output = '<span class="btn-group" role="group" konvertierung_oid="' + row.konvertierungen_oid + '" konvertierung_id="' + value + '">';
     // enabled by status of konvertierung
     // Bearbeiten
     funcIsDisabled = row.status == "<?php echo Konvertierung::$STATUS['IN_GML_ERSTELLUNG']; ?>"
@@ -142,8 +142,7 @@
     output += '<a title="Konvertierung bearbeiten" class="btn btn-link btn-xs xpk-func-btn' + (funcIsDisabled ? disableFrag : '') + '" href="index.php?go=Layer-Suche_Suchen&selected_layer_id=8&operator_konvertierung_id==&value_konvertierung_id=' + value + '"><i class="fa fa-lg fa-pencil"></i></a>';
 
     // Shapefile upload
-    funcIsDisabled = row.status != "<?php echo Konvertierung::$STATUS['ERSTELLT']; ?>"
-                  && row.status != "<?php echo Konvertierung::$STATUS['IN_ERSTELLUNG']; ?>";
+    funcIsDisabled = false; //row.status != "<?php echo Konvertierung::$STATUS['ERSTELLT']; ?>";
     output += '<a title="Shapefiles bearbeiten" class="btn btn-link btn-xs  xpk-func-btn' + (funcIsDisabled ? disableFrag : '') + '" href="index.php?go=xplankonverter_shapefiles_index&konvertierung_id=' + value + '"><i class="fa fa-lg fa-upload"></i></a>';
 
     // Konvertieren und validieren
@@ -173,13 +172,15 @@
   }
 
   loescheKonvertierung = function(e) {
-    var konvertierung_id = $(e.target).parent().parent().attr('konvertierung_id');
+    var konvertierung_id = $(e.target).parent().parent().attr('konvertierung_id'),
+				konvertierung_oid = $(e.target).parent().parent().attr('konvertierung_oid');
     $(this).closest('tr').remove();
     result.text('Lösche Konvertierung für Id: ' + konvertierung_id);
     $.ajax({
-      url: 'index.php?go=xplankonverter_konvertierung_loeschen',
+      url: 'index.php?checkbox_names_<?php echo XPLANKONVERTER_KONVERTIERUNGEN_LAYER_ID; ?>=check;konvertierungen;konvertierungen;' + konvertierung_oid + '&check;konvertierungen;konvertierungen;' + konvertierung_oid + '=on',
       data: {
-        konvertierung_id: konvertierung_id
+				go: 'xplankonverter_konvertierung_loeschen',
+				chosen_layer_id: <?php echo XPLANKONVERTER_KONVERTIERUNGEN_LAYER_ID; ?>
       },
       success: function(response) {
         result.text(response.msg);
