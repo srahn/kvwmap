@@ -26,6 +26,7 @@ class Konvertierung extends PgObject {
 	}
 
 	public static	function find_by_id($gui, $by, $id) {
+			#echo '<br>find konvertierung by ' . $by . ' = ' . $id;
 			$konvertierung = new Konvertierung($gui);
 			$konvertierung->find_by($by, $id);
 			return $konvertierung;
@@ -111,6 +112,7 @@ class Konvertierung extends PgObject {
 	}
 
 	function set_status($new_status = '') {
+		#echo '<br>Setze status in Konvertierung.';
 		if ($new_status == '') {
 			$sql = "
 				SELECT DISTINCT
@@ -125,6 +127,7 @@ class Konvertierung extends PgObject {
 				WHERE
 					k.id = {$this->get('id')}
 			";
+			#echo '<br>Setze Status mit sql: ' . $sql;
 			$query = pg_query($this->database->dbConn, $sql);
 			$result = pg_fetch_assoc($query);
 			$plan_or_regel_assigned = $result['plan_or_regel_assigned'];

@@ -22,7 +22,7 @@ public static	function find_by_id($gui, $by, $id) {
 		#echo '<br>Class Regel function find_by ' . $by . ' ' . $id;
 		$regel = new Regel($gui);
 		$regel->find_by($by, $id);
-		$regel->konvertierung = Konvertierung::find_by_id($gui, 'id', $regel->get('konvertierung_id'));
+		$regel->konvertierung = $regel->get_konvertierung();
 		return $regel;
 	}
 
@@ -117,6 +117,45 @@ public static	function find_by_id($gui, $by, $id) {
 		return $layertyp;
 	}
 
+	function get_bereich() {
+		$bereich = new Bereich($this->gui);
+		return $bereich->find_by('gml_id', $this->get('bereich_gml_id'));
+	}
+
+	/*
+	* Funktion fragt die zur Regel gehöhrende Konvertierung ab
+	*/
+	function get_konvertierung() {
+		$konvertierung_id = $this->get('konvertierung_id');
+		if (!empty($this->get('konvertierung_id'))) {
+			#echo '<br>Regel gehört direkt zur Konvertierung: ' . $this->get('konvertierung_id');
+			$konvertierung = Konvertierung::find_by_id($this->gui, 'id', $this->get('konvertierung_id'));
+		}
+		else {
+			#echo '<br>Regel gehört über einen Bereich und Plan zur Konvertierung.';
+			$sql = "
+				SELECT
+					p.konvertierung_id
+				FROM
+					xplankonverter.regeln r JOIN
+					xplan_gml.rp_bereich b ON r.bereich_gml_id = b.gml_id JOIN
+					xplan_gml.rp_plan p ON p.gml_id::text = b.gehoertzuplan
+				WHERE
+					r.id = {$this->get('id')}
+			";
+			#echo '<br>SQL zum Abfragen der konvertierung_id der Regel: ' . $sql;
+			$result = pg_query($this->database->dbConn, $sql);
+			if (pg_num_rows($result) > 0) {
+				$row = pg_fetch_assoc($result);
+				$konvertierung = Konvertierung::find_by_id($this->gui, 'id', $row['konvertierung_id']);
+			}
+			else {
+				$konvertierung = null;
+			}
+		}
+		return $konvertierung;
+	}
+
 	function create_gml_layer() {
 		if (!$this->gml_layer_exists()) {
 			#echo '<br>Erzeuge Layer ' . $this->get('class_name') . ' in Gruppe' . $this->konvertierung->get('bezeichnung') . ' layertyp ' . $this->layertyp;
@@ -161,7 +200,7 @@ public static	function find_by_id($gui, $by, $id) {
 	function delete_gml_layer() {
 		if (!empty($this->layer_id)) {
 			# delete gml layer by konvertierung_id, name and geometrytype
-			echo 'Delete gml layer with layer_id: ' . $this->layer_id;
+			#echo 'Delete gml layer with layer_id: ' . $this->layer_id;
 
 			# Lösche Layer, wenn von keiner anderen Regel mehr verwendet
 			$this->gui->formvars['selected_layer_id'] = $layer_id;
@@ -174,11 +213,51 @@ public static	function find_by_id($gui, $by, $id) {
 	}
 
 	function destroy() {
-		echo 'destroy regel';
-		echo 'Lösche Layer';
+		#echo '<br>destroy regel';
 
 		# Frage ab ob es in der Gruppe der gml Layer einen Layer von class_name gibt
 		# der ansonsten von keiner anderen Regel verwendet wird und lösche diesen
+		$sql = "
+			SELECT
+				class_name
+			FROM
+				(
+					SELECT
+						rk.*
+					FROM
+						xplankonverter.konvertierungen k join
+						xplankonverter.regeln rk on k.id = rk.konvertierung_id
+					WHERE
+						k.id = 52
+					UNION
+					SELECT
+						rb.*
+					FROM
+						xplan_gml.rp_plan p JOIN
+						xplan_gml.rp_bereich b ON p.gml_id::text = b.gehoertzuplan JOIN
+						xplankonverter.regeln rb ON b.gml_id = rb.bereich_gml_id
+					WHERE
+						p.konvertierung_id = {$this->konvertierung->get('id')}
+				) regeln
+			WHERE
+				lower(class_name) = (
+					SELECT
+						lower(class_name)
+					from
+						xplankonverter.regeln
+					WHERE
+						id = {$this->get('id')}
+				) AND
+				id != {$this->get('id')}
+		";
+		#echo '<br>Gibt es weitere Regeln, die den selben Klassname verwenden?' . $sql;
+		if (pg_num_rows(pg_query($this->database->dbConn, $sql)) == 0) {
+			# Lösche Layer von class_name mit der entsprechenden Konvertierungs id
+			echo '<br>Lösche Layer mit class_name ' . $this->get('class_name') . ' mit der entsprechenden Konvertierungs id.' . $this->konvertierung->get('id');
+			##		$this->formvars['selected_layer_id'] = 
+			#		$this->LayerLoeschen();
+		}
+		$this->delete();
 	}
 
 }

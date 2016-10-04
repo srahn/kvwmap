@@ -6980,7 +6980,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         }
 	
 				$layerset[0]['sql'] = $sql;
-				#echo "Abfragestatement: ".$sql.$sql_order.$sql_limit;
+				#echo "<p>Abfragestatement: ".$sql.$sql_order.$sql_limit;
         $ret=$layerdb->execSQL('SET enable_seqscan=off;'.$sql.$sql_order.$sql_limit,4, 0);
         if(!$ret[0]){
           while ($rs=pg_fetch_assoc($ret[1])) {
@@ -7496,15 +7496,18 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 				if (!empty($layer['trigger_function'])) {
 					# Rufe Instead Delte trigger auf
+					#echo '<br>Rufe Instead Delete trigger auf.';
 					$trigger_result = $this->exec_trigger_function('INSTEAD', 'DELETE', $layer, $element[3]);
 				}
 
 				if ($trigger_result['executed']) {
+					#echo '<br>Delete Trigger Funktion wurde ausgeführt.';
 					# Instead Triggerfunktion wurde ausgeführt, übergebe Erfolgsmeldung
-					$success = $trigger_result['success'];
 					$result = array($trigger_result['message']);
+					$success = $trigger_result['success'];
 				}
 				else {
+					echo '<br>Delete Trigger Funktion wurde nicht ausgeführt.';
 					# Instead Triggerfuktion wurde nicht ausgeführt
 					# Delete the object regularly in database
 					$sql = "DELETE FROM ".$element[2]." WHERE oid = ".$element[3];

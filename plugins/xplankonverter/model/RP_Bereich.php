@@ -13,6 +13,12 @@ class RP_Bereich extends PgObject {
     $this->rp_objekte = array();
   }
 
+	public static	function find_by_id($gui, $by, $id) {
+		$rp_bereich = new RP_Bereich($gui);
+		$rp_bereich->find_by($by, $id);
+		return $rp_bereich;
+	}
+
   function holeObjekte($konvertierung_id) {
     $this->rp_objekte;
   }
