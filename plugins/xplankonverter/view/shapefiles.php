@@ -4,7 +4,7 @@
 <br>
 <script language="javascript" type="text/javascript">
   function shapeFileFunctionsFormatter(value, row) {
-    output = '<a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=10&operator_shapefile_id==&value_shapefile_id=' + value + '"><i class="fa fa-pencil"></i></a>&nbsp;&nbsp;';
+    output = '<a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<?php echo XPLANKONVERTER_SHAPEFILES_LAYER_ID; ?>&operator_shapefile_id==&value_shapefile_id=' + value + '"><i class="fa fa-pencil"></i></a>&nbsp;&nbsp;';
     output += '<a href="index.php?go=xplankonverter_shapefiles_delete&konvertierung_id=' + row.konvertierung_id + '&shapefile_id=' + row.shapefile_id + '&layer_id=' + row.layer_id + '"><i class="fa fa-trash"></i></a>&nbsp;';
     return output;
   }
@@ -62,13 +62,10 @@
   <input type="hidden" name="konvertierung_id" value="<?php echo $this->formvars['konvertierung_id']; ?>">
   <div class="file-upload">
     <input type="file" name="shape_files[]" multiple>
-    <select name="epsg_code">
-      <option value="25832" selected>25832</option>
-      <option value="25833">25833</option>
-      <option value="35833">35833</option>
-      <option value="31467">31467</option>
-      <option value="31468">31468</option>
-      <option value="31469">31469</option>
+		<select name="epsg_code"><?php
+			foreach($this->konvertierung->get_input_epgs_codes() AS $epsg_code) {
+				echo "<option value=\"{$epsg_code}\"" . ($this->konvertierung->get('input_epsg') == $epsg_code ? ' selected' : '') . ">{$epsg_code}</option>";
+			}?>
     </select>
     <input type="submit" value="Upload">
   </div>

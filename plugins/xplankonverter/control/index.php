@@ -12,9 +12,21 @@ include(PLUGINS . 'xplankonverter/model/RP_Bereich.php');
 include(PLUGINS . 'xplankonverter/model/konvertierung.php');
 include(PLUGINS . 'xplankonverter/model/regel.php');
 include(PLUGINS . 'xplankonverter/model/shapefiles.php');
-include(PLUGINS . 'xplankonverter/model/validator.php');
+include(PLUGINS . 'xplankonverter/model/validierung.php');
+include(PLUGINS . 'xplankonverter/model/validierungsergebnis.php');
 include(PLUGINS . 'xplankonverter/model/xplan.php');
 
+/**
+* Anwendungsfälle
+* show_elements
+* xplankonverter_shapefiles_index
+* xplankonverter_shapefiles_delete
+* xplankonverter_konvertierung_status
+* xplankonverter_konvertierung
+* xplankonverter_gml_generierenxplan
+* konverter_gml_ausliefernxplan
+* konverter_konvertierung_loeschen
+*/
 switch($this->go){
 
 	case 'show_elements':
@@ -242,6 +254,7 @@ switch($this->go){
 				$shapefile->deleteUploadFiles();
 				# Delete the record in postgres shapefile table (unregister for konverter)
 				$shapefile->delete();
+				$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
 				$this->main = '../../plugins/xplankonverter/view/shapefiles.php';
 			}
 		}
@@ -338,75 +351,36 @@ switch($this->go){
     echo json_encode($response);
   } break;
 
-  case 'xplankonverter_konvertierung_validate': {
-// TODO: remove
-sleep(5);
-		$response = array();
-		header('Content-Type: application/json');
+  case 'xplankonverter_konvertierung': {
+    // TODO: Stati setzen
 		if ($this->formvars['konvertierung_id'] == '') {
-			$response['success'] = false;
-			$response['msg'] = 'Konvertierung wurde nicht angegeben';
-			echo json_encode($response);
-			return;
+			$this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
+			$this->main = 'Hinweis.php';
 		}
-		$this->konvertierung = new Konvertierung($this);
-		$this->konvertierung->find_by('id', $this->formvars['konvertierung_id']);
-
-		if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id')))
-			return;
-
-		// do the validation
-		$validator = new Validator();
-		$validator->validateKonvertierung(
-				$this->konvertierung,
-				function() { // Validation successful
-					$this->konvertierung->set('status', Konvertierung::$STATUS['KONVERTIERUNG_OK']);
-					$this->konvertierung->update();
-					$response['success'] = true;
-					$response['msg'] = 'Konvertierung erfolgreich ausgeführt.';
-					echo json_encode($response);
-				},
-				function($error) { // Validation failed
-					$this->konvertierung->set('status', Konvertierung::$STATUS['KONVERTIERUNG_ERR']);
-					$this->konvertierung->update();
-					$response['success'] = false;
-					$response['msg'] = 'Bei der Validierung ist ein Fehler aufgetreten: '.$error;
-					echo json_encode($response);
-				}
-		);
-	} break;
-
-	case 'xplankonverter_regeln_anwenden': {
-		include(PLUGINS . 'xplankonverter/model/converter.php');
-// TODO: remove
-sleep(5);
-		$response = array();
-		header('Content-Type: application/json');
-		if ($this->formvars['konvertierung_id'] == '') {
-			$response['success'] = false;
-			$response['msg'] = 'Konvertierung wurde nicht angegeben';
-			echo json_encode($response);
-			return;
+		else {
+			$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
+			if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) {
+				$this->Fehlermeldung = "Der Zugriff auf den Anwendungsfall ist nicht erlaubt.<br>
+					Die Konvertierung mit der ID={$this->konvertierung->get('id')} gehört zur Stelle ID= {$this->konvertierung->get('stelle_id')}<br>
+					Sie befinden sich aber in Stelle ID= {$this->Stelle->id}<br>
+					Melden Sie sich mit einem anderen Benutzer an.";
+			}
+			else {
+				$this->konvertierung->reset_mapping();
+				$this->konvertierung->mapping();
+				$this->konvertierung->set_status(
+					($this->konvertierung->validierung_erfolgreich() ? 'Konvertierung abgeschlossen' : 'Konvertierung abgebrochen')
+				);
+				# Validierungsergebnisse anzeigen.
+				$this->main = '../../plugins/xplankonverter/view/validierungsergebnisse.php';
+			}
 		}
-		$this->konvertierung = new Konvertierung($this);
-		$this->konvertierung->find_by('id', $this->formvars['konvertierung_id']);
-
-		if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id')))
-			return;
-
-		// do apply the rule set
-		$this->converter = new Converter($this->pgdatabase, $this->pgdatabase);
-		$this->converter->gmlfeatures_loeschen($this->formvars['konvertierung_id']);
-		$this->converter->regeln_anwenden($this->formvars['konvertierung_id']);
-
-		$response['success'] = true;
-		$response['msg'] = 'Regeln erfolgreich angewendet.';
-		header('Content-Type: application/json');
-		echo json_encode($response);
+		$this->output();
 	} break;
 
 	case 'xplankonverter_gml_generieren' : {
 		include(PLUGINS . 'xplankonverter/model/build_gml.php');
+		include(PLUGINS . 'xplankonverter/model/TypeInfo.php');
 		$response = array();
 		if ($this->formvars['konvertierung_id'] == '') {
 			$response['success'] = false;
@@ -426,11 +400,18 @@ sleep(5);
 					// XPlan-GML ausgeben
 					$this->gml_builder = new Gml_builder($this->pgdatabase);
 					$plan = RP_Plan::find_by_id($this,'konvertierung_id', $this->konvertierung->get('id'));
-					//$bereiche = new RP_Bereich($this);
-					//$bereiche->find_by('gehoertzuplan', $this->plan->get('gml_id'));
-					//$this->plan->bereiche = $bereiche;
 
-					$this->gml_builder->build_gml($this->konvertierung, $plan);
+					if (!$this->gml_builder->build_gml($this->konvertierung, $plan)){
+  					// Status setzen
+  					$this->konvertierung->set('status', Konvertierung::$STATUS['GML_ERSTELLUNG_ERR']);
+  					$this->konvertierung->update();
+  					// Antwort absenden und case beenden
+  					$response['success'] = false;
+  					$response['msg'] = 'Bei der GML-Generierung ist ein Fehler aufgetreten.';
+        		header('Content-Type: application/json');
+        		echo json_encode($response);
+        		break;
+					}
 					$this->gml_builder->save(XPLANKONVERTER_SHAPE_PATH . $this->konvertierung->get('id') . '/xplan_' . $this->konvertierung->get('id') . '.gml');
 
 					// Status setzen
@@ -455,46 +436,23 @@ sleep(5);
 		echo json_encode($response);
 	} break;
 
+	case 'xplankonverter_gml_ausliefern' : {
+		if ($this->formvars['konvertierung_id'] == '') {
+		  echo 'Diese Link kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
+		  return;
+		}
+		$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
+		if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) return;
+
+		$filename = XPLANKONVERTER_SHAPE_PATH . $this->formvars['konvertierung_id'] . '/xplan_' . $this->formvars['konvertierung_id'] . '.gml';
+		header('Content-Type: text/xml; subtype="gml/3.3"');
+    echo fread(fopen($filename, "r"), filesize($filename));
+	} break;
+
 	case 'xplankonverter_konvertierung_loeschen' : {
-		# Dieser ganze case kann durchgeführt werden durch das Löschen der Konvertierung mit den GLE Funktionen und
-		# dem after delete Trigger. (siehe trigger_function handle_konvertierung in control/kvwmap.php)
-		$konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
-
-		# Lösche gml-Datei
-		$gml_file = new gml_file(XPLANKONVERTER_SHAPE_PATH . $konvertierung->get('id') . '/xplan_' . $konvertierung->get('id') . '.gml');
-		if ($gml_file->exists()) {
-			$msg = "\nLösche gml file: ". $gml_file->filename;
-			$gml_file->delete();
-		}
-
-		# Lösche Regeln
-		$regeln = $konvertierung->getRegeln();
-		foreach($regeln AS $regel) {
-			$msg .= "\nLösche Regel ". $regel->get('name') . ' für Klasse ' . $regel->get('class_name');
-		}
-		# Lösche Layer
-		# Lösche gml Layer
-		# Lösche gml Layer Gruppe
-		# Lösche shape Layer
-
-		# Lösche Shapes
-		#$shapeFile->deleteDataTable();
-		#$shapeFile->delete();
-		# Lösche Shape Layer Gruppe
-
-		# Lösche Bereiche
-		# Lösche Plan
-		$plan = RP_Plan::find_by_id($this, 'konvertierung_id', $konvertierung->get('id'));
-		$msg .= "\nRP Plan " . $plan->get('name') . ' gelöscht.';
-		$plan->delete();
-
-		# Lösche Konvertierung
-		$konvertierung->delete();
-
-
 		$response = array(
-				'success' => true,
-				'msg' => 'Konvertierung erfolgreich gelöscht. ' . $msg
+			'success' => $this->layer_Datensaetze_loeschen(false),
+			'msg' => 'Konvertierung erfolgreich gelöscht. ' . $msg
 		);
 		header('Content-Type: application/json');
 		echo json_encode($response);

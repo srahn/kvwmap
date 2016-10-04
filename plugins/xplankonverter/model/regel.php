@@ -1,10 +1,10 @@
 <?php
 #############################
-# Klasse Konvertierung #
+# Klasse Regel #
 #############################
 
 class Regel extends PgObject {
-	
+
 	static $schema = 'xplankonverter';
 	static $tableName = 'regeln';
 
@@ -16,6 +16,7 @@ class Regel extends PgObject {
 			'Linien',
 			'Flächen'
 		);
+		#$this->debug = true;
 	}
 
 public static	function find_by_id($gui, $by, $id) {
@@ -29,26 +30,75 @@ public static	function find_by_id($gui, $by, $id) {
 	/*
 	* Führt die in der Regel definierten SQL-Statements aus um
 	* Daten aus Shapefiles in die Tabellen der XPlan GML Datentabellen
-	* zu schreiben. Dabei wird jedem neu erzeugtem XPlan GML
-	* Objekt die Id der Konvertierung mitgegeben.
-	* Optional wird eine gml_id eines Bereiches mitgegeben, die in der
+	* zu schreiben. Dabei wird die im sql angegebene Id der Konvertierung
+	* für jedes RP_Objekt gesetzt.
+	* Wenn die Regel auch eine Bereich Id hat, wird diese in der
 	* Tabelle rp_breich2rp_objekt zusammen mit den gml_id's der erzeugten
-	* XPlan GML Objekte eingetragen wird.
+	* XPlan GML Objekte eingetragen.
 	*/
-	function convert($konvertierung_id, $bereich_gml_id = null) {
-		$sql = $this->get('sql');
-		$features = $this->getSQLResults($sql);
-		foreach($features AS $feature) {
-			if ($bereich_gml_id != '') {
+	function convert($konvertierung_id) {
+		$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'sql_ausfuehrbar');
+		$validierung->konvertierung_id = $konvertierung_id;
+		$result = @pg_query(
+			$this->database->dbConn,
+			$this->get_convert_sql($konvertierung_id)
+		);
+		$validierung->sql_ausfuehrbar($result, $this->get('id'));
+
+		/*
+		foreach(pg_fetch_all($query) AS $object_gml_id) {
+			if ($this->get('bereich_gml_id') != '') {
 				$sql = "
 					INSERT INTO
-				gml_classes.rp_object2rp_bereich
-				SET
-				rp_object_gml_id = '" . $feature->get('gml_id') . "',
-				rp_bereich_gml_id = '" . $bereich_gml_id . "'
+						gml_classes.rp_object2rp_bereich
+					SET
+						rp_object_gml_id = '" . $object_gml_id . "',
+						rp_bereich_gml_id = '" . $this->get('bereich_gml_id') . "'
 				";
 			}
+		}*/
+	}
+
+	function get_convert_sql($konvertierung_id) {
+		if ($this->debug) echo '<p>Konvertiere sql: ' . $this->get('sql');
+		$sql = strtolower($this->get('sql'));
+		if ($this->debug) echo '<p>sql0: ' . $sql;
+		$sql = substr_replace(
+			$sql,
+			'(konvertierung_id, ',
+			strpos($sql, '('),
+			strlen('(')
+		);
+		if ($this->debug) echo '<p>sql1: ' . $sql;
+
+		$sql = str_replace(
+			'select',
+			"select {$konvertierung_id},",
+			$sql
+		);
+		if ($this->debug) echo '<p>sql2: ' . $sql;
+
+		if ($this->get('bereiche') != '') {
+			$sql = substr_replace(
+				$sql,
+				' (gehoertzurp_bereich, ',
+				strpos($sql, ' ('),
+				strlen(' (')
+			);
+			if ($this->debug) echo '<p>sql3: ' . $sql;
+
+			$sql = str_replace(
+				'select',
+				"select '{$this->get('bereiche')}',",
+				$sql
+			);
+			if ($this->debug) echo '<p>sql4: ' . $sql;
 		}
+
+		$sql = "SET search_path=xplan_gml, xplan_shapes_{$konvertierung_id}; {$sql}";
+
+		if ($this->debug) echo '<br>nach sql: ' . $sql;
+		return $sql;
 	}
 
 	function gml_layer_exists() {
@@ -123,6 +173,15 @@ public static	function find_by_id($gui, $by, $id) {
 			# Lösche Gruppe, wenn kein anderer Layer mehr drin ist
 		}
 	}
+
+	function destroy() {
+		echo 'destroy regel';
+		echo 'Lösche Layer';
+
+		# Frage ab ob es in der Gruppe der gml Layer einen Layer von class_name gibt
+		# der ansonsten von keiner anderen Regel verwendet wird und lösche diesen
+	}
+
 }
 
 ?>

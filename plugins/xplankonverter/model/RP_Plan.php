@@ -22,5 +22,24 @@ class RP_Plan extends PgObject {
 		return $rp_plan;
 	}
 
+	function get_bereiche() {
+		$bereiche = array();
+		$bereich = new Bereich($this->gui);
+		$bereiche = $bereich->find_where("
+			gehoertzuplan = '{$this->get('gml_id')}'
+		");
+		return $bereiche;
+	}
+	
+	/*
+	* Löscht den Plan und alles was damit verbunden ist
+	* Löscht die Bereiche
+	*/
+	function destroy() {
+		$bereiche = $this->get_bereiche();
+		foreach($bereiche AS $bereich) {
+			$bereich->destroy();
+		}
+	}
 }
 ?>
