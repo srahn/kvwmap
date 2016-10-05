@@ -89,6 +89,11 @@ function updateGemarkungsauswahl(){
 	selectbyString(document.GUI.suchgemarkung, document.GUI.gemschl.value);
 }
 
+function updateGemarkungsschluessel(value){
+	document.GUI.gemschl1.value = value.substring(0, 2);
+	document.GUI.gemschl2.value = value.substring(2);	
+}
+
 function clear(){
 	document.GUI.gemschl2.value = '';
 	document.GUI.suchgemarkung.value = '';
