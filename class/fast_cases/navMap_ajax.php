@@ -881,6 +881,9 @@
 				if($dbStyle['datarange'] != '') {
 					$style->updateFromString("STYLE DATARANGE ".$dbStyle['datarange']." END");
 				}
+				if($dbStyle['rangeitem'] != '') {
+					$style->updateFromString("STYLE RANGEITEM ".$dbStyle['rangeitem']." END");
+				}
         if ($dbStyle['offsetx']!='') {
           $style->set('offsetx', $dbStyle['offsetx']);
         }
