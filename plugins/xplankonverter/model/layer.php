@@ -1,8 +1,8 @@
 <?php
 class Layer extends MyObject {
 
-  function Layer($database) {
-    $this->MyObject($Database, 'layer');
+  function Layer($gui) {
+    $this->MyObject($gui, 'layer');
   }
 
   function create($params) {

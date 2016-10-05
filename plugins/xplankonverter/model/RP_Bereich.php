@@ -11,6 +11,8 @@ class RP_Bereich extends PgObject {
   function RP_Bereich($gui) {
     $this->PgObject($gui, RP_Bereich::$schema, RP_Bereich::$tableName);
     $this->rp_objekte = array();
+		$this->identifier = 'gml_id';
+		$this->identifier_type = 'text';
   }
 
 	public static	function find_by_id($gui, $by, $id) {
@@ -36,8 +38,9 @@ class RP_Bereich extends PgObject {
 	* Löscht dazugehörige Regeln
 	*/
 	function destroy() {
-		$this->get_regeln();
+		$regeln = $this->get_regeln();
 		foreach($regeln AS $regel) {
+			$regel->konvertierung = $regel->get_konvertierung();
 			$regel->destroy();
 		}
 		$this->delete();

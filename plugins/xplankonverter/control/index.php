@@ -1,6 +1,5 @@
 <?php
 $this->goNotExecutedInPlugins = false;
-
 include(PLUGINS . 'xplankonverter/model/kvwmap.php');
 include_once(CLASSPATH . 'PgObject.php');
 include_once(CLASSPATH . 'MyObject.php');

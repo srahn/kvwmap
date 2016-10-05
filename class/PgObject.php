@@ -38,23 +38,21 @@ class PgObject {
 	*
 	*/
   function PgObject($gui, $schema, $tableName) {
-		#echo '<br>Create new Object PgObject with schema ' . $schema . ' table ' . $tableName;
-    global $debug;
-    $this->debug=$debug;
+		$gui->debug->show('Create new Object PgObject with schema ' . $schema . ' table ' . $tableName, false);
+    $this->debug=$gui->debug;
     $this->gui = $gui;
     $this->database = $gui->pgdatabase;
     $this->schema = $schema;
     $this->tableName = $tableName;
     $this->qualifiedTableName = $schema . '.' . $tableName;
     $this->data = array();
-    $this->debug = false;
 		$this->select = '*';
 		$this->identifier = 'id';
 		$this->identifier_type = 'integer';
   }
 
 	function find_by($attribute, $value) {
-		#echo '<br>find by attribute ' . $attribute . ' with value ' . $value;
+		$this->debug->show('find by attribute ' . $attribute . ' with value ' . $value, false);
 		$sql = "
 			SELECT
 				{$this->select}
@@ -63,8 +61,7 @@ class PgObject {
 			WHERE
 				\"{$attribute}\" = '{$value}'
 		";
-		#echo '<p>find_by: ' . $sql;
-		$this->debug('<p>find_by sql: ' . $sql);
+		$this->debug->show('find_by sql: ' . $sql, false);
 		$query = pg_query($this->database->dbConn, $sql);
 		$this->data = pg_fetch_assoc($query);
 		return $this;
@@ -83,8 +80,7 @@ class PgObject {
       WHERE
         " . $where . "
     ";
-    $this->debug('<p>sql: ' . $sql);
-		#echo '<p>find_where: ' . $sql;
+    $this->debug->show('find_where sql: ' . $sql, true);
     $query = pg_query($this->database->dbConn, $sql);
 		$result = array();
 		while($this->data = pg_fetch_assoc($query)) {
@@ -101,8 +97,7 @@ class PgObject {
 			WHERE
 				\"{$attribute}\" = '{$value}'
 		";
-		#echo 'delete query: ' . $sql;
-		$this->debug('<p>delete_by sql: ' . $sql);
+		$this->debug->show('delete_by sql: ' . $sql, false);
 		$query = pg_query($this->database->dbConn, $sql);
 		return $query;
 	}
@@ -144,8 +139,7 @@ class PgObject {
       )
       RETURNING id
     ";
-		#echo '<p>Create Postgres Datensatz: ' . $sql;
-    $this->debug('<p>Insert into pg table sql: ' . $sql);
+    $this->debug->show('create sql: ' . $sql);
     $query = pg_query($this->database->dbConn, $sql);
     $row = pg_fetch_assoc($query);
     $this->set('id', $row['id']);
@@ -161,7 +155,7 @@ class PgObject {
       WHERE
         id = " . $this->get('id') . "
     ";
-    $this->debug('<p>Update in pg table sql: ' . $sql);
+    $this->debug->show('update sql: ' . $sql);
     $query = pg_query($this->database->dbConn, $sql);
   }
 
@@ -174,8 +168,7 @@ class PgObject {
       WHERE
         " . $this->identifier . " = {$quote}" . $this->get($this->identifier) . "{$quote}
     ";
-		#echo $sql;
-    $this->debug('<p>Delete in pg table sql: ' . $sql);
+    $this->debug->show('delete sql: ' . $sql, true);
     $result = pg_query($this->database->dbConn, $sql);
     return $result;
   }
@@ -189,9 +182,5 @@ class PgObject {
     return $result;
   }
 
-  function debug($msg) {
-    if ($this->debug)
-      echo $msg;
-  }
 }
 ?>

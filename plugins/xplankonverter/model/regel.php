@@ -7,9 +7,10 @@ class Regel extends PgObject {
 	
 	static $schema = 'xplankonverter';
 	static $tableName = 'regeln';
+	static $write_debug = false;
 
 	function Regel($gui) {
-		#echo '<br>Create new Object Regel';
+		$gui->debug->show('Create new Object Regel', Regel::$write_debug);
 		$this->PgObject($gui, Regel::$schema, Regel::$tableName);
 		$this->layertypen = array(
 			'Punkte',
@@ -19,7 +20,6 @@ class Regel extends PgObject {
 	}
 
 public static	function find_by_id($gui, $by, $id) {
-		#echo '<br>Class Regel function find_by ' . $by . ' ' . $id;
 		$regel = new Regel($gui);
 		$regel->find_by($by, $id);
 		$regel->konvertierung = $regel->get_konvertierung();
@@ -59,23 +59,21 @@ public static	function find_by_id($gui, $by, $id) {
 	}
 
 	function get_convert_sql($konvertierung_id) {
-		if ($this->debug) echo '<p>Konvertiere sql: ' . $this->get('sql');
+		$this->debug->show('<br>Konvertiere sql: ' . $this->get('sql'), $this->write_debug);
 		$sql = strtolower($this->get('sql'));
-		if ($this->debug) echo '<p>sql0: ' . $sql;
+
 		$sql = substr_replace(
 			$sql,
 			'(konvertierung_id, ',
 			strpos($sql, '('),
 			strlen('(')
 		);
-		if ($this->debug) echo '<p>sql1: ' . $sql;
-		
+
 		$sql = str_replace(
 			'select',
 			"select {$konvertierung_id},",
 			$sql
 		);
-		if ($this->debug) echo '<p>sql2: ' . $sql;
 
 		if ($this->get('bereiche') != '') {
 			$sql = substr_replace(
@@ -84,30 +82,36 @@ public static	function find_by_id($gui, $by, $id) {
 				strpos($sql, ' ('),
 				strlen(' (')
 			);
-			if ($this->debug) echo '<p>sql3: ' . $sql;
 			
 			$sql = str_replace(
 				'select',
 				"select '{$this->get('bereiche')}',",
 				$sql
 			);
-			if ($this->debug) echo '<p>sql4: ' . $sql;
 		}
 
 		$sql = "SET search_path=xplan_gml, xplan_shapes_{$konvertierung_id}; {$sql}";
 
-		if ($this->debug) echo '<br>nach sql: ' . $sql;
+		$this->debug->show('nach sql: ' . $sql, $this->write_debug);
 		return $sql;
 	}
 
 	function gml_layer_exists() {
-		$layer = new MyObject($this->gui->database, 'layer');
-		$layer = $layer->find_where("
-			`Gruppe` = " . (empty($this->konvertierung->get('gml_layer_group_id')) ? 0 : $this->konvertierung->get('gml_layer_group_id')) . " AND
-			`Name` = '" . $this->get('class_name') . "' AND
-			`Datentyp`= " . $this->get_layertyp() . "
+		$this->debug->show("Layer mit Gruppe: {$this->konvertierung->get('gml_layer_group_id')} Name: {$this->get('class_name')} {$this->get('geometrietyp')} Datentyp: {$this->get_layertyp()}", $this->write_debug);
+		$layer = new MyObject($this->gui, 'layer');
+		$layers = $layer->find_where("
+			`Gruppe` = {$this->konvertierung->get('gml_layer_group_id')} AND
+			`Name` = '{$this->get('class_name')} {$this->get('geometrietyp')}' AND
+			`Datentyp`= {$this->get_layertyp()}
 		");
-		return is_array($layer);
+		if (count($layers) > 0) {
+			$layer_exists = true;
+			$this->gml_layer = $layers[0];
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 
 	function get_layertyp() {
@@ -158,14 +162,14 @@ public static	function find_by_id($gui, $by, $id) {
 
 	function create_gml_layer() {
 		if (!$this->gml_layer_exists()) {
-			#echo '<br>Erzeuge Layer ' . $this->get('class_name') . ' in Gruppe' . $this->konvertierung->get('bezeichnung') . ' layertyp ' . $this->layertyp;
 			$layertyp = $this->get_layertyp();
+			$this->debug->show('Erzeuge Layer ' . $this->get('class_name') . ' ' . $this->layertypen[$layertyp] . ' in Gruppe ' . $this->konvertierung->get('bezeichnung') . ' layertyp ' . $layertyp, $this->write_debug);
 
 			$formvars_before = $this->gui->formvars;
 			$this->gui->formvars = array_merge($this->gui->formvars, array(
 				'Name' => $this->get('class_name') . ' ' . $this->layertypen[$layertyp],
 				'schema' => 'xplan_gml',
-				'Datentyp' => $this->layertyp,
+				'Datentyp' => $layertyp,
 				'Gruppe' => $this->konvertierung->get('gml_layer_group_id'),
 				'connectiontype' => 6,
 				'connection' => $this->gui->pgdatabase->connect_string,
@@ -213,7 +217,7 @@ public static	function find_by_id($gui, $by, $id) {
 	}
 
 	function destroy() {
-		#echo '<br>destroy regel';
+		$this->debug->show('destroy regel ' . $this->get('name'), $this->write_debug);
 
 		# Frage ab ob es in der Gruppe der gml Layer einen Layer von class_name gibt
 		# der ansonsten von keiner anderen Regel verwendet wird und lösche diesen
@@ -250,12 +254,18 @@ public static	function find_by_id($gui, $by, $id) {
 				) AND
 				id != {$this->get('id')}
 		";
-		#echo '<br>Gibt es weitere Regeln, die den selben Klassname verwenden?' . $sql;
+		$this->debug->show('Gibt es weitere Regeln, die den selben Klassname verwenden?' . $sql, $this->write_debug);
 		if (pg_num_rows(pg_query($this->database->dbConn, $sql)) == 0) {
-			# Lösche Layer von class_name mit der entsprechenden Konvertierungs id
-			echo '<br>Lösche Layer mit class_name ' . $this->get('class_name') . ' mit der entsprechenden Konvertierungs id.' . $this->konvertierung->get('id');
-			##		$this->formvars['selected_layer_id'] = 
-			#		$this->LayerLoeschen();
+			$this->debug->show('nein, Prüfe ob der Layer existiert.', $this->write_debug);
+			if ($this->gml_layer_exists()) {
+				$this->debug->show("Layer {$this->gml_layer->get('Name')} existiert.", $this->write_debug);
+				$this->debug->show("Lösche Layer mit ID: {$this->gml_layer->get('Layer_ID')}", $this->write_debug);
+				$this->gui->formvars['selected_layer_id'] = $this->gml_layer->get('Layer_ID');
+				$this->gui->LayerLoeschen();
+			}
+		}
+		else {
+			$this->debug->show('ja', $this->write_debug);
 		}
 		$this->delete();
 	}

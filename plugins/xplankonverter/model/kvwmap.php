@@ -71,20 +71,20 @@
 		switch(true) {
 
 			case ($fired == 'AFTER' AND $event == 'INSERT') : {
-				#echo '<br>Führe ' . $fired . ' ' . $event . ' in handle_regel Funktion aus mit oid: ' . $oid;
+				$this->debug->show('Führe ' . $fired . ' ' . $event . ' in handle_regel Funktion aus mit oid: ' . $oid, false);
 				$regel = Regel::find_by_id($this, 'oid', $oid);
 				$regel->create_gml_layer();
 				$regel->konvertierung->set_status();
 			} break;
 
 			case ($fired == 'INSTEAD' AND $event == 'DELETE') : {
-				#echo '<br>Führe ' . $fired . ' ' . $event . ' in handle_regel Funktion aus.';
+				$this->debug->show('Führe ' . $fired . ' ' . $event . ' in handle_regel Funktion aus.', false);
 				$regel = Regel::find_by_id($this, 'oid', $oid);
 				$regel->destroy();
 			} break;
 
 			case ($fired == 'AFTER' AND $event == 'DELETE') : {
-				#echo '<br>Führe ' . $fired . ' ' . $event . ' in handle_regel Funktion aus.';
+				$this->debug->show('Führe ' . $fired . ' ' . $event . ' in handle_regel Funktion aus.', false);
 				if (empty($old_dataset['konvertierung_id'])) {
 					# hole konvertierung_id ueber plan und bereich_gml_id
 					$bereich = RP_Bereich::find_by_id($this, 'gml_id', $old_dataset['bereich_gml_id']);

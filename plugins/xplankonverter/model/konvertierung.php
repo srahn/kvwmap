@@ -163,7 +163,7 @@ class Konvertierung extends PgObject {
 	function create_layer_group($layer_type) {
 		$layer_group_id = $this->get(strtolower($layer_type) . '_layer_group_id');
 		if (empty($layer_group_id)) {
-			$layerGroup = new MyObject($this->gui->database, 'u_groups');
+			$layerGroup = new MyObject($this->gui, 'u_groups');
 			$layerGroup->create(array(
 				'Gruppenname' => $this->get('bezeichnung') . ' ' . $layer_type
 			));
@@ -171,6 +171,26 @@ class Konvertierung extends PgObject {
 			$this->update();
 		}
 		return $this->get(strtolower($layer_type) . '_layer_group_id');
+	}
+
+	/**
+	* Erzeugt eine Layergruppe vom Typ GML oder Shape und trägt die dazugehörige
+	* gml_layer_group_id oder shape_layer_group_id in PG-Tabelle konvertierung ein.
+	*
+	*/
+	function delete_layer_group($layer_type) {
+		$this->debug->show('delete_layer_group typ: ' . $layer_type, true);
+		$layer_group_id = $this->get(strtolower($layer_type) . '_layer_group_id');
+		if (!empty($layer_group_id)) {
+			$layer_group = new MyObject($this->gui, 'u_groups');
+			$layer_group->set('id', $layer_group_id);
+			$layer_group->identifier = 'id';
+			$layer_group->identifier_type = 'integer';
+			return $layer_group->delete();
+		}
+		else {
+			return false;
+		}
 	}
 
 	/*
@@ -249,23 +269,26 @@ class Konvertierung extends PgObject {
 			bereich_gml_id IS NULL
 		");
 		foreach($regeln AS $regel) {
+			$regel->konvertierung = $regel->get_konvertierung();
 			$regel->destroy();
 		}
 
 		# Lösche Plan der Konvertierung
-		# Lösche Plan
-		$plan = $konvertierung->get_plan();
+		$plan = $this->get_plan();
 		$msg .= "\nRP Plan " . $plan->get('name') . ' gelöscht.';
 		$plan->destroy();
 
 		# Lösche GML-Layer Gruppe
-		$konvertierung->delete_layer_group('GML');
-	
+		$this->delete_layer_group('GML');
+
 		# Lösche Shapes
 		#$shapeFile->deleteDataTable();
 		#$shapeFile->delete();
 
 		# Lösche Shape Layer Gruppe
+
+		# Lösche Konvertierung
+		$this->delete();
 	}
 
 
