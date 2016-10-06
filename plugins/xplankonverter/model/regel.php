@@ -1,10 +1,10 @@
 <?php
 #############################
-# Klasse Regel #
+# Klasse Konvertierung #
 #############################
 
 class Regel extends PgObject {
-
+	
 	static $schema = 'xplankonverter';
 	static $tableName = 'regeln';
 	static $write_debug = false;
@@ -17,7 +17,6 @@ class Regel extends PgObject {
 			'Linien',
 			'Flächen'
 		);
-		#$this->debug = true;
 	}
 
 public static	function find_by_id($gui, $by, $id) {
@@ -83,7 +82,7 @@ public static	function find_by_id($gui, $by, $id) {
 				strpos($sql, ' ('),
 				strlen(' (')
 			);
-
+			
 			$sql = str_replace(
 				'select',
 				"select '{$this->get('bereiche')}',",
@@ -176,7 +175,7 @@ public static	function find_by_id($gui, $by, $id) {
 				'connection' => $this->gui->pgdatabase->connect_string,
 				'epsg_code' => $this->konvertierung->get('output_epsg'),
 				'pfad' => "SELECT * FROM " . $this->get('class_name') . " WHERE 1=1",
-				'Data' => "geom from (select oid, (position)." . $this->get('geometrietyp') . " AS geom FROM xplan_gml." . strtolower($this->get('class_name')) . ") as foo using unique oid using srid=" . $this->konvertierung->get('output_epsg'),
+				'Data' => "geom from (select oid, position AS geom FROM xplan_gml." . strtolower($this->get('class_name')) . ") as foo using unique oid using srid=" . $this->konvertierung->get('output_epsg'),
 				'querymap' => 1,
 				'queryable' => 1,
 				'transparency' => 60,
