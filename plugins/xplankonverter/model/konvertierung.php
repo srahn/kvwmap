@@ -161,6 +161,7 @@ class Konvertierung extends PgObject {
 	*
 	*/
 	function create_layer_group($layer_type) {
+		$this->debug->show('Konvertierung create_layer_group layer_type: ' . $layer_type, false);
 		$layer_group_id = $this->get(strtolower($layer_type) . '_layer_group_id');
 		if (empty($layer_group_id)) {
 			$layerGroup = new MyObject($this->gui, 'u_groups');

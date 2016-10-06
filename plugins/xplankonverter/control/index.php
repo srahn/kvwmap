@@ -157,7 +157,7 @@ switch($this->go){
 							);
 							if (!empty($shapeFiles)) $shapeFile = $shapeFiles[0]; # es kann nur eins geben
 							if (!empty($shapeFile->data)) {
-								$this->debug('<p>Lösche gefundenes shape file.');
+								$this->debug->show('<p>Lösche gefundenes shape file.', false);
 								$shapeFile->deleteLayer();
 								$shapeFile->deleteDataTable();
 								$shapeFile->delete();
