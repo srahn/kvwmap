@@ -351,6 +351,7 @@ switch($this->go){
   } break;
 
   case 'xplankonverter_konvertierung': {
+    // TODO: Stati setzen
 		if ($this->formvars['konvertierung_id'] == '') {
 			$this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
 			$this->main = 'Hinweis.php';
@@ -398,21 +399,18 @@ switch($this->go){
 					// XPlan-GML ausgeben
 					$this->gml_builder = new Gml_builder($this->pgdatabase);
 					$plan = RP_Plan::find_by_id($this,'konvertierung_id', $this->konvertierung->get('id'));
-					//$bereiche = new RP_Bereich($this);
-					//$bereiche->find_by('gehoertzuplan', $this->plan->get('gml_id'));
-					//$this->plan->bereiche = $bereiche;
-//					$this->gml_builder->build_gml($this->konvertierung, $plan);
-if (!$this->gml_builder->build_gml($this->konvertierung, $plan)){
-					// Status setzen
-					$this->konvertierung->set('status', Konvertierung::$STATUS['GML_ERSTELLUNG_ERR']);
-					$this->konvertierung->update();
 
-					$response['success'] = false;
-					$response['msg'] = 'Bei der GML-Generierung ist ein Fehler aufgetreten.';
-      		header('Content-Type: application/json');
-      		echo json_encode($response);
-      		break;
-}
+					if (!$this->gml_builder->build_gml($this->konvertierung, $plan)){
+  					// Status setzen
+  					$this->konvertierung->set('status', Konvertierung::$STATUS['GML_ERSTELLUNG_ERR']);
+  					$this->konvertierung->update();
+  					// Antwort absenden und case beenden
+  					$response['success'] = false;
+  					$response['msg'] = 'Bei der GML-Generierung ist ein Fehler aufgetreten.';
+        		header('Content-Type: application/json');
+        		echo json_encode($response);
+        		break;
+					}
 					$this->gml_builder->save(XPLANKONVERTER_SHAPE_PATH . $this->konvertierung->get('id') . '/xplan_' . $this->konvertierung->get('id') . '.gml');
 
 					// Status setzen

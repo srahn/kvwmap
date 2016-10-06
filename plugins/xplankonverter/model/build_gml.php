@@ -106,15 +106,15 @@ class Gml_builder {
     # XPlan XSD's sind derzeit unter: http://xplan-raumordnung.de/devk/model/2016-05-06_XSD/ hinterlegt
     fwrite($this->tmpFile,
       "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>\n".
-      "<XPlanAuszug xmlns=\"{XPLAN_NS_URI}\"\n".
+      "<XPlanAuszug xmlns=\"".XPLAN_NS_URI."\"\n".
       "  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n".
       "  xmlns:wfs=\"http://www.opengis.net/wfs\"\n".
       "  xmlns:gml=\"http://www.opengis.net/gml\"\n".
       "  xmlns:xlink=\"http://www.w3.org/1999/xlink\"\n".
-      XPLAN_NS_PREFIX==""?"":
-      "  xmlns:".XPLAN_NS_PREFIX."=\"{XPLAN_NS_URI}\"\n".
-      "  xmlns:".RPLAN_NS_PREFIX."=\"http://xplan-raumordnung.de/model/xplangml/raumordnungsmodell\"\n".
-      "  xsi:schemaLocation=\"{XPLAN_NS_URI} {XPLAN_NS_SCHEMA_LOCATION}\"\n".
+      (XPLAN_NS_PREFIX==""
+          ? ""
+          : "  xmlns:".XPLAN_NS_PREFIX."=\"".XPLAN_NS_URI."\"\n").
+      "  xsi:schemaLocation=\"".XPLAN_NS_URI." ".XPLAN_NS_SCHEMA_LOCATION."\"\n".
       ">\n".
 
     # TODO: <boundedBy> sollte für jeden Plan definiert oder festgehalten werden,
@@ -191,13 +191,13 @@ class Gml_builder {
       // und im RP_Bereich Element verlinken
       $_sql = "
           SELECT gml_id
-          FROM $contentScheme.rp_bereich
-          WHERE ANY(gehoertZuRP_Bereich) = {$bereich['gml_id']}";
+          FROM $contentScheme.xp_bereich
+          WHERE ANY(gehoertzubereich) = {$bereich['gml_id']}";
       $sql = "
-          SELECT b2o.rp_objekt_gml_id AS gml_id
+          SELECT b2o.xp_objekt_gml_id AS gml_id
           FROM
-            $contentScheme.rp_bereich AS b JOIN
-            $contentScheme.rp_bereich_zu_rp_objekt AS b2o ON b.gml_id = b2o.rp_bereich_gml_id
+            $contentScheme.xp_bereich AS b JOIN
+            $contentScheme.xp_bereich_zu_xp_objekt AS b2o ON b.gml_id = b2o.xp_bereich_gml_id
           WHERE b.gml_id = '" . $bereich['gml_id'] ."'";
       $rp_objekte = pg_query($this->database->dbConn, $sql);
       # complete RP_Bereich element by iteratively inserting
@@ -220,7 +220,7 @@ class Gml_builder {
       $_sql = "
           SELECT
             *,
-            gehoertZuRP_Bereich AS bereiche_gml_ids,
+            gehoertzubereich AS bereiche_gml_ids,
             ST_AsGML(
                 ST_Reverse(ST_Transform(
                   position,
@@ -275,9 +275,9 @@ class Gml_builder {
               array_agg(b.gml_id) as bereiche_gml_ids,
               o.gml_id
               FROM
-                $contentScheme.rp_bereich AS b JOIN
-                $contentScheme.rp_bereich_zu_rp_objekt AS b2o ON b.gml_id = b2o.rp_bereich_gml_id JOIN
-                $contentScheme.rp_objekt AS o ON b2o.rp_objekt_gml_id = o.gml_id
+                $contentScheme.xp_bereich AS b JOIN
+                $contentScheme.xp_bereich_zu_xp_objekt AS b2o ON b.gml_id = b2o.xp_bereich_gml_id JOIN
+                $contentScheme.xp_objekt AS o ON b2o.xp_objekt_gml_id = o.gml_id
               WHERE o.konvertierung_id = {$konvertierung->get('id')}
               GROUP BY o.gml_id
             ) AS agg ON ft.gml_id = agg.gml_id";
@@ -364,9 +364,15 @@ class Gml_builder {
             }
           }
           break;
-        case 'e': // enum type
         case 'b': // built-in datatype
-        default:
+          // geometrie attribute
+          if ($uml_attribute['type'] == "geometry") {
+            $gml_value = $gml_object['gml_'.$uml_attribute['col_name']];
+            $gmlStr .= $this->wrapWithElement("{$xplan_ns_prefix}{$uml_attribute['uml_name']}", $gml_value);
+            break;
+          }
+        case 'e': // enum type
+          default:
           // TODO: Datumsangaben formatieren nach ISO 8601
           $gml_value = trim($gml_object[$uml_attribute['col_name']]);
           // check for array values

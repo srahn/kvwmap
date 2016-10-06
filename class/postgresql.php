@@ -473,7 +473,7 @@ FROM
         # Geometrietyp
         if($fieldtype == 'geometry'){
           $fields[$i]['geomtype'] = $this->get_geom_type($fields[$i]['real_name'], $tablename);
-          #$fields['the_geom'] = $fieldname;		todo
+          $fields['the_geom'] = $fieldname;
         }				
       }
       
