@@ -934,6 +934,11 @@ class data_import_export {
 					$contenttype = 'application/vnd.google-earth.kml+xml';
 				}break;
 				
+				case 'GeoJSON' : {
+					$exportfile = $exportfile.'.json';
+					$this->ogr2ogr_export($sql, 'GeoJSON', $exportfile, $layerdb);
+				}break;
+				
 				case 'CSV' : {
 					while($rs=pg_fetch_assoc($ret[1])){
 						$result[] = $rs;
