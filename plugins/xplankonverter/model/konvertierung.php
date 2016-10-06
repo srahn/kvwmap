@@ -20,6 +20,7 @@ class Konvertierung extends PgObject {
 		'GML_ERSTELLUNG_OK'  => 'GML-Erstellung abgeschlossen',
 		'GML_ERSTELLUNG_ERR' => 'GML-Erstellung abgebrochen'
 	);
+	static $write_debug = false;
 
 	function Konvertierung($gui) {
 		$this->PgObject($gui, Konvertierung::$schema, Konvertierung::$tableName);
@@ -82,17 +83,19 @@ class Konvertierung extends PgObject {
 	* Fragt die unique class names ab, die in der Konvertierung verwendet wurden.
 	*/
 	function get_class_names() {
+		$this->debug->show('Konvertierung: get_class_names.', Konvertierung::$write_debug);
 		$sql = "
 			SELECT DISTINCT
 			  lower(r.class_name) AS class_name
 			FROM
 			  xplankonverter.regeln r LEFT JOIN
-			  xplan_gml.rp_bereich b ON r.bereich_gml_id = b.gml_id
+			  xplan_gml.rp_bereich b ON r.bereich_gml_id = b.gml_id LEFT JOIN
+				xplan_gml.rp_plan p ON b.gehoertzuplan = p.gml_id::text
 			WHERE
-			  b.konvertierung_id = {$this->get('id')} OR
+			  p.konvertierung_id = {$this->get('id')} OR
 			  r.konvertierung_id = {$this->get('id')}
 		";
-		#echo '<br>get_class_names in konvertierung: ' . $sql;
+		$this->debug->show('sql: ' . $sql, Konvertierung::$write_debug);
 		$result = pg_fetch_all(
 			pg_query($this->database->dbConn, $sql)
 		);
@@ -102,7 +105,7 @@ class Konvertierung extends PgObject {
 				function($row) {
 					return 'xplan_gml.' . $row['class_name'];
 				},
-				$class_names
+				$result
 			);
 		}
 		else {
@@ -199,6 +202,7 @@ class Konvertierung extends PgObject {
 	* XPlan GML Datensätze, Beziehungen und Validierungsergebnisse
 	*/
 	function reset_mapping() {
+		$this->debug->show('Konvertierung: reset_mapping mit konvertierung_id: ' . $this->get('id'), Konvertierung::$write_debug);
 		# Lösche vorhandene Validierungsergebnisse der Konvertierung
 		Validierungsergebnis::delete_by_id($this->gui, 'konvertierung_id', $this->get('id'));
 
@@ -210,6 +214,7 @@ class Konvertierung extends PgObject {
 				WHERE
 					konvertierung_id = {$this->get('id')}
 			";
+			$this->debug->show('Delete Objekte with konvertierung_id ' . $this->get('id') . ' und sql: ' . $sql . ' in reset Mapping.', Konvertierung::$write_debug);
 			$query = pg_query($this->database->dbConn, $sql);
 		}
 	}
@@ -227,14 +232,21 @@ class Konvertierung extends PgObject {
 	*/
 	function mapping() {
 		$regeln = $this->get_regeln();
-
 		$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'regel_existiert');
 		$validierung->konvertierung_id = $this->get('id');
 		$validierung->regel_existiert($regeln);
 
+		$success = true;
 		foreach($regeln AS $regel) {
-			$regel->convert($this->get('id'));
+			$result = $regel->convert($this->get('id'));
+			if (!$result) {
+				$success = false;
+			}
 		}
+		$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'alle_sql_ausfuehrbar');
+		$validierung->konvertierung_id = $this->get('id');
+		$validierung->alle_sql_ausfuehrbar($success);
+
 	}
 	
 	function validierung_erfolgreich() {

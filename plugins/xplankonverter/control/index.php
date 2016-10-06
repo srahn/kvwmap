@@ -351,7 +351,6 @@ switch($this->go){
   } break;
 
   case 'xplankonverter_konvertierung': {
-    // TODO: Stati setzen
 		if ($this->formvars['konvertierung_id'] == '') {
 			$this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
 			$this->main = 'Hinweis.php';
@@ -455,6 +454,10 @@ switch($this->go){
 		);
 		header('Content-Type: application/json');
 		echo json_encode($response);
+	} break;
+
+	case 'xplankonverter_regeleditor' : {
+		include(PLUGINS . 'xplankonverter/view/regeleditor/index.php');
 	} break;
 
 	default : {

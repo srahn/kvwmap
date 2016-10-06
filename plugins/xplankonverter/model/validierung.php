@@ -65,6 +65,7 @@ class Validierung extends PgObject {
 	}
 
 	function sql_ausfuehrbar($result, $regel_id) {
+		$ausfuehrbar = true;
 		if (!$result) {
 			$validierungsergebnis = new Validierungsergebnis($this->gui);
 			$validierungsergebnis->create(
@@ -74,6 +75,22 @@ class Validierung extends PgObject {
 					'status' => 'Fehler',
 					'msg' => str_replace("'","''",@pg_last_error($this->database->dbConn)),
 					'regel_id' => $regel_id
+				)
+			);
+			$ausfuehrbar = false;
+		}
+		return $ausfuehrbar;
+	}
+
+	function alle_sql_ausfuehrbar($alle_ausfuehrbar) {
+		if ($alle_ausfuehrbar) {
+			$validierungsergebnis = new Validierungsergebnis($this->gui);
+			$validierungsergebnis->create(
+				array(
+					'konvertierung_id' => $this->konvertierung_id,
+					'validierung_id' => $this->get('id'),
+					'status' => 'Erfolg',
+					'msg' => 'Alle Regeln konnten erfolgreich konvertiert werden.'
 				)
 			);
 		}

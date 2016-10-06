@@ -11,7 +11,13 @@ if ($this->Fehlermeldung!='') {
 <script language="javascript" type="text/javascript">
 // formatter functions
 function validierung_msg_correcture_formatter(value, row) {
-	output = row.validierung_msg_correcture;
+	if ( row.ergebnis_status == 'Fehler'
+		|| row.ergebnis_status == 'Warnung') {
+		output = row.validierung_msg_correcture;
+	}
+	else {
+		output = '';
+	}
 	if (row.regel_id)
 		output += ' <a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=9&operator_id==&value_id=' + row.regel_id + '"><i class="fa fa-lg fa-pencil"></i></a>';
 	return output;
@@ -83,7 +89,7 @@ function validierungsergebnisseRowAttribs(row, index){
         data-switchable="true"
         data-sortable="true"
         class="text-left"
-      >Meldung</th>
+      >Meldungen</th>
       <th
         data-field="regel_sql"
         data-visible="false"
@@ -94,11 +100,11 @@ function validierungsergebnisseRowAttribs(row, index){
       <th
         data-field="validierung_msg_correcture"
 				data-formatter="validierung_msg_correcture_formatter"
-        data-visible="false"
+        data-visible="true"
         data-switchable="true"
         data-sortable="true"
         class="text-left"
-      >Korrekturhinweis</th>
+      >Korrekturhinweise</th>
       <th
         data-field="regel_id"
         data-visible="false"

@@ -6545,17 +6545,17 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $attrib['order'] = 1;
     return $mapDB->new_Class($attrib);
   }
-	
+
   function LayerAnlegen(){
 		global $supportedLanguages;
-    $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-	  if (trim($this->formvars['id'])!='' and $mapDB->id_exists('layer',$this->formvars['id'])) {
-		  $table_information = $mapDB->get_table_information($this->Stelle->database->dbName,'layer');
+		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		if (trim($this->formvars['id'])!='' and $mapDB->id_exists('layer',$this->formvars['id'])) {
+			$table_information = $mapDB->get_table_information($this->Stelle->database->dbName,'layer');
 			$this->Meldung = "Die Id: ".$this->formvars['id']." existiert schon. Nächste freie Layer_ID ist ".$table_information['AUTO_INCREMENT'];
 		}
 		else {
 			$this->formvars['selected_layer_id'] = $mapDB->newLayer($this->formvars);
-			
+
 			if($this->formvars['connectiontype'] == 6 AND $this->formvars['pfad'] != ''){
 				#---------- Speichern der Layerattribute -------------------
 				$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
@@ -6565,11 +6565,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				$mapDB->delete_old_attributes($this->formvars['selected_layer_id'], $attributes);
 				#---------- Speichern der Layerattribute -------------------
 			}
-			
+
 			# Klassen übernehmen (aber als neue Klassen anlegen)
 			$name = @array_values($this->formvars['name']);
 			foreach($supportedLanguages as $language){
-				if($language != 'german'){	
+				if($language != 'german'){
 					$name_[$language] = @array_values($this->formvars['name_'.$language]);
 				}
 			}

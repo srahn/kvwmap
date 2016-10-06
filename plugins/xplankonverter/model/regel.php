@@ -36,13 +36,14 @@ public static	function find_by_id($gui, $by, $id) {
 	* XPlan GML Objekte eingetragen.
 	*/
 	function convert($konvertierung_id) {
+		$this->debug->show('Regel convert mit konvertierung_id: ' . $konvertierung_id, Regel::$write_debug);
 		$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'sql_ausfuehrbar');
 		$validierung->konvertierung_id = $konvertierung_id;
 		$result = @pg_query(
 			$this->database->dbConn,
 			$this->get_convert_sql($konvertierung_id)
 		);
-		$validierung->sql_ausfuehrbar($result, $this->get('id'));
+		return $validierung->sql_ausfuehrbar($result, $this->get('id'));
 
 		/*
 		foreach(pg_fetch_all($query) AS $object_gml_id) {
@@ -59,8 +60,8 @@ public static	function find_by_id($gui, $by, $id) {
 	}
 
 	function get_convert_sql($konvertierung_id) {
-		$this->debug->show('<br>Konvertiere sql: ' . $this->get('sql'), $this->write_debug);
-		$sql = strtolower($this->get('sql'));
+		$this->debug->show('<br>Konvertiere sql: ' . $this->get('sql'), Regel::$write_debug);
+		$sql = $this->get('sql');
 
 		$sql = substr_replace(
 			$sql,
@@ -69,7 +70,7 @@ public static	function find_by_id($gui, $by, $id) {
 			strlen('(')
 		);
 
-		$sql = str_replace(
+		$sql = str_ireplace(
 			'select',
 			"select {$konvertierung_id},",
 			$sql
@@ -83,16 +84,16 @@ public static	function find_by_id($gui, $by, $id) {
 				strlen(' (')
 			);
 			
-			$sql = str_replace(
+			$sql = str_ireplace(
 				'select',
 				"select '{$this->get('bereiche')}',",
 				$sql
 			);
 		}
 
-		$sql = "SET search_path=xplan_gml, xplan_shapes_{$konvertierung_id}; {$sql}";
+		$sql = "SET search_path=xplan_gml, xplan_shapes_{$konvertierung_id}, public; {$sql}";
 
-		$this->debug->show('nach sql: ' . $sql, $this->write_debug);
+		$this->debug->show('nach sql: ' . $sql, Regel::$write_debug);
 		return $sql;
 	}
 
