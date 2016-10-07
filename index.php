@@ -983,6 +983,14 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->checkCaseAllowed('DXF_Import');
 			$GUI->dxf_import_importieren();
 	  } break;
+		
+		case 'GeoJSON_Anzeigen' : {
+			$GUI->create_geojson_rollenlayer();
+	  } break;
+		
+	  case 'GeoJSON_Anzeigen_Datei laden' : {
+			$GUI->create_geojson_rollenlayer_load();
+	  } break;
 
 		case 'SHP_Anzeigen' : {
 			$GUI->create_shp_rollenlayer();

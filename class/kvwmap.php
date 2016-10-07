@@ -8782,6 +8782,23 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->main='tif_export.php';
     $this->output();
   }
+	
+	function create_geojson_rollenlayer(){
+    $this->main='create_geojson_rollenlayer.php';
+    $this->output();
+	}
+	
+	function create_geojson_rollenlayer_load(){
+		include_(CLASSPATH.'data_import_export.php');
+		$this->data_import_export = new data_import_export();
+		$layer_id = $this->data_import_export->create_import_rollenlayer($this->formvars, 'GeoJSON', $this->Stelle, $this->user, $this->database, $this->pgdatabase);
+		$this->loadMap('DataBase');
+		$this->zoomToMaxLayerExtent($layer_id);
+		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
+    $this->drawMap();
+    $this->saveMap('');
+    $this->output();
+	}	
 
 	function create_shp_rollenlayer(){
 		$this->titel='Shape-Datei Anzeigen';
