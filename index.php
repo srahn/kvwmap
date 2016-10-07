@@ -1031,6 +1031,10 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->checkCaseAllowed('SHP_Import');
 			$GUI->shp_import_speichern();
 	  } break;
+		
+		case 'Daten_Import' : {
+			$GUI->daten_import();
+	  } break;
 
 	  case 'Daten_Export' : {
 			$GUI->checkCaseAllowed('Daten_Export');
