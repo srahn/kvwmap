@@ -8862,6 +8862,21 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->data_import_export->shp_import($this->formvars);
     $this->output();
   }
+	
+	function geojson_import(){
+    $this->titel='GeoJSON-Import';
+    $this->main='geojson_import.php';
+    $this->output();
+  }
+	
+	function geojson_import_importieren(){
+		include_once (CLASSPATH.'data_import_export.php');
+    $this->titel='GeoJSON-Import';
+    $this->main='geojson_import.php';
+		$this->data_import_export = new data_import_export();
+    $this->result = $this->data_import_export->geojson_import($this->pgdatabase, $this->formvars['schema_name'], $this->formvars['table_name']);
+    $this->output();
+  }	
 
   function daten_export(){
 		include_once (CLASSPATH.'data_import_export.php');

@@ -1016,6 +1016,16 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->checkCaseAllowed('SHP_Import');
 			$GUI->shp_import();
 	  } break;
+		
+		case 'GeoJSON_Import' : {
+			$GUI->checkCaseAllowed('GeoJSON_Import');
+			$GUI->geojson_import();
+	  } break;
+		
+		case 'GeoJSON_Import_Importieren' : {
+			$GUI->checkCaseAllowed('GeoJSON_Import');
+			$GUI->geojson_import_importieren();
+	  } break;
 
 	  case 'SHP_Import_speichern' : {
 			$GUI->checkCaseAllowed('SHP_Import');

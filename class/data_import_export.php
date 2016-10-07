@@ -61,7 +61,7 @@ class data_import_export {
 				$custom_tables = $this->import_custom_dxf($formvars, $pgdatabase);
 			}break;
 			case 'GeoJSON' : {
-				$custom_tables = $this->import_custom_geojson($formvars, $pgdatabase);
+				$custom_tables = $this->import_custom_geojson($pgdatabase);
 				$formvars['epsg'] = $custom_tables[0]['epsg'];
 			}break;
 		}
@@ -456,7 +456,11 @@ class data_import_export {
 		}
 	}
 	
-	function import_custom_geojson($formvars, $pgdatabase){
+	function import_custom_geojson($pgdatabase){
+		return $this->geojson_import($pgdatabase, CUSTOM_SHAPE_SCHEMA, NULL);
+	}
+	
+	function geojson_import($pgdatabase, $schema, $tablename){
 		$_files = $_FILES;	
 		if($_files['file1']['name']){
       $importfile = UPLOADPATH.$_files['file1']['name'];
@@ -465,11 +469,11 @@ class data_import_export {
 					$json = json_decode(file_get_contents($importfile));
 					if($json->crs->properties->name != '')$epsg = array_pop(explode('EPSG::', $json->crs->properties->name));
 					else $epsg = 4326;
-					$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($importfile), 0, 15))).rand(1,1000000);
-					$this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $epsg, $importfile, $pgdatabase, NULL, NULL, NULL, 'UTF8');
+					if($tablename == NULL)$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($importfile), 0, 15))).rand(1,1000000);
+					$this->ogr2ogr_import($schema, $tablename, $epsg, $importfile, $pgdatabase, NULL, NULL, NULL, 'UTF8');
 					$sql = '
-						ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' SET WITH OIDS; 
-						SELECT geometrytype(the_geom) AS geometrytype FROM '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' LIMIT 1;';
+						ALTER TABLE '.$schema.'.'.$tablename.' SET WITH OIDS; 
+						SELECT geometrytype(the_geom) AS geometrytype FROM '.$schema.'.'.$tablename.' LIMIT 1;';
 					$ret = $pgdatabase->execSQL($sql,4, 0);
 					if(!$ret[0]){
 						$result = pg_fetch_assoc($ret[1]);
