@@ -1,5 +1,5 @@
 ﻿<?php
  $strTitle="Data-Import"; 
- $strType="filetype";
+ $strType="format";
  $strPointlist="Coordinate-List";
 ?>  

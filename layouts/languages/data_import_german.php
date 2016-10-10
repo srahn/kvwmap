@@ -1,6 +1,6 @@
 ﻿<?php
  $strTitle="Daten-Import";
- $strType="Dateityp";
+ $strType="Format";
  $strPointlist="Punktliste";
  
 ?>  
