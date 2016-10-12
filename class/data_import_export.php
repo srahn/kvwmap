@@ -579,7 +579,7 @@ class data_import_export {
       // }
 			
 			if($ret == 0){
-				$sql = 'SELECT count(*) FROM '.$this->formvars['schema_name'].'.'.$this->formvars['table_name'];
+				$sql = 'ALTER TABLE '.$this->formvars['schema_name'].'.'.$this->formvars['table_name'].' SET WITH OIDS;SELECT count(*) FROM '.$this->formvars['schema_name'].'.'.$this->formvars['table_name'];
 				$ret = $database->execSQL($sql,4, 0);
 				if (!$ret[0]) {
 					$count = pg_fetch_row($ret[1]);
