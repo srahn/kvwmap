@@ -546,7 +546,7 @@ FROM
 				c.relname = '".$table."' AND
 				".$and_column."
 				a.attnum > 0
-			ORDER BY a.attnum
+			ORDER BY a.attnum, indisunique desc, indisprimary desc
 		";
 		#echo '<br><br>' . $sql;
 		$ret = $this->execSQL($sql, 4, 0);
