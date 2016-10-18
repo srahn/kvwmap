@@ -50,6 +50,12 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 	  <tr>
 	    <th colspan="2"><h2><? echo $this->titel.' '.$this->buchungen[0]['bezirk'].'-'.$this->buchungen[0]['blatt']; ?></h2></th>
     </tr>
+		<?
+			if(in_array($this->buchungen[$i]['buchungsart'], array(2101, 2103, 2203, 2303))){echo '<tr><td colspan="2" align="center">';
+				if(in_array($this->buchungen[$i]['buchungsart'], array(2101, 2203, 2303)))echo '- belastet mit Erbbaurecht -'; 
+				if(in_array($this->buchungen[$i]['buchungsart'], array(2103)))echo '- belastet mit Nutzungsrecht -';
+				echo '</td></tr>';
+			} ?>
 		<tr>
 			<td style="padding-bottom: 9px;height:100%">
 				<table id="gbb_eigentuemer">
@@ -99,7 +105,6 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 								<? echo $this->buchungen[$i]['gemkgname'].', Flur '.$this->buchungen[$i]['flur'].', '.$this->buchungen[$i]['flurstuecksnr']; ?>
 									</a>
 								<? if($this->buchungen[$i]['anteil'] != '')echo '<br><br>zu '.$this->buchungen[$i]['anteil'];	?>
-								<? if(in_array($this->buchungen[$i]['buchungsart'], array(2101, 2203, 2303)))echo 'belastet mit Erbbaurecht'; if(in_array($this->buchungen[$i]['buchungsart'], array(2103)))echo 'belastet mit Nutzungsrecht'; ?>
 								</td>
 								<td>
 									<? echo $Adressbezeichnung; ?>
