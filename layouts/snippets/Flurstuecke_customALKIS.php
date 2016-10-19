@@ -75,7 +75,11 @@ hide_versions = function(flst){
 		$this->found = 'true';
 	?>
 		<br>
+		<? if($this->user->rolle->hist_timestamp == ''){ ?>
 		<span style="font-size:80%;">Stand ALKIS vom: <? echo $aktalkis[0]; ?><br></span>
+		<? }else{ ?>
+		<span class="fett" style="color: #a82e2e;">historischer Stand vom: <? echo $this->user->rolle->hist_timestamp; ?><br></span>
+		<? } ?>
 		<br>
     <u><? echo $gesamt; ?> Flurstück<? if ($gesamt>1) { echo "e"; } ?> abgefragt</u>
 		<? if($gesamt > $anzObj){ ?>

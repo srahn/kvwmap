@@ -388,7 +388,7 @@ class GUI {
 										$class = $maplayer->getClass($k);
 										for($s = 0; $s < $class->numstyles; $s++){
 											$style = $class->getStyle($s);
-											if($current_group[$j]->type > 0){
+											if($maplayer->type > 0){
 												$symbol = $this->map->getSymbolObjectById($style->symbol);
 												if($symbol->type == 1006){ 	# 1006 == hatch
 													$style->set('size', 2*$style->width);					# size und maxsize beim Typ Hatch auf die doppelte Linienbreite setzen, damit man was in der Legende erkennt 
@@ -399,21 +399,27 @@ class GUI {
 													$style->set('maxsize', 2);
 												}
 											}
-											else{
+											else{		# Punktlayer
+												if($style->size > 14)$style->set('size', 14);
 												$style->set('maxsize', $style->size);		# maxsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
+												$style->set('minsize', $style->size);		# minsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
+												if($class->numstyles == 1){							# wenn es nur einen Style in der Klasse gibt, die Offsets auf 0 setzen, damit man was in der Legende erkennt
+													$style->set('offsety', 0);
+													$style->set('offsetx', 0);
+												}
 											}
 											if (MAPSERVERVERSION > 500){
-												if($current_group[$j]->opacity < 100 AND $current_group[$j]->opacity > 0){			# Layer-Transparenz auch in Legendenbildchen berücksichtigen
+												if($maplayer->opacity < 100 AND $maplayer->opacity > 0){			# Layer-Transparenz auch in Legendenbildchen berücksichtigen
 													$hsv = rgb2hsv($style->color->red,$style->color->green, $style->color->blue);
-													$hsv[1] = $hsv[1]*$current_group[$j]->opacity/100;
+													$hsv[1] = $hsv[1]*$maplayer->opacity/100;
 													$rgb = hsv2rgb($hsv[0], $hsv[1], $hsv[2]);
 													$style->color->setRGB($rgb[0],$rgb[1],$rgb[2]);
 												}
 											}
 											else {
-												if($current_group[$j]->transparency < 100 AND $current_group[$j]->transparency > 0){			# Layer-Transparenz auch in Legendenbildchen berücksichtigen
+												if($maplayer->transparency < 100 AND $maplayer->transparency > 0){			# Layer-Transparenz auch in Legendenbildchen berücksichtigen
 													$hsv = rgb2hsv($style->color->red,$style->color->green, $style->color->blue);
-													$hsv[1] = $hsv[1]*$current_group[$j]->transparency/100;
+													$hsv[1] = $hsv[1]*$maplayer->transparency/100;
 													$rgb = hsv2rgb($hsv[0], $hsv[1], $hsv[2]);
 													$style->color->setRGB($rgb[0],$rgb[1],$rgb[2]);
 												}												
@@ -426,7 +432,9 @@ class GUI {
 												$this->colorramp(IMAGEPATH.$newname, 18, 18, $layer['Class'][$k]['Style'][0]['colorrange']);
 											}
 											else{
-												$image = $class->createLegendIcon(18,12);
+												if($maplayer->type == 0)$height = 18;			# Punktlayer
+												else $height = 12;
+												$image = $class->createLegendIcon(18, $height);
 												$filename = $this->map_saveWebImage($image,'jpeg');
 												$newname = $this->user->id.basename($filename);
 												rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
@@ -2237,7 +2245,7 @@ class GUI {
     	}
     	$select = $mapDB->getSelectFromData($layer['Data']);
 			$select = str_replace(' FROM ', ' from ', $select);
-			if($this->formvars['layer_id'] > 0)$select = str_replace(' from ', ', '.$data_attributes['table_alias_name'][$data_attributes['the_geom']].'.oid as exclude_oid'.' from ', $select);		# bei Rollenlayern nicht machen
+			if($this->formvars['layer_id'] > 0)$select = str_replace(' from ', ', '.$data_attributes[$data_attributes['the_geom_id']]['table_alias_name'].'.oid as exclude_oid'.' from ', $select);		# bei Rollenlayern nicht machen
 			$extent = 'st_transform(st_geomfromtext(\'POLYGON(('.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.'))\', '.$this->user->rolle->epsg_code.'), '.$layer['epsg_code'].')';				
 			$fromwhere = 'from ('.$select.') as foo1 WHERE st_intersects('.$data_attributes['the_geom'].', '.$extent.') ';
 			if($layer['Datentyp'] !== '1' AND $this->formvars['layer_id'] > 0 AND $this->formvars['oid']){		# bei Linienlayern werden auch die eigenen Punkte geholt, bei Polygonen nicht
@@ -3583,7 +3591,22 @@ class GUI {
     $this->formvars['fromwhere'] = pg_escape_string('from ('.$fromwhere.') as foo where 1=1');
     if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
       $this->formvars['fromwhere'] .= ' where (1=1)';
-    }    
+    }
+		
+		if($this->formvars['layer_id'] < 0){	# Rollenlayer sofort selektieren
+			$layerdb1 = $this->mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+			include_once (CLASSPATH.'polygoneditor.php');
+			$polygoneditor = new polygoneditor($layerdb1, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+			$tablename = '('.$fromwhere.') as foo';
+			$this->polygon = $polygoneditor->getpolygon(NULL, $tablename, $this->formvars['columnname'], $this->map->extent);
+			if($this->polygon['wktgeom'] != ''){
+				$this->formvars['newpathwkt'] = $this->polygon['wktgeom'];
+				$this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
+				$this->formvars['newpath'] = $this->polygon['svggeom'];
+				$this->formvars['firstpoly'] = 'true';
+			}
+		}
+		
     if($this->formvars['CMD'] != 'previous' AND $this->formvars['CMD'] != 'next'){
     	$currenttime=date('Y-m-d H:i:s',time());
     	$this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
@@ -7465,11 +7488,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->GenerischeSuche_Suchen();
 	}
 	
-	function dokument_loeschen(){
-		$_FILES[$this->formvars['document_attributename']]['name'] = 'delete';
-		$this->sachdaten_speichern();
-	}
-
   function layer_Datensaetze_loeschen($output = true) {
 		$layers = $this->user->rolle->getLayer($this->formvars['chosen_layer_id']);
 		$layer = $layers[0];
@@ -7980,6 +7998,21 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
             if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
               $this->formvars['fromwhere'] .= ' where (1=1)';
             }
+						
+						if($this->formvars['layer_id'] < 0){	# Rollenlayer sofort selektieren
+							$layerdb1 = $mapdb->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+							include_once (CLASSPATH.'polygoneditor.php');
+							$polygoneditor = new polygoneditor($layerdb1, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+							$tablename = '('.$fromwhere.') as foo';
+							$this->polygon = $polygoneditor->getpolygon(NULL, $tablename, $this->formvars['columnname'], $this->map->extent);
+							if($this->polygon['wktgeom'] != ''){
+								$this->formvars['newpathwkt'] = $this->polygon['wktgeom'];
+								$this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
+								$this->formvars['newpath'] = $this->polygon['svggeom'];
+								$this->formvars['firstpoly'] = 'true';
+							}
+						}
+						
 						if($this->formvars['chosen_layer_id']){			# für neuen Datensatz verwenden -> Geometrie abfragen
 							if($this->geomtype == 'POLYGON' OR $this->geomtype == 'MULTIPOLYGON' OR $this->geomtype == 'GEOMETRY'){		# Polygonlayer
 								include_once (CLASSPATH.'polygoneditor.php');
@@ -8785,6 +8818,23 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->main='tif_export.php';
     $this->output();
   }
+	
+	function create_geojson_rollenlayer(){
+    $this->main='create_geojson_rollenlayer.php';
+    $this->output();
+	}
+	
+	function create_geojson_rollenlayer_load(){
+		include_(CLASSPATH.'data_import_export.php');
+		$this->data_import_export = new data_import_export();
+		$layer_id = $this->data_import_export->create_import_rollenlayer($this->formvars, 'GeoJSON', $this->Stelle, $this->user, $this->database, $this->pgdatabase);
+		$this->loadMap('DataBase');
+		$this->zoomToMaxLayerExtent($layer_id);
+		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
+    $this->drawMap();
+    $this->saveMap('');
+    $this->output();
+	}	
 
 	function create_shp_rollenlayer(){
 		$this->titel='Shape-Datei Anzeigen';
@@ -8848,6 +8898,26 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->data_import_export->shp_import($this->formvars);
     $this->output();
   }
+	
+	function geojson_import(){
+    $this->titel='GeoJSON-Import';
+    $this->main='geojson_import.php';
+    $this->output();
+  }
+	
+	function geojson_import_importieren(){
+		include_once (CLASSPATH.'data_import_export.php');
+    $this->titel='GeoJSON-Import';
+    $this->main='geojson_import.php';
+		$this->data_import_export = new data_import_export();
+    $this->result = $this->data_import_export->geojson_import($this->pgdatabase, $this->formvars['schema_name'], $this->formvars['table_name']);
+    $this->output();
+  }
+	
+	function daten_import(){	
+		$this->main='data_import.php';
+		$this->output();
+	}
 
   function daten_export(){
 		include_once (CLASSPATH.'data_import_export.php');
@@ -8883,6 +8953,19 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	    if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
 	      $this->formvars['fromwhere'] .= ' where (1=1)';
 	    }
+			if($this->formvars['layer_id'] < 0){	# Rollenlayer sofort selektieren
+				$layerdb1 = $this->mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+				include_once (CLASSPATH.'polygoneditor.php');
+				$polygoneditor = new polygoneditor($layerdb1, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+				$tablename = '('.$fromwhere.') as foo';
+				$this->polygon = $polygoneditor->getpolygon(NULL, $tablename, $this->formvars['columnname'], $this->map->extent);
+				if($this->polygon['wktgeom'] != ''){
+					$this->formvars['newpathwkt'] = $this->polygon['wktgeom'];
+					$this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
+					$this->formvars['newpath'] = $this->polygon['svggeom'];
+					$this->formvars['firstpoly'] = 'true';
+				}
+			}
 		}
 		###################### über Checkboxen aus der Sachdatenanzeige des GLE ausgewählt ###############
 		if($this->formvars['all'] == ''){	    
@@ -10960,6 +11043,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
   }
 
   function sachdaten_speichern(){
+		if($this->formvars['document_attributename'] != '')$_FILES[$this->formvars['document_attributename']]['name'] = 'delete';		# das zu löschende Dokument
   	$_files = $_FILES;
     $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $form_fields = explode('|', $this->formvars['form_field_names']);

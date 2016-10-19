@@ -6,6 +6,11 @@ function vorlage(){
 	document.GUI.submit();
 }
 
+function loeschen(){
+	document.GUI.go.value='Nachweisloeschen';
+	document.GUI.submit();
+}
+
 function add_to_order(order){
 	if(document.GUI.order.value != '')document.GUI.order.value = document.GUI.order.value + ',';
 	document.GUI.order.value = document.GUI.order.value + order;
@@ -123,25 +128,30 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 			<? if(strpos($this->formvars['order'], 'flurid') === false){ ?>
 				<td align="center" width="65"><a href="javascript:add_to_order('flurid');" title="nach individueller Nummer sortieren"><span class="fett">Flur</span></a></td>
 			<? }else{echo '<td align="center" width="65"><span class="fett">Flur</span></td>';} ?>
-          <? if(NACHWEIS_PRIMARY_ATTRIBUTE != 'rissnummer'){			
+			
+      <? if(NACHWEIS_PRIMARY_ATTRIBUTE != 'rissnummer'){			
 				if(strpos($this->formvars['order'], 'stammnr') === false){ ?>
 					<td align="center" width="64"><a href="javascript:add_to_order('stammnr');" title="nach Antragsnr. sortieren"><span class="fett">Antragsnr.</span></a></td>
 				<? }else{echo '<td align="center" width="64"><span class="fett">Antragsnr.</span></td>';}
-			} ?>
-			<? if(strpos($this->formvars['order'], 'rissnummer') === false){ echo strpos($this->formvars['order'], 'rissnummer');?>
+				if(strpos($this->formvars['order'], 'blattnummer') === false){ ?>
+				<td align="center" width="87"><a href="javascript:add_to_order('blattnummer');" title="nach Blattnummer sortieren"><span class="fett">Blattnr.</span></a></td>
+			<? }else{echo '<td align="center" width="137"><span class="fett">Blattnr.</span></td>';}
+				} ?>
+			<? if(strpos($this->formvars['order'], 'rissnummer') === false){ ?>
 				<td align="center" width="64"><a href="javascript:add_to_order('rissnummer');" title="nach Rissnr. sortieren"><span class="fett">Rissnr.</span></a></td>
 			<? }else{echo '<td align="center" width="64"><span class="fett">Rissnr.</span></td>';} ?>
           <? if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){
+						if(strpos($this->formvars['order'], 'blattnummer') === false){ ?>
+				<td align="center" width="87"><a href="javascript:add_to_order('blattnummer');" title="nach Blattnummer sortieren"><span class="fett">Blattnr.</span></a></td>
+			<? }else{echo '<td align="center" width="137"><span class="fett">Blattnr.</span></td>';} 
 				if(strpos($this->formvars['order'], 'stammnr') === false){ ?>
 					<td align="center" width="64"><a href="javascript:add_to_order('stammnr');" title="nach Antragsnr. sortieren"><span class="fett">Antragsnr.</span></a></td>
 				<? }else{echo '<td align="center" width="64"><span class="fett">Antragsnr.</span></td>';}
 			} ?>            
+			
 			<? if(strpos($this->formvars['order'], 'art') === false){ ?>
 				<td align="center" width="137"><a href="javascript:add_to_order('art');" title="nach Dokumentenart sortieren"><span class="fett">Dokumentart</span></a></td>
 			<? }else{echo '<td align="center" width="137"><span class="fett">Dokumentart</span></td>';} ?>
-			<? if(strpos($this->formvars['order'], 'blattnummer') === false){ ?>
-				<td align="center" width="87"><a href="javascript:add_to_order('blattnummer');" title="nach Blattnummer sortieren"><span class="fett">Blattnr.</span></a></td>
-			<? }else{echo '<td align="center" width="137"><span class="fett">Blattnr.</span></td>';} ?>
 			<? if(strpos($this->formvars['order'], 'datum') === false){ ?>
 				<td align="center" width="45"><a href="javascript:add_to_order('datum');" title="nach Datum sortieren"><span class="fett">Datum</span></a></td>
 			<? }else{echo '<td align="center" width="137"><span class="fett">Datum</span></td>';} ?>
@@ -201,9 +211,11 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
           <td><div align="center"><?php echo $this->formvars['flurid']=$this->nachweis->Dokumente[$i]['flurid']; ?></div></td>
           <? if(NACHWEIS_PRIMARY_ATTRIBUTE != 'rissnummer'){ ?>  
           <td><div align="center"><?php echo $this->formvars['stammnr']=$this->nachweis->Dokumente[$i]['stammnr']; ?></div></td>
+					<td><div align="center"><?php echo $this->formvars['blattnummer']=str_pad($this->nachweis->Dokumente[$i]['blattnummer'],BLATTNUMMERMAXLENGTH,'0',STR_PAD_LEFT); ?></div></td>
           <? } ?>
           <td><div align="center"><?php echo $this->formvars['rissnummer']=$this->nachweis->Dokumente[$i]['rissnummer']; ?></div></td>
           <? if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){ ?>
+					<td><div align="center"><?php echo $this->formvars['blattnummer']=str_pad($this->nachweis->Dokumente[$i]['blattnummer'],BLATTNUMMERMAXLENGTH,'0',STR_PAD_LEFT); ?></div></td>
           <td><div align="center"><?php echo $this->formvars['stammnr']=$this->nachweis->Dokumente[$i]['stammnr']; ?></div></td>
           <? } ?>
           <td><div align="center"> 
@@ -223,8 +235,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
                     	echo $this->nachweis->Dokumente[$i]['andere_art_name'];
                     }
                 ?>
-            </div></td>
-          <td><div align="center"><?php echo $this->formvars['blattnummer']=str_pad($this->nachweis->Dokumente[$i]['blattnummer'],BLATTNUMMERMAXLENGTH,'0',STR_PAD_LEFT); ?></div></td>
+            </div></td>          
           <td><div align="center"><?php echo $this->nachweis->Dokumente[$i]['datum']; ?></div></td>
           <td><div align="center"><?php echo $this->formvars['fortf']=$this->nachweis->Dokumente[$i]['fortfuehrung']; ?></div></td>
           <td><div align="center"><?php echo $this->formvars['vermstelle']=$this->nachweis->Dokumente[$i]['vermst']; ?></div></td>
@@ -278,8 +289,9 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
           </td>
           <td>
           	<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten')){ ?>
-          		<a href="javascript:vorlage();"><span class="fett">--> markierte als Vorlage übernehmen</span></a></td>
+          		<a href="javascript:vorlage();"><span class="fett">--> markierte als Vorlage übernehmen</span></a>
           	<? } ?>
+					</td>
         </tr>
         <tr> 
           <td>einblenden</td>
@@ -299,7 +311,13 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
               <option value="1101"<?php if ($this->formvars['art_einblenden']==='1101') { ?> selected<?php } ?>>FFR + KVZ + Andere</option>
               <option value="1011"<?php if ($this->formvars['art_einblenden']==='1011') { ?> selected<?php } ?>>FFR + GN + Andere</option>
               <option value="0111"<?php if ($this->formvars['art_einblenden']==='0111') { ?> selected<?php } ?>>KVZ + GN + Andere</option>
-            </select></td>
+            </select>
+					</td>
+					<td>
+          	<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten')){ ?>
+          		<a href="javascript:loeschen();"><span class="fett">--> markierte löschen</span></a>
+          	<? } ?>
+					</td>
         </tr>
         <tr> 
           <td>Vorbereitungsnummer:</td>

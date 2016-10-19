@@ -474,6 +474,7 @@ FROM
         if($fieldtype == 'geometry'){
           $fields[$i]['geomtype'] = $this->get_geom_type($fields[$i]['real_name'], $tablename);
           $fields['the_geom'] = $fieldname;
+					$fields['the_geom_id'] = $i;
         }				
       }
       
@@ -546,7 +547,7 @@ FROM
 				c.relname = '".$table."' AND
 				".$and_column."
 				a.attnum > 0
-			ORDER BY a.attnum
+			ORDER BY a.attnum, indisunique desc, indisprimary desc
 		";
 		#echo '<br><br>' . $sql;
 		$ret = $this->execSQL($sql, 4, 0);

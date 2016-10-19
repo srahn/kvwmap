@@ -5,7 +5,7 @@
 #                                                                  #
 ####################################################################
 # aktuelle Versionsnummer
-define('VERSION','2.4');
+define('VERSION','2.5');
 define('APPLVERSION','kvwmap/');
 # Bezeichnung der MySQL-Datenbank mit den Benutzerdaten
 $dbname='kvwmapdb';
@@ -379,7 +379,7 @@ define('MINSCALE', 100);                                                        
 define('COORD_ZOOM_SCALE', 50000);																							# Version 2.4
 
 # Puffer in der Einheit (ZOOMUNIT) der beim Zoom auf ein Objekt hinzugegeben wird
-define('ZOOMBUFFER', 100);                                                 # Version 2.1 geändert in Version 2.5
+define('ZOOMBUFFER', 100);                                                 # Version 2.1
 
 # Einheit des Puffer der beim Zoom auf ein Objekt hinzugegeben wird
 # 'meter' oder 'scale'
