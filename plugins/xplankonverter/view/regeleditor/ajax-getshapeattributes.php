@@ -1,8 +1,9 @@
 <?PHP
 # DB_Conn
-$conn = pg_connect('dbname=kvwmapsp user=pgadmin password=PicaPica_Elster2');
+$conn = $this->pgdatabase->dbConn;
+
 if (!$conn){echo "Verbindung mit der Datenbank konnte nicht hergestellt werden.\n"; exit;}
-# Variablen, die aus Konvertierung übergeben werden sollten:
+# Variablen, die aus Konvertierung Ã¼bergeben werden sollten:
 $konvertierung_id = $_GET['konvertierung_id'];
   
 // Retrieve data from Query String

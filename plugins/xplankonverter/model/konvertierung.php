@@ -208,13 +208,14 @@ class Konvertierung extends PgObject {
 
 		# Lösche vorhandene Datenobjekte der Konvertierung
 		foreach($this->get_class_names() AS $class_name) {
+			# Lösche Relationen
 			$sql = "
 				DELETE FROM
 					{$class_name}
 				WHERE
 					konvertierung_id = {$this->get('id')}
 			";
-			$this->debug->show('Delete Objekte with konvertierung_id ' . $this->get('id') . ' und sql: ' . $sql . ' in reset Mapping.', Konvertierung::$write_debug);
+			$this->debug->show("Delete Objekte von {$class_name} with konvertierung_id " . $this->get('id') . ' und sql: ' . $sql . ' in reset Mapping.', Konvertierung::$write_debug);
 			$query = pg_query($this->database->dbConn, $sql);
 		}
 	}

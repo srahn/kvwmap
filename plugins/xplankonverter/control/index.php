@@ -460,6 +460,14 @@ switch($this->go){
 		include(PLUGINS . 'xplankonverter/view/regeleditor/index.php');
 	} break;
 
+	case 'xplankonverter_regeleditor_getxplanattributes' : {
+		include(PLUGINS . 'xplankonverter/view/regeleditor/ajax-getxplanattributes.php');
+	} break;
+
+	case 'xplankonverter_regeleditor_getshapeattributes' : {
+		include(PLUGINS . 'xplankonverter/view/regeleditor/ajax-getshapeattributes.php');
+	} break;
+
 	default : {
 		$this->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
 	}

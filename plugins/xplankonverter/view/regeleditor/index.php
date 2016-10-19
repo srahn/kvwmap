@@ -55,12 +55,12 @@ $class_name = $_REQUEST['class_name'];
     <div id="warnung_area">
       <div id="Warnung_1"><i class="fa fa-exclamation-triangle"> Es muss eine XPlan-Klasse ausgewählt werden!</i></div>
       <div id="Warnung_2"><i class="fa fa-exclamation-triangle"> Es muss eine Shape-Datei ausgewählt werden!</i></div>
-      <div id="Warnung_3" style="display: none"><i class="fa fa-exclamation-triangle"> Das Attribut rechtscharakter ist ein Pflichtattribut in XPlan und sollte immer befüllt sein!</i></div>
+      <div id="Warnung_3" style="display: none"><i class="fa fa-exclamation-triangle"> Die Attribute rechtscharakter und typ sind Pflichtattribute und müssen immer befüllt sein!</i></div>
     </div>
     <!-- SQL-Ausgabefenster -->
     <div id="sql_area" class="ganze-breite" style="display: none">
       <div id="sql_ausgabe" class="center60p box">
-        <h3>SQL-Ausgabe:
+        <h3>SQL-Statement:
         <!--<a class="float-right" id="setValue"><input type="button" onclick="setValue();" value="Übernehmen"></a></h3>-->
         <a class="float-right" id="setValue"><button onclick="setValue()" value="Übernehmen"><i class="fa fa-arrow-circle-up fa-3x"></i></button></a></h3>
         <div id="sql_ausgabefenster" class="boxsql">
@@ -187,7 +187,7 @@ $class_name = $_REQUEST['class_name'];
           <td align="top left">
             <!--<div class="halbe-breite box">-->
               <?php
-              featuretype_liste($this->pgdatabase->dbConn, $class_name);
+              	featuretype_liste($this->pgdatabase->dbConn, $class_name);
               ?>
               <div id="target_table"></div>
             </div>
@@ -221,6 +221,7 @@ $class_name = $_REQUEST['class_name'];
       ORDER BY
         table_name
     ";
+		echo '<br>Frage Shape Tabellen der Konvertierung (' . $konvertierung_id . ') ab mit sql:<br>';
     $result = pg_query($conn, $sql);
     $num_rows = pg_num_rows($result);
     while ($row = pg_fetch_row($result)) {
@@ -230,7 +231,7 @@ $class_name = $_REQUEST['class_name'];
     echo '</select>';
 
     #Fehlermeldung bei nicht vorhandenen Shape-Dateien
-    if($num_rows <=0) {
+    if($num_rows =0) {
       echo '<script>';
       echo '$("#fehler_area").append("<b>Fehler: Bevor der Query Builder verwendet werden kann, müssen zum Plan gehörige Shapefiles hochgeladen werden!</b>");';
       echo '$("#target_selector").hide();';
@@ -240,13 +241,14 @@ $class_name = $_REQUEST['class_name'];
     }
     echo '<b><span id="source"></span></b>';
     echo '<br>';
-    foreach($shp_tables as $shp_table){
-      echo '<div id="' . $shp_table . '_source_attributes" style="display: none">';
-      echo '<table border="1" style="width:100%">';
-      echo '<tr>';
-      echo '<td><b>Attribut</b></td>';
-      echo'<td><b>Wertedefinition</b></td>';
-      echo'</tr>';
+    foreach($shp_tables as $shp_table) { ?>
+      <div id="<?php echo $shp_table; ?>_source_attributes" style="display: none">
+				<table border="1" cellspacing="0" cellpadding="2" style="width:100%; margin-top: 6px"">
+      		<tr>
+      			<th style="background-color: <?php echo BG_DEFAULT; ?>"><b>Attribut</b></th>
+      			<th style="background-color: <?php echo BG_DEFAULT; ?>"><b>Datentyp</b></th>
+						<th style="background-color: <?php echo BG_DEFAULT; ?>">Werte</th>
+      		</tr><?php
       $sql ="
         SELECT
           column_name, data_type
@@ -278,7 +280,7 @@ $class_name = $_REQUEST['class_name'];
             echo '<td><div id="geom_' . $shp_table . '">' . $geom . '</td>';
           }
         }
-        echo '<td><button id ="distinct_' . $row[0] . '" title="Zeigt die ersten 100 Werte an" onclick="distinctValues(this.id)"><i class="fa fa-question-circle"></i></button>';
+        echo '<td align="center"><button id ="distinct_' . $row[0] . '" title="Zeigt die ersten 100 Werte an" onclick="distinctValues(this.id)"><i class="fa fa-question-circle"></i></button>';
         echo '<span id="distinctValues_' . $shp_table . "_" .  $row[0] . '" style="display: none">';
         $sqlDistinct = "
           SELECT 
@@ -333,12 +335,11 @@ $class_name = $_REQUEST['class_name'];
 		}
 		echo ' </select>';
 		echo '<b><span id="target"></span></b><br>';
-		if ($was_selected) {
-			echo '
+		if ($was_selected) { ?>
 				<script type="text/javascript">
+					console.log('call choosFeatureTable()');
 				 chooseFeatureTable();
-				</script>
-			';
+				</script><?php
 		}
 	}
 ?></HTML>

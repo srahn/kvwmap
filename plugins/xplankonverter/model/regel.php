@@ -39,24 +39,14 @@ public static	function find_by_id($gui, $by, $id) {
 		$this->debug->show('Regel convert mit konvertierung_id: ' . $konvertierung_id, Regel::$write_debug);
 		$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'sql_ausfuehrbar');
 		$validierung->konvertierung_id = $konvertierung_id;
+
+		# Objekte anlegen
 		$result = @pg_query(
 			$this->database->dbConn,
 			$this->get_convert_sql($konvertierung_id)
 		);
-		return $validierung->sql_ausfuehrbar($result, $this->get('id'));
 
-		/*
-		foreach(pg_fetch_all($query) AS $object_gml_id) {
-			if ($this->get('bereich_gml_id') != '') {
-				$sql = "
-					INSERT INTO
-						gml_classes.rp_object2rp_bereich
-					SET
-						rp_object_gml_id = '" . $object_gml_id . "',
-						rp_bereich_gml_id = '" . $this->get('bereich_gml_id') . "'
-				";
-			}
-		}*/
+		return $validierung->sql_ausfuehrbar($result, $this->get('id'));
 	}
 
 	function get_convert_sql($konvertierung_id) {
@@ -79,19 +69,22 @@ public static	function find_by_id($gui, $by, $id) {
 		if ($this->get('bereiche') != '') {
 			$sql = substr_replace(
 				$sql,
-				' (gehoertzurp_bereich, ',
+				' (gehoertzubereich, ',
 				strpos($sql, ' ('),
 				strlen(' (')
 			);
 			
 			$sql = str_ireplace(
 				'select',
-				"select '{$this->get('bereiche')}',",
+				"select '" . $this->get_bereich_gml_ids() . "',",
 				$sql
 			);
 		}
 
-		$sql = "SET search_path=xplan_gml, xplan_shapes_{$konvertierung_id}, public; {$sql}";
+		$sql = "SET search_path=xplan_gml, xplan_shapes_{$konvertierung_id}, public;
+			{$sql}
+			RETURNING gml_id, gehoertzubereich
+		";
 
 		$this->debug->show('nach sql: ' . $sql, Regel::$write_debug);
 		return $sql;
@@ -125,6 +118,13 @@ public static	function find_by_id($gui, $by, $id) {
 	function get_bereich() {
 		$bereich = new Bereich($this->gui);
 		return $bereich->find_by('gml_id', $this->get('bereich_gml_id'));
+	}
+	
+	/*
+	* Diese Funktion liefert die bereich_gml_id der Regel oder falls vorhanden mehrere aus dem Attribut bereiche
+	*/
+	function get_bereich_gml_ids() {
+		return ($this->get('bereiche') != '{}' ? $this->get('bereiche') : '{' . $this->get('bereich_gml_id') . '}');
 	}
 
 	/*

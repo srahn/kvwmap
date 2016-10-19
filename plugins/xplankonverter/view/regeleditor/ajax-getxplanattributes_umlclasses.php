@@ -30,7 +30,7 @@ while ($row = pg_fetch_row($results)){
   $generalizations[] = $row;
 }
 
-// Array für die Ids des abzufragenden FeatureTypes und aller Parent-Objekte (RP_Objekt, XP_Objekt)
+// Array fÃ¼r die Ids des abzufragenden FeatureTypes und aller Parent-Objekte (RP_Objekt, XP_Objekt)
 $classes_all_id = array();
 foreach ($classes as $class){
   if($class[1] == $featuretype){

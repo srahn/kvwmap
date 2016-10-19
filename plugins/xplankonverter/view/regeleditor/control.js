@@ -2,7 +2,6 @@
 // ----------------------------------------------------------------------------------------------------
 // Information & Basic
 // ----------------------------------------------------------------------------------------------------
-
 function getRelPath() {
   return 'plugins/xplankonverter/view/regeleditor/';
 }
@@ -815,7 +814,6 @@ function resetAttributzuweisungen() {
 // AJAX Funktionen
 // ----------------------------------------------------------------------------------------------------
 function getXPlanAttributes() {
-  console.log('getXPlanAttributes');
    var ajaxRequest; // The variable that makes Ajax possible!
    try{
       ajaxRequest = new XMLHttpRequest(); // Opera 8.0+, Firefox, Safari
@@ -843,8 +841,8 @@ function getXPlanAttributes() {
   }
    // Nimmt den Wert featuretype und gibt es an den Server Script
    var featuretype = document.getElementById('target_selector').value;
-   var queryString = "?featuretype=" + featuretype;
-   ajaxRequest.open("GET", getRelPath() + "ajax-getxplanattributes.php" + queryString, true);
+   var queryString = "featuretype=" + featuretype;
+   ajaxRequest.open("GET", 'index.php?go=xplankonverter_regeleditor_getxplanattributes&' + queryString, true);
    ajaxRequest.send(null);
 }
 
@@ -874,8 +872,8 @@ function getShapeAttributes() {
   }
   // Nimmt den Wert Shapefile und gibt es an den Server Script 
    var shapefile = document.getElementById('source_selector').value;
-   var queryString = "?shapefile=" + shapefile + "&konvertierung_id=" + konvertierung_id;
-   ajaxRequest.open("GET", getRelPath() + "ajax-getshapeattributes.php" + queryString, true);
+   var queryString = "shapefile=" + shapefile + "&konvertierung_id=" + konvertierung_id;
+   ajaxRequest.open("GET", "index.php?go=xplankonverter_regeleditor_getshapeattributes&" + queryString, true);
    ajaxRequest.send(null);
 }
 
