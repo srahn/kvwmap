@@ -1076,7 +1076,7 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  } break;
 	  
 	  case 'Dokument_Loeschen' : {
-			$GUI->dokument_loeschen();
+			$GUI->sachdaten_speichern();
 	  } break;
 
 		case 'neuer_Layer_Datensatz' : {
