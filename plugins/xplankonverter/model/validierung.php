@@ -54,15 +54,17 @@ class Validierung extends PgObject {
 	}
 
 	function regel_existiert($regeln) {
+		$regeln_existieren = (count($regeln) > 0);
 		$validierungsergebnis = new Validierungsergebnis($this->gui);
 		$validierungsergebnis->create(
 			array(
 				'konvertierung_id' => $this->konvertierung_id,
 				'validierung_id' => $this->get('id'),
-				'status' => (count($regeln) == 0 ? 'Warung' : 'Erfolg'),
-				'msg' => 'Es sind Regeln zur Konvertierung vorhanden.'
+				'status' => ($regeln_existieren ? 'Erfolg' : 'Warnung'),
+				'msg' => 'Es sind' . ($regeln_existieren ? '' : ' keine') . ' Regeln zur Konvertierung vorhanden.'
 			)
 		);
+		return $regeln_existieren;
 	}
 
 	function sql_ausfuehrbar($result, $regel_id) {
@@ -114,6 +116,62 @@ class Validierung extends PgObject {
 				)
 			);
 		}
+	}
+
+	/*
+	* Funktion findet alle Shape-Objekte, die the_geom = NULL haben.
+	* ToDo: Eigentlich müsste hier noch die Shape-Tabelle, bzw. der Shape-Layer extrahiert werden,
+	* damit in der Meldung direkt auf die fehlerhaften Objekte verwiesen werden kann.
+	* Wenn die Geometrie dann auch änderbar sein soll, müssten die Layerrechte für den shape Layer
+	* noch gesetzt werden. Aber dann immer automatisch beim Anlegen des Layers.
+	*/
+	function geometrie_vorhanden($sql, $regel_id) {
+		$this->debug->show('validate geometrie_vorhanden mit sql: ' . $sql, Validierung::$write_debug);
+		$geometrie_vorhanden = true;
+		$sql = stristr($sql, 'select');
+		$this->debug->show('sql von select an: ' . $sql, Validierung::$write_debug);
+
+		$sql = str_ireplace(
+			'select',
+			"select gid,",
+			$sql
+		);
+		$this->debug->show('sql mit gid: ' . $sql, Validierung::$write_debug);
+
+		if (strpos(strtolower($sql), 'where') === false) {
+			$sql .= ' where the_geom IS NULL';
+		}
+		else {
+			$sql = str_ireplace(
+				'where',
+				"where the_geom IS NULL AND",
+				$sql
+			);
+		}
+		$this->debug->show('sql mit where Klausel: ' . $sql, Validierung::$write_debug);
+
+		$sql = "SET search_path=xplan_shapes_{$this->konvertierung_id}, public; " . $sql;
+
+		$this->debug->show('sql zur Prüfung: ' . $sql, Validierung::$write_debug);
+
+		$result = pg_query($this->database->dbConn, $sql);
+
+		while ($row = pg_fetch_assoc($result)) {
+			$validierungsergebnis = new Validierungsergebnis($this->gui);
+			$validierungsergebnis->create(
+				array(
+					'konvertierung_id' => $this->konvertierung_id,
+					'validierung_id' => $this->get('id'),
+					'status' => 'Warnung',
+					'regel_id' => $regel_id,
+					'shape_gid' => $row['gid'],
+					'msg' => 'Objekt mit gid=' . $row['gid'] . ' hat keine Geometrie.'
+				)
+			);
+			$geometrie_vorhanden = false;
+		}
+
+		return $geometrie_vorhanden;
 	}
 
   function doValidate($konvertierung) {

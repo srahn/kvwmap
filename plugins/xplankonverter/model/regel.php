@@ -41,12 +41,20 @@ public static	function find_by_id($gui, $by, $id) {
 		$validierung->konvertierung_id = $konvertierung_id;
 
 		if ($validierung->sql_vorhanden($this->get('sql'), $this->get('id'))) {
+
+			# Prüft ob alle Objekte eine Geometrie haben
+			$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'geometrie_vorhanden');
+			$validierung->konvertierung_id = $konvertierung_id;
+			$validierung->geometrie_vorhanden($this->get('sql'), $this->get('id'));
+
+			# Prüft ob das sql ausführbar ist.
 			$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'sql_ausfuehrbar');
 			$validierung->konvertierung_id = $konvertierung_id;
+			$sql = $this->get_convert_sql($konvertierung_id);
 			# Objekte anlegen
 			$result = @pg_query(
 				$this->database->dbConn,
-				$this->get_convert_sql($konvertierung_id)
+				$sql
 			);
 			$success = $validierung->sql_ausfuehrbar($result, $this->get('id'));
 		}
@@ -72,6 +80,17 @@ public static	function find_by_id($gui, $by, $id) {
 			"select {$konvertierung_id},",
 			$sql
 		);
+
+		if (strpos(strtolower($sql), 'where') === false) {
+			$sql .= ' WHERE the_geom IS NOT NULL';
+		}
+		else {
+			$sql = str_ireplace(
+				'where',
+				"WHERE the_geom IS NOT NULL AND",
+				$sql
+			);
+		}
 
 		if ($this->get('bereiche') != '') {
 			$sql = substr_replace(

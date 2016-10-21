@@ -235,19 +235,18 @@ class Konvertierung extends PgObject {
 		$regeln = $this->get_regeln();
 		$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'regel_existiert');
 		$validierung->konvertierung_id = $this->get('id');
-		$validierung->regel_existiert($regeln);
-
-		$success = true;
-		foreach($regeln AS $regel) {
-			$result = $regel->convert($this->get('id'));
-			if (!$result) {
-				$success = false;
+		if ($validierung->regel_existiert($regeln)) {
+			$success = true;
+			foreach($regeln AS $regel) {
+				$result = $regel->convert($this->get('id'));
+				if (!$result) {
+					$success = false;
+				}
 			}
+			$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'alle_sql_ausfuehrbar');
+			$validierung->konvertierung_id = $this->get('id');
+			$validierung->alle_sql_ausfuehrbar($success);
 		}
-		$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'alle_sql_ausfuehrbar');
-		$validierung->konvertierung_id = $this->get('id');
-		$validierung->alle_sql_ausfuehrbar($success);
-
 	}
 	
 	function validierung_erfolgreich() {

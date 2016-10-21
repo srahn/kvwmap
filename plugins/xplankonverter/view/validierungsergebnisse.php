@@ -10,16 +10,26 @@ if ($this->Fehlermeldung!='') {
 <br>
 <script language="javascript" type="text/javascript">
 // formatter functions
+function validierung_msg_formatter(value, row) {
+	if (row.ergebnis_status == 'Fehler')
+		return row.validierung_msg_error;
+	else if (row.ergebnis_status == 'Warnung')
+		return row.validierung_msg_warning + '<br>' + value;
+	else
+		return row.validierung_msg_success;
+}
+
 function validierung_msg_correcture_formatter(value, row) {
-	if ( row.ergebnis_status == 'Fehler'
-		|| row.ergebnis_status == 'Warnung') {
+	if ( row.ergebnis_status == 'Fehler' || row.ergebnis_status == 'Warnung') {
 		output = row.validierung_msg_correcture;
 	}
 	else {
 		output = '';
 	}
 	if (row.regel_id)
-		output += ' <a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=9&operator_id==&value_id=' + row.regel_id + '"><i class="fa fa-lg fa-pencil"></i></a>';
+		output += ' zur Regel <a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=9&operator_id==&value_id=' + row.regel_id + '"><i class="fa fa-lg fa-pencil"></i></a>';
+	if (row.shape_gid)
+		output += ' zum Objekt <a href="index.php?go=Layer-Suche&selected_group_id=' + row.shape_layer_group_id + '"><i class="fa fa-lg fa-pencil"></i></a>';
 	return output;
 }
 
@@ -77,6 +87,13 @@ function validierungsergebnisseRowAttribs(row, index){
         class="text-left"
       >Validierung</th>
       <th
+        data-field="validierung_beschreibung"
+        data-visible="false"
+        data-switchable="true"
+        data-sortable="false"
+        class="text-left"
+      >Beschreibung</th>
+      <th
         data-field="ergebnis_status"
         data-visible="true"
         data-switchable="true"
@@ -85,6 +102,7 @@ function validierungsergebnisseRowAttribs(row, index){
       >Status</th>
       <th
         data-field="ergebnis_msg"
+				data-formatter="validierung_msg_formatter"
         data-visible="true"
         data-switchable="true"
         data-sortable="true"
