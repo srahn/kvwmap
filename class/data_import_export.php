@@ -200,6 +200,7 @@ class data_import_export {
 				if($komma)$sql.= ", ";
 				$j = $i+1;
 				if($headlines){
+					if(is_numeric(substr($columns[$i], 0, 1)))$columns[$i] = '_'.$columns[$i];
 					$column = strtolower(umlaute_umwandeln(utf8_encode($columns[$i])));
 					$sql.= $column." varchar";
 					if($formvars['column'.$i] == 'label')$labelitem = $column;
