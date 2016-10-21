@@ -37,16 +37,23 @@ public static	function find_by_id($gui, $by, $id) {
 	*/
 	function convert($konvertierung_id) {
 		$this->debug->show('Regel convert mit konvertierung_id: ' . $konvertierung_id, Regel::$write_debug);
-		$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'sql_ausfuehrbar');
+		$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'sql_vorhanden');
 		$validierung->konvertierung_id = $konvertierung_id;
 
-		# Objekte anlegen
-		$result = @pg_query(
-			$this->database->dbConn,
-			$this->get_convert_sql($konvertierung_id)
-		);
-
-		return $validierung->sql_ausfuehrbar($result, $this->get('id'));
+		if ($validierung->sql_vorhanden($this->get('sql'), $this->get('id'))) {
+			$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'sql_ausfuehrbar');
+			$validierung->konvertierung_id = $konvertierung_id;
+			# Objekte anlegen
+			$result = @pg_query(
+				$this->database->dbConn,
+				$this->get_convert_sql($konvertierung_id)
+			);
+			$success = $validierung->sql_ausfuehrbar($result, $this->get('id'));
+		}
+		else {
+			$success = false;
+		}
+		return $success;
 	}
 
 	function get_convert_sql($konvertierung_id) {

@@ -34,6 +34,7 @@ class Validierung extends PgObject {
 
 	static $schema = 'xplankonverter';
 	static $tableName = 'validierungen';
+	static $write_debug = false;
 
 	function Validierung($gui) {
 		#echo '<br>Create new Object Validierung';
@@ -80,6 +81,25 @@ class Validierung extends PgObject {
 			$ausfuehrbar = false;
 		}
 		return $ausfuehrbar;
+	}
+
+	function sql_vorhanden($sql, $regel_id) {
+		$this->debug->show('sql_vorhanden mit sql: ' . $sql . ' validieren.', Validierung::$write_debug);
+		$vorhanden = true;
+		if (empty($sql)) {
+			$validierungsergebnis = new Validierungsergebnis($this->gui);
+			$validierungsergebnis->create(
+				array(
+					'konvertierung_id' => $this->konvertierung_id,
+					'validierung_id' => $this->get('id'),
+					'status' => 'Fehler',
+					'msg' => 'Das SQL-Statement ist leer.',
+					'regel_id' => $regel_id
+				)
+			);
+			$vorhanden = false;
+		}
+		return $vorhanden;
 	}
 
 	function alle_sql_ausfuehrbar($alle_ausfuehrbar) {
