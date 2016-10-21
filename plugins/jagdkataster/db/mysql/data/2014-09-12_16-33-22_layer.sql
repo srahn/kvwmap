@@ -192,7 +192,7 @@ UPDATE layer_attributes SET options = REPLACE(options, '146', @last_layer_id146)
 # Layer für Gruppe Abrundungsverfahren  #
 #########################################
 # Definitionen
-INSERT INTO `u_groups` (`id` ,`Gruppenname`) VALUES (NULL , 'Jagd-Abrundungsverfahren');
+INSERT INTO `u_groups` (`id` ,`Gruppenname`) VALUES (NULL , 'Jagdkataster-Abrundung');
 SET @group_id = LAST_INSERT_ID();
 SET @connection = 'user=xxxx password=xxxx dbname=kvwmapsp';
 
