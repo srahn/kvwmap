@@ -50,15 +50,19 @@ class data_import_export {
 				$custom_tables = $this->import_custom_pointlist($formvars, $pgdatabase);
 			}break;
 			case 'GPX' : {
-				$custom_tables = $this->import_custom_gpx($formvars, $pgdatabase);
 				$formvars['epsg'] = 4326;
+				$custom_tables = $this->import_custom_gpx($formvars, $pgdatabase);				
 			}break;
 			case 'OVL' : {
-				$custom_tables = $this->import_custom_ovl($formvars, $pgdatabase);
 				$formvars['epsg'] = 4326;
+				$custom_tables = $this->import_custom_ovl($formvars, $pgdatabase);
 			}break;
 			case 'DXF' : {
 				$custom_tables = $this->import_custom_dxf($formvars, $pgdatabase);
+			}break;
+			case 'GeoJSON' : {
+				$custom_tables = $this->import_custom_geojson($pgdatabase);
+				$formvars['epsg'] = $custom_tables[0]['epsg'];
 			}break;
 		}
 		foreach($custom_tables as $custom_table){				# ------ Rollenlayer erzeugen ------- #
@@ -366,7 +370,7 @@ class data_import_export {
 	    ";
 	    $ret = $pgdatabase->execSQL($sql,4, 0);
 	    if(!$ret[0]){
-	      $result = pg_fetch_array($ret[1]);
+	      $result = pg_fetch_assoc($ret[1]);
 	      if(strpos($result['geometrytype'], 'POINT') !== false){
 	      	$datatype = 0;
 	      }elseif(strpos($result['geometrytype'], 'LINESTRING') !== false){
@@ -452,6 +456,46 @@ class data_import_export {
 			}
 		}
 	}
+	
+	function import_custom_geojson($pgdatabase){
+		return $this->geojson_import($pgdatabase, CUSTOM_SHAPE_SCHEMA, NULL);
+	}
+	
+	function geojson_import($pgdatabase, $schema, $tablename){
+		$_files = $_FILES;	
+		if($_files['file1']['name']){
+      $importfile = UPLOADPATH.$_files['file1']['name'];
+      if(move_uploaded_file($_files['file1']['tmp_name'],$importfile)){
+				if(file_exists($importfile)){
+					$json = json_decode(file_get_contents($importfile));
+					if($json->crs->properties->name != '')$epsg = array_pop(explode('EPSG::', $json->crs->properties->name));
+					else $epsg = 4326;
+					if($tablename == NULL)$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($importfile), 0, 15))).rand(1,1000000);
+					$this->ogr2ogr_import($schema, $tablename, $epsg, $importfile, $pgdatabase, NULL, NULL, NULL, 'UTF8');
+					$sql = '
+						ALTER TABLE '.$schema.'.'.$tablename.' SET WITH OIDS; 
+						SELECT geometrytype(the_geom) AS geometrytype FROM '.$schema.'.'.$tablename.' LIMIT 1;';
+					$ret = $pgdatabase->execSQL($sql,4, 0);
+					if(!$ret[0]){
+						$result = pg_fetch_assoc($ret[1]);
+						if(strpos($result['geometrytype'], 'POINT') !== false){
+							$datatype = 0;
+						}elseif(strpos($result['geometrytype'], 'LINESTRING') !== false){
+							$datatype = 1;
+						}elseif(strpos($result['geometrytype'], 'POLYGON') !== false){
+							$datatype = 2;
+						}
+					}
+					$custom_tables[0]['datatype'] = $datatype;
+					$custom_tables[0]['tablename'] = $tablename;
+					$custom_tables[0]['epsg'] = $epsg;
+		      if(!$ret[0]){
+						return $custom_tables;
+					}
+				}
+			}
+		}
+	}	
 	
   function shp_import_speichern($formvars, $database){
    	$this->formvars = $formvars;
@@ -650,8 +694,8 @@ class data_import_export {
 		exec($command.'"');
 	}
 	
-	function ogr2ogr_import($schema, $tablename, $epsg, $importfile, $database, $layer, $sql = NULL, $options = NULL){
-		$command = 'export PGCLIENTENCODING=LATIN1;'.OGR_BINPATH.'ogr2ogr ';
+	function ogr2ogr_import($schema, $tablename, $epsg, $importfile, $database, $layer, $sql = NULL, $options = NULL, $encoding = 'LATIN1'){
+		$command = 'export PGCLIENTENCODING='.$encoding.';'.OGR_BINPATH.'ogr2ogr ';
 		if($options != NULL)$command.= $options;
 		$command.= ' -f PostgreSQL -lco GEOMETRY_NAME=the_geom -nln '.$tablename.' -a_srs EPSG:'.$epsg;
 		if($sql != NULL)$command.= ' -sql "'.$sql.'"';
@@ -933,6 +977,11 @@ class data_import_export {
 					$exportfile = $exportfile.'.kml';
 					$this->ogr2ogr_export($sql, 'KML', $exportfile, $layerdb);
 					$contenttype = 'application/vnd.google-earth.kml+xml';
+				}break;
+				
+				case 'GeoJSON' : {
+					$exportfile = $exportfile.'.json';
+					$this->ogr2ogr_export($sql, 'GeoJSON', $exportfile, $layerdb);
 				}break;
 				
 				case 'CSV' : {
