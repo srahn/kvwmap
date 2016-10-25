@@ -81,6 +81,7 @@
 				$this->debug->show('Führe ' . $fired . ' ' . $event . ' in handle_regel Funktion aus.', false);
 				$regel = Regel::find_by_id($this, 'oid', $oid);
 				$regel->destroy();
+				$regel->konvertierung->set_status();
 			} break;
 
 			case ($fired == 'AFTER' AND $event == 'DELETE') : {

@@ -1,13 +1,17 @@
 <?php
 class MyObject {
+	
+	static $write_debug = false;
   
-  function MyObject($gui, $tableName, $debug = false) {
+  function MyObject($gui, $tableName) {
+		$this->gui = $gui;
     $this->debug = $gui->debug;
     $this->database = $gui->database;
     $this->tableName = $tableName;
     $this->identifier = 'id';
     $this->identifier_type = 'integer';
     $this->data = array();
+		$this->debug->show('<p>New MyObject for table: '. $this->tableName, MyObject::$write_debug);
   }
 
   /*
@@ -33,7 +37,7 @@ class MyObject {
 	/*
 	* Search for an record in the database
 	* by the given where clause
-	* @ return an object with this record
+	* @ return all objects
 	*/
 	function find_where($where) {
 		$sql = "
@@ -44,7 +48,31 @@ class MyObject {
 				WHERE
 					" . $where . "
 		";
-		$this->debug->show('mysql find_where sql: ' . $sql, false);
+		$this->debug->show('mysql find_where sql: ' . $sql, MyObject::$write_debug);
+		$query = mysql_query($sql, $this->database->dbConn);
+		$result = array();
+		while($this->data = mysql_fetch_assoc($query)) {
+			$result[] = clone $this;
+		}
+		return $result;
+	}
+
+	/*
+	* Search for an record in the database
+	* by the given sql clause
+	* @ return all found objects
+	*/
+	function find_by_sql($params) {
+		$sql = "
+			SELECT
+				" . (!empty($params['select']) ? $params['select'] : '*') . "
+			FROM
+				" . (!empty($params['from']) ? $params['from'] : "`" . $this->tableName . "`") . "
+			WHERE
+				" . (!empty($params['where']) ? $params['where'] : '') . "
+				" . (!empty($params['order']) ? 'ORDER BY ' . $params['order'] : '') . "
+		";
+		$this->debug->show('mysql find_by_sql sql: ' . $sql, MyObject::$write_debug);
 		$query = mysql_query($sql, $this->database->dbConn);
 		$result = array();
 		while($this->data = mysql_fetch_assoc($query)) {
@@ -77,20 +105,41 @@ class MyObject {
     $this->data[$attribute] = $value;
   }
 
-  function create($data) {
+  function create($data = array()) {
+		$this->debug->show('<p>MyObject create ' . $this->tablename, MyObject::$write_debug);
     if (!empty($data))
       $this->data = $data;
+
     $sql = "
       INSERT INTO `" . $this->tableName . "` (
         `" . implode('`, `', $this->getAttributes()) . "`
       )
       VALUES (
-        '" . implode("', '", $this->getValues()) . "'
+        " . implode(
+					", ", 
+					array_map(
+						function ($value) {
+							if ($value === NULL) {
+								$v = 'NULL';
+							}
+							else if (is_numeric($value)) {
+								$v = "'" . $value . "'";
+							}
+							else {
+								$v = "'" . addslashes($value) . "'";
+							}
+							return $v;
+						},
+						$this->getValues()
+					)
+				) . "
       )
     ";
-    $this->debug->show('<p>sql: ' . $sql);
+    $this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
     mysql_query($sql);
-    $this->set('id', mysql_insert_id());
+		$new_id = mysql_insert_id();
+    $this->debug->show('<p>new id: ' . $new_id, MyObject::$write_debug);
+    $this->set($this->identifier, $new_id);
   }
 
   function update() {
@@ -115,7 +164,7 @@ class MyObject {
       WHERE
         " . $this->identifier . " = {$quote}" . $this->get($this->identifier) . "{$quote}
     ";
-    $this->debug->show('MyObject delete sql: ' . $sql, true);
+    $this->debug->show('MyObject delete sql: ' . $sql, MyObject::$write_debug);
     $result = mysql_query($sql);
     return $result;
   }

@@ -118,8 +118,7 @@ public static	function find_by_id($gui, $by, $id) {
 
 	function gml_layer_exists() {
 		$this->debug->show("Layer mit Gruppe: {$this->konvertierung->get('gml_layer_group_id')} Name: {$this->get('class_name')} {$this->get('geometrietyp')} Datentyp: {$this->get_layertyp()}", $this->write_debug);
-		$layer = new MyObject($this->gui, 'layer');
-		$layers = $layer->find_where("
+		$layers = Layer::find($this->gui, "
 			`Gruppe` = {$this->konvertierung->get('gml_layer_group_id')} AND
 			`Name` = '{$this->get('class_name')} {$this->get('geometrietyp')}' AND
 			`Datentyp`= {$this->get_layertyp()}
@@ -191,36 +190,36 @@ public static	function find_by_id($gui, $by, $id) {
 		if (!$this->gml_layer_exists()) {
 			$layertyp = $this->get_layertyp();
 			$this->debug->show('Erzeuge Layer ' . $this->get('class_name') . ' ' . $this->layertypen[$layertyp] . ' in Gruppe ' . $this->konvertierung->get('bezeichnung') . ' layertyp ' . $layertyp, $this->write_debug);
+			
+			$this->debug->show('<p>Suche nach Templatelayer ' . $this->get('class_name') . ' ' . $this->layertypen[$layertyp] . ' in Obergruppe ' . GML_LAYER_TEMPLATE_GROUP, Regel::$write_debug);
+			$template_layer = Layer::find_by_obergruppe_und_name(
+				$this->gui,
+				GML_LAYER_TEMPLATE_GROUP,
+				$this->get('class_name') . ' ' . $this->layertypen[$layertyp]
+			);
 
-			$formvars_before = $this->gui->formvars;
-			$this->gui->formvars = array_merge($this->gui->formvars, array(
-				'Name' => $this->get('class_name') . ' ' . $this->layertypen[$layertyp],
-				'schema' => 'xplan_gml',
-				'Datentyp' => $layertyp,
-				'Gruppe' => $this->konvertierung->get('gml_layer_group_id'),
-				'connectiontype' => 6,
-				'connection' => $this->gui->pgdatabase->connect_string,
-				'epsg_code' => $this->konvertierung->get('output_epsg'),
-				'pfad' => "SELECT * FROM " . $this->get('class_name') . " WHERE 1=1",
-				'Data' => "geom from (select oid, position AS geom FROM xplan_gml." . strtolower($this->get('class_name')) . ") as foo using unique oid using srid=" . $this->konvertierung->get('output_epsg'),
-				'querymap' => 1,
-				'queryable' => 1,
-				'transparency' => 60,
-				'drawingorder' => 100
-			));
+			if (empty($template_layer)) {
+				# ToDo: Kein Template Layer vorhanden, erzeuge einen Dummy
+			}
+			else {
+				$this->debug->show('<p>Copiere Templatelayer in gml layer gruppe id: ' . $this->konvertierung->get('gml_layer_group_id'), Regel::$write_debug);
+				$gml_layer = $template_layer->copy(
+					array(
+						'Gruppe' => $this->konvertierung->get('gml_layer_group_id')
+					)
+				);
 
-			$this->gui->LayerAnlegen();
-
-			# id vom Layer abfragen
-			$layer_id = $this->gui->formvars['selected_layer_id'];
+				$formvars_before = $this->gui->formvars;
+			}
 
 			$stellen = $this->gui->Stellenzuweisung(
-				array($layer_id),
-				array($this->gui->Stelle->id)
+				array($gml_layer->get($gml_layer->identifier)),
+				array($this->gui->Stelle->id),
+				'(konvertierung_id = ' . $this->konvertierung->get('id') .')'
 			);
 
 			# Assign layer_id to Konvertierung
-			$this->set('layer_id', $layer_id);
+			$this->set('layer_id', $gml_layer->get($gml_layer->identifier));
 			$this->update();
 
 			$this->gui->formvars = $formvars_before;
@@ -244,7 +243,7 @@ public static	function find_by_id($gui, $by, $id) {
 	}
 
 	function destroy() {
-		$this->debug->show('destroy regel ' . $this->get('name'), $this->write_debug);
+		$this->debug->show('destroy regel ' . $this->get('name'), Regel::$write_debug);
 
 		# Frage ab ob es in der Gruppe der gml Layer einen Layer von class_name gibt
 		# der ansonsten von keiner anderen Regel verwendet wird und lösche diesen
@@ -281,18 +280,21 @@ public static	function find_by_id($gui, $by, $id) {
 				) AND
 				id != {$this->get('id')}
 		";
-		$this->debug->show('Gibt es weitere Regeln, die den selben Klassname verwenden?' . $sql, $this->write_debug);
+		$this->debug->show('Gibt es weitere Regeln, die den selben Klassname verwenden?<br>' . $sql, Regel::$write_debug);
 		if (pg_num_rows(pg_query($this->database->dbConn, $sql)) == 0) {
-			$this->debug->show('nein, Prüfe ob der Layer existiert.', $this->write_debug);
+			$this->debug->show('nein, Prüfe ob der Layer existiert.', Regel::$write_debug);
 			if ($this->gml_layer_exists()) {
-				$this->debug->show("Layer {$this->gml_layer->get('Name')} existiert.", $this->write_debug);
-				$this->debug->show("Lösche Layer mit ID: {$this->gml_layer->get('Layer_ID')}", $this->write_debug);
+				$this->debug->show("Layer {$this->gml_layer->get('Name')} existiert.", Regel::$write_debug);
+				$this->debug->show("Lösche Layer mit ID: " . $this->gml_layer->get('Layer_ID'), Regel::$write_debug);
+
+				$formvars_before = $this->gui->formvars;
 				$this->gui->formvars['selected_layer_id'] = $this->gml_layer->get('Layer_ID');
 				$this->gui->LayerLoeschen();
+				$this->gui->formvars = $formvars_before;
 			}
 		}
 		else {
-			$this->debug->show('ja', $this->write_debug);
+			$this->debug->show('ja', Regel::$write_debug);
 		}
 		$this->delete();
 	}

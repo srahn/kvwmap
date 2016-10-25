@@ -6717,14 +6717,22 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
   /*
   * Weist Layer Stellen zu
-  * @params array Array von layer_ids, die den Stellen zugewiesen werden sollen.
-  * @params array Array von Stellen, denen die Layer zugewiesen werden sollen.
+  * @param array Array von layer_ids, die den Stellen zugewiesen werden sollen.
+  * @param array Array von Stellen, denen die Layer zugewiesen werden sollen.
+	* @param string (optional) Text der in used_layer im Attribut Filter verwendet werden soll.
   * @return void
   */
-  function Stellenzuweisung($layer_ids, $stellen_ids) {
+  function Stellenzuweisung($layer_ids, $stellen_ids, $filter = '') {
     for($i = 0; $i < count($stellen_ids); $i++) {
-      $stelle = new stelle($stellen_ids[$i], $this->database);
-      $stelle->addLayer($layer_ids, 0);
+      $stelle = new stelle(
+				$stellen_ids[$i],
+				$this->database
+			);
+      $stelle->addLayer(
+				$layer_ids,
+				0,
+				$filter
+			);
       $users = $stelle->getUser();
       for($j = 0; $j < count($users['ID']); $j++){
         $this->user->rolle->setGroups($users['ID'][$j], array($stellen_ids[$i]), $layer_ids, 0); # Hinzufügen der Layergruppen der selektierten Layer zur Rolle
@@ -7517,7 +7525,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				}
 
 				if (!empty($layer['trigger_function'])) {
-					# Rufe Instead Delte trigger auf
+					# Rufe Instead Delete trigger auf
 					#echo '<br>Rufe Instead Delete trigger auf.';
 					$trigger_result = $this->exec_trigger_function('INSTEAD', 'DELETE', $layer, $element[3]);
 				}
@@ -7563,6 +7571,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				}
 			}
 		}
+
 		if ($output) {
 			if($this->formvars['embedded'] == ''){
 				if($success == false){
@@ -7645,8 +7654,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				}
 			}
 		}
-    
-    if($this->formvars['geomtype'] == 'POLYGON' OR $this->formvars['geomtype'] == 'MULTIPOLYGON' OR $this->formvars['geomtype'] == 'GEOMETRY'){
+
+		if ($this->formvars['geomtype'] == 'GEOMETRY') {
+			$this->formvars['geomtype'] = array('POINT', 'LINESTRING', 'POLYGON')[$this->formvars['Datentyp']];
+		}
+
+		if($this->formvars['geomtype'] == 'POLYGON' OR $this->formvars['geomtype'] == 'MULTIPOLYGON') {
       if($this->formvars['newpathwkt'] == '' AND $this->formvars['newpath'] != ''){   # wenn keine WKT-Geoemtrie da ist, muss die WKT-Geometrie aus dem SVG erzeugt werden
 				include_(CLASSPATH.'spatial_processor.php');
         $spatial_pro = new spatial_processor($this->user->rolle, $this->database, $this->pgdatabase);
