@@ -922,7 +922,7 @@
       # Abfrage ob gelöscht werden soll oder nicht
       if ($GUI->formvars['bestaetigung']=='JA') {
         # Der Löschvorgang wurde bestätigt und wird jetzt ausgeführt
-        $idListe=array_keys($GUI->formvars['id']);
+        $idListe=$GUI->formvars['id'];
         $ret=$GUI->nachweis->nachweiseLoeschen($idListe,1);
         if ($ret[0]) { # Fehler beim Löschen in Fehlermeldung übergeben
           $GUI->Fehlermeldung=$ret[1];
