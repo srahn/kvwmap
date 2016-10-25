@@ -414,6 +414,7 @@ define("LAYER_ID_ADRESSAENDERUNGEN_PERSON", '827');  						# Version 2.1
 define("LAYER_ID_ADRESSAENDERUNGEN_ANSCHRIFT", '162');  				# Version 2.1
 define("LAYER_IDS_DOP", '79,80');							# Version 1.8.0
 define("LAYER_ID_JAGDBEZIRKE", '432');				# Version 1.10.0
+define("LAYER_ID_NACHWEISE", 786);						# Version 2.6
 define("LAYER_ID_SCHNELLSPRUNG", 749);				# Version 2.0
 $quicksearch_layer_ids = array(752);					# Version 2.0
 
@@ -539,6 +540,7 @@ $kvwmap_plugins = array();																			# Version 1.11.0
 #$kvwmap_plugins[] = 'anliegerbeitraege';												# Version 2.0.0
 #$kvwmap_plugins[] = 'probaug';																	# Version 2.0.0
 #$kvwmap_plugins[] = 'geodoc';																	# Version 2.0.0
+#$kvwmap_plugins[] = 'baumfaellantrag';													# Version 2.0.0
 #																																# Version 1.11.0
 #############################################################		# Version 1.11.0
 

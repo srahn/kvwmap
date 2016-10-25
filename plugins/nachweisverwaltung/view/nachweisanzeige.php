@@ -6,6 +6,17 @@ function vorlage(){
 	document.GUI.submit();
 }
 
+function bearbeiten(){
+	selected_ids = new Array();
+	ids = document.getElementsByName('id[]');
+	for(i = 0; i < ids.length; i++){
+		if(ids[i].checked)selected_ids.push(ids[i].value);
+	}
+	document.GUI.go.value='Layer-Suche_Suchen';
+	document.GUI.value_id.value = selected_ids.join('|');
+	document.GUI.submit();
+}
+
 function loeschen(){
 	document.GUI.go.value='Nachweisloeschen';
 	document.GUI.submit();
@@ -63,6 +74,9 @@ function getvorschau(url){
 <input type="hidden" name="richtung" value="<? echo $this->formvars['richtung']; ?>">
 <input type="hidden" name="flur_thematisch" value="<? echo $this->formvars['flur_thematisch']; ?>">
 <input type="hidden" name="such_andere_art" value="<? echo $this->formvars['such_andere_art']; ?>">
+<input type="hidden" name="selected_layer_id" value="<? echo LAYER_ID_NACHWEISE; ?>">
+<input type="hidden" name="value_id" value="">
+<input type="hidden" name="operator_id" value="IN">
 	
 <table width="0%" border="0" cellpadding="5" cellspacing="0">
   <tr> 
@@ -188,7 +202,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
             ?>
 			"> 
           <td align="left"> 
-              <input type="checkbox" name="id[<?php echo $this->nachweis->Dokumente[$i]['id']; ?>]" value="<?php echo $this->nachweis->Dokumente[$i]['id']; ?>"<?php 
+              <input type="checkbox" name="id[]" value="<?php echo $this->nachweis->Dokumente[$i]['id']; ?>"<?php 
         # Püfen ob das Dokument markiert werden soll
                 
         if ($this->art_markieren=='individuell') {
@@ -314,24 +328,33 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
             </select>
 					</td>
 					<td>
-          	<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten')){ ?>
-          		<a href="javascript:loeschen();"><span class="fett">--> markierte löschen</span></a>
+          	<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten')){ ?>          		
+							<a href="javascript:bearbeiten();"><span class="fett">--> markierte bearbeiten</span></a>
           	<? } ?>
 					</td>
         </tr>
         <tr> 
           <td>Vorbereitungsnummer:</td>
-          <td><span class="fett">
+          <td colspan="3">
+						<span class="fett">
             <?php $this->FormObjAntr_nr->outputHTML();
     					echo $this->FormObjAntr_nr->html;?>
-          </span></td>
-          <td> <select name="go_plus" onChange="document.GUI.submit()">
+						</span>
+						&nbsp;
+						<select name="go_plus" onChange="document.GUI.submit()">
               <option value="">---</option>
               <option value="zum_Auftrag_hinzufuegen"<?php if ($this->formvars['nachweisaction']=='markierte_zum_Auftrag_hinzufuegen') { ?> selected<?php } ?>>zu 
               Auftrag hinzufügen</option>
               <option value="aus_Auftrag_entfernen"<?php if ($this->formvars['nachweisaction']=='markierte_aus_Auftrag_entfernen') { ?> selected<?php } ?>>aus 
               Auftrag entfernen</option>
-            </select><span class="fett">&nbsp;</span>          </td>
+            </select>
+						<span class="fett">&nbsp;</span>
+					</td>
+					<td>
+          	<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten')){ ?>
+          		<a href="javascript:loeschen();"><span class="fett">--> markierte löschen</span></a>
+          	<? } ?>
+					</td>
         </tr>
       </table>
 	  <?php 

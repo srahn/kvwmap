@@ -17,6 +17,10 @@ function submitDatatypeSelector() {
 	    element.value = '<?php echo $strPleaseSelect; ?>';
 	document.GUI.submit();
 }  
+
+function toLayerEditor(){	
+	location.href='index.php?go=Layereditor&selected_layer_id='+document.GUI.selected_layer_id.value;
+}
 //-->
 </script>
 <table cellpadding="5" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
@@ -41,6 +45,7 @@ function submitDatatypeSelector() {
     		}
     	?>
       </select>
+			&nbsp;&nbsp;<a id="toLayerLink" href="javascript:toLayerEditor();" style="<? if($this->formvars['selected_layer_id'] != '')echo 'display:inline';else echo 'display:none'; ?>">zum Layer</a>
 		</td>
     <td style="border:1px solid #C3C7C3;<? if(count($this->datatypes) == 0)echo 'display: none'; ?>">
 			<?php echo $strDatatype;?><br>
