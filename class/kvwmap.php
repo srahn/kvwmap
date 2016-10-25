@@ -6848,7 +6848,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 								if($attributes['form_element_type'][$i] == 'Autovervollständigungsfeld' AND $attributes['options'][$i] != ''){
 									$optionen = explode(';', $attributes['options'][$i]);  # SQL; weitere Optionen
 									if(strpos($value, '%') === false)$value2 = '%'.$value.'%';else $value2 = $value;
-									$sql = 'SELECT * FROM ('.$optionen[0].') as foo WHERE output '.$operator.' \''.$value2.'\'';
+									$sql = 'SELECT * FROM ('.$optionen[0].') as foo WHERE LOWER(CAST(output AS TEXT)) '.$operator.' LOWER(\''.$value2.'\')';
 									$ret=$layerdb->execSQL($sql,4,0);
 									if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
 									while($rs = pg_fetch_assoc($ret[1])){
@@ -6856,6 +6856,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 									}
 									$value_like = $value;					# Value sichern
 									$operator_like = $operator;			# Operator sichern
+									if($keys == NULL)$keys[0] = '####';		# Dummy-Wert, damit in der IN-Suche nichts gefunden wird
 									$this->formvars[$prefix.'value_'.$attributes['name'][$i]] = implode('|', $keys);
 									$this->formvars[$prefix.'operator_'.$attributes['name'][$i]] = 'IN';									
 									$i--;
