@@ -50,12 +50,12 @@ class data_import_export {
 				$custom_tables = $this->import_custom_pointlist($formvars, $pgdatabase);
 			}break;
 			case 'GPX' : {
-				$custom_tables = $this->import_custom_gpx($formvars, $pgdatabase);
 				$formvars['epsg'] = 4326;
+				$custom_tables = $this->import_custom_gpx($formvars, $pgdatabase);				
 			}break;
 			case 'OVL' : {
-				$custom_tables = $this->import_custom_ovl($formvars, $pgdatabase);
 				$formvars['epsg'] = 4326;
+				$custom_tables = $this->import_custom_ovl($formvars, $pgdatabase);
 			}break;
 			case 'DXF' : {
 				$custom_tables = $this->import_custom_dxf($formvars, $pgdatabase);
