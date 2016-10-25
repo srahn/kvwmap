@@ -77,7 +77,7 @@
 		}
 		
 		###### Array-Typ #####
-		if(substr($attributes['type'][$j], 0, 1) == '_'){
+		if(POSTGRESVERSION >= 930 AND substr($attributes['type'][$j], 0, 1) == '_'){
 			if($field_name != NULL)$id = $field_name.'_'.$k;		# wenn field_name übergeben wurde (nicht die oberste Ebene)
 			else $id = $k.'_'.$name;	# oberste Ebene
 			$datapart .= '<input type="hidden" title="'.$alias.'" name="'.$fieldname.'" id="'.$id.'" onchange="'.$onchange.'" value="'.htmlspecialchars($value).'">';
