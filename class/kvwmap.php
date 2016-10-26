@@ -383,7 +383,7 @@ class GUI {
 								}
 								else{
 									$legend .= '<table border="0" cellspacing="0" cellpadding="0">';
-									$maplayer = $this->map->getLayerByName($layer['alias']);
+									$maplayer = $this->map->getLayer($layer['index_mapobject']);
 									for($k = 0; $k < $maplayer->numclasses; $k++){
 										$class = $maplayer->getClass($k);
 										for($s = 0; $s < $class->numstyles; $s++){
@@ -884,6 +884,7 @@ class GUI {
         $layerset['anzLayer'] = count($layerset) - 1; # wegen $layerset['layer_ids']
         unset($this->layers_of_group);		# falls loadmap zweimal aufgerufen wird
 				unset($this->groups_with_layers);	# falls loadmap zweimal aufgerufen wird				
+				$index_mapobject = 0;
         for($i=0; $i < $layerset['anzLayer']; $i++){			
 					if($layerset[$i]['alias'] == '' OR !$this->Stelle->useLayerAliases){
 						$layerset[$i]['alias'] = $layerset[$i]['Name'];			# kann vielleicht auch in read_layer gesetzt werden
@@ -900,6 +901,8 @@ class GUI {
 					}
 					
 					if($this->class_load_level == 2 OR ($this->class_load_level == 1 AND $layerset[$i]['aktivStatus'] != 0)){      # nur wenn der Layer aktiv ist, sollen seine Parameter gesetzt werden
+						$layerset[$i]['index_mapobject'] = $index_mapobject;
+						$index_mapobject++;
 						$layer = ms_newLayerObj($map);
 						$layer->setMetaData('wfs_request_method', 'GET');
 						$layer->setMetaData('wms_name', $layerset[$i]['wms_name']);
@@ -4865,11 +4868,7 @@ class GUI {
     #$this->map->legend->label->set("offsety", -1*$size*$this->map_factor);
     $this->map->legend->label->color->setRGB(0,0,0);
     #$this->map->legend->outlinecolor->setRGB(0,0,0);
-    $legendmapDB = new db_mapObj($this->Stelle->id, $this->user->id);
-    $legendmapDB->nurAktiveLayer = 1;
-    $layerset = $legendmapDB->read_Layer(1);
-    $rollenlayer = $legendmapDB->read_RollenLayer();
-    $layerset = array_merge($layerset, $rollenlayer);		
+    $layerset = $this->layerset;		
     for($i = 0; $i < $this->map->numlayers; $i++){
       $layer = $this->map->getlayer($i);
       $layer->set('status', 0);
@@ -4882,9 +4881,7 @@ class GUI {
     for($i = 0; $i < count($layerset); $i++){
       if($layerset[$i]['aktivStatus'] != 0){
         if(($layerset[$i]['minscale'] < $scale OR $layerset[$i]['minscale'] == 0) AND ($layerset[$i]['maxscale'] > $scale OR $layerset[$i]['maxscale'] == 0)){
-					if($layerset[$i]['alias'] != '')$name = $layerset[$i]['alias'];
-					else $name = $layerset[$i]['Name'];
-          $layer = $this->map->getLayerByName($name);
+          $layer = $this->map->getLayer($layerset[$i]['index_mapobject']);
           if($layerset[$i]['showclasses']){
             for($j = 0; $j < $layer->numclasses; $j++){
               $class = $layer->getClass($j);
