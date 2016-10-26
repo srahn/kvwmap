@@ -534,7 +534,7 @@
 						$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
 					}
 					else{
-						$datapart .= ' style="width: 100%; style="font-size: '.$fontsize.'px;"';
+						$datapart .= ' style="width: 100%; font-size: '.$fontsize.'px;"';
 					}
 					if($name == 'lock'){
 						$datapart .= ' type="hidden"';
