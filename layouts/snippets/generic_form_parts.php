@@ -7,12 +7,12 @@
 	global $strNewEmbeddedPK;
 	global $hover_preview;
 
-	function attribute_name($layer_id, $attributes, $j, $k, $fontsize){
+	function attribute_name($layer_id, $attributes, $j, $k, $fontsize, $sort_links = true){
 		$datapart .= '<table ';
 		if($attributes['group'][0] != '' AND $attributes['arrangement'][$j+1] != 1 AND $attributes['arrangement'][$j-1] != 1 AND $attributes['arrangement'][$j] != 1)$datapart .= 'width="200px"';
 		else $datapart .= 'width="100%"';
 		$datapart .= '><tr style="border: none"><td>';
-		if(!in_array($attributes['form_element_type'][$j], array('SubFormPK', 'SubFormEmbeddedPK', 'SubFormFK', 'dynamicLink'))){
+		if($sort_links AND !in_array($attributes['form_element_type'][$j], array('SubFormPK', 'SubFormEmbeddedPK', 'SubFormFK', 'dynamicLink'))){
 			$datapart .= '<a style="font-size: '.$fontsize.'px" title="Sortieren nach '.$attributes['alias'][$j].'" href="javascript:change_orderby(\''.$attributes['name'][$j].'\', '.$layer_id.');">
 							'.$attributes['alias'][$j].'</a>';
 		}
@@ -68,9 +68,8 @@
 			$b = $j+1;
 			while($a > $j-4 AND $attributes['arrangement'][$a] == 1)$a--;		# 4 vorwärts gucken
 			while($b < $j+4 AND $attributes['arrangement'][$b] == 1)$b++;		# 4 rückwärts gucken
-			$attributes_in_row = $b-$a;
-			if($attributes['labeling'][$j] == 0)$size=40;
-			else $size = 60;
+			$attributes_in_row = $b-$a;			
+			#if($attributes['labeling'][$j] != 0)$size = $size * 1.5;
 			$size = $size/$attributes_in_row;
 			$sw = 8*$size;
 			$select_width = 'width: '.$sw.'px;';
@@ -535,7 +534,7 @@
 						$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
 					}
 					else{
-						$datapart .= ' style="font-size: '.$fontsize.'px;"';
+						$datapart .= ' style="width: 100%; style="font-size: '.$fontsize.'px;"';
 					}
 					if($name == 'lock'){
 						$datapart .= ' type="hidden"';
