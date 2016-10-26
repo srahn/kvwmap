@@ -400,7 +400,7 @@ class GUI {
 												}
 											}
 											else{		# Punktlayer
-												if($style->size > 14)$style->set('size', 14);
+												if($style->size > 13)$style->set('size', 13);
 												$style->set('maxsize', $style->size);		# maxsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
 												$style->set('minsize', $style->size);		# minsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
 												if($class->numstyles == 1){							# wenn es nur einen Style in der Klasse gibt, die Offsets auf 0 setzen, damit man was in der Legende erkennt
