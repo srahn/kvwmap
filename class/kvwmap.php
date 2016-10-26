@@ -876,7 +876,7 @@ class GUI {
         $layerset['anzLayer'] = count($layerset) - 1; # wegen $layerset['layer_ids']
         unset($this->layers_of_group);		# falls loadmap zweimal aufgerufen wird
 				unset($this->groups_with_layers);	# falls loadmap zweimal aufgerufen wird				
-				$index_mapobject = 0;
+				$index_mapobject = $map->numlayers;
         for($i=0; $i < $layerset['anzLayer']; $i++){			
 					if($layerset[$i]['alias'] == '' OR !$this->Stelle->useLayerAliases){
 						$layerset[$i]['alias'] = $layerset[$i]['Name'];			# kann vielleicht auch in read_layer gesetzt werden
