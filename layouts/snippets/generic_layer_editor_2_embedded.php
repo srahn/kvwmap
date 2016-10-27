@@ -56,7 +56,7 @@
 					$explosion = explode(';', $attributes['group'][$j]);
 					if($explosion[1] != '')$collapsed = true;else $collapsed = false;
 					$groupname = $explosion[0];
-					echo '<tr>
+					$datapart .= '<tr>
 									<td colspan="2" width="100%">
 										<table width="100%" id="colgroup'.$layer['Layer_ID'].'_'.$j.'_'.$k.'" class="tgle" '; if(!$collapsed)$datapart .= 'style="display:none"'; $datapart .= ' border="2"><tbody width="100%" class="gle">
 											<tr>
@@ -68,7 +68,7 @@
 												<td bgcolor="'.BG_GLEATTRIBUTE.'" colspan="40">&nbsp;<a href="javascript:void(0);" onclick="javascript:document.getElementById(\'group'.$layer['Layer_ID'].'_'.$j.'_'.$k.'\').style.display=\'none\';document.getElementById(\'colgroup'.$layer['Layer_ID'].'_'.$j.'_'.$k.'\').style.display=\'\';"><img border="0" src="'.GRAPHICSPATH.'/minus.gif"></a>&nbsp;&nbsp;<span class="fett">'.$groupname.'</span></td>
 											</tr>';
 				}
-				
+
 				if($attributes['invisible'][$attributes['name'][$j]] != 'true'  AND $attributes['name'][$j] != 'lock'){
 					if($attributes['type'][$j] != 'geometry'){
 						if($attributes['privileg'][$j] != '0' AND !$lock[$k])$this->editable = $layer['Layer_ID'];
@@ -92,7 +92,6 @@
 							$next_line = '';
 							$nl = false;
 						}
-						echo $datapart;
 						if($attributes['privileg'][$j] >= '0'){
 							$this->form_field_names .= $layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'|';
 						}
@@ -107,8 +106,9 @@
 		  		}
 					}
 					if($attributes['group'][$j] != $attributes['group'][$j+1]){		# wenn die nächste Gruppe anders ist, Tabelle schliessen
-						echo '</table></td></tr>';
+						$datapart .= '</table></td></tr>';
 					}
+					echo $datapart;
 				}
 				if($privileg == 1) {
 					if($this->new_entry == true){
