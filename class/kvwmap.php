@@ -383,7 +383,7 @@ class GUI {
 								}
 								else{
 									$legend .= '<table border="0" cellspacing="0" cellpadding="0">';
-									$maplayer = $this->map->getLayer($layer['index_mapobject']);
+									$maplayer = $this->map->getLayerByName($layer['alias']);
 									for($k = 0; $k < $maplayer->numclasses; $k++){
 										$class = $maplayer->getClass($k);
 										for($s = 0; $s < $class->numstyles; $s++){
@@ -400,7 +400,7 @@ class GUI {
 												}
 											}
 											else{		# Punktlayer
-												if($style->size > 13)$style->set('size', 13);
+												if($style->size > 14)$style->set('size', 14);
 												$style->set('maxsize', $style->size);		# maxsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
 												$style->set('minsize', $style->size);		# minsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
 												if($class->numstyles == 1){							# wenn es nur einen Style in der Klasse gibt, die Offsets auf 0 setzen, damit man was in der Legende erkennt
@@ -884,7 +884,6 @@ class GUI {
         $layerset['anzLayer'] = count($layerset) - 1; # wegen $layerset['layer_ids']
         unset($this->layers_of_group);		# falls loadmap zweimal aufgerufen wird
 				unset($this->groups_with_layers);	# falls loadmap zweimal aufgerufen wird				
-				$index_mapobject = $map->numlayers;
         for($i=0; $i < $layerset['anzLayer']; $i++){			
 					if($layerset[$i]['alias'] == '' OR !$this->Stelle->useLayerAliases){
 						$layerset[$i]['alias'] = $layerset[$i]['Name'];			# kann vielleicht auch in read_layer gesetzt werden
@@ -901,8 +900,6 @@ class GUI {
 					}
 					
 					if($this->class_load_level == 2 OR ($this->class_load_level == 1 AND $layerset[$i]['aktivStatus'] != 0)){      # nur wenn der Layer aktiv ist, sollen seine Parameter gesetzt werden
-						$layerset[$i]['index_mapobject'] = $index_mapobject;
-						$index_mapobject++;
 						$layer = ms_newLayerObj($map);
 						$layer->setMetaData('wfs_request_method', 'GET');
 						$layer->setMetaData('wms_name', $layerset[$i]['wms_name']);
@@ -4868,7 +4865,11 @@ class GUI {
     #$this->map->legend->label->set("offsety", -1*$size*$this->map_factor);
     $this->map->legend->label->color->setRGB(0,0,0);
     #$this->map->legend->outlinecolor->setRGB(0,0,0);
-    $layerset = $this->layerset;		
+    $legendmapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+    $legendmapDB->nurAktiveLayer = 1;
+    $layerset = $legendmapDB->read_Layer(1);
+    $rollenlayer = $legendmapDB->read_RollenLayer();
+    $layerset = array_merge($layerset, $rollenlayer);		
     for($i = 0; $i < $this->map->numlayers; $i++){
       $layer = $this->map->getlayer($i);
       $layer->set('status', 0);
@@ -4881,7 +4882,9 @@ class GUI {
     for($i = 0; $i < count($layerset); $i++){
       if($layerset[$i]['aktivStatus'] != 0){
         if(($layerset[$i]['minscale'] < $scale OR $layerset[$i]['minscale'] == 0) AND ($layerset[$i]['maxscale'] > $scale OR $layerset[$i]['maxscale'] == 0)){
-          $layer = $this->map->getLayer($layerset[$i]['index_mapobject']);
+					if($layerset[$i]['alias'] != '')$name = $layerset[$i]['alias'];
+					else $name = $layerset[$i]['Name'];
+          $layer = $this->map->getLayerByName($name);
           if($layerset[$i]['showclasses']){
             for($j = 0; $j < $layer->numclasses; $j++){
               $class = $layer->getClass($j);
@@ -7535,7 +7538,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					$success = $trigger_result['success'];
 				}
 				else {
-					echo '<br>Delete Trigger Funktion wurde nicht ausgeführt.';
+					#echo '<br>Delete Trigger Funktion wurde nicht ausgeführt.';
 					# Instead Triggerfuktion wurde nicht ausgeführt
 					# Delete the object regularly in database
 					$sql = "DELETE FROM ".$element[2]." WHERE oid = ".$element[3];
@@ -7654,8 +7657,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		}
 
 		if ($this->formvars['geomtype'] == 'GEOMETRY') {
-			$geomtypes = array('POINT', 'LINESTRING', 'POLYGON');
-			$this->formvars['geomtype'] = $geomtypes[$this->formvars['Datentyp']];
+			$this->formvars['geomtype'] = array('POINT', 'LINESTRING', 'POLYGON')[$this->formvars['Datentyp']];
 		}
 
 		if($this->formvars['geomtype'] == 'POLYGON' OR $this->formvars['geomtype'] == 'MULTIPOLYGON') {
