@@ -71,8 +71,8 @@
 			$attributes_in_row = $b-$a;			
 			#if($attributes['labeling'][$j] != 0)$size = $size * 1.5;
 			$size = $size/$attributes_in_row;
-			$sw = 8*$size;
-			$select_width = 'width: '.$sw.'px;';
+			$sw = 20*$size;
+			$select_width = 'max-width: '.$sw.'px;';
 		}
 		
 		###### Array-Typ #####
