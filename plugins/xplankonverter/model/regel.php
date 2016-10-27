@@ -65,22 +65,32 @@ public static	function find_by_id($gui, $by, $id) {
 	}
 
 	function get_convert_sql($konvertierung_id) {
-		$this->debug->show('<br>Konvertiere sql: ' . $this->get('sql'), Regel::$write_debug);
+		$this->debug->show('<br>Konvertiere sql vor Anpassung:<br>' . $this->get('sql'), Regel::$write_debug);
 		$sql = $this->get('sql');
+		$konvertierung = $this->get_konvertierung();
+		$epsg = $konvertierung->get('output_epsg');
 
+		# konvertierung_id hinzufügen
 		$sql = substr_replace(
 			$sql,
 			'(konvertierung_id, ',
 			strpos($sql, '('),
 			strlen('(')
 		);
-
 		$sql = str_ireplace(
 			'select',
 			"select {$konvertierung_id},",
 			$sql
 		);
 
+		# transformation hinzufügen
+		$sql = str_ireplace(
+			'the_geom',
+			"st_transform(the_geom, {$epsg})",
+			$sql
+		);
+
+		# nur nicht leere Geometrien übernehmen
 		if (strpos(strtolower($sql), 'where') === false) {
 			$sql .= ' WHERE the_geom IS NOT NULL';
 		}
@@ -92,7 +102,7 @@ public static	function find_by_id($gui, $by, $id) {
 			);
 		}
 
-		if ($this->get('bereiche') != '') {
+		if ($this->get('bereich_gml_id') != '') {
 			$sql = substr_replace(
 				$sql,
 				' (gehoertzubereich, ',
@@ -107,12 +117,13 @@ public static	function find_by_id($gui, $by, $id) {
 			);
 		}
 
+		# search_path und returning hinzufügen.
 		$sql = "SET search_path=xplan_gml, xplan_shapes_{$konvertierung_id}, public;
 			{$sql}
 			RETURNING gml_id, gehoertzubereich
 		";
 
-		$this->debug->show('nach sql: ' . $sql, Regel::$write_debug);
+		$this->debug->show('sql nach Anpassung:<br>' . $sql, Regel::$write_debug);
 		return $sql;
 	}
 
@@ -149,7 +160,12 @@ public static	function find_by_id($gui, $by, $id) {
 	* Diese Funktion liefert die bereich_gml_id der Regel oder falls vorhanden mehrere aus dem Attribut bereiche
 	*/
 	function get_bereich_gml_ids() {
-		return ($this->get('bereiche') != '{}' ? $this->get('bereiche') : '{' . $this->get('bereich_gml_id') . '}');
+		if (empty($this->get('bereiche')) or $this->get('bereiche') == '{}')
+			$gml_ids = '{' . $this->get('bereich_gml_id') . '}';
+		else
+			$gml_ids = $this->get('bereiche');
+
+		return $gml_ids;
 	}
 
 	/*
@@ -165,13 +181,14 @@ public static	function find_by_id($gui, $by, $id) {
 			#echo '<br>Regel gehört über einen Bereich und Plan zur Konvertierung.';
 			$sql = "
 				SELECT
-					p.konvertierung_id
+					coalesce(bp.konvertierung_id, rp.konvertierung_id) AS konvertierung_id
 				FROM
-					xplankonverter.regeln r JOIN
-					xplan_gml.rp_bereich b ON r.bereich_gml_id = b.gml_id JOIN
-					xplan_gml.rp_plan p ON p.gml_id::text = b.gehoertzuplan
+					xplankonverter.regeln r LEFT JOIN
+					xplan_gml.rp_bereich b ON r.bereich_gml_id = b.gml_id LEFT JOIN
+					xplan_gml.rp_plan bp ON bp.gml_id::text = b.gehoertzuplan LEFT JOIN
+					xplan_gml.rp_plan rp ON rp.konvertierung_id = r.konvertierung_id
 				WHERE
-					r.id = {$this->get('id')}
+					r.id = " . $this->get('id') . "
 			";
 			#echo '<br>SQL zum Abfragen der konvertierung_id der Regel: ' . $sql;
 			$result = pg_query($this->database->dbConn, $sql);

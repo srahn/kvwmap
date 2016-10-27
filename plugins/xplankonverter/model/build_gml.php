@@ -211,14 +211,22 @@ class Gml_builder {
     }
     // und nun alle RP_Objekte generieren
     // dazu alle RP_Objektklassen finden die mit der Konvertierung verknüpft sind
-    $sql =
-      "SELECT DISTINCT r.class_name
-       FROM xplankonverter.regeln r
-       WHERE r.konvertierung_id = " . $konvertierung->get('id');
+		$sql = "
+			SELECT DISTINCT
+				r.class_name
+			FROM
+				xplankonverter.regeln r LEFT JOIN
+				xplan_gml.rp_bereich b ON r.bereich_gml_id = b.gml_id left JOIN
+				xplan_gml.rp_plan bp ON b.gehoertzuplan = bp.gml_id::text LEFT JOIN
+				xplan_gml.rp_plan rp ON r.konvertierung_id = rp.konvertierung_id
+			WHERE
+				bp.konvertierung_id = " . $konvertierung->get('id') . " OR
+				rp.konvertierung_id = " . $konvertierung->get('id') . "
+		";
     $classNameSet = pg_query($this->database->dbConn, $sql);
     // zu jeder RP_Objektklassse die Objekte holen, die mit der Konvertierung verknüpft sind
     while ($gml_className = pg_fetch_array($classNameSet)[0]) {
-      $_sql = "
+      $sql = "
           SELECT
             *,
             gehoertzubereich AS bereiche_gml_ids,
@@ -235,9 +243,9 @@ class Gml_builder {
               {$konvertierung->get('geom_precision')},
               32) AS envelope
           FROM
-            $contentScheme.$gml_className AS ft JOIN
+            $contentScheme.$gml_className AS ft
           WHERE konvertierung_id = {$konvertierung->get('id')}";
-      $sql = "
+      $_sql = "
           SELECT
             bereiche_gml_ids,
             ft.*,
@@ -282,6 +290,7 @@ class Gml_builder {
               WHERE o.konvertierung_id = {$konvertierung->get('id')}
               GROUP BY o.gml_id
             ) AS agg ON ft.gml_id = agg.gml_id";
+			#echo "\n sql to get objekte:  " . $sql;
       $gml_objects = pg_query($this->database->dbConn, $sql);
 
       // fetch information about attributes and their properties
@@ -292,9 +301,10 @@ class Gml_builder {
         $objekt_gml = "<{$xplan_ns_prefix}{$gml_className} gml:id=\"GML_{$gml_object['gml_id']}\">";
 
         // Rueckverweise auf etwaige Bereiche hinzufügen
-        $aggregated_bereich_gml_ids = explode(',',substr($gml_object['bereiche_gml_ids'], 1, -1));
-        foreach ($aggregated_bereich_gml_ids as $bereich_gml_id){
-          $objekt_gml .= "<{$xplan_ns_prefix}gehoertZuRP_Bereich xlink:href=\"#GML_{$bereich_gml_id}\"/>";
+        $aggregated_bereich_gml_ids = explode(',', substr($gml_object['bereiche_gml_ids'], 1, -1));
+        foreach ($aggregated_bereich_gml_ids as $bereich_gml_id) {
+					if (!empty($bereich_gml_id))
+						$objekt_gml .= "<{$xplan_ns_prefix}gehoertZuRP_Bereich xlink:href=\"#GML_{$bereich_gml_id}\"/>";
         }
 
         // alle uebrigen Attribute ausgeben
