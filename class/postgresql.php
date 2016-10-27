@@ -643,27 +643,38 @@ FROM
 			if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
 		}
 	}
-	
-  function get_geom_type($geomcolumn, $tablename){
-  	if($geomcolumn != '' AND $tablename != ''){
-	    $sql = "SELECT GeometryType(".$geomcolumn.") FROM ".$tablename." WHERE ".$geomcolumn." IS NOT NULL LIMIT 1";
-	    $ret1 = $this->execSQL($sql, 4, 0);
-	    if($ret1[0]==0){
-	      $geom_type = pg_fetch_row($ret1[1]);
-	      if($geom_type[0] == ''){
-	      	$sql = "SELECT type FROM geometry_columns WHERE f_table_name = '".$tablename."' AND f_geometry_column = '".$geomcolumn."'";
-	    		$ret1 = $this->execSQL($sql, 4, 0);
-	    		if($ret1[0]==0){
-	      		$geom_type = pg_fetch_row($ret1[1]);
-	    		}
-	      }
-	    }
-	    return $geom_type[0];
-  	}
-  	else{
-  		return NULL;
-  	}
-  }
+
+	/*
+	* Fragt den Geometrietyp der Spalte aus geometry_column ab
+	* Wird dort nichts gefunden wird GEOMETRY gesetzt
+	* @param string $geomcolumn Name der Geometriespalte
+	* @param string $tablename Name der Tabelle
+	* @return string Geometrytyp
+	*/
+	function get_geom_type($geomcolumn, $tablename){
+		if($geomcolumn != '' AND $tablename != ''){
+			$sql = "
+				SELECT
+					type
+				FROM
+					geometry_columns
+				WHERE
+					f_table_name = '" . $tablename . "' AND
+					f_geometry_column = '" . $geomcolumn ."'
+			";
+			$ret1 = $this->execSQL($sql, 4, 0);
+			if($ret1[0] == 0) {
+				$geom_type = pg_fetch_assoc($ret1[1])['type'];
+			}
+			else {
+				$geom_type = 'GEOMETRY';
+			}
+		}
+		else{
+			$geom_type = NULL;
+		}
+		return $geom_type;
+	}
 
   function check_oid($tablename){
     $sql = 'SELECT oid from '.$tablename.' limit 0';

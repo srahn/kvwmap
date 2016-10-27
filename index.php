@@ -1551,8 +1551,8 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
       # Karteninformationen lesen
       $GUI->loadMap('DataBase');
       $GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-      $GUI->drawMap();
      	$GUI->saveMap('');
+      $GUI->drawMap();
       $GUI->output();
 	  }break;
 	}

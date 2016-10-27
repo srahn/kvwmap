@@ -1309,7 +1309,7 @@ function curl_get_contents($url, $username = NULL, $password = NULL) {
   return $result;
 }
 
-function debug_write($msg) {
+function debug_write($msg, $debug = false) {
   #$fp = fopen(LOGPATH.'debug.htm','a+');
 	#$log = getTimestamp().":\n";
 	#$msg = "- ".$msg."\n";

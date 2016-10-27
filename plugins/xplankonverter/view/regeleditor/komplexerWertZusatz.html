@@ -1,0 +1,156 @@
+<!-- XP_ExterneReferenz --> 
+<span id="xp_externereferenz_area" style="display:none">
+  <table border ="1">
+    <tr>
+      <td>georefURL</td><!--georefURL :URI[0..1]  URI wird von CharacterString abgeleitet, ohne neue Attribute -->
+      <td><input id="xp_externereferenz_georefurl"></input></td>
+    </tr>
+    <tr>
+      <td>georefMimeType</td><!--georefMimeType :XP_MimeTypes [0..1]-->
+      <td>
+        <select id="xp_externereferenz_georefmimetype">
+          <option value="">georefMimeType wählen</option>
+          <option value="application/pdf">application/pdf</option>
+          <option value="application/zip">application/zip</option>
+          <option value="application/xml">application/xml</option>
+          <option value="application/msword">application/msword</option>
+          <option value="application/msexcel">application/msexcel</option>
+          <option value="application/vnd.ogc.sld+xml">application/vnd.ogc.sld+xml</option>
+          <option value="application/vnd.ogc.wms_xml">application/vnd.ogc.wms_xml</option>
+          <option value="application/vnd.ogc.gml">application/vnd.ogc.gml</option>
+          <option value="application/odt">application/odt</option>
+          <option value="image/jpg">image/jpg</option>
+          <option value="image/png">image/png</option>
+          <option value="image/tiff">image/tiff</option>
+          <option value="image/ecw">image/ecw</option>
+          <option value="image/svb+xml">image/svg+xml</option>
+          <option value="text/html">text/html</option>
+          <option value="text/plan">text/plain</option>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>art</td><!-- art :XP_ExterneReferenzArt [0..1]-->
+      <td>
+        <select id="xp_externereferenz_art">
+            <option value="">art wählen</option>
+            <option value="dokument">Dokument</option>
+            <option value="planmitgeoreferenz">PlanMitGeoreferenz</option>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>informationssystemURL</td><!-- informationssystemURL :URI [0..1] -->
+      <td><input id="xp_externereferenz_informationssystemurl"></input></td>
+    </tr>
+    <tr>
+      <td>referenzName</td><!-- referenzName :CharacterString[0..1]-->
+      <td><input id="xp_externereferenz_referenzname"></input></td>
+    </tr>
+    <tr>
+      <td>referenzURL</td><!--referenzURL :URI[0..1]-->
+      <td><input id="xp_externereferenz_referenzurl"></input></td>
+    </tr>
+    <tr>
+      <td>referenzMimeType</td><!-- referenzMimeType :XP_MimeTypes[0..1]-->
+      <td>
+        <select id="xp_externereferenz_referenzmimetype">
+          <option value="">georefMimeType wählen</option>
+          <option value="application/pdf">application/pdf</option>
+          <option value="application/zip">application/zip</option>
+          <option value="application/xml">application/xml</option>
+          <option value="application/msword">application/msword</option>
+          <option value="application/msexcel">application/msexcel</option>
+          <option value="application/vnd.ogc.sld+xml">application/vnd.ogc.sld+xml</option>
+          <option value="application/vnd.ogc.wms_xml">application/vnd.ogc.wms_xml</option>
+          <option value="application/vnd.ogc.gml">application/vnd.ogc.gml</option>
+          <option value="application/odt">application/odt</option>
+          <option value="image/jpg">image/jpg</option>
+          <option value="image/png">image/png</option>
+          <option value="image/tiff">image/tiff</option>
+          <option value="image/ecw">image/ecw</option>
+          <option value="image/svb+xml">image/svg+xml</option>
+          <option value="text/html">text/html</option>
+          <option value="text/plan">text/plain</option>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>beschreibung</td><!--beschreibung :CharacterString [0..1]-->
+      <td><input id="xp_externereferenz_beschreibung"></input></td>
+    </tr>
+    <tr>
+      <td>datum</td><!-- datum :Date [0..1] nach ISO 8601: YYYY-MM-DD -->
+      <td><input id="xp_externereferenz_datum"></input></td>
+    </tr>
+  </table>
+  <button id="xp_externereferenz_array_add" onClick="externeReferenzAdd(this.id)" title="Wert hinzufuegen und weiteren Wert aufnehmen"><i class="fa fa-plus" aria-hidden="true"></i></button>
+  <button id="xp_externereferenz_add" onClick="externeReferenzAdd(this.id)" title="Wert hinzufuegen"><i class="fa fa-level-up" aria-hidden="true"></i></button>
+</span>
+<!-- XP_GenerAttribut -->
+<span id="xp_generattribut_area" style="display:none">
+  <table border ="1">
+    <tr>
+      <td>name</td><!-- name :CharacterString[1] -->
+      <td><input id="xp_generattribut_name"></input></td>
+    </tr>
+  </table>
+  <button id="xp_generattribut_array_add" onClick="generAttributAdd(this.id)" title="Wert hinzufuegen und weiteren Wert aufnehmen"><i class="fa fa-plus" aria-hidden="true"></i></button>
+  <button id="xp_generattribut_add" onClick="generAttributAdd(this.id)" title="Wert hinzufuegen"><i class="fa fa-level-up" aria-hidden="true"></i></button>
+</span>
+<!-- XP_Hoehenangabe -->
+<span id="xp_hoehenangabe_area" style="display:none">
+  <table border ="1">
+    <tr>
+      <td>abweichenderHoehenbezug</td><!--abweichenderHoehenbezug: CharacterString [0..1]-->
+      <td><input id="xp_hoehenangabe_abweichenderHoehenbezug"></input></td>
+    </tr>
+    <tr>
+      <td>hoehenbezug</td><!-- hoehenbezug: XP_ArtHoehenbezug [0..1]-->
+      <td>
+        <select id="xp_hoehenangabe_hoehenbezug">
+          <option value="">hoehenbezug wählen</option>
+          <option value="1000">absolutNHN = 1000</option>
+          <option value="2000">relativGelaendeoberkante = 2000</option>
+          <option value="2500">relativGehwegOberkante = 2500</option>
+          <option value="3000">relativBezugshoehe = 3000</option>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>bezugspunkt</td><!-- bezugspunkt: XP_ArtHoehenbezugspunkt [0..1]-->
+      <td>
+        <select id="xp_hoehenangabe_bezugspunkt">
+          <option value="">bezugspunkt wählen</option>
+          <option value="1000">TH = 1000</option>
+          <option value="2000">FH = 2000</option>
+          <option value="3000">OK = 3000</option>
+          <option value = "3500">LH = 3500</option>
+          <option value="400=">SH = 4000</option>
+          <option value="4500">EFH = 4500</option>
+          <option value="5000">HBA = 5000</option>
+          <option value="5500">UK = 5500</option>
+          <option value="6000">GBH = 6000</option>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>hMin</td><!-- hMin :Length [0..1] -->
+      <td><input id="xp_hoehenangabe_hmin"></input></td>
+    </tr>
+    <tr>
+      <td>hMax</td><!--hMax :Length [0..1]-->
+      <td><input id="xp_hoehenangabe_hmax"></input></td>
+    </tr>
+    <tr>
+      <td>hZwingend</td><!--hZwingend :Length[0..1]-->
+      <td><input id="xp_hoehenangabe_hzwingend"></input></td>
+    </tr>
+    <tr>
+      <td>h</td><!-- h :Length [0..1] -->
+      <td><input id="xp_hoehenangabe_h"></input></td>
+    </tr>
+  </table>
+  <button id="xp_hoehenangabe_array_add" onClick="hoehenangabeAdd(this.id)" title="Wert hinzufuegen und weiteren Wert aufnehmen"><i class="fa fa-plus" aria-hidden="true"></i></button>
+  <button id="xp_hoehenangabe_add" onClick="hoehenangabeAdd(this.id)" title="Wert hinzufuegen"><i class="fa fa-level-up" aria-hidden="true"></i></button>
+</span>

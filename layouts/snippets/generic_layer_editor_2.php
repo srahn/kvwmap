@@ -132,6 +132,11 @@
 						$columnname = $attributes['name'][$j];
 						$geom_tablename = $attributes['table_name'][$attributes['name'][$j]];
 						$geomtype = $attributes['geomtype'][$attributes['name'][$j]];
+						# Frage den Geometrietyp aus der Layerdefinition, wenn in geometry_columns nur als Geometry definiert.
+						if ($geomtype == 'GEOMETRY' OR empty($geomtype)) {
+							$geomtype = array('POINT', 'LINESTRING', 'POLYGON')[$layer['Datentyp']];
+							?><input type="hidden" name="Datentyp" value="<?php echo $layer['Datentyp']; ?>"><?php
+						}
 						$dimension = $attributes['dimension'][$j];
 						$privileg = $attributes['privileg'][$j];
 						$nullable = $attributes['nullable'][$j];
@@ -159,7 +164,8 @@
 <?						
 							if(!$layer['shape'][$k]['wfs_geom']){		// kein WFS 
 								echo '<input type="hidden" id="'.$columnname.'_'.$k.'" value="'.$layer['shape'][$k][$columnname].'">';
-								if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON' OR $geomtype == 'GEOMETRY'){ ?>
+
+								if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON'){ ?>
 									<table cellspacing="0" cellpadding="0">
 										<tr>
 <?								if($privileg == 1 AND !$lock[$k]) { ?>
@@ -223,7 +229,6 @@
 					<? }		    
 	}
 
-				
 				if($this->new_entry == true){
 					if($privileg == 1){
 						if(!$this->user->rolle->geom_edit_first)echo $datapart;
@@ -233,7 +238,7 @@
     					</script>
 <?					}
 						$this->titel=$strTitleGeometryEditor;
-						if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON' OR $geomtype == 'GEOMETRY'){
+						if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON'){
 							echo '
 							<tr>
 								<td colspan="2" align="center">';
