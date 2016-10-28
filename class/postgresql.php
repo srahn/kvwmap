@@ -664,7 +664,8 @@ FROM
 			";
 			$ret1 = $this->execSQL($sql, 4, 0);
 			if($ret1[0] == 0) {
-				$geom_type = pg_fetch_assoc($ret1[1])['type'];
+				$result = pg_fetch_assoc($ret1[1]);
+				$geom_type = $result['type'];
 			}
 			else {
 				$geom_type = 'GEOMETRY';
@@ -684,7 +685,7 @@ FROM
     $this->debug->write("<p>file:kvwmap class:postgresql->check_oid:<br>".$sql,4);
     @$query=pg_query($sql);
     if ($query==0) {
-      return false;
+			return false;
     }
     else{
       return true;

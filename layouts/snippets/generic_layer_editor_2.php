@@ -134,7 +134,8 @@
 						$geomtype = $attributes['geomtype'][$attributes['name'][$j]];
 						# Frage den Geometrietyp aus der Layerdefinition, wenn in geometry_columns nur als Geometry definiert.
 						if ($geomtype == 'GEOMETRY' OR empty($geomtype)) {
-							$geomtype = array('POINT', 'LINESTRING', 'POLYGON')[$layer['Datentyp']];
+							$geomtypes = array('POINT', 'LINESTRING', 'POLYGON');
+							$geomtype = $geomtypes[$layer['Datentyp']];
 							?><input type="hidden" name="Datentyp" value="<?php echo $layer['Datentyp']; ?>"><?php
 						}
 						$dimension = $attributes['dimension'][$j];

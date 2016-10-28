@@ -15,7 +15,7 @@ class Layer extends MyObject {
 
 	public static function find_by_obergruppe_und_name($gui, $obergruppe_id, $layer_name) {
 		$layer = new Layer($gui);
-		return $layer->find_by_sql(
+		$result = $layer->find_by_sql(
 			array(
 				'select' => 'l.*',
 				'from' => "
@@ -25,7 +25,8 @@ class Layer extends MyObject {
 					g.obergruppe = " . $obergruppe_id . " AND
 					l.Name = '" . $layer_name . "'"
 			)
-		)[0];
+		);
+		return $result[0];
 	}
 
 	/*
