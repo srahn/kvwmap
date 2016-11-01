@@ -139,7 +139,7 @@ class PgObject {
 			)
 			RETURNING id
 		";
-		$this->debug->show('create sql: ' . $sql);
+		$this->debug->show('create sql: ' . $sql, false);
 		$query = pg_query($this->database->dbConn, $sql);
 		$row = pg_fetch_assoc($query);
 		$this->set($this->identifier, $row[$this->identifier]);
