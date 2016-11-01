@@ -38,7 +38,7 @@
 		return $datapart;
 	}
 
-	function attribute_value(&$gui, $layer_id, $attributes, $j, $k, $dataset, $size, $select_width, $fontsize, $change_all = false, $onchange = NULL, $field_name = NULL){
+	function attribute_value(&$gui, $layer_id, $attributes, $j, $k, $dataset, $size, $select_width, $fontsize, $change_all = false, $onchange = NULL, $field_name = NULL, $field_id = NULL){
 		global $strShowPK;
 		global $strNewPK;
 		global $strShowFK;
@@ -77,7 +77,7 @@
 		
 		###### Array-Typ #####
 		if(POSTGRESVERSION >= 930 AND substr($attributes['type'][$j], 0, 1) == '_'){
-			if($field_name != NULL)$id = $field_name.'_'.$k;		# wenn field_name übergeben wurde (nicht die oberste Ebene)
+			if($field_id != NULL)$id = $field_id;		# wenn field_id übergeben wurde (nicht die oberste Ebene)
 			else $id = $k.'_'.$name;	# oberste Ebene
 			$datapart .= '<input type="hidden" title="'.$alias.'" name="'.$fieldname.'" id="'.$id.'" onchange="'.$onchange.'" value="'.htmlspecialchars($value).'">';
 			$datapart .= '<div id="'.$id.'_elements" style="">';
@@ -93,7 +93,7 @@
 				if(is_array($elements[$e]) OR is_object($elements[$e]))$elements[$e] = json_encode($elements[$e]);		# ist ein Array oder Objekt (also entweder ein Array-Typ oder ein Datentyp) und wird zur Übertragung wieder encodiert
 				$dataset2[$attributes2['name'][$j]] = $elements[$e];
 				$datapart .= '<div id="div_'.$id.'_'.$e.'" style="display: '.($e==-1 ? 'none' : 'block').'"><table cellpadding="0" cellspacing="0"><tr><td>';
-				$datapart .= attribute_value($gui, $layer_id, $attributes2, $j, $k, $dataset2, $size, $select_width, $fontsize, $change_all, $onchange2, $elements_fieldname);
+				$datapart .= attribute_value($gui, $layer_id, $attributes2, $j, $k, $dataset2, $size, $select_width, $fontsize, $change_all, $onchange2, $elements_fieldname, $elements_fieldname.'_'.$e);
 				$datapart .= '</td>';
 				if($attributes['privileg'][$j] == '1' AND !$lock[$k]){
 					$datapart .= '<td valign="top"><a href="#" onclick="removeArrayElement(\''.$id.'\', \'div_'.$id.'_'.$e.'\');'.$onchange2.'return false;"><img style="width: 18px" src="'.GRAPHICSPATH.'datensatz_loeschen.png"></a></td>';
@@ -110,7 +110,7 @@
 		
 		###### Nutzer-Datentyp #####
 		if(is_numeric($attributes['type'][$j])){
-			if($field_name != NULL)$id = $field_name.'_'.($name == '' ? '' : $name.'_').$k;		# wenn field_name übergeben wurde (nicht die oberste Ebene)
+			if($field_id != NULL)$id = $field_id;		# wenn field_id übergeben wurde (nicht die oberste Ebene)
 			else $id = $k.'_'.$name;	# oberste Ebene
 			$datapart .= '<input type="hidden" title="'.$alias.'" name="'.$fieldname.'" id="'.$id.'" onchange="'.$onchange.'" value="'.htmlspecialchars($value).'">';
 			$type_attributes = $attributes['type_attributes'][$j];
@@ -129,7 +129,7 @@
 				$type_attributes['privileg'][$e] = $attributes['privileg'][$j];
 				if($type_attributes['alias'][$e] == '')$type_attributes['alias'][$e] = $type_attributes['name'][$e];
 				$datapart .= '<tr><td valign="top" class="gle_attribute_name"><table><tr><td>'.$type_attributes['alias'][$e].'</td></tr></table></td>';
-				$datapart .= '<td class="gle_attribute_value">'.attribute_value($gui, $layer_id, $type_attributes, $e, NULL, $dataset2, $tsize, $select_width, $fontsize, $change_all, $onchange2, $elements_fieldname).'</td></tr>';
+				$datapart .= '<td class="gle_attribute_value">'.attribute_value($gui, $layer_id, $type_attributes, $e, NULL, $dataset2, $tsize, $select_width, $fontsize, $change_all, $onchange2, $elements_fieldname, $elements_fieldname.'_'.$e).'</td></tr>';
 			}
 			$datapart .= '</tr></table>';
 			return $datapart;
