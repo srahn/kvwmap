@@ -109,7 +109,7 @@ class Gml_builder {
       "<XPlanAuszug xmlns=\"".XPLAN_NS_URI."\"\n".
       "  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n".
       "  xmlns:wfs=\"http://www.opengis.net/wfs\"\n".
-      "  xmlns:gml=\"http://www.opengis.net/gml\"\n".
+      "  xmlns:gml=\"http://www.opengis.net/gml/3.2\"\n".
       "  xmlns:xlink=\"http://www.w3.org/1999/xlink\"\n".
       (XPLAN_NS_PREFIX==""
           ? ""
@@ -390,10 +390,14 @@ class Gml_builder {
           if ($gml_value[0] == '{' && substr($gml_value,-1) == '}') {
             $gml_value_array = explode(',',substr($gml_value, 1, -1));
             for ($j = 0; $j < count($gml_value_array); $j++){
-              $gmlStr .= $this->wrapWithElement("{$xplan_ns_prefix}{$uml_attribute['uml_name']}",htmlentities($gml_value_array[$j]));
+              $gmlStr .= $this->wrapWithElement(
+                  "{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
+                  htmlspecialchars($gml_value_array[$j],ENT_QUOTES|ENT_XML1,"UTF-8"));
             }
           } else
-          $gmlStr .= $this->wrapWithElement("{$xplan_ns_prefix}{$uml_attribute['uml_name']}",htmlentities($gml_value));
+          $gmlStr .= $this->wrapWithElement(
+              "{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
+              htmlspecialchars($gml_value_array[$j],ENT_QUOTES|ENT_XML1,"UTF-8"));
       }
     }
     return $gmlStr;
