@@ -109,7 +109,7 @@ class Gml_builder {
       "<XPlanAuszug xmlns=\"".XPLAN_NS_URI."\"\n".
       "  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n".
       "  xmlns:wfs=\"http://www.opengis.net/wfs\"\n".
-      "  xmlns:gml=\"http://www.opengis.net/gml\"\n".
+      "  xmlns:gml=\"http://www.opengis.net/gml/3.2\"\n".
       "  xmlns:xlink=\"http://www.w3.org/1999/xlink\"\n".
       (XPLAN_NS_PREFIX==""
           ? ""
@@ -356,21 +356,27 @@ class Gml_builder {
               case NULL:
                 break;
               case "CodeList":
-                $gml_value = $gml_object[$uml_attribute['col_name']]['id'];
-                $codeSpaceUri = $gml_object[$uml_attribute['col_name']]['codespace'];
-                $gmlStr .= "<{$xplan_ns_prefix}{$uml_attribute['uml_name']} codeSpace=\"$codeSpaceUri\">$gml_value</{$xplan_ns_prefix}{$uml_attribute['uml_name']}>";
+                $gml_value_array = explode(',',substr($gml_object[$uml_attribute['col_name']], 1, -1));
+                $codeSpaceUri = $gml_value_array[0];
+                $code_value = $gml_value_array[1];
+                $gmlStr .= "<{$xplan_ns_prefix}{$uml_attribute['uml_name']} codeSpace=\"$codeSpaceUri\">$code_value</{$xplan_ns_prefix}{$uml_attribute['uml_name']}>";
                 break;
               case "DataType":
                 // fetch information about attributes and their properties
                 $datatype_attribs = $this->typeInfo->getInfo($uml_attribute['type']);
-                $gmlStr .= "<{$xplan_ns_prefix}{$uml_attribute['uml_name']}>";
                 $gml_value_array = explode(',',substr($gml_object[$uml_attribute['col_name']], 1, -1));
+                $gml_attrib_str = "";
                 foreach ($datatype_attribs as $dt_attrib){
-                  $gmlStr .= $this->wrapWithElement(
+                  $attrib_value = $gml_value_array[$dt_attrib['sequence']];
+                  // leere Attribute auslassen
+                  if (strlen($attrib_value) == 0) continue;
+                  $gml_attrib_str .= $this->wrapWithElement(
                     "{$xplan_ns_prefix}{$dt_attrib['uml_name']}",
-                    $gml_value_array[$dt_attrib['sequence']]);
+                    $attrib_value);
                 }
-                $gmlStr .= "</{$xplan_ns_prefix}{$uml_attribute['uml_name']}>";
+                // leere Datentypen auslassen
+                if (strlen($gml_attrib_str) == 0) break;
+                $gmlStr .= $this->wrapWithElement("{$xplan_ns_prefix}{$uml_attribute['uml_name']}", $gml_attrib_str);
               default:
             }
           }
@@ -390,12 +396,14 @@ class Gml_builder {
           if ($gml_value[0] == '{' && substr($gml_value,-1) == '}') {
             $gml_value_array = explode(',',substr($gml_value, 1, -1));
             for ($j = 0; $j < count($gml_value_array); $j++){
-							$gmlStr .= $this->wrapWithElement("{$xplan_ns_prefix}{$uml_attribute['uml_name']}", $gml_value_array[$j]);
-#              $gmlStr .= $this->wrapWithElement("{$xplan_ns_prefix}{$uml_attribute['uml_name']}",htmlentities($gml_value_array[$j]));
+              $gmlStr .= $this->wrapWithElement(
+                  "{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
+                  htmlspecialchars($gml_value_array[$j],ENT_QUOTES|ENT_XML1,"UTF-8"));
             }
           } else
-						$gmlStr .= $this->wrapWithElement("{$xplan_ns_prefix}{$uml_attribute['uml_name']}", $gml_value);
-#          $gmlStr .= $this->wrapWithElement("{$xplan_ns_prefix}{$uml_attribute['uml_name']}",htmlentities($gml_value));
+          $gmlStr .= $this->wrapWithElement(
+              "{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
+              htmlspecialchars($gml_value,ENT_QUOTES|ENT_XML1,"UTF-8"));
       }
     }
     return $gmlStr;
