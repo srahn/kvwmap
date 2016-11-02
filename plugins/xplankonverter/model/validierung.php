@@ -189,32 +189,142 @@ class Validierung extends PgObject {
 	}
 
 	/*
+	* Prüft ob die im SQL-Teil der Abfrage gelieferten Geometrien valide sind
+	* @param object $regel Objekt der Regel
+	* @param object $konvertierung Objekt der Konvertierung
+	* @return boolean $all_valid true wenn alle valide sind, false wenn nicht.
+	*/
+	function geometrie_isvalid($regel, $konvertierung) {
+		$this->debug->show('<br>Validate geom_isvalid sql:', Validierung::$write_debug);
+		$all_geom_isvalid = true;
+
+		$sql = $regel->get_convert_sql($konvertierung->get('id'));
+		$this->debug->show('Regel sql:<br>'. $sql, Validierung::$write_debug);
+
+		# Extrahiere alles ab select
+		$sql = stristr($sql, 'select');
+		$this->debug->show('<br>sql von select an: ' . $sql, Validierung::$write_debug);
+
+		# Selektiere gid zur eindeutigen Identifizierung des Datensatzes und st_isvalidreason
+		$sql = str_ireplace(
+			'select',
+			"select
+				gid,
+				st_isvalidreason(the_geom) validreason,
+			",
+			$sql
+		);
+		$this->debug->show('<br>sql mit gid und is_validreason: ' . $sql, Validierung::$write_debug);
+
+		# where klausel für rp_plan hinzufügen
+		$sql = str_ireplace(
+			'where',
+			"where
+				NOT st_isvalid(the_geom) AND
+			",
+			$sql
+		);
+		$this->debug->show('<br>sql mit where st_isvalid: ' . $sql, Validierung::$write_debug);
+
+		$sql = "SET search_path=xplan_shapes_" . $konvertierung->get('id') . ", public; " . substr($sql, 0, stripos($sql, 'returning'));
+
+		$this->debug->show('Sql für Prüfung geom_isvalid:<br>' . $sql, Validierung::$write_debug);
+
+		$result = @pg_query(
+			$this->database->dbConn,
+			$sql
+		);
+
+		if (!$result) {
+			$validierungsergebnis = new Validierungsergebnis($this->gui);
+			$validierungsergebnis->create(
+				array(
+					'konvertierung_id' => $konvertierung->get('id'),
+					'validierung_id' => $this->get('id'),
+					'status' => 'Fehler',
+					'msg' => 'Regel: ' . $regel->get('name') . ', ' . str_replace("'","''",'SQL: ' . $sql . ' nicht ausführbar.<br>' . @pg_last_error($this->database->dbConn)),
+					'user_id' => $this->gui->user->id,
+					'regel_id' => $regel->get('id')
+				)
+			);
+		}
+		else {
+			while ($row = pg_fetch_assoc($result)) {
+				$validierungsergebnis = new Validierungsergebnis($this->gui);
+				$validierungsergebnis->create(
+					array(
+						'konvertierung_id' => $konvertierung->get('id'),
+						'validierung_id' => $this->get('id'),
+						'status' => 'Fehler',
+						'regel_id' => $regel->get('id'),
+						'shape_gid' => $row['gid'],
+						'msg' => 'Regel: ' . $regel->get('name') . '. Objekt mit gid=' . $row['gid'] . ' ist nicht valide. Grund: ' . $row['validreason']
+					)
+				);
+				$all_geom_isvalid = false;
+			}
+		}
+
+		if ($all_geom_isvalid) {
+			$validierungsergebnis = new Validierungsergebnis($this->gui);
+			$validierungsergebnis->create(
+				array(
+					'konvertierung_id' => $konvertierung->get('id'),
+					'validierung_id' => $this->get('id'),
+					'status' => 'Erfolg',
+					'msg' => 'Alle Geometrien der Regel sind valide.'
+				)
+			);
+		}
+		return $all_geom_isvalid;
+	}
+
+	/*
 	* Prüft ob die im SQL-Teil der Abfrage gelieferten Geometrien im räumlichen Geltungsbereich
 	* des Planes mit plan_gml_id enthalten sind.
 	* Wenn nicht wird pro Ausreißer ein Validierungsergebnis mit status = Warnung angelegt
 	* wenn die Entfernung <= 100km ist ansonsten mit status = Fehler.
 	* Wenn alle innerhalb sind, wird ein Validierungsergebnis mit status = Erfolg angelegt.
-	* @param string $sql Das vollständige SQL der Regel
-	* @param integer $regel_id ebendies
-	* @param string $geltungsbereich Die WKB-Geometrie des räumlichen Geltungsbereiches des Planes
+	* @param object $regel Objekt der Regel
+	* @param object $konvertierung Objekt der Konvertierung
 	* @return boolean $all_within_plan true wenn alle drin liegen, false wenn nicht.
 	*/
-	function geom_within_plan($sql, $regel_id, $konvertierung) {
+	function geom_within_plan($regel, $konvertierung) {
 		$this->debug->show('<br>Validate ob geom_within_plan sql:', Validierung::$write_debug);
-		$this->debug->show('Regel sql:<br>'. $sql, Validierung::$write_debug);
 		$all_within_plan = true;
+
+		$sql = $regel->get_convert_sql($konvertierung->get('id'));
+		$this->debug->show('Regel sql:<br>'. $sql, Validierung::$write_debug);
 
 		# Extrahiere alles ab select
 		$sql = stristr($sql, 'select');
 		#$this->debug->show('<br>sql von select an: ' . $sql, Validierung::$write_debug);
 
-		# Selektiere gid zur eindeutigen Identifizierung des Datensatzes
+		# Selektiere gid zur eindeutigen Identifizierung des Datensatzes und within und distance
 		$sql = str_ireplace(
 			'select',
 			"select
 				gid,
-				NOT st_within(st_transform(the_geom, " . $konvertierung->get('output_epsg') . "), st_transform('" . $konvertierung->plan->get('raeumlichergeltungsbereich') . "'::geometry, " . $konvertierung->get('output_epsg') . ")) AS ausserhalb,
-				st_distance(st_transform(the_geom, " . $konvertierung->get('output_epsg') . "), st_transform('" . $konvertierung->plan->get('raeumlichergeltungsbereich') . "'::geometry, " . $konvertierung->get('output_epsg') . "))/1000 AS distance,
+				NOT st_within(st_transform(the_geom, " . $konvertierung->get('output_epsg') . "), st_transform(rp_plan.raeumlichergeltungsbereich, " . $konvertierung->get('output_epsg') . ")) AS ausserhalb,
+				st_distance(st_transform(the_geom, " . $konvertierung->get('output_epsg') . "), st_transform(rp_plan.raeumlichergeltungsbereich, " . $konvertierung->get('output_epsg') . "))/1000 AS distance,
+			",
+			$sql
+		);
+
+		# tabelle rp_plan hinzufügen
+		$sql = str_ireplace(
+			'from',
+			"from
+				xplan_gml.rp_plan rp_plan,
+			",
+			$sql
+		);
+
+		# where klausel für rp_plan hinzufügen
+		$sql = str_ireplace(
+			'where',
+			"where
+				rp_plan.konvertierung_id = " . $konvertierung->get('id') . " AND
 			",
 			$sql
 		);
@@ -223,24 +333,42 @@ class Validierung extends PgObject {
 
 		$sql = "SET search_path=xplan_shapes_" . $konvertierung->get('id') . ", public; " . substr($sql, 0, stripos($sql, 'returning'));
 
-		$this->debug->show('Sql für Prüfung:<br>' . $sql, Validierung::$write_debug);
+		$this->debug->show('Sql für Prüfung geom_within_plan:<br>' . $sql, false);
 
-		$result = pg_query($this->database->dbConn, $sql);
+		$result = @pg_query(
+			$this->database->dbConn,
+			$sql
+		);
 
-		while ($row = pg_fetch_assoc($result)) {
-			if ($row['ausserhalb'] == 't') {
-				$validierungsergebnis = new Validierungsergebnis($this->gui);
-				$validierungsergebnis->create(
-					array(
-						'konvertierung_id' => $konvertierung->get('id'),
-						'validierung_id' => $this->get('id'),
-						'status' => ($row['distance'] > 100 ? 'Fehler' : 'Warnung'),
-						'regel_id' => $regel_id,
-						'shape_gid' => $row['gid'],
-						'msg' => 'Objekt mit gid=' . $row['gid'] . ' ist außerhalb des räumlichen Geltungsbereiches des Planes.' . ($row['distance'] > 100 ? ' Das Objekt ist mehr als 100 km entfernt.' : '')
-					)
-				);
-				$all_within_plan = false;
+		if (!$result) {
+			$validierungsergebnis = new Validierungsergebnis($this->gui);
+			$validierungsergebnis->create(
+				array(
+					'konvertierung_id' => $konvertierung->get('id'),
+					'validierung_id' => $this->get('id'),
+					'status' => 'Fehler',
+					'msg' => 'Regel: ' . $regel->get('name') . ', ' . str_replace("'","''",'SQL: ' . $sql . ' nicht ausführbar.<br>' . @pg_last_error($this->database->dbConn)),
+					'user_id' => $this->gui->user->id,
+					'regel_id' => $regel->get('id')
+				)
+			);
+		}
+		else {
+			while ($row = pg_fetch_assoc($result)) {
+				if ($row['ausserhalb'] == 't') {
+					$validierungsergebnis = new Validierungsergebnis($this->gui);
+					$validierungsergebnis->create(
+						array(
+							'konvertierung_id' => $konvertierung->get('id'),
+							'validierung_id' => $this->get('id'),
+							'status' => ($row['distance'] > 100 ? 'Fehler' : 'Warnung'),
+							'regel_id' => $regel->get('id'),
+							'shape_gid' => $row['gid'],
+							'msg' => 'Objekt mit gid=' . $row['gid'] . ' ist außerhalb des räumlichen Geltungsbereiches des Planes.' . ($row['distance'] > 100 ? ' Das Objekt ist mehr als 100 km entfernt.' : '')
+						)
+					);
+					$all_within_plan = false;
+				}
 			}
 		}
 

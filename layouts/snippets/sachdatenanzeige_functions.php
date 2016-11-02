@@ -47,8 +47,8 @@ include('funktionen/input_check_functions.php');
 			else if(i > 0 && value != '')values.push(value);		// bei Arrays ist das erste Element ein Dummy
 		}
 		if(!is_array)json = '{'+values.join()+'}';
-		else json = '['+values.join()+']';
-		field.value = json;		
+		else json = '['+values.join()+']';		
+		field.value = json;
 		if(field.onchange)field.onchange();
 	}
 	

@@ -12,6 +12,12 @@ include(WWWROOT.APPLVERSION.'funktionen/gui_functions.php');
 </HEAD>
 <BODY onload="onload_functions();">
 	<div id="sperrdiv" style="position: absolute;height: 100%;z-index: 1000000;background:rgba(200,200,200,0.3);"></div>
+	<div id="sperrspinner" style="position: absolute;height: 100%; width: 100%; z-index: 1000000; display: none; background:rgba(200,200,200,0.3); text-align: center">
+		<div style="margin: 300px">
+			<i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
+			ist in Arbeit ...
+		</div>
+	</div>
 	<a name="oben"></a>
   <table width="900" align="center" border="0" cellspacing="0" cellpadding="0">
     <tr>

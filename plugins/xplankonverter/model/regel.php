@@ -48,32 +48,28 @@ public static	function find_by_id($gui, $by, $id) {
 			$validierung->konvertierung_id = $konvertierung_id;
 			$validierung->geometrie_vorhanden($this->get('sql'), $this->get('id'));
 
-			# Prüft ob das sql ausführbar ist.
+			# Prüft ob das sql ausführbar ist und legt die Objekte an wenn ja.
 			$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'sql_ausfuehrbar');
 			$validierung->konvertierung_id = $konvertierung_id;
+			$alle_ausfuehrbar = $validierung->sql_ausfuehrbar($this, $konvertierung_id);
 
-			# Ausführen des SQL
-			$sql = $this->get_convert_sql($konvertierung_id);
-			# Objekte anlegen
-			$result = @pg_query(
-				$this->database->dbConn,
-				$sql
-			);
+			if ($alle_ausfuehrbar and !empty($this->get('bereich_gml_id'))) {
 
-			# Prüft ob das sql ausführbar war.
-			$success = $validierung->sql_ausfuehrbar($this, $konvertierung_id);
-#			$success = $validierung->sql_ausfuehrbar($result, $this->get('id'));
+					# Prüft ob die erzeugten Geometrien valide sind.
+					$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'geometrie_isvalid');
+					$validierung->konvertierung_id = $konvertierung_id;
+					$all_geom_isvalid = $validierung->geometrie_isvalid($this, $konvertierung);
+					
+					if ($all_geom_isvalid) {
+						# Prüft ob die erzeugten Geometrien im räumlichen Geltungsbereich des Planes liegen.
+						$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'geom_within_plan');
+						$validierung->konvertierung_id = $konvertierung_id;
+						$validierung->geom_within_plan($this, $konvertierung);
 
-			if ($success) {
-				if (!empty($this->get('bereich_gml_id'))) {
-
-					# Prüft ob die erzeugten Geometrien im räumlichen Geltungsbereich des Planes liegen.
-					$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'geom_within_plan');
-					$validierung->geom_within_plan($sql, $this->get('id'), $konvertierung);
-
-					# Prüft ob die erzeugten Geometrien im Geltungsbereich der Bereiche liegen.
-					$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'geom_within_bereich');
-					$validierung->geom_within_bereich();
+						# Prüft ob die erzeugten Geometrien im Geltungsbereich der Bereiche liegen.
+						$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'geom_within_bereich');
+						$validierung->konvertierung_id = $konvertierung_id;
+						$validierung->geom_within_bereich($this, $konvertierung);
 				}
 			}
 
