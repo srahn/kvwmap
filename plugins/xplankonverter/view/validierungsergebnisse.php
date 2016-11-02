@@ -12,7 +12,7 @@ if ($this->Fehlermeldung!='') {
 // formatter functions
 function validierung_msg_formatter(value, row) {
 	if (row.ergebnis_status == 'Fehler')
-		return row.validierung_msg_error;
+		return row.validierung_msg_error + '<br>' + value;
 	else if (row.ergebnis_status == 'Warnung')
 		return row.validierung_msg_warning + '<br>' + value;
 	else

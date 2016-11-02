@@ -67,8 +67,20 @@ class Validierung extends PgObject {
 		return $regeln_existieren;
 	}
 
-	function sql_ausfuehrbar($result, $regel_id) {
+	function sql_ausfuehrbar($regel, $konvertierung_id) {
+		$this->debug->show('<br>Validiere ob sql_ausfuehrbar sql: ', Validierung::$write_debug);
 		$ausfuehrbar = true;
+
+		$sql = $regel->get_convert_sql($konvertierung_id);
+
+		$this->debug->show($sql, Validierung::$write_debug);
+
+		# Objekte anlegen
+		$result = @pg_query(
+			$this->database->dbConn,
+			$sql
+		);
+
 		if (!$result) {
 			$validierungsergebnis = new Validierungsergebnis($this->gui);
 			$validierungsergebnis->create(
@@ -76,8 +88,8 @@ class Validierung extends PgObject {
 					'konvertierung_id' => $this->konvertierung_id,
 					'validierung_id' => $this->get('id'),
 					'status' => 'Fehler',
-					'msg' => str_replace("'","''",@pg_last_error($this->database->dbConn)),
-					'regel_id' => $regel_id
+					'msg' => 'Regel: ' . $regel->get('name') . ', ' . str_replace("'","''",'SQL: ' . $sql . ' nicht ausführbar.<br>' . @pg_last_error($this->database->dbConn)),
+					'regel_id' => $regel->get('id')
 				)
 			);
 			$ausfuehrbar = false;
@@ -85,8 +97,8 @@ class Validierung extends PgObject {
 		return $ausfuehrbar;
 	}
 
-	function sql_vorhanden($sql, $regel_id) {
-		$this->debug->show('sql_vorhanden mit sql: ' . $sql . ' validieren.', Validierung::$write_debug);
+	function sql_vorhanden($sql, $regel) {
+		$this->debug->show('<hr><br>Regel: ' . $regel->get('name') . '<br>Validiere ob sql_vorhanden sql:<br>' . $sql . ' validieren.', Validierung::$write_debug);
 		$vorhanden = true;
 		if (empty($sql)) {
 			$validierungsergebnis = new Validierungsergebnis($this->gui);
@@ -96,7 +108,7 @@ class Validierung extends PgObject {
 					'validierung_id' => $this->get('id'),
 					'status' => 'Fehler',
 					'msg' => 'Das SQL-Statement ist leer.',
-					'regel_id' => $regel_id
+					'regel_id' => $regel->get('id')
 				)
 			);
 			$vorhanden = false;
@@ -126,33 +138,35 @@ class Validierung extends PgObject {
 	* noch gesetzt werden. Aber dann immer automatisch beim Anlegen des Layers.
 	*/
 	function geometrie_vorhanden($sql, $regel_id) {
-		$this->debug->show('validate geometrie_vorhanden mit sql: ' . $sql, Validierung::$write_debug);
+		#$this->debug->show('<br>validate geometrie_vorhanden mit sql: ' . $sql, Validierung::$write_debug);
 		$geometrie_vorhanden = true;
 		$sql = stristr($sql, 'select');
-		$this->debug->show('sql von select an: ' . $sql, Validierung::$write_debug);
+		#$this->debug->show('<br>sql von select an: ' . $sql, Validierung::$write_debug);
 
+		# Frage gid mit ab
 		$sql = str_ireplace(
 			'select',
 			"select gid,",
 			$sql
 		);
-		$this->debug->show('sql mit gid: ' . $sql, Validierung::$write_debug);
+		#$this->debug->show('<br>sql mit gid: ' . $sql, Validierung::$write_debug);
 
+		# Hänge Where Klauses is null an
 		if (strpos(strtolower($sql), 'where') === false) {
 			$sql .= ' where the_geom IS NULL';
 		}
 		else {
 			$sql = str_ireplace(
 				'where',
-				"where the_geom IS NULL AND",
+				"where the_geom IS NULL AND ",
 				$sql
 			);
 		}
-		$this->debug->show('sql mit where Klausel: ' . $sql, Validierung::$write_debug);
+		#$this->debug->show('<br>sql mit where Klausel: ' . $sql, Validierung::$write_debug);
 
 		$sql = "SET search_path=xplan_shapes_{$this->konvertierung_id}, public; " . $sql;
 
-		$this->debug->show('sql zur Prüfung: ' . $sql, Validierung::$write_debug);
+		$this->debug->show('<br>Validiere ob geometrie_vorhanden sql:<br>' . $sql, Validierung::$write_debug);
 
 		$result = pg_query($this->database->dbConn, $sql);
 
@@ -172,6 +186,80 @@ class Validierung extends PgObject {
 		}
 
 		return $geometrie_vorhanden;
+	}
+
+	/*
+	* Prüft ob die im SQL-Teil der Abfrage gelieferten Geometrien im räumlichen Geltungsbereich
+	* des Planes mit plan_gml_id enthalten sind.
+	* Wenn nicht wird pro Ausreißer ein Validierungsergebnis mit status = Warnung angelegt
+	* wenn die Entfernung <= 100km ist ansonsten mit status = Fehler.
+	* Wenn alle innerhalb sind, wird ein Validierungsergebnis mit status = Erfolg angelegt.
+	* @param string $sql Das vollständige SQL der Regel
+	* @param integer $regel_id ebendies
+	* @param string $geltungsbereich Die WKB-Geometrie des räumlichen Geltungsbereiches des Planes
+	* @return boolean $all_within_plan true wenn alle drin liegen, false wenn nicht.
+	*/
+	function geom_within_plan($sql, $regel_id, $konvertierung) {
+		$this->debug->show('<br>Validate ob geom_within_plan sql:', Validierung::$write_debug);
+		$this->debug->show('Regel sql:<br>'. $sql, Validierung::$write_debug);
+		$all_within_plan = true;
+
+		# Extrahiere alles ab select
+		$sql = stristr($sql, 'select');
+		#$this->debug->show('<br>sql von select an: ' . $sql, Validierung::$write_debug);
+
+		# Selektiere gid zur eindeutigen Identifizierung des Datensatzes
+		$sql = str_ireplace(
+			'select',
+			"select
+				gid,
+				NOT st_within(st_transform(the_geom, " . $konvertierung->get('output_epsg') . "), st_transform('" . $konvertierung->plan->get('raeumlichergeltungsbereich') . "'::geometry, " . $konvertierung->get('output_epsg') . ")) AS ausserhalb,
+				st_distance(st_transform(the_geom, " . $konvertierung->get('output_epsg') . "), st_transform('" . $konvertierung->plan->get('raeumlichergeltungsbereich') . "'::geometry, " . $konvertierung->get('output_epsg') . "))/1000 AS distance,
+			",
+			$sql
+		);
+
+		#$this->debug->show('<br>sql mit gid, ausserhalb und distance: ' . $sql, Validierung::$write_debug);
+
+		$sql = "SET search_path=xplan_shapes_" . $konvertierung->get('id') . ", public; " . substr($sql, 0, stripos($sql, 'returning'));
+
+		$this->debug->show('Sql für Prüfung:<br>' . $sql, Validierung::$write_debug);
+
+		$result = pg_query($this->database->dbConn, $sql);
+
+		while ($row = pg_fetch_assoc($result)) {
+			if ($row['ausserhalb'] == 't') {
+				$validierungsergebnis = new Validierungsergebnis($this->gui);
+				$validierungsergebnis->create(
+					array(
+						'konvertierung_id' => $konvertierung->get('id'),
+						'validierung_id' => $this->get('id'),
+						'status' => ($row['distance'] > 100 ? 'Fehler' : 'Warnung'),
+						'regel_id' => $regel_id,
+						'shape_gid' => $row['gid'],
+						'msg' => 'Objekt mit gid=' . $row['gid'] . ' ist außerhalb des räumlichen Geltungsbereiches des Planes.' . ($row['distance'] > 100 ? ' Das Objekt ist mehr als 100 km entfernt.' : '')
+					)
+				);
+				$all_within_plan = false;
+			}
+		}
+
+		if ($all_within_plan) {
+			$validierungsergebnis = new Validierungsergebnis($this->gui);
+			$validierungsergebnis->create(
+				array(
+					'konvertierung_id' => $konvertierung->get('id'),
+					'validierung_id' => $this->get('id'),
+					'status' => 'Erfolg',
+					'msg' => 'Alle Objekte der Regel liegen im Planbereich.'
+				)
+			);
+		}
+		return $all_within_plan;
+	}
+
+	function geom_within_bereich() {
+		
 	}
 
   function doValidate($konvertierung) {

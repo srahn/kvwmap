@@ -68,9 +68,15 @@ class Konvertierung extends PgObject {
 	}
 
 	function get_plan() {
-		$plan = new RP_Plan($this->gui);
-		$plan = $plan->find_where('konvertierung_id = ' . $this->get('id'));
-		return (count($plan) > 0 ? $plan[0] : array());
+		if (!$this->plan) {
+			$plan = new RP_Plan($this->gui);
+			$plan = $plan->find_where('konvertierung_id = ' . $this->get('id'));
+			if ($plan > 0)
+				$this->plan = $plan[0];
+			else
+				$this->plan = false;
+		}
+		return $this->plan;
 	}
 
 	function get_bereiche($plan_id) {
@@ -237,8 +243,9 @@ class Konvertierung extends PgObject {
 		$validierung->konvertierung_id = $this->get('id');
 		if ($validierung->regel_existiert($regeln)) {
 			$success = true;
+			$this->get_plan();
 			foreach($regeln AS $regel) {
-				$result = $regel->convert($this->get('id'));
+				$result = $regel->convert($this);
 				if (!$result) {
 					$success = false;
 				}
@@ -288,8 +295,10 @@ class Konvertierung extends PgObject {
 
 		# Lösche Plan der Konvertierung
 		$plan = $this->get_plan();
-		$msg .= "\nRP Plan " . $plan->get('name') . ' gelöscht.';
-		$plan->destroy();
+		if ($plan) {
+			$msg .= "\nRP Plan " . $plan->get('name') . ' gelöscht.';
+			$plan->destroy();
+		}
 
 		# Lösche GML-Layer Gruppe
 		$this->delete_layer_group('GML');

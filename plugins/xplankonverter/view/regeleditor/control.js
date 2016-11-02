@@ -86,6 +86,9 @@ function chooseFeatureTable() {
 function showSqlArea() {
   var shapefileTable = $("#source_selector").val();
   var xplanTable = $("#target_selector").val();
+  
+  console.log("#" + shapefileTable + "_source_attributes");
+  console.log("#" + xplanTable+ "_attributes_table");
   if($("#" + shapefileTable + "_source_attributes").is(":visible") && $("#" + xplanTable+ "_attributes_table").is(":visible")) {
     $("#sql_area").show();
   }

@@ -35,12 +35,13 @@ public static	function find_by_id($gui, $by, $id) {
 	* Tabelle rp_breich2rp_objekt zusammen mit den gml_id's der erzeugten
 	* XPlan GML Objekte eingetragen.
 	*/
-	function convert($konvertierung_id) {
+	function convert($konvertierung) {
+		$konvertierung_id = $konvertierung->get('id');
 		$this->debug->show('Regel convert mit konvertierung_id: ' . $konvertierung_id, Regel::$write_debug);
 		$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'sql_vorhanden');
 		$validierung->konvertierung_id = $konvertierung_id;
 
-		if ($validierung->sql_vorhanden($this->get('sql'), $this->get('id'))) {
+		if ($validierung->sql_vorhanden($this->get('sql'), $this)) {
 
 			# Prüft ob alle Objekte eine Geometrie haben
 			$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'geometrie_vorhanden');
@@ -50,13 +51,32 @@ public static	function find_by_id($gui, $by, $id) {
 			# Prüft ob das sql ausführbar ist.
 			$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'sql_ausfuehrbar');
 			$validierung->konvertierung_id = $konvertierung_id;
+
+			# Ausführen des SQL
 			$sql = $this->get_convert_sql($konvertierung_id);
 			# Objekte anlegen
 			$result = @pg_query(
 				$this->database->dbConn,
 				$sql
 			);
-			$success = $validierung->sql_ausfuehrbar($result, $this->get('id'));
+
+			# Prüft ob das sql ausführbar war.
+			$success = $validierung->sql_ausfuehrbar($this, $konvertierung_id);
+#			$success = $validierung->sql_ausfuehrbar($result, $this->get('id'));
+
+			if ($success) {
+				if (!empty($this->get('bereich_gml_id'))) {
+
+					# Prüft ob die erzeugten Geometrien im räumlichen Geltungsbereich des Planes liegen.
+					$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'geom_within_plan');
+					$validierung->geom_within_plan($sql, $this->get('id'), $konvertierung);
+
+					# Prüft ob die erzeugten Geometrien im Geltungsbereich der Bereiche liegen.
+					$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'geom_within_bereich');
+					$validierung->geom_within_bereich();
+				}
+			}
+
 		}
 		else {
 			$success = false;
@@ -79,16 +99,18 @@ public static	function find_by_id($gui, $by, $id) {
 		);
 		$sql = str_ireplace(
 			'select',
-			"select {$konvertierung_id},",
+			"select {$konvertierung_id} AS konvertierung_id,",
 			$sql
 		);
+		$this->debug->show('sql nach konvertierung_id hinzufügen:<br>' . $sql, Regel::$write_debug);
 
 		# transformation hinzufügen
 		$sql = str_ireplace(
 			'the_geom',
-			"st_transform(the_geom, {$epsg})",
+			"st_multi(st_transform(the_geom, {$epsg}))",
 			$sql
 		);
+		$this->debug->show('sql nach transformation:<br>' . $sql, Regel::$write_debug);
 
 		# nur nicht leere Geometrien übernehmen
 		if (strpos(strtolower($sql), 'where') === false) {
@@ -101,21 +123,24 @@ public static	function find_by_id($gui, $by, $id) {
 				$sql
 			);
 		}
+		$this->debug->show('sql nach nicht leere Geometrien:<br>' . $sql, Regel::$write_debug);
+
 
 		if ($this->get('bereich_gml_id') != '') {
 			$sql = substr_replace(
 				$sql,
 				' (gehoertzubereich, ',
-				strpos($sql, ' ('),
-				strlen(' (')
+				strpos($sql, '('),
+				strlen('(')
 			);
 			
 			$sql = str_ireplace(
 				'select',
-				"select '" . $this->get_bereich_gml_ids() . "',",
+				"select '" . $this->get_bereich_gml_ids() . "' AS gehoertzubereich,",
 				$sql
 			);
 		}
+		$this->debug->show('sql nach bereich:<br>' . $sql, Regel::$write_debug);
 
 		# search_path und returning hinzufügen.
 		$sql = "SET search_path=xplan_gml, xplan_shapes_{$konvertierung_id}, public;
@@ -152,10 +177,10 @@ public static	function find_by_id($gui, $by, $id) {
 	}
 
 	function get_bereich() {
-		$bereich = new Bereich($this->gui);
+		$bereich = new RP_Bereich($this->gui);
 		return $bereich->find_by('gml_id', $this->get('bereich_gml_id'));
 	}
-	
+
 	/*
 	* Diese Funktion liefert die bereich_gml_id der Regel oder falls vorhanden mehrere aus dem Attribut bereiche
 	*/
@@ -222,7 +247,9 @@ public static	function find_by_id($gui, $by, $id) {
 				$this->debug->show('<p>Copiere Templatelayer in gml layer gruppe id: ' . $this->konvertierung->get('gml_layer_group_id'), Regel::$write_debug);
 				$gml_layer = $template_layer->copy(
 					array(
-						'Gruppe' => $this->konvertierung->get('gml_layer_group_id')
+						'Gruppe' => $this->konvertierung->get('gml_layer_group_id'),
+						'Data' => str_ireplace('using srid=25832', 'using srid=' . $this->konvertierung->get('output_epsg'), $template_layer->get('Data')),
+						'epsg_code' => $this->konvertierung->get('output_epsg')
 					)
 				);
 
@@ -275,7 +302,7 @@ public static	function find_by_id($gui, $by, $id) {
 						xplankonverter.konvertierungen k join
 						xplankonverter.regeln rk on k.id = rk.konvertierung_id
 					WHERE
-						k.id = 52
+						k.id = {$this->konvertierung->get('id')}
 					UNION
 					SELECT
 						rb.*
@@ -287,9 +314,9 @@ public static	function find_by_id($gui, $by, $id) {
 						p.konvertierung_id = {$this->konvertierung->get('id')}
 				) regeln
 			WHERE
-				lower(class_name) = (
-					SELECT
-						lower(class_name)
+				lower(class_name) || ' ' || geometrietyp = (
+				SELECT
+					lower(class_name) || ' ' || geometrietyp
 					from
 						xplankonverter.regeln
 					WHERE
@@ -298,7 +325,8 @@ public static	function find_by_id($gui, $by, $id) {
 				id != {$this->get('id')}
 		";
 		$this->debug->show('Gibt es weitere Regeln, die den selben Klassname verwenden?<br>' . $sql, Regel::$write_debug);
-		if (pg_num_rows(pg_query($this->database->dbConn, $sql)) == 0) {
+		$result = pg_query($this->database->dbConn, $sql);
+		if (pg_num_rows($result) == 0) {
 			$this->debug->show('nein, Prüfe ob der Layer existiert.', Regel::$write_debug);
 			if ($this->gml_layer_exists()) {
 				$this->debug->show("Layer {$this->gml_layer->get('Name')} existiert.", Regel::$write_debug);

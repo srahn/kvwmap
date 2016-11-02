@@ -337,7 +337,6 @@ $class_name = $_REQUEST['class_name'];
 		echo '<b><span id="target"></span></b><br>';
 		if ($was_selected) { ?>
 				<script type="text/javascript">
-					console.log('call choosFeatureTable()');
 				 chooseFeatureTable();
 				</script><?php
 		}

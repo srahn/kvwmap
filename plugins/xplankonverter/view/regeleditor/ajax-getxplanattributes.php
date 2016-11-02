@@ -21,7 +21,7 @@ $sql = "
 
 //Execute query
 $result = pg_query($conn, $sql); ?>
-<div id="'.  $featuretype . '_attributes_table">
+<div id="<?php echo $featuretype; ?>_attributes_table">
 <table border="1" cellspacing="0" cellpadding="2" style="width:100%; margin-top: 6px">
 <tr>
 	<th style="background-color: <?php echo BG_DEFAULT; ?>"><b>Attributname</b></th>
