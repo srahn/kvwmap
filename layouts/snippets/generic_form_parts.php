@@ -215,14 +215,16 @@
 					if($gui->new_entry != true){
 						$datapart .= '<td width="100%" align="right">';
 						if($value != ''){
-							$datapart .= '&nbsp;<a href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
+							$params = 'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j].'&subform_link=true';
 							for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
-								$datapart .= '&value_'.$attributes['subform_pkeys'][$j][$p].'='.$dataset[$attributes['subform_pkeys'][$j][$p]];
-								$datapart .= '&operator_'.$attributes['subform_pkeys'][$j][$p].'==';
+								$params .= '&value_'.$attributes['subform_pkeys'][$j][$p].'='.$dataset[$attributes['subform_pkeys'][$j][$p]];
+								$params .= '&operator_'.$attributes['subform_pkeys'][$j][$p].'==';
 							}
-							$datapart .= 	'&subform_link=true\')"';
-							if($attributes['no_new_window'][$j] != true){
-								$datapart .= 	' target="_blank"';
+							if($attributes['no_new_window'][$j] == true){
+								$datapart .= '&nbsp;<a href="javascript:overlay_link(\''.$params.'\');"';
+							}
+							else{	
+								$datapart .= '&nbsp;<a href="index.php?'.$params.'" target="_blank"';
 							}
 							$datapart .= 	' class="buttonlink"><span>'.$strShowPK.'</span></a>&nbsp;';
 						}
