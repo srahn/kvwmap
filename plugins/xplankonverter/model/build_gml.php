@@ -362,6 +362,7 @@ class Gml_builder {
                 $gmlStr .= "<{$xplan_ns_prefix}{$uml_attribute['uml_name']} codeSpace=\"$codeSpaceUri\">$code_value</{$xplan_ns_prefix}{$uml_attribute['uml_name']}>";
                 break;
               case "DataType":
+break;
                 // fetch information about attributes and their properties
                 $datatype_attribs = $this->typeInfo->getInfo($uml_attribute['type']);
                 $gml_value_array = explode(',',substr($gml_object[$uml_attribute['col_name']], 1, -1));
