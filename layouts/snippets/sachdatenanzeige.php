@@ -71,8 +71,8 @@ for($i=0;$i<$anzLayer;$i++){
 	   	<tr valign="top">
 	   		<td align="right" width="38%">';
 	   		if($this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] >= $this->formvars['anzahl'] AND $this->formvars['printversion'] == ''){
-					echo '<a href="javascript:firstdatasets(\'offset_'.$this->qlayerset[$i]['Layer_ID'].'\');"><img src="'.GRAPHICSPATH.'go-first.png" class="hover-border" style="vertical-align:middle" title="'.$strFirstDatasets.'"></a>&nbsp;&nbsp;&nbsp;';
-	   			echo '<a href="javascript:prevdatasets(\'offset_'.$this->qlayerset[$i]['Layer_ID'].'\');"><img src="'.GRAPHICSPATH.'go-previous.png" class="hover-border" style="vertical-align:middle" title="'.$strBackDatasets.'"></a>&nbsp;';
+					echo '<a href="javascript:firstdatasets('.$this->qlayerset[$i]['Layer_ID'].');"><img src="'.GRAPHICSPATH.'go-first.png" class="hover-border" style="vertical-align:middle" title="'.$strFirstDatasets.'"></a>&nbsp;&nbsp;&nbsp;';
+	   			echo '<a href="javascript:prevdatasets('.$this->qlayerset[$i]['Layer_ID'].');"><img src="'.GRAPHICSPATH.'go-previous.png" class="hover-border" style="vertical-align:middle" title="'.$strBackDatasets.'"></a>&nbsp;';
 	   		}
 	      echo '
 				</td>
@@ -81,8 +81,8 @@ for($i=0;$i<$anzLayer;$i++){
 				</td>
 	      <td width="38%">';
 	      if($bis < $gesamt AND $this->formvars['printversion'] == ''){
-	      	echo '&nbsp;<a href="javascript:nextdatasets(\'offset_'.$this->qlayerset[$i]['Layer_ID'].'\');"><img src="'.GRAPHICSPATH.'go-next.png" class="hover-border" style="vertical-align:middle" title="'.$strForwardDatasets.'"></a>&nbsp;&nbsp;&nbsp;';
-					echo '<a href="javascript:lastdatasets(\'offset_'.$this->qlayerset[$i]['Layer_ID'].'\', '.$gesamt.');"><img src="'.GRAPHICSPATH.'go-last.png" class="hover-border" style="vertical-align:middle" title="'.$strLastDatasets.'"></a>';
+	      	echo '&nbsp;<a href="javascript:nextdatasets('.$this->qlayerset[$i]['Layer_ID'].');"><img src="'.GRAPHICSPATH.'go-next.png" class="hover-border" style="vertical-align:middle" title="'.$strForwardDatasets.'"></a>&nbsp;&nbsp;&nbsp;';
+					echo '<a href="javascript:lastdatasets('.$this->qlayerset[$i]['Layer_ID'].', '.$gesamt.');"><img src="'.GRAPHICSPATH.'go-last.png" class="hover-border" style="vertical-align:middle" title="'.$strLastDatasets.'"></a>';
 	      }
 	      echo '
 				</td>
