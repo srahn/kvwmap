@@ -160,7 +160,7 @@ class ALB {
 	}
 
   function export_klassifizierung_csv($flurstuecke, $formvars){
-  if($formvars['flurstkennz']){ $csv .= 'FlstKZ;';}
+		if($formvars['flurstkennz']){ $csv .= 'FlstKZ;';}
   	if($formvars['flurstkennz']){ $csv .= 'FlstKZ_kurz;';}
     if($formvars['gemkgname']){ $csv .= 'Gemkg-Name;';}
     if($formvars['gemkgschl']){ $csv .= 'Gemkg-Schl.;';}
@@ -198,6 +198,8 @@ class ALB {
     if($formvars['bvnr']){ $csv .= 'BVNR;';}
     if($formvars['buchungsart']){ $csv .= 'Buchungsart;';}
     if($formvars['eigentuemer']){ $csv .= utf8_encode('Eigentümer;');}
+		if($formvars['abweichenderrechtszustand']){ $csv .= utf8_encode('abweichender Rechtszustand;');}
+		if($formvars['baubodenrecht']){ $csv .= utf8_encode('Bauraum/Bodenordnungsrecht;');}
     
     $csv .= chr(10);
     for($i = 0; $i < count($flurstuecke); $i++) {
@@ -285,8 +287,9 @@ class ALB {
 					$csv .= $emz;
 					$flst->emz = true;
 				}
+				elseif($kl != $limit-2) $csv .= ';;';
 				
-				if($kl == $limit-2){              
+				if($kl == $limit-2){
 					if($nichtgeschaetzt>0){
 						$csv .= utf8_encode('nicht geschätzt: ;'.$nichtgeschaetzt.';');
 					}
@@ -295,8 +298,7 @@ class ALB {
 					}
 				}
 				$csv .= ';';
-				if($kl == $limit-1){              
-					$csv .= ';';
+				if($kl == $limit-1){
 					if($emzges_222 > 0){
 						$BWZ_222 = round($emzges_222/$flaeche_222*100);
 						$csv .= ' Ackerland gesamt: EMZ '.$emzges_222.' , BWZ '.$BWZ_222." ";
@@ -407,6 +409,21 @@ class ALB {
 	          }
 	        $csv .= '";';
 	      }
+				
+				if($formvars['abweichenderrechtszustand']){
+					$csv .= $flst->abweichenderrechtszustand;
+					$csv .= ';';
+				}
+				
+				if($formvars['baubodenrecht']){
+					for($j = 0; $j < count($flst->BauBodenrecht); $j++){
+						if($j > 0)$csv .= ' | ';
+						$csv .= $flst->BauBodenrecht[$j]['art'].' '.$flst->BauBodenrecht[$j]['bezeichnung'];
+						if($flst->BauBodenrecht[$j]['stelle'] != '')$csv .=  ' ('.$flst->BauBodenrecht[$j]['stelle'].')';
+					}
+					$csv .= ';';
+				}
+				
 	      $csv .= chr(10);
 	    }
 	    $csv .= chr(10);
@@ -458,6 +475,8 @@ class ALB {
   	if($formvars['pruefzeichen_f']){ $csv .= utf8_encode('P Flurstück;');}
     if($formvars['bvnr']){ $csv .= 'BVNR;';}
     if($formvars['buchungsart']){ $csv .= 'Buchungsart;';}
+		if($formvars['abweichenderrechtszustand']){ $csv .= utf8_encode('abweichender Rechtszustand;');}
+		if($formvars['baubodenrecht']){ $csv .= utf8_encode('Bauraum/Bodenordnungsrecht;');}
     $csv .= 'Namensnummer;'; 
     $csv .= utf8_encode('Eigentümer;Zusatz;Adresse;Ort;');
     
@@ -625,6 +644,20 @@ class ALB {
 				$csv .= ' '.$flst->Buchungen[$b]['bezeichnung'];
 				$csv .= ';';
 			}
+			
+			if($formvars['abweichenderrechtszustand']){
+				$csv .= $flst->abweichenderrechtszustand;
+				$csv .= ';';
+			}
+			
+			if($formvars['baubodenrecht']){
+				for($j = 0; $j < count($flst->BauBodenrecht); $j++){
+					if($j > 0)$csv .= ' | ';
+					$csv .= $flst->BauBodenrecht[$j]['art'].' '.$flst->BauBodenrecht[$j]['bezeichnung'];
+					if($flst->BauBodenrecht[$j]['stelle'] != '')$csv .=  ' ('.$flst->BauBodenrecht[$j]['stelle'].')';
+				}
+				$csv .= ';';
+			}
 						
 				if($Eigentuemerliste[$e]->Nr != '')$csv .= '\''.$Eigentuemerliste[$e]->Nr.'\'';
 				$csv .= $Eigentuemerliste[$e]->zusatz_eigentuemer;
@@ -685,6 +718,8 @@ class ALB {
   	if($formvars['pruefzeichen_f']){ $csv .= utf8_encode('P Flurstück;');}
     if($formvars['bvnr']){ $csv .= 'BVNR;';}
     if($formvars['buchungsart']){ $csv .= 'Buchungsart;';}
+		if($formvars['abweichenderrechtszustand']){ $csv .= utf8_encode('abweichender Rechtszustand;');}
+		if($formvars['baubodenrecht']){ $csv .= utf8_encode('Bauraum/Bodenordnungsrecht;');}
     if($formvars['eigentuemer']){ $csv .= utf8_encode('Eigentümer;');}
     $csv .= utf8_encode('Nutzung - Fläche;');
     $csv .= 'Nutzung - Kennzeichen;';
@@ -851,6 +886,20 @@ class ALB {
 					}
 	        $csv .= ';';
 	      }
+				
+			if($formvars['abweichenderrechtszustand']){
+				$csv .= $flst->abweichenderrechtszustand;
+				$csv .= ';';
+			}
+			
+			if($formvars['baubodenrecht']){
+				for($j = 0; $j < count($flst->BauBodenrecht); $j++){
+					if($j > 0)$csv .= ' | ';
+					$csv .= $flst->BauBodenrecht[$j]['art'].' '.$flst->BauBodenrecht[$j]['bezeichnung'];
+					if($flst->BauBodenrecht[$j]['stelle'] != '')$csv .=  ' ('.$flst->BauBodenrecht[$j]['stelle'].')';
+				}
+				$csv .= ';';
+			}
 	      
   		if($formvars['eigentuemer']){
 				for($b = 0; $b < count($flst->Buchungen); $b++){
@@ -932,6 +981,8 @@ class ALB {
   	if($formvars['pruefzeichen_f']){ $csv .= utf8_encode('P Flurstück;');}
     if($formvars['bvnr']){ $csv .= 'BVNR;';}
     if($formvars['buchungsart']){ $csv .= 'Buchungsart;';}
+		if($formvars['abweichenderrechtszustand']){ $csv .= utf8_encode('abweichender Rechtszustand;');}
+		if($formvars['baubodenrecht']){ $csv .= utf8_encode('Bauraum/Bodenordnungsrecht;');}
     if($formvars['eigentuemer']){ $csv .= utf8_encode('Eigentümer;');}
     
     $csv .= chr(10);
@@ -1106,6 +1157,20 @@ class ALB {
 					}
 	        $csv .= ';';
 	      }
+				
+			if($formvars['abweichenderrechtszustand']){
+				$csv .= $flst->abweichenderrechtszustand;
+				$csv .= ';';
+			}
+			
+			if($formvars['baubodenrecht']){
+				for($j = 0; $j < count($flst->BauBodenrecht); $j++){
+					if($j > 0)$csv .= ' | ';
+					$csv .= $flst->BauBodenrecht[$j]['art'].' '.$flst->BauBodenrecht[$j]['bezeichnung'];
+					if($flst->BauBodenrecht[$j]['stelle'] != '')$csv .=  ' ('.$flst->BauBodenrecht[$j]['stelle'].')';
+				}
+				$csv .= ';';
+			}
       
       if($formvars['eigentuemer']){
       	$csv .= '"';

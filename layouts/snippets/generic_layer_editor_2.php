@@ -1,5 +1,4 @@
 <?
- 
 	include(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->language.'.php');
 	
 	$checkbox_names = '';
@@ -24,16 +23,18 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 	<tr>
 		<td width="99%" align="center"><h2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<? echo $layer['Name']; ?></h2></td>
-		<td valign="top" style="padding: 0 10 0 0">
-			<? if($layer['template'] == '' OR $layer['template'] == 'generic_layer_editor_2.php'){ ?>
-			<a href="javascript:switch_gle_view(<? echo $layer['Layer_ID']; ?>);"><img title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'columns.png'; ?>"></a>
-			<? }else{ ?>
-			<a href="javascript:switch_gle_view(<? echo $layer['Layer_ID']; ?>);"><img title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'rows.png'; ?>"></a>
-			<? } ?>
-		</td>
-		<td align="right">			
-			<a href="javascript:scrollbottom();"><img class="hover-border" title="nach unten" src="<? echo GRAPHICSPATH; ?>pfeil.gif" width="11" height="11" border="0"></a>&nbsp;
-		</td>		
+    <? if (!$this->user->rolle->visually_impaired) { ?>
+			<td valign="top" style="padding: 0 10 0 0">
+				<? if($layer['template'] == '' OR $layer['template'] == 'generic_layer_editor_2.php'){ ?>
+				<a href="javascript:switch_gle_view(<? echo $layer['Layer_ID']; ?>);"><img title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'columns.png'; ?>"></a>
+				<? }else{ ?>
+				<a href="javascript:switch_gle_view(<? echo $layer['Layer_ID']; ?>);"><img title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'rows.png'; ?>"></a>
+				<? } ?>
+			</td>
+			<td align="right">			
+				<a href="javascript:scrollbottom();"><img class="hover-border" title="nach unten" src="<? echo GRAPHICSPATH; ?>pfeil.gif" width="11" height="11" border="0"></a>&nbsp;
+			</td>
+		<? } ?>
 	</tr>
 </table>
 <? }
@@ -66,77 +67,14 @@
 			>
 	    <input type="hidden" value="" name="changed_<? echo $layer['Layer_ID'].'_'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
 	    <table id="dstable" class="tgle" <? if($attributes['group'][0] != ''){echo 'border="0" cellpadding="6" cellspacing="0"';}else{echo 'border="1"';} ?>>
-				<? if($this->new_entry != true AND $this->formvars['printversion'] == ''){ ?>
-	      <thead class="gle">
-	        <th colspan="20" style="background-color:<? echo BG_GLEHEADER; ?>;">			  
-			  <table width="100%">
-			    <tr>
-						<? if($layer['connectiontype'] == 6 AND $layer['Layer_ID'] > 0){ ?>
-			      <td>
-			        <input id="<? echo $layer['Layer_ID'].'_'.$k; ?>" type="checkbox" name="check;<? echo $attributes['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>">&nbsp;
-			        <span style="color:<? echo TXT_GLEHEADER; ?>;"><? echo $strSelectThisDataset; ?></span>
-			      </td>
-						<? } ?>
-			      <td align="right">
-							<table cellspacing="0" cellpadding="0">
-								<tr>
-									<? if($this->formvars['go'] == 'Zwischenablage' OR $this->formvars['go'] == 'gemerkte_Datensaetze_anzeigen'){ ?>
-										<td style="padding: 0 0 0 10;"><a title="<? echo $strDontRememberDataset; ?>" href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);remove_from_clipboard(<? echo $layer['Layer_ID']; ?>);"><div class="button_background"><div class="emboss nicht_mehr_merken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div></a></td>
-									<? }elseif($layer['connectiontype'] == 6 AND $layer['Layer_ID'] > 0){ ?>
-									<td style="padding: 0 0 0 10;"><a title="<? echo $strRememberDataset; ?>" href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);add_to_clipboard(<? echo $layer['Layer_ID']; ?>);"><div class="button_background"><div class="emboss merken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div></a></td>
-									<? } ?>
-			     	<? 	if($layer['privileg'] > '0'){ ?>
-									<td style="padding: 0 0 0 10;"><a href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);use_for_new_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>)" title="<? echo $strUseForNewDataset; ?>"><div class="button_background"><div class="emboss use_for_dataset"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div></a></td>
-			      <? 	} 
-								if($layer['connectiontype'] == 6 AND $layer['export_privileg'] != 0){ ?>
-									<td style="padding: 0 0 0 10;"><a href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);daten_export(<? echo $layer['Layer_ID']; ?>, <? echo $layer['count']; ?>);" title="<? echo $strExportThis; ?>"><div class="button_background"><div class="emboss datensatz_exportieren"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div></a></td>
-			      <? 	} 
-								if($layer['layouts']){ ?>
-									<td style="padding: 0 0 0 10;"><a title="<? echo $strPrintDataset; ?>" href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);print_data(<?php echo $layer['Layer_ID']; ?>);"><div class="button_background"><div class="emboss drucken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div></a></td>
-						<?	}
-								if($layer['privileg'] == '2'){ ?>
-									<td style="padding: 0 0 0 10;"><a href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);delete_datasets(<?php echo $layer['Layer_ID']; ?>);" title="<? echo $strDeleteThisDataset; ?>"><div class="button_background"><div class="emboss datensatz_loeschen"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div></a></td>
-			        <? } ?>
-								</tr>
-							</table>
-			      </td>
-			    </tr>
-			  </table>
-		    </th>
-		  </thead>
-			<? } ?>
-          <tbody <? if($attributes['group'][0] == '')echo 'class="gle"'; ?>>
+				<? if (!$this->user->rolle->visually_impaired) include(LAYOUTPATH . 'snippets/generic_layer_editor_2_layer_head.php'); ?>
+        <tbody <? if($attributes['group'][0] == '')echo 'class="gle"'; ?>>
 <?		$trans_oid = explode('|', $layer['shape'][$k]['lock']);
 			if($layer['shape'][$k]['lock'] == 'bereits übertragen' OR $trans_oid[1] != '' AND $layer['shape'][$k][$layer['maintable'].'_oid'] == $trans_oid[1]){
 				echo '<tr><td colspan="2" align="center"><span class="red">Dieser Datensatz wurde bereits übertragen und kann nicht bearbeitet werden.</span></td></tr>';
 				$lock[$k] = true;
 			}
-			
-			// $attributes['position'][3] = 'daneben';
-			// $attributes['position'][4] = 'daneben';
-			// $attributes['position'][5] = 'daneben';
-			// $attributes['position'][6] = 'daneben';
-			// $attributes['position'][16] = 'daneben';
-			// $attributes['position'][18] = 'daneben';
-			// $attributes['position'][19] = 'daneben';
-			// $attributes['position'][20] = 'daneben';
-			// $attributes['position'][22] = 'daneben';
-			// $attributes['position'][23] = 'daneben';
-			// $attributes['position'][31] = 'daneben';
-			// $attributes['position'][32] = 'daneben';
-			// $attributes['position'][33] = 'daneben';
-			// $attributes['position'][34] = 'daneben';
-			// $attributes['attribute_name'][2] = 'oben';
-			// $attributes['attribute_name'][3] = 'oben';
-			// $attributes['attribute_name'][4] = 'oben';
-			// $attributes['attribute_name'][5] = 'oben';
-			// $attributes['attribute_name'][6] = 'oben';
-			// $attributes['attribute_name'][30] = 'oben';
-			// $attributes['attribute_name'][31] = 'oben';
-			// $attributes['attribute_name'][32] = 'oben';
-			// $attributes['attribute_name'][33] = 'oben';
-			// $attributes['attribute_name'][34] = 'oben';
-			
+						
 			for($j = 0; $j < count($attributes['name']); $j++){
 				if($layer['shape'][$k][$attributes['name'][$j]] == ''){
 					#$layer['shape'][$k][$attributes['name'][$j]] = $this->formvars[$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j]];
@@ -158,7 +96,7 @@
 										</table>
 										<table width="100%" class="tgle" id="group'.$layer['Layer_ID'].'_'.$j.'_'.$k.'" '; if($collapsed)$datapart .= 'style="display:none"'; $datapart .= 'border="2"><tbody class="gle">
 											<tr>
-												<td bgcolor="'.BG_GLEATTRIBUTE.'" colspan="20">&nbsp;<a href="javascript:void(0);" onclick="javascript:document.getElementById(\'group'.$layer['Layer_ID'].'_'.$j.'_'.$k.'\').style.display=\'none\';document.getElementById(\'colgroup'.$layer['Layer_ID'].'_'.$j.'_'.$k.'\').style.display=\'\';"><img border="0" src="'.GRAPHICSPATH.'/minus.gif"></a>&nbsp;&nbsp;<span class="fett">'.$groupname.'</span></td>
+												<td bgcolor="'.BG_GLEATTRIBUTE.'" colspan="40">&nbsp;<a href="javascript:void(0);" onclick="javascript:document.getElementById(\'group'.$layer['Layer_ID'].'_'.$j.'_'.$k.'\').style.display=\'none\';document.getElementById(\'colgroup'.$layer['Layer_ID'].'_'.$j.'_'.$k.'\').style.display=\'\';"><img border="0" src="'.GRAPHICSPATH.'/minus.gif"></a>&nbsp;&nbsp;<span class="fett">'.$groupname.'</span></td>
 											</tr>';
 				}
 				
@@ -167,20 +105,20 @@
 						if($attributes['privileg'][$j] != '0' AND !$lock[$k])$this->editable = $layer['Layer_ID'];
 						if($attributes['alias'][$j] == '')$attributes['alias'][$j] = $attributes['name'][$j];
 						
-						if($attributes['position'][$j] != 'daneben')$datapart .= '<tr>';							# wenn Attribut nicht daneben -> neue Zeile beginnen
-						if($attributes['attribute_name'][$j] != 'kein'){
-							$td = '	<td class="gle_attribute_name" '; if($attributes['group'][0] != '' AND $attributes['position'][$j] != 'daneben')$td .= 'width="10%">';else $td.='width="1%">';
+						if($attributes['arrangement'][$j] != 1)$datapart .= '<tr>';							# wenn Attribut nicht daneben -> neue Zeile beginnen
+						if($attributes['labeling'][$j] != 2){
+							$td = '	<td class="gle_attribute_name" '; if($attributes['labeling'][$j] == 1 AND $attributes['arrangement'][$j] == 1 AND $attributes['arrangement'][$j+1] != 1)$td .= 'colspan="20" ';if($attributes['group'][0] != '' AND $attributes['arrangement'][$j] != 1)$td .= 'width="10%">';else $td.='width="1%">';
 							$td.= 			attribute_name($layer['Layer_ID'], $attributes, $j, $k, $this->user->rolle->fontsize_gle);
 							$td.= '	</td>';
-							if($nl AND $attributes['attribute_name'][$j] != 'oben')$next_line .= $td; else $datapart .= $td;
+							if($nl AND $attributes['labeling'][$j] != 1)$next_line .= $td; else $datapart .= $td;
 						}
-						if($attributes['attribute_name'][$j] == 'oben')$nl = true;										# Attributname soll oben stehen -> alle weiteren tds für die nächste Zeile aufsammeln
-						$td = '	<td class="gle_attribute_value"'; if($attributes['position'][$j+1] != 'daneben')$td .= 'colspan="20"'; $td .= '>';												
+						if($attributes['labeling'][$j] == 1)$nl = true;										# Attributname soll oben stehen -> alle weiteren tds für die nächste Zeile aufsammeln
+						$td = '	<td class="gle_attribute_value"'; if($attributes['arrangement'][$j+1] != 1)$td .= 'colspan="20"'; $td .= '>';												
 						$td.= 			attribute_value($this, $layer['Layer_ID'], $attributes, $j, $k, $layer['shape'][$k], $size, $select_width, $this->user->rolle->fontsize_gle);
 						$td.= '	</td>';
 						if($nl)$next_line .= $td; else $datapart .= $td;
-						if($attributes['position'][$j+1] != 'daneben')$datapart .= '</tr>';						# wenn nächstes Attribut nicht daneben -> Zeile abschliessen
-						if($attributes['position'][$j+1] != 'daneben' AND $nl){												# die aufgesammelten tds in neuer Zeile ausgeben
+						if($attributes['arrangement'][$j+1] != 1)$datapart .= '</tr>';						# wenn nächstes Attribut nicht daneben -> Zeile abschliessen
+						if($attributes['arrangement'][$j+1] != 1 AND $nl){												# die aufgesammelten tds in neuer Zeile ausgeben
 							$datapart .= '<tr>'.$next_line.'</tr>';
 							$next_line = '';
 							$nl = false;
@@ -194,6 +132,12 @@
 						$columnname = $attributes['name'][$j];
 						$geom_tablename = $attributes['table_name'][$attributes['name'][$j]];
 						$geomtype = $attributes['geomtype'][$attributes['name'][$j]];
+						# Frage den Geometrietyp aus der Layerdefinition, wenn in geometry_columns nur als Geometry definiert.
+						if ($geomtype == 'GEOMETRY' OR empty($geomtype)) {
+							$geomtypes = array('POINT', 'LINESTRING', 'POLYGON');
+							$geomtype = $geomtypes[$layer['Datentyp']];
+							?><input type="hidden" name="Datentyp" value="<?php echo $layer['Datentyp']; ?>"><?php
+						}
 						$dimension = $attributes['dimension'][$j];
 						$privileg = $attributes['privileg'][$j];
 						$nullable = $attributes['nullable'][$j];
@@ -221,7 +165,8 @@
 <?						
 							if(!$layer['shape'][$k]['wfs_geom']){		// kein WFS 
 								echo '<input type="hidden" id="'.$columnname.'_'.$k.'" value="'.$layer['shape'][$k][$columnname].'">';
-								if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON' OR $geomtype == 'GEOMETRY'){ ?>
+
+								if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON'){ ?>
 									<table cellspacing="0" cellpadding="0">
 										<tr>
 <?								if($privileg == 1 AND !$lock[$k]) { ?>
@@ -285,7 +230,6 @@
 					<? }		    
 	}
 
-				
 				if($this->new_entry == true){
 					if($privileg == 1){
 						if(!$this->user->rolle->geom_edit_first)echo $datapart;
@@ -295,7 +239,7 @@
     					</script>
 <?					}
 						$this->titel=$strTitleGeometryEditor;
-						if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON' OR $geomtype == 'GEOMETRY'){
+						if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON'){
 							echo '
 							<tr>
 								<td colspan="2" align="center">';
@@ -327,6 +271,7 @@
 				}
  ?>
 			</tbody>
+				<? if ($this->user->rolle->visually_impaired) include(LAYOUTPATH . 'snippets/generic_layer_editor_2_layer_head.php'); ?>
 			</table>
 			</div>
 			<img height="7" src="<? echo GRAPHICSPATH ?>leer.gif">

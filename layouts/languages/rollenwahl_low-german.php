@@ -33,6 +33,7 @@
 	$strDataPresentation="Tüüchdatenaffraag";
 	$strInstantReload="Kort gliek nieg loden";
 	$strMenuAutoClose="Menüs von süllst sluten";
+	$strVisuallyImpaired="Vereinfachungen im Vorlesemodus";
 	$strdecimal="Dezimal";
 	$strgrad1="Grod, Minüten, Sekunn";
 	$strgrad2="Grod, Dezimalminüten";
@@ -43,6 +44,7 @@
 	$strHintColor="Sök de Faarf ut, för dat wat rutekümt un wat rutekieken sall.";
 	$strHintInstantReload="Deist du de Optschoon ut wähln, ward bi jede Aktivierung un Gegenaktivierung een Sock de Kort gliek nig loden.";
 	$strHintMenuAutoClose="Deist du de Optschoon ut söken, is linkerhand ümmer blot een Överspies apen.";
+	$strHintVisuallyImpaired="Wenn Sie diese Option auswählen, wird die Oberfläche und das Arbeiten im Vorlesemodus vereinfacht. Diese Einstellung ist besonders für Menschen mit Seebehinderungen geeignet. Es werden allerdings auch einige Funktionen ausgeblendet.";
 	$strHintZoomFactor="Sök de Faktoor ut, mit de du de Rakenlup hen un her trecken daust.";
 	$strHintMapSize="Sök de Grött ut, wenn de von süllmst bereken Grött nix dugt.";
 	$strHintMapExtent="De afsteckt Koordinat unner linkepoot un boben rechtepoot in de eerste Koortprojektschoon.";

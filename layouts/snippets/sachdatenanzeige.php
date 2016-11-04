@@ -16,7 +16,7 @@ $this->found = 'false';
 $anzLayer=count($this->qlayerset);
 if ($anzLayer==0) {
 	?>
-<span style="font:normal 12px verdana, arial, helvetica, sans-serif; color:#FF0000;"><? echo $strNoLayer; ?></span>	<br/>
+<span style="font:normal 12px verdana, arial, helvetica, sans-serif; color:#FF0000;"><? echo $strNoLayer; ?></span><br/>
 	<?php	
 }
 for($i=0;$i<$anzLayer;$i++){
@@ -95,6 +95,15 @@ for($i=0;$i<$anzLayer;$i++){
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
 	<tr>
 		<td align="right">
+    <? if ($this->user->rolle->visually_impaired) { ?>
+				<? if($layer['template'] == '' OR $layer['template'] == 'generic_layer_editor_2.php'){ ?>
+				<a href="javascript:switch_gle_view(<? echo $layer['Layer_ID']; ?>);"><img title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'columns.png'; ?>"></a>
+				<? }else{ ?>
+				<a href="javascript:switch_gle_view(<? echo $layer['Layer_ID']; ?>);"><img title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'rows.png'; ?>"></a>
+				<? } ?>
+		<? } ?>
+
+
 			<a href="javascript:scrolltop();"><img class="hover-border" title="nach oben" src="<? echo GRAPHICSPATH; ?>pfeil2.gif" width="11" height="11" border="0"></a>&nbsp;&nbsp;&nbsp;
 		</td>
 	</tr>

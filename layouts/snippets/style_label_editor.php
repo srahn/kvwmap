@@ -2,16 +2,19 @@
 <!--
 
 function change_layer(){
-	document.GUI.class_1.disabled = true;
-	document.getElementById('style_div').innerHTML = '';
-	document.getElementById('label_div').innerHTML = '';
-	document.getElementById('selected_style_div').innerHTML = '';
-	document.getElementById('selected_label_div').innerHTML = '';
-	document.GUI.selected_style_id.value = '';
-	document.GUI.selected_label_id.value = '';
 	layer_id = document.GUI.layer.options[document.GUI.layer.selectedIndex].value;
-	document.GUI.selected_layer_id.value = layer_id;
-	ahah('index.php', 'go=getclasses&layer_id='+layer_id, new Array(document.getElementById('classes_div')), "");
+	if(layer_id != ''){
+		document.GUI.class_1.disabled = true;
+		document.getElementById('style_div').innerHTML = '';
+		document.getElementById('label_div').innerHTML = '';
+		document.getElementById('selected_style_div').innerHTML = '';
+		document.getElementById('selected_label_div').innerHTML = '';
+		document.GUI.selected_style_id.value = '';
+		document.GUI.selected_label_id.value = '';
+		document.GUI.selected_layer_id.value = layer_id;
+		ahah('index.php', 'go=getclasses&layer_id='+layer_id, new Array(document.getElementById('classes_div')), "");
+		document.getElementById('toLayerLink').style='display:inline';
+	}
 }
 
 function change_class(){
@@ -112,6 +115,7 @@ function save_style(style_id){
 	data+= '&outlinecolor='+document.GUI.style_outlinecolor.value;
 	data+= '&colorrange='+document.GUI.style_colorrange.value;
 	data+= '&datarange='+document.GUI.style_datarange.value;
+	data+= '&rangeitem='+document.GUI.style_rangeitem.value;
 	data+= '&opacity='+document.GUI.style_opacity.value;
 	data+= '&minsize='+document.GUI.style_minsize.value;
 	data+= '&maxsize='+document.GUI.style_maxsize.value;
@@ -187,6 +191,10 @@ function browser_check(){
 	}
 }
 
+function toLayerEditor(){	
+	location.href='index.php?go=Layereditor&selected_layer_id='+document.GUI.layer.value;
+}
+
 
 //-->
 </script>
@@ -215,7 +223,8 @@ function browser_check(){
 			    			echo '>'.$this->layerdaten['Bezeichnung'][$i].'</option>';
 			    		}
 			    	?>
-			      </select>
+			      </select><br><br><br>
+							&nbsp;<a id="toLayerLink" href="javascript:toLayerEditor();" style="<? if($this->formvars['selected_layer_id'] != '')echo 'display:inline';else echo 'display:none'; ?>">zum Layer</a>
 			    </td>
 			    <td style="border-bottom:1px solid #C3C7C3;" colspan="2">
 			    	<div id="classes_div"> 

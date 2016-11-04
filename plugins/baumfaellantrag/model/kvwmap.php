@@ -3,7 +3,10 @@
 	
 	# set upload_path from layers document_path
 	$layer = $GUI->user->rolle->getLayer(BAUMFAELLANTRAG_LAYER_ID_ANTRAEGE);
-	define('BAUMFAELLANTRAG_UPLOAD_PATH', $layer[0]['document_path']);
+	define(
+		'BAUMFAELLANTRAG_UPLOAD_PATH',
+		($layer[0]['document_path'] != '') ? $layer[0]['document_path'] : UPLOADPATH
+	);
 
 	$this->uploadTempFile = function() use ($GUI) {
 		# pruefe Version
@@ -29,11 +32,19 @@
 		$upload_file = basename($_FILES["file"]["tmp_name"] . "." . $pathinfo["extension"]);
 
 		# copiere die temporäre Datei in den upload ordner
-		if (!@copy($_FILES["file"]["tmp_name"], BAUMFAELLANTRAG_UPLOAD_PATH . $upload_file))
+		$copy_to_upload_path = @copy($_FILES["file"]["tmp_name"], BAUMFAELLANTRAG_UPLOAD_PATH . $upload_file);
+
+		# erzeuge thumb in temp ordner
+		$preview_file = basename($_FILES["file"]["tmp_name"] . '.jpg');
+		$command = IMAGEMAGICKPATH . 'convert '. BAUMFAELLANTRAG_UPLOAD_PATH . $upload_file .' -quality 75 -background white -flatten -resize 128x128 ' . IMAGEPATH . $preview_file;
+
+		exec($command, $ausgabe, $ret);
+		if($ret == 0) $copy_to_temp_path = true;
+		if (!$copy_to_upload_path OR !$copy_to_temp_path)
 			return array("success" => 0, "error_message" => "Fehler: Die hochgeladene Datei konnte nicht auf dem Server gespeichert werden. Beim Kopieren vom temporären Uploadverzeichnis in das Uploadverzeichnis der Anwendung trat ein Fehler auf. Wahrscheinlich fehlen die Schreibrechte im Uploadverzeichnins für den WebServer-Nutzer.");
 
 		# sende den Namen der temporären Datei zurück
-		return array("success" => 1, "temp_file" => $upload_file);
+		return array("success" => 1, "temp_file" => $upload_file, "preview_file" => $preview_file );
 	};
 
 	$this->createFiles = function($antrag_id, $data) use ($GUI) {

@@ -1,4 +1,6 @@
-<?function in_subnet($ip,$net) {
+<?
+
+function in_subnet($ip,$net) {
 	$ipparts=explode('.',$ip);
 	$netparts=explode('.',$net);
 
@@ -32,14 +34,16 @@
 	}
 	return 0;
 }
-function checkPasswordAge($passwordSettingTime,$allowedPassordAgeMonth) {
+
+function checkPasswordAge($passwordSettingTime,$allowedPassordAgeMonth) {
   $passwordSettingUnixTime=strtotime($passwordSettingTime); # Unix Zeit in Sekunden an dem das Passwort gesetzt wurde
   $allowedPasswordAgeDays=round($allowedPassordAgeMonth*30.5); # Zeitintervall, wie alt das Password sein darf in Tagen
   $passwordAgeDays=round((time()-$passwordSettingUnixTime)/60/60/24); # Zeitinterval zwischen setzen des Passwortes und aktueller Zeit in Tagen
   $allowedPasswordAgeRemainDays=$allowedPasswordAgeDays-$passwordAgeDays; # Zeitinterval wie lange das Passwort noch gilt in Tagen
 	return $allowedPasswordAgeRemainDays; // Passwort ist abgelaufen wenn Wert < 1  
 }
-function html_umlaute($string){
+
+function html_umlaute($string){
 	$string = str_replace('ä', '&auml;', $string);
 	$string = str_replace('ü', '&uuml;', $string);
 	$string = str_replace('ö', '&ouml;', $string);
@@ -51,7 +55,41 @@
 	$string = str_replace('æ', '&aelig;', $string);
 	return $string;
 }
-class GUI {  var $layout;  var $style;  var $mime_type;  var $menue;  var $pdf;  var $addressliste;  var $debug;  var $dbConn;  var $flst;  var $formvars;  var $legende;  var $map;  var $mapDB;  var $img;  var $FormObject;  var $StellenForm;  var $Fehlermeldung;  var $Hinweis;  var $Stelle;  var $ALB;  var $activeLayer;  var $nImageWidth;  var $nImageHeight;  var $user;  var $qlayerset;  var $scaleUnitSwitchScale;  var $map_scaledenom;  var $map_factor;  var $formatter;  function GUI($main, $style, $mime_type) {
+
+
+class GUI {
+
+  var $layout;
+  var $style;
+  var $mime_type;
+  var $menue;
+  var $pdf;
+  var $addressliste;
+  var $debug;
+  var $dbConn;
+  var $flst;
+  var $formvars;
+  var $legende;
+  var $map;
+  var $mapDB;
+  var $img;
+  var $FormObject;
+  var $StellenForm;
+  var $Fehlermeldung;
+  var $Hinweis;
+  var $Stelle;
+  var $ALB;
+  var $activeLayer;
+  var $nImageWidth;
+  var $nImageHeight;
+  var $user;
+  var $qlayerset;
+  var $scaleUnitSwitchScale;
+  var $map_scaledenom;
+  var $map_factor;
+  var $formatter;
+
+  function GUI($main, $style, $mime_type) {
     # Debugdatei setzen
     global $debug;
     $this->debug=$debug;
@@ -68,14 +106,17 @@
     # mime_type html, pdf
     if (isset ($mime_type)) $this->mime_type=$mime_type;
 		$this->scaleUnitSwitchScale = 239210;
+		$this->trigger_functions = array();
   }
-	function loadMultiLingualText($language) {
+
+	function loadMultiLingualText($language) {
     #echo 'In der Rolle eingestellte Sprache: '.$GUI->user->rolle->language;
     $this->Stelle->language=$language;
     $this->Stelle->getName();
     include(LAYOUTPATH.'languages/'.$this->user->rolle->language.'.php');
   }
-	function get_group_legend(){
+
+	function get_group_legend(){
     # Änderungen in den Gruppen werden gesetzt
     $this->formvars = $this->user->rolle->setGroupStatus($this->formvars);
     # Ein- oder Ausblenden der Klassen
@@ -83,7 +124,8 @@
     $this->loadMap('DataBase');
     echo $this->create_group_legend($this->formvars['group']);
   } 
-  function loadMap($loadMapSource) {
+
+  function loadMap($loadMapSource) {
     $this->debug->write("<p>Funktion: loadMap('".$loadMapSource."','".$connStr."')",4);
     switch ($loadMapSource) {
       # lade Karte aus Post-Parametern
@@ -389,6 +431,7 @@
         $layerset['anzLayer'] = count($layerset) - 1; # wegen $layerset['layer_ids']
         unset($this->layers_of_group);		# falls loadmap zweimal aufgerufen wird
 				unset($this->groups_with_layers);	# falls loadmap zweimal aufgerufen wird				
+				$index_mapobject = $map->numlayers;
         for($i=0; $i < $layerset['anzLayer']; $i++){			
 					if($layerset[$i]['alias'] == '' OR !$this->Stelle->useLayerAliases){
 						$layerset[$i]['alias'] = $layerset[$i]['Name'];			# kann vielleicht auch in read_layer gesetzt werden
@@ -404,7 +447,9 @@
 						$layerset[$i]['showclasses'] = $layerset['layer_ids'][$layerset[$i]['requires']]['showclasses'];
 					}
 					
-					if($this->class_load_level == 2 OR $layerset[$i]['requires'] != '' OR ($this->class_load_level == 1 AND $layerset[$i]['aktivStatus'] != 0)){      # nur wenn der Layer aktiv ist (oder ein requires-Layer), sollen seine Parameter gesetzt werden
+					if($this->class_load_level == 2 OR ($this->class_load_level == 1 AND $layerset[$i]['aktivStatus'] != 0)){      # nur wenn der Layer aktiv ist, sollen seine Parameter gesetzt werden
+						$layerset[$i]['index_mapobject'] = $index_mapobject;
+						$index_mapobject++;
 						$layer = ms_newLayerObj($map);
 						$layer->setMetaData('wfs_request_method', 'GET');
 						$layer->setMetaData('wms_name', $layerset[$i]['wms_name']);
@@ -445,7 +490,7 @@
 						$layer->set('debug',MS_ON);
 						
 						# fremde Layer werden auf Verbindung getestet 
-						if($layerset[$i]['aktivStatus'] != 0 AND $layerset[$i]['connectiontype'] == 6 AND strpos($layerset[$i]['connection'], 'host') !== false AND strpos($layerset[$i]['connection'], 'host=localhost') === false){
+						if($layerset[$i]['aktivStatus'] != 0 AND $layerset[$i]['connectiontype'] == 6 AND strpos($layerset[$i]['connection'], 'host') !== false AND strpos($layerset[$i]['connection'], 'host=localhost') === false AND strpos($layerset[$i]['connection'], 'host=pgsql') === false){
 						$connection = explode(' ', trim($layerset[$i]['connection']));
 								for($j = 0; $j < count($connection); $j++){
 								if($connection[$j] != ''){
@@ -550,6 +595,11 @@
             }
 						if ($layerset[$i]['postlabelcache'] != 0) {
 							$layer->set('postlabelcache',$layerset[$i]['postlabelcache']);
+						}
+						
+						if($layerset[$i]['Datentyp'] == MS_LAYER_POINT AND $layerset[$i]['cluster_maxdistance'] != ''){
+							$layer->cluster->maxdistance = $layerset[$i]['cluster_maxdistance'];
+							$layer->cluster->region = 'ellipse';
 						}
                 
             if ($layerset[$i]['Datentyp']=='3') {
@@ -704,7 +754,8 @@
     } # end of switch loadMapSource
     return 1;
   }
-	function list_subgroups($groupid){
+
+	function list_subgroups($groupid){
 		if($groupid != ''){
 			$group = $this->groupset[$groupid];
 			if($group['untergruppen'] != ''){
@@ -716,7 +767,8 @@
 			else return $groupid;
 		}
 	}
-  function loadclasses($layer, $layerset, $classset, $map){
+
+  function loadclasses($layer, $layerset, $classset, $map){
     $anzClass=count($classset);
     for ($j=0;$j<$anzClass;$j++) {
       $klasse = ms_newClassObj($layer);
@@ -805,7 +857,7 @@
 
         if($this->map_factor != '' and $layerset['Datentyp'] != 8){ 
           # Skalierung der Stylegröße, wenn map_factor gesetzt und nicht vom Type Chart
-          $style->set('size', $dbStyle['size']*$this->map_factor);
+          $style->set('size', $dbStyle['size']*$this->map_factor/1.414);
         }
         else{
           $style->set('size', $dbStyle['size']);
@@ -813,7 +865,7 @@
 
         if ($dbStyle['minsize']!='') {
           if($this->map_factor != ''){
-            $style -> set('minsize',$dbStyle['minsize']*$this->map_factor);
+            $style -> set('minsize',$dbStyle['minsize']*$this->map_factor/1.414);
           }
           else{
             $style -> set('minsize',$dbStyle['minsize']);
@@ -822,7 +874,7 @@
 
         if ($dbStyle['maxsize']!='') {
           if($this->map_factor != ''){
-            $style -> set('maxsize',$dbStyle['maxsize']*$this->map_factor);
+            $style -> set('maxsize',$dbStyle['maxsize']*$this->map_factor/1.414);
           }
           else{
             $style -> set('maxsize',$dbStyle['maxsize']);
@@ -845,7 +897,7 @@
             $style -> set('antialias',$dbStyle['antialias']);
           }
           if($this->map_factor != ''){
-            $style -> set('width',$dbStyle['width']*$this->map_factor);
+            $style -> set('width',$dbStyle['width']*$this->map_factor/1.414);
           }
           else{
             $style->set('width',$dbStyle['width']);
@@ -854,7 +906,7 @@
 
         if ($dbStyle['minwidth']!='') {
           if($this->map_factor != ''){
-            $style->set('minwidth',$dbStyle['minwidth']*$this->map_factor);
+            $style->set('minwidth',$dbStyle['minwidth']*$this->map_factor/1.414);
           }
           else{
             $style->set('minwidth',$dbStyle['minwidth']);
@@ -863,7 +915,7 @@
 
         if ($dbStyle['maxwidth']!='') {
           if($this->map_factor != ''){
-            $style->set('maxwidth',$dbStyle['maxwidth']*$this->map_factor);
+            $style->set('maxwidth',$dbStyle['maxwidth']*$this->map_factor/1.414);
           }
           else{
             $style->set('maxwidth',$dbStyle['maxwidth']);
@@ -876,7 +928,8 @@
         if ($dbStyle['color']!='') {
           $RGB=explode(" ",$dbStyle['color']);
           if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
-          if(is_numeric($RGB[0]))$style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);					else $style->updateFromString("STYLE COLOR [".$dbStyle['color']."] END");
+          if(is_numeric($RGB[0]))$style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
+					else $style->updateFromString("STYLE COLOR [".$dbStyle['color']."] END");
         }
 				if($dbStyle['opacity'] != '') {		# muss nach color gesetzt werden
 					$style->set('opacity', $dbStyle['opacity']);
@@ -896,6 +949,9 @@
 				}
 				if($dbStyle['datarange'] != '') {
 					$style->updateFromString("STYLE DATARANGE ".$dbStyle['datarange']." END");
+				}
+				if($dbStyle['rangeitem'] != '') {
+					$style->updateFromString("STYLE RANGEITEM ".$dbStyle['rangeitem']." END");
 				}
         if ($dbStyle['offsetx']!='') {
           $style->set('offsetx', $dbStyle['offsetx']);
@@ -958,9 +1014,9 @@
           $klasse->label->set('maxsize',$dbLabel['maxsize']);
           # Skalierung der Labelschriftgröße, wenn map_factor gesetzt
           if($this->map_factor != ''){
-            $klasse->label->set('minsize',$dbLabel['minsize']*$this->map_factor);
-            $klasse->label->set('maxsize',$dbLabel['size']*$this->map_factor);
-            $klasse->label->set('size',$dbLabel['size']*$this->map_factor);
+            $klasse->label->set('minsize',$dbLabel['minsize']*$this->map_factor/1.414);
+            $klasse->label->set('maxsize',$dbLabel['size']*$this->map_factor/1.414);
+            $klasse->label->set('size',$dbLabel['size']*$this->map_factor/1.414);
           }
           if ($dbLabel['position']!='') {
             switch ($dbLabel['position']){
@@ -1067,9 +1123,9 @@
           $label->maxsize = $dbLabel['maxsize'];
           # Skalierung der Labelschriftgröße, wenn map_factor gesetzt
           if($this->map_factor != ''){
-            $label->minsize = $dbLabel['minsize']*$this->map_factor;
-            $label->maxsize = $dbLabel['size']*$this->map_factor;
-            $label->size = $dbLabel['size']*$this->map_factor;
+            $label->minsize = $dbLabel['minsize']*$this->map_factor/1.414;
+            $label->maxsize = $dbLabel['size']*$this->map_factor/1.414;
+            $label->size = $dbLabel['size']*$this->map_factor/1.414;
           }
           if ($dbLabel['position']!='') {
             switch ($dbLabel['position']){
@@ -1116,7 +1172,8 @@
       } # ende Schleife für mehrere Label
     } # end of Schleife Class
   }
-	function create_group_legend($group_id){
+
+	function create_group_legend($group_id){
 		if($this->groupset[$group_id]['untergruppen'] == NULL AND $this->groups_with_layers[$group_id] == NULL)return;			# wenns keine Layer oder Untergruppen gibt, nix machen
     $groupname = $this->groupset[$group_id]['Gruppenname'];
 	  $groupstatus = $this->groupset[$group_id]['status'];
@@ -1228,39 +1285,23 @@
 								$legend .=  ' title="'.$this->activatelayer.'"'; 
 							}
 							$legend .= ' ></td><td valign="middle">';							
-							if($layer['metalink'] != ''){
-								$legend .= '<a ';
-								if(substr($layer['metalink'], 0, 10) != 'javascript'){
-									$legend .= 'target="_blank"';
-								}
-								$legend .= ' class="metalink" href="'.$layer['metalink'].'">';
-							}
+							$legend .= '<a oncontextmenu="getLayerOptions('.$layer['Layer_ID'].');return false;"';
+							if($layer['metalink'] != '' AND substr($layer['metalink'], 0, 10) != 'javascript')$legend .= 'target="_blank"';
+							if($layer['metalink'] != '')$legend .= ' class="metalink boldhover" href="'.$layer['metalink'].'">';
+							else $legend .= ' class="visiblelayerlink boldhover" href="javascript:void(0)"';
 							$legend .= '<span ';
 							if($layer['minscale'] != -1 AND $layer['maxscale'] > 0){
 								$legend .= 'title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
 							}			  
 							$legend .=' class="legend_layer">'.html_umlaute($layer['alias']).'</span>';
-							if($layer['metalink'] != ''){
-								$legend .= '</a>';
-							}
-							# Bei eingeschalteten Layern kann man auf die maximale Ausdehnung des Layers zoomen
-							if ($layer['aktivStatus'] == 1) {
-								if ($layer['connectiontype']==6) {
-									# Link zum Zoomen auf maximalen Extent des Layers erstmal nur für PostGIS Layer									$legend.='&nbsp;<a href="javascript:zoomToMaxLayerExtent('.$layer['Layer_ID'].');"><img src="graphics/maxLayerExtent.gif" border="0" title="'.$this->FullLayerExtent.'"></a>';
-								}
-							}
+							$legend .= '</a>';
+							# Bei eingeschalteten Layern ist ein Optionen-Button sichtbar
+							if($layer['aktivStatus'] == 1)$legend.='&nbsp;<a href="javascript:getLayerOptions('.$layer['Layer_ID'].')"><img src="graphics/rows.png" border="0" title="'.$this->layerOptions.'"></a>';
+							$legend.='<div style="position:static" id="options_'.$layer['Layer_ID'].'"> </div>';
 						}
 						if($layer['aktivStatus'] == 1 AND $layer['Class'][0]['Name'] != ''){
 							if($layer['requires'] == '' AND $layer['Layer_ID'] > 0){
-								$legend .=  ' <a href="javascript:getlegend(\''.$group_id.'\', '.$layer['Layer_ID'].', document.GUI.nurFremdeLayer.value)" title="'.$this->DisplayClasses.'"><img border="0" src="graphics/';
-								if($layer['showclasses']){
-									$legend .=  'minus.gif';
-								}
-								else{
-									$legend .=  'plus.gif';
-								}
-								$legend .=  '"></a>
-								<input id="classes_'.$layer['Layer_ID'].'" name="classes_'.$layer['Layer_ID'].'" type="hidden" value="'.$layer['showclasses'].'">';
+								$legend .= '<input id="classes_'.$layer['Layer_ID'].'" name="classes_'.$layer['Layer_ID'].'" type="hidden" value="'.$layer['showclasses'].'">';
 							}
 							if($layer['showclasses'] != 0){
 								if($layer['connectiontype'] == 7){      # WMS   
@@ -1274,7 +1315,7 @@
 								}
 								else{
 									$legend .= '<table border="0" cellspacing="0" cellpadding="0">';
-									$maplayer = $this->map->getLayerByName($layer['alias']);
+									$maplayer = $this->map->getLayer($layer['index_mapobject']);
 									for($k = 0; $k < $maplayer->numclasses; $k++){
 										$class = $maplayer->getClass($k);
 										for($s = 0; $s < $class->numstyles; $s++){
@@ -1377,12 +1418,14 @@
 						if($layer['aktivStatus'] == 1){
 							$legend .=  'checked="true" ';
 						}
-						$legend .= 'id="thema_'.$layer['Layer_ID'].'" name="thema'.$layer['Layer_ID'].'" disabled="true"></td><td>
-						<span class="legend_layer_hidden" ';
+						$legend .= 'id="thema_'.$layer['Layer_ID'].'" name="thema'.$layer['Layer_ID'].'" disabled="true"></td><td>';
+						$legend .= '<a oncontextmenu="getLayerOptions('.$layer['Layer_ID'].');return false;" class="invisiblelayerlink boldhover" href="javascript:void(0)"';
+						$legend .= '<span class="legend_layer_hidden" ';
 						if($layer['minscale'] != -1 AND $layer['maxscale'] != -1){
 							$legend .= 'title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
 						}
-						$legend .= ' >'.html_umlaute($layer['alias']).'</span>';
+						$legend .= ' >'.html_umlaute($layer['alias']).'</span></a>';
+						$legend.='<div style="position:static" id="options_'.$layer['Layer_ID'].'"> </div>';
 						if($layer['status'] != ''){
 							$legend .= '&nbsp;<img title="Thema nicht verfügbar: '.$layer['status'].'" src="'.GRAPHICSPATH.'warning.png">';
 						}
@@ -1404,13 +1447,15 @@
 	  $legend .= '</div>';
     return $legend;
   }
-	function check_layer_visibility(&$layer){
+
+	function check_layer_visibility(&$layer){
 		if($layer['status'] != '' OR ($this->map_scaledenom < $layer['minscale'] OR ($layer['maxscale'] > 0 AND $this->map_scaledenom > $layer['maxscale']))) {
 			return false;
 		}
 		return true;
 	}
-	function map_saveWebImage($image,$format) {
+
+	function map_saveWebImage($image,$format) {
 		if(MAPSERVERVERSION >= 600 ) {		
 			return $image->saveWebImage();
 		}
@@ -1418,7 +1463,18 @@
 			return $image->saveWebImage($format, 1, 1, 0);
 		}
 	}	
-}class database {  var $ist_Fortfuehrung;  var $debug;  var $loglevel;  var $logfile;  var $commentsign;  var $blocktransaction;  function database() {
+}
+
+class database {
+
+  var $ist_Fortfuehrung;
+  var $debug;
+  var $loglevel;
+  var $logfile;
+  var $commentsign;
+  var $blocktransaction;
+
+  function database() {
     global $debug;
     $this->debug=$debug;
     $this->loglevel=LOG_LEVEL;
@@ -1438,13 +1494,15 @@
     # Dazu Fehlerausschriften bearchten.
     $this->blocktransaction=0;
   }
-  function open() {
+
+  function open() {
     $this->debug->write("<br>MySQL Verbindung öffnen mit Host: ".$this->host." User: ".$this->user,4);
     $this->dbConn=mysql_connect($this->host,$this->user,$this->passwd);
     $this->debug->write("Datenbank mit ID: ".$this->dbConn." und Name: ".$this->dbName." auswählen.",4);
     return mysql_select_db($this->dbName,$this->dbConn);
   }
-  function execSQL($sql,$debuglevel, $loglevel) {
+
+  function execSQL($sql,$debuglevel, $loglevel) {
   	switch ($this->loglevel) {
   		case 0 : {
   			$logsql=0;
@@ -1488,14 +1546,32 @@
     }
     return $ret;
   }
-  function close() {
+
+  function close() {
     $this->debug->write("<br>MySQL Verbindung mit ID: ".$this->dbConn." schließen.",4);
     if (LOG_LEVEL>0){
     	$this->logfile->close();
     }
     return mysql_close($this->dbConn);
   }
-}class user {  var $id;  var $Name;  var $Vorname;  var $login_name;  var $funktion;  var $dbConn;  var $Stellen;  var $nZoomFactor;  var $nImageWidth;  var $nImageHeight;  var $database;  var $remote_addr;	function user($login_name,$id,$database) {
+}
+
+class user {
+
+  var $id;
+  var $Name;
+  var $Vorname;
+  var $login_name;
+  var $funktion;
+  var $dbConn;
+  var $Stellen;
+  var $nZoomFactor;
+  var $nImageWidth;
+  var $nImageHeight;
+  var $database;
+  var $remote_addr;
+
+	function user($login_name,$id,$database) {
 		global $debug;
 		$this->debug=$debug;
 		$this->database=$database;
@@ -1509,7 +1585,8 @@
 			$this->readUserDaten($id,0);
 		}
 	}
-  function readUserDaten($id,$login_name) {
+
+  function readUserDaten($id,$login_name) {
     $sql ='SELECT * FROM user WHERE 1=1';
     if ($id>0) {
       $sql.=' AND ID='.$id;
@@ -1534,7 +1611,8 @@
     }
     $this->password_setting_time=$rs['password_setting_time'];
   }
-  function getLastStelle() {
+
+  function getLastStelle() {
     $sql = 'SELECT stelle_id FROM user WHERE ID='.$this->id;
     $this->debug->write("<p>file:users.php class:user->getLastStelle - Abfragen der zuletzt genutzten Stelle:<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);
@@ -1542,14 +1620,16 @@
     $rs=mysql_fetch_array($query);
     return $rs['stelle_id'];
   }
-	function StellenZugriff($stelle_id) {
+
+	function StellenZugriff($stelle_id) {
 		$this->Stellen=$this->getStellen($stelle_id);
 		if (count($this->Stellen['ID'])>0) {
 			return 1;
 		}
 		return 0;
 	}
-	function getStellen($stelle_ID) {
+
+	function getStellen($stelle_ID) {
 		$sql ='SELECT s.ID,s.Bezeichnung FROM stelle AS s,rolle AS r';
 		$sql.=' WHERE s.ID=r.stelle_id AND r.user_id='.$this->id;
 		if ($stelle_ID>0) {
@@ -1574,13 +1654,15 @@
 		}
 		return $stellen;
 	}
-	function clientIpIsValide($remote_addr) {
+
+	function clientIpIsValide($remote_addr) {
     # Prüfen ob die übergebene IP Adresse zu den für den Nutzer eingetragenen Adressen passt
     $ips=explode(';',$this->ips);
     foreach ($ips AS $ip) {
       if (trim($ip)!='') {
-        $ip=trim($ip);				if(!is_numeric(array_pop(explode('.', $ip))))$ip = gethostbyname($ip);			# für dyndns-Hosts
-        if (in_subnet($remote_addr,$ip)) {
+        $ip=trim($ip);
+				if(!is_numeric(array_pop(explode('.', $ip))))$ip = gethostbyname($ip);			# für dyndns-Hosts
+        if (in_subnet($remote_addr, $ip)) {
           $this->debug->write('<br>IP:'.$remote_addr.' paßt zu '.$ip,4);
           #echo '<br>IP:'.$remote_addr.' paßt zu '.$ip;
           return 1;
@@ -1589,7 +1671,8 @@
     }
     return 0;
   }
-	function setRolle($stelle_id) {
+
+	function setRolle($stelle_id) {
 		# Abfragen und zuweisen der Einstellungen für die Rolle		
 		$rolle=new rolle($this->id,$stelle_id,$this->database);		
 		if ($rolle->readSettings()) {
@@ -1598,7 +1681,21 @@
 		}
 		return 0;
 	}
-}class stelle {  var $id;  var $Bezeichnung;  var $debug;  var $nImageWidth;  var $nImageHeight;  var $oGeorefExt;  var $pixsize;  var $selectedButton;  var $database;	function stelle($id,$database) {
+}
+
+class stelle {
+
+  var $id;
+  var $Bezeichnung;
+  var $debug;
+  var $nImageWidth;
+  var $nImageHeight;
+  var $oGeorefExt;
+  var $pixsize;
+  var $selectedButton;
+  var $database;
+
+	function stelle($id,$database) {
 		global $debug;
 		$this->debug=$debug;
 		$this->id=$id;
@@ -1606,7 +1703,8 @@
 		$this->Bezeichnung=$this->getName();
 		$this->readDefaultValues();
 	}
-  function getName() {
+
+  function getName() {
     $sql ='SELECT ';
     if ($this->language != 'german' AND $this->language != ''){
       $sql.='`Bezeichnung_'.$this->language.'` AS ';
@@ -1620,7 +1718,8 @@
     $this->Bezeichnung=$rs['Bezeichnung'];
     return $rs['Bezeichnung'];
   }
-  function readDefaultValues() {
+
+  function readDefaultValues() {
     $sql ='SELECT * FROM stelle WHERE ID='.$this->id;
     $this->debug->write("<p>file:users.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);
@@ -1631,8 +1730,7 @@
     $this->epsg_code=$rs["epsg_code"];
     $this->alb_raumbezug=$rs["alb_raumbezug"];
     $this->alb_raumbezug_wert=$rs["alb_raumbezug_wert"];
-    $this->wasserzeichen=$rs["wasserzeichen"];
-    $this->pgdbhost=$rs["pgdbhost"];
+    $this->pgdbhost = ($rs["pgdbhost"] == 'PGSQL_PORT_5432_TCP_ADDR') ? getenv('PGSQL_PORT_5432_TCP_ADDR') : $rs["pgdbhost"];
     $this->pgdbname=$rs["pgdbname"];
     $this->pgdbuser=$rs["pgdbuser"];
     $this->pgdbpasswd=$rs["pgdbpasswd"];
@@ -1651,8 +1749,10 @@
     $this->checkPasswordAge=$rs["check_password_age"];
     $this->allowedPasswordAge=$rs["allowed_password_age"];
     $this->useLayerAliases=$rs["use_layer_aliases"];
+		$this->hist_timestamp=$rs["hist_timestamp"];
   }
-  function checkClientIpIsOn() {
+
+  function checkClientIpIsOn() {
     $sql ='SELECT check_client_ip FROM stelle WHERE ID = '.$this->id;
     $this->debug->write("<p>file:users.php class:stelle->checkClientIpIsOn- Abfragen ob IP's der Nutzer in der Stelle getestet werden sollen<br>".$sql,4);
     #echo '<br>'.$sql;
@@ -1664,7 +1764,18 @@
     }
     return 0;
   }
-}class rolle {  var $user_id;  var $stelle_id;  var $debug;  var $database;  var $loglevel;  static $hist_timestamp;	function rolle($user_id,$stelle_id,$database) {
+}
+
+class rolle {
+
+  var $user_id;
+  var $stelle_id;
+  var $debug;
+  var $database;
+  var $loglevel;
+  static $hist_timestamp;
+
+	function rolle($user_id,$stelle_id,$database) {
 		global $debug;
 		$this->debug=$debug;
 		$this->user_id=$user_id;
@@ -1674,7 +1785,8 @@
 		#$this->groupset=$this->getGroups('');
 		$this->loglevel = 0;
 	}
-  function readSettings() {
+
+  function readSettings() {
 		global $language;
     # Abfragen und Zuweisen der Einstellungen der Rolle
     $sql ='SELECT * FROM rolle WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
@@ -1719,11 +1831,13 @@
 			$this->overlayy=$rs['overlayy'];
 			$this->instant_reload=$rs['instant_reload'];
 			$this->menu_auto_close=$rs['menu_auto_close'];
+			$this->visually_impaired = $rs['visually_impaired'];
 			if($rs['hist_timestamp'] != ''){
 				$this->hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');			# der wird zur Anzeige des Timestamps benutzt
 				rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');	# der hat die Form, wie der timestamp in der PG-DB steht und wird für die Abfragen benutzt
 			}
 			else rolle::$hist_timestamp = $this->hist_timestamp = '';
+			$this->selectedButton=$rs['selectedButton'];
 			$buttons = explode(',', $rs['buttons']);
 			$this->back = in_array('back', $buttons);
 			$this->forward = in_array('forward', $buttons);
@@ -1732,6 +1846,7 @@
 			$this->zoomall = in_array('zoomall', $buttons);
 			$this->recentre = in_array('recentre', $buttons);
 			$this->jumpto = in_array('jumpto', $buttons);
+			$this->coord_query = in_array('coord_query', $buttons);			
 			$this->query = in_array('query', $buttons);
 			$this->queryradius = in_array('queryradius', $buttons);
 			$this->polyquery = in_array('polyquery', $buttons);
@@ -1743,7 +1858,8 @@
 			return 1;
 		}else return 0;
   }
-	function setGroupStatus($formvars) {
+
+	function setGroupStatus($formvars) {
 		$this->groupset=$this->getGroups('');
 		# Eintragen des group_status=1 für Gruppen, die angezeigt werden sollen
 		for ($i=0;$i<count($this->groupset);$i++) {
@@ -1763,7 +1879,8 @@
 		}
 		return $formvars;
 	}
-  function getGroups($GroupName) {
+
+  function getGroups($GroupName) {
 		global $language;
     # Abfragen der Gruppen in der Rolle
     $sql ='SELECT g2r.*, ';
@@ -1784,7 +1901,8 @@
     }
     return $groups;
   }
-	function setClassStatus($formvars) {
+
+	function setClassStatus($formvars) {
 		if($formvars['layer_id'] != ''){
 			# Eintragen des showclasses=1 für Klassen, die angezeigt werden sollen
 			$sql ='UPDATE u_rolle2used_layer set showclasses = "'.$formvars['show_classes'].'"';
@@ -1794,7 +1912,20 @@
 			$this->database->execSQL($sql,4, $this->loglevel);
 		}
 	}
-}class pgdatabase {  var $ist_Fortfuehrung;  var $debug;  var $loglevel;  var $defaultloglevel;  var $logfile;  var $defaultlogfile;  var $commentsign;  var $blocktransaction;	function pgdatabase() {
+}
+
+class pgdatabase {
+
+  var $ist_Fortfuehrung;
+  var $debug;
+  var $loglevel;
+  var $defaultloglevel;
+  var $logfile;
+  var $defaultlogfile;
+  var $commentsign;
+  var $blocktransaction;
+
+	function pgdatabase() {
 	  global $debug;
     $this->debug=$debug;
     $this->loglevel=LOG_LEVEL;
@@ -1814,24 +1945,32 @@
     # Dazu Fehlerausschriften bearchten.
     $this->blocktransaction=0;
   }
-  function open() {
+
+  function open() {
   	if($this->port == '') $this->port = 5432;
     #$this->debug->write("<br>Datenbankverbindung öffnen: Datenbank: ".$this->dbName." User: ".$this->user,4);
-		$connect_string = 'dbname='.$this->dbName.' port='.$this->port.' user='.$this->user.' password='.$this->passwd;
-		if($this->host != 'localhost' AND $this->host != '127.0.0.1')$connect_string .= ' host='.$this->host;		// das beschleunigt den Connect extrem
-    $this->dbConn=pg_connect($connect_string);
+		$this->connect_string = '' .
+      'dbname='. $this->dbName .
+      ' port=' . $this->port .
+      ' user=' . $this->user .
+      ' password=' . $this->passwd;
+		if($this->host != 'localhost' AND $this->host != '127.0.0.1')
+      $this->connect_string .= ' host=' . $this->host; // das beschleunigt den Connect extrem
+    $this->dbConn = pg_connect($this->connect_string);
     $this->debug->write("Datenbank mit Connection_ID: ".$this->dbConn." geöffnet.",4);
     # $this->version = pg_version($this->dbConn); geht erst mit PHP 5
     $this->version = POSTGRESVERSION;
     return $this->dbConn;
   }
-  function setClientEncoding() {
+
+  function setClientEncoding() {
     $sql ="SET CLIENT_ENCODING TO '".POSTGRES_CHARSET."';";
 		$ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     return $ret[1];    	
   }  
-  function execSQL($sql,$debuglevel, $loglevel) {
+
+  function execSQL($sql,$debuglevel, $loglevel) {
   	switch ($this->loglevel) {
   		case 0 : {
   			$logsql=0;
@@ -1855,8 +1994,10 @@
       $query=pg_query($this->dbConn,$sql);
       //$query=0;
       if ($query==0) {
+				$errormessage = pg_last_error($this->dbConn);
+				header('error: true');		// damit ajax-Requests das auch mitkriegen
         $ret[0]=1;
-        $ret[1]="Fehler bei SQL Anweisung:<br>".$sql."<br>".pg_result_error($query);
+        $ret[1]="Fehler bei SQL Anweisung:<br><br>\n\n".$sql."\n\n<br><br>".$errormessage;
         echo "<br><b>".$ret[1]."</b>";
         $this->debug->write("<br><b>".$ret[1]."</b>",$debuglevel);
         if ($logsql) {
@@ -1892,48 +2033,55 @@
 
     return $ret;
   }
-	function read_epsg_codes($order = true){
+
+	function read_epsg_codes($order = true){
     global $supportedSRIDs;
-    $sql ="SELECT spatial_ref_sys.srid, srtext, alias, minx, miny, maxx, maxy FROM spatial_ref_sys ";
+    $sql ="SELECT spatial_ref_sys.srid, coalesce(alias, substr(srtext, 9, 35)) as srtext, minx, miny, maxx, maxy FROM spatial_ref_sys ";
     $sql.="LEFT JOIN spatial_ref_sys_alias ON spatial_ref_sys_alias.srid = spatial_ref_sys.srid";
     # Wenn zu unterstützende SRIDs angegeben sind, ist die Abfrage diesbezüglich eingeschränkt
     $anzSupportedSRIDs = count($supportedSRIDs);
     if ($anzSupportedSRIDs > 0) {
       $sql.=" WHERE spatial_ref_sys.srid IN (".implode(',', $supportedSRIDs).")";
     }
-    if($order)$sql.=" ORDER BY spatial_ref_sys.srid";
+    if($order)$sql.=" ORDER BY srtext";
     #echo $sql;		
     $ret = $this->execSQL($sql, 4, 0);		
     if($ret[0]==0){
 			$i = 0;
-      while($row = pg_fetch_array($ret[1])){
-      	if($row['alias'] != ''){
-      		$row['srtext'] = $row['alias'];
-      	}
-      	else{
-	        $explosion = explode('[', $row['srtext']);
-	        if(strlen($explosion[1]) > 30){
-	          $explosion[1] = substr($explosion[1], 0, 30);
-	        }
-	        $row['srtext'] = $explosion[1];
-      	}
+      while($row = pg_fetch_assoc($ret[1])){
 				$epsg_codes[$row['srid']] = $row;
 				$i++;
       }
     }
     return $epsg_codes;
   }
-  function close() {
+
+  function close() {
     $this->debug->write("<br>PostgreSQL Verbindung mit ID: ".$this->dbConn." schließen.",4);
     return pg_close($this->dbConn);
   }
-}class db_mapObj {  var $debug;  var $referenceMap;  var $Layer;  var $anzLayer;  var $nurAufgeklappteLayer;  var $Stelle_ID;  var $User_ID;  function db_mapObj($Stelle_ID,$User_ID) {
+}
+
+class db_mapObj {
+
+  var $debug;
+  var $referenceMap;
+  var $Layer;
+  var $anzLayer;
+  var $nurAufgeklappteLayer;
+  var $Stelle_ID;
+  var $User_ID;
+  var $database;
+
+  function db_mapObj($Stelle_ID, $User_ID, $database = NULL) {
     global $debug;
     $this->debug=$debug;
     $this->Stelle_ID=$Stelle_ID;
     $this->User_ID=$User_ID;
+		$this->database=$database;
   }
-	function read_ReferenceMap() {
+
+	function read_ReferenceMap() {
     $sql ='SELECT r.* FROM referenzkarten AS r, stelle AS s WHERE r.ID=s.Referenzkarte_ID';
     $sql.=' AND s.ID='.$this->Stelle_ID;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_ReferenceMap - Lesen der Referenzkartendaten:<br>".$sql,4);
@@ -1943,7 +2091,8 @@
     $this->referenceMap=$rs;
     return $rs;
   }  
-  function read_Groups($all = false, $order = '') {
+
+  function read_Groups($all = false, $order = '') {
 		global $language;
 		$sql = 'SELECT ';
 		if($all == false) $sql .= 'g2r.status, ';
@@ -1969,13 +2118,15 @@
     $this->anzGroups=count($groups);
     return $groups;
   }
-  function read_Layer($withClasses, $groups = NULL){
+
+  function read_Layer($withClasses, $groups = NULL){
 		global $language;
-    $sql ='SELECT DISTINCT rl.*,ul.*, l.Layer_ID, ';
+    $sql ='SELECT DISTINCT coalesce(rl.transparency, ul.transparency, 100) as transparency, rl.`aktivStatus`, rl.`queryStatus`, rl.`gle_view`, rl.`showclasses`, rl.`logconsume`, ';
+		$sql.=' ul.`queryable`, ul.`drawingorder`, ul.`minscale`, ul.`maxscale`, ul.`offsite`, ul.`postlabelcache`, ul.`Filter`, ul.`template`, ul.`header`, ul.`footer`, ul.`symbolscale`, ul.`logconsume`, ul.`requires`, ul.`privileg`, ul.`export_privileg`, ';
 		if($language != 'german') {
 			$sql.='CASE WHEN `Name_'.$language.'` != "" THEN `Name_'.$language.'` ELSE `Name` END AS ';
 		}
-		$sql.='Name, l.alias, l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem, l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.filteritem, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version, l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, g.*';
+		$sql.=' l.Layer_ID, Name, l.alias, l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem, l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.filteritem, l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version, l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, g.*';
     $sql.=' FROM u_rolle2used_layer AS rl,used_layer AS ul,layer AS l, u_groups AS g, u_groups2rolle as gr';
     $sql.=' WHERE rl.stelle_id=ul.Stelle_ID AND rl.layer_id=ul.Layer_ID AND l.Layer_ID=ul.Layer_ID';
     $sql.=' AND (ul.minscale != -1 OR ul.minscale IS NULL) AND l.Gruppe = g.id AND rl.stelle_ID='.$this->Stelle_ID.' AND rl.user_id='.$this->User_ID;
@@ -2015,7 +2166,8 @@
     }
     return $this->Layer;
   }
-  function read_disabled_classes(){
+
+  function read_disabled_classes(){
   	#Anne
     $sql_classes = 'SELECT class_id, status FROM u_rolle2used_class WHERE user_id='.$this->User_ID.' AND stelle_id='.$this->Stelle_ID.';';
     $query_classes=mysql_query($sql_classes);
@@ -2025,7 +2177,8 @@
 		}
 		return $classarray;
   }
-  function read_Classes($Layer_ID, $disabled_classes = NULL, $all_languages = false) {
+
+  function read_Classes($Layer_ID, $disabled_classes = NULL, $all_languages = false) {
 		global $language;
     $sql ='SELECT ';
 		if(!$all_languages AND $language != 'german') {
@@ -2047,7 +2200,11 @@
 					for($i = 0; $i < count($rs['Style']); $i++){
 						if($rs['Style'][$i]['color'] != '' AND $rs['Style'][$i]['color'] != '-1 -1 -1'){
 							$rs['Style'][$i]['outlinecolor'] = $rs['Style'][$i]['color'];
-							$rs['Style'][$i]['color'] = '-1 -1 -1';							$rs['Style'][$i]['width'] = 2;							$rs['Style'][$i]['minwidth'] = 3;							$rs['Style'][$i]['maxwidth'] = 7;
+							$rs['Style'][$i]['color'] = '-1 -1 -1';
+							if($rs['Style'][$i]['width'] == '')$rs['Style'][$i]['width'] = 3;
+							if($rs['Style'][$i]['minwidth'] == '')$rs['Style'][$i]['minwidth'] = 2;
+							if($rs['Style'][$i]['maxwidth'] == '')$rs['Style'][$i]['maxwidth'] = 4;
+							$rs['Style'][$i]['symbolname'] = '';
 						}
 					}
 				}
@@ -2062,7 +2219,8 @@
     }
     return $Classes;
   }
-  function read_Styles($Class_ID) {
+
+  function read_Styles($Class_ID) {
     $sql ='SELECT * FROM styles AS s,u_styles2classes AS s2c';
     $sql.=' WHERE s.Style_ID=s2c.style_id AND s2c.class_id='.$Class_ID;
     $sql.=' ORDER BY drawingorder';
@@ -2074,7 +2232,8 @@
     }
     return $Styles;
   }
-  function read_Label($Class_ID) {
+
+  function read_Label($Class_ID) {
     $sql ='SELECT * FROM labels AS l,u_labels2classes AS l2c';
     $sql.=' WHERE l.Label_ID=l2c.label_id AND l2c.class_id='.$Class_ID;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Label - Lesen der Labels zur Classe eines Layers:<br>".$sql,4);
@@ -2085,7 +2244,8 @@
     }
     return $Labels;
   }
-  function read_RollenLayer($id = NULL, $typ = NULL){
+
+  function read_RollenLayer($id = NULL, $typ = NULL){
 		$sql = "SELECT DISTINCT l.*, g.Gruppenname, -l.id AS Layer_ID, 1 as showclasses, CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable from rollenlayer AS l, u_groups AS g";
     $sql.= ' WHERE l.Gruppe = g.id AND l.stelle_id='.$this->Stelle_ID.' AND l.user_id='.$this->User_ID;
     if($id != NULL){
@@ -2104,4 +2264,5 @@
     }
     return $Layer;
   }
-}?>
+}
+?>
