@@ -89,6 +89,7 @@ if($this->formvars['selected_layer_id'] AND $this->Fehler == ''){
 <input type="hidden" name="go" value="neuer_Layer_Datensatz">
 <input name="form_field_names" type="hidden" value="<?php echo $this->form_field_names; ?>">
 <input type="hidden" name="geomtype" value="<? echo $this->geomtype; ?>">
+<input type="hidden" name="layer_options_open" value="">
 
 <?
 	if ($this->Meldung1!='') {

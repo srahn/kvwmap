@@ -1,9 +1,13 @@
 <?php
 $this->goNotExecutedInPlugins = false;
-
 include(PLUGINS . 'xplankonverter/model/kvwmap.php');
 include_once(CLASSPATH . 'PgObject.php');
 include_once(CLASSPATH . 'MyObject.php');
+include_once(CLASSPATH . 'Layer.php');
+include_once(CLASSPATH . 'LayerClass.php');
+include_once(CLASSPATH . 'LayerAttribute.php');
+include_once(CLASSPATH . 'Style2Class.php');
+include_once(CLASSPATH . 'Label2Class.php');
 #include_once(CLASSPATH . 'LayerGroup.php');
 include_once(CLASSPATH . 'data_import_export.php');
 include(PLUGINS . 'xplankonverter/model/gml_file.php');
@@ -158,7 +162,7 @@ switch($this->go){
 							);
 							if (!empty($shapeFiles)) $shapeFile = $shapeFiles[0]; # es kann nur eins geben
 							if (!empty($shapeFile->data)) {
-								$this->debug('<p>Lösche gefundenes shape file.');
+								$this->debug->show('<p>Lösche gefundenes shape file.', false);
 								$shapeFile->deleteLayer();
 								$shapeFile->deleteDataTable();
 								$shapeFile->delete();
@@ -352,7 +356,6 @@ switch($this->go){
   } break;
 
   case 'xplankonverter_konvertierung': {
-    // TODO: Stati setzen
 		if ($this->formvars['konvertierung_id'] == '') {
 			$this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
 			$this->main = 'Hinweis.php';
@@ -456,6 +459,18 @@ switch($this->go){
 		);
 		header('Content-Type: application/json');
 		echo json_encode($response);
+	} break;
+
+	case 'xplankonverter_regeleditor' : {
+		include(PLUGINS . 'xplankonverter/view/regeleditor/index.php');
+	} break;
+
+	case 'xplankonverter_regeleditor_getxplanattributes' : {
+		include(PLUGINS . 'xplankonverter/view/regeleditor/ajax-getxplanattributes.php');
+	} break;
+
+	case 'xplankonverter_regeleditor_getshapeattributes' : {
+		include(PLUGINS . 'xplankonverter/view/regeleditor/ajax-getshapeattributes.php');
 	} break;
 
 	default : {

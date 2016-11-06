@@ -983,6 +983,14 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->checkCaseAllowed('DXF_Import');
 			$GUI->dxf_import_importieren();
 	  } break;
+		
+		case 'GeoJSON_Anzeigen' : {
+			$GUI->create_geojson_rollenlayer();
+	  } break;
+		
+	  case 'GeoJSON_Anzeigen_Datei laden' : {
+			$GUI->create_geojson_rollenlayer_load();
+	  } break;
 
 		case 'SHP_Anzeigen' : {
 			$GUI->create_shp_rollenlayer();
@@ -1008,10 +1016,24 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->checkCaseAllowed('SHP_Import');
 			$GUI->shp_import();
 	  } break;
+		
+		case 'GeoJSON_Import' : {
+			$GUI->checkCaseAllowed('GeoJSON_Import');
+			$GUI->geojson_import();
+	  } break;
+		
+		case 'GeoJSON_Import_Importieren' : {
+			$GUI->checkCaseAllowed('GeoJSON_Import');
+			$GUI->geojson_import_importieren();
+	  } break;
 
 	  case 'SHP_Import_speichern' : {
 			$GUI->checkCaseAllowed('SHP_Import');
 			$GUI->shp_import_speichern();
+	  } break;
+		
+		case 'Daten_Import' : {
+			$GUI->daten_import();
 	  } break;
 
 	  case 'Daten_Export' : {
@@ -1076,7 +1098,7 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  } break;
 	  
 	  case 'Dokument_Loeschen' : {
-			$GUI->dokument_loeschen();
+			$GUI->sachdaten_speichern();
 	  } break;
 
 		case 'neuer_Layer_Datensatz' : {
@@ -1529,8 +1551,8 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
       # Karteninformationen lesen
       $GUI->loadMap('DataBase');
       $GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-      $GUI->drawMap();
      	$GUI->saveMap('');
+      $GUI->drawMap();
       $GUI->output();
 	  }break;
 	}

@@ -21,6 +21,7 @@
 
 <div id="layer" onclick="remove_calendar();">
 <? if($this->new_entry != true AND $layer['requires'] == ''){ ?>
+<input type="hidden" value="" id="changed_<? echo $layer['Layer_ID']; ?>" name="changed_<? echo $layer['Layer_ID']; ?>">
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 	<tr>
 		<td align="right" valign="top" style="padding: 0 10 0 0">
@@ -118,7 +119,7 @@
 	for ($k=0;$k<$anzObj;$k++) {
 		$checkbox_names .= 'check;'.$attributes['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].'|';
 ?>
-	<input type="hidden" value="" name="changed_<? echo $layer['Layer_ID'].'_'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
+	<input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
 	<tr 
 	<? if($this->user->rolle->querymode == 1){ ?>
 		onmouseenter="ahah('index.php', 'go=tooltip_query&querylayer_id=<? echo $layer['Layer_ID']; ?>&oid=<? echo $layer['shape'][$k][$attributes['table_name'][$attributes['the_geom']].'_oid']; ?>', new Array(top.document.GUI.result, ''), new Array('setvalue', 'execute_function'));"

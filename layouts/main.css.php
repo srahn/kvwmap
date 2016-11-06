@@ -688,6 +688,10 @@ tbody.gle tr {
  border:1px dotted gray;
 }
 
+tbody.nogle tr,tr:hover{ 
+ border: none !important;
+}
+
 tbody.gle tr:hover { 
  border:1px solid #03476F;
 }
@@ -948,4 +952,29 @@ tbody.gle tr:hover {
 	min-width: 85px;
 	max-width: 350px;
 	padding-right: 5px;
+}
+
+#gbb_grundbuchblatt{
+	width: 1000px;
+	background-color: #dae4ec;
+	padding: 7px;
+	margin: 10px;
+	margin-bottom: 20px;
+	border: 1px solid lightgrey;
+}
+
+#gbb_grundstueck{
+	width: 600px;
+	background-color: white;
+	padding: 7px;
+	margin-bottom: 7px;
+	border: 1px solid lightgrey;
+}
+
+#gbb_eigentuemer{
+	width: 390px;
+	background-color: white;
+	padding: 7px;
+	height: 100%;
+	border: 1px solid lightgrey;
 }

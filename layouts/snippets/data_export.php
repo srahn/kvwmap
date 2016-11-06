@@ -168,6 +168,7 @@ $j=0;
 									<option <? if($this->formvars['export_format'] == 'Shape')echo 'selected '; ?> value="Shape">Shape</option>
 									<option <? if($this->formvars['export_format'] == 'GML')echo 'selected '; ?> value="GML">GML</option>
 									<option <? if($this->formvars['export_format'] == 'KML')echo 'selected '; ?> value="KML">KML</option>
+									<option <? if($this->formvars['export_format'] == 'GeoJSON')echo 'selected '; ?> value="GeoJSON">GeoJSON</option>
 									<? if($this->data_import_export->layerset[0]['Datentyp'] == MS_LAYER_POLYGON){ ?>
 									<option <? if($this->formvars['export_format'] == 'UKO')echo 'selected '; ?> value="UKO">UKO</option>
 									<? } ?>

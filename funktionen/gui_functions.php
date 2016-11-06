@@ -449,9 +449,10 @@ function resetLayerOptions(layer_id){
 function scrollLayerOptions(){
 	layer_id = document.GUI.layer_options_open.value;
 	if(layer_id != ''){
-		legend_posy = document.getElementById('legenddiv').getBoundingClientRect().top;
-		posy = document.getElementById('options_'+layer_id).getBoundingClientRect().top - (13+legend_posy);
-		if(posy > 70 && posy < document.GUI.browserheight.value-220)document.getElementById('options_content_'+layer_id).style.top = posy;
+		legend_top = document.getElementById('legenddiv').getBoundingClientRect().top;
+		legend_bottom = document.getElementById('legenddiv').getBoundingClientRect().bottom;
+		posy = document.getElementById('options_'+layer_id).getBoundingClientRect().top;
+		if(posy < legend_bottom - 150 && posy > legend_top + 10)document.getElementById('options_content_'+layer_id).style.top = posy - (13+legend_top);		
 	}
 }
 

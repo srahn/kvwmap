@@ -77,9 +77,18 @@ class ddl {
 					$y = $this->layout['texts'][$j]['posy'];
 					$offset_attribute = $this->layout['texts'][$j]['offset_attribute'];
 					if($offset_attribute != ''){			# ist ein offset_attribute gesetzt
-						$offset_value = $this->layout['offset_attributes'][$offset_attribute];
-						if($offset_value != ''){																							# dieses Attribut wurde auch schon geschrieben, d.h. dessen y-Position ist bekannt -> Freitext relativ dazu setzen
-							$y = $this->handlePageOverflow($offset_attribute, $offset_value, $y);		# Seitenüberläufe berücksichtigen
+						$offset_attributes = explode(',', $offset_attribute);		# es können mehrere Offset-Attribute durch Komma getrennt angegeben sein (ist aber noch nicht in der Oberfläche umgesetzt)
+						$smallest_offset_value = 10000;
+						foreach($offset_attributes as $offset_attribute){
+							$offset_value = $this->layout['offset_attributes'][$offset_attribute];
+							if($offset_value == ''){		# wenn eines der Offset-Attribute noch keinen Wert hat, also noch nicht geschrieben wurde, abbrechen
+								$smallest_offset_value = '';
+								break;
+							}
+							if($offset_value < $smallest_offset_value)$smallest_offset_value = $offset_value;
+						}
+						if($smallest_offset_value != ''){																							# dieses Attribut wurde auch schon geschrieben, d.h. dessen y-Position ist bekannt -> Freitext relativ dazu setzen
+							$y = $this->handlePageOverflow($offset_attribute, $smallest_offset_value, $y);		# Seitenüberläufe berücksichtigen
 						}
 						else{
 							$remaining_freetexts[] = $this->layout['texts'][$j]['id'];
@@ -192,7 +201,10 @@ class ddl {
 								}
 								# den letzten y-Wert dieses Elements in das Offset-Array schreiben
 								$this->layout['offset_attributes'][$attributes['name'][$j]] = $y;
-								if(!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $y)$this->miny[$this->pdf->currentContents] = $y;		# miny ist die unterste y-Position das aktuellen Datensatzes 
+								if(!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $y){
+									if(($this->miny[$this->pdf->currentContents] - $y) > $this->max_dataset_height)$this->max_dataset_height = $this->miny[$this->pdf->currentContents] - $y;
+									$this->miny[$this->pdf->currentContents] = $y;		# miny ist die unterste y-Position das aktuellen Datensatzes									
+								}
 								
 								$this->layout['page_id'][$attributes['name'][$j]] = $this->pdf->currentContents;		# und die Page-ID merken, in der das Attribut beendet wurde								
 								if($this->pdf->currentContents != end($this->pdf->objects['3']['info']['pages'])+1)$this->pdf->closeObject();									# falls in eine alte Seite geschrieben wurde, zurückkehren
@@ -267,7 +279,10 @@ class ddl {
 									$y = $this->putText($text, $zeilenhoehe, $width, $x, $y, $offsetx);
 								}								
 																
-								if(!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $y)$this->miny[$this->pdf->currentContents] = $y;		# miny ist die unterste y-Position das aktuellen Datensatzes 
+								if(!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $y){
+									if(($this->miny[$this->pdf->currentContents] - $y) > $this->max_dataset_height)$this->max_dataset_height = $this->miny[$this->pdf->currentContents] - $y;
+									$this->miny[$this->pdf->currentContents] = $y;		# miny ist die unterste y-Position das aktuellen Datensatzes									
+								}
 								
 								$this->layout['offset_attributes'][$attributes['name'][$j]] = $y;					# den unteren y-Wert dieses Elements in das Offset-Array schreiben
 								$this->layout['page_id'][$attributes['name'][$j]] = $this->pdf->currentContents;		# und die Page-ID merken, in der das Attribut beendet wurde
@@ -465,6 +480,7 @@ class ddl {
 			$this->pdf = $pdfobject;			# ein PDF-Objekt wurde aus einem übergeordneten Druckrahmen/Layer übergeben
 		}
 		$this->miny[$this->pdf->currentContents] = 1000000;
+		$this->max_dataset_height = 0;
 		if($this->offsety)$this->miny[$this->pdf->currentContents] = 842 - $this->offsety;
 		$this->pdf->ezSetMargins(40,30,0,0);
     if($this->layout['elements'][$attributes['the_geom']]['xpos'] > 0){		# wenn ein Geometriebild angezeigt werden soll -> loadmap()
@@ -488,8 +504,7 @@ class ddl {
 				$this->add_static_elements($offsetx);
     	}
 			$this->yoffset_onpage = $this->maxy - $this->miny[$lastpage];			# der Offset mit dem die Elemente beim Untereinander-Typ nach unten versetzt werden
-			if($this->i_on_page > 0)$average_dataset_height = $this->yoffset_onpage/$this->i_on_page;
-			if($this->layout['type'] != 0 AND $this->miny[$lastpage] < $average_dataset_height+60){		# neue Seite beim Untereinander-Typ oder eingebettet-Typ und Seitenüberlauf
+			if($this->layout['type'] != 0 AND $this->miny[$lastpage] < $this->max_dataset_height+60){		# neue Seite beim Untereinander-Typ oder eingebettet-Typ und Seitenüberlauf
 				$this->i_on_page = 0;
 				#$this->maxy = 0;
 				if(!$this->initial_yoffset)$this->initial_yoffset = 780-$this->maxy;			# der Offset von oben gesehen, mit dem das erste fortlaufende Element auf der ersten Seite beginnt; wird benutzt, um die fortlaufenden Elemente ab der 2. Seite oben beginnen zu lassen

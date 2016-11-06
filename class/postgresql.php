@@ -474,6 +474,7 @@ FROM
         if($fieldtype == 'geometry'){
           $fields[$i]['geomtype'] = $this->get_geom_type($fields[$i]['real_name'], $tablename);
           $fields['the_geom'] = $fieldname;
+					$fields['the_geom_id'] = $i;
         }				
       }
       
@@ -546,7 +547,7 @@ FROM
 				c.relname = '".$table."' AND
 				".$and_column."
 				a.attnum > 0
-			ORDER BY a.attnum
+			ORDER BY a.attnum, indisunique desc, indisprimary desc
 		";
 		#echo '<br><br>' . $sql;
 		$ret = $this->execSQL($sql, 4, 0);
@@ -642,27 +643,39 @@ FROM
 			if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
 		}
 	}
-	
-  function get_geom_type($geomcolumn, $tablename){
-  	if($geomcolumn != '' AND $tablename != ''){
-	    $sql = "SELECT GeometryType(".$geomcolumn.") FROM ".$tablename." WHERE ".$geomcolumn." IS NOT NULL LIMIT 1";
-	    $ret1 = $this->execSQL($sql, 4, 0);
-	    if($ret1[0]==0){
-	      $geom_type = pg_fetch_row($ret1[1]);
-	      if($geom_type[0] == ''){
-	      	$sql = "SELECT type FROM geometry_columns WHERE f_table_name = '".$tablename."' AND f_geometry_column = '".$geomcolumn."'";
-	    		$ret1 = $this->execSQL($sql, 4, 0);
-	    		if($ret1[0]==0){
-	      		$geom_type = pg_fetch_row($ret1[1]);
-	    		}
-	      }
-	    }
-	    return $geom_type[0];
-  	}
-  	else{
-  		return NULL;
-  	}
-  }
+
+	/*
+	* Fragt den Geometrietyp der Spalte aus geometry_column ab
+	* Wird dort nichts gefunden wird GEOMETRY gesetzt
+	* @param string $geomcolumn Name der Geometriespalte
+	* @param string $tablename Name der Tabelle
+	* @return string Geometrytyp
+	*/
+	function get_geom_type($geomcolumn, $tablename){
+		if($geomcolumn != '' AND $tablename != ''){
+			$sql = "
+				SELECT
+					type
+				FROM
+					geometry_columns
+				WHERE
+					f_table_name = '" . $tablename . "' AND
+					f_geometry_column = '" . $geomcolumn ."'
+			";
+			$ret1 = $this->execSQL($sql, 4, 0);
+			if($ret1[0] == 0) {
+				$result = pg_fetch_assoc($ret1[1]);
+				$geom_type = $result['type'];
+			}
+			else {
+				$geom_type = 'GEOMETRY';
+			}
+		}
+		else{
+			$geom_type = NULL;
+		}
+		return $geom_type;
+	}
 
   function check_oid($tablename){
     $sql = 'SELECT oid from '.$tablename.' limit 0';
@@ -672,7 +685,7 @@ FROM
     $this->debug->write("<p>file:kvwmap class:postgresql->check_oid:<br>".$sql,4);
     @$query=pg_query($sql);
     if ($query==0) {
-      return false;
+			return false;
     }
     else{
       return true;

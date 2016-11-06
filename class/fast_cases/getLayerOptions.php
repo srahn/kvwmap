@@ -136,7 +136,7 @@ class GUI {
 							if($layer[0]['Class'][0]['Status'] == '1' || $layer[0]['Class'][1]['Status'] == '1')echo '<li><a href="javascript:deactivateAllClasses(\''.implode(',', $class_ids).'\')">'.$this->deactivateAllClasses.'</a></li>';
 							if($layer[0]['Class'][0]['Status'] == '0' || $layer[0]['Class'][1]['Status'] == '0')echo '<li><a href="javascript:activateAllClasses(\''.implode(',', $class_ids).'\')">'.$this->activateAllClasses.'</a></li>';
 						}
-						echo '<li><span>Transparenz:</span> <input name="layer_options_transparency" style="width: 30px" value="'.$layer[0]['transparency'].'"><input type="range" id="transparency_slider" style="width: 120px" value="'.$layer[0]['transparency'].'" oninput="layer_options_transparency.value=parseInt(transparency_slider.value)"></li>
+						echo '<li><span>Transparenz:</span> <input name="layer_options_transparency" onchange="transparency_slider.value=parseInt(layer_options_transparency.value)" style="width: 30px" value="'.$layer[0]['transparency'].'"><input type="range" id="transparency_slider" name="transparency_slider" style="width: 120px" value="'.$layer[0]['transparency'].'" onchange="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()" oninput="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()"></li>
 					</td>
 				</tr>
 				<tr>
@@ -157,11 +157,11 @@ class GUI {
 			</table>
 		</div>
 		~
-		legend_posy = document.getElementById(\'legenddiv\').getBoundingClientRect().top;
-		posy = document.getElementById(\'options_'.$this->formvars['layer_id'].'\').getBoundingClientRect().top - (13+legend_posy);
-		if(posy < 70)posy = 70;
-		if(posy > document.GUI.browserheight.value-220)posy = document.GUI.browserheight.value-220;
-		document.getElementById(\'options_content_'.$this->formvars['layer_id'].'\').style.top = posy;
+		legend_top = document.getElementById(\'legenddiv\').getBoundingClientRect().top;
+		legend_bottom = document.getElementById(\'legenddiv\').getBoundingClientRect().bottom;
+		posy = document.getElementById(\'options_'.$this->formvars['layer_id'].'\').getBoundingClientRect().top;		
+		if(posy > legend_bottom - 150)posy = legend_bottom - 150;
+		document.getElementById(\'options_content_'.$this->formvars['layer_id'].'\').style.top = posy - (13+legend_top);
 		';
 	}
 }

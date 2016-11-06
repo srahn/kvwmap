@@ -3174,10 +3174,17 @@ class stelle {
 		return 1;
 	}
 
-	function addLayer($layer_ids, $drawingorder) {
+	function addLayer($layer_ids, $drawingorder, $filter = '') {
 		# Hinzufügen von Layern zur Stelle
 		for ($i=0;$i<count($layer_ids);$i++) {
-			$sql = "SELECT queryable, template, transparency, drawingorder, minscale, maxscale, symbolscale, offsite, requires, privileg, postlabelcache FROM layer WHERE Layer_ID = ".$layer_ids[$i];
+			$sql = "
+				SELECT
+					queryable, template, transparency, drawingorder, minscale, maxscale, symbolscale, offsite, requires, privileg, postlabelcache
+				FROM
+					layer
+				WHERE
+					Layer_ID = " . $layer_ids[$i];
+			#echo '<br>sql: ' . $sql;
 			$this->debug->write("<p>file:users.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 			$query=mysql_query($sql,$this->database->dbConn);
 			$rs = mysql_fetch_array($query);
@@ -3196,9 +3203,45 @@ class stelle {
 			$postlabelcache = $rs['postlabelcache'];
 			if($rs['requires'] == '')$rs['requires']='NULL';
 			$requires = $rs['requires'];
-			$sql ='INSERT IGNORE INTO used_layer ( `Stelle_ID` , `Layer_ID` , `queryable` , `drawingorder` , `minscale` , `maxscale` , `symbolscale`, `offsite` , `transparency`, `Filter` , `template` , `header` , `footer` , `privileg`, `postlabelcache`, `requires` )';
-			$sql.="VALUES ('".$this->id."', '".$layer_ids[$i]."', '".$queryable."', '".$drawingorder."', '".$minscale."', '".$maxscale."', '".$symbolscale."', '".$offsite."' , ".$transparency.", NULL,'".$template."', NULL, NULL, '".$privileg."', '".$postlabelcache."', ".$requires.")";
-			#echo $sql.'<br>';
+			$sql = "
+				INSERT IGNORE INTO used_layer (
+					`Stelle_ID`,
+					`Layer_ID`,
+					`queryable`,
+					`drawingorder`,
+					`minscale`,
+					`maxscale`,
+					`symbolscale`,
+					`offsite`,
+					`transparency`,
+					`Filter`,
+					`template`,
+					`header`,
+					`footer`,
+					`privileg`,
+					`postlabelcache`,
+					`requires`
+				)
+				VALUES (
+					'" . $this->id . "',
+					'" . $layer_ids[$i] . "',
+					'" . $queryable . "',
+					'" . $drawingorder . "',
+					'" . $minscale . "',
+					'" . $maxscale . "',
+					'" . $symbolscale . "',
+					'" . $offsite . "',
+					" . $transparency . ",
+					'" . $filter . "',
+					'" . $template . "',
+					NULL,
+					NULL,
+					'" . $privileg . "',
+					'" . $postlabelcache . "',
+					" . $requires . "
+				)
+			";
+			#echo '<br>' . $sql;
 			$this->debug->write("<p>file:users.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 			$query=mysql_query($sql,$this->database->dbConn);
 			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
@@ -3562,14 +3605,16 @@ class stelle {
 				if(strpos(strtolower($fieldstring[$i]), ' as ')){   # Ausdruck AS attributname
 					$explosion = explode(' as ', strtolower($fieldstring[$i]));
 					$attributename = array_pop($explosion);
+					$real_attributename = $explosion[0];
 				}
 				else{   # tabellenname.attributname oder attributname
 					$explosion = explode('.', strtolower($fieldstring[$i]));
 					$attributename = trim($explosion[count($explosion)-1]);
+					$real_attributename = $fieldstring[$i];
 				}
 				if($privileges[$attributename] != ''){
 					$type = $attributes['type'][$attributes['indizes'][$attributename]];
-					if(substr($type, 0, 1) == '_' OR is_numeric($type))$newattributesstring .= 'to_json('.$fieldstring[$i].') as '.$attributename.', ';		# Array oder Datentyp
+					if(POSTGRESVERSION >= 930 AND substr($type, 0, 1) == '_' OR is_numeric($type))$newattributesstring .= 'to_json('.$real_attributename.') as '.$attributename.', ';		# Array oder Datentyp
 					else $newattributesstring .= $fieldstring[$i].', ';																																			# normal
 				}
 				if(substr_count($fieldstring[$i], '(') - substr_count($fieldstring[$i], ')') > 0){

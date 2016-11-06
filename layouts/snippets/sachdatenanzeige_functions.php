@@ -74,53 +74,77 @@ include('funktionen/input_check_functions.php');
 		buildJSONString(fieldname, false);
 	}
 	
-	nextdatasets = function(offset){
-		currentform.target = '';
-		if(currentform.go_backup.value != ''){
-			currentform.go.value = currentform.go_backup.value;
+	nextdatasets = function(layer_id){
+		var sure = true;
+		if(document.getElementById('changed_'+layer_id).value == 1){
+			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch weiterblättern?');
 		}
-		obj = document.getElementById(offset);
-		if(obj.value == '' || obj.value == undefined){
-			obj.value = 0;
+		if(sure){
+			currentform.target = '';
+			if(currentform.go_backup.value != ''){
+				currentform.go.value = currentform.go_backup.value;
+			}
+			obj = document.getElementById('offset_'+layer_id);
+			if(obj.value == '' || obj.value == undefined){
+				obj.value = 0;
+			}
+			obj.value = parseInt(obj.value) + <? echo $this->formvars['anzahl']; ?>;
+			overlay_submit(currentform, false);
 		}
-		obj.value = parseInt(obj.value) + <? echo $this->formvars['anzahl']; ?>;
-		overlay_submit(currentform, false);
 	}
 	
-	lastdatasets = function(offset, count){
-		currentform.target = '';
-		if(currentform.go_backup.value != ''){
-			currentform.go.value = currentform.go_backup.value;
+	lastdatasets = function(layer_id, count){
+		var sure = true;
+		if(document.getElementById('changed_'+layer_id).value == 1){
+			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch weiterblättern?');
 		}
-		obj = document.getElementById(offset);
-		if(obj.value == '' || obj.value == undefined){
-			obj.value = 0;
+		if(sure){
+			currentform.target = '';
+			if(currentform.go_backup.value != ''){
+				currentform.go.value = currentform.go_backup.value;
+			}
+			obj = document.getElementById('offset_'+layer_id);
+			if(obj.value == '' || obj.value == undefined){
+				obj.value = 0;
+			}
+			obj.value = count - (count % <? echo $this->formvars['anzahl']; ?>);
+			overlay_submit(currentform, false);
 		}
-		obj.value = count - (count % <? echo $this->formvars['anzahl']; ?>);
-		overlay_submit(currentform, false);
 	}
 	
-	firstdatasets = function(offset){
-		currentform.target = '';
-		if(currentform.go_backup.value != ''){
-			currentform.go.value = currentform.go_backup.value;
+	firstdatasets = function(layer_id){
+		var sure = true;
+		if(document.getElementById('changed_'+layer_id).value == 1){
+			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch zurückblättern?');
 		}
-		obj = document.getElementById(offset);
-		obj.value = 0;
-		overlay_submit(currentform, false);
+		if(sure){
+			currentform.target = '';
+			if(currentform.go_backup.value != ''){
+				currentform.go.value = currentform.go_backup.value;
+			}
+			obj = document.getElementById('offset_'+layer_id);
+			obj.value = 0;
+			overlay_submit(currentform, false);
+		}
 	}
 
-	prevdatasets = function(offset){
-		currentform.target = '';
-		if(currentform.go_backup.value != ''){
-			currentform.go.value = currentform.go_backup.value;
+	prevdatasets = function(layer_id){
+		var sure = true;
+		if(document.getElementById('changed_'+layer_id).value == 1){
+			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch zurückblättern?');
 		}
-		obj = document.getElementById(offset);
-		if(obj.value == '' || obj.value == undefined){
-			obj.value = 0;
+		if(sure){
+			currentform.target = '';
+			if(currentform.go_backup.value != ''){
+				currentform.go.value = currentform.go_backup.value;
+			}
+			obj = document.getElementById('offset_'+layer_id);
+			if(obj.value == '' || obj.value == undefined){
+				obj.value = 0;
+			}
+			obj.value = parseInt(obj.value) - <? echo $this->formvars['anzahl']; ?>;
+			overlay_submit(currentform, false);
 		}
-		obj.value = parseInt(obj.value) - <? echo $this->formvars['anzahl']; ?>;
-		overlay_submit(currentform, false);
 	}
 
 	back = function(){
@@ -188,9 +212,14 @@ include('funktionen/input_check_functions.php');
 		// data ist ein string, der weitere benötigte KVPs enthalten kann (durch <und> getrennt)
 		if(confirm('Wollen Sie die ausgewählten Datensätze wirklich löschen?')){
 			data_r = data.replace(/<und>/g, "&");
-			data = 'go=Layer_Datensaetze_Loeschen&chosen_layer_id='+layer_id+'&selected_layer_id='+layer_id+'&fromobject='+fromobject+'&targetobject='+targetobject+'&targetlayer_id='+targetlayer_id+'&targetattribute='+targetattribute+'&data='+data+'&embedded=true' + data_r;
+			form_fieldstring = document.getElementById('sub_'+layer_id+'_form_field_names').value;
+			data = 'go=Layer_Datensaetze_Loeschen&chosen_layer_id='+layer_id+'&selected_layer_id='+layer_id+'&fromobject='+fromobject+'&targetobject='+targetobject+'&targetlayer_id='+targetlayer_id+'&targetattribute='+targetattribute+'&data='+data+'&form_field_names='+form_fieldstring+'&embedded=true' + data_r;
 			data += '&checkbox_names_'+layer_id+'='+document.getElementsByName('checkbox_names_'+layer_id)[0].value;
-			data += '&'+document.getElementsByName('checkbox_names_'+layer_id)[0].value+'=on';
+			data += '&'+document.getElementsByName('checkbox_names_'+layer_id)[0].value+'=on';			
+			if(typeof (window.FormData) != 'undefined'){		// in alten IEs gibts FormData nicht
+				formdata = new FormData(currentform);
+				data = urlstring2formdata(formdata, data);
+			}			
 			ahah('index.php', data, new Array(document.getElementById(fromobject), document.getElementById(targetobject)), new Array('sethtml', 'sethtml'));
 		}
 	}
@@ -236,14 +265,14 @@ include('funktionen/input_check_functions.php');
 		// targetattribute ist das Attribut, zu dem das targetobject gehoert
 		// data ist ein string, der weitere benötigte KVPs enthalten kann (durch <und> getrennt)
 		data_r = data.replace(/<und>/g, "&");
-  	form_fieldstring = document.getElementById('sub_'+layer_id+'_form_field_names').value;
+  	form_fieldstring = document.getElementById('sub_new_'+layer_id+'_form_field_names').value;
   	form_fields = form_fieldstring.split('|');
   	for(i = 0; i < form_fields.length-1; i++){
   		fieldstring = form_fields[i]+'';
   		field = fieldstring.split(';');
   		if(document.getElementsByName(fieldstring)[0] != undefined && document.getElementsByName(fieldstring)[0].readOnly != true && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
   			alert('Das Feld '+document.getElementsByName(fieldstring)[0].title+' erfordert eine Eingabe.');
-  			return;
+  			//return;
   		}
   		if(document.getElementsByName(fieldstring)[0] != undefined && field[6] == 'date' && field[4] != 'Time' && document.getElementsByName(fieldstring)[0].value != '' && !checkDate(document.getElementsByName(fieldstring)[0].value)){
   			alert('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
@@ -436,11 +465,17 @@ include('funktionen/input_check_functions.php');
 		}
 	}
 
-	delete_document = function(attributename){
+	delete_document = function(attributename, layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data, reload){
 		if(confirm('Wollen Sie das ausgewählte Dokument wirklich löschen?')){
-			currentform.document_attributename.value = attributename; 
-			currentform.go.value = 'Dokument_Loeschen';
-			currentform.submit();
+			currentform.document_attributename.value = attributename;
+			if(targetlayer_id != ''){		// SubForm-Layer
+				subsave_data(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data, reload);
+				currentform.document_attributename.value = '';
+			}
+			else{												// normaler Layer
+				currentform.go.value = 'Dokument_Loeschen';
+				currentform.submit();
+			}
 		}
 	}
 
@@ -610,7 +645,10 @@ include('funktionen/input_check_functions.php');
 	}
 
 	set_changed_flag = function(flag){
-		if(flag != undefined)flag.value=1;
+		if(flag != undefined){
+			flag.value=1;
+			flag.onchange();
+		}
 	}
 
 </script>
