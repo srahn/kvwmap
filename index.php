@@ -5,7 +5,7 @@ session_start();
 # kvwmap - Kartenserver für die Verwaltung raumbezogener Daten.   #
 # Lizenz                                                          #
 #                                                                 #
-# Copyright (C) 2008  Peter Korduan                               # 
+# Copyright (C) 2016  Peter Korduan                               # 
 #                                                                 #
 # This program is free software; you can redistribute it and/or   #
 # modify it under the terms of the GNU General Public License as  #
@@ -40,20 +40,21 @@ ob_start ();    // Ausgabepufferung starten
 $go = $_REQUEST['go'];
 if($_REQUEST['go_plus'] != '')$go = $go.'_'.$_REQUEST['go_plus'];
 
-#########################################################################################################
-define(CASE_COMPRESS, false);																																						#
-#																																																				#
-# 	navMap_ajax: 		- unter 1:10 zoomen																																	#
-#										- ein räumlich gefilterter Layer muss an sein																				#
-#										- man muss einen anderen EPSG-Code als den der Ref-Karte (2398) eingestellt haben		#
-# 	tooltip_query:	- ein Datensatz mit Bild muss abgefragt werden																			#
-#										- getRollenLayer() reinkopieren																											#
-#																																																				#
-#		alle:						- die Stelle muss die IP checken  																									#
-#																																																				#
-#########################################################################################################
+###########################################################################################################
+define(CASE_COMPRESS, false);																																						  #
+#																																																				  #
+# 	navMap_ajax: 		  - unter 1:10 zoomen																																	#
+#										  - ein räumlich gefilterter Layer muss an sein																				#
+#										  - man muss einen anderen EPSG-Code als den der Ref-Karte (2398) eingestellt haben		#
+# 	tooltip_query:	  - ein Datensatz mit Bild muss agefragt werden																			  #
+#										  - getRollenLayer() reinkopieren																										  #
+#   getLayerOptions:  - getRollenLayer() reinkopieren																											#
+#																																																				  #
+#		ALLE:						  - die Stelle muss die IP checken  																								  #
+#																																																				  #
+###########################################################################################################
 
-$non_spatial_cases = array('changemenue_with_ajax', 'get_select_list');		// für non-spatial cases wird in start.php keine Verbindung zur PostgreSQL aufgebaut usw.
+$non_spatial_cases = array('getLayerOptions', 'get_select_list');		// für non-spatial cases wird in start.php keine Verbindung zur PostgreSQL aufgebaut usw.
 $spatial_cases = array('navMap_ajax', 'tooltip_query', 'get_group_legend');
 $fast_loading_cases = array_merge($spatial_cases, $non_spatial_cases);
 
@@ -98,12 +99,12 @@ if(!CASE_COMPRESS AND FAST_CASE){
 else{
 	include_(WWWROOT.APPLVERSION.'funktionen/allg_funktionen.php');	
 	if($userDb == NULL)include_(CLASSPATH.'mysql.php');
-	include_(CLASSPATH.'kvwmap.php');	
+	include_(CLASSPATH.'kvwmap.php');
 	include_(CLASSPATH.'kataster.php');
-	include_(CLASSPATH.'postgresql.php');																										
+	include_(CLASSPATH.'postgresql.php');
 	include_(CLASSPATH.'users.php');
-	include_(CLASSPATH.'bauleitplanung.php');           
-}																						
+	include_(CLASSPATH.'bauleitplanung.php');
+}
 
 include(WWWROOT.APPLVERSION.'start.php');
 
@@ -133,6 +134,32 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
       $GUI->mime_type='map_ajax';
       $GUI->output();
 		}break;
+			
+		case 'openCustomSubform' : {
+			$GUI->openCustomSubform();
+	  } break;
+		
+		case 'getLayerOptions' : {
+			$GUI->getLayerOptions();
+	  } break;
+		
+		case 'saveLayerOptions' : {
+			$GUI->saveLayerOptions();
+			$GUI->neuLaden();
+			$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+			$GUI->drawMap();
+			$GUI->saveMap('');
+			$GUI->output();
+	  } break;
+		
+		case 'resetLayerOptions' : {
+			$GUI->resetLayerOptions();
+			$GUI->neuLaden();
+			$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+			$GUI->drawMap();
+			$GUI->saveMap('');
+			$GUI->output();
+	  } break;
 				
 		case 'switch_gle_view' : {
 			$GUI->switch_gle_view();
@@ -961,6 +988,14 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->checkCaseAllowed('DXF_Import');
 			$GUI->dxf_import_importieren();
 	  } break;
+		
+		case 'GeoJSON_Anzeigen' : {
+			$GUI->create_geojson_rollenlayer();
+	  } break;
+		
+	  case 'GeoJSON_Anzeigen_Datei laden' : {
+			$GUI->create_geojson_rollenlayer_load();
+	  } break;
 
 		case 'SHP_Anzeigen' : {
 			$GUI->create_shp_rollenlayer();
@@ -981,25 +1016,29 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 		case 'Punktliste_Anzeigen_Anzeigen' : {
 			$GUI->create_point_rollenlayer_import();
 	  } break;
-
-	  case 'simple_SHP_Import' : {
-			$GUI->checkCaseAllowed('simple_SHP_Import');
-			$GUI->simple_shp_import();
-	  } break;
-
-	  case 'simple_SHP_Import_speichern' : {
-			$GUI->checkCaseAllowed('simple_SHP_Import');
-			$GUI->simple_shp_import_speichern();
-	  } break;
 	  
 	  case 'SHP_Import' : {
 			$GUI->checkCaseAllowed('SHP_Import');
 			$GUI->shp_import();
 	  } break;
+		
+		case 'GeoJSON_Import' : {
+			$GUI->checkCaseAllowed('GeoJSON_Import');
+			$GUI->geojson_import();
+	  } break;
+		
+		case 'GeoJSON_Import_Importieren' : {
+			$GUI->checkCaseAllowed('GeoJSON_Import');
+			$GUI->geojson_import_importieren();
+	  } break;
 
 	  case 'SHP_Import_speichern' : {
 			$GUI->checkCaseAllowed('SHP_Import');
 			$GUI->shp_import_speichern();
+	  } break;
+		
+		case 'Daten_Import' : {
+			$GUI->daten_import();
 	  } break;
 
 	  case 'Daten_Export' : {
@@ -1064,17 +1103,17 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  } break;
 	  
 	  case 'Dokument_Loeschen' : {
-			$GUI->dokument_loeschen();
+			$GUI->sachdaten_speichern();
 	  } break;
 
-	  case 'neuer_Layer_Datensatz' : {			
+		case 'neuer_Layer_Datensatz' : {
 			$GUI->neuer_Layer_Datensatz();
-	  } break;
+		} break;
 
-	  case 'neuer_Layer_Datensatz_speichern' : {
+		case 'neuer_Layer_Datensatz_speichern' : {
 			$GUI->neuer_Layer_Datensatz_speichern();
-	  } break;
-	  
+		} break;
+
 	  case 'generisches_sachdaten_diagramm' : {
 			$GUI->generisches_sachdaten_diagramm($GUI->formvars['width']);
 	  } break;
@@ -1132,6 +1171,17 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->layer_export_exportieren();
 	  } break;
 
+		case 'Layer_Generator' : {
+			$GUI->checkCaseAllowed($go);
+			$GUI->layer_generator();
+		} break;
+
+		case 'Layer_Generator_Erzeugen' : {
+			$GUI->checkCaseAllowed('Layer_Generator');
+			$GUI->layer_generator_erzeugen();
+			$GUI->layer_generator();
+		} break;
+
 		case 'Style_Label_Editor' : {
 			$GUI->checkCaseAllowed($go);
 			$GUI->StyleLabelEditor();
@@ -1175,30 +1225,35 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->Attributeditor();
 	  } break;
 
-	  case 'Attributeditor' : {
+		case 'Attributeditor' : {
 			$GUI->checkCaseAllowed('Attributeditor');
 			$GUI->Attributeditor();
-	  } break;
+		} break;
 
-	  case 'Attributeditor_speichern' : {    
+		case 'Attributeditor_speichern' : {    
 			$GUI->checkCaseAllowed('Attributeditor');
 			$GUI->Attributeditor_speichern();
-	  } break;
+		} break;
 
-	  case 'Layer_Anzeigen' : {
+		case 'Datentypen_Anzeigen' : {
+			$GUI->checkCaseAllowed($go);
+			$GUI->DatentypenAnzeigen();
+		} break;
+
+		case 'Layer_Anzeigen' : {
 			$GUI->checkCaseAllowed($go);
 			$GUI->LayerAnzeigen();
-	  } break;
-	  
+		} break;
+
 	  case 'Layer_Uebersicht' : {
 			$GUI->LayerUebersicht();
-	  } break;
+		} break;
 
-	  case 'Layer_Löschen' : {    
+		case 'Layer_Löschen' : {    
 			$GUI->checkCaseAllowed('Layer_Anzeigen');
 			$GUI->LayerLoeschen();
 			$GUI->LayerAnzeigen();
-	  } break;
+		} break;
 
 	  case 'Layer2Stelle_Reihenfolge' : {
 			$GUI->checkCaseAllowed('Stellen_Anzeigen');
@@ -1507,8 +1562,8 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
       # Karteninformationen lesen
       $GUI->loadMap('DataBase');
       $GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-      $GUI->drawMap();
      	$GUI->saveMap('');
+      $GUI->drawMap();
       $GUI->output();
 	  }break;
 	}

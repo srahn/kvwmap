@@ -17,6 +17,31 @@ function MapserverErrorHandler($errno, $errstr, $errfile, $errline){
 	return true;
 }
 
+function compare_names($a, $b){
+	return strcmp($a['name'], $b['name']);
+}
+
+function JSON_to_PG($json, $quote = ''){
+	if(is_array($json)){
+		for($i = 0; $i < count($json); $i++){
+			$elems[] = JSON_to_PG($json[$i], '"');
+		}
+		$pg = '{'.@implode(',', $elems).'}';
+	}
+	elseif(is_object($json)){
+		if($quote == '')$new_quote = '"';
+		else $new_quote = '\\'.$quote;
+		foreach($json as $elem){
+			$elems[] = JSON_to_PG($elem, $new_quote);
+		}
+		$pg = $quote.'('.implode(',', $elems).')'.$quote;
+	}
+	else{
+		$pg = $json;
+	}
+	return $pg;
+}
+
 function strip_pg_escape_string($string){
 	$string = str_replace("''", "'", $string);
 	return $string;
@@ -705,7 +730,6 @@ function umlaute_sortieren($array, $second_array){
 }
 
 function umlaute_umwandeln($name){
-  $name = utf8_decode($name);
   $name = str_replace('ä', 'ae', $name);
   $name = str_replace('ü', 'ue', $name);
   $name = str_replace('ö', 'oe', $name);
@@ -1285,7 +1309,7 @@ function curl_get_contents($url, $username = NULL, $password = NULL) {
   return $result;
 }
 
-function debug_write($msg) {
+function debug_write($msg, $debug = false) {
   #$fp = fopen(LOGPATH.'debug.htm','a+');
 	#$log = getTimestamp().":\n";
 	#$msg = "- ".$msg."\n";

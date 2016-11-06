@@ -46,7 +46,7 @@ else {
  ?>
 		<table border="0" cellspacing="0" cellpadding="3" style="border:1px solid <?php echo BG_DEFAULT ?>">
 			<tr align="center">
-		    	<th bgcolor="<?php echo BG_DEFAULT ?>" width="570" colspan="3" class="fetter" style="border-bottom:1px solid #C3C7C3"><?php echo $strCommonData; ?></th>
+		    	<th bgcolor="<?php echo BG_DEFAULT ?>" width="670" colspan="3" class="fetter" style="border-bottom:1px solid #C3C7C3"><?php echo $strCommonData; ?></th>
 		    </tr><?php if ($this->formvars['selected_layer_id']>0) {?>
 		  	<tr>
 		    	<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLayerID; ?></th>
@@ -323,12 +323,18 @@ else {
 		      		<input name="status" type="text" value="<?php echo $this->layerdata['status']; ?>" size="25" maxlength="255">
 		  		</td>
 		  	</tr>
-		 	</table>
-		  <br>
-		  	
+				<tr>
+					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTriggerFunction; ?></th>
+					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
+							<input name="trigger_function" type="text" value="<?php echo $this->layerdata['trigger_function']; ?>" size="25" maxlength="100">
+					</td>
+				</tr>
+			</table>
+			<br>
+
 		  <table border="0" cellspacing="0" cellpadding="3" style="border:1px solid <?php echo BG_DEFAULT ?>">
 		  	<tr align="center">
-		  		<th class="fetter" bgcolor="<?php echo BG_DEFAULT ?>" width="570" style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strDefaultValues; ?></th>
+		  		<th class="fetter" bgcolor="<?php echo BG_DEFAULT ?>" width="670" style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strDefaultValues; ?></th>
 		  	</tr>
 		  	<tr>
 		    	<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTemplate; ?></th>
@@ -410,14 +416,14 @@ else {
     	<a name="stellenzuweisung"></a>
       <table border="0" cellspacing="0" cellpadding="3" style="border:1px solid <?php echo BG_DEFAULT ?>">
 		  	<tr align="center">
-		  		<th class="fetter" bgcolor="<?php echo BG_DEFAULT ?>" width="570" style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strTasks; ?></th>
+		  		<th class="fetter" bgcolor="<?php echo BG_DEFAULT ?>" width="670" style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strTasks; ?></th>
 		  	</tr>
         <tr valign="top"> 
           <td align="right">Zugeordnete<br>
-            <select name="selectedstellen" size="4" multiple style="width:220px">
+            <select name="selectedstellen" size="4" multiple style="width:300px">
             <? 
             for($i=0; $i < count($this->formvars['selstellen']["Bezeichnung"]); $i++){
-              	echo '<option value="'.$this->formvars['selstellen']["ID"][$i].'">'.$this->formvars['selstellen']["Bezeichnung"][$i].'</option>';
+              	echo '<option value="'.$this->formvars['selstellen']["ID"][$i].'" title="'.$this->formvars['selstellen']["Bezeichnung"][$i].'">'.$this->formvars['selstellen']["Bezeichnung"][$i].'</option>';
                }
             ?>
             </select>
@@ -427,9 +433,9 @@ else {
             <input type="button" name="substractPlaces" value="&gt;&gt;" onClick=substractOptions(document.GUI.selectedstellen,document.GUI.selstellen,'value')>
           </td>
           <td>verfügbare<br>
-            <select name="allstellen" size="4" multiple style="width:220px">
+            <select name="allstellen" size="4" multiple style="width:300px">
             <? for($i=0; $i < count($this->stellen["Bezeichnung"]); $i++){
-              	echo '<option value="'.$this->stellen["ID"][$i].'">'.$this->stellen["Bezeichnung"][$i].'</option>';
+              	echo '<option value="'.$this->stellen["ID"][$i].'" title="'.$this->stellen["Bezeichnung"][$i].'">'.$this->stellen["Bezeichnung"][$i].'</option>';
                }
             ?>
             </select>
@@ -449,7 +455,7 @@ else {
 		  <br>
 		  <table border="0" cellspacing="0" cellpadding="3" style="border:1px solid <?php echo BG_DEFAULT ?>">
 		  	<tr align="center">
-		  		<th class="fetter" bgcolor="<?php echo BG_DEFAULT ?>" width="570" style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strOWSParameter; ?></th>
+		  		<th class="fetter" bgcolor="<?php echo BG_DEFAULT ?>" width="670" style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strOWSParameter; ?></th>
 		  	</tr>	
 		  	<tr>
 		    	<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsSrs; ?></th>
@@ -480,7 +486,7 @@ else {
 		      		<select name="wms_format">
 		      			<option value=""><?php echo $this->strPleaseSelect; ?></option>
 		      			<option <? if($this->layerdata['wms_format'] == 'image/png'){echo 'selected';} ?> value="image/png">image/png</option>
-		      			<option <? if($this->layerdata['wms_format'] == 'image/jpg'){echo 'selected';} ?> value="image/jpg">image/jpg</option>
+		      			<option <? if($this->layerdata['wms_format'] == 'image/jpeg'){echo 'selected';} ?> value="image/jpeg">image/jpeg</option>
 		      			<option <? if($this->layerdata['wms_format'] == 'image/gif'){echo 'selected';} ?> value="image/gif">image/gif</option>		      			
 		      		</select>
 		  		</td>
@@ -592,7 +598,10 @@ else {
 			</tr>
 		</table>
 		<?}?>
-	</td>
+		</td>
+		<td valign="top">
+			<a href="javascript:window.scrollTo(0, document.body.scrollHeight);"><img class="hover-border" title="nach unten" src="<? echo GRAPHICSPATH; ?>pfeil.gif" width="11" height="11" border="0"></a>
+		</td>
   </tr>
   <tr>
   	<td>&nbsp;</td>
@@ -606,7 +615,10 @@ else {
       <input type="button" name="dummy" value="<?php echo $strButtonSave; ?>" onclick="submitWithValue('GUI','go_plus','Ändern')">
       <?php
      } ?>&nbsp;<input type="button" name="dummy" value="<?php echo $strButtonSaveAsNewLayer; ?>" onclick="submitWithValue('GUI','go_plus','Als neuen Layer eintragen')">     
-	</td>
+		</td>
+		<td valign="top">
+			<a href="javascript:window.scrollTo(0, 0);"><img class="hover-border" title="nach oben" src="<? echo GRAPHICSPATH; ?>pfeil2.gif" width="11" height="11" border="0"></a>
+		</td>
   </tr>
   <tr>
   	<td>&nbsp;</td>

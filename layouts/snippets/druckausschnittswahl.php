@@ -116,6 +116,17 @@ function remove(){
 	}
 }
 
+function rotate_print_extent(angle){
+	svgdoc = document.SVG.getSVGDocument();
+	extent = svgdoc.getElementById('auswahl');
+	rotation = extent.getAttributeNS(null, "transform");
+	rotation = rotation.substring(7);
+	rot_parts = rotation.split(' ');
+	rot_parts[0] = angle;
+	rotation = rot_parts.join(' ');
+	extent.setAttribute('transform', 'rotate('+rotation);
+}
+
   
 //-->
 </script>
@@ -207,7 +218,8 @@ function remove(){
 
   <tr align="center"> 
     <td valign="top" align="left">
-    	<?php echo $strRotationAngle; ?><input type="text" size="3" name="angle" value="<?php echo $this->formvars['angle']; ?>">&nbsp;°
+    	<?php echo $strRotationAngle; ?><input type="text" size="3" name="angle" onchange="angle_slider.value=parseInt(angle.value);rotate_print_extent(this.value);" value="<? echo $this->formvars['angle']; ?>">&nbsp;°<br>
+			<input type="range" id="angle_slider" min="-90" max="90" style="width: 120px" value="<? echo $this->formvars['angle']; ?>" oninput="angle.value=parseInt(angle_slider.value);angle.onchange();" onchange="angle.value=parseInt(angle_slider.value);angle.onchange();">
     </td>
     <td align="left">
     	<? if($this->Document->activeframe[0]['refmapfile']){ 

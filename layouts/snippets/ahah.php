@@ -44,79 +44,81 @@ function ahahDone(url, targets, req, actions) {
 	    //Zerlegung des Resultes für den Fall, dass es mehrere Responsvalues sind
 	    responsevalues = response.split("~");
 			if(actions == undefined || actions == "")actions = new Array();
-	    for (i=0; i < targets.length; ++i) {
-				if(actions[i] == undefined)actions[i] = "";
-				switch (actions[i]) {
-					case "execute_function":
-						eval(responsevalues[i]);
-					break;
-					case "src":
-						targets[i].src = responsevalues[i];
-					break;
-					case "xlink:href":
-						//targets[i].setAttribute("xlink:href", responsevalues[i]);	
-						targets[i].setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", responsevalues[i]);
-					break;
-					case "points":
-						targets[i].setAttribute("points", responsevalues[i]);	
-					break;
-				  case "sethtml":
-						if(targets[i] != undefined){
-				    	targets[i].innerHTML = responsevalues[i];
-							if(targets[i].tagName == "SELECT" && targets[i].outerHTML != undefined)targets[i].outerHTML = targets[i].outerHTML;		// Bug-Workaround fuer den IE 8 beim setzen eines select-Objekts
-													
-							scripts = targets[i].getElementsByTagName("script");		// Alle script-Bloecke evaln damit diese Funktionen bekannt sind							
-							for(s = 0; s < scripts.length; s++){
-								if(scripts[s].hasAttribute("src")){
-									var script = document.createElement("script");
-									script.setAttribute("src", scripts[s].src);
-									document.head.appendChild(script);
-								}
-								else{
-									eval(scripts[s].innerHTML);
+	    for (i=0; i < targets.length; ++i){
+				if(targets[i] != undefined){
+					if(actions[i] == undefined)actions[i] = "";
+					switch (actions[i]) {
+						case "execute_function":
+							eval(responsevalues[i]);
+						break;
+						case "src":
+							targets[i].src = responsevalues[i];
+						break;
+						case "xlink:href":
+							//targets[i].setAttribute("xlink:href", responsevalues[i]);	
+							targets[i].setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", responsevalues[i]);
+						break;
+						case "points":
+							targets[i].setAttribute("points", responsevalues[i]);	
+						break;
+						case "sethtml":
+							if(targets[i] != undefined){
+								targets[i].innerHTML = responsevalues[i];
+								if(targets[i].tagName == "SELECT" && targets[i].outerHTML != undefined)targets[i].outerHTML = targets[i].outerHTML;		// Bug-Workaround fuer den IE 8 beim setzen eines select-Objekts
+														
+								scripts = targets[i].getElementsByTagName("script");		// Alle script-Bloecke evaln damit diese Funktionen bekannt sind							
+								for(s = 0; s < scripts.length; s++){
+									if(scripts[s].hasAttribute("src")){
+										var script = document.createElement("script");
+										script.setAttribute("src", scripts[s].src);
+										document.head.appendChild(script);
+									}
+									else{
+										eval(scripts[s].innerHTML);
+									}
 								}
 							}
-						}
-				  break;
-					case "setvalue":
-						targets[i].value = responsevalues[i];
-				  break;
-				  default :{
-						if(targets[i] != null){
-				    	if (targets[i].value == undefined) {
-				    		targets[i].innerHTML = responsevalues[i];
-				    	}
-				    	else{
-								if(targets[i].type == "checkbox"){
-									if(responsevalues[i] == "1"){
-										targets[i].checked = "true";
+						break;
+						case "setvalue":
+							targets[i].value = responsevalues[i];
+						break;
+						default :{
+							if(targets[i] != null){
+								if (targets[i].value == undefined) {
+									targets[i].innerHTML = responsevalues[i];
+								}
+								else{
+									if(targets[i].type == "checkbox"){
+										if(responsevalues[i] == "1"){
+											targets[i].checked = "true";
+										}
+										else{
+											targets[i].checked = "";
+										}
 									}
-									else{
-										targets[i].checked = "";
+									if(targets[i].type == "select-one") {
+										found = false;
+										for (j = 0; j < targets[i].length; ++j) {
+											if (targets[i].options[j].value == responsevalues[i]) {
+												targets[i].options[j].selected = true;
+												found = true;
+											}
+										}
+										if(found == false){		// wenns nicht dabei ist, wirds hinten rangehangen
+											targets[i].options[targets[i].length] = new Option(responsevalues[i], responsevalues[i]);
+											targets[i].options[targets[i].length-1].selected = true;
+										}
+									}
+									else {
+										if(targets[i].type == "select-multiple") {
+											targets[i].innerHTML = responsevalues[i];
+										}
+										else{
+											targets[i].value = responsevalues[i];
+										}
 									}
 								}
-				    		if(targets[i].type == "select-one") {
-									found = false;
-				    			for (j = 0; j < targets[i].length; ++j) {
-				    				if (targets[i].options[j].value == responsevalues[i]) {
-				    					targets[i].options[j].selected = true;
-											found = true;
-				    				}
-				    			}
-									if(found == false){		// wenns nicht dabei ist, wirds hinten rangehangen
-										targets[i].options[targets[i].length] = new Option(responsevalues[i], responsevalues[i]);
-										targets[i].options[targets[i].length-1].selected = true;
-									}
-				    		}
-				    	  else {
-									if(targets[i].type == "select-multiple") {
-										targets[i].innerHTML = responsevalues[i];
-									}
-									else{
-				      	  	targets[i].value = responsevalues[i];
-									}
-				    	  }
-				    	}
+							}
 						}
 					}
 				}

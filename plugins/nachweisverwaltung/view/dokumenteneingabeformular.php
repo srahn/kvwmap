@@ -2,8 +2,12 @@
 <script type="text/javascript">
 <!--
 
-function save(){
+function save(){	
 	document.GUI.result2.value = '';
+	if(document.getElementsByName('art')[3].checked==true && document.GUI.andere_art.value == ''){
+		alert('Keine Dokumentart ausgewählt.');
+		return;
+	}
 	if(document.GUI.newpathwkt.value == ''){
 		if(document.GUI.newpath.value == ''){
 			alert('Geben Sie ein Polygon an.');
@@ -308,6 +312,7 @@ $legendheight = $this->map->height + 20;
 						<input type="hidden" name="flur_thematisch" value="<? echo $this->formvars['flur_thematisch']; ?>">
 						<input type="hidden" name="such_andere_art" value="<? echo $this->formvars['such_andere_art']; ?>">						
 						<INPUT TYPE="hidden" NAME="reset_layers" VALUE="">
+						<input type="hidden" name="layer_options_open" value="">
 					</td>
 				</tr>
 			</table>

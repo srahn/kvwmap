@@ -1880,10 +1880,11 @@ class flurstueck {
 				$person_gml_ids[] = $Eigentuemerliste[$e]->gml_id;
 			}
 		}
-		$versionen= $this->database->getVersionen('ax_flurstueck', array($this->gml_id));
-		$versionen= array_merge($versionen, $this->database->getVersionen('ax_buchungsstelle', $buchungsstelle_gml_ids));
-		$versionen= array_merge($versionen, $this->database->getVersionen('ax_namensnummer', $namensnummer_gml_ids));
-		$versionen= array_merge($versionen, $this->database->getVersionen('ax_person', $person_gml_ids));
+		$versionen= $this->database->getVersionen('ax_flurstueck', array($this->gml_id), NULL);
+		$flst_beginnt = $versionen[0]['beginnt'];
+		$versionen= array_merge($versionen, $this->database->getVersionen('ax_buchungsstelle', $buchungsstelle_gml_ids, $flst_beginnt));
+		$versionen= array_merge($versionen, $this->database->getVersionen('ax_namensnummer', $namensnummer_gml_ids, $flst_beginnt));
+		$versionen= array_merge($versionen, $this->database->getVersionen('ax_person', $person_gml_ids, $flst_beginnt));
 		# sortieren
 		usort($versionen, function($a, $b){return DateTime::createFromFormat('d.m.Y H:i:s', $a['beginnt']) > DateTime::createFromFormat('d.m.Y H:i:s', $b['beginnt']);});
 		# gleiche beginnts rausnehmen, Anlässe zusammenfassen

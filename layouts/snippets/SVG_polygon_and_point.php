@@ -73,6 +73,7 @@ $svg .='
 '.$pointelement.'
   </defs>';
 $svg .= $canvaswithall;
+$svg .= '<g id="buttons" cursor="pointer" transform="scale(1.1)">';
 $svg .= $navbuttons;
 $svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate(0 26)">';
 $svg .= polygonbuttons($strUndo, $strDeletePolygon, $strDrawPolygon, $strCutByPolygon);
@@ -80,6 +81,7 @@ $svg .= flurstquerybuttons();
 $svg .= vertex_edit_buttons($strCornerPoint);
 $svg .= pointbuttons($strSetPosition);
 $svg .= measure_buttons($strRuler);
+$svg .= '</g>';
 $svg .= '</g>';
 $svg .= $SVG_end;
 

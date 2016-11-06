@@ -1,4 +1,6 @@
 ﻿<?php
+<<<<<<< HEAD
+	$strTitle="Layer Editor";
   $strAsteriskRequired="Fields marked with an asterisk * are required";
 	$strClassItem="Classitem";
   $strLayerID="Layer ID*";
@@ -49,35 +51,26 @@
   $strminscale="minscale";
   $strmaxscale="maxscale";
 	$strsymbolscale="symbolscale";
-  $stroffsite="offsite";
-  $strOWSParameter="OWS-Parameters";
-  $strDefaultValues="Default-Values for Task-Asignment";
-  $strWFS_geom="WFS-Geometry-Attribute";
-  $strQueryMap="QueryMap";
-  $strProcessing="Processing";
-  $strTasks="Tasks";
-  $strSchema="Schema";
-  $strWMSAuthUsername="wms_auth_username";
-  $strWMSAuthPassword="wms_auth_password";
-  $strDocument_path="Document Path";
-  $strDescribtion="Short Description";
-  $strDataOwner="Data-Owner";
-  $strMetaLink="Metadata-Link";
-  $strMaintable="Main Table";
-  $strPrivileges="Set Privileges";
-  $strAlias="Alias";
+	$stroffsite="offsite";
+	$strOWSParameter="OWS-Parameters";
+	$strDefaultValues="Default-Values for Task-Asignment";
+	$strWFS_geom="WFS-Geometry-Attribute";
+	$strQueryMap="QueryMap";
+	$strProcessing="Processing";
+	$strTasks="Tasks";
+	$strSchema="Schema";
+	$strWMSAuthUsername="wms_auth_username";
+	$strWMSAuthPassword="wms_auth_password";
+	$strDocument_path="Document Path";
+	$strDescribtion="Short Description";
+	$strDataOwner="Data-Owner";
+	$strMetaLink="Metadata-Link";
+	$strMaintable="Main Table";
+	$strPrivileges="Set Privileges";
+	$strAlias="Alias";
 	$strStatus="Status";
 	$strPostlabelcache="Postlabelcache";
 	$strrequires="Requires";
 	$strClusterMaxdistance="Cluster:Maxdistance";
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+	$strTriggerFunction="Trigger function";
 ?>  

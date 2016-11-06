@@ -1,20 +1,13 @@
 <?php
-	define('PG_DB_HOST', '85.214.126.13');
-	define('PG_DB_PORT', '5432');
-	define('PG_DATABASE', 'kvwmapsp');
-	define('PG_USER_NAME', 'pgadmin');
-	define('PG_PASSWORD', 'PaGeMin2');
-
-	define('PG_CONNECTION_STRING',
-	  ' host='     . PG_DB_HOST .
-	  ' port='     . PG_DB_PORT .
-	  ' user='     . PG_USER_NAME .
-	  ' password=' . PG_PASSWORD .
-	  ' dbname='   . PG_DATABASE);
-	define('PG_CONNECTION', pg_connect(PG_CONNECTION_STRING));
-
-	define('CONTENT_SCHEME', 'gml_classes');
+  // database schemes
+	define('CONTENT_SCHEME', 'xplan_gml');
 	define('STRUCTURE_SCHEME', 'xplan_uml');
+
+	// XML-namespace
+	define('XPLAN_NS_PREFIX', 'xplan');
+	define('XPLAN_NS_URI', "http://www.xplanung.de/xplangml/4/1");
+// 	define('XPLAN_NS_URI', "http://xplan-raumordnung.de/model/xplangml/raumordnungsmodell");
+	define('XPLAN_NS_SCHEMA_LOCATION', "http://xplan-raumordnung.de/model/xplangml/raumordnungsmodell/XPlanung-Operationen.xsd");
 
 	$packages[] = 'Basisklassen';
 	#  $packages[] = 'Bebauungsplan';
@@ -56,7 +49,7 @@
 	$packages[] = 'RP_Infrastruktur';
 	##$packages[] = 'RP_Raster';
 	$packages[] = 'RP_Siedlungsstruktur';
-	##$packages[] = 'RP_Sonstiges';
+	$packages[] = 'RP_Sonstiges';
 	#  $packages[] = 'SO_Basisobjekte';
 	#  $packages[] = 'SO_NachrichtlicheUebernahmen';
 	#  $packages[] = 'SonstigePlanwerke';

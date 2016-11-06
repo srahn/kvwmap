@@ -8,12 +8,12 @@
     # aktuellen Kartenausschnitt laden + zeichnen!
 		$saved_scale = $GUI->reduce_mapwidth(100);
     $GUI->loadMap('DataBase');
-		if($_SERVER['REQUEST_METHOD'] == 'GET')$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
+		if($saved_scale != NULL)$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
     if ($GUI->formvars['CMD']!='') {
       $GUI->navMap($GUI->formvars['CMD']);
       $GUI->user->rolle->saveDrawmode($GUI->formvars['always_draw']);
     }
-    $GUI->queryable_postgis_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id);
+    $GUI->queryable_postgis_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true);
 
   	if(!$GUI->formvars['layer_id']){
       $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
@@ -64,7 +64,7 @@
     }
     else{
       $umring = $GUI->formvars['newpathwkt'];
-      $ret = $anliegerbeitraege->eintragenNeueStrasse($umring);
+      $ret = $anliegerbeitraege->eintragenNeueStrasse($umring, $GUI->Stelle->id);
       if ($ret[0]) { # fehler beim eintrag
           $GUI->Meldung=$ret[1];
       }
@@ -90,7 +90,7 @@
     }
     else{
       $umring = $GUI->formvars['newpathwkt'];
-      $ret = $anliegerbeitraege->eintragenNeueBereiche($umring);
+      $ret = $anliegerbeitraege->eintragenNeueBereiche($umring, $GUI->Stelle->id);
       if ($ret[0]) { # fehler beim eintrag
           $GUI->Meldung=$ret[1];
       }

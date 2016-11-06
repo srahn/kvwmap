@@ -33,7 +33,7 @@ class data_import_export {
   function data_import_export() {
     global $debug;
     $this->debug=$debug;
-		$this->delimiters = array(';', ' ', ',', "\t");		# erlaubte Trennzeichen
+		$this->delimiters = array("\t", ';', ' ', ',');		# erlaubte Trennzeichen
   }
 
 ################# Import #################
@@ -50,31 +50,35 @@ class data_import_export {
 				$custom_tables = $this->import_custom_pointlist($formvars, $pgdatabase);
 			}break;
 			case 'GPX' : {
-				$custom_tables = $this->import_custom_gpx($formvars, $pgdatabase);
 				$formvars['epsg'] = 4326;
+				$custom_tables = $this->import_custom_gpx($formvars, $pgdatabase);				
 			}break;
 			case 'OVL' : {
-				$custom_tables = $this->import_custom_ovl($formvars, $pgdatabase);
 				$formvars['epsg'] = 4326;
+				$custom_tables = $this->import_custom_ovl($formvars, $pgdatabase);
 			}break;
 			case 'DXF' : {
 				$custom_tables = $this->import_custom_dxf($formvars, $pgdatabase);
 			}break;
+			case 'GeoJSON' : {
+				$custom_tables = $this->import_custom_geojson($pgdatabase);
+				$formvars['epsg'] = $custom_tables[0]['epsg'];
+			}break;
 		}
 		foreach($custom_tables as $custom_table){				# ------ Rollenlayer erzeugen ------- #
 			$layer_id = $this->create_rollenlayer(
-        $database,
-        $pgdatabase,
-        $stelle,
-        $user,
-        $file." (".date('d.m. H:i',time()).")".str_repeat(' ', $custom_table['datatype']),
-        CUSTOM_SHAPE_SCHEMA,
-        $custom_table,
-        $formvars['epsg']
-      );
+				$database,
+				$pgdatabase,
+				$stelle,
+				$user,
+				$file." (".date('d.m. H:i',time()).")".str_repeat(' ', $custom_table['datatype']),
+				CUSTOM_SHAPE_SCHEMA,
+				$custom_table,
+				$formvars['epsg']
+			);
 		}
-    return -$layer_id;
-  }
+		return -$layer_id;
+	}
 
 	function create_rollenlayer($database, $pgdatabase, $stelle, $user, $layername, $schema, $custom_table, $epsg) {
 		$result_colors = read_colors($database);
@@ -95,27 +99,24 @@ class data_import_export {
 		$this->formvars['Typ'] = 'import';
 		$this->formvars['Datentyp'] = $custom_table['datatype'];
 		$select = 'oid, the_geom';
-		if($custom_table['labelitem'] != '') $select .= ', ' . $custom_table['labelitem'];
-		$this->formvars['Data'] = 'the_geom from (SELECT ' . $select . ' FROM ' . $schema . '.' . $custom_table['tablename'] . ' WHERE 1=1 ' . $custom_table['where'] . ') as foo using unique oid using srid=' . $epsg;
-		$this->formvars['query'] = 'SELECT * FROM ' . $custom_table['tablename'] . ' WHERE 1=1' . $custom_table['where'];
-		$connectionstring ='user=' . $pgdatabase->user;
-		if($pgdatabase->passwd != '')
-      $connectionstring .=' password=' . $pgdatabase->passwd;
-		$connectionstring .= ' dbname=' . $pgdatabase->dbName;
-    if($pgdatabase->host != 'localhost')
-      $connectionstring .= ' host=' . $pgdatabase->host;
+		if($custom_table['labelitem'] != '')$select .= ', '.$custom_table['labelitem'];
+		$this->formvars['Data'] = 'the_geom from (SELECT '.$select.' FROM '.CUSTOM_SHAPE_SCHEMA.'.'.$custom_table['tablename'].' WHERE 1=1 '.$custom_table['where'].')as foo using unique oid using srid='.$epsg;
+		$this->formvars['query'] = 'SELECT * FROM '.$custom_table['tablename'].' WHERE 1=1'.$custom_table['where'];
+		$connectionstring ='user='.$pgdatabase->user;
+		if($pgdatabase->passwd != '')$connectionstring.=' password='.$pgdatabase->passwd;
+		$connectionstring.=' dbname='.$pgdatabase->dbName;
+    if($pgdatabase->host != 'localhost') $connectionstring .= ' host=' . $pgdatabase->host;
 		$this->formvars['connection'] = $connectionstring;
 		$this->formvars['connectiontype'] = 6;
 		$this->formvars['epsg_code'] = $epsg;
 		$this->formvars['transparency'] = 65;
-		if($custom_table['labelitem'] != '')
-			$this->formvars['labelitem'] = $custom_table['labelitem'];
+		if($custom_table['labelitem'] != '')$this->formvars['labelitem'] = $custom_table['labelitem'];
 		$layer_id = $dbmap->newRollenLayer($this->formvars);
 		$layerdb = $dbmap->getlayerdatabase(-$layer_id, $this->Stelle->pgdbhost);
 		$layerdb->setClientEncoding();
 		$path = $this->formvars['query'];
 		$attributes = $dbmap->load_attributes($layerdb, $path);
-		$dbmap->save_postgis_attributes(-$layer_id, $attributes, '');
+		$dbmap->save_postgis_attributes(-$layer_id, $attributes, '', '');
 		$attrib['name'] = ' ';
 		$attrib['layer_id'] = -$layer_id;
 		$attrib['expression'] = '';
@@ -149,7 +150,7 @@ class data_import_export {
 		$style['backgroundcolor'] = NULL;
 		$style['minsize'] = NULL;
 		$style['angle'] = 360;
-		$style_id = $dbmap->new_Style($style);
+		$style_id = $dbmap->new_Style($style);	
 		$dbmap->addStyle2Class($class_id, $style_id, 0);          # den Style der Klasse zuordnen
 		if($custom_table['labelitem'] != ''){
 			$label['font'] = 'arial';
@@ -159,7 +160,7 @@ class data_import_export {
 			$label['minsize'] = 6;
 			$label['maxsize'] = 10;
 			$label['position'] = 9;
-			$new_label_id = $dbmap->new_Label($label);
+			$new_label_id = $dbmap->new_Label($label);				
 			$dbmap->addLabel2Class($class_id, $new_label_id, 0);
 		}
     return $layer_id;
@@ -170,21 +171,31 @@ class data_import_export {
 		if($_files['file1']['name']){
 			$this->pointfile = UPLOADPATH.$_files['file1']['name'];
 			if(move_uploaded_file($_files['file1']['tmp_name'], $this->pointfile)){
-				$rows = file($this->pointfile);
+				$rows = file($this->pointfile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+				$delimiters = implode($this->delimiters);
 				while(count($this->delimiters) > 0 AND count($this->columns) < 2){
 					$this->delimiter = array_shift($this->delimiters);
-					$this->columns = explode($this->delimiter, utf8_encode($rows[0]));
+					$i = 0;
+					while(trim($rows[$i], "$delimiters\n\r") == ''){	// Leerzeilen überspringen bis zur ersten Zeile mit Inhalt
+						$i++;
+					}					
+					$this->columns = explode($this->delimiter, utf8_encode($rows[$i]));
+					echo '<br>';
 				}
 			}
 		}
 	}
 	
 	function import_custom_pointlist($formvars, $pgdatabase){
-		$rows = file($formvars['file1']);
+		$rows = file($formvars['file1'], FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 		$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($formvars['file1']), 0, 15))).rand(1,1000000);
-		$columns = explode($formvars['delimiter'], $rows[0]);
+		$i = 0;
+		while(trim($rows[$i], $formvars['delimiter']."\n\r") == ''){	// Leerzeilen überspringen bis zur ersten Zeile mit Inhalt
+			$i++;
+		}
+		$columns = explode($formvars['delimiter'], $rows[$i]);
 		for($i = 0; $i < count($columns); $i++){
-			if($formvars['column'.$i] == 'x' AND !is_numeric($columns[$i]))$headlines = true;		// die erste Zeile enthält die Spaltenüberschriften
+			if($formvars['column'.$i] == 'x' AND !is_numeric(str_replace(',', '.', $columns[$i])))$headlines = true;		// die erste Zeile enthält die Spaltenüberschriften
 		}
 		$sql = "CREATE TABLE ".CUSTOM_SHAPE_SCHEMA.".".$tablename." (";
 		$komma = false;
@@ -193,6 +204,7 @@ class data_import_export {
 				if($komma)$sql.= ", ";
 				$j = $i+1;
 				if($headlines){
+					if(is_numeric(substr($columns[$i], 0, 1)))$columns[$i] = '_'.$columns[$i];
 					$column = strtolower(umlaute_umwandeln(utf8_encode($columns[$i])));
 					$sql.= $column." varchar";
 					if($formvars['column'.$i] == 'label')$labelitem = $column;
@@ -209,7 +221,7 @@ class data_import_export {
 		$sql.= "CREATE INDEX ".$tablename."_gist_idx ON ".CUSTOM_SHAPE_SCHEMA.".".$tablename." USING gist (the_geom );";
 		$i = 0;
 		foreach($rows as $row){
-			if($headlines AND $i == 0){$i++;continue;}				// Überschriftenzeile auslassen
+			if($headlines AND $i == 0 OR trim($row, $formvars['delimiter']."\n\r") == ''){$i++;continue;}				// Überschriftenzeile und Leerzeilen auslassen
 			$columns = explode($formvars['delimiter'], $row);
 			$sql.= "INSERT INTO ".CUSTOM_SHAPE_SCHEMA.".".$tablename." VALUES(";
 			$komma = false;
@@ -223,7 +235,11 @@ class data_import_export {
 					$$formvars['column'.$i] = $columns[$i];			# Hier werden $x und $y gesetzt (nicht das doppelte $ wegnehmen!)
 				}
 			}
-			$sql.= ", st_geomfromtext('POINT(".$x." ".$y.")', ".$formvars['epsg']."));";
+			$x = str_replace(',', '.', $x);
+			$y = str_replace(',', '.', $y);
+			if($komma)$sql.= ", ";
+			if(!is_numeric($x) OR !is_numeric($y))$sql.= "NULL);";
+			else $sql.= "st_geomfromtext('POINT(".$x." ".$y.")', ".$formvars['epsg']."));";
 			$i++;
 		}
 		#echo $sql;
@@ -354,7 +370,7 @@ class data_import_export {
 	    ";
 	    $ret = $pgdatabase->execSQL($sql,4, 0);
 	    if(!$ret[0]){
-	      $result = pg_fetch_array($ret[1]);
+	      $result = pg_fetch_assoc($ret[1]);
 	      if(strpos($result['geometrytype'], 'POINT') !== false){
 	      	$datatype = 0;
 	      }elseif(strpos($result['geometrytype'], 'LINESTRING') !== false){
@@ -441,124 +457,141 @@ class data_import_export {
 		}
 	}
 	
+	function import_custom_geojson($pgdatabase){
+		return $this->geojson_import($pgdatabase, CUSTOM_SHAPE_SCHEMA, NULL);
+	}
+	
+	function geojson_import($pgdatabase, $schema, $tablename){
+		$_files = $_FILES;	
+		if($_files['file1']['name']){
+      $importfile = UPLOADPATH.$_files['file1']['name'];
+      if(move_uploaded_file($_files['file1']['tmp_name'],$importfile)){
+				if(file_exists($importfile)){
+					$json = json_decode(file_get_contents($importfile));
+					if($json->crs->properties->name != '')$epsg = array_pop(explode('EPSG::', $json->crs->properties->name));
+					else $epsg = 4326;
+					if($tablename == NULL)$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($importfile), 0, 15))).rand(1,1000000);
+					$this->ogr2ogr_import($schema, $tablename, $epsg, $importfile, $pgdatabase, NULL, NULL, NULL, 'UTF8');
+					$sql = '
+						ALTER TABLE '.$schema.'.'.$tablename.' SET WITH OIDS; 
+						SELECT geometrytype(the_geom) AS geometrytype FROM '.$schema.'.'.$tablename.' LIMIT 1;';
+					$ret = $pgdatabase->execSQL($sql,4, 0);
+					if(!$ret[0]){
+						$result = pg_fetch_assoc($ret[1]);
+						if(strpos($result['geometrytype'], 'POINT') !== false){
+							$datatype = 0;
+						}elseif(strpos($result['geometrytype'], 'LINESTRING') !== false){
+							$datatype = 1;
+						}elseif(strpos($result['geometrytype'], 'POLYGON') !== false){
+							$datatype = 2;
+						}
+					}
+					$custom_tables[0]['datatype'] = $datatype;
+					$custom_tables[0]['tablename'] = $tablename;
+					$custom_tables[0]['epsg'] = $epsg;
+		      if(!$ret[0]){
+						return $custom_tables;
+					}
+				}
+			}
+		}
+	}	
+	
   function shp_import_speichern($formvars, $database){
    	$this->formvars = $formvars;
     if(file_exists(UPLOADPATH.$this->formvars['dbffile'])){
+			$importfile = basename($this->formvars['dbffile'], '.dbf');
 			include_(CLASSPATH.'dbf.php');
       $this->dbf = new dbf();
       $this->dbf->header = $this->dbf->get_dbf_header(UPLOADPATH.$this->formvars['dbffile']);
       $this->dbf->header = $this->dbf->get_sql_types($this->dbf->header);
+			$sql = 'SELECT ';
       for($i = 0; $i < count($this->dbf->header); $i++){
-        if($i > 0){
-          $alterstring .= ';';
-        }
         if($this->formvars['check_'.$this->dbf->header[$i][0]]){
-          $alterstring .= $this->formvars['dbf_name_'.$this->dbf->header[$i][0]].' as '.strtolower($this->formvars['sql_name_'.$this->dbf->header[$i][0]]).' '.$this->formvars['sql_type_'.$this->dbf->header[$i][0]];
-          if($this->formvars['primary_key'] == $this->dbf->header[$i][0]){
-            $alterstring .= ' PRIMARY KEY';
-          }
-        }
-        else{
-          $alterstring .= $this->formvars['dbf_name_'.$this->dbf->header[$i][0]].' as NULL';
+					if($this->formvars['primary_key'] != $this->formvars['sql_name_'.$this->dbf->header[$i][0]]){
+						if($i > 0)$sql .= ', ';
+						$sql .= $this->formvars['dbf_name_'.$this->dbf->header[$i][0]].' as '.strtolower($this->formvars['sql_name_'.$this->dbf->header[$i][0]]);
+					}
         }
       }
-      if($this->formvars['table_option'] == '-u') {
-        $command = POSTGRESBINPATH.'shp2pgsql -g the_geom -A "'.$alterstring.'" -a ';
-      }
-      else {
-        $command = POSTGRESBINPATH.'shp2pgsql -g the_geom -A "'.$alterstring.'" '.$this->formvars['table_option'].' ';
-      }
-      if($this->formvars['srid'] != ''){
-        $command .= '-s '.$this->formvars['srid'].' ';
-      }
-      if($this->formvars['gist'] != ''){
-        $command .= '-I ';
-      }
-      if($this->formvars['oids'] != ''){
-        $command .= '-o ';
-      }
-      if($this->formvars['primary_key'] == 'gid'){
-        $command .= '-P ';
-      }
-      $command.= UPLOADPATH.$this->formvars['dbffile'].' '.$this->formvars['table_name'].' > '.UPLOADPATH.$this->formvars['table_name'].'.sql'; 
-      exec($command);
-      #echo $command;
-      
-      # erzeugte SQL-Datei anpassen
-      if($this->formvars['table_option'] == '-u') {
-        $oldsqld = UPLOADPATH.$this->formvars['table_name'].'.sql';
-        # Shared lock auf die Quelldatei
-        $oldsql = fopen($oldsqld, "r");
-        flock($oldsql, 1) or die("Kann die Quelldatei $oldsqld nicht locken.");
-        # Exclusive lock auf die Zieldatei     
-        $newsql = fopen($oldsqld.".new", "w");
-        flock($newsql, 2) or die("Kann die Zieldatei $newsql nicht locken.");
-				# Zeilenweises einlesen der SQL-Datei $oldsqld in das array *sqlold zum weiteren Umformen
-        $sqlold = file($oldsqld);
-				# Anzahl der Zeilen bestimmen
-				$anzzei = count($sqlold);
-				# Schleife für jede Zeile durchlaufen
-				for ($i = 0; $i < $anzzei; $i++) {
-				# Neuer SQL-Befehl $sqlnew wird gelesen
-					$sqlnew = $sqlold[$i];
-				# Wenn der SQL-Befehl mit INSERT beginnt, dann weiterverarbeiten
-          if (substr($sqlnew,0,6) == "INSERT") {
-  			# alte Befehlszeile wird bei jedem Leerzeichen gesplittet  
-            $old = explode(" ",$sqlnew);
-  			# Feldbezeichner werden herausgelesen, sind durch Kommata getrennt
-            $feld = explode(",",$old[3]);
-  			# da Feldbezeichner in der INSERT-Anweisung eingeklammert sind werden die oeffnende und schliessende Klammer entfernt
-            for ($j=0; $j < count($feld); $j++) {
-              $feld[$j] = trim($feld[$j],"()");
-            }
-  			# heraussuchen, an welcher Stelle der primary_key steht
-            $primkey = array_search($this->formvars['primary_key'],$feld);
-  			# Werte extrahieren, sind duch Kommata getrennt
-  			# Achtung, kommen in den Werten Kommata vor, so wird hier ein fehlerhaftes Statement erzeugt, da die Anzahl der Felder nicht mehr mit der Anzahl der Werte uebereinstimmt
-            $wert = explode(",",$old[5]);
-  			# Bereinigen der Werte
-            for ($j=0; $j < count($wert); $j++) {
-              $wert[$j] = trim($wert[$j]);
-              $wert[$j] = trim($wert[$j],"(;)");
-            }
-  			# SQL-Anweisung neu schreiben
-            $sqlnew = "UPDATE ".$this->formvars['table_name']." SET ";
-  			# den Feldbezeichnern die Werte zuweisen
-            for ($j=0; $j < count($feld); $j++) {
-              $sqlnew .= $feld[$j]." = ". $wert[$j];
-    		# Wertzuweisungen mit Komma voneinander trennen
-              if ($j < count($feld)-1) {
-                $sqlnew .= ", ";
-              }
-            }
-  			# Bindungung hinzufuegen 
-            $sqlnew .= " WHERE ".$feld[$primkey]." = ".$wert[$primkey].";";
-          }
-  			# SQL-Anweisung in die neue Datei $newsql schreiben  
-          fwrite($newsql,$sqlnew);
-        }
-        fclose($oldsql);
-        unlink($oldsqld);
-        rename($oldsqld.".new", $oldsqld);
-        fclose($newsql);
-      }
-      
-			$command = POSTGRESBINPATH.'psql -f '.UPLOADPATH.$this->formvars['table_name'].'.sql '.$database->dbName.' -U '.$database->user;
-			if($database->passwd != '')$command = 'export PGPASSWORD='.$database->passwd.'; '.$command;
-      exec($command);
-      #echo $command;
+			$sql .= ' FROM '.$importfile;
+			$options = $this->formvars['table_option'];
+			$options.= ' -nlt PROMOTE_TO_MULTI -lco FID=gid';
+			$ret = $this->ogr2ogr_import($this->formvars['schema_name'], $this->formvars['table_name'], $formvars['epsg'], UPLOADPATH.$importfile.'.shp', $database, NULL, $sql, $options);
 			
-      $sql = 'SELECT count(*) FROM '.$this->formvars['table_name'];
-      $ret = $database->execSQL($sql,4, 0);
-      if (!$ret[0]) {
-        $count = pg_fetch_array($ret[1]);
-        $alert = 'Import erfolgreich.';
-        if($this->formvars['table_option'] == '-c'){
-        	$alert.= ' Die Tabelle '.$this->formvars['table_name'].' wurde erzeugt.';
-        }
-        $alert .= ' Die Tabelle enthält jetzt '.$count[0].' Datensätze.';
-        showAlert($alert);
-      }
+      
+      // # erzeugte SQL-Datei anpassen
+      // if($this->formvars['table_option'] == '-u') {
+        // $oldsqld = UPLOADPATH.$this->formvars['table_name'].'.sql';
+        // # Shared lock auf die Quelldatei
+        // $oldsql = fopen($oldsqld, "r");
+        // flock($oldsql, 1) or die("Kann die Quelldatei $oldsqld nicht locken.");
+        // # Exclusive lock auf die Zieldatei     
+        // $newsql = fopen($oldsqld.".new", "w");
+        // flock($newsql, 2) or die("Kann die Zieldatei $newsql nicht locken.");
+				// # Zeilenweises einlesen der SQL-Datei $oldsqld in das array *sqlold zum weiteren Umformen
+        // $sqlold = file($oldsqld);
+				// # Anzahl der Zeilen bestimmen
+				// $anzzei = count($sqlold);
+				// # Schleife für jede Zeile durchlaufen
+				// for ($i = 0; $i < $anzzei; $i++) {
+				// # Neuer SQL-Befehl $sqlnew wird gelesen
+					// $sqlnew = $sqlold[$i];
+				// # Wenn der SQL-Befehl mit INSERT beginnt, dann weiterverarbeiten
+          // if (substr($sqlnew,0,6) == "INSERT") {
+  			// # alte Befehlszeile wird bei jedem Leerzeichen gesplittet  
+            // $old = explode(" ",$sqlnew);
+  			// # Feldbezeichner werden herausgelesen, sind durch Kommata getrennt
+            // $feld = explode(",",$old[3]);
+  			// # da Feldbezeichner in der INSERT-Anweisung eingeklammert sind werden die oeffnende und schliessende Klammer entfernt
+            // for ($j=0; $j < count($feld); $j++) {
+              // $feld[$j] = trim($feld[$j],"()");
+            // }
+  			// # heraussuchen, an welcher Stelle der primary_key steht
+            // $primkey = array_search($this->formvars['primary_key'],$feld);
+  			// # Werte extrahieren, sind duch Kommata getrennt
+  			// # Achtung, kommen in den Werten Kommata vor, so wird hier ein fehlerhaftes Statement erzeugt, da die Anzahl der Felder nicht mehr mit der Anzahl der Werte uebereinstimmt
+            // $wert = explode(",",$old[5]);
+  			// # Bereinigen der Werte
+            // for ($j=0; $j < count($wert); $j++) {
+              // $wert[$j] = trim($wert[$j]);
+              // $wert[$j] = trim($wert[$j],"(;)");
+            // }
+  			// # SQL-Anweisung neu schreiben
+            // $sqlnew = "UPDATE ".$this->formvars['table_name']." SET ";
+  			// # den Feldbezeichnern die Werte zuweisen
+            // for ($j=0; $j < count($feld); $j++) {
+              // $sqlnew .= $feld[$j]." = ". $wert[$j];
+    		// # Wertzuweisungen mit Komma voneinander trennen
+              // if ($j < count($feld)-1) {
+                // $sqlnew .= ", ";
+              // }
+            // }
+  			// # Bindungung hinzufuegen 
+            // $sqlnew .= " WHERE ".$feld[$primkey]." = ".$wert[$primkey].";";
+          // }
+  			// # SQL-Anweisung in die neue Datei $newsql schreiben  
+          // fwrite($newsql,$sqlnew);
+        // }
+        // fclose($oldsql);
+        // unlink($oldsqld);
+        // rename($oldsqld.".new", $oldsqld);
+        // fclose($newsql);
+      // }
+			
+			if($ret == 0){
+				$sql = 'ALTER TABLE '.$this->formvars['schema_name'].'.'.$this->formvars['table_name'].' SET WITH OIDS;SELECT count(*) FROM '.$this->formvars['schema_name'].'.'.$this->formvars['table_name'];
+				$ret = $database->execSQL($sql,4, 0);
+				if (!$ret[0]) {
+					$count = pg_fetch_row($ret[1]);
+					$alert = 'Import erfolgreich.';
+					if($this->formvars['table_option'] == ''){
+						$alert.= ' Die Tabelle '.$this->formvars['schema_name'].'.'.$this->formvars['table_name'].' wurde erzeugt.';
+					}
+					$alert .= ' Die Tabelle enthält jetzt '.$count[0].' Datensätze.';
+					showAlert($alert);
+				}
+			}
       else{
         showAlert('Import fehlgeschlagen.');
       }
@@ -592,53 +625,7 @@ class data_import_export {
       }
     }
   }
-  
-  function simple_shp_import_speichern($formvars, $database){
-  	$this->formvars = $formvars;
-    if(file_exists(UPLOADPATH.$this->formvars['dbffile'])){      
-      $command = POSTGRESBINPATH.'shp2pgsql -g the_geom -W LATIN1 '.$this->formvars['table_option'].' ';
-      if($this->formvars['srid'] != ''){
-        $command .= '-s '.$this->formvars['srid'].' ';
-      }
-      if($this->formvars['gist'] != ''){
-        $command .= '-I ';
-      }
-      $command.= UPLOADPATH.$this->formvars['dbffile'].' '.$this->formvars['table_name'].' > '.UPLOADPATH.$this->formvars['table_name'].'.sql'; 
-      exec($command);
-      #echo $command;
-			
-			$command = POSTGRESBINPATH.'psql -h '.$database->host.' -f '.UPLOADPATH.$this->formvars['table_name'].'.sql '.$database->dbName.' '.$database->user;
-			if($database->passwd != '')$command = 'export PGPASSWORD='.$database->passwd.'; '.$command;
-      exec($command);
-      #echo $command;
-      $sql = 'SELECT count(*) FROM '.$this->formvars['table_name'];
-      $ret = $database->execSQL($sql,4, 0);
-      if (!$ret[0]) {
-        $count = pg_fetch_array($ret[1]);
-        $alert = 'Import erfolgreich.';
-        if($this->formvars['table_option'] == '-c'){
-        	$alert.= ' Die Tabelle '.$this->formvars['table_name'].' wurde erzeugt.';
-        	$sql = 'INSERT INTO shp_import_tables (tabellenname) VALUES (\''.$this->formvars['table_name'].'\')';
-        	$ret = $database->execSQL($sql,4, 1);
-        }
-        $alert .= ' Die Tabelle enthält jetzt '.$count[0].' Datensätze.';
-        showAlert($alert);
-      }
-      else{
-        showAlert('Import fehlgeschlagen.');
-      }
-    }
-  }
-  
-  function simple_shp_import($formvars, $database){
-  	$this->shp_import($formvars);
-  	$sql = 'SELECT DISTINCT * FROM shp_import_tables';
-  	$ret = $database->execSQL($sql,4, 0);
-    while($rs = pg_fetch_array($ret[1])){
-    	$this->tables[] = $rs;
-    }
-  }
-	
+  	
 	function get_ukotable_srid($database){
 		$sql = "select srid from geometry_columns where f_table_name = 'uko_polygon'";
 		$ret = $database->execSQL($sql,4, 1);
@@ -707,14 +694,19 @@ class data_import_export {
 		exec($command.'"');
 	}
 	
-	function ogr2ogr_import($schema, $tablename, $epsg, $importfile, $database, $options){
-		$command = 'export PGCLIENTENCODING=LATIN1;'.OGR_BINPATH.'ogr2ogr -f PostgreSQL -lco GEOMETRY_NAME=the_geom -nln '.$tablename.' -a_srs EPSG:'.$epsg.' PG:"dbname='.$database->dbName.' user='.$database->user.' active_schema='.$schema;
+	function ogr2ogr_import($schema, $tablename, $epsg, $importfile, $database, $layer, $sql = NULL, $options = NULL, $encoding = 'LATIN1'){
+		$command = 'export PGCLIENTENCODING='.$encoding.';'.OGR_BINPATH.'ogr2ogr ';
+		if($options != NULL)$command.= $options;
+		$command.= ' -f PostgreSQL -lco GEOMETRY_NAME=the_geom -nln '.$tablename.' -a_srs EPSG:'.$epsg;
+		if($sql != NULL)$command.= ' -sql "'.$sql.'"';
+		$command.= ' PG:"dbname='.$database->dbName.' user='.$database->user.' active_schema='.$schema;
 		if($database->passwd != '')$command.= ' password='.$database->passwd;
 		if($database->port != '')$command.=' port='.$database->port;
 		if($database->host != '') $command .= ' host=' . $database->host;
-		$command .= '" '.$importfile.' '.$options;
+		$command .= '" '.$importfile.' '.$layer;
 		#echo $command;
-		exec($command);
+		exec($command, $output, $ret);
+		return $ret;
 	}
 	
 	function create_csv($result, $attributes, $groupnames){
@@ -773,17 +765,23 @@ class data_import_export {
 							}
 						}
 					}
-					if(in_array($attributes['type'][$j], array('numeric', 'float4', 'float8'))){
-						$value = str_replace('.', ",", $value);			# Excel-Datumsproblem
+					else{
+						if($attributes['form_element_type'][$j] == 'Autovervollständigungsfeld'){
+							$value = $attributes['enum_output'][$j][$i];
+						}
+						if(in_array($attributes['type'][$j], array('numeric', 'float4', 'float8'))){
+							$value = str_replace('.', ",", $value);			# Excel-Datumsproblem
+						}
+						if($attributes['type'][$j] == 'bool'){
+							$value = str_replace('t', "ja", $value);	
+							$value = str_replace('f', "nein", $value);
+						}
+						$value = str_replace(';', ",", $value);
+						if(strpos($value, '/') !== false OR strpos($value, chr(10)) !== false OR strpos($value, chr(13)) !== false){		# Excel-Datumsproblem oder Zeilenumbruch
+							$value = str_replace('"', "'", $value);
+							$value = '"'.$value.'"';
+						}
 					}
-					if($attributes['type'][$j] == 'bool'){
-						$value = str_replace('t', "ja", $value);	
-						$value = str_replace('f', "nein", $value);
-					}
-					$value = str_replace(';', ",", $value);
-					$value = str_replace(chr(10), " ", $value);
-					$value = str_replace(chr(13), "", $value);
-					if(strpos($value, '/') !== false)$value = "'".$value."'";		# Excel-Datumsproblem
 	        $csv .= $value.';';
       	}
       }
@@ -852,7 +850,7 @@ class data_import_export {
 		$filter = $mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id);
 		
 		# Where-Klausel aus Sachdatenabfrage-SQL
-		$where = substr(strip_pg_escape_string($this->formvars['sql_'.$this->formvars['selected_layer_id']]), strrpos(strtolower(strip_pg_escape_string($this->formvars['sql_'.$this->formvars['selected_layer_id']])), 'where')+5);
+		$where = substr(strip_pg_escape_string($this->formvars['sql_'.$this->formvars['selected_layer_id']]), strrpos(strtolower(strip_pg_escape_string($this->formvars['sql_'.$this->formvars['selected_layer_id']])), 'where'));
 		
 		# order by rausnehmen
   	$orderbyposition = strrpos(strtolower($sql), 'order by');
@@ -904,6 +902,7 @@ class data_import_export {
 		foreach($this->attributes['all_table_names'] as $tablename){
 			if(($tablename == $layerset[0]['maintable']) AND $this->attributes['oids'][$j]){		# hat Haupttabelle oids?
 				$pfad = $this->attributes['table_alias_name'][$tablename].'.oid AS '.$tablename.'_oid, '.$pfad;
+				if($groupby != '')$groupby .= ','.$this->attributes['table_alias_name'][$tablename].'.oid';
 			}
 			$j++;
 		}
@@ -911,61 +910,35 @@ class data_import_export {
 			$pfad = 'DISTINCT '.$pfad;
 		}
 		$sql = "SELECT ".$pfad;		
-    
-    if($this->attributes['table_alias_name'][$this->attributes['the_geom']] != $this->attributes['table_name'][$this->attributes['the_geom']]){
-    	$the_geom = $this->attributes['table_alias_name'][$this->attributes['the_geom']].'.'.$this->attributes['the_geom'];
-    }
-    else{
-    	$the_geom = $this->attributes['the_geom'];
-    }
-    
-		# Transformieren von the_geom im Select-Teil
-    if($this->formvars['epsg']){
-    	$select = substr($sql, 0, strrpos(strtolower($sql), 'from'));
-    	$rest = substr($sql, strrpos(strtolower($sql), 'from'));
-    	if(strpos($select, '.'.$this->attributes['the_geom']) !== false) $geom = $the_geom;	// table.the_geom muss ersetzt werden
-    	else	$geom = $this->attributes['the_geom'];	// nur the_geom muss ersetzt werden 
-			$select = str_replace(' '.$geom.',', ' st_transform('.$geom.', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'].',', $select);
-			$select = str_replace(',  '.$geom, ', st_transform('.$geom.', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);    		
-			$select = str_replace(', '.$geom, ', st_transform('.$geom.', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);
-			$select = str_replace(','.$geom, ',st_transform('.$geom.', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);
-    	$sql = $select.$rest;
-    }
-  	# über Polygon einschränken
-    if($this->formvars['newpathwkt']){
-    	$sql.= " AND ".$the_geom." && st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code'].") AND ST_INTERSECTS(".$the_geom.", st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code']."))";
-    }
-		# Where-Klausel aus Sachdatenabfrage-SQL anhängen
-  	if($where != ''){
+        
+		# Bedingungen
+  	if($where != ''){		# Where-Klausel aus Sachdatenabfrage-SQL (abgefragter Extent, Suchparameter oder oids)
   		$orderbyposition = strpos(strtolower($where), 'order by');
   		if($orderbyposition)$where = substr($where, 0, $orderbyposition);
-	    if(strpos($where, 'query.') !== false OR strpos($where, '_oid') !== false){
-	    	if($this->formvars['epsg']){
-	    		$where = str_replace('), '.$layerset[0]['epsg_code'].')', '), '.$this->formvars['epsg'].')', $where);		# die räumliche Einschränkung das Such-SQLs auf den neuen EPSG-Code anpassen
-	    	}
-	    	$sql = "SELECT * FROM (".$sql.$groupby.") as query WHERE 1=1 AND ".$where;
-	    }
-	    else{
-	    	$sql = $sql." AND ".$where;
-	    }
+	    $sql = "SELECT * FROM (".$sql.$groupby.") as query ".$where;
   	}
-		# Filter
-    if($filter != ''){
+    elseif($filter != ''){		# Filter muss nur dazu, wenn kein $where vorhanden, also keine Abfrage gemacht wurde, sondern der gesamte Layer exportiert werden soll (Filter ist ja schon im $where enthalten)
 			$filter = str_replace('$userid', $user->id, $filter);
-    	$sql = 'SELECT * FROM ('.$sql.') as query2 WHERE '.$filter;
-    }		
+    	$sql = "SELECT * FROM (".$sql.$groupby.") as query WHERE ".$filter;
+    }
+    if($this->formvars['newpathwkt']){	# über Polygon einschränken
+    	$sql.= " AND ST_INTERSECTS(".$this->attributes['the_geom'].", st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code']."))";
+    }
     $sql.= $orderby;
 		#echo $sql;
+		
     $temp_table = 'shp_export_'.rand(1, 10000);
     $sql = 'CREATE TABLE public.'.$temp_table.' AS '.$sql;		# temporäre Tabelle erzeugen, damit das/die Schema/ta berücksichtigt werden
     $ret = $layerdb->execSQL($sql,4, 0);
-		
-		if($this->formvars['export_format'] == 'Shape'){				# das Abschneiden bei nicht in der Länge begrenzten Textspalten verhindern
-			for($s = 0; $s < count($selected_attributes); $s++){
+				
+		for($s = 0; $s < count($selected_attributes); $s++){
+			# Transformieren der Geometrie
+			if($this->attributes['the_geom'] == $selected_attributes[$s])$selected_attributes[$s] = 'st_transform('.$selected_attributes[$s].', '.$this->formvars['epsg'].') as '.$selected_attributes[$s];
+			# das Abschneiden bei nicht in der Länge begrenzten Textspalten verhindern
+			if($this->formvars['export_format'] == 'Shape'){
 				if(in_array($selected_attr_types[$s], array('text', 'varchar')))$selected_attributes[$s] = $selected_attributes[$s].'::varchar(254)';
 			}
 		}
-		
     $sql = 'SELECT '.implode(', ', $selected_attributes).' FROM public.'.$temp_table;		# auf die ausgewählten Attribute einschränken
     $ret = $layerdb->execSQL($sql,4, 0);
     if(!$ret[0]){
@@ -1004,6 +977,11 @@ class data_import_export {
 					$exportfile = $exportfile.'.kml';
 					$this->ogr2ogr_export($sql, 'KML', $exportfile, $layerdb);
 					$contenttype = 'application/vnd.google-earth.kml+xml';
+				}break;
+				
+				case 'GeoJSON' : {
+					$exportfile = $exportfile.'.json';
+					$this->ogr2ogr_export($sql, 'GeoJSON', $exportfile, $layerdb);
 				}break;
 				
 				case 'CSV' : {

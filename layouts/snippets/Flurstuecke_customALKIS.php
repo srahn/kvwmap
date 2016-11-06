@@ -33,9 +33,9 @@ backto = function(go){
   currentform.submit();
 }
 
-show_all = function(count){
+show_all = function(){
 	currentform.offset_<? echo $this->qlayerset[$i]['Layer_ID']; ?>.value = 0;
-	currentform.anzahl.value = count;
+	currentform.anzahl.value = currentform.anzahl.options[currentform.anzahl.options.length-1].value;
 	currentform.submit();
 }
 
@@ -61,7 +61,7 @@ hide_versions = function(flst){
 	$timestamp = DateTime::createFromFormat('d.m.Y H:i:s', $this->user->rolle->hist_timestamp);
 	$sql = "SELECT max(beginnt)::date FROM alkis.ax_fortfuehrungsfall;";
   $ret=$this->pgdatabase->execSQL($sql,4,0);
-  $aktalkis = pg_fetch_array($ret[1]);
+  $aktalkis = pg_fetch_row($ret[1]);
 
 	$this->Stelle->getFunktionen();
 	$forall = false;
@@ -71,13 +71,19 @@ hide_versions = function(flst){
 	if($gesamt == '')$gesamt = $anzObj;
 	$von = $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] + 1;
 	$bis = $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] + $this->formvars['anzahl'];
-  if ($anzObj>0) { ?>
+  if ($anzObj>0) {
+		$this->found = 'true';
+	?>
 		<br>
+		<? if($this->user->rolle->hist_timestamp == ''){ ?>
 		<span style="font-size:80%;">Stand ALKIS vom: <? echo $aktalkis[0]; ?><br></span>
+		<? }else{ ?>
+		<span class="fett" style="color: #a82e2e;">historischer Stand vom: <? echo $this->user->rolle->hist_timestamp; ?><br></span>
+		<? } ?>
 		<br>
     <u><? echo $gesamt; ?> Flurstück<? if ($gesamt>1) { echo "e"; } ?> abgefragt</u>
 		<? if($gesamt > $anzObj){ ?>
-		&nbsp;<a href="javascript:show_all(<? echo $gesamt; ?>);">alle anzeigen</a>
+		&nbsp;<a href="javascript:show_all();">alle anzeigen</a>
     <br><br>
 		<u>Flurstücke <? echo $von; ?> bis <? echo $bis; ?></u>
 		<? } ?>
@@ -523,7 +529,7 @@ hide_versions = function(flst){
 									if($flst->BauBodenrecht[$j]['stelle'] != '')echo ' ('.$flst->BauBodenrecht[$j]['stelle'].')';
 									echo '</td></tr>';
 		            }
-								if($flst->abweichenderrechtszustand == 'true')echo '<tr><td colspan="2" width="600px">In einem durch Gesetz geregelten Verfahren der Bodenordnung ist für das Flurstück ein neuer Rechtszustand eingetreten. Die Festlegungen des Verfahrens sind noch nicht in das Liegenschaftskataster übernommen. Dieser Nachweis entspricht deshalb nicht dem aktuellen Stand.</td></tr>';
+								if($flst->abweichenderrechtszustand == 'ja')echo '<tr><td colspan="2" width="600px">In einem durch Gesetz geregelten Verfahren der Bodenordnung ist für das Flurstück ein neuer Rechtszustand eingetreten. Die Festlegungen des Verfahrens sind noch nicht in das Liegenschaftskataster übernommen. Dieser Nachweis entspricht deshalb nicht dem aktuellen Stand.</td></tr>';
 								for($j = 0; $j < count($flst->Denkmalschutzrecht); $j++){
 									echo '<tr><td valign="top">'.$flst->Denkmalschutzrecht[$j]['flaeche'].' m²</td><td width="500px">'.$flst->Denkmalschutzrecht[$j]['art'].' '.$flst->Denkmalschutzrecht[$j]['name'].'</td></tr>';
 		            }
@@ -656,40 +662,44 @@ hide_versions = function(flst){
           <td colspan="2">
             <table border="0" cellspacing="0" cellpadding="2">
               <tr>
-                <td colspan="3"><span class="fett">Nutzung</span></td>
+                <td><span class="fett">Nutzung</span></td>
               </tr>
               <tr>
-                <td><span class="fett">Fl&auml;che&nbsp;</span></td>
-                <td><span class="fett">Nutzung&nbsp;</span></td>
-                <td><span class="fett">Bezeichnung</span></td>
-              </tr>
+                <td>
               <?php
               $anzNutzung=count($flst->Nutzung);
-              for ($j=0;$j<$anzNutzung;$j++) { ?>
-              <tr>
-			          <td align="right" valign="top"><?php echo $flst->Nutzung[$j][flaeche]; ?> m&sup2;&nbsp;</td>
-			          <td align="right" valign="top">&nbsp;<?php echo $flst->Nutzung[$j][nutzungskennz]; ?>&nbsp;</td>
-			          <td valign="top">
-			          <?php
-			          if (strlen($flst->Nutzung[$j][bezeichnung])>80) {
-			            $needle=array(
-			             strrpos(substr($flst->Nutzung[$j][bezeichnung],0,80),','),
-			             strrpos(substr($flst->Nutzung[$j][bezeichnung],0,80),'-'),
-			             strrpos(substr($flst->Nutzung[$j][bezeichnung],0,80),'/'),
-			             strrpos(substr($flst->Nutzung[$j][bezeichnung],0,80),' ')
-			            );
-			            rsort($needle);
-			            echo substr($flst->Nutzung[$j][bezeichnung],0,$needle[0]+1)."<br>".substr($flst->Nutzung[$j][bezeichnung],$needle[0]+1);
-			          } else {
-			            echo $flst->Nutzung[$j][bezeichnung];
-			          }
-			  				if ($flst->Nutzung[$j][kurzbezeichnung]!='') { ?> (<?php echo $flst->Nutzung[$j][kurzbezeichnung]; ?>)<?php } ?>
-			  				</td>
-			        </tr>
+              for ($j=0;$j<$anzNutzung;$j++){
+								if($flst->Nutzung[$j]['bereich'] != $flst->Nutzung[$j-1]['bereich']){
+									if($j > 0){ ?></table></div></div><? } ?>
+									<div id="nu_bereich">
+										<span id="nu_bereich_span"><? echo $flst->Nutzung[$j]['bereich']; ?></span>
+										<div id="nu_gruppe_nutzungsart">
+								<? }
+										if($flst->Nutzung[$j]['gruppe'] != $flst->Nutzung[$j-1]['gruppe']){
+											if($j > 0 AND $flst->Nutzung[$j]['bereich'] == $flst->Nutzung[$j-1]['bereich']){ ?></table><? } ?>
+											<span id="nu_gruppe_nutzungsart_span"><? echo $flst->Nutzung[$j]['gruppe']; ?></span>
+											<table id="nu_gruppe_nutzungsart_table">
+												<tr>
+													<th>Fläche</th><th>Schlüssel</th><th>Nutzung</th>
+												</tr>
+								<?  } ?>
+												<tr>
+													<td align="right"><? echo $flst->Nutzung[$j][flaeche]; ?> m&sup2;&nbsp;</td>
+													<td><? echo $flst->Nutzung[$j][nutzungskennz]; ?></td>
+													<td>
+														<? echo implode(', ', array_filter(array($flst->Nutzung[$j]['nutzungsart'], $flst->Nutzung[$j]['untergliederung1'], $flst->Nutzung[$j]['untergliederung2'])));
+															 if($flst->Nutzung[$j]['nutzungsart'] == '' AND $flst->Nutzung[$j]['untergliederung1'] == '' AND $flst->Nutzung[$j]['untergliederung2'] == '')echo '&mdash;'; ?>
+													</td>
+												</tr>
               <?php } ?>
-          </table>
-          </td>
-        </tr>
+											</table>
+										</div>
+									</div>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
         <? } ?>
         <? if($privileg_['eigentuemer']){
 						$currenttime=date('Y-m-d H:i:s',time());

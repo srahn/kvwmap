@@ -53,13 +53,13 @@ class anliegerbeitraege {
     return $ret; 
   }
   
-  function eintragenNeueStrasse($umring){
+  function eintragenNeueStrasse($umring, $stelle_id){
     $sql = "SELECT st_IsValid(st_geometryfromtext('".$umring."', ".$this->clientepsg."))";
     $ret = $this->database->execSQL($sql, 4, 0);
     $valid = pg_fetch_array($ret[1]);
     if($valid[0] == 't'){
-      $sql = "INSERT INTO anliegerbeitraege.anliegerbeitraege_strassen (the_geom)";
-      $sql.= " VALUES(st_multi(st_transform(st_geometryfromtext('".$umring."', ".$this->clientepsg."), ".$this->layerepsg.")))";
+      $sql = "INSERT INTO anliegerbeitraege.anliegerbeitraege_strassen (the_geom, stelle_id)";
+      $sql.= " VALUES(st_multi(st_transform(st_geometryfromtext('".$umring."', ".$this->clientepsg."), ".$this->layerepsg.")), ".$stelle_id.")";
       $ret = $this->database->execSQL($sql, 4, 1);
       if ($ret[0]) {
         # Fehler beim Eintragen in Datenbank
@@ -74,12 +74,12 @@ class anliegerbeitraege {
     return $ret;
   }
   
-  function eintragenNeueBereiche($umring){
+  function eintragenNeueBereiche($umring, $stelle_id){
     $sql = "SELECT st_IsValid(st_geometryfromtext('".$umring."', ".$this->clientepsg."))";
     $ret = $this->database->execSQL($sql, 4, 0);
     $valid = pg_fetch_array($ret[1]);
     if($valid[0] == 't'){
-      $sql = "INSERT INTO anliegerbeitraege.anliegerbeitraege_bereiche (the_geom, flaeche) select * from (select bereich, round((amtlicheflaeche*st_area_utm(bereich, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")/st_area_utm(wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID."))::numeric, 2) as flaeche  from (select amtlicheflaeche, wkb_geometry, st_multi(st_transform(st_Intersection(st_transform(st_geometryfromtext('".$umring."', ".$this->clientepsg."), ".EPSGCODE_ALKIS."),f.wkb_geometry), ".$this->layerepsg.")) as bereich ";
+      $sql = "INSERT INTO anliegerbeitraege.anliegerbeitraege_bereiche (stelle_id, the_geom, flaeche) select * from (select ".$stelle_id.", bereich, round((amtlicheflaeche*st_area_utm(bereich, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")/st_area_utm(wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID."))::numeric, 2) as flaeche  from (select amtlicheflaeche, wkb_geometry, st_multi(st_transform(st_Intersection(st_transform(st_geometryfromtext('".$umring."', ".$this->clientepsg."), ".EPSGCODE_ALKIS."),f.wkb_geometry), ".$this->layerepsg.")) as bereich ";
       $sql.= "from alkis.ax_flurstueck as f "; 
       $sql.= "where st_transform(st_geometryfromtext('".$umring."', ".$this->clientepsg."), ".EPSGCODE_ALKIS.") && f.wkb_geometry) as foo ) as foofoo ";
       $sql.= "WHERE flaeche > 0 ";

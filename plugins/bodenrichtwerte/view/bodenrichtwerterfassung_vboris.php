@@ -1,4 +1,6 @@
-
+<?
+include_once(CLASSPATH.'FormObject.php');
+?>
 <script language="JavaScript">
 <!--
 

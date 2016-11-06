@@ -82,6 +82,7 @@
   };
 
 	$this->nachweisAenderungsformular = function() use ($GUI){
+		include_once(CLASSPATH.'FormObject.php');
     #2005-11-25_pk
     # Anzeige des Formulars zum Eintragen neuer/Ändern vorhandener Metadaten zu einem Nachweisdokument
     # (FFR, KVZ oder GN)
@@ -112,10 +113,10 @@
 			else{
 				$GUI->loadMap('DataBase');
 			}
-			if($_SERVER['REQUEST_METHOD'] == 'GET')$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
+			if($saved_scale != NULL)$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
       # zoomToMaxLayerExtent
 			if($GUI->formvars['zoom_layer_id'] != '')$GUI->zoomToMaxLayerExtent($GUI->formvars['zoom_layer_id']);
-      $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id);
+      $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true);
 	    if(!$GUI->formvars['layer_id']){
 	      $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
 	      $GUI->formvars['layer_id'] = $layerset[0]['Layer_ID'];
@@ -464,7 +465,7 @@
     # Suchparameter in Ordnung
     # Recherchieren nach den Nachweisen
 		if($GUI->formvars['such_andere_art'] != NULL)$GUI->formvars['such_andere_art'] = implode(',', $GUI->formvars['such_andere_art']);
-    $ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['such_andere_art']);
+    $ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['such_andere_art'], $GUI->formvars['suchbemerkung']);
     #$GUI->nachweis->getAnzahlNachweise($GUI->formvars['suchpolygon']);
     if($ret!=''){
       # Fehler bei der Recherche im Datenbestand
@@ -694,6 +695,7 @@
 	};
 
 	$this->nachweisFormAnzeige = function($nachweis = NULL) use ($GUI){
+		include_once(CLASSPATH.'FormObject.php');
 		if($GUI->formvars['reset_layers'])$GUI->reset_layers(NULL);
 
     # Wenn eine oid in formvars übergeben wurde ist es eine Änderung, sonst Neueingabe
@@ -712,8 +714,8 @@
     else{
       $GUI->loadMap('DataBase');
     }
-		if($_SERVER['REQUEST_METHOD'] == 'GET')$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
-    $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id);
+		if($saved_scale != NULL)$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
+    $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true);
   	if(!$GUI->formvars['layer_id']){
       $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
       $GUI->formvars['layer_id'] = $layerset[0]['Layer_ID'];
@@ -920,7 +922,7 @@
       # Abfrage ob gelöscht werden soll oder nicht
       if ($GUI->formvars['bestaetigung']=='JA') {
         # Der Löschvorgang wurde bestätigt und wird jetzt ausgeführt
-        $idListe=array_keys($GUI->formvars['id']);
+        $idListe=$GUI->formvars['id'];
         $ret=$GUI->nachweis->nachweiseLoeschen($idListe,1);
         if ($ret[0]) { # Fehler beim Löschen in Fehlermeldung übergeben
           $GUI->Fehlermeldung=$ret[1];
@@ -942,6 +944,7 @@
   };
 	
 	$this->rechercheFormAnzeigen = function() use ($GUI){
+		include_once(CLASSPATH.'FormObject.php');
 		# Speichern einer neuen Dokumentauswahl
 		if($GUI->formvars['go_plus'] == 'Dokumentauswahl_speichern'){
 			$GUI->formvars['dokauswahlen'] = $GUI->save_Dokumentauswahl($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars);
@@ -993,6 +996,7 @@
 		}
     # Erzeugen des Formobjektes für die Gemarkungsauswahl
     $GUI->GemkgFormObj=new FormObject("suchgemarkung","select",$GemkgListe['GemkgID'],$GUI->formvars['suchgemarkung'],$GemkgListe['Bezeichnung'],"1","","",NULL);
+		$GUI->GemkgFormObj->addJavaScript("onchange","updateGemarkungsschluessel(this.value)");
 		$GUI->GemkgFormObj->insertOption('',0,'--Auswahl--',0);
 			
     # erzeugen des Formularobjektes für die VermessungsStellen
@@ -1001,14 +1005,14 @@
     # aktuellen Kartenausschnitt laden + zeichnen!
     $saved_scale = $GUI->reduce_mapwidth(200);
 		$GUI->loadMap('DataBase');
-		if($_SERVER['REQUEST_METHOD'] == 'GET' AND !isset($GUI->formvars['datum']))$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
+		if($saved_scale != NULL AND !isset($GUI->formvars['datum']))$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
     if ($GUI->formvars['CMD']!='') {
       # Nur Navigieren
       $GUI->navMap($GUI->formvars['CMD']);
       $GUI->user->rolle->saveDrawmode($GUI->formvars['always_draw']);
     }
 	
-    $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id);
+    $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true);
     # Spaltenname und from-where abfragen
   	if(!$GUI->formvars['layer_id']){
       $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
@@ -1575,6 +1579,7 @@
   };
 	
 	$this->getFormObjVermStelle = function($name, $VermStelle) use ($GUI){
+		include_once(CLASSPATH.'FormObject.php');
     $VermStObj = new Vermessungsstelle($GUI->pgdatabase);
     $back=$VermStObj->getVermStelleListe();
     if ($back[0]=='') {
@@ -1588,6 +1593,7 @@
   };
 
 	$this->getFormObjVermArt = function($verm_art) use ($GUI){
+		include_once(CLASSPATH.'FormObject.php');
     $VermArtObj = new Vermessungsart($GUI->pgdatabase);
     $back=$VermArtObj->getVermArtListe();
     if ($back[0]=='') {
@@ -1601,6 +1607,7 @@
   };
 
 	$this->getFormObjAntr_nr = function($antr_nr) use ($GUI){
+		include_once(CLASSPATH.'FormObject.php');
     $Antrag = new Antrag($antr_nr,$GUI->Stelle->id,$GUI->pgdatabase);
     $back=$Antrag->getAntragsnr_Liste($GUI->Stelle->id);
     if ($back[0]=='') {

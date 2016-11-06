@@ -16,7 +16,7 @@ $this->found = 'false';
 $anzLayer=count($this->qlayerset);
 if ($anzLayer==0) {
 	?>
-<span style="font:normal 12px verdana, arial, helvetica, sans-serif; color:#FF0000;"><? echo $strNoLayer; ?></span>	<br/>
+<span style="font:normal 12px verdana, arial, helvetica, sans-serif; color:#FF0000;"><? echo $strNoLayer; ?></span><br/>
 	<?php	
 }
 for($i=0;$i<$anzLayer;$i++){
@@ -71,8 +71,8 @@ for($i=0;$i<$anzLayer;$i++){
 	   	<tr valign="top">
 	   		<td align="right" width="38%">';
 	   		if($this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] >= $this->formvars['anzahl'] AND $this->formvars['printversion'] == ''){
-					echo '<a href="javascript:firstdatasets(\'offset_'.$this->qlayerset[$i]['Layer_ID'].'\');"><img src="'.GRAPHICSPATH.'go-first.png" class="hover-border" style="vertical-align:middle" title="'.$strFirstDatasets.'"></a>&nbsp;&nbsp;&nbsp;';
-	   			echo '<a href="javascript:prevdatasets(\'offset_'.$this->qlayerset[$i]['Layer_ID'].'\');"><img src="'.GRAPHICSPATH.'go-previous.png" class="hover-border" style="vertical-align:middle" title="'.$strBackDatasets.'"></a>&nbsp;';
+					echo '<a href="javascript:firstdatasets('.$this->qlayerset[$i]['Layer_ID'].');"><img src="'.GRAPHICSPATH.'go-first.png" class="hover-border" style="vertical-align:middle" title="'.$strFirstDatasets.'"></a>&nbsp;&nbsp;&nbsp;';
+	   			echo '<a href="javascript:prevdatasets('.$this->qlayerset[$i]['Layer_ID'].');"><img src="'.GRAPHICSPATH.'go-previous.png" class="hover-border" style="vertical-align:middle" title="'.$strBackDatasets.'"></a>&nbsp;';
 	   		}
 	      echo '
 				</td>
@@ -81,8 +81,8 @@ for($i=0;$i<$anzLayer;$i++){
 				</td>
 	      <td width="38%">';
 	      if($bis < $gesamt AND $this->formvars['printversion'] == ''){
-	      	echo '&nbsp;<a href="javascript:nextdatasets(\'offset_'.$this->qlayerset[$i]['Layer_ID'].'\');"><img src="'.GRAPHICSPATH.'go-next.png" class="hover-border" style="vertical-align:middle" title="'.$strForwardDatasets.'"></a>&nbsp;&nbsp;&nbsp;';
-					echo '<a href="javascript:lastdatasets(\'offset_'.$this->qlayerset[$i]['Layer_ID'].'\', '.$gesamt.');"><img src="'.GRAPHICSPATH.'go-last.png" class="hover-border" style="vertical-align:middle" title="'.$strLastDatasets.'"></a>';
+	      	echo '&nbsp;<a href="javascript:nextdatasets('.$this->qlayerset[$i]['Layer_ID'].');"><img src="'.GRAPHICSPATH.'go-next.png" class="hover-border" style="vertical-align:middle" title="'.$strForwardDatasets.'"></a>&nbsp;&nbsp;&nbsp;';
+					echo '<a href="javascript:lastdatasets('.$this->qlayerset[$i]['Layer_ID'].', '.$gesamt.');"><img src="'.GRAPHICSPATH.'go-last.png" class="hover-border" style="vertical-align:middle" title="'.$strLastDatasets.'"></a>';
 	      }
 	      echo '
 				</td>
@@ -95,6 +95,15 @@ for($i=0;$i<$anzLayer;$i++){
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
 	<tr>
 		<td align="right">
+    <? if ($this->user->rolle->visually_impaired) { ?>
+				<? if($layer['template'] == '' OR $layer['template'] == 'generic_layer_editor_2.php'){ ?>
+				<a href="javascript:switch_gle_view(<? echo $layer['Layer_ID']; ?>);"><img title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'columns.png'; ?>"></a>
+				<? }else{ ?>
+				<a href="javascript:switch_gle_view(<? echo $layer['Layer_ID']; ?>);"><img title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'rows.png'; ?>"></a>
+				<? } ?>
+		<? } ?>
+
+
 			<a href="javascript:scrolltop();"><img class="hover-border" title="nach oben" src="<? echo GRAPHICSPATH; ?>pfeil2.gif" width="11" height="11" border="0"></a>&nbsp;&nbsp;&nbsp;
 		</td>
 	</tr>

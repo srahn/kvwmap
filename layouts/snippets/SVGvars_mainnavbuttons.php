@@ -86,7 +86,7 @@ else {
              style="stroke-linecap:round;fill:none;stroke:rgb(0,0,0);stroke-width:2"/>
           <circle cx="23" cy="26" r="6" style="fill:none;stroke:rgb(0,0,0);stroke-width:2"/>
         </g>
-        <rect id="zoomin0" onmouseover="show_tooltip(\''.$strZoomIn.'\',evt.clientX,evt.clientY)" onmousedown="zoomin();highlight(evt);noMeasuring();" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;opacity:0.25"/>
+        <rect id="zoomin0" onmouseover="show_tooltip(\''.$strZoomIn.'\',evt.clientX,evt.clientY)" onmousedown="zoomin();highlight(evt);" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;opacity:0.25"/>
       </g>';
     $last_x += 26;
   	return $zoomin;
@@ -110,7 +110,7 @@ else {
              style="stroke-linecap:round;fill:none;stroke:rgb(0,0,0);stroke-width:2"/>
           <circle cx="23" cy="26" r="6" style="fill:none;stroke:rgb(0,0,0);stroke-width:2"/>
         </g>
-        <rect id="zoomout0" onmouseover="show_tooltip(\''.$strZoomOut.'\',evt.clientX,evt.clientY)" onmousedown="zoomout();highlight(evt);noMeasuring();" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;opacity:0.25"/>
+        <rect id="zoomout0" onmouseover="show_tooltip(\''.$strZoomOut.'\',evt.clientX,evt.clientY)" onmousedown="zoomout();highlight(evt);" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;opacity:0.25"/>
       </g>';
     $last_x += 26;
   	return $zoomout;
@@ -208,7 +208,7 @@ else {
           <set attributeName="filter" begin="ppquery0.mousedown" fill="freeze" to="none"/>
           <set attributeName="filter" begin="ppquery0.mouseup;ppquery0.mouseout" fill="freeze" to="url(#Schatten)"/>
         </rect>
-        <text transform="scale(1.7 1.1)" x="7" y="17" style="text-anchor:middle;fill:rgb(0,0,0);font-size:20;font-family:Times;font-weight:bold;">
+        <text transform="scale(1.7 1.2)" x="7" y="16" style="text-anchor:middle;fill:rgb(0,0,0);font-size:20;font-family:Times;font-weight:bold;">
          i </text>
         <rect id="ppquery0" onmouseover="show_tooltip(\''.$strInfo.'\',evt.clientX,evt.clientY)" onmousedown="ppquery();hide_tooltip();highlight(evt);noMeasuring();" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;opacity:0.25"/>
       </g>';

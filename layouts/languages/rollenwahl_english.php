@@ -33,6 +33,7 @@
 	$strDataPresentation="Data Presentation";
 	$strInstantReload="Instant Map Reload";
 	$strMenuAutoClose="Close Menus automatically";
+	$strVisuallyImpaired="Simplifications in reading mode";
 	$strdecimal="Decimal";
 	$strgrad1="Degrees,Minutes,Seconds";
 	$strgrad2="Degrees Decimalminutes";
@@ -43,6 +44,7 @@
 	$strHintColor="Choose the color search results will be highlighted with.";
 	$strHintInstantReload="If you activate this option, the map is going to be reloaded immediately after you are activating or disactivating a theme.";
 	$strHintMenuAutoClose="If you activate this option, there will be only one menue opened at the same time.";
+	$strHintVisuallyImpaired="If you select this option, the surface and the work will be simplified in the reading mode. This setting is particularly suitable for people with visually imairance. It, however, some functions are hidden.";
 	$strHintZoomFactor="Choose the factor you want to zoom with in and out.";
 	$strHintMapSize="Choose the size of the map if the computed size does not fit.";
 	$strHintMapExtent="Coordinates of the lower left and upper right corner points in the selected first map projection.";

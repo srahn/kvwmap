@@ -14,6 +14,7 @@ Text_buttons=["<? echo $strHelp; ?>:","<? echo $strHintButtons; ?>"];
 Text_color=["<? echo $strHelp; ?>:","<? echo $strHintColor; ?>"];
 Text_instantreload=["<? echo $strHelp; ?>:","<? echo $strHintInstantReload; ?>"];
 Text_menueautoclose=["<? echo $strHelp; ?>:","<? echo $strHintMenuAutoClose; ?>"];
+Text_visuallyimpaired=["<? echo $strHelp; ?>:","<? echo $strHintVisuallyImpaired; ?>"];
 Text_zoomfactor=["<? echo $strHelp; ?>:","<? echo $strHintZoomFactor; ?>"];
 Text_mapsize=["<? echo $strHelp; ?>:","<? echo $strHintMapSize; ?>"];
 Text_mapextent=["<? echo $strHelp; ?>:","<? echo $strHintMapExtent; ?>"];
@@ -151,6 +152,14 @@ Text_histtimestamp=["<? echo $strHelp; ?>:","<? echo $strHinthist_timestamp; ?>"
 				<input name="menu_auto_close" type="checkbox" value="1" <? if($this->user->rolle->menu_auto_close == '1'){echo 'checked="true"';} ?> >
 				<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_menueautoclose, Style[0], document.getElementById('Tip7'))" onmouseout="htm()">
 				<div id="Tip7" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+			</td>
+		</tr>
+		<tr>
+			<td align="left" style="padding: 8px; padding-top: 0px"><? echo $strVisuallyImpaired; ?>:&nbsp;</td>
+			<td style="padding: 8px; padding-top: 0px">
+				<input name="visually_impaired" type="checkbox" value="1" <? if($this->user->rolle->visually_impaired == '1') { echo 'checked="true"';} ?> >
+				<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_visuallyimpaired, Style[0], document.getElementById('Tip8'))" onmouseout="htm()">
+				<div id="Tip8" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 			</td>
 		</tr>
 	</table>
@@ -304,9 +313,8 @@ Text_histtimestamp=["<? echo $strHelp; ?>:","<? echo $strHinthist_timestamp; ?>"
 				<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_highlight, Style[0], document.getElementById('Tip19'))" onmouseout="htm()">
 				<div id="Tip19" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 			</td>
-		</tr>
-		<? if($this->Stelle->hist_timestamp){ ?>
-		<tr>		
+		</tr>		
+		<tr <? if(!$this->Stelle->hist_timestamp)echo 'style="display:none"'; ?> >		
 			<td align="left" style="padding: 8px; padding-top: 0px"><? echo $strhist_timestamp; ?>:&nbsp;<a href="javascript:;" onclick="new CalendarJS().init('hist_timestamp');"><img title="TT.MM.JJJJ hh:mm:ss" src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar" style="bottom:100px"><input type="hidden" id="calendar_hist_timestamp"></div></td>
 			<td style="padding: 8px; padding-top: 0px">
 				<input onchange="if(this.value.length == 10)this.value = this.value + ' 06:00:00'" id="hist_timestamp" name="hist_timestamp" type="text" value="<? echo $this->user->rolle->hist_timestamp; ?>" size="16">
@@ -314,7 +322,6 @@ Text_histtimestamp=["<? echo $strHelp; ?>:","<? echo $strHinthist_timestamp; ?>"
 				<div id="Tip20" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 			</td>			
 		</tr>
-		<? } ?>
 	</table>
 </div>
 <table>

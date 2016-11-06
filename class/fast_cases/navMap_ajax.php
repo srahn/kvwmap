@@ -893,6 +893,9 @@
 				if($dbStyle['datarange'] != '') {
 					$style->updateFromString("STYLE DATARANGE ".$dbStyle['datarange']." END");
 				}
+				if($dbStyle['rangeitem'] != '') {
+					$style->updateFromString("STYLE RANGEITEM ".$dbStyle['rangeitem']." END");
+				}
         if ($dbStyle['offsetx']!='') {
           $style->set('offsetx', $dbStyle['offsetx']);
         }
@@ -2174,6 +2177,7 @@
   }  
   function read_Layer($withClasses, $groups = NULL){
 		global $language;
+
 		if($language != 'german') {
 			$name_column = "
 			CASE
@@ -2186,8 +2190,8 @@
 
 		$sql = "
 			SELECT DISTINCT
-				rl.*,
-				ul.*,
+				coalesce(rl.transparency, ul.transparency, 100) as transparency, rl.`aktivStatus`, rl.`queryStatus`, rl.`gle_view`, rl.`showclasses`, rl.`logconsume`, ';
+				ul.`queryable`, ul.`drawingorder`, ul.`minscale`, ul.`maxscale`, ul.`offsite`, ul.`postlabelcache`, ul.`Filter`, ul.`template`, ul.`header`, ul.`footer`, ul.`symbolscale`, ul.`logconsume`, ul.`requires`, ul.`privileg`, ul.`export_privileg`,
 				l.Layer_ID," .
 				$name_column . ",
 				l.alias,
@@ -2210,6 +2214,7 @@
 				gr.id = g.id AND
 				gr.stelle_id = " . $this->Stelle_ID . " AND
 				gr.user_id = " . $this->User_ID;
+
 		if($groups != NULL){
 			$sql.=' AND g.id IN ('.$groups.')';
 		}

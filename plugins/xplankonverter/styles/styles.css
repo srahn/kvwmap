@@ -42,6 +42,16 @@ div.td {
   background-color: #fff;
 }
 
+.xpk-func-btn.disabled {
+  pointer-events: auto !important;
+  cursor: default;
+}
+
+.xpk-func-btn.disabled:hover,
+.xpk-func-btn.disabled:focus {
+	color: #337ab7;
+}
+
 .xplankonverter div.step {
   float: left;
   margin-right: 10px;
