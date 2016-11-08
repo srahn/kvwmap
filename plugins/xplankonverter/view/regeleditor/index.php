@@ -1,9 +1,3 @@
-<?PHP
-# Die Konvertierungs-Id sollte noch vom Konverter übergeben werden
-$konvertierung_id = $_REQUEST['konvertierung_id'];
-# Class_Name kann nur verwendet werden, wenn es nicht leer ist?
-$class_name = $_REQUEST['class_name'];
-?>
 <!DOCTYPE html>
 <HTML>
   <HEAD>
@@ -12,11 +6,12 @@ $class_name = $_REQUEST['class_name'];
     <script src="plugins/xplankonverter/3rdparty/jQuery-1.12.0/jquery-1.12.0.min.js"></script>
     <script src="plugins/xplankonverter/view/regeleditor/control.js">"use strict";</script>
     <!-- Setzt PHP Variable als (Global) Javascript Variable -->
-    <script>konvertierung_id = '<? echo $konvertierung_id; ?>';</script>
+    <script>konvertierung_id = '<?php echo $konvertierung_id; ?>';</script>
     <link rel="stylesheet" href="layouts/custom/font-awesome-4.5.0/css/font-awesome.min.css" type="text/css"/>
     <link rel="stylesheet" href="plugins/xplankonverter/view/regeleditor/styles.css" type="text/css"/>
   </HEAD>
   <BODY>
+		<div id="debug"></div>
 		<input type="hidden" id="field_id" value="<? echo $_REQUEST['field_id']; ?>">
     <h1>Regeleditor</h1>
     <!-- Reload-->
@@ -55,7 +50,7 @@ $class_name = $_REQUEST['class_name'];
     <div id="warnung_area">
       <div id="Warnung_1"><i class="fa fa-exclamation-triangle"> Es muss eine XPlan-Klasse ausgewählt werden!</i></div>
       <div id="Warnung_2"><i class="fa fa-exclamation-triangle"> Es muss eine Shape-Datei ausgewählt werden!</i></div>
-      <div id="Warnung_3" style="display: none"><i class="fa fa-exclamation-triangle"> Die Attribute rechtscharakter und typ sind Pflichtattribute und müssen immer befüllt sein!</i></div>
+      <div id="Warnung_3" style="display: none"><i class="fa fa-exclamation-triangle"> Attribute mit der Multiplizität 1 müssen immer befüllt sein!</i></div>
     </div>
     <!-- SQL-Ausgabefenster -->
     <div id="sql_area" class="ganze-breite" style="display: none">
@@ -197,7 +192,7 @@ $class_name = $_REQUEST['class_name'];
               <select id="source_selector" onChange="setShapefile()">
                 <option value="">Shape Datei waehlen ...</option>
                 <?php
-                  shapeTables($this->pgdatabase->dbConn, $_REQUEST['konvertierung_id']);
+                  shapeTables($this->pgdatabase->dbConn, $konvertierung_id);
                 ?>
             </div>
           </td>

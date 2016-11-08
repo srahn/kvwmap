@@ -483,7 +483,21 @@ switch($this->go){
 	} break;
 
 	case 'xplankonverter_regeleditor' : {
+		$konvertierung_id = $_REQUEST['konvertierung_id'];
+		$bereich_gml_id = $_REQUEST['bereich_gml_id'];
+		$class_name = $_REQUEST['class_name'];
+
+		if (empty($konvertierung_id)) {
+			if (!empty($bereich_gml_id)) {
+				# Hole konvertierung_id über den Bereich
+				$bereich = RP_Bereich::find_by_id($this, 'gml_id', $bereich_gml_id);
+				$plan = $bereich->get_plan();
+				$konvertierung_id = $plan->get('konvertierung_id');
+			}
+		}
+
 		include(PLUGINS . 'xplankonverter/view/regeleditor/index.php');
+
 	} break;
 
 	case 'xplankonverter_regeleditor_getxplanattributes' : {
