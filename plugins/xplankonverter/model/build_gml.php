@@ -47,18 +47,10 @@ class Gml_builder {
     $this->typeInfo = new TypeInfo($database);
 
     $this->tmpFile = tmpfile();
-    // use the DOMDocument functionality to format XML output
-    $this->formatter = new DOMDocument('1.0', 'utf-8');
   }
 
   function __destruct() {
     fclose($this->tmpFile);
-  }
-
-  function _findRPPlanByKonvertierung($konvertierung) {
-    $sql = "SELECT gml_id FROM xplan_gml.rp_plan WHERE konvertierung_id = " . $konvertierung->get('id');
-    $result = pg_query($this->database->dbConn, $sql);
-    return pg_fetch_assoc($result)['gml_id'];
   }
 
   /*
@@ -90,14 +82,12 @@ class Gml_builder {
       ST_AsGML(
           ST_Reverse(ST_Transform(
             raeumlichergeltungsbereich,
---            COALESCE((raeumlichergeltungsbereich).flaeche, (raeumlichergeltungsbereich).multiflaeche),
             {$konvertierung->get('output_epsg')})),
           {$konvertierung->get('geom_precision')}) AS gml_raeumlichergeltungsbereich,
       ST_AsGML(
         3,
         ST_Transform(
           raeumlichergeltungsbereich,
---          COALESCE((raeumlichergeltungsbereich).flaeche, (raeumlichergeltungsbereich).multiflaeche),
           {$konvertierung->get('output_epsg')}),
         {$konvertierung->get('geom_precision')},
         32) AS envelope";
@@ -132,7 +122,7 @@ class Gml_builder {
     $plan_attribs = $this->typeInfo->getInfo('rp_plan');
 
     // alle Attribute von RP_Plan ausgeben
-    $gmlElemInner .= $this->generateGmlForAttributes($plan->data, $plan_attribs);
+    $gmlElemInner .= $this->generateGmlForAttributes($plan->data, $plan_attribs, XPLAN_MAX_NESTING_DEPTH);
 
     $rp_plan = $gmlElemOpenTag . ">" . $gmlElemInner;
 
@@ -146,14 +136,12 @@ class Gml_builder {
           ST_AsGML(
             ST_Reverse(ST_Transform(
               b.geltungsbereich,
---              COALESCE ((b.geltungsbereich).flaeche,(b.geltungsbereich).multiflaeche),
               {$konvertierung->get('output_epsg')})),
               {$konvertierung->get('geom_precision')}) AS gml_geltungsbereich,
           ST_AsGML(
             3,
             ST_Transform(
               b.geltungsbereich,
---              COALESCE ((b.geltungsbereich).flaeche,(b.geltungsbereich).multiflaeche),
               {$konvertierung->get('output_epsg')}),
               {$konvertierung->get('geom_precision')},
               32) AS envelope
@@ -182,9 +170,8 @@ class Gml_builder {
 
       // Rueckbezug zu RP_Plan
       $gmlElemInner = "<{$xplan_ns_prefix}gehoertZuPlan xlink:href=\"#GML_{$bereich['gehoertzuplan']}\"/>";
-
       // alle uebrigen Attribute ausgeben
-      $gmlElemInner .= $this->generateGmlForAttributes($bereich, $bereich_attribs);
+      $gmlElemInner .= $this->generateGmlForAttributes($bereich, $bereich_attribs, XPLAN_MAX_NESTING_DEPTH);
 
       $rp_bereich = $gmlElemOpenTag . ">" . $gmlElemInner;
 
@@ -252,28 +239,12 @@ class Gml_builder {
             ST_AsGML(
                 ST_Reverse(ST_Transform(
                   ft.position,
---                  COALESCE(
---                    (ft.position).punkt,
---                    (ft.position).multipunkt,
---                    (ft.position).linie,
---                    (ft.position).multilinie,
---                    (ft.position).flaeche,
---                    (ft.position).multiflaeche
---                    ),
                   {$konvertierung->get('output_epsg')})),
                 {$konvertierung->get('geom_precision')}) AS gml_position,
             ST_AsGML(
               3,
               ST_Transform(
                 ft.position,
---                  COALESCE(
---                    (ft.position).punkt,
---                    (ft.position).multipunkt,
---                    (ft.position).linie,
---                    (ft.position).multilinie,
---                    (ft.position).flaeche,
---                    (ft.position).multiflaeche
---                    ),
                 {$konvertierung->get('output_epsg')}),
               {$konvertierung->get('geom_precision')},
               32) AS envelope
@@ -308,7 +279,7 @@ class Gml_builder {
         }
 
         // alle uebrigen Attribute ausgeben
-        $objekt_gml .= $this->generateGmlForAttributes($gml_object, $objekt_attribs);
+        $objekt_gml .= $this->generateGmlForAttributes($gml_object, $objekt_attribs, XPLAN_MAX_NESTING_DEPTH);
         # close and write FeatureMember
         $objekt_gml .= "</{$xplan_ns_prefix}{$gml_className}>";
 
@@ -331,12 +302,13 @@ class Gml_builder {
     return $this->wrapWithElement("gml:featureMember",$inner);
   }
 
-  function generateGmlForAttributes($gml_object, $uml_attribute_info) {
+  function generateGmlForAttributes($gml_object, $uml_attribute_info, $depth) {
+    if (($depth) < 0) return '';
     $xplan_ns_prefix = XPLAN_NS_PREFIX ? XPLAN_NS_PREFIX.':' : '';
     $gmlStr = '';
     foreach ($uml_attribute_info as  $uml_attribute) {
       // leere Felder auslassen
-      if (strlen($gml_object[$uml_attribute['col_name']]) == 0) continue;
+      if (empty($gml_object[$uml_attribute['col_name']])) continue;
 
       $lowercaseName = strtolower($uml_attribute['name']);
       switch ($uml_attribute['type_type']) {
@@ -356,24 +328,40 @@ class Gml_builder {
               case NULL:
                 break;
               case "CodeList":
-                $gml_value_array = explode(',',substr($gml_object[$uml_attribute['col_name']], 1, -1));
+                $gml_value_array = is_array($gml_object[$uml_attribute['col_name']])
+                  ? $gml_object[$uml_attribute['col_name']]
+                  : explode(',',substr($gml_object[$uml_attribute['col_name']], 1, -1));
                 $codeSpaceUri = $gml_value_array[0];
                 $code_value = $gml_value_array[1];
                 $gmlStr .= "<{$xplan_ns_prefix}{$uml_attribute['uml_name']} codeSpace=\"$codeSpaceUri\">$code_value</{$xplan_ns_prefix}{$uml_attribute['uml_name']}>";
                 break;
               case "DataType":
-break;
+                $gml_attrib_str = '';
+                // check whether attribute value is already parsed into an array
+                if (is_array($gml_object[$uml_attribute['col_name']]))
+                  $value_array = $gml_object[$uml_attribute['col_name']];
+                else // parse attribute value if not yet done
+                  $value_array = $this->parseCompositeDataType($gml_object[$uml_attribute['col_name']]);
+
                 // fetch information about attributes and their properties
                 $datatype_attribs = $this->typeInfo->getInfo($uml_attribute['type']);
-                $gml_value_array = explode(',',substr($gml_object[$uml_attribute['col_name']], 1, -1));
-                $gml_attrib_str = "";
-                foreach ($datatype_attribs as $dt_attrib){
-                  $attrib_value = $gml_value_array[$dt_attrib['sequence']];
-                  // leere Attribute auslassen
-                  if (strlen($attrib_value) == 0) continue;
-                  $gml_attrib_str .= $this->wrapWithElement(
-                    "{$xplan_ns_prefix}{$dt_attrib['uml_name']}",
-                    $attrib_value);
+                // retrieve attribute names
+                $value_array_keys = array_column($datatype_attribs,'col_name');
+
+                // wrap singular values into an array in order to
+                // unify the processing of singular and multiple values
+                if (!$uml_attribute['is_array']) {
+                  $aux_array = array(0 => $value_array);
+                  $value_array = $aux_array;
+                }
+                // leere Datentypen auslassen
+                if (!$value_array) break;
+                // process composite data type
+                foreach ($value_array as $single_value) {
+                  // associate values with attribute names
+                  $single_value = array_combine($value_array_keys, $single_value);
+                  // generate GML output (!!! recursive !!!)
+                  $gml_attrib_str .= $this->generateGmlForAttributes($single_value, $datatype_attribs,$depth-1);
                 }
                 // leere Datentypen auslassen
                 if (strlen($gml_attrib_str) == 0) break;
@@ -454,6 +442,49 @@ break;
         $pad    += $indent;
     endwhile;
     return $result;
+  }
+
+  /*
+  * Diese Funktion parses den Inhalt des übergebenen
+  * Query-Results für Spalten vom Typ Composite Datatype
+  * und gibt die Werte in einem (ggf. verschachtelten)
+  * Array zurück.
+  */
+  function parseCompositeDataType($data_string) {
+    $value_array = array();
+    $stack = array();
+    $curr_value = '';
+    // prepare data string
+    $value_str = substr($data_string, 1, -1);
+    $value_str = str_replace('\"', '"', $value_str);
+    $value_str = str_replace('"(', '(', $value_str);
+    $value_str = str_replace(')"', ')', $value_str);
+    // return if no data
+    if (strlen($value_str) == 0) return;
+    // cast string to array
+    $value_str_array = str_split($value_str);
+    // parse character by character
+    foreach ($value_str_array as $char) {
+      switch ($char) {
+        case '(':
+          array_push($stack,$value_array);
+          $value_array = array();
+          break;
+        case ')':
+          $value_array[] = $curr_value;
+          $curr_value = $value_array;
+          $value_array = array_pop($stack);
+          break;
+        case ',':
+          $value_array[] = $curr_value;
+          $curr_value = '';
+          break;
+        default:
+          $curr_value .= $char;
+      }
+    }
+    $value_array[] = $curr_value;
+    return $value_array;
   }
 }
 ?>
