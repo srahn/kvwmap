@@ -34,6 +34,7 @@ class TypeInfo {
             'col_name'   => $attribInfo[$lowercaseName]['name'],
             'type'       => $attribInfo[$lowercaseName]['type'],
             'type_type'  => $attribInfo[$lowercaseName]['type_type'],
+            'is_array'   => $attribInfo[$lowercaseName]['is_array'] == 't',
             'stereotype' => $this->getStereotype($attribInfo[$lowercaseName]['type']),
             'sequence'   => $sequence,
             'origin'     => $uml_attrib['origin']
@@ -58,7 +59,7 @@ class TypeInfo {
       FROM $structure_schema.class_generalizations inner_inh
       INNER JOIN inheritance ON inheritance.xmi_id = inner_inh.child_id
       )
-      SELECT uc.name AS origin, ua.name AS name, ua.datatype AS stype, uc2.name AS ctype, dt.name AS dtype, tv.datavalue AS sequence, inheritance.order
+      SELECT uc.name AS origin, ua.name AS name, ua.datatype AS stype, ua.multiplicity_range_upper = '*' as is_array, uc2.name AS ctype, dt.name AS dtype, tv.datavalue AS sequence, inheritance.order
       FROM (SELECT *, row_number() OVER () AS order FROM inheritance) AS inheritance
       INNER JOIN $structure_schema.uml_classes uc ON uc.xmi_id = inheritance.xmi_id
       INNER JOIN $structure_schema.uml_attributes ua ON ua.uml_class_id = uc.id
