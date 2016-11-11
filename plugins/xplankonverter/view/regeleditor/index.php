@@ -15,32 +15,32 @@
 		<input type="hidden" id="field_id" value="<? echo $_REQUEST['field_id']; ?>">
     <h1>Regeleditor</h1>
     <!-- Reload-->
-    <a onClick="reloadPage()" href="" class="float-right" title="Lädt die Seite neu und löscht alle Einträge"><i class="fa fa-undo"></i></a>
+    <a onClick="reloadPage()" href="" class="float-right" title="Lädt die Seite neu und löscht alle Einträge"><i class="fa fa-undo fa-lg"></i></a>
     <br>
     <!-- Info -->
-    <a onClick="infoPage()" class="float-right" title="Info"><i class="fa fa-info"></i></a>
+    <a onClick="infoPage()" class="float-right" title="Info"><i class="fa fa-info fa-lg"></i></a>
     <div id="myModal" class="modal">
     <!-- Modal content -->
       <div class="modal-content">
         <span class="close">×</span>
         <h3>Shape2XPlan SQL-Query Builder</h3>
         <b>Dokumentation</b><br><hr>
-        <i class="fa fa-undo"></i> Neu laden<br>
+        <i class="fa fa-undo fa-lg"></i> Neu laden<br>
         Lädt die Seite neu und leert alle Eingaben.<br><br>
-        <i class="fa fa-exclamation-triangle"></i> Warnung<br>
+        <i class="fa fa-exclamation-triangle fa-lg"></i> Warnung<br>
         Warnungen sind Hinweise des Konverters zur korrekten Befüllung von XPlanung-Daten<br><br>
-        <i class="fa fa-filter"></i> WHERE<br>
+        <i class="fa fa-filter fa-lg"></i> WHERE<br>
         Trägt einen WHERE-Filter in die Abfrage ein. Dieser legt Konditionen fest, welche die Abfrage erfüllen muss.<br>
         Mehr Informationen zur WHERE Kondition:
         https://www.postgresql.org/docs/9.5/static/sql-select.html#SQL-WHERE<br><br>
-        <i class="fa fa-plus"></i> Hinzufügen<br>
+        <i class="fa fa-plus fa-lg"></i> Hinzufügen<br>
         Bearbeitet ein XPlanung-Attribut<br><br>
-        <i class="fa fa-question-circle"></i> Shape-Information<br>
+        <i class="fa fa-question-circle fa-lg"></i> Shape-Information<br>
         Zeigt bis zu hundert einzigartige Werte einer Shape-Datei an.<br>
         Lässt sich ein und ausschalten.<br><br>
-        <i class="fa fa-level-up"></i> Hinzufügen und Beenden<br>
+        <i class="fa fa-level-up fa-lg"></i> Hinzufügen und Beenden<br>
         Beendet die Eingabe weiterer Werte für ein Attribut.<br><br>
-        <i class="fa fa-trash-o"></i> Verwerfen<br>
+        <i class="fa fa-trash-o fa-lg"></i> Verwerfen<br>
         Verwirft ein zugewiesenes Attribut oder ein sich in der Zuweisung befindliches Attribut<br><br>
       </div>
     </div>
@@ -48,9 +48,10 @@
     <div id="fehler_area"></div>
     <!-- Warnungen -->
     <div id="warnung_area">
-      <div id="Warnung_1"><i class="fa fa-exclamation-triangle"> Es muss eine XPlan-Klasse ausgewählt werden!</i></div>
-      <div id="Warnung_2"><i class="fa fa-exclamation-triangle"> Es muss eine Shape-Datei ausgewählt werden!</i></div>
-      <div id="Warnung_3" style="display: none"><i class="fa fa-exclamation-triangle"> Attribute mit der Multiplizität 1 müssen immer befüllt sein!</i></div>
+      <div id="Warnung_1"><i class="fa fa-exclamation-triangle fa-lg"> Es muss eine XPlan-Klasse ausgewählt werden!</i></div>
+      <div id="Warnung_2"><i class="fa fa-exclamation-triangle fa-lg"> Es muss eine Shape-Datei ausgewählt werden!</i></div>
+      <div id="Warnung_3" style="display: none"><i class="fa fa-exclamation-triangle fa-lg"> Das Attribut rechtscharakter ist ein Pflichtattribut und muss immer befüllt sein!</i></div>
+       <div id="Warnung_4" style="display: none"><i class="fa fa-exclamation-triangle fa-lg"> Das Attribut typ ist ein Pflichtattribut für Zentrale Orte und muss immer befüllt sein!</i></div>
     </div>
     <!-- SQL-Ausgabefenster -->
     <div id="sql_area" class="ganze-breite" style="display: none">
@@ -71,8 +72,8 @@
         </div>
         <!-- WHERE-Filter-->
         <!-- Filter Erstellen u. Löschen-->
-        <button id="filter" onClick="filterEintragen()" title="Fügt der Regel einen Filter in Form einer WHERE Kondition hinzu, um nur bestimmte Teile einer Shape-Datei zu verwenden"><i class="fa fa-filter"></i></button>
-        <button id="filterloeschen" onClick="filterLoeschen()" title="Löscht alle WHERE-Konditions-Filter in der Regel" style="display:none"><i class="fa fa-trash-o"></i></button>
+        <button id="filter" onClick="filterEintragen()" title="Fügt der Regel einen Filter in Form einer WHERE Kondition hinzu, um nur bestimmte Teile einer Shape-Datei zu verwenden"><i class="fa fa-filter fa-lg"></i></button>
+        <button id="filterloeschen" onClick="filterLoeschen()" title="Löscht alle WHERE-Konditions-Filter in der Regel" style="display:none"><i class="fa fa-trash-o fa-lg"></i></button>
         <!-- Filter Zuweisung -->
         <span id="where_zuweisung" style="display:none">
           <span id='where_zuweisung_shp_attribute'></span><!-- Zuweisung der SHP-Attribute durch Ajax -->
@@ -86,8 +87,8 @@
           <span id ="where_compare_value"></span>
           <input id="where_like_eingabe" style="display:none"></input>
           <!-- hier noch Integer und Distinct Values von Shape als Eingabe ermöglichen-->
-          <button id="where_and_add" onClick="whereEintragenAnd()" title="Wert hinzufuegen und weiteren Wert aufnehmen"><i class="fa fa-plus"></i></button>
-          <button id="where_add" onClick="whereEintragen()" title="Wert hinzufuegen"><i class="fa fa-level-up"></i></button>
+          <button id="where_and_add" onClick="whereEintragenAnd()" title="Wert hinzufuegen und weiteren Wert aufnehmen"><i class="fa fa-plus fa-lg"></i></button>
+          <button id="where_add" onClick="whereEintragen()" title="Wert hinzufuegen"><i class="fa fa-level-up fa-lg"></i></button>
         </span>
       </div>
     </div>
@@ -107,11 +108,11 @@
             </select>
             <!-- Fester Wert (Text) -->
             <input id="fester_wert_text" style="display: none"></input>
-            <button id="fester_wert_text_array_add" style="display:none" onClick="festenWertTextEintragen(this.id)" title="Wert hinzufuegen und weiteren Wert aufnehmen"><i class="fa fa-plus" ></i></button>
-            <button id="fester_wert_text_add" style="display:none" onClick="festenWertTextEintragen(this.id)" title="Wert hinzufuegen"><i class="fa fa-level-up"></i></button>
+            <button id="fester_wert_text_array_add" style="display:none" onClick="festenWertTextEintragen(this.id)" title="Wert hinzufuegen und weiteren Wert aufnehmen"><i class="fa fa-plus fa-lg" ></i></button>
+            <button id="fester_wert_text_add" style="display:none" onClick="festenWertTextEintragen(this.id)" title="Wert hinzufuegen"><i class="fa fa-level-up fa-lg"></i></button>
             <!-- Fester Wert (Integer) -->
             <input id="fester_wert_integer" type="text" style="display: none" onkeypress='return event.charCode >= 48 && event.charCode <= 57'></input> <!-- Legt fest, dass nur Zahlen eingegeben werden können-->
-            <button id="fester_wert_integer_add" style="display:none" onClick="festenWertEintragenInteger()" title="Wert hinzufuegen"><i class="fa fa-level-up"></i></button>
+            <button id="fester_wert_integer_add" style="display:none" onClick="festenWertEintragenInteger()" title="Wert hinzufuegen"><i class="fa fa-level-up fa-lg"></i></button>
             <!-- Fester Wert: Boolean -->
             <select id="fester_wert_boolean" style="display:none" onChange="festenWertEintragenBoolean()">
               <option value="">Boolean-Wert waehlen ...</option>
@@ -140,23 +141,26 @@
               dann
               <!-- Hier statt neuen Wenn Dann Selector die bereits existierenden Selektoren anderer Abfragen darstellen?-->
               <input id="wenn_dann_value_text_selector" style="display:none"></input>
-              <button id="wenn_dann_text_array_add" style="display:none" onClick="wennDannEintragen(this.id)" title="Wert hinzufuegen und weiteren Wert aufnehmen"><i class="fa fa-plus" ></i></button>
-              <button id="wenn_dann_text_add" style="display:none" onClick="wennDannEintragen(this.id)" title="Wert hinzufuegen"><i class="fa fa-level-up"></i></button>
+              <button id="wenn_dann_text_case_add" style="display:none" onClick="wennDannEintragen(this.id)" title="Wert hinzufuegen und weiteren Case aufnehmen"><i class="fa fa-list fa-lg" ></i></button>
+              <button id="wenn_dann_text_array_add" style="display:none" onClick="wennDannEintragen(this.id)" title="Wert hinzufuegen und weiteren Wert aufnehmen"><i class="fa fa-plus fa-lg" ></i></button>
+              <button id="wenn_dann_text_add" style="display:none" onClick="wennDannEintragen(this.id)" title="Wert hinzufuegen"><i class="fa fa-level-up fa-lg"></i></button>
               <input id="wenn_dann_value_integer_selector" style="display:none" onkeypress='return event.charCode >= 48 && event.charCode <= 57'></input>
-              <button id="wenn_dann_integer_add" style="display:none" onClick="wennDannEintragen(this.id)" title="Wert hinzufuegen"><i class="fa fa-level-up" ></i></button>
+              <button id="wenn_dann_integer_case_add" style="display:none" onClick="wennDannEintragen(this.id)" title="Wert hinzufuegen und weiteren Case aufnehmen"><i class="fa fa-list fa-lg" ></i></button>
+              <button id="wenn_dann_integer_add" style="display:none" onClick="wennDannEintragen(this.id)" title="Wert hinzufuegen"><i class="fa fa-level-up fa-lg" ></i></button>
               <select id="wenn_dann_value_boolean_selector" style="display:none">
                 <option value="">Boolean-Wert waehlen ...</option>
                 <option value="true">true</option>
                 <option value="false">false</option>
               </select>
-              <button id="wenn_dann_boolean_add" style="display:none" onClick="wennDannEintragen(this.id)" title="Wert hinzufuegen"><i class="fa fa-level-up"></i></button>
+              <button id="wenn_dann_boolean_case_add" style="display:none" onClick="wennDannEintragen(this.id)" title="Wert hinzufuegen und weiteren Case aufnehmen"><i class="fa fa-list fa-lg" ></i></button>
+              <button id="wenn_dann_boolean_add" style="display:none" onClick="wennDannEintragen(this.id)" title="Wert hinzufuegen"><i class="fa fa-level-up fa-lg"></i></button>
               <input id="wenn_dann_value_codelisten_selector" style="display:none"></input>
-              <button id="wenn_dann_codelisten_add" style="display:none" onClick="wennDannEintragen(this.id)" title="Wert hinzufuegen"><i class="fa fa-level-up"></i></button>
+              <button id="wenn_dann_codelisten_add" style="display:none" onClick="wennDannEintragen(this.id)" title="Wert hinzufuegen"><i class="fa fa-level-up fa-lg"></i></button>
               <!-- Hier werden Enumerationswerte mit Ajax als Optionen eingetragen-->
               <span id ="wenn_dann_enumeration_select"></span>
-              <button id="wenn_dann_enumeration_case_add" style="display:none" onClick="wennDannEintragen(this.id)" title="Wert hinzufuegen und weiteren Case aufnehmen"><i class="fa fa-list" ></i></button>
-              <button id="wenn_dann_enumeration_array_add" style="display:none" onClick="wennDannEintragen(this.id)" title="Wert hinzufuegen und weiteren Wert aufnehmen"><i class="fa fa-plus" ></i></button>
-              <button id="wenn_dann_enumeration_add" style="display:none" onClick="wennDannEintragen(this.id)" title="Wert hinzufuegen"><i class="fa fa-level-up"></i></button>
+              <button id="wenn_dann_enumeration_case_add" style="display:none" onClick="wennDannEintragen(this.id)" title="Wert hinzufuegen und weiteren Case aufnehmen"><i class="fa fa-list fa-lg" ></i></button>
+              <button id="wenn_dann_enumeration_array_add" style="display:none" onClick="wennDannEintragen(this.id)" title="Wert hinzufuegen und weiteren Wert aufnehmen"><i class="fa fa-plus fa-lg" ></i></button>
+              <button id="wenn_dann_enumeration_add" style="display:none" onClick="wennDannEintragen(this.id)" title="Wert hinzufuegen"><i class="fa fa-level-up fa-lg"></i></button>
             </span>
           </span>
           <!-- Externe Codeliste -->
@@ -165,7 +169,7 @@
             <input id="externe_codeliste_quelle"></input>
             Wert: 
             <input id="externe_codeliste_wert"></input>
-            <button id="externe_codeliste_add" onClick="externeCodelisteEintragen()" title="Wert hinzufuegen"><i class="fa fa-level-up"></i></button>
+            <button id="externe_codeliste_add" onClick="externeCodelisteEintragen()" title="Wert hinzufuegen"><i class="fa fa-level-up fa-lg"></i></button>
           </span>
           <!-- Fügt Tables für 3 komplexe Typen ExterneReferenz, GenerAttribut und Hoehenbezug ein-->
           <span id="komplexer_wert"><?include 'komplexerWertZusatz.html';?></span>
@@ -173,7 +177,7 @@
       </div>
       <div class="breite100px box">
         <!--<button id="add_zuweisung" title= "Weitere Zuweisung für dieses Attribut hinzufuegen" onClick="weitereZuweisung()" style="display:none"><i class="fa fa-plus"></i></button>-->
-        <button id="remove_zuweisung" title= "Attributzuweisung löschen" onClick="resetAttributzuweisungen()"><i class="fa fa-trash-o"></i></button>
+        <button id="remove_zuweisung" title= "Attributzuweisung löschen" onClick="resetAttributzuweisungen()"><i class="fa fa-trash-o fa-lg"></i></button>
       </div>
     </div>
     <div id="source_and_target_area">
@@ -275,7 +279,7 @@
             echo '<td><div id="geom_' . $shp_table . '">' . $geom . '</td>';
           }
         }
-        echo '<td align="center"><button id ="distinct_' . $row[0] . '" title="Zeigt die ersten 100 Werte an" onclick="distinctValues(this.id)"><i class="fa fa-question-circle"></i></button>';
+        echo '<td align="center"><button id ="distinct_' . $row[0] . '" title="Zeigt die ersten 100 Werte an" onclick="distinctValues(this.id)"><i class="fa fa-question-circle fa-lg"></i></button>';
         echo '<span id="distinctValues_' . $shp_table . "_" .  $row[0] . '" style="display: none">';
         $sqlDistinct = "
           SELECT 

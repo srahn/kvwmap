@@ -71,21 +71,15 @@ h3 {
   float: right;
 }
 
-#sqlvalidation {
-  color: #20954F;
-  text-shadow: 1px 1px 1px #ccc;
-  font-size: 1.5em;
-}
-
-#Warnung_1, #Warnung_2, #Warnung_3 {
+#Warnung_1, #Warnung_2, #Warnung_3, #Warnung_4 {
   color: #CF4B2D;
   text-shadow: 1px 1px 1px #ccc;
 }
+
 #target, #source {
   color: #000000;
   text-shadow: 1px 1px 1px #ccc;
   font-size: 1em;
-}
 }
 
 .fa-plus:before, .fa-undo:before, .fa-info:before, .fa-filter:before, .fa-trash-o:before, .fa-question-circle:before, .fa-level-up:before, .fa-list:before {
