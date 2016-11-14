@@ -11174,6 +11174,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					foreach($table as $oid => $attributes){
 						if(count($attributes) > 0){
 							if(!$layerset[$layer_id][0]['maintable_is_view'])$sql = "LOCK TABLE ".$tablename." IN SHARE ROW EXCLUSIVE MODE;";
+							else $sql = '';
 							$sql .= "UPDATE ".$tablename." SET ";
 							$i = 0;
 							foreach($attributes as $attribute => $value){
