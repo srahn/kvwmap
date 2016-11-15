@@ -278,7 +278,7 @@ class Nachweis {
 			$nachweise = $this->getNachweise(NULL,NULL,$gemarkung,$stammnr,NULL,$fortf,$art,NULL,'indiv_nr',NULL,NULL,NULL,NULL,NULL,NULL, $flur, true,NULL,NULL, $blattnr);
 		}
 		else{
-			$nachweise = $this->getNachweise(NULL,NULL,$gemarkung,NULL,$rissnr,$fortf,$art,NULL,'indiv_nr',NULL,NULL,NULL,NULL,NULL,NULL, $flur, true,NULL,NULL, $blattnr);
+			$nachweise = $this->getNachweise(NULL,NULL,$gemarkung,NULL,$rissnummer,$fortf,$art,NULL,'indiv_nr',NULL,NULL,NULL,NULL,NULL,NULL, $flur, true,NULL,NULL, $blattnr);
 		}
 		if($this->Dokumente[0]['id'] != '' AND $id != $this->Dokumente[0]['id']){
 			$errmsg.='Es existiert bereits ein Nachweis mit diesen Parametern.';
