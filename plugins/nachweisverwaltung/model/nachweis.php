@@ -275,10 +275,10 @@ class Nachweis {
 		# Test ob schon ein Nachweis mit dieser Kombination existiert
 		if(NACHWEIS_SECONDARY_ATTRIBUTE == 'fortfuehrung')$fortf = $fortfuehrung;
 		if(NACHWEIS_PRIMARY_ATTRIBUTE == 'stammnr'){
-			$nachweise = $this->getNachweise(NULL,NULL,$gemarkung,$stammnr,NULL,$fortf,$art,NULL,'indiv_nr',NULL,NULL,NULL,NULL,NULL,NULL, $flur, true,NULL,NULL, $blattnr);
+			$nachweise = $this->getNachweise(NULL,NULL,$gemarkung,$stammnr,NULL,$fortf,NULL,NULL,'indiv_nr',NULL,NULL,NULL,NULL,NULL,NULL, $flur, true,NULL,NULL, $blattnr);
 		}
 		else{
-			$nachweise = $this->getNachweise(NULL,NULL,$gemarkung,NULL,$rissnummer,$fortf,$art,NULL,'indiv_nr',NULL,NULL,NULL,NULL,NULL,NULL, $flur, true,NULL,NULL, $blattnr);
+			$nachweise = $this->getNachweise(NULL,NULL,$gemarkung,NULL,$rissnummer,$fortf,NULL,NULL,'indiv_nr',NULL,NULL,NULL,NULL,NULL,NULL, $flur, true,NULL,NULL, $blattnr);
 		}
 		if($this->Dokumente[0]['id'] != '' AND $id != $this->Dokumente[0]['id']){
 			$errmsg.='Es existiert bereits ein Nachweis mit diesen Parametern.';
