@@ -178,9 +178,9 @@ define('PUNKTDATEINAME','festpunkte.csv');
 define('PUNKTDATEIPATH',SHAPEPATH.'festpunkte/');
 define('PUNKTDATEIARCHIVPATH',PUNKTDATEIPATH.'archiv/');
 define('KVZAUSGABEDATEINAME','festpunkte.kvz');
-define('KVZKOPF', '# Datenaustauschformat M-V
-#LS PKZ            VMA  RECHTSWERT    HOCHWERT    HOEHE H H  L L
-#                                                       Z G  Z G');
+define('KVZKOPF', '# Datenaustauschformat Landkreis Rostock
+#KST PKN             VMA  RECHTSWERT   HOCHWERT    HOEHE    GST  VWL  DES  ART
+# ');																																									# in Version 2.6 angepasst
 define('SKIZZEN_DATEI_TYP','tif');            # Version 1.6.8
 # Pfad zu den WLDGE Dateien
 define('WLDGEFILEPATH',SHAPEPATH.'alb/');
