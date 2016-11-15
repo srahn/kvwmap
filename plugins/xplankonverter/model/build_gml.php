@@ -158,8 +158,9 @@ class Gml_builder {
               {$konvertierung->get('geom_precision')},
               32) AS envelope
         FROM $contentScheme.rp_bereich b
-        WHERE b.konvertierung_id = {$konvertierung->get('id')}";
-    #echo $sql."<br>";
+          JOIN $contentScheme.rp_plan p ON b.gehoertzuplan = p.gml_id::text
+        WHERE p.konvertierung_id = {$konvertierung->get('id')}";
+    #echo $sql."\n";
     $bereiche = pg_query($this->database->dbConn, $sql);
 
     // fetch information about attributes and their properties
@@ -189,11 +190,11 @@ class Gml_builder {
 
       // alle gml_ids von RP_Objekten finden die mit dem Bereich verknüpft sind
       // und im RP_Bereich Element verlinken
-      $_sql = "
-          SELECT gml_id
-          FROM $contentScheme.xp_bereich
-          WHERE ANY(gehoertzubereich) = {$bereich['gml_id']}";
       $sql = "
+          SELECT gml_id
+          FROM $contentScheme.xp_objekt
+          WHERE '{$bereich['gml_id']}' = ANY (gehoertzubereich)";
+      $_sql = "
           SELECT b2o.xp_objekt_gml_id AS gml_id
           FROM
             $contentScheme.xp_bereich AS b JOIN

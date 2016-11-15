@@ -7,12 +7,12 @@
 	global $strNewEmbeddedPK;
 	global $hover_preview;
 
-	function attribute_name($layer_id, $attributes, $j, $k, $fontsize){
+	function attribute_name($layer_id, $attributes, $j, $k, $fontsize, $sort_links = true){
 		$datapart .= '<table ';
 		if($attributes['group'][0] != '' AND $attributes['arrangement'][$j+1] != 1 AND $attributes['arrangement'][$j-1] != 1 AND $attributes['arrangement'][$j] != 1)$datapart .= 'width="200px"';
 		else $datapart .= 'width="100%"';
 		$datapart .= '><tr style="border: none"><td>';
-		if(!in_array($attributes['form_element_type'][$j], array('SubFormPK', 'SubFormEmbeddedPK', 'SubFormFK', 'dynamicLink'))){
+		if($sort_links AND !in_array($attributes['form_element_type'][$j], array('SubFormPK', 'SubFormEmbeddedPK', 'SubFormFK', 'dynamicLink'))){
 			$datapart .= '<a style="font-size: '.$fontsize.'px" title="Sortieren nach '.$attributes['alias'][$j].'" href="javascript:change_orderby(\''.$attributes['name'][$j].'\', '.$layer_id.');">
 							'.$attributes['alias'][$j].'</a>';
 		}
@@ -38,7 +38,7 @@
 		return $datapart;
 	}
 
-	function attribute_value(&$gui, $layer_id, $attributes, $j, $k, $dataset, $size, $select_width, $fontsize, $change_all = false, $onchange = NULL, $field_name = NULL){
+	function attribute_value(&$gui, $layer_id, $attributes, $j, $k, $dataset, $size, $select_width, $fontsize, $change_all = false, $onchange = NULL, $field_name = NULL, $field_id = NULL){
 		global $strShowPK;
 		global $strNewPK;
 		global $strShowFK;
@@ -68,17 +68,16 @@
 			$b = $j+1;
 			while($a > $j-4 AND $attributes['arrangement'][$a] == 1)$a--;		# 4 vorwärts gucken
 			while($b < $j+4 AND $attributes['arrangement'][$b] == 1)$b++;		# 4 rückwärts gucken
-			$attributes_in_row = $b-$a;
-			if($attributes['labeling'][$j] == 0)$size=40;
-			else $size = 60;
+			$attributes_in_row = $b-$a;			
+			#if($attributes['labeling'][$j] != 0)$size = $size * 1.5;
 			$size = $size/$attributes_in_row;
-			$sw = 8*$size;
-			$select_width = 'width: '.$sw.'px;';
+			$sw = 20*$size;
+			$select_width = 'max-width: '.$sw.'px;';
 		}
 		
 		###### Array-Typ #####
 		if(POSTGRESVERSION >= 930 AND substr($attributes['type'][$j], 0, 1) == '_'){
-			if($field_name != NULL)$id = $field_name.'_'.$k;		# wenn field_name übergeben wurde (nicht die oberste Ebene)
+			if($field_id != NULL)$id = $field_id;		# wenn field_id übergeben wurde (nicht die oberste Ebene)
 			else $id = $k.'_'.$name;	# oberste Ebene
 			$datapart .= '<input type="hidden" title="'.$alias.'" name="'.$fieldname.'" id="'.$id.'" onchange="'.$onchange.'" value="'.htmlspecialchars($value).'">';
 			$datapart .= '<div id="'.$id.'_elements" style="">';
@@ -94,7 +93,7 @@
 				if(is_array($elements[$e]) OR is_object($elements[$e]))$elements[$e] = json_encode($elements[$e]);		# ist ein Array oder Objekt (also entweder ein Array-Typ oder ein Datentyp) und wird zur Übertragung wieder encodiert
 				$dataset2[$attributes2['name'][$j]] = $elements[$e];
 				$datapart .= '<div id="div_'.$id.'_'.$e.'" style="display: '.($e==-1 ? 'none' : 'block').'"><table cellpadding="0" cellspacing="0"><tr><td>';
-				$datapart .= attribute_value($gui, $layer_id, $attributes2, $j, $k, $dataset2, $size, $select_width, $fontsize, $change_all, $onchange2, $elements_fieldname);
+				$datapart .= attribute_value($gui, $layer_id, $attributes2, $j, $k, $dataset2, $size, $select_width, $fontsize, $change_all, $onchange2, $elements_fieldname, $elements_fieldname.'_'.$e);
 				$datapart .= '</td>';
 				if($attributes['privileg'][$j] == '1' AND !$lock[$k]){
 					$datapart .= '<td valign="top"><a href="#" onclick="removeArrayElement(\''.$id.'\', \'div_'.$id.'_'.$e.'\');'.$onchange2.'return false;"><img style="width: 18px" src="'.GRAPHICSPATH.'datensatz_loeschen.png"></a></td>';
@@ -111,7 +110,7 @@
 		
 		###### Nutzer-Datentyp #####
 		if(is_numeric($attributes['type'][$j])){
-			if($field_name != NULL)$id = $field_name.'_'.($name == '' ? '' : $name.'_').$k;		# wenn field_name übergeben wurde (nicht die oberste Ebene)
+			if($field_id != NULL)$id = $field_id;		# wenn field_id übergeben wurde (nicht die oberste Ebene)
 			else $id = $k.'_'.$name;	# oberste Ebene
 			$datapart .= '<input type="hidden" title="'.$alias.'" name="'.$fieldname.'" id="'.$id.'" onchange="'.$onchange.'" value="'.htmlspecialchars($value).'">';
 			$type_attributes = $attributes['type_attributes'][$j];
@@ -130,7 +129,7 @@
 				$type_attributes['privileg'][$e] = $attributes['privileg'][$j];
 				if($type_attributes['alias'][$e] == '')$type_attributes['alias'][$e] = $type_attributes['name'][$e];
 				$datapart .= '<tr><td valign="top" class="gle_attribute_name"><table><tr><td>'.$type_attributes['alias'][$e].'</td></tr></table></td>';
-				$datapart .= '<td class="gle_attribute_value">'.attribute_value($gui, $layer_id, $type_attributes, $e, NULL, $dataset2, $tsize, $select_width, $fontsize, $change_all, $onchange2, $elements_fieldname).'</td></tr>';
+				$datapart .= '<td class="gle_attribute_value">'.attribute_value($gui, $layer_id, $type_attributes, $e, NULL, $dataset2, $tsize, $select_width, $fontsize, $change_all, $onchange2, $elements_fieldname, $elements_fieldname.'_'.$e).'</td></tr>';
 			}
 			$datapart .= '</tr></table>';
 			return $datapart;
@@ -216,14 +215,16 @@
 					if($gui->new_entry != true){
 						$datapart .= '<td width="100%" align="right">';
 						if($value != ''){
-							$datapart .= '&nbsp;<a href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
+							$params = 'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j].'&subform_link=true';
 							for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
-								$datapart .= '&value_'.$attributes['subform_pkeys'][$j][$p].'='.$dataset[$attributes['subform_pkeys'][$j][$p]];
-								$datapart .= '&operator_'.$attributes['subform_pkeys'][$j][$p].'==';
+								$params .= '&value_'.$attributes['subform_pkeys'][$j][$p].'='.$dataset[$attributes['subform_pkeys'][$j][$p]];
+								$params .= '&operator_'.$attributes['subform_pkeys'][$j][$p].'==';
 							}
-							$datapart .= 	'&subform_link=true\')"';
-							if($attributes['no_new_window'][$j] != true){
-								$datapart .= 	' target="_blank"';
+							if($attributes['no_new_window'][$j] == true){
+								$datapart .= '&nbsp;<a href="javascript:overlay_link(\''.$params.'\');"';
+							}
+							else{	
+								$datapart .= '&nbsp;<a href="index.php?'.$params.'" target="_blank"';
 							}
 							$datapart .= 	' class="buttonlink"><span>'.$strShowPK.'</span></a>&nbsp;';
 						}
@@ -535,7 +536,7 @@
 						$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
 					}
 					else{
-						$datapart .= ' style="font-size: '.$fontsize.'px;"';
+						$datapart .= ' style="width: 100%; font-size: '.$fontsize.'px;"';
 					}
 					if($name == 'lock'){
 						$datapart .= ' type="hidden"';

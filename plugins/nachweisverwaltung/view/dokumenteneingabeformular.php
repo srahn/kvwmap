@@ -146,17 +146,17 @@ $legendheight = $this->map->height + 20;
 					<td colspan="2" style="border-top:1px solid #999999"><img width="290px" height="1px" src="<? echo GRAPHICSPATH; ?>leer.gif"></td>
 				</tr>					
 				<tr> 
-					<td colspan="2"><input type="radio" name="art" value="100"<?php if ($this->formvars['art']=='100') { ?> checked<?php } ?>>
+					<td colspan="2"><input type="radio" name="art" onchange="andere_art.value=''" value="100"<?php if ($this->formvars['art']=='100') { ?> checked<?php } ?>>
 						Fortführungsriss&nbsp;(FFR)
 					</td>
 				</tr>
 				<tr> 
-					<td colspan="2"><input type="radio" name="art" value="010"<?php if ($this->formvars['art']=='010') { ?> checked<?php } ?>>
+					<td colspan="2"><input type="radio" name="art" onchange="andere_art.value=''" value="010"<?php if ($this->formvars['art']=='010') { ?> checked<?php } ?>>
 						Koordinatenverzeichnis&nbsp;(KVZ)
 					</td>
 				</tr>
 				<tr> 
-					<td colspan="2"><input type="radio" name="art" value="001"<?php if ($this->formvars['art']=='001') { ?> checked<?php } ?>>
+					<td colspan="2"><input type="radio" name="art" onchange="andere_art.value=''" value="001"<?php if ($this->formvars['art']=='001') { ?> checked<?php } ?>>
 						Grenzniederschrift&nbsp;(GN)
 					</td>
 				</tr>
@@ -312,6 +312,7 @@ $legendheight = $this->map->height + 20;
 						<input type="hidden" name="flur_thematisch" value="<? echo $this->formvars['flur_thematisch']; ?>">
 						<input type="hidden" name="such_andere_art" value="<? echo $this->formvars['such_andere_art']; ?>">						
 						<INPUT TYPE="hidden" NAME="reset_layers" VALUE="">
+						<input type="hidden" name="layer_options_open" value="">
 					</td>
 				</tr>
 			</table>

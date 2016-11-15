@@ -24,7 +24,7 @@ class RP_Plan extends PgObject {
 
 	function get_bereiche() {
 		$bereiche = array();
-		$bereich = new Bereich($this->gui);
+		$bereich = new RP_Bereich($this->gui);
 		$bereiche = $bereich->find_where("
 			gehoertzuplan = '{$this->get('gml_id')}'
 		");

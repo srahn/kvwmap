@@ -63,7 +63,7 @@ class Nachweis {
     $this->database->begintransaction();        
 
     # 2. Prüfen der Eingabewerte
-    $ret=$this->pruefeEingabedaten($formvars['datum'],$formvars['VermStelle'],$formvars['art'],$formvars['gueltigkeit'],$formvars['stammnr'],$formvars['rissnummer'],$formvars['fortfuehrung'],$formvars['Blattformat'],$formvars['Blattnr'],$formvars['changeDocument'],$formvars['Bilddatei_name'],$formvars['pathlength'],$formvars['umring']);
+    $ret=$this->pruefeEingabedaten($formvars['id'], $formvars['datum'],$formvars['VermStelle'],$formvars['art'],$formvars['gueltigkeit'],$formvars['stammnr'],$formvars['rissnummer'],$formvars['fortfuehrung'],$formvars['Blattformat'],$formvars['Blattnr'],$formvars['changeDocument'],$formvars['Bilddatei_name'],$formvars['pathlength'],$formvars['umring'], $formvars['flurid'], $formvars['Blattnr']);
     if ($ret[0]) {
       # Fehler bei den Eingabewerten entdeckt.  
       #echo '<br>Ergebnis der Prüfung: '.$ret;
@@ -271,18 +271,23 @@ class Nachweis {
   	return $result;
   }
   
-  function pruefeEingabedaten($datum, $VermStelle, $art, $gueltigkeit, $stammnr, $rissnummer, $fortfuehrung, $Blattformat, $Blattnr, $changeDocument,$Bilddatei_name, $pathlength, $umring) {
-    #echo '<br>Starten der Funktion zum testen der Eingabedaten.';
-    # Test: wurde das Polgon für den raumbezug festgelegt?
+  function pruefeEingabedaten($id, $datum, $VermStelle, $art, $gueltigkeit, $stammnr, $rissnummer, $fortfuehrung, $Blattformat, $Blattnr, $changeDocument,$Bilddatei_name, $pathlength, $umring, $flur, $blattnr){
+		# Test ob schon ein Nachweis mit dieser Kombination existiert
+		if(NACHWEIS_SECONDARY_ATTRIBUTE == 'fortfuehrung')$fortf = $fortfuehrung;
+		if(NACHWEIS_PRIMARY_ATTRIBUTE == 'stammnr'){
+			$nachweise = $this->getNachweise(NULL,NULL,$gemarkung,$stammnr,NULL,$fortf,NULL,NULL,'indiv_nr',NULL,NULL,NULL,NULL,NULL,NULL, $flur, true,NULL,NULL, $blattnr);
+		}
+		else{
+			$nachweise = $this->getNachweise(NULL,NULL,$gemarkung,NULL,$rissnummer,$fortf,NULL,NULL,'indiv_nr',NULL,NULL,NULL,NULL,NULL,NULL, $flur, true,NULL,NULL, $blattnr);
+		}
+		if($this->Dokumente[0]['id'] != '' AND $id != $this->Dokumente[0]['id']){
+			$errmsg.='Es existiert bereits ein Nachweis mit diesen Parametern.';
+		}
+		
     if ($umring == ''){
       $errmsg.='Bitte legen Sie das Polygon für den einzuarbeitenden Nachweis fest! \n';
     }
-        
-    # Test:  Sind die X-Y-Werte als Arrays übegeben worden?
-    if (@is_array($pathy)!=1 OR @is_array($pathx)!=1){
-      $errmasg.='X-Y-Koordinaten wurden nicht oder falsch gesetzt! \n';
-    }
-    
+            
     # test auf korrekte Vermessungstelle 
     $sql='SELECT * FROM nachweisverwaltung.n_vermstelle WHERE id='.$VermStelle;
     $queryret=$this->database->execSQL($sql,4, 0);
@@ -704,7 +709,7 @@ class Nachweis {
     return $errmsg;
   }
   
-  function getNachweise($id,$polygon,$gemarkung,$stammnr,$rissnr,$fortf,$art_einblenden,$richtung,$abfrage_art,$order,$antr_nr, $datum = NULL, $VermStelle = NULL, $gueltigkeit = NULL, $datum2 = NULL, $flur = NULL, $flur_thematisch = NULL, $andere_art = NULL, $suchbemerkung = NULL) {
+  function getNachweise($id,$polygon,$gemarkung,$stammnr,$rissnr,$fortf,$art_einblenden,$richtung,$abfrage_art,$order,$antr_nr, $datum = NULL, $VermStelle = NULL, $gueltigkeit = NULL, $datum2 = NULL, $flur = NULL, $flur_thematisch = NULL, $andere_art = NULL, $suchbemerkung = NULL, $blattnr = NULL) {
 		$explosion = explode('~', $antr_nr);
 		$antr_nr = $explosion[0];
 		$stelle_id = $explosion[1];
@@ -904,6 +909,9 @@ class Nachweis {
 	      	if($fortf!=''){
 	          $sql.=" AND n.fortfuehrung=".(int)$fortf;
 	        }
+					if($blattnr!=''){
+	          $sql.=" AND n.blattnummer='".$blattnr."'";
+	        }					
           if($datum != ''){
 						if($datum2 != ''){
 							$sql.=" AND n.datum between '".$datum."' AND '".$datum2."'";

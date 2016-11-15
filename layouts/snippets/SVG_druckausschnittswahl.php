@@ -65,6 +65,7 @@
 	<input type="hidden" name="pathy" value="<?php echo $this->formvars['pathy']; ?>">
 	<input type="hidden" name="pathlength" value="<?php echo $this->formvars['pathlength']; ?>">
 	<input type="hidden" name="scale" value="<?php echo $this->user->rolle->pixsize; ?>">
+	<input type="hidden" name="layer_options_open" value="">
 
 <SCRIPT type="text/ecmascript"><!--
 
