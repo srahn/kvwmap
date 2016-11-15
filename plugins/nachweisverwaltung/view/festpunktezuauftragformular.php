@@ -13,11 +13,11 @@ else {
 <table width="100%" border="0" cellspacing="0" cellpadding="2">
   <tr>
     <td align="center" valign="middle">
-	     <input type="hidden" name="pkz[<?php echo $this->pkz[0]; ?>]" value="0"><?php
-		 echo $this->pkz[0];
+	     <input type="hidden" name="pkn[<?php echo $this->pkn[0]; ?>]" value="0"><?php
+		 echo $this->pkn[0];
 	  	 for($i=1;$i<$this->anzPunkte;$i++) {
-		    ?><input type="hidden" name="pkz[<?php echo $this->pkz[$i]; ?>]" value="0"><?php
-			echo ', '.$this->pkz[$i];
+		    ?><input type="hidden" name="pkn[<?php echo $this->pkn[$i]; ?>]" value="0"><?php
+			echo ', '.$this->pkn[$i];
 		 }
 		 ?><br>
       <br>
