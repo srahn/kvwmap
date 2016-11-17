@@ -931,7 +931,6 @@ class Nachweis {
           if($VermStelle!=''){
             $sql.=" AND n.vermstelle = '".$VermStelle."'";
           }
-					echo $art_einblenden.'<br>';
           if (substr($art_einblenden,0,1)) { $art[]='100'; }
           if (substr($art_einblenden,1,1)) { $art[]='010'; }
           if (substr($art_einblenden,2,1)) { $art[]='001'; }
