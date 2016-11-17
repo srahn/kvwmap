@@ -272,16 +272,24 @@ class Nachweis {
   }
   
   function pruefeEingabedaten($id, $datum, $VermStelle, $art, $gueltigkeit, $stammnr, $rissnummer, $fortfuehrung, $Blattformat, $Blattnr, $changeDocument,$Bilddatei_name, $pathlength, $umring, $flur, $blattnr){
+		global $nachweis_unique_attributes;
 		# Test ob schon ein Nachweis mit dieser Kombination existiert
-		if(NACHWEIS_SECONDARY_ATTRIBUTE == 'fortfuehrung')$fortf = $fortfuehrung;
-		if(NACHWEIS_PRIMARY_ATTRIBUTE == 'stammnr'){
-			$nachweise = $this->getNachweise(NULL,NULL,$gemarkung,$stammnr,NULL,$fortf,NULL,NULL,'indiv_nr',NULL,NULL,NULL,NULL,NULL,NULL, $flur, true,NULL,NULL, $blattnr);
-		}
-		else{
-			$nachweise = $this->getNachweise(NULL,NULL,$gemarkung,NULL,$rissnummer,$fortf,NULL,NULL,'indiv_nr',NULL,NULL,NULL,NULL,NULL,NULL, $flur, true,NULL,NULL, $blattnr);
-		}
-		if($this->Dokumente[0]['id'] != '' AND $id != $this->Dokumente[0]['id']){
-			$errmsg.='Es existiert bereits ein Nachweis mit diesen Parametern.';
+		if($nachweis_unique_attributes != NULL){
+			if(NACHWEIS_SECONDARY_ATTRIBUTE == 'fortfuehrung')$test_fortfuehrung = $fortfuehrung;
+			if(in_array('art', $nachweis_unique_attributes)){
+				if($art = '111')$test_art = '0001';
+				else $test_art = $art;
+			}
+			if(in_array('blattnr', $nachweis_unique_attributes))$test_blattnr = $Blattnr;			
+			if(NACHWEIS_PRIMARY_ATTRIBUTE == 'stammnr'){
+				$nachweise = $this->getNachweise(NULL,NULL,$gemarkung,$stammnr,NULL,$test_fortfuehrung,$test_art,NULL,'indiv_nr',NULL,NULL,NULL,NULL,NULL,NULL, $flur, true,NULL,NULL, $test_blattnr);
+			}
+			else{
+				$nachweise = $this->getNachweise(NULL,NULL,$gemarkung,NULL,$rissnummer,$test_fortfuehrung,$test_art,NULL,'indiv_nr',NULL,NULL,NULL,NULL,NULL,NULL, $flur, true,NULL,NULL, $test_blattnr);
+			}
+			if($this->Dokumente[0]['id'] != '' AND $id != $this->Dokumente[0]['id']){
+				$errmsg.='Es existiert bereits ein Nachweis mit diesen Parametern.\n';
+			}
 		}
 		
     if ($umring == ''){
@@ -923,6 +931,7 @@ class Nachweis {
           if($VermStelle!=''){
             $sql.=" AND n.vermstelle = '".$VermStelle."'";
           }
+					echo $art_einblenden.'<br>';
           if (substr($art_einblenden,0,1)) { $art[]='100'; }
           if (substr($art_einblenden,1,1)) { $art[]='010'; }
           if (substr($art_einblenden,2,1)) { $art[]='001'; }
