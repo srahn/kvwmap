@@ -242,11 +242,11 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 					<a target="_blank" onmouseover="getvorschau('<? echo $url; ?>');" href="index.php?go=document_anzeigen&ohnesession=1&id=<?php echo $this->nachweis->Dokumente[$i]['id']; ?>&file=1" title="Ansicht"><img src="graphics/button_ansicht.png" border="0"></a></td>
           <td width="15">
           	<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten')){ ?>
-          	<a href="index.php?go=Nachweisformular&id=<?php echo $this->nachweis->Dokumente[$i]['id'];?>&order=<? echo $this->formvars['order'] ?>&flur_thematisch=<? echo $this->formvars['flur_thematisch']; ?>&such_andere_art=<? echo $this->formvars['such_andere_art']; ?>" title="bearbeiten"><img src="graphics/button_edit.png" border="0"></a></td>
+          	<a href="index.php?go=Nachweisformular&id=<?php echo $this->nachweis->Dokumente[$i]['id'];?>&order=<? echo $this->formvars['order'] ?>&richtung=<? echo $this->formvars['richtung'] ?>&flur_thematisch=<? echo $this->formvars['flur_thematisch']; ?>&such_andere_art=<? echo $this->formvars['such_andere_art']; ?>" title="bearbeiten"><img src="graphics/button_edit.png" border="0"></a></td>
           	<? } ?>
           <td width="30">
           	<? if($this->Stelle->isFunctionAllowed('Nachweisloeschen')){ ?>
-          	<a href="index.php?go=Nachweisloeschen&id=<?php echo $this->nachweis->Dokumente[$i]['id']; ?>&order=<? echo $this->formvars['order'] ?>&flur_thematisch=<? echo $this->formvars['flur_thematisch']; ?>"  title="löschen"><img src="graphics/button_drop.png" border="0"></a>
+          	<a href="index.php?go=Nachweisloeschen&id=<?php echo $this->nachweis->Dokumente[$i]['id']; ?>&order=<? echo $this->formvars['order'] ?>&richtung=<? echo $this->formvars['richtung'] ?>&flur_thematisch=<? echo $this->formvars['flur_thematisch']; ?>"  title="löschen"><img src="graphics/button_drop.png" border="0"></a>
           	<? } ?>
           </td>
         </tr>
