@@ -13950,7 +13950,7 @@ class db_mapObj{
 		}
 		else{
 			$currenttime = date('Y-m-d_H_i_s',time());			// andernfalls werden keine weiteren Unterordner generiert und der Dateiname aus Zeitstempel und Zufallszahl zusammengesetzt
-      $doc_path .= $currenttime.'-'.rand(0, 1000000);
+      $doc_path .= $currenttime.'-'.rand(100000, 999999);
 		}
     return $doc_path;
   }
