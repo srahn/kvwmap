@@ -322,6 +322,8 @@ define('NACHWEIS_PRIMARY_ATTRIBUTE', 'stammnr');			# Version 1.10.0
 # das zusätzliche Ordnungskriterium der Nachweisverwaltung (kann bei eindeutigem primärem leer gelassen werden): fortfuehrung
 define('NACHWEIS_SECONDARY_ATTRIBUTE', '');			# Version 1.11.0
 
+$nachweis_unique_attributes = array('gemarkung', 'flur', NACHWEIS_PRIMARY_ATTRIBUTE, NACHWEIS_SECONDARY_ATTRIBUTE, 'art', 'blattnr');		# Version 2.5
+
 # PostgreSQL Server Version                         # Version 1.6.4
 define('POSTGRESVERSION', '804');                   # Version 1.6.4   (800 == 8.0)
 
