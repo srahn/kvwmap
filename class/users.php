@@ -1310,7 +1310,7 @@ class rolle {
 				ul.`requires`,
 				ul.`privileg`,
 				ul.`export_privileg`,
-				`start_aktiv`
+				`start_aktiv`,
 				r2ul.showclasses
 			FROM
 				layer AS l,
@@ -1326,7 +1326,7 @@ class rolle {
 			ORDER BY
 				ul.drawingorder desc
 		";
-		#echo $sql.'<br>';
+#		echo $sql.'<br>';
     $this->debug->write("<p>file:users.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);
     if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }

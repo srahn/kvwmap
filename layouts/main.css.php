@@ -3,10 +3,20 @@
 	include('../config.php');
 ?>
 
+#layerParamsBar {
+	display: none;
+	position: absolute;
+  border-radius: 5px;
+	top: 22;
+	right: 5;
+	width: 350;
+	z-index: 9999;
+}
+
 @font-face {
 	font-family: 'SourceSansPro';
 	font-style: normal;
-	font-weight: 300;
+	font-weight: 200;
 	src: local('SourceSansPro'), url(../fonts/SourceSansPro-Light.ttf);
 }
 @font-face {
