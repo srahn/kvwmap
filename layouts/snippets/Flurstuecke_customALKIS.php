@@ -135,747 +135,732 @@ hide_versions = function(flst){
   </tr>
   <tr>
     <td>
-    <div style="position:relative; top:0px; right:0px; padding:=px; border-color:<?php echo BG_DEFAULT ?>; border-width:1px; border-style:solid;">
-      <table width="100%" border="0" cellspacing="0" cellpadding="0">
-      <tr>
-        <td colspan="2">
-          <table width="100%">
-            <tr>
-              <td align="left"><span style="font-size:80%;">auswählen</span></td>
-              <td align="right"><a href="#anfang"><span style="font-size:80%;">>> nach oben</span></a></td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-      <tr>
-        <td valign="top">
-          <input type="checkbox" name="check_flurstueck" value="<?php echo $flst->FlurstKennz; ?>" checked>
-        </td>
-        <td>
-      <table border="0" cellspacing="0" cellpadding="0">
-        <tr>
-          <td>
-          <? if($privileg_['flurstkennz']){ ?>
-						<table border="0" cellspacing="0" cellpadding="2">
-              <tr>
-								<td colspan="2">
-									<table cellspacing="0" cellpadding="0">
-										<tr>
-											<td valign="top">
-												<span class="px17 fett"><? echo $flst->Flurstkennz_alt; ?></span>
-											</td>
-											<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-											<td>
-												<? if($this->Stelle->hist_timestamp){ ?>
-												<div id="no_versions_<? echo $flst->FlurstKennz; ?>">
-													<table cellspacing="0" cellpadding="2">
+			<div style="position:relative; top:0px; right:0px; padding:=px; border-color:<?php echo BG_DEFAULT ?>; border-width:1px; border-style:solid;">
+				<table width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td colspan="2">
+							<table width="100%">
+								<tr>
+									<td align="left"><span style="font-size:80%;">auswählen</span></td>
+									<td align="right"><a href="#anfang"><span style="font-size:80%;">>> nach oben</span></a></td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+					<tr>
+						<td valign="top">
+							<input type="checkbox" name="check_flurstueck" value="<?php echo $flst->FlurstKennz; ?>" checked>
+						</td>
+						<td>
+							<table border="0" cellspacing="0" cellpadding="0">
+								<tr>
+									<td>
+									<? if($privileg_['flurstkennz']){ ?>
+										<table border="0" cellspacing="0" cellpadding="2">
+											<tr>
+												<td colspan="2">
+													<table cellspacing="0" cellpadding="0">
 														<tr>
-															<td>
-																<a href="javascript:show_versions('<? echo $flst->FlurstKennz; ?>');"><img src="<? echo GRAPHICSPATH.'plus.gif'; ?>"></a>
+															<td valign="top">
+																<span class="px17 fett"><? echo $flst->Flurstkennz_alt; ?></span>
 															</td>
+															<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
 															<td>
-																<span class="px14">Versionen</span>
+																<? if($this->Stelle->hist_timestamp){ ?>
+																<div id="no_versions_<? echo $flst->FlurstKennz; ?>">
+																	<table cellspacing="0" cellpadding="2">
+																		<tr>
+																			<td>
+																				<a href="javascript:show_versions('<? echo $flst->FlurstKennz; ?>');"><img src="<? echo GRAPHICSPATH.'plus.gif'; ?>"></a>
+																			</td>
+																			<td>
+																				<span class="px14">Versionen</span>
+																			</td>
+																		</tr>
+																	</table>
+																</div>
+																<div id="versions_<? echo $flst->FlurstKennz; ?>" style="border: 1px solid <? echo BG_DEFAULT ?>; display:none"></div>
 															</td>
+															<? } ?>
 														</tr>
 													</table>
-												</div>
-												<div id="versions_<? echo $flst->FlurstKennz; ?>" style="border: 1px solid <? echo BG_DEFAULT ?>; display:none"></div>
-											</td>
+												</td>
+											</tr>
+										</table>
+									<? } ?>
+
+								<table border="0" cellspacing="0" cellpadding="2">
+								
+								<? if($privileg_['flurstkennz']){ ?>
+											<tr>
+												<td align="right"><span class="fett">Flurst&uuml;cksnummer&nbsp;</span></td>
+												<td>
+													<? echo $flst->FlurstNr; ?>
+												</td>
+											</tr>
+									<? } 
+									$both = ($privileg_['gemkgname'] AND $privileg_['gemkgschl']);
+									if($privileg_['gemkgname'] OR $privileg_['gemkgschl']){
+											?>
+											<tr>
+												<td align="right"><span class="fett">Gemarkung&nbsp;</span></td>
+												<td><?php if($privileg_['gemkgname']){echo $flst->GemkgName;} ?> <?php if($both){ echo '('.$flst->GemkgSchl.')';} elseif($privileg_['gemkgschl']){ echo $flst->GemkgSchl;}?></td>
+											</tr>
+											<? }
+											if($privileg_['flurnr']){ ?>
+											<tr>
+												<td height="20" align="right"><span class="fett">Flur&nbsp;</span></td>
+												<td><?php echo $flst->FlurNr; ?></td>
+											</tr>
+											<? }
+											$both = ($privileg_['gemeinde'] AND $privileg_['gemeindename']);
+											if($privileg_['gemeinde'] OR $privileg_['gemeindename']){
+											?>
+											<tr>
+												<td align="right"><span class="fett">Gemeinde&nbsp;</span></td>
+												<td><?php if($privileg_['gemeindename']){ echo $flst->GemeindeName;} ?> <?php if($both){ echo '('.$flst->GemeindeID.')';} elseif($privileg_['gemeinde']){ echo $flst->GemeindeID;} ?></td>
+											</tr>
+											<? }
+											$both = ($privileg_['kreisname'] AND $privileg_['kreisid']);
+											if($privileg_['kreisname'] OR $privileg_['kreisid']){
+											?>
+											<tr>
+												<td align="right"><span class="fett">Kreis&nbsp;</span></td>
+												<td><?php if($privileg_['kreisname']){ echo $flst->KreisName;} ?> <?php if($both){echo '('.$flst->KreisID.')';} elseif($privileg_['kreisid']){ echo $flst->KreisID;} ?></td>
+											</tr>
+									<? }
+									$both = ($privileg_['finanzamtname'] AND $privileg_['finanzamt']);
+									if($privileg_['finanzamtname'] OR $privileg_['finanzamt']){
+									?>
+											<tr>
+												<td align="right"><span class="fett"> Finanzamt&nbsp;</span></td>
+												<td><?php if($privileg_['finanzamtname']){ echo $flst->FinanzamtName;} ?> <?php if($both){echo '('.$flst->FinanzamtSchl.')';} elseif($privileg_['finanzamt']){ echo $flst->FinanzamtSchl; } ?></td>
+											</tr>
+									<? }
+									$both = ($privileg_['forstname'] AND $privileg_['forstschluessel']);
+									if($privileg_['forstname'] OR $privileg_['forstschluessel']){
+									?>
+											<tr>
+												<td align="right"><span class="fett">Forstamt&nbsp;</span></td>
+												<td><?php if($privileg_['forstname']){echo $flst->Forstamt['name'];} ?> <?php if($both){echo '('.$flst->Forstamt['schluessel'].')';} elseif($privileg_['forstschluessel']){ echo $flst->Forstamt['schluessel'];} ?></td>
+											</tr>
+									<? }
+									if($privileg_['flaeche']){ ?>
+											<tr>
+												<td align="right"><span class="fett">Fl&auml;che&nbsp;</span></td>
+												<td><?php echo $flst->ALB_Flaeche; ?>&nbsp;m&sup2;</td>
+											</tr>
+									<? }
+									$both = ($privileg_['amtsgerichtname'] AND $privileg_['amtsgerichtnr']);
+									if($privileg_['amtsgerichtname'] OR $privileg_['amtsgerichtnr']){
+									?>
+									<tr>
+												<td align="right"><span class="fett">Amtsgericht</span>&nbsp;</td>
+												<td><?php if($privileg_['amtsgerichtname']){ echo $flst->Amtsgericht['name'];} ?>&nbsp;<? if($privileg_['amtsgerichtnr']){echo '('.$flst->Amtsgericht['schluessel'].')';} ?></td>
+											</tr>
+											<? }
+											$both = ($privileg_['grundbuchbezirkname'] AND $privileg_['grundbuchbezirkschl']);
+									if($privileg_['grundbuchbezirkname'] OR $privileg_['grundbuchbezirkschl']){
+									?>
+											<tr>
+												<td align="right"><span class="fett">Grundbuchbezirk</span>&nbsp;</td>
+												<td><?php if($privileg_['grundbuchbezirkname']){ echo $flst->Grundbuchbezirk['name'];} ?>&nbsp;<? if($privileg_['grundbuchbezirkschl']){ echo '('.$flst->Grundbuchbezirk['schluessel'].')';} ?></td>
+											</tr>
+									<? }
+									if($privileg_['lagebezeichnung']){ ?>
+											<tr>
+												<td align="right" valign="top"><span class="fett">Lage&nbsp;</span></td>
+												<td>
+												<?php
+												$anzStrassen=count($flst->Adresse);
+												for ($s=0;$s<$anzStrassen;$s++) {
+													$flst->selHausID[] = $flst->Adresse[$s]["gemeinde"].'-'.$flst->Adresse[$s]["strasse"].'-'.$flst->Adresse[$s]["hausnr"];	# für die Adressensuche
+													echo $flst->Adresse[$s]["gemeindename"]; ?><br><?php
+													echo $flst->Adresse[$s]["strassenname"]; ?>&nbsp;<?php
+													echo $flst->Adresse[$s]["hausnr"]; ?><br><?php
+												}
+												$anzLage=count($flst->Lage);
+												$Lage='';
+												for ($j=0;$j<$anzLage;$j++) {
+													$Lage.=' '.$flst->Lage[$j];
+												}
+												if ($Lage!='') {
+													?><br><?php echo TRIM($Lage);
+												}
+											?>
+												</td>
+											</tr>
+									<? }
+									if($privileg_['entsteh']){ ?>
+											<tr>
+												<td align="right"><span class="fett">Entstehung&nbsp;</span></td>
+												<td><?php echo $flst->Entstehung; ?></td>
+											</tr>
+									<? }
+									if($privileg_['letzff']){ ?>
+											<tr>
+												<td align="right"><span class="fett">Fortf&uuml;hrung&nbsp;</span></td>
+												<td><?php echo $flst->LetzteFF; ?></td>
+											</tr>
+									<? }
+									if($privileg_['karte']){ ?>
+											<tr>
+												<td align="right"><span class="fett"> Flurkarte/Ri&szlig;&nbsp;</span></td>
+												<td><?php echo $flst->Flurkarte; ?></td>
+											</tr>
+											<? }
+											if($privileg_['status']){ ?>
+											<tr>
+												<td align="right"><span class="fett"> Status&nbsp;</span></td>
+												<td><?php 
+													$beginnt = DateTime::createFromFormat('d.m.Y H:i:s', $flst->beginnt);
+													$endet = DateTime::createFromFormat('d.m.Y H:i:s', $flst->endet);
+													if($flst->Nachfolger != ''){
+														echo "historisches&nbsp;Flurst&uuml;ck"; 
+														if($flst->endet != ''){
+															if($this->Stelle->hist_timestamp AND ($timestamp == NULL OR $timestamp < $beginnt OR $timestamp >= $endet)){
+																$set_timestamp = 'setHistTimestamp&timestamp='.$flst->beginnt;
+																echo '<a href="index.php?go='.$set_timestamp.'" title="in die Zeit des Flurstücks wechseln">&nbsp;(endet: '.$flst->endet.')</a>';
+															}
+															else echo "&nbsp;(endet: ".$flst->endet.")";
+														} 
+													} 
+													else{
+														if($this->Stelle->hist_timestamp AND $timestamp != NULL AND $timestamp < $beginnt){
+															$set_timestamp = 'setHistTimestamp';
+															echo '<a href="index.php?go='.$set_timestamp.'" title="Zeitpunkt auf aktuell setzen">aktuelles&nbsp;Flurst&uuml;ck</a>';
+														}
+														else{
+															echo "aktuelles&nbsp;Flurst&uuml;ck";
+															if($timestamp != '')echo ' (historische Version)';
+														}
+													}  ?></td>
+											</tr>
 											<? } ?>
+											<?php if ($privileg_['vorgaenger'] AND $flst->Vorgaenger != '') { ?>
+											<tr>
+											<td align="right"><span class="fett">Vorgänger</span></td>
+											<td>
+												<?php
+												for($v = 0; $v < count($flst->Vorgaenger); $v++){ ?>
+													<a href="javascript:overlay_link('go=Flurstueck_Anzeigen&FlurstKennz=<?php echo $flst->Vorgaenger[$v]['vorgaenger']; ?>&without_temporal_filter=1');">
+													<? echo formatFlurstkennzALK($flst->Vorgaenger[$v]['vorgaenger']).' (H)<br>'; ?>
+													</a>
+												<? } ?>
+												</td>
+												<td>
+												<? if (count($flst->Vorgaenger) > 1){?>
+													<a href="javascript:overlay_link('go=Flurstueck_Anzeigen&FlurstKennz=<?php echo $flst->Vorgaenger[0]['vorgaenger'];
+													for($v = 1; $v < count($flst->Vorgaenger); $v++)echo ';'.$flst->Vorgaenger[$v]['vorgaenger']; ?>&without_temporal_filter=1');">alle</a>
+												<? } ?>
+											</td>
+										</tr>
+										<? } ?>
+										<?php if ($privileg_['nachfolger'] AND $flst->Nachfolger != '') { ?>
+										<tr>
+											<td align="right" valign="top"><span class="fett">Nachfolger</span></td>
+											<td>
+												<?php
+												for($v = 0; $v < count($flst->Nachfolger); $v++){ ?>
+													<a href="javascript:overlay_link('go=Flurstueck_Anzeigen&FlurstKennz=<?php echo $flst->Nachfolger[$v]['nachfolger']; ?>&without_temporal_filter=1');">
+													<? echo formatFlurstkennzALK($flst->Nachfolger[$v]['nachfolger']);
+													if($flst->Nachfolger[$v]['endet'] != '' OR $flst->Nachfolger[$v]['hist_alb'] != ''){
+														echo ' (H)';
+													}
+													echo '<br>';
+												} ?>
+												</a>
+											</td>
+											<td>
+											<? if(count($flst->Nachfolger) > 1){ ?>
+												<a href="javascript:overlay_link('go=Flurstueck_Anzeigen&FlurstKennz=<?php echo $flst->Nachfolger[0]['nachfolger'];
+												for($v = 1; $v < count($flst->Nachfolger); $v++)
+												echo ';'.$flst->Nachfolger[$v]['nachfolger']; ?>&without_temporal_filter=1');">alle</a>
+											<? } ?>
+											</td>
+										</tr>
+									<?php } 
+									
+											global $kvwmap_plugins;
+											if(in_array('probaug', $kvwmap_plugins) AND $this->Stelle->isFunctionAllowed('Bauakteneinsicht')){
+												include_once(PLUGINS.'probaug/model/bau.php');
+												$this->bau = new Bauauskunft($this->baudatabase);
+												$searchvars['flurstkennz'] = $flst->Flurstkennz_alt;
+												$this->bau->getbaudaten($searchvars);
+												if(count($this->bau->baudata) != 0){
+												?>
+											<tr>
+												<td align="right"><span class="fett"> Baudaten&nbsp;</span></td>
+												<td><a href="index.php?go=Bauauskunft_Suche_Suchen&flurstkennz=<? echo $flst->Flurstkennz_alt; ?>&distinct=1">anzeigen</a></td>
+											</tr>
+												<?
+												}
+									} # ende Bauakteneinsicht
+											?>
+
+										</table>
+									</td>
+								</tr>
+
+								<? if($privileg_['klassifizierung']){
+										if($flst->Klassifizierung[0]['wert'] != ''){
+									?>
+										<tr>
+											<td colspan="2">
+												<span class="fett">Gesetzl.&nbsp;Klassifizierung Bodensch&auml;tzung</span>
+											</td>
+										</tr>
+										<tr>
+													<td>
+												<table border="0" cellspacing="0" cellpadding="2">
+														<colgroup>
+															<col width="120px">
+															<col width="*">
+															<col width="*">
+															<col width="*">
+														</colgroup>
+												<?  $emzges_a = 0; $emzges_gr = 0; $emzges_agr = 0; $emzges_gra = 0;
+														$flaeche_a = 0; $flaeche_gr = 0; $flaeche_agr = 0; $flaeche_gra = 0;
+													for($j = 0; $j < count($flst->Klassifizierung); $j++){
+														if($flst->Klassifizierung[$j]['flaeche'] != ''){
+															$wert=$flst->Klassifizierung[$j]['wert'];
+															$emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
+															if($flst->Klassifizierung[$j]['objart'] == 1000){
+																$emzges_a = $emzges_a + $emz;
+																$flaeche_a = $flaeche_a + $flst->Klassifizierung[$j]['flaeche'];
+															}
+															if($flst->Klassifizierung[$j]['objart'] == 2000){
+																$emzges_agr = $emzges_agr + $emz;
+																$flaeche_agr = $flaeche_agr + $flst->Klassifizierung[$j]['flaeche'];
+															}
+															if($flst->Klassifizierung[$j]['objart'] == 3000){
+																$emzges_gr = $emzges_gr + $emz;
+																$flaeche_gr = $flaeche_gr + $flst->Klassifizierung[$j]['flaeche'];
+															}
+															if($flst->Klassifizierung[$j]['objart'] == 4000){
+																$emzges_gra = $emzges_gra + $emz;
+																$flaeche_gra = $flaeche_gra + $flst->Klassifizierung[$j]['flaeche'];
+															}
+															?>
+															<tr>
+																<td></td>
+																<td><? echo $flst->Klassifizierung[$j]['flaeche']; ?> m&sup2&nbsp;</td>
+																<td><? echo $flst->Klassifizierung[$j]['label']; ?></td>
+																<td>EMZ: <? echo $emz; ?></td><td>BWZ: <? echo $wert; ?></td>
+															</tr>
+												<?	}
+													} // end for
+												if ($flst->Klassifizierung['nicht_geschaetzt'] > 0) { ?>
+													<tr>
+														<td></td>
+														<td colspan="3">nicht geschätzt: <? echo $flst->Klassifizierung['nicht_geschaetzt']; ?> m&sup2;</td>
+													</tr>
+												<? }
+											if ($emzges_a > 0)  {
+													$BWZ_a = round($emzges_a/$flaeche_a*100);
+													?>
+													<tr>
+														<td></td>
+														<td colspan="3">Ackerland gesamt: <? echo round($flaeche_a); ?>m², EMZ <? echo $emzges_a; ?>, BWZ <? echo $BWZ_a; ?></td>
+													</tr>
+											<?	}
+											if ($emzges_gr > 0) {
+													$BWZ_gr = round($emzges_gr/$flaeche_gr*100);
+													?>
+													<tr>
+														<td></td>
+														<td colspan="3">Grünland gesamt: <? echo round($flaeche_gr); ?>m², EMZ <? echo $emzges_gr; ?>, BWZ <? echo $BWZ_gr; ?></td>
+													</tr>
+											<?	}
+											if ($emzges_agr > 0) {
+													$BWZ_agr = round($emzges_agr/$flaeche_agr*100);
+													?>
+													<tr>
+														<td></td>
+														<td colspan="3">Acker-Grünland gesamt: <? echo round($flaeche_agr); ?>m², EMZ <? echo $emzges_agr; ?>, BWZ <? echo $BWZ_agr; ?></td>
+													</tr>
+											<?	}
+											if ($emzges_gra > 0) {
+													$BWZ_gra = round($emzges_gra/$flaeche_gra*100);
+													?>
+													<tr>
+														<td></td>
+														<td colspan="3">Grünland-Acker gesamt: <? echo round($flaeche_gra); ?>m², EMZ <? echo $emzges_gra; ?>, BWZ <? echo $BWZ_gra; ?></td>
+													</tr>
+											<?	} ?>
+											</table>
+											</td>
+										 </tr>
+									<?
+										}
+								} ?>
+								
+								 <? if($privileg_['festlegungen'] AND (count($flst->Strassenrecht) > 0 OR count($flst->Wasserrecht) > 0 OR count($flst->Schutzgebiet) > 0 OR count($flst->NaturUmweltrecht) > 0 OR count($flst->BauBodenrecht) > 0 OR count($flst->Denkmalschutzrecht) > 0 OR count($flst->Forstrecht) > 0 OR count($flst->Sonstigesrecht) > 0)){
+									?>
+										<tr>
+											<td colspan="2">
+												<span class="fett">Öffentlich-rechtliche und sonstige Festlegungen</span>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<table border="0" cellspacing="0" cellpadding="2">
+												<?
+												for($j = 0; $j < count($flst->Strassenrecht); $j++){
+													echo '<tr><td valign="top">'.$flst->Strassenrecht[$j]['flaeche'].' m²</td><td width="500px">'.$flst->Strassenrecht[$j]['art'].': '.$flst->Strassenrecht[$j]['bezeichnung'].'</td></tr>';
+												}
+												for($j = 0; $j < count($flst->Wasserrecht); $j++){
+													echo '<tr><td valign="top">'.$flst->Wasserrecht[$j]['flaeche'].' m²</td><td width="500px">'.$flst->Wasserrecht[$j]['art'].': '.$flst->Wasserrecht[$j]['bezeichnung'].'</td></tr>';
+												}
+												for($j = 0; $j < count($flst->Schutzgebiet); $j++){
+													echo '<tr><td valign="top">'.$flst->Schutzgebiet[$j]['flaeche'].' m²</td><td width="500px">'.$flst->Schutzgebiet[$j]['art'].'</td></tr>';
+												}
+												for($j = 0; $j < count($flst->NaturUmweltrecht); $j++){
+													echo '<tr><td valign="top">'.$flst->NaturUmweltrecht[$j]['flaeche'].' m²</td><td width="500px">'.$flst->NaturUmweltrecht[$j]['art'].'</td></tr>';
+												}
+												for($j = 0; $j < count($flst->BauBodenrecht); $j++){
+													echo '<tr><td valign="top">'.$flst->BauBodenrecht[$j]['flaeche'].' m²</td><td width="500px">'.$flst->BauBodenrecht[$j]['art'];
+													if($flst->BauBodenrecht[$j]['bezeichnung'] != '')echo ': '.$flst->BauBodenrecht[$j]['bezeichnung'];
+													if($flst->BauBodenrecht[$j]['stelle'] != '')echo ' ('.$flst->BauBodenrecht[$j]['stelle'].')';
+													echo '</td></tr>';
+												}
+												if($flst->abweichenderrechtszustand == 'ja')echo '<tr><td colspan="2" width="600px">In einem durch Gesetz geregelten Verfahren der Bodenordnung ist für das Flurstück ein neuer Rechtszustand eingetreten. Die Festlegungen des Verfahrens sind noch nicht in das Liegenschaftskataster übernommen. Dieser Nachweis entspricht deshalb nicht dem aktuellen Stand.</td></tr>';
+												for($j = 0; $j < count($flst->Denkmalschutzrecht); $j++){
+													echo '<tr><td valign="top">'.$flst->Denkmalschutzrecht[$j]['flaeche'].' m²</td><td width="500px">'.$flst->Denkmalschutzrecht[$j]['art'].' '.$flst->Denkmalschutzrecht[$j]['name'].'</td></tr>';
+												}
+												for($j = 0; $j < count($flst->Forstrecht); $j++){
+													echo '<tr><td valign="top">'.$flst->Forstrecht[$j]['flaeche'].' m²</td><td width="500px">'.$flst->Forstrecht[$j]['art'].': '.$flst->Forstrecht[$j]['funktion'].'</td></tr>';
+												}
+												for($j = 0; $j < count($flst->Sonstigesrecht); $j++){
+													echo '<tr><td valign="top">'.$flst->Sonstigesrecht[$j]['flaeche'].' m²</td><td width="500px">'.$flst->Sonstigesrecht[$j]['art'].' '.$flst->Sonstigesrecht[$j]['name'].'</td></tr>';
+												}
+												?>
+												</table>
+											</td>
+										 </tr>
+									<?
+								} ?>
+								
+
+								<?php if ($privileg_['freitext'] AND count($flst->FreiText)>0) { ?>
+								<tr>
+									<td colspan="2">
+										<table border="0" cellspacing="0" cellpadding="2">
+										<tr valign="top">
+											<td align="right"><span class="fett">Zus&auml;tzliche&nbsp;Angaben</span></td>
+											<td>
+											<?php for ($j=0;$j<count($flst->FreiText);$j++) {
+											if ($j>0) { ?><br>
+												<?php }
+											echo $flst->FreiText[$j]['text'];
+											}?>
+											</td>
 										</tr>
 									</table>
 								</td>
-							</tr>
-						</table>
-					<? } ?>
-
-				<table border="0" cellspacing="0" cellpadding="2">
-				
-				<? if($privileg_['flurstkennz']){ ?>
-							<tr>
-                <td align="right"><span class="fett">Flurst&uuml;cksnummer&nbsp;</span></td>
-                <td>
-									<? echo $flst->FlurstNr; ?>
-								</td>
-              </tr>
-					<? } 
-          $both = ($privileg_['gemkgname'] AND $privileg_['gemkgschl']);
-          if($privileg_['gemkgname'] OR $privileg_['gemkgschl']){
-              ?>
-              <tr>
-                <td align="right"><span class="fett">Gemarkung&nbsp;</span></td>
-                <td><?php if($privileg_['gemkgname']){echo $flst->GemkgName;} ?> <?php if($both){ echo '('.$flst->GemkgSchl.')';} elseif($privileg_['gemkgschl']){ echo $flst->GemkgSchl;}?></td>
-              </tr>
-              <? }
-              if($privileg_['flurnr']){ ?>
-              <tr>
-                <td height="20" align="right"><span class="fett">Flur&nbsp;</span></td>
-                <td><?php echo $flst->FlurNr; ?></td>
-              </tr>
-              <? }
-              $both = ($privileg_['gemeinde'] AND $privileg_['gemeindename']);
-              if($privileg_['gemeinde'] OR $privileg_['gemeindename']){
-              ?>
-              <tr>
-                <td align="right"><span class="fett">Gemeinde&nbsp;</span></td>
-                <td><?php if($privileg_['gemeindename']){ echo $flst->GemeindeName;} ?> <?php if($both){ echo '('.$flst->GemeindeID.')';} elseif($privileg_['gemeinde']){ echo $flst->GemeindeID;} ?></td>
-              </tr>
-              <? }
-              $both = ($privileg_['kreisname'] AND $privileg_['kreisid']);
-              if($privileg_['kreisname'] OR $privileg_['kreisid']){
-              ?>
-              <tr>
-                <td align="right"><span class="fett">Kreis&nbsp;</span></td>
-                <td><?php if($privileg_['kreisname']){ echo $flst->KreisName;} ?> <?php if($both){echo '('.$flst->KreisID.')';} elseif($privileg_['kreisid']){ echo $flst->KreisID;} ?></td>
-              </tr>
-          <? }
-          $both = ($privileg_['finanzamtname'] AND $privileg_['finanzamt']);
-          if($privileg_['finanzamtname'] OR $privileg_['finanzamt']){
-          ?>
-              <tr>
-                <td align="right"><span class="fett"> Finanzamt&nbsp;</span></td>
-                <td><?php if($privileg_['finanzamtname']){ echo $flst->FinanzamtName;} ?> <?php if($both){echo '('.$flst->FinanzamtSchl.')';} elseif($privileg_['finanzamt']){ echo $flst->FinanzamtSchl; } ?></td>
-              </tr>
-          <? }
-          $both = ($privileg_['forstname'] AND $privileg_['forstschluessel']);
-          if($privileg_['forstname'] OR $privileg_['forstschluessel']){
-          ?>
-              <tr>
-                <td align="right"><span class="fett">Forstamt&nbsp;</span></td>
-                <td><?php if($privileg_['forstname']){echo $flst->Forstamt['name'];} ?> <?php if($both){echo '('.$flst->Forstamt['schluessel'].')';} elseif($privileg_['forstschluessel']){ echo $flst->Forstamt['schluessel'];} ?></td>
-              </tr>
-          <? }
-          if($privileg_['flaeche']){ ?>
-              <tr>
-                <td align="right"><span class="fett">Fl&auml;che&nbsp;</span></td>
-                <td><?php echo $flst->ALB_Flaeche; ?>&nbsp;m&sup2;</td>
-              </tr>
-          <? }
-          $both = ($privileg_['amtsgerichtname'] AND $privileg_['amtsgerichtnr']);
-          if($privileg_['amtsgerichtname'] OR $privileg_['amtsgerichtnr']){
-          ?>
-          <tr>
-                <td align="right"><span class="fett">Amtsgericht</span>&nbsp;</td>
-                <td><?php if($privileg_['amtsgerichtname']){ echo $flst->Amtsgericht['name'];} ?>&nbsp;<? if($privileg_['amtsgerichtnr']){echo '('.$flst->Amtsgericht['schluessel'].')';} ?></td>
-              </tr>
-              <? }
-              $both = ($privileg_['grundbuchbezirkname'] AND $privileg_['grundbuchbezirkschl']);
-          if($privileg_['grundbuchbezirkname'] OR $privileg_['grundbuchbezirkschl']){
-          ?>
-              <tr>
-                <td align="right"><span class="fett">Grundbuchbezirk</span>&nbsp;</td>
-                <td><?php if($privileg_['grundbuchbezirkname']){ echo $flst->Grundbuchbezirk['name'];} ?>&nbsp;<? if($privileg_['grundbuchbezirkschl']){ echo '('.$flst->Grundbuchbezirk['schluessel'].')';} ?></td>
-              </tr>
-          <? }
-          if($privileg_['lagebezeichnung']){ ?>
-              <tr>
-                <td align="right" valign="top"><span class="fett">Lage&nbsp;</span></td>
-                <td>
-                <?php
-                $anzStrassen=count($flst->Adresse);
-                for ($s=0;$s<$anzStrassen;$s++) {
-									$flst->selHausID[] = $flst->Adresse[$s]["gemeinde"].'-'.$flst->Adresse[$s]["strasse"].'-'.$flst->Adresse[$s]["hausnr"];	# für die Adressensuche
-                  echo $flst->Adresse[$s]["gemeindename"]; ?><br><?php
-                  echo $flst->Adresse[$s]["strassenname"]; ?>&nbsp;<?php
-                  echo $flst->Adresse[$s]["hausnr"]; ?><br><?php
-                }
-                $anzLage=count($flst->Lage);
-                $Lage='';
-                for ($j=0;$j<$anzLage;$j++) {
-                  $Lage.=' '.$flst->Lage[$j];
-                }
-                if ($Lage!='') {
-                  ?><br><?php echo TRIM($Lage);
-                }
-              ?>
-                </td>
-              </tr>
-          <? }
-          if($privileg_['entsteh']){ ?>
-              <tr>
-                <td align="right"><span class="fett">Entstehung&nbsp;</span></td>
-                <td><?php echo $flst->Entstehung; ?></td>
-              </tr>
-          <? }
-          if($privileg_['letzff']){ ?>
-              <tr>
-                <td align="right"><span class="fett">Fortf&uuml;hrung&nbsp;</span></td>
-                <td><?php echo $flst->LetzteFF; ?></td>
-              </tr>
-          <? }
-          if($privileg_['karte']){ ?>
-              <tr>
-                <td align="right"><span class="fett"> Flurkarte/Ri&szlig;&nbsp;</span></td>
-                <td><?php echo $flst->Flurkarte; ?></td>
-              </tr>
-              <? }
-              if($privileg_['status']){ ?>
-              <tr>
-                <td align="right"><span class="fett"> Status&nbsp;</span></td>
-                <td><?php 
-									$beginnt = DateTime::createFromFormat('d.m.Y H:i:s', $flst->beginnt);
-									$endet = DateTime::createFromFormat('d.m.Y H:i:s', $flst->endet);
-									if($flst->Nachfolger != ''){
-										echo "historisches&nbsp;Flurst&uuml;ck"; 
-										if($flst->endet != ''){
-											if($this->Stelle->hist_timestamp AND ($timestamp == NULL OR $timestamp < $beginnt OR $timestamp >= $endet)){
-												$set_timestamp = 'setHistTimestamp&timestamp='.$flst->beginnt;
-												echo '<a href="index.php?go='.$set_timestamp.'" title="in die Zeit des Flurstücks wechseln">&nbsp;(endet: '.$flst->endet.')</a>';
-											}
-											else echo "&nbsp;(endet: ".$flst->endet.")";
-										} 
-									} 
-									else{
-										if($this->Stelle->hist_timestamp AND $timestamp != NULL AND $timestamp < $beginnt){
-											$set_timestamp = 'setHistTimestamp';
-											echo '<a href="index.php?go='.$set_timestamp.'" title="Zeitpunkt auf aktuell setzen">aktuelles&nbsp;Flurst&uuml;ck</a>';
-										}
-										else{
-											echo "aktuelles&nbsp;Flurst&uuml;ck";
-											if($timestamp != '')echo ' (historische Version)';
-										}
-									}  ?></td>
-              </tr>
-              <? } ?>
-              <?php if ($privileg_['vorgaenger'] AND $flst->Vorgaenger != '') { ?>
-          <tr>
-              <td align="right"><span class="fett">Vorgänger</span></td>
-              <td>
-                <?php
-                for($v = 0; $v < count($flst->Vorgaenger); $v++){ ?>
-                  <a href="javascript:overlay_link('go=Flurstueck_Anzeigen&FlurstKennz=<?php echo $flst->Vorgaenger[$v]['vorgaenger']; ?>&without_temporal_filter=1');">
-                  <? echo formatFlurstkennzALK($flst->Vorgaenger[$v]['vorgaenger']).' (H)<br>'; ?>
-                  </a>
-                <? } ?>
-                </td>
-                <td>
-                <? if (count($flst->Vorgaenger) > 1){?>
-                  <a href="javascript:overlay_link('go=Flurstueck_Anzeigen&FlurstKennz=<?php echo $flst->Vorgaenger[0]['vorgaenger'];
-                  for($v = 1; $v < count($flst->Vorgaenger); $v++)echo ';'.$flst->Vorgaenger[$v]['vorgaenger']; ?>&without_temporal_filter=1');">alle</a>
-                <? } ?>
-              </td>
-          </tr>
-          <? } ?>
-          <?php if ($privileg_['nachfolger'] AND $flst->Nachfolger != '') { ?>
-          <tr>
-              <td align="right" valign="top"><span class="fett">Nachfolger</span></td>
-              <td>
-                <?php
-                for($v = 0; $v < count($flst->Nachfolger); $v++){ ?>
-                  <a href="javascript:overlay_link('go=Flurstueck_Anzeigen&FlurstKennz=<?php echo $flst->Nachfolger[$v]['nachfolger']; ?>&without_temporal_filter=1');">
-                  <? echo formatFlurstkennzALK($flst->Nachfolger[$v]['nachfolger']);
-                  if($flst->Nachfolger[$v]['endet'] != '' OR $flst->Nachfolger[$v]['hist_alb'] != ''){
-                    echo ' (H)';
-                  }
-                  echo '<br>';
-                } ?>
-                </a>
-              </td>
-              <td>
-              <? if(count($flst->Nachfolger) > 1){ ?>
-                <a href="javascript:overlay_link('go=Flurstueck_Anzeigen&FlurstKennz=<?php echo $flst->Nachfolger[0]['nachfolger'];
-                for($v = 1; $v < count($flst->Nachfolger); $v++)
-                echo ';'.$flst->Nachfolger[$v]['nachfolger']; ?>&without_temporal_filter=1');">alle</a>
-              <? } ?>
-              </td>
-          </tr>
-          <?php } ?>
-
-              <?
-							global $kvwmap_plugins;
-							if(in_array('probaug', $kvwmap_plugins) AND $this->Stelle->isFunctionAllowed('Bauakteneinsicht')){
-								include_once(PLUGINS.'probaug/model/bau.php');
-								$this->bau = new Bauauskunft($this->baudatabase);
-								$searchvars['flurstkennz'] = $flst->Flurstkennz_alt;
-								$this->bau->getbaudaten($searchvars);
-								if(count($this->bau->baudata) != 0){
-								?>
-						<tr>
-								<td align="right"><span class="fett"> Baudaten&nbsp;</span></td>
-								<td><a href="index.php?go=Bauauskunft_Suche_Suchen&flurstkennz=<? echo $flst->Flurstkennz_alt; ?>&distinct=1">anzeigen</a></td>
-							</tr>
-								<?
-								}
-          } # ende Bauakteneinsicht
-              ?>
-
-            </table>
-          </td>
-        </tr>
-
-        <? if($privileg_['klassifizierung']){
-	        	if($flst->Klassifizierung[0]['wert'] != ''){
-	        ?>
-	        	<tr>
-          		<td colspan="2">
-            		<span class="fett">Gesetzl.&nbsp;Klassifizierung Bodensch&auml;tzung</span>
-              </td>
-            </tr>
-            <tr>
-                  <td>
-		            <table border="0" cellspacing="0" cellpadding="2">
-                    <colgroup>
-                      <col width="120px">
-                      <col width="*">
-                      <col width="*">
-                      <col width="*">
-                    </colgroup>
-		            <?  $emzges_a = 0; $emzges_gr = 0; $emzges_agr = 0; $emzges_gra = 0;
-										$flaeche_a = 0; $flaeche_gr = 0; $flaeche_agr = 0; $flaeche_gra = 0;
-		            	for($j = 0; $j < count($flst->Klassifizierung); $j++){
-										if($flst->Klassifizierung[$j]['flaeche'] != ''){
-											$wert=$flst->Klassifizierung[$j]['wert'];
-											$emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
-											if($flst->Klassifizierung[$j]['objart'] == 1000){
-												$emzges_a = $emzges_a + $emz;
-												$flaeche_a = $flaeche_a + $flst->Klassifizierung[$j]['flaeche'];
-											}
-											if($flst->Klassifizierung[$j]['objart'] == 2000){
-												$emzges_agr = $emzges_agr + $emz;
-												$flaeche_agr = $flaeche_agr + $flst->Klassifizierung[$j]['flaeche'];
-											}
-											if($flst->Klassifizierung[$j]['objart'] == 3000){
-												$emzges_gr = $emzges_gr + $emz;
-												$flaeche_gr = $flaeche_gr + $flst->Klassifizierung[$j]['flaeche'];
-											}
-											if($flst->Klassifizierung[$j]['objart'] == 4000){
-												$emzges_gra = $emzges_gra + $emz;
-												$flaeche_gra = $flaeche_gra + $flst->Klassifizierung[$j]['flaeche'];
-											}
+								</tr>
+								<?php } ?>
+								<?php if ($privileg_['hinweis'] AND $flst->strittigeGrenze){ ?>
+								<tr>
+									<td colspan="2">
+										<table border="0" cellspacing="0" cellpadding="2">
+										<tr>
+											<td valign="top"><span class="fett">Hinweise zum Flurstück:</span>&nbsp;</td>
+											<td>
+											<?php
+											echo 'strittige Grenze';
 											?>
-											<tr>
-												<td></td>
-												<td><? echo $flst->Klassifizierung[$j]['flaeche']; ?> m&sup2&nbsp;</td>
-												<td><? echo $flst->Klassifizierung[$j]['label']; ?></td>
-												<td>EMZ: <? echo $emz; ?></td><td>BWZ: <? echo $wert; ?></td>
+											</td>
+										</tr>
+										</table>
+									</td>
+									</tr>
+								<?php } ?>
+								<?php if ($privileg_['baulasten'] != '' AND count($flst->Baulasten)>0) { ?>
+								<tr>
+									<td colspan="2">
+										<table border="0" cellspacing="0" cellpadding="2">
+										<tr>
+											<td><span class="fett">Baulastenblatt-Nr</span></td>
+											<td>
+											<?php
+													for ($b=0;$b<count($flst->Baulasten);$b++) {
+													echo " ".$flst->Baulasten[$b]['blattnr'];
+													} ?>
+												</td>
 											</tr>
-								<?	}
-									} // end for
-		            if ($flst->Klassifizierung['nicht_geschaetzt'] > 0) { ?>
-          				<tr>
-          					<td></td>
-          					<td colspan="3">nicht geschätzt: <? echo $flst->Klassifizierung['nicht_geschaetzt']; ?> m&sup2;</td>
-          				</tr>
-		            <? }
-        			if ($emzges_a > 0)  {
-        					$BWZ_a = round($emzges_a/$flaeche_a*100);
-        					?>
-          				<tr>
-          					<td></td>
-          					<td colspan="3">Ackerland gesamt: <? echo round($flaeche_a); ?>m², EMZ <? echo $emzges_a; ?>, BWZ <? echo $BWZ_a; ?></td>
-          				</tr>
-        			<?	}
-        			if ($emzges_gr > 0) {
-        					$BWZ_gr = round($emzges_gr/$flaeche_gr*100);
-        					?>
-          				<tr>
-          					<td></td>
-          					<td colspan="3">Grünland gesamt: <? echo round($flaeche_gr); ?>m², EMZ <? echo $emzges_gr; ?>, BWZ <? echo $BWZ_gr; ?></td>
-          				</tr>
-        			<?	}
-							if ($emzges_agr > 0) {
-        					$BWZ_agr = round($emzges_agr/$flaeche_agr*100);
-        					?>
-          				<tr>
-          					<td></td>
-          					<td colspan="3">Acker-Grünland gesamt: <? echo round($flaeche_agr); ?>m², EMZ <? echo $emzges_agr; ?>, BWZ <? echo $BWZ_agr; ?></td>
-          				</tr>
-        			<?	}
-							if ($emzges_gra > 0) {
-        					$BWZ_gra = round($emzges_gra/$flaeche_gra*100);
-        					?>
-          				<tr>
-          					<td></td>
-          					<td colspan="3">Grünland-Acker gesamt: <? echo round($flaeche_gra); ?>m², EMZ <? echo $emzges_gra; ?>, BWZ <? echo $BWZ_gra; ?></td>
-          				</tr>
-        			<?	} ?>
-		          </table>
-		          </td>
-		         </tr>
-	        <?
-	        	}
-        } ?>
-				
-				 <? if($privileg_['festlegungen'] AND (count($flst->Strassenrecht) > 0 OR count($flst->Wasserrecht) > 0 OR count($flst->Schutzgebiet) > 0 OR count($flst->NaturUmweltrecht) > 0 OR count($flst->BauBodenrecht) > 0 OR count($flst->Denkmalschutzrecht) > 0 OR count($flst->Forstrecht) > 0 OR count($flst->Sonstigesrecht) > 0)){
-	        ?>
-	        	<tr>
-          		<td colspan="2">
-            		<span class="fett">Öffentlich-rechtliche und sonstige Festlegungen</span>
-              </td>
-            </tr>
-            <tr>
-							<td>
-		            <table border="0" cellspacing="0" cellpadding="2">
-		            <?
-								for($j = 0; $j < count($flst->Strassenrecht); $j++){
-									echo '<tr><td valign="top">'.$flst->Strassenrecht[$j]['flaeche'].' m²</td><td width="500px">'.$flst->Strassenrecht[$j]['art'].': '.$flst->Strassenrecht[$j]['bezeichnung'].'</td></tr>';
-		            }
-								for($j = 0; $j < count($flst->Wasserrecht); $j++){
-									echo '<tr><td valign="top">'.$flst->Wasserrecht[$j]['flaeche'].' m²</td><td width="500px">'.$flst->Wasserrecht[$j]['art'].': '.$flst->Wasserrecht[$j]['bezeichnung'].'</td></tr>';
-		            }
-								for($j = 0; $j < count($flst->Schutzgebiet); $j++){
-									echo '<tr><td valign="top">'.$flst->Schutzgebiet[$j]['flaeche'].' m²</td><td width="500px">'.$flst->Schutzgebiet[$j]['art'].'</td></tr>';
-		            }
-								for($j = 0; $j < count($flst->NaturUmweltrecht); $j++){
-									echo '<tr><td valign="top">'.$flst->NaturUmweltrecht[$j]['flaeche'].' m²</td><td width="500px">'.$flst->NaturUmweltrecht[$j]['art'].'</td></tr>';
-		            }
-								for($j = 0; $j < count($flst->BauBodenrecht); $j++){
-									echo '<tr><td valign="top">'.$flst->BauBodenrecht[$j]['flaeche'].' m²</td><td width="500px">'.$flst->BauBodenrecht[$j]['art'];
-									if($flst->BauBodenrecht[$j]['bezeichnung'] != '')echo ': '.$flst->BauBodenrecht[$j]['bezeichnung'];
-									if($flst->BauBodenrecht[$j]['stelle'] != '')echo ' ('.$flst->BauBodenrecht[$j]['stelle'].')';
-									echo '</td></tr>';
-		            }
-								if($flst->abweichenderrechtszustand == 'ja')echo '<tr><td colspan="2" width="600px">In einem durch Gesetz geregelten Verfahren der Bodenordnung ist für das Flurstück ein neuer Rechtszustand eingetreten. Die Festlegungen des Verfahrens sind noch nicht in das Liegenschaftskataster übernommen. Dieser Nachweis entspricht deshalb nicht dem aktuellen Stand.</td></tr>';
-								for($j = 0; $j < count($flst->Denkmalschutzrecht); $j++){
-									echo '<tr><td valign="top">'.$flst->Denkmalschutzrecht[$j]['flaeche'].' m²</td><td width="500px">'.$flst->Denkmalschutzrecht[$j]['art'].' '.$flst->Denkmalschutzrecht[$j]['name'].'</td></tr>';
-		            }
-								for($j = 0; $j < count($flst->Forstrecht); $j++){
-									echo '<tr><td valign="top">'.$flst->Forstrecht[$j]['flaeche'].' m²</td><td width="500px">'.$flst->Forstrecht[$j]['art'].': '.$flst->Forstrecht[$j]['funktion'].'</td></tr>';
-		            }
-								for($j = 0; $j < count($flst->Sonstigesrecht); $j++){
-									echo '<tr><td valign="top">'.$flst->Sonstigesrecht[$j]['flaeche'].' m²</td><td width="500px">'.$flst->Sonstigesrecht[$j]['art'].' '.$flst->Sonstigesrecht[$j]['name'].'</td></tr>';
-		            }
-								?>
-								</table>
-		          </td>
-		         </tr>
-	        <?
-        } ?>
-				
-
-        <?php if ($privileg_['freitext'] AND count($flst->FreiText)>0) { ?>
-        <tr>
-          <td colspan="2">
-            <table border="0" cellspacing="0" cellpadding="2">
-            <tr valign="top">
-              <td align="right"><span class="fett">Zus&auml;tzliche&nbsp;Angaben</span></td>
-              <td>
-              <?php for ($j=0;$j<count($flst->FreiText);$j++) {
-              if ($j>0) { ?><br>
-                <?php }
-              echo $flst->FreiText[$j]['text'];
-              }?>
-              </td>
-            </tr>
-          </table>
-        </td>
-        </tr>
-        <?php } ?>
-        <?php if ($privileg_['hinweis'] AND $flst->strittigeGrenze){ ?>
-        <tr>
-          <td colspan="2">
-            <table border="0" cellspacing="0" cellpadding="2">
-            <tr>
-              <td valign="top"><span class="fett">Hinweise zum Flurstück:</span>&nbsp;</td>
-              <td>
-              <?php
-              echo 'strittige Grenze';
-              ?>
-              </td>
-            </tr>
-            </table>
-          </td>
-          </tr>
-        <?php } ?>
-        <?php if ($privileg_['baulasten'] != '' AND count($flst->Baulasten)>0) { ?>
-        <tr>
-          <td colspan="2">
-            <table border="0" cellspacing="0" cellpadding="2">
-            <tr>
-              <td><span class="fett">Baulastenblatt-Nr</span></td>
-              <td>
-              <?php
-                  for ($b=0;$b<count($flst->Baulasten);$b++) {
-                  echo " ".$flst->Baulasten[$b]['blattnr'];
-                  } ?>
-                </td>
-              </tr>
-          </table>
-        </td>
-        </tr>
-        <?php } ?>
-        <?php
-        if (($privileg_['verfahren'] OR $privileg_['ausfstelle']) AND $flst->Verfahren[0]['flurstkennz']!='') {
-          for($j = 0; $j < count($flst->Verfahren); $j++){
-          ?>
-        <tr>
-          <td colspan="2">
-            <table border="0" cellspacing="0" cellpadding="2">
-            <?php if ($privileg_['ausfstelle'])
-            { ?>
-              <tr valign="top">
-			          <td align="right"><span class="fett">Ausf&uuml;hrende&nbsp;Stelle</span></td>
-			          <td valign="top"><?php echo $flst->Verfahren[$j]['ausfstelleid']; ?></td>
-			          <td valign="top">
-			          <?php
-			          if (strlen($flst->Verfahren[$j]['ausfstellename'])>40) {
-			            $needle=array(
-			             strrpos(substr($flst->Verfahren[$j]['ausfstellename'],0,40),','),
-			             strrpos(substr($flst->Verfahren[$j]['ausfstellename'],0,40),'-'),
-			             strrpos(substr($flst->Verfahren[$j]['ausfstellename'],0,40),'/'),
-			             strrpos(substr($flst->Verfahren[$j]['ausfstellename'],0,40),' ')
-			            );
-			            rsort($needle);
-			            echo substr($flst->Verfahren[$j]['ausfstellename'],0,$needle[0]+1)."<br>".substr($flst->Verfahren[$j]['ausfstellename'],$needle[0]+1);
-			          } else {
-			            echo $flst->Verfahren[$j]['ausfstellename'];
-			          }
-			          ?>
-			          </td>
-			        </tr>
-            <?php }
-              if ($privileg_['verfahren']){ ?>
-              <tr valign="top">
-			          <td align="right"><span class="fett">Verfahren</span></td>
-			          <td valign="top"><?php echo $flst->Verfahren[$j]['verfnr']; ?></td>
-			          <td valign="top">
-			          (<?php echo $flst->Verfahren[$j]['verfbemid']; ?>)
-			          &nbsp;
-			          <?php
-			          if (strlen($flst->Verfahren[$j]['verfbemerkung'])>35) {
-			            $needle=array(
-			             strrpos(substr($flst->Verfahren[$j]['verfbemerkung'],0,35),','),
-			             strrpos(substr($flst->Verfahren[$j]['verfbemerkung'],0,35),'-'),
-			             strrpos(substr($flst->Verfahren[$j]['verfbemerkung'],0,35),'/'),
-			             strrpos(substr($flst->Verfahren[$j]['verfbemerkung'],0,35),' ')
-			            );
-			            rsort($needle);
-			            echo substr($flst->Verfahren[$j]['verfbemerkung'],0,$needle[0]+1)."<br>".substr($flst->Verfahren[$j]['verfbemerkung'],$needle[0]+1);
-			          } else {
-			            echo $flst->Verfahren[$j]['verfbemerkung'];
-			          }
-			          ?>
-			          </td>
-			      	</tr>
-            <? } ?>
-            </table>
-          </td>
-        </tr>
-          <? } ?>
-        <? } ?>
-        <?php if ($privileg_['nutzung']){ ?>
-        <tr>
-          <td colspan="2">
-            <table border="0" cellspacing="0" cellpadding="2">
-              <tr>
-                <td><span class="fett">Nutzung</span></td>
-              </tr>
-              <tr>
-                <td>
-              <?php
-              $anzNutzung=count($flst->Nutzung);
-              for ($j=0;$j<$anzNutzung;$j++){
-								if($flst->Nutzung[$j]['bereich'] != $flst->Nutzung[$j-1]['bereich']){
-									if($j > 0){ ?></table></div></div><? } ?>
-									<div id="nu_bereich">
-										<span id="nu_bereich_span"><? echo $flst->Nutzung[$j]['bereich']; ?></span>
-										<div id="nu_gruppe_nutzungsart">
-								<? }
-										if($flst->Nutzung[$j]['gruppe'] != $flst->Nutzung[$j-1]['gruppe']){
-											if($j > 0 AND $flst->Nutzung[$j]['bereich'] == $flst->Nutzung[$j-1]['bereich']){ ?></table><? } ?>
-											<span id="nu_gruppe_nutzungsart_span"><? echo $flst->Nutzung[$j]['gruppe']; ?></span>
-											<table id="nu_gruppe_nutzungsart_table">
-												<tr>
-													<th>Fläche</th><th>Schlüssel</th><th>Nutzung</th>
-												</tr>
-								<?  } ?>
-												<tr>
-													<td align="right"><? echo $flst->Nutzung[$j][flaeche]; ?> m&sup2;&nbsp;</td>
-													<td><? echo $flst->Nutzung[$j][nutzungskennz]; ?></td>
-													<td>
-														<? echo implode(', ', array_filter(array($flst->Nutzung[$j]['nutzungsart'], $flst->Nutzung[$j]['untergliederung1'], $flst->Nutzung[$j]['untergliederung2'])));
-															 if($flst->Nutzung[$j]['nutzungsart'] == '' AND $flst->Nutzung[$j]['untergliederung1'] == '' AND $flst->Nutzung[$j]['untergliederung2'] == '')echo '&mdash;'; ?>
-													</td>
-												</tr>
-              <?php } ?>
-											</table>
-										</div>
-									</div>
+									</table>
 								</td>
-							</tr>
-						</table>
-					</td>
-				</tr>
-        <? } ?>
-        <? if($privileg_['eigentuemer']){
-						$currenttime=date('Y-m-d H:i:s',time());
-						$this->user->rolle->setConsumeALB($currenttime, 'Flurstücksanzeige', array($flst->FlurstKennz), 0, 'NULL');		# das Flurstückskennzeichen wird geloggt
-				?>
-        <tr>
-        <td colspan="2">
-            <table border="0" cellspacing="0" cellpadding="2">
-              <tr>
-                <td colspan="3"><span class="fett">Eigentümer</span></td>
-              </tr>
-            <? 
-            for ($b=0;$b<count($flst->Buchungen);$b++) {
-							if($privileg_['bestandsnr']){
-								$BestandStr ='<a href="index.php?go=Grundbuchblatt_Auswaehlen_Suchen&selBlatt='.$flst->Buchungen[$b]['bezirk'].'-'.$flst->Buchungen[$b]['blatt'].'">'.$flst->Buchungen[$b]['bezirk'].'-'.ltrim($flst->Buchungen[$b]['blatt'], '0').'</a>';
-								$BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
-									$BestandStr.=' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
-									$BestandStr.=' ('.$flst->Buchungen[$b]['buchungsart'].')';
-									$BestandStr.=' '.$flst->Buchungen[$b]['bezeichnung']; ?>
-								<tr>
-									<td>Bestand</td>
-									<td colspan="2"><? echo $BestandStr; ?></td>
 								</tr>
-              <? if($flst->Buchungen[$b]['blattart'] == 3000){ ?>
+								<?php } ?>
+								<?php
+								if (($privileg_['verfahren'] OR $privileg_['ausfstelle']) AND $flst->Verfahren[0]['flurstkennz']!='') {
+									for($j = 0; $j < count($flst->Verfahren); $j++){
+									?>
 								<tr>
-									<td></td>
-									<td colspan="2">Im Grundbuch noch nicht gebucht.</td>
+									<td colspan="2">
+										<table border="0" cellspacing="0" cellpadding="2">
+										<?php if ($privileg_['ausfstelle'])
+										{ ?>
+											<tr valign="top">
+												<td align="right"><span class="fett">Ausf&uuml;hrende&nbsp;Stelle</span></td>
+												<td valign="top"><?php echo $flst->Verfahren[$j]['ausfstelleid']; ?></td>
+												<td valign="top">
+												<?php
+												if (strlen($flst->Verfahren[$j]['ausfstellename'])>40) {
+													$needle=array(
+													 strrpos(substr($flst->Verfahren[$j]['ausfstellename'],0,40),','),
+													 strrpos(substr($flst->Verfahren[$j]['ausfstellename'],0,40),'-'),
+													 strrpos(substr($flst->Verfahren[$j]['ausfstellename'],0,40),'/'),
+													 strrpos(substr($flst->Verfahren[$j]['ausfstellename'],0,40),' ')
+													);
+													rsort($needle);
+													echo substr($flst->Verfahren[$j]['ausfstellename'],0,$needle[0]+1)."<br>".substr($flst->Verfahren[$j]['ausfstellename'],$needle[0]+1);
+												} else {
+													echo $flst->Verfahren[$j]['ausfstellename'];
+												}
+												?>
+												</td>
+											</tr>
+										<?php }
+											if ($privileg_['verfahren']){ ?>
+											<tr valign="top">
+												<td align="right"><span class="fett">Verfahren</span></td>
+												<td valign="top"><?php echo $flst->Verfahren[$j]['verfnr']; ?></td>
+												<td valign="top">
+												(<?php echo $flst->Verfahren[$j]['verfbemid']; ?>)
+												&nbsp;
+												<?php
+												if (strlen($flst->Verfahren[$j]['verfbemerkung'])>35) {
+													$needle=array(
+													 strrpos(substr($flst->Verfahren[$j]['verfbemerkung'],0,35),','),
+													 strrpos(substr($flst->Verfahren[$j]['verfbemerkung'],0,35),'-'),
+													 strrpos(substr($flst->Verfahren[$j]['verfbemerkung'],0,35),'/'),
+													 strrpos(substr($flst->Verfahren[$j]['verfbemerkung'],0,35),' ')
+													);
+													rsort($needle);
+													echo substr($flst->Verfahren[$j]['verfbemerkung'],0,$needle[0]+1)."<br>".substr($flst->Verfahren[$j]['verfbemerkung'],$needle[0]+1);
+												} else {
+													echo $flst->Verfahren[$j]['verfbemerkung'];
+												}
+												?>
+												</td>
+											</tr>
+										<? } ?>
+										</table>
+									</td>
 								</tr>
-							<? }
-							}
-              $Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
-                  $anzEigentuemer=count($Eigentuemerliste);
-                  for ($e=0;$e<$anzEigentuemer;$e++) { ?>
-              <tr>
-              <td valign="top"><? echo $Eigentuemerliste[$e]->Nr ?>&nbsp;&nbsp;&nbsp;</td>
-              <td valign="top">
-              <?
-                $anzNamenszeilen=count($Eigentuemerliste[$e]->Name);
-                $Eigentuemerliste[$e]->Name_bearb = $Eigentuemerliste[$e]->Name;
-								if($this->Stelle->isFunctionAllowed('Adressaenderungen')) {
-											$eigentuemer = new eigentuemer(NULL, NULL, $this->pgdatabase);
-											$adressaenderungen =  $eigentuemer->getAdressaenderungen($Eigentuemerliste[$e]->gml_id);
-											$aendatum=substr($adressaenderungen['datum'],0,10);
-								}
-								if ($adressaenderungen['user_id'] != '') {
-									$user = new user(NULL, $adressaenderungen['user_id'], $this->database);
-								}
-              ?>
-                <table border="0" cellspacing="0" cellpadding="2">
-                  <tr>
-                  <td>
-                  <?
-                    for ($n=0;$n<$anzNamenszeilen;$n++) {
-                      if (!($Eigentuemerliste[$e]->Name_bearb[$n]=="" OR $Eigentuemerliste[$e]->Name_bearb[$n]==' ')) {
-                          echo $Eigentuemerliste[$e]->Name_bearb[$n].'<br>';
-                      }
-                    }
-                  if ($adressaenderungen['user_id'] != '') {
-											echo '<span class="fett"><u>Aktualisierte Anschrift ('.$aendatum.' - '.$user->Name.'):</u></span><br>';
-                      echo '&nbsp;&nbsp;<span class="fett">'.$adressaenderungen['strasse'].' '.$adressaenderungen['hausnummer'].'</span><br>';
-                      echo '&nbsp;&nbsp;<span class="fett">'.$adressaenderungen['postleitzahlpostzustellung'].' '.$adressaenderungen['ort_post'].' '.$adressaenderungen['ortsteil'].'</span><br>';
-                  }
-                  ?>
-                  </td>
-                  <td valign="bottom">
-                  <?
-                  if($this->Stelle->isFunctionAllowed('Adressaenderungen') AND $Eigentuemerliste[$e]->Nr != ''){
-                    if ($adressaenderungen['user_id'] == '') {											
-											echo '<img src="'.GRAPHICSPATH.'pfeil_links.gif" width="12" height="12" border="0">'; ?>&nbsp;<a class="buttonlink" href="javascript:ahah('index.php', 'go=neuer_Layer_Datensatz&reload=true&selected_layer_id=<? echo LAYER_ID_ADRESSAENDERUNGEN_PERSON; ?>&attributenames[0]=gml_id&attributenames[1]=hat&values[0]=<? echo urlencode($Eigentuemerliste[$e]->gml_id); ?>&values[1]=<? echo urlencode($Eigentuemerliste[$e]->anschrift_gml_id); ?>&embedded=true&fromobject=subform_ax_person_temp<? echo $b.'_'.$e; ?>&targetlayer_id=0&targetattribute=leer', new Array(document.getElementById('subform_ax_person_temp<? echo $b.'_'.$e; ?>')), new Array('sethtml'));"><span> Anschrift aktualisieren</span></a>
-                  <?}
-                    else {
-											echo '<img src="'.GRAPHICSPATH.'pfeil_links.gif" width="12" height="12" border="0">'; ?>&nbsp;<a class="buttonlink" href="javascript:ahah('index.php', 'go=Layer-Suche_Suchen&reload=true&selected_layer_id=<? echo LAYER_ID_ADRESSAENDERUNGEN_PERSON; ?>&value_gml_id=<? echo urlencode($Eigentuemerliste[$e]->gml_id); ?>&operator_gml_id==&attributenames[0]=user_id&values[0]=<? echo $this->user->id ?>&embedded=true&fromobject=subform_ax_person_temp<? echo $b.'_'.$e; ?>&targetlayer_id=0&targetattribute=leer', new Array(document.getElementById('subform_ax_person_temp<? echo $b.'_'.$e; ?>')), '');">Anschrift &auml;ndern</a>
-                  <?}
-                  }?>
-                    </td>
-									<tr>
-										<td colspan="2"><div id="subform_ax_person_temp<? echo $b.'_'.$e; ?>" style="display:inline"></div></td>
-									</tr>
-									</tr>
-                </table>
-                </td>
-							</tr>
-							<? if($Eigentuemerliste[$e]->zusatz_eigentuemer != ''){ ?>
+									<? } ?>
+								<? } ?>
+								<?php if ($privileg_['nutzung']){ ?>
 								<tr>
-									<td colspan="2"><? echo $Eigentuemerliste[$e]->zusatz_eigentuemer; if($Eigentuemerliste[$e]->Anteil != '')echo ' zu '.$Eigentuemerliste[$e]->Anteil;?></td>
-								</tr>
-								<? }
-									 elseif($Eigentuemerliste[$e]->Anteil != ''){ ?>
-								<tr>
-									<td></td>
-									<td>zu <? echo $Eigentuemerliste[$e]->Anteil; ?></td>
+									<td colspan="2">
+										<table border="0" cellspacing="0" cellpadding="2">
+											<tr>
+												<td><span class="fett">Nutzung</span></td>
+											</tr>
+											<tr>
+												<td>
+											<?php
+											$anzNutzung=count($flst->Nutzung);
+											if($anzNutzung > 0){
+												for ($j=0;$j<$anzNutzung;$j++){
+													if($flst->Nutzung[$j]['bereich'] != $flst->Nutzung[$j-1]['bereich']){
+														if($j > 0){ ?></table></div></div><? } ?>
+														<div id="nu_bereich">
+															<span id="nu_bereich_span"><? echo $flst->Nutzung[$j]['bereich']; ?></span>
+															<div id="nu_gruppe_nutzungsart">
+													<? }
+															if($flst->Nutzung[$j]['gruppe'] != $flst->Nutzung[$j-1]['gruppe']){
+																if($j > 0 AND $flst->Nutzung[$j]['bereich'] == $flst->Nutzung[$j-1]['bereich']){ ?></table><? } ?>
+																<span id="nu_gruppe_nutzungsart_span"><? echo $flst->Nutzung[$j]['gruppe']; ?></span>
+																<table id="nu_gruppe_nutzungsart_table">
+																	<tr>
+																		<th>Fläche</th><th>Schlüssel</th><th>Nutzung</th>
+																	</tr>
+													<?  } ?>
+																	<tr>
+																		<td align="right"><? echo $flst->Nutzung[$j][flaeche]; ?> m&sup2;&nbsp;</td>
+																		<td><? echo $flst->Nutzung[$j][nutzungskennz]; ?></td>
+																		<td>
+																			<? echo implode(', ', array_filter(array($flst->Nutzung[$j]['nutzungsart'], $flst->Nutzung[$j]['untergliederung1'], $flst->Nutzung[$j]['untergliederung2'])));
+																				 if($flst->Nutzung[$j]['nutzungsart'] == '' AND $flst->Nutzung[$j]['untergliederung1'] == '' AND $flst->Nutzung[$j]['untergliederung2'] == '')echo '&mdash;'; ?>
+																		</td>
+																	</tr>
+														<? } ?>
+															</table>
+														</div>
+													</div>
+												<? } ?>
+												</td>
+											</tr>
+										</table>
+									</td>
 								</tr>
 								<? } ?>
-							<? }
-               } ?>
-          </table>
-        </td>
-        </tr>
-        <?} ?>
+								<? if($privileg_['eigentuemer']){
+										$currenttime=date('Y-m-d H:i:s',time());
+										$this->user->rolle->setConsumeALB($currenttime, 'Flurstücksanzeige', array($flst->FlurstKennz), 0, 'NULL');		# das Flurstückskennzeichen wird geloggt
+								?>
+								<tr>
+								<td colspan="2">
+										<table border="0" cellspacing="0" cellpadding="2">
+											<tr>
+												<td colspan="3"><span class="fett">Eigentümer</span></td>
+											</tr>
+										<? 
+										for ($b=0;$b<count($flst->Buchungen);$b++) {
+											if($privileg_['bestandsnr']){
+												$BestandStr ='<a href="index.php?go=Grundbuchblatt_Auswaehlen_Suchen&selBlatt='.$flst->Buchungen[$b]['bezirk'].'-'.$flst->Buchungen[$b]['blatt'].'">'.$flst->Buchungen[$b]['bezirk'].'-'.ltrim($flst->Buchungen[$b]['blatt'], '0').'</a>';
+												$BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
+													$BestandStr.=' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
+													$BestandStr.=' ('.$flst->Buchungen[$b]['buchungsart'].')';
+													$BestandStr.=' '.$flst->Buchungen[$b]['bezeichnung']; ?>
+												<tr>
+													<td>Bestand</td>
+													<td colspan="2"><? echo $BestandStr; ?></td>
+												</tr>
+											<? if($flst->Buchungen[$b]['blattart'] == 3000){ ?>
+												<tr>
+													<td></td>
+													<td colspan="2">Im Grundbuch noch nicht gebucht.</td>
+												</tr>
+											<? }
+											}
+											$Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
+													$anzEigentuemer=count($Eigentuemerliste);
+													for ($e=0;$e<$anzEigentuemer;$e++) { ?>
+											<tr>
+											<td valign="top"><? echo $Eigentuemerliste[$e]->Nr ?>&nbsp;&nbsp;&nbsp;</td>
+											<td valign="top">
+											<?
+												$anzNamenszeilen=count($Eigentuemerliste[$e]->Name);
+												$Eigentuemerliste[$e]->Name_bearb = $Eigentuemerliste[$e]->Name;
+												if($this->Stelle->isFunctionAllowed('Adressaenderungen')) {
+															$eigentuemer = new eigentuemer(NULL, NULL, $this->pgdatabase);
+															$adressaenderungen =  $eigentuemer->getAdressaenderungen($Eigentuemerliste[$e]->gml_id);
+															$aendatum=substr($adressaenderungen['datum'],0,10);
+												}
+												if ($adressaenderungen['user_id'] != '') {
+													$user = new user(NULL, $adressaenderungen['user_id'], $this->database);
+												}
+											?>
+												<table border="0" cellspacing="0" cellpadding="2">
+													<tr>
+													<td>
+													<?
+														for ($n=0;$n<$anzNamenszeilen;$n++) {
+															if (!($Eigentuemerliste[$e]->Name_bearb[$n]=="" OR $Eigentuemerliste[$e]->Name_bearb[$n]==' ')) {
+																	echo $Eigentuemerliste[$e]->Name_bearb[$n].'<br>';
+															}
+														}
+													if ($adressaenderungen['user_id'] != '') {
+															echo '<span class="fett"><u>Aktualisierte Anschrift ('.$aendatum.' - '.$user->Name.'):</u></span><br>';
+															echo '&nbsp;&nbsp;<span class="fett">'.$adressaenderungen['strasse'].' '.$adressaenderungen['hausnummer'].'</span><br>';
+															echo '&nbsp;&nbsp;<span class="fett">'.$adressaenderungen['postleitzahlpostzustellung'].' '.$adressaenderungen['ort_post'].' '.$adressaenderungen['ortsteil'].'</span><br>';
+													}
+													?>
+													</td>
+													<td valign="bottom">
+													<?
+													if($this->Stelle->isFunctionAllowed('Adressaenderungen') AND $Eigentuemerliste[$e]->Nr != ''){
+														if ($adressaenderungen['user_id'] == '') {											
+															echo '<img src="'.GRAPHICSPATH.'pfeil_links.gif" width="12" height="12" border="0">'; ?>&nbsp;<a class="buttonlink" href="javascript:ahah('index.php', 'go=neuer_Layer_Datensatz&reload=true&selected_layer_id=<? echo LAYER_ID_ADRESSAENDERUNGEN_PERSON; ?>&attributenames[0]=gml_id&attributenames[1]=hat&values[0]=<? echo urlencode($Eigentuemerliste[$e]->gml_id); ?>&values[1]=<? echo urlencode($Eigentuemerliste[$e]->anschrift_gml_id); ?>&embedded=true&fromobject=subform_ax_person_temp<? echo $b.'_'.$e; ?>&targetlayer_id=0&targetattribute=leer', new Array(document.getElementById('subform_ax_person_temp<? echo $b.'_'.$e; ?>')), new Array('sethtml'));"><span> Anschrift aktualisieren</span></a>
+													<?}
+														else {
+															echo '<img src="'.GRAPHICSPATH.'pfeil_links.gif" width="12" height="12" border="0">'; ?>&nbsp;<a class="buttonlink" href="javascript:ahah('index.php', 'go=Layer-Suche_Suchen&reload=true&selected_layer_id=<? echo LAYER_ID_ADRESSAENDERUNGEN_PERSON; ?>&value_gml_id=<? echo urlencode($Eigentuemerliste[$e]->gml_id); ?>&operator_gml_id==&attributenames[0]=user_id&values[0]=<? echo $this->user->id ?>&embedded=true&fromobject=subform_ax_person_temp<? echo $b.'_'.$e; ?>&targetlayer_id=0&targetattribute=leer', new Array(document.getElementById('subform_ax_person_temp<? echo $b.'_'.$e; ?>')), '');">Anschrift &auml;ndern</a>
+													<?}
+													}?>
+														</td>
+													<tr>
+														<td colspan="2"><div id="subform_ax_person_temp<? echo $b.'_'.$e; ?>" style="display:inline"></div></td>
+													</tr>
+													</tr>
+												</table>
+												</td>
+											</tr>
+											<? if($Eigentuemerliste[$e]->zusatz_eigentuemer != ''){ ?>
+												<tr>
+													<td colspan="2"><? echo $Eigentuemerliste[$e]->zusatz_eigentuemer; if($Eigentuemerliste[$e]->Anteil != '')echo ' zu '.$Eigentuemerliste[$e]->Anteil;?></td>
+												</tr>
+												<? }
+													 elseif($Eigentuemerliste[$e]->Anteil != ''){ ?>
+												<tr>
+													<td></td>
+													<td>zu <? echo $Eigentuemerliste[$e]->Anteil; ?></td>
+												</tr>
+												<? } ?>
+											<? }
+											 } ?>
+									</table>
+								</td>
+								</tr>
+								<?} ?>
 
-        <tr>
-          <td>&nbsp;</td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-  <tr>
-    <td colspan="2">
-      <table width="100%" cellspacing="0" cellpading="0" border="0">
-        <tr align="center" valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
-		  <td colspan="2">
-            <div class="fstanzeigecontainer">
+								<tr>
+									<td>&nbsp;</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="2">
+							<table width="100%" cellspacing="0" cellpading="0" border="0">
+								<tr align="center" valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
+									<td colspan="2">
+										<div class="fstanzeigecontainer">
+											<a href="index.php?go=Flurstueck_<? if($flst->endet!="" OR $flst->hist_alb == 1)echo 'hist_';?>Auswaehlen&searchInExtent=<?php echo $this->searchInExtent;
+											?>&GemID=<?php echo $flst->GemeindeID;
+											?>&GemkgID=<?php echo $flst->GemkgSchl; ?>&FlurID=<?php echo $flst->FlurID;
+											?>&FlstID=<?php echo $flst->FlurstKennz; ?>">
+												<div class="fstanzeigehover">&nbsp;&nbsp;zur Flurstückssuche&nbsp;&nbsp;</div>
+											</a>
+											<a href="index.php?go=Adresse_Auswaehlen&searchInExtent=<?php echo $this->searchInExtent;
+											?>&GemID=<? echo $flst->GemeindeID;
+											?>&StrID=<? echo $flst->Adresse[0]["strasse"];
+											?>&selHausID=<? if($flst->selHausID != '')echo implode($flst->selHausID, ', '); ?>">
+												<div class="fstanzeigehover">&nbsp;&nbsp;zur Adresssuche&nbsp;&nbsp;</div>
+											</a>
+											<?
+												if($flst->hist_alb != 1){
+													$zoomlink = 'ZoomToFlst&FlurstKennz='.$flst->FlurstKennz; 
+													if($set_timestamp != '')$zoomlink = $set_timestamp.'&go_next='.urlencode($zoomlink);else $zoom_all = true;
+											?>
+													<a href="index.php?go=<? echo $zoomlink;?>">
+														<div class="fstanzeigehover">&nbsp;&nbsp;Kartenausschnitt&nbsp;&nbsp;</div>
+													</a>
+											<? } ?>
+											<div class="fstanzeigehover">
+												&nbsp;&nbsp;
+												Auszug:
+												<select style="width: 130px" onchange="this.options[this.selectedIndex].onchange();">
+													<option>-- Auswahl --</option>
+													<? if($this->Stelle->funktionen['MV0510']['erlaubt']){ ?><option onchange="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0510&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurstücksnachweis</option><? } ?>
+													<? if($this->Stelle->funktionen['MV0550']['erlaubt']){ ?><option onchange="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0550&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurstücks- und Eigentumsnachweis</option><? } ?>
+													<? if($this->Stelle->funktionen['MV0520']['erlaubt']){ ?><option onchange="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0520&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurstücksnachweis mit Bodenschätzung</option><? } ?>
+													<? if($this->Stelle->funktionen['MV0560']['erlaubt']){ ?><option onchange="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0560&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurstücks- und Eigentumsnachweis mit Bodenschätzung</option><? } ?>
 
-					<a href="index.php?go=Flurstueck_<? if($flst->endet!="" OR $flst->hist_alb == 1)echo 'hist_';?>Auswaehlen&searchInExtent=<?php echo $this->searchInExtent;
-					?>&GemID=<?php echo $flst->GemeindeID;
-					?>&GemkgID=<?php echo $flst->GemkgSchl; ?>&FlurID=<?php echo $flst->FlurID;
-					?>&FlstID=<?php echo $flst->FlurstKennz; ?>">
-                    <div class="fstanzeigehover">
-					  &nbsp;&nbsp;
-					  zur Flurstückssuche
-					  &nbsp;&nbsp;
-                    </div>
-    				</a>
-					<a href="index.php?go=Adresse_Auswaehlen&searchInExtent=<?php echo $this->searchInExtent;
-					?>&GemID=<? echo $flst->GemeindeID;
-					?>&StrID=<? echo $flst->Adresse[0]["strasse"];
-					?>&selHausID=<? if($flst->selHausID != '')echo implode($flst->selHausID, ', '); ?>">
-										<div class="fstanzeigehover">
-					  &nbsp;&nbsp;
-					  zur Adresssuche
-					  &nbsp;&nbsp;
-                    </div>
-					</a>
-					<?
-						if($flst->hist_alb != 1){
-							$zoomlink = 'ZoomToFlst&FlurstKennz='.$flst->FlurstKennz; 
-							if($set_timestamp != '')$zoomlink = $set_timestamp.'&go_next='.urlencode($zoomlink);else $zoom_all = true;
-					?>
-							<a href="index.php?go=<? echo $zoomlink;?>">
-												<div class="fstanzeigehover">
-								&nbsp;&nbsp;
-								Kartenausschnitt
-								&nbsp;&nbsp;
-							</div>
-							</a>
-					<? } ?>
-              <div class="fstanzeigehover">
-					  &nbsp;&nbsp;
-					  Auszug:
-						<select style="width: 130px" onchange="this.options[this.selectedIndex].onchange();">
-							<option>-- Auswahl --</option>
-							<? if($this->Stelle->funktionen['MV0510']['erlaubt']){ ?><option onchange="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0510&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurstücksnachweis</option><? } ?>
-							<? if($this->Stelle->funktionen['MV0550']['erlaubt']){ ?><option onchange="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0550&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurstücks- und Eigentumsnachweis</option><? } ?>
-							<? if($this->Stelle->funktionen['MV0520']['erlaubt']){ ?><option onchange="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0520&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurstücksnachweis mit Bodenschätzung</option><? } ?>
-							<? if($this->Stelle->funktionen['MV0560']['erlaubt']){ ?><option onchange="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0560&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurstücks- und Eigentumsnachweis mit Bodenschätzung</option><? } ?>
-
-							<? if($this->Stelle->funktionen['ALB-Auszug 30']['erlaubt']){ ?><option onchange="window.open('index.php?go=ALB_Anzeige&formnummer=30&wz=1&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurst&uuml;cksdaten</option><? } ?>
-							<? if($this->Stelle->funktionen['ALB-Auszug 35']['erlaubt']){ ?><option onchange="window.open('index.php?go=ALB_Anzeige&formnummer=35&wz=1&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurst&uuml;cksdaten&nbsp;mit&nbsp;Eigent&uuml;mer</option><? } ?>
-							<? if($this->Stelle->funktionen['ALB-Auszug 40']['erlaubt']){ ?><option onchange="window.open('index.php?go=ALB_Anzeige&formnummer=40&wz=1&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Eigent&uuml;merdaten&nbsp;zum&nbsp;Flurst&uuml;ck</option><? } ?>
-						</select>
-					  &nbsp;&nbsp;
-                      </div>
-
-              </div>
-			</td>
-          </tr>
-        </tr>
-      </table>
-        </td>
-      </tr>
-      </table>
-      </div>
-    </td>
-  </tr>
+													<? if($this->Stelle->funktionen['ALB-Auszug 30']['erlaubt']){ ?><option onchange="window.open('index.php?go=ALB_Anzeige&formnummer=30&wz=1&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurst&uuml;cksdaten</option><? } ?>
+													<? if($this->Stelle->funktionen['ALB-Auszug 35']['erlaubt']){ ?><option onchange="window.open('index.php?go=ALB_Anzeige&formnummer=35&wz=1&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurst&uuml;cksdaten&nbsp;mit&nbsp;Eigent&uuml;mer</option><? } ?>
+													<? if($this->Stelle->funktionen['ALB-Auszug 40']['erlaubt']){ ?><option onchange="window.open('index.php?go=ALB_Anzeige&formnummer=40&wz=1&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Eigent&uuml;merdaten&nbsp;zum&nbsp;Flurst&uuml;ck</option><? } ?>
+												</select>
+												&nbsp;&nbsp;
+											</div>
+										</div>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+			</div>
+		</td>
+	</tr>
 
   <?} # Ende es wurde auch was zum Flurstück gefunden
     else { ?>
     <tr>
-    <td>Das Flurstück mit Kennzeichen: <?php echo $flurstkennz; ?> ist nicht in der aktuellen<br> PostGIS-Datenbank enthalten. Aktualisieren Sie die ALB und ALK-Daten.
-    </td>
+			<td>Das Flurstück mit Kennzeichen: <?php echo $flurstkennz; ?> ist nicht in der aktuellen<br> PostGIS-Datenbank enthalten. Aktualisieren Sie die ALB und ALK-Daten.</td>
     </tr>
     <? }
   } # Ende der Schleife zur Abfrage und Anzeige der einzelnen Flurstücke

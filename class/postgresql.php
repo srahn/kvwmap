@@ -1414,7 +1414,7 @@ FROM
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret[0] OR pg_num_rows($queryret[1])==0) {
       # keine Eintragungen zu Nutzungen gefunden
-      return $queryret;
+      return NULL;
     }
     $summe = 0;
 		$groesste = 0;
