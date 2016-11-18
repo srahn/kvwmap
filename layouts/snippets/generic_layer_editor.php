@@ -119,7 +119,6 @@
 	for ($k=0;$k<$anzObj;$k++) {
 		$checkbox_names .= 'check;'.$attributes['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].'|';
 ?>
-	<input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
 	<tr 
 	<? if($this->user->rolle->querymode == 1){ ?>
 		onmouseenter="ahah('index.php', 'go=tooltip_query&querylayer_id=<? echo $layer['Layer_ID']; ?>&oid=<? echo $layer['shape'][$k][$attributes['table_name'][$attributes['the_geom']].'_oid']; ?>', new Array(top.document.GUI.result, ''), new Array('setvalue', 'execute_function'));"
@@ -130,6 +129,7 @@
 		  <table>
 				<tr>
 					<td style="line-height: 1px; ">
+						<input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
 						<input id="<? echo $layer['Layer_ID'].'_'.$k; ?>" type="checkbox" name="check;<? echo $attributes['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>">&nbsp;
 					</td>
 				</tr>
