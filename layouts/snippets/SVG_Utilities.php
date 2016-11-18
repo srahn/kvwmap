@@ -12,6 +12,10 @@
 	function show_vertices(){
 		document.getElementById("svghelp").SVGshow_foreign_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 	}
+	
+	function coord_input_submit(){
+		document.getElementById("svghelp").SVGcoord_input_submit();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+	}	
 
 	var nbh = new Array();
 	
@@ -1005,6 +1009,8 @@ function mouseup(evt){
 	$coord_input_functions = '
 
 	coord_input_functions = true;
+	
+	top.document.getElementById("svghelp").SVGcoord_input_submit = coord_input_submit;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
 	function coord_input(){
 		doing = top.currentform.last_doing.value;
@@ -1024,17 +1030,51 @@ function mouseup(evt){
 				}
 			}
 		}
-		coord = prompt("Koordinateneingabe:", Math.round(minx+(maxx-minx)/2)+" "+Math.round(miny+(maxy-miny)/2))+"";
-		coords1 = coord.split(" ");
+		mittex = Math.round(minx+(maxx-minx)/2);
+		mittey = Math.round(miny+(maxy-miny)/2);
+		var Msg = top.document.getElementById("message_box");
+		Msg.className = \'message_box_visible\';
+		content = \'<div style="position: absolute;top: 0px;right: 0px"><a href="#" onclick="javascript:document.getElementById(\\\'message_box\\\').className = \\\'message_box_hidden\\\';" title="Schlie&szlig;en"><img style="border:none" src="'.GRAPHICSPATH.'exit2.png"></img></a></div>\';
+		content+= \'<div style="height: 30px">Koordinateneingabe</div>\';
+		content+= \'<table style="padding: 5px"><tr><td align="left" style="width: 300px" class="px15">Koordinate</td></tr>\';
+		content+= \'<tr><td><input style="width: 310px" type="text" id="input_coords" name="input_coords" value="\'+mittex+\' \'+mittey+\'"></td></tr>\';
+		content+= \'<tr><td>Koordinatensystem:&nbsp;<select name="epsg_code" id="epsg_code" style="width: 310px">'.$epsg_codes.'</select></td></tr></table>\';
+		content+= \'<br><input type="button" value="OK" onclick="coord_input_submit()">\';
+		Msg.innerHTML = content;
+	}
+		
+	function coord_input_submit(){
+		coordtype = \''.$this->user->rolle->coordtype.'\';
+		viewer_epsg = \''.$this->user->rolle->epsg_code.'\';
+		coords1 = top.document.getElementById(\'input_coords\').value;
+		epsgcode = top.document.getElementById(\'epsg_code\').value;
+		if(coords1){
+			coords2 = coords1.split(" ");
+			if(epsgcode == 4326 && coordtype != "dec"){
+				coords2[0] = dms2dec(coords2[0], coordtype)+"";
+				coords2[1] = dms2dec(coords2[1], coordtype)+"";
+			}
+			if(!coords2[0] || !coords2[1] || coords2[0].search(/[^-\d.]/g) != -1 || coords2[1].search(/[^-\d.]/g) != -1){
+				alert("Falsches Format");
+				return;
+			}
+			top.document.getElementById(\'message_box\').className = \'message_box_hidden\';
+			if(viewer_epsg == epsgcode){
+				set_coord(coords2[0], coords2[1]);
+			}
+		}
+	}
+			
+	function set_coord(coordx, coordy){
 		mouse_coords_type = "world";
 		evt1 = new Object();
-		evt1.clientX = coords1[0];
-		evt1.clientY = coords1[1];
+		evt1.clientX = coordx;
+		evt1.clientY = coordy;
 		mousedown(evt1);
 		mouse_coords_type = "image";
-		if(coords1[0] < minx || coords1[0] > maxx || coords1[1] < miny || coords1[1] > maxy){		// wenn Punkt ausserhalb des Kartenausschnittes -> hinzoomen
-			pathx[0] = (coords1[0]-minx)/scale;
-			pathy[0] = resy-((coords1[1]-miny)/scale);
+		if(coordx < minx || coordx > maxx || coordy < miny || coordy > maxy){		// wenn Punkt ausserhalb des Kartenausschnittes -> hinzoomen
+			pathx[0] = (coordx-minx)/scale;
+			pathy[0] = resy-((coordy-miny)/scale);
 			sendpath("recentre", pathx, pathy);
 		}
 	}
