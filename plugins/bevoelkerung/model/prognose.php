@@ -149,8 +149,10 @@ class prognose {
 			SELECT
 				*
 			FROM
-				" . $tablename . "
+				mvbevoelkerung" . $year . "." . $tablename . "
 		";
+		#echo '<br>' . $sql;
+
 		$ret = $this->database->execSQL($sql, 4, 0);
 
 		if ($ret[0] == 0) {

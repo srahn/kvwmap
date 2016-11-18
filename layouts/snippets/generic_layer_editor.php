@@ -324,7 +324,7 @@
 				}
 				else {
 					x[i].style.display = '';
-					img.src = 'graphics/minus_.gif'
+					img.src = 'graphics/minus.gif'
 				}
 			}
 		}

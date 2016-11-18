@@ -25,6 +25,19 @@
 			$prog->transpose();
 		} break;
 
+		case 'bevoelkerung_transpose_table' : {
+			$year = $_REQUEST['year'];
+			$tablename = $_REQUEST['tablename'];
+			if (empty($year) or empty($tablename)) {
+				echo 'Es müssen die Parameter <b>year</b> und <b>tablename</b> angegeben werden.';
+			}
+			else {
+				include(PLUGINS.'bevoelkerung/model/prognose.php');
+				$prog = new prognose($this->pgdatabase);
+				$prog->transposeTable($year, $tablename);
+			}
+		} break;
+
 		case 'show_ternary_charts' : {
 			include(PLUGINS.'bevoelkerung/model/prognose.php');
 			$prog = new prognose($this->pgdatabase);
