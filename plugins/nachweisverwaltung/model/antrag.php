@@ -762,13 +762,14 @@ class antrag {
     return $ret;
   }
   
-  function addFestpunkt($pkz) {
+# 2016-11-03, H.Riedel - um stelle_id erweitert, pkz in pkn geaendert
+  function addFestpunkt($pkn) {
     # Fügt einen Festpunkt in dem Antrag hinzu
-    $sql ="INSERT INTO nachweisverwaltung.fp_punkte2antraege (pkz,antrag_nr,zeitstempel)";
+    $sql ="INSERT INTO nachweisverwaltung.fp_punkte2antraege (pkn,antrag_nr,zeitstempel,stelle_id)";
     $sql.="(";
-    $sql.=" SELECT '".$pkz."','".$this->nr."',CURRENT_TIMESTAMP(0)";
+    $sql.=" SELECT '".$pkn."','".$this->nr."',CURRENT_TIMESTAMP(0), '".$this->stelle_id."' ";
     $sql.=" WHERE NOT EXISTS (";
-    $sql.=" SELECT 1 FROM nachweisverwaltung.fp_punkte2antraege WHERE pkz='".$pkz."' AND antrag_nr='".$this->nr."')";
+    $sql.=" SELECT 1 FROM nachweisverwaltung.fp_punkte2antraege WHERE pkn='".$pkn."' AND antrag_nr='".$this->nr."' AND stelle_id='".$this->stelle_id."')";
     $sql.=")";
     $this->debug->write("<br>antrag->addFestpunkt().<br>",4);
     $ret=$this->database->execSQL($sql,4, 1);

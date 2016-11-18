@@ -9,6 +9,7 @@ include(WWWROOT.APPLVERSION.'funktionen/gui_functions.php');
 <link rel="stylesheet" href="<?php echo 'layouts/custom/'.CUSTOM_STYLE; ?>">
 <? } ?>
 <? include(WWWROOT.APPLVERSION.'funktionen/msgboxes.php'); ?>
+<link rel="stylesheet" href="../3rdparty/font-awesome-4.6.3/css/font-awesome.min.css" type="text/css">
 </HEAD>
 <BODY onload="onload_functions();">
 	<div id="sperrdiv" style="position: absolute;height: 100%;z-index: 1000000;background:rgba(200,200,200,0.3);"></div>
