@@ -5,23 +5,7 @@
 			<? if($this->user->rolle->hist_timestamp != '') echo '<a href="index.php?go=setHistTimestamp" title="Zeitpunkt auf aktuell setzen"><h2 style="color: #a82e2e;">Zeitpunkt ALKIS-Historie: '.$this->user->rolle->hist_timestamp.'</h2></a>'; ?>
 		</td>
 		<td width="5%" align="right">
-			<?php $params = $this->user->rolle->get_layer_params($this->Stelle->selectable_layer_params, $this->pgdatabase);
-			if (!empty($params)) { ?>
-				<table>
-					<tr width="100%" align="center">
-						<td>
-							<div style="position: relative;">
-								<div style="position: relative;">
-									<i id="openLayerParamBarIcon" class="fa fa-bars" style="margin: 5 5 5 5" onclick="toggleLayerParamsBar();"></i>
-								</div>
-								<?php
-									include(LAYOUTPATH . "snippets/params.php");
-								?>
-							</div>
-						</td>
-					</tr>
-				</table><?php
-			} ?>
+			<? include(SNIPPETS.'params.php'); ?>
 		</td>
 	</tr>
 </table>

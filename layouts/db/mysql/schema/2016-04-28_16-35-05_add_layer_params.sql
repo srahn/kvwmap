@@ -1,7 +1,7 @@
 BEGIN;
 
-	CREATE TABLE	`layer_parameter` (
-		`id`,
+	CREATE TABLE `layer_parameter` (
+		`id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
 		`key` VARCHAR( 255 ) NOT NULL ,
 		`alias` VARCHAR( 255 ) NOT NULL,
 		`default_value` VARCHAR( 255 ) NOT NULL ,
