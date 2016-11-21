@@ -654,40 +654,6 @@ CREATE OR REPLACE VIEW alkis.lk_fp_besonderertopographischerpunkt AS
   WHERE topp.gml_id::text = au.istteilvon::text;
 
 
-
-
--- DROP VIEW alkis.lk_fp_festpunkt;
-
-CREATE OR REPLACE VIEW alkis.lk_fp_festpunkt AS 
- SELECT f.pkn,
-    f.pktnr,
-    f.vma,
-    n.field_2 AS rw,
-    n.field_3 AS hw,
-    f.hoe,
-    f.hop,
-    f.par,
-    f.zde,
-        CASE
-            WHEN length(f.pkn::character varying::text) = 9 THEN ((substr(f.pkn::character varying::text, 1, 3) || '/'::text) || f.pkn::character varying::text) || '.tif'::text
-            ELSE ((substr(f.pkn::character varying::text, 1, 4) || '/'::text) || f.pkn::character varying::text) || '.tif'::text
-        END AS datei,
-        CASE
-            WHEN f.hoe IS NULL THEN force_3d(st_setsrid(st_makepoint(n.field_2, n.field_3), 25833))
-            ELSE st_setsrid(st_makepoint(n.field_2, n.field_3, f.hoe::double precision), 25833)
-        END AS wkb_geometry
-   FROM alkis.lro_festpunkt_ohnegeom_alkis f,
-    ( SELECT DISTINCT ON ("LkRos_EIN_20141104_TRAFO_25833".field_1, "LkRos_EIN_20141104_TRAFO_25833".field_2, "LkRos_EIN_20141104_TRAFO_25833".field_3) "LkRos_EIN_20141104_TRAFO_25833".gid,
-            "LkRos_EIN_20141104_TRAFO_25833".field_1,
-            "LkRos_EIN_20141104_TRAFO_25833".field_2,
-            "LkRos_EIN_20141104_TRAFO_25833".field_3,
-            "LkRos_EIN_20141104_TRAFO_25833".the_geom
-           FROM alkis_m."LkRos_EIN_20141104_TRAFO_25833") n
-  WHERE f.pkn = n.field_1;
-
-
-
-
 -- DROP VIEW alkis.lk_fp_grenzpunkt;
 
 CREATE OR REPLACE VIEW alkis.lk_fp_grenzpunkt AS 
