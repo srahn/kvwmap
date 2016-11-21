@@ -119,7 +119,6 @@
 	for ($k=0;$k<$anzObj;$k++) {
 		$checkbox_names .= 'check;'.$attributes['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].'|';
 ?>
-	<input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
 	<tr 
 	<? if($this->user->rolle->querymode == 1){ ?>
 		onmouseenter="ahah('index.php', 'go=tooltip_query&querylayer_id=<? echo $layer['Layer_ID']; ?>&oid=<? echo $layer['shape'][$k][$attributes['table_name'][$attributes['the_geom']].'_oid']; ?>', new Array(top.document.GUI.result, ''), new Array('setvalue', 'execute_function'));"
@@ -130,6 +129,7 @@
 		  <table>
 				<tr>
 					<td style="line-height: 1px; ">
+						<input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
 						<input id="<? echo $layer['Layer_ID'].'_'.$k; ?>" type="checkbox" name="check;<? echo $attributes['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>">&nbsp;
 					</td>
 				</tr>
@@ -309,7 +309,70 @@
 				</tr>
 				
 	<?  } ?>
-
+				<tr onclick="toggle_statistic_row();">
+					<td style="background-color:lightsteelblue;">
+						<img border="0" id="statistic_img" src="graphics/plus.gif">&nbsp;&Sigma;
+<script type="text/javascript">
+		function toggle_statistic_row() {
+			var x = document.getElementsByClassName('statistic_row'),
+					img = document.getElementById('statistic_img'),
+					i;
+			for (i = 0; i < x.length; i++) {
+				if (x[i].style.display == '') {
+					x[i].style.display = 'none';
+					img.src = 'graphics/plus.gif';
+				}
+				else {
+					x[i].style.display = '';
+					img.src = 'graphics/minus.gif'
+				}
+			}
+		}
+</script>
+					</td><?
+					for ($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++) { ?>
+						<td valign="top"><div class="statistic_row" style="display:none"><?php
+							$column_name = $this->qlayerset[$i]['attributes']['name'][$j];
+							if (!in_array($column_name, array('id', 'geom'))) {
+								$values = array_map(
+									function ($row) use ($column_name) {
+										return $row[$column_name];
+									},
+									$this->qlayerset[$i]['shape']
+								);
+								$summe = array_sum($values);
+								if ($summe > 0) {
+									$average = round($summe / count($values), 2);
+									$min = min($values);
+									$max = max($values);
+									echo '&Sigma;:&nbsp;' . $summe;
+									echo '<br>&empty;:&nbsp;' . $average;
+									echo '<br>&darr;:&nbsp;' . $min;
+									echo '<br>&uarr;:&nbsp;' . $max;
+									$percent_values = array_map(
+										function ($row) use ($column_name, $min, $max) {
+											$value = $row[$column_name];
+											$delta = $max - $min;
+											return ($max == $min) ? 100 : round(($value - $min) * 100 / ($max - $min));
+										},
+										$this->qlayerset[$i]['shape']
+									);
+									sort($percent_values);
+									$hist_values = array();
+									foreach($percent_values AS $percent_value) {
+										if (!isset($hist_values[$percent_value]))
+											$hist_values[$percent_value] = 0;
+										$hist_values[$percent_value]++;
+									}
+									echo '<br>Häufigkeit:';
+									foreach($hist_values AS $key => $value) {
+										echo '<br>' . round($key * ($max - $min) / 100 + $min, strlen(substr(strrchr($summe, "."), 1))) . ':&nbsp;' . $value;
+									}
+								}
+							} ?></div>
+						</td><?
+					} ?>
+				</tr>
 			</table>
 		</td>
 	</tr>

@@ -1,34 +1,44 @@
 <?php
-  header('Content-type: text/css');
-  include('../config.php');
+	header('Content-type: text/css');
+	include('../config.php');
 ?>
 
-@font-face {
-  font-family: 'SourceSansPro';
-  font-style: normal;
-  font-weight: 300;
-  src: local('SourceSansPro'), url(../fonts/SourceSansPro-Light.ttf);
-}
-@font-face {
-  font-family: 'SourceSansPro1';
-  font-style: normal;
-  font-weight: 400;
-  src: local('SourceSansPro1'), url(../fonts/SourceSansPro-Regular.ttf);
-}
-@font-face {
-  font-family: 'SourceSansPro2';
-  font-style: normal;
-  font-weight: 600;
-  src: local('SourceSansPro2'), url(../fonts/SourceSansPro-Semibold.ttf);
-}
-@font-face {
-  font-family: 'SourceSansPro3';
-  font-style: normal;
-  font-weight: 700;
-  src: local('SourceSansPro3'), url(../fonts/SourceSansPro-Bold.ttf);
+#layerParamsBar {
+	display: none;
+	position: absolute;
+  border-radius: 5px;
+	top: 22;
+	right: 5;
+	width: 350;
+	z-index: 9999;
 }
 
-body {  
+@font-face {
+	font-family: 'SourceSansPro';
+	font-style: normal;
+	font-weight: 200;
+	src: local('SourceSansPro'), url(../fonts/SourceSansPro-Light.ttf);
+}
+@font-face {
+	font-family: 'SourceSansPro1';
+	font-style: normal;
+	font-weight: 400;
+	src: local('SourceSansPro1'), url(../fonts/SourceSansPro-Regular.ttf);
+}
+@font-face {
+	font-family: 'SourceSansPro2';
+	font-style: normal;
+	font-weight: 600;
+	src: local('SourceSansPro2'), url(../fonts/SourceSansPro-Semibold.ttf);
+}
+@font-face {
+	font-family: 'SourceSansPro3';
+	font-style: normal;
+	font-weight: 700;
+	src: local('SourceSansPro3'), url(../fonts/SourceSansPro-Bold.ttf);
+}
+
+body {	
 	font-family: SourceSansPro1, Arial, Verdana, Helvetica, sans-serif;
 	BACKGROUND:white;
 	margin:0px;
@@ -122,7 +132,7 @@ input[type="text"].transparent_input{
 select {
 	font-size: 14px;
 	font-family: SourceSansPro1;
-  padding: 0 0;
+	padding: 0 0;
 }
 
 textarea {
@@ -130,24 +140,24 @@ textarea {
 	font-family: SourceSansPro1;
 }
 
-td {  
+td {	
 	font-size: 15px;
 	line-height: 16px;
 	font-family: SourceSansPro1;
 }
 
-th {  
+th {	
 	font-size: 17px;
 	font-family: SourceSansPro2;
 }
 
-th a {  
+th a {	
 	font-size: 17px;
 	font-family: SourceSansPro2;
 }
 
 
-a, img {  
+a, img {	
 	color: firebrick; 
 	TEXT-DECORATION: none;
 	font-size: 15px;
@@ -159,7 +169,7 @@ a:focus{
 	outline: none;
 }
 
-a:hover {  
+a:hover {	
 	color: black;
 }
 
@@ -187,7 +197,7 @@ a.link {
 
 a.blue_underline {
 	color: #0000CC;
-    font-weight: bold;
+		font-weight: bold;
 	TEXT-DECORATION:underline; 
 }
 
@@ -225,12 +235,12 @@ a.invisiblelayerlink:hover{
 	border: 1px solid #cccccc;
 	border-color: #bbbbbb;
 	background: linear-gradient(#eff3f6, lightsteelblue);
-  padding: 4px;
+	padding: 4px;
 	padding-top: 0px;
 	padding-bottom: 4px;
-  text-align: center;
+	text-align: center;
 	color: black;
-  border-radius: 5px;
+	border-radius: 5px;
 }
 
 .buttonlink:hover{
@@ -258,7 +268,7 @@ a.menuered {
 	line-height : 17px;
 }
 
-a.menuered:hover {  
+a.menuered:hover {	
 	color: black;
 }
 
@@ -374,7 +384,7 @@ a.menuered:hover {
 	box-shadow:
 	2px 3px 3px rgba(0, 0, 0, 0.2), 
 	0px 3px 1px rgba(255, 255, 255, 0.6) inset, 
-	-1px -1px 3px rgba(0, 0, 0, 0.7) inset,   
+	-1px -1px 3px rgba(0, 0, 0, 0.7) inset,	 
 	0px 1px 1px rgba(0, 0, 0, 0.8) inset;
 }
 
@@ -386,7 +396,7 @@ a.menuered:hover {
 	0 -2px 7px rgba( 255, 255, 255 ,0.1),
 	2px 3px 3px rgba(0, 0, 0, 0.2), 
 	0px 3px 1px rgba(255, 255, 255, 0.6) inset, 
-	-1px -1px 3px rgba(0, 0, 0, 0.7) inset,   
+	-1px -1px 3px rgba(0, 0, 0, 0.7) inset,	 
 	0px 1px 1px rgba(0, 0, 0, 0.8) inset;
 }
 
@@ -396,7 +406,7 @@ a.menuered:hover {
 	0 2px 7px rgba( 255, 255, 255 ,0.2), 
 	-2px 0 7px rgba( 255, 255, 255 ,0.2),
 	0 -2px 7px rgba( 255, 255, 255 ,0.2),
-	-1px -1px 3px rgba(0, 0, 0, 0.7) inset,   
+	-1px -1px 3px rgba(0, 0, 0, 0.7) inset,	 
 	0px 0px 1px rgba(0, 0, 0, 0.8) inset;
 }
 
@@ -406,35 +416,35 @@ a.menuered:hover {
 }
 
 .slidinglegend_slideout {
-  position:absolute;
+	position:absolute;
 	border-top: 1px solid #eeeeee;
-  border-left:1px solid #CCCCCC;
-  background-image: url(../graphics/bg.gif);
-  transform: translate3d(-27px,0px,0px);
-  transition: all 0.4s ease;
-  -webkit-transform: translate3d(-27px,0px,0px);
-  -webkit-transition: all 0.3s ease;
+	border-left:1px solid #CCCCCC;
+	background-image: url(../graphics/bg.gif);
+	transform: translate3d(-27px,0px,0px);
+	transition: all 0.4s ease;
+	-webkit-transform: translate3d(-27px,0px,0px);
+	-webkit-transition: all 0.3s ease;
 }
 
-.slidinglegend_slideout  .table1{
-  opacity: 0.0;
+.slidinglegend_slideout	.table1{
+	opacity: 0.0;
 	transition: all 0.4s ease;
 }
 
 .slidinglegend_slidein .table1{
-  opacity: 1;
+	opacity: 1;
 	transition: all 0.4s ease;
 }
 
 .slidinglegend_slidein {
 	position:absolute;
 	border-top: 1px solid #eeeeee;
-  border-left:1px solid #CCCCCC;
-  background-image: url(../graphics/bg.gif);
-  transform: translate3d(-255px,0px,0px);
-  transition: all 0.4s ease;
-  -webkit-transform: translate3d(-255px,0px,0px);
-  -webkit-transition: all 0.3s ease;
+	border-left:1px solid #CCCCCC;
+	background-image: url(../graphics/bg.gif);
+	transform: translate3d(-255px,0px,0px);
+	transition: all 0.4s ease;
+	-webkit-transform: translate3d(-255px,0px,0px);
+	-webkit-transition: all 0.3s ease;
 }
 
 .legend_group{
@@ -465,32 +475,32 @@ a.menuered:hover {
 	font-family: SourceSansPro1;
 }
 
-.infobox {  
+.infobox {	
 	text-decoration:none;
 	overflow: auto;
 }
 
-.infotext{  
+.infotext{	
 	overflow-y: auto; 
 	max-height:100px;
 }
 
 .infobox:hover { 
-	text-decoration:none;  
+	text-decoration:none;	
 }
 
 .infobox .infotext 
 	{ display:none; 
 		position:absolute;
-    padding:0.5em; 
-    text-decoration:none; 
+		padding:0.5em; 
+		text-decoration:none; 
 }
 
 .infobox:hover .infotext{
 	display:inline;
-  border:1px solid steelblue; 
-  background:white; 
-  text-decoration:none;
+	border:1px solid steelblue; 
+	background:white; 
+	text-decoration:none;
 }
 
 
@@ -512,14 +522,14 @@ span.italic {
 	font-style: italic; 
 }
 
-span.red {  
-	font-size: 15px;  
+span.red {	
+	font-size: 15px;	
 	color: #a82e2e;
 	font-family: SourceSansPro2;
 }
 
 .blink {
-  animation: blink 1s step-end infinite;
+	animation: blink 1s step-end infinite;
 }
 @keyframes blink { 80% { visibility: hidden; }}
 
@@ -530,7 +540,7 @@ span.black {
 }
 
 #layer {
-  margin:0px 8px 8px 8px;
+	margin:0px 8px 8px 8px;
 	#overflow:hidden;
 	clear: both;
 }
@@ -592,31 +602,31 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 .raster_record_open .preview_image:hover{width: 125; ?>px;transition: all 0.25s ease;}
 
 
-#layer  h2{
+#layer	h2{
 	font-weight: bold;
 }
 
 #datensatz {
- border:0px solid gray;
- border-collapse:collapse;
- padding:0px 0px 0px 0px;
+	border:0px solid gray;
+	border-collapse:collapse;
+	padding:0px 0px 0px 0px;
 }
 
 .message_box_visible{
-  opacity: 1;
-  position: absolute;
-  top:350px;
-  left:45%;
-  min-width:250px;
-  #height:90px;
+	opacity: 1;
+	position: absolute;
+	top:350px;
+	left:45%;
+	min-width:250px;
+	#height:90px;
 	font-size: 17px;
 	font-family: SourceSansPro2;
 	margin:-45px 0 0 -100px;
 	padding: 20px;
-  text-align:center;
+	text-align:center;
 	line-height: 20px;
-  border: 1px solid grey;
-  background-color: #DAE4EC;
+	border: 1px solid grey;
+	background-color: #DAE4EC;
 	box-shadow: 0px 0px 14px #777;
 	z-index: 1000000;
 }
@@ -624,38 +634,38 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 .message_box_hide{
 	opacity: 0;
 	transition: opacity 2s ease-out;
-  position: absolute;
-  top:350px;
-  left:45%;
-  min-width:250px;
-  #height:90px;
+	position: absolute;
+	top:350px;
+	left:45%;
+	min-width:250px;
+	#height:90px;
 	font-size: 17px;
 	font-family: SourceSansPro2;
 	margin:-45px 0 0 -100px;
 	padding: 20px;
-  text-align:center;
+	text-align:center;
 	line-height: 20px;
-  border: 1px solid grey;
-  background-color: #DAE4EC;
+	border: 1px solid grey;
+	background-color: #DAE4EC;
 	box-shadow: 0px 0px 14px #777;
 	z-index: 1000000;
 }
 
 .message_box_hidden{
 	display: none;
-  position: absolute;
-  top:350;
-  left:45%;
-  min-width:250px;
-  #height:90px;
+	position: absolute;
+	top:350;
+	left:45%;
+	min-width:250px;
+	#height:90px;
 	margin:-45px 0 0 -100px;
-  text-align:center;
+	text-align:center;
 	padding: 20px;
 	font-size: 17px;
 	font-family: SourceSansPro2;
 	line-height: 20px;
-  border: 1px solid grey;
-  background-color: #DAE4EC;
+	border: 1px solid grey;
+	background-color: #DAE4EC;
 	box-shadow: 0px 0px 14px #777;
 	z-index: 1000000;
 }
@@ -698,11 +708,11 @@ tbody.gle tr:hover {
 
 
 .gle1_table{
-    border-collapse: collapse;
+		border-collapse: collapse;
 }
 
 .gle1_table>tbody>tr>td{
-    border: 1px solid grey;
+		border: 1px solid grey;
 }
 
 .gle_datatype_table{
@@ -814,39 +824,39 @@ tbody.gle tr:hover {
 }
 
 .fstanzeigecontainer{
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: flex-start;
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+		justify-content: center;
+		align-items: flex-start;
 }
 
 .fstanzeigehover{
-                position: relative;
-                float: left;
-                margin: auto;
-                visibility: visible;
-                z-index:3;
-                line-height: 30px;
+								position: relative;
+								float: left;
+								margin: auto;
+								visibility: visible;
+								z-index:3;
+								line-height: 30px;
 }
 
 .fstanzeigehover:hover{
-                background-color:rgba(255,255,255,0.2);
+								background-color:rgba(255,255,255,0.2);
 }
 
 .flexcontainer1{
-    display: flex;
-    justify-content:flex-start;
-    flex-direction: row;
-    flex-wrap: wrap;
+		display: flex;
+		justify-content:flex-start;
+		flex-direction: row;
+		flex-wrap: wrap;
 }
 
 .flexcontainer2{
 		max-width: 800px;
-    display: flex;
-    justify-content:flex-start;
-    flex-direction: row;
-    align-items:stretch;
+		display: flex;
+		justify-content:flex-start;
+		flex-direction: row;
+		align-items:stretch;
 }
 
 .map-right{
@@ -875,6 +885,15 @@ tbody.gle tr:hover {
 .hover-border:hover{
 	padding: 1px;
 	border: 1px solid #CCCCCC;
+}
+
+.fa {
+	color: gray;
+}
+
+.fa:hover {
+	color: #993333;
+	cursor: pointer;
 }
 
 .layerOptions{

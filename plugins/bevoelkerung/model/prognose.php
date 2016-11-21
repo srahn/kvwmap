@@ -16,7 +16,7 @@ class prognose {
 	*/
 	function import() {
 		$dir = new DirectoryIterator(BEVOELKERUNG_IMPORT_DATA_PATH);
-		echo 'loop through ' . BEVOELKERUNG_IMPORT_DATA_PATH . '*.gz <br>';
+		echo 'Loop through ' . BEVOELKERUNG_IMPORT_DATA_PATH . '*.gz <br>';
 		foreach (glob(BEVOELKERUNG_IMPORT_DATA_PATH . '*.gz') as $filename) {
 			echo 'Packe ' . $filename . ' aus.<br>';
 			exec('gunzip ' . $filename);
@@ -28,11 +28,11 @@ class prognose {
 	}
 
 	function transpose() {
-		$sql = "
+/*		$sql = "
 			TRUNCATE mvbevoelkerung.zahlen;
 		";
 		$ret = $this->database->execSQL($sql, 4, 0);
-
+*/
 		foreach (glob(BEVOELKERUNG_IMPORT_DATA_PATH . '*.sql') as $filename) {
 			if (strpos($filename, 'Prognose') !== false) {
 				$year = substr($filename, -13, 4);
@@ -127,7 +127,7 @@ class prognose {
 				sed -i 's|ENGINE=InnoDB|--ENGINE=InnoDB|g' " . $filename . "
 				sed -i 's|UNLOCK TABLES|--LOCK TABLES|g' " . $filename . "
 				sed -i 's|LOCK TABLES|--LOCK TABLES|g' " . $filename . "
-				sed -i 's|massen|mvbevoelkerung.massen|g' " . $filename . "
+				sed -i 's| massen| mvbevoelkerung.massen|g' " . $filename . "
 			");
 		}
 	}
@@ -149,8 +149,9 @@ class prognose {
 			SELECT
 				*
 			FROM
-				" . $tablename . "
+				mvbevoelkerung" . $year . "." . $tablename . "
 		";
+		#echo '<br>' . $sql;
 
 		$ret = $this->database->execSQL($sql, 4, 0);
 
@@ -161,9 +162,23 @@ class prognose {
 			# Insgesamt werden folgende Felder ausgegeben:
 			# jahr, mstand, kennungnum, masse, prz, wbl, v, bu, z
 			while ($row = pg_fetch_assoc($ret[1])) {
+				switch ($row['mstand']) {
+					case 'KBu2014' : {
+						$mstand = 3;
+					} break;
+					case 'AUG2015' : {
+						$mstand = 2;
+					} break;
+					case 'AUG2014' : {
+						$mstand = 1;
+					} break;
+					default : { # Prognose
+						$mstand = 0;
+					}
+				}
 				$values = array(
 					intval($row['jahr']) - 2000, # jahr
-					$row['mstand'], # mstand
+					$mstand, # mstand
 					intval($row['kennungnum']), # kennungnum
 					$row['masse'], # masse
 					intval($row['prz']) # prz
@@ -200,7 +215,7 @@ class prognose {
 
 		echo "<br>Kopiere in Tabelle mvbevoelkerung.zahlen von CSV-Datei: " . $csvfilename;
 		$sql = "
-			COPY mvbevoelkerung.zahlen FROM '" . $csvfilename . "'
+			COPY mvbevoelkerung.zahlen (jahr, mstand, kennungnum, masse, prz, wbl, v, bu, z) FROM '" . $csvfilename . "'
 			WITH
 				CSV
 				DELIMITER ';'
@@ -255,6 +270,30 @@ class prognose {
 			WHERE
 				jahr = '" . $year . "'
 		";*/
+	}
+
+	function find_triple($bereich, $jahr, $geschlecht, $col1, $col2, $col3, $label) {
+		$sql = "
+			SELECT
+				round((" . $col1 . " / summe * 100)::numeric, 1),
+				round((" . $col2 . " / summe * 100)::numeric, 1),
+				round((" . $col3 . " / summe * 100)::numeric, 1), " .
+				$label . "
+			FROM
+				mvbevoelkerung." . $bereich . "vergleiche
+			WHERE
+				jahr = " . $jahr . " AND
+				geschlecht = '" . $geschlecht . "'
+		";
+		#echo $sql;
+		$ret = $this->database->execSQL($sql, 4, 0);
+		if ($ret[0] == 0) {
+			$result = array();
+			while ($rs = pg_fetch_row($ret[1])) {
+				$result[] = $rs;
+			}
+		}
+		return $result;
 	}
 }
 ?>

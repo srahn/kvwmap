@@ -4,116 +4,110 @@
   if ($anzObj>0) {
     ?><table border="1" cellspacing="0" cellpadding="2">
     <tr align="right" bgcolor="<?php echo BG_DEFAULT ?>"> 
-    <td width="121"><span class="fett">Punktkennzeichen</span></td>
+    <td width="121"><span class="fett">GML_ID</span></td>
+    <td width="121"><span class="fett">PKN</span></td>
+    <td width="27"><span class="fett">PAR</span></td>
     <td width="27"><span class="fett">RW</span></td>
-    <td width="27"><span class="fett">HW</span></td>    
-    <td width="17"><span class="fett">H</span></td>
+    <td width="27"><span class="fett">HW</span></td> 
+    <td width="27"><span class="fett">H</span></td> 
+    <td width="27"><span class="fett">HOP</span></td> 
+    <td width="17"><span class="fett">RHO</span></td>
     <td width="104"><span class="fett">Vorschau</span></td>
-	<td width="71"><span class="fett">verhandelt</span></td>
-    <td width="62"><span class="fett">vermarkt</span></td>
     <td width="53"><span class="fett">Anzeige</span></td>
-    <td width="17"><span class="fett">S</span></td>
+    <td width="71"><span class="fett">FGP</span></td>
+    <td width="62"><span class="fett">vermarkt</span></td>
+    <td width="17"><span class="fett">KST</span></td>
     <td width="28"><span class="fett">ZST</span></td>
-    <td width="38"><span class="fett">VMA</span></td>
-    <td width="37"><span class="fett">BEM</span></td>
-    <td width="32"><span class="fett">ENT</span></td>
-    <td width="33"><span class="fett">UNT</span></td>
-    <td width="32"><span class="fett">ZUO</span></td>
-    <td width="19"><span class="fett">LS</span></td>
-    <td width="22"><span class="fett">LG</span></td>
-    <td width="19"><span class="fett">LZ</span></td>
-    <td width="29"><span class="fett">LBJ</span></td>
-    <td width="33"><span class="fett">LAH</span></td>
+    <td width="38"><span class="fett">ABM</span></td>
+    <td width="32"><span class="fett">ZDE</span></td>
+    <td width="22"><span class="fett">GST</span></td>
+    <td width="19"><span class="fett">VWL</span></td>
     <td width="21"><span class="fett">HS</span></td>
-    <td width="24"><span class="fett">HG</span></td>
-    <td width="21"><span class="fett">HZ</span></td>
-    <td width="31"><span class="fett">HBJ</span></td>
-    <td width="35"><span class="fett">HAH</span></td>
-    <td width="31"><span class="fett">TEX</span></td>
+    <td width="32"><span class="fett">SOE</span></td>
+    <td width="31"><span class="fett">HIN</span></td>
+    <td width="31"><span class="fett">beginnt</span></td>
+    <td width="31"><span class="fett">endet</span></td>
     </tr><?php
     for ($j=0;$j<$anzObj;$j++) {
-    	$rs=$this->qlayerset[$i]['shape'][$j];
+      $rs=$this->qlayerset[$i]['shape'][$j];
       ?><tr>
-        <td><?php echo $rs['pkz']; ?>
-        <input name="pkz[<?php echo $rs['pkz']; ?>]" type="hidden" value="<?php echo $rs['pkz']; ?>"></td>
+        <td><?php if ($rs['gml_id']=='') { ?>&nbsp;<?php } else { echo $rs['gml_id']; } ?></td>
+        <td><?php if ($rs['pkn']=='') { ?>&nbsp;<?php } else { echo $rs['pkn']; } ?>
+        <input name="pkn[<?php echo $rs['pkn']; ?>]" type="hidden" value="<?php echo $rs['pkn']; ?>"></td>
+        <td><?php echo $rs['par']; ?></td>
         <td><?php echo $rs['rw']; ?></td>
         <td><?php echo $rs['hw']; ?></td>        
-        <td>&nbsp;<?php echo trim($rs['hoe']); ?></td>
+        <td><?php if ($rs['hoe']=='') { ?>&nbsp;<?php } else { echo $rs['hoe']; } ?></td>
+        <td><?php if ($rs['hop']=='') { ?>&nbsp;<?php } else { echo $rs['hop']; } ?></td>
+        <td>&nbsp;<?php echo trim($rs['rho']); ?></td>
         <td><?php
         $festpunktskizze_extension="png";
         # Pfüfen ob Festpunktskizze eine PDF Datei ist
         $dateiname=basename($rs['datei']);
         $dateinamensteil=explode('.',$dateiname);
         if (strtolower($dateinamensteil[1])=='pdf') {
-        	$festpunktskizze_extension='pdf';
+          $festpunktskizze_extension='pdf';
         }
         if (strtolower($dateinamensteil[1])=='tif') {
-        	$festpunktskizze_extension='tif';
+          $festpunktskizze_extension='tif';
         }
         if ($dateinamensteil[1]=='TIF') {
-        	$festpunktskizze_extension='TIF';
+          $festpunktskizze_extension='TIF';
         }
-        if ($rs['art']<2) {
-        	$blatt=0;
-        	$skizzenDatei=substr($rs['datei'],0,-3).$festpunktskizze_extension;
-        	if (file_exists(PUNKTDATEIPATH.$skizzenDatei)) {
-			      $blatt++;
+        if ($rs['par']<2) {
+          $blatt=0;
+          $skizzenDatei=substr($rs['datei'],0,-3).$festpunktskizze_extension;
+          if (file_exists(PUNKTDATEIPATH.$skizzenDatei)) {
+            $blatt++;
             # Setzen eines Links auf das Vorschaubilder.
             $link="index.php?go=sendeFestpunktskizze&name=".$skizzenDatei;
             ?><a href="<?php echo $link; ?>" target="_blank"><?php echo $skizzenDatei; ?></a><?php
-        	}
-					$skizzenDatei_1=substr($rs['datei'],0,-4)."-1.png";
-		        	if (file_exists(PUNKTDATEIPATH.$skizzenDatei_1)) {
-					  $blatt++;
-					  $link="index.php?go=sendeFestpunktskizze&name&name=".$skizzenDatei_1;
-					  ?><a href="<?php echo $link; ?>" target="_blank"><?php echo $skizzenDatei_1; ?></a><?php
-					}
-					$skizzenDatei_2=substr($rs['datei'],0,-4)."-2.png";
-		        	if (file_exists(PUNKTDATEIPATH.$skizzenDatei_2)) {
-					  $blatt++;
-					  $link="index.php?go=sendeFestpunktskizze&name&name=".$skizzenDatei_2;
-					  ?><br><a href="<?php echo $link; ?>" target="_blank"><?php echo $skizzenDatei_2; ?></a><?php
-					}
-					if ($blatt==0) {
-					  ?>nicht vorhanden<?php
-		        	}
-		      }
-		      else {
-	        	if ($rs['art']==6) {
-	        		?>auf TP-Skizze<?php
-	        	}
-	        	else {
-	        		?>auf AP-Skizze<?php
-	        	}
-					  $blatt=-1;
-		      }
+          }
+          $skizzenDatei_1=substr($rs['datei'],0,-4)."-1.png";
+              if (file_exists(PUNKTDATEIPATH.$skizzenDatei_1)) {
+            $blatt++;
+            $link="index.php?go=sendeFestpunktskizze&name&name=".$skizzenDatei_1;
+            ?><a href="<?php echo $link; ?>" target="_blank"><?php echo $skizzenDatei_1; ?></a><?php
+          }
+          $skizzenDatei_2=substr($rs['datei'],0,-4)."-2.png";
+              if (file_exists(PUNKTDATEIPATH.$skizzenDatei_2)) {
+            $blatt++;
+            $link="index.php?go=sendeFestpunktskizze&name&name=".$skizzenDatei_2;
+            ?><br><a href="<?php echo $link; ?>" target="_blank"><?php echo $skizzenDatei_2; ?></a><?php
+          }
+          if ($blatt==0) {
+            ?>nicht vorhanden<?php
+              }
+          }
+          else {
+          if ($rs['par']=='OP') {
+            ?>auf TP-Skizze<?php
+          }
+          else {
+            ?>auf AP-Skizze<?php
+          }
+          $blatt=-1;
+        }
         ?>  
         </td>
-		<td align="right"><?php if ($rs['verhandelt']) { ?>ja<?php } else { ?>nein<?php } ?></td>
-        <td align="right"><?php if ($rs['vermarkt']) { ?>ja<?php } else { ?>nein<?php } ?></td>
-        <td align="right"><a href="index.php?go=Festpunkte%20Anzeigen&pkz=<?php echo $rs['pkz']; ?>">in Karte</a></td>
-        <td align="right">&nbsp;<?php echo $rs['s']; ?></td>
+        <td align="right"><?php if ($rs['pkn']=='') { ?>&nbsp;<?php } else { ?><a href="index.php?go=Festpunkte%20Anzeigen&pkn=<?php echo $rs['pkn']; ?>">in Karte</a> <?php } ?></td>
+        <td align="center"><?php if ($rs['fgp']=='true') { ?>ja<?php } else { ?>nein<?php } ?></td>
+        <td align="center"><?php if ($rs['abm']=='') { ?>nein<?php } elseif ($rs['abm'] < 9000) { ?>ja<?php } else { ?>nein<?php } ?></td>
+        <td align="right">&nbsp;<?php echo $rs['kst']; ?></td>
         <td align="right"><?php if ($rs['zst']=='') { ?>&nbsp;<?php } else { echo $rs['zst']; } ?></td>
-        <td align="right"><?php if ($rs['vma']=='') { ?>&nbsp;<?php } else { echo $rs['vma']; } ?></td>
-        <td align="right"><?php if (trim($rs['bem'])=='') { ?>&nbsp;<?php } else { echo $rs['bem']; } ?></td>
-        <td align="right"><?php if (trim($rs['ent'])=='') { ?>&nbsp;<?php } else { echo $rs['ent']; } ?></td>
-        <td align="right">&nbsp;<?php echo $rs['unt']; ?></td>
-        <td align="right">&nbsp;<?php echo $rs['zuo']; ?></td>
-        <td align="right">&nbsp;<?php echo $rs['ls']; ?></td>
-        <td align="right">&nbsp;<?php echo $rs['lg']; ?></td>
-        <td align="right">&nbsp;<?php echo $rs['lz']; ?></td>
-        <td align="right">&nbsp;<?php echo $rs['lbj']; ?></td>
-        <td align="right"><?php if (trim($rs['lah'])=='') { ?>&nbsp;<?php } else { echo $rs['lah']; } ?></td>
+        <td align="right"><?php if ($rs['abm']=='') { ?>&nbsp;<?php } else { echo $rs['abm']; } ?></td>
+        <td align="right"><?php if (trim($rs['zde'])=='') { ?>&nbsp;<?php } else { echo $rs['zde']; } ?></td>
+        <td align="right">&nbsp;<?php echo $rs['gst']; ?></td>
+        <td align="right">&nbsp;<?php echo $rs['vwl']; ?></td>
         <td align="right">&nbsp;<?php echo $rs['hs']; ?></td>
-        <td align="right">&nbsp;<?php echo $rs['hg']; ?></td>
-        <td align="right">&nbsp;<?php echo $rs['hz']; ?></td>
-        <td align="right">&nbsp;<?php echo $rs['hbj']; ?></td>
-        <td align="right">&nbsp;<?php echo $rs['hah']; ?></td>
-        <td align="right"><?php if ($rs['tex']=='') { ?>&nbsp;<?php } else { echo $rs['tex']; } ?></td>
-        </tr><?php
+        <td align="right">&nbsp;<?php echo $rs['soe']; ?></td>
+        <td align="right"><?php if ($rs['hin']=='') { ?>&nbsp;<?php } else { echo $rs['hin']; } ?></td>
+        <td align="right">&nbsp;<?php echo $rs['beginnt']; ?></td>
+        <td align="right"><?php if ($rs['endet']=='') { ?>&nbsp;<?php } else { echo $rs['endet']; } ?></td>
+      </tr><?php
     }
     ?></table>
-	<div align="left">
+  <div align="left">
       <table border="0" cellspacing="0" cellpadding="2">
         <tr valign="top">
           <td><table width="100%" border="0" cellpadding="0" cellspacing="0">
@@ -125,56 +119,44 @@
                 <td width="85%"><em><font size="-2">Punktkennzeichen</font></em></td>
               </tr>
               <tr>
-                <td><em><font size="-2">NBZ</font></em></td>
-                <td><em><font size="-2">- Nummerierungsbezirk</font></em></td>
+                <td><em><font size="-2">GML_ID</font></em></td>
+                <td><em><font size="-2">- Identifikator</font></em></td>
               </tr>
               <tr>
                 <td><em><font size="-2">PAR</font></em></td>
                 <td><em><font size="-2">- Punktart</font></em></td>
               </tr>
               <tr>
-                <td><em><font size="-2">PNR</font></em></td>
-                <td><em><font size="-2">- Punktnummer</font></em></td>
+                <td><em><font size="-2">PKN</font></em></td>
+                <td><em><font size="-2">- Punktkennung</font></em></td>
               </tr>
               <tr>
-                <td><em><font size="-2">P</font></em></td>
-                <td><em><font size="-2">Pr&uuml;fzeichen*</font></em></td>
+                <td><em><font size="-2">FGP</font></em></td>
+                <td><em><font size="-2">- festgestellter Grenzpunkt</font></em></td>
               </tr>
               <tr>
-                <td><em><font size="-2">S</font></em></td>
-                <td><em><font size="-2">Punktstatus</font></em></td>
+                <td><em><font size="-2">KST</font></em></td>
+                <td><em><font size="-2">- Koordinatenstatus</font></em></td>
               </tr>
               <tr>
                 <td><em><font size="-2">ZST</font></em></td>
-                <td><em><font size="-2">zust&auml;ndige Stelle</font></em></td>
+                <td><em><font size="-2">- zust&auml;ndige Stelle</font></em></td>
               </tr>
               <tr>
-                <td><em><font size="-2">AK</font></em></td>
-                <td><em><font size="-2">Aktualit&auml;t des Punktes*</font></em></td>
+                <td><em><font size="-2">ABM</font></em></td>
+                <td><em><font size="-2">- Ab-/Vermarkungsart</font></em></td>
               </tr>
               <tr>
-                <td><em><font size="-2">VMA</font></em></td>
-                <td><em><font size="-2">Vermarkungsart</font></em></td>
+                <td><em><font size="-2">DES</font></em></td>
+                <td><em><font size="-2">- Description - Datenerhebung Punktort</font></em></td>
               </tr>
               <tr>
-                <td><em><font size="-2">BEM</font></em></td>
-                <td><em><font size="-2">Bemerkung zur Vermarkung</font></em></td>
+                <td><em><font size="-2">ZDE</font></em></td>
+                <td><em><font size="-2">- Zeitpunkt der Entstehung</font></em></td>
               </tr>
               <tr>
-                <td><em><font size="-2">ENT</font></em></td>
-                <td><em><font size="-2">Entstehung des Punktes</font></em></td>
-              </tr>
-              <tr>
-                <td><em><font size="-2">UNT</font></em></td>
-                <td><em><font size="-2">Untergang des Punktes</font></em></td>
-              </tr>
-              <tr>
-                <td><em><font size="-2">ZUO</font></em></td>
-                <td><em><font size="-2">? entspr. evtl. KB</font></em></td>
-              </tr>
-              <tr>
-                <td><em><font size="-2">KB</font></em></td>
-                <td><em><font size="-2">Kennung f&uuml;r Bemerkung*</font></em></td>
+                <td><em><font size="-2">SOE</font></em></td>
+                <td><em><font size="-2">- sonstige Eigenschaft</font></em></td>
               </tr>
             </table>
           </td>
@@ -184,12 +166,8 @@
               <td colspan="2"><em><font size="-2">Lage</font></em></td>
             </tr>
             <tr>
-              <td width="10%"><em><font size="-2">LS</font></em></td>
-              <td width="90%"><em><font size="-2">Lagestatus</font></em></td>
-            </tr>
-            <tr>
-              <td>&nbsp;</td>
-              <td><em><font size="-2">Lagekoordinate</font></em></td>
+              <td width="20%">&nbsp;</td>
+              <td width="80%"><em><font size="-2">Lagekoordinate</font></em></td>
             </tr>
             <tr>
               <td><em><font size="-2">RW</font></em></td>
@@ -200,24 +178,20 @@
               <td><em><font size="-2">- Hochwert</font></em></td>
             </tr>
             <tr>
-              <td><em><font size="-2">LG</font></em></td>
-              <td><em><font size="-2">Lagegenauigkeit - Lagegenauigkeitsstufe</font></em></td>
+            <tr>
+              <td><em><font size="-2">RHO</font></em></td>
+              <td><em><font size="-2">- Relative H&ouml;he</font></em></td>
+            </tr>
+              <td><em><font size="-2">GST</font></em></td>
+              <td><em><font size="-2">- Genauigkeitsstufe</font></em></td>
             </tr>
             <tr>
-              <td><em><font size="-2">LZ</font></em></td>
-              <td><em><font size="-2">Lagezuverl&auml;ssigkeit</font></em></td>
+              <td><em><font size="-2">VWL</font></em></td>
+              <td><em><font size="-2">- Vertrauensw&uuml;rdigkeit</font></em></td>
             </tr>
             <tr>
-              <td>&nbsp;</td>
-              <td><em><font size="-2">Berechnungshinweis Lage</font></em></td>
-            </tr>
-            <tr>
-              <td><em><font size="-2">LBJ</font></em></td>
-              <td><em><font size="-2"> - Jahr der Berechnung</font></em></td>
-            </tr>
-            <tr>
-              <td><em><font size="-2">LAH</font></em></td>
-              <td><em><font size="-2">- Aktenhinweis</font></em></td>
+              <td><em><font size="-2">HIN</font></em></td>
+              <td><em><font size="-2">- Hinweise</font></em></td>
             </tr>
           </table></td>
           <td>&nbsp;</td>
@@ -226,35 +200,19 @@
               <td colspan="2"><em><font size="-2">H&ouml;he</font></em></td>
             </tr>
             <tr>
-              <td width="10%"><em><font size="-2">HS</font></em></td>
-              <td width="90%"><em><font size="-2">H&ouml;henstatus</font></em></td>
+              <td width="15%"><em><font size="-2">HS</font></em></td>
+              <td width="85%"><em><font size="-2">H&ouml;henstatus</font></em></td>
             </tr>
             <tr>
               <td><em><font size="-2">H</font></em></td>
-              <td><em><font size="-2">H&ouml;henangabe</font></em></td>
+              <td><em><font size="-2">- H&ouml;henangabe</font></em></td>
             </tr>
             <tr>
-              <td><em><font size="-2">HG</font></em></td>
-              <td><em><font size="-2">H&ouml;hengenauigkeit- H&ouml;hengenauigkeitsstufe</font></em></td>
-            </tr>
-            <tr>
-              <td><em><font size="-2">HZ</font></em></td>
-              <td><em><font size="-2">H&ouml;henzuverl&auml;ssigkeit</font></em></td>
-            </tr>
-            <tr>
-              <td>&nbsp;</td>
-              <td><em><font size="-2">Berechnungshinweise H&ouml;he</font></em></td>
-            </tr>
-            <tr>
-              <td><em><font size="-2">HBJ</font></em></td>
-              <td><em><font size="-2"> - Jahr der Berechnung</font></em></td>
-            </tr>
-            <tr>
-              <td><em><font size="-2">HAH</font></em></td>
-              <td><em><font size="-2">- Aktenhinweis</font></em></td>
+              <td><em><font size="-2">HOP</font></em></td>
+              <td><em><font size="-2">- H&ouml;he, Oberkante Pfeiler</font></em></td>
             </tr>
           </table>
-            </td>
+         </td>
         </tr>
         <tr>
           <td colspan="5"><em><font size="-2">* Werden nicht in der Punktdatei
@@ -262,36 +220,36 @@
         </tr>
           </table></div>
       <br>
-	  <br>
+    <br>
       <input name="go_plus" type="submit" value="Festpunkte Anzeigen"> 
       <input name="go_plus" type="submit" value="Festpunkte zu Auftrag Hinzufügen">
       <input name="go_plus" type="submit" value="KVZ-Datei erzeugen">
-	  <?php if ($this->formvars['kiloquad']!='' AND $this->formvars['pkz']=='') { ?>
-	  <input name="kiloquad" type="hidden" value="<?php echo $this->formvars['kiloquad']; ?>">
-	  <input name="go" type="hidden" value="Sachdaten">
-	  <input name="go_plus" type="submit" value="FestpunkteSkizzenZuordnung">
-	  <?php
-	}
-	if ($this->formvars['kiloquad']!='' OR $this->formvars['pkz']!='') { ?>
-	  <br>
-	  <br>
-	<table width="100%" border="0" cellpadding="2" cellspacing="0">
+    <?php if ($this->formvars['kiloquad']!='' AND $this->formvars['pkn']=='') { ?>
+    <input name="kiloquad" type="hidden" value="<?php echo $this->formvars['kiloquad']; ?>">
+    <input name="go" type="hidden" value="Sachdaten">
+    <input name="go_plus" type="submit" value="FestpunkteSkizzenZuordnung">
+    <?php
+  }
+  if ($this->formvars['kiloquad']!='' OR $this->formvars['pkn']!='') { ?>
+    <br>
+    <br>
+  <table width="100%" border="0" cellpadding="2" cellspacing="0">
   <tr align="center" valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
-    <td><a href="index.php">zur&uuml;ck zur Karte</a> | <a href="index.php?go=Festpunkte_Auswaehlen&kiloquad=<?php echo $this->formvars['kiloquad']; ?>&pkz=<?php echo $this->formvars['pkz']; ?>">zur Festpunktsuche</a></td>
+    <td><a href="index.php">zur&uuml;ck zur Karte</a> | <a href="index.php?go=Festpunkte_Auswaehlen&kiloquad=<?php echo $this->formvars['kiloquad']; ?>&pkz=<?php echo $this->formvars['pkn']; ?>">zur Festpunktsuche</a></td>
   </tr>
 </table><?php
 }
-	?>
-	
-	<br>
-	<br>	
-	<?php    
+  ?>
+  
+  <br>
+  <br>  
+  <?php    
   }
   else {
-	  ?><br>
-	<span class="fett"><font color="#FF0000">
-	  Zu diesem Layer wurden keine Objekte gefunden!</font></span><br>
-	  Wählen Sie einen neuen Bereich oder prüfen Sie die Datenquellen.<br>
-	  <?php  	
+    ?><br>
+  <span class="fett"><font color="#FF0000">
+    Zu diesem Layer wurden keine Objekte gefunden!</font></span><br>
+    Wählen Sie einen neuen Bereich oder prüfen Sie die Datenquellen.<br>
+    <?php    
   }
 ?>

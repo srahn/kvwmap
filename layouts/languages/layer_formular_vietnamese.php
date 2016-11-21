@@ -13,6 +13,7 @@
 	$strLabelMaxScale="Tỉ lệ nhãn tối đa";
 	$strLabelMinScale="Tỉ lệ nhãn tối thiểu";
 	$strLabelRequires="Yêu cầu gắn nhãn";
+	$strLayerParams="Thông số lớp";
 	$strConnection="Kết nối*";
 	$strConnectionType="Kiểu kết nối*";
 	$strClassItem="Mục lớp";
@@ -31,6 +32,7 @@
 	$strSelectionType="SelectionType";
 	$strClasses="Các lớp";
 	$strID="Số ID";
+	$strAddAutoClasses="Thêm lớp";
 	$strClass="Lớp";
 	$strExpression="Biểu thức";
 	$strSignOrder="Thứ tự ký hiệu";
