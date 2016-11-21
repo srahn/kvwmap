@@ -10,7 +10,27 @@ class NASLoader extends DOMDocument {
 
 	function load_fortfuehrungsfaelle($ff_auftrag) {
 		$auftragsdatei_parts = explode('&', $ff_auftrag->get('auftragsdatei'));
-		$xml = file_get_contents($auftragsdatei_parts[0]);
+		$file_name = $auftragsdatei_parts[0];
+		$original_file_name_parts = explode('=', $auftragsdatei_parts[1]);
+		$original_file_name = $original_file_name_parts[1];
+
+		$file = pathinfo($file_name);
+		if (strtolower($file['extension']) == 'zip') {
+			unzip($file_name, false, false, true);
+			$original_file = pathinfo($original_file_name);
+			$xml_file_name = $file['dirname'] . '/' . $original_file['filename'];
+			$xml = file_get_contents($xml_file_name);
+			unlink($xml_file_name);
+			if (is_dir($file['dirname'])) {
+				unlink($file['dirname'] . '/__MACOSX/._' . $original_file['filename']);
+				rmdir($file['dirname'] . '/__MACOSX');
+			}
+		}
+		else {
+			$xml_file_name = $file_name;
+			$xml = file_get_contents($xml_file_name);
+		}
+
 		$this->loadXML($xml, LIBXML_NOBLANKS);
 
 		# Lese und speicher Attribute zum Auftrag
@@ -35,7 +55,36 @@ class NASLoader extends DOMDocument {
 				$ff_auftrag->set($tag, $child_node->nodeValue);
 			}
 		}
+
+		# Finde Gebäude und deren Anlass
+		$this->gebaeude_nodes = $this->getElementsByTagName('AX_Gebaeude');
+		if ($this->gebaeude_nodes->length > 0) {
+			foreach($this->gebaeude_nodes[0]->childNodes AS $child_node) {
+				$tag = strtolower($child_node->localName);
+				if ($tag == 'anlass') {
+					$ff_auftrag->set('gebaeude', $child_node->nodeValue);
+				}
+			}
+		}
+
+		# speicher Auftrag
 		$ff_auftrag->update();
+
+		# Finde Flurstüecke und deren Anlässe
+		$this->flst_nodes = $this->getElementsByTagName('AX_Flurstueck');
+		$flurstuecke = array();
+		foreach($this->flst_nodes AS $flst_node) {
+			foreach($flst_node->childNodes AS $child_node) {
+				$tag = strtolower($child_node->localName);
+				if ($tag == 'flurstueckskennzeichen') {
+					$flst['flurstueckskennzeichen'] = $child_node->nodeValue;
+				}
+				if ($tag == 'anlass') {
+					$flst['anlass'] = $child_node->nodeValue;
+				}
+			}
+			$anlaesse[$flst['flurstueckskennzeichen']] = $flst['anlass'];
+		}
 
 		# Lösche vorhandene Fälle des Auftrages
 		$ff = new Fortfuehrungsfall($this->gui);
@@ -60,7 +109,14 @@ class NASLoader extends DOMDocument {
 					'zeigtaufneuesflurstueck'
 				))) {
 					$ff->set_array($tag, $child_node->nodeValue);
+					if ($tag == 'zeigtaufneuesflurstueck') {
+						$ff->set_array('anlassarten', $anlaesse[$child_node->nodeValue]);
+					}
 				}
+			}
+			$anlassarten = $ff->get('anlassarten');
+			if (!empty($anlassarten)) {
+				$ff->set('anlassart', $anlassarten[0]);
 			}
 			$ff->create();
 			$this->fortfuehrungsfaelle[] = $ff;
