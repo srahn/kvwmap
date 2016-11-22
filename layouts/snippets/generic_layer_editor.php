@@ -333,7 +333,7 @@
 					for ($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++) { ?>
 						<td valign="top"><div class="statistic_row" style="display:none"><?php
 							$column_name = $this->qlayerset[$i]['attributes']['name'][$j];
-							if (!in_array($column_name, array('id', 'geom'))) {
+							if(in_array($this->qlayerset[$i]['attributes']['type'][$j], array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))) {
 								$values = array_map(
 									function ($row) use ($column_name) {
 										return $row[$column_name];
