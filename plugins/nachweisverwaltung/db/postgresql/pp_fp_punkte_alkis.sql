@@ -14,7 +14,7 @@ INSERT INTO nachweisverwaltung.fp_punkte_alkis
 SELECT 
   * 
 FROM 
-  alkis.lk_fp_aufnahmepunkt;
+  nachweisverwaltung.fp_aufnahmepunkt;
 
 -- 
 -- Sicherungspunkte einlesen
@@ -28,7 +28,7 @@ INSERT INTO nachweisverwaltung.fp_punkte_alkis
 SELECT 
   * 
 FROM 
-  alkis.lk_fp_sicherungspunkt;
+  nachweisverwaltung.fp_sicherungspunkt;
 
 -- 
 -- Sonstige Vermessungspunkte einlesen
@@ -42,7 +42,7 @@ INSERT INTO nachweisverwaltung.fp_punkte_alkis
 SELECT 
   * 
 FROM 
-  alkis.lk_fp_sonstigervermessungspunkt;
+  nachweisverwaltung.fp_sonstigervermessungspunkt;
 
 -- 
 -- Grenzpunkte einlesen
@@ -57,7 +57,7 @@ INSERT INTO nachweisverwaltung.fp_punkte_alkis
 SELECT 
   * 
 FROM 
-  alkis.lk_fp_grenzpunkt;
+  nachweisverwaltung.fp_grenzpunkt;
 
 -- 
 -- Besondere Gebaeudepunkte einlesen
@@ -71,7 +71,7 @@ INSERT INTO nachweisverwaltung.fp_punkte_alkis
 SELECT 
   * 
 FROM 
-  alkis.lk_fp_besonderergebaeudepunkt;
+  nachweisverwaltung.fp_besonderergebaeudepunkt;
 
 -- 
 -- Besondere Bauwerkspunkte einlesen
@@ -85,7 +85,7 @@ INSERT INTO nachweisverwaltung.fp_punkte_alkis
 SELECT 
   * 
 FROM 
-  alkis.lk_fp_besondererbauwerkspunkt;
+  nachweisverwaltung.fp_besondererbauwerkspunkt;
 
 -- 
 -- Besondere Topographische Punkte einlesen
@@ -99,5 +99,5 @@ INSERT INTO nachweisverwaltung.fp_punkte_alkis
 SELECT 
   * 
 FROM 
-  alkis.lk_fp_besonderertopographischerpunkt;
+  nachweisverwaltung.fp_besonderertopographischerpunkt;
 
