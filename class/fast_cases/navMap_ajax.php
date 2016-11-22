@@ -2274,6 +2274,7 @@ function checkPasswordAge($passwordSettingTime,$allowedPassordAgeMonth) {
 		}
 		return $classarray;
   }
+	
 	function read_Classes($Layer_ID, $disabled_classes = NULL, $all_languages = false, $layer_class_item = '') {
 		global $language;
 
@@ -2304,7 +2305,7 @@ function checkPasswordAge($passwordSettingTime,$allowedPassordAgeMonth) {
 				(
 					(!empty($layer_class_item)) ? " AND
 						(
-							class_item IN (NULL, '', '" . $layer_class_item . "')
+							class_item IS NULL OR class_item IN ('', '" . $layer_class_item . "')
 						)
 					" : ""
 				) . "

@@ -14171,7 +14171,7 @@ class db_mapObj{
 				(
 					(!empty($layer_class_item)) ? " AND
 						(
-							class_item IN (NULL, '', '" . $layer_class_item . "')
+							class_item IS NULL OR class_item IN ('', '" . $layer_class_item . "')
 						)
 					" : ""
 				) . "
