@@ -32,6 +32,14 @@
 	}
 	return 0;
 }
+
+function checkPasswordAge($passwordSettingTime,$allowedPassordAgeMonth) {
+  $passwordSettingUnixTime=strtotime($passwordSettingTime); # Unix Zeit in Sekunden an dem das Passwort gesetzt wurde
+  $allowedPasswordAgeDays=round($allowedPassordAgeMonth*30.5); # Zeitintervall, wie alt das Password sein darf in Tagen
+  $passwordAgeDays=round((time()-$passwordSettingUnixTime)/60/60/24); # Zeitinterval zwischen setzen des Passwortes und aktueller Zeit in Tagen
+  $allowedPasswordAgeRemainDays=$allowedPasswordAgeDays-$passwordAgeDays; # Zeitinterval wie lange das Passwort noch gilt in Tagen
+	return $allowedPasswordAgeRemainDays; // Passwort ist abgelaufen wenn Wert < 1  
+}
 function replace_params($str, $params) {
 	foreach ($params AS $key => $value) {
 		#echo '<br>Replace: ' . '$' . $key . ' by ' . $value;
@@ -2190,7 +2198,7 @@
 
 		$sql = "
 			SELECT DISTINCT
-				coalesce(rl.transparency, ul.transparency, 100) as transparency, rl.`aktivStatus`, rl.`queryStatus`, rl.`gle_view`, rl.`showclasses`, rl.`logconsume`, ';
+				coalesce(rl.transparency, ul.transparency, 100) as transparency, rl.`aktivStatus`, rl.`queryStatus`, rl.`gle_view`, rl.`showclasses`, rl.`logconsume`, 
 				ul.`queryable`, ul.`drawingorder`, ul.`minscale`, ul.`maxscale`, ul.`offsite`, ul.`postlabelcache`, ul.`Filter`, ul.`template`, ul.`header`, ul.`footer`, ul.`symbolscale`, ul.`logconsume`, ul.`requires`, ul.`privileg`, ul.`export_privileg`,
 				l.Layer_ID," .
 				$name_column . ",
@@ -2266,6 +2274,7 @@
 		}
 		return $classarray;
   }
+	
 	function read_Classes($Layer_ID, $disabled_classes = NULL, $all_languages = false, $layer_class_item = '') {
 		global $language;
 
@@ -2296,7 +2305,7 @@
 				(
 					(!empty($layer_class_item)) ? " AND
 						(
-							class_item IN (NULL, '', '" . $layer_class_item . "')
+							class_item IS NULL OR class_item IN ('', '" . $layer_class_item . "')
 						)
 					" : ""
 				) . "

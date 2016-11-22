@@ -178,9 +178,9 @@ define('PUNKTDATEINAME','festpunkte.csv');
 define('PUNKTDATEIPATH',SHAPEPATH.'festpunkte/');
 define('PUNKTDATEIARCHIVPATH',PUNKTDATEIPATH.'archiv/');
 define('KVZAUSGABEDATEINAME','festpunkte.kvz');
-define('KVZKOPF', '# Datenaustauschformat M-V
-#LS PKZ            VMA  RECHTSWERT    HOCHWERT    HOEHE H H  L L
-#                                                       Z G  Z G');
+define('KVZKOPF', '# Datenaustauschformat Landkreis Rostock
+#KST PKN             VMA  RECHTSWERT   HOCHWERT    HOEHE    GST  VWL  DES  ART
+# ');																																									# in Version 2.6 angepasst
 define('SKIZZEN_DATEI_TYP','tif');            # Version 1.6.8
 # Pfad zu den WLDGE Dateien
 define('WLDGEFILEPATH',SHAPEPATH.'alb/');
@@ -208,7 +208,7 @@ define('DRUCKRAHMEN_PATH',SHAPEPATH.'druckrahmen/');
 define('PDFCLASSPATH',WWWROOT.'PDFClass/');
 
 # 3rdparty Pfade
-define('THIRDPARTY_PATH', 'http://gdi-service.de/3rdparty/');
+define('THIRDPARTY_PATH', 'http://gdi-service.de/3rdparty/');												# Version 2.6
 define('FONTAWESOME_PATH', THIRDPARTY_PATH . 'font-awesome-4.6.3/');								# Version 2.6
 define('JQUERY_PATH', THIRDPARTY_PATH . 'jQuery-1.12.0/');													# Version 2.6
 define('BOOTSTRAP_PATH', THIRDPARTY_PATH . 'bootstrap-3.3.6/');											# Version 2.6
@@ -329,6 +329,8 @@ define('NACHWEIS_PRIMARY_ATTRIBUTE', 'stammnr');			# Version 1.10.0
 
 # das zusätzliche Ordnungskriterium der Nachweisverwaltung (kann bei eindeutigem primärem leer gelassen werden): fortfuehrung
 define('NACHWEIS_SECONDARY_ATTRIBUTE', '');			# Version 1.11.0
+
+$nachweis_unique_attributes = array('gemarkung', 'flur', NACHWEIS_PRIMARY_ATTRIBUTE, NACHWEIS_SECONDARY_ATTRIBUTE, 'art', 'blattnr');		# Version 2.5
 
 # PostgreSQL Server Version                         # Version 1.6.4
 define('POSTGRESVERSION', '804');                   # Version 1.6.4   (800 == 8.0)

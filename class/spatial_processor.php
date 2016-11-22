@@ -330,6 +330,7 @@ class spatial_processor {
 			}
 			$result .= '~update_geometry();';
 		}
+		if($formvars['code2execute'] != '')$result .= '~'.$formvars['code2execute'];
 		echo $result;
 	}
 	
