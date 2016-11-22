@@ -32,6 +32,14 @@
 	}
 	return 0;
 }
+
+function checkPasswordAge($passwordSettingTime,$allowedPassordAgeMonth) {
+  $passwordSettingUnixTime=strtotime($passwordSettingTime); # Unix Zeit in Sekunden an dem das Passwort gesetzt wurde
+  $allowedPasswordAgeDays=round($allowedPassordAgeMonth*30.5); # Zeitintervall, wie alt das Password sein darf in Tagen
+  $passwordAgeDays=round((time()-$passwordSettingUnixTime)/60/60/24); # Zeitinterval zwischen setzen des Passwortes und aktueller Zeit in Tagen
+  $allowedPasswordAgeRemainDays=$allowedPasswordAgeDays-$passwordAgeDays; # Zeitinterval wie lange das Passwort noch gilt in Tagen
+	return $allowedPasswordAgeRemainDays; // Passwort ist abgelaufen wenn Wert < 1  
+}
 function replace_params($str, $params) {
 	foreach ($params AS $key => $value) {
 		#echo '<br>Replace: ' . '$' . $key . ' by ' . $value;
