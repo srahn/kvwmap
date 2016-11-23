@@ -6592,7 +6592,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $attrib['name'] = $this->formvars['class_name'];
     $attrib['layer_id'] = $this->formvars['selected_layer_id'];
-		$attrib['class_item'] = $this->formvars['class_item'];
+		$attrib['classification'] = $this->formvars['classification'];
     $attrib['order'] = ($this->formvars['class_order'] != '') ? $this->formvars['class_order'] : 1;
     $attrib['expression'] = ($this->formvars['class_expression'] != '') ? $this->formvars['class_expression'] : '';
     return $mapDB->new_Class($attrib);
@@ -6621,7 +6621,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
     for ($i = 0; $i < count($auto_classes); $i++) {
       $this->formvars['class_name'] = $auto_classes[$i]['name'];
-      $this->formvars['class_item'] = $auto_classes[$i]['class_item'];
+      $this->formvars['classification'] = $auto_classes[$i]['classification'];
       $this->formvars['class_order'] = $auto_classes[$i]['order'];
       $this->formvars['class_expression'] = $auto_classes[$i]['expression'];
 
@@ -6879,13 +6879,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				#---------- Speichern der Layerattribute -------------------
 				$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 				$path = strip_pg_escape_string($this->formvars['pfad']);
-				$attributes = $mapDB->load_attributes(
-					$layerdb,
-					replace_params(
-						$path,
-						rolle::$layer_params
-					)
-				);
+				$all_layer_params = $mapDB->get_all_layer_params();					
+			  $attributes = $mapDB->load_attributes($layerdb,	replace_params($path,	$all_layer_params));
 				$mapDB->save_postgis_attributes($this->formvars['selected_layer_id'], $attributes, $this->formvars['maintable'], $this->formvars['schema']);
 				$mapDB->delete_old_attributes($this->formvars['selected_layer_id'], $attributes);
 				#---------- Speichern der Layerattribute -------------------
@@ -6945,13 +6940,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			    $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 			    $layerdb->setClientEncoding();
 			    $path = strip_pg_escape_string($this->formvars['pfad']);
-			    $attributes = $mapDB->load_attributes(
-						$layerdb,
-						replace_params(
-							$path,
-							rolle::$layer_params
-						)
-					);
+					$all_layer_params = $mapDB->get_all_layer_params();					
+			    $attributes = $mapDB->load_attributes($layerdb,	replace_params($path,	$all_layer_params));
 			    $mapDB->save_postgis_attributes($this->formvars['selected_layer_id'], $attributes, $this->formvars['maintable'], $this->formvars['schema']);
 			    #---------- Speichern der Layerattribute -------------------
 				}
@@ -7004,7 +6994,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		}
     $expression = @array_values($this->formvars['expression']);
 		$text = @array_values($this->formvars['text']);
-		$class_item = @array_values($this->formvars['class_item']);
+		$classification = @array_values($this->formvars['classification']);
     $order = @array_values($this->formvars['order']);
     $this->classes = $mapDB->read_Classes($old_layer_id);
     for($i = 0; $i < count($name); $i++){
@@ -7017,7 +7007,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $attrib['layer_id'] = $this->formvars['selected_layer_id'];
       $attrib['expression'] = $expression[$i];
 			$attrib['text'] = $text[$i];
-			$attrib['class_item'] = $class_item[$i];
+			$attrib['classification'] = $classification[$i];
       $attrib['order'] = $order[$i];
       $attrib['class_id'] = $this->classes[$i]['Class_ID'];
       $mapDB->update_Class($attrib);
@@ -7034,20 +7024,14 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
   */
   function Stellenzuweisung($layer_ids, $stellen_ids, $filter = '') {
     for($i = 0; $i < count($stellen_ids); $i++) {
-      $stelle = new stelle(
-				$stellen_ids[$i],
-				$this->database
-			);
-      $stelle->addLayer(
-				$layer_ids,
-				0,
-				$filter
-			);
+      $stelle = new stelle($stellen_ids[$i], $this->database);
+      $stelle->addLayer($layer_ids,	0, $filter);
       $users = $stelle->getUser();
       for($j = 0; $j < count($users['ID']); $j++){
         $this->user->rolle->setGroups($users['ID'][$j], array($stellen_ids[$i]), $layer_ids, 0); # Hinzufügen der Layergruppen der selektierten Layer zur Rolle
         $this->user->rolle->setLayer($users['ID'][$j], array($stellen_ids[$i]), 0); # Hinzufügen der Layer zur Rolle
       }
+			$stelle->updateLayerParams();
     }
     return $stellen_ids;
   }
@@ -9469,7 +9453,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $new_stelle->addMenue($menues); // und dann hinzufügen, damit die Reihenfolge stimmt
       if($layer[0] != NULL){
         $new_stelle->addLayer($layer, 0); # Hinzufügen der Layer zur Stelle
-      }
+      }			
       $new_stelle->removeFunctions();   // Entfernen aller Funktionen
       if($functions[0] != NULL){
         $new_stelle->addFunctions($functions, 0); # Hinzufügen der Funktionen zur Stelle
@@ -9497,8 +9481,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         $this->selected_user = new user(0,$selectedusers[$i],$this->user->database);
         $this->selected_user->checkstelle();
       }
-
-    # Löschen der in der Selectbox entfernten Layer
+			$new_stelle->updateLayerParams();
+			# Löschen der in der Selectbox entfernten Layer
       $stellenlayer = $Stelle->getLayers(NULL);
       for($i = 0; $i < count($stellenlayer['ID']); $i++){
         $found = false;
@@ -9613,6 +9597,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
           $this->selected_user = new user(0,$users[$i],$this->user->database);
           $this->selected_user->checkstelle();
         }
+				$Stelle->updateLayerParams();
         if ($ret[0]) {
           $this->Meldung=$ret[1];
         }
@@ -14021,7 +14006,7 @@ class db_mapObj{
 				$name_column . ",
 				l.alias,
 				l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem,
-				l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.filteritem,
+				l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.classification, l.filteritem,
 				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version,
 				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status,
 				g.*
@@ -14064,14 +14049,11 @@ class db_mapObj{
     $this->disabled_classes = $this->read_disabled_classes();
 		$i = 0;
     while ($rs=mysql_fetch_assoc($query)) {
-			$rs['classitem'] = replace_params(
-					$rs['classitem'],
-					rolle::$layer_params
-			);
+			$rs['classification'] = replace_params($rs['classification'], rolle::$layer_params);
 			if ($withClasses == 2 OR $rs['requires'] != '' OR ($withClasses == 1 AND $rs['aktivStatus'] != '0')) {
 				# bei withclasses == 2 werden für alle Layer die Klassen geladen,
 				# bei withclasses == 1 werden Klassen nur dann geladen, wenn der Layer aktiv ist
-				$rs['Class']=$this->read_Classes($rs['Layer_ID'], $this->disabled_classes, false, $rs['classitem']);
+				$rs['Class']=$this->read_Classes($rs['Layer_ID'], $this->disabled_classes, false, $rs['classification']);
 			}
 			if($rs['maxscale'] > 0)$rs['maxscale'] = $rs['maxscale']+0.3;
 			if($rs['minscale'] > 0)$rs['minscale'] = $rs['minscale']-0.3;
@@ -14127,8 +14109,8 @@ class db_mapObj{
 		if($language != 'german') {
 			$sql.='CASE WHEN `Name_'.$language.'` IS NOT NULL THEN `Name_'.$language.'` ELSE `Name` END AS ';
 		}
-		$sql.='Name, Class_ID, Layer_ID, Expression, class_item, drawingorder, text FROM classes';
-    $sql.=' WHERE Class_ID = '.$class_id.' ORDER BY class_item, drawingorder,Class_ID';
+		$sql.='Name, Class_ID, Layer_ID, Expression, classification, drawingorder, text FROM classes';
+    $sql.=' WHERE Class_ID = '.$class_id.' ORDER BY classification, drawingorder,Class_ID';
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Class - Lesen der Classen eines Layers:<br>".$sql,4);
     $query=mysql_query($sql);
@@ -14141,7 +14123,7 @@ class db_mapObj{
     return $Classes;
 	}
 
-	function read_Classes($Layer_ID, $disabled_classes = NULL, $all_languages = false, $layer_class_item = '') {
+	function read_Classes($Layer_ID, $disabled_classes = NULL, $all_languages = false, $classification = '') {
 		global $language;
 
 		$sql = "
@@ -14161,7 +14143,7 @@ class db_mapObj{
 				Class_ID,
 				Layer_ID,
 				Expression,
-				class_item,
+				classification,
 				drawingorder,
 				text
 			FROM
@@ -14169,14 +14151,14 @@ class db_mapObj{
 			WHERE
 				Layer_ID = " . $Layer_ID .
 				(
-					(!empty($layer_class_item)) ? " AND
+					(!empty($classification)) ? " AND
 						(
-							class_item IS NULL OR class_item IN ('', '" . $layer_class_item . "')
+							classification IS NULL OR classification IN ('', '" . $classification . "')
 						)
 					" : ""
 				) . "
 			ORDER BY
-				class_item,
+				classification,
 				drawingorder,
 				Class_ID
 		";
@@ -14993,7 +14975,7 @@ class db_mapObj{
 				}
 			}
       $classdata['layer_id'] = -$layer_id;
-			$classdata['class_item'] = $attribute;
+			$classdata['classification'] = $attribute;
       $classdata['expression'] = "('[".$attribute."]' eq '".$value."')";
       $classdata['order'] = 0;
       $class_id = $this->new_Class($classdata);
@@ -15060,6 +15042,7 @@ class db_mapObj{
     $sql .= "`printconnection` = '".$formvars['printconnection']."', ";
     $sql .= "connectiontype = '".$formvars['connectiontype']."', ";
     $sql .= "classitem = '".$formvars['classitem']."', ";
+		$sql .= "classification = '".$formvars['layer_classification']."', ";		
     $sql .= "filteritem = '".$formvars['filteritem']."', ";
 		if($formvars['cluster_maxdistance'] == '')$formvars['cluster_maxdistance'] = 'NULL';
 		$sql .= "cluster_maxdistance = ".$formvars['cluster_maxdistance'].", ";
@@ -15120,7 +15103,7 @@ class db_mapObj{
 					$sql .= "`Name_".$language."`, ";
 				}
 			}
-			$sql.="`alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `printconnection`, `connectiontype`, `classitem`, `filteritem`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `status`) VALUES(";
+			$sql.="`alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `printconnection`, `connectiontype`, `classitem`, `classification`, `filteritem`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `status`) VALUES(";
       if($formvars['id'] != ''){
         $sql.="'".$formvars['id']."', ";
       }
@@ -15177,6 +15160,7 @@ class db_mapObj{
       $sql .= "'".$formvars['printconnection']."', ";
       $sql .= $formvars['connectiontype'].", ";
       $sql .= "'".$formvars['classitem']."', ";
+			$sql .= "'".$formvars['layer_classification']."', ";
       $sql .= "'".$formvars['filteritem']."', ";
 			if($formvars['cluster_maxdistance'] == '')$formvars['cluster_maxdistance'] = 'NULL';
 			$sql .= $formvars['cluster_maxdistance'].", ";
@@ -15599,6 +15583,19 @@ class db_mapObj{
 		}
 		return $layer;
 	}
+	
+	function get_all_layer_params() {
+		$layer_params = array();
+		$sql = "SELECT GROUP_CONCAT(concat('\"', `key`, '\":\"', default_value, '\"')) as params FROM layer_parameter p";
+		$params_result = mysql_query($sql);
+		if($params_result==0) {
+			echo '<br>Fehler bei der Abfrage der Layerparameter mit SQL: ' . $sql;
+		}
+		else{
+			$rs = mysql_fetch_assoc($params_result);
+		}
+		return (array)json_decode('{' . $rs['params'] . '}');
+	}
 
   function get_stellen_from_layer($layer_id){
     $sql = 'SELECT ID, Bezeichnung FROM stelle, used_layer WHERE used_layer.Stelle_ID = stelle.ID AND used_layer.Layer_ID = '.$layer_id.' ORDER BY Bezeichnung';
@@ -15639,10 +15636,8 @@ class db_mapObj{
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
     $layer = mysql_fetch_array($query);
 		if ($replace_class_item) {
-			$layer['classitem'] = replace_params(
-				$layer['classitem'],
-				rolle::$layer_params
-			);
+			$layer['classitem'] = replace_params($layer['classitem'],	rolle::$layer_params);
+			$layer['classification'] = replace_params($layer['classification'],	rolle::$layer_params);
 		}
     return $layer;
   }
@@ -15817,7 +15812,7 @@ class db_mapObj{
   function copyClass($class_id, $layer_id){
     # diese Funktion kopiert eine Klasse mit Styles und Labels und gibt die ID der neuen Klasse zurück
     $class = $this->read_ClassesbyClassid($class_id);
-    $sql = "INSERT INTO classes (Name, `Name_low-german`, Name_english, Name_polish, Name_vietnamese, Layer_ID,Expression,class_item,drawingorder,text) SELECT Name, `Name_low-german`, Name_english, Name_polish, Name_vietnamese, ".$layer_id.",Expression,class_item,drawingorder,text FROM classes WHERE Class_ID = ".$class_id;
+    $sql = "INSERT INTO classes (Name, `Name_low-german`, Name_english, Name_polish, Name_vietnamese, Layer_ID,Expression,classification,drawingorder,text) SELECT Name, `Name_low-german`, Name_english, Name_polish, Name_vietnamese, ".$layer_id.",Expression,classification,drawingorder,text FROM classes WHERE Class_ID = ".$class_id;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->copyClass - Kopieren einer Klasse:<br>".$sql,4);
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
@@ -15844,13 +15839,13 @@ class db_mapObj{
 					$sql.= '`Name_'.$language.'`, ';
 				}
 			}
-			$sql.= 'Layer_ID, Expression, class_item, drawingorder) VALUES ("'.$attrib['name'].'",';
+			$sql.= 'Layer_ID, Expression, classification, drawingorder) VALUES ("'.$attrib['name'].'",';
 			foreach($supportedLanguages as $language){
 				if($language != 'german'){
 					$sql.= '"'.$attrib['name_'.$language].'",';
 				}
 			}
-			$sql.= $attrib['layer_id'].', "'.$attrib['expression'].'", "' . $attrib['class_item'] . '", "'.$attrib['order'].'")';
+			$sql.= $attrib['layer_id'].', "'.$attrib['expression'].'", "' . $attrib['classification'] . '", "'.$attrib['order'].'")';
     }
     else{
       $class = $classdata;        # Classobjekt wurde übergeben
@@ -15860,8 +15855,8 @@ class db_mapObj{
       else{
         $expression = $class->getExpression();
       }
-      $sql = 'INSERT INTO classes (Name, Layer_ID, Expression, class_item, drawingorder) VALUES ';
-      $sql.= '("'.$class->name.'", '.$class->layer_id.', "'.$expression.'", "' . $class->class_item . '", "'.$class->drawingorder.'")';
+      $sql = 'INSERT INTO classes (Name, Layer_ID, Expression, classification, drawingorder) VALUES ';
+      $sql.= '("'.$class->name.'", '.$class->layer_id.', "'.$expression.'", "' . $class->classification . '", "'.$class->drawingorder.'")';
     }
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->new_Class - Erstellen einer Klasse zu einem Layer:<br>".$sql,4);
@@ -15901,14 +15896,14 @@ class db_mapObj{
 
   function update_Class($attrib){
 		global $supportedLanguages;
-    # attrib:(Name, Layer_ID, Expression, class_item, drawingorder, Class_ID)
+    # attrib:(Name, Layer_ID, Expression, classification, drawingorder, Class_ID)
     $sql = 'UPDATE classes SET Name = "'.$attrib['name'].'",';
 		foreach($supportedLanguages as $language){
 			if($language != 'german'){
 				$sql.= '`Name_'.$language.'` = "'.$attrib['name_'.$language].'",';
 			}
 		}
-		$sql.= 'Layer_ID = '.$attrib['layer_id'].', Expression = "'.$attrib['expression'].'", text = "'.$attrib['text'].'", class_item = "' . $attrib['class_item'] . '", drawingorder = "'.$attrib['order'].'" WHERE Class_ID = '.$attrib['class_id'];
+		$sql.= 'Layer_ID = '.$attrib['layer_id'].', Expression = "'.$attrib['expression'].'", text = "'.$attrib['text'].'", classification = "' . $attrib['classification'] . '", drawingorder = "'.$attrib['order'].'" WHERE Class_ID = '.$attrib['class_id'];
     #echo $sql.'<br>';
     $this->debug->write("<p>file:kvwmap class:db_mapObj->update_Class - Aktualisieren einer Klasse:<br>".$sql,4);
     $query=mysql_query($sql);

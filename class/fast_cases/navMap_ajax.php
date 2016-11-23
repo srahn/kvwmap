@@ -2204,7 +2204,7 @@ function checkPasswordAge($passwordSettingTime,$allowedPassordAgeMonth) {
 				$name_column . ",
 				l.alias,
 				l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem,
-				l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.filteritem,
+				l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.classification, l.filteritem,
 				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version,
 				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status,
 				g.*
@@ -2247,14 +2247,11 @@ function checkPasswordAge($passwordSettingTime,$allowedPassordAgeMonth) {
     $this->disabled_classes = $this->read_disabled_classes();
 		$i = 0;
     while ($rs=mysql_fetch_assoc($query)) {
-			$rs['classitem'] = replace_params(
-					$rs['classitem'],
-					rolle::$layer_params
-			);
+			$rs['classification'] = replace_params($rs['classification'], rolle::$layer_params);
 			if ($withClasses == 2 OR $rs['requires'] != '' OR ($withClasses == 1 AND $rs['aktivStatus'] != '0')) {
 				# bei withclasses == 2 werden für alle Layer die Klassen geladen,
 				# bei withclasses == 1 werden Klassen nur dann geladen, wenn der Layer aktiv ist
-				$rs['Class']=$this->read_Classes($rs['Layer_ID'], $this->disabled_classes, false, $rs['classitem']);
+				$rs['Class']=$this->read_Classes($rs['Layer_ID'], $this->disabled_classes, false, $rs['classification']);
 			}
 			if($rs['maxscale'] > 0)$rs['maxscale'] = $rs['maxscale']+0.3;
 			if($rs['minscale'] > 0)$rs['minscale'] = $rs['minscale']-0.3;
@@ -2275,7 +2272,7 @@ function checkPasswordAge($passwordSettingTime,$allowedPassordAgeMonth) {
 		return $classarray;
   }
 	
-	function read_Classes($Layer_ID, $disabled_classes = NULL, $all_languages = false, $layer_class_item = '') {
+	function read_Classes($Layer_ID, $disabled_classes = NULL, $all_languages = false, $classification = '') {
 		global $language;
 
 		$sql = "
@@ -2295,7 +2292,7 @@ function checkPasswordAge($passwordSettingTime,$allowedPassordAgeMonth) {
 				Class_ID,
 				Layer_ID,
 				Expression,
-				class_item,
+				classification,
 				drawingorder,
 				text
 			FROM
@@ -2303,14 +2300,14 @@ function checkPasswordAge($passwordSettingTime,$allowedPassordAgeMonth) {
 			WHERE
 				Layer_ID = " . $Layer_ID .
 				(
-					(!empty($layer_class_item)) ? " AND
+					(!empty($classification)) ? " AND
 						(
-							class_item IS NULL OR class_item IN ('', '" . $layer_class_item . "')
+							classification IS NULL OR classification IN ('', '" . $classification . "')
 						)
 					" : ""
 				) . "
 			ORDER BY
-				class_item,
+				classification,
 				drawingorder,
 				Class_ID
 		";

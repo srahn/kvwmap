@@ -72,4 +72,5 @@
 	$strrequires="Requires";
 	$strClusterMaxdistance="Cluster:Maxdistance";
 	$strTriggerFunction="Trigger function";
+	$strClassification="Classification";
 ?>  
