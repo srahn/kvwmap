@@ -1,17 +1,7 @@
 <?
-if($this->Document->selectedframe[0]['format'] == 'A5hoch'){ $formatx = 420; $formaty = 595;}
-if($this->Document->selectedframe[0]['format'] == 'A5quer'){ $formatx = 595; $formaty = 420;}
-if($this->Document->selectedframe[0]['format'] == 'A4hoch'){ $formatx = 595; $formaty = 842;}
-if($this->Document->selectedframe[0]['format'] == 'A4quer'){ $formatx = 842; $formaty = 595;}
-if($this->Document->selectedframe[0]['format'] == 'A3hoch'){ $formatx = 842; $formaty = 1191;}
-if($this->Document->selectedframe[0]['format'] == 'A3quer'){ $formatx = 1191; $formaty = 842;}
-if($this->Document->selectedframe[0]['format'] == 'A2hoch'){ $formatx = 1191; $formaty = 1684;}
-if($this->Document->selectedframe[0]['format'] == 'A2quer'){ $formatx = 1684; $formaty = 1191;}
-if($this->Document->selectedframe[0]['format'] == 'A1hoch'){ $formatx = 1684; $formaty = 2384;}
-if($this->Document->selectedframe[0]['format'] == 'A1quer'){ $formatx = 2384; $formaty = 1684;}
-if($this->Document->selectedframe[0]['format'] == 'A0hoch'){ $formatx = 2384; $formaty = 3370;}
-if($this->Document->selectedframe[0]['format'] == 'A0quer'){ $formatx = 3370; $formaty = 2384;}
-
+$parts = explode(' x ', $this->Document->din_formats[$this->Document->selectedframe[0]['format']]['size']);
+$formatx = ltrim($parts[0], '(');
+$formaty = rtrim($parts[1], ')');
 $preview_height = round(595 * $formaty / $formatx);
 ?>
 
@@ -246,7 +236,7 @@ function art_hide(){
       <table border="1" width="605" cellspacing="0" cellpadding="0">
         	<td colspan=8 align="left">
         		<? if($this->previewfile){ ?>
-        			<div id="preview_div" onmouseout="document.getElementById('coords').style.visibility='hidden';" onmousemove="image_coords(event)" style="width:595px;height:<? echo $preview_height; ?>px;background-image:url('<? echo $this->previewfile; ?>');">
+        			<div id="preview_div" onmouseout="document.getElementById('coords').style.visibility='hidden';" onmousemove="image_coords(event)" style="width:595px; height:<? echo $preview_height; ?>px; background-image: url('<? echo $this->previewfile; ?>');">
         				<div id="coords" style="background-color: white;width:70px;visibility: hidden;position:relative;border: 1px solid black">
         					&nbsp;x:&nbsp;<input type="text" id="posx" size="3" style="border:none"><br>
         					&nbsp;y:&nbsp;<input type="text" id="posy" size="3" style="border:none">
@@ -309,32 +299,12 @@ function art_hide(){
         	<td>&nbsp;x:</td>
         	<td style="border-right:1px solid #C3C7C3"><input type="text" name="lageposx" value="<? echo $this->Document->selectedframe[0]['lageposx'] ?>" size="5"></td>
         	<td colspan="2" style="border-right:2px solid #C3C7C3" align="center">
-        		<select name="font_lage">
-	        		<?
-	        		for($i = 0; $i < count($this->Document->fonts); $i++){
-	        			echo '<option ';
-	        			if($this->Document->selectedframe[0]['font_lage'] == $this->Document->fonts[$i]){
-	        				echo 'selected ';
-	        			}
-	        			echo 'value="'.$this->Document->fonts[$i].'">'.basename($this->Document->fonts[$i]).'</option>';
-	        		}
-	        		?>
-        		</select>
+						<?php echo output_select('font_large', $this->Document->fonts, $this->Document->selectedframe[0]['font_lage']); ?>
         	</td>
 					<td>&nbsp;x:</td>
         	<td style="border-right:1px solid #C3C7C3"><input type="text" name="gemeindeposx" value="<? echo $this->Document->selectedframe[0]['gemeindeposx'] ?>" size="5"></td>
 					<td colspan="2" align="center">
-						<select name="font_gemeinde">
-	        		<?
-	        		for($i = 0; $i < count($this->Document->fonts); $i++){
-	        			echo '<option ';
-	        			if($this->Document->selectedframe[0]['font_gemeinde'] == $this->Document->fonts[$i]){
-	        				echo 'selected ';
-	        			}
-	        			echo 'value="'.$this->Document->fonts[$i].'">'.basename($this->Document->fonts[$i]).'</option>';
-	        		}
-	        		?>
-        		</select>
+						<?php echo output_select('font_gemeinde', $this->Document->fonts, $this->Document->selectedframe[0]['font_gemeinde']); ?>
 					</td>
         </tr>
         <tr>
@@ -354,32 +324,12 @@ function art_hide(){
         	<td>&nbsp;x:</td>
         	<td style="border-right:1px solid #C3C7C3"><input type="text" name="gemarkungposx" value="<? echo $this->Document->selectedframe[0]['gemarkungposx'] ?>" size="5"></td>
         	<td colspan="2" style="border-right:2px solid #C3C7C3" align="center">
-        		<select name="font_gemarkung">
-	        		<?
-	        		for($i = 0; $i < count($this->Document->fonts); $i++){
-	        			echo '<option ';
-	        			if($this->Document->selectedframe[0]['font_gemarkung'] == $this->Document->fonts[$i]){
-	        				echo 'selected ';
-	        			}
-	        			echo 'value="'.$this->Document->fonts[$i].'">'.basename($this->Document->fonts[$i]).'</option>';
-	        		}
-	        		?>
-        		</select>
+						<?php echo output_select('font_gemarkung', $this->Document->fonts, $this->Document->selectedframe[0]['font_gemarkung']); ?>
         	</td>
 					<td>&nbsp;x:</td>
         	<td style="border-right:1px solid #C3C7C3"><input type="text" name="flurposx" value="<? echo $this->Document->selectedframe[0]['flurposx'] ?>" size="5"></td>
 					<td colspan="2" align="center">
-						<select name="font_flur">
-	        		<?
-	        		for($i = 0; $i < count($this->Document->fonts); $i++){
-	        			echo '<option ';
-	        			if($this->Document->selectedframe[0]['font_flur'] == $this->Document->fonts[$i]){
-	        				echo 'selected ';
-	        			}
-	        			echo 'value="'.$this->Document->fonts[$i].'">'.basename($this->Document->fonts[$i]).'</option>';
-	        		}
-	        		?>
-        		</select>
+						<?php echo output_select('font_flur', $this->Document->fonts, $this->Document->selectedframe[0]['font_flur']); ?>
 					</td>
         </tr>
         <tr>
@@ -398,32 +348,12 @@ function art_hide(){
         	<td>&nbsp;x:</td>
         	<td style="border-right:1px solid #C3C7C3"><input type="text" name="flurstposx" value="<? echo $this->Document->selectedframe[0]['flurstposx'] ?>" size="5"></td>
         	<td colspan="2" style="border-right:2px solid #C3C7C3" align="center">
-        		<select name="font_flurst">
-	        		<?
-	        		for($i = 0; $i < count($this->Document->fonts); $i++){
-	        			echo '<option ';
-	        			if($this->Document->selectedframe[0]['font_flurst'] == $this->Document->fonts[$i]){
-	        				echo 'selected ';
-	        			}
-	        			echo 'value="'.$this->Document->fonts[$i].'">'.basename($this->Document->fonts[$i]).'</option>';
-	        		}
-	        		?>
-        		</select>
+						<?php echo output_select('font_flurst', $this->Document->fonts, $this->Document->selectedframe[0]['font_flurst']); ?>
         	</td>
 					<td>&nbsp;x:</td>
         	<td style="border-right:1px solid #C3C7C3"><input type="text" name="dateposx" value="<? echo $this->Document->selectedframe[0]['dateposx'] ?>" size="5"></td>
         	<td colspan="2" align="center">
-        		<select name="font_date">
-	        		<?
-	        		for($i = 0; $i < count($this->Document->fonts); $i++){
-	        			echo '<option ';
-	        			if($this->Document->selectedframe[0]['font_date'] == $this->Document->fonts[$i]){
-	        				echo 'selected ';
-	        			}
-	        			echo 'value="'.$this->Document->fonts[$i].'">'.basename($this->Document->fonts[$i]).'</option>';
-	        		}
-	        		?>
-        		</select>
+						<?php echo output_select('font_date', $this->Document->fonts, $this->Document->selectedframe[0]['font_date']); ?>
         	</td>
         </tr>
         <tr>
@@ -442,32 +372,12 @@ function art_hide(){
         	<td>&nbsp;x:</td>
         	<td style="border-right:1px solid #C3C7C3"><input type="text" name="legendposx" value="<? echo $this->Document->selectedframe[0]['legendposx'] ?>" size="5"></td>
         	<td colspan="2" style="border-right:2px solid #C3C7C3" align="center">
-        		<select name="font_legend">
-	        		<?
-	        		for($i = 0; $i < count($this->Document->fonts); $i++){
-	        			echo '<option ';
-	        			if($this->Document->selectedframe[0]['font_legend'] == $this->Document->fonts[$i]){
-	        				echo 'selected ';
-	        			}
-	        			echo 'value="'.$this->Document->fonts[$i].'">'.basename($this->Document->fonts[$i]).'</option>';
-	        		}
-	        		?>
-        		</select>
+						<?php echo output_select('font_legend', $this->Document->fonts, $this->Document->selectedframe[0]['font_legend']); ?>
         	</td>
 					<td>&nbsp;x:</td>
         	<td style="border-right:1px solid #C3C7C3"><input type="text" name="userposx" value="<? echo $this->Document->selectedframe[0]['userposx'] ?>" size="5"></td>
         	<td colspan="2" align="center">
-        		<select name="font_user">
-	        		<?
-	        		for($i = 0; $i < count($this->Document->fonts); $i++){
-	        			echo '<option ';
-	        			if($this->Document->selectedframe[0]['font_user'] == $this->Document->fonts[$i]){
-	        				echo 'selected ';
-	        			}
-	        			echo 'value="'.$this->Document->fonts[$i].'">'.basename($this->Document->fonts[$i]).'</option>';
-	        		}
-	        		?>
-        		</select>
+						<?php echo output_select('font_user', $this->Document->fonts, $this->Document->selectedframe[0]['font_user']); ?>
         	</td>
         </tr>
         <tr>
@@ -490,17 +400,7 @@ function art_hide(){
         	<td>&nbsp;x:</td>
         	<td style="border-right:1px solid #C3C7C3"><input type="text" name="scaleposx" value="<? echo $this->Document->selectedframe[0]['scaleposx'] ?>" size="5"></td>
         	<td colspan="2" align="center">
-        		<select name="font_scale">
-	        		<?
-	        		for($i = 0; $i < count($this->Document->fonts); $i++){
-	        			echo '<option ';
-	        			if($this->Document->selectedframe[0]['font_scale'] == $this->Document->fonts[$i]){
-	        				echo 'selected ';
-	        			}
-	        			echo 'value="'.$this->Document->fonts[$i].'">'.basename($this->Document->fonts[$i]).'</option>';
-	        		}
-	        		?>
-        		</select>
+						<?php echo output_select('font_scale', $this->Document->fonts, $this->Document->selectedframe[0]['font_scale']); ?>
         	</td>
         </tr>
         <tr>
@@ -544,17 +444,7 @@ function art_hide(){
 	        	<td rowspan="1" style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3">&nbsp;</td>
 	        	<td rowspan="4" style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3" colspan=4><textarea name="text<? echo $i ?>" cols="31" rows="4"><? echo $this->Document->selectedframe[0]['texts'][$i]['text'] ?></textarea></td>
 	        	<td style="border-top:2px solid #C3C7C3;" colspan=2 align="center">
-	        		<select name="textfont<? echo $i ?>">
-		        		<?
-		        		for($j = 0; $j < count($this->Document->fonts); $j++){
-		        			echo '<option ';
-		        			if($this->Document->selectedframe[0]['texts'][$i]['font'] == $this->Document->fonts[$j]){
-		        				echo 'selected ';
-		        			}
-		        			echo 'value="'.$this->Document->fonts[$j].'">'.basename($this->Document->fonts[$j]).'</option>';
-		        		}
-		        		?>
-	        		</select>
+							<?php echo output_select('textfont' . $i, $this->Document->fonts, $this->Document->selectedframe[0]['texts'][$i]['font']); ?>
 	        	</td>
 	        </tr>
 	        <tr>
@@ -586,17 +476,7 @@ function art_hide(){
         	<td style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3"><input type="text" name="watermarkposx" value="<? echo $this->Document->selectedframe[0]['watermarkposx'] ?>" size="5"></td>
         	<td style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3" colspan=4>Text:&nbsp;<input size="40" type="text" name="watermark" value="<? echo $this->Document->selectedframe[0]['watermark'] ?>"></td>
         	<td style="border-top:1px solid #C3C7C3;" colspan=2 align="center">
-        		<select name="font_watermark">
-	        		<?
-	        		for($i = 0; $i < count($this->Document->fonts); $i++){
-	        			echo '<option ';
-	        			if($this->Document->selectedframe[0]['font_watermark'] == $this->Document->fonts[$i]){
-	        				echo 'selected ';
-	        			}
-	        			echo 'value="'.$this->Document->fonts[$i].'">'.basename($this->Document->fonts[$i]).'</option>';
-	        		}
-	        		?>
-        		</select>
+						<?php echo output_select('font_watermark', $this->Document->fonts, $this->Document->selectedframe[0]['font_watermark']); ?>
         	</td>
         </tr>
         <tr>
@@ -613,20 +493,7 @@ function art_hide(){
         <tr>
           <td colspan="8" style="border-bottom:1px solid #C3C7C3">
 			    	&nbsp;<span class="fett">Format:</span>&nbsp;
-			    	<select  name="format" onchange="updateformatinfo();">
-			    		<option <? if($this->Document->selectedframe[0]['format'] == 'A5hoch') echo 'selected'; ?> value="A5hoch">A5 hoch</option>
-			    		<option <? if($this->Document->selectedframe[0]['format'] == 'A5quer') echo 'selected'; ?> value="A5quer">A5 quer</option>
-			    		<option <? if($this->Document->selectedframe[0]['format'] == 'A4hoch') echo 'selected'; ?> value="A4hoch">A4 hoch</option>
-			    		<option <? if($this->Document->selectedframe[0]['format'] == 'A4quer') echo 'selected'; ?> value="A4quer">A4 quer</option>
-			    		<option <? if($this->Document->selectedframe[0]['format'] == 'A3hoch') echo 'selected'; ?> value="A3hoch">A3 hoch</option>
-			    		<option <? if($this->Document->selectedframe[0]['format'] == 'A3quer') echo 'selected'; ?> value="A3quer">A3 quer</option>
-			    		<option <? if($this->Document->selectedframe[0]['format'] == 'A2hoch') echo 'selected'; ?> value="A2hoch">A2 hoch</option>
-			    		<option <? if($this->Document->selectedframe[0]['format'] == 'A2quer') echo 'selected'; ?> value="A2quer">A2 quer</option>
-			    		<option <? if($this->Document->selectedframe[0]['format'] == 'A1hoch') echo 'selected'; ?> value="A1hoch">A1 hoch</option>
-			    		<option <? if($this->Document->selectedframe[0]['format'] == 'A1quer') echo 'selected'; ?> value="A1quer">A1 quer</option>
-			    		<option <? if($this->Document->selectedframe[0]['format'] == 'A0hoch') echo 'selected'; ?> value="A0hoch">A0 hoch</option>
-			    		<option <? if($this->Document->selectedframe[0]['format'] == 'A0quer') echo 'selected'; ?> value="A0quer">A0 quer</option>
-			    	</select>
+						<?php echo output_select('format', $this->Document->din_formats, $this->Document->selectedframe[0]['format'], 'updateformatinfo()'); ?>
 			    	(
 			    	<input type="text" style="border:0px;background-color:transparent;" size="3" readonly name="formatx" value="<? echo $formatx; ?>">
 			    	x

@@ -22,37 +22,12 @@ function updaterefwidth(imagewidth, imageheight){
 	document.GUI.refmapwidth.value = Math.round(document.GUI.refmapheight.value * ratio); 
 }
 
-function updateformatinfo(){
-	if(document.GUI.format.value == 'A4hoch'){
-		document.GUI.formatinfo.value = '(595 x 842)';
-	}
-	if(document.GUI.format.value == 'A4quer'){
-		document.GUI.formatinfo.value = '(842 x 595)';
-	}
-	if(document.GUI.format.value == 'A3hoch'){
-		document.GUI.formatinfo.value = '(842 x 1191)';
-	}
-	if(document.GUI.format.value == 'A3quer'){
-		document.GUI.formatinfo.value = '(1191 x 842)';
-	}
-	if(document.GUI.format.value == 'A2hoch'){
-		document.GUI.formatinfo.value = '(1191 x 1684)';
-	}
-	if(document.GUI.format.value == 'A2quer'){
-		document.GUI.formatinfo.value = '(1684 x 1191)';
-	}
-	if(document.GUI.format.value == 'A1hoch'){
-		document.GUI.formatinfo.value = '(1684 x 2384)';
-	}
-	if(document.GUI.format.value == 'A1quer'){
-		document.GUI.formatinfo.value = '(2384 x 1684)';
-	}
-	if(document.GUI.format.value == 'A0hoch'){
-		document.GUI.formatinfo.value = '(2384 x 3370)';
-	}
-	if(document.GUI.format.value == 'A0quer'){
-		document.GUI.formatinfo.value = '(3370 x 2384)';
-	}
+function updateformatinfo(){ <?
+	foreach ($this->Document->din_formats AS $din_format) {
+		echo "if (document.GUI.format.value == '{$din_format['value']}'){\n";
+		echo "\tdocument.GUI.formatinfo.value = '{$din_format['size']}';\n"
+		echo "}";
+	} ?>
 }
 
 function addfreetext(){
@@ -519,30 +494,10 @@ function addfreetext(){
         <tr>
           <td colspan="8" style="border-bottom:1px solid #C3C7C3">
 			    	&nbsp;<span class="fett">Format:</span>&nbsp;
-			    	<select  name="format" onchange="updateformatinfo();">
-			    		<option <? if($this->Document->selectedframe[0]['format'] == 'A4hoch') echo 'selected'; ?> value="A4hoch">A4 hoch</option>
-			    		<option <? if($this->Document->selectedframe[0]['format'] == 'A4quer') echo 'selected'; ?> value="A4quer">A4 quer</option>
-			    		<option <? if($this->Document->selectedframe[0]['format'] == 'A3hoch') echo 'selected'; ?> value="A3hoch">A3 hoch</option>
-			    		<option <? if($this->Document->selectedframe[0]['format'] == 'A3quer') echo 'selected'; ?> value="A3quer">A3 quer</option>
-			    		<option <? if($this->Document->selectedframe[0]['format'] == 'A2hoch') echo 'selected'; ?> value="A2hoch">A2 hoch</option>
-			    		<option <? if($this->Document->selectedframe[0]['format'] == 'A2quer') echo 'selected'; ?> value="A2quer">A2 quer</option>
-			    		<option <? if($this->Document->selectedframe[0]['format'] == 'A1hoch') echo 'selected'; ?> value="A1hoch">A1 hoch</option>
-			    		<option <? if($this->Document->selectedframe[0]['format'] == 'A1quer') echo 'selected'; ?> value="A1quer">A1 quer</option>
-			    		<option <? if($this->Document->selectedframe[0]['format'] == 'A0hoch') echo 'selected'; ?> value="A0hoch">A0 hoch</option>
-			    		<option <? if($this->Document->selectedframe[0]['format'] == 'A0quer') echo 'selected'; ?> value="A0quer">A0 quer</option>
-			    	</select>
-			    	<input type="text" style="border:0px;background-color:transparent;" size="10" readonly name="formatinfo" value="<? 
-			    		if($this->Document->selectedframe[0]['format'] == 'A4hoch') echo '(595 x 842)';
-			    		if($this->Document->selectedframe[0]['format'] == 'A4quer') echo '(842 x 595)';
-			    		if($this->Document->selectedframe[0]['format'] == 'A3hoch') echo '(842 x 1191)';
-			    		if($this->Document->selectedframe[0]['format'] == 'A3quer') echo '(1191 x 842)'; 
-			    		if($this->Document->selectedframe[0]['format'] == 'A2hoch') echo '(1191 x 1684)';
-			    		if($this->Document->selectedframe[0]['format'] == 'A2quer') echo '(1684 x 1191)';
-			    		if($this->Document->selectedframe[0]['format'] == 'A1hoch') echo '(1684 x 2384)';
-			    		if($this->Document->selectedframe[0]['format'] == 'A1quer') echo '(2384 x 1684)';
-			    		if($this->Document->selectedframe[0]['format'] == 'A0hoch') echo '(2384 x 3370)';
-			    		if($this->Document->selectedframe[0]['format'] == 'A0quer') echo '(3370 x 2384)';
-			    	?>">
+						<?php echo output_select('format', $this->Document->din_formats, $this->Document->selectedframe[0]['format'], 'updateformatinfo()'); ?>
+			    	<input type="text" style="border:0px;background-color:transparent;" size="10" readonly name="formatinfo" value="<?
+							echo $this->Document->din_formats[$this->Document->selectedframe[0]['format']];
+						?>">
 	      </td>
         </tr>
         <tr>

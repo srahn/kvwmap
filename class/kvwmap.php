@@ -4299,8 +4299,11 @@ class GUI {
 			$this->formvars['map_factor'] = 1;
       if($this->Document->selectedframe[0]['dhk_call'] == '')$this->previewfile = $this->createMapPDF($this->formvars['aktiverRahmen'], true, true);
 
-      # Fonts auslesen
-      $this->Document->fonts = searchdir(PDFCLASSPATH.'fonts/', true);
+			# Fonts auslesen
+			include_(CLASSPATH . 'datendrucklayout.php');
+			$ddl = new ddl($this->database);
+			$this->Document->fonts = $ddl->get_fonts();
+			$this->Document->din_formats = $ddl->get_din_formats();
 
 			if($this->Document->selectedframe[0]['headsrc'] != '' && file_exists(DRUCKRAHMEN_PATH.basename($this->Document->selectedframe[0]['headsrc']))){
         $this->Document->headsize = GetImageSize(DRUCKRAHMEN_PATH.basename($this->Document->selectedframe[0]['headsrc']));
@@ -4340,7 +4343,11 @@ class GUI {
     $this->Document->selectedframe = $this->Document->load_frames(NULL, $this->formvars['aktiverRahmen']);
     if($this->Document->selectedframe != NULL){
       # Fonts auslesen
-      $this->document->fonts = searchdir(PDFCLASSPATH.'fonts/', true);
+
+			include_(CLASSPATH . 'datendrucklayout.php');
+			$ddl = new ddl($this->database);
+			$this->Document->fonts = $ddl->get_fonts();
+			$this->Document->din_formats = $ddl->get_din_formats();
 
       if($this->Document->selectedframe[0]['headsrc'] != '' && file_exists(DRUCKRAHMEN_PATH.basename($this->Document->selectedframe[0]['headsrc']))){
         $this->Document->headsize = GetImageSize(DRUCKRAHMEN_PATH.basename($this->Document->selectedframe[0]['headsrc']));
@@ -5682,14 +5689,14 @@ class GUI {
     # Zeichnen der Karte
     $this->drawMap();
     # Einbinden der PDF Klassenbibliotheken
-    include (PDFCLASSPATH."class.ezpdf.php");
+    include (CLASSPATH.'class.ezpdf.php');
     # Erzeugen neue Dokument-Klasse
     $Document=new Document($this->database);
     $this->Docu=$Document;
 
     # Erzeugen neue pdf-Klasse
     $pdf=new Cezpdf();
-    $pdf->selectFont(PDFCLASSPATH.'fonts/Helvetica-Bold.afm');
+    $pdf->selectFont(WWWROOT . APPLVERSION . 'fonts/PDFClass/Helvetica-Bold.afm');
 
     $massstab = explode('.', $this->map_scaledenom);
     $row = 712;
@@ -5904,7 +5911,7 @@ class GUI {
 				$this->user->rolle->setConsumeALK($currenttime, $this->Docu->activeframe[0]['id']);
 			}
 
-			/**
+			/* *
 			* Problem: Es gibt WMS, die trotz der Einstellung EXCEPTIONS=application/vnd.ogc.se_inimage kein Bild mit Fehlermeldung
 			* schicken, sondern gar kein Bild bzw. nichts.
 			* Der Fall und auch andere Fälle bei denen kein Bild zurück kommt müssen abgefangen werden.
@@ -5965,7 +5972,7 @@ class GUI {
 			}
 
 			# Einbinden der PDF Klassenbibliotheken
-			include (PDFCLASSPATH."class.ezpdf.php");
+			include (CLASSPATH . 'class.ezpdf.php');
 			switch ($this->Docu->activeframe[0]['format']) {
 				case "A5hoch" : {
 					# Erzeugen neue pdf-Klasse
@@ -6216,7 +6223,7 @@ class GUI {
 
 			# variable Freitexte
 			for($j = 1; $j <= $this->formvars['last_freetext_id']; $j++){
-				$pdf->selectFont(PDFCLASSPATH.'fonts/Helvetica.afm');
+				$pdf->selectFont(WWWROOT . APPLVERSION . 'fonts/PDFClass/Helvetica.afm');
 				if(strpos($this->Docu->activeframe[0]['format'], 'quer') !== false)$height = 420;			# das ist die Höhe des Vorschaubildes
 				else $height = 842;																																		# das ist die Höhe des Vorschaubildes
 				$ratio = $height/$this->Docu->height;
@@ -11083,7 +11090,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         }
       }
       # Ausgabe der Flurstücksdaten im PDF Format
-      include (PDFCLASSPATH."class.ezpdf.php");
+      include (CLASSPATH.'class.ezpdf.php');
       $pdf=new Cezpdf();
       $ALB=new ALB($this->pgdatabase);
 

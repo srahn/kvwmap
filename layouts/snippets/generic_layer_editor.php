@@ -299,7 +299,7 @@
 					<td style="background-color:<? echo BG_TR; ?>;" valign="top" align="center">
 						&Sigma;
 <script type="text/javascript">
-		function toggle_statistic_row() {
+toggle_statistic_row = function() {
 			var x = document.getElementsByClassName('statistic_row'),
 					img = document.getElementById('statistic_img'),
 					i;
@@ -326,19 +326,19 @@
 									$this->qlayerset[$i]['shape']
 								);
 								$summe = array_sum($values);
+								$average = round($summe / count($values), 2);
+								$min = min($values);
+								$max = max($values);
+								$statistic = array();
+								$statistic['Summe'] = array('title' => '&Sigma;', 'value' => $summe);
+								$statistic['Durchschnitt'] = array('title' => '&empty;', 'value' => $average);
+								$statistic['Min'] = array('title' => '&darr;', 'value' => $min);
+								$statistic['Max'] = array('title' => '&uarr;', 'value' => $max);
+								#$statistic['relative Häufigkeit'] = relative_haeufigkeit($this->qlayerset[$i]['shape'], $column_name, $min, $max);
+								#$statistic['absolute Häufigkeit'] = absolute_haeufigkeit($this->qlayerset[$i]['shape'], $column_name);
 								if ($summe > 0) {
-									$average = round($summe / count($values), 2);
-									$min = min($values);
-									$max = max($values);
-									$statistic = array();
-									$statistic['Summe'] = array('title' => '&Sigma;', 'value' => $summe);
-									$statistic['Durchschnitt'] = array('title' => '&empty;', 'value' => $average);
-									$statistic['Min'] = array('title' => '&darr;', 'value' => $min);
-									$statistic['Max'] = array('title' => '&uarr;', 'value' => $max);
-									#$statistic['relative Häufigkeit'] = relative_haeufigkeit($this->qlayerset[$i]['shape'], $column_name, $min, $max);
-									#$statistic['absolute Häufigkeit'] = absolute_haeufigkeit($this->qlayerset[$i]['shape'], $column_name);
+									output_statistic($statistic);
 								}
-								output_statistic($statistic);
 							} ?></div>
 						</td><?
 					} ?>

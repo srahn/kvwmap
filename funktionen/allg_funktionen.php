@@ -1489,4 +1489,33 @@ function arrStrToArr($str, $delimiter) {
 	}
 	return $arr;
 }
+
+/**
+* @param string $form_field_name - used also als form field id
+* @param array $data - array with values and options per array element
+* @param string $selected_value
+* @param string $onchange - javascript to execute on change
+* @param string $title - of the select field
+* @param string $null_option - create a first option with value = '' and the text of $null_option
+* @param string $style - css Style for the select element
+* @return string - the html representing the select form element
+* */
+function output_select($form_field_name, $data, $selected_value = null, $onchange = null, $title = null, $null_option = null, $style = null) {
+	if (!empty($onchange)) {
+		$onchange = " onchange=\"{$onchange}\"";
+	}
+	if (!empty($style)) {
+		$style = " style=\"{$style}\"";
+	}
+	$html = "<select id=\"{$form_field_name}\" name=\"{$form_field_name}\"{$onchange}{$style}>\n";
+	if (!empty($null_option)) {
+		$html .= "\t<option value=\"\">{$null_option}</option>\n";
+	}
+	foreach ($data AS $option) {
+		$selected = ($option['value'] == $selected_value ? ' selected' : '');
+		$html .= "\t<option value=\"{$option['value']}\"{$selected}>{$option['output']}</option>\n";
+	}
+	$html .= "</select>\n";
+	return $html;
+}
 ?>
