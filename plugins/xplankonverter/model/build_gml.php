@@ -80,17 +80,23 @@ class Gml_builder {
     $plan->select = "
       *,
       ST_AsGML(
-          ST_Reverse(ST_Transform(
-            raeumlichergeltungsbereich,
-            {$konvertierung->get('output_epsg')})),
-          {$konvertierung->get('geom_precision')}) AS gml_raeumlichergeltungsbereich,
+        3,
+        ST_Reverse(ST_Transform(
+          raeumlichergeltungsbereich,
+          {$konvertierung->get('output_epsg')})),
+        {$konvertierung->get('geom_precision')},
+        0,
+        null,
+        gml_id::text || '_geom' ) AS gml_raeumlichergeltungsbereich,
       ST_AsGML(
         3,
         ST_Transform(
           raeumlichergeltungsbereich,
           {$konvertierung->get('output_epsg')}),
         {$konvertierung->get('geom_precision')},
-        32) AS envelope";
+        32,
+        null,
+        gml_id::text || '_envelope' ) AS envelope";
     $plan->find_by('konvertierung_id',$konvertierung->get('id'));
 
     # XPlan XSD's sind derzeit unter: http://xplan-raumordnung.de/devk/model/2016-05-06_XSD/ hinterlegt
@@ -134,17 +140,23 @@ class Gml_builder {
         SELECT
           b.*,
           ST_AsGML(
+            3,
             ST_Reverse(ST_Transform(
               b.geltungsbereich,
               {$konvertierung->get('output_epsg')})),
-              {$konvertierung->get('geom_precision')}) AS gml_geltungsbereich,
+            {$konvertierung->get('geom_precision')},
+            0,
+            null,
+            b.gml_id::text || '_geom' ) AS gml_geltungsbereich,
           ST_AsGML(
             3,
             ST_Transform(
               b.geltungsbereich,
               {$konvertierung->get('output_epsg')}),
-              {$konvertierung->get('geom_precision')},
-              32) AS envelope
+            {$konvertierung->get('geom_precision')},
+            32,
+            null,
+            b.gml_id::text || '_envelope' ) AS envelope
         FROM $contentScheme.rp_bereich b
           JOIN $contentScheme.rp_plan p ON b.gehoertzuplan = p.gml_id::text
         WHERE p.konvertierung_id = {$konvertierung->get('id')}";
@@ -168,10 +180,8 @@ class Gml_builder {
       $gmlElemOpenTag = "<{$xplan_ns_prefix}RP_Bereich";
       $gmlElemOpenTag .= " gml:id=\"GML_{$bereich['gml_id']}\"";
 
-      // Rueckbezug zu RP_Plan
-      $gmlElemInner = "<{$xplan_ns_prefix}gehoertZuPlan xlink:href=\"#GML_{$bereich['gehoertzuplan']}\"/>";
       // alle uebrigen Attribute ausgeben
-      $gmlElemInner .= $this->generateGmlForAttributes($bereich, $bereich_attribs, XPLAN_MAX_NESTING_DEPTH);
+      $gmlElemInner = $this->generateGmlForAttributes($bereich, $bereich_attribs, XPLAN_MAX_NESTING_DEPTH);
 
       $rp_bereich = $gmlElemOpenTag . ">" . $gmlElemInner;
 
@@ -191,8 +201,11 @@ class Gml_builder {
       # complete RP_Bereich element by iteratively inserting
       # xlink-references to each associated RP_Objekt element
       while ($rp_objekt = pg_fetch_array($rp_objekte, NULL, PGSQL_ASSOC)) {
-        $rp_bereich .= "<{$xplan_ns_prefix}inhaltRPlan xlink:href=\"#GML_" . $rp_objekt['gml_id'] . "\"/>";
+        $rp_bereich .= "<{$xplan_ns_prefix}planinhalt xlink:href=\"#GML_" . $rp_objekt['gml_id'] . "\"/>";
       }
+      // Rueckbezug zu RP_Plan
+      $rp_bereich .= "<{$xplan_ns_prefix}gehoertZuPlan xlink:href=\"#GML_{$bereich['gehoertzuplan']}\"/>";
+
       # close and write RP_Bereich element
       fwrite($this->tmpFile, "\n" . $this->formatXML($this->wrapWithFeatureMember($rp_bereich . "</{$xplan_ns_prefix}RP_Bereich>")));
     }
@@ -218,17 +231,23 @@ class Gml_builder {
             *,
             gehoertzubereich AS bereiche_gml_ids,
             ST_AsGML(
-                ST_Reverse(ST_Transform(
-                  position,
-                  {$konvertierung->get('output_epsg')})),
-                {$konvertierung->get('geom_precision')}) AS gml_position,
+              3,
+              ST_Reverse(ST_Transform(
+                position,
+                {$konvertierung->get('output_epsg')})),
+              {$konvertierung->get('geom_precision')},
+              0,
+              null,
+              gml_id::text || '_geom' ) AS gml_position,
             ST_AsGML(
               3,
               ST_Transform(
                 position,
                 {$konvertierung->get('output_epsg')}),
               {$konvertierung->get('geom_precision')},
-              32) AS envelope
+              32,
+              null,
+              gml_id::text || '_envelope' ) AS envelope
           FROM
             $contentScheme.$gml_className AS ft
           WHERE konvertierung_id = {$konvertierung->get('id')}";
@@ -237,17 +256,23 @@ class Gml_builder {
             bereiche_gml_ids,
             ft.*,
             ST_AsGML(
-                ST_Reverse(ST_Transform(
-                  ft.position,
-                  {$konvertierung->get('output_epsg')})),
-                {$konvertierung->get('geom_precision')}) AS gml_position,
+              3,
+              ST_Reverse(ST_Transform(
+                ft.position,
+                {$konvertierung->get('output_epsg')})),
+              {$konvertierung->get('geom_precision')},
+              0,
+              null,
+              ft.gml_id::text || '_geom' ) AS gml_position,
             ST_AsGML(
               3,
               ST_Transform(
                 ft.position,
                 {$konvertierung->get('output_epsg')}),
               {$konvertierung->get('geom_precision')},
-              32) AS envelope
+              32,
+              null,
+              ft.gml_id::text || '_envelope' ) AS envelope
           FROM
             $contentScheme.$gml_className AS ft JOIN
             (SELECT
@@ -333,7 +358,7 @@ class Gml_builder {
                   : explode(',',substr($gml_object[$uml_attribute['col_name']], 1, -1));
                 $codeSpaceUri = $gml_value_array[0];
                 $code_value = $gml_value_array[1];
-                $gmlStr .= "<{$xplan_ns_prefix}{$uml_attribute['uml_name']} codeSpace=\"$codeSpaceUri\">$code_value</{$xplan_ns_prefix}{$uml_attribute['uml_name']}>";
+                $gmlStr .= "<{$xplan_ns_prefix}{$uml_attribute['uml_name']} gml:codeSpace=\"$codeSpaceUri\">$code_value</{$xplan_ns_prefix}{$uml_attribute['uml_name']}>";
                 break;
               case "DataType":
                 $gml_attrib_str = '';
@@ -363,9 +388,15 @@ class Gml_builder {
                   // generate GML output (!!! recursive !!!)
                   $gml_attrib_str .= $this->generateGmlForAttributes($single_value, $datatype_attribs,$depth-1);
                 }
+
                 // leere Datentypen auslassen
                 if (strlen($gml_attrib_str) == 0) break;
-                $gmlStr .= $this->wrapWithElement("{$xplan_ns_prefix}{$uml_attribute['uml_name']}", $gml_attrib_str);
+
+                $typeElementName = end($datatype_attribs)['origin'];
+                $gmlStr .= $this->wrapWithElement(
+                  "{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
+                  // wrap all data-types with their data-type-element-tag
+                  $this->wrapWithElement("{$xplan_ns_prefix}{$typeElementName}", $gml_attrib_str));
               default:
             }
           }
@@ -377,9 +408,20 @@ class Gml_builder {
             $gmlStr .= $this->wrapWithElement("{$xplan_ns_prefix}{$uml_attribute['uml_name']}", $gml_value);
             break;
           }
+          // date attribute
+          if ($uml_attribute['type'] == "date") {
+            $gml_value = $gml_object[$uml_attribute['col_name']];
+            $timestamp = strtotime($gml_value);
+            if (!$timestamp) {
+              echo "Ungueltige Datumsangabe: " . $gml_value;
+              break;
+            }
+            $iso_date_str = date("Y-m-d", $timestamp);
+            $gmlStr .= $this->wrapWithElement("{$xplan_ns_prefix}{$uml_attribute['uml_name']}", $iso_date_str);
+            break;
+          }
         case 'e': // enum type
-          default:
-          // TODO: Datumsangaben formatieren nach ISO 8601
+        default:
           $gml_value = trim($gml_object[$uml_attribute['col_name']]);
           // check for array values
           if ($gml_value[0] == '{' && substr($gml_value,-1) == '}') {
