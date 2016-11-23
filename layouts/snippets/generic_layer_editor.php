@@ -16,6 +16,61 @@
 	if($layer['alias'] != '' AND $this->Stelle->useLayerAliases){
 		$layer['Name'] = $layer['alias'];
 	}
+
+	function output_statistic($statistic) {
+		echo '<table>';
+		foreach($statistic AS $key => $row) {
+			if ($key == 'relative Häufigkeit' or $key == 'absolute Häufigkeit') {
+				echo '<tr><td colspan="2">' . $row['title'] . '&nbsp;:</td></tr>';
+				foreach ($row['values'] AS $key => $row) {
+					echo '<tr><td align="right">' . $row['title'] . '&nbsp;:</td><td align="left">' . $row['value'] . '</td></tr>';
+				}
+			}
+			else {
+				echo '<tr><td align="left">' . $row['title'] . '&nbsp;:</td><td align="left">' . $row['value'] . '</td></tr>';
+			}
+		}
+		echo '</table>';
+	}
+
+	function relative_haeufigkeit($data, $column_name, $min, $max) {
+		$ha = array('title' => 'hr(A)', 'values' => array());
+		$percent_values = array_map(
+			function ($row) use ($column_name, $min, $max) {
+				$value = $row[$column_name];
+				$delta = $max - $min;
+				return ($max == $min) ? 100 : round(($value - $min) * 100 / ($max - $min));
+			},
+			$data
+		);
+		sort($percent_values);
+		$hist_values = array();
+		foreach($percent_values AS $percent_value) {
+			if (!isset($hist_values[$percent_value]))
+				$hist_values[$percent_value] = 0;
+			$hist_values[$percent_value]++;
+		}
+		foreach($hist_values AS $key => $value) {
+			$hr['values'][] = array('title' => round($key * ($max - $min) / 100 + $min, strlen(substr(strrchr($summe, "."), 1))), 'value' => $value);
+		}
+		return $hr;
+	}
+
+	function absolute_haeufigkeit($data, $column_name) {
+		$ha = array('title' => 'ha(A)', 'values' => array());
+		foreach($data AS $row) {
+			$value = $row[$column_name];
+			if (empty($ha['values'][$value])) {
+				$ha['values'][$value] = array('title' => $value, 'value' => 1);
+			}
+			else {
+				$ha['values'][$value]['value']++;
+			}
+		}
+		ksort($ha['values']);
+		return $ha;
+	}
+
 ?>
 <SCRIPT src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></SCRIPT>
 
@@ -239,7 +294,57 @@
 			    </td>
 		<? 	} ?>
 				</tr>
-<?	} 
+<?	} ?>
+				<tr onclick="toggle_statistic_row();">
+					<td style="background-color:<? echo BG_TR; ?>;" valign="top" align="center">
+						&Sigma;
+<script type="text/javascript">
+		function toggle_statistic_row() {
+			var x = document.getElementsByClassName('statistic_row'),
+					img = document.getElementById('statistic_img'),
+					i;
+			for (i = 0; i < x.length; i++) {
+				if (x[i].style.display == '') {
+					x[i].style.display = 'none';
+				}
+				else {
+					x[i].style.display = '';
+				}
+			}
+		}
+</script>
+					</td><?
+					for ($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++) { ?>
+						<td valign="top">
+							<div class="statistic_row" style="display:none"><?php
+							$column_name = $this->qlayerset[$i]['attributes']['name'][$j];
+							if(in_array($this->qlayerset[$i]['attributes']['type'][$j], array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))) {
+								$values = array_map(
+									function ($row) use ($column_name) {
+										return $row[$column_name];
+									},
+									$this->qlayerset[$i]['shape']
+								);
+								$summe = array_sum($values);
+								if ($summe > 0) {
+									$average = round($summe / count($values), 2);
+									$min = min($values);
+									$max = max($values);
+									$statistic = array();
+									$statistic['Summe'] = array('title' => '&Sigma;', 'value' => $summe);
+									$statistic['Durchschnitt'] = array('title' => '&empty;', 'value' => $average);
+									$statistic['Min'] = array('title' => '&darr;', 'value' => $min);
+									$statistic['Max'] = array('title' => '&uarr;', 'value' => $max);
+									#$statistic['relative Häufigkeit'] = relative_haeufigkeit($this->qlayerset[$i]['shape'], $column_name, $min, $max);
+									#$statistic['absolute Häufigkeit'] = absolute_haeufigkeit($this->qlayerset[$i]['shape'], $column_name);
+								}
+								output_statistic($statistic);
+							} ?></div>
+						</td><?
+					} ?>
+				</tr>
+
+<?
 			if($this->new_entry != true AND $this->editable == $layer['Layer_ID']){
 ?>
 				<tr id="edit_all1_<? echo $layer['Layer_ID']; ?>" style="height: 30px">
@@ -250,7 +355,6 @@
 				</tr>
 				<tr id="edit_all3_<? echo $layer['Layer_ID']; ?>" bgcolor="<?php echo BG_DEFAULT ?>" style="display: none">
 				<td></td>
-			  
 			  <?
 			  	for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
 						if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
@@ -284,6 +388,7 @@
 			  	}
 			  ?>
 			  </tr>
+
 				<tr id="edit_all4_<? echo $layer['Layer_ID']; ?>" style="display: none">
 					<td style="text-align: center; background-color:<? echo BG_DEFAULT; ?>;">
 						<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(new Array('Hilfe:','Sie können hier die Attribut-Werte von mehreren Datensätzen gleichzeitig bearbeiten. Die Werte werden nur für die ausgewählten Datensätze übernommen.'),Style[0], document.getElementById('TipLayer<? echo $layer['Layer_ID']; ?>'))" onmouseout="htm()">
@@ -309,70 +414,6 @@
 				</tr>
 				
 	<?  } ?>
-				<tr onclick="toggle_statistic_row();">
-					<td style="background-color:lightsteelblue;">
-						<img border="0" id="statistic_img" src="graphics/plus.gif">&nbsp;&Sigma;
-<script type="text/javascript">
-		function toggle_statistic_row() {
-			var x = document.getElementsByClassName('statistic_row'),
-					img = document.getElementById('statistic_img'),
-					i;
-			for (i = 0; i < x.length; i++) {
-				if (x[i].style.display == '') {
-					x[i].style.display = 'none';
-					img.src = 'graphics/plus.gif';
-				}
-				else {
-					x[i].style.display = '';
-					img.src = 'graphics/minus.gif'
-				}
-			}
-		}
-</script>
-					</td><?
-					for ($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++) { ?>
-						<td valign="top"><div class="statistic_row" style="display:none"><?php
-							$column_name = $this->qlayerset[$i]['attributes']['name'][$j];
-							if(in_array($this->qlayerset[$i]['attributes']['type'][$j], array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))) {
-								$values = array_map(
-									function ($row) use ($column_name) {
-										return $row[$column_name];
-									},
-									$this->qlayerset[$i]['shape']
-								);
-								$summe = array_sum($values);
-								if ($summe > 0) {
-									$average = round($summe / count($values), 2);
-									$min = min($values);
-									$max = max($values);
-									echo '&Sigma;:&nbsp;' . $summe;
-									echo '<br>&empty;:&nbsp;' . $average;
-									echo '<br>&darr;:&nbsp;' . $min;
-									echo '<br>&uarr;:&nbsp;' . $max;
-									$percent_values = array_map(
-										function ($row) use ($column_name, $min, $max) {
-											$value = $row[$column_name];
-											$delta = $max - $min;
-											return ($max == $min) ? 100 : round(($value - $min) * 100 / ($max - $min));
-										},
-										$this->qlayerset[$i]['shape']
-									);
-									sort($percent_values);
-									$hist_values = array();
-									foreach($percent_values AS $percent_value) {
-										if (!isset($hist_values[$percent_value]))
-											$hist_values[$percent_value] = 0;
-										$hist_values[$percent_value]++;
-									}
-									echo '<br>Häufigkeit:';
-									foreach($hist_values AS $key => $value) {
-										echo '<br>' . round($key * ($max - $min) / 100 + $min, strlen(substr(strrchr($summe, "."), 1))) . ':&nbsp;' . $value;
-									}
-								}
-							} ?></div>
-						</td><?
-					} ?>
-				</tr>
 			</table>
 		</td>
 	</tr>
