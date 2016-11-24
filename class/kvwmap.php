@@ -1249,11 +1249,17 @@ class GUI {
 				else {
 				  $style = new styleObj($klasse);
 				}
-				if($dbStyle['geomtransform'] != '') {
-					$style->updateFromString("STYLE GEOMTRANSFORM '".$dbStyle['geomtransform']."' END");
+				if($dbStyle['geomtransform'] != ''){
+					$style->updateFromString("STYLE GEOMTRANSFORM '".$dbStyle['geomtransform']."' END"); 
+				}
+				if($dbStyle['minscale'] != ''){
+					$style->set('minscaledenom', $dbStyle['minscale']);
+				}
+				if($dbStyle['maxscale'] != ''){
+					$style->set('maxscaledenom', $dbStyle['maxscale']);
 				}
 				if ($dbStyle['symbolname']!='') {
-          $style -> set('symbolname',$dbStyle['symbolname']);
+          $style->set('symbolname',$dbStyle['symbolname']);
         }
         if ($dbStyle['symbol']>0) {
           $style->set('symbol',$dbStyle['symbol']);
@@ -16079,6 +16085,8 @@ class db_mapObj{
 		if($formvars["rangeitem"] != ''){$sql.="rangeitem = '".$formvars["rangeitem"]."',";}else{$sql.="rangeitem = NULL,";}
     if($formvars["minsize"] != ''){$sql.="minsize = '".$formvars["minsize"]."',";}else{$sql.="minsize = NULL,";}
     if($formvars["maxsize"] != ''){$sql.="maxsize = '".$formvars["maxsize"]."',";}else{$sql.="maxsize = NULL,";}
+		if($formvars["minscale"] != ''){$sql.="minscale = '".$formvars["minscale"]."',";}else{$sql.="minscale = NULL,";}
+    if($formvars["maxscale"] != ''){$sql.="maxscale = '".$formvars["maxscale"]."',";}else{$sql.="maxscale = NULL,";}
     if($formvars["angle"] != ''){$sql.="angle = '".$formvars["angle"]."',";}else{$sql.="angle = NULL,";}
     $sql.="angleitem = '".$formvars["angleitem"]."',";
     if($formvars["antialias"] != ''){$sql.="antialias = '".$formvars["antialias"]."',";}else{$sql.="antialias = NULL,";}
