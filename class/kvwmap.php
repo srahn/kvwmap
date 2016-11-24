@@ -6569,6 +6569,21 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		}
 		return $sql;
 	}
+	
+	function layer_parameter(){
+    $this->main='layer_parameter.php';
+    $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$this->params = $mapDB->get_all_layer_params();
+    $this->output();
+	}
+	
+	function layer_parameter_speichern(){
+    $this->main='layer_parameter.php';
+    $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$mapDB->save_all_layer_params($this->formvars);
+		$this->params = $mapDB->get_all_layer_params();
+    $this->output();
+	}	
 
   function Layereditor() {
     $this->titel='Layer Editor';
@@ -6885,7 +6900,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				#---------- Speichern der Layerattribute -------------------
 				$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 				$path = strip_pg_escape_string($this->formvars['pfad']);
-				$all_layer_params = $mapDB->get_all_layer_params();					
+				$all_layer_params = $mapDB->get_all_layer_params_default_values();					
 			  $attributes = $mapDB->load_attributes($layerdb,	replace_params($path,	$all_layer_params));
 				$mapDB->save_postgis_attributes($this->formvars['selected_layer_id'], $attributes, $this->formvars['maintable'], $this->formvars['schema']);
 				$mapDB->delete_old_attributes($this->formvars['selected_layer_id'], $attributes);
@@ -15591,6 +15606,37 @@ class db_mapObj{
 	}
 	
 	function get_all_layer_params() {
+		$layer_params = array();
+		$sql = "SELECT * FROM layer_parameter";
+		$params_result = mysql_query($sql);
+		if($params_result==0) {
+			echo '<br>Fehler bei der Abfrage der Layerparameter mit SQL: ' . $sql;
+		}
+		else{
+			while($rs = mysql_fetch_assoc($params_result)){
+				$params[] = $rs;
+			}
+		}
+		return $params;
+	}
+	
+	function save_all_layer_params($formvars){
+		$sql = "TRUNCATE layer_parameter";
+		$result = mysql_query($sql);
+		$sql = "INSERT INTO layer_parameter VALUES ";
+		for($i = 0; $i < count($formvars['key']); $i++){
+			if($formvars['key'][$i] != ''){
+				if($formvars['id'][$i] == '')$formvars['id'][$i] = 'NULL';
+				if($komma)$sql .= ",";
+				$sql .= "(".$formvars['id'][$i].", '".$formvars['key'][$i]."', '".$formvars['alias'][$i]."', '".$formvars['default_value'][$i]."', '".mysql_real_escape_string($formvars['options_sql'][$i])."')";
+				$komma = true;
+			}
+		}
+		$result = mysql_query($sql);
+		if($result==0)echo '<br>Fehler beim Speichern der Layerparameter mit SQL: ' . $sql;
+	}
+	
+	function get_all_layer_params_default_values() {
 		$layer_params = array();
 		$sql = "SELECT GROUP_CONCAT(concat('\"', `key`, '\":\"', default_value, '\"')) as params FROM layer_parameter p";
 		$params_result = mysql_query($sql);

@@ -1284,6 +1284,16 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->checkCaseAllowed('Layerattribut-Rechteverwaltung');
 			$GUI->layer_attributes_privileges_save();
 	  } break;
+		
+		case 'Layer_Parameter' : {
+			$GUI->checkCaseAllowed('Layer_Parameter');
+			$GUI->layer_parameter();
+	  } break;
+		
+		case 'Layer_Parameter_speichern' : {
+			$GUI->checkCaseAllowed('Layer_Parameter');
+			$GUI->layer_parameter_speichern();
+	  } break;
 
 	  case 'Stelleneditor' : {
 			$GUI->checkCaseAllowed('Stellen_Anzeigen');
