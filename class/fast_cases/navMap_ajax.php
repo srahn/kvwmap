@@ -730,6 +730,12 @@
 				}
 				if($dbStyle['geomtransform'] != '') {
 					$style->updateFromString("STYLE GEOMTRANSFORM '".$dbStyle['geomtransform']."' END"); 
+				}
+				if($dbStyle['minscale'] != ''){
+					$style->set('minscaledenom', $dbStyle['minscale']);
+				}
+				if($dbStyle['maxscale'] != ''){
+					$style->set('maxscaledenom', $dbStyle['maxscale']);
 				}				
 				if ($dbStyle['symbolname']!='') {
           $style -> set('symbolname',$dbStyle['symbolname']);
