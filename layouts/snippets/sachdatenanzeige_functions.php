@@ -33,6 +33,19 @@ include('funktionen/input_check_functions.php');
 		}
 	}
 	
+	toggle_statistic_row = function(layer_id) {
+		var x = document.getElementsByClassName('statistic_row_'+layer_id),
+				i;
+		for (i = 0; i < x.length; i++) {
+			if (x[i].style.display == '') {
+				x[i].style.display = 'none';
+			}
+			else {
+				x[i].style.display = '';
+			}
+		}
+	}
+	
 	buildJSONString = function(id, is_array){
 		var field = document.getElementById(id);		
 		values = new Array();

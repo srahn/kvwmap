@@ -17,60 +17,6 @@
 		$layer['Name'] = $layer['alias'];
 	}
 
-	function output_statistic($statistic) {
-		echo '<table>';
-		foreach($statistic AS $key => $row) {
-			if ($key == 'relative Häufigkeit' or $key == 'absolute Häufigkeit') {
-				echo '<tr><td colspan="2">' . $row['title'] . '&nbsp;:</td></tr>';
-				foreach ($row['values'] AS $key => $row) {
-					echo '<tr><td align="right">' . $row['title'] . '&nbsp;:</td><td align="left">' . $row['value'] . '</td></tr>';
-				}
-			}
-			else {
-				echo '<tr><td align="left">' . $row['title'] . '&nbsp;:</td><td align="left">' . $row['value'] . '</td></tr>';
-			}
-		}
-		echo '</table>';
-	}
-
-	function relative_haeufigkeit($data, $column_name, $min, $max) {
-		$ha = array('title' => 'hr(A)', 'values' => array());
-		$percent_values = array_map(
-			function ($row) use ($column_name, $min, $max) {
-				$value = $row[$column_name];
-				$delta = $max - $min;
-				return ($max == $min) ? 100 : round(($value - $min) * 100 / ($max - $min));
-			},
-			$data
-		);
-		sort($percent_values);
-		$hist_values = array();
-		foreach($percent_values AS $percent_value) {
-			if (!isset($hist_values[$percent_value]))
-				$hist_values[$percent_value] = 0;
-			$hist_values[$percent_value]++;
-		}
-		foreach($hist_values AS $key => $value) {
-			$hr['values'][] = array('title' => round($key * ($max - $min) / 100 + $min, strlen(substr(strrchr($summe, "."), 1))), 'value' => $value);
-		}
-		return $hr;
-	}
-
-	function absolute_haeufigkeit($data, $column_name) {
-		$ha = array('title' => 'ha(A)', 'values' => array());
-		foreach($data AS $row) {
-			$value = $row[$column_name];
-			if (empty($ha['values'][$value])) {
-				$ha['values'][$value] = array('title' => $value, 'value' => 1);
-			}
-			else {
-				$ha['values'][$value]['value']++;
-			}
-		}
-		ksort($ha['values']);
-		return $ha;
-	}
-
 ?>
 <SCRIPT src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></SCRIPT>
 
@@ -295,28 +241,13 @@
 		<? 	} ?>
 				</tr>
 <?	} ?>
-				<tr onclick="toggle_statistic_row();">
+				<tr onclick="toggle_statistic_row(<? echo $layer['Layer_ID']; ?>);">
 					<td style="background-color:<? echo BG_TR; ?>;" valign="top" align="center">
 						&Sigma;
-<script type="text/javascript">
-toggle_statistic_row = function() {
-			var x = document.getElementsByClassName('statistic_row'),
-					img = document.getElementById('statistic_img'),
-					i;
-			for (i = 0; i < x.length; i++) {
-				if (x[i].style.display == '') {
-					x[i].style.display = 'none';
-				}
-				else {
-					x[i].style.display = '';
-				}
-			}
-		}
-</script>
 					</td><?
 					for ($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++) { ?>
 						<td valign="top">
-							<div class="statistic_row" style="display:none"><?php
+							<div class="statistic_row_<? echo $layer['Layer_ID']; ?>" style="display:none"><?php
 							$column_name = $this->qlayerset[$i]['attributes']['name'][$j];
 							if(in_array($this->qlayerset[$i]['attributes']['type'][$j], array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))) {
 								$values = array_map(

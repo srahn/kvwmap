@@ -26,6 +26,12 @@
       document.getElementById('test_link').innerHTML=getCapabilitiesURL;
     }
   }
+	
+	function toggleAutoClassForm(){
+		form = document.getElementById('autoClassForm');
+		if(form.style.display == 'none')form.style.display = ''
+		else form.style.display = 'none';
+	}
   
 </script>						
 
@@ -584,21 +590,45 @@ else {
       </tr>
       <tr>
         <td style="border-bottom:1px solid #C3C7C3" colspan="8">
-            <!--Methode:
-            <select name="classification_method">
-              <option value="gleich große Klassengrenzen">gleiche Klassengrösse</option>
-              <option value="gleiche Anzahl Klassenmitglieder">gleiche Anzahl in Klasse</option>
-            </select>
-            Anzahl Klassen:
-            <select name="num_classes">
-              <option value="3">3</option>
-              <option value="3">4</option>
-              <option value="3">5</option>
-              <option value="3">6</option>
-              <option value="3">7</option>
-              <option value="3">8</option>
-            </select> //-->
-            <a href="index.php?go=Layereditor_Autoklassen_Hinzufügen&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&=num_classes=5&classification_method=Clustering nach Jenk, Mininierung Abweichung i.d. Klassen"><?php echo $strAddAutoClasses; ?></a>
+					<a href="javascript:void(0);" onclick="toggleAutoClassForm();"><? echo $strAddAutoClasses; ?></a>
+					<div id="autoClassForm" style="display:none">
+						<table>
+							<tr>
+								<td>Methode:</td>
+								<td>
+									<select name="classification_method">
+										<option value="1">gleiche Klassengrösse</option>
+										<option value="2">gleiche Anzahl Klassenmitglieder</option>
+										<!--option value="3">Clustering nach Jenk, Initialisierung mit Histogramm-Maxima</option-->
+										<option value="4">Clustering nach Jenks, Mininierung der Abweichung in den Klassen</option>
+									</select>
+								</td>
+							</tr>
+							<tr>
+								<td>Attribut:</td>
+								<td>
+									<input type="text" name="classification_column" value="">
+								</td>
+							</tr>
+							<tr>
+								<td>Anzahl Klassen:</td>
+								<td>
+									<input type="text" name="num_classes" value="5">
+								</td>
+							</tr>
+							<tr>
+								<td>Klassifizierung:</td>
+								<td>
+									<input type="text" name="classification_name" value="">
+								</td>
+							</tr>
+							<tr>
+								<td colspan="2" align="center">
+									<input type="button" name="dummy" value="Klassen erzeugen" onclick="submitWithValue('GUI','go_plus','Autoklassen_Hinzufügen')">
+								</td>
+							</tr>
+						</table>
+					</div>
         </td>
 			</tr>
 			<tr>

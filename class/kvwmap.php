@@ -6639,13 +6639,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $end = strrpos($this->layerdata['Data'], ')');
     $data_sql = substr($this->layerdata['Data'], $begin, $end - $begin);
 
-    $auto_classes = $this->AutoklassenErzeugen(
-      $layerdb,
-      $data_sql,
-      $this->layerdata['classitem'],
-      ($this->formvars['classification_method'] != '' ) ? $this->formvars['classification_method'] : 'gleiche Anzahl Klassenmitglieder',
-      ($this->formvars['num_classes'] != '' ) ? $this->formvars['num_classes'] : 5
-    );
+    $auto_classes = $this->AutoklassenErzeugen($layerdb, $data_sql, $this->formvars['classification_column'], $this->formvars['classification_method'], $this->formvars['num_classes'], $this->formvars['classification_name']);
 
     for ($i = 0; $i < count($auto_classes); $i++) {
       $this->formvars['class_name'] = $auto_classes[$i]['name'];
@@ -6660,11 +6654,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     }
   }
 
-  function AutoklassenErzeugen($layerdb, $data_sql, $class_item, $method, $num_classes) {
+  function AutoklassenErzeugen($layerdb, $data_sql, $class_item, $method, $num_classes, $classification_name) {
     $classes = array();
-
     switch ($method) {
-      case 'gleich große Klassengrenzen' : {
+      case 1 : {		# gleiche Klassengröße
         $sql = "
           SELECT
             min(" . $class_item . "),
@@ -6689,14 +6682,14 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
         for ($order = 1; $range_floor < $range_ceil; $range_floor += $range_step) {
           $class['name'] = $range_floor . ' - ' . ($range_floor + $range_step);
-					$class['class_item'] = $class_item;
+					$class['classification'] = $classification_name;
           $class['order'] = $order++;
           $class['expression'] = '([' . $class_item . '] >= ' . $range_floor . ' AND [' . $class_item . '] < ' . ($range_floor + $range_step) . ')';
           $classes[] = $class;
         }
       } break;
 
-      case 'gleiche Anzahl Klassenmitglieder' : {
+      case 2 : {		# gleiche Anzahl Klassenmitglieder
         $sql = "
           SELECT
             " . $class_item . "
@@ -6719,41 +6712,14 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
             $range_step = $range_ceil - $range_floor - 1;
           }
           $class['name'] = $rows[$range_floor][$class_item] . ' - ' . $rows[$range_floor + $range_step][$class_item];
-					$class['class_item'] = $class_item;
+					$class['classification'] = $classification_name;
           $class['order'] = $order++;
           $class['expression'] = '([' . $class_item . '] >= ' . $rows[$range_floor][$class_item] . ' AND [' . $class_item . '] < ' . $rows[$range_floor + $range_step][$class_item] . ')';
           $classes[] = $class;
         }
       } break;
-      case 'nach Histogramm' : {
-        # sql zur Berechnung des Histogramms
-        $sql = "
-          SELECT
-            round(
-              (" . $class_item . " - (
-                SELECT
-                  min(" . $class_item . ")
-                FROM
-                  (" . $data_sql . ") AS data
-                )
-              ) * (
-                SELECT
-                  100 / (max(" . $class_item . ") - min(" . $class_item . "))
-                FROM
-                  (" . $data_sql . ") AS data
-              )
-            ) prozent,
-            count(*) anzahl
-          FROM
-            (" . $data_sql . ") AS data
-          GROUP BY
-            prozent
-          ORDER BY
-            prozent
-        ";
-      } break;
 
-      case 'Clustering nach Jenk, Initialisierung mit Histogramm-Maxima' : {
+      case 3 : {		# Clustering nach Jenk, Initialisierung mit Histogramm-Maxima
         include_(CLASSPATH.'k-Means_clustering.php');
         // fetch data
         $sql = "
@@ -6812,28 +6778,27 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
         // determine the maxima of the smoothened histogram as seeds for k-Means-Clustering
         $seeds = kMeansClustering::seedsFromLocalMaxima($flatHistogram, $flatData);
-        echo '<br>seeds: ';var_dump($seeds); echo '<br>';
         // optimize classes (clusters) by k-Means
         kMeansClustering::kMeansWithSeeds($flatData, $seeds);
 
         // calculate class ranges from cluster centers
-        $ranges = array("0");
+        $ranges[] = $data[0][$class_item];
         for ($sIdx = 1; $sIdx < count($seeds); $sIdx++) {
-          $ranges[] = number_format(($seeds[$sIdx-1]+ $seeds[$sIdx]) / 2, 2);
+          $ranges[] = ($seeds[$sIdx-1]+ $seeds[$sIdx]) / 2;
         }
-        $ranges[]= "100";
-
+        $ranges[]= $data[count($data)-1][$class_item];
+				
         // build classes
         for ($order = $rIdx = 1; $rIdx < count($ranges); $rIdx++) {
           $class['name'] = $ranges[$rIdx-1] . ' - ' . $ranges[$rIdx];
-          $class['class_item'] = $class_item;
+          $class['classification'] = $classification_name;
           $class['order'] = $order++;
           $class['expression'] = '([' . $class_item . '] >= ' . $ranges[$rIdx-1] . ' AND [' . $class_item . '] < ' . $ranges[$rIdx] . ')';
           $classes[] = $class;
         }
       } break;
 
-      case 'Clustering nach Jenk, Mininierung Abweichung i.d. Klassen' : {
+      case 4 : {		# Clustering nach Jenk, Mininierung Abweichung i.d. Klassen
         include_(CLASSPATH.'k-Means_clustering.php');
         // fetch data
         $sql = "
@@ -6865,16 +6830,16 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
           $centers = kMeansClustering::kMeansNoSeeds($flatData, $num_classes);
 
           // calculate class ranges from cluster centers
-          $ranges = array("0");
+          $ranges[] = $data[0][$class_item];
           for ($cIdx = 1; $cIdx < count($centers); $cIdx++) {
-            $ranges[] = number_format(($centers[$cIdx-1]+ $centers[$cIdx]) /2, 2);
+            $ranges[] = ($centers[$cIdx-1]+ $centers[$cIdx]) / 2;
           }
-          $ranges[]= "100";
+          $ranges[]= $data[count($data)-1][$class_item];
 
           // build classes
           for ($order = $rIdx = 1; $rIdx < count($ranges); $rIdx++) {
             $class['name'] = $ranges[$rIdx-1] . ' - ' . $ranges[$rIdx];
-            $class['class_item'] = $class_item;
+            $class['classification'] = $classification_name;
             $class['order'] = $order++;
             $class['expression'] = '([' . $class_item . '] >= ' . str_replace(',', '', $ranges[$rIdx-1]) . ' AND [' . $class_item . '] < ' . str_replace(',', '', $ranges[$rIdx]) . ')';
             $classes[] = $class;
