@@ -13373,7 +13373,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		# Abfragen der Datenbankverbindung des Layers
     $layerdb=$this->mapDB->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
 
-		$data = $layer[0]['Data'];
+		$data = replace_params($layer[0]['Data'], rolle::$layer_params);
 		if($data != ''){
 			# suchen nach dem ersten Vorkommen von using
 			$pos = strpos(strtolower($data),'using ');
