@@ -533,7 +533,7 @@
         $GUI->Antraege_Anzeigen();
       }
       else{
-		    include_once (PDFCLASSPATH."class.ezpdf.php");
+		    include_once (CLASSPATH.'class.ezpdf.php');
 		    $pdf=new Cezpdf();
 		    $pdf=$GUI->antrag->erzeugenUbergabeprotokoll_PDF();		    
 				if($path == NULL){					# Ausgabe direkt an den Browser
