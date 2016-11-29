@@ -61,19 +61,6 @@
 		else{
 			$onchange .= 'change_all('.$layer_id.', '.$k.', \''.$name.'\');';
 		}
-
-		# Ermittlung einer geeigneten Größe für das Attribut
-		if($attributes['arrangement'][$j+1] == 1 OR $attributes['arrangement'][$j] == 1){
-			$a = $j;
-			$b = $j+1;
-			while($a > $j-4 AND $attributes['arrangement'][$a] == 1)$a--;		# 4 vorwärts gucken
-			while($b < $j+4 AND $attributes['arrangement'][$b] == 1)$b++;		# 4 rückwärts gucken
-			$attributes_in_row = $b-$a;			
-			#if($attributes['labeling'][$j] != 0)$size = $size * 1.5;
-			$size = $size/$attributes_in_row;
-			$sw = 20*$size;
-			$select_width = 'max-width: '.$sw.'px;';
-		}
 		
 		###### Array-Typ #####
 		if(POSTGRESVERSION >= 930 AND substr($attributes['type'][$j], 0, 1) == '_'){
