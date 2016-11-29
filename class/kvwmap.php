@@ -5702,7 +5702,7 @@ class GUI {
 
     # Erzeugen neue pdf-Klasse
     $pdf=new Cezpdf();
-    $pdf->selectFont(WWWROOT . APPLVERSION . 'fonts/PDFClass/Helvetica-Bold.afm');
+    $pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/Helvetica-Bold.afm');
 
     $massstab = explode('.', $this->map_scaledenom);
     $row = 712;
@@ -6092,21 +6092,21 @@ class GUI {
 			$this->date = date("d.m.Y");
 			$this->scale = $this->formvars['printscale'];
 
-			$pdf->selectFont($this->Docu->activeframe[0]['font_date']);
+			$pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_date']);
 			if($this->Docu->activeframe[0]['datesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['dateposx'],$this->Docu->activeframe[0]['dateposy'],$this->Docu->activeframe[0]['datesize'], $this->date);
-			$pdf->selectFont($this->Docu->activeframe[0]['font_scale']);
+			$pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_scale']);
 			if($this->Docu->activeframe[0]['scalesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['scaleposx'],$this->Docu->activeframe[0]['scaleposy'],$this->Docu->activeframe[0]['scalesize'],'1: '.$this->scale);
-			$pdf->selectFont($this->Docu->activeframe[0]['font_oscale']);
+			$pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_oscale']);
 			if($this->Docu->activeframe[0]['oscalesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['oscaleposx'],$this->Docu->activeframe[0]['oscaleposy'],$this->Docu->activeframe[0]['oscalesize'],'1:xxxx');
-			$pdf->selectFont($this->Docu->activeframe[0]['font_lage']);
+			$pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_lage']);
 			if($this->Docu->activeframe[0]['lagesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['lageposx'],$this->Docu->activeframe[0]['lageposy'],$this->Docu->activeframe[0]['lagesize'],$this->lage);
-			$pdf->selectFont($this->Docu->activeframe[0]['font_gemeinde']);
+			$pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_gemeinde']);
 			if($this->Docu->activeframe[0]['gemeindesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['gemeindeposx'],$this->Docu->activeframe[0]['gemeindeposy'],$this->Docu->activeframe[0]['gemeindesize'],$this->gemeinde);
-			$pdf->selectFont($this->Docu->activeframe[0]['font_gemarkung']);
+			$pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_gemarkung']);
 			if($this->Docu->activeframe[0]['gemarkungsize'] > 0)$pdf->addText($this->Docu->activeframe[0]['gemarkungposx'],$this->Docu->activeframe[0]['gemarkungposy'],$this->Docu->activeframe[0]['gemarkungsize'],$this->gemarkung);
-			$pdf->selectFont($this->Docu->activeframe[0]['font_flur']);
+			$pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_flur']);
 			if($this->Docu->activeframe[0]['flursize'] > 0)$pdf->addText($this->Docu->activeframe[0]['flurposx'],$this->Docu->activeframe[0]['flurposy'],$this->Docu->activeframe[0]['flursize'], $this->flur);
-			$pdf->selectFont($this->Docu->activeframe[0]['font_flurst']);
+			$pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_flurst']);
 			if($this->Docu->activeframe[0]['flurstsize'] > 0)$pdf->addText($this->Docu->activeframe[0]['flurstposx'],$this->Docu->activeframe[0]['flurstposy'],$this->Docu->activeframe[0]['flurstsize'], $this->flurstueck);
 
 			# Freie Graphiken
@@ -6123,7 +6123,7 @@ class GUI {
 
 			# Freitexte
 			for($j = 0; $j < count($this->Docu->activeframe[0]['texts']); $j++){
-				$pdf->selectFont($this->Docu->activeframe[0]['texts'][$j]['font']);
+				$pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['texts'][$j]['font']);
 				if($this->Docu->activeframe[0]['texts'][$j]['text'] == '' AND $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']] != ''){    // ein Freitext hat keinen Text aber in der Druckausschnittswahl wurde ein Text vom Nutzer eingefügt
 					$this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']] = str_replace(chr(10), ';', $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']]);
 					$this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']] = str_replace(chr(13), '', $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']]);
@@ -6166,7 +6166,7 @@ class GUI {
 
 			# Nutzer
 			if($this->Docu->activeframe[0]['usersize'] > 0){
-				$pdf->selectFont($this->Docu->activeframe[0]['font_user']);
+				$pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_user']);
 				$pdf->addText($this->Docu->activeframe[0]['userposx'],$this->Docu->activeframe[0]['userposy'],$this->Docu->activeframe[0]['usersize'], utf8_decode('Stelle: '.$this->Stelle->Bezeichnung.', Nutzer: '.$this->user->Name));
 			}
 
@@ -6229,7 +6229,7 @@ class GUI {
 
 			# variable Freitexte
 			for($j = 1; $j <= $this->formvars['last_freetext_id']; $j++){
-				$pdf->selectFont(WWWROOT . APPLVERSION . 'fonts/PDFClass/Helvetica.afm');
+				$pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/Helvetica.afm');
 				if(strpos($this->Docu->activeframe[0]['format'], 'quer') !== false)$height = 420;			# das ist die Höhe des Vorschaubildes
 				else $height = 842;																																		# das ist die Höhe des Vorschaubildes
 				$ratio = $height/$this->Docu->height;
