@@ -1,9 +1,9 @@
 <?
 
 if($this->go == 'bevoelkerung_bericht_Bericht erstellen'){
-	include (PDFCLASSPATH."class.ezpdf.php");
+	include (CLASSPATH.'class.ezpdf.php');
   $pdf=new Cezpdf();
-  $pdf->selectFont(PDFCLASSPATH.'fonts/Helvetica.afm');
+  $pdf->selectFont(WWWROOT . APPLVERSION . 'fonts/PDFClass/Helvetica.afm');
   $y = 825;
   $pdf->addText(45, $y-=30, 18, utf8_decode('Bevölkerungsprognose - Bericht'));
   $ueberschriften = array('Einwohner pro Landkreis', 'Einwohnerdichte pro Landkreis', 'Einwohner pro Altersgruppe', 'Durchschnittsalter pro Landkreis', 'Zusammengefasste Geburtenziffer', 'Bevölkerungsbewegung');

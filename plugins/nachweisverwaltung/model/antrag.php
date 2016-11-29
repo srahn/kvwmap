@@ -207,7 +207,7 @@ class antrag {
     $row=560;
     $rowGap=3;
     $colGap=3;
-    $pdf->selectFont(PDFCLASSPATH.'fonts/Times-Roman.afm',$tmp);
+    $pdf->selectFont(WWWROOT . APPLVERSION . 'fonts/PDFClass/Times-Roman.afm',$tmp);
     $pdf->addText(100,$row-=12,20,'<b>Anlage der Vermessungsvorbereitung zur Auftragsnummer '.$this->nr.'</b>');
     $pdf->addText(330,$row-=20,16,utf8_decode('Liste der Fortführungsrisse'));
     $row-=3; $pdf->line(330,$row,505,$row);
