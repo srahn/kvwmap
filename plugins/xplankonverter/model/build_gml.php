@@ -404,9 +404,14 @@ class Gml_builder {
               $unified_gml .= substr($haystack, 0, $currpos);
               $unified_gml .= "_geom_". $seq_number++;
               $currpos = strpos($haystack, '"', $currpos);
-              if (!$currpos) break;
+              if (!$currpos) { // should never happen!!!
+                $currpos += 5;
+                $unified_gml .= '"';
+                continue;
+              }
               $haystack = substr($haystack, $currpos);
             }
+            $unified_gml .= $haystack;
             #echo $unified_str . "\n";
             $gmlStr .= $this->wrapWithElement("{$xplan_ns_prefix}{$uml_attribute['uml_name']}", $unified_gml);
             break;
