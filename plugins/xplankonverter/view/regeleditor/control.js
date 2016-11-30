@@ -248,7 +248,7 @@ function showRemoveHideAdd(xplanAttributsent) {
   $("#add_" + xplanAttribut).hide();
   $("#remove_" + xplanAttribut).show();
   // if remove_rechtscharakter = sichtbar dann, Warnung Rechtscharakter entfernen
-  if($("#remove_rechtscharakter").is(":visible")){
+  if($("#remove_rechtscharakter").is(":visible")) {
     $("#Warnung_3").hide();
   }
   if($("#target").text() == 'rp_zentralerort' && $("#remove_typ").is(":visible")) {

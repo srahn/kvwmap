@@ -76,6 +76,13 @@ h3 {
   text-shadow: 1px 1px 1px #ccc;
 }
 
+#warnung_area {
+  width: 60%;
+  margin: 2px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 #target, #source {
   color: #000000;
   text-shadow: 1px 1px 1px #ccc;

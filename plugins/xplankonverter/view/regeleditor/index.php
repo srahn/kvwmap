@@ -13,7 +13,7 @@
   <BODY>
 		<div id="debug"></div>
 		<input type="hidden" id="field_id" value="<? echo $_REQUEST['field_id']; ?>">
-    <h1>Regeleditor</h1>
+    <h1 align="center">Regeleditor</h1>
     <!-- Reload-->
     <a onClick="reloadPage()" href="" class="float-right" title="Lädt die Seite neu und löscht alle Einträge"><i class="fa fa-undo fa-lg"></i></a>
     <br>
@@ -48,10 +48,10 @@
     <div id="fehler_area"></div>
     <!-- Warnungen -->
     <div id="warnung_area">
-      <div id="Warnung_1"><i class="fa fa-exclamation-triangle fa-lg"> Es muss eine XPlan-Klasse ausgewählt werden!</i></div>
-      <div id="Warnung_2"><i class="fa fa-exclamation-triangle fa-lg"> Es muss eine Shape-Datei ausgewählt werden!</i></div>
-      <div id="Warnung_3" style="display: none"><i class="fa fa-exclamation-triangle fa-lg"> Das Attribut rechtscharakter ist ein Pflichtattribut und muss immer befüllt sein!</i></div>
-       <div id="Warnung_4" style="display: none"><i class="fa fa-exclamation-triangle fa-lg"> Das Attribut typ ist ein Pflichtattribut für Zentrale Orte und muss immer befüllt sein!</i></div>
+      <div id="Warnung_1" class="center60p"><i class="fa fa-exclamation-triangle fa-lg"> Es muss eine XPlan-Klasse ausgewählt werden!</i></div>
+      <div id="Warnung_2" class="center60p"><i class="fa fa-exclamation-triangle fa-lg"> Es muss eine Shape-Datei ausgewählt werden!</i></div>
+      <div id="Warnung_3" style="display: none" class="center60p"><i class="fa fa-exclamation-triangle fa-lg"> Das Attribut rechtscharakter ist ein Pflichtattribut und muss immer befüllt sein!</i></div>
+       <div id="Warnung_4" style="display: none" class="center60p"><i class="fa fa-exclamation-triangle fa-lg"> Das Attribut typ ist ein Pflichtattribut für Zentrale Orte und muss immer befüllt sein!</i></div>
     </div>
     <!-- SQL-Ausgabefenster -->
     <div id="sql_area" class="ganze-breite" style="display: none">
