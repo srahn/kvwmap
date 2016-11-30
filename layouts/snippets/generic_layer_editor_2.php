@@ -19,8 +19,8 @@
 	}
 ?>
 <div id="layer" onclick="remove_calendar();">
-<? if($this->new_entry != true AND $layer['requires'] == ''){ ?>
 <input type="hidden" value="" id="changed_<? echo $layer['Layer_ID']; ?>" name="changed_<? echo $layer['Layer_ID']; ?>">
+<? if($this->new_entry != true AND $layer['requires'] == ''){ ?>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 	<tr>
 		<td width="99%" align="center"><h2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<? echo $layer['Name']; ?></h2></td>
