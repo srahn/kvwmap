@@ -176,7 +176,12 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 		case 'getNBH' : {
 			$GUI->getNBH();
 		}break;
-				
+
+		case 'setLayerParams' : {
+			$GUI->setLayerParams();
+			echo "onLayerParamsUpdated('success')";
+		} break;
+
 		case 'changemenue' : {
 			$GUI->changemenue($GUI->formvars['id'], $GUI->formvars['status']);
 			$GUI->loadMap('DataBase');
@@ -1198,6 +1203,12 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->Layereditor();
 	  } break;
 
+	  case 'Layereditor_Autoklassen_Hinzufügen' : {
+			$GUI->checkCaseAllowed('Layereditor');
+			$GUI->Layereditor_AutoklassenHinzufuegen();
+			$GUI->Layereditor();
+	  } break;
+
 	  case 'Layereditor_Als neuen Layer eintragen' : {
 			$GUI->checkCaseAllowed('Layereditor');
 			$GUI->LayerAnlegen();
@@ -1430,7 +1441,7 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->drawMap();
 			$GUI->output();
 	  } break;
-		
+
 		case "setMapExtent" : {
 			$GUI->setMapExtent();
 		} break;
