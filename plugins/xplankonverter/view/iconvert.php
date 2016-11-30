@@ -25,37 +25,7 @@
   };
   
   function outputHeader() {
-    $debug_js = true;
-    $local_js = true;
-    if ($local_js) {
-      if ($debug_js) {
-      ?>
-      <head>
-        <link rel='stylesheet' href='/kvwmap/plugins/xplankonverter/3rdparty/bootstrap-3.3.6/css/bootstrap.css'/>
-        <script src='/kvwmap/plugins/xplankonverter/3rdparty/jQuery-1.12.0/jquery-1.12.0.js'></script>
-        <script src='/kvwmap/plugins/xplankonverter/3rdparty/bootstrap-3.3.6/js/bootstrap.js'></script>
-      </head>
-      <?php
-      } else {
-      ?>
-      <head>
-        <link rel='stylesheet' href='/kvwmap/plugins/xplankonverter/3rdparty/bootstrap-3.3.6/css/bootstrap.min.css'>
-        <script src='/kvwmap/plugins/xplankonverter/3rdparty/jQuery-1.12.0/jquery-1.12.0.min.js'></script>
-        <script src='/kvwmap/plugins/xplankonverter/3rdparty/bootstrap-3.3.6/js/bootstrap.min.js'></script>
-      </head>
-      <?php
-      }
-    } else {
-    ?>
-      <head>
-      <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css'>
-      <script src='https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js'></script>
-      <script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js' 
-        integrity='sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS' crossorigin='anonymous'>
-      </script>
-      </head>
-    <?php
-    }
+		include('header.php');
   };
   
   function outputBody($content = ''){

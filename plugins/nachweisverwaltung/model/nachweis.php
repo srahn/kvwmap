@@ -63,7 +63,7 @@ class Nachweis {
     $this->database->begintransaction();        
 
     # 2. Prüfen der Eingabewerte
-    $ret=$this->pruefeEingabedaten($formvars['datum'],$formvars['VermStelle'],$formvars['art'],$formvars['gueltigkeit'],$formvars['stammnr'],$formvars['rissnummer'],$formvars['fortfuehrung'],$formvars['Blattformat'],$formvars['Blattnr'],$formvars['changeDocument'],$formvars['Bilddatei_name'],$formvars['pathlength'],$formvars['umring']);
+    $ret=$this->pruefeEingabedaten($formvars['id'], $formvars['datum'],$formvars['VermStelle'],$formvars['art'],$formvars['gueltigkeit'],$formvars['stammnr'],$formvars['rissnummer'],$formvars['fortfuehrung'],$formvars['Blattformat'],$formvars['Blattnr'],$formvars['changeDocument'],$formvars['Bilddatei_name'],$formvars['pathlength'],$formvars['umring'], $formvars['flurid'], $formvars['Blattnr']);
     if ($ret[0]) {
       # Fehler bei den Eingabewerten entdeckt.  
       #echo '<br>Ergebnis der Prüfung: '.$ret;
@@ -271,18 +271,31 @@ class Nachweis {
   	return $result;
   }
   
-  function pruefeEingabedaten($datum, $VermStelle, $art, $gueltigkeit, $stammnr, $rissnummer, $fortfuehrung, $Blattformat, $Blattnr, $changeDocument,$Bilddatei_name, $pathlength, $umring) {
-    #echo '<br>Starten der Funktion zum testen der Eingabedaten.';
-    # Test: wurde das Polgon für den raumbezug festgelegt?
+  function pruefeEingabedaten($id, $datum, $VermStelle, $art, $gueltigkeit, $stammnr, $rissnummer, $fortfuehrung, $Blattformat, $Blattnr, $changeDocument,$Bilddatei_name, $pathlength, $umring, $flur, $blattnr){
+		global $nachweis_unique_attributes;
+		# Test ob schon ein Nachweis mit dieser Kombination existiert
+		if($nachweis_unique_attributes != NULL){
+			if(NACHWEIS_SECONDARY_ATTRIBUTE == 'fortfuehrung')$test_fortfuehrung = $fortfuehrung;
+			if(in_array('art', $nachweis_unique_attributes)){
+				if($art = '111')$test_art = '0001';
+				else $test_art = $art;
+			}
+			if(in_array('blattnr', $nachweis_unique_attributes))$test_blattnr = $Blattnr;			
+			if(NACHWEIS_PRIMARY_ATTRIBUTE == 'stammnr'){
+				$nachweise = $this->getNachweise(NULL,NULL,$gemarkung,$stammnr,NULL,$test_fortfuehrung,$test_art,NULL,'indiv_nr',NULL,NULL,NULL,NULL,NULL,NULL, $flur, true,NULL,NULL, $test_blattnr);
+			}
+			else{
+				$nachweise = $this->getNachweise(NULL,NULL,$gemarkung,NULL,$rissnummer,$test_fortfuehrung,$test_art,NULL,'indiv_nr',NULL,NULL,NULL,NULL,NULL,NULL, $flur, true,NULL,NULL, $test_blattnr);
+			}
+			if($this->Dokumente[0]['id'] != '' AND $id != $this->Dokumente[0]['id']){
+				$errmsg.='Es existiert bereits ein Nachweis mit diesen Parametern.\n';
+			}
+		}
+		
     if ($umring == ''){
       $errmsg.='Bitte legen Sie das Polygon für den einzuarbeitenden Nachweis fest! \n';
     }
-        
-    # Test:  Sind die X-Y-Werte als Arrays übegeben worden?
-    if (@is_array($pathy)!=1 OR @is_array($pathx)!=1){
-      $errmasg.='X-Y-Koordinaten wurden nicht oder falsch gesetzt! \n';
-    }
-    
+            
     # test auf korrekte Vermessungstelle 
     $sql='SELECT * FROM nachweisverwaltung.n_vermstelle WHERE id='.$VermStelle;
     $queryret=$this->database->execSQL($sql,4, 0);
@@ -704,7 +717,7 @@ class Nachweis {
     return $errmsg;
   }
   
-  function getNachweise($id,$polygon,$gemarkung,$stammnr,$rissnr,$fortf,$art_einblenden,$richtung,$abfrage_art,$order,$antr_nr, $datum = NULL, $VermStelle = NULL, $gueltigkeit = NULL, $datum2 = NULL, $flur = NULL, $flur_thematisch = NULL, $andere_art = NULL, $suchbemerkung = NULL) {
+  function getNachweise($id,$polygon,$gemarkung,$stammnr,$rissnr,$fortf,$art_einblenden,$richtung,$abfrage_art,$order,$antr_nr, $datum = NULL, $VermStelle = NULL, $gueltigkeit = NULL, $datum2 = NULL, $flur = NULL, $flur_thematisch = NULL, $andere_art = NULL, $suchbemerkung = NULL, $blattnr = NULL) {
 		$explosion = explode('~', $antr_nr);
 		$antr_nr = $explosion[0];
 		$stelle_id = $explosion[1];
@@ -904,6 +917,9 @@ class Nachweis {
 	      	if($fortf!=''){
 	          $sql.=" AND n.fortfuehrung=".(int)$fortf;
 	        }
+					if($blattnr!=''){
+	          $sql.=" AND n.blattnummer='".$blattnr."'";
+	        }					
           if($datum != ''){
 						if($datum2 != ''){
 							$sql.=" AND n.datum between '".$datum."' AND '".$datum2."'";
@@ -1209,9 +1225,10 @@ class Nachweis {
 #-> Festpunkte #
 ################
 
+# 2016-11-03 H.Riedel - pkz durch pkn ersetzt, par durch art ersetzt
 class Festpunkte {
-  var $pkz;
-  var $art;
+  var $pkn;
+  var $par;
   var $koordinaten;
   var $debug;
   var $database;
@@ -1223,37 +1240,41 @@ class Festpunkte {
   #
   # aktualisieren()
   # Festpunktdatei()
-  # filebasenamepkz($filename)
-  # getFestpunkte($pkz,$art,$vermarkt,$verhandelt,$polygon,$auftr_nr,$kmquad,$order)
+  # filebasenamepkn($filename)
+  # getFestpunkte($pkn,$par,$vermarkt,$verhandelt,$polygon,$auftr_nr,$kmquad,$order)
   # getKilometerQuadrate()
   # is_valid_pfad()
   # ladenFestpunktdatei()
   # leereFestpunktTabelle()
   # moveFiles()
-  # pkz2pfad()
+  # pkn2pfad()
   # pruefeSuchParameterPolygon($polygon)
   # uebernehmen()
   #
   ################################################################################
 
+# 2016-11-03 H.Riedel - fp_punkte_temp durch fp_punkte_alkis ersetzt
   function Festpunkte($dateiname,$database) {
     global $debug;
     $this->debug=$debug;
     $this->database=$database;
     $this->dateiname=$dateiname;
-    $this->tabellenname='fp_punkte_temp';
+    $this->tabellenname='fp_punkte_alkis';
   }
 
-  function createKVZdatei($antrag_nr, $stelle_id, $pkz = '') {
+# 2016-11-03 H.Riedel - pkz durch pkn ersetzt, an ALKIS angepasst
+  function createKVZdatei($antrag_nr, $stelle_id, $pkn = '') {
     # Diese Funktion erzeugt im Verzeichnis der recherchierten Antraege (RECHERCHEERGEBNIS_PATH)
     # ein Datei mit Koordinatenverzeichnis im Satzformat aus GEOI-Programm (Standardisiertes Ausgabeformat)
     # Ausgegeben werden alle Punkte, die zur antrag_nr gehören, die über die Abfrage getFestpunkte in $this->liste geschrieben wurden
     # Verzeichnispfad bilden und prüfen ob schon vorhanden, wenn nicht Verzeichnis anlegen
-    if($pkz != '')$pkz = array_values($pkz);
+    if($pkn != '')$pkn = array_values($pkn);
+#		if($stelle_id != '')$antrag_nr.='~'.$stelle_id;
+		$ret=$this->getFestpunkte($pkn,'','','','',$antrag_nr,$stelle_id,'','pkn');
 		if($stelle_id != '')$antrag_nr.='~'.$stelle_id;
-		$ret=$this->getFestpunkte($pkz,'','','','',$antrag_nr,$stelle_id,'','pkz');
-		if($this->anzPunkte > 0){
+    if($this->anzPunkte > 0){
 			$kvzPfad=RECHERCHEERGEBNIS_PATH.$antrag_nr.'/';
+#			$kvzPfad=RECHERCHEERGEBNIS_PATH.'ohne/';
 			if (!is_dir($kvzPfad)) {
 				mkdir($kvzPfad,0770); # erzeugt das Verzeichnis für den Auftrag, weil es das noch nicht gibt
 			}
@@ -1279,38 +1300,45 @@ class Festpunkte {
 					for ($i=0;$i<$this->anzPunkte;$i++) {
 						if($i!=0)$zeile = "";
 						$p=$this->liste[$i];
-						# Entfernen der - in pkz für Punktnummer ohne -
-						$p["pnr"]=str_replace("-","",$p["pkz"]);
-						$zeile.=$p["ls"]; # Lagestatus
-						$zeile.=" ".str_pad(trim($p["pnr"]),14," ",STR_PAD_LEFT); # Punktkennzeichen
-						$zeile.=" ".str_pad(trim($p["vma"]),3,"0",STR_PAD_LEFT); # Vermarkungsart
-						$zeile.=" ".$p["rw"]; # Rechtswert
-						$zeile.=" ".$p["hw"]; # Hochwert
-						$zeile.=" "; # 47 Leerstelle
-						if ($p["hoe"]=='') {
-							$zeile.=str_repeat(" ",8); # 48-55 Wenn Höhe nicht angegeben mit Leerstellen auffüllen
-						}
-						else {
-							$zeile.=" ".sprintf("%08.3f",$p["hoe"]); # 48-55 Höhe
-						}
-						$zeile.=" "; # 56 Leerstelle
-						if ($p["hz"]=='') {
-							$zeile.=" "; # 57 Wenn HZ nicht angegeben mit Leerzstelle auffüllen
-						}
-						else {
-							$zeile.=sprintf("%1d",$p["hz"]); # 57 HZ
-						}
-						$zeile.=" "; # 58 Leerstelle
-						if ($p["hg"]=='') {
-							$zeile.=" "; # 59 Wenn hg nicht angegeben mit Leerzstelle auffüllen
-						}
-						else {
-							$zeile.=sprintf("%1d",$p["hg"]); # 59 HG
-						}
-						$zeile.="  "; # 60-61 Leerzeichen
-						$zeile.=sprintf("%1d",$p["lz"]); # 62 Lagezuverlässigkeit
-						$zeile.=" "; # 63 Leerstelle
-						$zeile.=sprintf("%1d",$p["lg"]); # 64 Lagegenauigkeitsstufe
+						# Entfernen der - in pkn für Punktnummer ohne -
+#						$p["pnr"]=str_replace("-","",$p["pkn"]);
+            if ($p["kst"]=='') {
+              $zeile.=str_repeat(" ",4); # 1-5 Wenn Koordinatenstatus nicht angegeben mit Leerstellen auffüllen
+            }
+            else { 
+              $zeile.=$p["kst"]; # 1-5 Koordinatenstatus
+            }
+						$zeile.=" ".str_pad(trim($p["pkn"]),15," ",STR_PAD_LEFT); # Punktkennzeichen
+						$zeile.=" ".str_pad(trim($p["abm"]),4,"0",STR_PAD_LEFT); # Vermarkungsart
+            $zeile.=" ".sprintf("%12.3f","33".$p["rw"]); # 27-38 Rechtswert
+            $zeile.=" ".sprintf("%11.3f",$p["hw"]); # 40-50 Hochwert
+#						$zeile.=" "; # 47 Leerstelle
+            if ($p["hoe"]=='') {
+              $zeile.=str_repeat(" ",9); # 48-55 Wenn Höhe nicht angegeben mit Leerstellen auffüllen
+            }
+            else {
+              $zeile.=" ".sprintf("%08.3f",$p["hoe"]); # 48-55 Höhe
+            }
+#						$zeile.=" "; # 56 Leerstelle
+            if ($p["gst"]=='') {
+              $zeile.=str_repeat(" ",5); # 48-55 Wenn Genauigkeitsstufe nicht angegeben mit Leerstellen auffüllen
+            }
+            else { 
+              $zeile.=" ".$p["gst"]; # Genauigkeitsstufe
+            }
+            if ($p["vwl"]=='') {
+              $zeile.=str_repeat(" ",5); # 48-55 Wenn Vertrauenswuerdigkeit nicht angegeben mit Leerstellen auffüllen
+            }
+            else { 
+              $zeile.=" ".$p["vwl"]; # Vertrauenswuerdigkeit
+            }
+            if ($p["des"]=='') {
+              $zeile.=str_repeat(" ",5); # 48-55 Wenn Description nicht angegeben mit Leerstellen auffüllen
+            }
+            else { 
+              $zeile.=" ".$p["des"]; # Description
+            }
+						$zeile.=str_pad($p["par"],4," ",STR_PAD_LEFT); # Art des Punktes
 						$zeile.=" "; # 65 Leerstelle
 						$zeile.="\r\n"; # Zeilenumbruch
 						if (!fwrite($fp,$zeile)) {
@@ -1336,12 +1364,13 @@ class Festpunkte {
     return $ret;
   }
 
+# 2016-11-03 H.Riedel - the_geom durch wkb_geometry, pkz durch pkn ersetzt
   # 2006-02-19 pk koordinaten durch the_geom ersetzt
   function getBBoxAsRectObj($Festpunkte) {
     if (is_array($Festpunkte)) { $Liste=$Festpunkte;  } else { $Liste=array($Festpunkte); }
-    $sql ="SELECT round(st_xmin(st_extent(the_geom))) as xmin,round(st_ymin(st_extent(the_geom))) as ymin";
-    $sql.=",round(st_xmax(st_extent(the_geom))) as xmax, round(st_ymax(st_extent(the_geom))) as ymax";
-    $sql.=" FROM nachweisverwaltung.fp_punkte WHERE pkz IN ('".$Liste[0]."'";
+    $sql ="SELECT round(st_xmin(st_extent(wkb_geometry))) as xmin,round(st_ymin(st_extent(wkb_geometry))) as ymin";
+    $sql.=",round(st_xmax(st_extent(wkb_geometry))) as xmax, round(st_ymax(st_extent(wkb_geometry))) as ymax";
+    $sql.=" FROM nachweisverwaltung.fp_punkte WHERE pkn IN ('".$Liste[0]."'";
     for ($i=1;$i<count($Liste);$i++) {
       $sql.=",'".$Liste[$i]."'";
     }
@@ -1375,20 +1404,24 @@ class Festpunkte {
     return $ret;
   }
 
-  function filebasename2pkz($filebasename) {
+# 2016-03-11 H.Riedel - pkz durch pkn ersetzt
+  function filebasename2pkn($filebasename) {
     $kiloquad=substr($filebasename,0,-6);
-    $art=substr($filebasename,-6,-5);
-    $nr=substr($filebasename,-5);
-    $pkz=$kiloquad.'-'.$art.'-'.$nr;
-    return $pkz;
+#    $art=substr($filebasename,-6,-5);
+    $nr=substr($filebasename,-6);
+#    $pkz=$kiloquad.'-'.$art.'-'.$nr;
+    $pkn=$kiloquad.$nr;
+    return $pkn;
   }
 
-  function pkz2pfad($pkz) {
+# 2016-03-11 H.Riedel - pkz durch pkn ersetzt, pfadname an alkis angepasst
+  function pkn2pfad($pkn) {
     # erzeugt aus einer pkz Angabe den Dateiname mit Pfadangabe für eine Einmessungsskizze.
     # png oder tif muss selbst noch hinterher angehängt werden.
-    $kiloquad=substr($pkz,0,-8);
-    $filename=str_replace('-','',$pkz);
-    $pfadname=$kiloquad.'/'.$filename;
+    $kiloquad=substr($pkn,0,-6);
+#    $filename=str_replace('-','',$pkz);
+#    $pfadname=$kiloquad.'/'.$filename;
+    $pfadname=$kiloquad.'/'.$pkn;
     return $pfadname;
   }
 
@@ -1539,10 +1572,11 @@ class Festpunkte {
     return $ret;
   }
 
-  function checkSkizzen($pkz) {
-    # ermittelt für pkz ob Einmessungskizzen in Form von tif oder png Dateien vorliegen,
-    # Konvertieren des pkz in den Pfadnamen für die Einmessungsskizze
-    $relPfad=$this->pkz2pfad($pkz);
+# 2016-11-03 H.Riedel, pkz durch pkn ersetzt
+  function checkSkizzen($pkn) {
+    # ermittelt für pkn ob Einmessungskizzen in Form von tif oder png Dateien vorliegen,
+    # Konvertieren des pkn in den Pfadnamen für die Einmessungsskizze
+    $relPfad=$this->pkn2pfad($pkn);
     $skizze['tif']=0;
     if (file_exists(PUNKTDATEIPATH.$relPfad.'.tif')) {
       $skizze['tif']=1;
@@ -1645,8 +1679,9 @@ class Festpunkte {
     return $ret;
   }
 
+# 2016-11-03 H.Riedel, pkz durch pkn ersetzt, art durch par ersetzt
   function getAnzFestpunkte() {
-    $sql ="SELECT art,COUNT(pkz) AS anz FROM nachweisverwaltung.fp_punkte_temp GROUP BY art ORDER BY art";
+    $sql ="SELECT par, COUNT(pkn) AS anz FROM nachweisverwaltung.fp_punkte_alkis GROUP BY par ORDER BY par";
     $this->debug->write("<p>kataster.php->Festpunkte->getAnzFestpunkte",4);
     $ret=$this->database->execSQL($sql,4, 0);
     if ($ret[0]) {
@@ -1656,24 +1691,28 @@ class Festpunkte {
       $anzPunkte['Gesamt']=0;
       $rs=pg_fetch_array($ret[1]); $anzPunkte['TP']=$rs['anz']; $anzPunkte['Gesamt']+=$rs['anz'];
       $rs=pg_fetch_array($ret[1]); $anzPunkte['AP']=$rs['anz']; $anzPunkte['Gesamt']+=$rs['anz'];
-      $rs=pg_fetch_array($ret[1]); $anzPunkte['GrenzP']=$rs['anz']; $anzPunkte['Gesamt']+=$rs['anz'];
+      $rs=pg_fetch_array($ret[1]); $anzPunkte['GP']=$rs['anz']; $anzPunkte['Gesamt']+=$rs['anz'];
       $rs=pg_fetch_array($ret[1]); $anzPunkte['GebP']=$rs['anz']; $anzPunkte['Gesamt']+=$rs['anz'];
-      $rs=pg_fetch_array($ret[1]); $anzPunkte['NutzP']=$rs['anz']; $anzPunkte['Gesamt']+=$rs['anz'];
+      $rs=pg_fetch_array($ret[1]); $anzPunkte['BwP']=$rs['anz']; $anzPunkte['Gesamt']+=$rs['anz'];
       $rs=pg_fetch_array($ret[1]); $anzPunkte['SiP']=$rs['anz']; $anzPunkte['Gesamt']+=$rs['anz'];
       $rs=pg_fetch_array($ret[1]); $anzPunkte['OP']=$rs['anz']; $anzPunkte['Gesamt']+=$rs['anz'];
+      $rs=pg_fetch_array($ret[1]); $anzPunkte['SVP']=$rs['anz']; $anzPunkte['Gesamt']+=$rs['anz'];
+      $rs=pg_fetch_array($ret[1]); $anzPunkte['TopP']=$rs['anz']; $anzPunkte['Gesamt']+=$rs['anz'];
       $ret[1]=$anzPunkte;
     }
     return $ret;
   }
 
-  function getFestpunkte($pkz,$art,$vermarkt,$verhandelt,$polygon,$antrag_nr,$stelle_id,$kmquad,$order) {
+# 2016-11-03 H.Riedel, the_geom durch wkb_geometry, pkz durch pkn ersetzt, art durch par ersetzt
+#                      Ergaenzung wg. Antrag_nr 'ohne'
+  function getFestpunkte($pkn,$par,$vermarkt,$verhandelt,$polygon,$antrag_nr,$stelle_id,$kmquad,$order) {
     # Die Funktion liefert die Festpunkte nach verschiedenen Suchkriterien.
-    if (is_array($pkz)) { $pkzListe=$pkz; } else { $pkzListe=array($pkz); }
-    if (is_array($art)) { $artListe=$art; } else {
-      if ($art=='') {
-        $art='-1';
+    if (is_array($pkn)) { $pknListe=$pkn; } else { $pknListe=array($pkn); }
+    if (is_array($par)) { $parListe=$par; } else {
+      if ($par=='') {
+        $par='-1';
       }
-      $artListe=array($art);
+      $parListe=array($par);
     }
     # Prüfen der Suchparameter
     # Es muss ein gültiges Polygon vorhanden sein.
@@ -1691,24 +1730,24 @@ class Festpunkte {
           $sql.=",nachweisverwaltung.fp_punkte2antraege AS p2a";
         }
         $sql.=" WHERE p.objnr=o.objnr";
-        $anzPkz=count($pkzListe);
-        if ($pkzListe[0]!='') {
-          if ($anzPkz==1) {
-            $sql.=" AND pkz LIKE '".$pkzListe[0]."'";
+        $anzPkn=count($pknListe);
+        if ($pknListe[0]!='') {
+          if ($anzPkn==1) {
+            $sql.=" AND pkz LIKE '".$pknListe[0]."'";
           }
           else {
-            $sql.=" AND pkz IN ('".$pkzListe[0]."'";
-            for ($i=1;$i<$anzPkz;$i++) {
-              $sql.=",'".$pkzListe[$i]."'";
+            $sql.=" AND pkz IN ('".$pknListe[0]."'";
+            for ($i=1;$i<$anzPkn;$i++) {
+              $sql.=",'".$pknListe[$i]."'";
             }
             $sql.=")";
           }
         }
-        $anzArten=count($artListe);
-        if ($artListe[0]>'-1') {
-          $sql.=" AND p.pat IN (".$artListe[0];
+        $anzArten=count($parListe);
+        if ($parListe[0]>'-1') {
+          $sql.=" AND p.pat IN (".$parListe[0];
           for ($i=1;$i<$anzArten;$i++) {
-            $sql.=",".$artListe[$i];
+            $sql.=",".$parListe[$i];
           }
           $sql.=")";
         }
@@ -1742,58 +1781,67 @@ class Festpunkte {
         }
       } # ende Datenquelle für Festpunkte alk-Tabellen
       else {
-        $sql ="SELECT p.*,st_asText(p.the_geom) AS wkt_the_geom FROM nachweisverwaltung.fp_punkte_temp AS p";
-        if ($antrag_nr!='') {
-          $sql.=",nachweisverwaltung.fp_punkte2antraege AS p2a";
-        }
-        $sql.=" WHERE 1=1";
-        $anzPkz=count($pkzListe);
-        if ($pkzListe[0]!='') {
-          if ($anzPkz==1) {
-            $sql.=" AND p.pkz LIKE '".$pkzListe[0]."'";
+        rsort($pknListe);
+          $sql ="SELECT p.*,st_asText(p.wkb_geometry) AS wkt_wkb_geometry FROM nachweisverwaltung.fp_punkte_alkis AS p";
+          if ($antrag_nr!='') {
+            if ($antrag_nr!='ohne') {
+              $sql.=",nachweisverwaltung.fp_punkte2antraege AS p2a";
+            }
+          }
+          $sql.=" WHERE 1=1";
+          $anzPkn=count($pknListe);
+          if ($pknListe[0]!='') {
+            if ($anzPkn==1) {
+              $sql.=" AND p.pkn LIKE '".$pknListe[0]."'";
+            }
+            else {
+              $sql.=" AND p.pkn IN ('".$pknListe[0]."'";
+              for ($i=1;$i<$anzPkn;$i++) {
+                $sql.=",'".$pknListe[$i]."'";
+              }
+              $sql.=")";
+            }
+          }
+          $anzArten=count($parListe);
+          if ($parListe[0]!='-1') {
+            $sql.=" AND p.par IN ('".$parListe[0];
+            for ($i=1;$i<$anzArten;$i++) {
+              $sql.="','".$parListe[$i];
+            }
+            $sql.="')";
+          }
+          if ($kmquad!='') {
+            $sql.=" AND substring(p.pkn, 1, 9)='".$kmquad."'";
+          }
+          if ($polygon!='') {
+            $sql.=" AND NOT DISJOINT('".$polygon."',p.wkb_geometry)";
+          }
+          if ($antrag_nr!='') {
+            if ($antrag_nr!='ohne') {
+            $sql.=" AND p.pkn=p2a.pkn AND p2a.antrag_nr='".$antrag_nr."'";
+            }
+          }
+          if ($stelle_id!='') {
+            $sql.=" AND p2a.stelle_id='".$stelle_id."'";
+          }
+          if ($order=='') {
+            $order="pkn";
+          }
+          # nur die Aktuellen Punkte auswaehlen
+          $sql.=" AND endet IS NULL AND endet_punktort IS NULL";
+          $sql.=" ORDER BY ".$order;
+          $ret=$this->database->execSQL($sql,4, 0);
+          if ($ret[0]) {
+            $errmsg.='Fehler bei der Abfrage der Festpunkte:<br>'.$ret[1];
           }
           else {
-            $sql.=" AND p.pkz IN ('".$pkzListe[0]."'";
-            for ($i=1;$i<$anzPkz;$i++) {
-              $sql.=",'".$pkzListe[$i]."'";
+            $this->anzPunkte=0;
+            while ($rs=pg_fetch_array($ret[1])) {
+              $festpunkte[]=$rs;
+              $this->anzPunkte++;
             }
-            $sql.=")";
+            $ret[1]=$festpunkte;
           }
-        }
-        $anzArten=count($artListe);
-        if ($artListe[0]>'-1') {
-          $sql.=" AND p.art IN (".$artListe[0];
-          for ($i=1;$i<$anzArten;$i++) {
-            $sql.=",".$artListe[$i];
-          }
-          $sql.=")";
-        }
-        if ($kmquad!='') {
-          $sql.=" AND substring(p.pkz from 0 for position('-' in p.pkz))='".$kmquad."'";
-        }
-        if ($polygon!='') {
-          $sql.=" AND NOT DISJOINT('".$polygon."',p.the_geom)";
-        }
-        if ($antrag_nr!='') {
-          $sql.=" AND p.pkz=p2a.pkz AND p2a.antrag_nr='".$antrag_nr."'";
-        }
-        if ($order=='') {
-          $order="pkz";
-        }
-        $sql.=" ORDER BY ".$order;
-        #echo $sql;
-        $ret=$this->database->execSQL($sql,4, 0);
-        if ($ret[0]) {
-          $errmsg.='Fehler bei der Abfrage der Festpunkte:<br>'.$ret[1];
-        }
-        else {
-          $this->anzPunkte=0;
-          while ($rs=pg_fetch_array($ret[1])) {
-            $festpunkte[]=$rs;
-            $this->anzPunkte++;
-          }
-          $ret[1]=$festpunkte;
-        }
       } # ende Datenquelle für Festpunkte fp_punkte
     }
     if ($errmsg!='') { $ret[1]=$errmsg; }
@@ -1801,6 +1849,7 @@ class Festpunkte {
     return $ret;
   } # ende funktion getFestpunkte
 
+# 2016-11-03 H.Riedel - Kilometerquadrate aus pkn extrahieren
   function getKilometerQuadrate() {
     $kilometerquadrate=array();
     if ($this->anzPunkte>0) {
@@ -1809,9 +1858,11 @@ class Festpunkte {
       # Auslesen aller Werte aus der Liste der Festpunkte
       foreach($this->liste AS $value) {
         # extrahieren der Bestandteile von pkz, getrennt durch "-"
-        $pkz=explode('-',$value['pkz']);
-        # zuweisen des ersten Teiles der pkz zur Liste der kilometerquadrate
-        $kilometerquadrate[]=$pkz[0];
+#        $pkz=explode('-',$value['pkz']);
+        $pkn=substr($value['pkn'],0,-6); 
+#        echo $pkn.', ';
+        # zuweisen des ersten Teiles der pkn zur Liste der kilometerquadrate
+        $kilometerquadrate[]=$pkn;
       }
       # Reduzieren der Liste der Kilometerquadrate um einmalig vorkommene Werte
       $kilometerquadrate=array_values(array_unique($kilometerquadrate));

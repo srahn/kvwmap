@@ -9,11 +9,11 @@ $class_name = $_REQUEST['class_name'];
   <HEAD>
     <TITLE>Regeleditor</TITLE>
     <META charset="UTF-8">
-    <script src="plugins/xplankonverter/3rdparty/jQuery-1.12.0/jquery-1.12.0.min.js"></script>
+    <script src="<?php echo JQUERY_PATH; ?>/jquery-1.12.0.min.js"></script>
     <script src="plugins/xplankonverter/view/regeleditor/control.js">"use strict";</script>
     <!-- Setzt PHP Variable als (Global) Javascript Variable -->
     <script>konvertierung_id = '<? echo $konvertierung_id; ?>';</script>
-    <link rel="stylesheet" href="layouts/custom/font-awesome-4.5.0/css/font-awesome.min.css" type="text/css"/>
+    <link rel="stylesheet" href="<?php echo FONTAWESOME_PATH; ?>/css/font-awesome.min.css" type="text/css"/>
     <link rel="stylesheet" href="plugins/xplankonverter/view/regeleditor/styles.css" type="text/css"/>
   </HEAD>
   <BODY>

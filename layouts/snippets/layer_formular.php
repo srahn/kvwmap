@@ -4,12 +4,12 @@
  ?><script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <script src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
-
-Text[0]=["Hilfe:","Wendet eine Prozessierungsanweisung für den Layer an. Die unterstützten Anweisungen hängen vom Layertyp und dem verwendeten Treiber ab. Es gibt Anweisungen für Attribute, Connection Pooling, OGR Styles und Raster. siehe Beschreibung zum Layerattribut PROCESSING unter: http://www.mapserver.org/mapfile/layer.html. Mehrere Prozessinganweisungen werden hier eingegeben getrennt durch Semikolon. z.B. CHART_SIZE=60;CHART_TYPE=pie für die Darstellung eines Tortendiagramms des Typs MS_LAYER_CHART"]
-Text[1]=["Hilfe:","Die Haupttabelle ist diejenige der im Query-SQL-Statement abgefragten Tabellen, die die oid liefern soll.<br><br>Die Haupttabelle muss oids besitzen, diese müssen allerdings nicht im SQL angegeben werden.<br><br>Ist das Feld Haupttabelle leer, wird der Name der Haupttabelle automatisch eingetragen. Bei einer Layerdefinition über mehrere Tabellen hinweg kann es sein, dass kvwmap die falsche Tabelle als Haupttabelle auswählt. In diesem Fall kann hier händisch die gewünschte Tabelle eingetragen werden. Achtung: Wenn die Tabellennamen im Query-SQL geändert werden, muss auch der Eintrag im Feld Haupttabelle angepasst werden!"]
-Text[2]=["Hilfe:","Das Query-SQL ist das SQL-Statement, welches für die Sachdatenabfrage verwendet wird. Es kann eine beliebige Abfrage auf Tabellen oder Sichten sein, eine WHERE-Bedingung ist aber erforderlich. Der Schemaname wird hier nicht angegeben, sondern im Feld 'Schema'"]
-Text[3]=["Hilfe:","Das Data-Feld wird vom Mapserver für die Kartendarstellung verwendet (siehe Mapserver-Doku). Etwaige Schemanamen müssen hier angegeben werden."]
-Text[4]=["Hilfe:","Bei Punktlayern kann durch Angabe dieses Wertes die Clusterbildung aktiviert werden. Der Wert ist der Radius in Pixeln, in dem Punktobjekte zu einem Cluster zusammengefasst werden. <br>Damit die Cluster dargestellt werden können, muss es eine Klasse mit der Expression \"('[Cluster:FeatureCount]' != '1')\" geben. Cluster:FeatureCount kann auch als Labelitem verwendet werden, um die Anzahl der Punkte pro Cluster anzuzeigen."]
+  Text[0]=["Hilfe:","Wendet eine Prozessierungsanweisung für den Layer an. Die unterstützten Anweisungen hängen vom Layertyp und dem verwendeten Treiber ab. Es gibt Anweisungen für Attribute, Connection Pooling, OGR Styles und Raster. siehe Beschreibung zum Layerattribut PROCESSING unter: http://www.mapserver.org/mapfile/layer.html. Mehrere Prozessinganweisungen werden hier eingegeben getrennt durch Semikolon. z.B. CHART_SIZE=60;CHART_TYPE=pie für die Darstellung eines Tortendiagramms des Typs MS_LAYER_CHART"];
+  Text[1]=["Hilfe:","Die Haupttabelle ist diejenige der im Query-SQL-Statement abgefragten Tabellen, die die oid liefern soll.<br><br>Die Haupttabelle muss oids besitzen, diese müssen allerdings nicht im SQL angegeben werden.<br><br>Ist das Feld Haupttabelle leer, wird der Name der Haupttabelle automatisch eingetragen. Bei einer Layerdefinition über mehrere Tabellen hinweg kann es sein, dass kvwmap die falsche Tabelle als Haupttabelle auswählt. In diesem Fall kann hier händisch die gewünschte Tabelle eingetragen werden. Achtung: Wenn die Tabellennamen im Query-SQL geändert werden, muss auch der Eintrag im Feld Haupttabelle angepasst werden!"];
+  Text[2]=["Hilfe:","Das Query-SQL ist das SQL-Statement, welches für die Sachdatenabfrage verwendet wird. Es kann eine beliebige Abfrage auf Tabellen oder Sichten sein, eine WHERE-Bedingung ist aber erforderlich. Der Schemaname wird hier nicht angegeben, sondern im Feld 'Schema'"];
+  Text[3]=["Hilfe:","Das Data-Feld wird vom Mapserver für die Kartendarstellung verwendet (siehe Mapserver-Doku). Etwaige Schemanamen müssen hier angegeben werden."];
+  Text[4]=["Hilfe:","Bei Punktlayern kann durch Angabe dieses Wertes die Clusterbildung aktiviert werden. Der Wert ist der Radius in Pixeln, in dem Punktobjekte zu einem Cluster zusammengefasst werden. <br>Damit die Cluster dargestellt werden können, muss es eine Klasse mit der Expression \"('[Cluster:FeatureCount]' != '1')\" geben. Cluster:FeatureCount kann auch als Labelitem verwendet werden, um die Anzahl der Punkte pro Cluster anzuzeigen."];
+	Text[5]=["Hilfe:","Für einen Layer lassen sich verschiedene Klassifizierungen erstellen. Klassen mit dem gleichen Eintrag im Klassen-Feld \"Klassifizierung\" gehören zu einer Klassifizierung. Welche Klassifizierung in einem Layer verwendet wird, wird über das Layer-Feld \"Klassifizierung\" festgelegt."];
 
   function testConnection() {
     if (document.getElementById('connectiontype').value == 7) {
@@ -26,6 +26,23 @@ Text[4]=["Hilfe:","Bei Punktlayern kann durch Angabe dieses Wertes die Clusterbi
       document.getElementById('test_link').innerHTML=getCapabilitiesURL;
     }
   }
+	
+	function toggleAutoClassForm(){
+		form = document.getElementById('autoClassForm');
+		if(form.style.display == 'none')form.style.display = ''
+		else form.style.display = 'none';
+	}
+	
+	function updateAutoClassesForm(){
+		if(document.GUI.classification_method.value == 1){
+			document.getElementById('tr_num_classes').style.display='none';
+			document.getElementById('tr_color').style.display='none';			
+		}
+		else{
+			document.getElementById('tr_num_classes').style.display='';
+			document.getElementById('tr_color').style.display='';
+		}
+	}
   
 </script>						
 
@@ -232,6 +249,12 @@ else {
 		      		<input name="classitem" type="text" value="<?php echo $this->layerdata['classitem']; ?>" size="25" maxlength="100">
 		  		</td>
 		  	</tr>
+				<tr>
+		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strClassification; ?></th>
+		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+		      		<input name="layer_classification" type="text" value="<?php echo $this->layerdata['classification']; ?>" size="25" maxlength="50">
+		  		</td>
+		  	</tr>				
 		  	<tr>
 		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strFilterItem; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
@@ -543,6 +566,9 @@ else {
 				}		?>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strExpression; ?></td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strText; ?></td>
+				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strClassification; ?>&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[5], Style[0], document.getElementById('TipLayer6'))" onmouseout="htm()">
+						<div id="TipLayer6" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+				</td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strSignOrder; ?></td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strDelete; ?></td>
 	<!--			<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">ändern</td>  -->
@@ -561,14 +587,67 @@ else {
 				}
 				echo '<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><textarea name="expression['.$this->classes[$i]['Class_ID'].']" cols="28" rows="3">'.$this->classes[$i]['Expression'].'</textarea></td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><textarea name="text['.$this->classes[$i]['text'].']" cols="18" rows="3">'.$this->classes[$i]['text'].'</textarea></td>
+				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><input type="text" name="classification['.$this->classes[$i]['Class_ID'].']" size="18" value="' . $this->classes[$i]['classification'] . '"></td>
 				<td align="center" style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><input size="3" type="text" name="order['.$this->classes[$i]['Class_ID'].']" value="'.$this->classes[$i]['drawingorder'].'"></td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><a href="javascript:Bestaetigung(\'index.php?go=Layereditor_Klasse_Löschen&class_id='.$this->classes[$i]['Class_ID'].'&selected_layer_id='.$this->formvars['selected_layer_id'].'#Klassen\', \''.$this->strDeleteWarningMessage.'\');">'.$this->strDelete.'</a></td>
-			</tr>						
+			</tr>
 				';
 			}
 			?>
 			<tr>
-				<td style="border-bottom:1px solid #C3C7C3" colspan="8"><a href="index.php?go=Layereditor_Klasse_Hinzufügen&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>#Klassen"><?php echo $strAddClass; ?></a></td>
+        <td style="border-bottom:1px solid #C3C7C3" colspan="8">
+          <a href="index.php?go=Layereditor_Klasse_Hinzufügen&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>#Klassen"><?php echo $strAddClass; ?></a>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-bottom:1px solid #C3C7C3" colspan="8">
+					<a href="javascript:void(0);" onclick="toggleAutoClassForm();"><? echo $strAddAutoClasses; ?></a>
+					<div id="autoClassForm" style="display:none">
+						<table>
+							<tr>
+								<td>Methode:</td>
+								<td>
+									<select name="classification_method" onchange="updateAutoClassesForm();">
+										<option value="1">für jeden Wert eine Klasse</option>
+										<option value="2">gleiche Klassengrösse</option>
+										<option value="3">gleiche Anzahl Klassenmitglieder</option>
+										<!--option value="4">Clustering nach Jenk, Initialisierung mit Histogramm-Maxima</option-->
+										<option value="5">Jenks-Caspall-Algorithmus</option>
+									</select> <span title="Pflichtfeld">*</span>
+								</td>
+							</tr>
+							<tr id="tr_num_classes" style="display:none">
+								<td>Anzahl Klassen:</td>
+								<td>
+									<input type="text" name="num_classes" value="5"> <span title="Pflichtfeld">*</span>
+								</td>
+							</tr>
+							<tr id="tr_color" style="display:none">
+								<td>Farbe:</td>
+								<td>
+									<input type="text" name="classification_color" value="0 100 180"> <span title="Pflichtfeld">*</span>
+								</td>
+							</tr>
+							<tr>
+								<td>Attribut:</td>
+								<td>
+									<input type="text" name="classification_column" value=""> <span title="Pflichtfeld">*</span>
+								</td>
+							</tr>
+							<tr>
+								<td>Klassifizierung:</td>
+								<td>
+									<input type="text" name="classification_name" value="">
+								</td>
+							</tr>
+							<tr>
+								<td colspan="2" align="center">
+									<input type="button" name="dummy" value="Klassen erzeugen" onclick="submitWithValue('GUI','go_plus','Autoklassen_Hinzufügen')">
+								</td>
+							</tr>
+						</table>
+					</div>
+        </td>
 			</tr>
 			<tr>
 				<td colspan="8"><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>">Styles und Labels bearbeiten</a></td>

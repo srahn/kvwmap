@@ -113,7 +113,12 @@ class PgObject {
 	function getKVP() {
 		$kvp = array();
 		foreach($this->data AS $key => $value) {
-			$kvp[] = "\"" . $key . "\" = " . ((''.$value) == '' ? "NULL" : "'$value'") . "";
+			if (is_array($value))
+				$value = "{" . implode(", ", $value) . "}";
+			if ('' . $value == '')
+				$value = 'NULL';
+
+			$kvp[] = "\"" . $key . "\" = " . ($value == 'NULL' ? $value : "'{$value}'");
 		}
 		return $kvp;
 	}
@@ -127,15 +132,28 @@ class PgObject {
 		return $value;
 	}
 
-	function create($data) {
+	function set_array($attribute, $value) {
+		$this->data[$attribute][] = $value;
+		return $this->data[$attribute];
+	}
+
+	function create($data = '') {
 		if (!empty($data))
 			$this->data = $data;
+
+		$values = array_map(
+			function($value) {
+				return (is_array($value) ? "{" . implode(", ", $value) . "}" : $value);
+			},
+			$this->getValues()
+		);
+
 		$sql = "
 			INSERT INTO " . $this->qualifiedTableName . " (
 				" . implode(', ', $this->getAttributes()) . "
 			)
-			VALUES (
-				'" . implode("', '", $this->getValues()) . "'
+			VALUES (" .
+				"'" . implode("', '", $values) . "'
 			)
 			RETURNING id
 		";
@@ -155,7 +173,7 @@ class PgObject {
 			WHERE
 				id = " . $this->get('id') . "
 		";
-		$this->debug->show('update sql: ' . $sql);
+		$this->debug->show('update sql: ' . $sql, false);
 		$query = pg_query($this->database->dbConn, $sql);
 	}
 

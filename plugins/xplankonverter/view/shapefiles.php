@@ -1,5 +1,5 @@
 <?php include('header.php'); ?>
-
+<div class="xplankonverter">
 <h2>Hochgeladene Dateien</h2>
 <br>
 <script language="javascript" type="text/javascript">
@@ -87,3 +87,4 @@
     );
   }
 ?>
+</div>

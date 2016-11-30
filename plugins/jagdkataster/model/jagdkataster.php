@@ -143,13 +143,12 @@ class jagdkataster {
   }
 
   function eintragenNeueFlaeche($umring, $nummer, $name, $art, $flaeche, $jb_zuordnung, $status, $verzicht, $oid = ''){
-  	$valid[0] = 't';
   	if($umring != ''){
-	  	$sql = "SELECT st_IsValid(st_geometryfromtext('".$umring."', ".$this->clientepsg."))";
+	  	$sql = "SELECT st_IsValidReason(st_geometryfromtext('".$umring."', ".$this->clientepsg."))";
 	  	$ret = $this->database->execSQL($sql, 4, 0);
 	  	$valid = pg_fetch_array($ret[1]);
   	}
-  	if($valid[0] == 't'){
+  	if($valid[0] == 'Valid Geometry'){
 			if($oid != ''){
 				$sql = "UPDATE jagdkataster.jagdbezirke SET";
 				if($umring != ''){$sql.= " the_geom = st_multi(st_transform(st_geometryfromtext('".$umring."', ".$this->clientepsg."), ".$this->layerepsg.")),";}
@@ -181,7 +180,7 @@ class jagdkataster {
     else{
     	# Fehlerhafte Geometrie
     	$ret[0] = 1;
-	    $ret[1]='\nDie Flaeche konnte nicht eingetragen werden, da sie fehlerhaft ist!\n';
+	    $ret[1]='\nDie Flaeche konnte nicht eingetragen werden, da sie fehlerhaft ist!\n\n'.$valid[0];
     }
     return $ret;
   }

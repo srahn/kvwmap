@@ -355,18 +355,9 @@ function output_header($with_menu) {
     <meta name="author" content="GDI-Service" />
     <meta http-equiv="Access-Control-Allow-Origin" content="*" />
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
-    
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" type="text/css">
-    <link rel="stylesheet" href="styles/bootstrap-table.css" type="text/css">
-    <link rel="stylesheet" href="styles/design.css" type="text/css">
-    
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
-    <script src="javascript/tableExport.js"></script>
-    <script src="javascript/jquery.base64.js"></script>
-    <script src="javascript/bootstrap-table.js"></script>
-    <script src="javascript/bootstrap-table-export.js"></script>
-    <script src="javascript/bootstrap-table-flatJSON.js"></script>
+
+		<?php include('header.php'); ?>
+
     <script language="javascript" type="text/javascript">
       /*
       * Konvertiert den Zeitstempel aus einem Javascript Date Objekt in ein Objekt mit formatierten Elementen für Jahr, Monat, Tag etc.

@@ -62,9 +62,10 @@
         }
       }
 
+# 2016-11-03 H.Riedel - pkz durch pkn ersetzt
       # Zusammenstellen der Einmessungsskizzen der Festpunkte
       $festpunkte=new Festpunkte('',$GUI->pgdatabase);
-      $ret=$festpunkte->getFestpunkte('',array('0','1'),'','','',$antr_selected,$stelle_id,'','pkz');
+      $ret=$festpunkte->getFestpunkte('',array('TP','AP'),'','','',$antr_selected,$stelle_id,'','pkn');
       if ($ret[0]) {
         $errmsg="Festpunkte konnten nicht abgefragt werden.";
       }
@@ -532,7 +533,7 @@
         $GUI->Antraege_Anzeigen();
       }
       else{
-		    include_once (PDFCLASSPATH."class.ezpdf.php");
+		    include_once (CLASSPATH.'class.ezpdf.php');
 		    $pdf=new Cezpdf();
 		    $pdf=$GUI->antrag->erzeugenUbergabeprotokoll_PDF();		    
 				if($path == NULL){					# Ausgabe direkt an den Browser
@@ -608,7 +609,7 @@
     if ($GUI->formvars['id']=='') {
       # Prüfen der Eingabewerte
       #echo '<br>Prüfen der Eingabewerte.';
-      $ret=$GUI->nachweis->pruefeEingabedaten($GUI->formvars['datum'],$GUI->formvars['VermStelle'],$GUI->formvars['art'],$GUI->formvars['gueltigkeit'],$GUI->formvars['stammnr'],$GUI->formvars['rissnummer'], $GUI->formvars['fortfuehrung'], $GUI->formvars['Blattformat'],$GUI->formvars['Blattnr'],$GUI->formvars['changeDocument'],$GUI->formvars['Bilddatei_name'],$GUI->formvars['pathlength'],$GUI->formvars['umring']);
+      $ret=$GUI->nachweis->pruefeEingabedaten($GUI->formvars['id'], $GUI->formvars['datum'],$GUI->formvars['VermStelle'],$GUI->formvars['art'],$GUI->formvars['gueltigkeit'],$GUI->formvars['stammnr'],$GUI->formvars['rissnummer'], $GUI->formvars['fortfuehrung'], $GUI->formvars['Blattformat'],$GUI->formvars['Blattnr'],$GUI->formvars['changeDocument'],$GUI->formvars['Bilddatei_name'],$GUI->formvars['pathlength'],$GUI->formvars['umring'], $GUI->formvars['flurid'], $GUI->formvars['Blattnr']);
       if ($ret[0]) {
         #echo '<br>Ergebnis der Prüfung: '.$ret;
         $errmsg=$ret[1];
@@ -1076,6 +1077,7 @@
     }
   };
 	
+# 2016-11-03 H.Riedel - pkz durch pkn ersetzt
 	$this->festpunkteZuAntragZeigen = function() use ($GUI){
     # Funktion fragt alle Festpunkte zum einem Antrag heraus und übergibt diese an die Funktion
     # zum Anzeigen der Festpunkte in der Karte
@@ -1083,7 +1085,7 @@
 		$GUI->formvars['antr_selected'] = $explosion[0];
 		$stelle_id = $explosion[1];
     $festpunkte=new Festpunkte('',$GUI->pgdatabase);
-    $ret=$festpunkte->getFestpunkte('','','','','',$GUI->formvars['antr_selected'],$stelle_id,'','pkz');
+    $ret=$festpunkte->getFestpunkte('','','','','',$GUI->formvars['antr_selected'],$stelle_id,'','pkn');
     if ($ret[0]) {
       $errmsg="Die Festpuntke zum Antrag $GUI->formvars['antr_selected'] konnten nicht abgefragt werden.";
     }
@@ -1094,20 +1096,21 @@
       else {
         # Zuweisen der Punktkennzeichen zu einem Array, welches von der Funktion zum Anzeigen in der Karte verwendet wird.
         foreach($festpunkte->liste AS $punkt) {
-          $GUI->formvars['pkz'][$punkt['pkz']]=$punkt['pkz'];
+          $GUI->formvars['pkn'][$punkt['pkn']]=$punkt['pkn'];
         }
         $GUI->festpunkteZeigen();
       }
     }
   };
 
+# 2016-11-03 H.Riedel - pkz durch pkn ersetzt
 	$this->festpunkteZeigen = function() use ($GUI){
     $GUI->loadMap('DataBase');
-    if (is_array($GUI->formvars['pkz'])) {
-      $punktliste=array_keys($GUI->formvars['pkz']);
+    if (is_array($GUI->formvars['pkn'])) {
+      $punktliste=array_keys($GUI->formvars['pkn']);
     }
     else {
-      $punktliste=$GUI->formvars['pkz'];
+      $punktliste=$GUI->formvars['pkn'];
     }
     $GUI->zoomToFestpunkte($punktliste,20);
     $GUI->saveMap('');
@@ -1156,16 +1159,19 @@
     $GUI->output();
   };
 
+# 2016-11-03 H.Riedel - pkz durch pkn ersetzt
 	$this->festpunkteSuchen = function() use ($GUI){
 		$explosion = explode('~', $GUI->formvars['antr_selected']);
 		$GUI->formvars['antr_selected'] = $explosion[0];
 		$stelle_id = $explosion[1];
-    if ($GUI->formvars['antr_selected']=='' AND $GUI->formvars['pkz']=='' AND $GUI->formvars['kiloquad']=='') {
+    if ($GUI->formvars['antr_selected']=='' AND $GUI->formvars['pkn']=='' AND $GUI->formvars['kiloquad']=='') {
       $GUI->Fehlermeldung='<br>Geben Sie mindestens eine Antragsnummer, Kilometerquadrat oder Punktkennzeichen zu Suche an!';
     }
     else {
       $GUI->festpunkte=new festpunkte('',$GUI->pgdatabase);
-      $ret=$GUI->festpunkte->getFestpunkte(array($GUI->formvars['pkz']),array(0,1,2,3,4,5,6),'','','',$GUI->formvars['antr_selected'],$stelle_id,$GUI->formvars['kiloquad'],'pkz');
+# 2016-11-03 H.Riedel, Einschraenken der Punktarten wg zu hoher Treffer --> nachfolgende Operationen brechen ab.
+#      $ret=$GUI->festpunkte->getFestpunkte(array($GUI->formvars['pkn']),array('TP','AP','GP','GebP','BwP','OP','SiP','SVP','TopP'),'','','',$GUI->formvars['antr_selected'],$stelle_id,$GUI->formvars['kiloquad'],'pkn');
+      $ret=$GUI->festpunkte->getFestpunkte(array($GUI->formvars['pkn']),array('TP','AP','OP','SiP','SVP'),'','','',$GUI->formvars['antr_selected'],$stelle_id,$GUI->formvars['kiloquad'],'pkn');
       if ($ret[0]) {
         $GUI->Fehlermeldung='<br>Es konnten keine Festpunkte abgefragt werden'.$ret[1];
       }
@@ -1204,23 +1210,24 @@
     return 1;
   };
 
+# 2016-11-03 H.Riedel - pkz durch pkn ersetzt
 	$GUI->showFestpunkteSkizze = function() use ($GUI){
     # Daten sind in Datenbank eingelesen. Herausfiltern von Fehlern
 
     # 1) Übergeben der Liste von Punkten, die geprüft werden sollen
-    if (is_array($GUI->formvars['pkz'])) {
-      $abgefragtefestpunkte=array_values($GUI->formvars['pkz']);
+    if (is_array($GUI->formvars['pkn'])) {
+      $abgefragtefestpunkte=array_values($GUI->formvars['pkn']);
     }
 
     # 2) Abfragen der zu prüfenden Festpunkte
     $festpunkte=new Festpunkte('',$GUI->pgdatabase);
-    $festpunkte->getFestpunkte($abgefragtefestpunkte,array(0,1),'','','','','','pkz');
+    $festpunkte->getFestpunkte($abgefragtefestpunkte,array('TP','AP'),'','','','','','','pkn');
     # 3) Übernehmen der Punkte in eine Liste, die mindestens eine Datei/Blatt haben.
     for ($i=0;$i<$festpunkte->anzPunkte;$i++) {
-      $festpunkte->liste[$i]['skizze']=$festpunkte->checkSkizzen($festpunkte->liste[$i]['pkz']);
+      $festpunkte->liste[$i]['skizze']=$festpunkte->checkSkizzen($festpunkte->liste[$i]['pkn']);
       if ($festpunkte->liste[$i]['skizze']['is_file']) {
-        # Wenn mindestens eine Datei gefunden wurde, pkz in die Liste aufnehmen
-        $punktnummern[]=trim(str_replace('-','',$festpunkte->liste[$i]['pkz']));
+        # Wenn mindestens eine Datei gefunden wurde, pkn in die Liste aufnehmen
+        $punktnummern[]=trim(str_replace('-','',$festpunkte->liste[$i]['pkn']));
       }
     }
 
@@ -1244,36 +1251,37 @@
     $GUI->output();
   };
 
+# 2016-11-03 H.Riedel - pkz durch pkn ersetzt
 	$this->ordneFestpunktSkizzen = function() use ($GUI){
   	$_files = $_FILES;
     ####################################################
     # 1) Verschieben von Dateien, die zu Festpunkten zugeordnet waren,
-    # aber jetzt neu zu anderen pkz zugeordnet werden sollen (aus oberen Formularteil)
+    # aber jetzt neu zu anderen pkn zugeordnet werden sollen (aus oberen Formularteil)
     # Variable $name
     $Festpunkte=new Festpunkte('',$GUI->pgdatabase);
     if (!is_array($GUI->formvars['name'])) {
       $GUI->formvars['name']=array();
     }
-    $vonPkz=array_keys($GUI->formvars['name']);
+    $vonPkn=array_keys($GUI->formvars['name']);
     $nachNameStern=array_values($GUI->formvars['name']);
-    $anzZuordnungen=count($vonPkz);
+    $anzZuordnungen=count($vonPkn);
     # Zerlegen von nachNameStern in Bestandteile :
     # 45601234/45601234120001.*
     # rhhhrzhz/rhhhrzhzapktnr.* davon sind
     # Pfad: 45601234/45601234120001 (rhhhrzhz/rhhhrzhzapktnr)
     # Kiloquadr: 45601234 (rhhhrzhz)
     # Name: 45601234120001 (rhhhrzhzapktnr)
-    # Pkz: 45601234-1-20001 (rhhhrzhz-a-pktnr)
+    # Pkn: 45601234-1-20001 (rhhhrzhz-a-pktnr)
     for ($i=0;$i<$anzZuordnungen;$i++) {
       # extrahieren von Kilometerquadrat, Dateiname und Pfad zur Datei an Hand des Punktkennzeichens
-      $vonKiloquad[$i]=substr(trim($vonPkz[$i]),0,-8);
-      $vonName[$i]=str_replace('-','',trim($vonPkz[$i]));
+      $vonKiloquad[$i]=substr(trim($vonPkn[$i]),0,-8);
+      $vonName[$i]=str_replace('-','',trim($vonPkn[$i]));
       $vonPfad[$i]=$vonKiloquad[$i].'/'.$vonName[$i];
       # extrahieren des Punktkennzeichen, Dateinamen und Pfad zum neuen Speicherort der Datei
       $nachName[$i]=basename(substr($nachNameStern[$i],0,-2));
       $nachKiloquad[$i]=dirname($nachNameStern[$i]); # entnommen aus Verzeichnisnamen
       $nachPfad[$i]=$nachKiloquad[$i].'/'.$nachName[$i];
-      $nachPkz[$i]=$nachKiloquad[$i].'-'.substr($filebasename,-6,-5).'-'.substr($nachName[$i],-5);
+      $nachPkn[$i]=$nachKiloquad[$i].'-'.substr($filebasename,-6,-5).'-'.substr($nachName[$i],-5);
       # Vergleich, ob in einem Feld Änderungen vorgenommen wurden.
       if ($vonPfad[$i]!=$nachPfad[$i]) {
         if ($Festpunkte->is_valid_pfad($nachPfad[$i])) {
@@ -1288,17 +1296,17 @@
     $Festpunkte->moveFiles($moveListe);
 
     #################################################################
-    # 2) Kopieren der hochgeladenen Dateien an die Speicherplätze, die den PKZ entsprechen.
+    # 2) Kopieren der hochgeladenen Dateien an die Speicherplätze, die den PKN entsprechen.
     # Variable $_FILES
     $uploadedFiles=array_values($_files);
-    $uploadedFilesPKZ=array_keys($_files);
+    $uploadedFilesPKN=array_keys($_files);
     $anzUploadedFiles=count($uploadedFiles);
     for ($i=0;$i<$anzUploadedFiles;$i++) {
       if ($uploadedFiles[$i]['tmp_name']!='') {
         # Zusammensetzung der Dateinamen
-        $pkz=substr(trim($uploadedFilesPKZ[$i]),9);
-        $ext=substr(trim($uploadedFilesPKZ[$i]),0,3);
-        $nachDatei=PUNKTDATEIPATH.$Festpunkte->pkz2pfad($pkz).'.'.$ext;
+        $pkn=substr(trim($uploadedFilesPKN[$i]),9);
+        $ext=substr(trim($uploadedFilesPKN[$i]),0,3);
+        $nachDatei=PUNKTDATEIPATH.$Festpunkte->pkn2pfad($pkn).'.'.$ext;
         if (move_uploaded_file($uploadedFiles[$i]['tmp_name'],$nachDatei)) {
           echo '<br>Lade '.$uploadedFiles[$i]['tmp_name'].' nach '.$nachDatei.' hoch';
         }
@@ -1397,16 +1405,18 @@
     $GUI->output();
   };
 
+# 2016-11-03 H.Riedel - pkz durch pkn ersetzt
 	$this->festpunkteZuAuftragFormular = function() use ($GUI){
     $GUI->titel='Festpunkte zum Auftrag Hinzufügen';
     $GUI->main = PLUGINS.'nachweisverwaltung/view/festpunktezuauftragformular.php';
-    $GUI->pkz=array_keys($GUI->formvars['pkz']);
-    $GUI->anzPunkte=count($GUI->pkz);
+    $GUI->pkn=array_keys($GUI->formvars['pkn']);
+    $GUI->anzPunkte=count($GUI->pkn);
     $GUI->FormObjAntr_nr=$GUI->getFormObjAntr_nr('');
     $GUI->FormObjAntr_nr->select['name']='antr_selected';
     $GUI->output();
   };
 
+# 2016-11-03 H.Riedel - pkz durch pkn ersetzt
 	$this->festpunkteZuAuftragSenden = function() use ($GUI){
     # Prüfen, ob eine Auftragsnummer mit übergeben wurde
     if ($GUI->formvars['antr_selected']=='') {
@@ -1416,12 +1426,12 @@
 		$explosion = explode('~', $GUI->formvars['antr_selected']);
 		$GUI->formvars['antr_selected'] = $explosion[0];
 		$stelle_id = $explosion[1];
-    $pkz=array_keys($GUI->formvars['pkz']);
-    $anzPunkte=count($pkz);
+    $pkn=array_keys($GUI->formvars['pkn']);
+    $anzPunkte=count($pkn);
     $auftrag=new antrag($GUI->formvars['antr_selected'],$stelle_id,$GUI->pgdatabase);
     $anzPunkteAdd=0;
     for ($i=0;$i<$anzPunkte;$i++) {
-      $ret=$auftrag->addFestpunkt($pkz[$i]);
+      $ret=$auftrag->addFestpunkt($pkn[$i]);
       if (!$ret[0]) {
         if (pg_affected_rows($ret[1])) {
           $anzPunkteAdd++;
@@ -1433,6 +1443,7 @@
     $GUI->Antraege_Anzeigen();
   };
 
+# 2016-11-03 H.Riedel - pkz durch pkn ersetzt
 	$this->festpunkteInKVZschreiben = function() use ($GUI){
 		$explosion = explode('~', $GUI->formvars['antr_selected']);
 		$antr_selected = $explosion[0];
@@ -1442,7 +1453,7 @@
     }
     else {
       $festpunkte=new Festpunkte('',$GUI->pgdatabase);
-      $ret=$festpunkte->createKVZdatei($antr_selected, $stelle_id, $GUI->formvars['pkz']);
+      $ret=$festpunkte->createKVZdatei($antr_selected, $stelle_id, $GUI->formvars['pkn']);
       if ($ret[0]) {
         $GUI->Fehlermeldung=$ret[1];
       }

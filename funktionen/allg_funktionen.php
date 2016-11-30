@@ -199,7 +199,7 @@ function allocateImageColors($image, $colors) {
 	return $imageColors;
 }
 
-function rgb2hsv($R,$G,$B) {
+function rgb2hsv($R,$G,$B){
 	$var_R = $R / 255;                     //RGB from 0 to 255
 	$var_G = $G / 255;
 	$var_B = $B / 255;
@@ -240,7 +240,7 @@ function rgb2hsv($R,$G,$B) {
 }
 
 
-function hsv2rgb($Hdeg,$S,$V) {
+function hsv2rgb($Hdeg,$S,$V){
   $H = $Hdeg;
   if ($S==0) {       // HSV values = From 0 to 1
     $R = $V*255;     // RGB results = From 0 to 255
@@ -276,7 +276,83 @@ function hsv2rgb($Hdeg,$S,$V) {
   }
   return array($R,$G,$B);
 }
- 
+
+function rgb2hsl($r, $g, $b){
+	$oldR = $r;
+	$oldG = $g;
+	$oldB = $b;
+	$r /= 255;
+	$g /= 255;
+	$b /= 255;
+	$max = max( $r, $g, $b );
+	$min = min( $r, $g, $b );
+	$h;
+	$s;
+	$l = ( $max + $min ) / 2;
+	$d = $max - $min;
+	if($d == 0){
+		$h = $s = 0; // achromatic
+	}
+	else{
+		$s = $d / ( 1 - abs( 2 * $l - 1 ) );
+		switch($max){
+			case $r:
+				$h = 60 * fmod( ( ( $g - $b ) / $d ), 6 ); 
+				if($b > $g)$h += 360;
+			break;
+			case $g: 
+				$h = 60 * ( ( $b - $r ) / $d + 2 ); 
+			break;
+			case $b: 
+				$h = 60 * ( ( $r - $g ) / $d + 4 ); 
+			break;
+		}     	        
+	}
+	return array(round($h, 2), round($s, 2), round($l, 2));
+}
+
+function hsl2rgb($h, $s, $l){
+	$r; 
+	$g; 
+	$b;
+	$c = ( 1 - abs( 2 * $l - 1 ) ) * $s;
+	$x = $c * ( 1 - abs( fmod( ( $h / 60 ), 2 ) - 1 ) );
+	$m = $l - ( $c / 2 );
+	if($h < 60){
+		$r = $c;
+		$g = $x;
+		$b = 0;
+	}
+	elseif($h < 120){
+		$r = $x;
+		$g = $c;
+		$b = 0;			
+	}
+	elseif($h < 180){
+		$r = 0;
+		$g = $c;
+		$b = $x;					
+	}
+	elseif($h < 240){
+		$r = 0;
+		$g = $x;
+		$b = $c;
+	}
+	elseif($h < 300){
+		$r = $x;
+		$g = 0;
+		$b = $c;
+	}
+	else{
+		$r = $c;
+		$g = 0;
+		$b = $x;
+	}
+	$r = ($r + $m) * 255;
+	$g = ($g + $m) * 255;
+	$b = ($b + $m) * 255;
+  return array(floor($r), floor($g), floor($b));
+}
  
 if(!function_exists('imagerotate')){
 	function imagerotate($source_image, $angle, $bgd_color){
@@ -1381,6 +1457,18 @@ function formvars_strip($formvars, $strip_list) {
 	return $stripped_formvars;
 }
 
+/*
+* Funktion ersetzt in $str die Schlüsselwörter, die in $params
+* als key übergeben werden durch die values von $params
+*/
+function replace_params($str, $params) {
+	foreach($params AS $key => $value){
+		$str = str_replace('$'.$key, $value, $str);
+	}
+  return $str;
+}
+
+
 /**
 * Funktion sendet e-mail mit Dateien im Anhang
 * siehe http://www.php-einfach.de/codeschnipsel_1114.php
@@ -1476,5 +1564,34 @@ function arrStrToArr($str, $delimiter) {
 		$value = trim(stripslashes($value), '"[]"');
 	}
 	return $arr;
+}
+
+/**
+* @param string $form_field_name - used also als form field id
+* @param array $data - array with values and options per array element
+* @param string $selected_value
+* @param string $onchange - javascript to execute on change
+* @param string $title - of the select field
+* @param string $null_option - create a first option with value = '' and the text of $null_option
+* @param string $style - css Style for the select element
+* @return string - the html representing the select form element
+* */
+function output_select($form_field_name, $data, $selected_value = null, $onchange = null, $title = null, $null_option = null, $style = null) {
+	if (!empty($onchange)) {
+		$onchange = " onchange=\"{$onchange}\"";
+	}
+	if (!empty($style)) {
+		$style = " style=\"{$style}\"";
+	}
+	$html = "<select id=\"{$form_field_name}\" name=\"{$form_field_name}\"{$onchange}{$style}>\n";
+	if (!empty($null_option)) {
+		$html .= "\t<option value=\"\">{$null_option}</option>\n";
+	}
+	foreach ($data AS $option) {
+		$selected = ($option['value'] == $selected_value ? ' selected' : '');
+		$html .= "\t<option value=\"{$option['value']}\"{$selected}>{$option['output']}</option>\n";
+	}
+	$html .= "</select>\n";
+	return $html;
 }
 ?>

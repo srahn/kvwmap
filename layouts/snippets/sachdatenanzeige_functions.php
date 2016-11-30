@@ -33,6 +33,19 @@ include('funktionen/input_check_functions.php');
 		}
 	}
 	
+	toggle_statistic_row = function(layer_id) {
+		var x = document.getElementsByClassName('statistic_row_'+layer_id),
+				i;
+		for (i = 0; i < x.length; i++) {
+			if (x[i].style.display == '') {
+				x[i].style.display = 'none';
+			}
+			else {
+				x[i].style.display = '';
+			}
+		}
+	}
+	
 	buildJSONString = function(id, is_array){
 		var field = document.getElementById(id);		
 		values = new Array();
@@ -47,8 +60,8 @@ include('funktionen/input_check_functions.php');
 			else if(i > 0 && value != '')values.push(value);		// bei Arrays ist das erste Element ein Dummy
 		}
 		if(!is_array)json = '{'+values.join()+'}';
-		else json = '['+values.join()+']';		
-		field.value = json;
+		else json = '['+values.join()+']';
+		field.value = json;		
 		if(field.onchange)field.onchange();
 	}
 	
@@ -74,53 +87,77 @@ include('funktionen/input_check_functions.php');
 		buildJSONString(fieldname, false);
 	}
 	
-	nextdatasets = function(offset){
-		currentform.target = '';
-		if(currentform.go_backup.value != ''){
-			currentform.go.value = currentform.go_backup.value;
+	nextdatasets = function(layer_id){
+		var sure = true;
+		if(document.getElementById('changed_'+layer_id).value == 1){
+			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch weiterblättern?');
 		}
-		obj = document.getElementById(offset);
-		if(obj.value == '' || obj.value == undefined){
-			obj.value = 0;
+		if(sure){
+			currentform.target = '';
+			if(currentform.go_backup.value != ''){
+				currentform.go.value = currentform.go_backup.value;
+			}
+			obj = document.getElementById('offset_'+layer_id);
+			if(obj.value == '' || obj.value == undefined){
+				obj.value = 0;
+			}
+			obj.value = parseInt(obj.value) + <? echo $this->formvars['anzahl']; ?>;
+			overlay_submit(currentform, false);
 		}
-		obj.value = parseInt(obj.value) + <? echo $this->formvars['anzahl']; ?>;
-		overlay_submit(currentform, false);
 	}
 	
-	lastdatasets = function(offset, count){
-		currentform.target = '';
-		if(currentform.go_backup.value != ''){
-			currentform.go.value = currentform.go_backup.value;
+	lastdatasets = function(layer_id, count){
+		var sure = true;
+		if(document.getElementById('changed_'+layer_id).value == 1){
+			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch weiterblättern?');
 		}
-		obj = document.getElementById(offset);
-		if(obj.value == '' || obj.value == undefined){
-			obj.value = 0;
+		if(sure){
+			currentform.target = '';
+			if(currentform.go_backup.value != ''){
+				currentform.go.value = currentform.go_backup.value;
+			}
+			obj = document.getElementById('offset_'+layer_id);
+			if(obj.value == '' || obj.value == undefined){
+				obj.value = 0;
+			}
+			obj.value = count - (count % <? echo $this->formvars['anzahl']; ?>);
+			overlay_submit(currentform, false);
 		}
-		obj.value = count - (count % <? echo $this->formvars['anzahl']; ?>);
-		overlay_submit(currentform, false);
 	}
 	
-	firstdatasets = function(offset){
-		currentform.target = '';
-		if(currentform.go_backup.value != ''){
-			currentform.go.value = currentform.go_backup.value;
+	firstdatasets = function(layer_id){
+		var sure = true;
+		if(document.getElementById('changed_'+layer_id).value == 1){
+			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch zurückblättern?');
 		}
-		obj = document.getElementById(offset);
-		obj.value = 0;
-		overlay_submit(currentform, false);
+		if(sure){
+			currentform.target = '';
+			if(currentform.go_backup.value != ''){
+				currentform.go.value = currentform.go_backup.value;
+			}
+			obj = document.getElementById('offset_'+layer_id);
+			obj.value = 0;
+			overlay_submit(currentform, false);
+		}
 	}
 
-	prevdatasets = function(offset){
-		currentform.target = '';
-		if(currentform.go_backup.value != ''){
-			currentform.go.value = currentform.go_backup.value;
+	prevdatasets = function(layer_id){
+		var sure = true;
+		if(document.getElementById('changed_'+layer_id).value == 1){
+			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch zurückblättern?');
 		}
-		obj = document.getElementById(offset);
-		if(obj.value == '' || obj.value == undefined){
-			obj.value = 0;
+		if(sure){
+			currentform.target = '';
+			if(currentform.go_backup.value != ''){
+				currentform.go.value = currentform.go_backup.value;
+			}
+			obj = document.getElementById('offset_'+layer_id);
+			if(obj.value == '' || obj.value == undefined){
+				obj.value = 0;
+			}
+			obj.value = parseInt(obj.value) - <? echo $this->formvars['anzahl']; ?>;
+			overlay_submit(currentform, false);
 		}
-		obj.value = parseInt(obj.value) - <? echo $this->formvars['anzahl']; ?>;
-		overlay_submit(currentform, false);
 	}
 
 	back = function(){
@@ -621,7 +658,10 @@ include('funktionen/input_check_functions.php');
 	}
 
 	set_changed_flag = function(flag){
-		if(flag != undefined)flag.value=1;
+		if(flag != undefined){
+			flag.value=1;
+			flag.onchange();
+		}
 	}
 
 </script>
