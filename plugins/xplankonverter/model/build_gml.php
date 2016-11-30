@@ -506,9 +506,10 @@ class Gml_builder {
     $curr_value = '';
     // prepare data string
     $value_str = substr($data_string, 1, -1);
-    $value_str = str_replace('\"', '"', $value_str);
-    $value_str = str_replace('"(', '(', $value_str);
-    $value_str = str_replace(')"', ')', $value_str);
+    $value_str = str_replace('\"(', '(', $value_str);
+    $value_str = str_replace(')\"', ')', $value_str);
+    $value_str = str_replace('\"', '&quot;', $value_str);
+    $value_str = str_replace('"', '', $value_str);
     // return if no data
     if (strlen($value_str) == 0) return;
     // cast string to array
