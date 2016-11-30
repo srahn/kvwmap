@@ -612,7 +612,7 @@ else {
 										<option value="2">gleiche Klassengrösse</option>
 										<option value="3">gleiche Anzahl Klassenmitglieder</option>
 										<!--option value="4">Clustering nach Jenk, Initialisierung mit Histogramm-Maxima</option-->
-										<option value="5">Clustering nach Jenks, Mininierung der Abweichung in den Klassen</option>
+										<option value="5">Jenks-Caspall-Algorithmus</option>
 									</select> <span title="Pflichtfeld">*</span>
 								</td>
 							</tr>
