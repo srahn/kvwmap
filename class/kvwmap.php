@@ -6639,7 +6639,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $end = strrpos($this->layerdata['Data'], ')');
     $data_sql = substr($this->layerdata['Data'], $begin, $end - $begin);
 
-    $auto_classes = $this->AutoklassenErzeugen($layerdb, $data_sql, $this->formvars['classification_column'], $this->formvars['classification_method'], $this->formvars['num_classes'], $this->formvars['classification_name']);
+    $auto_classes = $this->AutoklassenErzeugen($layerdb, $data_sql, $this->formvars['classification_column'], $this->formvars['classification_method'], $this->formvars['num_classes'], $this->formvars['classification_name'], $this->formvars['classification_color']);
 
     for ($i = 0; $i < count($auto_classes); $i++) {
       $this->formvars['class_name'] = $auto_classes[$i]['name'];
@@ -6654,10 +6654,27 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     }
   }
 
-  function AutoklassenErzeugen($layerdb, $data_sql, $class_item, $method, $num_classes, $classification_name) {
+  function AutoklassenErzeugen($layerdb, $data_sql, $class_item, $method, $num_classes, $classification_name, $classification_color) {
     $classes = array();
     switch ($method) {
-      case 1 : {		# gleiche Klassengröße
+			case 1 : {		# für jeden Wert eine Klasse
+        $sql = "
+          SELECT DISTINCT ".$class_item."
+          FROM (".$data_sql.") AS data ORDER BY ".$class_item." LIMIT 50";
+				
+        $ret=$layerdb->execSQL($sql, 4, 0);
+        if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
+				$order = 1;
+        while($rs = pg_fetch_assoc($ret[1])){
+          $class['name'] = $rs[$class_item];
+					$class['classification'] = $classification_name;
+          $class['order'] = $order++;
+          $class['expression'] = $rs[$class_item];
+          $classes[] = $class;
+        }
+      } break;
+		
+      case 2 : {		# gleiche Klassengröße
         $sql = "
           SELECT
             min(" . $class_item . "),
@@ -6689,7 +6706,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         }
       } break;
 
-      case 2 : {		# gleiche Anzahl Klassenmitglieder
+      case 3 : {		# gleiche Anzahl Klassenmitglieder
         $sql = "
           SELECT
             " . $class_item . "
@@ -6719,7 +6736,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         }
       } break;
 
-      case 3 : {		# Clustering nach Jenk, Initialisierung mit Histogramm-Maxima
+      case 4 : {		# Clustering nach Jenk, Initialisierung mit Histogramm-Maxima
         include_(CLASSPATH.'k-Means_clustering.php');
         // fetch data
         $sql = "
@@ -6798,7 +6815,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         }
       } break;
 
-      case 4 : {		# Clustering nach Jenk, Mininierung Abweichung i.d. Klassen
+      case 5 : {		# Clustering nach Jenk, Mininierung Abweichung i.d. Klassen
         include_(CLASSPATH.'k-Means_clustering.php');
         // fetch data
         $sql = "
@@ -6847,14 +6864,28 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         }
       } break;
     }
-    $color = 255;
-    $color_step = floor(255 / count($classes));
-    $half_color_step = round($color_step / 2);
-    foreach ($classes AS $key => $class) {
-      $color -= $color_step;
-      $classes[$key]['style_color'] = ($color + $half_color_step). ' ' . ($color + $half_color_step) . ' 255';
-      $classes[$key]['style_outlinecolor'] = $color . ' ' . $color . ' 255';
-    }
+		if($method == 1){			# für jeden Wert eine Klasse: zufällige Farben
+			$colors = read_colors($this->database);
+			foreach ($classes AS $key => $class) {
+				shuffle($colors);			
+				$classes[$key]['style_color'] = $colors[0]['red'].' '.$colors[0]['green'].' '.$colors[0]['blue'];
+				$classes[$key]['style_outlinecolor'] = '0 0 0';
+			}
+		}
+		else{					# für alle anderen Methoden: kontinuierlicher Farbverlauf der ausgewählten Farbe von hell nach dunkel
+			$rgb = explode(' ', $classification_color);
+			$hsl = rgb2hsl($rgb[0], $rgb[1], $rgb[2]);
+			$lightness = 0.8;
+			$lightness_step = ($lightness - $hsl[2]) / (count($classes)-1);
+			$half_lightness_step = $lightness_step / 2;
+			foreach ($classes AS $key => $class) {				
+				$rgb1 = hsl2rgb($hsl[0], $hsl[1], $lightness);
+				$rgb2 = hsl2rgb($hsl[0], $hsl[1], $lightness-$half_lightness_step);
+				$classes[$key]['style_color'] = $rgb1[0].' '.$rgb1[1].' '.$rgb1[2];
+				$classes[$key]['style_outlinecolor'] = $rgb2[0].' '.$rgb2[1].' '.$rgb2[2];
+				$lightness -= $lightness_step;
+			}
+		}
     return $classes;
   }
 

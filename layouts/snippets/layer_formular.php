@@ -32,6 +32,17 @@
 		if(form.style.display == 'none')form.style.display = ''
 		else form.style.display = 'none';
 	}
+	
+	function updateAutoClassesForm(){
+		if(document.GUI.classification_method.value == 1){
+			document.getElementById('tr_num_classes').style.display='none';
+			document.getElementById('tr_color').style.display='none';			
+		}
+		else{
+			document.getElementById('tr_num_classes').style.display='';
+			document.getElementById('tr_color').style.display='';
+		}
+	}
   
 </script>						
 
@@ -596,24 +607,31 @@ else {
 							<tr>
 								<td>Methode:</td>
 								<td>
-									<select name="classification_method">
-										<option value="1">gleiche Klassengrösse</option>
-										<option value="2">gleiche Anzahl Klassenmitglieder</option>
-										<!--option value="3">Clustering nach Jenk, Initialisierung mit Histogramm-Maxima</option-->
-										<option value="4">Clustering nach Jenks, Mininierung der Abweichung in den Klassen</option>
-									</select>
+									<select name="classification_method" onchange="updateAutoClassesForm();">
+										<option value="1">für jeden Wert eine Klasse</option>
+										<option value="2">gleiche Klassengrösse</option>
+										<option value="3">gleiche Anzahl Klassenmitglieder</option>
+										<!--option value="4">Clustering nach Jenk, Initialisierung mit Histogramm-Maxima</option-->
+										<option value="5">Clustering nach Jenks, Mininierung der Abweichung in den Klassen</option>
+									</select> <span title="Pflichtfeld">*</span>
+								</td>
+							</tr>
+							<tr id="tr_num_classes" style="display:none">
+								<td>Anzahl Klassen:</td>
+								<td>
+									<input type="text" name="num_classes" value="5"> <span title="Pflichtfeld">*</span>
+								</td>
+							</tr>
+							<tr id="tr_color" style="display:none">
+								<td>Farbe:</td>
+								<td>
+									<input type="text" name="classification_color" value="0 100 180"> <span title="Pflichtfeld">*</span>
 								</td>
 							</tr>
 							<tr>
 								<td>Attribut:</td>
 								<td>
-									<input type="text" name="classification_column" value="">
-								</td>
-							</tr>
-							<tr>
-								<td>Anzahl Klassen:</td>
-								<td>
-									<input type="text" name="num_classes" value="5">
+									<input type="text" name="classification_column" value=""> <span title="Pflichtfeld">*</span>
 								</td>
 							</tr>
 							<tr>
