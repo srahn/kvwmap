@@ -177,12 +177,17 @@ class Gml_builder {
     # second pass: iteratively building and writing gml for each RP_Bereich element
     #
     // fetch information about attributes and their properties
-    $bereich_attribs = $this->typeInfo->getInfo('rp_bereich');
+    $rp_bereich_attribs = $this->typeInfo->getInfo('rp_bereich', false);
+    $xp_bereich_attribs = $this->typeInfo->getInfo('xp_bereich', false);
+
     pg_result_seek($bereiche, 0);
     while ($bereich = pg_fetch_array($bereiche, NULL, PGSQL_ASSOC)) {
       $gmlElemOpenTag = "<{$xplan_ns_prefix}RP_Bereich";
       $gmlElemOpenTag .= " gml:id=\"GML_{$bereich['gml_id']}\"";
       $rp_bereich = $gmlElemOpenTag . ">";
+
+      // alle von XP_Bereich geerbten Attribute ausgeben
+      $rp_bereich .= $this->generateGmlForAttributes($bereich, $xp_bereich_attribs, XPLAN_MAX_NESTING_DEPTH);
 
       // alle gml_ids von RP_Objekten finden die mit dem Bereich verknüpft sind
       // und im RP_Bereich Element verlinken
@@ -202,8 +207,8 @@ class Gml_builder {
       while ($rp_objekt = pg_fetch_array($rp_objekte, NULL, PGSQL_ASSOC)) {
         $rp_bereich .= "<{$xplan_ns_prefix}planinhalt xlink:href=\"#GML_" . $rp_objekt['gml_id'] . "\"/>";
       }
-      // alle uebrigen Attribute ausgeben
-      $rp_bereich .= $this->generateGmlForAttributes($bereich, $bereich_attribs, XPLAN_MAX_NESTING_DEPTH);
+      // die übrigen in RP_Bereich definierten Attribute ausgeben
+      $rp_bereich .= $this->generateGmlForAttributes($bereich, $rp_bereich_attribs, XPLAN_MAX_NESTING_DEPTH);
 
       // Rueckbezug zu RP_Plan
       $rp_bereich .= "<{$xplan_ns_prefix}gehoertZuPlan xlink:href=\"#GML_{$bereich['gehoertzuplan']}\"/>";
