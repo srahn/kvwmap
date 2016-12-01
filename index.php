@@ -47,7 +47,7 @@ define(CASE_COMPRESS, false);																																						  #
 #											- die Stelle muss das Passwortalter checken																					#
 #																																																				  #
 # 	navMap_ajax: 		  - LAGEBEZEICHNUNGSART muss auf 'Flurbezeichnung' gesetzt sein												#
-#											- unter 1:100 zoomen																																#
+#											- man muss über den Rechteckzoom unter 1:100 zoomen (kein Mausrad!)									#
 #										  - ein räumlich gefilterter Layer muss an sein																				#
 #										  - man muss einen anderen EPSG-Code als den der Ref-Karte (2398) eingestellt haben		#
 # 	tooltip_query:	  - ein Datensatz mit Bild muss agefragt werden																			  #

@@ -1994,6 +1994,16 @@ class rolle {
 		}else return 0;
   }
 
+  function setSelectedButton($selectedButton) {
+    $this->selectedButton=$selectedButton;
+    # Eintragen des aktiven Button
+    $sql ='UPDATE rolle SET selectedButton="'.$selectedButton.'"';
+    $sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+    $this->debug->write("<p>file:users.php class:rolle->setSelectedButton - Speichern des zuletzt gewählten Buttons aus dem Kartenfensters:",4);
+    $this->database->execSQL($sql,4, $this->loglevel);
+    return 1;
+  }
+
   function saveSettings($extent) {
     $sql ='UPDATE rolle SET minx='.$extent->minx.',miny='.$extent->miny;
     $sql.=',maxx='.$extent->maxx.',maxy='.$extent->maxy;
