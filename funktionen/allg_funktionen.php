@@ -1462,12 +1462,13 @@ function formvars_strip($formvars, $strip_list) {
 * als key übergeben werden durch die values von $params
 */
 function replace_params($str, $params) {
-	foreach($params AS $key => $value){
-		$str = str_replace('$'.$key, $value, $str);
+	if (is_array($params)) {
+		foreach($params AS $key => $value){
+			$str = str_replace('$'.$key, $value, $str);
+		}
 	}
-  return $str;
+	return $str;
 }
-
 
 /**
 * Funktion sendet e-mail mit Dateien im Anhang
