@@ -21,6 +21,18 @@ function setValue() {
     //removes last word WHERE and last space
     sqlString = sqlString.substring(0,sqlString.length -6);
   }
+  // Ueberprueft ob Pflichtelemente vorhanden sind
+  // Rechtscharakter
+  if(sqlString.indexOf("rechtscharakter") == -1) {
+    alert("Warnung: Das Pflichtattribut Rechtscharakter ist noch nicht befüllt! Die Regel kann ohne Rechtscharakter kein valides XPlanGML erzeugen.");
+    return;
+  }
+  // Typ bei Klasse ZentralerOrt
+  var target = $("#target").text();
+  if(target == 'rp_zentralerort' && sqlString.indexOf("typ") == -1) {
+    alert("Warnung: Für die Klasse RP_ZentralerOrt ist das Pflichtattribut typ noch nicht befüllt. Die Regel kann ohne das Attribut Typ kein valides XPlanGML erzeugen.");
+    return;
+  }
   // Sets the sql in the kvwmap-form
   top.document.getElementById(field_id).value = sqlString;
   top.closeCustomSubform();
@@ -86,6 +98,9 @@ function chooseFeatureTable() {
 function showSqlArea() {
   var shapefileTable = $("#source_selector").val();
   var xplanTable = $("#target_selector").val();
+  
+  console.log("#" + shapefileTable + "_source_attributes");
+  console.log("#" + xplanTable+ "_attributes_table");
   if($("#" + shapefileTable + "_source_attributes").is(":visible") && $("#" + xplanTable+ "_attributes_table").is(":visible")) {
     $("#sql_area").show();
   }
@@ -233,9 +248,11 @@ function showRemoveHideAdd(xplanAttributsent) {
   $("#add_" + xplanAttribut).hide();
   $("#remove_" + xplanAttribut).show();
   // if remove_rechtscharakter = sichtbar dann, Warnung Rechtscharakter entfernen
-  if($("#remove_rechtscharakter").is(":visible")){
+  if($("#remove_rechtscharakter").is(":visible")) {
     $("#Warnung_3").hide();
-    $("sqlvalidation").show();
+  }
+  if($("#target").text() == 'rp_zentralerort' && $("#remove_typ").is(":visible")) {
+    $("#Warnung_4").hide();
   }
 }
 
@@ -258,7 +275,7 @@ function setSelectorVisibility() {
   $("#xp_generattribut_area").hide();
   $("#xp_hoehenangabe_area").hide();
   $("#externe_codeliste").hide();
-  if($("#wertespanne_" + xplanAttribut).html() == "[0..*]") {
+  if($("#wertespanne_" + xplanAttribut).html() == "0..*") {
     $("#add_zuweisung").show();
   }
   if($.inArray(wertedefinition,codelists) !== -1) {
@@ -290,7 +307,7 @@ function setSelectorVisibility() {
 
 function zuweisungSelect(clicked_id) {
   var xplanAttribut = $("#zuweisung_xplan_attribut").html();
-  //Wertedefinition ist z.B. bool, integer, text
+  //Wertedefinition ist z.B. boolean, integer, text
   var wertedefinition = $("#wertedefinition_" + xplanAttribut).html();
   //Zeigt Plus für multiple Zuordnungen
   var zuweisung = $("#zuweisung_selector")[0].value;
@@ -303,21 +320,21 @@ function zuweisungSelect(clicked_id) {
       $("#fester_wert_text_add").show();
       //falls array
       var wertespanneText = $("#wertespanne_" + xplanAttribut).html();
-      if((wertespanneText == "[0..*]") || (wertespanneText == "[1..*]")) {
+      if((wertespanneText == "0..*") || (wertespanneText == "1..*")) {
         $("#fester_wert_text_array_add").show();
       }
     }
     // falls boolean dann auswahlfeld ja nein?
-    if(wertedefinition == "bool") {
+    if(wertedefinition == "boolean") {
       $("#fester_wert_boolean").show();
     }
     // falls integer dann auswahlfeld, dass nur Nummern zulässt
-    if(wertedefinition == "int4") {
+    if(wertedefinition == "integer") {
       $("#fester_wert_integer").show();
       $("#fester_wert_integer_add").show();
     }
     // falls Enumerationsliste dann Listenauswahl.
-    if((wertedefinition != "text") && (wertedefinition != "bool") && (wertedefinition != "int4")) {
+    if((wertedefinition != "text") && (wertedefinition != "boolean") && (wertedefinition != "integer")) {
       //Auswahlliste mit AJAX abfragen und anzeigen
       getEnumerationListe();
     }
@@ -332,21 +349,24 @@ function zuweisungSelect(clicked_id) {
     if(wertedefinition == "text") {
       $("#wenn_dann_value_text_selector").show();
       $("#wenn_dann_text_add").show();
+      $("#wenn_dann_text_case_add").show();
       //falls array
       var wertespanneWennDann = $("#wertespanne_" + xplanAttribut).html();
-      if((wertespanneWennDann == "[0..*]") || (wertespanneWennDann== "[1..*]")) {
+      if((wertespanneWennDann == "0..*]") || (wertespanneWennDann== "1..*")) {
         $("#wenn_dann_text_array_add").show();
       }
     }
-    if(wertedefinition == "bool") {
+    if(wertedefinition == "boolean") {
       $("#wenn_dann_value_boolean_selector").show();
       $("#wenn_dann_boolean_add").show();
+      $("#wenn_dann_boolean_case_add").show();
     }
-    if(wertedefinition == "int4") {
+    if(wertedefinition == "integer") {
       $("#wenn_dann_value_integer_selector").show();
       $("#wenn_dann_integer_add").show();
+      $("#wenn_dann_integer_case_add").show();
     }
-    if((wertedefinition != "text") && (wertedefinition != "bool") && (wertedefinition != "int4")) {
+    if((wertedefinition != "text") && (wertedefinition != "boolean") && (wertedefinition != "integer")) {
       //Auswahlliste mit AJAX abfragen und anzeigen
       getEnumerationListe2();
       $("#wenn_dann_enumeration_select").show();
@@ -354,7 +374,7 @@ function zuweisungSelect(clicked_id) {
       $("#wenn_dann_enumeration_case_add").show();
       //falls array
      var wertespanneWennDann = $("#wertespanne_" + xplanAttribut).html();
-      if((wertespanneWennDann == "[0..*]") || (wertespanneWennDann== "[1..*]")) {
+      if((wertespanneWennDann == "0..*") || (wertespanneWennDann== "1..*")) {
         $("#wenn_dann_enumeration_array_add").show();
       }
     }
@@ -382,7 +402,7 @@ function festenWertTextEintragen(clicked_id) {
   var xplanAttribut  = $("#zuweisung_xplan_attribut").html();
   var festerWert = $("#fester_wert_text")[0].value;
   var wertespanneAttribut = $("#wertespanne_" + xplanAttribut).html();
-  if((wertespanneAttribut == "[0..*]") || (wertespanneAttribut == "[1..*]")) {
+  if((wertespanneAttribut == "0..*") || (wertespanneAttribut == "1..*")) {
     //Ist Array
     var divAttribut = $("#sql_" + xplanAttribut);
     // Falls div existiert, wird replaced, falls nicht neu erstellt
@@ -416,7 +436,7 @@ function festenWertTextEintragen(clicked_id) {
 function festenWertEintragenInteger() {
   var xplanAttribut  = $("#zuweisung_xplan_attribut").html();
   var festerWertInteger = $("#fester_wert_integer")[0].value;
-  $("#sql_select").append('<div id ="sql_' + xplanAttribut  + '">' + festerWertInteger.value + ' AS ' + xplanAttribut  + ',</div>');
+  $("#sql_select").append('<div id ="sql_' + xplanAttribut  + '">' + festerWertInteger + ' AS ' + xplanAttribut  + ',</div>');
   insertIntoAttributes(xplanAttribut);
   resetAttributzuweisungen();
   showRemoveHideAdd(xplanAttribut);
@@ -454,8 +474,8 @@ function festenWertEintragenEnumerationArray(clicked_id) {
   // zum Casten des Werts auf die Wertedefinition
   var wertedefinition = $("#wertedefinition_" + xplanAttribut).html();
   var festerWertEnumeration = $("#fester_wert_enumeration")[0].value;
-  //REGEX um alle Werte nach dem letzten _ zu erhalten
-  var festerWertEnumerationValue = /[^_]*$/.exec(festerWertEnumeration)[0];
+  //REGEX um alle Werte nach dem letzten _ zu erhalten + ' ' 
+  var festerWertEnumerationValue = "'" + /[^_]*$/.exec(festerWertEnumeration)[0] + "'";
   if(festerWertEnumeration == "") {
     // Falls Default dann Benachrichtigung und break Funktion
     alert("Bitte wählen Sie zuerst einen Enumerationswert aus!");
@@ -497,6 +517,8 @@ function alleAusShapeAttributEintragen() {
 
 function wennDannEintragen(clicked_id) {
   var xplanAttribut = $("#zuweisung_xplan_attribut").html();
+  var divAttribut = $("#sql_" + xplanAttribut);
+  var divAttributInside = $("#sql_" + xplanAttribut + 'Inside');
   var wertedefinition = $("#wertedefinition_" + xplanAttribut).html();
   var wertespanneAttribut = $("#wertespanne_" + xplanAttribut).html();
   var shpAttribut = $("#wenn_dann_shape_attribut_attribut_selector")[0].value;
@@ -515,25 +537,40 @@ function wennDannEintragen(clicked_id) {
   // Text
   if(wertedefinition == "text") {
     var resultWert = "'" + $("#wenn_dann_value_text_selector")[0].value + "'";
-    $("#sql_select").append('<div id ="sql_' + xplanAttribut + '">' + "CASE WHEN " + shpAttribut + ' ' + operator + ' ' + "'" + shpWert + "'" + " THEN " + " " + resultWert + " END AS " + xplanAttribut +  ',</div>');
+    if(divAttribut.length) {
+      // Das DIV existiert
+      divAttributInside.append("WHEN " + shpAttribut + ' ' + operator + ' ' + "'" + shpWert + "'" + " THEN " + " " + resultWert + "<br>");
+    } else {
+      // Das DIV existiert nicht
+      $("#sql_select").append('<div id ="sql_' + xplanAttribut + '">' + "CASE WHEN " + shpAttribut + ' ' + operator + ' ' + "'" + shpWert + "'" + " THEN " + " " + resultWert + ' <div id="sql_' + xplanAttribut + 'Inside"></div> END AS ' + xplanAttribut +  ',</div>');
+    }
   }
   // Int
-  if(wertedefinition == "int4") {
+  if(wertedefinition == "integer") {
     var resultWert = $("#wenn_dann_value_integer_selector")[0].value;
-    $("#sql_select").append('<div id ="sql_' + xplanAttribut + '">' + "CASE WHEN " + shpAttribut + ' ' + operator + ' ' + "'" + shpWert + "'" + " THEN " + " " + resultWert + " END AS " + xplanAttribut +  ',</div>');
+    if(divAttribut.length) {
+      divAttributInside.append("WHEN " + shpAttribut + ' ' + operator + ' ' + "'" + shpWert + "'" + " THEN " + " " + resultWert + "<br>");
+    } else {
+      // Das Div existiert nicht
+      $("#sql_select").append('<div id ="sql_' + xplanAttribut + '">' + "CASE WHEN " + shpAttribut + ' ' + operator + ' ' + "'" + shpWert + "'" + " THEN " + " " + resultWert + ' <div id="sql_' + xplanAttribut + 'Inside"></div> END AS ' + xplanAttribut +  ',</div>');
+    }
   }
   // Bool
-  if(wertedefinition == "bool") {
+  if(wertedefinition == "boolean") {
     var resultWert = "'" + $("#wenn_dann_value_boolean_selector")[0].value + "'";
     if(resultWert == "''") {
       // Falls Default dann Benachrichtigung und break Funktion
       alert("Bitte wählen Sie zuerst einen Boolean-Wert aus!");
       return;
     }
-    $("#sql_select").append('<div id ="sql_' + xplanAttribut + '">' + "CASE WHEN " + shpAttribut + ' ' + operator + ' ' + "'" + shpWert + "'" + " THEN " + " " + resultWert + " END AS " + xplanAttribut +  ',</div>');
+    if(divAttribut.length){
+      divAttributInside.append("WHEN " + shpAttribut + ' ' + operator + ' ' + "'" + shpWert + "'" + " THEN " + " " + resultWert + "<br>");
+    } else {
+      $("#sql_select").append('<div id ="sql_' + xplanAttribut + '">' + "CASE WHEN " + shpAttribut + ' ' + operator + ' ' + "'" + shpWert + "'" + " THEN " + " " + resultWert + ' <div id="sql_' + xplanAttribut + 'Inside"></div> END AS ' + xplanAttribut +  ',</div>');
+    }
   }
   // Enumeration
-  if((wertedefinition != "text") && (wertedefinition != "bool") && (wertedefinition != "int4")) {
+  if((wertedefinition != "text") && (wertedefinition != "boolean") && (wertedefinition != "integer")) {
     var wennDannEnumeration = $("#wenn_dann_enumeration")[0].value;
     //REGEX um alle Werte nach dem letzten _ zu erhalten
     var resultWert = /[^_]*$/.exec(wennDannEnumeration)[0];
@@ -542,16 +579,14 @@ function wennDannEintragen(clicked_id) {
       alert("Bitte wählen Sie zuerst einen Enumerationswert aus!");
       return;
     }
-    var divAttribut = $("#sql_" + xplanAttribut);
-    if((wertespanneAttribut == "[0..*]") || (wertespanneAttribut == "[1..*]")) {
-      // Die Enumeration ist ein Array
+     // Die Enumeration ist ein Array
+    if((wertespanneAttribut == "0..*") || (wertespanneAttribut == "1..*")) {
+      // Das Div existiert bereits und ist ein Array
       if(divAttribut.length) {
-          
-        // Das Div existiert bereits und ist ein Array
          if(clicked_id == "wenn_dann_enumeration_case_add") {
           //CASE
-          // Nimmt den Inhalt des divAttributs und hängt einen weiteren Case an
-          divAttribut.append("<br>CASE WHEN " +shpAttribut + ' ' + operator + ' ' + "'" + shpWert + "'" + " THEN ARRAY[" + resultWert + "]::xplan_gml." + wertedefinition + "[] END AS " + xplanAttribut + ',');
+          // Nimmt den Inhalt des divAttributs und hängt einen weiteren WHEN THEN innerhalb des CASE an
+          divAttributInside.append("WHEN " +shpAttribut + ' ' + operator + ' ' + "'" + shpWert + "'" + " THEN ARRAY['" + resultWert + "']::xplan_gml." + wertedefinition + "[]<br>");
          }
         if(clicked_id == "wenn_dann_enumeration_array_add") {
           // Array ADD
@@ -570,7 +605,7 @@ function wennDannEintragen(clicked_id) {
           // sliced den String durch 2, vom Start bis zum lastIndexOf
           // und wechselt word im Rest aus
           divAttributHtml = divAttributHtml.slice(0, n) + divAttributHtml.slice(n).replace(word, newWord);
-          divAttribut.replaceWith('<div id ="sql_' + xplanAttribut + '">' + divAttributHtml +  ',</div>')
+          divAttribut.replaceWith('<div id ="sql_' + xplanAttribut + '">' + divAttributHtml +  '</div>')
         }
         if(clicked_id == "wenn_dann_enumeration_add") {
           // Ende
@@ -579,7 +614,7 @@ function wennDannEintragen(clicked_id) {
       } else {
         // Das Div existiert noch nicht und ist ein Array
         // falls noch kein Wert eingetragen ist, wird der gewählte Wert 1x eingetragen
-        $("#sql_select").append('<div id ="sql_' + xplanAttribut + '">' + "CASE WHEN " + shpAttribut + ' ' + operator + ' ' + "'" + shpWert + "'" + " THEN ARRAY[" + resultWert + "]::xplan_gml." + wertedefinition+ "[] END AS " + xplanAttribut +  ',</div>');
+        $("#sql_select").append('<div id ="sql_' + xplanAttribut + '">' + "CASE WHEN " + shpAttribut + ' ' + operator + ' ' + "'" + shpWert + "'" + " THEN ARRAY['" + resultWert + "']::xplan_gml." + wertedefinition+ '[] <div id="sql_' + xplanAttribut + 'Inside"></div> END AS ' + xplanAttribut +  ',</div>');
       }
     } else {
       // Die Enumeration ist kein Array
@@ -588,7 +623,7 @@ function wennDannEintragen(clicked_id) {
         if(clicked_id == "wenn_dann_enumeration_case_add") {
           // CASE
           // Nimmt den Inhalt des divAttributs und hängt einen weiteren Case an
-          $('#sql_' + xplanAttribut).append("<br>CASE WHEN " +shpAttribut + ' ' + operator + ' ' + "'" + shpWert + "'" + " THEN " + resultWert + "::" + wertedefinition + " END AS " + xplanAttribut + ',');
+          divAttributInside.append("WHEN " +shpAttribut + ' ' + operator + ' ' + "'" + shpWert + "'" + " THEN '" + resultWert + "'::xplan_gml." + wertedefinition + "<br>");
         }
         if(clicked_id == "wenn_dann_enumeration_add") {
           // Ende
@@ -597,7 +632,7 @@ function wennDannEintragen(clicked_id) {
       } else {
         // das Div existiert noch nicht und ist kein Array
         // Der gewählte Wert wird 1x eingetragen
-        $("#sql_select").append('<div id ="sql_' + xplanAttribut + '">' + "CASE WHEN " + shpAttribut + ' ' + operator + ' ' + "'" + shpWert + "'" + " THEN " + resultWert + "::xplan_gml." + wertedefinition +  "END AS " + xplanAttribut +  ',</div>');
+        $("#sql_select").append('<div id ="sql_' + xplanAttribut + '">' + "CASE WHEN " + shpAttribut + ' ' + operator + ' ' + "'" + shpWert + "'" + " THEN '" + resultWert + "'::xplan_gml." + wertedefinition +  ' <div id="sql_' + xplanAttribut + 'Inside"></div> END AS ' + xplanAttribut +  ',</div>');
       }
     }
   }
@@ -756,14 +791,17 @@ function resetAttributzuweisungen() {
   wennDannValueTextSelector.html("");
   wennDannValueTextSelector.hide();
   $("#wenn_dann_text_add").hide();
+  $("#wenn_dann_text_case_add").hide();
   var wennDannValueIntSelector = $("#wenn_dann_value_integer_selector");
   wennDannValueIntSelector[0].value = wennDannValueIntSelector[0].defaultValue;
   wennDannValueIntSelector.html("");
   $(wennDannValueIntSelector).hide();
   $("#wenn_dann_integer_add").hide();
+  $("#wenn_dann_integer_case_add").hide();
   $("#wenn_dann_value_boolean_selector")[0].selectedIndex = "0";
   $("#wenn_dann_value_boolean_selector").hide();
   $("#wenn_dann_boolean_add").hide();
+  $("#wenn_dann_boolean_case_add").hide();
   $("#wenn_dann_enumeration_select").hide();
   $("#wenn_dann_enumeration_add").hide();
   $("#wenn_dann_enumeration_case_add").hide();
@@ -837,6 +875,9 @@ function getXPlanAttributes() {
       ajaxDisplay.innerHTML = ajaxRequest.responseText;
       // SQL-Area wird hier nocheinmal aufgerufen (redundant?)
       showSqlArea();
+       if($("#target").text() == 'rp_zentralerort') {
+        $("#Warnung_4").show(); // Kein typ für Zentralen Ort gewählt
+      }
     }
   }
    // Nimmt den Wert featuretype und gibt es an den Server Script
