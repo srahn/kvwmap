@@ -13,9 +13,12 @@ class NASLoader extends DOMDocument {
 		$file_name = $auftragsdatei_parts[0];
 		$original_file_name_parts = explode('=', $auftragsdatei_parts[1]);
 		$original_file_name = $original_file_name_parts[1];
+		#echo '<br>Lade Datei: ' . $file_name;
 
 		$file = pathinfo($file_name);
+		#echo '<br>Prüfe ob Datei: ' . $file['basename'] . ' eine Zip-Datei ist.';
 		if (strtolower($file['extension']) == 'zip') {
+			#echo '<br>Ja Datei ist eine Zipdatei. Versuche auszupacken.';
 			$unziped_files = unzip($file_name, false, false, true);
 			foreach ($unziped_files AS $unziped_file) {
 				$unziped_file = str_replace('\\', '/', $unziped_file);
@@ -60,6 +63,7 @@ class NASLoader extends DOMDocument {
 			$nodes = $this->getElementsByTagName('AX_Fortfuehrungsauftrag');
 			$auftrag_node = $nodes[0];
 			foreach($auftrag_node->childNodes AS $child_node) {
+				#echo '<br>node: ' . $child_node->localName;
 				$tag = strtolower($child_node->localName);
 				if (in_array($tag, array(
 					'profilkennung',
