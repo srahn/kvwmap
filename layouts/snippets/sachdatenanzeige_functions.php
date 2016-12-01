@@ -170,38 +170,26 @@ include('funktionen/input_check_functions.php');
 		currentform.printversion.value = 'true';
 		currentform.submit();
 	}
-	
+
 	save = function(){
-		var value = '';
 		form_fieldstring = currentform.form_field_names.value+'';
 		form_fields = form_fieldstring.split('|');
-		for(i = 0; i < form_fields.length-1; i++) {
+		for(i = 0; i < form_fields.length-1; i++){
 			fieldstring = form_fields[i]+'';
 			field = fieldstring.split(';');
 			if(document.getElementsByName(fieldstring)[0] != undefined && field[4] != 'Dokument' && (document.getElementsByName(fieldstring)[0].readOnly != true) && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
 				alert('Das Feld '+document.getElementsByName(fieldstring)[0].title+' erfordert eine Eingabe.');
 				return;
 			}
-			if(document.getElementsByName(fieldstring)[0] != undefined && field[6] == 'date' && field[4] != 'Time' && document.getElementsByName(fieldstring)[0].value != '' && !checkDate(document.getElementsByName(fieldstring)[0].value)) {
-				console.log('value: ' + document.getElementsByName(fieldstring)[0].value + ' is not a date');
-				// try to add current year and check again.
-				document.getElementsByName(fieldstring)[0].value += (endsWith(document.getElementsByName(fieldstring)[0].value, '.') ? '' : '.') + new Date().getFullYear();
-				console.log('try this: ' + document.getElementsByName(fieldstring)[0].value);
-				if(document.getElementsByName(fieldstring)[0] != undefined && field[6] == 'date' && field[4] != 'Time' && document.getElementsByName(fieldstring)[0].value != '' && !checkDate(document.getElementsByName(fieldstring)[0].value)) {
-					console.log('value: ' + document.getElementsByName(fieldstring)[0].value + ' is also not a date');
-					alert('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
-					return;
-				}
+			if(document.getElementsByName(fieldstring)[0] != undefined && field[6] == 'date' && field[4] != 'Time' && document.getElementsByName(fieldstring)[0].value != '' && !checkDate(document.getElementsByName(fieldstring)[0].value)){
+				alert('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
+				return;
 			}
 		}
 		currentform.go.value = 'Sachdaten_speichern';
 		document.getElementById('loader').style.display = '';
 		setTimeout('document.getElementById(\'loaderimg\').src=\'graphics/ajax-loader.gif\'', 50);
 		overlay_submit(currentform, false);
-	}
-
-	endsWith = function(str, suffix) {
-		return str.indexOf(suffix, str.length - suffix.length) !== -1;
 	}
 
 	save_new_dataset = function(){
@@ -675,5 +663,4 @@ include('funktionen/input_check_functions.php');
 			flag.onchange();
 		}
 	}
-
 </script>

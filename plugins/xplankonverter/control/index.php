@@ -381,6 +381,27 @@ switch($this->go){
 		$this->output();
 	} break;
 
+	case 'xplankonverter_validierungsergebnisse' : {
+		if ($this->formvars['konvertierung_id'] == '') {
+			$this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
+			$this->main = 'Hinweis.php';
+		}
+		else {
+			$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
+			if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) {
+				$this->Fehlermeldung = "Der Zugriff auf den Anwendungsfall ist nicht erlaubt.<br>
+					Die Konvertierung mit der ID={$this->konvertierung->get('id')} gehört zur Stelle ID= {$this->konvertierung->get('stelle_id')}<br>
+					Sie befinden sich aber in Stelle ID= {$this->Stelle->id}<br>
+					Melden Sie sich mit einem anderen Benutzer an.";
+			}
+			else {
+				# Validierungsergebnisse anzeigen.
+				$this->main = '../../plugins/xplankonverter/view/validierungsergebnisse.php';
+			}
+		}
+		$this->output();
+	} break;
+
 	case 'xplankonverter_gml_generieren' : {
 		include(PLUGINS . 'xplankonverter/model/build_gml.php');
 		include(PLUGINS . 'xplankonverter/model/TypeInfo.php');
@@ -462,7 +483,21 @@ switch($this->go){
 	} break;
 
 	case 'xplankonverter_regeleditor' : {
+		$konvertierung_id = $_REQUEST['konvertierung_id'];
+		$bereich_gml_id = $_REQUEST['bereich_gml_id'];
+		$class_name = $_REQUEST['class_name'];
+
+		if (empty($konvertierung_id)) {
+			if (!empty($bereich_gml_id)) {
+				# Hole konvertierung_id über den Bereich
+				$bereich = RP_Bereich::find_by_id($this, 'gml_id', $bereich_gml_id);
+				$plan = $bereich->get_plan();
+				$konvertierung_id = $plan->get('konvertierung_id');
+			}
+		}
+
 		include(PLUGINS . 'xplankonverter/view/regeleditor/index.php');
+
 	} break;
 
 	case 'xplankonverter_regeleditor_getxplanattributes' : {

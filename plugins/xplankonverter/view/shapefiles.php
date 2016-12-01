@@ -47,12 +47,17 @@
         data-visible="true"
       >Shapedatei Dateiname</th>
       <th
+        data-field="epsg_code"
+        data-sortable="true"
+        data-visible="true"
+      >EPSG-Code</th>
+      <th
         data-field="shapefile_id"
         data-visible="true"
         data-formatter="shapeFileFunctionsFormatter"
         data-switchable="false"
         class="text-right"
-      ></th>
+      >Bearbeiten</th>
     </tr>
   </thead>
 </table>
