@@ -225,6 +225,8 @@ public static	function find_by_id($gui, $by, $id) {
 	}
 
 	function create_gml_layer() {
+		$this->konvertierung->create_layer_group('GML');
+		
 		if (!$this->gml_layer_exists()) {
 			$layertyp = $this->get_layertyp();
 			$this->debug->show('Erzeuge Layer ' . $this->get('class_name') . ' ' . $this->layertypen[$layertyp] . ' in Gruppe ' . $this->konvertierung->get('bezeichnung') . ' layertyp ' . $layertyp, $this->write_debug);
