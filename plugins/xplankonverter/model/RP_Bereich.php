@@ -33,6 +33,11 @@ class RP_Bereich extends PgObject {
 		return $regeln;
 	}
 
+	function get_plan() {
+		$plan = new RP_Plan($this->gui);
+		return $plan->find_by('gml_id', $this->get('gehoertzuplan'));
+	}
+
 	/*
 	* Löscht den Bereich und alles was dazugehört
 	* Löscht dazugehörige Regeln
