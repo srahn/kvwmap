@@ -1249,11 +1249,17 @@ class GUI {
 				else {
 				  $style = new styleObj($klasse);
 				}
-				if($dbStyle['geomtransform'] != '') {
-					$style->updateFromString("STYLE GEOMTRANSFORM '".$dbStyle['geomtransform']."' END");
+				if($dbStyle['geomtransform'] != ''){
+					$style->updateFromString("STYLE GEOMTRANSFORM '".$dbStyle['geomtransform']."' END"); 
+				}
+				if($dbStyle['minscale'] != ''){
+					$style->set('minscaledenom', $dbStyle['minscale']);
+				}
+				if($dbStyle['maxscale'] != ''){
+					$style->set('maxscaledenom', $dbStyle['maxscale']);
 				}
 				if ($dbStyle['symbolname']!='') {
-          $style -> set('symbolname',$dbStyle['symbolname']);
+          $style->set('symbolname',$dbStyle['symbolname']);
         }
         if ($dbStyle['symbol']>0) {
           $style->set('symbol',$dbStyle['symbol']);
@@ -4299,8 +4305,11 @@ class GUI {
 			$this->formvars['map_factor'] = 1;
       if($this->Document->selectedframe[0]['dhk_call'] == '')$this->previewfile = $this->createMapPDF($this->formvars['aktiverRahmen'], true, true);
 
-      # Fonts auslesen
-      $this->Document->fonts = searchdir(PDFCLASSPATH.'fonts/', true);
+			# Fonts auslesen
+			include_(CLASSPATH . 'datendrucklayout.php');
+			$ddl = new ddl($this->database);
+			$this->Document->fonts = $ddl->get_fonts();
+			$this->Document->din_formats = $ddl->get_din_formats();
 
 			if($this->Document->selectedframe[0]['headsrc'] != '' && file_exists(DRUCKRAHMEN_PATH.basename($this->Document->selectedframe[0]['headsrc']))){
         $this->Document->headsize = GetImageSize(DRUCKRAHMEN_PATH.basename($this->Document->selectedframe[0]['headsrc']));
@@ -4340,7 +4349,11 @@ class GUI {
     $this->Document->selectedframe = $this->Document->load_frames(NULL, $this->formvars['aktiverRahmen']);
     if($this->Document->selectedframe != NULL){
       # Fonts auslesen
-      $this->document->fonts = searchdir(PDFCLASSPATH.'fonts/', true);
+
+			include_(CLASSPATH . 'datendrucklayout.php');
+			$ddl = new ddl($this->database);
+			$this->Document->fonts = $ddl->get_fonts();
+			$this->Document->din_formats = $ddl->get_din_formats();
 
       if($this->Document->selectedframe[0]['headsrc'] != '' && file_exists(DRUCKRAHMEN_PATH.basename($this->Document->selectedframe[0]['headsrc']))){
         $this->Document->headsize = GetImageSize(DRUCKRAHMEN_PATH.basename($this->Document->selectedframe[0]['headsrc']));
@@ -5682,14 +5695,14 @@ class GUI {
     # Zeichnen der Karte
     $this->drawMap();
     # Einbinden der PDF Klassenbibliotheken
-    include (PDFCLASSPATH."class.ezpdf.php");
+    include (CLASSPATH.'class.ezpdf.php');
     # Erzeugen neue Dokument-Klasse
     $Document=new Document($this->database);
     $this->Docu=$Document;
 
     # Erzeugen neue pdf-Klasse
     $pdf=new Cezpdf();
-    $pdf->selectFont(PDFCLASSPATH.'fonts/Helvetica-Bold.afm');
+    $pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/Helvetica-Bold.afm');
 
     $massstab = explode('.', $this->map_scaledenom);
     $row = 712;
@@ -5904,7 +5917,7 @@ class GUI {
 				$this->user->rolle->setConsumeALK($currenttime, $this->Docu->activeframe[0]['id']);
 			}
 
-			/**
+			/* *
 			* Problem: Es gibt WMS, die trotz der Einstellung EXCEPTIONS=application/vnd.ogc.se_inimage kein Bild mit Fehlermeldung
 			* schicken, sondern gar kein Bild bzw. nichts.
 			* Der Fall und auch andere Fälle bei denen kein Bild zurück kommt müssen abgefangen werden.
@@ -5965,7 +5978,7 @@ class GUI {
 			}
 
 			# Einbinden der PDF Klassenbibliotheken
-			include (PDFCLASSPATH."class.ezpdf.php");
+			include (CLASSPATH . 'class.ezpdf.php');
 			switch ($this->Docu->activeframe[0]['format']) {
 				case "A5hoch" : {
 					# Erzeugen neue pdf-Klasse
@@ -6079,21 +6092,21 @@ class GUI {
 			$this->date = date("d.m.Y");
 			$this->scale = $this->formvars['printscale'];
 
-			$pdf->selectFont($this->Docu->activeframe[0]['font_date']);
+			$pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_date']);
 			if($this->Docu->activeframe[0]['datesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['dateposx'],$this->Docu->activeframe[0]['dateposy'],$this->Docu->activeframe[0]['datesize'], $this->date);
-			$pdf->selectFont($this->Docu->activeframe[0]['font_scale']);
+			$pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_scale']);
 			if($this->Docu->activeframe[0]['scalesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['scaleposx'],$this->Docu->activeframe[0]['scaleposy'],$this->Docu->activeframe[0]['scalesize'],'1: '.$this->scale);
-			$pdf->selectFont($this->Docu->activeframe[0]['font_oscale']);
+			$pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_oscale']);
 			if($this->Docu->activeframe[0]['oscalesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['oscaleposx'],$this->Docu->activeframe[0]['oscaleposy'],$this->Docu->activeframe[0]['oscalesize'],'1:xxxx');
-			$pdf->selectFont($this->Docu->activeframe[0]['font_lage']);
+			$pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_lage']);
 			if($this->Docu->activeframe[0]['lagesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['lageposx'],$this->Docu->activeframe[0]['lageposy'],$this->Docu->activeframe[0]['lagesize'],$this->lage);
-			$pdf->selectFont($this->Docu->activeframe[0]['font_gemeinde']);
+			$pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_gemeinde']);
 			if($this->Docu->activeframe[0]['gemeindesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['gemeindeposx'],$this->Docu->activeframe[0]['gemeindeposy'],$this->Docu->activeframe[0]['gemeindesize'],$this->gemeinde);
-			$pdf->selectFont($this->Docu->activeframe[0]['font_gemarkung']);
+			$pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_gemarkung']);
 			if($this->Docu->activeframe[0]['gemarkungsize'] > 0)$pdf->addText($this->Docu->activeframe[0]['gemarkungposx'],$this->Docu->activeframe[0]['gemarkungposy'],$this->Docu->activeframe[0]['gemarkungsize'],$this->gemarkung);
-			$pdf->selectFont($this->Docu->activeframe[0]['font_flur']);
+			$pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_flur']);
 			if($this->Docu->activeframe[0]['flursize'] > 0)$pdf->addText($this->Docu->activeframe[0]['flurposx'],$this->Docu->activeframe[0]['flurposy'],$this->Docu->activeframe[0]['flursize'], $this->flur);
-			$pdf->selectFont($this->Docu->activeframe[0]['font_flurst']);
+			$pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_flurst']);
 			if($this->Docu->activeframe[0]['flurstsize'] > 0)$pdf->addText($this->Docu->activeframe[0]['flurstposx'],$this->Docu->activeframe[0]['flurstposy'],$this->Docu->activeframe[0]['flurstsize'], $this->flurstueck);
 
 			# Freie Graphiken
@@ -6110,7 +6123,7 @@ class GUI {
 
 			# Freitexte
 			for($j = 0; $j < count($this->Docu->activeframe[0]['texts']); $j++){
-				$pdf->selectFont($this->Docu->activeframe[0]['texts'][$j]['font']);
+				$pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['texts'][$j]['font']);
 				if($this->Docu->activeframe[0]['texts'][$j]['text'] == '' AND $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']] != ''){    // ein Freitext hat keinen Text aber in der Druckausschnittswahl wurde ein Text vom Nutzer eingefügt
 					$this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']] = str_replace(chr(10), ';', $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']]);
 					$this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']] = str_replace(chr(13), '', $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']]);
@@ -6153,7 +6166,7 @@ class GUI {
 
 			# Nutzer
 			if($this->Docu->activeframe[0]['usersize'] > 0){
-				$pdf->selectFont($this->Docu->activeframe[0]['font_user']);
+				$pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_user']);
 				$pdf->addText($this->Docu->activeframe[0]['userposx'],$this->Docu->activeframe[0]['userposy'],$this->Docu->activeframe[0]['usersize'], utf8_decode('Stelle: '.$this->Stelle->Bezeichnung.', Nutzer: '.$this->user->Name));
 			}
 
@@ -6216,7 +6229,7 @@ class GUI {
 
 			# variable Freitexte
 			for($j = 1; $j <= $this->formvars['last_freetext_id']; $j++){
-				$pdf->selectFont(PDFCLASSPATH.'fonts/Helvetica.afm');
+				$pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/Helvetica.afm');
 				if(strpos($this->Docu->activeframe[0]['format'], 'quer') !== false)$height = 420;			# das ist die Höhe des Vorschaubildes
 				else $height = 842;																																		# das ist die Höhe des Vorschaubildes
 				$ratio = $height/$this->Docu->height;
@@ -6563,6 +6576,21 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		}
 		return $sql;
 	}
+	
+	function layer_parameter(){
+    $this->main='layer_parameter.php';
+    $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$this->params = $mapDB->get_all_layer_params();
+    $this->output();
+	}
+	
+	function layer_parameter_speichern(){
+    $this->main='layer_parameter.php';
+    $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$mapDB->save_all_layer_params($this->formvars);
+		$this->params = $mapDB->get_all_layer_params();
+    $this->output();
+	}	
 
   function Layereditor() {
     $this->titel='Layer Editor';
@@ -6592,7 +6620,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $attrib['name'] = $this->formvars['class_name'];
     $attrib['layer_id'] = $this->formvars['selected_layer_id'];
-		$attrib['class_item'] = $this->formvars['class_item'];
+		$attrib['classification'] = $this->formvars['classification'];
     $attrib['order'] = ($this->formvars['class_order'] != '') ? $this->formvars['class_order'] : 1;
     $attrib['expression'] = ($this->formvars['class_expression'] != '') ? $this->formvars['class_expression'] : '';
     return $mapDB->new_Class($attrib);
@@ -6611,17 +6639,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $end = strrpos($this->layerdata['Data'], ')');
     $data_sql = substr($this->layerdata['Data'], $begin, $end - $begin);
 
-    $auto_classes = $this->AutoklassenErzeugen(
-      $layerdb,
-      $data_sql,
-      $this->layerdata['classitem'],
-      ($this->formvars['classification_method'] != '' ) ? $this->formvars['classification_method'] : 'gleiche Anzahl Klassenmitglieder',
-      ($this->formvars['num_classes'] != '' ) ? $this->formvars['num_classes'] : 5
-    );
+    $auto_classes = $this->AutoklassenErzeugen($layerdb, $data_sql, $this->formvars['classification_column'], $this->formvars['classification_method'], $this->formvars['num_classes'], $this->formvars['classification_name'], $this->formvars['classification_color']);
 
     for ($i = 0; $i < count($auto_classes); $i++) {
       $this->formvars['class_name'] = $auto_classes[$i]['name'];
-      $this->formvars['class_item'] = $auto_classes[$i]['class_item'];
+      $this->formvars['classification'] = $auto_classes[$i]['classification'];
       $this->formvars['class_order'] = $auto_classes[$i]['order'];
       $this->formvars['class_expression'] = $auto_classes[$i]['expression'];
 
@@ -6632,11 +6654,27 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     }
   }
 
-  function AutoklassenErzeugen($layerdb, $data_sql, $class_item, $method, $num_classes) {
+  function AutoklassenErzeugen($layerdb, $data_sql, $class_item, $method, $num_classes, $classification_name, $classification_color) {
     $classes = array();
-
     switch ($method) {
-      case 'gleich große Klassengrenzen' : {
+			case 1 : {		# für jeden Wert eine Klasse
+        $sql = "
+          SELECT DISTINCT ".$class_item."
+          FROM (".$data_sql.") AS data ORDER BY ".$class_item." LIMIT 50";
+				
+        $ret=$layerdb->execSQL($sql, 4, 0);
+        if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
+				$order = 1;
+        while($rs = pg_fetch_assoc($ret[1])){
+          $class['name'] = $rs[$class_item];
+					$class['classification'] = $classification_name;
+          $class['order'] = $order++;
+          $class['expression'] = $rs[$class_item];
+          $classes[] = $class;
+        }
+      } break;
+		
+      case 2 : {		# gleiche Klassengröße
         $sql = "
           SELECT
             min(" . $class_item . "),
@@ -6661,14 +6699,14 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
         for ($order = 1; $range_floor < $range_ceil; $range_floor += $range_step) {
           $class['name'] = $range_floor . ' - ' . ($range_floor + $range_step);
-					$class['class_item'] = $class_item;
+					$class['classification'] = $classification_name;
           $class['order'] = $order++;
           $class['expression'] = '([' . $class_item . '] >= ' . $range_floor . ' AND [' . $class_item . '] < ' . ($range_floor + $range_step) . ')';
           $classes[] = $class;
         }
       } break;
 
-      case 'gleiche Anzahl Klassenmitglieder' : {
+      case 3 : {		# gleiche Anzahl Klassenmitglieder
         $sql = "
           SELECT
             " . $class_item . "
@@ -6691,41 +6729,14 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
             $range_step = $range_ceil - $range_floor - 1;
           }
           $class['name'] = $rows[$range_floor][$class_item] . ' - ' . $rows[$range_floor + $range_step][$class_item];
-					$class['class_item'] = $class_item;
+					$class['classification'] = $classification_name;
           $class['order'] = $order++;
           $class['expression'] = '([' . $class_item . '] >= ' . $rows[$range_floor][$class_item] . ' AND [' . $class_item . '] < ' . $rows[$range_floor + $range_step][$class_item] . ')';
           $classes[] = $class;
         }
       } break;
-      case 'nach Histogramm' : {
-        # sql zur Berechnung des Histogramms
-        $sql = "
-          SELECT
-            round(
-              (" . $class_item . " - (
-                SELECT
-                  min(" . $class_item . ")
-                FROM
-                  (" . $data_sql . ") AS data
-                )
-              ) * (
-                SELECT
-                  100 / (max(" . $class_item . ") - min(" . $class_item . "))
-                FROM
-                  (" . $data_sql . ") AS data
-              )
-            ) prozent,
-            count(*) anzahl
-          FROM
-            (" . $data_sql . ") AS data
-          GROUP BY
-            prozent
-          ORDER BY
-            prozent
-        ";
-      } break;
 
-      case 'Clustering nach Jenk, Initialisierung mit Histogramm-Maxima' : {
+      case 4 : {		# Clustering nach Jenk, Initialisierung mit Histogramm-Maxima
         include_(CLASSPATH.'k-Means_clustering.php');
         // fetch data
         $sql = "
@@ -6784,28 +6795,27 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
         // determine the maxima of the smoothened histogram as seeds for k-Means-Clustering
         $seeds = kMeansClustering::seedsFromLocalMaxima($flatHistogram, $flatData);
-        echo '<br>seeds: ';var_dump($seeds); echo '<br>';
         // optimize classes (clusters) by k-Means
         kMeansClustering::kMeansWithSeeds($flatData, $seeds);
 
         // calculate class ranges from cluster centers
-        $ranges = array("0");
+        $ranges[] = $data[0][$class_item];
         for ($sIdx = 1; $sIdx < count($seeds); $sIdx++) {
-          $ranges[] = number_format(($seeds[$sIdx-1]+ $seeds[$sIdx]) / 2, 2);
+          $ranges[] = ($seeds[$sIdx-1]+ $seeds[$sIdx]) / 2;
         }
-        $ranges[]= "100";
-
+        $ranges[]= $data[count($data)-1][$class_item];
+				
         // build classes
         for ($order = $rIdx = 1; $rIdx < count($ranges); $rIdx++) {
           $class['name'] = $ranges[$rIdx-1] . ' - ' . $ranges[$rIdx];
-          $class['class_item'] = $class_item;
+          $class['classification'] = $classification_name;
           $class['order'] = $order++;
           $class['expression'] = '([' . $class_item . '] >= ' . $ranges[$rIdx-1] . ' AND [' . $class_item . '] < ' . $ranges[$rIdx] . ')';
           $classes[] = $class;
         }
       } break;
 
-      case 'Clustering nach Jenk, Mininierung Abweichung i.d. Klassen' : {
+      case 5 : {		# Clustering nach Jenk, Mininierung Abweichung i.d. Klassen
         include_(CLASSPATH.'k-Means_clustering.php');
         // fetch data
         $sql = "
@@ -6837,16 +6847,16 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
           $centers = kMeansClustering::kMeansNoSeeds($flatData, $num_classes);
 
           // calculate class ranges from cluster centers
-          $ranges = array("0");
+          $ranges[] = $data[0][$class_item];
           for ($cIdx = 1; $cIdx < count($centers); $cIdx++) {
-            $ranges[] = number_format(($centers[$cIdx-1]+ $centers[$cIdx]) /2, 2);
+            $ranges[] = ($centers[$cIdx-1]+ $centers[$cIdx]) / 2;
           }
-          $ranges[]= "100";
+          $ranges[]= $data[count($data)-1][$class_item];
 
           // build classes
           for ($order = $rIdx = 1; $rIdx < count($ranges); $rIdx++) {
             $class['name'] = $ranges[$rIdx-1] . ' - ' . $ranges[$rIdx];
-            $class['class_item'] = $class_item;
+            $class['classification'] = $classification_name;
             $class['order'] = $order++;
             $class['expression'] = '([' . $class_item . '] >= ' . str_replace(',', '', $ranges[$rIdx-1]) . ' AND [' . $class_item . '] < ' . str_replace(',', '', $ranges[$rIdx]) . ')';
             $classes[] = $class;
@@ -6854,14 +6864,28 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         }
       } break;
     }
-    $color = 255;
-    $color_step = floor(255 / count($classes));
-    $half_color_step = round($color_step / 2);
-    foreach ($classes AS $key => $class) {
-      $color -= $color_step;
-      $classes[$key]['style_color'] = ($color + $half_color_step). ' ' . ($color + $half_color_step) . ' 255';
-      $classes[$key]['style_outlinecolor'] = $color . ' ' . $color . ' 255';
-    }
+		if($method == 1){			# für jeden Wert eine Klasse: zufällige Farben
+			$colors = read_colors($this->database);
+			foreach ($classes AS $key => $class) {
+				shuffle($colors);			
+				$classes[$key]['style_color'] = $colors[0]['red'].' '.$colors[0]['green'].' '.$colors[0]['blue'];
+				$classes[$key]['style_outlinecolor'] = '0 0 0';
+			}
+		}
+		else{					# für alle anderen Methoden: kontinuierlicher Farbverlauf der ausgewählten Farbe von hell nach dunkel
+			$rgb = explode(' ', $classification_color);
+			$hsl = rgb2hsl($rgb[0], $rgb[1], $rgb[2]);
+			$lightness = 0.8;
+			$lightness_step = ($lightness - $hsl[2]) / (count($classes)-1);
+			$half_lightness_step = $lightness_step / 2;
+			foreach ($classes AS $key => $class) {				
+				$rgb1 = hsl2rgb($hsl[0], $hsl[1], $lightness);
+				$rgb2 = hsl2rgb($hsl[0], $hsl[1], $lightness-$half_lightness_step);
+				$classes[$key]['style_color'] = $rgb1[0].' '.$rgb1[1].' '.$rgb1[2];
+				$classes[$key]['style_outlinecolor'] = $rgb2[0].' '.$rgb2[1].' '.$rgb2[2];
+				$lightness -= $lightness_step;
+			}
+		}
     return $classes;
   }
 
@@ -6879,13 +6903,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				#---------- Speichern der Layerattribute -------------------
 				$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 				$path = strip_pg_escape_string($this->formvars['pfad']);
-				$attributes = $mapDB->load_attributes(
-					$layerdb,
-					replace_params(
-						$path,
-						rolle::$layer_params
-					)
-				);
+				$all_layer_params = $mapDB->get_all_layer_params_default_values();					
+			  $attributes = $mapDB->load_attributes($layerdb,	replace_params($path,	$all_layer_params));
 				$mapDB->save_postgis_attributes($this->formvars['selected_layer_id'], $attributes, $this->formvars['maintable'], $this->formvars['schema']);
 				$mapDB->delete_old_attributes($this->formvars['selected_layer_id'], $attributes);
 				#---------- Speichern der Layerattribute -------------------
@@ -6945,13 +6964,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			    $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 			    $layerdb->setClientEncoding();
 			    $path = strip_pg_escape_string($this->formvars['pfad']);
-			    $attributes = $mapDB->load_attributes(
-						$layerdb,
-						replace_params(
-							$path,
-							rolle::$layer_params
-						)
-					);
+					$all_layer_params = $mapDB->get_all_layer_params();					
+			    $attributes = $mapDB->load_attributes($layerdb,	replace_params($path,	$all_layer_params));
 			    $mapDB->save_postgis_attributes($this->formvars['selected_layer_id'], $attributes, $this->formvars['maintable'], $this->formvars['schema']);
 			    #---------- Speichern der Layerattribute -------------------
 				}
@@ -7004,7 +7018,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		}
     $expression = @array_values($this->formvars['expression']);
 		$text = @array_values($this->formvars['text']);
-		$class_item = @array_values($this->formvars['class_item']);
+		$classification = @array_values($this->formvars['classification']);
     $order = @array_values($this->formvars['order']);
     $this->classes = $mapDB->read_Classes($old_layer_id);
     for($i = 0; $i < count($name); $i++){
@@ -7017,7 +7031,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $attrib['layer_id'] = $this->formvars['selected_layer_id'];
       $attrib['expression'] = $expression[$i];
 			$attrib['text'] = $text[$i];
-			$attrib['class_item'] = $class_item[$i];
+			$attrib['classification'] = $classification[$i];
       $attrib['order'] = $order[$i];
       $attrib['class_id'] = $this->classes[$i]['Class_ID'];
       $mapDB->update_Class($attrib);
@@ -7034,20 +7048,14 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
   */
   function Stellenzuweisung($layer_ids, $stellen_ids, $filter = '') {
     for($i = 0; $i < count($stellen_ids); $i++) {
-      $stelle = new stelle(
-				$stellen_ids[$i],
-				$this->database
-			);
-      $stelle->addLayer(
-				$layer_ids,
-				0,
-				$filter
-			);
+      $stelle = new stelle($stellen_ids[$i], $this->database);
+      $stelle->addLayer($layer_ids,	0, $filter);
       $users = $stelle->getUser();
       for($j = 0; $j < count($users['ID']); $j++){
         $this->user->rolle->setGroups($users['ID'][$j], array($stellen_ids[$i]), $layer_ids, 0); # Hinzufügen der Layergruppen der selektierten Layer zur Rolle
         $this->user->rolle->setLayer($users['ID'][$j], array($stellen_ids[$i]), 0); # Hinzufügen der Layer zur Rolle
       }
+			$stelle->updateLayerParams();
     }
     return $stellen_ids;
   }
@@ -9469,7 +9477,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $new_stelle->addMenue($menues); // und dann hinzufügen, damit die Reihenfolge stimmt
       if($layer[0] != NULL){
         $new_stelle->addLayer($layer, 0); # Hinzufügen der Layer zur Stelle
-      }
+      }			
       $new_stelle->removeFunctions();   // Entfernen aller Funktionen
       if($functions[0] != NULL){
         $new_stelle->addFunctions($functions, 0); # Hinzufügen der Funktionen zur Stelle
@@ -9497,8 +9505,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         $this->selected_user = new user(0,$selectedusers[$i],$this->user->database);
         $this->selected_user->checkstelle();
       }
-
-    # Löschen der in der Selectbox entfernten Layer
+			$new_stelle->updateLayerParams();
+			# Löschen der in der Selectbox entfernten Layer
       $stellenlayer = $Stelle->getLayers(NULL);
       for($i = 0; $i < count($stellenlayer['ID']); $i++){
         $found = false;
@@ -9613,6 +9621,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
           $this->selected_user = new user(0,$users[$i],$this->user->database);
           $this->selected_user->checkstelle();
         }
+				$Stelle->updateLayerParams();
         if ($ret[0]) {
           $this->Meldung=$ret[1];
         }
@@ -11083,7 +11092,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         }
       }
       # Ausgabe der Flurstücksdaten im PDF Format
-      include (PDFCLASSPATH."class.ezpdf.php");
+      include (CLASSPATH.'class.ezpdf.php');
       $pdf=new Cezpdf();
       $ALB=new ALB($this->pgdatabase);
 
@@ -13367,7 +13376,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		# Abfragen der Datenbankverbindung des Layers
     $layerdb=$this->mapDB->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
 
-		$data = $layer[0]['Data'];
+		$data = replace_params($layer[0]['Data'], rolle::$layer_params);
 		if($data != ''){
 			# suchen nach dem ersten Vorkommen von using
 			$pos = strpos(strtolower($data),'using ');
@@ -14021,7 +14030,7 @@ class db_mapObj{
 				$name_column . ",
 				l.alias,
 				l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem,
-				l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.filteritem,
+				l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.classification, l.filteritem,
 				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version,
 				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status,
 				g.*
@@ -14064,14 +14073,11 @@ class db_mapObj{
     $this->disabled_classes = $this->read_disabled_classes();
 		$i = 0;
     while ($rs=mysql_fetch_assoc($query)) {
-			$rs['classitem'] = replace_params(
-					$rs['classitem'],
-					rolle::$layer_params
-			);
+			$rs['classification'] = replace_params($rs['classification'], rolle::$layer_params);
 			if ($withClasses == 2 OR $rs['requires'] != '' OR ($withClasses == 1 AND $rs['aktivStatus'] != '0')) {
 				# bei withclasses == 2 werden für alle Layer die Klassen geladen,
 				# bei withclasses == 1 werden Klassen nur dann geladen, wenn der Layer aktiv ist
-				$rs['Class']=$this->read_Classes($rs['Layer_ID'], $this->disabled_classes, false, $rs['classitem']);
+				$rs['Class']=$this->read_Classes($rs['Layer_ID'], $this->disabled_classes, false, $rs['classification']);
 			}
 			if($rs['maxscale'] > 0)$rs['maxscale'] = $rs['maxscale']+0.3;
 			if($rs['minscale'] > 0)$rs['minscale'] = $rs['minscale']-0.3;
@@ -14127,8 +14133,8 @@ class db_mapObj{
 		if($language != 'german') {
 			$sql.='CASE WHEN `Name_'.$language.'` IS NOT NULL THEN `Name_'.$language.'` ELSE `Name` END AS ';
 		}
-		$sql.='Name, Class_ID, Layer_ID, Expression, class_item, drawingorder, text FROM classes';
-    $sql.=' WHERE Class_ID = '.$class_id.' ORDER BY class_item, drawingorder,Class_ID';
+		$sql.='Name, Class_ID, Layer_ID, Expression, classification, drawingorder, text FROM classes';
+    $sql.=' WHERE Class_ID = '.$class_id.' ORDER BY classification, drawingorder,Class_ID';
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Class - Lesen der Classen eines Layers:<br>".$sql,4);
     $query=mysql_query($sql);
@@ -14141,7 +14147,7 @@ class db_mapObj{
     return $Classes;
 	}
 
-	function read_Classes($Layer_ID, $disabled_classes = NULL, $all_languages = false, $layer_class_item = '') {
+	function read_Classes($Layer_ID, $disabled_classes = NULL, $all_languages = false, $classification = '') {
 		global $language;
 
 		$sql = "
@@ -14161,7 +14167,7 @@ class db_mapObj{
 				Class_ID,
 				Layer_ID,
 				Expression,
-				class_item,
+				classification,
 				drawingorder,
 				text
 			FROM
@@ -14169,14 +14175,14 @@ class db_mapObj{
 			WHERE
 				Layer_ID = " . $Layer_ID .
 				(
-					(!empty($layer_class_item)) ? " AND
+					(!empty($classification)) ? " AND
 						(
-							class_item IS NULL OR class_item IN ('', '" . $layer_class_item . "')
+							classification IS NULL OR classification IN ('', '" . $classification . "')
 						)
 					" : ""
 				) . "
 			ORDER BY
-				class_item,
+				classification,
 				drawingorder,
 				Class_ID
 		";
@@ -14993,7 +14999,7 @@ class db_mapObj{
 				}
 			}
       $classdata['layer_id'] = -$layer_id;
-			$classdata['class_item'] = $attribute;
+			$classdata['classification'] = $attribute;
       $classdata['expression'] = "('[".$attribute."]' eq '".$value."')";
       $classdata['order'] = 0;
       $class_id = $this->new_Class($classdata);
@@ -15060,6 +15066,7 @@ class db_mapObj{
     $sql .= "`printconnection` = '".$formvars['printconnection']."', ";
     $sql .= "connectiontype = '".$formvars['connectiontype']."', ";
     $sql .= "classitem = '".$formvars['classitem']."', ";
+		$sql .= "classification = '".$formvars['layer_classification']."', ";		
     $sql .= "filteritem = '".$formvars['filteritem']."', ";
 		if($formvars['cluster_maxdistance'] == '')$formvars['cluster_maxdistance'] = 'NULL';
 		$sql .= "cluster_maxdistance = ".$formvars['cluster_maxdistance'].", ";
@@ -15120,7 +15127,7 @@ class db_mapObj{
 					$sql .= "`Name_".$language."`, ";
 				}
 			}
-			$sql.="`alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `printconnection`, `connectiontype`, `classitem`, `filteritem`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `status`) VALUES(";
+			$sql.="`alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `printconnection`, `connectiontype`, `classitem`, `classification`, `filteritem`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `status`) VALUES(";
       if($formvars['id'] != ''){
         $sql.="'".$formvars['id']."', ";
       }
@@ -15177,6 +15184,7 @@ class db_mapObj{
       $sql .= "'".$formvars['printconnection']."', ";
       $sql .= $formvars['connectiontype'].", ";
       $sql .= "'".$formvars['classitem']."', ";
+			$sql .= "'".$formvars['layer_classification']."', ";
       $sql .= "'".$formvars['filteritem']."', ";
 			if($formvars['cluster_maxdistance'] == '')$formvars['cluster_maxdistance'] = 'NULL';
 			$sql .= $formvars['cluster_maxdistance'].", ";
@@ -15599,6 +15607,50 @@ class db_mapObj{
 		}
 		return $layer;
 	}
+	
+	function get_all_layer_params() {
+		$layer_params = array();
+		$sql = "SELECT * FROM layer_parameter";
+		$params_result = mysql_query($sql);
+		if($params_result==0) {
+			echo '<br>Fehler bei der Abfrage der Layerparameter mit SQL: ' . $sql;
+		}
+		else{
+			while($rs = mysql_fetch_assoc($params_result)){
+				$params[] = $rs;
+			}
+		}
+		return $params;
+	}
+	
+	function save_all_layer_params($formvars){
+		$sql = "TRUNCATE layer_parameter";
+		$result = mysql_query($sql);
+		$sql = "INSERT INTO layer_parameter VALUES ";
+		for($i = 0; $i < count($formvars['key']); $i++){
+			if($formvars['key'][$i] != ''){
+				if($formvars['id'][$i] == '')$formvars['id'][$i] = 'NULL';
+				if($komma)$sql .= ",";
+				$sql .= "(".$formvars['id'][$i].", '".$formvars['key'][$i]."', '".$formvars['alias'][$i]."', '".$formvars['default_value'][$i]."', '".mysql_real_escape_string($formvars['options_sql'][$i])."')";
+				$komma = true;
+			}
+		}
+		$result = mysql_query($sql);
+		if($result==0)echo '<br>Fehler beim Speichern der Layerparameter mit SQL: ' . $sql;
+	}
+	
+	function get_all_layer_params_default_values() {
+		$layer_params = array();
+		$sql = "SELECT GROUP_CONCAT(concat('\"', `key`, '\":\"', default_value, '\"')) as params FROM layer_parameter p";
+		$params_result = mysql_query($sql);
+		if($params_result==0) {
+			echo '<br>Fehler bei der Abfrage der Layerparameter mit SQL: ' . $sql;
+		}
+		else{
+			$rs = mysql_fetch_assoc($params_result);
+		}
+		return (array)json_decode('{' . $rs['params'] . '}');
+	}
 
   function get_stellen_from_layer($layer_id){
     $sql = 'SELECT ID, Bezeichnung FROM stelle, used_layer WHERE used_layer.Stelle_ID = stelle.ID AND used_layer.Layer_ID = '.$layer_id.' ORDER BY Bezeichnung';
@@ -15639,10 +15691,8 @@ class db_mapObj{
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
     $layer = mysql_fetch_array($query);
 		if ($replace_class_item) {
-			$layer['classitem'] = replace_params(
-				$layer['classitem'],
-				rolle::$layer_params
-			);
+			$layer['classitem'] = replace_params($layer['classitem'],	rolle::$layer_params);
+			$layer['classification'] = replace_params($layer['classification'],	rolle::$layer_params);
 		}
     return $layer;
   }
@@ -15817,7 +15867,7 @@ class db_mapObj{
   function copyClass($class_id, $layer_id){
     # diese Funktion kopiert eine Klasse mit Styles und Labels und gibt die ID der neuen Klasse zurück
     $class = $this->read_ClassesbyClassid($class_id);
-    $sql = "INSERT INTO classes (Name, `Name_low-german`, Name_english, Name_polish, Name_vietnamese, Layer_ID,Expression,class_item,drawingorder,text) SELECT Name, `Name_low-german`, Name_english, Name_polish, Name_vietnamese, ".$layer_id.",Expression,class_item,drawingorder,text FROM classes WHERE Class_ID = ".$class_id;
+    $sql = "INSERT INTO classes (Name, `Name_low-german`, Name_english, Name_polish, Name_vietnamese, Layer_ID,Expression,classification,drawingorder,text) SELECT Name, `Name_low-german`, Name_english, Name_polish, Name_vietnamese, ".$layer_id.",Expression,classification,drawingorder,text FROM classes WHERE Class_ID = ".$class_id;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->copyClass - Kopieren einer Klasse:<br>".$sql,4);
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
@@ -15844,13 +15894,13 @@ class db_mapObj{
 					$sql.= '`Name_'.$language.'`, ';
 				}
 			}
-			$sql.= 'Layer_ID, Expression, class_item, drawingorder) VALUES ("'.$attrib['name'].'",';
+			$sql.= 'Layer_ID, Expression, classification, drawingorder) VALUES ("'.$attrib['name'].'",';
 			foreach($supportedLanguages as $language){
 				if($language != 'german'){
 					$sql.= '"'.$attrib['name_'.$language].'",';
 				}
 			}
-			$sql.= $attrib['layer_id'].', "'.$attrib['expression'].'", "' . $attrib['class_item'] . '", "'.$attrib['order'].'")';
+			$sql.= $attrib['layer_id'].', "'.$attrib['expression'].'", "' . $attrib['classification'] . '", "'.$attrib['order'].'")';
     }
     else{
       $class = $classdata;        # Classobjekt wurde übergeben
@@ -15860,8 +15910,8 @@ class db_mapObj{
       else{
         $expression = $class->getExpression();
       }
-      $sql = 'INSERT INTO classes (Name, Layer_ID, Expression, class_item, drawingorder) VALUES ';
-      $sql.= '("'.$class->name.'", '.$class->layer_id.', "'.$expression.'", "' . $class->class_item . '", "'.$class->drawingorder.'")';
+      $sql = 'INSERT INTO classes (Name, Layer_ID, Expression, classification, drawingorder) VALUES ';
+      $sql.= '("'.$class->name.'", '.$class->layer_id.', "'.$expression.'", "' . $class->classification . '", "'.$class->drawingorder.'")';
     }
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->new_Class - Erstellen einer Klasse zu einem Layer:<br>".$sql,4);
@@ -15901,14 +15951,14 @@ class db_mapObj{
 
   function update_Class($attrib){
 		global $supportedLanguages;
-    # attrib:(Name, Layer_ID, Expression, class_item, drawingorder, Class_ID)
+    # attrib:(Name, Layer_ID, Expression, classification, drawingorder, Class_ID)
     $sql = 'UPDATE classes SET Name = "'.$attrib['name'].'",';
 		foreach($supportedLanguages as $language){
 			if($language != 'german'){
 				$sql.= '`Name_'.$language.'` = "'.$attrib['name_'.$language].'",';
 			}
 		}
-		$sql.= 'Layer_ID = '.$attrib['layer_id'].', Expression = "'.$attrib['expression'].'", text = "'.$attrib['text'].'", class_item = "' . $attrib['class_item'] . '", drawingorder = "'.$attrib['order'].'" WHERE Class_ID = '.$attrib['class_id'];
+		$sql.= 'Layer_ID = '.$attrib['layer_id'].', Expression = "'.$attrib['expression'].'", text = "'.$attrib['text'].'", classification = "' . $attrib['classification'] . '", drawingorder = "'.$attrib['order'].'" WHERE Class_ID = '.$attrib['class_id'];
     #echo $sql.'<br>';
     $this->debug->write("<p>file:kvwmap class:db_mapObj->update_Class - Aktualisieren einer Klasse:<br>".$sql,4);
     $query=mysql_query($sql);
@@ -16084,6 +16134,8 @@ class db_mapObj{
 		if($formvars["rangeitem"] != ''){$sql.="rangeitem = '".$formvars["rangeitem"]."',";}else{$sql.="rangeitem = NULL,";}
     if($formvars["minsize"] != ''){$sql.="minsize = '".$formvars["minsize"]."',";}else{$sql.="minsize = NULL,";}
     if($formvars["maxsize"] != ''){$sql.="maxsize = '".$formvars["maxsize"]."',";}else{$sql.="maxsize = NULL,";}
+		if($formvars["minscale"] != ''){$sql.="minscale = '".$formvars["minscale"]."',";}else{$sql.="minscale = NULL,";}
+    if($formvars["maxscale"] != ''){$sql.="maxscale = '".$formvars["maxscale"]."',";}else{$sql.="maxscale = NULL,";}
     if($formvars["angle"] != ''){$sql.="angle = '".$formvars["angle"]."',";}else{$sql.="angle = NULL,";}
     $sql.="angleitem = '".$formvars["angleitem"]."',";
     if($formvars["antialias"] != ''){$sql.="antialias = '".$formvars["antialias"]."',";}else{$sql.="antialias = NULL,";}

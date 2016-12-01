@@ -61,19 +61,6 @@
 		else{
 			$onchange .= 'change_all('.$layer_id.', '.$k.', \''.$name.'\');';
 		}
-
-		# Ermittlung einer geeigneten Größe für das Attribut
-		if($attributes['arrangement'][$j+1] == 1 OR $attributes['arrangement'][$j] == 1){
-			$a = $j;
-			$b = $j+1;
-			while($a > $j-4 AND $attributes['arrangement'][$a] == 1)$a--;		# 4 vorwärts gucken
-			while($b < $j+4 AND $attributes['arrangement'][$b] == 1)$b++;		# 4 rückwärts gucken
-			$attributes_in_row = $b-$a;			
-			#if($attributes['labeling'][$j] != 0)$size = $size * 1.5;
-			$size = $size/$attributes_in_row;
-			$sw = 20*$size;
-			$select_width = 'max-width: '.$sw.'px;';
-		}
 		
 		###### Array-Typ #####
 		if(POSTGRESVERSION >= 930 AND substr($attributes['type'][$j], 0, 1) == '_'){
@@ -667,6 +654,60 @@
 			}
 		}
 		return $datapart;
+	}
+	
+	function output_statistic($statistic) {
+		echo '<table>';
+		foreach($statistic AS $key => $row) {
+			if ($key == 'relative Häufigkeit' or $key == 'absolute Häufigkeit') {
+				echo '<tr><td colspan="2">' . $row['title'] . '&nbsp;:</td></tr>';
+				foreach ($row['values'] AS $key => $row) {
+					echo '<tr><td align="right">' . $row['title'] . '&nbsp;:</td><td align="left">' . $row['value'] . '</td></tr>';
+				}
+			}
+			else {
+				echo '<tr><td align="left">' . $row['title'] . '&nbsp;:</td><td align="left">' . $row['value'] . '</td></tr>';
+			}
+		}
+		echo '</table>';
+	}
+
+	function relative_haeufigkeit($data, $column_name, $min, $max) {
+		$ha = array('title' => 'hr(A)', 'values' => array());
+		$percent_values = array_map(
+			function ($row) use ($column_name, $min, $max) {
+				$value = $row[$column_name];
+				$delta = $max - $min;
+				return ($max == $min) ? 100 : round(($value - $min) * 100 / ($max - $min));
+			},
+			$data
+		);
+		sort($percent_values);
+		$hist_values = array();
+		foreach($percent_values AS $percent_value) {
+			if (!isset($hist_values[$percent_value]))
+				$hist_values[$percent_value] = 0;
+			$hist_values[$percent_value]++;
+		}
+		foreach($hist_values AS $key => $value) {
+			$hr['values'][] = array('title' => round($key * ($max - $min) / 100 + $min, strlen(substr(strrchr($summe, "."), 1))), 'value' => $value);
+		}
+		return $hr;
+	}
+
+	function absolute_haeufigkeit($data, $column_name) {
+		$ha = array('title' => 'ha(A)', 'values' => array());
+		foreach($data AS $row) {
+			$value = $row[$column_name];
+			if (empty($ha['values'][$value])) {
+				$ha['values'][$value] = array('title' => $value, 'value' => 1);
+			}
+			else {
+				$ha['values'][$value]['value']++;
+			}
+		}
+		ksort($ha['values']);
+		return $ha;
 	}
 
 ?>

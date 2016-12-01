@@ -1245,7 +1245,7 @@ class ALB {
   function ALBAuszug_Flurstueck($FlurstKennz,$formnummer) {
   	global $katasterfuehrendestelle;
     $pdf=new Cezpdf();
-    $pdf->selectFont(PDFCLASSPATH.'fonts/Helvetica.afm');
+    $pdf->selectFont(WWWROOT . APPLVERSION . 'fonts/PDFClass/Helvetica.afm');
     # Hilfsobjekte erzeugen
     $fontSize=12;
     $col00=28;
@@ -1836,7 +1836,7 @@ class ALB {
 
   function ALBAuszug_Bestand($Grundbuchbezirk,$Grundbuchblatt,$formnummer) {
     $pdf=new Cezpdf();
-		$pdf->selectFont(PDFCLASSPATH.'fonts/Helvetica.afm');
+		$pdf->selectFont(WWWROOT . APPLVERSION . 'fonts/PDFClass/Helvetica.afm');
     # Hilfsobjekte erzeugen
 
     $grundbuch=new grundbuch($Grundbuchbezirk,$Grundbuchblatt,$this->database);

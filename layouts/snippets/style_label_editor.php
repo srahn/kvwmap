@@ -119,6 +119,8 @@ function save_style(style_id){
 	data+= '&opacity='+document.GUI.style_opacity.value;
 	data+= '&minsize='+document.GUI.style_minsize.value;
 	data+= '&maxsize='+document.GUI.style_maxsize.value;
+	data+= '&minscale='+document.GUI.style_minscale.value;
+	data+= '&maxscale='+document.GUI.style_maxscale.value;
 	data+= '&angle='+document.GUI.style_angle.value;
 	data+= '&angleitem='+document.GUI.style_angleitem.value;
 	data+= '&width='+document.GUI.style_width.value;

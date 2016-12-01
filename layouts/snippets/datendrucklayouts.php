@@ -326,17 +326,14 @@ function save_layout(){
 								<td style="border-top:1px solid #C3C7C3" width="60px">&nbsp;Breite:</td>
 								<td style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3"><input  type="text" name="width_<? echo $this->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['width']; ?>" size="5"></td>
 								<td style="border-top:1px solid #C3C7C3" align="left" colspan="2" align="center">
-									<select title="Schriftart" name="font_<? echo $this->attributes['name'][$i]; ?>">
-										<?
-										for($j = 0; $j < count($this->ddl->fonts); $j++){
-											echo '<option ';
-											if($this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['font'] == $this->ddl->fonts[$j]){
-												echo 'selected ';
-											}
-											echo 'value="'.$this->ddl->fonts[$j].'">'.basename($this->ddl->fonts[$j]).'</option>';
-										}
-										?>
-									</select>
+									<?php echo output_select(
+										'font_' . $this->attributes['name'][$i],
+										$this->ddl->fonts,
+										$this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['font'],
+										null,
+										'Schriftart',
+										' - Bitte wählen - '
+									); ?>
 								</td>
 								<td style="border-top:1px solid #C3C7C3" align="left" align="center"><input type="text" title="Schriftgröße" name="fontsize_<? echo $this->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['fontsize']; ?>" size="2">&nbsp;pt</td>
 							</tr>
@@ -404,34 +401,26 @@ function save_layout(){
         	<td>&nbsp;x:</td>
         	<td style="border-right:1px solid #C3C7C3"><input type="text" name="dateposx" value="<? echo $this->ddl->selectedlayout[0]['dateposx'] ?>" size="5"></td>
         	<td colspan="2" style="border-right:2px solid #C3C7C3" align="center">
-        		<select title="Schriftart" name="font_date">
-        			<option value="">--- bitte wählen ---</option>
-	        		<?
-	        		for($i = 0; $i < count($this->ddl->fonts); $i++){
-	        			echo '<option ';
-	        			if($this->ddl->selectedlayout[0]['font_date'] == $this->ddl->fonts[$i]){
-	        				echo 'selected ';
-	        			}
-	        			echo 'value="'.$this->ddl->fonts[$i].'">'.basename($this->ddl->fonts[$i]).'</option>';
-	        		}
-	        		?>
-        		</select>
+						<?php echo output_select(
+							'font_date',
+							$this->ddl->fonts,
+							$this->ddl->selectedlayout[0]['font_date'],
+							null,
+							'Schriftart',
+							'--- bitte wählen ---'
+						); ?>
         	</td>
         	<td width="100px" style="border-right:1px solid #C3C7C3">
         		&nbsp;x:&nbsp;<input type="text" name="userposx" value="<? echo $this->ddl->selectedlayout[0]['userposx'] ?>" size="5"></td>
         	<td colspan="2" align="center">
-        		<select title="Schriftart" name="font_user">
-        			<option value="">--- bitte wählen ---</option>
-	        		<?
-	        		for($i = 0; $i < count($this->ddl->fonts); $i++){
-	        			echo '<option ';
-	        			if($this->ddl->selectedlayout[0]['font_user'] == $this->ddl->fonts[$i]){
-	        				echo 'selected ';
-	        			}
-	        			echo 'value="'.$this->ddl->fonts[$i].'">'.basename($this->ddl->fonts[$i]).'</option>';
-	        		}
-	        		?>
-        		</select>
+						<?php echo output_select(
+							'font_user',
+							$this->ddl->fonts,
+							$this->ddl->selectedlayout[0]['font_user'],
+							null,
+							'Schriftnutzer',
+							'--- bitte wählen ---'
+						); ?>
         	</td>
         </tr>
         <tr>
@@ -464,18 +453,14 @@ function save_layout(){
 	        		<textarea name="text<? echo $i ?>" cols="37" rows="6"><? echo $this->ddl->selectedlayout[0]['texts'][$i]['text'] ?></textarea>
 	        	</td>
 	        	<td style="border-top:2px solid #C3C7C3;" colspan=2 align="left">
-	        		<select title="Schriftart" name="textfont<? echo $i ?>">
-	        			<option value="">--- bitte wählen ---</option>
-		        		<?
-		        		for($j = 0; $j < count($this->ddl->fonts); $j++){
-		        			echo '<option ';
-		        			if($this->ddl->selectedlayout[0]['texts'][$i]['font'] == $this->ddl->fonts[$j]){
-		        				echo 'selected ';
-		        			}
-		        			echo 'value="'.$this->ddl->fonts[$j].'">'.basename($this->ddl->fonts[$j]).'</option>';
-		        		}
-		        		?>
-	        		</select>
+							<?php echo output_select(
+								'textfont' . $i,
+								$this->ddl->fonts,
+								$this->ddl->selectedlayout[0]['texts'][$i]['font'],
+								null,
+								'Schriftart',
+								'--- bitte wählen ---'
+							); ?>
 	        	</td>
 	        </tr>
 	        <tr>

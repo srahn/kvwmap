@@ -19,8 +19,8 @@
 	}
 ?>
 <div id="layer" onclick="remove_calendar();">
-<? if($this->new_entry != true AND $layer['requires'] == ''){ ?>
 <input type="hidden" value="" id="changed_<? echo $layer['Layer_ID']; ?>" name="changed_<? echo $layer['Layer_ID']; ?>">
+<? if($this->new_entry != true AND $layer['requires'] == ''){ ?>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 	<tr>
 		<td width="99%" align="center"><h2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<? echo $layer['Name']; ?></h2></td>
@@ -106,7 +106,11 @@
 						if($attributes['privileg'][$j] != '0' AND !$lock[$k])$this->editable = $layer['Layer_ID'];
 						if($attributes['alias'][$j] == '')$attributes['alias'][$j] = $attributes['name'][$j];
 						
-						if($attributes['arrangement'][$j] != 1)$datapart .= '<tr>';							# wenn Attribut nicht daneben -> neue Zeile beginnen
+						if($attributes['arrangement'][$j] != 1){	# wenn Attribut nicht daneben -> neue Zeile beginnen
+							$attributes_in_row_so_far = 1;					# Attributanzahl in dieser Zeile bis zu diesem Attribut
+							$datapart .= '<tr>';							
+						}
+						else $attributes_in_row_so_far++;
 						if($attributes['labeling'][$j] != 2){
 							$td = '	<td class="gle_attribute_name" '; if($attributes['labeling'][$j] == 1 AND $attributes['arrangement'][$j] == 1 AND $attributes['arrangement'][$j+1] != 1)$td .= 'colspan="20" ';if($attributes['group'][0] != '' AND $attributes['arrangement'][$j] != 1)$td .= 'width="10%">';else $td.='width="1%">';
 							$td.= 			attribute_name($layer['Layer_ID'], $attributes, $j, $k, $this->user->rolle->fontsize_gle);
@@ -114,8 +118,24 @@
 							if($nl AND $attributes['labeling'][$j] != 1)$next_line .= $td; else $datapart .= $td;
 						}
 						if($attributes['labeling'][$j] == 1)$nl = true;										# Attributname soll oben stehen -> alle weiteren tds für die nächste Zeile aufsammeln
-						$td = '	<td class="gle_attribute_value"'; if($attributes['arrangement'][$j+1] != 1)$td .= 'colspan="20"'; $td .= '>';												
-						$td.= 			attribute_value($this, $layer['Layer_ID'], $attributes, $j, $k, $layer['shape'][$k], $size, $select_width, $this->user->rolle->fontsize_gle);
+						
+						# Ermittlung einer geeigneten Größe für das Attribut
+						if($attributes['arrangement'][$j+1] == 1 OR $attributes['arrangement'][$j] == 1){
+							$b = $j+1;
+							while($b < $j+4 AND $attributes['arrangement'][$b] == 1)$b++;			# 4 vorwärts gucken
+							$attributes_in_row = $attributes_in_row_so_far + $b - $j -1;			# Anzahl der bisherigen Attribute in der Zeile dazurechnen
+							$size_backup = $size;
+							$size2 = $size/$attributes_in_row;
+							$sw = 20*$size2;
+							$select_width2 = 'max-width: '.$sw.'px;';
+						}
+						else{
+							$size2 = $size;
+							$select_width2 = $select_width;
+						}
+						
+						$td = '	<td class="gle_attribute_value"'; if($attributes['arrangement'][$j+1] != 1){$colspan = 20 - $attributes_in_row_so_far; $td .= 'colspan="'.$colspan.'"';} $td .= '>';
+						$td.= 			attribute_value($this, $layer['Layer_ID'], $attributes, $j, $k, $layer['shape'][$k], $size2, $select_width2, $this->user->rolle->fontsize_gle);
 						$td.= '	</td>';
 						if($nl)$next_line .= $td; else $datapart .= $td;
 						if($attributes['arrangement'][$j+1] != 1)$datapart .= '</tr>';						# wenn nächstes Attribut nicht daneben -> Zeile abschliessen
@@ -162,7 +182,7 @@
 						<? } else { ?>
 			    	    <td <? if($attributes['group'][0] != '')echo 'width="200px"'; ?> bgcolor="<? echo BG_GLEATTRIBUTE; ?>" style="padding-top:5px; padding-bottom:5px;">&nbsp;</td>
 			    	    <? } ?>
-			    	    <td style="padding-top:5px; padding-bottom:5px;" valign="middle">
+			    	    <td style="padding-top:5px; padding-bottom:5px;" valign="middle" colspan="19">
 <?						
 							if(!$layer['shape'][$k]['wfs_geom']){		// kein WFS 
 								echo '<input type="hidden" id="'.$columnname.'_'.$k.'" value="'.$layer['shape'][$k][$columnname].'">';
@@ -344,7 +364,7 @@
 						</table>
 					</td>
 				</tr>
-				<tr style="display:true">
+				<tr style="display:none">
 					<td height="23" colspan="3">
 						&nbsp;&nbsp;&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:showcharts(<?php echo $layer['Layer_ID']; ?>);"><? echo $strCreateChart; ?></a>
 					</td>

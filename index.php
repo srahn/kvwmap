@@ -5,7 +5,7 @@ session_start();
 # kvwmap - Kartenserver für die Verwaltung raumbezogener Daten.   #
 # Lizenz                                                          #
 #                                                                 #
-# Copyright (C) 2016  Peter Korduan                               # 
+# Copyright (C) 2016  Peter Korduan                               #
 #                                                                 #
 # This program is free software; you can redistribute it and/or   #
 # modify it under the terms of the GNU General Public License as  #
@@ -42,15 +42,18 @@ if($_REQUEST['go_plus'] != '')$go = $go.'_'.$_REQUEST['go_plus'];
 
 ###########################################################################################################
 define(CASE_COMPRESS, false);																																						  #
+#																																																					#
+#		ALLE:						  - die Stelle muss die IP checken  																								  #
+#											- die Stelle muss das Passwortalter checken																					#
 #																																																				  #
-# 	navMap_ajax: 		  - unter 1:10 zoomen																																	#
+# 	navMap_ajax: 		  - LAGEBEZEICHNUNGSART muss auf 'Flurbezeichnung' gesetzt sein												#
+#											- man muss über den Rechteckzoom unter 1:100 zoomen (kein Mausrad!)									#
 #										  - ein räumlich gefilterter Layer muss an sein																				#
 #										  - man muss einen anderen EPSG-Code als den der Ref-Karte (2398) eingestellt haben		#
 # 	tooltip_query:	  - ein Datensatz mit Bild muss agefragt werden																			  #
 #										  - getRollenLayer() reinkopieren																										  #
 #   getLayerOptions:  - getRollenLayer() reinkopieren																											#
 #																																																				  #
-#		ALLE:						  - die Stelle muss die IP checken  																								  #
 #																																																				  #
 ###########################################################################################################
 
@@ -1283,6 +1286,16 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  case 'Layerattribut-Rechteverwaltung_speichern' : {
 			$GUI->checkCaseAllowed('Layerattribut-Rechteverwaltung');
 			$GUI->layer_attributes_privileges_save();
+	  } break;
+		
+		case 'Layer_Parameter' : {
+			$GUI->checkCaseAllowed('Layer_Parameter');
+			$GUI->layer_parameter();
+	  } break;
+		
+		case 'Layer_Parameter_speichern' : {
+			$GUI->checkCaseAllowed('Layer_Parameter');
+			$GUI->layer_parameter_speichern();
 	  } break;
 
 	  case 'Stelleneditor' : {
