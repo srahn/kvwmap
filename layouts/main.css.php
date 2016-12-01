@@ -892,7 +892,7 @@ tbody.gle tr:hover {
 }
 
 .fa:hover {
-	color: #993333;
+	color: #90a0b5;
 	cursor: pointer;
 }
 

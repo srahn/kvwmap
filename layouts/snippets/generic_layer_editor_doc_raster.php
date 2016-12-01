@@ -34,8 +34,8 @@
 </script>
 
 <div id="layer" align="left" onclick="remove_calendar();">
-<? if($this->formvars['embedded_subformPK'] == '' AND $this->new_entry != true){ ?>
 <input type="hidden" value="" id="changed_<? echo $layer['Layer_ID']; ?>" name="changed_<? echo $layer['Layer_ID']; ?>">
+<? if($this->formvars['embedded_subformPK'] == '' AND $this->new_entry != true){ ?>
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
 	<tr>
 		<td valign="top" style="padding: 0 0 0 0">

@@ -46,14 +46,14 @@ class ddl {
 		}
     # Datum
     if($this->layout['datesize']){
-    	$this->pdf->selectFont($this->layout['font_date']);
+    	$this->pdf->selectFont(WWWROOT . APPLVERSION . 'fonts/PDFClass/' . $this->layout['font_date']);
 			$x = $this->layout['dateposx'];
 			$y = $this->layout['dateposy'] - $offsety;
 			$this->putText(date("d.m.Y"), $this->layout['datesize'], NULL, $x, $y, $offsetx);
     }
     # Nutzer
     if($this->layout['usersize']){
-    	$this->pdf->selectFont($this->layout['font_user']);			
+    	$this->pdf->selectFont(WWWROOT . APPLVERSION . 'fonts/PDFClass/' . $this->layout['font_user']);			
 			$x = $this->layout['userposx'];
 			$y = $this->layout['userposy'] - $offsety;
 			$this->putText('Stelle: '.$this->Stelle->Bezeichnung.', Nutzer: '.$this->user->Name, $this->layout['usersize'], NULL, $x, $y, $offsetx);
@@ -72,7 +72,7 @@ class ddl {
 				if(($type == 'fixed' AND $this->layout['texts'][$j]['type'] != 2 AND ($this->layout['type'] == 0 OR $this->layout['texts'][$j]['type'] == 1)) 
 				OR ($type == 'running' AND $this->layout['type'] != 0 AND $this->layout['texts'][$j]['type'] == 0)
 				OR ($type == 'everypage' AND $this->layout['texts'][$j]['type'] == 2)){									
-					$this->pdf->selectFont($this->layout['texts'][$j]['font']);								
+					$this->pdf->selectFont(WWWROOT . APPLVERSION . 'fonts/PDFClass/' . $this->layout['texts'][$j]['font']);								
 					$x = $this->layout['texts'][$j]['posx'];
 					$y = $this->layout['texts'][$j]['posy'];
 					$offset_attribute = $this->layout['texts'][$j]['offset_attribute'];
@@ -217,7 +217,7 @@ class ddl {
 						
 						default : {
 							if($this->page_overflow_by_sublayout)$this->pdf->reopenObject($this->page_id_before_sublayout);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
-							$this->pdf->selectFont($this->layout['elements'][$attributes['name'][$j]]['font']);
+							$this->pdf->selectFont(WWWROOT . APPLVERSION . 'fonts/PDFClass/' . $this->layout['elements'][$attributes['name'][$j]]['font']);
 							if($this->layout['elements'][$attributes['name'][$j]]['fontsize'] > 0 OR $attributes['form_element_type'][$j] == 'Dokument'){
 								$y = $this->layout['elements'][$attributes['name'][$j]]['ypos'];
 								#### relative Positionierung über Offset-Attribut ####
@@ -473,8 +473,8 @@ class ddl {
   	$this->i_on_page = -1;
 		$this->page_overflow_by_sublayout = false;
 		if($pdfobject == NULL){
-			include (PDFCLASSPATH."class.ezpdf.php");				# Einbinden der PDF Klassenbibliotheken
-			$this->pdf=new Cezpdf();			# neues PDF-Objekt erzeugen
+			include (CLASSPATH . 'class.ezpdf.php');
+			$this->pdf=new Cezpdf();
 		}
 		else{
 			$this->pdf = $pdfobject;			# ein PDF-Objekt wurde aus einem übergeordneten Druckrahmen/Layer übergeben
@@ -898,18 +898,38 @@ class ddl {
     $this->database->execSQL($sql,4, 1);
 	}
  
- 	function get_fonts(){
- 		$fonts = searchdir(PDFCLASSPATH.'fonts/', true);
- 		$count = count($fonts);
- 		for($i = 0; $i < $count; $i++){
- 			if(strpos($fonts[$i], 'php_')){
- 				unset($fonts[$i]);
- 			}
- 		}
- 		sort($fonts);
- 		return $fonts;
- 	}
- 
+	function get_fonts() {
+		$font_files = searchdir(WWWROOT . APPLVERSION . 'fonts/PDFClass/', true);
+		$fonts = array();
+		foreach($font_files AS $font_file) {
+			if (strpos($font_file, 'php_') === false) {
+				$pathinfo = pathinfo($font_file);
+				$fonts[] = array(
+					'value' => $pathinfo['basename'],
+					'output' => $pathinfo['filename']
+				);
+			}
+		}
+		#print_r($fonts);
+		return $fonts;
+	}
+
+	function get_din_formats() {
+		$din_formats = array(
+			'A5hoch' => array('value' => 'A5hoch', 'output' => 'A5 hoch', 'size' => '(420 x 595)'),
+			'A5quer' => array('value' => 'A5quer', 'output' => 'A5 quer', 'size' => '(595 x 420)'),
+			'A4hoch' => array('value' => 'A4hoch', 'output' => 'A4 hoch', 'size' => '(595 x 842)'),
+			'A4quer' => array('value' => 'A4quer', 'output' => 'A4 quer', 'size' => '(842 x 595)'),
+			'A3hoch' => array('value' => 'A3hoch', 'output' => 'A3 hoch', 'size' => '(842 x 1191)'),
+			'A3quer' => array('value' => 'A3quer', 'output' => 'A3 quer', 'size' => '(1191 x 842)'),
+			'A2hoch' => array('value' => 'A2hoch', 'output' => 'A2 hoch', 'size' => '(1191 x 1684)'),
+			'A2quer' => array('value' => 'A2quer', 'output' => 'A2 quer', 'size' => '(1684 x 1191)'),
+			'A1hoch' => array('value' => 'A1hoch', 'output' => 'A1 hoch', 'size' => '(1684 x 2384)'),
+			'A1quer' => array('value' => 'A1quer', 'output' => 'A1 quer', 'size' => '(2384 x 1684)'),
+			'A0hoch' => array('value' => 'A0hoch', 'output' => 'A0 hoch', 'size' => '(2384 x 3370)'),
+			'A0quer' => array('value' => 'A0quer', 'output' => 'A0 quer', 'size' => '(3370 x 2384)'),
+		);
+		return $din_formats;
+	}
 }
-	
 ?>

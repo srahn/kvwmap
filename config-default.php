@@ -204,8 +204,9 @@ define('DRUCKRAHMEN_PATH',SHAPEPATH.'druckrahmen/');
 
 # Pfad zu den Funktionen
 #define('FKT_PATH',WWWROOT.APPLVERSION.'funktionen/');			# in Version 1.7.3 wieder gelöscht
+
 # Pfad zu den PDF-Generator Klassen
-define('PDFCLASSPATH',WWWROOT.'PDFClass/');
+#define('PDFCLASSPATH', '../PDFClass/');																						# in Version 2.6 gelöscht
 
 # 3rdparty Pfade
 define('THIRDPARTY_PATH', 'http://gdi-service.de/3rdparty/');												# Version 2.6
@@ -214,7 +215,6 @@ define('JQUERY_PATH', THIRDPARTY_PATH . 'jQuery-1.12.0/');													# Version
 define('BOOTSTRAP_PATH', THIRDPARTY_PATH . 'bootstrap-3.3.6/');											# Version 2.6
 define('BOOTSTRAPTABLE_PATH', THIRDPARTY_PATH . 'bootstrap-table-1.11.0/');					# Version 2.6
 
-bootstrap-table-1.11.0
 # Bin-Pfad der Postgres-tools (shp2pgsql, pgsql2shp)
 define('POSTGRESBINPATH', '/usr/bin/');         # Version 1.6.4
 
