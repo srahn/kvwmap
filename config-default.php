@@ -546,6 +546,7 @@ $kvwmap_plugins = array();																			# Version 1.11.0
 #$kvwmap_plugins[] = 'gewaesser';																# Version 1.11.0
 #$kvwmap_plugins[] = 'bodenrichtwerte';													# Version 2.0.0
 #$kvwmap_plugins[] = 'jagdkataster';														# Version 2.0.0
+#$kvwmap_plugins[] = 'fortfuehrungslisten';											# Version 2.6.0
 #$kvwmap_plugins[] = 'nachweisverwaltung';											# Version 2.0.0
 #$kvwmap_plugins[] = 'anliegerbeitraege';												# Version 2.0.0
 #$kvwmap_plugins[] = 'probaug';																	# Version 2.0.0
