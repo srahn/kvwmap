@@ -5,9 +5,37 @@
 
 class ShapeFile extends PgObject {
 
+	static $schema = 'xplankonverter';
+	static $tableName = 'konvertierungen';
+	static $write_debug = false;
+
 	function ShapeFile($gui, $schema, $tableName) {
 		$this->PgObject($gui, $schema, $tableName);
 		$this->importer = new data_import_export();
+	}
+
+	public static	function find_by_id($gui, $by, $id) {
+		#echo '<br>find konvertierung by ' . $by . ' = ' . $id;
+		$shapefile = new ShapeFile($gui, 'xplankonverter', 'shapefiles');
+		$shapefile->find_by($by, $id);
+		return $shapefile;
+	}
+
+	function geometry_column_srid() {
+		$sql = "
+			SELECT
+			  srid
+			FROM
+			  geometry_columns
+			WHERE
+				f_table_schema = '" . $this->dataSchemaName() . "' AND
+				f_table_name = '" . $this->dataTableName() . "' AND
+				f_geometry_column = 'the_geom'
+		";
+		$this->debug->show('<p>Get geometry_column_srid sql: ' . $sql, ShapeFile::$write_debug);
+		$result = pg_query($this->database->dbConn, $sql);
+		$row = pg_fetch_assoc($result);
+		return $row['srid'];
 	}
 
 	function dataSchemaName() {
@@ -37,7 +65,7 @@ class ShapeFile extends PgObject {
 	*/
 	function deleteLayer() {
 		if ($this->get('layer_id') != '') {
-			$this->debug->show('<p>Delete Layer in mysql db: ' . $this->dataTableName());
+			$this->debug->show('<p>Delete Layer in mysql db: ' . $this->dataTableName(), false);
 			$this->gui->formvars['selected_layer_id'] = $this->get('layer_id');
 			$this->gui->LayerLoeschen();
 		}
@@ -56,7 +84,7 @@ class ShapeFile extends PgObject {
 			DROP TABLE IF EXISTS
 				" . $this->qualifiedDataTableName() . "
 		";
-		$this->debug->show('<p>sql: ' . $sql);
+		$this->debug->show('<p>sql: ' . $sql, false);
 		$result = pg_query($this->database->dbConn, $sql);
 		return $result;
 	}
@@ -99,6 +127,21 @@ class ShapeFile extends PgObject {
 			$this->dataSchemaName(),
 			$this->dataTableName()
 		);
+	}
+
+	function update_geometry_srid() {
+		$sql = "
+			SELECT
+				UpdateGeometrySRID(
+					'" . $this->dataSchemaName() . "',
+					'" . $this->dataTableName() . "',
+					'the_geom',
+					" . $this->get('epsg_code') . "
+				)
+		";
+		$this->debug->show('<p>Set geometry_column_srid sql: ' . $sql, ShapeFile::$write_debug);
+		$result = pg_query($this->database->dbConn, $sql);
+		return $result;
 	}
 }
 	

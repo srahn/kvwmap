@@ -28,6 +28,28 @@
 	};
 
 	/**
+	* Trigger für Shapefiles
+	*/
+	$this->trigger_functions['handle_shapes'] = function($fired, $event, $layer = '', $oid = 0, $old_dataset = array()) use ($GUI) {
+		$executed = true;
+		$success = true;
+
+		switch(true) {
+			# Passe die SRID der Spalte the_geom an den epsg_code des Shapefiles an.
+			case ($fired == 'AFTER' AND $event == 'UPDATE') : {
+				$shapefile = ShapeFile::find_by_id($this, 'oid', $oid);
+				if ($shapefile->geometry_column_srid() != $shapefile->get(epsg_code))
+					$shapefile->update_geometry_srid();
+			} break;
+
+			default : {
+				$executed = false;
+			}
+		}
+		return array('executed' => $executed, 'success' => $success);
+	};
+
+	/**
 	* Trigger für RP_Plan Objekte
 	*/
 	$this->trigger_functions['handle_rp_plan'] = function($fired, $event, $layer = '', $oid = 0, $old_dataset = array()) use ($GUI) {
@@ -69,13 +91,21 @@
 		$success = true;
 
 		switch(true) {
-
+			
 			case ($fired == 'AFTER' AND $event == 'INSERT') : {
 				$this->debug->show('Führe ' . $fired . ' ' . $event . ' in handle_regel Funktion aus mit oid: ' . $oid, false);
 				$regel = Regel::find_by_id($this, 'oid', $oid);
 				$regel->create_gml_layer();
 				$regel->konvertierung->set_status();
-			} break;
+			} break;			
+			
+			case ($fired == 'AFTER' AND $event == 'UPDATE') : {
+				$this->debug->show('Führe ' . $fired . ' ' . $event . ' in handle_regel Funktion aus mit oid: ' . $oid, false);
+				$regel = Regel::find_by_id($this, 'oid', $oid);
+				$regel->delete_gml_layer();
+				$regel->create_gml_layer();
+				$regel->konvertierung->set_status();
+			} break;			
 
 			case ($fired == 'INSTEAD' AND $event == 'DELETE') : {
 				$this->debug->show('Führe ' . $fired . ' ' . $event . ' in handle_regel Funktion aus.', false);

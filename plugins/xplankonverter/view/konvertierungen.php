@@ -40,6 +40,7 @@
   // functions
   starteKonvertierung = function(e) {
     var konvertierung_id = $(e.target).parent().parent().attr('konvertierung_id');
+		document.getElementById('sperrspinner').style.display = 'block';
     result.success('Starte Konvertierung und Validierung für Konvertierung-Id: ' + konvertierung_id);
     // set status to 'IN_KONVERTIERUNG'
     $.ajax({
@@ -60,6 +61,9 @@
           data: {
             konvertierung_id: konvertierung_id
           },
+					complete: function () {
+						document.getElementById('sperrspinner').style.display = 'none';
+					},
           error: function(response) {
             result.error(response.msg);
           },
@@ -72,6 +76,9 @@
               data: {
                 konvertierung_id: konvertierung_id
               },
+							complete: function () {
+								document.getElementById('sperrspinner').style.display = 'none';
+							},
               error: function(response) {
                 result.error(response.msg);
               },
@@ -90,6 +97,8 @@
 
   starteGmlAusgabe = function(e) {
     var konvertierung_id = $(e.target).parent().parent().attr('konvertierung_id');
+		
+		onclick="document.getElementById(\'sperrspinner\').style.display = \'block\';"
     result.success('Starte GML-Ausgabe für Konvertierung-Id: ' + konvertierung_id);
     // set status to 'IN_GML_ERSTELLUNG'
     $.ajax({
@@ -98,6 +107,9 @@
         konvertierung_id: konvertierung_id,
         status: "<?php echo Konvertierung::$STATUS['IN_GML_ERSTELLUNG']; ?>"
       },
+			complete: function () {
+				document.getElementById('sperrspinner').style.display = 'none';
+			},
       error: function(response) {
         result.error('Fehler beim Starten der GML-Erstellung für Konvertierung-Id: ' + konvertierung_id);
         return;
@@ -110,6 +122,9 @@
           data: {
             konvertierung_id: konvertierung_id
           },
+					complete: function () {
+						document.getElementById('sperrspinner').style.display = 'none';
+					},
           error: function(response) {
             $('#konvertierungen_table').bootstrapTable('refresh');
             result.error('Fehler bei der GML-Erstellung für Konvertierung-Id: ' + konvertierung_id);
@@ -149,7 +164,13 @@
     funcIsDisabled = row.status == "<?php echo Konvertierung::$STATUS['IN_ERSTELLUNG']; ?>"
                   || row.status == "<?php echo Konvertierung::$STATUS['IN_KONVERTIERUNG']; ?>"
                   || row.status == "<?php echo Konvertierung::$STATUS['IN_GML_ERSTELLUNG']; ?>";
-    output += '<a title="Konvertierung durchführen & validieren" class="btn btn-link btn-xs xpk-func-btn' + (funcIsDisabled ? disableFrag : '') + '" href="index.php?go=xplankonverter_konvertierung&konvertierung_id=' + value + '"><i class="fa fa-lg fa-cogs"></i></a>';
+    output += '<a title="Konvertierung durchführen & validieren" class="btn btn-link btn-xs xpk-func-btn' + (funcIsDisabled ? disableFrag : '') + '" href="index.php?go=xplankonverter_konvertierung&konvertierung_id=' + value + '" onclick="document.getElementById(\'sperrspinner\').style.display = \'block\';"><i class="fa fa-lg fa-cogs"></i></a>';
+
+		// Validierungsergebnisse anzeigen
+		funcIsDisabled = row.status == "<?php echo Konvertierung::$STATUS['IN_ERSTELLUNG']; ?>"
+		              || row.status == "<?php echo Konvertierung::$STATUS['IN_KONVERTIERUNG']; ?>"
+		              || row.status == "<?php echo Konvertierung::$STATUS['IN_GML_ERSTELLUNG']; ?>";
+		output += '<a title="Validierungsergebnisse anzeigen" class="btn btn-link btn-xs xpk-func-btn' + (funcIsDisabled ? disableFrag : '') + '" href="index.php?go=xplankonverter_validierungsergebnisse&konvertierung_id=' + value + '" onclick="document.getElementById(\'sperrspinner\').style.display = \'block\';"><i class="fa fa-lg fa-eye"></i></a>';
 
     // GML-Erzeugen
     funcIsDisabled = row.status != "<?php echo Konvertierung::$STATUS['KONVERTIERUNG_OK']; ?>"
