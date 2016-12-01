@@ -12,7 +12,7 @@ if ($this->Fehlermeldung!='') {
 // formatter functions
 function validierung_msg_formatter(value, row) {
 	if (row.ergebnis_status == 'Fehler')
-		return row.validierung_msg_error;
+		return row.validierung_msg_error + '<br>' + value;
 	else if (row.ergebnis_status == 'Warnung')
 		return row.validierung_msg_warning + '<br>' + value;
 	else
@@ -27,7 +27,7 @@ function validierung_msg_correcture_formatter(value, row) {
 		output = '';
 	}
 	if (row.regel_id)
-		output += ' zur Regel <a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=9&operator_id==&value_id=' + row.regel_id + '"><i class="fa fa-lg fa-pencil"></i></a>';
+		output += '<br>zur Regel <a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=9&operator_id==&value_id=' + row.regel_id + '"><i class="fa fa-lg fa-pencil"></i></a>';
 	if (row.shape_gid)
 		output += ' zum Objekt <a href="index.php?go=Layer-Suche&selected_group_id=' + row.shape_layer_group_id + '"><i class="fa fa-lg fa-pencil"></i></a>';
 	return output;

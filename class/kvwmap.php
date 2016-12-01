@@ -11392,7 +11392,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $i = 0;
   }
 
-  function sachdaten_speichern(){
+  function sachdaten_speichern() {
 		if($this->formvars['document_attributename'] != '')$_FILES[$this->formvars['document_attributename']]['name'] = 'delete';		# das zu löschende Dokument
   	$_files = $_FILES;
     $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
@@ -11526,8 +11526,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 							# Before Update trigger
 							if (!empty($layer['trigger_function'])) {
-								$this->exec_trigger_function('BEFORE', 'UPDATE', $layerset[$layer_id], $oid);
+								$this->exec_trigger_function('BEFORE', 'UPDATE', $layerset[$layer_id][0], $oid);
 							}
+
+							#echo '<br>sql for update: ' . $sql;
 
 							$this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
 							$ret = $layerdb[$layer_id]->execSQL($sql,4, 1);
@@ -11538,10 +11540,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 									$ret[0] = 1;
 									$success = false;
 								}
-								else{
+								else {
 									# After Update trigger
-									if (!empty($layer['trigger_function'])){
-										$this->exec_trigger_function('AFTER', 'UPDATE', $layerset[$layer_id], $oid);
+									if (!empty($layerset[$layer_id][0]['trigger_function'])){
+										$this->exec_trigger_function('AFTER', 'UPDATE', $layerset[$layer_id][0], $oid);
 									}
 								}
 							}
