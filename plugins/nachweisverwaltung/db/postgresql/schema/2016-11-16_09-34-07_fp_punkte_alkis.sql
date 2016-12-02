@@ -143,6 +143,74 @@ CREATE INDEX fp_punkte_alkis_za_idx
   (zeigtauf COLLATE pg_catalog."default");
 
 
+	
+-- DROP TABLE nachweisverwaltung.fp_afismv;
+
+CREATE TABLE nachweisverwaltung.fp_afismv
+(
+  ogc_fid serial NOT NULL,
+  wkb_geometry geometry(Point,25833),
+  gml_id character varying,
+  punktkennung character varying,
+  x character varying,
+  y character varying,
+  anlass character varying,
+  punktvermarkung character varying,
+  bemerkung character varying,
+  upd character varying,
+  h3d character varying,
+  wertigkeit character varying,
+  ordnung character varying,
+  pfeilerhoehe character varying,
+  gnsstauglichkeit character varying,
+  pdfurl character varying,
+  ellipsoidhoehe character varying,
+  hoehe character varying,
+  CONSTRAINT fp_afismv_pkey PRIMARY KEY (ogc_fid)
+)
+WITH (
+  OIDS=FALSE
+);	
+	
+COMMENT ON TABLE nachweisverwaltung.fp_afismv IS 'Tabelle wird gefüllt über: ogr2ogr -overwrite -f PostgreSQL "PG:user=XXXXXX password=XXXXXXXXXX host=XXXXXX dbname=XXXXXX schemas=nachweisverwaltung" "WFS:http://www.geodaten-mv.de/dienste/afis_wfs?service=WFS&request=GetFeature&version=1.1.0&typeName=afismv:afis_wfs&srsName=EPSG:25833" -lco OVERWRITE=yes -nln fp_afismv';
+	
+	
+-- DROP VIEW nachweisverwaltung.fp_pp_afismv;
+	
+CREATE OR REPLACE VIEW nachweisverwaltung.fp_pp_afismv AS 
+ SELECT fp_afismv.gml_id,
+    fp_afismv.anlass,
+    '{DLKM}'::character varying AS advstandardmodell,
+    13 AS land,
+    40 AS zst,
+    fp_afismv.punktkennung AS pkn,
+    ltrim("right"(fp_afismv.punktkennung::text, 5), '0'::text) AS pktnr,
+    round("substring"(fp_afismv.x::text, 3)::numeric, 3)::character varying(11) AS rw,
+    round(fp_afismv.y::numeric, 3)::character varying(11) AS hw,
+    fp_afismv.hoehe::character varying(9) AS hoe,
+    (fp_afismv.hoehe::numeric(9,3) + fp_afismv.pfeilerhoehe::numeric / 1000::numeric)::numeric(9,3)::character varying(9) AS hop,
+        CASE
+            WHEN "right"(fp_afismv.punktkennung::text, 1) <> '0'::text THEN 'OP'::character varying(4)
+            ELSE 'TP'::character varying(4)
+        END AS par,
+    fp_afismv.punktvermarkung::integer AS abm,
+    fp_afismv.bemerkung AS hin,
+    fp_afismv.upd AS pru,
+        CASE
+            WHEN length(fp_afismv.punktkennung::text) = 8 THEN ((substr(fp_afismv.punktkennung::text, 1, 3) || '/'::text) || fp_afismv.punktkennung::text) || '.tif'::text
+            ELSE ((substr(fp_afismv.punktkennung::text, 1, 4) || '/'::text) || fp_afismv.punktkennung::text) || '.tif'::text
+        END AS datei,
+        CASE
+            WHEN fp_afismv.hoehe IS NULL THEN st_force_3d(st_transform(fp_afismv.wkb_geometry, 25833))
+            ELSE st_setsrid(st_makepoint("substring"(fp_afismv.x::text, 3)::double precision, fp_afismv.y::double precision, fp_afismv.hoehe::double precision), 25833)
+        END AS wkb_geometry
+   FROM nachweisverwaltung.fp_afismv;
+
+COMMENT ON VIEW nachweisverwaltung.fp_pp_afismv
+  IS '30.11.2016, H.Riedel
+Abrage zum Befuellen der fp_punkte_alkis mit den Lagefestpunkten aus AFIS MV';
+
+	
   
   -- DROP VIEW nachweisverwaltung.fp_aufnahmepunkt;
 
