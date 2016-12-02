@@ -97,8 +97,7 @@
 		case 'upload_temp_file' : {
 			$this->checkCaseAllowed($this->go);
 			include(PLUGINS.'baumfaellantrag/model/kvwmap.php');
-			$content_type = (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== false ? 'text/html' : 'application/json');
-			header('Content-Type: ' . $content_type . '; charset=utf-8');
+			header('Content-Type: application/json; charset=utf-8');
 			echo utf8_decode(json_encode($this->uploadTempFile()));
 		} break;
 
