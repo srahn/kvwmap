@@ -3,6 +3,16 @@ TRUNCATE nachweisverwaltung.fp_punkte_alkis;
 SELECT setval('nachweisverwaltung.fp_punkte_alkis_ogc_fid_seq', 1, true); 
 
 -- 
+-- Festpunkte einlesen
+-- 
+INSERT INTO nachweisverwaltung.fp_punkte_alkis 
+  ( gml_id, anlass, advstandardmodell, land, zst, pkn, pktnr, rw, hw, hoe, hop, par, abm, hin, pru, datei, wkb_geometry ) 
+SELECT 
+   * 
+FROM 
+  nachweisverwaltung.fp_pp_afismv;
+
+-- 
 -- Aufnahmepunkte einlesen
 -- 
 INSERT INTO nachweisverwaltung.fp_punkte_alkis 

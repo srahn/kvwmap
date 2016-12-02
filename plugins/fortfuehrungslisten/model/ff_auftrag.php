@@ -5,7 +5,7 @@
 
 class Fortfuehrungsauftrag extends PgObject {
 	
-	static $schema = 'kataster';
+	static $schema = 'fortfuehrungslisten';
 	static $tableName = 'ff_auftraege';
 	static $write_debug = false;
 

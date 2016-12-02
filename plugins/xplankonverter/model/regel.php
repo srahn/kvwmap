@@ -225,6 +225,8 @@ public static	function find_by_id($gui, $by, $id) {
 	}
 
 	function create_gml_layer() {
+		$this->konvertierung->create_layer_group('GML');
+		
 		if (!$this->gml_layer_exists()) {
 			$layertyp = $this->get_layertyp();
 			$this->debug->show('Erzeuge Layer ' . $this->get('class_name') . ' ' . $this->layertypen[$layertyp] . ' in Gruppe ' . $this->konvertierung->get('bezeichnung') . ' layertyp ' . $layertyp, $this->write_debug);
@@ -268,23 +270,6 @@ public static	function find_by_id($gui, $by, $id) {
 	}
 
 	function delete_gml_layer() {
-		if (!empty($this->layer_id)) {
-			# delete gml layer by konvertierung_id, name and geometrytype
-			#echo 'Delete gml layer with layer_id: ' . $this->layer_id;
-
-			# Lösche Layer, wenn von keiner anderen Regel mehr verwendet
-			$this->gui->formvars['selected_layer_id'] = $layer_id;
-			$this->gui->LayerLoeschen();
-
-			# Lösche Datatypes, wenn von keinem anderen mehr verwendet
-
-			# Lösche Gruppe, wenn kein anderer Layer mehr drin ist
-		}
-	}
-
-	function destroy() {
-		$this->debug->show('destroy regel ' . $this->get('name'), Regel::$write_debug);
-
 		# Frage ab ob es in der Gruppe der gml Layer einen Layer von class_name gibt
 		# der ansonsten von keiner anderen Regel verwendet wird und lösche diesen
 		$sql = "
@@ -337,6 +322,11 @@ public static	function find_by_id($gui, $by, $id) {
 		else {
 			$this->debug->show('ja', Regel::$write_debug);
 		}
+	}
+
+	function destroy() {
+		$this->debug->show('destroy regel ' . $this->get('name'), Regel::$write_debug);
+		$this->delete_gml_layer();
 		$this->delete();
 	}
 

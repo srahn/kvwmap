@@ -20,7 +20,10 @@ switch($this->go) {
 			}
 			else {
 				$this->loader = new NASLoader($this);
-				$this->loader->load_fortfuehrungsfaelle($ff_auftrag);
+				$result = $this->loader->load_fortfuehrungsfaelle($ff_auftrag);
+				if (!$result['succes']) {
+					$this->Fehlermeldung = $result['err_msg'];
+				}
 			}
 		}
 		$this->formvars['selected_layer_id'] = LAYER_ID_FF_AUFTRAG;
