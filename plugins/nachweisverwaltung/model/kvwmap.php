@@ -1390,21 +1390,6 @@
     $GUI->showFestpunkteSkizze();
   };
 
-	$this->uebernehmeFestpunkte = function() use ($GUI){
-    $Festpunkte=new Festpunkte(PUNKTDATEIPATH.PUNKTDATEINAME,$GUI->pgdatabase);
-    $ret=$Festpunkte->uebernehmen();
-    if ($ret[0]) { # Fehler bei der Aktualisierung der Festpunkte
-      $GUI->Fehlermeldung=$ret[1];
-    }
-    else {
-      $GUI->Protokoll=$ret[1];
-    }
-    $GUI->Festpunkte=$Festpunkte;
-    $GUI->titel='Übernahme der Festpunkte';
-    $GUI->main = PLUGINS.'nachweisverwaltung/view/aktualisierungfestpunkte.php';
-    $GUI->output();
-  };
-
 # 2016-11-03 H.Riedel - pkz durch pkn ersetzt
 	$this->festpunkteZuAuftragFormular = function() use ($GUI){
     $GUI->titel='Festpunkte zum Auftrag Hinzufügen';
@@ -1462,27 +1447,6 @@
         $GUI->datei = $ret[2];
       }
     }
-  };
-
-	$this->aktualisiereFestpunkte = function() use ($GUI){
-    if (is_file(PUNKTDATEIPATH.PUNKTDATEINAME)) {
-      # Datei ist vorhanden, Einlesen und Aufbereiten der Punkte in Datenbank
-      $Festpunkte=new Festpunkte(PUNKTDATEIPATH.PUNKTDATEINAME,$GUI->pgdatabase);
-      $ret=$Festpunkte->aktualisieren();
-      if ($ret[0]) { # Fehler bei der Aktualisierung der Festpunkte
-        $GUI->Fehlermeldung=$ret[1];
-      }
-      else {
-        $GUI->Protokoll=$ret[1];
-      }
-    }
-    else {
-      $GUI->Fehlermeldung='Die Datei '.PUNKTDATEIPATH.PUNKTDATEINAME.' existiert nicht auf dem Server.';
-    }
-    $GUI->Festpunkte=$Festpunkte;
-    $GUI->titel='Aktualisierung der Festpunkte';
-    $GUI->main = PLUGINS.'nachweisverwaltung/view/aktualisierungfestpunkte.php';
-    $GUI->output();
   };
 
 	$this->vermessungsantragsFormular = function() use ($GUI){

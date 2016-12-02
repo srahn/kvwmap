@@ -180,8 +180,7 @@ define('CUSTOM_SHAPE_SCHEMA', 'custom_shapes');					# Version 1.11.0
 define('REFERENCEMAPPATH',SHAPEPATH.'referencemaps/');
 define('NACHWEISDOCPATH',SHAPEPATH.'nachweise/');
 # Dateiname und Pfad der Festpunkte, mit der die Tabelle der Festpunkte aktualisiert werden soll
-define('PUNKTDATEINAME','festpunkte.csv');
-#define('PUNKTDATEINAME','alk');
+define('PUNKTDATEINAME','festpunkte.csv');										# in Version 2.6 gelöscht
 define('PUNKTDATEIPATH',SHAPEPATH.'festpunkte/');
 define('PUNKTDATEIARCHIVPATH',PUNKTDATEIPATH.'archiv/');
 define('KVZAUSGABEDATEINAME','festpunkte.kvz');
@@ -381,13 +380,13 @@ define('IMAGEMAGICKPATH', '/usr/bin/');                        # Version 1.7.3
 define('UPLOADPATH',SHAPEPATH.'upload/');       # Version 1.6.7
 
 # Definiert, ob die Festpunkte in 2 Streifen liegen oder nicht
-define('FESTPUNKTE_2_STREIFEN', 'true');  #true/false   # Version 1.6.7
+define('FESTPUNKTE_2_STREIFEN', 'true');  #true/false   # Version 1.6.7			# in Version 2.6 gelöscht
 
 # Legt fest, ob die Hausnummernzusätze groß oder klein dargestellt werden
 define('HAUSNUMMER_TYPE', 'LOWER');     # UPPER/LOWER   # Version 1.6.8
 
 # Definiert ob die einzulesende Festpunktedatei auf doppelte Punktkennzeichen getestet werden soll, oder nicht    # Version 1.6.8
-define('CHECKPUNKTDATEI', 'true');      # true/false                                                                # Version 1.6.8
+define('CHECKPUNKTDATEI', 'true');      # true/false                                                                # Version 1.6.8			# in Version 2.6 gelöscht
 
 # Minmale Maßstabszahl
 define('MINSCALE', 100);                                                        # Version 1.7.0
