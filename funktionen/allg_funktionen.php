@@ -703,7 +703,7 @@ function unzip($src_file, $dest_dir=false, $create_zip_name_dir=true, $overwrite
 	$output = array();
 	$entries = NULL;
 	exec('export LD_LIBRARY_PATH=;unzip -l "'.$src_file.'" -d '.dirname($src_file), $output);
-	#echo 'unzip -l "'.$src_file.'" -d '.dirname($src_file);
+	#echo '<br>unzip -l "'.$src_file.'" -d '.dirname($src_file);
 	for($i = 3; $i < count($output)-2; $i++){
   		$entries[] = array_pop(explode('   ', $output[$i]));
 	}
@@ -1462,12 +1462,13 @@ function formvars_strip($formvars, $strip_list) {
 * als key übergeben werden durch die values von $params
 */
 function replace_params($str, $params) {
-	foreach($params AS $key => $value){
-		$str = str_replace('$'.$key, $value, $str);
+	if (is_array($params)) {
+		foreach($params AS $key => $value){
+			$str = str_replace('$'.$key, $value, $str);
+		}
 	}
-  return $str;
+	return $str;
 }
-
 
 /**
 * Funktion sendet e-mail mit Dateien im Anhang
