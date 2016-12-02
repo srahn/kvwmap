@@ -54,15 +54,8 @@ define('HEADER', 'header.php');															# Version 1.8.0
 define('FOOTER', 'footer.php');															# Version 1.8.0
 # Höhe von Header und Footer zusammen
 define('HEADER_FOOTER_HEIGHT', 132);																# Version 2.0
-
-# Breite vom Scrollbaren Layer-DIV
-define('SCROLLDIV_WIDTH', 440);																			# Version 2.6
-define('MENUE_WIDTH', 235);																					# Version 2.6
-define('BUTTON_MENUE_WIDTH', 236);																					# Version 2.6
-
 # Breite von Menü und Legende zusammen
-$menue_legend_widths = array('gui.php' => (SCROLLDIV_WIDTH + MENUE_WIDTH), 'gui_button.php' => (SCROLLDIV_WIDTH + BUTTON_MENUE_WIDTH));		# Version 2.0 geändert in Version 2.6
-
+$menue_legend_widths = array('gui.php' => 485, 'gui_button.php' => 486);		# Version 2.0
 # login.php
 define('LOGIN', 'login.php');																# Version 1.8.0
 # Seite zur Fehlerbehandlung, die durch fehlerhafte Layer verursacht werden; unterhalb von /snippets
