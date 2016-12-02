@@ -273,7 +273,7 @@ a.menuered:hover {
 }
 
 #scrolldiv{
-	width:<?php echo (empty(SCROLLDIV_WIDTH) ? 250 : SCROLLDIV_WIDTH); ?>;
+	width:250;
 }
 
 #legend{
