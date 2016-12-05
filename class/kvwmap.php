@@ -7656,7 +7656,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		    $this->drawMap();
 	    	########################################################################
     	}
-      $this->formvars['anzahl'] = MAXQUERYROWS;
+			if (empty($this->formvars['anzahl'])) {
+				$this->formvars['anzahl'] = MAXQUERYROWS;
+			}
 
 			if($this->formvars['selected_layer_id'] > 0)
 				$this->layerset=$this->user->rolle->getLayer($this->formvars['selected_layer_id']);
