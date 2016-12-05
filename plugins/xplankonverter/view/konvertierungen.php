@@ -27,6 +27,9 @@
       $('.xpk-func-generate-gml').click(
         starteGmlAusgabe
       );
+      $('.xpk-func-generate-inspire').click(
+        starteInspireAusgabe
+      );
       $('.xpk-func-del-konvertierung').click(
         loescheKonvertierung
       );
@@ -144,7 +147,57 @@
       }
     });
   };
-
+  
+  starteInspireAusgabe = function(e) {
+    var konvertierung_id = $(e.target).parent().parent().attr('konvertierung_id');
+		
+		//onclick="document.getElementById(\'sperrspinner\').style.display = \'block\';"
+    result.success('Starte INSPIRE GML-Ausgabe für Konvertierung-Id: ' + konvertierung_id);
+    // set status to 'IN_INSPIRE_GML_ERSTELLUNG'
+    $.ajax({
+      url: 'index.php?go=xplankonverter_konvertierung_status',
+      data: {
+        konvertierung_id: konvertierung_id,
+        status: "<?php echo Konvertierung::$STATUS['IN_INSPIRE_GML_ERSTELLUNG']; ?>"
+      },
+			complete: function () {
+				//document.getElementById('sperrspinner').style.display = 'none';
+			},
+      error: function(response) {
+        result.error('Fehler beim Starten der INSPIRE GML-Erstellung für Konvertierung-Id: ' + konvertierung_id);
+        return;
+      },
+      success: function(response) {
+        $('#konvertierungen_table').bootstrapTable('refresh');
+        // gml-erzeugung starten
+        $.ajax({
+          url: 'index.php?go=xplankonverter_inspire_gml_generieren',
+          data: {
+            konvertierung_id: konvertierung_id
+          },
+					complete: function () {
+						//document.getElementById('sperrspinner').style.display = 'none';
+					},
+          error: function(response) {
+            $('#konvertierungen_table').bootstrapTable('refresh');
+            result.error('Fehler bei der INSPIRE GML-Erstellung für Konvertierung-Id: ' + konvertierung_id);
+            console.error(response.responseText);
+          },
+          success: function(response) {
+            if (!response.success){
+              result.error(response.msg);
+              return;
+            }
+            $('#konvertierungen_table').one('load-success.bs.table', function () {
+              result.success(response.msg);
+            });
+            $('#konvertierungen_table').bootstrapTable('refresh');
+          }
+        });
+      }
+    });
+  };
+    
   // formatter functions
   function konvertierungFunctionsFormatter(value, row) {
     var funcIsDisabled, funcIsInProgress,
@@ -182,6 +235,15 @@
     funcIsDisabled = row.status != "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_OK']; ?>";
     output += '<a title="GML-Datei herunterladen" class="btn btn-link btn-xs xpk-func-btn xpk-func-download-gml' + (funcIsDisabled ? disableFrag : '') + '" href="index.php?go=xplankonverter_gml_ausliefern&konvertierung_id=' + value + '" download="xplan_' + value + '.gml"><i class="fa fa-lg fa-download"></i></a>';
 
+    // INSPIRE-Erstellung
+    funcIsDisabled = row.status != "<?php echo Konvertierung::$STATUS['KONVERTIERUNG_OK']; ?>"
+                  && row.status != "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK']; ?>";
+    funcIsInProgress = row.status == "<?php echo Konvertierung::$STATUS['IN_INSPIRE_GML_ERSTELLUNG']; ?>";
+    output += '<a title="INSPIRE GML-Datei ausgeben" class="btn btn-link btn-xs xpk-func-btn xpk-func-generate-inspire' + (funcIsDisabled ? disableFrag : '') + '" href="index.php?go=xplankonverter_inspire_gml_generieren"><i class="fa fa-lg fa-globe"></i></a>';
+     // INSPIRE-Download
+    /*funcIsDisabled = row.status != "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK']; ?>";*/
+    output += '<a title="INSPIRE GML-Datei herunterladen" class="btn btn-link btn-xs xpk-func-btn xpk-func-download-inspire-gml' + (funcIsDisabled ? disableFrag : '') + '" href="index.php?go=xplankonverter_inspire_gml_ausliefern&konvertierung_id=' + value + '" download="inspire_' + value + '.gml"><i class="fa fa-lg fa-cloud-download"></i></a>';
+    
     // Konvertierung Löschen
     funcIsDisabled = row.status == "<?php echo Konvertierung::$STATUS['IN_GML_ERSTELLUNG']; ?>"
                   || row.status == "<?php echo Konvertierung::$STATUS['IN_KONVERTIERUNG']; ?>";

@@ -19,6 +19,7 @@ include(PLUGINS . 'xplankonverter/model/shapefiles.php');
 include(PLUGINS . 'xplankonverter/model/validierung.php');
 include(PLUGINS . 'xplankonverter/model/validierungsergebnis.php');
 include(PLUGINS . 'xplankonverter/model/xplan.php');
+include(PLUGINS . 'xplankonverter/model/converter.php');
 
 /**
 * Anwendungsfälle
@@ -472,6 +473,13 @@ switch($this->go){
 		header('Content-Type: text/xml; subtype="gml/3.3"');
     echo fread(fopen($filename, "r"), filesize($filename));
 	} break;
+  
+  case 'index.php?go=xplankonverter_gml_ausliefern&konvertierung_id' : {
+    if ($this->formvars['konvertierung_id'] == '') {
+		  echo 'Diese Link kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
+		  return;
+		}
+  } break;
 
 	case 'xplankonverter_konvertierung_loeschen' : {
 		$response = array(
@@ -481,7 +489,50 @@ switch($this->go){
 		header('Content-Type: application/json');
 		echo json_encode($response);
 	} break;
+  
+  case 'xplankonverter_inspire_gml_generieren' : {
+    $konvertierung_id = $this->formvars['konvertierung_id'];
+    if($konvertierung_id == '') {
+      $this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
+      $this->main = 'Hinweis.php';
+    }
+    
+    $this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
+    if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) return;
 
+     # set the paths
+    $xsl = PLUGINS . 'xplankonverter/model/xplan2inspire.xsl';
+    $fileinput = XPLANKONVERTER_SHAPE_PATH . $this->formvars['konvertierung_id'] . '/xplan_' . $this->formvars['konvertierung_id'] . '.gml';
+    $fileoutput = XPLANKONVERTER_SHAPE_PATH . $this->formvars['konvertierung_id'] . '/inspire_' . $this->formvars['konvertierung_id'] . '.gml';
+
+    # set and run the XSLT-Processor
+    $proc = new XsltProcessor;
+    $proc->importStylesheet(DOMDocument::load($xsl)); // load script
+    $output = $proc->transformToXML(DomDocument::load($fileinput)); // load your file
+    file_put_contents($fileoutput, $output, FILE_APPEND | LOCK_EX);
+
+  } break;
+
+  case 'xplankonverter_inspire_gml_ausliefern' : {
+		if ($this->formvars['konvertierung_id'] == '') {
+		  echo 'Diese Link kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
+		  return;
+		}
+		$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
+		if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) return;
+
+		$filename = XPLANKONVERTER_SHAPE_PATH . $this->formvars['konvertierung_id'] . '/inspire_' . $this->formvars['konvertierung_id'] . '.gml';
+		header('Content-Type: text/xml; subtype="gml/3.3"');
+    echo fread(fopen($filename, "r"), filesize($filename));
+	} break;
+  
+  /*case 'index.php?go=xplankonverter_inspire_gml_ausliefern&konvertierung_id' : {
+    if ($this->formvars['konvertierung_id'] == '') {
+		  echo 'Diese Link kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
+		  return;
+		}
+  } break;*/
+  
 	case 'xplankonverter_regeleditor' : {
 		$konvertierung_id = $_REQUEST['konvertierung_id'];
 		$bereich_gml_id = $_REQUEST['bereich_gml_id'];
@@ -511,6 +562,8 @@ switch($this->go){
 	default : {
 		$this->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
 	}
+  
+  
 
 }
 
