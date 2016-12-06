@@ -1448,9 +1448,9 @@ FROM
   }
 
 	function getSonstigesrecht($FlurstKennz) {
-    $sql ="SELECT round((st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")::numeric / st_area_utm(f.wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.") * f.amtlicheflaeche)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche,  a.bezeichner as art, fo.name";
+    $sql ="SELECT round((st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")::numeric / st_area_utm(f.wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.") * f.amtlicheflaeche)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche,  a.beschreibung as art, fo.name";
     $sql.=" FROM alkis.ax_flurstueck f, alkis.ax_sonstigesrecht fo ";
-		$sql.=" LEFT JOIN alkis.ax_sonstigesrecht_artdf a ON a.wert=fo.artderfestlegung";		
+		$sql.=" LEFT JOIN alkis.ax_artderfestlegung_sonstigesrecht a ON a.wert=fo.artderfestlegung";		
     $sql.=" WHERE st_intersects(fo.wkb_geometry,f.wkb_geometry) = true AND st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.") > 0.001 AND f.flurstueckskennzeichen='".$FlurstKennz."'";
 		$sql.= $this->build_temporal_filter(array('f', 'fo'));
 		#echo $sql;
@@ -1466,9 +1466,9 @@ FROM
   }
 	
 	function getDenkmalschutzrecht($FlurstKennz) {
-    $sql ="SELECT round((sum(st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")::numeric / st_area_utm(f.wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.") * f.amtlicheflaeche))::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche,  a.bezeichner as art, fo.name";
+    $sql ="SELECT round((sum(st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")::numeric / st_area_utm(f.wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.") * f.amtlicheflaeche))::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche,  a.beschreibung as art, fo.name";
     $sql.=" FROM alkis.ax_flurstueck f, alkis.ax_denkmalschutzrecht fo ";
-		$sql.=" LEFT JOIN alkis.ax_denkmalschutzrecht_artdf a ON a.wert=fo.artderfestlegung";		
+		$sql.=" LEFT JOIN alkis.ax_artderfestlegung_denkmalschutzrecht a ON a.wert=fo.artderfestlegung";		
     $sql.=" WHERE st_intersects(fo.wkb_geometry,f.wkb_geometry) = true AND st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.") > 0.001 AND f.flurstueckskennzeichen='".$FlurstKennz."'";
 		$sql.= $this->build_temporal_filter(array('f', 'fo'));
 		$sql.=" GROUP BY a.bezeichner, fo.name, f.amtlicheflaeche ";
@@ -1485,9 +1485,9 @@ FROM
   }
 	
 	function getBauBodenrecht($FlurstKennz) {
-    $sql ="SELECT distinct round((st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")::numeric / st_area_utm(f.wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.") * f.amtlicheflaeche)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche,  a.bezeichner as art, fo.bezeichnung, s.bezeichnung as stelle";
+    $sql ="SELECT distinct round((st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")::numeric / st_area_utm(f.wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.") * f.amtlicheflaeche)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche,  a.beschreibung as art, fo.bezeichnung, s.bezeichnung as stelle";
     $sql.=" FROM alkis.ax_flurstueck f, alkis.ax_bauraumoderbodenordnungsrecht fo ";
-		$sql.=" LEFT JOIN alkis.ax_bauraumoderbodenordnungsrecht_artderfestlegung a ON a.wert=fo.artderfestlegung";
+		$sql.=" LEFT JOIN alkis.ax_artderfestlegung_bauraumoderbodenordnungsrecht a ON a.wert=fo.artderfestlegung";
 		$sql.=" LEFT JOIN alkis.ax_dienststelle s ON s.stelle = fo.stelle";
     $sql.=" WHERE st_intersects(fo.wkb_geometry,f.wkb_geometry) = true AND st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.") > 0.001 AND f.flurstueckskennzeichen='".$FlurstKennz."'";
 		$sql.= $this->build_temporal_filter(array('f', 'fo'));
