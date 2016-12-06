@@ -293,7 +293,8 @@ switch($this->go){
     $applicableStates = array(
         Konvertierung::$STATUS['IN_ERSTELLUNG'],
         Konvertierung::$STATUS['IN_KONVERTIERUNG'],
-        Konvertierung::$STATUS['IN_GML_ERSTELLUNG']
+        Konvertierung::$STATUS['IN_GML_ERSTELLUNG'],
+        Konvertierung::$STATUS['IN_INSPIRE_GML_ERSTELLUNG']
     );
     array_walk(
       $applicableStates,
@@ -320,20 +321,26 @@ switch($this->go){
           Konvertierung::$STATUS['GML_ERSTELLUNG_OK'],
           Konvertierung::$STATUS['GML_ERSTELLUNG_ERR']
         );
-        break;
+      break;
       case Konvertierung::$STATUS['IN_KONVERTIERUNG']:
         $validPredecessorStates = array(
           Konvertierung::$STATUS['ERSTELLT'],
           Konvertierung::$STATUS['KONVERTIERUNG_OK'],
           Konvertierung::$STATUS['GML_ERSTELLUNG_OK']
         );
-        break;
+      break;
       case Konvertierung::$STATUS['IN_GML_ERSTELLUNG']:
         $validPredecessorStates = array(
           Konvertierung::$STATUS['KONVERTIERUNG_OK'],
           Konvertierung::$STATUS['GML_ERSTELLUNG_OK']
         );
-        break;
+      break;
+      case Konvertierung::$STATUS['IN_INSPIRE_GML_ERSTELLUNG']:
+        $validPredecessorStates = array(
+          Konvertierung::$STATUS['GML_ERSTELLUNG_OK'],
+          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK']
+        );
+      break;
     }
     $currStatus = $this->konvertierung->get('status');
     $isValid = array_reduce(
