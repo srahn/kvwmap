@@ -43,7 +43,7 @@
 	// functions
 	starteKonvertierung = function(e) {
 		var konvertierung_id = $(e.target).parent().parent().attr('konvertierung_id');
-	//	document.getElementById('sperrspinner').style.display = 'block';
+		document.getElementById('sperrspinner').style.display = 'block';
 		result.success('Starte Konvertierung und Validierung für Konvertierung-Id: ' + konvertierung_id);
 		// set status to 'IN_KONVERTIERUNG'
 		$.ajax({
@@ -65,7 +65,7 @@
 						konvertierung_id: konvertierung_id
 					},
 					complete: function () {
-					//	document.getElementById('sperrspinner').style.display = 'none';
+						document.getElementById('sperrspinner').style.display = 'none';
 					},
 					error: function(response) {
 						result.error(response.msg);
@@ -80,7 +80,7 @@
 								konvertierung_id: konvertierung_id
 							},
 							complete: function () {
-							//	document.getElementById('sperrspinner').style.display = 'none';
+								document.getElementById('sperrspinner').style.display = 'none';
 							},
 							error: function(response) {
 								result.error(response.msg);
@@ -100,8 +100,8 @@
 
 	starteGmlAusgabe = function(e) {
 		var konvertierung_id = $(e.target).parent().parent().attr('konvertierung_id');
-		
-		//onclick="document.getElementById(\'sperrspinner\').style.display = \'block\';"
+
+		// onclick="document.getElementById(\'sperrspinner\').style.display = \'block\';"
 		result.success('Starte GML-Ausgabe für Konvertierung-Id: ' + konvertierung_id);
 		// set status to 'IN_GML_ERSTELLUNG'
 		$.ajax({
@@ -111,7 +111,7 @@
 				status: "<?php echo Konvertierung::$STATUS['IN_GML_ERSTELLUNG']; ?>"
 			},
 			complete: function () {
-				//document.getElementById('sperrspinner').style.display = 'none';
+				// document.getElementById('sperrspinner').style.display = 'none';
 			},
 			error: function(response) {
 				result.error('Fehler beim Starten der GML-Erstellung für Konvertierung-Id: ' + konvertierung_id);
@@ -150,7 +150,7 @@
 	
 	starteInspireGmlAusgabe = function(e) {
 		var konvertierung_id = $(e.target).parent().parent().attr('konvertierung_id');
-		
+
 		//onclick="document.getElementById(\'sperrspinner\').style.display = \'block\';"
 		result.success('Starte INSPIRE GML-Ausgabe für Konvertierung-Id: ' + konvertierung_id);
 		// set status to 'IN_INSPIRE_GML_ERSTELLUNG'
@@ -161,7 +161,7 @@
 				status: "<?php echo Konvertierung::$STATUS['IN_INSPIRE_GML_ERSTELLUNG']; ?>"
 			},
 			complete: function () {
-			//	document.getElementById('sperrspinner').style.display = 'none';
+				// document.getElementById('sperrspinner').style.display = 'none';
 			},
 			error: function(response) {
 				result.error('Fehler beim Starten der INSPIRE-GML-Erstellung für Konvertierung-Id: ' + konvertierung_id);
@@ -176,7 +176,7 @@
 						konvertierung_id: konvertierung_id
 					},
 					complete: function () {
-					//	document.getElementById('sperrspinner').style.display = 'none';
+						// document.getElementById('sperrspinner').style.display = 'none';
 					},
 					error: function(response) {
 						$('#konvertierungen_table').bootstrapTable('refresh');
@@ -328,4 +328,4 @@
 	</thead>
 </table>
 
-<button class="button" type="button" id="new_konvertierung" name="go_plus" onclick="location.href='index.php?go=neuer_Layer_Datensatz&selected_layer_id=8'">neu</button>
+<button class="button" type="button" id="new_konvertierung" name="go_plus" onclick="location.href='index.php?go=neuer_Layer_Datensatz&selected_layer_id=<?php echo XPLANKONVERTER_KONVERTIERUNGEN_LAYER_ID; ?>'">neu</button>
