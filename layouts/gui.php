@@ -7,7 +7,7 @@ include(WWWROOT.APPLVERSION.'funktionen/gui_functions.php');
 <link rel="stylesheet" href="<?php echo 'layouts/'.$this->style; ?>">
 <? if(defined('CUSTOM_STYLE') AND CUSTOM_STYLE != ''){ ?>
 <link rel="stylesheet" href="<?php echo 'layouts/custom/'.CUSTOM_STYLE; ?>">
-<script src="<?php echo JQUERY_PATH; ?>/jquery-1.12.0.min.js"></script>
+<script src="<?php echo JQUERY_PATH; ?>jquery-1.12.0.min.js"></script>
 <? } ?>
 <? include(WWWROOT.APPLVERSION.'funktionen/msgboxes.php'); ?>
 <link rel="stylesheet" href="<?php echo FONTAWESOME_PATH; ?>/css/font-awesome.min.css" type="text/css">
