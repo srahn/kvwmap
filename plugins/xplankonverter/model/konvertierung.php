@@ -20,8 +20,8 @@ class Konvertierung extends PgObject {
 		'GML_ERSTELLUNG_OK'  => 'GML-Erstellung abgeschlossen',
 		'GML_ERSTELLUNG_ERR' => 'GML-Erstellung abgebrochen',
     'IN_INSPIRE_GML_ERSTELLUNG'  => 'in INSPIRE_GML-Erstellung',
-		'INSPIRE_GML_ERSTELLUNG_OK'  => 'INSPIRE_GML-Erstellung abgeschlossen',
-		'INSPIRE_GML_ERSTELLUNG_ERR' => 'INSPIRE_GML-Erstellung abgebrochen'
+		'INSPIRE_GML_ERSTELLUNG_OK'  => 'INSPIRE-GML-Erstellung abgeschlossen',
+		'INSPIRE_GML_ERSTELLUNG_ERR' => 'INSPIRE-GML-Erstellung abgebrochen'
 	);
 	static $write_debug = false;
 

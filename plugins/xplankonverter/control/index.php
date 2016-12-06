@@ -490,28 +490,53 @@ switch($this->go){
 		echo json_encode($response);
 	} break;
   
-  case 'xplankonverter_inspire_gml_generieren' : {
-    $konvertierung_id = $this->formvars['konvertierung_id'];
-    if($konvertierung_id == '') {
-      $this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
-      $this->main = 'Hinweis.php';
-    }
+	case 'xplankonverter_inspire_gml_generieren' : {
+		$success = true;
+		$konvertierung_id = $this->formvars['konvertierung_id'];
+		if ($konvertierung_id == '') {
+			$this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
+			$this->main = 'Hinweis.php';
+		}
     
-    $this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
-    if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) return;
+		$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
+		if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) return;
 
-     # set the paths
-    $xsl = PLUGINS . 'xplankonverter/model/xplan2inspire.xsl';
-    $fileinput = XPLANKONVERTER_SHAPE_PATH . $this->formvars['konvertierung_id'] . '/xplan_' . $this->formvars['konvertierung_id'] . '.gml';
-    $fileoutput = XPLANKONVERTER_SHAPE_PATH . $this->formvars['konvertierung_id'] . '/inspire_' . $this->formvars['konvertierung_id'] . '.gml';
+		# set the paths
+		$xsl = PLUGINS . 'xplankonverter/model/xplan2inspire.xsl';
+		$fileinput = XPLANKONVERTER_SHAPE_PATH . $this->formvars['konvertierung_id'] . '/xplan_' . $this->formvars['konvertierung_id'] . '.gml';
+		$fileoutput = XPLANKONVERTER_SHAPE_PATH . $this->formvars['konvertierung_id'] . '/inspire_' . $this->formvars['konvertierung_id'] . '.gml';
 
-    # set and run the XSLT-Processor
-    $proc = new XsltProcessor;
-    $proc->importStylesheet(DOMDocument::load($xsl)); // load script
-    $output = $proc->transformToXML(DomDocument::load($fileinput)); // load your file
-    file_put_contents($fileoutput, $output, FILE_APPEND | LOCK_EX);
+		if (!file_exists($fileinput)) {
+			$success = false;
+			$msg = 'Die XPlanGML-Datei fehlt. Sie wurde noch nicht erzeugt oder ein Pfad ist falsch.';
+			$status =  Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR'];
+		}
 
-  } break;
+		if (file_exists(fileoutput)) {
+			unlink(fileoutput);
+		}
+
+		if ($success) {
+	    $this->konvertierung->set('status', Konvertierung::$STATUS['IN_INSPIRE_GML_ERSTELLUNG']);
+	    $this->konvertierung->update();
+
+			# set and run the XSLT-Processor
+			$proc = new XsltProcessor;
+			$proc->importStylesheet(DOMDocument::load($xsl)); // load script
+			$output = $proc->transformToXML(DomDocument::load($fileinput)); // load your file
+			file_put_contents($fileoutput, $output, FILE_APPEND | LOCK_EX);
+	    $status = Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK'];
+			$msg = 'Die Konvertierung nach INSPIRE-GML wurde erfolgreich ausgeführt. Sie können die Datei jetzt herunterladen.';
+		}
+
+    $this->konvertierung->set('status', $status);
+    $this->konvertierung->update();
+		$response['success'] = $success;
+		$response['msg'] = $msg;
+
+		header('Content-Type: application/json');
+		echo json_encode($response);
+	} break;
 
   case 'xplankonverter_inspire_gml_ausliefern' : {
 		if ($this->formvars['konvertierung_id'] == '') {

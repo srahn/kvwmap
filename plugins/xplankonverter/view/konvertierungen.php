@@ -239,9 +239,10 @@
     funcIsDisabled = row.status != "<?php echo Konvertierung::$STATUS['KONVERTIERUNG_OK']; ?>"
                   && row.status != "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK']; ?>";
     funcIsInProgress = row.status == "<?php echo Konvertierung::$STATUS['IN_INSPIRE_GML_ERSTELLUNG']; ?>";
-    output += '<a title="INSPIRE GML-Datei ausgeben" class="btn btn-link btn-xs xpk-func-btn xpk-func-generate-inspire' + (funcIsDisabled ? disableFrag : '') + '" href="index.php?go=xplankonverter_inspire_gml_generieren"><i class="fa fa-lg fa-globe"></i></a>';
+    output += '<a title="INSPIRE GML-Datei ausgeben" class="btn btn-link btn-xs xpk-func-btn xpk-func-generate-inspire' + (funcIsDisabled ? disableFrag : '') + '" href="index.php?go=xplankonverter_inspire_gml_generieren&konvertierung_id=' + value + '"><i class="fa fa-lg fa-globe"></i></a>';
+
      // INSPIRE-Download
-    /*funcIsDisabled = row.status != "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK']; ?>";*/
+    funcIsDisabled = row.status != "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK']; ?>";
     output += '<a title="INSPIRE GML-Datei herunterladen" class="btn btn-link btn-xs xpk-func-btn xpk-func-download-inspire-gml' + (funcIsDisabled ? disableFrag : '') + '" href="index.php?go=xplankonverter_inspire_gml_ausliefern&konvertierung_id=' + value + '" download="inspire_' + value + '.gml"><i class="fa fa-lg fa-cloud-download"></i></a>';
     
     // Konvertierung Löschen
@@ -321,7 +322,7 @@
         data-visible="true"
         data-formatter="konvertierungFunctionsFormatter"
         data-switchable="false"
-        class="col-md-4"
+        class="col-md-5"
       >Funktionen</th>
     </tr>
   </thead>
