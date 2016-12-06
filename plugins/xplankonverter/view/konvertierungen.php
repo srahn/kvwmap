@@ -27,8 +27,8 @@
       $('.xpk-func-generate-gml').click(
         starteGmlAusgabe
       );
-      $('.xpk-func-generate-inspire').click(
-        starteInspireAusgabe
+      $('.xpk-func-generate-inspire-gml').click(
+        starteInspireGmlAusgabe
       );
       $('.xpk-func-del-konvertierung').click(
         loescheKonvertierung
@@ -148,7 +148,7 @@
     });
   };
   
-  starteInspireAusgabe = function(e) {
+  starteInspireGmlAusgabe = function(e) {
     var konvertierung_id = $(e.target).parent().parent().attr('konvertierung_id');
 		
 		//onclick="document.getElementById(\'sperrspinner\').style.display = \'block\';"
@@ -161,7 +161,7 @@
         status: "<?php echo Konvertierung::$STATUS['IN_INSPIRE_GML_ERSTELLUNG']; ?>"
       },
 			complete: function () {
-				//document.getElementById('sperrspinner').style.display = 'none';
+				document.getElementById('sperrspinner').style.display = 'none';
 			},
       error: function(response) {
         result.error('Fehler beim Starten der INSPIRE GML-Erstellung für Konvertierung-Id: ' + konvertierung_id);
@@ -169,14 +169,14 @@
       },
       success: function(response) {
         $('#konvertierungen_table').bootstrapTable('refresh');
-        // gml-erzeugung starten
+        // inspire-gml-erzeugung starten
         $.ajax({
           url: 'index.php?go=xplankonverter_inspire_gml_generieren',
           data: {
             konvertierung_id: konvertierung_id
           },
 					complete: function () {
-						//document.getElementById('sperrspinner').style.display = 'none';
+						document.getElementById('sperrspinner').style.display = 'none';
 					},
           error: function(response) {
             $('#konvertierungen_table').bootstrapTable('refresh');
@@ -236,14 +236,14 @@
     output += '<a title="GML-Datei herunterladen" class="btn btn-link btn-xs xpk-func-btn xpk-func-download-gml' + (funcIsDisabled ? disableFrag : '') + '" href="index.php?go=xplankonverter_gml_ausliefern&konvertierung_id=' + value + '" download="xplan_' + value + '.gml"><i class="fa fa-lg fa-download"></i></a>';
 
     // INSPIRE-Erstellung
-    funcIsDisabled = row.status != "<?php echo Konvertierung::$STATUS['KONVERTIERUNG_OK']; ?>"
-                  && row.status != "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK']; ?>";
-    funcIsInProgress = row.status == "<?php echo Konvertierung::$STATUS['IN_INSPIRE_GML_ERSTELLUNG']; ?>";
-    output += '<a title="INSPIRE GML-Datei ausgeben" class="btn btn-link btn-xs xpk-func-btn xpk-func-generate-inspire' + (funcIsDisabled ? disableFrag : '') + '" href="index.php?go=xplankonverter_inspire_gml_generieren&konvertierung_id=' + value + '"><i class="fa fa-lg fa-globe"></i></a>';
+		funcIsDisabled = row.status != "<?php echo Konvertierung::$STATUS['KONVERTIERUNG_OK']; ?>"
+									&& row.status != "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK']; ?>";
+funcIsInProgress = row.status == "<?php echo Konvertierung::$STATUS['IN_INSPIRE_GML_ERSTELLUNG']; ?>";
+output += '<a title="INSPIRE-GML-Datei ausgeben" class="btn btn-link btn-xs xpk-func-btn xpk-func-generate-inspire-gml' + (funcIsDisabled ? disableFrag : '') + '" href="#"><i class="' + (funcIsInProgress ? 'fa fa-spinner fa-pulse fa-fw' : 'fa fa-lg fa-globe') + '"></i></a>';
 
      // INSPIRE-Download
     funcIsDisabled = row.status != "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK']; ?>";
-    output += '<a title="INSPIRE GML-Datei herunterladen" class="btn btn-link btn-xs xpk-func-btn xpk-func-download-inspire-gml' + (funcIsDisabled ? disableFrag : '') + '" href="index.php?go=xplankonverter_inspire_gml_ausliefern&konvertierung_id=' + value + '" download="inspire_' + value + '.gml"><i class="fa fa-lg fa-cloud-download"></i></a>';
+    output += '<a title="INSPIRE-GML-Datei herunterladen" class="btn btn-link btn-xs xpk-func-btn xpk-func-download-inspire-gml' + (funcIsDisabled ? disableFrag : '') + '" href="index.php?go=xplankonverter_inspire_gml_ausliefern&konvertierung_id=' + value + '" download="inspire_' + value + '.gml"><i class="fa fa-lg fa-cloud-download"></i></a>';
     
     // Konvertierung Löschen
     funcIsDisabled = row.status == "<?php echo Konvertierung::$STATUS['IN_GML_ERSTELLUNG']; ?>"
