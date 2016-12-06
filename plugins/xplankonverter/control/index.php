@@ -512,8 +512,8 @@ switch($this->go){
 			$status =  Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR'];
 		}
 
-		if (file_exists(fileoutput)) {
-			unlink(fileoutput);
+		if (file_exists($fileoutput)) {
+			unlink($fileoutput);
 		}
 
 		if ($success) {
