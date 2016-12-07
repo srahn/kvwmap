@@ -319,26 +319,36 @@ switch($this->go){
           Konvertierung::$STATUS['KONVERTIERUNG_OK'],
           Konvertierung::$STATUS['KONVERTIERUNG_ERR'],
           Konvertierung::$STATUS['GML_ERSTELLUNG_OK'],
-          Konvertierung::$STATUS['GML_ERSTELLUNG_ERR']
+          Konvertierung::$STATUS['GML_ERSTELLUNG_ERR'],
+          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK'],
+          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']
         );
       break;
       case Konvertierung::$STATUS['IN_KONVERTIERUNG']:
         $validPredecessorStates = array(
           Konvertierung::$STATUS['ERSTELLT'],
           Konvertierung::$STATUS['KONVERTIERUNG_OK'],
-          Konvertierung::$STATUS['GML_ERSTELLUNG_OK']
+          Konvertierung::$STATUS['KONVERTIERUNG_ERR'],
+          Konvertierung::$STATUS['GML_ERSTELLUNG_OK'],
+          Konvertierung::$STATUS['GML_ERSTELLUNG_ERR'],
+          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK'],
+          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']
         );
       break;
       case Konvertierung::$STATUS['IN_GML_ERSTELLUNG']:
         $validPredecessorStates = array(
           Konvertierung::$STATUS['KONVERTIERUNG_OK'],
-          Konvertierung::$STATUS['GML_ERSTELLUNG_OK']
+          Konvertierung::$STATUS['GML_ERSTELLUNG_OK'],
+          Konvertierung::$STATUS['GML_ERSTELLUNG_ERR'],
+          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK'],
+          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']
         );
       break;
       case Konvertierung::$STATUS['IN_INSPIRE_GML_ERSTELLUNG']:
         $validPredecessorStates = array(
           Konvertierung::$STATUS['GML_ERSTELLUNG_OK'],
-          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK']
+          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK'],
+          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']
         );
       break;
     }
@@ -480,7 +490,7 @@ switch($this->go){
 		header('Content-Type: text/xml; subtype="gml/3.3"');
     echo fread(fopen($filename, "r"), filesize($filename));
 	} break;
-  
+
   case 'index.php?go=xplankonverter_gml_ausliefern&konvertierung_id' : {
     if ($this->formvars['konvertierung_id'] == '') {
 		  echo 'Diese Link kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
@@ -496,7 +506,7 @@ switch($this->go){
 		header('Content-Type: application/json');
 		echo json_encode($response);
 	} break;
-  
+
 	case 'xplankonverter_inspire_gml_generieren' : {
 		$success = true;
 		$konvertierung_id = $this->formvars['konvertierung_id'];
@@ -504,7 +514,7 @@ switch($this->go){
 			$this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
 			$this->main = 'Hinweis.php';
 		}
-    
+
 		$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
 		if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) return;
 
@@ -557,14 +567,14 @@ switch($this->go){
 		header('Content-Type: text/xml; subtype="gml/3.3"');
     echo fread(fopen($filename, "r"), filesize($filename));
 	} break;
-  
+
   /*case 'index.php?go=xplankonverter_inspire_gml_ausliefern&konvertierung_id' : {
     if ($this->formvars['konvertierung_id'] == '') {
 		  echo 'Diese Link kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
 		  return;
 		}
   } break;*/
-  
+
 	case 'xplankonverter_regeleditor' : {
 		$konvertierung_id = $_REQUEST['konvertierung_id'];
 		$bereich_gml_id = $_REQUEST['bereich_gml_id'];
@@ -594,8 +604,8 @@ switch($this->go){
 	default : {
 		$this->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
 	}
-  
-  
+
+
 
 }
 
