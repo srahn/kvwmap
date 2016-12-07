@@ -380,7 +380,7 @@ CREATE OR REPLACE VIEW nachweisverwaltung.fp_besondererbauwerkspunkt AS
     au.genauigkeitsstufe AS gst,
     au.koordinatenstatus AS kst,
     au.hinweise AS hin,
-    ST_Force3D(au.wkb_geometry) AS wkb_geometry
+    st_force_3d(au.wkb_geometry) AS wkb_geometry
    FROM alkis.ax_besondererbauwerkspunkt bwp,
     alkis.ax_punktortau au
   WHERE bwp.gml_id::text = au.istteilvon::text
@@ -461,7 +461,7 @@ UNION
     ag.genauigkeitsstufe AS gst,
     ag.koordinatenstatus AS kst,
     ag.hinweise AS hin,
-    ST_Force3D(ag.wkb_geometry) AS wkb_geometry
+    st_force_3d(ag.wkb_geometry) AS wkb_geometry
    FROM alkis.ax_besondererbauwerkspunkt bwp,
     alkis.ax_punktortag ag
   WHERE bwp.gml_id::text = ag.istteilvon::text;
@@ -629,7 +629,7 @@ UNION
     ag.genauigkeitsstufe AS gst,
     ag.koordinatenstatus AS kst,
     ag.hinweise AS hin,
-    ST_Force3D(ag.wkb_geometry) AS wkb_geometry
+    st_force_3d(ag.wkb_geometry) AS wkb_geometry
    FROM alkis.ax_besonderergebaeudepunkt gebp,
     alkis.ax_punktortag ag
   WHERE gebp.gml_id::text = ag.istteilvon::text;
@@ -911,7 +911,7 @@ UNION
     NULL::character varying AS beziehtsichauf,
     NULL::character varying AS gehoertzu,
     NULL::character varying AS datei,
-    ST_Force3D(ta.wkb_geometry) AS wkb_geometry
+    st_force_3d(ta.wkb_geometry) AS wkb_geometry
    FROM alkis.ax_grenzpunkt gp,
     alkis.ax_punktortta ta
   WHERE gp.gml_id::text = ta.istteilvon::text;
