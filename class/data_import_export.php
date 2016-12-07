@@ -517,7 +517,7 @@ class data_import_export {
 			$sql .= ' FROM '.$importfile;
 			$options = $this->formvars['table_option'];
 			$options.= ' -nlt PROMOTE_TO_MULTI -lco FID=gid';
-			$ret = $this->ogr2ogr_import($this->formvars['schema_name'], $this->formvars['table_name'], $formvars['epsg'], UPLOADPATH.$importfile.'.shp', $database, NULL, $sql, $options);
+			$ret = $this->ogr2ogr_import($this->formvars['schema_name'], $this->formvars['table_name'], $formvars['epsg'], UPLOADPATH.$importfile.'.shp', $database, NULL, $sql, $options, 'UTF8');
 			
       
       // # erzeugte SQL-Datei anpassen
