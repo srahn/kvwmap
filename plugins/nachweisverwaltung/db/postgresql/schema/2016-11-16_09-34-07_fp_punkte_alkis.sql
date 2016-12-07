@@ -53,15 +53,13 @@ CREATE TABLE nachweisverwaltung.fp_punkte_alkis
   beziehtsichauf character varying,
   gehoertzu character varying,
   datei character varying,
-  wkb_geometry geometry,
-  CONSTRAINT fp_punkte_alkis_pkey PRIMARY KEY (ogc_fid),
-  CONSTRAINT enforce_dims_wbk_geometry CHECK (st_ndims(wkb_geometry) = 3),
-  CONSTRAINT enforce_geotype_wbk_geometry CHECK (geometrytype(wkb_geometry) = 'POINT'::text OR wkb_geometry IS NULL),
-  CONSTRAINT enforce_srid_wbk_geometry CHECK (st_srid(wkb_geometry) = 25833)
+  CONSTRAINT fp_punkte_alkis_pkey PRIMARY KEY (ogc_fid)
 )
 WITH (
   OIDS=TRUE
 );
+SELECT AddGeometryColumn('nachweisverwaltung', 'fp_punkte_alkis','wkb_geometry',25833,'POINT', 3);
+
 COMMENT ON COLUMN nachweisverwaltung.fp_punkte_alkis.gml_id IS 'Identifikator, global eindeutig';
 COMMENT ON COLUMN nachweisverwaltung.fp_punkte_alkis.zst IS 'Stelle';
 COMMENT ON COLUMN nachweisverwaltung.fp_punkte_alkis.pkn IS 'Punktkennung';
@@ -149,7 +147,6 @@ CREATE INDEX fp_punkte_alkis_za_idx
 CREATE TABLE nachweisverwaltung.fp_afismv
 (
   ogc_fid serial NOT NULL,
-  wkb_geometry geometry(Point,25833),
   gml_id character varying,
   punktkennung character varying,
   x character varying,
@@ -170,7 +167,9 @@ CREATE TABLE nachweisverwaltung.fp_afismv
 )
 WITH (
   OIDS=FALSE
-);	
+);
+
+SELECT AddGeometryColumn('nachweisverwaltung', 'fp_afismv','wkb_geometry',25833,'POINT', 2);
 	
 COMMENT ON TABLE nachweisverwaltung.fp_afismv IS 'Tabelle wird gefüllt über: ogr2ogr -overwrite -f PostgreSQL "PG:user=XXXXXX password=XXXXXXXXXX host=XXXXXX dbname=XXXXXX schemas=nachweisverwaltung" "WFS:http://www.geodaten-mv.de/dienste/afis_wfs?service=WFS&request=GetFeature&version=1.1.0&typeName=afismv:afis_wfs&srsName=EPSG:25833" -lco OVERWRITE=yes -nln fp_afismv';
 	
