@@ -393,7 +393,7 @@ class data_import_export {
 				if(file_exists($importfile)){
 					if($formvars['tracks']){
 						$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($importfile), 0, 15))).rand(1,1000000);
-						$this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $formvars['epsg'], $importfile, $pgdatabase, 'tracks');
+						$this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $formvars['epsg'], $importfile, $pgdatabase, 'tracks', NULL, NULL, 'UTF8');
 						$sql = '
 							ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' SET WITH OIDS;
 							ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' RENAME "desc" TO desc_;
@@ -406,7 +406,7 @@ class data_import_export {
 					}
 					if($formvars['waypoints']){
 						$tablename = 'a'.strtolower(umlaute_umwandeln(basename($importfile))).rand(1,1000000);
-						$this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $formvars['epsg'], $importfile, $pgdatabase, 'waypoints');
+						$this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $formvars['epsg'], $importfile, $pgdatabase, 'waypoints', NULL, NULL, 'UTF8');
 						$sql = '
 							ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' SET WITH OIDS;
 							ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' RENAME "desc" TO desc_;
