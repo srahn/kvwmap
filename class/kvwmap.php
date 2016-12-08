@@ -2092,6 +2092,9 @@ class GUI {
 			case 'overlay_html' : {
 				$this->overlaymain = $this->main;
 				include (LAYOUTPATH.'snippets/overlay.php');
+				if($this->alert != ''){
+					echo '<script type="text/javascript">alert("'.$this->alert.'");</script>';			# manchmal machen alert-Ausgaben über die allgemeinde Funktioen showAlert Probleme, deswegen am besten erst hier am Ende ausgeben
+				}
 			} break;
       case 'map_ajax' : {
 				$this->debug->write("Include <b>".LAYOUTPATH."snippets/map_ajax.php</b> in kvwmap.php function output()",4);
@@ -11554,11 +11557,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				}
 			}
 			if($success == false){
-				showAlert('Änderung fehlgeschlagen.\n'.$result[0]);
+				$this->alert = 'Änderung fehlgeschlagen.\n'.$result[0];
 			}
 			else{
 				if($this->formvars['close_window'] == ""){
-					if($result[0] != '')showAlert('Änderung erfolgreich.\n'.$result[0]);
+					if($result[0] != '')$this->alert = 'Änderung erfolgreich.\n'.$result[0];
 					else showMessage('Änderung erfolgreich');
 				}
 			}
