@@ -13473,8 +13473,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	    $rect->maxx=$rs['maxx'];
 	    $rect->miny=$rs['miny'];
 	    $rect->maxy=$rs['maxy'];
-	    $randx=($rect->maxx-$rect->minx)*50/100;
-	    $randy=($rect->maxy-$rect->miny)*50/100;
+	    $randx=($rect->maxx-$rect->minx)*50/100 + 0.01;
+	    $randy=($rect->maxy-$rect->miny)*50/100 + 0.01;
 	    if($rect->minx != ''){
 	    	$map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
 		    # Haupt-Layer erzeugen
