@@ -7,7 +7,7 @@ CREATE TABLE fortfuehrungslisten.ff_auftraege
   antragsnr integer,
   bemerkung text,
   auftragsdatei character varying,
-  datumderausgabe timestamp without time zone,
+  datumderausgabe date,
   profilkennung character varying,
   auftragsnummer integer,
   impliziteloeschungderreservierung integer,
