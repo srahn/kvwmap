@@ -5,7 +5,7 @@ ALTER TABLE nachweisverwaltung.fp_punkte2antraege RENAME pkz TO pkn;
 CREATE TABLE nachweisverwaltung.fp_punkte_alkis
 (
   ogc_fid serial NOT NULL,
-  gml_id character varying, -- Identifikator, global eindeutig
+  gml_id character varying, 
   gml_id_punktort character varying,
   identifier character varying,
   beginnt character(20),
@@ -16,38 +16,38 @@ CREATE TABLE nachweisverwaltung.fp_punkte_alkis
   sonstigesmodell character varying,
   anlass character varying,
   land integer,
-  zst integer, -- Stelle
-  pkn character varying, -- Punktkennung
-  pktnr character varying(6), -- Punktnummer
-  rw character varying(11), -- Rechtswert
-  hw character varying(11), -- Hochwert
-  hoe character varying(9), -- Hoehe
-  hop character varying(9), -- Hoehe, Oberkante Pfeiler im STN
-  par character varying(4), -- Punktart
-  soe character varying, -- sonstige Eigenschaft
-  soe_alk_pkz character varying, -- sonstige Eigenschaft - ALK-Punktkennzeichen
-  soe_alk_par character varying, -- sonstige Eigenschaft - ALK-Punktart
-  soe_alk_vma character varying, -- sonstige Eigenschaft - ALK-Vermarkungsart
-  soe_weitere character varying, -- sonstige Eigenschaft - weitere
-  abm integer, -- Ab-/Vermarkung_Marke
-  fgp character varying, -- festgestellter Grenzpunkt
-  bpn character varying, -- besondere Punktnummer
-  aam integer, -- Ausgesetzte Abmarkung
-  bza integer, -- Bemerkung zur Abmarkung
-  zde character varying, -- Zeitpunkt der Entstehung
-  rho double precision, -- relative Höhe
-  kds character varying, -- Kartendarstellung
-  des integer, -- AX_Datenerhebung_Punktort
-  nam character varying, -- Name
-  art character varying[], -- Art des Punktes
-  idn character varying, -- Individualname
-  vwl integer, -- Vertrauenswürdigkeit
-  lzk boolean, -- Lagezuverlaessigkeit
-  gst integer, -- Genauigkeitsstufe
-  kst integer, -- Koordinatenstatus
-  pru character(20), -- Ueberpruefungsdatum
-  hin character varying, -- Hinweise
-  fdv character varying, -- AA-Fachdatenverbindung
+  zst integer, 
+  pkn character varying, 
+  pktnr character varying(6),
+  rw character varying(11),
+  hw character varying(11), 
+  hoe character varying(9), 
+  hop character varying(9), 
+  par character varying(4), 
+  soe character varying, 
+  soe_alk_pkz character varying, 
+  soe_alk_par character varying, 
+  soe_alk_vma character varying, 
+  soe_weitere character varying, 
+  abm integer, 
+  fgp character varying, 
+  bpn character varying, 
+  aam integer, 
+  bza integer, 
+  zde character varying, 
+  rho double precision, 
+  kds character varying, 
+  des integer,
+  nam character varying,
+  art character varying[], 
+  idn character varying,
+  vwl integer, 
+  lzk boolean, 
+  gst integer, 
+  kst integer, 
+  pru character(20), 
+  hin character varying,
+  fdv character varying, 
   zeigtauf character varying,
   hat character varying,
   beziehtsichauf character varying,
@@ -95,45 +95,34 @@ COMMENT ON COLUMN nachweisverwaltung.fp_punkte_alkis.hin IS 'Hinweise';
 COMMENT ON COLUMN nachweisverwaltung.fp_punkte_alkis.fdv IS 'AA-Fachdatenverbindung';
 
 
--- Index: nachweisverwaltung.fp_punkte_alkis_bsa_idx
-
--- DROP INDEX nachweisverwaltung.fp_punkte_alkis_bsa_idx;
 
 CREATE INDEX fp_punkte_alkis_bsa_idx
   ON nachweisverwaltung.fp_punkte_alkis
   USING btree
   (beziehtsichauf COLLATE pg_catalog."default");
 
--- Index: nachweisverwaltung.fp_punkte_alkis_geom_idx
 
--- DROP INDEX nachweisverwaltung.fp_punkte_alkis_geom_idx;
 
 CREATE INDEX fp_punkte_alkis_geom_idx
   ON nachweisverwaltung.fp_punkte_alkis
   USING gist
   (wkb_geometry);
 
--- Index: nachweisverwaltung.fp_punkte_alkis_gz_idx
 
--- DROP INDEX nachweisverwaltung.fp_punkte_alkis_gz_idx;
 
 CREATE INDEX fp_punkte_alkis_gz_idx
   ON nachweisverwaltung.fp_punkte_alkis
   USING btree
   (gehoertzu COLLATE pg_catalog."default");
 
--- Index: nachweisverwaltung.fp_punkte_alkis_hat_idx
 
--- DROP INDEX nachweisverwaltung.fp_punkte_alkis_hat_idx;
 
 CREATE INDEX fp_punkte_alkis_hat_idx
   ON nachweisverwaltung.fp_punkte_alkis
   USING btree
   (hat COLLATE pg_catalog."default");
 
--- Index: nachweisverwaltung.fp_punkte_alkis_za_idx
 
--- DROP INDEX nachweisverwaltung.fp_punkte_alkis_za_idx;
 
 CREATE INDEX fp_punkte_alkis_za_idx
   ON nachweisverwaltung.fp_punkte_alkis
@@ -141,8 +130,6 @@ CREATE INDEX fp_punkte_alkis_za_idx
   (zeigtauf COLLATE pg_catalog."default");
 
 
-	
--- DROP TABLE nachweisverwaltung.fp_afismv;
 
 CREATE TABLE nachweisverwaltung.fp_afismv
 (
@@ -174,7 +161,7 @@ SELECT AddGeometryColumn('nachweisverwaltung', 'fp_afismv','wkb_geometry',25833,
 COMMENT ON TABLE nachweisverwaltung.fp_afismv IS 'Tabelle wird gefüllt über: ogr2ogr -overwrite -f PostgreSQL "PG:user=XXXXXX password=XXXXXXXXXX host=XXXXXX dbname=XXXXXX schemas=nachweisverwaltung" "WFS:http://www.geodaten-mv.de/dienste/afis_wfs?service=WFS&request=GetFeature&version=1.1.0&typeName=afismv:afis_wfs&srsName=EPSG:25833" -lco OVERWRITE=yes -nln fp_afismv';
 	
 	
--- DROP VIEW nachweisverwaltung.fp_pp_afismv;
+
 	
 CREATE OR REPLACE VIEW nachweisverwaltung.fp_pp_afismv AS 
  SELECT fp_afismv.gml_id,
@@ -211,7 +198,7 @@ Abrage zum Befuellen der fp_punkte_alkis mit den Lagefestpunkten aus AFIS MV';
 
 	
   
-  -- DROP VIEW nachweisverwaltung.fp_aufnahmepunkt;
+
 
 CREATE OR REPLACE VIEW nachweisverwaltung.fp_aufnahmepunkt AS 
  SELECT ap.gml_id,
@@ -300,8 +287,6 @@ CREATE OR REPLACE VIEW nachweisverwaltung.fp_aufnahmepunkt AS
 
 
 
-
--- DROP VIEW nachweisverwaltung.fp_besondererbauwerkspunkt;
 
 CREATE OR REPLACE VIEW nachweisverwaltung.fp_besondererbauwerkspunkt AS 
  SELECT bwp.gml_id,
@@ -469,7 +454,7 @@ UNION
 
 
 
--- DROP VIEW nachweisverwaltung.fp_besonderergebaeudepunkt;
+
 
 CREATE OR REPLACE VIEW nachweisverwaltung.fp_besonderergebaeudepunkt AS 
  SELECT gebp.gml_id,
@@ -637,8 +622,6 @@ UNION
 
 
 
--- DROP VIEW nachweisverwaltung.fp_besonderertopographischerpunkt;
-
 CREATE OR REPLACE VIEW nachweisverwaltung.fp_besonderertopographischerpunkt AS 
  SELECT topp.gml_id,
     au.gml_id AS gml_id_punktort,
@@ -721,7 +704,7 @@ CREATE OR REPLACE VIEW nachweisverwaltung.fp_besonderertopographischerpunkt AS
   WHERE topp.gml_id::text = au.istteilvon::text;
 
 
--- DROP VIEW nachweisverwaltung.fp_grenzpunkt;
+
 
 CREATE OR REPLACE VIEW nachweisverwaltung.fp_grenzpunkt AS 
  SELECT gp.gml_id,
@@ -919,7 +902,6 @@ UNION
 
 
 
--- DROP VIEW nachweisverwaltung.fp_sicherungspunkt;
 
 CREATE OR REPLACE VIEW nachweisverwaltung.fp_sicherungspunkt AS 
  SELECT sip.gml_id,
@@ -1009,8 +991,6 @@ CREATE OR REPLACE VIEW nachweisverwaltung.fp_sicherungspunkt AS
 
 
 
-
--- DROP VIEW nachweisverwaltung.fp_sonstigervermessungspunkt;
 
 CREATE OR REPLACE VIEW nachweisverwaltung.fp_sonstigervermessungspunkt AS 
  SELECT svp.gml_id,
