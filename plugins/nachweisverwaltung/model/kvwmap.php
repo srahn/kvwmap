@@ -1193,15 +1193,13 @@
     $dateiname=basename($Bild);
     $dateinamensteil=explode('.',$dateiname);
     ob_end_clean();
-    if (in_array($dateinamensteil[1],array('png','jpg','gif'))) {
+    if (in_array($dateinamensteil[1],array('png','jpg','gif','tif'))) {
       header("Content-type: image/".$dateinamensteil[1]);
     }
     elseif ($dateinamensteil[1]=='pdf') {
       header("Content-type: application/pdf");
     }
-    else{
-    	header("Content-Disposition: attachment; filename=".$dateiname);
-    }
+    header("Content-Disposition: attachment; filename=".$dateiname);
     header('Expires: 0');
     header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
     header('Pragma: public');
