@@ -27,15 +27,9 @@ public static	function find_by_id($gui, $by, $id) {
 	}
 
 	/*
-	* Führt die in der Regel definierten SQL-Statements aus um
-	* Daten aus Shapefiles in die Tabellen der XPlan GML Datentabellen
-	* zu schreiben. Dabei wird die im sql angegebene Id der Konvertierung
-	* für jedes RP_Objekt gesetzt.
-	* Wenn die Regel auch eine Bereich Id hat, wird diese in der
-	* Tabelle rp_breich2rp_objekt zusammen mit den gml_id's der erzeugten
-	* XPlan GML Objekte eingetragen.
+	* Validiert die in der Regel definierten SQL-Statements
 	*/
-	function convert($konvertierung) {
+	function validate($konvertierung) {
 		$konvertierung_id = $konvertierung->get('id');
 		$this->debug->show('Regel convert mit konvertierung_id: ' . $konvertierung_id, Regel::$write_debug);
 		$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'sql_vorhanden');
@@ -78,6 +72,99 @@ public static	function find_by_id($gui, $by, $id) {
 			$success = false;
 		}
 		return $success;
+	}
+
+	/*
+	* Führt die in der Regel definierten SQL-Statements aus um
+	* Daten aus Shapefiles in die Tabellen der XPlan GML Datentabellen
+	* zu schreiben. Dabei wird die im sql angegebene Id der Konvertierung
+	* für jedes RP_Objekt gesetzt.
+	* Bei Objekten, die eine gml_id haben wird diese mit übernommen,
+	* bei den anderen wird die gid mit übernommen und die erzeugte gml_id
+	* zusammen mit der gid im Result mit zurückgeliefert und
+	* in der Shape-Tabelle eingetragen
+	* @return array Liste der Objekte, für die bei der Konvertierung
+	* eine neue gml_id erzeugt wurde
+	*/
+	function convert($konvertierung) {
+		$sql = 	$regel->get_convert_sql($konvertierung->get('id'));
+
+		# Konvertiere Objekte, die eine gml_id haben
+		# Die gid muss nicht mit übertragen werden
+		pg_query(
+			$this->database->dbConn,
+			$regel->get_convert_sql_with_gml_id($sql)
+		);
+
+		# Konvertiere Objekte, die keine gml_id haben
+		# Die gid muss mit übertragen werden und zusammen mit der
+		# erzeugten gml_id zurückkommen.
+		$result = pg_query(
+			$this->database->dbConn,
+			$regel->get_convert_sql_with_gid($sql)
+		);
+
+		return (pg_num_rows($result) == 0 ? array() : pg_fetch_all($result));
+	}
+
+	/*
+	* Ergänzt converter sql so, dass die gml_id mit übertragen wird
+	* aber nur für Objekte, die eine gml_id haben
+	*/
+	function get_convert_sql_with_gml_id($sql) {
+		# gml_id hinzufügen
+		$sql = substr_replace(
+			$sql,
+			'(gml_id, ',
+			strpos($sql, '('),
+			strlen('(')
+		);
+		$sql = str_ireplace(
+			'select',
+			"select gml_id,",
+			$sql
+		);
+		$sql = str_ireplace(
+			'where',
+			"WHERE gml_id IS NOT NULL AND",
+			$sql
+		);
+
+		$this->debug->show('sql nach gml_id hinzufügen für Objekte mit gml_id:<br>' . $sql, Regel::$write_debug);
+		return $sql;
+	}
+
+	/*
+	* Ergänzt converter sql so, dass gid mit übertragen wird
+	* für alle Objekte, die keine gml_id haben.
+	*/
+	function get_convert_sql_with_gid($sql) {
+		# gid hinzufügen
+		$sql = substr_replace(
+			$sql,
+			'(gid, ',
+			strpos($sql, '('),
+			strlen('(')
+		);
+		$sql = str_ireplace(
+			'select',
+			"select gid,",
+			$sql
+		);
+		$sql = str_ireplace(
+			'where',
+			"WHERE gml_id IS NULL AND",
+			$sql
+		);
+
+		$sql = str_ireplace(
+			'RETURNING',
+			'RETURNING gid,',
+			$sql
+		);
+
+		$this->debug->show('sql nach gid hinzufügen für Objekte ohne gml_id und mit RETURNING gid:<br>' . $sql, Regel::$write_debug);
+		return $sql;
 	}
 
 	function get_convert_sql($konvertierung_id) {
@@ -146,6 +233,32 @@ public static	function find_by_id($gui, $by, $id) {
 
 		$this->debug->show('sql nach Anpassung:<br>' . $sql, Regel::$write_debug);
 		return $sql;
+	}
+
+	function rewrite_gml_ids($rows) {
+		$selects =  array();
+		foreach($rows AS $row) {
+			$selects[] = "
+				SELECT ({$rows['gml_id']}, {$rows['gid']})
+			";
+		}
+		$converter_table = implode(' UNION ', $selects);
+
+		$converter_result = "SELECT bla UNION blu UNION bli";
+		$sql = "
+			UPDATE
+				custom_shapes.xplan_shape_{$this->konvertierung->get('id')} AS shape
+			SET
+				gml_id = xplan.gml_id
+			FROM
+			  ({$converter_table}) AS xplan
+			WHERE
+			  shape.gid = xplan.gid
+		";
+		pg_query(
+			$this->database->dbConn,
+			$sql
+		);
 	}
 
 	function gml_layer_exists() {

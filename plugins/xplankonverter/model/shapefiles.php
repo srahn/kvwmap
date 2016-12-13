@@ -143,6 +143,30 @@ class ShapeFile extends PgObject {
 		$result = pg_query($this->database->dbConn, $sql);
 		return $result;
 	}
-}
+
+	function gmlIdColumnExists() {
+		$sql = "
+			SELECT
+				gml_id
+			FROM
+  			information_schema.columns
+			WHERE
+  			table_schema = '{$this->schema}' AND
+  			table_name = '{$this->tableName}' AND
+  			column_name = 'gml_id'
+  		LIMIT 1
+		";
+		$this->debug->show('<p>Query for gml_id column sql: ' . $sql, ShapeFile::$write_debug);
+		$result = pg_query($this->database->dbConn, $sql);
+		return (pg_num_rows($result) == 1)
+	}
 	
+	function addGmlIdColumn() {
+		$sql = "
+			ALTER TABLE {$this->schema}.{$this->tableName} ADD COLUMN gml_id character varying;
+		";
+		$this->debug->show('<p>Add column gml_id sql: ' . $sql, ShapeFile::$write_debug);
+		$result = pg_query($this->database->dbConn, $sql);
+	}
+}
 ?>
