@@ -734,9 +734,9 @@ FROM
 	    if(strpos(strtolower($fieldstring), ' as '.$fieldname)){
 	      $fieldstring = trim($fieldstring);
 	      $explosion = explode(' ', $fieldstring);
-	      $klammerstartpos = strrpos($explosion[0], '(');
+	      $klammerstartpos = strrpos($fieldstring, '(');
 	      if($klammerstartpos !== false){										# eine Funktion wurde auf das Attribut angewendet
-	        $klammerendpos = strpos($explosion[0], ')');
+	        $klammerendpos = strpos($fieldstring, ')');
 	        if($klammerendpos){
 	        	$name_pair['real_name'] = substr($explosion[0], $klammerstartpos+1, $klammerendpos-$klammerstartpos-1);
 	        	$name_pair['name'] = $explosion[count($explosion)-1];
