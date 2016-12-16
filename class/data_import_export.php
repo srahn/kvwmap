@@ -783,8 +783,7 @@ class data_import_export {
 						$value = $value."\t";
 					}
 					if(in_array($attributes['type'][$j], array('numeric', 'float4', 'float8'))){
-						$explosion = explode('.', $value);
-						if(count($explosion) == 2 AND strlen($explosion[1]) < 3)$value = str_replace('.', ",", $value);				# nur ein Punkt und nicht mehr als 2 Zeichen nach dem Punkt	=> Excel-Datumsproblem
+						$value = str_replace('.', ",", $value);				#  Excel-Datumsproblem
 					}
 	        $csv .= $value.';';
       	}
