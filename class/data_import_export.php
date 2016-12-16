@@ -749,41 +749,46 @@ class data_import_export {
 			foreach($result[$i] As $key => $value){
 				$j = $attributes['indizes'][$key];
       	if($attributes['type'][$j] != 'geometry' AND $attributes['name'][$i] != 'lock'){
-					if($attributes['form_element_type'][$j] == 'Auswahlfeld'){
-						if(is_array($attributes['dependent_options'][$j])){
-							$enum_value = $attributes['enum_value'][$j][$i];		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
-							$enum_output = $attributes['enum_output'][$j][$i];		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
-						}
-						else{
-							$enum_value = $attributes['enum_value'][$j];
-							$enum_output = $attributes['enum_output'][$j];
-						}
-						for($o = 0; $o < count($enum_value); $o++){
-							if($value == $enum_value[$o]){
-								$value = $enum_output[$o];
-								break;
-							}
-						}
+					if($attributes['form_element_type'][$j] == 'Zahl'){
+						$value = tausenderTrenner($value);
 					}
 					else{
-						if($attributes['form_element_type'][$j] == 'Autovervollständigungsfeld'){
-							$value = $attributes['enum_output'][$j][$i];
+						if($attributes['form_element_type'][$j] == 'Auswahlfeld'){
+							if(is_array($attributes['dependent_options'][$j])){
+								$enum_value = $attributes['enum_value'][$j][$i];		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
+								$enum_output = $attributes['enum_output'][$j][$i];		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
+							}
+							else{
+								$enum_value = $attributes['enum_value'][$j];
+								$enum_output = $attributes['enum_output'][$j];
+							}
+							for($o = 0; $o < count($enum_value); $o++){
+								if($value == $enum_value[$o]){
+									$value = $enum_output[$o];
+									break;
+								}
+							}
 						}
-						if($attributes['type'][$j] == 'bool'){
-							$value = str_replace('t', "ja", $value);	
-							$value = str_replace('f', "nein", $value);
+						else{
+							if($attributes['form_element_type'][$j] == 'Autovervollständigungsfeld'){
+								$value = $attributes['enum_output'][$j][$i];
+							}
+							if($attributes['type'][$j] == 'bool'){
+								$value = str_replace('t', "ja", $value);	
+								$value = str_replace('f', "nein", $value);
+							}
 						}
-					}
-					$value = str_replace(';', ",", $value);
-					if(strpos($value, chr(10)) !== false OR strpos($value, chr(13)) !== false){		# Zeilenumbruch => Wert in Anführungszeichen setzen
-						$value = str_replace('"', "'", $value);
-						$value = '"'.$value.'"';
-					}
-					if(strpos($value, '/') !== false){		# Excel-Datumsproblem
-						$value = $value."\t";
-					}
-					if(in_array($attributes['type'][$j], array('numeric', 'float4', 'float8'))){
-						$value = str_replace('.', ",", $value);				#  Excel-Datumsproblem
+						$value = str_replace(';', ",", $value);
+						if(strpos($value, chr(10)) !== false OR strpos($value, chr(13)) !== false){		# Zeilenumbruch => Wert in Anführungszeichen setzen
+							$value = str_replace('"', "'", $value);
+							$value = '"'.$value.'"';
+						}
+						if(strpos($value, '/') !== false){		# Excel-Datumsproblem
+							$value = $value."\t";
+						}
+						if(in_array($attributes['type'][$j], array('numeric', 'float4', 'float8'))){
+							$value = str_replace('.', ",", $value);				#  Excel-Datumsproblem
+						}
 					}
 	        $csv .= $value.';';
       	}
