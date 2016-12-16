@@ -11463,7 +11463,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
             } break;
 						case 'Zahl' : {
 							$this->formvars[$form_fields[$i]] = str_replace('.', '', $this->formvars[$form_fields[$i]]);		# bei Zahlen den Punkt (Tausendertrenner) entfernen
-							$this->formvars[$form_fields[$i]] = str_replace(',', '.', $this->formvars[$form_fields[$i]]);		# und Komma in Punkt umwandeln
+							$eintrag = str_replace(',', '.', $this->formvars[$form_fields[$i]]);		# und Komma in Punkt umwandeln
 						} break;
             default : {
               if($tablename AND $formtype != 'Text_not_saveable' AND $formtype != 'Auswahlfeld_not_saveable' AND $formtype != 'SubFormPK' AND $formtype != 'SubFormFK' AND $formtype != 'SubFormEmbeddedPK' AND $attributname != 'the_geom'){							
