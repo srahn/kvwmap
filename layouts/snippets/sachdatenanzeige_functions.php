@@ -75,7 +75,7 @@ include('funktionen/input_check_functions.php');
 		new_element.id = 'div_'+fieldname+'_'+new_id;
 		var regex = new RegExp(fieldname+'_-1', "g");
 		new_element.innerHTML = new_element.innerHTML.replace(regex, fieldname+'_'+new_id);
-		new_element.style = 'display: block';
+		new_element.style.display = 'block';
 		outer_div.appendChild(new_element);
 		buildJSONString(fieldname, true);
 	}
@@ -663,4 +663,5 @@ include('funktionen/input_check_functions.php');
 			if(flag.onchange)flag.onchange();
 		}
 	}
+
 </script>
