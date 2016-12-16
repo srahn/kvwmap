@@ -251,7 +251,7 @@
 					'".$data['statute_type']."',
 					'".$data['statute_name']."',
 					".(($data['statute_allowedDiameter'] == '') ? 'NULL' : $data['statute_allowedDiameter']).",
-					'".$data['reason']."',
+					'".$data['cause'][$i]."',
 					'".$data['wood_species'][$i]."',
 					".(($data['trunk_circumference'][$i] == '') ? 'NULL' : $data['trunk_circumference'][$i]).",
 					".(($data['crown_diameter'][$i] == '') ? 'NULL' : $data['crown_diameter'][$i]).",
