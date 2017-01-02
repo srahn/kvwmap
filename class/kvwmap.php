@@ -11602,9 +11602,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 	function queryMap() {
 		# scale ausrechnen, da wir uns das loadmap sparen
-		$width = $this->user->rolle->nImageWidth;
-		$pixelsize = ($this->user->rolle->oGeorefExt->maxx - $this->user->rolle->oGeorefExt->minx)/($width-1);		# das width - 1 kommt daher, weil der Mapserver das auch so macht
-		$this->map_scaledenom = round($pixelsize * 96 / 0.0254);
+		$center_y = ($this->user->rolle->oGeorefExt->maxy + $this->user->rolle->oGeorefExt->miny) / 2;
+		if($this->user->rolle->epsg_code == 4326){$unit = MS_DD;} else {$unit = MS_METERS;}
+		$md = ($this->user->rolle->nImageWidth-1)/(96 * InchesPerUnit($unit, $center_y));
+		$gd = $this->user->rolle->oGeorefExt->maxx - $this->user->rolle->oGeorefExt->minx;
+		$this->map_scaledenom = round($gd/$md);
     # Abfragebereich berechnen
 		if($this->formvars['querypolygon'] != ''){
 			$rect = $this->formvars['querypolygon'];
@@ -11850,6 +11852,15 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							$client_epsg=$this->user->rolle->epsg_code;
 							# EPSG-Code des Layers der Abgefragt werden soll
 							$layer_epsg=$layerset[$i]['epsg_code'];
+							
+							if($client_epsg == 4326){
+								$center_y = ($rect->maxy+$rect->miny)/2;
+								$cos_lat = cos(pi() * $center_y/180.0);
+								$lat_adj = sqrt(1 + $cos_lat * $cos_lat)/sqrt(2);
+								$rand_in_metern = $layerset[$i]['tolerance'] * $pixsize * $lat_adj * 111000;
+							}
+							else $rand_in_metern = $rand;
+							
 							# Bildung der Where-Klausel für die räumliche Abfrage mit der searchbox
 							$searchbox_wkt ="POLYGON((";
 							$searchbox_wkt.=strval($rect->minx)." ".strval($rect->miny).",";
@@ -11879,7 +11890,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 									$sql_where =" AND ".$the_geom." && st_geomfromtext('".$loosesearchbox_wkt."',".$client_epsg.")";
 									$sql_where.=" AND st_distance(".$the_geom.",st_geomfromtext('POINT(".$rect->minx." ".$rect->miny.")',".$client_epsg."))";
 								}
-								$sql_where.=" <= ".$rand;
+								$sql_where.=" <= ".$rand_in_metern;
 							}
 							# ---------- Suche über Polygon ---------- #
 							else {
