@@ -77,6 +77,21 @@ class FormObject {
 		$this->outputHTML();
 	} # ende constructor
 
+static	function createSelectField($name, $options, $value, $size = 1) {
+	$options_html = array();
+	foreach($options AS $option) {
+		$selected = ($option['value'] == $value ? 'selected' : '');
+		$options_html[] = "<option value=\"{$option['value']}\" {$selected}>{$option['output']}</option>";
+	}
+
+	$html  = "
+<select name=\"{$name}\" size=\"{$size}\">
+	" . implode('<br>', $options_html) . "
+</select>
+";
+  return $html;
+}
+
 	function addJavaScript($event,$script){
 		$this->JavaScript.=' '.$event.'="'.$script.'"';
 	}
