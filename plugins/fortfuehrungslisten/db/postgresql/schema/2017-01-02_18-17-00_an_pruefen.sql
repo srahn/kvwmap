@@ -1,6 +1,4 @@
-ALTER TABLE fortfuehrungslisten.ff_auftraege ADD COLUMN an_pruefen boolean;
-ALTER TABLE fortfuehrungslisten.ff_auftraege ALTER COLUMN an_pruefen SET NOT NULL;
-ALTER TABLE fortfuehrungslisten.ff_auftraege ALTER COLUMN an_pruefen SET DEFAULT true;
+ALTER TABLE fortfuehrungslisten.ff_auftraege ADD COLUMN an_pruefen boolean NOT NULL DEFAULT true;
 
 CREATE OR REPLACE RULE an_pruefen AS
 	ON INSERT TO fortfuehrungslisten.ff_auftraege
