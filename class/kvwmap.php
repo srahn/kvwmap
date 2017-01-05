@@ -8201,8 +8201,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         $this->neuer_Layer_Datensatz();
       }
       else{
-        if($this->formvars['close_window'] == ""){
-					if($result[0] != '')showMessage('Eintrag erfolgreich.\n'.$result[0], false);
+        if($this->formvars['close_window'] == "") {
+					$msg = (is_array($result) and array_key_exists(1, $result) and $result[1] == 'error') ? '' : $result[0];
+					if($msg != '')
+						showMessage('Eintrag erfolgreich.\n' . $msg, false);
           else showMessage('Eintrag erfolgreich!');
         }
         if($this->formvars['weiter_erfassen'] == 1){
