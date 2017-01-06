@@ -3437,6 +3437,25 @@ class GUI {
           $this->Meldung=$ret[1];
       }
       else { # eintrag erfolgreich
+	      # wenn Time-Attribute vorhanden, aktuelle Zeit speichern      
+				$this->attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
+				for($i = 0; $i < count($this->attributes['type']); $i++){
+					if($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'Time'){
+						$sql = "UPDATE ".$this->formvars['layer_tablename']." SET ".$this->attributes['name'][$i]." = '".date('Y-m-d G:i:s')."' WHERE oid = '".$this->formvars['oid']."'";
+						$this->debug->write("<p>file:kvwmap :PointEditor_Senden :",4);
+						$ret = $layerdb->execSQL($sql,4, 1);
+					}
+					elseif($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'User'){
+						$sql = "UPDATE ".$this->formvars['layer_tablename']." SET ".$this->attributes['name'][$i]." = '".$this->user->Vorname." ".$this->user->Name."' WHERE oid = '".$this->formvars['oid']."'";
+						$this->debug->write("<p>file:kvwmap :PointEditor_Senden :",4);
+						$ret = $layerdb->execSQL($sql,4, 1);
+					}
+					elseif($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'UserID'){
+						$sql = "UPDATE ".$this->formvars['layer_tablename']." SET ".$this->attributes['name'][$i]." = ".$this->user->id." WHERE oid = '".$this->formvars['oid']."'";
+						$this->debug->write("<p>file:kvwmap :PointEditor_Senden :",4);
+						$ret = $layerdb->execSQL($sql,4, 1);
+					}
+				}
         showMessage('Eintrag erfolgreich!');
       }
       $this->PointEditor();
@@ -3548,6 +3567,11 @@ class GUI {
 					}
 					elseif($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'User'){
 						$sql = "UPDATE ".$this->formvars['layer_tablename']." SET ".$this->attributes['name'][$i]." = '".$this->user->Vorname." ".$this->user->Name."' WHERE oid = '".$this->formvars['oid']."'";
+						$this->debug->write("<p>file:kvwmap :LineEditor_Senden :",4);
+						$ret = $layerdb->execSQL($sql,4, 1);
+					}
+					elseif($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'UserID'){
+						$sql = "UPDATE ".$this->formvars['layer_tablename']." SET ".$this->attributes['name'][$i]." = ".$this->user->id." WHERE oid = '".$this->formvars['oid']."'";
 						$this->debug->write("<p>file:kvwmap :LineEditor_Senden :",4);
 						$ret = $layerdb->execSQL($sql,4, 1);
 					}
