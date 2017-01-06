@@ -8,11 +8,11 @@ class NASLoader extends DOMDocument {
 		$this->gui = $gui;
 	}
 
+	
+
 	function load_fortfuehrungsfaelle($ff_auftrag) {
-		$auftragsdatei_parts = explode('&', $ff_auftrag->get('auftragsdatei'));
-		$file_name = $auftragsdatei_parts[0];
-		$original_file_name_parts = explode('=', $auftragsdatei_parts[1]);
-		$original_file_name = $original_file_name_parts[1];
+		$file_name = $ff_auftrag->get_file_name();
+		$original_file_name = $ff_auftrag->get_original_file_name();
 		#echo '<br>Lade Datei: ' . $file_name;
 
 		$file = pathinfo($file_name);

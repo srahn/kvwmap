@@ -78,37 +78,39 @@ function operatorchange(attributname, searchmask_number){
 function suche(){
 	var nogo = '';
 	<?
-	for($i = 0; $i < count($this->attributes['type']); $i++){ 
-		if($this->attributes['type'][$i] != 'geometry' AND $this->attributes['form_element_type'][$i] != 'SubFormFK' AND $this->attributes['form_element_type'][$i] != 'dynamicLink'){		
-			if($this->attributes['mandatory'][$i] == 1){
-				if($this->attributes['alias'][$i] == ''){
-					$this->attributes['alias'][$i] = $this->attributes['name'][$i];
-				}		?>
-				if(document.GUI.value_<? echo $this->attributes['name'][$i]; ?>.value == ''){
-					if('<? echo $this->attributes['form_element_type'][$i]; ?>' != 'Autovervollständigungsfeld'
-					|| (document.GUI.value_<? echo $this->attributes['name'][$i]; ?>[0].value == '' && document.GUI.value_<? echo $this->attributes['name'][$i]; ?>[0].disabled == false)
-					|| (document.GUI.value_<? echo $this->attributes['name'][$i]; ?>[1].value == '' && document.GUI.value_<? echo $this->attributes['name'][$i]; ?>[1].disabled == false)
-					){
-						console.log(document.GUI.value_<? echo $this->attributes['name'][$i]; ?>[0].value);
-						console.log(document.GUI.value_<? echo $this->attributes['name'][$i]; ?>[0].disabled);
-						console.log(document.GUI.value_<? echo $this->attributes['name'][$i]; ?>[1].value);
-						console.log(document.GUI.value_<? echo $this->attributes['name'][$i]; ?>[1].disabled);
-						nogo = 'Das Feld <? echo $this->attributes['alias'][$i]; ?> ist ein Such-Pflichtfeld und muss ausgefüllt werden.';
+	for($i = 0; $i < count($this->attributes['type']); $i++) {
+		if ($this->attributes['mandatory'][$i] == '' or $this->attributes['mandatory'][$i] > -1) {
+			if($this->attributes['type'][$i] != 'geometry' AND $this->attributes['form_element_type'][$i] != 'SubFormFK' AND $this->attributes['form_element_type'][$i] != 'dynamicLink') {
+				if($this->attributes['mandatory'][$i] == 1){
+					if($this->attributes['alias'][$i] == ''){
+						$this->attributes['alias'][$i] = $this->attributes['name'][$i];
+					}		?>
+					if(document.GUI.value_<? echo $this->attributes['name'][$i]; ?>.value == ''){
+						if('<? echo $this->attributes['form_element_type'][$i]; ?>' != 'Autovervollständigungsfeld'
+						|| (document.GUI.value_<? echo $this->attributes['name'][$i]; ?>[0].value == '' && document.GUI.value_<? echo $this->attributes['name'][$i]; ?>[0].disabled == false)
+						|| (document.GUI.value_<? echo $this->attributes['name'][$i]; ?>[1].value == '' && document.GUI.value_<? echo $this->attributes['name'][$i]; ?>[1].disabled == false)
+						){
+							console.log(document.GUI.value_<? echo $this->attributes['name'][$i]; ?>[0].value);
+							console.log(document.GUI.value_<? echo $this->attributes['name'][$i]; ?>[0].disabled);
+							console.log(document.GUI.value_<? echo $this->attributes['name'][$i]; ?>[1].value);
+							console.log(document.GUI.value_<? echo $this->attributes['name'][$i]; ?>[1].disabled);
+							nogo = 'Das Feld <? echo $this->attributes['alias'][$i]; ?> ist ein Such-Pflichtfeld und muss ausgefüllt werden.';
+						}
 					}
-				}
-	<?	} ?>
-			test = document.GUI.value_<? echo $this->attributes['name'][$i]; ?>.value + '';
-			if(test.search(/%/) > -1 && document.GUI.operator_<? echo $this->attributes['name'][$i]; ?>.value == 'IN'){
-				nogo = 'Der Platzhalter % darf nur bei der Suche mit ähnlich oder nicht ähnlich verwendet werden.';
-			}
-	<? 	if(strpos($this->attributes['type'][$i], 'time') !== false OR $this->attributes['type'][$i] == 'date'){ ?>
+		<?	} ?>
 				test = document.GUI.value_<? echo $this->attributes['name'][$i]; ?>.value + '';
-				if(test != ''){
-					if(!checkDate(test)){
-						nogo = 'Das Datum hat das falsche Format';
-					}
+				if(test.search(/%/) > -1 && document.GUI.operator_<? echo $this->attributes['name'][$i]; ?>.value == 'IN'){
+					nogo = 'Der Platzhalter % darf nur bei der Suche mit ähnlich oder nicht ähnlich verwendet werden.';
 				}
-	<?	} 
+		<? 	if(strpos($this->attributes['type'][$i], 'time') !== false OR $this->attributes['type'][$i] == 'date'){ ?>
+					test = document.GUI.value_<? echo $this->attributes['name'][$i]; ?>.value + '';
+					if(test != ''){
+						if(!checkDate(test)){
+							nogo = 'Das Datum hat das falsche Format';
+						}
+					}
+		<?	} 
+			}
 		}
 	}?>
 	if(document.GUI.map_flag.value == 1){
