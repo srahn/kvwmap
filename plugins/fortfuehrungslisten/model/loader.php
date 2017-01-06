@@ -80,70 +80,76 @@ class NASLoader extends DOMDocument {
 				}
 			}
 
-			# Finde Gebäude und deren Anlass
-			$this->gebaeude_nodes = $this->getElementsByTagName('AX_Gebaeude');
-			if ($this->gebaeude_nodes->length > 0) {
-				foreach($this->gebaeude_nodes[0]->childNodes AS $child_node) {
-					$tag = strtolower($child_node->localName);
-					if ($tag == 'anlass') {
-						$ff_auftrag->set('gebaeude', $child_node->nodeValue);
-					}
-				}
+			if ($ff_auftrag->get('auftragsnummer') != $ff_auftrag->get('antragsnr')) {
+				$success = false;
+				$err_msg = "Die Aufragsnummer in der Auftragsdatei stimmt nicht<br>mit der Antragsnr im Formular überein.<br>Prüfen Sie die Eingabe und die Datei<br>und laden Sie ggf. eine neue Datei hoch!";
 			}
-
-			# speicher Auftrag
-			$ff_auftrag->update();
-
-			# Finde Flurstüecke und deren Anlässe
-			$this->flst_nodes = $this->getElementsByTagName('AX_Flurstueck');
-			$flurstuecke = array();
-			foreach($this->flst_nodes AS $flst_node) {
-				foreach($flst_node->childNodes AS $child_node) {
-					$tag = strtolower($child_node->localName);
-					if ($tag == 'flurstueckskennzeichen') {
-						$flst['flurstueckskennzeichen'] = $child_node->nodeValue;
-					}
-					if ($tag == 'anlass') {
-						$flst['anlass'] = $child_node->nodeValue;
-					}
-				}
-				$anlaesse[$flst['flurstueckskennzeichen']] = $flst['anlass'];
-			}
-
-			# Lösche vorhandene Fälle des Auftrages
-			$ff = new Fortfuehrungsfall($this->gui);
-			$ff->delete_by('ff_auftrag_id', $ff_auftrag->get('id'));
-
-			# Lege Fälle des Auftrages an
-			$this->fall_nodes = $this->getElementsByTagName('AX_Fortfuehrungsfall');
-			foreach($this->fall_nodes AS $fall_node) {
-				$ff = new Fortfuehrungsfall($this->gui);
-				$ff->set('ff_auftrag_id', $ff_auftrag->get('id'));
-				foreach($fall_node->childNodes AS $child_node) {
-					$tag = strtolower($child_node->localName);
-					if (in_array($tag, array(
-						'fortfuehrungsfallnummer',
-						'laufendenummer',
-						'ueberschriftimfortfuehrungsnachweis'
-					))) {
-						$ff->set($tag, $child_node->nodeValue);
-					}
-					if (in_array($tag, array(
-						'zeigtaufaltesflurstueck',
-						'zeigtaufneuesflurstueck'
-					))) {
-						$ff->set_array($tag, $child_node->nodeValue);
-						if ($tag == 'zeigtaufneuesflurstueck') {
-							$ff->set_array('anlassarten', $anlaesse[$child_node->nodeValue]);
+			else {
+				# Finde Gebäude und deren Anlass
+				$this->gebaeude_nodes = $this->getElementsByTagName('AX_Gebaeude');
+				if ($this->gebaeude_nodes->length > 0) {
+					foreach($this->gebaeude_nodes[0]->childNodes AS $child_node) {
+						$tag = strtolower($child_node->localName);
+						if ($tag == 'anlass') {
+							$ff_auftrag->set('gebaeude', $child_node->nodeValue);
 						}
 					}
 				}
-				$anlassarten = $ff->get('anlassarten');
-				if (!empty($anlassarten)) {
-					$ff->set('anlassart', $anlassarten[0]);
+
+				# speicher Auftrag
+				$ff_auftrag->update();
+
+				# Finde Flurstüecke und deren Anlässe
+				$this->flst_nodes = $this->getElementsByTagName('AX_Flurstueck');
+				$flurstuecke = array();
+				foreach($this->flst_nodes AS $flst_node) {
+					foreach($flst_node->childNodes AS $child_node) {
+						$tag = strtolower($child_node->localName);
+						if ($tag == 'flurstueckskennzeichen') {
+							$flst['flurstueckskennzeichen'] = $child_node->nodeValue;
+						}
+						if ($tag == 'anlass') {
+							$flst['anlass'] = $child_node->nodeValue;
+						}
+					}
+					$anlaesse[$flst['flurstueckskennzeichen']] = $flst['anlass'];
 				}
-				$ff->create();
-				$this->fortfuehrungsfaelle[] = $ff;
+
+				# Lösche vorhandene Fälle des Auftrages
+				$ff = new Fortfuehrungsfall($this->gui);
+				$ff->delete_by('ff_auftrag_id', $ff_auftrag->get('id'));
+
+				# Lege Fälle des Auftrages an
+				$this->fall_nodes = $this->getElementsByTagName('AX_Fortfuehrungsfall');
+				foreach($this->fall_nodes AS $fall_node) {
+					$ff = new Fortfuehrungsfall($this->gui);
+					$ff->set('ff_auftrag_id', $ff_auftrag->get('id'));
+					foreach($fall_node->childNodes AS $child_node) {
+						$tag = strtolower($child_node->localName);
+						if (in_array($tag, array(
+							'fortfuehrungsfallnummer',
+							'laufendenummer',
+							'ueberschriftimfortfuehrungsnachweis'
+						))) {
+							$ff->set($tag, $child_node->nodeValue);
+						}
+						if (in_array($tag, array(
+							'zeigtaufaltesflurstueck',
+							'zeigtaufneuesflurstueck'
+						))) {
+							$ff->set_array($tag, $child_node->nodeValue);
+							if ($tag == 'zeigtaufneuesflurstueck') {
+								$ff->set_array('anlassarten', $anlaesse[$child_node->nodeValue]);
+							}
+						}
+					}
+					$anlassarten = $ff->get('anlassarten');
+					if (!empty($anlassarten)) {
+						$ff->set('anlassart', $anlassarten[0]);
+					}
+					$ff->create();
+					$this->fortfuehrungsfaelle[] = $ff;
+				}
 			}
 		}
 		$result = array(
