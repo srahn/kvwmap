@@ -8197,7 +8197,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     }
     else{
       if($success == false){
-        showAlert('Eintrag fehlgeschlagen.\n'.$result[0]);
+        showMessage('Eintrag fehlgeschlagen.\n'.$result[0], false, 'error');
         $this->neuer_Layer_Datensatz();
       }
       else{

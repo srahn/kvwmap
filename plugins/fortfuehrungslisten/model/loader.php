@@ -8,9 +8,8 @@ class NASLoader extends DOMDocument {
 		$this->gui = $gui;
 	}
 
-	
-
 	function load_fortfuehrungsfaelle($ff_auftrag) {
+		$success = true;
 		$file_name = $ff_auftrag->get_file_name();
 		$original_file_name = $ff_auftrag->get_original_file_name();
 		#echo '<br>Lade Datei: ' . $file_name;
@@ -40,6 +39,7 @@ class NASLoader extends DOMDocument {
 				}
 			}
 			if (empty($xml_file_name)) {
+				$success = false;
 				$err_msg = "Keine Datei mit der Endung _2000 in Zip-Datei gefunden. Prüfen Sie bitte ob Sie die richtige Zip-Datei hochgeladen haben.";
 			}
 		}
@@ -49,6 +49,7 @@ class NASLoader extends DOMDocument {
 		}
 
 		if (empty($xml_file_name)) {
+			$success = false;
 			$err_msg = "Keine Datei gefunden. Prüfen Sie ob Sie schon eine Datei hochgeladen haben.";
 		}
 		else {
