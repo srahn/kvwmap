@@ -5,7 +5,6 @@ $BODY$
     $BODY$
   LANGUAGE sql VOLATILE
   COST 100;
-
 COMMENT ON FUNCTION fortfuehrungslisten.ff_auftraege_next_lfdnr(integer, integer) IS 'Liefert die nächste freie Nummer pro Fortführungsjahr (jahr) und Gemarkung (gemkgnr) aus der Tabelle der Fortführungsaufträge (ff_auftraege).';
 
 CREATE OR REPLACE FUNCTION fortfuehrungslisten.ff_auftraege_set_next_lfdnr() RETURNS trigger AS $$
@@ -18,3 +17,4 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER ff_auftraege_set_next_lfdnr before insert or update on fortfuehrungslisten.ff_auftraege
 	FOR EACH ROW
 	EXECUTE PROCEDURE fortfuehrungslisten.ff_auftraege_set_next_lfdnr();
+COMMENT ON TRIGGER ff_auftraege_set_next_lfdnr ON fortfuehrungslisten.ff_auftraege IS 'Der Trigger setzt die laufnede Nummer (lfdnr) pro Jahr (jahr) und Gemarkung (gemkgnr) vor dem INSERT eines neuen Fortführungsauftrages in Tabelle ff_auftraege.';
