@@ -1001,16 +1001,18 @@ function showMessage($text, $fade = true, $msg_type = 'warning') {
   ?>
   <script type="text/javascript">
 		var Msg = document.getElementById("message_box");
+				innerhtml = '';
 		if(Msg == undefined){
 			document.write('<div id="message_box" class="message_box_hidden"></div>');
 			var Msg = document.getElementById("message_box");
 		}
 		Msg.className = 'message_box_visible';<?php
 		if ($msg_type == 'error') { ?>
+			innerhtml += '<h2>Eingabefehler</h2>';
 			Msg.className = 'message_box_error';<?php
 		} ?>
 		Msg.style.top = document.body.scrollTop + 350;
-		var innerhtml = '<?php echo $text; ?>';
+		innerhtml += '<?php echo $text; ?>';
 		<? if($fade == true){ ?>
 			setTimeout(function() {Msg.className = 'message_box_hide';},1000);
 			setTimeout(function() {Msg.className = 'message_box_hidden';},3000);
