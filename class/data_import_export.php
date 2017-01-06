@@ -792,8 +792,8 @@ class data_import_export {
 		return utf8_decode($csv);
 	}
   
-	function create_uko($layerdb, $table, $column){
-		$sql.= "SELECT st_astext(st_multi(st_union(".$column."))) as geom FROM ".$table;
+	function create_uko($layerdb, $table, $column, $epsg){
+		$sql.= "SELECT st_astext(st_multi(st_union(st_transform(".$column.", ".$epsg.")))) as geom FROM ".$table;
 		#echo $sql;
 		$ret = $layerdb->execSQL($sql,4, 1);
 		if(!$ret[0]){
@@ -808,12 +808,12 @@ class data_import_export {
 		}
   }
 	
-	function create_ovl($datentyp, $layerdb, $table, $column){
+	function create_ovl($datentyp, $layerdb, $table, $column, $epsg){
 		$ovl_type = array(MS_LAYER_POINT => 6, MS_LAYER_LINE => 3, MS_LAYER_POLYGON => 4);
 		$sql.= "SELECT st_astext(";
 		if($datentyp == MS_LAYER_POLYGON)$sql.= "ST_MakePolygon(st_exteriorring(geom))) as geom ";
 		else $sql.= "geom) as geom ";
-		$sql.= "FROM (select (st_dump(st_union(".$column."))).geom as geom FROM ".$table.") as foo";
+		$sql.= "FROM (select (st_dump(st_union(st_transform(".$column.", ".$epsg.")))).geom as geom FROM ".$table.") as foo";
 		#echo $sql;
 		$ret = $layerdb->execSQL($sql,4, 1);
 		if(!$ret[0]){
@@ -999,7 +999,7 @@ class data_import_export {
 				}break;
 				
 				case 'UKO' : {
-					$uko = $this->create_uko($layerdb, $temp_table, $this->attributes['the_geom']);
+					$uko = $this->create_uko($layerdb, $temp_table, $this->attributes['the_geom'], $this->formvars['epsg']);
 					$exportfile = $exportfile.'.uko';
 					$fp = fopen($exportfile, 'w');
 					fwrite($fp, $uko);
@@ -1008,7 +1008,7 @@ class data_import_export {
 				}break;
 				
 				case 'OVL' : {
-					$ovl = $this->create_ovl($layerset[0]['Datentyp'], $layerdb, $temp_table, $this->attributes['the_geom']);
+					$ovl = $this->create_ovl($layerset[0]['Datentyp'], $layerdb, $temp_table, $this->attributes['the_geom'], $this->formvars['epsg']);
 					for($i = 0; $i < count($ovl); $i++){
 						$exportfile2 = $exportfile.'_'.$i.'.ovl';
 						$fp = fopen($exportfile2, 'w');
