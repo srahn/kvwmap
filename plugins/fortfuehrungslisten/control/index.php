@@ -29,26 +29,26 @@ switch($this->go) {
 	case 'lade_fortfuehrungsfaelle': {
 		$ff_auftrag_id = $_REQUEST['ff_auftrag_id'];
 		if (empty($ff_auftrag_id)) {
-			$this->Fehlermeldung = 'Sie müssen eine Fortführungsauftrags Id angeben im Parameter ff_auftrag_id!';
+			showMessage('Sie müssen eine Fortführungsauftrags Id angeben im Parameter ff_auftrag_id!', false, 'error');
 		}
 		else {
 			$ff_auftrag = Fortfuehrungsauftrag::find_by_id($this, 'id', $ff_auftrag_id);
 			if (empty($ff_auftrag->get('auftragsdatei'))) {
-				$this->Fehlermeldung = 'Sie müssen erst eine Auftragsdatei zum Fortführungsauftrag hochladen!';
+				showMessage('Sie müssen erst eine Auftragsdatei zum Fortführungsauftrag hochladen!', false, 'error');
 			}
 			else {
 				$this->loader = new NASLoader($this);
 				$result = $this->loader->load_fortfuehrungsfaelle($ff_auftrag);
+				$msg = $result['msg'];
+				$msg_type = $result['msg_type'];
 				if ($result['success']) {
 					$result = $ff_auftrag->auftragsdatei_loeschen();
+					if (!$result['success']) {
+						$msg .= '<br><br>' . $result['msg'];
+					}
 				}
-				if (!$result['success']) {
-					$this->Fehlermeldung = '<br>' . $result['err_msg'];
-				}
+				showMessage($msg, false, $msg_type);
 			}
-		}
-		if (!empty($this->Fehlermeldung)) {
-			showMessage($this->Fehlermeldung, false, 'error');
 		}
 		$this->formvars['selected_layer_id'] = LAYER_ID_FF_AUFTRAG;
 		$this->formvars['operator_ff_auftrag_id'] = '=';

@@ -23,7 +23,7 @@ public static	function find_by_id($gui, $by, $id) {
 public function auftragsdatei_loeschen() {
 		$success = false;
 		if (empty($this->get('auftragsdatei'))) {
-			$err_msg = 'Keine Auftragsdatei zum Löschen vorhanden!';
+			$msg = 'Keine Auftragsdatei zum Löschen vorhanden!';
 		}
 		else {
 			# FF_Auftrag hat Auftragsdatei -> löschen
@@ -31,11 +31,11 @@ public function auftragsdatei_loeschen() {
 			if (file_exists($file_name)) {
 				$success = unlink($file_name); // success = true if unlink successfully
 				if (!$success) {
-					$err_msg = 'Auftragsdatei konnte nicht gelöscht werden. Melden Sie dies bei Ihrem GIS-Administrator. Möglicherweise sind die Zugriffsrechte falsch gesetzt.';
+					$msg = 'Auftragsdatei konnte nicht gelöscht werden. Melden Sie dies bei Ihrem GIS-Administrator. Möglicherweise sind die Zugriffsrechte falsch gesetzt.';
 				}
 			}
 			else {
-				$err_msg = 'Auftragsdatei existierte nicht. Es wurde nur der Eintrag des Dateinamens gelöscht. Kommt dies öffter vor, informieren Sie Ihren GIS-Administrator. Registrierte Auftragsdateien sollten auch immer auf dem Server vorhanden sein. Möglicherweise wurden diese aber auf dem Server manuell gelöscht oder verschoben.';
+				$msg = 'Auftragsdatei existierte nicht. Es wurde nur der Eintrag des Dateinamens gelöscht. Kommt dies öffter vor, informieren Sie Ihren GIS-Administrator. Registrierte Auftragsdateien sollten auch immer auf dem Server vorhanden sein. Möglicherweise wurden diese aber auf dem Server manuell gelöscht oder verschoben.';
 			}
 
 			# Name der Auftragsdatei im Datensatz des FF_Auftrag löschen
@@ -44,7 +44,8 @@ public function auftragsdatei_loeschen() {
 		}
 		$result = array(
 			'success' => $success,
-			'err_msg' => $err_msg
+			'msg' => $msg,
+			'msg_type' => 'error'
 		);
 		return $result;
 	}

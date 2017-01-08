@@ -10,6 +10,7 @@ class NASLoader extends DOMDocument {
 
 	function load_fortfuehrungsfaelle($ff_auftrag) {
 		$success = true;
+		$msg_type = 'error';
 		$file_name = $ff_auftrag->get_file_name();
 		$original_file_name = $ff_auftrag->get_original_file_name();
 		#echo '<br>Lade Datei: ' . $file_name;
@@ -163,8 +164,15 @@ class NASLoader extends DOMDocument {
 						if (!empty($anlassarten)) {
 							$ff->set('anlassart', $anlassarten[0]);
 						}
-						$ff->create();
-						$this->fortfuehrungsfaelle[] = $ff;
+						# Fall nur Speichern wenn sich altes und neue Flurstücke unterscheiden
+						if ($ff->has_changed_parcels()) {
+							$ff->create();
+							$this->fortfuehrungsfaelle[] = $ff;
+						}
+					}
+					if (empty($this->fortfuehrungsfaelle[])) {
+						$err_msg = 'Es wurden keine Fortführungsfälle gefunden<br>bei denen sich die Flurstücksnummer geändert hat.'
+						$msg_type = 'waring';
 					}
 				}
 			}
@@ -172,6 +180,7 @@ class NASLoader extends DOMDocument {
 		$result = array(
 			'success' => $success,
 			'err_msg' => $err_msg,
+			'msg_type' => $msg_type, 
 			'fortfuehrungsfaelle' => $this->fortfuehrungsfaelle
 		);
 		return $result;
