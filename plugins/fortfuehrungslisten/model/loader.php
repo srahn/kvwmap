@@ -79,11 +79,14 @@ class NASLoader extends DOMDocument {
 				))) {
 					$ff_auftrag->set($tag, $child_node->nodeValue);
 				}
+				if ($tag == 'antragsnummer') {
+					$antragsnummer_datei = $child_node->nodeValue;
+				}
 			}
 
-			if ($ff_auftrag->get('auftragsnummer') != $ff_auftrag->get('antragsnr')) {
+			if ($antragsnummer_datei != $ff_auftrag->get('antragsnr')) {
 				$success = false;
-				$msg = "Die Aufragsnummer in der Auftragsdatei stimmt nicht<br>mit der Antragsnr im Formular überein.<br>Prüfen Sie die Eingabe und die Datei<br>und laden Sie ggf. eine neue Datei hoch!";
+				$msg = "Die Antragsnummer in der Auftragsdatei stimmt nicht<br>mit der Antragsnr im Formular überein.<br>Prüfen Sie die Eingabe und die Datei<br>und laden Sie ggf. eine neue Datei hoch!";
 			}
 			else {
 				# Suche alle Gemarkungsnummern von Flurstücken raus.
@@ -150,33 +153,30 @@ class NASLoader extends DOMDocument {
 							))) {
 								$ff->set($tag, $child_node->nodeValue);
 							}
-							if (in_array($tag, array(
-								'zeigtaufaltesflurstueck',
-								'zeigtaufneuesflurstueck'
-							))) {
+
+							if ($tag == 'zeigtaufaltesflurstueck') {
 								$ff->set_array($tag, $child_node->nodeValue);
-								if ($tag == 'zeigtaufneuesflurstueck') {
+							}
+							if ($tag == 'zeigtaufneuesflurstueck') {
+								# Speichert neues Flurstück nur, wenn es nicht mit altem übereinstimmt
+								if ($child_node->nodeValue != $ff->get('zeigtaufaltesflurstueck')[0]) {
 									$ff->set_array('anlassarten', $anlaesse[$child_node->nodeValue]);
+									$ff->set_array($tag, $child_node->nodeValue);
+								}
+								else {
+									$msg .= 'Im Fortführungsfall Nr.: ' . $ff->get('fortfuehrungsfallnummer') . ' ist die alte Flurstücksnummer:<br>' . $ff->get('zeigtaufaltesflurstueck')[0] . ' identisch mit der neuen Nummer.<br>In dem Fall wird die neue Nummer nicht gespeichert.';
+									$msg_type = 'waring';
 								}
 							}
 						}
+
 						$anlassarten = $ff->get('anlassarten');
 						if (!empty($anlassarten)) {
 							$ff->set('anlassart', $anlassarten[0]);
 						}
-						# Fall nur Speichern wenn sich altes und neue Flurstücke unterscheiden
-						if ($ff->has_changed_parcels()) {
-							$ff->create();
-							$this->fortfuehrungsfaelle[] = $ff;
-						}
-						else {
-							$msg .= 'Im Fortführungsfall Nr.: ' . $ff->get('fortfuehrungsfallnummer') . ' gibt es keine neue Flurstücksnummer.<br>Der Fall wird nicht gespeichert.<br>Prüfen Sie ggf. die Auftragsdatei.';
-							$msg_type = 'waring';
-						}
-					}
-					if (empty($this->fortfuehrungsfaelle)) {
-						$msg = 'Es wurden keine Fortführungsfälle gefunden<br>bei denen sich die Flurstücksnummer geändert hat.';
-						$msg_type = 'waring';
+
+						$ff->create();
+						$this->fortfuehrungsfaelle[] = $ff;
 					}
 				}
 			}

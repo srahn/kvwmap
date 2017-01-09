@@ -14,7 +14,7 @@ BEGIN
 	END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER ff_auftraege_set_next_lfdnr before insert or update on fortfuehrungslisten.ff_auftraege
+CREATE TRIGGER ff_auftraege_set_next_lfdnr before insert on fortfuehrungslisten.ff_auftraege
 	FOR EACH ROW
 	EXECUTE PROCEDURE fortfuehrungslisten.ff_auftraege_set_next_lfdnr();
 COMMENT ON TRIGGER ff_auftraege_set_next_lfdnr ON fortfuehrungslisten.ff_auftraege IS 'Der Trigger setzt die laufnede Nummer (lfdnr) pro Jahr (jahr) und Gemarkung (gemkgnr) vor dem INSERT eines neuen Fortführungsauftrages in Tabelle ff_auftraege.';
