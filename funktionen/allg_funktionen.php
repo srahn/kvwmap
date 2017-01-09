@@ -1050,7 +1050,7 @@ function showMessage($text, $fade = true, $msg_type = 'warning') {
 			document.write('<div id="message_box" class="message_box_hidden"></div>');
 			var Msg = document.getElementById("message_box");
 		}
-		Msg.className = 'message_box_visible';<?php
+		Msg.className = 'message_box_<?php echo $msg_type; ?>';<?php
 		if ($msg_type == 'error') { ?>
 			innerhtml += '<h2>Eingabefehler</h2>';
 			Msg.className = 'message_box_error';<?php

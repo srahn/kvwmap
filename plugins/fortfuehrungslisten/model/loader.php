@@ -41,7 +41,7 @@ class NASLoader extends DOMDocument {
 			}
 			if (empty($xml_file_name)) {
 				$success = false;
-				$err_msg = "Keine Datei mit der Endung _2000 in Zip-Datei gefunden. Prüfen Sie bitte ob Sie die richtige Zip-Datei hochgeladen haben.";
+				$msg = "Keine Datei mit der Endung _2000 in Zip-Datei gefunden. Prüfen Sie bitte ob Sie die richtige Zip-Datei hochgeladen haben.";
 			}
 		}
 		else {
@@ -51,7 +51,7 @@ class NASLoader extends DOMDocument {
 
 		if (empty($xml_file_name)) {
 			$success = false;
-			$err_msg = "Keine Datei gefunden. Prüfen Sie ob Sie schon eine Datei hochgeladen haben.";
+			$msg = "Keine Datei gefunden. Prüfen Sie ob Sie schon eine Datei hochgeladen haben.";
 		}
 		else {
 			#echo '<br>Lade Datei: ' . $xml_file_name;
@@ -83,7 +83,7 @@ class NASLoader extends DOMDocument {
 
 			if ($ff_auftrag->get('auftragsnummer') != $ff_auftrag->get('antragsnr')) {
 				$success = false;
-				$err_msg = "Die Aufragsnummer in der Auftragsdatei stimmt nicht<br>mit der Antragsnr im Formular überein.<br>Prüfen Sie die Eingabe und die Datei<br>und laden Sie ggf. eine neue Datei hoch!";
+				$msg = "Die Aufragsnummer in der Auftragsdatei stimmt nicht<br>mit der Antragsnr im Formular überein.<br>Prüfen Sie die Eingabe und die Datei<br>und laden Sie ggf. eine neue Datei hoch!";
 			}
 			else {
 				# Suche alle Gemarkungsnummern von Flurstücken raus.
@@ -92,10 +92,10 @@ class NASLoader extends DOMDocument {
 					foreach($this->gemkg_nummern AS $gemkg_nummer) {
 						if ($gemkg_nummer->nodeValue != $ff_auftrag->get('gemkgnr')) {
 							$success = false;
-							$err_msg  = "In der Auftragsdatei wurde die Gemarkungsnummer: " . $gemkg_nummer->nodeValue . " gefunden.<br>";
-							$err_msg .= "Diese Nummer stimmt nicht mit der im Formular oben angegebenen<br>Gemarkungsnummer: " . $ff_auftrag->get('gemkgnr') . ' überein.<br>';
-							$err_msg .= "Korrigieren Sie die Gemarkungsnummer im Formular oder<br>";
-							$err_msg .= "prüfen Sie die ob die Datei korrekt ist.";
+							$msg  = "In der Auftragsdatei wurde die Gemarkungsnummer: " . $gemkg_nummer->nodeValue . " gefunden.<br>";
+							$msg .= "Diese Nummer stimmt nicht mit der im Formular oben angegebenen<br>Gemarkungsnummer: " . $ff_auftrag->get('gemkgnr') . ' überein.<br>';
+							$msg .= "Korrigieren Sie die Gemarkungsnummer im Formular oder<br>";
+							$msg .= "prüfen Sie die ob die Auftragsdatei korrekt ist.";
 							break;
 						}
 					}
@@ -169,9 +169,13 @@ class NASLoader extends DOMDocument {
 							$ff->create();
 							$this->fortfuehrungsfaelle[] = $ff;
 						}
+						else {
+							$msg .= 'Im Fortführungsfall Nr.: ' . $ff->get('fortfuehrungsfallnummer') . ' gibt es keine neue Flurstücksnummer.<br>Der Fall wird nicht gespeichert.<br>Prüfen Sie ggf. die Auftragsdatei.';
+							$msg_type = 'waring';
+						}
 					}
-					if (empty($this->fortfuehrungsfaelle[])) {
-						$err_msg = 'Es wurden keine Fortführungsfälle gefunden<br>bei denen sich die Flurstücksnummer geändert hat.'
+					if (empty($this->fortfuehrungsfaelle)) {
+						$msg = 'Es wurden keine Fortführungsfälle gefunden<br>bei denen sich die Flurstücksnummer geändert hat.';
 						$msg_type = 'waring';
 					}
 				}
@@ -179,7 +183,7 @@ class NASLoader extends DOMDocument {
 		}
 		$result = array(
 			'success' => $success,
-			'err_msg' => $err_msg,
+			'msg' => $msg,
 			'msg_type' => $msg_type, 
 			'fortfuehrungsfaelle' => $this->fortfuehrungsfaelle
 		);

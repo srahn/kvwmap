@@ -47,7 +47,8 @@ switch($this->go) {
 						$msg .= '<br><br>' . $result['msg'];
 					}
 				}
-				showMessage($msg, false, $msg_type);
+				if (!empty($msg))
+					showMessage($msg, false, $msg_type);
 			}
 		}
 		$this->formvars['selected_layer_id'] = LAYER_ID_FF_AUFTRAG;
