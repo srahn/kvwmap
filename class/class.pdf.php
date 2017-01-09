@@ -1397,9 +1397,9 @@ function openFont($font){
     }
     $data['_version_']=1;
     $this->fonts[$font]=$data;
-    $fp = fopen($dir.'php_'.$name.'.afm','w');
-    fwrite($fp,serialize($data));
-    fclose($fp);
+#    $fp = fopen($dir.'php_'.$name.'.afm','w');
+#    fwrite($fp,serialize($data));
+#    fclose($fp);
   } else if (!isset($this->fonts[$font])){
     $this->addMessage('openFont: no font file found');
 //    echo 'Font not Found '.$font;
