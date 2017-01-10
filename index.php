@@ -1374,6 +1374,37 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->BenutzerdatenAendern();
 	  } break;
 
+		case 'cronjobs_anzeigen' : {
+			$GUI->checkCaseAllowed('cronjobs_anzeigen');
+			$GUI->cronjobs_anzeigen();
+		} break;
+
+		case 'cronjob_editieren' : {
+			$GUI->checkCaseAllowed('cronjobs_anzeigen');
+			$GUI->cronjob_editieren();
+		} break;
+
+		case 'cronjob_speichern_Anlegen' : {
+			$GUI->checkCaseAllowed('cronjobs_anzeigen');
+			$GUI->formvars = formvars_strip($GUI->formvars, 'go, go_plus, overlayx, overlayy, browserwidth, browserheight');
+			$GUI->cronjobs_anlegen();
+		} break;
+
+		case 'cronjob_speichern_Speichern' : {
+			$GUI->checkCaseAllowed('cronjobs_anzeigen');
+			$GUI->formvars = formvars_strip($GUI->formvars, 'go, go_plus, overlayx, overlayy, browserwidth, browserheight');
+			$GUI->cronjob_update();
+		} break;
+
+		case 'cronjob_löschen' : {
+			$GUI->checkCaseAllowed('cronjobs_anzeigen');
+			$GUI->cronjob_delete();
+		} break;
+
+		case 'crontab_anzeigen' : {
+			$GUI->checkCaseAllowed('cronjobs_anzeigen');
+			$GUI->crontab_show();
+		} break;
 
 	  case 'Funktionen_Anzeigen' : {
 			$GUI->checkCaseAllowed('Funktionen_Anzeigen');

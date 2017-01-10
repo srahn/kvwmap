@@ -10425,7 +10425,59 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->output();
   }
 
-  function LayerUebersicht(){
+	function cronjobs_anzeigen() {
+		include_once(CLASSPATH . 'CronJob.php');
+		$this->cronjobs = CronJob::find($this);
+		$this->main = 'cronjobs.php';
+		$this->output();
+	}
+
+	function cronjob_editieren() {
+		include_once(CLASSPATH . 'CronJob.php');
+		$this->cronjob = CronJob::find_by_id($this, $this->formvars['selected_cronjob_id']);
+		$this->main = 'cronjob_formular.php';
+		$this->output();
+	}
+
+	function cronjobs_anlegen() {
+		include_once(CLASSPATH . 'CronJob.php');
+		$this->cronjob = new CronJob($this);
+		$this->cronjob->data = $this->formvars;
+		$this->cronjob->set('query', strip_pg_escape_string($this->formvars['query']));
+		$this->cronjob->create();
+		$this->cronjobs = CronJob::find($this);
+		$this->main = 'cronjobs.php';
+		$this->output();
+	}
+
+	function cronjob_update() {
+		include_once(CLASSPATH . 'CronJob.php');
+		$this->cronjob = CronJob::find_by_id($this, $this->formvars['id']);
+		$this->cronjob->data = $this->formvars;
+		$this->cronjob->update();
+		$this->cronjob->set('query', strip_pg_escape_string($this->cronjob->get('query')));
+		$this->cronjobs = CronJob::find($this);
+		$this->main = 'cronjobs.php';
+		$this->output();
+	}
+
+	function cronjob_delete() {
+		include_once(CLASSPATH . 'CronJob.php');
+		$this->cronjob = CronJob::find_by_id($this, $this->formvars['selected_cronjob_id']);
+		$this->cronjob->delete();
+		$this->cronjobs = CronJob::find($this);
+		$this->main = 'cronjobs.php';
+		$this->output();
+	}
+
+	function crontab_show() {
+		include_once(CLASSPATH . 'CronJob.php');
+		$this->cronjobs = CronJob::find($this);
+		$this->main = 'crontab.php';
+		$this->output();
+	}
+
+  function LayerUebersicht() {
   	$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->titel='Themenübersicht';
     $this->main='layer_uebersicht.php';

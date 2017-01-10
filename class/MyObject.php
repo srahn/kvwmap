@@ -28,7 +28,7 @@ class MyObject {
       WHERE
         `" . $attribute . "` = '" . $value . "'
     ";
-    $this->debug->show('<p>sql: ' . $sql);
+    $this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
     $query = mysql_query($sql, $this->database->dbConn);
     $this->data = mysql_fetch_assoc($query);
     return $this;
