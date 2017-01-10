@@ -491,20 +491,31 @@ class ddl {
     for($i = 0; $i < count($result); $i++){
 			$lastpage = end($this->pdf->objects['3']['info']['pages'])+1;
     	$this->i_on_page++;
-			if($this->page_overflow_by_sublayout != false){
-				$this->page_overflow_by_sublayout = false;						
-				#$this->miny = $this->miny_on_new_page; 
+			if($this->page_overflow_by_sublayout != false){		# Ein Sublayout hat einen Seitenüberlauf verursacht. Das ist ungewollt und deshalb wird zurückgerollt und eine neue Seite begonnen.
+				$this->page_overflow_by_sublayout = false;
+				$this->pdf->transaction('rewind');
+				$i--;
+				$this->i_on_page = 0;
+				#$this->maxy = 0;
 				if(!$this->initial_yoffset)$this->initial_yoffset = 780-$this->maxy;			# der Offset von oben gesehen, mit dem das erste fortlaufende Element auf der ersten Seite beginnt; wird benutzt, um die fortlaufenden Elemente ab der 2. Seite oben beginnen zu lassen
-				$this->i_on_page = 1;	# ??
-				$this->maxy = 781;
-				if($this->layout['type'] == 2)$this->offsety = 50;		# das ist für den Fall, dass ein Sublayout in einem Sublayout einen Seitenüberlauf verursacht hat (hier muss eigentlich der Offset der nächsten Seite rein)
+				if($this->layout['type'] == 2)$this->offsety = 50; else $this->offsety = 0;
+				$this->pdf->newPage();
+				$this->miny[$lastpage] = 1000000;
 			}
-    	if($this->layout['type'] == 0 AND $i > 0){		# neue Seite beim seitenweisen Typ und neuem Datensatz 
+			elseif($this->pdf->transaction_started == $selected_layer_id){
+				$this->pdf->transaction('commit');
+				$this->pdf->transaction_started = false;
+			}			
+			if($this->layout['type'] != 0 AND !$this->pdf->transaction_started){		# bei den beiden Listentypen eine Transaktion starten um evtl. bei einem Seitenüberlauf zurückkehren zu können
+				$this->pdf->transaction('start');
+				$this->pdf->transaction_started = $selected_layer_id;
+			}
+			if($this->layout['type'] == 0 AND $i > 0){		# neue Seite beim seitenweisen Typ und neuem Datensatz 
     		$this->pdf->newPage();
 				$this->add_static_elements($offsetx);
     	}
 			$this->yoffset_onpage = $this->maxy - $this->miny[$lastpage];			# der Offset mit dem die Elemente beim Untereinander-Typ nach unten versetzt werden
-			if($this->layout['type'] != 0 AND $this->miny[$lastpage] < $this->max_dataset_height+60){		# neue Seite beim Untereinander-Typ oder eingebettet-Typ und Seitenüberlauf
+			if($this->layout['type'] != 0 AND $this->miny[$lastpage] < 60){		# neue Seite beim Untereinander-Typ oder eingebettet-Typ und Seitenüberlauf
 				$this->i_on_page = 0;
 				#$this->maxy = 0;
 				if(!$this->initial_yoffset)$this->initial_yoffset = 780-$this->maxy;			# der Offset von oben gesehen, mit dem das erste fortlaufende Element auf der ersten Seite beginnt; wird benutzt, um die fortlaufenden Elemente ab der 2. Seite oben beginnen zu lassen
