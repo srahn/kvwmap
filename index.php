@@ -1401,9 +1401,9 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->cronjob_delete();
 		} break;
 
-		case 'crontab_anzeigen' : {
+		case 'crontab_schreiben' : {
 			$GUI->checkCaseAllowed('cronjobs_anzeigen');
-			$GUI->crontab_show();
+			$GUI->crontab_schreiben();
 		} break;
 
 	  case 'Funktionen_Anzeigen' : {

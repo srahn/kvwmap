@@ -19,5 +19,20 @@ class CronJob extends MyObject {
 		return $cronjob->find_where($where);
 	}
 
+	public function get_crontab_line() {
+		$line = '';
+		if (!empty($this->get('time'))) {
+			if (!empty($this->get('query'))) {
+				$line = $this->get('time') . ' PGPASSWORD=' . $this->gui->pgdatabase->passwd . ' psql -h pgsql -U ' . $this->gui->pgdatabase->user . ' -c "' . preg_replace('/\s+/', ' ', $this->get('query')) . '" ' . $this->gui->pgdatabase->dbName;
+			}
+			else {
+				if (!empty($this->get('function'))) {
+					$line = $this->get('time') . ' ' . $this->get('function');
+				}
+			}
+		}
+		return $line;
+	}
+
 }
 ?>

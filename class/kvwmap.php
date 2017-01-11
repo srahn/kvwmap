@@ -10470,9 +10470,34 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->output();
 	}
 
-	function crontab_show() {
+	function crontab_schreiben() {
 		include_once(CLASSPATH . 'CronJob.php');
 		$this->cronjobs = CronJob::find($this);
+
+		# erzeugt die Zeilen für den crontab
+		$crontab_lines = array_map(
+			function ($cronjob) {
+				return $cronjob->get_crontab_line();
+			},
+			$this->cronjobs
+		);
+
+		# schreibt die Zeilen in eine Datei
+		$crontab_file = '/tmp/crontab_www-data';
+		$fp = fopen($crontab_file, 'w');
+		foreach($crontab_lines AS $line) {
+			fwrite($fp, $line . PHP_EOL);
+		}
+		fclose($fp);
+
+		# crontab starten
+		exec('crontab -u www-data ' . $crontab_file);
+
+		# crontab datei löschen
+		unlink($crontab_file);
+
+		# crontab Zeilen anzeigen
+		$this->crontab_lines = $crontab_lines;
 		$this->main = 'crontab.php';
 		$this->output();
 	}
