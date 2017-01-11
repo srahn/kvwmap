@@ -670,6 +670,45 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 	z-index: 1000000;
 }
 
+.message_box_error {
+	background-color: #fdc1c1;
+	opacity: 1;
+	position: absolute;
+	top:350px;
+	left:45%;
+	min-width:250px;
+	#height:90px;
+	font-size: 17px;
+	font-family: SourceSansPro2;
+	margin:-45px 0 0 -100px;
+	padding: 20px;
+	text-align:center;
+	line-height: 20px;
+	border: 1px solid grey;
+	box-shadow: 0px 0px 14px #777;
+	z-index: 1000000;
+}
+
+.message_box_waring {
+	background-color: #fdfcde;
+	opacity: 1;
+	position: absolute;
+	top:350px;
+	left:45%;
+	min-width:250px;
+	#height:90px;
+	font-size: 17px;
+	font-family: SourceSansPro2;
+	margin:-45px 0 0 -100px;
+	padding: 20px;
+	text-align:center;
+	line-height: 20px;
+	border: 1px solid grey;
+	border-radius: 5px;
+	box-shadow: 10px 10px 14px #777;
+	z-index: 1000000;
+}
+
 table.tgle {
  border:1px solid gray;
  border-collapse:collapse;
