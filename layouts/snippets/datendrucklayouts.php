@@ -41,6 +41,11 @@ function updatewidth(imagewidth, imageheight){
 	document.GUI.headwidth.value = Math.round(document.GUI.headheight.value * ratio); 
 }
 
+function update_options(){
+	if(document.GUI.type.value > 0)document.getElementById('list_type_options').style.display = '';
+	else document.getElementById('list_type_options').style.display = 'none';
+}
+
 function addfreetext(){
 	document.GUI.go.value = 'sachdaten_druck_editor_Freitexthinzufuegen';
 	document.GUI.submit();
@@ -195,15 +200,21 @@ function save_layout(){
         <tr>
           <td colspan=8 style="border-bottom:1px solid #C3C7C3">
           	&nbsp;<span class="fett">Name:</span> 
-          	<input type="text" name="name" value="<? echo $this->ddl->selectedlayout[0]['name'] ?>" size="23">
+          	<input type="text" name="name" value="<? echo $this->ddl->selectedlayout[0]['name'] ?>" size="40">
           	&nbsp;&nbsp;&nbsp;<span class="fett">Typ:</span> 
-          	<select name="type">
+          	<select name="type" onchange="update_options();">
           		<option value="0" <? if($this->ddl->selectedlayout[0]['type'] == 0)echo 'selected' ?>>neue Seite für jeden Datensatz</option>
           		<option value="1" <? if($this->ddl->selectedlayout[0]['type'] == 1)echo 'selected' ?>>Datensätze fortlaufend</option>
 							<option value="2" <? if($this->ddl->selectedlayout[0]['type'] == 2)echo 'selected' ?>>eingebettet</option>
           	</select>
-						&nbsp;&nbsp;&nbsp;<span class="fett">Abstand:</span>
-						<input type="text" name="gap" title="Der Abstand zwischen den Datensätzen. Ist nur beim fortlaufenden oder eingebetteten Typ relevant." value="<? echo $this->ddl->selectedlayout[0]['gap'] ?>" size="2">
+					</td>
+				</tr>
+				<tr id="list_type_options" style="display:<? if($this->ddl->selectedlayout[0]['type'] == 0)echo 'none' ?>">
+          <td colspan=8 style="border-bottom:1px solid #C3C7C3">
+						&nbsp;<span class="fett">Datensätze:</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="fett">Abstand:</span>
+						<input type="text" name="gap" title="Der Abstand zwischen den Datensätzen." value="<? echo $this->ddl->selectedlayout[0]['gap'] ?>" size="2">
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="fett">nicht durch Seitenumbruch unterbrechen:</span>
+						<input type="checkbox" name="no_record_splitting" title="Wenn angehakt, wird ein Seitenumbruch nicht innerhalb eines Datensatzes gemacht, sondern davor." value="1" <? if($this->ddl->selectedlayout[0]['no_record_splitting']) echo 'checked'; ?>>
 					</td>
         </tr>
         <tr>
