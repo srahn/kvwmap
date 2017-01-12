@@ -42,7 +42,7 @@
 							<div style="position: absolute; top: 2px; right: 2px;">
 								<img style="border:none" src="graphics/exit2.png" onclick="toggleLayerParamsBar();">
 							</div>
-							<table><tr height="22px"><td class="layerOptionsHeader" colspan="2" width="350"><span class="fett">Layerparameter</span></td><?php
+							<table><tr height="22px"><td class="layerOptionsHeader" colspan="2" width="350"><span class="fett">Themenparameter</span></td><?php
 							foreach($params AS $param){
 								$options = array();
 								$options_result = $this->pgdatabase->execSQL($param['options_sql'], 4, 1);
@@ -56,7 +56,7 @@
 									}
 								} ?>
 								<tr>
-									<td><?php echo $param['alias']; ?></td>
+									<td>&nbsp;&nbsp;<?php echo $param['alias']; ?></td>
 									<td>
 										<select id="layer_parameter_<?php echo $param['key']; ?>" name="layer_parameter_<?php echo $param['key']; ?>" onchange="onLayerParameterChanged(this);"><?php
 											foreach($options AS $option) { ?>
