@@ -3653,17 +3653,20 @@ class GUI {
       $this->formvars['fromwhere'] .= ' where (1=1)';
     }
 
-		if($this->formvars['layer_id'] < 0) {	# Rollenlayer sofort selektieren
-			$layerdb1 = $this->mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-			include_once (CLASSPATH.'polygoneditor.php');
-			$polygoneditor = new polygoneditor($layerdb1, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
-			$tablename = '('.$fromwhere.') as foo';
-			$this->polygon = $polygoneditor->getpolygon(NULL, $tablename, $this->formvars['columnname'], $this->map->extent);
-			if($this->polygon['wktgeom'] != '') {
-				$this->formvars['newpathwkt'] = $this->polygon['wktgeom'];
-				$this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
-				$this->formvars['newpath'] = $this->polygon['svggeom'];
-				$this->formvars['firstpoly'] = 'true';
+		if($this->formvars['layer_id'] < 0){	# Suchergebnislayer sofort selektieren
+			$rollenlayer = $this->mapDB->read_RollenLayer(-$this->formvars['layer_id']);
+			if($rollenlayer[0]['Typ'] == 'search'){
+				$layerdb1 = $this->mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+				include_once (CLASSPATH.'polygoneditor.php');
+				$polygoneditor = new polygoneditor($layerdb1, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+				$tablename = '('.$fromwhere.') as foo';
+				$this->polygon = $polygoneditor->getpolygon(NULL, $tablename, $this->formvars['columnname'], $this->map->extent);
+				if($this->polygon['wktgeom'] != '') {
+					$this->formvars['newpathwkt'] = $this->polygon['wktgeom'];
+					$this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
+					$this->formvars['newpath'] = $this->polygon['svggeom'];
+					$this->formvars['firstpoly'] = 'true';
+				}
 			}
 		}
 
@@ -7660,17 +7663,20 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		      $this->formvars['fromwhere'] .= ' where (1=1)';
 		    }
 
-				if($this->formvars['layer_id'] < 0){	# Rollenlayer sofort selektieren
-					$layerdb = $mapdb->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-					include_once (CLASSPATH.'polygoneditor.php');
-					$polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
-					$tablename = '('.$fromwhere.') as foo';
-					$this->polygon = $polygoneditor->getpolygon(NULL, $tablename, $this->formvars['columnname'], $this->map->extent);
-					if($this->polygon['wktgeom'] != ''){
-						$this->formvars['newpathwkt'] = $this->polygon['wktgeom'];
-						$this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
-						$this->formvars['newpath'] = $this->polygon['svggeom'];
-						$this->formvars['firstpoly'] = 'true';
+				if($this->formvars['layer_id'] < 0){	# Suchergebnislayer sofort selektieren
+					$rollenlayer = $this->mapDB->read_RollenLayer(-$this->formvars['layer_id']);
+					if($rollenlayer[0]['Typ'] == 'search'){
+						$layerdb = $mapdb->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+						include_once (CLASSPATH.'polygoneditor.php');
+						$polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+						$tablename = '('.$fromwhere.') as foo';
+						$this->polygon = $polygoneditor->getpolygon(NULL, $tablename, $this->formvars['columnname'], $this->map->extent);
+						if($this->polygon['wktgeom'] != ''){
+							$this->formvars['newpathwkt'] = $this->polygon['wktgeom'];
+							$this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
+							$this->formvars['newpath'] = $this->polygon['svggeom'];
+							$this->formvars['firstpoly'] = 'true';
+						}
 					}
 				}
 
@@ -8377,17 +8383,20 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
               $this->formvars['fromwhere'] .= ' where (1=1)';
             }
 						
-						if($this->formvars['layer_id'] < 0){	# Rollenlayer sofort selektieren
-							$layerdb1 = $mapdb->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-							include_once (CLASSPATH.'polygoneditor.php');
-							$polygoneditor = new polygoneditor($layerdb1, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
-							$tablename = '('.$fromwhere.') as foo';
-							$this->polygon = $polygoneditor->getpolygon(NULL, $tablename, $this->formvars['columnname'], $this->map->extent);
-							if($this->polygon['wktgeom'] != ''){
-								$this->formvars['newpathwkt'] = $this->polygon['wktgeom'];
-								$this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
-								$this->formvars['newpath'] = $this->polygon['svggeom'];
-								$this->formvars['firstpoly'] = 'true';
+						if($this->formvars['layer_id'] < 0){	# Suchergebnislayer sofort selektieren
+							$rollenlayer = $this->mapDB->read_RollenLayer(-$this->formvars['layer_id']);
+							if($rollenlayer[0]['Typ'] == 'search'){
+								$layerdb1 = $mapdb->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+								include_once (CLASSPATH.'polygoneditor.php');
+								$polygoneditor = new polygoneditor($layerdb1, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+								$tablename = '('.$fromwhere.') as foo';
+								$this->polygon = $polygoneditor->getpolygon(NULL, $tablename, $this->formvars['columnname'], $this->map->extent);
+								if($this->polygon['wktgeom'] != ''){
+									$this->formvars['newpathwkt'] = $this->polygon['wktgeom'];
+									$this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
+									$this->formvars['newpath'] = $this->polygon['svggeom'];
+									$this->formvars['firstpoly'] = 'true';
+								}
 							}
 						}
 						
@@ -9334,17 +9343,20 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	    if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
 	      $this->formvars['fromwhere'] .= ' where (1=1)';
 	    }
-			if($this->formvars['layer_id'] < 0){	# Rollenlayer sofort selektieren
-				$layerdb1 = $this->mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-				include_once (CLASSPATH.'polygoneditor.php');
-				$polygoneditor = new polygoneditor($layerdb1, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
-				$tablename = '('.$fromwhere.') as foo';
-				$this->polygon = $polygoneditor->getpolygon(NULL, $tablename, $this->formvars['columnname'], $this->map->extent);
-				if($this->polygon['wktgeom'] != ''){
-					$this->formvars['newpathwkt'] = $this->polygon['wktgeom'];
-					$this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
-					$this->formvars['newpath'] = $this->polygon['svggeom'];
-					$this->formvars['firstpoly'] = 'true';
+			if($this->formvars['layer_id'] < 0){	# Suchergebnislayer sofort selektieren
+				$rollenlayer = $this->mapDB->read_RollenLayer(-$this->formvars['layer_id']);
+				if($rollenlayer[0]['Typ'] == 'search'){
+					$layerdb1 = $this->mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+					include_once (CLASSPATH.'polygoneditor.php');
+					$polygoneditor = new polygoneditor($layerdb1, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+					$tablename = '('.$fromwhere.') as foo';
+					$this->polygon = $polygoneditor->getpolygon(NULL, $tablename, $this->formvars['columnname'], $this->map->extent);
+					if($this->polygon['wktgeom'] != ''){
+						$this->formvars['newpathwkt'] = $this->polygon['wktgeom'];
+						$this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
+						$this->formvars['newpath'] = $this->polygon['svggeom'];
+						$this->formvars['firstpoly'] = 'true';
+					}
 				}
 			}
 		}
