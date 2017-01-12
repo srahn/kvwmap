@@ -94,7 +94,7 @@ class NASLoader extends DOMDocument {
 				if ($this->gemkg_nummern->length > 0) {
 					foreach($this->gemkg_nummern AS $gemkg_nummer) {
 						if ($gemkg_nummer->nodeValue != $ff_auftrag->get('gemkgnr')) {
-							$success = false;
+							$success = true;
 							$msg  = "In der Auftragsdatei wurde die Gemarkungsnummer: " . $gemkg_nummer->nodeValue . " gefunden.<br>";
 							$msg .= "Diese Nummer stimmt nicht mit der im Formular oben angegebenen<br>Gemarkungsnummer: " . $ff_auftrag->get('gemkgnr') . ' überein.<br>';
 							$msg .= "Korrigieren Sie die Gemarkungsnummer im Formular oder<br>";

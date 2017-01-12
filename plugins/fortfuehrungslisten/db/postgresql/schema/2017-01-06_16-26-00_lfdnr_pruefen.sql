@@ -1,3 +1,5 @@
+BEGIN;
+
 CREATE OR REPLACE FUNCTION fortfuehrungslisten.ff_auftraege_next_lfdnr(in in_jahr integer, IN in_gemkgnr integer, OUT lfdnr integer)
   RETURNS integer AS
 $BODY$
@@ -18,3 +20,5 @@ CREATE TRIGGER ff_auftraege_set_next_lfdnr before insert on fortfuehrungslisten.
 	FOR EACH ROW
 	EXECUTE PROCEDURE fortfuehrungslisten.ff_auftraege_set_next_lfdnr();
 COMMENT ON TRIGGER ff_auftraege_set_next_lfdnr ON fortfuehrungslisten.ff_auftraege IS 'Der Trigger setzt die laufnede Nummer (lfdnr) pro Jahr (jahr) und Gemarkung (gemkgnr) vor dem INSERT eines neuen Fortführungsauftrages in Tabelle ff_auftraege.';
+
+COMMIT;
