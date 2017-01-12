@@ -3,7 +3,7 @@ CREATE TABLE fortfuehrungslisten.ff_auftraege
   id serial NOT NULL,
   jahr integer NOT NULL DEFAULT date_part('year'::text, now()),
   gemkgnr integer NOT NULL,
-  lfdnr integer NOT NULL,
+  lfdnr integer,
   antragsnr integer,
   bemerkung text,
   auftragsdatei character varying,
