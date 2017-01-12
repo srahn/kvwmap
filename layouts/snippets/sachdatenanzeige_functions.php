@@ -178,11 +178,11 @@ include('funktionen/input_check_functions.php');
 			fieldstring = form_fields[i]+'';
 			field = fieldstring.split(';');
 			if(document.getElementsByName(fieldstring)[0] != undefined && field[4] != 'Dokument' && (document.getElementsByName(fieldstring)[0].readOnly != true) && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
-				alert('Das Feld '+document.getElementsByName(fieldstring)[0].title+' erfordert eine Eingabe.');
+				message('Das Feld '+document.getElementsByName(fieldstring)[0].title + ' erfordert eine Eingabe. und hier noch mehr Text und hier noch mehr Textund hier noch mehr Textund hier noch mehr Textund hier noch mehr Textund hier noch mehr Textund hier noch mehr Textund hier noch mehr Textund hier noch mehr Text');
 				return;
 			}
 			if(document.getElementsByName(fieldstring)[0] != undefined && field[6] == 'date' && field[4] != 'Time' && document.getElementsByName(fieldstring)[0].value != '' && !checkDate(document.getElementsByName(fieldstring)[0].value)){
-				alert('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
+				message('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
 				return;
 			}
 		}
@@ -194,7 +194,7 @@ include('funktionen/input_check_functions.php');
 
 	save_new_dataset = function(){
 		if((geom_not_null && currentform.newpath.value == '' && currentform.loc_x == undefined) || (geom_not_null && currentform.loc_x != undefined && currentform.loc_x.value == '')){ 
-			alert('Sie haben keine Geometrie angegeben.');
+			message('Sie haben keine Geometrie angegeben.');
 			return;
 		}
   	form_fieldstring = currentform.form_field_names.value+'';
@@ -203,11 +203,11 @@ include('funktionen/input_check_functions.php');
   		fieldstring = form_fields[i]+'';
   		field = fieldstring.split(';'); 
   		if(document.getElementsByName(fieldstring)[0] != undefined && field[4] != 'SubFormFK' && field[6] != 'not_saveable' && (document.getElementsByName(fieldstring)[0].readOnly != true) && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
-			  alert('Das Feld '+document.getElementsByName(fieldstring)[0].title+' erfordert eine Eingabe.');
+			  message('Das Feld '+document.getElementsByName(fieldstring)[0].title+' erfordert eine Eingabe.');
   			return;
   		}
   		if(document.getElementsByName(fieldstring)[0] != undefined && field[6] == 'date' && field[4] != 'Time' && document.getElementsByName(fieldstring)[0].value != '' && !checkDate(document.getElementsByName(fieldstring)[0].value)){
-  			alert('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
+  			message('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
   			return;
   		}
   	}
@@ -251,11 +251,11 @@ include('funktionen/input_check_functions.php');
   		fieldstring = form_fields[i]+'';
   		field = fieldstring.split(';');
   		if(document.getElementsByName(fieldstring)[0] != undefined && field[4] != 'Dokument' && document.getElementsByName(fieldstring)[0].readOnly != true && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
-  			alert('Das Feld '+document.getElementsByName(fieldstring)[0].title+' erfordert eine Eingabe.');
+  			message('Das Feld '+document.getElementsByName(fieldstring)[0].title+' erfordert eine Eingabe.');
   			return;
   		}
   		if(document.getElementsByName(fieldstring)[0] != undefined && field[6] == 'date' && field[4] != 'Time' && document.getElementsByName(fieldstring)[0].value != '' && !checkDate(document.getElementsByName(fieldstring)[0].value)){
-  			alert('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
+  			message('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
   			return;
   		}
 			if(document.getElementsByName(form_fields[i])[0] != undefined){
@@ -284,11 +284,11 @@ include('funktionen/input_check_functions.php');
   		fieldstring = form_fields[i]+'';
   		field = fieldstring.split(';');
   		if(document.getElementsByName(fieldstring)[0] != undefined && document.getElementsByName(fieldstring)[0].readOnly != true && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
-  			alert('Das Feld '+document.getElementsByName(fieldstring)[0].title+' erfordert eine Eingabe.');
+  			message('Das Feld '+document.getElementsByName(fieldstring)[0].title+' erfordert eine Eingabe.');
   			//return;
   		}
   		if(document.getElementsByName(fieldstring)[0] != undefined && field[6] == 'date' && field[4] != 'Time' && document.getElementsByName(fieldstring)[0].value != '' && !checkDate(document.getElementsByName(fieldstring)[0].value)){
-  			alert('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
+  			message('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
   			return;
   		}
   		if(document.getElementsByName(form_fields[i])[0] != undefined){
@@ -450,7 +450,7 @@ include('funktionen/input_check_functions.php');
 			}
 		}
 		if(go == 'false'){
-			alert('Es wurde kein Datensatz ausgewählt.');
+			message('Es wurde kein Datensatz ausgewählt.');
 			return false;
 		}
 		else{

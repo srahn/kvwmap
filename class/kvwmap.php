@@ -2062,6 +2062,20 @@ class GUI {
 		return $result;
 	}
 
+	function add_message($type, $msg) {
+		$this->messages[] = array(
+			'type' => $type,
+			'msg' => $msg
+		);
+	}
+
+	function output_messages() { ?>
+		<script type="text/javascript">
+			message(<?php echo json_encode($this->messages); ?>);
+		</script><?php
+#		include(LAYOUTPATH . 'snippets/messages.php'); 
+	}
+
   # Ausgabe der Seite
   function output() {
 	  foreach($this->formvars as $key => $value){
@@ -2088,12 +2102,18 @@ class GUI {
 				if($this->alert != ''){
 					echo '<script type="text/javascript">alert("'.$this->alert.'");</script>';			# manchmal machen alert-Ausgaben über die allgemeinde Funktioen showAlert Probleme, deswegen am besten erst hier am Ende ausgeben
 				}
+				if (!empty($this->messages)) {
+					$this->output_messages();
+				}
       } break;
 			case 'overlay_html' : {
 				$this->overlaymain = $this->main;
 				include (LAYOUTPATH.'snippets/overlay.php');
 				if($this->alert != ''){
 					echo '<script type="text/javascript">alert("'.$this->alert.'");</script>';			# manchmal machen alert-Ausgaben über die allgemeinde Funktioen showAlert Probleme, deswegen am besten erst hier am Ende ausgeben
+				}
+				if (!empty($this->messages)) {
+					$this->output_messages();
 				}
 			} break;
       case 'map_ajax' : {
@@ -3456,7 +3476,7 @@ class GUI {
 						$ret = $layerdb->execSQL($sql,4, 1);
 					}
 				}
-        showMessage('Eintrag erfolgreich!');
+        $this->add_message('notice', 'Eintrag erfolgreich!');
       }
       $this->PointEditor();
     }
@@ -3582,7 +3602,7 @@ class GUI {
         $this->formvars['firstline']="";
         $this->formvars['secondline']="";
         $this->formvars['secondpoly']="";
-        showMessage('Eintrag erfolgreich!');
+        $this->add_message('notice', 'Eintrag erfolgreich!');
       }
       $this->formvars['CMD'] = '';
       $this->LineEditor();
@@ -3725,7 +3745,7 @@ class GUI {
         $this->formvars['pathwkt']="";
         $this->formvars['firstpoly']="";
         $this->formvars['secondpoly']="";
-        showMessage('Eintrag erfolgreich!');
+        $this->add_message('notice', 'Eintrag erfolgreich!');
       }
       $this->formvars['CMD'] = '';
       $this->PolygonEditor();
@@ -4280,7 +4300,7 @@ class GUI {
           $this->formvars['pathwkt']="";
           $this->formvars['firstpoly']="";
           $this->formvars['secondpoly']="";
-          showMessage('Eintrag erfolgreich!');
+          $this->add_message('notice', 'Eintrag erfolgreich!');
         }
       }
     $this->bauleitplanung();
@@ -7935,12 +7955,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		}
 
 		if ($output) {
-			if($this->formvars['embedded'] == ''){
-				if($success == false){
-					showAlert('Löschen fehlgeschlagen.\n'.$result[0]);
+			if($this->formvars['embedded'] == '') {
+				if($success == false) {
+					$this->add_message('error', 'Löschen fehlgeschlagen.<br>' . $result[0]);
 				}
-				else{
-					showAlert('Löschen erfolgreich');
+				else {
+					$this->add_message('warning', 'Löschen erfolgreich');
 				}
 				$this->last_query = $this->user->rolle->get_last_query();
 				if($this->formvars['search']){ # man kam von der Suche -> nochmal suchen
@@ -8219,17 +8239,18 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			}
 
     }
-    else{
-      if($success == false){
-        showMessage('Eintrag fehlgeschlagen.\n'.$result[0], false, 'error');
+    else {
+      if($success == false) {
+        $this->add_message('error', 'Eintrag fehlgeschlagen.<br>' . $result[0]);
         $this->neuer_Layer_Datensatz();
       }
       else{
-        if($this->formvars['close_window'] == "") {
+        if ($this->formvars['close_window'] == "") {
 					$msg = (is_array($result) and array_key_exists(1, $result) and $result[1] == 'error') ? '' : $result[0];
-					if($msg != '')
-						showMessage('Eintrag erfolgreich.\n' . $msg, false);
-          else showMessage('Eintrag erfolgreich!');
+					if ($msg != '')
+						$this->add_message('warning', 'Eintrag erfolgreich.<br>' . $msg);
+					else
+						$this->add_message('notice', 'Eintrag erfolgreich!');
         }
         if($this->formvars['weiter_erfassen'] == 1){
         	$this->formvars['firstpoly'] = '';
@@ -10627,7 +10648,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
   function mapCommentStore() {
     $ret=$this->user->rolle->insertMapComment($this->formvars['consumetime'],$this->formvars['comment']);
-		showMessage('Ausschnitt gespeichert.');
+		$this->add_message('notice', 'Ausschnitt gespeichert.');
     $ret=$this->user->rolle->getConsume($this->formvars['consumetime']);
     if ($ret[0]) {
       $this->errmsg="Der nächste Kartenausschnitt konnte nicht abgefragt werden.<br>".$ret[1];
@@ -10645,7 +10666,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
 		$this->loadMap('DataBase');
     $ret=$this->user->rolle->insertLayerComment($this->layerset, $this->formvars['comment']);
-    showMessage('Themenauswahl gespeichert.');
+    $this->add_message('notice', 'Themenauswahl gespeichert.');
     $this->drawMap();
     $this->output();
   }
@@ -11585,20 +11606,22 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					}
 				}
 			}
-			if($success == false){
-				$this->alert = 'Änderung fehlgeschlagen.\n'.$result[0];
+			if ($success == false) {
+				$this->add_message('error', 'Änderung fehlgeschlagen.<br>' . $result[0]);
 			}
-			else{
+			else {
 				if($this->formvars['close_window'] == ""){
-					if($result[0] != '')$this->alert = 'Änderung erfolgreich.\n'.$result[0];
-					else showMessage('Änderung erfolgreich');
+					if($result[0] != '')
+						$this->add_message('warning', 'Änderung erfolgreich.<br>' . $result[0]);
+					else
+						$this->add_message('notice', 'Änderung erfolgreich');
 				}
 			}
 		}
-		else{
-			showMessage('Keine Änderung.');
+		else {
+			$this->add_message('warning', 'Keine Änderung.');
 		}
-    if($this->formvars['embedded'] != ''){    # wenn es ein Datensatz aus einem embedded-Formular ist, muss das entsprechende Attribut des Hauptformulars aktualisiert werden
+    if ($this->formvars['embedded'] != ''){    # wenn es ein Datensatz aus einem embedded-Formular ist, muss das entsprechende Attribut des Hauptformulars aktualisiert werden
       header('Content-type: text/html; charset=UTF-8');
       $attributenames[0] = $this->formvars['targetattribute'];
       $attributes = $mapdb->read_layer_attributes($this->formvars['targetlayer_id'], $layerdb, $attributenames);
