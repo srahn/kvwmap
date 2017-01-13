@@ -883,16 +883,14 @@ tbody.gle tr:hover {
 	border: 1px solid #CCCCCC;
 }
 
-/*
 .fa {
 	color: gray;
 }
 
-.fa:hover {
+.pointer:hover {
 	color: #90a0b5;
 	cursor: pointer;
 }
-*/
 
 .layerOptions{
 	border: 1px solid #cccccc;
