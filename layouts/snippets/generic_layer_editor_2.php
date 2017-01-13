@@ -19,6 +19,7 @@
 	}
 ?>
 <div id="layer" onclick="remove_calendar();">
+<input type="hidden" value="" id="changed_<? echo $layer['Layer_ID']; ?>" name="changed_<? echo $layer['Layer_ID']; ?>">
 <? if($this->new_entry != true AND $layer['requires'] == ''){ ?>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 	<tr>
@@ -65,7 +66,7 @@
 			onmouseenter="if(typeof FormData !== 'undefined')ahah('index.php', 'go=tooltip_query&querylayer_id=<? echo $layer['Layer_ID']; ?>&oid=<? echo $layer['shape'][$k][$attributes['table_name'][$attributes['the_geom']].'_oid']; ?>', new Array(top.document.GUI.result, ''), new Array('setvalue', 'execute_function'));"
 			<? } ?>
 			>
-	    <input type="hidden" value="" name="changed_<? echo $layer['Layer_ID'].'_'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
+	    <input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
 	    <table id="dstable" class="tgle" <? if($attributes['group'][0] != ''){echo 'border="0" cellpadding="6" cellspacing="0"';}else{echo 'border="1"';} ?>>
 				<? if (!$this->user->rolle->visually_impaired) include(LAYOUTPATH . 'snippets/generic_layer_editor_2_layer_head.php'); ?>
         <tbody <? if($attributes['group'][0] == '')echo 'class="gle"'; ?>>
@@ -152,6 +153,12 @@
 						$columnname = $attributes['name'][$j];
 						$geom_tablename = $attributes['table_name'][$attributes['name'][$j]];
 						$geomtype = $attributes['geomtype'][$attributes['name'][$j]];
+						# Frage den Geometrietyp aus der Layerdefinition, wenn in geometry_columns nur als Geometry definiert.
+						if ($geomtype == 'GEOMETRY' OR empty($geomtype)) {
+							$geomtypes = array('POINT', 'LINESTRING', 'POLYGON');
+							$geomtype = $geomtypes[$layer['Datentyp']];
+							?><input type="hidden" name="Datentyp" value="<?php echo $layer['Datentyp']; ?>"><?php
+						}
 						$dimension = $attributes['dimension'][$j];
 						$privileg = $attributes['privileg'][$j];
 						$nullable = $attributes['nullable'][$j];
@@ -179,7 +186,8 @@
 <?						
 							if(!$layer['shape'][$k]['wfs_geom']){		// kein WFS 
 								echo '<input type="hidden" id="'.$columnname.'_'.$k.'" value="'.$layer['shape'][$k][$columnname].'">';
-								if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON' OR $geomtype == 'GEOMETRY'){ ?>
+
+								if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON'){ ?>
 									<table cellspacing="0" cellpadding="0">
 										<tr>
 <?								if($privileg == 1 AND !$lock[$k]) { ?>
@@ -243,7 +251,6 @@
 					<? }		    
 	}
 
-				
 				if($this->new_entry == true){
 					if($privileg == 1){
 						if(!$this->user->rolle->geom_edit_first)echo $datapart;
@@ -253,7 +260,7 @@
     					</script>
 <?					}
 						$this->titel=$strTitleGeometryEditor;
-						if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON' OR $geomtype == 'GEOMETRY'){
+						if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON'){
 							echo '
 							<tr>
 								<td colspan="2" align="center">';

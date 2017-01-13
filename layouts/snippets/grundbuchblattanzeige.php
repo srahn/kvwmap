@@ -24,36 +24,17 @@ function flurstanzeige(flurstkennz){
 $this->Stelle->getFunktionen();
 for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 	$this->buchungen = $this->gbblaetter[$gb];
-	$alle_flst = array();
-	echo '<br><h2>'.$this->titel.' '.$this->buchungen[0]['bezirk'].'-'.$this->buchungen[0]['blatt'].'</h2><br>';
+	$alle_flst = array();	
 	$currenttime=date('Y-m-d H:i:s',time());
 	$this->user->rolle->setConsumeALB($currenttime, 'Grundbuchblattanzeige', array($this->buchungen[0]['bezirk'].'-'.$this->buchungen[0]['blatt']), 0, 'NULL');		# das Grundbuchblattkennzeichen wird geloggt
   $anzObj=count($this->buchungen);
-  if ($anzObj>0) {?>
-	<table border="1" cellspacing="0" cellpadding="2" style="width:1000px">
-	  <tr bgcolor="<?php echo BG_DEFAULT ?>">
-	    <th colspan="3">Buchung</th>
-	    <th colspan="6">Flurst&uuml;ck</th>
-      </tr>
-	  <tr bgcolor="<?php echo BG_DEFAULT ?>">
-	    <th>BVNR</th>
-	    <th>EBRH</th>
-	    <th style="width:250px">Eigentümer</th>
-	    <th>Lage</th>
-	    <th width="250">Nutzung</th>
-	    <th>Gemarkung</th>
-	    <th>Flur</th>
-	    <th>Flst.</th>
-	    <th>&nbsp;</th>
-	  </tr>
-	  <?
-	  $flst=new flurstueck($this->buchungen[0]['flurstkennz'],$this->pgdatabase);
-	  $alle_flst[] = $this->buchungen[0]['flurstkennz'];
+  if ($anzObj>0) { 
+		$flst=new flurstueck($this->buchungen[0]['flurstkennz'],$this->pgdatabase);
 	  $ret=$flst->readALB_Data($this->buchungen[0]['flurstkennz']);
     $Eigentuemerliste=$flst->getEigentuemerliste($this->buchungen[0]['bezirk'],$this->buchungen[0]['blatt'],$this->buchungen[0]['bvnr']);
-    $Eigentuemer = '';
+    $Eigentuemer = '<tr><td colspan="2" valign="top" style="height: 16px">Eigentümer:</td></tr>';
     for ($i=0;$i<count($Eigentuemerliste);$i++) {
-    	$Eigentuemer .= '<tr><td valign="top">'.$Eigentuemerliste[$i]->Nr.'</td><td>';
+    	$Eigentuemer .= '<tr><td valign="top">'.$Eigentuemerliste[$i]->Nr.'</td><td valign="top">';
     	for ($k=0;$k<count($Eigentuemerliste[$i]);$k++) {
       	$Eigentuemer .= $Eigentuemerliste[$i]->Name[$k].'<br>';
     	}			
@@ -63,63 +44,21 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 			elseif($Eigentuemerliste[$i]->Anteil)$Eigentuemer .= 'zu '.$Eigentuemerliste[$i]->Anteil.'<br>';
     	$Eigentuemer .= '</td></tr>';
     }
-    $Adressbezeichnung = '';
-    for($s=0;$s<count($flst->Adresse);$s++) {
-      $Adressbezeichnung.=$flst->Adresse[$s]["strassenname"];
-      $Adressbezeichnung.='&nbsp;'.$flst->Adresse[$s]["hausnr"];
-    }
-    for($s=0;$s<count($flst->Lage);$s++) {
-      $Adressbezeichnung .= '<br>'.$flst->Lage[$s];
-    }
-    $Nutzunglangtext = '';
-    for($i=0;$i<count($flst->Nutzung);$i++) {
-    	if($flst->Nutzung[$i]['bezeichnung'] != ''){
-    		$Nutzunglangtext.=$flst->Nutzung[$i]['flaeche'].'m<sup>2</sup> '.$flst->Nutzung[$i]['bezeichnung'].'<br>';
-    	}
-    }
-		$index = 0;
-		$rowspan = array();
-		$rowspan[$index] = 0;
-		for($i=0;$i<$anzObj;$i++){
-			if($this->buchungen[$index]['bvnr'] == $this->buchungen[$i]['bvnr']){
-				$rowspan[$index]++;
-			}
-			else{
-				$index = $i;
-				$rowspan[$index] = 1;
-			}
-		}
-		
-	  ?>
+		$Eigentuemer .= '<tr><td style="height: 100%"></td></tr>';
+	?>
+	<table cellspacing="0" cellpadding="2" id="gbb_grundbuchblatt">
 	  <tr>
-      <td valign="top" align="center" <? if($rowspan[0] > 1)echo 'rowspan="'.$rowspan[0].'"' ?>>
-			<? echo $this->buchungen[0]['bvnr'];
-			if($this->Stelle->funktionen['MV0600']['erlaubt']){ ?>&nbsp;<a href="index.php?go=ALKIS_Auszug&formnummer=MV0600&Buchungsstelle=<? echo $this->buchungen[0]['gml_id'] ?>" target="_blank">Grundstücksnachweis</a>&nbsp;<? } ?>
+	    <th colspan="2"><h2><? echo $this->titel.' '.$this->buchungen[0]['bezirk'].'-'.$this->buchungen[0]['blatt']; ?></h2></th>
+    </tr>
+		<tr>
+			<td style="padding-bottom: 9px;height:100%">
+				<table id="gbb_eigentuemer">
+					<? echo $Eigentuemer; ?>
+				</table>
 			</td>
-      <td valign="top" align="center"><? if(in_array($this->buchungen[0]['buchungsart'], array(2101, 2203, 2303)))echo 'belastet mit Erbbaurecht'; if(in_array($this->buchungen[0]['buchungsart'], array(2103)))echo 'belastet mit Nutzungsrecht'; ?></td>
-      <td style="width:250px" valign="top" rowspan="<? echo $anzObj; ?>">
-      	<table>
-      		<? echo $Eigentuemer; ?>
-      	</table>
-      </td>
-    	<td valign="top"><? echo $Adressbezeichnung.'&nbsp;'; ?></td>
-    	<td valign="top"><? echo $Nutzunglangtext.'&nbsp;'; ?></td>
-      <td valign="top" align="center"><?php echo $this->buchungen[0]['gemkgname']; ?></td>
-      <td valign="top" align="center"><?php echo $this->buchungen[0]['flur']; ?></td>
-      <td valign="top" align="center">
-      	<? echo $this->buchungen[0]['flurstuecksnr'];
-					if($this->buchungen[0]['sondereigentum'] != ''){
-      			echo '<br><br>'.$this->buchungen[0]['anteil'].' Miteigentumsanteil an '.$this->buchungen[0]['sondereigentum'];
-      		}
-      		elseif($this->buchungen[0]['anteil'] != ''){
-      			echo '<br><br>zu '.$this->buchungen[0]['anteil'];
-      		}
-      	?>
-      </td>
-      <td valign="top" align="center"><a href="javascript:flurstanzeige('<?php echo $this->buchungen[0]['flurstkennz']; ?>');" title="Flurstücksdaten anzeigen">anzeigen</a></td>
-	  </tr>
-	  <?php
-	  for ($i=1;$i<$anzObj;$i++) {
+			<td style="height:100%">
+	  <?		
+	  for ($i=0;$i<$anzObj;$i++) {
 	  	$Nutzunglangtext = '';
 	  	$Adressbezeichnung = '';
 	  	$flst=new flurstueck($this->buchungen[$i]['flurstkennz'],$this->pgdatabase);
@@ -130,61 +69,67 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 	      $Adressbezeichnung.='&nbsp;'.$flst->Adresse[$s]["hausnr"];
 	    }
 	    for($s=0;$s<count($flst->Lage);$s++) {
-      	$Adressbezeichnung .= '<br>'.$flst->Lage[$s];
+      	$Adressbezeichnung .= $flst->Lage[$s];
     	}
 	    for($n=0;$n<count($flst->Nutzung);$n++) {
 	    	if($flst->Nutzung[$n]['bezeichnung'] != ''){
 	    		$Nutzunglangtext.=$flst->Nutzung[$n]['flaeche'].'m<sup>2</sup> '.$flst->Nutzung[$n]['bezeichnung'].'<br>';
 	    	}
 	    }
-	    ?><tr>
-				<? if($rowspan[$i] != ''){ ?>
-	      <td valign="top" align="center" <? if($rowspan[$i] > 1)echo 'rowspan="'.$rowspan[$i].'"' ?>>
-					<? echo $this->buchungen[$i]['bvnr'];
-					if($this->Stelle->funktionen['MV0600']['erlaubt']){ ?>&nbsp;<a href="index.php?go=ALKIS_Auszug&formnummer=MV0600&Buchungsstelle=<? echo $this->buchungen[$i]['gml_id'] ?>" target="_blank">Grundstücksnachweis</a>&nbsp;<? } ?>
-				</td>
+			if($this->buchungen[$i-1]['bvnr'] != $this->buchungen[$i]['bvnr']){
+						if($i > 0){ ?>
+							</table>
+						<? } ?>
+						<table id="gbb_grundstueck">
+							<tr>
+								<td style="height: 50px" valign="top">
+									Bestandsverzeichnisnummer: <? echo $this->buchungen[$i]['bvnr']; ?>
+								</td>
+								<td style="height: 50px" valign="top">
+									<? if($this->Stelle->funktionen['MV0600']['erlaubt']){ ?>&nbsp;<a href="index.php?go=ALKIS_Auszug&formnummer=MV0600&Buchungsstelle=<? echo $this->buchungen[$i]['gml_id'] ?>" target="_blank">Grundstücksnachweis</a>&nbsp;<? } ?>
+								</td>
+							</tr>
+							<tr>
+								<td style="height: 30px">Flurstücke</td>
+							</tr>
 				<? } ?>
-	      <td valign="top" align="center"><? if(in_array($this->buchungen[$i]['buchungsart'], array(2101, 2203, 2303)))echo 'belastet mit Erbbaurecht'; if(in_array($this->buchungen[$i]['buchungsart'], array(2103)))echo 'belastet mit Nutzungsrecht'; ?></td>
-	    	<td valign="top"><? echo $Adressbezeichnung.'&nbsp;'; ?></td>
-	    	<td valign="top"><? echo $Nutzunglangtext.'&nbsp;'; ?></td>
-	      <td valign="top" align="center"><?php echo $this->buchungen[$i]['gemkgname']; ?></td>
-	      <td valign="top" align="center"><?php echo $this->buchungen[$i]['flur']; ?></td>
-	      <td valign="top" align="center">
-      	<? echo $this->buchungen[$i]['flurstuecksnr'];
-      		if($this->buchungen[$i]['anteil'] != ''){
-      			echo '<br><br>zu '.$this->buchungen[$i]['anteil'];
-      		} 
-      	?>
-      </td>
-	      <td valign="top" align="center"><a href="javascript:flurstanzeige('<?php echo $this->buchungen[$i]['flurstkennz']; ?>');" title="Flurstücksdaten anzeigen">anzeigen</a></td>
-	  </tr>
-	  <?php }
-	  if(count($alle_flst) > 1){ ?>
-	  <tr>
-	  	<td colspan="7">&nbsp;</td>
-	  	<td colspan="2" align="center"><a href="javascript:flurstanzeige('<?php echo implode(';', $alle_flst); ?>');" title="Flurstücksdaten anzeigen">alle anzeigen</a></td>
-	  </tr>
+							<tr>
+								<td>
+									<a href="javascript:flurstanzeige('<?php echo $this->buchungen[$i]['flurstkennz']; ?>');" title="Flurstücksdaten anzeigen">
+								<? echo $this->buchungen[$i]['gemkgname'].', Flur '.$this->buchungen[$i]['flur'].', '.$this->buchungen[$i]['flurstuecksnr']; ?>
+									</a>
+								<? if($this->buchungen[$i]['anteil'] != '')echo '<br><br>zu '.$this->buchungen[$i]['anteil'];	?>
+								<? if(in_array($this->buchungen[$i]['buchungsart'], array(2101, 2203, 2303)))echo ' - belastet mit Erbbaurecht - '; if(in_array($this->buchungen[$i]['buchungsart'], array(2103)))echo ' - belastet mit Nutzungsrecht - '; ?>
+								</td>
+								<td>
+									<? echo $Adressbezeichnung; ?>
+								</td>
+							</tr>
+							<tr>
+								<td colspan="2">
+									<? echo $Nutzunglangtext; ?>
+									<br>
+								</td>
+							</tr>
 	  <? } ?>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2" align="center">
+					<table border="0" cellspacing="0" cellpadding="3">
+						<tr align="center">
+							<td>	<? 
+								if(count($alle_flst) > 1){ ?><a href="javascript:flurstanzeige('<?php echo implode(';', $alle_flst); ?>');" title="Flurstücksdaten anzeigen">alle Flurstücke anzeigen</a>&nbsp;|<? } 
+								if($this->Stelle->funktionen['MV0700']['erlaubt']){ ?>&nbsp;<a href="index.php?go=ALKIS_Auszug&formnummer=MV0700&Grundbuchbezirk=<? echo $this->buchungen[0]['bezirk'] ?>&Grundbuchblatt=<? echo $this->buchungen[0]['blatt'] ?>" target="_blank">Bestandsnachweis</a>&nbsp;<? }							
+								if($this->Stelle->funktionen['ALB-Auszug 20']['erlaubt']){ ?>|&nbsp;<a href="index.php?go=ALB_Anzeige_Bestand&formnummer=20&Grundbuchbezirk=<? echo $this->buchungen[0]['bezirk'] ?>&Grundbuchblatt=<? echo $this->buchungen[0]['blatt'] ?>&wz=1" target="_blank">Bestandsdaten</a>&nbsp;<? }
+								if($this->Stelle->funktionen['ALB-Auszug 25']['erlaubt']){ ?>|&nbsp;<a href="index.php?go=ALB_Anzeige_Bestand&formnummer=25&Grundbuchbezirk=<? echo $this->buchungen[0]['bezirk'] ?>&Grundbuchblatt=<? echo $this->buchungen[0]['blatt'] ?>&wz=1" target="_blank">&Uuml;bersicht&nbsp;Bestandsdaten</a>&nbsp;<? } ?>
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
 </table>
-<table border="0" cellspacing="0" cellpadding="2">
-   <tr><td colspan="8">&nbsp;</td></tr>
-   <tr>
-     <td colspan="8">
-       <table widt="100%" border="0" cellspacing="0" cellpadding="2">
-         <tr align="center" bgcolor="<?php echo BG_DEFAULT ?>">
-           <td>
-            	<? if($this->Stelle->funktionen['MV0700']['erlaubt']){ ?>&nbsp;<a href="index.php?go=ALKIS_Auszug&formnummer=MV0700&Grundbuchbezirk=<? echo $this->buchungen[0]['bezirk'] ?>&Grundbuchblatt=<? echo $this->buchungen[0]['blatt'] ?>" target="_blank">Bestandsnachweis</a>&nbsp;<? } ?>
-           </td>
-					 <td>
-            	<? if($this->Stelle->funktionen['ALB-Auszug 20']['erlaubt']){ ?>|&nbsp;<a href="index.php?go=ALB_Anzeige_Bestand&formnummer=20&Grundbuchbezirk=<? echo $this->buchungen[0]['bezirk'] ?>&Grundbuchblatt=<? echo $this->buchungen[0]['blatt'] ?>&wz=1" target="_blank">Bestandsdaten</a>&nbsp;<? } ?>
-              <? if($this->Stelle->funktionen['ALB-Auszug 25']['erlaubt']){ ?>|&nbsp;<a href="index.php?go=ALB_Anzeige_Bestand&formnummer=25&Grundbuchbezirk=<? echo $this->buchungen[0]['bezirk'] ?>&Grundbuchblatt=<? echo $this->buchungen[0]['blatt'] ?>&wz=1" target="_blank">&Uuml;bersicht&nbsp;Bestandsdaten</a>&nbsp;<? } ?>
-           </td>
-         </tr>
-       </table>
-     </td>
-   </tr>
-   <tr><td colspan="8">&nbsp;</td></tr>
- </table>
  <?  }
   else {?>
    <br><span class="fett" style="color:"#FF0000">Es wurden keine Daten gefunden.</span><br>

@@ -38,6 +38,7 @@
 	$strSignOrder="Zeichenreihenfolge";
 	$strDelete="löschen";
 	$strAddClass="Klasse hinzufügen";
+  $strAddAutoClasses="Klassen automatisch hinzufügen";
 	$strOtherExtentions="erweiterte Einstellungen";
 	$strButtonSave="Ändern";
 	$strBack="Zurücksetzen";
@@ -71,4 +72,5 @@
 	$strrequires="Requires";
 	$strClusterMaxdistance="Cluster:Maxdistance";
 	$strTriggerFunction="Triggerfunktion";
+	$strClassification="Klassifizierung";
 ?>  

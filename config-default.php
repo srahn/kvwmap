@@ -5,7 +5,7 @@
 #                                                                  #
 ####################################################################
 # aktuelle Versionsnummer
-define('VERSION','2.5');
+define('VERSION','2.6');
 define('APPLVERSION','kvwmap/');
 # Bezeichnung der MySQL-Datenbank mit den Benutzerdaten
 $dbname='kvwmapdb';
@@ -173,14 +173,13 @@ define('CUSTOM_SHAPE_SCHEMA', 'custom_shapes');					# Version 1.11.0
 define('REFERENCEMAPPATH',SHAPEPATH.'referencemaps/');
 define('NACHWEISDOCPATH',SHAPEPATH.'nachweise/');
 # Dateiname und Pfad der Festpunkte, mit der die Tabelle der Festpunkte aktualisiert werden soll
-define('PUNKTDATEINAME','festpunkte.csv');
-#define('PUNKTDATEINAME','alk');
+#define('PUNKTDATEINAME','festpunkte.csv');										# in Version 2.6 gelöscht
 define('PUNKTDATEIPATH',SHAPEPATH.'festpunkte/');
 define('PUNKTDATEIARCHIVPATH',PUNKTDATEIPATH.'archiv/');
 define('KVZAUSGABEDATEINAME','festpunkte.kvz');
-define('KVZKOPF', '# Datenaustauschformat M-V
-#LS PKZ            VMA  RECHTSWERT    HOCHWERT    HOEHE H H  L L
-#                                                       Z G  Z G');
+define('KVZKOPF', '# Datenaustauschformat Landkreis Rostock
+#KST PKN             VMA  RECHTSWERT   HOCHWERT    HOEHE    GST  VWL  DES  ART
+# ');																																									# in Version 2.6 angepasst
 define('SKIZZEN_DATEI_TYP','tif');            # Version 1.6.8
 # Pfad zu den WLDGE Dateien
 define('WLDGEFILEPATH',SHAPEPATH.'alb/');
@@ -204,8 +203,16 @@ define('DRUCKRAHMEN_PATH',SHAPEPATH.'druckrahmen/');
 
 # Pfad zu den Funktionen
 #define('FKT_PATH',WWWROOT.APPLVERSION.'funktionen/');			# in Version 1.7.3 wieder gelöscht
+
 # Pfad zu den PDF-Generator Klassen
-define('PDFCLASSPATH',WWWROOT.'PDFClass/');
+#define('PDFCLASSPATH', '../PDFClass/');																						# in Version 2.6 gelöscht
+
+# 3rdparty Pfade
+define('THIRDPARTY_PATH', 'http://gdi-service.de/3rdparty/');												# Version 2.6
+define('FONTAWESOME_PATH', THIRDPARTY_PATH . 'font-awesome-4.6.3/');								# Version 2.6
+define('JQUERY_PATH', THIRDPARTY_PATH . 'jQuery-1.12.0/');													# Version 2.6
+define('BOOTSTRAP_PATH', THIRDPARTY_PATH . 'bootstrap-3.3.6/');											# Version 2.6
+define('BOOTSTRAPTABLE_PATH', THIRDPARTY_PATH . 'bootstrap-table-1.11.0/');					# Version 2.6
 
 # Bin-Pfad der Postgres-tools (shp2pgsql, pgsql2shp)
 define('POSTGRESBINPATH', '/usr/bin/');         # Version 1.6.4
@@ -366,13 +373,13 @@ define('IMAGEMAGICKPATH', '/usr/bin/');                        # Version 1.7.3
 define('UPLOADPATH',SHAPEPATH.'upload/');       # Version 1.6.7
 
 # Definiert, ob die Festpunkte in 2 Streifen liegen oder nicht
-define('FESTPUNKTE_2_STREIFEN', 'true');  #true/false   # Version 1.6.7
+#define('FESTPUNKTE_2_STREIFEN', 'true');  #true/false   # Version 1.6.7			# in Version 2.6 gelöscht
 
 # Legt fest, ob die Hausnummernzusätze groß oder klein dargestellt werden
 define('HAUSNUMMER_TYPE', 'LOWER');     # UPPER/LOWER   # Version 1.6.8
 
 # Definiert ob die einzulesende Festpunktedatei auf doppelte Punktkennzeichen getestet werden soll, oder nicht    # Version 1.6.8
-define('CHECKPUNKTDATEI', 'true');      # true/false                                                                # Version 1.6.8
+#define('CHECKPUNKTDATEI', 'true');      # true/false                                                                # Version 1.6.8			# in Version 2.6 gelöscht
 
 # Minmale Maßstabszahl
 define('MINSCALE', 100);                                                        # Version 1.7.0
@@ -416,6 +423,7 @@ define("LAYER_ID_ADRESSAENDERUNGEN_PERSON", '827');  						# Version 2.1
 define("LAYER_ID_ADRESSAENDERUNGEN_ANSCHRIFT", '162');  				# Version 2.1
 define("LAYER_IDS_DOP", '79,80');							# Version 1.8.0
 define("LAYER_ID_JAGDBEZIRKE", '432');				# Version 1.10.0
+define("LAYER_ID_NACHWEISE", 786);						# Version 2.6
 define("LAYER_ID_SCHNELLSPRUNG", 749);				# Version 2.0
 $quicksearch_layer_ids = array(752);					# Version 2.0
 
@@ -537,10 +545,12 @@ $kvwmap_plugins = array();																			# Version 1.11.0
 #$kvwmap_plugins[] = 'gewaesser';																# Version 1.11.0
 #$kvwmap_plugins[] = 'bodenrichtwerte';													# Version 2.0.0
 #$kvwmap_plugins[] = 'jagdkataster';														# Version 2.0.0
+#$kvwmap_plugins[] = 'fortfuehrungslisten';											# Version 2.6.0
 #$kvwmap_plugins[] = 'nachweisverwaltung';											# Version 2.0.0
 #$kvwmap_plugins[] = 'anliegerbeitraege';												# Version 2.0.0
 #$kvwmap_plugins[] = 'probaug';																	# Version 2.0.0
 #$kvwmap_plugins[] = 'geodoc';																	# Version 2.0.0
+#$kvwmap_plugins[] = 'baumfaellantrag';													# Version 2.0.0
 #																																# Version 1.11.0
 #############################################################		# Version 1.11.0
 

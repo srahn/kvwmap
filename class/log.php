@@ -25,7 +25,7 @@ class debugfile {
     fwrite($this->fp,"<h2>Debug Datei</h2>");
   }
 
-  function write($msg,$level) {
+  function write($msg, $level) {
     if ($level>=DEBUG_LEVEL) {
       $ret=@fwrite($this->fp,"\n<br>".$msg);
       if (!$ret) {
@@ -36,6 +36,10 @@ class debugfile {
         exit;
       }
     }
+  }
+
+  function show($msg, $debug = false) {
+    if ($debug) echo '<br>' . $msg;
   }
 
   function close() {

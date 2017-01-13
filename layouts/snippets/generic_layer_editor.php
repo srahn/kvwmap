@@ -16,10 +16,12 @@
 	if($layer['alias'] != '' AND $this->Stelle->useLayerAliases){
 		$layer['Name'] = $layer['alias'];
 	}
+
 ?>
 <SCRIPT src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></SCRIPT>
 
 <div id="layer" onclick="remove_calendar();">
+<input type="hidden" value="" id="changed_<? echo $layer['Layer_ID']; ?>" name="changed_<? echo $layer['Layer_ID']; ?>">
 <? if($this->new_entry != true AND $layer['requires'] == ''){ ?>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 	<tr>
@@ -118,7 +120,6 @@
 	for ($k=0;$k<$anzObj;$k++) {
 		$checkbox_names .= 'check;'.$attributes['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].'|';
 ?>
-	<input type="hidden" value="" name="changed_<? echo $layer['Layer_ID'].'_'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
 	<tr 
 	<? if($this->user->rolle->querymode == 1){ ?>
 		onmouseenter="ahah('index.php', 'go=tooltip_query&querylayer_id=<? echo $layer['Layer_ID']; ?>&oid=<? echo $layer['shape'][$k][$attributes['table_name'][$attributes['the_geom']].'_oid']; ?>', new Array(top.document.GUI.result, ''), new Array('setvalue', 'execute_function'));"
@@ -129,6 +130,7 @@
 		  <table>
 				<tr>
 					<td style="line-height: 1px; ">
+						<input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
 						<input id="<? echo $layer['Layer_ID'].'_'.$k; ?>" type="checkbox" name="check;<? echo $attributes['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>">&nbsp;
 					</td>
 				</tr>
@@ -145,7 +147,7 @@
 			}
 			if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
 				if($attributes['type'][$j] != 'geometry'){
-					echo '<td>';
+					echo '<td style="text-align: right">';
 					$datapart .= attribute_value($this, $layer['Layer_ID'], $attributes, $j, $k, $layer['shape'][$k], $size, $select_width, $this->user->rolle->fontsize_gle);
 					echo $datapart;
 					echo '
@@ -238,7 +240,42 @@
 			    </td>
 		<? 	} ?>
 				</tr>
-<?	} 
+<?	} ?>
+				<tr onclick="toggle_statistic_row(<? echo $layer['Layer_ID']; ?>);">
+					<td style="background-color:<? echo BG_TR; ?>;" valign="top" align="center">
+						&Sigma;
+					</td><?
+					for ($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++) { ?>
+						<td valign="top">
+							<div class="statistic_row_<? echo $layer['Layer_ID']; ?>" style="display:none"><?php
+							$column_name = $this->qlayerset[$i]['attributes']['name'][$j];
+							if(in_array($this->qlayerset[$i]['attributes']['type'][$j], array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))) {
+								$values = array_map(
+									function ($row) use ($column_name) {
+										return $row[$column_name];
+									},
+									$this->qlayerset[$i]['shape']
+								);
+								$summe = array_sum($values);
+								$average = round($summe / count($values), 2);
+								$min = min($values);
+								$max = max($values);
+								$statistic = array();
+								$statistic['Summe'] = array('title' => '&Sigma;', 'value' => $summe);
+								$statistic['Durchschnitt'] = array('title' => '&empty;', 'value' => $average);
+								$statistic['Min'] = array('title' => '&darr;', 'value' => $min);
+								$statistic['Max'] = array('title' => '&uarr;', 'value' => $max);
+								#$statistic['relative Häufigkeit'] = relative_haeufigkeit($this->qlayerset[$i]['shape'], $column_name, $min, $max);
+								#$statistic['absolute Häufigkeit'] = absolute_haeufigkeit($this->qlayerset[$i]['shape'], $column_name);
+								if ($summe > 0) {
+									output_statistic($statistic);
+								}
+							} ?></div>
+						</td><?
+					} ?>
+				</tr>
+
+<?
 			if($this->new_entry != true AND $this->editable == $layer['Layer_ID']){
 ?>
 				<tr id="edit_all1_<? echo $layer['Layer_ID']; ?>" style="height: 30px">
@@ -249,7 +286,6 @@
 				</tr>
 				<tr id="edit_all3_<? echo $layer['Layer_ID']; ?>" bgcolor="<?php echo BG_DEFAULT ?>" style="display: none">
 				<td></td>
-			  
 			  <?
 			  	for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
 						if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
@@ -283,6 +319,7 @@
 			  	}
 			  ?>
 			  </tr>
+
 				<tr id="edit_all4_<? echo $layer['Layer_ID']; ?>" style="display: none">
 					<td style="text-align: center; background-color:<? echo BG_DEFAULT; ?>;">
 						<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(new Array('Hilfe:','Sie können hier die Attribut-Werte von mehreren Datensätzen gleichzeitig bearbeiten. Die Werte werden nur für die ausgewählten Datensätze übernommen.'),Style[0], document.getElementById('TipLayer<? echo $layer['Layer_ID']; ?>'))" onmouseout="htm()">
@@ -308,7 +345,6 @@
 				</tr>
 				
 	<?  } ?>
-
 			</table>
 		</td>
 	</tr>

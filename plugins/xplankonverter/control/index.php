@@ -1,9 +1,13 @@
 <?php
 $this->goNotExecutedInPlugins = false;
-
 include(PLUGINS . 'xplankonverter/model/kvwmap.php');
 include_once(CLASSPATH . 'PgObject.php');
 include_once(CLASSPATH . 'MyObject.php');
+include_once(CLASSPATH . 'Layer.php');
+include_once(CLASSPATH . 'LayerClass.php');
+include_once(CLASSPATH . 'LayerAttribute.php');
+include_once(CLASSPATH . 'Style2Class.php');
+include_once(CLASSPATH . 'Label2Class.php');
 #include_once(CLASSPATH . 'LayerGroup.php');
 include_once(CLASSPATH . 'data_import_export.php');
 include(PLUGINS . 'xplankonverter/model/gml_file.php');
@@ -15,6 +19,7 @@ include(PLUGINS . 'xplankonverter/model/shapefiles.php');
 include(PLUGINS . 'xplankonverter/model/validierung.php');
 include(PLUGINS . 'xplankonverter/model/validierungsergebnis.php');
 include(PLUGINS . 'xplankonverter/model/xplan.php');
+include(PLUGINS . 'xplankonverter/model/converter.php');
 
 /**
 * Anwendungsfälle
@@ -158,7 +163,7 @@ switch($this->go){
 							);
 							if (!empty($shapeFiles)) $shapeFile = $shapeFiles[0]; # es kann nur eins geben
 							if (!empty($shapeFile->data)) {
-								$this->debug('<p>Lösche gefundenes shape file.');
+								$this->debug->show('<p>Lösche gefundenes shape file.', false);
 								$shapeFile->deleteLayer();
 								$shapeFile->deleteDataTable();
 								$shapeFile->delete();
@@ -288,7 +293,8 @@ switch($this->go){
     $applicableStates = array(
         Konvertierung::$STATUS['IN_ERSTELLUNG'],
         Konvertierung::$STATUS['IN_KONVERTIERUNG'],
-        Konvertierung::$STATUS['IN_GML_ERSTELLUNG']
+        Konvertierung::$STATUS['IN_GML_ERSTELLUNG'],
+        Konvertierung::$STATUS['IN_INSPIRE_GML_ERSTELLUNG']
     );
     array_walk(
       $applicableStates,
@@ -313,22 +319,38 @@ switch($this->go){
           Konvertierung::$STATUS['KONVERTIERUNG_OK'],
           Konvertierung::$STATUS['KONVERTIERUNG_ERR'],
           Konvertierung::$STATUS['GML_ERSTELLUNG_OK'],
-          Konvertierung::$STATUS['GML_ERSTELLUNG_ERR']
+          Konvertierung::$STATUS['GML_ERSTELLUNG_ERR'],
+          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK'],
+          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']
         );
-        break;
+      break;
       case Konvertierung::$STATUS['IN_KONVERTIERUNG']:
         $validPredecessorStates = array(
           Konvertierung::$STATUS['ERSTELLT'],
           Konvertierung::$STATUS['KONVERTIERUNG_OK'],
-          Konvertierung::$STATUS['GML_ERSTELLUNG_OK']
+          Konvertierung::$STATUS['KONVERTIERUNG_ERR'],
+          Konvertierung::$STATUS['GML_ERSTELLUNG_OK'],
+          Konvertierung::$STATUS['GML_ERSTELLUNG_ERR'],
+          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK'],
+          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']
         );
-        break;
+      break;
       case Konvertierung::$STATUS['IN_GML_ERSTELLUNG']:
         $validPredecessorStates = array(
           Konvertierung::$STATUS['KONVERTIERUNG_OK'],
-          Konvertierung::$STATUS['GML_ERSTELLUNG_OK']
+          Konvertierung::$STATUS['GML_ERSTELLUNG_OK'],
+          Konvertierung::$STATUS['GML_ERSTELLUNG_ERR'],
+          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK'],
+          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']
         );
-        break;
+      break;
+      case Konvertierung::$STATUS['IN_INSPIRE_GML_ERSTELLUNG']:
+        $validPredecessorStates = array(
+          Konvertierung::$STATUS['GML_ERSTELLUNG_OK'],
+          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK'],
+          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']
+        );
+      break;
     }
     $currStatus = $this->konvertierung->get('status');
     $isValid = array_reduce(
@@ -352,7 +374,6 @@ switch($this->go){
   } break;
 
   case 'xplankonverter_konvertierung': {
-    // TODO: Stati setzen
 		if ($this->formvars['konvertierung_id'] == '') {
 			$this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
 			$this->main = 'Hinweis.php';
@@ -371,6 +392,27 @@ switch($this->go){
 				$this->konvertierung->set_status(
 					($this->konvertierung->validierung_erfolgreich() ? 'Konvertierung abgeschlossen' : 'Konvertierung abgebrochen')
 				);
+				# Validierungsergebnisse anzeigen.
+				$this->main = '../../plugins/xplankonverter/view/validierungsergebnisse.php';
+			}
+		}
+		$this->output();
+	} break;
+
+	case 'xplankonverter_validierungsergebnisse' : {
+		if ($this->formvars['konvertierung_id'] == '') {
+			$this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
+			$this->main = 'Hinweis.php';
+		}
+		else {
+			$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
+			if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) {
+				$this->Fehlermeldung = "Der Zugriff auf den Anwendungsfall ist nicht erlaubt.<br>
+					Die Konvertierung mit der ID={$this->konvertierung->get('id')} gehört zur Stelle ID= {$this->konvertierung->get('stelle_id')}<br>
+					Sie befinden sich aber in Stelle ID= {$this->Stelle->id}<br>
+					Melden Sie sich mit einem anderen Benutzer an.";
+			}
+			else {
 				# Validierungsergebnisse anzeigen.
 				$this->main = '../../plugins/xplankonverter/view/validierungsergebnisse.php';
 			}
@@ -449,6 +491,13 @@ switch($this->go){
     echo fread(fopen($filename, "r"), filesize($filename));
 	} break;
 
+  case 'index.php?go=xplankonverter_gml_ausliefern&konvertierung_id' : {
+    if ($this->formvars['konvertierung_id'] == '') {
+		  echo 'Diese Link kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
+		  return;
+		}
+  } break;
+
 	case 'xplankonverter_konvertierung_loeschen' : {
 		$response = array(
 			'success' => $this->layer_Datensaetze_loeschen(false),
@@ -458,9 +507,105 @@ switch($this->go){
 		echo json_encode($response);
 	} break;
 
+	case 'xplankonverter_inspire_gml_generieren' : {
+		$success = true;
+		$konvertierung_id = $this->formvars['konvertierung_id'];
+		if ($konvertierung_id == '') {
+			$this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
+			$this->main = 'Hinweis.php';
+		}
+
+		$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
+		if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) return;
+
+		# set the paths
+		$xsl = PLUGINS . 'xplankonverter/model/xplan2inspire.xsl';
+		$fileinput = XPLANKONVERTER_SHAPE_PATH . $this->formvars['konvertierung_id'] . '/xplan_' . $this->formvars['konvertierung_id'] . '.gml';
+		$fileoutput = XPLANKONVERTER_SHAPE_PATH . $this->formvars['konvertierung_id'] . '/inspire_' . $this->formvars['konvertierung_id'] . '.gml';
+
+		if (!file_exists($fileinput)) {
+			$success = false;
+			$msg = 'Die XPlanGML-Datei fehlt. Sie wurde noch nicht erzeugt oder ein Pfad ist falsch.';
+			$status =  Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR'];
+		}
+
+		if (file_exists($fileoutput)) {
+			unlink($fileoutput);
+		}
+
+		if ($success) {
+	    $this->konvertierung->set('status', Konvertierung::$STATUS['IN_INSPIRE_GML_ERSTELLUNG']);
+	    $this->konvertierung->update();
+
+			# set and run the XSLT-Processor
+			$proc = new XsltProcessor;
+			$proc->importStylesheet(DOMDocument::load($xsl)); // load script
+			$output = $proc->transformToXML(DomDocument::load($fileinput)); // load your file
+			file_put_contents($fileoutput, $output, FILE_APPEND | LOCK_EX);
+	    $status = Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK'];
+			$msg = 'Die Konvertierung nach INSPIRE-GML wurde erfolgreich ausgeführt. Sie können die Datei jetzt herunterladen.';
+		}
+
+    $this->konvertierung->set('status', $status);
+    $this->konvertierung->update();
+		$response['success'] = $success;
+		$response['msg'] = $msg;
+
+		header('Content-Type: application/json');
+		echo json_encode($response);
+	} break;
+
+  case 'xplankonverter_inspire_gml_ausliefern' : {
+		if ($this->formvars['konvertierung_id'] == '') {
+		  echo 'Diese Link kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
+		  return;
+		}
+		$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
+		if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) return;
+
+		$filename = XPLANKONVERTER_SHAPE_PATH . $this->formvars['konvertierung_id'] . '/inspire_' . $this->formvars['konvertierung_id'] . '.gml';
+		header('Content-Type: text/xml; subtype="gml/3.3"');
+    echo fread(fopen($filename, "r"), filesize($filename));
+	} break;
+
+  /*case 'index.php?go=xplankonverter_inspire_gml_ausliefern&konvertierung_id' : {
+    if ($this->formvars['konvertierung_id'] == '') {
+		  echo 'Diese Link kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
+		  return;
+		}
+  } break;*/
+
+	case 'xplankonverter_regeleditor' : {
+		$konvertierung_id = $_REQUEST['konvertierung_id'];
+		$bereich_gml_id = $_REQUEST['bereich_gml_id'];
+		$class_name = $_REQUEST['class_name'];
+
+		if (empty($konvertierung_id)) {
+			if (!empty($bereich_gml_id)) {
+				# Hole konvertierung_id über den Bereich
+				$bereich = RP_Bereich::find_by_id($this, 'gml_id', $bereich_gml_id);
+				$plan = $bereich->get_plan();
+				$konvertierung_id = $plan->get('konvertierung_id');
+			}
+		}
+
+		include(PLUGINS . 'xplankonverter/view/regeleditor/index.php');
+
+	} break;
+
+	case 'xplankonverter_regeleditor_getxplanattributes' : {
+		include(PLUGINS . 'xplankonverter/view/regeleditor/ajax-getxplanattributes.php');
+	} break;
+
+	case 'xplankonverter_regeleditor_getshapeattributes' : {
+		include(PLUGINS . 'xplankonverter/view/regeleditor/ajax-getshapeattributes.php');
+	} break;
+
 	default : {
 		$this->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
 	}
+
+
 
 }
 

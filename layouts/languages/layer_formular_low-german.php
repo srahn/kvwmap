@@ -1,5 +1,6 @@
 ﻿<?php
 	$strAsteriskRequired="Weerte mit een * mööst du indragen";
+	$strClassItem="Classitem";
 	$strLayerID="Layer ID*";
 	$strName="Naam*";
 	$strDataType="Datentyp*";
@@ -36,6 +37,7 @@
 	$strSignOrder="Riegfolg vun de Teiken";
 	$strDelete="löschen";
 	$strAddClass="Klass tau fögen";
+  $strAddAutoClasses="Klassen van süllmst tau fögen";
 	$strOtherExtentions="tosett Instellen";
 	$strButtonSave="Ännern";
 	$strBack="Trüggsetten";

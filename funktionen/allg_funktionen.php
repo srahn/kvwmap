@@ -115,24 +115,12 @@ function formatFlurstkennzALK($FlurstKennz){
 }
 
 function tausenderTrenner($number){
-	if(strpos($number, ' ') === false){
-		$explosion = explode('.', $number);
-		$length = strlen($explosion[0]);
-		$length = $length - 3;
-		while($length > 0){
-			$new_number = substr($explosion[0], $length, 3).' '.$new_number;
-			$length = $length-3;
-		}
-		$new_number = substr($explosion[0], 0, $length+3).' '.$new_number;
-		$new_number = trim($new_number);
-		if($explosion[1] != ''){
-			$new_number .= '.'.$explosion[1];
-		}
-		return $new_number;
+	if($number != ''){
+		$explo = explode('.', $number);
+		$formated_number = number_format($explo[0], 0, ',', '.');
+		if($explo[1] != '')$formated_number .= ','.$explo[1];
+		return $formated_number;
 	}
-	else{
-		return $number;
-	}	
 }
 
 function transformCoordsSVG($path){
@@ -199,7 +187,7 @@ function allocateImageColors($image, $colors) {
 	return $imageColors;
 }
 
-function rgb2hsv($R,$G,$B) {
+function rgb2hsv($R,$G,$B){
 	$var_R = $R / 255;                     //RGB from 0 to 255
 	$var_G = $G / 255;
 	$var_B = $B / 255;
@@ -240,7 +228,7 @@ function rgb2hsv($R,$G,$B) {
 }
 
 
-function hsv2rgb($Hdeg,$S,$V) {
+function hsv2rgb($Hdeg,$S,$V){
   $H = $Hdeg;
   if ($S==0) {       // HSV values = From 0 to 1
     $R = $V*255;     // RGB results = From 0 to 255
@@ -276,7 +264,83 @@ function hsv2rgb($Hdeg,$S,$V) {
   }
   return array($R,$G,$B);
 }
- 
+
+function rgb2hsl($r, $g, $b){
+	$oldR = $r;
+	$oldG = $g;
+	$oldB = $b;
+	$r /= 255;
+	$g /= 255;
+	$b /= 255;
+	$max = max( $r, $g, $b );
+	$min = min( $r, $g, $b );
+	$h;
+	$s;
+	$l = ( $max + $min ) / 2;
+	$d = $max - $min;
+	if($d == 0){
+		$h = $s = 0; // achromatic
+	}
+	else{
+		$s = $d / ( 1 - abs( 2 * $l - 1 ) );
+		switch($max){
+			case $r:
+				$h = 60 * fmod( ( ( $g - $b ) / $d ), 6 ); 
+				if($b > $g)$h += 360;
+			break;
+			case $g: 
+				$h = 60 * ( ( $b - $r ) / $d + 2 ); 
+			break;
+			case $b: 
+				$h = 60 * ( ( $r - $g ) / $d + 4 ); 
+			break;
+		}     	        
+	}
+	return array(round($h, 2), round($s, 2), round($l, 2));
+}
+
+function hsl2rgb($h, $s, $l){
+	$r; 
+	$g; 
+	$b;
+	$c = ( 1 - abs( 2 * $l - 1 ) ) * $s;
+	$x = $c * ( 1 - abs( fmod( ( $h / 60 ), 2 ) - 1 ) );
+	$m = $l - ( $c / 2 );
+	if($h < 60){
+		$r = $c;
+		$g = $x;
+		$b = 0;
+	}
+	elseif($h < 120){
+		$r = $x;
+		$g = $c;
+		$b = 0;			
+	}
+	elseif($h < 180){
+		$r = 0;
+		$g = $c;
+		$b = $x;					
+	}
+	elseif($h < 240){
+		$r = 0;
+		$g = $x;
+		$b = $c;
+	}
+	elseif($h < 300){
+		$r = $x;
+		$g = 0;
+		$b = $c;
+	}
+	else{
+		$r = $c;
+		$g = 0;
+		$b = $x;
+	}
+	$r = ($r + $m) * 255;
+	$g = ($g + $m) * 255;
+	$b = ($b + $m) * 255;
+  return array(floor($r), floor($g), floor($b));
+}
  
 if(!function_exists('imagerotate')){
 	function imagerotate($source_image, $angle, $bgd_color){
@@ -627,7 +691,7 @@ function unzip($src_file, $dest_dir=false, $create_zip_name_dir=true, $overwrite
 	$output = array();
 	$entries = NULL;
 	exec('export LD_LIBRARY_PATH=;unzip -l "'.$src_file.'" -d '.dirname($src_file), $output);
-	#echo 'unzip -l "'.$src_file.'" -d '.dirname($src_file);
+	#echo '<br>unzip -l "'.$src_file.'" -d '.dirname($src_file);
 	for($i = 3; $i < count($output)-2; $i++){
   		$entries[] = array_pop(explode('   ', $output[$i]));
 	}
@@ -933,17 +997,66 @@ function showAlert($text) {
   </script><?php
 }
 
-function showMessage($text, $fade = true) {
+/**
+* Funktion gibt Meldungen aus
+* ToDo: Funktion wie folgt umbauen:
+* Funktion gibt Liste von Meldungen aus. Je nach Typ wird die Meldung
+* unterschiedlich dargestellt.
+* @param array[][] $messages Liste der Meldungen
+* 	Eine Meldung besteht aus einen assoziativen Array mit folgenden
+*		Bestandteilen:
+*		type: Type der Meldung. 'success' (default), 'warning', 'error'
+*		msg: Die Meldung, die als Text ausgegeben werden soll.
+*		Die Klassen zum Stylen der Meldungen lauten: 'message_' + type
+* @param boolean $fade Ob das Fenster zur Anzeige der Message von allein
+* 	verschwinden soll oder nicht.
+*/
+/*
+function showMessages($messages, $fade = true) { ?>
+	<script type="text/javascript">
+	var Msg = document.getElementById("message_box");
+			innerhtml = '';
+	if(Msg == undefined){
+		document.write('<div id="message_box" class="message_box_hidden"></div>');
+		var Msg = document.getElementById("message_box");
+	}
+	Msg.className = 'message_box_visible'; <?php
+	Msg.style.top = document.body.scrollTop + 350; <?php
+	$html = array_map($messages, function($m) {
+		return = "
+			<div class=\"message_row\">
+				<div class=\"message_type\">{$m['type']}</div>
+				<div class=\"message_{$m['type']}\">{$m['msg']}</div>
+			</div>
+		";
+	});
+ 	if ($fade){ ?>
+		setTimeout(function() {Msg.className = 'message_box_hide';}, 1000);
+		setTimeout(function() {Msg.className = 'message_box_hidden';}, 3000);<?php
+	}
+	else {
+		$html .= "<br><br><input type=\"button\" onclick=\"this.parentNode.className = 'message_box_hidden';\" value=\"ok\">";
+	} ?>
+	Msg.innerHTML = <?php echo $html; ?>
+  </script><?php
+}
+*/
+function showMessage($text, $fade = true, $msg_type = 'warning') {
   ?>
   <script type="text/javascript">
 		var Msg = document.getElementById("message_box");
+				innerhtml = '';
 		if(Msg == undefined){
 			document.write('<div id="message_box" class="message_box_hidden"></div>');
 			var Msg = document.getElementById("message_box");
 		}
-		Msg.className = 'message_box_visible';
-		Msg.style.top = document.body.scrollTop + 350;		
-		var innerhtml = '<?php echo $text; ?>';
+		Msg.className = 'message_box_<?php echo $msg_type; ?>';<?php
+		if ($msg_type == 'error') { ?>
+			innerhtml += '<h2>Eingabefehler</h2>';
+			Msg.className = 'message_box_error';<?php
+		} ?>
+		Msg.style.top = document.body.scrollTop + 350;
+		innerhtml += '<?php echo $text; ?>';
 		<? if($fade == true){ ?>
 			setTimeout(function() {Msg.className = 'message_box_hide';},1000);
 			setTimeout(function() {Msg.className = 'message_box_hidden';},3000);
@@ -1309,7 +1422,7 @@ function curl_get_contents($url, $username = NULL, $password = NULL) {
   return $result;
 }
 
-function debug_write($msg) {
+function debug_write($msg, $debug = false) {
   #$fp = fopen(LOGPATH.'debug.htm','a+');
 	#$log = getTimestamp().":\n";
 	#$msg = "- ".$msg."\n";
@@ -1379,6 +1492,19 @@ function formvars_strip($formvars, $strip_list) {
 		}
 	}
 	return $stripped_formvars;
+}
+
+/*
+* Funktion ersetzt in $str die Schlüsselwörter, die in $params
+* als key übergeben werden durch die values von $params
+*/
+function replace_params($str, $params) {
+	if (is_array($params)) {
+		foreach($params AS $key => $value){
+			$str = str_replace('$'.$key, $value, $str);
+		}
+	}
+	return $str;
 }
 
 /**
@@ -1476,5 +1602,34 @@ function arrStrToArr($str, $delimiter) {
 		$value = trim(stripslashes($value), '"[]"');
 	}
 	return $arr;
+}
+
+/**
+* @param string $form_field_name - used also als form field id
+* @param array $data - array with values and options per array element
+* @param string $selected_value
+* @param string $onchange - javascript to execute on change
+* @param string $title - of the select field
+* @param string $null_option - create a first option with value = '' and the text of $null_option
+* @param string $style - css Style for the select element
+* @return string - the html representing the select form element
+* */
+function output_select($form_field_name, $data, $selected_value = null, $onchange = null, $title = null, $null_option = null, $style = null) {
+	if (!empty($onchange)) {
+		$onchange = " onchange=\"{$onchange}\"";
+	}
+	if (!empty($style)) {
+		$style = " style=\"{$style}\"";
+	}
+	$html = "<select id=\"{$form_field_name}\" name=\"{$form_field_name}\"{$onchange}{$style}>\n";
+	if (!empty($null_option)) {
+		$html .= "\t<option value=\"\">{$null_option}</option>\n";
+	}
+	foreach ($data AS $option) {
+		$selected = ($option['value'] == $selected_value ? ' selected' : '');
+		$html .= "\t<option value=\"{$option['value']}\"{$selected}>{$option['output']}</option>\n";
+	}
+	$html .= "</select>\n";
+	return $html;
 }
 ?>

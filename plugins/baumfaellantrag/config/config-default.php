@@ -4,7 +4,8 @@
 #   Konfigurationsdatei zur Fachschale baumfaellantrag             #
 #                                                                  #
 ####################################################################
-define('BAUMFAELLANTRAG_STELLE_ID', 1);
+define('BAUMFAELLANTRAG_ANTRAGSTELLER_STELLE_ID', 1);
+define('BAUMFAELLANTRAG_BEARBEITER_STELLE_ID', 2);
 define('BAUMFAELLANTRAG_LAYER_ID_FLURSTUECKE', 10);
 define('BAUMFAELLANTRAG_LAYER_ID_SATZUNGSGEBIETE', 11);
 define('BAUMFAELLANTRAG_LAYER_ID_ZUSTAENDIGESTELLEN', 12);

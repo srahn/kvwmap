@@ -37,9 +37,8 @@ else {
 	# die Variable für id ist eine Liste (Array)
 	$idListe[$this->formvars['id']]=$this->formvars['id'];
 }
-$idselected=array_keys ($idListe);
-for ($i=0;$i<count($idselected);$i++) {
-  ?><input type="hidden" name="id[<?php echo $idselected[$i]; ?>]" value="<?php echo $idselected[$i]; ?>"><?php
+for ($i=0;$i<count($idListe);$i++) {
+  ?><input type="hidden" name="id[]" value="<?php echo $idListe[$i]; ?>"><?php
 }
 ?>
     </td>

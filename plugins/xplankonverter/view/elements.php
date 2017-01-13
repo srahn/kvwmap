@@ -1,10 +1,11 @@
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
-<script src="javascript/tableExport.js"></script>
-<script src="javascript/jquery.base64.js"></script>
-<script src="javascript/bootstrap-table.js"></script>
-<script src="javascript/bootstrap-table-export.js"></script>
-<script src="javascript/bootstrap-table-flatJSON.js"></script>
+<script src="<?php echo JQUERY_PATH; ?>jquery-1.12.0.min.js"></script>
+<script src="<?php echo JQUERY_PATH; ?>jquery.base64.js"></script>
+<script src="<?php echo BOOTSTRAP_PATH; ?>js/bootstrap.min.js"></script>
+<script src="<?php echo BOOTSTRAP_PATH; ?>bootstrap-table-flatJSON.js"></script>
+<script src="<?php echo BOOTSTRAPTABLE_PATH; ?>tableExport.js"></script>
+<script src="<?php echo BOOTSTRAPTABLE_PATH; ?>bootstrap-table.js"></script>
+<script src="<?php echo BOOTSTRAPTABLE_PATH; ?>bootstrap-table-export.js"></script>
+
 <script language="javascript" type="text/javascript">
   /*
   * Konvertiert den Zeitstempel aus einem Javascript Date Objekt in ein Objekt mit formatierten Elementen für Jahr, Monat, Tag etc.

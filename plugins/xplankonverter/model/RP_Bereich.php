@@ -11,7 +11,15 @@ class RP_Bereich extends PgObject {
   function RP_Bereich($gui) {
     $this->PgObject($gui, RP_Bereich::$schema, RP_Bereich::$tableName);
     $this->rp_objekte = array();
+		$this->identifier = 'gml_id';
+		$this->identifier_type = 'text';
   }
+
+	public static	function find_by_id($gui, $by, $id) {
+		$rp_bereich = new RP_Bereich($gui);
+		$rp_bereich->find_by($by, $id);
+		return $rp_bereich;
+	}
 
   function holeObjekte($konvertierung_id) {
     $this->rp_objekte;
@@ -25,13 +33,19 @@ class RP_Bereich extends PgObject {
 		return $regeln;
 	}
 
+	function get_plan() {
+		$plan = new RP_Plan($this->gui);
+		return $plan->find_by('gml_id', $this->get('gehoertzuplan'));
+	}
+
 	/*
 	* Löscht den Bereich und alles was dazugehört
 	* Löscht dazugehörige Regeln
 	*/
 	function destroy() {
-		$this->get_regeln();
+		$regeln = $this->get_regeln();
 		foreach($regeln AS $regel) {
+			$regel->konvertierung = $regel->get_konvertierung();
 			$regel->destroy();
 		}
 		$this->delete();

@@ -1,7 +1,8 @@
 <?php
+	include_once(CLASSPATH.'FormObject.php');
 	global $supportedLanguages;
-  include(LAYOUTPATH.'languages/attribut_editor_'.$this->user->rolle->language.'.php');
 	global $quicksearch_layer_ids;
+  include(LAYOUTPATH.'languages/attribut_editor_'.$this->user->rolle->language.'.php');
  ?>
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
@@ -17,6 +18,10 @@ function submitDatatypeSelector() {
 	    element.value = '<?php echo $strPleaseSelect; ?>';
 	document.GUI.submit();
 }  
+
+function toLayerEditor(){	
+	location.href='index.php?go=Layereditor&selected_layer_id='+document.GUI.selected_layer_id.value;
+}
 //-->
 </script>
 <table cellpadding="5" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
@@ -41,6 +46,7 @@ function submitDatatypeSelector() {
     		}
     	?>
       </select>
+			&nbsp;&nbsp;<a id="toLayerLink" href="javascript:toLayerEditor();" style="<? if($this->formvars['selected_layer_id'] != '')echo 'display:inline';else echo 'display:none'; ?>">zum Layer</a>
 		</td>
     <td style="border:1px solid #C3C7C3;<? if(count($this->datatypes) == 0)echo 'display: none'; ?>">
 			<?php echo $strDatatype;?><br>
@@ -93,7 +99,7 @@ function submitDatatypeSelector() {
 						<td>&nbsp;&nbsp;</td>
 						<td align="center"><span class="fett">sichtbar im Rastertemplate</span></td>
 						<td>&nbsp;</td>
-						<td align="center"><span class="fett">Suche-Pflicht</span></td>';
+						<td align="center"><span class="fett">Bei der Suche</span></td>';
 			if(in_array($this->formvars['selected_layer_id'], $quicksearch_layer_ids)){			
 				echo '
 						<td>&nbsp;</td>
@@ -257,10 +263,16 @@ function submitDatatypeSelector() {
 				  </td>
 					<td>&nbsp;</td>
 				  <td align="center" valign="top">
-				  	<input name="mandatory_'.$this->attributes['name'][$i].'" type="checkbox" value="1" ';
-				  	if($this->attributes['mandatory'][$i]) echo 'checked="true"';
-						echo '>
-				  </td>';
+						' . FormObject::createSelectField(
+									'mandatory_' . $this->attributes['name'][$i],
+									array(
+										array('value' => -1, 'output' => 'nicht sichtbar'),
+										array('value' => 0, 'output' => 'anzeigen'),
+										array('value' => 1, 'output' => 'Pflichtangabe')
+									),
+									$this->attributes['mandatory'][$i]
+								) . '
+					</td>';
 				if(in_array($this->formvars['selected_layer_id'], $quicksearch_layer_ids)){	
 					echo '
 					<td>&nbsp;</td>

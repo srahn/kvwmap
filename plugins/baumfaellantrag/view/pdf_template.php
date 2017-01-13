@@ -1,8 +1,8 @@
 <?php
   error_reporting(E_ERROR | E_PARSE);
-	include (PDFCLASSPATH."class.ezpdf.php");
+	include (CLASSPATH.'class.ezpdf.php');
   $pdf=new Cezpdf();
-	$pdf->selectFont(PDFCLASSPATH.'fonts/Courier.afm');
+	$pdf->selectFont(WWWROOT . APPLVERSION . 'fonts/PDFClass/Courier.afm');
 	$table_data = array();
 
   $table_data[] = array('key' => '', 'value' => 'Angaben zum Antragsteller');

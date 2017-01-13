@@ -1222,6 +1222,7 @@ class rolle {
 	var $database;
 	var $loglevel;
 	static $hist_timestamp;
+	static $layer_params;
 
 	function rolle($user_id,$stelle_id,$database) {
 		global $debug;
@@ -1268,35 +1269,40 @@ class rolle {
   function getLayer($LayerName) {
 		global $language;
 
-		# Abfragen der Layer in der Rolle
+    # Abfragen der Layer in der Rolle
 		if($language != 'german') {
-			$name = "CASE WHEN `Name_{$language}` != '' THEN `Name_{$language}` ELSE `Name` END";
+			$name_column = "
+			CASE
+				WHEN `l.Name_" . $language . "` != \"\" THEN `l.Name_" . $language . "`
+				ELSE `l.Name`
+			END AS l.Name";
 		}
-		else {
-			$name = 'name';
-		}
+		else
+			$name_column = "l.Name";
 
 		if ($LayerName != '') {
-			$where_name = " AND (l.Name LIKE '{$LayerName}'";
-			if(is_numeric($LayerName)) {
-				$where_name .= " OR l.Layer_ID = {$LayerName}";
-			}
-			$where_name .= ")";
+			$layer_name_filter = " AND (l.Name LIKE '" . $LayerName . "'";
+			if(is_numeric($LayerName))
+				$layer_name_filter .= " OR l.Layer_ID = " . $LayerName;
+			$layer_name_filter .= ")";
 		}
 
 		$sql = "
-			SELECT
-				{$name} AS Name,
+			SELECT " .
+				$name_column . ",
 				l.Layer_ID,
-				alias, Datentyp, Gruppe, pfad, maintable, maintable_is_view, Data, `schema`, document_path, labelitem, connection,
-				printconnection, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password,
-				wms_server_version, ows_srs, wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink,
-				status,
-				trigger_function,
-				ul.`queryable`, ul.`drawingorder`, ul.`minscale`, ul.`maxscale`, ul.`offsite`,
+				alias, Datentyp, Gruppe, pfad, maintable, maintable_is_view, Data, `schema`, document_path, labelitem, connection, printconnection,
+				connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
+				wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, trigger_function, ul.`queryable`, ul.`drawingorder`,
+				ul.`minscale`, ul.`maxscale`,
+				ul.`offsite`,
 				coalesce(r2ul.transparency, ul.transparency, 100) as transparency,
-				ul.`postlabelcache`, `Filter`,
-				CASE r2ul.gle_view WHEN '0' THEN 'generic_layer_editor.php' ELSE ul.`template` END as template,
+				ul.`postlabelcache`,
+				`Filter`,
+				CASE r2ul.gle_view
+					WHEN '0' THEN 'generic_layer_editor.php'
+					ELSE ul.`template`
+				END as template,
 				`header`,
 				`footer`,
 				ul.`symbolscale`,
@@ -1311,29 +1317,29 @@ class rolle {
 				used_layer AS ul,
 				u_rolle2used_layer as r2ul
 			WHERE
-				l.Layer_ID = ul.Layer_ID AND
-				r2ul.Stelle_ID = ul.Stelle_ID AND
-				r2ul.Layer_ID = ul.Layer_ID AND
-				ul.Stelle_ID = {$this->stelle_id} AND
-				r2ul.User_ID={$this->user_id}
-				{$where_name}
-			ORDER BY ul.drawingorder desc
+				l.Layer_ID=ul.Layer_ID AND
+				r2ul.Stelle_ID=ul.Stelle_ID AND
+				r2ul.Layer_ID=ul.Layer_ID AND
+				ul.Stelle_ID= " . $this->stelle_id . " AND
+				r2ul.User_ID= " . $this->user_id .
+				$layer_name_filter . "
+			ORDER BY
+				ul.drawingorder desc
 		";
-		#echo $sql.'<br>';
-		$this->debug->write("<p>file:users.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+#		echo $sql.'<br>';
+    $this->debug->write("<p>file:users.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>".$sql,4);
+    $query=mysql_query($sql,$this->database->dbConn);
+    if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		$i = 0;
 		while ($rs=mysql_fetch_assoc($query)) {
 			$layer[$i]=$rs;
 			$layer['layer_ids'][$rs['Layer_ID']] =& $layer[$i];
 			$layer['layer_ids'][$layer[$i]['requires']]['required'] = $rs['Layer_ID'];
 			$i++;
-		}
-		return $layer;
-	}
+    }
+    return $layer;
+  }
 
-  # 2006-02-11 pk
   function getAktivLayer($aktivStatus,$queryStatus,$logconsume) {
     # Abfragen der zu loggenden Layer der Rolle
     $sql ='SELECT r2ul.layer_id FROM u_rolle2used_layer AS r2ul';
@@ -1466,7 +1472,15 @@ class rolle {
   function readSettings() {
 		global $language;
     # Abfragen und Zuweisen der Einstellungen der Rolle
-    $sql ='SELECT * FROM rolle WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+    $sql = "
+			SELECT
+				*
+			FROM
+				rolle
+			WHERE
+				user_id = " . $this->user_id . " AND
+				stelle_id = " . $this->stelle_id . "
+		";
     #echo $sql;
     $this->debug->write("<p>file:users.php class:rolle function:readSettings - Abfragen der Einstellungen der Rolle:<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);
@@ -1475,7 +1489,7 @@ class rolle {
       return 0;
     }
 		if(mysql_num_rows($query) > 0){
-			$rs=mysql_fetch_assoc($query);
+			$rs = mysql_fetch_assoc($query);
 			$this->oGeorefExt=ms_newRectObj();
 			$this->oGeorefExt->setextent($rs['minx'],$rs['miny'],$rs['maxx'],$rs['maxy']);
 			$this->nImageWidth=$rs['nImageWidth'];
@@ -1508,12 +1522,14 @@ class rolle {
 			$this->overlayy=$rs['overlayy'];
 			$this->instant_reload=$rs['instant_reload'];
 			$this->menu_auto_close=$rs['menu_auto_close'];
+			rolle::$layer_params = (array)json_decode('{' . $rs['layer_params'] . '}');
 			$this->visually_impaired = $rs['visually_impaired'];
 			if($rs['hist_timestamp'] != ''){
 				$this->hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');			# der wird zur Anzeige des Timestamps benutzt
 				rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');	# der hat die Form, wie der timestamp in der PG-DB steht und wird für die Abfragen benutzt
 			}
-			else rolle::$hist_timestamp = $this->hist_timestamp = '';
+			else
+				rolle::$hist_timestamp = $this->hist_timestamp = '';
 			$this->selectedButton=$rs['selectedButton'];
 			$buttons = explode(',', $rs['buttons']);
 			$this->back = in_array('back', $buttons);
@@ -1535,7 +1551,52 @@ class rolle {
 			return 1;
 		}else return 0;
   }
-	  
+
+	function get_layer_params($selectable_layer_params, $pgdatabase) {
+		$layer_params = array();
+		if (!empty($selectable_layer_params)) {
+			$sql = "
+				SELECT
+					*
+				FROM
+					layer_parameter
+				WHERE
+					id IN (" . $selectable_layer_params . ")
+			";
+			$params_result = $this->database->execSQL($sql, 4, 1);
+			if ($params_result[0]) {
+				echo '<br>Fehler bei der Abfrage der Layerparameter mit SQL: ' . $sql;
+			}
+			else {
+				while ($param = mysql_fetch_assoc($params_result[1])) {
+					$options_result = $pgdatabase->execSQL($param['options_sql'], 4, 1);
+					$param['options'] = array();
+					while ($option = pg_fetch_assoc($options_result[1])) {
+						$param['options'][] = $option;
+					}
+					$layer_params[$param['key']] = $param;
+				}
+			}
+		}
+		return $layer_params;
+	}
+
+	function set_layer_params($layer_params) {
+		$sql = "
+			UPDATE
+				rolle
+			SET
+				`layer_params` = '" . $layer_params . "'
+			WHERE
+				user_id = " . $this->user_id . " AND
+				stelle_id = " . $this->stelle_id . "
+		";
+		#echo $sql;
+		$ret = $this->database->execSQL($sql,4, 1);
+		rolle::$layer_params = (array)json_decode('{' . $layer_params . '}');
+		return $ret;
+	}
+
   function set_last_time_id($time){
     # Eintragen der last_time_id
     $sql = 'UPDATE rolle SET last_time_id="'.$time.'"';
@@ -2689,6 +2750,7 @@ class stelle {
     $this->checkPasswordAge=$rs["check_password_age"];
     $this->allowedPasswordAge=$rs["allowed_password_age"];
     $this->useLayerAliases=$rs["use_layer_aliases"];
+		$this->selectable_layer_params = $rs['selectable_layer_params'];
 		$this->hist_timestamp=$rs["hist_timestamp"];
   }
 
@@ -3174,10 +3236,17 @@ class stelle {
 		return 1;
 	}
 
-	function addLayer($layer_ids, $drawingorder) {
+	function addLayer($layer_ids, $drawingorder, $filter = '') {
 		# Hinzufügen von Layern zur Stelle
 		for ($i=0;$i<count($layer_ids);$i++) {
-			$sql = "SELECT queryable, template, transparency, drawingorder, minscale, maxscale, symbolscale, offsite, requires, privileg, postlabelcache FROM layer WHERE Layer_ID = ".$layer_ids[$i];
+			$sql = "
+				SELECT
+					queryable, template, transparency, drawingorder, minscale, maxscale, symbolscale, offsite, requires, privileg, postlabelcache
+				FROM
+					layer
+				WHERE
+					Layer_ID = " . $layer_ids[$i];
+			#echo '<br>sql: ' . $sql;
 			$this->debug->write("<p>file:users.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 			$query=mysql_query($sql,$this->database->dbConn);
 			$rs = mysql_fetch_array($query);
@@ -3196,9 +3265,45 @@ class stelle {
 			$postlabelcache = $rs['postlabelcache'];
 			if($rs['requires'] == '')$rs['requires']='NULL';
 			$requires = $rs['requires'];
-			$sql ='INSERT IGNORE INTO used_layer ( `Stelle_ID` , `Layer_ID` , `queryable` , `drawingorder` , `minscale` , `maxscale` , `symbolscale`, `offsite` , `transparency`, `Filter` , `template` , `header` , `footer` , `privileg`, `postlabelcache`, `requires` )';
-			$sql.="VALUES ('".$this->id."', '".$layer_ids[$i]."', '".$queryable."', '".$drawingorder."', '".$minscale."', '".$maxscale."', '".$symbolscale."', '".$offsite."' , ".$transparency.", NULL,'".$template."', NULL, NULL, '".$privileg."', '".$postlabelcache."', ".$requires.")";
-			#echo $sql.'<br>';
+			$sql = "
+				INSERT IGNORE INTO used_layer (
+					`Stelle_ID`,
+					`Layer_ID`,
+					`queryable`,
+					`drawingorder`,
+					`minscale`,
+					`maxscale`,
+					`symbolscale`,
+					`offsite`,
+					`transparency`,
+					`Filter`,
+					`template`,
+					`header`,
+					`footer`,
+					`privileg`,
+					`postlabelcache`,
+					`requires`
+				)
+				VALUES (
+					'" . $this->id . "',
+					'" . $layer_ids[$i] . "',
+					'" . $queryable . "',
+					'" . $drawingorder . "',
+					'" . $minscale . "',
+					'" . $maxscale . "',
+					'" . $symbolscale . "',
+					'" . $offsite . "',
+					" . $transparency . ",
+					'" . $filter . "',
+					'" . $template . "',
+					NULL,
+					NULL,
+					'" . $privileg . "',
+					'" . $postlabelcache . "',
+					" . $requires . "
+				)
+			";
+			#echo '<br>' . $sql;
 			$this->debug->write("<p>file:users.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 			$query=mysql_query($sql,$this->database->dbConn);
 			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
@@ -3213,6 +3318,29 @@ class stelle {
 			}
 		}
 		return 1;
+	}
+	
+	function updateLayerParams(){
+		$sql = "UPDATE stelle SET selectable_layer_params = ";
+		$sql.= "(SELECT GROUP_CONCAT(id) ";
+		$sql.= "FROM `layer_parameter` as p, used_layer as ul, layer as l ";
+		$sql.= "WHERE ul.Stelle_ID = stelle.ID ";
+		$sql.= "AND ul.Layer_ID = l.Layer_ID ";
+		$sql.= "AND locate(concat('$', p.key), concat(l.Data, l.pfad, l.classitem, l.classification)) > 0) ";
+		$sql.= "WHERE stelle.ID = ".$this->id;
+		$this->debug->write("<p>file:users.php class:stelle->updateLayerParams:<br>".$sql,4);
+		$query=mysql_query($sql,$this->database->dbConn);
+		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		$sql = "UPDATE rolle SET layer_params = ";
+		$sql.= "(SELECT GROUP_CONCAT(concat('\"', `key`, '\":\"', default_value, '\"')) ";
+		$sql.= "FROM layer_parameter p, stelle ";
+		$sql.= "WHERE FIND_IN_SET(p.id, stelle.selectable_layer_params) ";
+		$sql.= "AND stelle.ID = rolle.stelle_id) ";
+		$sql.= "WHERE rolle.layer_params IS NULL ";
+		$sql.= "AND rolle.stelle_id = ".$this->id;
+		$this->debug->write("<p>file:users.php class:stelle->updateLayerParams:<br>".$sql,4);
+		$query=mysql_query($sql,$this->database->dbConn);
+		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 	}
 
 	function updateLayer($formvars){
