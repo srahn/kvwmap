@@ -2071,9 +2071,8 @@ class GUI {
 
 	function output_messages() { ?>
 		<script type="text/javascript">
-			message(<?php echo json_encode($this->messages); ?>);
-		</script><?php
-#		include(LAYOUTPATH . 'snippets/messages.php'); 
+			message(<? echo json_encode($this->messages); ?>);
+		</script><?
 	}
 
   # Ausgabe der Seite
