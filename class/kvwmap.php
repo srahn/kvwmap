@@ -7965,7 +7965,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					$this->add_message('error', 'Löschen fehlgeschlagen.<br>' . $result[0]);
 				}
 				else {
-					$this->add_message('warning', 'Löschen erfolgreich');
+					$this->add_message('notice', 'Löschen erfolgreich');
 				}
 				$this->last_query = $this->user->rolle->get_last_query();
 				if($this->formvars['search']){ # man kam von der Suche -> nochmal suchen
@@ -11622,10 +11622,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			}
 			else {
 				if($this->formvars['close_window'] == ""){
-					if($result[0] != '')
-						$this->add_message('warning', 'Änderung erfolgreich.<br>' . $result[0]);
-					else
-						$this->add_message('notice', 'Änderung erfolgreich');
+					$this->add_message('notice', 'Änderung erfolgreich');
+					if($result[0] != '')$this->add_message('warning', $result[0]);
 				}
 			}
 		}
