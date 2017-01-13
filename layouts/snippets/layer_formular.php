@@ -574,9 +574,15 @@ else {
 	<!--			<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">ändern</td>  -->
 			</tr>
 			<?
+			$last_classification = $this->classes[0]['classification'];
 			for($i = 0; $i < count($this->classes); $i++){
+				if($this->classes[$i]['classification'] != $last_classification){
+					$last_classification = $this->classes[$i]['classification'];
+					if($tr_color == 'gainsboro')$tr_color = '';
+					else $tr_color = 'gainsboro';
+				}
 				echo '
-			<tr>
+			<tr style="background-color:'.$tr_color.'">
 				<input type="hidden" name="ID['.$this->classes[$i]['Class_ID'].']" value="'.$this->classes[$i]['Class_ID'].'">
 				<td style="border-bottom:1px solid #C3C7C3">'.$this->classes[$i]['Class_ID'].'</td>	
 				<td style="border-bottom:1px solid #C3C7C3"><input size="12" type="text" name="name['.$this->classes[$i]['Class_ID'].']" value="'.$this->classes[$i]['Name'].'"</td>';

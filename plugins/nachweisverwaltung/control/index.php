@@ -319,22 +319,6 @@
 			$this->sendeFestpunktskizze($this->formvars['name'],PUNKTDATEIPATH);
 	  } break;
 
-	  case 'FestpunktDateiUebernehmen' : {
-			$this->checkCaseAllowed($this->go);
-			include (PLUGINS.'nachweisverwaltung/model/kvwmap.php');						# GUI-Objekt erweitern
-			include (PLUGINS.'nachweisverwaltung/model/nachweis.php');					# nachweis-Klasse einbinden
-			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
-			$this->uebernehmeFestpunkte();
-	  } break;
-
-	  case 'FestpunktDateiAktualisieren' : {
-			$this->checkCaseAllowed($this->go);
-			include (PLUGINS.'nachweisverwaltung/model/kvwmap.php');						# GUI-Objekt erweitern
-			include (PLUGINS.'nachweisverwaltung/model/nachweis.php');					# nachweis-Klasse einbinden
-			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
-			$this->aktualisiereFestpunkte();
-	  } break;
-
 	  case 'Sachdaten_FestpunkteSkizzenZuordnung' : {
 			include (PLUGINS.'nachweisverwaltung/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'nachweisverwaltung/model/nachweis.php');					# nachweis-Klasse einbinden

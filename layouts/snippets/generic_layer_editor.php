@@ -147,7 +147,7 @@
 			}
 			if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
 				if($attributes['type'][$j] != 'geometry'){
-					echo '<td>';
+					echo '<td style="text-align: right">';
 					$datapart .= attribute_value($this, $layer['Layer_ID'], $attributes, $j, $k, $layer['shape'][$k], $size, $select_width, $this->user->rolle->fontsize_gle);
 					echo $datapart;
 					echo '

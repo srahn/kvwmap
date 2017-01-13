@@ -443,11 +443,17 @@
 
 				case 'dynamicLink': {
 					$show_link = false;
+					$one_param_is_null = false;
 					$options = $attributes['options'][$j];
 					for($a = 0; $a < count($attributes['name']); $a++){
 						if(strpos($options, '$'.$attributes['name'][$a]) !== false){
 							$options = str_replace('$'.$attributes['name'][$a], $dataset[$attributes['name'][$a]], $options);
-							if($dataset[$attributes['name'][$a]] != '')$show_link = true;
+							if(empty($dataset[$attributes['name'][$a]])) {
+								$one_param_is_null = true;
+							}
+							else {
+								$show_link = true;
+							}
 						}
 					}
 					$explosion = explode(';', $options);		# url;alias;embedded
@@ -458,7 +464,11 @@
 					else{
 						$alias = $href;
 					}
-					if($show_link){
+					if ($explosion[3] == 'all_not_null' and $one_param_is_null) {
+						$show_link = false;
+					}
+
+					if ($show_link) {
 						if($explosion[2] == 'embedded'){
 							$datapart .= '<a style="padding: 0 0 0 3;" href="javascript:if(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\').innerHTML != \'\'){clearsubform(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\');} else {ahah(\''.$href.'\', \'\', new Array(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'))}">';
 							$datapart .= $alias;
@@ -518,7 +528,7 @@
 				case 'Zahl': {
 					# bei Zahlen Tausendertrennzeichen einfügen 
 					$value = tausenderTrenner($value);
-					$datapart .= '<input onchange="'.$onchange.'" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
+					$datapart .= '<input onchange="'.$onchange.'" title="'.$alias.'" ';
 					if($attribute_privileg == '0' OR $lock[$k]){
 						$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
 					}

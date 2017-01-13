@@ -54,15 +54,8 @@ define('HEADER', 'header.php');															# Version 1.8.0
 define('FOOTER', 'footer.php');															# Version 1.8.0
 # Höhe von Header und Footer zusammen
 define('HEADER_FOOTER_HEIGHT', 132);																# Version 2.0
-
-# Breite vom Scrollbaren Layer-DIV
-define('SCROLLDIV_WIDTH', 440);																			# Version 2.6
-define('MENUE_WIDTH', 235);																					# Version 2.6
-define('BUTTON_MENUE_WIDTH', 236);																					# Version 2.6
-
 # Breite von Menü und Legende zusammen
-$menue_legend_widths = array('gui.php' => (SCROLLDIV_WIDTH + MENUE_WIDTH), 'gui_button.php' => (SCROLLDIV_WIDTH + BUTTON_MENUE_WIDTH));		# Version 2.0 geändert in Version 2.6
-
+$menue_legend_widths = array('gui.php' => 485, 'gui_button.php' => 486);		# Version 2.0
 # login.php
 define('LOGIN', 'login.php');																# Version 1.8.0
 # Seite zur Fehlerbehandlung, die durch fehlerhafte Layer verursacht werden; unterhalb von /snippets
@@ -180,8 +173,7 @@ define('CUSTOM_SHAPE_SCHEMA', 'custom_shapes');					# Version 1.11.0
 define('REFERENCEMAPPATH',SHAPEPATH.'referencemaps/');
 define('NACHWEISDOCPATH',SHAPEPATH.'nachweise/');
 # Dateiname und Pfad der Festpunkte, mit der die Tabelle der Festpunkte aktualisiert werden soll
-define('PUNKTDATEINAME','festpunkte.csv');
-#define('PUNKTDATEINAME','alk');
+#define('PUNKTDATEINAME','festpunkte.csv');										# in Version 2.6 gelöscht
 define('PUNKTDATEIPATH',SHAPEPATH.'festpunkte/');
 define('PUNKTDATEIARCHIVPATH',PUNKTDATEIPATH.'archiv/');
 define('KVZAUSGABEDATEINAME','festpunkte.kvz');
@@ -381,13 +373,13 @@ define('IMAGEMAGICKPATH', '/usr/bin/');                        # Version 1.7.3
 define('UPLOADPATH',SHAPEPATH.'upload/');       # Version 1.6.7
 
 # Definiert, ob die Festpunkte in 2 Streifen liegen oder nicht
-define('FESTPUNKTE_2_STREIFEN', 'true');  #true/false   # Version 1.6.7
+#define('FESTPUNKTE_2_STREIFEN', 'true');  #true/false   # Version 1.6.7			# in Version 2.6 gelöscht
 
 # Legt fest, ob die Hausnummernzusätze groß oder klein dargestellt werden
 define('HAUSNUMMER_TYPE', 'LOWER');     # UPPER/LOWER   # Version 1.6.8
 
 # Definiert ob die einzulesende Festpunktedatei auf doppelte Punktkennzeichen getestet werden soll, oder nicht    # Version 1.6.8
-define('CHECKPUNKTDATEI', 'true');      # true/false                                                                # Version 1.6.8
+#define('CHECKPUNKTDATEI', 'true');      # true/false                                                                # Version 1.6.8			# in Version 2.6 gelöscht
 
 # Minmale Maßstabszahl
 define('MINSCALE', 100);                                                        # Version 1.7.0

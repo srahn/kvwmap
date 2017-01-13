@@ -63,9 +63,9 @@ class ddl {
 	function add_freetexts($i, $offsetx, $type, $pagenumber = NULL, $pagecount = NULL){
 		if(count($this->remaining_freetexts) == 0)return;
     for($j = 0; $j < count($this->layout['texts']); $j++){
-			if($type != 'everypage' AND $this->page_overflow_by_sublayout){
+			if($type != 'everypage' AND $this->page_overflow){
 				$this->pdf->reopenObject($this->page_id_before_sublayout);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
-				if($this->layout['type'] == 0)$this->page_overflow_by_sublayout = false;			# if ???							
+				if($this->layout['type'] == 0)$this->page_overflow = false;			# if ???							
 			}
 			# der Freitext wurde noch nicht geschrieben und ist entweder ein fester Freitext oder ein fortlaufender oder einer, der auf jeder Seite erscheinen soll
     	if(in_array($this->layout['texts'][$j]['id'], $this->remaining_freetexts) AND $this->layout['texts'][$j]['posy'] != ''){	# nur Freitexte mit einem y-Wert werden geschrieben
@@ -160,15 +160,13 @@ class ddl {
 								if($this->layout['type'] == 1 AND $offset_attribute == '' AND $pagecount > 1)$ypos = $ypos + $this->initial_yoffset;		# ab der 2. Seite sollen die forlaufenden absolut positionierten Elemente oben auf der Seite beginnen
 								
 								$offy = 842 - $ypos + $this->offsety;
-								
 								if($this->layout['type'] != 0 AND $offset_attribute == '' AND $this->i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben (aber nur bei abolut positionierten)
 									$offy = $offy + $this->yoffset_onpage+$this->layout['gap'];
-								}	
+								}
 								# beim jedem Datensatz die Gesamthoehe der Elemente des Datensatzes ermitteln
 								if($this->i_on_page == 0){
 									if($this->maxy < 842-$offy)$this->maxy = 842-$offy;		# beim ersten Datensatz das maxy ermitteln
 								}
-								
 								if($preview){
 									$sublayoutobject = $this->load_layouts(NULL, $sublayout, NULL, NULL);
 									$y = $this->gui->sachdaten_druck_editor_preview($sublayoutobject[0], $this->pdf, $offx, $offy);
@@ -193,7 +191,7 @@ class ddl {
 									$y = $this->gui->generischer_sachdaten_druck_drucken($this->pdf, $offx, $offy);
 									$page_id_after_sublayout = $this->pdf->currentContents;
 									if($page_id_before_sublayout != $page_id_after_sublayout){
-										$this->page_overflow_by_sublayout = true;		# bei einem Seitenüberlauf, der durch ein Sublayout verursacht wurde, wird sich hier die vorhergehende Page-ID gemerkt
+										$this->page_overflow = true;		# bei einem Seitenüberlauf, der durch ein Sublayout verursacht wurde, wird sich hier die vorhergehende Page-ID gemerkt
 										$this->page_id_before_sublayout = $page_id_before_sublayout;
 										#$this->miny_on_new_page = $y;
 										#$this->miny[$this->pdf->currentContents] = $y;
@@ -216,7 +214,7 @@ class ddl {
 						}break;
 						
 						default : {
-							if($this->page_overflow_by_sublayout)$this->pdf->reopenObject($this->page_id_before_sublayout);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
+							if($this->page_overflow)$this->pdf->reopenObject($this->page_id_before_sublayout);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
 							$this->pdf->selectFont(WWWROOT . APPLVERSION . 'fonts/PDFClass/' . $this->layout['elements'][$attributes['name'][$j]]['font']);
 							if($this->layout['elements'][$attributes['name'][$j]]['fontsize'] > 0 OR $attributes['form_element_type'][$j] == 'Dokument'){
 								$y = $this->layout['elements'][$attributes['name'][$j]]['ypos'];
@@ -241,13 +239,10 @@ class ddl {
 								
 								$pagecount = count($this->pdf->objects['3']['info']['pages']);								
 								if($this->layout['type'] == 1 AND $offset_attribute == '' AND $pagecount > 1)$y = $y + $this->initial_yoffset;		# ab der 2. Seite sollen die forlaufenden absolut positionierten Elemente oben auf der Seite beginnen
-								
 								if($offset_attribute == '')$y = $y - $this->offsety;
-								
 								if($this->layout['type'] != 0 AND $offset_attribute == '' AND $this->i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben (aber nur bei absolut positionierten)
 									$y = $y - $this->yoffset_onpage-$this->layout['gap'];
-								}	
-																
+								}			
 								# beim jedem Datensatz die Gesamthoehe der Elemente des Datensatzes ermitteln
 								if($this->i_on_page == 0){
 									if($this->maxy < $y)$this->maxy = $y;		# beim ersten Datensatz das maxy ermitteln
@@ -356,7 +351,7 @@ class ddl {
 				$this->miny[$this->pdf->currentContents] = 842;
 				$this->maxy = 800;
 				if($this->layout['type'] == 2)$this->offsety = 50;
-				$this->page_overflow_by_sublayout = true;
+				$this->page_overflow = true;
 				$this->page_id_before_sublayout = $page_id_before;
 			}
 		}
@@ -395,9 +390,9 @@ class ddl {
 		$page_id_before_puttext = $this->pdf->currentContents;
 		$ret = $this->pdf->ezText(iconv("UTF-8", "CP1252//TRANSLIT", $text), $fontsize, $options);
 		$page_id_after_puttext = $this->pdf->currentContents;		
-		#if($this->gui->user->id == 101)echo $page_id_before_puttext.' '.$page_id_after_puttext.' '.$text.'<br>';
+		#if($this->gui->user->id != 101)echo $page_id_before_puttext.' '.$page_id_after_puttext.' - '.$y.' - '.$text.'<br>';
 		if($page_id_before_puttext != $page_id_after_puttext){
-			$this->page_overflow_by_sublayout = true;
+			$this->page_overflow = true;
 			$this->page_id_before_sublayout = $page_id_before_puttext;
 		}
 		return $ret;
@@ -471,7 +466,7 @@ class ddl {
 		$this->offsety = $offsety;
   	#$this->miny = 1000000;
   	$this->i_on_page = -1;
-		$this->page_overflow_by_sublayout = false;
+		$this->page_overflow = false;
 		if($pdfobject == NULL){
 			include (CLASSPATH . 'class.ezpdf.php');
 			$this->pdf=new Cezpdf();
@@ -488,30 +483,33 @@ class ddl {
     	$this->gui->loadmap('DataBase');
     }
 		$this->add_static_elements($offsetx);
+		$layout_with_sublayout = false;
+		for($j = 0; $j < count($this->attributes['name']); $j++){
+			if(in_array($this->attributes['form_element_type'][$j], array('SubFormPK', 'SubFormEmbeddedPK')) AND $this->layout['elements'][$attributes['name'][$j]]['font'] != ''){
+				$layout_with_sublayout = true;
+			}
+		}
     for($i = 0; $i < count($result); $i++){
 			$lastpage = end($this->pdf->objects['3']['info']['pages'])+1;
     	$this->i_on_page++;
-			if($this->page_overflow_by_sublayout != false){
-				$this->page_overflow_by_sublayout = false;						
-				#$this->miny = $this->miny_on_new_page; 
-				if(!$this->initial_yoffset)$this->initial_yoffset = 780-$this->maxy;			# der Offset von oben gesehen, mit dem das erste fortlaufende Element auf der ersten Seite beginnt; wird benutzt, um die fortlaufenden Elemente ab der 2. Seite oben beginnen zu lassen
-				$this->i_on_page = 1;	# ??
-				$this->maxy = 781;
-				if($this->layout['type'] == 2)$this->offsety = 50;		# das ist für den Fall, dass ein Sublayout in einem Sublayout einen Seitenüberlauf verursacht hat (hier muss eigentlich der Offset der nächsten Seite rein)
+			# beim Untereinander-Typ oder eingebettet-Typ ohne Sublayouts oder wenn Datensätze nicht durch Seitenumbruch 
+			# unterbrochen werden dürfen, eine Transaktion starten um evtl. bei einem Seitenüberlauf zurückkehren zu können
+			if($this->layout['type'] != 0 AND (!$layout_with_sublayout OR $this->layout['no_record_splitting'])){
+				$this->pdf->transaction('start');
 			}
-    	if($this->layout['type'] == 0 AND $i > 0){		# neue Seite beim seitenweisen Typ und neuem Datensatz 
+			if($this->layout['type'] == 0 AND $i > 0){		# neue Seite beim seitenweisen Typ und neuem Datensatz 
     		$this->pdf->newPage();
 				$this->add_static_elements($offsetx);
     	}
 			$this->yoffset_onpage = $this->maxy - $this->miny[$lastpage];			# der Offset mit dem die Elemente beim Untereinander-Typ nach unten versetzt werden
-			if($this->layout['type'] != 0 AND $this->miny[$lastpage] < $this->max_dataset_height+60){		# neue Seite beim Untereinander-Typ oder eingebettet-Typ und Seitenüberlauf
+			if($this->layout['type'] != 0 AND $this->miny[$lastpage] != '' AND $this->miny[$lastpage] < 60){		# neue Seite beim Untereinander-Typ oder eingebettet-Typ und Seitenüberlauf
 				$this->i_on_page = 0;
 				#$this->maxy = 0;
 				if(!$this->initial_yoffset)$this->initial_yoffset = 780-$this->maxy;			# der Offset von oben gesehen, mit dem das erste fortlaufende Element auf der ersten Seite beginnt; wird benutzt, um die fortlaufenden Elemente ab der 2. Seite oben beginnen zu lassen
 				if($this->layout['type'] == 2)$this->offsety = 50; else $this->offsety = 0;
 				$this->pdf->newPage();
+				$lastpage = end($this->pdf->objects['3']['info']['pages'])+1;
 				$this->miny[$lastpage] = 1000000;
-				#$this->add_static_elements($offsetx, $offsety);
 			}			
 			$this->layout['offset_attributes'] = array();
 			
@@ -541,6 +539,36 @@ class ddl {
 			# (die festen Freitexte werden vor jedem Attribut geschrieben, da ein Attribut zu einem Seitenüberlauf führen können)
 			$this->remaining_freetexts = $this->add_freetexts($i, $offsetx, 'running');
 			################# fortlaufende Freitexte schreiben ###############
+			
+			if($this->layout['type'] != 0 AND (!$layout_with_sublayout OR $this->layout['no_record_splitting'])){				
+				# Ein listenförmiges Layout hat einen Seitenüberlauf verursacht und in diesem gibt es entweder
+				# keine weiteren Sublayouts an deren Datensätzen man den Seitenumbruch durchführen könnte oder 
+				# das Unterbrechen von Datensätzen ist nicht gewollt. Deshalb wird bis zum Beginn des letzten 
+				# Datensatzes zurückgerollt und die Seite vorher umgebrochen, so dass sauber zwischen 2 Datensätzen 
+				# und nicht innerhalb eines Datensatzes getrennt wird.
+				if($this->page_overflow != false){
+					$this->page_overflow = false;
+					$this->pdf->transaction('rewind');
+					$i--;
+					$this->i_on_page = -1;
+					$this->maxy = 0;
+					if(!$this->initial_yoffset)$this->initial_yoffset = 780-$this->maxy;			# der Offset von oben gesehen, mit dem das erste fortlaufende Element auf der ersten Seite beginnt; wird benutzt, um die fortlaufenden Elemente ab der 2. Seite oben beginnen zu lassen
+					if($this->layout['type'] == 2)$this->offsety = 50; else $this->offsety = 0;
+					$this->pdf->newPage();
+					$lastpage = end($this->pdf->objects['3']['info']['pages'])+1;
+					$this->miny[$lastpage] = 0;
+				}
+				else{
+					$this->pdf->transaction('commit');
+				}
+			}
+			elseif($this->page_overflow != false){		# Ein Sublayout hat einen Seitenüberlauf verursacht.
+				$this->page_overflow = false;
+				$this->i_on_page = 0;
+				if(!$this->initial_yoffset)$this->initial_yoffset = 780-$this->maxy;			# der Offset von oben gesehen, mit dem das erste fortlaufende Element auf der ersten Seite beginnt; wird benutzt, um die fortlaufenden Elemente ab der 2. Seite oben beginnen zu lassen
+				if($this->layout['type'] == 2)$this->offsety = 50; else $this->offsety = 0;
+				$this->miny[$lastpage] = 1000000;
+			}
     }
 		if($pdfobject == NULL){		# nur wenn kein PDF-Objekt aus einem übergeordneten Layer übergeben wurde, PDF erzeugen
 			# Freitexte hinzufügen, die auf jeder Seite erscheinen sollen (Seitennummerierung etc.)
@@ -602,6 +630,7 @@ class ddl {
 			if($formvars['gap'] != '')$sql .= ", `gap` = ".(int)$formvars['gap'];
       if($formvars['type'] != '')$sql .= ", `type` = ".(int)$formvars['type'];
       else $sql .= ", `type` = NULL";
+			$sql .= ", `no_record_splitting` = ".(int)$formvars['no_record_splitting'];
       if($_files['bgsrc']['name']){
         $nachDatei = DRUCKRAHMEN_PATH.$_files['bgsrc']['name'];
         if (move_uploaded_file($_files['bgsrc']['tmp_name'],$nachDatei)) {
@@ -707,6 +736,7 @@ class ddl {
 			$sql .= ", `gap` = ".(int)$formvars['gap'];
       if($formvars['type'])$sql .= ", `type` = ".(int)$formvars['type'];
       else $sql .= ", `type` = NULL";
+			$sql .= ", `no_record_splitting` = ".(int)$formvars['no_record_splitting'];
       if($_files['bgsrc']['name']){
         $nachDatei = DRUCKRAHMEN_PATH.$_files['bgsrc']['name'];
         if (move_uploaded_file($_files['bgsrc']['tmp_name'],$nachDatei)) {
