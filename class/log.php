@@ -1,14 +1,12 @@
 <?
-
 ##########################
 # Klasse für Debug-Datei #
 ##########################
 # Klasse debugfile #
 ####################
 
-class debugfile {
-  var $filename;
-  var $fp;
+class Debugger {
+  public $filename, $fp, $level;
 
   ###################### Liste der Funktionen ####################################
   #
@@ -18,16 +16,27 @@ class debugfile {
   #
   ################################################################################
 
-  function debugfile($filename) {
+  function Debugger($filename, $mime_type = 'text/html') {
     $this->filename=$filename;
     $this->fp=fopen($filename,'w');
-    fwrite($this->fp,"<html>\n<head>\n  <title>kvwmap Debug-Datei</title>\n<META http-equiv=Content-Type content='text/html; charset=UTF-8'>\n</head>\n<body>");
-    fwrite($this->fp,"<h2>Debug Datei</h2>");
+		if ($mime_type == 'text/html') {
+			fwrite($this->fp,"<html>\n<head>\n  <title>kvwmap Debug-Datei</title>\n<META http-equiv=Content-Type content='text/html; charset=UTF-8'>\n</head>\n<body>");
+			fwrite($this->fp,"<h2>Debug Datei</h2>");
+		}
+		else {
+			fwrite($this->fp, date("Y-m-d H:i:s") . PHP_EOL);
+		}
   }
 
-  function write($msg, $level) {
+  function write($msg, $level = 4) {
     if ($level>=DEBUG_LEVEL) {
-      $ret=@fwrite($this->fp,"\n<br>".$msg);
+			if ($mime_type == 'text/html') {
+				fwrite($this->fp, "\n<br>");
+			}
+			else {
+				fwrite($this->fp, PHP_EOL);
+			}
+      $ret=@fwrite($this->fp, $msg);
       if (!$ret) {
         $this->Fehlermeldung ='In die Debugdatei '.$this->filename.' läßt sich nicht schreiben.';
         $this->Fehlermeldung.='<br>Das kann daran liegen, dass für den WebServer, in dem kvwmap läuft, keine Schreibrechte gesetzt sind.';
@@ -38,12 +47,14 @@ class debugfile {
     }
   }
 
-  function show($msg, $debug = false) {
-    if ($debug) echo '<br>' . $msg;
-  }
+	function show($msg, $debug = false) {
+		if ($debug or $level > 1) echo '<br>' . $msg;
+	}
 
   function close() {
-    fwrite($this->fp,"\n</body>\n</html>");
+		if ($mime_type == 'text/html') {
+			fwrite($this->fp,"\n</body>\n</html>");
+		}
     fclose($this->fp);
   }
 }

@@ -34,8 +34,6 @@
 # Liste der Klassen:
 ########################################
 # GUI - Das Programm
-# debugfile - Klasse für die Debugdatei
-# LogFile
 # db_MapObj
 # Menue
 ########################################

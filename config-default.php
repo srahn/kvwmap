@@ -554,28 +554,6 @@ $kvwmap_plugins = array();																			# Version 1.11.0
 #																																# Version 1.11.0
 #############################################################		# Version 1.11.0
 
-
-################################ Erweiterungen laden
-# PHP-Extensions laden
-#dl('php_mapscript.so');             #Version 5.0.2
-#dl('php_mapscript_4.10.0.so');     #Version 4.10
-
-// # Einstellen des Debuglevels und öffnen der Debug-log-datei																																						# in Version 2.0 gelöscht
-// if (DEBUG_LEVEL>0) {																																																										# in Version 2.0 gelöscht
- // # Datei für debug Meldungen öffnen																																																		# in Version 2.0 gelöscht
- // $debug=new debugfile(DEBUGFILE);																																																			# in Version 2.0 gelöscht
-// }																																																																			# in Version 2.0 gelöscht
-
-// # Öffnen der Log-Dateien																																																								# in Version 2.0 gelöscht
-// # Derzeit werden in den Log-Dateien nur die SQL-Statements gespeichert, die über execSQL																								# in Version 2.0 gelöscht
-// # in den Classen mysql und postgres ausgeführt werden.																																									# in Version 2.0 gelöscht
-// if (LOG_LEVEL>0) {																																																											# in Version 2.0 gelöscht
- // # Datei für mysql-logs öffnen																																																					# in Version 2.0 gelöscht
- // $log_mysql=new LogFile(LOGFILE_MYSQL,'text','Log-Datei MySQL', '#------v: '.date("Y:m:d H:i:s",time())); # Version 1.6.4							# in Version 2.0 gelöscht
- // # Datei für postgres-logs öffnen																																																			# in Version 2.0 gelöscht
- // $log_postgres=new LogFile(LOGFILE_POSTGRES,'text', 'Log-Datei-Postgres', '------v: '.date("Y:m:d H:i:s",time())); # Version 1.6.4			# in Version 2.0 gelöscht
-// }																																																																			# in Version 2.0 gelöscht
-
 # Festlegung von Fehlermeldungen und Hinweisen
 define ('INFO1','Prüfen Sie ob Ihr Datenbankmodell aktuell ist.');
 
