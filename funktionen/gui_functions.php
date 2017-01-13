@@ -54,8 +54,8 @@ function message(messages) {
 		},
 		'warning': {
 			'description': 'Warnung',
-//			'icon': 'fa-exclamation',
-			'color': 'yellow',
+			'icon': 'fa-exclamation',
+			'color': 'firebrick',
 			'confirm': true
 		},
 		'error': {
@@ -85,7 +85,6 @@ function message(messages) {
 	});
 
 	msgDiv.attr('class', 'message_box');
-//	msgDiv.show();
 
 	if (!confirmMsgDiv) {
 		setTimeout(function() {msgDiv.addClass('message_box_hide');},1000);
