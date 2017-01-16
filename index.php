@@ -74,10 +74,7 @@ if (LOG_LEVEL>0) {
  $log_postgres=new LogFile(LOGFILE_POSTGRES,'text', 'Log-Datei-Postgres', '------v: '.date("Y:m:d H:i:s",time()));
 }
 
-$adb = new Debugger(LOGPATH . 'adb.log', 'text/plain');
-$adb->write(print_r($_SESSION, true), 4);
-
-if(!$_SESSION['angemeldet']){
+if (!$_SESSION['angemeldet'] or !empty($_REQUEST['username'])) {
 	include(CLASSPATH . 'mysql.php');
 	$userDb = new database();
 	$userDb->host = MYSQL_HOST;
@@ -85,11 +82,7 @@ if(!$_SESSION['angemeldet']){
 	$userDb->passwd = MYSQL_PASSWORD;
 	$userDb->dbName = MYSQL_DBNAME;
 	header('logout: true');		// damit ajax-Requests das auch mitkriegen
-	$adb->write('Session ist nicht angemeldet. Lade Login: ' . LOGIN, 4);
 	include(LAYOUTPATH . 'snippets/' . LOGIN);
-}
-else {
-	$adb->write('angemeldet', 4);
 }
 
 function include_($filename){
@@ -118,8 +111,6 @@ else{
 
 include(WWWROOT . APPLVERSION.'start.php');
 
-$adb->write('formvars: ' . PHP_EOL . print_r($formvars, 4), 4);
-$GUI->adb = $adb;
 # Übergeben des Anwendungsfalles
 $debug->write("<br><b>Anwendungsfall go: ".$go."</b>",4);
 $GUI->go=$go;
@@ -1600,5 +1591,4 @@ if(CASE_COMPRESS AND FAST_CASE)case_compressor::write_fast_case_file($go);
 	// $dauer = $executiontimes['time'][$i] - $starttime;
 	// echo chr(10).chr(13).'<br>'.$executiontimes['action'][$i].': '.$dauer.'s';
 // }
-$adb->close();
 ?>
