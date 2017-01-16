@@ -521,7 +521,7 @@ function deactivateAllClasses(class_ids){
 }
 
 /*Anne*/
-function changeClassStatus(classid,imgsrc,instantreload){
+function changeClassStatus(classid,imgsrc,instantreload,height){
 	selClass = document.getElementsByName("class"+classid)[0];
 	selImg   = document.getElementsByName("imgclass"+classid)[0];
 	if(selClass.value=='0'){
@@ -529,37 +529,37 @@ function changeClassStatus(classid,imgsrc,instantreload){
 		selImg.src=imgsrc;
 	}else if(selClass.value=='1'){
 		selClass.value='2';
-		selImg.src="graphics/outline.jpg";
+		selImg.src="graphics/outline"+height+".jpg";
 	}else if(selClass.value=='2'){
 		selClass.value='0';
-		selImg.src="graphics/inactive.jpg";
+		selImg.src="graphics/inactive"+height+".jpg";
 	}
 	if(instantreload)document.GUI.neuladen.click();
 }
 
 /*Anne*/
-function mouseOverClassStatus(classid,imgsrc){
+function mouseOverClassStatus(classid,imgsrc,height){
 	selClass = document.getElementsByName("class"+classid)[0];
 	selImg   = document.getElementsByName("imgclass"+classid)[0];
 	if(selClass.value=='0'){
 		selImg.src=imgsrc;	
 	}else if(selClass.value=='1'){
-		selImg.src="graphics/outline.jpg";
+		selImg.src="graphics/outline"+height+".jpg";
 	}else if(selClass.value=='2'){
-		selImg.src="graphics/inactive.jpg";
+		selImg.src="graphics/inactive"+height+".jpg";
 	}
 }
 
 /*Anne*/
-function mouseOutClassStatus(classid,imgsrc){
+function mouseOutClassStatus(classid,imgsrc,height){
 	selClass = document.getElementsByName("class"+classid)[0];
 	selImg   = document.getElementsByName("imgclass"+classid)[0];
 	if(selClass.value=='0'){
-		selImg.src="graphics/inactive.jpg";	
+		selImg.src="graphics/inactive"+height+".jpg";	
 	}else if(selClass.value=='1'){
 		selImg.src=imgsrc;
 	}else if(selClass.value=='2'){
-		selImg.src="graphics/outline.jpg";
+		selImg.src="graphics/outline"+height+".jpg";
 	}
 }
 

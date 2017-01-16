@@ -443,12 +443,14 @@ class GUI {
 										$legend .= '<tr style="line-height: 15px"><td style="line-height: 14px">';
 										if($s > 0){
 											if($layer['Class'][$k]['Style'][0]['colorrange'] != ''){
+												$height = 18;
 												$newname = rand(0, 1000000).'.jpg';
-												$this->colorramp(IMAGEPATH.$newname, 18, 18, $layer['Class'][$k]['Style'][0]['colorrange']);
+												$this->colorramp(IMAGEPATH.$newname, 18, $height, $layer['Class'][$k]['Style'][0]['colorrange']);
 											}
 											else{
 												if($maplayer->type == 0)$height = 18;			# Punktlayer
 												else $height = 12;
+												$padding = 1;
 												$image = $class->createLegendIcon(18, $height);
 												$filename = $this->map_saveWebImage($image,'jpeg');
 												$newname = $this->user->id.basename($filename);
@@ -457,14 +459,18 @@ class GUI {
 											#Anne
 											$classid = $layer['Class'][$k]['Class_ID'];
 											if($this->mapDB->disabled_classes['status'][$classid] == '0'){
-												$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="0"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\', '.$this->user->rolle->instant_reload.')"><img style="vertical-align:middle" border="0" name="imgclass'.$classid.'" src="graphics/inactive.jpg"></a>';
+												$imagename = 'graphics/inactive'.$height.'.jpg';
+												$status = 0;
 											}
 											elseif($this->mapDB->disabled_classes['status'][$classid] == 2){
-												$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="2"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\', '.$this->user->rolle->instant_reload.')"><img style="vertical-align:middle" border="0" name="imgclass'.$classid.'" src="'.TEMPPATH_REL.$newname.'"></a>';
+												$imagename = TEMPPATH_REL.$newname;												
+												$status = 2;
 											}
 											else{
-												$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="1"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\', '.$this->user->rolle->instant_reload.')"><img style="vertical-align:middle" border="0" name="imgclass'.$classid.'" src="'.TEMPPATH_REL.$newname.'"></a>';
+												$imagename = TEMPPATH_REL.$newname;												
+												$status = 1;
 											}
+											$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="'.$status.'"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\','.$height.')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\','.$height.')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\', '.$this->user->rolle->instant_reload.','.$height.')"><img style="vertical-align:middle;padding-bottom: '.$padding.'" border="0" name="imgclass'.$classid.'" src="'.$imagename.'"></a>';
 										}
 										$legend .= '&nbsp;<span class="px13">'.html_umlaute($class->name).'</span></td></tr>';
 									}
