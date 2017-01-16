@@ -14,8 +14,8 @@
 <br>
 <script language="javascript" type="text/javascript">
   function shapeFileFunctionsFormatter(value, row) {
-    output = '<a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<?php echo XPLANKONVERTER_SHAPEFILES_LAYER_ID; ?>&operator_shapefile_id==&value_shapefile_id=' + value + '"><i class="fa fa-pencil"></i></a>&nbsp;&nbsp;';
-    output += '<a href="index.php?go=xplankonverter_shapefiles_delete&konvertierung_id=' + row.konvertierung_id + '&shapefile_id=' + row.shapefile_id + '&layer_id=' + row.layer_id + '"><i class="fa fa-trash"></i></a>&nbsp;';
+    output = '<a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<?php echo XPLANKONVERTER_SHAPEFILES_LAYER_ID; ?>&operator_shapefile_id==&value_shapefile_id=' + value + '"><i class="btn-link fa fa-pencil"></i></a>&nbsp;&nbsp;';
+    output += '<a href="index.php?go=xplankonverter_shapefiles_delete&konvertierung_id=' + row.konvertierung_id + '&shapefile_id=' + row.shapefile_id + '&layer_id=' + row.layer_id + '"><i class="btn-link fa fa-trash"></i></a>&nbsp;';
     return output;
   }
 </script>
