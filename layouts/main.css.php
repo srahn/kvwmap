@@ -614,9 +614,9 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 
 .message_box {
 	opacity: 1;
-	position: absolute;
+	position: fixed;
 	display: block;
-	top:350px;
+	top:40%;
 	left:45%;
 	min-width:250px;
 	max-width: 500px;
@@ -883,16 +883,14 @@ tbody.gle tr:hover {
 	border: 1px solid #CCCCCC;
 }
 
-/*
 .fa {
 	color: gray;
 }
 
-.fa:hover {
+.pointer:hover {
 	color: #90a0b5;
 	cursor: pointer;
 }
-*/
 
 .layerOptions{
 	border: 1px solid #cccccc;

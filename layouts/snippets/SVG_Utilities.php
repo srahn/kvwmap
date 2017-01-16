@@ -1033,7 +1033,7 @@ function mouseup(evt){
 		mittex = Math.round(minx+(maxx-minx)/2);
 		mittey = Math.round(miny+(maxy-miny)/2);
 		var Msg = top.document.getElementById("message_box");
-		Msg.className = \'message_box_visible\';
+		Msg.className = \'message_box\';
 		content = \'<div style="position: absolute;top: 0px;right: 0px"><a href="#" onclick="javascript:document.getElementById(\\\'message_box\\\').className = \\\'message_box_hidden\\\';" title="Schlie&szlig;en"><img style="border:none" src="'.GRAPHICSPATH.'exit2.png"></img></a></div>\';
 		content+= \'<div style="height: 30px">Koordinateneingabe</div>\';
 		content+= \'<table style="padding: 5px"><tr><td align="left" style="width: 300px" class="px15">Koordinate</td></tr>\';
