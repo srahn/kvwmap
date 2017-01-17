@@ -5,7 +5,7 @@
 #                                                                  #
 ####################################################################
 # aktuelle Versionsnummer
-define('VERSION','2.5');
+define('VERSION','2.6');
 define('APPLVERSION','kvwmap/');
 # Bezeichnung der MySQL-Datenbank mit den Benutzerdaten
 $dbname='kvwmapdb';
@@ -173,8 +173,7 @@ define('CUSTOM_SHAPE_SCHEMA', 'custom_shapes');					# Version 1.11.0
 define('REFERENCEMAPPATH',SHAPEPATH.'referencemaps/');
 define('NACHWEISDOCPATH',SHAPEPATH.'nachweise/');
 # Dateiname und Pfad der Festpunkte, mit der die Tabelle der Festpunkte aktualisiert werden soll
-define('PUNKTDATEINAME','festpunkte.csv');
-#define('PUNKTDATEINAME','alk');
+#define('PUNKTDATEINAME','festpunkte.csv');										# in Version 2.6 gelöscht
 define('PUNKTDATEIPATH',SHAPEPATH.'festpunkte/');
 define('PUNKTDATEIARCHIVPATH',PUNKTDATEIPATH.'archiv/');
 define('KVZAUSGABEDATEINAME','festpunkte.kvz');
@@ -374,13 +373,13 @@ define('IMAGEMAGICKPATH', '/usr/bin/');                        # Version 1.7.3
 define('UPLOADPATH',SHAPEPATH.'upload/');       # Version 1.6.7
 
 # Definiert, ob die Festpunkte in 2 Streifen liegen oder nicht
-define('FESTPUNKTE_2_STREIFEN', 'true');  #true/false   # Version 1.6.7
+#define('FESTPUNKTE_2_STREIFEN', 'true');  #true/false   # Version 1.6.7			# in Version 2.6 gelöscht
 
 # Legt fest, ob die Hausnummernzusätze groß oder klein dargestellt werden
 define('HAUSNUMMER_TYPE', 'LOWER');     # UPPER/LOWER   # Version 1.6.8
 
 # Definiert ob die einzulesende Festpunktedatei auf doppelte Punktkennzeichen getestet werden soll, oder nicht    # Version 1.6.8
-define('CHECKPUNKTDATEI', 'true');      # true/false                                                                # Version 1.6.8
+#define('CHECKPUNKTDATEI', 'true');      # true/false                                                                # Version 1.6.8			# in Version 2.6 gelöscht
 
 # Minmale Maßstabszahl
 define('MINSCALE', 100);                                                        # Version 1.7.0
@@ -546,6 +545,7 @@ $kvwmap_plugins = array();																			# Version 1.11.0
 #$kvwmap_plugins[] = 'gewaesser';																# Version 1.11.0
 #$kvwmap_plugins[] = 'bodenrichtwerte';													# Version 2.0.0
 #$kvwmap_plugins[] = 'jagdkataster';														# Version 2.0.0
+#$kvwmap_plugins[] = 'fortfuehrungslisten';											# Version 2.6.0
 #$kvwmap_plugins[] = 'nachweisverwaltung';											# Version 2.0.0
 #$kvwmap_plugins[] = 'anliegerbeitraege';												# Version 2.0.0
 #$kvwmap_plugins[] = 'probaug';																	# Version 2.0.0
@@ -553,28 +553,6 @@ $kvwmap_plugins = array();																			# Version 1.11.0
 #$kvwmap_plugins[] = 'baumfaellantrag';													# Version 2.0.0
 #																																# Version 1.11.0
 #############################################################		# Version 1.11.0
-
-
-################################ Erweiterungen laden
-# PHP-Extensions laden
-#dl('php_mapscript.so');             #Version 5.0.2
-#dl('php_mapscript_4.10.0.so');     #Version 4.10
-
-// # Einstellen des Debuglevels und öffnen der Debug-log-datei																																						# in Version 2.0 gelöscht
-// if (DEBUG_LEVEL>0) {																																																										# in Version 2.0 gelöscht
- // # Datei für debug Meldungen öffnen																																																		# in Version 2.0 gelöscht
- // $debug=new debugfile(DEBUGFILE);																																																			# in Version 2.0 gelöscht
-// }																																																																			# in Version 2.0 gelöscht
-
-// # Öffnen der Log-Dateien																																																								# in Version 2.0 gelöscht
-// # Derzeit werden in den Log-Dateien nur die SQL-Statements gespeichert, die über execSQL																								# in Version 2.0 gelöscht
-// # in den Classen mysql und postgres ausgeführt werden.																																									# in Version 2.0 gelöscht
-// if (LOG_LEVEL>0) {																																																											# in Version 2.0 gelöscht
- // # Datei für mysql-logs öffnen																																																					# in Version 2.0 gelöscht
- // $log_mysql=new LogFile(LOGFILE_MYSQL,'text','Log-Datei MySQL', '#------v: '.date("Y:m:d H:i:s",time())); # Version 1.6.4							# in Version 2.0 gelöscht
- // # Datei für postgres-logs öffnen																																																			# in Version 2.0 gelöscht
- // $log_postgres=new LogFile(LOGFILE_POSTGRES,'text', 'Log-Datei-Postgres', '------v: '.date("Y:m:d H:i:s",time())); # Version 1.6.4			# in Version 2.0 gelöscht
-// }																																																																			# in Version 2.0 gelöscht
 
 # Festlegung von Fehlermeldungen und Hinweisen
 define ('INFO1','Prüfen Sie ob Ihr Datenbankmodell aktuell ist.');

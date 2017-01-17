@@ -1,5 +1,7 @@
 <?php
 
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT & ~E_NOTICE);
+
 ########################################################################################################################################################################
 #																																																																																			 #
 #	Dieses Skript kann in einem Web-Verzeichnis wie z.B. .../kvwmap/tools plaziert werden.																																							 #
@@ -80,7 +82,7 @@ function getExceptionCode($data){
 include($config);
 include(CLASSPATH.'log.php');
 include(CLASSPATH.'mysql.php');
-$debug=new debugfile(DEBUGFILE);	# öffnen der Debug-log-datei
+$debug=new Debugger(DEBUGFILE);	# öffnen der Debug-log-datei
 $userDb = new database();
 $userDb->host = MYSQL_HOST;
 $userDb->user = MYSQL_USER;																			

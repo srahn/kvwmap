@@ -115,24 +115,12 @@ function formatFlurstkennzALK($FlurstKennz){
 }
 
 function tausenderTrenner($number){
-	if(strpos($number, ' ') === false){
-		$explosion = explode('.', $number);
-		$length = strlen($explosion[0]);
-		$length = $length - 3;
-		while($length > 0){
-			$new_number = substr($explosion[0], $length, 3).' '.$new_number;
-			$length = $length-3;
-		}
-		$new_number = substr($explosion[0], 0, $length+3).' '.$new_number;
-		$new_number = trim($new_number);
-		if($explosion[1] != ''){
-			$new_number .= '.'.$explosion[1];
-		}
-		return $new_number;
+	if($number != ''){
+		$explo = explode('.', $number);
+		$formated_number = number_format($explo[0], 0, ',', '.');
+		if($explo[1] != '')$formated_number .= ','.$explo[1];
+		return $formated_number;
 	}
-	else{
-		return $number;
-	}	
 }
 
 function transformCoordsSVG($path){
@@ -703,7 +691,7 @@ function unzip($src_file, $dest_dir=false, $create_zip_name_dir=true, $overwrite
 	$output = array();
 	$entries = NULL;
 	exec('export LD_LIBRARY_PATH=;unzip -l "'.$src_file.'" -d '.dirname($src_file), $output);
-	#echo 'unzip -l "'.$src_file.'" -d '.dirname($src_file);
+	#echo '<br>unzip -l "'.$src_file.'" -d '.dirname($src_file);
 	for($i = 3; $i < count($output)-2; $i++){
   		$entries[] = array_pop(explode('   ', $output[$i]));
 	}
@@ -1009,17 +997,66 @@ function showAlert($text) {
   </script><?php
 }
 
-function showMessage($text, $fade = true) {
+/**
+* Funktion gibt Meldungen aus
+* ToDo: Funktion wie folgt umbauen:
+* Funktion gibt Liste von Meldungen aus. Je nach Typ wird die Meldung
+* unterschiedlich dargestellt.
+* @param array[][] $messages Liste der Meldungen
+* 	Eine Meldung besteht aus einen assoziativen Array mit folgenden
+*		Bestandteilen:
+*		type: Type der Meldung. 'success' (default), 'warning', 'error'
+*		msg: Die Meldung, die als Text ausgegeben werden soll.
+*		Die Klassen zum Stylen der Meldungen lauten: 'message_' + type
+* @param boolean $fade Ob das Fenster zur Anzeige der Message von allein
+* 	verschwinden soll oder nicht.
+*/
+/*
+function showMessages($messages, $fade = true) { ?>
+	<script type="text/javascript">
+	var Msg = document.getElementById("message_box");
+			innerhtml = '';
+	if(Msg == undefined){
+		document.write('<div id="message_box" class="message_box_hidden"></div>');
+		var Msg = document.getElementById("message_box");
+	}
+	Msg.className = 'message_box_visible'; <?php
+	Msg.style.top = document.body.scrollTop + 350; <?php
+	$html = array_map($messages, function($m) {
+		return = "
+			<div class=\"message_row\">
+				<div class=\"message_type\">{$m['type']}</div>
+				<div class=\"message_{$m['type']}\">{$m['msg']}</div>
+			</div>
+		";
+	});
+ 	if ($fade){ ?>
+		setTimeout(function() {Msg.className = 'message_box_hide';}, 1000);
+		setTimeout(function() {Msg.className = 'message_box_hidden';}, 3000);<?php
+	}
+	else {
+		$html .= "<br><br><input type=\"button\" onclick=\"this.parentNode.className = 'message_box_hidden';\" value=\"ok\">";
+	} ?>
+	Msg.innerHTML = <?php echo $html; ?>
+  </script><?php
+}
+*/
+function showMessage($text, $fade = true, $msg_type = 'warning') {
   ?>
   <script type="text/javascript">
 		var Msg = document.getElementById("message_box");
+				innerhtml = '';
 		if(Msg == undefined){
 			document.write('<div id="message_box" class="message_box_hidden"></div>');
 			var Msg = document.getElementById("message_box");
 		}
-		Msg.className = 'message_box_visible';
-		Msg.style.top = document.body.scrollTop + 350;		
-		var innerhtml = '<?php echo $text; ?>';
+		Msg.className = 'message_box_<?php echo $msg_type; ?>';<?php
+		if ($msg_type == 'error') { ?>
+			innerhtml += '<h2>Eingabefehler</h2>';
+			Msg.className = 'message_box_error';<?php
+		} ?>
+		Msg.style.top = document.body.scrollTop + 350;
+		innerhtml += '<?php echo $text; ?>';
 		<? if($fade == true){ ?>
 			setTimeout(function() {Msg.className = 'message_box_hide';},1000);
 			setTimeout(function() {Msg.className = 'message_box_hidden';},3000);
@@ -1462,12 +1499,13 @@ function formvars_strip($formvars, $strip_list) {
 * als key übergeben werden durch die values von $params
 */
 function replace_params($str, $params) {
-	foreach($params AS $key => $value){
-		$str = str_replace('$'.$key, $value, $str);
+	if (is_array($params)) {
+		foreach($params AS $key => $value){
+			$str = str_replace('$'.$key, $value, $str);
+		}
 	}
-  return $str;
+	return $str;
 }
-
 
 /**
 * Funktion sendet e-mail mit Dateien im Anhang

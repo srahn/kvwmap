@@ -34,8 +34,6 @@
 # Liste der Klassen:
 ########################################
 # GUI - Das Programm
-# debugfile - Klasse für die Debugdatei
-# LogFile
 # db_MapObj
 # Menue
 ########################################
@@ -443,12 +441,14 @@ class GUI {
 										$legend .= '<tr style="line-height: 15px"><td style="line-height: 14px">';
 										if($s > 0){
 											if($layer['Class'][$k]['Style'][0]['colorrange'] != ''){
+												$height = 18;
 												$newname = rand(0, 1000000).'.jpg';
-												$this->colorramp(IMAGEPATH.$newname, 18, 18, $layer['Class'][$k]['Style'][0]['colorrange']);
+												$this->colorramp(IMAGEPATH.$newname, 18, $height, $layer['Class'][$k]['Style'][0]['colorrange']);
 											}
 											else{
 												if($maplayer->type == 0)$height = 18;			# Punktlayer
 												else $height = 12;
+												$padding = 1;
 												$image = $class->createLegendIcon(18, $height);
 												$filename = $this->map_saveWebImage($image,'jpeg');
 												$newname = $this->user->id.basename($filename);
@@ -457,14 +457,18 @@ class GUI {
 											#Anne
 											$classid = $layer['Class'][$k]['Class_ID'];
 											if($this->mapDB->disabled_classes['status'][$classid] == '0'){
-												$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="0"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\', '.$this->user->rolle->instant_reload.')"><img style="vertical-align:middle" border="0" name="imgclass'.$classid.'" src="graphics/inactive.jpg"></a>';
+												$imagename = 'graphics/inactive'.$height.'.jpg';
+												$status = 0;
 											}
 											elseif($this->mapDB->disabled_classes['status'][$classid] == 2){
-												$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="2"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\', '.$this->user->rolle->instant_reload.')"><img style="vertical-align:middle" border="0" name="imgclass'.$classid.'" src="'.TEMPPATH_REL.$newname.'"></a>';
+												$imagename = TEMPPATH_REL.$newname;												
+												$status = 2;
 											}
 											else{
-												$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="1"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\', '.$this->user->rolle->instant_reload.')"><img style="vertical-align:middle" border="0" name="imgclass'.$classid.'" src="'.TEMPPATH_REL.$newname.'"></a>';
+												$imagename = TEMPPATH_REL.$newname;												
+												$status = 1;
 											}
+											$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="'.$status.'"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\','.$height.')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\','.$height.')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\', '.$this->user->rolle->instant_reload.','.$height.')"><img style="vertical-align:middle;padding-bottom: '.$padding.'" border="0" name="imgclass'.$classid.'" src="'.$imagename.'"></a>';
 										}
 										$legend .= '&nbsp;<span class="px13">'.html_umlaute($class->name).'</span></td></tr>';
 									}
@@ -2062,6 +2066,19 @@ class GUI {
 		return $result;
 	}
 
+	function add_message($type, $msg) {
+		$this->messages[] = array(
+			'type' => $type,
+			'msg' => $msg
+		);
+	}
+
+	function output_messages() { ?>
+		<script type="text/javascript">
+			message(<? echo json_encode($this->messages); ?>);
+		</script><?
+	}
+
   # Ausgabe der Seite
   function output() {
 	  foreach($this->formvars as $key => $value){
@@ -2088,10 +2105,19 @@ class GUI {
 				if($this->alert != ''){
 					echo '<script type="text/javascript">alert("'.$this->alert.'");</script>';			# manchmal machen alert-Ausgaben über die allgemeinde Funktioen showAlert Probleme, deswegen am besten erst hier am Ende ausgeben
 				}
+				if (!empty($this->messages)) {
+					$this->output_messages();
+				}
       } break;
 			case 'overlay_html' : {
 				$this->overlaymain = $this->main;
 				include (LAYOUTPATH.'snippets/overlay.php');
+				if($this->alert != ''){
+					echo '<script type="text/javascript">alert("'.$this->alert.'");</script>';			# manchmal machen alert-Ausgaben über die allgemeinde Funktioen showAlert Probleme, deswegen am besten erst hier am Ende ausgeben
+				}
+				if (!empty($this->messages)) {
+					$this->output_messages();
+				}
 			} break;
       case 'map_ajax' : {
 				$this->debug->write("Include <b>".LAYOUTPATH."snippets/map_ajax.php</b> in kvwmap.php function output()",4);
@@ -3434,7 +3460,26 @@ class GUI {
           $this->Meldung=$ret[1];
       }
       else { # eintrag erfolgreich
-        showMessage('Eintrag erfolgreich!');
+	      # wenn Time-Attribute vorhanden, aktuelle Zeit speichern      
+				$this->attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, NULL);
+				for($i = 0; $i < count($this->attributes['type']); $i++){
+					if($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'Time'){
+						$sql = "UPDATE ".$this->formvars['layer_tablename']." SET ".$this->attributes['name'][$i]." = '".date('Y-m-d G:i:s')."' WHERE oid = '".$this->formvars['oid']."'";
+						$this->debug->write("<p>file:kvwmap :PointEditor_Senden :",4);
+						$ret = $layerdb->execSQL($sql,4, 1);
+					}
+					elseif($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'User'){
+						$sql = "UPDATE ".$this->formvars['layer_tablename']." SET ".$this->attributes['name'][$i]." = '".$this->user->Vorname." ".$this->user->Name."' WHERE oid = '".$this->formvars['oid']."'";
+						$this->debug->write("<p>file:kvwmap :PointEditor_Senden :",4);
+						$ret = $layerdb->execSQL($sql,4, 1);
+					}
+					elseif($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'UserID'){
+						$sql = "UPDATE ".$this->formvars['layer_tablename']." SET ".$this->attributes['name'][$i]." = ".$this->user->id." WHERE oid = '".$this->formvars['oid']."'";
+						$this->debug->write("<p>file:kvwmap :PointEditor_Senden :",4);
+						$ret = $layerdb->execSQL($sql,4, 1);
+					}
+				}
+        $this->add_message('notice', 'Eintrag erfolgreich!');
       }
       $this->PointEditor();
     }
@@ -3548,6 +3593,11 @@ class GUI {
 						$this->debug->write("<p>file:kvwmap :LineEditor_Senden :",4);
 						$ret = $layerdb->execSQL($sql,4, 1);
 					}
+					elseif($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'UserID'){
+						$sql = "UPDATE ".$this->formvars['layer_tablename']." SET ".$this->attributes['name'][$i]." = ".$this->user->id." WHERE oid = '".$this->formvars['oid']."'";
+						$this->debug->write("<p>file:kvwmap :LineEditor_Senden :",4);
+						$ret = $layerdb->execSQL($sql,4, 1);
+					}
 				}
         $this->formvars['newpath']="";
         $this->formvars['newpathwkt']="";
@@ -3555,7 +3605,7 @@ class GUI {
         $this->formvars['firstline']="";
         $this->formvars['secondline']="";
         $this->formvars['secondpoly']="";
-        showMessage('Eintrag erfolgreich!');
+        $this->add_message('notice', 'Eintrag erfolgreich!');
       }
       $this->formvars['CMD'] = '';
       $this->LineEditor();
@@ -3626,17 +3676,20 @@ class GUI {
       $this->formvars['fromwhere'] .= ' where (1=1)';
     }
 
-		if($this->formvars['layer_id'] < 0) {	# Rollenlayer sofort selektieren
-			$layerdb1 = $this->mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-			include_once (CLASSPATH.'polygoneditor.php');
-			$polygoneditor = new polygoneditor($layerdb1, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
-			$tablename = '('.$fromwhere.') as foo';
-			$this->polygon = $polygoneditor->getpolygon(NULL, $tablename, $this->formvars['columnname'], $this->map->extent);
-			if($this->polygon['wktgeom'] != '') {
-				$this->formvars['newpathwkt'] = $this->polygon['wktgeom'];
-				$this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
-				$this->formvars['newpath'] = $this->polygon['svggeom'];
-				$this->formvars['firstpoly'] = 'true';
+		if($this->formvars['layer_id'] < 0){	# Suchergebnislayer sofort selektieren
+			$rollenlayer = $this->mapDB->read_RollenLayer(-$this->formvars['layer_id']);
+			if($rollenlayer[0]['Typ'] == 'search'){
+				$layerdb1 = $this->mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+				include_once (CLASSPATH.'polygoneditor.php');
+				$polygoneditor = new polygoneditor($layerdb1, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+				$tablename = '('.$fromwhere.') as foo';
+				$this->polygon = $polygoneditor->getpolygon(NULL, $tablename, $this->formvars['columnname'], $this->map->extent);
+				if($this->polygon['wktgeom'] != '') {
+					$this->formvars['newpathwkt'] = $this->polygon['wktgeom'];
+					$this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
+					$this->formvars['newpath'] = $this->polygon['svggeom'];
+					$this->formvars['firstpoly'] = 'true';
+				}
 			}
 		}
 
@@ -3698,7 +3751,7 @@ class GUI {
         $this->formvars['pathwkt']="";
         $this->formvars['firstpoly']="";
         $this->formvars['secondpoly']="";
-        showMessage('Eintrag erfolgreich!');
+        $this->add_message('notice', 'Eintrag erfolgreich!');
       }
       $this->formvars['CMD'] = '';
       $this->PolygonEditor();
@@ -4253,7 +4306,7 @@ class GUI {
           $this->formvars['pathwkt']="";
           $this->formvars['firstpoly']="";
           $this->formvars['secondpoly']="";
-          showMessage('Eintrag erfolgreich!');
+          $this->add_message('notice', 'Eintrag erfolgreich!');
         }
       }
     $this->bauleitplanung();
@@ -7633,17 +7686,20 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		      $this->formvars['fromwhere'] .= ' where (1=1)';
 		    }
 
-				if($this->formvars['layer_id'] < 0){	# Rollenlayer sofort selektieren
-					$layerdb = $mapdb->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-					include_once (CLASSPATH.'polygoneditor.php');
-					$polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
-					$tablename = '('.$fromwhere.') as foo';
-					$this->polygon = $polygoneditor->getpolygon(NULL, $tablename, $this->formvars['columnname'], $this->map->extent);
-					if($this->polygon['wktgeom'] != ''){
-						$this->formvars['newpathwkt'] = $this->polygon['wktgeom'];
-						$this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
-						$this->formvars['newpath'] = $this->polygon['svggeom'];
-						$this->formvars['firstpoly'] = 'true';
+				if($this->formvars['layer_id'] < 0){	# Suchergebnislayer sofort selektieren
+					$rollenlayer = $this->mapDB->read_RollenLayer(-$this->formvars['layer_id']);
+					if($rollenlayer[0]['Typ'] == 'search'){
+						$layerdb = $mapdb->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+						include_once (CLASSPATH.'polygoneditor.php');
+						$polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+						$tablename = '('.$fromwhere.') as foo';
+						$this->polygon = $polygoneditor->getpolygon(NULL, $tablename, $this->formvars['columnname'], $this->map->extent);
+						if($this->polygon['wktgeom'] != ''){
+							$this->formvars['newpathwkt'] = $this->polygon['wktgeom'];
+							$this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
+							$this->formvars['newpath'] = $this->polygon['svggeom'];
+							$this->formvars['firstpoly'] = 'true';
+						}
 					}
 				}
 
@@ -7656,7 +7712,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		    $this->drawMap();
 	    	########################################################################
     	}
-      $this->formvars['anzahl'] = MAXQUERYROWS;
+			if (empty($this->formvars['anzahl'])) {
+				$this->formvars['anzahl'] = MAXQUERYROWS;
+			}
 
 			if($this->formvars['selected_layer_id'] > 0)
 				$this->layerset=$this->user->rolle->getLayer($this->formvars['selected_layer_id']);
@@ -7906,12 +7964,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		}
 
 		if ($output) {
-			if($this->formvars['embedded'] == ''){
-				if($success == false){
-					showAlert('Löschen fehlgeschlagen.\n'.$result[0]);
+			if($this->formvars['embedded'] == '') {
+				if($success == false) {
+					$this->add_message('error', 'Löschen fehlgeschlagen.<br>' . $result[0]);
 				}
-				else{
-					showAlert('Löschen erfolgreich');
+				else {
+					$this->add_message('notice', 'Löschen erfolgreich');
 				}
 				$this->last_query = $this->user->rolle->get_last_query();
 				if($this->formvars['search']){ # man kam von der Suche -> nochmal suchen
@@ -8077,7 +8135,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
           }
           elseif($table['type'][$i] != 'Text_not_saveable' AND $table['type'][$i] != 'Auswahlfeld_not_saveable' AND $table['type'][$i] != 'SubFormPK' AND $table['type'][$i] != 'SubFormFK' AND ($this->formvars[$table['formfield'][$i]] != '' OR $table['type'][$i] == 'Checkbox')){
           	if($table['type'][$i] == 'Zahl'){                       # Typ "Zahl"
-	            $this->formvars[$table['formfield'][$i]] = str_replace(' ', '', $this->formvars[$table['formfield'][$i]]);		# bei Zahlen das Leerzeichen (Tausendertrenner) entfernen
+	            $this->formvars[$table['formfield'][$i]] = str_replace('.', '', $this->formvars[$table['formfield'][$i]]);		# bei Zahlen den Punkt (Tausendertrenner) entfernen
+							$this->formvars[$table['formfield'][$i]] = str_replace(',', '.', $this->formvars[$table['formfield'][$i]]);		# und Komma in Punkt umwandeln
 	          }
 	          if($table['type'][$i] == 'Checkbox' AND $this->formvars[$table['formfield'][$i]] == ''){                       # Typ "Checkbox"
 	          	$this->formvars[$table['formfield'][$i]] = 'f';
@@ -8189,15 +8248,18 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			}
 
     }
-    else{
-      if($success == false){
-        showAlert('Eintrag fehlgeschlagen.\n'.$result[0]);
+    else {
+      if($success == false) {
+        $this->add_message('error', 'Eintrag fehlgeschlagen.<br>' . $result[0]);
         $this->neuer_Layer_Datensatz();
       }
       else{
-        if($this->formvars['close_window'] == ""){
-					if($result[0] != '')showMessage('Eintrag erfolgreich.\n'.$result[0], false);
-          else showMessage('Eintrag erfolgreich!');
+        if ($this->formvars['close_window'] == "") {
+					$msg = (is_array($result) and array_key_exists(1, $result) and $result[1] == 'error') ? '' : $result[0];
+					if ($msg != '')
+						$this->add_message('warning', 'Eintrag erfolgreich.<br>' . $msg);
+					else
+						$this->add_message('notice', 'Eintrag erfolgreich!');
         }
         if($this->formvars['weiter_erfassen'] == 1){
         	$this->formvars['firstpoly'] = '';
@@ -8345,17 +8407,20 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
               $this->formvars['fromwhere'] .= ' where (1=1)';
             }
 						
-						if($this->formvars['layer_id'] < 0){	# Rollenlayer sofort selektieren
-							$layerdb1 = $mapdb->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-							include_once (CLASSPATH.'polygoneditor.php');
-							$polygoneditor = new polygoneditor($layerdb1, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
-							$tablename = '('.$fromwhere.') as foo';
-							$this->polygon = $polygoneditor->getpolygon(NULL, $tablename, $this->formvars['columnname'], $this->map->extent);
-							if($this->polygon['wktgeom'] != ''){
-								$this->formvars['newpathwkt'] = $this->polygon['wktgeom'];
-								$this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
-								$this->formvars['newpath'] = $this->polygon['svggeom'];
-								$this->formvars['firstpoly'] = 'true';
+						if($this->formvars['layer_id'] < 0){	# Suchergebnislayer sofort selektieren
+							$rollenlayer = $this->mapDB->read_RollenLayer(-$this->formvars['layer_id']);
+							if($rollenlayer[0]['Typ'] == 'search'){
+								$layerdb1 = $mapdb->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+								include_once (CLASSPATH.'polygoneditor.php');
+								$polygoneditor = new polygoneditor($layerdb1, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+								$tablename = '('.$fromwhere.') as foo';
+								$this->polygon = $polygoneditor->getpolygon(NULL, $tablename, $this->formvars['columnname'], $this->map->extent);
+								if($this->polygon['wktgeom'] != ''){
+									$this->formvars['newpathwkt'] = $this->polygon['wktgeom'];
+									$this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
+									$this->formvars['newpath'] = $this->polygon['svggeom'];
+									$this->formvars['firstpoly'] = 'true';
+								}
 							}
 						}
 						
@@ -9302,17 +9367,20 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	    if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
 	      $this->formvars['fromwhere'] .= ' where (1=1)';
 	    }
-			if($this->formvars['layer_id'] < 0){	# Rollenlayer sofort selektieren
-				$layerdb1 = $this->mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-				include_once (CLASSPATH.'polygoneditor.php');
-				$polygoneditor = new polygoneditor($layerdb1, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
-				$tablename = '('.$fromwhere.') as foo';
-				$this->polygon = $polygoneditor->getpolygon(NULL, $tablename, $this->formvars['columnname'], $this->map->extent);
-				if($this->polygon['wktgeom'] != ''){
-					$this->formvars['newpathwkt'] = $this->polygon['wktgeom'];
-					$this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
-					$this->formvars['newpath'] = $this->polygon['svggeom'];
-					$this->formvars['firstpoly'] = 'true';
+			if($this->formvars['layer_id'] < 0){	# Suchergebnislayer sofort selektieren
+				$rollenlayer = $this->mapDB->read_RollenLayer(-$this->formvars['layer_id']);
+				if($rollenlayer[0]['Typ'] == 'search'){
+					$layerdb1 = $this->mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+					include_once (CLASSPATH.'polygoneditor.php');
+					$polygoneditor = new polygoneditor($layerdb1, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+					$tablename = '('.$fromwhere.') as foo';
+					$this->polygon = $polygoneditor->getpolygon(NULL, $tablename, $this->formvars['columnname'], $this->map->extent);
+					if($this->polygon['wktgeom'] != ''){
+						$this->formvars['newpathwkt'] = $this->polygon['wktgeom'];
+						$this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
+						$this->formvars['newpath'] = $this->polygon['svggeom'];
+						$this->formvars['firstpoly'] = 'true';
+					}
 				}
 			}
 		}
@@ -10595,7 +10663,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
   function mapCommentStore() {
     $ret=$this->user->rolle->insertMapComment($this->formvars['consumetime'],$this->formvars['comment']);
-		showMessage('Ausschnitt gespeichert.');
+		$this->add_message('notice', 'Ausschnitt gespeichert.');
     $ret=$this->user->rolle->getConsume($this->formvars['consumetime']);
     if ($ret[0]) {
       $this->errmsg="Der nächste Kartenausschnitt konnte nicht abgefragt werden.<br>".$ret[1];
@@ -10613,7 +10681,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
 		$this->loadMap('DataBase');
     $ret=$this->user->rolle->insertLayerComment($this->layerset, $this->formvars['comment']);
-    showMessage('Themenauswahl gespeichert.');
+    $this->add_message('notice', 'Themenauswahl gespeichert.');
     $this->drawMap();
     $this->output();
   }
@@ -11392,7 +11460,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $i = 0;
   }
 
-  function sachdaten_speichern(){
+  function sachdaten_speichern() {
 		if($this->formvars['document_attributename'] != '')$_FILES[$this->formvars['document_attributename']]['name'] = 'delete';		# das zu löschende Dokument
   	$_files = $_FILES;
     $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
@@ -11455,11 +11523,13 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
             	if($this->formvars[$form_fields[$i]] == '')$this->formvars[$form_fields[$i]] = 'f';
 							$eintrag = $this->formvars[$form_fields[$i]];
             } break;
+						case 'Zahl' : {
+							$this->formvars[$form_fields[$i]] = str_replace('.', '', $this->formvars[$form_fields[$i]]);		# bei Zahlen den Punkt (Tausendertrenner) entfernen
+							$eintrag = str_replace(',', '.', $this->formvars[$form_fields[$i]]);		# und Komma in Punkt umwandeln
+							if($this->formvars[$form_fields[$i]] == '')$eintrag = 'NULL';
+						} break;
             default : {
-              if($tablename AND $formtype != 'Text_not_saveable' AND $formtype != 'Auswahlfeld_not_saveable' AND $formtype != 'SubFormPK' AND $formtype != 'SubFormFK' AND $formtype != 'SubFormEmbeddedPK' AND $attributname != 'the_geom'){
-              	if(in_array($datatype, array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))){
-              		$this->formvars[$form_fields[$i]] = str_replace(' ', '', $this->formvars[$form_fields[$i]]);		# bei Zahlen das Leerzeichen (Tausendertrenner) entfernen
-              	}								
+              if($tablename AND $formtype != 'Text_not_saveable' AND $formtype != 'Auswahlfeld_not_saveable' AND $formtype != 'SubFormPK' AND $formtype != 'SubFormFK' AND $formtype != 'SubFormEmbeddedPK' AND $attributname != 'the_geom'){							
 								if(substr($datatype, 0, 1) == '_' OR is_numeric($datatype)){
               		$this->formvars[$form_fields[$i]] = JSON_to_PG(json_decode($this->formvars[$form_fields[$i]]));		# bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln									
               	}
@@ -11526,8 +11596,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 							# Before Update trigger
 							if (!empty($layer['trigger_function'])) {
-								$this->exec_trigger_function('BEFORE', 'UPDATE', $layerset[$layer_id], $oid);
+								$this->exec_trigger_function('BEFORE', 'UPDATE', $layerset[$layer_id][0], $oid);
 							}
+
+							#echo '<br>sql for update: ' . $sql;
 
 							$this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
 							$ret = $layerdb[$layer_id]->execSQL($sql,4, 1);
@@ -11538,10 +11610,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 									$ret[0] = 1;
 									$success = false;
 								}
-								else{
+								else {
 									# After Update trigger
-									if (!empty($layer['trigger_function'])){
-										$this->exec_trigger_function('AFTER', 'UPDATE', $layerset[$layer_id], $oid);
+									if (!empty($layerset[$layer_id][0]['trigger_function'])){
+										$this->exec_trigger_function('AFTER', 'UPDATE', $layerset[$layer_id][0], $oid);
 									}
 								}
 							}
@@ -11549,20 +11621,20 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					}
 				}
 			}
-			if($success == false){
-				showAlert('Änderung fehlgeschlagen.\n'.$result[0]);
+			if ($success == false) {
+				$this->add_message('error', 'Änderung fehlgeschlagen.<br>' . $result[0]);
 			}
-			else{
+			else {
 				if($this->formvars['close_window'] == ""){
-					if($result[0] != '')showAlert('Änderung erfolgreich.\n'.$result[0]);
-					else showMessage('Änderung erfolgreich');
+					$this->add_message('notice', 'Änderung erfolgreich');
+					if($result[0] != '')$this->add_message('warning', $result[0]);
 				}
 			}
 		}
-		else{
-			showMessage('Keine Änderung.');
+		else {
+			$this->add_message('warning', 'Keine Änderung.');
 		}
-    if($this->formvars['embedded'] != ''){    # wenn es ein Datensatz aus einem embedded-Formular ist, muss das entsprechende Attribut des Hauptformulars aktualisiert werden
+    if ($this->formvars['embedded'] != ''){    # wenn es ein Datensatz aus einem embedded-Formular ist, muss das entsprechende Attribut des Hauptformulars aktualisiert werden
       header('Content-type: text/html; charset=UTF-8');
       $attributenames[0] = $this->formvars['targetattribute'];
       $attributes = $mapdb->read_layer_attributes($this->formvars['targetlayer_id'], $layerdb, $attributenames);
@@ -11592,9 +11664,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 	function queryMap() {
 		# scale ausrechnen, da wir uns das loadmap sparen
-		$width = $this->user->rolle->nImageWidth;
-		$pixelsize = ($this->user->rolle->oGeorefExt->maxx - $this->user->rolle->oGeorefExt->minx)/($width-1);		# das width - 1 kommt daher, weil der Mapserver das auch so macht
-		$this->map_scaledenom = round($pixelsize * 96 / 0.0254);
+		$center_y = ($this->user->rolle->oGeorefExt->maxy + $this->user->rolle->oGeorefExt->miny) / 2;
+		if($this->user->rolle->epsg_code == 4326){$unit = MS_DD;} else {$unit = MS_METERS;}
+		$md = ($this->user->rolle->nImageWidth-1)/(96 * InchesPerUnit($unit, $center_y));
+		$gd = $this->user->rolle->oGeorefExt->maxx - $this->user->rolle->oGeorefExt->minx;
+		$this->map_scaledenom = round($gd/$md);
     # Abfragebereich berechnen
 		if($this->formvars['querypolygon'] != ''){
 			$rect = $this->formvars['querypolygon'];
@@ -11840,6 +11914,15 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							$client_epsg=$this->user->rolle->epsg_code;
 							# EPSG-Code des Layers der Abgefragt werden soll
 							$layer_epsg=$layerset[$i]['epsg_code'];
+							
+							if($client_epsg == 4326){
+								$center_y = ($rect->maxy+$rect->miny)/2;
+								$cos_lat = cos(pi() * $center_y/180.0);
+								$lat_adj = sqrt(1 + $cos_lat * $cos_lat)/sqrt(2);
+								$rand_in_metern = $layerset[$i]['tolerance'] * $pixsize * $lat_adj * 111000;
+							}
+							else $rand_in_metern = $rand;
+							
 							# Bildung der Where-Klausel für die räumliche Abfrage mit der searchbox
 							$searchbox_wkt ="POLYGON((";
 							$searchbox_wkt.=strval($rect->minx)." ".strval($rect->miny).",";
@@ -11869,7 +11952,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 									$sql_where =" AND ".$the_geom." && st_geomfromtext('".$loosesearchbox_wkt."',".$client_epsg.")";
 									$sql_where.=" AND st_distance(".$the_geom.",st_geomfromtext('POINT(".$rect->minx." ".$rect->miny.")',".$client_epsg."))";
 								}
-								$sql_where.=" <= ".$rand;
+								$sql_where.=" <= ".$rand_in_metern;
 							}
 							# ---------- Suche über Polygon ---------- #
 							else {
@@ -13466,8 +13549,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	    $rect->maxx=$rs['maxx'];
 	    $rect->miny=$rs['miny'];
 	    $rect->maxy=$rs['maxy'];
-	    $randx=($rect->maxx-$rect->minx)*50/100;
-	    $randy=($rect->maxy-$rect->miny)*50/100;
+	    $randx=($rect->maxx-$rect->minx)*50/100 + 0.01;
+	    $randy=($rect->maxy-$rect->miny)*50/100 + 0.01;
 	    if($rect->minx != ''){
 	    	$map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
 		    # Haupt-Layer erzeugen

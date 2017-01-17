@@ -29,6 +29,7 @@
 			if ($this->formvars['format'] == '')
 				$this->formvars['format'] = "json";
 
+			$this->formvars['content_type'] = 'text/plain';
 			$this->GenerischeSuche_Suchen();
 		} break;
 
@@ -60,6 +61,7 @@
 			if ($this->formvars['format'] == '')
 				$this->formvars['format'] = "json";
 
+			$this->formvars['content_type'] = 'text/plain';
 			$this->GenerischeSuche_Suchen();
 		} break;
 
@@ -91,13 +93,14 @@
 			if ($this->formvars['format'] == '')
 				$this->formvars['format'] = "json";
 
+			$this->formvars['content_type'] = 'text/plain';
 			$this->GenerischeSuche_Suchen();
 		} break;
 
 		case 'upload_temp_file' : {
 			$this->checkCaseAllowed($this->go);
 			include(PLUGINS.'baumfaellantrag/model/kvwmap.php');
-			header('Content-Type: application/json; charset=utf-8');
+			header('Content-Type: text/plain; charset=utf-8');
 			echo utf8_decode(json_encode($this->uploadTempFile()));
 		} break;
 
@@ -122,7 +125,10 @@
 				$this->qlayerset[0]['shape'][0] = array("success" => 0, "data" => $application_data);
 			}
 			$this->mime_type = "formatter";
-			if ($this->formvars['format'] == '') $this->formvars['format'] = "json";
+			if ($this->formvars['format'] == '')
+				$this->formvars['format'] = "json";
+
+			$this->formvars['content_type'] = 'text/plain';
 			$this->output();
 		} break;
 

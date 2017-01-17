@@ -1,7 +1,8 @@
 <?php
+	include_once(CLASSPATH.'FormObject.php');
 	global $supportedLanguages;
-  include(LAYOUTPATH.'languages/attribut_editor_'.$this->user->rolle->language.'.php');
 	global $quicksearch_layer_ids;
+  include(LAYOUTPATH.'languages/attribut_editor_'.$this->user->rolle->language.'.php');
  ?>
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
@@ -98,7 +99,7 @@ function toLayerEditor(){
 						<td>&nbsp;&nbsp;</td>
 						<td align="center"><span class="fett">sichtbar im Rastertemplate</span></td>
 						<td>&nbsp;</td>
-						<td align="center"><span class="fett">Suche-Pflicht</span></td>';
+						<td align="center"><span class="fett">Bei der Suche</span></td>';
 			if(in_array($this->formvars['selected_layer_id'], $quicksearch_layer_ids)){			
 				echo '
 						<td>&nbsp;</td>
@@ -262,10 +263,16 @@ function toLayerEditor(){
 				  </td>
 					<td>&nbsp;</td>
 				  <td align="center" valign="top">
-				  	<input name="mandatory_'.$this->attributes['name'][$i].'" type="checkbox" value="1" ';
-				  	if($this->attributes['mandatory'][$i]) echo 'checked="true"';
-						echo '>
-				  </td>';
+						' . FormObject::createSelectField(
+									'mandatory_' . $this->attributes['name'][$i],
+									array(
+										array('value' => -1, 'output' => 'nicht sichtbar'),
+										array('value' => 0, 'output' => 'anzeigen'),
+										array('value' => 1, 'output' => 'Pflichtangabe')
+									),
+									$this->attributes['mandatory'][$i]
+								) . '
+					</td>';
 				if(in_array($this->formvars['selected_layer_id'], $quicksearch_layer_ids)){	
 					echo '
 					<td>&nbsp;</td>

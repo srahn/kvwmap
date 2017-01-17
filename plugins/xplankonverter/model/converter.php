@@ -31,11 +31,32 @@
 
 class Converter {
 
+  public static	function find_by_id($gui, $by, $id) {
+    #echo '<br>find konvertierung by ' . $by . ' = ' . $id;
+    $konvertierung = new Konvertierung($gui);
+    $konvertierung->find_by($by, $id);
+    return $konvertierung;
+  }
+  
+  function build_inspire($konvertierung) {
+    # Hier XSLT-Prozessor
+  }
+  
+   function save($path){
+    rewind($this->tmpFile);
+    $file = fopen($path,'w');
+
+    stream_copy_to_stream($this->tmpFile,$file);
+
+    fclose($file);
+    
+  }
+  
   function Converter($structDb, $contentDb) {
     $this->structDb = $structDb;
     $this->contentDb = (empty($contentDb)) ? $structDb : $contentDb;
   }
-
+  
   function say_hello($msg){
     $hallo = 'Hallo XPlan: <br>' . $msg;
     return $hallo;
