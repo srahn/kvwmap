@@ -1471,7 +1471,7 @@ FROM
 		$sql.=" LEFT JOIN alkis.ax_artderfestlegung_denkmalschutzrecht a ON a.wert=fo.artderfestlegung";		
     $sql.=" WHERE st_intersects(fo.wkb_geometry,f.wkb_geometry) = true AND st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.") > 0.001 AND f.flurstueckskennzeichen='".$FlurstKennz."'";
 		$sql.= $this->build_temporal_filter(array('f', 'fo'));
-		$sql.=" GROUP BY a.bezeichner, fo.name, f.amtlicheflaeche ";
+		$sql.=" GROUP BY a.beschreibung, fo.name, f.amtlicheflaeche ";
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
@@ -1663,7 +1663,7 @@ FROM
 	  
 	function getNachfolger($FlurstKennz) {
 		$sql = "SELECT DISTINCT ON (nachfolger) nachfolger, c.endet FROM (";
-    $sql.= "SELECT unnest(zeigtaufneuesflurstueck) as nachfolger FROM alkis.ax_fortfuehrungsfall WHERE ARRAY['".$FlurstKennz."'::varchar] <@ zeigtaufaltesflurstueck AND NOT ARRAY['".$FlurstKennz."'::varchar] <@ zeigtaufneuesflurstueck) as foo ";
+    $sql.= "SELECT unnest(zeigtaufneuesflurstueck) as nachfolger FROM alkis.ax_fortfuehrungsfall WHERE ARRAY['".$FlurstKennz."'::text] <@ zeigtaufaltesflurstueck AND NOT ARRAY['".$FlurstKennz."'::text] <@ zeigtaufneuesflurstueck) as foo ";
 		$sql.= "LEFT JOIN alkis.ax_flurstueck c ON c.flurstueckskennzeichen = nachfolger ORDER BY nachfolger, c.endet DESC";
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret[0]) {
@@ -1672,7 +1672,7 @@ FROM
     }
     else {
 			if(pg_num_rows($queryret[1]) == 0){		# kein Fortführungsfall unter ALKIS -> Suche in ALB-Historie
-				$sql = "SELECT nachfolger, bool_and(CASE WHEN b.flurstueckskennzeichen IS NULL THEN NULL ELSE TRUE END) as hist_alb, min(CASE WHEN c.endet IS NULL THEN '' ELSE c.endet END) as endet FROM (";
+				$sql = "SELECT nachfolger, bool_and(CASE WHEN b.flurstueckskennzeichen IS NULL THEN NULL ELSE TRUE END) as hist_alb, min(c.endet) as endet FROM (";
 				$sql.= "SELECT unnest(a.nachfolgerflurstueckskennzeichen) as nachfolger FROM alkis.ax_historischesflurstueckohneraumbezug as a WHERE a.flurstueckskennzeichen = '".$FlurstKennz."') as foo ";
 				$sql.= "LEFT JOIN alkis.ax_historischesflurstueckohneraumbezug b ON b.flurstueckskennzeichen = nachfolger ";
 				$sql.= "LEFT JOIN alkis.ax_flurstueck c ON c.flurstueckskennzeichen = nachfolger ";			# falls ein Nachfolger in ALKIS historisch ist (endet IS NOT NULL)
@@ -1694,7 +1694,7 @@ FROM
   }
 
   function getVorgaenger($FlurstKennz) {
-    $sql = "SELECT unnest(zeigtaufaltesflurstueck) as vorgaenger, array_to_string(array_agg(bezeichner), ';') as anlass FROM alkis.ax_fortfuehrungsfall, alkis.ax_fortfuehrungsanlaesse WHERE ARRAY['".$FlurstKennz."'::varchar] <@ zeigtaufneuesflurstueck AND NOT ARRAY['".$FlurstKennz."'::varchar] <@ zeigtaufaltesflurstueck AND wert = ANY(ueberschriftimfortfuehrungsnachweis) GROUP BY zeigtaufaltesflurstueck ORDER BY vorgaenger";
+    $sql = "SELECT unnest(zeigtaufaltesflurstueck) as vorgaenger, array_to_string(array_agg(value), ';') as anlass FROM alkis.ax_fortfuehrungsfall, alkis.aa_anlassart WHERE ARRAY['".$FlurstKennz."'::text] <@ zeigtaufneuesflurstueck AND NOT ARRAY['".$FlurstKennz."'::text] <@ zeigtaufaltesflurstueck AND id = ANY(ueberschriftimfortfuehrungsnachweis) GROUP BY zeigtaufaltesflurstueck ORDER BY vorgaenger";
     $queryret=$this->execSQL($sql, 4, 0);
     if($queryret[0]) {
       $ret[0]=1;
@@ -1702,7 +1702,7 @@ FROM
     }
     else{
 			if(pg_num_rows($queryret[1]) == 0){			# kein Vorgänger unter ALKIS -> Suche in ALB-Historie
-				$sql = "SELECT flurstueckskennzeichen as vorgaenger, TRUE as hist_alb FROM alkis.ax_historischesflurstueckohneraumbezug WHERE ARRAY['".$FlurstKennz."'::varchar] <@ nachfolgerflurstueckskennzeichen ORDER BY vorgaenger";
+				$sql = "SELECT flurstueckskennzeichen as vorgaenger, TRUE as hist_alb FROM alkis.ax_historischesflurstueckohneraumbezug WHERE ARRAY['".$FlurstKennz."'::text] <@ nachfolgerflurstueckskennzeichen ORDER BY vorgaenger";
 				$queryret=$this->execSQL($sql, 4, 0);
 				while($rs=pg_fetch_assoc($queryret[1])) {
 					$Vorgaenger[]=$rs;
@@ -1932,8 +1932,8 @@ FROM
 	function getAmtsgerichtby($flurstkennz, $bezirk){
 		$sql ="SELECT a.bezeichnung as name, a.stelle as schluessel";
 		$sql.=" FROM alkis.ax_buchungsblattbezirk b , alkis.ax_dienststelle a";
-		$sql.=" WHERE b.land=a.land AND b.stelle=a.stelle AND a.stellenart=1000";
-		$sql.=" AND b.schluesselgesamt = ".$bezirk['schluessel'];
+		$sql.=" WHERE b.gehoertzu_land=a.land AND b.stelle=a.stelle AND a.stellenart=1000";
+		$sql.=" AND b.schluesselgesamt = '".$bezirk['schluessel']."'";
 		$sql.= $this->build_temporal_filter(array('b', 'a'));
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret[0]) {
