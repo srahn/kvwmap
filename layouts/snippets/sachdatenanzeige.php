@@ -195,13 +195,11 @@ for($i=0;$i<$anzLayer;$i++){
 						echo '<input name="boolean_operator_'.$m.'" type="hidden" value="'.$this->formvars['boolean_operator_'.$m].'">';
 					}
 					for($j = 0; $j < count($this->qlayerset[0]['attributes']['type']); $j++){
-						if($this->qlayerset[0]['attributes']['type'][$j] != 'geometry'){
-							echo '
-								<input name="'.$prefix.'value_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars[$prefix.'value_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
-								<input name="'.$prefix.'value2_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars[$prefix.'value2_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
-								<input name="'.$prefix.'operator_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars[$prefix.'operator_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
-							';
-						}
+						echo '
+							<input name="'.$prefix.'value_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars[$prefix.'value_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
+							<input name="'.$prefix.'value2_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars[$prefix.'value2_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
+							<input name="'.$prefix.'operator_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars[$prefix.'operator_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
+						';
 					}
 				}
 			}
