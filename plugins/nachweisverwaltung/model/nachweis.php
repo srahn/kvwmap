@@ -724,7 +724,7 @@ class Nachweis {
     # Die Funktion liefert die Nachweise nach verschiedenen Suchverfahren.
     # Vor dem Suchen nach Nachweisen werden jeweils die Suchparameter überprüft    
     if (is_array($id)) { $idListe=$id; } else { $idListe=array($id); }
-    $idselected=$idListe;
+    $idselected=array_keys($idListe);
     #echo 'Suche nach Verfahren: '.$abfrage_art;
     # Unterscheidung der Suchverfahren.
     switch ($abfrage_art) {
