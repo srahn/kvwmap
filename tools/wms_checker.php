@@ -82,7 +82,7 @@ function getExceptionCode($data){
 include($config);
 include(CLASSPATH.'log.php');
 include(CLASSPATH.'mysql.php');
-$debug=new debugfile(DEBUGFILE);	# öffnen der Debug-log-datei
+$debug=new Debugger(DEBUGFILE);	# öffnen der Debug-log-datei
 $userDb = new database();
 $userDb->host = MYSQL_HOST;
 $userDb->user = MYSQL_USER;																			

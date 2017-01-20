@@ -77,15 +77,15 @@ class FormObject {
 		$this->outputHTML();
 	} # ende constructor
 
-static	function createSelectField($name, $options, $value, $size = 1) {
+static	function createSelectField($name, $options, $value = '', $size = 1, $style = '') {
 	$options_html = array();
 	foreach($options AS $option) {
-		$selected = ($option['value'] == $value ? 'selected' : '');
-		$options_html[] = "<option value=\"{$option['value']}\" {$selected}>{$option['output']}</option>";
+		$selected = ($option['value'] == $value ? ' selected' : '');
+		$options_html[] = "<option" . (array_key_exists('title', $option) ? " title=\"{$option['title']}\"" : '') . " value=\"{$option['value']}\"{$selected}>{$option['output']}</option>";
 	}
 
 	$html  = "
-<select name=\"{$name}\" size=\"{$size}\">
+<select name=\"{$name}\" size=\"{$size}\" style=\"{$style}\">
 	" . implode('<br>', $options_html) . "
 </select>
 ";

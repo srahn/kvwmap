@@ -40,14 +40,17 @@ include(WWWROOT.APPLVERSION.'funktionen/gui_functions.php');
 						</td>
             <td align="center" valign="top" background="<?php echo GRAPHICSPATH; ?>bg.gif" style="border-right: 1px solid; border-color: #FFFFFF #CCCCCC #CCCCCC;">
 							<div style=" position: relative; overflow: hidden; ">
-							<?php
-              $this->debug->write("Include <b>".$this->main."</b> in gui.php",4);
-				      if(file_exists($this->main)){
-				      	include($this->main);			# Pluginviews
-				      }
-				      else{ 	    
-				      	include(LAYOUTPATH."snippets/".$this->main);		# normale snippets
-				      } ?>
+								<script type="text/javascript">
+									currentform = document.GUI;
+								</script>
+								<?php
+								$this->debug->write("Include <b>".$this->main."</b> in gui.php",4);
+								if(file_exists($this->main)){
+									include($this->main);			# Pluginviews
+								}
+								else{ 	    
+									include(LAYOUTPATH."snippets/".$this->main);		# normale snippets
+								} ?>
 							</div>
       			</td>
           </tr>
@@ -63,9 +66,6 @@ include(WWWROOT.APPLVERSION.'funktionen/gui_functions.php');
 				<input type="hidden" name="browserheight">
 				<div id="message_box" class="message_box_hidden"></div>
         </form>
-				<script type="text/javascript">
-					currentform = document.GUI;
-				</script>
 <? if($this->user->rolle->querymode == 1){
 		include(LAYOUTPATH.'snippets/overlayframe.php');
 	 } ?>

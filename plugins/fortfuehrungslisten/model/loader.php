@@ -2,6 +2,7 @@
 class NASLoader extends DOMDocument {
 	
 	static $write_debug = false;
+	public $messages = array();
 	
 	function NASLoader($gui) {
 		$gui->debug->show('Create new Object NASLoader', NASLoader::$write_debug);
@@ -10,7 +11,6 @@ class NASLoader extends DOMDocument {
 
 	function load_fortfuehrungsfaelle($ff_auftrag) {
 		$success = true;
-		$msg_type = 'error';
 		$file_name = $ff_auftrag->get_file_name();
 		$original_file_name = $ff_auftrag->get_original_file_name();
 		#echo '<br>Lade Datei: ' . $file_name;
@@ -41,7 +41,10 @@ class NASLoader extends DOMDocument {
 			}
 			if (empty($xml_file_name)) {
 				$success = false;
-				$msg = "Keine Datei mit der Endung _2000 in Zip-Datei gefunden. Prüfen Sie bitte ob Sie die richtige Zip-Datei hochgeladen haben.";
+				$this->messages[] = array(
+					'msg' => "Keine Datei mit der Endung _2000 in Zip-Datei gefunden. Prüfen Sie bitte ob Sie die richtige Zip-Datei hochgeladen haben.",
+					'type' => 'error'
+				);
 			}
 		}
 		else {
@@ -51,7 +54,10 @@ class NASLoader extends DOMDocument {
 
 		if (empty($xml_file_name)) {
 			$success = false;
-			$msg = "Keine Datei gefunden. Prüfen Sie ob Sie schon eine Datei hochgeladen haben.";
+			$this->messages[] = array(
+				'msg' => "Keine Datei gefunden. Prüfen Sie ob Sie schon eine Datei hochgeladen haben.",
+				'type' => 'error'
+			);
 		}
 		else {
 			#echo '<br>Lade Datei: ' . $xml_file_name;
@@ -86,7 +92,10 @@ class NASLoader extends DOMDocument {
 
 			if ($antragsnummer_datei != $ff_auftrag->get('antragsnr')) {
 				$success = false;
-				$msg = "Die Antragsnummer in der Auftragsdatei stimmt nicht<br>mit der Antragsnr im Formular überein.<br>Prüfen Sie die Eingabe und die Datei<br>und laden Sie ggf. eine neue Datei hoch!";
+				$this->messages[] = array(
+					'msg' => "Die Antragsnummer in der Auftragsdatei stimmt nicht<br>mit der Antragsnr im Formular überein.<br>Prüfen Sie die Eingabe und die Datei<br>und laden Sie ggf. eine neue Datei hoch!",
+					'type' => 'warning'
+				);
 			}
 			else {
 				# Suche alle Gemarkungsnummern von Flurstücken raus.
@@ -94,11 +103,13 @@ class NASLoader extends DOMDocument {
 				if ($this->gemkg_nummern->length > 0) {
 					foreach($this->gemkg_nummern AS $gemkg_nummer) {
 						if ($gemkg_nummer->nodeValue != $ff_auftrag->get('gemkgnr')) {
-							$success = true;
-							$msg  = "In der Auftragsdatei wurde die Gemarkungsnummer: " . $gemkg_nummer->nodeValue . " gefunden.<br>";
-							$msg .= "Diese Nummer stimmt nicht mit der im Formular oben angegebenen<br>Gemarkungsnummer: " . $ff_auftrag->get('gemkgnr') . ' überein.<br>';
-							$msg .= "Korrigieren Sie die Gemarkungsnummer im Formular oder<br>";
-							$msg .= "prüfen Sie die ob die Auftragsdatei korrekt ist.";
+							$success = ($ff_auftrag->get('an_pruefen') == 't' ? false : true);
+							$msg  = "In der Auftragsdatei wurde die Gemarkungsnummer: " . $gemkg_nummer->nodeValue . " gefunden. Diese Nummer stimmt nicht mit der im Formular oben angegebenen Gemarkungsnummer: " . $ff_auftrag->get('gemkgnr') . ' überein.<br>';
+							$msg .= "Korrigieren Sie die Gemarkungsnummer im Formular, prüfen Sie ob die Auftragsdatei korrekt ist oder speichern Sie vorher, dass der Datensatz nicht geprüft werden soll.";
+							$this->messages[] = array(
+								'msg' => $msg,
+								'type' => ($ff_auftrag->get('an_pruefen') == 't' ? 'error' : 'warning')
+							);
 							break;
 						}
 					}
@@ -164,8 +175,10 @@ class NASLoader extends DOMDocument {
 									$ff->set_array($tag, $child_node->nodeValue);
 								}
 								else {
-									$msg .= 'Im Fortführungsfall Nr.: ' . $ff->get('fortfuehrungsfallnummer') . ' ist die alte Flurstücksnummer:<br>' . $ff->get('zeigtaufaltesflurstueck')[0] . ' identisch mit der neuen Nummer.<br>In dem Fall wird die neue Nummer nicht gespeichert.';
-									$msg_type = 'waring';
+									$this->messages[] = array(
+										'msg' => 'Im Fortführungsfall Nr.: ' . $ff->get('fortfuehrungsfallnummer') . ' ist die alte Flurstücksnummer:<br>' . $ff->get('zeigtaufaltesflurstueck')[0] . ' identisch mit der neuen Nummer.<br>In dem Fall wird die neue Nummer nicht gespeichert.',
+										'type' => 'warning'
+									);
 								}
 							}
 						}
@@ -181,10 +194,9 @@ class NASLoader extends DOMDocument {
 				}
 			}
 		}
+
 		$result = array(
 			'success' => $success,
-			'msg' => $msg,
-			'msg_type' => $msg_type, 
 			'fortfuehrungsfaelle' => $this->fortfuehrungsfaelle
 		);
 		return $result;

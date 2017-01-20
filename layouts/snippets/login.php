@@ -130,7 +130,9 @@
 				<input type="hidden" name="go" value="login">
 				<? 
 				for($i = 0; $i < count($_REQUEST); $i++){
-					echo '<input type="hidden" name="'.key($_REQUEST).'" value="'.$_REQUEST[key($_REQUEST)].'">';
+					if (!in_array(key($_REQUEST), array('go', 'username', 'passwort'))) {
+						echo '<input type="hidden" name="'.key($_REQUEST).'" value="'.$_REQUEST[key($_REQUEST)].'">';
+					}
 					next($_REQUEST);
 				}
 				?>

@@ -1526,7 +1526,7 @@
 		if($GUI->formvars['stelle_id'] == $GUI->Stelle->id OR in_array($GUI->Stelle->id, $admin_stellen)){
 			if ($GUI->formvars['bestaetigung']=='JA') {
 				$GUI->antrag = new antrag('','',$GUI->pgdatabase);
-				$antragsnummern=array_keys ($GUI->formvars['id']);
+				$antragsnummern=$GUI->formvars['id'];
 				$ret=$GUI->antrag->antrag_loeschen($antragsnummern[0],$GUI->formvars['stelle_id']);
 				if($ret == 'Antrag erfolgreich gelöscht')$GUI->Suchparameter_loeschen($antragsnummern[0], $GUI->formvars['stelle_id']);
 				showAlert($ret);

@@ -36,7 +36,7 @@
 				<td>
 					<div style="position: relative;">
 						<div style="position: relative;">
-							<i id="openLayerParamBarIcon" class="fa fa-bars" style="font-size: 1.1em;margin: 5 5 5 5" onclick="toggleLayerParamsBar();"></i>
+							<i id="openLayerParamBarIcon" class="fa fa-bars pointer" style="font-size: 1.1em;margin: 5 5 5 5" onclick="toggleLayerParamsBar();"></i>
 						</div>
 						<div id="layerParamsBar" class="layerOptions">
 							<div style="position: absolute; top: 2px; right: 2px;">

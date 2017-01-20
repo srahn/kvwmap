@@ -261,7 +261,7 @@
     </a>  
     <p>Arbeitsversion 2015-12-03</p>
     <div id="basisobjekteuml" style="display:none;">
-    <p><img src="http://xplan-raumordnung.de/images/2016_05_06-Modell/RP_Basisobjekte_1.png" alt="RP_Basisobjekte1" style="width:826px;height:1168px;" usemap="#RP_Basisobjekte1"><img src="http://xplan-raumordnung.de/images/2016_05_06-Modell/RP_Basisobjekte_2.png" alt="RP_Basisobjekte2" style="width:826px;height:1168px;" usemap="#RP_Basisobjekte2"></p>
+    <p><img src="http://xplan-raumordnung.de/images/2016_10_13-Modell/RP_Basisobjekte_1.png" alt="RP_Basisobjekte1" style="width:826px;height:1168px;" usemap="#RP_Basisobjekte1"><img src="http://xplan-raumordnung.de/images/2016_10_13-Modell/RP_Basisobjekte_2.png" alt="RP_Basisobjekte2" style="width:826px;height:1168px;" usemap="#RP_Basisobjekte2"></p>
     </div>
 
     <a href="javascript:ReverseDisplay('freiraumstrukturuml')" class=hlink>
@@ -269,7 +269,7 @@
     </a>
     <p>Arbeitsversion 2015-12-03</p>
     <div id="freiraumstrukturuml" style="display:none;">
-    <p><img src="http://xplan-raumordnung.de/images/2016_05_06-Modell/RP_Freiraumstruktur_1.png" alt="RP_Freiraumstruktur1" style="width:826px;height:1168px;" usemap="#RP_Freiraumstruktur1"><img src="http://xplan-raumordnung.de/images/2016_05_06-Modell/RP_Freiraumstruktur_2.png" alt="RP_Freiraumstruktur2" style="width:826px;height:1168px;" usemap="#RP_Freiraumstruktur2"><img src="http://xplan-raumordnung.de/images/2016_05_06-Modell/RP_Freiraumstruktur_3.png" alt="RP_Freiraumstruktur3" style="width:826px;height:1168px;" usemap="#RP_Freiraumstruktur3"></p>
+    <p><img src="http://xplan-raumordnung.de/images/2016_10_13-Modell/RP_Freiraumstruktur_1.png" alt="RP_Freiraumstruktur1" style="width:826px;height:1168px;" usemap="#RP_Freiraumstruktur1"><img src="http://xplan-raumordnung.de/images/2016_10_13-Modell/RP_Freiraumstruktur_2.png" alt="RP_Freiraumstruktur2" style="width:826px;height:1168px;" usemap="#RP_Freiraumstruktur2"><img src="http://xplan-raumordnung.de/images/2016_10_13-Modell/RP_Freiraumstruktur_3.png" alt="RP_Freiraumstruktur3" style="width:826px;height:1168px;" usemap="#RP_Freiraumstruktur3"></p>
     </div>
 
     <a href="javascript:ReverseDisplay('infrastrukturuml')" class=hlink>
@@ -277,7 +277,7 @@
     </a>
     <p>Arbeitsversion 2015-12-03</p>
     <div id="infrastrukturuml" style="display:none;">
-    <p><img src="http://xplan-raumordnung.de/images/2016_05_06-Modell/RP_Infrastruktur_1.png" alt="RP_Infrastruktur1" style="width:826px;height:1168px;" usemap="#RP_Infrastruktur1"><img src="http://xplan-raumordnung.de/images/2016_05_06-Modell/RP_Infrastruktur_2.png" alt="RP_Infrastruktur2" style="width:826px;height:1168px;" usemap="#RP_Infrastruktur2"></p>
+    <p><img src="http://xplan-raumordnung.de/images/2016_10_13-Modell/RP_Infrastruktur_1.png" alt="RP_Infrastruktur1" style="width:826px;height:1168px;" usemap="#RP_Infrastruktur1"><img src="http://xplan-raumordnung.de/images/2016_10_13-Modell/RP_Infrastruktur_2.png" alt="RP_Infrastruktur2" style="width:826px;height:1168px;" usemap="#RP_Infrastruktur2"></p>
     </div>
 
     <a href="javascript:ReverseDisplay('siedlungsstrukturuml')" class=hlink>
@@ -285,7 +285,7 @@
     </a>
     <p>Arbeitsversion 2015-12-03</p>
     <div id="siedlungsstrukturuml" style="display:none;">
-    <p><img src="http://xplan-raumordnung.de/images/2016_05_06-Modell/RP_Siedlungsstruktur_1.png" alt="RP_Siedlungsstruktur1" style="width:826px;height:1168px;" usemap="#RP_Siedlungsstruktur1"><img src="http://xplan-raumordnung.de/images/2016_05_06-Modell/RP_Siedlungsstruktur_2.png" alt="RP_Siedlungsstruktur1" style="width:826px;height:1168px;" usemap="#RP_Siedlungsstruktur2"></p>
+    <p><img src="http://xplan-raumordnung.de/images/2016_10_13-Modell/RP_Siedlungsstruktur_1.png" alt="RP_Siedlungsstruktur1" style="width:826px;height:1168px;" usemap="#RP_Siedlungsstruktur1"><img src="http://xplan-raumordnung.de/images/2016_10_13-Modell/RP_Siedlungsstruktur_2.png" alt="RP_Siedlungsstruktur1" style="width:826px;height:1168px;" usemap="#RP_Siedlungsstruktur2"></p>
     </div>
 
     <a href="javascript:ReverseDisplay('sonstigesuml')" class=hlink>
@@ -293,7 +293,7 @@
     </a>
     <p>Arbeitsversion 2015-12-03</p>
     <div id="sonstigesuml" style="display:none;">
-    <p><img src="http://xplan-raumordnung.de/images/2016_05_06-Modell/RP_Sonstiges.png" alt="RP_Sonstiges" style="width:826px;height:1168px;" usemap="#RP_Sonstiges"></p>
+    <p><img src="http://xplan-raumordnung.de/images/2016_10_13-Modell/RP_Sonstiges.png" alt="RP_Sonstiges" style="width:826px;height:1168px;" usemap="#RP_Sonstiges"></p>
     </div>
   
     <a href="javascript:ReverseDisplay('rasteruml')" class=hlink>
@@ -301,7 +301,7 @@
     </a>
     <p>XPlan 4.1</p>
     <div id="rasteruml" style="display:none;">
-    <p><img src="http://xplan-raumordnung.de/images/2016_05_06-Modell/RP_Raster.png" alt="RP_Raster" style="width:826px;height:1168px;" usemap="#RP_Raster"></p>
+    <p><img src="http://xplan-raumordnung.de/images/2016_10_13-Modell/RP_Raster.png" alt="RP_Raster" style="width:826px;height:1168px;" usemap="#RP_Raster"></p>
     </div>
   
     <a href="javascript:ReverseDisplay('xpbasisobjekteuml')" class=hlink>
@@ -309,7 +309,7 @@
     </a>
     <p>XPlan 4.1</p>
     <div id="xpbasisobjekteuml" style="display:none;">
-    <p><img src="http://xplan-raumordnung.de/images/2016_05_06-Modell/XP_Basisobjekte_1.png" alt="XP_Basisobjekte1" style="width:826px;height:1168px;"usemap="#XP_Basisobjekte1"><img src="http://xplan-raumordnung.de/images/2016_05_06-Modell/XP_Basisobjekte_2.png" alt="XP_Basisobjekte2" style="width:826px;height:1168px;"usemap="#XP_Basisobjekte2"><p>
+    <p><img src="http://xplan-raumordnung.de/images/2016_10_13-Modell/XP_Basisobjekte_1.png" alt="XP_Basisobjekte1" style="width:826px;height:1168px;"usemap="#XP_Basisobjekte1"><img src="http://xplan-raumordnung.de/images/2016_10_13-Modell/XP_Basisobjekte_2.png" alt="XP_Basisobjekte2" style="width:826px;height:1168px;"usemap="#XP_Basisobjekte2"><p>
     </div>
     
     <a href="javascript:ReverseDisplay('xppraesentationsobjekteuml')" class=hlink>
@@ -317,7 +317,7 @@
     </a>
     <p>XPlan 4.1</p>
     <div id="xppraesentationsobjekteuml" style="display:none;">
-    <p><img src="http://xplan-raumordnung.de/images/2016_05_06-Modell/XP_Praesentationsobjekte.png" alt="XP_Praesentationsobjekte" style="width:826px;height:1168px;"usemap="#XP_Praesentationsobjekte"><p>
+    <p><img src="http://xplan-raumordnung.de/images/2016_10_13-Modell/XP_Praesentationsobjekte.png" alt="XP_Praesentationsobjekte" style="width:826px;height:1168px;"usemap="#XP_Praesentationsobjekte"><p>
     </div>
   
     <a href="javascript:ReverseDisplay('inspireuml')" class=hlink>
@@ -325,13 +325,13 @@
     </a>
     <p>Version 3.0</p>
     <div id="inspireuml" style="display:none;">
-    <p><img src="http://xplan-raumordnung.de/images/2016_05_06-Modell/inspireuml.jpg" alt="INSPIRE Modell" style="width:1168px;height:826px;" usemap="#INSPIRE"></p>
+    <p><img src="http://xplan-raumordnung.de/images/2016_10_13-Modell/inspireuml.jpg" alt="INSPIRE Modell" style="width:1168px;height:826px;" usemap="#INSPIRE"></p>
     </div>
     
     <center><h2>Modell-Downloads</h2></center><hr>
     <h3>UML-Modell als PDF zum <a target="_blank" href="http://xplan-raumordnung.de/model/XPlan Raumordnungsplan Arbeitsmodell (Version 16-05-06).pdf">herunterladen</a> (Arbeitsversion 2016-05-06)</h3>
     Diese Datei enthält alle Pakete des XP- und RP-Schemas. Die UML-Repräsentation in PDF-Form ist eine graphische Darstellung der relevanten Modellelemente und erlaubt die Suche von Begriffen innerhalb des Modells.
-    <h3>Liste aller Modelländerungen zum <a target="_blank" href="http://xplan-raumordnung.de/model/2016_05_06_Aenderungsliste_XPlan_Raumordnungsmodell.doc">herunterladen</a> (Arbeitsversion 2016-05-06)</h3>
+    <h3>Liste aller Modelländerungen zum <a target="_blank" href="http://xplan-raumordnung.de/model/2016_10_13_Aenderungsliste_XPlan_Raumordnungsmodell.doc">herunterladen</a> (Arbeitsversion 2016-05-06)</h3>
     Änderungen am RP-Schema von XPlanGML4.1 seit Projektbeginn sind hier textlich dokumentiert und werden mit jeder Modelländerung aktualisiert.
     <h3>Konformitätsbedingungen für das Raumordnungsschema zum <a target="_blank" href="http://xplan-raumordnung.de/model/2016_01_11_Konformitaetsbedingungen.doc">herunterladen</a> (Arbeitsversion 2016-01-11)</h3>
     Konformitätsbedingungen beschreiben Regeln und Relationen des Modells, welche nicht direkt in UML festgehalten werden können. Diese sind jedoch für eine vollständige und valide Konvertierung wichtig. Da XPlanGML4.1 keine Konformitätsbedingungen für das RP-Schema besitzt, wurden für das Projekt neue Konformitätsbedingungen für die Raumordnung zur Integration in die bestehenden Konformitätsbedingungen von XPlan aufgestellt.
@@ -341,7 +341,7 @@
     XMI (XML Metadata Interchange) ist ein anbieterneutrales Format des Modells, welches zum Austausch zwischen Software-Entwicklungswerkzeugen benutzt werden kann. Die dazugehörige Datei erlaubt die Nutzung des Modells mit jeglicher Software.
    <!--<h3>Featurekatalog</h3>
     Diese Sektion enthält den Featurekatalog des Modells zum herunterladen.-->
-    <h3>XSD-Dateien zum <a target="_blank" href="http://xplan-raumordnung.de/model/2016_05_06_XSD_Modell.zip">herunterladen</a> (Arbeitsversion 2016-05-06)</h3>
+    <h3>XSD-Dateien zum <a target="_blank" href="http://xplan-raumordnung.de/model/2016_10_13_XSD_Modell.zip">herunterladen</a> (Arbeitsversion 2016-05-06)</h3>
     XSD(XML Schema Definition)-Dateien definieren die Strukturen von XML-Dokumenten. Für das Projekt sind diese zur Definition der Struktur eines XPlanGML-Dokuments nötig. Anbei werden die XSD-Dateien aller relevanten Pakete des Modells als .zip bereitgestellt.
     <h3>Modell Report zum <a target="_blank" href="http://xplan-raumordnung.de/model/2016_01_26_model_report.pdf">herunterladen</a> (Arbeitsversion 2016-01-26)</h3>
     Der Modellreport aus Enterprise Architect zeigt eine textliche Gesamtübersicht über das gesamte Modell zu Dokumentationszwecken.

@@ -526,7 +526,7 @@ include('funktionen/input_check_functions.php');
 			formdata = new FormData(currentform);
 			ahah("index.php", formdata, new Array(), new Array());
 			currentform.go.value = saved_go;
-			message("Datensätze gemerkt");
+			message([{'type': 'notice', 'msg': 'Datensätze gemerkt'}]);
 		}
 	}
 
@@ -538,7 +538,7 @@ include('funktionen/input_check_functions.php');
 			formdata = new FormData(currentform);
 			ahah("index.php", formdata, new Array(), new Array());
 			currentform.go.value = saved_go;
-			message("Datensätze entfernt");
+			message([{'type': 'notice', 'msg': 'Datensätze entfernt'}]);
 		}
 	}
 

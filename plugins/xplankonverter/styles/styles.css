@@ -749,3 +749,7 @@ nav > ul > li > ul > li:hover > ul {
   top: 0;
   text-decoration: none;
 }
+.xpk-func-btn .fa.fa-code {
+	font-weight: bold;
+	font-size: 1.5em;
+}

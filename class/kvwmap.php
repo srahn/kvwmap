@@ -34,8 +34,6 @@
 # Liste der Klassen:
 ########################################
 # GUI - Das Programm
-# debugfile - Klasse für die Debugdatei
-# LogFile
 # db_MapObj
 # Menue
 ########################################
@@ -64,6 +62,7 @@ class GUI {
   var $FormObject;
   var $StellenForm;
   var $Fehlermeldung;
+	var $messages = array();
   var $Hinweis;
   var $Stelle;
   var $ALB;
@@ -443,12 +442,14 @@ class GUI {
 										$legend .= '<tr style="line-height: 15px"><td style="line-height: 14px">';
 										if($s > 0){
 											if($layer['Class'][$k]['Style'][0]['colorrange'] != ''){
+												$height = 18;
 												$newname = rand(0, 1000000).'.jpg';
-												$this->colorramp(IMAGEPATH.$newname, 18, 18, $layer['Class'][$k]['Style'][0]['colorrange']);
+												$this->colorramp(IMAGEPATH.$newname, 18, $height, $layer['Class'][$k]['Style'][0]['colorrange']);
 											}
 											else{
 												if($maplayer->type == 0)$height = 18;			# Punktlayer
 												else $height = 12;
+												$padding = 1;
 												$image = $class->createLegendIcon(18, $height);
 												$filename = $this->map_saveWebImage($image,'jpeg');
 												$newname = $this->user->id.basename($filename);
@@ -457,14 +458,18 @@ class GUI {
 											#Anne
 											$classid = $layer['Class'][$k]['Class_ID'];
 											if($this->mapDB->disabled_classes['status'][$classid] == '0'){
-												$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="0"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\', '.$this->user->rolle->instant_reload.')"><img style="vertical-align:middle" border="0" name="imgclass'.$classid.'" src="graphics/inactive.jpg"></a>';
+												$imagename = 'graphics/inactive'.$height.'.jpg';
+												$status = 0;
 											}
 											elseif($this->mapDB->disabled_classes['status'][$classid] == 2){
-												$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="2"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\', '.$this->user->rolle->instant_reload.')"><img style="vertical-align:middle" border="0" name="imgclass'.$classid.'" src="'.TEMPPATH_REL.$newname.'"></a>';
+												$imagename = TEMPPATH_REL.$newname;												
+												$status = 2;
 											}
 											else{
-												$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="1"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\', '.$this->user->rolle->instant_reload.')"><img style="vertical-align:middle" border="0" name="imgclass'.$classid.'" src="'.TEMPPATH_REL.$newname.'"></a>';
+												$imagename = TEMPPATH_REL.$newname;												
+												$status = 1;
 											}
+											$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="'.$status.'"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\','.$height.')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\','.$height.')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\', '.$this->user->rolle->instant_reload.','.$height.')"><img style="vertical-align:middle;padding-bottom: '.$padding.'" border="0" name="imgclass'.$classid.'" src="'.$imagename.'"></a>';
 										}
 										$legend .= '&nbsp;<span class="px13">'.html_umlaute($class->name).'</span></td></tr>';
 									}
@@ -2071,9 +2076,8 @@ class GUI {
 
 	function output_messages() { ?>
 		<script type="text/javascript">
-			message(<?php echo json_encode($this->messages); ?>);
-		</script><?php
-#		include(LAYOUTPATH . 'snippets/messages.php'); 
+			message(<? echo json_encode($this->messages); ?>);
+		</script><?
 	}
 
   # Ausgabe der Seite
@@ -6642,23 +6646,23 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->output();
 	}	
 
-  function Layereditor() {
-    $this->titel='Layer Editor';
-    $this->main='layer_formular.php';
-    $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-    # Abfragen der Layerdaten wenn eine layer_id zur Änderung selektiert ist
-    if ($this->formvars['selected_layer_id'] > 0) {
-      $this->classes = $mapDB->read_Classes($this->formvars['selected_layer_id'], NULL, true);
-      $this->layerdata = $mapDB->get_Layer($this->formvars['selected_layer_id'], false);
-      # Abfragen der Stellen des Layer
-      $this->formvars['selstellen']=$mapDB->get_stellen_from_layer($this->formvars['selected_layer_id']);
+	function Layereditor() {
+		$this->titel='Layer Editor';
+		$this->main='layer_formular.php';
+		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		# Abfragen der Layerdaten wenn eine layer_id zur Änderung selektiert ist
+		if ($this->formvars['selected_layer_id'] > 0) {
+			$this->classes = $mapDB->read_Classes($this->formvars['selected_layer_id'], NULL, true);
+			$this->layerdata = $mapDB->get_Layer($this->formvars['selected_layer_id'], false);
+			# Abfragen der Stellen des Layer
+			$this->formvars['selstellen']=$mapDB->get_stellen_from_layer($this->formvars['selected_layer_id']);
 			$this->grouplayers = $mapDB->get_layersfromgroup($this->layerdata['Gruppe']);
-    }
-    $this->stellen=$this->Stelle->getStellen('Bezeichnung');
-    $this->Groups = $mapDB->get_Groups();
-    $this->epsg_codes = read_epsg_codes($this->pgdatabase);
-    $this->output();
-  }
+		}
+		$this->stellen=$this->Stelle->getStellen('Bezeichnung');
+		$this->Groups = $mapDB->get_Groups();
+		$this->epsg_codes = read_epsg_codes($this->pgdatabase);
+		$this->output();
+	}
 
   function Layereditor_KlasseLoeschen(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
@@ -6944,7 +6948,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		if (trim($this->formvars['id'])!='' and $mapDB->id_exists('layer',$this->formvars['id'])) {
 			$table_information = $mapDB->get_table_information($this->Stelle->database->dbName,'layer');
-			$this->Meldung = "Die Id: ".$this->formvars['id']." existiert schon. Nächste freie Layer_ID ist ".$table_information['AUTO_INCREMENT'];
+			$this->add_message('error', 'Die Id: ' . $this->formvars['id'] . ' existiert schon. Nächste freie Layer_ID ist ' . $table_information['AUTO_INCREMENT']);
 		}
 		else {
 			$this->formvars['selected_layer_id'] = $mapDB->newLayer($this->formvars);
@@ -7966,7 +7970,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					$this->add_message('error', 'Löschen fehlgeschlagen.<br>' . $result[0]);
 				}
 				else {
-					$this->add_message('warning', 'Löschen erfolgreich');
+					$this->add_message('notice', 'Löschen erfolgreich');
 				}
 				$this->last_query = $this->user->rolle->get_last_query();
 				if($this->formvars['search']){ # man kam von der Suche -> nochmal suchen
@@ -9621,13 +9625,13 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
           $this->selected_user->checkstelle();
         }
       }
-    # /Löschen der in der Selectbox entfernten User
+			# /Löschen der in der Selectbox entfernten User
 
       if ($ret[0]) {
-        $this->Meldung=$ret[1];
+				$this->add_message('error', $ret[1]);
       }
       else {
-        $this->Meldung='Daten der Stelle erfolgreich eingetragen!';
+        $this->add_message('notice', 'Daten der Stelle erfolgreich eingetragen!');
       }
     }
     $this->Stelleneditor();
@@ -11700,10 +11704,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			}
 			else {
 				if($this->formvars['close_window'] == ""){
-					if($result[0] != '')
-						$this->add_message('warning', 'Änderung erfolgreich.<br>' . $result[0]);
-					else
-						$this->add_message('notice', 'Änderung erfolgreich');
+					$this->add_message('notice', 'Änderung erfolgreich');
+					if($result[0] != '')$this->add_message('warning', $result[0]);
 				}
 			}
 		}
@@ -12880,10 +12882,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     }
   }
 
-  function setFullExtent() {
-    $this->map->setextent($this->Stelle->MaxGeorefExt->minx,$this->Stelle->MaxGeorefExt->miny,$this->Stelle->MaxGeorefExt->maxx,$this->Stelle->MaxGeorefExt->maxy);
-  }
-
+	function setFullExtent() { 		$this->map->setextent($this->Stelle->MaxGeorefExt->minx,$this->Stelle->MaxGeorefExt->miny,$this->Stelle->MaxGeorefExt->maxx,$this->Stelle->MaxGeorefExt->maxy);
+	}
 
   function zoomToALKGemeinde($Gemeinde,$border) {
     # 2006-01-31 pk
@@ -15493,7 +15493,6 @@ class db_mapObj{
 				}
 			}
 			$sql.= ' raster_visibility = '.$formvars['raster_visibility_'.$attributes['name'][$i]].', mandatory = '.$formvars['mandatory_'.$attributes['name'][$i]].' , quicksearch = '.$formvars['quicksearch_'.$attributes['name'][$i]];
-			#echo '<br>' . $sql;
       $this->debug->write("<p>file:kvwmap class:Document->save_layer_attributes :",4);
       $database->execSQL($sql,4, 1);
     }
