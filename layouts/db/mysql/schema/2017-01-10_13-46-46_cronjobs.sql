@@ -3,7 +3,7 @@ BEGIN;
 CREATE TABLE `cron_jobs` (
 	`id` bigint(20) UNSIGNED NOT NULL,
 	`bezeichnung` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-	`beschreibung` TEXT;
+	`beschreibung` TEXT,
 	`time` varchar(25) COLLATE utf8_unicode_ci NOT NULL DEFAULT '0 6 1 * *',
 	`query` text COLLATE utf8_unicode_ci,
 	`function` varchar(255) COLLATE utf8_unicode_ci,
