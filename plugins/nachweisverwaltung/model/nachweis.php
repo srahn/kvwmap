@@ -724,7 +724,7 @@ class Nachweis {
     # Die Funktion liefert die Nachweise nach verschiedenen Suchverfahren.
     # Vor dem Suchen nach Nachweisen werden jeweils die Suchparameter überprüft    
     if (is_array($id)) { $idListe=$id; } else { $idListe=array($id); }
-    $idselected=array_keys($idListe);
+    $idselected=$idListe;
     #echo 'Suche nach Verfahren: '.$abfrage_art;
     # Unterscheidung der Suchverfahren.
     switch ($abfrage_art) {
@@ -1091,7 +1091,7 @@ class Nachweis {
     else {
       if(pg_num_rows($queryret[1])!=0){
         while ($rs=pg_fetch_array($queryret[1])) {
-          $ergebnis[$rs['nachweis_id']]=$rs['nachweis_id'];
+          $ergebnis[]=$rs['nachweis_id'];
         }
         $this->nachweisanz=count($ergebnis);
         $this->nachweise_id=$ergebnis;
