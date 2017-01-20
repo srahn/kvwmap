@@ -111,6 +111,7 @@ update_gebietstyp = function(){
 	$layer = $this->qlayerset[$i];
  	$attributes = $layer['attributes'];
 ?>
+<input type="hidden" value="" id="changed_<? echo $layer['Layer_ID']; ?>" name="changed_<? echo $layer['Layer_ID']; ?>">
 <table border="0" cellspacing="0" cellpadding="0">
 	<tr>
 		<td>&nbsp;&nbsp;</td>
