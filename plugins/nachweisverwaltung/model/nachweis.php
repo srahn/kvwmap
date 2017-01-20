@@ -1134,7 +1134,7 @@ class Nachweis {
   function zum_Auftrag_hinzufuegen($antrag_id,$stelle_id,$nachweis_id){
     #echo '<br>Start der Funktion zum_Autrag_hinzufuegen';
     # Umsortierung der übergebenen ids
-    $idselected=array_keys($nachweis_id);
+    $idselected=$nachweis_id;
     for ($i=0;$i<count($idselected);$i++) {
       # Abfragen ob die Zuordnung schon existiert.
       $sql ="SELECT * FROM nachweisverwaltung.n_nachweise2antraege";
@@ -1178,7 +1178,7 @@ class Nachweis {
 
   function aus_Auftrag_entfernen($antr_nr,$stelle_id,$id){
     #Funktion löscht Nachweise, die unter einer Antragsnummer recherchiert wurde. 
-    $idselected=array_keys ($id);
+    $idselected=$id;
     for ($i=0;$i<count($idselected);$i++) {
       $sql ="DELETE FROM nachweisverwaltung.n_nachweise2antraege";
       $sql.=" WHERE antrag_id='".$antr_nr."' AND nachweis_id='".$idselected[$i]."'";
