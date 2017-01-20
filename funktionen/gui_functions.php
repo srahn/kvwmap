@@ -37,16 +37,62 @@ function resizemap2window(){
 <? } ?>
 }
 
-function message(text){
-	var Msg = document.getElementById("message_box");
-	if(Msg == undefined){
-		document.write('<div id="message_box" class="message_box_hidden"></div>');
-		var Msg = document.getElementById("message_box");
+/*
+* Function create content to show messages of different types
+* in div message_box
+* @param array or string messages contain the messages as array
+* or as a single string
+*/
+function message(messages) {
+	var msgDiv = $("#message_box");
+	types = {
+		'notice': {
+			'description': 'Erfolg',
+			'icon': 'fa-check',
+			'color': 'green',
+			'confirm': false
+		},
+		'warning': {
+			'description': 'Warnung',
+			'icon': 'fa-exclamation',
+			'color': 'firebrick',
+			'confirm': true
+		},
+		'error': {
+			'description': 'Fehler',
+			'icon': 'fa-ban',
+			'color': 'red',
+			'confirm': true
+		}
+	},
+	confirmMsgDiv = false;
+
+	if (!$.isArray(messages)) {
+		messages = [{
+			'type': 'warning',
+			'msg': messages
+		}];
 	}
-	Msg.className = 'message_box_visible';
-	Msg.innerHTML = text;
-	setTimeout(function() {Msg.className = 'message_box_hide';},500);
-	setTimeout(function() {Msg.className = 'message_box_hidden';},2500);
+
+	msgDiv.html('');
+
+	$.each(messages, function (index, msg) {
+		msg.type = (msg.type ? msg.type : 'warning');
+		msgDiv.append('<div class="message-box-' + msg.type + '">' + (types[msg.type].icon ? '<div class="message-box-type"><i class="fa ' + types[msg.type].icon + '" style="color: ' + types[msg.type].color + '; cursor: default;"></i></div>' : '') + '<div class="message-box-msg">' + msg.msg + '</div><div style="clear: both"></div></div>');
+		if (types[msg.type].confirm) {
+			confirmMsgDiv = true;
+		}
+	});
+
+	msgDiv.attr('class', 'message_box');
+
+	if (!confirmMsgDiv) {
+		setTimeout(function() {msgDiv.addClass('message_box_hide');},1000);
+		setTimeout(function() {msgDiv.addClass('message_box_hidden');},3000);
+	}
+	else {
+		msgDiv.append('<input type="button" onclick="$(\'#message_box\').addClass(\'message_box_hidden\');" value="ok" style="margin-top: 10px;">');
+	}
 }
 
 function onload_functions(){
@@ -475,7 +521,7 @@ function deactivateAllClasses(class_ids){
 }
 
 /*Anne*/
-function changeClassStatus(classid,imgsrc,instantreload){
+function changeClassStatus(classid,imgsrc,instantreload,height){
 	selClass = document.getElementsByName("class"+classid)[0];
 	selImg   = document.getElementsByName("imgclass"+classid)[0];
 	if(selClass.value=='0'){
@@ -483,37 +529,37 @@ function changeClassStatus(classid,imgsrc,instantreload){
 		selImg.src=imgsrc;
 	}else if(selClass.value=='1'){
 		selClass.value='2';
-		selImg.src="graphics/outline.jpg";
+		selImg.src="graphics/outline"+height+".jpg";
 	}else if(selClass.value=='2'){
 		selClass.value='0';
-		selImg.src="graphics/inactive.jpg";
+		selImg.src="graphics/inactive"+height+".jpg";
 	}
 	if(instantreload)document.GUI.neuladen.click();
 }
 
 /*Anne*/
-function mouseOverClassStatus(classid,imgsrc){
+function mouseOverClassStatus(classid,imgsrc,height){
 	selClass = document.getElementsByName("class"+classid)[0];
 	selImg   = document.getElementsByName("imgclass"+classid)[0];
 	if(selClass.value=='0'){
 		selImg.src=imgsrc;	
 	}else if(selClass.value=='1'){
-		selImg.src="graphics/outline.jpg";
+		selImg.src="graphics/outline"+height+".jpg";
 	}else if(selClass.value=='2'){
-		selImg.src="graphics/inactive.jpg";
+		selImg.src="graphics/inactive"+height+".jpg";
 	}
 }
 
 /*Anne*/
-function mouseOutClassStatus(classid,imgsrc){
+function mouseOutClassStatus(classid,imgsrc,height){
 	selClass = document.getElementsByName("class"+classid)[0];
 	selImg   = document.getElementsByName("imgclass"+classid)[0];
 	if(selClass.value=='0'){
-		selImg.src="graphics/inactive.jpg";	
+		selImg.src="graphics/inactive"+height+".jpg";	
 	}else if(selClass.value=='1'){
 		selImg.src=imgsrc;
 	}else if(selClass.value=='2'){
-		selImg.src="graphics/outline.jpg";
+		selImg.src="graphics/outline"+height+".jpg";
 	}
 }
 

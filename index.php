@@ -67,22 +67,22 @@ include('config.php');
 include(CLASSPATH.'log.php');
 if(CASE_COMPRESS)	include(CLASSPATH.'case_compressor.php');
 
-if(DEBUG_LEVEL>0) $debug=new debugfile(DEBUGFILE);	# öffnen der Debug-log-datei
+if(DEBUG_LEVEL>0) $debug=new Debugger(DEBUGFILE);	# öffnen der Debug-log-datei
 # Öffnen der Log-Dateien. Derzeit werden in den Log-Dateien nur die SQL-Statements gespeichert, die über execSQL in den Klassen mysql und postgres ausgeführt werden.
 if (LOG_LEVEL>0) {
  $log_mysql=new LogFile(LOGFILE_MYSQL,'text','Log-Datei MySQL', '#------v: '.date("Y:m:d H:i:s",time()));
  $log_postgres=new LogFile(LOGFILE_POSTGRES,'text', 'Log-Datei-Postgres', '------v: '.date("Y:m:d H:i:s",time()));
 }
 
-if(!$_SESSION['angemeldet']){
-	include(CLASSPATH.'mysql.php');
+if (!$_SESSION['angemeldet'] or !empty($_REQUEST['username'])) {
+	include(CLASSPATH . 'mysql.php');
 	$userDb = new database();
 	$userDb->host = MYSQL_HOST;
-	$userDb->user = MYSQL_USER;																			
-	$userDb->passwd = MYSQL_PASSWORD;															
+	$userDb->user = MYSQL_USER;
+	$userDb->passwd = MYSQL_PASSWORD;
 	$userDb->dbName = MYSQL_DBNAME;
-	header('logout: true');		// damit ajax-Requests das auch mitkriegen	
-  include(LAYOUTPATH.'snippets/'.LOGIN);
+	header('logout: true');		// damit ajax-Requests das auch mitkriegen
+	include(LAYOUTPATH . 'snippets/' . LOGIN);
 }
 
 function include_($filename){
@@ -109,7 +109,7 @@ else{
 	include_(CLASSPATH.'bauleitplanung.php');
 }
 
-include(WWWROOT.APPLVERSION.'start.php');
+include(WWWROOT . APPLVERSION.'start.php');
 
 # Übergeben des Anwendungsfalles
 $debug->write("<br><b>Anwendungsfall go: ".$go."</b>",4);

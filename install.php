@@ -67,7 +67,7 @@ function install() {
   #show_constants();
 
   include(CLASSPATH.'log.php');
-  if(DEBUG_LEVEL > 0) $debug = new debugfile(DEBUGFILE);
+  if(DEBUG_LEVEL > 0) $debug = new Debugger(DEBUGFILE);
   if (LOG_LEVEL > 0) {
    $log_mysql = new LogFile(LOGFILE_MYSQL, 'text', 'Log-Datei MySQL' , '#------v: ' . date("Y:m:d H:i:s", time()));
    $log_postgres = new LogFile(LOGFILE_POSTGRES, 'text', 'Log-Datei-Postgres', '------v: ' . date("Y:m:d H:i:s", time()));

@@ -35,7 +35,7 @@ if (is_array($this->formvars['id'])) {
 }
 else {
 	# die Variable für id ist eine Liste (Array)
-	$idListe[$this->formvars['id']]=$this->formvars['id'];
+	$idListe[]=$this->formvars['id'];
 }
 for ($i=0;$i<count($idListe);$i++) {
   ?><input type="hidden" name="id[]" value="<?php echo $idListe[$i]; ?>"><?php

@@ -1,11 +1,21 @@
-<?php include('header.php'); ?>
-<div class="xplankonverter">
+<link rel="stylesheet" href="<?php echo BOOTSTRAP_PATH; ?>css/bootstrap.min.css" type="text/css">
+<link rel="stylesheet" href="<?php echo BOOTSTRAPTABLE_PATH; ?>bootstrap-table.min.css" type="text/css">
+<link rel="stylesheet" href="plugins/xplankonverter/styles/design.css" type="text/css">
+<link rel="stylesheet" href="plugins/xplankonverter/styles/styles.css" type="text/css">
+
+<script src="<?php echo JQUERY_PATH; ?>jquery-1.12.0.min.js"></script>
+<script src="<?php echo JQUERY_PATH; ?>jquery.base64.js"></script>
+<script src="<?php echo BOOTSTRAP_PATH; ?>js/bootstrap.min.js"></script>
+<script src="<?php echo BOOTSTRAP_PATH; ?>js/bootstrap-table-flatJSON.js"></script>
+<script src="<?php echo BOOTSTRAPTABLE_PATH; ?>bootstrap-table.min.js"></script>
+<script src="<?php echo BOOTSTRAPTABLE_PATH; ?>extension/bootstrap-table-export.min.js"></script>
+<script src="<?php echo BOOTSTRAPTABLE_PATH; ?>locale/bootstrap-table-de-DE.min.js"></script>
 <h2>Hochgeladene Dateien</h2>
 <br>
 <script language="javascript" type="text/javascript">
   function shapeFileFunctionsFormatter(value, row) {
-    output = '<a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<?php echo XPLANKONVERTER_SHAPEFILES_LAYER_ID; ?>&operator_shapefile_id==&value_shapefile_id=' + value + '"><i class="fa fa-pencil"></i></a>&nbsp;&nbsp;';
-    output += '<a href="index.php?go=xplankonverter_shapefiles_delete&konvertierung_id=' + row.konvertierung_id + '&shapefile_id=' + row.shapefile_id + '&layer_id=' + row.layer_id + '"><i class="fa fa-trash"></i></a>&nbsp;';
+    output = '<a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<?php echo XPLANKONVERTER_SHAPEFILES_LAYER_ID; ?>&operator_shapefile_id==&value_shapefile_id=' + value + '"><i class="btn-link fa fa-pencil"></i></a>&nbsp;&nbsp;';
+    output += '<a href="index.php?go=xplankonverter_shapefiles_delete&konvertierung_id=' + row.konvertierung_id + '&shapefile_id=' + row.shapefile_id + '&layer_id=' + row.layer_id + '"><i class="btn-link fa fa-trash"></i></a>&nbsp;';
     return output;
   }
 </script>
@@ -87,4 +97,3 @@
     );
   }
 ?>
-</div>
