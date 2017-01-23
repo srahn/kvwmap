@@ -26,8 +26,7 @@ else {
 		if(is_string($value))$_REQUEST[$key] = pg_escape_string($value);
   }
   $GUI->formvars=$_REQUEST;
-}		
-											
+}
 
 #################################################################################
 # Setzen der Konstante, ob in die Datenbank geschrieben werden soll oder nicht.

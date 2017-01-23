@@ -997,3 +997,12 @@ tbody.gle tr:hover {
 	height: 100%;
 	border: 1px solid lightgrey;
 }
+
+.btn-new {
+	padding: 5px;
+	background-color: #6cc644;
+	background-image: linear-gradient(#91dd70, #55ae2e);
+	border: 1px solid #5aad35;
+	border-radius: 5px;
+	color: white;
+}

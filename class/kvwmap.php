@@ -62,6 +62,7 @@ class GUI {
   var $FormObject;
   var $StellenForm;
   var $Fehlermeldung;
+	var $messages = array();
   var $Hinweis;
   var $Stelle;
   var $ALB;
@@ -6645,23 +6646,23 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->output();
 	}	
 
-  function Layereditor() {
-    $this->titel='Layer Editor';
-    $this->main='layer_formular.php';
-    $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-    # Abfragen der Layerdaten wenn eine layer_id zur Änderung selektiert ist
-    if ($this->formvars['selected_layer_id'] > 0) {
-      $this->classes = $mapDB->read_Classes($this->formvars['selected_layer_id'], NULL, true);
-      $this->layerdata = $mapDB->get_Layer($this->formvars['selected_layer_id'], false);
-      # Abfragen der Stellen des Layer
-      $this->formvars['selstellen']=$mapDB->get_stellen_from_layer($this->formvars['selected_layer_id']);
+	function Layereditor() {
+		$this->titel='Layer Editor';
+		$this->main='layer_formular.php';
+		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		# Abfragen der Layerdaten wenn eine layer_id zur Änderung selektiert ist
+		if ($this->formvars['selected_layer_id'] > 0) {
+			$this->classes = $mapDB->read_Classes($this->formvars['selected_layer_id'], NULL, true);
+			$this->layerdata = $mapDB->get_Layer($this->formvars['selected_layer_id'], false);
+			# Abfragen der Stellen des Layer
+			$this->formvars['selstellen']=$mapDB->get_stellen_from_layer($this->formvars['selected_layer_id']);
 			$this->grouplayers = $mapDB->get_layersfromgroup($this->layerdata['Gruppe']);
-    }
-    $this->stellen=$this->Stelle->getStellen('Bezeichnung');
-    $this->Groups = $mapDB->get_Groups();
-    $this->epsg_codes = read_epsg_codes($this->pgdatabase);
-    $this->output();
-  }
+		}
+		$this->stellen=$this->Stelle->getStellen('Bezeichnung');
+		$this->Groups = $mapDB->get_Groups();
+		$this->epsg_codes = read_epsg_codes($this->pgdatabase);
+		$this->output();
+	}
 
   function Layereditor_KlasseLoeschen(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
@@ -6947,7 +6948,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		if (trim($this->formvars['id'])!='' and $mapDB->id_exists('layer',$this->formvars['id'])) {
 			$table_information = $mapDB->get_table_information($this->Stelle->database->dbName,'layer');
-			$this->Meldung = "Die Id: ".$this->formvars['id']." existiert schon. Nächste freie Layer_ID ist ".$table_information['AUTO_INCREMENT'];
+			$this->add_message('error', 'Die Id: ' . $this->formvars['id'] . ' existiert schon. Nächste freie Layer_ID ist ' . $table_information['AUTO_INCREMENT']);
 		}
 		else {
 			$this->formvars['selected_layer_id'] = $mapDB->newLayer($this->formvars);
@@ -9624,13 +9625,13 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
           $this->selected_user->checkstelle();
         }
       }
-    # /Löschen der in der Selectbox entfernten User
+			# /Löschen der in der Selectbox entfernten User
 
       if ($ret[0]) {
-        $this->Meldung=$ret[1];
+				$this->add_message('error', $ret[1]);
       }
       else {
-        $this->Meldung='Daten der Stelle erfolgreich eingetragen!';
+        $this->add_message('notice', 'Daten der Stelle erfolgreich eingetragen!');
       }
     }
     $this->Stelleneditor();
@@ -10461,7 +10462,84 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->output();
   }
 
-  function LayerUebersicht(){
+	function cronjobs_anzeigen() {
+		include_once(CLASSPATH . 'CronJob.php');
+		$this->cronjobs = CronJob::find($this);
+		$this->main = 'cronjobs.php';
+		$this->output();
+	}
+
+	function cronjob_editieren() {
+		include_once(CLASSPATH . 'CronJob.php');
+		$this->cronjob = CronJob::find_by_id($this, $this->formvars['selected_cronjob_id']);
+		$this->main = 'cronjob_formular.php';
+		$this->output();
+	}
+
+	function cronjobs_anlegen() {
+		include_once(CLASSPATH . 'CronJob.php');
+		$this->cronjob = new CronJob($this);
+		$this->cronjob->data = $this->formvars;
+		$this->cronjob->set('query', strip_pg_escape_string($this->formvars['query']));
+		$this->cronjob->create();
+		$this->cronjobs = CronJob::find($this);
+		$this->main = 'cronjobs.php';
+		$this->output();
+	}
+
+	function cronjob_update() {
+		include_once(CLASSPATH . 'CronJob.php');
+		$this->cronjob = CronJob::find_by_id($this, $this->formvars['id']);
+		$this->cronjob->data = $this->formvars;
+		$this->cronjob->update();
+		$this->cronjob->set('query', strip_pg_escape_string($this->cronjob->get('query')));
+		$this->cronjobs = CronJob::find($this);
+		$this->main = 'cronjobs.php';
+		$this->output();
+	}
+
+	function cronjob_delete() {
+		include_once(CLASSPATH . 'CronJob.php');
+		$this->cronjob = CronJob::find_by_id($this, $this->formvars['selected_cronjob_id']);
+		$this->cronjob->delete();
+		$this->cronjobs = CronJob::find($this);
+		$this->main = 'cronjobs.php';
+		$this->output();
+	}
+
+	function crontab_schreiben() {
+		include_once(CLASSPATH . 'CronJob.php');
+		$this->cronjobs = CronJob::find($this);
+
+		# erzeugt die Zeilen für den crontab
+		$crontab_lines = array_map(
+			function ($cronjob) {
+				return $cronjob->get_crontab_line();
+			},
+			$this->cronjobs
+		);
+
+		# schreibt die Zeilen in eine Datei
+		$crontab_file = '/tmp/crontab_www-data';
+		$fp = fopen($crontab_file, 'w');
+		foreach($crontab_lines AS $line) {
+			fwrite($fp, $line . PHP_EOL);
+		}
+		fclose($fp);
+
+		# crontab starten
+		exec('crontab -u www-data ' . $crontab_file);
+
+		# crontab datei löschen
+		unlink($crontab_file);
+
+		# crontab Zeilen anzeigen
+		$this->crontab_lines = $crontab_lines;
+		$this->main = 'crontab.php';
+		$this->output();
+	}
+
+  function LayerUebersicht() {
   	$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->titel='Themenübersicht';
     $this->main='layer_uebersicht.php';
@@ -12804,10 +12882,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     }
   }
 
-  function setFullExtent() {
-    $this->map->setextent($this->Stelle->MaxGeorefExt->minx,$this->Stelle->MaxGeorefExt->miny,$this->Stelle->MaxGeorefExt->maxx,$this->Stelle->MaxGeorefExt->maxy);
-  }
-
+	function setFullExtent() { 		$this->map->setextent($this->Stelle->MaxGeorefExt->minx,$this->Stelle->MaxGeorefExt->miny,$this->Stelle->MaxGeorefExt->maxx,$this->Stelle->MaxGeorefExt->maxy);
+	}
 
   function zoomToALKGemeinde($Gemeinde,$border) {
     # 2006-01-31 pk
@@ -15417,7 +15493,6 @@ class db_mapObj{
 				}
 			}
 			$sql.= ' raster_visibility = '.$formvars['raster_visibility_'.$attributes['name'][$i]].', mandatory = '.$formvars['mandatory_'.$attributes['name'][$i]].' , quicksearch = '.$formvars['quicksearch_'.$attributes['name'][$i]];
-			#echo '<br>' . $sql;
       $this->debug->write("<p>file:kvwmap class:Document->save_layer_attributes :",4);
       $database->execSQL($sql,4, 1);
     }
