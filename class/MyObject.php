@@ -151,7 +151,7 @@ class MyObject {
       WHERE
         `id` = " . $this->get('id') . "
     ";
-    $this->debug->show('<p>sql: ' . $sql);
+    $this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
     $query = mysql_query($sql);
   }
 

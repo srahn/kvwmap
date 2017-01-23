@@ -10492,7 +10492,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->cronjob = CronJob::find_by_id($this, $this->formvars['id']);
 		$this->cronjob->data = $this->formvars;
 		$this->cronjob->update();
-		$this->cronjob->set('query', strip_pg_escape_string($this->cronjob->get('query')));
+#		$this->cronjob->set('query', strip_pg_escape_string($this->cronjob->get('query')));
 		$this->cronjobs = CronJob::find($this);
 		$this->main = 'cronjobs.php';
 		$this->output();
@@ -10512,12 +10512,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->cronjobs = CronJob::find($this);
 
 		# erzeugt die Zeilen für den crontab
-		$crontab_lines = array_map(
-			function ($cronjob) {
-				return $cronjob->get_crontab_line();
-			},
-			$this->cronjobs
-		);
+		$crontab_lines = array();
+		foreach($this->cronjobs AS $cronjob) {
+			if ($cronjob->get('aktiv')) {
+				$crontab_lines[] = $cronjob->get_crontab_line();
+			}
+		}
 
 		# schreibt die Zeilen in eine Datei
 		$crontab_file = '/tmp/crontab_www-data';
