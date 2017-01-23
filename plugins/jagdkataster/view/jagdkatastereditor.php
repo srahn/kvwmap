@@ -53,7 +53,7 @@ function buildwktpolygonfromsvgpath(svgpath){
 }
 
 function update_form(art){
-	if(art == 'jbe' || art == 'jbf' || art == 'jbe' || art == 'agf' || art == 'atf' || art == 'atv' || art == 'apf'){
+	if(art == 'jex' || art == 'jbe' || art == 'jbf' || art == 'jbe' || art == 'agf' || art == 'atf' || art == 'atv' || art == 'apf'){
 		document.GUI.nummer.value = '';
 		document.getElementById('lfdnr').style.display = 'none';
 		document.getElementById('dummy').style.display = 'none';
@@ -123,6 +123,7 @@ function update_form(art){
   			<option <? if($this->jagdbezirk['art'] == 'tjb' OR $this->formvars['art'] == 'tjb'){echo 'selected';} ?> value="tjb">Teiljagdbezirk</option>
   			<option <? if($this->jagdbezirk['art'] == 'sf' OR $this->formvars['art'] == 'sf'){echo 'selected';} ?> value="sf">Sonderfläche</option>
   			<option <? if($this->jagdbezirk['art'] == 'jbe' OR $this->formvars['art'] == 'jbe'){echo 'selected';} ?> value="jbe">Enklave</option>
+				<option <? if($this->jagdbezirk['art'] == 'jex' OR $this->formvars['art'] == 'jex'){echo 'selected';} ?> value="jex">Exklave</option>
   			<option <? if($this->jagdbezirk['art'] == 'jbf' OR $this->formvars['art'] == 'jbf'){echo 'selected';} ?> value="jbf">Jagdbezirksfreie Fläche</option>
   			<option <? if($this->jagdbezirk['art'] == 'agf' OR $this->formvars['art'] == 'agf'){echo 'selected';} ?> value="agf">Angliederungsfläche</option>
   			<option <? if($this->jagdbezirk['art'] == 'atf' OR $this->formvars['art'] == 'atf'){echo 'selected';} ?> value="atf">Abtrennungsfläche</option>

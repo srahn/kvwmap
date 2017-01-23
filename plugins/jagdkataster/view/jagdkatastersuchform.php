@@ -13,7 +13,7 @@ function csv_export(){
 }
 
 function update_form(art){
-	if(art == 'jbe' || art == 'jbf' || art == 'agf' || art == 'atf'){
+	if(art == 'jex' || art == 'jbe' || art == 'jbf' || art == 'agf' || art == 'atf'){
 		document.getElementById('status').style.display = '';
 	}
 	else{
@@ -105,6 +105,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
   			<option <? if($this->formvars['search_art'] == 'tjb'){echo 'selected';} ?> value="tjb">Teiljagdbezirk</option>
   			<option <? if($this->formvars['search_art'] == 'sf'){echo 'selected';} ?> value="sf">Sonderfläche</option>
   			<option <? if($this->formvars['search_art'] == 'jbe'){echo 'selected';} ?> value="jbe">Enklave</option>
+				<option <? if($this->formvars['search_art'] == 'jex'){echo 'selected';} ?> value="jex">Exklave</option>
   			<option <? if($this->formvars['search_art'] == 'jbf'){echo 'selected';} ?> value="jbf">Jagdbezirksfreie Fläche</option>
   			<option <? if($this->formvars['search_art'] == 'agf'){echo 'selected';} ?> value="agf">Angliederungsfläche</option>
   			<option <? if($this->formvars['search_art'] == 'atf'){echo 'selected';} ?> value="atf">Abtrennungsfläche</option>
