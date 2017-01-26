@@ -73,6 +73,7 @@ switch($this->go) {
 		$this->{'attributes'.$m} = $mapdb->add_attribute_values($this->attributes, $layerdb, array(), true, $this->Stelle->id);
 		$this->attributes = fortfuehrungslisten_add_user_names($this);
 		$this->attributes = fortfuehrungslisten_add_flurstuecke($this);
+		$this->attributes = fortfuehrungslisten_add_fluren($this);
 
 		?><pre style="text-align: left"><?php #print_r($this->attributes); ?></pre><?php
 		$this->main = PLUGINS . 'fortfuehrungslisten/view/suche_fortfuehrungsnachweise.php';
@@ -163,6 +164,7 @@ function fortfuehrungslisten_add_user_names($GUI) {
 
 function fortfuehrungslisten_add_flurstuecke($GUI) {
 	$field_name = 'flurstueckskennzeichen';
+	$GUI->attributes['indizes'][$field_name] = count($GUI->attributes['indizes']);
 	$sql = "
 		SELECT DISTINCT
 			flurstkennz AS value,
@@ -185,12 +187,42 @@ function fortfuehrungslisten_add_flurstuecke($GUI) {
 					unnest(zeigtaufneuesflurstueck) AS flurstkennz
 				FROM
 					ff_faelle
-		) AS foo ORDER BY value
+		) AS foo ORDER BY flurstkennz
 	";
 	$result = $GUI->pgdatabase->execSQL($sql, 4, 0);
 	while ($rs = pg_fetch_assoc($result[1])) {
 		$GUI->attributes['enum_value'][$GUI->attributes['indizes'][$field_name]][] = $rs['value'];
 		$GUI->attributes['enum_output'][$GUI->attributes['indizes'][$field_name]][] = $rs['output'];
+	}
+
+	return $GUI->attributes;
+};
+
+function fortfuehrungslisten_add_fluren($GUI) {
+	$field_name = 'flur';
+	$GUI->attributes['indizes'][$field_name] = count($GUI->attributes['indizes']);
+	$sql = "
+		SELECT DISTINCT
+			ltrim(substr(flurstkennz, 7, 3), '0') AS flur
+		FROM
+			(
+				SELECT
+					unnest(zeigtaufaltesflurstueck) AS flurstkennz
+				FROM
+					ff_faelle
+
+	  		UNION
+
+	  		SELECT
+					unnest(zeigtaufneuesflurstueck) AS flurstkennz
+				FROM
+					ff_faelle
+		) AS foo ORDER BY flur
+	";
+	$result = $GUI->pgdatabase->execSQL($sql, 4, 0);
+	while ($rs = pg_fetch_assoc($result[1])) {
+		$GUI->attributes['enum_value'][$GUI->attributes['indizes'][$field_name]][] = $rs['flur'];
+		$GUI->attributes['enum_output'][$GUI->attributes['indizes'][$field_name]][] = $rs['flur'];
 	}
 
 	return $GUI->attributes;

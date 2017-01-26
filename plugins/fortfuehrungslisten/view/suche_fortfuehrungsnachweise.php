@@ -1,5 +1,77 @@
-<?php
+<script type="text/javascript">
+	function filterFlurAndFlurstuecke() {
+		var gemkgschl = $('#gemkgnr').val(),
+				flstOptions = $('#flurstueckskennzeichen option'),
+				flurOptions = $('#flur option'),
+				fluren = [];
 
+		$.each(flstOptions, function(index, option) {
+			var flstgemkgschl = (parseInt(option.value.substring(2, 6), 10) || '').toString(),
+					hide = (gemkgschl != '' && option.value != '' && flstgemkgschl != gemkgschl),
+					flur;
+
+			if (hide) {
+				if (option.selected) {
+					option.selected = false;
+				}
+				option.style.display = 'none';
+			}
+			else {
+				if (option.value != '') {
+					flur = parseInt(option.value.substring(6, 9), 10)
+					fluren[flur] = true;
+				}
+				option.style.display = 'block';
+			}
+		});
+
+		$.each(flurOptions, function(index, option) {
+			var flur = option.value,
+					hide = (option.value != '' & !(fluren[option.value] ? true : false));
+
+			if (hide) {
+				if (option.selected) {
+					option.selected = false;
+				}
+				option.style.display = 'none';
+			}
+			else {
+				option.style.display = 'block';
+			}
+		});
+
+	}
+
+	function filterFlurstuecke() {
+		var gemkgschl = $('#gemkgnr').val(),
+				flur = $('#flur').val(),
+				options = $('#flurstueckskennzeichen option');
+
+		$.each(options, function(index, option) {
+			var flstgemkgschl = (parseInt(option.value.substring(2, 6), 10) || '').toString(),
+					flstflur = (parseInt(option.value.substring(6, 9), 10) || '').toString(),
+					hide;
+			
+			if (gemkgschl == '') {
+				hide = (flur != '' && option.value != '' && flstflur != flur);
+			}
+			else {
+				hide = (flur != '' && option.value != '' && (flstgemkgschl != gemkgschl || flstflur != flur));
+			}
+
+			if (hide) {
+				if (option.selected) {
+					option.selected = false;
+				}
+				option.style.display = 'none';
+			}
+			else {
+				option.style.display = 'block';
+			}
+		});
+	}
+</script>
+<?php
 include_once(CLASSPATH . 'FormObject.php');
 
 function getAttributOptions($field_name, $attributes) {
@@ -49,7 +121,7 @@ $altesneues_options = array(
 			<?php echo FormObject::createSelectField('operator_' . $field_name, $operator_options, '', 1, 'width: 45px'); ?>
 		</td>
 		<td align="left">
-			<?php echo FormObject::createSelectField('value_'. $field_name, getAttributOptions($field_name, $this->attributes)); ?>
+			<?php echo FormObject::createSelectField('value_'. $field_name, getAttributOptions($field_name, $this->attributes), '', 1, '', 'filterFlurAndFlurstuecke()', $field_name); ?>
 		</td>
 	</tr>
 
@@ -98,13 +170,24 @@ $altesneues_options = array(
 	</tr>
 
 	<tr>
+		<?php $field_name = 'flur'; ?>
+		<th style="text-align: left">Flur</td>
+		<td align="center">
+			<?php echo FormObject::createSelectField('operator_' . $filed_name, $operator_options, '', 1, 'width: 45px'); ?>
+		</td>
+		<td align="left" width="40%">
+			<?php echo FormObject::createSelectField('value_'. $field_name, getAttributOptions($field_name, $this->attributes), '', 1, '', 'filterFlurstuecke()', $field_name); ?>
+		</td>
+	</tr>
+
+	<tr>
 		<?php $field_name = 'flurstueckskennzeichen'; ?>
 		<th style="text-align: left">Flurstueck</td>
 		<td align="center">
 			<?php echo FormObject::createSelectField('operator_' . $filed_name, $operator_options, '', 1, 'width: 45px'); ?>
 		</td>
 		<td align="left" width="40%">
-			<?php echo FormObject::createSelectField('value_'. $field_name, getAttributOptions($field_name, $this->attributes)); ?>
+			<?php echo FormObject::createSelectField('value_'. $field_name, getAttributOptions($field_name, $this->attributes), '', 1, '', '', $field_name); ?>
 		</td>
 	</tr>
 
