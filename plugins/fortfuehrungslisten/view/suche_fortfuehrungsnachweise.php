@@ -173,7 +173,7 @@ $altesneues_options = array(
 		<?php $field_name = 'flur'; ?>
 		<th style="text-align: left">Flur</td>
 		<td align="center">
-			<?php echo FormObject::createSelectField('operator_' . $filed_name, $operator_options, '', 1, 'width: 45px'); ?>
+			<?php echo FormObject::createSelectField('operator_' . $field_name, $operator_options, '', 1, 'width: 45px'); ?>
 		</td>
 		<td align="left" width="40%">
 			<?php echo FormObject::createSelectField('value_'. $field_name, getAttributOptions($field_name, $this->attributes), '', 1, '', 'filterFlurstuecke()', $field_name); ?>
@@ -184,7 +184,7 @@ $altesneues_options = array(
 		<?php $field_name = 'flurstueckskennzeichen'; ?>
 		<th style="text-align: left">Flurstueck</td>
 		<td align="center">
-			<?php echo FormObject::createSelectField('operator_' . $filed_name, $operator_options, '', 1, 'width: 45px'); ?>
+			<?php echo FormObject::createSelectField('operator_' . $field_name, $operator_options, '', 1, 'width: 45px'); ?>
 		</td>
 		<td align="left" width="40%">
 			<?php echo FormObject::createSelectField('value_'. $field_name, getAttributOptions($field_name, $this->attributes), '', 1, '', '', $field_name); ?>
@@ -225,7 +225,7 @@ $altesneues_options = array(
 		<?php $field_name = 'updated_at'; ?>
 		<th style="text-align: left">geändert am</td>
 		<td align="center">
-			<?php echo FormObject::createSelectField('operator_' . $filed_name, $operator_options, '', 1, 'width: 45px'); ?>
+			<?php echo FormObject::createSelectField('operator_' . $field_name, $operator_options, '', 1, 'width: 45px'); ?>
 		</td>
 		<td align="left" width="40%">
 			<input name="value_<?php echo $field_name; ?>" value="" size="12">
@@ -236,7 +236,7 @@ $altesneues_options = array(
 		<?php $field_name = 'user_name'; ?>
 		<th style="text-align: left">bearbeitet von</td>
 		<td align="center">
-			<?php echo FormObject::createSelectField('operator_' . $filed_name, $operator_options, '', 1, 'width: 45px'); ?>
+			<?php echo FormObject::createSelectField('operator_' . $field_name, $operator_options, '', 1, 'width: 45px'); ?>
 		</td>
 		<td align="left" width="40%">
 			<?php echo FormObject::createSelectField('value_'. $field_name, getAttributOptions($field_name, $this->attributes)); ?>
