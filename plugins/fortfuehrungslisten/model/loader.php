@@ -93,7 +93,7 @@ class NASLoader extends DOMDocument {
 			if ($antragsnummer_datei != $ff_auftrag->get('antragsnr')) {
 				$success = false;
 				$this->messages[] = array(
-					'msg' => "Die Antragsnummer in der Auftragsdatei stimmt nicht<br>mit der Antragsnr im Formular überein.<br>Prüfen Sie die Eingabe und die Datei<br>und laden Sie ggf. eine neue Datei hoch!",
+					'msg' => "Die Antragsnummer in der Auftragsdatei (" . $antragsnummer_datei . ") stimmt nicht mit der Antragsnr im Formular (" . $ff_auftrag->get('antragsnr') . ") überein.<br>Prüfen Sie die Eingabe und die Datei<br>und laden Sie ggf. eine neue Datei hoch!",
 					'type' => 'warning'
 				);
 			}
