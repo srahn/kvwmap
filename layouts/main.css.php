@@ -616,15 +616,17 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 	opacity: 1;
 	position: fixed;
 	display: block;
-	top:40%;
+	top:20%;
 	left:45%;
 	min-width:250px;
-	max-width: 500px;
+	max-width: 550px;
 	#height:90px;
+	max-height: 600px;
+	overflow: scroll;
 	font-size: 17px;
 	font-family: SourceSansPro2;
 	margin:-45px 0 0 -100px;
-	padding: 20px;
+	padding: 10px;
 	text-align: center;
 	line-height: 20px;
 	border: 1px solid grey;
@@ -664,6 +666,7 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 	float: left;
 	margin-left: 20px;
 	padding: 0px;
+	max-width: 490px
 }
 
 table.tgle {
