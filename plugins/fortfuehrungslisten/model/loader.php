@@ -175,7 +175,7 @@ class NASLoader extends DOMDocument {
 								if ($child_node->nodeValue != $ff->get('zeigtaufaltesflurstueck')[0]) {
 									# Ab 2017 prüfe ob es eine höhere Flurstücksnummer in ALKIS gibt als die, die eingetragen werden soll
 									if ($ff_auftrag->get('jahr') > 2016) {
-										$result = $this->is_last_nenner($child_node->nodeValue);
+										$result = $this->is_last_nenner($child_node->nodeValue, $ff->get('fortfuehrungsfallnummer'));
 										if ($result['success']) {
 											if (!empty($result['bigger_kennz'])) {
 												$this->messages[] = array(
@@ -258,7 +258,7 @@ class NASLoader extends DOMDocument {
 	* @param $flurstueckskennzeichen String
 	* @return Array('success', 'msg', 'bigger_kennz')
 	*/
-	function is_last_nenner($flurstueckskennzeichen) {
+	function is_last_nenner($flurstueckskennzeichen, $fortfuehrungsfallnummer) {
 		$success = true;
 		$msg = '';
 		$bigger_kennz = array();
@@ -289,7 +289,7 @@ class NASLoader extends DOMDocument {
 					},
 					pg_fetch_all($ret[1])
 				);
-				$msg = (count($bigger_kennz) == 1 ? 'Das Flurstück:' : 'Die Flurstücke:') . ' ' . implode(', ', $bigger_kennz) . ' ' . (count($bigger_kennz) == 1 ? 'hat einen höheren' : 'haben höhere') . ' Nenner als das in ALKIS vorhandene Flurstück: ' . $flurstueckskennzeichen;
+				$msg = 'Im Fortführungsfall Nr.: ' . $fortfuehrungsfallnummer . ' hat das Flurstück: ' . $flurstueckskennzeichen . ' einen kleineren Nenner als folgende Flurstücke aus ALKIS: ' . implode(', ', $bigger_kennz);
 			}
 		}
 		return array(

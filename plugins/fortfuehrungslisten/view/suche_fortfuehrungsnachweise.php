@@ -1,9 +1,24 @@
 <script type="text/javascript">
+	$.fn.optVisible = function(show) {
+		if (show) {
+			if (this.parent().is('span')) {
+				this.unwrap('span');
+			}
+		}
+		else {
+			if (!this.parent().is('span')) {
+				this.wrap("<span>").parent().hide();
+			}
+		}
+		return this;
+	};
+
 	function filterFlurAndFlurstuecke() {
 		var gemkgschl = $('#gemkgnr').val(),
 				flstOptions = $('#flurstueckskennzeichen option'),
 				flurOptions = $('#flur option'),
 				fluren = [];
+				debug_f = flstOptions;
 
 		$.each(flstOptions, function(index, option) {
 			var flstgemkgschl = (parseInt(option.value.substring(2, 6), 10) || '').toString(),
@@ -14,14 +29,14 @@
 				if (option.selected) {
 					option.selected = false;
 				}
-				option.style.display = 'none';
+				$(option).optVisible(false);
 			}
 			else {
 				if (option.value != '') {
 					flur = parseInt(option.value.substring(6, 9), 10)
 					fluren[flur] = true;
 				}
-				option.style.display = 'block';
+				$(option).optVisible(true);
 			}
 		});
 
@@ -33,13 +48,12 @@
 				if (option.selected) {
 					option.selected = false;
 				}
-				option.style.display = 'none';
+				$(option).optVisible(false);
 			}
 			else {
-				option.style.display = 'block';
+				$(option).optVisible(true);
 			}
 		});
-
 	}
 
 	function filterFlurstuecke() {
@@ -63,10 +77,10 @@
 				if (option.selected) {
 					option.selected = false;
 				}
-				option.style.display = 'none';
+				$(option).optVisible(false);
 			}
 			else {
-				option.style.display = 'block';
+				$(option).optVisible(true);
 			}
 		});
 	}
