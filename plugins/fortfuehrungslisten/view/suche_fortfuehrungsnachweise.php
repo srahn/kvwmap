@@ -7,7 +7,7 @@
 		}
 		else {
 			if (!this.parent().is('span')) {
-				this.wrap("<span>").parent().hide();
+				this.wrap("<span>");
 			}
 		}
 		return this;
