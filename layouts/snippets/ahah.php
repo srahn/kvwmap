@@ -1,7 +1,7 @@
 <?
 $ahah = '
 <script language="javascript" type="text/javascript">
-	function ahah(url, data, target, action, response_format = \'tilde_separated\') {
+	function ahah(url, data, target, action) {
 		for (k = 0; k < target.length; ++k) {
 			if (target[k] != null && target[k].tagName == "DIV" && target[k].innerHTML == "") {
 				target[k].innerHTML = \'<img src="graphics/ajax-loader.gif">\';
@@ -15,7 +15,7 @@ $ahah = '
 		}
 		if (req != undefined) {
 			req.onreadystatechange = function() {
-				ahahDone(url, target, req, action, response_format);
+				ahahDone(url, target, req, action);
 			};
 			req.open("POST", url, true);
 			if (typeof data == "string") {
@@ -25,15 +25,11 @@ $ahah = '
 		}
 	}
 
-	function ahahDone(url, targets, req, actions, response_format) {
+	function ahahDone(url, targets, req, actions) {
 		if (req.readyState == 4) { // only if req is "loaded"
 			if (req.status == 200) { // only if "OK"
 				if (req.getResponseHeader(\'logout\') == \'true\') { // falls man zwischenzeitlich ausgeloggt wurde
 					window.location = url;
-					return;
-				}
-				if (req.getResponseHeader(\'error\') == \'true\') { // falls man ein Fehler aufgetreten ist
-					//alert(req.responseText);
 					return;
 				}
 				var found = false;
@@ -72,7 +68,7 @@ $ahah = '
 							break;
 
 							case "sethtml":
-								if (targets[i] != undefined) {
+								if (targets[i] != undefined && req.getResponseHeader(\'error\') != \'true\') {
 									targets[i].innerHTML = responsevalues[i];
 									if (targets[i].tagName == "SELECT" && targets[i].outerHTML != undefined) {
 										targets[i].outerHTML = targets[i].outerHTML; // Bug-Workaround fuer den IE 8 beim setzen eines select-Objekts
