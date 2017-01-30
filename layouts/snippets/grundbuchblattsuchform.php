@@ -82,7 +82,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
     <td align="right"><span class="fett">Grundbuchblatt:</span></td>
     <td>
     	<br>ausgewählte:<br>
-    	<select size="10" style="width:110px" multiple="true"  name="selectedBlatt">
+    	<select size="10" style="width:130px" multiple="true"  name="selectedBlatt">
     		 <?
           for($i=0; $i < count($this->selblattliste); $i++){
           	echo '<option value="'.$this->selblattliste[$i].'">'.$this->selblattliste[$i].'</option>';
@@ -96,7 +96,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
     </td>
     <td>
     	<br>vorhandene:<br>
-    	<select size="10" style="width:80px" multiple="true"  name="Blatt">
+    	<select size="10" style="width:100px" multiple="true"  name="Blatt">
     		<?for($i = 0; $i < count($this->blattliste['blatt']); $i++){?>
     			<option
     			<?if($this->formvars['Blatt'] == $this->blattliste['blatt'][$i]){?>
