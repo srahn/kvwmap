@@ -1721,8 +1721,8 @@ FROM
 	
 	function getVersionen($table, $gml_ids, $start){
 		$versionen = array();
-		$sql = "SELECT beginnt::timestamp, endet::timestamp, bezeichner as anlass, '".$table."' as table ";
-		$sql.= "FROM alkis.".$table." LEFT JOIN alkis.ax_fortfuehrungsanlaesse ON wert = NULLIF(anlass, '')::integer ";
+		$sql = "SELECT beginnt::timestamp, endet::timestamp, value as anlass, '".$table."' as table ";
+		$sql.= "FROM alkis.".$table." LEFT JOIN alkis.aa_anlassart ON id = anlass[1] ";
 		$sql.= "WHERE gml_id IN ('".implode("','", $gml_ids)."') ";
 		if($start)$sql.= "AND beginnt::timestamp > '".$start."' ";
 		$sql.= "ORDER BY beginnt";
