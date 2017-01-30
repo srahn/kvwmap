@@ -1,13 +1,21 @@
 <?php
 	include(LAYOUTPATH.'languages/cronjobs_'.$this->user->rolle->language.'.php');
 ?>
+<script language="javascript" type="text/javascript">
+	function update_aktiv(id) {
+		var aktiv = ($('#aktiv_' + id).is(':checked') ? 1 : 0);
+		window.location = 'index.php?go=cronjob_speichern_Speichern&id=' + id + '&aktiv=' + aktiv;
+	}
+</script>
 <table width="700px" border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>" style="margin-bottom: 40px;">
   <tr>
-    <td align="center" colspan="3" height="40" valign="middle"><h2><?php echo $strTitle; ?></h2></td>
-		<td align="right"><a class="btn btn-new" href="index.php?go=cronjob_editieren"><i class="fa fa-plus" style="color: white;"></i>&nbsp;Neuer&nbsp;Job</a></td>
+    <td align="center" colspan="4"><h2><?php echo $strTitle; ?></h2></td>
+	</tr>
+	<tr>
+		<td align="right" colspan="4"><a class="btn btn-new" href="index.php?go=cronjob_editieren"><i titel="Lege einen neuen Job an." class="fa fa-plus" style="color: white;"></i>&nbsp;Neuer&nbsp;Job</a></td>
   </tr>
 	<tr>
-		<th>Id</th>
+		<th><i title="Aktiviere oder Deaktiviere die Cron Jobs über die Checkboxen." class="fa fa-check-square-o" aria-hidden="true"></i></th>
 		<th>Bezeichnung</th>
 		<th>Beschreibung</th>
 		<!--th>Query/Command</th>
@@ -17,7 +25,16 @@
 	<tr><?php
 	foreach($this->cronjobs AS $cronjob) { ?>
 		<tr>
-			<td><?php echo $cronjob->get('id'); ?></td>
+			<td>
+				<input
+					id="aktiv_<?php echo $cronjob->get('id'); ?>"
+					type="checkbox"
+					class="aktiv_checkboxes"
+					value="<?php echo $cronjob->get('id'); ?>"
+					<?php echo ($cronjob->get('aktiv') ? ' checked' : ''); ?>
+					onchange="update_aktiv(this.value);"
+				>
+			</td>
 			<td><?php echo $cronjob->get('bezeichnung'); ?></td>
 			<td><?php echo $cronjob->get('beschreibung'); ?></td>
 			<!--td><textarea cols="33" rows="1" readonly><?php echo (empty($cronjob->get('query')) ? $cronjob->get('function') : $cronjob->get('query')); ?></textarea></td>
@@ -31,4 +48,4 @@
 	} ?>
 </table>
 <p>
-<a class="btn btn-new" href="index.php?go=crontab_schreiben"><i class="fa fa-clock-o" style="color: white;"></i> Crontab Schreiben</a>
+<a class="btn btn-new" href="index.php?go=crontab_schreiben"><i title="Schreibe die aktiven Cronjobs in die Crontab, damit sie von da an ausgeführt werden." class="fa fa-clock-o" style="color: white;"></i> Crontab Schreiben</a>

@@ -24,7 +24,7 @@ include(LAYOUTPATH.'languages/cronjob_formular_'.$this->user->rolle->language.'.
 		<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo 'ID'; ?></th>
 		<td style="border-bottom:1px solid #C3C7C3">
 			<input name="id" type="hidden" value="<?php echo $this->cronjob->get('id'); ?>">
-			<?php echo $this->cronjob->get('id'); ?> 
+			<?php echo $this->cronjob->get('id'); ?>
 		</td>
 	</tr><?php
 	} ?>

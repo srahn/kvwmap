@@ -231,7 +231,7 @@ FROM
     return $ret;
   }
 
-  function execSQL($sql,$debuglevel, $loglevel) {
+  function execSQL($sql, $debuglevel, $loglevel, $suppress_error_msg = false) {
   	switch ($this->loglevel) {
   		case 0 : {
   			$logsql=0;
@@ -252,14 +252,22 @@ FROM
       if($this->schema != ''){
       	$sql = "SET search_path = ".$this->schema.", public;".$sql;
       }
-      $query=pg_query($this->dbConn,$sql);
+			if ($suppress_error_msg) {
+				$query = @pg_query($this->dbConn, $sql);
+			}
+			else {
+				$query = pg_query($this->dbConn, $sql);
+			}
+
       //$query=0;
       if ($query==0) {
 				$errormessage = pg_last_error($this->dbConn);
 				header('error: true');		// damit ajax-Requests das auch mitkriegen
         $ret[0]=1;
         $ret[1]="Fehler bei SQL Anweisung:<br><br>\n\n".$sql."\n\n<br><br>".$errormessage;
-        echo "<br><b>".$ret[1]."</b>";
+        if (!$suppress_error_msg) {
+					echo "<br><b>".$ret[1]."</b>";
+				}
         $this->debug->write("<br><b>".$ret[1]."</b>",$debuglevel);
         if ($logsql) {
           $this->logfile->write($this->commentsign." ".$ret[1]);

@@ -8171,11 +8171,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					if (!empty($layerset[0]['trigger_function'])) {
 						$this->exec_trigger_function('BEFORE', 'INSERT', $layerset[0]);
 					}
-
           $this->debug->write("<p>file:kvwmap class:neuer_Layer_Datensatz_speichern :",4);
-          if($this->formvars['embedded'] == ''){
+          if($this->formvars['embedded'] == '') {
             $ret = $layerdb->execSQL($sql,4, 1);
-            if(!$ret[0]){
+            if(!$ret[0]) {
 							$result = pg_fetch_row($ret[1]);
             	if(pg_affected_rows($ret[1]) > 0){
               	$this->formvars['value_'.$table['tablename'].'_oid'] = pg_last_oid($ret[1]);
@@ -8186,8 +8185,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
             	}
             }
           }
-          else{
-            $ret = $layerdb->execSQL($sql,4, 1);
+          else {
+            $ret = $layerdb->execSQL($sql,4, 1, true);
             if(!$ret[0]){
               $last_oid = pg_last_oid($ret[1]);
 							$oid = $last_oid;
@@ -8203,12 +8202,18 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							$this->exec_trigger_function('AFTER', 'INSERT', $layerset[0], $oid);
 						}
 					}
-
         }
       }
     }
     if($this->formvars['embedded'] != ''){    # wenn es ein neuer Datensatz aus einem embedded-Formular ist, muss das entsprechende Attribut des Hauptformulars aktualisiert werden
       header('Content-type: text/html; charset=UTF-8');
+
+			$result = pg_fetch_all($ret[1]);
+			if (!empty($result) AND !empty($result[0]['msg'])) {
+				$this->add_message($result[0]['msg_type'], $result[0]['msg']);
+				$this->output_messages();
+			}
+
       $attributename[0] = $this->formvars['targetattribute'];
       $attributes = $mapdb->read_layer_attributes($this->formvars['targetlayer_id'], $layerdb, $attributename);
 
@@ -8227,7 +8232,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						}
 						echo '~'.$html;
 					}
-        }break;
+        } break;
 
         case 'SubFormEmbeddedPK' : {
           $this->formvars['embedded_subformPK'] = true;
@@ -10492,7 +10497,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->cronjob = CronJob::find_by_id($this, $this->formvars['id']);
 		$this->cronjob->data = $this->formvars;
 		$this->cronjob->update();
-		$this->cronjob->set('query', strip_pg_escape_string($this->cronjob->get('query')));
+#		$this->cronjob->set('query', strip_pg_escape_string($this->cronjob->get('query')));
 		$this->cronjobs = CronJob::find($this);
 		$this->main = 'cronjobs.php';
 		$this->output();
@@ -10512,12 +10517,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->cronjobs = CronJob::find($this);
 
 		# erzeugt die Zeilen für den crontab
-		$crontab_lines = array_map(
-			function ($cronjob) {
-				return $cronjob->get_crontab_line();
-			},
-			$this->cronjobs
-		);
+		$crontab_lines = array();
+		foreach($this->cronjobs AS $cronjob) {
+			if ($cronjob->get('aktiv')) {
+				$crontab_lines[] = $cronjob->get_crontab_line();
+			}
+		}
 
 		# schreibt die Zeilen in eine Datei
 		$crontab_file = '/tmp/crontab_www-data';
@@ -11682,7 +11687,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							$this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
 							$ret = $layerdb[$layer_id]->execSQL($sql,4, 1);
 
-							if(!$ret[0]){
+							if(!$ret[0]) {
 								$result = pg_fetch_row($ret[1]);
 								if(pg_affected_rows($ret[1]) == 0){
 									$ret[0] = 1;
@@ -11714,6 +11719,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		}
     if ($this->formvars['embedded'] != ''){    # wenn es ein Datensatz aus einem embedded-Formular ist, muss das entsprechende Attribut des Hauptformulars aktualisiert werden
       header('Content-type: text/html; charset=UTF-8');
+			$this->output_messages();
       $attributenames[0] = $this->formvars['targetattribute'];
       $attributes = $mapdb->read_layer_attributes($this->formvars['targetlayer_id'], $layerdb, $attributenames);
       switch ($attributes['form_element_type'][0]){

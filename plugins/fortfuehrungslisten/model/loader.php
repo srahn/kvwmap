@@ -93,7 +93,7 @@ class NASLoader extends DOMDocument {
 			if ($antragsnummer_datei != $ff_auftrag->get('antragsnr')) {
 				$success = false;
 				$this->messages[] = array(
-					'msg' => "Die Antragsnummer in der Auftragsdatei stimmt nicht<br>mit der Antragsnr im Formular überein.<br>Prüfen Sie die Eingabe und die Datei<br>und laden Sie ggf. eine neue Datei hoch!",
+					'msg' => "Die Antragsnummer in der Auftragsdatei (" . $antragsnummer_datei . ") stimmt nicht mit der Antragsnr im Formular (" . $ff_auftrag->get('antragsnr') . ") überein.<br>Prüfen Sie die Eingabe und die Datei<br>und laden Sie ggf. eine neue Datei hoch!",
 					'type' => 'warning'
 				);
 			}
@@ -104,8 +104,10 @@ class NASLoader extends DOMDocument {
 					foreach($this->gemkg_nummern AS $gemkg_nummer) {
 						if ($gemkg_nummer->nodeValue != $ff_auftrag->get('gemkgnr')) {
 							$success = ($ff_auftrag->get('an_pruefen') == 't' ? false : true);
-							$msg  = "In der Auftragsdatei wurde die Gemarkungsnummer: " . $gemkg_nummer->nodeValue . " gefunden. Diese Nummer stimmt nicht mit der im Formular oben angegebenen Gemarkungsnummer: " . $ff_auftrag->get('gemkgnr') . ' überein.<br>';
-							$msg .= "Korrigieren Sie die Gemarkungsnummer im Formular, prüfen Sie ob die Auftragsdatei korrekt ist oder speichern Sie vorher, dass der Datensatz nicht geprüft werden soll.";
+							$msg  = "In der Auftragsdatei wurde die Gemarkungsnummer: " . $gemkg_nummer->nodeValue . " gefunden. Diese Nummer stimmt nicht mit der im Formular oben angegebenen Gemarkungsnummer: " . $ff_auftrag->get('gemkgnr') . ' überein.';
+							if (!$success) {
+								$msg .= "<br>Korrigieren Sie die Gemarkungsnummer im Formular, prüfen Sie ob die Auftragsdatei korrekt ist oder speichern Sie vorher, dass der Datensatz nicht geprüft werden soll.";
+							}
 							$this->messages[] = array(
 								'msg' => $msg,
 								'type' => ($ff_auftrag->get('an_pruefen') == 't' ? 'error' : 'warning')
@@ -171,6 +173,25 @@ class NASLoader extends DOMDocument {
 							if ($tag == 'zeigtaufneuesflurstueck') {
 								# Speichert neues Flurstück nur, wenn es nicht mit altem übereinstimmt
 								if ($child_node->nodeValue != $ff->get('zeigtaufaltesflurstueck')[0]) {
+									# Ab 2017 prüfe ob es eine höhere Flurstücksnummer in ALKIS gibt als die, die eingetragen werden soll
+									if ($ff_auftrag->get('jahr') > 2016) {
+										$result = $this->is_last_nenner($child_node->nodeValue, $ff->get('fortfuehrungsfallnummer'));
+										if ($result['success']) {
+											if (!empty($result['bigger_kennz'])) {
+												$this->messages[] = array(
+													'msg' => $result['msg'],
+													'type' => 'warning'
+												);
+											}
+										}
+										else {
+											$this->messages[] = array(
+												'msg' => $result['msg'],
+												'type' => 'error'
+											);
+										}
+									}
+
 									$ff->set_array('anlassarten', $anlaesse[$child_node->nodeValue]);
 									$ff->set_array($tag, $child_node->nodeValue);
 								}
@@ -227,6 +248,55 @@ class NASLoader extends DOMDocument {
 			}
 		}
 		return $array; 
+	}
+
+	/*
+	* Diese Funktion liefert ein Array mit success = true wenn das im flurstueckskennzeichen übergebene Flurstück von der
+	* zählweise her das letzte Flurstück ist. Ansonsten ist success = false und bigger_kennz enthält ein Array aller
+	* flurstueckskennzeichen, die eine höhere Nummerierung haben und in msg eine Message, die das beschreibt.
+	* Tritt ein Fehler bei der Abfrag auf ist success auch  false und msg enthält eine Fehlermeldung.
+	* @param $flurstueckskennzeichen String
+	* @return Array('success', 'msg', 'bigger_kennz')
+	*/
+	function is_last_nenner($flurstueckskennzeichen, $fortfuehrungsfallnummer) {
+		$success = true;
+		$msg = '';
+		$bigger_kennz = array();
+
+		$bis_zahler = substr($flurstueckskennzeichen, 0, 14); 
+		$sql = "
+			SELECT
+				flurstueckskennzeichen
+			FROM
+				alkis.ax_flurstueck
+			WHERE
+				flurstueckskennzeichen like '{$bis_zahler}%' AND
+				flurstueckskennzeichen > '{$flurstueckskennzeichen}'
+			LIMIT 1
+		";
+		$ret = $this->gui->pgdatabase->execSQL($sql, 4, 0, true);
+
+		if ($ret[0]) {
+			$success = false;
+			$msg = 'Fehler bei der Abfrage der Datenbank in SQL-Statement:<br>' . $sql;
+		}
+		else {
+			$num_rows = pg_num_rows($ret[1]);
+			if ($num_rows > 0) {
+				$bigger_kennz = array_map(
+					function($row) {
+						return $row['flurstueckskennzeichen'];
+					},
+					pg_fetch_all($ret[1])
+				);
+				$msg = 'Im Fortführungsfall Nr.: ' . $fortfuehrungsfallnummer . ' hat das Flurstück: ' . $flurstueckskennzeichen . ' einen kleineren Nenner als folgende Flurstücke aus ALKIS: ' . implode(', ', $bigger_kennz);
+			}
+		}
+		return array(
+			'success' => $success,
+			'msg' => $msg,
+			'bigger_kennz' => $bigger_kennz
+		);
 	}
 
 }

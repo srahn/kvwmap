@@ -77,7 +77,8 @@ class FormObject {
 		$this->outputHTML();
 	} # ende constructor
 
-static	function createSelectField($name, $options, $value = '', $size = 1, $style = '') {
+static	function createSelectField($name, $options, $value = '', $size = 1, $style = '', $onchange = '', $id = '') {
+	$id = (empty($id) ? $name : $id);
 	$options_html = array();
 	foreach($options AS $option) {
 		$selected = ($option['value'] == $value ? ' selected' : '');
@@ -85,7 +86,7 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 	}
 
 	$html  = "
-<select name=\"{$name}\" size=\"{$size}\" style=\"{$style}\">
+<select id=\"{$id}\" name=\"{$name}\" size=\"{$size}\" style=\"{$style}\" onchange=\"{$onchange}\">
 	" . implode('<br>', $options_html) . "
 </select>
 ";
