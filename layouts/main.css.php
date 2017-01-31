@@ -622,7 +622,7 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 	max-width: 550px;
 	#height:90px;
 	max-height: 600px;
-	overflow: scroll;
+	overflow: auto;
 	font-size: 17px;
 	font-family: SourceSansPro2;
 	margin:-45px 0 0 -100px;
