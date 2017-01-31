@@ -5566,14 +5566,14 @@ class GUI {
 
 	function nameSuchen() {
 		$GemeindenStelle=$this->Stelle->getGemeindeIDs();
-		if($GemeindenStelle != ''){
+		if(!empty($GemeindenStelle['ganze_gemeinde'])){
 			$Gemarkung=new gemarkung('',$this->pgdatabase);
-			$GemkgListe=$Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), NULL);						# hier die Gemarkungen der ganzen Gemeinden ermitteln
-			$ganze_gemarkungen = array_merge($GemkgListe['GemkgID'], array_keys($GemeindenStelle['ganze_gemarkung']));	# und mit den ganzen Gemarkungen vereinen
+			$GemkgListe = $Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), array_keys($GemeindenStelle['ganze_gemarkung']));
+			$GemeindenStelle['ganze_gemarkung'] = array_flip($GemkgListe['GemkgID']);
 		}
     $formvars = $this->formvars;
     $flurstueck=new flurstueck('',$this->pgdatabase);
-		$ret=$flurstueck->getNamen($formvars,$ganze_gemarkungen, $GemeindenStelle['eingeschr_gemarkung']);
+		$ret=$flurstueck->getNamen($formvars,array_keys($GemeindenStelle['ganze_gemarkung']), $GemeindenStelle['eingeschr_gemarkung']);
     if ($ret[0]) {
       $this->Fehlermeldung='<br>Es konnten keine Namen abgefragt werden'.$ret[1];
       $this->namenWahl();
@@ -5586,7 +5586,7 @@ class GUI {
       else {
 				$formvars['anzahl'] = '';
 				$formvars['offset'] = '';
-				$ret=$flurstueck->getNamen($formvars, $ganze_gemarkungen, $GemeindenStelle['eingeschr_gemarkung']);
+				$ret=$flurstueck->getNamen($formvars, array_keys($GemeindenStelle['ganze_gemarkung']), $GemeindenStelle['eingeschr_gemarkung']);
         $this->anzNamenGesamt=count($ret[1]);
 
 				for($i = 0; $i < count($this->namen); $i++){
