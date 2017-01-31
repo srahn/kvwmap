@@ -231,77 +231,85 @@ FROM
     return $ret;
   }
 
-  function execSQL($sql, $debuglevel, $loglevel, $suppress_error_msg = false) {
-  	switch ($this->loglevel) {
-  		case 0 : {
-  			$logsql=0;
-  		} break;
-  		case 1 : {
-  			$logsql=1;
-  		} break;
-  		case 2 : {
-  			$logsql=$loglevel;
-  		} break;
-  	}
-    # SQL-Statement wird nur ausgeführt, wenn DBWRITE gesetzt oder
-    # wenn keine INSERT, UPDATE und DELETE Anweisungen in $sql stehen.
-    # (lesend immer, aber schreibend nur mit DBWRITE=1)
-    if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
-      #echo "<br>".$sql;
-      $sql = "SET datestyle TO 'German';".$sql;
-      if($this->schema != ''){
-      	$sql = "SET search_path = ".$this->schema.", public;".$sql;
-      }
+	function execSQL($sql, $debuglevel, $loglevel, $suppress_error_msg = false) {
+		$ret = array(); // Array with results to return
+
+		switch ($this->loglevel) {
+			case 0 : {
+				$logsql = 0;
+			} break;
+			case 1 : {
+				$logsql = 1;
+			} break;
+			case 2 : {
+				$logsql = $loglevel;
+			} break;
+		}
+		# SQL-Statement wird nur ausgeführt, wenn DBWRITE gesetzt oder
+		# wenn keine INSERT, UPDATE und DELETE Anweisungen in $sql stehen.
+		# (lesend immer, aber schreibend nur mit DBWRITE=1)
+		if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
+			#echo "<br>".$sql;
+			$sql = "SET datestyle TO 'German';".$sql;
+			if($this->schema != ''){
+				$sql = "SET search_path = " . $this->schema . ", public;" . $sql;
+			}
 			if ($suppress_error_msg) {
 				$query = @pg_query($this->dbConn, $sql);
 			}
 			else {
-				$query = pg_query($this->dbConn, $sql);
+				$query = @pg_query($this->dbConn, $sql);
 			}
 
-      //$query=0;
-      if ($query==0) {
+			//$query=0;
+			if ($query == 0) {
+				$ret[0] = 1;
+				$ret['success'] = false;
 				$errormessage = pg_last_error($this->dbConn);
-				header('error: true');		// damit ajax-Requests das auch mitkriegen
-        $ret[0]=1;
-        $ret[1]="Fehler bei SQL Anweisung:<br><br>\n\n".$sql."\n\n<br><br>".$errormessage;
-        if (!$suppress_error_msg) {
-					echo "<br><b>".$ret[1]."</b>";
+				#header('error: true');		// damit ajax-Requests das auch mitkriegen
+				$ret[1] = "Fehler bei SQL Anweisung:<br><br>\n\n" . $sql . "\n\n<br><br>" . $errormessage;
+				$ret['msg'] = $ret[1];
+				$ret['type'] = 'error';
+				if (!$suppress_error_msg) {
+					echo "<br><b>" . $ret[1] . "</b>";
 				}
-        $this->debug->write("<br><b>".$ret[1]."</b>",$debuglevel);
-        if ($logsql) {
-          $this->logfile->write($this->commentsign." ".$ret[1]);
-        }
-      }
-      else {
-      	# Abfrage wurde erfolgreich ausgeführt
-        $ret[0]=0;
-        $ret[1]=$query;
-        $this->debug->write("<br>".$sql,$debuglevel);
-        # 2006-07-04 pk $logfile ersetzt durch $this->logfile
-        if ($logsql) {
-          $this->logfile->write($sql.';');
-        }
-      }
-      $ret[2]=$sql;
-    }
-    else {
-      # Es werden keine SQL-Kommandos ausgeführt
-      # Die Funktion liefert ret[0]=0, und zeigt damit an, daß kein Datenbankfehler aufgetreten ist,
-      $ret[0]=0;
-      # jedoch hat $ret[1] keine query_ID sondern auch den Wert 0
-      $ret[1]=0;
-      # Wenn $this->loglevel != 0 wird die sql-Anweisung in die logdatei geschrieben
-      # zusätzlich immer in die debugdatei
-      # 2006-07-04 pk $logfile ersetzt durch $this->logfile
-      if ($logsql) {
-        $this->logfile->write($sql.';');
-      }
-      $this->debug->write("<br>".$sql,$debuglevel);
-    }
+				$this->debug->write("<br><b>" . $ret[1] . "</b>", $debuglevel);
+				if ($logsql) {
+					$this->logfile->write($this->commentsign . " " . $ret[1]);
+				}
+			}
+			else {
+				# Abfrage wurde erfolgreich ausgeführt
+				$ret[0] = 0;
+				$ret['success'] = true;
+				$ret[1] = $query;
+				$ret['query'] = $ret[1]; 
+				$this->debug->write("<br>" . $sql, $debuglevel);
+				# 2006-07-04 pk $logfile ersetzt durch $this->logfile
+				if ($logsql) {
+					$this->logfile->write($sql . ';');
+				}
+			}
+			$ret[2] = $sql;
+		}
+		else {
+			# Es werden keine SQL-Kommandos ausgeführt
+			# Die Funktion liefert ret[0]=0, und zeigt damit an, daß kein Datenbankfehler aufgetreten ist,
+			$ret[0] = 0;
+			$ret['success'] = true;
+			# jedoch hat $ret[1] keine query_ID sondern auch den Wert 0
+			$ret[1] = 0;
+			# Wenn $this->loglevel != 0 wird die sql-Anweisung in die logdatei geschrieben
+			# zusätzlich immer in die debugdatei
+			# 2006-07-04 pk $logfile ersetzt durch $this->logfile
+			if ($logsql) {
+				$this->logfile->write($sql . ';');
+			}
+			$this->debug->write("<br>" . $sql, $debuglevel);
+		}
 
-    return $ret;
-  }
+		return $ret;
+	}
 
 	function build_temporal_filter($tablenames){
 		$timestamp = rolle::$hist_timestamp;

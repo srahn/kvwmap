@@ -140,17 +140,6 @@ $altesneues_options = array(
 	</tr>
 
 	<tr>
-		<?php $field_name = 'gemkgschl'; ?>
-		<th style="text-align: left">Gemarkungsschlüssel</td>
-		<td align="center">
-			<?php echo FormObject::createSelectField('operator_' . $field_name, $operator_options, '', 1, 'width: 45px'); ?>
-		</td>
-		<td align="left" width="40%">
-			<input name="value_<?php echo $field_name; ?>" value="" size="4">
-		</td>
-	</tr>
-
-	<tr>
 		<?php $field_name = 'jahr'; ?>
 		<th style="text-align: left">Fortführungsjahr</td>
 		<td align="center">
