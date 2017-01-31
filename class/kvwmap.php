@@ -8149,8 +8149,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						if ($table['type'][$i] == 'Zahl') {
 							# bei Zahlen den Punkt (Tausendertrenner) entfernen
 							$this->formvars[$table['formfield'][$i]] = str_replace('.', '', $this->formvars[$table['formfield'][$i]]);
-							# und Komma in Punkt umwandeln
-							$this->formvars[$table['formfield'][$i]] = str_replace(',', '.', $this->formvars[$table['formfield'][$i]]);
 						}
 						if ($table['type'][$i] == 'Checkbox' AND $this->formvars[$table['formfield'][$i]] == '') {
 							$this->formvars[$table['formfield'][$i]] = 'f';
