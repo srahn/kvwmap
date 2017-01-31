@@ -123,6 +123,14 @@ function tausenderTrenner($number){
 	}
 }
 
+function removeTausenderTrenner($number){
+	if($number != ''){
+		$number = str_replace('.', '', $number);		# Punkt entfernen
+		$number = str_replace(',', '.', $number);		# Komma in Punkt umwandeln
+		return $number;
+	}
+}
+
 function transformCoordsSVG($path){
 	$path = str_replace('L ', '', $path);		# neuere Postgis-Versionen haben ein L mit drin
   $svgcoords = explode(' ',$path);
