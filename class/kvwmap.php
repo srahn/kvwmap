@@ -8148,7 +8148,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					) {
 						if ($table['type'][$i] == 'Zahl') {
 							# bei Zahlen den Punkt (Tausendertrenner) entfernen
-							$this->formvars[$table['formfield'][$i]] = str_replace('.', '', $this->formvars[$table['formfield'][$i]]);
+							$this->formvars[$table['formfield'][$i]] = removeTausenderTrenner($this->formvars[$table['formfield'][$i]]); # bei Zahlen den Punkt (Tausendertrenner) entfernen
 						}
 						if ($table['type'][$i] == 'Checkbox' AND $this->formvars[$table['formfield'][$i]] == '') {
 							$this->formvars[$table['formfield'][$i]] = 'f';
@@ -11617,7 +11617,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							$eintrag = $this->formvars[$form_fields[$i]];
             } break;
 						case 'Zahl' : {
-							$eintrag = removeTausenderTrenner($this->formvars[$form_fields[$i]]);		# bei Zahlen den Punkt (Tausendertrenner) entfernen
+							$eintrag = removeTausenderTrenner($this->formvars[$form_fields[$i]]); # bei Zahlen den Punkt (Tausendertrenner) entfernen
 							if($this->formvars[$form_fields[$i]] == '')$eintrag = 'NULL';
 						} break;
             default : {
