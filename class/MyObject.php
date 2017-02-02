@@ -150,6 +150,7 @@ class MyObject {
 		$new_id = mysql_insert_id();
 		$this->debug->show('<p>new id: ' . $new_id, MyObject::$write_debug);
 		$this->set($this->identifier, $new_id);
+		return NULL;
 	}
 
 	function update() {
@@ -179,5 +180,70 @@ class MyObject {
 		$result = mysql_query($sql);
 		return $result;
 	}
+
+	public function validates($key, $condition, $msg = '', $option = '') {
+		switch ($condition) {
+
+			case 'presence' :
+				$result = $this->validate_presence($key, $msg);
+				break;
+
+			case 'not_null' :
+				$result = $this->validate_not_null($key, $msg);
+				break;
+
+			case 'presence_one_of' :
+				$result = $this->validate_presence_one_of($key, $msg);
+				break;
+
+			case 'format' :
+				$result = $this->validate_format($key, $msg, $option);
+				break;
+		}
+		return (empty($result) ? '' : array('type' => 'error', 'msg' => $result));
+	}
+
+
+	function validate_presence($key, $msg = '') {
+		if (empty($msg)) {
+			$msg = "Der Parameter <i>{$key}</i> wurde nicht an den Server übermittelt.";
+		}
+
+		return (array_key_exists($key, $this->data) ? '' : $msg);
+	}
+
+	function validate_not_null($key, $msg = '') {
+		if (empty($msg)) $msg = "Der Parameter <i>{$key}</i> darf nicht leer sein.";
+
+		return (!empty($this->get($key)) ? '' : $msg);
+	}
+
+	function validate_presence_one_of($keys, $msg = '') {
+		if (empty($msg)) $msg = 'Einer der Parameter <i>' . implode(', ', $keys) . '</i> muss angegeben und darf nicht leer sein.';
+
+		$one_present = false;
+		foreach($keys AS $key) {
+			if (array_key_exists($key, $this->data) AND !empty($this->get($key))) {
+				$one_present = true;
+			}
+		}
+		return ($one_present ? '' : $msg);
+	}
+
+	function validate_format($key, $msg, $format) {
+		$invalid_msg = '';
+		# ToDo validate again regex pattern in format
+
+		# This validates only the amount of parts separated by single spaces.
+		$format_parts = explode(' ', $format);
+		$value_parts = explode(' ', $this->get($key));
+
+		if (count($format_parts) != count($value_parts)) {
+			$invalid_msg = 'Der angegebene Wert <i>' . $this->get($key) . ' enthält nur ' . count($value_parts) . ' Bestandteile, muss aber ' . count($format_parts) . ' haben.';
+		}
+
+		return (empty($invalid_msg) ? '' : $msg . '<br>' . $invalid_msg);
+	}
+
 }
 ?>

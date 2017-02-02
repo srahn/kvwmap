@@ -2069,10 +2069,17 @@ class GUI {
 	}
 
 	function add_message($type, $msg) {
-		$this->messages[] = array(
-			'type' => $type,
-			'msg' => $msg
-		);
+		if ($type == 'array' or is_array($msg)) {
+			foreach($msg AS $m) {
+				$this->add_message($m['type'], $m['msg']);
+			}
+		}
+		else {
+			$this->messages[] = array(
+				'type' => $type,
+				'msg' => $msg
+			);
+		}
 	}
 
 	function output_messages($option = 'with_script_tags') {
@@ -10496,9 +10503,19 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->cronjob = new CronJob($this);
 		$this->cronjob->data = formvars_strip($this->formvars, $this->cronjob->getAttributes(), 'keep');
 		$this->cronjob->set('query', strip_pg_escape_string($this->formvars['query']));
-		$this->cronjob->create();
-		$this->cronjobs = CronJob::find($this);
-		$this->main = 'cronjobs.php';
+		$results = $this->cronjob->validate();
+		if (empty($results)) {
+			$results = $this->cronjob->create();
+		}
+		if (empty($results)) {
+			$this->add_message('notice', 'Job erfolgreich angelegt.');
+			$this->cronjobs = CronJob::find($this);
+			$this->main = 'cronjobs.php';
+		}
+		else {
+			$this->add_message('array', $results);
+			$this->main = 'cronjob_formular.php';
+		}
 		$this->output();
 	}
 
@@ -10509,10 +10526,13 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$result = $this->cronjob->update();
 		if (!empty($result)) {
 			$this->add_message('error', 'Fehler beim Eintragen in die Datenbank!<br>' . $result);
+			$this->main = 'cronjob_formular.php';
 		}
-#		$this->cronjob->set('query', strip_pg_escape_string($this->cronjob->get('query')));
-		$this->cronjobs = CronJob::find($this);
-		$this->main = 'cronjobs.php';
+		else {
+	#		$this->cronjob->set('query', strip_pg_escape_string($this->cronjob->get('query')));
+			$this->cronjobs = CronJob::find($this);
+			$this->main = 'cronjobs.php';
+		}
 		$this->output();
 	}
 

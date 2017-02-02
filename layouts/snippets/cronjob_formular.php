@@ -31,28 +31,28 @@ include(LAYOUTPATH.'languages/cronjob_formular_'.$this->user->rolle->language.'.
 	<tr>
 		<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strName;?></th>
 		<td style="border-bottom:1px solid #C3C7C3">
-			<input name="bezeichnung" type="text" value="<?php echo $this->cronjob->get('bezeichnung'); ?>" size="81" maxlength="255">
+			<input name="bezeichnung" type="text" value="<?php echo $this->cronjob->get('bezeichnung'); ?>" size="81" maxlength="255" placeholder="Wird zur Identifizierung des Jobs in der Liste verwendet.">
 		</td>
 	</tr>
 	<tr>
 		<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo 'Beschreibung';?></th>
-		<td style="border-bottom:1px solid #C3C7C3"><textarea name="beschreibung" cols="80" rows="1"><?php echo $this->cronjob->get('beschreibung'); ?></textarea></td>
+		<td style="border-bottom:1px solid #C3C7C3"><textarea name="beschreibung" cols="80" rows="1" placeholder="Kurzbeschreibung was der Job machen wird."><?php echo $this->cronjob->get('beschreibung'); ?></textarea></td>
 	</tr>
 	<tr>
 		<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo 'Zeit';?></th>
-		<td style="border-bottom:1px solid #C3C7C3"><input name="time" type="text" value="<?php echo $this->cronjob->get('time'); ?>" size="10" maxlength="25"></td>
+		<td style="border-bottom:1px solid #C3C7C3"><input name="time" type="text" value="<?php echo $this->cronjob->get('time'); ?>" size="10" maxlength="25" placeholder="m h d M wd"></td>
 	</tr>
 	<tr>
-		<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo 'SQL-Query';?></th>
-		<td style="border-bottom:1px solid #C3C7C3"><textarea name="query" cols="80" rows="20"><?php echo $this->cronjob->get('query'); ?></textarea></td>
+		<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo 'Datenbankname';?></th>
+		<td style="border-bottom:1px solid #C3C7C3"><input type="text" name="dbname" size="81" value="<?php echo $this->cronjob->get('dbname'); ?>" placeholder="Wenn leer wird pgdbname von Stelle oder sonst von GUI genommen."></td>
 	</tr>
 	<tr>
-		<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo 'Database Name';?></th>
-		<td style="border-bottom:1px solid #C3C7C3"><input type="text" name="dbname" size="81" value="<?php echo $this->cronjob->get('dbname'); ?>"></td>
+		<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo 'SQL-Anfrage';?></th>
+		<td style="border-bottom:1px solid #C3C7C3"><textarea name="query" cols="80" rows="20" placeholder="SQL wird in der unten angegebenen Datenbank ausgeführt. Wenn kein SQL angegeben ist, wird ein Eintrag in Shell-Befehlszeile erwartet. Eines von beiden muss angegeben werden."><?php echo $this->cronjob->get('query'); ?></textarea></td>
 	</tr>
 	<tr>
-		<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo 'Command';?></th>
-		<td style="border-bottom:1px solid #C3C7C3"><input type="text" name="function" size="81" value="<?php echo $this->cronjob->get('function'); ?>"></td>
+		<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo 'Shell Befehlszeile';?></th>
+		<td style="border-bottom:1px solid #C3C7C3"><input type="text" name="function" size="81" value="<?php echo htmlspecialchars($this->cronjob->get('function')); ?>" placeholder="Wirkt sich nur aus, wenn kein SQL angegeben ist."></td>
 	</tr>
 	<!--tr>
 		<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo 'user_id';?></th>
