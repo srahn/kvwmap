@@ -1448,7 +1448,7 @@ function getTimestamp() {
 
 function formatBytes($size, $precision = 2) {
   $base = log($size) / log(1024);
-  $suffixes = array('', 'kB', 'MB', 'GB', 'TB');   
+  $suffixes = array('', 'kB', 'MB', 'GB', 'TB');
   return round(pow(1024, $base - floor($base)), $precision) . $suffixes[floor($base)];
 }
 
@@ -1483,24 +1483,51 @@ function get_upload_error_message($code) {
   return $message;
 }
 
-function formvars_strip($formvars, $strip_list) {
-	$strip_array = explode(', ', $strip_list);
+/*
+* This function removes or keeps elements defined in $strip_list from $fromvars array
+* If elements from strip_list shall be removed (default), all other will be keeped in the formvars array.
+* If elements shall be keeped, all other will be removed in the formars array.
+* strip_type 'remove' delete formvars defined in strip_list.
+* strip_type ('keep' | any other than 'remove') keep formvars defined in strip_list.
+*
+* @param $formvars array
+* @param $strip_list comma separated string or array - formvar names to keep or to remove
+* @param $strip_type string - Tells the function to keep or remove the formvars
+*/
+function formvars_strip($formvars, $strip_list, $strip_type = 'remove') {
+	#echo '<br>formvars vorher: ' . print_r($formvars, true);
+	#echo '<br>strip_list: ' . print_r($strip_list, true);
+	#echo '<br>strip_type: ' . $strip_type;
+
+	$strip_array = (is_array($strip_list) ? $strip_list : explode(', ', $strip_list));
 	$stripped_formvars = array();
+
 	foreach($formvars AS $key => $value) {
-		if (!in_array($key, $strip_array)) {
-#			if (array_key_exists($key, $stripped_formvars)) {
-#				// 1. occurance of key in stripped_formvars: first_value, 2. occurance: [first_val, second_val], more occurances [first_val, second_val, third_val, ...]
-#				is_array($stripped_formvars[$key]) ? array_push($stripped_formvars[$key], $value) : $stripped_formvars[$key] = array($stripped_formvars[$key], $value);
-#			} else {
-				$pos = strpos($value, '[');
-				if ($pos === false) {
-					$stripped_formvars[$key] = stripslashes($value);	
-				} else {
-					$stripped_formvars[$key] = arrStrToArr(stripslashes($value), ',');
-				}
-#			}
+
+		if ($strip_type == 'remove') {
+			# strip key if in strip_list
+			$strip = in_array($key, $strip_array);
 		}
+		else {
+			# do not strip key if in strip_list
+			$strip = !in_array($key, $strip_array);
+		}
+
+		if (!$strip) {
+			#echo "<br>Keep {$key} in formvars.";
+			$pos = strpos($value, '[');
+			if ($pos === false) {
+				$stripped_formvars[$key] = stripslashes($value);	
+			} else {
+				$stripped_formvars[$key] = arrStrToArr(stripslashes($value), ',');
+			}
+		}
+		else {
+			#echo "<br>Strip {$key} from formvars.";
+		}
+
 	}
+	#echo '<br>formvars nachher: ' . print_r($stripped_formvars, true);
 	return $stripped_formvars;
 }
 

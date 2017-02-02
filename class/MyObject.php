@@ -1,38 +1,38 @@
 <?php
 class MyObject {
-	
-	static $write_debug = false;
-  
-  function MyObject($gui, $tableName) {
-		$this->gui = $gui;
-    $this->debug = $gui->debug;
-    $this->database = $gui->database;
-    $this->tableName = $tableName;
-    $this->identifier = 'id';
-    $this->identifier_type = 'integer';
-    $this->data = array();
-		$this->debug->show('<p>New MyObject for table: '. $this->tableName, MyObject::$write_debug);
-  }
 
-  /*
-  * Search for an record in the database
-  * by the given attribut and value
-  * @ return an object with this record
-  */
-  function find_by($attribute, $value) {
-    $sql = "
-      SELECT
-        *
-      FROM
-        `" . $this->tableName . "`
-      WHERE
-        `" . $attribute . "` = '" . $value . "'
-    ";
-    $this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
-    $query = mysql_query($sql, $this->database->dbConn);
-    $this->data = mysql_fetch_assoc($query);
-    return $this;
-  }
+	static $write_debug = false;
+
+	function MyObject($gui, $tableName) {
+		$this->gui = $gui;
+		$this->debug = $gui->debug;
+		$this->database = $gui->database;
+		$this->tableName = $tableName;
+		$this->identifier = 'id';
+		$this->identifier_type = 'integer';
+		$this->data = array();
+		$this->debug->show('<p>New MyObject for table: '. $this->tableName, MyObject::$write_debug);
+	}
+
+	/*
+	* Search for an record in the database
+	* by the given attribut and value
+	* @ return an object with this record
+	*/
+	function find_by($attribute, $value) {
+		$sql = "
+			SELECT
+				*
+			FROM
+				`" . $this->tableName . "`
+			WHERE
+				`" . $attribute . "` = '" . $value . "'
+		";
+		$this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
+		$query = mysql_query($sql, $this->database->dbConn);
+		$this->data = mysql_fetch_assoc($query);
+		return $this;
+	}
 
 	/*
 	* Search for an record in the database
@@ -81,13 +81,21 @@ class MyObject {
 		return $result;
 	}
 
-  function getAttributes() {
-    return array_keys($this->data);
-  }
+	function getAttributes() {
+		return array_keys($this->data);
+	}
 
-  function getValues() {
-    return array_values($this->data);
-  }
+	function setAttributes($keys) {
+		foreach ($keys AS $key) {
+			if (!array_key_exists($key, $this->data)) {
+				$this->set($key, NULL);
+			}
+		}
+	}
+
+	function getValues() {
+		return array_values($this->data);
+	}
 
 	function getKVP() {
 		$kvp = array();
@@ -99,25 +107,25 @@ class MyObject {
 		return $kvp;
 	}
 
-  function get($attribute) {
-    return $this->data[$attribute];
-  }
+	function get($attribute) {
+		return $this->data[$attribute];
+	}
 
-  function set($attribute, $value) {
-    $this->data[$attribute] = $value;
-  }
+	function set($attribute, $value) {
+		$this->data[$attribute] = $value;
+	}
 
-  function create($data = array()) {
+	function create($data = array()) {
 		$this->debug->show('<p>MyObject create ' . $this->tablename, MyObject::$write_debug);
-    if (!empty($data))
-      $this->data = $data;
+		if (!empty($data))
+			$this->data = $data;
 
-    $sql = "
-      INSERT INTO `" . $this->tableName . "` (
-        `" . implode('`, `', $this->getAttributes()) . "`
-      )
-      VALUES (
-        " . implode(
+		$sql = "
+			INSERT INTO `" . $this->tableName . "` (
+				`" . implode('`, `', $this->getAttributes()) . "`
+			)
+			VALUES (
+				" . implode(
 					", ", 
 					array_map(
 						function ($value) {
@@ -135,41 +143,41 @@ class MyObject {
 						$this->getValues()
 					)
 				) . "
-      )
-    ";
-    $this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
-    mysql_query($sql);
+			)
+		";
+		$this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
+		mysql_query($sql);
 		$new_id = mysql_insert_id();
-    $this->debug->show('<p>new id: ' . $new_id, MyObject::$write_debug);
-    $this->set($this->identifier, $new_id);
-  }
+		$this->debug->show('<p>new id: ' . $new_id, MyObject::$write_debug);
+		$this->set($this->identifier, $new_id);
+	}
 
-  function update() {
-    $sql = "
-      UPDATE
-        `" . $this->tableName . "`
-      SET
-        " . implode(', ', $this->getKVP()) . "
-      WHERE
-        `id` = " . $this->get('id') . "
-    ";
-    $this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
-    $query = mysql_query($sql);
-    return mysql_error($this->database->dbConn);
-  }
+	function update() {
+		$sql = "
+			UPDATE
+				`" . $this->tableName . "`
+			SET
+				" . implode(', ', $this->getKVP()) . "
+			WHERE
+				`id` = " . $this->get('id') . "
+		";
+		$this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
+		$query = mysql_query($sql);
+		return mysql_error($this->database->dbConn);
+	}
 
-  function delete() {
-    $quote = ($this->identifier_type == 'text') ? "'" : "";
-    $sql = "
-      DELETE
-      FROM
-        `" . $this->tableName . "`
-      WHERE
-        " . $this->identifier . " = {$quote}" . $this->get($this->identifier) . "{$quote}
-    ";
-    $this->debug->show('MyObject delete sql: ' . $sql, MyObject::$write_debug);
-    $result = mysql_query($sql);
-    return $result;
-  }
+	function delete() {
+		$quote = ($this->identifier_type == 'text') ? "'" : "";
+		$sql = "
+			DELETE
+			FROM
+				`" . $this->tableName . "`
+			WHERE
+				" . $this->identifier . " = {$quote}" . $this->get($this->identifier) . "{$quote}
+		";
+		$this->debug->show('MyObject delete sql: ' . $sql, MyObject::$write_debug);
+		$result = mysql_query($sql);
+		return $result;
+	}
 }
 ?>

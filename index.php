@@ -1386,13 +1386,11 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 
 		case 'cronjob_speichern_Anlegen' : {
 			$GUI->checkCaseAllowed('cronjobs_anzeigen');
-			$GUI->formvars = formvars_strip($GUI->formvars, 'go, go_plus, overlayx, overlayy, browserwidth, browserheight');
 			$GUI->cronjobs_anlegen();
 		} break;
 
 		case 'cronjob_speichern_Speichern' : {
 			$GUI->checkCaseAllowed('cronjobs_anzeigen');
-			$GUI->formvars = formvars_strip($GUI->formvars, 'go, go_plus, overlayx, overlayy, browserwidth, browserheight');
 			$GUI->cronjob_update();
 		} break;
 

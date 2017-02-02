@@ -47,8 +47,12 @@ include(LAYOUTPATH.'languages/cronjob_formular_'.$this->user->rolle->language.'.
 		<td style="border-bottom:1px solid #C3C7C3"><textarea name="query" cols="80" rows="20"><?php echo $this->cronjob->get('query'); ?></textarea></td>
 	</tr>
 	<tr>
+		<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo 'Database Name';?></th>
+		<td style="border-bottom:1px solid #C3C7C3"><input type="text" name="dbname" size="81" value="<?php echo $this->cronjob->get('dbname'); ?>"></td>
+	</tr>
+	<tr>
 		<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo 'Command';?></th>
-		<td style="border-bottom:1px solid #C3C7C3"><input type="text" name="function" size="81" value = "<?php echo $this->cronjob->get('function'); ?>"></td>
+		<td style="border-bottom:1px solid #C3C7C3"><input type="text" name="function" size="81" value="<?php echo $this->cronjob->get('function'); ?>"></td>
 	</tr>
 	<!--tr>
 		<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo 'user_id';?></th>
