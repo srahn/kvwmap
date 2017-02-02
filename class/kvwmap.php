@@ -10505,8 +10505,13 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	function cronjob_update() {
 		include_once(CLASSPATH . 'CronJob.php');
 		$this->cronjob = CronJob::find_by_id($this, $this->formvars['id']);
-		$this->cronjob->data = $this->formvars;
-		$this->cronjob->update();
+		$strip_list = "go, go_plus, username, passwort, Stelle_ID, format, version, callback, _dc, file, quicksearch_layer_id";
+		$application_data = formvars_strip($this->formvars, $strip_list);
+		$this->cronjob->data = $application_dat_a;
+		$result = $this->cronjob->update();
+		if (!empty($result)) {
+			$this->add_message('error', 'Fehler beim Eintragen in die Datenbank!<br>' . $result);
+		}
 #		$this->cronjob->set('query', strip_pg_escape_string($this->cronjob->get('query')));
 		$this->cronjobs = CronJob::find($this);
 		$this->main = 'cronjobs.php';

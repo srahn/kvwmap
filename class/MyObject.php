@@ -89,13 +89,15 @@ class MyObject {
     return array_values($this->data);
   }
 
-  function getKVP() {
-    $kvp = array();
-    foreach($this->data AS $key => $value) {
-      $kvp[] = "`" . $key . "` = '" . $value . "'";
-    }
-    return $kvp;
-  }
+	function getKVP() {
+		$kvp = array();
+		if (is_array($this->data)) {
+			foreach($this->data AS $key => $value) {
+				$kvp[] = "`" . $key . "` = '" . $value . "'";
+			}
+		}
+		return $kvp;
+	}
 
   function get($attribute) {
     return $this->data[$attribute];
@@ -153,6 +155,7 @@ class MyObject {
     ";
     $this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
     $query = mysql_query($sql);
+    return mysql_error($this->database->dbConn);
   }
 
   function delete() {
