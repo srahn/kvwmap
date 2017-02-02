@@ -10535,7 +10535,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		}
 
 		# schreibt die Zeilen in eine Datei
-		$crontab_file = '/tmp/crontab_www-data';
+		$crontab_file = '/var/www/cron/crontab_gisadmin';
 		$fp = fopen($crontab_file, 'w');
 		foreach($crontab_lines AS $line) {
 			fwrite($fp, $line . PHP_EOL);
@@ -10543,10 +10543,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		fclose($fp);
 
 		# crontab starten
-		exec('crontab -u www-data ' . $crontab_file);
+#		exec('crontab -u www-data ' . $crontab_file);
 
 		# crontab datei löschen
-		unlink($crontab_file);
+#		unlink($crontab_file);
 
 		# crontab Zeilen anzeigen
 		$this->crontab_lines = $crontab_lines;
