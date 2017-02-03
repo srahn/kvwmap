@@ -10,8 +10,10 @@ if($this->user->rolle->querymode == 1){
 <link rel="stylesheet" href="<?php echo 'layouts/'.$this->style; ?>">
 <? if(defined('CUSTOM_STYLE') AND CUSTOM_STYLE != ''){ ?>
 <link rel="stylesheet" href="<?php echo 'layouts/custom/'.CUSTOM_STYLE; ?>">
+<script src="<?php echo JQUERY_PATH; ?>jquery-1.12.0.min.js"></script>
 <? } ?>
 <? include(WWWROOT.APPLVERSION.'funktionen/msgboxes.php'); ?>
+<link rel="stylesheet" href="<?php echo FONTAWESOME_PATH; ?>css/font-awesome.min.css" type="text/css">
 </HEAD>
 <BODY onload="onload_functions();">
 	<div id="sperrdiv" style="position: absolute;height: 100%;z-index: 1000000;opacity: 0.3;background-color: grey;"></div>

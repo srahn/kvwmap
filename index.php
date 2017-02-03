@@ -963,32 +963,26 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  } break;
 		
 	  case 'GPX_Import' : {
-			$GUI->checkCaseAllowed('GPX_Import');
 			$GUI->gpx_import();
 	  } break;
 	  
 	  case 'GPX_Import_Laden' : {
-			$GUI->checkCaseAllowed('GPX_Import');
 			$GUI->gpx_import_importieren();
 	  } break;
 		
 		case 'OVL_Import' : {
-			$GUI->checkCaseAllowed('OVL_Import');
 			$GUI->ovl_import();
 	  } break;
 	  
 	  case 'OVL_Import_Laden' : {
-			$GUI->checkCaseAllowed('OVL_Import');
 			$GUI->ovl_import_importieren();
 	  } break;
 		
 		case 'DXF_Import' : {
-			$GUI->checkCaseAllowed('DXF_Import');
 			$GUI->dxf_import();
 	  } break;
 	  
 	  case 'DXF_Import_Laden' : {
-			$GUI->checkCaseAllowed('DXF_Import');
 			$GUI->dxf_import_importieren();
 	  } break;
 		

@@ -986,10 +986,9 @@ tbody.gle tr:hover {
 }
 
 #gbb_grundstueck{
+	height: 100%;
 	width: 600px;
 	background-color: white;
-	padding: 7px;
-	margin-bottom: 7px;
 	border: 1px solid lightgrey;
 }
 
