@@ -75,6 +75,7 @@ class GUI {
   var $map_scaledenom;
   var $map_factor='';
 	var $formatter;
+	var $success = true;
 
 
   # Konstruktor
@@ -2068,16 +2069,28 @@ class GUI {
 	}
 
 	function add_message($type, $msg) {
-		$this->messages[] = array(
-			'type' => $type,
-			'msg' => $msg
-		);
+		if ($type == 'array' or is_array($msg)) {
+			foreach($msg AS $m) {
+				$this->add_message($m['type'], $m['msg']);
+			}
+		}
+		else {
+			$this->messages[] = array(
+				'type' => $type,
+				'msg' => $msg
+			);
+		}
 	}
 
-	function output_messages() { ?>
-		<script type="text/javascript">
-			message(<? echo json_encode($this->messages); ?>);
-		</script><?
+	function output_messages($option = 'with_script_tags') {
+		if (!$this->success) {
+			header('error: true');
+		}
+		$html = "message(" . json_encode($this->messages) . ");";
+		if ($option == 'with_script_tags') {
+			$html = "<script type=\"text/javascript\">" . $html . "</script>";
+		}
+		echo $html;
 	}
 
   # Ausgabe der Seite
@@ -7894,7 +7907,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$mapdb = new db_mapObj($this->Stelle->id, $this->user->id);
 		$layerdb = $mapdb->getlayerdatabase($this->formvars['chosen_layer_id'], $this->Stelle->pgdbhost);
 
-		$success = true;
 		$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
 		for($i = 0; $i < count($checkbox_names); $i++){
 			if($this->formvars[$checkbox_names[$i]] == 'on') {
@@ -7926,7 +7938,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					#echo '<br>Delete Trigger Funktion wurde ausgeführt.';
 					# Instead Triggerfunktion wurde ausgeführt, übergebe Erfolgsmeldung
 					$result = array($trigger_result['message']);
-					$success = $trigger_result['success'];
+					$this->success = $trigger_result['success'];
 				}
 				else {
 					#echo '<br>Delete Trigger Funktion wurde nicht ausgeführt.';
@@ -7940,12 +7952,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						$result = pg_fetch_row($ret[1]);
 						if (pg_affected_rows($ret[1]) == 0){
 							$ret[0] = 1;
-							$success = false;
+							$this->success = false;
 						}
 					}
 				}
 				
-				if ($success) {
+				if ($this->success) {
 					# After delete trigger
 					if (!empty($layer['trigger_function'])) {
 						$this->exec_trigger_function('AFTER', 'DELETE', $layer, '', $old_dataset);
@@ -7966,7 +7978,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 		if ($output) {
 			if($this->formvars['embedded'] == '') {
-				if($success == false) {
+				if($this->success == false) {
 					$this->add_message('error', 'Löschen fehlgeschlagen.<br>' . $result[0]);
 				}
 				else {
@@ -7995,38 +8007,38 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			}
 		}
 
-		return $success;
+		return $this->success;
 	}
 
-  function neuer_Layer_Datensatz_speichern(){
-  	$_files = $_FILES;
-    $mapdb = new db_mapObj($this->Stelle->id, $this->user->id);
-    $layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
-    $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-    $layerdb->setClientEncoding();
+	function neuer_Layer_Datensatz_speichern(){
+		$_files = $_FILES;
+		$mapdb = new db_mapObj($this->Stelle->id, $this->user->id);
+		$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
+		$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+		$layerdb->setClientEncoding();
 		$attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
-    $layer_epsg = $layerset[0]['epsg_code'];
-    $client_epsg = $this->user->rolle->epsg_code;
-    $form_fields = explode('|', $this->formvars['form_field_names']);
-    $success = true;
-    for($i = 0; $i < count($form_fields); $i++){
-      if($form_fields[$i] != ''){
-        $element = explode(';', $form_fields[$i]);
-        $tablename[$element[2]]['tablename'] = $element[2];
-        $tablename[$element[2]]['attributname'][] = $attributenames[] = $element[1];
+		$layer_epsg = $layerset[0]['epsg_code'];
+		$client_epsg = $this->user->rolle->epsg_code;
+		$form_fields = explode('|', $this->formvars['form_field_names']);
+
+		for($i = 0; $i < count($form_fields); $i++){
+			if($form_fields[$i] != ''){
+				$element = explode(';', $form_fields[$i]);
+				$tablename[$element[2]]['tablename'] = $element[2];
+				$tablename[$element[2]]['attributname'][] = $attributenames[] = $element[1];
 				$attributevalues[] = $this->formvars[$form_fields[$i]];
 				if($this->formvars['embedded'] != '')$formfieldstring .= '&'.$form_fields[$i].'='.$this->formvars[$form_fields[$i]];
-        $tablename[$element[2]]['type'][] = $element[4];
+				$tablename[$element[2]]['type'][] = $element[4];
 				$tablename[$element[2]]['datatype'][] = $element[6];
-        $tablename[$element[2]]['formfield'][] = $form_fields[$i];
-        # Dokumente sammeln
-        if($element[4] == 'Dokument'){
-          if($_files[$form_fields[$i]]['name']){
+				$tablename[$element[2]]['formfield'][] = $form_fields[$i];
+				# Dokumente sammeln
+				if($element[4] == 'Dokument'){
+					if($_files[$form_fields[$i]]['name']){
 						$document_attributes[$i] = $element[1];
-          }
-        }
-      }
-    }
+					}
+				}
+			}
+		}
 
 		# Dokumente speichern
 		if(count($document_attributes) > 0){
@@ -8053,173 +8065,183 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		}
 
 		if($this->formvars['geomtype'] == 'POLYGON' OR $this->formvars['geomtype'] == 'MULTIPOLYGON') {
-      if($this->formvars['newpathwkt'] == '' AND $this->formvars['newpath'] != ''){   # wenn keine WKT-Geoemtrie da ist, muss die WKT-Geometrie aus dem SVG erzeugt werden
+			if($this->formvars['newpathwkt'] == '' AND $this->formvars['newpath'] != ''){   # wenn keine WKT-Geoemtrie da ist, muss die WKT-Geometrie aus dem SVG erzeugt werden
 				include_(CLASSPATH.'spatial_processor.php');
-        $spatial_pro = new spatial_processor($this->user->rolle, $this->database, $this->pgdatabase);
-        $this->formvars['newpathwkt'] = $spatial_pro->composeMultipolygonWKTStringFromSVGPath($this->formvars['newpath']);
-      }
-      if($this->formvars['newpathwkt'] != ''){
+				$spatial_pro = new spatial_processor($this->user->rolle, $this->database, $this->pgdatabase);
+				$this->formvars['newpathwkt'] = $spatial_pro->composeMultipolygonWKTStringFromSVGPath($this->formvars['newpath']);
+			}
+			if($this->formvars['newpathwkt'] != ''){
 				include_(CLASSPATH.'polygoneditor.php');
-        $polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
-        $ret = $polygoneditor->pruefeEingabedaten($this->formvars['newpathwkt']);
-        if ($ret[0]) { # fehlerhafte eingabedaten
-          $this->Meldung1=$ret[1];
-          $this->neuer_Layer_Datensatz();
-          return;
-        }
-      }
-    }
+				$polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+				$ret = $polygoneditor->pruefeEingabedaten($this->formvars['newpathwkt']);
+				if ($ret[0]) { # fehlerhafte eingabedaten
+					$this->Meldung1=$ret[1];
+					$this->neuer_Layer_Datensatz();
+					return;
+				}
+			}
+		}
 		elseif($this->formvars['geomtype'] == 'LINESTRING' OR $this->formvars['geomtype'] == 'MULTILINESTRING'){
-      if($this->formvars['newpathwkt'] == '' AND $this->formvars['newpath'] != ''){   # wenn keine WKT-Geoemtrie da ist, muss die WKT-Geometrie aus dem SVG erzeugt werden
+			if($this->formvars['newpathwkt'] == '' AND $this->formvars['newpath'] != ''){   # wenn keine WKT-Geoemtrie da ist, muss die WKT-Geometrie aus dem SVG erzeugt werden
 				include_(CLASSPATH.'spatial_processor.php');
-        $spatial_pro = new spatial_processor($this->user->rolle, $this->database, $this->pgdatabase);
-        $this->formvars['newpathwkt'] = $spatial_pro->composeMultilineWKTStringFromSVGPath($this->formvars['newpath']);
-      }
-      if($this->formvars['newpathwkt'] != ''){
+				$spatial_pro = new spatial_processor($this->user->rolle, $this->database, $this->pgdatabase);
+				$this->formvars['newpathwkt'] = $spatial_pro->composeMultilineWKTStringFromSVGPath($this->formvars['newpath']);
+			}
+			if($this->formvars['newpathwkt'] != ''){
 				include_(CLASSPATH.'lineeditor.php');
-        $lineeditor = new lineeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
-        # eingeabewerte pruefen:
-        $ret = $lineeditor->pruefeEingabedaten($this->formvars['newpathwkt']);
-        if ($ret[0]) { # fehlerhafte eingabedaten
-          $this->Meldung1=$ret[1];
-          $this->neuer_Layer_Datensatz();
-          return;
-        }
-      }
-    }
-    $success = true;
-    foreach($tablename as $table){
-      $execute = false;
-      if($table['tablename'] != '' AND $table['tablename'] == $layerset[0]['maintable']){		# nur Attribute aus der Haupttabelle werden gespeichert
+				$lineeditor = new lineeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+				# eingeabewerte pruefen:
+				$ret = $lineeditor->pruefeEingabedaten($this->formvars['newpathwkt']);
+				if ($ret[0]) { # fehlerhafte eingabedaten
+					$this->Meldung1=$ret[1];
+					$this->neuer_Layer_Datensatz();
+					return;
+				}
+			}
+		}
+		$this->success = true;
+		foreach($tablename as $table){
+			$execute = false;
+			if($table['tablename'] != '' AND $table['tablename'] == $layerset[0]['maintable']){		# nur Attribute aus der Haupttabelle werden gespeichert
 				if(!$layerset[0]['maintable_is_view'])$sql = "LOCK TABLE ".$table['tablename']." IN SHARE ROW EXCLUSIVE MODE;";
-        $sql.= "INSERT INTO ".$table['tablename']." (";
-        for($i = 0; $i < count($table['attributname']); $i++){
-          if(($table['type'][$i] != 'Text_not_saveable' AND $table['type'][$i] != 'Auswahlfeld_not_saveable' AND $table['type'][$i] != 'SubFormPK' AND $table['type'][$i] != 'SubFormFK' AND $this->formvars[$table['formfield'][$i]] != '')
-          OR $table['type'][$i] == 'Checkbox' OR $table['type'][$i] == 'Time' OR $table['type'][$i] == 'User' OR $table['type'][$i] == 'UserID' OR $table['type'][$i] == 'Stelle' OR $table['type'][$i] == 'StelleID' OR $table['type'][$i] == 'Geometrie'){
-            if($table['type'][$i] == 'Geometrie'){
-              if($this->formvars['geomtype'] == 'POINT' AND $this->formvars['loc_x'] != ''){
-                $sql .= $table['attributname'][$i].", ";
-                $execute = true;
-              }
-              elseif($this->formvars['newpathwkt'] != ''){
-                $sql .= $table['attributname'][$i].", ";
-                $execute = true;
-              }
-            }
-            else{
-              $sql .= $table['attributname'][$i].", ";
-              $execute = true;
-            }
-          }
-        }
-        $sql = substr($sql, 0, strlen($sql)-2);
-        $sql.= ") VALUES (";
-        for($i = 0; $i < count($table['attributname']); $i++){
-          if($table['type'][$i] == 'Time'){                       # Typ "Time"
-            $sql.= "(now())::timestamp(0), ";
-          }
-          elseif($table['type'][$i] == 'User'){                       # Typ "User"
-            $sql.= "'".$this->user->Vorname." ".$this->user->Name."', ";
-          }
-        	elseif($table['type'][$i] == 'UserID'){                       # Typ "UserID"
-            $sql.= "'".$this->user->id."', ";
-          }
-        	elseif($table['type'][$i] == 'Stelle'){                       # Typ "Stelle"
-            $sql.= "'".$this->Stelle->Bezeichnung."', ";
-          }
-					elseif($table['type'][$i] == 'StelleID'){                       # Typ "StelleID"
-            $sql.= "'".$this->Stelle->id."', ";
-          }
-					elseif($table['type'][$i] == 'Dokument' AND $this->formvars[$table['formfield'][$i]] != ''){                       # Typ "Dokument"
-            $sql.= "'".$this->formvars[$table['formfield'][$i]]."', ";
-						$this->formvars[$table['formfield'][$i]] = '';				# leeren, falls weiter_erfassen angehakt
-          }
-          elseif($table['type'][$i] != 'Text_not_saveable' AND $table['type'][$i] != 'Auswahlfeld_not_saveable' AND $table['type'][$i] != 'SubFormPK' AND $table['type'][$i] != 'SubFormFK' AND ($this->formvars[$table['formfield'][$i]] != '' OR $table['type'][$i] == 'Checkbox')){
-          	if($table['type'][$i] == 'Zahl'){                       # Typ "Zahl"
-	            $this->formvars[$table['formfield'][$i]] = removeTausenderTrenner($this->formvars[$table['formfield'][$i]]);		# bei Zahlen den Punkt (Tausendertrenner) entfernen							
-	          }
-	          if($table['type'][$i] == 'Checkbox' AND $this->formvars[$table['formfield'][$i]] == ''){                       # Typ "Checkbox"
-	          	$this->formvars[$table['formfield'][$i]] = 'f';
-	          }						
-						if(substr($table['datatype'][$i], 0, 1) == '_' OR is_numeric($table['datatype'][$i])){
-							$this->formvars[$table['formfield'][$i]] = JSON_to_PG(json_decode($this->formvars[$table['formfield'][$i]]));		# bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln									
+				$sql.= "INSERT INTO ".$table['tablename']." (";
+				for($i = 0; $i < count($table['attributname']); $i++){
+					if(($table['type'][$i] != 'Text_not_saveable' AND $table['type'][$i] != 'Auswahlfeld_not_saveable' AND $table['type'][$i] != 'SubFormPK' AND $table['type'][$i] != 'SubFormFK' AND $this->formvars[$table['formfield'][$i]] != '')
+					OR $table['type'][$i] == 'Checkbox' OR $table['type'][$i] == 'Time' OR $table['type'][$i] == 'User' OR $table['type'][$i] == 'UserID' OR $table['type'][$i] == 'Stelle' OR $table['type'][$i] == 'StelleID' OR $table['type'][$i] == 'Geometrie'){
+						if($table['type'][$i] == 'Geometrie'){
+							if($this->formvars['geomtype'] == 'POINT' AND $this->formvars['loc_x'] != ''){
+								$sql .= $table['attributname'][$i].", ";
+								$execute = true;
+							}
+							elseif($this->formvars['newpathwkt'] != ''){
+								$sql .= $table['attributname'][$i].", ";
+								$execute = true;
+							}
 						}
-            $sql.= "'".$this->formvars[$table['formfield'][$i]]."', ";      # Typ "normal"
-          }
-          elseif($table['type'][$i] == 'Geometrie'){                    # Typ "Geometrie"
-            if($this->formvars['geomtype'] == 'POINT'){
-              if($this->formvars['loc_x'] != ''){
-                if($this->formvars['dimension'] == 3){
-                  $sql .= "st_transform(st_geomfromtext('POINT(".$this->formvars['loc_x']." ".$this->formvars['loc_y']." 0)', ".$client_epsg."), ".$layer_epsg."), ";
-                }
-                else{
-                  $sql .= "st_transform(st_geomfromtext('POINT(".$this->formvars['loc_x']." ".$this->formvars['loc_y'].")', ".$client_epsg."), ".$layer_epsg."), ";
-                }
-              }
-            }
-            elseif($this->formvars['newpathwkt'] != ''){
-              $sql .= "st_transform(st_multi(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$client_epsg.")), ".$layer_epsg."), ";
-            }
-          }
-        }
-        $sql = substr($sql, 0, strlen($sql)-2);
-        $sql.= ")";
+						else{
+							$sql .= $table['attributname'][$i].", ";
+							$execute = true;
+						}
+					}
+				}
+				$sql = substr($sql, 0, strlen($sql)-2);
+				$sql.= ") VALUES (";
+				for($i = 0; $i < count($table['attributname']); $i++){
+					if($table['type'][$i] == 'Time'){                       # Typ "Time"
+						$sql.= "(now())::timestamp(0), ";
+					}
+					elseif($table['type'][$i] == 'User'){                       # Typ "User"
+						$sql.= "'".$this->user->Vorname." ".$this->user->Name."', ";
+					}
+					elseif($table['type'][$i] == 'UserID'){                       # Typ "UserID"
+						$sql.= "'".$this->user->id."', ";
+					}
+					elseif($table['type'][$i] == 'Stelle'){                       # Typ "Stelle"
+						$sql.= "'".$this->Stelle->Bezeichnung."', ";
+					}
+					elseif($table['type'][$i] == 'StelleID'){                       # Typ "StelleID"
+						$sql.= "'".$this->Stelle->id."', ";
+					}
+					elseif($table['type'][$i] == 'Dokument' AND $this->formvars[$table['formfield'][$i]] != '') {
+						$sql.= "'".$this->formvars[$table['formfield'][$i]]."', ";
+						$this->formvars[$table['formfield'][$i]] = ''; # leeren, falls weiter_erfassen angehakt
+					}
+					elseif (
+						$table['type'][$i] != 'Text_not_saveable' AND
+						$table['type'][$i] != 'Auswahlfeld_not_saveable' AND
+						$table['type'][$i] != 'SubFormPK' AND
+						$table['type'][$i] != 'SubFormFK' AND
+						($this->formvars[$table['formfield'][$i]] != '' OR $table['type'][$i] == 'Checkbox')
+					) {
+						if ($table['type'][$i] == 'Zahl') {
+							# bei Zahlen den Punkt (Tausendertrenner) entfernen
+							$this->formvars[$table['formfield'][$i]] = removeTausenderTrenner($this->formvars[$table['formfield'][$i]]); # bei Zahlen den Punkt (Tausendertrenner) entfernen
+						}
+						if ($table['type'][$i] == 'Checkbox' AND $this->formvars[$table['formfield'][$i]] == '') {
+							$this->formvars[$table['formfield'][$i]] = 'f';
+						}
+						if (substr($table['datatype'][$i], 0, 1) == '_' OR is_numeric($table['datatype'][$i])){
+							# bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln
+							$this->formvars[$table['formfield'][$i]] = JSON_to_PG(json_decode($this->formvars[$table['formfield'][$i]]));
+						}
+						$sql .= "'" . $this->formvars[$table['formfield'][$i]] . "', "; # Typ "normal"
+					}
+					elseif($table['type'][$i] == 'Geometrie') {
+						if($this->formvars['geomtype'] == 'POINT') {
+							if($this->formvars['loc_x'] != '') {
+								if($this->formvars['dimension'] == 3) {
+									$sql .= "st_transform(st_geomfromtext('POINT(".$this->formvars['loc_x']." ".$this->formvars['loc_y']." 0)', ".$client_epsg."), ".$layer_epsg."), ";
+								}
+								else{
+									$sql .= "st_transform(st_geomfromtext('POINT(".$this->formvars['loc_x']." ".$this->formvars['loc_y'].")', ".$client_epsg."), ".$layer_epsg."), ";
+								}
+							}
+						}
+						elseif($this->formvars['newpathwkt'] != ''){
+							$sql .= "st_transform(st_multi(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$client_epsg.")), ".$layer_epsg."), ";
+						}
+					}
+				}
+				$sql = substr($sql, 0, strlen($sql)-2);
+				$sql.= ")";
 
-        if($execute == true){
+				if ($execute == true) {
 					# Before Insert trigger
 					if (!empty($layerset[0]['trigger_function'])) {
 						$this->exec_trigger_function('BEFORE', 'INSERT', $layerset[0]);
 					}
-          $this->debug->write("<p>file:kvwmap class:neuer_Layer_Datensatz_speichern :",4);
-          if($this->formvars['embedded'] == '') {
-            $ret = $layerdb->execSQL($sql,4, 1);
-            if(!$ret[0]) {
-							$result = pg_fetch_row($ret[1]);
-            	if(pg_affected_rows($ret[1]) > 0){
-              	$this->formvars['value_'.$table['tablename'].'_oid'] = pg_last_oid($ret[1]);
-								$oid = $this->formvars['value_'.$table['tablename'].'_oid'];
-            	}
-            	else {
-            		$ret[0] = 1;
-            	}
-            }
-          }
-          else {
-            $ret = $layerdb->execSQL($sql,4, 1, true);
-            if(!$ret[0]){
-              $last_oid = pg_last_oid($ret[1]);
-							$oid = $last_oid;
-            }
-          }
 
-          if ($ret[0]) {
-            $success = false;
-          }
-					else {
-						# After Insert trigger
-						if (!empty($layerset[0]['trigger_function'])) {
-							$this->exec_trigger_function('AFTER', 'INSERT', $layerset[0], $oid);
+					$this->debug->write("<p>file:kvwmap class:neuer_Layer_Datensatz_speichern :",4);
+
+					$ret = $layerdb->execSQL($sql, 4, 1, true);
+
+					if ($ret['success']) {
+
+						$result = pg_fetch_row($ret['query']);
+
+						if (pg_affected_rows($ret['query']) > 0) {
+							# dataset was created
+							if (is_array($result) and array_key_exists(1, $result) and $result[1] == 'error') {
+								$this->add_message('waring', 'Eintrag erfolgreich.<br>' . $result[0]);
+							}
+							else {
+								$this->add_message('notice', 'Eintrag erfolgreich!');
+							}
+
+							$last_oid = pg_last_oid($ret['query']);
+							$this->formvars['value_' . $table['tablename'] . '_oid'] = $last_oid;
+
+							# After Insert trigger
+							if (!empty($layerset[0]['trigger_function'])) {
+								$this->exec_trigger_function('AFTER', 'INSERT', $layerset[0], $last_oid);
+							}
+						}
+						else {
+							# dataset was not created
+							$this->add_message('error', 'Eintrag fehlgeschlagen.<br>' . $result[0]);
 						}
 					}
-        }
-      }
-    }
-    if($this->formvars['embedded'] != ''){    # wenn es ein neuer Datensatz aus einem embedded-Formular ist, muss das entsprechende Attribut des Hauptformulars aktualisiert werden
-      header('Content-type: text/html; charset=UTF-8');
-
-			$result = pg_fetch_all($ret[1]);
-			if (!empty($result) AND !empty($result[0]['msg'])) {
-				$this->add_message($result[0]['msg_type'], $result[0]['msg']);
-				$this->output_messages();
+					else {
+						# query not successfull set query error message
+						$this->success = false;
+						$this->add_message($ret['type'], $ret['msg']);
+					}
+				}
 			}
+		}
 
-      $attributename[0] = $this->formvars['targetattribute'];
-      $attributes = $mapdb->read_layer_attributes($this->formvars['targetlayer_id'], $layerdb, $attributename);
+		if ($this->formvars['embedded'] != '') {    # wenn es ein neuer Datensatz aus einem embedded-Formular ist, muss das entsprechende Attribut des Hauptformulars aktualisiert werden
+			header('Content-type: text/html; charset=UTF-8');
+			$attributename[0] = $this->formvars['targetattribute'];
+			$attributes = $mapdb->read_layer_attributes($this->formvars['targetlayer_id'], $layerdb, $attributename);
 
-      switch ($attributes['form_element_type'][0]){
-        case 'Auswahlfeld' : {
-					if(strpos($attributes['options'][0], '<requires>') !== false)echo "~~currentform.go.value='get_last_query';overlay_submit(currentform, false);";		# wenn <requires> verwendet wird, muss komplett neu geladen werden
-					else{		# andernfalls wird nur das Auswahlfeld ausgetauscht und die Option gleich selektiert
+			switch ($attributes['form_element_type'][0]){
+				case 'Auswahlfeld' : {
+					if (strpos($attributes['options'][0], '<requires>') !== false) {
+						# wenn <requires> verwendet wird, muss komplett neu geladen werden
+						echo "~~currentform.go.value='get_last_query';overlay_submit(currentform, false);";
+					}
+					else { # andernfalls wird nur das Auswahlfeld ausgetauscht und die Option gleich selektiert
 						list($sql) = explode(';', $attributes['options'][0]);
 						$sql = str_replace(' from ', ',oid from ', strtolower($sql));    # auch die oid abfragen
 						$re=$layerdb->execSQL($sql,4,0);
@@ -8237,13 +8259,15 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
           $this->formvars['embedded_subformPK'] = true;
           echo '~';
           $this->GenerischeSuche_Suchen();
+					echo '~';
 					if($this->formvars['weiter_erfassen'] == 1){
-						echo '~href_save = document.getElementById("new_'.$this->formvars['targetobject'].'").href;';
+						echo 'href_save = document.getElementById("new_'.$this->formvars['targetobject'].'").href;';
 						echo 'document.getElementById("new_'.$this->formvars['targetobject'].'").href = document.getElementById("new_'.$this->formvars['targetobject'].'").href.replace("go=neuer_Layer_Datensatz", "go=neuer_Layer_Datensatz&weiter_erfassen=1'.$formfieldstring.'");';
 						echo 'document.getElementById("new_'.$this->formvars['targetobject'].'").click();';
 						echo 'document.getElementById("new_'.$this->formvars['targetobject'].'").href = href_save;';
 					}
-        }break;
+					$this->output_messages('without_script_tags');
+        } break;
       }
 
 			if($this->formvars['reload']){			# in diesem Fall wird die komplette Seite neu geladen
@@ -8254,18 +8278,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
     }
     else {
-      if($success == false) {
-        $this->add_message('error', 'Eintrag fehlgeschlagen.<br>' . $result[0]);
+      if ($ret['success'] == false) {
         $this->neuer_Layer_Datensatz();
       }
-      else{
-        if ($this->formvars['close_window'] == "") {
-					$msg = (is_array($result) and array_key_exists(1, $result) and $result[1] == 'error') ? '' : $result[0];
-					if ($msg != '')
-						$this->add_message('warning', 'Eintrag erfolgreich.<br>' . $msg);
-					else
-						$this->add_message('notice', 'Eintrag erfolgreich!');
-        }
+      else {
         if($this->formvars['weiter_erfassen'] == 1){
         	$this->formvars['firstpoly'] = '';
         	$this->formvars['firstline'] = '';
@@ -10485,22 +10501,38 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	function cronjobs_anlegen() {
 		include_once(CLASSPATH . 'CronJob.php');
 		$this->cronjob = new CronJob($this);
-		$this->cronjob->data = $this->formvars;
+		$this->cronjob->data = formvars_strip($this->formvars, $this->cronjob->getAttributes(), 'keep');
 		$this->cronjob->set('query', strip_pg_escape_string($this->formvars['query']));
-		$this->cronjob->create();
-		$this->cronjobs = CronJob::find($this);
-		$this->main = 'cronjobs.php';
+		$results = $this->cronjob->validate();
+		if (empty($results)) {
+			$results = $this->cronjob->create();
+		}
+		if (empty($results)) {
+			$this->add_message('notice', 'Job erfolgreich angelegt.');
+			$this->cronjobs = CronJob::find($this);
+			$this->main = 'cronjobs.php';
+		}
+		else {
+			$this->add_message('array', $results);
+			$this->main = 'cronjob_formular.php';
+		}
 		$this->output();
 	}
 
 	function cronjob_update() {
 		include_once(CLASSPATH . 'CronJob.php');
 		$this->cronjob = CronJob::find_by_id($this, $this->formvars['id']);
-		$this->cronjob->data = $this->formvars;
-		$this->cronjob->update();
-#		$this->cronjob->set('query', strip_pg_escape_string($this->cronjob->get('query')));
-		$this->cronjobs = CronJob::find($this);
-		$this->main = 'cronjobs.php';
+		$this->cronjob->data = formvars_strip($this->formvars, $this->cronjob->getAttributes(), 'keep');
+		$result = $this->cronjob->update();
+		if (!empty($result)) {
+			$this->add_message('error', 'Fehler beim Eintragen in die Datenbank!<br>' . $result);
+			$this->main = 'cronjob_formular.php';
+		}
+		else {
+	#		$this->cronjob->set('query', strip_pg_escape_string($this->cronjob->get('query')));
+			$this->cronjobs = CronJob::find($this);
+			$this->main = 'cronjobs.php';
+		}
 		$this->output();
 	}
 
@@ -10526,7 +10558,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		}
 
 		# schreibt die Zeilen in eine Datei
-		$crontab_file = '/tmp/crontab_www-data';
+		$crontab_file = '/var/www/cron/crontab_gisadmin';
 		$fp = fopen($crontab_file, 'w');
 		foreach($crontab_lines AS $line) {
 			fwrite($fp, $line . PHP_EOL);
@@ -10534,10 +10566,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		fclose($fp);
 
 		# crontab starten
-		exec('crontab -u www-data ' . $crontab_file);
+#		exec('crontab -u www-data ' . $crontab_file);
 
 		# crontab datei löschen
-		unlink($crontab_file);
+#		unlink($crontab_file);
 
 		# crontab Zeilen anzeigen
 		$this->crontab_lines = $crontab_lines;
@@ -11549,7 +11581,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
   	$_files = $_FILES;
     $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $form_fields = explode('|', $this->formvars['form_field_names']);
-    $success = true;
+    $this->success = true;
     $old_layer_id = '';
     for($i = 0; $i < count($form_fields); $i++){
       if($form_fields[$i] != ''){
@@ -11608,7 +11640,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							$eintrag = $this->formvars[$form_fields[$i]];
             } break;
 						case 'Zahl' : {
-							$eintrag = removeTausenderTrenner($this->formvars[$form_fields[$i]]);		# bei Zahlen den Punkt (Tausendertrenner) entfernen
+							$eintrag = removeTausenderTrenner($this->formvars[$form_fields[$i]]); # bei Zahlen den Punkt (Tausendertrenner) entfernen
 							if($this->formvars[$form_fields[$i]] == '')$eintrag = 'NULL';
 						} break;
             default : {
@@ -11657,15 +11689,15 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			}
 		}
 		if($updates != NULL){
-			foreach($updates as $layer_id => $layer){
-				foreach($layer as $tablename => $table){
-					foreach($table as $oid => $attributes){
+			foreach($updates as $layer_id => $layer) {
+				foreach($layer as $tablename => $table) {
+					foreach($table as $oid => $attributes) {
 						if(count($attributes) > 0){
 							if(!$layerset[$layer_id][0]['maintable_is_view'])$sql = "LOCK TABLE ".$tablename." IN SHARE ROW EXCLUSIVE MODE;";
 							else $sql = '';
 							$sql .= "UPDATE ".$tablename." SET ";
 							$i = 0;
-							foreach($attributes as $attribute => $value){
+							foreach($attributes as $attribute => $value) {
 								if($i > 0)$sql .= ', ';
 								$sql .= $attribute." = ";
 								if($value == 'NULL')$sql .= 'NULL';
@@ -11685,26 +11717,31 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							#echo '<br>sql for update: ' . $sql;
 
 							$this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
-							$ret = $layerdb[$layer_id]->execSQL($sql,4, 1);
+							$ret = $layerdb[$layer_id]->execSQL($sql, 4, 1, true);
 
-							if(!$ret[0]) {
-								$result = pg_fetch_row($ret[1]);
-								if(pg_affected_rows($ret[1]) == 0){
-									$ret[0] = 1;
-									$success = false;
-								}
-								else {
+							if ($ret['success']) {
+								$result = pg_fetch_row($ret['query']);
+								if (pg_affected_rows($ret['query']) > 0) {
 									# After Update trigger
-									if (!empty($layerset[$layer_id][0]['trigger_function'])){
+									if (!empty($layerset[$layer_id][0]['trigger_function'])) {
 										$this->exec_trigger_function('AFTER', 'UPDATE', $layerset[$layer_id][0], $oid);
 									}
 								}
+								else {
+									# dataset was not created
+									$this->success = false;
+								}
+							}
+							else {
+								# query not successfull set query error message
+								$this->success = false;
+								$this->add_message($ret['type'], $ret['msg']);
 							}
 						}
 					}
 				}
 			}
-			if ($success == false) {
+			if ($this->success == false) {
 				$this->add_message('error', 'Änderung fehlgeschlagen.<br>' . $result[0]);
 			}
 			else {
@@ -11717,9 +11754,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		else {
 			$this->add_message('warning', 'Keine Änderung.');
 		}
-    if ($this->formvars['embedded'] != ''){    # wenn es ein Datensatz aus einem embedded-Formular ist, muss das entsprechende Attribut des Hauptformulars aktualisiert werden
-      header('Content-type: text/html; charset=UTF-8');
-			$this->output_messages();
+		if ($this->formvars['embedded'] != ''){    # wenn es ein Datensatz aus einem embedded-Formular ist, muss das entsprechende Attribut des Hauptformulars aktualisiert werden
+			header('Content-type: text/html; charset=UTF-8');
+
       $attributenames[0] = $this->formvars['targetattribute'];
       $attributes = $mapdb->read_layer_attributes($this->formvars['targetlayer_id'], $layerdb, $attributenames);
       switch ($attributes['form_element_type'][0]){
@@ -11729,6 +11766,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
           $this->GenerischeSuche_Suchen();
         }break;
       }
+			echo '~';
+			$this->output_messages('without_script_tags');
 			if($this->formvars['reload']){			# in diesem Fall wird die komplette Seite neu geladen
 				echo '~~';
 				echo "document.GUI.go.value='get_last_query';

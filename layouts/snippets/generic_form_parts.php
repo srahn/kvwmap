@@ -335,7 +335,7 @@
 							$datapart .= '&value_'.$attributes['subform_pkeys'][$j][$p].'='.$dataset[$attributes['subform_pkeys'][$j][$p]];
 							$datapart .= '&operator_'.$attributes['subform_pkeys'][$j][$p].'==';
 						}
-						$datapart .= 	'&subform_link=true\')"><span>'.$strShowAll.'</span></a>';												
+						$datapart .= 	'&subform_link=true\')"><span>'.$strShowAll.'</span></a>';
 						if($attributes['subform_layer_privileg'][$j] > 0 AND !$lock[$k]){
 							if($attributes['embedded'][$j] == true){
 								$datapart .= '&nbsp;<a id="new_'.$layer_id.'_'.$name.'_'.$k.'" class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz';
@@ -348,7 +348,11 @@
 								}
 								$data .= '&preview_attribute='.$attributes['preview_attribute'][$j];
 								$datapart .= '&data='.str_replace('&', '<und>', $data);
-								$datapart .= '&selected_layer_id='.$attributes['subform_layer_id'][$j].'&embedded=true&fromobject=subform'.$layer_id.'_'.$k.'_'.$j.'&targetobject='.$layer_id.'_'.$name.'_'.$k.'&targetlayer_id='.$layer_id.'&targetattribute='.$name.'\', new Array(document.getElementById(\'subform'.$layer_id.'_'.$k.'_'.$j.'\'), \'\'), new Array(\'sethtml\', \'execute_function\'));clearsubforms('.$attributes['subform_layer_id'][$j].');"><span>'.$strNewEmbeddedPK.'</span></a>';
+								$datapart .= '&selected_layer_id='.$attributes['subform_layer_id'][$j] .
+														 '&embedded=true&fromobject=subform' . $layer_id . '_' . $k . '_' . $j .
+														 '&targetobject=' . $layer_id . '_' . $name . '_' . $k .
+														 '&targetlayer_id=' . $layer_id .
+														 '&targetattribute=' . $name . '\', new Array(document.getElementById(\'subform'.$layer_id.'_'.$k.'_'.$j.'\'), \'\'), new Array(\'sethtml\', \'execute_function\'));clearsubforms('.$attributes['subform_layer_id'][$j].');"><span>'.$strNewEmbeddedPK.'</span></a>';
 								$datapart .= '<div style="display:inline" id="subform'.$layer_id.'_'.$k.'_'.$j.'"></div>';
 							}
 							else{
