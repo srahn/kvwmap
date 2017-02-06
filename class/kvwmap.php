@@ -8299,6 +8299,16 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         $layerdb->setClientEncoding();
         $privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
         $layerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames'], false, true);
+		    $form_fields = explode('|', $this->formvars['form_field_names']);
+				for($i = 0; $i < count($form_fields); $i++){
+					if($form_fields[$i] != ''){
+						$element = explode(';', $form_fields[$i]);
+						$formElementType = $layerset[0]['attributes']['form_element_type'][$layerset[0]['attributes']['indizes'][$element[1]]];
+						if($formElementType == 'Zahl'){
+							$this->formvars[$form_fields[$i]] = removeTausenderTrenner($this->formvars[$form_fields[$i]]);	# beim Typ Zahl Tausendertrenner entfernen
+						}
+					}
+				}				
         ######### für neuen Datensatz verwenden -> von der Sachdatenanzeige übergebene Formvars #######
 	      if($this->formvars['chosen_layer_id']){
 		    	$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
@@ -8308,7 +8318,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		          $oid = $element[3];
 		        }
 		      }
-		      $form_fields = explode('|', $this->formvars['form_field_names']);
 		      for($i = 0; $i < count($form_fields); $i++){
 			      if($form_fields[$i] != ''){
 			        $element = explode(';', $form_fields[$i]);
@@ -8318,7 +8327,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 								 AND !in_array($formElementType, array('Time', 'User', 'UserID', 'Stelle', 'StelleID')) # und automatisch generierte Typen auch nicht
 							){
 				        $element[3] = '';
-								if($formElementType == 'Zahl')$this->formvars[$form_fields[$i]] = removeTausenderTrenner($this->formvars[$form_fields[$i]]);	# beim Typ Zahl Tausendertrenner entfernen
 				        $this->formvars[implode(';', $element)] = $this->formvars[$form_fields[$i]];
 			        }
 			      }
