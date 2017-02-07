@@ -161,17 +161,6 @@ for($i=0;$i<$anzLayer;$i++){
 <? } ?>
   <br><div align="center">
 
-
-  <?
-		for($i = 0; $i < $anzLayer; $i++){
-			if($this->formvars['qLayer'.$this->qlayerset[$i]['Layer_ID']] == 1){
-				echo '<input name="qLayer'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="1">';
-				echo '<input id="offset_'.$this->qlayerset[$i]['Layer_ID'].'" name="offset_'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="'.$this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']].'">';
-				echo '<input name="sql_'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="'.$this->qlayerset[$i]['sql'].'">';
-			}
-		}
-  ?>
-
   <?
   	if($this->search == true){			# wenn man von der Suche kam -> Hidden Felder zum Speichern der Suchparameter
 		echo '<input name="go" type="hidden" value="Layer-Suche_Suchen">';
@@ -187,20 +176,17 @@ for($i=0;$i<$anzLayer;$i++){
 		      }
 		    }
   		}
-
-			if($this->formvars['quicksearch'] != true){
-				for($m = 0; $m <= $this->formvars['searchmask_count']; $m++){
-					if($m > 0){
-						$prefix = $m.'_';
-						echo '<input name="boolean_operator_'.$m.'" type="hidden" value="'.$this->formvars['boolean_operator_'.$m].'">';
-					}
-					for($j = 0; $j < count($this->qlayerset[0]['attributes']['type']); $j++){
-						echo '
-							<input name="'.$prefix.'value_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars[$prefix.'value_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
-							<input name="'.$prefix.'value2_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars[$prefix.'value2_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
-							<input name="'.$prefix.'operator_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars[$prefix.'operator_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
-						';
-					}
+			for($m = 0; $m <= $this->formvars['searchmask_count']; $m++){
+				if($m > 0){
+					$prefix = $m.'_';
+					echo '<input name="boolean_operator_'.$m.'" type="hidden" value="'.$this->formvars['boolean_operator_'.$m].'">';
+				}
+				for($j = 0; $j < count($this->qlayerset[0]['attributes']['type']); $j++){
+					echo '
+						<input name="'.$prefix.'value_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars[$prefix.'value_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
+						<input name="'.$prefix.'value2_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars[$prefix.'value2_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
+						<input name="'.$prefix.'operator_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars[$prefix.'operator_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
+					';
 				}
 			}
 	  	if($this->formvars['printversion'] == '' AND $this->formvars['keinzurueck'] == '' AND $this->formvars['subform_link'] == ''){
@@ -208,6 +194,13 @@ for($i=0;$i<$anzLayer;$i++){
 	  	}
   	}
   	else{
+			for($i = 0; $i < $anzLayer; $i++){
+				if($this->formvars['qLayer'.$this->qlayerset[$i]['Layer_ID']] == 1){
+					echo '<input name="qLayer'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="1">';
+					echo '<input id="offset_'.$this->qlayerset[$i]['Layer_ID'].'" name="offset_'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="'.$this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']].'">';
+					echo '<input name="sql_'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="'.$this->qlayerset[$i]['sql'].'">';
+				}
+			}
 			echo '<input name="go" type="hidden" value="Sachdaten">';
   	}
   ?>
