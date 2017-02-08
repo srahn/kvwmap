@@ -228,7 +228,7 @@ class NASLoader extends DOMDocument {
 			return false;
 		}
 		$array = false;
-		if( empty( trim( $node->localName ))) { // Discard empty nodes
+		if(trim($node->localName) == '') { // Discard empty nodes
 			return false;
 		}
 		if( XML_TEXT_NODE == $node->nodeType ) {

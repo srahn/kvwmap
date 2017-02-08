@@ -36,7 +36,7 @@ switch($this->go) {
 		}
 		else {
 			$ff_auftrag = Fortfuehrungsauftrag::find_by_id($this, 'id', $ff_auftrag_id);
-			if (empty($ff_auftrag->get('auftragsdatei'))) {
+			if ($ff_auftrag->get('auftragsdatei') == '') {
 				$this->messages[] = array(
 					'type' => 'error',
 					'msg' => 'Sie müssen erst eine Auftragsdatei zum Fortführungsauftrag hochladen!'

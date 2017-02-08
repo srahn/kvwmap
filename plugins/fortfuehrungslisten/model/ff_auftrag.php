@@ -23,7 +23,7 @@ public static	function find_by_id($gui, $by, $id) {
 
 public function auftragsdatei_loeschen() {
 		$success = false;
-		if (empty($this->get('auftragsdatei'))) {
+		if ($this->get('auftragsdatei') == '') {
 			$msg = 'Keine Auftragsdatei zum Löschen vorhanden!';
 		}
 		else {
