@@ -3,7 +3,7 @@ BEGIN;
 CREATE OR REPLACE FUNCTION fortfuehrungslisten.ff_auftraege_next_lfdnr(in in_jahr integer, IN in_gemkgnr integer, OUT lfdnr integer)
   RETURNS integer AS
 $BODY$
-  SELECT coalesce(lfdnr, 0) + increment_table.n FROM (SELECT 1 AS n) AS increment_table left join (SELECT max(lfdnr) lfdnr FROM fortfuehrungslisten.ff_auftraege WHERE jahr = in_jahr AND gemkgnr = in_gemkgnr) AS lfdnr_table ON true
+  SELECT coalesce(lfdnr, 0) + increment_table.n FROM (SELECT 1 AS n) AS increment_table left join (SELECT max(lfdnr) lfdnr FROM fortfuehrungslisten.ff_auftraege WHERE jahr = $1 AND gemkgnr = $1) AS lfdnr_table ON true
     $BODY$
   LANGUAGE sql VOLATILE
   COST 100;
