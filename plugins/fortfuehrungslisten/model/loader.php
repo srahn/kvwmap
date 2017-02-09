@@ -65,11 +65,11 @@ class NASLoader extends DOMDocument {
 
 			# Lese und speicher Attribute zum Auftrag
 			$nodes = $this->getElementsByTagName('datumDerAusgabe');
-			$node = $nodes[0];
+			$node = $nodes->item(0);
 			$ff_auftrag->set('datumderausgabe', $node->nodeValue);
 
 			$nodes = $this->getElementsByTagName('AX_Fortfuehrungsauftrag');
-			$auftrag_node = $nodes[0];
+			$auftrag_node = $nodes->item(0);
 			foreach($auftrag_node->childNodes AS $child_node) {
 				#echo '<br>node: ' . $child_node->localName;
 				$tag = strtolower($child_node->localName);
@@ -121,7 +121,7 @@ class NASLoader extends DOMDocument {
 					# Finde Gebäude und deren Anlass
 					$this->gebaeude_nodes = $this->getElementsByTagName('AX_Gebaeude');
 					if ($this->gebaeude_nodes->length > 0) {
-						foreach($this->gebaeude_nodes[0]->childNodes AS $child_node) {
+						foreach($this->gebaeude_nodes->item(0)->childNodes AS $child_node) {
 							$tag = strtolower($child_node->localName);
 							if ($tag == 'anlass') {
 								$ff_auftrag->set('gebaeude', $child_node->nodeValue);
