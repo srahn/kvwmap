@@ -45,7 +45,7 @@ switch($this->go) {
 			else {
 				$this->loader = new NASLoader($this);
 				$result = $this->loader->load_fortfuehrungsfaelle($ff_auftrag);
-				$this->messages = array_merge($this->messages, $this->loader->messages);
+				$this->messages = @array_merge($this->messages, $this->loader->messages);
 
 				if ($result['success']) {
 					$result = $ff_auftrag->auftragsdatei_loeschen();
@@ -53,7 +53,7 @@ switch($this->go) {
 			}
 		}
 
-		$this->messages = array_merge($this->messages, $ff_auftrag->messages);
+		@$this->messages = array_merge($this->messages, $ff_auftrag->messages);
 
 		$this->formvars['selected_layer_id'] = LAYER_ID_FF_AUFTRAG;
 		$this->formvars['operator_ff_auftrag_id'] = '=';
