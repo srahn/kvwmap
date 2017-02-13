@@ -887,6 +887,32 @@ tbody.gle tr:hover {
 	color: gray;
 }
 
+.fa-7x {
+	font-size: 7em !important;
+}
+
+.wobble-fix {
+	-webkit-transform-origin: 49.1% 49.8%;
+	-moz-transform-origin: 50% 50%;
+}
+
+.spinner {
+	opacity: 0.75;
+	color: LightSteelBlue;
+	text-shadow: 0px 0px 4px #000000;
+	animation: 0.8s steps(8) 0s normal none infinite running fa-spin;
+}
+
+.waitingdiv_spinner {
+	pointer-events:none;
+	background:none;
+}
+
+.waitingdiv_spinner_lock {
+	background:rgba(200,200,200,0.3);
+	pointer-events:auto;
+}
+
 .pointer:hover {
 	color: #90a0b5;
 	cursor: pointer;

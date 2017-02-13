@@ -13,11 +13,9 @@ include(WWWROOT.APPLVERSION.'funktionen/gui_functions.php');
 <link rel="stylesheet" href="<?php echo FONTAWESOME_PATH; ?>css/font-awesome.min.css" type="text/css">
 </HEAD>
 <BODY onload="onload_functions();">
-	<div id="sperrdiv" style="position: absolute;height: 100%;z-index: 1000000;background:rgba(200,200,200,0.3);"></div>
-	<div id="sperrspinner" style="position: absolute;height: 100%; width: 100%; z-index: 1000000; display: none; background:rgba(200,200,200,0.3); text-align: center">
-		<div style="margin: 300px">
-			<i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
-			ist in Arbeit ...
+	<div id="waitingdiv" style="position: absolute;height: 100%; width: 100%; display:none; z-index: 1000000; text-align: center">
+		<div style="margin: 350px">
+			<i class="fa fa-spinner fa-7x wobble-fix spinner"></i>
 		</div>
 	</div>
 	<a name="oben"></a>
@@ -64,6 +62,7 @@ include(WWWROOT.APPLVERSION.'funktionen/gui_functions.php');
 				<input type="hidden" name="overlayy" value="<? echo $this->user->rolle->overlayy; ?>">
 				<input type="hidden" name="browserwidth">
 				<input type="hidden" name="browserheight">
+				<input type="hidden" name="stopnavigation" value="0">
 				<div id="message_box" class="message_box_hidden"></div>
         </form>
 <? if($this->user->rolle->querymode == 1){

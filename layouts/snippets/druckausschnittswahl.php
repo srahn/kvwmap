@@ -288,7 +288,6 @@ function rotate_print_extent(angle){
 <input type="hidden" name="mapheight" value="<?php echo $this->Document->activeframe[0]['mapheight']; ?>">
 <input type="hidden" name="printextent" value="">
 <input type="hidden" name="map_factor" value="<? echo $this->formvars['map_factor'] ?>">
-<input type="hidden" name="stopnavigation" value="0">
 
 <!-- für den externen Druck -->
 <input type="hidden" name="post_width" value="<? echo $this->formvars['post_width'] ?>">

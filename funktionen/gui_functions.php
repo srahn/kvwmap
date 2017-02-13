@@ -11,6 +11,20 @@ function ImageLoadFailed(id) {
 var currentform;
 var doit;
 
+function startwaiting(lock = false){
+	document.GUI.stopnavigation.value = 1;
+	waitingdiv = document.getElementById('waitingdiv');
+	waitingdiv.style.display='';
+	if(lock)waitingdiv.className='waitingdiv_spinner_lock';
+	else waitingdiv.className='waitingdiv_spinner';
+}
+
+function stopwaiting(){
+	document.GUI.stopnavigation.value = 0;
+	waitingdiv = document.getElementById('waitingdiv');
+	waitingdiv.style.display='none';
+}
+
 function getBrowserSize(){
 	if(typeof(window.innerWidth) == 'number'){
 		width = window.innerWidth;
@@ -241,9 +255,7 @@ function urlstring2formdata(formdata, string){
 
 function overlay_submit(gui, start){
 	// diese Funktion macht beim Fenstermodus und einer Kartenabfrage oder einem Aufruf aus dem Overlay-Fenster einen ajax-Request mit den Formulardaten des uebergebenen Formularobjektes, ansonsten einen normalen Submit
-<? if($this->main == 'map.php'){ ?>
 	startwaiting();
-<? } ?>
 	if(typeof FormData !== 'undefined' && (1 == <? echo $this->user->rolle->querymode; ?> && start || gui.id == 'GUI2')){	
 		formdata = new FormData(gui);
 		formdata.append("mime_type", "overlay_html");	
