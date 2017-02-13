@@ -13,7 +13,7 @@ include(WWWROOT.APPLVERSION.'funktionen/gui_functions.php');
 <link rel="stylesheet" href="<?php echo FONTAWESOME_PATH; ?>css/font-awesome.min.css" type="text/css">
 </HEAD>
 <BODY onload="onload_functions();">
-	<div id="waitingdiv" style="position: absolute;height: 100%; width: 100%;  z-index: 1000000; text-align: center">
+	<div id="waitingdiv" style="position: absolute;height: 100%; width: 100%; display:none; z-index: 1000000; text-align: center">
 		<div style="margin: 350px">
 			<i class="fa fa-spinner fa-7x wobble-fix spinner"></i>
 		</div>
