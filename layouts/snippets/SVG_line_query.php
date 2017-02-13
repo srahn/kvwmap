@@ -56,9 +56,7 @@
 	<input name="lastcoordy" type="hidden" value="">
 	<input type="hidden" name="str_pathx" value="<? echo $this->formvars['str_pathx']; ?>">
   <input type="hidden" name="str_pathy" value="<? echo $this->formvars['str_pathy']; ?>">
-  <input type="hidden" name="vertices" id="vertices" value="">
-  <input type="hidden" name="stopnavigation" value="0">
-	
+  <input type="hidden" name="vertices" id="vertices" value="">	
 
 <?php
 #

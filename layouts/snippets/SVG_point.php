@@ -48,7 +48,6 @@
 	<input name="last_doing2" type="hidden" value="<? echo $this->formvars['last_doing2']; ?>">
 	<input type="hidden" name="str_pathx" value="<? echo $this->formvars['str_pathx']; ?>">
   <input type="hidden" name="str_pathy" value="<? echo $this->formvars['str_pathy']; ?>">
-  <input type="hidden" name="stopnavigation" value="0">
   
 <?php
 #

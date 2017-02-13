@@ -58,10 +58,9 @@
 		if(navigator.userAgent.toLowerCase().indexOf('chrome') >= 0) var browser = 'chrome';
 		else var browser = 'other';
 	}
-	
-   
+	 
   function get_map_ajax(postdata){
-		startwaiting();
+		top.startwaiting();
 		if(document.GUI.legendtouched.value == 0){
   		svgdoc = document.SVG.getSVGDocument();	
 			// nix
@@ -311,10 +310,6 @@ $svg='<?xml version="1.0"?>
 	var gps_follow_cooldown = 0;
 	var root = document.documentElement;
 	var mousewheelloop = 0;
-	var stopnavigation = false;
-	var currentTheta = 0;
-  var thetaDelta = '.WAITING_ANIMATION_SPEED.'; // The amount to rotate the square about every 16.7 milliseconds, in degrees.
-	var requestAnimationFrameID;
 	var last_x = 0;
 	freehand_measuring = false;
 	var measured_distance = 0;
@@ -372,43 +367,6 @@ function startup(){';
 function sendpath(cmd, pathx, pathy){
 	top.sendpath(cmd, pathx, pathy);
 	if(cmd == "polygonquery")deletepolygon();
-}
-
-if (!window.requestAnimationFrame){ 
-	window.requestAnimationFrame = ( function(){
-		return window.webkitRequestAnimationFrame ||
-		window.mozRequestAnimationFrame ||
-		window.oRequestAnimationFrame ||
-		window.msRequestAnimationFrame ||
-		function( /* function FrameRequestCallback */ callback, /* DOMElement Element */ element ) {
-			window.setTimeout( callback, 1000 / 60 );
-		};	 
-	})();
-}
-
-if (!window.cancelAnimationFrame){
-	window.cancelAnimationFrame = function(id) {
-		clearTimeout(id);
-	};
-}
-
-function doAnim() {
-	if(currentTheta%30 == 0)document.getElementById("waitingimage").setAttribute("transform", "translate('.$res_xm.', '.$res_ym.') scale(0.3 0.3) rotate(" + currentTheta + ")"); 
-	currentTheta += thetaDelta;  
-	requestAnimationFrameID = requestAnimationFrame(doAnim); 
-}
-
-function startwaiting(){
-	top.document.GUI.stopnavigation.value = 1;
-	document.getElementById("waitingimage").style.setProperty("visibility","visible", "");
-	requestAnimationFrameID = requestAnimationFrame(doAnim); // Start the loop.
-}
-
-function stopwaiting(){
-	top.document.GUI.stopnavigation.value = 0;
-	document.getElementById("waitingimage").style.setProperty("visibility","hidden", "");
-	//document.getElementById("waiting_animation").endElement();
-	cancelAnimationFrame(requestAnimationFrameID);
 }
 
 function mousewheelzoom(){
@@ -487,10 +445,6 @@ function init(){
 
 top.document.getElementById("map").SVGstartup = startup;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
-top.document.getElementById("svghelp").SVGstopwaiting = stopwaiting;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-
-top.document.getElementById("svghelp").SVGstartwaiting = startwaiting;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-
 top.document.getElementById("svghelp").SVGmoveback = moveback;
 
 function moveback_ff(evt){
@@ -505,7 +459,7 @@ function moveback_ff(evt){
 	oldmousex = undefined;
 	hidetooltip(evt);
 	// Navigation wieder erlauben
-	stopwaiting();
+	top.stopwaiting();
 	window.setTimeout(\'document.getElementById("mapimg2").setAttribute("xlink:href", "")\', 400);
 	window.setTimeout(\'document.getElementById("mapimg2").setAttribute("style", "display:none")\', 400);
 	startup();
@@ -536,7 +490,7 @@ function moveback(evt){
 	oldmousex = undefined;
 	hidetooltip(evt);
 	// Navigation wieder erlauben
-	stopwaiting();
+	top.stopwaiting();
 }
 
 function go_previous(){
@@ -1649,26 +1603,6 @@ if($_SESSION['mobile'] == 'true'){
 	 $svg.=' <use id="gps_position" xlink:href="#crosshair_red" x="-100" y="-100"/>';
 }
 $svg.='
-    </g>
-  </g>
-	<g id="waitingimage" currentTheta="0" style="visibility:hidden" transform="translate('.$res_xm.', '.$res_ym.') scale(0.3 0.3)">
-		<g>
-	    <line id="line" x1="-165" y1="0" x2="-115" y2="0" stroke="#111" stroke-width="30" style="stroke-linecap:round"/>
-	    <use xlink:href="#line" transform="rotate(30,0,0)" style="opacity:.0833"/>
-	    <use xlink:href="#line" transform="rotate(60,0,0)" style="opacity:.166"/>
-	    <use xlink:href="#line" transform="rotate(90,0,0)" style="opacity:.25"/>
-	    <use xlink:href="#line" transform="rotate(120,0,0)" style="opacity:.3333"/>
-	    <use xlink:href="#line" transform="rotate(150,0,0)" style="opacity:.4166"/>
-	    <use xlink:href="#line" transform="rotate(180,0,0)" style="opacity:.5"/>
-	    <use xlink:href="#line" transform="rotate(210,0,0)" style="opacity:.5833"/>
-	    <use xlink:href="#line" transform="rotate(240,0,0)" style="opacity:.6666"/>
-	    <use xlink:href="#line" transform="rotate(270,0,0)" style="opacity:.75"/>
-	    <use xlink:href="#line" transform="rotate(300,0,0)" style="opacity:.8333"/>
-	    <use xlink:href="#line" transform="rotate(330,0,0)" style="opacity:.9166"/>
-	    
-	    <!--animateTransform id="waiting_animation" attributeName="transform" attributeType="XML" type="rotate" begin="indefinite" end="indefinite" dur="1s" repeatCount="indefinite" calcMode="discrete"
-	    keyTimes="0;.0833;.166;.25;.3333;.4166;.5;.5833;.6666;.75;.8333;.9166;1"
-	    values="0,0,0;30,0,0;60,0,0;90,0,0;120,0,0;150,0,0;180,0,0;210,0,0;240,0,0;270,0,0;300,0,0;330,0,0;360,0,0"/-->
     </g>
   </g>
 	<g id="mapimg2_group">

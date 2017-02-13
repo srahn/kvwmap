@@ -24,16 +24,6 @@ function startup(){
 	document.getElementById("map").SVGstartup();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 }
 
-function stopwaiting(){
-	if(typeof document.getElementById("svghelp").SVGstopwaiting == 'function')
-	document.getElementById("svghelp").SVGstopwaiting();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-}
-
-function startwaiting(){
-	if(typeof document.getElementById("svghelp").SVGstartwaiting == 'function')
-	document.getElementById("svghelp").SVGstartwaiting();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-}
-
 function showtooltip(result, showdata){
 	document.getElementById("svghelp").SVGshowtooltip(result, showdata);			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 }
@@ -150,8 +140,7 @@ if($this->formvars['gps_follow'] == ''){
             <input type="hidden" name="svg_string" value="">
             <input type="hidden" name="scrollposition" value="">
             <input type="hidden" name="vertices" id="vertices" value="">
-            <input type="hidden" name="legendtouched" value="0">
-            <input type="hidden" name="stopnavigation" value="0">
+            <input type="hidden" name="legendtouched" value="0">            
 						<input type="hidden" name="svghelp" id="svghelp">
 						<input type="hidden" name="activated_vertex" value="0">
 						<input type="hidden" name="measured_distance" value="<? echo $this->formvars['measured_distance']; ?>">						
@@ -278,7 +267,7 @@ if($this->formvars['gps_follow'] == ''){
 						<tr align="left">
 							<td><!-- bgcolor=#e3e3e6 -->
 							<div align="center"><?php # 2007-12-30 pk
-							?><input type="submit" name="neuladen" onclick="document.getElementById('sperrdiv').style.width = '100%';startwaiting();document.GUI.go.value='neu Laden';" value="<?php echo $strLoadNew; ?>" tabindex="1"></div>
+							?><input type="submit" name="neuladen" onclick="startwaiting(true);document.GUI.go.value='neu Laden';" value="<?php echo $strLoadNew; ?>" tabindex="1"></div>
 							<br>
 							<? if(defined('LAYER_ID_SCHNELLSPRUNG') AND LAYER_ID_SCHNELLSPRUNG != ''){
 								include(SNIPPETS.'schnellsprung.php');

@@ -144,10 +144,6 @@
 	var geomload = '.$geomload.';		// Geometrie wird das erste Mal geladen, diese Variable verhindert den Weiterzeichnenmodus
 	var root = document.documentElement;
 	var mousewheelloop = 0;
-	var stopnavigation = false;
-	var currentTheta = 0;
-  var thetaDelta = '.WAITING_ANIMATION_SPEED.'; // The amount to rotate the square about every 16.7 milliseconds, in degrees.
-	var requestAnimationFrameID;
 	var measured_distance = 0;
 	var new_distance = 0;
 	';
@@ -163,30 +159,10 @@
 	$SVGvars_navscript = '
 
 	function submit(){
-		top.currentform.stopnavigation.value = 1;
-		document.getElementById("waitingimage").style.setProperty("visibility","visible", "");
-		requestAnimationFrameID = requestAnimationFrame(doAnim); // Start the loop.
+		top.startwaiting();
 		top.overlay_submit(top.currentform, false);
 	}
-	
-	function doAnim() {
-		if(currentTheta%30 == 0)document.getElementById("waitingimage").setAttribute("transform", "translate('.$res_xm.', '.$res_ym.') scale(0.3 0.3) rotate(" + currentTheta + ")"); 
-		currentTheta += thetaDelta;  
-		requestAnimationFrameID = requestAnimationFrame(doAnim); 
-	}
-	
-	if (!window.requestAnimationFrame){ 
-		window.requestAnimationFrame = ( function(){
-			return window.webkitRequestAnimationFrame ||
-			window.mozRequestAnimationFrame ||
-			window.oRequestAnimationFrame ||
-			window.msRequestAnimationFrame ||
-			function( /* function FrameRequestCallback */ callback, /* DOMElement Element */ element ) {
-				window.setTimeout( callback, 1000 / 60 );
-			};	 
-		})();
-	}
-	
+		
 	function go_previous(){
 	  document.getElementById("canvas").setAttribute("cursor", "wait");
 	  top.currentform.CMD.value  = "previous";
@@ -3179,26 +3155,6 @@ $measurefunctions = '
 			</g>
 			<g id="foreignvertices" transform="translate(0,'.$res_y.') scale(1,-1)">
 			</g>
-	  </g>
-	  <g id="waitingimage" style="visibility:hidden" transform="translate('.$res_xm.', '.$res_ym.') scale(0.3 0.3)">
-			<g>
-		    <line id="line" x1="-165" y1="0" x2="-115" y2="0" stroke="#111" stroke-width="30" style="stroke-linecap:round"/>
-		    <use xlink:href="#line" transform="rotate(30,0,0)" style="opacity:.0833"/>
-		    <use xlink:href="#line" transform="rotate(60,0,0)" style="opacity:.166"/>
-		    <use xlink:href="#line" transform="rotate(90,0,0)" style="opacity:.25"/>
-		    <use xlink:href="#line" transform="rotate(120,0,0)" style="opacity:.3333"/>
-		    <use xlink:href="#line" transform="rotate(150,0,0)" style="opacity:.4166"/>
-		    <use xlink:href="#line" transform="rotate(180,0,0)" style="opacity:.5"/>
-		    <use xlink:href="#line" transform="rotate(210,0,0)" style="opacity:.5833"/>
-		    <use xlink:href="#line" transform="rotate(240,0,0)" style="opacity:.6666"/>
-		    <use xlink:href="#line" transform="rotate(270,0,0)" style="opacity:.75"/>
-		    <use xlink:href="#line" transform="rotate(300,0,0)" style="opacity:.8333"/>
-		    <use xlink:href="#line" transform="rotate(330,0,0)" style="opacity:.9166"/>
-		    
-		    <!--animateTransform id="waiting_animation" attributeName="transform" attributeType="XML" type="rotate" begin="indefinite" dur="1s" repeatCount="indefinite" calcMode="discrete"
-		    keyTimes="0;.0833;.166;.25;.3333;.4166;.5;.5833;.6666;.75;.8333;.9166;1"
-		    values="0,0,0;30,0,0;60,0,0;90,0,0;120,0,0;150,0,0;180,0,0;210,0,0;240,0,0;270,0,0;300,0,0;330,0,0;360,0,0"/-->
-	    </g>
 	  </g>
 	  <g id="templates">
 	  	<circle style="-moz-user-select: none;" id="kreis" cx="-5000" cy="-5000" r="7" opacity="0.3" onmouseover="activate_vertex(evt)" onmouseout="deactivate_vertex(evt)" onmousedown="select_vertex(evt)" onmousemove="move_vertex(evt)" onmouseup="end_vertex_move(evt)" />
