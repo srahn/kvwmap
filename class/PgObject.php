@@ -155,6 +155,43 @@ class PgObject {
 			VALUES (" .
 				"'" . implode("', '", $values) . "'
 			)
+		";
+		$this->debug->show('create sql: ' . $sql, false);
+		$query = pg_query($this->database->dbConn, $sql);
+		$row = pg_fetch_assoc($query);
+		$oid = pg_last_oid($query);
+		$sql = "
+			SELECT
+				*
+			FROM
+				" . $this->qualifiedTableName . "
+			WHERE
+				oid = " . $oid . "
+		";
+		$query = pg_query($this->database->dbConn, $sql);
+		$row = pg_fetch_assoc($query);
+		$this->set($this->identifier, $row[$this->identifier]);
+		return $this->get($this->identifier);
+	}
+	/* Für Postgres Version in der RETURNING zusammen mit RULE und Bedingung funktioniert. 
+	function create($data = '') {
+		if (!empty($data))
+			$this->data = $data;
+
+		$values = array_map(
+			function($value) {
+				return (is_array($value) ? "{" . implode(", ", $value) . "}" : $value);
+			},
+			$this->getValues()
+		);
+
+		$sql = "
+			INSERT INTO " . $this->qualifiedTableName . " (
+				" . implode(', ', $this->getAttributes()) . "
+			)
+			VALUES (" .
+				"'" . implode("', '", $values) . "'
+			)
 			RETURNING id
 		";
 		$this->debug->show('create sql: ' . $sql, false);
@@ -162,7 +199,7 @@ class PgObject {
 		$row = pg_fetch_assoc($query);
 		$this->set($this->identifier, $row[$this->identifier]);
 		return $this->get('id');
-	}
+	} */
 
 	function update() {
 		$sql = "
