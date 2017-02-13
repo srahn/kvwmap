@@ -895,7 +895,7 @@ tbody.gle tr:hover {
 }
 
 .wobble-fix {
-	-webkit-transform-origin: 49.1% 49.8%;
+	-webkit-transform-origin: 49.5% 49.9%;
 	-moz-transform-origin: 50% 50%;
 }
 
