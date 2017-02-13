@@ -11,7 +11,8 @@ CREATE OR REPLACE RULE altes_flst_pruefen_on_insert AS
 		FROM
 			alkis.ax_flurstueck
 		WHERE
-      flurstueckskennzeichen IN (SELECT unnest(new.zeigtaufaltesflurstueck))
+      endet IS NULL AND
+			flurstueckskennzeichen IN (SELECT unnest(new.zeigtaufaltesflurstueck))
    ) DO INSTEAD 
 SELECT
   CASE
@@ -41,7 +42,8 @@ CREATE OR REPLACE RULE altes_flst_pruefen_on_update AS
 		FROM
 			alkis.ax_flurstueck
 		WHERE
-      flurstueckskennzeichen IN (SELECT unnest(new.zeigtaufaltesflurstueck))
+      endet IS NULL
+			flurstueckskennzeichen IN (SELECT unnest(new.zeigtaufaltesflurstueck))
    ) DO INSTEAD 
 SELECT
   CASE
