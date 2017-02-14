@@ -891,16 +891,13 @@ tbody.gle tr:hover {
 	font-size: 7em !important;
 }
 
-.wobble-fix {
-	-webkit-transform-origin: 49.5% 49.9%;
-	-moz-transform-origin: 50% 50%;
-}
+
 
 .spinner {
 	opacity: 0.75;
 	color: LightSteelBlue;
 	text-shadow: 0px 0px 4px #000000;
-	animation: 0.8s steps(8) 0s normal none infinite running fa-spin;
+	animation: fa-spin 1s infinite steps(8);
 }
 
 .waitingdiv_spinner {
