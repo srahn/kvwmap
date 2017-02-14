@@ -11,7 +11,8 @@ function ImageLoadFailed(id) {
 var currentform;
 var doit;
 
-function startwaiting(lock = false){
+function startwaiting(lock){
+	var lock = lock || false;
 	document.GUI.stopnavigation.value = 1;
 	waitingdiv = document.getElementById('waitingdiv');
 	waitingdiv.style.display='';
