@@ -393,7 +393,7 @@ class data_import_export {
 				if(file_exists($importfile)){
 					if($formvars['tracks']){
 						$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($importfile), 0, 15))).rand(1,1000000);
-						$this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $formvars['epsg'], $importfile, $pgdatabase, 'tracks');
+						$this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $formvars['epsg'], $importfile, $pgdatabase, 'tracks', NULL, NULL, 'UTF8');
 						$sql = '
 							ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' SET WITH OIDS;
 							ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' RENAME "desc" TO desc_;
@@ -406,7 +406,7 @@ class data_import_export {
 					}
 					if($formvars['waypoints']){
 						$tablename = 'a'.strtolower(umlaute_umwandeln(basename($importfile))).rand(1,1000000);
-						$this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $formvars['epsg'], $importfile, $pgdatabase, 'waypoints');
+						$this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $formvars['epsg'], $importfile, $pgdatabase, 'waypoints', NULL, NULL, 'UTF8');
 						$sql = '
 							ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' SET WITH OIDS;
 							ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' RENAME "desc" TO desc_;
@@ -517,7 +517,7 @@ class data_import_export {
 			$sql .= ' FROM '.$importfile;
 			$options = $this->formvars['table_option'];
 			$options.= ' -nlt PROMOTE_TO_MULTI -lco FID=gid';
-			$ret = $this->ogr2ogr_import($this->formvars['schema_name'], $this->formvars['table_name'], $formvars['epsg'], UPLOADPATH.$importfile.'.shp', $database, NULL, $sql, $options);
+			$ret = $this->ogr2ogr_import($this->formvars['schema_name'], $this->formvars['table_name'], $formvars['epsg'], UPLOADPATH.$importfile.'.shp', $database, NULL, $sql, $options, 'UTF8');
 			
       
       // # erzeugte SQL-Datei anpassen
@@ -699,7 +699,7 @@ class data_import_export {
 		if($options != NULL)$command.= $options;
 		$command.= ' -f PostgreSQL -lco GEOMETRY_NAME=the_geom -nln '.$tablename.' -a_srs EPSG:'.$epsg;
 		if($sql != NULL)$command.= ' -sql "'.$sql.'"';
-		$command.= ' PG:"dbname='.$database->dbName.' user='.$database->user.' active_schema='.$schema;
+		$command.= ' -append PG:"dbname='.$database->dbName.' user='.$database->user.' active_schema='.$schema;
 		if($database->passwd != '')$command.= ' password='.$database->passwd;
 		if($database->port != '')$command.=' port='.$database->port;
 		if($database->host != '') $command .= ' host=' . $database->host;
@@ -734,66 +734,73 @@ class data_import_export {
 			$i = $attributes['indizes'][$key];
     	if($attributes['type'][$i] != 'geometry' AND $attributes['name'][$i] != 'lock'){
 	      if($attributes['alias'][$i] != ''){
-	        $name = $attributes['alias'][$i];
+	        $names[] = $attributes['alias'][$i];
 	      }
 	      else{
-	        $name = $attributes['name'][$i];
+	        $names[] = $attributes['name'][$i];
 	      }
-	      $csv .= $name.';';
     	}
     }
-    $csv .= chr(13).chr(10);
+    $csv .= implode(';', $names).chr(13).chr(10);
  
     # Daten schreiben
     for($i = 0; $i < count($result); $i++){
 			foreach($result[$i] As $key => $value){
 				$j = $attributes['indizes'][$key];
       	if($attributes['type'][$j] != 'geometry' AND $attributes['name'][$i] != 'lock'){
-					if($attributes['form_element_type'][$j] == 'Auswahlfeld'){
-						if(is_array($attributes['dependent_options'][$j])){
-							$enum_value = $attributes['enum_value'][$j][$i];		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
-							$enum_output = $attributes['enum_output'][$j][$i];		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
-						}
-						else{
-							$enum_value = $attributes['enum_value'][$j];
-							$enum_output = $attributes['enum_output'][$j];
-						}
-						for($o = 0; $o < count($enum_value); $o++){
-							if($value == $enum_value[$o]){
-								$value = $enum_output[$o];
-								break;
-							}
-						}
+					if($attributes['form_element_type'][$j] == 'Zahl'){
+						$value = tausenderTrenner($value);
 					}
 					else{
-						if($attributes['form_element_type'][$j] == 'Autovervollständigungsfeld'){
-							$value = $attributes['enum_output'][$j][$i];
+						if($attributes['form_element_type'][$j] == 'Auswahlfeld'){
+							if(is_array($attributes['dependent_options'][$j])){
+								$enum_value = $attributes['enum_value'][$j][$i];		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
+								$enum_output = $attributes['enum_output'][$j][$i];		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
+							}
+							else{
+								$enum_value = $attributes['enum_value'][$j];
+								$enum_output = $attributes['enum_output'][$j];
+							}
+							for($o = 0; $o < count($enum_value); $o++){
+								if($value == $enum_value[$o]){
+									$value = $enum_output[$o];
+									break;
+								}
+							}
 						}
-						if(in_array($attributes['type'][$j], array('numeric', 'float4', 'float8'))){
-							$value = str_replace('.', ",", $value);			# Excel-Datumsproblem
-						}
-						if($attributes['type'][$j] == 'bool'){
-							$value = str_replace('t', "ja", $value);	
-							$value = str_replace('f', "nein", $value);
+						else{
+							if($attributes['form_element_type'][$j] == 'Autovervollständigungsfeld'){
+								$value = $attributes['enum_output'][$j][$i];
+							}
+							if($attributes['type'][$j] == 'bool'){
+								$value = str_replace('t', "ja", $value);	
+								$value = str_replace('f', "nein", $value);
+							}
 						}
 						$value = str_replace(';', ",", $value);
-						if(strpos($value, '/') !== false OR strpos($value, chr(10)) !== false OR strpos($value, chr(13)) !== false){		# Excel-Datumsproblem oder Zeilenumbruch
+						if(strpos($value, chr(10)) !== false OR strpos($value, chr(13)) !== false){		# Zeilenumbruch => Wert in Anführungszeichen setzen
 							$value = str_replace('"', "'", $value);
 							$value = '"'.$value.'"';
 						}
+						if(strpos($value, '/') !== false){		# Excel-Datumsproblem
+							$value = $value."\t";
+						}
+						if(in_array($attributes['type'][$j], array('numeric', 'float4', 'float8'))){
+							$value = str_replace('.', ",", $value);				#  Excel-Datumsproblem
+						}
 					}
-	        $csv .= $value.';';
+					$values[$i][] = $value;
       	}
       }
-      $csv .= chr(13).chr(10);
+      $csv .= implode(';', $values[$i]).chr(13).chr(10);
     }
     
     $currenttime=date('Y-m-d H:i:s',time());
 		return utf8_decode($csv);
 	}
   
-	function create_uko($layerdb, $table, $column){
-		$sql.= "SELECT st_astext(st_multi(st_union(".$column."))) as geom FROM ".$table;
+	function create_uko($layerdb, $table, $column, $epsg){
+		$sql.= "SELECT st_astext(st_multi(st_union(st_transform(".$column.", ".$epsg.")))) as geom FROM ".$table;
 		#echo $sql;
 		$ret = $layerdb->execSQL($sql,4, 1);
 		if(!$ret[0]){
@@ -808,12 +815,12 @@ class data_import_export {
 		}
   }
 	
-	function create_ovl($datentyp, $layerdb, $table, $column){
+	function create_ovl($datentyp, $layerdb, $table, $column, $epsg){
 		$ovl_type = array(MS_LAYER_POINT => 6, MS_LAYER_LINE => 3, MS_LAYER_POLYGON => 4);
 		$sql.= "SELECT st_astext(";
 		if($datentyp == MS_LAYER_POLYGON)$sql.= "ST_MakePolygon(st_exteriorring(geom))) as geom ";
 		else $sql.= "geom) as geom ";
-		$sql.= "FROM (select (st_dump(st_union(".$column."))).geom as geom FROM ".$table.") as foo";
+		$sql.= "FROM (select (st_dump(st_union(st_transform(".$column.", ".$epsg.")))).geom as geom FROM ".$table.") as foo";
 		#echo $sql;
 		$ret = $layerdb->execSQL($sql,4, 1);
 		if(!$ret[0]){
@@ -999,7 +1006,7 @@ class data_import_export {
 				}break;
 				
 				case 'UKO' : {
-					$uko = $this->create_uko($layerdb, $temp_table, $this->attributes['the_geom']);
+					$uko = $this->create_uko($layerdb, $temp_table, $this->attributes['the_geom'], $this->formvars['epsg']);
 					$exportfile = $exportfile.'.uko';
 					$fp = fopen($exportfile, 'w');
 					fwrite($fp, $uko);
@@ -1008,7 +1015,7 @@ class data_import_export {
 				}break;
 				
 				case 'OVL' : {
-					$ovl = $this->create_ovl($layerset[0]['Datentyp'], $layerdb, $temp_table, $this->attributes['the_geom']);
+					$ovl = $this->create_ovl($layerset[0]['Datentyp'], $layerdb, $temp_table, $this->attributes['the_geom'], $this->formvars['epsg']);
 					for($i = 0; $i < count($ovl); $i++){
 						$exportfile2 = $exportfile.'_'.$i.'.ovl';
 						$fp = fopen($exportfile2, 'w');

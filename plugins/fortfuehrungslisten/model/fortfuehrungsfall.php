@@ -19,6 +19,22 @@ public static	function find_by_id($gui, $by, $id) {
 		$ff->find_by($by, $id);
 		return $ff;
 	}
+
+	/**
+	* Ermittelt ob das alte Flurstück fortgeführt wurde
+	* wenn es die Nummern der neuen Flurstücke in zeigtaufneuesflurstueck
+	* identisch sind mit der alten Nummer in zeigtaufaltesflurstueck
+	* hat sich nichts geändert und es wird false zurückgegebnen.
+	* @return boolean
+	*/
+	function has_changed_parcels() {
+		$has_changed = false;
+		$altes_flst = $this->get('zeigtaufaltesflurstueck')[0];
+		foreach($this->get('zeigtaufneuesflurstueck') AS $neuesflst) {
+			$has_changed = ($altes_flst != $neuesflst);
+		}
+		return $has_changed;
+	}
 }
 
 ?>

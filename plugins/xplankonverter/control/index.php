@@ -173,6 +173,7 @@ switch($this->go){
 								konvertierung_id = '" . $this->konvertierung->get('id') . "' AND
 								stelle_id = " . $this->konvertierung->get('stelle_id')
 							);
+
 							if (!empty($shapeFiles)) $shapeFile = $shapeFiles[0]; # es kann nur eins geben
 							if (!empty($shapeFile->data)) {
 								$this->debug->show('<p>Lösche gefundenes shape file.', false);
@@ -180,6 +181,7 @@ switch($this->go){
 								$shapeFile->deleteDataTable();
 								$shapeFile->delete();
 							}
+
 							# create new record in shapefile table
 							$shapeFile->create(
 								array(
@@ -335,26 +337,36 @@ switch($this->go){
           Konvertierung::$STATUS['KONVERTIERUNG_OK'],
           Konvertierung::$STATUS['KONVERTIERUNG_ERR'],
           Konvertierung::$STATUS['GML_ERSTELLUNG_OK'],
-          Konvertierung::$STATUS['GML_ERSTELLUNG_ERR']
+          Konvertierung::$STATUS['GML_ERSTELLUNG_ERR'],
+          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK'],
+          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']
         );
       break;
       case Konvertierung::$STATUS['IN_KONVERTIERUNG']:
         $validPredecessorStates = array(
           Konvertierung::$STATUS['ERSTELLT'],
           Konvertierung::$STATUS['KONVERTIERUNG_OK'],
-          Konvertierung::$STATUS['GML_ERSTELLUNG_OK']
+          Konvertierung::$STATUS['KONVERTIERUNG_ERR'],
+          Konvertierung::$STATUS['GML_ERSTELLUNG_OK'],
+          Konvertierung::$STATUS['GML_ERSTELLUNG_ERR'],
+          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK'],
+          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']
         );
       break;
       case Konvertierung::$STATUS['IN_GML_ERSTELLUNG']:
         $validPredecessorStates = array(
           Konvertierung::$STATUS['KONVERTIERUNG_OK'],
-          Konvertierung::$STATUS['GML_ERSTELLUNG_OK']
+          Konvertierung::$STATUS['GML_ERSTELLUNG_OK'],
+          Konvertierung::$STATUS['GML_ERSTELLUNG_ERR'],
+          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK'],
+          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']
         );
       break;
       case Konvertierung::$STATUS['IN_INSPIRE_GML_ERSTELLUNG']:
         $validPredecessorStates = array(
           Konvertierung::$STATUS['GML_ERSTELLUNG_OK'],
-          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK']
+          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK'],
+          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']
         );
       break;
     }
@@ -497,7 +509,7 @@ switch($this->go){
 		header('Content-Type: text/xml; subtype="gml/3.3"');
     echo fread(fopen($filename, "r"), filesize($filename));
 	} break;
-  
+
   case 'index.php?go=xplankonverter_gml_ausliefern&konvertierung_id' : {
     if ($this->formvars['konvertierung_id'] == '') {
 		  echo 'Diese Link kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
@@ -513,7 +525,7 @@ switch($this->go){
 		header('Content-Type: application/json');
 		echo json_encode($response);
 	} break;
-  
+
 	case 'xplankonverter_inspire_gml_generieren' : {
 		$success = true;
 		$konvertierung_id = $this->formvars['konvertierung_id'];
@@ -521,7 +533,7 @@ switch($this->go){
 			$this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
 			$this->main = 'Hinweis.php';
 		}
-    
+
 		$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
 		if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) return;
 
@@ -574,14 +586,14 @@ switch($this->go){
 		header('Content-Type: text/xml; subtype="gml/3.3"');
     echo fread(fopen($filename, "r"), filesize($filename));
 	} break;
-  
+
   /*case 'index.php?go=xplankonverter_inspire_gml_ausliefern&konvertierung_id' : {
     if ($this->formvars['konvertierung_id'] == '') {
 		  echo 'Diese Link kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
 		  return;
 		}
   } break;*/
-  
+
 	case 'xplankonverter_regeleditor' : {
 		$konvertierung_id = $_REQUEST['konvertierung_id'];
 		$bereich_gml_id = $_REQUEST['bereich_gml_id'];
@@ -611,8 +623,8 @@ switch($this->go){
 	default : {
 		$this->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
 	}
-  
-  
+
+
 
 }
 
@@ -631,6 +643,7 @@ function isInStelleAllowed($stelle, $requestStelleId) {
 function xplankonverter_unzip_and_check_and_copy($shape_files, $dest_dir) {
 	# extract zip files if necessary and extract info
 	$temp_files = xplankonverter_unzip($shape_files, $dest_dir);
+
 	# group uploaded files to triples according to their basename
 	$check = array('shp' => false, 'shx' => false, 'dbf' => false);
 	$check_list = array();
@@ -685,7 +698,7 @@ function xplankonverter_unzip($shape_files, $dest_dir) {
 }
 
 /*
-* Packt die angegebenen Zip-Datei im sys_temp_dir Verzeichnis aus
+* Packt die angegebenen Zip-Dateien im sys_temp_dir Verzeichnis aus
 * und gibt die ausgepackten Dateien in der Struktur von
 * hochgeladenen Dateien aus
 */
@@ -694,13 +707,14 @@ function extract_uploaded_zip_file($zip_file) {
 	$extracted_files = array_map(
 		function($extracted_file) {
 			$path_parts = pathinfo($extracted_file);
-			return array(
+			$file = array(
 				'basename' => $path_parts['basename'],
 				'filename' => $path_parts['filename'],
 				'extension' => $path_parts['extension'],
 				'tmp_name' => sys_get_temp_dir() . '/' . $extracted_file,
 				'unziped' => true
 			);
+			return $file;
 		},
 		unzip($zip_file, false, false, true)
 	);
@@ -713,7 +727,16 @@ function extract_uploaded_zip_file($zip_file) {
 */
 function xplankonverter_copy_uploaded_shp_file($file, $dest_dir) {
 	$messages = array();
-	if (in_array($file['extension'], array('dbf', 'shx', 'shp'))) {
+	if (
+		in_array($file['extension'], array('dbf', 'shx', 'shp')) and # nur Shape files
+		substr($file['basename'], 0, 2) != '._' # keine versteckten files
+	) {
+
+		$umlaute_mit_diakritic = array('ä','Ä','ü', 'Ü', 'ö', 'Ö');
+		$umlaute_ohne_diakritic = array('ä', 'Ä', 'ü', 'Ü', 'ö', 'Ö');
+		$file['basename'] = str_replace($umlaute_mit_diakritic, $umlaute_ohne_diakritic, $file['basename']);
+		$file['filename'] = str_replace($umlaute_mit_diakritic, $umlaute_ohne_diakritic, $file['filename']);
+
 		if (file_exists($dest_dir . $file['basename'])) {
 			$file['state'] = 'geändert';
 		}

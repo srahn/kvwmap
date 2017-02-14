@@ -60,7 +60,7 @@ include('funktionen/input_check_functions.php');
 			else if(i > 0 && value != '')values.push(value);		// bei Arrays ist das erste Element ein Dummy
 		}
 		if(!is_array)json = '{'+values.join()+'}';
-		else json = '['+values.join()+']';
+		else json = JSON.stringify(values);
 		field.value = json;		
 		if(field.onchange)field.onchange();
 	}
@@ -75,7 +75,7 @@ include('funktionen/input_check_functions.php');
 		new_element.id = 'div_'+fieldname+'_'+new_id;
 		var regex = new RegExp(fieldname+'_-1', "g");
 		new_element.innerHTML = new_element.innerHTML.replace(regex, fieldname+'_'+new_id);
-		new_element.style = 'display: block';
+		new_element.style.display = 'block';
 		outer_div.appendChild(new_element);
 		buildJSONString(fieldname, true);
 	}
@@ -89,7 +89,7 @@ include('funktionen/input_check_functions.php');
 	
 	nextdatasets = function(layer_id){
 		var sure = true;
-		if(document.getElementById('changed_'+layer_id).value == 1){
+		if(document.getElementById('changed_'+layer_id) != undefined && document.getElementById('changed_'+layer_id).value == 1){
 			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch weiterblättern?');
 		}
 		if(sure){
@@ -108,7 +108,7 @@ include('funktionen/input_check_functions.php');
 	
 	lastdatasets = function(layer_id, count){
 		var sure = true;
-		if(document.getElementById('changed_'+layer_id).value == 1){
+		if(document.getElementById('changed_'+layer_id) != undefined && document.getElementById('changed_'+layer_id).value == 1){
 			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch weiterblättern?');
 		}
 		if(sure){
@@ -127,7 +127,7 @@ include('funktionen/input_check_functions.php');
 	
 	firstdatasets = function(layer_id){
 		var sure = true;
-		if(document.getElementById('changed_'+layer_id).value == 1){
+		if(document.getElementById('changed_'+layer_id) != undefined && document.getElementById('changed_'+layer_id).value == 1){
 			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch zurückblättern?');
 		}
 		if(sure){
@@ -143,7 +143,7 @@ include('funktionen/input_check_functions.php');
 
 	prevdatasets = function(layer_id){
 		var sure = true;
-		if(document.getElementById('changed_'+layer_id).value == 1){
+		if(document.getElementById('changed_'+layer_id) != undefined && document.getElementById('changed_'+layer_id).value == 1){
 			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch zurückblättern?');
 		}
 		if(sure){
@@ -178,11 +178,11 @@ include('funktionen/input_check_functions.php');
 			fieldstring = form_fields[i]+'';
 			field = fieldstring.split(';');
 			if(document.getElementsByName(fieldstring)[0] != undefined && field[4] != 'Dokument' && (document.getElementsByName(fieldstring)[0].readOnly != true) && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
-				alert('Das Feld '+document.getElementsByName(fieldstring)[0].title+' erfordert eine Eingabe.');
+				message('Das Feld '+document.getElementsByName(fieldstring)[0].title + ' erfordert eine Eingabe. und hier noch mehr Text und hier noch mehr Textund hier noch mehr Textund hier noch mehr Textund hier noch mehr Textund hier noch mehr Textund hier noch mehr Textund hier noch mehr Textund hier noch mehr Text');
 				return;
 			}
 			if(document.getElementsByName(fieldstring)[0] != undefined && field[6] == 'date' && field[4] != 'Time' && document.getElementsByName(fieldstring)[0].value != '' && !checkDate(document.getElementsByName(fieldstring)[0].value)){
-				alert('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
+				message('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
 				return;
 			}
 		}
@@ -194,7 +194,7 @@ include('funktionen/input_check_functions.php');
 
 	save_new_dataset = function(){
 		if((geom_not_null && currentform.newpath.value == '' && currentform.loc_x == undefined) || (geom_not_null && currentform.loc_x != undefined && currentform.loc_x.value == '')){ 
-			alert('Sie haben keine Geometrie angegeben.');
+			message('Sie haben keine Geometrie angegeben.');
 			return;
 		}
   	form_fieldstring = currentform.form_field_names.value+'';
@@ -203,11 +203,11 @@ include('funktionen/input_check_functions.php');
   		fieldstring = form_fields[i]+'';
   		field = fieldstring.split(';'); 
   		if(document.getElementsByName(fieldstring)[0] != undefined && field[4] != 'SubFormFK' && field[6] != 'not_saveable' && (document.getElementsByName(fieldstring)[0].readOnly != true) && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
-			  alert('Das Feld '+document.getElementsByName(fieldstring)[0].title+' erfordert eine Eingabe.');
+			  message('Das Feld '+document.getElementsByName(fieldstring)[0].title+' erfordert eine Eingabe.');
   			return;
   		}
   		if(document.getElementsByName(fieldstring)[0] != undefined && field[6] == 'date' && field[4] != 'Time' && document.getElementsByName(fieldstring)[0].value != '' && !checkDate(document.getElementsByName(fieldstring)[0].value)){
-  			alert('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
+  			message('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
   			return;
   		}
   	}
@@ -251,11 +251,11 @@ include('funktionen/input_check_functions.php');
   		fieldstring = form_fields[i]+'';
   		field = fieldstring.split(';');
   		if(document.getElementsByName(fieldstring)[0] != undefined && field[4] != 'Dokument' && document.getElementsByName(fieldstring)[0].readOnly != true && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
-  			alert('Das Feld '+document.getElementsByName(fieldstring)[0].title+' erfordert eine Eingabe.');
+  			message('Das Feld '+document.getElementsByName(fieldstring)[0].title+' erfordert eine Eingabe.');
   			return;
   		}
   		if(document.getElementsByName(fieldstring)[0] != undefined && field[6] == 'date' && field[4] != 'Time' && document.getElementsByName(fieldstring)[0].value != '' && !checkDate(document.getElementsByName(fieldstring)[0].value)){
-  			alert('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
+  			message('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
   			return;
   		}
 			if(document.getElementsByName(form_fields[i])[0] != undefined){
@@ -284,11 +284,11 @@ include('funktionen/input_check_functions.php');
   		fieldstring = form_fields[i]+'';
   		field = fieldstring.split(';');
   		if(document.getElementsByName(fieldstring)[0] != undefined && document.getElementsByName(fieldstring)[0].readOnly != true && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
-  			alert('Das Feld '+document.getElementsByName(fieldstring)[0].title+' erfordert eine Eingabe.');
+  			message('Das Feld '+document.getElementsByName(fieldstring)[0].title+' erfordert eine Eingabe.');
   			//return;
   		}
   		if(document.getElementsByName(fieldstring)[0] != undefined && field[6] == 'date' && field[4] != 'Time' && document.getElementsByName(fieldstring)[0].value != '' && !checkDate(document.getElementsByName(fieldstring)[0].value)){
-  			alert('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
+  			message('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
   			return;
   		}
   		if(document.getElementsByName(form_fields[i])[0] != undefined){
@@ -379,21 +379,20 @@ include('funktionen/input_check_functions.php');
 	
 	openCustomSubform = function(layer_id, attribute, attributenamesarray, field_id, k){
 		names_values = get_current_attribute_values(attributenamesarray, '', k);
-		document.getElementById('sperrdiv').style.background = 'rgba(200,200,200,0.8)';
-		document.getElementById('sperrdiv').style.width = '100%';
+		document.getElementById('waitingdiv').style.background = 'rgba(200,200,200,0.8)';
+		document.getElementById('waitingdiv').style.display = '';
 		subformWidth = document.GUI.browserwidth.value-70;
 		subform = '<div style="position:relative; margin: 30px;width:'+subformWidth+'px; height:90%">';
 		subform += '<div style="position: absolute;top: 2px;right: -2px"><a href="javascript:closeCustomSubform();" title="Schlie&szlig;en"><img style="border:none" src="<? echo GRAPHICSPATH.'exit2.png'; ?>"></img></a></div>';
 		subform += '<iframe id="customSubform" style="width:100%; height:100%" src=""></iframe>';
 		subform += '</div>';
-		document.getElementById('sperrdiv').innerHTML= subform;
+		document.getElementById('waitingdiv').innerHTML= subform;
 		ahah("index.php", "go=openCustomSubform&layer_id="+layer_id+"&attribute="+attribute+"&attributenames="+names_values[0]+"&attributevalues="+names_values[1]+"&field_id="+field_id, new Array(document.getElementById('customSubform')), new Array("src"));
 	}
 	
 	closeCustomSubform = function(){
-		document.getElementById('sperrdiv').style.background = 'rgba(200,200,200,0.3)';
-		document.getElementById('sperrdiv').style.width = '0%';
-		document.getElementById('sperrdiv').innerHTML = '';
+		document.getElementById('waitingdiv').style.display = 'none';
+		document.getElementById('waitingdiv').innerHTML = '';
 	}
 	 
 	update_buttons = function(all, layer_id){
@@ -450,7 +449,7 @@ include('funktionen/input_check_functions.php');
 			}
 		}
 		if(go == 'false'){
-			alert('Es wurde kein Datensatz ausgewählt.');
+			message('Es wurde kein Datensatz ausgewählt.');
 			return false;
 		}
 		else{
@@ -526,7 +525,7 @@ include('funktionen/input_check_functions.php');
 			formdata = new FormData(currentform);
 			ahah("index.php", formdata, new Array(), new Array());
 			currentform.go.value = saved_go;
-			message("Datensätze gemerkt");
+			message([{'type': 'notice', 'msg': 'Datensätze gemerkt'}]);
 		}
 	}
 
@@ -538,7 +537,7 @@ include('funktionen/input_check_functions.php');
 			formdata = new FormData(currentform);
 			ahah("index.php", formdata, new Array(), new Array());
 			currentform.go.value = saved_go;
-			message("Datensätze entfernt");
+			message([{'type': 'notice', 'msg': 'Datensätze entfernt'}]);
 		}
 	}
 
@@ -660,7 +659,8 @@ include('funktionen/input_check_functions.php');
 	set_changed_flag = function(flag){
 		if(flag != undefined){
 			flag.value=1;
-			flag.onchange();
+			if(flag.onchange)flag.onchange();
 		}
 	}
+
 </script>

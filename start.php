@@ -26,8 +26,7 @@ else {
 		if(is_string($value))$_REQUEST[$key] = pg_escape_string($value);
   }
   $GUI->formvars=$_REQUEST;
-}		
-											
+}
 
 #################################################################################
 # Setzen der Konstante, ob in die Datenbank geschrieben werden soll oder nicht.
@@ -130,7 +129,7 @@ if (isset($GUI->formvars['newPassword'])) {
 	if ($GUI->Fehlermeldung=='') {
 		$GUI->user->setNewPassword($GUI->formvars['newPassword']);
 		$GUI->user->password_setting_time=date('Y-m-d H:i:s',time());
-		$GUI->Fehlermeldung='Password ist erfolgreich geändert worden.';
+		$GUI->add_message('notice', 'Password ist erfolgreich geändert worden.');
 		#$GUI->formvars['newPassword'];
 	}
   else {

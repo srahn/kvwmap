@@ -114,6 +114,7 @@ function save(){
 			  			<option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'tjb'){echo 'selected';} ?> value="tjb">Teiljagdbezirk</option>
 			  			<option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'sf'){echo 'selected';} ?> value="sf">Sonderfläche</option>
 			  			<option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'jbe'){echo 'selected';} ?> value="jbe">Enklave</option>
+							<option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'jex'){echo 'selected';} ?> value="jex">Exklave</option>
 			  			<option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'jbf'){echo 'selected';} ?> value="jbf">Jagdbezirksfreie Fläche</option>
 			  			<option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'agf'){echo 'selected';} ?> value="agf">Angliederungsfläche</option>
 			  			<option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'atf'){echo 'selected';} ?> value="atf">Abtrennungsfläche</option>

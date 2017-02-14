@@ -1,3 +1,4 @@
+BEGIN;
 CREATE TABLE fortfuehrungslisten.aa_anlassart
 (
   code character varying,
@@ -232,3 +233,5 @@ INSERT INTO fortfuehrungslisten.aa_anlassart (code, name, modellarten, status) V
 INSERT INTO fortfuehrungslisten.aa_anlassart (code, name, modellarten, status) VALUES ('061200', 'Erstbuchung eines Grundstücks', 'DLKM', 'Gültig');
 INSERT INTO fortfuehrungslisten.aa_anlassart (code, name, modellarten, status) VALUES ('061300', 'Ausbuchung eines Grundstücks nach § 3 (3) GBO', 'DLKM', 'Veraltet');
 INSERT INTO fortfuehrungslisten.aa_anlassart (code, name, modellarten, status) VALUES ('061400', 'Aufhebung von Anteilen am ungetrennten Hofraum', 'DLKM', 'Gültig');
+
+COMMIT;

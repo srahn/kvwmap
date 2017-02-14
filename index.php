@@ -67,22 +67,22 @@ include('config.php');
 include(CLASSPATH.'log.php');
 if(CASE_COMPRESS)	include(CLASSPATH.'case_compressor.php');
 
-if(DEBUG_LEVEL>0) $debug=new debugfile(DEBUGFILE);	# öffnen der Debug-log-datei
+if(DEBUG_LEVEL>0) $debug=new Debugger(DEBUGFILE);	# öffnen der Debug-log-datei
 # Öffnen der Log-Dateien. Derzeit werden in den Log-Dateien nur die SQL-Statements gespeichert, die über execSQL in den Klassen mysql und postgres ausgeführt werden.
 if (LOG_LEVEL>0) {
  $log_mysql=new LogFile(LOGFILE_MYSQL,'text','Log-Datei MySQL', '#------v: '.date("Y:m:d H:i:s",time()));
  $log_postgres=new LogFile(LOGFILE_POSTGRES,'text', 'Log-Datei-Postgres', '------v: '.date("Y:m:d H:i:s",time()));
 }
 
-if(!$_SESSION['angemeldet']){
-	include(CLASSPATH.'mysql.php');
+if (!$_SESSION['angemeldet'] or !empty($_REQUEST['username'])) {
+	include(CLASSPATH . 'mysql.php');
 	$userDb = new database();
 	$userDb->host = MYSQL_HOST;
-	$userDb->user = MYSQL_USER;																			
-	$userDb->passwd = MYSQL_PASSWORD;															
+	$userDb->user = MYSQL_USER;
+	$userDb->passwd = MYSQL_PASSWORD;
 	$userDb->dbName = MYSQL_DBNAME;
-	header('logout: true');		// damit ajax-Requests das auch mitkriegen	
-  include(LAYOUTPATH.'snippets/'.LOGIN);
+	header('logout: true');		// damit ajax-Requests das auch mitkriegen
+	include(LAYOUTPATH . 'snippets/' . LOGIN);
 }
 
 function include_($filename){
@@ -109,7 +109,7 @@ else{
 	include_(CLASSPATH.'bauleitplanung.php');
 }
 
-include(WWWROOT.APPLVERSION.'start.php');
+include(WWWROOT . APPLVERSION.'start.php');
 
 # Übergeben des Anwendungsfalles
 $debug->write("<br><b>Anwendungsfall go: ".$go."</b>",4);
@@ -963,32 +963,26 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  } break;
 		
 	  case 'GPX_Import' : {
-			$GUI->checkCaseAllowed('GPX_Import');
 			$GUI->gpx_import();
 	  } break;
 	  
 	  case 'GPX_Import_Laden' : {
-			$GUI->checkCaseAllowed('GPX_Import');
 			$GUI->gpx_import_importieren();
 	  } break;
 		
 		case 'OVL_Import' : {
-			$GUI->checkCaseAllowed('OVL_Import');
 			$GUI->ovl_import();
 	  } break;
 	  
 	  case 'OVL_Import_Laden' : {
-			$GUI->checkCaseAllowed('OVL_Import');
 			$GUI->ovl_import_importieren();
 	  } break;
 		
 		case 'DXF_Import' : {
-			$GUI->checkCaseAllowed('DXF_Import');
 			$GUI->dxf_import();
 	  } break;
 	  
 	  case 'DXF_Import_Laden' : {
-			$GUI->checkCaseAllowed('DXF_Import');
 			$GUI->dxf_import_importieren();
 	  } break;
 		
@@ -1374,6 +1368,35 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->BenutzerdatenAendern();
 	  } break;
 
+		case 'cronjobs_anzeigen' : {
+			$GUI->checkCaseAllowed('cronjobs_anzeigen');
+			$GUI->cronjobs_anzeigen();
+		} break;
+
+		case 'cronjob_editieren' : {
+			$GUI->checkCaseAllowed('cronjobs_anzeigen');
+			$GUI->cronjob_editieren();
+		} break;
+
+		case 'cronjob_speichern_Anlegen' : {
+			$GUI->checkCaseAllowed('cronjobs_anzeigen');
+			$GUI->cronjobs_anlegen();
+		} break;
+
+		case 'cronjob_speichern_Speichern' : {
+			$GUI->checkCaseAllowed('cronjobs_anzeigen');
+			$GUI->cronjob_update();
+		} break;
+
+		case 'cronjob_löschen' : {
+			$GUI->checkCaseAllowed('cronjobs_anzeigen');
+			$GUI->cronjob_delete();
+		} break;
+
+		case 'crontab_schreiben' : {
+			$GUI->checkCaseAllowed('cronjobs_anzeigen');
+			$GUI->crontab_schreiben();
+		} break;
 
 	  case 'Funktionen_Anzeigen' : {
 			$GUI->checkCaseAllowed('Funktionen_Anzeigen');

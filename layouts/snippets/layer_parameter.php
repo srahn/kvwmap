@@ -33,7 +33,7 @@
 				</tr>
 			<? } ?>
 			</table>
-			<i class="fa fa-plus-square" style="margin: 5px; font-size: 20px" aria-hidden="true" title="Parameter hinzufügen" onclick="addParam();"></i>
+			<i class="fa fa-plus-square pointer" style="margin: 5px; font-size: 20px" aria-hidden="true" title="Parameter hinzufügen" onclick="addParam();"></i>
 		</td>
 	</tr>
 	<tr>

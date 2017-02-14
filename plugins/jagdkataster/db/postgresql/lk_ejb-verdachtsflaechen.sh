@@ -10,7 +10,7 @@ DATUM=`date +%a`; export DATUM
 PSQLPATH=/usr/lib/postgresql/9.1/bin; export PSQLPATH
 PGUSERNAME=kvwmap; export PGUSERNAME
 PGDBNAME=kvwmapsp; export PGDBNAME
-SCHEMANAME=alkis; export SCHEMANAME
+SCHEMANAME=jagdkataster; export SCHEMANAME
 TABLENAME=lk_ejb_verdachtsflaechen; export TABLENAME
 LOGFILE=/pfad/zu/logs/lk_ejb_verdachtsflaechen.log; export LOGFILE
 
@@ -25,7 +25,7 @@ BEGIN;
 DROP INDEX $SCHEMANAME.ixlkvrejbverd_the_geom_gist;
 TRUNCATE $SCHEMANAME.$TABLENAME;
 INSERT INTO $SCHEMANAME.$TABLENAME 
-select eigentuemer, round(area((the_geom).geom)), (the_geom).geom from (
+select eigentuemer, round(st_area((the_geom).geom)), (the_geom).geom from (
 select 
  eigentuemer, 
 st_dump(st_buffer(st_union(the_geom), -10)) as the_geom 
@@ -59,7 +59,7 @@ from (
  ) as foo
 group by eigentuemer
 ) as foofoo 
-where area((the_geom).geom)>750000
+where st_area((the_geom).geom)>750000
 ;
 CREATE INDEX ixlkvrejbverd_the_geom_gist
  ON $SCHEMANAME.$TABLENAME

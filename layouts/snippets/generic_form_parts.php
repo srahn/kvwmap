@@ -335,7 +335,7 @@
 							$datapart .= '&value_'.$attributes['subform_pkeys'][$j][$p].'='.$dataset[$attributes['subform_pkeys'][$j][$p]];
 							$datapart .= '&operator_'.$attributes['subform_pkeys'][$j][$p].'==';
 						}
-						$datapart .= 	'&subform_link=true\')"><span>'.$strShowAll.'</span></a>';												
+						$datapart .= 	'&subform_link=true\')"><span>'.$strShowAll.'</span></a>';
 						if($attributes['subform_layer_privileg'][$j] > 0 AND !$lock[$k]){
 							if($attributes['embedded'][$j] == true){
 								$datapart .= '&nbsp;<a id="new_'.$layer_id.'_'.$name.'_'.$k.'" class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz';
@@ -348,7 +348,11 @@
 								}
 								$data .= '&preview_attribute='.$attributes['preview_attribute'][$j];
 								$datapart .= '&data='.str_replace('&', '<und>', $data);
-								$datapart .= '&selected_layer_id='.$attributes['subform_layer_id'][$j].'&embedded=true&fromobject=subform'.$layer_id.'_'.$k.'_'.$j.'&targetobject='.$layer_id.'_'.$name.'_'.$k.'&targetlayer_id='.$layer_id.'&targetattribute='.$name.'\', new Array(document.getElementById(\'subform'.$layer_id.'_'.$k.'_'.$j.'\'), \'\'), new Array(\'sethtml\', \'execute_function\'));clearsubforms('.$attributes['subform_layer_id'][$j].');"><span>'.$strNewEmbeddedPK.'</span></a>';
+								$datapart .= '&selected_layer_id='.$attributes['subform_layer_id'][$j] .
+														 '&embedded=true&fromobject=subform' . $layer_id . '_' . $k . '_' . $j .
+														 '&targetobject=' . $layer_id . '_' . $name . '_' . $k .
+														 '&targetlayer_id=' . $layer_id .
+														 '&targetattribute=' . $name . '\', new Array(document.getElementById(\'subform'.$layer_id.'_'.$k.'_'.$j.'\'), \'\'), new Array(\'sethtml\', \'execute_function\'));clearsubforms('.$attributes['subform_layer_id'][$j].');"><span>'.$strNewEmbeddedPK.'</span></a>';
 								$datapart .= '<div style="display:inline" id="subform'.$layer_id.'_'.$k.'_'.$j.'"></div>';
 							}
 							else{
@@ -443,11 +447,17 @@
 
 				case 'dynamicLink': {
 					$show_link = false;
+					$one_param_is_null = false;
 					$options = $attributes['options'][$j];
 					for($a = 0; $a < count($attributes['name']); $a++){
 						if(strpos($options, '$'.$attributes['name'][$a]) !== false){
 							$options = str_replace('$'.$attributes['name'][$a], $dataset[$attributes['name'][$a]], $options);
-							if($dataset[$attributes['name'][$a]] != '')$show_link = true;
+							if(empty($dataset[$attributes['name'][$a]])) {
+								$one_param_is_null = true;
+							}
+							else {
+								$show_link = true;
+							}
 						}
 					}
 					$explosion = explode(';', $options);		# url;alias;embedded
@@ -458,7 +468,11 @@
 					else{
 						$alias = $href;
 					}
-					if($show_link){
+					if ($explosion[3] == 'all_not_null' and $one_param_is_null) {
+						$show_link = false;
+					}
+
+					if ($show_link) {
 						if($explosion[2] == 'embedded'){
 							$datapart .= '<a style="padding: 0 0 0 3;" href="javascript:if(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\').innerHTML != \'\'){clearsubform(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\');} else {ahah(\''.$href.'\', \'\', new Array(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'))}">';
 							$datapart .= $alias;
@@ -518,7 +532,7 @@
 				case 'Zahl': {
 					# bei Zahlen Tausendertrennzeichen einfügen 
 					$value = tausenderTrenner($value);
-					$datapart .= '<input onchange="'.$onchange.'" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
+					$datapart .= '<input onchange="'.$onchange.'" title="'.$alias.'" ';
 					if($attribute_privileg == '0' OR $lock[$k]){
 						$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
 					}

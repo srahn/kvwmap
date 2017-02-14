@@ -1,7 +1,16 @@
 <?php
+	include_once(CLASSPATH.'FormObject.php');
 	global $supportedLanguages;
-  include(LAYOUTPATH.'languages/attribut_editor_'.$this->user->rolle->language.'.php');
 	global $quicksearch_layer_ids;
+	include(LAYOUTPATH.'languages/attribut_editor_'.$this->user->rolle->language.'.php');
+	$form_element_options = array(
+		array('value' => 'Time', 'output' => 'Zeitstempel', 'title' => 'Erzeugt beim Anlegen und Speichern eines Datensatzes automatisch einen Zeitstempel. Dieser läßst sich nicht ändern, auch wenn das Recht des Attributes auf Editieren gesetzt ist.'),
+		array('value' => 'User', 'output' => 'Nutzer', 'title' => 'Trägt beim Anlegen und Speichern eines Datensatzes automatisch den angemeldeten Benutzernamen ein. Dieser läßt sich nicht ändern, auch wenn das Recht des Attributes auf Editieren gesetzt ist.'),
+		array('value' => 'UserID', 'output' => 'NutzerID'),
+		array('value' => 'Stelle', 'output' => 'Stelle'),
+		array('value' => 'StelleID', 'output' => 'StelleID')
+	);
+
  ?>
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
@@ -98,7 +107,7 @@ function toLayerEditor(){
 						<td>&nbsp;&nbsp;</td>
 						<td align="center"><span class="fett">sichtbar im Rastertemplate</span></td>
 						<td>&nbsp;</td>
-						<td align="center"><span class="fett">Suche-Pflicht</span></td>';
+						<td align="center"><span class="fett">Bei der Suche</span></td>';
 			if(in_array($this->formvars['selected_layer_id'], $quicksearch_layer_ids)){			
 				echo '
 						<td>&nbsp;</td>
@@ -132,7 +141,7 @@ function toLayerEditor(){
 					  	elseif($this->attributes['constraints'][$i] != '' AND !in_array($this->attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))){
 					  		echo '<option value="Auswahlfeld" selected>Auswahlfeld</option>';
 					  	}
-					  	else{
+					  	else {
 					  		echo '
 					  		<option value="Text" ';
 					  		if($this->attributes['form_element_type'][$i] == 'Text'){echo 'selected';}
@@ -160,23 +169,14 @@ function toLayerEditor(){
 					  		echo ' >SubFormFK</option>
 								<option value="SubFormEmbeddedPK" ';
 					  		if($this->attributes['form_element_type'][$i] == 'SubFormEmbeddedPK'){echo 'selected';}
-					  		echo ' >SubFormEmbeddedPK</option>
-					  		<option value="Time" ';
-					  		if($this->attributes['form_element_type'][$i] == 'Time'){echo 'selected';}
-					  		echo ' >Time</option>
-								<option value="User" ';
-					  		if($this->attributes['form_element_type'][$i] == 'User'){echo 'selected';}
-					  		echo ' >User</option>
-					  		<option value="UserID" ';
-					  		if($this->attributes['form_element_type'][$i] == 'UserID'){echo 'selected';}
-					  		echo ' >UserID</option>
-					  		<option value="Stelle" ';
-					  		if($this->attributes['form_element_type'][$i] == 'Stelle'){echo 'selected';}
-					  		echo ' >Stelle</option>
-								<option value="StelleID" ';
-					  		if($this->attributes['form_element_type'][$i] == 'StelleID'){echo 'selected';}
-					  		echo ' >StelleID</option>
-					  		<option value="Dokument" ';
+					  		echo ' >SubFormEmbeddedPK</option>';
+
+								foreach($form_element_options AS $option) {
+									$selected = ($this->attributes['form_element_type'][$i] == $option['value'] ? ' selected' : '');
+									echo '<option value="' . $option['value'] . '" title="' . $option['title'] . '"' .	$selected . '>' . $option['output'] . '</option>';
+								}
+
+					  		echo '<option value="Dokument" ';
 					  		if($this->attributes['form_element_type'][$i] == 'Dokument'){echo 'selected';}
 					  		echo ' >Dokument</option>
 								<option value="Link" ';
@@ -262,10 +262,16 @@ function toLayerEditor(){
 				  </td>
 					<td>&nbsp;</td>
 				  <td align="center" valign="top">
-				  	<input name="mandatory_'.$this->attributes['name'][$i].'" type="checkbox" value="1" ';
-				  	if($this->attributes['mandatory'][$i]) echo 'checked="true"';
-						echo '>
-				  </td>';
+						' . FormObject::createSelectField(
+									'mandatory_' . $this->attributes['name'][$i],
+									array(
+										array('value' => -1, 'output' => 'nicht sichtbar'),
+										array('value' => 0, 'output' => 'anzeigen'),
+										array('value' => 1, 'output' => 'Pflichtangabe')
+									),
+									$this->attributes['mandatory'][$i]
+								) . '
+					</td>';
 				if(in_array($this->formvars['selected_layer_id'], $quicksearch_layer_ids)){	
 					echo '
 					<td>&nbsp;</td>

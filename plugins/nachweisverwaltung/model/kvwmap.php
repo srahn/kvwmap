@@ -65,7 +65,7 @@
 # 2016-11-03 H.Riedel - pkz durch pkn ersetzt
       # Zusammenstellen der Einmessungsskizzen der Festpunkte
       $festpunkte=new Festpunkte('',$GUI->pgdatabase);
-      $ret=$festpunkte->getFestpunkte('',array('TP','AP'),'','','',$antr_selected,$stelle_id,'','pkn');
+      $ret=$festpunkte->getFestpunkte('',array('TP','AP','SiP','SVP'),'','','',$antr_selected,$stelle_id,'','pkn');
       if ($ret[0]) {
         $errmsg="Festpunkte konnten nicht abgefragt werden.";
       }
@@ -1193,15 +1193,13 @@
     $dateiname=basename($Bild);
     $dateinamensteil=explode('.',$dateiname);
     ob_end_clean();
-    if (in_array($dateinamensteil[1],array('png','jpg','gif'))) {
+    if (in_array($dateinamensteil[1],array('png','jpg','gif','tif'))) {
       header("Content-type: image/".$dateinamensteil[1]);
     }
     elseif ($dateinamensteil[1]=='pdf') {
       header("Content-type: application/pdf");
     }
-    else{
-    	header("Content-Disposition: attachment; filename=".$dateiname);
-    }
+    header("Content-Disposition: attachment; filename=".$dateiname);
     header('Expires: 0');
     header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
     header('Pragma: public');
@@ -1221,7 +1219,7 @@
 
     # 2) Abfragen der zu prüfenden Festpunkte
     $festpunkte=new Festpunkte('',$GUI->pgdatabase);
-    $festpunkte->getFestpunkte($abgefragtefestpunkte,array('TP','AP'),'','','','','','','pkn');
+    $festpunkte->getFestpunkte($abgefragtefestpunkte,array('TP','AP','SiP','SVP'),'','','','','','','pkn');
     # 3) Übernehmen der Punkte in eine Liste, die mindestens eine Datei/Blatt haben.
     for ($i=0;$i<$festpunkte->anzPunkte;$i++) {
       $festpunkte->liste[$i]['skizze']=$festpunkte->checkSkizzen($festpunkte->liste[$i]['pkn']);
@@ -1390,21 +1388,6 @@
     $GUI->showFestpunkteSkizze();
   };
 
-	$this->uebernehmeFestpunkte = function() use ($GUI){
-    $Festpunkte=new Festpunkte(PUNKTDATEIPATH.PUNKTDATEINAME,$GUI->pgdatabase);
-    $ret=$Festpunkte->uebernehmen();
-    if ($ret[0]) { # Fehler bei der Aktualisierung der Festpunkte
-      $GUI->Fehlermeldung=$ret[1];
-    }
-    else {
-      $GUI->Protokoll=$ret[1];
-    }
-    $GUI->Festpunkte=$Festpunkte;
-    $GUI->titel='Übernahme der Festpunkte';
-    $GUI->main = PLUGINS.'nachweisverwaltung/view/aktualisierungfestpunkte.php';
-    $GUI->output();
-  };
-
 # 2016-11-03 H.Riedel - pkz durch pkn ersetzt
 	$this->festpunkteZuAuftragFormular = function() use ($GUI){
     $GUI->titel='Festpunkte zum Auftrag Hinzufügen';
@@ -1462,27 +1445,6 @@
         $GUI->datei = $ret[2];
       }
     }
-  };
-
-	$this->aktualisiereFestpunkte = function() use ($GUI){
-    if (is_file(PUNKTDATEIPATH.PUNKTDATEINAME)) {
-      # Datei ist vorhanden, Einlesen und Aufbereiten der Punkte in Datenbank
-      $Festpunkte=new Festpunkte(PUNKTDATEIPATH.PUNKTDATEINAME,$GUI->pgdatabase);
-      $ret=$Festpunkte->aktualisieren();
-      if ($ret[0]) { # Fehler bei der Aktualisierung der Festpunkte
-        $GUI->Fehlermeldung=$ret[1];
-      }
-      else {
-        $GUI->Protokoll=$ret[1];
-      }
-    }
-    else {
-      $GUI->Fehlermeldung='Die Datei '.PUNKTDATEIPATH.PUNKTDATEINAME.' existiert nicht auf dem Server.';
-    }
-    $GUI->Festpunkte=$Festpunkte;
-    $GUI->titel='Aktualisierung der Festpunkte';
-    $GUI->main = PLUGINS.'nachweisverwaltung/view/aktualisierungfestpunkte.php';
-    $GUI->output();
   };
 
 	$this->vermessungsantragsFormular = function() use ($GUI){
@@ -1564,7 +1526,7 @@
 		if($GUI->formvars['stelle_id'] == $GUI->Stelle->id OR in_array($GUI->Stelle->id, $admin_stellen)){
 			if ($GUI->formvars['bestaetigung']=='JA') {
 				$GUI->antrag = new antrag('','',$GUI->pgdatabase);
-				$antragsnummern=array_keys ($GUI->formvars['id']);
+				$antragsnummern=$GUI->formvars['id'];
 				$ret=$GUI->antrag->antrag_loeschen($antragsnummern[0],$GUI->formvars['stelle_id']);
 				if($ret == 'Antrag erfolgreich gelöscht')$GUI->Suchparameter_loeschen($antragsnummern[0], $GUI->formvars['stelle_id']);
 				showAlert($ret);
