@@ -423,22 +423,6 @@ class GUI {
 													$style->set('offsetx', 0);
 												}
 											}
-											if (MAPSERVERVERSION > 500){
-												if($maplayer->opacity < 100 AND $maplayer->opacity > 0){			# Layer-Transparenz auch in Legendenbildchen berücksichtigen
-													$hsv = rgb2hsv($style->color->red,$style->color->green, $style->color->blue);
-													$hsv[1] = $hsv[1]*$maplayer->opacity/100;
-													$rgb = hsv2rgb($hsv[0], $hsv[1], $hsv[2]);
-													$style->color->setRGB($rgb[0],$rgb[1],$rgb[2]);
-												}
-											}
-											else {
-												if($maplayer->transparency < 100 AND $maplayer->transparency > 0){			# Layer-Transparenz auch in Legendenbildchen berücksichtigen
-													$hsv = rgb2hsv($style->color->red,$style->color->green, $style->color->blue);
-													$hsv[1] = $hsv[1]*$maplayer->transparency/100;
-													$rgb = hsv2rgb($hsv[0], $hsv[1], $hsv[2]);
-													$style->color->setRGB($rgb[0],$rgb[1],$rgb[2]);
-												}
-											}
 										}
 										$legend .= '<tr style="line-height: 15px"><td style="line-height: 14px">';
 										if($s > 0){
