@@ -89,7 +89,7 @@ include('funktionen/input_check_functions.php');
 	
 	nextdatasets = function(layer_id){
 		var sure = true;
-		if(document.getElementById('changed_'+layer_id).value == 1){
+		if(document.getElementById('changed_'+layer_id) != undefined && document.getElementById('changed_'+layer_id).value == 1){
 			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch weiterblättern?');
 		}
 		if(sure){
@@ -108,7 +108,7 @@ include('funktionen/input_check_functions.php');
 	
 	lastdatasets = function(layer_id, count){
 		var sure = true;
-		if(document.getElementById('changed_'+layer_id).value == 1){
+		if(document.getElementById('changed_'+layer_id) != undefined && document.getElementById('changed_'+layer_id).value == 1){
 			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch weiterblättern?');
 		}
 		if(sure){
@@ -127,7 +127,7 @@ include('funktionen/input_check_functions.php');
 	
 	firstdatasets = function(layer_id){
 		var sure = true;
-		if(document.getElementById('changed_'+layer_id).value == 1){
+		if(document.getElementById('changed_'+layer_id) != undefined && document.getElementById('changed_'+layer_id).value == 1){
 			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch zurückblättern?');
 		}
 		if(sure){
@@ -143,7 +143,7 @@ include('funktionen/input_check_functions.php');
 
 	prevdatasets = function(layer_id){
 		var sure = true;
-		if(document.getElementById('changed_'+layer_id).value == 1){
+		if(document.getElementById('changed_'+layer_id) != undefined && document.getElementById('changed_'+layer_id).value == 1){
 			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch zurückblättern?');
 		}
 		if(sure){
