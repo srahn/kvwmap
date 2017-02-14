@@ -13,6 +13,7 @@ include_once(CLASSPATH . 'data_import_export.php');
 include(PLUGINS . 'xplankonverter/model/gml_file.php');
 include(PLUGINS . 'xplankonverter/model/RP_Plan.php');
 include(PLUGINS . 'xplankonverter/model/RP_Bereich.php');
+include(PLUGINS . 'xplankonverter/model/RP_Object.php');
 include(PLUGINS . 'xplankonverter/model/konvertierung.php');
 include(PLUGINS . 'xplankonverter/model/regel.php');
 include(PLUGINS . 'xplankonverter/model/shapefiles.php');

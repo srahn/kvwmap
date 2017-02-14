@@ -158,7 +158,7 @@ class ShapeFile extends PgObject {
 		";
 		$this->debug->show('<p>Query for gml_id column sql: ' . $sql, ShapeFile::$write_debug);
 		$result = pg_query($this->database->dbConn, $sql);
-		return (pg_num_rows($result) == 1)
+		return (pg_num_rows($result) == 1);
 	}
 	
 	function addGmlIdColumn() {

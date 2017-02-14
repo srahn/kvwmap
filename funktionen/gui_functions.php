@@ -11,7 +11,7 @@ function ImageLoadFailed(id) {
 var currentform;
 var doit;
 
-function startwaiting(lock){
+function startwaiting(lock) {
 	var lock = lock || false;
 	document.GUI.stopnavigation.value = 1;
 	waitingdiv = document.getElementById('waitingdiv');
@@ -20,7 +20,7 @@ function startwaiting(lock){
 	else waitingdiv.className='waitingdiv_spinner';
 }
 
-function stopwaiting(){
+function stopwaiting() {
 	document.GUI.stopnavigation.value = 0;
 	waitingdiv = document.getElementById('waitingdiv');
 	waitingdiv.style.display='none';
