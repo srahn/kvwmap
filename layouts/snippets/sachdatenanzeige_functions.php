@@ -379,8 +379,8 @@ include('funktionen/input_check_functions.php');
 	
 	openCustomSubform = function(layer_id, attribute, attributenamesarray, field_id, k){
 		names_values = get_current_attribute_values(attributenamesarray, '', k);
-		document.getElementById('sperrdiv').style.background = 'rgba(200,200,200,0.8)';
-		document.getElementById('sperrdiv').style.width = '100%';
+		document.getElementById('waitingdiv').style.background = 'rgba(200,200,200,0.8)';
+		document.getElementById('waitingdiv').style.display = '';
 		subformWidth = document.GUI.browserwidth.value-70;
 		subform = '<div style="position:relative; margin: 30px;width:'+subformWidth+'px; height:90%">';
 		subform += '<div style="position: absolute;top: 2px;right: -2px"><a href="javascript:closeCustomSubform();" title="Schlie&szlig;en"><img style="border:none" src="<? echo GRAPHICSPATH.'exit2.png'; ?>"></img></a></div>';
@@ -391,8 +391,7 @@ include('funktionen/input_check_functions.php');
 	}
 	
 	closeCustomSubform = function(){
-		document.getElementById('sperrdiv').style.background = 'rgba(200,200,200,0.3)';
-		document.getElementById('sperrdiv').style.width = '0%';
+		document.getElementById('sperrdiv').style.display = 'none';
 		document.getElementById('sperrdiv').innerHTML = '';
 	}
 	 
