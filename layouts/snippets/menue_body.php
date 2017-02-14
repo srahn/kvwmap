@@ -173,11 +173,6 @@
 		?><tr>
 		<td><input style="border: 1px solid #cccccc;" id="refmap" type="image" onmousedown="document.GUI.go.value='neu Laden';" name="refmap" src="<?php echo $this->img['referenzkarte']; ?>" alt="Referenzkarte" align="right" hspace="0"></td>
 	</tr>
-	<tr>
-		<td valign="top" align="center"> <input name="button" type="button" class="button" onClick="showMapParameter()" value="<?php echo $strMapInfo; ?>">
-			<br/>
-			<br/> </td>
-	</tr>
 	<? } 
 	if (MENU_WAPPEN=="unten") {
 ?>

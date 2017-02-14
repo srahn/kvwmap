@@ -67,6 +67,12 @@ function message(messages) {
 			'color': 'green',
 			'confirm': false
 		},
+		'info': {
+			'description': 'Info',
+			'icon': 'fa-info-circle',
+			'color': '#ff6200',
+			'confirm': true
+		},
 		'warning': {
 			'description': 'Warnung',
 			'icon': 'fa-exclamation',
@@ -576,4 +582,27 @@ function mouseOutClassStatus(classid,imgsrc,height){
 	}
 }
 
+function showMapParameter(epsg_code, width, height) {
+	var gui = document.GUI,
+			msg = " \
+				<div style=\"text-align: left\"> \
+					<h2>Daten des aktuellen Kartenausschnitts</h2><br> \
+					Koordinatensystem: EPSG: " + epsg_code + "<br> \
+					linke untere Ecke: (" + toFixed(gui.minx.value, 3) + ", " + toFixed(gui.miny.value, 3) + ")<br> \
+					rechte obere Ecke: (" + toFixed(gui.maxx.value, 3) + ", " + toFixed(gui.maxy.value, 3) + ")<br> \
+					Ausdehnung: " + toFixed(gui.maxx.value - gui.minx.value, 3) + " x " + toFixed(gui.maxy.value-gui.miny.value,3) + "<br> \
+					Bildgröße: " + width + " x " + height + " Pixel<br> \
+					Pixelgröße: " + toFixed(gui.pixelsize.value, 3) + " \
+				</div> \
+			";
+	message([{
+			'type': 'info',
+			'msg': msg
+	}]);
+}
+
+function toFixed(value, precision) {
+	var power = Math.pow(10, precision || 0);
+	return String(Math.round(value * power) / power);
+}
 </script>
