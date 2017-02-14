@@ -2,6 +2,7 @@
 <?php
   $anzObj=count($this->qlayerset[$i]['shape']);
   if ($anzObj>0) {
+		$this->found = 'true';
     ?><table border="1" cellspacing="0" cellpadding="2">
     <tr align="right" bgcolor="<?php echo BG_DEFAULT ?>"> 
     <td width="121"><span class="fett">GML_ID</span></td>
