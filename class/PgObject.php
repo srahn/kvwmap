@@ -158,19 +158,23 @@ class PgObject {
 		";
 		$this->debug->show('create sql: ' . $sql, false);
 		$query = pg_query($this->database->dbConn, $sql);
-		$row = pg_fetch_assoc($query);
 		$oid = pg_last_oid($query);
-		$sql = "
-			SELECT
-				*
-			FROM
-				" . $this->qualifiedTableName . "
-			WHERE
-				oid = " . $oid . "
-		";
-		$query = pg_query($this->database->dbConn, $sql);
-		$row = pg_fetch_assoc($query);
-		$this->set($this->identifier, $row[$this->identifier]);
+		if (empty($oid)) {
+			$this->lastquery = $query;
+		}
+		else {
+			$sql = "
+				SELECT
+					*
+				FROM
+					" . $this->qualifiedTableName . "
+				WHERE
+					oid = " . $oid . "
+			";
+			$query = pg_query($this->database->dbConn, $sql);
+			$row = pg_fetch_assoc($query);
+			$this->set($this->identifier, $row[$this->identifier]);
+		}
 		return $this->get($this->identifier);
 	}
 	/* Für Postgres Version in der RETURNING zusammen mit RULE und Bedingung funktioniert. 
