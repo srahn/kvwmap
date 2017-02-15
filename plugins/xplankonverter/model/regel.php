@@ -168,7 +168,7 @@ public static	function find_by_id($gui, $by, $id) {
 	}
 
 	function get_convert_sql($konvertierung_id) {
-		$this->debug->show('<br>Konvertiere sql vor Anpassung:<br>' . $this->get('sql'), Regel::$write_debug);
+		$this->debug->show('<br>sql vor Anpassung:<br>' . $this->get('sql'), Regel::$write_debug);
 		$sql = $this->get('sql');
 		$konvertierung = $this->get_konvertierung();
 		$epsg = $konvertierung->get('output_epsg');
@@ -225,11 +225,14 @@ public static	function find_by_id($gui, $by, $id) {
 		}
 		$this->debug->show('sql nach bereich:<br>' . $sql, Regel::$write_debug);
 
-		# search_path und returning hinzufügen.
-		$sql = "SET search_path=xplan_gml, xplan_shapes_{$konvertierung_id}, public;
-			{$sql}
+		# search_path hinzufügen.
+		# $sql = "SET search_path=xplan_gml, xplan_shapes_{$konvertierung_id}, public; {$sql};
+
+		# returning hinzufügen
+		$sql = "{$sql}
 			RETURNING gml_id, gehoertzubereich
 		";
+		$this->debug->show('sql nach Hinzufügen von RETURNING:<br>' . $sql, Regel::$write_debug);
 
 		$this->debug->show('sql nach Anpassung:<br>' . $sql, Regel::$write_debug);
 		return $sql;

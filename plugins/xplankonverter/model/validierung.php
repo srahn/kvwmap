@@ -68,7 +68,7 @@ class Validierung extends PgObject {
 	}
 
 	function sql_ausfuehrbar($regel, $konvertierung_id) {
-		$this->debug->show('<br>Validiere ob sql_ausfuehrbar sql: ', Validierung::$write_debug);
+		$this->debug->show('<br>Validiere ob sql_ausfuehrbar: ', Validierung::$write_debug);
 		$ausfuehrbar = true;
 
 		$sql = $regel->get_convert_sql($konvertierung_id);
@@ -82,7 +82,9 @@ class Validierung extends PgObject {
 		);
 
 		if (!$result) {
+			echo '<br>Regel nicht ausführbar.';
 			$validierungsergebnis = new Validierungsergebnis($this->gui);
+					echo '<p>==' .$sql . '<br>==<p>';
 			$validierungsergebnis->create(
 				array(
 					'konvertierung_id' => $this->konvertierung_id,
@@ -94,6 +96,7 @@ class Validierung extends PgObject {
 			);
 			$ausfuehrbar = false;
 		}
+
 		return $ausfuehrbar;
 	}
 
@@ -226,7 +229,8 @@ class Validierung extends PgObject {
 		);
 		$this->debug->show('<br>sql mit where st_isvalid: ' . $sql, Validierung::$write_debug);
 
-		$sql = "SET search_path=xplan_shapes_" . $konvertierung->get('id') . ", public; " . substr($sql, 0, stripos($sql, 'returning'));
+#		$sql = "SET search_path=xplan_shapes_" . $konvertierung->get('id') . ", public; " . substr($sql, 0, stripos($sql, 'returning'));
+		$sql = substr($sql, 0, stripos($sql, 'returning'));
 
 		$this->debug->show('Sql für Prüfung geom_isvalid:<br>' . $sql, Validierung::$write_debug);
 
@@ -331,7 +335,8 @@ class Validierung extends PgObject {
 
 		#$this->debug->show('<br>sql mit gid, ausserhalb und distance: ' . $sql, Validierung::$write_debug);
 
-		$sql = "SET search_path=xplan_shapes_" . $konvertierung->get('id') . ", public; " . substr($sql, 0, stripos($sql, 'returning'));
+		#$sql = "SET search_path=xplan_shapes_" . $konvertierung->get('id') . ", public; " . 
+		$sql = substr($sql, 0, stripos($sql, 'returning'));
 
 		$this->debug->show('Sql für Prüfung geom_within_plan:<br>' . $sql, false);
 
