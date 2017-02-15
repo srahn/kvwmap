@@ -11,6 +11,21 @@ function ImageLoadFailed(id) {
 var currentform;
 var doit;
 
+function startwaiting(lock) {
+	var lock = lock || false;
+	document.GUI.stopnavigation.value = 1;
+	waitingdiv = document.getElementById('waitingdiv');
+	waitingdiv.style.display='';
+	if(lock)waitingdiv.className='waitingdiv_spinner_lock';
+	else waitingdiv.className='waitingdiv_spinner';
+}
+
+function stopwaiting() {
+	document.GUI.stopnavigation.value = 0;
+	waitingdiv = document.getElementById('waitingdiv');
+	waitingdiv.style.display='none';
+}
+
 function getBrowserSize(){
 	if(typeof(window.innerWidth) == 'number'){
 		width = window.innerWidth;
@@ -51,6 +66,12 @@ function message(messages) {
 			'icon': 'fa-check',
 			'color': 'green',
 			'confirm': false
+		},
+		'info': {
+			'description': 'Info',
+			'icon': 'fa-info-circle',
+			'color': '#ff6200',
+			'confirm': true
 		},
 		'warning': {
 			'description': 'Warnung',
@@ -241,9 +262,7 @@ function urlstring2formdata(formdata, string){
 
 function overlay_submit(gui, start){
 	// diese Funktion macht beim Fenstermodus und einer Kartenabfrage oder einem Aufruf aus dem Overlay-Fenster einen ajax-Request mit den Formulardaten des uebergebenen Formularobjektes, ansonsten einen normalen Submit
-<? if($this->main == 'map.php'){ ?>
 	startwaiting();
-<? } ?>
 	if(typeof FormData !== 'undefined' && (1 == <? echo $this->user->rolle->querymode; ?> && start || gui.id == 'GUI2')){	
 		formdata = new FormData(gui);
 		formdata.append("mime_type", "overlay_html");	
@@ -563,4 +582,27 @@ function mouseOutClassStatus(classid,imgsrc,height){
 	}
 }
 
+function showMapParameter(epsg_code, width, height) {
+	var gui = document.GUI,
+			msg = " \
+				<div style=\"text-align: left\"> \
+					<h2>Daten des aktuellen Kartenausschnitts</h2><br> \
+					Koordinatensystem: EPSG: " + epsg_code + "<br> \
+					linke untere Ecke: (" + toFixed(gui.minx.value, 3) + ", " + toFixed(gui.miny.value, 3) + ")<br> \
+					rechte obere Ecke: (" + toFixed(gui.maxx.value, 3) + ", " + toFixed(gui.maxy.value, 3) + ")<br> \
+					Ausdehnung: " + toFixed(gui.maxx.value - gui.minx.value, 3) + " x " + toFixed(gui.maxy.value-gui.miny.value,3) + "<br> \
+					Bildgröße: " + width + " x " + height + " Pixel<br> \
+					Pixelgröße: " + toFixed(gui.pixelsize.value, 3) + " \
+				</div> \
+			";
+	message([{
+			'type': 'info',
+			'msg': msg
+	}]);
+}
+
+function toFixed(value, precision) {
+	var power = Math.pow(10, precision || 0);
+	return String(Math.round(value * power) / power);
+}
 </script>

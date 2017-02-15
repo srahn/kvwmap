@@ -78,7 +78,7 @@ class Validierung extends PgObject {
 		# Objekte anlegen
 		$result = @pg_query(
 			$this->database->dbConn,
-			$sql
+			'EXPLAIN ' . $sql
 		);
 
 		if (!$result) {

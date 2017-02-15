@@ -248,9 +248,15 @@ class Konvertierung extends PgObject {
 			$success = true;
 			$this->get_plan();
 			foreach($regeln AS $regel) {
-				$result = $regel->convert($this);
+				$result = $regel->validate($this);
 				if (!$result) {
 					$success = false;
+				}
+				else {
+					$result = $regel->convert($this);
+					if (!empty($result)) {
+						$regel->rewrite_gml_ids($result);
+					}
 				}
 			}
 			$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'alle_sql_ausfuehrbar');

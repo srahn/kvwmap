@@ -228,7 +228,7 @@ function changemenue(id){
       <div style="position: relative; visibility: visible; left: 0px; top: 0px"> 
         <table border="0" cellspacing="0" cellpadding="0">
           <tr> 
-            <td valign="top" align="center"> <input name="button" type="button" class="button" onClick="showMapParameter()" value="Karteninfo"> 
+            <td valign="top" align="center"> <input name="button" type="button" class="button" onClick="showMapParameter(<? echo $this->user->rolle->epsg_code; ?>, <? echo $this->map->width; ?>, <? echo $this->map->height; ?>)" value="Karteninfo"> 
               <br/>
               <br/> </td>
           </tr>

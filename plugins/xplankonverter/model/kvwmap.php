@@ -91,13 +91,13 @@
 		$success = true;
 
 		switch(true) {
-			
+
 			case ($fired == 'AFTER' AND $event == 'INSERT') : {
 				$this->debug->show('Führe ' . $fired . ' ' . $event . ' in handle_regel Funktion aus mit oid: ' . $oid, false);
 				$regel = Regel::find_by_id($this, 'oid', $oid);
 				$regel->create_gml_layer();
 				$regel->konvertierung->set_status();
-			} break;			
+			} break;
 			
 			case ($fired == 'AFTER' AND $event == 'UPDATE') : {
 				$this->debug->show('Führe ' . $fired . ' ' . $event . ' in handle_regel Funktion aus mit oid: ' . $oid, false);

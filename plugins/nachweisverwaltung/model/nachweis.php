@@ -1611,7 +1611,12 @@ class Festpunkte {
       foreach($this->liste AS $value) {
         # extrahieren der Bestandteile von pkz, getrennt durch "-"
 #        $pkz=explode('-',$value['pkz']);
-        $pkn=substr($value['pkn'],0,-6); 
+        if ($value['par']=='TP' OR $value['par']=='OP') {
+          $pkn=substr($value['pkn'],0,-5);
+        }
+        else {
+          $pkn=substr($value['pkn'],0,-6);
+        } 
 #        echo $pkn.', ';
         # zuweisen des ersten Teiles der pkn zur Liste der kilometerquadrate
         $kilometerquadrate[]=$pkn;

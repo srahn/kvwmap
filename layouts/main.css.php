@@ -890,6 +890,29 @@ tbody.gle tr:hover {
 	color: gray;
 }
 
+.fa-7x {
+	font-size: 7em !important;
+}
+
+
+
+.spinner {
+	opacity: 0.75;
+	color: LightSteelBlue;
+	text-shadow: 0px 0px 4px #000000;
+	animation: fa-spin 1s infinite steps(8);
+}
+
+.waitingdiv_spinner {
+	pointer-events:none;
+	background:none;
+}
+
+.waitingdiv_spinner_lock {
+	background:rgba(200,200,200,0.3);
+	pointer-events:auto;
+}
+
 .fa-color-red {
 	color: #236dbf;
 }

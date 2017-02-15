@@ -13,6 +13,7 @@ include_once(CLASSPATH . 'data_import_export.php');
 include(PLUGINS . 'xplankonverter/model/gml_file.php');
 include(PLUGINS . 'xplankonverter/model/RP_Plan.php');
 include(PLUGINS . 'xplankonverter/model/RP_Bereich.php');
+include(PLUGINS . 'xplankonverter/model/RP_Object.php');
 include(PLUGINS . 'xplankonverter/model/konvertierung.php');
 include(PLUGINS . 'xplankonverter/model/regel.php');
 include(PLUGINS . 'xplankonverter/model/shapefiles.php');
@@ -24,17 +25,27 @@ include(PLUGINS . 'xplankonverter/model/converter.php');
 /**
 * Anwendungsfälle
 * show_elements
+* show_simple_types
+* show_uml
+* xplankonverter_konvertierungen_index
 * xplankonverter_shapefiles_index
 * xplankonverter_shapefiles_delete
 * xplankonverter_konvertierung_status
 * xplankonverter_konvertierung
-* xplankonverter_gml_generierenxplan
-* konverter_gml_ausliefernxplan
-* konverter_konvertierung_loeschen
+* xplankonverter_validierungsergebnisse
+* xplankonverter_gml_generieren
+* xplankonverter_gml_ausliefern
+* xplankonverter_konvertierung_loeschen
+* xplankonverter_inspire_gml_generieren
+* xplankonverter_inspire_gml_ausliefern
+* xplankonverter_regeleditor
+* xplankonverter_regeleditor_getxplanattributes
+* xplankonverter_regeleditor_getshapeattributes
 */
+
 switch($this->go){
 
-	case 'show_elements':
+	case 'show_elements': {
 		$packages = array();
 		$sql	= "
 			SELECT
@@ -49,15 +60,17 @@ switch($this->go){
 		array_unshift($packages, array('package' => 'Alle'));
 		$this->main = PLUGINS . 'xplankonverter/view/elements.php';
 		$this->output();
-		break;
-	case 'show_simple_types':
+	}	break;
+
+	case 'show_simple_types': {
 		$this->main = PLUGINS . 'xplankonverter/view/simple_types.php';
 		$this->output();
-		break;
-	case 'show_uml':
+	}	break;
+
+	case 'show_uml': {
 		$this->main = PLUGINS . 'xplankonverter/view/uml_diagramms.php';
 		$this->output();
-		break;
+	}	break;
 
 	case 'xplankonverter_konvertierungen_index' : {
 		$this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
@@ -185,6 +198,10 @@ switch($this->go){
 
 							# load into database table
 							$created_tables = $shapeFile->loadIntoDataTable();
+
+							# add gml_id column if not exists
+							if ($shapeFile->gmlIdColumnExists())
+								$shapeFile->addGmlIdColumn();
 
 							# Set datatype for shapefile
 							$shapeFile->set('datatype', $created_tables[0]['datatype']);
@@ -389,8 +406,9 @@ switch($this->go){
 					Melden Sie sich mit einem anderen Benutzer an.";
 			}
 			else {
-				$this->konvertierung->reset_mapping();
+				# $this->konvertierung->reset_mapping();
 				$this->konvertierung->mapping();
+				$this->konvertierung->set_historie();
 				$this->konvertierung->set_status(
 					($this->konvertierung->validierung_erfolgreich() ? 'Konvertierung abgeschlossen' : 'Konvertierung abgebrochen')
 				);
