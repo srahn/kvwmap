@@ -408,7 +408,7 @@ switch($this->go){
 			else {
 				# $this->konvertierung->reset_mapping();
 				$this->konvertierung->mapping();
-				$this->konvertierung->set_historie();
+#				$this->konvertierung->set_historie();
 				$this->konvertierung->set_status(
 					($this->konvertierung->validierung_erfolgreich() ? 'Konvertierung abgeschlossen' : 'Konvertierung abgebrochen')
 				);
