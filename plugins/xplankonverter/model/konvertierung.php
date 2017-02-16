@@ -30,11 +30,66 @@ class Konvertierung extends PgObject {
 	}
 
 	public static	function find_by_id($gui, $by, $id) {
-			#echo '<br>find konvertierung by ' . $by . ' = ' . $id;
-			$konvertierung = new Konvertierung($gui);
-			$konvertierung->find_by($by, $id);
-			return $konvertierung;
+		#echo '<br>find konvertierung by ' . $by . ' = ' . $id;
+		$konvertierung = new Konvertierung($gui);
+		$konvertierung->find_by($by, $id);
+		return $konvertierung;
+	}
+
+	function create_directories() {
+		$directories = array(
+			'uploaded_shapes',
+			'edited_shapes',
+			'xplan_gml',
+			'xplan_shapes',
+			'inspire_gml'
+		);
+
+		foreach ($directories AS $directory) {
+			$path = $this->get_file_path($directory);
+			$this->debug->show('Check if directory: ' . $path . ' exists.', Konvertierung::$write_debug);
+			if (!is_dir($path)) {
+				$this->debug->show('Create directory', Konvertierung::$write_debug);
+				$old = umask(0);
+				mkdir($path, 0770, true);
+				umask($old);
+			}
 		}
+	}
+
+	function get_file_path($directory) {
+		return XPLANKONVERTER_FILE_PATH . $this->get('id') . '/' . $directory;
+	}
+
+	function get_file_name($name) {
+		$parts = explode('_', $name);
+		return $this->get_file_path($name) . '/' . $parts[0] . '_' . $this->get('id') . '.' . $parts[1];
+	}
+
+	function create_export_file($file_type) {
+		$path = $this->get_file_path($file_type);
+		exec(ZIP_PATH . ' ' . $path . ' ' . $path . '/*');
+		
+		$exportfile = $path . '.zip';
+		return $exportfile;
+	}
+
+	function send_export_file($exportfile, $contenttype) {
+		header('Content-type: ' . $contenttype);
+		header("Content-disposition:  attachment; filename=" . basename($exportfile));
+		header("Content-Length: " . filesize($exportfile));
+		header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+		header('Pragma: public');
+		readfile($exportfile);
+	}
+
+	function files_exists($dir) {
+		$dir = $this->get_file_path($dir);
+		$this->debug->show('Prüfe ob Dateien im Verzeichnis : ' . $dir . ' vorhanden sind: ', Konvertierung::$write_debug);
+	  $result = !(count(glob("$dir/*")) === 0);
+		$this->debug->show(($result ? 'ja' : 'nein'), Konvertierung::$write_debug);
+		return $result;
+	}
 
 	function get_input_epgs_codes() {
 		$sql = "
@@ -192,7 +247,7 @@ class Konvertierung extends PgObject {
 	*
 	*/
 	function delete_layer_group($layer_type) {
-		$this->debug->show('delete_layer_group typ: ' . $layer_type, true);
+		$this->debug->show('delete_layer_group typ: ' . $layer_type, false);
 		$layer_group_id = $this->get(strtolower($layer_type) . '_layer_group_id');
 		if (!empty($layer_group_id)) {
 			$layer_group = new MyObject($this->gui, 'u_groups');
@@ -284,7 +339,7 @@ class Konvertierung extends PgObject {
 	*/
 	function destroy() {
 		# Lösche gml-Datei
-		$gml_file = new gml_file(XPLANKONVERTER_SHAPE_PATH . $this->get('id') . '/xplan_' . $this->get('id') . '.gml');
+		$gml_file = new gml_file($this->get_file_name('xplan_gml'));
 		if ($gml_file->exists()) {
 			$msg = "\nLösche gml file: ". $gml_file->filename;
 			$gml_file->delete();

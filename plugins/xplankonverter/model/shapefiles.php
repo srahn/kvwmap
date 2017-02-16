@@ -6,17 +6,17 @@
 class ShapeFile extends PgObject {
 
 	static $schema = 'xplankonverter';
-	static $tableName = 'konvertierungen';
+	static $tableName = 'shapefiles';
 	static $write_debug = false;
 
-	function ShapeFile($gui, $schema, $tableName) {
-		$this->PgObject($gui, $schema, $tableName);
+	function ShapeFile($gui) {
+		$this->PgObject($gui, ShapeFile::$schema, ShapeFile::$tableName);
 		$this->importer = new data_import_export();
 	}
 
 	public static	function find_by_id($gui, $by, $id) {
 		#echo '<br>find konvertierung by ' . $by . ' = ' . $id;
-		$shapefile = new ShapeFile($gui, 'xplankonverter', 'shapefiles');
+		$shapefile = new ShapeFile($gui);
 		$shapefile->find_by($by, $id);
 		return $shapefile;
 	}
@@ -52,7 +52,8 @@ class ShapeFile extends PgObject {
 	}
 
 	function uploadShapePath() {
-		return XPLANKONVERTER_SHAPE_PATH . $this->get('konvertierung_id') . '/';
+		$path = XPLANKONVERTER_FILE_PATH . $this->get('konvertierung_id') . '/uploaded_shapes/';
+		return $path;
 	}
 
 	function uploadShapeFileName() {
@@ -100,7 +101,7 @@ class ShapeFile extends PgObject {
 
 		foreach(array('shp', 'shx', 'dbf', 'sql') AS $extension) {
 			$this->debug->show('<br>Delete file: ' . $this->uploadShapeFileName() . '.' . $extension);
-			$shapefile = XPLANKONVERTER_SHAPE_PATH . $this->get('konvertierung_id') . '/' . $this->get('filename') . '.' . $extension;
+			$shapefile = $this->uploadShapePath() . $this->get('filename') . '.' . $extension;
 			if (is_file($shapefile))
 				unlink($shapefile);
 		}

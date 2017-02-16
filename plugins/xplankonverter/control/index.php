@@ -34,13 +34,16 @@ include(PLUGINS . 'xplankonverter/model/converter.php');
 * xplankonverter_konvertierung
 * xplankonverter_validierungsergebnisse
 * xplankonverter_gml_generieren
-* xplankonverter_gml_ausliefern
 * xplankonverter_konvertierung_loeschen
 * xplankonverter_inspire_gml_generieren
-* xplankonverter_inspire_gml_ausliefern
 * xplankonverter_regeleditor
 * xplankonverter_regeleditor_getxplanattributes
 * xplankonverter_regeleditor_getshapeattributes
+* xplankonverter_download_uploaded_shapes
+* xplankonverter_download_edited_shapes
+* xplankonverter_download_xplan_shapes
+* xplankonverter_download_xplan_gml
+* xplankonverter_download_inspire_gml
 */
 
 switch($this->go){
@@ -149,14 +152,6 @@ switch($this->go){
 			$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
 			if (isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) {
 				if (isset($_FILES['shape_files']) and $_FILES['shape_files']['name'][0] != '') {
-					$upload_path = XPLANKONVERTER_SHAPE_PATH . $this->formvars['konvertierung_id'] . '/';
-
-					# create upload dir if not exists
-					if (!is_dir($upload_path)) {
-						$old = umask(0);
-						mkdir($upload_path, 0770, true);
-						umask($old);
-					}
 
 					# unzip and copy files to upload folder
 					$uploaded_files = xplankonverter_unzip_and_check_and_copy($_FILES['shape_files'], $upload_path);
@@ -168,7 +163,7 @@ switch($this->go){
 						if ($uploaded_file['extension'] == 'dbf' and $uploaded_file['state'] != 'ignoriert') {
 
 							# delete existing shape file
-							$shapeFile = new ShapeFile($this, 'xplankonverter', 'shapefiles');
+							$shapeFile = new ShapeFile($this);
 							$shapeFiles = $shapeFile->find_where("
 								filename = '" . $uploaded_file['filename'] . "' AND
 								konvertierung_id = '" . $this->konvertierung->get('id') . "' AND
@@ -406,7 +401,7 @@ switch($this->go){
 					Melden Sie sich mit einem anderen Benutzer an.";
 			}
 			else {
-				# $this->konvertierung->reset_mapping();
+				$this->konvertierung->reset_mapping();
 				$this->konvertierung->mapping();
 				$this->konvertierung->set_historie();
 				$this->konvertierung->set_status(
@@ -469,12 +464,12 @@ switch($this->go){
   					$this->konvertierung->update();
   					// Antwort absenden und case beenden
   					$response['success'] = false;
-  					$response['msg'] = 'Bei der GML-Generierung ist ein Fehler aufgetreten.';
+  					$response['msg'] = 'Bei der XPlan-GML-Generierung ist ein Fehler aufgetreten.';
         		header('Content-Type: application/json');
         		echo json_encode($response);
         		break;
 					}
-					$this->gml_builder->save(XPLANKONVERTER_SHAPE_PATH . $this->konvertierung->get('id') . '/xplan_' . $this->konvertierung->get('id') . '.gml');
+					$this->gml_builder->save($this->konvertierung->get_file_name('xplan_gml'));
 
 					// Status setzen
 					$this->konvertierung->set('status', Konvertierung::$STATUS['GML_ERSTELLUNG_OK']);
@@ -498,26 +493,6 @@ switch($this->go){
 		echo json_encode($response);
 	} break;
 
-	case 'xplankonverter_gml_ausliefern' : {
-		if ($this->formvars['konvertierung_id'] == '') {
-		  echo 'Diese Link kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
-		  return;
-		}
-		$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
-		if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) return;
-
-		$filename = XPLANKONVERTER_SHAPE_PATH . $this->formvars['konvertierung_id'] . '/xplan_' . $this->formvars['konvertierung_id'] . '.gml';
-		header('Content-Type: text/xml; subtype="gml/3.3"');
-    echo fread(fopen($filename, "r"), filesize($filename));
-	} break;
-
-  case 'index.php?go=xplankonverter_gml_ausliefern&konvertierung_id' : {
-    if ($this->formvars['konvertierung_id'] == '') {
-		  echo 'Diese Link kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
-		  return;
-		}
-  } break;
-
 	case 'xplankonverter_konvertierung_loeschen' : {
 		$response = array(
 			'success' => $this->layer_Datensaetze_loeschen(false),
@@ -540,8 +515,8 @@ switch($this->go){
 
 		# set the paths
 		$xsl = PLUGINS . 'xplankonverter/model/xplan2inspire.xsl';
-		$fileinput = XPLANKONVERTER_SHAPE_PATH . $this->formvars['konvertierung_id'] . '/xplan_' . $this->formvars['konvertierung_id'] . '.gml';
-		$fileoutput = XPLANKONVERTER_SHAPE_PATH . $this->formvars['konvertierung_id'] . '/inspire_' . $this->formvars['konvertierung_id'] . '.gml';
+		$fileinput = $this->konvertierung->get_file_name('xplan_gml');
+		$fileoutput = $this->konvertierung->get_file_name('inspire_gml');
 
 		if (!file_exists($fileinput)) {
 			$success = false;
@@ -575,26 +550,6 @@ switch($this->go){
 		echo json_encode($response);
 	} break;
 
-  case 'xplankonverter_inspire_gml_ausliefern' : {
-		if ($this->formvars['konvertierung_id'] == '') {
-		  echo 'Diese Link kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
-		  return;
-		}
-		$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
-		if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) return;
-
-		$filename = XPLANKONVERTER_SHAPE_PATH . $this->formvars['konvertierung_id'] . '/inspire_' . $this->formvars['konvertierung_id'] . '.gml';
-		header('Content-Type: text/xml; subtype="gml/3.3"');
-    echo fread(fopen($filename, "r"), filesize($filename));
-	} break;
-
-  /*case 'index.php?go=xplankonverter_inspire_gml_ausliefern&konvertierung_id' : {
-    if ($this->formvars['konvertierung_id'] == '') {
-		  echo 'Diese Link kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
-		  return;
-		}
-  } break;*/
-
 	case 'xplankonverter_regeleditor' : {
 		$konvertierung_id = $_REQUEST['konvertierung_id'];
 		$bereich_gml_id = $_REQUEST['bereich_gml_id'];
@@ -621,11 +576,70 @@ switch($this->go){
 		include(PLUGINS . 'xplankonverter/view/regeleditor/ajax-getshapeattributes.php');
 	} break;
 
+	#-------------------------------------------------------------------------------------------------------------------------
+	# Download cases
+	#-------------------------------------------------------------------------------------------------------------------------
+	case 'xplankonverter_download_uploaded_shapes' : {
+		if ($this->xplankonverter_is_case_forbidden()) return;
+		if (!$this->konvertierung->files_exists('uploaded_shapes')) {
+			$this->add_message('warning', 'Es sind keine Dateien für den Export vorhanden.');
+			$this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
+			$this->output();
+			return;
+		}
+
+		$exportfile = $this->konvertierung->create_export_file('uploaded_shapes');
+		$this->konvertierung->send_export_file($exportfile, 'application/octet-stream');
+
+	} break;
+
+	case 'xplankonverter_download_edited_shapes' : {
+		if ($this->xplankonverter_is_case_forbidden()) return;
+
+		if (!$this->konvertierung->files_exists('edited_shapes')) {
+			$this->add_message('warning', 'Es sind keine Dateien für den Export vorhanden.');
+			$this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
+			$this->output();
+			return;
+		}
+
+		$exportfile = $this->konvertierung->create_export_file('edited_shapes');
+		$this->konvertierung->send_export_file($exportfile, 'application/octet-stream');
+	} break;
+
+	case 'xplankonverter_download_xplan_shapes' : {
+		if ($this->xplankonverter_is_case_forbidden()) return;
+		if (!$this->konvertierung->files_exists('xplan_shapes')) {
+			$this->add_message('warning', 'Es sind keine Dateien für den Export vorhanden.');
+			$this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
+			$this->output();
+			return;
+		}
+
+		$exportfile = $this->konvertierung->create_export_file('xplan_shapes');
+		$this->konvertierung->send_export_file($exportfile, 'application/octet-stream');
+
+	} break;
+
+	case 'xplankonverter_download_xplan_gml' : {
+		if ($this->xplankonverter_is_case_forbidden()) return;
+
+		$filename = XPLANKONVERTER_SHAPE_PATH . $this->formvars['konvertierung_id'] . '/xplan_' . $this->formvars['konvertierung_id'] . '.gml';
+		header('Content-Type: text/xml; subtype="gml/3.3"');
+		echo fread(fopen($filename, "r"), filesize($filename));
+	} break;
+
+	case 'xplankonverter_download_inspire_gml' : {
+		if ($this->xplankonverter_is_case_forbidden()) return;
+
+		$filename = XPLANKONVERTER_SHAPE_PATH . $this->formvars['konvertierung_id'] . '/inspire_' . $this->formvars['konvertierung_id'] . '.gml';
+		header('Content-Type: text/xml; subtype="gml/3.3"');
+		echo fread(fopen($filename, "r"), filesize($filename));
+	} break;
+
 	default : {
 		$this->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
 	}
-
-
 
 }
 
