@@ -458,7 +458,7 @@ switch($this->go){
 					$this->gml_builder = new Gml_builder($this->pgdatabase);
 					$plan = RP_Plan::find_by_id($this,'konvertierung_id', $this->konvertierung->get('id'));
 
-					if (!$this->gml_builder->build_gml($this->konvertierung, $plan)){
+					if (!$this->gml_builder->build_gml($this->konvertierung, $plan)) {
   					// Status setzen
   					$this->konvertierung->set('status', Konvertierung::$STATUS['GML_ERSTELLUNG_ERR']);
   					$this->konvertierung->update();
@@ -482,7 +482,7 @@ switch($this->go){
 					$this->layer_generator_erzeugen($layer_group_id); # Funktion aus kvwmap.php
 
 					$response['success'] = true;
-					$response['msg'] = 'GML-Datei erfolgreich erstellt.';
+					$response['msg'] = 'XPlan-GML-Datei erfolgreich erstellt.';
 				} else {
 					$response['success'] = false;
 					$response['msg'] = 'Die ausgewählte Konvertierung muss zuerst ausgeführt werden.';
@@ -609,6 +609,9 @@ switch($this->go){
 
 	case 'xplankonverter_download_xplan_shapes' : {
 		if ($this->xplankonverter_is_case_forbidden()) return;
+
+		$this->konvertierung->create_xplan_shapes();
+
 		if (!$this->konvertierung->files_exists('xplan_shapes')) {
 			$this->add_message('warning', 'Es sind keine Dateien für den Export vorhanden.');
 			$this->main = '../../plugins/xplankonverter/view/konvertierungen.php';

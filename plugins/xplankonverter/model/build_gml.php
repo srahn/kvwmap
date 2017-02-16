@@ -223,32 +223,18 @@ class Gml_builder {
 
 		// und nun alle RP_Objekte generieren
 		// dazu alle RP_Objektklassen finden die mit der Konvertierung verknüpft sind
-		$sql = "
-			SELECT DISTINCT
-				r.class_name
-			FROM
-				xplankonverter.regeln r LEFT JOIN
-				xplan_gml.rp_bereich b ON r.bereich_gml_id = b.gml_id left JOIN
-				xplan_gml.rp_plan bp ON b.gehoertzuplan = bp.gml_id::text LEFT JOIN
-				xplan_gml.rp_plan rp ON r.konvertierung_id = rp.konvertierung_id
-			WHERE
-				bp.konvertierung_id = " . $konvertierung->get('id') . " OR
-				rp.konvertierung_id = " . $konvertierung->get('id') . "
-		";
-	#	echo '<br>sql: ' . $sql;
-		$classNameSet = pg_query($this->database->dbConn, $sql);
-
+		$class_names = $konvertierung->get_class_names();
 		# zu jeder RP_Objektklassse die Objekte holen, die mit der Konvertierung verknüpft sind
-		while ($gml_className = pg_fetch_array($classNameSet)[0]) {
-			$rp_object = new RP_Object($konvertierung, $gml_className);
+		foreach ($class_names AS $class_name) {
+			$rp_object = new RP_Object($konvertierung, $class_name);
 			$rp_object_rows = $rp_object->get_object_rows();
 
 			// fetch information about attributes and their properties
-			$objekt_attribs = $this->typeInfo->getInfo($gml_className);
+			$objekt_attribs = $this->typeInfo->getInfo($class_name);
 
 			foreach ($rp_object_rows AS $rp_object_row) {
 				# elment anlegen und gml_id als attribut eintragen
-				$objekt_gml = "<{$xplan_ns_prefix}{$gml_className} gml:id=\"GML_{$rp_object_row['gml_id']}\">";
+				$objekt_gml = "<{$xplan_ns_prefix}{$class_name} gml:id=\"GML_{$rp_object_row['gml_id']}\">";
 
 				# Rueckverweise auf etwaige Bereiche hinzufügen
 				$aggregated_bereich_gml_ids = explode(',', substr($rp_object_row['bereiche_gml_ids'], 1, -1));
@@ -260,7 +246,7 @@ class Gml_builder {
 				# alle uebrigen Attribute ausgeben
 				$objekt_gml .= $this->generateGmlForAttributes($rp_object_row, $objekt_attribs, XPLAN_MAX_NESTING_DEPTH);
 				# close and write FeatureMember
-				$objekt_gml .= "</{$xplan_ns_prefix}{$gml_className}>";
+				$objekt_gml .= "</{$xplan_ns_prefix}{$class_name}>";
 
 				fwrite($this->tmpFile, "\n" . $this->formatXML($this->wrapWithFeatureMember($objekt_gml)));
 			}
