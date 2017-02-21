@@ -26,7 +26,7 @@
 				?><tr>
 					<td align="left"><?php
 						 if($attributes['form_element_type'][$i] == 'Auswahlfeld'){
-								?><select  
+								?><select class="schnellsprung-select-field" 
 								<?
 									if($attributes['req_by'][$i] != ''){
 										echo 'onchange="update_require_attribute(\''.$attributes['req_by'][$i].'\','.LAYER_ID_SCHNELLSPRUNG.', this.value);" ';
