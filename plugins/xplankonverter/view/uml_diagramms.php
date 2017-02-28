@@ -325,29 +325,6 @@
     </a>
     <p>Version 3.0</p>
     <div id="inspireuml" style="display:none;">
-<<<<<<< HEAD
-    <p><img src="http://xplan-raumordnung.de/images/2016_10_13-Modell/inspireuml.jpg" alt="INSPIRE Modell" style="width:1168px;height:826px;" usemap="#INSPIRE"></p>
-    </div>
-    
-    <center><h2>Modell-Downloads</h2></center><hr>
-    <h3>UML-Modell als PDF zum <a target="_blank" href="http://xplan-raumordnung.de/model/XPlan Raumordnungsplan Arbeitsmodell (Version 16-05-06).pdf">herunterladen</a> (Arbeitsversion 2016-05-06)</h3>
-    Diese Datei enthält alle Pakete des XP- und RP-Schemas. Die UML-Repräsentation in PDF-Form ist eine graphische Darstellung der relevanten Modellelemente und erlaubt die Suche von Begriffen innerhalb des Modells.
-    <h3>Liste aller Modelländerungen zum <a target="_blank" href="http://xplan-raumordnung.de/model/2016_10_13_Aenderungsliste_XPlan_Raumordnungsmodell.doc">herunterladen</a> (Arbeitsversion 2016-05-06)</h3>
-    Änderungen am RP-Schema von XPlanGML4.1 seit Projektbeginn sind hier textlich dokumentiert und werden mit jeder Modelländerung aktualisiert.
-    <h3>Konformitätsbedingungen für das Raumordnungsschema zum <a target="_blank" href="http://xplan-raumordnung.de/model/2016_01_11_Konformitaetsbedingungen.doc">herunterladen</a> (Arbeitsversion 2016-01-11)</h3>
-    Konformitätsbedingungen beschreiben Regeln und Relationen des Modells, welche nicht direkt in UML festgehalten werden können. Diese sind jedoch für eine vollständige und valide Konvertierung wichtig. Da XPlanGML4.1 keine Konformitätsbedingungen für das RP-Schema besitzt, wurden für das Projekt neue Konformitätsbedingungen für die Raumordnung zur Integration in die bestehenden Konformitätsbedingungen von XPlan aufgestellt.
-    <h3>Enterprise Architect Modell zum <a target="_blank" href="http://xplan-raumordnung.de/model/2016-05-06_Modell_EA.eap">herunterladen</a> (Arbeitsversion 2016-05-06)</h3>
-    Die Modellierung und Erweiterung des Modells erfolgt anhand der UML-Modellierungssoftware Enterprise Architect von SparxSystems. Durch die .eap Datei kann das derzeitige Modell in Enterprise Architect genutzt werden. Änderungen von Projektseite fanden dabei nur im Paket Raumordnungsplanung (früher: Kernmodell_Regionalplanung) statt.
-    <h3>XMI-Datei zum <a target="_blank" href="http://xplan-raumordnung.de/model/xplan.xmi.zip">herunterladen</a> (Arbeitsversion 2016-01-18)</h3>
-    XMI (XML Metadata Interchange) ist ein anbieterneutrales Format des Modells, welches zum Austausch zwischen Software-Entwicklungswerkzeugen benutzt werden kann. Die dazugehörige Datei erlaubt die Nutzung des Modells mit jeglicher Software.
-   <!--<h3>Featurekatalog</h3>
-    Diese Sektion enthält den Featurekatalog des Modells zum herunterladen.-->
-    <h3>XSD-Dateien zum <a target="_blank" href="http://xplan-raumordnung.de/model/2016_10_13_XSD_Modell.zip">herunterladen</a> (Arbeitsversion 2016-05-06)</h3>
-    XSD(XML Schema Definition)-Dateien definieren die Strukturen von XML-Dokumenten. Für das Projekt sind diese zur Definition der Struktur eines XPlanGML-Dokuments nötig. Anbei werden die XSD-Dateien aller relevanten Pakete des Modells als .zip bereitgestellt.
-    <h3>Modell Report zum <a target="_blank" href="http://xplan-raumordnung.de/model/2016_01_26_model_report.pdf">herunterladen</a> (Arbeitsversion 2016-01-26)</h3>
-    Der Modellreport aus Enterprise Architect zeigt eine textliche Gesamtübersicht über das gesamte Modell zu Dokumentationszwecken.
-  </div>
-=======
     <p><img src="http://xplan-raumordnung.de/images/inspireuml.png" alt="INSPIRE Modell" style="width:1168px;height:826px;" usemap="#INSPIRE"></p>
     </div>
     
@@ -375,5 +352,4 @@
       <h3>Bereitstellung einer klassenbasierten XPlan-Visualisierungsdatei als <a href="/files/xplanung.sld">SLD</a> (Version 2016-10-13)</h3>
       Die bereitgestellte XPlanung SLD kann zur Visualisierung einer XPlanGML-Datei auf Klassenbasis verwendet werden und die Grundlage zum Aufbau einer eigenen Visualisierungsdatei auf Basis eines spezifischen Plans bilden.
     </div>
->>>>>>> BBSR-19
 </div>
