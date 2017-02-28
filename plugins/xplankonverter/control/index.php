@@ -576,7 +576,23 @@ switch($this->go){
 	} break;
 
 	case 'xplankonverter_regeleditor_getshapeattributes' : {
-		include(PLUGINS . 'xplankonverter/view/regeleditor/ajax-getshapeattributes.php');
+		$sql = "
+			SELECT
+				column_name
+			FROM
+				information_schema.columns
+			WHERE
+				table_name = '" . $this->formvars['shapefile'] . "' AND
+				table_schema = 'xplan_shapes_" . $this->formvars['konvertierung_id'] . "'
+			ORDER BY
+				column_name
+		";
+
+		$result = pg_query($this->pgdatabase->dbConn, $sql);
+
+		$this->main = PLUGINS . 'xplankonverter/view/regeleditor/ajax-getshapeattributes.php';
+		$this->output();
+
 	} break;
 
 	#-------------------------------------------------------------------------------------------------------------------------
