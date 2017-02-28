@@ -153,6 +153,9 @@ switch($this->go){
 			if (isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) {
 				if (isset($_FILES['shape_files']) and $_FILES['shape_files']['name'][0] != '') {
 
+					$this->konvertierung->create_directories();
+					$upload_path = $this->konvertierung->get_file_path('uploaded_shapes/');
+
 					# unzip and copy files to upload folder
 					$uploaded_files = xplankonverter_unzip_and_check_and_copy($_FILES['shape_files'], $upload_path);
 					# get layerGroupId or create a group if not exists
@@ -195,7 +198,7 @@ switch($this->go){
 							$created_tables = $shapeFile->loadIntoDataTable();
 
 							# add gml_id column if not exists
-							if ($shapeFile->gmlIdColumnExists())
+							if (!$shapeFile->gmlIdColumnExists())
 								$shapeFile->addGmlIdColumn();
 
 							# Set datatype for shapefile

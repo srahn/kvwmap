@@ -148,12 +148,12 @@ class ShapeFile extends PgObject {
 	function gmlIdColumnExists() {
 		$sql = "
 			SELECT
-				gml_id
+				*
 			FROM
   			information_schema.columns
 			WHERE
-  			table_schema = '{$this->schema}' AND
-  			table_name = '{$this->tableName}' AND
+  			table_schema = '" . $this->dataSchemaName() . "' AND
+  			table_name = '" . $this->dataTableName() . "' AND
   			column_name = 'gml_id'
   		LIMIT 1
 		";
@@ -164,7 +164,7 @@ class ShapeFile extends PgObject {
 	
 	function addGmlIdColumn() {
 		$sql = "
-			ALTER TABLE {$this->schema}.{$this->tableName} ADD COLUMN gml_id character varying;
+			ALTER TABLE " . $this->qualifiedDataTableName() . " ADD COLUMN gml_id character varying;
 		";
 		$this->debug->show('<p>Add column gml_id sql: ' . $sql, ShapeFile::$write_debug);
 		$result = pg_query($this->database->dbConn, $sql);
