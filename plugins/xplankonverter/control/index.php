@@ -520,6 +520,7 @@ switch($this->go){
 		$xsl = PLUGINS . 'xplankonverter/model/xplan2inspire.xsl';
 		$fileinput = $this->konvertierung->get_file_name('xplan_gml');
 		$fileoutput = $this->konvertierung->get_file_name('inspire_gml');
+		echo 'test' . $fileinput;
 
 		if (!file_exists($fileinput)) {
 			$success = false;
@@ -821,7 +822,7 @@ switch($this->go){
 	case 'xplankonverter_download_xplan_gml' : {
 		if ($this->xplankonverter_is_case_forbidden()) return;
 
-		$filename = XPLANKONVERTER_SHAPE_PATH . $this->formvars['konvertierung_id'] . '/xplan_' . $this->formvars['konvertierung_id'] . '.gml';
+		$filename = XPLANKONVERTER_FILE_PATH . $this->formvars['konvertierung_id'] . '/xplan_gml/xplan_' . $this->formvars['konvertierung_id'] . '.gml';
 		header('Content-Type: text/xml; subtype="gml/3.3"');
 		echo fread(fopen($filename, "r"), filesize($filename));
 	} break;
@@ -829,7 +830,7 @@ switch($this->go){
 	case 'xplankonverter_download_inspire_gml' : {
 		if ($this->xplankonverter_is_case_forbidden()) return;
 
-		$filename = XPLANKONVERTER_SHAPE_PATH . $this->formvars['konvertierung_id'] . '/inspire_' . $this->formvars['konvertierung_id'] . '.gml';
+		$filename = XPLANKONVERTER_FILE_PATH . $this->formvars['konvertierung_id'] . '/inspire_gml/inspire_' . $this->formvars['konvertierung_id'] . '.gml';
 		header('Content-Type: text/xml; subtype="gml/3.3"');
 		echo fread(fopen($filename, "r"), filesize($filename));
 	} break;
