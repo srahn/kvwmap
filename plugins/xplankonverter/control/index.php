@@ -572,10 +572,26 @@ switch($this->go){
 	} break;
 
 	case 'xplankonverter_regeleditor_getxplanattributes' : {
-		include(PLUGINS . 'xplankonverter/view/regeleditor/ajax-getxplanattributes.php');
+		$sql = "
+		SELECT
+			column_name, udt_name, data_type, is_nullable
+		FROM
+			information_schema.columns
+		WHERE
+			table_name='" . $this->formvars['featuretype'] . "' AND
+			table_schema='xplan_gml'
+		ORDER BY
+			column_name
+		";
+
+		$result = pg_query($this->pgdatabase->dbConn, $sql);	
+
+		$this->main = PLUGINS . 'xplankonverter/view/regeleditor/getxplanattributes.php';
+		$this->output();
 	} break;
 
 	case 'xplankonverter_regeleditor_getshapeattributes' : {
+		// Sets für alle Option in Regeleditor
 		$sql = "
 			SELECT
 				column_name
@@ -590,9 +606,168 @@ switch($this->go){
 
 		$result = pg_query($this->pgdatabase->dbConn, $sql);
 
-		$this->main = PLUGINS . 'xplankonverter/view/regeleditor/ajax-getshapeattributes.php';
+		$this->main = PLUGINS . 'xplankonverter/view/regeleditor/getshapeattributes.php';
 		$this->output();
+	} break;
 
+	case 'xplankonverter_regeleditor_getshapeattributes2' : {
+		// Sets Wenn dann Option in Regeleditor
+		$sql = "
+			SELECT
+				column_name
+			FROM
+				information_schema.columns
+			WHERE
+				table_name = '" . $this->formvars['shapefile'] . "' AND
+				table_schema = 'xplan_shapes_" . $this->formvars['konvertierung_id'] . "'
+			ORDER BY
+				column_name
+		";
+
+		$result = pg_query($this->pgdatabase->dbConn, $sql);
+
+		$this->main = PLUGINS . 'xplankonverter/view/regeleditor/getshapeattributes2.php';
+		$this->output();
+	} break;
+
+	case 'xplankonverter_regeleditor_getshapeattributes3' : {
+		// Sets WHERE Filter for Shapes in Regeleditor
+		$sql = "
+			SELECT
+				column_name
+			FROM
+				information_schema.columns
+			WHERE
+				table_name = '" . $this->formvars['shapefile'] . "' AND
+				table_schema = 'xplan_shapes_" . $this->formvars['konvertierung_id'] . "'
+			ORDER BY
+				column_name
+		";
+
+		$result = pg_query($this->pgdatabase->dbConn, $sql);
+
+		$this->main = PLUGINS . 'xplankonverter/view/regeleditor/getshapeattributes3.php';
+		$this->output();
+	} break;
+
+	case 'xplankonverter_regeleditor_getshapeattributesdistinctvalues' : {
+		// Sets DISTINCT value für alle aus Shape
+		$sql = "
+			SELECT
+				DISTINCT " . $this->formvars['shapefile_attribut'] . "
+			FROM
+				xplan_shapes_" . $this->formvars['konvertierung_id'] . "." . $this->formvars['shapefile'] . "
+			ORDER BY
+				" . $this->formvars['shapefile_attribut'] . "
+		";
+
+		$result = pg_query($this->pgdatabase->dbConn, $sql);
+
+		$this->main = PLUGINS . 'xplankonverter/view/regeleditor/getshapeattributesdistinctvalues.php';
+		$this->output();
+	} break;
+
+	case 'xplankonverter_regeleditor_getshapeattributesdistinctvalues2' : {
+		// Sets DISTINCT value für WHERE Selector
+		$sql = "
+			SELECT
+				DISTINCT " . $this->formvars['shapefile_attribut'] . "
+			FROM
+				xplan_shapes_" . $this->formvars['konvertierung_id'] . "." . $this->formvars['shapefile'] . "
+			ORDER BY
+				" . $this->formvars['shapefile_attribut'] . "
+		";
+
+		$result = pg_query($this->pgdatabase->dbConn, $sql);
+
+		$this->main = PLUGINS . 'xplankonverter/view/regeleditor/getshapeattributesdistinctvalues2.php';
+		$this->output();
+	} break;
+
+	case 'xplankonverter_regeleditor_getxplanenumerationattributes' : {
+		//Enumerationsliste Auswahl von Shape
+		$sql = "
+			SELECT
+				udt_name
+			FROM
+				information_schema.columns
+			WHERE
+				table_name='" . $this->formvars['featuretype'] . "' AND
+				column_name = '" . $this->formvars['featureattribut'] . "' AND
+				table_schema='xplan_classes'
+			ORDER BY
+				column_name
+		";
+
+		$result = pg_query($this->pgdatabase->dbConn, $sql);
+
+		while($row = pg_fetch_row($result)) {
+			$enumerationsliste = $row[0];
+		}
+		# wenn es mit _startet ist es ein array, dann das _ entfernen
+		$arrayEnum = bool;
+		if(substr($enumerationsliste, 0, 1) === '_') {
+			$arrayEnum = true;
+		} else {
+			$arrayEnum = false;
+		}
+		$enumerationsliste = ltrim($enumerationsliste, '_');
+
+		$sql = "
+			SELECT
+				wert,
+				beschreibung
+			FROM
+				xplan_classes. " . $enumerationsliste . "
+		";
+
+		$result = pg_query($this->pgdatabase->dbConn, $sql);
+
+		$this->main = PLUGINS . 'xplankonverter/view/regeleditor/getxplanenumerationattributes.php';
+		$this->output();
+	} break;
+
+	case 'xplankonverter_regeleditor_getxplanenumerationattributes2' : {
+		//Enumerationsliste Wenn-Dann Auswahl von Shape
+		$sql = "
+			SELECT
+				udt_name
+			FROM
+				information_schema.columns
+			WHERE
+				table_name='" . $this->formvars['featuretype'] . "' AND
+				column_name = '" . $this->formvars['featureattribut'] . "' AND
+				table_schema='xplan_classes'
+			ORDER BY
+				column_name
+		";
+
+		$result = pg_query($this->pgdatabase->dbConn, $sql);
+
+		while($row = pg_fetch_row($result)) {
+			$enumerationsliste = $row[0];
+		}
+		# wenn es mit _startet ist es ein array, dann das _ entfernen
+		$arrayEnum = bool;
+		if(substr($enumerationsliste, 0, 1) === '_') {
+			$arrayEnum = true;
+		} else {
+			$arrayEnum = false;
+		}
+		$enumerationsliste = ltrim($enumerationsliste, '_');
+
+		$sql = "
+			SELECT
+				wert,
+			beschreibung
+			FROM
+				xplan_classes. " . $enumerationsliste . "
+			";
+			
+		$result = pg_query($this->pgdatabase->dbConn, $sql);
+
+		$this->main = PLUGINS . 'xplankonverter/view/regeleditor/getxplanenumerationattributes2.php';
+		$this->output();
 	} break;
 
 	#-------------------------------------------------------------------------------------------------------------------------
