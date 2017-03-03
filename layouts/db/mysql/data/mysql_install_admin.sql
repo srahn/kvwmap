@@ -87,8 +87,6 @@ INSERT INTO `u_funktionen` (`id`, `bezeichnung`, `link`) VALUES
 ####################################################################################
 # 2006-05-12
 
-SET @stelle_id=1;
-
 INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (1,@stelle_id);
 INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (2,@stelle_id);
 INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (3,@stelle_id);
@@ -111,18 +109,12 @@ INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (19,@stelle_i
 INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (20,@stelle_id);
 INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (21,@stelle_id);
 
-
 ###########################
 # Einträge der Menüpunkte #
 ###########################
 #### gegebenenfalls vorherige Einträge löschen
 # TRUNCATE u_menues;
 # TRUNCATE u_menue2stelle;
-
-# Setzen der Stelle, für die die Menüs eingetragen werden sollen
-SET @stelle_id=1;
-# Setzen der User_ID für die die Menüs zugeordnet werden sollen
-SET @user_id=1;
 
 # Die nachfolgenden Statements müssen in 1.5 angepasst werden
 # Alle Gruppen von Menüs sind in einer separaten Tabelle u_groups enthalten und in der Tabelle u_menues erscheinen in der Spalte
