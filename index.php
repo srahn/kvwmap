@@ -145,7 +145,11 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 		case 'getLayerOptions' : {
 			$GUI->getLayerOptions();
 	  } break;
-		
+
+		case 'getGroupOptions' : {
+			$GUI->getGroupOptions();
+	  } break;
+
 		case 'saveLayerOptions' : {
 			$GUI->saveLayerOptions();
 			$GUI->neuLaden();

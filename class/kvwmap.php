@@ -123,7 +123,7 @@ class GUI {
 		return $trigger_result;
 	}
 	
-	function getLayerOptions(){
+	function getLayerOptions() {
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		if($this->formvars['layer_id'] > 0)$layer = $this->user->rolle->getLayer($this->formvars['layer_id']);
 		else $layer = $this->user->rolle->getRollenLayer(-$this->formvars['layer_id']);
@@ -185,6 +185,48 @@ class GUI {
 		document.getElementById(\'options_content_'.$this->formvars['layer_id'].'\').style.top = posy - (13+legend_top);
 		';
 	}
+
+	function getGroupOptions() {
+		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+		echo '
+		<div class="groupOptions" id="group_options_content_' . $this->formvars['group_id'].'">
+			<div style="position: absolute;top: 0px;right: 0px"><a href="javascript:closeGroupOptions(' . $this->formvars['group_id'] . ');" title="Schlie&szlig;en"><img style="border:none" src="' . GRAPHICSPATH . 'exit2.png"></img></a></div>
+			<table width="100%" cellspacing="0" cellpadding="0" style="padding-bottom: 8px">
+				<tr>
+					<td class="groupOptionsHeader">
+						<span class="fett">Gruppenoptionen</span>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<ul>
+							<li><a href="javascript:selectgroupthema(document.GUI.layers_of_group_' . $this->formvars['group_id'] . ', 0)" style="margin-left: -15px">alle Layer ein/ausschalten</a></li>
+						</ul>
+					</td>
+				</tr>
+				<tr>
+					<td align="center">
+						<table cellspacing="0" cellpadding="0">
+							<tr>
+								<td>
+								</td>
+								<td>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</div>
+		~
+		legend_top = document.getElementById(\'legenddiv\').getBoundingClientRect().top;
+		legend_bottom = document.getElementById(\'legenddiv\').getBoundingClientRect().bottom;
+		posy = document.getElementById(\'group_options_' . $this->formvars['group_id'] . '\').getBoundingClientRect().top;		
+		if(posy > legend_bottom - 150) posy = legend_bottom - 150;
+		document.getElementById(\'group_options_content_' . $this->formvars['group_id'] . '\').style.top = posy - (13 + legend_top);
+		$(\'#group_options_' . $this->formvars['group_id'] . '\').show()
+		';
+	}
 	
 	function saveLayerOptions(){	
 		$this->user->rolle->setTransparency($this->formvars);
@@ -244,7 +286,7 @@ class GUI {
 		}
 	}
 
-	function get_group_legend(){
+	function get_group_legend() {
     # Änderungen in den Gruppen werden gesetzt
     $this->formvars = $this->user->rolle->setGroupStatus($this->formvars);
     # Ein- oder Ausblenden der Klassen
@@ -259,24 +301,24 @@ class GUI {
 	  $groupstatus = $this->groupset[$group_id]['status'];
     $legend .=  '
 	  <div id="groupdiv_'.$group_id.'" style="width:100%">
-      <table cellspacing="0" cellpadding="0" border="0" style="width:100%"><tr><td>
-      <input id="group_'.$group_id.'" name="group_'.$group_id.'" type="hidden" value="'.$groupstatus.'">
-      <a href="javascript:getlegend(\''.$group_id.'\', \'\', document.GUI.nurFremdeLayer.value)">
-        <img border="0" id="groupimg_'.$group_id.'" src="graphics/';
-		if($groupstatus == 1){
-			$legend .=  'minus.gif">&nbsp;';
-		}
-		else{
-			$legend .=  'plus.gif">&nbsp;';
-		}
-    $legend .=  '</a>';
-		if($this->group_has_active_layers[$group_id] == ''){
-			$legend .=  '<span class="legend_group">'.html_umlaute($groupname).'</span><br>';
-		}
-		else{
-			$legend .=  '<span class="legend_group_active_layers">'.html_umlaute($groupname).'</span><br>';
-		}
-		$legend .= '</td></tr><tr><td><div id="layergroupdiv_'.$group_id.'" style="width:100%"><table cellspacing="0" cellpadding="0">';
+      <table cellspacing="0" cellpadding="0" border="0" style="width:100%">
+				<tr>
+					<td>
+						<input id="group_' . $group_id . '" name="group_' . $group_id . '" type="hidden" value="' . $groupstatus . '">
+						<a href="javascript:getlegend(\'' . $group_id . '\', \'\', document.GUI.nurFremdeLayer.value)">
+							<img border="0" id="groupimg_' . $group_id . '" src="graphics/' . ($groupstatus == 1 ? 'minus' : 'plus') . '.gif">&nbsp;
+						</a>
+						<span class="legend_group' . ($this->group_has_active_layers[$group_id] != '' ? '_active_layers' : '') . '">
+							<a href="javascript:getGroupOptions(' . $group_id . ')" onmouseover="$(\'#test_' . $group_id . '\').show()" onmouseout="$(\'#test_' . $group_id . '\').hide()">' . html_umlaute($groupname) . '
+								<i id="test_' . $group_id . '" class="fa fa-bars" style="display: none;"></i>
+							</a>
+							<div style="position:static;" id="group_options_' . $group_id . '"></div>
+						</span>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<div id="layergroupdiv_'.$group_id.'" style="width:100%"><table cellspacing="0" cellpadding="0">';
 		$layercount = count($this->groups_with_layers[$group_id]);
     if($groupstatus == 1){		# Gruppe aufgeklappt
 			for($u = 0; $u < count($this->groupset[$group_id]['untergruppen']); $u++){			# die Untergruppen rekursiv durchlaufen
@@ -290,7 +332,7 @@ class GUI {
 					$legend .=  '<tr>
 												<td align="center">
 													<input name="layers_of_group_'.$group_id.'" type="hidden" value="'.implode(',', $this->layers_of_group[$group_id]).'">';
-					if(!$this->user->rolle->singlequery){
+					if(!$this->user->rolle->singlequery) {
 						$legend .=  '<a href="javascript:selectgroupquery(document.GUI.layers_of_group_'.$group_id.', '.$this->user->rolle->instant_reload.')"><img border="0" src="graphics/pfeil.gif" title="'.$this->strActivateAllQueries.'"></a>';
 					}
 					$legend .=		'</td>

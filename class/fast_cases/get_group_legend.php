@@ -1196,24 +1196,24 @@ class GUI {
 	  $groupstatus = $this->groupset[$group_id]['status'];
     $legend .=  '
 	  <div id="groupdiv_'.$group_id.'" style="width:100%">
-      <table cellspacing="0" cellpadding="0" border="0" style="width:100%"><tr><td>
-      <input id="group_'.$group_id.'" name="group_'.$group_id.'" type="hidden" value="'.$groupstatus.'">
-      <a href="javascript:getlegend(\''.$group_id.'\', \'\', document.GUI.nurFremdeLayer.value)">
-        <img border="0" id="groupimg_'.$group_id.'" src="graphics/';
-		if($groupstatus == 1){
-			$legend .=  'minus.gif">&nbsp;';
-		}
-		else{
-			$legend .=  'plus.gif">&nbsp;';
-		}
-    $legend .=  '</a>';
-		if($this->group_has_active_layers[$group_id] == ''){
-			$legend .=  '<span class="legend_group">'.html_umlaute($groupname).'</span><br>';
-		}
-		else{
-			$legend .=  '<span class="legend_group_active_layers">'.html_umlaute($groupname).'</span><br>';
-		}
-		$legend .= '</td></tr><tr><td><div id="layergroupdiv_'.$group_id.'" style="width:100%"><table cellspacing="0" cellpadding="0">';
+      <table cellspacing="0" cellpadding="0" border="0" style="width:100%">
+				<tr>
+					<td>
+						<input id="group_' . $group_id . '" name="group_' . $group_id . '" type="hidden" value="' . $groupstatus . '">
+						<a href="javascript:getlegend(\'' . $group_id . '\', \'\', document.GUI.nurFremdeLayer.value)">
+							<img border="0" id="groupimg_' . $group_id . '" src="graphics/' . ($groupstatus == 1 ? 'minus' : 'plus') . '.gif">&nbsp;
+						</a>
+						<span class="legend_group' . ($this->group_has_active_layers[$group_id] != '' ? '_active_layers' : '') . '">
+							<a href="javascript:getGroupOptions(' . $group_id . ')" onmouseover="$(\'#test_' . $group_id . '\').show()" onmouseout="$(\'#test_' . $group_id . '\').hide()">' . html_umlaute($groupname) . '
+								<i id="test_' . $group_id . '" class="fa fa-bars" style="display: none;"></i>
+							</a>
+							<div style="position:static;" id="group_options_' . $group_id . '"></div>
+						</span>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<div id="layergroupdiv_'.$group_id.'" style="width:100%"><table cellspacing="0" cellpadding="0">';
 		$layercount = count($this->groups_with_layers[$group_id]);
     if($groupstatus == 1){		# Gruppe aufgeklappt
 			for($u = 0; $u < count($this->groupset[$group_id]['untergruppen']); $u++){			# die Untergruppen rekursiv durchlaufen
@@ -1227,7 +1227,7 @@ class GUI {
 					$legend .=  '<tr>
 												<td align="center">
 													<input name="layers_of_group_'.$group_id.'" type="hidden" value="'.implode(',', $this->layers_of_group[$group_id]).'">';
-					if(!$this->user->rolle->singlequery){
+					if(!$this->user->rolle->singlequery) {
 						$legend .=  '<a href="javascript:selectgroupquery(document.GUI.layers_of_group_'.$group_id.', '.$this->user->rolle->instant_reload.')"><img border="0" src="graphics/pfeil.gif" title="'.$this->strActivateAllQueries.'"></a>';
 					}
 					$legend .=		'</td>
