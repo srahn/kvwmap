@@ -122,7 +122,32 @@ class GUI {
 		}
 		return $trigger_result;
 	}
-	
+
+	function show_snippet() {
+		if (empty($this->formvars['snippet'])) {
+			$error_msg = 'Geben Sie im Parameter snippets einen Namen für eine Datei an!';
+		}
+		else {
+			$snippet_path = SNIPPETS . 'custom/';
+			$snippet_file = $this->formvars['snippet'] . '.php';
+			if (!file_exists($snippet_path . $snippet_file)) {
+				$error_msg = 'Die Datei ' . $snippet_path . $snippet_file . ' existiert nicht. Geben Sie einen anderen Namen im Parameter snippet an!';
+			}
+		}
+
+		if (empty($error_msg)) {
+			$this->main = 'custom/' . $snippet_file;
+		}
+		else {
+			$this->add_message('error', $error_msg);
+			$this->loadMap('DataBase');
+			$this->user->rolle->newtime = $this->user->rolle->last_time_id;
+			$this->saveMap('');
+			$this->drawMap();
+		}
+		$this->output();
+	}
+
 	function getLayerOptions() {
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		if($this->formvars['layer_id'] > 0)$layer = $this->user->rolle->getLayer($this->formvars['layer_id']);
@@ -2141,7 +2166,7 @@ class GUI {
         if (basename($this->user->rolle->gui)=='') {
           $this->user->rolle->gui='gui.php';
         }
-        include (LAYOUTPATH.$this->user->rolle->gui);
+        include (LAYOUTPATH . $this->user->rolle->gui);
 				if($this->alert != ''){
 					echo '<script type="text/javascript">alert("'.$this->alert.'");</script>';			# manchmal machen alert-Ausgaben über die allgemeinde Funktioen showAlert Probleme, deswegen am besten erst hier am Ende ausgeben
 				}
