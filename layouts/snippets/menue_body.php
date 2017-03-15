@@ -33,7 +33,7 @@
 		<td valign="top" bgcolor="<? echo BG_MENUETOP; ?>">
 			<a href="index.php?go=logout">
 				<div>
-				<div class="menu">
+				<div class="menu logout-menue">
 					<img src="<? echo GRAPHICSPATH; ?>leer.gif" width="17" height="17" border="0"><span class="red">&nbsp;Logout</span>
 				</div>
 				</div>
