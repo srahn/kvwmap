@@ -56,6 +56,8 @@ define('FOOTER', 'footer.php');															# Version 1.8.0
 define('HEADER_FOOTER_HEIGHT', 132);																# Version 2.0
 # Breite von Menü und Legende zusammen
 $menue_legend_widths = array('gui.php' => 485, 'gui_button.php' => 486);		# Version 2.0
+define('LEGEND_HEIGHT_OFFSET', 29);													# Version 2.7
+
 # login.php
 define('LOGIN', 'login.php');																# Version 1.8.0
 # Seite zur Fehlerbehandlung, die durch fehlerhafte Layer verursacht werden; unterhalb von /snippets

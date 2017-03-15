@@ -93,7 +93,7 @@ function switchlegend(){
 
   $res_x    = $this->map->width;
   $res_y    = $this->map->height;
-  $legendheight = $this->map->height-29;
+  $legendheight = $this->map->height - LEGEND_HEIGHT_OFFSET;
   $res_xm   = $this->map->width/2;
   $res_ym   = $this->map->height/2;
   $dx       = $this->map->extent->maxx-$this->map->extent->minx;
@@ -145,6 +145,7 @@ if($this->formvars['gps_follow'] == ''){
 						<input type="hidden" name="activated_vertex" value="0">
 						<input type="hidden" name="measured_distance" value="<? echo $this->formvars['measured_distance']; ?>">						
 						<input type="hidden" name="layer_options_open" value="">
+						<input type="hidden" name="group_options_open" value="">
     <?php
         include(LAYOUTPATH.'snippets/SVG_map.php');
     ?>

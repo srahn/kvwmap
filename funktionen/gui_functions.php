@@ -98,7 +98,7 @@ function message(messages) {
 	msgDiv.html('');
 
 	$.each(messages, function (index, msg) {
-		msg.type = (msg.type ? msg.type : 'warning');
+		msg.type = (['notice, info, error'].indexOf(msg.type) > 0 ? msg.type : 'warning');
 		msgDiv.append('<div class="message-box-' + msg.type + '">' + (types[msg.type].icon ? '<div class="message-box-type"><i class="fa ' + types[msg.type].icon + '" style="color: ' + types[msg.type].color + '; cursor: default;"></i></div>' : '') + '<div class="message-box-msg">' + msg.msg + '</div><div style="clear: both"></div></div>');
 		if (types[msg.type].confirm) {
 			confirmMsgDiv = true;
@@ -492,13 +492,24 @@ function zoomToMaxLayerExtent(zoom_layer_id){
 
 function getLayerOptions(layer_id){
 	if(document.GUI.layer_options_open.value != '')closeLayerOptions(document.GUI.layer_options_open.value);
-	ahah('index.php', 'go=getLayerOptions&layer_id='+layer_id, new Array(document.getElementById('options_'+layer_id), ''), new Array('sethtml', 'execute_function'));
+	ahah('index.php', 'go=getLayerOptions&layer_id=' + layer_id, new Array(document.getElementById('options_'+layer_id), ''), new Array('sethtml', 'execute_function'));
 	document.GUI.layer_options_open.value = layer_id;
+}
+
+function getGroupOptions(group_id) {
+	if (document.GUI.group_options_open.value != '') closeGroupOptions(document.GUI.group_options_open.value);
+	ahah('index.php', 'go=getGroupOptions&group_id=' + group_id, new Array(document.getElementById('group_options_' + group_id), ''), new Array('sethtml', 'execute_function'));
+	document.GUI.group_options_open.value = group_id;
 }
 
 function closeLayerOptions(layer_id){
 	document.GUI.layer_options_open.value = '';
 	document.getElementById('options_'+layer_id).innerHTML=' ';
+}
+
+function closeGroupOptions(group_id) {
+	document.GUI.group_options_open.value = '';
+	document.getElementById('group_options_' + group_id).innerHTML = ' ';
 }
 
 function saveLayerOptions(layer_id){	
@@ -508,6 +519,11 @@ function saveLayerOptions(layer_id){
 
 function resetLayerOptions(layer_id){	
 	document.GUI.go.value = 'resetLayerOptions';
+	document.GUI.submit();
+}
+
+function home() {
+	document.GUI.go.value = '';
 	document.GUI.submit();
 }
 

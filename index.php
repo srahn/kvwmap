@@ -137,15 +137,24 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
       $GUI->mime_type='map_ajax';
       $GUI->output();
 		}break;
-			
+
+	  case 'show_snippet' : {
+			$GUI->checkCaseAllowed($go);
+			$GUI->show_snippet();
+	  } break;
+
 		case 'openCustomSubform' : {
 			$GUI->openCustomSubform();
 	  } break;
-		
+
 		case 'getLayerOptions' : {
 			$GUI->getLayerOptions();
 	  } break;
-		
+
+		case 'getGroupOptions' : {
+			$GUI->getGroupOptions();
+	  } break;
+
 		case 'saveLayerOptions' : {
 			$GUI->saveLayerOptions();
 			$GUI->neuLaden();

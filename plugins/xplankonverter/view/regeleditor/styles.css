@@ -1,30 +1,35 @@
 h1 {
 	margin-bottom: 0px;
-  color: #000000;
-  text-shadow: 1px 1px 1px #ccc;
-  font-size: 2em;
+	color: #000000;
+	text-shadow: 1px 1px 1px #ccc;
+	font-size: 2em;
 }
+
 h2 {
 	margin-top: 5px;
 	margin-bottom: 2px;
-  color: #000000;
-  text-shadow: 1px 1px 1px #ccc;
-  font-size: 1.5em;
+	color: #000000;
+	text-shadow: 1px 1px 1px #ccc;
+		font-size: 1.5em;
 }
+
 h3 {
-  color: #000000;
-  text-shadow: 1px 1px 1px #ccc;
-  font-size: 1.5em;
+	color: #000000;
+	text-shadow: 1px 1px 1px #ccc;
+	font-size: 1.5em;
 }
+
 .halbe-breite {
 	float: left;
 	width: 48%;
 	margin-bottom: 5px;
 }
+
 .halbe-breite-rechts {
 	float: right;
 	width: 48%;
 }
+
 .breite80p {
 	float: left;
 	width: 90%;
@@ -36,9 +41,11 @@ h3 {
 	width: 50px;
 	margin-bottom: 5px;
 }
+
 .ganze-breite {
 	float: block;
 }
+
 .box {
 	border: 1px solid #ddd;
 	border-radius: 5px;
@@ -48,14 +55,14 @@ h3 {
 }
 
 .center60p{
-  width: 60%;
-  border: 1px solid #ddd;
+	width: 60%;
+	border: 1px solid #ddd;
 	border-radius: 5px;
 	background-color: #eee;
 	padding: 10px;
 	margin: 2px;
-  margin-left: auto;
-  margin-right: auto;
+	margin-left: auto;
+	margin-right: auto;
 }
 
 .boxsql {
@@ -64,94 +71,93 @@ h3 {
 	background-color: #fff;
 	padding: 2px;
 	margin: 2px;
-  word-wrap: break-word;
+	word-wrap: break-word;
 }
 
 .float-right{
-  float: right;
+	float: right;
 }
 
 #Warnung_1, #Warnung_2, #Warnung_3, #Warnung_4 {
-  color: #CF4B2D;
-  text-shadow: 1px 1px 1px #ccc;
+	color: #CF4B2D;
+	text-shadow: 1px 1px 1px #ccc;
 }
 
 #warnung_area {
-  width: 60%;
-  margin: 2px;
-  margin-left: auto;
-  margin-right: auto;
+	width: 60%;
+	margin: 2px;
+	margin-left: auto;
+	margin-right: auto;
 }
 
 #target, #source {
-  color: #000000;
-  text-shadow: 1px 1px 1px #ccc;
-  font-size: 1em;
+	color: #000000;
+	text-shadow: 1px 1px 1px #ccc;
+	font-size: 1em;
 }
 
 .fa-plus:before, .fa-undo:before, .fa-info:before, .fa-filter:before, .fa-trash-o:before, .fa-question-circle:before, .fa-level-up:before, .fa-list:before {
-  color: #216582;
+	color: #216582;
 }
 
 button {
-  padding: 0;
-  border: none;
-  background: none;
-  color: #216582;
+	padding: 0;
+	border: none;
+	background: none;
+	color: #216582;
 }
 
 button:hover {
-  color: #CF832D;
+	color: #CF832D;
 }
 
 .fa-plus:hover, .fa-undo:hover, .fa-info:hover, .fa-filter:hover, .fa-trash-o:hover, .fa-question-circle:hover, .fa-level-up:hover, .fa-list:hover {
-  color: #CF832D;
+	color: #CF832D;
 }
 
 td {
-  background: #FFFFFF;
+	background: #FFFFFF;
 }
 
 /* The Modal (background) */
 .modal {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 1; /* Sit on top */
-    padding-top: 100px; /* Location of the box */
-    left: 0;
-    top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    overflow: auto; /* Enable scroll if needed */
-    background-color: rgb(0,0,0); /* Fallback color */
-    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+	display: none; /* Hidden by default */
+	position: fixed; /* Stay in place */
+	z-index: 1; /* Sit on top */
+	padding-top: 100px; /* Location of the box */
+	left: 0;
+	top: 0;
+	width: 100%; /* Full width */
+	height: 100%; /* Full height */
+	overflow: auto; /* Enable scroll if needed */
+	background-color: rgb(0,0,0); /* Fallback color */
+	background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
 }
 
 /* Modal Content */
 .modal-content {
-    background-color: #fefefe;
-    margin: auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
+	background-color: #fefefe;
+	margin: auto;
+	padding: 20px;
+	border: 1px solid #888;
+	width: 80%;
 }
 
 /* The Close Button */
 .close {
-    color: #aaaaaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
+	color: #aaaaaa;
+	float: right;
+	font-size: 28px;
+		font-weight: bold;
 }
 
-.close:hover,
-.close:focus {
-    color: #000;
-    text-decoration: none;
-    cursor: pointer;
+.close:hover, .close:focus {
+		color: #000;
+		text-decoration: none;
+		cursor: pointer;
 }
 
 body {
-  background-color: white;
-  font-family: Verdana;
+	background-color: white;
+	font-family: Verdana;
 }

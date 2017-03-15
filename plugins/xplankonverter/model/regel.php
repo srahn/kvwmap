@@ -30,8 +30,9 @@ public static	function find_by_id($gui, $by, $id) {
 	* Validiert die in der Regel definierten SQL-Statements
 	*/
 	function validate($konvertierung) {
+		$success = true;
 		$konvertierung_id = $konvertierung->get('id');
-		$this->debug->show('Regel convert mit konvertierung_id: ' . $konvertierung_id, Regel::$write_debug);
+		$this->debug->show('Regel validate mit konvertierung_id: ' . $konvertierung_id, Regel::$write_debug);
 		$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'sql_vorhanden');
 		$validierung->konvertierung_id = $konvertierung_id;
 
@@ -45,9 +46,10 @@ public static	function find_by_id($gui, $by, $id) {
 			# Prüft ob das sql ausführbar ist und legt die Objekte an wenn ja.
 			$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'sql_ausfuehrbar');
 			$validierung->konvertierung_id = $konvertierung_id;
-			$alle_ausfuehrbar = $validierung->sql_ausfuehrbar($this, $konvertierung_id);
+			$sql_ausfuehrbar = $validierung->sql_ausfuehrbar($this, $konvertierung_id);
 
-			if ($alle_ausfuehrbar and !empty($this->get('bereich_gml_id'))) {
+			$this->debug->show('<br>bereich_gml_id: ' . $this->get('bereich_gml_id'), Regel::$write_debug);
+			if ($sql_ausfuehrbar and !empty($this->get('bereich_gml_id'))) {
 
 					# Prüft ob die erzeugten Geometrien valide sind.
 					$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'geometrie_isvalid');
@@ -71,6 +73,7 @@ public static	function find_by_id($gui, $by, $id) {
 		else {
 			$success = false;
 		}
+		$this->debug->show('<br>Die Validierungen sind' . ($success ? '' : ' nicht') . ' erfolgreich verlaufen.', Validierung::$write_debug);
 		return $success;
 	}
 
@@ -87,13 +90,14 @@ public static	function find_by_id($gui, $by, $id) {
 	* eine neue gml_id erzeugt wurde
 	*/
 	function convert($konvertierung) {
-		$sql = 	$regel->get_convert_sql($konvertierung->get('id'));
+		$this->debug->show('convert', Regel::$write_debug);
+		$sql = 	$this->get_convert_sql($konvertierung->get('id'));
 
 		# Konvertiere Objekte, die eine gml_id haben
 		# Die gid muss nicht mit übertragen werden
 		pg_query(
 			$this->database->dbConn,
-			$regel->get_convert_sql_with_gml_id($sql)
+			$this->get_convert_sql_with_gml_id($sql)
 		);
 
 		# Konvertiere Objekte, die keine gml_id haben
@@ -101,10 +105,17 @@ public static	function find_by_id($gui, $by, $id) {
 		# erzeugten gml_id zurückkommen.
 		$result = pg_query(
 			$this->database->dbConn,
-			$regel->get_convert_sql_with_gid($sql)
+			$this->get_convert_sql_with_gid($sql)
 		);
 
 		return (pg_num_rows($result) == 0 ? array() : pg_fetch_all($result));
+	}
+
+	function get_shape_table_name() {
+		$this->debug->show('<br>Extrahiere Tabellenname der Shape-Datei aus sql: ' . $this->get($sql), Validierung::$write_debug);
+		$shape_table_name = get_first_word_after($this->get('sql'), 'FROM');
+		$this->debug->show('<br>Shape table name: ' . $shape_table_name, Validierung::$write_debug);
+		return $shape_table_name;
 	}
 
 	/*
@@ -121,7 +132,7 @@ public static	function find_by_id($gui, $by, $id) {
 		);
 		$sql = str_ireplace(
 			'select',
-			"select gml_id,",
+			"select gml_id::uuid,",
 			$sql
 		);
 		$sql = str_ireplace(
@@ -130,7 +141,7 @@ public static	function find_by_id($gui, $by, $id) {
 			$sql
 		);
 
-		$this->debug->show('sql nach gml_id hinzufügen für Objekte mit gml_id:<br>' . $sql, Regel::$write_debug);
+		$this->debug->show('<b>sql nach gml_id hinzufügen für Objekte mit gml_id</b>:<br>' . $sql, Regel::$write_debug);
 		return $sql;
 	}
 
@@ -239,10 +250,11 @@ public static	function find_by_id($gui, $by, $id) {
 	}
 
 	function rewrite_gml_ids($rows) {
+		$this->debug->show('<br><b>gml_ids in Shape-Tabellen zurückschreiben.</b>' . $sql, Regel::$write_debug);
 		$selects =  array();
 		foreach($rows AS $row) {
 			$selects[] = "
-				SELECT ({$rows['gml_id']}, {$rows['gid']})
+				SELECT '{$row['gml_id']}' AS gml_id, {$row['gid']} AS gid
 			";
 		}
 		$converter_table = implode(' UNION ', $selects);
@@ -250,7 +262,7 @@ public static	function find_by_id($gui, $by, $id) {
 		$converter_result = "SELECT bla UNION blu UNION bli";
 		$sql = "
 			UPDATE
-				custom_shapes.xplan_shape_{$this->konvertierung->get('id')} AS shape
+				xplan_shapes_" . $this->konvertierung->get('id') . '.' . $this->get_shape_table_name() . " AS shape
 			SET
 				gml_id = xplan.gml_id
 			FROM
@@ -258,6 +270,7 @@ public static	function find_by_id($gui, $by, $id) {
 			WHERE
 			  shape.gid = xplan.gid
 		";
+		$this->debug->show('<br><b>Schreibe gml_ids mit folgendem sql zurück:</b>' . $sql, Regel::$write_debug);
 		pg_query(
 			$this->database->dbConn,
 			$sql

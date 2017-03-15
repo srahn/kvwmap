@@ -131,22 +131,41 @@ class Konvertierung extends PgObject {
 	}
 
 	function get_regeln() {
-		#echo '<p>get_regeln';
+		$this->debug->show('get_regeln', Konvertierung::$write_debug);
+
 		$regeln = array();
 		$regel = new Regel($this->gui);
-		$regeln = $regel->find_where("
+		$regeln_ohne_bereich = $regel->find_where("
 			konvertierung_id = {$this->get('id')} AND
 			bereich_gml_id IS NULL
 		");
-		
+		$this->debug->show(count($regeln_ohne_bereich) . ' Regeln ohne Bereich gefunden.', Konvertierung::$write_debug);
+
 		$plan = $this->get_plan();
 
 		foreach($this->get_bereiche($plan->get('gml_id')) AS $bereich) {
+			$regeln_mit_bereich = $regel->find_where("bereich_gml_id = '{$bereich->get('gml_id')}'");
+			$this->debug->show(count($regeln_mit_bereich) . ' Regeln mit Bereich gefunden.', Konvertierung::$write_debug);
 			$regeln = array_merge(
-				$regeln,
-				$regel->find_where("bereich_gml_id = '{$bereich->get('gml_id')}'")
+				$regeln_ohne_bereich,
+				$regeln_mit_bereich
 			);
 		}
+		$this->debug->show('Insgesamt ' . count($regeln) . ' Regeln gefunden.', Konvertierung::$write_debug);
+
+		foreach($regeln AS $regel) {
+			$regel->konvertierung = $regel->get_konvertierung();
+		}
+
+		$this->debug->show(implode(
+			'<br>',
+			array_map(
+				function($regel) {
+					return '<br>id: ' . $regel->get('id') . '<br>sql: ' . $regel->get('sql');
+				},
+				$regeln
+			)
+		), Konvertierung::$write_debug);
 		return $regeln;
 	}
 

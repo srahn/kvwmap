@@ -87,8 +87,6 @@ INSERT INTO `u_funktionen` (`id`, `bezeichnung`, `link`) VALUES
 ####################################################################################
 # 2006-05-12
 
-SET @stelle_id=1;
-
 INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (1,@stelle_id);
 INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (2,@stelle_id);
 INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (3,@stelle_id);
@@ -111,18 +109,12 @@ INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (19,@stelle_i
 INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (20,@stelle_id);
 INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (21,@stelle_id);
 
-
 ###########################
 # Einträge der Menüpunkte #
 ###########################
 #### gegebenenfalls vorherige Einträge löschen
 # TRUNCATE u_menues;
 # TRUNCATE u_menue2stelle;
-
-# Setzen der Stelle, für die die Menüs eingetragen werden sollen
-SET @stelle_id=1;
-# Setzen der User_ID für die die Menüs zugeordnet werden sollen
-SET @user_id=1;
 
 # Die nachfolgenden Statements müssen in 1.5 angepasst werden
 # Alle Gruppen von Menüs sind in einer separaten Tabelle u_groups enthalten und in der Tabelle u_menues erscheinen in der Spalte
@@ -226,6 +218,24 @@ INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@
 INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Filterverwaltung', 'index.php?go=Filterverwaltung', @last_level1menue_id, 2, NULL);
 SET @last_menue_id=LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,64);
+INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
+
+#### Funktionenverwaltung
+INSERT INTO u_menues (name, links, obermenue, menueebene, target, `order`) VALUES ('Funktionenverwaltung', 'index.php?go=changemenue', 0, 1, NULL, 10);
+SET @last_level1menue_id=LAST_INSERT_ID();
+INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_level1menue_id,66);
+INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_level1menue_id,0);
+
+# Funktion anlegen
+INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Funktion anlegen', 'index.php?go=Funktionen_Formular', @last_level1menue_id, 2, NULL);
+SET @last_menue_id=LAST_INSERT_ID();
+INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,67);
+INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
+
+# Funktionen anzeigen
+INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Funktionen anzeigen', 'index.php?go=Funktionen_Anzeigen', @last_level1menue_id, 2, NULL);
+SET @last_menue_id=LAST_INSERT_ID();
+INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,68);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
 
 #### Nutzerverwaltung
@@ -350,7 +360,7 @@ INSERT INTO `u_menue2stelle` ( `stelle_id` , `menue_id` , `menue_order` )
 VALUES (@stelle_id, @last_menue_id, '91');
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
 
-# eine Layer-Gruppe anlegen
+# Layer-Gruppen anlegen
 INSERT INTO `u_groups` (`id`, `Gruppenname`, `order`) VALUES (1, 'Hintergrundkarten', 1000);
 INSERT INTO `u_groups` (`id`, `Gruppenname`, `order`) VALUES (2, 'Verwaltungsgrenzen', 900);
 INSERT INTO `u_groups` (`id`, `Gruppenname`, `order`) VALUES (3, 'Kataster', 800);
