@@ -754,7 +754,8 @@ FROM
 	      if($klammerstartpos !== false){										# eine Funktion wurde auf das Attribut angewendet
 	        $klammerendpos = strpos($fieldstring, ')');
 	        if($klammerendpos){
-	        	$name_pair['real_name'] = substr($explosion[0], $klammerstartpos+1, $klammerendpos-$klammerstartpos-1);
+						$klammer_inhalt = substr($explosion[0], $klammerstartpos+1, $klammerendpos-$klammerstartpos-1);
+						if(strpos($klammer_inhalt, "'") === false)$name_pair['real_name'] = $klammer_inhalt;
 	        	$name_pair['name'] = $explosion[count($explosion)-1];
 	        	$name_pair['no_real_attribute'] = true;
 	        }
