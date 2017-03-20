@@ -1472,11 +1472,11 @@ class flurstueck {
 	}
 	
 	function outputEigentuemerShort($eigentuemer, $adressAenderungen = NULL, $indent = NULL){
-		$Eigentuemer .= '<tr><td colspan="2"><table cellpadding="0" cellspacing="0"><tr><td valign="top">'.$eigentuemer->Nr.'</td><td valign="top">'.$eigentuemer->Name[0];
+		$Eigentuemer .= '<tr><td colspan="2"><table cellpadding="0" cellspacing="0"><tr><td valign="top" style="padding-right: 4">'.$eigentuemer->Nr.'</td><td valign="top" style="padding-right: 4">'.$eigentuemer->Name[0];
 		if($eigentuemer->zusatz_eigentuemer != ''){
 			$Eigentuemer .= '</td></tr><tr><td colspan="2">'.$eigentuemer->zusatz_eigentuemer; if($eigentuemer->Anteil != '')$Eigentuemer .= ' zu '.$eigentuemer->Anteil; $Eigentuemer .= '</td></tr><tr><td>';
 		}
-		elseif($eigentuemer->Anteil)$Eigentuemer .= 'zu '.$eigentuemer->Anteil.'<br>';
+		elseif($eigentuemer->Anteil)$Eigentuemer .= '&nbsp;&nbsp;&nbsp;zu '.$eigentuemer->Anteil.'<br>';
 		$Eigentuemer .= '</td></tr></table></td></tr>';
 		return $Eigentuemer;
 	}
