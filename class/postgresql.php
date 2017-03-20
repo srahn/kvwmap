@@ -1735,10 +1735,7 @@ FROM
 	}
   
   function getEigentuemerliste($FlurstKennz,$Bezirk,$Blatt,$BVNR, $without_temporal_filter = false) {
-		# order1 dient zum Trennen von "normalen" Eigentümern ohne Rechtsverhältnissen und Eigentümern mit Rechtsverhältnissen sowie deren Rechtsverhältnis-Überschriften. Es werden erst die normalen Eigentümer angezeigt.
-		# order2 dient dazu, die verschiedenen Blöcke von "Eigentümern in Rechtsverhältnissen" zusammengehörig anzuzeigen.
-		# order3 dient dazu, innerhalb eines Rechtsverhältnis-Blocks nach der Namensnummer zu sortieren, wobei die Überschrift als erstes ausgegeben wird.
-    $sql = "SELECT distinct case when bestehtausrechtsverhaeltnissenzu is not null or n.beschriebderrechtsgemeinschaft is not null or n.artderrechtsgemeinschaft is not null then true else false end as order1, CASE WHEN n.beschriebderrechtsgemeinschaft is not null or n.artderrechtsgemeinschaft is not null THEN n.gml_id ELSE bestehtausrechtsverhaeltnissenzu END as order2, coalesce(n.laufendenummernachdin1421, '0') as order3, CASE WHEN n.beschriebderrechtsgemeinschaft is null and n.artderrechtsgemeinschaft is null THEN n.laufendenummernachdin1421 ELSE NULL END AS namensnr, n.gml_id as n_gml_id, p.gml_id, p.nachnameoderfirma, p.vorname, p.akademischergrad, p.namensbestandteil, p.geburtsname, p.geburtsdatum::date, anschrift.gml_id as anschrift_gml_id, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, 'OT '||anschrift.ortsteil as ortsteil, anschrift.bestimmungsland, w.bezeichner as Art, n.zaehler||'/'||n.nenner as anteil, coalesce(NULLIF(n.beschriebderrechtsgemeinschaft, ''),adrg.artderrechtsgemeinschaft) as zusatz_eigentuemer ";
+    $sql = "SELECT distinct coalesce(n.laufendenummernachdin1421, '0') as order1, coalesce(bestehtausrechtsverhaeltnissenzu, '0') as order2, bestehtausrechtsverhaeltnissenzu, CASE WHEN n.beschriebderrechtsgemeinschaft is null and n.artderrechtsgemeinschaft is null THEN n.laufendenummernachdin1421 ELSE NULL END AS namensnr, n.gml_id as n_gml_id, p.gml_id, p.nachnameoderfirma, p.vorname, p.akademischergrad, p.namensbestandteil, p.geburtsname, p.geburtsdatum::date, anschrift.gml_id as anschrift_gml_id, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, 'OT '||anschrift.ortsteil as ortsteil, anschrift.bestimmungsland, w.bezeichner as Art, n.zaehler||'/'||n.nenner as anteil, coalesce(NULLIF(n.beschriebderrechtsgemeinschaft, ''),adrg.artderrechtsgemeinschaft) as zusatz_eigentuemer ";
 		$sql.= "FROM alkis.ax_buchungsstelle s ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
@@ -1759,10 +1756,12 @@ FROM
       $sql.=" AND s.laufendenummer='".$BVNR."'";
     }
 		if(!$without_temporal_filter)$sql.= $this->build_temporal_filter(array('s', 'g', 'b', 'n', 'p'));
-    $sql.= " ORDER BY order1, order2, order3;";
+    $sql.= " ORDER BY order1, order2;";
     #echo $sql.'<br><br>';
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0] OR pg_num_rows($ret[1])==0) { return; }
+		$wurzel = new eigentuemer($Grundbuch,NULL, $this);
+		$Eigentuemerliste['wurzel'] = $wurzel;
     while ($rs=pg_fetch_assoc($ret[1])) {
       $Grundbuch = new grundbuch("","",$this->debug);
       
@@ -1775,8 +1774,7 @@ FROM
 				}
 			}
 			$rs['namensnr'] = implode('.', $newparts);
-      
-      $Eigentuemer = new eigentuemer($Grundbuch,$rs['namensnr']);
+      $Eigentuemer = new eigentuemer($Grundbuch,$rs['namensnr'], $this);
 
 			$Eigentuemer->gml_id = $rs['gml_id'];
       $Eigentuemer->lfd_nr=$rs['lfd_nr_name'];
@@ -1798,12 +1796,32 @@ FROM
 			$Eigentuemer->anschrift_gml_id=$rs['anschrift_gml_id'];
 			$Eigentuemer->zusatz_eigentuemer=$rs['zusatz_eigentuemer'];
 			$Eigentuemer->n_gml_id=$rs['n_gml_id'];
-      $Eigentuemerliste[]=$Eigentuemer;
+			$Eigentuemer->bestehtausrechtsverhaeltnissenzu=$rs['bestehtausrechtsverhaeltnissenzu'];
+      $Eigentuemerliste[$rs['n_gml_id']]=$Eigentuemer;
+			if($rs['namensnr'] != '')$this->writeRechtsverhaeltnisChildren($rs['n_gml_id'], $Eigentuemerliste);
     }
     $retListe[0]=0;
     $retListe[1]=$Eigentuemerliste;
     return $retListe;
   }
+	
+	function writeRechtsverhaeltnisChildren($gml_id, &$Eigentuemerliste){
+		# Diese Funktion hängt an jedes Rechtsverhältnis ein Array "children" mit den zugehörigen Kindknoten (Eigentümer bzw. Unter-Rechtsverhältnisse) an
+		# Ausgehend vom Wurzelknoten (Erstes Element aus der Eigentuemerliste) kann man damit dann den Rechtsverhältnisbaum aufbauen
+		$eigentuemer = $Eigentuemerliste[$gml_id];
+		$rechtsverhaeltnis = $eigentuemer->bestehtausrechtsverhaeltnissenzu;
+		if($rechtsverhaeltnis != ''){
+			if($rechtsverhaeltnis != '-'){
+				$Eigentuemerliste[$rechtsverhaeltnis]->children[] = $gml_id;
+				$eigentuemer->bestehtausrechtsverhaeltnissenzu = '-';
+				$this->writeRechtsverhaeltnisChildren($rechtsverhaeltnis, $Eigentuemerliste);
+			}
+		}
+		else{
+			$Eigentuemerliste['wurzel']->children[] = $gml_id;
+			$eigentuemer->bestehtausrechtsverhaeltnissenzu = '-';
+		}
+	}
   
   function getNamen($formvars, $ganze_gemkg_ids, $eingeschr_gemkg_ids){
 		if(!$formvars['exakt']){

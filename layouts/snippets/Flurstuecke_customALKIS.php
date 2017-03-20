@@ -732,70 +732,16 @@ hide_versions = function(flst){
 											<? }
 											}
 											$Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
-													$anzEigentuemer=count($Eigentuemerliste);
-													for ($e=0;$e<$anzEigentuemer;$e++) { ?>
-											<tr>
-											<td valign="top"><? echo $Eigentuemerliste[$e]->Nr ?>&nbsp;&nbsp;&nbsp;</td>
-											<td valign="top">
-											<?
-												$anzNamenszeilen=count($Eigentuemerliste[$e]->Name);
-												$Eigentuemerliste[$e]->Name_bearb = $Eigentuemerliste[$e]->Name;
-												if($this->Stelle->isFunctionAllowed('Adressaenderungen')) {
-															$eigentuemer = new eigentuemer(NULL, NULL, $this->pgdatabase);
-															$adressaenderungen =  $eigentuemer->getAdressaenderungen($Eigentuemerliste[$e]->gml_id);
-															$aendatum=substr($adressaenderungen['datum'],0,10);
-												}
-												if ($adressaenderungen['user_id'] != '') {
-													$user = new user(NULL, $adressaenderungen['user_id'], $this->database);
-												}
+											reset($Eigentuemerliste);
 											?>
-												<table border="0" cellspacing="0" cellpadding="2">
-													<tr>
-													<td>
-													<?
-														for ($n=0;$n<$anzNamenszeilen;$n++) {
-															if (!($Eigentuemerliste[$e]->Name_bearb[$n]=="" OR $Eigentuemerliste[$e]->Name_bearb[$n]==' ')) {
-																	echo $Eigentuemerliste[$e]->Name_bearb[$n].'<br>';
-															}
-														}
-													if ($adressaenderungen['user_id'] != '') {
-															echo '<span class="fett"><u>Aktualisierte Anschrift ('.$aendatum.' - '.$user->Name.'):</u></span><br>';
-															echo '&nbsp;&nbsp;<span class="fett">'.$adressaenderungen['strasse'].' '.$adressaenderungen['hausnummer'].'</span><br>';
-															echo '&nbsp;&nbsp;<span class="fett">'.$adressaenderungen['postleitzahlpostzustellung'].' '.$adressaenderungen['ort_post'].' '.$adressaenderungen['ortsteil'].'</span><br>';
-													}
-													?>
-													</td>
-													<td valign="bottom">
-													<?
-													if($this->Stelle->isFunctionAllowed('Adressaenderungen') AND $Eigentuemerliste[$e]->Nr != ''){
-														if ($adressaenderungen['user_id'] == '') {											
-															echo '<img src="'.GRAPHICSPATH.'pfeil_links.gif" width="12" height="12" border="0">'; ?>&nbsp;<a class="buttonlink" href="javascript:ahah('index.php', 'go=neuer_Layer_Datensatz&reload=true&selected_layer_id=<? echo LAYER_ID_ADRESSAENDERUNGEN_PERSON; ?>&attributenames[0]=gml_id&attributenames[1]=hat&values[0]=<? echo urlencode($Eigentuemerliste[$e]->gml_id); ?>&values[1]=<? echo urlencode($Eigentuemerliste[$e]->anschrift_gml_id); ?>&embedded=true&fromobject=subform_ax_person_temp<? echo $b.'_'.$e; ?>&targetlayer_id=0&targetattribute=leer', new Array(document.getElementById('subform_ax_person_temp<? echo $b.'_'.$e; ?>')), new Array('sethtml'));"><span> Anschrift aktualisieren</span></a>
-													<?}
-														else {
-															echo '<img src="'.GRAPHICSPATH.'pfeil_links.gif" width="12" height="12" border="0">'; ?>&nbsp;<a class="buttonlink" href="javascript:ahah('index.php', 'go=Layer-Suche_Suchen&reload=true&selected_layer_id=<? echo LAYER_ID_ADRESSAENDERUNGEN_PERSON; ?>&value_gml_id=<? echo urlencode($Eigentuemerliste[$e]->gml_id); ?>&operator_gml_id==&attributenames[0]=user_id&values[0]=<? echo $this->user->id ?>&embedded=true&fromobject=subform_ax_person_temp<? echo $b.'_'.$e; ?>&targetlayer_id=0&targetattribute=leer', new Array(document.getElementById('subform_ax_person_temp<? echo $b.'_'.$e; ?>')), '');">Anschrift &auml;ndern</a>
-													<?}
-													}?>
-														</td>
-													<tr>
-														<td colspan="2"><div id="subform_ax_person_temp<? echo $b.'_'.$e; ?>" style="display:inline"></div></td>
-													</tr>
-													</tr>
-												</table>
+											<tr>
+												<td colspan="3">
+													<table>				<?
+											echo $flst->outputEigentuemer(key($Eigentuemerliste), $Eigentuemerliste, 'Long', $this->Stelle->isFunctionAllowed('Adressaenderungen'));
+											?>	</table>
 												</td>
 											</tr>
-											<? if($Eigentuemerliste[$e]->zusatz_eigentuemer != ''){ ?>
-												<tr>
-													<td colspan="2"><? echo $Eigentuemerliste[$e]->zusatz_eigentuemer; if($Eigentuemerliste[$e]->Anteil != '')echo ' zu '.$Eigentuemerliste[$e]->Anteil;?></td>
-												</tr>
-												<? }
-													 elseif($Eigentuemerliste[$e]->Anteil != ''){ ?>
-												<tr>
-													<td></td>
-													<td>zu <? echo $Eigentuemerliste[$e]->Anteil; ?></td>
-												</tr>
-												<? } ?>
-											<? }
-											 } ?>
+								<?	} ?>
 									</table>
 								</td>
 								</tr>
