@@ -21,6 +21,7 @@ function flurstanzeige(flurstkennz){
 </script>
 
 <?php
+
 $this->Stelle->getFunktionen();
 for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 	$this->buchungen = $this->gbblaetter[$gb];
@@ -33,17 +34,8 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 	  $ret=$flst->readALB_Data($this->buchungen[0]['flurstkennz']);
     $Eigentuemerliste=$flst->getEigentuemerliste($this->buchungen[0]['bezirk'],$this->buchungen[0]['blatt'],$this->buchungen[0]['bvnr']);
     $Eigentuemer = '<tr><td colspan="2" valign="top" style="height: 16px">Eigentümer:</td></tr>';
-    for ($i=0;$i<count($Eigentuemerliste);$i++) {
-    	$Eigentuemer .= '<tr><td valign="top">'.$Eigentuemerliste[$i]->Nr.'</td><td valign="top">';
-    	for ($k=0;$k<count($Eigentuemerliste[$i]);$k++) {
-      	$Eigentuemer .= $Eigentuemerliste[$i]->Name[$k].'<br>';
-    	}			
-			if($Eigentuemerliste[$i]->zusatz_eigentuemer != ''){
-				$Eigentuemer .= '</td></tr><tr><td colspan="2">'.$Eigentuemerliste[$i]->zusatz_eigentuemer; if($Eigentuemerliste[$i]->Anteil != '')$Eigentuemer .= ' zu '.$Eigentuemerliste[$i]->Anteil; $Eigentuemer .= '</td></tr><tr><td>';
-			}
-			elseif($Eigentuemerliste[$i]->Anteil)$Eigentuemer .= 'zu '.$Eigentuemerliste[$i]->Anteil.'<br>';
-    	$Eigentuemer .= '</td></tr>';
-    }
+		reset($Eigentuemerliste);
+    $Eigentuemer .= $flst->outputEigentuemer(key($Eigentuemerliste), $Eigentuemerliste, 'Short');
 		$Eigentuemer .= '<tr><td style="height: 100%"></td></tr>';
 	?>
 	<table cellspacing="0" cellpadding="2" id="gbb_grundbuchblatt">
