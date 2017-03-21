@@ -1321,7 +1321,7 @@ FROM
 					$sql.=" OR (f.land*10000 + f.gemarkungsnummer = ".$eingeschr_gemkg_id." AND flurnummer IN (".implode(',', $fluren)."))";
 				}
 			}
-			$sql .= ")";
+			$sql .= ") ORDER BY flurstkennz";
 		}
     $this->debug->write("<p>postgresql.php getFlurstuecksKennzByGemeindeIDs() Abfragen erlaubten Flurstückskennzeichen nach Gemeindeids:<br>".$sql,4);
 		#echo $sql;
