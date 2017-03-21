@@ -178,12 +178,10 @@ if($this->formvars['gps_follow'] == ''){
 			          				<span class="fett"><?php echo $this->strCoordinates; ?></span>&nbsp;
 			          				<input type="text" style="width: 190px" class="transparent_input" name="runningcoords" value=""><span title="<? echo $this->epsg_codes[$this->user->rolle->epsg_code]['srtext']; ?>">EPSG&#8209;Code:&nbsp;<?php echo $this->user->rolle->epsg_code; ?></span>
 											</td>
-						          <td width="25%" align="right">
+						          <td width="25%" align="right" valign="top">
 						            <img id="scalebar" style="padding-right:<? if($this->user->rolle->hideLegend)echo '35';else echo '5'; ?>px" alt="Maßstabsleiste" src="<? echo $this->img['scalebar']; ?>">
-						          </td>
-						          <td>
 												<a href="#" onclick="showMapParameter(<? echo $this->user->rolle->epsg_code; ?>, <? echo $this->map->width; ?>, <? echo $this->map->height; ?>)">
-													<i class="fa fa-info-circle" style="margin-right: 5px; color: #444; font-size: 110%"></i>
+													<i class="fa fa-info-circle" style="margin-right: 5px; color: #666; font-size: 110%"></i>
 												</a>
 						          </td>
 						        </tr>
