@@ -127,7 +127,6 @@
 		</head>
 		<body style="font-family: Arial, Verdana, Helvetica, sans-serif" onload="document.login.username.focus();">
 		  <form name="login" action="index.php" method="post">
-				<input type="hidden" name="go" value="login">
 				<? 
 				for($i = 0; $i < count($_REQUEST); $i++){
 					echo '<input type="hidden" name="'.key($_REQUEST).'" value="'.$_REQUEST[key($_REQUEST)].'">';
