@@ -123,6 +123,14 @@ function tausenderTrenner($number){
 	}
 }
 
+function removeTausenderTrenner($number){
+	if($number != ''){
+		$number = str_replace('.', '', $number);		# Punkt entfernen
+		$number = str_replace(',', '.', $number);		# Komma in Punkt umwandeln
+		return $number;
+	}
+}
+
 function transformCoordsSVG($path){
 	$path = str_replace('L ', '', $path);		# neuere Postgis-Versionen haben ein L mit drin
   $svgcoords = explode(' ',$path);
@@ -185,84 +193,6 @@ function allocateImageColors($image, $colors) {
 		$imageColors[$colorName] = ImageColorAllocate($image, $rgbValues[0], $rgbValues[1], $rgbValues[2]);
 	}
 	return $imageColors;
-}
-
-function rgb2hsv($R,$G,$B){
-	$var_R = $R / 255;                     //RGB from 0 to 255
-	$var_G = $G / 255;
-	$var_B = $B / 255;
-	$var_Min = min(array($var_R,$var_G,$var_B));    //Min. value of RGB
-	$var_Max = max(array($var_R,$var_G,$var_B));    //Max. value of RGB
-	$del_Max = $var_Max - $var_Min;			              //Delta RGB value
-	$V = $var_Max;
-	if($del_Max == 0){                     //This is a gray, no chroma...
-		$H = 0;                                //HSV results from 0 to 1
-		$S = 0;
-	}
-	else{																	//Chromatic data...
-		$S = $del_Max / $var_Max;
-		$del_R = ((($var_Max-$var_R)/6)+($del_Max/2))/$del_Max;
-		$del_G = ((($var_Max-$var_G)/6)+($del_Max/2))/$del_Max;
-		$del_B = ((($var_Max-$var_B)/6)+($del_Max/2))/$del_Max;
-		if($var_R == $var_Max){
-			$H = $del_B - $del_G;
-		}
-	  else{
-			if($var_G == $var_Max){
-				$H = (1/3)+$del_R - $del_B;
-			}
-	   	else{
-				if($var_B == $var_Max){
-					$H = (2/3) + $del_G - $del_R;
-				}
-			}
-		}
-		if($H < 0){
-			$H += 1;
-		}
-		if($H > 1){
-			$H -= 1;
-		}
-	}
-	return array($H,$S,$V);
-}
-
-
-function hsv2rgb($Hdeg,$S,$V){
-  $H = $Hdeg;
-  if ($S==0) {       // HSV values = From 0 to 1
-    $R = $V*255;     // RGB results = From 0 to 255
-    $G = $V*255;
-    $B = $V*255;}
-  else {
-    $var_h = $H*6;
-    $var_i = floor( $var_h );     //Or ... var_i = floor( var_h )
-    $var_1 = $V*(1-$S);
-    $var_2 = $V*(1-$S*($var_h-$var_i));
-    $var_3 = $V*(1-$S*(1-($var_h-$var_i)));
-    if($var_i==0){
-    	$var_r=$V ;    	$var_g=$var_3;    	$var_b=$var_1;
-    }
-    elseif($var_i==1){
-    	$var_r=$var_2; $var_g=$V;     $var_b=$var_1;
-    }
-    elseif($var_i==2){
-    	$var_r=$var_1; $var_g=$V;     $var_b=$var_3;
-    }
-    elseif($var_i==3){
-    	$var_r=$var_1; $var_g=$var_2; $var_b=$V;
-    }
-    elseif($var_i==4){
-    	$var_r=$var_3; $var_g=$var_1; $var_b=$V;
-    }
-    else{
-    	$var_r=$V;     $var_g=$var_1; $var_b=$var_2;
-    }
-    $R = round($var_r*255);   //RGB results = From 0 to 255
-    $G = round($var_g*255);
-    $B = round($var_b*255);
-  }
-  return array($R,$G,$B);
 }
 
 function rgb2hsl($r, $g, $b){
@@ -813,6 +743,8 @@ function umlaute_umwandeln($name){
   $name = str_replace(' ', '', $name);
   $name = str_replace('-', '_', $name);
   $name = str_replace('?', '_', $name);
+	$name = str_replace('+', '_', $name);
+	$name = str_replace(',', '_', $name);
   return $name;
 }
 
@@ -1438,7 +1370,7 @@ function getTimestamp() {
 
 function formatBytes($size, $precision = 2) {
   $base = log($size) / log(1024);
-  $suffixes = array('', 'kB', 'MB', 'GB', 'TB');   
+  $suffixes = array('', 'kB', 'MB', 'GB', 'TB');
   return round(pow(1024, $base - floor($base)), $precision) . $suffixes[floor($base)];
 }
 
@@ -1473,24 +1405,51 @@ function get_upload_error_message($code) {
   return $message;
 }
 
-function formvars_strip($formvars, $strip_list) {
-	$strip_array = explode(', ', $strip_list);
+/*
+* This function removes or keeps elements defined in $strip_list from $fromvars array
+* If elements from strip_list shall be removed (default), all other will be keeped in the formvars array.
+* If elements shall be keeped, all other will be removed in the formars array.
+* strip_type 'remove' delete formvars defined in strip_list.
+* strip_type ('keep' | any other than 'remove') keep formvars defined in strip_list.
+*
+* @param $formvars array
+* @param $strip_list comma separated string or array - formvar names to keep or to remove
+* @param $strip_type string - Tells the function to keep or remove the formvars
+*/
+function formvars_strip($formvars, $strip_list, $strip_type = 'remove') {
+	#echo '<br>formvars vorher: ' . print_r($formvars, true);
+	#echo '<br>strip_list: ' . print_r($strip_list, true);
+	#echo '<br>strip_type: ' . $strip_type;
+
+	$strip_array = (is_array($strip_list) ? $strip_list : explode(', ', $strip_list));
 	$stripped_formvars = array();
+
 	foreach($formvars AS $key => $value) {
-		if (!in_array($key, $strip_array)) {
-#			if (array_key_exists($key, $stripped_formvars)) {
-#				// 1. occurance of key in stripped_formvars: first_value, 2. occurance: [first_val, second_val], more occurances [first_val, second_val, third_val, ...]
-#				is_array($stripped_formvars[$key]) ? array_push($stripped_formvars[$key], $value) : $stripped_formvars[$key] = array($stripped_formvars[$key], $value);
-#			} else {
-				$pos = strpos($value, '[');
-				if ($pos === false) {
-					$stripped_formvars[$key] = stripslashes($value);	
-				} else {
-					$stripped_formvars[$key] = arrStrToArr(stripslashes($value), ',');
-				}
-#			}
+
+		if ($strip_type == 'remove') {
+			# strip key if in strip_list
+			$strip = in_array($key, $strip_array);
 		}
+		else {
+			# do not strip key if in strip_list
+			$strip = !in_array($key, $strip_array);
+		}
+
+		if (!$strip) {
+			#echo "<br>Keep {$key} in formvars.";
+			$pos = strpos($value, '[');
+			if ($pos === false) {
+				$stripped_formvars[$key] = stripslashes($value);	
+			} else {
+				$stripped_formvars[$key] = arrStrToArr(stripslashes($value), ',');
+			}
+		}
+		else {
+			#echo "<br>Strip {$key} from formvars.";
+		}
+
 	}
+	#echo '<br>formvars nachher: ' . print_r($stripped_formvars, true);
 	return $stripped_formvars;
 }
 
@@ -1631,5 +1590,13 @@ function output_select($form_field_name, $data, $selected_value = null, $onchang
 	}
 	$html .= "</select>\n";
 	return $html;
+}
+
+function get_first_word_after($str, $word) {
+	$s = 'select * from table where nix';
+	$word_pos = stripos($str, $word);
+	$str_from_word_pos = substr($str, $word_pos);
+	$parts = explode(' ', $str_from_word_pos);
+	return $parts[1];
 }
 ?>

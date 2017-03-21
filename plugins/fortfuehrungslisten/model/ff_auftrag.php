@@ -8,6 +8,7 @@ class Fortfuehrungsauftrag extends PgObject {
 	static $schema = 'fortfuehrungslisten';
 	static $tableName = 'ff_auftraege';
 	static $write_debug = false;
+	public $messages = array();
 
 	function Fortfuehrungsauftrag($gui) {
 		$gui->debug->show('Create new Object Fortfuehrungsauftrag', Fortfuehrungsauftrag::$write_debug);
@@ -22,7 +23,7 @@ public static	function find_by_id($gui, $by, $id) {
 
 public function auftragsdatei_loeschen() {
 		$success = false;
-		if (empty($this->get('auftragsdatei'))) {
+		if ($this->get('auftragsdatei') == '') {
 			$msg = 'Keine Auftragsdatei zum Löschen vorhanden!';
 		}
 		else {
@@ -31,11 +32,17 @@ public function auftragsdatei_loeschen() {
 			if (file_exists($file_name)) {
 				$success = unlink($file_name); // success = true if unlink successfully
 				if (!$success) {
-					$msg = 'Auftragsdatei konnte nicht gelöscht werden. Melden Sie dies bei Ihrem GIS-Administrator. Möglicherweise sind die Zugriffsrechte falsch gesetzt.';
+					$messages[] = array(
+						'msg' => 'Auftragsdatei konnte nicht gelöscht werden. Melden Sie dies bei Ihrem GIS-Administrator. Möglicherweise sind die Zugriffsrechte falsch gesetzt.',
+						'type' => 'error'
+					);
 				}
 			}
 			else {
-				$msg = 'Auftragsdatei existierte nicht. Es wurde nur der Eintrag des Dateinamens gelöscht. Kommt dies öffter vor, informieren Sie Ihren GIS-Administrator. Registrierte Auftragsdateien sollten auch immer auf dem Server vorhanden sein. Möglicherweise wurden diese aber auf dem Server manuell gelöscht oder verschoben.';
+				$messages[] = array(
+					'msg' => 'Auftragsdatei existierte nicht. Es wurde nur der Eintrag des Dateinamens gelöscht. Kommt dies öffter vor, informieren Sie Ihren GIS-Administrator. Registrierte Auftragsdateien sollten auch immer auf dem Server vorhanden sein. Möglicherweise wurden diese aber auf dem Server manuell gelöscht oder verschoben.',
+					'type' => 'warning'
+				);
 			}
 
 			# Name der Auftragsdatei im Datensatz des FF_Auftrag löschen
@@ -43,10 +50,9 @@ public function auftragsdatei_loeschen() {
 			$this->update();
 		}
 		$result = array(
-			'success' => $success,
-			'msg' => $msg,
-			'msg_type' => 'error'
+			'success' => $success
 		);
+		$this->gui->debug(print_r($result, true), true);
 		return $result;
 	}
 

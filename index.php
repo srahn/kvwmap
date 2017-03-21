@@ -137,15 +137,24 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
       $GUI->mime_type='map_ajax';
       $GUI->output();
 		}break;
-			
+
+	  case 'show_snippet' : {
+			$GUI->checkCaseAllowed($go);
+			$GUI->show_snippet();
+	  } break;
+
 		case 'openCustomSubform' : {
 			$GUI->openCustomSubform();
 	  } break;
-		
+
 		case 'getLayerOptions' : {
 			$GUI->getLayerOptions();
 	  } break;
-		
+
+		case 'getGroupOptions' : {
+			$GUI->getGroupOptions();
+	  } break;
+
 		case 'saveLayerOptions' : {
 			$GUI->saveLayerOptions();
 			$GUI->neuLaden();
@@ -963,32 +972,26 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  } break;
 		
 	  case 'GPX_Import' : {
-			$GUI->checkCaseAllowed('GPX_Import');
 			$GUI->gpx_import();
 	  } break;
 	  
 	  case 'GPX_Import_Laden' : {
-			$GUI->checkCaseAllowed('GPX_Import');
 			$GUI->gpx_import_importieren();
 	  } break;
 		
 		case 'OVL_Import' : {
-			$GUI->checkCaseAllowed('OVL_Import');
 			$GUI->ovl_import();
 	  } break;
 	  
 	  case 'OVL_Import_Laden' : {
-			$GUI->checkCaseAllowed('OVL_Import');
 			$GUI->ovl_import_importieren();
 	  } break;
 		
 		case 'DXF_Import' : {
-			$GUI->checkCaseAllowed('DXF_Import');
 			$GUI->dxf_import();
 	  } break;
 	  
 	  case 'DXF_Import_Laden' : {
-			$GUI->checkCaseAllowed('DXF_Import');
 			$GUI->dxf_import_importieren();
 	  } break;
 		
@@ -1374,6 +1377,35 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->BenutzerdatenAendern();
 	  } break;
 
+		case 'cronjobs_anzeigen' : {
+			$GUI->checkCaseAllowed('cronjobs_anzeigen');
+			$GUI->cronjobs_anzeigen();
+		} break;
+
+		case 'cronjob_editieren' : {
+			$GUI->checkCaseAllowed('cronjobs_anzeigen');
+			$GUI->cronjob_editieren();
+		} break;
+
+		case 'cronjob_speichern_Anlegen' : {
+			$GUI->checkCaseAllowed('cronjobs_anzeigen');
+			$GUI->cronjobs_anlegen();
+		} break;
+
+		case 'cronjob_speichern_Speichern' : {
+			$GUI->checkCaseAllowed('cronjobs_anzeigen');
+			$GUI->cronjob_update();
+		} break;
+
+		case 'cronjob_löschen' : {
+			$GUI->checkCaseAllowed('cronjobs_anzeigen');
+			$GUI->cronjob_delete();
+		} break;
+
+		case 'crontab_schreiben' : {
+			$GUI->checkCaseAllowed('cronjobs_anzeigen');
+			$GUI->crontab_schreiben();
+		} break;
 
 	  case 'Funktionen_Anzeigen' : {
 			$GUI->checkCaseAllowed('Funktionen_Anzeigen');

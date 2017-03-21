@@ -10,11 +10,16 @@ if($this->user->rolle->querymode == 1){
 <link rel="stylesheet" href="<?php echo 'layouts/'.$this->style; ?>">
 <? if(defined('CUSTOM_STYLE') AND CUSTOM_STYLE != ''){ ?>
 <link rel="stylesheet" href="<?php echo 'layouts/custom/'.CUSTOM_STYLE; ?>">
+<script src="<?php echo JQUERY_PATH; ?>jquery-1.12.0.min.js"></script>
 <? } ?>
-<? include(WWWROOT.APPLVERSION.'funktionen/msgboxes.php'); ?>
+<link rel="stylesheet" href="<?php echo FONTAWESOME_PATH; ?>css/font-awesome.min.css" type="text/css">
 </HEAD>
 <BODY onload="onload_functions();">
-	<div id="sperrdiv" style="position: absolute;height: 100%;z-index: 1000000;opacity: 0.3;background-color: grey;"></div>
+	<div id="waitingdiv" style="position: absolute;height: 100%; width: 100%; display:none; z-index: 1000000; text-align: center">
+		<div style="margin: 350px">
+			<i class="fa fa-spinner fa-7x wobble-fix spinner"></i>
+		</div>
+	</div>
 	<a name="oben"></a>
   <table width="900" align="center" border="0" cellspacing="0" cellpadding="0">
     <tr>
@@ -59,6 +64,7 @@ if($this->user->rolle->querymode == 1){
 				<input type="hidden" name="overlayy" value="<? echo $this->user->rolle->overlayy; ?>">
 				<input type="hidden" name="browserwidth">
 				<input type="hidden" name="browserheight">
+				<input type="hidden" name="stopnavigation" value="0">
 				<div id="message_box" class="message_box_hidden"></div>
         </form>
 <? if($this->user->rolle->querymode == 1){

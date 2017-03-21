@@ -13,6 +13,7 @@ include_once(CLASSPATH . 'data_import_export.php');
 include(PLUGINS . 'xplankonverter/model/gml_file.php');
 include(PLUGINS . 'xplankonverter/model/RP_Plan.php');
 include(PLUGINS . 'xplankonverter/model/RP_Bereich.php');
+include(PLUGINS . 'xplankonverter/model/RP_Object.php');
 include(PLUGINS . 'xplankonverter/model/konvertierung.php');
 include(PLUGINS . 'xplankonverter/model/regel.php');
 include(PLUGINS . 'xplankonverter/model/shapefiles.php');
@@ -24,17 +25,30 @@ include(PLUGINS . 'xplankonverter/model/converter.php');
 /**
 * Anwendungsfälle
 * show_elements
+* show_simple_types
+* show_uml
+* xplankonverter_konvertierungen_index
 * xplankonverter_shapefiles_index
 * xplankonverter_shapefiles_delete
 * xplankonverter_konvertierung_status
 * xplankonverter_konvertierung
-* xplankonverter_gml_generierenxplan
-* konverter_gml_ausliefernxplan
-* konverter_konvertierung_loeschen
+* xplankonverter_validierungsergebnisse
+* xplankonverter_gml_generieren
+* xplankonverter_konvertierung_loeschen
+* xplankonverter_inspire_gml_generieren
+* xplankonverter_regeleditor
+* xplankonverter_regeleditor_getxplanattributes
+* xplankonverter_regeleditor_getshapeattributes
+* xplankonverter_download_uploaded_shapes
+* xplankonverter_download_edited_shapes
+* xplankonverter_download_xplan_shapes
+* xplankonverter_download_xplan_gml
+* xplankonverter_download_inspire_gml
 */
+
 switch($this->go){
 
-	case 'show_elements':
+	case 'show_elements': {
 		$packages = array();
 		$sql	= "
 			SELECT
@@ -49,15 +63,17 @@ switch($this->go){
 		array_unshift($packages, array('package' => 'Alle'));
 		$this->main = PLUGINS . 'xplankonverter/view/elements.php';
 		$this->output();
-		break;
-	case 'show_simple_types':
+	}	break;
+
+	case 'show_simple_types': {
 		$this->main = PLUGINS . 'xplankonverter/view/simple_types.php';
 		$this->output();
-		break;
-	case 'show_uml':
+	}	break;
+
+	case 'show_uml': {
 		$this->main = PLUGINS . 'xplankonverter/view/uml_diagramms.php';
 		$this->output();
-		break;
+	}	break;
 
 	case 'xplankonverter_konvertierungen_index' : {
 		$this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
@@ -136,14 +152,9 @@ switch($this->go){
 			$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
 			if (isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) {
 				if (isset($_FILES['shape_files']) and $_FILES['shape_files']['name'][0] != '') {
-					$upload_path = XPLANKONVERTER_SHAPE_PATH . $this->formvars['konvertierung_id'] . '/';
 
-					# create upload dir if not exists
-					if (!is_dir($upload_path)) {
-						$old = umask(0);
-						mkdir($upload_path, 0770, true);
-						umask($old);
-					}
+					$this->konvertierung->create_directories();
+					$upload_path = $this->konvertierung->get_file_path('uploaded_shapes/');
 
 					# unzip and copy files to upload folder
 					$uploaded_files = xplankonverter_unzip_and_check_and_copy($_FILES['shape_files'], $upload_path);
@@ -155,7 +166,7 @@ switch($this->go){
 						if ($uploaded_file['extension'] == 'dbf' and $uploaded_file['state'] != 'ignoriert') {
 
 							# delete existing shape file
-							$shapeFile = new ShapeFile($this, 'xplankonverter', 'shapefiles');
+							$shapeFile = new ShapeFile($this);
 							$shapeFiles = $shapeFile->find_where("
 								filename = '" . $uploaded_file['filename'] . "' AND
 								konvertierung_id = '" . $this->konvertierung->get('id') . "' AND
@@ -185,6 +196,10 @@ switch($this->go){
 
 							# load into database table
 							$created_tables = $shapeFile->loadIntoDataTable();
+
+							# add gml_id column if not exists
+							if (!$shapeFile->gmlIdColumnExists())
+								$shapeFile->addGmlIdColumn();
 
 							# Set datatype for shapefile
 							$shapeFile->set('datatype', $created_tables[0]['datatype']);
@@ -391,6 +406,7 @@ switch($this->go){
 			else {
 				$this->konvertierung->reset_mapping();
 				$this->konvertierung->mapping();
+#				$this->konvertierung->set_historie();
 				$this->konvertierung->set_status(
 					($this->konvertierung->validierung_erfolgreich() ? 'Konvertierung abgeschlossen' : 'Konvertierung abgebrochen')
 				);
@@ -445,18 +461,18 @@ switch($this->go){
 					$this->gml_builder = new Gml_builder($this->pgdatabase);
 					$plan = RP_Plan::find_by_id($this,'konvertierung_id', $this->konvertierung->get('id'));
 
-					if (!$this->gml_builder->build_gml($this->konvertierung, $plan)){
+					if (!$this->gml_builder->build_gml($this->konvertierung, $plan)) {
   					// Status setzen
   					$this->konvertierung->set('status', Konvertierung::$STATUS['GML_ERSTELLUNG_ERR']);
   					$this->konvertierung->update();
   					// Antwort absenden und case beenden
   					$response['success'] = false;
-  					$response['msg'] = 'Bei der GML-Generierung ist ein Fehler aufgetreten.';
+  					$response['msg'] = 'Bei der XPlan-GML-Generierung ist ein Fehler aufgetreten.';
         		header('Content-Type: application/json');
         		echo json_encode($response);
         		break;
 					}
-					$this->gml_builder->save(XPLANKONVERTER_SHAPE_PATH . $this->konvertierung->get('id') . '/xplan_' . $this->konvertierung->get('id') . '.gml');
+					$this->gml_builder->save($this->konvertierung->get_file_name('xplan_gml'));
 
 					// Status setzen
 					$this->konvertierung->set('status', Konvertierung::$STATUS['GML_ERSTELLUNG_OK']);
@@ -469,7 +485,7 @@ switch($this->go){
 					$this->layer_generator_erzeugen($layer_group_id); # Funktion aus kvwmap.php
 
 					$response['success'] = true;
-					$response['msg'] = 'GML-Datei erfolgreich erstellt.';
+					$response['msg'] = 'XPlan-GML-Datei erfolgreich erstellt.';
 				} else {
 					$response['success'] = false;
 					$response['msg'] = 'Die ausgewählte Konvertierung muss zuerst ausgeführt werden.';
@@ -479,26 +495,6 @@ switch($this->go){
 		header('Content-Type: application/json');
 		echo json_encode($response);
 	} break;
-
-	case 'xplankonverter_gml_ausliefern' : {
-		if ($this->formvars['konvertierung_id'] == '') {
-		  echo 'Diese Link kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
-		  return;
-		}
-		$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
-		if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) return;
-
-		$filename = XPLANKONVERTER_SHAPE_PATH . $this->formvars['konvertierung_id'] . '/xplan_' . $this->formvars['konvertierung_id'] . '.gml';
-		header('Content-Type: text/xml; subtype="gml/3.3"');
-    echo fread(fopen($filename, "r"), filesize($filename));
-	} break;
-
-  case 'index.php?go=xplankonverter_gml_ausliefern&konvertierung_id' : {
-    if ($this->formvars['konvertierung_id'] == '') {
-		  echo 'Diese Link kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
-		  return;
-		}
-  } break;
 
 	case 'xplankonverter_konvertierung_loeschen' : {
 		$response = array(
@@ -522,8 +518,9 @@ switch($this->go){
 
 		# set the paths
 		$xsl = PLUGINS . 'xplankonverter/model/xplan2inspire.xsl';
-		$fileinput = XPLANKONVERTER_SHAPE_PATH . $this->formvars['konvertierung_id'] . '/xplan_' . $this->formvars['konvertierung_id'] . '.gml';
-		$fileoutput = XPLANKONVERTER_SHAPE_PATH . $this->formvars['konvertierung_id'] . '/inspire_' . $this->formvars['konvertierung_id'] . '.gml';
+		$fileinput = $this->konvertierung->get_file_name('xplan_gml');
+		$fileoutput = $this->konvertierung->get_file_name('inspire_gml');
+		echo 'test' . $fileinput;
 
 		if (!file_exists($fileinput)) {
 			$success = false;
@@ -557,26 +554,6 @@ switch($this->go){
 		echo json_encode($response);
 	} break;
 
-  case 'xplankonverter_inspire_gml_ausliefern' : {
-		if ($this->formvars['konvertierung_id'] == '') {
-		  echo 'Diese Link kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
-		  return;
-		}
-		$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
-		if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) return;
-
-		$filename = XPLANKONVERTER_SHAPE_PATH . $this->formvars['konvertierung_id'] . '/inspire_' . $this->formvars['konvertierung_id'] . '.gml';
-		header('Content-Type: text/xml; subtype="gml/3.3"');
-    echo fread(fopen($filename, "r"), filesize($filename));
-	} break;
-
-  /*case 'index.php?go=xplankonverter_inspire_gml_ausliefern&konvertierung_id' : {
-    if ($this->formvars['konvertierung_id'] == '') {
-		  echo 'Diese Link kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
-		  return;
-		}
-  } break;*/
-
 	case 'xplankonverter_regeleditor' : {
 		$konvertierung_id = $_REQUEST['konvertierung_id'];
 		$bereich_gml_id = $_REQUEST['bereich_gml_id'];
@@ -596,18 +573,271 @@ switch($this->go){
 	} break;
 
 	case 'xplankonverter_regeleditor_getxplanattributes' : {
-		include(PLUGINS . 'xplankonverter/view/regeleditor/ajax-getxplanattributes.php');
+		$sql = "
+		SELECT
+			column_name, udt_name, data_type, is_nullable
+		FROM
+			information_schema.columns
+		WHERE
+			table_name='" . $this->formvars['featuretype'] . "' AND
+			table_schema='xplan_gml'
+		ORDER BY
+			column_name
+		";
+
+		$result = pg_query($this->pgdatabase->dbConn, $sql);	
+
+		$this->main = PLUGINS . 'xplankonverter/view/regeleditor/getxplanattributes.php';
+		$this->output();
 	} break;
 
 	case 'xplankonverter_regeleditor_getshapeattributes' : {
-		include(PLUGINS . 'xplankonverter/view/regeleditor/ajax-getshapeattributes.php');
+		// Sets für alle Option in Regeleditor
+		$sql = "
+			SELECT
+				column_name
+			FROM
+				information_schema.columns
+			WHERE
+				table_name = '" . $this->formvars['shapefile'] . "' AND
+				table_schema = 'xplan_shapes_" . $this->formvars['konvertierung_id'] . "'
+			ORDER BY
+				column_name
+		";
+
+		$result = pg_query($this->pgdatabase->dbConn, $sql);
+
+		$this->main = PLUGINS . 'xplankonverter/view/regeleditor/getshapeattributes.php';
+		$this->output();
+	} break;
+
+	case 'xplankonverter_regeleditor_getshapeattributes2' : {
+		// Sets Wenn dann Option in Regeleditor
+		$sql = "
+			SELECT
+				column_name
+			FROM
+				information_schema.columns
+			WHERE
+				table_name = '" . $this->formvars['shapefile'] . "' AND
+				table_schema = 'xplan_shapes_" . $this->formvars['konvertierung_id'] . "'
+			ORDER BY
+				column_name
+		";
+
+		$result = pg_query($this->pgdatabase->dbConn, $sql);
+
+		$this->main = PLUGINS . 'xplankonverter/view/regeleditor/getshapeattributes2.php';
+		$this->output();
+	} break;
+
+	case 'xplankonverter_regeleditor_getshapeattributes3' : {
+		// Sets WHERE Filter for Shapes in Regeleditor
+		$sql = "
+			SELECT
+				column_name
+			FROM
+				information_schema.columns
+			WHERE
+				table_name = '" . $this->formvars['shapefile'] . "' AND
+				table_schema = 'xplan_shapes_" . $this->formvars['konvertierung_id'] . "'
+			ORDER BY
+				column_name
+		";
+
+		$result = pg_query($this->pgdatabase->dbConn, $sql);
+
+		$this->main = PLUGINS . 'xplankonverter/view/regeleditor/getshapeattributes3.php';
+		$this->output();
+	} break;
+
+	case 'xplankonverter_regeleditor_getshapeattributesdistinctvalues' : {
+		// Sets DISTINCT value für alle aus Shape
+		$sql = "
+			SELECT
+				DISTINCT " . $this->formvars['shapefile_attribut'] . "
+			FROM
+				xplan_shapes_" . $this->formvars['konvertierung_id'] . "." . $this->formvars['shapefile'] . "
+			ORDER BY
+				" . $this->formvars['shapefile_attribut'] . "
+		";
+
+		$result = pg_query($this->pgdatabase->dbConn, $sql);
+
+		$this->main = PLUGINS . 'xplankonverter/view/regeleditor/getshapeattributesdistinctvalues.php';
+		$this->output();
+	} break;
+
+	case 'xplankonverter_regeleditor_getshapeattributesdistinctvalues2' : {
+		// Sets DISTINCT value für WHERE Selector
+		$sql = "
+			SELECT
+				DISTINCT " . $this->formvars['shapefile_attribut'] . "
+			FROM
+				xplan_shapes_" . $this->formvars['konvertierung_id'] . "." . $this->formvars['shapefile'] . "
+			ORDER BY
+				" . $this->formvars['shapefile_attribut'] . "
+		";
+
+		$result = pg_query($this->pgdatabase->dbConn, $sql);
+
+		$this->main = PLUGINS . 'xplankonverter/view/regeleditor/getshapeattributesdistinctvalues2.php';
+		$this->output();
+	} break;
+
+	case 'xplankonverter_regeleditor_getxplanenumerationattributes' : {
+		//Enumerationsliste Auswahl von Shape
+		$sql = "
+			SELECT
+				udt_name
+			FROM
+				information_schema.columns
+			WHERE
+				table_name='" . $this->formvars['featuretype'] . "' AND
+				column_name = '" . $this->formvars['featureattribut'] . "' AND
+				table_schema='xplan_classes'
+			ORDER BY
+				column_name
+		";
+
+		$result = pg_query($this->pgdatabase->dbConn, $sql);
+
+		while($row = pg_fetch_row($result)) {
+			$enumerationsliste = $row[0];
+		}
+		# wenn es mit _startet ist es ein array, dann das _ entfernen
+		$arrayEnum = bool;
+		if(substr($enumerationsliste, 0, 1) === '_') {
+			$arrayEnum = true;
+		} else {
+			$arrayEnum = false;
+		}
+		$enumerationsliste = ltrim($enumerationsliste, '_');
+
+		$sql = "
+			SELECT
+				wert,
+				beschreibung
+			FROM
+				xplan_classes. " . $enumerationsliste . "
+		";
+
+		$result = pg_query($this->pgdatabase->dbConn, $sql);
+
+		$this->main = PLUGINS . 'xplankonverter/view/regeleditor/getxplanenumerationattributes.php';
+		$this->output();
+	} break;
+
+	case 'xplankonverter_regeleditor_getxplanenumerationattributes2' : {
+		//Enumerationsliste Wenn-Dann Auswahl von Shape
+		$sql = "
+			SELECT
+				udt_name
+			FROM
+				information_schema.columns
+			WHERE
+				table_name='" . $this->formvars['featuretype'] . "' AND
+				column_name = '" . $this->formvars['featureattribut'] . "' AND
+				table_schema='xplan_classes'
+			ORDER BY
+				column_name
+		";
+
+		$result = pg_query($this->pgdatabase->dbConn, $sql);
+
+		while($row = pg_fetch_row($result)) {
+			$enumerationsliste = $row[0];
+		}
+		# wenn es mit _startet ist es ein array, dann das _ entfernen
+		$arrayEnum = bool;
+		if(substr($enumerationsliste, 0, 1) === '_') {
+			$arrayEnum = true;
+		} else {
+			$arrayEnum = false;
+		}
+		$enumerationsliste = ltrim($enumerationsliste, '_');
+
+		$sql = "
+			SELECT
+				wert,
+			beschreibung
+			FROM
+				xplan_classes. " . $enumerationsliste . "
+			";
+			
+		$result = pg_query($this->pgdatabase->dbConn, $sql);
+
+		$this->main = PLUGINS . 'xplankonverter/view/regeleditor/getxplanenumerationattributes2.php';
+		$this->output();
+	} break;
+
+	#-------------------------------------------------------------------------------------------------------------------------
+	# Download cases
+	#-------------------------------------------------------------------------------------------------------------------------
+	case 'xplankonverter_download_uploaded_shapes' : {
+		if ($this->xplankonverter_is_case_forbidden()) return;
+		if (!$this->konvertierung->files_exists('uploaded_shapes')) {
+			$this->add_message('warning', 'Es sind keine Dateien für den Export vorhanden.');
+			$this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
+			$this->output();
+			return;
+		}
+
+		$exportfile = $this->konvertierung->create_export_file('uploaded_shapes');
+		$this->konvertierung->send_export_file($exportfile, 'application/octet-stream');
+
+	} break;
+
+	case 'xplankonverter_download_edited_shapes' : {
+		if ($this->xplankonverter_is_case_forbidden()) return;
+
+		if (!$this->konvertierung->files_exists('edited_shapes')) {
+			$this->add_message('warning', 'Es sind keine Dateien für den Export vorhanden.');
+			$this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
+			$this->output();
+			return;
+		}
+
+		$exportfile = $this->konvertierung->create_export_file('edited_shapes');
+		$this->konvertierung->send_export_file($exportfile, 'application/octet-stream');
+	} break;
+
+	case 'xplankonverter_download_xplan_shapes' : {
+		if ($this->xplankonverter_is_case_forbidden()) return;
+
+		$this->konvertierung->create_xplan_shapes();
+
+		if (!$this->konvertierung->files_exists('xplan_shapes')) {
+			$this->add_message('warning', 'Es sind keine Dateien für den Export vorhanden.');
+			$this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
+			$this->output();
+			return;
+		}
+
+		$exportfile = $this->konvertierung->create_export_file('xplan_shapes');
+		$this->konvertierung->send_export_file($exportfile, 'application/octet-stream');
+
+	} break;
+
+	case 'xplankonverter_download_xplan_gml' : {
+		if ($this->xplankonverter_is_case_forbidden()) return;
+
+		$filename = XPLANKONVERTER_FILE_PATH . $this->formvars['konvertierung_id'] . '/xplan_gml/xplan_' . $this->formvars['konvertierung_id'] . '.gml';
+		header('Content-Type: text/xml; subtype="gml/3.3"');
+		echo fread(fopen($filename, "r"), filesize($filename));
+	} break;
+
+	case 'xplankonverter_download_inspire_gml' : {
+		if ($this->xplankonverter_is_case_forbidden()) return;
+
+		$filename = XPLANKONVERTER_FILE_PATH . $this->formvars['konvertierung_id'] . '/inspire_gml/inspire_' . $this->formvars['konvertierung_id'] . '.gml';
+		header('Content-Type: text/xml; subtype="gml/3.3"');
+		echo fread(fopen($filename, "r"), filesize($filename));
 	} break;
 
 	default : {
 		$this->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
 	}
-
-
 
 }
 

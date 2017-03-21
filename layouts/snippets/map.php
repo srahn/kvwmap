@@ -24,16 +24,6 @@ function startup(){
 	document.getElementById("map").SVGstartup();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 }
 
-function stopwaiting(){
-	if(typeof document.getElementById("svghelp").SVGstopwaiting == 'function')
-	document.getElementById("svghelp").SVGstopwaiting();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-}
-
-function startwaiting(){
-	if(typeof document.getElementById("svghelp").SVGstartwaiting == 'function')
-	document.getElementById("svghelp").SVGstartwaiting();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-}
-
 function showtooltip(result, showdata){
 	document.getElementById("svghelp").SVGshowtooltip(result, showdata);			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 }
@@ -103,7 +93,7 @@ function switchlegend(){
 
   $res_x    = $this->map->width;
   $res_y    = $this->map->height;
-  $legendheight = $this->map->height-29;
+  $legendheight = $this->map->height - LEGEND_HEIGHT_OFFSET;
   $res_xm   = $this->map->width/2;
   $res_ym   = $this->map->height/2;
   $dx       = $this->map->extent->maxx-$this->map->extent->minx;
@@ -150,12 +140,12 @@ if($this->formvars['gps_follow'] == ''){
             <input type="hidden" name="svg_string" value="">
             <input type="hidden" name="scrollposition" value="">
             <input type="hidden" name="vertices" id="vertices" value="">
-            <input type="hidden" name="legendtouched" value="0">
-            <input type="hidden" name="stopnavigation" value="0">
+            <input type="hidden" name="legendtouched" value="0">            
 						<input type="hidden" name="svghelp" id="svghelp">
 						<input type="hidden" name="activated_vertex" value="0">
 						<input type="hidden" name="measured_distance" value="<? echo $this->formvars['measured_distance']; ?>">						
 						<input type="hidden" name="layer_options_open" value="">
+						<input type="hidden" name="group_options_open" value="">
     <?php
         include(LAYOUTPATH.'snippets/SVG_map.php');
     ?>
@@ -184,12 +174,15 @@ if($this->formvars['gps_follow'] == ''){
 													&nbsp;&nbsp;<span class="fett"><?php echo $this->strMapScale; ?>&nbsp;1:&nbsp;</span><input type="text" id="scale" autocomplete="off" name="nScale" style="width:58px" value="<?php echo round($this->map_scaledenom); ?>">
 												</div>
 						          </td>
-			        				<td align="left" style="width:80%;<? if($this->user->rolle->runningcoords == '0'){echo ';display:none';} ?>">
+			        				<td align="left" style="width:77%;<? if($this->user->rolle->runningcoords == '0'){echo ';display:none';} ?>">
 			          				<span class="fett"><?php echo $this->strCoordinates; ?></span>&nbsp;
-			          				<input type="text" style="width: 190px" class="transparent_input" name="runningcoords" value=""><span title="<? echo $this->epsg_codes[$this->user->rolle->epsg_code]['srtext']; ?>">EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?></span>
+			          				<input type="text" style="width: 190px" class="transparent_input" name="runningcoords" value=""><span title="<? echo $this->epsg_codes[$this->user->rolle->epsg_code]['srtext']; ?>">EPSG&#8209;Code:&nbsp;<?php echo $this->user->rolle->epsg_code; ?></span>
 											</td>
 						          <td width="25%" align="right">
 						            <img id="scalebar" style="padding-right:<? if($this->user->rolle->hideLegend)echo '35';else echo '5'; ?>px" alt="Maßstabsleiste" src="<? echo $this->img['scalebar']; ?>">
+												<a href="#" onclick="showMapParameter(<? echo $this->user->rolle->epsg_code; ?>, <? echo $this->map->width; ?>, <? echo $this->map->height; ?>)">
+													<i class="fa fa-info-circle" style="margin-right: 5px; color: #666; font-size: 110%"></i>
+												</a>
 						          </td>
 						        </tr>
 						    </table>
@@ -278,7 +271,7 @@ if($this->formvars['gps_follow'] == ''){
 						<tr align="left">
 							<td><!-- bgcolor=#e3e3e6 -->
 							<div align="center"><?php # 2007-12-30 pk
-							?><input type="submit" name="neuladen" onclick="document.getElementById('sperrdiv').style.width = '100%';startwaiting();document.GUI.go.value='neu Laden';" value="<?php echo $strLoadNew; ?>" tabindex="1"></div>
+							?><input type="submit" name="neuladen" onclick="startwaiting(true);document.GUI.go.value='neu Laden';" value="<?php echo $strLoadNew; ?>" tabindex="1"></div>
 							<br>
 							<? if(defined('LAYER_ID_SCHNELLSPRUNG') AND LAYER_ID_SCHNELLSPRUNG != ''){
 								include(SNIPPETS.'schnellsprung.php');

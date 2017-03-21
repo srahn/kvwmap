@@ -616,15 +616,17 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 	opacity: 1;
 	position: fixed;
 	display: block;
-	top:40%;
+	top:20%;
 	left:45%;
 	min-width:250px;
-	max-width: 500px;
+	max-width: 550px;
 	#height:90px;
+	max-height: 600px;
+	overflow: auto;
 	font-size: 17px;
 	font-family: SourceSansPro2;
 	margin:-45px 0 0 -100px;
-	padding: 20px;
+	padding: 10px;
 	text-align: center;
 	line-height: 20px;
 	border: 1px solid grey;
@@ -664,6 +666,7 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 	float: left;
 	margin-left: 20px;
 	padding: 0px;
+	max-width: 490px
 }
 
 table.tgle {
@@ -887,6 +890,29 @@ tbody.gle tr:hover {
 	color: gray;
 }
 
+.fa-7x {
+	font-size: 7em !important;
+}
+
+
+
+.spinner {
+	opacity: 0.75;
+	color: LightSteelBlue;
+	text-shadow: 0px 0px 4px #000000;
+	animation: fa-spin 1s infinite steps(8);
+}
+
+.waitingdiv_spinner {
+	pointer-events:none;
+	background:none;
+}
+
+.waitingdiv_spinner_lock {
+	background:rgba(200,200,200,0.3);
+	pointer-events:auto;
+}
+
 .fa-color-red {
 	color: #236dbf;
 }
@@ -924,6 +950,37 @@ tbody.gle tr:hover {
 }
 
 .layerOptions span{
+	color: #252525;
+}
+
+.groupOptions{
+	border: 1px solid #cccccc;
+	background: #EDEFEF;
+	padding:0px;
+	right: 240px;
+	top: 300px;
+	width: 200px;
+	position:absolute;
+	z-index: 1000;
+	-moz-box-shadow: 6px 5px 7px #777;
+	-webkit-box-shadow: 6px 5px 7px #777;
+	box-shadow: 6px 5px 7px #777;
+}
+
+.groupOptionsHeader{
+	background-color: #c7d9e6;
+	padding: 2px 2px 2px 8px;
+}
+
+.groupOptions ul{
+	color: lightsteelblue;
+	margin: 5px;
+	padding: 0px;
+	padding-left: 5px;
+	list-style: square inside none;
+}
+
+.groupOptions span{
 	color: #252525;
 }
 
@@ -983,10 +1040,9 @@ tbody.gle tr:hover {
 }
 
 #gbb_grundstueck{
+	height: 100%;
 	width: 600px;
 	background-color: white;
-	padding: 7px;
-	margin-bottom: 7px;
 	border: 1px solid lightgrey;
 }
 
@@ -996,4 +1052,13 @@ tbody.gle tr:hover {
 	padding: 7px;
 	height: 100%;
 	border: 1px solid lightgrey;
+}
+
+.btn-new {
+	padding: 5px;
+	background-color: #6cc644;
+	background-image: linear-gradient(#91dd70, #55ae2e);
+	border: 1px solid #5aad35;
+	border-radius: 5px;
+	color: white;
 }

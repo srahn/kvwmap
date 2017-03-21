@@ -30,11 +30,91 @@ class Konvertierung extends PgObject {
 	}
 
 	public static	function find_by_id($gui, $by, $id) {
-			#echo '<br>find konvertierung by ' . $by . ' = ' . $id;
-			$konvertierung = new Konvertierung($gui);
-			$konvertierung->find_by($by, $id);
-			return $konvertierung;
+		#echo '<br>find konvertierung by ' . $by . ' = ' . $id;
+		$konvertierung = new Konvertierung($gui);
+		$konvertierung->find_by($by, $id);
+		return $konvertierung;
+	}
+
+	function create_directories() {
+		$directories = array(
+			'uploaded_shapes',
+			'edited_shapes',
+			'xplan_gml',
+			'xplan_shapes',
+			'inspire_gml'
+		);
+
+		foreach ($directories AS $directory) {
+			$path = $this->get_file_path($directory);
+			$this->debug->show('Check if directory: ' . $path . ' exists.', Konvertierung::$write_debug);
+			if (!is_dir($path)) {
+				$this->debug->show('Create directory', Konvertierung::$write_debug);
+				$old = umask(0);
+				mkdir($path, 0770, true);
+				umask($old);
+			}
 		}
+	}
+
+	function get_file_path($directory) {
+		return XPLANKONVERTER_FILE_PATH . $this->get('id') . '/' . $directory;
+	}
+
+	function get_file_name($name) {
+		$parts = explode('_', $name);
+		return $this->get_file_path($name) . '/' . $parts[0] . '_' . $this->get('id') . '.' . $parts[1];
+	}
+
+	function create_xplan_shapes() {
+		$path = $this->get_file_path('xplan_shapes');
+		$this->debug->show('Erzeuge XPlan-Shape-Files in: ' . $path, Konvertierung::$write_debug);
+		$export_class = new data_import_export();
+
+		$this->debug->show('Frage XPlan-Klassen ab:', Konvertierung::$write_debug);
+		$class_names = $this->get_class_names();
+
+		$this->debug->show('Erzeuge Shape-Dateien für jede Klasse:', Konvertierung::$write_debug);
+		foreach ($class_names AS $class_name) {
+			$this->debug->show('Klasse: ' . $class_name, Konvertierung::$write_debug);
+			$sql = "
+				SELECT
+					*
+				FROM
+					xplan_gml. " . strtolower($class_name) . "
+				WHERE
+					konvertierung_id = " . $this->get('id') . "
+			";
+			$this->debug->show('Objektabfrage sql: ' . $sql, Konvertierung::$write_debug);
+			$export_class->ogr2ogr_export($sql, '"ESRI Shapefile"', $path . '/' . $class_name . '.shp', $this->database);
+		}
+
+	}
+
+	function create_export_file($file_type) {
+		$path = $this->get_file_path($file_type);
+		exec(ZIP_PATH . ' ' . $path . ' ' . $path . '/*');
+		
+		$exportfile = $path . '.zip';
+		return $exportfile;
+	}
+
+	function send_export_file($exportfile, $contenttype) {
+		header('Content-type: ' . $contenttype);
+		header("Content-disposition:  attachment; filename=" . basename($exportfile));
+		header("Content-Length: " . filesize($exportfile));
+		header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+		header('Pragma: public');
+		readfile($exportfile);
+	}
+
+	function files_exists($dir) {
+		$dir = $this->get_file_path($dir);
+		$this->debug->show('Prüfe ob Dateien im Verzeichnis : ' . $dir . ' vorhanden sind: ', Konvertierung::$write_debug);
+	  $result = !(count(glob("$dir/*")) === 0);
+		$this->debug->show(($result ? 'ja' : 'nein'), Konvertierung::$write_debug);
+		return $result;
+	}
 
 	function get_input_epgs_codes() {
 		$sql = "
@@ -51,22 +131,41 @@ class Konvertierung extends PgObject {
 	}
 
 	function get_regeln() {
-		#echo '<p>get_regeln';
+		$this->debug->show('get_regeln', Konvertierung::$write_debug);
+
 		$regeln = array();
 		$regel = new Regel($this->gui);
-		$regeln = $regel->find_where("
+		$regeln_ohne_bereich = $regel->find_where("
 			konvertierung_id = {$this->get('id')} AND
 			bereich_gml_id IS NULL
 		");
-		
+		$this->debug->show(count($regeln_ohne_bereich) . ' Regeln ohne Bereich gefunden.', Konvertierung::$write_debug);
+
 		$plan = $this->get_plan();
 
 		foreach($this->get_bereiche($plan->get('gml_id')) AS $bereich) {
+			$regeln_mit_bereich = $regel->find_where("bereich_gml_id = '{$bereich->get('gml_id')}'");
+			$this->debug->show(count($regeln_mit_bereich) . ' Regeln mit Bereich gefunden.', Konvertierung::$write_debug);
 			$regeln = array_merge(
-				$regeln,
-				$regel->find_where("bereich_gml_id = '{$bereich->get('gml_id')}'")
+				$regeln_ohne_bereich,
+				$regeln_mit_bereich
 			);
 		}
+		$this->debug->show('Insgesamt ' . count($regeln) . ' Regeln gefunden.', Konvertierung::$write_debug);
+
+		foreach($regeln AS $regel) {
+			$regel->konvertierung = $regel->get_konvertierung();
+		}
+
+		$this->debug->show(implode(
+			'<br>',
+			array_map(
+				function($regel) {
+					return '<br>id: ' . $regel->get('id') . '<br>sql: ' . $regel->get('sql');
+				},
+				$regeln
+			)
+		), Konvertierung::$write_debug);
 		return $regeln;
 	}
 
@@ -95,15 +194,17 @@ class Konvertierung extends PgObject {
 		$this->debug->show('Konvertierung: get_class_names.', Konvertierung::$write_debug);
 		$sql = "
 			SELECT DISTINCT
-			  lower(r.class_name) AS class_name
+				r.class_name
 			FROM
-			  xplankonverter.regeln r LEFT JOIN
-			  xplan_gml.rp_bereich b ON r.bereich_gml_id = b.gml_id LEFT JOIN
-				xplan_gml.rp_plan p ON b.gehoertzuplan = p.gml_id::text
+				xplankonverter.regeln r LEFT JOIN
+				xplan_gml.rp_bereich b ON r.bereich_gml_id = b.gml_id left JOIN
+				xplan_gml.rp_plan bp ON b.gehoertzuplan = bp.gml_id::text LEFT JOIN
+				xplan_gml.rp_plan rp ON r.konvertierung_id = rp.konvertierung_id
 			WHERE
-			  p.konvertierung_id = {$this->get('id')} OR
-			  r.konvertierung_id = {$this->get('id')}
+				bp.konvertierung_id = " . $this->get('id') . " OR
+				rp.konvertierung_id = " . $this->get('id') . "
 		";
+
 		$this->debug->show('sql: ' . $sql, Konvertierung::$write_debug);
 		$result = pg_fetch_all(
 			pg_query($this->database->dbConn, $sql)
@@ -112,7 +213,7 @@ class Konvertierung extends PgObject {
 		if ($result) {
 			$class_names = array_map(
 				function($row) {
-					return 'xplan_gml.' . $row['class_name'];
+					return $row['class_name'];
 				},
 				$result
 			);
@@ -192,7 +293,7 @@ class Konvertierung extends PgObject {
 	*
 	*/
 	function delete_layer_group($layer_type) {
-		$this->debug->show('delete_layer_group typ: ' . $layer_type, true);
+		$this->debug->show('delete_layer_group typ: ' . $layer_type, false);
 		$layer_group_id = $this->get(strtolower($layer_type) . '_layer_group_id');
 		if (!empty($layer_group_id)) {
 			$layer_group = new MyObject($this->gui, 'u_groups');
@@ -220,13 +321,18 @@ class Konvertierung extends PgObject {
 			# Lösche Relationen
 			$sql = "
 				DELETE FROM
-					{$class_name}
+					xplan_gml." . strtolower($class_name) . "
 				WHERE
-					konvertierung_id = {$this->get('id')}
+					konvertierung_id = " . $this->get('id') . "
 			";
 			$this->debug->show("Delete Objekte von {$class_name} with konvertierung_id " . $this->get('id') . ' und sql: ' . $sql . ' in reset Mapping.', Konvertierung::$write_debug);
 			$query = pg_query($this->database->dbConn, $sql);
 		}
+
+		# Lösche vorhandene xplan_shapes Export-Dateien
+		$file = XPLANKONVERTER_FILE_PATH . $this->get('id') . '/xplan_shapes.zip';
+		if (file_exists($file)) unlink($file);
+		array_map('unlink', glob($this->get_file_path('xplan_shapes') . '/*'));
 	}
 
 	/*
@@ -248,9 +354,15 @@ class Konvertierung extends PgObject {
 			$success = true;
 			$this->get_plan();
 			foreach($regeln AS $regel) {
-				$result = $regel->convert($this);
+				$result = $regel->validate($this);
 				if (!$result) {
 					$success = false;
+				}
+				else {
+					$result = $regel->convert($this);
+					if (!empty($result)) {
+						$regel->rewrite_gml_ids($result);
+					}
 				}
 			}
 			$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'alle_sql_ausfuehrbar');
@@ -278,7 +390,7 @@ class Konvertierung extends PgObject {
 	*/
 	function destroy() {
 		# Lösche gml-Datei
-		$gml_file = new gml_file(XPLANKONVERTER_SHAPE_PATH . $this->get('id') . '/xplan_' . $this->get('id') . '.gml');
+		$gml_file = new gml_file($this->get_file_name('xplan_gml'));
 		if ($gml_file->exists()) {
 			$msg = "\nLösche gml file: ". $gml_file->filename;
 			$gml_file->delete();

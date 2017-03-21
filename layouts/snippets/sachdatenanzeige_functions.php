@@ -89,7 +89,7 @@ include('funktionen/input_check_functions.php');
 	
 	nextdatasets = function(layer_id){
 		var sure = true;
-		if(document.getElementById('changed_'+layer_id).value == 1){
+		if(document.getElementById('changed_'+layer_id) != undefined && document.getElementById('changed_'+layer_id).value == 1){
 			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch weiterblättern?');
 		}
 		if(sure){
@@ -108,7 +108,7 @@ include('funktionen/input_check_functions.php');
 	
 	lastdatasets = function(layer_id, count){
 		var sure = true;
-		if(document.getElementById('changed_'+layer_id).value == 1){
+		if(document.getElementById('changed_'+layer_id) != undefined && document.getElementById('changed_'+layer_id).value == 1){
 			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch weiterblättern?');
 		}
 		if(sure){
@@ -127,7 +127,7 @@ include('funktionen/input_check_functions.php');
 	
 	firstdatasets = function(layer_id){
 		var sure = true;
-		if(document.getElementById('changed_'+layer_id).value == 1){
+		if(document.getElementById('changed_'+layer_id) != undefined && document.getElementById('changed_'+layer_id).value == 1){
 			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch zurückblättern?');
 		}
 		if(sure){
@@ -143,7 +143,7 @@ include('funktionen/input_check_functions.php');
 
 	prevdatasets = function(layer_id){
 		var sure = true;
-		if(document.getElementById('changed_'+layer_id).value == 1){
+		if(document.getElementById('changed_'+layer_id) != undefined && document.getElementById('changed_'+layer_id).value == 1){
 			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch zurückblättern?');
 		}
 		if(sure){
@@ -379,21 +379,20 @@ include('funktionen/input_check_functions.php');
 	
 	openCustomSubform = function(layer_id, attribute, attributenamesarray, field_id, k){
 		names_values = get_current_attribute_values(attributenamesarray, '', k);
-		document.getElementById('sperrdiv').style.background = 'rgba(200,200,200,0.8)';
-		document.getElementById('sperrdiv').style.width = '100%';
+		document.getElementById('waitingdiv').style.background = 'rgba(200,200,200,0.8)';
+		document.getElementById('waitingdiv').style.display = '';
 		subformWidth = document.GUI.browserwidth.value-70;
 		subform = '<div style="position:relative; margin: 30px;width:'+subformWidth+'px; height:90%">';
 		subform += '<div style="position: absolute;top: 2px;right: -2px"><a href="javascript:closeCustomSubform();" title="Schlie&szlig;en"><img style="border:none" src="<? echo GRAPHICSPATH.'exit2.png'; ?>"></img></a></div>';
 		subform += '<iframe id="customSubform" style="width:100%; height:100%" src=""></iframe>';
 		subform += '</div>';
-		document.getElementById('sperrdiv').innerHTML= subform;
+		document.getElementById('waitingdiv').innerHTML= subform;
 		ahah("index.php", "go=openCustomSubform&layer_id="+layer_id+"&attribute="+attribute+"&attributenames="+names_values[0]+"&attributevalues="+names_values[1]+"&field_id="+field_id, new Array(document.getElementById('customSubform')), new Array("src"));
 	}
 	
 	closeCustomSubform = function(){
-		document.getElementById('sperrdiv').style.background = 'rgba(200,200,200,0.3)';
-		document.getElementById('sperrdiv').style.width = '0%';
-		document.getElementById('sperrdiv').innerHTML = '';
+		document.getElementById('waitingdiv').style.display = 'none';
+		document.getElementById('waitingdiv').innerHTML = '';
 	}
 	 
 	update_buttons = function(all, layer_id){

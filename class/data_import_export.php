@@ -734,15 +734,14 @@ class data_import_export {
 			$i = $attributes['indizes'][$key];
     	if($attributes['type'][$i] != 'geometry' AND $attributes['name'][$i] != 'lock'){
 	      if($attributes['alias'][$i] != ''){
-	        $name = $attributes['alias'][$i];
+	        $names[] = $attributes['alias'][$i];
 	      }
 	      else{
-	        $name = $attributes['name'][$i];
+	        $names[] = $attributes['name'][$i];
 	      }
-	      $csv .= $name.';';
     	}
     }
-    $csv .= chr(13).chr(10);
+    $csv .= implode(';', $names).chr(13).chr(10);
  
     # Daten schreiben
     for($i = 0; $i < count($result); $i++){
@@ -790,10 +789,10 @@ class data_import_export {
 							$value = str_replace('.', ",", $value);				#  Excel-Datumsproblem
 						}
 					}
-	        $csv .= $value.';';
+					$values[$i][] = $value;
       	}
       }
-      $csv .= chr(13).chr(10);
+      $csv .= implode(';', $values[$i]).chr(13).chr(10);
     }
     
     $currenttime=date('Y-m-d H:i:s',time());

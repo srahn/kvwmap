@@ -56,12 +56,14 @@ define('FOOTER', 'footer.php');															# Version 1.8.0
 define('HEADER_FOOTER_HEIGHT', 132);																# Version 2.0
 # Breite von Menü und Legende zusammen
 $menue_legend_widths = array('gui.php' => 485, 'gui_button.php' => 486);		# Version 2.0
+define('LEGEND_HEIGHT_OFFSET', 29);													# Version 2.7
+
 # login.php
 define('LOGIN', 'login.php');																# Version 1.8.0
 # Seite zur Fehlerbehandlung, die durch fehlerhafte Layer verursacht werden; unterhalb von /snippets
 define('LAYER_ERROR_PAGE', 'layer_error_page.php');					# Version 2.0
 # Geschwindigkeit der Warteanimation (normal: 6, 0 = keine Animation)
-define('WAITING_ANIMATION_SPEED', 6);												# Version 2.0
+#define('WAITING_ANIMATION_SPEED', 6);											# Version 2.0			# in Version 2.6 über den Bugfix 2.6.23 gelöscht
 # Vorschaubildgröße
 define('PREVIEW_IMAGE_WIDTH', 250);													# Version 2.1
 

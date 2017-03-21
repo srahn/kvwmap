@@ -21,6 +21,7 @@ function flurstanzeige(flurstkennz){
 </script>
 
 <?php
+
 $this->Stelle->getFunktionen();
 for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 	$this->buchungen = $this->gbblaetter[$gb];
@@ -33,17 +34,8 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 	  $ret=$flst->readALB_Data($this->buchungen[0]['flurstkennz']);
     $Eigentuemerliste=$flst->getEigentuemerliste($this->buchungen[0]['bezirk'],$this->buchungen[0]['blatt'],$this->buchungen[0]['bvnr']);
     $Eigentuemer = '<tr><td colspan="2" valign="top" style="height: 16px">Eigentümer:</td></tr>';
-    for ($i=0;$i<count($Eigentuemerliste);$i++) {
-    	$Eigentuemer .= '<tr><td valign="top">'.$Eigentuemerliste[$i]->Nr.'</td><td valign="top">';
-    	for ($k=0;$k<count($Eigentuemerliste[$i]);$k++) {
-      	$Eigentuemer .= $Eigentuemerliste[$i]->Name[$k].'<br>';
-    	}			
-			if($Eigentuemerliste[$i]->zusatz_eigentuemer != ''){
-				$Eigentuemer .= '</td></tr><tr><td colspan="2">'.$Eigentuemerliste[$i]->zusatz_eigentuemer; if($Eigentuemerliste[$i]->Anteil != '')$Eigentuemer .= ' zu '.$Eigentuemerliste[$i]->Anteil; $Eigentuemer .= '</td></tr><tr><td>';
-			}
-			elseif($Eigentuemerliste[$i]->Anteil)$Eigentuemer .= 'zu '.$Eigentuemerliste[$i]->Anteil.'<br>';
-    	$Eigentuemer .= '</td></tr>';
-    }
+		reset($Eigentuemerliste);
+    $Eigentuemer .= $flst->outputEigentuemer(key($Eigentuemerliste), $Eigentuemerliste, 'Short');
 		$Eigentuemer .= '<tr><td style="height: 100%"></td></tr>';
 	?>
 	<table cellspacing="0" cellpadding="2" id="gbb_grundbuchblatt">
@@ -51,12 +43,13 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 	    <th colspan="2"><h2><? echo $this->titel.' '.$this->buchungen[0]['bezirk'].'-'.$this->buchungen[0]['blatt']; ?></h2></th>
     </tr>
 		<tr>
-			<td style="padding-bottom: 9px;height:100%">
+			<td style="padding-bottom: 6px;height:100%">
 				<table id="gbb_eigentuemer">
 					<? echo $Eigentuemer; ?>
 				</table>
 			</td>
 			<td style="height:100%">
+				<table cellpadding="0" cellspacing="0" style="height:100%">
 	  <?		
 	  for ($i=0;$i<$anzObj;$i++) {
 	  	$Nutzunglangtext = '';
@@ -73,14 +66,14 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
     	}
 	    for($n=0;$n<count($flst->Nutzung);$n++) {
 	    	if($flst->Nutzung[$n]['bezeichnung'] != ''){
-	    		$Nutzunglangtext.=$flst->Nutzung[$n]['flaeche'].'m<sup>2</sup> '.$flst->Nutzung[$n]['bezeichnung'].'<br>';
+	    		$Nutzunglangtext.=tausenderTrenner($flst->Nutzung[$n]['flaeche']).' m<sup>2</sup> '.$flst->Nutzung[$n]['bezeichnung'].'<br>';
 	    	}
 	    }
 			if($this->buchungen[$i-1]['bvnr'] != $this->buchungen[$i]['bvnr']){
 						if($i > 0){ ?>
-							</table>
+							</table></tr></td>
 						<? } ?>
-						<table id="gbb_grundstueck">
+						<tr><td style="padding-bottom: 6px"><div id="gbb_grundstueck"><table style="padding: 7px">
 							<tr>
 								<td style="height: 50px" valign="top">
 									Bestandsverzeichnisnummer: <? echo $this->buchungen[$i]['bvnr']; ?>
@@ -112,7 +105,7 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 								</td>
 							</tr>
 	  <? } ?>
-					</table>
+					</table></div></td></tr></table>
 				</td>
 			</tr>
 			<tr>

@@ -231,69 +231,85 @@ FROM
     return $ret;
   }
 
-  function execSQL($sql,$debuglevel, $loglevel) {
-  	switch ($this->loglevel) {
-  		case 0 : {
-  			$logsql=0;
-  		} break;
-  		case 1 : {
-  			$logsql=1;
-  		} break;
-  		case 2 : {
-  			$logsql=$loglevel;
-  		} break;
-  	}
-    # SQL-Statement wird nur ausgeführt, wenn DBWRITE gesetzt oder
-    # wenn keine INSERT, UPDATE und DELETE Anweisungen in $sql stehen.
-    # (lesend immer, aber schreibend nur mit DBWRITE=1)
-    if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
-      #echo "<br>".$sql;
-      $sql = "SET datestyle TO 'German';".$sql;
-      if($this->schema != ''){
-      	$sql = "SET search_path = ".$this->schema.", public;".$sql;
-      }
-      $query=pg_query($this->dbConn,$sql);
-      //$query=0;
-      if ($query==0) {
-				$errormessage = pg_last_error($this->dbConn);
-				header('error: true');		// damit ajax-Requests das auch mitkriegen
-        $ret[0]=1;
-        $ret[1]="Fehler bei SQL Anweisung:<br><br>\n\n".$sql."\n\n<br><br>".$errormessage;
-        echo "<br><b>".$ret[1]."</b>";
-        $this->debug->write("<br><b>".$ret[1]."</b>",$debuglevel);
-        if ($logsql) {
-          $this->logfile->write($this->commentsign." ".$ret[1]);
-        }
-      }
-      else {
-      	# Abfrage wurde erfolgreich ausgeführt
-        $ret[0]=0;
-        $ret[1]=$query;
-        $this->debug->write("<br>".$sql,$debuglevel);
-        # 2006-07-04 pk $logfile ersetzt durch $this->logfile
-        if ($logsql) {
-          $this->logfile->write($sql.';');
-        }
-      }
-      $ret[2]=$sql;
-    }
-    else {
-      # Es werden keine SQL-Kommandos ausgeführt
-      # Die Funktion liefert ret[0]=0, und zeigt damit an, daß kein Datenbankfehler aufgetreten ist,
-      $ret[0]=0;
-      # jedoch hat $ret[1] keine query_ID sondern auch den Wert 0
-      $ret[1]=0;
-      # Wenn $this->loglevel != 0 wird die sql-Anweisung in die logdatei geschrieben
-      # zusätzlich immer in die debugdatei
-      # 2006-07-04 pk $logfile ersetzt durch $this->logfile
-      if ($logsql) {
-        $this->logfile->write($sql.';');
-      }
-      $this->debug->write("<br>".$sql,$debuglevel);
-    }
+	function execSQL($sql, $debuglevel, $loglevel, $suppress_error_msg = false) {
+		$ret = array(); // Array with results to return
 
-    return $ret;
-  }
+		switch ($this->loglevel) {
+			case 0 : {
+				$logsql = 0;
+			} break;
+			case 1 : {
+				$logsql = 1;
+			} break;
+			case 2 : {
+				$logsql = $loglevel;
+			} break;
+		}
+		# SQL-Statement wird nur ausgeführt, wenn DBWRITE gesetzt oder
+		# wenn keine INSERT, UPDATE und DELETE Anweisungen in $sql stehen.
+		# (lesend immer, aber schreibend nur mit DBWRITE=1)
+		if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
+			#echo "<br>".$sql;
+			$sql = "SET datestyle TO 'German';".$sql;
+			if($this->schema != ''){
+				$sql = "SET search_path = " . $this->schema . ", public;" . $sql;
+			}
+			if ($suppress_error_msg) {
+				$query = @pg_query($this->dbConn, $sql);
+			}
+			else {
+				$query = @pg_query($this->dbConn, $sql);
+			}
+
+			//$query=0;
+			if ($query == 0) {
+				$ret[0] = 1;
+				$ret['success'] = false;
+				$errormessage = pg_last_error($this->dbConn);
+				#header('error: true');		// damit ajax-Requests das auch mitkriegen
+				$ret[1] = "Fehler bei SQL Anweisung:<br><br>\n\n" . $sql . "\n\n<br><br>" . $errormessage;
+				$ret['msg'] = $ret[1];
+				$ret['type'] = 'error';
+				if (!$suppress_error_msg) {
+					echo "<br><b>" . $ret[1] . "</b>";
+				}
+				$this->debug->write("<br><b>" . $ret[1] . "</b>", $debuglevel);
+				if ($logsql) {
+					$this->logfile->write($this->commentsign . " " . $ret[1]);
+				}
+			}
+			else {
+				# Abfrage wurde erfolgreich ausgeführt
+				$ret[0] = 0;
+				$ret['success'] = true;
+				$ret[1] = $query;
+				$ret['query'] = $ret[1]; 
+				$this->debug->write("<br>" . $sql, $debuglevel);
+				# 2006-07-04 pk $logfile ersetzt durch $this->logfile
+				if ($logsql) {
+					$this->logfile->write($sql . ';');
+				}
+			}
+			$ret[2] = $sql;
+		}
+		else {
+			# Es werden keine SQL-Kommandos ausgeführt
+			# Die Funktion liefert ret[0]=0, und zeigt damit an, daß kein Datenbankfehler aufgetreten ist,
+			$ret[0] = 0;
+			$ret['success'] = true;
+			# jedoch hat $ret[1] keine query_ID sondern auch den Wert 0
+			$ret[1] = 0;
+			# Wenn $this->loglevel != 0 wird die sql-Anweisung in die logdatei geschrieben
+			# zusätzlich immer in die debugdatei
+			# 2006-07-04 pk $logfile ersetzt durch $this->logfile
+			if ($logsql) {
+				$this->logfile->write($sql . ';');
+			}
+			$this->debug->write("<br>" . $sql, $debuglevel);
+		}
+
+		return $ret;
+	}
 
 	function build_temporal_filter($tablenames){
 		$timestamp = rolle::$hist_timestamp;
@@ -738,7 +754,8 @@ FROM
 	      if($klammerstartpos !== false){										# eine Funktion wurde auf das Attribut angewendet
 	        $klammerendpos = strpos($fieldstring, ')');
 	        if($klammerendpos){
-	        	$name_pair['real_name'] = substr($explosion[0], $klammerstartpos+1, $klammerendpos-$klammerstartpos-1);
+						$klammer_inhalt = substr($explosion[0], $klammerstartpos+1, $klammerendpos-$klammerstartpos-1);
+						if(strpos($klammer_inhalt, "'") === false)$name_pair['real_name'] = $klammer_inhalt;
 	        	$name_pair['name'] = $explosion[count($explosion)-1];
 	        	$name_pair['no_real_attribute'] = true;
 	        }
@@ -1304,7 +1321,7 @@ FROM
 					$sql.=" OR (f.gemarkung_land||f.gemarkungsnummer = ".$eingeschr_gemkg_id." AND flurnummer IN (".implode(',', $fluren)."))";
 				}
 			}
-			$sql .= ")";
+			$sql .= ") ORDER BY flurstkennz";
 		}
     $this->debug->write("<p>postgresql.php getFlurstuecksKennzByGemeindeIDs() Abfragen erlaubten Flurstückskennzeichen nach Gemeindeids:<br>".$sql,4);
 		#echo $sql;
@@ -1734,7 +1751,7 @@ FROM
 	}
   
   function getEigentuemerliste($FlurstKennz,$Bezirk,$Blatt,$BVNR, $without_temporal_filter = false) {
-    $sql = "SELECT distinct case when bestehtausrechtsverhaeltnissenzu is not null or n.beschriebderrechtsgemeinschaft is not null or n.artderrechtsgemeinschaft is not null then true else false end as order1, CASE WHEN n.laufendenummernachdin1421 IS NULL THEN n.gml_id ELSE bestehtausrechtsverhaeltnissenzu END as order2, coalesce(n.laufendenummernachdin1421, '0') as order3, CASE WHEN n.beschriebderrechtsgemeinschaft is null and n.artderrechtsgemeinschaft is null THEN n.laufendenummernachdin1421 ELSE NULL END AS namensnr, n.gml_id as n_gml_id, p.gml_id, p.nachnameoderfirma, p.vorname, p.akademischergrad, p.namensbestandteil, p.geburtsname, p.geburtsdatum::date, anschrift.gml_id as anschrift_gml_id, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, 'OT '||anschrift.ortsteil as ortsteil, anschrift.bestimmungsland, w.beschreibung as Art, n.zaehler||'/'||n.nenner as anteil, coalesce(NULLIF(n.beschriebderrechtsgemeinschaft, ''),adrg.beschreibung) as zusatz_eigentuemer ";
+    $sql = "SELECT distinct coalesce(n.laufendenummernachdin1421, '0') as order1, coalesce(bestehtausrechtsverhaeltnissenzu, '0') as order2, bestehtausrechtsverhaeltnissenzu, CASE WHEN n.beschriebderrechtsgemeinschaft is null and n.artderrechtsgemeinschaft is null THEN n.laufendenummernachdin1421 ELSE NULL END AS namensnr, n.gml_id as n_gml_id, p.gml_id, p.nachnameoderfirma, p.vorname, p.akademischergrad, p.namensbestandteil, p.geburtsname, p.geburtsdatum::date, anschrift.gml_id as anschrift_gml_id, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, 'OT '||anschrift.ortsteil as ortsteil, anschrift.bestimmungsland, w.beschreibung as Art, n.zaehler||'/'||n.nenner as anteil, coalesce(NULLIF(n.beschriebderrechtsgemeinschaft, ''),adrg.beschreibung) as zusatz_eigentuemer ";
 		$sql.= "FROM alkis.ax_buchungsstelle s ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.schluessel_land AND g.bezirk = b.bezirk ";
@@ -1755,10 +1772,12 @@ FROM
       $sql.=" AND s.laufendenummer='".$BVNR."'";
     }
 		if(!$without_temporal_filter)$sql.= $this->build_temporal_filter(array('s', 'g', 'b', 'n', 'p'));
-    $sql.= " ORDER BY order1, order2, order3;";
+    $sql.= " ORDER BY order1, order2;";
     #echo $sql.'<br><br>';
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0] OR pg_num_rows($ret[1])==0) { return; }
+		$wurzel = new eigentuemer($Grundbuch,NULL, $this);
+		$Eigentuemerliste['wurzel'] = $wurzel;
     while ($rs=pg_fetch_assoc($ret[1])) {
       $Grundbuch = new grundbuch("","",$this->debug);
       
@@ -1771,8 +1790,7 @@ FROM
 				}
 			}
 			$rs['namensnr'] = implode('.', $newparts);
-      
-      $Eigentuemer = new eigentuemer($Grundbuch,$rs['namensnr']);
+      $Eigentuemer = new eigentuemer($Grundbuch,$rs['namensnr'], $this);
 
 			$Eigentuemer->gml_id = $rs['gml_id'];
       $Eigentuemer->lfd_nr=$rs['lfd_nr_name'];
@@ -1794,12 +1812,32 @@ FROM
 			$Eigentuemer->anschrift_gml_id=$rs['anschrift_gml_id'];
 			$Eigentuemer->zusatz_eigentuemer=$rs['zusatz_eigentuemer'];
 			$Eigentuemer->n_gml_id=$rs['n_gml_id'];
-      $Eigentuemerliste[]=$Eigentuemer;
+			$Eigentuemer->bestehtausrechtsverhaeltnissenzu=$rs['bestehtausrechtsverhaeltnissenzu'];
+      $Eigentuemerliste[$rs['n_gml_id']]=$Eigentuemer;
+			if($rs['namensnr'] != '')$this->writeRechtsverhaeltnisChildren($rs['n_gml_id'], $Eigentuemerliste);
     }
     $retListe[0]=0;
     $retListe[1]=$Eigentuemerliste;
     return $retListe;
   }
+	
+	function writeRechtsverhaeltnisChildren($gml_id, &$Eigentuemerliste){
+		# Diese Funktion hängt an jedes Rechtsverhältnis ein Array "children" mit den zugehörigen Kindknoten (Eigentümer bzw. Unter-Rechtsverhältnisse) an
+		# Ausgehend vom Wurzelknoten (Erstes Element aus der Eigentuemerliste) kann man damit dann den Rechtsverhältnisbaum aufbauen
+		$eigentuemer = $Eigentuemerliste[$gml_id];
+		$rechtsverhaeltnis = $eigentuemer->bestehtausrechtsverhaeltnissenzu;
+		if($rechtsverhaeltnis != ''){
+			if($rechtsverhaeltnis != '-'){
+				$Eigentuemerliste[$rechtsverhaeltnis]->children[] = $gml_id;
+				$eigentuemer->bestehtausrechtsverhaeltnissenzu = '-';
+				$this->writeRechtsverhaeltnisChildren($rechtsverhaeltnis, $Eigentuemerliste);
+			}
+		}
+		else{
+			$Eigentuemerliste['wurzel']->children[] = $gml_id;
+			$eigentuemer->bestehtausrechtsverhaeltnissenzu = '-';
+		}
+	}
   
   function getNamen($formvars, $ganze_gemkg_ids, $eingeschr_gemkg_ids){
 		if(!$formvars['exakt']){

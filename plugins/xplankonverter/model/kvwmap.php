@@ -5,17 +5,21 @@
 	* Trigger für Konvertierungen
 	*/
 	$this->trigger_functions['handle_konvertierung'] = function($fired, $event, $layer = '', $oid = 0, $old_dataset = array()) use ($GUI) {
+		echo '<br>Handle Konvertierungen trigger ';
 		$executed = true;
 		$success = true;
 
 		switch(true) {
-			# Erzeuge Layergruppe nach dem Erzeugen einer Konvertierung
+			# Erzeuge Layergruppe und Verzeichnisse nach dem Erzeugen einer Konvertierung
 			case ($fired == 'AFTER' AND $event == 'INSERT') : {
+				echo 'AFTER INSERT';
 				$konvertierung = Konvertierung::find_by_id($this, 'oid', $oid);
 				$konvertierung->create_layer_group('GML');
+				$konvertierung->create_directories();
 			} break;
 
 			case ($fired == 'INSTEAD' AND $event == 'DELETE') : {
+				echo 'INSTEAD DELETE';
 				$konvertierung = Konvertierung::find_by_id($this, 'oid', $oid);
 				$konvertierung->destroy();
 			} break;
@@ -91,13 +95,13 @@
 		$success = true;
 
 		switch(true) {
-			
+
 			case ($fired == 'AFTER' AND $event == 'INSERT') : {
 				$this->debug->show('Führe ' . $fired . ' ' . $event . ' in handle_regel Funktion aus mit oid: ' . $oid, false);
 				$regel = Regel::find_by_id($this, 'oid', $oid);
 				$regel->create_gml_layer();
 				$regel->konvertierung->set_status();
-			} break;			
+			} break;
 			
 			case ($fired == 'AFTER' AND $event == 'UPDATE') : {
 				$this->debug->show('Führe ' . $fired . ' ' . $event . ' in handle_regel Funktion aus mit oid: ' . $oid, false);
@@ -137,4 +141,20 @@
 		}
 		return array('executed' => $executed, 'success' => $success);
 	};
+
+	$this->xplankonverter_is_case_forbidden = function() {
+		$forbidden = false;
+		if ($this->formvars['konvertierung_id'] == '') {
+			echo 'Diese Link kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
+			$forbidden = true;
+		}
+		else {
+			$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
+			if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) {
+				$forbidden = true;
+			}
+		}
+		return $forbidden;
+	}
+
 ?>

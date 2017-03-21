@@ -11,6 +11,21 @@ function ImageLoadFailed(id) {
 var currentform;
 var doit;
 
+function startwaiting(lock) {
+	var lock = lock || false;
+	document.GUI.stopnavigation.value = 1;
+	waitingdiv = document.getElementById('waitingdiv');
+	waitingdiv.style.display='';
+	if(lock)waitingdiv.className='waitingdiv_spinner_lock';
+	else waitingdiv.className='waitingdiv_spinner';
+}
+
+function stopwaiting() {
+	document.GUI.stopnavigation.value = 0;
+	waitingdiv = document.getElementById('waitingdiv');
+	waitingdiv.style.display='none';
+}
+
 function getBrowserSize(){
 	if(typeof(window.innerWidth) == 'number'){
 		width = window.innerWidth;
@@ -52,6 +67,12 @@ function message(messages) {
 			'color': 'green',
 			'confirm': false
 		},
+		'info': {
+			'description': 'Info',
+			'icon': 'fa-info-circle',
+			'color': '#ff6200',
+			'confirm': true
+		},
 		'warning': {
 			'description': 'Warnung',
 			'icon': 'fa-exclamation',
@@ -77,7 +98,7 @@ function message(messages) {
 	msgDiv.html('');
 
 	$.each(messages, function (index, msg) {
-		msg.type = (msg.type ? msg.type : 'warning');
+		msg.type = (['notice, info, error'].indexOf(msg.type) > 0 ? msg.type : 'warning');
 		msgDiv.append('<div class="message-box-' + msg.type + '">' + (types[msg.type].icon ? '<div class="message-box-type"><i class="fa ' + types[msg.type].icon + '" style="color: ' + types[msg.type].color + '; cursor: default;"></i></div>' : '') + '<div class="message-box-msg">' + msg.msg + '</div><div style="clear: both"></div></div>');
 		if (types[msg.type].confirm) {
 			confirmMsgDiv = true;
@@ -241,9 +262,7 @@ function urlstring2formdata(formdata, string){
 
 function overlay_submit(gui, start){
 	// diese Funktion macht beim Fenstermodus und einer Kartenabfrage oder einem Aufruf aus dem Overlay-Fenster einen ajax-Request mit den Formulardaten des uebergebenen Formularobjektes, ansonsten einen normalen Submit
-<? if($this->main == 'map.php'){ ?>
 	startwaiting();
-<? } ?>
 	if(typeof FormData !== 'undefined' && (1 == <? echo $this->user->rolle->querymode; ?> && start || gui.id == 'GUI2')){	
 		formdata = new FormData(gui);
 		formdata.append("mime_type", "overlay_html");	
@@ -473,13 +492,24 @@ function zoomToMaxLayerExtent(zoom_layer_id){
 
 function getLayerOptions(layer_id){
 	if(document.GUI.layer_options_open.value != '')closeLayerOptions(document.GUI.layer_options_open.value);
-	ahah('index.php', 'go=getLayerOptions&layer_id='+layer_id, new Array(document.getElementById('options_'+layer_id), ''), new Array('sethtml', 'execute_function'));
+	ahah('index.php', 'go=getLayerOptions&layer_id=' + layer_id, new Array(document.getElementById('options_'+layer_id), ''), new Array('sethtml', 'execute_function'));
 	document.GUI.layer_options_open.value = layer_id;
+}
+
+function getGroupOptions(group_id) {
+	if (document.GUI.group_options_open.value != '') closeGroupOptions(document.GUI.group_options_open.value);
+	ahah('index.php', 'go=getGroupOptions&group_id=' + group_id, new Array(document.getElementById('group_options_' + group_id), ''), new Array('sethtml', 'execute_function'));
+	document.GUI.group_options_open.value = group_id;
 }
 
 function closeLayerOptions(layer_id){
 	document.GUI.layer_options_open.value = '';
 	document.getElementById('options_'+layer_id).innerHTML=' ';
+}
+
+function closeGroupOptions(group_id) {
+	document.GUI.group_options_open.value = '';
+	document.getElementById('group_options_' + group_id).innerHTML = ' ';
 }
 
 function saveLayerOptions(layer_id){	
@@ -489,6 +519,11 @@ function saveLayerOptions(layer_id){
 
 function resetLayerOptions(layer_id){	
 	document.GUI.go.value = 'resetLayerOptions';
+	document.GUI.submit();
+}
+
+function home() {
+	document.GUI.go.value = '';
 	document.GUI.submit();
 }
 
@@ -563,4 +598,27 @@ function mouseOutClassStatus(classid,imgsrc,height){
 	}
 }
 
+function showMapParameter(epsg_code, width, height) {
+	var gui = document.GUI,
+			msg = " \
+				<div style=\"text-align: left\"> \
+					<h2>Daten des aktuellen Kartenausschnitts</h2><br> \
+					Koordinatensystem: EPSG: " + epsg_code + "<br> \
+					linke untere Ecke: (" + toFixed(gui.minx.value, 3) + ", " + toFixed(gui.miny.value, 3) + ")<br> \
+					rechte obere Ecke: (" + toFixed(gui.maxx.value, 3) + ", " + toFixed(gui.maxy.value, 3) + ")<br> \
+					Ausdehnung: " + toFixed(gui.maxx.value - gui.minx.value, 3) + " x " + toFixed(gui.maxy.value-gui.miny.value,3) + "<br> \
+					Bildgröße: " + width + " x " + height + " Pixel<br> \
+					Pixelgröße: " + toFixed(gui.pixelsize.value, 3) + " \
+				</div> \
+			";
+	message([{
+			'type': 'info',
+			'msg': msg
+	}]);
+}
+
+function toFixed(value, precision) {
+	var power = Math.pow(10, precision || 0);
+	return String(Math.round(value * power) / power);
+}
 </script>
