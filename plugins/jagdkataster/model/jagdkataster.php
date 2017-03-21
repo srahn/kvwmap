@@ -267,10 +267,11 @@ class jagdkataster {
 				$flst->Buchungen=$flst->getBuchungen(NULL,NULL,0);
       	for($b = 0; $b < count($flst->Buchungen); $b++){
 	        $Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
-	        $anzEigentuemer=count($Eigentuemerliste);
-	        for($e=0;$e<$anzEigentuemer;$e++){
-	        	$rs['eigentuemer'][] = rtrim($Eigentuemerliste[$e]->Name[0], ',');						
-						$rs['eigentuemer_nr'][] = $Eigentuemerliste[$e]->NamensNr;
+	        foreach($Eigentuemerliste as $eigentuemer){
+						if($eigentuemer->Nr != ''){
+							$rs['eigentuemer'][] = rtrim($eigentuemer->Name[0], ',');						
+							$rs['eigentuemer_nr'][] = $eigentuemer->Nr;
+						}
 	        }
       	}
 				if($flst->Grundbuecher[$g]['zusatz_eigentuemer'] != ''){
