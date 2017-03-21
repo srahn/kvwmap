@@ -568,6 +568,7 @@ class ddl {
 				if(!$this->initial_yoffset)$this->initial_yoffset = 780-$this->maxy;			# der Offset von oben gesehen, mit dem das erste fortlaufende Element auf der ersten Seite beginnt; wird benutzt, um die fortlaufenden Elemente ab der 2. Seite oben beginnen zu lassen
 				if($this->layout['type'] == 2)$this->offsety = 50; else $this->offsety = 0;
 				$this->miny[$lastpage] = 1000000;
+				$this->maxy = 800;
 			}
     }
 		if($pdfobject == NULL){		# nur wenn kein PDF-Objekt aus einem übergeordneten Layer übergeben wurde, PDF erzeugen
