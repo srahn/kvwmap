@@ -281,7 +281,8 @@ a.menuered:hover {
 }
 
 #legendcontrol{
-	margin-left:13px;
+	margin-left: 18px;
+	margin-top: -10px;
 }
 
 .use_for_dataset{
@@ -1061,4 +1062,31 @@ tbody.gle tr:hover {
 	border: 1px solid #5aad35;
 	border-radius: 5px;
 	color: white;
+}
+
+.legend-tab {
+	font-weight: bold;
+	width: 118px;
+	margin-top: 1px;
+	border: 2px solid #ccc;
+	border-top-right-radius: 10px;
+	padding-top: 1px;
+	padding-right: 0px;
+	padding-bottom: 2px;
+	padding-left: 5px;
+	padding-bottom: 2px;
+}
+
+.activ-legend-tab {
+  border-bottom: 0px;
+}
+
+#legend_layer_tab {
+	float: left;
+}
+
+#legend_graphic_tab {
+	position: relative;
+	float: right;
+	left: -2px
 }

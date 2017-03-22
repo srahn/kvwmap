@@ -24,6 +24,16 @@ function startup(){
 	document.getElementById("map").SVGstartup();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 }
 
+function stopwaiting(){
+	if(typeof document.getElementById("svghelp").SVGstopwaiting == 'function')
+	document.getElementById("svghelp").SVGstopwaiting();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+}
+
+function startwaiting(){
+	if(typeof document.getElementById("svghelp").SVGstartwaiting == 'function')
+	document.getElementById("svghelp").SVGstartwaiting();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+}
+
 function showtooltip(result, showdata){
 	document.getElementById("svghelp").SVGshowtooltip(result, showdata);			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 }
@@ -93,7 +103,7 @@ function switchlegend(){
 
   $res_x    = $this->map->width;
   $res_y    = $this->map->height;
-  $legendheight = $this->map->height - LEGEND_HEIGHT_OFFSET;
+  $legendheight = $this->map->height-29;
   $res_xm   = $this->map->width/2;
   $res_ym   = $this->map->height/2;
   $dx       = $this->map->extent->maxx-$this->map->extent->minx;
@@ -140,12 +150,12 @@ if($this->formvars['gps_follow'] == ''){
             <input type="hidden" name="svg_string" value="">
             <input type="hidden" name="scrollposition" value="">
             <input type="hidden" name="vertices" id="vertices" value="">
-            <input type="hidden" name="legendtouched" value="0">            
+            <input type="hidden" name="legendtouched" value="0">
+            <input type="hidden" name="stopnavigation" value="0">
 						<input type="hidden" name="svghelp" id="svghelp">
 						<input type="hidden" name="activated_vertex" value="0">
 						<input type="hidden" name="measured_distance" value="<? echo $this->formvars['measured_distance']; ?>">						
 						<input type="hidden" name="layer_options_open" value="">
-						<input type="hidden" name="group_options_open" value="">
     <?php
         include(LAYOUTPATH.'snippets/SVG_map.php');
     ?>
@@ -174,15 +184,12 @@ if($this->formvars['gps_follow'] == ''){
 													&nbsp;&nbsp;<span class="fett"><?php echo $this->strMapScale; ?>&nbsp;1:&nbsp;</span><input type="text" id="scale" autocomplete="off" name="nScale" style="width:58px" value="<?php echo round($this->map_scaledenom); ?>">
 												</div>
 						          </td>
-			        				<td align="left" style="width:77%;<? if($this->user->rolle->runningcoords == '0'){echo ';display:none';} ?>">
+			        				<td align="left" style="width:80%;<? if($this->user->rolle->runningcoords == '0'){echo ';display:none';} ?>">
 			          				<span class="fett"><?php echo $this->strCoordinates; ?></span>&nbsp;
-			          				<input type="text" style="width: 190px" class="transparent_input" name="runningcoords" value=""><span title="<? echo $this->epsg_codes[$this->user->rolle->epsg_code]['srtext']; ?>">EPSG&#8209;Code:&nbsp;<?php echo $this->user->rolle->epsg_code; ?></span>
+			          				<input type="text" style="width: 190px" class="transparent_input" name="runningcoords" value=""><span title="<? echo $this->epsg_codes[$this->user->rolle->epsg_code]['srtext']; ?>">EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?></span>
 											</td>
 						          <td width="25%" align="right">
 						            <img id="scalebar" style="padding-right:<? if($this->user->rolle->hideLegend)echo '35';else echo '5'; ?>px" alt="Maßstabsleiste" src="<? echo $this->img['scalebar']; ?>">
-												<a href="#" onclick="showMapParameter(<? echo $this->user->rolle->epsg_code; ?>, <? echo $this->map->width; ?>, <? echo $this->map->height; ?>)">
-													<i class="fa fa-info-circle" style="margin-right: 5px; color: #666; font-size: 110%"></i>
-												</a>
 						          </td>
 						        </tr>
 						    </table>
@@ -264,22 +271,30 @@ if($this->formvars['gps_follow'] == ''){
 							?></td>
 						</tr>
 					</table>
-					<table class="table1" id="legendTable" style="display: <? echo $display; ?>" cellspacing=0 cellpadding=2 border=0>
-						<tr align="center">
-							<td><?php echo $strAvailableLayer; ?>:</td>
-						</tr>
+					<div
+						id="legend_layer_tab"
+						class="legend-tab activ-legend-tab"
+						onclick="$('.legend-tab').toggleClass('activ-legend-tab'); $('#legend_grafik').hide(); $('#legend_layer').show();"
+					>Layer</div>
+					<div
+						id="legend_graphic_tab"
+						class="legend-tab"
+						onclick="$('.legend-tab').toggleClass('activ-legend-tab'); $('#legend_layer').hide(); $('#legend_grafik').show()"
+					>Legende</div>
+					<div id="legend_layer">
+						<table class="table1" id="legendTable" style="display: <? echo $display; ?>" cellspacing=0 cellpadding=2 border=0>
 						<tr align="left">
-							<td><!-- bgcolor=#e3e3e6 -->
-							<div align="center"><?php # 2007-12-30 pk
-							?><input type="submit" name="neuladen" onclick="startwaiting(true);document.GUI.go.value='neu Laden';" value="<?php echo $strLoadNew; ?>" tabindex="1"></div>
-							<br>
-							<? if(defined('LAYER_ID_SCHNELLSPRUNG') AND LAYER_ID_SCHNELLSPRUNG != ''){
-								include(SNIPPETS.'schnellsprung.php');
-								} ?>
-							&nbsp;
+							<td><?php
+								if(defined('LAYER_ID_SCHNELLSPRUNG') AND LAYER_ID_SCHNELLSPRUNG != ''){
+									include(SNIPPETS.'schnellsprung.php');
+								} ?>&nbsp;
 							<div id="legendcontrol">
 								<a href="index.php?go=reset_querys"><img src="graphics/tool_info.png" border="0" alt="<? echo $strInfoQuery; ?>" title="<? echo $strInfoQuery.' | '.$strClearAllQuerys; ?>" width="17"></a>
-								<a href="index.php?go=reset_layers"><img src="graphics/layer.png" border="0" alt="<? echo $strLayerControl; ?>" title="<? echo $strLayerControl.' | '.$strDeactivateAllLayer; ?>" width="20" height="20"></a><br>
+								<a href="index.php?go=reset_layers"><img src="graphics/layer.png" border="0" alt="<? echo $strLayerControl; ?>" title="<? echo $strLayerControl.' | '.$strDeactivateAllLayer; ?>" width="20" height="20"></a>
+								<a
+									title="Themensteuerung | Hier klicken um Karte mit gewählten Themen neu zu laden."
+									href="#" onclick="startwaiting();document.GUI.go.value='neu Laden';document.GUI.submit();"
+								><i class="fa fa-refresh" style="font-size: 22px; color: #a82e2e; margin-left: 2px"></i></a>
 							</div>
 						<div id="scrolldiv" onscroll="document.GUI.scrollposition.value = this.scrollTop; scrollLayerOptions();" style="height:<?php echo $legendheight; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
 							<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
@@ -293,6 +308,12 @@ if($this->formvars['gps_follow'] == ''){
 							</td>
 						</tr>
 					</table>
+					</div>
+					<div
+						id="legend_grafik"
+						style="display: none; width: 254px; float: left; padding: 4px; max-height: 500px; overflow: scroll;">
+						<br>Hier wird die Legende als Grafik oder ähnlich, jedenfalls in einem separatem Div dargestellt in welches ein custom snippets eingebunden werden kann. Die Möglichkeit zum Umschalten auf die Legendengrafik muss noch per Configuration einstellbar sein. Default wird keine Legendengrafik. Ist der Parameter nicht gesetzt wird auch der Reiter oben nicht angezeigt. Max-height muss auch noch angepasst werden, so wie die Layerlegende.<br>Hier wird die Legende als Grafik oder ähnlich, jedenfalls in einem separatem Div dargestellt in welches ein custom snippets eingebunden werden kann. Die Möglichkeit zum Umschalten auf die Legendengrafik muss noch per Configuration einstellbar sein. Default wird keine Legendengrafik. Ist der Parameter nicht gesetzt wird auch der Reiter oben nicht angezeigt.<br>Hier wird die Legende als Grafik oder ähnlich, jedenfalls in einem separatem Div dargestellt in welches ein custom snippets eingebunden werden kann. Die Möglichkeit zum Umschalten auf die Legendengrafik muss noch per Configuration einstellbar sein. Default wird keine Legendengrafik. Ist der Parameter nicht gesetzt wird auch der Reiter oben nicht angezeigt.<br>Hier wird die Legende als Grafik oder ähnlich, jedenfalls in einem separatem Div dargestellt in welches ein custom snippets eingebunden werden kann. Die Möglichkeit zum Umschalten auf die Legendengrafik muss noch per Configuration einstellbar sein. Default wird keine Legendengrafik. Ist der Parameter nicht gesetzt wird auch der Reiter oben nicht angezeigt.<br>Hier wird die Legende als Grafik oder ähnlich, jedenfalls in einem separatem Div dargestellt in welches ein custom snippets eingebunden werden kann. Die Möglichkeit zum Umschalten auf die Legendengrafik muss noch per Configuration einstellbar sein. Default wird keine Legendengrafik. Ist der Parameter nicht gesetzt wird auch der Reiter oben nicht angezeigt.<br>Hier wird die Legende als Grafik oder ähnlich, jedenfalls in einem separatem Div dargestellt in welches ein custom snippets eingebunden werden kann. Die Möglichkeit zum Umschalten auf die Legendengrafik muss noch per Configuration einstellbar sein. Default wird keine Legendengrafik. Ist der Parameter nicht gesetzt wird auch der Reiter oben nicht angezeigt.<br>Hier wird die Legende als Grafik oder ähnlich, jedenfalls in einem separatem Div dargestellt in welches ein custom snippets eingebunden werden kann. Die Möglichkeit zum Umschalten auf die Legendengrafik muss noch per Configuration einstellbar sein. Default wird keine Legendengrafik. Ist der Parameter nicht gesetzt wird auch der Reiter oben nicht angezeigt.
+					</div>
 				</div>
 			</td>
     </tr>
