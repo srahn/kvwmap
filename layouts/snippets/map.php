@@ -273,16 +273,18 @@ if($this->formvars['gps_follow'] == ''){
 						</tr>
 					</table><?php
 					if ($show_legend_graphic) { ?>
-						<div
-							id="legend_layer_tab"
-							class="legend-tab activ-legend-tab"
-							onclick="$('.legend-tab').toggleClass('activ-legend-tab'); $('#legend_grafik').hide(); $('#legend_layer').show();"
-						>Layer</div>
-						<div
-							id="legend_graphic_tab"
-							class="legend-tab"
-							onclick="$('.legend-tab').toggleClass('activ-legend-tab'); $('#legend_layer').hide(); $('#legend_grafik').show()"
-						>Legende</div><?php
+						<div style="padding-top: 1px;">
+							<div class="half-width"><div
+								id="legend_layer_tab"
+								class="legend-tab activ-legend-tab"
+								onclick="$('.legend-tab').toggleClass('activ-legend-tab'); $('#legend_grafik').hide(); $('#legend_layer').show();"
+							>Layer</div></div><div class="half-width"><div
+								id="legend_graphic_tab"
+								class="legend-tab"
+								onclick="$('.legend-tab').toggleClass('activ-legend-tab'); $('#legend_layer').hide(); $('#legend_grafik').show()"
+							>Legende</div>
+						</div>
+					</div><?php
 					} ?>
 					<div id="legend_layer">
 						<table class="table1" id="legendTable" style="display: <? echo $display; ?>" cellspacing=0 cellpadding=2 border=0>
@@ -315,7 +317,7 @@ if($this->formvars['gps_follow'] == ''){
 					if ($show_legend_graphic) { ?>
 						<div
 							id="legend_grafik"
-							style="display: none; width: 246px; float: left; padding: 4px; max-height: 500px; overflow: scroll;"
+							style="display: none; width: 246px; padding: 4px; max-height: 500px; overflow: scroll;"
 						><?php include(SNIPPETS . LEGEND_GRAPHIC_FILE); ?></div><?php
 					}?>
 				</div>

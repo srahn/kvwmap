@@ -546,7 +546,7 @@ span.black {
 	clear: both;
 }
 
-a .preview_image{border:1px solid black;width: 125px;transition: all 0.25s ease;}	/* Vorschaubilder für Bilder (und PDFs) werden zunächst mit 125px Breite angezeigt und bei Hover auf 250px vergrößert */
+a .preview_image{border:1px solid black;width: 125px;transition: all 0.25s ease;}	/* Vorschaubilder fÃ¼r Bilder (und PDFs) werden zunÃ¤chst mit 125px Breite angezeigt und bei Hover auf 250px vergrÃ¶ÃŸert */
 
 a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 0.25s ease;}
 
@@ -577,8 +577,8 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 .raster_record .tr_show select{width: 112%;height:22px;transition: all 0.25s ease;}									/* Selectfelder werden auf 130px Breite verkleinert*/
 .raster_record .tr_show input{width:130px;font-size: 15px;height:22px;transition: all 0.25s ease;}		/* normale Inputfelder werden auf 130px Breite verkleinert*/
 .raster_record .tr_show input[type=file]{width:0.0001px;font-size: 0.0001px;height:0.0001px;transition: all 0.25s ease;}		/* Das FileUpload-Inputfeld soll auch versteckt werden*/
-.raster_record .tr_show .preview_image{width: 125px;transition: all 0.25s ease;}	/* Vorschaubilder für Bilder (und PDFs) werden zunächst mit 125px Breite angezeigt und bei Hover auf 250px vergrößert */
-.raster_record .tr_show .preview_doc{width: auto;}																/* Vorschaubilder für andere Dokumente nicht */
+.raster_record .tr_show .preview_image{width: 125px;transition: all 0.25s ease;}	/* Vorschaubilder fÃ¼r Bilder (und PDFs) werden zunÃ¤chst mit 125px Breite angezeigt und bei Hover auf 250px vergrÃ¶ÃŸert */
+.raster_record .tr_show .preview_doc{width: auto;}																/* Vorschaubilder fÃ¼r andere Dokumente nicht */
 /* Alle Attribute: */
 .raster_record span{line-height:0.0001px;font-size: 0px;transition: all 0.25s ease;}
 .raster_record img{width: 0px;transition: all 0.25s ease;}
@@ -1064,29 +1064,36 @@ tbody.gle tr:hover {
 	color: white;
 }
 
+.half-width {
+	display: inline-block;
+	width: 50%;
+}
+
 .legend-tab {
-	font-weight: bold;
-	width: 118px;
+	text-align: center;
+	cursor: pointer;
+	font-family: SourceSansPro2;
+	color: #a82e2e;
 	margin-top: 1px;
-	border: 2px solid #ccc;
+	border: 1px solid #aaa;
 	border-top-right-radius: 10px;
+	border-top-left-radius: 10px;
 	padding-top: 1px;
 	padding-right: 0px;
 	padding-bottom: 2px;
 	padding-left: 5px;
 	padding-bottom: 2px;
+/*	background: linear-gradient(#DAE4EC 0%, #c7d9e6 100%);*/
 }
 
 .activ-legend-tab {
-  border-bottom: 0px;
+	border-bottom-color: #efefef;
 }
 
 #legend_layer_tab {
-	float: left;
+
 }
 
 #legend_graphic_tab {
-	position: relative;
-	float: right;
-	left: -2px
+
 }
