@@ -2,6 +2,7 @@
 # 2007-12-30 pk
   include(LAYOUTPATH.'languages/map_'.$this->user->rolle->language.'.php');
 	include(LAYOUTPATH.'snippets/ahah.php');
+	$show_legend_graphic = (defined('LEGEND_GRAPHIC_FILE') and file_exists(SNIPPETS . LEGEND_GRAPHIC_FILE));
 	global $selectable_scales;
 	$selectable_scales = array_reverse($selectable_scales);
 ?>
@@ -270,17 +271,19 @@ if($this->formvars['gps_follow'] == ''){
 								}
 							?></td>
 						</tr>
-					</table>
-					<div
-						id="legend_layer_tab"
-						class="legend-tab activ-legend-tab"
-						onclick="$('.legend-tab').toggleClass('activ-legend-tab'); $('#legend_grafik').hide(); $('#legend_layer').show();"
-					>Layer</div>
-					<div
-						id="legend_graphic_tab"
-						class="legend-tab"
-						onclick="$('.legend-tab').toggleClass('activ-legend-tab'); $('#legend_layer').hide(); $('#legend_grafik').show()"
-					>Legende</div>
+					</table><?php
+					if ($show_legend_graphic) { ?>
+						<div
+							id="legend_layer_tab"
+							class="legend-tab activ-legend-tab"
+							onclick="$('.legend-tab').toggleClass('activ-legend-tab'); $('#legend_grafik').hide(); $('#legend_layer').show();"
+						>Layer</div>
+						<div
+							id="legend_graphic_tab"
+							class="legend-tab"
+							onclick="$('.legend-tab').toggleClass('activ-legend-tab'); $('#legend_layer').hide(); $('#legend_grafik').show()"
+						>Legende</div><?php
+					} ?>
 					<div id="legend_layer">
 						<table class="table1" id="legendTable" style="display: <? echo $display; ?>" cellspacing=0 cellpadding=2 border=0>
 						<tr align="left">
@@ -308,12 +311,13 @@ if($this->formvars['gps_follow'] == ''){
 							</td>
 						</tr>
 					</table>
-					</div>
-					<div
-						id="legend_grafik"
-						style="display: none; width: 254px; float: left; padding: 4px; max-height: 500px; overflow: scroll;">
-						<br>Hier wird die Legende als Grafik oder ähnlich, jedenfalls in einem separatem Div dargestellt in welches ein custom snippets eingebunden werden kann. Die Möglichkeit zum Umschalten auf die Legendengrafik muss noch per Configuration einstellbar sein. Default wird keine Legendengrafik. Ist der Parameter nicht gesetzt wird auch der Reiter oben nicht angezeigt. Max-height muss auch noch angepasst werden, so wie die Layerlegende.<br>Hier wird die Legende als Grafik oder ähnlich, jedenfalls in einem separatem Div dargestellt in welches ein custom snippets eingebunden werden kann. Die Möglichkeit zum Umschalten auf die Legendengrafik muss noch per Configuration einstellbar sein. Default wird keine Legendengrafik. Ist der Parameter nicht gesetzt wird auch der Reiter oben nicht angezeigt.<br>Hier wird die Legende als Grafik oder ähnlich, jedenfalls in einem separatem Div dargestellt in welches ein custom snippets eingebunden werden kann. Die Möglichkeit zum Umschalten auf die Legendengrafik muss noch per Configuration einstellbar sein. Default wird keine Legendengrafik. Ist der Parameter nicht gesetzt wird auch der Reiter oben nicht angezeigt.<br>Hier wird die Legende als Grafik oder ähnlich, jedenfalls in einem separatem Div dargestellt in welches ein custom snippets eingebunden werden kann. Die Möglichkeit zum Umschalten auf die Legendengrafik muss noch per Configuration einstellbar sein. Default wird keine Legendengrafik. Ist der Parameter nicht gesetzt wird auch der Reiter oben nicht angezeigt.<br>Hier wird die Legende als Grafik oder ähnlich, jedenfalls in einem separatem Div dargestellt in welches ein custom snippets eingebunden werden kann. Die Möglichkeit zum Umschalten auf die Legendengrafik muss noch per Configuration einstellbar sein. Default wird keine Legendengrafik. Ist der Parameter nicht gesetzt wird auch der Reiter oben nicht angezeigt.<br>Hier wird die Legende als Grafik oder ähnlich, jedenfalls in einem separatem Div dargestellt in welches ein custom snippets eingebunden werden kann. Die Möglichkeit zum Umschalten auf die Legendengrafik muss noch per Configuration einstellbar sein. Default wird keine Legendengrafik. Ist der Parameter nicht gesetzt wird auch der Reiter oben nicht angezeigt.<br>Hier wird die Legende als Grafik oder ähnlich, jedenfalls in einem separatem Div dargestellt in welches ein custom snippets eingebunden werden kann. Die Möglichkeit zum Umschalten auf die Legendengrafik muss noch per Configuration einstellbar sein. Default wird keine Legendengrafik. Ist der Parameter nicht gesetzt wird auch der Reiter oben nicht angezeigt.
-					</div>
+					</div><?php
+					if ($show_legend_graphic) { ?>
+						<div
+							id="legend_grafik"
+							style="display: none; width: 246px; float: left; padding: 4px; max-height: 500px; overflow: scroll;"
+						><?php include(SNIPPETS . LEGEND_GRAPHIC_FILE); ?></div><?php
+					}?>
 				</div>
 			</td>
     </tr>
