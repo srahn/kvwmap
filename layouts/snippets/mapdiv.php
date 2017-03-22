@@ -43,8 +43,8 @@
         				<td width="100%" colspan="3" class="map-bottom">
         					<table width="100%" border="0" cellpadding="0" cellspacing="0">
 						        <tr style="background-color: <? echo BG_MENUETOP; ?>;">
-						          <td style="width:150px;height:30px">
-												<div style="width:150px;" onmouseover="document.getElementById('scales').style.display='inline-block';" onmouseout="document.getElementById('scales').style.display='none';">
+						          <td style="width:145px;height:30px">
+												<div style="width:145px;" onmouseover="document.getElementById('scales').style.display='inline-block';" onmouseout="document.getElementById('scales').style.display='none';">
 													<div valign="top" style="height:0px; position:relative;">
 														<div id="scales" style="display:none; position:absolute; left:60px; bottom:-1px; width: 78px; vertical-align:top; overflow:hidden; border:solid grey 1px;">
 															<select size="<? echo count($selectable_scales); ?>" style="padding:4px; margin:-2px -17px -4px -4px;" onclick="document.GUI.nScale.value=this.value; document.getElementById('scales').style.display='none'; document.GUI.go.value='neu Laden'; document.GUI.submit();">
@@ -59,50 +59,64 @@
 													&nbsp;&nbsp;<span class="fett"><?php echo $this->strMapScale; ?>&nbsp;1:&nbsp;</span><input type="text" id="scale" autocomplete="off" name="nScale" style="width:58px" value="<?php echo round($this->map_scaledenom); ?>">
 												</div>
 						          </td>
-			        				<td align="left" style="width:80%;<? if($this->user->rolle->runningcoords == '0'){echo ';display:none';} ?>">
+			        				<td align="left" style="width:60%;<? if($this->user->rolle->runningcoords == '0') { echo ';display:none';} ?>">
 			          				<span class="fett"><?php echo $this->strCoordinates; ?></span>&nbsp;
-			          				<input type="text" style="width: 190px" class="transparent_input" name="runningcoords" value=""><span title="<? echo $this->epsg_codes[$this->user->rolle->epsg_code]['srtext']; ?>">EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?></span>
+			          				<input type="text" style="width: 140px" class="transparent_input" name="runningcoords" value="">
+												<span title="<? echo $this->epsg_codes[$this->user->rolle->epsg_code]['srtext']; ?>">EPSG:<?php echo $this->user->rolle->epsg_code; ?></span>
 											</td>
-						          <td width="25%" align="right">
-						            <img id="scalebar" style="padding-right:<? if($this->user->rolle->hideLegend)echo '35';else echo '5'; ?>px" alt="Maßstabsleiste" src="<? echo $this->img['scalebar']; ?>">
+						          <td width="28%" align="right" valign="top">
+												<div style="width: 230px">
+													<img
+														id="scalebar"
+														valign="top"
+														style="margin-top: 5px; padding-right:<? echo ($this->user->rolle->hideLegend ? '35' : '5'); ?>px"
+														alt="Maßstabsleiste"
+														src="<? echo $this->img['scalebar']; ?>"
+													>
+													<a href="#" onclick="showMapParameter(<? echo $this->user->rolle->epsg_code; ?>, <? echo $this->map->width; ?>, <? echo $this->map->height; ?>)">
+														<i class="fa fa-info-circle" style="margin-top: 8px; margin-right: 5px; color: #666; font-size: 110%"></i>
+													</a>
+												</div>
 						          </td>
 						        </tr>
 						    </table>
 						  	</td>
-						  </tr>
-        			<tr>
-        				<td width="100%" colspan="3" class="map-bottom">
-        					<table width="100%" border="0" cellpadding="0" cellspacing="0">
-										<tr style="background-color: <? echo BG_MENUETOP; ?>;">
-											<td colspan="3" style="height:22px" align="center">
-						          	<div id="lagebezeichnung">
-						          <?	if($this->Lagebezeichung!='')echo '<span class="fett">Gemeinde:&nbsp;</span>'.$this->Lagebezeichung['gemeindename'].' <span class="fett">Gemarkung:</span>&nbsp;'.$this->Lagebezeichung['gemkgname'].' ('.$this->Lagebezeichung['gemkgschl'].') <span class="fett">Flur:</span>&nbsp;'.$this->Lagebezeichung['flur']; ?>
-						          	</div>
-						          </td>
-										</tr>
-			        			<tr id="showcoords" style="background-color: <? echo BG_MENUETOP; ?>;display:none">
-			        				<td style="width:150px">
-			          					<span class="fett">&nbsp;&nbsp;<?php echo $strShowCoordinates; ?></span>&nbsp;
-			          				</td>
-			        				<td colspan="2">
-			        					<input type="text" style="width: 150px" name="firstcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?>
-			        					<? if($this->user->rolle->epsg_code2 != ''){ ?>
-			        					<br><input type="text" style="width: 150px" name="secondcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code2; ?>
-			        					<? } ?>
-			        				</td>
-			        			</tr>
-									</table>
+						  </tr><?php
+								if ($this->Lagebezeichnung != '') { ?>
+									<tr style="background-color: <? echo BG_MENUETOP; ?>; height: 30px">
+										<td width="100%" colspan="3" class="map-bottom" align="center">
+											<div id="lagebezeichnung">
+												<span class="fett">Gemeinde:</span>&nbsp;<?php echo $this->Lagebezeichung['gemeindename']; ?>
+												<span class="fett">Gemarkung:</span>&nbsp;<?php echo $this->Lagebezeichung['gemkgname']; ?>&nbsp;(<?php echo $this->Lagebezeichung['gemkgschl']; ?>)
+												<span class="fett">Flur:</span>&nbsp;<?php echo $this->Lagebezeichung['flur']; ?>
+											</div>
+										</td>
+									</tr><?php
+								} ?>
+								<tr id="showcoords" style="background-color: <? echo BG_MENUETOP; ?>; display:none">
+									<td style="height: 30px; padding-top: 2px" class="map-bottom">
+										<i class="fa fa-close" style="float: right; margin-right: 5px;" onclick="$('#showcoords').hide();"></i>
+										<span class="fett">&nbsp;&nbsp;<?php echo $strShowCoordinates; ?></span>
+										&nbsp;
+										EPSG-Code <?php echo $this->user->rolle->epsg_code;?>:
+										&nbsp;
+										<input type="text" style="width: 150px" name="firstcoords" value=""><?
+										if ($this->user->rolle->epsg_code2 != '') { ?>
+											&nbsp;
+											EPSG-Code <?php echo $this->user->rolle->epsg_code2; ?>:
+											&nbsp;
+											<input type="text" style="width: 150px" name="secondcoords" value=""><?
+										} ?>
 								</td>
-							</tr>
-			        <?
-			        # 2006-03-20 pk
+							</tr><?
+
 			        if ($this->user->rolle->newtime!='') { ?>
 			        <tr style="background-color: <? echo BG_MENUESUB; ?>;">
 			          <td class="map-options" height="36" colspan="3">
 			          	<table width="100%" border="0" cellpadding="0" cellspacing="0">
 			          		<tr>
 			          			<td>
-						          	<div id="maptime" style="padding: 2px">
+						          	<div id="maptime">
 													<table cellpadding="0" cellspacing="0">
 														<tr>
 															<td style="padding: 0 0 0 5;"><a title="<? echo $strSaveExtent; ?>" href="index.php?go=Kartenkommentar_Formular"><div class="button_background"><div class="emboss save_extent"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div></a></td>
@@ -115,7 +129,7 @@
 													</table>
 						            </div>
 						          </td>
-						          <td width="120px" class="special-options">
+						          <td width="120px" class="special-options" align="right">
 												<input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;Punktfang
 												<div id="options"></div><!-- hier werden die Spezialoptionen eingefügt -->
 											</td>

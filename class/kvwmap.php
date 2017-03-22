@@ -2405,7 +2405,7 @@ class GUI {
 
 
 
-	function resizeMap2Window(){
+	function resizeMap2Window() {
 		global $sizes;
 		
 		$size = $sizes[$this->user->rolle->gui];
@@ -2415,8 +2415,13 @@ class GUI {
 			($this->user->rolle->hideMenue  == 1 ? 0 : $size['menue']['width']) -
 			($this->user->rolle->hideLegend == 1 ? 0 : $size['legend']['width']);
 
+		if (empty($this->Lagebezeichnung)) $size['lagebezeichnung']['height'] = 0;
+
 		$height = $this->formvars['browserheight'] -
 			$size['margin']['height'] -
+			$size['scale_bar']['height'] -
+			$size['lagebezeichnung_bar']['height'] -
+			$size['map_functions_bar']['height'] -
 			$size['footer']['height'];
 
 		if($width  < 0) $width = 10;

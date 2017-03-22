@@ -101,15 +101,39 @@ function switchlegend(){
 </script>
 
 <?
+	global $sizes;
+	$map_width = $this->user->rolle->nImageWidth;
+	$legend_width = $sizes[$this->user->rolle->gui]['legend']['width'];
+	$legend_height = $this->map->height +
+		$sizes[$this->user->rolle->gui]['scale_bar']['height'] +
+		(empty($this->Lagebezeichnung) ? 0 : $sizes[$this->user->rolle->gui]['lagebezeichnung_bar']['height']) +
+		$sizes[$this->user->rolle->gui]['map_functions_bar']['height'] +
+		$sizes[$this->user->rolle->gui]['footer']['height'] -
+		66; # height of every thing above legend inclusiv tabs
 
-  $res_x    = $this->map->width;
-  $res_y    = $this->map->height;
-  $legendheight = $this->map->height - LEGEND_HEIGHT_OFFSET;
-  $res_xm   = $this->map->width/2;
-  $res_ym   = $this->map->height/2;
-  $dx       = $this->map->extent->maxx-$this->map->extent->minx;
-  $dy       = $this->map->extent->maxy-$this->map->extent->miny;
-  $pixelsize    = ($dx/$res_x+$dy/$res_y)/2;
+	$scrolldiv_height = $this->map->height +
+		$sizes[$this->user->rolle->gui]['scale_bar']['height'] +
+		(empty($this->Lagebezeichnung) ? 0 : $sizes[$this->user->rolle->gui]['lagebezeichnung_bar']['height']) +
+		$sizes[$this->user->rolle->gui]['map_functions_bar']['height'] +
+		$sizes[$this->user->rolle->gui]['footer']['height'] -
+		91; # height of every thing above scroll div inclusive tabs.
+/*
+	$msg  = 'map_height: ' . $this->map->height;
+	$msg .= '<br>scale_bar_height: ' . $sizes[$this->user->rolle->gui]['scale_bar']['height'];
+	$msg .= '<br>lagebezeichnung_bar_height: ' . $sizes[$this->user->rolle->gui]['lagebezeichnung_bar']['height'];
+	$msg .= '<br>map_functions_bar_height: ' . $sizes[$this->user->rolle->gui]['map_functions_bar']['height'];
+	$msg .= '<br>footer_height: ' . $sizes[$this->user->rolle->gui]['footer']['height'];
+	$msg .= '<br>scrolldiv_height: ' . $scrolldiv_height;
+	$msg .= '<br>legend_height: ' . $legend_height;
+	$this->add_message('error', $msg);
+*/
+	$res_x    = $this->map->width;
+	$res_y    = $this->map->height;
+	$res_xm   = $this->map->width/2;
+	$res_ym   = $this->map->height/2;
+	$dx       = $this->map->extent->maxx-$this->map->extent->minx;
+	$dy       = $this->map->extent->maxy-$this->map->extent->miny;
+	$pixelsize    = ($dx/$res_x+$dy/$res_y)/2;
 
 # 2006-02-17 pk den javascript teil, der hier drin war in SVGvars_coordscript verschoben.
 if ($this->Fehlermeldung!='') {
@@ -118,10 +142,6 @@ if ($this->Fehlermeldung!='') {
 if($this->formvars['gps_follow'] == ''){
 	$this->formvars['gps_follow'] = 'off';
 }
-?><?php
-	global $sizes;
-	$map_width = $this->user->rolle->nImageWidth;
-	$legend_width = $sizes[$this->user->rolle->gui]['legend']['width'];
 ?>
 <div id="m" style="width: <?php echo ($map_width + $legend_width); ?>px;">
 	<div

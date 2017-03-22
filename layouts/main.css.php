@@ -863,7 +863,7 @@ tbody.gle tr:hover {
 	border-right: 1px solid #CCCCCC;
 }
 
-.map-bottom{
+.map-bottom {
 	border-top: 1px solid #aaaaaa;
 }
 

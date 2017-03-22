@@ -17,7 +17,7 @@
 								id="legend_layer_tab"
 								class="legend-tab activ-legend-tab"
 								onclick="$('.legend-tab').toggleClass('activ-legend-tab'); $('#legend_graphic').hide(); $('#legend_layer').show();"
-							>Layer</div></div><div class="half-width"><div
+							>Themen</div></div><div class="half-width"><div
 								id="legend_graphic_tab"
 								class="legend-tab"
 								onclick="$('.legend-tab').toggleClass('activ-legend-tab'); $('#legend_layer').hide(); $('#legend_graphic').show()"
@@ -38,9 +38,9 @@
 								<a
 									title="Themensteuerung | Hier klicken um Karte mit gewählten Themen neu zu laden."
 									href="#" onclick="startwaiting();document.GUI.go.value='neu Laden';document.GUI.submit();"
-								><i class="fa fa-refresh" style="font-size: 22px; color: #a82e2e; margin-left: 2px"></i></a>
+								><i class="fa fa-refresh" style="font-size: 22px; color: #a82e2e; margin-left: 2px; float: right; margin-right: 15px;"></i></a>
 							</div>
-						<div id="scrolldiv" onscroll="document.GUI.scrollposition.value = this.scrollTop; scrollLayerOptions();" style="height:<?php echo $legendheight; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
+						<div id="scrolldiv" onscroll="document.GUI.scrollposition.value = this.scrollTop; scrollLayerOptions();" style="height:<?php echo $scrolldiv_height; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
 							<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
 							<div onclick="document.GUI.legendtouched.value = 1;" id="legend">
 								<? echo $this->legende; ?>
@@ -54,5 +54,5 @@
 					</table>
 					</div><?php
 					if ($show_legend_graphic) { ?>
-						<div id="legend_graphic" style="height:<?php echo $legendheight + 25; ?>"><?php include(SNIPPETS . LEGEND_GRAPHIC_FILE); ?></div><?php
+						<div id="legend_graphic" style="height:<?php echo $legend_height; ?>"><?php include(SNIPPETS . LEGEND_GRAPHIC_FILE); ?></div><?php
 					} ?>
