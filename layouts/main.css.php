@@ -1090,10 +1090,9 @@ tbody.gle tr:hover {
 	border-bottom-color: #efefef;
 }
 
-#legend_layer_tab {
-
-}
-
-#legend_graphic_tab {
-
+#legend_graphic {
+	display: none;
+	width: 246px;
+	padding: 4px;
+	overflow: scroll;"
 }
