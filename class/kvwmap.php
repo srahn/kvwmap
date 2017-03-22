@@ -2402,18 +2402,28 @@ class GUI {
 		$this->user->rolle->resetQuerys('');
 	}
 
+
+
+
 	function resizeMap2Window(){
-		global $menue_legend_widths;
-		if($menue_legend_widths[$this->user->rolle->gui] == NULL)$menue_legend_widths[$this->user->rolle->gui] = 490;
-		$width = $this->formvars['browserwidth'] - $menue_legend_widths[$this->user->rolle->gui];
-		$height = $this->formvars['browserheight'] - HEADER_FOOTER_HEIGHT;
-		if($this->user->rolle->hideMenue == 1)$width = $width + 195;
-		if($this->user->rolle->hideLegend == 1)$width = $width + 254;
-		$height = $height - 22;
-		if($height < 0)$height = 10;
-		if($width < 0)$width = 10;
+		global $sizes;
+		
+		$size = $sizes[$this->user->rolle->gui];
+
+		$width = $this->formvars['browserwidth'] -
+			$size['margin']['width'] -
+			($this->user->rolle->hideMenue  == 1 ? 0 : $size['menue']['width']) -
+			($this->user->rolle->hideLegend == 1 ? 0 : $size['legend']['width']);
+
+		$height = $this->formvars['browserheight'] -
+			$size['margin']['height'] -
+			$size['footer']['height'];
+
+		if($width  < 0) $width = 10;
+		if($height < 0) $height = 10;
 		if($height % 2 != 0)$height = $height - 1;		# muss gerade sein, sonst verspringt die Karte beim Panen immer um 1 Pixel
-		if($width % 2 != 0)$width = $width - 1;				# muss gerade sein, sonst verspringt die Karte beim Panen immer um 1 Pixel
+		if($width  % 2 != 0)$width = $width - 1;				# muss gerade sein, sonst verspringt die Karte beim Panen immer um 1 Pixel
+
 		$this->user->rolle->setSize($width.'x'.$height);
 		$this->user->rolle->readSettings();
 	}
