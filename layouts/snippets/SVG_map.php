@@ -59,7 +59,7 @@
 		else var browser = 'other';
 	}
 	 
-  function get_map_ajax(postdata){
+  function get_map_ajax(postdata, code2execute_before, code2execute_after){
 		top.startwaiting();
 		if(document.GUI.legendtouched.value == 0){
   		svgdoc = document.SVG.getSVGDocument();	
@@ -81,11 +81,9 @@
 			input_coord = document.GUI.INPUT_COORD.value;
       cmd = document.GUI.CMD.value;
 			
-			var code2execute_before;
-			var code2execute_after;
 			if(browser != 'firefox'){
-				code2execute_before = 'moveback()';
-				code2execute_after = 'startup()';
+				code2execute_before += 'moveback()';
+				code2execute_after += 'startup()';
 			}
 			
   		ahah("index.php", postdata+"&mime_type=map_ajax&INPUT_COORD="+input_coord+"&CMD="+cmd+"&code2execute_before="+code2execute_before+"&code2execute_after="+code2execute_after, 
@@ -127,35 +125,35 @@
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "zoomin";
 			document.GUI.go.value = "neu Laden";
-      get_map_ajax('go=navMap_ajax');
+      get_map_ajax('go=navMap_ajax', '', '');
      break;
      case "zoomout":
       path = pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = cmd;
 			document.GUI.go.value = "neu Laden";
-      get_map_ajax('go=navMap_ajax');
+      get_map_ajax('go=navMap_ajax', '', '');
      break;
      case "zoomin_box":
       path = pathx[0]+","+pathy[0]+";"+pathx[2]+","+pathy[2];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "zoomin";
 			document.GUI.go.value = "neu Laden";
-      get_map_ajax('go=navMap_ajax');
+      get_map_ajax('go=navMap_ajax', '', '');
      break;
 		 case "zoomin_wheel":
       path = pathx[0]+","+pathy[0]+";"+pathx[2]+","+pathy[2];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "zoomin_wheel";
 			document.GUI.go.value = "neu Laden";
-      get_map_ajax('go=navMap_ajax');
+      get_map_ajax('go=navMap_ajax', '', '');
      break;
      case "recentre":
       path = pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = cmd;
 			document.GUI.go.value = "neu Laden";
-      get_map_ajax('go=navMap_ajax');
+      get_map_ajax('go=navMap_ajax', '', '');
      break;
      case "pquery_point":
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
