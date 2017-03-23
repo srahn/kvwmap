@@ -2402,18 +2402,15 @@ class GUI {
 		$this->user->rolle->resetQuerys('');
 	}
 
-
-
-
 	function resizeMap2Window() {
 		global $sizes;
-		
+
 		$size = $sizes[$this->user->rolle->gui];
 
 		$width = $this->formvars['browserwidth'] -
 			$size['margin']['width'] -
-			($this->user->rolle->hideMenue  == 1 ? 0 : $size['menue']['width']) -
-			($this->user->rolle->hideLegend == 1 ? 0 : $size['legend']['width']);
+			($this->user->rolle->hideMenue  == 1 ? $size['menue']['hide_width'] : $size['menue']['width']) -
+			($this->user->rolle->hideLegend == 1 ? $size['legend']['hide_width'] : $size['legend']['width']);
 
 		if (empty($this->Lagebezeichnung)) $size['lagebezeichnung']['height'] = 0;
 
@@ -3465,10 +3462,10 @@ class GUI {
 		echo '~if(typeof resizemap2window != "undefined")resizemap2window();';
   }
 
-  function changeLegendDisplay(){
-  	$this->user->rolle->changeLegendDisplay($this->formvars['hide']);
-		echo '~resizemap2window();';
-  }
+	function changeLegendDisplay(){
+		$this->user->rolle->changeLegendDisplay($this->formvars['hide']);
+		echo 'hide: ' . $this->formvars['hide'] . '~resizemap2window();';
+	}
 
 	function saveOverlayPosition(){
   	$this->user->rolle->saveOverlayPosition($this->formvars['overlayx'],$this->formvars['overlayy']);

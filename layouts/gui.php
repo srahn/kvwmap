@@ -37,7 +37,7 @@
 									else {
 										include(LAYOUTPATH."snippets/".$this->main);		# normale snippets
 									} ?>
-								</div>
+                </div>
 							</td>
 						</tr>
 						<tr> 
