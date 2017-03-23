@@ -63,7 +63,7 @@
 			<img height="7" src="<? echo GRAPHICSPATH ?>leer.gif">
 	    <div id="datensatz" 
 			<? if($this->new_entry != true AND $this->user->rolle->querymode == 1){ ?>
-			onmouseenter="if(typeof FormData !== 'undefined')ahah('index.php', 'go=tooltip_query&querylayer_id=<? echo $layer['Layer_ID']; ?>&oid=<? echo $layer['shape'][$k][$attributes['table_name'][$attributes['the_geom']].'_oid']; ?>', new Array(top.document.GUI.result, ''), new Array('setvalue', 'execute_function'));"
+			onmouseenter="if(typeof FormData !== 'undefined')highlight_object(<? echo $layer['Layer_ID']; ?>, '<? echo $layer['shape'][$k][$attributes['table_name'][$attributes['the_geom']].'_oid']; ?>');"
 			<? } ?>
 			>
 	    <input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
@@ -187,52 +187,24 @@
 							if(!$layer['shape'][$k]['wfs_geom']){		// kein WFS 
 								echo '<input type="hidden" id="'.$columnname.'_'.$k.'" value="'.$layer['shape'][$k][$columnname].'">';
 
-								if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON'){ ?>
-									<table cellspacing="0" cellpadding="0">
-										<tr>
+								if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON' OR $geomtype == 'GEOMETRY')$geomtype = 'Polygon';
+								elseif($geomtype == 'POINT')$geomtype = 'Point';
+								elseif($geomtype == 'MULTILINESTRING' OR $geomtype == 'LINESTRING')$geomtype = 'Line';
+?>								
+								<table cellspacing="0" cellpadding="0">
+									<tr>
 <?								if($privileg == 1 AND !$lock[$k]) { ?>
-											<td style="padding: 0 0 0 10;"><a title="<? echo $strEditGeom; ?>" href="index.php?go=PolygonEditor&oid=<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>&layer_tablename=<? echo $geom_tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>&selected_layer_id=<? echo $layer['Layer_ID'];?>"><div class="emboss edit_geom"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+										<td style="padding: 0 0 0 10;"><a title="<? echo $strEditGeom; ?>" href="index.php?go=<? echo $geomtype; ?>Editor&oid=<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>&layer_tablename=<? echo $geom_tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>&selected_layer_id=<? echo $layer['Layer_ID'];?>&dimension=<? echo $dimension; ?>"><div class="emboss edit_geom"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
 <?								} 
-									if($layer['shape'][$k][$attributes['the_geom']]){ ?>
-											<td style="padding: 0 0 0 10;"><a title="<? echo $strMapZoom; ?>" href="javascript:zoom2object('go=zoomtoPolygon&oid=<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>&layer_tablename=<? echo $geom_tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>&selektieren=zoomonly');"><div class="emboss zoom_normal"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
-									<? if($layer['Layer_ID'] > 0){ ?>
-											<td style="padding: 0 0 0 10;"><a title="<? echo $strMapZoom.$strAndHighlight; ?>" href="javascript:zoom2object('go=zoomtoPolygon&oid=<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>&layer_tablename=<? echo $geom_tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>&selektieren=false');"><div class="emboss zoom_highlight"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
-											<td style="padding: 0 0 0 10;"><a title="<? echo $strMapZoom.$strAndHide; ?>" href="javascript:zoom2object('go=zoomtoPolygon&oid=<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>&layer_tablename=<? echo $geom_tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>&selektieren=true');"><div class="emboss zoom_select"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
-									<? }} ?>
-										</tr>
-									</table>
-<?							}
-								elseif($geomtype == 'POINT'){ ?>
-									<table cellspacing="0" cellpadding="0">
-										<tr>
-<?								if($privileg == 1 AND !$lock[$k]) { ?>
-											<td style="padding: 0 0 0 10;"><a title="<? echo $strEditGeom; ?>" href="index.php?go=PointEditor&dimension=<? echo $dimension; ?>&oid=<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>&layer_tablename=<? echo $geom_tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>"><div class="emboss edit_geom"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
-<?								}
-									if($layer['shape'][$k][$attributes['the_geom']]){ ?>
-											<td style="padding: 0 0 0 10;"><a title="<? echo $strMapZoom; ?>" href="javascript:zoom2object('go=zoomtoPoint&dimension=<? echo $dimension; ?>&oid=<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>&layer_tablename=<? echo $geom_tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>&selektieren=zoomonly')"><div class="emboss zoom_normal"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
-									<? if($layer['Layer_ID'] > 0){ ?>
-											<td style="padding: 0 0 0 10;"><a title="<? echo $strMapZoom.$strAndHighlight; ?>" href="javascript:zoom2object('go=zoomtoPoint&dimension=<? echo $dimension; ?>&oid=<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>&layer_tablename=<? echo $geom_tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>&selektieren=false')"><div class="emboss zoom_highlight"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
-											<td style="padding: 0 0 0 10;"><!--a title="<? echo $strMapZoom.$strAndHide; ?>" href="javascript:zoom2object('go=zoomtoPoint&dimension=<? #echo $dimension; ?>&oid=<?php #echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>&layer_tablename=<? #echo $geom_tablename; ?>&layer_columnname=<? #echo $columnname; ?>&layer_id=<? #echo $layer['Layer_ID'];?>&selektieren=true')"><div class="emboss zoom_select"><img src="<? #echo GRAPHICSPATH.'leer.gif'; ?>"></div></a--></td>
-									<? }} ?>
-										</tr>
-									</table>
-<?	    				}
-								elseif($geomtype == 'MULTILINESTRING' OR $geomtype == 'LINESTRING') { ?>
-									<table cellspacing="0" cellpadding="0">
-										<tr>
-<?								if($privileg == 1 AND !$lock[$k]) { ?>
-											<td style="padding: 0 0 0 10;"><a title="<? echo $strEditGeom; ?>" href="index.php?go=LineEditor&oid=<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>&layer_tablename=<? echo $geom_tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>&selected_layer_id=<? echo $layer['Layer_ID'];?>"><div class="emboss edit_geom"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
-<?								}
-									if($layer['shape'][$k][$attributes['the_geom']]){ ?>
-											<td style="padding: 0 0 0 10;"><a title="<? echo $strMapZoom; ?>" href="javascript:zoom2object('go=zoomToLine&oid=<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>&layer_tablename=<? echo $geom_tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>&selektieren=zoomonly')"><div class="emboss zoom_normal"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
-									<? if($layer['Layer_ID'] > 0){ ?>
-											<td style="padding: 0 0 0 10;"><a title="<? echo $strMapZoom.$strAndHighlight; ?>" href="javascript:zoom2object('go=zoomToLine&oid=<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>&layer_tablename=<? echo $geom_tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>&selektieren=false')"><div class="emboss zoom_highlight"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
-											<td style="padding: 0 0 0 10;"><a title="<? echo $strMapZoom.$strAndHide; ?>" href="javascript:zoom2object('go=zoomToLine&oid=<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>&layer_tablename=<? echo $geom_tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>&selektieren=true')"><div class="emboss zoom_select"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
-									<? }} ?>
-										</tr>
-									</table>
-<?
-			    				}
+								if($layer['shape'][$k][$attributes['the_geom']]){ ?>
+										<td style="padding: 0 0 0 10;"><a title="<? echo $strMapZoom; ?>" href="javascript:zoom2object(<? echo $layer['Layer_ID'];?>, '<? echo $geomtype; ?>', '<? echo $geom_tablename; ?>', '<? echo $columnname; ?>', '<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>', 'zoomonly');"><div class="emboss zoom_normal"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+								<? if($layer['Layer_ID'] > 0){ ?>
+										<td style="padding: 0 0 0 10;"><a title="<? echo $strMapZoom.$strAndHighlight; ?>" href="javascript:zoom2object(<? echo $layer['Layer_ID'];?>, '<? echo $geomtype; ?>', '<? echo $geom_tablename; ?>', '<? echo $columnname; ?>', '<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>', 'false');"><div class="emboss zoom_highlight"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+										<td style="padding: 0 0 0 10;"><a title="<? echo $strMapZoom.$strAndHide; ?>" href="javascript:zoom2object(<? echo $layer['Layer_ID'];?>, '<? echo $geomtype; ?>', '<? echo $geom_tablename; ?>', '<? echo $columnname; ?>', '<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>', 'true');"><div class="emboss zoom_select"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+								<? }} ?>
+									</tr>
+								</table>
+<?							
 						}
 						else{		# bei WFS-Layern
 ?>						<table cellspacing="0" cellpadding="0">
@@ -260,32 +232,13 @@
     					</script>
 <?					}
 						$this->titel=$strTitleGeometryEditor;
-						if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON'){
-							echo '
-							<tr>
-								<td colspan="2" align="center">';
-									include(LAYOUTPATH.'snippets/PolygonEditor.php');
-							echo'
-								</td>
-							</tr>';
-						} elseif($geomtype == 'POINT') {
-							$this->formvars['dimension'] = $dimension;
-							echo '
-							<tr>
-								<td colspan="2" align="center">';
-									include(LAYOUTPATH.'snippets/PointEditor.php');
-							echo'
-								</td>
-							</tr>';
-						} elseif($geomtype == 'MULTILINESTRING' OR $geomtype == 'LINESTRING') {
-							echo '
-							<tr>
-								<td colspan="2" align="center">';
-									include(LAYOUTPATH.'snippets/LineEditor.php');
-							echo'
-								</td>
-							</tr>';
-						}
+						echo '
+						<tr>
+							<td colspan="2" align="center">';
+								include(LAYOUTPATH.'snippets/'.$geomtype.'Editor.php');
+						echo'
+							</td>
+						</tr>';						
 						if($this->user->rolle->geom_edit_first)echo '</table><table class="tgle" border="0" cellspacing="0" cellpadding="2"><tbody class="gle">'.$datapart;
 					}
 					else echo $datapart;
