@@ -177,7 +177,7 @@
 									</a>
 								</div>
 							</div>
-							<div class="special-options" style="float: right">
+							<div class="special-options" style="float: right; margin-top: 5px; margin-right: 5px">
 								<input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;Punktfang
 							<div id="options"></div><!-- hier werden die Spezialoptionen eingefügt -->
 						</div>

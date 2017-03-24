@@ -1099,7 +1099,7 @@ tbody.gle tr:hover {
 }
 
 .activ-legend-tab {
-	border-bottom-color: #efefef;
+	border-bottom-color: #fff;
 }
 
 #legend_graphic {

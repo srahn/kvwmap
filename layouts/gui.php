@@ -9,7 +9,7 @@
 			</div>
 		</div>
 		<a name="oben"></a>
-		<table width="900" align="center" border="0" cellspacing="0" cellpadding="0">
+		<table align="center" border="0" cellspacing="0" cellpadding="0">
 			<tr>
 				<td align="center" valign="top">
 					<form name="GUI" enctype="multipart/form-data" method="post" action="index.php" id="GUI">

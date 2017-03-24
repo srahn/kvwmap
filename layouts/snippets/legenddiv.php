@@ -38,7 +38,9 @@ if ($show_legend_graphic) { ?>
 			<a
 				title="Themensteuerung | Hier klicken um Karte mit gewählten Themen neu zu laden."
 				href="#" onclick="startwaiting();document.GUI.go.value='neu Laden';document.GUI.submit();"
-			><i class="fa fa-refresh" style="font-size: 22px; color: #a82e2e; margin-left: 2px; float: right; margin-right: 15px;"></i></a>
+			><div class="emboss button_background" style="width: 122px; height: 30px; float: right; text-align: center; border: 1 solid #cccccc; border-radius: 5px; margin-right: 5px; margin-top: -5px">
+				<span style="font-family: SourceSansPro2; color: #444; font-weight: bold">Neu Laden <i class="fa fa-refresh" style="font-size: 16; color: #3E6AA9; margin-left: 5px; margin-top: 5px;"></i></span>
+			</div></a>
 		</div>
 	<div id="scrolldiv" onscroll="document.GUI.scrollposition.value = this.scrollTop; scrollLayerOptions();" style="height:<?php echo $scrolldiv_height; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
 		<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">

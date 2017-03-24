@@ -26,16 +26,19 @@
 		$size['map_functions_bar']['height'] +
 		$size['footer']['height'] -
 		91; # height of every thing above scroll div inclusive tabs.
-	/*
-	$msg  = 'map width x height: ' . $this->map->width . ' x ' . $this->map->height;
+
+	$msg  = 'browser width x height: ' . $this->formvars['browserwidth'] . ' x ' . $this->formvars['browserwidth'];
+	$msg .= '<br>map width x height: ' . $this->map->width . ' x ' . $this->map->height;
 	$msg .= '<br>scale_bar_height: ' . $size['scale_bar']['height'];
 	$msg .= '<br>lagebezeichnung_bar_height: ' . $size['lagebezeichnung_bar']['height'];
 	$msg .= '<br>map_functions_bar_height: ' . $size['map_functions_bar']['height'];
 	$msg .= '<br>footer_height: ' . $size['footer']['height'];
 	$msg .= '<br>scrolldiv_height: ' . $scrolldiv_height;
+	$msg .= '<br>menue hide width: ' . $size['menue']['hide_width'];
+	$msg .= '<br>menue width: ' . $size['menue']['width'];
 	$msg .= '<br>legend width x height: ' . $legend_width . ' x ' . $legend_height;
-	$this->add_message('error', $msg);
-*/
+#	$this->add_message('error', $msg);
+
 	$res_x    = $this->map->width;
 	$res_y    = $this->map->height;
 	$res_xm   = $this->map->width/2;
@@ -152,7 +155,7 @@ if($this->formvars['gps_follow'] == ''){
 <div id="map_frame" style="position: relative; width: <?php echo $map_width + $legend_width; ?>px; height: <?php echo $legend_height; ?>px;">
 	<div
 		id="map"
-		style="float: left; width: <?php echo $map_width; ?>px; overflow: scroll;"
+		style="float: left; width: <?php echo $map_width; ?>px;"
 	>
 		<?php include(SNIPPETS . 'mapdiv.php'); ?>
 	</div>

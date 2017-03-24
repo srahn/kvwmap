@@ -521,6 +521,9 @@ class GUI {
 												$imagename = TEMPPATH_REL.$newname;												
 												$status = 1;
 											}
+											if (!empty($layer['Class'][$k]['legendgraphic'])) {
+												$imagename = GRAPHICSPATH . 'custom/' . $layer['Class'][$k]['legendgraphic'];
+											}
 											$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="'.$status.'"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\','.$height.')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\','.$height.')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\', '.$this->user->rolle->instant_reload.','.$height.')"><img style="vertical-align:middle;padding-bottom: '.$padding.'" border="0" name="imgclass'.$classid.'" src="'.$imagename.'"></a>';
 										}
 										$legend .= '&nbsp;<span class="px13">'.html_umlaute($class->name).'</span></td></tr>';
@@ -7149,9 +7152,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $expression = @array_values($this->formvars['expression']);
 		$text = @array_values($this->formvars['text']);
 		$classification = @array_values($this->formvars['classification']);
+		$legendgraphic = @array_values($this->formvars['legendgraphic']);
     $order = @array_values($this->formvars['order']);
+    $legendorder = @array_values($this->formvars['legendorder']);
     $this->classes = $mapDB->read_Classes($old_layer_id);
-    for($i = 0; $i < count($name); $i++){
+    for($i = 0; $i < count($name); $i++) {
       $attrib['name'] = $name[$i];
 			foreach($supportedLanguages as $language){
 				if($language != 'german'){
@@ -7162,7 +7167,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $attrib['expression'] = $expression[$i];
 			$attrib['text'] = $text[$i];
 			$attrib['classification'] = $classification[$i];
+			$attrib['legendgraphic'] = $legendgraphic[$i];
       $attrib['order'] = $order[$i];
+			$attrib['legendorder'] = $legendorder[$i];
       $attrib['class_id'] = $this->classes[$i]['Class_ID'];
       $mapDB->update_Class($attrib);
     }
@@ -14402,24 +14409,45 @@ class db_mapObj{
   // }
 
 
-  function read_ClassesbyClassid($class_id) {
+	function read_ClassesbyClassid($class_id) {
 		global $language;
-    $sql ='SELECT ';
-		if($language != 'german') {
-			$sql.='CASE WHEN `Name_'.$language.'` IS NOT NULL THEN `Name_'.$language.'` ELSE `Name` END AS ';
+
+		$sql = "
+			SELECT" .
+				((!$all_languages AND $language != 'german') ? "
+					CASE
+						WHEN `Name_" . $language . "` IS NOT NULL THEN `Name_" . $language . "`
+						ELSE `Name`
+					END" : "`Name`"
+				) . " AS Name,
+				`Class_ID`,
+				`Layer_ID`,
+				`Expression`,
+				`classification`,
+				`legendgraphic`,
+				`drawingorder`,
+				`legendorder`,
+				`text`
+			FROM
+				`classes`
+			WHERE
+				`Class_ID` = " . $class_id . "
+			ORDER BY
+				`classification`,
+				`drawingorder`,
+				`Class_ID`
+		";
+
+		#echo $sql;
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Class - Lesen der Classen eines Layers:<br>" . $sql, 4);
+		$query=mysql_query($sql);
+		if ($query == 0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
+		while ($rs = mysql_fetch_array($query)) {
+			$rs['Style'] = $this->read_Styles($rs['Class_ID']);
+			$rs['Label'] = $this->read_Label($rs['Class_ID']);
+			$Classes[] = $rs;
 		}
-		$sql.='Name, Class_ID, Layer_ID, Expression, classification, drawingorder, text FROM classes';
-    $sql.=' WHERE Class_ID = '.$class_id.' ORDER BY classification, drawingorder,Class_ID';
-    #echo $sql;
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Class - Lesen der Classen eines Layers:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
-    while($rs=mysql_fetch_array($query)) {
-      $rs['Style']=$this->read_Styles($rs['Class_ID']);
-      $rs['Label']=$this->read_Label($rs['Class_ID']);
-      $Classes[]=$rs;
-    }
-    return $Classes;
+		return $Classes;
 	}
 
 	function read_Classes($Layer_ID, $disabled_classes = NULL, $all_languages = false, $classification = '') {
@@ -14427,28 +14455,29 @@ class db_mapObj{
 
 		$sql = "
 			SELECT " .
-				(
-					(!$all_languages AND $language != 'german') ? "
-						CASE
-							WHEN `Name_" . $language . "`IS NOT NULL THEN `Name_" . $language . "`
-							ELSE `Name`
-						END AS Name
-					" : "Name"
-				) . ",
+				((!$all_languages AND $language != 'german') ? "
+					CASE
+						WHEN `Name_" . $language . "`IS NOT NULL THEN `Name_" . $language . "`
+						ELSE `Name`
+					END" : "
+					`Name`"
+				) . " AS Name,
 				`Name_low-german`,
 				`Name_english`,
 				`Name_polish`,
 				`Name_vietnamese`,
-				Class_ID,
-				Layer_ID,
-				Expression,
-				classification,
-				drawingorder,
-				text
+				`Class_ID`,
+				`Layer_ID`,
+				`Expression`,
+				`classification`,
+				`legendgraphic`,
+				`drawingorder`,
+				`legendorder`,
+				`text`
 			FROM
-				classes
+				`classes`
 			WHERE
-				Layer_ID = " . $Layer_ID .
+				`Layer_ID` = " . $Layer_ID .
 				(
 					(!empty($classification)) ? " AND
 						(
@@ -14461,39 +14490,39 @@ class db_mapObj{
 				drawingorder,
 				Class_ID
 		";
-    #echo $sql.'<br>';
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Class - Lesen der Classen eines Layers:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
-    while($rs=mysql_fetch_assoc($query)) {
-      $rs['Style']=$this->read_Styles($rs['Class_ID']);
-      $rs['Label']=$this->read_Label($rs['Class_ID']);
-      #Anne
-      if($disabled_classes){
-				if($disabled_classes['status'][$rs['Class_ID']] == 2){
+		#echo $sql.'<br>';
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Class - Lesen der Classen eines Layers:<br>" . $sql, 4);
+		$query = mysql_query($sql);
+		if ($query == 0) { echo "<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__; return 0; }
+		while ($rs = mysql_fetch_assoc($query)) {
+			$rs['Style'] = $this->read_Styles($rs['Class_ID']);
+			$rs['Label'] = $this->read_Label($rs['Class_ID']);
+			#Anne
+			if($disabled_classes){
+				if($disabled_classes['status'][$rs['Class_ID']] == 2) {
 					$rs['Status'] = 1;
-					for($i = 0; $i < count($rs['Style']); $i++){
-						if($rs['Style'][$i]['color'] != '' AND $rs['Style'][$i]['color'] != '-1 -1 -1'){
+					for($i = 0; $i < count($rs['Style']); $i++) {
+						if ($rs['Style'][$i]['color'] != '' AND $rs['Style'][$i]['color'] != '-1 -1 -1') {
 							$rs['Style'][$i]['outlinecolor'] = $rs['Style'][$i]['color'];
 							$rs['Style'][$i]['color'] = '-1 -1 -1';
-							if($rs['Style'][$i]['width'] == '')$rs['Style'][$i]['width'] = 3;
-							if($rs['Style'][$i]['minwidth'] == '')$rs['Style'][$i]['minwidth'] = 2;
-							if($rs['Style'][$i]['maxwidth'] == '')$rs['Style'][$i]['maxwidth'] = 4;
+							if($rs['Style'][$i]['width'] == '') $rs['Style'][$i]['width'] = 3;
+							if($rs['Style'][$i]['minwidth'] == '') $rs['Style'][$i]['minwidth'] = 2;
+							if($rs['Style'][$i]['maxwidth'] == '') $rs['Style'][$i]['maxwidth'] = 4;
 							$rs['Style'][$i]['symbolname'] = '';
 						}
 					}
 				}
-				elseif($disabled_classes['status'][$rs['Class_ID']] == '0'){
+				elseif ($disabled_classes['status'][$rs['Class_ID']] == '0') {
 					$rs['Status'] = 0;
 				}
 				else $rs['Status'] = 1;
-      }
-      else $rs['Status'] = 1;
+			}
+			else $rs['Status'] = 1;
 
-      $Classes[]=$rs;
-    }
-    return $Classes;
-  }
+			$Classes[] = $rs;
+		}
+		return $Classes;
+	}
 
   function read_disabled_classes(){
   	#Anne
@@ -16223,21 +16252,43 @@ class db_mapObj{
     }
   }
 
-  function update_Class($attrib){
+	function update_Class($attrib) {
 		global $supportedLanguages;
-    # attrib:(Name, Layer_ID, Expression, classification, drawingorder, Class_ID)
-    $sql = 'UPDATE classes SET Name = "'.$attrib['name'].'",';
-		foreach($supportedLanguages as $language){
-			if($language != 'german'){
-				$sql.= '`Name_'.$language.'` = "'.$attrib['name_'.$language].'",';
-			}
-		}
-		$sql.= 'Layer_ID = '.$attrib['layer_id'].', Expression = "'.$attrib['expression'].'", text = "'.$attrib['text'].'", classification = "' . $attrib['classification'] . '", drawingorder = "'.$attrib['order'].'" WHERE Class_ID = '.$attrib['class_id'];
-    #echo $sql.'<br>';
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->update_Class - Aktualisieren einer Klasse:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
-  }
+
+		$foreign_names = implode(
+			', ',
+			array_map(
+				function($language) {
+					if ($language != 'german') {
+						return "`Name_" . $language . "` = '" . $attrib['Name_' . $language] . "'";
+					}
+				},
+				$supportedLanguages
+			)
+		);
+
+		$sql = "
+			UPDATE
+				classes
+			SET
+				`Name` = '" . $attrib['name'] . "'," .
+				$foreign_names . "
+				`Layer_ID` = " . $attrib['layer_id'] . ",
+				`Expression` = '" . $attrib['expression'] . "',
+				`text` = '" . $attrib['text'] . "',
+				`classification` = '" . $attrib['classification'] . "',
+				`legendgraphic`= '" . $attrib['legendgraphic'] . "',
+				`drawingorder` = " . $attrib['order'] . ",
+				`legendorder` = ". $attrib['legendorder'] . "
+			WHERE
+				`Class_ID` = " . $attrib['class_id'] . "
+		";
+
+		#echo $sql.'<br>';
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->update_Class - Aktualisieren einer Klasse:<br>".$sql,4);
+		$query=mysql_query($sql);
+		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
+	}
 
   function new_Style($style){
     if(is_array($style)){
