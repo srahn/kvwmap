@@ -517,7 +517,8 @@ class data_import_export {
 			$sql .= ' FROM '.$importfile;
 			$options = $this->formvars['table_option'];
 			$options.= ' -nlt PROMOTE_TO_MULTI -lco FID=gid';
-			$ret = $this->ogr2ogr_import($this->formvars['schema_name'], $this->formvars['table_name'], $formvars['epsg'], UPLOADPATH.$importfile.'.shp', $database, NULL, $sql, $options, 'UTF8');
+			$encoding = $this->getEncoding(UPLOADPATH.$this->formvars['dbffile']);
+			$ret = $this->ogr2ogr_import($this->formvars['schema_name'], $this->formvars['table_name'], $formvars['epsg'], UPLOADPATH.$importfile.'.shp', $database, NULL, $sql, $options, $encoding);
 			
       
       // # erzeugte SQL-Datei anpassen
@@ -707,6 +708,18 @@ class data_import_export {
 		#echo $command;
 		exec($command, $output, $ret);
 		return $ret;
+	}
+	
+	function getEncoding($dbf){
+		$folder = dirname($dbf);
+		$command = OGR_BINPATH.'ogr2ogr -f CSV '.$folder.'/test.csv '.$dbf;
+		exec($command, $output, $ret);
+		$command = 'file '.$folder.'/test.csv';
+		exec($command, $output, $ret);
+		unlink($folder.'/test.csv');
+		if(strpos($output[0], 'UTF') !== false)$encoding = 'UTF-8';
+		if(strpos($output[0], 'ISO-8859') !== false)$encoding = 'LATIN1';
+		return $encoding;
 	}
 	
 	function create_csv($result, $attributes, $groupnames){
