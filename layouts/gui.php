@@ -4,7 +4,7 @@
 	</head>
 	<body onload="onload_functions();">
 		<div id="waitingdiv" style="position: absolute;height: 100%; width: 100%; display:none; z-index: 1000000; text-align: center">
-			<div style="margin: 350px">
+			<div style="position: absolute;  top: 50%; left: 50%; transform: translate(-50%,-50%);">
 				<i class="fa fa-spinner fa-7x wobble-fix spinner"></i>
 			</div>
 		</div>

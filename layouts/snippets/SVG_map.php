@@ -365,6 +365,7 @@ function startup(){';
 	set_suchkreis();
 	eval(doing+"()");	
   document.getElementById(doing+"0").style.setProperty("fill",highlighted,"");
+	pinching = false;
 }
 
 function sendpath(cmd, pathx, pathy){
@@ -446,14 +447,13 @@ function touchstart(evt){
 
 function touchmove(evt){
 	if(top.document.GUI.stopnavigation.value == 0){
-		if(evt.touches.length == 1){		// 1 Finger
+		if(pinching == false && evt.touches.length == 1){		// 1 Finger
 			touchx = evt.clientX = evt.touches[0].pageX;
 			touchy = evt.clientY = evt.touches[0].pageY;
 			mousemove(evt);
 		}
 		else if(pinching){
-			delta = getPinchDistance(evt) - pinch_distance;			
-			var z = 1 + delta/100000;
+			z = getPinchDistance(evt) / pinch_distance;
 			var p = getEventPoint(evt);
 			if(p.x > 0 && p.y > 0){
 				zoomTransform(p, z, start_ctm);
@@ -463,14 +463,14 @@ function touchmove(evt){
 }
 
 function touchend(evt){
-	if(!pinching){		// 1 Finger
+	if(pinching == false){		// 1 Finger
 		evt.clientX = touchx;
 		evt.clientY = touchy;
 		mouseup(evt);
 	}
-	else if(pinching){
+	else if(evt.touches.length == 0 && pinching){
 		applyZoom();
-		pinching = false;
+		//pinching = false;
 	}
 }
 

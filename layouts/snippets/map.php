@@ -66,16 +66,6 @@ function startup(){
 	document.getElementById("map").SVGstartup();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 }
 
-function stopwaiting(){
-	if(typeof document.getElementById("svghelp").SVGstopwaiting == 'function')
-	document.getElementById("svghelp").SVGstopwaiting();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-}
-
-function startwaiting(){
-	if(typeof document.getElementById("svghelp").SVGstartwaiting == 'function')
-	document.getElementById("svghelp").SVGstartwaiting();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-}
-
 function showtooltip(result, showdata){
 	document.getElementById("svghelp").SVGshowtooltip(result, showdata);			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 }
