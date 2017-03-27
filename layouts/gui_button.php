@@ -39,7 +39,7 @@ if($this->user->rolle->querymode == 1){
 								$this->debug->write("Include <b>".LAYOUTPATH."snippets/menue_button_switch.php</b> in gui.php",4);    
 								include(LAYOUTPATH."snippets/menue_button_switch.php"); ?>
 						</td>
-            <td align="center" valign="top" background="<?php echo GRAPHICSPATH; ?>bg.gif" style="border-right: 1px solid; border-color: #FFFFFF #CCCCCC #CCCCCC;">
+            <td align="center" width="100%" valign="top" background="<?php echo GRAPHICSPATH; ?>bg.gif" style="border-right: 1px solid; border-color: #FFFFFF #CCCCCC #CCCCCC;">
 							<div style=" position: relative; overflow: hidden; ">
 								<script type="text/javascript">
 									currentform = document.GUI;
