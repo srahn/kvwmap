@@ -150,11 +150,9 @@
 				vectorx = top.document.GUI.lastcoordx.value - coorxf;
 				vectory = top.document.GUI.lastcoordy.value - cooryf;
 				distance = format_number(Math.sqrt(Math.pow(vectorx, 2) + Math.pow(vectory, 2)), false, true, false);
-				window.status = " R:" + coorxf + " / H:" + cooryf + "  Entfernung: " + distance + " m    EPSG: "+'.$this->user->rolle->epsg_code.';
 				if(top.document.GUI.runningcoords != undefined)top.document.GUI.runningcoords.value = coorxf + " / " + cooryf + "   " + distance + " m"; 
 			}
 			else{
-				window.status = " R:" + coorxf + " / H:" + cooryf + "   EPSG: "+'.$this->user->rolle->epsg_code.';
 				if(top.document.GUI.runningcoords != undefined)top.document.GUI.runningcoords.value = coorxf + " / " + cooryf; 
 			}			
 		}

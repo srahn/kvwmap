@@ -21,17 +21,9 @@ document.onkeydown = function(ev){
 	}
 }
 
-function changeInputType(oldObject, oType) {
-	if(oldObject != undefined){
-	  var newObject = document.createElement('input');
-	  newObject.type = oType;
-	  if(oldObject.style.width) newObject.style.width = oldObject.style.width;
-	  if(oldObject.value) newObject.value = oldObject.value;
-	  if(oldObject.name) newObject.name = oldObject.name;
-	  if(oldObject.id) newObject.id = oldObject.id;
-	  if(oldObject.className) newObject.className = oldObject.className;
-	  oldObject.parentNode.replaceChild(newObject,oldObject);
-	  return newObject;
+function changeInputType(Object, oType) {
+	if(object != undefined){
+		object.type = oType;
 	}
 }
 

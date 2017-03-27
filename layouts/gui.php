@@ -21,7 +21,7 @@
 								</td>
 							</tr>
 							<tr> 
-							<td width="1%" valign="top" background="<?php echo GRAPHICSPATH."bg.gif"; ?>" style="border: 1px solid; border-color: #FFFFFF #CCCCCC #CCCCCC;"> <?php
+							<td width="1" valign="top" background="<?php echo GRAPHICSPATH."bg.gif"; ?>" style="border: 1px solid; border-color: #FFFFFF #CCCCCC #CCCCCC;"> <?php
 								$this->debug->write("Include <b>".LAYOUTPATH."snippets/menue_switch.php</b> in gui.php",4);
 								include(SNIPPETS . "menue_switch.php"); ?>
 							</td>

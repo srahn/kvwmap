@@ -33,7 +33,7 @@ if($this->user->rolle->querymode == 1){
        ?></td>
           </tr>
           <tr> 
-						<td width="1%" valign="top" background="<?php echo GRAPHICSPATH."bg.gif"; ?>" style="border: 1px solid; border-color: #FFFFFF #CCCCCC #CCCCCC;"> 
+						<td width="1" valign="top" background="<?php echo GRAPHICSPATH."bg.gif"; ?>" style="border: 1px solid; border-color: #FFFFFF #CCCCCC #CCCCCC;"> 
 							<?php
 								$this->debug->write("Include <b>".LAYOUTPATH."snippets/menue_button_switch.php</b> in gui.php",4);    
 								include(LAYOUTPATH."snippets/menue_button_switch.php"); ?>
