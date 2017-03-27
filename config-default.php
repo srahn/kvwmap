@@ -55,8 +55,63 @@ define('FOOTER', 'footer.php');															# Version 1.8.0
 # Höhe von Header und Footer zusammen
 define('HEADER_FOOTER_HEIGHT', 132);																# Version 2.0
 # Breite von Menü und Legende zusammen
-$menue_legend_widths = array('gui.php' => 485, 'gui_button.php' => 486);		# Version 2.0
-define('LEGEND_HEIGHT_OFFSET', 29);													# Version 2.7
+#$menue_legend_widths = array('gui.php' => 485, 'gui_button.php' => 486);		# Version 2.0
+
+# Breiten von Rand, Menü und Legende zusammen
+#$menue_legend_widths = array('gui.php' => 459, 'gui_button.php' => 486);		# Version 2.0 gelöscht in Version 2.7
+
+# Höhen und Breiten von Browser, Rand, Header, Footer, Menü und Legende																# Version 2.7
+$sizes = array(
+	'gui.php' => array(
+		'margin' => array(
+			'width'  => 10,
+			'height' => 10
+		),
+		'header' => array(
+			'height' => 25
+		),
+		'scale_bar' => array(
+			'height' => 30
+		),
+		'lagebezeichnung_bar' => array(
+			'height' => 30
+		),
+		'map_functions_bar' => array(
+			'height' => 36
+		),
+		'footer' => array(
+			'height' => 20
+		),
+		'menue' => array(
+			'width'  => 209,
+			'hide_width' => 22
+		),
+		'legend' => array(
+			'width' => 250,
+			'hide_width' => 27
+		)
+	),
+	'gui_button.php' => array(
+		'margin' => array(
+			'width'  => 10,
+			'height' => 22
+		),
+		'header' => array(
+			'height' => 25
+		),
+		'footer' => array(
+			'height' => 107
+		),
+		'menue' => array(
+			'width'  => 209
+		),
+		'legend' => array(
+			'width' => 250
+		)
+	)
+);
+
+define('LEGEND_GRAPHIC_FILE', 'custom/legend_graphic.php');		# Version 2.7
 
 # login.php
 define('LOGIN', 'login.php');																# Version 1.8.0
