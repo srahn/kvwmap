@@ -3,7 +3,7 @@
 	if($layerset != NULL){ ?>
 
 <div style="margin-right: 4px;">
-	<table style="border:1px solid grey" width="100%">
+	<table style="border:1px solid lightgrey" width="100%">
 	<?
 		$legendheight -= 48;
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);

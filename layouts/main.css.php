@@ -286,7 +286,8 @@ a.menuered:hover {
 
 #legendcontrol{
 	margin-left: 18px;
-	margin-top: -10px;
+	margin-top: -7px;
+	margin-bottom: 7px;
 }
 
 .use_for_dataset{
