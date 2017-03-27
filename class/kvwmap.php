@@ -7169,7 +7169,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$attrib['classification'] = $classification[$i];
 			$attrib['legendgraphic'] = $legendgraphic[$i];
 			$attrib['order'] = $order[$i];
-			$attrib['legendorder'] = ($legendorder[$i] == '' ? 0 : $legendorder[$i]);
+			$attrib['legendorder'] = ($legendorder[$i] == '' ? 'NULL' : $legendorder[$i]);
 			$attrib['class_id'] = $this->classes[$i]['Class_ID'];
 			$mapDB->update_Class($attrib);
 		}
