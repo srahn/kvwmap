@@ -518,13 +518,17 @@ class GUI {
 												$status = 2;
 											}
 											else{
-												$imagename = TEMPPATH_REL.$newname;												
+												$imagename = TEMPPATH_REL.$newname;
 												$status = 1;
 											}
-											if (!empty($layer['Class'][$k]['legendgraphic'])) {
+											if ($layer['Class'][$k]['legendgraphic'] != '') {
 												$imagename = GRAPHICSPATH . 'custom/' . $layer['Class'][$k]['legendgraphic'];
+												$new_class_image = $imagename;
 											}
-											$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="'.$status.'"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\','.$height.')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\','.$height.')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\', '.$this->user->rolle->instant_reload.','.$height.')"><img style="vertical-align:middle;padding-bottom: '.$padding.'" border="0" name="imgclass'.$classid.'" src="'.$imagename.'"></a>';
+											else {
+												$new_class_image = TEMPPATH_REL . $newname;
+											}
+											$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="'.$status.'"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.$new_class_image.'\','.$height.')" onmouseout="mouseOutClassStatus('.$classid.',\''.$new_class_image.'\','.$height.')" onclick="changeClassStatus('.$classid.',\''.$new_class_image.'\', '.$this->user->rolle->instant_reload.','.$height.')"><img style="vertical-align:middle;padding-bottom: '.$padding.'" border="0" name="imgclass'.$classid.'" src="'.$imagename.'"></a>';
 										}
 										$legend .= '&nbsp;<span class="px13">'.html_umlaute($class->name).'</span></td></tr>';
 									}
