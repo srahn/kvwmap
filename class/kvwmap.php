@@ -7149,32 +7149,32 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				$name_[$language] = @array_values($this->formvars['name_'.$language]);
 			}
 		}
-    $expression = @array_values($this->formvars['expression']);
+		$expression = @array_values($this->formvars['expression']);
 		$text = @array_values($this->formvars['text']);
 		$classification = @array_values($this->formvars['classification']);
 		$legendgraphic = @array_values($this->formvars['legendgraphic']);
-    $order = @array_values($this->formvars['order']);
-    $legendorder = @array_values($this->formvars['legendorder']);
-    $this->classes = $mapDB->read_Classes($old_layer_id);
-    for($i = 0; $i < count($name); $i++) {
-      $attrib['name'] = $name[$i];
+		$order = @array_values($this->formvars['order']);
+		$legendorder = @array_values($this->formvars['legendorder']);
+		$this->classes = $mapDB->read_Classes($old_layer_id);
+		for($i = 0; $i < count($name); $i++) {
+			$attrib['name'] = $name[$i];
 			foreach($supportedLanguages as $language){
 				if($language != 'german'){
 					$attrib['name_'.$language] = $name_[$language][$i];
 				}
 			}
-      $attrib['layer_id'] = $this->formvars['selected_layer_id'];
-      $attrib['expression'] = $expression[$i];
+			$attrib['layer_id'] = $this->formvars['selected_layer_id'];
+			$attrib['expression'] = $expression[$i];
 			$attrib['text'] = $text[$i];
 			$attrib['classification'] = $classification[$i];
 			$attrib['legendgraphic'] = $legendgraphic[$i];
-      $attrib['order'] = $order[$i];
-			$attrib['legendorder'] = $legendorder[$i];
-      $attrib['class_id'] = $this->classes[$i]['Class_ID'];
-      $mapDB->update_Class($attrib);
-    }
-    $this->Layereditor();
-  }
+			$attrib['order'] = $order[$i];
+			$attrib['legendorder'] = (empty($legendorder[$i]) ? 0 : $legendorder[$i]);
+			$attrib['class_id'] = $this->classes[$i]['Class_ID'];
+			$mapDB->update_Class($attrib);
+		}
+		$this->Layereditor();
+	}
 
   /*
   * Weist Layer Stellen zu
@@ -16284,7 +16284,7 @@ class db_mapObj{
 				`Class_ID` = " . $attrib['class_id'] . "
 		";
 
-		#echo $sql.'<br>';
+		echo $sql.'<br>';
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->update_Class - Aktualisieren einer Klasse:<br>".$sql,4);
 		$query=mysql_query($sql);
 		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
