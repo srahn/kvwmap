@@ -37,6 +37,7 @@
 	$msg .= '<br>menue hide width: ' . $size['menue']['hide_width'];
 	$msg .= '<br>menue width: ' . $size['menue']['width'];
 	$msg .= '<br>legend width x height: ' . $legend_width . ' x ' . $legend_height;
+	$msg .= '<br>map_frame width x height: ' . ($map_width + $legend_width);
 #	$this->add_message('error', $msg);
 
 	$res_x    = $this->map->width;
@@ -142,7 +143,7 @@ if($this->formvars['gps_follow'] == ''){
 	$this->formvars['gps_follow'] = 'off';
 }
 ?>
-<div id="map_frame" style="position: relative; width: <?php echo $map_width + $legend_width; ?>px; height: <?php echo $legend_height; ?>px;">
+<div id="map_frame" style="position: relative; width: <?php echo ($map_width + $legend_width + 1); ?>px; height: <?php echo $legend_height; ?>px;">
 	<div
 		id="map"
 		style="float: left; width: <?php echo $map_width; ?>px;"

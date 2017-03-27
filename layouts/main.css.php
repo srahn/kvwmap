@@ -280,6 +280,10 @@ a.menuered:hover {
 	margin-left:5px;
 }
 
+#legenddiv {
+	border-left: 1px solid #ccc;
+}
+
 #legendcontrol{
 	margin-left: 18px;
 	margin-top: -10px;

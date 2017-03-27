@@ -29,7 +29,6 @@ session_start();
 # peter.korduan@gdi-service.de                                    #
 # stefan.rahn@gdi-service.de                                      #
 ###################################################################
-
 // function microtime_float1(){
    // list($usec, $sec) = explode(" ", microtime());
    // return ((float)$usec + (float)$sec);
