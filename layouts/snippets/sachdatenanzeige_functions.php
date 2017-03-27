@@ -428,10 +428,15 @@ include('funktionen/input_check_functions.php');
 		}
 	}
 
-	zoom2object = function(params){
+	highlight_object = function(layer_id, oid){
+		ahah('index.php', 'go=tooltip_query&querylayer_id='+layer_id+'&oid='+oid, new Array(top.document.GUI.result, ''), new Array('setvalue', 'execute_function'));
+	}
+	
+	zoom2object = function(layer_id, geomtype, tablename, columnname, oid, selektieren){
+		params = 'go=zoomto'+geomtype+'&oid='+oid+'&layer_tablename='+tablename+'&layer_columnname='+columnname+'&layer_id='+layer_id+'&selektieren='+selektieren;
 		if(currentform.id == 'GUI2'){					// aus overlay heraus --> Kartenzoom per Ajax machen
 			startwaiting();
-			get_map_ajax(params);
+			get_map_ajax(params, '', 'highlight_object('+layer_id+', '+oid+');');		// Objekt highlighten
 		}
 		else{
 			window.location.href = 'index.php?'+params;		// aus normaler Sachdatenanzeige heraus --> normalen Kartenzoom machen
