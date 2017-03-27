@@ -308,6 +308,11 @@ $svg='<?xml version="1.0"?>
 	var gps_follow_cooldown = 0;
 	var root = document.documentElement;
 	var mousewheelloop = 0;
+	var touchx;
+	var touchy;
+	var start_ctm;
+	var pinching = false;
+	var pinch_distance = 0;
 	var last_x = 0;
 	freehand_measuring = false;
 	var measured_distance = 0;
@@ -367,7 +372,7 @@ function sendpath(cmd, pathx, pathy){
 	if(cmd == "polygonquery")deletepolygon();
 }
 
-function mousewheelzoom(){
+function applyZoom(){
 	var g = document.getElementById("moveGroup");
 	zx = g.getCTM().inverse();
 	pathx[0] = Math.round(zx.e);
@@ -395,17 +400,77 @@ function mousewheelchange(evt){
     };
 		if(evt.wheelDelta)
 			delta = evt.wheelDelta / 3600; // Chrome/Safari
-		else
+		else if(evt.detail)
 			delta = evt.detail / -90; // Mozilla
 		var z = 1 + delta*5;
-		var g = document.getElementById("moveGroup");
 		var p = getEventPoint(evt);
 		if(p.x > 0 && p.y > 0){
-			p = p.matrixTransform(g.getCTM().inverse());
-			var k = root.createSVGMatrix().translate(p.x, p.y).scale(z).translate(-p.x, -p.y);
-			setCTM(g, g.getCTM().multiply(k)); 
-			mousewheelloop = window.setTimeout("mousewheelzoom()", 400);
+			zoomTransform(p, z, null);
+			mousewheelloop = window.setTimeout("applyZoom()", 400);
 		}
+	}
+}
+
+function zoomTransform(p, z, ctm){
+	var g = document.getElementById("moveGroup");
+	if(ctm == null)ctm = g.getCTM();
+	p = p.matrixTransform(ctm.inverse());
+	var k = root.createSVGMatrix().translate(p.x, p.y).scale(z).translate(-p.x, -p.y);
+	setCTM(g, ctm.multiply(k)); 
+}
+
+function getPinchDistance(evt){
+	return (evt.touches[0].pageX-evt.touches[1].pageX) * (evt.touches[0].pageX-evt.touches[1].pageX) + (evt.touches[0].pageY-evt.touches[1].pageY) * (evt.touches[0].pageY-evt.touches[1].pageY);
+}
+
+function touchstart(evt){
+	if(evt.preventDefault){
+		evt.preventDefault();
+	}else{ // IE fix
+		evt.returnValue = false;
+	};
+	if(top.document.GUI.stopnavigation.value == 0){
+		if(evt.touches.length == 1){		// 1 Finger
+			touchx = evt.clientX = evt.touches[0].pageX;
+			touchy = evt.clientY = evt.touches[0].pageY;
+			mousedown(evt);
+		}
+		else if(evt.touches.length == 2){		// 2 Finger
+			var g = document.getElementById("moveGroup");
+			pinching = true;
+			pinch_distance = getPinchDistance(evt);
+			start_ctm = g.getCTM();
+		}
+	}
+}
+
+function touchmove(evt){
+	if(top.document.GUI.stopnavigation.value == 0){
+		if(evt.touches.length == 1){		// 1 Finger
+			touchx = evt.clientX = evt.touches[0].pageX;
+			touchy = evt.clientY = evt.touches[0].pageY;
+			mousemove(evt);
+		}
+		else if(pinching){
+			delta = getPinchDistance(evt) - pinch_distance;			
+			var z = 1 + delta/100000;
+			var p = getEventPoint(evt);
+			if(p.x > 0 && p.y > 0){
+				zoomTransform(p, z, start_ctm);
+			}
+		}
+	}
+}
+
+function touchend(evt){
+	if(!pinching){		// 1 Finger
+		evt.clientX = touchx;
+		evt.clientY = touchy;
+		mouseup(evt);
+	}
+	else if(pinching){
+		applyZoom();
+		pinching = false;
 	}
 }
 
@@ -416,8 +481,14 @@ function setCTM(element, matrix) {
 
 function getEventPoint(evt) {
 	var p = root.createSVGPoint();
-	p.x = evt.clientX;
-	p.y = evt.clientY;
+	if(evt.clientX != undefined){		// Maus: Mausposition
+		p.x = evt.clientX;
+		p.y = evt.clientY;
+	}
+	else if(evt.touches[0].pageX != undefined){		// Touch: Mitte zwischen beiden Fingern
+		p.x = evt.touches[0].pageX - ((evt.touches[0].pageX-evt.touches[1].pageX)/2);
+		p.y = evt.touches[0].pageY - ((evt.touches[0].pageY-evt.touches[1].pageY)/2);
+	}
 	if(top.navigator.userAgent.toLowerCase().indexOf("msie") >= 0){
 		p.x = p.x - (top.document.body.clientWidth - resx)/2;
     p.y = p.y - 30;
@@ -435,6 +506,10 @@ function init(){
 	if(window.addEventListener){
 			window.addEventListener(\'mousewheel\', mousewheelchange, false); // Chrome/Safari//IE9
   		window.addEventListener(\'DOMMouseScroll\', mousewheelchange, false);		//Firefox
+			window.addEventListener(\'touchstart\', touchstart, false);		//touchstart
+			window.addEventListener(\'touchmove\', touchmove, false);		//touchmove
+			window.addEventListener(\'touchend\', touchend, false);		//touchend
+			
   }
   else{	
 		top.document.getElementById("map").onmousewheel = mousewheelchange;		// <=IE8
