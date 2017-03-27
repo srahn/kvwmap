@@ -379,6 +379,11 @@ a.menuered:hover {
 	height: 29px;
 }
 
+.toolbar-background {
+	border-top: 1px solid #cccccc;
+	background: <? echo BG_MENUETOP; ?>;
+}
+
 .emboss{
 	width:30px;
 	height:30px;
@@ -412,14 +417,20 @@ a.menuered:hover {
 }
 
 .normallegend {
+	float: right;
+	vertical-align: top;
+	background-image: url(../graphics/bg.gif);
 	border-top: 1px solid #eeeeee;
 	border-bottom: 1px solid #aaaaaa;
 }
+
+/* display: inline-block; width: <?php echo $legend_width; ?>px; vertical-align: top" */
 
 .slidinglegend_slideout {
 	position:absolute;
 	border-top: 1px solid #eeeeee;
 	border-left:1px solid #CCCCCC;
+	border-bottom: 1px solid #aaaaaa;
 	background-image: url(../graphics/bg.gif);
 	transform: translate3d(-27px,0px,0px);
 	transition: all 0.4s ease;
@@ -427,25 +438,26 @@ a.menuered:hover {
 	-webkit-transition: all 0.3s ease;
 }
 
-.slidinglegend_slideout	.table1{
+.slidinglegend_slideout	.table1 {
 	opacity: 0.0;
 	transition: all 0.4s ease;
+}
+
+.slidinglegend_slidein {
+	position: absolute;
+	border-top: 1px solid #eeeeee;
+	border-left:1px solid #CCCCCC;
+	border-bottom: 1px solid #aaaaaa;
+	background-image: url(../graphics/bg.gif);
+	transform: translate3d(-255px,0px,0px);
+	transition: all 0.4s ease;
+	-webkit-transform: translate3d(-250px,0px,0px);
+	-webkit-transition: all 0.3s ease;
 }
 
 .slidinglegend_slidein .table1{
 	opacity: 1;
 	transition: all 0.4s ease;
-}
-
-.slidinglegend_slidein {
-	position:absolute;
-	border-top: 1px solid #eeeeee;
-	border-left:1px solid #CCCCCC;
-	background-image: url(../graphics/bg.gif);
-	transform: translate3d(-255px,0px,0px);
-	transition: all 0.4s ease;
-	-webkit-transform: translate3d(-255px,0px,0px);
-	-webkit-transition: all 0.3s ease;
 }
 
 .legend_group{
@@ -863,7 +875,7 @@ tbody.gle tr:hover {
 	border-right: 1px solid #CCCCCC;
 }
 
-.map-bottom{
+.map-bottom {
 	border-top: 1px solid #aaaaaa;
 }
 
@@ -1087,7 +1099,7 @@ tbody.gle tr:hover {
 }
 
 .activ-legend-tab {
-	border-bottom-color: #efefef;
+	border-bottom-color: #fff;
 }
 
 #legend_graphic {

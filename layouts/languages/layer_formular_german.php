@@ -35,7 +35,6 @@
 	$strClass="Klasse";
 	$strExpression="Expression";
 	$strText="Text";
-	$strSignOrder="Zeichenreihenfolge";
 	$strDelete="löschen";
 	$strAddClass="Klasse hinzufügen";
   $strAddAutoClasses="Klassen automatisch hinzufügen";
@@ -46,7 +45,11 @@
 	$strButtonSaveAsNewLayer="Als neuen Layer eintragen";
 	$strCommonData="Allgemeine Angaben";
 	$strtransparency="Transparenz";
-	$strdrawingorder="Drawingorder";
+	$strDrawingOrder="Zeichenreihenfolge";
+	$strLegend="Legende";
+	$strLegendGraphic="Legendengrafik";
+	$strDrawing="Zeichnen";
+	$strOrder="Reihenfolge";
 	$strminscale="Minscale";
 	$strmaxscale="Maxscale";
 	$strsymbolscale="Symbolscale";

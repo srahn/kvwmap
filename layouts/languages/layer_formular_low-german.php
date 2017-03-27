@@ -34,7 +34,6 @@
 	$strID="ID";
 	$strClass="Klass";
 	$strExpression="Expression";
-	$strSignOrder="Riegfolg vun de Teiken";
 	$strDelete="löschen";
 	$strAddClass="Klass tau fögen";
   $strAddAutoClasses="Klassen van süllmst tau fögen";
@@ -45,7 +44,11 @@
 	$strButtonSaveAsNewLayer="As niegen Layer indragen";
 	$strCommonData="Allgemeen Angaaven";
 	$strtransparency="Dörchsichtigkeit";
-	$strdrawingorder="Drawingorder";
+	$strDrawingOrder="Riegfolg vun de Teiken";
+	$strLegend="Legend";
+	$strLegendGraphic="Legendafbild";
+	$strDrawing="Teiken";
+	$strOrder="Riegfolg";
 	$strminscale="Minscale";
 	$strmaxscale="Maxscale";
 	$stroffsite="Offsite";
