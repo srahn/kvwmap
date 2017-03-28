@@ -892,6 +892,8 @@ class GUI {
         $map->setMetaData("ows_onlineresource",$ows_onlineresource);
         $bb=$this->Stelle->MaxGeorefExt;
         $map->setMetaData("wms_extent",$bb->minx.' '.$bb->miny.' '.$bb->maxx.' '.$bb->maxy);
+				// enable service types
+        $map->setMetaData("ows_enable_request", '*');
         ///------------------------------////
 
         $map->setSymbolSet(SYMBOLSET);
@@ -981,8 +983,8 @@ class GUI {
 					if($this->class_load_level == 2 OR ($this->class_load_level == 1 AND $layerset[$i]['aktivStatus'] != 0)){      # nur wenn der Layer aktiv ist, sollen seine Parameter gesetzt werden
 						$layer = ms_newLayerObj($map);
 						$layer->setMetaData('wfs_request_method', 'GET');
-						$layer->setMetaData('wms_name', $layerset[$i]['wms_name']);
-						$layer->setMetaData('wfs_typename', $layerset[$i]['wms_name']);
+						$layer->setMetaData('wms_name', umlaute_umwandeln($layerset[$i]['wms_name']));
+						$layer->setMetaData('wfs_typename', umlaute_umwandeln($layerset[$i]['wms_name']));
 						$layer->setMetaData('ows_title', $layerset[$i]['Name']); # required
 						$layer->setMetaData('wms_group_title',$layerset[$i]['Gruppenname']);
 						$layer->setMetaData('wms_queryable',$layerset[$i]['queryable']);
@@ -996,12 +998,13 @@ class GUI {
 						$layer->setMetaData('ows_auth_password', $layerset[$i]['wms_auth_password']);
 						$layer->setMetaData('ows_auth_type', 'basic');
 						$layer->setMetaData('wms_exceptions_format', 'application/vnd.ogc.se_xml');
+						$layer->setMetaData("wms_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
 
 						$layer->set('dump', 0);
 						$layer->set('type',$layerset[$i]['Datentyp']);
 						$layer->set('group',$layerset[$i]['Gruppenname']);
 
-						$layer->set('name', $layerset[$i]['alias']);
+						$layer->set('name', umlaute_umwandeln($layerset[$i]['alias']));
 
 						if($layerset[$i]['status'] != ''){
 							$layerset[$i]['aktivStatus'] = 0;
