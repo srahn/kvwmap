@@ -1004,7 +1004,7 @@ class GUI {
 						$layer->set('type',$layerset[$i]['Datentyp']);
 						$layer->set('group',$layerset[$i]['Gruppenname']);
 
-						$layer->set('name', umlaute_umwandeln($layerset[$i]['alias']));
+						$layer->set('name', $layerset[$i]['alias']);
 
 						if($layerset[$i]['status'] != ''){
 							$layerset[$i]['aktivStatus'] = 0;
