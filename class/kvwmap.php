@@ -998,7 +998,6 @@ class GUI {
 						$layer->setMetaData('ows_auth_password', $layerset[$i]['wms_auth_password']);
 						$layer->setMetaData('ows_auth_type', 'basic');
 						$layer->setMetaData('wms_exceptions_format', 'application/vnd.ogc.se_xml');
-						$layer->setMetaData("wms_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
 
 						$layer->set('dump', 0);
 						$layer->set('type',$layerset[$i]['Datentyp']);
