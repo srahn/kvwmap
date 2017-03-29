@@ -16702,27 +16702,41 @@ class Menue {
     $this->language=$language;
   }
 
-  function loadMenue($Stelle_ID, $User_ID) {
-    $sql ='SELECT status, m.id, m.links, name as name_german,';
-    if ($this->language != 'german') {
-      $sql.=' `name_'.$this->language.'` AS ';
-    }
-    $sql.='name,m.menueebene,m.obermenue, m.target';
-    $sql.=' FROM u_menue2rolle, u_menue2stelle AS m2s, u_menues AS m';
-    $sql.=' WHERE m2s.stelle_id = u_menue2rolle.stelle_id AND m2s.stelle_id = '.$Stelle_ID;
-    $sql.=' AND m2s.menue_id = m.id AND u_menue2rolle.menue_id = m2s.menue_id AND u_menue2rolle.user_id = '.$User_ID.' ORDER  BY m2s.menue_order';
-    #echo $sql;
-    $this->debug->write("<p>file:kvwmap class:Menue - Lesen der Menüangaben:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) {
+	function loadMenue($Stelle_ID, $User_ID) {
+		$sql = "
+			SELECT
+				status,
+				m.id,
+				m.links,
+				name as name_german," .
+				($this->language != 'german' ? "`name_" . $this->language . "` AS" : "") . " name,
+				m.menueebene,
+				m.obermenue,
+				m.target,
+				m.title
+			FROM
+				u_menue2rolle m2r JOIN
+				u_menue2stelle AS m2s ON (m2r.stelle_id = m2s.stelle_id AND m2r.menue_id = m2s.menue_id) JOIN
+				u_menues AS m ON (m2s.menue_id = m.id)
+			WHERE
+				m2s.stelle_id = " . $Stelle_ID . " AND
+				m2r.user_id = " . $User_ID . "
+			ORDER BY
+				m2s.menue_order
+		";
 
-    }
-    else {
-      while($rs=mysql_fetch_array($query)) {
-        $this->Menueoption[]=$rs;
-      }
-    }
-  }
+		#echo 'SQL: ' . $sql;
+		$this->debug->write("<p>file:kvwmap class:Menue - Lesen der Menüangaben:<br>".$sql,4);
+		$query=mysql_query($sql);
+		if ($query==0) {
+
+		}
+		else {
+			while($rs=mysql_fetch_array($query)) {
+				$this->Menueoption[]=$rs;
+			}
+		}
+	}
 
   function get_menue_width($Stelle_ID){
     $sql ='SELECT r.width FROM referenzkarten AS r, stelle AS s WHERE r.ID=s.Referenzkarte_ID';
