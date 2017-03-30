@@ -110,35 +110,21 @@
 					}
 					echo $datapart;
 				}
+				
+				if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON' OR $geomtype == 'GEOMETRY')$geomtype = 'Polygon';
+				elseif($geomtype == 'POINT')$geomtype = 'Point';
+				elseif($geomtype == 'MULTILINESTRING' OR $geomtype == 'LINESTRING')$geomtype = 'Line';				
+				
 				if($privileg == 1) {
 					if($this->new_entry == true){
 						$this->titel=$strTitleGeometryEditor;
-						if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON' OR $geomtype == 'GEOMETRY'){
-							echo '
-							<tr>
-								<td colspan="2" align="center">';
-									include(LAYOUTPATH.'snippets/PolygonEditor.php');
-							echo'
-								</td>
-							</tr>';
-						} elseif($geomtype == 'POINT') {
-							$this->formvars['dimension'] = $dimension;
-							echo '
-							<tr>
-								<td colspan="2" align="center">';
-									include(LAYOUTPATH.'snippets/PointEditor.php');
-							echo'
-								</td>
-							</tr>';
-						} elseif($geomtype == 'MULTILINESTRING'  OR $geomtype == 'LINESTRING') {
-							echo '
-							<tr>
-								<td colspan="2" align="center">';
-									include(LAYOUTPATH.'snippets/LineEditor.php');
-							echo'
-								</td>
-							</tr>';
-						}
+						echo '
+						<tr>
+							<td colspan="2" align="center">';
+								include(LAYOUTPATH.'snippets/'.$geomtype.'Editor.php');
+						echo'
+							</td>
+						</tr>';
 					}
 					else{
 							if($this->formvars['printversion'] == '' AND !$lock[$k]){
@@ -148,27 +134,12 @@
 						    		<table border="0" cellspacing="0" cellpadding="2">
 						    			<tr>
 						    				<td align="center">
-	<?
-									if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON' OR $geomtype == 'GEOMETRY'){
-	?>
-				    					<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="index.php?go=PolygonEditor&oid=<?php echo $layer['shape'][$k][$tablename.'_oid']; ?>&layer_tablename=<? echo $tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>&selected_layer_id=<? echo $layer['Layer_ID'];?>"><? echo $strEditGeom; ?></a>
-	<?
-									} elseif($geomtype == 'POINT') {
-	?>
-				    					<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="index.php?go=PointEditor&dimension=<? echo $dimension; ?>&oid=<?php echo $layer['shape'][$k][$tablename.'_oid']; ?>&layer_tablename=<? echo $tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>"><? echo $strEditGeom; ?></a>
-	<?
-				    				}
-				    				elseif($geomtype == 'MULTILINESTRING' OR $geomtype == 'LINESTRING') {
-	?>
-				    					<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="index.php?go=LineEditor&oid=<?php echo $layer['shape'][$k][$tablename.'_oid']; ?>&layer_tablename=<? echo $tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>&selected_layer_id=<? echo $layer['Layer_ID'];?>"><? echo $strEditGeom; ?></a>
-	<?
-				    				}
-	?>
-										</td>
-									</tr>
-								</table>
-							</td>
-					    </tr>
+													<a title="<? echo $strEditGeom; ?>" href="index.php?go=<? echo $geomtype; ?>Editor&oid=<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>&layer_tablename=<? echo $geom_tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>&selected_layer_id=<? echo $layer['Layer_ID'];?>&dimension=<? echo $dimension; ?>"><div class="emboss edit_geom"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
+												</td>
+											</tr>
+										</table>
+									</td>
+								</tr>
 	<?
 						}
 					}
@@ -181,23 +152,8 @@
 			    	    <td bgcolor="<? echo BG_GLEATTRIBUTE; ?>" style="padding-top:5px; padding-bottom:5px;">&nbsp;</td>
 			    	    <? } ?>
 			    	    <td style="padding-top:5px; padding-bottom:5px;">&nbsp;&nbsp;
-<?
-								if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON' OR $geomtype == 'GEOMETRY'){
-?>
-			    					<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="index.php?go=zoomtoPolygon&oid=<?php echo $layer['shape'][$k][$tablename.'_oid']; ?>&layer_tablename=<? echo $tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>"><? echo $strMapZoom; ?></a>
-<?
-								} elseif($geomtype == 'POINT') {
-?>
-			    					<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="index.php?go=zoomtoPoint&dimension=<? echo $dimension; ?>&oid=<?php echo $layer['shape'][$k][$tablename.'_oid']; ?>&layer_tablename=<? echo $tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>"><? echo $strMapZoom; ?></a>
-<?
-			    				}
-			    				elseif($geomtype == 'MULTILINESTRING' OR $geomtype == 'LINESTRING') {
-?>
-			    					<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="index.php?go=zoomToLine&oid=<?php echo $layer['shape'][$k][$tablename.'_oid']; ?>&layer_tablename=<? echo $tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>"><? echo $strMapZoom; ?></a>
-<?
-			    				}
-?>
-			    		</td>
+			    				<a title="<? echo $strMapZoom; ?>" href="javascript:zoom2object(<? echo $layer['Layer_ID'];?>, '<? echo $geomtype; ?>', '<? echo $geom_tablename; ?>', '<? echo $columnname; ?>', '<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>', 'zoomonly');"><div class="emboss zoom_normal"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
+								</td>
 			        </tr>
 <? } ?>
 			  </tbody>

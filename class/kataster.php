@@ -1456,7 +1456,7 @@ class flurstueck {
     $this->LayerName=LAYERNAME_FLURSTUECKE;
   }
 
-	function outputEigentuemerText($eigentuemer, $adressAenderungen = NULL, $indent){
+	function outputEigentuemerText($eigentuemer, $adressAenderungen = NULL, $indent, $database = NULL){
 		if($eigentuemer->Nr != '' OR $eigentuemer->zusatz_eigentuemer != ''){
 			$Eigentuemer .= $indent;
 			$Eigentuemer .= $eigentuemer->zusatz_eigentuemer;
@@ -1471,7 +1471,7 @@ class flurstueck {
 		}
 	}
 	
-	function outputEigentuemerShort($eigentuemer, $adressAenderungen = NULL, $indent = NULL){
+	function outputEigentuemerShort($eigentuemer, $adressAenderungen = NULL, $indent = NULL, $database = NULL){
 		$Eigentuemer .= '<tr><td colspan="2"><table cellpadding="0" cellspacing="0"><tr><td valign="top" style="padding-right: 4">'.$eigentuemer->Nr.'</td><td valign="top" style="padding-right: 4">'.$eigentuemer->Name[0];
 		if($eigentuemer->zusatz_eigentuemer != ''){
 			$Eigentuemer .= '</td></tr><tr><td colspan="2">'.$eigentuemer->zusatz_eigentuemer; if($eigentuemer->Anteil != '')$Eigentuemer .= ' zu '.$eigentuemer->Anteil; $Eigentuemer .= '</td></tr><tr><td>';
@@ -1481,7 +1481,7 @@ class flurstueck {
 		return $Eigentuemer;
 	}
 	
-	function outputEigentuemerLong($eigentuemer, $adressAenderungen, $indent = NULL){
+	function outputEigentuemerLong($eigentuemer, $adressAenderungen, $indent = NULL, $database){
 		if($eigentuemer->Nr != ''){
 			$Eigentuemer .= '<tr><td colspan="2"><table><tr>
 												<td valign="top">'.$eigentuemer->Nr.'&nbsp;&nbsp;&nbsp;</td>
@@ -1492,7 +1492,7 @@ class flurstueck {
 				$adressaenderungen =  $eigentuemer->getAdressaenderungen($eigentuemer->gml_id);
 				$aendatum=substr($adressaenderungen['datum'],0,10);
 			}
-			if($adressaenderungen['user_id'] != '')$user = new user(NULL, $adressaenderungen['user_id'], $this->database);
+			if($adressaenderungen['user_id'] != '')$user = new user(NULL, $adressaenderungen['user_id'], $database);
 			$Eigentuemer .= '<table border="0" cellspacing="0" cellpadding="0">
 												<tr>
 													<td>';
@@ -1535,15 +1535,15 @@ class flurstueck {
 		return $Eigentuemer;
 	}	
 	
-	function outputEigentuemer($gml_id, $Eigentuemerliste, $type, $adressAenderungen = NULL, $indent = NULL){
+	function outputEigentuemer($gml_id, $Eigentuemerliste, $type, $adressAenderungen = NULL, $indent = NULL, $database = NULL){
 		if($gml_id != 'wurzel')$style = 'style="border-left: 1px solid lightgrey"';
 		$eigentuemer = $Eigentuemerliste[$gml_id];
-		$Eigentuemer .= $this->{'outputEigentuemer'.$type}($eigentuemer, $adressAenderungen, $indent);
+		$Eigentuemer .= $this->{'outputEigentuemer'.$type}($eigentuemer, $adressAenderungen, $indent, $database);
 		if($eigentuemer->children != ''){
 			if($type == 'Text')$indent = $indent.'  ';
 			else $Eigentuemer .= '<tr><td '.$style.'>&nbsp;&nbsp;</td><td><table>';
 			foreach($eigentuemer->children as $child){
-				$Eigentuemer .= $this->outputEigentuemer($child, $Eigentuemerliste, $type, $adressAenderungen, $indent);
+				$Eigentuemer .= $this->outputEigentuemer($child, $Eigentuemerliste, $type, $adressAenderungen, $indent, $database);
 			}
 			if($type != 'Text')$Eigentuemer .= '</table></td></tr>';
 		}

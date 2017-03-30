@@ -59,7 +59,7 @@
 		else var browser = 'other';
 	}
 	 
-  function get_map_ajax(postdata){
+  function get_map_ajax(postdata, code2execute_before, code2execute_after){
 		top.startwaiting();
 		if(document.GUI.legendtouched.value == 0){
   		svgdoc = document.SVG.getSVGDocument();	
@@ -81,11 +81,9 @@
 			input_coord = document.GUI.INPUT_COORD.value;
       cmd = document.GUI.CMD.value;
 			
-			var code2execute_before;
-			var code2execute_after;
 			if(browser != 'firefox'){
-				code2execute_before = 'moveback()';
-				code2execute_after = 'startup()';
+				code2execute_before += 'moveback()';
+				code2execute_after += 'startup()';
 			}
 			
   		ahah("index.php", postdata+"&mime_type=map_ajax&INPUT_COORD="+input_coord+"&CMD="+cmd+"&code2execute_before="+code2execute_before+"&code2execute_after="+code2execute_after, 
@@ -127,35 +125,35 @@
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "zoomin";
 			document.GUI.go.value = "neu Laden";
-      get_map_ajax('go=navMap_ajax');
+      get_map_ajax('go=navMap_ajax', '', '');
      break;
      case "zoomout":
       path = pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = cmd;
 			document.GUI.go.value = "neu Laden";
-      get_map_ajax('go=navMap_ajax');
+      get_map_ajax('go=navMap_ajax', '', '');
      break;
      case "zoomin_box":
       path = pathx[0]+","+pathy[0]+";"+pathx[2]+","+pathy[2];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "zoomin";
 			document.GUI.go.value = "neu Laden";
-      get_map_ajax('go=navMap_ajax');
+      get_map_ajax('go=navMap_ajax', '', '');
      break;
 		 case "zoomin_wheel":
       path = pathx[0]+","+pathy[0]+";"+pathx[2]+","+pathy[2];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "zoomin_wheel";
 			document.GUI.go.value = "neu Laden";
-      get_map_ajax('go=navMap_ajax');
+      get_map_ajax('go=navMap_ajax', '', '');
      break;
      case "recentre":
       path = pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = cmd;
 			document.GUI.go.value = "neu Laden";
-      get_map_ajax('go=navMap_ajax');
+      get_map_ajax('go=navMap_ajax', '', '');
      break;
      case "pquery_point":
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
@@ -310,6 +308,11 @@ $svg='<?xml version="1.0"?>
 	var gps_follow_cooldown = 0;
 	var root = document.documentElement;
 	var mousewheelloop = 0;
+	var touchx;
+	var touchy;
+	var start_ctm;
+	var pinching = false;
+	var pinch_distance = 0;
 	var last_x = 0;
 	freehand_measuring = false;
 	var measured_distance = 0;
@@ -362,6 +365,7 @@ function startup(){';
 	set_suchkreis();
 	eval(doing+"()");	
   document.getElementById(doing+"0").style.setProperty("fill",highlighted,"");
+	pinching = false;
 }
 
 function sendpath(cmd, pathx, pathy){
@@ -369,7 +373,15 @@ function sendpath(cmd, pathx, pathy){
 	if(cmd == "polygonquery")deletepolygon();
 }
 
-function mousewheelzoom(){
+function prevent(evt){
+	if(evt.preventDefault){
+		evt.preventDefault();
+	}else{ // IE fix
+		evt.returnValue = false;
+	};
+}
+
+function applyZoom(){
 	var g = document.getElementById("moveGroup");
 	zx = g.getCTM().inverse();
 	pathx[0] = Math.round(zx.e);
@@ -390,24 +402,77 @@ function mousewheelchange(evt){
 	if(!evt)evt = window.event; // For IE
 	if(top.document.GUI.stopnavigation.value == 0){
 		window.clearTimeout(mousewheelloop);
-		if(evt.preventDefault){
-			evt.preventDefault();
-		}else{ // IE fix
-    	evt.returnValue = false;
-    };
+		prevent(evt);
 		if(evt.wheelDelta)
 			delta = evt.wheelDelta / 3600; // Chrome/Safari
-		else
+		else if(evt.detail)
 			delta = evt.detail / -90; // Mozilla
 		var z = 1 + delta*5;
-		var g = document.getElementById("moveGroup");
 		var p = getEventPoint(evt);
 		if(p.x > 0 && p.y > 0){
-			p = p.matrixTransform(g.getCTM().inverse());
-			var k = root.createSVGMatrix().translate(p.x, p.y).scale(z).translate(-p.x, -p.y);
-			setCTM(g, g.getCTM().multiply(k)); 
-			mousewheelloop = window.setTimeout("mousewheelzoom()", 400);
+			zoomTransform(p, z, null);
+			mousewheelloop = window.setTimeout("applyZoom()", 400);
 		}
+	}
+}
+
+function zoomTransform(p, z, ctm){
+	var g = document.getElementById("moveGroup");
+	if(ctm == null)ctm = g.getCTM();
+	p = p.matrixTransform(ctm.inverse());
+	var k = root.createSVGMatrix().translate(p.x, p.y).scale(z).translate(-p.x, -p.y);
+	setCTM(g, ctm.multiply(k)); 
+}
+
+function getPinchDistance(evt){
+	return (evt.touches[0].pageX-evt.touches[1].pageX) * (evt.touches[0].pageX-evt.touches[1].pageX) + (evt.touches[0].pageY-evt.touches[1].pageY) * (evt.touches[0].pageY-evt.touches[1].pageY);
+}
+
+function touchstart(evt){
+	prevent(evt);
+	if(top.document.GUI.stopnavigation.value == 0){
+		if(evt.touches.length == 1){		// 1 Finger
+			touchx = evt.clientX = evt.touches[0].pageX;
+			touchy = evt.clientY = evt.touches[0].pageY;
+			mousedown(evt);
+		}
+		else if(evt.touches.length == 2){		// 2 Finger
+			var g = document.getElementById("moveGroup");
+			pinching = true;
+			pinch_distance = getPinchDistance(evt);
+			start_ctm = g.getCTM();
+		}
+	}
+}
+
+function touchmove(evt){
+	prevent(evt);
+	if(top.document.GUI.stopnavigation.value == 0){
+		if(pinching == false && evt.touches.length == 1){		// 1 Finger
+			touchx = evt.clientX = evt.touches[0].pageX;
+			touchy = evt.clientY = evt.touches[0].pageY;
+			mousemove(evt);
+		}
+		else if(pinching){
+			z = getPinchDistance(evt) / pinch_distance;
+			var p = getEventPoint(evt);
+			if(p.x > 0 && p.y > 0){
+				zoomTransform(p, z, start_ctm);
+			}
+		}
+	}
+}
+
+function touchend(evt){
+	prevent(evt);
+	if(pinching == false){		// 1 Finger
+		evt.clientX = touchx;
+		evt.clientY = touchy;
+		mouseup(evt);
+	}
+	else if(evt.touches.length == 0 && pinching){
+		applyZoom();
+		//pinching = false;
 	}
 }
 
@@ -418,8 +483,14 @@ function setCTM(element, matrix) {
 
 function getEventPoint(evt) {
 	var p = root.createSVGPoint();
-	p.x = evt.clientX;
-	p.y = evt.clientY;
+	if(evt.clientX != undefined){		// Maus: Mausposition
+		p.x = evt.clientX;
+		p.y = evt.clientY;
+	}
+	else if(evt.touches[0].pageX != undefined){		// Touch: Mitte zwischen beiden Fingern
+		p.x = evt.touches[0].pageX - ((evt.touches[0].pageX-evt.touches[1].pageX)/2);
+		p.y = evt.touches[0].pageY - ((evt.touches[0].pageY-evt.touches[1].pageY)/2);
+	}
 	if(top.navigator.userAgent.toLowerCase().indexOf("msie") >= 0){
 		p.x = p.x - (top.document.body.clientWidth - resx)/2;
     p.y = p.y - 30;
@@ -437,6 +508,11 @@ function init(){
 	if(window.addEventListener){
 			window.addEventListener(\'mousewheel\', mousewheelchange, false); // Chrome/Safari//IE9
   		window.addEventListener(\'DOMMouseScroll\', mousewheelchange, false);		//Firefox
+			window.addEventListener(\'touchstart\', touchstart, false);		//touchstart
+			window.addEventListener(\'touchmove\', touchmove, false);		//touchmove
+			window.addEventListener(\'touchend\', touchend, false);		//touchend
+			window.addEventListener(\'touchcancel\', prevent, false);		//touchcancel
+			
   }
   else{	
 		top.document.getElementById("map").onmousewheel = mousewheelchange;		// <=IE8

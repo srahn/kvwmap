@@ -16,7 +16,7 @@ if($this->user->rolle->querymode == 1){
 </HEAD>
 <BODY onload="onload_functions();">
 	<div id="waitingdiv" style="position: absolute;height: 100%; width: 100%; display:none; z-index: 1000000; text-align: center">
-		<div style="margin: 350px">
+		<div style="position: absolute;  top: 50%; left: 50%; transform: translate(-50%,-50%);">
 			<i class="fa fa-spinner fa-7x wobble-fix spinner"></i>
 		</div>
 	</div>
@@ -33,12 +33,12 @@ if($this->user->rolle->querymode == 1){
        ?></td>
           </tr>
           <tr> 
-						<td width="1%" valign="top" background="<?php echo GRAPHICSPATH."bg.gif"; ?>" style="border: 1px solid; border-color: #FFFFFF #CCCCCC #CCCCCC;"> 
+						<td width="1" valign="top" background="<?php echo GRAPHICSPATH."bg.gif"; ?>" style="border: 1px solid; border-color: #FFFFFF #CCCCCC #CCCCCC;"> 
 							<?php
 								$this->debug->write("Include <b>".LAYOUTPATH."snippets/menue_button_switch.php</b> in gui.php",4);    
 								include(LAYOUTPATH."snippets/menue_button_switch.php"); ?>
 						</td>
-            <td align="center" valign="top" background="<?php echo GRAPHICSPATH; ?>bg.gif" style="border-right: 1px solid; border-color: #FFFFFF #CCCCCC #CCCCCC;">
+            <td align="center" width="100%" valign="top" background="<?php echo GRAPHICSPATH; ?>bg.gif" style="border-right: 1px solid; border-color: #FFFFFF #CCCCCC #CCCCCC;">
 							<div style=" position: relative; overflow: hidden; ">
 								<script type="text/javascript">
 									currentform = document.GUI;

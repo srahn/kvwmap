@@ -29,7 +29,6 @@ session_start();
 # peter.korduan@gdi-service.de                                    #
 # stefan.rahn@gdi-service.de                                      #
 ###################################################################
-
 // function microtime_float1(){
    // list($usec, $sec) = explode(" ", microtime());
    // return ((float)$usec + (float)$sec);
@@ -498,7 +497,7 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  }break;
 	  
 	  # zoomToLine
-	  case 'zoomToLine' : {
+	  case 'zoomtoLine' : {
 			if($GUI->formvars['mime_type'] != '')$GUI->mime_type = $GUI->formvars['mime_type'];
 			$GUI->zoom_toLine();
 	  }break;

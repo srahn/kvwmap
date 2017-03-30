@@ -606,9 +606,9 @@ function showMapParameter(epsg_code, width, height) {
 					Koordinatensystem: EPSG: " + epsg_code + "<br> \
 					linke untere Ecke: (" + toFixed(gui.minx.value, 3) + ", " + toFixed(gui.miny.value, 3) + ")<br> \
 					rechte obere Ecke: (" + toFixed(gui.maxx.value, 3) + ", " + toFixed(gui.maxy.value, 3) + ")<br> \
-					Ausdehnung: " + toFixed(gui.maxx.value - gui.minx.value, 3) + " x " + toFixed(gui.maxy.value-gui.miny.value,3) + "<br> \
+					Ausdehnung: " + toFixed(gui.maxx.value - gui.minx.value, 3) + " x " + toFixed(gui.maxy.value-gui.miny.value,3) + " m<br> \
 					Bildgröße: " + width + " x " + height + " Pixel<br> \
-					Pixelgröße: " + toFixed(gui.pixelsize.value, 3) + " \
+					Pixelgröße: " + toFixed(gui.pixelsize.value, 3) + " m\
 				</div> \
 			";
 	message([{
