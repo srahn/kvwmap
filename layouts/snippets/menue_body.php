@@ -66,7 +66,7 @@
 											</td>
 											<td>';
 						?>
-												<a href="<?
+												<a title="<?php echo $this->Menue->Menueoption[$i]['title']; ?>" href="<?
 											if ($this->Menue->Menueoption[$i]['target']=='confirm') {
 													?>javascript:Bestaetigung('<?
 											}
@@ -110,7 +110,7 @@
 									echo'
 									<tr>
 										<td valign="top" onmouseover="popup(\'menue'.$this->Menue->Menueoption[$i]['id'].'\')" onmouseout="popdown(\'menue'.$this->Menue->Menueoption[$i]['id'].'\')">
-											<a href="javascript:changemenue('.$this->Menue->Menueoption[$i]['id'].');" >
+											<a title="' . $this->Menue->Menueoption[$i]['title'] . '" href="javascript:changemenue('.$this->Menue->Menueoption[$i]['id'].');" >
 											<div name="obermenu" id="menue'.$this->Menue->Menueoption[$i]['id'].'" class="" style="background-color: '.BG_MENUETOP.';position: relative; visibility: visible; left: 0px; top: 0px; z-index:3">
 											<img id="image_'.$this->Menue->Menueoption[$i]['id'].'" src="'.GRAPHICSPATH.'menue_top.gif" width="17" height="17" border="0">
 												<span class="black">'.$this->Menue->Menueoption[$i]['name'].'</span>';
@@ -119,7 +119,7 @@
 									echo '
 									<tr>
 										<td valign="top" bgcolor="'.BG_MENUETOP.'">
-											<a href="javascript:changemenue('.$this->Menue->Menueoption[$i]['id'].');" >
+											<a title="' . $this->Menue->Menueoption[$i]['title'] . '" href="javascript:changemenue('.$this->Menue->Menueoption[$i]['id'].');" >
 											<div name="obermenu" id="menue'.$this->Menue->Menueoption[$i]['id'].'">
 												<div class="menu">
 													<img id="image_'.$this->Menue->Menueoption[$i]['id'].'" src="'.GRAPHICSPATH.'menue_top.gif" width="17" height="17" border="0">
@@ -131,7 +131,7 @@
 								echo'
 									<tr>
 										<td valign="top" bgcolor="'.BG_MENUETOP.'">
-											<a href="javascript:changemenue('.$this->Menue->Menueoption[$i]['id'].');" >
+											<a title="' . $this->Menue->Menueoption[$i]['title'] . '" href="javascript:changemenue('.$this->Menue->Menueoption[$i]['id'].');" >
 											<div name="obermenu" id="menue'.$this->Menue->Menueoption[$i]['id'].'">
 												<div class="menu">
 													<img id="image_'.$this->Menue->Menueoption[$i]['id'].'" src="'.GRAPHICSPATH.'menue_top_open.gif" width="17" height="17" border="0">
@@ -143,7 +143,7 @@
 							echo'
 								<tr>
 									<td valign="top" bgcolor="'.BG_MENUETOP.'">
-										<a href="'.$this->Menue->Menueoption[$i]['links'].'" target="'.$this->Menue->Menueoption[$i]['target'].'" >
+										<a title="' . $this->Menue->Menueoption[$i]['title'] . '" href="'.$this->Menue->Menueoption[$i]['links'].'" target="'.$this->Menue->Menueoption[$i]['target'].'" >
 										<div id="menue'.$this->Menue->Menueoption[$i]['id'].'">
 											<div class="menu">
 												<img src="'.GRAPHICSPATH.'leer.gif" width="17" height="17" border="0">
