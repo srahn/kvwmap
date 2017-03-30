@@ -47,6 +47,10 @@
   $strCommonData="general information";
   $strtransparency="transparency";
   $strdrawingorder="drawingorder";
+	$strLegend="legend";
+	$strLegendGraphic="legendgraphic";
+	$strMap="Map";
+	$strOrder="Order";
   $strminscale="minscale";
   $strmaxscale="maxscale";
 	$strsymbolscale="symbolscale";
