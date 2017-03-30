@@ -11838,11 +11838,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		else {
 			$this->add_message('warning', 'Keine Änderung.');
 		}
-		if ($this->formvars['embedded'] != ''){    # wenn es ein Datensatz aus einem embedded-Formular ist, muss das entsprechende Attribut des Hauptformulars aktualisiert werden
-			header('Content-type: text/html; charset=UTF-8');
-
+    if ($this->formvars['embedded'] != ''){    # wenn es ein Datensatz aus einem embedded-Formular ist, muss das entsprechende Attribut des Hauptformulars aktualisiert werden
+      header('Content-type: text/html; charset=UTF-8');
       $attributenames[0] = $this->formvars['targetattribute'];
-      $attributes = $mapdb->read_layer_attributes($this->formvars['targetlayer_id'], $layerdb, $attributenames);
+			$targetlayerdb = $mapdb->getlayerdatabase($this->formvars['targetlayer_id'], $this->Stelle->pgdbhost);
+      $attributes = $mapdb->read_layer_attributes($this->formvars['targetlayer_id'], $targetlayerdb, $attributenames);
       switch ($attributes['form_element_type'][0]){
         case 'SubFormEmbeddedPK' : {
           $this->formvars['embedded_subformPK'] = true;
