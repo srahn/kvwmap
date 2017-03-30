@@ -16261,13 +16261,12 @@ class db_mapObj{
 	function update_Class($attrib) {
 		global $supportedLanguages;
 
-		$foreign_names = implode(
+		$names = implode(
 			', ',
 			array_map(
-				function($language) {
-					if ($language != 'german') {
-						return "`Name_" . $language . "` = '" . $attrib['Name_' . $language] . "'";
-					}
+				function($language) use ($attrib) {
+					if($language != 'german')return "`Name_" . $language . "` = '" . $attrib['Name_' . $language] . "'";
+					else return "`Name` = '".$attrib['name']."'";
 				},
 				$supportedLanguages
 			)
@@ -16277,8 +16276,7 @@ class db_mapObj{
 			UPDATE
 				classes
 			SET
-				`Name` = '" . $attrib['name'] . "'," .
-				$foreign_names . "
+				".$names.",
 				`Layer_ID` = " . $attrib['layer_id'] . ",
 				`Expression` = '" . $attrib['expression'] . "',
 				`text` = '" . $attrib['text'] . "',
