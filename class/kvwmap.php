@@ -7714,7 +7714,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 	function GenerischeSuche_Suchmaske(){
 		if($this->formvars['selected_layer_id']){
-      $layerset=$this->user->rolle->getLayer($this->formvars['selected_layer_id']);
+			if($this->formvars['selected_layer_id'] > 0)$layerset=$this->user->rolle->getLayer($this->formvars['selected_layer_id']);
+			else $layerset = $this->user->rolle->getRollenlayer(-$this->formvars['selected_layer_id']);
       switch ($layerset[0]['connectiontype']) {
         case MS_POSTGIS : {
           $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
