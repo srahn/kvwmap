@@ -13201,7 +13201,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $layer=ms_newLayerObj($this->map);
     $datastring ="the_geom from (SELECT 1 as id, st_multi(st_buffer(st_union(wkb_geometry), 0.1)) as the_geom FROM alkis.ax_flurstueck ";
     $datastring.="WHERE land*10000 + gemarkungsnummer = ".$Gemkgschl;
-		$datastring.=" AND CASE WHEN '\$hist_timestamp' = '' THEN endet IS NULL ELSE beginnt <= '\$hist_timestamp' and ('\$hist_timestamp' <= endet or endet IS NULL) END";
+		$datastring.=" AND CASE WHEN '\$hist_timestamp' = '' THEN endet IS NULL ELSE beginnt::text <= '\$hist_timestamp' and ('\$hist_timestamp' <= endet::text or endet IS NULL) END";
     $datastring.=") as foo using unique id using srid=".EPSGCODE_ALKIS;
     $legendentext ="Gemarkung: ".$GemkgObj->getGemkgName($Gemkgschl);
     $layer->set('data',$datastring);
@@ -13271,7 +13271,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $datastring ="the_geom from (SELECT 1 as id, st_multi(st_buffer(st_union(wkb_geometry), 0.1)) as the_geom FROM alkis.ax_flurstueck ";
     $datastring.="WHERE land*10000 + gemarkungsnummer = ".$GemkgID;
     $datastring.=" AND flurnummer = ".(int)$FlurID;
-		$datastring.=" AND CASE WHEN '\$hist_timestamp' = '' THEN endet IS NULL ELSE beginnt <= '\$hist_timestamp' and ('\$hist_timestamp' <= endet or endet IS NULL) END";
+		$datastring.=" AND CASE WHEN '\$hist_timestamp' = '' THEN endet IS NULL ELSE beginnt::text <= '\$hist_timestamp' and ('\$hist_timestamp' <= endet::text or endet IS NULL) END";
     $datastring.=") as foo using unique id using srid=".EPSGCODE_ALKIS;
     $legendentext ="Gemarkung: ".$GemkgObj->getGemkgName($GemkgID);
     $legendentext .="<br>Flur: ".$FlurID;
@@ -13353,7 +13353,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $legendentext.=",<br>".$FlurstListe[$i];
     }
    	$datastring.=") ";
-		$datastring.=" AND CASE WHEN '\$hist_timestamp' = '' THEN endet IS NULL ELSE beginnt <= '\$hist_timestamp' and ('\$hist_timestamp' <= endet or endet IS NULL) END";
+		$datastring.=" AND CASE WHEN '\$hist_timestamp' = '' THEN endet IS NULL ELSE beginnt::text <= '\$hist_timestamp' and ('\$hist_timestamp' <= endet::text or endet IS NULL) END";
 		# Filter
 		$filter = $dbmap->getFilter($layerset[0]['Layer_ID'], $this->Stelle->id);
 		if($filter != '')$datastring.= ' AND '.$filter;
@@ -13467,8 +13467,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					$datastring.=" AND l.lage='".$Strasse."'";
 				}
 			}
-			$datastring.=" AND CASE WHEN '\$hist_timestamp' = '' THEN g.endet IS NULL ELSE g.beginnt <= '\$hist_timestamp' and ('\$hist_timestamp' <= g.endet or g.endet IS NULL) END";
-			$datastring.=" AND CASE WHEN '\$hist_timestamp' = '' THEN gem.endet IS NULL ELSE gem.beginnt <= '\$hist_timestamp' and ('\$hist_timestamp' <= gem.endet or gem.endet IS NULL) END";
+			$datastring.=" AND CASE WHEN '\$hist_timestamp' = '' THEN g.endet IS NULL ELSE g.beginnt::text <= '\$hist_timestamp' and ('\$hist_timestamp' <= g.endet::text or g.endet IS NULL) END";
+			$datastring.=" AND CASE WHEN '\$hist_timestamp' = '' THEN gem.endet IS NULL ELSE gem.beginnt::text <= '\$hist_timestamp' and ('\$hist_timestamp' <= gem.endet::text or gem.endet IS NULL) END";
 	    $datastring.=") as foo using unique oid using srid=".$epsg;
 	    $legendentext ="Geb&auml;ude<br>";
 	    if ($Hausnr!='') {
@@ -16261,13 +16261,12 @@ class db_mapObj{
 	function update_Class($attrib) {
 		global $supportedLanguages;
 
-		$foreign_names = implode(
+		$names = implode(
 			', ',
 			array_map(
-				function($language) {
-					if ($language != 'german') {
-						return "`Name_" . $language . "` = '" . $attrib['Name_' . $language] . "'";
-					}
+				function($language) use ($attrib) {
+					if($language != 'german')return "`Name_" . $language . "` = '" . $attrib['Name_' . $language] . "'";
+					else return "`Name` = '".$attrib['name']."'";
 				},
 				$supportedLanguages
 			)
@@ -16277,8 +16276,7 @@ class db_mapObj{
 			UPDATE
 				classes
 			SET
-				`Name` = '" . $attrib['name'] . "'," .
-				$foreign_names . "
+				".$names.",
 				`Layer_ID` = " . $attrib['layer_id'] . ",
 				`Expression` = '" . $attrib['expression'] . "',
 				`text` = '" . $attrib['text'] . "',
