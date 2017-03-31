@@ -26,7 +26,6 @@
 			<input type="hidden" name="scrollposition" value="">
 			<input type="hidden" name="vertices" id="vertices" value="">
 			<input type="hidden" name="legendtouched" value="0">
-			<input type="hidden" name="stopnavigation" value="0">
 			<input type="hidden" name="svghelp" id="svghelp">
 			<input type="hidden" name="activated_vertex" value="0">
 			<input type="hidden" name="measured_distance" value="<? echo $this->formvars['measured_distance']; ?>">						

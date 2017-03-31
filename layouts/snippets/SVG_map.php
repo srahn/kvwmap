@@ -45,7 +45,6 @@
   <SCRIPT type="text/ecmascript"><!--
 
 	var nbh = new Array();
-	
   function go_cmd(cmd)   {
       document.GUI.CMD.value  = cmd;
       document.GUI.submit();
@@ -1007,7 +1006,6 @@ function texttype(evt){
 		var text = current_freetext.lastChild.firstChild.nodeValue;
 		var offsetx = current_freetext.getAttribute("x");
 		var offsety = 20;
-		console.log(evt.type);
 		if(evt.type == "keypress" || evt.type == "keydown"){			
 			if(evt.charCode){
 	      var charCode = evt.charCode;
