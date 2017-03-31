@@ -1599,4 +1599,16 @@ function get_first_word_after($str, $word) {
 	$parts = explode(' ', $str_from_word_pos);
 	return $parts[1];
 }
+
+/*
+* Function return value of parameter go in url
+* @params string $t url
+* @return string value of parameter go
+*/
+function extract_go($url) {
+	$go_pos = strpos($url, 'go=');
+	$url = substr($url, $go_pos + 3);
+	$and_pos = strpos($url, '&');
+	return substr($url, 0, $and_pos);
+}
 ?>

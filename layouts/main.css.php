@@ -247,7 +247,7 @@ a.invisiblelayerlink:hover{
 	background: linear-gradient(#DAE4EC, #84accf);
 }
 
-.menu{
+.menu {
 	background: linear-gradient(#DAE4EC 0%, #c7d9e6 100%);
 	position: relative; 
 	visibility: visible; 
@@ -256,6 +256,9 @@ a.invisiblelayerlink:hover{
 	z-index:3;
 	border: 1px solid #cccccc;
 	line-height : 17px;
+	margin-top: 2px;
+	margin-bottom: 2px;
+	padding: 2px;
 }
 
 .menu:hover{
@@ -270,6 +273,43 @@ a.menuered {
 
 a.menuered:hover {	
 	color: black;
+}
+
+.menue-auf:before {
+	content:url('../graphics/menue_top_open.gif');
+}
+
+.menue-zu:before {
+	content:url('../graphics/menue_top.gif');
+}
+
+.hauptmenue {
+
+}
+
+.hauptmenue:before {
+	content: ' ';
+	margin-right: 20px;
+}
+
+a.hauptmenue {
+	color: #993333;
+	font-size: 15px;
+	line-height : 17px;
+}
+
+.untermenue:before {
+  content:url('../graphics/submenue.png');
+  position:relative;
+  z-index:100000;
+  top: 3px;
+}
+
+.untermenue {
+	background: rgb(237, 239, 239);
+}
+
+.untermenues {
 }
 
 #scrolldiv{

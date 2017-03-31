@@ -35,7 +35,6 @@
 ########################################
 # GUI - Das Programm
 # db_MapObj
-# Menue
 ########################################
 
 ###############################################################
@@ -2168,7 +2167,7 @@ class GUI {
       case 'html' : {
         $this->debug->write("Include <b>".LAYOUTPATH.$this->user->rolle->gui."</b> in kvwmap.php function output()",4);
         # erzeugen des Menueobjektes
-        $this->Menue=new menue($this->user->rolle->language);
+        $this->Menue=new menues($this->user->rolle->language);
         # laden des Menues der Stelle und der Rolle
         $this->Menue->loadMenue($this->Stelle->id, $this->user->id);
         $this->Menue->get_menue_width($this->Stelle->id);
@@ -2983,7 +2982,7 @@ class GUI {
   }
 
   function get_sub_menues(){
-    $this->Menue = new menue($this->user->rolle->language);
+    $this->Menue = new menues($this->user->rolle->language);
     $submenues = $this->Menue->getsubmenues($this->formvars['menue_id']);
     echo '<select name="submenues" size="6" multiple style="width:300px">';
     for($i=0; $i < count($submenues["Bezeichnung"]); $i++){
@@ -3457,7 +3456,7 @@ class GUI {
     $this->loadMap('DataBase');
     $this->drawMap();
     # erzeugen des Menueobjektes
-    $this->Menue=new menue($this->user->rolle->language);
+    $this->Menue=new menues($this->user->rolle->language);
     # laden des Menues der Stelle und der Rolle
     $this->Menue->loadMenue($this->Stelle->id, $this->user->id);
     $this->Menue->get_menue_width($this->Stelle->id);
@@ -9872,8 +9871,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $this->formvars['selusers'] = $Stelle->getUser();
     }
     # Abfragen aller möglichen Menuepunkte
-    $this->Menue=new menue($this->user->rolle->language);
-    $this->formvars['menues']=$this->Menue->getallOberMenues();
+    $this->Menue=new menues($this->user->rolle->language);
+    $this->formvars['menues']=$this->Menue->get_all_ober_menues();
     # Abfragen aller möglichen Funktionen
     $funktion = new funktion($this->database);
     $this->formvars['functions'] = $funktion->getFunktionen(NULL, 'bezeichnung');
@@ -16671,147 +16670,6 @@ class db_mapObj{
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
     $rs=mysql_fetch_array($query);
     return $rs;
-  }
-}
-
-###########################################
-# Klasse zum Menüoptionen zusammenstellen #
-###########################################
-# Klasse Menue #
-################
-
-# functions of class menue
-# load Menue -- load all menue items according to the stelle
-
-class Menue {
-  var $html;
-  var $debug;
-
-  ###################### Liste der Funktionen ####################################
-  #
-  # function Menue () - Construktor
-  # function loadMenue ($Stelle_ID)
-  # function getallMenues()
-  #
-  ################################################################################
-
-  function menue ($language){
-    global $debug;
-    $this->debug=$debug;
-    $this->language=$language;
-  }
-
-	function loadMenue($Stelle_ID, $User_ID) {
-		$sql = "
-			SELECT
-				status,
-				m.id,
-				m.links,
-				name as name_german," .
-				($this->language != 'german' ? "`name_" . $this->language . "` AS" : "") . " name,
-				m.menueebene,
-				m.obermenue,
-				m.target,
-				m.title
-			FROM
-				u_menue2rolle m2r JOIN
-				u_menue2stelle AS m2s ON (m2r.stelle_id = m2s.stelle_id AND m2r.menue_id = m2s.menue_id) JOIN
-				u_menues AS m ON (m2s.menue_id = m.id)
-			WHERE
-				m2s.stelle_id = " . $Stelle_ID . " AND
-				m2r.user_id = " . $User_ID . "
-			ORDER BY
-				m2s.menue_order
-		";
-
-		#echo 'SQL: ' . $sql;
-		$this->debug->write("<p>file:kvwmap class:Menue - Lesen der Menüangaben:<br>".$sql,4);
-		$query=mysql_query($sql);
-		if ($query==0) {
-
-		}
-		else {
-			while($rs=mysql_fetch_array($query)) {
-				$this->Menueoption[]=$rs;
-			}
-		}
-	}
-
-  function get_menue_width($Stelle_ID){
-    $sql ='SELECT r.width FROM referenzkarten AS r, stelle AS s WHERE r.ID=s.Referenzkarte_ID';
-    $sql.=' AND s.ID='.$Stelle_ID;
-    $this->debug->write("<p>file:kvwmap class:Menue->get_menue_width - Lesen der Menuebreite:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs=mysql_fetch_row($query);
-    $this->width = $rs[0];
-  }
-
-  function getallOberMenues(){
-    $sql.='SELECT id,';
-    if ($this->language != 'german') {
-      $sql.='`name_'.$this->language.'` AS ';
-    }
-    $sql.=' name, `order`, menueebene FROM u_menues WHERE menueebene = 1 ORDER BY `order`';
-    $this->debug->write("<p>file:kvwmap class:Menue - Lesen aller OberMenüs:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) {
-
-    }
-    else {
-    while($rs=mysql_fetch_array($query)) {
-          $menues['ID'][]=$rs['id'];
-          $menues['Bezeichnung'][]=$rs['name'];
-          $menues['ORDER'][]=$rs['order'];
-		  $menues['menueebene'][]=$rs['menueebene'];
-      }
-      return $menues;
-    }
-  }
-
-  function getsubmenues($menue_id){
-    $sql.='SELECT id,';
-    if ($this->language != 'german') {
-      $sql.='`name_'.$this->language.'` AS ';
-    }
-    $sql.=' name, `order`, menueebene FROM u_menues WHERE obermenue = '.$menue_id.' AND menueebene = 2 ORDER BY `order`, name';
-    $this->debug->write("<p>file:kvwmap class:Menue - Lesen aller OberMenüs:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) {
-
-    }
-    else {
-    while($rs=mysql_fetch_array($query)) {
-          $menues['ID'][]=$rs['id'];
-          $menues['Bezeichnung'][]=$rs['name'];
-		  $menues['ORDER'][]=$rs['order'];
-		  $menues['menueebene'][]=$rs['menueebene'];
-      }
-      return $menues;
-    }
-  }
-
-}
-
-class point {
-  var $x;
-  var $y;
-
-  function point($x,$y) {
-    $this->x=$x;
-    $this->y=$y;
-  }
-
-  function pixel2welt($minX,$minY,$pixSize) {
-    # Rechnet Pixel- in Weltkoordinaten um mit minx, miny und pixsize
-    $this->x=($this->x*$pixSize)+$minX;
-    $this->y=($this->y*$pixSize)+$minY;
-  }
-
-  function welt2pixel($minX,$minY,$pixSize) {
-    # Rechnet Welt- in Pixelkoordinaten um mit minx, miny und pixsize
-    $this->x=round(($this->x-$minX)/$pixSize);
-    $this->y=round(($this->y-$minY)/$pixSize);
   }
 }
 

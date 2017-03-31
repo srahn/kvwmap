@@ -74,11 +74,11 @@ class MyObject {
 		";
 		$this->debug->show('mysql find_by_sql sql: ' . $sql, MyObject::$write_debug);
 		$query = mysql_query($sql, $this->database->dbConn);
-		$result = array();
+		$results = array();
 		while($this->data = mysql_fetch_assoc($query)) {
-			$result[] = clone $this;
+			$results[] = clone $this;
 		}
-		return $result;
+		return $results;
 	}
 
 	function getAttributes() {

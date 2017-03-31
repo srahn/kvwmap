@@ -135,7 +135,8 @@ define('TITLE_HILFE','Hilfe');                  						# Version 1.6.6
 define('TITLE_OPTIONEN','Optionen');										# Version 1.7.3
 define('TITLE_SCHNELLDRUCK','schnelle Druckausgabe');					# Version 1.7.5
 # Schalter für die PopUp-Funktion des Menüs
-define('POPUPMENUE','false');          # true / false
+#define('POPUPMENUE','false');          # true / false 				# Version 2.7 gelöscht
+
 # Position des Wappens (oben/unten/kein)
 define('MENU_WAPPEN','oben');          # oben / unten / kein
 # Position der Referenzkarte (oben/unten)                   # Version 1.6.4
