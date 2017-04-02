@@ -1609,6 +1609,6 @@ function extract_go($url) {
 	$go_pos = strpos($url, 'go=');
 	$url = substr($url, $go_pos + 3);
 	$and_pos = strpos($url, '&');
-	return substr($url, 0, $and_pos);
+	return ($and_pos ? substr($url, 0, $and_pos) : $url);
 }
 ?>

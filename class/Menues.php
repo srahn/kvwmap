@@ -74,7 +74,7 @@ class Menues {
     $this->width = $rs[0];
   }
 
-	function get_all_ober_menues() {
+	function get_all_ober_menues($stelle_id, $user_id) {
 		$sql .= "
 			SELECT
 				m.id,
@@ -84,7 +84,7 @@ class Menues {
 				m2r.status
 			FROM
 				u_menues m join
-				u_menue2rolle m2r ON (m.id = m2r.menue_id AND m2r.stelle_id = " . $this->stelle_id . " AND m2r.user_id = " . $this->user_id . ") 
+				u_menue2rolle m2r ON (m.id = m2r.menue_id AND m2r.stelle_id = " . $stelle_id . " AND m2r.user_id = " . $user_id . ") 
 			WHERE
 				m.menueebene = 1
 			ORDER BY
@@ -94,7 +94,8 @@ class Menues {
 		$this->debug->write("<p>file:kvwmap class:Menue - Lesen aller OberMenüs:<br>".$sql,4);
 		$query=mysql_query($sql);
 		if ($query==0) {
-			echo 'error';
+			$msg = 'Fehler bei der Abfrage:<br>' . $sql;
+			echo $msg;
 		}
 		else {
 			while($rs = mysql_fetch_assoc($query)) {

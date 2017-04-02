@@ -6,7 +6,7 @@
 #layerParamsBar {
 	display: none;
 	position: absolute;
-  border-radius: 5px;
+	border-radius: 5px;
 	top: 22;
 	right: 5;
 	width: 350;
@@ -283,8 +283,18 @@ a.menuered:hover {
 	content:url('../graphics/menue_top.gif');
 }
 
-.hauptmenue {
+.obermenue {
+	cursor: pointer;
+	font-size: 15px;
+	color: black;
+	font-family: SourceSansPro2;
+}
 
+.hauptmenue {
+	cursor: pointer;
+	font-size: 15px;
+	color: #a82e2e;
+	font-family: SourceSansPro2;
 }
 
 .hauptmenue:before {
@@ -292,24 +302,26 @@ a.menuered:hover {
 	margin-right: 20px;
 }
 
-a.hauptmenue {
-	color: #993333;
-	font-size: 15px;
-	line-height : 17px;
-}
-
 .untermenue:before {
-  content:url('../graphics/submenue.png');
-  position:relative;
-  z-index:100000;
-  top: 3px;
+	content:url('../graphics/submenue.png');
+	position:relative;
+	z-index:100000;
+	top: 3px;
 }
 
 .untermenue {
+	cursor: pointer;
 	background: rgb(237, 239, 239);
 }
 
 .untermenues {
+	color: #993333;
+	font-size: 15px;
+	line-height: 17px;
+}
+
+.ausgewaehltes-menue {
+	background: rgb(205, 208, 208);
 }
 
 #scrolldiv{
@@ -580,7 +592,7 @@ span.italic {
 	font-style: italic; 
 }
 
-span.red {	
+span.red {
 	font-size: 15px;	
 	color: #a82e2e;
 	font-family: SourceSansPro2;
@@ -860,7 +872,7 @@ tbody.gle tr:hover {
 }
 
 #calendar table tbody td.last_month, #calendar table tbody td.next_month {
-	color: 	#a3afc4;
+	color:	 #a3afc4;
 }
 
 #calendar table{

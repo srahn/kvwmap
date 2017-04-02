@@ -9872,7 +9872,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     }
     # Abfragen aller möglichen Menuepunkte
     $this->Menue=new menues($this->user->rolle->language);
-    $this->formvars['menues']=$this->Menue->get_all_ober_menues();
+    $this->formvars['menues']=$this->Menue->get_all_ober_menues($this->Stelle->id, $this->user->id);
     # Abfragen aller möglichen Funktionen
     $funktion = new funktion($this->database);
     $this->formvars['functions'] = $funktion->getFunktionen(NULL, 'bezeichnung');
