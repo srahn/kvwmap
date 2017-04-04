@@ -8279,7 +8279,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						if (pg_affected_rows($ret['query']) > 0) {
 							# dataset was created
 							if (is_array($result) and (!array_key_exists(1, $result) OR $result[1] != 'error')) {
-								$this->add_message('waring', 'Eintrag erfolgreich.<br>' . $result[0]);
+								$this->add_message('warning', 'Eintrag erfolgreich.<br>' . $result[0]);
 							}
 							else {
 								$this->add_message('notice', 'Eintrag erfolgreich!');
@@ -11725,7 +11725,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							$eintrag = $this->formvars[$form_fields[$i]];
             } break;
 						case 'Zahl' : {
-							$eintrag = removeTausenderTrenner($this->formvars[$form_fields[$i]]); # bei Zahlen den Punkt (Tausendertrenner) entfernen
+							$eintrag = removeTausenderTrenner($this->formvars[$form_fields[$i]]);		# bei Zahlen den Punkt (Tausendertrenner) entfernen
 							if($this->formvars[$form_fields[$i]] == '')$eintrag = 'NULL';
 						} break;
             default : {
