@@ -1217,6 +1217,10 @@ function activate_vertex(evt){
 		redrawPL();
 		deletelast(evt);
 	}
+	if(doing == "pquery"){
+		document.getElementById("suchkreis").setAttribute("cx", image_coordx);
+		document.getElementById("suchkreis").setAttribute("cy", image_coordy);
+	}
 	//if(top.document.GUI.runningcoords != undefined)top.document.GUI.runningcoords.value = top.format_number(coordx, false, false, false) + " / " + top.format_number(coordy, false, false, false); 
 	top.document.GUI.activated_vertex.value = vertex.getAttribute("id");
 	top.coords_anzeige(evt, vertex);
@@ -1265,15 +1269,19 @@ function deactivate_vertex(evt){
 
 function add_vertex(evt){
 	vertex = evt.target;
+	var imgx = vertex.getAttribute("cx");
+	var imgy = vertex.getAttribute("cy");
+	var worldx = vertex.getAttribute("x");
+	var worldy = vertex.getAttribute("y");
 	if(doing == "measure"){
 		if(!measuring){
 			restart();	
 			measuring = true;
 		}
-		pathx.push(vertex.getAttribute("cx"));
-		pathy.push(vertex.getAttribute("cy"));
-		pathx_world.push(parseFloat(vertex.getAttribute("x")));
-		pathy_world.push(parseFloat(vertex.getAttribute("y")));		
+		pathx.push(imgx);
+		pathy.push(imgy);
+		pathx_world.push(parseFloat(worldx));
+		pathy_world.push(parseFloat(worldy));		
 		if(new_distance > 0){
 			measured_distance = new_distance;
 			showMeasurement(evt);
@@ -1286,11 +1294,17 @@ function add_vertex(evt){
 			restart();
 			polydrawing = true;
 		}
-  	polypathx.push(parseFloat(vertex.getAttribute("x")));
-  	polypathy.push(parseFloat(vertex.getAttribute("y")));
+  	polypathx.push(parseFloat(worldx));
+  	polypathy.push(parseFloat(worldy));
 		redrawPolygon();
 		polygonarea();
 		vertex.setAttribute("opacity", "0.8");
+	}
+	if(doing == "pquery" || doing == "ppquery"){
+		evt.clientX = imgx;
+		evt.clientY = imgy;
+		mousedown(evt);
+		mouseup(evt);
 	}
 	if(doing == "showcoords"){
 		top.show_coords(evt, vertex);
