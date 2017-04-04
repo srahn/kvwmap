@@ -72,6 +72,24 @@ class Menue extends MyObject {
 		return $menues;
 	}
 
+	function is_selected() {
+		$is_selected = true;
+		$formvars = $_REQUEST;
+		$link = parse_url($this->get('links'));
+		if ($link['query'] == '') {
+			$is_selected = false;
+		}
+		else {
+			parse_str($link['query'], $link_params);
+			foreach($link_params AS $key => $value) {
+				if ($formvars[$key] != $value) {
+					$is_selected = false;
+				}
+			}
+		}
+		return $is_selected;
+	}
+
 	function get_class($untermenues) {
 		# define menue class
 		if (count($untermenues) > 0) {
@@ -88,6 +106,8 @@ class Menue extends MyObject {
 				$class = 'untermenue';
 			}
 		}
+
+		$class .= ($this->is_selected() ? ' ausgewaehltes-menue' : '');
 		$this->class = $class;
 		return $class;
 	}
@@ -106,21 +126,7 @@ class Menue extends MyObject {
 
 	function get_onclick($class, $target) {
 		# define click events
-		if (in_array($class, array('untermenue', 'hauptmenue'))) {
-			# call a link
-			if ($this->get('target') == 'confirm') {
-				$onclick = "javascript:Bestaetigung('" . $this->get('links') . "', 'Diese Aktion wirklich ausführen?')";
-			}
-			else {
-				if ($target != '') { # open link in target
-					$onclick = "window.open('" . $this->get('links') . "', '" . $target . "')";
-				}
-				else { # open link in same window
-					$onclick = "location.href='" . $this->get('links') . "'";
-				}
-			}
-		}
-		else {
+		if (strpos($class, 'obermenu') !== false) {
 			# only toggle menues
 			$onclick .= "ahah('index.php', 'go=changemenue_with_ajax&id=" . $this->get('id') . "&status=' + ($('#menue_div_name_" . $this->get('id') . "').hasClass('menue-auf') ? 'off' : 'on'), new Array(''), '');";
 			if ($this->gui->user->rolle->menu_auto_close == 1) {
@@ -138,17 +144,28 @@ class Menue extends MyObject {
 				$onclick .= "$('#menue_div_name_" . $this->get('id') . "').toggleClass('menue-auf menue-zu');";
 			}
 		}
+		else {
+			# call a link
+			if ($this->get('target') == 'confirm') {
+				$onclick = "javascript:Bestaetigung('" . $this->get('links') . "', 'Diese Aktion wirklich ausführen?')";
+			}
+			else {
+				if ($target != '') { # open link in target
+					$onclick = "window.open('" . $this->get('links') . "', '" . $target . "')";
+				}
+				else { # open link in same window
+					$onclick = "location.href='" . $this->get('links') . "'";
+				}
+			}
+		}
 		return $onclick;
 	}
 
 	function html() {
 		$untermenues = $this->get_untermenues($this->get('id'));
-		$class = $this->get_class($untermenues);
+		$class  = $this->get_class($untermenues);
 		$target = $this->get_target();
 		$onclick = $this->get_onclick($class, $target);
-		if (extract_go($this->get('links')) == $this->gui->formvars['go']) {
-			$class .= ' ausgewaehltes-menue';
-		};
 
 		$html .= '<div id="menue_div_' . $this->get('id') . '">';
 		$html .= '<div

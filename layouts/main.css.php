@@ -1,4 +1,4 @@
-<?php
+ord<?php
 	header('Content-type: text/css');
 	include('../config.php');
 ?>
@@ -255,14 +255,16 @@ a.invisiblelayerlink:hover{
 	top: 0px; 
 	z-index:3;
 	border: 1px solid #cccccc;
-	line-height : 17px;
+	line-height : 19px;
+	height: 19px;
 	margin-top: 2px;
-	margin-bottom: 2px;
+/*	margin-bottom: 2px;*/
 	padding: 2px;
 }
 
 .menu:hover{
-	background: linear-gradient(#DAE4EC 0%, #adc7da 100%);
+	background: linear-gradient(#ece1da 0%, #dac4ad 100%)
+/*	background: linear-gradient(#DAE4EC 0%, #adc7da 100%); */
 }
 
 a.menuered {
@@ -306,12 +308,16 @@ a.menuered:hover {
 	content:url('../graphics/submenue.png');
 	position:relative;
 	z-index:100000;
-	top: 3px;
+	float: left;
 }
 
 .untermenue {
 	cursor: pointer;
 	background: rgb(237, 239, 239);
+	margin: 0px;
+	padding-top: 1px;
+	padding-bottom: 0px;
+	border: 0px;
 }
 
 .untermenues {
