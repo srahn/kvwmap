@@ -8278,7 +8278,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 						if (pg_affected_rows($ret['query']) > 0) {
 							# dataset was created
-							if (is_array($result) and array_key_exists(1, $result) and $result[1] == 'error') {
+							if (is_array($result) and (!array_key_exists(1, $result) OR $result[1] != 'error')) {
 								$this->add_message('waring', 'Eintrag erfolgreich.<br>' . $result[0]);
 							}
 							else {
@@ -8286,7 +8286,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							}
 
 							$last_oid = pg_last_oid($ret['query']);
-							$this->formvars['value_' . $table['tablename'] . '_oid'] = $last_oid;
+							if($this->formvars['embedded'] == '')$this->formvars['value_' . $table['tablename'] . '_oid'] = $last_oid;
 
 							# After Insert trigger
 							if (!empty($layerset[0]['trigger_function'])) {
