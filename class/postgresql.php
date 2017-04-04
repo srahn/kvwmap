@@ -255,6 +255,7 @@ FROM
       $query=pg_query($this->dbConn,$sql);
       //$query=0;
       if ($query==0) {
+				$ret['success'] = false;
 				$errormessage = pg_last_error($this->dbConn);
 				header('error: true');		// damit ajax-Requests das auch mitkriegen
         $ret[0]=1;
@@ -268,7 +269,9 @@ FROM
       else {
       	# Abfrage wurde erfolgreich ausgeführt
         $ret[0]=0;
-        $ret[1]=$query;
+        $ret['success'] = true;
+				$ret[1] = $query;
+				$ret['query'] = $ret[1];
         $this->debug->write("<br>".$sql,$debuglevel);
         # 2006-07-04 pk $logfile ersetzt durch $this->logfile
         if ($logsql) {

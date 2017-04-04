@@ -2059,10 +2059,15 @@ class GUI {
 		);
 	}
 
-	function output_messages() { ?>
-		<script type="text/javascript">
-			message(<? echo json_encode($this->messages); ?>);
-		</script><?
+	function output_messages($option = 'with_script_tags') {
+		if (!$this->success) {
+			header('error: true');
+		}
+		$html = "message(" . json_encode($this->messages) . ");";
+		if ($option == 'with_script_tags') {
+			$html = "<script type=\"text/javascript\">" . $html . "</script>";
+		}
+		echo $html;
 	}
 
   # Ausgabe der Seite
@@ -8073,7 +8078,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         }
       }
     }
-    $success = true;
+    $this->success = true;
     foreach($tablename as $table){
       $execute = false;
       if($table['tablename'] != '' AND $table['tablename'] == $layerset[0]['maintable']){		# nur Attribute aus der Haupttabelle werden gespeichert
@@ -8151,56 +8156,63 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         $sql = substr($sql, 0, strlen($sql)-2);
         $sql.= ")";
 
-        if($execute == true){
+				if ($execute == true) {
 					# Before Insert trigger
 					if (!empty($layerset[0]['trigger_function'])) {
 						$this->exec_trigger_function('BEFORE', 'INSERT', $layerset[0]);
 					}
 
-          $this->debug->write("<p>file:kvwmap class:neuer_Layer_Datensatz_speichern :",4);
-          if($this->formvars['embedded'] == ''){
-            $ret = $layerdb->execSQL($sql,4, 1);
-            if(!$ret[0]){
-							$result = pg_fetch_row($ret[1]);
-            	if(pg_affected_rows($ret[1]) > 0){
-              	$this->formvars['value_'.$table['tablename'].'_oid'] = pg_last_oid($ret[1]);
-								$oid = $this->formvars['value_'.$table['tablename'].'_oid'];
-            	}
-            	else {
-            		$ret[0] = 1;
-            	}
-            }
-          }
-          else{
-            $ret = $layerdb->execSQL($sql,4, 1);
-            if(!$ret[0]){
-              $last_oid = pg_last_oid($ret[1]);
-							$oid = $last_oid;
-            }
-          }
+					$this->debug->write("<p>file:kvwmap class:neuer_Layer_Datensatz_speichern :",4);
 
-          if ($ret[0]) {
-            $success = false;
-          }
-					else {
-						# After Insert trigger
-						if (!empty($layerset[0]['trigger_function'])) {
-							$this->exec_trigger_function('AFTER', 'INSERT', $layerset[0], $oid);
+					$ret = $layerdb->execSQL($sql, 4, 1, true);
+
+					if ($ret['success']) {
+
+						$result = pg_fetch_row($ret['query']);
+
+						if (pg_affected_rows($ret['query']) > 0) {
+							# dataset was created
+							if (is_array($result) and (!array_key_exists(1, $result) OR $result[1] != 'error')) {
+								$this->add_message('warning', 'Eintrag erfolgreich.<br>' . $result[0]);
+							}
+							else {
+								$this->add_message('notice', 'Eintrag erfolgreich!');
+							}
+
+							$last_oid = pg_last_oid($ret['query']);
+							if($this->formvars['embedded'] == '')$this->formvars['value_' . $table['tablename'] . '_oid'] = $last_oid;
+
+							# After Insert trigger
+							if (!empty($layerset[0]['trigger_function'])) {
+								$this->exec_trigger_function('AFTER', 'INSERT', $layerset[0], $last_oid);
+							}
+						}
+						else {
+							# dataset was not created
+							$this->add_message('error', 'Eintrag fehlgeschlagen.<br>' . $result[0]);
 						}
 					}
+					else {
+						# query not successfull set query error message
+						$this->success = false;
+						$this->add_message($ret['type'], $ret['msg']);
+					}
+				}
+			}
+		}
 
-        }
-      }
-    }
-    if($this->formvars['embedded'] != ''){    # wenn es ein neuer Datensatz aus einem embedded-Formular ist, muss das entsprechende Attribut des Hauptformulars aktualisiert werden
-      header('Content-type: text/html; charset=UTF-8');
-      $attributename[0] = $this->formvars['targetattribute'];
-      $attributes = $mapdb->read_layer_attributes($this->formvars['targetlayer_id'], $layerdb, $attributename);
+		if ($this->formvars['embedded'] != '') {    # wenn es ein neuer Datensatz aus einem embedded-Formular ist, muss das entsprechende Attribut des Hauptformulars aktualisiert werden
+			header('Content-type: text/html; charset=UTF-8');
+			$attributename[0] = $this->formvars['targetattribute'];
+			$attributes = $mapdb->read_layer_attributes($this->formvars['targetlayer_id'], $layerdb, $attributename);
 
-      switch ($attributes['form_element_type'][0]){
-        case 'Auswahlfeld' : {
-					if(strpos($attributes['options'][0], '<requires>') !== false)echo "~~currentform.go.value='get_last_query';overlay_submit(currentform, false);";		# wenn <requires> verwendet wird, muss komplett neu geladen werden
-					else{		# andernfalls wird nur das Auswahlfeld ausgetauscht und die Option gleich selektiert
+			switch ($attributes['form_element_type'][0]){
+				case 'Auswahlfeld' : {
+					if (strpos($attributes['options'][0], '<requires>') !== false) {
+						# wenn <requires> verwendet wird, muss komplett neu geladen werden
+						echo "~~currentform.go.value='get_last_query';overlay_submit(currentform, false);";
+					}
+					else { # andernfalls wird nur das Auswahlfeld ausgetauscht und die Option gleich selektiert
 						list($sql) = explode(';', $attributes['options'][0]);
 						$sql = str_replace(' from ', ',oid from ', strtolower($sql));    # auch die oid abfragen
 						$re=$layerdb->execSQL($sql,4,0);
@@ -8212,19 +8224,21 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						}
 						echo '~'.$html;
 					}
-        }break;
+        } break;
 
         case 'SubFormEmbeddedPK' : {
           $this->formvars['embedded_subformPK'] = true;
           echo '~';
           $this->GenerischeSuche_Suchen();
+					echo '~';
 					if($this->formvars['weiter_erfassen'] == 1){
-						echo '~href_save = document.getElementById("new_'.$this->formvars['targetobject'].'").href;';
+						echo 'href_save = document.getElementById("new_'.$this->formvars['targetobject'].'").href;';
 						echo 'document.getElementById("new_'.$this->formvars['targetobject'].'").href = document.getElementById("new_'.$this->formvars['targetobject'].'").href.replace("go=neuer_Layer_Datensatz", "go=neuer_Layer_Datensatz&weiter_erfassen=1'.$formfieldstring.'");';
 						echo 'document.getElementById("new_'.$this->formvars['targetobject'].'").click();';
 						echo 'document.getElementById("new_'.$this->formvars['targetobject'].'").href = href_save;';
 					}
-        }break;
+					$this->output_messages('without_script_tags');
+        } break;
       }
 
 			if($this->formvars['reload']){			# in diesem Fall wird die komplette Seite neu geladen
@@ -8235,18 +8249,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
     }
     else {
-      if($success == false) {
-        $this->add_message('error', 'Eintrag fehlgeschlagen.<br>' . $result[0]);
+      if ($ret['success'] == false) {
         $this->neuer_Layer_Datensatz();
       }
-      else{
-        if ($this->formvars['close_window'] == "") {
-					$msg = (is_array($result) and array_key_exists(1, $result) and $result[1] == 'error') ? '' : $result[0];
-					if ($msg != '')
-						$this->add_message('warning', 'Eintrag erfolgreich.<br>' . $msg);
-					else
-						$this->add_message('notice', 'Eintrag erfolgreich!');
-        }
+      else {
         if($this->formvars['weiter_erfassen'] == 1){
         	$this->formvars['firstpoly'] = '';
         	$this->formvars['firstline'] = '';
