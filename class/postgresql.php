@@ -1897,11 +1897,11 @@ FROM
 		if($ganze_gemkg_ids[0] != '' OR count($eingeschr_gemkg_ids) > 0){
 			$sql.=" AND (FALSE ";
 			if($ganze_gemkg_ids[0] != ''){
-				$sql.="OR f.land*10000 + f.gemarkungsnummer IN (".implode(',', $ganze_gemkg_ids).")";
+				$sql.="OR f.gemarkung_land||f.gemarkungsnummer IN (".implode(',', $ganze_gemkg_ids).")";
 			}
 			if(count($eingeschr_gemkg_ids) > 0){
 				foreach($eingeschr_gemkg_ids as $eingeschr_gemkg_id => $fluren){
-					$sql.=" OR (f.land*10000 + f.gemarkungsnummer = ".$eingeschr_gemkg_id." AND flurnummer IN (".implode(',', $fluren)."))";
+					$sql.=" OR (f.gemarkung_land||f.gemarkungsnummer = ".$eingeschr_gemkg_id." AND flurnummer IN (".implode(',', $fluren)."))";
 				}
 			}
 			$sql.=")";
@@ -1986,7 +1986,7 @@ FROM
 	}
   
   function getGemarkungName($GemkgSchl) {
-    $sql ="SELECT bezeichnung as gemkgname FROM alkis.ax_gemarkung WHERE land*10000 + gemarkungsnummer = ".$GemkgSchl;
+    $sql ="SELECT bezeichnung as gemkgname FROM alkis.ax_gemarkung WHERE schluesselgesamt = ".$GemkgSchl;
 		$sql.= $this->build_temporal_filter(array('ax_gemarkung'));
     $this->debug->write("<p>postgres.sql getGemarkungName Abfragen des Gemarkungsnamen:<br>".$sql,4);
     $queryret=$this->execSQL($sql, 4, 0);
@@ -2020,13 +2020,13 @@ FROM
 		$sql.="FROM alkis.ax_flurstueck f ";
 		$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR f.istgebucht = ANY(s.an) OR f.gml_id = ANY(s.verweistauf) ";		
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
-		$sql.="WHERE g.land*10000 + g.bezirk = ".$bezirk." AND (blattart = 1000 OR blattart = 2000 OR blattart = 3000) AND (FALSE ";		
+		$sql.="WHERE g.land||g.bezirk = ".$bezirk." AND (blattart = 1000 OR blattart = 2000 OR blattart = 3000) AND (FALSE ";		
 		if($ganze_gemkg_ids[0] != ''){
-			$sql.="OR f.land*10000 + f.gemarkungsnummer IN (".implode(',', $ganze_gemkg_ids).")";
+			$sql.="OR f.gemarkung_land||f.gemarkungsnummer IN (".implode(',', $ganze_gemkg_ids).")";
 		}
 		if(count($eingeschr_gemkg_ids) > 0){
 			foreach($eingeschr_gemkg_ids as $eingeschr_gemkg_id => $fluren){
-				$sql.=" OR (f.land*10000 + f.gemarkungsnummer = ".$eingeschr_gemkg_id." AND flurnummer IN (".implode(',', $fluren)."))";
+				$sql.=" OR (f.gemarkung_land||f.gemarkungsnummer = ".$eingeschr_gemkg_id." AND flurnummer IN (".implode(',', $fluren)."))";
 			}
 		}
 		$sql.= ")";
@@ -2065,11 +2065,11 @@ FROM
 		$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
 		$sql.="WHERE (g.blattart = 1000 OR g.blattart = 2000 OR g.blattart = 3000) AND (FALSE ";
 		if($ganze_gemkg_ids[0] != ''){
-			$sql.="OR f.land*10000 + f.gemarkungsnummer IN (".implode(',', $ganze_gemkg_ids).")";
+			$sql.="OR f.gemarkung_land||f.gemarkungsnummer IN (".implode(',', $ganze_gemkg_ids).")";
 		}
 		if(count($eingeschr_gemkg_ids) > 0){
 			foreach($eingeschr_gemkg_ids as $eingeschr_gemkg_id => $fluren){
-				$sql.=" OR (f.land*10000 + f.gemarkungsnummer = ".$eingeschr_gemkg_id." AND flurnummer IN (".implode(',', $fluren)."))";
+				$sql.=" OR (f.gemarkung_land||f.gemarkungsnummer = ".$eingeschr_gemkg_id." AND flurnummer IN (".implode(',', $fluren)."))";
 			}
 		}
 		$sql.= ")";
@@ -2220,7 +2220,7 @@ FROM
   }
 			
 	function check_poly_in_flur($polygon, $epsg){
-		$sql = "SELECT f.land * 10000 + f.gemarkungsnummer, f.flurnummer FROM alkis.ax_flurstueck f WHERE st_intersects(wkb_geometry, st_transform(st_geomfromtext('".$polygon."', ".$epsg."), ".EPSGCODE_ALKIS."))";
+		$sql = "SELECT f.gemarkung_land||f.gemarkungsnummer, f.flurnummer FROM alkis.ax_flurstueck f WHERE st_intersects(wkb_geometry, st_transform(st_geomfromtext('".$polygon."', ".$epsg."), ".EPSGCODE_ALKIS."))";
 		$sql.= $this->build_temporal_filter(array('f'));
   	return $this->execSQL($sql,4, 1);
 	}
@@ -2275,7 +2275,7 @@ FROM
     $sql ="SELECT MIN(st_xmin(st_envelope(st_transform(the_geom, ".$epsgcode.")))) AS minx,MAX(st_xmax(st_envelope(st_transform(the_geom, ".$epsgcode.")))) AS maxx";
     $sql.=",MIN(st_ymin(st_envelope(st_transform(the_geom, ".$epsgcode.")))) AS miny,MAX(st_ymax(st_envelope(st_transform(the_geom, ".$epsgcode.")))) AS maxy";
     $sql.=" FROM alkis.pp_gemarkung";
-    $sql.=" WHERE land*10000 + gemarkung = ".$Gemarkung;
+    $sql.=" WHERE schluesselgesamt = ".$Gemarkung;
     #echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) {
@@ -2299,7 +2299,7 @@ FROM
     $sql ="SELECT MIN(st_xmin(st_envelope(st_transform(the_geom, ".$epsgcode.")))) AS minx,MAX(st_xmax(st_envelope(st_transform(the_geom, ".$epsgcode.")))) AS maxx";
     $sql.=",MIN(st_ymin(st_envelope(st_transform(the_geom, ".$epsgcode.")))) AS miny,MAX(st_ymax(st_envelope(st_transform(the_geom, ".$epsgcode.")))) AS maxy";
     $sql.=" FROM alkis.pp_flur";
-    $sql.=" WHERE land*10000 + gemarkung = ".$Gemarkung;
+    $sql.=" WHERE land||gemarkung = ".$Gemarkung;
     $sql.=" AND flurnummer = ".(int)$Flur;
     #echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
