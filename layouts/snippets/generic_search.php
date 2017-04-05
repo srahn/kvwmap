@@ -21,7 +21,7 @@ document.onkeydown = function(ev){
 	}
 }
 
-function changeInputType(Object, oType) {
+function changeInputType(object, oType) {
 	if(object != undefined){
 		object.type = oType;
 	}
@@ -40,7 +40,7 @@ function operatorchange(attributname, searchmask_number){
 	}
 	if(document.getElementById(prefix+"operator_"+attributname).value == "between"){
 		changeInputType(document.getElementById(prefix+"value2_"+attributname), "text");
-		document.getElementById(prefix+"value_"+attributname).style.width = '145px';
+		document.getElementById(prefix+"value_"+attributname).style.width = '144px';
 	}
 	else{
 		if(document.getElementById(prefix+"value2_"+attributname) != undefined){

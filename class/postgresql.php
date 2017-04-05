@@ -307,7 +307,6 @@ FROM
 			}
 			$this->debug->write("<br>" . $sql, $debuglevel);
 		}
-
 		return $ret;
 	}
 
