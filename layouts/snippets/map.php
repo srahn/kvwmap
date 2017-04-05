@@ -22,12 +22,12 @@
 
 	$scrolldiv_height = $this->map->height +
 		$size['scale_bar']['height'] +
-		(empty($this->Lagebezeichnung) ? 0 : $size['lagebezeichnung_bar']['height']) +
+		$size['lagebezeichnung_bar']['height'] +
 		$size['map_functions_bar']['height'] +
 		$size['footer']['height'] -
-		91; # height of every thing above scroll div inclusive tabs.
+		100; # height of every thing above scroll div inclusive tabs.
 
-	$msg  = 'browser width x height: ' . $this->formvars['browserwidth'] . ' x ' . $this->formvars['browserwidth'];
+	$msg  = 'browser width x height: ' . $this->formvars['browserwidth'] . ' x ' . $this->formvars['browserheight'];
 	$msg .= '<br>map width x height: ' . $this->map->width . ' x ' . $this->map->height;
 	$msg .= '<br>scale_bar_height: ' . $size['scale_bar']['height'];
 	$msg .= '<br>lagebezeichnung_bar_height: ' . $size['lagebezeichnung_bar']['height'];
@@ -38,7 +38,7 @@
 	$msg .= '<br>menue width: ' . $size['menue']['width'];
 	$msg .= '<br>legend width x height: ' . $legend_width . ' x ' . $legend_height;
 	$msg .= '<br>map_frame width x height: ' . ($map_width + $legend_width);
-#	$this->add_message('error', $msg);
+	$this->add_message('error', $msg);
 
 	$res_x    = $this->map->width;
 	$res_y    = $this->map->height;

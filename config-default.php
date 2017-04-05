@@ -540,6 +540,7 @@ define('DELETE_ROLLENLAYER', 'true');   # true / false                          
 # Definiert, ob das aktuelle Kartenbild separat angezeigt werden darf oder nicht
 define('SHOW_MAP_IMAGE', 'true');       # true / false                            # Version 1.6.7
 
+define('SHOW_MAP_FUNCTIONS', true);																									# Version 2.7
 
 // ############################# Klassenbibliotheken lesen														# in Version 2.0 gelöscht
 // # laden der Klassenbibliotheken																										# in Version 2.0 gelöscht

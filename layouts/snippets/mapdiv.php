@@ -109,79 +109,81 @@
 					</td>
 				</tr><?
 
-				if ($this->user->rolle->newtime!='') { ?>
-					<tr style="background-color: <? echo BG_MENUESUB; ?>;">
-						<td class="map-options" height="36" colspan="3">
-							<div id="maptime">
-								<div style="float: left; padding: 0 0 0 5;">
-									<a title="<? echo $strSaveExtent; ?>" href="index.php?go=Kartenkommentar_Formular">
-										<div class="button_background">
-											<div class="emboss save_extent">
-												<img src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
-											</div>
-										</div>
-									</a>
-								</div>
-								<div style="float: left; padding: 0 0 0 10;">
-									<a title="<? echo $strChoose ?>" href="index.php?go=Kartenkommentar_Waehlen">
-										<div class="button_background">
-											<div class="emboss load_extent">
-												<img src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
-											</div>
-										</div>
-									</a>
-								</div>
-								<div style="float: left; padding: 0 0 0 10;">
-									<a title="<? echo $strSaveLayers; ?>" href="javascript:document.GUI.go.value='Layerauswahl_Formular';document.GUI.submit();">
-										<div class="button_background">
-											<div class="emboss save_layers">
-												<img src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
-											</div>
-										</div>
-									</a>
-								</div>
-								<div style="float: left; padding: 0 0 0 10;">
-									<a title="<? echo $strChooseLayers ?>" href="index.php?go=Layerauswahl_Waehlen">
-										<div class="button_background">
-											<div class="emboss load_layers">
-												<img src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
-											</div>
-										</div>
-									</a>
-								</div>
-								<div style="float: left; padding: 0 0 0 10;"><?
-									if (SHOW_MAP_IMAGE == 'true') { ?>
-										<a
-											title="<? echo $strMapImageURL ?>"
-											id="MapImageLink"
-											target="_blank"
-											href=""
-											onmouseover="javascript:showMapImage();"
-										>
+				if ($this->user->rolle->newtime!='') {
+					if (!(defined('SHOW_MAP_FUNCTIONS') and SHOW_MAP_FUNCTIONS == false)) { ?>
+						<tr style="background-color: <? echo BG_MENUESUB; ?>;">
+							<td class="map-options" height="36" colspan="3">
+								<div id="maptime">
+									<div style="float: left; padding: 0 0 0 5;">
+										<a title="<? echo $strSaveExtent; ?>" href="index.php?go=Kartenkommentar_Formular">
 											<div class="button_background">
-												<div class="emboss save_image">
+												<div class="emboss save_extent">
 													<img src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
 												</div>
 											</div>
-										</a><?
-									} ?>
-								</div>
-								<div style="float: left; padding: 0 0 0 10;">
-									<a title="<? echo $strMapSize; ?>" href="javascript:resizemap2window();" >
-										<div class="button_background">
-											<div class="emboss resize_map">
-												<img src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
+										</a>
+									</div>
+									<div style="float: left; padding: 0 0 0 10;">
+										<a title="<? echo $strChoose ?>" href="index.php?go=Kartenkommentar_Waehlen">
+											<div class="button_background">
+												<div class="emboss load_extent">
+													<img src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
+												</div>
 											</div>
-										</div>
-									</a>
+										</a>
+									</div>
+									<div style="float: left; padding: 0 0 0 10;">
+										<a title="<? echo $strSaveLayers; ?>" href="javascript:document.GUI.go.value='Layerauswahl_Formular';document.GUI.submit();">
+											<div class="button_background">
+												<div class="emboss save_layers">
+													<img src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
+												</div>
+											</div>
+										</a>
+									</div>
+									<div style="float: left; padding: 0 0 0 10;">
+										<a title="<? echo $strChooseLayers ?>" href="index.php?go=Layerauswahl_Waehlen">
+											<div class="button_background">
+												<div class="emboss load_layers">
+													<img src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
+												</div>
+											</div>
+										</a>
+									</div>
+									<div style="float: left; padding: 0 0 0 10;"><?
+										if (SHOW_MAP_IMAGE == 'true') { ?>
+											<a
+												title="<? echo $strMapImageURL ?>"
+												id="MapImageLink"
+												target="_blank"
+												href=""
+												onmouseover="javascript:showMapImage();"
+											>
+												<div class="button_background">
+													<div class="emboss save_image">
+														<img src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
+													</div>
+												</div>
+											</a><?
+										} ?>
+									</div>
+									<div style="float: left; padding: 0 0 0 10;">
+										<a title="<? echo $strMapSize; ?>" href="javascript:resizemap2window();" >
+											<div class="button_background">
+												<div class="emboss resize_map">
+													<img src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
+												</div>
+											</div>
+										</a>
+									</div>
 								</div>
+								<div class="special-options" style="float: right; margin-top: 5px; margin-right: 5px">
+									<input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;Punktfang
+								<div id="options"></div><!-- hier werden die Spezialoptionen eingefügt -->
 							</div>
-							<div class="special-options" style="float: right; margin-top: 5px; margin-right: 5px">
-								<input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;Punktfang
-							<div id="options"></div><!-- hier werden die Spezialoptionen eingefügt -->
-						</div>
-						</td>
-					</tr><?
+							</td>
+						</tr><?
+					}
 				} ?>
 			</table>
 		</td>
