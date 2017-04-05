@@ -183,6 +183,8 @@
 							</div>
 							</td>
 						</tr><?
+					} else { ?>
+						<input type="hidden" name="punktfang"><?php
 					}
 				} ?>
 			</table>
