@@ -25,7 +25,7 @@
 		$size['lagebezeichnung_bar']['height'] +
 		$size['map_functions_bar']['height'] +
 		$size['footer']['height'] -
-		100; # height of every thing above scroll div inclusive tabs.
+		$size['legend']['header_height']; # height of every thing above scroll div inclusive tabs.
 
 	$msg  = 'browser width x height: ' . $this->formvars['browserwidth'] . ' x ' . $this->formvars['browserheight'];
 	$msg .= '<br>map width x height: ' . $this->map->width . ' x ' . $this->map->height;

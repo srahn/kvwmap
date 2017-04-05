@@ -97,43 +97,159 @@ class database {
   }
 
 	function create_new_gast($gast_stelle){
-    $loginname = "";
-    $laenge=10;
-    $string="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    mt_srand((double)microtime()*1000000);
-    for ($i=1; $i <= $laenge; $i++) {
-    	$loginname .= substr($string, mt_rand(0,strlen($string)-1), 1);
-    }
-    
-    $sql = "INSERT INTO user (`login_name`, `Name`, `Vorname`, `Namenszusatz`, `passwort`, `ips`, `Funktion`, `stelle_id`)
-            VALUES('".$loginname."' , 'gast' , 'gast', '', 'd4061b1486fe2da19dd578e8d970f7eb', '', 'gast', '$gast_stelle');";
+		$loginname = "";
+		$laenge=10;
+		$string="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+		mt_srand((double)microtime()*1000000);
+		for ($i=1; $i <= $laenge; $i++) {
+			$loginname .= substr($string, mt_rand(0,strlen($string)-1), 1);
+		}
+		# Gastnutzer anlegen
+		$sql = "
+			INSERT INTO user (
+				`login_name`,
+				`Name`,
+				`Vorname`,
+				`Namenszusatz`,
+				`passwort`,
+				`ips`,
+				`Funktion`,
+				`stelle_id`
+			)
+			VALUES (
+				'" . $loginname . "',
+				'gast',
+				'gast',
+				'',
+				'd4061b1486fe2da19dd578e8d970f7eb',
+				'',
+				'gast',
+				'" . $gast_stelle . 
+				"'
+			);
+		";
+		echo '<br>sql: ' . $sql;
 		$query = mysql_query($sql);
-		$sql = "SELECT LAST_INSERT_ID();";
-    $query = mysql_query($sql);
-    $user_id = mysql_fetch_row($query);
-    $id = $user_id[0];
-    
-    $sql = "INSERT INTO `rolle` (`user_id`,`stelle_id`,`nImageWidth`,`nImageHeight`,`minx`,`miny`,`maxx`,`maxy`,`nZoomFactor`,`selectedButton`,`epsg_code`,`active_frame`,`last_time_id`,`language`,`hidemenue`,`fontsize_gle`,`highlighting`, `singlequery`, `querymode`)
-                    SELECT ".$id.", ".$gast_stelle.", '800', '600', minxmax, minymax, maxxmax, maxymax, '2', 'recentre', epsg_code, NULL , '0000-00-00 00:00:00', 'german', '0', '15', '1', '1', '1' FROM stelle WHERE ID = ".$gast_stelle;
-    $query = mysql_query($sql);
-    include(CLASSPATH.'users.php');
+
+		# ID des Gastnutzers abfragen
+		$sql = "
+			SELECT LAST_INSERT_ID();
+		";
+		$query = mysql_query($sql);
+		$row = mysql_fetch_row($query);
+		$new_user_id = $row[0];
+
+		# ID des Defaultnutzers abfragen
+		$sql = "
+			SELECT
+				`default_user_id`
+			FROM
+				`stelle` s JOIN
+				`rolle` r ON (s.ID = r.stelle_id AND s.default_user_id = r.user_id)
+			WHERE
+				`ID` = " . $gast_stelle . "
+		";
+		echo '<br>sql: ' . $sql;
+		$query = mysql_query($sql);
+
+		if (mysql_num_rows($query) == 1) {
+
+			# Rolleneinstellungen vom Defaultnutzer verwenden
+			$row = mysql_fetch_assoc($query);
+			$rolle_select_sql = "
+				SELECT
+					" . $new_user_id . ", " .
+					$gast_stelle . ",
+					`nImageWidth`, `nImageHeight`,
+					`minx`,`miny`,`maxx`,`maxy`,
+					`nZoomFactor`,
+					`selectedButton`,
+					`epsg_code`,
+					`active_frame`,
+					`last_time_id`,
+					`language`,
+					`hidemenue`,
+					`fontsize_gle`,
+					`highlighting`,
+					`singlequery`,
+					`querymode`,
+					`buttons`
+				FROM
+					`rolle`
+				WHERE
+					`user_id` = " . $row['default_user_id'] . " AND
+					`stelle_id` = " . $gast_stelle . "
+			";
+		}
+		else {
+			# Default - Rolleneinstellungen verwenden
+			$rolle_select_sql = "
+				SELECT " .
+					$new_user_id . ", " .
+					$gast_stelle . ",
+					'800', '600',
+					minxmax, minymax, maxxmax, maxymax,
+					'2',
+					'recentre',
+					epsg_code,
+					NULL ,
+					'0000-00-00 00:00:00',
+					'german',
+					'0',
+					'15',
+					'1',
+					'1',
+					'1',
+					'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure'
+				FROM
+					stelle
+				WHERE
+					ID = " . $gast_stelle . "
+			";
+		}
+
+		# Rolle für Gastnutzer eintragen
+		$sql = "
+			INSERT INTO `rolle` (
+				`user_id`,
+				`stelle_id`,
+				`nImageWidth`, `nImageHeight`,
+				`minx`, `miny`, `maxx`, `maxy`,
+				`nZoomFactor`,
+				`selectedButton`,
+				`epsg_code`,
+				`active_frame`,
+				`last_time_id`,
+				`language`,
+				`hidemenue`,
+				`fontsize_gle`,
+				`highlighting`,
+				`singlequery`,
+				`querymode`,
+				`buttons`
+			) " .
+			$rolle_select_sql . "
+		";
+		echo '<br>sql: ' . $sql;
+		$query = mysql_query($sql);
+		include(CLASSPATH.'users.php');
 		$stelle = new stelle($gast_stelle,$this);
 		$rolle = new rolle(NULL,$gast_stelle,$this);
 		$layers = $stelle->getLayers(NULL);
-		$rolle->setGroups($id, array($gast_stelle), $layers['ID'], '0');
+		$rolle->setGroups($new_user_id, array($gast_stelle), $layers['ID'], '0');
 
-    $sql = "INSERT INTO `u_menue2rolle` ( `user_id` , `stelle_id` , `menue_id` , `status` ) SELECT ".$id.", ".$gast_stelle.", menue_id, '0' FROM u_menue2stelle WHERE stelle_id = ".$gast_stelle;
+    $sql = "INSERT INTO `u_menue2rolle` ( `user_id` , `stelle_id` , `menue_id` , `status` ) SELECT ".$new_user_id.", ".$gast_stelle.", menue_id, '0' FROM u_menue2stelle WHERE stelle_id = ".$gast_stelle;
 		$query = mysql_query($sql);
 
 
     $sql = "INSERT INTO `u_rolle2used_layer` ( `user_id` , `stelle_id` , `layer_id` , `aktivStatus` , `queryStatus` , `showclasses` , `logconsume` ) ";
-    $sql.= "SELECT ".$id.", ".$gast_stelle.", Layer_ID, start_aktiv, start_aktiv, 1, 0 FROM used_layer WHERE Stelle_ID=".(int)$gast_stelle;
+    $sql.= "SELECT ".$new_user_id.", ".$gast_stelle.", Layer_ID, start_aktiv, start_aktiv, 1, 0 FROM used_layer WHERE Stelle_ID=".(int)$gast_stelle;
 		$query = mysql_query($sql);
 		
     $sql = "UPDATE u_groups2rolle, u_rolle2used_layer, layer SET u_groups2rolle.status = 1 ";
-		$sql.= "WHERE u_groups2rolle.user_id = ".$id." "; 
+		$sql.= "WHERE u_groups2rolle.user_id = ".$new_user_id." "; 
 		$sql.= "AND u_groups2rolle.stelle_id = ".$gast_stelle." "; 
-		$sql.= "AND u_rolle2used_layer.user_id = ".$id." ";
+		$sql.= "AND u_rolle2used_layer.user_id = ".$new_user_id." ";
 		$sql.= "AND u_rolle2used_layer.stelle_id = ".$gast_stelle." ";
 		$sql.= "AND u_rolle2used_layer.aktivStatus = '1' ";
 		$sql.= "AND u_rolle2used_layer.layer_id = layer.Layer_ID ";

@@ -484,7 +484,7 @@ a.menuered:hover {
 	vertical-align: top;
 	background-image: url(../graphics/bg.gif);
 	border-top: 1px solid #eeeeee;
-	border-bottom: 1px solid #aaaaaa;
+/*	border-bottom: 1px solid #aaaaaa;*/
 }
 
 /* display: inline-block; width: <?php echo $legend_width; ?>px; vertical-align: top" */

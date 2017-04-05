@@ -9871,8 +9871,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $this->formvars['selusers'] = $Stelle->getUser();
     }
     # Abfragen aller möglichen Menuepunkte
-    $this->Menue=new menues($this->user->rolle->language);
-    $this->formvars['menues']=$this->Menue->get_all_ober_menues($this->Stelle->id, $this->user->id);
+    $this->Menue = new menues($this->user->rolle->language);
+    $this->formvars['menues'] = $this->Menue->get_all_ober_menues($this->Stelle->id, $this->user->id);
     # Abfragen aller möglichen Funktionen
     $funktion = new funktion($this->database);
     $this->formvars['functions'] = $funktion->getFunktionen(NULL, 'bezeichnung');
@@ -10502,8 +10502,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       if($this->formvars['id'] != ''){
         $this->formvars['selected_user_id'] = $this->formvars['id'];
       }
-      $this->user->rolle->setRollen($this->formvars['selected_user_id'],$stellen);
-      $this->user->rolle->setMenue($this->formvars['selected_user_id'],$stellen);
+      $this->user->rolle->setRollen($this->formvars['selected_user_id'], $stellen);
+      $this->user->rolle->setMenue($this->formvars['selected_user_id'], $stellen);
       $this->user->rolle->setLayer($this->formvars['selected_user_id'], $stellen, 0);
 			for($i = 0; $i < count($stellen); $i++){
 				$stelle = new stelle($stellen[$i], $this->database);
@@ -11393,7 +11393,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
   function rollenwahl($Stelle_ID) {
 		include_once(CLASSPATH.'FormObject.php');
-    $this->user->Stellen=$this->user->getStellen(0);
+    $this->user->Stellen = $this->user->getStellen(0);
     $this->Hinweis.='Aktuelle Stellen_ID: '.$Stelle_ID;
     $StellenFormObj=new FormObject("Stelle_ID","select",$this->user->Stellen['ID'],$Stelle_ID,$this->user->Stellen['Bezeichnung'],'Anzahl Werte',"","",NULL);
     # hinzufügen von Javascript welches dafür sorgt, dass die Angegebenen Werte abgefragt werden

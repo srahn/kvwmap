@@ -74,39 +74,25 @@ class Menues {
     $this->width = $rs[0];
   }
 
-	function get_all_ober_menues($stelle_id, $user_id) {
-		$sql .= "
-			SELECT
-				m.id,
-				m.name" . ($this->language != 'german' ? '_' . $this->language . ' AS name' : '') . ",
-				m.order,
-				m.menueebene,
-				m2r.status
-			FROM
-				u_menues m join
-				u_menue2rolle m2r ON (m.id = m2r.menue_id AND m2r.stelle_id = " . $stelle_id . " AND m2r.user_id = " . $user_id . ") 
-			WHERE
-				m.menueebene = 1
-			ORDER BY
-				m.order
-		";
-		#echo 'sql: ' . $sql;
-		$this->debug->write("<p>file:kvwmap class:Menue - Lesen aller OberMenüs:<br>".$sql,4);
-		$query=mysql_query($sql);
-		if ($query==0) {
-			$msg = 'Fehler bei der Abfrage:<br>' . $sql;
-			echo $msg;
-		}
-		else {
-			while($rs = mysql_fetch_assoc($query)) {
-				$menues['ID'][] = $rs['id'];
-				$menues['Bezeichnung'][] = $rs['name'];
-				$menues['ORDER'][] = $rs['order'];
-				$menues['menueebene'][] = $rs['menueebene'];
-				$menues['status'][] = $rs['status'];
-			}
-			return $menues;
-		}
+	function get_all_ober_menues() {
+    $sql.='SELECT id,';
+    if ($this->language != 'german') {
+      $sql.='`name_'.$this->language.'` AS ';
+    }
+    $sql.=' name, `order`, menueebene FROM u_menues WHERE menueebene = 1 ORDER BY `order`';
+    $this->debug->write("<p>file:kvwmap class:Menue - Lesen aller OberMenüs:<br>".$sql,4);
+    $query=mysql_query($sql);
+    if ($query==0) {
+    }
+    else {
+    while($rs=mysql_fetch_array($query)) {
+          $menues['ID'][]=$rs['id'];
+          $menues['Bezeichnung'][]=$rs['name'];
+          $menues['ORDER'][]=$rs['order'];
+		  $menues['menueebene'][]=$rs['menueebene'];
+      }
+      return $menues;
+    }
 	}
 
   function getsubmenues($menue_id){

@@ -135,12 +135,12 @@ class Menue extends MyObject {
 				$onclick .= "$('.untermenues').hide();";
 				$onclick .= "$('.menue-auf').toggleClass('menue-auf menue-zu');";
 				$onclick .= "if (was_closed) {
-					$('#menue_div_untermenues_" . $this->get('id') . "').slideToggle();
+					$('#menue_div_untermenues_" . $this->get('id') . "').toggle();
 					$('#menue_div_name_" . $this->get('id') . "').toggleClass('menue-auf menue-zu');
 				}";
 			}
 			else {
-				$onclick .= "$('#menue_div_untermenues_" . $this->get('id') . "').slideToggle();";
+				$onclick .= "$('#menue_div_untermenues_" . $this->get('id') . "').toggle();";
 				$onclick .= "$('#menue_div_name_" . $this->get('id') . "').toggleClass('menue-auf menue-zu');";
 			}
 		}

@@ -62,7 +62,7 @@
  	} ?>
 </table>
 <script type="text/javascript">
-	$('.untermenue').contextmenu(function(evt) {
+	$('.hauptmenue, .untermenue').contextmenu(function(evt) {
 		debug_e = evt;
 		var messages = [];
 		if (evt.target.getAttribute('title') != '') {

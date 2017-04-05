@@ -746,9 +746,9 @@ class user {
 
 	function setRolle($stelle_id) {
 		# Abfragen und zuweisen der Einstellungen für die Rolle		
-		$rolle=new rolle($this->id,$stelle_id,$this->database);		
+		$rolle = new rolle($this->id, $stelle_id, $this->database);		
 		if ($rolle->readSettings()) {
-			$this->rolle=$rolle;			
+			$this->rolle=$rolle;
 			return 1;
 		}
 		return 0;
@@ -854,21 +854,27 @@ class user {
 	}
 
 	function getStellen($stelle_ID) {
-		$sql ='SELECT s.ID,s.Bezeichnung FROM stelle AS s,rolle AS r';
-		$sql.=' WHERE s.ID=r.stelle_id AND r.user_id='.$this->id;
-		if ($stelle_ID>0) {
-			$sql.=' AND s.ID='.$stelle_ID;
-		}
-		# Zeiteinschränkung
-		$sql.=' AND (';
-		# Zeiteinschränkung wird berücksichtigt
-		$sql.='("'.date('Y-m-d h:i:s').'" >= s.start AND "'.date('Y-m-d h:i:s').'" <= s.stop)';
-		$sql.=' OR ';
-		# Zeiteinschränkung wird nicht berücksichtigt.
-		$sql.='(s.start="0000-00-00 00:00:00" AND s.stop="0000-00-00 00:00:00")';
-		$sql.=')';
-		$sql.=' ORDER BY Bezeichnung';
-		#echo $sql;
+		$sql = "
+			SELECT
+				s.ID,
+				s.Bezeichnung
+			FROM
+				stelle AS s,
+				rolle AS r
+			WHERE
+				s.ID = r.stelle_id AND
+				r.user_id = " . $this->id .
+				($stelle_ID > 0 ? " AND s.ID = " . $stelle_ID : "") . "
+				AND (
+					('" . date('Y-m-d h:i:s') . "' >= s.start AND '" . date('Y-m-d h:i:s') . "' <= s.stop)
+					OR
+					(s.start = '0000-00-00 00:00:00' AND s.stop = '0000-00-00 00:00:00')
+				)
+			ORDER BY
+				Bezeichnung;
+		";
+
+		#echo '<br>sql: ' . $sql;
 		$this->debug->write("<p>file:users.php class:user->getStellen - Abfragen der Stellen die der User einnehmen darf:<br>".$sql,4);
 		$query=mysql_query($sql,$this->database->dbConn);
 		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
@@ -3035,14 +3041,21 @@ class stelle {
 	}
 
 	function getStellen($order) {
-		$sql ='SELECT s.ID,s.Bezeichnung FROM stelle AS s';
-		if ($order!='') {
-			$sql.=' ORDER BY '.$order;
-		}
-		$this->debug->write("<p>file:users.php class:stelle->getStellen - Abfragen aller Stellen<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-		while($rs=mysql_fetch_array($query)) {
+		if ($order != '') $order = ' ORDER BY ' . $order;
+		$sql = "
+			SELECT
+				s.ID,
+				s.Bezeichnung
+			FROM
+				`stelle` AS s" .
+			$order . "
+		";
+
+		#echo '<br>sql: ' . $sql;
+		$this->debug->write("<p>file:users.php class:stelle->getStellen - Abfragen aller Stellen<br>" . $sql, 4);
+		$query = mysql_query($sql, $this->database->dbConn);
+		if ($query == 0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+		while($rs = mysql_fetch_array($query)) {
 			$stellen['ID'][]=$rs['ID'];
 			$stellen['Bezeichnung'][]=$rs['Bezeichnung'];
 		}

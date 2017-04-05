@@ -88,7 +88,8 @@ $sizes = array(
 		),
 		'legend' => array(
 			'width' => 250,
-			'hide_width' => 27
+			'hide_width' => 27,
+			'header_height' => 97
 		)
 	),
 	'gui_button.php' => array(
