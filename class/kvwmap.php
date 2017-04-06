@@ -333,9 +333,14 @@ class GUI {
 							<img border="0" id="groupimg_' . $group_id . '" src="graphics/' . ($groupstatus == 1 ? 'minus' : 'plus') . '.gif">&nbsp;
 						</a>
 						<span class="legend_group' . ($this->group_has_active_layers[$group_id] != '' ? '_active_layers' : '') . '">
-							<a href="javascript:getGroupOptions(' . $group_id . ')" onmouseover="$(\'#test_' . $group_id . '\').show()" onmouseout="$(\'#test_' . $group_id . '\').hide()">' . html_umlaute($groupname) . '
+							<!--a
+								href="javascript:getGroupOptions(' . $group_id . ')" 
+								onmouseover="$(\'#test_' . $group_id . '\').show()"
+								onmouseout="$(\'#test_' . $group_id . '\').hide()"
+							>' . html_umlaute($groupname) . '
 								<i id="test_' . $group_id . '" class="fa fa-bars" style="display: none;"></i>
-							</a>
+							</a//-->' .
+							html_umlaute($groupname) . '
 							<div style="position:static;" id="group_options_' . $group_id . '"></div>
 						</span>
 					</td>
@@ -2424,9 +2429,10 @@ class GUI {
 
 		$height = $this->formvars['browserheight'] -
 			$size['margin']['height'] -
+			$size['header']['height'] -
 			$size['scale_bar']['height'] -
 			$size['lagebezeichnung_bar']['height'] -
-			$size['map_functions_bar']['height'] -
+			($this->user->rolle->showmapfunctions == 1 ? $size['map_functions_bar']['height'] : 0) -
 			$size['footer']['height'];
 
 		if($width  < 0) $width = 10;
@@ -11395,7 +11401,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		include_once(CLASSPATH.'FormObject.php');
     $this->user->Stellen = $this->user->getStellen(0);
     $this->Hinweis.='Aktuelle Stellen_ID: '.$Stelle_ID;
-    $StellenFormObj=new FormObject("Stelle_ID","select",$this->user->Stellen['ID'],$Stelle_ID,$this->user->Stellen['Bezeichnung'],'Anzahl Werte',"","",NULL);
+    $StellenFormObj=new FormObject("Stelle_ID", "select", $this->user->Stellen['ID'], $Stelle_ID, $this->user->Stellen['Bezeichnung'], 'Anzahl Werte', "", "", NULL , NULL, "vertical-align: middle");
     # hinzufügen von Javascript welches dafür sorgt, dass die Angegebenen Werte abgefragt werden
     # und die genannten Formularobjekte mit diesen Werten bestückt werden
     # übergebene Werte
@@ -11403,10 +11409,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     # Liste der Formularelementnamen, die betroffen sind in der Reihenfolge,
     # wie die Spalten in der Abfrage
     $select ="nZoomFactor,gui,CONCAT(nImageWidth,'x',nImageHeight) AS mapsize";
-    $select.=",CONCAT(minx,' ',miny,',',maxx,' ',maxy) AS newExtent,epsg_code,fontsize_gle,highlighting,runningcoords,DATE_FORMAT(hist_timestamp,'%d.%m.%Y %T')";
+    $select.=",CONCAT(minx,' ',miny,',',maxx,' ',maxy) AS newExtent, epsg_code, fontsize_gle, highlighting, runningcoords, showmapfunctions, DATE_FORMAT(hist_timestamp,'%d.%m.%Y %T')";
     $from ='rolle';
     $where ="stelle_id='+this.form.Stelle_ID.value+' AND user_id=".$this->user->id;
-    $StellenFormObj->addJavaScript("onchange","ahah('index.php','go=getRow&select=".urlencode($select)."&from=".$from."&where=".$where."',new Array(nZoomFactor,gui,mapsize,newExtent,epsg_code,fontsize_gle,highlighting,runningcoords,hist_timestamp));");
+    $StellenFormObj->addJavaScript("onchange","$('#sign_in_stelle').show(); ahah('index.php','go=getRow&select=".urlencode($select)."&from=".$from."&where=".$where."',new Array(nZoomFactor,gui,mapsize,newExtent,epsg_code,fontsize_gle,highlighting,runningcoords,showmapfunctions,hist_timestamp));");
     #echo URL.APPLVERSION."index.php?go=getRow&select=".urlencode($select)."&from=".$from."&where=stelle_id=3 AND user_id=7";
     $StellenFormObj->outputHTML();
     $this->StellenForm=$StellenFormObj;

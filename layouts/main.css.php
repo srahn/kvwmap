@@ -944,7 +944,8 @@ tbody.gle tr:hover {
 
 .map-options{
 	border-top: 1px solid #aaaaaa;
-	border-bottom: 1px solid #aaaaaa;
+	padding-top: 6px;
+	padding-bottom: 6px;
 }
 
 .rollenwahl-gruppen{

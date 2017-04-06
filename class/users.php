@@ -933,8 +933,10 @@ class user {
 			if($formvars['highlighting'] != '')	$sql.=',highlighting="1"';
 			else $sql.=',highlighting="0"';
 			$sql.=',result_color="'.$formvars['result_color'].'"';
-			if($formvars['runningcoords'] != '') $sql.=',runningcoords="1"';
-			else	$sql.=',runningcoords="0"';
+
+			$sql .= ', runningcoords = "' . ($formvars['runningcoords'] == '' ? '0' : '1') . '"';
+			$sql .= ', showmapfunctions = "' . ($formvars['showmapfunctions'] == '' ? '0' : '1') . '"';
+
 			if($formvars['singlequery'] != '') $sql.=',singlequery="1"';
 			else $sql.=',singlequery="0"';
 			if($formvars['instant_reload'] != '') $sql.=',instant_reload="1"';
@@ -1521,6 +1523,7 @@ class rolle {
 			$this->result_color=$rs['result_color'];
 			$this->always_draw=$rs['always_draw'];
 			$this->runningcoords=$rs['runningcoords'];
+			$this->showmapfunctions=$rs['showmapfunctions'];
 			$this->singlequery=$rs['singlequery'];
 			$this->querymode=$rs['querymode'];
 			$this->geom_edit_first=$rs['geom_edit_first'];		

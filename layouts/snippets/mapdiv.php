@@ -30,6 +30,7 @@
 			<input type="hidden" name="activated_vertex" value="0">
 			<input type="hidden" name="measured_distance" value="<? echo $this->formvars['measured_distance']; ?>">						
 			<input type="hidden" name="layer_options_open" value="">
+			<input type="hidden" name="group_options_open" value="">
 			<?php
 				include(LAYOUTPATH.'snippets/SVG_map.php');
 			?>
@@ -110,7 +111,7 @@
 				</tr><?
 
 				if ($this->user->rolle->newtime!='') {
-					if (!(defined('SHOW_MAP_FUNCTIONS') and SHOW_MAP_FUNCTIONS == false)) { ?>
+					if ($this->user->rolle->showmapfunctions) { ?>
 						<tr style="background-color: <? echo BG_MENUESUB; ?>;">
 							<td class="map-options" height="36" colspan="3">
 								<div id="maptime">

@@ -128,7 +128,7 @@ class database {
 				"'
 			);
 		";
-		echo '<br>sql: ' . $sql;
+		#echo '<br>sql: ' . $sql;
 		$query = mysql_query($sql);
 
 		# ID des Gastnutzers abfragen
@@ -149,7 +149,7 @@ class database {
 			WHERE
 				`ID` = " . $gast_stelle . "
 		";
-		echo '<br>sql: ' . $sql;
+		#echo '<br>sql: ' . $sql;
 		$query = mysql_query($sql);
 
 		if (mysql_num_rows($query) == 1) {
@@ -230,7 +230,7 @@ class database {
 			) " .
 			$rolle_select_sql . "
 		";
-		echo '<br>sql: ' . $sql;
+		#echo '<br>sql: ' . $sql;
 		$query = mysql_query($sql);
 		include(CLASSPATH.'users.php');
 		$stelle = new stelle($gast_stelle,$this);

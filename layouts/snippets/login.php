@@ -39,7 +39,6 @@
 			</script>
 		</head>
 		<body onload="logon();">
-			Loginfenster
 		  <form name="login" action="index.php" method="post">
 				<input type="hidden" value="<? echo $username; ?>" name="username"/>
 				<input type="hidden" value="<? echo $passwort; ?>" name="passwort" />
