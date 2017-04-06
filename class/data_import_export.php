@@ -704,7 +704,7 @@ class data_import_export {
 		if($database->passwd != '')$command.= ' password='.$database->passwd;
 		if($database->port != '')$command.=' port='.$database->port;
 		if($database->host != '') $command .= ' host=' . $database->host;
-		$command .= '" '.$importfile.' '.$layer;
+		$command .= '" "'.$importfile.'" '.$layer;
 		#echo $command;
 		exec($command, $output, $ret);
 		return $ret;
