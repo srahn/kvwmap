@@ -11467,7 +11467,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
   	$_files = $_FILES;
     $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $form_fields = explode('|', $this->formvars['form_field_names']);
-    $success = true;
+    $this->success = true;
     $old_layer_id = '';
     for($i = 0; $i < count($form_fields); $i++){
       if($form_fields[$i] != ''){
@@ -11609,7 +11609,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 								$result = pg_fetch_row($ret[1]);
 								if(pg_affected_rows($ret[1]) == 0){
 									$ret[0] = 1;
-									$success = false;
+									$this->success = false;
 								}
 								else {
 									# After Update trigger
@@ -11622,7 +11622,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					}
 				}
 			}
-			if ($success == false) {
+			if ($this->success == false) {
 				$this->add_message('error', 'Änderung fehlgeschlagen.<br>' . $result[0]);
 			}
 			else {
