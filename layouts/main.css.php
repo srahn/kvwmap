@@ -948,10 +948,25 @@ tbody.gle tr:hover {
 	padding-bottom: 6px;
 }
 
-.rollenwahl-gruppen{
+.rollenwahl-gruppe {
+	margin: 10px;
+	border: 1px solid #cccccc;
+}
+
+.rollenwahl-gruppen-header {
 	background-color: #c7d9e6; 
 	padding: 2px;
 	padding-left: 8px
+}
+
+.rollenwahl-option-header {
+	width: 250px;
+	padding: 8px;
+	padding-top: 0px;
+}
+
+.rollenwahl-option-data {
+	padding: 8px;
 }
 
 .hover-border{

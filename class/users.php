@@ -936,6 +936,7 @@ class user {
 
 			$sql .= ', runningcoords = "' . ($formvars['runningcoords'] == '' ? '0' : '1') . '"';
 			$sql .= ', showmapfunctions = "' . ($formvars['showmapfunctions'] == '' ? '0' : '1') . '"';
+			$sql .= ', showlayeroptions = "' . ($formvars['showlayeroptions'] == '' ? '0' : '1') . '"';
 
 			if($formvars['singlequery'] != '') $sql.=',singlequery="1"';
 			else $sql.=',singlequery="0"';
@@ -1524,6 +1525,7 @@ class rolle {
 			$this->always_draw=$rs['always_draw'];
 			$this->runningcoords=$rs['runningcoords'];
 			$this->showmapfunctions=$rs['showmapfunctions'];
+			$this->showlayeroptions=$rs['showlayeroptions'];
 			$this->singlequery=$rs['singlequery'];
 			$this->querymode=$rs['querymode'];
 			$this->geom_edit_first=$rs['geom_edit_first'];		

@@ -436,7 +436,12 @@ class GUI {
 								$legend .=  ' title="'.$this->activatelayer.'"';
 							}
 							$legend .= ' ></td><td valign="middle">';
-							$legend .= '<a oncontextmenu="getLayerOptions('.$layer['Layer_ID'].');return false;"';
+
+							$legend .= '<a';
+							# Bei eingeschalteter Rollenoption Layeroptionen anzeigen wird das Optionsfeld mit einem Rechtsklick geöffnet.
+							if ($this->user->rolle->showlayeroptions) {
+								$legend .= ' oncontextmenu="getLayerOptions(' . $layer['Layer_ID'] . '); return false;"';
+							}
 							if($layer['metalink'] != '' AND substr($layer['metalink'], 0, 10) != 'javascript')
 								$legend .= 'target="_blank"';
 							if($layer['metalink'] != '')
@@ -449,8 +454,9 @@ class GUI {
 							}			  
 							$legend .=' class="legend_layer">'.html_umlaute($layer['alias']).'</span>';
 							$legend .= '</a>';
-							# Bei eingeschalteten Layern ist ein Optionen-Button sichtbar
-							if($layer['aktivStatus'] == 1)$legend.='&nbsp;<a href="javascript:getLayerOptions('.$layer['Layer_ID'].')"><img src="graphics/rows.png" border="0" title="'.$this->layerOptions.'"></a>';
+
+							# Bei eingeschalteten Layern und eingeschalteter Rollenoption ist ein Optionen-Button sichtbar
+							if($layer['aktivStatus'] == 1 and $this->user->rolle->showlayeroptions) $legend.='&nbsp;<a href="javascript:getLayerOptions('.$layer['Layer_ID'].')"><img src="graphics/rows.png" border="0" title="'.$this->layerOptions.'"></a>';
 							$legend.='<div style="position:static" id="options_'.$layer['Layer_ID'].'"> </div>';
 						}
 						if($layer['aktivStatus'] == 1 AND $layer['Class'][0]['Name'] != ''){

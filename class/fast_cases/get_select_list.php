@@ -392,9 +392,10 @@
 			$this->always_draw=$rs['always_draw'];
 			$this->runningcoords=$rs['runningcoords'];
 			$this->showmapfunctions=$rs['showmapfunctions'];
+			$this->showlayeroptions=$rs['showlayeroptions'];
 			$this->singlequery=$rs['singlequery'];
 			$this->querymode=$rs['querymode'];
-			$this->geom_edit_first=$rs['geom_edit_first'];		
+			$this->geom_edit_first=$rs['geom_edit_first'];
 			$this->overlayx=$rs['overlayx'];
 			$this->overlayy=$rs['overlayy'];
 			$this->instant_reload=$rs['instant_reload'];
