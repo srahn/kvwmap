@@ -151,33 +151,56 @@ class database {
 		";
 		#echo '<br>sql: ' . $sql;
 		$query = mysql_query($sql);
+		if (mysql_num_rows($query) > 0) {
+			$row = mysql_fetch_assoc($query);
+			$default_user_id = $row['default_user_id'];
+		}
+		else {
+			$default_user_id = 0;
+		}
+		#echo '<br>Default user id: ' . $default_user_id;
 
-		if (mysql_num_rows($query) == 1) {
-
+		if ($default_user_id > 0) {
 			# Rolleneinstellungen vom Defaultnutzer verwenden
 			$row = mysql_fetch_assoc($query);
 			$rolle_select_sql = "
-				SELECT
-					" . $new_user_id . ", " .
+				SELECT " .
+					$new_user_id . ", " .
 					$gast_stelle . ",
 					`nImageWidth`, `nImageHeight`,
-					`minx`,`miny`,`maxx`,`maxy`,
+					`auto_map_resize`,
+					`minx`, `miny`, `maxx`, `maxy`,
 					`nZoomFactor`,
 					`selectedButton`,
 					`epsg_code`,
+					`epsg_code2`,
+					`coordtype`,
 					`active_frame`,
 					`last_time_id`,
+					`gui`,
 					`language`,
 					`hidemenue`,
+					`hidelegend`,
 					`fontsize_gle`,
 					`highlighting`,
+					`buttons`,
+					`scrollposition`,
+					`result_color`,
+					`always_draw`,
+					`runningcoords`,
+					`showmapfunctions`,
 					`singlequery`,
 					`querymode`,
-					`buttons`
+					`geom_edit_first`,
+					`overlayx`, `overlayy`,
+					`instant_reload`,
+					`menu_auto_close`,
+					`layer_params`,
+					`visually_impaired`
 				FROM
 					`rolle`
 				WHERE
-					`user_id` = " . $row['default_user_id'] . " AND
+					`user_id` = " . $default_user_id . " AND
 					`stelle_id` = " . $gast_stelle . "
 			";
 		}
@@ -188,19 +211,35 @@ class database {
 					$new_user_id . ", " .
 					$gast_stelle . ",
 					'800', '600',
+					1,
 					minxmax, minymax, maxxmax, maxymax,
 					'2',
 					'recentre',
-					epsg_code,
-					NULL ,
+					`epsg_code`,
+					NULL,
+					'dec',
+					NULL,
 					'0000-00-00 00:00:00',
+					'gui.php',
 					'german',
+					'0',
 					'0',
 					'15',
 					'1',
+					'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure',
+					'0',
 					'1',
 					'1',
-					'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure'
+					'1',
+					'1',
+					'1',
+					'0',
+					'0',
+					'400', '150',
+					'1',
+					'0',
+					'0'
+					NULL
 				FROM
 					stelle
 				WHERE
@@ -214,52 +253,160 @@ class database {
 				`user_id`,
 				`stelle_id`,
 				`nImageWidth`, `nImageHeight`,
+				`auto_map_resize`,
 				`minx`, `miny`, `maxx`, `maxy`,
 				`nZoomFactor`,
 				`selectedButton`,
 				`epsg_code`,
+				`epsg_code2`,
+				`coordtype`,
 				`active_frame`,
 				`last_time_id`,
+				`gui`,
 				`language`,
 				`hidemenue`,
+				`hidelegend`,
 				`fontsize_gle`,
 				`highlighting`,
+				`buttons`,
+				`scrollposition`,
+				`result_color`,
+				`always_draw`,
+				`runningcoords`,
+				`showmapfunctions`,
 				`singlequery`,
 				`querymode`,
-				`buttons`
+				`geom_edit_first`,
+				`overlayx`, `overlayy`,
+				`instant_reload`,
+				`menu_auto_close`,
+				`layer_params`,
+				`visually_impaired`
 			) " .
 			$rolle_select_sql . "
 		";
 		#echo '<br>sql: ' . $sql;
 		$query = mysql_query($sql);
+
 		include(CLASSPATH.'users.php');
-		$stelle = new stelle($gast_stelle,$this);
-		$rolle = new rolle(NULL,$gast_stelle,$this);
+		$stelle = new stelle($gast_stelle, $this);
+		$rolle = new rolle(NULL, $gast_stelle, $this);
 		$layers = $stelle->getLayers(NULL);
 		$rolle->setGroups($new_user_id, array($gast_stelle), $layers['ID'], '0');
 
-    $sql = "INSERT INTO `u_menue2rolle` ( `user_id` , `stelle_id` , `menue_id` , `status` ) SELECT ".$new_user_id.", ".$gast_stelle.", menue_id, '0' FROM u_menue2stelle WHERE stelle_id = ".$gast_stelle;
+		# Menüeinstellungen der Rolle eintragen
+		$sql = "
+			INSERT INTO `u_menue2rolle` (
+				`user_id`,
+				`stelle_id`,
+				`menue_id`,
+				`status`
+			)
+			SELECT " .
+				$new_user_id . ", " .
+				$gast_stelle . ",
+				menue_id,
+				'0'
+			FROM
+				u_menue2stelle
+			WHERE
+				stelle_id = " . $gast_stelle . "
+		";
+		#echo '<br>sql: ' . $sql;
 		$query = mysql_query($sql);
 
+		if ($default_user_id > 0) {
+			# Layereinstellungen von Defaultrolle abfragen
+			$rolle2used_layer_select_sql = "
+				SELECT " .
+					$new_user_id . ", " .
+					$gast_stelle . ",
+					`layer_id`,
+					`aktivStatus`,
+					`queryStatus`,
+					`showclasses`,
+					`logconsume`
+				FROM
+					u_rolle2used_layer
+				WHERE
+					user_id = " . $default_user_id . " AND
+					stelle_id = " . $gast_stelle . "
+			";
+		}
+		else {
+			# Layereinstellungen von Defaultlayerzuordnung abfragen
+			$rolle2used_layer_select_sql = "
+				SELECT " .
+					$new_user_id . ", " .
+					$gast_stelle . ",
+					`Layer_ID`,
+					`start_aktiv`,
+					`start_aktiv`,
+					1,
+					0
+				FROM
+					used_layer
+				WHERE
+					Stelle_ID = " . (int)$gast_stelle . "
+			";
+		}
 
-    $sql = "INSERT INTO `u_rolle2used_layer` ( `user_id` , `stelle_id` , `layer_id` , `aktivStatus` , `queryStatus` , `showclasses` , `logconsume` ) ";
-    $sql.= "SELECT ".$new_user_id.", ".$gast_stelle.", Layer_ID, start_aktiv, start_aktiv, 1, 0 FROM used_layer WHERE Stelle_ID=".(int)$gast_stelle;
+		# Layereinstellungen der Rolle eintragen
+		$sql = "
+			INSERT INTO `u_rolle2used_layer` (
+				`user_id`,
+				`stelle_id`,
+				`layer_id`,
+				`aktivStatus`,
+				`queryStatus`,
+				`showclasses`,
+				`logconsume`
+			) " . 
+			$rolle2used_layer_select_sql . "
+		";
+		#echo '<br>sql: ' . $sql;
 		$query = mysql_query($sql);
-		
-    $sql = "UPDATE u_groups2rolle, u_rolle2used_layer, layer SET u_groups2rolle.status = 1 ";
-		$sql.= "WHERE u_groups2rolle.user_id = ".$new_user_id." "; 
-		$sql.= "AND u_groups2rolle.stelle_id = ".$gast_stelle." "; 
-		$sql.= "AND u_rolle2used_layer.user_id = ".$new_user_id." ";
-		$sql.= "AND u_rolle2used_layer.stelle_id = ".$gast_stelle." ";
-		$sql.= "AND u_rolle2used_layer.aktivStatus = '1' ";
-		$sql.= "AND u_rolle2used_layer.layer_id = layer.Layer_ID ";
-		$sql.= "AND layer.Gruppe = u_groups2rolle.id";
-    $query = mysql_query($sql);
-    
-    $gast['username'] = $loginname;
-    $gast['passwort'] = 'gast';
-    return $gast;
-  }
+
+		if ($default_user_id > 0) {
+			$sql = "
+				UPDATE
+					u_groups2rolle AS n,
+					u_groups2rolle AS d
+				SET
+					n.status = d.status
+				WHERE
+					n.stelle_id = d.stelle_id AND
+					n.id = d.id AND
+					n.stelle_id = " . $gast_stelle . " AND
+					n.user_id = " . $new_user_id . " AND
+					d.user_id = " . $default_user_id . "
+			";
+		}
+		else {
+			$sql = "
+				UPDATE
+					u_groups2rolle,
+					u_rolle2used_layer,
+					layer
+				SET
+					u_groups2rolle.status = 1
+				WHERE
+					u_groups2rolle.user_id = " . $new_user_id . " AND
+					u_groups2rolle.stelle_id = " . $gast_stelle . " AND
+					u_rolle2used_layer.user_id = " . $new_user_id . " AND
+					u_rolle2used_layer.stelle_id = " . $gast_stelle. " AND
+					u_rolle2used_layer.aktivStatus = '1' AND
+					u_rolle2used_layer.layer_id = layer.Layer_ID AND
+					layer.Gruppe = u_groups2rolle.id
+			";
+		}
+		#echo '<br>sql: ' . $sql;
+		$query = mysql_query($sql);
+
+		$gast['username'] = $loginname;
+		$gast['passwort'] = 'gast';
+		return $gast;
+	}
 
   function getRow($select,$from,$where) {
 		$sql = "SELECT ".$select;

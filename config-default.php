@@ -52,11 +52,9 @@ define('GLEVIEW', 2);                  # 1 / 2              # Version 1.6.5
 # Header und Footer
 define('HEADER', 'header.php');															# Version 1.8.0
 define('FOOTER', 'footer.php');															# Version 1.8.0
-# Höhe von Header und Footer zusammen
-define('HEADER_FOOTER_HEIGHT', 132);																# Version 2.0
-# Breite von Menü und Legende zusammen
-#$menue_legend_widths = array('gui.php' => 485, 'gui_button.php' => 486);		# Version 2.0
 
+# Höhe von Header und Footer zusammen
+#define('HEADER_FOOTER_HEIGHT', 132);																# Version 2.0 gelöscht in Version 2.7
 # Breiten von Rand, Menü und Legende zusammen
 #$menue_legend_widths = array('gui.php' => 459, 'gui_button.php' => 486);		# Version 2.0 gelöscht in Version 2.7
 
