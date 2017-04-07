@@ -72,7 +72,7 @@
 			});
 		}
 		messages.push({
-			'type' : 'notice',
+			'type' : 'info',
 			'msg' : 'Der Menüpunkt führt folgenden Befehl aus:<br>' + evt.target.getAttribute('onclick')
 		});
 		message(messages);

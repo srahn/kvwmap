@@ -150,11 +150,16 @@ class Menue extends MyObject {
 				$onclick = "javascript:Bestaetigung('" . $this->get('links') . "', 'Diese Aktion wirklich ausführen?')";
 			}
 			else {
-				if ($target != '') { # open link in target
-					$onclick = "window.open('" . $this->get('links') . "', '" . $target . "')";
+				if ($target == 'javascript') {
+					$onclick = $this->get('links');
 				}
-				else { # open link in same window
-					$onclick = "location.href='" . $this->get('links') . "'";
+				else {
+					if ($target != '') { # open link in target
+						$onclick = "window.open('" . $this->get('links') . "', '" . $target . "')";
+					}
+					else { # open link in same window
+						$onclick = "location.href='" . $this->get('links') . "'";
+					}
 				}
 			}
 		}

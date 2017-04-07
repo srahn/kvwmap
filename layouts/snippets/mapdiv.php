@@ -28,9 +28,10 @@
 			<input type="hidden" name="legendtouched" value="0">
 			<input type="hidden" name="svghelp" id="svghelp">
 			<input type="hidden" name="activated_vertex" value="0">
-			<input type="hidden" name="measured_distance" value="<? echo $this->formvars['measured_distance']; ?>">						
+			<input type="hidden" name="measured_distance" value="<? echo $this->formvars['measured_distance']; ?>">
 			<input type="hidden" name="layer_options_open" value="">
 			<input type="hidden" name="group_options_open" value="">
+			<input type="hidden" name="hauptkarte" value="<?php echo $this->img['hauptkarte']; ?>">
 			<?php
 				include(LAYOUTPATH.'snippets/SVG_map.php');
 			?>
