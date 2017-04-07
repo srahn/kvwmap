@@ -953,6 +953,10 @@ tbody.gle tr:hover {
 	border: 1px solid #cccccc;
 }
 
+.rollenwahl-table {
+	width: 700px
+}
+
 .rollenwahl-gruppen-header {
 	background-color: #c7d9e6; 
 	padding: 2px;
@@ -960,13 +964,16 @@ tbody.gle tr:hover {
 }
 
 .rollenwahl-option-header {
-	width: 250px;
-	padding: 8px;
-	padding-top: 0px;
+	width: 221px;
+	padding-top : 4px;
+	padding-bottom: 4px;
+	padding-left: 8px;
 }
 
 .rollenwahl-option-data {
-	padding: 8px;
+	padding-top : 4px;
+	padding-bottom: 4px;
+  padding-left: 2px;
 }
 
 .hover-border{
