@@ -44,12 +44,12 @@ Text_showlayeroptions=["<? echo $strHelp; ?>:","<? echo $strHintShowLayerOptions
 } ?>
 
 <div class="rollenwahl-gruppe">
-	<table width="700" border="0" cellpadding="0" cellspacing="0">
+	<table class="rollenwahl-table" border="0" cellpadding="0" cellspacing="0">
 		<tr>
 			<td colspan="2" class="rollenwahl-gruppen-header"><span class="fett"><? echo $strGeneralOptions; ?></span></td>
 		</tr>
 		<tr>
-			<td align="left" valign="top" class="rollenwahl-option-header">
+			<td valign="top" class="rollenwahl-option-header">
 				<? echo $strTask; ?>:
 			</td>
 			<td class="rollenwahl-option-data">
@@ -62,17 +62,22 @@ Text_showlayeroptions=["<? echo $strHelp; ?>:","<? echo $strHintShowLayerOptions
 						<div id="Tip1" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 					</div>
 					<div style="float: left; height: 100%">
-						<i id="sign_in_stelle" class="fa fa-sign-out fa-2x" onclick="document.GUI.submit();" style="cursor: pointer; position: relative; top: 50%; transform: translate(50%, -60%); display: none;"></i>
+						<i
+							id="sign_in_stelle"
+							class="fa fa-sign-out fa-2x"
+							onclick="document.GUI.submit();"
+							style="cursor: pointer; position: relative; top: 50%; transform: translate(50%, -60%); display: none;">
+						</i>
 					</div>
 					<div style="clear: both;">
 				</div>
 			</td>
 		</tr>
-		<tr align="center">
-			<td align="left" class="rollenwahl-option-header">
+		<tr>
+			<td class="rollenwahl-option-header">
 				<? echo $strLanguage; ?>:
 			</td>
-			<td align="left" style="padding: 8px; padding-top: 0px">
+			<td class="rollenwahl-option-data">
 				<select name="language">
 					<? if(in_array('german', $supportedLanguages)){ ?><option value="german"<? if($this->user->rolle->language == 'german') { echo ' selected'; }	?>><? echo $strGerman; ?></option><? } ?>
 					<? if(in_array('low-german', $supportedLanguages)){ ?><option value="low-german"<? if($this->user->rolle->language == 'low-german') { echo ' selected'; }	?>><? echo $strPlatt; ?></option><? } ?>
@@ -85,10 +90,10 @@ Text_showlayeroptions=["<? echo $strHelp; ?>:","<? echo $strHintShowLayerOptions
 			</td>
 		</tr>
 		<tr>
-			<td align="left" class="rollenwahl-option-header">
+			<td class="rollenwahl-option-header">
 				<? echo $strGUI; ?>:
 			</td>
-			<td style="padding: 8px; padding-top: 0px">
+			<td class="rollenwahl-option-data">
 				<select name="gui"><?
 					# Anzeige der GUI´s, die kvwmap bereitstellt
 					for($i = 0; $i < count($this->guifiles); $i++){ ?>
@@ -104,20 +109,20 @@ Text_showlayeroptions=["<? echo $strHelp; ?>:","<? echo $strHintShowLayerOptions
 			</td>
 		</tr>
 		<tr>
-			<td align="left" class="rollenwahl-option-header">
+			<td class="rollenwahl-option-header">
 				<? echo $strMenuAutoClose; ?>:
 			</td>
-			<td style="padding: 8px; padding-top: 0px">
+			<td class="rollenwahl-option-data">
 				<input name="menu_auto_close" type="checkbox" value="1" <? if($this->user->rolle->menu_auto_close == '1'){echo 'checked="true"';} ?> >
 				<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_menueautoclose, Style[0], document.getElementById('Tip7'))" onmouseout="htm()">
 				<div id="Tip7" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 			</td>
 		</tr>
 		<tr>
-			<td align="left" class="rollenwahl-option-header">
+			<td class="rollenwahl-option-header">
 				<? echo $strVisuallyImpaired; ?>:
 			</td>
-			<td style="padding: 8px; padding-top: 0px">
+			<td class="rollenwahl-option-data">
 				<input name="visually_impaired" type="checkbox" value="1" <? if($this->user->rolle->visually_impaired == '1') { echo 'checked="true"';} ?> >
 				<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_visuallyimpaired, Style[0], document.getElementById('Tip8'))" onmouseout="htm()">
 				<div id="Tip8" style="visibility:hidden;position:absolute;z-index:1000;"></div>
@@ -127,14 +132,15 @@ Text_showlayeroptions=["<? echo $strHelp; ?>:","<? echo $strHintShowLayerOptions
 </div>
 
 <div class="rollenwahl-gruppe">
-	<table width="700" border="0" cellpadding="0" cellspacing="0">
+	<table class="rollenwahl-table" border="0" cellpadding="0" cellspacing="0">
 		<tr>
 			<td colspan="2" class="rollenwahl-gruppen-header"><span class="fett"><? echo $strButtons; ?></span></td>
 		</tr>
 		<tr>
-			<td align="left" valign="top" class="rollenwahl-option-header">
-				<? echo $strMapTools; ?>:</td>
-			<td style="padding: 8px">
+			<td valign="top" class="rollenwahl-option-header">
+				<? echo $strMapTools; ?>:
+			</td>
+			<td class="rollenwahl-option-data">
 				<img src="<? echo GRAPHICSPATH.'back.png'; ?>"><input type="checkbox" name="back" value="1" <? if($this->user->rolle->back){echo 'checked="true"';} ?>>&nbsp;
 				<img src="<? echo GRAPHICSPATH.'frwd.png'; ?>"><input type="checkbox" name="forward" value="1" <? if($this->user->rolle->forward){echo 'checked="true"';} ?>>&nbsp;
 				<img src="<? echo GRAPHICSPATH.'zoomin.png'; ?>"><input type="checkbox" name="zoomin" value="1" <? if($this->user->rolle->zoomin){echo 'checked="true"';} ?>>&nbsp;
@@ -157,20 +163,20 @@ Text_showlayeroptions=["<? echo $strHelp; ?>:","<? echo $strHintShowLayerOptions
 			</td>
 		</tr>
 		<tr>
-			<td align="left" class="rollenwahl-option-header">
+			<td class="rollenwahl-option-header">
 				<? echo $strMapFunctions; ?>:
 			</td>
-			<td style="padding: 8px; padding-top: 0px">
+			<td class="rollenwahl-option-data">
 				<input name="showmapfunctions" type="checkbox" value="1" <? if($this->user->rolle->showmapfunctions == '1') { echo 'checked="true"'; } ?> >
 				<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_showmapfunctions, Style[0], document.getElementById('Tip21'))" onmouseout="htm()">
 				<div id="Tip21" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 			</td>
 		</tr>
 		<tr>
-			<td align="left" class="rollenwahl-option-header">
+			<td class="rollenwahl-option-header">
 				<? echo $strShowLayerOptions; ?>:
 			</td>
-			<td style="padding: 8px; padding-top: 0px">
+			<td class="rollenwahl-option-data">
 				<input name="showlayeroptions" type="checkbox" value="1" <? if($this->user->rolle->showlayeroptions == '1') { echo 'checked="true"'; } ?> >
 				<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_showlayeroptions, Style[0], document.getElementById('Tip22'))" onmouseout="htm()">
 				<div id="Tip22" style="visibility:hidden;position:absolute;z-index:1000;"></div>
@@ -180,25 +186,25 @@ Text_showlayeroptions=["<? echo $strHelp; ?>:","<? echo $strHintShowLayerOptions
 </div>
 
 <div class="rollenwahl-gruppe">
-	<table width="700" border="0" cellpadding="0" cellspacing="0">
+	<table class="rollenwahl-table" border="0" cellpadding="0" cellspacing="0">
 			<tr>
 			<td colspan="2" class="rollenwahl-gruppen-header"><span class="fett"><? echo $strMapOptions; ?></span></td>
 		</tr>
 		<tr>
-			<td align="left" class="rollenwahl-option-header">
+			<td class="rollenwahl-option-header">
 				<? echo $strZoomFactor; ?>:
 			</td>
-			<td style="padding: 8px">
+			<td class="rollenwahl-option-data">
 				<input name="nZoomFactor" type="text" value="<? echo $this->user->rolle->nZoomFactor; ?>" size="2" maxlength="3">
 				<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_zoomfactor, Style[0], document.getElementById('Tip8'))" onmouseout="htm()">
 				<div id="Tip8" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 			</td>
 		</tr>
 		<tr>
-			<td align="left" class="rollenwahl-option-header">
+			<td class="rollenwahl-option-header">
 				<? echo $strMapSize; ?>:
 			</td>
-			<td style="padding: 8px; padding-top: 0px">  
+			<td class="rollenwahl-option-data">  
 				<select name="mapsize">
 					<? $selected = false; ?>
 					<option value="<? echo $this->user->rolle->mapsize; ?>xauto" <? if($this->user->rolle->auto_map_resize){ echo "selected"; $selected = true;}?>><? echo $strAutoResize; ?></option>              	
@@ -221,22 +227,22 @@ Text_showlayeroptions=["<? echo $strHelp; ?>:","<? echo $strHintShowLayerOptions
 				<div id="Tip9" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 			</td>
 		</tr>
-		<tr align="center">
-			<td align="left" class="rollenwahl-option-header">
+		<tr>
+			<td class="rollenwahl-option-header">
 				<? echo $strMapExtent; ?>:
 			</td>
-			<td align="left" style="padding: 8px; padding-top: 0px"><?
+			<td class="rollenwahl-option-data"><?
 				$curExtentText=round($this->user->rolle->oGeorefExt->minx, 3).' '.round($this->user->rolle->oGeorefExt->miny, 3).', '.round($this->user->rolle->oGeorefExt->maxx, 3).' '.round($this->user->rolle->oGeorefExt->maxy, 3);
 			 ?><input name="newExtent" id="newExtent" type="text" size="<? echo strlen($curExtentText); ?>" value="<? echo $curExtentText; ?>">
 				<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_mapextent, Style[0], document.getElementById('Tip10'))" onmouseout="htm()">
 				<div id="Tip10" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 			</td>
 		</tr>
-		<tr align="center">
-			<td align="left" class="rollenwahl-option-header">
+		<tr>
+			<td class="rollenwahl-option-header">
 				<? echo $strMapProjection; ?>:
 			</td>
-			<td align="left" style="padding: 8px; padding-top: 0px">
+			<td class="rollenwahl-option-data">
 				<select name="epsg_code" onchange="ahah('index.php','go=spatial_processing&newSRID='+this.form.epsg_code.value+'&operation=transform&resulttype=wkt',new Array(newExtent), '');">
 					<?
 					foreach($this->epsg_codes as $epsg_code){
@@ -250,11 +256,11 @@ Text_showlayeroptions=["<? echo $strHelp; ?>:","<? echo $strHintShowLayerOptions
 				<div id="Tip11" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 			</td>
 		</tr>
-		<tr align="center">
-			<td align="left" class="rollenwahl-option-header">
+		<tr>
+			<td class="rollenwahl-option-header">
 				<? echo $strSecondMapProjection; ?>:
 			</td>
-			<td align="left" style="padding: 8px; padding-top: 0px">
+			<td class="rollenwahl-option-data">
 				<select name="epsg_code2">
 					<option value="">--<? echo $this->strChoose; ?>--</option>
 					<?
@@ -270,10 +276,10 @@ Text_showlayeroptions=["<? echo $strHelp; ?>:","<? echo $strHintShowLayerOptions
 			</td>
 		</tr>
 		<tr>
-			<td align="left" class="rollenwahl-option-header">
+			<td class="rollenwahl-option-header">
 				<? echo $strCoordType; ?>:
 			</td>
-			<td style="padding: 8px; padding-top: 0px">
+			<td  class="rollenwahl-option-data">
 				<select name="coordtype">
 					<option value="dec" <? if ($this->user->rolle->coordtype=="dec") { echo "selected"; } ?>><? echo $strdecimal; ?></option>
 					<option value="dms" <? if ($this->user->rolle->coordtype=="dms") { echo "selected"; } ?>><? echo $strgrad1; ?></option>
@@ -284,30 +290,30 @@ Text_showlayeroptions=["<? echo $strHelp; ?>:","<? echo $strHintShowLayerOptions
 			</td>
 		</tr>
 		<tr>
-			<td align="left" class="rollenwahl-option-header">
+			<td class="rollenwahl-option-header">
 				<? echo $strRunningCoords; ?>:
 			</td>
-			<td style="padding: 8px; padding-top: 0px">
+			<td class="rollenwahl-option-data">
 				<input name="runningcoords" type="checkbox" value="1" <? if($this->user->rolle->runningcoords == '1'){echo 'checked="true"';} ?> >
 				<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_runningcoords, Style[0], document.getElementById('Tip14'))" onmouseout="htm()">
 				<div id="Tip14" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 			</td>
 		</tr>
 		<tr>
-			<td align="left" class="rollenwahl-option-header">
+			<td class="rollenwahl-option-header">
 				<? echo $strInstantReload; ?>:
 			</td>
-			<td style="padding: 8px; padding-top: 0px">
+			<td class="rollenwahl-option-data">
 				<input name="instant_reload" type="checkbox" value="1" <? if($this->user->rolle->instant_reload == '1'){echo 'checked="true"';} ?> >
 				<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_instantreload, Style[0], document.getElementById('Tip6'))" onmouseout="htm()">
 				<div id="Tip6" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 			</td>
 		</tr>
-		<tr align="center">
-			<td align="left" class="rollenwahl-option-header">
+		<tr>
+			<td class="rollenwahl-option-header">
 				<? echo $strSearchColor; ?>:
 			</td>
-			<td align="left" style="padding: 8px; padding-top: 0px">
+			<td class="rollenwahl-option-data">
 			<?
 			
 			for($i = 0; $i < count($this->result_colors); $i++){
@@ -339,35 +345,35 @@ Text_showlayeroptions=["<? echo $strHelp; ?>:","<? echo $strHintShowLayerOptions
 </div>
 
 <div class="rollenwahl-gruppe">
-	<table width="700" border="0" cellpadding="0" cellspacing="0">
+	<table class="rollenwahl-table" border="0" cellpadding="0" cellspacing="0">
 		<tr>
 			<td colspan="2" class="rollenwahl-gruppen-header"><span class="fett"><? echo $strDataPresentation; ?></span></td>
 		</tr>
 		<tr>
-			<td align="left" class="rollenwahl-option-header">
+			<td class="rollenwahl-option-header">
 				<? echo $strSingleQuery; ?>:
 			</td>
-			<td style="padding: 8px">
+			<td  class="rollenwahl-option-data">
 				<input name="singlequery" type="checkbox" value="1" <? if($this->user->rolle->singlequery == '1'){echo 'checked="true"';} ?> >
 				<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_singlequery, Style[0], document.getElementById('Tip15'))" onmouseout="htm()">
 				<div id="Tip15" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 			</td>
 		</tr>
 		<tr>
-			<td align="left" class="rollenwahl-option-header">
+			<td class="rollenwahl-option-header">
 				<? echo $strQuerymode; ?>:
 			</td>
-			<td style="padding: 8px; padding-top: 0px">
+			<td class="rollenwahl-option-data">
 				<input name="querymode" type="checkbox" value="1" <? if($this->user->rolle->querymode == '1'){echo 'checked="true"';} ?> >
 				<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_querymode, Style[0], document.getElementById('Tip16'))" onmouseout="htm()">
 				<div id="Tip16" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 			</td>
 		</tr>
-		<tr align="center">
-			<td align="left" class="rollenwahl-option-header">
+		<tr>
+			<td class="rollenwahl-option-header">
 				<? echo $strNewDatasetOrder; ?>:
 			</td>
-			<td align="left" style="padding: 8px; padding-top: 0px">
+			<td class="rollenwahl-option-data">
 				<select name="geom_edit_first">
 					<option value="0"<? if($this->user->rolle->geom_edit_first == '0') { echo ' selected'; }	?>><? echo $strGeomSecond; ?></option>
 					<option value="1"<? if($this->user->rolle->geom_edit_first == '1') { echo ' selected'; }	?>><? echo $strGeomFirst; ?></option>
@@ -377,29 +383,29 @@ Text_showlayeroptions=["<? echo $strHelp; ?>:","<? echo $strHintShowLayerOptions
 			</td>
 		</tr>
 		<tr>
-			<td align="left" class="rollenwahl-option-header">
+			<td class="rollenwahl-option-header">
 				<? echo $strFontSizeGLE; ?>:
 			</td>
-			<td style="padding: 8px; padding-top: 0px">
+			<td class="rollenwahl-option-data">
 				<input name="fontsize_gle" type="text" value="<? echo $this->user->rolle->fontsize_gle; ?>" size="2" maxlength="2">
 				<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_fontsizegle, Style[0], document.getElementById('Tip18'))" onmouseout="htm()">
 				<div id="Tip18" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 			</td>
 		</tr>
 		<tr>
-			<td align="left" class="rollenwahl-option-header">
+			<td class="rollenwahl-option-header">
 				<? echo $strHighlight; ?>:
 			</td>
-			<td style="padding: 8px; padding-top: 0px">
+			<td  class="rollenwahl-option-data">
 				<input name="highlighting" type="checkbox" value="1" <? if($this->user->rolle->highlighting == '1'){echo 'checked="true"';} ?> >
 				<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_highlight, Style[0], document.getElementById('Tip19'))" onmouseout="htm()">
 				<div id="Tip19" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 			</td>
 		</tr>		
 		<tr <? if(!$this->Stelle->hist_timestamp)echo 'style="display:none"'; ?> >		
-			<td align="left" class="rollenwahl-option-header">
+			<td class="rollenwahl-option-header">
 				<? echo $strhist_timestamp; ?>:&nbsp;<a href="javascript:;" onclick="new CalendarJS().init('hist_timestamp');"><img title="TT.MM.JJJJ hh:mm:ss" src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar" style="bottom:100px"><input type="hidden" id="calendar_hist_timestamp"></div></td>
-			<td style="padding: 8px; padding-top: 0px">
+			<td class="rollenwahl-option-data">
 				<input onchange="if(this.value.length == 10)this.value = this.value + ' 06:00:00'" id="hist_timestamp" name="hist_timestamp" type="text" value="<? echo $this->user->rolle->hist_timestamp; ?>" size="16">
 				<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_histtimestamp, Style[0], document.getElementById('Tip20'))" onmouseout="htm()">
 				<div id="Tip20" style="visibility:hidden;position:absolute;z-index:1000;"></div>
