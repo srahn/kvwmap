@@ -41,7 +41,7 @@
 	$msg .= '<br>menue width: ' . $size['menue']['width'];
 	$msg .= '<br>legend: ' . $legend_width . ' x ' . $legend_height;
 	$msg .= '<br>map_frames: ' . ($map_width + $legend_width);
-	$this->add_message('error', $msg);
+#	$this->add_message('error', $msg);
 
 	$res_x    = $this->map->width;
 	$res_y    = $this->map->height;
