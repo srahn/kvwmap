@@ -35,7 +35,6 @@
 ########################################
 # GUI - Das Programm
 # db_MapObj
-# Menue
 ########################################
 
 ###############################################################
@@ -334,9 +333,14 @@ class GUI {
 							<img border="0" id="groupimg_' . $group_id . '" src="graphics/' . ($groupstatus == 1 ? 'minus' : 'plus') . '.gif">&nbsp;
 						</a>
 						<span class="legend_group' . ($this->group_has_active_layers[$group_id] != '' ? '_active_layers' : '') . '">
-							<a href="javascript:getGroupOptions(' . $group_id . ')" onmouseover="$(\'#test_' . $group_id . '\').show()" onmouseout="$(\'#test_' . $group_id . '\').hide()">' . html_umlaute($groupname) . '
+							<!--a
+								href="javascript:getGroupOptions(' . $group_id . ')" 
+								onmouseover="$(\'#test_' . $group_id . '\').show()"
+								onmouseout="$(\'#test_' . $group_id . '\').hide()"
+							>' . html_umlaute($groupname) . '
 								<i id="test_' . $group_id . '" class="fa fa-bars" style="display: none;"></i>
-							</a>
+							</a//-->' .
+							html_umlaute($groupname) . '
 							<div style="position:static;" id="group_options_' . $group_id . '"></div>
 						</span>
 					</td>
@@ -2168,7 +2172,7 @@ class GUI {
       case 'html' : {
         $this->debug->write("Include <b>".LAYOUTPATH.$this->user->rolle->gui."</b> in kvwmap.php function output()",4);
         # erzeugen des Menueobjektes
-        $this->Menue=new menue($this->user->rolle->language);
+        $this->Menue=new menues($this->user->rolle->language);
         # laden des Menues der Stelle und der Rolle
         $this->Menue->loadMenue($this->Stelle->id, $this->user->id);
         $this->Menue->get_menue_width($this->Stelle->id);
@@ -2425,9 +2429,10 @@ class GUI {
 
 		$height = $this->formvars['browserheight'] -
 			$size['margin']['height'] -
+			$size['header']['height'] -
 			$size['scale_bar']['height'] -
 			$size['lagebezeichnung_bar']['height'] -
-			$size['map_functions_bar']['height'] -
+			($this->user->rolle->showmapfunctions == 1 ? $size['map_functions_bar']['height'] : 0) -
 			$size['footer']['height'];
 
 		if($width  < 0) $width = 10;
@@ -2983,7 +2988,7 @@ class GUI {
   }
 
   function get_sub_menues(){
-    $this->Menue = new menue($this->user->rolle->language);
+    $this->Menue = new menues($this->user->rolle->language);
     $submenues = $this->Menue->getsubmenues($this->formvars['menue_id']);
     echo '<select name="submenues" size="6" multiple style="width:300px">';
     for($i=0; $i < count($submenues["Bezeichnung"]); $i++){
@@ -3457,7 +3462,7 @@ class GUI {
     $this->loadMap('DataBase');
     $this->drawMap();
     # erzeugen des Menueobjektes
-    $this->Menue=new menue($this->user->rolle->language);
+    $this->Menue=new menues($this->user->rolle->language);
     # laden des Menues der Stelle und der Rolle
     $this->Menue->loadMenue($this->Stelle->id, $this->user->id);
     $this->Menue->get_menue_width($this->Stelle->id);
@@ -9872,8 +9877,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $this->formvars['selusers'] = $Stelle->getUser();
     }
     # Abfragen aller möglichen Menuepunkte
-    $this->Menue=new menue($this->user->rolle->language);
-    $this->formvars['menues']=$this->Menue->getallOberMenues();
+    $this->Menue = new menues($this->user->rolle->language);
+    $this->formvars['menues'] = $this->Menue->get_all_ober_menues($this->Stelle->id, $this->user->id);
     # Abfragen aller möglichen Funktionen
     $funktion = new funktion($this->database);
     $this->formvars['functions'] = $funktion->getFunktionen(NULL, 'bezeichnung');
@@ -10503,8 +10508,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       if($this->formvars['id'] != ''){
         $this->formvars['selected_user_id'] = $this->formvars['id'];
       }
-      $this->user->rolle->setRollen($this->formvars['selected_user_id'],$stellen);
-      $this->user->rolle->setMenue($this->formvars['selected_user_id'],$stellen);
+      $this->user->rolle->setRollen($this->formvars['selected_user_id'], $stellen);
+      $this->user->rolle->setMenue($this->formvars['selected_user_id'], $stellen);
       $this->user->rolle->setLayer($this->formvars['selected_user_id'], $stellen, 0);
 			for($i = 0; $i < count($stellen); $i++){
 				$stelle = new stelle($stellen[$i], $this->database);
@@ -11394,9 +11399,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
   function rollenwahl($Stelle_ID) {
 		include_once(CLASSPATH.'FormObject.php');
-    $this->user->Stellen=$this->user->getStellen(0);
+    $this->user->Stellen = $this->user->getStellen(0);
     $this->Hinweis.='Aktuelle Stellen_ID: '.$Stelle_ID;
-    $StellenFormObj=new FormObject("Stelle_ID","select",$this->user->Stellen['ID'],$Stelle_ID,$this->user->Stellen['Bezeichnung'],'Anzahl Werte',"","",NULL);
+    $StellenFormObj=new FormObject("Stelle_ID", "select", $this->user->Stellen['ID'], $Stelle_ID, $this->user->Stellen['Bezeichnung'], 'Anzahl Werte', "", "", NULL , NULL, "vertical-align: middle");
     # hinzufügen von Javascript welches dafür sorgt, dass die Angegebenen Werte abgefragt werden
     # und die genannten Formularobjekte mit diesen Werten bestückt werden
     # übergebene Werte
@@ -11404,10 +11409,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     # Liste der Formularelementnamen, die betroffen sind in der Reihenfolge,
     # wie die Spalten in der Abfrage
     $select ="nZoomFactor,gui,CONCAT(nImageWidth,'x',nImageHeight) AS mapsize";
-    $select.=",CONCAT(minx,' ',miny,',',maxx,' ',maxy) AS newExtent,epsg_code,fontsize_gle,highlighting,runningcoords,DATE_FORMAT(hist_timestamp,'%d.%m.%Y %T')";
+    $select.=",CONCAT(minx,' ',miny,',',maxx,' ',maxy) AS newExtent, epsg_code, fontsize_gle, highlighting, runningcoords, showmapfunctions, DATE_FORMAT(hist_timestamp,'%d.%m.%Y %T')";
     $from ='rolle';
     $where ="stelle_id='+this.form.Stelle_ID.value+' AND user_id=".$this->user->id;
-    $StellenFormObj->addJavaScript("onchange","ahah('index.php','go=getRow&select=".urlencode($select)."&from=".$from."&where=".$where."',new Array(nZoomFactor,gui,mapsize,newExtent,epsg_code,fontsize_gle,highlighting,runningcoords,hist_timestamp));");
+    $StellenFormObj->addJavaScript("onchange","$('#sign_in_stelle').show(); ahah('index.php','go=getRow&select=".urlencode($select)."&from=".$from."&where=".$where."',new Array(nZoomFactor,gui,mapsize,newExtent,epsg_code,fontsize_gle,highlighting,runningcoords,showmapfunctions,hist_timestamp));");
     #echo URL.APPLVERSION."index.php?go=getRow&select=".urlencode($select)."&from=".$from."&where=stelle_id=3 AND user_id=7";
     $StellenFormObj->outputHTML();
     $this->StellenForm=$StellenFormObj;
@@ -16671,147 +16676,6 @@ class db_mapObj{
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
     $rs=mysql_fetch_array($query);
     return $rs;
-  }
-}
-
-###########################################
-# Klasse zum Menüoptionen zusammenstellen #
-###########################################
-# Klasse Menue #
-################
-
-# functions of class menue
-# load Menue -- load all menue items according to the stelle
-
-class Menue {
-  var $html;
-  var $debug;
-
-  ###################### Liste der Funktionen ####################################
-  #
-  # function Menue () - Construktor
-  # function loadMenue ($Stelle_ID)
-  # function getallMenues()
-  #
-  ################################################################################
-
-  function menue ($language){
-    global $debug;
-    $this->debug=$debug;
-    $this->language=$language;
-  }
-
-	function loadMenue($Stelle_ID, $User_ID) {
-		$sql = "
-			SELECT
-				status,
-				m.id,
-				m.links,
-				name as name_german," .
-				($this->language != 'german' ? "`name_" . $this->language . "` AS" : "") . " name,
-				m.menueebene,
-				m.obermenue,
-				m.target,
-				m.title
-			FROM
-				u_menue2rolle m2r JOIN
-				u_menue2stelle AS m2s ON (m2r.stelle_id = m2s.stelle_id AND m2r.menue_id = m2s.menue_id) JOIN
-				u_menues AS m ON (m2s.menue_id = m.id)
-			WHERE
-				m2s.stelle_id = " . $Stelle_ID . " AND
-				m2r.user_id = " . $User_ID . "
-			ORDER BY
-				m2s.menue_order
-		";
-
-		#echo 'SQL: ' . $sql;
-		$this->debug->write("<p>file:kvwmap class:Menue - Lesen der Menüangaben:<br>".$sql,4);
-		$query=mysql_query($sql);
-		if ($query==0) {
-
-		}
-		else {
-			while($rs=mysql_fetch_array($query)) {
-				$this->Menueoption[]=$rs;
-			}
-		}
-	}
-
-  function get_menue_width($Stelle_ID){
-    $sql ='SELECT r.width FROM referenzkarten AS r, stelle AS s WHERE r.ID=s.Referenzkarte_ID';
-    $sql.=' AND s.ID='.$Stelle_ID;
-    $this->debug->write("<p>file:kvwmap class:Menue->get_menue_width - Lesen der Menuebreite:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs=mysql_fetch_row($query);
-    $this->width = $rs[0];
-  }
-
-  function getallOberMenues(){
-    $sql.='SELECT id,';
-    if ($this->language != 'german') {
-      $sql.='`name_'.$this->language.'` AS ';
-    }
-    $sql.=' name, `order`, menueebene FROM u_menues WHERE menueebene = 1 ORDER BY `order`';
-    $this->debug->write("<p>file:kvwmap class:Menue - Lesen aller OberMenüs:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) {
-
-    }
-    else {
-    while($rs=mysql_fetch_array($query)) {
-          $menues['ID'][]=$rs['id'];
-          $menues['Bezeichnung'][]=$rs['name'];
-          $menues['ORDER'][]=$rs['order'];
-		  $menues['menueebene'][]=$rs['menueebene'];
-      }
-      return $menues;
-    }
-  }
-
-  function getsubmenues($menue_id){
-    $sql.='SELECT id,';
-    if ($this->language != 'german') {
-      $sql.='`name_'.$this->language.'` AS ';
-    }
-    $sql.=' name, `order`, menueebene FROM u_menues WHERE obermenue = '.$menue_id.' AND menueebene = 2 ORDER BY `order`, name';
-    $this->debug->write("<p>file:kvwmap class:Menue - Lesen aller OberMenüs:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) {
-
-    }
-    else {
-    while($rs=mysql_fetch_array($query)) {
-          $menues['ID'][]=$rs['id'];
-          $menues['Bezeichnung'][]=$rs['name'];
-		  $menues['ORDER'][]=$rs['order'];
-		  $menues['menueebene'][]=$rs['menueebene'];
-      }
-      return $menues;
-    }
-  }
-
-}
-
-class point {
-  var $x;
-  var $y;
-
-  function point($x,$y) {
-    $this->x=$x;
-    $this->y=$y;
-  }
-
-  function pixel2welt($minX,$minY,$pixSize) {
-    # Rechnet Pixel- in Weltkoordinaten um mit minx, miny und pixsize
-    $this->x=($this->x*$pixSize)+$minX;
-    $this->y=($this->y*$pixSize)+$minY;
-  }
-
-  function welt2pixel($minX,$minY,$pixSize) {
-    # Rechnet Welt- in Pixelkoordinaten um mit minx, miny und pixsize
-    $this->x=round(($this->x-$minX)/$pixSize);
-    $this->y=round(($this->y-$minY)/$pixSize);
   }
 }
 

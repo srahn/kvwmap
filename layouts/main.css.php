@@ -1,4 +1,4 @@
-<?php
+ord<?php
 	header('Content-type: text/css');
 	include('../config.php');
 ?>
@@ -6,7 +6,7 @@
 #layerParamsBar {
 	display: none;
 	position: absolute;
-  border-radius: 5px;
+	border-radius: 5px;
 	top: 22;
 	right: 5;
 	width: 350;
@@ -247,7 +247,7 @@ a.invisiblelayerlink:hover{
 	background: linear-gradient(#DAE4EC, #84accf);
 }
 
-.menu{
+.menu {
 	background: linear-gradient(#DAE4EC 0%, #c7d9e6 100%);
 	position: relative; 
 	visibility: visible; 
@@ -255,11 +255,16 @@ a.invisiblelayerlink:hover{
 	top: 0px; 
 	z-index:3;
 	border: 1px solid #cccccc;
-	line-height : 17px;
+	line-height : 19px;
+	height: 19px;
+	margin-top: 2px;
+/*	margin-bottom: 2px;*/
+	padding: 2px;
 }
 
 .menu:hover{
-	background: linear-gradient(#DAE4EC 0%, #adc7da 100%);
+	background: linear-gradient(#ece1da 0%, #dac4ad 100%)
+/*	background: linear-gradient(#DAE4EC 0%, #adc7da 100%); */
 }
 
 a.menuered {
@@ -270,6 +275,59 @@ a.menuered {
 
 a.menuered:hover {	
 	color: black;
+}
+
+.menue-auf:before {
+	content:url('../graphics/menue_top_open.gif');
+}
+
+.menue-zu:before {
+	content:url('../graphics/menue_top.gif');
+}
+
+.obermenue {
+	cursor: pointer;
+	font-size: 15px;
+	color: black;
+	font-family: SourceSansPro2;
+}
+
+.hauptmenue {
+	cursor: pointer;
+	font-size: 15px;
+	color: #a82e2e;
+	font-family: SourceSansPro2;
+}
+
+.hauptmenue:before {
+	content: ' ';
+	margin-right: 20px;
+}
+
+.untermenue:before {
+	content:url('../graphics/submenue.png');
+	position:relative;
+	z-index:100000;
+	float: left;
+}
+
+.untermenue {
+	cursor: pointer;
+	background: rgb(237, 239, 239);
+	margin: 0px;
+	padding-top: 1px;
+	padding-bottom: 0px;
+	border: 0px;
+}
+
+.untermenues {
+	color: #993333;
+	font-size: 15px;
+	line-height: 17px;
+}
+
+.ausgewaehltes-menue {
+	background: rgb(205, 208, 208);
 }
 
 #scrolldiv{
@@ -426,7 +484,7 @@ a.menuered:hover {
 	vertical-align: top;
 	background-image: url(../graphics/bg.gif);
 	border-top: 1px solid #eeeeee;
-	border-bottom: 1px solid #aaaaaa;
+/*	border-bottom: 1px solid #aaaaaa;*/
 }
 
 /* display: inline-block; width: <?php echo $legend_width; ?>px; vertical-align: top" */
@@ -540,7 +598,7 @@ span.italic {
 	font-style: italic; 
 }
 
-span.red {	
+span.red {
 	font-size: 15px;	
 	color: #a82e2e;
 	font-family: SourceSansPro2;
@@ -820,7 +878,7 @@ tbody.gle tr:hover {
 }
 
 #calendar table tbody td.last_month, #calendar table tbody td.next_month {
-	color: 	#a3afc4;
+	color:	 #a3afc4;
 }
 
 #calendar table{
@@ -886,7 +944,8 @@ tbody.gle tr:hover {
 
 .map-options{
 	border-top: 1px solid #aaaaaa;
-	border-bottom: 1px solid #aaaaaa;
+	padding-top: 6px;
+	padding-bottom: 6px;
 }
 
 .rollenwahl-gruppen{

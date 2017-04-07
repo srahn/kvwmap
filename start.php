@@ -114,7 +114,6 @@ $GUI->database->execSQL("SET NAMES '".MYSQL_CHARSET."'",0,0);
 # aktuellen Benutzer abfragen
 $login_name = $_SESSION['login_name'];
 
-
 # User Daten lesen
 $GUI->user=new user($login_name,0,$GUI->database);
 if(BEARBEITER == 'true'){
@@ -250,8 +249,8 @@ if ($GUI->Stelle->checkPasswordAge==true){
 
 # Abfragen der Einstellungen des Benutzers in der ausgewählten Stelle
 # Rollendaten zuweisen
-if(!$GUI->user->setRolle($Stelle_ID)){
-	echo 'Dem aktuellen Nutzer ist keine Stelle zugeordet!';
+if(!$GUI->user->setRolle($Stelle_ID)) {
+	echo 'Dem aktuellen Nutzer ' . $GUI->user->Name . ' (login name: ' . $GUI->user->login_name . ') läßt sich die Stelle Id: ' . $Stelle_ID . ' nicht zuweisen!<br><a href="index.php?go=logout&username=' . $GUI->user->login_name . '">Zur Anmeldung</a>';
 	exit;
 }
 

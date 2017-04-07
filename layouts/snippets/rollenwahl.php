@@ -22,6 +22,7 @@ Text_mapprojection=["<? echo $strHelp; ?>:","<? echo $strHintMapProjection; ?>"]
 Text_secondmapprojection=["<? echo $strHelp; ?>:","<? echo $strHintSecondMapProjection; ?>"];
 Text_coordtype=["<? echo $strHelp; ?>:","<? echo $strHintCoordType; ?>"];
 Text_runningcoords=["<? echo $strHelp; ?>:","<? echo $strHintRunningCoords; ?>"];
+Text_showmapfunctions=["<? echo $strHelp; ?>:","<? echo $strHintShowMapFunctions; ?>"];
 Text_singlequery=["<? echo $strHelp; ?>:","<? echo $strHintSingleQuery; ?>"];
 Text_querymode=["<? echo $strHelp; ?>:","<? echo $strHintQuerymode; ?>"];
 Text_newdatasetorder=["<? echo $strHelp; ?>:","<? echo $strHintNewDatasetOrder; ?>"];
@@ -47,10 +48,20 @@ Text_histtimestamp=["<? echo $strHelp; ?>:","<? echo $strHinthist_timestamp; ?>"
 		</tr>
 		<tr>
 			<td align="left" valign="top" style="width: 250px;padding: 8px"><? echo $strTask; ?>:&nbsp;</td>
-			<td style="padding: 8px">
-				<? echo $this->StellenForm->html; ?>
-				<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_task, Style[0], document.getElementById('Tip1'))" onmouseout="htm()">
-				<div id="Tip1" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+			<td style="padding: 8px; height: 100%;">
+				<div style="height: 100%">
+					<div style="float: left;">
+						<? echo $this->StellenForm->html; ?>
+					</div>
+					<div style="float: left; margin-left: 5px;">
+						<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_task, Style[0], document.getElementById('Tip1'))" onmouseout="htm()">
+						<div id="Tip1" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+					</div>
+					<div style="float: left; height: 100%">
+						<i id="sign_in_stelle" class="fa fa-sign-out fa-2x" onclick="document.GUI.submit();" style="cursor: pointer; position: relative; top: 50%; transform: translate(50%, -50%); display: none;"></i>
+					</div>
+					<div style="clear: both;">
+				</div>
 			</td>
 		</tr>
 		<tr align="center">
@@ -262,6 +273,14 @@ Text_histtimestamp=["<? echo $strHelp; ?>:","<? echo $strHinthist_timestamp; ?>"
 				<input name="runningcoords" type="checkbox" value="1" <? if($this->user->rolle->runningcoords == '1'){echo 'checked="true"';} ?> >
 				<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_runningcoords, Style[0], document.getElementById('Tip14'))" onmouseout="htm()">
 				<div id="Tip14" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+			</td>
+		</tr>
+		<tr>
+			<td align="left" style="padding: 8px; padding-top: 0px"><? echo $strMapFunctions; ?>:&nbsp;</td>
+			<td style="padding: 8px; padding-top: 0px">
+				<input name="showmapfunctions" type="checkbox" value="1" <? if($this->user->rolle->showmapfunctions == '1') { echo 'checked="true"'; } ?> >
+				<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_showmapfunctions, Style[0], document.getElementById('Tip21'))" onmouseout="htm()">
+				<div id="Tip21" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 			</td>
 		</tr>
 	</table>

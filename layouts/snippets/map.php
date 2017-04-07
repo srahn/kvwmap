@@ -8,6 +8,8 @@
 
 	global $sizes;
 	$size = $sizes[$this->user->rolle->gui];
+	$size['map_functions_bar']['height'] = ($this->user->rolle->showmapfunctions == 1 ? $size['map_functions_bar']['height'] : 0);
+	$size['lagebzeichnung_bar']['height'] = (count($this->Lagebezeichnung) == 0 ? $size['lagebezeichnung_bar']['height'] : 0);
 
 	$map_width = $this->user->rolle->nImageWidth;
 	$legend_hide_width = $size['legend']['hide_width'];
@@ -15,29 +17,30 @@
 
 	$legend_height = $this->map->height +
 		$size['scale_bar']['height'] +
-		(empty($this->Lagebezeichnung) ? 0 : $size['lagebezeichnung_bar']['height']) +
+		$size['lagebzeichnung']['height'] +
 		$size['map_functions_bar']['height'] +
 		$size['footer']['height'] -
 		66; # height of every thing above legend inclusiv tabs
 
-	$scrolldiv_height = $this->map->height +
-		$size['scale_bar']['height'] +
-		(empty($this->Lagebezeichnung) ? 0 : $size['lagebezeichnung_bar']['height']) +
-		$size['map_functions_bar']['height'] +
-		$size['footer']['height'] -
-		91; # height of every thing above scroll div inclusive tabs.
+	$scrolldiv_height = $this->map->height
+		+ $size['scale_bar']['height']
+		+ $size['lagebzeichnung']['height']
+		+ $size['map_functions_bar']['height']
+		- $size['legend']['header_height']; # height of every thing above scroll div inclusive tabs.
 
-	$msg  = 'browser width x height: ' . $this->formvars['browserwidth'] . ' x ' . $this->formvars['browserwidth'];
-	$msg .= '<br>map width x height: ' . $this->map->width . ' x ' . $this->map->height;
+	$msg  = 'browser: ' . $this->formvars['browserwidth'] . ' x ' . $this->formvars['browserheight'];
+	$msg .= '<br>margin: ' . $size['margin']['width'] . ' x ' . $size['margin']['height'];
+	$msg .= '<br>header height: ' . $size['header']['height'];
+	$msg .= '<br>map: ' . $this->map->width . ' x ' . $this->map->height;
 	$msg .= '<br>scale_bar_height: ' . $size['scale_bar']['height'];
-	$msg .= '<br>lagebezeichnung_bar_height: ' . $size['lagebezeichnung_bar']['height'];
-	$msg .= '<br>map_functions_bar_height: ' . $size['map_functions_bar']['height'];
-	$msg .= '<br>footer_height: ' . $size['footer']['height'];
-	$msg .= '<br>scrolldiv_height: ' . $scrolldiv_height;
+	$msg .= '<br>lagebezeichnung_bar height: ' . $size['lagebezeichnung_bar']['height'];
+	$msg .= '<br>map_functions_bar height: ' . $size['map_functions_bar']['height'];
+	$msg .= '<br>footer height: ' . $size['footer']['height'];
+	$msg .= '<br>scrolldiv height: ' . $scrolldiv_height;
 	$msg .= '<br>menue hide width: ' . $size['menue']['hide_width'];
 	$msg .= '<br>menue width: ' . $size['menue']['width'];
-	$msg .= '<br>legend width x height: ' . $legend_width . ' x ' . $legend_height;
-	$msg .= '<br>map_frame width x height: ' . ($map_width + $legend_width);
+	$msg .= '<br>legend: ' . $legend_width . ' x ' . $legend_height;
+	$msg .= '<br>map_frames: ' . ($map_width + $legend_width);
 #	$this->add_message('error', $msg);
 
 	$res_x    = $this->map->width;

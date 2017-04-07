@@ -1542,7 +1542,7 @@ class GUI {
       case 'html' : {
         $this->debug->write("Include <b>".LAYOUTPATH.$this->user->rolle->gui."</b> in kvwmap.php function output()",4);
         # erzeugen des Menueobjektes
-        $this->Menue=new menue($this->user->rolle->language);
+        $this->Menue=new menues($this->user->rolle->language);
         # laden des Menues der Stelle und der Rolle
         $this->Menue->loadMenue($this->Stelle->id, $this->user->id);
         $this->Menue->get_menue_width($this->Stelle->id);
@@ -1957,6 +1957,7 @@ class rolle {
 			$this->result_color=$rs['result_color'];
 			$this->always_draw=$rs['always_draw'];
 			$this->runningcoords=$rs['runningcoords'];
+			$this->showmapfunctions=$rs['showmapfunctions'];
 			$this->singlequery=$rs['singlequery'];
 			$this->querymode=$rs['querymode'];
 			$this->geom_edit_first=$rs['geom_edit_first'];		

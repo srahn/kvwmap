@@ -73,6 +73,7 @@ if (LOG_LEVEL>0) {
  $log_postgres=new LogFile(LOGFILE_POSTGRES,'text', 'Log-Datei-Postgres', '------v: '.date("Y:m:d H:i:s",time()));
 }
 
+
 if (!$_SESSION['angemeldet'] or !empty($_REQUEST['username'])) {
 	include(CLASSPATH . 'mysql.php');
 	$userDb = new database();
@@ -101,11 +102,13 @@ if(!CASE_COMPRESS AND FAST_CASE){
 else{
 	include_(WWWROOT.APPLVERSION.'funktionen/allg_funktionen.php');	
 	if($userDb == NULL)include_(CLASSPATH.'mysql.php');
-	include_(CLASSPATH.'kvwmap.php');
-	include_(CLASSPATH.'kataster.php');
-	include_(CLASSPATH.'postgresql.php');
-	include_(CLASSPATH.'users.php');
-	include_(CLASSPATH.'bauleitplanung.php');
+	include_(CLASSPATH . 'kvwmap.php');
+	include_(CLASSPATH . 'Menues.php');
+	include_(CLASSPATH . 'Menue.php');
+	include_(CLASSPATH . 'kataster.php');
+	include_(CLASSPATH . 'postgresql.php');
+	include_(CLASSPATH . 'users.php');
+	include_(CLASSPATH . 'bauleitplanung.php');
 }
 
 include(WWWROOT . APPLVERSION.'start.php');
@@ -433,21 +436,23 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  } break;
 
 	  case 'logout' : {
+			echo '<br>case logout';
 			session_start();
 			$_SESSION = array();
-			if(ini_get("session.use_cookies")){
+			if (ini_get("session.use_cookies")){
 				$params = session_get_cookie_params();
 				setcookie(session_name(), '', time() - 42000, $params["path"], $params["domain"], $params["secure"], $params["httponly"]);
 			}
 			session_destroy();
-			$locationStr='index.php';
+			echo '<br>session destroyed';
+			$locationStr = 'index.php';
 			if (isset($newPassword)) {
 				$locationStr.='?newPassword='.$newPassword;
 				$locationStr.='&msg='.$GUI->Fehlermeldung;
 				$locationStr.='&passwort='.$passwort;
 				$locationStr.='&username='.$username;
 			}
-			header('Location: '.$locationStr);
+			header('Location: ' . $locationStr);
 	  } break;
 
 	  case 'Flurstuecks-CSV-Export' : {

@@ -9,6 +9,7 @@
   $strMapProjection="1.Map Projection (EPSG-Code)";
   $strSecondMapProjection="2.Map Projection (EPSG-Code)";
   $strRunningCoords="Coordinates";
+	$strShowMapFunctions="Show map functions bar";
   $strMapSize="Map Size";
 	$strAutoResize="auto fit";
   $strTask="Task";
@@ -52,6 +53,7 @@
 	$strHintSecondMapProjection="Choose an additional coordinate reference system for displaying the map coordinates.";
 	$strHintCoordType="Only if you have selected a geographic map projection: Choose the way the geographic coordinates should be displayed.";
 	$strHintRunningCoords="If you activate this option, the coordinates of the cursor position will be shown below the map under specification of the selected map projection.";
+	$strHintShowMapFunctions="Uncheck this field to hide the menu bar below the map with the options to save map image, store properties and max map extent.";
 	$strHintSingleQuery="If you activate this option, the legends request checkboxes will be shown as radiobuttons. You may query only one theme per request.";
 	$strHintQuerymode="If you activate this option, a displayed request will appear as a window that is floating above the map.";
 	$strHintNewDatasetOrder="Choose whether you want to edit the geometry or the attributes first, when you are recording a new dataset.";

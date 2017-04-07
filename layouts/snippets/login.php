@@ -9,10 +9,10 @@
  
 	session_start();
 
-	if($_REQUEST['gast'] != '' AND in_array($_REQUEST['gast'], $gast_stellen)){
+	if ($_REQUEST['gast'] != '' AND in_array($_REQUEST['gast'], $gast_stellen)) {
 		$gast = $userDb->create_new_gast($_REQUEST['gast']);
-		$username = $gast['username'];    
-		$passwort = $gast['passwort'];	?>
+		$username = $gast['username'];
+		$passwort = $gast['passwort']; ?>
 		
 	<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de" lang="de">
 		<head>
@@ -36,7 +36,6 @@
 				document.login.browserheight.value = height;
 				document.login.submit();
 			}
-							
 			</script>
 		</head>
 		<body onload="logon();">
@@ -65,7 +64,7 @@
 		<?
 		exit;
 	}
-	else{
+	else {
 		$username = $_REQUEST['username'];
 		$passwort = $_REQUEST['passwort'];
 	}
@@ -89,7 +88,7 @@
 			$_SESSION['mobile'] = 'false';
 		}
 	}
-	else{
+	else {
 		?>
 		<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de" lang="de">
 		<head>
