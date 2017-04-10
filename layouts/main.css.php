@@ -328,10 +328,15 @@ a.menuered:hover {
 .untermenue {
 	cursor: pointer;
 	background: rgb(237, 239, 239);
-	margin: 0px;
+	margin-bottom: 0px;
+	margin-top: 0px;
 	padding-top: 1px;
 	padding-bottom: 1px;
 	border: 0px;
+}
+
+.untermenue:hover{
+	background: linear-gradient(#dae4ec 0%, #c7d9e6 100%);
 }
 
 .untermenues {
@@ -342,7 +347,7 @@ a.menuered:hover {
 }
 
 .ausgewaehltes-menue {
-	background: rgb(205, 208, 208);
+	#background: rgb(205, 208, 208);
 }
 
 #scrolldiv{
