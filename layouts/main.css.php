@@ -228,7 +228,6 @@ a.invisiblelayerlink:hover{
 	color: gray;
 }
 
-
 .buttonlink{
 	height: 13px;
 	display: inline-block;
@@ -245,6 +244,10 @@ a.invisiblelayerlink:hover{
 
 .buttonlink:hover{
 	background: linear-gradient(#DAE4EC, #84accf);
+}
+
+#menueTable{
+	margin-bottom: 1px;
 }
 
 .menu {
@@ -315,6 +318,7 @@ a.menuered:hover {
 }
 
 .untermenue:before {
+	padding-left: 3px;
 	content:url('../graphics/submenue.png');
 	position:relative;
 	z-index:100000;
@@ -326,7 +330,7 @@ a.menuered:hover {
 	background: rgb(237, 239, 239);
 	margin: 0px;
 	padding-top: 1px;
-	padding-bottom: 0px;
+	padding-bottom: 1px;
 	border: 0px;
 }
 
@@ -334,6 +338,7 @@ a.menuered:hover {
 	color: #993333;
 	font-size: 15px;
 	line-height: 17px;
+	padding-bottom: 2px;
 }
 
 .ausgewaehltes-menue {
