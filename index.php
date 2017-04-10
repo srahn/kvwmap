@@ -37,8 +37,7 @@ session_start();
 
 ob_start ();    // Ausgabepufferung starten
 $go = $_REQUEST['go'];
-if($_REQUEST['go_plus'] != '')$go = $go.'_'.$_REQUEST['go_plus'];
-
+if($_REQUEST['go_plus'] != '') $go = $go.'_'.$_REQUEST['go_plus'];
 ###########################################################################################################
 define(CASE_COMPRESS, false);																																						  #
 #																																																					#
@@ -73,8 +72,8 @@ if (LOG_LEVEL>0) {
  $log_postgres=new LogFile(LOGFILE_POSTGRES,'text', 'Log-Datei-Postgres', '------v: '.date("Y:m:d H:i:s",time()));
 }
 
-
 if (!$_SESSION['angemeldet'] or !empty($_REQUEST['username'])) {
+	$msg .= '<br>Nicht angemeldet';
 	include(CLASSPATH . 'mysql.php');
 	$userDb = new database();
 	$userDb->host = MYSQL_HOST;
@@ -108,6 +107,8 @@ else{
 	include_(CLASSPATH . 'kataster.php');
 	include_(CLASSPATH . 'postgresql.php');
 	include_(CLASSPATH . 'users.php');
+	include_(CLASSPATH . 'rolle.php');
+	include_(CLASSPATH . 'stelle.php');
 	include_(CLASSPATH . 'bauleitplanung.php');
 }
 
@@ -126,7 +127,7 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 		$GUI->last_query_requested = true;		# get_last_query wurde direkt aufgerufen
 		$GUI->formvars['go'] = $go = $GUI->last_query['go'];
 	}
-		
+	#echo '<br>go: ' . $go;
 	switch($go){
 		case 'navMap_ajax' : {   
       $GUI->formvars['nurAufgeklappteLayer'] = true;		
@@ -141,6 +142,7 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 		}break;
 
 	  case 'show_snippet' : {
+			echo 'snipp';
 			$GUI->checkCaseAllowed($go);
 			$GUI->show_snippet();
 	  } break;
@@ -436,7 +438,6 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  } break;
 
 	  case 'logout' : {
-			echo '<br>case logout';
 			session_start();
 			$_SESSION = array();
 			if (ini_get("session.use_cookies")){
@@ -444,8 +445,7 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 				setcookie(session_name(), '', time() - 42000, $params["path"], $params["domain"], $params["secure"], $params["httponly"]);
 			}
 			session_destroy();
-			echo '<br>session destroyed';
-			$locationStr = 'index.php';
+			$locationStr = 'index.php' . ($_REQUEST['gast'] != '' ? '?gast=' . $_REQUEST['gast'] : '');
 			if (isset($newPassword)) {
 				$locationStr.='?newPassword='.$newPassword;
 				$locationStr.='&msg='.$GUI->Fehlermeldung;

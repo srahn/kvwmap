@@ -16,13 +16,13 @@
 						<table cellpadding=0 cellspacing=0>
 							<tr> 
 								<td colspan="2" style="border: 1px solid; border-color: #ffffff #cccccc #bbbbbb;"><?php
-									$this->debug->write("Include <b>".LAYOUTPATH."snippets/".HEADER."</b> in gui.php",4);
+									$this->debug->write("<br>Include <b>".LAYOUTPATH."snippets/".HEADER."</b> in gui.php",4);
 									include(LAYOUTPATH."snippets/".HEADER); ?>
 								</td>
 							</tr>
 							<tr> 
 							<td width="1" valign="top" background="<?php echo GRAPHICSPATH."bg.gif"; ?>" style="border: 1px solid; border-color: #FFFFFF #CCCCCC #CCCCCC; border-bottom: 0px"> <?php
-								$this->debug->write("Include <b>".LAYOUTPATH."snippets/menue_switch.php</b> in gui.php",4);
+								$this->debug->write("<br>Include <b>".LAYOUTPATH."snippets/menue_switch.php</b> in gui.php",4);
 								include(SNIPPETS . "menue_switch.php"); ?>
 							</td>
 							<td align="center" width="100%" valign="top" background="<?php echo GRAPHICSPATH; ?>bg.gif" style="border-right: 1px solid; border-color: #FFFFFF #CCCCCC #CCCCCC;">
@@ -30,7 +30,7 @@
 									<script type="text/javascript">
 									currentform = document.GUI;
 									</script><?php
-									$this->debug->write("Include <b>".$this->main."</b> in gui.php",4);
+									$this->debug->write("<br>Include <b>".$this->main."</b> in gui.php",4);
 									if(file_exists($this->main)){
 										include($this->main);			# Pluginviews
 									}
@@ -42,7 +42,7 @@
 						</tr>
 						<tr> 
 							<td colspan="2" style="border: 1px solid; border-color: #cccccc #cccccc #cccccc;"><?php
-								$this->debug->write("Include <b>".LAYOUTPATH."snippets/".FOOTER."</b> in gui.php",4);    
+								$this->debug->write("<br>Include <b>".LAYOUTPATH."snippets/".FOOTER."</b> in gui.php",4);    
 								include(LAYOUTPATH."snippets/".FOOTER); ?></td>
 							</tr>
 						</table>

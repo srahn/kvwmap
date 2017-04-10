@@ -73,6 +73,7 @@ class MyObject {
 				" . (!empty($params['order']) ? 'ORDER BY ' . $params['order'] : '') . "
 		";
 		$this->debug->show('mysql find_by_sql sql: ' . $sql, MyObject::$write_debug);
+
 		$query = mysql_query($sql, $this->database->dbConn);
 		$results = array();
 		while($this->data = mysql_fetch_assoc($query)) {

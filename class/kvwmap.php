@@ -2176,7 +2176,7 @@ class GUI {
         include (LAYOUTPATH.'snippets/printversion.php');
       } break;
       case 'html' : {
-        $this->debug->write("Include <b>".LAYOUTPATH.$this->user->rolle->gui."</b> in kvwmap.php function output()",4);
+        $this->debug->write("<br>Include <b>".LAYOUTPATH.$this->user->rolle->gui."</b> in kvwmap.php function output()",4);
         # erzeugen des Menueobjektes
         $this->Menue=new menues($this->user->rolle->language);
         # laden des Menues der Stelle und der Rolle
@@ -9631,7 +9631,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $this->Meldung=$ret[1];
     }
     else {
-      if($_files['wappen']['name']){
+      if ($_files['wappen']['name']){
         $this->formvars['wappen'] = $_files['wappen']['name'];
         $nachDatei = WWWROOT.APPLVERSION.WAPPENPATH.$_files['wappen']['name'];
         if (move_uploaded_file($_files['wappen']['tmp_name'],$nachDatei)) {
@@ -9642,12 +9642,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $Stelle = new stelle($stelleid,$this->user->database);
       $Stelle->language = $this->Stelle->language;
       $Stelle->Aendern($this->formvars);
-      if($this->formvars['id'] != ''){
-        $new_stelle = new stelle($this->formvars['id'],$this->user->database);
+      if ($this->formvars['id'] != '') {
+        $new_stelle = new stelle($this->formvars['id'], $this->user->database);
         $new_stelleid = $this->formvars['id'];
         $this->formvars['selected_stelle_id'] = $new_stelleid;
       }
-      else{
+      else {
         $new_stelle = $Stelle;
         $new_stelleid = $stelleid;
       }
@@ -9660,11 +9660,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $users= $Stelle->getUser();
       $stelle_id = explode(',',$stelleid);
       $new_stelle_id = explode(',',$new_stelleid);
-      $new_stelle->deleteMenue(0);    // erst alle Menüs rausnehmen
+      $new_stelle->deleteMenue(0); // erst alle Menüs rausnehmen
       $new_stelle->addMenue($menues); // und dann hinzufügen, damit die Reihenfolge stimmt
-      if($layer[0] != NULL){
+      if($layer[0] != NULL) {
         $new_stelle->addLayer($layer, 0); # Hinzufügen der Layer zur Stelle
-      }			
+      }
       $new_stelle->removeFunctions();   // Entfernen aller Funktionen
       if($functions[0] != NULL){
         $new_stelle->addFunctions($functions, 0); # Hinzufügen der Funktionen zur Stelle
@@ -9679,14 +9679,16 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			include_(CLASSPATH.'datendrucklayout.php');
 			$ddl = new ddl($this->database, $this);
       $ddl->removelayouts($new_stelleid);   // Entfernen aller Datendruck-Layouts der Stelle
-      if($layouts[0] != NULL){
-        for($i = 0; $i < count($layouts); $i++){
+      if ($layouts[0] != NULL){
+        for ($i = 0; $i < count($layouts); $i++){
           $ddl->add_layout2stelle($layouts[$i], $new_stelleid); # Hinzufügen der Datendruck-Layouts zur Stelle
         }
       }
-      for($i=0; $i<count($selectedusers); $i++){
-        $this->user->rolle->setRollen($selectedusers[$i],$new_stelle_id); # Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
-        $this->user->rolle->setMenue($selectedusers[$i],$new_stelle_id); # Hinzufügen der selectierten Obermenüs zur Rolle
+			echo '<br>new_stelle_id: ';
+			var_dump($new_stelle_id);
+      for ($i = 0; $i < count($selectedusers); $i++) {
+        $this->user->rolle->setRollen($selectedusers[$i], $new_stelle_id); # Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
+        $this->user->rolle->setMenue($selectedusers[$i], $new_stelle_id); # Hinzufügen der selectierten Obermenüs zur Rolle
         $this->user->rolle->setGroups($selectedusers[$i], $new_stelle_id, $layer, 0); # Hinzufügen der Layergruppen der selektierten Layer zur Rolle
         $this->user->rolle->setLayer($selectedusers[$i], $new_stelle_id, 0); # Hinzufügen der Layer zur Rolle
         $this->selected_user = new user(0,$selectedusers[$i],$this->user->database);
@@ -9732,8 +9734,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
           $deleteuser[] = $users['ID'][$i];
         }
       }
-      $anzdeleteuser=count($deleteuser);
-      if($anzdeleteuser>0){
+      $anzdeleteuser = count($deleteuser);
+      if ($anzdeleteuser > 0) {
         for($i=0; $i<$anzdeleteuser; $i++){
           $this->user->rolle->deleteRollen($deleteuser[$i], $stelle_id);
           $this->user->rolle->deleteMenue($deleteuser[$i], $stelle_id, 0);

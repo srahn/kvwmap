@@ -24,7 +24,7 @@
 		<tr>
 			<td align="center">
 				<div style="position: relative; visibility: visible; left: 0px; top: 0px"><?
-					$this->debug->write("Include Wappen <b>".WAPPENPATH.$this->Stelle->getWappen()."</b> in menue.php",4);
+					$this->debug->write("<br>Include Wappen <b>".WAPPENPATH.$this->Stelle->getWappen()."</b> in menue.php",4);
 					echo $wappen_html; ?>
 				</div>
 			</td>

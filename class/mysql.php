@@ -291,7 +291,8 @@ class database {
 		#echo '<br>sql: ' . $sql;
 		$query = mysql_query($sql);
 
-		include(CLASSPATH.'users.php');
+		include(CLASSPATH . 'stelle.php');
+		include(CLASSPATH . 'rolle.php');
 		$stelle = new stelle($gast_stelle, $this);
 		$rolle = new rolle(NULL, $gast_stelle, $this);
 		$layers = $stelle->getLayers(NULL);
