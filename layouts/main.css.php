@@ -255,16 +255,15 @@ a.invisiblelayerlink:hover{
 	top: 0px; 
 	z-index:3;
 	border: 1px solid #cccccc;
-	line-height : 19px;
-	height: 19px;
-	margin-top: 2px;
-/*	margin-bottom: 2px;*/
-	padding: 2px;
+	height: 17px;
+	margin: 2px;
+	margin-bottom: 1px;
+	padding-bottom: 4px;
+	line-height : 17px;
 }
 
 .menu:hover{
-	background: linear-gradient(#ece1da 0%, #dac4ad 100%)
-/*	background: linear-gradient(#DAE4EC 0%, #adc7da 100%); */
+	background: linear-gradient(#DAE4EC 0%, #adc7da 100%);
 }
 
 a.menuered {
@@ -277,12 +276,23 @@ a.menuered:hover {
 	color: black;
 }
 
-.menue-auf:before {
-	content:url('../graphics/menue_top_open.gif');
+.menue_before {
+	display: none;
+	height: 17px;
+	width: 17px;
+	box-sizing:border-box;
+  padding-left: 17;
+	padding-right: 3px;
 }
 
-.menue-zu:before {
-	content:url('../graphics/menue_top.gif');
+.menue-auf .menue_before {
+	display: inline-block;
+	background: url('../graphics/menue_top_open.gif');
+}
+
+.menue-zu .menue_before {	
+	display: inline-block;
+	background: url('../graphics/menue_top.gif');
 }
 
 .obermenue {

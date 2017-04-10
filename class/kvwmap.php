@@ -2159,6 +2159,7 @@ class GUI {
 
   # Ausgabe der Seite
   function output() {
+		global $sizes;
 	  foreach($this->formvars as $key => $value){
 			#if(is_string($value))$this->formvars[$key] = stripslashes($value);
 			if(is_string($value))$this->formvars[$key] = strip_pg_escape_string($value);

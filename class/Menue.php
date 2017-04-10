@@ -147,7 +147,8 @@ class Menue extends MyObject {
 			class="menu ' . $class . '"
 			onclick="' . $onclick . '"
 		>';
-		$html .= $this->get('name');
+		$html .= '<img src="../graphics/menue_top.gif" class="menue_before">';
+		$html .= '<span style="vertical-align: top">'.$this->get('name').'</span>';
 		$html .= '	</div>';
 
 		if (count($this->children_ids) > 0) {

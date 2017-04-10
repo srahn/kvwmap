@@ -8,7 +8,7 @@
 	}
 	$refmap_html = '
 		<input
-			style="border: 1px solid #cccccc;"
+			style="margin: 2px;border: 1px solid #cccccc;"
 			type="image"
 			id="refmap"
 			onmousedown="document.GUI.go.value=\'neu Laden\';"
@@ -19,7 +19,7 @@
 			hspace="0"
 		>';
 ?>
-<table width="<? echo $this->Menue->width+7 ?>" height="100%" border="0" cellpadding="0" cellspacing="2"><?php
+<table width="<? echo $sizes[$this->user->rolle->gui]['menue']['width']; ?>" height="100%" border="0" cellpadding="0" cellspacing="0"><?php
 	if (MENU_WAPPEN=="oben") { ?>
 		<tr>
 			<td align="center">
@@ -48,7 +48,9 @@
 	</tr><?php
 	if ($this->img['referenzkarte']!='' AND MENU_REFMAP !="oben") { ?>
 		<tr>
-			<td><input style="border: 1px solid #cccccc;" id="refmap" type="image" onmousedown="document.GUI.go.value='neu Laden';" name="refmap" src="<?php echo $this->img['referenzkarte']; ?>" alt="Referenzkarte" align="right" hspace="0"></td>
+			<td>
+				<?php echo $refmap_html; ?>
+			</td>
 		</tr><?
 	} 
 	if (MENU_WAPPEN=="unten") { ?>
