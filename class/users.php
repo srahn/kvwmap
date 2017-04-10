@@ -2789,40 +2789,63 @@ class stelle {
 	}
 
 	function deleteMenue($menues) {
-		if($menues == 0){
+		if ($menues == 0) {
 			# löscht alle Menuepunkte der Stelle
-			$sql ='DELETE FROM `u_menue2stelle` WHERE `stelle_id` = '.$this->id;
-			#echo '<br>'.$sql;
+			$sql = "
+				DELETE FROM
+					`u_menue2stelle`
+				WHERE
+					`stelle_id` = " . $this->id . "
+			";
+			#echo '<br>sql: ' . $sql;
 			$this->debug->write("<p>file:users.php class:stelle function:deleteMenue - Löschen der Menuepunkte der Stelle:<br>".$sql,4);
 			$query=mysql_query($sql,$this->database->dbConn);
 			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		}
-		else{
+		else {
 			# löscht die übergebenen Menuepunkte der Stelle
-			for ($i=0;$i<count($menues);$i++) {
-				$sql ='DELETE FROM `u_menue2stelle` WHERE `stelle_id` = '.$this->id.' AND `menue_id` = '.$menues[$i];
-				#echo '<br>'.$sql;
+			for ($i = 0; $i < count($menues); $i++) {
+				$sql = "
+					DELETE FROM
+						`u_menue2stelle`
+					WHERE
+						`stelle_id` = " . $this->id . " AND
+						`menue_id` = " . $menues[$i] . "
+				";
+				#echo '<br>sql: ' . $sql;
 				$this->debug->write("<p>file:users.php class:stelle function:deleteMenue - Löschen der Menuepunkte der Stelle:<br>".$sql,4);
 				$query=mysql_query($sql,$this->database->dbConn);
 				if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 
-				/*  $sql ='SELECT id FROM u_menues WHERE obermenue = '.$menues[$i];
-				 #echo '<br>'.$sql;
-				 $this->debug->write("<p>file:users.php class:stelle->deleteMenue - Lesen der Untermenuepunkte zu den Obermenuepunken zur Stelle:<br>".$sql,4);
-				 $query=mysql_query($sql,$this->database->dbConn);
-				 if ($query==0) {
-				 $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
-				 }
-				 else{
-				 while($rs=mysql_fetch_array($query)) {
-				 $sql ='DELETE FROM `u_menue2stelle` WHERE `stelle_id` = '.$this->id.' AND `menue_id` = '.$rs[0];
-				 #echo '<br>'.$sql;
-				 $this->debug->write("<p>file:users.php class:stelle->deleteMenue - Löschen von Menuepunkten zur Stelle:<br>".$sql,4);
-				 $query1=mysql_query($sql,$this->database->dbConn);
-				 if ($query1==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-				 }
-				 }
-				 */
+			  $sql = "
+					SELECT
+						id
+					FROM
+						u_menues
+					WHERE
+						obermenue = " . $menues[$i] . "
+				";
+				#echo '<br>sql: ' . $sql;
+				$this->debug->write("<p>file:users.php class:stelle->deleteMenue - Lesen der Untermenuepunkte zu den Obermenuepunken zur Stelle:<br>".$sql,4);
+				$query = mysql_query($sql, $this->database->dbConn);
+				if ($query==0) {
+					$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
+				}
+				else {
+					while ($rs = mysql_fetch_array($query)) {
+						$sql = "
+							DELETE FROM
+								`u_menue2stelle`
+							WHERE
+								`stelle_id` = " . $this->id . " AND
+								`menue_id` = " . $rs[0] . "
+						";
+						#echo '<br>sql: ' . $sql;
+						$this->debug->write("<p>file:users.php class:stelle->deleteMenue - Löschen von Menuepunkten zur Stelle:<br>".$sql,4);
+						$query1 = mysql_query($sql, $this->database->dbConn);
+						if ($query1 == 0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+					}
+				}
 			}
 		}
 		return 1;
@@ -3035,7 +3058,7 @@ class stelle {
 		$sql.=', use_layer_aliases="';if ($stellendaten['use_layer_aliases']=='1')$sql.='1';else $sql.='0';$sql.='"';
 		$sql.=', hist_timestamp="';if($stellendaten['hist_timestamp']=='1')$sql.='1';else $sql.='0';$sql.='"';
 		$sql.=' WHERE ID = '.$this->id;
-		#echo $sql;
+		echo '<br>sql' . $sql;
 		# Abfrage starten
 		$ret=$this->database->execSQL($sql,4, 0);
 		if ($ret[0]) {
