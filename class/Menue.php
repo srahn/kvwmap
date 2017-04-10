@@ -14,60 +14,34 @@ class Menue extends MyObject {
 		return $menue->find_where($where);
 	}
 
-	public static function find_all_obermenues($gui) {
+	public static function loadMenue($gui) {
 		$menue = new Menue($gui);
 		$menues = $menue->find_by_sql(
 			array(
 				'select' => "
+					status,
 					m.id,
-					m.name" . ($gui->user->rolle->language != 'german' ? '_' . $gui->user->rolle->language . ' AS name' : '') . ",
-					m.title,
-					m.target,
-					m.order,
 					m.links,
+					name as name_german," .
+					($gui->user->rolle->language != 'german' ? "`name_" . $gui->user->rolle->language . "` AS" : "") . " name,
 					m.menueebene,
-					m2r.status
+					m.obermenue,
+					m.target,
+					m.title
 				",
 				'from' => "
-					u_menues m join
-					u_menue2rolle m2r ON (m.id = m2r.menue_id AND m2r.stelle_id = " . $gui->Stelle->id . " AND m2r.user_id = " . $gui->user->id . ") 
+					u_menue2rolle m2r JOIN
+					u_menue2stelle AS m2s ON (m2r.stelle_id = m2s.stelle_id AND m2r.menue_id = m2s.menue_id) JOIN
+					u_menues AS m ON (m2s.menue_id = m.id)
 				",
 				'where' => "
-					m.menueebene = 1
+					m2s.stelle_id = " . $gui->Stelle->id . " AND
+					m2r.user_id = " . $gui->user->id . "
 				",
 				'order' => "
-					m.order
+					m2s.menue_order
 				"
-			)
-		);
-		return $menues;
-	}
-
-	function get_untermenues($obermenue_id) {
-		$menue = new Menue($this->gui);
-		$menues = $menue->find_by_sql(
-			array(
-				'select' => "
-					m.id,
-					m.name" . ($this->gui->user->rolle->language != 'german' ? '_' . $this->gui->user->rolle->language . ' AS name' : '') . ",
-					m.title,
-					m.target,
-					m.links,
-					m.order,
-					m.menueebene,
-					m2r.status
-				",
-				'from' => "
-					u_menues m join
-					u_menue2rolle m2r ON (m.id = m2r.menue_id AND m2r.stelle_id = " . $this->gui->Stelle->id . " AND m2r.user_id = " . $this->gui->user->id . ") 
-				",
-				'where' => "
-					m.obermenue = " . $obermenue_id . "
-				",
-				'order' => "
-					m.order
-				"
-			)
+			), 'obermenue'
 		);
 		return $menues;
 	}
@@ -162,8 +136,7 @@ class Menue extends MyObject {
 	}
 
 	function html() {
-		$untermenues = $this->get_untermenues($this->get('id'));
-		$class  = $this->get_class($untermenues);
+		$class  = $this->get_class($this->children_ids);
 		$target = $this->get_target();
 		$onclick = $this->get_onclick($class, $target);
 
@@ -177,20 +150,15 @@ class Menue extends MyObject {
 		$html .= $this->get('name');
 		$html .= '	</div>';
 
-		if (count($untermenues) > 0) {
+		if (count($this->children_ids) > 0) {
 			$html .= '	<div id="menue_div_untermenues_' . $this->get('id') . '" class="untermenues" style="' . ($this->get('status') == 1 ? '' : 'display: none;') . '"">';
-			foreach($untermenues AS $untermenue) {
-				$html .= $untermenue->html();
+			foreach($this->children_ids AS $untermenue) {
+				$html .= $this->gui->menues[$untermenue]->html();
 			}
 			$html .= '	</div>';
 		}
-		else {
-			
-		}
 
 		$html .= '</div>';
-#		echo $html;
-#		$html = $this->get('name');
 		return $html;
 	}
 }

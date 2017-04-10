@@ -38,9 +38,10 @@
 		</tr><?php
 	} ?>
 	<tr>
-		<td><?php
-			foreach(Menue::find_all_obermenues($this) AS $obermenue) {
-				echo $obermenue->html();
+		<td><?
+			$this->menues = Menue::loadMenue($this);
+			foreach($this->menues as $menue){				
+				if($menue->get('menueebene') == 1) echo $menue->html();
 			}
 		 ?>
 		</td>
