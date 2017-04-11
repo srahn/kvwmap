@@ -70,21 +70,3 @@
 		</tr><?php
  	} ?>
 </table>
-<script type="text/javascript">
-	$('.hauptmenue, .untermenue').contextmenu(function(evt) {
-		debug_e = evt;
-		var messages = [];
-		if (evt.target.getAttribute('title') != '') {
-			messages.push({
-				'type' : 'info',
-				'msg' : evt.target.getAttribute('title')
-			});
-		}
-		messages.push({
-			'type' : 'notice',
-			'msg' : 'Der Menüpunkt führt folgenden Befehl aus:<br>' + evt.target.getAttribute('onclick')
-		});
-		message(messages);
-		return false;
-	});
-</script>

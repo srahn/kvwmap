@@ -98,43 +98,35 @@ class Menue extends MyObject {
 	}
 
 
-	function get_onclick($class, $target) {
+	function get_href($class, $target) {
 		# define click events
 		if(strpos($class, 'obermenu') !== false){
-			$onclick .= "changemenue(".$this->get('id').", ".$this->gui->user->rolle->menu_auto_close.");";
+			$href .= "javascript:changemenue(".$this->get('id').", ".$this->gui->user->rolle->menu_auto_close.");";
 		}
 		else {
 			# call a link
 			if ($this->get('target') == 'confirm') {
-				$onclick = "javascript:Bestaetigung('" . $this->get('links') . "', 'Diese Aktion wirklich ausführen?')";
+				$href = "javascript:Bestaetigung('" . $this->get('links') . "', 'Diese Aktion wirklich ausführen?')";
 			}
-			else {
-				if ($target != '') { # open link in target
-					$onclick = "window.open('" . $this->get('links') . "', '" . $target . "')";
-				}
-				else { # open link in same window
-					$onclick = "location.href='" . $this->get('links') . "'";
-				}
-			}
+			else $href = $this->get('links');
 		}
-		return $onclick;
+		return $href;
 	}
 
 	function html() {
 		$class  = $this->get_class($this->children_ids);
 		$target = $this->get_target();
-		$onclick = $this->get_onclick($class, $target);
+		$href = $this->get_href($class, $target);
 
 		$html .= '<div id="menue_div_' . $this->get('id') . '">';
-		$html .= '<div
+		$html .= '<a href="'.$href.'" target="'.$target.'"><div
 			id="menue_div_name_' . $this->get('id') . '"
 			title="' . $this->get('title') . '" 
 			class="menu ' . $class . '"
-			onclick="' . $onclick . '"
 		>';
 		$html .= '<img src="graphics/menue_top.gif" class="menue_before">';
 		$html .= '<span style="vertical-align: top">'.$this->get('name').'</span>';
-		$html .= '	</div>';
+		$html .= '	</div></a>';
 
 		if (count($this->children_ids) > 0) {
 			$html .= '	<div id="menue_div_untermenues_' . $this->get('id') . '" class="untermenues" style="' . ($this->get('status') == 1 ? '' : 'display: none;') . '"">';
