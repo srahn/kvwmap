@@ -1004,7 +1004,7 @@ class rolle {
 				WHERE
 					u_menue2stelle.stelle_id = " . $stellen[$i] . "
 			";
-			echo '<br>sql: ' . $sql;
+			#echo '<br>sql: ' . $sql;
 			$this->debug->write("<p>file:users.php class:rolle function:setMenue - Setzen der Menuepunkte der Rollen:<br>".$sql,4);
 			$query=mysql_query($sql,$this->database->dbConn);
 			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }

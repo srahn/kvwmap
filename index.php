@@ -142,7 +142,6 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 		}break;
 
 	  case 'show_snippet' : {
-			echo 'snipp';
 			$GUI->checkCaseAllowed($go);
 			$GUI->show_snippet();
 	  } break;

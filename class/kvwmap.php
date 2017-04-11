@@ -377,17 +377,69 @@ class GUI {
 					$layer = $this->layerset[$this->groups_with_layers[$group_id][$j]];
 					$visible = $this->check_layer_visibility($layer);
 					# sichtbare Layer
-					if($visible){
-						if($layer['requires'] == ''){
+					if ($visible) {
+						if ($layer['requires'] == '') {
 							$legend .= '<tr><td valign="top">';
+
+							if ($layer['queryable'] == 1 AND !$this->formvars['nurFremdeLayer']) {
+								$input_attr['id'] = 'qLayer' . $layer['Layer_ID'];
+								$input_attr['name'] = 'qLayer' . $layer['Layer_ID'];
+								$input_attr['title'] = ($layer['queryStatus'] == 1 ? $this->deactivatequery : $this->activatequery);
+								$input_attr['value'] = 1;
+								$input_attr['class'] = 'info-select-field';
+								$input_attr['type'] = (($this->user->rolle->singlequery or $layer['selectiontype'] == 'radio') ? 'radio' : 'checkbox');
+								$input_attr['style'] = ((
+									$this->user->rolle->query or
+									$this->user->rolle->touchquery or
+									$this->user->rolle->queryradius or
+									$this->user->rolle->polyquery
+								) ? '' : 'display: none');
+								$input_attr['onClick'] = ($input_attr['type'] == 'radio' ?
+									"this.checked = this.checked2;" :
+									"updateThema(
+										event,
+										document.getElementById('thema_" . $layer['Layer_ID'] . "'),
+										document.getElementById('qLayer" . $layer['Layer_ID'] . "'),
+										'',
+										''," .
+										$this->user->rolle->instant_reload . "
+									)"
+								);
+								$input_attr['onMouseUp'] = ($input_attr['type'] == 'radio' ?
+									"this.checked = this.checked2;" :
+									""
+								);
+								
+								$input_attr['onMouseDown'] = ($input_attr['type'] == 'radio' ?
+									"updateThema(
+										event,
+										document.getElementById('thema_" . $layer['Layer_ID'] . "'),
+										document.getElementById('qLayer" . $layer['Layer_ID'] . "')," .
+										($layer['selectiontype'] == 'radio' ? "document.GUI.radiolayers_" . $group_id : "''") . "," .
+										($this->user->rolle->singlequery ? "document.GUI.layers" : "''") . "," .
+										$this->user->rolle->instant_reload . "
+									)" :
+									""
+								);
+
+								# die sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen, welches immer den value 0 hat,
+								# damit sie beim Neuladen ausgeschaltet werden können, denn eine nicht angehakte Checkbox/Radiobutton wird ja nicht übergeben
+								$legend .= '<input type="hidden" name="qLayer'.$layer['Layer_ID'].'" value="0">';
+								$legend .= '<input';
+								foreach ($input_attr AS $key => $value) {
+									$legend .= ($value != '' ? ' ' . $key . '="' . $value . '"' : '');
+								}
+								$legend .= ($layer['queryStatus'] == 1 ? ' checked' : '');
+								$legend .= '>';
+
+/*############################################
 							if($layer['queryable'] == 1 AND !$this->formvars['nurFremdeLayer']){
 								// die sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen, welches immer den value 0 hat, damit sie beim Neuladen ausgeschaltet werden können, denn eine nicht angehakte Checkbox/Radiobutton wird ja nicht übergeben
 								$legend .=  '<input type="hidden" name="qLayer'.$layer['Layer_ID'].'" value="0">';
 								$legend .=  '<input id="qLayer'.$layer['Layer_ID'].'"';
-
 								if($this->user->rolle->singlequery){			# singlequery-Modus
 									$legend .=  'type="radio" ';
-									if($layer['selectiontype'] == 'radio'){
+									if($layer['selectiontype'] == 'radio') {
 										$legend .=  ' onClick="this.checked = this.checked2;" onMouseUp="this.checked = this.checked2;" onMouseDown="updateThema(event, document.getElementById(\'thema_'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), document.GUI.radiolayers_'.$group_id.', document.GUI.layers, '.$this->user->rolle->instant_reload.')"';
 									}
 									else{
@@ -404,12 +456,13 @@ class GUI {
 										$legend .=  ' onClick="updateThema(event, document.getElementById(\'thema_'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), \'\', \'\', '.$this->user->rolle->instant_reload.')"';
 									}
 								}
-
 								$legend .=  ' name="qLayer'.$layer['Layer_ID'].'" value="1" ';
 								if($layer['queryStatus'] == 1){
 									$legend .=  'checked title="'.$this->deactivatequery.'"';
 								}
 								$legend .=  ' title="'.$this->activatequery.'">';
+##################################################################*/
+
 							}
 							else{
 								$legend .= '<img src="'.GRAPHICSPATH.'leer.gif" width="17" height="1" border="0">';
@@ -443,14 +496,14 @@ class GUI {
 								$legend .= ' oncontextmenu="getLayerOptions(' . $layer['Layer_ID'] . '); return false;"';
 							}
 							if($layer['metalink'] != '' AND substr($layer['metalink'], 0, 10) != 'javascript')
-								$legend .= 'target="_blank"';
+								$legend .= ' target="_blank"';
 							if($layer['metalink'] != '')
 								$legend .= ' class="metalink boldhover" href="'.$layer['metalink'].'">';
 							else
 								$legend .= ' class="visiblelayerlink boldhover" href="javascript:void(0)"';
-							$legend .= '<span ';
+							$legend .= '<span';
 							if($layer['minscale'] != -1 AND $layer['maxscale'] > 0){
-								$legend .= 'title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
+								$legend .= ' title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
 							}			  
 							$legend .=' class="legend_layer">'.html_umlaute($layer['alias']).'</span>';
 							$legend .= '</a>';
@@ -9452,10 +9505,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->output();
 	}
 
-  function daten_export(){
+  function daten_export() {
 		include_once (CLASSPATH.'data_import_export.php');
-    if($this->formvars['chosen_layer_id'] != '')$this->formvars['selected_layer_id'] = $this->formvars['chosen_layer_id'];		# aus der Sachdatenanzeige des GLE
-    $this->main='data_export.php';
+    if ($this->formvars['chosen_layer_id'] != '') $this->formvars['selected_layer_id'] = $this->formvars['chosen_layer_id'];		# aus der Sachdatenanzeige des GLE
+    $this->main = 'data_export.php';
     $saved_scale = $this->reduce_mapwidth(10);
 		$this->loadMap('DataBase');
 		if($saved_scale != NULL)$this->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
@@ -9466,7 +9519,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
       $this->formvars['layer_id'] = $layerset[0]['Layer_ID'];
     }
-    if($this->formvars['layer_id']){
+    if ($this->formvars['layer_id']) {
 	    # Geometrie-Übernahme-Layer:
 	    # Spaltenname und from-where abfragen
 	    $data = $this->mapDB->getData($this->formvars['layer_id']);
@@ -9504,7 +9557,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			}
 		}
 		###################### über Checkboxen aus der Sachdatenanzeige des GLE ausgewählt ###############
-		if($this->formvars['all'] == ''){
+		if ($this->formvars['all'] == '') {
 			$anzahl = 0;
 			$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
 			# Daten abfragen
@@ -9524,14 +9577,14 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			}
 		}
 		####################################################################################################
-    if($this->formvars['CMD']== 'Full_Extent' OR $this->formvars['CMD'] == 'recentre' OR $this->formvars['CMD'] == 'zoomin' OR $this->formvars['CMD'] == 'zoomout' OR $this->formvars['CMD'] == 'previous' OR $this->formvars['CMD'] == 'next') {
+    if ($this->formvars['CMD'] == 'Full_Extent' OR $this->formvars['CMD'] == 'recentre' OR $this->formvars['CMD'] == 'zoomin' OR $this->formvars['CMD'] == 'zoomout' OR $this->formvars['CMD'] == 'previous' OR $this->formvars['CMD'] == 'next') {
       $this->navMap($this->formvars['CMD']);
     }
     else{
       $this->formvars['load'] = true;
     }
     $this->data_import_export->export($this->formvars, $this->Stelle, $this->user, $this->mapDB);
-		if($this->formvars['epsg'] == '')$this->formvars['epsg'] = $this->data_import_export->layerset[0]['epsg_code'];		// originäres System
+		if ($this->formvars['epsg'] == '') $this->formvars['epsg'] = $this->data_import_export->layerset[0]['epsg_code'];		// originäres System
     $this->saveMap('');
     $currenttime=date('Y-m-d H:i:s',time());
     $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
@@ -9539,8 +9592,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->output();
   }
 
-  function daten_export_exportieren(){
-		include_(CLASSPATH.'data_import_export.php');
+  function daten_export_exportieren() {
+		include_(CLASSPATH . 'data_import_export.php');
     $this->data_import_export = new data_import_export();
     $this->formvars['filename'] = $this->data_import_export->export_exportieren($this->formvars, $this->Stelle, $this->user);
     $this->daten_export();
@@ -9684,8 +9737,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
           $ddl->add_layout2stelle($layouts[$i], $new_stelleid); # Hinzufügen der Datendruck-Layouts zur Stelle
         }
       }
-			echo '<br>new_stelle_id: ';
-			var_dump($new_stelle_id);
       for ($i = 0; $i < count($selectedusers); $i++) {
         $this->user->rolle->setRollen($selectedusers[$i], $new_stelle_id); # Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
         $this->user->rolle->setMenue($selectedusers[$i], $new_stelle_id); # Hinzufügen der selectierten Obermenüs zur Rolle
@@ -13943,7 +13994,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			}
 		}
 		restore_error_handler();
-		include(SNIPPETS.LAYER_ERROR_PAGE);
+		include(SNIPPETS . LAYER_ERROR_PAGE);
 	}
 
   # Flurstücksauswahl
@@ -14812,7 +14863,7 @@ class db_mapObj{
 		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		$rs = mysql_fetch_array($query);
 		$connectionstring = $rs[0];
-		$this->debug->write("<p>file:kvwmap class:db_mapObj->getlayerdatabase - Gefundener Connection String des Layers:<br>".$connectionstring, 4);
+#		$this->debug->write("<p>file:kvwmap class:db_mapObj->getlayerdatabase - Gefundener Connection String des Layers:<br>" . $connectionstring, 4);
 		if($connectionstring != ''){
 			$layerdb = new pgdatabase();
 			if($rs[1] == ''){

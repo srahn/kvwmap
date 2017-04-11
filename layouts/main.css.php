@@ -1194,3 +1194,11 @@ tbody.gle tr:hover {
 	padding: 4px;
 	overflow: scroll;"
 }
+
+#log {
+	display: none;
+	background-color: #dae4ec;
+	border: 1px solid #cccccc;
+	margin-top: 1px;
+	padding: 5px;
+}

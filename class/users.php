@@ -704,30 +704,37 @@ class user {
     return 0;
   }
 
-  function readUserDaten($id,$login_name) {
-    $sql ='SELECT * FROM user WHERE 1=1';
-    if ($id>0) {
-      $sql.=' AND ID='.$id;
-    }
-    if ($login_name!='') {
-      $sql.=' AND login_name LIKE "'.$login_name.'"';
-    }
-    $this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs=mysql_fetch_array($query);
-    $this->id=$rs['ID'];
-    $this->login_name=$rs['login_name'];
-    $this->Namenszusatz=$rs['Namenszusatz'];
-    $this->Name=$rs['Name'];
-    $this->Vorname=$rs['Vorname'];
-    $this->stelle_id=$rs['stelle_id'];
-    $this->phon=$rs['phon'];
-    $this->email=$rs['email'];
-    if (CHECK_CLIENT_IP) {
-      $this->ips=$rs['ips'];
-    }
-    $this->password_setting_time=$rs['password_setting_time'];
+	function readUserDaten($id, $login_name) {
+		$where = array();
+		if ($id > 0) array_push($where, "ID = " . $id);
+		if ($login_name != '') array_push($where, "login_name LIKE '" . $login_name . "'");
+		$sql = "
+			SELECT
+				*
+			FROM
+				user
+			WHERE " .
+				implode(" AND ", $where) . "
+		";
+		#echo '<br>Sql: ' . $sql;
+
+		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>" . $sql, 4);
+		$query = mysql_query($sql,$this->database->dbConn);
+		if ($query == 0) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
+		$rs = mysql_fetch_array($query);
+		$this->id = $rs['ID'];
+		$this->login_name = $rs['login_name'];
+		$this->Namenszusatz = $rs['Namenszusatz'];
+		$this->Name = $rs['Name'];
+		$this->Vorname = $rs['Vorname'];
+		$this->stelle_id = $rs['stelle_id'];
+		$this->phon = $rs['phon'];
+		$this->email = $rs['email'];
+		if (CHECK_CLIENT_IP) {
+			$this->ips = $rs['ips'];
+		}
+		$this->funktion = $rs['Funktion'];
+		$this->password_setting_time = $rs['password_setting_time'];
   }
   
   function getLastStelle() {

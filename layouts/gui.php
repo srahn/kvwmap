@@ -53,11 +53,20 @@
 						<input type="hidden" name="stopnavigation" value="0">
 						<div id="message_box" class="message_box_hidden"></div>
 					</form><?
-					if($this->user->rolle->querymode == 1){
+					if ($this->user->rolle->querymode == 1) {
 						include(LAYOUTPATH.'snippets/overlayframe.php');
 					} ?>
 				</td>
-			</tr>
+			</tr><?php
+			if ($this->user->funktion == 'admin' AND DEBUG_LEVEL > 0) { ?>
+				<tr>
+					<td>
+						<div id="log">
+							<?php echo readfile('/var/www/logs/2.6_' . $this->user->login_name . '_debug.htm');  ?>
+						</div>
+					</td>
+				</tr><?php
+			} ?>
 		</table>
 	</body>
 </html>
