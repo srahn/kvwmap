@@ -12,7 +12,7 @@ function save(the_geom_checked){
 			if(document.GUI.newpath.value == ''){
 				alert('Geben Sie ein Polygon an.');
 			}
-			else{
+			else{				
 				document.GUI.newpathwkt.value = buildwktpolygonfromsvgpath(document.GUI.newpath.value);
 				document.GUI.go_plus.value = 'speichern';
 				document.GUI.submit();
@@ -229,7 +229,7 @@ function setlayers(selected_options){
 				';
 			}
 			if(count($this->attributes) > 0){
-				if($this->attributes['name'][$the_geom_index[0]] != '')$geom_check = 'document.GUI.check_'.$this->attributes['name'][$the_geom_index[0]].'.checked';
+				if($this->attributes[$the_geom_index[0]]['name'] != '')$geom_check = 'document.GUI.check_'.$this->attributes[$the_geom_index[0]]['name'].'.checked';
 				else $geom_check = 0;
 				echo '<tr>
 			 					<td align="center" colspan="5"><br><br><input class="button" type="button" name="speichern" value="speichern" onclick="save('.$geom_check.');">
