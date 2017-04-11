@@ -38,7 +38,13 @@
 		</tr><?php
 	} ?>
 	<tr>
-		<td><?
+		<td>
+			<div id="logout_menue">
+				<div title="" class="menu hauptmenue" onclick="location.href='index.php?go=logout'">
+					<span style="vertical-align: top">Logout</span>
+				</div>
+			</div>
+		<?
 			$this->menues = Menue::loadMenue($this);
 			foreach($this->menues as $menue){				
 				if($menue->get('menueebene') == 1) echo $menue->html();

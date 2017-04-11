@@ -100,23 +100,8 @@ class Menue extends MyObject {
 
 	function get_onclick($class, $target) {
 		# define click events
-		if (strpos($class, 'obermenu') !== false) {
-			# only toggle menues
-			$onclick .= "ahah('index.php', 'go=changemenue_with_ajax&id=" . $this->get('id') . "&status=' + ($('#menue_div_name_" . $this->get('id') . "').hasClass('menue-auf') ? 'off' : 'on'), new Array(''), '');";
-			if ($this->gui->user->rolle->menu_auto_close == 1) {
-				# close all untermenues if menu_auto_close option is 1
-				$onclick .= "var was_closed = $('#menue_div_name_" . $this->get('id') . "').hasClass('menue-zu');";
-				$onclick .= "$('.untermenues').hide();";
-				$onclick .= "$('.menue-auf').toggleClass('menue-auf menue-zu');";
-				$onclick .= "if (was_closed) {
-					$('#menue_div_untermenues_" . $this->get('id') . "').toggle();
-					$('#menue_div_name_" . $this->get('id') . "').toggleClass('menue-auf menue-zu');
-				}";
-			}
-			else {
-				$onclick .= "$('#menue_div_untermenues_" . $this->get('id') . "').toggle();";
-				$onclick .= "$('#menue_div_name_" . $this->get('id') . "').toggleClass('menue-auf menue-zu');";
-			}
+		if(strpos($class, 'obermenu') !== false){
+			$onclick .= "changemenue(".$this->get('id').", ".$this->gui->user->rolle->menu_auto_close.");";
 		}
 		else {
 			# call a link
@@ -147,7 +132,7 @@ class Menue extends MyObject {
 			class="menu ' . $class . '"
 			onclick="' . $onclick . '"
 		>';
-		$html .= '<img src="../graphics/menue_top.gif" class="menue_before">';
+		$html .= '<img src="graphics/menue_top.gif" class="menue_before">';
 		$html .= '<span style="vertical-align: top">'.$this->get('name').'</span>';
 		$html .= '	</div>';
 
