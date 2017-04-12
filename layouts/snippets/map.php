@@ -17,31 +17,8 @@
 
 	$legend_height = $this->map->height +
 		$size['scale_bar']['height'] +
-		$size['lagebzeichnung']['height'] +
-		$size['map_functions_bar']['height'] +
-		$size['footer']['height'] -
-		66; # height of every thing above legend inclusiv tabs
-
-	$scrolldiv_height = $this->map->height
-		+ $size['scale_bar']['height']
-		+ $size['lagebzeichnung']['height']
-		+ $size['map_functions_bar']['height']
-		- $size['legend']['header_height']; # height of every thing above scroll div inclusive tabs.
-
-	$msg  = 'browser: ' . $this->formvars['browserwidth'] . ' x ' . $this->formvars['browserheight'];
-	$msg .= '<br>margin: ' . $size['margin']['width'] . ' x ' . $size['margin']['height'];
-	$msg .= '<br>header height: ' . $size['header']['height'];
-	$msg .= '<br>map: ' . $this->map->width . ' x ' . $this->map->height;
-	$msg .= '<br>scale_bar_height: ' . $size['scale_bar']['height'];
-	$msg .= '<br>lagebezeichnung_bar height: ' . $size['lagebezeichnung_bar']['height'];
-	$msg .= '<br>map_functions_bar height: ' . $size['map_functions_bar']['height'];
-	$msg .= '<br>footer height: ' . $size['footer']['height'];
-	$msg .= '<br>scrolldiv height: ' . $scrolldiv_height;
-	$msg .= '<br>menue hide width: ' . $size['menue']['hide_width'];
-	$msg .= '<br>menue width: ' . $size['menue']['width'];
-	$msg .= '<br>legend: ' . $legend_width . ' x ' . $legend_height;
-	$msg .= '<br>map_frames: ' . ($map_width + $legend_width);
-#	$this->add_message('error', $msg);
+		+ (LAGEBEZEICHNUNGSART != '' ? $size['lagebezeichnung_bar']['height'] : 0)
+		+ ($this->user->rolle->showmapfunctions == 1 ? $size['map_functions_bar']['height'] : 0);
 
 	$res_x    = $this->map->width;
 	$res_y    = $this->map->height;
@@ -89,13 +66,11 @@ function showMapImage(){
 
 function slide_legend_in(evt) {
 	document.getElementById('legenddiv').className = 'slidinglegend_slidein';
-	$('#legenddiv').width(<?php echo $size['legend']['width']; ?>);
 }
 
 function slide_legend_out(evt) {
 	if(window.outerWidth - evt.pageX > 100) {
 		document.getElementById('legenddiv').className = 'slidinglegend_slideout';
-		$('#legenddiv').width(<?php echo $legend_hide_width; ?>);
 	}
 }
 
@@ -153,16 +128,13 @@ if($this->formvars['gps_follow'] == ''){
 	>
 		<?php include(SNIPPETS . 'mapdiv.php'); ?>
 	</div>
-	<div
-		id="legenddiv"<?
+	<div id="legenddiv" style="height: <? echo $legend_height; ?>px;"<?
 		if (!ie_check() AND $this->user->rolle->hideLegend) { ?>
 			onmouseenter="slide_legend_in(event);"
 			onmouseleave="slide_legend_out(event);"
-			style="left: <?php echo $map_width + $legend_width; ?>px; width: <?php echo $legend_hide_width; ?>;"
 			class="slidinglegend_slideout"<?
 		}
 		else { ?>
-			style="left: <?php echo $map_width + $legend_width; ?>px; width: <?php echo $legend_width; ?>;"
 			class="normallegend" <?
 		} ?>
 	>

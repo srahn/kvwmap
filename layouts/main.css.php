@@ -1,4 +1,4 @@
-ord<?php
+<?php
 	header('Content-type: text/css');
 	include('../config.php');
 ?>
@@ -228,7 +228,6 @@ a.invisiblelayerlink:hover{
 	color: gray;
 }
 
-
 .buttonlink{
 	height: 13px;
 	display: inline-block;
@@ -247,6 +246,10 @@ a.invisiblelayerlink:hover{
 	background: linear-gradient(#DAE4EC, #84accf);
 }
 
+#menueTable{
+	margin-bottom: 1px;
+}
+
 .menu {
 	background: linear-gradient(#DAE4EC 0%, #c7d9e6 100%);
 	position: relative; 
@@ -255,16 +258,15 @@ a.invisiblelayerlink:hover{
 	top: 0px; 
 	z-index:3;
 	border: 1px solid #cccccc;
-	line-height : 19px;
-	height: 19px;
-	margin-top: 2px;
-/*	margin-bottom: 2px;*/
-	padding: 2px;
+	height: 17px;
+	margin: 2px;
+	margin-bottom: 1px;
+	padding-bottom: 4px;
+	line-height : 17px;
 }
 
 .menu:hover{
-	background: linear-gradient(#ece1da 0%, #dac4ad 100%)
-/*	background: linear-gradient(#DAE4EC 0%, #adc7da 100%); */
+	background: linear-gradient(#DAE4EC 0%, #adc7da 100%);
 }
 
 a.menuered {
@@ -277,12 +279,23 @@ a.menuered:hover {
 	color: black;
 }
 
-.menue-auf:before {
-	content:url('../graphics/menue_top_open.gif');
+.menue_before {
+	display: none;
+	height: 17px;
+	width: 17px;
+	box-sizing:border-box;
+  padding-left: 17;
+	padding-right: 3px;
 }
 
-.menue-zu:before {
-	content:url('../graphics/menue_top.gif');
+.menue-auf .menue_before {
+	display: inline-block;
+	background: url('../graphics/menue_top_open.gif');
+}
+
+.menue-zu .menue_before {	
+	display: inline-block;
+	background: url('../graphics/menue_top.gif');
 }
 
 .obermenue {
@@ -305,6 +318,7 @@ a.menuered:hover {
 }
 
 .untermenue:before {
+	padding-left: 3px;
 	content:url('../graphics/submenue.png');
 	position:relative;
 	z-index:100000;
@@ -314,38 +328,26 @@ a.menuered:hover {
 .untermenue {
 	cursor: pointer;
 	background: rgb(237, 239, 239);
-	margin: 0px;
+	margin-bottom: 0px;
+	margin-top: 0px;
 	padding-top: 1px;
-	padding-bottom: 0px;
+	padding-bottom: 1px;
 	border: 0px;
+}
+
+.untermenue:hover{
+	background: linear-gradient(#dae4ec 0%, #c7d9e6 100%);
 }
 
 .untermenues {
 	color: #993333;
 	font-size: 15px;
 	line-height: 17px;
+	padding-bottom: 2px;
 }
 
 .ausgewaehltes-menue {
-	background: rgb(205, 208, 208);
-}
-
-#scrolldiv{
-	width:250;
-}
-
-#legend{
-	margin-left:5px;
-}
-
-#legenddiv {
-	border-left: 1px solid #ccc;
-}
-
-#legendcontrol{
-	margin-left: 18px;
-	margin-top: -6px;
-	margin-bottom: 8px;
+	#background: rgb(205, 208, 208);
 }
 
 .use_for_dataset{
@@ -479,46 +481,83 @@ a.menuered:hover {
 	0px 0px 1px rgba(0, 0, 0, 0.8) inset;
 }
 
+<?	
+	global $sizes;
+	$size = $sizes[$_REQUEST['gui']];
+	$legend_hide_width = $size['legend']['hide_width'];
+	$legend_width = $size['legend']['width'];
+?>
+
 .normallegend {
 	float: right;
+	width: <?php echo $legend_width; ?>px;
 	vertical-align: top;
 	background-image: url(../graphics/bg.gif);
 	border-top: 1px solid #eeeeee;
 /*	border-bottom: 1px solid #aaaaaa;*/
 }
 
-/* display: inline-block; width: <?php echo $legend_width; ?>px; vertical-align: top" */
+#legenddiv {
+	border-left: 1px solid #ccc;
+	display: flex; 
+	flex-direction: column;
+}
+
+#legend_layer{
+	flex: 1; 
+	display: flex; 
+	flex-direction: column;
+}
+
+#legendcontrol{
+	margin-top: 5px;
+	margin-bottom: 8px;
+	display: flex; 
+	flex-direction: row;
+	justify-content: flex-start;
+	padding-left: 20px;
+}
+
+#scrolldiv{
+	width:250;
+	flex: 1 1 0; 
+	overflow:auto; 
+	scrollbar-base-color:<?php echo BG_DEFAULT ?>;
+}
+
+#legend{
+	margin-left:5px;
+}
 
 .slidinglegend_slideout {
+	right: -<?php echo $legend_width; ?>px;
 	position:absolute;
 	border-top: 1px solid #eeeeee;
 	border-left:1px solid #CCCCCC;
 	border-bottom: 1px solid #aaaaaa;
 	background-image: url(../graphics/bg.gif);
-	transform: translate3d(-27px,0px,0px);
-	transition: all 0.4s ease;
-	-webkit-transform: translate3d(-27px,0px,0px);
-	-webkit-transition: all 0.3s ease;
+	transform: translate3d(-<? echo ($legend_hide_width + 2); ?>px,0px,0px);
+	transition: all 0.3s ease;
 }
 
-.slidinglegend_slideout	.table1 {
+
+.slidinglegend_slideout	#legend_layer {
 	opacity: 0.0;
-	transition: all 0.4s ease;
+	transition: all 0.3s ease;
 }
 
 .slidinglegend_slidein {
+	right: -<?php echo $legend_width; ?>px;
 	position: absolute;
 	border-top: 1px solid #eeeeee;
 	border-left:1px solid #CCCCCC;
 	border-bottom: 1px solid #aaaaaa;
 	background-image: url(../graphics/bg.gif);
-	transform: translate3d(-255px,0px,0px);
-	transition: all 0.4s ease;
-	-webkit-transform: translate3d(-250px,0px,0px);
-	-webkit-transition: all 0.3s ease;
+	transform: translate3d(-<?php echo $legend_width; ?>px,0px,0px);
+	transition: all 0.3s ease;
 }
 
-.slidinglegend_slidein .table1{
+.slidinglegend_slidein #legend_layer{
 	opacity: 1;
 	transition: all 0.4s ease;
 }
@@ -535,10 +574,6 @@ a.menuered:hover {
 	font-family: SourceSansPro3;
 	font-size: 15px;
 	line-height: 17px;
-}
-
-.legend_layer{
-	font-size: 15px;
 }
 
 .legend_layer_hidden{

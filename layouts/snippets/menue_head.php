@@ -5,46 +5,21 @@ function Bestaetigung(link,text) {
   window.location.href = link;
 }
 
-function popup(id){
-  document.getElementById(id).style.backgroundImage ="none";
-  document.getElementById(id).style.backgroundColor="#CBD8E9";
-  id = id+'subpop';
-  document.getElementById(id).style.visibility="visible";
-}
-
-function popdown(id){
-  document.getElementById(id).style.backgroundColor="#DAE4EC";
-  id = id+'subpop';
-  document.getElementById(id).style.visibility="hidden";
-}
-
-function changemenue(id){
-	main = document.getElementById('menue'+id);
-	image = document.getElementById('image_'+id);
-	sub = document.getElementById('menue'+id+'sub');
-	if(sub.style.display == 'none'){
-		<? if($this->user->rolle->menu_auto_close == 1){ ?>
-		// alle anderen Obermenuepunkte schliessen
-		obermenues = document.getElementsByName('obermenu');
-		for(i = 0; i < obermenues.length; i++){
-			sub1 = document.getElementById(obermenues[i].id+'sub');
-			if(sub1.style.display != 'none'){
-				sub1.style.display = 'none';
-				image1 = document.getElementById('image_'+obermenues[i].id.substr(5));
-				image1.src = '<? echo GRAPHICSPATH; ?>menue_top.gif';
-			}
+function changemenue(id, auto_close){
+	if(auto_close == 1){
+		var was_closed = $('#menue_div_name_'+id).hasClass('menue-zu');
+		$('.untermenues').hide();
+		$('.menue-auf').toggleClass('menue-auf menue-zu');
+		if(was_closed){
+			$('#menue_div_untermenues_'+id).toggle();
+			$('#menue_div_name_'+id).toggleClass('menue-auf menue-zu');
 		}
-		<? } ?>
-		// Untermenue oeffnen
-		ahah('index.php', 'go=changemenue_with_ajax&id='+id+'&status=on', new Array(""), "");
-  	image.src = '<? echo GRAPHICSPATH; ?>menue_top_open.gif';
-		sub.style.display = '';
 	}
-	else{
-		ahah('index.php', 'go=changemenue_with_ajax&id='+id+'&status=off', new Array(""), "");
-		sub.style.display = 'none';
-		image.src = '<? echo GRAPHICSPATH; ?>menue_top.gif';
+	else {
+		$('#menue_div_untermenues_'+id).toggle();
+		$('#menue_div_name_'+id).toggleClass('menue-auf menue-zu');
 	}
+	ahah('index.php', 'go=changemenue_with_ajax&id='+id+'&status='+($('#menue_div_name_'+id).hasClass("menue-auf") ? "on" : "off"), new Array(''), '');
 }
 
 function hideMenue() {

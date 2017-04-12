@@ -4,7 +4,7 @@
 <link rel="stylesheet" href="<?php echo FONTAWESOME_PATH; ?>css/font-awesome.min.css" type="text/css">
 <? include(WWWROOT . APPLVERSION . 'funktionen/gui_functions.php'); ?>
 <link rel="shortcut icon" href="graphics/wappen/favicon.ico">
-<link rel="stylesheet" href="<?php echo 'layouts/'.$this->style; ?>"><?
+<link rel="stylesheet" href="<?php echo 'layouts/'.$this->style.'?gui='.$this->user->rolle->gui; ?>"><?
 if(defined('CUSTOM_STYLE') AND CUSTOM_STYLE != '') { ?>
 	<link rel="stylesheet" href="<?php echo 'layouts/custom/'.CUSTOM_STYLE; ?>"><?
 } ?>

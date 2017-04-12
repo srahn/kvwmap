@@ -33,7 +33,8 @@ session_start();
    // list($usec, $sec) = explode(" ", microtime());
    // return ((float)$usec + (float)$sec);
 // }
-// $starttime=microtime_float1();
+// $starttime = $executiontimes['time'][] = microtime_float1();
+// $executiontimes['action'][] = 'Start';
 
 ob_start ();    // Ausgabepufferung starten
 $go = $_REQUEST['go'];
@@ -1623,7 +1624,9 @@ if(CASE_COMPRESS AND FAST_CASE)case_compressor::write_fast_case_file($go);
 // $executiontimes['time'][] = microtime_float1();
 // $executiontimes['action'][] = 'Ende';
 // for($i = 0;  $i < count($executiontimes['time']); $i++){
-	// $dauer = $executiontimes['time'][$i] - $starttime;
-	// echo chr(10).chr(13).'<br>'.$executiontimes['action'][$i].': '.$dauer.'s';
+	// if($i > 0)$dauer1 = $executiontimes['time'][$i] - $executiontimes['time'][$i-1];
+	// else $dauer1 = 0;
+	// $dauer2 = $executiontimes['time'][$i] - $starttime;
+	// echo chr(10).chr(13).'<br>'.$executiontimes['action'][$i].': '.$dauer1.'s   seit Start '.$dauer2.'s';
 // }
 ?>

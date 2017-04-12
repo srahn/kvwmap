@@ -26,18 +26,15 @@ if ($show_legend_graphic) { ?>
 </div><?php
 } ?>
 <div id="legend_layer">
-	<table class="table1" id="legendTable" style="display: <? echo $display; ?>" cellspacing=0 cellpadding=2 border=0>
-	<tr align="left">
-		<td><?php
-			if(defined('LAYER_ID_SCHNELLSPRUNG') AND LAYER_ID_SCHNELLSPRUNG != ''){
+	<?	if(defined('LAYER_ID_SCHNELLSPRUNG') AND LAYER_ID_SCHNELLSPRUNG != ''){
 				include(SNIPPETS.'schnellsprung.php');
-			} ?>&nbsp;
-		<div id="legendcontrol">
-			<a href="index.php?go=reset_querys"><img src="graphics/tool_info.png" border="0" alt="<? echo $strInfoQuery; ?>" title="<? echo $strInfoQuery.' | '.$strClearAllQuerys; ?>" width="17" style="vertical-align: bottom;"></a>
-			<a href="index.php?go=reset_layers"><img src="graphics/layer.png" border="0" alt="<? echo $strLayerControl; ?>" title="<? echo $strLayerControl.' | '.$strDeactivateAllLayer; ?>" width="20" height="20" style="vertical-align: bottom;"></a>
-			<input type="submit" name="neuladen" onclick="startwaiting(true);document.GUI.go.value='neu Laden';" value="<?php echo $strLoadNew; ?>" tabindex="1" style="vertical-align: top; margin-left: 25px">			
-		</div>
-	<div id="scrolldiv" onscroll="document.GUI.scrollposition.value = this.scrollTop; scrollLayerOptions();" style="height:<?php echo $scrolldiv_height; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
+			} ?>
+	<div id="legendcontrol">
+		<a href="index.php?go=reset_querys"><img src="graphics/tool_info.png" border="0" alt="<? echo $strInfoQuery; ?>" title="<? echo $strInfoQuery.' | '.$strClearAllQuerys; ?>" width="17" style="vertical-align: bottom;"></a>
+		<a href="index.php?go=reset_layers"><img src="graphics/layer.png" border="0" alt="<? echo $strLayerControl; ?>" title="<? echo $strLayerControl.' | '.$strDeactivateAllLayer; ?>" width="20" height="20" style="vertical-align: bottom;"></a>
+		<input type="submit" name="neuladen" onclick="startwaiting(true);document.GUI.go.value='neu Laden';" value="<?php echo $strLoadNew; ?>" tabindex="1" style="vertical-align: top; margin-left: 25px">			
+	</div>
+	<div id="scrolldiv" onscroll="document.GUI.scrollposition.value = this.scrollTop; scrollLayerOptions();">
 		<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
 		<div onclick="document.GUI.legendtouched.value = 1;" id="legend">
 			<? echo $this->legende; ?>
@@ -46,10 +43,8 @@ if ($show_legend_graphic) { ?>
 			document.getElementById('scrolldiv').scrollTop = <? echo $this->user->rolle->scrollposition; ?>;
 		</script>
 	</div>
-		</td>
-	</tr>
-</table>
-</div><?php
+</div>
+<?php
 if ($show_legend_graphic) { ?>
 	<div id="legend_graphic" style="height:<?php echo $legend_height; ?>"><?php include(SNIPPETS . LEGEND_GRAPHIC_FILE); ?></div><?php
 } ?>
