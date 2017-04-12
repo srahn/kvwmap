@@ -82,7 +82,7 @@
 						</div>
 			  	</td>
 			  </tr><?php
-				if ($this->Lagebezeichnung['gemeindename'] != '') { ?>
+				if ($this->Lagebezeichung['gemeindename'] != '') { ?>
 						<tr style="background-color: <? echo BG_MENUETOP; ?>; height: 30px">
 							<td width="100%" colspan="3" class="map-bottom" align="center">
 								<div id="lagebezeichnung">

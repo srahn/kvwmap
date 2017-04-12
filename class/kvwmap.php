@@ -2424,15 +2424,14 @@ class GUI {
 		$width = $this->formvars['browserwidth'] -
 			$size['margin']['width'] -
 			($this->user->rolle->hideMenue  == 1 ? $size['menue']['hide_width'] : $size['menue']['width']) -
-			($this->user->rolle->hideLegend == 1 ? $size['legend']['hide_width'] : $size['legend']['width']);
-
-		if (empty($this->Lagebezeichnung)) $size['lagebezeichnung']['height'] = 0;
+			($this->user->rolle->hideLegend == 1 ? $size['legend']['hide_width'] : $size['legend']['width'])
+			- 10;	# Breite für möglichen Scrollbalken
 
 		$height = $this->formvars['browserheight'] -
 			$size['margin']['height'] -
 			$size['header']['height'] -
 			$size['scale_bar']['height'] -
-			$size['lagebezeichnung_bar']['height'] -
+			(LAGEBEZEICHNUNGSART != '' ? $size['lagebezeichnung_bar']['height'] : 0) -
 			($this->user->rolle->showmapfunctions == 1 ? $size['map_functions_bar']['height'] : 0) -
 			$size['footer']['height'];
 

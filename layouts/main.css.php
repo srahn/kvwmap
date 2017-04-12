@@ -350,24 +350,6 @@ a.menuered:hover {
 	#background: rgb(205, 208, 208);
 }
 
-#scrolldiv{
-	width:250;
-}
-
-#legend{
-	margin-left:5px;
-}
-
-#legenddiv {
-	border-left: 1px solid #ccc;
-}
-
-#legendcontrol{
-	margin-left: 18px;
-	margin-top: -6px;
-	margin-bottom: 8px;
-}
-
 .use_for_dataset{
 	background-image: url(../graphics/use_for_dataset.png);
 }
@@ -499,46 +481,83 @@ a.menuered:hover {
 	0px 0px 1px rgba(0, 0, 0, 0.8) inset;
 }
 
+<?	
+	global $sizes;
+	$size = $sizes[$_REQUEST['gui']];
+	$legend_hide_width = $size['legend']['hide_width'];
+	$legend_width = $size['legend']['width'];
+?>
+
 .normallegend {
 	float: right;
+	width: <?php echo $legend_width; ?>px;
 	vertical-align: top;
 	background-image: url(../graphics/bg.gif);
 	border-top: 1px solid #eeeeee;
 /*	border-bottom: 1px solid #aaaaaa;*/
 }
 
-/* display: inline-block; width: <?php echo $legend_width; ?>px; vertical-align: top" */
+#legenddiv {
+	border-left: 1px solid #ccc;
+	display: flex; 
+	flex-direction: column;
+}
+
+#legend_layer{
+	flex: 1; 
+	display: flex; 
+	flex-direction: column;
+}
+
+#legendcontrol{
+	margin-top: 5px;
+	margin-bottom: 8px;
+	display: flex; 
+	flex-direction: row;
+	justify-content: flex-start;
+	padding-left: 20px;
+}
+
+#scrolldiv{
+	width:250;
+	flex: 1 1 0; 
+	overflow:auto; 
+	scrollbar-base-color:<?php echo BG_DEFAULT ?>;
+}
+
+#legend{
+	margin-left:5px;
+}
 
 .slidinglegend_slideout {
+	right: -<?php echo $legend_width; ?>px;
 	position:absolute;
 	border-top: 1px solid #eeeeee;
 	border-left:1px solid #CCCCCC;
 	border-bottom: 1px solid #aaaaaa;
 	background-image: url(../graphics/bg.gif);
-	transform: translate3d(-27px,0px,0px);
-	transition: all 0.4s ease;
-	-webkit-transform: translate3d(-27px,0px,0px);
-	-webkit-transition: all 0.3s ease;
+	transform: translate3d(-<? echo ($legend_hide_width + 2); ?>px,0px,0px);
+	transition: all 0.3s ease;
 }
 
-.slidinglegend_slideout	.table1 {
+
+.slidinglegend_slideout	#legend_layer {
 	opacity: 0.0;
-	transition: all 0.4s ease;
+	transition: all 0.3s ease;
 }
 
 .slidinglegend_slidein {
+	right: -<?php echo $legend_width; ?>px;
 	position: absolute;
 	border-top: 1px solid #eeeeee;
 	border-left:1px solid #CCCCCC;
 	border-bottom: 1px solid #aaaaaa;
 	background-image: url(../graphics/bg.gif);
-	transform: translate3d(-255px,0px,0px);
-	transition: all 0.4s ease;
-	-webkit-transform: translate3d(-250px,0px,0px);
-	-webkit-transition: all 0.3s ease;
+	transform: translate3d(-<?php echo $legend_width; ?>px,0px,0px);
+	transition: all 0.3s ease;
 }
 
-.slidinglegend_slidein .table1{
+.slidinglegend_slidein #legend_layer{
 	opacity: 1;
 	transition: all 0.4s ease;
 }
@@ -555,10 +574,6 @@ a.menuered:hover {
 	font-family: SourceSansPro3;
 	font-size: 15px;
 	line-height: 17px;
-}
-
-.legend_layer{
-	font-size: 15px;
 }
 
 .legend_layer_hidden{

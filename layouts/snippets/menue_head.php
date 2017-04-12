@@ -19,7 +19,7 @@ function changemenue(id, auto_close){
 		$('#menue_div_untermenues_'+id).toggle();
 		$('#menue_div_name_'+id).toggleClass('menue-auf menue-zu');
 	}
-	ahah('index.php', 'go=changemenue_with_ajax&id='+id+'&status='+($('#menue_div_name_'+id).hasClass("menue-auf") ? "off" : "on"), new Array(''), '');
+	ahah('index.php', 'go=changemenue_with_ajax&id='+id+'&status='+($('#menue_div_name_'+id).hasClass("menue-auf") ? "on" : "off"), new Array(''), '');
 }
 
 function hideMenue() {
