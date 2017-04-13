@@ -989,7 +989,7 @@ tbody.gle tr:hover {
 }
 
 .rollenwahl-table {
-	width: 700px
+	width: 700px;
 }
 
 .rollenwahl-gruppen-header {
@@ -998,17 +998,18 @@ tbody.gle tr:hover {
 	padding-left: 8px
 }
 
+.rollenwahl-gruppen-options{
+	padding : 4px;
+}
+
 .rollenwahl-option-header {
 	width: 221px;
-	padding-top : 4px;
-	padding-bottom: 4px;
-	padding-left: 8px;
+	padding : 4px;
 }
 
 .rollenwahl-option-data {
-	padding-top : 4px;
-	padding-bottom: 4px;
-  padding-left: 2px;
+	width: 440px;
+	padding : 4px;
 }
 
 .hover-border{
