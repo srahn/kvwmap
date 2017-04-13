@@ -610,6 +610,12 @@ class GUI {
 									<tr>
 										<td valign="top">';
 						if($layer['queryable'] == 1){
+							$style = ((
+									$this->user->rolle->query or
+									$this->user->rolle->touchquery or
+									$this->user->rolle->queryradius or
+									$this->user->rolle->polyquery
+								) ? '' : 'style="display: none"');
 							$legend .=  '<input ';
 							if($layer['selectiontype'] == 'radio'){
 								$legend .=  'type="radio" ';
@@ -620,7 +626,7 @@ class GUI {
 							if($layer['queryStatus'] == 1){
 								$legend .=  'checked="true"';
 							}
-							$legend .=' type="checkbox" name="pseudoqLayer'.$layer['Layer_ID'].'" disabled>';
+							$legend .=' type="checkbox" name="pseudoqLayer'.$layer['Layer_ID'].'" disabled '.$style.'>';
 						}
 						$legend .=  '</td><td valign="top">';
 						// die nicht sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen nur bei Radiolayern, damit sie beim Neuladen ausgeschaltet werden können, denn ein disabledtes input-Feld wird ja nicht übergeben
@@ -637,7 +643,11 @@ class GUI {
 							$legend .=  'checked="true" ';
 						}
 						$legend .= 'id="thema_'.$layer['Layer_ID'].'" name="thema'.$layer['Layer_ID'].'" disabled="true"></td><td>';
-						$legend .= '<a oncontextmenu="getLayerOptions('.$layer['Layer_ID'].');return false;" class="invisiblelayerlink boldhover" href="javascript:void(0)"';
+						$legend .= '<a ';
+						if ($this->user->rolle->showlayeroptions) {
+							$legend .= ' oncontextmenu="getLayerOptions(' . $layer['Layer_ID'] . '); return false;"';
+						}
+						$legend .= 'class="invisiblelayerlink boldhover" href="javascript:void(0)"';
 						$legend .= '<span class="legend_layer_hidden" ';
 						if($layer['minscale'] != -1 AND $layer['maxscale'] != -1){
 							$legend .= 'title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
