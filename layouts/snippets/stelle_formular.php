@@ -338,8 +338,8 @@ else {
                     <td>
                       <?php echo $strAvailable; ?><br>
                       <select name="allmenues" size="6" onchange="getsubmenues();" style="width:300px">
-                      <? for($i=0; $i < count($this->formvars['menues']["Bezeichnung"]); $i++){
-                          echo '<option id="'.$this->formvars['menues']["ORDER"][$i].'_all_'.$this->formvars['menues']["menueebene"][$i].'_'.$i.'" title="'.str_replace(' ', '&nbsp;', $this->formvars['menues']["Bezeichnung"][$i]).'" value="'.$this->formvars['menues']["ID"][$i].'">'.$this->formvars['menues']["Bezeichnung"][$i].'</option>';
+                      <? for($i=0; $i < count($this->formvars['menues']); $i++){
+                          echo '<option id="'.$this->formvars['menues'][$i]->data['order'].'_all_'.$this->formvars['menues'][$i]->data['menueebene'].'_'.$i.'" title="'.str_replace(' ', '&nbsp;', $this->formvars['menues'][$i]->data['name']).'" value="'.$this->formvars['menues'][$i]->data['id'].'">'.$this->formvars['menues'][$i]->data['name'].'</option>';
                            }
                       ?>
                       </select>

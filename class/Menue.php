@@ -46,6 +46,30 @@ class Menue extends MyObject {
 		);
 		return $menues;
 	}
+	
+	public static function get_all_ober_menues($gui){
+		$menue = new Menue($gui);
+		$menues = $menue->find_by_sql(
+			array(
+				'select' => "
+					id,".
+					($gui->user->rolle->language != 'german' ? "`name_" . $gui->user->rolle->language . "` AS" : "") . " name,
+					`order`,
+					menueebene
+				",
+				'from' => "
+					u_menues
+				",
+				'where' => "
+					menueebene = 1
+				",
+				'order' => "
+					`order`
+				"
+			)
+		);
+    return $menues;
+	}
 
 	function is_selected() {
 		$is_selected = true;

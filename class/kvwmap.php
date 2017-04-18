@@ -2242,11 +2242,6 @@ class GUI {
       } break;
       case 'html' : {
         $this->debug->write("<br>Include <b>".LAYOUTPATH.$this->user->rolle->gui."</b> in kvwmap.php function output()",4);
-        # erzeugen des Menueobjektes
-        #$this->Menue=new menues($this->user->rolle->language);
-        # laden des Menues der Stelle und der Rolle
-        #$this->Menue->loadMenue($this->Stelle->id, $this->user->id);
-        #$this->Menue->get_menue_width($this->Stelle->id);
         if (basename($this->user->rolle->gui)=='') {
           $this->user->rolle->gui='gui.php';
         }
@@ -9947,8 +9942,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $this->formvars['selusers'] = $Stelle->getUser();
     }
     # Abfragen aller möglichen Menuepunkte
-    $this->Menue = new menues($this->user->rolle->language);
-    $this->formvars['menues'] = $this->Menue->get_all_ober_menues($this->Stelle->id, $this->user->id);
+    $this->formvars['menues'] = Menue::get_all_ober_menues($this);
     # Abfragen aller möglichen Funktionen
     $funktion = new funktion($this->database);
     $this->formvars['functions'] = $funktion->getFunktionen(NULL, 'bezeichnung');
