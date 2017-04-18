@@ -319,7 +319,7 @@ class GUI {
     echo $this->create_group_legend($this->formvars['group']);
   }
 
-	function create_group_legend($group_id){
+	function create_group_legend($group_id) {
 		if($this->groupset[$group_id]['untergruppen'] == NULL AND $this->groups_with_layers[$group_id] == NULL)return;			# wenns keine Layer oder Untergruppen gibt, nix machen
     $groupname = $this->groupset[$group_id]['Gruppenname'];
 	  $groupstatus = $this->groupset[$group_id]['status'];
@@ -516,7 +516,7 @@ class GUI {
 							if($layer['requires'] == '' AND $layer['Layer_ID'] > 0){
 								$legend .= '<input id="classes_'.$layer['Layer_ID'].'" name="classes_'.$layer['Layer_ID'].'" type="hidden" value="'.$layer['showclasses'].'">';
 							}
-							if($layer['showclasses'] != 0){
+							if ($layer['showclasses'] != 0) {
 								if($layer['connectiontype'] == 7){      # WMS
 									$layersection = substr($layer['connection'], strpos(strtolower($layer['connection']), 'layers')+7);
 									$pos = strpos($layersection, '&');
@@ -526,7 +526,7 @@ class GUI {
 										$legend .=  '<div style="display:inline" id="lg'.$j.'_'.$l.'"><br><img src="'.$layer['connection'].'&layer='.$layers[$l].'&service=WMS&request=GetLegendGraphic" onerror="ImageLoadFailed(\'lg'.$j.'_'.$l.'\')"></div>';
 									}
 								}
-								else{
+								else {
 									$legend .= '<table border="0" cellspacing="0" cellpadding="0">';
 									$maplayer = $this->map->getLayerByName($layer['alias']);
 									for($k = 0; $k < $maplayer->numclasses; $k++){
@@ -10995,32 +10995,32 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->output();
   }
 
-	function layerCommentLoad(){
-		$ret=$this->user->rolle->getLayerComments($this->formvars['id']);
-    if ($ret[0]) {
-      $this->Fehlermeldung='Es konnten keine gespeicherten Themen abgefragt werden.<br>'.$ret[1];
-    }
-    else {
+	function layerCommentLoad() {
+		$ret = $this->user->rolle->getLayerComments($this->formvars['id'], $this->Stelle->default_user_id);
+		if ($ret[0]) {
+			$this->Fehlermeldung = 'Es konnten keine gespeicherten Themen abgefragt werden.<br>' . $ret[1];
+		}
+		else {
 			$layerset = $this->user->rolle->getLayer('');
-			for($i=0; $i < count($layerset); $i++){
+			for ($i = 0; $i < count($layerset); $i++){
 				$formvars['thema'.$layerset[$i]['Layer_ID']] = 0;		# erstmal alle ausschalten
 				$formvars['qLayer'.$layerset[$i]['Layer_ID']] = 0;		# erstmal alle ausschalten
 			}
       $layer_ids = explode(',', $ret[1][0]['layers']);
 			foreach($layer_ids as $layer_id){
-				$formvars['thema'.$layer_id] = 1;
+				$formvars['thema' . $layer_id] = 1;
 			}
 			$query_ids = explode(',', $ret[1][0]['query']);
 			foreach($query_ids as $layer_id){
-				$formvars['qLayer'.$layer_id] = 1;
+				$formvars['qLayer' . $layer_id] = 1;
 			}
 			$this->user->rolle->setAktivLayer($formvars, $this->Stelle->id, $this->user->id, true);
 			$this->user->rolle->setQueryStatus($formvars);
-    }
+		}
 		$this->loadMap('DataBase');
 		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
 		$this->drawMap();
-    $this->output();
+		$this->output();
 	}
 
   function composePolygonWKTString($pathx,$pathy,$minx,$miny,$scale) {
@@ -12346,8 +12346,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							$ret=$layerdb->execSQL($sql.$sql_order.$sql_limit,4, 0);
 							#echo $sql.$sql_order.$sql_limit;
 							if (!$ret[0]) {
-								while ($rs=pg_fetch_assoc($ret[1])) {
-									$layerset[$i]['shape'][]=$rs;
+								while ($rs = pg_fetch_array($ret[1])) {
+									$layerset[$i]['shape'][] = $rs;
 								}
 								$num_rows = pg_num_rows($ret[1]);
 								if($this->formvars['offset_'.$layerset[$i]['Layer_ID']] == '' AND $num_rows < $this->formvars['anzahl'])$layerset[$i]['count'] = $num_rows;
@@ -12374,7 +12374,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 								# Querymaps erzeugen
 								if($layerset[$i]['querymap'] == 1 AND $layerset[$i]['attributes']['privileg'][$layerset[$i]['attributes']['the_geom']] >= '0' AND ($layerset[$i]['Datentyp'] == 1 OR $layerset[$i]['Datentyp'] == 2)){
-									for($k = 0; $k < count($layerset[$i]['shape']); $k++){
+									for($k = 0; $k < count($layerset[$i]['shape']); $k++) {
 										$layerset[$i]['querymaps'][$k] = $this->createQueryMap($layerset[$i], $k);
 									}
 								}
@@ -13805,7 +13805,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
   }
 
   function createQueryMap($layerset, $k){
-  	if($layerset['attributes']['the_geom'] != ''){
+  	if($layerset['attributes']['the_geom'] != '') {
 	    $layer_id = $layerset['Layer_ID'];
 	    $tablename = $layerset['attributes']['table_name'][$layerset['attributes']['the_geom']];
 	    $oid = $layerset['shape'][$k][$tablename.'_oid'];

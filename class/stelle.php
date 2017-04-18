@@ -89,7 +89,14 @@ class stelle {
   }
 
   function readDefaultValues() {
-    $sql ='SELECT * FROM stelle WHERE ID='.$this->id;
+    $sql = "
+			SELECT
+				*
+			FROM
+				stelle
+			WHERE
+				ID = " . $this->id . "
+		";
     $this->debug->write("<p>file:users.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);
     if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
@@ -120,6 +127,7 @@ class stelle {
     $this->useLayerAliases=$rs["use_layer_aliases"];
 		$this->selectable_layer_params = $rs['selectable_layer_params'];
 		$this->hist_timestamp=$rs["hist_timestamp"];
+		$this->default_user_id = $rs['default_user_id'];
   }
 
   function checkClientIpIsOn() {
