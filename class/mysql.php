@@ -56,7 +56,7 @@ class database {
   }
 
   function login_user($username, $passwort){
-  	$sql = "SELECT login_name FROM user WHERE login_name = BINARY('".addslashes($username)."') AND passwort = '".md5($passwort)."'";
+  	$sql = "SELECT login_name FROM user WHERE login_name = '".addslashes($username)."' AND passwort = '".md5($passwort)."'";
   	$sql.=' AND (("'.date('Y-m-d h:i:s').'" >= start AND "'.date('Y-m-d h:i:s').'" <= stop)';
     $sql.=' OR ';
     $sql.='(start="0000-00-00 00:00:00" AND stop="0000-00-00 00:00:00"))';		# Zeiteinschränkung wird nicht berücksichtigt.
