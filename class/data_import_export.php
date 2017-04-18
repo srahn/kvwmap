@@ -435,21 +435,20 @@ class data_import_export {
 					$this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $formvars['epsg'], $importfile, $pgdatabase, NULL);
 					$sql = '
 						ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' SET WITH OIDS;
+						
+						SELECT geometrytype(the_geom), count(*) FROM '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' GROUP BY geometrytype(the_geom);
 					';
 					$ret = $pgdatabase->execSQL($sql,4, 0);
-					# Punkte
-					$custom_tables[0]['datatype'] = 0;
-					$custom_tables[0]['tablename'] = $tablename;
-					$custom_tables[0]['where'] = " AND geometrytype(the_geom) = 'POINT'";
-					# Linien
-					$custom_tables[1]['datatype'] = 1;
-					$custom_tables[1]['tablename'] = $tablename;
-					$custom_tables[1]['where'] = " AND geometrytype(the_geom) = 'LINESTRING'";
-					# Flächen
-					$custom_tables[2]['datatype'] = 2;
-					$custom_tables[2]['tablename'] = $tablename;
-					$custom_tables[2]['where'] = " AND geometrytype(the_geom) = 'POLYGON'";
-		      if(!$ret[0]){
+					if(!$ret[0]){
+						$geom_types = array('POINT' => 0, 'LINESTRING' => 1, 'POLYGON' => 2);
+						while($result = pg_fetch_assoc($ret[1])){
+							if($result['count'] > 0 AND $geom_types[$result['geometrytype']] !== NULL){
+								$custom_table['datatype'] = $geom_types[$result['geometrytype']];
+								$custom_table['tablename'] = $tablename;
+								$custom_table['where'] = " AND geometrytype(the_geom) = '".$result['geometrytype']."'";
+								$custom_tables[] = $custom_table;
+							}
+						}
 						return $custom_tables;
 					}
 				}
