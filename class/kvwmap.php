@@ -3836,7 +3836,7 @@ class GUI {
       $this->formvars['fromwhere'] .= ' where (1=1)';
     }
 
-		if($this->formvars['layer_id'] < 0){	# Suchergebnislayer sofort selektieren
+		if($this->formvars['newpath'] == '' AND $this->formvars['layer_id'] < 0){	# Suchergebnislayer sofort selektieren
 			$rollenlayer = $this->mapDB->read_RollenLayer(-$this->formvars['layer_id']);
 			if($rollenlayer[0]['Typ'] == 'search'){
 				$layerdb1 = $this->mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
@@ -7851,7 +7851,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		      $this->formvars['fromwhere'] .= ' where (1=1)';
 		    }
 
-				if($this->formvars['layer_id'] < 0){	# Suchergebnislayer sofort selektieren
+				if($this->formvars['newpath'] == '' AND $this->formvars['layer_id'] < 0){	# Suchergebnislayer sofort selektieren				
 					$rollenlayer = $this->mapDB->read_RollenLayer(-$this->formvars['layer_id']);
 					if($rollenlayer[0]['Typ'] == 'search'){
 						$layerdb = $mapdb->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
@@ -8589,7 +8589,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
               $this->formvars['fromwhere'] .= ' where (1=1)';
             }
 						
-						if($this->formvars['layer_id'] < 0){	# Suchergebnislayer sofort selektieren
+						if($this->formvars['newpath'] == '' AND $this->formvars['layer_id'] < 0){	# Suchergebnislayer sofort selektieren
 							$rollenlayer = $this->mapDB->read_RollenLayer(-$this->formvars['layer_id']);
 							if($rollenlayer[0]['Typ'] == 'search'){
 								$layerdb1 = $mapdb->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
@@ -9549,7 +9549,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	    if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
 	      $this->formvars['fromwhere'] .= ' where (1=1)';
 	    }
-			if($this->formvars['layer_id'] < 0){	# Suchergebnislayer sofort selektieren
+			if($this->formvars['newpath'] == '' AND $this->formvars['layer_id'] < 0){	# Suchergebnislayer sofort selektieren			
 				$rollenlayer = $this->mapDB->read_RollenLayer(-$this->formvars['layer_id']);
 				if($rollenlayer[0]['Typ'] == 'search'){
 					$layerdb1 = $this->mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
