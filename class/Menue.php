@@ -70,7 +70,31 @@ class Menue extends MyObject {
 		);
     return $menues;
 	}
-
+	
+	public static function getsubmenues($gui, $menue_id){
+		$menue = new Menue($gui);
+		$menues = $menue->find_by_sql(
+			array(
+				'select' => "
+					id,".
+					($gui->user->rolle->language != 'german' ? "`name_" . $gui->user->rolle->language . "` AS" : "") . " name,
+					`order`,
+					menueebene
+				",
+				'from' => "
+					u_menues
+				",
+				'where' => "
+					obermenue = ".$menue_id." AND menueebene = 2
+				",
+				'order' => "
+					`order`, name
+				"
+			)
+		);
+    return $menues;
+	}
+	
 	function is_selected() {
 		$is_selected = true;
 		$formvars = $_REQUEST;

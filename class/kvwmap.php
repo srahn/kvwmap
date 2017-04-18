@@ -3053,11 +3053,10 @@ class GUI {
   }
 
   function get_sub_menues(){
-    $this->Menue = new menues($this->user->rolle->language);
-    $submenues = $this->Menue->getsubmenues($this->formvars['menue_id']);
+    $submenues = Menue::getsubmenues($this, $this->formvars['menue_id']);
     echo '<select name="submenues" size="6" multiple style="width:300px">';
-    for($i=0; $i < count($submenues["Bezeichnung"]); $i++){
-      echo '<option selected title="'.$submenues["Bezeichnung"][$i].'" id="'.$submenues["ORDER"][$i].'_all_'.$submenues["menueebene"][$i].'_'.$i.'" value="'.$submenues["ID"][$i].'">&nbsp;&nbsp;-->&nbsp;'.$submenues["Bezeichnung"][$i].'</option>';
+    for($i=0; $i < count($submenues); $i++){
+      echo '<option selected title="'.$submenues[$i]->data['name'].'" id="'.$submenues[$i]->data['order'].'_all_'.$submenues[$i]->data['menueebene'].'_'.$i.'" value="'.$submenues[$i]->data['id'].'">&nbsp;&nbsp;-->&nbsp;'.$submenues[$i]->data['name'].'</option>';
     }
     echo '</select>';
   }
@@ -3526,11 +3525,6 @@ class GUI {
   function getMenueWithAjax() {
     $this->loadMap('DataBase');
     $this->drawMap();
-    # erzeugen des Menueobjektes
-    $this->Menue=new menues($this->user->rolle->language);
-    # laden des Menues der Stelle und der Rolle
-    $this->Menue->loadMenue($this->Stelle->id, $this->user->id);
-    $this->Menue->get_menue_width($this->Stelle->id);
     $this->user->rolle->hideMenue(0);
     include(LAYOUTPATH."snippets/".$this->formvars['menuebodyfile']);
 		echo '~if(typeof resizemap2window != "undefined")resizemap2window();';
@@ -17234,6 +17228,29 @@ class Document {
     if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     $rs=mysql_fetch_array($query);
     return $rs[0];
+  }
+}
+
+
+class point {
+  var $x;
+  var $y;
+
+  function point($x,$y) {
+    $this->x=$x;
+    $this->y=$y;
+  }
+
+  function pixel2welt($minX,$minY,$pixSize) {
+    # Rechnet Pixel- in Weltkoordinaten um mit minx, miny und pixsize
+    $this->x=($this->x*$pixSize)+$minX;
+    $this->y=($this->y*$pixSize)+$minY;
+  }
+
+  function welt2pixel($minX,$minY,$pixSize) {
+    # Rechnet Welt- in Pixelkoordinaten um mit minx, miny und pixsize
+    $this->x=round(($this->x-$minX)/$pixSize);
+    $this->y=round(($this->y-$minY)/$pixSize);
   }
 }
 
