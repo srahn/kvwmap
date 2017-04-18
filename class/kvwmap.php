@@ -2079,6 +2079,7 @@ class GUI {
 		}
 
     # Erstellen des Maßstabes
+		$this->map_scaledenom = $this->map->scaledenom;
     $this->switchScaleUnitIfNecessary();
     $img_scalebar = $this->map->drawScaleBar();
     $filename = $this->map_saveWebImage($img_scalebar,'png');
