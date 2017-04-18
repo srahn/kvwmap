@@ -409,7 +409,7 @@ class database {
 		#echo '<br>sql: ' . $sql;
 		$query = mysql_query($sql);
 
-		# gespeicherte Themeneinstellungen von default user übernehmen
+		# Gespeicherte Themeneinstellungen von default user übernehmen
 		if ($default_user_id > 0) {
 			$sql = "
 				INSERT INTO `rolle_saved_layers` (

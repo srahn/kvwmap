@@ -1303,8 +1303,7 @@ class rolle {
 		return $ret;
 	}
 	
-	function getLayerComments($id, $user_id = 0) {
-		$user_id = ($user_id > 0 ? $user_id : $this->user_id);
+	function getLayerComments($id, $user_id) {
 		$where_id = ($id != '' ? " AND id = " . $id : "");
 		$sql = "
 			SELECT

@@ -10974,7 +10974,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 	function layerCommentSelectForm() {
     $this->main='LayerCommentSelectForm.php';
-    $ret=$this->user->rolle->getLayerComments(NULL);
+    $ret=$this->user->rolle->getLayerComments(NULL, $this->user->id);
     if ($ret[0]) {
       $this->Fehlermeldung='Es konnten keine gespeicherten Themen abgefragt werden.<br>'.$ret[1];
     }
@@ -10985,7 +10985,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
   }
 
 	function layerCommentLoad() {
-		$ret = $this->user->rolle->getLayerComments($this->formvars['id'], $this->Stelle->default_user_id);
+		$ret = $this->user->rolle->getLayerComments(
+			$this->formvars['id'],
+			($this->formvars['from_default_user'] != '' ? $this->Stelle->default_user_id : $this->user->id)
+		);
 		if ($ret[0]) {
 			$this->Fehlermeldung = 'Es konnten keine gespeicherten Themen abgefragt werden.<br>' . $ret[1];
 		}
