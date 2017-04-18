@@ -248,7 +248,16 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->saveMap('');
 			$GUI->output();
 	  } break;
-	  
+
+		case 'show_all_layers' : {
+			$GUI->user->rolle->update_layer_status(NULL, '1');
+			$GUI->loadMap('DataBase');
+			$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+			$GUI->drawMap();
+			$GUI->saveMap('');
+			$GUI->output();
+	  } break;
+
 	  case 'reset_querys' : {
 			$GUI->reset_querys();
 			$GUI->loadMap('DataBase');

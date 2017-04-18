@@ -22,6 +22,7 @@ class Menue extends MyObject {
 					status,
 					m.id,
 					m.links,
+					m.onclick,
 					name as name_german," .
 					($gui->user->rolle->language != 'german' ? "`name_" . $gui->user->rolle->language . "` AS" : "") . " name,
 					m.menueebene,
@@ -117,9 +118,14 @@ class Menue extends MyObject {
 		$class  = $this->get_class($this->children_ids);
 		$target = $this->get_target();
 		$href = $this->get_href($class, $target);
+		$onclick = $this->get('onclick');
 
 		$html .= '<div id="menue_div_' . $this->get('id') . '">';
-		$html .= '<a href="'.$href.'" target="'.$target.'"><div
+		$html .= '<a
+			href="' . $href . '"
+			target="' . $target . '"
+			onclick="' . $onclick . '"
+		><div
 			id="menue_div_name_' . $this->get('id') . '"
 			title="' . $this->get('title') . '" 
 			class="menu ' . $class . '"
