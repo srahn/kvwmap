@@ -1420,6 +1420,7 @@ class GUI {
 		}
 
     # Erstellen des Maßstabes
+		$this->map_scaledenom = $this->map->scaledenom;
     $this->switchScaleUnitIfNecessary();
     $img_scalebar = $this->map->drawScaleBar();
     $filename = $this->map_saveWebImage($img_scalebar,'png');
@@ -1541,11 +1542,6 @@ class GUI {
       } break;
       case 'html' : {
         $this->debug->write("Include <b>".LAYOUTPATH.$this->user->rolle->gui."</b> in kvwmap.php function output()",4);
-        # erzeugen des Menueobjektes
-        $this->Menue=new menue($this->user->rolle->language);
-        # laden des Menues der Stelle und der Rolle
-        $this->Menue->loadMenue($this->Stelle->id, $this->user->id);
-        $this->Menue->get_menue_width($this->Stelle->id);
         if (basename($this->user->rolle->gui)=='') {
           $this->user->rolle->gui='gui.php';
         }
@@ -1957,9 +1953,11 @@ class rolle {
 			$this->result_color=$rs['result_color'];
 			$this->always_draw=$rs['always_draw'];
 			$this->runningcoords=$rs['runningcoords'];
+			$this->showmapfunctions=$rs['showmapfunctions'];
+			$this->showlayeroptions=$rs['showlayeroptions'];
 			$this->singlequery=$rs['singlequery'];
 			$this->querymode=$rs['querymode'];
-			$this->geom_edit_first=$rs['geom_edit_first'];		
+			$this->geom_edit_first=$rs['geom_edit_first'];
 			$this->overlayx=$rs['overlayx'];
 			$this->overlayy=$rs['overlayy'];
 			$this->instant_reload=$rs['instant_reload'];

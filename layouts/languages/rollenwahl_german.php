@@ -1,27 +1,30 @@
 <?php
-  $strCharSet="Zeichensatz";
-  $strLanguage="Sprache";
-  $strEnglish="Englisch";
-  $strGerman="Deutsch";
-  $strGUI="Graphische&nbsp;Oberfl&auml;che";
-  $strButtons="Schaltflächen";
-  $strMapExtent="Aktuelle Kartenausdehnung";
-  $strMapProjection="1.Kartenprojektion (EPSG-Code)";
-  $strSecondMapProjection="2.Kartenprojektion (EPSG-Code)";
-  $strRunningCoords="mitlaufende Koordinaten";
-  $strMapSize="Kartenfenstergr&ouml;&szlig;e";
+	$strCharSet="Zeichensatz";
+	$strLanguage="Sprache";
+	$strEnglish="Englisch";
+	$strGerman="Deutsch";
+	$strGUI="Graphische&nbsp;Oberfl&auml;che";
+	$strButtons="Schaltflächen";
+	$strMapTools="Kartenwerkzeuge";
+	$strMapExtent="Aktuelle Kartenausdehnung";
+	$strMapProjection="1.Kartenprojektion (EPSG-Code)";
+	$strSecondMapProjection="2.Kartenprojektion (EPSG-Code)";
+	$strRunningCoords="mitlaufende Koordinaten";
+	$strMapFunctions="Zeige Kartenfunktionen";
+	$strShowLayerOptions="Zeige Layeroptionen";
+	$strMapSize="Kartenfenstergr&ouml;&szlig;e";
 	$strAutoResize="automatisch";
-  $strTask="Stelle";
-  $strTitleRoleSelection="Optionen";
-  $strVietnamese="Vietnamesisch";
-  $strZoomFactor="Zoomfaktor";
-  $strButtonNext="Weiter";
-  $strFontSizeGLE="GLE-Textgröße";
-  $strHighlight="Objekt-Highlighting";
-  $strPlatt="Plattdeutsch";
-  $strSearchColor="Suchergebnis-Farbe";
-  $strPolish="Polnisch";
-  $strCoordType="Koordinatendarstellung";
+	$strTask="Stelle";
+	$strTitleRoleSelection="Optionen";
+	$strVietnamese="Vietnamesisch";
+	$strZoomFactor="Zoomfaktor";
+	$strButtonNext="Weiter";
+	$strFontSizeGLE="GLE-Textgröße";
+	$strHighlight="Objekt-Highlighting";
+	$strPlatt="Plattdeutsch";
+	$strSearchColor="Suchergebnis-Farbe";
+	$strPolish="Polnisch";
+	$strCoordType="Koordinatendarstellung";
 	$strSingleQuery="nur ein Thema abfragbar";
 	$strQuerymode="Sachdatenanzeige in extra Fenster";
 	$strNewDatasetOrder="Reihenfolge Datensatz-Erfassung";
@@ -52,12 +55,12 @@
 	$strHintSecondMapProjection="Wählen Sie optional ein zusätzliches Koordinaten- referenzsystem,in dem Ihnen die Koordinaten der Karte angezeigt werden sollen.";
 	$strHintCoordType="Nur wenn Sie eine geografische Kartenprojektion gewählt haben: Wählen Sie, wie Ihnen die geografischen Koordinaten angezeigt werden sollen.";
 	$strHintRunningCoords="Wenn Sie diese Option auswählen, erscheint unterhalb der Karte die Koordinate der Cursorposition unter Angabe der ausgewählten Kartenprojektion.";
+	$strHintShowMapFunctions="Mit dieser Option können Sie die Menüleiste mit den Kartenfunktionen unter der Karte zum Speichern der Karte als Bild, der Karteneinstellungen und maximale Kartengröße ausschalten.";
+	$strHintShowLayerOptions="Wenn Sie diese Option auwählen, erscheint beim Überfahren des Layernamen in der Legende ein Button, der erweiterte Funktionen und Einstellungsmöglichkeiten für den Layer anbietet.";
 	$strHintSingleQuery="Wenn Sie diese Option auswählen, erscheinen die Abfragehäkchenfelder in der Legende als sog. Radiobutton. Es kann dann immer nur genau ein Thema abfragbar geschaltet werden.";
 	$strHintQuerymode="Wenn Sie diese Option auswählen, erscheinen Sachdatenabfragen als eigene Fenster, die über der Karte schweben.";
 	$strHintNewDatasetOrder="Wählen Sie, ob bei der Erfassung neuer Daten der Geometrie-Editor oberhalb der Sachdaten erscheinen soll oder darunter.";
 	$strHintFontSizeGLE="Wählen Sie die Schriftgröße der Texte in der Sachdatenanzeige";
 	$strHintHighlight="Wenn Sie diese Option auswählen, werden Objekte von Themen, die abfragbar geschaltet sind, in der Karte mit blauem Rand hervorgehoben, wenn Sie mit dem Cursor darüber fahren.";
 	$strHinthist_timestamp="Wenn Sie hier ein Datum eingeben, werden ALKIS-Objekte in der Karte mit diesem historischen Stand dargestellt. Abfragen auf Flurstücke liefern ebenfalls Ergebnisse zu diesem historischen Stand.";
-  
-  
 ?>

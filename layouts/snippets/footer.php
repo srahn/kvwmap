@@ -7,6 +7,11 @@
       <a href="http://www.kvwmap.de/index.php" title="Informationen von der kvwmap-Homepage!" target="_blank">kvwmap </a><?php echo $strVersion; ?><?php echo VERSION; ?><?php echo $strPoweredByUMNMapServer; ?><?php echo $strDate; ?><?php echo date("d.m.Y",time()); ?>. 
       <?php echo $strUser; ?><?php echo $this->user->Namenszusatz.' '.$this->user->Vorname.' '.$this->user->Name; ?>. 
       <?php echo $strTask; ?><?php echo $this->Stelle->Bezeichnung; ?>
-    </td>
+    </td><?php
+		if ($this->user->funktion == 'admin' AND DEBUG_LEVEL > 0) { ?>
+			<td width="1%" align="right">
+				<i class="fa fa-wpforms" onclick="$('#log').toggle();" style="cursor: pointer; margin-right: 2px;"></i>
+			</td><?php
+		} ?>
   </tr>
  </table>

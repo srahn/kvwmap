@@ -52,11 +52,9 @@ define('GLEVIEW', 2);                  # 1 / 2              # Version 1.6.5
 # Header und Footer
 define('HEADER', 'header.php');															# Version 1.8.0
 define('FOOTER', 'footer.php');															# Version 1.8.0
-# Höhe von Header und Footer zusammen
-define('HEADER_FOOTER_HEIGHT', 132);																# Version 2.0
-# Breite von Menü und Legende zusammen
-#$menue_legend_widths = array('gui.php' => 485, 'gui_button.php' => 486);		# Version 2.0
 
+# Höhe von Header und Footer zusammen
+#define('HEADER_FOOTER_HEIGHT', 132);																# Version 2.0 gelöscht in Version 2.7
 # Breiten von Rand, Menü und Legende zusammen
 #$menue_legend_widths = array('gui.php' => 459, 'gui_button.php' => 486);		# Version 2.0 gelöscht in Version 2.7
 
@@ -88,7 +86,8 @@ $sizes = array(
 		),
 		'legend' => array(
 			'width' => 250,
-			'hide_width' => 27
+			'hide_width' => 27,
+			'header_height' => 97
 		)
 	),
 	'gui_button.php' => array(
@@ -135,7 +134,8 @@ define('TITLE_HILFE','Hilfe');                  						# Version 1.6.6
 define('TITLE_OPTIONEN','Optionen');										# Version 1.7.3
 define('TITLE_SCHNELLDRUCK','schnelle Druckausgabe');					# Version 1.7.5
 # Schalter für die PopUp-Funktion des Menüs
-define('POPUPMENUE','false');          # true / false
+#define('POPUPMENUE','false');          # true / false 				# Version 2.7 gelöscht
+
 # Position des Wappens (oben/unten/kein)
 define('MENU_WAPPEN','oben');          # oben / unten / kein
 # Position der Referenzkarte (oben/unten)                   # Version 1.6.4
@@ -311,6 +311,9 @@ $supportedSRIDs = array(4326,2397,2398,2399,31466,31467,31468,31469,32648,25832,
 
 # Unterstützte Sprachen, nur diese stehen zur Auswahl bei der Stellenwahl ('german', 'low-german', 'english', 'polish', 'vietnamese')
 $supportedLanguages = array('german');															# Version 2.0
+
+# Unterstützte Exportformate
+$supportedExportFormats = array('Shape', 'GML', 'KML', 'GeoJSON', 'UKO', 'OVL', 'CSV');																										# Version 2.7
 
 # Hier kann festgelegt werden, ob in den Optionen das Feld "Zeitpunkt für historische Daten" erscheinen soll, oder nicht (true/false)
 #define('HIST_TIMESTAMP', true);								# Version 2.3 		# in Version 2.4 wieder gelöscht (ist jetzt stellenbezogen)
@@ -538,7 +541,6 @@ define('DELETE_ROLLENLAYER', 'true');   # true / false                          
 
 # Definiert, ob das aktuelle Kartenbild separat angezeigt werden darf oder nicht
 define('SHOW_MAP_IMAGE', 'true');       # true / false                            # Version 1.6.7
-
 
 // ############################# Klassenbibliotheken lesen														# in Version 2.0 gelöscht
 // # laden der Klassenbibliotheken																										# in Version 2.0 gelöscht

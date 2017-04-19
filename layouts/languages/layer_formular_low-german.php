@@ -47,7 +47,7 @@
 	$strDrawingOrder="Riegfolg vun de Teiken";
 	$strLegend="Legend";
 	$strLegendGraphic="Legendafbild";
-	$strDrawing="Teiken";
+	$strMap="Koort";
 	$strOrder="Riegfolg";
 	$strminscale="Minscale";
 	$strmaxscale="Maxscale";

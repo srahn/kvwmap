@@ -34,11 +34,12 @@ class FormObject {
 	#
 	################################################################################
 
-	function FormObject($name,$type,$value,$selectedValue,$label,$size,$maxlenght,$multiple, $width, $disabled = NULL) {
+	function FormObject($name, $type, $value, $selectedValue, $label, $size, $maxlenght, $multiple, $width, $disabled = NULL, $style = "") {
 		if (!is_array($selectedValue)) { $selectedValue=array($selectedValue); }
-		$this->type=$type;
-		$this->width=$width;
-		$this->disabled=$disabled;
+		$this->type = $type;
+		$this->width = $width;
+		$this->disabled = $disabled;
+		$this->style = $style;
 		switch ($type) {
 			case "select" : {
 				if($value){
@@ -155,6 +156,9 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 				}
 				if ($this->JavaScript!='') {
 					$this->html.=$this->JavaScript;
+				}
+				if ($this->style != '') {
+					$this->html .= ' style="' . $this->style . '"';
 				}
 				$this->html.=">\n";
 				for ($i=0;$i<count($this->select[option]);$i++) {

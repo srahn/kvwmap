@@ -33,12 +33,12 @@ session_start();
    // list($usec, $sec) = explode(" ", microtime());
    // return ((float)$usec + (float)$sec);
 // }
-// $starttime=microtime_float1();
+// $starttime = $executiontimes['time'][] = microtime_float1();
+// $executiontimes['action'][] = 'Start';
 
 ob_start ();    // Ausgabepufferung starten
 $go = $_REQUEST['go'];
-if($_REQUEST['go_plus'] != '')$go = $go.'_'.$_REQUEST['go_plus'];
-
+if($_REQUEST['go_plus'] != '') $go = $go.'_'.$_REQUEST['go_plus'];
 ###########################################################################################################
 define(CASE_COMPRESS, false);																																						  #
 #																																																					#
@@ -74,6 +74,7 @@ if (LOG_LEVEL>0) {
 }
 
 if (!$_SESSION['angemeldet'] or !empty($_REQUEST['username'])) {
+	$msg .= '<br>Nicht angemeldet';
 	include(CLASSPATH . 'mysql.php');
 	$userDb = new database();
 	$userDb->host = MYSQL_HOST;
@@ -101,11 +102,14 @@ if(!CASE_COMPRESS AND FAST_CASE){
 else{
 	include_(WWWROOT.APPLVERSION.'funktionen/allg_funktionen.php');	
 	if($userDb == NULL)include_(CLASSPATH.'mysql.php');
-	include_(CLASSPATH.'kvwmap.php');
-	include_(CLASSPATH.'kataster.php');
-	include_(CLASSPATH.'postgresql.php');
-	include_(CLASSPATH.'users.php');
-	include_(CLASSPATH.'bauleitplanung.php');
+	include_(CLASSPATH . 'kvwmap.php');
+	include_(CLASSPATH . 'Menue.php');
+	include_(CLASSPATH . 'kataster.php');
+	include_(CLASSPATH . 'postgresql.php');
+	include_(CLASSPATH . 'users.php');
+	include_(CLASSPATH . 'rolle.php');
+	include_(CLASSPATH . 'stelle.php');
+	include_(CLASSPATH . 'bauleitplanung.php');
 }
 
 include(WWWROOT . APPLVERSION.'start.php');
@@ -123,7 +127,7 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 		$GUI->last_query_requested = true;		# get_last_query wurde direkt aufgerufen
 		$GUI->formvars['go'] = $go = $GUI->last_query['go'];
 	}
-		
+	#echo '<br>go: ' . $go;
 	switch($go){
 		case 'navMap_ajax' : {   
       $GUI->formvars['nurAufgeklappteLayer'] = true;		
@@ -243,7 +247,16 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->saveMap('');
 			$GUI->output();
 	  } break;
-	  
+
+		case 'show_all_layers' : {
+			$GUI->user->rolle->update_layer_status(NULL, '1');
+			$GUI->loadMap('DataBase');
+			$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+			$GUI->drawMap();
+			$GUI->saveMap('');
+			$GUI->output();
+	  } break;
+
 	  case 'reset_querys' : {
 			$GUI->reset_querys();
 			$GUI->loadMap('DataBase');
@@ -435,19 +448,19 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  case 'logout' : {
 			session_start();
 			$_SESSION = array();
-			if(ini_get("session.use_cookies")){
+			if (ini_get("session.use_cookies")){
 				$params = session_get_cookie_params();
 				setcookie(session_name(), '', time() - 42000, $params["path"], $params["domain"], $params["secure"], $params["httponly"]);
 			}
 			session_destroy();
-			$locationStr='index.php';
+			$locationStr = 'index.php' . ($_REQUEST['gast'] != '' ? '?gast=' . $_REQUEST['gast'] : '');
 			if (isset($newPassword)) {
 				$locationStr.='?newPassword='.$newPassword;
 				$locationStr.='&msg='.$GUI->Fehlermeldung;
 				$locationStr.='&passwort='.$passwort;
 				$locationStr.='&username='.$username;
 			}
-			header('Location: '.$locationStr);
+			header('Location: ' . $locationStr);
 	  } break;
 
 	  case 'Flurstuecks-CSV-Export' : {
@@ -1619,7 +1632,9 @@ if(CASE_COMPRESS AND FAST_CASE)case_compressor::write_fast_case_file($go);
 // $executiontimes['time'][] = microtime_float1();
 // $executiontimes['action'][] = 'Ende';
 // for($i = 0;  $i < count($executiontimes['time']); $i++){
-	// $dauer = $executiontimes['time'][$i] - $starttime;
-	// echo chr(10).chr(13).'<br>'.$executiontimes['action'][$i].': '.$dauer.'s';
+	// if($i > 0)$dauer1 = $executiontimes['time'][$i] - $executiontimes['time'][$i-1];
+	// else $dauer1 = 0;
+	// $dauer2 = $executiontimes['time'][$i] - $starttime;
+	// echo chr(10).chr(13).'<br>'.$executiontimes['action'][$i].': '.$dauer1.'s   seit Start '.$dauer2.'s';
 // }
 ?>

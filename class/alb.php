@@ -481,7 +481,7 @@ class ALB {
 				for($b = 0; $b < count($flst->Buchungen); $b++){
 					$Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
 					foreach($Eigentuemerliste as $eigentuemer){
-						if($eigentuemer->Nr != ''){
+						if($eigentuemer->zusatz_eigentuemer != '' or $eigentuemer->Nr != ''){
 							if($formvars['flurstkennz']){ $csv .= $flst->FlurstKennz.';';}
 							if($formvars['flurstkennz']){ $csv .= "'".$flst->FlurstNr."';";}
 							if($formvars['gemkgname']){ $csv .= $flst->GemkgName.';';}

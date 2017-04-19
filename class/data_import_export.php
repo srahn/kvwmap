@@ -435,21 +435,20 @@ class data_import_export {
 					$this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $formvars['epsg'], $importfile, $pgdatabase, NULL);
 					$sql = '
 						ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' SET WITH OIDS;
+						
+						SELECT geometrytype(the_geom), count(*) FROM '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' GROUP BY geometrytype(the_geom);
 					';
 					$ret = $pgdatabase->execSQL($sql,4, 0);
-					# Punkte
-					$custom_tables[0]['datatype'] = 0;
-					$custom_tables[0]['tablename'] = $tablename;
-					$custom_tables[0]['where'] = " AND geometrytype(the_geom) = 'POINT'";
-					# Linien
-					$custom_tables[1]['datatype'] = 1;
-					$custom_tables[1]['tablename'] = $tablename;
-					$custom_tables[1]['where'] = " AND geometrytype(the_geom) = 'LINESTRING'";
-					# Flächen
-					$custom_tables[2]['datatype'] = 2;
-					$custom_tables[2]['tablename'] = $tablename;
-					$custom_tables[2]['where'] = " AND geometrytype(the_geom) = 'POLYGON'";
-		      if(!$ret[0]){
+					if(!$ret[0]){
+						$geom_types = array('POINT' => 0, 'LINESTRING' => 1, 'POLYGON' => 2);
+						while($result = pg_fetch_assoc($ret[1])){
+							if($result['count'] > 0 AND $geom_types[$result['geometrytype']] !== NULL){
+								$custom_table['datatype'] = $geom_types[$result['geometrytype']];
+								$custom_table['tablename'] = $tablename;
+								$custom_table['where'] = " AND geometrytype(the_geom) = '".$result['geometrytype']."'";
+								$custom_tables[] = $custom_table;
+							}
+						}
 						return $custom_tables;
 					}
 				}
@@ -674,18 +673,18 @@ class data_import_export {
 	
 ################### Export ########################
 
-  function export($formvars, $stelle, $user, $mapdb){
-  	$this->formvars = $formvars;
-    $this->layerdaten = $stelle->getqueryablePostgisLayers(NULL, 1);
-    if($this->formvars['selected_layer_id']){
+	function export($formvars, $stelle, $user, $mapdb){
+		$this->formvars = $formvars;
+		$this->layerdaten = $stelle->getqueryablePostgisLayers(NULL, 1);
+		if ($this->formvars['selected_layer_id']) {
 			$this->layerset = $user->rolle->getLayer($this->formvars['selected_layer_id']);
 			$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $stelle->pgdbhost);
 			$path = $this->layerset[0]['pfad'];
-      $privileges = $stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
-      $newpath = $stelle->parse_path($layerdb, $path, $privileges);
-      $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
-    }
-  }
+			$privileges = $stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
+			$newpath = $stelle->parse_path($layerdb, $path, $privileges);
+			$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
+		}
+	}
 	
 	function ogr2ogr_export($sql, $exportformat, $exportfile, $layerdb){
 		$command = 'export PGCLIENTENCODING=UTF-8;'.OGR_BINPATH.'ogr2ogr -f '.$exportformat.' -lco ENCODING=UTF-8 -sql "'.$sql.'" '.$exportfile.' PG:"dbname='.$layerdb->dbName.' user='.$layerdb->user;
@@ -704,7 +703,7 @@ class data_import_export {
 		if($database->passwd != '')$command.= ' password='.$database->passwd;
 		if($database->port != '')$command.=' port='.$database->port;
 		if($database->host != '') $command .= ' host=' . $database->host;
-		$command .= '" '.$importfile.' '.$layer;
+		$command .= '" "'.$importfile.'" '.$layer;
 		#echo $command;
 		exec($command, $output, $ret);
 		return $ret;
@@ -859,7 +858,7 @@ class data_import_export {
   }
 	
 	function export_exportieren($formvars, $stelle, $user){
-		$currenttime=date('Y-m-d H:i:s',time());
+		$currenttime = date('Y-m-d H:i:s',time());
   	$this->formvars = $formvars;
   	$layerset = $user->rolle->getLayer($this->formvars['selected_layer_id']);
     $mapdb = new db_mapObj($stelle->id,$user->id);
@@ -887,22 +886,22 @@ class data_import_export {
   	}
 		
 		# Zusammensammeln der Attribute, die abgefragt werden müssen
-    for($i = 0; $i < count($this->attributes['name']); $i++){
-    	if($this->formvars['check_'.$this->attributes['name'][$i]]){		# Entweder das Attribut wurde angehakt
+    for ($i = 0; $i < count($this->attributes['name']); $i++) {
+    	if ($this->formvars['check_'.$this->attributes['name'][$i]]) {		# Entweder das Attribut wurde angehakt
     		$selection[$this->attributes['name'][$i]] = 1;
 				$selected_attributes[] = $this->attributes['name'][$i];						# Zusammensammeln der angehakten Attribute, denn nur die sollen weiter unten auch exportiert werden
 				$selected_attr_types[] = $this->attributes['type'][$i];
     	}
-			if(strpos($where, 'query.'.$this->attributes['name'][$i])){			# oder es kommt in der Where-Bedingung des Sachdatenabfrage-SQLs vor
+			if (strpos($where, 'query.'.$this->attributes['name'][$i])) {			# oder es kommt in der Where-Bedingung des Sachdatenabfrage-SQLs vor
 				$selection[$this->attributes['name'][$i]] = 1;
 			}
-			if(strpos($orderby, $this->attributes['name'][$i])){						# oder es kommt im ORDER BY des Layer-Query vor
+			if (strpos($orderby, $this->attributes['name'][$i])) {						# oder es kommt im ORDER BY des Layer-Query vor
 				$selection[$this->attributes['name'][$i]] = 1;
 			}
-			if(strpos($filter, $this->attributes['name'][$i])){						# oder es kommt im Filter des Layers vor
+			if (strpos($filter, $this->attributes['name'][$i])) {						# oder es kommt im Filter des Layers vor
 				$selection[$this->attributes['name'][$i]] = 1;
 			}
-			if($this->formvars['download_documents'] != '' AND $this->attributes['form_element_type'][$i] == 'Dokument'){			# oder das Attribut ist vom Typ "Dokument" und die Dokumente sollen auch exportiert werden
+			if ($this->formvars['download_documents'] != '' AND $this->attributes['form_element_type'][$i] == 'Dokument') {			# oder das Attribut ist vom Typ "Dokument" und die Dokumente sollen auch exportiert werden
 				$selection[$this->attributes['name'][$i]] = 1;
 			}
     }
@@ -911,26 +910,26 @@ class data_import_export {
 		
 		# oid auch abfragen
 		$distinctpos = strpos(strtolower($sql), 'distinct');
-		if($distinctpos !== false && $distinctpos < 10){
+		if ($distinctpos !== false && $distinctpos < 10) {
 			$pfad = substr(trim($sql), $distinctpos+8);
 			$distinct = true;
 		}
-		else{
+		else {
 			$pfad = substr(trim($sql), 7);
 		}
 		$j = 0;
-		foreach($this->attributes['all_table_names'] as $tablename){
+		foreach ($this->attributes['all_table_names'] as $tablename) {
 			if(($tablename == $layerset[0]['maintable']) AND $this->attributes['oids'][$j]){		# hat Haupttabelle oids?
 				$pfad = $this->attributes['table_alias_name'][$tablename].'.oid AS '.$tablename.'_oid, '.$pfad;
 				if($groupby != '')$groupby .= ','.$this->attributes['table_alias_name'][$tablename].'.oid';
 			}
 			$j++;
 		}
-		if($distinct == true){
+		if ($distinct == true){
 			$pfad = 'DISTINCT '.$pfad;
 		}
-		$sql = "SELECT ".$pfad;		
-        
+		$sql = "SELECT " . $pfad;
+
 		# Bedingungen
   	if($where != ''){		# Where-Klausel aus Sachdatenabfrage-SQL (abgefragter Extent, Suchparameter oder oids)
   		$orderbyposition = strpos(strtolower($where), 'order by');

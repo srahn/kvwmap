@@ -6,7 +6,7 @@
 #layerParamsBar {
 	display: none;
 	position: absolute;
-  border-radius: 5px;
+	border-radius: 5px;
 	top: 22;
 	right: 5;
 	width: 350;
@@ -228,7 +228,6 @@ a.invisiblelayerlink:hover{
 	color: gray;
 }
 
-
 .buttonlink{
 	height: 13px;
 	display: inline-block;
@@ -247,7 +246,11 @@ a.invisiblelayerlink:hover{
 	background: linear-gradient(#DAE4EC, #84accf);
 }
 
-.menu{
+#menueTable{
+	margin-bottom: 1px;
+}
+
+.menu {
 	background: linear-gradient(#DAE4EC 0%, #c7d9e6 100%);
 	position: relative; 
 	visibility: visible; 
@@ -255,6 +258,10 @@ a.invisiblelayerlink:hover{
 	top: 0px; 
 	z-index:3;
 	border: 1px solid #cccccc;
+	height: 17px;
+	margin: 2px;
+	margin-bottom: 1px;
+	padding-bottom: 4px;
 	line-height : 17px;
 }
 
@@ -272,22 +279,75 @@ a.menuered:hover {
 	color: black;
 }
 
-#scrolldiv{
-	width:250;
+.menue_before {
+	display: none;
+	height: 17px;
+	width: 17px;
+	box-sizing:border-box;
+  padding-left: 17;
+	padding-right: 3px;
 }
 
-#legend{
-	margin-left:5px;
+.menue-auf .menue_before {
+	display: inline-block;
+	background: url('../graphics/menue_top_open.gif');
 }
 
-#legenddiv {
-	border-left: 1px solid #ccc;
+.menue-zu .menue_before {	
+	display: inline-block;
+	background: url('../graphics/menue_top.gif');
 }
 
-#legendcontrol{
-	margin-left: 18px;
-	margin-top: -6px;
-	margin-bottom: 8px;
+.obermenue {
+	cursor: pointer;
+	font-size: 15px;
+	color: black;
+	font-family: SourceSansPro2;
+}
+
+.hauptmenue {
+	cursor: pointer;
+	font-size: 15px;
+	color: #a82e2e;
+	font-family: SourceSansPro2;
+}
+
+.hauptmenue:before {
+	content: ' ';
+	margin-right: 20px;
+}
+
+.untermenue:before {
+	padding-left: 3px;
+	content:url('../graphics/submenue.png');
+	position:relative;
+	z-index:100000;
+	float: left;
+}
+
+.untermenue {
+	cursor: pointer;
+	background: rgb(237, 239, 239);
+	margin-bottom: 0px;
+	margin-top: 0px;
+	padding-top: 1px;
+	padding-bottom: 1px;
+	border: 0px;
+}
+
+.untermenue:hover{
+	background: linear-gradient(#dae4ec 0%, #c7d9e6 100%);
+}
+
+.untermenues {
+	color: #993333;
+	font-size: 15px;
+	line-height: 17px;
+	padding-bottom: 2px;
+}
+
+.ausgewaehltes-menue {
+	#background: rgb(205, 208, 208);
 }
 
 .use_for_dataset{
@@ -421,46 +481,83 @@ a.menuered:hover {
 	0px 0px 1px rgba(0, 0, 0, 0.8) inset;
 }
 
+<?	
+	global $sizes;
+	$size = $sizes[$_REQUEST['gui']];
+	$legend_hide_width = $size['legend']['hide_width'];
+	$legend_width = $size['legend']['width'];
+?>
+
 .normallegend {
 	float: right;
+	width: <?php echo $legend_width; ?>px;
 	vertical-align: top;
 	background-image: url(../graphics/bg.gif);
 	border-top: 1px solid #eeeeee;
-	border-bottom: 1px solid #aaaaaa;
+/*	border-bottom: 1px solid #aaaaaa;*/
 }
 
-/* display: inline-block; width: <?php echo $legend_width; ?>px; vertical-align: top" */
+#legenddiv {
+	border-left: 1px solid #ccc;
+	display: flex; 
+	flex-direction: column;
+}
+
+#legend_layer{
+	flex: 1; 
+	display: flex; 
+	flex-direction: column;
+}
+
+#legendcontrol{
+	margin-top: 5px;
+	margin-bottom: 8px;
+	display: flex; 
+	flex-direction: row;
+	justify-content: flex-start;
+	padding-left: 20px;
+}
+
+#scrolldiv{
+	width:250;
+	flex: 1 1 0; 
+	overflow:auto; 
+	scrollbar-base-color:<?php echo BG_DEFAULT ?>;
+}
+
+#legend{
+	margin-left:5px;
+}
 
 .slidinglegend_slideout {
+	right: -<?php echo $legend_width; ?>px;
 	position:absolute;
 	border-top: 1px solid #eeeeee;
 	border-left:1px solid #CCCCCC;
 	border-bottom: 1px solid #aaaaaa;
 	background-image: url(../graphics/bg.gif);
-	transform: translate3d(-27px,0px,0px);
-	transition: all 0.4s ease;
-	-webkit-transform: translate3d(-27px,0px,0px);
-	-webkit-transition: all 0.3s ease;
+	transform: translate3d(-<? echo ($legend_hide_width + 2); ?>px,0px,0px);
+	transition: all 0.3s ease;
 }
 
-.slidinglegend_slideout	.table1 {
+
+.slidinglegend_slideout	#legend_layer {
 	opacity: 0.0;
-	transition: all 0.4s ease;
+	transition: all 0.3s ease;
 }
 
 .slidinglegend_slidein {
+	right: -<?php echo $legend_width; ?>px;
 	position: absolute;
 	border-top: 1px solid #eeeeee;
 	border-left:1px solid #CCCCCC;
 	border-bottom: 1px solid #aaaaaa;
 	background-image: url(../graphics/bg.gif);
-	transform: translate3d(-255px,0px,0px);
-	transition: all 0.4s ease;
-	-webkit-transform: translate3d(-250px,0px,0px);
-	-webkit-transition: all 0.3s ease;
+	transform: translate3d(-<?php echo $legend_width; ?>px,0px,0px);
+	transition: all 0.3s ease;
 }
 
-.slidinglegend_slidein .table1{
+.slidinglegend_slidein #legend_layer{
 	opacity: 1;
 	transition: all 0.4s ease;
 }
@@ -477,10 +574,6 @@ a.menuered:hover {
 	font-family: SourceSansPro3;
 	font-size: 15px;
 	line-height: 17px;
-}
-
-.legend_layer{
-	font-size: 15px;
 }
 
 .legend_layer_hidden{
@@ -540,7 +633,7 @@ span.italic {
 	font-style: italic; 
 }
 
-span.red {	
+span.red {
 	font-size: 15px;	
 	color: #a82e2e;
 	font-family: SourceSansPro2;
@@ -820,7 +913,7 @@ tbody.gle tr:hover {
 }
 
 #calendar table tbody td.last_month, #calendar table tbody td.next_month {
-	color: 	#a3afc4;
+	color:	 #a3afc4;
 }
 
 #calendar table{
@@ -886,13 +979,37 @@ tbody.gle tr:hover {
 
 .map-options{
 	border-top: 1px solid #aaaaaa;
-	border-bottom: 1px solid #aaaaaa;
+	padding-top: 6px;
+	padding-bottom: 6px;
 }
 
-.rollenwahl-gruppen{
+.rollenwahl-gruppe {
+	margin: 10px;
+	border: 1px solid #cccccc;
+}
+
+.rollenwahl-table {
+	width: 700px;
+}
+
+.rollenwahl-gruppen-header {
 	background-color: #c7d9e6; 
 	padding: 2px;
 	padding-left: 8px
+}
+
+.rollenwahl-gruppen-options{
+	padding : 4px;
+}
+
+.rollenwahl-option-header {
+	width: 221px;
+	padding : 4px;
+}
+
+.rollenwahl-option-data {
+	width: 440px;
+	padding : 4px;
 }
 
 .hover-border{
@@ -1112,4 +1229,12 @@ tbody.gle tr:hover {
 	width: 246px;
 	padding: 4px;
 	overflow: scroll;"
+}
+
+#log {
+	display: none;
+	background-color: #dae4ec;
+	border: 1px solid #cccccc;
+	margin-top: 1px;
+	padding: 5px;
 }

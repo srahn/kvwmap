@@ -48,7 +48,7 @@
 	$strDrawingOrder="Zeichenreihenfolge";
 	$strLegend="Legende";
 	$strLegendGraphic="Legendengrafik";
-	$strDrawing="Zeichnen";
+	$strMap="Karte";
 	$strOrder="Reihenfolge";
 	$strminscale="Minscale";
 	$strmaxscale="Maxscale";

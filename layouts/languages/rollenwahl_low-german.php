@@ -58,4 +58,6 @@
 	$strHintFontSizeGLE="Sök de Grött de Schrift in de Tüüchdatenanzeich.";
 	$strHintHighlight="Deist du de Optschoon utwähln, kieken de affrogen Themenobjekte in de Koort mit blaach Suum rut wenn du mit de Cursor överfleigst.";
 	$strHinthist_timestamp="Deist du een Dach ingeven, warn de ALKIS-Objekt mit düsse verleden Tied vörstellt. Affraag to´n Flurstück ergewen ok düsse verleden Tied.";
+	$strShowMapFunctions="Show map functions bar";
+	$strHintShowMapFunctions="Uncheck this field to hide the menu bar below the map with the options to save map image, store properties and max map extent.";
 ?>

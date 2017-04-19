@@ -1593,7 +1593,6 @@ function output_select($form_field_name, $data, $selected_value = null, $onchang
 }
 
 function get_first_word_after($str, $word) {
-	$s = 'select * from table where nix';
 	$word_pos = stripos($str, $word);
 	$str_from_word_pos = substr($str, $word_pos);
 	$parts = explode(' ', $str_from_word_pos);

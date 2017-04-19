@@ -98,7 +98,8 @@ function message(messages) {
 	msgDiv.html('');
 
 	$.each(messages, function (index, msg) {
-		msg.type = (['notice, info, error'].indexOf(msg.type) > 0 ? msg.type : 'warning');
+		msg.type = (['notice', 'info', 'error'].indexOf(msg.type) > -1 ? msg.type : 'warning');
+		console.log('type: ' + msg.type);
 		msgDiv.append('<div class="message-box-' + msg.type + '">' + (types[msg.type].icon ? '<div class="message-box-type"><i class="fa ' + types[msg.type].icon + '" style="color: ' + types[msg.type].color + '; cursor: default;"></i></div>' : '') + '<div class="message-box-msg">' + msg.msg + '</div><div style="clear: both"></div></div>');
 		if (types[msg.type].confirm) {
 			confirmMsgDiv = true;
@@ -620,5 +621,16 @@ function showMapParameter(epsg_code, width, height) {
 function toFixed(value, precision) {
 	var power = Math.pow(10, precision || 0);
 	return String(Math.round(value * power) / power);
+}
+
+function exportMapImage(target) {
+	var link = document.GUI.hauptkarte.value;
+	console.log(link);
+	if (target != '') {
+		window.open(link, target);
+	}
+	else {
+		location.href = link;
+	}
 }
 </script>

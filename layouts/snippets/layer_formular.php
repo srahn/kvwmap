@@ -10,7 +10,7 @@
 	Text[3]=["Hilfe:","Das Data-Feld wird vom Mapserver für die Kartendarstellung verwendet (siehe Mapserver-Doku). Etwaige Schemanamen müssen hier angegeben werden."];
 	Text[4]=["Hilfe:","Bei Punktlayern kann durch Angabe dieses Wertes die Clusterbildung aktiviert werden. Der Wert ist der Radius in Pixeln, in dem Punktobjekte zu einem Cluster zusammengefasst werden. <br>Damit die Cluster dargestellt werden können, muss es eine Klasse mit der Expression \"('[Cluster:FeatureCount]' != '1')\" geben. Cluster:FeatureCount kann auch als Labelitem verwendet werden, um die Anzahl der Punkte pro Cluster anzuzeigen."];
 	Text[5]=["Hilfe:","Für einen Layer lassen sich verschiedene Klassifizierungen erstellen. Klassen mit dem gleichen Eintrag im Klassen-Feld \"Klassifizierung\" gehören zu einer Klassifizierung. Welche Klassifizierung in einem Layer verwendet wird, wird über das Layer-Feld \"Klassifizierung\" festgelegt."];
-	Text[6]=["Hilfe:","Wird hier der Name einer Grafikdatei aus dem Ordner <?php echo GRAPHICSPATH; ?>custom angegeben, wird diese Graphik in seiner vollen Ausdehnung an Stelle der vom MapServer erzeugten Graphik in der Legende angezeigt."];
+	Text[6]=["Hilfe:","Wird hier der Name einer Grafikdatei aus dem Ordner <?php echo GRAPHICSPATH; ?>custom angegeben, wird diese Grafik in seiner vollen Ausdehnung an Stelle der vom MapServer erzeugten Grafik in der Legende angezeigt."];
 	
 	function testConnection() {
 		if (document.getElementById('connectiontype').value == 7) {
@@ -545,7 +545,7 @@
 		<? if($this->formvars['selected_layer_id']){ ?>
 		<table border="0" cellspacing="0" cellpadding="3" style="border:1px solid <?php echo BG_DEFAULT ?>">
 			<tr>
-				<th class="fetter" bgcolor="<?php echo BG_DEFAULT ?>" style="border-bottom:1px solid #C3C7C3" colspan="9"><a name="Klassen"></a><?php echo $strClasses; ?></th>
+				<th class="fetter" bgcolor="<?php echo BG_DEFAULT ?>" style="border-bottom:1px solid #C3C7C3" colspan="10"><a name="Klassen"></a><?php echo $strClasses; ?></th>
 			</tr>
 			<tr>
 				<td style="border-bottom:1px solid #C3C7C3">&nbsp;<?php echo $strID; ?></td>
@@ -559,6 +559,9 @@
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strText; ?></td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strClassification; ?>&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[5], Style[0], document.getElementById('TipLayer6'))" onmouseout="htm()">
 						<div id="TipLayer6" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+				</td>
+				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strLegendGraphic; ?>&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[6], Style[0], document.getElementById('TipLayer7'))" onmouseout="htm()">
+						<div id="TipLayer7" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 				</td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strOrder; ?></td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strDelete; ?></td>
@@ -594,18 +597,12 @@
 				</td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">
 					<input type="text" name="classification[<?php echo $this->classes[$i]['Class_ID']; ?>]" size="18" value="<?php echo $this->classes[$i]['classification']; ?>">
-					<br>
-					<?php echo $strLegendGraphic; ?>
-					<img
-						src="<?php echo GRAPHICSPATH;?>icon_i.png"
-						onMouseOver="stm(Text[6], Style[0], document.getElementById('TipLayer7'))"
-						onmouseout="htm()"
-					><div id="TipLayer7" style="visibility:hidden;position:absolute;z-index:1000;"></div>
-					<br>
-					<input type="text" name="legendgraphic[<?php echo $this->classes[$i]['Class_ID']; ?>]" size="30" value="<?php echo $this->classes[$i]['legendgraphic']; ?>">
+				</td>
+				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">
+					<input type="text" name="legendgraphic[<?php echo $this->classes[$i]['Class_ID']; ?>]" size="18" value="<?php echo $this->classes[$i]['legendgraphic']; ?>">
 				</td>
 				<td align="left" style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">
-					<input size="3" type="text" name="order[<?php echo $this->classes[$i]['Class_ID']; ?>]" value="<?php echo $this->classes[$i]['drawingorder']; ?>"> <?php echo $strDrawing; ?><br>
+					<input size="3" type="text" name="order[<?php echo $this->classes[$i]['Class_ID']; ?>]" value="<?php echo $this->classes[$i]['drawingorder']; ?>"> <?php echo $strMap; ?><br>
 					<input size="3" type="text" name="legendorder[<?php echo $this->classes[$i]['Class_ID']; ?>]" value="<?php echo $this->classes[$i]['legendorder']; ?>"> <?php echo $strLegend; ?>
 				</td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">

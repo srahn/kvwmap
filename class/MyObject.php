@@ -11,6 +11,7 @@ class MyObject {
 		$this->identifier = 'id';
 		$this->identifier_type = 'integer';
 		$this->data = array();
+		$this->children_ids = array();
 		$this->debug->show('<p>New MyObject for table: '. $this->tableName, MyObject::$write_debug);
 	}
 
@@ -62,7 +63,7 @@ class MyObject {
 	* by the given sql clause
 	* @ return all found objects
 	*/
-	function find_by_sql($params) {
+	function find_by_sql($params, $hierarchy_key = NULL) {
 		$sql = "
 			SELECT
 				" . (!empty($params['select']) ? $params['select'] : '*') . "
@@ -73,12 +74,19 @@ class MyObject {
 				" . (!empty($params['order']) ? 'ORDER BY ' . $params['order'] : '') . "
 		";
 		$this->debug->show('mysql find_by_sql sql: ' . $sql, MyObject::$write_debug);
+		$this->debug->write('#mysql find_by_sql sql:<br> ' . $sql.';<br>',4);
 		$query = mysql_query($sql, $this->database->dbConn);
-		$result = array();
+		$results = array();
 		while($this->data = mysql_fetch_assoc($query)) {
-			$result[] = clone $this;
+			if($hierarchy_key == NULL){
+				$results[] = clone $this;
+			}
+			else{
+				$results[$this->data[$this->identifier]] = clone $this;		// create result-array as associative array
+				if($this->data[$hierarchy_key] > 0)$results[$this->data[$hierarchy_key]]->children_ids[] = $this->data[$this->identifier];		// add this id to parents children array
+			}
 		}
-		return $result;
+		return $results;
 	}
 
 	function getAttributes() {
