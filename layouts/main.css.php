@@ -6,16 +6,6 @@
 	$size = $sizes[$_REQUEST['gui']];
 ?>
 	
-#layerParamsBar {
-	display: none;
-	position: absolute;
-	border-radius: 5px;
-	top: 22;
-	right: 5;
-	width: 350;
-	z-index: 9999;
-}
-
 @font-face {
 	font-family: 'SourceSansPro';
 	font-style: normal;
@@ -249,9 +239,20 @@ a.invisiblelayerlink:hover{
 	background: linear-gradient(#DAE4EC, #84accf);
 }
 
+#layerParamsBar {
+	display: none;
+	position: absolute;
+	border-radius: 5px;
+	top: 22;
+	right: 5;
+	width: 350;
+	z-index: 9999;
+}
+
 #menueTable{
-	margin-bottom: 1px;
+	margin-bottom: 2px;
 	width: <? echo ($size['menue']['width'] - 2); ?>px;
+	text-align: center;
 }
 
 .menu {
@@ -267,6 +268,7 @@ a.invisiblelayerlink:hover{
 	margin-bottom: 1px;
 	padding-bottom: 4px;
 	line-height : 17px;
+	text-align: left;
 }
 
 .menu:hover{

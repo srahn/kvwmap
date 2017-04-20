@@ -1,5 +1,4 @@
 <?php
-	# 2008-01-11 pk
 	include(LAYOUTPATH.'languages/menue_body_'.$this->user->rolle->language.'.php');
 	$wappen_html = '<img src="' . WAPPENPATH . $this->Stelle->getWappen() . '" alt="Wappen" align="middle" border="0">';
 	$wappen_link = $this->Stelle->getWappenLink();
@@ -15,7 +14,6 @@
 			name="refmap"
 			src="' . $this->img['referenzkarte'] . '"
 			alt="Referenzkarte"
-			align="right"
 			hspace="0"
 		>';
 
