@@ -18,55 +18,29 @@
 			align="right"
 			hspace="0"
 		>';
-?>
-<table width="<? echo $sizes[$this->user->rolle->gui]['menue']['width']; ?>" height="100%" border="0" cellpadding="0" cellspacing="0"><?php
-	if (MENU_WAPPEN=="oben") { ?>
-		<tr>
-			<td align="center">
-				<div style="position: relative; visibility: visible; left: 0px; top: 0px"><?
-					$this->debug->write("<br>Include Wappen <b>".WAPPENPATH.$this->Stelle->getWappen()."</b> in menue.php",4);
-					echo $wappen_html; ?>
-				</div>
-			</td>
-		</tr><?php
+
+	if(MENU_WAPPEN=="oben") { ?>
+	<div style="position: relative; visibility: visible; left: 0px; top: 0px"><?
+		echo $wappen_html; ?>
+	</div>		<? }
+	
+	if($this->img['referenzkarte'] != '' AND MENU_REFMAP == "oben")echo $refmap_html; ?>
+	
+	<div id="logout_menue">
+		<div title="" class="menu hauptmenue" onclick="location.href='index.php?go=logout'">
+			<span style="vertical-align: top">Logout</span>
+		</div>
+	</div>
+	<?
+	$this->menues = Menue::loadMenue($this);
+	foreach($this->menues as $menue){				
+		if($menue->get('menueebene') == 1) echo $menue->html();
 	}
-	if ($this->img['referenzkarte'] != '' AND MENU_REFMAP == "oben") { ?>
-		<tr>
-			<td>
-				<?php echo $refmap_html; ?>
-			</td>
-		</tr><?php
-	} ?>
-	<tr>
-		<td>
-			<div id="logout_menue">
-				<div title="" class="menu hauptmenue" onclick="location.href='index.php?go=logout'">
-					<span style="vertical-align: top">Logout</span>
-				</div>
-			</div>
-		<?
-			$this->menues = Menue::loadMenue($this);
-			foreach($this->menues as $menue){				
-				if($menue->get('menueebene') == 1) echo $menue->html();
-			}
-		 ?>
-		</td>
-	</tr><?php
-	if ($this->img['referenzkarte']!='' AND MENU_REFMAP !="oben") { ?>
-		<tr>
-			<td>
-				<?php echo $refmap_html; ?>
-			</td>
-		</tr><?
-	} 
-	if (MENU_WAPPEN=="unten") { ?>
-		<tr>
-			<td align="center">
-				<div style="position: relative; visibility: visible; left: 0px; top: 0px"><?
-					$this->debug->write("Include Wappen <b>".WAPPENPATH.$this->Stelle->getWappen()."</b> in menue.php",4);
-					echo $wappen_html; ?>
-				</div>
-			</td>
-		</tr><?php
- 	} ?>
-</table>
+
+	if($this->img['referenzkarte']!='' AND MENU_REFMAP !="oben")echo $refmap_html;
+	
+	if(MENU_WAPPEN=="unten"){ ?>
+	<div style="position: relative; visibility: visible; left: 0px; top: 0px"><?
+		echo $wappen_html; ?>
+	</div>
+ 	<? } ?>

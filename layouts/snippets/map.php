@@ -121,11 +121,8 @@ if($this->formvars['gps_follow'] == ''){
 	$this->formvars['gps_follow'] = 'off';
 }
 ?>
-<div id="map_frame" style="position: relative; width: <?php echo ($map_width + $legend_width + 1); ?>px; height: <?php echo $legend_height; ?>px;">
-	<div
-		id="map"
-		style="float: left; width: <?php echo $map_width; ?>px;"
-	>
+<div id="map_frame" style="position: relative; width: <?php echo ($map_width + $legend_width); ?>px;">
+	<div id="map" style="float: left; width: <?php echo $map_width; ?>px; height: 100%">
 		<?php include(SNIPPETS . 'mapdiv.php'); ?>
 	</div>
 	<div id="legenddiv" style="height: <? echo $legend_height; ?>px;"<?

@@ -1,8 +1,11 @@
 <?php
 	header('Content-type: text/css');
 	include('../config.php');
+	
+	global $sizes;
+	$size = $sizes[$_REQUEST['gui']];
 ?>
-
+	
 #layerParamsBar {
 	display: none;
 	position: absolute;
@@ -248,6 +251,7 @@ a.invisiblelayerlink:hover{
 
 #menueTable{
 	margin-bottom: 1px;
+	width: <? echo ($size['menue']['width'] - 2); ?>px;
 }
 
 .menu {
@@ -444,11 +448,6 @@ a.menuered:hover {
 	height: 29px;
 }
 
-.toolbar-background {
-	border-top: 1px solid #cccccc;
-	background: <? echo BG_MENUETOP; ?>;
-}
-
 .emboss{
 	width:30px;
 	height:30px;
@@ -481,20 +480,41 @@ a.menuered:hover {
 	0px 0px 1px rgba(0, 0, 0, 0.8) inset;
 }
 
-<?	
-	global $sizes;
-	$size = $sizes[$_REQUEST['gui']];
-	$legend_hide_width = $size['legend']['hide_width'];
-	$legend_width = $size['legend']['width'];
-?>
+#header{
+	height: <? echo ($size['header']['height'] - 2); ?>;
+	border: 1px solid; 
+	border-color: #ffffff #cccccc #bbbbbb;
+}
 
-.normallegend {
-	float: right;
-	width: <?php echo $legend_width; ?>px;
-	vertical-align: top;
-	background-image: url(../graphics/bg.gif);
-	border-top: 1px solid #eeeeee;
-/*	border-bottom: 1px solid #aaaaaa;*/
+#footer{
+	height: <? echo ($size['footer']['height'] - 2); ?>;
+	border: 1px solid; 
+	border-color: #cccccc #cccccc #cccccc;
+}
+
+#scale_bar {
+	background: <? echo BG_MENUETOP; ?>;
+	border-top: 1px solid #aaaaaa;
+	height: <? echo ($size['scale_bar']['height'] - 1); ?>;
+}
+
+#lagebezeichnung_bar{
+	background: <? echo BG_MENUETOP; ?>;
+	border-top: 1px solid #aaaaaa;
+	height: <? echo ($size['lagebezeichnung_bar']['height'] - 1); ?>;
+}
+
+#lagebezeichnung{
+	padding-top: 5px;
+	font-size: 15px;
+	font-family: SourceSansPro1;
+}
+
+#map_functions_bar{
+	border-top: 1px solid #aaaaaa;
+	padding-top: 6px;
+	padding-bottom: 6px;
+	height: <? echo ($size['map_functions_bar']['height'] - 13); ?>;
 }
 
 #legenddiv {
@@ -519,7 +539,8 @@ a.menuered:hover {
 }
 
 #scrolldiv{
-	width:250;
+	width: <?php echo ($size['legend']['width'] - 3); ?>px;
+	margin-right: 2px;
 	flex: 1 1 0; 
 	overflow:auto; 
 	scrollbar-base-color:<?php echo BG_DEFAULT ?>;
@@ -529,14 +550,22 @@ a.menuered:hover {
 	margin-left:5px;
 }
 
+.normallegend {
+	float: right;
+	width: <?php echo ($size['legend']['width'] - 1); ?>px;
+	vertical-align: top;
+	background-image: url(../graphics/bg.gif);
+	border-top: 1px solid #eeeeee;
+}
+
 .slidinglegend_slideout {
-	right: -<?php echo $legend_width; ?>px;
+	right: -<?php echo $size['legend']['width']; ?>px;
 	position:absolute;
 	border-top: 1px solid #eeeeee;
 	border-left:1px solid #CCCCCC;
 	border-bottom: 1px solid #aaaaaa;
 	background-image: url(../graphics/bg.gif);
-	transform: translate3d(-<? echo ($legend_hide_width + 2); ?>px,0px,0px);
+	transform: translate3d(-<? echo ($size['legend']['hide_width'] + 2); ?>px,0px,0px);
 	transition: all 0.3s ease;
 }
 
@@ -547,13 +576,13 @@ a.menuered:hover {
 }
 
 .slidinglegend_slidein {
-	right: -<?php echo $legend_width; ?>px;
+	right: -<?php echo $size['legend']['width']; ?>px;
 	position: absolute;
 	border-top: 1px solid #eeeeee;
 	border-left:1px solid #CCCCCC;
 	border-bottom: 1px solid #aaaaaa;
 	background-image: url(../graphics/bg.gif);
-	transform: translate3d(-<?php echo $legend_width; ?>px,0px,0px);
+	transform: translate3d(-<?php echo $size['legend']['width']; ?>px,0px,0px);
 	transition: all 0.3s ease;
 }
 
@@ -579,11 +608,6 @@ a.menuered:hover {
 .legend_layer_hidden{
 	font-size: 15px;
 	color: gray;
-}
-
-#lagebezeichnung{
-	font-size: 15px;
-	font-family: SourceSansPro1;
 }
 
 .infobox {	
@@ -971,16 +995,6 @@ tbody.gle tr:hover {
 
 .map-right{
 	border-right: 1px solid #CCCCCC;
-}
-
-.map-bottom {
-	border-top: 1px solid #aaaaaa;
-}
-
-.map-options{
-	border-top: 1px solid #aaaaaa;
-	padding-top: 6px;
-	padding-bottom: 6px;
 }
 
 .rollenwahl-gruppe {

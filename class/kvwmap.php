@@ -2490,7 +2490,7 @@ class GUI {
 			$size['margin']['width'] -
 			($this->user->rolle->hideMenue  == 1 ? $size['menue']['hide_width'] : $size['menue']['width']) -
 			($this->user->rolle->hideLegend == 1 ? $size['legend']['hide_width'] : $size['legend']['width'])
-			- 10;	# Breite für möglichen Scrollbalken
+			- 18;	# Breite für möglichen Scrollbalken
 
 		$height = $this->formvars['browserheight'] -
 			$size['margin']['height'] -

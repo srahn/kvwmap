@@ -15,13 +15,13 @@
 					<form name="GUI" enctype="multipart/form-data" method="post" action="index.php" id="GUI">
 						<table cellpadding=0 cellspacing=0>
 							<tr> 
-								<td colspan="2" style="border: 1px solid; border-color: #ffffff #cccccc #bbbbbb;"><?php
+								<td colspan="2" id="header"><?php
 									$this->debug->write("<br>Include <b>".LAYOUTPATH."snippets/".HEADER."</b> in gui.php",4);
 									include(LAYOUTPATH."snippets/".HEADER); ?>
 								</td>
 							</tr>
 							<tr> 
-							<td width="1" valign="top" background="<?php echo GRAPHICSPATH."bg.gif"; ?>" style="border: 1px solid; border-color: #FFFFFF #CCCCCC #CCCCCC; border-bottom: 0px"> <?php
+							<td valign="top" background="<?php echo GRAPHICSPATH."bg.gif"; ?>" style="border: 1px solid; border-color: #FFFFFF #CCCCCC #CCCCCC; border-bottom: 0px"> <?php
 								$this->debug->write("<br>Include <b>".LAYOUTPATH."snippets/menue_switch.php</b> in gui.php",4);
 								include(SNIPPETS . "menue_switch.php"); ?>
 							</td>
@@ -41,7 +41,7 @@
 							</td>
 						</tr>
 						<tr> 
-							<td colspan="2" style="border: 1px solid; border-color: #cccccc #cccccc #cccccc;"><?php
+							<td colspan="2" id="footer"><?php
 								$this->debug->write("<br>Include <b>".LAYOUTPATH."snippets/".FOOTER."</b> in gui.php",4);    
 								include(LAYOUTPATH."snippets/".FOOTER); ?></td>
 							</tr>
