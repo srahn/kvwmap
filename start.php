@@ -265,17 +265,17 @@ $debug->write('Stelle_ID: '.$GUI->Stelle->id,4);
 $debug->write('Stellenbezeichnung: '.$GUI->Stelle->Bezeichnung,4);
 $debug->write('Host_ID: '.getenv("REMOTE_ADDR"),4); 
 
-if(!in_array($go, $non_spatial_cases)){		// für fast_cases, die keinen Raumbezug haben, den PGConnect und Trafos weglassen
+if (!in_array($go, $non_spatial_cases)) {	// für fast_cases, die keinen Raumbezug haben, den PGConnect und Trafos weglassen
 	##############################################################################
 	# Übergeben der Datenbank für die raumbezogenen Daten (PostgreSQL mit PostGIS)
-	if(POSTGRES_DBNAME != ''){																													
-		$PostGISdb=new pgdatabase();											
-		$PostGISdb->host = POSTGRES_HOST;												
-		$PostGISdb->user = POSTGRES_USER;													
-		$PostGISdb->passwd = POSTGRES_PASSWORD;										
-		$PostGISdb->dbName = POSTGRES_DBNAME;												
-	}	
-	else{
+	if(POSTGRES_DBNAME != '') {
+		$PostGISdb=new pgdatabase();
+		$PostGISdb->host = POSTGRES_HOST;
+		$PostGISdb->user = POSTGRES_USER;
+		$PostGISdb->passwd = POSTGRES_PASSWORD;
+		$PostGISdb->dbName = POSTGRES_DBNAME;
+	}
+	else {
 		# pgdbname ist leer, die Informationen zur Verbindung mit der PostGIS Datenbank
 		# mit Geometriedaten werden aus der Tabelle stelle
 		# der kvwmap-Datenbank $GUI->database gelesen
@@ -284,13 +284,14 @@ if(!in_array($go, $non_spatial_cases)){		// für fast_cases, die keinen Raumbezu
 		$PostGISdb->dbName = $GUI->Stelle->pgdbname;
 		$PostGISdb->user = $GUI->Stelle->pgdbuser;
 		$PostGISdb->passwd = $GUI->Stelle->pgdbpasswd;
-		$PostGISdb->port = $GUI->Stelle->port;  
+		$PostGISdb->port = $GUI->Stelle->port;
 	}
-	if ($PostGISdb->dbName!='') {
+
+	if ($PostGISdb->dbName != '') {
 		# Übergeben der GIS-Datenbank für GIS-Daten an die GUI
-		$GUI->pgdatabase=$PostGISdb;
+		$GUI->pgdatabase = $PostGISdb;
 		# Übergeben der GIS-Datenbank für die Bauaktendaten an die GUI
-		$GUI->baudatabase=$PostGISdb;
+		$GUI->baudatabase = $PostGISdb;
 		
 		if (!$GUI->pgdatabase->open()) {
 			echo 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden:';
@@ -301,7 +302,7 @@ if(!in_array($go, $non_spatial_cases)){		// für fast_cases, die keinen Raumbezu
 			exit;
 		}
 		else {
-			$debug->write("Verbindung zur PostGIS Datenbank erfolgreich hergestellt.",4);
+			$debug->write("Verbindung zur PostGIS Datenbank erfolgreich hergestellt.", 4);
 			$GUI->pgdatabase->setClientEncoding();
 		}
 	}

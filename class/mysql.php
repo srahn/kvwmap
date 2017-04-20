@@ -409,6 +409,32 @@ class database {
 		#echo '<br>sql: ' . $sql;
 		$query = mysql_query($sql);
 
+		# Gespeicherte Themeneinstellungen von default user übernehmen
+		if ($default_user_id > 0) {
+			$sql = "
+				INSERT INTO `rolle_saved_layers` (
+					`user_id`,
+					`stelle_id`,
+					`name`,
+					`layers`,
+					`query`
+				)
+				SELECT " .
+					$new_user_id . "," .
+					$gast_stelle . ",
+					`name`,
+					`layers`,
+					`query`
+				FROM
+					`rolle_saved_layers`
+				WHERE
+					`user_id` = " . $default_user_id . " AND
+					`stelle_id` = " . $gast_stelle . "
+			";
+		}
+		#echo '<br>Sql: ' . $sql;
+		$query = mysql_query($sql);
+
 		$gast['username'] = $loginname;
 		$gast['passwort'] = 'gast';
 		return $gast;

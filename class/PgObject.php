@@ -71,7 +71,8 @@ class PgObject {
 	* Search for an record in the database by the given where clause
 	* @ return an array with all found object
 	*/
-	function find_where($where) {
+	function find_where($where, $order = NULL) {
+		$order = (empty($order) ? "" : " ORDER BY " . $order);
 		$sql = "
 			SELECT
 				*
@@ -79,6 +80,7 @@ class PgObject {
 				" . $this->schema . '.' . $this->tableName . "
 			WHERE
 				" . $where . "
+			" . $order . "
 		";
 		$this->debug->show('find_where sql: ' . $sql, false);
 		$query = pg_query($this->database->dbConn, $sql);

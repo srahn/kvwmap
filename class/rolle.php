@@ -1303,27 +1303,37 @@ class rolle {
 		return $ret;
 	}
 	
-	function getLayerComments($id) {
-		$sql ='SELECT id, name, layers, query FROM rolle_saved_layers WHERE';
-		$sql.=' user_id='.$this->user_id;
-		$sql.=' AND stelle_id='.$this->stelle_id;
-		if($id!=''){
-			$sql.=' AND id="'.$id.'"';
-		}
-		$sql.=' ORDER BY name';
-		#echo '<br>'.$sql;
-		$queryret=$this->database->execSQL($sql,4, 0);
+	function getLayerComments($id, $user_id) {
+		$where_id = ($id != '' ? " AND id = " . $id : "");
+		$sql = "
+			SELECT
+				`id`,
+				`name`,
+				`layers`,
+				`query`
+			FROM
+				`rolle_saved_layers`
+			WHERE
+				`user_id` = " . $user_id . " AND
+				`stelle_id` = " . $this->stelle_id .
+				$where_id . "
+			ORDER BY
+				`name`
+		";
+		#echo '<br>Sql: ' . $sql;
+
+		$queryret = $this->database->execSQL($sql, 4, 0);
 		if ($queryret[0]) {
 			# Fehler bei Datenbankanfrage
-			$ret[0]=1;
-			$ret[1]='<br>Fehler beim Laden der Themenauswahl.<br>'.$ret[1];
+			$ret[0] = 1;
+			$ret[1] = '<br>Fehler beim Laden der Themenauswahl.<br>' . $ret[1];
 		}
 		else {
-			while ($rs=mysql_fetch_array($queryret[1])) {
-				$layerComments[]=$rs;
+			while ($rs = mysql_fetch_array($queryret[1])) {
+				$layerComments[] = $rs;
 			}
-			$ret[0]=0;
-			$ret[1]=$layerComments;
+			$ret[0] = 0;
+			$ret[1] = $layerComments;
 		}
 		return $ret;
 	}

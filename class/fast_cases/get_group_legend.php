@@ -65,6 +65,30 @@ function html_umlaute($string){
 	return $string;
 }
 
+function umlaute_umwandeln($name){
+	$name = str_replace('ä', 'ae', $name);
+	$name = str_replace('ü', 'ue', $name);
+	$name = str_replace('ö', 'oe', $name);
+	$name = str_replace('Ä', 'Ae', $name);
+	$name = str_replace('Ü', 'Ue', $name);
+	$name = str_replace('Ö', 'Oe', $name);
+	$name = str_replace('a?', 'ae', $name);
+	$name = str_replace('u?', 'ue', $name);
+	$name = str_replace('o?', 'oe', $name);
+	$name = str_replace('A?', 'ae', $name);
+	$name = str_replace('U?', 'ue', $name);
+	$name = str_replace('O?', 'oe', $name);
+	$name = str_replace('ß', 'ss', $name);
+	$name = str_replace('.', '', $name);
+	$name = str_replace(':', '', $name);
+	$name = str_replace('/', '-', $name);
+	$name = str_replace(' ', '', $name);
+	$name = str_replace('-', '_', $name);
+	$name = str_replace('?', '_', $name);
+	$name = str_replace('+', '_', $name);
+	$name = str_replace(',', '_', $name);
+	return $name;
+}
 
 class GUI {
 
@@ -369,6 +393,8 @@ class GUI {
         $map->setMetaData("ows_onlineresource",$ows_onlineresource);
         $bb=$this->Stelle->MaxGeorefExt;
         $map->setMetaData("wms_extent",$bb->minx.' '.$bb->miny.' '.$bb->maxx.' '.$bb->maxy);
+				// enable service types
+        $map->setMetaData("ows_enable_request", '*');
         ///------------------------------////
 
         $map->setSymbolSet(SYMBOLSET);
@@ -458,8 +484,8 @@ class GUI {
 					if($this->class_load_level == 2 OR ($this->class_load_level == 1 AND $layerset[$i]['aktivStatus'] != 0)){      # nur wenn der Layer aktiv ist, sollen seine Parameter gesetzt werden
 						$layer = ms_newLayerObj($map);
 						$layer->setMetaData('wfs_request_method', 'GET');
-						$layer->setMetaData('wms_name', $layerset[$i]['wms_name']);
-						$layer->setMetaData('wfs_typename', $layerset[$i]['wms_name']);
+						$layer->setMetaData('wms_name', umlaute_umwandeln($layerset[$i]['wms_name']));
+						$layer->setMetaData('wfs_typename', umlaute_umwandeln($layerset[$i]['wms_name']));
 						$layer->setMetaData('ows_title', $layerset[$i]['Name']); # required
 						$layer->setMetaData('wms_group_title',$layerset[$i]['Gruppenname']);
 						$layer->setMetaData('wms_queryable',$layerset[$i]['queryable']);
@@ -1190,7 +1216,7 @@ class GUI {
     } # end of Schleife Class
   }
 
-	function create_group_legend($group_id){
+	function create_group_legend($group_id) {
 		if($this->groupset[$group_id]['untergruppen'] == NULL AND $this->groups_with_layers[$group_id] == NULL)return;			# wenns keine Layer oder Untergruppen gibt, nix machen
     $groupname = $this->groupset[$group_id]['Gruppenname'];
 	  $groupstatus = $this->groupset[$group_id]['status'];
@@ -1387,7 +1413,7 @@ class GUI {
 							if($layer['requires'] == '' AND $layer['Layer_ID'] > 0){
 								$legend .= '<input id="classes_'.$layer['Layer_ID'].'" name="classes_'.$layer['Layer_ID'].'" type="hidden" value="'.$layer['showclasses'].'">';
 							}
-							if($layer['showclasses'] != 0){
+							if ($layer['showclasses'] != 0) {
 								if($layer['connectiontype'] == 7){      # WMS
 									$layersection = substr($layer['connection'], strpos(strtolower($layer['connection']), 'layers')+7);
 									$pos = strpos($layersection, '&');
@@ -1397,7 +1423,7 @@ class GUI {
 										$legend .=  '<div style="display:inline" id="lg'.$j.'_'.$l.'"><br><img src="'.$layer['connection'].'&layer='.$layers[$l].'&service=WMS&request=GetLegendGraphic" onerror="ImageLoadFailed(\'lg'.$j.'_'.$l.'\')"></div>';
 									}
 								}
-								else{
+								else {
 									$legend .= '<table border="0" cellspacing="0" cellpadding="0">';
 									$maplayer = $this->map->getLayerByName($layer['alias']);
 									for($k = 0; $k < $maplayer->numclasses; $k++){
@@ -2239,9 +2265,9 @@ class db_mapObj {
 		if($language != 'german') {
 			$name_column = "
 			CASE
-				WHEN `l.Name_" . $language . "` != \"\" THEN `l.Name_" . $language . "`
-				ELSE `l.Name`
-			END AS l.Name";
+				WHEN l.`Name_" . $language . "` != \"\" THEN l.`Name_" . $language . "`
+				ELSE l.`Name`
+			END AS Name";
 		}
 		else
 			$name_column = "l.Name";
@@ -2328,28 +2354,29 @@ class db_mapObj {
 
 		$sql = "
 			SELECT " .
-				(
-					(!$all_languages AND $language != 'german') ? "
-						CASE
-							WHEN `Name_" . $language . "`IS NOT NULL THEN `Name_" . $language . "`
-							ELSE `Name`
-						END AS Name
-					" : "Name"
-				) . ",
+				((!$all_languages AND $language != 'german') ? "
+					CASE
+						WHEN `Name_" . $language . "`IS NOT NULL THEN `Name_" . $language . "`
+						ELSE `Name`
+					END" : "
+					`Name`"
+				) . " AS Name,
 				`Name_low-german`,
 				`Name_english`,
 				`Name_polish`,
 				`Name_vietnamese`,
-				Class_ID,
-				Layer_ID,
-				Expression,
-				classification,
-				drawingorder,
-				text
+				`Class_ID`,
+				`Layer_ID`,
+				`Expression`,
+				`classification`,
+				`legendgraphic`,
+				`drawingorder`,
+				`legendorder`,
+				`text`
 			FROM
-				classes
+				`classes`
 			WHERE
-				Layer_ID = " . $Layer_ID .
+				`Layer_ID` = " . $Layer_ID .
 				(
 					(!empty($classification)) ? " AND
 						(
@@ -2362,39 +2389,39 @@ class db_mapObj {
 				drawingorder,
 				Class_ID
 		";
-    #echo $sql.'<br>';
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Class - Lesen der Classen eines Layers:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
-    while($rs=mysql_fetch_assoc($query)) {
-      $rs['Style']=$this->read_Styles($rs['Class_ID']);
-      $rs['Label']=$this->read_Label($rs['Class_ID']);
-      #Anne
-      if($disabled_classes){
-				if($disabled_classes['status'][$rs['Class_ID']] == 2){
+		#echo $sql.'<br>';
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Class - Lesen der Classen eines Layers:<br>" . $sql, 4);
+		$query = mysql_query($sql);
+		if ($query == 0) { echo "<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__; return 0; }
+		while ($rs = mysql_fetch_assoc($query)) {
+			$rs['Style'] = $this->read_Styles($rs['Class_ID']);
+			$rs['Label'] = $this->read_Label($rs['Class_ID']);
+			#Anne
+			if($disabled_classes){
+				if($disabled_classes['status'][$rs['Class_ID']] == 2) {
 					$rs['Status'] = 1;
-					for($i = 0; $i < count($rs['Style']); $i++){
-						if($rs['Style'][$i]['color'] != '' AND $rs['Style'][$i]['color'] != '-1 -1 -1'){
+					for($i = 0; $i < count($rs['Style']); $i++) {
+						if ($rs['Style'][$i]['color'] != '' AND $rs['Style'][$i]['color'] != '-1 -1 -1') {
 							$rs['Style'][$i]['outlinecolor'] = $rs['Style'][$i]['color'];
 							$rs['Style'][$i]['color'] = '-1 -1 -1';
-							if($rs['Style'][$i]['width'] == '')$rs['Style'][$i]['width'] = 3;
-							if($rs['Style'][$i]['minwidth'] == '')$rs['Style'][$i]['minwidth'] = 2;
-							if($rs['Style'][$i]['maxwidth'] == '')$rs['Style'][$i]['maxwidth'] = 4;
+							if($rs['Style'][$i]['width'] == '') $rs['Style'][$i]['width'] = 3;
+							if($rs['Style'][$i]['minwidth'] == '') $rs['Style'][$i]['minwidth'] = 2;
+							if($rs['Style'][$i]['maxwidth'] == '') $rs['Style'][$i]['maxwidth'] = 4;
 							$rs['Style'][$i]['symbolname'] = '';
 						}
 					}
 				}
-				elseif($disabled_classes['status'][$rs['Class_ID']] == '0'){
+				elseif ($disabled_classes['status'][$rs['Class_ID']] == '0') {
 					$rs['Status'] = 0;
 				}
 				else $rs['Status'] = 1;
-      }
-      else $rs['Status'] = 1;
+			}
+			else $rs['Status'] = 1;
 
-      $Classes[]=$rs;
-    }
-    return $Classes;
-  }
+			$Classes[] = $rs;
+		}
+		return $Classes;
+	}
 
   function read_Styles($Class_ID) {
     $sql ='SELECT * FROM styles AS s,u_styles2classes AS s2c';
