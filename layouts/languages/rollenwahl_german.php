@@ -4,7 +4,7 @@
 	$strEnglish="Englisch";
 	$strGerman="Deutsch";
 	$strGUI="Graphische&nbsp;Oberfl&auml;che";
-	$strButtons="Schaltflächen";
+	$strButtons="Schaltflächen und Menüs";
 	$strMapTools="Kartenwerkzeuge";
 	$strMapExtent="Aktuelle Kartenausdehnung";
 	$strMapProjection="1.Kartenprojektion (EPSG-Code)";
@@ -12,6 +12,7 @@
 	$strRunningCoords="mitlaufende Koordinaten";
 	$strMapFunctions="Zeige Kartenfunktionen";
 	$strShowLayerOptions="Zeige Layeroptionen";
+	$strMenueButtons="Menüs als Schaltflächen";
 	$strMapSize="Kartenfenstergr&ouml;&szlig;e";
 	$strAutoResize="automatisch";
 	$strTask="Stelle";
@@ -63,4 +64,5 @@
 	$strHintFontSizeGLE="Wählen Sie die Schriftgröße der Texte in der Sachdatenanzeige";
 	$strHintHighlight="Wenn Sie diese Option auswählen, werden Objekte von Themen, die abfragbar geschaltet sind, in der Karte mit blauem Rand hervorgehoben, wenn Sie mit dem Cursor darüber fahren.";
 	$strHinthist_timestamp="Wenn Sie hier ein Datum eingeben, werden ALKIS-Objekte in der Karte mit diesem historischen Stand dargestellt. Abfragen auf Flurstücke liefern ebenfalls Ergebnisse zu diesem historischen Stand.";
+	$strHintMenueButtons="Wenn Sie diese Option auswählen, werden oft verwendete Menüpunkte als separate Schaltfläche über dem Menü angezeigt.";
 ?>

@@ -4,7 +4,8 @@
 	$strEnglish="English";
 	$strGerman="German";
 	$strGUI="Graphical User Interface";
-	$strButtons="Buttons";
+	$strButtons="Buttons and Menus";
+	$strMenueButtons="Menus as Buttons";
 	$strMapExtent="Map Extent";
 	$strMapProjection="1.Map Projection (EPSG-Code)";
 	$strSecondMapProjection="2.Map Projection (EPSG-Code)";
@@ -63,4 +64,5 @@
 	$strMapTools="Maptools";
 	$strShowLayerOptions="Show layer options";
 	$strHintShowLayerOptions="If you activate this option, a button appears on mouse over the layer names in legend. The button shows extended functions and settings for the layer.";
+	$strHintMenueButtons="If you activate this option, often used menu options will be shown as seperate buttons above the menue bar.";
 ?>  

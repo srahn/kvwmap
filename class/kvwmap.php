@@ -3526,7 +3526,7 @@ class GUI {
     $this->loadMap('DataBase');
     $this->drawMap();
     $this->user->rolle->hideMenue(0);
-    include(LAYOUTPATH."snippets/".$this->formvars['menuebodyfile']);
+    include(LAYOUTPATH."snippets/menue.php");
 		echo '~if(typeof resizemap2window != "undefined")resizemap2window();';
   }
 

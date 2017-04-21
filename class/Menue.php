@@ -28,7 +28,8 @@ class Menue extends MyObject {
 					m.menueebene,
 					m.obermenue,
 					m.target,
-					m.title
+					m.title,
+					m.button_class
 				",
 				'from' => "
 					u_menue2rolle m2r JOIN
@@ -39,8 +40,8 @@ class Menue extends MyObject {
 					m2s.stelle_id = " . $gui->Stelle->id . " AND
 					m2r.user_id = " . $gui->user->id . "
 				",
-				'order' => "
-					m2s.menue_order
+				'order' => 
+					($gui->user->rolle->menue_buttons ? "CASE WHEN m.button_class != '' THEN 0 ELSE 1 END, " : ""). "m2s.menue_order
 				"
 			), 'obermenue'
 		);
@@ -113,9 +114,8 @@ class Menue extends MyObject {
 		return $is_selected;
 	}
 
-	function get_class($untermenues) {
-		# define menue class
-		if (count($untermenues) > 0) {
+	function get_class() {
+		if (count($this->children_ids) > 0) {
 			# Obermenue
 			$class = 'obermenue	' . ($this->get('status') == 1 ? 'menue-auf' : 'menue-zu');
 		}
@@ -161,26 +161,38 @@ class Menue extends MyObject {
 		}
 		return $href;
 	}
+	
+	function get_style(){
+		if($this->gui->user->rolle->menue_buttons AND $this->get('button_class') != ''){		# Button-Menüpunkt
+			return 'button';
+		}
+		else{
+			return 'text';
+		}
+	}
 
 	function html() {
-		$class  = $this->get_class($this->children_ids);
+		$class  = $this->get_class();
 		$target = $this->get_target();
 		$href = $this->get_href($class, $target);
 		$onclick = $this->get('onclick');
+		$style = $this->get_style();
 
-		$html .= '<div id="menue_div_' . $this->get('id') . '">';
-		$html .= '<a
-			href="' . $href . '"
-			target="' . $target . '"
-			onclick="' . $onclick . '"
-		><div
-			id="menue_div_name_' . $this->get('id') . '"
-			title="' . $this->get('title') . '" 
-			class="menu ' . $class . '"
-		>';
-		$html .= '<img src="graphics/menue_top.gif" class="menue_before">';
-		$html .= '<span style="vertical-align: top">'.$this->get('name').'</span>';
-		$html .= '	</div></a>';
+		$html .= '<div style="flex: 0 0 '.($style == 'button' ? 'auto;padding: 0 0 6 4;' : '100%').'" id="menue_div_'.$this->get('id').'">';
+		$html .= '<a href="'.$href.'" target="'.$target.'" onclick="'.$onclick.'">';
+		if($style == 'button'){		# Button-Menüpunkt
+			$html .= '<div class="button_background">';
+			$html .= '	<div class="emboss '.$this->get('button_class').'" title="'.$this->get('name').'"></div>';
+			$html .= '</div>';
+		}
+		else{				# textueller Menüpunkt
+			$html .= '<div id="menue_div_name_'.$this->get('id').'" title="'.$this->get('title').'" class="menu '.$class.'">';
+			$html .= '	<img src="graphics/menue_top.gif" class="menue_before">';
+			$html .= '	<span style="vertical-align: top">'.$this->get('name').'</span>';
+			$html .= '</div>';
+		}
+		
+		$html .= '</a>';
 
 		if (count($this->children_ids) > 0) {
 			$html .= '	<div id="menue_div_untermenues_' . $this->get('id') . '" class="untermenues" style="' . ($this->get('status') == 1 ? '' : 'display: none;') . '"">';

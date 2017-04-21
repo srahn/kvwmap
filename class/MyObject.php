@@ -83,7 +83,7 @@ class MyObject {
 			}
 			else{
 				$results[$this->data[$this->identifier]] = clone $this;		// create result-array as associative array
-				if($this->data[$hierarchy_key] > 0)$results[$this->data[$hierarchy_key]]->children_ids[] = $this->data[$this->identifier];		// add this id to parents children array
+				if($this->data[$hierarchy_key] > 0 AND $results[$this->data[$hierarchy_key]] != NULL)$results[$this->data[$hierarchy_key]]->children_ids[] = $this->data[$this->identifier];		// add this id to parents children array
 			}
 		}
 		return $results;

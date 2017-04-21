@@ -250,9 +250,13 @@ a.invisiblelayerlink:hover{
 }
 
 #menueTable{
+	padding-top: 6px;
 	margin-bottom: 2px;
 	width: <? echo ($size['menue']['width'] - 2); ?>px;
 	text-align: center;
+	display: flex; 
+	flex-wrap: wrap;
+	justify-content: flex-start;
 }
 
 .menu {
@@ -320,7 +324,7 @@ a.menuered:hover {
 
 .hauptmenue:before {
 	content: ' ';
-	margin-right: 20px;
+	margin-right: 23px;
 }
 
 .untermenue:before {

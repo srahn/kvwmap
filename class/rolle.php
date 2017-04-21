@@ -303,6 +303,7 @@ class rolle {
 			$this->runningcoords=$rs['runningcoords'];
 			$this->showmapfunctions=$rs['showmapfunctions'];
 			$this->showlayeroptions=$rs['showlayeroptions'];
+			$this->menue_buttons=$rs['menue_buttons'];
 			$this->singlequery=$rs['singlequery'];
 			$this->querymode=$rs['querymode'];
 			$this->geom_edit_first=$rs['geom_edit_first'];		
@@ -1248,6 +1249,7 @@ class rolle {
 		# speichern des Zustandes des Menües
 		# hide=0 Menü ist zu sehen
 		# hide=1 Menü wird nicht angezeigt
+		$this->hideMenue = $hide;
 		$sql ="UPDATE rolle SET hidemenue='".$hide."'";
 		$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 		#echo $sql;
