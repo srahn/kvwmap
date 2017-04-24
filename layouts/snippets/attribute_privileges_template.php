@@ -90,19 +90,32 @@
 							  	<input style="width:100px" type="text" name="attribute_'.$this->attributes['name'][$i].'" value="'.$this->attributes['name'][$i].'" readonly>
 							  </td>
 							  <td>&nbsp;</td>
-							  <td align="center" style="height:21px">
-							  	<select  style="width:100px" name="privileg_'.$this->attributes['name'][$i].$this->stelle->id.'">';
-							  		echo '
-							  		<option value="" ';
-							  		if($this->attributes_privileges[$this->attributes['name'][$i]] == '' AND !$noentry){echo 'selected';}
-							  		echo ' >nicht sichtbar</option>
-							  		<option value="0" ';
-							  		if($this->attributes_privileges[$this->attributes['name'][$i]] == '0' OR $noentry){echo 'selected';}
-							  		echo ' >lesen</option>
-							  		<option value="1" ';
-							  		if($this->attributes_privileges[$this->attributes['name'][$i]] == 1 AND !$noentry){echo 'selected';}
-							  		echo ' >editieren</option>
-							  	</select>
+							  <td align="center" style="height:21px">';
+								$privilege_options = array(
+									array(
+										value => '',
+										output => 'nicht sichtbar'
+									),
+									array(
+										value => '-1',
+										output => 'nur exportieren'
+									),
+									array(
+										value => '0',
+										output => 'lesen'
+									),
+									array(
+										value => '1',
+										output => 'editieren'
+									)
+								);
+
+							  echo '<select style="width:100px" name="privileg_'.$this->attributes['name'][$i].$this->stelle->id.'">';
+								foreach($privilege_options AS $option) {
+									$selected = ($this->attributes_privileges[$this->attributes['name'][$i]] == $option['value'] ? ' selected' : '');
+									echo '<option value="' . $option['value'] . '"' . $selected . '>' . $option['output'] . '</option>';
+								}
+								echo '</select>
 							  </td>
 							  <td>&nbsp;</td>
 							  <td align="center"><input type="checkbox" name="tooltip_'.$this->attributes['name'][$i].$this->stelle->id.'" ';
