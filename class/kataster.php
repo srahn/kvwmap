@@ -1463,7 +1463,7 @@ class flurstueck {
 			$Eigentuemer .= $eigentuemer->Nr;
 			$anzNamenszeilen = count($eigentuemer->Name);
 			for($n=0;$n<$anzNamenszeilen;$n++){
-				$Eigentuemer .= ' '.$eigentuemer->Name[$n];
+				$Eigentuemer .= ' '.str_replace('"', '\'', $eigentuemer->Name[$n]);
 			}						
 			if($eigentuemer->Anteil != '')$Eigentuemer .= '  zu '.$eigentuemer->Anteil;
 			$Eigentuemer .= "\n";
