@@ -9583,7 +9583,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     else{
       $this->formvars['load'] = true;
     }
-    $this->data_import_export->export($this->formvars, $this->Stelle, $this->user, $this->mapDB);
+
+		$this->data_import_export->export($this->formvars, $this->Stelle, $this->user, $this->mapDB);
 		if ($this->formvars['epsg'] == '') $this->formvars['epsg'] = $this->data_import_export->layerset[0]['epsg_code'];		// originäres System
     $this->saveMap('');
     $currenttime=date('Y-m-d H:i:s',time());
@@ -15824,7 +15825,7 @@ class db_mapObj{
 		}
 		return $attributes;
   }
-  
+
   function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false){
 		global $language;
 		if($attributenames != NULL){
