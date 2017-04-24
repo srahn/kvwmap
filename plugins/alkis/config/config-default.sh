@@ -20,6 +20,8 @@ UNZIPPASSWORD="secret2"
 RENAME="YES"
 RENAME_SCRIPT="/var/www/apps/xmi2db/converter/rename_nas.rb"
 
+OGR_BINPATH="/usr/local/gdal/bin" # inside the gdal container
+
 ALKIS_PLUGIN_PATH="/var/www/apps/kvwmap_pet_dev/plugings/alkis"
 
 EPSG_CODE="25833"

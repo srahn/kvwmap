@@ -23,7 +23,7 @@ rename_nas_file() {
 
 load_nas_file() {
   log "ogr2ogr import Datei: ${IMPORT_FILE}"
-  ogr2ogr -f "PostgreSQL" --config PG_USE_COPY NO -nlt CONVERT_TO_LINEAR -append PG:"dbname=${POSTGRES_DBNAME} POSTGRES_SCHEMA=${POSTGRES_SCHEMA} user=${POSTGRES_USER} host=pgsql port=5432 password=${POSTGRES_PASSWORD}" -a_srs EPSG:25832 "$IMPORT_FILE"
+  ${OGR_BINPATH}/ogr2ogr -f "PostgreSQL" --config PG_USE_COPY NO -nlt CONVERT_TO_LINEAR -append PG:"dbname=${POSTGRES_DBNAME} POSTGRES_SCHEMA=${POSTGRES_SCHEMA} user=${POSTGRES_USER} host=pgsql port=5432 password=${POSTGRES_PASSWORD}" -a_srs EPSG:25832 "$IMPORT_FILE"
 }
 
 delete_renamed_file() {
@@ -186,7 +186,7 @@ fi
 
 cp ${NAS_FILE} "${TEMP_PATH}/import.xml"
 export PGPASSWORD=$POSTGRES_PASSWORD
-${OGR_PATH}/ogr2ogr -f "PostgreSQL" --config PG_USE_COPY NO -nlt CONVERT_TO_LINEAR -append PG:"host=${POSTGRES_HOST} port=${POSTGRES_PORT} user=${POSTGRES_USER} password=${POSTGRES_PASSWORD} dbname=${POSTGRES_DBNAME} active_schema=${POSTGRES_SCHEMA}" -a_srs EPSG:${EPSG_CODE} import.xml 2>> $ERROR_FILE
+${OGR_BINPATH}/ogr2ogr -f "PostgreSQL" --config PG_USE_COPY NO -nlt CONVERT_TO_LINEAR -append PG:"host=${POSTGRES_HOST} port=${POSTGRES_PORT} user=${POSTGRES_USER} password=${POSTGRES_PASSWORD} dbname=${POSTGRES_DBNAME} active_schema=${POSTGRES_SCHEMA}" -a_srs EPSG:${EPSG_CODE} import.xml 2>> $ERROR_FILE
 if [ -n "$(grep 'ERROR' ${ERROR_FILE})" ] ; then
   err "Fehler beim Einlesen der Datei: ${NAS_FILE}."
   erro
