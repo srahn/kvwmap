@@ -70,6 +70,7 @@
 							}
 							echo ' value="'.$quicksearch_layerdaten['ID'][$i].'">'.$quicksearch_layerdaten['Bezeichnung'][$i].'</option>';
 						}
+						$i = 0;		// $i wieder zurücksetzen
 					?>
 					</select>
 				</td>
