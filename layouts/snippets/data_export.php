@@ -81,12 +81,12 @@ function update_format(){
 	if(document.GUI.export_format.value == 'CSV'){
 		document.getElementById('coord_div').style.display = 'none';
 		document.getElementById('geom_div').style.display = 'none';
-		document.getElementById('groupnames_div').style.visibility = 'visible';		
+		if(document.getElementById('groupnames_div') != null)document.getElementById('groupnames_div').style.visibility = 'visible';		
 	}
 	else{
 		document.getElementById('geom_div').style.display = '';
 		document.getElementById('coord_div').style.display = 'inline';
-		document.getElementById('groupnames_div').style.visibility = 'hidden';
+		if(document.getElementById('groupnames_div') != null)document.getElementById('groupnames_div').style.visibility = 'hidden';
 		if(document.GUI.export_format.value == 'KML' || document.GUI.export_format.value == 'OVL'){
 			document.getElementById('wgs84').style.display = 'inline';
 			document.GUI.epsg.style.display = 'none';
