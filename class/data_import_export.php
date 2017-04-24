@@ -680,7 +680,7 @@ class data_import_export {
 			$this->layerset = $user->rolle->getLayer($this->formvars['selected_layer_id']);
 			$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $stelle->pgdbhost);
 			$path = $this->layerset[0]['pfad'];
-			$privileges = $stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
+			$privileges = $stelle->get_attributes_privileges($this->formvars['selected_layer_id'], true);
 			$newpath = $stelle->parse_path($layerdb, $path, $privileges);
 			$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
 		}
@@ -794,7 +794,8 @@ class data_import_export {
 							$value = str_replace('"', "'", $value);
 							$value = '"'.$value.'"';
 						}
-						if(strpos($value, '/') !== false){		# Excel-Datumsproblem
+						$strpos = strpos($value, '/');
+						if ($strpos !== false AND $strpos < 3) {		# Excel-Datumsproblem
 							$value = $value."\t";
 						}
 						if(in_array($attributes['type'][$j], array('numeric', 'float4', 'float8'))){
@@ -864,7 +865,7 @@ class data_import_export {
     $mapdb = new db_mapObj($stelle->id,$user->id);
     $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $stelle->pgdbhost);
 		$sql = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[0]['pfad']);
-    $privileges = $stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
+    $privileges = $stelle->get_attributes_privileges($this->formvars['selected_layer_id'], true);
     $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
 		$filter = $mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id);
 		

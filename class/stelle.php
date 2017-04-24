@@ -1037,14 +1037,26 @@ class stelle {
 		return $layer;
 	}
 
-	function get_attributes_privileges($layer_id){
-		$sql = 'SELECT attributename, privileg, tooltip FROM layer_attributes2stelle WHERE stelle_id = '.$this->id.' AND layer_id = '.$layer_id;
-		$this->debug->write("<p>file:users.php class:stelle->get_attributes_privileges - Abfragen der Layerrechte zur Stelle:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-		while ($rs=mysql_fetch_array($query)) {
+	function get_attributes_privileges($layer_id, $with_export_attributes = false) {
+		$sql = "
+			SELECT
+				`attributename`,
+				`privileg`,
+				`tooltip`
+			FROM
+				`layer_attributes2stelle`
+			WHERE
+				`stelle_id` = " . $this->id . " AND
+				`layer_id` = " . $layer_id ." AND
+				`privileg` >= " . ($with_export_attributes ? "-1" : "0") . "
+		";
+		#echo '<br>Sql: ' . $sql;
+		$this->debug->write("<p>file:users.php class:stelle->get_attributes_privileges - Abfragen der Layerrechte zur Stelle:<br>" . $sql, 4);
+		$query = mysql_query($sql, $this->database->dbConn);
+		if ($query == 0) { $this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__, 4); return 0; }
+		while ($rs = mysql_fetch_array($query)) {
 			$privileges[$rs['attributename']] = $rs['privileg'];
-			$privileges['tooltip_'.$rs['attributename']] = $rs['tooltip'];
+			$privileges['tooltip_' . $rs['attributename']] = $rs['tooltip'];
 			$privileges['attributenames'][] = $rs['attributename'];
 		}
 		return $privileges;

@@ -221,17 +221,17 @@ class MyObject {
 	}
 
 	function validate_not_null($key, $msg = '') {
-		if (empty($msg)) $msg = "Der Parameter <i>{$key}</i> darf nicht leer sein.";
+		if ($msg == '') $msg = "Der Parameter <i>{$key}</i> darf nicht leer sein.";
 
-		return (!empty($this->get($key)) ? '' : $msg);
+		return ($this->get($key) != '' ? '' : $msg);
 	}
 
 	function validate_presence_one_of($keys, $msg = '') {
-		if (empty($msg)) $msg = 'Einer der Parameter <i>' . implode(', ', $keys) . '</i> muss angegeben und darf nicht leer sein.';
+		if ($msg == '') $msg = 'Einer der Parameter <i>' . implode(', ', $keys) . '</i> muss angegeben und darf nicht leer sein.';
 
 		$one_present = false;
 		foreach($keys AS $key) {
-			if (array_key_exists($key, $this->data) AND !empty($this->get($key))) {
+			if (array_key_exists($key, $this->data) AND $this->get($key) != '') {
 				$one_present = true;
 			}
 		}
@@ -250,7 +250,7 @@ class MyObject {
 			$invalid_msg = 'Der angegebene Wert <i>' . $this->get($key) . ' enthält nur ' . count($value_parts) . ' Bestandteile, muss aber ' . count($format_parts) . ' haben.';
 		}
 
-		return (empty($invalid_msg) ? '' : $msg . '<br>' . $invalid_msg);
+		return ($invalid_msg == '' ? '' : $msg . '<br>' . $invalid_msg);
 	}
 
 }
