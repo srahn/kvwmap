@@ -2217,9 +2217,6 @@ class GUI {
 	}
 
 	function output_messages($option = 'with_script_tags') {
-		if (!$this->success) {
-			header('error: true');
-		}
 		$html = "message(" . json_encode($this->messages) . ");";
 		if ($option == 'with_script_tags') {
 			$html = "<script type=\"text/javascript\">" . $html . "</script>";
