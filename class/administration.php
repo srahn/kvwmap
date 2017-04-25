@@ -129,7 +129,8 @@ class administration{
 			foreach($component_migration as $file){
 				$filepath = $prepath.'db/postgresql/schema/'.$file;
 				$sql = file_get_contents($filepath);
-				if($sql != ''){
+				if ($sql != '') {
+					$sql = str_replace('$EPSGCODE_ALKIS', EPSGCODE_ALKIS, $sql);
 					$queryret=$this->pgdatabase->execSQL($sql,0, 0);
 					if($queryret[0]){
 						echo $queryret[1].'<br>Fehler beim Ausführen von migration-Datei: '.$filepath.'<br>';

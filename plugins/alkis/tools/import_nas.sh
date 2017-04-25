@@ -12,18 +12,17 @@ usage() {
 }
 
 rename_nas_file() {
-  if [ $RENAME = "YES" ] ; then
-    log "Führe Umbenennungen in ${NAS_FILE} aus."
-    ruby $RENAME_SCRIPT $NAS_FILE $NAS_RENAMED_FILE
-    IMPORT_FILE=$NAS_RENAMED_FILE
-  else
-    IMPORT_FILE=$NAS_FILE
-  fi
+  log "Führe Umbenennungen in ${NAS_FILE} aus."
+  ruby $RENAME_SCRIPT $NAS_FILE $NAS_RENAMED_FILE
 }
 
 load_nas_file() {
-  log "ogr2ogr import Datei: ${IMPORT_FILE}"
-  ${OGR_BINPATH}/ogr2ogr -f "PostgreSQL" --config PG_USE_COPY NO -nlt CONVERT_TO_LINEAR -append PG:"dbname=${POSTGRES_DBNAME} POSTGRES_SCHEMA=${POSTGRES_SCHEMA} user=${POSTGRES_USER} host=pgsql port=5432 password=${POSTGRES_PASSWORD}" -a_srs EPSG:25832 "$IMPORT_FILE"
+  log "Kopiere $CONFIG_PATH/alkis_schema.gfs nach $GFS_FILE"
+  cp $CONFIG_PATH/alkis_schema.gfs $GFS_FILE
+
+ # log "ogr2ogr import Datei: ${IMPORT_FILE}"
+#  ${OGR_BINPATH}/ogr2ogr -f "PostgreSQL" --config -nlt CONVERT_TO_LINEAR -append PG:"dbname=${POSTGRES_DBNAME} active_schema=${POSTGRES_SCHEMA} user=${POSTGRES_USER} host=pgsql port=5432 password=${POSTGRES_PASSWORD}" -a_srs EPSG:25832 "$IMPORT_FILE"
+#  /usr/local/gdal/bin/ogr2ogr -f "PostgreSQL" --config PG_USE_COPY NO -nlt CONVERT_TO_LINEAR -append PG:"dbname=${POSTGRES_DBNAME} active_schema=${POSTGRES_SCHEMA} user=${POSTGRES_USER} host=pgsql port=5432 password=${POSTGRES_PASSWORD}" /var/www/data/alkis/ff/temp/NBA_testpostgis/NBA_testpostgis3_160907_02von24_renamed.xml
 }
 
 delete_renamed_file() {
@@ -74,8 +73,8 @@ err() {
 
 ###############################
 # Load and set config params
-SCRIPT_PATH=`dirname $0`
-CONFIG_PATH=${SCRIPT_PATH}/../config
+SCRIPT_PATH=$(dirname $(realpath $0))
+CONFIG_PATH=$(realpath ${SCRIPT_PATH}/../config)
 if [ -e "${CONFIG_PATH}/config.sh" ] ; then
   source ${CONFIG_PATH}/config.sh
   log "Konfigurationsdatei: ${ALKIS_PLUGIN_PATH}/config/config.sh gelesen."
@@ -96,97 +95,76 @@ if [ "$(ls -A $DATA_PATH)" ] ; then
   for ZIP_FILE in ${DATA_PATH}/*.zip ; do
     log "Unzip ${ZIP_FILE} ..."
     unzip $ZIP_FILE -d $TEMP_PATH
-    find $TEMP_PATH -iname '*.xml.gz' | sort |  while read GZ_FILE ; do
-      GZ_FILE_=${GZ_FILE// /_} # ersetzt Leerzeichen durch _ in Dateiname
-      if [ ! "$GZ_FILE" = "$GZ_FILE_" ] ; then
-        log "Benenne Datei: ${GZ_FILE} um in ${GZ_FILE_}"
-        mv "$GZ_FILE" "$GZ_FILE_"
-        GZ_FILE="$GZ_FILE_"
-      fi
-      log "Extrahiere: ${GZ_FILE}"
-      gunzip $GZ_FILE
-    done
-
-    FIRST_FILE="YES"
-    find $TEMP_PATH -iname '*.xml' | sort |  while read NAS_FILE ; do
-      if [ -z $FIRST_FILE ] ; then
-        log "Ausgewählte Datei ${NAS_FILE}."
-        NAS_FILE_=${NAS_FILE// /_} # ersetzt Leerzeichen durch _ in Dateiname
-        if [ ! "$NAS_FILE" = "$NAS_FILE_" ] ; then
-          echo "Benenne Datei ${NAS_FILE} um in ${NAS_FILE_}"
-          mv $NAS_FILE $NAS_FILE_
-          $NAS_FILE=$NAS_FILE_
-        fi
-
-        NAS_DIR=$(dirname "${NAS_FILE}")
-        log "dir: ${NAS_DIR}"
-      
-        NAS_FILENAME=${NAS_FILE##*/}
-        log "filename: ${NAS_FILENAME}"
-      
-        NAS_BASENAME=${NAS_FILENAME%.*}
-        log "base: ${NAS_BASENAME}"
-      
-        NAS_EXTENSION=${NAS_FILE##*.}
-        log "ext: ${NAS_EXTENSION}"
-      
-        NAS_RENAMED_FILE="${NAS_DIR}/${NAS_BASENAME}_renamed.${NAS_EXTENSION}"
-        log "renamed: ${NAS_RENAMED_FILE}"
-
-        rename_nas_file
-  #      load_nas_file
-  #      delete_renamed_file
-  #      delete_gfs_file
-  #      archivate_nas_file
-
-      else
-        echo "Ignore file ${NAS_FILE} ..."
-        FIRST_FILE=""
-      fi;
-    done
+    rm $ZIP_FILE
   done
 else
   log "Dateingangsverzeichnis: ${DATA_PATH} ist leer."
 fi
 
-commend() {
-FILE=$1
-if [ -f "$FILE" ] ; then
-#  echo "Ausgewählte Datei ${FILE}."
-  NAS_FILE=${FILE// /_} # ersetzt Leerzeichen durch _ in Dateiname
-  if [ ! "$FILE" = "$NAS_FILE" ] ; then
-#    echo "Benenne Datei ${FILE} um in ${NAS_FILE}"
-    mv "${FILE}" $NAS_FILE
+find $TEMP_PATH -iname '*.xml.gz' | sort |  while read GZ_FILE ; do
+  GZ_FILE_=${GZ_FILE// /_} # ersetzt Leerzeichen durch _ in Dateiname
+  if [ ! "$GZ_FILE" = "$GZ_FILE_" ] ; then
+    log "Benenne Datei: ${GZ_FILE} um in ${GZ_FILE_}"
+    mv "$GZ_FILE" "$GZ_FILE_"
+    GZ_FILE="$GZ_FILE_"
   fi
+  log "Extrahiere: ${GZ_FILE}"
+  gunzip $GZ_FILE
+done
 
-  #echo 'file: '$NAS_FILE
-  NAS_DIR=$(dirname "${NAS_FILE}")
-  #echo 'dir: '$NAS_DIR
-  NAS_FILENAME=${NAS_FILE##*/}
+FIRST_FILE="YES"
+find $TEMP_PATH -iname '*.xml' | sort |  while read NAS_FILE ; do
+  # ToDo nicht einfach nur erstes ignorieren, sondern wenn es eine Metadatei ist.
+  if [ -z $FIRST_FILE ] ; then
+    log "Ausgewählte Datei ${NAS_FILE}."
+    NAS_FILE_=${NAS_FILE// /_} # ersetzt Leerzeichen durch _ in Dateiname
+    if [ ! "$NAS_FILE" = "$NAS_FILE_" ] ; then
+      echo "Benenne Datei ${NAS_FILE} um in ${NAS_FILE_}"
+      mv $NAS_FILE $NAS_FILE_
+      $NAS_FILE=$NAS_FILE_
+    fi
+    NAS_DIR=$(dirname "${NAS_FILE}")
+    NAS_FILENAME=${NAS_FILE##*/}
+    NAS_BASENAME=${NAS_FILENAME%.*}
+    NAS_EXTENSION=${NAS_FILE##*.}
+    NAS_RENAMED_FILE="${NAS_DIR}/${NAS_BASENAME}_renamed.${NAS_EXTENSION}"
 
-  #echo 'filename: '$NAS_FILENAME
-  NAS_BASENAME=${NAS_FILENAME%.*}
+    # Umbenennung der Tags
+    if [ $RENAME = "YES" ] ; then
+      # ToDo, führe Umbenennungen nur in files ohne _renamed am Ende aus
+      rename_nas_file
+      IMPORT_FILE=$NAS_RENAMED_FILE
+      rm $NAS_FILE
+    else
+      IMPORT_FILE=$NAS_FILE
+    fi
 
-  #echo 'base: '$NAS_BASENAME
-  NAS_EXTENSION=${NAS_FILE##*.}
+    # Einlesen mit ogr2ogr
+    IMPORT_FILENAME=${IMPORT_FILE##*/}
+    IMPORT_BASENAME=${IMPORT_FILENAME%.*}
+    GFS_FILE="${NAS_DIR}/${IMPORT_BASENAME}.gfs"
 
-  #echo 'ext: '$NAS_EXTENSION
-  NAS_RENAMED_FILE="${NAS_DIR}/${NAS_BASENAME}_renamed.${NAS_EXTENSION}"
-  #echo 'renamed: '$NAS_RENAMED_FILE
+    load_nas_file
 
-  rename_nas_file
-  load_nas_file
-  delete_renamed_file
-  delete_gfs_file
-  archivate_nas_file
-else
-  echo "Datei ${FILE} existiert nicht."
-  usage
-fi
+    # ToDo
+    if [ $success ] ; then
+      # log success
+      # and optional cp IMPORT_FILE to archive
+      archivate_nas_file
+      rm IMPORT_FILE
+      rm GFS_FILE
+    #else
+      # log error
+      
+    fi
 
-cp ${NAS_FILE} "${TEMP_PATH}/import.xml"
-export PGPASSWORD=$POSTGRES_PASSWORD
-${OGR_BINPATH}/ogr2ogr -f "PostgreSQL" --config PG_USE_COPY NO -nlt CONVERT_TO_LINEAR -append PG:"host=${POSTGRES_HOST} port=${POSTGRES_PORT} user=${POSTGRES_USER} password=${POSTGRES_PASSWORD} dbname=${POSTGRES_DBNAME} active_schema=${POSTGRES_SCHEMA}" -a_srs EPSG:${EPSG_CODE} import.xml 2>> $ERROR_FILE
+  else
+    echo "Ignore file ${NAS_FILE} ..."
+    FIRST_FILE=""
+  fi;
+done
+
+commend() {
 if [ -n "$(grep 'ERROR' ${ERROR_FILE})" ] ; then
   err "Fehler beim Einlesen der Datei: ${NAS_FILE}."
   erro

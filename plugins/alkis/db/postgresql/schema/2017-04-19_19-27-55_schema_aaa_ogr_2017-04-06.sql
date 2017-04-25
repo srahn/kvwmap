@@ -2,10 +2,10 @@ BEGIN;
 	-- Version vom 06.04.2017 15:54
 	-- gewählte Pakete: 'ISO/TC 211', 'ISO 19115 All', 'ISO 19115:2003 Metadata', 'Data quality information', 'Citation and responsible party information', 'AAA Basisschema', 'AAA_Basisklassen', 'AAA_GemeinsameGeometrie', 'AAA_Nutzerprofile', 'AAA_Operationen', 'AAA_Praesentationsobjekte', 'AAA_Praesentationsobjekte 3D', 'AAA_Projektsteuerung', 'AAA_Punktmengenobjekte', 'AAA_Spatial Schema', 'AAA_Spatial Schema 3D', 'AAA_Unabhaengige Geometrie', 'AAA_Unabhaengige Geometrie 3D', 'Codelisten', 'AFIS-ALKIS-ATKIS Fachschema', 'Bauwerke, Einrichtungen und sonstige Angaben', 'Bauwerke und Einrichtungen in Siedlungsflächen', 'Bauwerke, Anlagen und Einrichtungen für den Verkehr', 'Besondere Angaben zum Gewässer', 'Besondere Angaben zum Verkehr', 'Besondere Anlagen auf Siedlungsflächen', 'Besondere Eigenschaften von Gewässern', 'Besondere Vegetationsmerkmale', 'Eigentümer', 'Personen- und Bestandsdaten', 'Flurstücke, Lage, Punkte', 'Angaben zu Festpunkten der Landesvermessung', 'Angaben zum Flurstück', 'Angaben zum Netzpunkt', 'Angaben zum Punktort', 'Angaben zur Historie', 'Angaben zur Lage', 'Angaben zu Nutzerprofilen', 'Angaben zur Reservierung', 'Fortführungsnachweis', 'Gebäude', 'Angaben zum Gebäude', 'Gesetzliche Festlegungen, Gebietseinheiten, Kataloge', 'Administrative Gebietseinheiten', 'Bodenschätzung, Bewertung', 'Geographische Gebietseinheiten', 'Kataloge', 'Öffentlich-rechtliche und sonstige Festlegungen', 'Migration', 'Migrationsobjekte', 'Nutzerprofile', 'Angaben zu Nutzerprofilen', 'Relief', 'Primäres DGM', 'Reliefformen', 'Sekundäres DGM', 'Tatsächliche Nutzung', 'Gewässer', 'Siedlung', 'Vegetation', 'Verkehr', 'NAS-Operationen', 'AFIS-ALKIS-ATKIS-Ausgabekatalog', 'AFIS-ALKIS-ATKIS-Ausgaben', 'AFIS-Einzelpunktnachweise', 'AFIS-Punktlisten', 'ALKIS-Ausgaben', 'Komplexe Datentypen für Ausgaben', 'ALKIS-Auswertungen', 'Angaben im Kopf der Ausgaben', 'Externe Datentypen', 'Flurstücksangaben', 'Fortführungsfälle', 'Gebäudeangaben', 'Personen- und Bestandsangaben', 'Punktangaben', 'Reservierungen'
 	-- gewählte Filter: Ohne Attribute objektkoordinaten.
-	DROP SCHEMA IF EXISTS aaa_ogr CASCADE;
+	DROP SCHEMA IF EXISTS alkis CASCADE;
 	CREATE SCHEMA alkis;
-	COMMENT ON SCHEMA aaa_ogr IS 'Version vom 06.04.2017 15:54';
-	SET search_path = aaa_ogr, public;
+	COMMENT ON SCHEMA alkis IS 'Version vom 06.04.2017 15:54';
+	SET search_path = alkis, public;
 	CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 	CREATE TABLE IF NOT EXISTS aa_advstandardmodell (
@@ -19338,8 +19338,8 @@ BEGIN;
 	COMMENT ON COLUMN au_geometrieobjekt_3d.levelofdetail IS 'levelOfDetail codelist AA_LevelOfDetail 1';
 	COMMENT ON COLUMN au_geometrieobjekt_3d.wkb_geometry IS 'wkb_geometry  GM_Object 0..1';
 
-	-- Table: aaa_ogr.delete
-	CREATE TABLE aaa_ogr.delete (
+	-- Table: alkis.delete
+	CREATE TABLE alkis.delete (
 	  ogc_fid serial NOT NULL,
 	  typename character varying, -- Objektart, also Name der Tabelle, aus der das Objekt zu löschen ist.
 	  featureid character varying, -- gml_id des zu löschenden Objekts.
@@ -19352,17 +19352,17 @@ BEGIN;
 	  dummy geometry(Point,$EPSGCODE_ALKIS),
 	  CONSTRAINT delete_pk PRIMARY KEY (ogc_fid)
 	) WITH (OIDS=TRUE);
-	COMMENT ON TABLE aaa_ogr.delete
+	COMMENT ON TABLE alkis.delete
 	  IS 'Hilfstabelle für das Speichern von Löschinformationen.';
-	COMMENT ON COLUMN aaa_ogr.delete.typename IS 'Objektart, also Name der Tabelle, aus der das Objekt zu löschen ist.';
-	COMMENT ON COLUMN aaa_ogr.delete.featureid IS 'gml_id des zu löschenden Objekts.';
-	COMMENT ON COLUMN aaa_ogr.delete.context IS 'Operation ''delete'', ''replace'' oder ''update''.';
-	COMMENT ON COLUMN aaa_ogr.delete.safetoignore IS 'Attribut safeToIgnore von wfsext:Replace';
-	COMMENT ON COLUMN aaa_ogr.delete.replacedby IS 'gml_id des Objekts, das featureid ersetzt';
-	COMMENT ON COLUMN aaa_ogr.delete.ignored IS 'Löschsatz wurde ignoriert';
+	COMMENT ON COLUMN alkis.delete.typename IS 'Objektart, also Name der Tabelle, aus der das Objekt zu löschen ist.';
+	COMMENT ON COLUMN alkis.delete.featureid IS 'gml_id des zu löschenden Objekts.';
+	COMMENT ON COLUMN alkis.delete.context IS 'Operation ''delete'', ''replace'' oder ''update''.';
+	COMMENT ON COLUMN alkis.delete.safetoignore IS 'Attribut safeToIgnore von wfsext:Replace';
+	COMMENT ON COLUMN alkis.delete.replacedby IS 'gml_id des Objekts, das featureid ersetzt';
+	COMMENT ON COLUMN alkis.delete.ignored IS 'Löschsatz wurde ignoriert';
 
-	-- Function: aaa_ogr.delete_feature_hist()
-	CREATE OR REPLACE FUNCTION aaa_ogr.delete_feature_hist()
+	-- Function: alkis.delete_feature_hist()
+	CREATE OR REPLACE FUNCTION alkis.delete_feature_hist()
 	RETURNS trigger AS
 	$BODY$
 		DECLARE
@@ -19470,7 +19470,7 @@ BEGIN;
 				RAISE EXCEPTION '%: Ungültiger Kontext % (''delete'', ''replace'' oder ''update'' erwartet).', NEW.featureid, NEW.context;
 			END IF;
 
-			-- Vorgaenger aaa_ogr-Objekt nun beenden
+			-- Vorgaenger alkis-Objekt nun beenden
 			s := 'UPDATE ' || NEW.typename || ' SET endet=''' || NEW.endet || '''';			-- am 28.06.2016 angepasst
 			IF NEW.context='update' AND NEW.anlass IS NOT NULL THEN
 				s := s || ',anlass = ''' || NEW.anlass::text || '''';
@@ -19491,12 +19491,12 @@ BEGIN;
 	LANGUAGE plpgsql VOLATILE
 	COST 100;
 
-	-- Trigger: delete_feature_trigger on aaa_ogr.delete
+	-- Trigger: delete_feature_trigger on alkis.delete
 	CREATE TRIGGER delete_feature_trigger
 	  BEFORE INSERT
-	  ON aaa_ogr.delete
+	  ON alkis.delete
 	  FOR EACH ROW
-	  EXECUTE PROCEDURE aaa_ogr.delete_feature_hist();
+	  EXECUTE PROCEDURE alkis.delete_feature_hist();
 
 
 	CREATE TABLE ax_fortfuehrungsauftrag (
