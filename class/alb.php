@@ -1386,8 +1386,7 @@ class ALB {
             $Adressbezeichnung.=' '.$flst->Adresse[$s]["strassenname"];
             $Adressbezeichnung.=' '.$flst->Adresse[$s]["hausnr"];
             $ausgabetext=zeilenumbruch($Adressbezeichnung,60);
-            $pdf->addText($col2,$row,$fontSize,utf8_decode($ausgabetext[0]));
-            for ($j=1;$j<count($ausgabetext);$j++) {
+            for ($j=0;$j<count($ausgabetext);$j++) {
               $pdf->addText($col2,$row-=12,$fontSize,utf8_decode($ausgabetext[$j]));
             }
           }
