@@ -319,6 +319,10 @@ class GUI {
     echo $this->create_group_legend($this->formvars['group']);
   }
 
+  function close_group_legend() {
+    $this->formvars = $this->user->rolle->setGroupStatus($this->formvars);
+  }
+
 	function create_group_legend($group_id) {
 		if($this->groupset[$group_id]['untergruppen'] == NULL AND $this->groups_with_layers[$group_id] == NULL)return;			# wenns keine Layer oder Untergruppen gibt, nix machen
     $groupname = $this->groupset[$group_id]['Gruppenname'];

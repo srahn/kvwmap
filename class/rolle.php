@@ -21,22 +21,29 @@ class rolle {
 		$this->loglevel = 0;
 	}
 
+	/*
+	* Speichert den Status der Layergruppen
+	* @param $formvars array mit key group_<group_id> welcher den Status der Gruppe enthält 
+	*/
 	function setGroupStatus($formvars) {
-		$this->groupset=$this->getGroups('');
+		$this->groupset = $this->getGroups('');
 		# Eintragen des group_status=1 für Gruppen, die angezeigt werden sollen
-		for ($i=0;$i<count($this->groupset);$i++) {
-			if($formvars['group_'.$this->groupset[$i]['id']] !== NULL){
-				if ($formvars['group_'.$this->groupset[$i]['id']] == 1) {
-					$group_status=1;
-				}
-				else {
-					$group_status=0;
-				}
-				$sql ='UPDATE u_groups2rolle set status="'.$group_status.'"';
-				$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-				$sql.=' AND id='.$this->groupset[$i]['id'];
-				$this->debug->write("<p>file:rolle.php class:rolle->setGroupStatus - Speichern des Status der Gruppen zur Rolle:",4);
-				$this->database->execSQL($sql,4, $this->loglevel);
+		for ($i = 0; $i < count($this->groupset); $i++) {
+			if ($formvars['group_' . $this->groupset[$i]['id']] !== NULL) {
+				$group_status = ($formvars['group_' . $this->groupset[$i]['id']] == 1 ? 1 : 0);
+				$sql = "
+					UPDATE
+						`u_groups2rolle`
+					SET
+						`status` = '" . $group_status . "'
+					WHERE
+						`user_id` = " . $this->user_id . " AND
+						`stelle_id` = " . $this->stelle_id . " AND
+						`id` = " . $this->groupset[$i]['id'] . "
+				";
+				echo '<br>Sql: ' . $sql;
+				$this->debug->write("<p>file:rolle.php class:rolle->setGroupStatus - Speichern des Status der Gruppen zur Rolle:", 4);
+				$this->database->execSQL($sql, 4, $this->loglevel);
 			}
 		}
 		return $formvars;
