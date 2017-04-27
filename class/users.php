@@ -1229,4 +1229,5 @@ class user {
 		return $ret;
 	}
 }
+
 ?>

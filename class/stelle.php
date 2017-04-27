@@ -1096,7 +1096,7 @@ class stelle {
 			for($i = 0; $i < $count; $i++){
 				if(strpos(strtolower($fieldstring[$i]), ' as ')){   # Ausdruck AS attributname
 					$explosion = explode(' as ', strtolower($fieldstring[$i]));
-					$attributename = array_pop($explosion);
+					$attributename = trim(array_pop($explosion));
 					$real_attributename = $explosion[0];
 				}
 				else{   # tabellenname.attributname oder attributname
