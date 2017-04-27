@@ -20,8 +20,8 @@ load_nas_file() {
   log "Kopiere $CONFIG_PATH/alkis_schema.gfs nach $GFS_FILE"
   cp $CONFIG_PATH/alkis_schema.gfs $GFS_FILE
 
- # log "ogr2ogr import Datei: ${IMPORT_FILE}"
-#  ${OGR_BINPATH}/ogr2ogr -f "PostgreSQL" --config -nlt CONVERT_TO_LINEAR -append PG:"dbname=${POSTGRES_DBNAME} active_schema=${POSTGRES_SCHEMA} user=${POSTGRES_USER} host=pgsql port=5432 password=${POSTGRES_PASSWORD}" -a_srs EPSG:25832 "$IMPORT_FILE"
+  log "ogr2ogr import Datei: ${IMPORT_FILE}"
+  ${OGR_BINPATH}/ogr2ogr -f "PostgreSQL" --config -nlt CONVERT_TO_LINEAR -append PG:"dbname=${POSTGRES_DBNAME} active_schema=${POSTGRES_SCHEMA} user=${POSTGRES_USER} host=pgsql port=5432 password=${POSTGRES_PASSWORD}" -a_srs EPSG:25832 "$IMPORT_FILE"
 #  /usr/local/gdal/bin/ogr2ogr -f "PostgreSQL" --config PG_USE_COPY NO -nlt CONVERT_TO_LINEAR -append PG:"dbname=${POSTGRES_DBNAME} active_schema=${POSTGRES_SCHEMA} user=${POSTGRES_USER} host=pgsql port=5432 password=${POSTGRES_PASSWORD}" /var/www/data/alkis/ff/temp/NBA_testpostgis/NBA_testpostgis3_160907_02von24_renamed.xml
 }
 
@@ -114,8 +114,10 @@ done
 
 FIRST_FILE="YES"
 find $TEMP_PATH -iname '*.xml' | sort |  while read NAS_FILE ; do
-  # ToDo nicht einfach nur erstes ignorieren, sondern wenn es eine Metadatei ist.
-  if [ -z $FIRST_FILE ] ; then
+
+# ToDo nicht einfach nur erstes ignorieren, sondern wenn es eine Metadatei ist.
+# Nimm erstmal immer alle
+#  if [ -z $FIRST_FILE ] ; then
     log "Ausgewählte Datei ${NAS_FILE}."
     NAS_FILE_=${NAS_FILE// /_} # ersetzt Leerzeichen durch _ in Dateiname
     if [ ! "$NAS_FILE" = "$NAS_FILE_" ] ; then
@@ -158,10 +160,10 @@ find $TEMP_PATH -iname '*.xml' | sort |  while read NAS_FILE ; do
       
     fi
 
-  else
-    echo "Ignore file ${NAS_FILE} ..."
-    FIRST_FILE=""
-  fi;
+#  else
+#    echo "Ignore file ${NAS_FILE} ..."
+#    FIRST_FILE=""
+#  fi;
 done
 
 commend() {
