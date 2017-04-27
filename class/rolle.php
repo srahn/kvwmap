@@ -41,7 +41,7 @@ class rolle {
 						`stelle_id` = " . $this->stelle_id . " AND
 						`id` = " . $this->groupset[$i]['id'] . "
 				";
-				echo '<br>Sql: ' . $sql;
+				#echo '<br>Sql: ' . $sql;
 				$this->debug->write("<p>file:rolle.php class:rolle->setGroupStatus - Speichern des Status der Gruppen zur Rolle:", 4);
 				$this->database->execSQL($sql, 4, $this->loglevel);
 			}
