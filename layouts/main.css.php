@@ -259,6 +259,10 @@ a.invisiblelayerlink:hover{
 	justify-content: flex-start;
 }
 
+#menueTable a {
+	color: firebrick;
+}
+
 .menu {
 	background: linear-gradient(#DAE4EC 0%, #c7d9e6 100%);
 	position: relative; 
