@@ -1592,10 +1592,13 @@ function output_select($form_field_name, $data, $selected_value = null, $onchang
 	return $html;
 }
 
+/*
+* Die Funktion liefert das erste Word, welches nach $word in $str gefunden wird.
+*/
 function get_first_word_after($str, $word) {
 	$word_pos = stripos($str, $word);
 	$str_from_word_pos = substr($str, $word_pos);
-	$parts = explode(' ', $str_from_word_pos);
+	$parts = preg_split('/\s+/', $str_from_word_pos);
 	return $parts[1];
 }
 ?>

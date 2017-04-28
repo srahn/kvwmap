@@ -252,6 +252,7 @@ public static	function find_by_id($gui, $by, $id) {
 	function rewrite_gml_ids($rows) {
 		$this->debug->show('<br><b>gml_ids in Shape-Tabellen zurückschreiben.</b>' . $sql, Regel::$write_debug);
 		$selects =  array();
+		# Erzeugt Abfrage für eine Tabelle mit allen gml_id's und gid's der neu eingetragenen Objekte.
 		foreach($rows AS $row) {
 			$selects[] = "
 				SELECT '{$row['gml_id']}' AS gml_id, {$row['gid']} AS gid
@@ -259,7 +260,6 @@ public static	function find_by_id($gui, $by, $id) {
 		}
 		$converter_table = implode(' UNION ', $selects);
 
-		$converter_result = "SELECT bla UNION blu UNION bli";
 		$sql = "
 			UPDATE
 				xplan_shapes_" . $this->konvertierung->get('id') . '.' . $this->get_shape_table_name() . " AS shape
