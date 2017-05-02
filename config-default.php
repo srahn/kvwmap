@@ -241,7 +241,7 @@ define('DHK_CALL_PROFILKENNUNG', 'mvaaa');														# Version 2.4
 
 # Parameter für die Strecken- und Flächenreduktion
 define('EARTH_RADIUS', 6384000);																										# Version 2.1
-define('M_QUASIGEOID', 38);																													# Version 2.1
+#define('M_QUASIGEOID', 38);																													# Version 2.1			in Version 2.6 über Bugfix 2.6.61 gelöscht
 
 # auswählbare Treffermengen
 $selectable_limits = array(10, 25, 50, 100, 200);			# Version 2.4
