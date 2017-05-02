@@ -3037,27 +3037,32 @@ $measurefunctions = '
 	  m_pathy[0] = client_y;
 	}
 	
-	function calculate_reduction(pathx, y1){
+	function calculate_reduction(pathx, pathy){
 		k = 1;
+		em = 0;
+		hell = 0;
 		r = '.EARTH_RADIUS.';
+		used_nbs = new Array();
 		if(r > 0 && top.nbh.length > 0){
-			em = 0;
-			x = pathx[0] + "";
-			y = y1 + "";
-			x_1 = x.substring(2,3);
-			x_10 = x.substring(1,2);
-			x_100 = x.substring(0,1);
-			y_1 = y.substring(3,4);
-			y_10 = y.substring(2,3);
-			y_100 = y.substring(1,2);
-			y_1000 = y.substring(0,1);
-			nhn = 33+x_100+y_1000+y_100+x_10+x_1+y_10+y_1;
-			if(top.nbh[nhn] > 0){
-				hell = '.M_QUASIGEOID.' + top.nbh[nhn];
-				for(i = 0; i < pathx.length; i++){
-					em = em + parseInt(pathx[i]);
+			for(i = 0; i < pathx.length; i++){
+				x = pathx[i] + "";
+				y = pathy[i] + "";
+				x_1 = x.substring(2,3);
+				x_10 = x.substring(1,2);
+				x_100 = x.substring(0,1);
+				y_1 = y.substring(3,4);
+				y_10 = y.substring(2,3);
+				y_100 = y.substring(1,2);
+				y_1000 = y.substring(0,1);
+				nhn = 33+x_100+y_1000+y_100+x_10+x_1+y_10+y_1;
+				if(top.nbh[nhn] == null)return 1;
+				if(used_nbs[nhn] == null){				// wenn NB nicht schon durch einen anderen Stuetzpunkt verwendet wird
+					used_nbs[nhn] = top.nbh[nhn];
+					hell = hell + top.nbh[nhn];
 				}
+				em = em + parseInt(pathx[i]);
 				em = em / pathx.length;
+				hell = hell / used_nbs.length;
 				k = (1 - (hell / r)) * (1 + (((em - 500000)*(em - 500000))/(2 * r * r))) * 0.9996;
 			}
 		}
@@ -3072,7 +3077,8 @@ $measurefunctions = '
 			distance = Math.sqrt(((x1-x2)*(x1-x2))+((y1-y2)*(y1-y2)));
 		}
 		var pathx = new Array(x1, x2);
-		k = calculate_reduction(pathx, y1);
+		var pathy = new Array(y1, y2);
+		k = calculate_reduction(pathx, pathy);
 		distance = distance / k;
 		return distance;
 	}
