@@ -332,6 +332,35 @@ function getlegend(groupid, layerid, fremde){
 	}
 }
 
+function getlegend(groupid, layerid, fremde) {
+	groupdiv = document.getElementById('groupdiv_' + groupid);
+	if (layerid == '') {														// eine Gruppe wurde auf- oder zugeklappt
+		group = document.getElementById('group_' + groupid);
+		if (group.value == 0) {												// eine Gruppe wurde aufgeklappt -> Layerstruktur per Ajax holen
+			group.value = 1;
+			ahah('index.php', 'go=get_group_legend&' + group.name + '=' + group.value + '&group=' + groupid + '&nurFremdeLayer=' + fremde, new Array(groupdiv), "");
+		}
+		else {																// eine Gruppe wurde zugeklappt -> Layerstruktur verstecken und Einstellung per Ajax senden
+			group.value = 0;
+			layergroupdiv = document.getElementById('layergroupdiv_' + groupid);
+			groupimg = document.getElementById('groupimg_' + groupid);
+			layergroupdiv.style.display = 'none';
+			groupimg.src = 'graphics/plus.gif';
+			ahah('index.php', 'go=close_group_legend&' + group.name + '=' + group.value, '', '');
+		}
+	}
+	else {																	// eine Klasse wurde auf- oder zugeklappt
+		layer = document.getElementById('classes_'+layerid);
+		if(layer.value == 0){
+			layer.value = 1;
+		}
+		else{
+			layer.value = 0;
+		}
+		ahah('index.php', 'go=get_group_legend&layer_id='+layerid+'&show_classes='+layer.value+'&group='+groupid+'&nurFremdeLayer='+fremde, new Array(groupdiv), "");
+	}
+}
+
 function updateThema(event, thema, query, groupradiolayers, queryradiolayers, instantreload){
 	var status = query.checked;
 	var reload = false;

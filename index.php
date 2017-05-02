@@ -220,6 +220,10 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  case 'get_group_legend' : {
 			$GUI->get_group_legend();
 	  } break;
+
+	  case 'close_group_legend' : {
+			$GUI->close_group_legend();
+	  } break;
 		
 		# Legende erzeugen
 	  case 'get_legend' : {

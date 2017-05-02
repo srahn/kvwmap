@@ -27,28 +27,28 @@ function hideMenue() {
 	document.all.menue_options.innerHTML='';
 	document.all.imgMinMax.src='<?php echo GRAPHICSPATH; ?>maximize_menue.png';
 	document.all.linkMinMax.href="javascript:showMenue()";
-	document.all.linkMinMax.title="Menü zeigen";
+	document.all.linkMinMax.title="MenÃ¼ zeigen";
 	
 }
 
 function showMenue() {
-  // läd den Content der Menütabelle über AJAX vom Server nach,
-  // löscht die aktuelle Tabelle mit dem Link auf das Nachladen des Menüs und
-  // fügt das Menü in die Spalte der GUI wieder ein.
+  // lÃ¤d den Content der MenÃ¼tabelle Ã¼ber AJAX vom Server nach,
+  // lÃ¶scht die aktuelle Tabelle mit dem Link auf das Nachladen des MenÃ¼s und
+  // fÃ¼gt das MenÃ¼ in die Spalte der GUI wieder ein.
   ahah('index.php', 'go=getMenueWithAjax', new Array(document.all.menuebar, ""), new Array("", "execute_function"));
   document.all.linkMinMax.href="javascript:hideMenue()";
   document.all.imgMinMax.src='<?php echo GRAPHICSPATH; ?>minimize_menue.png';
-  document.all.linkMinMax.title="Menü verstecken";
+  document.all.linkMinMax.title="MenÃ¼ verstecken";
 }
 </script>
 <table class="menue-switch" width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="<?php echo BG_DEFAULT ?>">
     <tr>
       <td bgcolor="<?php echo BG_DEFAULT ?>" align="right"><?php
         if ($this->user->rolle->hideMenue) {
-          ?><a id="linkMinMax" title="Menü zeigen" href="javascript:showMenue()"><img id="imgMinMax" src="<?php  echo GRAPHICSPATH; ?>maximize_menue.png" border="0"></a><?php
+          ?><a id="linkMinMax" title="MenÃ¼ zeigen" href="javascript:showMenue()"><img id="imgMinMax" src="<?php  echo GRAPHICSPATH; ?>maximize_menue.png" border="0"></a><?php
         }
         else {
-        	?><a id="linkMinMax" title="Menü verstecken" href="javascript:hideMenue()"><img id="imgMinMax" src="<?php  echo GRAPHICSPATH; ?>minimize_menue.png" border="0"></a><?php
+        	?><a id="linkMinMax" title="MenÃ¼ verstecken" href="javascript:hideMenue()"><img id="imgMinMax" src="<?php  echo GRAPHICSPATH; ?>minimize_menue.png" border="0"></a><?php
         }
       ?></td>
     </tr>
