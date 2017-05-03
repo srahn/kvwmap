@@ -271,7 +271,6 @@ a.invisiblelayerlink:hover{
 	top: 0px; 
 	z-index:3;
 	border: 1px solid #cccccc;
-	height: 17px;
 	margin: 2px;
 	margin-bottom: 1px;
 	padding-bottom: 4px;
@@ -317,6 +316,7 @@ a.menuered:hover {
 	font-size: 15px;
 	color: black;
 	font-family: SourceSansPro2;
+	height: 17px;
 }
 
 .hauptmenue {
@@ -340,6 +340,8 @@ a.menuered:hover {
 }
 
 .untermenue {
+	display: flex;
+  align-items: top;
 	cursor: pointer;
 	background: rgb(237, 239, 239);
 	margin-bottom: 0px;
