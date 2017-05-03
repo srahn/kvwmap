@@ -75,11 +75,11 @@ class lineeditor {
     $ret[1]='';
     $ret[0]=0;
     if ( $newpathwkt != ''){
-    	$sql = "SELECT st_isvalid(ST_SnapToGrid(st_geomfromtext('".$newpathwkt."'), 0.0001))";
+    	$sql = "SELECT st_isvalid(st_geomfromtext('".$newpathwkt."'))";
     	$ret = $this->database->execSQL($sql, 4, 0);
     	$valid = pg_fetch_row($ret[1]);
 			if($valid[0] == 'f'){
-				$sql = "SELECT st_isvalidreason(ST_SnapToGrid(st_geomfromtext('".$newpathwkt."'), 0.0001))";
+				$sql = "SELECT st_isvalidreason(st_geomfromtext('".$newpathwkt."'))";
 				$ret = $this->database->execSQL($sql, 4, 0);
     		$reason = pg_fetch_row($ret[1]);
 				$ret[1]='\nDie Geometrie des Linienzugs ist fehlerhaft und kann nicht gespeichert werden: \n'.$reason[0];
