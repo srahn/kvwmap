@@ -13458,6 +13458,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $layer_id = $dbmap->newRollenLayer($this->formvars);
 
     $classdata['layer_id'] = -$layer_id;
+		$classdata['name'] = ' ';
     $class_id = $dbmap->new_Class($classdata);
 
 		$color = $this->user->rolle->readcolor();
