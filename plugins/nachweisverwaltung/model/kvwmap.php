@@ -160,6 +160,8 @@
         $GUI->formvars['newpath'] = transformCoordsSVG($nachweis->document['svg_umring']);
         $GUI->formvars['newpathwkt'] = $nachweis->document['wkt_umring'];
         $GUI->formvars['pathwkt'] = $GUI->formvars['newpathwkt'];
+				$GUI->formvars['firstpoly'] = 'true';
+				$this->geomload = true;			# Geometrie wird das erste Mal geladen, deshalb nicht in den Weiterzeichnenmodus gehen
       }
       else{
       	showAlert('Achtung! Nachweis hat noch keine Geometrie!');
