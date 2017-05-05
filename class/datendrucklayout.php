@@ -390,7 +390,7 @@ class ddl {
 		$page_id_before_puttext = $this->pdf->currentContents;
 		$ret = $this->pdf->ezText(iconv("UTF-8", "CP1252//TRANSLIT", $text), $fontsize, $options);
 		$page_id_after_puttext = $this->pdf->currentContents;		
-		#if($this->gui->user->id != 101)echo $page_id_before_puttext.' '.$page_id_after_puttext.' - '.$y.' - '.$text.'<br>';
+		#echo $page_id_before_puttext.' '.$page_id_after_puttext.' - '.$y.' - '.$text.'<br>';
 		if($page_id_before_puttext != $page_id_after_puttext){
 			$this->page_overflow = true;
 			$this->page_id_before_sublayout = $page_id_before_puttext;
@@ -496,6 +496,8 @@ class ddl {
 			# unterbrochen werden dürfen, eine Transaktion starten um evtl. bei einem Seitenüberlauf zurückkehren zu können
 			if($this->layout['type'] != 0 AND (!$layout_with_sublayout OR $this->layout['no_record_splitting'])){
 				$this->pdf->transaction('start');
+				$this->transaction_start_pageid = $this->pdf->currentContents;
+				$this->transaction_start_y = $this->miny[$this->pdf->currentContents];
 			}
 			if($this->layout['type'] == 0 AND $i > 0){		# neue Seite beim seitenweisen Typ und neuem Datensatz 
     		$this->pdf->newPage();
@@ -547,16 +549,23 @@ class ddl {
 				# Datensatzes zurückgerollt und die Seite vorher umgebrochen, so dass sauber zwischen 2 Datensätzen 
 				# und nicht innerhalb eines Datensatzes getrennt wird.
 				if($this->page_overflow != false){
-					$this->page_overflow = false;
-					$this->pdf->transaction('rewind');
-					$i--;
-					$this->i_on_page = -1;
-					$this->maxy = 0;
-					if(!$this->initial_yoffset)$this->initial_yoffset = 780-$this->maxy;			# der Offset von oben gesehen, mit dem das erste fortlaufende Element auf der ersten Seite beginnt; wird benutzt, um die fortlaufenden Elemente ab der 2. Seite oben beginnen zu lassen
-					if($this->layout['type'] == 2)$this->offsety = 50; else $this->offsety = 0;
-					$this->pdf->newPage();
-					$lastpage = end($this->pdf->objects['3']['info']['pages'])+1;
-					$this->miny[$lastpage] = 0;
+					if($this->getNextPage($this->transaction_start_pageid) != $this->pdf->currentContents		# wenn die Transaktion aber mehr als 2 Seiten umfasst
+					OR $this->transaction_start_y > $this->miny[$this->pdf->currentContents]){							# oder insgesamt länger als 1 Seite ist, bringt es nichts auf einer neuen Seite zu beginnen, dann committen
+						$this->pdf->transaction('commit');
+						$this->page_overflow = false;
+					}
+					else{
+						$this->page_overflow = false;
+						$this->pdf->transaction('rewind');
+						$i--;
+						$this->i_on_page = -1;
+						$this->maxy = 0;
+						if(!$this->initial_yoffset)$this->initial_yoffset = 780-$this->maxy;			# der Offset von oben gesehen, mit dem das erste fortlaufende Element auf der ersten Seite beginnt; wird benutzt, um die fortlaufenden Elemente ab der 2. Seite oben beginnen zu lassen
+						if($this->layout['type'] == 2)$this->offsety = 50; else $this->offsety = 0;
+						$this->pdf->newPage();
+						$lastpage = end($this->pdf->objects['3']['info']['pages'])+1;
+						$this->miny[$lastpage] = 0;
+					}
 				}
 				else{
 					$this->pdf->transaction('commit');
