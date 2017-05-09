@@ -1804,10 +1804,10 @@ class GUI {
         $this->user->rolle->setSelectedButton('recentre');
         $this->zoomMap(1);
       } break;
-      case "jump_coords" : {
-        $this->user->rolle->setSelectedButton('recentre');
-        $this->zoomMap(1);
-      } break;
+      // case "jump_coords" : {
+        // $this->user->rolle->setSelectedButton('recentre');
+        // $this->zoomMap(1);
+      // } break;
       case "pquery" : {
         $this->user->rolle->setSelectedButton('pquery');
         $this->queryMap();
@@ -1851,9 +1851,8 @@ class GUI {
 		}
   }
 
-  function zoomMap($nZoomFactor) {
-    # Zerlegung der Input Koordinaten in linke obere und rechte untere Ecke
-    # echo ('formvars[INPUT_COORD]: '.$this->formvars['INPUT_COORD']);
+  function zoomMap($nZoomFactor){
+		# Funktion zum Zoomen über die Navigationswerkzeuge; Koordinaten sind Bildkoordinaten
     $corners=explode(';',$this->formvars['INPUT_COORD']);
     # Auslesen der ersten übergebenen Koordinate
     $lo=explode(',',$corners[0]);
@@ -1886,117 +1885,148 @@ class GUI {
       # Erzeugen eines Punktobjektes
       $oPixelPos=ms_newPointObj();
 
-			if($this->formvars['epsg_code'] != '' AND $this->formvars['epsg_code'] != $this->user->rolle->epsg_code){
-				$oPixelPos->setXY($minx,$maxy);
-				$projFROM = ms_newprojectionobj("init=epsg:".$this->formvars['epsg_code']);
-				$projTO = ms_newprojectionobj("init=epsg:".$this->user->rolle->epsg_code);
-				$oPixelPos->project($projFROM, $projTO);
-				$minx = $oPixelPos->x;
-				$maxy = $oPixelPos->y;
-			}
-
-      if($this->formvars['CMD'] != 'jump_coords'){
-        $oPixelPos->setXY($minx,$maxy);
-        $this->map->zoompoint($nZoomFactor,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
-      }
-      else{
-        #---------- Punkt-Rollenlayer erzeugen --------#
-        $legendentext ="Koordinate: ".$minx." ".$maxy;
-        if(strpos($minx, '°') !== false){
-	      	$minx = dms2dec($minx);
-	      	$maxy = dms2dec($maxy);
-	      }
-        $datastring ="the_geom from (select st_geomfromtext('POINT(".$minx." ".$maxy.")', ".$this->user->rolle->epsg_code.") as the_geom, 1 as oid) as foo using unique oid using srid=".$this->user->rolle->epsg_code;
-        $group = $this->mapDB->getGroupbyName('Suchergebnis');
-        if($group != ''){
-          $groupid = $group['id'];
-        }
-        else{
-          $groupid = $this->mapDB->newGroup('Suchergebnis', 0);
-        }
-        $this->formvars['user_id'] = $this->user->id;
-        $this->formvars['stelle_id'] = $this->Stelle->id;
-        $this->formvars['aktivStatus'] = 1;
-        $this->formvars['Name'] = $legendentext;
-        $this->formvars['Gruppe'] = $groupid;
-        $this->formvars['Typ'] = 'search';
-        $this->formvars['Datentyp'] = 0;
-        $this->formvars['Data'] = $datastring;
-        $this->formvars['connectiontype'] = 6;
-        $connectionstring ='user='.$this->pgdatabase->user;
-        if($this->pgdatabase->passwd != ''){
-          $connectionstring.=' password='.$this->pgdatabase->passwd;
-        }
-        if($this->pgdatabase->host != ''){
-		      $connectionstring.=' host='.$this->pgdatabase->host;
-		    }
-      	if($this->pgdatabase->port != ''){
-	        $connectionstring.=' port='.$this->pgdatabase->port;
-	      }
-        $connectionstring.=' dbname='.$this->pgdatabase->dbName;
-        $this->formvars['connection'] = $connectionstring;
-        $this->formvars['epsg_code'] = $this->user->rolle->epsg_code;
-        $this->formvars['transparency'] = 60;
-
-        $layer_id = $this->mapDB->newRollenLayer($this->formvars);
-
-        $classdata['layer_id'] = -$layer_id;
-        $class_id = $this->mapDB->new_Class($classdata);
-
-				if(defined('ZOOM2COORD_STYLE_ID') AND ZOOM2COORD_STYLE_ID != ''){
-					$style_id = $this->mapDB->copyStyle(ZOOM2COORD_STYLE_ID);
-				}
-				else{
-					$style['colorred'] = 255;
-					$style['colorgreen'] = 255;
-					$style['colorblue'] = 128;
-					$style['outlinecolorred'] = 0;
-					$style['outlinecolorgreen'] = 0;
-					$style['outlinecolorblue'] = 0;
-					$style['size'] = 10;
-					$style['symbolname'] = 'circle';
-					$style['backgroundcolor'] = NULL;
-					$style['minsize'] = NULL;
-					$style['maxsize'] = 100000;
-					$style['angle'] = 360;
-					$style_id = $this->mapDB->new_Style($style);
-				}
-
-        $this->mapDB->addStyle2Class($class_id, $style_id, 0);          # den Style der Klasse zuordnen
-        $this->user->rolle->set_one_Group($this->user->id, $this->Stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
-        $this->loadMap('DataBase');
-
-				if($this->map->scaledenom > COORD_ZOOM_SCALE){
-					$this->map->zoomscale(COORD_ZOOM_SCALE/4,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
-				}
-        # hier wurden Weltkoordinaten übergeben
-        $this->pixwidth = ($this->map->extent->maxx - $this->map->extent->minx)/$this->map->width;
-        $pixel_x = ($minx-$this->map->extent->minx)/$this->pixwidth;
-        $pixel_y = ($this->map->extent->maxy-$maxy)/$this->pixwidth;
-        $oPixelPos->setXY($pixel_x,$pixel_y);
-        $this->map->zoompoint($nZoomFactor,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
-      }
+			$oPixelPos->setXY($minx,$maxy);
+			$this->map->zoompoint($nZoomFactor,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
     }
     else {
       # Zoomen auf ein Rechteck
-      $this->debug->write('<br>Es wird auf eine Rechteckgezoomt gezoomt',4);
-			if (MAPSERVERVERSION < 600) {
-				$oPixelExt=ms_newRectObj();
-			}
-			else {
-				$oPixelExt = new rectObj();
-			}
+      $this->debug->write('<br>Es wird auf ein Rechteck gezoomt',4);
+			$oPixelExt=ms_newRectObj();
       if($minx != 'undefined' AND $miny != 'undefined' AND $maxx != 'undefined' AND $maxy != 'undefined'){
        	$oPixelExt->setextent($minx,$miny,$maxx,$maxy);
         $this->map->zoomrectangle($oPixelExt,$this->map->width,$this->map->height,$this->map->extent);
         # Nochmal Zoomen auf die Mitte mit Faktor 1, damit der Ausschnitt in den erlaubten Bereich
         # verschoben wird, falls er ausserhalb liegt, zoompoint berücksichtigt das, zoomrectangle nicht.
-        # Berechnung der Bildmitte
         $oPixelPos=ms_newPointObj();
         $oPixelPos->setXY($this->map->width/2,$this->map->height/2);
         $this->map->zoompoint(1,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
       }
     }
+  }
+	
+	function zoom2coord(){
+		# Funktion zum Zoomen auf eine Punktkoordinate oder einen Kartenausschnitt; Koordinaten sind Weltkoordinaten
+		$corners=explode(';',$this->formvars['INPUT_COORD']);
+    $lo=explode(',',$corners[0]);
+    $minx=$lo[0];
+    $miny=$lo[1];
+    if(count($corners)==1){		# Zoom auf Punktkoordinate
+			$oPixelPos=ms_newPointObj();
+			if($this->formvars['epsg_code'] != '' AND $this->formvars['epsg_code'] != $this->user->rolle->epsg_code){
+				$oPixelPos->setXY($minx,$miny);
+				$projFROM = ms_newprojectionobj("init=epsg:".$this->formvars['epsg_code']);
+				$projTO = ms_newprojectionobj("init=epsg:".$this->user->rolle->epsg_code);
+				$oPixelPos->project($projFROM, $projTO);
+				$minx = $oPixelPos->x;
+				$miny = $oPixelPos->y;
+			}
+			#---------- Punkt-Rollenlayer erzeugen --------#
+			$legendentext ="Koordinate: ".$minx." ".$miny;
+			if(strpos($minx, '°') !== false){
+				$minx = dms2dec($minx);
+				$miny = dms2dec($miny);
+			}
+			$datastring ="the_geom from (select st_geomfromtext('POINT(".$minx." ".$miny.")', ".$this->user->rolle->epsg_code.") as the_geom, 1 as oid) as foo using unique oid using srid=".$this->user->rolle->epsg_code;
+			$group = $this->mapDB->getGroupbyName('Suchergebnis');
+			if($group != ''){
+				$groupid = $group['id'];
+			}
+			else{
+				$groupid = $this->mapDB->newGroup('Suchergebnis', 0);
+			}
+			$this->formvars['user_id'] = $this->user->id;
+			$this->formvars['stelle_id'] = $this->Stelle->id;
+			$this->formvars['aktivStatus'] = 1;
+			$this->formvars['Name'] = $legendentext;
+			$this->formvars['Gruppe'] = $groupid;
+			$this->formvars['Typ'] = 'search';
+			$this->formvars['Datentyp'] = 0;
+			$this->formvars['Data'] = $datastring;
+			$this->formvars['connectiontype'] = 6;
+			$connectionstring ='user='.$this->pgdatabase->user;
+			if($this->pgdatabase->passwd != ''){
+				$connectionstring.=' password='.$this->pgdatabase->passwd;
+			}
+			if($this->pgdatabase->host != ''){
+				$connectionstring.=' host='.$this->pgdatabase->host;
+			}
+			if($this->pgdatabase->port != ''){
+				$connectionstring.=' port='.$this->pgdatabase->port;
+			}
+			$connectionstring.=' dbname='.$this->pgdatabase->dbName;
+			$this->formvars['connection'] = $connectionstring;
+			$this->formvars['epsg_code'] = $this->user->rolle->epsg_code;
+			$this->formvars['transparency'] = 60;
+
+			$layer_id = $this->mapDB->newRollenLayer($this->formvars);
+
+			$classdata['layer_id'] = -$layer_id;
+			$class_id = $this->mapDB->new_Class($classdata);
+
+			if(defined('ZOOM2COORD_STYLE_ID') AND ZOOM2COORD_STYLE_ID != ''){
+				$style_id = $this->mapDB->copyStyle(ZOOM2COORD_STYLE_ID);
+			}
+			else{
+				$style['colorred'] = 255;
+				$style['colorgreen'] = 255;
+				$style['colorblue'] = 128;
+				$style['outlinecolorred'] = 0;
+				$style['outlinecolorgreen'] = 0;
+				$style['outlinecolorblue'] = 0;
+				$style['size'] = 10;
+				$style['symbolname'] = 'circle';
+				$style['backgroundcolor'] = NULL;
+				$style['minsize'] = NULL;
+				$style['maxsize'] = 100000;
+				$style['angle'] = 360;
+				$style_id = $this->mapDB->new_Style($style);
+			}
+
+			$this->mapDB->addStyle2Class($class_id, $style_id, 0);          # den Style der Klasse zuordnen
+			$this->user->rolle->set_one_Group($this->user->id, $this->Stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
+			$this->loadMap('DataBase');
+
+			# Bildkoordinaten ausrechnen
+			$this->pixwidth = ($this->map->extent->maxx - $this->map->extent->minx)/$this->map->width;
+			$pixel_x = ($minx-$this->map->extent->minx)/$this->pixwidth;
+			$pixel_y = ($this->map->extent->maxy-$miny)/$this->pixwidth;
+			$oPixelPos->setXY($pixel_x,$pixel_y);
+			if($this->map->scaledenom > COORD_ZOOM_SCALE){
+				$this->map->zoomscale(COORD_ZOOM_SCALE/4,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
+			}
+			else{
+				$this->map->zoompoint(1,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
+			}
+		}
+		else{	# Zoom auf Rechteck
+			$ru=explode(',',$corners[1]);      
+      $maxx=$ru[0];
+			$maxy=$ru[1];
+			$rect=ms_newRectObj();
+			$rect->setextent($minx,$miny,$maxx,$maxy);
+			if($this->formvars['epsg_code'] != '' AND $this->formvars['epsg_code'] != $this->user->rolle->epsg_code){
+				$projFROM = ms_newprojectionobj("init=epsg:".$this->formvars['epsg_code']);
+				$projTO = ms_newprojectionobj("init=epsg:".$this->user->rolle->epsg_code);
+				$rect->project($projFROM, $projTO);
+			}
+			$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
+			# Nochmal Zoomen auf die Mitte mit Faktor 1, damit der Ausschnitt in den erlaubten Bereich
+			# verschoben wird, falls er ausserhalb liegt, zoompoint berücksichtigt das, zoomrectangle nicht.
+			$oPixelPos=ms_newPointObj();
+			$oPixelPos->setXY($this->map->width/2,$this->map->height/2);
+			$this->map->zoompoint(1,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
+		}
+	}
+	
+	function zoom2wkt(){
+    $rect = $this->pgdatabase->getWKTBBox($this->formvars['wkt'], $this->formvars['epsg'], $this->user->rolle->epsg_code);
+    $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
+		if(MAPSERVERVERSION >= 600 ) {
+			$this->map_scaledenom = $this->map->scaledenom;
+		}
+		else {
+			$this->map_scaledenom = $this->map->scale;
+		}
   }
 
   # Speichert die Daten des MapObjetes in Datei oder Datenbank und den Extent in die Rolle
@@ -10777,22 +10807,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         $this->navMap($this->formvars['CMD']);
       }
     }
-  }
-
-  function zoom2coord(){
-  	$this->zoomMap(1);
-  	$this->scaleMap(5000);
-  }
-
-	function zoom2wkt(){
-    $rect = $this->pgdatabase->getWKTBBox($this->formvars['wkt'], $this->formvars['epsg'], $this->user->rolle->epsg_code);
-    $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
-		if(MAPSERVERVERSION >= 600 ) {
-			$this->map_scaledenom = $this->map->scaledenom;
-		}
-		else {
-			$this->map_scaledenom = $this->map->scale;
-		}
   }
 
 # 2006-03-20 pk

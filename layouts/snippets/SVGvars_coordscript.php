@@ -120,6 +120,7 @@
 				document.getElementById(\'message_box\').className = \'message_box_hidden\';
 				startwaiting();
 				document.GUI.INPUT_COORD.value = coords2[0]+","+coords2[1];
+				document.GUI.go.value = "zoom2coord";
 				document.GUI.CMD.value = "jump_coords";
 				document.GUI.submit();
 			}

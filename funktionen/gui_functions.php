@@ -647,6 +647,21 @@ function showMapParameter(epsg_code, width, height) {
 	}]);
 }
 
+function showExtentURL(epsg_code) {
+	var gui = document.GUI,
+			msg = " \
+				<div style=\"text-align: left\"> \
+					<h2>URL des aktuellen Kartenausschnitts</h2><br> \
+					<input id=\"extenturl\" style=\"width: 350px\" type=\"text\" value=\"<? echo URL.APPLVERSION; ?>index.php?go=zoom2coord&INPUT_COORD="+toFixed(gui.minx.value, 3)+","+toFixed(gui.miny.value, 3)+";"+toFixed(gui.maxx.value, 3)+","+toFixed(gui.maxy.value, 3)+"&epsg_code="+epsg_code+"\"><br> \
+				</div> \
+			";
+	message([{
+			'type': 'info',
+			'msg': msg
+	}]);
+	document.getElementById('extenturl').select();
+}
+
 function toFixed(value, precision) {
 	var power = Math.pow(10, precision || 0);
 	return String(Math.round(value * power) / power);

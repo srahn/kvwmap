@@ -106,6 +106,15 @@
 			<div id="map_functions_bar">
 				<div id="maptime">
 					<div style="float: left; padding: 0 0 0 5;">
+						<a title="<? echo $strExtentURL ?>" href="javascript:showExtentURL(<? echo $this->user->rolle->epsg_code; ?>);">
+							<div class="button_background">
+								<div class="emboss url_extent">
+									<img src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
+								</div>
+							</div>
+						</a>
+					</div>
+					<div style="float: left; padding: 0 0 0 10;">
 						<a title="<? echo $strSaveExtent; ?>" href="index.php?go=Kartenkommentar_Formular">
 							<div class="button_background">
 								<div class="emboss save_extent">
@@ -113,7 +122,7 @@
 								</div>
 							</div>
 						</a>
-					</div>
+					</div>				
 					<div style="float: left; padding: 0 0 0 10;">
 						<a title="<? echo $strChoose ?>" href="index.php?go=Kartenkommentar_Waehlen">
 							<div class="button_background">

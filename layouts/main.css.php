@@ -414,6 +414,10 @@ a.menuered:hover {
 	background-image: url(../graphics/switch_gle.png);
 }
 
+.url_extent{
+	background-image: url(../graphics/url_extent.png);
+}
+
 .save_extent{
 	background-image: url(../graphics/save_extent.png);
 }

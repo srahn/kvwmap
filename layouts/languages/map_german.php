@@ -23,6 +23,7 @@
   $strFreeText="Text Hinzufuegen";
   $strX="R";  
   $strY="H";
+	$strExtentURL="URL des Ausschnitts anzeigen";
   $strSaveExtent="Ausschnitt speichern";
 	$strSaveLayers="Themenauswahl speichern";
 	$strChooseLayers="Themenauswahl laden";
