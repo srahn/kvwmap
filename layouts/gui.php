@@ -28,6 +28,7 @@
 									<div style=" position: relative; overflow: hidden; ">
 										<script type="text/javascript">
 											currentform = document.GUI;
+											<? $this->currentform = 'document.GUI'; ?>
 										</script><?php
 										$this->debug->write("<br>Include <b>".$this->main."</b> in gui.php",4);
 										if(file_exists($this->main)){
