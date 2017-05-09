@@ -8,6 +8,7 @@ $strRotationAngle="Drehwinkel: ";
 $strPrintDetail="Druckausschnitt";
 $strLoad="Laden";
 $strReferenceMap="Übersichtskarte";
+$strExpandedLegend="erweiterte Legende";
 $strLegendExtra="Legende auf Extrablatt";
 $strNoMinMaxscaling="Maßstabseinschränkung aufheben";
 $strWarning1="Bitte aktualisieren Sie den Druckausschnitt durch Klick in die Maßstabseingabe und dann [Enter].";

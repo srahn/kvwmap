@@ -229,7 +229,8 @@ function rotate_print_extent(angle){
     </td>
 		<td align="left">
     	<? if($this->Document->activeframe[0]['legendsize'] > 0){ 
-    	echo $strLegendExtra; ?>&nbsp;<input type="checkbox" name="legend_extra" value="1" <? if($this->formvars['legend_extra']) echo 'checked="true"'; ?>">
+    	echo $strExpandedLegend; ?>&nbsp;<input type="checkbox" name="rollenlayer_legend" value="1" <? if($this->formvars['rollenlayer_legend']) echo 'checked="true"'; ?>">&nbsp;&nbsp;&nbsp;
+    	<? echo $strLegendExtra; ?>&nbsp;<input type="checkbox" name="legend_extra" value="1" <? if($this->formvars['legend_extra']) echo 'checked="true"'; ?>">
     	<? } ?>
     </td>
 		<td align="left">
