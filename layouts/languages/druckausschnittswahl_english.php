@@ -8,6 +8,7 @@ $strRotationAngle="Rotation Angle";
 $strPrintDetail="Print Extent";
 $strLoad="Load";
 $strReferenceMap="Referencemap";
+$strExpandedLegend="expanded Legend";
 $strLegendExtra="Legend on separate page";
 $strNoMinMaxscaling="disable minscale/maxscale";
 $strWarning1="Please update the print extent by clicking in the scale input and then [Enter].";

@@ -5142,8 +5142,10 @@ class GUI {
     $legendmapDB = new db_mapObj($this->Stelle->id, $this->user->id);
     $legendmapDB->nurAktiveLayer = 1;
     $layerset = $legendmapDB->read_Layer(1);
-    $rollenlayer = $legendmapDB->read_RollenLayer();
-    $layerset = array_merge($layerset, $rollenlayer);
+		if($this->formvars['rollenlayer_legend']){
+			$rollenlayer = $legendmapDB->read_RollenLayer();
+			$layerset = array_merge($layerset, $rollenlayer);
+		}
     for($i = 0; $i < $this->map->numlayers; $i++){
       $layer = $this->map->getlayer($i);
       $layer->set('status', 0);
