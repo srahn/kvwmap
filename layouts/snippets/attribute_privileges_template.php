@@ -113,8 +113,7 @@
 							  echo '<select style="width:100px" name="privileg_'.$this->attributes['name'][$i].$this->stelle->id.'">';
 								foreach($privilege_options AS $option) {
 									$selected = ($this->attributes_privileges[$this->attributes['name'][$i]] == $option['value'] ? ' selected' : '');
-								#	echo '<option value="' . $option['value'] . '"' . $selected . '>' . $option['output'] . '</option>';
-echo '<option debug="' . $this->attributes_privileges[$this->attributes['name'][$i]] . '" value="' . $option['value'] . '"' . $selected . '>' . $option['output'] . '</option>';
+									echo '<option value="' . $option['value'] . '"' . $selected . '>' . $option['output'] . '</option>';
 								}
 								echo '</select>
 							  </td>
