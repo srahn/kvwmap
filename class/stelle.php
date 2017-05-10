@@ -1129,29 +1129,34 @@ class stelle {
 
 	function set_attributes_privileges($formvars, $attributes){
 		# erst alles löschen zu diesem Layer und Stelle
-		$sql = 'DELETE FROM layer_attributes2stelle WHERE ';
-		$sql.= 'layer_id = '.$formvars['selected_layer_id'].' AND ';
-		$sql.= 'stelle_id = '.$this->id;
-		$this->debug->write("<p>file:users.php class:stelle->set_attributes_privileges - Speichern des Layerrechte zur Stelle:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		$sql = "
+			DELETE FROM
+				`layer_attributes2stelle`
+			WHERE
+				`layer_id` = " . $formvars['selected_layer_id'] . " AND
+				`stelle_id` = " . $this->id . "
+		";
+		#echo '<br>Sql: ' . $sql;
+		$this->debug->write("<p>file:users.php class:stelle->set_attributes_privileges - Speichern des Layerrechte zur Stelle:<br>" . $sql, 4);
+		$query=mysql_query($sql, $this->database->dbConn);
+		if ($query == 0) { $this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__, 4); return 0; }
 		# dann Attributrechte eintragen
-		for($i = 0; $i < count($attributes['type']); $i++){
-			if($formvars['privileg_'.$attributes['name'][$i].$this->id] !== ''){
-				$sql = 'INSERT INTO layer_attributes2stelle SET ';
-				$sql.= 'layer_id = '.$formvars['selected_layer_id'].', ';
-				$sql.= 'stelle_id = '.$this->id.', ';
-				$sql.= 'attributename = "'.$attributes['name'][$i].'", ';
-				$sql.= 'privileg = '.$formvars['privileg_'.$attributes['name'][$i].$this->id];
-				if($formvars['tooltip_'.$attributes['name'][$i].$this->id] == 'on'){
-					$sql.= ', tooltip = 1';
-				}
-				else{
-					$sql.= ', tooltip = 0';
-				}
-				$this->debug->write("<p>file:users.php class:stelle->set_attributes_privileges - Speichern des Layerrechte zur Stelle:<br>".$sql,4);
-				$query=mysql_query($sql,$this->database->dbConn);
-				if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		for ($i = 0; $i < count($attributes['type']); $i++) {
+			if($formvars['privileg_'.$attributes['name'][$i].$this->id] !== '') {
+				$sql = "
+					INSERT INTO
+						layer_attributes2stelle
+					SET 
+						`layer_id` = " . $formvars['selected_layer_id'] . ",
+						`stelle_id` = " . $this->id . ",
+						`attributename` = '" . $attributes['name'][$i] . "',
+						`privileg` = " . $formvars['privileg_' . $attributes['name'][$i] . $this->id] .",
+						`tooltip`= " . ($formvars['tooltip_' . $attributes['name'][$i] . $this->id] == 'on' ? "1" : "0") . "
+				";
+				#echo '<br>Sql: ' . $sql;
+				$this->debug->write("<p>file:users.php class:stelle->set_attributes_privileges - Speichern des Layerrechte zur Stelle:<br>" . $sql, 4);
+				$query=mysql_query($sql, $this->database->dbConn);
+				if ($query==0) { $this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__, 4); return 0; }
 			}
 		}
 	}

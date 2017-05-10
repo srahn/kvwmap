@@ -79,8 +79,8 @@
 							$noentry = false;
 						}
 						$attributenames = implode('|', $this->attributes['name']);
-			    	for($i = 0; $i < count($this->attributes['type']); $i++){
-			    		if($this->stelle->id == ''){
+			    	for ($i = 0; $i < count($this->attributes['type']); $i++){
+			    		if ($this->stelle->id == ''){
 			    			$this->attributes_privileges[$this->attributes['name'][$i]] = $this->attributes['privileg'][$i]; 	# die default-Rechte kommen aus layer_attributes
 			    			$this->attributes_privileges['tooltip_'.$this->attributes['name'][$i]] = $this->attributes['query_tooltip'][$i]; 	# die default-Rechte kommen aus layer_attributes
 			    		}
@@ -113,7 +113,8 @@
 							  echo '<select style="width:100px" name="privileg_'.$this->attributes['name'][$i].$this->stelle->id.'">';
 								foreach($privilege_options AS $option) {
 									$selected = ($this->attributes_privileges[$this->attributes['name'][$i]] == $option['value'] ? ' selected' : '');
-									echo '<option value="' . $option['value'] . '"' . $selected . '>' . $option['output'] . '</option>';
+								#	echo '<option value="' . $option['value'] . '"' . $selected . '>' . $option['output'] . '</option>';
+echo '<option debug="' . $this->attributes_privileges[$this->attributes['name'][$i]] . '" value="' . $option['value'] . '"' . $selected . '>' . $option['output'] . '</option>';
 								}
 								echo '</select>
 							  </td>
