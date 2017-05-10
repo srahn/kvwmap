@@ -15847,16 +15847,6 @@ class db_mapObj{
   function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false){
 		global $language;
 
-		if ($language != 'german') {
-			$name_column = "
-			CASE
-				WHEN l.`Name_" . $language . "` != \"\" THEN l.`Name_" . $language . "`
-				ELSE l.`Name`
-			END AS Name";
-		}
-		else
-			$name_column = "l.Name";
-
 		$alias_column = (
 			(!$all_languages AND $language != 'german') ?
 			"
@@ -15871,11 +15861,7 @@ class db_mapObj{
 		);
 
 		if ($attributenames != NULL) {
-			$einschr = " AND
-				a.name IN ('" .
-					implode("', '", $attributenames) . "
-				')
-			";
+			$einschr = " AND a.name IN ('" . implode("', '", $attributenames) . "')";
 		}
 
 		$sql = "
