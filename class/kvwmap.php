@@ -7220,29 +7220,29 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     );
 
     # Löschen der in der Selectbox entfernten Stellen
-      $layerstellen = $mapDB->get_stellen_from_layer($this->formvars['selected_layer_id']);
-      for($i = 0; $i < count($layerstellen['ID']); $i++){
-        $found = false;
-        for($j = 0; $j < count($stellen); $j++){
-          if($stellen[$j] == $layerstellen['ID'][$i]){
-            $found = true;
-          }
-        }
-        if($found == false){
-          $deletestellen[] = $layerstellen['ID'][$i];
+    $layerstellen = $mapDB->get_stellen_from_layer($this->formvars['selected_layer_id']);
+    for($i = 0; $i < count($layerstellen['ID']); $i++){
+      $found = false;
+      for($j = 0; $j < count($stellen); $j++){
+        if($stellen[$j] == $layerstellen['ID'][$i]){
+          $found = true;
         }
       }
-      if($deletestellen != 0){
-        for($i = 0; $i < count($deletestellen); $i++){
-          $stelle = new stelle($deletestellen[$i], $this->database);
-          $stelle->deleteLayer(array($this->formvars['selected_layer_id']), $this->pgdatabase);
-          $users = $stelle->getUser();
-          for($j = 0; $j < count($users['ID']); $j++){
-            $this->user->rolle->deleteLayer($users['ID'][$j], array($deletestellen[$i]), array($this->formvars['selected_layer_id']));
-            $this->user->rolle->updateGroups($users['ID'][$j],$deletestellen[$i], $this->formvars['selected_layer_id']);
-          }
+      if($found == false){
+        $deletestellen[] = $layerstellen['ID'][$i];
+      }
+    }
+    if($deletestellen != 0){
+      for($i = 0; $i < count($deletestellen); $i++){
+        $stelle = new stelle($deletestellen[$i], $this->database);
+        $stelle->deleteLayer(array($this->formvars['selected_layer_id']), $this->pgdatabase);
+        $users = $stelle->getUser();
+        for($j = 0; $j < count($users['ID']); $j++){
+          $this->user->rolle->deleteLayer($users['ID'][$j], array($deletestellen[$i]), array($this->formvars['selected_layer_id']));
+          $this->user->rolle->updateGroups($users['ID'][$j],$deletestellen[$i], $this->formvars['selected_layer_id']);
         }
       }
+    }
     # /Löschen der in der Selectbox entfernten Stellen
 
 		# Klassen
@@ -9697,15 +9697,15 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
   	$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
     $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
-    if($this->formvars['stelle'] != '' AND $this->formvars['selected_layer_id'] != ''){
+    if ($this->formvars['stelle'] != '' AND $this->formvars['selected_layer_id'] != '') {
 			$stellen = explode('|', $this->formvars['stelle']);
-			foreach($stellen as $stelleid){
+			foreach ($stellen as $stelleid) {
 				$stelle = new stelle($stelleid, $this->database);
 				$stelle->set_attributes_privileges($this->formvars, $this->attributes);
 				$stelle->set_layer_privileges($this->formvars['selected_layer_id'], $this->formvars['privileg'.$stelleid], $this->formvars['export_privileg'.$stelleid]);
 			}
     }
-    elseif($this->formvars['selected_layer_id'] != ''){
+    elseif ($this->formvars['selected_layer_id'] != '') {
       $mapdb->set_default_layer_privileges($this->formvars, $this->attributes);
     }
     $this->layer_attributes_privileges();
@@ -15846,29 +15846,72 @@ class db_mapObj{
 
   function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false){
 		global $language;
-		if($attributenames != NULL){
-			$einschr = ' AND a.name IN (\'';
-			$einschr.= implode('\', \'', $attributenames);
-			$einschr.= '\')';
+
+		$alias_column = (
+			(!$all_languages AND $language != 'german') ?
+			"
+				CASE
+					WHEN `alias_" . $language. "` != '' THEN `alias_" . $language . "`
+					ELSE `alias`
+				END AS alias
+			" :
+			"
+				`alias`
+			"
+		);
+
+		if ($attributenames != NULL) {
+			$einschr = " AND a.name IN ('" . implode("', '", $attributenames) . "')";
 		}
-		$sql = 'SELECT ';
-		if(!$all_languages AND $language != 'german') {
-			$sql.='CASE WHEN `alias_'.$language.'` != "" THEN `alias_'.$language.'` ELSE `alias` END AS ';
-		}
-		$sql.='alias, `alias_low-german`, alias_english, alias_polish, alias_vietnamese, layer_id, a.name, real_name, tablename, table_alias_name, type, d.name as typename, geometrytype, constraints, nullable, length, decimal_length, `default`, form_element_type, options, tooltip, `group`, arrangement, labeling, raster_visibility, mandatory, quicksearch, `order`, privileg, query_tooltip ';
-		$sql.='FROM layer_attributes as a ';
-		$sql.='LEFT JOIN datatypes as d ON d.id = REPLACE(type, \'_\', \'\') ';
-		$sql.='WHERE layer_id = '.$layer_id.$einschr.' ORDER BY `order`';
+
+		$sql = "
+			SELECT " .
+				$alias_column . ", `alias_low-german`, `alias_english`, `alias_polish`, `alias_vietnamese`,
+				`layer_id`,
+				a.`name`,
+				`real_name`,
+				`tablename`,
+				`table_alias_name`,
+				`type`,
+				d.`name` as typename,
+				`geometrytype`,
+				`constraints`,
+				`nullable`,
+				`length`,
+				`decimal_length`,
+				`default`,
+				`form_element_type`,
+				`options`,
+				`tooltip`,
+				`group`,
+				`arrangement`,
+				`labeling`,
+				`raster_visibility`,
+				`mandatory`,
+				`quicksearch`,
+				`order`,
+				`privileg`,
+				`query_tooltip`
+			FROM
+				`layer_attributes` as a LEFT JOIN
+				`datatypes` as d ON d.`id` = REPLACE(`type`, '_', '')
+			WHERE
+				`layer_id` = " . $layer_id .
+				$einschr . "
+			ORDER BY
+				`order`
+		";
+		#echo '<br>Sql read_layer_attributes: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_layer_attributes:<br>".$sql,4);
 		$query=mysql_query($sql);
 		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
 		$i = 0;
-		while($rs=mysql_fetch_array($query)){
-			$attributes['name'][$i]= $rs['name'];
+		while ($rs = mysql_fetch_array($query)) {
+			$attributes['name'][$i] = $rs['name'];
 			$attributes['indizes'][$rs['name']] = $i;
-			$attributes['real_name'][$rs['name']]= $rs['real_name'];
-			if($rs['tablename']){
-				if(strpos($rs['tablename'], '.') !== false){
+			$attributes['real_name'][$rs['name']] = $rs['real_name'];
+			if ($rs['tablename']){
+				if (strpos($rs['tablename'], '.') !== false){
 					$explosion = explode('.', $rs['tablename']);
 					$rs['tablename'] = $explosion[1];		# Tabellenname ohne Schema
 					$attributes['schema_name'][$rs['tablename']] = $explosion[0];
@@ -15876,16 +15919,16 @@ class db_mapObj{
 				$attributes['table_name'][$i]= $rs['tablename'];
 				$attributes['table_name'][$rs['name']] = $rs['tablename'];
 			}
-			if($rs['table_alias_name'])$attributes['table_alias_name'][$i]= $rs['table_alias_name'];
-			if($rs['table_alias_name'])$attributes['table_alias_name'][$rs['name']]= $rs['table_alias_name'];
-			$attributes['table_alias_name'][$rs['tablename']]= $rs['table_alias_name'];
-			$attributes['type'][$i]= $rs['type'];
-			$attributes['typename'][$i]= $rs['typename'];
+			if ($rs['table_alias_name'])$attributes['table_alias_name'][$i] = $rs['table_alias_name'];
+			if ($rs['table_alias_name'])$attributes['table_alias_name'][$rs['name']] = $rs['table_alias_name'];
+			$attributes['table_alias_name'][$rs['tablename']] = $rs['table_alias_name'];
+			$attributes['type'][$i] = $rs['type'];
+			$attributes['typename'][$i] = $rs['typename'];
 			$type = ltrim($rs['type'], '_');
-			if($recursive AND is_numeric($type)){
+			if ($recursive AND is_numeric($type)){
 				$attributes['type_attributes'][$i] = $this->read_datatype_attributes($type, $layerdb, NULL, $all_languages, true);
 			}
-			if($rs['type'] == 'geometry'){
+			if ($rs['type'] == 'geometry'){
 				$attributes['the_geom'] = $rs['name'];
 			}
 			$attributes['geomtype'][$i]= $rs['geometrytype'];
@@ -15896,46 +15939,46 @@ class db_mapObj{
 			$attributes['length'][$i]= $rs['length'];
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
 
-			if(substr($rs['default'], 0, 6) == 'SELECT'){					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
+			if (substr($rs['default'], 0, 6) == 'SELECT'){					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
 				$ret1 = $layerdb->execSQL($rs['default'], 4, 0);
-				if($ret1[0]==0){
+				if ($ret1[0] == 0) {
 					$attributes['default'][$i] = array_pop(pg_fetch_row($ret1[1]));
 				}
 			}
-			else{															# das sind die alten Defaultwerte ohne 'SELECT ' davor, ab Version 1.13 haben Defaultwerte immer ein SELECT, wenn man den Layer in dieser Version einmal gespeichert hat
-				$attributes['default'][$i]= $rs['default'];
+			else {															# das sind die alten Defaultwerte ohne 'SELECT ' davor, ab Version 1.13 haben Defaultwerte immer ein SELECT, wenn man den Layer in dieser Version einmal gespeichert hat
+				$attributes['default'][$i] = $rs['default'];
 			}
-			$attributes['form_element_type'][$i]= $rs['form_element_type'];
-			$attributes['form_element_type'][$rs['name']]= $rs['form_element_type'];
+			$attributes['form_element_type'][$i] = $rs['form_element_type'];
+			$attributes['form_element_type'][$rs['name']] = $rs['form_element_type'];
 			$rs['options'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $rs['options']);
 			$rs['options'] = str_replace('$language', $this->user->rolle->language, $rs['options']);
-			$attributes['options'][$i]= $rs['options'];
-			$attributes['options'][$rs['name']]= $rs['options'];
-			$attributes['alias'][$i]= $rs['alias'];
-			$attributes['alias'][$attributes['name'][$i]]= $rs['alias'];
-			$attributes['alias_low-german'][$i]= $rs['alias_low-german'];
-			$attributes['alias_english'][$i]= $rs['alias_english'];
-			$attributes['alias_polish'][$i]= $rs['alias_polish'];
-			$attributes['alias_vietnamese'][$i]= $rs['alias_vietnamese'];
-			$attributes['tooltip'][$i]= $rs['tooltip'];
-			$attributes['group'][$i]= $rs['group'];
-			$attributes['arrangement'][$i]= $rs['arrangement'];
-			$attributes['labeling'][$i]= $rs['labeling'];
-			$attributes['raster_visibility'][$i]= $rs['raster_visibility'];
-			$attributes['mandatory'][$i]= $rs['mandatory'];
-			$attributes['quicksearch'][$i]= $rs['quicksearch'];
-			$attributes['privileg'][$i]= $rs['privileg'];
-			$attributes['query_tooltip'][$i]= $rs['query_tooltip'];
+			$attributes['options'][$i] = $rs['options'];
+			$attributes['options'][$rs['name']] = $rs['options'];
+			$attributes['alias'][$i] = $rs['alias'];
+			$attributes['alias'][$attributes['name'][$i]] = $rs['alias'];
+			$attributes['alias_low-german'][$i] = $rs['alias_low-german'];
+			$attributes['alias_english'][$i] = $rs['alias_english'];
+			$attributes['alias_polish'][$i] = $rs['alias_polish'];
+			$attributes['alias_vietnamese'][$i] = $rs['alias_vietnamese'];
+			$attributes['tooltip'][$i] = $rs['tooltip'];
+			$attributes['group'][$i] = $rs['group'];
+			$attributes['arrangement'][$i] = $rs['arrangement'];
+			$attributes['labeling'][$i] = $rs['labeling'];
+			$attributes['raster_visibility'][$i] = $rs['raster_visibility'];
+			$attributes['mandatory'][$i] = $rs['mandatory'];
+			$attributes['quicksearch'][$i] = $rs['quicksearch'];
+			$attributes['privileg'][$i] = $rs['privileg'];
+			$attributes['query_tooltip'][$i] = $rs['query_tooltip'];
 			$i++;
 		}
-		if($attributes['table_name'] != NULL){
+		if ($attributes['table_name'] != NULL) {
 			$attributes['all_table_names'] = array_unique($attributes['table_name']);
 			//$attributes['all_alias_table_names'] = array_values(array_unique($attributes['table_alias_name']));
-			foreach($attributes['all_table_names'] as $tablename){
+			foreach ($attributes['all_table_names'] as $tablename) {
 				$attributes['oids'][] = $layerdb->check_oid($tablename);   # testen ob Tabelle oid hat
 			}
 		}
-		else{
+		else {
 			$attributes['all_table_names'] = array();
 		}
 		return $attributes;
@@ -16048,13 +16091,26 @@ class db_mapObj{
 	}
 
   function get_stellen_from_layer($layer_id){
-    $sql = 'SELECT ID, Bezeichnung FROM stelle, used_layer WHERE used_layer.Stelle_ID = stelle.ID AND used_layer.Layer_ID = '.$layer_id.' ORDER BY Bezeichnung';
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->get_stellen_from_layer - Lesen der Stellen eines Layers:<br>".$sql,4);
+    $sql = "
+			SELECT
+				`ID`,
+				`Bezeichnung`
+			FROM
+				`stelle`,
+				`used_layer`
+			WHERE
+				`used_layer`.`Stelle_ID` = `stelle`.`ID` AND
+				`used_layer`.`Layer_ID` = " . $layer_id . "
+			ORDER BY
+				`Bezeichnung`
+		";
+		#echo '<br>Sql: ' . $sql;
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->get_stellen_from_layer - Lesen der Stellen eines Layers:<br>" . $sql, 4);
     $query=mysql_query($sql);
-    if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
-    while($rs=mysql_fetch_array($query)) {
-      $stellen['ID'][]=$rs['ID'];
-      $stellen['Bezeichnung'][]=$rs['Bezeichnung'];
+    if ($query==0) { echo "<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>" . INFO1; return 0; }
+    while ($rs = mysql_fetch_array($query)) {
+      $stellen['ID'][] = $rs['ID'];
+      $stellen['Bezeichnung'][] = $rs['Bezeichnung'];
     }
     return $stellen;
   }
@@ -16080,10 +16136,18 @@ class db_mapObj{
   }
 
   function get_Layer($id, $replace_class_item = false) {
-    $sql ='SELECT * FROM layer WHERE Layer_ID = '.$id;
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->get_Layer - Lesen eines Layers:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+    $sql = "
+			SELECT
+				*
+			FROM
+				`layer`
+			WHERE
+				`Layer_ID` = " . $id ."
+		";
+		#echo '<br>Sql: ' . $sql;
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->get_Layer - Lesen eines Layers:<br>" . $sql, 4);
+    $query = mysql_query($sql);
+    if ($query == 0) { echo "<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>" . INFO1; return 0; }
     $layer = mysql_fetch_array($query);
 		if ($replace_class_item) {
 			$layer['classitem'] = replace_params($layer['classitem'],	rolle::$layer_params);
@@ -16093,29 +16157,40 @@ class db_mapObj{
   }
 
 	function set_default_layer_privileges($formvars, $attributes){
-		for($i = 0; $i < count($attributes['type']); $i++){
-			if($formvars['privileg_'.$attributes['name'][$i]] == '')$formvars['privileg_'.$attributes['name'][$i]] = 'NULL';
-			$sql = 'UPDATE layer_attributes SET ';
-			$sql.= 'privileg = '.$formvars['privileg_'.$attributes['name'][$i]];
-			if($formvars['tooltip_'.$attributes['name'][$i]] == 'on'){
-				$sql.= ', query_tooltip = 1';
-			}
-			else{
-				$sql.= ', query_tooltip = 0';
-			}
-			$sql.= ' WHERE layer_id = '.$formvars['selected_layer_id'].' AND name = "'.$attributes['name'][$i].'"';
-			$this->debug->write("<p>file:users.php class:stelle->set_default_layer_privileges - Speichern des Layerrechte zur Stelle:<br>".$sql,4);
-			$query=mysql_query($sql);
-			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-			$sql = 'UPDATE layer SET privileg = "'.$formvars['privileg'].'", export_privileg = "'.$formvars['export_privileg'].'" WHERE ';
-			$sql.= 'Layer_ID = '.$formvars['selected_layer_id'];
+		for ($i = 0; $i < count($attributes['type']); $i++) {
+			if ($formvars['privileg_'.$attributes['name'][$i]] == '') $formvars['privileg_'.$attributes['name'][$i]] = 'NULL';
+			$sql = "
+				UPDATE
+					`layer_attributes`
+				SET
+					`privileg` = " . $formvars['privileg_' . $attributes['name'][$i]] . ",
+					`query_tooltip` = " . ($formvars['tooltip_' . $attributes['name'][$i]] == 'on' ? "1" : "0") ."
+				WHERE
+					`layer_id` = " . $formvars['selected_layer_id'] . " AND
+					`name` = '" . $attributes['name'][$i] . "'
+			";
+			#echo '<br>Sql: ' . $sql;
+			$this->debug->write("<p>file:users.php class:stelle->set_default_layer_privileges - Speichern des Layerrechte zur Stelle:<br>" . $sql, 4);
+			$query = mysql_query($sql);
+			if ($query == 0) { $this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__, 4); return 0; }
+
+			$sql = "
+				UPDATE
+					`layer`
+				SET
+					`privileg` = '" . $formvars['privileg'] . "',
+					`export_privileg` = '" . $formvars['export_privileg'] . "'
+				WHERE
+					`Layer_ID` = " . $formvars['selected_layer_id'] . "
+			";
+			#echo '<br>Sql: ' . $sql;
 			$this->debug->write("<p>file:users.php class:stelle->set_default_layer_privileges - Speichern der Layerrechte zur Stelle:<br>".$sql,4);
 			$query=mysql_query($sql);
 			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		}
 	}
 
-	function get_layersfromgroup($group_id ){
+	function get_layersfromgroup($group_id ) {
     $sql ='SELECT * FROM layer';
 		if($group_id != '')$sql.=' WHERE Gruppe = '.$group_id;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->get_Layerfromgroup - Lesen der Layer einer Gruppe:<br>".$sql,4);
