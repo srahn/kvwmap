@@ -261,7 +261,7 @@ chmod(IMAGEPATH.$svgfile, 0666);
 $svg='<?xml version="1.0"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
   "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg id="svgmap" zoomAndPan="disable" width="'.$res_x.'" height="'.$res_y.'" onload="init();" onmousemove="mouse_move(evt);top.drag(evt);" 
+<svg id="svgmap" zoomAndPan="disable" width="'.$res_x.'" height="'.$res_y.'" onload="init();" onmousemove="mouse_move(evt);top.drag(evt);" onmouseup="top.dragstop(evt)"
   xmlns="http://www.w3.org/2000/svg" version="1.1"
   xmlns:xlink="http://www.w3.org/1999/xlink">
 <title> kvwmap </title><desc> kvwmap - WebGIS application - kvwmap.sourceforge.net </desc>
