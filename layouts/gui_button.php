@@ -43,6 +43,7 @@ if($this->user->rolle->querymode == 1){
 							<div style=" position: relative; overflow: hidden; ">
 								<script type="text/javascript">
 									currentform = document.GUI;
+									<? $this->currentform = 'document.GUI'; ?>
 								</script>
 								<?php
 								$this->debug->write("Include <b>".$this->main."</b> in gui.php",4);
