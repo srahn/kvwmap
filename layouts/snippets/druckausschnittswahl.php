@@ -3,8 +3,11 @@
   include(LAYOUTPATH.'languages/druckausschnittswahl_'.$this->user->rolle->language.'.php');
 	include(LAYOUTPATH.'languages/map_'.$this->user->rolle->language.'.php');
  ?>
+<script src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
 <!--
+
+Text_rollenlayer_legend=["<? echo $strHelp; ?>:","<? echo $strRollenlayerLegend ?>"];
 
 function setprintextent(wert){
 	document.GUI.printextent.value = wert;
@@ -229,7 +232,9 @@ function rotate_print_extent(angle){
     </td>
 		<td align="left">
     	<? if($this->Document->activeframe[0]['legendsize'] > 0){ 
-    	echo $strExpandedLegend; ?>&nbsp;<input type="checkbox" name="rollenlayer_legend" value="1" <? if($this->formvars['rollenlayer_legend']) echo 'checked="true"'; ?>">&nbsp;&nbsp;&nbsp;
+    	echo $strExpandedLegend; ?>&nbsp;<input type="checkbox" name="rollenlayer_legend" value="1" <? if($this->formvars['rollenlayer_legend']) echo 'checked="true"'; ?>">
+			<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_rollenlayer_legend, Style[0], document.getElementById('Tip1'))" onmouseout="htm()">
+			<div id="Tip1" style="visibility:hidden;position:absolute;z-index:1000;"></div>&nbsp;&nbsp;&nbsp;
     	<? echo $strLegendExtra; ?>&nbsp;<input type="checkbox" name="legend_extra" value="1" <? if($this->formvars['legend_extra']) echo 'checked="true"'; ?>">
     	<? } ?>
     </td>
