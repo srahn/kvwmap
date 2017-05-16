@@ -44,6 +44,7 @@ class data_import_export {
 		switch ($type){
 			case 'Shape' : {
 				$custom_tables = $this->import_custom_shape($formvars, $pgdatabase);
+				$formvars['epsg'] = $custom_tables[0]['epsg'];
 			}break;
 			case 'point' : {
 				$file = basename($formvars['file1']);
@@ -65,19 +66,21 @@ class data_import_export {
 				$formvars['epsg'] = $custom_tables[0]['epsg'];
 			}break;
 		}
-		foreach($custom_tables as $custom_table){				# ------ Rollenlayer erzeugen ------- #
-			$layer_id = $this->create_rollenlayer(
-				$database,
-				$pgdatabase,
-				$stelle,
-				$user,
-				$file." (".date('d.m. H:i',time()).")".str_repeat(' ', $custom_table['datatype']),
-				CUSTOM_SHAPE_SCHEMA,
-				$custom_table,
-				$formvars['epsg']
-			);
+		if($custom_tables != NULL){
+			foreach($custom_tables as $custom_table){				# ------ Rollenlayer erzeugen ------- #
+				$layer_id = $this->create_rollenlayer(
+					$database,
+					$pgdatabase,
+					$stelle,
+					$user,
+					$file." (".date('d.m. H:i',time()).")".str_repeat(' ', $custom_table['datatype']),
+					CUSTOM_SHAPE_SCHEMA,
+					$custom_table,
+					$formvars['epsg']
+				);
+			}
+			return -$layer_id;
 		}
-		return -$layer_id;
 	}
 
 	function create_rollenlayer($database, $pgdatabase, $stelle, $user, $layername, $schema, $custom_table, $epsg) {
@@ -318,23 +321,56 @@ class data_import_export {
 		}
 	}
 	
+	function get_shp_epsg($file, $pgdatabase){
+		global $supportedSRIDs;
+		if(file_exists($file.'.prj')){
+			$prj = file_get_contents($file.'.prj');
+			# 1. Versuch: Suche nach AUTHORITY
+			for($i = 0; $i < count($supportedSRIDs); $i++){
+				if(strpos($prj, 'AUTHORITY["EPSG","'.$supportedSRIDs[$i].'"]') > 0)return $supportedSRIDs[$i];
+			}
+			# 2. Versuch: Abgleich bestimmter Parameter im prj-String mit spatial_ref_sys_alias
+			$datum = get_first_word_after($prj, 'DATUM[', '"', '"');
+			$projection = get_first_word_after($prj, 'PROJECTION[', '"', '"');
+			$false_easting = get_first_word_after($prj, 'False_Easting"', ',', ']');
+			$central_meridian = get_first_word_after($prj, 'Central_Meridian"', ',', ']');
+			$scale_factor = get_first_word_after($prj, 'Scale_Factor"', ',', ']');
+			$unit = get_first_word_after($prj, 'UNIT[', '"', '"', true);
+			$sql = "SELECT srid FROM spatial_ref_sys_alias
+							WHERE '".$datum."' = ANY(datum) 
+							AND '".$projection."' = ANY(projection) 
+							AND ".$false_easting." = false_easting 
+							AND ".$central_meridian." = central_meridian 
+							AND ".$scale_factor." = scale_factor 
+							AND '".$unit."' = ANY(unit)";
+			$ret = $pgdatabase->execSQL($sql,4, 0);
+			if(!$ret[0])$result = pg_fetch_row($ret[1]);
+			return $result[0];
+		}
+		else return false;
+	}
+	
 	function import_custom_shape($formvars, $pgdatabase){
-		$_files = $_FILES;	
-		if($_files['file1']['name']){     # eine Zipdatei wurde ausgewählt
-      $nachDatei = UPLOADPATH.$_files['file1']['name'];
-      if(move_uploaded_file($_files['file1']['tmp_name'],$nachDatei)){
-				$files = unzip($nachDatei, false, false, true);
-				$firstfile = explode('.', $files[0]);
-				return $this->load_shp_into_pgsql(
-					$pgdatabase,
-					UPLOADPATH,
-					$firstfile[0],
-					$formvars['epsg'],
-					CUSTOM_SHAPE_SCHEMA,
-					'a' . strtolower(umlaute_umwandeln(substr($file, 0, 15))) . rand(1,1000000)
-				);
+		if($formvars['shapefile'] == ''){
+			$_files = $_FILES;
+			if($_files['file1']['name']){     # eine Zipdatei wurde ausgewählt
+				$nachDatei = UPLOADPATH.$_files['file1']['name'];
+				if(move_uploaded_file($_files['file1']['tmp_name'],$nachDatei)){
+					$files = unzip($nachDatei, false, false, true);
+					$firstfile = explode('.', $files[0]);
+					$formvars['shapefile'] = $firstfile[0];
+					# EPSG-Code aus prj-Datei ermitteln
+					if($formvars['epsg'] == '')$formvars['epsg'] = $this->get_shp_epsg(UPLOADPATH.$firstfile[0], $pgdatabase);
+					if($formvars['epsg'] == ''){
+						$this->shapefile = $formvars['shapefile'];		# EPSG-Code konnte nicht aus prj-Datei ermittelt werden, Dateiname merken und EPSG-Code nachfragen
+						return;
+					}
+				}
 			}
 		}
+		$custom_table = $this->load_shp_into_pgsql($pgdatabase, UPLOADPATH, $formvars['shapefile'], $formvars['epsg'], CUSTOM_SHAPE_SCHEMA, 'a'.strtolower(umlaute_umwandeln(substr($formvars['shapefile'], 0, 15))).rand(1,1000000));
+		$custom_table[0]['epsg'] = $formvars['epsg'];
+		return $custom_table;
 	}
 
 	function load_shp_into_pgsql($pgdatabase, $uploadpath, $file, $epsg, $schemaname, $tablename) {

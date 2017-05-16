@@ -1597,11 +1597,14 @@ function output_select($form_field_name, $data, $selected_value = null, $onchang
 
 /*
 * Die Funktion liefert das erste Word, welches nach $word in $str gefunden wird.
+* Über die optionalen Parameter $delim1 und $delim2 kann man die Trennzeichen vor und nach dem Wort angeben.
+* Wenn der optionale Parameter $last true ist, wird das letzte Vorkommen des Wortes verwendet.
 */
-function get_first_word_after($str, $word) {
-	$word_pos = stripos($str, $word);
-	$str_from_word_pos = substr($str, $word_pos);
-	$parts = preg_split('/\s+/', $str_from_word_pos);
-	return $parts[1];
+function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last = false){
+	if($last)$word_pos = strripos($str, $word);
+	else $word_pos = stripos($str, $word);
+	$str_from_word_pos = substr($str, $word_pos+strlen($word));
+	$parts = explode($delim2, trim($str_from_word_pos, $delim1));
+	return $parts[0];
 }
 ?>

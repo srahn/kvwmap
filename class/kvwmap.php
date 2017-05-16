@@ -9466,12 +9466,17 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		include_(CLASSPATH.'data_import_export.php');
 		$this->data_import_export = new data_import_export();
 		$layer_id = $this->data_import_export->create_import_rollenlayer($this->formvars, 'Shape', $this->Stelle, $this->user, $this->database, $this->pgdatabase);
-		$this->loadMap('DataBase');
-		$this->zoomToMaxLayerExtent($layer_id);
-		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
-    $this->drawMap();
-    $this->saveMap('');
-    $this->output();
+		if($layer_id != NULL){
+			$this->loadMap('DataBase');
+			$this->zoomToMaxLayerExtent($layer_id);
+			$this->user->rolle->newtime = $this->user->rolle->last_time_id;
+			$this->drawMap();
+			$this->saveMap('');
+			$this->output();
+		}
+		else{
+			$this->create_shp_rollenlayer();
+		}    
 	}
 
 	function create_point_rollenlayer(){
