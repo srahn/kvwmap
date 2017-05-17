@@ -1603,8 +1603,10 @@ function output_select($form_field_name, $data, $selected_value = null, $onchang
 function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last = false){
 	if($last)$word_pos = strripos($str, $word);
 	else $word_pos = stripos($str, $word);
-	$str_from_word_pos = substr($str, $word_pos+strlen($word));
-	$parts = explode($delim2, trim($str_from_word_pos, $delim1));
-	return $parts[0];
+	if($word_pos !== false){
+		$str_from_word_pos = substr($str, $word_pos+strlen($word));
+		$parts = explode($delim2, trim($str_from_word_pos, $delim1));
+		return $parts[0];
+	}
 }
 ?>
