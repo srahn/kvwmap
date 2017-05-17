@@ -840,7 +840,8 @@ thead.gle th {
  background-color: <? echo BG_GLEATTRIBUTE; ?>;
 }
 
-.gle_attribute_value { 
+.gle_attribute_value {
+ position: relative;
  padding-left: 4px;
  padding-right: 5px;
 }

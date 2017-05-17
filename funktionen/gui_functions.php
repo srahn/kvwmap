@@ -170,8 +170,9 @@ function resizestart(element, type){
 		dragy = posy - resizeobjekt.parentNode.offsetTop;
 		resizex = posx;
 		resizey = posy;
-		width = parseInt(resizeobjekt.offsetWidth);		// da style.width auf 100% steht
-		height = parseInt(resizeobjekt.offsetHeight);	// da style.height auf 100% steht
+		info = resizeobjekt.getBoundingClientRect();
+		width = parseInt(info.width);
+		height = parseInt(info.height);
 	}
 }
 
@@ -229,6 +230,9 @@ function drag(event) {
 				resizeobjekt.parentNode.style.left = (posx - dragx) + "px";
 			break;
 			case "e":
+				resizeobjekt.style.width = width + (posx - resizex) + "px";
+			break;
+			case "col_resize":
 				resizeobjekt.style.width = width + (posx - resizex) + "px";
 			break;
 		}

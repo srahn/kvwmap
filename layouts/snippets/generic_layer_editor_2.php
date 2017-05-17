@@ -134,8 +134,9 @@
 							$select_width2 = $select_width;
 						}
 						
-						$td = '	<td class="gle_attribute_value"'; if($attributes['arrangement'][$j+1] != 1){$colspan = 20 - $attributes_in_row_so_far; $td .= 'colspan="'.$colspan.'"';} $td .= '>';
+						$td = '	<td id="row'.$j.'" class="gle_attribute_value"'; if($attributes['arrangement'][$j+1] != 1){$colspan = 20 - $attributes_in_row_so_far; $td .= 'colspan="'.$colspan.'"';} $td .= '>';
 						$td.= 			attribute_value($this, $layer['Layer_ID'], $attributes, $j, $k, $layer['shape'][$k], $size2, $select_width2, $this->user->rolle->fontsize_gle);
+						$td.= '<div onmousedown="resizestart(document.getElementById(\'row'.$j.'\'), \'col_resize\');" style="position: absolute; transform: translate(4px); top: 0px; right: 0px; height: 20px; width: 6px; cursor: e-resize;"></div>';
 						$td.= '	</td>';
 						if($nl)$next_line .= $td; else $datapart .= $td;
 						if($attributes['arrangement'][$j+1] != 1)$datapart .= '</tr>';						# wenn nächstes Attribut nicht daneben -> Zeile abschliessen
