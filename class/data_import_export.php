@@ -634,7 +634,7 @@ class data_import_export {
     }
   }
   
-  function shp_import($formvars){
+  function shp_import($formvars, $pgdatabase){
 		include_(CLASSPATH.'dbf.php');
   	$_files = $_FILES;
     $this->formvars = $formvars;
@@ -644,6 +644,7 @@ class data_import_export {
       if(move_uploaded_file($_files['zipfile']['tmp_name'],$nachDatei)){
         $files = unzip($nachDatei, false, false, true);
         $firstfile = explode('.', $files[0]);
+				$this->formvars['epsg'] = $this->get_shp_epsg(UPLOADPATH.$firstfile[0], $pgdatabase);
         $file = $firstfile[0].'.dbf';
         if(!file_exists(UPLOADPATH.$file)){
         	$file = $firstfile[0].'.DBF';

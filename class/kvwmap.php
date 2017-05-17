@@ -9519,7 +9519,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->titel='Shape-Import';
     $this->main='shape_import.php';
 		$this->data_import_export = new data_import_export();
-    $this->data_import_export->shp_import($this->formvars);
+    $this->data_import_export->shp_import($this->formvars, $this->pgdatabase);
     $this->output();
   }
 	
