@@ -10020,7 +10020,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
   function Filterverwaltung() {
     $this->loadMap('DataBase');
     $this->titel='Filterverwaltung';
-    $this->main='attribut_eingabe_form.php';
+    $this->main='filterverwaltung.php';
     $this->stellendaten=$this->Stelle->getStellen('Bezeichnung');
     $showpolygon = true;
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
@@ -10111,6 +10111,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
             $PolygonAsText = $this->pgdatabase->selectPolyAsText($poly_id, $this->user->rolle->epsg_code);
             $this->formvars['newpathwkt'] = $PolygonAsText;
             $this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
+						$this->formvars['map_flag'] = 1;
           }
         }
       }
