@@ -178,7 +178,7 @@ class Menue extends MyObject {
 		$onclick = $this->get('onclick');
 		$style = $this->get_style();
 
-		$html .= '<div style="flex: 0 0 '.($style == 'button' ? 'auto;padding: 0 0 6 4;' : '100%').'" id="menue_div_'.$this->get('id').'">';
+		$html .= '<div class="'.$style.'-menue" id="menue_div_'.$this->get('id').'">';
 		$html .= '<a href="'.$href.'" target="'.$target.'" onclick="'.$onclick.'">';
 		if($style == 'button'){		# Button-Menüpunkt
 			$html .= '<div class="button_background">';

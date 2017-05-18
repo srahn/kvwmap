@@ -366,6 +366,15 @@ a.menuered:hover {
 	#background: rgb(205, 208, 208);
 }
 
+.button-menue{
+	flex: 0 0 auto;
+	padding: 0 0 6 4;
+}
+
+.text-menue{
+	flex: 0 0 100%;
+}
+
 .use_for_dataset{
 	background-image: url(../graphics/use_for_dataset.png);
 }
