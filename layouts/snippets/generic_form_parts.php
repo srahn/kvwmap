@@ -145,7 +145,7 @@
 				case 'Textfeld' : {
 					$datapart .= '<textarea title="'.$alias.'" id="'.$name.'_'.$k.'" cols="'.$size.'" onchange="'.$onchange.'"';
 					if($attribute_privileg == '0' OR $lock[$k]){
-						$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
+						$datapart .= ' readonly style="display: none"';
 					}
 					else{
 						$datapart .= ' style="font-size: '.$fontsize.'px"';
@@ -157,6 +157,16 @@
 						}
 						else{
 							$datapart .= '&nbsp;<a title="Eingabewerkzeug verwenden" href="javascript:openCustomSubform('.$layer_id.', \''.$name.'\', new Array(\''.implode($attributes['name'], "','").'\'), \''.$name.'_'.$k.'\', '.$k.');"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
+						}
+					}
+					if($attribute_privileg == '0' OR $lock[$k]){ // nur lesbares Attribut
+						if($size == 12){		// spaltenweise
+							$datapart .= htmlspecialchars($value);
+						}
+						else{								// zeilenweise
+							$maxwidth = $size * 11;
+							$minwidth = $size * 7.1;
+							$datapart .= '<div style="padding: 0 0 0 3; min-width: '.$minwidth.'px; max-width:'.$maxwidth.'px; font-size: '.$fontsize.'px;">'.htmlspecialchars($value).'</div>';
 						}
 					}
 				}break;
