@@ -149,6 +149,18 @@ th a {
 	font-family: SourceSansPro2;
 }
 
+pre {
+	white-space: pre-wrap;       /* Since CSS 2.1 */
+	white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+	white-space: -pre-wrap;      /* Opera 4-6 */
+	white-space: -o-pre-wrap;    /* Opera 7 */
+	word-wrap: break-word;       /* Internet Explorer 5.5+ */
+	background: inherit;
+	font: inherit;
+	margin: 0;
+	overflow: auto;
+	padding: 0;
+}
 
 a, img {	
 	color: firebrick; 
@@ -854,7 +866,7 @@ thead.gle th {
  position: relative;
  padding-left: 4px;
  padding-right: 5px;
- min-width: 1%;
+ min-width: 30px;
 }
 
 tbody.gle tr { 
