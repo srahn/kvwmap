@@ -110,7 +110,7 @@ for($i=0;$i<$anzLayer;$i++){
 </table>
 <?
 	if($this->found != 'false' AND $this->formvars['printversion'] == ''){	?>		
-		<table width="100%" border="0" cellpadding="0" cellspacing="0">
+		<table width="100%" border="0" cellpadding="0" cellspacing="0" id="sachdatenanzeige_anzahl">
     <tr>
     	<td width="49%" class="px13">
 				<? if($this->user->rolle->querymode == 1){ ?>
