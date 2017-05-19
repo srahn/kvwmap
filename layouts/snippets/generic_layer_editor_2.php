@@ -256,7 +256,7 @@
 	}
 	if($this->formvars['printversion'] == ''){
 ?>
-	<tr>
+	<tr id="dataset_operations">
 		<td colspan="2"align="left">
 		<? if($layer['connectiontype'] == 6 AND $this->new_entry != true AND $layer['Layer_ID'] > 0){ ?>
 			<table width="100%" border="0" cellspacing="4" cellpadding="0">
