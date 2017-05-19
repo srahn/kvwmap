@@ -23,7 +23,7 @@
 <? if($this->new_entry != true AND $layer['requires'] == ''){ ?>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 	<tr>
-		<td width="99%" align="center"><h2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<? echo $layer['Name']; ?></h2></td>
+		<td width="99%" align="center"><h2 id="layername"><? echo $layer['Name']; ?></h2></td>
     <? if (!$this->user->rolle->visually_impaired) { ?>
 			<td valign="top" style="padding: 0 10 0 0">
 				<? if($layer['template'] == '' OR $layer['template'] == 'generic_layer_editor_2.php'){ ?>

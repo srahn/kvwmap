@@ -765,6 +765,7 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 
 #layer	h2{
 	font-weight: bold;
+	padding-left: 50px;
 }
 
 #datensatz {
