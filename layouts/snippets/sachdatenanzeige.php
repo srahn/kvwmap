@@ -66,7 +66,7 @@ for($i=0;$i<$anzLayer;$i++){
 	   	$bis = $gesamt;
 	   }
 	   echo'
-	   <table border="0" cellpadding="2" width="100%" cellspacing="0">
+	   <table border="0" cellpadding="2" width="100%" cellspacing="0" id="sachdatenanzeige_footer">
 
 	   	<tr valign="top">
 	   		<td align="right" width="38%">';
@@ -92,7 +92,7 @@ for($i=0;$i<$anzLayer;$i++){
    }
 }
 ?>
-<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<table width="100%" border="0" cellpadding="0" cellspacing="0" id="sachdatenanzeige_footer">
 	<tr>
 		<td align="right">
     <? if ($this->user->rolle->visually_impaired) { ?>
@@ -110,7 +110,7 @@ for($i=0;$i<$anzLayer;$i++){
 </table>
 <?
 	if($this->found != 'false' AND $this->formvars['printversion'] == ''){	?>		
-		<table width="100%" border="0" cellpadding="0" cellspacing="0" id="sachdatenanzeige_anzahl">
+		<table width="100%" border="0" cellpadding="0" cellspacing="0" id="sachdatenanzeige_footer">
     <tr>
     	<td width="49%" class="px13">
 				<? if($this->user->rolle->querymode == 1){ ?>
