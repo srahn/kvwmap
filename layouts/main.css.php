@@ -853,6 +853,7 @@ thead.gle th {
  position: relative;
  padding-left: 4px;
  padding-right: 5px;
+ min-width: 1%;
 }
 
 tbody.gle tr { 
