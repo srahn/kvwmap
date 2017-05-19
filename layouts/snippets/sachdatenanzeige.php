@@ -190,7 +190,7 @@ for($i=0;$i<$anzLayer;$i++){
 				}
 			}
 	  	if($this->formvars['printversion'] == '' AND $this->formvars['keinzurueck'] == '' AND $this->formvars['subform_link'] == ''){
-	  		echo '<a href="javascript:currentform.go.value=\'Layer-Suche\';currentform.submit();">'.$strbackToSearch.'</a><br><br>';
+	  		echo '<a href="javascript:currentform.go.value=\'Layer-Suche\';currentform.submit();" id="sachdatenanzeige_footer">'.$strbackToSearch.'</a><br><br>';
 	  	}
   	}
   	else{
