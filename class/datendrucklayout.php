@@ -550,7 +550,7 @@ class ddl {
 				# und nicht innerhalb eines Datensatzes getrennt wird.
 				if($this->page_overflow != false){
 					if($this->getNextPage($this->transaction_start_pageid) != $this->pdf->currentContents		# wenn die Transaktion aber mehr als 2 Seiten umfasst
-					OR $this->transaction_start_y > $this->miny[$this->pdf->currentContents]){							# oder insgesamt länger als 1 Seite ist, bringt es nichts auf einer neuen Seite zu beginnen, dann committen
+					OR $this->transaction_start_y > $this->miny[$this->pdf->currentContents] - 50){							# oder insgesamt länger als 1 Seite ist, bringt es nichts auf einer neuen Seite zu beginnen, dann committen
 						$this->pdf->transaction('commit');
 						$this->page_overflow = false;
 					}
