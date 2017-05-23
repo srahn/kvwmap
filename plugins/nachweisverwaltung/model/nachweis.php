@@ -277,7 +277,7 @@ class Nachweis {
 		if($nachweis_unique_attributes != NULL){
 			if(NACHWEIS_SECONDARY_ATTRIBUTE == 'fortfuehrung')$test_fortfuehrung = $fortfuehrung;
 			if(in_array('art', $nachweis_unique_attributes)){
-				if($art = '111')$test_art = '0001';
+				if($art == '111')$test_art = '0001';
 				else $test_art = $art;
 			}
 			if(in_array('blattnr', $nachweis_unique_attributes))$test_blattnr = $Blattnr;			
