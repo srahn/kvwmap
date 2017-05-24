@@ -900,6 +900,7 @@ tbody.gle tr:hover {
 #calendar { /* Fuer IE <= 6 */
 	text-align: center;
 	position: absolute;
+	z-index: 1000000;
 }
 
 #calendar tr { 
