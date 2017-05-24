@@ -11,7 +11,7 @@
 	$strSecondMapProjection="2.Kartenprojektion (EPSG-Code)";
 	$strRunningCoords="mitlaufende Koordinaten";
 	$strMapFunctions="Zeige Kartenfunktionen";
-	$strShowLayerOptions="Zeige Layeroptionen";
+	$strShowLayerOptions="Zeige Themenoptionen";
 	$strMenueButtons="Menüs als Schaltflächen";
 	$strMapSize="Kartenfenstergr&ouml;&szlig;e";
 	$strAutoResize="automatisch";
@@ -45,8 +45,8 @@
 	$strHintLanguage="Wählen Sie die Sprache, die in der Oberfläche verwendet werden soll.";
 	$strHintGUI="Wählen Sie die grafische Oberfläche aus.";
 	$strHintButtons="Wählen Sie die Werkzeuge aus, die Sie benötigen.";
-	$strHintColor="Wählen Sie die Farbe aus, mit der Suchergebnisse hervorgehoben werden sollen.";
-	$strHintInstantReload="Wenn Sie diese Option auswählen, wird bei jeder Aktivierung oder Deaktivierung eines Layers die Karte sofort neu geladen.";
+	$strHintColor="Wählen Sie die Farbe aus, mit der Suchergebnisse in der Karte hervorgehoben werden sollen.";
+	$strHintInstantReload="Wenn Sie diese Option auswählen, wird bei jeder Aktivierung oder Deaktivierung eines Themas die Karte sofort neu geladen.";
 	$strHintMenuAutoClose="Wenn Sie diese Option auswählen, ist auf der linken Seite immer nur ein Obermenü geöffnet.";
 	$strHintVisuallyImpaired="Wenn Sie diese Option auswählen, wird die Oberfläche und das Arbeiten im Vorlesemodus vereinfacht. Diese Einstellung ist besonders für Menschen mit Sehbehinderungen geeignet. Es werden allerdings auch einige Funktionen ausgeblendet.";
 	$strHintZoomFactor="Wählen Sie den Faktor, mit dem Plus- und Minuslupe hinein bzw. heraus zoomen.";
@@ -56,8 +56,8 @@
 	$strHintSecondMapProjection="Wählen Sie optional ein zusätzliches Koordinaten- referenzsystem,in dem Ihnen die Koordinaten der Karte angezeigt werden sollen.";
 	$strHintCoordType="Nur wenn Sie eine geografische Kartenprojektion gewählt haben: Wählen Sie, wie Ihnen die geografischen Koordinaten angezeigt werden sollen.";
 	$strHintRunningCoords="Wenn Sie diese Option auswählen, erscheint unterhalb der Karte die Koordinate der Cursorposition unter Angabe der ausgewählten Kartenprojektion.";
-	$strHintShowMapFunctions="Mit dieser Option können Sie die Menüleiste mit den Kartenfunktionen unter der Karte zum Speichern der Karte als Bild, der Karteneinstellungen und maximale Kartengröße ausschalten.";
-	$strHintShowLayerOptions="Wenn Sie diese Option auwählen, erscheint beim Überfahren des Layernamen in der Legende ein Button, der erweiterte Funktionen und Einstellungsmöglichkeiten für den Layer anbietet.";
+	$strHintShowMapFunctions="Mit dieser Option können Sie die Menüleiste mit den Kartenfunktionen unterhalb der Karte ein- und ausschalten.";
+	$strHintShowLayerOptions="Wenn Sie diese Option auwählen, erscheint hinter aktiven Themen in der Legende ein Button, der erweiterte Funktionen und Einstellungsmöglichkeiten für das Thema anbietet.";
 	$strHintSingleQuery="Wenn Sie diese Option auswählen, erscheinen die Abfragehäkchenfelder in der Legende als sog. Radiobutton. Es kann dann immer nur genau ein Thema abfragbar geschaltet werden.";
 	$strHintQuerymode="Wenn Sie diese Option auswählen, erscheinen Sachdatenabfragen als eigene Fenster, die über der Karte schweben.";
 	$strHintNewDatasetOrder="Wählen Sie, ob bei der Erfassung neuer Daten der Geometrie-Editor oberhalb der Sachdaten erscheinen soll oder darunter.";

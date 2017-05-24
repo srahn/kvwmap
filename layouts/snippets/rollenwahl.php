@@ -113,8 +113,8 @@ Text_menue_buttons=["<? echo $strHelp; ?>:","<? echo $strHintMenueButtons; ?>"];
 						</td>
 						<td class="rollenwahl-option-data">
 							<input name="visually_impaired" type="checkbox" value="1" <? if($this->user->rolle->visually_impaired == '1') { echo 'checked="true"';} ?> >
-							<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_visuallyimpaired, Style[0], document.getElementById('Tip8'))" onmouseout="htm()">
-							<div id="Tip8" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+							<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_visuallyimpaired, Style[0], document.getElementById('Tip24'))" onmouseout="htm()">
+							<div id="Tip24" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 						</td>
 					</tr>
 				</table>
