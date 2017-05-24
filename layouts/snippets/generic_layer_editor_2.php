@@ -25,7 +25,7 @@
 	<tr>
 		<td width="99%" align="center"><h2 id="layername"><? echo $layer['Name']; ?></h2></td>
     <? if (!$this->user->rolle->visually_impaired) { ?>
-			<td valign="top" style="padding: 0 10 0 0">
+			<td valign="top" style="padding: 0 10 0 0" class="layer_header">
 				<? if($layer['template'] == '' OR $layer['template'] == 'generic_layer_editor_2.php'){ ?>
 				<a href="javascript:switch_gle_view(<? echo $layer['Layer_ID']; ?>);"><img title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'columns.png'; ?>"></a>
 				<? }else{ ?>

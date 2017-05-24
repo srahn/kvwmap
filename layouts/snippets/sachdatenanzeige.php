@@ -66,7 +66,7 @@ for($i=0;$i<$anzLayer;$i++){
 	   	$bis = $gesamt;
 	   }
 	   echo'
-	   <table border="0" cellpadding="2" width="100%" cellspacing="0" id="sachdatenanzeige_footer">
+	   <table border="0" cellpadding="2" width="100%" cellspacing="0" id="sachdatenanzeige_paging">
 
 	   	<tr valign="top">
 	   		<td align="right" width="38%">';
