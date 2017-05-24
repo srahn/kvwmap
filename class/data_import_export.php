@@ -45,6 +45,7 @@ class data_import_export {
 			case 'Shape' : {
 				$custom_tables = $this->import_custom_shape($formvars, $pgdatabase);
 				$formvars['epsg'] = $custom_tables[0]['epsg'];
+				if($file == '')$file = $formvars['shapefile'];
 			}break;
 			case 'point' : {
 				$file = basename($formvars['file1']);
