@@ -1293,3 +1293,7 @@ tbody.gle tr:hover {
 	margin-top: 1px;
 	padding: 5px;
 }
+
+.dynamicLink{
+	padding: 0 0 0 3;
+}

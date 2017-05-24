@@ -484,7 +484,7 @@
 
 					if ($show_link) {
 						if($explosion[2] == 'embedded'){
-							$datapart .= '<a style="padding: 0 0 0 3;" href="javascript:if(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\').innerHTML != \'\'){clearsubform(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\');} else {ahah(\''.$href.'\', \'\', new Array(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'))}">';
+							$datapart .= '<a class="dynamicLink" href="javascript:if(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\').innerHTML != \'\'){clearsubform(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\');} else {ahah(\''.$href.'\', \'\', new Array(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'))}">';
 							$datapart .= $alias;
 							$datapart .= '</a><br>';
 							$datapart .= '<div style="display:inline" id="dynamicLink'.$layer_id.'_'.$k.'_'.$j.'"></div>';
@@ -492,7 +492,7 @@
 						else{
 							$datapart .= '<a ';
 							if($explosion[2] != 'no_new_window'){$datapart .= 'target="_blank"';}
-							$datapart .= ' style="padding: 0 0 0 3;font-size: '.$fontsize.'px" href="'.$href.'">';
+							$datapart .= ' class="dynamicLink" style="font-size: '.$fontsize.'px" href="'.$href.'">';
 							$datapart .= $alias;
 							$datapart .= '</a><br>';
 						}
