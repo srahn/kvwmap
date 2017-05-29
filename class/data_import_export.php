@@ -325,26 +325,28 @@ class data_import_export {
       if(move_uploaded_file($_files['file1']['tmp_name'],$nachDatei)){
 				$files = unzip($nachDatei, false, false, true);
 				$firstfile = explode('.', $files[0]);
+				$encoding = $this->getEncoding(UPLOADPATH.$firstfile[0].'.dbf');
 				return $this->load_shp_into_pgsql(
 					$pgdatabase,
 					UPLOADPATH,
 					$firstfile[0],
 					$formvars['epsg'],
 					CUSTOM_SHAPE_SCHEMA,
-					'a' . strtolower(umlaute_umwandeln(substr($file, 0, 15))) . rand(1,1000000)
+					'a' . strtolower(umlaute_umwandeln(substr($file, 0, 15))) . rand(1,1000000),
+					$encoding
 				);
 			}
 		}
 	}
 
-	function load_shp_into_pgsql($pgdatabase, $uploadpath, $file, $epsg, $schemaname, $tablename) {
+	function load_shp_into_pgsql($pgdatabase, $uploadpath, $file, $epsg, $schemaname, $tablename, $encoding = 'LATIN1') {
 		if(file_exists($uploadpath . $file . '.dbf') OR file_exists($uploadpath . $file . '.DBF')){
 	    $command = POSTGRESBINPATH .
 				'shp2pgsql' .
 				' -g the_geom' .
 				' -I' .
 				' -s ' . $epsg .
-				' -W LATIN1' .
+				' -W ' . $encoding .
 				' -c "' . $uploadpath . $file . '"' .
 				' ' . $schemaname . '.' . $tablename .
 				' > "' . $uploadpath . $file . '.sql"';
