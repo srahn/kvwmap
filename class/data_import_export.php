@@ -369,19 +369,20 @@ class data_import_export {
 				}
 			}
 		}
-		$custom_table = $this->load_shp_into_pgsql($pgdatabase, UPLOADPATH, $formvars['shapefile'], $formvars['epsg'], CUSTOM_SHAPE_SCHEMA, 'a'.strtolower(umlaute_umwandeln(substr($formvars['shapefile'], 0, 15))).rand(1,1000000));
+		$encoding = $this->getEncoding(UPLOADPATH.$formvars['shapefile'].'.dbf');
+		$custom_table = $this->load_shp_into_pgsql($pgdatabase, UPLOADPATH, $formvars['shapefile'], $formvars['epsg'], CUSTOM_SHAPE_SCHEMA, 'a'.strtolower(umlaute_umwandeln(substr($formvars['shapefile'], 0, 15))).rand(1,1000000), $encoding);
 		$custom_table[0]['epsg'] = $formvars['epsg'];
 		return $custom_table;
 	}
 
-	function load_shp_into_pgsql($pgdatabase, $uploadpath, $file, $epsg, $schemaname, $tablename) {
+	function load_shp_into_pgsql($pgdatabase, $uploadpath, $file, $epsg, $schemaname, $tablename, $encoding = 'LATIN1') {
 		if(file_exists($uploadpath . $file . '.dbf') OR file_exists($uploadpath . $file . '.DBF')){
 	    $command = POSTGRESBINPATH .
 				'shp2pgsql' .
 				' -g the_geom' .
 				' -I' .
 				' -s ' . $epsg .
-				' -W LATIN1' .
+				' -W ' . $encoding .
 				' -c "' . $uploadpath . $file . '"' .
 				' ' . $schemaname . '.' . $tablename .
 				' > "' . $uploadpath . $file . '.sql"';
