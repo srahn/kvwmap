@@ -25,3 +25,5 @@ OGR_BINPATH="/usr/local/gdal/bin" # inside the gdal container
 ALKIS_PLUGIN_PATH="/var/www/apps/kvwmap_pet_dev/plugings/alkis"
 
 EPSG_CODE="25833"
+
+TRANSACTION="YES"

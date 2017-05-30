@@ -37,7 +37,7 @@ CREATE OR REPLACE VIEW alkis.lk_grenzpunkte AS
     p.koordinatenstatus,
     p.hinweise,
     rtrim(ltrim(st_astext(p.wkb_geometry), 'POINT('::text), ')'::text) AS "position",
-    p.source_description[0] as source_description,
+    p.herkunft_source_description[0] as source_description,
     e.beschreibung AS datenerhebung,
     p.genauigkeitsstufe,
     m.beschreibung AS punktgenauigkeit,
@@ -50,7 +50,7 @@ CREATE OR REPLACE VIEW alkis.lk_grenzpunkte AS
      LEFT JOIN alkis.ax_genauigkeitsstufe_punktort m ON m.wert = p.genauigkeitsstufe
      LEFT JOIN alkis.ax_vertrauenswuerdigkeit_punktort n ON n.wert = p.vertrauenswuerdigkeit
      LEFT JOIN alkis.ax_bemerkungzurabmarkung_grenzpunkt ba ON o.bemerkungzurabmarkung = ba.wert
-     LEFT JOIN alkis.ax_datenerhebung e ON e.wert = ANY (p.source_description)
+     LEFT JOIN alkis.ax_datenerhebung e ON e.wert = ANY (p.herkunft_source_description::integer[])
      LEFT JOIN alkis.ax_dienststelle d ON o.zustaendigestelle_stelle = d.stelle
   WHERE d.endet IS NULL;
 
@@ -107,13 +107,14 @@ LEFT JOIN alkis.ax_vertrauenswuerdigkeit_punktort n ON n.wert = p.vertrauenswuer
 -- Sicht zur Darstellung der Gebäude:
 
 CREATE OR REPLACE VIEW alkis.lk_gebaeude AS 
- SELECT o.oid, o.ogc_fid, o.gml_id, o.beginnt, o.endet, o.gebaeudefunktion, p.beschreibung as bezeichner, w.wert AS weiterefunktion, o.name, o.zustand, z.beschreibung AS gebaeudezustand, o.objekthoehe, o.lagezurerdoberflaeche, o.dachform, d.beschreibung AS dach_bezeichner, o.hochhaus, o.ax_datenerhebung, da.beschreibung AS herkunft, o.wkb_geometry
+ SELECT o.oid, o.ogc_fid, o.gml_id, o.beginnt, o.endet, o.gebaeudefunktion, p.beschreibung as bezeichner, w.wert AS weiterefunktion, o.name, o.zustand, z.beschreibung AS gebaeudezustand, o.objekthoehe,
+ o.lagezurerdoberflaeche, o.dachform, d.beschreibung AS dach_bezeichner, o.hochhaus, o.herkunft_source_ax_datenerhebung[1] ax_datenerhebung, da.beschreibung AS herkunft, o.wkb_geometry
    FROM alkis.ax_gebaeude o
    LEFT JOIN alkis.ax_gebaeudefunktion p ON p.wert = o.gebaeudefunktion
    LEFT JOIN alkis.ax_dachform d ON d.wert = o.dachform
    LEFT JOIN alkis.ax_zustand_gebaeude z ON z.wert = o.zustand
    LEFT JOIN alkis.ax_weitere_gebaeudefunktion w ON w.wert = ANY (o.weiteregebaeudefunktion)
-   LEFT JOIN alkis.ax_datenerhebung da ON da.wert = o.ax_datenerhebung;
+   LEFT JOIN alkis.ax_datenerhebung da ON da.wert = o.herkunft_source_ax_datenerhebung[1]::integer;
 
 -- Sicht zur Darstellung besonderer Gebäude:
 

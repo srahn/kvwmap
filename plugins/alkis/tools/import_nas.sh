@@ -21,7 +21,14 @@ load_nas_file() {
   cp $CONFIG_PATH/alkis_schema.gfs $GFS_FILE
 
   log "ogr2ogr import Datei: ${IMPORT_FILE}"
-  ${OGR_BINPATH}/ogr2ogr -f "PostgreSQL" --config -nlt CONVERT_TO_LINEAR -append PG:"dbname=${POSTGRES_DBNAME} active_schema=${POSTGRES_SCHEMA} user=${POSTGRES_USER} host=pgsql port=5432 password=${POSTGRES_PASSWORD}" -a_srs EPSG:25832 "$IMPORT_FILE"
+
+  if [ $TRANSACTION = "YES" ] ; then
+    ACTIVE_SCHEMA="${POSTGRES_SCHEMA}_neu"
+  else
+    ACTIVE_SCHEMA="${POSTGRES_SCHEMA}"
+  fi
+
+  ${OGR_BINPATH}/ogr2ogr -f "PostgreSQL" --config -nlt CONVERT_TO_LINEAR -append PG:"dbname=${POSTGRES_DBNAME} active_schema=${ACTIVE_SCHEMA} user=${POSTGRES_USER} host=pgsql port=5432 password=${POSTGRES_PASSWORD}" -a_srs EPSG:25832 "$IMPORT_FILE"
 #  /usr/local/gdal/bin/ogr2ogr -f "PostgreSQL" --config PG_USE_COPY NO -nlt CONVERT_TO_LINEAR -append PG:"dbname=${POSTGRES_DBNAME} active_schema=${POSTGRES_SCHEMA} user=${POSTGRES_USER} host=pgsql port=5432 password=${POSTGRES_PASSWORD}" /var/www/data/alkis/ff/temp/NBA_testpostgis/NBA_testpostgis3_160907_02von24_renamed.xml
 }
 
@@ -72,6 +79,7 @@ err() {
 }
 
 ###############################
+log `date`" Starte Import ALKIS-Daten mit Script import_nas.sh"
 # Load and set config params
 SCRIPT_PATH=$(dirname $(realpath $0))
 CONFIG_PATH=$(realpath ${SCRIPT_PATH}/../config)
@@ -85,6 +93,13 @@ else
   log "Konfigurationsdatei: ${CONFIG_PATH}/config.sh existiert nicht."
   log "Kopieren Sie ${CONFIG_PATH}/config-sample.sh nach ${SCRIPT_PATH}/config/config.sh und passen die Parameter darin an."
   usage
+fi
+
+###################################################################
+# Clone existing ALKIS schema with schema only and no contraints,
+# indexes and default values for new nas datasets to import
+if [ $TRANSACTION = "YES" ] ; then
+  psql -h $POSTGRES_HOST -U $POSTGRES_USER -c "SELECT clone_schema_to_log_queries('${POSTGRES_SCHEMA}', '${POSTGRES_SCHEMA}_neu')" $POSTGRES_DBNAME
 fi
 
 ##############################
@@ -112,6 +127,7 @@ find $TEMP_PATH -iname '*.xml.gz' | sort |  while read GZ_FILE ; do
   gunzip $GZ_FILE
 done
 
+error="NO"
 FIRST_FILE="YES"
 find $TEMP_PATH -iname '*.xml' | sort |  while read NAS_FILE ; do
 
@@ -148,23 +164,33 @@ find $TEMP_PATH -iname '*.xml' | sort |  while read NAS_FILE ; do
 
     load_nas_file
 
-    # ToDo
-    if [ $success ] ; then
+    if [ -n "$(grep 'ERROR' ${ERROR_FILE})" ] ; then
+      err "Fehler beim Einlesen der Datei: ${NAS_FILE}."
+      error="YES"
+      echo tail -n100 $ERROR_FILE
+      break
+    else
       # log success
       # and optional cp IMPORT_FILE to archive
       archivate_nas_file
       rm IMPORT_FILE
       rm GFS_FILE
-    #else
-      # log error
-      
     fi
-
 #  else
 #    echo "Ignore file ${NAS_FILE} ..."
 #    FIRST_FILE=""
 #  fi;
 done
+
+if [ $error = "NO"] ; then
+  # ogr2ogr read all xml files successfully
+
+  if [ $TRANSACTION = "YES" ] ; then
+    # copy data from alkis import schema to original schema
+    psql -h $POSTGRES_HOST -U $POSTGRES_USER -c "INSERT SELECT clone_schema('${POSTGRES_SCHEMA}', '${POSTGRES_SCHEMA}_neu', true, false)" $POSTGRES_DBNAME
+  fi
+  
+fi
 
 commend() {
 if [ -n "$(grep 'ERROR' ${ERROR_FILE})" ] ; then
