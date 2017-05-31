@@ -21,7 +21,7 @@
 	$strFontSizeGLE="GLE-Fontsize";
 	$strHighlight="Object-Highlighting";
 	$strPlatt="Lower German";
-	$strSearchColor="Result-Color";
+	$strSearchColor="Result/Import-Color";
 	$strPolish="Polish";
 	$strCoordType="Coordinate Presentation";
 	$strSingleQuery="only one layer queryable";
@@ -43,7 +43,7 @@
 	$strHintLanguage="Choose the language to be used in the user interface.";
 	$strHintGUI="Choose the graphical user interface.";
 	$strHintButtons="Choose the tool buttons you are going to work with.";
-	$strHintColor="Choose the color search results will be highlighted with.";
+	$strHintColor="Choose the color which should be used for search results and imported layers.";
 	$strHintInstantReload="If you activate this option, the map is going to be reloaded immediately after you are activating or disactivating a theme.";
 	$strHintMenuAutoClose="If you activate this option, there will be only one menue opened at the same time.";
 	$strHintVisuallyImpaired="If you select this option, the surface and the work will be simplified in the reading mode. This setting is particularly suitable for people with visually imairance. It, however, some functions are hidden.";

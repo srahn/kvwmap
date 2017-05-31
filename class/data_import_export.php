@@ -85,7 +85,6 @@ class data_import_export {
 	}
 
 	function create_rollenlayer($database, $pgdatabase, $stelle, $user, $layername, $schema, $custom_table, $epsg) {
-		$result_colors = read_colors($database);
 		$dbmap = new db_mapObj($stelle->id, $user->id);
 		$group = $dbmap->getGroupbyName('Eigene Importe');
 		if($group != ''){
@@ -127,9 +126,10 @@ class data_import_export {
 		$attrib['order'] = 0;
 		$class_id = $dbmap->new_Class($attrib);
 		$this->formvars['class'] = $class_id;
-		$style['colorred'] = $result_colors[rand(0,9)]['red'];
-		$style['colorgreen'] = $result_colors[rand(0,9)]['green'];
-		$style['colorblue'] = $result_colors[rand(0,9)]['blue'];
+		$color = $user->rolle->readcolor();
+		$style['colorred'] = $color['red'];
+		$style['colorgreen'] = $color['green'];
+		$style['colorblue'] = $color['blue'];
 		$style['outlinecolorred'] = 0;
 		$style['outlinecolorgreen'] = 0;
 		$style['outlinecolorblue'] = 0;

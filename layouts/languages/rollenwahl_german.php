@@ -23,7 +23,7 @@
 	$strFontSizeGLE="GLE-Textgröße";
 	$strHighlight="Objekt-Highlighting";
 	$strPlatt="Plattdeutsch";
-	$strSearchColor="Suchergebnis-Farbe";
+	$strSearchColor="Suchergebnis/Import-Farbe";
 	$strPolish="Polnisch";
 	$strCoordType="Koordinatendarstellung";
 	$strSingleQuery="nur ein Thema abfragbar";
@@ -45,7 +45,7 @@
 	$strHintLanguage="Wählen Sie die Sprache, die in der Oberfläche verwendet werden soll.";
 	$strHintGUI="Wählen Sie die grafische Oberfläche aus.";
 	$strHintButtons="Wählen Sie die Werkzeuge aus, die Sie benötigen.";
-	$strHintColor="Wählen Sie die Farbe aus, mit der Suchergebnisse in der Karte hervorgehoben werden sollen.";
+	$strHintColor="Wählen Sie die Farbe aus, mit der Suchergebnisse und importierte Themen in der Karte dargestellt werden sollen.";
 	$strHintInstantReload="Wenn Sie diese Option auswählen, wird bei jeder Aktivierung oder Deaktivierung eines Themas die Karte sofort neu geladen.";
 	$strHintMenuAutoClose="Wenn Sie diese Option auswählen, ist auf der linken Seite immer nur ein Obermenü geöffnet.";
 	$strHintVisuallyImpaired="Wenn Sie diese Option auswählen, wird die Oberfläche und das Arbeiten im Vorlesemodus vereinfacht. Diese Einstellung ist besonders für Menschen mit Sehbehinderungen geeignet. Es werden allerdings auch einige Funktionen ausgeblendet.";
