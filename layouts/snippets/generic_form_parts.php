@@ -27,12 +27,21 @@
 			else $title_link = 'href="javascript:void(0);"';
 			$datapart .= '<td align="right"><a '.$title_link.' title="'.$attributes['tooltip'][$j].'"><img src="'.GRAPHICSPATH.'emblem-important.png" border="0"></a></td>';
 		}
-		if($attributes['type'][$j] == 'date'){
-			$datapart .= '<td align="right"><a href="javascript:;" title=" (TT.MM.JJJJ) '.$attributes['tooltip'][$j].'" ';
-			if($attributes['privileg'][$j] == '1' AND !$lock[$k]){
-				$datapart .= 'onclick="add_calendar(event, \''.$attributes['name'][$j].'_'.$k.'\');"';
-			}
-			$datapart .= '><img src="'.GRAPHICSPATH.'calendarsheet.png" border="0"></a><div id="calendar"><input type="hidden" id="calendar_'.$attributes['name'][$j].'_'.$k.'"></div></td>';
+		if($attributes['type'][$j] == 'date') {
+			$datapart .= '
+				<td align="right">
+						<a
+		  			id="caldbl"
+						href="javascript:;"
+						title=" (TT.MM.JJJJ) ' . $attributes['tooltip'][$j] . '"
+						onclick="$(\'.calendar\').show();' . (($attributes['privileg'][$j] == '1' AND !$lock[$k]) ? 'add_calendar(event, \'' . $attributes['name'][$j] . '_' . $k . '\');' : '') . '"
+						ondblclick="$(\'.calendar\').hide(); $(\'#' . $attributes['name'][$j] . '_' . $k . '\').val(\'' . date('m.d.Y') . '\')"
+					><img src="' . GRAPHICSPATH . 'calendarsheet.png" border="0"></a>
+					<div id="calendar" class="calendar">
+						<input type="hidden" id="calendar_' . $attributes['name'][$j] . '_' . $k . '">
+					</div>
+				</td>
+			';
 		}
 		$datapart .= '</td></tr></table>';
 		return $datapart;
