@@ -73,9 +73,9 @@
 			  	for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
 						if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
 							if($this->qlayerset[$i]['attributes']['type'][$j] != 'geometry'){
-								echo '<td ';
+								echo '<td id="column'.$j.'"';
 									//if($attributes['group'][0] != '')echo 'width="10%"';
-									echo ' valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';
+									echo ' valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';									
 									if($attributes['privileg'][$j] != '0' AND !$lock[$k]){
 										$this->editable = $layer['Layer_ID'];
 									}
@@ -84,7 +84,7 @@
 									}
 									echo '<table ';
 									//if($attributes['group'][0] != '')echo 'width="200px"';
-									echo 'width="100%";';
+									echo 'width="100%"';
 									echo '><tr><td>';
 									if($attributes['form_element_type'][$j] != 'SubFormPK' AND $attributes['form_element_type'][$j] != 'SubFormEmbeddedPK'){
 										echo '<a style="font-size: '.$this->user->rolle->fontsize_gle.'px" title="Sortieren nach '.$attributes['alias'][$j].'" href="javascript:change_orderby(\''.$attributes['name'][$j].'\', '.$layer['Layer_ID'].');">
@@ -106,8 +106,10 @@
 										}
 										echo '><img src="'.GRAPHICSPATH.'calendarsheet.png" border="0"></a><div id="calendar"><input type="hidden" id=calendar_'.$attributes['name'][$j].'_'.$k.'"></div></td>';
 									}
-									echo '</td></tr></table>';
 									echo '</td>';
+									echo '<td><div onmousedown="resizestart(document.getElementById(\'column'.$j.'\'), \'col_resize\');" style="transform: translate(8px); float: right; right: 0px; height: 20px; width: 6px; cursor: e-resize;"></div></td>';
+									echo '</tr></table>';
+									echo '</td>';									
 							}
 							else{
 								echo '<td bgcolor="'.BG_GLEATTRIBUTE.'">&nbsp;</td>';
@@ -147,12 +149,10 @@
 			}
 			if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
 				if($attributes['type'][$j] != 'geometry'){
-					echo '<td style="text-align: right">';
-					$datapart .= attribute_value($this, $layer['Layer_ID'], $attributes, $j, $k, $layer['shape'][$k], $size, $select_width, $this->user->rolle->fontsize_gle);
-					echo $datapart;
-					echo '
-							</td>
-					';			  			
+					echo '<td style="position: relative; text-align: right">';
+					echo attribute_value($this, $layer['Layer_ID'], $attributes, $j, $k, $layer['shape'][$k], $size, $select_width, $this->user->rolle->fontsize_gle);
+					echo '<div onmousedown="resizestart(document.getElementById(\'column'.$j.'\'), \'col_resize\');" style="position: absolute; transform: translate(4px); top: 0px; right: 0px; height: 100%; width: 8px; cursor: e-resize;"></div>';
+					echo '</td>';
 					if($attributes['privileg'][$j] >= '0'){
 						$this->form_field_names .= $layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'|';
 					}

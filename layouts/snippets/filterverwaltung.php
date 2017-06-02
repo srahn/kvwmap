@@ -1,6 +1,6 @@
 <?php
  # 2008-01-12 pkvvm
-  include(LAYOUTPATH.'languages/attribut_eingabe_form_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/filterverwaltung_'.$this->user->rolle->language.'.php');
  ?>
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
@@ -65,6 +65,17 @@ function setlayers(selected_options){
 		document.GUI.layer.options[options[i]].selected = true;
 	}
 }
+
+function showmap(){
+	if(document.GUI.map_flag.value == 0){
+		document.GUI.map_flag.value = 1;
+		document.getElementById('map2').style.display = '';
+	}
+	else{
+		document.GUI.map_flag.value = '';
+		document.getElementById('map2').style.display = 'none';
+	}
+}
   
 //-->
 </script>
@@ -73,7 +84,10 @@ function setlayers(selected_options){
   <tr align="center"> 
     <td colspan="5"><h2><?php echo $strTitle; ?></h2></td>
   </tr>
-  <tr> 
+	<tr>
+    <td id="map1" colspan="5"><a href="javascript:showmap();"><? echo $strSpatialFiltering; ?></a>&nbsp;</td>
+  </tr>
+  <tr id="map2" style="<? if($this->formvars['map_flag'] == '')echo 'display:none'; ?>"> 
     <td align="right" colspan="5" align="center">
     	Geometrie übernehmen von: 
   		<select name="layer_id" onchange="document.GUI.submit();">
@@ -86,11 +100,7 @@ function setlayers(selected_options){
   				}
   			?>
   		</select> 
-      <?php
-	  #	if ($this->stellendaten['ID']=='' OR $this->layerdaten['ID']!='') {
- 				include(LAYOUTPATH.'snippets/SVG_polygon_query_area.php')
-	  # }
-			?>
+      <? include(LAYOUTPATH.'snippets/SVG_polygon_query_area.php');	?>
     </td>
   </tr>
   <tr> 
@@ -113,7 +123,8 @@ function setlayers(selected_options){
     			echo '>'.$this->stellendaten['Bezeichnung'][$i].'</option>';
     		}
     	?>
-      </select> </td>
+      </select>
+		</td>
     <td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3" colspan="4"> 
       <select style="width:250px" multiple size="5"  name="layer" onchange="document.GUI.newpath.value = '';document.GUI.newpathwkt.value = '';document.GUI.pathwkt.value = '';document.GUI.result.value = '';" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
         <?
@@ -121,7 +132,8 @@ function setlayers(selected_options){
     			echo '<option value="'.$this->layerdaten['ID'][$i].'">'.$this->layerdaten['Bezeichnung'][$i].'</option>';
     		}
     	?>
-      </select> </td>
+      </select>
+		</td>
   </tr>
   <tr>
 		<td align="right" colspan="5"><input class="button" type="button" name="load" value="<?php echo $strButtonLoad; ?>" onclick="document.GUI.newpath.value = '';document.GUI.newpathwkt.value = '';document.GUI.pathwkt.value = '';document.GUI.result.value = '';;getlayers();">
@@ -269,3 +281,4 @@ function setlayers(selected_options){
 <input type="hidden" name="map_pixsize" value="<? echo $this->user->rolle->pixsize; ?>">
 <input type="hidden" name="area" value="<?echo $this->formvars['area']?>">
 <input type="hidden" name="always_draw" value="<? echo $always_draw; ?>">
+<input type="hidden" name="map_flag" value="<? echo $this->formvars['map_flag']; ?>">

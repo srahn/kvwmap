@@ -23,16 +23,16 @@
 <? if($this->new_entry != true AND $layer['requires'] == ''){ ?>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 	<tr>
-		<td width="99%" align="center"><h2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<? echo $layer['Name']; ?></h2></td>
+		<td width="99%" align="center"><h2 id="layername"><? echo $layer['Name']; ?></h2></td>
     <? if (!$this->user->rolle->visually_impaired) { ?>
-			<td valign="top" style="padding: 0 10 0 0">
+			<td valign="top" style="padding: 0 10 0 0" class="layer_header">
 				<? if($layer['template'] == '' OR $layer['template'] == 'generic_layer_editor_2.php'){ ?>
 				<a href="javascript:switch_gle_view(<? echo $layer['Layer_ID']; ?>);"><img title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'columns.png'; ?>"></a>
 				<? }else{ ?>
 				<a href="javascript:switch_gle_view(<? echo $layer['Layer_ID']; ?>);"><img title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'rows.png'; ?>"></a>
 				<? } ?>
 			</td>
-			<td align="right">			
+			<td align="right" class="layer_header">			
 				<a href="javascript:scrollbottom();"><img class="hover-border" title="nach unten" src="<? echo GRAPHICSPATH; ?>pfeil.gif" width="11" height="11" border="0"></a>&nbsp;
 			</td>
 		<? } ?>
@@ -134,8 +134,9 @@
 							$select_width2 = $select_width;
 						}
 						
-						$td = '	<td class="gle_attribute_value"'; if($attributes['arrangement'][$j+1] != 1){$colspan = 20 - $attributes_in_row_so_far; $td .= 'colspan="'.$colspan.'"';} $td .= '>';
+						$td = '	<td id="row'.$j.'" class="gle_attribute_value"'; if($attributes['arrangement'][$j+1] != 1){$colspan = 20 - $attributes_in_row_so_far; $td .= 'colspan="'.$colspan.'"';} $td .= '>';
 						$td.= 			attribute_value($this, $layer['Layer_ID'], $attributes, $j, $k, $layer['shape'][$k], $size2, $select_width2, $this->user->rolle->fontsize_gle);
+						$td.= '<div onmousedown="resizestart(document.getElementById(\'row'.$j.'\'), \'col_resize\');" style="position: absolute; transform: translate(4px); top: 0px; right: 0px; height: 20px; width: 6px; cursor: e-resize;"></div>';
 						$td.= '	</td>';
 						if($nl)$next_line .= $td; else $datapart .= $td;
 						if($attributes['arrangement'][$j+1] != 1)$datapart .= '</tr>';						# wenn nächstes Attribut nicht daneben -> Zeile abschliessen
@@ -255,7 +256,7 @@
 	}
 	if($this->formvars['printversion'] == ''){
 ?>
-	<tr>
+	<tr id="dataset_operations">
 		<td colspan="2"align="left">
 		<? if($layer['connectiontype'] == 6 AND $this->new_entry != true AND $layer['Layer_ID'] > 0){ ?>
 			<table width="100%" border="0" cellspacing="4" cellpadding="0">

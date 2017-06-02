@@ -1813,7 +1813,7 @@ FROM
 			$Eigentuemer->n_gml_id=$rs['n_gml_id'];
 			$Eigentuemer->bestehtausrechtsverhaeltnissenzu=$rs['bestehtausrechtsverhaeltnissenzu'];
       $Eigentuemerliste[$rs['n_gml_id']]=$Eigentuemer;
-			if($rs['namensnr'] != '')$this->writeRechtsverhaeltnisChildren($rs['n_gml_id'], $Eigentuemerliste);
+			if($this->listendarstellung OR $rs['namensnr'] != '')$this->writeRechtsverhaeltnisChildren($rs['n_gml_id'], $Eigentuemerliste);
     }
     $retListe[0]=0;
     $retListe[1]=$Eigentuemerliste;
@@ -1827,9 +1827,19 @@ FROM
 		$rechtsverhaeltnis = $eigentuemer->bestehtausrechtsverhaeltnissenzu;
 		if($rechtsverhaeltnis != ''){
 			if($rechtsverhaeltnis != '-'){
-				$Eigentuemerliste[$rechtsverhaeltnis]->children[] = $gml_id;
-				$eigentuemer->bestehtausrechtsverhaeltnissenzu = '-';
-				$this->writeRechtsverhaeltnisChildren($rechtsverhaeltnis, $Eigentuemerliste);
+				if($Eigentuemerliste[$rechtsverhaeltnis] == NULL){
+					# Wenn das Rechtsverhältnis eines Eigentümers noch nicht im Array $Eigentuemerliste vorhanden ist, also erst später dem Array hinzugefügt wird,
+					# wird davon ausgegangen, dass alle Rechtsverhältnisse unter den Eigentümern angezeigt werden sollen. In diesem Fall werden alle Eigentümer und
+					# Rechtsverhältnisse der Wurzel zugeordnet. Dadurch erfolgt keine Baumdarstellung der Eigentümer, sondern eine alternative Darstellung als einfache Liste.
+					$this->listendarstellung = true;
+					$Eigentuemerliste['wurzel']->children[] = $gml_id;
+					$eigentuemer->bestehtausrechtsverhaeltnissenzu = '-';
+				}
+				else{
+					$Eigentuemerliste[$rechtsverhaeltnis]->children[] = $gml_id;
+					$eigentuemer->bestehtausrechtsverhaeltnissenzu = '-';
+					$this->writeRechtsverhaeltnisChildren($rechtsverhaeltnis, $Eigentuemerliste);
+				}
 			}
 		}
 		else{

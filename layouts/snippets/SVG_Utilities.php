@@ -469,7 +469,7 @@
 	
 	function mousewheelchange(evt){
 		if(!evt)evt = window.event; // For IE
-		if(top.currentform.stopnavigation.value == 0){
+		if(top.document.GUI.stopnavigation.value == 0){
 			window.clearTimeout(mousewheelloop);
 			if(evt.preventDefault){
 				evt.preventDefault();
@@ -628,7 +628,7 @@
 
 	// -------------------------mausinteraktionen auf canvas------------------------------
 	function mousedown(evt){
-	  if(top.currentform.stopnavigation.value == 0){
+	  if(top.document.GUI.stopnavigation.value == 0){
 		if(mouse_coords_type == "image"){					// Bildkoordinaten (Standardfall)
 			client_x = evt.clientX;
 	  	client_y = resy - evt.clientY;

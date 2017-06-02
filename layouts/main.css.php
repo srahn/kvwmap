@@ -149,6 +149,18 @@ th a {
 	font-family: SourceSansPro2;
 }
 
+pre {
+	white-space: pre-wrap;       /* Since CSS 2.1 */
+	white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+	white-space: -pre-wrap;      /* Opera 4-6 */
+	white-space: -o-pre-wrap;    /* Opera 7 */
+	word-wrap: break-word;       /* Internet Explorer 5.5+ */
+	background: inherit;
+	font: inherit;
+	margin: 0;
+	overflow: auto;
+	padding: 0;
+}
 
 a, img {	
 	color: firebrick; 
@@ -364,6 +376,15 @@ a.menuered:hover {
 
 .ausgewaehltes-menue {
 	#background: rgb(205, 208, 208);
+}
+
+.button-menue{
+	flex: 0 0 auto;
+	padding: 0 0 6 4;
+}
+
+.text-menue{
+	flex: 0 0 100%;
 }
 
 .use_for_dataset{
@@ -710,6 +731,7 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 /* Ohne Mouseover: */
 .raster_record{position: relative; max-width: 135px;border:1px solid gray;margin: 5px;padding: 0.0001px;transition: all 0.25s ease;}
 .raster_record .gle tr{border:none;}
+.raster_record .tgle{border:none;}
 .raster_record a{font-size: 0.0001px;transition: all 0.25s ease;}
 /* Attribute, die ausgeblendet werden sollen: */
 .raster_record .tr_hide{visibility:collapse;}
@@ -755,6 +777,7 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 
 #layer	h2{
 	font-weight: bold;
+	padding-left: 50px;
 }
 
 #datensatz {
@@ -839,9 +862,11 @@ thead.gle th {
  background-color: <? echo BG_GLEATTRIBUTE; ?>;
 }
 
-.gle_attribute_value { 
+.gle_attribute_value {
+ position: relative;
  padding-left: 4px;
  padding-right: 5px;
+ min-width: 30px;
 }
 
 tbody.gle tr { 
@@ -875,6 +900,7 @@ tbody.gle tr:hover {
 #calendar { /* Fuer IE <= 6 */
 	text-align: center;
 	position: absolute;
+	z-index: 1000000;
 }
 
 #calendar tr { 
@@ -1267,4 +1293,8 @@ tbody.gle tr:hover {
 	border: 1px solid #cccccc;
 	margin-top: 1px;
 	padding: 5px;
+}
+
+.dynamicLink{
+	padding: 0 0 0 3;
 }

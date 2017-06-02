@@ -1,5 +1,6 @@
 <html>
 	<head>
+		<title><? echo TITLE; ?></title>
 		<? include(SNIPPETS . 'gui_head.php'); ?>
 	</head>
 	<body onload="onload_functions();">

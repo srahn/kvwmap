@@ -99,7 +99,7 @@
   			<tr>
   				<td><input type="radio" name="table_option" value="" checked>Tabelle neu anlegen</td>
   				<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-  				<td>EPSG-Code:&nbsp;<input type="text" name="epsg" size="5" value=""></td>
+  				<td>EPSG-Code:&nbsp;<input type="text" name="epsg" size="5" value="<? echo $this->data_import_export->formvars['epsg']; ?>"></td>
   				<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
   				<!--td><input name="primary_key" type="radio" value="gid" checked>&nbsp;mit gid-Index</td-->
   			</tr>

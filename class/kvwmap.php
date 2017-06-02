@@ -4179,7 +4179,7 @@ class GUI {
 		if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
 			$select = substr($select, 0, $orderbyposition);
 		}
-		if(strpos(strtolower($select), 'oid') === false){
+		if(strpos(strtolower($select), 'oid') === false AND $layerset[0]['maintable_is_view'] == 0){
 			$select = str_replace('*', '*, oid', $select);
 			$select = str_replace($datageom, $datageom.', oid', $select);
 		}
@@ -9466,12 +9466,17 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		include_(CLASSPATH.'data_import_export.php');
 		$this->data_import_export = new data_import_export();
 		$layer_id = $this->data_import_export->create_import_rollenlayer($this->formvars, 'Shape', $this->Stelle, $this->user, $this->database, $this->pgdatabase);
-		$this->loadMap('DataBase');
-		$this->zoomToMaxLayerExtent($layer_id);
-		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
-    $this->drawMap();
-    $this->saveMap('');
-    $this->output();
+		if($layer_id != NULL){
+			$this->loadMap('DataBase');
+			$this->zoomToMaxLayerExtent($layer_id);
+			$this->user->rolle->newtime = $this->user->rolle->last_time_id;
+			$this->drawMap();
+			$this->saveMap('');
+			$this->output();
+		}
+		else{
+			$this->create_shp_rollenlayer();
+		}    
 	}
 
 	function create_point_rollenlayer(){
@@ -9514,7 +9519,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->titel='Shape-Import';
     $this->main='shape_import.php';
 		$this->data_import_export = new data_import_export();
-    $this->data_import_export->shp_import($this->formvars);
+    $this->data_import_export->shp_import($this->formvars, $this->pgdatabase);
     $this->output();
   }
 	
@@ -10015,7 +10020,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
   function Filterverwaltung() {
     $this->loadMap('DataBase');
     $this->titel='Filterverwaltung';
-    $this->main='attribut_eingabe_form.php';
+    $this->main='filterverwaltung.php';
     $this->stellendaten=$this->Stelle->getStellen('Bezeichnung');
     $showpolygon = true;
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
@@ -10106,6 +10111,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
             $PolygonAsText = $this->pgdatabase->selectPolyAsText($poly_id, $this->user->rolle->epsg_code);
             $this->formvars['newpathwkt'] = $PolygonAsText;
             $this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
+						$this->formvars['map_flag'] = 1;
           }
         }
       }
@@ -15847,16 +15853,6 @@ class db_mapObj{
   function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false){
 		global $language;
 
-		if ($language != 'german') {
-			$name_column = "
-			CASE
-				WHEN l.`Name_" . $language . "` != \"\" THEN l.`Name_" . $language . "`
-				ELSE l.`Name`
-			END AS Name";
-		}
-		else
-			$name_column = "l.Name";
-
 		$alias_column = (
 			(!$all_languages AND $language != 'german') ?
 			"
@@ -15871,11 +15867,7 @@ class db_mapObj{
 		);
 
 		if ($attributenames != NULL) {
-			$einschr = " AND
-				a.name IN ('" .
-					implode("', '", $attributenames) . "
-				')
-			";
+			$einschr = " AND a.name IN ('" . implode("', '", $attributenames) . "')";
 		}
 
 		$sql = "

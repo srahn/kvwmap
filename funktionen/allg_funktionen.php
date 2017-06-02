@@ -834,12 +834,15 @@ function searchdir($path, $recursive){
 
 
 function get_select_parts($select){
-	$column = explode(',', $select);
+	$column = explode(',', $select);		# an den Kommas splitten
   for($i = 0; $i < count($column); $i++){
   	$klammerauf = substr_count($column[$i], '(');
   	$klammerzu = substr_count($column[$i], ')');
-  	if($klammerauf > $klammerzu){			# mehr Klammern auf als zu --> hier wurde eine Funktion oder eine Unterabfrage mit Kommas verwendet
-  		$column[$i] = $column[$i].', '.$column[$i+1];
+		$hochkommas = substr_count($column[$i], "'");
+		# Wenn ein Select-Teil eine ungerade Anzahl von Hochkommas oder mehr Klammern auf als zu hat,
+		# wurde hier entweder ein Komma im einem String verwendet (z.B. x||','||y) oder eine Funktion (z.B. round(x, 2)) bzw. eine Unterabfrage mit Kommas verwendet
+  	if($hochkommas % 2 != 0 OR $klammerauf > $klammerzu){
+  		$column[$i] = $column[$i].','.$column[$i+1];
   		array_splice($column, $i+1, 1);
 			$i--;							# und nochmal prüfen, falls mehrere Kommas drin sind
   	}
@@ -1594,11 +1597,16 @@ function output_select($form_field_name, $data, $selected_value = null, $onchang
 
 /*
 * Die Funktion liefert das erste Word, welches nach $word in $str gefunden wird.
+* Über die optionalen Parameter $delim1 und $delim2 kann man die Trennzeichen vor und nach dem Wort angeben.
+* Wenn der optionale Parameter $last true ist, wird das letzte Vorkommen des Wortes verwendet.
 */
-function get_first_word_after($str, $word) {
-	$word_pos = stripos($str, $word);
-	$str_from_word_pos = substr($str, $word_pos);
-	$parts = preg_split('/\s+/', $str_from_word_pos);
-	return $parts[1];
+function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last = false){
+	if($last)$word_pos = strripos($str, $word);
+	else $word_pos = stripos($str, $word);
+	if($word_pos !== false){
+		$str_from_word_pos = substr($str, $word_pos+strlen($word));
+		$parts = explode($delim2, trim($str_from_word_pos, $delim1));
+		return $parts[0];
+	}
 }
 ?>
