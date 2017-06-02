@@ -386,7 +386,13 @@ class data_import_export {
 				' -c "' . $uploadpath . $file . '"' .
 				' ' . $schemaname . '.' . $tablename .
 				' > "' . $uploadpath . $file . '.sql"';
-	    exec($command);
+	    exec($command, $output, $ret);
+			if($ret == 1){	# bei Fehlschlag, das andere Encoding probieren
+				if($encoding == 'UTF-8')$new_encoding = 'LATIN1';
+				else $new_encoding = 'UTF-8';
+				$command = str_replace($encoding, $new_encoding, $command);
+				exec($command, $output, $ret);
+			}
 	   	#echo $command;
 			$command = POSTGRESBINPATH .
 				'psql' .
@@ -757,6 +763,7 @@ class data_import_export {
 		unlink($folder.'/test.csv');
 		if(strpos($output[0], 'UTF') !== false)$encoding = 'UTF-8';
 		if(strpos($output[0], 'ISO-8859') !== false)$encoding = 'LATIN1';
+		if(strpos($output[0], 'ASCII') !== false)$encoding = 'LATIN1';
 		return $encoding;
 	}
 	
