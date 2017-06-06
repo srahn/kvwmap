@@ -2833,13 +2833,13 @@ class GUI {
       }
       ImageCopy($mainimage, $scaleimage, imagesx($mainimage)-imagesx($scaleimage), imagesy($mainimage)-imagesy($scaleimage), 0, 0, imagesx($scaleimage), imagesy($scaleimage));
       ob_end_clean();
-      ob_start("output_handler");
+			header("Content-Type: image/jpeg");
       header('Content-Disposition: inline; filename="Karte.jpg"');
       ImageJPEG($mainimage);
     }
     else{
     	ob_end_clean();
-      header('content-type: image/jpg');
+      header('Content-Type: image/jpeg');
       header('Content-Disposition: inline; filename="Karte.jpg"');
       readfile(IMAGEPATH.$jpgfile);
     }
