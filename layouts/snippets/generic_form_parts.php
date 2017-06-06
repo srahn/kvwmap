@@ -154,7 +154,7 @@
 				case 'Textfeld' : {
 					$datapart .= '<textarea title="'.$alias.'" id="'.$name.'_'.$k.'" cols="'.$size.'" onchange="'.$onchange.'"';
 					if($attribute_privileg == '0' OR $lock[$k]){
-						$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
+						$datapart .= ' readonly style="display: none"';
 					}
 					else{
 						$datapart .= ' style="font-size: '.$fontsize.'px"';
@@ -166,6 +166,16 @@
 						}
 						else{
 							$datapart .= '&nbsp;<a title="Eingabewerkzeug verwenden" href="javascript:openCustomSubform('.$layer_id.', \''.$name.'\', new Array(\''.implode($attributes['name'], "','").'\'), \''.$name.'_'.$k.'\', '.$k.');"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
+						}
+					}
+					if($attribute_privileg == '0' OR $lock[$k]){ // nur lesbares Attribut
+						if($size == 12){		// spaltenweise
+							$datapart .= htmlspecialchars($value);
+						}
+						else{								// zeilenweise
+							$maxwidth = $size * 11;
+							$minwidth = $size * 7.1;
+							$datapart .= '<div style="padding: 0 0 0 3; min-width: '.$minwidth.'px; max-width:'.$maxwidth.'px; font-size: '.$fontsize.'px;"><pre>'.$value.'</pre></div>';
 						}
 					}
 				}break;
@@ -423,7 +433,7 @@
 							$datapart .= '<a href="javascript:delete_document(\''.$fieldname.'\', '.$layer_id.', \''.$gui->formvars['fromobject'].'\', \''.$gui->formvars['targetobject'].'\', \''.$gui->formvars['targetlayer_id'].'\', \''.$gui->formvars['targetattribute'].'\', \''.$gui->formvars['data'].'\', \''.$gui->formvars['reload'].'\');"><span>Dokument <br>löschen</span></a>';
 						}
 						$datapart .= '</td></tr>';
-						$datapart .= '<tr><td colspan="2"><span>'.$original_name.'</span></td></tr>';
+						$datapart .= '<tr><td colspan="2"><span id="image_original_name">'.$original_name.'</span></td></tr>';
 						$datapart .= '</table>';
 						$datapart .= '<input type="hidden" name="'.$layer_id.';'.$attributes['real_name'][$name].';'.$tablename.';'.$oid.';'.$attributes['form_element_type'][$j].'_alt'.';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$value.'">';
 					}
@@ -483,7 +493,7 @@
 
 					if ($show_link) {
 						if($explosion[2] == 'embedded'){
-							$datapart .= '<a style="padding: 0 0 0 3;" href="javascript:if(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\').innerHTML != \'\'){clearsubform(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\');} else {ahah(\''.$href.'\', \'\', new Array(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'))}">';
+							$datapart .= '<a class="dynamicLink" href="javascript:if(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\').innerHTML != \'\'){clearsubform(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\');} else {ahah(\''.$href.'\', \'\', new Array(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'))}">';
 							$datapart .= $alias;
 							$datapart .= '</a><br>';
 							$datapart .= '<div style="display:inline" id="dynamicLink'.$layer_id.'_'.$k.'_'.$j.'"></div>';
@@ -491,7 +501,7 @@
 						else{
 							$datapart .= '<a ';
 							if($explosion[2] != 'no_new_window'){$datapart .= 'target="_blank"';}
-							$datapart .= ' style="padding: 0 0 0 3;font-size: '.$fontsize.'px" href="'.$href.'">';
+							$datapart .= ' class="dynamicLink" style="font-size: '.$fontsize.'px" href="'.$href.'">';
 							$datapart .= $alias;
 							$datapart .= '</a><br>';
 						}
@@ -579,7 +589,7 @@
 						else{								// zeilenweise
 							$maxwidth = $size * 11;
 							$minwidth = $size * 7.1;
-							$datapart .= '<div style="padding: 0 0 0 3; min-width: '.$minwidth.'px; max-width:'.$maxwidth.'px; font-size: '.$fontsize.'px;">'.htmlspecialchars($value).'</div>';
+							$datapart .= '<div class="readonly_text" style="padding: 0 0 0 3; min-width: '.$minwidth.'px; max-width:'.$maxwidth.'px; font-size: '.$fontsize.'px;">'.$value.'</div>';
 						}
 					}
 					if($attribute_privileg > '0' AND $attributes['options'][$j] != ''){
