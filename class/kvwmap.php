@@ -2378,8 +2378,11 @@ class GUI {
 
   function checkCaseAllowed($case){
   	if(!$this->Stelle->isMenueAllowed($case) AND !$this->Stelle->isFunctionAllowed($case)) {
-      $this->Fehlermeldung=$this->TaskChangeWarning . '<br>(' . $case . ')';
-      $this->rollenwahl($this->Stelle->id);
+      $this->add_message('error', $this->TaskChangeWarning . '<br>(' . $case . ')');
+			$this->loadMap('DataBase');
+      $this->user->rolle->newtime = $this->user->rolle->last_time_id;
+     	$this->saveMap('');
+      $this->drawMap();
       $this->output();
       exit;
     }
