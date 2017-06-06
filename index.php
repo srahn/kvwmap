@@ -1615,6 +1615,7 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  
 	   # Auswählen einer neuen Stelle
 	  case 'Stelle_waehlen' : {
+			$GUI->checkCaseAllowed($go);
 			$GUI->rollenwahl($Stelle_ID);
 			$GUI->output();
 	  } break;
