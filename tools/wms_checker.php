@@ -6,11 +6,11 @@ error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT & ~E_NOTICE);
 #																																																																																			 #
 #	Dieses Skript kann in einem Web-Verzeichnis wie z.B. .../kvwmap/tools plaziert werden.																																							 #
 # Es sind 2 Einstellungen zu machen: - die Variable $config muss auf den Pfad zur config.php gesetzt werden.																													 #
-#                                    - das Array $bbox muss g¸ltige BBox-Werte im EPSG-Code 4326 enthalten; damit werden die Test-Requests gemacht										 #
+#                                    - das Array $bbox muss g√ºltige BBox-Werte im EPSG-Code 4326 enthalten; damit werden die Test-Requests gemacht										 #
 # Wenn man das Skript aufruft, werden alle WMS-Layer aus der in der config.php definierten MySQL-DB ausgelesen und mit einem getMap-Request getestet.									 #
 # Das Ergebnis des Tests wird in die Spalte status der Tabelle layer geschrieben. Diese Spalte wird von kvwmap ausgewertet und der Status in der Legende visualisiert. #
-# Ruft man das Skript im Browser auf, erh‰lt man auﬂerdem eine ‹bersicht ¸ber die getesteten Layer.																																		 #
-# Um den Status regelm‰ﬂig zu ¸berpr¸fen, muss man sich einen entsprechenden cron-job einrichten, der das Skript aufruft. 																																		 #
+# Ruft man das Skript im Browser auf, erh√§lt man au√üerdem eine √úbersicht √ºber die getesteten Layer.																																		 #
+# Um den Status regelm√§√üig zu √ºberpr√ºfen, muss man sich einen entsprechenden cron-job einrichten, der das Skript aufruft. 																																		 #
 #																																																																																			 #
 ########################################################################################################################################################################
 
@@ -18,12 +18,28 @@ $config = '../config.php';		# Pfad zur config.php (von tools aus kann er so blei
 $bbox = array("left" => 11.85321, "bottom" => 53.96559, "right" => 11.93711, "top" => 54.01517);		# BBox, mit der die Test-Requests gemacht werden
 
 /*
-* @params(string) $request ein getMap Request von dem der Status gepr¸ft werden soll 
-* gibt einen array mit 2 elementen zur¸ck das erste element ist entweder true
+* Die Funktion liefert das erste Word, welches nach $word in $str gefunden wird.
+* √úber die optionalen Parameter $delim1 und $delim2 kann man die Trennzeichen vor und nach dem Wort angeben.
+* Wenn der optionale Parameter $last true ist, wird das letzte Vorkommen des Wortes verwendet.
+*/
+function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last = false){
+	if($last)$word_pos = strripos($str, $word);
+	else $word_pos = stripos($str, $word);
+	if($word_pos !== false){
+		$str_from_word_pos = substr($str, $word_pos+strlen($word));
+		$parts = explode($delim2, trim($str_from_word_pos, $delim1));
+		return $parts[0];
+	}
+}
+
+/*
+* @params(string) $request ein getMap Request von dem der Status gepr√ºft werden soll 
+* gibt einen array mit 2 elementen zur√ºck das erste element ist entweder true
 *(abfrage war erfolgreich) oder false(d.h. abfrage war nicht erfolgreich) und das zweite
 * ist wenn der erste wert false ist eine kurze Info was falsch ist.
 */
 function checkStatus($request, $username, $password){
+	#echo '<p>Check Status of layer with request: ' . $request . '<p>'; 
   $info = null;
   $ch = curl_init();
   curl_setopt($ch, CURLOPT_URL, $request);
@@ -45,13 +61,20 @@ function checkStatus($request, $username, $password){
       $status = false;
       $info = 404;
     }
+		elseif (strpos($header, '301 Moved Permanently') !== false) {
+			$new_location = trim(get_first_word_after($header, 'Location:', ' ', 'Content-Length'));
+			$info = '<p>301 Moved Permanently Pr√ºfe neue Location: <a href="' . $new_location . '" target="_blank">' . $new_location . '</a>';
+			$result = checkStatus($new_location, $username, $password);
+			$result[1] = $info . ' ' . (string)$result[1];
+			return $result;
+		}
     else{
       if(strpos($data, '<?xml') === 0){
         $status = false;      
         $info = getExceptionCode($data);  
       }
       else{
-				if(strpos($data, 'âPNG') === false AND strpos($data, 'JFIF') === false){
+				if(strpos($data, '‚Ä∞PNG') === false AND strpos($data, 'JFIF') === false){
 					$status = false;
 					$info = substr(strip_tags($data), 0, 255);
 				}
@@ -82,7 +105,7 @@ function getExceptionCode($data){
 include($config);
 include(CLASSPATH.'log.php');
 include(CLASSPATH.'mysql.php');
-$debug=new Debugger(DEBUGFILE);	# ˆffnen der Debug-log-datei
+$debug=new Debugger(DEBUGFILE);	# √∂ffnen der Debug-log-datei
 $userDb = new database();
 $userDb->host = MYSQL_HOST;
 $userDb->user = MYSQL_USER;																			
@@ -90,6 +113,21 @@ $userDb->passwd = MYSQL_PASSWORD;
 $userDb->dbName = MYSQL_DBNAME;
 $userDb->open();
 $query = "SELECT * FROM `layer` WHERE connectiontype = 7";
+
+# nur bestimmte Layer einschlie√üen
+#$with_layer_id = '1,2,3,4';
+$with_layer_id = '';
+if ($with_layer_id != '') {
+	$query .= '	AND Layer_ID IN (' . $with_layer_id . ')';
+}
+# bestimmte Layer ausschlie√üen
+#$without_layer_id = '1,2,3,4';
+$without_layer_id = '';
+if ($without_layer_id != '') {
+	$query .= '	AND Layer_ID NOT IN (' . $without_layer_id . ')';
+}
+
+#echo '<br>get layer with sql: ' . $query;
 $result = mysql_query($query, $userDb->dbConn);
 
 while($line = mysql_fetch_array($result)){
@@ -115,13 +153,14 @@ while($line = mysql_fetch_array($result)){
 	if(!$status[0])$color = '#db5a5a';
 	else $color = '#36908a';
 	
-  echo '<div style="border: 1px solid black;width: 700px;padding: 10px;background-color: '.$color.'">';  
+  echo '<div style="border: 1px solid black;width: 100%;padding: 10px;background-color: '.$color.'">';  
 	echo '<a href="'.$url.'"target="_blank">'.$line["Name"]."</a><br/>";
   if(!$status[0]){
     echo 'nicht ok<br>'.$status[1];
 		$query = "UPDATE `layer` SET status = '".$status[1]."' WHERE Layer_ID = ".$line["Layer_ID"];
   }
   else{
+		echo ($status[0] != '' ? 'info: ' . $status[1] : '');
     echo 'ok<br>';
 		$query = "UPDATE `layer` SET status = '' WHERE Layer_ID = ".$line["Layer_ID"];
   }
