@@ -336,6 +336,7 @@ if (!in_array($go, $non_spatial_cases)) {	// für fast_cases, die keinen Raumbez
 }
 
 if($_SESSION['login_routines'] == true){
+	define('AFTER_LOGIN', true);
 # hier befinden sich Routinen, die beim einloggen des Nutzers einmalig durchgeführt werden
 	# Löschen der Rollenlayer
 	if(DELETE_ROLLENLAYER == 'true'){
@@ -362,6 +363,8 @@ if($_SESSION['login_routines'] == true){
 	# Zurücksetzen der veränderten Klassen
 	$GUI->user->rolle->resetClasses();
 	$_SESSION['login_routines'] = false;
+} else {
+		define('AFTER_LOGIN', false);
 }
 
 # Anpassen der Kartengröße an das Browserfenster
