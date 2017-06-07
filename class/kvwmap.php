@@ -2332,8 +2332,9 @@ class GUI {
 		# value und output ermitteln
 		$options = explode(';', $attributes['options'][0]);
 		$sql = $options[0];
+		if(strpos(strtolower($sql), 'order by') === false)$orderby = 'ORDER BY output';	# nur sortieren, wenn noch nicht sortiert
 		$sql = 'SELECT * FROM ('.$sql.') as foo WHERE';
-		$sql .= " lower(output::text) like lower('".$this->formvars['inputvalue']."%') ORDER BY output LIMIT 15";
+		$sql .= " lower(output::text) like lower('".$this->formvars['inputvalue']."%') ".$orderby." LIMIT 15";
 		#echo $sql;
   	$ret=$layerdb->execSQL($sql,4, 1);
 		$count = pg_num_rows($ret[1]);
