@@ -44,7 +44,7 @@ function checkStatus($request, $username, $password){
   $ch = curl_init();
   curl_setopt($ch, CURLOPT_URL, $request);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-  curl_setopt($ch, CURLOPT_CONNECTTIMEOUT,1);
+  curl_setopt($ch, CURLOPT_TIMEOUT,3);
 	curl_setopt($ch, CURLOPT_VERBOSE, 1);
 	curl_setopt($ch, CURLOPT_HEADER, 1);
 	if($username != '')curl_setopt($ch, CURLOPT_USERPWD, $username.':'.$password);	
