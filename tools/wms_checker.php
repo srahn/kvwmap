@@ -74,7 +74,7 @@ function checkStatus($request, $username, $password){
         $info = getExceptionCode($data);  
       }
       else{
-				if(strpos($data, '‰PNG') === false AND strpos($data, 'JFIF') === false){
+				if(substr(get_first_word_after($response, 'Content-Type: '), 0, 5) != 'image'){
 					$status = false;
 					$info = substr(strip_tags($data), 0, 255);
 				}
