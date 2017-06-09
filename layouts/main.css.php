@@ -1298,3 +1298,7 @@ tbody.gle tr:hover {
 .dynamicLink{
 	padding: 0 0 0 3;
 }
+
+.attribute-editor-table td {
+	padding-right: 2px
+}

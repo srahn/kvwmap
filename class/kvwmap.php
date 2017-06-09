@@ -8519,10 +8519,13 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			      if($form_fields[$i] != ''){
 			        $element = explode(';', $form_fields[$i]);
 							$formElementType = $layerset[0]['attributes']['form_element_type'][$layerset[0]['attributes']['indizes'][$element[1]]];
-			        if($element[3] == $oid
-								 AND !in_array($layerset[0]['attributes']['constraints'][$element[1]],  array('PRIMARY KEY', 'UNIQUE'))  # Primärschlüssel werden nicht mitübergeben
-								 AND !in_array($formElementType, array('Time', 'User', 'UserID', 'Stelle', 'StelleID')) # und automatisch generierte Typen auch nicht
-							){
+							$dont_use_for_new = $layerset[0]['attributes']['dont_use_for_new'][$layerset[0]['attributes']['indizes'][$element[1]]];
+			        if (
+								$element[3] == $oid AND
+								!in_array($layerset[0]['attributes']['constraints'][$element[1]],  array('PRIMARY KEY', 'UNIQUE')) AND  # Primärschlüssel werden nicht mitübergeben
+								!in_array($formElementType, array('Time', 'User', 'UserID', 'Stelle', 'StelleID')) AND # und automatisch generierte Typen auch nicht
+								$dont_use_for_new != 1
+							) {
 				        $element[3] = '';
 				        $this->formvars[implode(';', $element)] = $this->formvars[$form_fields[$i]];
 			        }
@@ -15203,32 +15206,37 @@ class db_mapObj{
 			if($attributes[$i]['nullable'] == '')$attributes[$i]['nullable'] = 'NULL';
 			if($attributes[$i]['length'] == '')$attributes[$i]['length'] = 'NULL';
 			if($attributes[$i]['decimal_length'] == '')$attributes[$i]['decimal_length'] = 'NULL';
-			$sql = "INSERT INTO layer_attributes SET ";
-			$sql.= "layer_id = ".$layer_id.", ";
-			$sql.= "name = '".$attributes[$i]['name']."', ";
-			$sql.= "real_name = '".$attributes[$i]['real_name']."', ";
-			$sql.= "tablename = '".$attributes[$i]['table_name']."', ";
-			$sql.= "table_alias_name = '".$attributes[$i]['table_alias_name']."', ";
-			$sql.= "type = '".$attributes[$i]['type']."', ";
-			$sql.= "geometrytype = '".$attributes[$i]['geomtype']."', ";
-			$sql.= "constraints = '".addslashes($attributes[$i]['constraints'])."', ";
-			$sql.= "nullable = ".$attributes[$i]['nullable'].", ";
-			$sql.= "length = ".$attributes[$i]['length'].", ";			
-			$sql.= "decimal_length = ".$attributes[$i]['decimal_length'].", ";
-			$sql.= "`default` = '".addslashes($attributes[$i]['default'])."', ";
-			$sql.= "`order` = ".$i;
-			$sql.= " ON DUPLICATE KEY UPDATE ";
-			$sql.= "real_name = '".$attributes[$i]['real_name']."', ";
-			$sql.= "tablename = '".$attributes[$i]['table_name']."', ";
-			$sql.= "table_alias_name = '".$attributes[$i]['table_alias_name']."', ";
-			$sql.= "type = '".$attributes[$i]['type']."', ";
-			$sql.= "geometrytype = '".$attributes[$i]['geomtype']."', ";
-			$sql.= "constraints = '".addslashes($attributes[$i]['constraints'])."', ";
-			$sql.= "nullable = ".$attributes[$i]['nullable'].", ";
-			$sql.= "length = ".$attributes[$i]['length'].", ";
-			$sql.= "decimal_length = ".$attributes[$i]['decimal_length'].", ";
-			$sql.= "`default` = '".addslashes($attributes[$i]['default'])."', ";
-			$sql.= "`order` = ".$i;
+			$sql = "
+				INSERT INTO
+					`layer_attributes`
+				SET 
+					layer_id = " . $layer_id.",
+					name = '" . $attributes[$i]['name'] . "',
+					real_name = '" . $attributes[$i]['real_name'] . "',
+					tablename = '" . $attributes[$i]['table_name'] ."',
+					table_alias_name = '" . $attributes[$i]['table_alias_name'] . "',
+					type = '" . $attributes[$i]['type'] . "',
+					geometrytype = '" . $attributes[$i]['geomtype'] . "',
+					constraints = '".addslashes($attributes[$i]['constraints']) . "',
+					nullable = ".$attributes[$i]['nullable'] . ",
+					length = ".$attributes[$i]['length'] . ",			
+					decimal_length = ".$attributes[$i]['decimal_length'] . ",
+					`default` = '".addslashes($attributes[$i]['default']) . "',
+					`order` = " . $i . "
+				ON DUPLICATE KEY UPDATE
+					real_name = '" . $attributes[$i]['real_name'] . "',
+					tablename = '" . $attributes[$i]['table_name'] . "',
+					table_alias_name = '" . $attributes[$i]['table_alias_name'] . "',
+					type = '" . $attributes[$i]['type'] . "',
+					geometrytype = '" . $attributes[$i]['geomtype'] . "',
+					constraints = '".addslashes($attributes[$i]['constraints']) . "',
+					nullable = ".$attributes[$i]['nullable'] . ",
+					length = ".$attributes[$i]['length'] . ",
+					decimal_length = ".$attributes[$i]['decimal_length'] . ",
+					`default` = '" . addslashes($attributes[$i]['default']) . "',
+					`order` = " . $i . "
+			";
+			echo '<br>Sql: ' . $sql;
 			$this->debug->write("<p>file:kvwmap class:db_mapObj->save_postgis_attributes - Speichern der Layerattribute:<br>".$sql,4);
 			$query=mysql_query($sql);
 			if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
@@ -15251,7 +15259,20 @@ class db_mapObj{
 		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
     	
 		# den PRIMARY KEY constraint rausnehmen, falls der tablename nicht der maintable entspricht
-		$sql = "UPDATE layer_attributes, layer SET constraints = '' WHERE layer_attributes.layer_id = ".$layer_id." AND layer.Layer_ID = ".$layer_id." AND constraints = 'PRIMARY KEY' AND tablename != maintable";
+		$sql = "
+			UPDATE
+				`layer_attributes`,
+				`layer`
+			SET
+				`constraints` = ''
+			WHERE
+				`layer_attributes`.
+				`layer_id` = ".$layer_id . " AND
+				`layer`.`Layer_ID` = " . $layer_id . " AND
+				`constraints` = 'PRIMARY KEY' AND
+				`tablename` != maintable
+		";
+		echo '<br>Sql: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->save_postgis_attributes - Speichern der Layerattribute:<br>".$sql,4);
 		$query=mysql_query($sql);
 		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }	
@@ -15708,41 +15729,44 @@ class db_mapObj{
     }
   }
 
-  function save_layer_attributes($attributes, $database, $formvars){
+	function save_layer_attributes($attributes, $database, $formvars){
 		global $supportedLanguages;
-    for($i = 0; $i < count($attributes['name']); $i++){
-      $sql = 'INSERT INTO layer_attributes SET ';
-      $sql.= 'layer_id = '.$formvars['selected_layer_id'].', ';
-      $sql.= 'name = "'.$attributes['name'][$i].'", ';
-      $sql.= 'form_element_type = "'.$formvars['form_element_'.$attributes['name'][$i]].'", ';
-      $sql.= "options = '".$formvars['options_'.$attributes['name'][$i]]."', ";
-      $sql.= 'tooltip = "'.$formvars['tooltip_'.$attributes['name'][$i]].'", ';
-      $sql.= '`group` = "'.$formvars['group_'.$attributes['name'][$i]].'", ';
-			$sql.= 'arrangement = '.$formvars['arrangement_'.$attributes['name'][$i]].', ';
-			$sql.= 'labeling = '.$formvars['labeling_'.$attributes['name'][$i]].', ';
-			if($formvars['raster_visibility_'.$attributes['name'][$i]] == '')$formvars['raster_visibility_'.$attributes['name'][$i]] = 'NULL';
-      $sql.= 'raster_visibility = '.$formvars['raster_visibility_'.$attributes['name'][$i]].', ';
-      if($formvars['mandatory_'.$attributes['name'][$i]] == '')$formvars['mandatory_'.$attributes['name'][$i]] = 'NULL';
-      $sql.= 'mandatory = '.$formvars['mandatory_'.$attributes['name'][$i]].', ';
-      $sql.= 'alias = "'.$formvars['alias_'.$attributes['name'][$i]].'", ';
-			foreach($supportedLanguages as $language){
-				if($language != 'german'){
-					$sql.= '`alias_'.$language.'` = "'.$formvars['alias_'.$language.'_'.$attributes['name'][$i]].'", ';
+
+		for($i = 0; $i < count($attributes['name']); $i++){
+			$alias_rows = "`alias` = '" . $formvars['alias_' . $attributes['name'][$i]] . "',";
+			foreach($supportedLanguages as $language) {
+				if ($language != 'german') {
+					$alias_rows .= "`alias_" . $language . "` = '" . $formvars['alias_' . $language . '_' . $attributes['name'][$i]] . "',";
 				}
 			}
-			if($formvars['quicksearch_'.$attributes['name'][$i]] == '')$formvars['quicksearch_'.$attributes['name'][$i]] = 'NULL';
-			$sql.= 'quicksearch = '.$formvars['quicksearch_'.$attributes['name'][$i]];
-      $sql.= " ON DUPLICATE KEY UPDATE name = '".$attributes['name'][$i]."', form_element_type = '".$formvars['form_element_'.$attributes['name'][$i]]."', options = '".$formvars['options_'.$attributes['name'][$i]]."', tooltip = '".$formvars['tooltip_'.$attributes['name'][$i]]."', `group` = '".$formvars['group_'.$attributes['name'][$i]]."', arrangement = ".$formvars['arrangement_'.$attributes['name'][$i]].", labeling = ".$formvars['labeling_'.$attributes['name'][$i]].", alias = '".$formvars['alias_'.$attributes['name'][$i]]."', ";
-			foreach($supportedLanguages as $language){
-				if($language != 'german'){
-					$sql.= '`alias_'.$language.'` = "'.$formvars['alias_'.$language.'_'.$attributes['name'][$i]].'", ';
-				}
-			}
-			$sql.= ' raster_visibility = '.$formvars['raster_visibility_'.$attributes['name'][$i]].', mandatory = '.$formvars['mandatory_'.$attributes['name'][$i]].' , quicksearch = '.$formvars['quicksearch_'.$attributes['name'][$i]];
-      $this->debug->write("<p>file:kvwmap class:Document->save_layer_attributes :",4);
-      $database->execSQL($sql,4, 1);
-    }
-  }
+			$rows = "
+				`name` = '" . $attributes['name'][$i] . "', " .
+				$alias_rows . "
+				`form_element_type` = '" . $formvars['form_element_' . $attributes['name'][$i]] . "',
+				`options` = '" . $formvars['options_' . $attributes['name'][$i]] . "',
+				`tooltip` = '" . $formvars['tooltip_' . $attributes['name'][$i]] . "',
+				`group` = '" . $formvars['group_' . $attributes['name'][$i]] . "',
+				`arrangement` = " . $formvars['arrangement_' . $attributes['name'][$i]] . ",
+				`labeling` = " . $formvars['labeling_' . $attributes['name'][$i]] . ",
+				`raster_visibility` = " . ($formvars['raster_visibility_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['raster_visibility_' . $attributes['name'][$i]]) . ",
+				`dont_use_for_new`= " . ($formvars['dont_use_for_new_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['dont_use_for_new_' . $attributes['name'][$i]]) . ",
+				`mandatory` = " . ($formvars['mandatory_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['mandatory_' . $attributes['name'][$i]]) . ",
+				`quicksearch`= " . ($formvars['quicksearch_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['quicksearch_' . $attributes['name'][$i]]) . "
+			";
+			$sql = "
+				INSERT INTO
+					`layer_attributes`
+				SET
+					`layer_id` = " . $formvars['selected_layer_id'] . ", " .
+					$rows . "
+				ON DUPLICATE KEY UPDATE " .
+					$rows . "
+			";
+			#echo '<br>Sql: ' . $sql;
+			$this->debug->write("<p>file:kvwmap class:Document->save_layer_attributes :",4);
+			$database->execSQL($sql,4, 1);
+		}
+	}
 
 	function delete_layer_filterattributes($layer_id){
     $sql = 'DELETE FROM u_attributfilter2used_layer WHERE layer_id = '.$layer_id;
@@ -15896,6 +15920,7 @@ class db_mapObj{
 				`arrangement`,
 				`labeling`,
 				`raster_visibility`,
+				`dont_use_for_new`,
 				`mandatory`,
 				`quicksearch`,
 				`order`,
@@ -15974,6 +15999,7 @@ class db_mapObj{
 			$attributes['arrangement'][$i] = $rs['arrangement'];
 			$attributes['labeling'][$i] = $rs['labeling'];
 			$attributes['raster_visibility'][$i] = $rs['raster_visibility'];
+			$attributes['dont_use_for_new'][$i] = $rs['dont_use_for_new'];
 			$attributes['mandatory'][$i] = $rs['mandatory'];
 			$attributes['quicksearch'][$i] = $rs['quicksearch'];
 			$attributes['privileg'][$i] = $rs['privileg'];

@@ -58,7 +58,7 @@ function resizemap2window(){
 * @param array or string messages contain the messages as array
 * or as a single string
 */
-function message(messages) {
+function message(messages, t_hide = 1000, t_hidden = 3000) {
 	var msgDiv = $("#message_box");
 	types = {
 		'notice': {
@@ -108,8 +108,8 @@ function message(messages) {
 	msgDiv.attr('class', 'message_box');
 
 	if (!confirmMsgDiv) {
-		setTimeout(function() {msgDiv.addClass('message_box_hide');},1000);
-		setTimeout(function() {msgDiv.addClass('message_box_hidden');},3000);
+		setTimeout(function() {msgDiv.addClass('message_box_hide');}, t_hide);
+//		setTimeout(function() {msgDiv.addClass('message_box_hidden');}, t_hidden);
 	}
 	else {
 		msgDiv.append('<input type="button" onclick="$(\'#message_box\').addClass(\'message_box_hidden\');" value="ok" style="margin-top: 10px;">');

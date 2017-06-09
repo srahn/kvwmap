@@ -499,21 +499,20 @@ function getEventPoint(evt) {
 
 function init(){
 	startup();
-	if(top.browser == "other"){
+	if (top.browser == "other"){
 	}
-	else{
+	else {
 		document.getElementById("mapimg2").addEventListener("load", function(evt) { moveback_ff(evt); }, true);
 	}
-	if(window.addEventListener){
+	if (window.addEventListener) {
 			window.addEventListener(\'mousewheel\', mousewheelchange, false); // Chrome/Safari//IE9
   		window.addEventListener(\'DOMMouseScroll\', mousewheelchange, false);		//Firefox
-			window.addEventListener(\'touchstart\', touchstart, false);		//touchstart
-			window.addEventListener(\'touchmove\', touchmove, false);		//touchmove
-			window.addEventListener(\'touchend\', touchend, false);		//touchend
-			window.addEventListener(\'touchcancel\', prevent, false);		//touchcancel
-			
+			document.getElementById(\'canvas\').addEventListener(\'touchstart\', touchstart, false);		//touchstart
+			document.getElementById(\'canvas\').addEventListener(\'touchmove\', touchmove, false);		//touchmove
+			document.getElementById(\'canvas\').addEventListener(\'touchend\', touchend, false);		//touchend
+			document.getElementById(\'canvas\').addEventListener(\'touchcancel\', prevent, false);		//touchcancel
   }
-  else{	
+  else {
 		top.document.getElementById("map").onmousewheel = mousewheelchange;		// <=IE8
 	}
 }
