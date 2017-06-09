@@ -44,7 +44,7 @@ function checkStatus($request, $username, $password){
   $ch = curl_init();
   curl_setopt($ch, CURLOPT_URL, $request);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-  curl_setopt($ch, CURLOPT_CONNECTTIMEOUT,1);
+  curl_setopt($ch, CURLOPT_TIMEOUT,3);
 	curl_setopt($ch, CURLOPT_VERBOSE, 1);
 	curl_setopt($ch, CURLOPT_HEADER, 1);
 	if($username != '')curl_setopt($ch, CURLOPT_USERPWD, $username.':'.$password);	
@@ -74,7 +74,7 @@ function checkStatus($request, $username, $password){
         $info = getExceptionCode($data);  
       }
       else{
-				if(strpos($data, '‰PNG') === false AND strpos($data, 'JFIF') === false){
+				if(substr(get_first_word_after($response, 'Content-Type: '), 0, 5) != 'image'){
 					$status = false;
 					$info = substr(strip_tags($data), 0, 255);
 				}
