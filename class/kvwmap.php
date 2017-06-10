@@ -15237,7 +15237,7 @@ class db_mapObj{
 					`default` = '" . addslashes($attributes[$i]['default']) . "',
 					`order` = " . $i . "
 			";
-			echo '<br>Sql: ' . $sql;
+			#echo '<br>Sql: ' . $sql;
 			$this->debug->write("<p>file:kvwmap class:db_mapObj->save_postgis_attributes - Speichern der Layerattribute:<br>".$sql,4);
 			$query=mysql_query($sql);
 			if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
@@ -15273,7 +15273,7 @@ class db_mapObj{
 				`constraints` = 'PRIMARY KEY' AND
 				`tablename` != maintable
 		";
-		echo '<br>Sql: ' . $sql;
+		#echo '<br>Sql: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->save_postgis_attributes - Speichern der Layerattribute:<br>".$sql,4);
 		$query=mysql_query($sql);
 		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }	
