@@ -71,11 +71,11 @@ class PgObject {
 	* Search for an record in the database by the given where clause
 	* @ return an array with all found object
 	*/
-	function find_where($where, $order = NULL) {
+	function find_where($where, $order = NULL, $select = '*') {
 		$order = (empty($order) ? "" : " ORDER BY " . $order);
 		$sql = "
 			SELECT
-				*
+				{$this->select}
 			FROM
 				" . $this->schema . '.' . $this->tableName . "
 			WHERE

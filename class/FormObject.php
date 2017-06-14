@@ -86,6 +86,7 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 		$options_html[] = "
 			<option
 				value=\"{$option['value']}\"{$selected}" .
+				(array_key_exists('attribute', $option) ? " {$option['attribute']}=\"{$option['attribute_value']}\"" : '') .
 				(array_key_exists('title', $option) ? " title=\"{$option['title']}\"" : '') .
 				(array_key_exists('style', $option) ? " style=\"{$option['style']}\"" : '') . "
 			>{$option['output']}</option>";
