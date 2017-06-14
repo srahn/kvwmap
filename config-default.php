@@ -606,8 +606,8 @@ define('POSTGRES_HOST', 'localhost');																# Version 2.0
 define('POSTGRES_USER', '');																				# Version 2.0
 define('POSTGRES_PASSWORD', '');																		# Version 2.0
 define('POSTGRES_DBNAME', $pgdbname);																# Version 2.0
-define('POSTGRES_ROOT_PASSWORD', getenv('PGSQL_ENV_POSTGRES_PASSWORD'));
-	
+#define('POSTGRES_ROOT_PASSWORD', getenv('PGSQL_ROOT_PASSWORD'));    # in Version 2.7 gelöscht
+
 // if ($pgdbname!='') {																													# in Version 2.0 gelöscht
 	// if(in_array($_REQUEST['go'], $fast_loading_cases)){		# Version 1.7.6			# in Version 2.0 gelöscht
 		// $PostGISdb=new pgdatabase_core();										# Version 1.7.6			# in Version 2.0 gelöscht

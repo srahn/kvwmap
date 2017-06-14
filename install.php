@@ -142,7 +142,7 @@ function install() {
   $pgsqlPostgresDb = new pgdatabase();
   $pgsqlPostgresDb->host = POSTGRES_HOST;                        
   $pgsqlPostgresDb->user = 'postgres';                          
-  $pgsqlPostgresDb->passwd = POSTGRES_ROOT_PASSWORD;                    
+  $pgsqlPostgresDb->passwd = getenv('PGSQL_ROOT_PASSWORD');                    
   $pgsqlPostgresDb->dbName = 'postgres'; ?>
   Verbindungsdaten für Zugang zu PostgreSQL postgres Nutzer wie folgt gesetzt:<br>
   Host: <?php echo $pgsqlPostgresDb->host; ?><br>
@@ -159,7 +159,7 @@ function install() {
     <ul>
       <li><b>PostgreSQL ist noch nicht installiert:</b> => Installieren sie PostgreSQL</li>
       <li><b>Der PostgreSQL server host ist nicht korrekt angegeben:</b> => Setzen Sie den richtigen hostnamen in der Datei config.php in der Konstante <b>POSTGRES_HOST</b>. In Docker Containern muss der Name pgsql oder pgsql-server heißen, sonst in der Regel localhost oder 172.0.0.1. Nur wenn sich die Datenbank auf einem anderem Rechner befindet geben Sie hier die entsprechende IP oder den Rechnername an.</li>
-      <li><b>Das Passwort des Datenbanknutzers postgres ist nicht richtig gesetzt:</b> => Das Passwort kann in der Konstante <b>POSTGRES_ROOT_PASSWORD</b> in der Datei config.php eingestellt werden. Nach der erfolgreichen Installation können sie diese Konstante löschen oder das Passwort auf ein Leerzeichen setzen.</li>
+      <li><b>Das Passwort des Datenbanknutzers postgres ist nicht richtig gesetzt:</b> => Das Passwort kann in der Umgebungsvariable <b>POSTGRES_ROOT_PASSWORD</b> in der env_and_volumes des web Containers  eingestellt werden. Normalerweise wird die Konstante beim Erzeugen des pgsql Containers abgefragt und steht in env_and_volumes des web Containers zur Verfügung.</li>
     </ul>
     <input type="button" value="Script neu starten" onclick="window.location.reload()">
     <?php
