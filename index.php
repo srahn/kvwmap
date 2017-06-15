@@ -1341,7 +1341,22 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->checkCaseAllowed('Stellen_Anzeigen');
 			$GUI->StellenAnzeigen();
 	  } break;
-	  
+
+		case 'Menues_Anzeigen' : {
+			$GUI->checkCaseAllowed('Menues_Anzeigen');
+			$GUI->MenuesAnzeigen();
+	  } break;
+
+		case 'Menueeditor' : {
+			$GUI->checkCaseAllowed('Menues_Anzeigen');
+			$GUI->Menueeditor();
+		} break;
+
+		case 'Menue_Ändern' : {
+			$GUI->checkCaseAllowed('Menues_Anzeigen');
+			$GUI->MenueAendern();
+		} break;
+
 	  case 'Filterverwaltung' : {
 			$GUI->checkCaseAllowed('Filterverwaltung');
 			$GUI->Filterverwaltung();

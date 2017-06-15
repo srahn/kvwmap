@@ -1,17 +1,18 @@
 <?php
 include_once(CLASSPATH . 'MyObject.php');
+include_once(CLASSPATH . 'MyAttribute.php');
 class Menue extends MyObject {
 
 	static $write_debug = false;
 
 	function Menue($gui) {
-		$this->MyObject($gui, 'menue');
+		$this->MyObject($gui, 'u_menues');
 		$this->identifier = 'id';
 	}
 
-	public static	function find($gui, $where) {
+	public static	function find($gui, $where, $order = '') {
 		$menue = new Menue($gui);
-		return $menue->find_where($where);
+		return $menue->find_where($where, $order);
 	}
 
 	public static function loadMenue($gui) {

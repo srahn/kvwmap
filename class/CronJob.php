@@ -7,7 +7,7 @@ class CronJob extends MyObject {
 	function CronJob($gui) {
 		$this->MyObject($gui, 'cron_jobs');
 		$this->identifier = 'id';
-		$this->setAttributes(
+		$this->setKeys(
 			array(
 				"id",
 				"bezeichnung",

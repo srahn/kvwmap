@@ -3561,7 +3561,7 @@ class GUI {
     $this->loadMap('DataBase');
     $this->drawMap();
     $this->user->rolle->hideMenue(0);
-    include(LAYOUTPATH."snippets/menue.php");
+    include(LAYOUTPATH . "snippets/menue.php");
 		echo '~if(typeof resizemap2window != "undefined")resizemap2window();';
   }
 
@@ -10086,15 +10086,15 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
                $this->formvars['operator_'.$filter[$i]['attributname']] == $filter[$i]['operator'])){
               $this->formvars['value_'.$filter[$i]['attributname']] = pg_escape_string($filter[$i]['attributvalue']);
               $this->formvars['operator_'.$filter[$i]['attributname']] = $filter[$i]['operator'];
-              $setAttributes[$filter[$i]['attributname']]++;
+              $setKeys[$filter[$i]['attributname']]++;
             }
             else{
               $this->formvars['value_'.$filter[$i]['attributname']] = '---- verschieden ----';
             }
           }
         }
-        for($i = 0; $i < count($setAttributes); $i++){
-          $element = each($setAttributes);
+        for($i = 0; $i < count($setKeys); $i++){
+          $element = each($setKeys);
           if($element['value'] < count($this->selected_layers)){
             $this->formvars['value_'.$element['key']] = '---- verschieden ----';
           }
@@ -10230,6 +10230,46 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     }
     $this->Filterverwaltung();
   }
+
+  function MenuesAnzeigen() {
+    # Abfragen aller Menues
+    if ($this->formvars['order'] == ''){
+      $this->formvars['order'] = 'name';
+    }
+    $this->menuedaten = Menue::find($this, 'true', $this->formvars['order']);
+    $this->titel='Menüdaten';
+    $this->main='menuedaten.php';
+    $this->output();
+  }
+
+	/*
+	* this function get the menue by formvar selected_menue_id,
+	* set the titel and page and start the output
+	*/
+	function Menueeditor() {
+		$this->menue = new Menue($this);
+		$this->menue->find_by('id', $this->formvars['selected_menue_id']);
+		$this->titel = 'Menü Editor';
+		$this->main = 'menue_formular.php';
+		$this->output();
+	}
+
+	function MenueAendern() {
+		$this->menue = new Menue($this);
+		$this->menue->find_by('id', $this->formvars['selected_menue_id']);
+		$this->menue->setData($this->formvars);
+		$this->menue->update();
+		$this->Menueeditor();
+	}
+
+	function MenueLoeschen(){
+		$this->menue = new Menue($this);
+		$this->menue->find_by('id', $this->formvars['selected_menue_id']);
+		$this->menue->delete();
+		$this->titel='Menüdaten';
+		$this->main='menuedaten.php';
+		$this->output();
+	}
 
   function StatistikAuswahl() {
     # Abfragen aller Stellen für die Statistik oder Abrechnung
@@ -10696,7 +10736,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	function cronjobs_anlegen() {
 		include_once(CLASSPATH . 'CronJob.php');
 		$this->cronjob = new CronJob($this);
-		$this->cronjob->data = formvars_strip($this->formvars, $this->cronjob->getAttributes(), 'keep');
+		$this->cronjob->data = formvars_strip($this->formvars, $this->cronjob->getKeys(), 'keep');
 		$this->cronjob->set('query', strip_pg_escape_string($this->formvars['query']));
 		$results = $this->cronjob->validate();
 		if (empty($results)) {
@@ -10717,7 +10757,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	function cronjob_update() {
 		include_once(CLASSPATH . 'CronJob.php');
 		$this->cronjob = CronJob::find_by_id($this, $this->formvars['id']);
-		$this->cronjob->data = formvars_strip($this->formvars, $this->cronjob->getAttributes(), 'keep');
+		$this->cronjob->data = formvars_strip($this->formvars, $this->cronjob->getKeys(), 'keep');
 		$result = $this->cronjob->update();
 		if (!empty($result)) {
 			$this->add_message('error', 'Fehler beim Eintragen in die Datenbank!<br>' . $result);

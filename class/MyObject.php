@@ -40,14 +40,15 @@ class MyObject {
 	* by the given where clause
 	* @ return all objects
 	*/
-	function find_where($where) {
+	function find_where($where, $order) {
 		$sql = "
 			SELECT
 				*
 			FROM
 				`" . $this->tableName . "`
-				WHERE
-					" . $where . "
+			WHERE
+				" . $where . 
+			($order != '' ? " ORDER BY " . $order : "") . "
 		";
 		$this->debug->show('mysql find_where sql: ' . $sql, MyObject::$write_debug);
 		$query = mysql_query($sql, $this->database->dbConn);
@@ -90,13 +91,29 @@ class MyObject {
 	}
 
 	function getAttributes() {
+		$attributes = [];
+		foreach ($this->data AS $key => $value) {
+			$attributes[] = new MyAttribute($this->debug, $key, 'text', $value);
+		}
+		return $attributes;
+	}
+
+	function getKeys() {
 		return array_keys($this->data);
 	}
 
-	function setAttributes($keys) {
+	function setKeys($keys) {
 		foreach ($keys AS $key) {
 			if (!array_key_exists($key, $this->data)) {
 				$this->set($key, NULL);
+			}
+		}
+	}
+
+	function setData($formvars) {
+		foreach ($this->data AS $key => $value) {
+			if (array_key_exists($key, $formvars)) {
+				$this->set($key, $formvars[$key]);
 			}
 		}
 	}
@@ -130,7 +147,7 @@ class MyObject {
 
 		$sql = "
 			INSERT INTO `" . $this->tableName . "` (
-				`" . implode('`, `', $this->getAttributes()) . "`
+				`" . implode('`, `', $this->getKeys()) . "`
 			)
 			VALUES (
 				" . implode(
@@ -251,6 +268,19 @@ class MyObject {
 		}
 
 		return ($invalid_msg == '' ? '' : $msg . '<br>' . $invalid_msg);
+	}
+
+	function as_form_html() {
+		$html = implode(
+			"<div class=\"clear\"></div>",
+			array_map(
+				function ($attribute) {
+					return $attribute->as_form_html();
+				},
+				$this->getAttributes()
+			)
+		);
+		return $html;
 	}
 
 }

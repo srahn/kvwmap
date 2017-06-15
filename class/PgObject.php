@@ -104,7 +104,7 @@ class PgObject {
 		return $query;
 	}
 
-	function getAttributes() {
+	function getKeys() {
 		return array_keys($this->data);
 	}
 
@@ -152,7 +152,7 @@ class PgObject {
 
 		$sql = "
 			INSERT INTO " . $this->qualifiedTableName . " (
-				" . implode(', ', $this->getAttributes()) . "
+				" . implode(', ', $this->getKeys()) . "
 			)
 			VALUES (" .
 				"'" . implode("', '", $values) . "'
@@ -193,7 +193,7 @@ class PgObject {
 
 		$sql = "
 			INSERT INTO " . $this->qualifiedTableName . " (
-				" . implode(', ', $this->getAttributes()) . "
+				" . implode(', ', $this->getKeys()) . "
 			)
 			VALUES (" .
 				"'" . implode("', '", $values) . "'
