@@ -315,10 +315,22 @@ $svg='<?xml version="1.0"?>
 	var last_x = 0;
 	freehand_measuring = false;
 	var measured_distance = 0;
-	var new_distance = 0;
-  		
-  ';
-	
+	var new_distance = 0,
+			dragVectors = [{
+					\'x0\': 0,
+					\'y0\': 0,
+					\'dx\': 0,
+					\'dy\': 0,
+				}, {
+					\'x0\': 0,
+					\'y0\': 0,
+					\'dx\': 0,
+					\'dy\': 0,
+				}
+			],
+			touchPanZoomThreshold = 17 // differences of drag vectors, to distinguish between pan and zoom on touch gestures;
+	';
+
 if($_SESSION['mobile'] == 'true'){
 	$svg.= '  
   function update_gps_position(){
@@ -409,22 +421,57 @@ function mousewheelchange(evt){
 		var z = 1 + delta*5;
 		var p = getEventPoint(evt);
 		if(p.x > 0 && p.y > 0){
-			zoomTransform(p, z, null);
+			zoomTransform(p, null, z, null);
 			mousewheelloop = window.setTimeout("applyZoom()", 400);
 		}
 	}
 }
 
-function zoomTransform(p, z, ctm){
+function zoomTransform(p, t, z, ctm) {
 	var g = document.getElementById("moveGroup");
-	if(ctm == null)ctm = g.getCTM();
+
+	if (t == null) t = { \'dx\': 0, \'dy\': 0 }
+
+	if(ctm == null) ctm = g.getCTM();
+
 	p = p.matrixTransform(ctm.inverse());
-	var k = root.createSVGMatrix().translate(p.x, p.y).scale(z).translate(-p.x, -p.y);
+	var k = root.createSVGMatrix().translate(p.x, p.y).scale(z).translate(-p.x + t.dx, -p.y + t.dy);
 	setCTM(g, ctm.multiply(k)); 
 }
 
-function getPinchDistance(evt){
-	return (evt.touches[0].pageX-evt.touches[1].pageX) * (evt.touches[0].pageX-evt.touches[1].pageX) + (evt.touches[0].pageY-evt.touches[1].pageY) * (evt.touches[0].pageY-evt.touches[1].pageY);
+/*
+* Returns the pinch distance between first and second touch position on page
+* Returns 0 if only one touch exists 
+*/
+function getPinchDistance(evt) {
+	return (evt.touches.length == 2 ? (Math.pow(evt.touches[0].pageX - evt.touches[1].pageX, 2) + Math.pow(evt.touches[0].pageY - evt.touches[1].pageY, 2)) : 0)
+}
+
+function getTouchPositions(evt) {
+	var touchPositions = [{
+			\'x\': evt.touches[0].pageX,
+			\'y\': evt.touches[0].pageY
+		}, {
+			\'x\': evt.touches[1].pageX,
+			\'y\': evt.touches[1].pageY
+		}
+	]
+	return touchPositions
+}
+
+function startDragVectors(touches) {
+	dragVectors[0].x0 = touches[0].pageX;
+	dragVectors[0].y0 = touches[0].pageY;
+	dragVectors[1].x0 = touches[1].pageX;
+	dragVectors[1].y0 = touches[1].pageY;
+}
+
+function updateDragVectors(touches) {
+	dragVectors[0].dx = touches[0].pageX - dragVectors[0].x0;
+	dragVectors[0].dy = touches[0].pageY - dragVectors[0].y0;
+	dragVectors[1].dx = touches[1].pageX - dragVectors[1].x0;
+	dragVectors[1].dy = touches[1].pageY - dragVectors[1].y0;
+	return dragVectors;
 }
 
 function touchstart(evt){
@@ -439,12 +486,13 @@ function touchstart(evt){
 			var g = document.getElementById("moveGroup");
 			pinching = true;
 			pinch_distance = getPinchDistance(evt);
+			startDragVectors(evt.touches);
 			start_ctm = g.getCTM();
 		}
 	}
 }
 
-function touchmove(evt){
+function touchmove(evt) {
 	prevent(evt);
 	if(top.document.GUI.stopnavigation.value == 0){
 		if(pinching == false && evt.touches.length == 1){		// 1 Finger
@@ -455,8 +503,25 @@ function touchmove(evt){
 		else if(pinching){
 			z = getPinchDistance(evt) / pinch_distance;
 			var p = getEventPoint(evt);
+			
+			if (evt.touches.length == 2) {
+				var v = updateDragVectors(evt.touches),
+						doing = ((Math.abs((v[1].dx - v[0].dx)) + Math.abs((v[1].dx - v[0].dx))) > touchPanZoomThreshold ? \' zoom\' : \'pan\');
+
+/*				console.log(
+					\'v1(\' + v[0].dx + \', \' + v[0].dy + \') \' +
+					\'v2(\' + v[1].dx + \', \' + v[1].dy + \') \' +
+					\'dv(\' + (v[1].dx - v[0].dx) + \', \' + (v[1].dy - v[0].dy) + \') \' +
+					\'s(\' + (Math.abs((v[1].dx - v[0].dx)) + Math.abs((v[1].dy - v[0].dy))) + \')\' +
+					\'doing: \' + doing
+				);
+*/
+			}
 			if(p.x > 0 && p.y > 0){
-				zoomTransform(p, z, start_ctm);
+				if (doing == \'pan\') {
+					t = v[0];
+				}
+				zoomTransform(p, t, z, start_ctm);
 			}
 		}
 	}
@@ -482,15 +547,21 @@ function setCTM(element, matrix) {
 
 function getEventPoint(evt) {
 	var p = root.createSVGPoint();
-	if(evt.clientX != undefined){		// Maus: Mausposition
+	if (evt.clientX != undefined) {		// Maus: Mausposition
 		p.x = evt.clientX;
 		p.y = evt.clientY;
 	}
-	else if(evt.touches[0].pageX != undefined){		// Touch: Mitte zwischen beiden Fingern
-		p.x = evt.touches[0].pageX - ((evt.touches[0].pageX-evt.touches[1].pageX)/2);
-		p.y = evt.touches[0].pageY - ((evt.touches[0].pageY-evt.touches[1].pageY)/2);
+	else if (evt.touches[0].pageX != undefined){		// Touch: Mitte zwischen beiden Fingern
+		if (evt.touches.length == 2) {
+			p.x = evt.touches[0].pageX - ((evt.touches[0].pageX-evt.touches[1].pageX)/2);
+			p.y = evt.touches[0].pageY - ((evt.touches[0].pageY-evt.touches[1].pageY)/2);
+		}
+		else {
+			p.x = 0;
+			p.y = 0;
+		}
 	}
-	if(top.navigator.userAgent.toLowerCase().indexOf("msie") >= 0){
+	if (top.navigator.userAgent.toLowerCase().indexOf("msie") >= 0){
 		p.x = p.x - (top.document.body.clientWidth - resx)/2;
     p.y = p.y - 30;
 	}
