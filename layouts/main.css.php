@@ -375,7 +375,7 @@ a.menuered:hover {
 }
 
 .ausgewaehltes-menue {
-	#background: rgb(205, 208, 208);
+/*	background: rgb(205, 208, 208); */
 }
 
 .button-menue{
@@ -713,7 +713,7 @@ span.black {
 
 #layer {
 	margin:0px 8px 8px 8px;
-	#overflow:hidden;
+/*	overflow:hidden; */
 	clear: both;
 }
 
@@ -772,7 +772,7 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 .raster_record_open img{width: auto; transition: all 0.25s ease;}
 .raster_record_open .tr_hide{visibility:visible;}
 .raster_record_open .preview_image{width: 125px;transition: all 0.25s ease;}
-.raster_record_open .preview_image:hover{width: 125; ?>px;transition: all 0.25s ease;}
+.raster_record_open .preview_image:hover{width: 125px;transition: all 0.25s ease;}
 
 
 #layer	h2{
@@ -794,7 +794,7 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 	left:45%;
 	min-width:250px;
 	max-width: 550px;
-	#height:90px;
+/*	height:90px; */
 	max-height: 600px;
 	overflow: auto;
 	font-size: 17px;
@@ -804,7 +804,7 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 	text-align: center;
 	line-height: 20px;
 	border: 1px solid grey;
-	#border-radius: 5px; 
+/*	border-radius: 5px;*/
 	background-color: #DAE4EC;
 	box-shadow: 10px 10px 14px #777;
 	z-index: 1000000;
@@ -1284,7 +1284,7 @@ tbody.gle tr:hover {
 	display: none;
 	width: 246px;
 	padding: 4px;
-	overflow: scroll;"
+	overflow: scroll;
 }
 
 #log {
