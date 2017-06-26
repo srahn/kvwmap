@@ -3241,7 +3241,7 @@ class stelle {
 		for ($i=0;$i<count($layer_ids);$i++) {
 			$sql = "
 				SELECT
-					queryable, template, transparency, drawingorder, minscale, maxscale, symbolscale, offsite, requires, privileg, postlabelcache
+					queryable, template, transparency, drawingorder, minscale, maxscale, symbolscale, offsite, requires, privileg, export_privileg, postlabelcache
 				FROM
 					layer
 				WHERE
@@ -3262,6 +3262,7 @@ class stelle {
 			$symbolscale = $rs['symbolscale'];
 			$offsite = $rs['offsite'];
 			$privileg = $rs['privileg'];
+			$export_privileg = $rs['export_privileg'];
 			$postlabelcache = $rs['postlabelcache'];
 			if($rs['requires'] == '')$rs['requires']='NULL';
 			$requires = $rs['requires'];
@@ -3281,6 +3282,7 @@ class stelle {
 					`header`,
 					`footer`,
 					`privileg`,
+					`export_privileg`,
 					`postlabelcache`,
 					`requires`
 				)
@@ -3299,6 +3301,7 @@ class stelle {
 					NULL,
 					NULL,
 					'" . $privileg . "',
+					'" . $export_privileg . "',
 					'" . $postlabelcache . "',
 					" . $requires . "
 				)
