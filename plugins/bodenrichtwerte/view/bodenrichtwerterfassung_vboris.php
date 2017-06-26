@@ -36,11 +36,20 @@ function send(){
 	if(document.GUI.stichtag.value == ''){alert('Bitte geben Sie einen Stichtag an.');exit();}
 	if(document.GUI.gemeinde.value == ''){alert('Bitte geben Sie eine Gemeinde an.');exit();}
 	if(document.GUI.gemarkung.value == ''){alert('Bitte geben Sie eine Gemarkung an.');exit();}
-	if(document.GUI.zonentyp.value == ''){alert('Bitte geben Sie einen Zonentyp an.');exit();}
-	if(document.GUI.zonentyp.value == 'Grünland' && document.GUI.gruenlandzahl.value == ''){alert('Bitte geben Sie eine Grünlandzahl an.');exit();}
-	if(document.GUI.zonentyp.value == 'Ackerland' && document.GUI.ackerzahl.value == ''){alert('Bitte geben Sie eine Ackerzahl an.');exit();}
+	if (document.GUI.zonentyp.value == '') {
+		alert('Bitte geben Sie einen Zonentyp an.');
+		exit();
+	}
+//	if(document.GUI.zonentyp.value == 'Grünland' && document.GUI.gruenlandzahl.value == ''){alert('Bitte geben Sie eine Grünlandzahl an.');exit();}
+	if (document.GUI.zonentyp.value == 'Ackerland' && document.GUI.ackerzahl.value == '') {
+		alert('Bitte geben Sie eine Ackerzahl an.');
+		exit();
+	}
 	if(document.GUI.entwicklungszustand.value == ''){alert('Bitte geben Sie einen Entwicklungszustand an.');exit();}
-	if(document.GUI.entwicklungszustand.value == 'B' && document.GUI.beitragszustand.value == ''){alert('Bitte geben Sie einen Beitragszustand an.');exit();}
+	if (document.GUI.entwicklungszustand.value == 'B ' && document.GUI.beitragszustand.value == '') {
+		alert('Bitte geben Sie einen Beitragszustand an.');
+		exit();
+	}
 	if(document.GUI.nutzungsart.value == ''){alert('Bitte geben Sie eine Nutzungsart an.');exit();}
 	if(document.GUI.newpathwkt.value == ''){
 		if(document.GUI.newpath.value == ''){
@@ -90,16 +99,16 @@ function update_verfahren(){
 	}
 }
 
-function update_nutzungsart(){
+function update_nutzungsart() {
 	document.GUI.nutzungsart.length = 0;
-	if(document.GUI.entwicklungszustand.value in {'B':'', 'R':'','E':''}){
+	if (document.GUI.entwicklungszustand.value in {'B ':'', 'R ':'','E ':''}) {
 		add_options(document.GUI.nutzungsart, new Array('W', 'WS', 'WR', 'WA', 'WB', 'M', 'MD', 'MI', 'MK', 'G', 'GE', 'GI', 'S', 'SE', 'SO', 'GB'), '-- Bitte wählen --');
 	}
-	if(document.GUI.entwicklungszustand.value == 'LF'){
+	if (document.GUI.entwicklungszustand.value == 'LF') {
 		add_options(document.GUI.nutzungsart, new Array('LW', 'A', 'GR', 'EGA', 'SK', 'WG', 'KUP', 'UN', 'F'), '-- Bitte wählen --');
 	}
-	if(document.GUI.entwicklungszustand.value == 'SF'){
-		add_options(document.GUI.nutzungsart, new Array('PG', 'KGA', 'FGA', 'CA', 'SPO', 'SG', 'FH', 'WF', 'FP', 'PP', 'LG', 'AB', 'GF', 'SN'), '-- Bitte wählen --');
+	if (document.GUI.entwicklungszustand.value == 'SF') {
+		add_options(document.GUI.nutzungsart, new Array('PG', 'KGA', 'FGA', 'CA', 'SPO', 'SG', 'FH', 'WF', 'FP', 'PP', 'LG', 'AB', 'GF', 'SN', 'UF', 'FF', 'FEE', 'FVE', 'FNS', 'ÖG', 'PVF'), '-- Bitte wählen --');
 	}
 }
 
@@ -183,7 +192,7 @@ update_require_attribute = function(attributes, layer_id, value){
 												    </td>
 												    <td colspan="2">
 												      <?php 
-												        $FormatWerte = array('ALKDOP', 'ALK', 'DOP', 'DTK10'); 
+												        $FormatWerte = array('ALKISDOP', 'ALKIS', 'DOP', 'DTK10'); 
 												        $basiskarte = new FormObject('basiskarte','select',$FormatWerte,array($this->formvars['basiskarte']),$FormatWerte,1,$maxlenght,$multiple,146);
 												        $basiskarte->OutputHTML();
 												        echo $basiskarte->html;
@@ -194,15 +203,27 @@ update_require_attribute = function(attributes, layer_id, value){
 												    <td>
 												    	Entwicklungszustand:
 												    </td>
-												    <td colspan="2"> 
-												      <?php 
-												        $FormatWerte = array('','R','E','B','LF','SF');
-												        $FormatBez = array('-- Bitte wählen --','Rohbauland','Bauerwartungsland','baureifes Land','Land- und Forstwirtschaft','sonstige Fläche'); 
-												        $zustand = new FormObject('entwicklungszustand','select',$FormatWerte,array($this->formvars['entwicklungszustand']),$FormatBez,1,$maxlenght,$multiple,146);
-												        $zustand->addJavaScript('onchange', "update_nutzungsart();");
-												        $zustand->OutputHTML();
-												        echo $zustand->html;
-												      ?>
+														<td colspan="2"><?php 
+															$FormatWerte = array(
+																'',
+																'R ',
+																'E ',
+																'B ',
+																'LF',
+																'SF'
+															);
+															$FormatBez = array(
+																'-- Bitte wählen --',
+																'Rohbauland',
+																'Bauerwartungsland',
+																'Baureifes Land',
+																'Fläche der Land- oder Forstwirtschaft',
+																'Sonstige Fläche'
+															);
+															$zustand = new FormObject('entwicklungszustand', 'select', $FormatWerte, array($this->formvars['entwicklungszustand']), $FormatBez, 1, $maxlenght, $multiple, 146);
+															$zustand->addJavaScript('onchange', "update_nutzungsart();");
+															$zustand->OutputHTML();
+															echo $zustand->html; ?>
 												    </td>
 												  </tr>
 												  <tr> 
@@ -225,7 +246,7 @@ update_require_attribute = function(attributes, layer_id, value){
 												    </td>
 												    <td colspan="2"> 
 												      <?php
-											      	 	if(in_array($this->formvars['entwicklungszustand'], array('B', 'R', 'E'))){
+											      	 	if(in_array($this->formvars['entwicklungszustand'], array('B ', 'R ', 'E '))){
 																	$FormatWerte = array('W', 'WS', 'WR', 'WA', 'WB', 'M', 'MD', 'MI', 'MK', 'G', 'GE', 'GI', 'S', 'SE', 'SO', 'GB', '');
 																	$FormatBez = array('W', 'WS', 'WR', 'WA', 'WB', 'M', 'MD', 'MI', 'MK', 'G', 'GE', 'GI', 'S', 'SE', 'SO', 'GB', '-- Bitte wählen --'); 
 																}
@@ -234,8 +255,8 @@ update_require_attribute = function(attributes, layer_id, value){
 																	$FormatBez = array('LW', 'A', 'GR', 'EGA', 'SK', 'WG', 'KUP', 'UN', 'F', '-- Bitte wählen --');
 																}
 																elseif($this->formvars['entwicklungszustand'] == 'SF'){
-																	$FormatWerte = array('PG', 'KGA', 'FGA', 'CA', 'SPO', 'SG', 'FH', 'WF', 'FP', 'PP', 'LG', 'AB', 'GF', 'SN', '');
-																	$FormatBez = array('PG', 'KGA', 'FGA', 'CA', 'SPO', 'SG', 'FH', 'WF', 'FP', 'PP', 'LG', 'AB', 'GF', 'SN', '-- Bitte wählen --');
+																	$FormatWerte = array('PG', 'KGA', 'FGA', 'CA', 'SPO', 'SG', 'FH', 'WF', 'FP', 'PP', 'LG', 'AB', 'GF', 'SN', 'UF', 'FF', 'FEE', 'FVE', 'FNS', 'ÖG', 'PVF', '');
+																	$FormatBez = array('PG', 'KGA', 'FGA', 'CA', 'SPO', 'SG', 'FH', 'WF', 'FP', 'PP', 'LG', 'AB', 'GF', 'SN', 'UF', 'FF', 'FEE', 'FVE', 'FNS', 'ÖG', 'PVF', '-- Bitte wählen --');
 																}
 																else{ 
 												        	$FormatWerte = array('');
@@ -350,8 +371,8 @@ update_require_attribute = function(attributes, layer_id, value){
 									    </td>
 									    <td colspan="2"> 
 									      <?php 
-									        $FormatWerte = array('', 'o', 'g', 'a','eh', 'ed', 'dh', 'rh', 'rm');
-									        $FormatBez = array('-- Bitte wählen --', 'offen', 'geschlossen', 'abweichend','Einzelhaus', 'Einzel- und Doppelhaus', 'Doppelhaushälfte', 'Reihenhaus', 'Reihenmittelhaus'); 
+									        $FormatWerte = array('', 'o', 'g', 'a','eh', 'ed', 'dh', 'rh', 'rm', 're');
+									        $FormatBez = array('-- Bitte wählen --', 'offen', 'geschlossen', 'abweichend','Einzelhaus', 'Einzel- und Doppelhaus', 'Doppelhaushälfte', 'Reihenhaus', 'Reihenmittelhaus', 'Reihenendhaus'); 
 									        $bauweise = new FormObject('bauweise','select',$FormatWerte,array($this->formvars['bauweise']),$FormatBez,1,$maxlenght,$multiple,146);
 									        $bauweise->OutputHTML();
 									        echo $bauweise->html;
@@ -590,14 +611,36 @@ update_require_attribute = function(attributes, layer_id, value){
 						    <td>
 						    	Zonentyp:
 						    </td>
-						    <td colspan="3"> 
-						      <?php 
-						        $FormatWerte = array('', 'Gewerbeflächen', 'Sanierungsflächen', 'Ackerlandflächen', 'Grünlandflächen', 'Forstflächen', 'Gartenflächen', 'gemischte Bauflächen', 'Wohnbauflächen', 'Sonderbauflächen');
-						        $FormatBez = array('-- Bitte wählen --', 'Gewerbeflächen', 'Sanierungsflächen', 'Ackerlandflächen', 'Grünlandflächen', 'Forstflächen', 'Gartenflächen', 'gemischte Bauflächen', 'Wohnbauflächen', 'Sonderbauflächen');
-						        $zonentyp = new FormObject('zonentyp','select',$FormatWerte,array($this->formvars['zonentyp']),$FormatBez,1,$maxlenght,$multiple,158);
-						        $zonentyp->OutputHTML();
-						        echo $zonentyp->html;
-						      ?>
+						    <td colspan="3"><?php 
+									$FormatWerte = array(
+										'',
+										'Ackerland',
+										'forstwirtschaftliche Flächen',
+										'gemischte Bauflächen',
+										'gewerbliche Bauflächen',
+										'Grünland',
+										'Wohnbauflächen',
+										'Sanierungsgebiet',
+										'sonstige Flächen',
+										'Entwicklungsbereich',
+										'Soziale Stadt'
+									);
+									$FormatBez = array(
+										'-- Bitte wählen --',
+										'Ackerland',
+										'forstwirtschaftliche Flächen',
+										'gemischte Bauflächen',
+										'gewerbliche Bauflächen',
+										'Grünland',
+										'Wohnbauflächen',
+										'Sanierungsgebiet',
+										'sonstige Flächen',
+										'Entwicklungsbereich',
+										'Soziale Stadt'
+									);
+									$zonentyp = new FormObject('zonentyp', 'select', $FormatWerte, array($this->formvars['zonentyp']), $FormatBez, 1, $maxlenght, $multiple, 158);
+									$zonentyp->OutputHTML();
+									echo $zonentyp->html; ?>
 						    </td>
 						  </tr>
 						  <tr>

@@ -17,6 +17,7 @@
 	<tr>
 		<th><i title="Aktiviere oder Deaktiviere die Cron Jobs über die Checkboxen." class="fa fa-check-square-o" aria-hidden="true"></i></th>
 		<th>Bezeichnung</th>
+		<td>Zeit</td>
 		<th>Beschreibung</th>
 		<!--th>Query/Command</th>
 		<th>User Id</th>
@@ -36,6 +37,7 @@
 				>
 			</td>
 			<td><?php echo $cronjob->get('bezeichnung'); ?></td>
+			<td><?php echo $cronjob->get('time'); ?></td>
 			<td><?php echo $cronjob->get('beschreibung'); ?></td>
 			<!--td><textarea cols="33" rows="1" readonly><?php echo (empty($cronjob->get('query')) ? $cronjob->get('function') : $cronjob->get('query')); ?></textarea></td>
 			<td><?php echo $cronjob->get('user_id'); ?></td>
