@@ -96,7 +96,22 @@ class Menue extends MyObject {
 		);
     return $menues;
 	}
-	
+
+	public function validate() {
+		$results = array();
+		$results[] = $this->validates('name', 'not_null', 'Es muss ein Menüname angegeben werden.');
+		$results[] = $this->validates('links', 'not_null', 'Ein Link muss angegeben werden. Für Obermenüpunkte in der Regel index.php?go=changemenue');
+		$results[] = $this->validates('menueebene', 'validate_value_is_one_off', 'Es muss Menüebene 1 oder 2 angegeben werden.', array('1', '2'));
+
+		$messages = array();
+		foreach($results AS $result) {
+			if (!empty($result)) {
+				$messages[] = $result;
+			}
+		}
+		return $messages;
+	}
+
 	function is_selected() {
 		$is_selected = true;
 		$formvars = $_REQUEST;

@@ -40,7 +40,7 @@ class MyObject {
 	* by the given where clause
 	* @ return all objects
 	*/
-	function find_where($where, $order) {
+	function find_where($where, $order = '') {
 		$sql = "
 			SELECT
 				*
@@ -108,6 +108,21 @@ class MyObject {
 				$this->set($key, NULL);
 			}
 		}
+	}
+
+	function setKeysFromTable() {
+		$sql = "
+			SHOW COLUMNS
+			FROM
+				`" . $this->tableName . "`
+		";
+		$this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
+		$query = mysql_query($sql, $this->database->dbConn);
+		
+		while($row = mysql_fetch_assoc($query)) {
+			$this->set($row['Field'], NULL);
+		}
+		return $this->getKeys();
 	}
 
 	function setData($formvars) {
@@ -220,11 +235,16 @@ class MyObject {
 			case 'presence_one_of' :
 				$result = $this->validate_presence_one_of($key, $msg);
 				break;
+				
+			case 'validate_value_is_one_off' :
+				$result = $this->validate_value_is_one_off($key, $option, $msg);
+				break;
 
 			case 'format' :
 				$result = $this->validate_format($key, $msg, $option);
 				break;
 		}
+		
 		return (empty($result) ? '' : array('type' => 'error', 'msg' => $result));
 	}
 
@@ -253,6 +273,11 @@ class MyObject {
 			}
 		}
 		return ($one_present ? '' : $msg);
+	}
+
+	function validate_value_is_one_off($key, $allowed_values, $msg = '') {
+		if ($msg == '') $msg = 'Der angegebene Wert ' . $this->get($key) . ' muss einer von diesen sein: <i>(' . implode(', ', $allowed_values) . '</i>)';
+		return (in_array($this->get($key), $allowed_values) ? '' : $msg);
 	}
 
 	function validate_format($key, $msg, $format) {
