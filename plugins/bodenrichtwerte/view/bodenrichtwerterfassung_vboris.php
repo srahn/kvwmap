@@ -108,7 +108,7 @@ function update_nutzungsart() {
 		add_options(document.GUI.nutzungsart, new Array('LW', 'A', 'GR', 'EGA', 'SK', 'WG', 'KUP', 'UN', 'F'), '-- Bitte wählen --');
 	}
 	if (document.GUI.entwicklungszustand.value == 'SF') {
-		add_options(document.GUI.nutzungsart, new Array('PG', 'KGA', 'FGA', 'CA', 'SPO', 'SG', 'FH', 'WF', 'FP', 'PP', 'LG', 'AB', 'GF', 'SN'), '-- Bitte wählen --');
+		add_options(document.GUI.nutzungsart, new Array('PG', 'KGA', 'FGA', 'CA', 'SPO', 'SG', 'FH', 'WF', 'FP', 'PP', 'LG', 'AB', 'GF', 'SN', 'UF', 'FF', 'FEE', 'FVE', 'FNS', 'ÖG', 'PVF'), '-- Bitte wählen --');
 	}
 }
 
@@ -192,7 +192,7 @@ update_require_attribute = function(attributes, layer_id, value){
 												    </td>
 												    <td colspan="2">
 												      <?php 
-												        $FormatWerte = array('ALKDOP', 'ALK', 'DOP', 'DTK10'); 
+												        $FormatWerte = array('ALKISDOP', 'ALKIS', 'DOP', 'DTK10'); 
 												        $basiskarte = new FormObject('basiskarte','select',$FormatWerte,array($this->formvars['basiskarte']),$FormatWerte,1,$maxlenght,$multiple,146);
 												        $basiskarte->OutputHTML();
 												        echo $basiskarte->html;
@@ -255,8 +255,8 @@ update_require_attribute = function(attributes, layer_id, value){
 																	$FormatBez = array('LW', 'A', 'GR', 'EGA', 'SK', 'WG', 'KUP', 'UN', 'F', '-- Bitte wählen --');
 																}
 																elseif($this->formvars['entwicklungszustand'] == 'SF'){
-																	$FormatWerte = array('PG', 'KGA', 'FGA', 'CA', 'SPO', 'SG', 'FH', 'WF', 'FP', 'PP', 'LG', 'AB', 'GF', 'SN', '');
-																	$FormatBez = array('PG', 'KGA', 'FGA', 'CA', 'SPO', 'SG', 'FH', 'WF', 'FP', 'PP', 'LG', 'AB', 'GF', 'SN', '-- Bitte wählen --');
+																	$FormatWerte = array('PG', 'KGA', 'FGA', 'CA', 'SPO', 'SG', 'FH', 'WF', 'FP', 'PP', 'LG', 'AB', 'GF', 'SN', 'UF', 'FF', 'FEE', 'FVE', 'FNS', 'ÖG', 'PVF', '');
+																	$FormatBez = array('PG', 'KGA', 'FGA', 'CA', 'SPO', 'SG', 'FH', 'WF', 'FP', 'PP', 'LG', 'AB', 'GF', 'SN', 'UF', 'FF', 'FEE', 'FVE', 'FNS', 'ÖG', 'PVF', '-- Bitte wählen --');
 																}
 																else{ 
 												        	$FormatWerte = array('');
@@ -371,8 +371,8 @@ update_require_attribute = function(attributes, layer_id, value){
 									    </td>
 									    <td colspan="2"> 
 									      <?php 
-									        $FormatWerte = array('', 'o', 'g', 'a','eh', 'ed', 'dh', 'rh', 'rm');
-									        $FormatBez = array('-- Bitte wählen --', 'offen', 'geschlossen', 'abweichend','Einzelhaus', 'Einzel- und Doppelhaus', 'Doppelhaushälfte', 'Reihenhaus', 'Reihenmittelhaus'); 
+									        $FormatWerte = array('', 'o', 'g', 'a','eh', 'ed', 'dh', 'rh', 'rm', 're');
+									        $FormatBez = array('-- Bitte wählen --', 'offen', 'geschlossen', 'abweichend','Einzelhaus', 'Einzel- und Doppelhaus', 'Doppelhaushälfte', 'Reihenhaus', 'Reihenmittelhaus', 'Reihenendhaus'); 
 									        $bauweise = new FormObject('bauweise','select',$FormatWerte,array($this->formvars['bauweise']),$FormatBez,1,$maxlenght,$multiple,146);
 									        $bauweise->OutputHTML();
 									        echo $bauweise->html;
