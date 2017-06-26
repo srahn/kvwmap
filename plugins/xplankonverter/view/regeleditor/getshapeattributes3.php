@@ -4,7 +4,7 @@ echo '<select id="where_shape_attribut_attribut_selector" onChange="getShapeAttr
 echo '<option value="where_default_shape_attribut_select">Shape-File Attribut waehlen ...</option>';
 
 // Insert a newoption for each attribute returned
-while($row = pg_fetch_row($result)){
+while($row = pg_fetch_row($this->result)){
 	echo '<option value="' . $row[0] . '">' . $row[0] . '</option>';
 }
 
