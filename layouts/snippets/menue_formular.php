@@ -2,7 +2,8 @@
 </script>
 <div class="center-outerdiv">
 	<div class="input-form">
-		<h2><?php echo $this->titel; ?></h2><?php
+		<h2><?php echo $this->titel; ?></h2>
+		<em><span class="px13">Werte mit * mussen eingetragen werden</span></em><br><?php
 		echo $this->menue->as_form_html(); ?>
 		<div class="clear"></div>
 		<div style="text-align: -webkit-center">

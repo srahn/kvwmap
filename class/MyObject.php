@@ -13,6 +13,7 @@ class MyObject {
 		$this->data = array();
 		$this->children_ids = array();
 		$this->debug->show('<p>New MyObject for table: '. $this->tableName, MyObject::$write_debug);
+		$this->validations = array();
 	}
 
 	/*
@@ -93,7 +94,13 @@ class MyObject {
 	function getAttributes() {
 		$attributes = [];
 		foreach ($this->data AS $key => $value) {
-			$attributes[] = new MyAttribute($this->debug, $key, 'text', $value);
+			$attribute_validations  = array_filter(
+				$this->validations,
+				function ($validation) use ($key) {
+					return $validation['attribute'] == $key;
+				}
+			);
+			$attributes[] = new MyAttribute($this->debug, $key, 'text', $value, $attribute_validations, $this->identifier);
 		}
 		return $attributes;
 	}

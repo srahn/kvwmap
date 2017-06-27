@@ -10285,8 +10285,19 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->menue = new Menue($this);
 		$this->menue->find_by('id', $this->formvars['selected_menue_id']);
 		$this->menue->setData($this->formvars);
-		$this->menue->update();
-		$this->Menueeditor();
+		$results = $this->menue->validate();
+		if (empty($results)) {
+			$results = $this->menue->update();
+		}
+		if (empty($results)) {
+			$this->add_message('notice', 'Menü erfolgreich aktualisiert.');
+		}
+		else {
+			$this->add_message('array', $results);
+		}
+		$this->titel = 'Menü Editor';
+		$this->main = 'menue_formular.php';
+		$this->output();
 	}
 
 	function MenueLoeschen(){
