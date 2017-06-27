@@ -1406,6 +1406,7 @@ tbody.gle tr:hover {
 }
 
 #neuer_datensatz_button {
+	display: none;
 	position: relative;
 	text-align: right;
 	margin-right: 8px;
