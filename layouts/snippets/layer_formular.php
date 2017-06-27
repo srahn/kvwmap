@@ -11,6 +11,7 @@
 	Text[4]=["Hilfe:","Bei Punktlayern kann durch Angabe dieses Wertes die Clusterbildung aktiviert werden. Der Wert ist der Radius in Pixeln, in dem Punktobjekte zu einem Cluster zusammengefasst werden. <br>Damit die Cluster dargestellt werden können, muss es eine Klasse mit der Expression \"('[Cluster:FeatureCount]' != '1')\" geben. Cluster:FeatureCount kann auch als Labelitem verwendet werden, um die Anzahl der Punkte pro Cluster anzuzeigen."];
 	Text[5]=["Hilfe:","Für einen Layer lassen sich verschiedene Klassifizierungen erstellen. Klassen mit dem gleichen Eintrag im Klassen-Feld \"Klassifizierung\" gehören zu einer Klassifizierung. Welche Klassifizierung in einem Layer verwendet wird, wird über das Layer-Feld \"Klassifizierung\" festgelegt."];
 	Text[6]=["Hilfe:","Wird hier der Name einer Grafikdatei aus dem Ordner <?php echo GRAPHICSPATH; ?>custom angegeben, wird diese Grafik in seiner vollen Ausdehnung an Stelle der vom MapServer erzeugten Grafik in der Legende angezeigt."];
+	Text[7]=["Hilfe:","Hier kann die Zeichenreihenfolge in der Karte und optional eine abweichende Reihenfolge für die Legende festgelegt werden. <br>Die Werte für die Zeichenreihenfolge in der Karte müssen bei 0 beginnen und sich fortlaufend um 1 erhöhen."];
 	
 	function testConnection() {
 		if (document.getElementById('connectiontype').value == 7) {
@@ -563,7 +564,9 @@
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strLegendGraphic; ?>&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[6], Style[0], document.getElementById('TipLayer7'))" onmouseout="htm()">
 						<div id="TipLayer7" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 				</td>
-				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strOrder; ?></td>
+				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strOrder; ?>&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[7], Style[0], document.getElementById('TipLayer8'))" onmouseout="htm()">
+						<div id="TipLayer8" style="visibility:hidden;right: 20px;position:absolute;z-index:1000;"></div>
+				</td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strDelete; ?></td>
 	<!--			<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">ändern</td>	-->
 			</tr>
@@ -602,8 +605,23 @@
 					<input type="text" name="legendgraphic[<?php echo $this->classes[$i]['Class_ID']; ?>]" size="18" value="<?php echo $this->classes[$i]['legendgraphic']; ?>">
 				</td>
 				<td align="left" style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">
-					<input size="3" type="text" name="order[<?php echo $this->classes[$i]['Class_ID']; ?>]" value="<?php echo $this->classes[$i]['drawingorder']; ?>"> <?php echo $strMap; ?><br>
-					<input size="3" type="text" name="legendorder[<?php echo $this->classes[$i]['Class_ID']; ?>]" value="<?php echo $this->classes[$i]['legendorder']; ?>"> <?php echo $strLegend; ?>
+					<table cellpadding="0" cellspcaing="0">
+						<tr>
+							<td>
+								<input size="3" type="text" name="order[<?php echo $this->classes[$i]['Class_ID']; ?>]" value="<?php echo $this->classes[$i]['drawingorder']; ?>">
+							</td>
+							<td>
+								<?php echo $strMap; ?>
+							</td>
+						</tr>
+							<td>
+								<input size="3" type="text" name="legendorder[<?php echo $this->classes[$i]['Class_ID']; ?>]" value="<?php echo $this->classes[$i]['legendorder']; ?>">
+							</td>
+							<td>
+								<?php echo $strLegend; ?>
+							</td>
+						</tr>
+					</table>
 				</td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">
 					<a

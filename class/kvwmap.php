@@ -533,8 +533,12 @@ class GUI {
 								else {
 									$legend .= '<table border="0" cellspacing="0" cellpadding="0">';
 									$maplayer = $this->map->getLayerByName($layer['alias']);
+									if($layer['Class'][0]['legendorder'] != ''){
+										usort($layer['Class'], 'compare_legendorder');
+									}
 									for($k = 0; $k < $maplayer->numclasses; $k++){
-										$class = $maplayer->getClass($k);
+										if($layer['Class'][0]['legendorder'] != '')$class = $maplayer->getClass($layer['Class'][$k]['drawingorder']);
+										else $class = $maplayer->getClass($k);
 										for($s = 0; $s < $class->numstyles; $s++){
 											$style = $class->getStyle($s);
 											if($maplayer->type > 0){
