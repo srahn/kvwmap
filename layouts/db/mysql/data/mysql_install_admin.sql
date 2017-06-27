@@ -122,7 +122,7 @@ INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (21,@stelle_i
 # Wer seine Tabellen dahingehend anpassen möchte muss das entsprechende Statement aus mysql_update.php ausführen.
 # siehe "Erzeugen einer neuen Tabelle groups"
 
-INSERT INTO `u_menues` (name, links, obermenue, menueebene, target, `order`) VALUES ('Stelle wählen', 'index.php?go=Stelle Wählen', 0, 1, NULL, 1);
+INSERT INTO `u_menues` (name, links, obermenue, menueebene, target, `order`, `title`, `button_class`) VALUES ('Stelle wählen', 'index.php?go=Stelle Wählen', 0, 1, NULL, 1, 'Zu anderen Stellen und den Einstellungen', 'optionen');
 SET @last_menue_id=LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,1);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
@@ -136,7 +136,7 @@ INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
 
 # Karte
-INSERT INTO u_menues (name, links, obermenue, menueebene, target, `order`) VALUES ('Karte', 'index.php', 0, 1, NULL, 3);
+INSERT INTO u_menues (name, links, obermenue, menueebene, target, `order`, `title`, `button_class`) VALUES ('Karte', 'index.php', 0, 1, NULL, 3, 'Karte anzeigen', 'karte');
 SET @last_menue_id=LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,3);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
@@ -191,7 +191,7 @@ INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@
 
 
 #### Stellenverwaltung
-INSERT INTO u_menues (name, links, obermenue, menueebene, target, `order`) VALUES ('Stellenverwaltung', 'index.php?go=changemenue', 0, 1, NULL, 10);
+INSERT INTO u_menues (name, links, obermenue, menueebene, target, `order`, `title`) VALUES ('Stellenverwaltung', 'index.php?go=changemenue', 0, 1, NULL, 10, 'Alle Stellen anzeigen');
 SET @last_level1menue_id=LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_level1menue_id,60);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_level1menue_id,0);
@@ -234,6 +234,24 @@ INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@
 
 # Funktionen anzeigen
 INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Funktionen anzeigen', 'index.php?go=Funktionen_Anzeigen', @last_level1menue_id, 2, NULL);
+SET @last_menue_id=LAST_INSERT_ID();
+INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,68);
+INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
+
+#### Menueverwaltung
+INSERT INTO u_menues (name, links, obermenue, menueebene, target, `order`, `title`) VALUES ('Menüverwaltung', 'index.php?go=changemenue', 0, 1, NULL, 5, 'Alle Menüpunkte anzeigen');
+SET @last_level1menue_id=LAST_INSERT_ID();
+INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_level1menue_id,66);
+INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_level1menue_id,0);
+
+# Menue anlegen
+INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Menü anlegen', 'index.php?go=Menueeditor', @last_level1menue_id, 2, NULL);
+SET @last_menue_id=LAST_INSERT_ID();
+INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,67);
+INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
+
+# Menues anzeigen
+INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Menüs anzeigen', 'index.php?go=Menues_Anzeigen', @last_level1menue_id, 2, NULL);
 SET @last_menue_id=LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,68);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
@@ -323,7 +341,7 @@ INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
 
 # Druckausgabe
-INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Druckausgabe', 'index.php?go=Schnelle_Druckausgabe', @last_level1menue_id, 2, '_blank');
+INSERT INTO u_menues (`name`, `links`, `obermenue`, `menueebene`, `target`, `title`, `button_class`) VALUES ('Druckausgabe', 'index.php?go=Schnelle_Druckausgabe', @last_level1menue_id, 2, '_blank', 'Karte sofort ausdrucken', 'schnelldruck');
 SET @last_menue_id=LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,86);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
@@ -353,8 +371,8 @@ INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@
 
 
 #### Drucken
-INSERT INTO u_menues ( `name` , `links` , `obermenue` , `menueebene` , `target` )
-VALUES ( 'Drucken', 'index.php?go=Druckausschnittswahl', @last_level1menue_id, '2', NULL);
+INSERT INTO u_menues ( `name` , `links` , `obermenue` , `menueebene` , `target`, `title`, `button_class`)
+VALUES ( 'Drucken', 'index.php?go=Druckausschnittswahl', @last_level1menue_id, '2', NULL, 'Zur Druckausschnittswahl', 'drucken');
 SET @last_menue_id=LAST_INSERT_ID();
 INSERT INTO `u_menue2stelle` ( `stelle_id` , `menue_id` , `menue_order` )
 VALUES (@stelle_id, @last_menue_id, '91');
