@@ -10252,9 +10252,36 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	*/
 	function Menueeditor() {
 		$this->menue = new Menue($this);
-		$this->menue->find_by('id', $this->formvars['selected_menue_id']);
+		if ($this->formvars['selected_menue_id'] != '') {
+			$this->menue->find_by('id', $this->formvars['selected_menue_id']);
+		}
+		else {
+			$this->menue->setKeysFromTable();
+		}
 		$this->titel = 'Menü Editor';
 		$this->main = 'menue_formular.php';
+		$this->output();
+	}
+
+	function MenueSpeichern() {
+		$this->menue = new Menue($this);
+		$this->menue->data = formvars_strip($this->formvars, $this->menue->setKeysFromTable(), 'keep');
+
+		$this->menue->set('title', strip_pg_escape_string($this->formvars['title']));
+		$results = $this->menue->validate();
+		if (empty($results)) {
+			$results = $this->menue->create();
+		}
+		if (empty($results)) {
+			$this->add_message('notice', 'Menü erfolgreich angelegt.');
+			$this->menuedaten = Menue::find($this, 'true', $this->formvars['order']);
+			$this->titel='Menüdaten';
+			$this->main='menuedaten.php';
+		}
+		else {
+			$this->add_message('array', $results);
+			$this->main = 'menue_formular.php';
+		}
 		$this->output();
 	}
 
@@ -10270,6 +10297,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->menue = new Menue($this);
 		$this->menue->find_by('id', $this->formvars['selected_menue_id']);
 		$this->menue->delete();
+		$this->menuedaten = Menue::find($this, 'true', $this->formvars['order']);
 		$this->titel='Menüdaten';
 		$this->main='menuedaten.php';
 		$this->output();

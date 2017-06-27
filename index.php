@@ -1352,10 +1352,20 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->Menueeditor();
 		} break;
 
+		case 'Menue_Speichern' : {
+			$GUI->checkCaseAllowed('Menues_Anzeigen');
+			$GUI->MenueSpeichern();
+		} break;
+
 		case 'Menue_Ändern' : {
 			$GUI->checkCaseAllowed('Menues_Anzeigen');
 			$GUI->MenueAendern();
 		} break;
+
+	  case 'Menue_Löschen' : {
+			$GUI->checkCaseAllowed('Menues_Anzeigen');
+			$GUI->MenueLoeschen();
+	  } break;
 
 	  case 'Filterverwaltung' : {
 			$GUI->checkCaseAllowed('Filterverwaltung');
