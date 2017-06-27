@@ -21,6 +21,16 @@ function compare_names($a, $b){
 	return strcmp($a['name'], $b['name']);
 }
 
+function compare_groups($a, $b){
+  if($a->group > $b->group)return 1;
+  else return 0;
+}
+
+function compare_legendorder($a, $b){
+	if($a['legendorder'] > $b['legendorder'])return 1;
+	else return 0;
+}
+
 function JSON_to_PG($json, $quote = ''){
 	if(is_array($json)){
 		for($i = 0; $i < count($json); $i++){
@@ -783,13 +793,6 @@ function translate($polygon, $transx, $transy){
     $i++;
   }
   return $newpolygon;
-}
-
-function compare_groups($a, $b){
-  if($a->group > $b->group){
-    return 1;
-  }
-  else return 0;
 }
 
 function is_dir_empty($path){

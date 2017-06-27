@@ -533,8 +533,11 @@ class GUI {
 								else {
 									$legend .= '<table border="0" cellspacing="0" cellpadding="0">';
 									$maplayer = $this->map->getLayerByName($layer['alias']);
+									if($layer['Class'][0]['legendorder'] != ''){
+										usort($layer['Class'], 'compare_legendorder');
+									}
 									for($k = 0; $k < $maplayer->numclasses; $k++){
-										$class = $maplayer->getClass($k);
+										$class = $maplayer->getClass($layer['Class'][$k]['index']);
 										for($s = 0; $s < $class->numstyles; $s++){
 											$style = $class->getStyle($s);
 											if($maplayer->type > 0){
@@ -14678,9 +14681,11 @@ class db_mapObj{
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Class - Lesen der Classen eines Layers:<br>" . $sql, 4);
 		$query = mysql_query($sql);
 		if ($query == 0) { echo "<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__; return 0; }
+		$i = 0;
 		while ($rs = mysql_fetch_assoc($query)) {
 			$rs['Style'] = $this->read_Styles($rs['Class_ID']);
 			$rs['Label'] = $this->read_Label($rs['Class_ID']);
+			$rs['index'] = $i;
 			#Anne
 			if($disabled_classes){
 				if($disabled_classes['status'][$rs['Class_ID']] == 2) {
@@ -14704,6 +14709,7 @@ class db_mapObj{
 			else $rs['Status'] = 1;
 
 			$Classes[] = $rs;
+			$i++;
 		}
 		return $Classes;
 	}
