@@ -934,7 +934,7 @@ class data_import_export {
 		
 		# Zusammensammeln der Attribute, die abgefragt werden müssen
     for ($i = 0; $i < count($this->attributes['name']); $i++) {
-    	if ($this->formvars['check_'.$this->attributes['name'][$i]]) {		# Entweder das Attribut wurde angehakt
+    	if ($this->formvars['check_'.$this->attributes['name'][$i]] or $this->formvars['all'] == 1) {		# Entweder das Attribut oder alle wurde angehakt
     		$selection[$this->attributes['name'][$i]] = 1;
 				$selected_attributes[] = $this->attributes['name'][$i];						# Zusammensammeln der angehakten Attribute, denn nur die sollen weiter unten auch exportiert werden
 				$selected_attr_types[] = $this->attributes['type'][$i];

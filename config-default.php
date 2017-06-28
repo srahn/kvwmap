@@ -590,6 +590,7 @@ $kvwmap_plugins = array();																			# Version 1.11.0
 #$kvwmap_plugins[] = 'probaug';																	# Version 2.0.0
 #$kvwmap_plugins[] = 'geodoc';																	# Version 2.0.0
 #$kvwmap_plugins[] = 'baumfaellantrag';													# Version 2.0.0
+#$kvwmap_plugins[] = 'mobile';																		# Version 2.7
 #																																# Version 1.11.0
 #############################################################		# Version 1.11.0
 

@@ -1,7 +1,7 @@
 <?php
 $this->goNotExecutedInPlugins = false;
-/*include(PLUGINS . 'mobile/model/kvwmap.php');
-include_once(CLASSPATH . 'PgObject.php');
+include(PLUGINS . 'mobile/model/kvwmap.php');
+/*include_once(CLASSPATH . 'PgObject.php');
 include_once(CLASSPATH . 'MyObject.php');
 include_once(CLASSPATH . 'Layer.php');
 include_once(CLASSPATH . 'LayerClass.php');
@@ -16,7 +16,6 @@ include_once(CLASSPATH . 'data_import_export.php');
 * Anwendungsfälle
 * mobile_get_layer
 */
-
 
 switch($this->go) {
 
@@ -98,18 +97,14 @@ switch($this->go) {
 		}
 	*/
 	case 'mobile_get_layer' : {
-		echo json_encode($this->mobile_get_layer());	
+		$result = $this->mobile_get_layers();
+		echo json_encode($result);
 	} break;
 
 	case 'mobile_update_data' : {
-		
-		$success = $this->mobile_update_data();
-		if ($success) {
-			$result = '{ "success": false,
-			"layer": ' . $this->mobile_get_layer() . '}';
-		}
-		else {
-			$result = '{ "success": false }';
+		$result = $this->mobile_update_data();
+		if ($result['success']) {
+			$result = $this->mobile_get_layers();
 		}
 		echo json_encode($result);
 	} break;
@@ -134,39 +129,5 @@ function mobile_update_data() {
 	# for each of data do update or insert or delete
 	$success = true;
 	return $succes;
-}
-
-function mobile_get_layer() {
-	# Abfragen der Layerdefinition
-	$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
-	$layer = $layerset[0];
-
-	# Abfragen der Privilegien der Attribute
-	$privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
-
-	# Abfragen der Attribute des Layers mit selected_layer_id
-	$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
-	$layerdb = $mapDB->getlayerdatabase(
-		$this->formvars['selected_layer_id'],
-		$this->Stelle->pgdbhost
-	);
-	$layerdb->setClientEncoding();
-	$attributes = $mapDB->read_layer_attributes(
-		$this->formvars['selected_layer_id'],
-		$layerdb,
-		$privileges['attributenames'],
-		false,
-		true
-	);
-
-	# Zuordnen der Privilegien zu den Attributen
-	for ($j = 0; $j < count($attributes['name']); $j++) {
-		$attributes['privileg'][$j] = $attributes['privileg'][$attributes['name'][$j]] = ($privileges == NULL ? 0 : $privileges[$attributes['name'][$j]]);
-	}
-
-	return array(
-		"layer" => $layer,
-		"attributes" => $attributes
-	);
 }
 ?>
