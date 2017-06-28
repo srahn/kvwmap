@@ -7207,7 +7207,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			    $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 			    $layerdb->setClientEncoding();
 			    $path = strip_pg_escape_string($this->formvars['pfad']);
-					$all_layer_params = $mapDB->get_all_layer_params();					
+					$all_layer_params = $mapDB->get_all_layer_params_default_values();					
 			    $attributes = $mapDB->load_attributes($layerdb,	replace_params($path,	$all_layer_params));
 			    $mapDB->save_postgis_attributes($this->formvars['selected_layer_id'], $attributes, $this->formvars['maintable'], $this->formvars['schema']);
 			    #---------- Speichern der Layerattribute -------------------
