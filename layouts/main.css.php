@@ -95,7 +95,6 @@ h2 {
 	margin-top: 0px;
 }
 
-
 input[type="text"]{
 	font-size: 14px;
 	font-family: SourceSansPro1;
@@ -120,6 +119,109 @@ input[type="text"].transparent_input{
 	font-family: SourceSansPro1;
 	border:0px;
 	background-color:	transparent;
+}
+
+.search-form {
+  display: inline-block;
+}
+
+.search-form h2 {
+  color: black;
+  margin-bottom: 10px
+}
+
+.search-form label {
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #eee;  
+  padding: 3px;
+  float: left;
+  text-align: left;
+  width: 150px;
+  height: 15px;
+  margin-right: 10px;
+}
+
+.search-form select {
+  float: left;
+  text-align: left;
+  width: 150px;
+}
+
+.search-form input[type=text] {
+  float: left;
+  text-align: left;
+  width: 150px;
+}
+
+.search-form input[type=reset] {
+  float: none;
+  text-align: center;
+  width: 80px;
+}
+
+.search-form input[type=button] {
+  float: none;
+  text-align: center;
+  width: 80px;
+}
+
+.search-form .clear {
+  clear: both;
+  padding-top: 10px;
+}
+
+.input-form {
+  display: inline-block;
+}
+
+.input-form h2 {
+  color: black;
+  margin-bottom: 10px
+}
+
+.input-form label {
+  float: left;
+  text-align: right;
+	font-size: 17px;
+  width: 150px;
+  height: 15px;
+  margin-right: 10px;
+}
+
+.input-form select {
+  float: left;
+  text-align: left;
+  width: 150px;
+}
+
+.input-form input {
+}
+
+.input-form input[type=text] {
+  float: left;
+  text-align: left;
+  width: 400px;
+}
+
+.input-form input[type=reset] {
+  float: none;
+  text-align: center;
+}
+
+.input-form input[type=button] {
+  float: none;
+  text-align: center;
+}
+
+.input-form .clear {
+  clear: both;
+  padding-top: 10px;
+}
+
+.center-outerdiv {
+  padding: 30px;
+  text-align: center;
 }
 
 select {
@@ -1303,114 +1405,9 @@ tbody.gle tr:hover {
 	padding-right: 2px
 }
 
-.search-form {
-  display: inline-block;
-}
-
-.search-form h2 {
-  color: black;
-  margin-bottom: 10px
-}
-
-.search-form label {
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  background-color: #eee;  
-  padding: 3px;
-  float: left;
-  text-align: left;
-  width: 150px;
-  height: 15px;
-  margin-right: 10px;
-}
-
-.search-form select {
-  float: left;
-  text-align: left;
-  width: 150px;
-}
-
-.search-form input[type=text] {
-  float: left;
-  text-align: left;
-  width: 150px;
-}
-
-.search-form input[type=reset] {
-  float: none;
-  text-align: center;
-  width: 80px;
-}
-
-.search-form input[type=button] {
-  float: none;
-  text-align: center;
-  width: 80px;
-}
-
-.search-form .clear {
-  clear: both;
-  padding-top: 10px;
-}
-
-.input-form {
-  display: inline-block;
-}
-
-.input-form h2 {
-  color: black;
-  margin-bottom: 10px
-}
-
-.input-form label {
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  background-color: #eee;  
-  padding: 3px;
-  float: left;
-  text-align: left;
-  width: 150px;
-  height: 15px;
-  margin-right: 10px;
-}
-
-.input-form select {
-  float: left;
-  text-align: left;
-  width: 150px;
-}
-
-.input-form input {
-  /* css 3 */
-   border-radius:5px;
-   /* mozilla */
-   -moz-border-radius:5px;
-   /* webkit */
-   -webkit-border-radius:5px;
-}
-
-.input-form input[type=text] {
-  float: left;
-  text-align: left;
-  width: 400px;
-}
-
-.input-form input[type=reset] {
-  float: none;
-  text-align: center;
-}
-
-.input-form input[type=button] {
-  float: none;
-  text-align: center;
-}
-
-.input-form .clear {
-  clear: both;
-  padding-top: 10px;
-}
-
-.center-outerdiv {
-  padding: 30px;
-  text-align: center;
+#neuer_datensatz_button {
+	display: none;
+	position: relative;
+	text-align: right;
+	margin-right: 8px;
 }

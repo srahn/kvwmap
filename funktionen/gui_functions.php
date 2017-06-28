@@ -4,6 +4,13 @@
 ?>
 <script language="javascript" type="text/javascript">
 
+function Bestaetigung(link,text) {
+	Check = confirm(text);
+	if (Check == true) {
+		window.location.href = link;
+	}
+}
+
 function ImageLoadFailed(id) {
   document.getElementById(id).innerHTML = '';
 }
