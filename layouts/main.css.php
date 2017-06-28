@@ -565,6 +565,14 @@ a.menuered:hover {
 	background-image: url(../graphics/karte.png);
 }
 
+.logout{
+	background-image: url(../graphics/logout.png);
+}
+
+.gesamtansicht {
+	background-image: url(../graphics/gesamtansicht.png);
+}
+
 .notiz{
 	background-image: url(../graphics/notiz.png);
 }

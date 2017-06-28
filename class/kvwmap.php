@@ -5149,10 +5149,8 @@ class GUI {
     $legendmapDB = new db_mapObj($this->Stelle->id, $this->user->id);
     $legendmapDB->nurAktiveLayer = 1;
     $layerset = $legendmapDB->read_Layer(1);
-		if($this->formvars['rollenlayer_legend']){
-			$rollenlayer = $legendmapDB->read_RollenLayer();
-			$layerset = array_merge($layerset, $rollenlayer);
-		}
+		$rollenlayer = $legendmapDB->read_RollenLayer();
+		$layerset = array_merge($layerset, $rollenlayer);
     for($i = 0; $i < $this->map->numlayers; $i++){
       $layer = $this->map->getlayer($i);
       $layer->set('status', 0);
@@ -5165,15 +5163,17 @@ class GUI {
     for($i = 0; $i < count($layerset); $i++){
       if($layerset[$i]['aktivStatus'] != 0){
         if(($layerset[$i]['minscale'] < $scale OR $layerset[$i]['minscale'] == 0) AND ($layerset[$i]['maxscale'] > $scale OR $layerset[$i]['maxscale'] == 0)){
-					if($layerset[$i]['alias'] != '')$name = $layerset[$i]['alias'];
-					else $name = $layerset[$i]['Name'];
-          $layer = $this->map->getLayerByName($name);
-          if($layerset[$i]['showclasses']){
-            for($j = 0; $j < $layer->numclasses; $j++){
-              $class = $layer->getClass($j);
-              if($class->name != '')$draw = true;
-            }
-          }
+					if($this->formvars['legendlayer'.$layerset[$i]['Layer_ID']] != ''){
+						if($layerset[$i]['alias'] != '')$name = $layerset[$i]['alias'];
+						else $name = $layerset[$i]['Name'];
+						$layer = $this->map->getLayerByName($name);
+						if($layerset[$i]['showclasses']){
+							for($j = 0; $j < $layer->numclasses; $j++){
+								$class = $layer->getClass($j);
+								if($class->name != '')$draw = true;
+							}
+						}
+					}
         }
         if($draw == true){
           $layer->set('status', 1);
@@ -7207,7 +7207,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			    $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 			    $layerdb->setClientEncoding();
 			    $path = strip_pg_escape_string($this->formvars['pfad']);
-					$all_layer_params = $mapDB->get_all_layer_params();					
+					$all_layer_params = $mapDB->get_all_layer_params_default_values();					
 			    $attributes = $mapDB->load_attributes($layerdb,	replace_params($path,	$all_layer_params));
 			    $mapDB->save_postgis_attributes($this->formvars['selected_layer_id'], $attributes, $this->formvars['maintable'], $this->formvars['schema']);
 			    #---------- Speichern der Layerattribute -------------------
@@ -13950,7 +13950,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
   }
 
   function createQueryMap($layerset, $k){
-  	if($layerset['attributes']['the_geom'] != '') {
+		global $language;
+  	if($layerset['attributes']['the_geom'] != ''){
 	    $layer_id = $layerset['Layer_ID'];
 	    $tablename = $layerset['attributes']['table_name'][$layerset['attributes']['the_geom']];
 	    $oid = $layerset['shape'][$k][$tablename.'_oid'];
@@ -13980,6 +13981,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	    	$map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
 		    # Haupt-Layer erzeugen
 		    $layer=ms_newLayerObj($map);
+				$layerset['Data'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset['Data']);
+				$layerset['Data'] = str_replace('$language', $language, $layerset['Data']);
+				$layerset['Data'] = replace_params($layerset['Data'], rolle::$layer_params);
 		    $layer->set('data',$layerset['Data']);
 				if($layerset['Filter'] != ''){
 					$layerset['Filter'] = str_replace('$userid', $this->user->id, $layerset['Filter']);
