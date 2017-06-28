@@ -7355,15 +7355,17 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		if($this->last_query != ''){
 			$this->formvars['selected_layer_id'] = $this->last_query['layer_ids'][0];
 		}
-    $layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
-		if($this->formvars['selected_layer_id'] > 0)$layerset=$this->user->rolle->getLayer($this->formvars['selected_layer_id']);
-		else $layerset=$this->user->rolle->getRollenlayer(-$this->formvars['selected_layer_id']);
-    switch ($layerset[0]['connectiontype']) {
-      case MS_POSTGIS : {
-        $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-        $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-        $layerdb->setClientEncoding();
-        #$path = $layerset[0]['pfad'];
+		if ($this->formvars['selected_layer_id'] > 0)
+			$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
+		else
+			$layerset = $this->user->rolle->getRollenlayer(-$this->formvars['selected_layer_id']);
+
+		switch ($layerset[0]['connectiontype']) {
+			case MS_POSTGIS : {
+				$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+				$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+				$layerdb->setClientEncoding();
+				#$path = $layerset[0]['pfad'];
 				$path = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[0]['pfad']);
 				$path = str_replace('$language', $this->user->rolle->language, $path);
 				$path = replace_params($path, rolle::$layer_params);
@@ -7372,36 +7374,34 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				$attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames'], false, true);
 				$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges, $attributes);
 
-		    # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
-		   	# $attributes = $mapDB->add_attribute_values($attributes, $layerdb, NULL, true); kann weg, weils weiter unten steht
+				# weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
+				# $attributes = $mapDB->add_attribute_values($attributes, $layerdb, NULL, true); kann weg, weils weiter unten steht
 
-    		# order by rausnehmen
-		  	$orderbyposition = strrpos(strtolower($newpath), 'order by');
+				# order by rausnehmen
+				$orderbyposition = strrpos(strtolower($newpath), 'order by');
 				$lastfromposition = strrpos(strtolower($newpath), 'from');
-		  	if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
-			  	$attributes['orderby'] = ' '.substr($newpath, $orderbyposition);
-			  	$newpath = substr($newpath, 0, $orderbyposition);
-		  	}
+				if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
+					$attributes['orderby'] = ' '.substr($newpath, $orderbyposition);
+					$newpath = substr($newpath, 0, $orderbyposition);
+				}
 
-		  	# group by rausnehmen
+				# group by rausnehmen
 				$groupbyposition = strpos(strtolower($newpath), 'group by');
 				if($groupbyposition !== false){
 					$attributes['groupby'] = ' '.substr($newpath, $groupbyposition);
 					$newpath = substr($newpath, 0, $groupbyposition);
-		  	}
+				}
 
-        if($privileges == NULL){    # kein Eintrag -> alle Attribute lesbar
-          for($j = 0; $j < count($attributes['name']); $j++){
-            $attributes['privileg'][$j] = '0';
-            $attributes['privileg'][$attributes['name'][$j]] = '0';
-          }
-        }
-        else{
-          for($j = 0; $j < count($attributes['name']); $j++){
-            $attributes['privileg'][$j] = $privileges[$attributes['name'][$j]];
-            $attributes['privileg'][$attributes['name'][$j]] = $privileges[$attributes['name'][$j]];
-          }
-        }
+				if ($privileges == NULL) { # kein Eintrag -> alle Attribute lesbar
+					for ($j = 0; $j < count($attributes['name']); $j++) {
+						$attributes['privileg'][$j] = $attributes['privileg'][$attributes['name'][$j]] = '0';
+					}
+				}
+				else {
+					for ($j = 0; $j < count($attributes['name']); $j++) {
+						$attributes['privileg'][$j] = $attributes['privileg'][$attributes['name'][$j]] = $privileges[$attributes['name'][$j]];
+					}
+				}
 
 				for($m = 0; $m <= $this->formvars['searchmask_count']; $m++){
 					if($m > 0){				// es ist nicht die erste Suchmaske, sondern eine weitere hinzugefügte
@@ -7545,22 +7545,35 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 								}
 								$j++;
 					}
-  			}
-        $sql = "SELECT * FROM (SELECT ".$pfad.") as query WHERE 1=1 ".$sql_where;
+				}
+				
+				$sql = "
+					SELECT
+						*
+					FROM (
+						SELECT
+							" . $pfad . "
+						) as query
+					WHERE
+						1=1 " . $sql_where . "
+				";
 
-        # order by
-        if($this->formvars['orderby'.$layerset[0]['Layer_ID']] != ''){									# Fall 1: im GLE soll nach einem Attribut sortiert werden
-          $sql_order = ' ORDER BY '.$this->formvars['orderby'.$layerset[0]['Layer_ID']];
-        }
-        elseif($attributes['orderby'] != ''){										# Fall 2: der Layer hat im Pfad ein ORDER BY
-        	$sql_order = $attributes['orderby'];
-        }
-        																																						# standardmäßig wird nach der oid sortiert
+				# order by
+				if ($this->formvars['orderby'.$layerset[0]['Layer_ID']] != '') { # Fall 1: im GLE soll nach einem Attribut sortiert werden
+					$sql_order = ' ORDER BY '.$this->formvars['orderby'.$layerset[0]['Layer_ID']];
+				}
+				elseif($attributes['orderby'] != '') { # Fall 2: der Layer hat im Pfad ein ORDER BY
+					$sql_order = $attributes['orderby'];
+				}
+				# standardmäßig wird nach der oid sortiert
 				$j = 0;
 				foreach($attributes['all_table_names'] as $tablename){
-					if($tablename == $layerset[0]['maintable'] AND $attributes['oids'][$j]){      # hat die Haupttabelle oids, dann wird immer ein order by oid gemacht, sonst ist die Sortierung nicht eindeutig
-						if($sql_order == '')$sql_order = ' ORDER BY '.$layerset[0]['maintable'].'_oid ';
-						else $sql_order .= ', '.$layerset[0]['maintable'].'_oid ';
+					if($tablename == $layerset[0]['maintable'] AND $attributes['oids'][$j]) {
+						# hat die Haupttabelle oids, dann wird immer ein order by oid gemacht, sonst ist die Sortierung nicht eindeutig
+						if($sql_order == '')
+							$sql_order = ' ORDER BY '.$layerset[0]['maintable'].'_oid ';
+						else
+							$sql_order .= ', '.$layerset[0]['maintable'].'_oid ';
 					}
 					$j++;
 				}
@@ -7572,50 +7585,75 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					if($this->formvars['offset_'.$layerset[0]['Layer_ID']] == '')$this->formvars['offset_'.$layerset[0]['Layer_ID']] = $this->last_query[$layerset[0]['Layer_ID']]['offset'];
 				}
 
-        if($this->formvars['embedded_subformPK'] == '' AND $this->formvars['embedded'] == '' AND $this->formvars['embedded_dataPDF'] == ''){
-        	if($this->formvars['anzahl'] == ''){
-	          $this->formvars['anzahl'] = MAXQUERYROWS;
-	        }
-        	$sql_limit.=' LIMIT '.$this->formvars['anzahl'];
-        	if($this->formvars['offset_'.$layerset[0]['Layer_ID']] != ''){
-          	$sql_limit.=' OFFSET '.$this->formvars['offset_'.$layerset[0]['Layer_ID']];
-        	}
-        }
+				if (
+					$this->formvars['embedded_subformPK'] == '' AND
+					$this->formvars['embedded'] == '' AND
+					$this->formvars['embedded_dataPDF'] == ''
+				) {
+					if ($this->formvars['anzahl'] == ''){
+						$this->formvars['anzahl'] = MAXQUERYROWS;
+					}
+					$sql_limit.=' LIMIT '.$this->formvars['anzahl'];
+					if ($this->formvars['offset_'.$layerset[0]['Layer_ID']] != ''){
+						$sql_limit.=' OFFSET '.$this->formvars['offset_'.$layerset[0]['Layer_ID']];
+					}
+				}
 
 				$layerset[0]['sql'] = $sql;
-				#echo "<p>Abfragestatement: ".$sql.$sql_order.$sql_limit;
-        $ret=$layerdb->execSQL('SET enable_seqscan=off;'.$sql.$sql_order.$sql_limit,4, 0);
-        if(!$ret[0]){
-          while ($rs=pg_fetch_assoc($ret[1])) {
-            $layerset[0]['shape'][]=$rs;
-          }
+
+				# Das ist die eigentliche Suchabfrage
+				#echo "<p>Abfragestatement: " . $sql . $sql_order . $sql_limit;
+				$ret = $layerdb->execSQL('SET enable_seqscan=off;' . $sql . $sql_order . $sql_limit, 4, 0);
+
+				if (!$ret[0]) {
+					while ($rs = pg_fetch_assoc($ret[1])) {
+						$layerset[0]['shape'][] = $rs;
+					}
 					$num_rows = pg_num_rows($ret[1]);
-					if($this->formvars['offset_'.$layerset[0]['Layer_ID']] == '' AND $num_rows < $this->formvars['anzahl'])$layerset[0]['count'] = $num_rows;
-					else{
+					if (
+						$this->formvars['offset_' . $layerset[0]['Layer_ID']] == '' AND
+						$num_rows < $this->formvars['anzahl']
+					) $layerset[0]['count'] = $num_rows;
+					else {
 						# Anzahl der Datensätze abfragen
-						$sql_count = "SELECT count(*) FROM (".$sql.") as foo";
-						$ret=$layerdb->execSQL($sql_count,4, 0);
-						if(!$ret[0]){
+						$sql_count = "
+							SELECT
+								count(*)
+							FROM (
+								" . $sql . "
+							) as foo
+						";
+						$ret = $layerdb->execSQL($sql_count,4, 0);
+						if (!$ret[0]) {
 							$rs=pg_fetch_array($ret[1]);
 							$layerset[0]['count'] = $rs[0];
 						}
 					}
-        }
-        # Hier nach der Abfrage der Sachdaten die weiteren Attributinformationen hinzufügen
-        # Steht an dieser Stelle, weil die Auswahlmöglichkeiten von Auswahlfeldern abhängig sein können
-        $attributes = $mapDB->add_attribute_values($attributes, $layerdb, $layerset[0]['shape'], true, $this->Stelle->id);
+				}
 
-				if($layerset[0]['count'] != 0 AND $this->formvars['embedded_subformPK'] == '' AND $this->formvars['embedded'] == '' AND $this->formvars['embedded_dataPDF'] == ''){
+				# Hier nach der Abfrage der Sachdaten die weiteren Attributinformationen hinzufügen
+				# Steht an dieser Stelle, weil die Auswahlmöglichkeiten von Auswahlfeldern abhängig sein können
+				$attributes = $mapDB->add_attribute_values($attributes, $layerdb, $layerset[0]['shape'], true, $this->Stelle->id);
+				if (
+					$layerset[0]['count'] != 0 AND
+					$this->formvars['embedded_subformPK'] == '' AND
+					$this->formvars['embedded'] == '' AND
+					$this->formvars['embedded_dataPDF'] == ''
+				) {
 					#if($this->formvars['go'] != 'neuer_Layer_Datensatz_speichern'){		// wenns nur die Anzeige des gerade angelegten Datensatzes ist, nicht als last_query speichern (wieder rausgenommen)
 						# last_query speichern
 						$this->user->rolle->delete_last_query();
 						$this->user->rolle->save_last_query('Layer-Suche_Suchen', $this->formvars['selected_layer_id'], $sql, $sql_order, $this->formvars['anzahl'], $this->formvars['offset_'.$layerset[0]['Layer_ID']]);
 					#}
 
-					# Querymaps erzeugen
-					if($layerset[0]['querymap'] == 1 AND $attributes['privileg'][$attributes['the_geom']] >= '0' AND ($layerset[0]['Datentyp'] == 1 OR $layerset[0]['Datentyp'] == 2)){
+					# Querymaps erzeugen und zum Layerset hinzufügen
+					if (
+						$layerset[0]['querymap'] == 1 AND
+						$attributes['privileg'][$attributes['the_geom']] >= '0' AND
+						($layerset[0]['Datentyp'] == 1 OR $layerset[0]['Datentyp'] == 2)
+					) {
 						$layerset[0]['attributes'] = $attributes;
-						for($k = 0; $k < count($layerset[0]['shape']); $k++){
+						for ($k = 0; $k < count($layerset[0]['shape']); $k++) {
 							$layerset[0]['querymaps'][$k] = $this->createQueryMap($layerset[0], $k);
 						}
 					}
@@ -7626,15 +7664,16 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					$layerset[0]['layouts'] = $ddl->load_layouts($this->Stelle->id, NULL, $layerset[0]['Layer_ID'], array(0,1));
 
 					# wenn Attributname/Wert-Paare übergeben wurden, diese im Formular einsetzen
-					if(is_array($this->formvars['attributenames'])){
+					if (is_array($this->formvars['attributenames'])) {
 						$attributenames = array_values($this->formvars['attributenames']);
 						$values = array_values($this->formvars['values']);
 					}
-					for($i = 0; $i < count($attributenames); $i++){
+					for ($i = 0; $i < count($attributenames); $i++){
 						$this->layerset[0]['shape'][0][$attributenames[$i]] = $values[$i];
 					}
 				}
-      }break;
+			}
+			break;
 
       case MS_WFS : {
 				include_(CLASSPATH.'wfs.php');
