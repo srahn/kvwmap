@@ -13911,7 +13911,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
   }
 
   function createQueryMap($layerset, $k){
-  	if($layerset['attributes']['the_geom'] != '') {
+		global $language;
+  	if($layerset['attributes']['the_geom'] != ''){
 	    $layer_id = $layerset['Layer_ID'];
 	    $tablename = $layerset['attributes']['table_name'][$layerset['attributes']['the_geom']];
 	    $oid = $layerset['shape'][$k][$tablename.'_oid'];
@@ -13941,6 +13942,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	    	$map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
 		    # Haupt-Layer erzeugen
 		    $layer=ms_newLayerObj($map);
+				$layerset['Data'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset['Data']);
+				$layerset['Data'] = str_replace('$language', $language, $layerset['Data']);
+				$layerset['Data'] = replace_params($layerset['Data'], rolle::$layer_params);
 		    $layer->set('data',$layerset['Data']);
 				if($layerset['Filter'] != ''){
 					$layerset['Filter'] = str_replace('$userid', $this->user->id, $layerset['Filter']);
