@@ -454,6 +454,8 @@ CREATE TABLE wasserrecht.gewaesserbenutzungen(
 )WITH OIDS;
 
 ------------------------------------------
+
+/*
 CREATE TABLE wasserrecht.wasserentnahme_messung
 (
 	id serial PRIMARY KEY,
@@ -589,5 +591,6 @@ CREATE TABLE wasserrecht.fiswrv_wem
   	kommentar text,
   	sachbearbeiter serial REFERENCES wasserrecht.bearbeiter(id)
 )WITH OIDS;
+*/
 
 COMMIT;
