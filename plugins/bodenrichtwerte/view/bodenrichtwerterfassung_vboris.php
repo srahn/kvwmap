@@ -466,7 +466,7 @@ update_require_attribute = function(attributes, layer_id, value){
 									        	$FormatWerte = array('');
 									        	$FormatBez = array('kein');
 									        } 
-									        $verfahren = new FormObject('verfahrensgrund_zusatz','select',$FormatWerte,array($this->formvars['verfahrensgrund_zusatz']),$FormatBez,1,$maxlenght,$multiple,NULL, true);
+									        $verfahren = new FormObject('verfahrensgrund_zusatz','select',$FormatWerte,array($this->formvars['verfahrensgrund_zusatz']),$FormatBez,1,$maxlenght,$multiple,NULL);
 									        $verfahren->OutputHTML();
 									        echo $verfahren->html;
 									      ?>  
