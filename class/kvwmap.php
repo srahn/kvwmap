@@ -15700,7 +15700,7 @@ class db_mapObj{
 			$sql .= "'".$formvars['postlabelcache']."', ";
       $sql .= "'".$formvars['connection']."', ";
       $sql .= "'".$formvars['printconnection']."', ";
-      $sql .= $formvars['connectiontype'].", ";
+      $sql .= ($formvars['connectiontype'] =='' ? "6" : $formvars['connectiontype']) .", "; # Set default to postgis layer
       $sql .= "'".$formvars['classitem']."', ";
 			$sql .= "'".$formvars['layer_classification']."', ";
       $sql .= "'".$formvars['filteritem']."', ";
