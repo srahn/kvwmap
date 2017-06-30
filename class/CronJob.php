@@ -48,7 +48,7 @@ class CronJob extends MyObject {
 
 	public static	function find($gui, $where = '1=1') {
 		$cronjob = new CronJob($gui);
-		return $cronjob->find_where($where);
+		return $cronjob->find_where($where, 'bezeichnung');
 	}
 
 	/*
