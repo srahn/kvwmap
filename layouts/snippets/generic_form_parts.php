@@ -157,7 +157,7 @@
 						$datapart .= ' readonly style="display: none"';
 					}
 					else{
-						$datapart .= ' style="font-size: '.$fontsize.'px"';
+						$datapart .= ' tabindex="1" style="font-size: '.$fontsize.'px"';
 					}
 					$datapart .= ' rows="3" name="'.$fieldname.'">'.$value.'</textarea>';
 					if($attribute_privileg > '0' AND $attributes['options'][$j] != ''){
@@ -202,6 +202,9 @@
 					if($attribute_privileg == '0' OR $lock[$k]){
 						$datapart .= ' onclick="return false" style="border:0px;background-color:transparent;"';
 					}
+					else{
+						$datapart .= ' tabindex="1" ';
+					}
 					$datapart .= 'value="t" name="'.$fieldname.'"';
 					if($value == 't')$datapart .= 'checked=true';
 					$datapart .= '>';
@@ -238,7 +241,7 @@
 							$datapart .= '<a href="" onclick="this.href=\'index.php?go=neuer_Layer_Datensatz&selected_layer_id='.$attributes['subform_layer_id'][$j];
 							for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
 								$datapart .= '&attributenames['.$p.']='.$attributes['subform_pkeys'][$j][$p];
-								$datapart .= '&values['.$p.']=\'+document.getElementById(\''.$attributes['subform_pkeys'][$j][$p].'_'.$k.'\').value';
+								$datapart .= '&values['.$p.']=\'+document.getElementById(\''.$layer_id.'_'.$attributes['subform_pkeys'][$j][$p].'_'.$k.'\').value';
 							}
 							$datapart .= 	'"';
 							if($attributes['no_new_window'][$j] != true){
@@ -361,8 +364,8 @@
 								$data = '';
 								for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
 									$datapart .= '&attributenames['.$p.']='.$attributes['subform_pkeys'][$j][$p];
-									$datapart .= '&values['.$p.']=\'+document.getElementById(\''.$attributes['subform_pkeys'][$j][$p].'_'.$k.'\').value+\'';
-									$data .= '&value_'.$attributes['subform_pkeys'][$j][$p].'=\'+document.getElementById(\''.$attributes['subform_pkeys'][$j][$p].'_'.$k.'\').value+\'';
+									$datapart .= '&values['.$p.']=\'+document.getElementById(\''.$layer_id.'_'.$attributes['subform_pkeys'][$j][$p].'_'.$k.'\').value+\'';
+									$data .= '&value_'.$attributes['subform_pkeys'][$j][$p].'=\'+document.getElementById(\''.$layer_id.'_'.$attributes['subform_pkeys'][$j][$p].'_'.$k.'\').value+\'';
 									$data .= '&operator_'.$attributes['subform_pkeys'][$j][$p].'==';
 								}
 								$data .= '&preview_attribute='.$attributes['preview_attribute'][$j];
@@ -382,7 +385,7 @@
 								$datapart .= ' href="javascript:overlay_link(\'go=neuer_Layer_Datensatz';
 								for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
 									$datapart .= '&attributenames['.$p.']='.$attributes['subform_pkeys'][$j][$p];
-									$datapart .= '&values['.$p.']=\'+document.getElementById(\''.$attributes['subform_pkeys'][$j][$p].'_'.$k.'\').value+\'';
+									$datapart .= '&values['.$p.']=\'+document.getElementById(\''.$layer_id.'_'.$attributes['subform_pkeys'][$j][$p].'_'.$k.'\').value+\'';
 								}
 								$datapart .= '&layer_id='.$layer_id;
 								$datapart .= '&oid='.$dataset[$attributes['table_name'][$attributes['subform_pkeys'][$j][0]].'_oid'];			# die oid des Datensatzes und die Layer-ID wird mit übergeben, für evtl. Zoom auf den Datensatz
@@ -438,7 +441,7 @@
 						$datapart .= '<input type="hidden" name="'.$layer_id.';'.$attributes['real_name'][$name].';'.$tablename.';'.$oid.';'.$attributes['form_element_type'][$j].'_alt'.';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$value.'">';
 					}
 					if($attribute_privileg != '0' AND !$lock[$k]){
-						$datapart .= '<input onchange="'.$onchange.'" style="font-size: '.$fontsize.'px" size="43" type="file" onchange="this.title=this.value;" id="'.$name.'_'.$k.'" name="'.$fieldname.'">';
+						$datapart .= '<input tabindex="1" onchange="'.$onchange.'" style="font-size: '.$fontsize.'px" size="43" type="file" onchange="this.title=this.value;" id="'.$name.'_'.$k.'" name="'.$fieldname.'">';
 					}
 					else{
 						$datapart .= '&nbsp;';
@@ -458,7 +461,7 @@
 						$datapart .= '</a><br>';
 					}
 					if($attribute_privileg != '0' OR $lock[$k]){
-						$datapart .= '<input onchange="'.$onchange.'" id="'.$name.'_'.$k.'" style="font-size: '.$fontsize.'px" size="'.$size.'" type="text" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
+						$datapart .= '<input tabindex="1" onchange="'.$onchange.'" id="'.$name.'_'.$k.'" style="font-size: '.$fontsize.'px" size="'.$size.'" type="text" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 					}else{
 						$datapart .= '<input type="hidden" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 					}
@@ -520,7 +523,7 @@
 						$datapart .= '</a><br>';
 					}
 					if($attribute_privileg != '0' OR $lock[$k]){
-						$datapart .= '<input onchange="'.$onchange.'" id="'.$name.'_'.$k.'" style="font-size: '.$fontsize.'px" size="'.$size.'" type="text" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
+						$datapart .= '<input tabindex="1" onchange="'.$onchange.'" id="'.$name.'_'.$k.'" style="font-size: '.$fontsize.'px" size="'.$size.'" type="text" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 					}else{
 						$datapart .= '<input type="hidden" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 					}
@@ -556,7 +559,7 @@
 						$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
 					}
 					else{
-						$datapart .= ' style="width: 100%; font-size: '.$fontsize.'px;"';
+						$datapart .= ' tabindex="1" style="width: 100%; font-size: '.$fontsize.'px;"';
 					}
 					if($name == 'lock'){
 						$datapart .= ' type="hidden"';
@@ -573,7 +576,7 @@
 						$datapart .= ' readonly style="display:none;"';
 					}
 					else{
-						$datapart .= ' style="width: 100%; font-size: '.$fontsize.'px;"';
+						$datapart .= ' tabindex="1" style="width: 100%; font-size: '.$fontsize.'px;"';
 					}
 					if($name == 'lock'){
 						$datapart .= ' type="hidden"';
@@ -581,7 +584,7 @@
 					if($attributes['length'][$j] AND !in_array($attributes['type'][$j], array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))){
 						$datapart .= ' maxlength="'.$attributes['length'][$j].'"';
 					}
-					$datapart .= ' size="'.$size.'" type="text" name="'.$fieldname.'" id="'.$name.'_'.$k.'" value="'.htmlspecialchars($value).'">';
+					$datapart .= ' size="'.$size.'" type="text" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$k.'" value="'.htmlspecialchars($value).'">';
 					if($attribute_privileg == '0' OR $lock[$k]){ // nur lesbares Attribut
 						if($size == 12){		// spaltenweise
 							$datapart .= htmlspecialchars($value);
@@ -617,7 +620,7 @@
 			$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
 		}
 		else{
-			$datapart .= ' style="font-size: '.$fontsize.'px;"';
+			$datapart .= ' tabindex="1" style="font-size: '.$fontsize.'px;"';
 		}
 		$datapart .= ' size="'.$size.'" type="text" id="output_'.$name.'_'.$k.'" value="'.htmlspecialchars($output).'">';
 		$datapart .= '<input type="hidden" onchange="'.$onchange.';" name="'.$fieldname.'" id="'.$name.'_'.$k.'" value="'.htmlspecialchars($value).'">';
@@ -659,7 +662,7 @@
 			if($change_all){
 				$onchange = 'change_all('.$layer_id.', '.$k.', \''.$name.'\');';
 			}
-			$datapart .= '<select title="'.$alias.'" style="'.$select_width.'font-size: '.$fontsize.'px"';
+			$datapart .= '<select tabindex="1" title="'.$alias.'" style="'.$select_width.'font-size: '.$fontsize.'px"';
 			if($req_by != ''){
 				$onchange .= 'update_require_attribute(\''.$req_by.'\', '.$k.','.$layer_id.', new Array(\''.implode($attributenames, "','").'\'));';
 			}

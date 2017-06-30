@@ -25,5 +25,7 @@ $hoch="hoch";
 $quer="quer";
 $strHelp="Hilfe";
 $strRollenlayerLegend="Wenn Sie diese Option aktivieren, werden in der Legende auch Ihre eigenen Suchergebnislayer sowie importierte Layer angezeigt.";
+$strLegendOptions="Legenden-Optionen";
+$strLayers="Themen";
  
 ?>  

@@ -310,9 +310,9 @@ define('IMAGEPATH',INSTALLPATH.'tmp/');
 # sendEmail async: E-Mails werden erst in einem temporären Verzeichnis MAILQUEUEPATH
 # 	abgelegt und können später durch das Script tools/sendEmailAsync.sh
 # 	versendet werden. Dort muss auch MAILQUEUEPATH eingestellt werden.
-define('MAILMETHOD', 'sendmail');						# Version 2.4
+define('MAILMETHOD', 'sendEmail async');						# Version 2.4
 # SMTP-Server, Muss nur angegeben werden, wenn Methode sendEmail async verwendet wird.
-define('MAILSMTPSERVER', '');						# Version 2.4
+define('MAILSMTPSERVER', 'smtp.p4.net');						# Version 2.4
 # SMTP-Port, Muss nur angegeben werden, wenn Methode sendEmail async verwendet wird.
 define('MAILSMTPPORT', 25);													# Version 2.4
 # Verzeichnis für die JSON-Dateien mit denzu versendenen E-Mails.

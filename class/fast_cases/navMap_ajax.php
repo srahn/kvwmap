@@ -2450,6 +2450,9 @@ class db_mapObj {
     $this->disabled_classes = $this->read_disabled_classes();
 		$i = 0;
     while ($rs=mysql_fetch_assoc($query)) {
+			$rs['Name'] = replace_params($rs['Name'], rolle::$layer_params);
+			$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);	
+			$rs['connection'] = replace_params($rs['connection'], rolle::$layer_params);
 			$rs['classification'] = replace_params($rs['classification'], rolle::$layer_params);
 			if ($withClasses == 2 OR $rs['requires'] != '' OR ($withClasses == 1 AND $rs['aktivStatus'] != '0')) {
 				# bei withclasses == 2 werden für alle Layer die Klassen geladen,

@@ -9,7 +9,7 @@ if($arrayEnum == true){
 }
 echo '<option value="">Enumerationswert waehlen...</option>';
 // Insert a newoption for each attribute returned
-while ($row = pg_fetch_row($result)){
+while ($row = pg_fetch_row($this->result)){
 	echo '<option value="' . $enumerationsliste . '_' . $row[0] . '">' . $row[0] . ' ( ' . $row[1] . ' )</option>';
 }
 echo '</select>';

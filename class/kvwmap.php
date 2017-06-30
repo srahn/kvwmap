@@ -533,8 +533,11 @@ class GUI {
 								else {
 									$legend .= '<table border="0" cellspacing="0" cellpadding="0">';
 									$maplayer = $this->map->getLayerByName($layer['alias']);
+									if($layer['Class'][0]['legendorder'] != ''){
+										usort($layer['Class'], 'compare_legendorder');
+									}
 									for($k = 0; $k < $maplayer->numclasses; $k++){
-										$class = $maplayer->getClass($k);
+										$class = $maplayer->getClass($layer['Class'][$k]['index']);
 										for($s = 0; $s < $class->numstyles; $s++){
 											$style = $class->getStyle($s);
 											if($maplayer->type > 0){
@@ -1382,8 +1385,10 @@ class GUI {
       if ($classset[$j]['text']!='') {
         $klasse -> settext($classset[$j]['text']);
       }
-      # setzen eines oder mehrerer Styles
-      # Änderung am 12.07.2005 Korduan
+      if ($classset[$j]['legendgraphic'] != '') {
+				$imagename = WWWROOT.APPLVERSION.GRAPHICSPATH . 'custom/' . $classset[$j]['legendgraphic'];
+				$klasse->set('keyimage', $imagename);
+			}
       for ($k=0;$k<count($classset[$j]['Style']);$k++) {
         $dbStyle=$classset[$j]['Style'][$k];
 				if (MAPSERVERVERSION < 600) {
@@ -5146,10 +5151,8 @@ class GUI {
     $legendmapDB = new db_mapObj($this->Stelle->id, $this->user->id);
     $legendmapDB->nurAktiveLayer = 1;
     $layerset = $legendmapDB->read_Layer(1);
-		if($this->formvars['rollenlayer_legend']){
-			$rollenlayer = $legendmapDB->read_RollenLayer();
-			$layerset = array_merge($layerset, $rollenlayer);
-		}
+		$rollenlayer = $legendmapDB->read_RollenLayer();
+		$layerset = array_merge($layerset, $rollenlayer);
     for($i = 0; $i < $this->map->numlayers; $i++){
       $layer = $this->map->getlayer($i);
       $layer->set('status', 0);
@@ -5162,15 +5165,17 @@ class GUI {
     for($i = 0; $i < count($layerset); $i++){
       if($layerset[$i]['aktivStatus'] != 0){
         if(($layerset[$i]['minscale'] < $scale OR $layerset[$i]['minscale'] == 0) AND ($layerset[$i]['maxscale'] > $scale OR $layerset[$i]['maxscale'] == 0)){
-					if($layerset[$i]['alias'] != '')$name = $layerset[$i]['alias'];
-					else $name = $layerset[$i]['Name'];
-          $layer = $this->map->getLayerByName($name);
-          if($layerset[$i]['showclasses']){
-            for($j = 0; $j < $layer->numclasses; $j++){
-              $class = $layer->getClass($j);
-              if($class->name != '')$draw = true;
-            }
-          }
+					if($this->formvars['legendlayer'.$layerset[$i]['Layer_ID']] == 'on'){
+						if($layerset[$i]['alias'] != '')$name = $layerset[$i]['alias'];
+						else $name = $layerset[$i]['Name'];
+						$layer = $this->map->getLayerByName($name);
+						if($layerset[$i]['showclasses']){
+							for($j = 0; $j < $layer->numclasses; $j++){
+								$class = $layer->getClass($j);
+								if($class->name != '')$draw = true;
+							}
+						}
+					}
         }
         if($draw == true){
           $layer->set('status', 1);
@@ -7204,7 +7209,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			    $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 			    $layerdb->setClientEncoding();
 			    $path = strip_pg_escape_string($this->formvars['pfad']);
-					$all_layer_params = $mapDB->get_all_layer_params();					
+					$all_layer_params = $mapDB->get_all_layer_params_default_values();					
 			    $attributes = $mapDB->load_attributes($layerdb,	replace_params($path,	$all_layer_params));
 			    $mapDB->save_postgis_attributes($this->formvars['selected_layer_id'], $attributes, $this->formvars['maintable'], $this->formvars['schema']);
 			    #---------- Speichern der Layerattribute -------------------
@@ -10248,9 +10253,36 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	*/
 	function Menueeditor() {
 		$this->menue = new Menue($this);
-		$this->menue->find_by('id', $this->formvars['selected_menue_id']);
+		if ($this->formvars['selected_menue_id'] != '') {
+			$this->menue->find_by('id', $this->formvars['selected_menue_id']);
+		}
+		else {
+			$this->menue->setKeysFromTable();
+		}
 		$this->titel = 'Menü Editor';
 		$this->main = 'menue_formular.php';
+		$this->output();
+	}
+
+	function MenueSpeichern() {
+		$this->menue = new Menue($this);
+		$this->menue->data = formvars_strip($this->formvars, $this->menue->setKeysFromTable(), 'keep');
+
+		$this->menue->set('title', strip_pg_escape_string($this->formvars['title']));
+		$results = $this->menue->validate();
+		if (empty($results)) {
+			$results = $this->menue->create();
+		}
+		if (empty($results)) {
+			$this->add_message('notice', 'Menü erfolgreich angelegt.');
+			$this->menuedaten = Menue::find($this, 'true', $this->formvars['order']);
+			$this->titel='Menüdaten';
+			$this->main='menuedaten.php';
+		}
+		else {
+			$this->add_message('array', $results);
+			$this->main = 'menue_formular.php';
+		}
 		$this->output();
 	}
 
@@ -10258,14 +10290,26 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->menue = new Menue($this);
 		$this->menue->find_by('id', $this->formvars['selected_menue_id']);
 		$this->menue->setData($this->formvars);
-		$this->menue->update();
-		$this->Menueeditor();
+		$results = $this->menue->validate();
+		if (empty($results)) {
+			$results = $this->menue->update();
+		}
+		if (empty($results)) {
+			$this->add_message('notice', 'Menü erfolgreich aktualisiert.');
+		}
+		else {
+			$this->add_message('array', $results);
+		}
+		$this->titel = 'Menü Editor';
+		$this->main = 'menue_formular.php';
+		$this->output();
 	}
 
 	function MenueLoeschen(){
 		$this->menue = new Menue($this);
 		$this->menue->find_by('id', $this->formvars['selected_menue_id']);
 		$this->menue->delete();
+		$this->menuedaten = Menue::find($this, 'true', $this->formvars['order']);
 		$this->titel='Menüdaten';
 		$this->main='menuedaten.php';
 		$this->output();
@@ -13869,7 +13913,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
   }
 
   function createQueryMap($layerset, $k){
-  	if($layerset['attributes']['the_geom'] != '') {
+		global $language;
+  	if($layerset['attributes']['the_geom'] != ''){
 	    $layer_id = $layerset['Layer_ID'];
 	    $tablename = $layerset['attributes']['table_name'][$layerset['attributes']['the_geom']];
 	    $oid = $layerset['shape'][$k][$tablename.'_oid'];
@@ -13899,6 +13944,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	    	$map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
 		    # Haupt-Layer erzeugen
 		    $layer=ms_newLayerObj($map);
+				$layerset['Data'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset['Data']);
+				$layerset['Data'] = str_replace('$language', $language, $layerset['Data']);
+				$layerset['Data'] = replace_params($layerset['Data'], rolle::$layer_params);
 		    $layer->set('data',$layerset['Data']);
 				if($layerset['Filter'] != ''){
 					$layerset['Filter'] = str_replace('$userid', $this->user->id, $layerset['Filter']);
@@ -14500,6 +14548,9 @@ class db_mapObj{
     $this->disabled_classes = $this->read_disabled_classes();
 		$i = 0;
     while ($rs=mysql_fetch_assoc($query)) {
+			$rs['Name'] = replace_params($rs['Name'], rolle::$layer_params);
+			$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);
+			$rs['connection'] = replace_params($rs['connection'], rolle::$layer_params);
 			$rs['classification'] = replace_params($rs['classification'], rolle::$layer_params);
 			if ($withClasses == 2 OR $rs['requires'] != '' OR ($withClasses == 1 AND $rs['aktivStatus'] != '0')) {
 				# bei withclasses == 2 werden für alle Layer die Klassen geladen,
@@ -14639,9 +14690,11 @@ class db_mapObj{
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Class - Lesen der Classen eines Layers:<br>" . $sql, 4);
 		$query = mysql_query($sql);
 		if ($query == 0) { echo "<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__; return 0; }
+		$i = 0;
 		while ($rs = mysql_fetch_assoc($query)) {
 			$rs['Style'] = $this->read_Styles($rs['Class_ID']);
 			$rs['Label'] = $this->read_Label($rs['Class_ID']);
+			$rs['index'] = $i;
 			#Anne
 			if($disabled_classes){
 				if($disabled_classes['status'][$rs['Class_ID']] == 2) {
@@ -14665,6 +14718,7 @@ class db_mapObj{
 			else $rs['Status'] = 1;
 
 			$Classes[] = $rs;
+			$i++;
 		}
 		return $Classes;
 	}
@@ -15649,7 +15703,7 @@ class db_mapObj{
 			$sql .= "'".$formvars['postlabelcache']."', ";
       $sql .= "'".$formvars['connection']."', ";
       $sql .= "'".$formvars['printconnection']."', ";
-      $sql .= $formvars['connectiontype'].", ";
+      $sql .= ($formvars['connectiontype'] =='' ? "6" : $formvars['connectiontype']) .", "; # Set default to postgis layer
       $sql .= "'".$formvars['classitem']."', ";
 			$sql .= "'".$formvars['layer_classification']."', ";
       $sql .= "'".$formvars['filteritem']."', ";
