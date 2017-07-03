@@ -15,8 +15,6 @@ CREATE TABLE wasserrecht.behoerde(
   	abkuerzung varchar(100),
   	status varchar(100)
 ) WITH OIDS;
-INSERT INTO wasserrecht.behoerde VALUES (1, 'Untere Wasserbehoerde', 'uwb', DEFAULT);
-INSERT INTO wasserrecht.behoerde VALUES (2, 'Staatliches Amt für Landwirtschaft und Umwelt', 'stalu', DEFAULT);
 
 CREATE TABLE wasserrecht.bearbeiter(
 	id serial PRIMARY KEY,
@@ -42,9 +40,15 @@ CREATE TABLE wasserrecht.betreiber(
 	the_geo geometry
 ) WITH OIDS;
 
-CREATE TABLE wasserrecht.koerperschaft(
+CREATE TABLE wasserrecht.koerperschaft_art(
 	id serial PRIMARY KEY,
 	name varchar(255)
+) WITH OIDS;
+
+CREATE TABLE wasserrecht.koerperschaft(
+	id serial PRIMARY KEY,
+	name varchar(255),
+	art serial REFERENCES wasserrecht.koerperschaft_art(id)
 ) WITH OIDS;
 
 CREATE TABLE wasserrecht.wrzaussteller(
@@ -101,10 +105,6 @@ CREATE TABLE wasserrecht.archivnummer(
 	id serial PRIMARY KEY,
 	nummer integer
 ) WITH OIDS;
-INSERT INTO wasserrecht.archivnummer VALUES (1, 188);
-INSERT INTO wasserrecht.archivnummer VALUES (2, 189);
-INSERT INTO wasserrecht.archivnummer VALUES (3, 209);
-INSERT INTO wasserrecht.archivnummer VALUES (4, 210);
 
 CREATE TABLE wasserrecht.wasserbuch(
 	id serial PRIMARY KEY,
@@ -127,11 +127,6 @@ CREATE TABLE wasserrecht.anlagen_klasse(
 	id serial PRIMARY KEY,
 	name varchar(100)
 )WITH OIDS;
-INSERT INTO wasserrecht.anlagen_klasse VALUES (1, 'Industriebetrieb');
-INSERT INTO wasserrecht.anlagen_klasse VALUES (2, 'Diensleistungsbetrieb');
-INSERT INTO wasserrecht.anlagen_klasse VALUES (3, 'Wasserwerk');
-INSERT INTO wasserrecht.anlagen_klasse VALUES (4, 'Landwirtschaftsbetrieb');
-INSERT INTO wasserrecht.anlagen_klasse VALUES (5, 'Sport- und Erhohlungsanlage');
 
 CREATE TABLE wasserrecht.anlagen(
 	id serial PRIMARY KEY,
@@ -147,9 +142,8 @@ CREATE TABLE wasserrecht.anlagen(
 	abwasser_koerperschaft serial REFERENCES wasserrecht.koerperschaft(id),
 	trinkwasser_koerperschaft serial REFERENCES wasserrecht.koerperschaft(id),
 	kommentar text,
-	the_geom geometry
+	the_geom geometry(Point, 35833)
 ) WITH OIDS;
-
 COMMENT ON COLUMN wasserrecht.anlagen.id IS 'Primärschlüssel der Fis-WrV Objekte';
 COMMENT ON COLUMN wasserrecht.anlagen.name IS 'Name der Fis-WrV Objekte';
 COMMENT ON COLUMN wasserrecht.anlagen.klasse IS 'Klasse der Fis-WrV Objekte';
@@ -166,16 +160,11 @@ CREATE TABLE wasserrecht.personen_status(
 	id serial PRIMARY KEY,
 	name varchar(100)
 )WITH OIDS;
-INSERT INTO wasserrecht.personen_status VALUES (1, '[aktuell]');
-INSERT INTO wasserrecht.personen_status VALUES (2, '[historisch 1994–2011]');
-INSERT INTO wasserrecht.personen_status VALUES (3, '[historisch DDR]');
 
 CREATE TABLE wasserrecht.personen_typ(
 	id serial PRIMARY KEY,
 	name varchar(100)
 )WITH OIDS;
-INSERT INTO wasserrecht.personen_typ VALUES (1, 'Körperschaft des öffentlichen Rechts');
-INSERT INTO wasserrecht.personen_typ VALUES (2, 'Körperschaft des Privatrechts');
 
 CREATE TABLE wasserrecht.personen(
 	id serial PRIMARY KEY,
@@ -213,15 +202,6 @@ CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_abesch_klasse(
 	id serial PRIMARY KEY,
 	name varchar(100)
 )WITH OIDS;
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen_abesch_klasse VALUES (1, 'Wasserrechtliche Erlaubnis');
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen_abesch_klasse VALUES (2, 'Gehobene Wasserrechtliche Erlaubnis');
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen_abesch_klasse VALUES (3, 'Wasserrechtliche Bewilligung');
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen_abesch_klasse VALUES (4, 'Planfeststellungsverfahren');
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen_abesch_klasse VALUES (5, 'Sonstige Zulassungen');
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen_abesch_klasse VALUES (6, 'Anzeige einer Gewässerbenutzung');
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen_abesch_klasse VALUES (7, 'Wasserrechtliche Nutzungsgenehmigung');
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen_abesch_klasse VALUES (8, 'Wasserrechtliche Nutzungsgenehmigung (historisch)');
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen_abesch_klasse VALUES (9, 'Anpassungsbescheid nach § 13 LWaG');
 
 CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_barbeitz(
 	id serial PRIMARY KEY,
@@ -243,13 +223,11 @@ CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_fassung_klasse(
 	id serial PRIMARY KEY,
 	name varchar(255)
 )WITH OIDS;
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen_fassung_klasse VALUES (1, 'Änderungsbescheides vom');
 
 CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_fassung_auswahl(
 	id serial PRIMARY KEY,
 	name varchar(255)
 )WITH OIDS;
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen_fassung_auswahl VALUES (1, 'In der Fassung des');
 
 CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_fassung(
 	id serial PRIMARY KEY,
@@ -276,18 +254,11 @@ CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_status(
 	id serial PRIMARY KEY,
 	name varchar(100)
 )WITH OIDS;
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen_status VALUES (1, 'Abschriften von WrZ');
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen_status VALUES (2, 'LUNG-Datenbanken');
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen_status VALUES (3, '[aktuelle]');
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen_status VALUES (4, 'Erstbefüllungsdaten');
 
 CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_ungueltig_aufgrund(
 	id serial PRIMARY KEY,
 	name varchar(255)
 )WITH OIDS;
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen_ungueltig_aufgrund VALUES (1, 'Fristablauf');
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen_ungueltig_aufgrund VALUES (2, 'Widerruf');
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen_ungueltig_aufgrund VALUES (3, 'Verzicht');
 
 CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_gueltigkeit(
 	id serial PRIMARY KEY,
@@ -321,68 +292,12 @@ CREATE TABLE wasserrecht.gewaesserbenutzungen_art(
 	freitext text,
 	wgh integer
 )WITH OIDS;
-INSERT INTO wasserrecht.gewaesserbenutzungen_art VALUES (1, 'Entnehmen und Ableiten von Wasser aus oberirdischen Gewässern (§ 9 Satz 1 Nr. 1 WHG)', DEFAULT, DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art VALUES (2, 'Aufstauen und Absenken von oberirdischen Gewässern (§ 9 Satz 1 Nr. 2 WHG)', DEFAULT, DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art VALUES (3, 'Entnehmen fester Stoffe aus oberirdischen Gewässern... (§ 9 Satz 1 Nr. 3 WHG)', DEFAULT, DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art VALUES (4, 'Einbringen und Einleiten von Stoffen in Gewässer (§ 9 Satz 1 Nr. 4 WHG)', DEFAULT, DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art VALUES (5, 'Entnehmen, Zutagefördern, Zutageleiten und Ableiten von Grundwasser (§ 9 Satz 1 Nr. 5 WHG)', DEFAULT, DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art VALUES (6, 'Aufstauen, Absenken und Umleiten von Grundwasser  (§ 9 Satz 2 Nr. 1 WHG)', DEFAULT, DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art VALUES (7, 'Maßnahmen [...] die [...] nachteilige Veränderungen der Wasserbeschaffenheit herbei [...] führen (§ 9 Satz 2 Nr. 1 WHG)', DEFAULT, DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art VALUES (8, DEFAULT, 'Entnahme von Wasser aus der Peene', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art VALUES (9, DEFAULT, 'Entnahme von Oberflächenwasser mittels eines stationären Pumpenhauses aus der Peene', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art VALUES (10, DEFAULT, 'Entnahme von Grundwasser', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art VALUES (11, DEFAULT, 'Einleiten von industriellem Abwasser', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art VALUES (12, DEFAULT, 'Entnahme und Zutageförderung von Grundwasser - Ziegeleiwiese Güstrow', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art VALUES (13, DEFAULT, 'Grundwasserabsenkung', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art VALUES (14, DEFAULT, 'Entnahme von Grundwasser aus 7 Brunnen', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art VALUES (15, DEFAULT, 'Entnahme von Grundwasser aus zehn bestehenden Brunnen', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art VALUES (16, DEFAULT, 'Entnahme von Grundwasser aus einem Brunnen', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art VALUES (17, DEFAULT, 'Entnehmen von Grundwasser', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art VALUES (18, DEFAULT, 'Entnahme und Zutageförderung von Grundwasser', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art VALUES (19, DEFAULT, 'Entnahme von Grundwasser aus Brunnen', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art VALUES (20, DEFAULT, 'Entnahme von Grundwasser aus 11 Bohrbrunnen', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art VALUES (21, DEFAULT, 'Entnehmen von Oberflächenwasser ... über einen offenen Zuleitungskanal (Neuer Kanal) aus der Peene', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art VALUES (22, DEFAULT, 'Entnahme von Oberflächengewässer mittels einer mobilen Pumpe', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art VALUES (23, DEFAULT, 'Zutagefördern von Grundwasser aus vier Bohrbrunnen', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art VALUES (24, DEFAULT, 'Entnahme von Oberflächenwasser aus dem Groß Wariner See', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art VALUES (25, DEFAULT, 'Entnahme von Oberflächenwasser', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art VALUES (26, DEFAULT, 'Entnehmen von Brauchwasser aus dem Hafenbecken B des Seehafens Rostock', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art VALUES (27, DEFAULT, 'Grundwasserentnahme', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art VALUES (28, DEFAULT, 'Entnahme und Eileiten von Oberflächenwasser', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art VALUES (29, DEFAULT, 'test', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art VALUES (30, DEFAULT, 'Entnahme von Wasser aus dem Grundwasser', DEFAULT);
-
 
 CREATE TABLE wasserrecht.gewaesserbenutzungen_zweck(
 	id serial PRIMARY KEY,
 	name varchar(255),
 	freitext text
 )WITH OIDS;
-INSERT INTO wasserrecht.gewaesserbenutzungen_zweck VALUES (1, 'Trink- und Brauchwasserversorgung für Aquakultur nicht nach § 16 Satz 2 Nummer 5', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_zweck VALUES (2, 'Öffentliche Trink- und Brauchwasserversorgung', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_zweck VALUES (3, 'Bewässerung von öffentlichen Plätzen', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_zweck VALUES (4, 'Kühlwasserversorgung', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_zweck VALUES (5, 'Trink- und Brauchwasserversorgung (ohne Landwirtschaft)', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_zweck VALUES (6, 'Brauchwasserversorgung (ohne Landwirtschaft)', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_zweck VALUES (7, 'Bewässerung von Sport- und Spielplätzen', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_zweck VALUES (8, 'Betrieb von Wasserspielen und künstlichen Gewässern', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_zweck VALUES (9, 'Trink- und Tränk- und Brauchwasserversorgung für die Landwirtschaft', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_zweck VALUES (10, 'Trink- und Brauchwasserversorgung für den Gartenbau', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_zweck VALUES (11, 'Bewässerung land- und forstwirtschaftlicher sowie gartenbaulicher Kulturen nicht nach § 16 Satz 2 Nummer 5', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_zweck VALUES (12, 'Wärmegewinnung nicht nach § 16 Satz 2 Nummer 3 oder 4 LWaG', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_zweck VALUES (13, 'Wärmegewinnung nach § 16 Satz 2 Nummer 3 LWaG', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_zweck VALUES (14, 'Wärmegewinnung nach § 16 Satz 2 Nummer 4 LWaG', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_zweck VALUES (15, 'Beregnung landwirtschaftlicher sowie erwerbsgärtnerischer Kulturen nach § 16 Satz 2 Nummer 5 LWaG', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_zweck VALUES (16, 'Erlaubnisfreiher Eigentümer- und Anliegergebrauch nach § 26 WHG', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_zweck VALUES (17, 'Wasserkraftnutzung nach § 16 Satz 2 Nummer 6 LWaG', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_zweck VALUES (18, 'Wasserkraftnutzung nicht nach § 16 Satz 2 Nummer 6 LWaG', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_zweck VALUES (19, 'Trink- und Brauchwasserversorgung für Fischerei nach § 16 Satz 2 Nummer 5 LWaG', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_zweck VALUES (20, 'Herstellung von Erfrischungsgetränken; Gewinnung natürlicher Mineralwässer', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_zweck VALUES (21, 'Erlaubnisfreihe Benutzung nach § 46 Satz 1 Nummer 1 WHG (Hofbetrieb etc.)', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_zweck VALUES (22, 'Erlaubnisfreihe Benutzung nach § 46 Satz 1 Nummer 2 WHG (Bodenentwässerung)', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_zweck VALUES (23, 'Erlaubnisfreihe Benutzung nach § 32 Satz 2 LWaG nicht gewerblicher Gartenbau', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_zweck VALUES (24, 'Erlaubnisfreihe Benutzung nach § 32 Satz 2 LWaG Erhaltung der Bodenfruchtbarkeit', DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_zweck VALUES (25, 'Heilquellennutzung nach § 16 Satz 2 Nummer 2 LWaG', DEFAULT);
 
 CREATE TABLE wasserrecht.gewaesserbenutzungen_umfang(
 	id serial PRIMARY KEY,
@@ -428,18 +343,6 @@ CREATE TABLE wasserrecht.gewaesserbenutzungen_wee_satz(
 	satz_ow numeric,
 	satz_gw numeric
 )WITH OIDS;
-INSERT INTO wasserrecht.gewaesserbenutzungen_wee_satz VALUES (1, '2010-01-01', 0.02, 0.05);
-INSERT INTO wasserrecht.gewaesserbenutzungen_wee_satz VALUES (2, '2011-01-01', 0.02, 0.05);
-INSERT INTO wasserrecht.gewaesserbenutzungen_wee_satz VALUES (3, '2012-01-01', 0.02, 0.05);
-INSERT INTO wasserrecht.gewaesserbenutzungen_wee_satz VALUES (4, '2013-01-01', 0.02, 0.05);
-INSERT INTO wasserrecht.gewaesserbenutzungen_wee_satz VALUES (5, '2014-01-01', 0.02, 0.05);
-INSERT INTO wasserrecht.gewaesserbenutzungen_wee_satz VALUES (6, '2014-01-01', 0.02, 0.10);
-INSERT INTO wasserrecht.gewaesserbenutzungen_wee_satz VALUES (7, '2015-01-01', 0.02, 0.10);
-INSERT INTO wasserrecht.gewaesserbenutzungen_wee_satz VALUES (8, '2016-01-01', 0.02, 0.10);
-INSERT INTO wasserrecht.gewaesserbenutzungen_wee_satz VALUES (9, '2017-01-01', 0.02, 0.10);
-INSERT INTO wasserrecht.gewaesserbenutzungen_wee_satz VALUES (10, '2018-01-01', 0.02, 0.10);
-INSERT INTO wasserrecht.gewaesserbenutzungen_wee_satz VALUES (11, '2019-01-01', 0.02, 0.10);
-INSERT INTO wasserrecht.gewaesserbenutzungen_wee_satz VALUES (12, '2020-01-01', 0.02, 0.10);
 
 CREATE TABLE wasserrecht.gewaesserbenutzungen(
 	id serial PRIMARY KEY,
