@@ -374,7 +374,7 @@ include('funktionen/input_check_functions.php');
 	
 	auto_generate = function(attributenamesarray, geom_attribute, attribute, k, layer_id){
 		names_values = get_current_attribute_values(attributenamesarray, geom_attribute, k);
-		ahah("index.php", "go=auto_generate&layer_id="+layer_id+"&attribute="+attribute+"&attributenames="+names_values[0]+"&attributevalues="+names_values[1], new Array(document.getElementById(attribute+'_'+k)), new Array("setvalue"));
+		ahah("index.php", "go=auto_generate&layer_id="+layer_id+"&attribute="+attribute+"&attributenames="+names_values[0]+"&attributevalues="+names_values[1], new Array(document.getElementById(layer_id+'_'+attribute+'_'+k)), new Array("setvalue"));
 	}
 	
 	openCustomSubform = function(layer_id, attribute, attributenamesarray, field_id, k){
