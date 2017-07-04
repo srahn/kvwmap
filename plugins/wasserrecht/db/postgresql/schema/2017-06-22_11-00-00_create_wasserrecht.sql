@@ -93,13 +93,11 @@ CREATE TABLE wasserrecht.betriebszustand(
 	id serial PRIMARY KEY,
 	name varchar(255)
 ) WITH OIDS;
-INSERT INTO wasserrecht.betriebszustand VALUES (1, 'WFBB');
 
 CREATE TABLE wasserrecht.messtischblatt(
 	id serial PRIMARY KEY,
 	nummer integer
 ) WITH OIDS;
-INSERT INTO wasserrecht.messtischblatt VALUES (1, 1445);
 
 CREATE TABLE wasserrecht.archivnummer(
 	id serial PRIMARY KEY,
@@ -110,7 +108,6 @@ CREATE TABLE wasserrecht.wasserbuch(
 	id serial PRIMARY KEY,
 	nummer integer
 ) WITH OIDS;
-INSERT INTO wasserrecht.wasserbuch VALUES (1, 3572);
 
 CREATE TABLE wasserrecht.konto(
 	id serial PRIMARY KEY,
@@ -154,7 +151,6 @@ CREATE TABLE wasserrecht.personen_klasse(
 	id serial PRIMARY KEY,
 	name varchar(100)
 )WITH OIDS;
-INSERT INTO wasserrecht.personen_klasse VALUES (1, 'Kieswerk');
 
 CREATE TABLE wasserrecht.personen_status(
 	id serial PRIMARY KEY,

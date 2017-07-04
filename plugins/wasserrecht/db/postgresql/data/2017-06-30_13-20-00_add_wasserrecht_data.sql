@@ -3,6 +3,9 @@ BEGIN;
 --INSERT INTO spatial_ref_sys VALUES (35833, 'EPSG', 35833, 'PROJCS["ETRS89/UTM 33N RW+33.000.000 MV",GEOGCS["ETRS89",DATUM["European_Terrestrial_Reference_System_1989",SPHEROID["GRS1980",6378137,298.257222101,AUTHORITY["EPSG","7019"]],AUTHORITY["EPSG","6258"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.01745329251994328,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4258"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",0],PARAMETER["central_meridian",15],PARAMETER["scale_factor",0.9996],PARAMETER["false_easting",33500000],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AUTHORITY["EPSG","25833"]]', '+proj=tmerc +lat_0=0 +lon_0=15 +k=0.9996 +x_0=33500000 +y_0=0 +ellps=GRS80 +units=m +no_defs towgs84=0,0,0<>');
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+INSERT INTO wasserrecht.betriebszustand (name) VALUES ('WFBB');
+INSERT INTO wasserrecht.messtischblatt (nummer) VALUES (1445);
+INSERT INTO wasserrecht.wasserbuch (nummer) VALUES (3572);
 
 INSERT INTO wasserrecht.behoerde (name, abkuerzung, status) VALUES ('Untere Wasserbehoerde', 'uwb', DEFAULT);
 INSERT INTO wasserrecht.behoerde (name, abkuerzung, status) VALUES ('Staatliches Amt für Landwirtschaft und Umwelt', 'stalu', DEFAULT);
@@ -24,6 +27,8 @@ INSERT INTO wasserrecht.personen_status (name) VALUES ('[historisch DDR]');
 
 INSERT INTO wasserrecht.personen_typ (name) VALUES ('Körperschaft des öffentlichen Rechts');
 INSERT INTO wasserrecht.personen_typ (name) VALUES ('Körperschaft des Privatrechts');
+
+INSERT INTO wasserrecht.personen_klasse (name) VALUES ('Kieswerk');
 
 INSERT INTO wasserrecht.wasserrechtliche_zulassungen_abesch_klasse (name) VALUES ('Wasserrechtliche Erlaubnis');
 INSERT INTO wasserrecht.wasserrechtliche_zulassungen_abesch_klasse (name) VALUES ('Gehobene Wasserrechtliche Erlaubnis');
