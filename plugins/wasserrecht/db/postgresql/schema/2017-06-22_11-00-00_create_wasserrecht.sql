@@ -268,6 +268,7 @@ CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_gueltigkeit(
 
 CREATE TABLE wasserrecht.wasserrechtliche_zulassungen(
 	id serial PRIMARY KEY,
+	name varchar(255),
 	ausstellbehoerde integer REFERENCES wasserrecht.behoerde(id),
 	ausgangsbescheid integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide(id),
 	fassung integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_fassung(id),
