@@ -9574,8 +9574,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         $this->user->rolle->setLayer($selectedusers[$i], $new_stelle_id, 0); # Hinzufügen der Layer zur Rolle
         $this->selected_user = new user(0,$selectedusers[$i],$this->user->database);
         $this->selected_user->checkstelle();
-      }
-			$new_stelle->updateLayerParams();
+      }			
 			# Löschen der in der Selectbox entfernten Layer
       $stellenlayer = $Stelle->getLayers(NULL);
       for($i = 0; $i < count($stellenlayer['ID']); $i++){
@@ -9601,7 +9600,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         }
       }
     # /Löschen der in der Selectbox entfernten Layer
-
+		$new_stelle->updateLayerParams();
     # Löschen  der User, die nicht mehr zur Stelle gehören sollen
     # Löschen der in der Selectbox entfernten User
       for($i = 0; $i < count($users['ID']); $i++){
