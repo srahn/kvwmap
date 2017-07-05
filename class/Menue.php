@@ -8,6 +8,32 @@ class Menue extends MyObject {
 	function Menue($gui) {
 		$this->MyObject($gui, 'u_menues');
 		$this->identifier = 'id';
+		$this->validations = array(
+			array(
+				'attribute' => 'name',
+				'condition' => 'not_null',
+				'description' => 'Es muss ein Menüname angegeben werden.',
+				'options' => null
+			),
+			array(
+				'attribute' => 'links',
+				'condition' => 'not_null',
+				'description' => 'Ein Link muss angegeben werden. Für Obermenüpunkte in der Regel index.php?go=changemenue',
+				'options' => null
+			),
+			array(
+				'attribute' => 'menueebene',
+				'condition' => 'not_null',
+				'description' => 'Es muss eine Menüebene angegeben werden.',
+				'options' => array(1, 2)
+			),
+			array(
+				'attribute' => 'menueebene',
+				'condition' => 'validate_value_is_one_off',
+				'description' => 'Es muss Menüebene 1=Obermenü oder 2=Untermenü angegeben werden.',
+				'options' => array(1, 2)
+			)
+		);
 	}
 
 	public static	function find($gui, $where, $order = '') {
@@ -96,7 +122,22 @@ class Menue extends MyObject {
 		);
     return $menues;
 	}
-	
+
+	public function validate() {
+		$results = array();
+		foreach($this->validations AS $validation) {
+			$results[] = $this->validates($validation['attribute'], $validation['condition'], $validation['description'], $validation['options']);
+		}
+
+		$messages = array();
+		foreach($results AS $result) {
+			if (!empty($result)) {
+				$messages[] = $result;
+			}
+		}
+		return $messages;
+	}
+
 	function is_selected() {
 		$is_selected = true;
 		$formvars = $_REQUEST;

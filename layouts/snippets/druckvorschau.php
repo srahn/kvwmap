@@ -249,5 +249,20 @@ function preventflickering(evt){
 		<input type="hidden" name="layer[<? echo $i ?>][connection]" value="<? echo $this->formvars['layer'][$i][connection]; ?>">
 		<input type="hidden" name="layer[<? echo $i ?>][transparency]" value="<? echo $this->formvars['layer'][$i][transparency]; ?>">
 <?	$i++;
-	}?>
+	}
+	
+	$layerset = $this->layerset;
+	$scale = $this->map_scaledenom;
+	for($i = 0; $i < count($layerset); $i++){
+		if($layerset[$i]['aktivStatus'] != 0 
+		AND ($layerset[$i]['minscale'] < $scale OR $layerset[$i]['minscale'] == 0) 
+		AND ($layerset[$i]['maxscale'] > $scale OR $layerset[$i]['maxscale'] == 0)
+		AND !empty($layerset[$i]['Class'])){
+			if($layerset[$i]['alias'] != '')$name = $layerset[$i]['alias'];
+			else $name = $layerset[$i]['Name'];
+			echo '<input type="hidden" name="legendlayer'.$layerset[$i]['Layer_ID'].'" value="'.($this->formvars['legendlayer'.$layerset[$i]['Layer_ID']] != '' ? 'on' : 'off').'" >';
+		}
+	}
+	
+	?>
 

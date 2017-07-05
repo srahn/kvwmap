@@ -585,10 +585,8 @@ switch($this->go){
 			column_name
 		";
 
-		$result = pg_query($this->pgdatabase->dbConn, $sql);	
-
-		$this->main = PLUGINS . 'xplankonverter/view/regeleditor/getxplanattributes.php';
-		$this->output();
+		$this->result = pg_query($this->pgdatabase->dbConn, $sql);
+		include(PLUGINS . 'xplankonverter/view/regeleditor/getxplanattributes.php');
 	} break;
 
 	case 'xplankonverter_regeleditor_getshapeattributes' : {
@@ -604,11 +602,8 @@ switch($this->go){
 			ORDER BY
 				column_name
 		";
-
-		$result = pg_query($this->pgdatabase->dbConn, $sql);
-
-		$this->main = PLUGINS . 'xplankonverter/view/regeleditor/getshapeattributes.php';
-		$this->output();
+		$this->result = pg_query($this->pgdatabase->dbConn, $sql);
+		include(PLUGINS . 'xplankonverter/view/regeleditor/getshapeattributes.php');
 	} break;
 
 	case 'xplankonverter_regeleditor_getshapeattributes2' : {
@@ -625,10 +620,10 @@ switch($this->go){
 				column_name
 		";
 
-		$result = pg_query($this->pgdatabase->dbConn, $sql);
+		#echo '<br>Sql: ' . $sql;
+		$this->result = pg_query($this->pgdatabase->dbConn, $sql);
 
-		$this->main = PLUGINS . 'xplankonverter/view/regeleditor/getshapeattributes2.php';
-		$this->output();
+		include(PLUGINS . 'xplankonverter/view/regeleditor/getshapeattributes2.php');
 	} break;
 
 	case 'xplankonverter_regeleditor_getshapeattributes3' : {
@@ -645,10 +640,9 @@ switch($this->go){
 				column_name
 		";
 
-		$result = pg_query($this->pgdatabase->dbConn, $sql);
+		$this->result = pg_query($this->pgdatabase->dbConn, $sql);
 
-		$this->main = PLUGINS . 'xplankonverter/view/regeleditor/getshapeattributes3.php';
-		$this->output();
+		include(PLUGINS . 'xplankonverter/view/regeleditor/getshapeattributes3.php');
 	} break;
 
 	case 'xplankonverter_regeleditor_getshapeattributesdistinctvalues' : {
@@ -661,11 +655,10 @@ switch($this->go){
 			ORDER BY
 				" . $this->formvars['shapefile_attribut'] . "
 		";
+		#echo '<br>Sql: ' . $sql;
+		$this->result = pg_query($this->pgdatabase->dbConn, $sql);
 
-		$result = pg_query($this->pgdatabase->dbConn, $sql);
-
-		$this->main = PLUGINS . 'xplankonverter/view/regeleditor/getshapeattributesdistinctvalues.php';
-		$this->output();
+		include(PLUGINS . 'xplankonverter/view/regeleditor/getshapeattributesdistinctvalues.php');
 	} break;
 
 	case 'xplankonverter_regeleditor_getshapeattributesdistinctvalues2' : {
@@ -679,10 +672,9 @@ switch($this->go){
 				" . $this->formvars['shapefile_attribut'] . "
 		";
 
-		$result = pg_query($this->pgdatabase->dbConn, $sql);
+		$this->result = pg_query($this->pgdatabase->dbConn, $sql);
 
-		$this->main = PLUGINS . 'xplankonverter/view/regeleditor/getshapeattributesdistinctvalues2.php';
-		$this->output();
+		include(PLUGINS . 'xplankonverter/view/regeleditor/getshapeattributesdistinctvalues2.php');
 	} break;
 
 	case 'xplankonverter_regeleditor_getxplanenumerationattributes' : {
@@ -694,7 +686,7 @@ switch($this->go){
 				information_schema.columns
 			WHERE
 				table_name='" . $this->formvars['featuretype'] . "' AND
-				column_name = '" . $this->formvars['featureattribut'] . "' AND
+				column_name = '" . $this->formvars['xplanattribut'] . "' AND
 				table_schema='xplan_classes'
 			ORDER BY
 				column_name
@@ -722,10 +714,9 @@ switch($this->go){
 				xplan_classes. " . $enumerationsliste . "
 		";
 
-		$result = pg_query($this->pgdatabase->dbConn, $sql);
+		$this->result = pg_query($this->pgdatabase->dbConn, $sql);
 
-		$this->main = PLUGINS . 'xplankonverter/view/regeleditor/getxplanenumerationattributes.php';
-		$this->output();
+		include(PLUGINS . 'xplankonverter/view/regeleditor/getxplanenumerationattributes.php');
 	} break;
 
 	case 'xplankonverter_regeleditor_getxplanenumerationattributes2' : {
@@ -737,11 +728,12 @@ switch($this->go){
 				information_schema.columns
 			WHERE
 				table_name='" . $this->formvars['featuretype'] . "' AND
-				column_name = '" . $this->formvars['featureattribut'] . "' AND
+				column_name = '" . $this->formvars['xplanattribut'] . "' AND
 				table_schema='xplan_classes'
 			ORDER BY
 				column_name
 		";
+		#echo '<br>Sql: ' . $sql;
 
 		$result = pg_query($this->pgdatabase->dbConn, $sql);
 
@@ -760,15 +752,14 @@ switch($this->go){
 		$sql = "
 			SELECT
 				wert,
-			beschreibung
+				beschreibung
 			FROM
-				xplan_classes. " . $enumerationsliste . "
+				xplan_classes." . $enumerationsliste . "
 			";
-			
-		$result = pg_query($this->pgdatabase->dbConn, $sql);
+		#echo '<br>Sql: ' . $sql;
+		$this->result = pg_query($this->pgdatabase->dbConn, $sql);
 
-		$this->main = PLUGINS . 'xplankonverter/view/regeleditor/getxplanenumerationattributes2.php';
-		$this->output();
+		include(PLUGINS . 'xplankonverter/view/regeleditor/getxplanenumerationattributes2.php');
 	} break;
 
 	#-------------------------------------------------------------------------------------------------------------------------

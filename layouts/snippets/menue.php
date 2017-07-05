@@ -1,10 +1,4 @@
 <script type="text/javascript">
-function Bestaetigung(link,text) {
-  Check = confirm(text);
-  if (Check == true)
-  window.location.href = link;
-}
-
 function changemenue(id, auto_close){
 	if(auto_close == 1){
 		var was_closed = $('#menue_div_name_'+id).hasClass('menue-zu');
