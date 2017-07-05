@@ -957,6 +957,9 @@ class stelle {
 					// }
 				// }
 				
+				$rs['Name'] = replace_params($rs['Name'], rolle::$layer_params);
+				$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);				
+				
 				if($rs['alias'] != '' AND $this->useLayerAliases){
 					$rs['Name'] = $rs['alias'];
 				}
