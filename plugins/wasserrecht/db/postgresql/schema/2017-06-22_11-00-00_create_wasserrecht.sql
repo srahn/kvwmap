@@ -37,7 +37,7 @@ CREATE TABLE wasserrecht.zustaendiger_behoerde(
 CREATE TABLE wasserrecht.betreiber(
 	id serial PRIMARY KEY,
 	name varchar(255),
-	the_geo geometry
+	the_geo geometry(Point, 35833)
 ) WITH OIDS;
 
 CREATE TABLE wasserrecht.koerperschaft_art(
@@ -66,7 +66,7 @@ CREATE TABLE wasserrecht.weeerklaerer(
 CREATE TABLE wasserrecht.ort(
 	id serial PRIMARY KEY,
 	name varchar(255),
-	the_geo geometry
+	the_geo geometry(Point, 35833)
 ) WITH OIDS;
 
 CREATE TABLE wasserrecht.adresse(
@@ -331,7 +331,7 @@ CREATE TABLE wasserrecht.gewaesserbenutzungen_lage(
 	archivnummer integer REFERENCES wasserrecht.archivnummer(id),
 	schichtenverzeichnis boolean,
 	invid varchar(255),
-	the_geo geometry
+	the_geo geometry(Point, 35833)
 )WITH OIDS;
 
 CREATE TABLE wasserrecht.gewaesserbenutzungen_wee_satz(
