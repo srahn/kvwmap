@@ -20,7 +20,7 @@ CREATE TABLE wasserrecht.bearbeiter(
 	id serial PRIMARY KEY,
 	name varchar(255),
   	datum timestamp,
-  	stelle serial REFERENCES wasserrecht.stelle(id)
+  	stelle integer REFERENCES wasserrecht.stelle(id)
 ) WITH OIDS;
 
 CREATE TABLE wasserrecht.zustaendiger(
@@ -30,8 +30,8 @@ CREATE TABLE wasserrecht.zustaendiger(
 
 CREATE TABLE wasserrecht.zustaendiger_behoerde(
 	id serial PRIMARY KEY,
-	zustaendiger serial REFERENCES wasserrecht.zustaendiger(id),
-	behoerde serial REFERENCES wasserrecht.behoerde(id)
+	zustaendiger integer REFERENCES wasserrecht.zustaendiger(id),
+	behoerde integer REFERENCES wasserrecht.behoerde(id)
 ) WITH OIDS;
 
 CREATE TABLE wasserrecht.betreiber(
@@ -48,7 +48,7 @@ CREATE TABLE wasserrecht.koerperschaft_art(
 CREATE TABLE wasserrecht.koerperschaft(
 	id serial PRIMARY KEY,
 	name varchar(255),
-	art serial REFERENCES wasserrecht.koerperschaft_art(id)
+	art integer REFERENCES wasserrecht.koerperschaft_art(id)
 ) WITH OIDS;
 
 CREATE TABLE wasserrecht.wrzaussteller(
@@ -128,16 +128,16 @@ CREATE TABLE wasserrecht.anlagen_klasse(
 CREATE TABLE wasserrecht.anlagen(
 	id serial PRIMARY KEY,
 	name varchar(255) NOT NULL,
-	klasse serial REFERENCES wasserrecht.anlagen_klasse(id),
-	zustaend_uwb serial REFERENCES wasserrecht.zustaendiger_behoerde(id),
-  	zustaend_stalu serial REFERENCES wasserrecht.zustaendiger_behoerde(id),
-  	bearbeiter serial REFERENCES wasserrecht.bearbeiter(id),
+	klasse integer REFERENCES wasserrecht.anlagen_klasse(id),
+	zustaend_uwb integer REFERENCES wasserrecht.zustaendiger_behoerde(id),
+  	zustaend_stalu integer REFERENCES wasserrecht.zustaendiger_behoerde(id),
+  	bearbeiter integer REFERENCES wasserrecht.bearbeiter(id),
   	objektid_geodin varchar(255),
   	wrz_aktuell boolean DEFAULT true,
 	wrz_historisch boolean DEFAULT true,
-	zustaend_betreiber serial REFERENCES wasserrecht.betreiber(id),
-	abwasser_koerperschaft serial REFERENCES wasserrecht.koerperschaft(id),
-	trinkwasser_koerperschaft serial REFERENCES wasserrecht.koerperschaft(id),
+	zustaend_betreiber integer REFERENCES wasserrecht.betreiber(id),
+	abwasser_koerperschaft integer REFERENCES wasserrecht.koerperschaft(id),
+	trinkwasser_koerperschaft integer REFERENCES wasserrecht.koerperschaft(id),
 	kommentar text,
 	the_geom geometry(Point, 35833)
 ) WITH OIDS;
@@ -166,35 +166,35 @@ CREATE TABLE wasserrecht.personen(
 	id serial PRIMARY KEY,
 	name_a varchar(255),
 	name_b varchar(255),
-	klasse serial REFERENCES wasserrecht.personen_klasse(id),
-	status serial REFERENCES wasserrecht.personen_status(id),
-	adresse serial REFERENCES wasserrecht.adresse(id),
-	typ serial REFERENCES wasserrecht.personen_typ(id),
+	klasse integer REFERENCES wasserrecht.personen_klasse(id),
+	status integer REFERENCES wasserrecht.personen_status(id),
+	adresse integer REFERENCES wasserrecht.adresse(id),
+	typ integer REFERENCES wasserrecht.personen_typ(id),
 	wrzadressat boolean,
   	wrzrechtsnachfolger boolean,
-  	betreiber serial REFERENCES wasserrecht.betreiber(id),
-  	weeerklaerer serial REFERENCES wasserrecht.weeerklaerer(id),
+  	betreiber integer REFERENCES wasserrecht.betreiber(id),
+  	weeerklaerer integer REFERENCES wasserrecht.weeerklaerer(id),
   	telefon varchar(50),
   	fax varchar(50),
   	email varchar(50),
-  	abkuerzung varchar(30) NOT NULL,
+  	abkuerzung varchar(30),
   	uwb boolean,
   	stalu text,
   	bezeichnung varchar(255),
-  	wrzaussteller serial REFERENCES wasserrecht.wrzaussteller(id),
-  	abwasser_koerperschaft serial REFERENCES wasserrecht.koerperschaft(id),
-  	trinkwasser_koerperschaft serial REFERENCES wasserrecht.koerperschaft(id),
+  	wrzaussteller integer REFERENCES wasserrecht.wrzaussteller(id),
+  	abwasser_koerperschaft integer REFERENCES wasserrecht.koerperschaft(id),
+  	trinkwasser_koerperschaft integer REFERENCES wasserrecht.koerperschaft(id),
   	kommentar varchar(255),
   	zimmer varchar(255),
   	behoerdenmitarbeiter varchar(255),
   	verwendungszweck varchar(255),
   	register_amtsgericht varchar(255),
   	register_nummer varchar(255),
-  	konto serial REFERENCES wasserrecht.konto(id)
+  	konto integer REFERENCES wasserrecht.konto(id)
 )WITH OIDS;
 
 --WASSERRECHTLICHE ZULASSUNGEN
-CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_abesch_klasse(
+CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide_klasse(
 	id serial PRIMARY KEY,
 	name varchar(100)
 )WITH OIDS;
@@ -204,15 +204,15 @@ CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_barbeitz(
 	name varchar(255)
 )WITH OIDS;
 
-CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_abesch(
+CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide(
 	id serial PRIMARY KEY,
-	klasse serial REFERENCES wasserrecht.wasserrechtliche_zulassungen_abesch_klasse(id),
-	barbeitz serial REFERENCES wasserrecht.wasserrechtliche_zulassungen_barbeitz(id),
-	aktenzeichen serial REFERENCES wasserrecht.aktenzeichen(id),
+	klasse integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide_klasse(id),
+	barbeitz integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_barbeitz(id),
+	aktenzeichen integer REFERENCES wasserrecht.aktenzeichen(id),
 	datum date,
-	ort serial REFERENCES wasserrecht.ort(id),
+	ort integer REFERENCES wasserrecht.ort(id),
 	regnummer varchar(255),
-	ausstellbehoerde serial REFERENCES wasserrecht.behoerde(id)
+	ausstellbehoerde integer REFERENCES wasserrecht.behoerde(id)
 )WITH OIDS;
 
 CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_fassung_klasse(
@@ -227,22 +227,22 @@ CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_fassung_auswahl(
 
 CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_fassung(
 	id serial PRIMARY KEY,
-	auswahl serial REFERENCES wasserrecht.wasserrechtliche_zulassungen_fassung_auswahl(id),
-	aktenzeichen serial REFERENCES wasserrecht.aktenzeichen(id),
-	klasse serial REFERENCES wasserrecht.wasserrechtliche_zulassungen_fassung_klasse(id),
+	auswahl integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_fassung_auswahl(id),
+	aktenzeichen integer REFERENCES wasserrecht.aktenzeichen(id),
+	klasse integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_fassung_klasse(id),
 	datum date,
-	ort serial REFERENCES wasserrecht.ort(id),
+	ort integer REFERENCES wasserrecht.ort(id),
 	nummer integer
 )WITH OIDS;
 
-CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_nbesch(
+CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_aenderungsbescheide(
 	id serial PRIMARY KEY,
-	barbeitz serial REFERENCES wasserrecht.wasserrechtliche_zulassungen_barbeitz(id),
-	aktenzeichen serial REFERENCES wasserrecht.aktenzeichen(id),
+	barbeitz integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_barbeitz(id),
+	aktenzeichen integer REFERENCES wasserrecht.aktenzeichen(id),
 	datum_postausgang date,
 	datum_bestand_mat date,
 	datum_bestand_form date,
-	ort serial REFERENCES wasserrecht.ort(id),
+	ort integer REFERENCES wasserrecht.ort(id),
 	nummer integer
 )WITH OIDS;
 
@@ -259,7 +259,7 @@ CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_ungueltig_aufgrund(
 CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_gueltigkeit(
 	id serial PRIMARY KEY,
 	ungueltig_seit date,
-	ungueltig_aufgrund serial REFERENCES wasserrecht.wasserrechtliche_zulassungen_ungueltig_aufgrund(id),
+	ungueltig_aufgrund integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_ungueltig_aufgrund(id),
 	aktuell boolean,
 	historisch boolean,
 	gueltig_vom date,
@@ -268,17 +268,17 @@ CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_gueltigkeit(
 
 CREATE TABLE wasserrecht.wasserrechtliche_zulassungen(
 	id serial PRIMARY KEY,
-	ausstellbehoerde serial REFERENCES wasserrecht.behoerde(id),
-	abesch serial REFERENCES wasserrecht.wasserrechtliche_zulassungen_abesch(id),
-	fassung serial REFERENCES wasserrecht.wasserrechtliche_zulassungen_fassung(id),
-	status serial REFERENCES wasserrecht.wasserrechtliche_zulassungen_status(id),
-	adresse serial REFERENCES wasserrecht.adresse(id),
-	nbesch serial REFERENCES wasserrecht.wasserrechtliche_zulassungen_nbesch(id),
-	gueltigkeit serial REFERENCES wasserrecht.wasserrechtliche_zulassungen_gueltigkeit(id),
-	bergamt_aktenzeichen serial REFERENCES wasserrecht.aktenzeichen(id),
-	dokument serial REFERENCES wasserrecht.dokument(id),
-	bearbeiter serial REFERENCES wasserrecht.bearbeiter(id),
-	anlage serial REFERENCES wasserrecht.anlagen(id)
+	ausstellbehoerde integer REFERENCES wasserrecht.behoerde(id),
+	ausgangsbescheid integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide(id),
+	fassung integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_fassung(id),
+	status integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_status(id),
+	adresse integer REFERENCES wasserrecht.adresse(id),
+	aenderungsbescheid integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_aenderungsbescheide(id),
+	gueltigkeit integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_gueltigkeit(id),
+	bergamt_aktenzeichen integer REFERENCES wasserrecht.aktenzeichen(id),
+	dokument integer REFERENCES wasserrecht.dokument(id),
+	bearbeiter integer REFERENCES wasserrecht.bearbeiter(id),
+	anlage integer REFERENCES wasserrecht.anlagen(id)
 )WITH OIDS;
 
 --GEWÄSSERBENUTZUNGEN
@@ -316,7 +316,7 @@ CREATE TABLE wasserrecht.gewaesserbenutzungen_umfang(
 CREATE TABLE wasserrecht.gewaesserbenutzungen_lage(
 	id serial PRIMARY KEY,
 	name varchar(255),
-	betreiber serial REFERENCES wasserrecht.betreiber(id),
+	betreiber integer REFERENCES wasserrecht.betreiber(id),
 	wwident varchar(255),
 	namelang varchar(255),
 	namekurz varchar(100),
@@ -325,9 +325,9 @@ CREATE TABLE wasserrecht.gewaesserbenutzungen_lage(
 	endteufe numeric(6,2),
 	filterok numeric(6,2),
 	filteruk numeric(6,2),
-	betriebszustand serial REFERENCES wasserrecht.betriebszustand(id),
-	messtischblatt serial REFERENCES wasserrecht.messtischblatt(id),
-	archivnummer serial REFERENCES wasserrecht.archivnummer(id),
+	betriebszustand integer REFERENCES wasserrecht.betriebszustand(id),
+	messtischblatt integer REFERENCES wasserrecht.messtischblatt(id),
+	archivnummer integer REFERENCES wasserrecht.archivnummer(id),
 	schichtenverzeichnis boolean,
 	invid varchar(255),
 	the_geo geometry
@@ -343,13 +343,13 @@ CREATE TABLE wasserrecht.gewaesserbenutzungen_wee_satz(
 CREATE TABLE wasserrecht.gewaesserbenutzungen(
 	id serial PRIMARY KEY,
 	kennnummer varchar(255),
-	art serial REFERENCES wasserrecht.gewaesserbenutzungen_art(id),
-	wasserbuch serial REFERENCES wasserrecht.wasserbuch(id),
-	zweck serial REFERENCES wasserrecht.gewaesserbenutzungen_zweck(id),
-	umfang serial REFERENCES wasserrecht.gewaesserbenutzungen_umfang(id),
+	art integer REFERENCES wasserrecht.gewaesserbenutzungen_art(id),
+	wasserbuch integer REFERENCES wasserrecht.wasserbuch(id),
+	zweck integer REFERENCES wasserrecht.gewaesserbenutzungen_zweck(id),
+	umfang integer REFERENCES wasserrecht.gewaesserbenutzungen_umfang(id),
 	gruppe_wee boolean,
-	lage serial REFERENCES wasserrecht.gewaesserbenutzungen_lage(id),
-	wasserrechtliche_zulassungen serial REFERENCES wasserrecht.wasserrechtliche_zulassungen(id)
+	lage integer REFERENCES wasserrecht.gewaesserbenutzungen_lage(id),
+	wasserrechtliche_zulassungen integer REFERENCES wasserrecht.wasserrechtliche_zulassungen(id)
 )WITH OIDS;
 
 ------------------------------------------
@@ -358,7 +358,7 @@ CREATE TABLE wasserrecht.gewaesserbenutzungen(
 CREATE TABLE wasserrecht.wasserentnahme_messung
 (
 	id serial PRIMARY KEY,
-	gewaesserbenutzungen serial REFERENCES wasserrecht.gewaesserbenutzungen(id),
+	gewaesserbenutzungen integer REFERENCES wasserrecht.gewaesserbenutzungen(id),
 	chem_datum date,
 	chem_temp numeric(5,2),
 	chem_farb numeric(6,4),
@@ -405,18 +405,18 @@ INSERT INTO wasserrecht.erstattung_auswahl VALUES (1, 'Hiermit beantrage ich gem
 
 CREATE TABLE wasserrecht.erstattung(
 	id serial PRIMARY KEY,
-	auswahl serial REFERENCES wasserrecht.erstattung_auswahl(id),
+	auswahl integer REFERENCES wasserrecht.erstattung_auswahl(id),
 	datum date,
-	konto serial REFERENCES wasserrecht.konto(id)
+	konto integer REFERENCES wasserrecht.konto(id)
 ) WITH OIDS;
 
 CREATE TABLE wasserrecht.aufforderung(
 	id serial PRIMARY KEY,
 	datum_absend date,
 	datum_wiedervorlage date,
-	dokument serial REFERENCES wasserrecht.dokument(id),
+	dokument integer REFERENCES wasserrecht.dokument(id),
 	status varchar(255),
-	aktenzeichen serial REFERENCES wasserrecht.aktenzeichen(id)
+	aktenzeichen integer REFERENCES wasserrecht.aktenzeichen(id)
 ) WITH OIDS;
 
 CREATE TABLE wasserrecht.erklaerung_eingang_check(
@@ -437,58 +437,58 @@ INSERT INTO wasserrecht.erklaerung_vollstendig_check VALUES (2, 'WEE-Erklärung 
 
 CREATE TABLE wasserrecht.erklaerung(
 	id serial PRIMARY KEY,
-	eingang_check serial REFERENCES wasserrecht.erklaerung_eingang_check(id),
-	vollstendig_check serial REFERENCES wasserrecht.erklaerung_vollstendig_check(id),
-	dokument serial REFERENCES wasserrecht.dokument(id)
+	eingang_check integer REFERENCES wasserrecht.erklaerung_eingang_check(id),
+	vollstendig_check integer REFERENCES wasserrecht.erklaerung_vollstendig_check(id),
+	dokument integer REFERENCES wasserrecht.dokument(id)
 ) WITH OIDS;
 
 CREATE TABLE wasserrecht.festsetzung(
 	id serial PRIMARY KEY,
-	dokument serial REFERENCES wasserrecht.dokument(id),
+	dokument integer REFERENCES wasserrecht.dokument(id),
 	status varchar(255)
 ) WITH OIDS;
 
 CREATE TABLE wasserrecht.bescheid(
 	id serial PRIMARY KEY,
-	konto serial REFERENCES wasserrecht.konto(id),
+	konto integer REFERENCES wasserrecht.konto(id),
 	datum_zustellurkunde date,
-	ort serial REFERENCES wasserrecht.ort(id)
+	ort integer REFERENCES wasserrecht.ort(id)
 ) WITH OIDS;
 
 CREATE TABLE wasserrecht.entnahme(
 	id serial PRIMARY KEY,
-	entnahme_zweck serial REFERENCES wasserrecht.gewaesserbenutzungen_zweck(id),
-	entnahme_typ serial REFERENCES wasserrecht.gewaesserbenutzungen_art(id)
+	entnahme_zweck integer REFERENCES wasserrecht.gewaesserbenutzungen_zweck(id),
+	entnahme_typ integer REFERENCES wasserrecht.gewaesserbenutzungen_art(id)
 ) WITH OIDS;
  
 CREATE TABLE wasserrecht.fiswrv_wem
 (
 	id serial PRIMARY KEY,
-  	jahr date NOT NULL,
-  	abesch serial REFERENCES wasserrecht.wasserrechtliche_zulassungen_abesch(id), 
+  	jahr date,
+  	ausgangsbescheid integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide(id), 
   	ent_a numeric(11,3),
-  	anlage serial REFERENCES wasserrecht.anlagen(id),
+  	anlage integer REFERENCES wasserrecht.anlagen(id),
   	ein_a numeric(11,3),
   	ent_erfassung text,
   	wem_absend_per_gid integer,
   	wem_nutzer_per_gid integer,
-  	bescheid serial REFERENCES wasserrecht.bescheid(id), 
-  	wrz_ben_zweck serial REFERENCES wasserrecht.gewaesserbenutzungen_zweck(id),
-  	aufforderung serial REFERENCES wasserrecht.aufforderung(id),
-  	erklaerung serial REFERENCES wasserrecht.erklaerung(id),
+  	bescheid integer REFERENCES wasserrecht.bescheid(id), 
+  	wrz_ben_zweck integer REFERENCES wasserrecht.gewaesserbenutzungen_zweck(id),
+  	aufforderung integer REFERENCES wasserrecht.aufforderung(id),
+  	erklaerung integer REFERENCES wasserrecht.erklaerung(id),
   	datum date,
-  	erstattung serial REFERENCES wasserrecht.erstattung(id),
-  	festsetzung serial REFERENCES wasserrecht.festsetzung(id),
-  	entnahme serial REFERENCES wasserrecht.entnahme(id),
-  	wasserrechtliche_zulassungen serial REFERENCES wasserrecht.wasserrechtliche_zulassungen(id),
-  	gewaesserbenutzungen serial REFERENCES wasserrecht.gewaesserbenutzungen(id),
+  	erstattung integer REFERENCES wasserrecht.erstattung(id),
+  	festsetzung integer REFERENCES wasserrecht.festsetzung(id),
+  	entnahme integer REFERENCES wasserrecht.entnahme(id),
+  	wasserrechtliche_zulassungen integer REFERENCES wasserrecht.wasserrechtliche_zulassungen(id),
+  	gewaesserbenutzungen integer REFERENCES wasserrecht.gewaesserbenutzungen(id),
   	wem_wee_befreiung numeric(1,0),
   	wee_beschwee_per_gid integer,
-  	bearbeiter serial REFERENCES wasserrecht.bearbeiter(id),
+  	bearbeiter integer REFERENCES wasserrecht.bearbeiter(id),
   	wee_wee_eingegangen_lk text,
   	wee_wee_eingegangen_land text,
   	kommentar text,
-  	sachbearbeiter serial REFERENCES wasserrecht.bearbeiter(id)
+  	sachbearbeiter integer REFERENCES wasserrecht.bearbeiter(id)
 )WITH OIDS;
 */
 
