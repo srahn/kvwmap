@@ -53,6 +53,7 @@ INSERT INTO wasserrecht.wasserrechtliche_zulassungen_status (name) VALUES ('Erst
 INSERT INTO wasserrecht.wasserrechtliche_zulassungen_ungueltig_aufgrund (name) VALUES ('Fristablauf');
 INSERT INTO wasserrecht.wasserrechtliche_zulassungen_ungueltig_aufgrund (name) VALUES ('Widerruf');
 INSERT INTO wasserrecht.wasserrechtliche_zulassungen_ungueltig_aufgrund (name) VALUES ('Verzicht');
+INSERT INTO wasserrecht.wasserrechtliche_zulassungen_ungueltig_aufgrund (name) VALUES ('Änderung');
 
 INSERT INTO wasserrecht.gewaesserbenutzungen_art (name,freitext,wgh) VALUES ('Entnehmen und Ableiten von Wasser aus oberirdischen Gewässern (§ 9 Satz 1 Nr. 1 WHG)', DEFAULT, DEFAULT);
 INSERT INTO wasserrecht.gewaesserbenutzungen_art (name,freitext,wgh) VALUES ('Aufstauen und Absenken von oberirdischen Gewässern (§ 9 Satz 1 Nr. 2 WHG)', DEFAULT, DEFAULT);
