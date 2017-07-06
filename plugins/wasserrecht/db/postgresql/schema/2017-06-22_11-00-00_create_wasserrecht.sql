@@ -229,12 +229,12 @@ CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_ungueltig_aufgrund(
 
 CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_gueltigkeit(
 	id serial PRIMARY KEY,
+	gueltig_seit date,
+	gueltig_bis date,
 	ungueltig_seit date,
 	ungueltig_aufgrund integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_ungueltig_aufgrund(id),
-	aktuell boolean,
-	historisch boolean,
-	gueltig_vom date,
-	gueltig_bis date
+	wirksam boolean,
+	fristablauf boolean
 )WITH OIDS;
 
 CREATE TABLE wasserrecht.wasserrechtliche_zulassungen(
