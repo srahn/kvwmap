@@ -2556,7 +2556,7 @@ class GUI {
 		$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 		$spatial_processor = new spatial_processor($this->user->rolle, $this->database, $layerdb);
 		$single_geoms = $spatial_processor->split_multi_geometries($this->formvars['newpathwkt'], $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
-		$this->split_datasets($this->formvars['selected_layer_id'], array('oid'), array($this->formvars['oid']), array($this->formvars['layer_columnname']), $single_geoms, $mapdb);
+		$this->copy_dataset($mapdb, $this->formvars['selected_layer_id'], array('oid'), array($this->formvars['oid']), count($single_geoms), array($this->formvars['layer_columnname']), $single_geoms, true);
 		$this->loadMap('DataBase');					# Karte anzeigen
 		$currenttime=date('Y-m-d H:i:s',time());
     $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
@@ -2565,12 +2565,14 @@ class GUI {
 		$this->output();
 	}
 
-	function split_datasets($layer_id, $id_names, $id_values, $update_columns, $update_values, $mapdb){
-		# Diese Funktion teilt einen über die Arrays $id_names und $id_values bestimmten Datensatz in einem Layer auf x neue Datensätze auf.
-		# Jeder Datensatz unterscheidet sich in den Attributen, die über das Array $update_columns definiert werden, von den anderen.
-		# D.h. der Datensatz wird x-mal kopiert und alle Attribute in $update_columns auf den entsprechenden Wert im Array $update_values gesetzt.
-		# Wie oft das passiert, hängt von der Größe des Arrays $update_values ab.
-		# Außerdem wird dieses Splitting rekursiv auf den über SubformPK- oder embeddedPK verknüpften Layern durchgeführt.
+	function copy_dataset($mapdb, $layer_id, $id_names, $id_values, $count, $update_columns = NULL, $update_values = NULL, $delete_original = false){
+		# Diese Funktion kopiert einen über die Arrays $id_names und $id_values bestimmten Datensatz in einem Layer $count-mal.
+		# $id_names sind die Namen und $id_values die Werte der Attribute, die den Datensatz identifizieren, also in der WHERE-Bedingung verwendet werden.
+		# Jeder neu entstandene Datensatz kann sich in den Attributen, die über das Array $update_columns definiert werden von den anderen unterscheiden.
+		# D.h. der Datensatz wird $count-mal kopiert und alle Attribute in $update_columns auf den entsprechenden Wert im Array $update_values gesetzt.
+		# Wenn $delete_original=true ist, wird der Original-Datensatz nach dem Kopieren gelöscht.
+		# Um auch die über SubformPK- oder embeddedPK verknüpften Datensätz zu kopieren, wird die Funktion rekursiv auf diese Datensätze angewendet.
+		# In diesem Fall wird durch die Arrays $id_names und $id_values nicht nur genau ein Datensatz bestimmt, sondern mehrere.
 
 		$layerset = $this->user->rolle->getLayer($layer_id);
 		$layerdb = $mapdb->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
@@ -2579,6 +2581,7 @@ class GUI {
 		# Attribute, die kopiert werden sollen ermitteln
 		$sql = "SELECT column_name FROM information_schema.columns WHERE table_name = '".$layerset[0]['maintable']."' AND table_schema = '".$layerdb->schema."' ";
 
+		# PRIMARY KEY und UNIQUE Attribute auslassen
 		$ret=$layerdb->execSQL($sql,4, 0);
 		if(!$ret[0]){
 			while ($rs=pg_fetch_row($ret[1])){
@@ -2586,7 +2589,9 @@ class GUI {
 			}
 		}
 
-		for($i = 0; $i < count($update_values); $i++){
+		# Erzeugen der neuen Datensätze
+		for($i = 0; $i < $count; $i++){
+			# zunächst als reine Kopie
 			$sql = "INSERT INTO ".$layerset[0]['maintable']." (".implode(',', $attributes).") SELECT ".implode(',', $attributes)." FROM ".$layerset[0]['maintable']." WHERE ";
 			for($n = 0; $n < count($id_names); $n++){
 				$sql.= $id_names[$n]." = '".$id_values[$n]."' AND ";
@@ -2601,7 +2606,8 @@ class GUI {
 					$all_new_oids[] = $rs[0];
 				}
 			}
-			if($new_oids[0] != ''){			# nur updaten, wenn auch was eingetragen wurde
+			# dann die Attribute updaten, die sich unterscheiden sollen
+			if($new_oids[0] != ''){
 				for($u = 0; $u < count($update_columns); $u++){
 					$sql = "UPDATE ".$layerset[0]['maintable']." SET ".$update_columns[$u]." = '".$update_values[$i][$u]."' WHERE oid IN (".implode(',', $new_oids).")";
 					$ret = $layerdb->execSQL($sql,4, 0);
@@ -2609,7 +2615,8 @@ class GUI {
 			}
 		}
 
-		if($all_new_oids[0] != ''){			# nur weitermachen, wenn auch was eingetragen wurde
+		# über SubFormEmbeddedPK oder SubFormPK verknüpfte Datensätze auch rekursiv kopieren
+		if($all_new_oids[0] != ''){
 			$j = 0;
 			for($l = 0; $l < count($layerattributes['name']); $l++){
 	    	if(in_array($layerattributes['form_element_type'][$l], array('SubFormEmbeddedPK', 'SubFormPK'))){
@@ -2645,16 +2652,19 @@ class GUI {
 						}
 					}
 	        $j++;
-	        $this->split_datasets($subform_layerid, $subform_pks, $pkvalues, $subform_pks, $next_update_values, $mapdb);
+	        $this->copy_dataset($mapdb, $subform_layerid, $subform_pks, $pkvalues, count($next_update_values), $subform_pks, $next_update_values, $delete_original);
 		    }
 			}
-			$sql = "DELETE FROM ".$layerset[0]['maintable']." WHERE ";
-			for($n = 0; $n < count($id_names); $n++){
-				$sql.= $id_names[$n]." = '".$id_values[$n]."' AND ";
+			# Original löschen
+			if($delete_original){
+				$sql = "DELETE FROM ".$layerset[0]['maintable']." WHERE ";
+				for($n = 0; $n < count($id_names); $n++){
+					$sql.= $id_names[$n]." = '".$id_values[$n]."' AND ";
+				}
+				$sql.= "1=1";#
+				#echo $sql.'<br>';
+				$ret = $layerdb->execSQL($sql,4, 0);
 			}
-			$sql.= "1=1";#
-			#echo $sql.'<br>';
-			$ret = $layerdb->execSQL($sql,4, 0);
 		}
 	}
 
