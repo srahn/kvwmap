@@ -153,7 +153,7 @@ CREATE TABLE wasserrecht.anlagen(
   	objektid_geodin varchar(255),
   	wrz_aktuell boolean DEFAULT true,
 	wrz_historisch boolean DEFAULT true,
-	zustaend_betreiber integer REFERENCES wasserrecht.personen(id),
+	betreiber integer REFERENCES wasserrecht.personen(id),
 	abwasser_koerperschaft integer REFERENCES wasserrecht.koerperschaft(id),
 	trinkwasser_koerperschaft integer REFERENCES wasserrecht.koerperschaft(id),
 	kommentar text,
@@ -234,7 +234,7 @@ CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_gueltigkeit(
 	ungueltig_seit date,
 	ungueltig_aufgrund integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_ungueltig_aufgrund(id),
 	wirksam boolean,
-	fristablauf boolean
+	abgelaufen boolean
 )WITH OIDS;
 
 CREATE TABLE wasserrecht.wasserrechtliche_zulassungen(
@@ -249,7 +249,8 @@ CREATE TABLE wasserrecht.wasserrechtliche_zulassungen(
 	gueltigkeit integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_gueltigkeit(id),
 	bergamt_aktenzeichen integer REFERENCES wasserrecht.aktenzeichen(id),
 	dokument integer REFERENCES wasserrecht.dokument(id),
-	bearbeiter integer REFERENCES wasserrecht.personen(id),
+	sachbearbeiter integer REFERENCES wasserrecht.personen(id),
+	adressat integer REFERENCES wasserrecht.personen(id),
 	anlage integer REFERENCES wasserrecht.anlagen(id)
 )WITH OIDS;
 

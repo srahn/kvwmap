@@ -137,6 +137,6 @@ INSERT INTO wasserrecht.koerperschaft_art (name) VALUES ('Abwasser');
 INSERT INTO wasserrecht.koerperschaft (name, art) VALUES ('MUSTER ABWASSER KOERPERSCHAFT', 2);
 INSERT INTO wasserrecht.koerperschaft (name, art) VALUES ('MUSTER TRINKWASSER KOERPERSCHAFT', 1);
 
-INSERT INTO wasserrecht.anlagen (name, klasse, zustaend_uwb, zustaend_stalu, bearbeiter, objektid_geodin, wrz_aktuell, wrz_historisch, zustaend_betreiber, abwasser_koerperschaft, trinkwasser_koerperschaft,kommentar,the_geom) VALUES ('Musterholzwerk Musterstadt', 1, 1, 1, 3, NULL, true, true, 4, 1, 2, NULL, ST_Transform(ST_GeomFromText('POINT(12 54)', 4326), 35833));
+INSERT INTO wasserrecht.anlagen (name, klasse, zustaend_uwb, zustaend_stalu, bearbeiter, objektid_geodin, wrz_aktuell, wrz_historisch, betreiber, abwasser_koerperschaft, trinkwasser_koerperschaft,kommentar,the_geom) VALUES ('Musterholzwerk Musterstadt', 1, 1, 1, 3, NULL, true, true, 4, 1, 2, NULL, ST_Transform(ST_GeomFromText('POINT(12 54)', 4326), 35833));
 
 COMMIT;
