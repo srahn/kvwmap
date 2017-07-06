@@ -170,7 +170,7 @@ CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide_klasse(
 	name varchar(100)
 )WITH OIDS;
 
-CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_barbeitz(
+CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_bearbeiterzeichen(
 	id serial PRIMARY KEY,
 	name varchar(255)
 )WITH OIDS;
@@ -178,7 +178,7 @@ CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_barbeitz(
 CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide(
 	id serial PRIMARY KEY,
 	klasse integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide_klasse(id),
-	barbeitz integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_barbeitz(id),
+	bearbeiterzeichen integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_bearbeiterzeichen(id),
 	aktenzeichen integer REFERENCES wasserrecht.aktenzeichen(id),
 	datum date,
 	ort integer REFERENCES wasserrecht.ort(id),
@@ -208,7 +208,7 @@ CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_fassung(
 
 CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_aenderungsbescheide(
 	id serial PRIMARY KEY,
-	barbeitz integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_barbeitz(id),
+	bearbeiterzeichen integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_bearbeiterzeichen(id),
 	aktenzeichen integer REFERENCES wasserrecht.aktenzeichen(id),
 	datum_postausgang date,
 	datum_bestand_mat date,
