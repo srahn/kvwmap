@@ -233,7 +233,6 @@ CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_gueltigkeit(
 	gueltig_bis date,
 	ungueltig_seit date,
 	ungueltig_aufgrund integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_ungueltig_aufgrund(id),
-	wirksam boolean,
 	abgelaufen boolean
 )WITH OIDS;
 
@@ -322,7 +321,7 @@ CREATE TABLE wasserrecht.gewaesserbenutzungen(
 	umfang integer REFERENCES wasserrecht.gewaesserbenutzungen_umfang(id),
 	gruppe_wee boolean,
 	lage integer REFERENCES wasserrecht.gewaesserbenutzungen_lage(id),
-	wasserrechtliche_zulassungen integer REFERENCES wasserrecht.wasserrechtliche_zulassungen(id)
+	wasserrechtliche_zulassungen integer NOT NULL REFERENCES wasserrecht.wasserrechtliche_zulassungen(id)
 )WITH OIDS;
 
 ------------------------------------------
