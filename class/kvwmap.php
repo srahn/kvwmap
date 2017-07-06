@@ -2620,19 +2620,22 @@ class GUI {
 			$j = 0;
 			for($l = 0; $l < count($layerattributes['name']); $l++){
 	    	if(in_array($layerattributes['form_element_type'][$l], array('SubFormEmbeddedPK', 'SubFormPK'))){
-	    		$subform_pks = array();
-	    		$pkvalues = array();
-	    		$subform_pks = array();
+	    		$subform_pks_realnames = array();	    		
+	    		$subform_pks_realnames2 = array();
+					$pkvalues = array();					
 	    		$next_update_values = array();;
 					$options = explode(';', $layerattributes['options'][$l]);
 	        $subform = explode(',', $options[0]);
 	        $subform_layerid = $subform[0];
+					$subformlayerdb = $mapdb->getlayerdatabase($subform_layerid, $this->Stelle->pgdbhost);
+					$subformlayerattributes = $mapdb->read_layer_attributes($subform_layerid, $subformlayerdb, NULL);
 	        if($layerattributes['form_element_type'][$l] == 'SubFormEmbeddedPK')$minus = 1;
 	        else $minus = 0;
 	        for($k = 1; $k < count($subform)-$minus; $k++){
-	        	$subform_pks[] = $subform[$k];																																# das sind die Namen der SubformPK-Schlüssel
+	        	$subform_pks_realnames[] = $layerattributes['real_name'][$subform[$k]];											# das sind die richtigen Namen der SubformPK-Schlüssel in der übergeordneten Tabelle
+						$subform_pks_realnames2[] = $subformlayerattributes['real_name'][$subform[$k]];							# das sind die richtigen Namen der SubformPK-Schlüssel in der untergeordneten Tabelle
 	        }
-	        $sql = "SELECT ".implode(',', $subform_pks)." FROM ".$layerset[0]['maintable']." WHERE ";			# die Werte der SubformPK-Schlüssel aus dem alten Datensatz abfragen
+	        $sql = "SELECT ".implode(',', $subform_pks_realnames)." FROM ".$layerset[0]['maintable']." WHERE ";			# die Werte der SubformPK-Schlüssel aus dem alten Datensatz abfragen
 	        for($n = 0; $n < count($id_names); $n++){
 						$sql.= $id_names[$n]." = '".$id_values[$n]."' AND ";
 					}
@@ -2642,7 +2645,7 @@ class GUI {
 					if(!$ret[0]){
 						$pkvalues=pg_fetch_row($ret[1]);
 					}
-	    		$sql = "SELECT ".implode(',', $subform_pks)." FROM ".$layerset[0]['maintable']." WHERE ";			# die Werte der SubformPK-Schlüssel aus den neuen Datensätzen abfragen
+	    		$sql = "SELECT ".implode(',', $subform_pks_realnames)." FROM ".$layerset[0]['maintable']." WHERE ";			# die Werte der SubformPK-Schlüssel aus den neuen Datensätzen abfragen
 	        $sql.= "oid IN (".implode(',', $all_new_oids).")";
 	        #echo $sql.'<br>';
 	    		$ret=$layerdb->execSQL($sql,4, 0);
@@ -2652,7 +2655,7 @@ class GUI {
 						}
 					}
 	        $j++;
-	        $this->copy_dataset($mapdb, $subform_layerid, $subform_pks, $pkvalues, count($next_update_values), $subform_pks, $next_update_values, $delete_original);
+	        $this->copy_dataset($mapdb, $subform_layerid, $subform_pks_realnames2, $pkvalues, count($next_update_values), $subform_pks_realnames2, $next_update_values, $delete_original);
 		    }
 			}
 			# Original löschen
