@@ -30,9 +30,9 @@
 		if($attributes['type'][$j] == 'date'){
 			$datapart .= '<td align="right"><a href="javascript:;" title=" (TT.MM.JJJJ) '.$attributes['tooltip'][$j].'" ';
 			if($attributes['privileg'][$j] == '1' AND !$lock[$k]){
-				$datapart .= 'onclick="add_calendar(event, \''.$attributes['name'][$j].'_'.$k.'\');"';
+				$datapart .= 'onclick="add_calendar(event, \''.$layer_id.'_'.$attributes['name'][$j].'_'.$k.'\');"';
 			}
-			$datapart .= '><img src="'.GRAPHICSPATH.'calendarsheet.png" border="0"></a><div id="calendar"><input type="hidden" id="calendar_'.$attributes['name'][$j].'_'.$k.'"></div></td>';
+			$datapart .= '><img src="'.GRAPHICSPATH.'calendarsheet.png" border="0"></a><div id="calendar"><input type="hidden" id="calendar_'.$layer_id.'_'.$attributes['name'][$j].'_'.$k.'"></div></td>';
 		}
 		$datapart .= '</td></tr></table>';
 		return $datapart;
