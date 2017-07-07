@@ -325,6 +325,11 @@ CREATE TABLE wasserrecht.gewaesserbenutzungen(
 )WITH OIDS;
 
 ------------------------------------------
+--VIEWS
+
+CREATE VIEW wasserrecht.wasserentnamebenutzer AS SELECT c.oid, a.name AS anlage, b.name AS wasserrechtliche_zulassung, c.kennnummer AS benutzungsnummer FROM wasserrecht.anlagen a INNER JOIN wasserrecht.wasserrechtliche_zulassungen b ON b.anlage=a.id INNER JOIN wasserrecht.gewaesserbenutzungen c ON b.id = c.wasserrechtliche_zulassungen;
+
+------------------------------------------
 
 /*
 CREATE TABLE wasserrecht.wasserentnahme_messung

@@ -137,6 +137,12 @@ INSERT INTO wasserrecht.koerperschaft_art (name) VALUES ('Abwasser');
 INSERT INTO wasserrecht.koerperschaft (name, art) VALUES ('MUSTER ABWASSER KOERPERSCHAFT', 2);
 INSERT INTO wasserrecht.koerperschaft (name, art) VALUES ('MUSTER TRINKWASSER KOERPERSCHAFT', 1);
 
+INSERT INTO wasserrecht.wasserrechtliche_zulassungen_gueltigkeit (gueltig_seit, gueltig_bis) VALUES('2017-07-01', '2017-07-06');
+INSERT INTO wasserrecht.wasserrechtliche_zulassungen_gueltigkeit (gueltig_seit, gueltig_bis) VALUES('2017-07-01', current_date);
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 INSERT INTO wasserrecht.anlagen (name, klasse, zustaend_uwb, zustaend_stalu, bearbeiter, objektid_geodin, wrz_aktuell, wrz_historisch, betreiber, abwasser_koerperschaft, trinkwasser_koerperschaft,kommentar,the_geom) VALUES ('Musterholzwerk Musterstadt', 1, 1, 1, 3, NULL, true, true, 4, 1, 2, NULL, ST_Transform(ST_GeomFromText('POINT(12 54)', 4326), 35833));
+INSERT INTO wasserrecht.wasserrechtliche_zulassungen (name, ausstellbehoerde, status, adresse, gueltigkeit, sachbearbeiter, adressat, anlage) VALUES ('Test Wasserrechtliche Zulassung', 1, 2, 1, 1, 2, 2, 1);
+INSERT INTO wasserrecht.gewaesserbenutzungen (kennnummer, art, wasserbuch, zweck, gruppe_wee, wasserrechtliche_zulassungen) VALUES ('1-1-2-1', 4, 1, 6, false, 1);
 
 COMMIT;
