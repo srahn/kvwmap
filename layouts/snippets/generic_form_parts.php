@@ -30,15 +30,12 @@
 		if($attributes['type'][$j] == 'date') {
 			$datapart .= '
 				<td align="right">
-						<a
-		  			id="caldbl"
-						href="javascript:;"
-						title=" (TT.MM.JJJJ) ' . $attributes['tooltip'][$j] . '"
-						onclick="$(\'.calendar\').show();' . (($attributes['privileg'][$j] == '1' AND !$lock[$k]) ? 'add_calendar(event, \'' . $attributes['name'][$j] . '_' . $k . '\');' : '') . '"
-						ondblclick="$(\'.calendar\').hide(); $(\'#' . $attributes['name'][$j] . '_' . $k . '\').val(\'' . date('d.m.Y') . '\')"
+						<a id="caldbl" href="javascript:;" title=" (TT.MM.JJJJ) ' . $attributes['tooltip'][$j] . '"
+						onclick="$(\'.calendar\').show();' . (($attributes['privileg'][$j] == '1' AND !$lock[$k]) ? 'add_calendar(event, \''.$layer_id.'_'.$attributes['name'][$j].'_'.$k.'\');' : '').'"
+						ondblclick="$(\'.calendar\').hide(); $(\'#' . $layer_id.'_'.$attributes['name'][$j].'_'.$k.'\').val(\'' . date('d.m.Y') . '\')"
 					><img src="' . GRAPHICSPATH . 'calendarsheet.png" border="0"></a>
 					<div id="calendar" class="calendar">
-						<input type="hidden" id="calendar_' . $attributes['name'][$j] . '_' . $k . '">
+						<input type="hidden" id="calendar_'.$layer_id.'_'.$attributes['name'][$j] . '_' . $k . '">
 					</div>
 				</td>
 			';
