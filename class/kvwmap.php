@@ -5210,7 +5210,7 @@ class GUI {
       if($layerset[$i]['aktivStatus'] != 0){
         if(($layerset[$i]['minscale'] < $scale OR $layerset[$i]['minscale'] == 0) AND ($layerset[$i]['maxscale'] > $scale OR $layerset[$i]['maxscale'] == 0)){
 					if($this->formvars['legendlayer'.$layerset[$i]['Layer_ID']] == 'on'){
-						if($layerset[$i]['alias'] != '')$name = $layerset[$i]['alias'];
+						if($layerset[$i]['alias'] != '' AND $this->Stelle->useLayerAliases)$name = $layerset[$i]['alias'];
 						else $name = $layerset[$i]['Name'];
 						$layer = $this->map->getLayerByName($name);
 						if($layerset[$i]['showclasses']){
