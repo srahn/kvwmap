@@ -1,6 +1,9 @@
 <script type="text/javascript">
 
 	checknumbers = function(input, type, length, decimal_length){
+		if(type == 'Zahl'){
+			var val = input.value.replace(/[^(0-9| |\.|,|\-)]/g, '');
+		}
 		if(type == 'numeric' || type == 'float4' || type == 'float8'){
 			var val = input.value.replace(/[^(0-9| |\.|,|\-)]/g, '');
 			val = val.replace(/,/g, '.');
@@ -24,9 +27,6 @@
 				}
 				val = val+'.'+parts[1];
 			}
-			if(input.value != val){
-				input.value = val;
-			}
 		}
 		if(type == 'int2' || type == 'int4' || type == 'int8'){
 			var val = input.value.replace(/[^(0-9|\-)]/g, '');
@@ -35,9 +35,9 @@
 				val = val.replace(/,/g, '');
 				val = val.replace(/\./g, '');
 			}
-			if(input.value != val){
-				input.value = val;
-			}
+		}
+		if(input.value != val){
+			input.value = val;
 		}
 	}
 
