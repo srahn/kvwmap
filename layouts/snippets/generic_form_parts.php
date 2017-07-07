@@ -528,7 +528,7 @@
 				case 'Zahl': {
 					# bei Zahlen Tausendertrennzeichen einfügen 
 					$value = tausenderTrenner($value);
-					$datapart .= '<input onchange="'.$onchange.'" title="'.$alias.'" ';
+					$datapart .= '<input onchange="'.$onchange.'" onkeyup="checknumbers(this, \'Zahl\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
 					if($attribute_privileg == '0' OR $lock[$k]){
 						$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
 					}
