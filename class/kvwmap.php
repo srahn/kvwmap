@@ -2646,9 +2646,9 @@ class GUI {
 			}
 		}
 
-		# über SubFormEmbeddedPK oder SubFormPK verknüpfte Datensätze auch rekursiv kopieren
 		if($all_new_oids[0] != ''){
 			$j = 0;
+			# über SubFormEmbeddedPK oder SubFormPK verknüpfte Datensätze auch rekursiv kopieren			
 			for($l = 0; $l < count($layerattributes['name']); $l++){
 	    	if(in_array($layerattributes['form_element_type'][$l], array('SubFormEmbeddedPK', 'SubFormPK'))){
 	    		$subform_pks_realnames = array();	    		
