@@ -2564,6 +2564,28 @@ class GUI {
     $this->saveMap('');
 		$this->output();
 	}
+	
+	function dublicate_dataset(){
+		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
+		$layerset = $this->user->rolle->getLayer($this->formvars['chosen_layer_id']);
+		$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
+    for($i = 0; $i < count($checkbox_names); $i++){
+      if($this->formvars[$checkbox_names[$i]] == 'on'){
+        $element = explode(';', $checkbox_names[$i]);     #  check;table_alias;table;oid
+        $oid = $element[3];
+				break;
+      }
+    }
+		if($new_oids = $this->copy_dataset($mapdb, $this->formvars['chosen_layer_id'], array('oid'), array($oid), 1)){
+			$this->add_message('notice', 'Der Datensatz wurde kopiert.');
+			$this->formvars['value_'.$layerset[0]['maintable'].'_oid'] = $new_oids[0];
+			$this->formvars['selected_layer_id'] = $this->formvars['chosen_layer_id'];
+			$this->GenerischeSuche_Suchen();
+		}
+		else{
+			$this->add_message('error', 'Kopiervorgang fehlgeschlagen.');
+		}
+	}
 
 	function copy_dataset($mapdb, $layer_id, $id_names, $id_values, $count, $update_columns = NULL, $update_values = NULL, $delete_original = false){
 		# Diese Funktion kopiert einen über die Arrays $id_names und $id_values bestimmten Datensatz in einem Layer $count-mal.
@@ -2699,6 +2721,7 @@ class GUI {
 				#echo $sql.'<br>';
 				$ret = $layerdb->execSQL($sql,4, 0);
 			}
+			return $all_new_oids;
 		}
 	}
 

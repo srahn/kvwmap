@@ -557,6 +557,15 @@ include('funktionen/input_check_functions.php');
 			currentform.submit();
 		}
 	}
+	
+	dublicate_dataset = function(layer_id){
+		if(check_for_selection(layer_id)){
+			currentform.chosen_layer_id.value = layer_id;
+			currentform.go_backup.value = currentform.go.value;
+			currentform.go.value = 'Datensatz_dublizieren';
+			currentform.submit();
+		}
+	}	
 
 	print_data = function(layer_id){
 		if(check_for_selection(layer_id)){

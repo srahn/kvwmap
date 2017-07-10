@@ -1119,6 +1119,10 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 		case 'gemerkte_Datensaetze_anzeigen' : {
 			$GUI->gemerkte_Datensaetze_anzeigen($GUI->formvars['layer_id']);
 	  } break;
+				
+		case 'Datensatz_dublizieren' : {
+			$GUI->dublicate_dataset();
+	  } break;
 		
 	  case 'Layer_Datensaetze_Loeschen' : {
 			$GUI->layer_Datensaetze_loeschen();
