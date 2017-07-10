@@ -1,6 +1,6 @@
 	<? if($this->new_entry != true AND $this->formvars['printversion'] == ''){ ?>
   <? if (!$this->user->rolle->visually_impaired) { ?><thead class="gle"><? } ?>
-    <th colspan="20" style="background-color:<? echo BG_GLEHEADER; ?>;">			  
+    <th class="datensatz_header" colspan="20" style="background-color:<? echo BG_GLEHEADER; ?>;">			  
   <table width="100%">
     <tr>
 			<? if($layer['connectiontype'] == 6 AND $layer['Layer_ID'] > 0){ ?>
