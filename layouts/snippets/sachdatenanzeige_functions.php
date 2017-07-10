@@ -655,17 +655,17 @@ include('funktionen/input_check_functions.php');
 	}
 	
 	change_all = function(layer_id, k, attribute){
-		allfield = document.getElementById(attribute+'_'+k);
+		allfield = document.getElementById(layer_id+'_'+attribute+'_'+k);
 		for(var i = 0; i < k; i++){			
 			if(document.getElementById(layer_id+'_'+i).checked){
-				formfield = document.getElementById(attribute+'_'+i);
+				formfield = document.getElementById(layer_id+'_'+attribute+'_'+i);
 				if(formfield.type == 'checkbox'){
 					formfield.checked = allfield.checked;
 				}
 				else{
 					formfield.value = allfield.value;
 				}
-				document.getElementById(attribute+'_'+i).onchange();
+				document.getElementById(layer_id+'_'+attribute+'_'+i).onchange();
 			}
 		}		
 	}

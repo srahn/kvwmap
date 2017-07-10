@@ -466,6 +466,7 @@ class GUI {
 									}
 								} break;
 								case 'Auswahlfeld': {
+									$auswahlfeld_output = '';
 									if(is_array($attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
 										for($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++){
 											if($attributes['enum_value'][$j][$k][$e] == $layer['shape'][$k][$attributes['name'][$j]]){
