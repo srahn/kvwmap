@@ -217,24 +217,6 @@ function save_layout(){
 						<input type="checkbox" name="no_record_splitting" title="Wenn angehakt, wird ein Seitenumbruch nicht innerhalb eines Datensatzes gemacht, sondern davor." value="1" <? if($this->ddl->selectedlayout[0]['no_record_splitting']) echo 'checked'; ?>>
 					</td>
         </tr>
-        <tr>
-        	<td class="fett" align="center" style="border-bottom:1px solid #C3C7C3" colspan="8">&nbsp;Hintergrundbild&nbsp;</td>
-        </tr>
-        <tr>
-        	<td width="50%" style="border-bottom:1px solid #C3C7C3" colspan=4>&nbsp;<? echo $this->ddl->selectedlayout[0]['bgsrc'] ?></td>
-        	<td>&nbsp;x:</td>
-        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="bgposx" value="<? echo $this->ddl->selectedlayout[0]['bgposx'] ?>" size="5"></td>
-					<td>&nbsp;Breite:</td>
-					<td><input type="text" name="bgwidth" value="<? echo $this->ddl->selectedlayout[0]['bgwidth'] ?>" size="5"></td>
-        </tr>
-        <tr>
-        	<td width="50%" style="border-bottom:1px solid #C3C7C3" colspan=4><input class="button" type="file" name="bgsrc" size="10"></td>
-        	<td>&nbsp;y:</td>
-        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="bgposy" value="<? echo $this->ddl->selectedlayout[0]['bgposy'] ?>" size="5"></td>
-        	<td>&nbsp;Höhe:</td>
-        	<td><input type="text" name="bgheight" value="<? echo $this->ddl->selectedlayout[0]['bgheight'] ?>" size="5"></td>
-        </tr>
-        <tr>
       </table>
       <table border="0" width="597" cellspacing="0" cellpadding="0">
       	<tr>
@@ -250,6 +232,26 @@ function save_layout(){
 					</td>
         </tr>
       </table>
+			<br>
+			<table width="597" border=0 cellpadding="3" cellspacing="0" style="border:1px solid #C3C7C3">
+				<tr>
+        	<td class="fett" align="center" style="border-bottom:1px solid #C3C7C3" colspan="8">&nbsp;Grafik&nbsp;</td>
+        </tr>
+        <tr>
+        	<td width="50%" style="border-bottom:1px solid #C3C7C3" colspan=4>&nbsp;<? echo $this->ddl->selectedlayout[0]['bgsrc'] ?></td>
+        	<td>&nbsp;x:</td>
+        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="bgposx" value="<? echo $this->ddl->selectedlayout[0]['bgposx'] ?>" size="5"></td>
+					<td>&nbsp;Breite:</td>
+					<td><input type="text" name="bgwidth" value="<? echo $this->ddl->selectedlayout[0]['bgwidth'] ?>" size="5"></td>
+        </tr>
+        <tr>
+        	<td width="50%" style="border-bottom:1px solid #C3C7C3" colspan=4><input class="button" type="file" name="bgsrc" size="10"></td>
+        	<td>&nbsp;y:</td>
+        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="bgposy" value="<? echo $this->ddl->selectedlayout[0]['bgposy'] ?>" size="5"></td>
+        	<td>&nbsp;Höhe:</td>
+        	<td><input type="text" name="bgheight" value="<? echo $this->ddl->selectedlayout[0]['bgheight'] ?>" size="5"></td>
+        </tr>
+			</table>
 			<br>
       <table width="597" border=0 cellpadding="3" cellspacing="0" style="border:1px solid #C3C7C3">
   			<tr>
@@ -379,9 +381,9 @@ function save_layout(){
     		<tr>
         	<td class="fett" align="left" style="border-top:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="8" onclick="toggle('<? echo $this->attributes['the_geom']; ?>');">
         	<? if($this->ddl->selectedlayout[0]['elements'][$this->attributes['the_geom']]['xpos'] == ''){ ?>
-        		<img id="img_<? echo $this->attributes['the_geom']; ?>" src="<? echo GRAPHICSPATH.'plus.gif'?>">&nbsp;<? echo $this->attributes['the_geom']; ?>
+        		<img id="img_<? echo $this->attributes['the_geom']; ?>" src="<? echo GRAPHICSPATH.'plus.gif'?>">&nbsp;Geometrie
         	<? }else{ ?>
-        		<img id="img_<? echo $this->attributes['the_geom']; ?>" src="<? echo GRAPHICSPATH.'minus.gif'?>">&nbsp;<? echo $this->attributes['the_geom']; ?>
+        		<img id="img_<? echo $this->attributes['the_geom']; ?>" src="<? echo GRAPHICSPATH.'minus.gif'?>">&nbsp;Geometrie
         	<? } ?>
         	</td>
         </tr>
