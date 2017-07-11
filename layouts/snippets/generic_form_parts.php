@@ -194,6 +194,37 @@
 					$datapart .= Autovervollstaendigungsfeld($layer_id, $name, $j, $alias, $fieldname, $value, $attributes['enum_output'][$j][$k], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $fontsize, $change_all, $size, $onchange);
 				}break;
 				
+				case 'Radiobutton' : {
+					$enum_value = $attributes['enum_value'][$j];
+					$enum_output = $attributes['enum_output'][$j];
+					if($attributes['nullable'][$j] != '0' OR $gui->new_entry == true)$strPleaseSelect = $gui->strPleaseSelect;
+					if($privileg == '0' OR $lock){
+						for($e = 0; $e < count($enum_value); $e++){
+							if($enum_value[$e] == $value){
+								$auswahlfeld_output = $enum_output[$e];
+								$auswahlfeld_output_laenge=strlen($auswahlfeld_output)+1;
+								break;
+							}
+						}
+						$datapart .= '<input readonly id="'.$layer_id.'_'.$name.'_'.$k.'" style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;" size="'.$auswahlfeld_output_laenge.'" type="text" name="'.$fieldname.'" value="'.$auswahlfeld_output.'">';
+						$auswahlfeld_output = '';
+						$auswahlfeld_output_laenge = '';
+					}
+					else{
+						if($change_all){
+							$onchange = 'change_all('.$layer_id.', '.$k.', \''.$name.'\');';
+						}						
+						for($e = 0; $e < count($enum_value); $e++){
+							$datapart .= '<input tabindex="1" type="radio" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$k.'_'.$e.'"';
+							$datapart .= ' onchange="'.$onchange.'" ';
+							if($enum_value[$e] == $value){
+								$datapart .= 'checked ';
+							}
+							$datapart .= 'value="'.$enum_value[$e].'"><label for="'.$layer_id.'_'.$name.'_'.$k.'_'.$e.'">'.$enum_output[$e].'</label><br>';
+						}
+					}
+				}break;				
+				
 				case 'Checkbox' : {
 					$datapart .= '<input type="checkbox" id="'.$layer_id.'_'.$name.'_'.$k.'" title="'.$alias.'" cols="45" onchange="'.$onchange.'"';
 					if($attribute_privileg == '0' OR $lock[$k]){
