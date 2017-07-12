@@ -50,8 +50,8 @@ switch($this->go){
 
 	case 'wasserrecht_test': {
 		$this->debug->write('wasserrecht_test called', 4);
-		$anlage = new Anlage($this);
-		$anlagen = $anlage->find_where('true');
+// 		$anlage = new Anlage($this);
+// 		$anlagen = $anlage->find_where('true');
 		$this->main = PLUGINS . 'wasserrecht/view/test.php';
 		$this->output();
 	}	break;
