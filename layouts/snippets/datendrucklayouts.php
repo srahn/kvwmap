@@ -51,6 +51,11 @@ function addfreetext(){
 	document.GUI.submit();
 }
 
+function addline(){
+	document.GUI.go.value = 'sachdaten_druck_editor_Liniehinzufuegen';
+	document.GUI.submit();
+}
+
 function toggle(attribute){
 	if(document.getElementById('tr1_'+attribute).style.display == 'none'){
 		document.getElementById('tr1_'+attribute).style.display = '';
@@ -235,7 +240,7 @@ function save_layout(){
 			<br>
 			<table width="597" border=0 cellpadding="3" cellspacing="0" style="border:1px solid #C3C7C3">
 				<tr>
-        	<td class="fett" align="center" style="border-bottom:1px solid #C3C7C3" colspan="8">&nbsp;Grafik&nbsp;</td>
+        	<td class="fett" align="center" style="border-bottom:2px solid #C3C7C3;border-top:2px solid #C3C7C3" colspan="8">&nbsp;Grafik&nbsp;</td>
         </tr>
         <tr>
         	<td width="50%" style="border-bottom:1px solid #C3C7C3" colspan=4>&nbsp;<? echo $this->ddl->selectedlayout[0]['bgsrc'] ?></td>
@@ -517,7 +522,71 @@ function save_layout(){
 	      <tr>
           <td style="border-top:2px solid #C3C7C3" colspan=8 align="left">&nbsp;<a href="javascript:addfreetext();">Freitext hinzufügen</a></td>
         </tr>        
-      </table> 
+      </table>
+			<br>
+			<table width="597" border=0 cellpadding="3" cellspacing="0" style="border:1px solid #C3C7C3">
+        <tr>
+          <td class="fett" style="border-top:2px solid #C3C7C3" colspan=8 align="center">
+						Linien
+					</td>
+        </tr>
+        <? for($i = 0; $i < count($this->ddl->selectedlayout[0]['lines']); $i++){
+        	 ?>
+					<tr>
+						<td colspan="2" style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3">Start<input type="hidden" name="line_id<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id'] ?>"></td>
+						<td colspan="2" style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3">Ende</td>
+						<td colspan="2" style="border-top:2px solid #C3C7C3"></td>
+					</tr>
+	        <tr>
+	        	<td style="border-top:2px solid #C3C7C3">&nbsp;x:</td>
+	        	<td style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3"><input type="text" name="lineposx<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['posx'] ?>" size="5"></td>
+						<td style="border-top:2px solid #C3C7C3">&nbsp;x:</td>
+	        	<td style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3"><input type="text" name="lineendposx<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['endposx'] ?>" size="5"></td>
+						<td>Breite:&nbsp;<input type="text" name="breite<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['breite'] ?>" size="5"></td>
+	        </tr>
+	        <tr>
+	        	<td>&nbsp;y:</td>
+	        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="lineposy<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['posy'] ?>" size="5"></td>
+						<td>&nbsp;y:</td>
+	        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="lineendposy<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['endposy'] ?>" size="5"></td>
+	        </tr>
+	       	<tr>
+	       		<td colspan="4" valign="bottom" style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3">&nbsp;unterhalb&nbsp;von:</td>
+	       		<td colspan="2" valign="bottom">&nbsp;Platzierung:</td>
+	        </tr>
+	        <tr>
+						<td colspan="4" valign="top" style="border-right:1px solid #C3C7C3">
+							<select name="lineoffset_attribute<? echo $i ?>" style="width: 200px">
+								<option value="">- Auswahl -</option>
+								<?
+								for($j = 0; $j < count($this->attributes['name']); $j++){
+									echo '<option ';
+									if($this->ddl->selectedlayout[0]['lines'][$i]['offset_attribute'] == $this->attributes['name'][$j]){
+										echo 'selected ';
+									}
+									echo 'value="'.$this->attributes['name'][$j].'">'.$this->attributes['name'][$j].'</option>';
+								}
+								?>
+							</select>
+						</td>
+	        	<td align="left" valign="top">
+							<select style="width: 110px" name="linetype<? echo $i ?>">
+								<option value="0">normal</option>
+								<? if($this->ddl->selectedlayout[0]['type'] != 0){ ?>
+								<option value="1" <? if($this->ddl->selectedlayout[0]['lines'][$i]['type'] == 1)echo ' selected '; ?>>fixiert</option>
+								<? } ?>
+								<option value="2" <? if($this->ddl->selectedlayout[0]['lines'][$i]['type'] == 2)echo ' selected '; ?>>auf jeder Seite</option>
+							</select>
+						</td>
+						<td align="right">
+							<a href="javascript:Bestaetigung('index.php?go=sachdaten_druck_editor_Linieloeschen&line_id=<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id'] ?>&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&aktivesLayout=<? echo $this->formvars['aktivesLayout']; ?>', 'Wollen Sie die Linie wirklich löschen?');">löschen&nbsp;</a>
+						</td>
+	        </tr>
+	      <? } ?>
+	      <tr>
+          <td style="border-top:2px solid #C3C7C3" colspan=8 align="left">&nbsp;<a href="javascript:addline();">Linie hinzufügen</a></td>
+        </tr>        
+      </table>			
     </td>
     <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
   </tr>
@@ -539,6 +608,7 @@ function save_layout(){
   </tr>
 </table>
 <input type="hidden" name="textcount" value="<? echo count($this->ddl->selectedlayout[0]['texts']); ?>">
+<input type="hidden" name="linecount" value="<? echo count($this->ddl->selectedlayout[0]['lines']); ?>">
 <input type="hidden" name="bgsrc_save" value="<? echo $this->ddl->selectedlayout[0]['bgsrc'] ?>">
 
 

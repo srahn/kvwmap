@@ -8864,7 +8864,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $layerdb->setClientEncoding();
     $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
     $this->ddl->update_layout($this->formvars, $this->attributes, $_files);
-		$this->sachdaten_druck_editor();
 	}
 
 	function sachdaten_druck_editor_loeschen(){
@@ -8884,31 +8883,28 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	}
 
 	function sachdaten_druck_editor_Freitexthinzufuegen(){
-		$_files = $_FILES;
-		include_(CLASSPATH.'datendrucklayout.php');
-		$ddl=new ddl($this->database);
-    $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
-    $this->ddl=$ddl;
-    $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-    $layerdb->setClientEncoding();
-    $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
-    $this->ddl->update_layout($this->formvars, $this->attributes, $_files);
+    $this->sachdaten_druck_editor_aendern();
     $this->ddl->addfreetext($this->formvars);
 		$this->scrolldown = true;
 		$this->sachdaten_druck_editor();
 	}
 
 	function sachdaten_druck_editor_Freitextloeschen(){
-		$_files = $_FILES;
-		include_(CLASSPATH.'datendrucklayout.php');
-		$ddl=new ddl($this->database);
-    $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
-    $this->ddl=$ddl;
-    $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-    $layerdb->setClientEncoding();
-    $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
-    $this->ddl->update_layout($this->formvars, $this->attributes, $_files);
+		$this->sachdaten_druck_editor_aendern();
     $this->ddl->removefreetext($this->formvars);
+		$this->sachdaten_druck_editor();
+	}
+	
+	function sachdaten_druck_editor_Liniehinzufuegen(){
+		$this->sachdaten_druck_editor_aendern();
+    $this->ddl->addline($this->formvars);
+		$this->scrolldown = true;
+		$this->sachdaten_druck_editor();
+	}
+
+	function sachdaten_druck_editor_Linieloeschen(){
+		$this->sachdaten_druck_editor_aendern();
+    $this->ddl->removeline($this->formvars);
 		$this->sachdaten_druck_editor();
 	}
 

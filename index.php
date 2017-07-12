@@ -1165,6 +1165,7 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  case 'sachdaten_druck_editor_Änderungen Speichern' : {
 			$GUI->checkCaseAllowed('sachdaten_druck_editor');
 			$GUI->sachdaten_druck_editor_aendern();
+			$GUI->sachdaten_druck_editor();
 	  } break;
 	  
 	  case 'sachdaten_druck_editor_Löschen' : {
@@ -1186,6 +1187,16 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->checkCaseAllowed('sachdaten_druck_editor');
 			$GUI->sachdaten_druck_editor_Freitextloeschen();
 	  } break;
+		
+		case 'sachdaten_druck_editor_Liniehinzufuegen' :
+			$GUI->checkCaseAllowed('sachdaten_druck_editor'); {
+			$GUI->sachdaten_druck_editor_Liniehinzufuegen();
+	  } break;
+	  
+	  case 'sachdaten_druck_editor_Linieloeschen' : {
+			$GUI->checkCaseAllowed('sachdaten_druck_editor');
+			$GUI->sachdaten_druck_editor_Linieloeschen();
+	  } break;		
 	  
 	  case 'Layer_Export' : {
 			$GUI->checkCaseAllowed($go);
