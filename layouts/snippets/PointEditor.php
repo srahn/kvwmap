@@ -8,6 +8,10 @@
 <script language="JavaScript">
 <!--
 
+function toggle_vertices(){	
+	document.getElementById("vertices").SVGtoggle_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+}
+
 function send(){
 	if(document.GUI.geom_nullable.value == '0' && document.GUI.loc_x.value == ''){
 		alert('Geben Sie einen Punkt an.');
@@ -37,7 +41,7 @@ function send(){
   </tr>
   <tr> 
     <td rowspan="3">&nbsp;</td>
-    <td colspan="3" rowspan="3"> 
+    <td colspan="4" rowspan="3"> 
       <?php
 				include(LAYOUTPATH.'snippets/SVG_point.php')
 			?>
@@ -100,6 +104,7 @@ function send(){
 	<? }else{ ?>
 	<td colspan="2"></td>
 	<? } ?>
+	<td align="right"><input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;Punktfang</td>
 	<td align="center">
 		<? if($this->new_entry != true){ ?>
 		<a href="index.php?go=Layer-Suche&go_plus=Suchen&selected_layer_id=<?php echo $this->formvars['layer_id']; ?>&value_<?php echo $this->formvars['layer_tablename']; ?>_oid=<?php echo $this->formvars['oid']; ?>">Sachdatenanzeige</a>
