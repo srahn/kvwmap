@@ -39,6 +39,7 @@ $SVGvars_defs = '
 			<line x1="-2" y1="0" x2="-11.5" y2="0" style="fill-opacity:0.5;fill:rgb(192,192,255);stroke:blue;stroke-width:1.2"/>
 			<line x1="0" y1="2" x2="0" y2="11.5" style="fill-opacity:0.5;fill:rgb(192,192,255);stroke:blue;stroke-width:1.2"/>
 			<line x1="0" y1="-2" x2="0" y2="-11.5" style="fill-opacity:0.5;fill:rgb(192,192,255);stroke:blue;stroke-width:1.2"/>
+			<polygon id="point_direction" transform="" visibility="visible" points="-5 15, 5 15, 5 35, 10 35, 0 50, -10 35, -5 35, -5 15" style="fill-opacity:0.5;fill:rgb(192,192,255);stroke:blue;stroke-width:1.2"/>
 		</g>
 
 		<g id="crosshair_red">

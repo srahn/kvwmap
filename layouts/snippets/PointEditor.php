@@ -12,6 +12,10 @@ function toggle_vertices(){
 	document.getElementById("vertices").SVGtoggle_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 }
 
+function rotate_point_direction(){
+	document.getElementById("svghelp").SVGrotate_point_direction();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+}
+
 function send(){
 	if(document.GUI.geom_nullable.value == '0' && document.GUI.loc_x.value == ''){
 		alert('Geben Sie einen Punkt an.');
@@ -40,8 +44,8 @@ function send(){
     <td align="center" colspan="5"><a name="geoedit_anchor"><h2><?php echo $this->titel; ?></h2></a></td>
   </tr>
   <tr> 
-    <td rowspan="3">&nbsp;</td>
-    <td colspan="4" rowspan="3"> 
+    <td rowspan="4">&nbsp;</td>
+    <td colspan="4" rowspan="4"> 
       <?php
 				include(LAYOUTPATH.'snippets/SVG_point.php')
 			?>
@@ -69,6 +73,12 @@ function send(){
 			</table>
 		</td>
   </tr>
+	<tr>
+		<td>
+			<?php echo $strRotationAngle; ?>: <input type="text" size="3" name="angle" onchange="angle_slider.value=parseInt(angle.value);rotate_point_direction(this.value);" value="<? echo $this->formvars['angle']; ?>">&nbsp;°<br>
+			<input type="range" id="angle_slider" min="-180" max="180" style="width: 120px" value="<? echo $this->formvars['angle']; ?>" oninput="angle.value=parseInt(angle_slider.value);angle.onchange();" onchange="angle.value=parseInt(angle_slider.value);angle.onchange();">
+		</td>
+	</tr>
   <? if($this->new_entry != true){ ?>
   <tr> 
     <td align="center">

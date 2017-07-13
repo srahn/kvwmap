@@ -1064,7 +1064,15 @@ function mouseup(evt){
 	$pointfunctions = '
 
 	pointfunctions = true;
+	
+	top.document.getElementById("svghelp").SVGrotate_point_direction = rotate_point_direction;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
+	function rotate_point_direction(){
+		dir_arrow = document.getElementById("point_direction");
+		angle = -top.currentform.angle.value;
+		dir_arrow.setAttribute("transform", "rotate("+angle+", 0 0)");
+	}
+	
 	function draw_point() {
 	  //document.getElementById("canvas_FS").setAttribute("cursor", "text");
 	  document.getElementById("text0").style.setProperty("fill",highlighted, "");
