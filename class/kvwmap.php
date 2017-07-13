@@ -7343,7 +7343,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				}
 			}
 			$attrib['layer_id'] = $this->formvars['selected_layer_id'];
-			$attrib['expression'] = addslashes($expression[$i]);
+			$attrib['expression'] = $expression[$i];
 			$attrib['text'] = $text[$i];
 			$attrib['classification'] = $classification[$i];
 			$attrib['legendgraphic'] = $legendgraphic[$i];
@@ -16658,21 +16658,21 @@ class db_mapObj{
 			)
 		);
 
-		$sql = "
+		$sql = '
 			UPDATE
 				classes
 			SET
-				".$names.",
-				`Layer_ID` = " . $attrib['layer_id'] . ",
-				`Expression` = '" . $attrib['expression'] . "',
-				`text` = '" . $attrib['text'] . "',
-				`classification` = '" . $attrib['classification'] . "',
-				`legendgraphic`= '" . $attrib['legendgraphic'] . "',
-				`drawingorder` = " . $attrib['order'] . ",
-				`legendorder` = ". $attrib['legendorder'] . "
+				'.$names.',
+				`Layer_ID` = ' . $attrib['layer_id'] . ',
+				`Expression` = "' . $attrib['expression'] . '",
+				`text` = "' . $attrib['text'] . '",
+				`classification` = "' . $attrib['classification'] . '",
+				`legendgraphic`= "' . $attrib['legendgraphic'] . '",
+				`drawingorder` = ' . $attrib['order'] . ',
+				`legendorder` = '. $attrib['legendorder'] . '
 			WHERE
-				`Class_ID` = " . $attrib['class_id'] . "
-		";
+				`Class_ID` = ' . $attrib['class_id'] . '
+		';
 
 		#echo $sql.'<br>';
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->update_Class - Aktualisieren einer Klasse:<br>".$sql,4);
