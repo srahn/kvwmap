@@ -74,9 +74,10 @@ function send(){
 		</td>
   </tr>
 	<tr>
-		<td>
-			<?php echo $strRotationAngle; ?>: <input type="text" size="3" name="angle" onchange="angle_slider.value=parseInt(angle.value);rotate_point_direction(this.value);" value="<? echo $this->formvars['angle']; ?>">&nbsp;°<br>
+		<td><? if($this->angle_attribute != ''){
+			echo $strRotationAngle; ?>: <input type="text" size="3" name="angle" onchange="angle_slider.value=parseInt(angle.value);rotate_point_direction(this.value);" value="<? echo $this->formvars['angle']; ?>">&nbsp;°<br>
 			<input type="range" id="angle_slider" min="-180" max="180" style="width: 120px" value="<? echo $this->formvars['angle']; ?>" oninput="angle.value=parseInt(angle_slider.value);angle.onchange();" onchange="angle.value=parseInt(angle_slider.value);angle.onchange();">
+			<? } ?>
 		</td>
 	</tr>
   <? if($this->new_entry != true){ ?>

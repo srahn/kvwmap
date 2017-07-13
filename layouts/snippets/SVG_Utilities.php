@@ -346,6 +346,7 @@
 			}
 		  obj.setAttribute("x", pixel_coordx);
 		  obj.setAttribute("y", pixel_coordy);
+			rotate_point_direction();
 		}
 	}
 
@@ -1068,8 +1069,10 @@ function mouseup(evt){
 	top.document.getElementById("svghelp").SVGrotate_point_direction = rotate_point_direction;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
 	function rotate_point_direction(){
+		angle = top.currentform.angle.value;
+		custom_angle = top.document.getElementById("custom_angle");
+		if(custom_angle != undefined)custom_angle.value = angle;
 		dir_arrow = document.getElementById("point_direction");
-		angle = -top.currentform.angle.value;
 		dir_arrow.setAttribute("transform", "rotate("+angle+", 0 0)");
 	}
 	
