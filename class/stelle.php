@@ -720,22 +720,21 @@ class stelle {
 	
 	function updateLayerParams(){
 		$sql = "UPDATE stelle SET selectable_layer_params = ";
-		$sql.= "(SELECT GROUP_CONCAT(id) ";
+		$sql.= "COALESCE((SELECT GROUP_CONCAT(id) ";
 		$sql.= "FROM `layer_parameter` as p, used_layer as ul, layer as l ";
 		$sql.= "WHERE ul.Stelle_ID = stelle.ID ";
 		$sql.= "AND ul.Layer_ID = l.Layer_ID ";
-		$sql.= "AND locate(concat('$', p.key), concat(l.Data, l.pfad, l.classitem, l.classification)) > 0) ";
+		$sql.= "AND locate(concat('$', p.key), concat(l.Name, l.alias, l.connection, l.Data, l.pfad, l.classitem, l.classification)) > 0), '') ";
 		$sql.= "WHERE stelle.ID = ".$this->id;
 		$this->debug->write("<p>file:users.php class:stelle->updateLayerParams:<br>".$sql,4);
 		$query=mysql_query($sql,$this->database->dbConn);
 		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		$sql = "UPDATE rolle SET layer_params = ";
-		$sql.= "(SELECT GROUP_CONCAT(concat('\"', `key`, '\":\"', default_value, '\"')) ";
+		$sql.= "COALESCE((SELECT GROUP_CONCAT(concat('\"', `key`, '\":\"', default_value, '\"')) ";
 		$sql.= "FROM layer_parameter p, stelle ";
 		$sql.= "WHERE FIND_IN_SET(p.id, stelle.selectable_layer_params) ";
-		$sql.= "AND stelle.ID = rolle.stelle_id) ";
-		$sql.= "WHERE rolle.layer_params IS NULL ";
-		$sql.= "AND rolle.stelle_id = ".$this->id;
+		$sql.= "AND stelle.ID = rolle.stelle_id), '') ";
+		$sql.= "WHERE rolle.stelle_id = ".$this->id;
 		$this->debug->write("<p>file:users.php class:stelle->updateLayerParams:<br>".$sql,4);
 		$query=mysql_query($sql,$this->database->dbConn);
 		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
@@ -956,6 +955,9 @@ class stelle {
 						// continue;
 					// }
 				// }
+				
+				$rs['Name'] = replace_params($rs['Name'], rolle::$layer_params);
+				$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);				
 				
 				if($rs['alias'] != '' AND $this->useLayerAliases){
 					$rs['Name'] = $rs['alias'];

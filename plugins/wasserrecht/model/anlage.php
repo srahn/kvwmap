@@ -10,7 +10,7 @@ class Anlage extends PgObject {
 	static $write_debug = true;
 
 	function Anlage($gui) {
-		$this->PgObject($gui, Anlage::$schema, Anlage::$tableName);
+		parent::__construct($gui, Anlage::$schema, Anlage::$tableName);
 	}
 
 	public static function find_by_id($gui, $by, $id) {
@@ -26,9 +26,5 @@ class Anlage extends PgObject {
 // 		$anlage->find_where($where, $order, $select);
 // 		return $anlage;
 // 	}
-
-	function say_hello() {
-		return 'hello';
-	}
 }
 ?>

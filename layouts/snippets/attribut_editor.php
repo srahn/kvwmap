@@ -174,6 +174,9 @@ function toLayerEditor(){
 										<option value="Autovervollständigungsfeld" ';
 							  		if($this->attributes['form_element_type'][$i] == 'Autovervollständigungsfeld'){echo 'selected';}
 							  		echo ' >Autovervollständigungsfeld</option>
+										<option value="Radiobutton" ';
+							  		if($this->attributes['form_element_type'][$i] == 'Radiobutton'){echo 'selected';}
+							  		echo ' >Radiobutton</option>
 							  		<option value="Checkbox" ';
 							  		if($this->attributes['form_element_type'][$i] == 'Checkbox'){echo 'selected';}
 							  		echo ' >Checkbox</option>

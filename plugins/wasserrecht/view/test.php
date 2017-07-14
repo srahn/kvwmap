@@ -67,17 +67,44 @@ function openCity(evt, cityName) {
 
 <div id="aufforderung_zur_erklaerung" class="tabcontent">
 	
-		<label>Erhebungsjahr:
+		<label style="float: left">Erhebungsjahr:
 				<select>
-					<option>2015</option>
-					<option>2016</option>
-					<option>2017</option>
+					<?php
+						$wasserrechtlicheZulassung = new WasserrechtlicheZulassungen($this);
+// 						$wasserrechtlicheZulassung = $wasserrechtlicheZulassung->find_where('gueltigkeit IS NOT NULL');
+// 						foreach($wasserrechtlicheZulassung AS $wrz)
+// 						{
+// 							echo '<option>' . $wrz->data['gueltigkeit'] . "</option>";
+// 						}
+						$results = $wasserrechtlicheZulassung->find_gueltigkeitsjahr($this);
+						foreach($results AS $result)
+						{
+							echo '<option>' . $result . "</option>";
+						}
+					?>
 				</select>
 		</label>
 		
 		<br />
+		<br />
 		
-		<label>Anlagen:
+		<label style="float: left">
+			Behörde:
+		</label>
+		
+		<br />
+		<br />
+		<br />
+		
+		<label style="float: left">
+			Adressat:
+		</label>
+		
+		<br />
+		<br />
+		<br />
+		
+		<label style="float: left">Anlagen:
 				<select>
 					<?php
 						$anlage = new Anlage($this);
@@ -97,6 +124,9 @@ function openCity(evt, cityName) {
 					?>
 				</select>
 		</label>
+		
+		<br />
+		<br />
 	
 	</div>
 

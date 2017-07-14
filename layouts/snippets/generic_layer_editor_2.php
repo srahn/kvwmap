@@ -190,7 +190,7 @@
 			    	    <td style="padding-top:5px; padding-bottom:5px;" valign="middle" colspan="19">
 <?						
 							if(!$layer['shape'][$k]['wfs_geom']){		// kein WFS 
-								echo '<input type="hidden" id="'.$columnname.'_'.$k.'" value="'.$layer['shape'][$k][$columnname].'">';						
+								echo '<input type="hidden" id="'.$layer['Layer_ID'].'_'.$columnname.'_'.$k.'" value="'.$layer['shape'][$k][$columnname].'">';						
 ?>								
 								<table cellspacing="0" cellpadding="0">
 									<tr>

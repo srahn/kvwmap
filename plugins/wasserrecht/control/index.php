@@ -11,6 +11,9 @@ include_once(CLASSPATH . 'PgObject.php');
 // #include_once(CLASSPATH . 'LayerGroup.php');
 // include_once(CLASSPATH . 'data_import_export.php');
 include(PLUGINS . 'wasserrecht/model/anlage.php');
+include(PLUGINS . 'wasserrecht/model/gewaesserbenutzungen.php');
+include(PLUGINS . 'wasserrecht/model/wasserrechtliche_zulassungen.php');
+include(PLUGINS . 'wasserrecht/model/wasserrechtliche_zulassungen_gueltigkeit.php');
 // include(PLUGINS . 'xplankonverter/model/RP_Plan.php');
 // include(PLUGINS . 'xplankonverter/model/RP_Bereich.php');
 // include(PLUGINS . 'xplankonverter/model/RP_Object.php');
@@ -49,7 +52,7 @@ include(PLUGINS . 'wasserrecht/model/anlage.php');
 switch($this->go){
 
 	case 'wasserrecht_test': {
-		$this->debug->write('wasserrecht_test called', 4);
+		$this->debug->write('wasserrecht_test called!', 4);
 // 		$anlage = new Anlage($this);
 // 		$anlagen = $anlage->find_where('true');
 		$this->main = PLUGINS . 'wasserrecht/view/test.php';

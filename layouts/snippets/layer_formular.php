@@ -624,27 +624,18 @@
 					</table>
 				</td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">
-					<a
-						href="javascript:Bestaetigung(
-							'index.php?\
-							go=Layereditor_Klasse_Löschen&\
-							class_id=<?php echo $this->classes[$i]['Class_ID']; ?>&\
-							selected_layer_id=<?php echo $this->formvars['selected_layer_id']; ?>#\
-							Klassen',\
-							'<?php echo $this->strDeleteWarningMessage; ?>'
-						);"
-					><?php echo $this->strDelete; ?></a>
+					<a href="javascript:Bestaetigung('index.php?go=Layereditor_Klasse_Löschen&class_id=<?php echo $this->classes[$i]['Class_ID']; ?>&selected_layer_id=<?php echo $this->formvars['selected_layer_id']; ?>#Klassen',	'<?php echo $this->strDeleteWarningMessage; ?>');"><?php echo $this->strDelete; ?></a>
 				</td>
 			</tr><?php
 			}
 			?>
 			<tr>
-				<td style="border-bottom:1px solid #C3C7C3" colspan="8">
+				<td style="border-bottom:1px solid #C3C7C3" colspan="10">
 					<a href="index.php?go=Layereditor_Klasse_Hinzufügen&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>#Klassen"><?php echo $strAddClass; ?></a>
 				</td>
 			</tr>
 			<tr>
-				<td style="border-bottom:1px solid #C3C7C3" colspan="8">
+				<td style="border-bottom:1px solid #C3C7C3" colspan="10">
 					<a href="javascript:void(0);" onclick="toggleAutoClassForm();"><? echo $strAddAutoClasses; ?></a>
 					<div id="autoClassForm" style="display:none">
 						<table>
@@ -694,7 +685,7 @@
 				</td>
 			</tr>
 			<tr>
-				<td colspan="8"><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>">Styles und Labels bearbeiten</a></td>
+				<td colspan="10"><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>">Styles und Labels bearbeiten</a></td>
 			</tr>
 		</table>
 		<?}?>
