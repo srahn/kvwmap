@@ -72,7 +72,7 @@ class PgObject {
 	* @ return an array with all found object
 	*/
 	function find_where($where, $order = NULL, $select = '*') {
-		$order = (empty($order) ? "" : " ORDER BY " . $order);
+		$order = (empty($order) ? "" : " ORDER BY " . replace_semicolon($order));
 		$sql = "
 			SELECT
 				{$this->select}

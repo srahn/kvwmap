@@ -6905,7 +6905,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			case 1 : {		# für jeden Wert eine Klasse
         $sql = "
           SELECT DISTINCT ".$class_item."
-          FROM (".$data_sql.") AS data ORDER BY ".$class_item." LIMIT 50";
+          FROM (".$data_sql.") AS data ORDER BY " . replace_semicolon($class_item) . " LIMIT 50";
 				
         $ret=$layerdb->execSQL($sql, 4, 0);
         if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
@@ -6960,7 +6960,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
               " . $data_sql . "
             ) AS data
           ORDER BY
-            " . $class_item . "
+            " . replace_semicolon($class_item) . "
         ";
 
         $ret=$layerdb->execSQL($sql, 4, 0);
@@ -6992,7 +6992,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
               " . $data_sql . "
             ) AS data
           ORDER BY
-            " . $class_item . "
+            " . replace_semicolon($class_item) . "
         ";
         $ret=$layerdb->execSQL($sql, 4, 0);
         if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
@@ -7071,7 +7071,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
               " . $data_sql . "
             ) AS data
           ORDER BY
-            " . $class_item . "
+            " . replace_semicolon($class_item) . "
         ";
         #echo '<p>' . $sql;
         $ret=$layerdb->execSQL($sql, 4, 0);
@@ -7552,7 +7552,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
         # order by
         if($this->formvars['orderby'.$layerset[0]['Layer_ID']] != ''){									# Fall 1: im GLE soll nach einem Attribut sortiert werden
-          $sql_order = ' ORDER BY '.$this->formvars['orderby'.$layerset[0]['Layer_ID']];
+          $sql_order = ' ORDER BY '. replace_semicolon($this->formvars['orderby'.$layerset[0]['Layer_ID']]);
         }
         elseif($attributes['orderby'] != ''){										# Fall 2: der Layer hat im Pfad ein ORDER BY
         	$sql_order = $attributes['orderby'];
@@ -7561,7 +7561,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				$j = 0;
 				foreach($attributes['all_table_names'] as $tablename){
 					if($tablename == $layerset[0]['maintable'] AND $attributes['oids'][$j]){      # hat die Haupttabelle oids, dann wird immer ein order by oid gemacht, sonst ist die Sortierung nicht eindeutig
-						if($sql_order == '')$sql_order = ' ORDER BY '.$layerset[0]['maintable'].'_oid ';
+						if($sql_order == '')$sql_order = ' ORDER BY ' . replace_semicolon($layerset[0]['maintable']) . '_oid ';
 						else $sql_order .= ', '.$layerset[0]['maintable'].'_oid ';
 					}
 					$j++;
@@ -7578,15 +7578,15 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         	if($this->formvars['anzahl'] == ''){
 	          $this->formvars['anzahl'] = MAXQUERYROWS;
 	        }
-        	$sql_limit.=' LIMIT '.$this->formvars['anzahl'];
+        	$sql_limit.=' LIMIT ' . intval($this->formvars['anzahl']);
         	if($this->formvars['offset_'.$layerset[0]['Layer_ID']] != ''){
-          	$sql_limit.=' OFFSET '.$this->formvars['offset_'.$layerset[0]['Layer_ID']];
+          	$sql_limit.=' OFFSET ' . intval($this->formvars['offset_'.$layerset[0]['Layer_ID']]);
         	}
         }
 
 				$layerset[0]['sql'] = $sql;
-				#echo "<p>Abfragestatement: ".$sql.$sql_order.$sql_limit;
-        $ret=$layerdb->execSQL('SET enable_seqscan=off;'.$sql.$sql_order.$sql_limit,4, 0);
+				echo "<p>Abfragestatement: ".$sql.$sql_order.$sql_limit;
+        $ret=$layerdb->execSQL('SET enable_seqscan=off;' . $sql . $sql_order . $sql_limit, 4, 0);
         if(!$ret[0]){
           while ($rs=pg_fetch_assoc($ret[1])) {
             $layerset[0]['shape'][]=$rs;
@@ -9041,7 +9041,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	    $sql .= " AND ".$element[1].".oid IN (".$oids.'0)';
     }
     if($this->formvars['orderby'.$this->formvars['chosen_layer_id']] != ''){
-    	$sql .= ' ORDER BY '.$this->formvars['orderby'.$this->formvars['chosen_layer_id']];
+    	$sql .= ' ORDER BY ' . replace_semicolon($this->formvars['orderby'.$this->formvars['chosen_layer_id']]);
     }
     #echo $sql.'<br><br>';
     $this->debug->write("<p>file:kvwmap class:generisches_sachdaten_diagramm :",4);
@@ -12417,7 +12417,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 							# order by
 							if($this->formvars['orderby'.$layerset[$i]['Layer_ID']] != ''){									# Fall 1: im GLE soll nach einem Attribut sortiert werden
-								$sql_order = ' ORDER BY '.$this->formvars['orderby'.$layerset[$i]['Layer_ID']];
+								$sql_order = ' ORDER BY ' . replace_semicolon($this->formvars['orderby'.$layerset[$i]['Layer_ID']]);
 							}
 							elseif($layerset[$i]['attributes']['orderby'] != ''){														# Fall 2: der Layer hat im Pfad ein ORDER BY
 								$sql_order = $layerset[$i]['attributes']['orderby'];
@@ -12426,7 +12426,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 								$j = 0;
 								foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
 									if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['attributes']['oids'][$j]){      # hat die Haupttabelle oids, dann wird immer ein order by oid gemacht, sonst ist die Sortierung nicht eindeutig
-										if($sql_order == '')$sql_order = ' ORDER BY '.$layerset[$i]['maintable'].'_oid ';
+										if($sql_order == '')$sql_order = ' ORDER BY ' . replace_semicolon($layerset[$i]['maintable']) . '_oid ';
 										else $sql_order .= ', '.$layerset[$i]['maintable'].'_oid ';
 									}
 									$j++;
@@ -12443,9 +12443,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							if($this->formvars['anzahl'] == ''){
 								$this->formvars['anzahl'] = MAXQUERYROWS;
 							}
-							$sql_limit =' LIMIT '.$this->formvars['anzahl'];
+							$sql_limit =' LIMIT ' . intval($this->formvars['anzahl']);
 							if($this->formvars['offset_'.$layerset[$i]['Layer_ID']] != ''){
-								$sql_limit.=' OFFSET '.$this->formvars['offset_'.$layerset[$i]['Layer_ID']];
+								$sql_limit.=' OFFSET ' . intval($this->formvars['offset_'.$layerset[$i]['Layer_ID']]);
 							}
 
 							$layerset[$i]['sql'] = $sql;
@@ -14579,7 +14579,7 @@ class db_mapObj{
 			$sql.=' WHERE g2r.stelle_ID='.$this->Stelle_ID.' AND g2r.user_id='.$this->User_ID;
 			$sql.=' AND g2r.id = g.id';
 		}
-		if($order != '')$sql.=' ORDER BY '.$order;
+		if($order != '')$sql.=' ORDER BY '. replace_semicolon($order);
 		else $sql.=' ORDER BY `order`';
 		#echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Groups - Lesen der Gruppen der Rolle:<br>".$sql,4);
@@ -16116,7 +16116,7 @@ class db_mapObj{
 
 	function getall_Datatypes($order) {
 		$datatypes = array();
-		$order_sql = ($order != '') ? "ORDER BY " . $order : '';
+		$order_sql = ($order != '') ? "ORDER BY " . replace_semicolon($order) : '';
 		$sql = "
 			SELECT
 				*
@@ -16152,7 +16152,7 @@ class db_mapObj{
 		}
 		$sql.='Gruppenname FROM layer, u_groups';
 		$sql.=' WHERE layer.Gruppe = u_groups.id';
-		if($order != ''){$sql .= ' ORDER BY '.$order;}
+		if($order != ''){$sql .= ' ORDER BY ' . replace_semicolon($order);}
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->getall_Layer - Lesen aller Layer:<br>".$sql,4);
 		$query=mysql_query($sql);
 		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
@@ -16248,7 +16248,7 @@ class db_mapObj{
   function get_postgis_layers($order) {
     $sql ='SELECT * FROM layer, u_groups';
     $sql.=' WHERE layer.Gruppe = u_groups.id AND connectiontype = 6';
-    if($order != ''){$sql .= ' ORDER BY '.$order;}
+    if($order != ''){$sql .= ' ORDER BY ' . replace_semicolon($order);}
     $this->debug->write("<p>file:kvwmap class:db_mapObj->getall_Layer - Lesen aller Layer:<br>".$sql,4);
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }

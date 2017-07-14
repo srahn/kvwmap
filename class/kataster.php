@@ -218,7 +218,7 @@ class adresse {
     }
     # sortiert nach order wenn angegeben
     if ($order!=0 AND $order!='') {
-      $sql.=' ORDER BY '.$order;
+      $sql.=' ORDER BY ' . replace_semicolon($order);
     }
     $this->debug->write("<p>kvwmap->getAdressenListeByFlst->Abfragen der Adressdaten für Flurstuecke:<br>".$sql,4);
     $query=mysql_query($sql);
@@ -941,7 +941,7 @@ class gemeinde {
       $sql.=')';
     }
     if ($order!='') {
-      $sql.=' ORDER BY '.$order;
+      $sql.=' ORDER BY ' . replace_semicolon($order);
     }
     $this->debug->write("<p>kataster.php Gemeinde->getGemeindeListeByExtent Abfragen der Geimeinden aus dem Kartenausschnitt:<br>".$sql,4);
     $query=mysql_query($sql);
