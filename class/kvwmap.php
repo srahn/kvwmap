@@ -3724,17 +3724,17 @@ class GUI {
 	      # wenn Time-Attribute vorhanden, aktuelle Zeit speichern      
 				$this->attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, NULL);
 				for($i = 0; $i < count($this->attributes['type']); $i++){
-					if($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'Time'){
+					if($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'Time' AND in_array($this->attributes['options'][$i], array('', 'update'))){
 						$sql = "UPDATE ".$this->formvars['layer_tablename']." SET ".$this->attributes['name'][$i]." = '".date('Y-m-d G:i:s')."' WHERE oid = '".$this->formvars['oid']."'";
 						$this->debug->write("<p>file:kvwmap :PointEditor_Senden :",4);
 						$ret = $layerdb->execSQL($sql,4, 1);
 					}
-					elseif($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'User'){
+					elseif($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'User' AND in_array($this->attributes['options'][$i], array('', 'update'))){
 						$sql = "UPDATE ".$this->formvars['layer_tablename']." SET ".$this->attributes['name'][$i]." = '".$this->user->Vorname." ".$this->user->Name."' WHERE oid = '".$this->formvars['oid']."'";
 						$this->debug->write("<p>file:kvwmap :PointEditor_Senden :",4);
 						$ret = $layerdb->execSQL($sql,4, 1);
 					}
-					elseif($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'UserID'){
+					elseif($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'UserID' AND in_array($this->attributes['options'][$i], array('', 'update'))){
 						$sql = "UPDATE ".$this->formvars['layer_tablename']." SET ".$this->attributes['name'][$i]." = ".$this->user->id." WHERE oid = '".$this->formvars['oid']."'";
 						$this->debug->write("<p>file:kvwmap :PointEditor_Senden :",4);
 						$ret = $layerdb->execSQL($sql,4, 1);
@@ -3844,7 +3844,7 @@ class GUI {
 	      # wenn Time-Attribute vorhanden, aktuelle Zeit speichern      
 				$this->attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
 				for($i = 0; $i < count($this->attributes['type']); $i++){
-					if($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'Time'){
+					if($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'Time' AND in_array($this->attributes['options'][$i], array('', 'update'))){
 						$sql = "UPDATE ".$this->formvars['layer_tablename']." SET ".$this->attributes['name'][$i]." = '".date('Y-m-d G:i:s')."' WHERE oid = '".$this->formvars['oid']."'";
 						$this->debug->write("<p>file:kvwmap :LineEditor_Senden :",4);
 						$ret = $layerdb->execSQL($sql,4, 1);
@@ -3854,12 +3854,12 @@ class GUI {
 						$this->debug->write("<p>file:kvwmap :LineEditor_Senden :",4);
 						$ret = $layerdb->execSQL($sql,4, 1);
 					}
-					elseif($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'User'){
+					elseif($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'User' AND in_array($this->attributes['options'][$i], array('', 'update'))){
 						$sql = "UPDATE ".$this->formvars['layer_tablename']." SET ".$this->attributes['name'][$i]." = '".$this->user->Vorname." ".$this->user->Name."' WHERE oid = '".$this->formvars['oid']."'";
 						$this->debug->write("<p>file:kvwmap :LineEditor_Senden :",4);
 						$ret = $layerdb->execSQL($sql,4, 1);
 					}
-					elseif($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'UserID'){
+					elseif($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'UserID' AND in_array($this->attributes['options'][$i], array('', 'update'))){
 						$sql = "UPDATE ".$this->formvars['layer_tablename']." SET ".$this->attributes['name'][$i]." = ".$this->user->id." WHERE oid = '".$this->formvars['oid']."'";
 						$this->debug->write("<p>file:kvwmap :LineEditor_Senden :",4);
 						$ret = $layerdb->execSQL($sql,4, 1);
@@ -3988,10 +3988,10 @@ class GUI {
           $this->Meldung=$ret[1];
       }
       else { # eintrag erfolgreich
-	      # wenn Time-Attribute vorhanden, aktuelle Zeit speichern
+	      # wenn auto-Attribute vorhanden, auto-Werte eintragen
 				$this->attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
 				for($i = 0; $i < count($this->attributes['type']); $i++){
-					if($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'Time'){
+					if($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'Time' AND in_array($this->attributes['options'][$i], array('', 'update'))){
 						$sql = "UPDATE ".$this->formvars['layer_tablename']." SET ".$this->attributes['name'][$i]." = '".date('Y-m-d G:i:s')."' WHERE oid = '".$this->formvars['oid']."'";
 						$this->debug->write("<p>file:kvwmap :PolygonEditor_Senden :",4);
 						$ret = $layerdb->execSQL($sql,4, 1);
@@ -4001,12 +4001,12 @@ class GUI {
 						$this->debug->write("<p>file:kvwmap :PolygonEditor_Senden :",4);
 						$ret = $layerdb->execSQL($sql,4, 1);
 					}
-					elseif($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'User'){
+					elseif($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'User' AND in_array($this->attributes['options'][$i], array('', 'update'))){
 						$sql = "UPDATE ".$this->formvars['layer_tablename']." SET ".$this->attributes['name'][$i]." = '".$this->user->Vorname." ".$this->user->Name."' WHERE oid = '".$this->formvars['oid']."'";
 						$this->debug->write("<p>file:kvwmap :PolygonEditor_Senden :",4);
 						$ret = $layerdb->execSQL($sql,4, 1);
 					}
-					elseif($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'UserID'){
+					elseif($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'UserID'  AND in_array($this->attributes['options'][$i], array('', 'update'))){
 						$sql = "UPDATE ".$this->formvars['layer_tablename']." SET ".$this->attributes['name'][$i]." = ".$this->user->id." WHERE oid = '".$this->formvars['oid']."'";
 						$this->debug->write("<p>file:kvwmap :PolygonEditor_Senden :",4);
 						$ret = $layerdb->execSQL($sql,4, 1);
@@ -8387,19 +8387,34 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				$sql.= ") VALUES (";
 				for($i = 0; $i < count($table['attributname']); $i++){
 					if($table['type'][$i] == 'Time'){                       # Typ "Time"
-						$sql.= "(now())::timestamp(0), ";
+						if(in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
+							$sql.= "(now())::timestamp(0), ";
+						}
+						else $sql.= "NULL, ";
 					}
 					elseif($table['type'][$i] == 'User'){                       # Typ "User"
-						$sql.= "'".$this->user->Vorname." ".$this->user->Name."', ";
+						if(in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
+							$sql.= "'".$this->user->Vorname." ".$this->user->Name."', ";
+						}
+						else $sql.= "NULL, ";
 					}
 					elseif($table['type'][$i] == 'UserID'){                       # Typ "UserID"
-						$sql.= "'".$this->user->id."', ";
+						if(in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
+							$sql.= "'".$this->user->id."', ";
+						}
+						else $sql.= "NULL, ";
 					}
 					elseif($table['type'][$i] == 'Stelle'){                       # Typ "Stelle"
-						$sql.= "'".$this->Stelle->Bezeichnung."', ";
+						if(in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
+							$sql.= "'".$this->Stelle->Bezeichnung."', ";
+						}
+						else $sql.= "NULL, ";
 					}
 					elseif($table['type'][$i] == 'StelleID'){                       # Typ "StelleID"
-						$sql.= "'".$this->Stelle->id."', ";
+						if(in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
+							$sql.= "'".$this->Stelle->id."', ";
+						}
+						else $sql.= "NULL, ";
 					}
 					elseif($table['type'][$i] == 'Dokument' AND $this->formvars[$table['formfield'][$i]] != '') {
 						$sql.= "'".$this->formvars[$table['formfield'][$i]]."', ";
@@ -11957,19 +11972,19 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
               } # ende vom Fall, dass ein neues Dokument hochgeladen wurde
             } break; # ende case Bild
             case 'Time' : {
-							$eintrag = date('Y-m-d G:i:s');
+							if(in_array($attributes['options'][$attributname], array('', 'update')))$eintrag = date('Y-m-d G:i:s');
             } break;
             case 'User' : {
-							$eintrag = $this->user->Vorname." ".$this->user->Name;
+							if(in_array($attributes['options'][$attributname], array('', 'update')))$eintrag = $this->user->Vorname." ".$this->user->Name;
             } break;
             case 'UserID' : {
-							$eintrag = $this->user->id;
+							if(in_array($attributes['options'][$attributname], array('', 'update')))$eintrag = $this->user->id;
             } break;
             case 'Stelle' : {
-							$eintrag = $this->Stelle->Bezeichnung;
+							if(in_array($attributes['options'][$attributname], array('', 'update')))$eintrag = $this->Stelle->Bezeichnung;
             } break;
 						case 'StelleID' : {
-							$eintrag = $this->Stelle->id;
+							if(in_array($attributes['options'][$attributname], array('', 'update')))$eintrag = $this->Stelle->id;
             } break;
             case 'Geometrie' : {
               # nichts machen
