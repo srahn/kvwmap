@@ -33,5 +33,6 @@
 	$strDeactivateAllLayer="Hier klicken, um alle Themen zu deaktivieren";
 	$strClearAllQuerys="Hier klicken, um alle Abfragehaken zu entfernen";
 	$strInfoQuery="Informationsabfrage";
+	$strRotationAngle="Richtungswinkel";
   
 ?>

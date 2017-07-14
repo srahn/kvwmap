@@ -1072,7 +1072,13 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->checkCaseAllowed('Daten_Export');
 			$GUI->daten_export_exportieren();
 	  } break;
-
+		
+		case 'get_last_search' : {
+			$GUI->formvars['selected_layer_id'] = $GUI->user->rolle->get_last_search_layer_id();
+			$GUI->formvars['searches'] = '<last_search>';
+			$GUI->GenerischeSuche();
+	  } break;
+		
 	  case 'Layer-Suche_Suchmaske_generieren' : {
 			$GUI->GenerischeSuche_Suchmaske();
 	  } break;
@@ -1119,6 +1125,10 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 		case 'gemerkte_Datensaetze_anzeigen' : {
 			$GUI->gemerkte_Datensaetze_anzeigen($GUI->formvars['layer_id']);
 	  } break;
+				
+		case 'Datensatz_dublizieren' : {
+			$GUI->dublicate_dataset();
+	  } break;
 		
 	  case 'Layer_Datensaetze_Loeschen' : {
 			$GUI->layer_Datensaetze_loeschen();
@@ -1161,6 +1171,7 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  case 'sachdaten_druck_editor_Änderungen Speichern' : {
 			$GUI->checkCaseAllowed('sachdaten_druck_editor');
 			$GUI->sachdaten_druck_editor_aendern();
+			$GUI->sachdaten_druck_editor();
 	  } break;
 	  
 	  case 'sachdaten_druck_editor_Löschen' : {
@@ -1182,6 +1193,16 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->checkCaseAllowed('sachdaten_druck_editor');
 			$GUI->sachdaten_druck_editor_Freitextloeschen();
 	  } break;
+		
+		case 'sachdaten_druck_editor_Liniehinzufuegen' :
+			$GUI->checkCaseAllowed('sachdaten_druck_editor'); {
+			$GUI->sachdaten_druck_editor_Liniehinzufuegen();
+	  } break;
+	  
+	  case 'sachdaten_druck_editor_Linieloeschen' : {
+			$GUI->checkCaseAllowed('sachdaten_druck_editor');
+			$GUI->sachdaten_druck_editor_Linieloeschen();
+	  } break;		
 	  
 	  case 'Layer_Export' : {
 			$GUI->checkCaseAllowed($go);

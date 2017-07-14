@@ -119,6 +119,75 @@ class ddl {
 		return $remaining_freetexts;
 	}
 	
+	function add_lines($offsetx, $type){
+		if(count($this->remaining_lines) == 0)return;
+    for($j = 0; $j < count($this->layout['lines']); $j++){
+			if($type != 'everypage' AND $this->page_overflow){
+				$this->pdf->reopenObject($this->page_id_before_sublayout);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
+				if($this->layout['type'] == 0)$this->page_overflow = false;			# if ???							
+			}
+			# die Linie wurde noch nicht geschrieben und ist entweder eine feste Linie oder eine fortlaufende oder eine, der auf jeder Seite erscheinen soll
+    	if(in_array($this->layout['lines'][$j]['id'], $this->remaining_lines) AND $this->layout['lines'][$j]['posy'] != ''){	# nur Linien mit einem y-Wert werden geschrieben
+				if(($type == 'fixed' AND $this->layout['lines'][$j]['type'] != 2 AND ($this->layout['type'] == 0 OR $this->layout['lines'][$j]['type'] == 1)) 
+				OR ($type == 'running' AND $this->layout['type'] != 0 AND $this->layout['lines'][$j]['type'] == 0)
+				OR ($type == 'everypage' AND $this->layout['lines'][$j]['type'] == 2)){							
+					$x = $this->layout['lines'][$j]['posx'] + $offsetx;
+					$y_orig = $y = $this->layout['lines'][$j]['posy'];
+					$endx = $this->layout['lines'][$j]['endposx'] + $offsetx;
+					$endy = $this->layout['lines'][$j]['endposy'];
+					$offset_attribute = $this->layout['lines'][$j]['offset_attribute'];
+					if($offset_attribute != ''){			# ist ein offset_attribute gesetzt
+						$offset_attributes = explode(',', $offset_attribute);		# es können mehrere Offset-Attribute durch Komma getrennt angegeben sein (ist aber noch nicht in der Oberfläche umgesetzt)
+						$smallest_offset_value = 10000;
+						foreach($offset_attributes as $offset_attribute){
+							$offset_value = $this->layout['offset_attributes'][$offset_attribute];
+							if($offset_value == ''){		# wenn eines der Offset-Attribute noch keinen Wert hat, also noch nicht geschrieben wurde, abbrechen
+								$smallest_offset_value = '';
+								break;
+							}
+							if($offset_value < $smallest_offset_value)$smallest_offset_value = $offset_value;
+						}
+						if($smallest_offset_value != ''){																							# dieses Attribut wurde auch schon geschrieben, d.h. dessen y-Position ist bekannt -> Linie relativ dazu setzen
+							$y = $this->handlePageOverflow($offset_attribute, $smallest_offset_value, $y);		# Seitenüberläufe berücksichtigen
+						}
+						else{
+							$remaining_lines[] = $this->layout['lines'][$j]['id'];
+							continue;			# die Linie ist abhängig aber das Attribut noch nicht geschrieben, Linie merken und überspringen
+						}
+					}
+					if($offset_attribute == '')$y = $y - $this->offsety;
+					$endy = $endy + $y_orig - $y;		# y-Endposition auch anpassen
+					if($type == 'running'){	# fortlaufende Linien
+						$pagecount = count($this->pdf->objects['3']['info']['pages']);								
+						if($this->layout['type'] == 1 AND $offset_attribute == '' AND $pagecount > 1){
+							$y = $y + $this->initial_yoffset;		# ab der 2. Seite sollen die forlaufenden absolut positionierten Elemente oben auf der Seite beginnen
+							$endy = $endy + $this->initial_yoffset;		# ab der 2. Seite sollen die forlaufenden absolut positionierten Elemente oben auf der Seite beginnen
+						}
+						if($this->i_on_page == 0){
+							#if($this->maxy < $y)$this->maxy = $y;		# beim ersten Datensatz das maxy ermitteln
+							#if($this->maxy < $endy)$this->maxy = $endy;		# beim ersten Datensatz das maxy ermitteln							
+						}						
+						if($offset_attribute == '' AND $this->i_on_page > 0){		# bei allen darauffolgenden den y-Wert um Offset verschieben (aber nur bei absolut positionierten)
+							$y = $y - $this->yoffset_onpage-$this->layout['gap'];
+							$endy = $endy - $this->yoffset_onpage-$this->layout['gap'];
+						}
+					}
+					$this->pdf->setLineStyle($this->layout['lines'][$j]['breite']);
+					$this->pdf->line($x,$y,$endx,$endy);
+					if($this->layout['lines'][$j]['type'] === 0){
+						#if(!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $y)$this->miny[$this->pdf->currentContents] = $y;		# miny ist die unterste y-Position das aktuellen Datensatzes 
+						#if(!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $endy)$this->miny[$this->pdf->currentContents] = $endy;		# miny ist die unterste y-Position das aktuellen Datensatzes 
+					}
+				}
+				else{
+					$remaining_lines[] = $this->layout['lines'][$j]['id'];
+				}
+			}
+			if($type != 'everypage' AND $this->pdf->currentContents != end($this->pdf->objects['3']['info']['pages'])+1)$this->pdf->closeObject();			# falls in eine alte Seite geschrieben wurde, zurückkehren
+	  }
+		return $remaining_lines;
+	}	
+	
 	function add_attribute_elements($selected_layer_id, $layerdb, $attributes, $oids, $offsetx, $i, $preview){
 		for($j = 0; $j < count($attributes['name']); $j++){		
 			$wordwrapoffset = 1;
@@ -126,6 +195,7 @@ class ddl {
 				# da ein Attribut zu einem Seitenüberlauf führen kann, müssen davor alle festen Freitexte geschrieben werden, die geschrieben werden können
 				# d.h. alle, deren Position nicht abhängig vom einem Attribut ist und alle deren Position abhängig ist und das Attribut schon geschrieben wurde
 				$this->remaining_freetexts = $this->add_freetexts($i, $offsetx, 'fixed');			#  feste Freitexte hinzufügen
+				$this->remaining_lines = $this->add_lines($offsetx, 'fixed');			# feste Linien hinzufügen
 				if($attributes['type'][$j] != 'geometry'){
 					switch ($attributes['form_element_type'][$j]){
 						case 'SubFormPK' : case 'SubFormEmbeddedPK' : {
@@ -394,6 +464,7 @@ class ddl {
 		if($page_id_before_puttext != $page_id_after_puttext){
 			$this->page_overflow = true;
 			$this->page_id_before_sublayout = $page_id_before_puttext;
+			if($this->getNextPage($page_id_before_puttext) != $page_id_after_puttext)$this->pdf->overflow_error = true;		# eine oder mehr Seiten übersprungen -> Fehler
 		}
 		return $ret;
 	}
@@ -520,6 +591,11 @@ class ddl {
 					$this->remaining_freetexts[] = $this->layout['texts'][$j]['id'];		# zu Beginn jedes Datensatzes sind alle Freitexte noch zu schreiben, bei fortlaufenden Layouts aber nur die fortlaufenden Freitexte
 				}
 			}
+			for($j = 0; $j < count($this->layout['lines']); $j++){
+				if($i == 0 OR $this->layout['type'] != 1 OR $this->layout['lines'][$j]['type'] != 1){
+					$this->remaining_lines[] = $this->layout['lines'][$j]['id'];		# zu Beginn jedes Datensatzes sind alle Linien noch zu schreiben, bei fortlaufenden Layouts aber nur die fortlaufenden Linien
+				}
+			}
 			################# Daten schreiben ###############
 			for($j = 0; $j < count($this->attributes['name']); $j++){
 				if($this->layout['elements'][$attributes['name'][$j]]['ypos'] > 0){
@@ -533,13 +609,15 @@ class ddl {
 			}			
 			################# Daten schreiben ###############
 			
-			#################  feste Freitexte hinzufügen, falls keine Attribute da sind ##################
+			#################  feste Freitexte und Linien hinzufügen, falls keine Attribute da sind ##################
 			$this->remaining_freetexts = $this->add_freetexts($i, $offsetx, 'fixed');
+			$this->remaining_lines = $this->add_lines($offsetx, 'fixed');
 			###############################################################################################
 			
 			################# fortlaufende Freitexte schreiben ###############
 			# (die festen Freitexte werden vor jedem Attribut geschrieben, da ein Attribut zu einem Seitenüberlauf führen können)
 			$this->remaining_freetexts = $this->add_freetexts($i, $offsetx, 'running');
+			$this->remaining_lines = $this->add_lines($offsetx, 'running');
 			################# fortlaufende Freitexte schreiben ###############
 			
 			if($this->layout['type'] != 0 AND (!$layout_with_sublayout OR $this->layout['no_record_splitting'])){				
@@ -549,8 +627,8 @@ class ddl {
 				# Datensatzes zurückgerollt und die Seite vorher umgebrochen, so dass sauber zwischen 2 Datensätzen 
 				# und nicht innerhalb eines Datensatzes getrennt wird.
 				if($this->page_overflow != false){
-					if($this->getNextPage($this->transaction_start_pageid) != $this->pdf->currentContents		# wenn die Transaktion aber mehr als 2 Seiten umfasst
-					OR $this->transaction_start_y > $this->miny[$this->pdf->currentContents] - 50){							# oder insgesamt länger als 1 Seite ist, bringt es nichts auf einer neuen Seite zu beginnen, dann committen
+					if($this->pdf->overflow_error != true AND ($this->getNextPage($this->transaction_start_pageid) != $this->pdf->currentContents		# wenn die Transaktion aber mehr als 2 Seiten umfasst
+					OR $this->transaction_start_y > $this->miny[$this->pdf->currentContents] - 50)){							# oder insgesamt länger als 1 Seite ist, bringt es nichts auf einer neuen Seite zu beginnen, dann committen
 						$this->pdf->transaction('commit');
 						$this->page_overflow = false;
 					}
@@ -605,6 +683,7 @@ class ddl {
 		for($i = 0; $i < $pagecount; $i++){
 			$this->pdf->reopenObject($pages[$i]+1);		# die Page-IDs sind komischerweise alle um 1 größer
 			$this->add_freetexts(0, 0, 'everypage', $i + 1, $pagecount);
+			$this->add_lines(0, 'everypage');
 			$this->pdf->closeObject();
 		}
 	}
@@ -809,6 +888,27 @@ class ddl {
         $this->database->execSQL($sql,4, 1);
         $lastfreitext_id = mysql_insert_id();
       }
+			
+      for($i = 0; $i < $formvars['linecount']; $i++){
+        $sql = "UPDATE druckfreilinien SET `breite` = '".$formvars['breite'.$i]."'";
+        if($formvars['lineposx'.$i])$sql .= ", `posx` = ".(int)$formvars['lineposx'.$i];
+        else $sql .= ", `posx` = NULL";
+        if($formvars['lineposy'.$i])$sql .= ", `posy` = ".(int)$formvars['lineposy'.$i];
+        else $sql .= ", `posy` = NULL";
+				if($formvars['lineendposx'.$i])$sql .= ", `endposx` = ".(int)$formvars['lineendposx'.$i];
+        else $sql .= ", `endposx` = NULL";
+        if($formvars['lineendposy'.$i])$sql .= ", `endposy` = ".(int)$formvars['lineendposy'.$i];
+        else $sql .= ", `endposy` = NULL";
+				if($formvars['lineoffset_attribute'.$i])$sql .= ", `offset_attribute` = '".$formvars['lineoffset_attribute'.$i]."'";
+        else $sql .= ", `offset_attribute` = NULL";
+        if($formvars['linetype'.$i] == '')$formvars['linetype'.$i] = 0;
+        $sql .= ", `type` = '".$formvars['linetype'.$i]."'";
+        $sql .= " WHERE id = ".(int)$formvars['line_id'.$i];
+        #echo $sql;
+        $this->debug->write("<p>file:kvwmap class:ddl->update_layout :",4);
+        $this->database->execSQL($sql,4, 1);
+        $lastline_id = mysql_insert_id();
+      }
     }
   }
  	
@@ -846,6 +946,7 @@ class ddl {
       #$layouts[0]['bilder'] = $this->load_bilder($rs['id']);
       $layouts[0]['elements'] = $this->load_elements($rs['id']);
       $layouts[0]['texts'] = $this->load_texts($rs['id']);
+			$layouts[0]['lines'] = $this->load_lines($rs['id']);
       $i++;
     }
     return $layouts;
@@ -895,6 +996,20 @@ class ddl {
     }
     return $texts;
   }
+	
+  function load_lines($ddl_id){
+    $sql = 'SELECT druckfreilinien.* FROM druckfreilinien, ddl2freilinien';
+    $sql.= ' WHERE ddl2freilinien.ddl_id = '.$ddl_id;
+    $sql.= ' AND ddl2freilinien.line_id = druckfreilinien.id';
+    #echo $sql;
+    $this->debug->write("<p>file:kvwmap class:ddl->load_lines :<br>".$sql,4);
+    $query=mysql_query($sql);
+    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    while($rs=mysql_fetch_array($query)){
+      $lines[] = $rs;
+    }
+    return $lines;
+  }	
   
   function addfreetext($formvars){
 		$i = $formvars['textcount'] - 1;
@@ -923,6 +1038,36 @@ class ddl {
     $this->database->execSQL($sql,4, 1);
     $sql = 'DELETE FROM ddl2freitexte WHERE freitext_id = '.$formvars['freitext_id'];
     $this->debug->write("<p>file:kvwmap class:ddl->removefreetext :",4);
+    $this->database->execSQL($sql,4, 1);
+  }
+	
+  function addline($formvars){
+		$i = $formvars['linecount'] - 1;
+		if($formvars['linebreite'.$i] != '')$breite = $formvars['linebreite'.$i];	else $breite = 1;
+		if($formvars['lineposx'.$i] != '')$posx = $formvars['lineposx'.$i]; else $posx = 70;
+		if($formvars['lineposy'.$i] != '')$posy = $formvars['lineposy'.$i]-20; else $posy = 0;
+		if($formvars['lineendposx'.$i] != '')$endposx = $formvars['lineendposx'.$i]; else $endposx = 520;
+		if($formvars['lineendposy'.$i] != '')$endposy = $formvars['lineendposy'.$i]-20; else $endposy = 0;
+    $sql = 'INSERT INTO druckfreilinien SET';
+    $sql .= ' posx = '.$posx.',';
+    $sql .= ' posy = '.$posy.',';
+		$sql .= ' endposx = '.$endposx.',';
+    $sql .= ' endposy = '.$endposy.',';
+    $sql .= ' breite = '.$breite;
+    $this->debug->write("<p>file:kvwmap class:ddl->addline :",4);
+    $this->database->execSQL($sql,4, 1);
+    $lastinsert_id = mysql_insert_id();
+    $sql = 'INSERT INTO ddl2freilinien (ddl_id, line_id) VALUES ('.$formvars['aktivesLayout'].', '.$lastinsert_id.')';
+    $this->debug->write("<p>file:kvwmap class:ddl->addline :",4);
+    $this->database->execSQL($sql,4, 1);
+  }
+  
+  function removeline($formvars){
+    $sql = 'DELETE FROM druckfreilinien WHERE id = '.$formvars['line_id'];
+    $this->debug->write("<p>file:kvwmap class:ddl->removeline :",4);
+    $this->database->execSQL($sql,4, 1);
+    $sql = 'DELETE FROM ddl2freilinien WHERE line_id = '.$formvars['line_id'];
+    $this->debug->write("<p>file:kvwmap class:ddl->removeline :",4);
     $this->database->execSQL($sql,4, 1);
   }
   

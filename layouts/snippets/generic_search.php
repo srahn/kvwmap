@@ -227,7 +227,7 @@ function add_searchmask(layer_id){
 	}
 
 ?><table border="0" cellpadding="5" cellspacing="2" bgcolor="<? echo $bgcolor; ?>"><?php
-	if($this->selected_search != ''){echo '<script type="text/javascript">showsearches();</script>';} ?>
+	if(!in_array($this->selected_search[0]['name'], array('', '<last_search>'))){echo '<script type="text/javascript">showsearches();</script>';} ?>
   <tr> 
     <td id="searchmasks">
 
