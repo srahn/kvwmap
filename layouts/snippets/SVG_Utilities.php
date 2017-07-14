@@ -346,7 +346,7 @@
 			}
 		  obj.setAttribute("x", pixel_coordx);
 		  obj.setAttribute("y", pixel_coordy);
-			rotate_point_direction();
+			if(pointfunctions == true)rotate_point_direction();
 		}
 	}
 
