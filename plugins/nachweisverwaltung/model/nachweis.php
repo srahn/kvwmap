@@ -908,7 +908,7 @@ class Nachweis {
 						}
 					}
           if($stammnr!=''){
-            $sql.=" AND n.stammnr='".$stammnr."'";
+            $sql.=" AND lower(n.stammnr)='".strtolower($stammnr)."'";
           }
 	        if($rissnr!=''){
 	          $sql.=" AND n.rissnummer='".$rissnr."'";
@@ -943,7 +943,7 @@ class Nachweis {
           }
 					if($andere_art)$sql.=" AND d.id IN (".$andere_art.")";
 					if($suchbemerkung != ''){
-						$sql.=" AND n.bemerkungen LIKE '%".$suchbemerkung."%'";
+						$sql.=" AND lower(n.bemerkungen) LIKE '%".strtolower($suchbemerkung)."%'";
 					}
           if ($order=='') {
             $order="flurid, stammnr, datum";
