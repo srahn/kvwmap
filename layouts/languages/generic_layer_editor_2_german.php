@@ -17,7 +17,7 @@
  $strNoMatch="Zu diesem Thema wurden keine Objekte gefunden!";
  $strDeleteThisDataset="Datensatz löschen";
  $strExportThis="Datensatz exportieren";
- $strUseForNewDataset="Für neuen Datensatz verwenden";
+ $strUseForNewDataset="Als Vorlage für neuen Datensatz verwenden";
  $strShowPK="anzeigen";
  $strNewPK="neu";
  $strShowFK="anzeigen";
@@ -32,4 +32,5 @@
  $strSwitchGLEViewColumns="zur spaltenweisen Darstellung wechseln";
  $strSwitchGLEViewRows="zur zeilenweisen Darstellung wechseln";
  $strEditAll="mehrere bearbeiten";
+ $strCopyDataset="Datensatz kopieren";
 ?>
