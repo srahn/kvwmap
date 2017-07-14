@@ -74,6 +74,7 @@ function umlaute_umwandeln($name){
   $name = str_replace('?', '_', $name);
 	$name = str_replace('+', '_', $name);
 	$name = str_replace(',', '_', $name);
+	$name = str_replace('*', '_', $name);
   return $name;
 }
 
@@ -827,8 +828,10 @@ class GUI {
       if ($classset[$j]['text']!='') {
         $klasse -> settext($classset[$j]['text']);
       }
-      # setzen eines oder mehrerer Styles
-      # Änderung am 12.07.2005 Korduan
+      if ($classset[$j]['legendgraphic'] != '') {
+				$imagename = WWWROOT.APPLVERSION.GRAPHICSPATH . 'custom/' . $classset[$j]['legendgraphic'];
+				$klasse->set('keyimage', $imagename);
+			}
       for ($k=0;$k<count($classset[$j]['Style']);$k++) {
         $dbStyle=$classset[$j]['Style'][$k];
 				if (MAPSERVERVERSION < 600) {
@@ -1464,16 +1467,18 @@ class GUI {
 										}
 										$legend .= '<tr style="line-height: 15px"><td style="line-height: 14px">';
 										if($s > 0){
+											$width = 18;
+											if($maplayer->type == 0)$height = 18;			# Punktlayer
+											else $height = 12;
+											if($layer['Class'][$k]['legendimagewidth'] != '')$width = $layer['Class'][$k]['legendimagewidth'];
+											if($layer['Class'][$k]['legendimageheight'] != '')$height = $layer['Class'][$k]['legendimageheight'];
 											if($layer['Class'][$k]['Style'][0]['colorrange'] != ''){
-												$height = 18;
 												$newname = rand(0, 1000000).'.jpg';
-												$this->colorramp(IMAGEPATH.$newname, 18, $height, $layer['Class'][$k]['Style'][0]['colorrange']);
+												$this->colorramp(IMAGEPATH.$newname, $width, $height, $layer['Class'][$k]['Style'][0]['colorrange']);
 											}
 											else{
-												if($maplayer->type == 0)$height = 18;			# Punktlayer
-												else $height = 12;
 												$padding = 1;
-												$image = $class->createLegendIcon(18, $height);
+												$image = $class->createLegendIcon($width, $height);
 												$filename = $this->map_saveWebImage($image,'jpeg');
 												$newname = $this->user->id.basename($filename);
 												rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
@@ -1499,7 +1504,7 @@ class GUI {
 											else {
 												$new_class_image = TEMPPATH_REL . $newname;
 											}
-											$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="'.$status.'"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.$new_class_image.'\','.$height.')" onmouseout="mouseOutClassStatus('.$classid.',\''.$new_class_image.'\','.$height.')" onclick="changeClassStatus('.$classid.',\''.$new_class_image.'\', '.$this->user->rolle->instant_reload.','.$height.')"><img style="vertical-align:middle;padding-bottom: '.$padding.'" border="0" name="imgclass'.$classid.'" src="'.$imagename.'"></a>';
+											$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="'.$status.'"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.$new_class_image.'\','.$height.')" onmouseout="mouseOutClassStatus('.$classid.',\''.$new_class_image.'\','.$height.')" onclick="changeClassStatus('.$classid.',\''.$new_class_image.'\', '.$this->user->rolle->instant_reload.','.$height.')"><img style="vertical-align:middle;padding-bottom: '.$padding.'" border="0" name="imgclass'.$classid.'" width="'.$layer['Class'][$k]['legendimagewidth'].'" height="'.$layer['Class'][$k]['legendimageheight'].'" src="'.$imagename.'"></a>';
 										}
 										$legend .= '&nbsp;<span class="px13">'.html_umlaute($class->name).'</span></td></tr>';
 									}
@@ -2424,6 +2429,8 @@ class db_mapObj {
 				`Expression`,
 				`classification`,
 				`legendgraphic`,
+				`legendimagewidth`,
+				`legendimageheight`,
 				`drawingorder`,
 				`legendorder`,
 				`text`

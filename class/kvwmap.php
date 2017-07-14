@@ -563,16 +563,18 @@ class GUI {
 										}
 										$legend .= '<tr style="line-height: 15px"><td style="line-height: 14px">';
 										if($s > 0){
+											$width = 18;
+											if($maplayer->type == 0)$height = 18;			# Punktlayer
+											else $height = 12;
+											if($layer['Class'][$k]['legendimagewidth'] != '')$width = $layer['Class'][$k]['legendimagewidth'];
+											if($layer['Class'][$k]['legendimageheight'] != '')$height = $layer['Class'][$k]['legendimageheight'];
 											if($layer['Class'][$k]['Style'][0]['colorrange'] != ''){
-												$height = 18;
 												$newname = rand(0, 1000000).'.jpg';
-												$this->colorramp(IMAGEPATH.$newname, 18, $height, $layer['Class'][$k]['Style'][0]['colorrange']);
+												$this->colorramp(IMAGEPATH.$newname, $width, $height, $layer['Class'][$k]['Style'][0]['colorrange']);
 											}
 											else{
-												if($maplayer->type == 0)$height = 18;			# Punktlayer
-												else $height = 12;
 												$padding = 1;
-												$image = $class->createLegendIcon(18, $height);
+												$image = $class->createLegendIcon($width, $height);
 												$filename = $this->map_saveWebImage($image,'jpeg');
 												$newname = $this->user->id.basename($filename);
 												rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
@@ -598,7 +600,7 @@ class GUI {
 											else {
 												$new_class_image = TEMPPATH_REL . $newname;
 											}
-											$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="'.$status.'"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.$new_class_image.'\','.$height.')" onmouseout="mouseOutClassStatus('.$classid.',\''.$new_class_image.'\','.$height.')" onclick="changeClassStatus('.$classid.',\''.$new_class_image.'\', '.$this->user->rolle->instant_reload.','.$height.')"><img style="vertical-align:middle;padding-bottom: '.$padding.'" border="0" name="imgclass'.$classid.'" src="'.$imagename.'"></a>';
+											$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="'.$status.'"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.$new_class_image.'\','.$height.')" onmouseout="mouseOutClassStatus('.$classid.',\''.$new_class_image.'\','.$height.')" onclick="changeClassStatus('.$classid.',\''.$new_class_image.'\', '.$this->user->rolle->instant_reload.','.$height.')"><img style="vertical-align:middle;padding-bottom: '.$padding.'" border="0" name="imgclass'.$classid.'" width="'.$layer['Class'][$k]['legendimagewidth'].'" height="'.$layer['Class'][$k]['legendimageheight'].'" src="'.$imagename.'"></a>';
 										}
 										$legend .= '&nbsp;<span class="px13">'.html_umlaute($class->name).'</span></td></tr>';
 									}
@@ -7341,6 +7343,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$text = @array_values($this->formvars['text']);
 		$classification = @array_values($this->formvars['classification']);
 		$legendgraphic = @array_values($this->formvars['legendgraphic']);
+		$legendimagewidth = @array_values($this->formvars['legendimagewidth']);
+		$legendimageheight = @array_values($this->formvars['legendimageheight']);
 		$order = @array_values($this->formvars['order']);
 		$legendorder = @array_values($this->formvars['legendorder']);
 		$this->classes = $mapDB->read_Classes($old_layer_id);
@@ -7356,6 +7360,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$attrib['text'] = $text[$i];
 			$attrib['classification'] = $classification[$i];
 			$attrib['legendgraphic'] = $legendgraphic[$i];
+			$attrib['legendimagewidth'] = $legendimagewidth[$i];
+			$attrib['legendimageheight'] = $legendimageheight[$i];
 			$attrib['order'] = $order[$i];
 			$attrib['legendorder'] = ($legendorder[$i] == '' ? 'NULL' : $legendorder[$i]);
 			$attrib['class_id'] = $this->classes[$i]['Class_ID'];
@@ -14759,6 +14765,8 @@ class db_mapObj{
 				`Expression`,
 				`classification`,
 				`legendgraphic`,
+				`legendimagewidth`,
+				`legendimageheight`,
 				`drawingorder`,
 				`legendorder`,
 				`text`
@@ -16675,7 +16683,8 @@ class db_mapObj{
 
 	function update_Class($attrib) {
 		global $supportedLanguages;
-
+		if($attrib['legendimagewidth'] == '')$attrib['legendimagewidth'] = 'NULL';
+		if($attrib['legendimageheight'] == '')$attrib['legendimageheight'] = 'NULL';
 		$names = implode(
 			', ',
 			array_map(
@@ -16697,6 +16706,8 @@ class db_mapObj{
 				`text` = "' . $attrib['text'] . '",
 				`classification` = "' . $attrib['classification'] . '",
 				`legendgraphic`= "' . $attrib['legendgraphic'] . '",
+				`legendimagewidth`= ' . $attrib['legendimagewidth'] . ',
+				`legendimageheight`= ' . $attrib['legendimageheight'] . ',
 				`drawingorder` = ' . $attrib['order'] . ',
 				`legendorder` = '. $attrib['legendorder'] . '
 			WHERE
