@@ -493,6 +493,10 @@ a.menuered:hover {
 	background-image: url(../graphics/use_for_dataset.png);
 }
 
+.copy_dataset{
+	background-image: url(../graphics/copy_dataset.png);
+}
+
 .datensatz_exportieren{
 	background-image: url(../graphics/datensatz_exportieren.png);
 }
