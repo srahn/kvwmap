@@ -1619,6 +1619,7 @@ class GUI {
           if ($dbLabel['buffer']!='') {
             $klasse->label->set('buffer',$dbLabel['buffer']);
           }
+					$klasse->label->set('maxlength',$dbLabel['maxlength']);
           $klasse->label->set('wrap',$dbLabel['wrap']);
           $klasse->label->set('force',$dbLabel['the_force']);
           $klasse->label->set('partials',$dbLabel['partials']);
@@ -1728,6 +1729,7 @@ class GUI {
           if ($dbLabel['buffer']!='') {
             $label->buffer = $dbLabel['buffer'];
           }
+					$label->set('maxlength',$dbLabel['maxlength']);
           $label->wrap = $dbLabel['wrap'];
           $label->force = $dbLabel['the_force'];
           $label->partials = $dbLabel['partials'];
@@ -16955,6 +16957,7 @@ class db_mapObj{
     if($formvars["minfeaturesize"]){$sql.="minfeaturesize = '".$formvars["minfeaturesize"]."',";}
     if($formvars["maxfeaturesize"]){$sql.="maxfeaturesize = '".$formvars["maxfeaturesize"]."',";}
     if($formvars["partials"] != ''){$sql.="partials = '".$formvars["partials"]."',";}
+		if($formvars["maxlength"] != ''){$sql.="maxlength = '".$formvars["maxlength"]."',";}
     if($formvars["wrap"] != ''){$sql.="wrap = '".$formvars["wrap"]."',";}
     if($formvars["the_force"] != ''){$sql.="the_force = '".$formvars["the_force"]."',";}
     $sql.="Label_ID = ".$formvars["new_label_id"];
