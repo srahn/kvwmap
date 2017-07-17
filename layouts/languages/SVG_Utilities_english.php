@@ -4,6 +4,7 @@
   $strDrawPolygon="draw polygon";
   $strDeletePolygon="delete polygon";
   $strSplitLine="split lines";
+	$strSplitPolygon="split polygons";
   $strUndo="undo";
   $strSetPosition="set position";
   $strSetGPSPosition="set GPS position";
