@@ -867,6 +867,7 @@ function mouseup(evt){
 		  	document.getElementById("undo0").style.setProperty("fill","ghostwhite", "");
 		  	document.getElementById("new0").style.setProperty("fill","ghostwhite", "");
 		  	document.getElementById("pgon_subtr0").style.setProperty("fill","ghostwhite", "");
+				document.getElementById("split0").style.setProperty("fill","ghostwhite", "");
 				document.getElementById("vertex_edit1").style.setProperty("fill","ghostwhite", "");
 				remove_vertices();
 				remove_in_between_vertices();
@@ -3264,10 +3265,12 @@ $measurefunctions = '
 		      	<set attributeName="filter" begin="del0.mousedown" fill="freeze" to="none"/>
 						<set attributeName="filter" begin="del0.mouseup;del0.mouseout" fill="freeze" to="url(#Schatten)"/>
 					</rect>
-						<line	x1="81.5" y1="391" x2="127.5" y2="250" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
-						<line	x1="127.5" y1="250" x2="310.5" y2="243" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
-						<line	x1="310.5" y1="243" x2="370.5" y2="103" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
-						<line x1="300" y1="340" x2="150" y2="160" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="fill:rgb(222,222,222);stroke:rgb(111,111,111);stroke-width:35"/>
+						<polygon
+						points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284
+							379.5,218 378.5,139 357.5,138 260.5,91"
+						transform="matrix(1 0 0 1 0 0) scale(0.05)"
+						 style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
+						<line x1="380" y1="420" x2="70" y2="80" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="fill:rgb(222,222,222);stroke:rgb(0,0,0);stroke-width:30"/>
 					<rect id="split0" onmouseover="show_tooltip(\''.$strSplitPolygon.'\',evt.clientX,evt.clientY)" x="0" y="0" width="25" height="25" style="fill:white;opacity:0.25"/>
 				</g>
 				';
