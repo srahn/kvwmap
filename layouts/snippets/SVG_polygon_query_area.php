@@ -23,8 +23,8 @@
 	<input name="newpathwkt" type="hidden" value="<?php echo $this->formvars['newpathwkt']; ?>">
 	<input name="result" type="hidden" value="">
 	<input name="firstpoly" type="hidden" value="<?php echo $this->formvars['firstpoly']; ?>">
-	<input name="secondpoly" type="text" value="<?php echo $this->formvars['secondpoly']; ?>">
-	<input name="secondline" type="text" value="<?php echo $this->formvars['secondline']; ?>">
+	<input name="secondpoly" type="hidden" value="<?php echo $this->formvars['secondpoly']; ?>">
+	<input name="secondline" type="hidden" value="<?php echo $this->formvars['secondline']; ?>">
 	<input name="pathx_second" type="hidden" value="<?php echo $this->formvars['pathx_second']; ?>">
 	<input name="pathy_second" type="hidden" value="<?php echo $this->formvars['pathy_second']; ?>">
 	<input type="hidden" name="svghelp" id="svghelp">
