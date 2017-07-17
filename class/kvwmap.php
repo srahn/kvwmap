@@ -7669,7 +7669,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         }
 
 				$layerset[0]['sql'] = $sql;
-				echo "<p>Abfragestatement: ".$sql.$sql_order.$sql_limit;
+				#echo "<p>Abfragestatement: ".$sql.$sql_order.$sql_limit;
         $ret=$layerdb->execSQL('SET enable_seqscan=off;' . $sql . $sql_order . $sql_limit, 4, 0);
         if(!$ret[0]){
           while ($rs=pg_fetch_assoc($ret[1])) {
