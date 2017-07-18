@@ -63,7 +63,7 @@ class pointeditor {
     return $ret;
   }
 	
-	function getpoint($oid, $tablename, $columnname, $angle_column){
+	function getpoint($oid, $tablename, $columnname, $angle_column = NULL){
 		$sql = "SELECT st_x(st_transform(".$columnname.",".$this->clientepsg.")) AS pointx, st_y(st_transform(".$columnname.",".$this->clientepsg.")) AS pointy ";
 		if($angle_column != '')$sql.= ", ".$angle_column." as angle ";
 		$sql.= "FROM ".$tablename." WHERE oid = ".$oid;
