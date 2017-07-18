@@ -654,18 +654,18 @@ include('funktionen/input_check_functions.php');
 		}
 	}
 	
-	change_all = function(layer_id, k, attribute){
-		allfield = document.getElementById(layer_id+'_'+attribute+'_'+k);
+	change_all = function(layer_id, k, layerid_attribute){
+		allfield = document.getElementById(layerid_attribute+'_'+k);
 		for(var i = 0; i < k; i++){			
 			if(document.getElementById(layer_id+'_'+i).checked){
-				formfield = document.getElementById(layer_id+'_'+attribute+'_'+i);
+				formfield = document.getElementById(layerid_attribute+'_'+i);
 				if(formfield.type == 'checkbox'){
 					formfield.checked = allfield.checked;
 				}
 				else{
 					formfield.value = allfield.value;
 				}
-				document.getElementById(layer_id+'_'+attribute+'_'+i).onchange();
+				document.getElementById(layerid_attribute+'_'+i).onchange();
 			}
 		}		
 	}
