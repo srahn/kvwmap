@@ -645,7 +645,7 @@ function showMapParameter(epsg_code, width, height) {
 			msg = " \
 				<div style=\"text-align: left\"> \
 					<h2>Daten des aktuellen Kartenausschnitts</h2><br> \
-					Koordinatensystem: EPSG: " + epsg_code + "<br> \
+					Koordinatenreferenzsystem: EPSG: " + epsg_code + "<br> \
 					linke untere Ecke: (" + toFixed(gui.minx.value, 3) + ", " + toFixed(gui.miny.value, 3) + ")<br> \
 					rechte obere Ecke: (" + toFixed(gui.maxx.value, 3) + ", " + toFixed(gui.maxy.value, 3) + ")<br> \
 					Ausdehnung: " + toFixed(gui.maxx.value - gui.minx.value, 3) + " x " + toFixed(gui.maxy.value-gui.miny.value,3) + " m<br> \
