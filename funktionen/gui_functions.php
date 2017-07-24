@@ -241,7 +241,7 @@ function drag(event) {
 				resizeobjekt.style.width = width + (posx - resizex) + "px";
 			break;
 			case "col_resize":
-				resizeobjekt.style.width = width + (posx - resizex) + "px";
+				resizeobjekt.style.minWidth = width + (posx - resizex) + "px";
 			break;
 		}
   }
