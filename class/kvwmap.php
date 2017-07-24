@@ -563,44 +563,52 @@ class GUI {
 										}
 										$legend .= '<tr style="line-height: 15px"><td style="line-height: 14px">';
 										if($s > 0){
-											$width = 18;
-											if($maplayer->type == 0)$height = 18;			# Punktlayer
-											else $height = 12;
+											$width = $height = '';
 											if($layer['Class'][$k]['legendimagewidth'] != '')$width = $layer['Class'][$k]['legendimagewidth'];
 											if($layer['Class'][$k]['legendimageheight'] != '')$height = $layer['Class'][$k]['legendimageheight'];
-											if($layer['Class'][$k]['Style'][0]['colorrange'] != ''){
-												$newname = rand(0, 1000000).'.jpg';
-												$this->colorramp(IMAGEPATH.$newname, $width, $height, $layer['Class'][$k]['Style'][0]['colorrange']);
+											$padding = 1;
+											if($layer['Class'][$k]['legendgraphic'] != ''){								# eigenes Klassenbild
+												$imagename = $original_class_image = GRAPHICSPATH . 'custom/' . $layer['Class'][$k]['legendgraphic'];
+												if($width == ''){
+													$size = getimagesize($imagename);
+													$width = $size[0];
+													$height = $size[1];
+												}
 											}
-											else{
-												$padding = 1;
-												$image = $class->createLegendIcon($width, $height);
-												$filename = $this->map_saveWebImage($image,'jpeg');
-												$newname = $this->user->id.basename($filename);
-												rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
+											else{																													# generiertes Klassenbild
+												if($width == '')$width = 18;
+												if($height == ''){
+													if($maplayer->type == 0)$height = 18;	# Punktlayer
+													else $height = 12;
+												}
+												if($layer['Class'][$k]['Style'][0]['colorrange'] != ''){		# generierte Color-Ramp
+													$padding = 0;
+													$newname = rand(0, 1000000).'.jpg';
+													$this->colorramp(IMAGEPATH.$newname, $width, $height, $layer['Class'][$k]['Style'][0]['colorrange']);
+												}
+												else{																												# vom Mapserver generiertes Klassenbild
+													$image = $class->createLegendIcon($width, $height);
+													$filename = $this->map_saveWebImage($image,'jpeg');
+													$newname = $this->user->id.basename($filename);
+													rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
+												}
+												$imagename = $original_class_image = TEMPPATH_REL.$newname;
 											}
-											#Anne
 											$classid = $layer['Class'][$k]['Class_ID'];
 											if($this->mapDB->disabled_classes['status'][$classid] == '0'){
-												$imagename = 'graphics/inactive'.$height.'.jpg';
+												if($height < $width)$height1 = 12;
+												else $height1 = 18;
+												$imagename = 'graphics/inactive'.$height1.'.jpg';
 												$status = 0;
 											}
 											elseif($this->mapDB->disabled_classes['status'][$classid] == 2){
-												$imagename = TEMPPATH_REL.$newname;												
 												$status = 2;
 											}
 											else{
-												$imagename = TEMPPATH_REL.$newname;
 												$status = 1;
 											}
-											if ($layer['Class'][$k]['legendgraphic'] != '') {
-												$imagename = GRAPHICSPATH . 'custom/' . $layer['Class'][$k]['legendgraphic'];
-												$new_class_image = $imagename;
-											}
-											else {
-												$new_class_image = TEMPPATH_REL . $newname;
-											}
-											$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="'.$status.'"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.$new_class_image.'\','.$height.')" onmouseout="mouseOutClassStatus('.$classid.',\''.$new_class_image.'\','.$height.')" onclick="changeClassStatus('.$classid.',\''.$new_class_image.'\', '.$this->user->rolle->instant_reload.','.$height.')"><img style="vertical-align:middle;padding-bottom: '.$padding.'" border="0" name="imgclass'.$classid.'" width="'.$layer['Class'][$k]['legendimagewidth'].'" height="'.$layer['Class'][$k]['legendimageheight'].'" src="'.$imagename.'"></a>';
+											# $original_class_image ist das eigentliche Klassenbild bei Status 1, $imagename das Bild, welches entsprechend des Status gerade gesetzt ist
+											$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="'.$status.'"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.$original_class_image.'\', '.$width.', '.$height.')" onmouseout="mouseOutClassStatus('.$classid.',\''.$original_class_image.'\', '.$width.', '.$height.')" onclick="changeClassStatus('.$classid.',\''.$original_class_image.'\', '.$this->user->rolle->instant_reload.', '.$width.', '.$height.')"><img style="vertical-align:middle;padding-bottom: '.$padding.'" border="0" name="imgclass'.$classid.'" width="'.$width.'" height="'.$height.'" src="'.$imagename.'"></a>';
 										}
 										$legend .= '&nbsp;<span class="px13">'.html_umlaute($class->name).'</span></td></tr>';
 									}
@@ -14791,11 +14799,11 @@ class db_mapObj{
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Class - Lesen der Classen eines Layers:<br>" . $sql, 4);
 		$query = mysql_query($sql);
 		if ($query == 0) { echo "<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__; return 0; }
-		$i = 0;
+		$index = 0;
 		while ($rs = mysql_fetch_assoc($query)) {
 			$rs['Style'] = $this->read_Styles($rs['Class_ID']);
 			$rs['Label'] = $this->read_Label($rs['Class_ID']);
-			$rs['index'] = $i;
+			$rs['index'] = $index;
 			#Anne
 			if($disabled_classes){
 				if($disabled_classes['status'][$rs['Class_ID']] == 2) {
@@ -14819,7 +14827,7 @@ class db_mapObj{
 			else $rs['Status'] = 1;
 
 			$Classes[] = $rs;
-			$i++;
+			$index++;
 		}
 		return $Classes;
 	}

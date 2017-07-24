@@ -598,9 +598,11 @@ function deactivateAllClasses(class_ids){
 }
 
 /*Anne*/
-function changeClassStatus(classid,imgsrc,instantreload,height){
+function changeClassStatus(classid,imgsrc,instantreload,width,height){
 	selClass = document.getElementsByName("class"+classid)[0];
 	selImg   = document.getElementsByName("imgclass"+classid)[0];
+	if(height < width)height = 12;
+	else height = 18;
 	if(selClass.value=='0'){
 		selClass.value='1';
 		selImg.src=imgsrc;
@@ -615,9 +617,11 @@ function changeClassStatus(classid,imgsrc,instantreload,height){
 }
 
 /*Anne*/
-function mouseOverClassStatus(classid,imgsrc,height){
+function mouseOverClassStatus(classid,imgsrc,width,height){
 	selClass = document.getElementsByName("class"+classid)[0];
 	selImg   = document.getElementsByName("imgclass"+classid)[0];
+	if(height < width)height = 12;
+	else height = 18;
 	if(selClass.value=='0'){
 		selImg.src=imgsrc;	
 	}else if(selClass.value=='1'){
@@ -628,9 +632,11 @@ function mouseOverClassStatus(classid,imgsrc,height){
 }
 
 /*Anne*/
-function mouseOutClassStatus(classid,imgsrc,height){
+function mouseOutClassStatus(classid,imgsrc,width,height){
 	selClass = document.getElementsByName("class"+classid)[0];
 	selImg   = document.getElementsByName("imgclass"+classid)[0];
+	if(height < width)height = 12;
+	else height = 18;	
 	if(selClass.value=='0'){
 		selImg.src="graphics/inactive"+height+".jpg";	
 	}else if(selClass.value=='1'){
