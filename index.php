@@ -82,7 +82,12 @@ if (!$_SESSION['angemeldet'] or !empty($_REQUEST['username'])) {
 	$userDb->passwd = MYSQL_PASSWORD;
 	$userDb->dbName = MYSQL_DBNAME;
 	header('logout: true');		// damit ajax-Requests das auch mitkriegen
-	include(LAYOUTPATH . 'snippets/' . LOGIN);
+	if (file_exists(LAYOUTPATH . 'snippets/' . LOGIN)) {
+		include(LAYOUTPATH . 'snippets/' . LOGIN);
+	}
+	else {
+		include(LAYOUTPATH . 'snippets/login.php');
+	}
 }
 
 function include_($filename){
