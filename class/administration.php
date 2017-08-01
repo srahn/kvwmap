@@ -131,6 +131,7 @@ class administration{
 				$sql = file_get_contents($filepath);
 				if ($sql != '') {
 					$sql = str_replace('$EPSGCODE_ALKIS', EPSGCODE_ALKIS, $sql);
+					$sql = str_replace(':alkis_epsg', EPSGCODE_ALKIS, $sql);
 					$queryret=$this->pgdatabase->execSQL($sql,0, 0);
 					if($queryret[0]){
 						echo $queryret[1].'<br>Fehler beim Ausführen von migration-Datei: '.$filepath.'<br>';

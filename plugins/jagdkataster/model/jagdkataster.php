@@ -317,7 +317,7 @@ class jagdkataster {
 		$sql.= "FROM alkis.ax_flurstueck ff ";		
 		$sql.= "LEFT JOIN alkis.ax_buchungsstelle s ON ff.istgebucht = s.gml_id OR ARRAY[ff.gml_id::text] <@ s.verweistauf OR ARRAY[ff.istgebucht] <@ s.an ";
 		$sql.= "LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
-		$sql.= "LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.schluessel_land AND g.bezirk = b.bezirk ";
+		$sql.= "LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
 		$sql.= "LEFT JOIN alkis.ax_namensnummer n ON n.istbestandteilvon = g.gml_id ";
 		$sql.= "LEFT JOIN alkis.ax_eigentuemerart_namensnummer w ON w.wert = n.eigentuemerart ";
 		$sql.= "LEFT JOIN alkis.ax_person p ON n.benennt = p.gml_id ";

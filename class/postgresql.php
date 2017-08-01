@@ -1075,7 +1075,7 @@ FROM
 		if($FlurstKennz!='') {
 			if($hist_alb) $sql.="FROM alkis.ax_historischesflurstueckohneraumbezug f ";
 			else $sql.="FROM alkis.ax_flurstueck f ";  
-			$sql.="LEFT JOIN alkis.ax_gemarkung gem ON f.gemarkung_land = gem.schluessel_land AND f.gemarkungsnummer = gem.gemarkungsnummer ";
+			$sql.="LEFT JOIN alkis.ax_gemarkung gem ON f.gemarkung_land = gem.land AND f.gemarkungsnummer = gem.gemarkungsnummer ";
 			if($fiktiv){
 				$sql.="JOIN alkis.ax_buchungsstelle s ON ARRAY[f.istgebucht] <@ s.an ";
 			}
@@ -1086,10 +1086,10 @@ FROM
 		}
 		else{
 			$sql.="FROM alkis.ax_buchungsblatt g ";
-			$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.schluessel_land AND g.bezirk = b.bezirk ";
+			$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
 			$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON s.istbestandteilvon = g.gml_id ";
 			$sql.="LEFT JOIN alkis.ax_flurstueck f ON f.istgebucht = s.gml_id OR f.gml_id = ANY(s.verweistauf) OR f.istgebucht = ANY(s.an) ";
-			$sql.="LEFT JOIN alkis.ax_gemarkung gem ON f.gemarkung_land = gem.schluessel_land AND f.gemarkungsnummer = gem.gemarkungsnummer ";
+			$sql.="LEFT JOIN alkis.ax_gemarkung gem ON f.gemarkung_land = gem.land AND f.gemarkungsnummer = gem.gemarkungsnummer ";
 			$sql.="LEFT JOIN alkis.ax_buchungsart_buchungsstelle art ON s.buchungsart = art.wert ";		
 		}
 		$sql.="WHERE 1=1 ";
@@ -1267,14 +1267,14 @@ FROM
 		$sql ="SELECT distinct f.gml_id, 0 as hist_alb, lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, CASE WHEN f.abweichenderrechtszustand = 'true' THEN 'ja' ELSE 'nein' END AS abweichenderrechtszustand, zaehler, nenner, k.schluesselgesamt AS kreisid, k.bezeichnung as kreisname, gem.schluesselgesamt as gemkgschl, gem.bezeichnung as gemkgname, g.schluesselgesamt as gemeinde, g.bezeichnung as gemeindename,d.stelle as finanzamt, d.bezeichnung AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp ";
 		$sql.="FROM alkis.ax_kreisregion AS k, alkis.ax_gemeinde as g, alkis.ax_gemarkung AS gem, alkis.ax_flurstueck AS f ";
 		$sql.="LEFT JOIN alkis.ax_dienststelle as d ON d.stellenart = 1200 AND d.stelle = ANY(f.stelle) ";
-		$sql.="WHERE f.gemarkungsnummer=gem.gemarkungsnummer AND f.gemarkung_land = gem.schluessel_land AND f.kreis = g.kreis AND f.gemeinde = g.gemeinde AND f.kreis = k.kreis AND f.flurstueckskennzeichen='".$FlurstKennz."'";
+		$sql.="WHERE f.gemarkungsnummer=gem.gemarkungsnummer AND f.gemarkung_land = gem.land AND f.kreis = g.kreis AND f.gemeinde = g.gemeinde AND f.kreis = k.kreis AND f.flurstueckskennzeichen='".$FlurstKennz."'";
 		if(!$without_temporal_filter)$sql.= $this->build_temporal_filter(array('k', 'g', 'gem', 'f'));
 		else{
 			$sql.= " UNION ";
 			$sql.= "SELECT distinct f.gml_id, 1 as hist_alb, lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, '' as abweichenderrechtszustand, zaehler, nenner, '0' AS kreisid, '' as kreisname, gem.schluesselgesamt as gemkgschl, gem.bezeichnung as gemkgname, g.schluesselgesamt as gemeinde, g.bezeichnung as gemeindename, '' as finanzamt, '' AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp ";
 			$sql.= "FROM alkis.ax_historischesflurstueckohneraumbezug as f ";
-			$sql.= "LEFT JOIN alkis.ax_gemarkung AS gem ON f.gemarkungsnummer=gem.gemarkungsnummer AND f.gemarkung_land = gem.schluessel_land ";
-			$sql.= "LEFT JOIN alkis.pp_gemarkung ppg ON gem.schluessel_land = ppg.land AND gem.gemarkungsnummer = ppg.gemarkung ";
+			$sql.= "LEFT JOIN alkis.ax_gemarkung AS gem ON f.gemarkungsnummer=gem.gemarkungsnummer AND f.gemarkung_land = gem.land ";
+			$sql.= "LEFT JOIN alkis.pp_gemarkung ppg ON gem.land = ppg.land AND gem.gemarkungsnummer = ppg.gemarkung ";
 			$sql.= "LEFT JOIN alkis.ax_gemeinde g ON f.gemeinde=g.gemeinde AND ppg.kreis = g.kreis ";
 			$sql.= "WHERE f.flurstueckskennzeichen='".$FlurstKennz."'";
 			$sql.=" order by endet DESC";		# damit immer die jüngste Version eines Flurstücks gefunden wird
@@ -1753,7 +1753,7 @@ FROM
     $sql = "SELECT distinct coalesce(n.laufendenummernachdin1421, '0') as order1, coalesce(bestehtausrechtsverhaeltnissenzu, '0') as order2, bestehtausrechtsverhaeltnissenzu, CASE WHEN n.beschriebderrechtsgemeinschaft is null and n.artderrechtsgemeinschaft is null THEN n.laufendenummernachdin1421 ELSE NULL END AS namensnr, n.gml_id as n_gml_id, p.gml_id, p.nachnameoderfirma, p.vorname, p.akademischergrad, p.namensbestandteil, p.geburtsname, p.geburtsdatum::date, anschrift.gml_id as anschrift_gml_id, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, 'OT '||anschrift.ortsteil as ortsteil, anschrift.bestimmungsland, w.beschreibung as Art, n.zaehler||'/'||n.nenner as anteil, coalesce(NULLIF(n.beschriebderrechtsgemeinschaft, ''),adrg.beschreibung) as zusatz_eigentuemer ";
 		$sql.= "FROM alkis.ax_buchungsstelle s ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
-		$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.schluessel_land AND g.bezirk = b.bezirk ";
+		$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
 		$sql.= "LEFT JOIN alkis.ax_namensnummer n ON n.istbestandteilvon = g.gml_id ";
 		$sql.= "LEFT JOIN alkis.ax_artderrechtsgemeinschaft_namensnummer adrg ON n.artderrechtsgemeinschaft = adrg.wert ";
 		$sql.= "LEFT JOIN alkis.ax_eigentuemerart_namensnummer w ON w.wert = n.eigentuemerart ";
@@ -1868,7 +1868,7 @@ FROM
 		$sql.= "LEFT JOIN alkis.ax_namensnummer n ON n.benennt = p.gml_id ";
 		$sql.= "LEFT JOIN alkis.ax_eigentuemerart_namensnummer w ON w.wert = n.eigentuemerart ";
 		$sql.= "LEFT JOIN alkis.ax_buchungsblatt g ON n.istbestandteilvon = g.gml_id ";
-		$sql.= "LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.schluessel_land AND g.bezirk = b.bezirk ";
+		$sql.= "LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
 		$sql.= "LEFT JOIN alkis.ax_buchungsstelle s ON s.istbestandteilvon = g.gml_id ";
 		$sql.= "LEFT JOIN alkis.ax_flurstueck f ON f.istgebucht = s.gml_id OR f.gml_id = ANY(s.verweistauf) OR f.istgebucht = ANY(s.an) ";
 		$sql.= " WHERE 1=1 ";
@@ -2094,7 +2094,7 @@ FROM
 		$sql.="JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id ";
 		$sql.="LEFT JOIN alkis.ax_buchungsart_buchungsstelle art ON s.buchungsart = art.wert ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id "; 
-		$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.schluessel_land AND g.bezirk = b.bezirk ";
+		$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
 		$sql.="WHERE f.flurstueckskennzeichen = '".$FlurstKennz."'";
 		if(!$hist_alb) $sql.= $this->build_temporal_filter(array('f', 's', 'g', 'b'));
 		#echo $sql;
@@ -2190,7 +2190,7 @@ FROM
 			$sql.=",schluesselgesamt AS GemFlurID FROM alkis.ax_gemarkungsteilflur WHERE '300700' != ANY(anlass)";
 			
 			if ($GemkgID>0) {
-				$sql.=" AND schluessel_land || gemarkung='".$GemkgID."'";
+				$sql.=" AND land || gemarkung='".$GemkgID."'";
 			}
 			if ($FlurID[0]>0) {
 				$sql.=" AND gemarkungsteilflur IN (".implode(',', $FlurID).")";
