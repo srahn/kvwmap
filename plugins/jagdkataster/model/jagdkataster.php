@@ -299,7 +299,7 @@ class jagdkataster {
   }
 	
 	function getIntersectedFlurstWithJagdbezirke($oids){
-		$sql = "SELECT f.gemarkung_land||f.gemarkungsnummer as gemkgschl, f.flurnummer as flur, f.zaehler, f.nenner, g.bezeichnung as gemkgname, f.flurstueckskennzeichen as flurstkennz, st_area_utm(f.wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.") AS flurstflaeche, st_area_utm(st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.")), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.") AS schnittflaeche, jagdbezirke.name, jagdbezirke.art, f.amtlicheflaeche AS albflaeche";
+		$sql = "SELECT f.land||f.gemarkungsnummer as gemkgschl, f.flurnummer as flur, f.zaehler, f.nenner, g.bezeichnung as gemkgname, f.flurstueckskennzeichen as flurstkennz, st_area_utm(f.wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.") AS flurstflaeche, st_area_utm(st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.")), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.") AS schnittflaeche, jagdbezirke.name, jagdbezirke.art, f.amtlicheflaeche AS albflaeche";
 		$sql.= " FROM alkis.ax_gemarkung AS g, jagdkataster.jagdbezirke, alkis.ax_flurstueck AS f";
 		$sql.= " WHERE f.gemarkungsnummer = g.gemarkungsnummer";
 		$sql.= " AND jagdbezirke.oid IN (".implode(',', $oids).")";

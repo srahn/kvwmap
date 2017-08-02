@@ -68,11 +68,11 @@ SET search_path = alkis, public;
 CREATE UNIQUE INDEX pp_kreis_gid_ix ON pp_kreis (gid);
 
 -- Gesamtflaeche
-SELECT AddGeometryColumn('pp_kreis','the_geom',25833,'MULTIPOLYGON',2);
+SELECT AddGeometryColumn('pp_kreis','the_geom',:alkis_epsg,'MULTIPOLYGON',2);
 CREATE INDEX pp_kreis_gidx ON pp_kreis USING gist(the_geom);
 
 -- vereinfachte Gesamtflaeche
-SELECT AddGeometryColumn('pp_kreis','simple_geom',25833,'MULTIPOLYGON',2);
+SELECT AddGeometryColumn('pp_kreis','simple_geom',:alkis_epsg,'MULTIPOLYGON',2);
 CREATE INDEX pp_kreis_sgidx ON pp_kreis USING gist(simple_geom);
 
 
@@ -99,11 +99,11 @@ CREATE INDEX pp_kreis_sgidx ON pp_kreis USING gist(simple_geom);
 CREATE UNIQUE INDEX pp_amt_gid_ix ON pp_amt (gid);
 
 -- Gesamtflaeche
-SELECT AddGeometryColumn('pp_amt','the_geom',25833,'MULTIPOLYGON',2);
+SELECT AddGeometryColumn('pp_amt','the_geom',:alkis_epsg,'MULTIPOLYGON',2);
 CREATE INDEX pp_amt_gidx ON pp_amt USING gist(the_geom);
 
 -- vereinfachte Gesamtflaeche
-SELECT AddGeometryColumn('pp_amt','simple_geom',25833,'MULTIPOLYGON',2);
+SELECT AddGeometryColumn('pp_amt','simple_geom',:alkis_epsg,'MULTIPOLYGON',2);
 CREATE INDEX pp_amt_sgidx ON pp_amt USING gist(simple_geom);
 
 
@@ -132,11 +132,11 @@ CREATE INDEX pp_amt_sgidx ON pp_amt USING gist(simple_geom);
 CREATE UNIQUE INDEX pp_gemeinde_gid_ix ON pp_gemeinde (gid);
 
 -- Gesamtflaeche
-SELECT AddGeometryColumn('pp_gemeinde','the_geom',25833,'MULTIPOLYGON',2);
+SELECT AddGeometryColumn('pp_gemeinde','the_geom',:alkis_epsg,'MULTIPOLYGON',2);
 CREATE INDEX pp_gemeinde_gidx ON pp_gemeinde USING gist(the_geom);
 
 -- vereinfachte Gesamtflaeche
-SELECT AddGeometryColumn('pp_gemeinde','simple_geom',25833,'MULTIPOLYGON',2);
+SELECT AddGeometryColumn('pp_gemeinde','simple_geom',:alkis_epsg,'MULTIPOLYGON',2);
 CREATE INDEX pp_gemeinde_sgidx ON pp_gemeinde USING gist(simple_geom);
 
 
@@ -173,11 +173,11 @@ CREATE INDEX pp_gemeinde_sgidx ON pp_gemeinde USING gist(simple_geom);
 CREATE UNIQUE INDEX pp_gemarkung_gid_ix ON pp_gemarkung (gid);
 
 -- Gesamtfläche
-SELECT AddGeometryColumn('pp_gemarkung','the_geom',25833,'MULTIPOLYGON',2);
+SELECT AddGeometryColumn('pp_gemarkung','the_geom',:alkis_epsg,'MULTIPOLYGON',2);
 CREATE INDEX pp_gemarkung_gidx ON pp_gemarkung USING gist(the_geom);
 
 -- vereinfachte Gesamtfläche
-SELECT AddGeometryColumn('pp_gemarkung','simple_geom',25833,'MULTIPOLYGON',2);
+SELECT AddGeometryColumn('pp_gemarkung','simple_geom',:alkis_epsg,'MULTIPOLYGON',2);
 CREATE INDEX pp_gemarkung_sgidx ON pp_gemarkung USING gist(simple_geom);
 
 
@@ -206,11 +206,11 @@ COMMENT ON COLUMN pp_gemarkung.simple_geom   IS 'vereinfachte Geometrie für die
 CREATE UNIQUE INDEX pp_flur_gid_ix ON pp_flur (gid);
 
 -- Gesamtfläche
-SELECT AddGeometryColumn('pp_flur','the_geom',25833,'MULTIPOLYGON',2);
+SELECT AddGeometryColumn('pp_flur','the_geom',:alkis_epsg,'MULTIPOLYGON',2);
 CREATE INDEX pp_flur_gidx ON pp_flur USING gist(the_geom);
 
 -- vereinfachte Gesamtflaeche
-SELECT AddGeometryColumn('pp_flur','simple_geom',25833,'MULTIPOLYGON',2);
+SELECT AddGeometryColumn('pp_flur','simple_geom',:alkis_epsg,'MULTIPOLYGON',2);
 CREATE INDEX pp_flur_sgidx ON pp_flur USING gist(simple_geom);
 
 
@@ -243,7 +243,7 @@ COMMENT ON COLUMN pp_flur.simple_geom    IS 'vereinfachte Geometrie für die Suc
 -- Ersatzweise einen ForeignKey über 2 Felder?
   );
 
-SELECT AddGeometryColumn('pp_flurstueck_nr','the_geom',25833,'POINT',2);
+SELECT AddGeometryColumn('pp_flurstueck_nr','the_geom',:alkis_epsg,'POINT',2);
 
 -- Geometrischer Index
 CREATE INDEX pp_flurstueck_nr_gidx ON pp_flurstueck_nr USING gist(the_geom);
@@ -278,7 +278,7 @@ CREATE TABLE pp_strassenname
     CONSTRAINT pp_snam_pk  PRIMARY KEY (gid)
 ) WITH (OIDS=FALSE);
 
-SELECT AddGeometryColumn('pp_strassenname','the_geom',25833,'POINT',2);
+SELECT AddGeometryColumn('pp_strassenname','the_geom',:alkis_epsg,'POINT',2);
 CREATE INDEX pp_snam_gidx ON pp_strassenname USING gist(the_geom); 
 
   COMMENT ON TABLE  pp_strassenname                IS 'Post-Processing: Label der Straßennamen in der Karte. Auszug aus ap_pto.';
@@ -305,7 +305,7 @@ WITH (
   OIDS=TRUE
 );
 
-SELECT AddGeometryColumn('pp_zuordungspfeilspitze_flurstueck','geom',25833,'POINT',2);
+SELECT AddGeometryColumn('pp_zuordungspfeilspitze_flurstueck','geom',:alkis_epsg,'POINT',2);
 CREATE INDEX pp_zuordungspfeilspitze_flurstueckgidx ON pp_zuordungspfeilspitze_flurstueck USING gist(geom);
 
 
@@ -318,7 +318,7 @@ WITH (
   OIDS=TRUE
 );
 
-SELECT AddGeometryColumn('pp_zuordungspfeilspitze_bodensch','geom',25833,'POINT',2);
+SELECT AddGeometryColumn('pp_zuordungspfeilspitze_bodensch','geom',:alkis_epsg,'POINT',2);
 CREATE INDEX pp_zuordungspfeilspitze_bodenschgidx ON pp_zuordungspfeilspitze_bodensch USING gist(geom);
 
 	

@@ -37,7 +37,7 @@ CREATE OR REPLACE VIEW alkis.lk_grenzpunkte AS
     p.koordinatenstatus,
     p.hinweise,
     rtrim(ltrim(st_astext(p.wkb_geometry), 'POINT('::text), ')'::text) AS "position",
-    p.herkunft_source_description[0] as source_description,
+    p.herkunft_source_source_description[0] as source_description,
     e.beschreibung AS datenerhebung,
     p.genauigkeitsstufe,
     m.beschreibung AS punktgenauigkeit,
@@ -50,7 +50,7 @@ CREATE OR REPLACE VIEW alkis.lk_grenzpunkte AS
      LEFT JOIN alkis.ax_genauigkeitsstufe_punktort m ON m.wert = p.genauigkeitsstufe
      LEFT JOIN alkis.ax_vertrauenswuerdigkeit_punktort n ON n.wert = p.vertrauenswuerdigkeit
      LEFT JOIN alkis.ax_bemerkungzurabmarkung_grenzpunkt ba ON o.bemerkungzurabmarkung = ba.wert
-     LEFT JOIN alkis.ax_datenerhebung e ON e.wert = ANY (p.herkunft_source_description::integer[])
+     LEFT JOIN alkis.ax_datenerhebung e ON e.wert = ANY (p.herkunft_source_source_description::integer[])
      LEFT JOIN alkis.ax_dienststelle d ON o.zustaendigestelle_stelle = d.stelle
   WHERE d.endet IS NULL;
 
@@ -108,13 +108,13 @@ LEFT JOIN alkis.ax_vertrauenswuerdigkeit_punktort n ON n.wert = p.vertrauenswuer
 
 CREATE OR REPLACE VIEW alkis.lk_gebaeude AS 
  SELECT o.oid, o.ogc_fid, o.gml_id, o.beginnt, o.endet, o.gebaeudefunktion, p.beschreibung as bezeichner, w.wert AS weiterefunktion, o.name, o.zustand, z.beschreibung AS gebaeudezustand, o.objekthoehe,
- o.lagezurerdoberflaeche, o.dachform, d.beschreibung AS dach_bezeichner, o.hochhaus, o.herkunft_source_ax_datenerhebung[1] ax_datenerhebung, da.beschreibung AS herkunft, o.wkb_geometry
+ o.lagezurerdoberflaeche, o.dachform, d.beschreibung AS dach_bezeichner, o.hochhaus, o.herkunft_source_source_ax_datenerhebung[1] ax_datenerhebung, da.beschreibung AS herkunft, o.wkb_geometry
    FROM alkis.ax_gebaeude o
    LEFT JOIN alkis.ax_gebaeudefunktion p ON p.wert = o.gebaeudefunktion
    LEFT JOIN alkis.ax_dachform d ON d.wert = o.dachform
    LEFT JOIN alkis.ax_zustand_gebaeude z ON z.wert = o.zustand
    LEFT JOIN alkis.ax_weitere_gebaeudefunktion w ON w.wert = ANY (o.weiteregebaeudefunktion)
-   LEFT JOIN alkis.ax_datenerhebung da ON da.wert = o.herkunft_source_ax_datenerhebung[1]::integer;
+   LEFT JOIN alkis.ax_datenerhebung da ON da.wert = o.herkunft_source_source_ax_datenerhebung[1]::integer;
 
 -- Sicht zur Darstellung besonderer Gebäude:
 
@@ -150,7 +150,7 @@ LEFT JOIN alkis.n_untergliederung2 nu2 on nas.nutzungsartengruppe = nu2.nutzungs
 -- Sicht zur Darstellung der Muster- und Vergleichsstücke:
 
 CREATE OR REPLACE VIEW alkis.lk_muster_vergleichsstueck AS 
- SELECT mu.oid, mu.ogc_fid, mu.gml_id, mu.identifier, mu.beginnt, mu.endet, mu.advstandardmodell, mu.anlass, mu.merkmal, me.beschreibung AS gruppe, mu.nummer, mu.kulturart, ku.beschreibung AS kultur, mu.bodenart, art.beschreibung, mu.zustandsstufeoderbodenstufe, zu.beschreibung AS zustand_bodenstufe, mu.entstehungsartoderklimastufewasserverhaeltnisse, ent.beschreibung AS entstehung, mu.bodenzahlodergruenlandgrundzahl, mu.ackerzahlodergruenlandzahl, mu.wkb_geometry AS the_geom
+ SELECT mu.oid, mu.ogc_fid, mu.gml_id, mu.gml_id as identifier, mu.beginnt, mu.endet, mu.advstandardmodell, mu.anlass, mu.merkmal, me.beschreibung AS gruppe, mu.nummer, mu.kulturart, ku.beschreibung AS kultur, mu.bodenart, art.beschreibung, mu.zustandsstufeoderbodenstufe, zu.beschreibung AS zustand_bodenstufe, mu.entstehungsartoderklimastufewasserverhaeltnisse, ent.beschreibung AS entstehung, mu.bodenzahlodergruenlandgrundzahl, mu.ackerzahlodergruenlandzahl, mu.wkb_geometry AS the_geom
    FROM alkis.ax_musterlandesmusterundvergleichsstueck mu
    LEFT JOIN alkis.ax_merkmal_musterlandesmusterundvergleichsstueck me ON mu.merkmal = me.wert
    LEFT JOIN alkis.ax_bodenart_bodenschaetzung art ON mu.bodenart = art.wert
@@ -161,7 +161,7 @@ CREATE OR REPLACE VIEW alkis.lk_muster_vergleichsstueck AS
 -- Sicht zur Darstellung der Grablöcher:
 
 CREATE OR REPLACE VIEW alkis.lk_grabloch AS 
- SELECT gr.oid, gr.ogc_fid, gr.gml_id, gr.identifier, gr.beginnt, gr.endet, gr.advstandardmodell, gr.anlass, gr.art, gr.name, gr.bedeutung, be.beschreibung, gr.ingemarkung_land, gr.nummerierungsbezirk, gr.ingemarkung_gemarkungsnummer, gr.nummerdesgrablochs, gr.wkb_geometry AS the_geom
+ SELECT gr.oid, gr.ogc_fid, gr.gml_id, gr.gml_id as identifier, gr.beginnt, gr.endet, gr.advstandardmodell, gr.anlass, gr.zeigtaufexternes_art as art, gr.zeigtaufexternes_name AS name, gr.bedeutung, be.beschreibung, gr.ingemarkung_land, gr.kennziffer_nummerierungsbezirk nummerierungsbezirk, gr.ingemarkung_gemarkungsnummer, gr.nummerdesgrablochs, gr.wkb_geometry AS the_geom
    FROM alkis.ax_grablochderbodenschaetzung gr, alkis.ax_bedeutung_grablochderbodenschaetzung be
   WHERE be.wert = ANY (gr.bedeutung);
 

@@ -24,7 +24,7 @@ CREATE TABLE n_nutzung(
 -- ALTER TABLE nutzung ADD  CONSTRAINT nutzung_pk PRIMARY KEY(gml_id, beginnt);
 
 
-SELECT AddGeometryColumn('n_nutzung','wkb_geometry','25833','POLYGON',2);
+SELECT AddGeometryColumn('n_nutzung','wkb_geometry',:alkis_epsg,'POLYGON',2);
 -- Vereinzelt vorkommende MULTIPOLYGON, zulässig?
 
 
