@@ -19,7 +19,7 @@ send_selected_flurst = function(go, formnummer, wz, target){
   }
 	if (go == 'kolkvw') {
 		message('Öffne folgende Flurstücke in Kolibri:<br>' + flurstkennz.replace(';', '<br>'));
-		window.location.href('kolkvw://flurstueckskennzeichen=' + flurstkennz);
+		window.location.href = 'kolkvw://flurstueckskennzeichen=' + flurstkennz;
 	}
 	else {
 		currentform.target = '';
