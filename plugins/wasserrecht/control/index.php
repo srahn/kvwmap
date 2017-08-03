@@ -58,8 +58,97 @@ switch($this->go){
 		$this->main = PLUGINS . 'wasserrecht/view/test.php';
 		$this->output();
 	}	break;
+
+	case 'wasserrecht_deploy': {
+		$this->checkCaseAllowed($go);
+		if ($this->user->funktion == 'admin') {
+			$this->main = PLUGINS . 'wasserrecht/view/deploy_form.php';
+			$this->output();
+		}
+		else {
+			echo 'Zugriff verweigert';
+		};
+	} break;
+
+	case 'wasserrecht_deploy_Starten': {
+		$this->checkCaseAllowed('wasserrecht_deploy');
+		if ($this->user->funktion == 'admin') {
+			$result = array(
+				'update_mysql' => 'Fehler',
+				'pull_git' => 'Fehlgeschlagen',
+				'migrate_pgsql' => 'Fehler',
+				'reset_pgsql_data' => 'Fehler'
+			);
+			$msg = array();
+
+			# update MySQL-Database
+			{
+				$mysqli = new mysqli("mysql", "kvwmap", "Laridae_Moewe1", "kvwmapdb_wr");
+				if (mysqli_connect_errno()) {
+					printf("Connect failed: %s\n", mysqli_connect_error());
+					exit();
+				}
+				$sql_dump .= file_get_contents($_FILES['file']['tmp_name']);
+				if (strpos($sql_dump, 'phpMyAdmin SQL Dump') === false) {
+					$msg[] = 'Datei ' . $_FILES['file']['name'] . ' ist MySQL-Dump.';
+				}
+				else {
+					$sql .= "DROP DATABASE kvwmapdb_wr;";
+					$msg[] = 'Lösche Datenbank kvwmapdb_wr.';
+					$sql .= "CREATE DATABASE kvwmapdb_wr;";
+					$msg[] = 'Erzeuge neue Datenbank kvwmapdb_wr.';
+					$sql .= "USE kvwmapdb_wr;";
+					$sql .= $sql_dump;
+					$msg[] = 'Befülle Datenbank kvwmapdb_wr.';
+					if ($mysqli->multi_query($sql)) {
+						do {
+							/* store first result set */
+							if ($result = $mysqli->store_result()) {
+								while ($row = $result->fetch_row()) {
+									$msg[] = $row[0];
+								}
+								$result->free();
+							}
+						} while ($mysqli->next_result());
+					}
+				}
+				$mysqli->close();
+				$msg[] = 'MySQL-Datenbank kvwmapdb_wr erfolgreich ausgetauscht.';
+				$result['update_mysql'] = implode('<p>', $msg);
+			}
+
+			# pull git repository
+			{
+				$this->formvars['func'] = 'update_code';
+				$this->adminFunctions();
+				$result['pull_git'] = "Git Repository aktualisiert";
+			}
+
+			# do migrations
+			{
+				$this->formvars['func'] = 'update_databases';
+				$this->adminFunctions();
+				$result['migrate_pgsql'] = "Datenbankmigrationen ausgeführt";
+			}
+
+			# reset_pgsql_data
+			# todo
+			{
+				$result['reset_pgsql_data'] = 'ToDo;';
+			}
+
+			$this->result = $result;
+			$this->main = PLUGINS . 'wasserrecht/view/deploy_results.php';
+			$this->output();
+		}
+		else {
+			echo 'Zugriff verweigert';
+		};
+	} break;
+
 	default : {
 		$this->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
 	}
 }
+
 ?>
