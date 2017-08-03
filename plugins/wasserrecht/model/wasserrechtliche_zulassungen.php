@@ -8,6 +8,8 @@ class WasserrechtlicheZulassungen extends PgObject {
 	static $schema = 'wasserrecht';
 	static $tableName = 'wasserrechtliche_zulassungen';
 	static $write_debug = true;
+	
+	public $gueltigkeitsJahr;
 
 	function WasserrechtlicheZulassungen($gui) {
 		parent::__construct($gui, WasserrechtlicheZulassungen::$schema, WasserrechtlicheZulassungen::$tableName);
@@ -23,15 +25,18 @@ class WasserrechtlicheZulassungen extends PgObject {
 		return parent::find_where($where, $order, $select);
 	}
 	
-	public function find_gueltigkeitsjahr($gui) {
+	public function find_gueltigkeitsjahre($gui) {
+	    
 		$results = $this->find_where('gueltigkeit IS NOT NULL');
+		$wrzProGueltigkeitsJahr = new WRZProGueltigkeitsJahr();
+		
 		if(!empty($results))
 		{
 			$wasserrechtlicheZulassungGueltigkeitJahrReturnArray = array();
 			foreach($results AS $result)
 			{
 // 				var_dump($this->debug);
-				$this->debug->write('result: ' . var_export($result, true), 4);
+			    $this->debug->write('result: ' . var_export($result->data, true), 4);
 				$wasserrechtlicheZulassungGueltigkeit = WasserrechtlicheZulassungenGueltigkeit::find_by_id($gui, 'id', $result->data['gueltigkeit']);
 				if(!empty($wasserrechtlicheZulassungGueltigkeit))
 				{
@@ -43,12 +48,19 @@ class WasserrechtlicheZulassungen extends PgObject {
 					{
 						$wasserrechtlicheZulassungGueltigkeitJahrReturnArray[] = $year;
 					}
+					
+					$result->gueltigkeitsJahr=$year;
+					$wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[]=$result;
 				}
 			}
-			return $wasserrechtlicheZulassungGueltigkeitJahrReturnArray;
+			$wrzProGueltigkeitsJahr->gueltigkeitsJahre=$wasserrechtlicheZulassungGueltigkeitJahrReturnArray;
+			return $wrzProGueltigkeitsJahr;
+// 			return $wasserrechtlicheZulassungGueltigkeitJahrReturnArray;
 		}
 		
-		return array('n/a');
+		$wrzProGueltigkeitsJahr->gueltigkeitsJahre=array('n/a');
+		return $wrzProGueltigkeitsJahr;
+// 		return array('n/a');
 	}
 }
 ?>
