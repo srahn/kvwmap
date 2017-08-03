@@ -58,6 +58,82 @@ switch($this->go){
 		$this->main = PLUGINS . 'wasserrecht/view/test.php';
 		$this->output();
 	}	break;
+
+	case 'wasserrecht_deploy': {
+		$this->checkCaseAllowed($go);
+		if ($this->user->funktion == 'admin') {
+			$this->main = PLUGINS . 'wasserrecht/view/deploy_form.php';
+			$this->output();
+		}
+		else {
+			echo 'Zugriff verweigert';
+		};
+	} break;
+
+	case 'wasserrecht_deploy_Starten': {
+		$this->checkCaseAllowed('wasserrecht_deploy');
+		if ($this->user->funktion == 'admin') {
+			$result = array(
+				'update_mysql' => 'Fehler',
+				'pull_git' => 'Fehlgeschlagen',
+				'migrate_pgsql' => 'Fehler',
+				'reset_pgsql_data' => 'Fehler'
+			);
+			$msg = array();
+
+			$mysqli = new mysqli("mysql", "kvwmap", "Laridae_Moewe1", "kvwmapdb_wr");
+
+			/* check connection */
+			if (mysqli_connect_errno()) {
+			    printf("Connect failed: %s\n", mysqli_connect_error());
+			    exit();
+			}
+
+			# update MySQL-Database
+			$msg = '';
+			$sql .= "DROP DATABASE kvwmapdb_wr;";
+			$msg[] = 'Lösche Datenbank kvwmapdb_wr.';
+
+			$sql .= "CREATE DATABASE kvwmapdb_wr;";
+			$msg[] = 'Erzeuge neue Datenbank kvwmapdb_wr.';
+
+			$sql .= "USE kvwmapdb_wr;";
+
+			$sql .= file_get_contents($_FILES['file']['tmp_name']);
+			$msg[] = 'Befülle Datenbank kvwmapdb_wr.';
+
+			/* execute multi query */
+			if ($mysqli->multi_query($sql)) {
+				do {
+					/* store first result set */
+					if ($result = $mysqli->store_result()) {
+						while ($row = $result->fetch_row()) {
+							$msg[] = $row[0];
+						}
+						$result->free();
+					}
+				} while ($mysqli->next_result());
+			}
+
+			/* close connection */
+			$mysqli->close();
+
+			$msg[] = 'MySQL-Datenbank kvwmapdb_wr erfolgreich ausgetauscht.';
+			$result['update_mysql'] = implode('<p>', $msg);
+	
+	
+	
+	
+			
+			$this->result = $result;
+			$this->main = PLUGINS . 'wasserrecht/view/deploy_results.php';
+			$this->output();
+		}
+		else {
+			echo 'Zugriff verweigert';
+		};
+	} break;
+
 	default : {
 		$this->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
 	}
