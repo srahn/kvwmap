@@ -1004,6 +1004,7 @@ class GUI {
           if ($dbLabel['buffer']!='') {
             $klasse->label->set('buffer',$dbLabel['buffer']);
           }
+					$klasse->label->set('maxlength',$dbLabel['maxlength']);
           $klasse->label->set('wrap',$dbLabel['wrap']);
           $klasse->label->set('force',$dbLabel['the_force']);
           $klasse->label->set('partials',$dbLabel['partials']);
@@ -1113,6 +1114,7 @@ class GUI {
           if ($dbLabel['buffer']!='') {
             $label->buffer = $dbLabel['buffer'];
           }
+					$label->set('maxlength',$dbLabel['maxlength']);
           $label->wrap = $dbLabel['wrap'];
           $label->force = $dbLabel['the_force'];
           $label->partials = $dbLabel['partials'];

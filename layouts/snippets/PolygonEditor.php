@@ -12,6 +12,11 @@ function toggle_vertices(){
 	document.getElementById("vertices").SVGtoggle_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 }
 
+function split_geometries(){
+	document.GUI.go.value = 'Multi_Geometrien_splitten';
+	document.GUI.submit();
+}
+
 function send(zoom){
 	document.GUI.zoom.value = zoom;
 	if(document.GUI.newpathwkt.value == ''){
@@ -98,9 +103,13 @@ function buildwktpolygonfromsvgpath(svgpath){
 			</table>
 		</td>
   </tr>
-	<tr>
-		<td></td>
-	</tr>
+  <tr>
+	  <? if($this->new_entry != true){ ?>
+  	<td align="center"><input type="button" style="visibility:hidden" name="split" value="Geometrie in neue Datensätze aufteilen" onclick="split_geometries();"></td>
+		<? }else{ ?>
+		<td style="height: 24px">&nbsp;</td>
+		<? } ?>
+  </tr>
   <tr>
   	<td><? echo $strGeomFrom; ?>:<br>
   		<select name="layer_id" style="width: 260px" onchange="startwaiting(true);document.GUI.no_load.value='true';document.GUI.submit();">

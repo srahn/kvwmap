@@ -8,10 +8,10 @@
 	}
  
 	session_start();
-	$msg .= '<br>gast: ' . $_REQUEST['gast'];
-	if ($_REQUEST['gast'] != '' AND in_array($_REQUEST['gast'], $gast_stellen)) {
+	$msg .= '<br>gast: ' . $formvars['gast'];
+	if ($formvars['gast'] != '' AND in_array($formvars['gast'], $gast_stellen)) {
 		$msg .= '<br>Erzeuge neue Gastrolle.';
-		$gast = $userDb->create_new_gast($_REQUEST['gast']);
+		$gast = $userDb->create_new_gast($formvars['gast']);
 		$username = $gast['username'];
 		$passwort = $gast['passwort']; ?>
 
@@ -47,11 +47,11 @@
 				<input type="hidden" name="browserheight">
 				<br>
 				<? 
-				for($i = 0; $i < count($_REQUEST); $i++){
-					if(key($_REQUEST) != 'gast'){			// sonst gibts ne Endlosschleife
-						echo '<input type="hidden" name="'.key($_REQUEST).'" value="'.$_REQUEST[key($_REQUEST)].'">';
+				for($i = 0; $i < count($formvars); $i++){
+					if(key($formvars) != 'gast'){			// sonst gibts ne Endlosschleife
+						echo '<input type="hidden" name="'.key($formvars).'" value="'.$formvars[key($formvars)].'">';
 					}
-					next($_REQUEST);
+					next($formvars);
 				}
 				?>
 				<table align="center" cellspacing="4" cellpadding="22" bgcolor="<? echo BG_DEFAULT; ?>" border="0" style="background-color: <? echo BG_DEFAULT; ?>; box-shadow: 12px 10px 14px #777; border: 1px solid #bbbbbb; background: linear-gradient(<? echo BG_GLEATTRIBUTE; ?> 0%, <? echo BG_DEFAULT ?> 100%);">
@@ -66,14 +66,14 @@
 		exit;
 	}
 	else {
-		$username = $_REQUEST['username'];
-		$passwort = $_REQUEST['passwort'];
+		$username = $formvars['username'];
+		$passwort = $formvars['passwort'];
 	}
-	$oldPassword = $_REQUEST['passwort'];
-	$newPassword = $_REQUEST['newPassword'];
-	$newPassword2 = $_REQUEST['newPassword2'];
-	$msg = $_REQUEST['msg'];
-	$mobile = $_REQUEST['mobile'];
+	$oldPassword = $formvars['passwort'];
+	$newPassword = $formvars['newPassword'];
+	$newPassword2 = $formvars['newPassword2'];
+	$msg = $formvars['msg'];
+	$mobile = $formvars['mobile'];
   $remote_addr = getenv('REMOTE_ADDR');
     
 	// Benutzername und Passwort werden überprüft
@@ -128,11 +128,11 @@
 		<body style="font-family: Arial, Verdana, Helvetica, sans-serif" onload="document.login.username.focus();">
 		  <form name="login" action="index.php" method="post">
 				<? 
-				for($i = 0; $i < count($_REQUEST); $i++){
-					if (!in_array(key($_REQUEST), array('username', 'passwort'))) {
-						echo '<input type="hidden" name="'.key($_REQUEST).'" value="'.$_REQUEST[key($_REQUEST)].'">';
+				for($i = 0; $i < count($formvars); $i++){
+					if (!in_array(key($formvars), array('username', 'passwort'))) {
+						echo '<input type="hidden" name="'.key($formvars).'" value="'.$formvars[key($formvars)].'">';
 					}
-					next($_REQUEST);
+					next($formvars);
 				}
 				?>
 				<br>

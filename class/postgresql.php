@@ -1916,19 +1916,19 @@ FROM
 			$sql.=")";
 		}
 		$sql.= $this->build_temporal_filter(array('p', 'anschrift', 'n', 'g', 'b'));
-    if($order != ''){
-    	$sql.=" ORDER BY ".$order;
+    if ($order != ''){
+    	$sql .= " ORDER BY ". replace_semicolon($order);
     }
-    if ($limitStart!='' OR $limitAnzahl!='') {
-      $sql.=" LIMIT ";
-      if ($limitStart!='' AND $limitAnzahl!='') {
-        $sql.=$limitAnzahl." OFFSET ".$limitStart;
+    if ($limitStart!='' OR $limitAnzahl != '') {
+      $sql .= " LIMIT ";
+      if ($limitStart!='' AND $limitAnzahl != '') {
+        $sql .= intval($limitAnzahl) . " OFFSET " . intval($limitStart);
       }
       if ($limitStart!='' AND $limitAnzahl=='') {
-        $sql.=" ALL OFFSET ".$limitStart;
+        $sql .= " ALL OFFSET " . intval($limitStart);
       }
-      if ($limitStart=='' AND $limitAnzahl!='') {
-        $sql.=$limitAnzahl;
+      if ($limitStart == '' AND $limitAnzahl != '') {
+        $sql .= intval($limitAnzahl);
       }
     }
     #echo $sql;
@@ -2138,7 +2138,7 @@ FROM
     }
 		$sql.= $this->build_temporal_filter(array('g', 'l', 's'));
     $sql.=") AS foo ";
-    $sql.=") AS foofoo ORDER BY ".$order;
+    $sql.=") AS foofoo ORDER BY " . replace_semicolon($order);
     #echo $sql;
     $this->debug->write("<p>postgres getHausNrListe Abfragen der Strassendaten:<br>".$sql,4);
     $queryret=$this->execSQL($sql, 4, 0);
@@ -2577,7 +2577,7 @@ FROM
     if ($thesaname!='') {
       $sql.=" AND k.thesaname='".$thesaname."'";
     }
-    $sql.=" ORDER BY ".$order;
+    $sql.=" ORDER BY " . replace_semicolon($order);
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) {
       # Fehler beim Abfragen in Datenbank

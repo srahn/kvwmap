@@ -70,7 +70,7 @@
       }
       else { # eintrag erfolgreich
         $GUI->formvars['secondpoly']="true";
-        showMessage('Eintrag erfolgreich!');
+				$GUI->add_message('notice', 'Eintrag erfolgreich');
       }
       $GUI->Anliegerbeiträge_editor();
     }
@@ -96,7 +96,7 @@
       }
       else { # eintrag erfolgreich
         $GUI->formvars['secondpoly']="true";
-        showMessage('Eintrag erfolgreich!');
+        $GUI->add_message('notice', 'Eintrag erfolgreich');
       }
       $GUI->Anliegerbeiträge_editor();
     }

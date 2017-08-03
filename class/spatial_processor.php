@@ -52,6 +52,18 @@ class spatial_processor {
       return $geoms;
     }
   }
+		
+	function split($geom_1, $geom_2){
+  	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom,0,8) as svg FROM (SELECT st_collect(geom) as geom from (select (st_dump(st_split(st_geomfromtext('".$geom_1."'), st_geomfromtext('".$geom_2."')))).geom as geom) as foo) as fooo";
+  	$ret = $this->pgdatabase->execSQL($sql,4, 0);
+    if ($ret[0]) {
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
+    }
+    else {
+    	$rs = pg_fetch_assoc($ret[1]);
+    }
+    return $rs;
+  }
   
   function union($geom_1, $geom_2){
   	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom,0,8) as svg FROM (SELECT st_union(st_geomfromtext('".$geom_1."'), st_geomfromtext('".$geom_2."')) as geom) as foo";
@@ -257,6 +269,13 @@ class spatial_processor {
 			case 'add_parallel_polygon':{
 				if($formvars['width'] == ''){$formvars['width'] = 50;}
 				$rs = $this->add_parallel_polygon($polywkt1, $polywkt2, $formvars['width']);
+				$result = $rs['svg'];
+				$result .= '||';
+				$result .= $rs['wkt'];
+			}break;
+		
+			case 'split':{
+				$rs = $this->split($polywkt1, $polywkt2);
 				$result = $rs['svg'];
 				$result .= '||';
 				$result .= $rs['wkt'];

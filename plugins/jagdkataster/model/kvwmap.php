@@ -242,7 +242,7 @@
   	$GUI->jagdkataster = new jagdkataster($GUI->pgdatabase);
   	$GUI->eigentuemer = $GUI->jagdkataster->getEigentuemerListe($GUI->formvars);
   	for($i = 0; $i < count($GUI->eigentuemer)-1; $i++){          	
-    	$csv .= $GUI->eigentuemer[$i]['eigentuemer'].';';
+    	$csv .= str_replace(';', ' ', $GUI->eigentuemer[$i]['eigentuemer']).';';
 			$csv .= str_replace('.', ',', $GUI->eigentuemer[$i]['anteil_alk']).';';
       $csv .= str_replace('.', ',', round($GUI->eigentuemer[$i]['albflaeche']*100/$GUI->eigentuemer['albsumme'], 1)).';';
       $csv .= str_replace('.', ',', $GUI->eigentuemer[$i]['albflaeche']).';';

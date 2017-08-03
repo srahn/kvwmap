@@ -800,12 +800,8 @@ function measure(){
 function save_measure_path(){
 	var length = pathx.length;
 	if(length > 0){
-		var str_pathx = pathx_world[0];
-		var str_pathy = pathy_world[0];
-	  for(var i = 1; i < length; i++){
-	    str_pathx = str_pathx + ";" + pathx_world[i];
-			str_pathy = str_pathy + ";" + pathy_world[i];
-		}
+		var str_pathx = pathx_world.join(";");
+		var str_pathy = pathy_world.join(";");
 		top.document.GUI.str_pathx.value = str_pathx;
 		top.document.GUI.str_pathy.value = str_pathy;
 		top.document.GUI.measured_distance.value = measured_distance;
@@ -829,6 +825,8 @@ function get_measure_path(){
 	  for(var i = 1; i < length; i++){
 	    pathx[i] = (pathx_world[i] - parseFloat(top.document.GUI.minx.value))/parseFloat(top.document.GUI.pixelsize.value);
 			pathy[i] = (pathy_world[i] - parseFloat(top.document.GUI.miny.value))/parseFloat(top.document.GUI.pixelsize.value);
+			document.getElementById("moveGroup").removeChild(document.getElementById("section"+i));
+			showSectionMeasurement(i);
 		}
 		measured_distance = parseFloat(top.document.GUI.measured_distance.value);
 		return true;
@@ -972,6 +970,7 @@ function mousedown(evt){
 			  }
 			  else{
 	      	addpoint(evt);
+					showSectionMeasurement(pathx.length-1);
 					measured_distance = new_distance;
 	      }
 	    }
@@ -1431,6 +1430,7 @@ function add_vertex(evt){
 		pathx_world.push(parseFloat(worldx));
 		pathy_world.push(parseFloat(worldy));		
 		if(new_distance > 0){
+			showSectionMeasurement(pathx.length-1);
 			measured_distance = new_distance;
 			showMeasurement(evt);
 		}
@@ -1521,13 +1521,30 @@ function calculate_distance(x1, y1, x2, y2){
 	return distance;
 }
 
+function showSectionMeasurement(j){
+	section_distance = calculate_distance(pathx_world[j-1], pathy_world[j-1], pathx_world[j], pathy_world[j]);
+	section_distance = top.format_number(section_distance, false, freehand_measuring, true);
+  output = section_distance+" m";
+	mittex = pathx[j-1] - ((pathx[j-1] - pathx[j]) / 2);
+	mittey = pathy[j-1] - ((pathy[j-1] - pathy[j]) / 2);	
+  show_tooltip(output, mittex-10, resy-mittey-10);
+	section_box = document.getElementById("tooltip_group").cloneNode(true);
+	section_box.setAttribute("id", "section"+j);
+	section_box.setAttribute("visibility", "visible");
+	section_box.setAttribute("opacity", "0.9");
+	section_rect = section_box.childNodes[1];		// 1, weil zwischen den eigentlichen Nodes noch Text steht (wahrscheinlich die Zeilenumbrueche)
+	section_text = section_box.childNodes[3];		// 3, weil zwischen den eigentlichen Nodes noch Text steht (wahrscheinlich die Zeilenumbrueche)
+	section_rect.setAttribute("id", "");
+	section_text.setAttribute("id", "");
+	document.getElementById("moveGroup").appendChild(section_box);
+}
+
 function showMeasurement(evt){
-  var track = 0, track0 = 0, output = "";
+  var track = 0, output = "";
 	j = pathx_world.length-1;
-  new_distance = measured_distance + calculate_distance(pathx_world[j-1], pathy_world[j-1], pathx_world[j], pathy_world[j]);	
-  track0 = top.format_number(measured_distance, false, freehand_measuring, true);
+  new_distance = measured_distance + calculate_distance(pathx_world[j-1], pathy_world[j-1], pathx_world[j], pathy_world[j]);
   track = top.format_number(new_distance, false, freehand_measuring, true);
-  output = "Strecke: "+track+" m ("+track0+" m)";
+  output = "gesamt: "+track+" m";
   show_tooltip(output, evt.clientX, evt.clientY);
 }
 
@@ -1556,6 +1573,7 @@ function restart(){
     pathy.pop();
 		pathx_world.pop();
   	pathy_world.pop();
+		if(document.getElementById("section"+i) != undefined)document.getElementById("moveGroup").removeChild(document.getElementById("section"+i));
 	}
 	deletepolygon();
   redrawPL();

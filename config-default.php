@@ -5,7 +5,7 @@
 #                                                                  #
 ####################################################################
 # aktuelle Versionsnummer
-define('VERSION','2.6');
+define('VERSION','2.7');
 define('APPLVERSION','kvwmap/');
 # Bezeichnung der MySQL-Datenbank mit den Benutzerdaten
 $dbname='kvwmapdb';
@@ -90,7 +90,8 @@ $sizes = array(
 	)
 );
 
-#define('LEGEND_GRAPHIC_FILE', 'custom/legend_graphic.php');		# Version 2.7
+# zusätzliche Legende; muss unterhalb von snippets liegen
+#define('LEGEND_GRAPHIC_FILE', '');		# Version 2.7
 
 # login.php
 define('LOGIN', 'login.php');																# Version 1.8.0
@@ -585,6 +586,7 @@ $kvwmap_plugins = array();																			# Version 1.11.0
 #$kvwmap_plugins[] = 'bodenrichtwerte';													# Version 2.0.0
 #$kvwmap_plugins[] = 'jagdkataster';														# Version 2.0.0
 #$kvwmap_plugins[] = 'fortfuehrungslisten';											# Version 2.6.0
+#$kvwmap_plugins[] = 'kolibri';																	# Version 2.8
 #$kvwmap_plugins[] = 'nachweisverwaltung';											# Version 2.0.0
 #$kvwmap_plugins[] = 'anliegerbeitraege';												# Version 2.0.0
 #$kvwmap_plugins[] = 'probaug';																	# Version 2.0.0

@@ -48,6 +48,7 @@
 	<input name="last_doing2" type="hidden" value="<? echo $this->formvars['last_doing2']; ?>">
 	<input type="hidden" name="str_pathx" value="<? echo $this->formvars['str_pathx']; ?>">
   <input type="hidden" name="str_pathy" value="<? echo $this->formvars['str_pathy']; ?>">
+	<input type="hidden" name="vertices" id="vertices" value="">
   
 <?php
 #
@@ -61,6 +62,7 @@ $svg .= $scriptdefinitions;
 $svg .= $polygonANDpoint;	
 $svg .= $SVGvars_navscript;
 $svg .= $basicfunctions;
+$svg .= $vertex_catch_functions;# Punktfangfunktionen
 $svg .= $pointfunctions;
 $svg .= $coord_input_functions;	# Funktionen zum Eingeben von Koordinaten
 $svg .= $measurefunctions;

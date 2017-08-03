@@ -763,7 +763,7 @@ class user {
 
 	function getall_Users($order){
 		$sql ='SELECT * FROM user';
-		if($order != ''){$sql .= ' ORDER BY '.$order;}
+		if($order != ''){$sql .= ' ORDER BY ' . replace_semicolon($order);}
 		$this->debug->write("<p>file:kvwmap class:user->getall_Users - Lesen aller User:<br>".$sql,4);
 		$query=mysql_query($sql);
 		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
@@ -835,7 +835,7 @@ class user {
 			$sql.=' AND login_name LIKE "'.$login_name.'"';
 		}
 		if ($order!='') {
-			$sql.=' ORDER BY '.$order;
+			$sql.=' ORDER BY ' . replace_semicolon($order);
 		}
 		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>".$sql,4);
 		$query=mysql_query($sql,$this->database->dbConn);
