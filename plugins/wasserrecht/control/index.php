@@ -79,16 +79,18 @@ switch($this->go){
 				'migrate_pgsql' => 'Fehler',
 				'reset_pgsql_data' => 'Fehler'
 			);
-			$msg = array();
 
 			# update MySQL-Database
 			{
 				$mysqli = new mysqli("mysql", "kvwmap", "Laridae_Moewe1", "kvwmapdb_wr");
 				if (mysqli_connect_errno()) {
-					printf("Connect failed: %s\n", mysqli_connect_error());
+					$this->result['update_mysql'] = 'Datenbankverbindung fehlgeschlagen<br>' . mysqli_connect_error();
+					$this->main = PLUGINS . 'wasserrecht/view/deploy_results.php';
+					$this->output();
 					exit();
 				}
 				$sql_dump .= file_get_contents($_FILES['file']['tmp_name']);
+				$msg = array();
 				if (strpos($sql_dump, 'phpMyAdmin SQL Dump') === false) {
 					$msg[] = 'Datei ' . $_FILES['file']['name'] . ' ist MySQL-Dump.';
 				}
@@ -132,9 +134,15 @@ switch($this->go){
 			}
 
 			# reset_pgsql_data
-			# todo
 			{
-				$result['reset_pgsql_data'] = 'ToDo;';
+				$msg = array();
+				foreach (glob(PLUGINS . "wasserrecht/db/postgresql/data/*.sql") as $filename) {
+					$sql = file_get_contents($filename);
+					$this->pgdatabase->execSQL($sql, 4, 1);
+					$msg[] = basename($filename) . ' eingelesen.';
+				}
+				
+				$result['reset_pgsql_data'] = implode('<br>', $msg);
 			}
 
 			$this->result = $result;
