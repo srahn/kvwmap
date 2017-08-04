@@ -76,7 +76,7 @@ switch($this->go){
 			$result = array(
 				'update_mysql' => 'Fehler',
 				'pull_git' => 'Fehlgeschlagen',
-				'migrate_pgsql' => 'Fehler',
+				'reset_pgsql_schema' => 'Fehler',
 				'reset_pgsql_data' => 'Fehler'
 			);
 
@@ -126,11 +126,16 @@ switch($this->go){
 				$result['pull_git'] = "Git Repository aktualisiert";
 			}
 
-			# do migrations
+			# reset pgsql schema
 			{
-				$this->formvars['func'] = 'update_databases';
-				$this->adminFunctions();
-				$result['migrate_pgsql'] = "Datenbankmigrationen ausgeführt";
+				$msg = array();
+				foreach (glob(PLUGINS . "wasserrecht/db/postgresql/schema/*.sql") as $filename) {
+					$sql = file_get_contents($filename);
+					$this->pgdatabase->execSQL($sql, 4, 1);
+					$msg[] = basename($filename) . ' eingelesen.';
+				}
+				
+				$result['reset_pgsql_schema'] = implode('<br>', $msg);
 			}
 
 			# reset_pgsql_data
