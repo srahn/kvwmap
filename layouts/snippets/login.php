@@ -83,7 +83,7 @@
 		$_SESSION['angemeldet'] = true;
 		$_SESSION['login_name'] = $username;
 		$_SESSION['login_routines'] = true;
-		$_SESSION['REQUEST_URI'] = $_SERVER]'REQUEST_URI'];
+		$_SESSION['REQUEST_URI'] = $_SERVER['REQUEST_URI'];
 		if ($mobile == 'on'){
 			$_SESSION['mobile'] = 'true';
 		}
