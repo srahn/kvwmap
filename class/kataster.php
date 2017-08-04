@@ -218,7 +218,7 @@ class adresse {
     }
     # sortiert nach order wenn angegeben
     if ($order!=0 AND $order!='') {
-      $sql.=' ORDER BY '.$order;
+      $sql.=' ORDER BY ' . replace_semicolon($order);
     }
     $this->debug->write("<p>kvwmap->getAdressenListeByFlst->Abfragen der Adressdaten für Flurstuecke:<br>".$sql,4);
     $query=mysql_query($sql);
@@ -941,7 +941,7 @@ class gemeinde {
       $sql.=')';
     }
     if ($order!='') {
-      $sql.=' ORDER BY '.$order;
+      $sql.=' ORDER BY ' . replace_semicolon($order);
     }
     $this->debug->write("<p>kataster.php Gemeinde->getGemeindeListeByExtent Abfragen der Geimeinden aus dem Kartenausschnitt:<br>".$sql,4);
     $query=mysql_query($sql);
@@ -1459,12 +1459,12 @@ class flurstueck {
 	function outputEigentuemerText($eigentuemer, $adressAenderungen = NULL, $indent, $database = NULL){
 		if($eigentuemer->Nr != '' OR $eigentuemer->zusatz_eigentuemer != ''){
 			$Eigentuemer .= $indent;
-			$Eigentuemer .= str_replace('"', '\'', $eigentuemer->zusatz_eigentuemer);
 			$Eigentuemer .= $eigentuemer->Nr;
 			$anzNamenszeilen = count($eigentuemer->Name);
 			for($n=0;$n<$anzNamenszeilen;$n++){
 				$Eigentuemer .= ' '.str_replace('"', '\'', $eigentuemer->Name[$n]);
 			}						
+			$Eigentuemer .= str_replace('"', '\'', $eigentuemer->zusatz_eigentuemer);
 			if($eigentuemer->Anteil != '')$Eigentuemer .= '  zu '.$eigentuemer->Anteil;
 			$Eigentuemer .= "\n";
 			return $Eigentuemer;
@@ -1522,7 +1522,7 @@ class flurstueck {
 		}
 		if($eigentuemer->zusatz_eigentuemer != ''){
 			$Eigentuemer .=	 '<tr>
-													<td colspan="2">'.$eigentuemer->zusatz_eigentuemer; if($eigentuemer->Anteil != '')$Eigentuemer .= ' zu '.$eigentuemer->Anteil;
+													<td>&nbsp;</td><td>'.$eigentuemer->zusatz_eigentuemer; if($eigentuemer->Anteil != '')$Eigentuemer .= ' zu '.$eigentuemer->Anteil;
 			$Eigentuemer .=	   '</td>
 												</tr>';
 		}

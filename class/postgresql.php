@@ -1750,7 +1750,7 @@ FROM
 	}
   
   function getEigentuemerliste($FlurstKennz,$Bezirk,$Blatt,$BVNR, $without_temporal_filter = false) {
-    $sql = "SELECT distinct coalesce(n.laufendenummernachdin1421, '0') as order1, coalesce(bestehtausrechtsverhaeltnissenzu, '0') as order2, bestehtausrechtsverhaeltnissenzu, CASE WHEN n.beschriebderrechtsgemeinschaft is null and n.artderrechtsgemeinschaft is null THEN n.laufendenummernachdin1421 ELSE NULL END AS namensnr, n.gml_id as n_gml_id, p.gml_id, p.nachnameoderfirma, p.vorname, p.akademischergrad, p.namensbestandteil, p.geburtsname, p.geburtsdatum::date, anschrift.gml_id as anschrift_gml_id, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, 'OT '||anschrift.ortsteil as ortsteil, anschrift.bestimmungsland, w.bezeichner as Art, n.zaehler||'/'||n.nenner as anteil, coalesce(NULLIF(n.beschriebderrechtsgemeinschaft, ''),adrg.artderrechtsgemeinschaft) as zusatz_eigentuemer ";
+    $sql = "SELECT distinct coalesce(n.laufendenummernachdin1421, '0') as order1, coalesce(bestehtausrechtsverhaeltnissenzu, '0') as order2, bestehtausrechtsverhaeltnissenzu, n.laufendenummernachdin1421 AS namensnr, n.gml_id as n_gml_id, p.gml_id, p.nachnameoderfirma, p.vorname, p.akademischergrad, p.namensbestandteil, p.geburtsname, p.geburtsdatum::date, anschrift.gml_id as anschrift_gml_id, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, 'OT '||anschrift.ortsteil as ortsteil, anschrift.bestimmungsland, w.bezeichner as Art, n.zaehler||'/'||n.nenner as anteil, coalesce(NULLIF(n.beschriebderrechtsgemeinschaft, ''),adrg.artderrechtsgemeinschaft) as zusatz_eigentuemer ";
 		$sql.= "FROM alkis.ax_buchungsstelle s ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
@@ -1916,19 +1916,19 @@ FROM
 			$sql.=")";
 		}
 		$sql.= $this->build_temporal_filter(array('p', 'anschrift', 'n', 'g', 'b'));
-    if($order != ''){
-    	$sql.=" ORDER BY ".$order;
+    if ($order != ''){
+    	$sql .= " ORDER BY ". replace_semicolon($order);
     }
-    if ($limitStart!='' OR $limitAnzahl!='') {
-      $sql.=" LIMIT ";
-      if ($limitStart!='' AND $limitAnzahl!='') {
-        $sql.=$limitAnzahl." OFFSET ".$limitStart;
+    if ($limitStart!='' OR $limitAnzahl != '') {
+      $sql .= " LIMIT ";
+      if ($limitStart!='' AND $limitAnzahl != '') {
+        $sql .= intval($limitAnzahl) . " OFFSET " . intval($limitStart);
       }
       if ($limitStart!='' AND $limitAnzahl=='') {
-        $sql.=" ALL OFFSET ".$limitStart;
+        $sql .= " ALL OFFSET " . intval($limitStart);
       }
-      if ($limitStart=='' AND $limitAnzahl!='') {
-        $sql.=$limitAnzahl;
+      if ($limitStart == '' AND $limitAnzahl != '') {
+        $sql .= intval($limitAnzahl);
       }
     }
     #echo $sql;
@@ -2138,7 +2138,7 @@ FROM
     }
 		$sql.= $this->build_temporal_filter(array('g', 'l', 's'));
     $sql.=") AS foo ";
-    $sql.=") AS foofoo ORDER BY ".$order;
+    $sql.=") AS foofoo ORDER BY " . replace_semicolon($order);
     #echo $sql;
     $this->debug->write("<p>postgres getHausNrListe Abfragen der Strassendaten:<br>".$sql,4);
     $queryret=$this->execSQL($sql, 4, 0);
@@ -2577,7 +2577,7 @@ FROM
     if ($thesaname!='') {
       $sql.=" AND k.thesaname='".$thesaname."'";
     }
-    $sql.=" ORDER BY ".$order;
+    $sql.=" ORDER BY " . replace_semicolon($order);
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) {
       # Fehler beim Abfragen in Datenbank

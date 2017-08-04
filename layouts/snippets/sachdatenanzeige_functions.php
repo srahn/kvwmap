@@ -320,7 +320,7 @@ include('funktionen/input_check_functions.php');
 	
 	switch_gle_view = function(layer_id){
 		currentform.chosen_layer_id.value = layer_id;
-		currentform.go.value='switch_gle_view';
+		currentform.go.value='toggle_gle_view';
 		overlay_submit(currentform, false);
 	}
 	
@@ -346,14 +346,14 @@ include('funktionen/input_check_functions.php');
 		}
 	}
 	
-	get_current_attribute_values = function(attributenamesarray, geom_attribute, k){
+	get_current_attribute_values = function(layer_id, attributenamesarray, geom_attribute, k){
 		var attributenames = '';
 		var attributevalues = '';
 		var geom = '';
 		for(i = 0; i < attributenamesarray.length; i++){
-			if(document.getElementById(attributenamesarray[i]+'_'+k) != undefined){
+			if(document.getElementById(layer_id+'_'+attributenamesarray[i]+'_'+k) != undefined){
 				attributenames += attributenamesarray[i] + '|';
-				attributevalues += encodeURIComponent(document.getElementById(attributenamesarray[i]+'_'+k).value) + '|';
+				attributevalues += encodeURIComponent(document.getElementById(layer_id+'_'+attributenamesarray[i]+'_'+k).value) + '|';
 			}
 			else if(attributenamesarray[i] == geom_attribute ){	// wenn es das Geometrieattribut ist, handelt es sich um eine Neuerfassung --> aktuelle Geometrie nehmen
 				if(document.GUI.loc_x != undefined && document.GUI.loc_x.value != ''){		// Punktgeometrie
@@ -373,12 +373,12 @@ include('funktionen/input_check_functions.php');
 	}
 	
 	auto_generate = function(attributenamesarray, geom_attribute, attribute, k, layer_id){
-		names_values = get_current_attribute_values(attributenamesarray, geom_attribute, k);
-		ahah("index.php", "go=auto_generate&layer_id="+layer_id+"&attribute="+attribute+"&attributenames="+names_values[0]+"&attributevalues="+names_values[1], new Array(document.getElementById(attribute+'_'+k)), new Array("setvalue"));
+		names_values = get_current_attribute_values(layer_id, attributenamesarray, geom_attribute, k);
+		ahah("index.php", "go=auto_generate&layer_id="+layer_id+"&attribute="+attribute+"&attributenames="+names_values[0]+"&attributevalues="+names_values[1], new Array(document.getElementById(layer_id+'_'+attribute+'_'+k)), new Array("setvalue"));
 	}
 	
 	openCustomSubform = function(layer_id, attribute, attributenamesarray, field_id, k){
-		names_values = get_current_attribute_values(attributenamesarray, '', k);
+		names_values = get_current_attribute_values(layer_id, attributenamesarray, '', k);
 		document.getElementById('waitingdiv').style.background = 'rgba(200,200,200,0.8)';
 		document.getElementById('waitingdiv').style.display = '';
 		subformWidth = document.GUI.browserwidth.value-70;
@@ -557,6 +557,15 @@ include('funktionen/input_check_functions.php');
 			currentform.submit();
 		}
 	}
+	
+	dublicate_dataset = function(layer_id){
+		if(check_for_selection(layer_id)){
+			currentform.chosen_layer_id.value = layer_id;
+			currentform.go_backup.value = currentform.go.value;
+			currentform.go.value = 'Datensatz_dublizieren';
+			currentform.submit();
+		}
+	}	
 
 	print_data = function(layer_id){
 		if(check_for_selection(layer_id)){
@@ -603,17 +612,17 @@ include('funktionen/input_check_functions.php');
 		var attributenames = '';
 		var attributevalues = '';
 		for(i = 0; i < attributenamesarray.length; i++){
-			if(document.getElementById(attributenamesarray[i]+'_'+k) != undefined){
+			if(document.getElementById(layer_id+'_'+attributenamesarray[i]+'_'+k) != undefined){
 				attributenames += attributenamesarray[i] + '|';
-				attributevalues += document.getElementById(attributenamesarray[i]+'_'+k).value + '|';
+				attributevalues += document.getElementById(layer_id+'_'+attributenamesarray[i]+'_'+k).value + '|';
 			}
 		}
 		attribute = attributes.split(',');
 		for(i = 0; i < attribute.length; i++){
-			type = document.getElementById(attribute[i]+'_'+k).type;
+			type = document.getElementById(layer_id+'_'+attribute[i]+'_'+k).type;
 			if(type == 'text'){action = 'setvalue'};
 			if(type == 'select-one'){action = 'sethtml'};
-			ahah("index.php", "go=get_select_list&layer_id="+layer_id+"&attribute="+attribute[i]+"&attributenames="+attributenames+"&attributevalues="+attributevalues+"&type="+type, new Array(document.getElementById(attribute[i]+'_'+k)), new Array(action));
+			ahah("index.php", "go=get_select_list&layer_id="+layer_id+"&attribute="+attribute[i]+"&attributenames="+attributenames+"&attributevalues="+attributevalues+"&type="+type, new Array(document.getElementById(layer_id+'_'+attribute[i]+'_'+k)), new Array(action));
 		}
 	}
 
@@ -645,18 +654,18 @@ include('funktionen/input_check_functions.php');
 		}
 	}
 	
-	change_all = function(layer_id, k, attribute){
-		allfield = document.getElementById(attribute+'_'+k);
+	change_all = function(layer_id, k, layerid_attribute){
+		allfield = document.getElementById(layerid_attribute+'_'+k);
 		for(var i = 0; i < k; i++){			
 			if(document.getElementById(layer_id+'_'+i).checked){
-				formfield = document.getElementById(attribute+'_'+i);
+				formfield = document.getElementById(layerid_attribute+'_'+i);
 				if(formfield.type == 'checkbox'){
 					formfield.checked = allfield.checked;
 				}
 				else{
 					formfield.value = allfield.value;
 				}
-				document.getElementById(attribute+'_'+i).onchange();
+				document.getElementById(layerid_attribute+'_'+i).onchange();
 			}
 		}		
 	}

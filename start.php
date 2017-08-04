@@ -4,29 +4,7 @@ $GUI=new GUI("map.php", "main.css.php", "html");
 
 $GUI->allowed_documents = array();
 $GUI->document_loader_name = session_id().rand(0,99999999).'.php';
-
-# Übergabe aller Formularvariablen an die Benutzeroberfläche an formvars
-# Dabei wird unterschieden zwischen Aufrufen über das Internet oder von der Komandozeile aus
-if (is_array($argc) AND $argc[1]!='') {
- # Aufruf des PHP-Skriptes über die Komandozeile (CLI)
- # Wenn die Variable argc > 0 ist, wurde die Datei von der Komandozeile aus aufgerufen
- # in dem Fall können die übergebenen Parameter hier der formvars-Variable übergeben werden.
- $arg['go']=$argv[1];
- $arg['ist_Fortfuehrung']=$argv[2];
- $arg['WLDGE_lokal']=$argv[3];
- $arg['WLDGE_Datei_lokal']=$argv[4];
- $GUI->formvars=$arg;
-}
-else {
-  # Übergeben der Variablen aus den Post oder Get Aufrufen
-  # normaler Aufruf des PHP-Skriptes über Apache oder CGI  
-  #$GUI->formvars=stripScript($_REQUEST);
-  foreach($_REQUEST as $key => $value){
-  	#if(is_string($value))$_REQUEST[$key] = addslashes($value);
-		if(is_string($value))$_REQUEST[$key] = pg_escape_string($value);
-  }
-  $GUI->formvars=$_REQUEST;
-}
+$GUI->formvars=$formvars;
 
 #################################################################################
 # Setzen der Konstante, ob in die Datenbank geschrieben werden soll oder nicht.

@@ -7,6 +7,7 @@
   $strDeleteLine="alles loeschen";
   $strDelLine="Linien loeschen";
   $strSplitLine="Linien teilen";
+	$strSplitPolygon="Polygone teilen";
   $strUndo="Rueckgaengig";
   $strSetPosition="Position setzen";
   $strSetGPSPosition="GPS Position setzen";

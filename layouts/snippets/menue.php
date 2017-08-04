@@ -77,10 +77,17 @@ function showMenue() {
 		if($this->img['referenzkarte'] != '' AND MENU_REFMAP == "oben")echo $refmap_html; ?>
 		
 		<div id="menueTable">
-		<?
-		$this->menues = Menue::loadMenue($this);
+		<?		
+		if($this->user->rolle->menue_buttons){
+			$button_menues = Menue::loadMenue($this, 'button');		# erst nur die Button-Menüpunkte
+			foreach($button_menues as $menue){
+				echo $menue->html();
+			}
+			$this->menues = Menue::loadMenue($this, 'all-buttons');		# dann alle Menüpunkte, wobei Obermenüpunkte, die Buttons sind, weggelassen werden
+		}
+		else $this->menues = Menue::loadMenue($this, 'all-no_buttons');		# ansonsten alle Menüpunkte, keine Buttons
 		foreach($this->menues as $menue){
-			if($menue->get('menueebene') == 1 OR ($this->user->rolle->menue_buttons AND $menue->get('button_class') != '')) echo $menue->html();
+			if($menue->get('menueebene') == 1) echo $menue->html();
 		}
 		?>
 		</div>

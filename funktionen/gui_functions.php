@@ -241,7 +241,7 @@ function drag(event) {
 				resizeobjekt.style.width = width + (posx - resizex) + "px";
 			break;
 			case "col_resize":
-				resizeobjekt.style.width = width + (posx - resizex) + "px";
+				resizeobjekt.style.minWidth = width + (posx - resizex) + "px";
 			break;
 		}
   }
@@ -598,9 +598,11 @@ function deactivateAllClasses(class_ids){
 }
 
 /*Anne*/
-function changeClassStatus(classid,imgsrc,instantreload,height){
+function changeClassStatus(classid,imgsrc,instantreload,width,height){
 	selClass = document.getElementsByName("class"+classid)[0];
 	selImg   = document.getElementsByName("imgclass"+classid)[0];
+	if(height < width)height = 12;
+	else height = 18;
 	if(selClass.value=='0'){
 		selClass.value='1';
 		selImg.src=imgsrc;
@@ -615,9 +617,11 @@ function changeClassStatus(classid,imgsrc,instantreload,height){
 }
 
 /*Anne*/
-function mouseOverClassStatus(classid,imgsrc,height){
+function mouseOverClassStatus(classid,imgsrc,width,height){
 	selClass = document.getElementsByName("class"+classid)[0];
 	selImg   = document.getElementsByName("imgclass"+classid)[0];
+	if(height < width)height = 12;
+	else height = 18;
 	if(selClass.value=='0'){
 		selImg.src=imgsrc;	
 	}else if(selClass.value=='1'){
@@ -628,9 +632,11 @@ function mouseOverClassStatus(classid,imgsrc,height){
 }
 
 /*Anne*/
-function mouseOutClassStatus(classid,imgsrc,height){
+function mouseOutClassStatus(classid,imgsrc,width,height){
 	selClass = document.getElementsByName("class"+classid)[0];
 	selImg   = document.getElementsByName("imgclass"+classid)[0];
+	if(height < width)height = 12;
+	else height = 18;	
 	if(selClass.value=='0'){
 		selImg.src="graphics/inactive"+height+".jpg";	
 	}else if(selClass.value=='1'){
@@ -645,7 +651,7 @@ function showMapParameter(epsg_code, width, height) {
 			msg = " \
 				<div style=\"text-align: left\"> \
 					<h2>Daten des aktuellen Kartenausschnitts</h2><br> \
-					Koordinatensystem: EPSG: " + epsg_code + "<br> \
+					Koordinatenreferenzsystem: EPSG: " + epsg_code + "<br> \
 					linke untere Ecke: (" + toFixed(gui.minx.value, 3) + ", " + toFixed(gui.miny.value, 3) + ")<br> \
 					rechte obere Ecke: (" + toFixed(gui.maxx.value, 3) + ", " + toFixed(gui.maxy.value, 3) + ")<br> \
 					Ausdehnung: " + toFixed(gui.maxx.value - gui.minx.value, 3) + " x " + toFixed(gui.maxy.value-gui.miny.value,3) + " m<br> \
