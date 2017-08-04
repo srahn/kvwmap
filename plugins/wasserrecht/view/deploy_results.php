@@ -13,3 +13,5 @@
 
 <h3>Reset PostgreSQL Data</h3>
 <?php echo $this->result['reset_pgsql_data']; ?>
+
+<p>fertig<p><p>
