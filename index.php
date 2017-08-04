@@ -58,7 +58,7 @@ else {
 		#if(is_string($value))$_REQUEST[$key] = pg_escape_string($value);
 		if(is_string($value))$_REQUEST[$key] = str_replace('<script', '', pg_escape_string($value));
   }
-  $formvars=$_REQUEST;
+  $formvars = $_REQUEST;
 }
 
 $go = $formvars['go'];
@@ -96,8 +96,11 @@ if (LOG_LEVEL>0) {
  $log_mysql=new LogFile(LOGFILE_MYSQL,'text','Log-Datei MySQL', '#------v: '.date("Y:m:d H:i:s",time()));
  $log_postgres=new LogFile(LOGFILE_POSTGRES,'text', 'Log-Datei-Postgres', '------v: '.date("Y:m:d H:i:s",time()));
 }
-
-if (!$_SESSION['angemeldet'] or !empty($formvars['username'])) {
+if (
+	!$_SESSION['angemeldet'] or
+	!empty($formvars['username']) or
+	$_SESSION['REQUEST_URI] => /kvwmap_pet_dev'] != $_SESSION['REQUEST_URI']
+) {
 	$msg .= '<br>Nicht angemeldet';
 	include(CLASSPATH . 'mysql.php');
 	$userDb = new database();
