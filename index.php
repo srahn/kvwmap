@@ -99,7 +99,7 @@ if (LOG_LEVEL>0) {
 if (
 	!$_SESSION['angemeldet'] or
 	!empty($formvars['username']) or
-	$_SESSION['REQUEST_URI] => /kvwmap_pet_dev'] != $_SESSION['REQUEST_URI']
+	$_SESSION['CONTEXT_PREFIX] => /kvwmap_pet_dev'] != $_SERVER['CONTEXT_PREFIX']
 ) {
 	$msg .= '<br>Nicht angemeldet';
 	include(CLASSPATH . 'mysql.php');

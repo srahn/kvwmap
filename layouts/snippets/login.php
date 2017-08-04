@@ -76,14 +76,14 @@
 	$msg = $formvars['msg'];
 	$mobile = $formvars['mobile'];
   $remote_addr = getenv('REMOTE_ADDR');
-    
+
 	// Benutzername und Passwort werden überprüft
 	if (($newPassword == '' OR ($newPassword != '' AND $newPassword2 != '')) AND $userDb->login_user($username, $passwort)) {
 	#if ($userDb->login_user($username, $passwort)) {
 		$_SESSION['angemeldet'] = true;
 		$_SESSION['login_name'] = $username;
 		$_SESSION['login_routines'] = true;
-		$_SESSION['REQUEST_URI'] = $_SERVER['REQUEST_URI'];
+		$_SESSION['CONTEXT_PREFIX'] = $_SERVER['CONTEXT_PREFIX'];
 		if ($mobile == 'on'){
 			$_SESSION['mobile'] = 'true';
 		}
