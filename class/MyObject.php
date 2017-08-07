@@ -49,8 +49,7 @@ class MyObject {
 				`" . $this->tableName . "`
 			WHERE
 				" . $where . 
-			($order != '' ? " ORDER BY " . replace_semicolon($order) : "") . "
-		";
+			($order != '' ? " ORDER BY `" . implode('`, `', $orders) . "`" : "");
 		$this->debug->show('mysql find_where sql: ' . $sql, MyObject::$write_debug);
 		$query = mysql_query($sql, $this->database->dbConn);
 		$result = array();
