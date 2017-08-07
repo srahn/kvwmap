@@ -10,6 +10,8 @@ class WasserrechtlicheZulassungen extends PgObject {
 	static $write_debug = true;
 	
 	public $gueltigkeitsJahr;
+	public $behoerde;
+	public $adressat;
 
 	function WasserrechtlicheZulassungen($gui) {
 		parent::__construct($gui, WasserrechtlicheZulassungen::$schema, WasserrechtlicheZulassungen::$tableName);
@@ -50,6 +52,21 @@ class WasserrechtlicheZulassungen extends PgObject {
 					}
 					
 					$result->gueltigkeitsJahr=$year;
+					
+					//get the 'Adressat'
+					if(!empty($result->data['adressat']))
+					{
+					    $adressat = Personen::find_by_id($gui, 'id', $result->data['adressat']);
+					    $result->adressat = $adressat;
+					}
+					
+					//get the 'Behoerde'
+					if(!empty($result->data['ausstellbehoerde']))
+					{
+					    $behoerde = Behoerde::find_by_id($gui, 'id', $result->data['ausstellbehoerde']);
+					    $result->behoerde = $behoerde;
+					}
+					
 					$wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[]=$result;
 				}
 			}
@@ -61,6 +78,18 @@ class WasserrechtlicheZulassungen extends PgObject {
 		$wrzProGueltigkeitsJahr->gueltigkeitsJahre=array('n/a');
 		return $wrzProGueltigkeitsJahr;
 // 		return array('n/a');
+	}
+	
+	public function toString() {
+	    return "gueltigkeitsJahr: " . $this->gueltigkeitsJahr . (!empty($this->behoerde) ? " behoerde: " . $this->behoerde->data['id'] : "" ) . (!empty($this->adressat) ? " adressat: " . $this->adressat->data['id'] : "");
+	}
+	
+	public function getBehoerdeName() {
+	    return !empty($this->behoerde) ?  $this->behoerde->getName() : null;
+	}
+	
+	public function getBehoerdeId() {
+	    return !empty($this->behoerde) ?  $this->behoerde->getId() : null;
 	}
 }
 ?>

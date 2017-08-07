@@ -14,9 +14,9 @@ class Personen extends PgObject {
 	}
 
 	public static function find_by_id($gui, $by, $id) {
-		$anlage = new Personen($gui);
-		$anlage->find_by($by, $id);
-		return $anlage;
+		$personen = new Personen($gui);
+		$personen->find_by($by, $id);
+		return $personen;
 	}
 }
 ?>

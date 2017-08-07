@@ -155,6 +155,7 @@ INSERT INTO wasserrecht.wasserrechtliche_zulassungen_fassung (auswahl, nummer, d
 
 INSERT INTO wasserrecht.wasserrechtliche_zulassungen (name, ausstellbehoerde, ausgangsbescheid, status, adresse, gueltigkeit, aktuell, historisch, sachbearbeiter, adressat, anlage) VALUES ('Test Wasserrechtliche Zulassung 1', 1, 1, 2, 1, 1, true, false, 2, 2, 1);
 INSERT INTO wasserrecht.wasserrechtliche_zulassungen (name, ausstellbehoerde, ausgangsbescheid, status, adresse, gueltigkeit, aktuell, historisch, sachbearbeiter, adressat, anlage) VALUES ('Test Wasserrechtliche Zulassung 2', 1, 2, 2, 1, 1, false, true, 2, 2, 2);
+INSERT INTO wasserrecht.wasserrechtliche_zulassungen (name, ausstellbehoerde, ausgangsbescheid, status, adresse, gueltigkeit, aktuell, historisch, sachbearbeiter, adressat, anlage) VALUES ('Test Wasserrechtliche Zulassung 3', 2, 2, 2, 1, 1, false, true, 2, 1, 2);
 
 INSERT INTO wasserrecht.gewaesserbenutzungen_umfang(name, max_ent_a) VALUES('Test Umfang', 80000.000);
 INSERT INTO wasserrecht.gewaesserbenutzungen_lage(name, namekurz, namelang, the_geo) VALUES('Test Gewaesserbenutzungen Lage', 'Test Gewaesserbenutzungen Lage (kurz)', 'Test Gewaesserbenutzungen Lage (lang)', ST_Transform(ST_GeomFromText('POINT(13 53)', 4326), 35833));
