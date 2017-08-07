@@ -18,5 +18,17 @@ class Personen extends PgObject {
 		$personen->find_by($by, $id);
 		return $personen;
 	}
+	
+	public function getName() {
+	    return $this->data['name'];
+	}
+	
+	public function getId() {
+	    return $this->data['id'];
+	}
+	
+	public function toString() {
+	    return "id: " . $this->getId() . " name: " . $this->getName();
+	}
 }
 ?>

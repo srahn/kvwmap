@@ -90,6 +90,12 @@ function setNewBehoerde(selectObject)
 	replaceParameterInUrl('behoerde', value);
 }
 
+function setNewAdressat(selectObject)
+{
+	var value = selectObject.value;
+	replaceParameterInUrl('adressat', value);
+}
+
 function replaceParameterInUrl(key, value)
 {
 	var url = window.location.href;
@@ -218,35 +224,51 @@ function replaceParameterInUrl(key, value)
 		
 		<label style="float: left">
 			Adressat:
+			<select onchange="setNewAdressat(this)">
+				<?php
+				
+				$getAdressat = !empty(htmlspecialchars($_GET['adressat'])) ? htmlspecialchars($_GET['adressat']) : null;
+				
+				if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen))
+				{
+				    $wasserrechtlicheZulassungen = $wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen;
+				    
+				    $adressatArray = array();
+				    
+				    //var_dump($wasserrechtlicheZulassungen);
+				    foreach($wasserrechtlicheZulassungen AS $wrz)
+				    {
+				        if(!empty($wrz) && $getYear === $wrz->gueltigkeitsJahr)
+				        {
+				            if(!empty($wrz->adressat))
+				            {
+				                if(empty($getAdressat))
+				                {
+				                    $getAdressat = $wrz->adressat->getId();
+				                }
+				                
+				                if(!in_array($wrz->adressat->toString(), $adressatArray))
+				                {
+				                    $adressatArray[]=$wrz->adressat->toString();
+				                    
+				                    echo '<option value='. $wrz->adressat->getId() . ' ' . ($wrz->adressat->getId() === $getAdressat ? "selected" : "") . '>' . $wrz->adressat->getName() . "</option>";
+				                }
+				            }
+				        }
+				        else
+				        {
+				            echo "<option>Keinen Eintrag in der Datenbank gefunden!</option>";
+				            break;
+				        }
+				    }
+				    
+				}
+				
+				?>
+			</select>
 		</label>
 		
 		<br />
-		<br />
-		<br />
-		
-		<label style="float: left">Anlagen:
-				<select>
-					<?php
-						$anlage = new Anlage($this);
-
-// 						$anlagen = Anlage::find_by_id($this, 'id', 1);
-// 						$anlagen = $anlage->find_where('true');
-						$anlagen = $anlage->find_where('id=1');
-						
-// 						$this->debug->write($anlagen, 4);
-
-// 						echo '<option>' . var_dump($anlagen) . "</option>";
-// 						echo '<option>' . $anlagen[0]->data['name'] . "</option>";
-// 						echo '<option>' . $gueltigkeitsjahr . "</option>";
-
-						foreach($anlagen AS $al) 
-						{
-							echo '<option>' . $al->data['name'] . "</option>";
-						}
-					?>
-				</select>
-		</label>
-		
 		<br />
 		<br />
 		
@@ -298,50 +320,53 @@ function replaceParameterInUrl(key, value)
     		          {
     		              if(empty($getBehoerde) || $getBehoerde === $wrz->behoerde->getId())
     		              {
-    		                  $anlage = new Anlage($this);
-    		                  $anlagen = $anlage->find_where('id=' . $wrz->data['anlage']);
-    		                  
-    		                  $gewaesserbenutzung = new Gewaesserbenutzungen($this);
-    		                  $gewaesserbenutzungen = $gewaesserbenutzung->find_where_with_umfang('wasserrechtliche_zulassungen=' . $wrz->data['id']);
-    		                  
-    		                  ?>
-            		          	<tr>
-            		          		<td>
-            		          			<input type="checkbox">
-            		          		</td>
-            		          		<td>
-            		          			<?php 
-            		          			     echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Anlagen'] . '&value_id=' . $anlagen[0]->data['id'] . 'operator_id==">' . $anlagen[0]->data['name'] . '</a>';
-        //     		          			     var_dump($wrz);
-            		          			?>
-            		          		</td>
-            		          		<td>
-            		          			<?php 
-            		          			     echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Wasserrechtliche_Zulassungen'] . '&value_id=' . $wrz->data['id'] . 'operator_id==">' . $wrz->data['name'] . '</a>';
-        //     		          			     echo $wrz->data['name'];
-        //     		          			     var_dump($wrz);
-            		          			?>
-            		          		</td>
-            		          		<td>
-            		          			<?php
-            		          			     if(!empty($gewaesserbenutzungen) && !empty($gewaesserbenutzungen[0]))
-            		          			     {
-            		          			         echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Gewaesserbenutzungen_Umfang'] . '&value_id=' . $gewaesserbenutzungen[0]->gewaesserbenutzungUmfang->data['id'] . 'operator_id==">' . $gewaesserbenutzungen[0]->gewaesserbenutzungUmfang->getUmfang() . '</a>';
-            		          			     }
-            		          			?>
-            		          		</td>
-            		          		<td>
-            		          			<?php 
-                		          			if(!empty($gewaesserbenutzungen) && !empty($gewaesserbenutzungen[0]))
-                		          			{
-            		          			         echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Gewaesserbenutzungen'] . '&value_id=' . $gewaesserbenutzungen[0]->data['id'] . 'operator_id==">' . $gewaesserbenutzungen[0]->data['kennnummer'] . '</a>';
-                		          			}
-            		          			?>
-            		          		</td>
-            		          		<td>
-            		          		</td>
-            		          	</tr>
-            		       <?php
+    		                  if(empty($getAdressat) || $getAdressat === $wrz->adressat->getId())
+    		                  {
+    		                      $anlage = new Anlage($this);
+    		                      $anlagen = $anlage->find_where('id=' . $wrz->data['anlage']);
+    		                      
+    		                      $gewaesserbenutzung = new Gewaesserbenutzungen($this);
+    		                      $gewaesserbenutzungen = $gewaesserbenutzung->find_where_with_umfang('wasserrechtliche_zulassungen=' . $wrz->data['id']);
+    		                      
+        		                      ?>
+                		          	<tr>
+                		          		<td>
+                		          			<input type="checkbox">
+                		          		</td>
+                		          		<td>
+                		          			<?php 
+                		          			     echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Anlagen'] . '&value_id=' . $anlagen[0]->data['id'] . 'operator_id==">' . $anlagen[0]->data['name'] . '</a>';
+            //     		          			     var_dump($wrz);
+                		          			?>
+                		          		</td>
+                		          		<td>
+                		          			<?php 
+                		          			     echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Wasserrechtliche_Zulassungen'] . '&value_id=' . $wrz->data['id'] . 'operator_id==">' . $wrz->data['name'] . '</a>';
+            //     		          			     echo $wrz->data['name'];
+            //     		          			     var_dump($wrz);
+                		          			?>
+                		          		</td>
+                		          		<td>
+                		          			<?php
+                		          			     if(!empty($gewaesserbenutzungen) && !empty($gewaesserbenutzungen[0]))
+                		          			     {
+                		          			         echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Gewaesserbenutzungen_Umfang'] . '&value_id=' . $gewaesserbenutzungen[0]->gewaesserbenutzungUmfang->data['id'] . 'operator_id==">' . $gewaesserbenutzungen[0]->gewaesserbenutzungUmfang->getUmfang() . '</a>';
+                		          			     }
+                		          			?>
+                		          		</td>
+                		          		<td>
+                		          			<?php 
+                    		          			if(!empty($gewaesserbenutzungen) && !empty($gewaesserbenutzungen[0]))
+                    		          			{
+                		          			         echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Gewaesserbenutzungen'] . '&value_id=' . $gewaesserbenutzungen[0]->data['id'] . 'operator_id==">' . $gewaesserbenutzungen[0]->data['kennnummer'] . '</a>';
+                    		          			}
+                		          			?>
+                		          		</td>
+                		          		<td>
+                		          		</td>
+                		          	</tr>
+                		       <?php
+    		                  }
     		              }
     		          }
     		      }
