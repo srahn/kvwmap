@@ -103,8 +103,21 @@ function toLayerEditor(){
 
 						<td align="center"><span class="fett">Beschriftung</span></td>
 
-						<td align="center"><span class="fett">Bei der Suche</span></td><?php
+						<td align="center"><span class="fett">Bei der Suche</span></td>
 
+						<?php
+						$msg = "Verwende Wert des Attributes nicht für neuen Datensatz"; ?>
+						<td align="center">
+							<span
+								class="fett"
+								title="<?php echo $msg; ?>"
+								onmouseover="message([{ 'type': 'notice', 'msg' : '<?php echo $msg; ?>' }], 3000, 6000);"
+								style="cursor: pointer"
+							>F&uuml;r neuen<br>Datensatz
+							</span>
+						</td>
+
+						<?php
 						if (in_array($this->formvars['selected_layer_id'], $quicksearch_layer_ids)) { ?>
 							<td align="center"><span class="fett">Schnell-<br>suche</span></td><?php
 						}
@@ -117,19 +130,6 @@ function toLayerEditor(){
 								onmouseover="message([{ 'type': 'notice', 'msg': '<?php echo $msg; ?>' }], 3000, 6000);"
 								style="cursor: pointer"
 							></i>
-						</td><?php
-
-						$msg = "Verwende Wert des Attributes nicht für neuen Datensatz"; ?>
-						<td align="center">
-							<span
-								class="fa-stack fa-lg"
-								title="<?php echo $msg; ?>"
-								onmouseover="message([{ 'type': 'notice', 'msg' : '<?php echo $msg; ?>' }], 3000, 6000);"
-								style="cursor: pointer"
-							>
-								<i class="fa fa-plus-square fa-stack-1x"></i>
-							  <i class="fa fa-times fa-stack-1x text-danger" style="color: red; margin-left: 7px; margin-top: -9px"></i>
-							</span>
 						</td>
 
 					</tr><?php
@@ -296,9 +296,29 @@ function toLayerEditor(){
 												array('value' => 0, 'output' => 'anzeigen'),
 												array('value' => 1, 'output' => 'Pflichtangabe')
 											),
-											$this->attributes['mandatory'][$i]
+											$this->attributes['mandatory'][$i],
+											1,
+											'width: 80px'
 										); ?>
 							</td>
+
+							<td align="center" valign="top"><?php
+								echo FormObject::createSelectField(
+											'dont_use_for_new_' . $this->attributes['name'][$i],
+											array(
+												array('value' => -1, 'output' => 'nicht sichtbar'),
+												array('value' => 0, 'output' => 'anzeigen'),
+												array('value' => 1, 'output' => 'Werte nicht übernehmen')
+											),
+											$this->attributes['dont_use_for_new'][$i],
+											1,
+											'width: 80px'
+										); ?>
+							</td>
+
+							<td align="center" valign="top">
+						  	<input name="raster_visibility_<?php echo $this->attributes['name'][$i]; ?>" type="checkbox" value="1"<?php echo ($this->attributes['raster_visibility'][$i] ? ' checked="true"' : ''); ?>>
+						  </td>
 
 							<?php
 							if (in_array($this->formvars['selected_layer_id'], $quicksearch_layer_ids)) { ?>
@@ -307,16 +327,8 @@ function toLayerEditor(){
 						  	</td><?php
 							} ?>
 
-							<td align="center" valign="top">
-						  	<input name="raster_visibility_<?php echo $this->attributes['name'][$i]; ?>" type="checkbox" value="1"<?php echo ($this->attributes['raster_visibility'][$i] ? ' checked="true"' : ''); ?>>
-						  </td>
-
-							<td align="center" valign="top">
-							  <input name="dont_use_for_new_<?php echo $this->attributes['name'][$i]; ?>" type="checkbox" value="1"<?php echo ($this->attributes['dont_use_for_new'][$i] ? ' checked="true"' : ''); ?>>
-							</td>
-
-		        </tr><?php
-		    	}
+						</tr><?php
+					}
 					if (count($this->attributes) > 0){ ?>
 						<tr>
 							<td align="center" colspan="19"><br><br>
