@@ -1,32 +1,14 @@
 <?php
-#############################
-# Klasse Konvertierung #
-#############################
+class WasserrechtlicheZulassungen extends WrPgObject {
 
-class WasserrechtlicheZulassungen extends PgObject {
-
-	static $schema = 'wasserrecht';
-	static $tableName = 'wasserrechtliche_zulassungen';
-	static $write_debug = true;
+	protected $tableName = 'wasserrechtliche_zulassungen';
 	
 	public $gueltigkeitsJahr;
 	public $behoerde;
 	public $adressat;
+	public $anlagen;
+	public $gewaesserbenutzungen;
 
-	function WasserrechtlicheZulassungen($gui) {
-		parent::__construct($gui, WasserrechtlicheZulassungen::$schema, WasserrechtlicheZulassungen::$tableName);
-	}
-
-	public static function find_by_id($gui, $by, $id) {
-		$wasserrechtlicheZulassung = new WasserrechtlicheZulassungen($gui);
-		$wasserrechtlicheZulassung->find_by($by, $id);
-		return $wasserrechtlicheZulassung;
-	}
-	
-	public function find_where($where, $order = NULL, $select = '*') {
-		return parent::find_where($where, $order, $select);
-	}
-	
 	public function find_gueltigkeitsjahre($gui) {
 	    
 		$results = $this->find_where('gueltigkeit IS NOT NULL');
@@ -39,7 +21,8 @@ class WasserrechtlicheZulassungen extends PgObject {
 			{
 // 				var_dump($this->debug);
 			    $this->debug->write('result: ' . var_export($result->data, true), 4);
-				$wasserrechtlicheZulassungGueltigkeit = WasserrechtlicheZulassungenGueltigkeit::find_by_id($gui, 'id', $result->data['gueltigkeit']);
+			    $wrzGueltigkeit = new WasserrechtlicheZulassungenGueltigkeit($gui);
+			    $wasserrechtlicheZulassungGueltigkeit = $wrzGueltigkeit->find_by_id($gui, 'id', $result->data['gueltigkeit']);
 				if(!empty($wasserrechtlicheZulassungGueltigkeit))
 				{
 					$datum = $wasserrechtlicheZulassungGueltigkeit->data['gueltig_bis'];
@@ -56,16 +39,31 @@ class WasserrechtlicheZulassungen extends PgObject {
 					//get the 'Adressat'
 					if(!empty($result->data['adressat']))
 					{
-					    $adressat = Personen::find_by_id($gui, 'id', $result->data['adressat']);
+					    $person = new Personen($gui);
+					    $adressat = $person->find_by_id($gui, 'id', $result->data['adressat']);
 					    $result->adressat = $adressat;
 					}
 					
 					//get the 'Behoerde'
 					if(!empty($result->data['ausstellbehoerde']))
 					{
-					    $behoerde = Behoerde::find_by_id($gui, 'id', $result->data['ausstellbehoerde']);
+					    $bh = new Behoerde($gui);
+					    $behoerde = $bh->find_by_id($gui, 'id', $result->data['ausstellbehoerde']);
 					    $result->behoerde = $behoerde;
 					}
+					
+					//get the 'Anlage'
+					if(!empty($result->data['anlage']))
+					{
+					    $anlage = new Anlage($gui);
+					    $anlagen = $anlage->find_where('id=' . $result->data['anlage']);
+					    $result->anlagen = $anlagen;
+					}
+					
+					//get the 'Gewaesserbenutzungen'
+					$gewaesserbenutzung = new Gewaesserbenutzungen($gui);
+					$gewaesserbenutzungen = $gewaesserbenutzung->find_where_with_umfang('wasserrechtliche_zulassungen=' . $result->getId());
+					$result->gewaesserbenutzungen = $gewaesserbenutzungen;
 					
 					$wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[]=$result;
 				}

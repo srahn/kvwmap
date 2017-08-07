@@ -10,6 +10,7 @@ include_once(CLASSPATH . 'Layer.php');
 // include_once(CLASSPATH . 'Label2Class.php');
 // #include_once(CLASSPATH . 'LayerGroup.php');
 // include_once(CLASSPATH . 'data_import_export.php');
+include(PLUGINS . 'wasserrecht/model/WrPgObject.php');
 include(PLUGINS . 'wasserrecht/model/anlage.php');
 include(PLUGINS . 'wasserrecht/model/personen.php');
 include(PLUGINS . 'wasserrecht/model/behoerde.php');
