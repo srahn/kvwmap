@@ -74,6 +74,7 @@
 	var bufferfunctions = false;
 	var special_bufferfunctions = false;
 	var polygonfunctions = false;
+	var polygonfunctions2 = false;
 	var flurstuecksqueryfunctions = false;
 	var boxfunctions = false;
 	var pointfunctions = false;
@@ -867,11 +868,13 @@ function mouseup(evt){
 		  	document.getElementById("undo0").style.setProperty("fill","ghostwhite", "");
 		  	document.getElementById("new0").style.setProperty("fill","ghostwhite", "");
 		  	document.getElementById("pgon_subtr0").style.setProperty("fill","ghostwhite", "");
-				document.getElementById("split0").style.setProperty("fill","ghostwhite", "");
 				document.getElementById("vertex_edit1").style.setProperty("fill","ghostwhite", "");
 				remove_vertices();
 				remove_in_between_vertices();
 		  }
+			if (polygonfunctions2 == true) {
+				document.getElementById("split0").style.setProperty("fill","ghostwhite", "");
+			}
 			if(linefunctions == true){
 				document.getElementById("undo0").style.setProperty("fill","ghostwhite", "");
 		  	document.getElementById("new0").style.setProperty("fill","ghostwhite", "");
@@ -1978,7 +1981,7 @@ function mouseup(evt){
 	top.document.getElementById("svghelp").SVGupdate_geometry = update_geometry;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
 	function update_geometry(){
-		if(top.currentform.secondline.value == "true" || top.currentform.secondpoly.value == "true"){
+		if(top.currentform.secondline != undefined && top.currentform.secondline.value == "true" || top.currentform.secondpoly.value == "true"){
 			document.getElementById("cartesian").setAttribute("transform", "translate(0,'.$res_y.') scale(1,-1)");
 			updatepaths();
 			if(top.currentform.last_doing.value == "add_geom" || top.currentform.last_doing.value == "subtract_geom" || top.currentform.last_doing.value == "move_geometry"){
@@ -2777,6 +2780,10 @@ function mouseup(evt){
 	  }
 	}
 	';
+
+$polygonfunctions2 = '
+	polygonfunctions2 = true;	
+';
 
 $transformfunctions = '
 
