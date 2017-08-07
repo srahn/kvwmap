@@ -45,15 +45,12 @@
 					<input type="hidden" value="<? echo $passwort; ?>" name="passwort" />
 					<input type="hidden" name="browserwidth">
 					<input type="hidden" name="browserheight">
-					<br>
-					<? 
-					for ($i = 0; $i < count($formvars); $i++){
-						if (key($formvars) != 'gast') {			// sonst gibts ne Endlosschleife
-							echo '<input type="hidden" name="' . key($formvars) . '" value="' . $formvars[key($formvars)] . '">';
+					<br><?php
+					foreach($formvars AS $key => $value) {
+						if ($key != 'gast') {
+							echo '<input type="hidden" name="'. $key . '" value="' . $value . '">';
 						}
-						next($formvars);
-					}
-					?>
+					} ?>
 					<table align="center" cellspacing="4" cellpadding="22" bgcolor="<? echo BG_DEFAULT; ?>" border="0" style="background-color: <? echo BG_DEFAULT; ?>; box-shadow: 12px 10px 14px #777; border: 1px solid #bbbbbb; background: linear-gradient(<? echo BG_GLEATTRIBUTE; ?> 0%, <? echo BG_DEFAULT ?> 100%);">
 						<tr>
 							<td align="center"><h1>Bitte warten...</h1></td>
@@ -128,15 +125,13 @@
 			</script>
 		</head>
 		<body style="font-family: Arial, Verdana, Helvetica, sans-serif" onload="document.login.username.focus();">
-		  <form name="login" action="index.php" method="post">
-				<? 
-				for($i = 0; $i < count($formvars); $i++){
-					if (!in_array(key($formvars), array('username', 'passwort'))) {
-						echo '<input type="hidden" name="'.key($formvars).'" value="'.$formvars[key($formvars)].'">';
+			<?php print_r($this->formvars); ?>
+		  <form name="login" action="index.php" method="post"><?php
+				foreach($formvars AS $key => $value) {
+					if (!in_array($key, array('username', 'passwort'))) {
+						echo '<input type="hidden" name="'. $key . '" value="' . $value . '">';
 					}
-					next($formvars);
-				}
-				?>
+				} ?>
 				<br>
 				<table align="center" cellspacing="4" cellpadding="12" bgcolor="<? echo BG_DEFAULT; ?>" border="0" style="background-color: <? echo BG_DEFAULT; ?>; box-shadow: 12px 10px 14px #777; border: 1px solid #bbbbbb; background: linear-gradient(<? echo BG_GLEATTRIBUTE; ?> 0%, <? echo BG_DEFAULT ?> 100%);">
 					<tr>
