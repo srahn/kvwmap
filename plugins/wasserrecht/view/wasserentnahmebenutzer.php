@@ -173,7 +173,17 @@ function replaceParameterInUrl(key, value)
 		<br />
 		
 		<label style="float: left">
-			Behörde: 
+			<?php 
+			     $getBehoerde = !empty(htmlspecialchars($_GET['behoerde'])) ? htmlspecialchars($_GET['behoerde']) : null;
+			     
+			     if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen)
+			         && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[0]) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[0]->behoerde) && empty($getBehoerde))
+			     {
+			         $getBehoerde = $wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[0]->behoerde->getId();
+			     }
+			     
+			     echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Behoerde'] . '&value_id=' . $getBehoerde . '&operator_id==">Behörde: </a>';
+			?>
 			<select onchange="setNewBehoerde(this)">
 				<?php
 				
@@ -192,11 +202,6 @@ function replaceParameterInUrl(key, value)
 				        {
 				            if(!empty($wrz->behoerde))
 				            {
-				                if(empty($getBehoerde))
-				                {
-				                    $getBehoerde = $wrz->behoerde->getId();
-				                }
-				                
 				                if(!in_array($wrz->behoerde->toString(), $behoerdeArray))
 				                {
 				                    $behoerdeArray[]=$wrz->behoerde->toString();
@@ -223,11 +228,19 @@ function replaceParameterInUrl(key, value)
 		<br />
 		
 		<label style="float: left">
-			Adressat:
+			<?php 
+			
+			    $getAdressat = !empty(htmlspecialchars($_GET['adressat'])) ? htmlspecialchars($_GET['adressat']) : null;
+			    if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen) 
+			        && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[0]) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[0]->adressat) && empty($getAdressat))
+			    {
+			        $getAdressat = $wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[0]->adressat->getId();
+			    }
+			
+			    echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Personen'] . '&value_personen_id=' . $getAdressat . '&operator_personen_id==">Adressat: </a>';
+            ?>
 			<select onchange="setNewAdressat(this)">
 				<?php
-				
-				$getAdressat = !empty(htmlspecialchars($_GET['adressat'])) ? htmlspecialchars($_GET['adressat']) : null;
 				
 				if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen))
 				{
@@ -242,11 +255,6 @@ function replaceParameterInUrl(key, value)
 				        {
 				            if(!empty($wrz->adressat))
 				            {
-				                if(empty($getAdressat))
-				                {
-				                    $getAdressat = $wrz->adressat->getId();
-				                }
-				                
 				                if(!in_array($wrz->adressat->toString(), $adressatArray))
 				                {
 				                    $adressatArray[]=$wrz->adressat->toString();
@@ -308,12 +316,12 @@ function replaceParameterInUrl(key, value)
                 		          		</td>
                 		          		<td>
                 		          			<?php 
-                		          			     echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Anlagen'] . '&value_id=' . $wrz->anlagen[0]->getId() . 'operator_id==">' . $wrz->anlagen[0]->getName() . '</a>';
+                		          			     echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Anlagen'] . '&value_anlage_id=' . $wrz->anlagen[0]->getId() . '&operator_anlage_id==">' . $wrz->anlagen[0]->getName() . '</a>';
                 		          			?>
                 		          		</td>
                 		          		<td>
                 		          			<?php 
-                		          			     echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Wasserrechtliche_Zulassungen'] . '&value_id=' . $wrz->getId() . 'operator_id==">' . $wrz->getName() . '</a>';
+                		          			     echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Wasserrechtliche_Zulassungen'] . '&value_wrz_id=' . $wrz->getId() . '&operator_wrz_id==">' . $wrz->getName() . '</a>';
             //     		          			     echo $wrz->getName();
             //     		          			     var_dump($wrz);
                 		          			?>
@@ -322,7 +330,7 @@ function replaceParameterInUrl(key, value)
                 		          			<?php
                 		          			     if(!empty($wrz->gewaesserbenutzungen) && !empty($wrz->gewaesserbenutzungen[0]))
                 		          			     {
-                		          			         echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Gewaesserbenutzungen_Umfang'] . '&value_id=' . $wrz->gewaesserbenutzungen[0]->gewaesserbenutzungUmfang->getId() . 'operator_id==">' . $wrz->gewaesserbenutzungen[0]->gewaesserbenutzungUmfang->getUmfang() . '</a>';
+                		          			         echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Gewaesserbenutzungen_Umfang'] . '&value_id=' . $wrz->gewaesserbenutzungen[0]->gewaesserbenutzungUmfang->getId() . '&operator_id==">' . $wrz->gewaesserbenutzungen[0]->gewaesserbenutzungUmfang->getUmfang() . '</a>';
                 		          			     }
                 		          			?>
                 		          		</td>
@@ -330,7 +338,7 @@ function replaceParameterInUrl(key, value)
                 		          			<?php 
                     		          			if(!empty($wrz->gewaesserbenutzungen) && !empty($wrz->gewaesserbenutzungen[0]))
                     		          			{
-                		          			         echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Gewaesserbenutzungen'] . '&value_id=' . $wrz->gewaesserbenutzungen[0]->getId() . 'operator_id==">' . $wrz->gewaesserbenutzungen[0]->getKennummer() . '</a>';
+                		          			         echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Gewaesserbenutzungen'] . '&value_id=' . $wrz->gewaesserbenutzungen[0]->getId() . '&operator_id==">' . $wrz->gewaesserbenutzungen[0]->getKennummer() . '</a>';
                     		          			}
                 		          			?>
                 		          		</td>

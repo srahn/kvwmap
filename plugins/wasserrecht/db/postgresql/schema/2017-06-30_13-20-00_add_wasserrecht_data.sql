@@ -23,7 +23,7 @@ INSERT INTO wasserrecht.anlagen_klasse (name) VALUES ('Wasserwerk');
 INSERT INTO wasserrecht.anlagen_klasse (name) VALUES ('Landwirtschaftsbetrieb');
 INSERT INTO wasserrecht.anlagen_klasse (name) VALUES ('Sport- und Erhohlungsanlage');
 
-INSERT INTO wasserrecht.personen (name, behoerde) VALUES ('MAX MUSTERMANN', 1);
+INSERT INTO wasserrecht.personen (name, behoerde, adresse) VALUES ('MAX MUSTERMANN', 1, 1);
 INSERT INTO wasserrecht.personen (name, behoerde) VALUES ('FRAU MUSTERMANN', 2);
 INSERT INTO wasserrecht.personen (name, bearbeiter) VALUES ('MUSTER BEARBEITER', true);
 INSERT INTO wasserrecht.personen (name, betreiber) VALUES ('MUSTER BETREIBER', true);
