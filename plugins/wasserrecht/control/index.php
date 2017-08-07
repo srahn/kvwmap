@@ -13,6 +13,7 @@ include_once(CLASSPATH . 'Layer.php');
 include(PLUGINS . 'wasserrecht/model/WrPgObject.php');
 include(PLUGINS . 'wasserrecht/model/anlage.php');
 include(PLUGINS . 'wasserrecht/model/personen.php');
+include(PLUGINS . 'wasserrecht/model/adresse.php');
 include(PLUGINS . 'wasserrecht/model/behoerde.php');
 include(PLUGINS . 'wasserrecht/model/gewaesserbenutzungen.php');
 include(PLUGINS . 'wasserrecht/model/gewaesserbenutzungen_umfang.php');

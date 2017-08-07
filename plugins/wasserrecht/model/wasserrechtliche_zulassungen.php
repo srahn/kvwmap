@@ -41,6 +41,12 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 					{
 					    $person = new Personen($gui);
 					    $adressat = $person->find_by_id($gui, 'id', $result->data['adressat']);
+					    if(!empty($adressat->data['adresse']))
+					    {
+					        $adress = new AdresseKlasse($gui);
+					        $adresse = $adress->find_by_id($gui, 'id', $adressat->data['adresse']);
+					        $adressat->adresse = $adresse;
+					    }
 					    $result->adressat = $adressat;
 					}
 					
