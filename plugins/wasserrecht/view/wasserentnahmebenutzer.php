@@ -154,7 +154,21 @@ function setNewAdressat(selectObject)
 
 function replaceParameterInUrl(key, value)
 {
+// 	setAuswahlToHiddenForm(key, key, value);
+	
 	var url = window.location.href;
+	
+	if (url.indexOf('go=wasserentnahmebenutzer') == -1){
+
+		if (url.indexOf('?') > -1){
+			url += "&go=wasserentnahmebenutzer";
+		}
+		else
+		{
+			url += "?go=wasserentnahmebenutzer";
+		}	
+	}
+	
 	if (url.indexOf('?') > -1){
 	   if (url.indexOf(key) > -1){
 		   if(url.indexOf(key + '=' + value) > -1){
@@ -170,13 +184,39 @@ function replaceParameterInUrl(key, value)
 		   }	   	   
 	   } 
 	   else{
-		   url += '&' + key + '=' + value
+		   url += '&' + key + '=' + value;
 	   }
 	}else{
-	   url += '?' + key + '=' + value
+	   url += '?' + key + '=' + value;
 	}
 	window.location.href = url;
 }
+
+// function setAuswahlToHiddenForm(id, key, value)
+// {
+// 	alert($('#aufforderung_form'));
+
+// // 	$("#aufforderung_form").find("input").each(function()
+// // 	{
+// //        var input = $(this);
+// //        alert(input.html());
+// // //        input.remove();
+// //     });
+
+// 	$('#aufforderung_form').append("<input type='hidden' id='" + id + "' name='" + key + "' value='" + value + "'>");
+// }
+
+// $(document).ready(function() {
+//     //option A
+//     $("#aufforderung_form").submit(function(e){
+		
+        
+// //         alert($("form").attr('action'));
+// //         e.preventDefault(e);
+// //         $('form').attr('action', "index.php?go=wasserentnahmebenutzer&request=post").submit();
+//     });
+// });
+
 </script>
 
 <div class="tab">
@@ -185,7 +225,37 @@ function replaceParameterInUrl(key, value)
 </div>
 
 <div id="aufforderung_zur_erklaerung" class="tabcontent" style="display: block">
-	
+
+		<?php
+		
+// 		  print_r($_REQUEST); 
+		  
+		  if($_SERVER ["REQUEST_METHOD"] == "POST")
+		  {
+// 		      print_r($_POST); 
+
+		      foreach($_POST as $key => $value)
+		      {
+		          if(substr($key, 0, strlen($key) - 1) === "auswahl_checkbox_")
+		          {
+// 		              echo '<br />Key = ' . $key . '<br />';
+// 		              echo 'Value= ' . $value;
+		              
+		              $aufforderungWrz1 = new WasserrechtlicheZulassungen($this);
+		              $aufforderungWrzId = substr($key, strlen($key) - 1, strlen($key));
+// 		              echo "<br />aufforderungWrzId: " . $aufforderungWrzId;
+		              $aufforderungWrz2 = $aufforderungWrz1->find_by_id($this, 'id', $aufforderungWrzId);
+		              if(!empty($aufforderungWrz2))
+		              {
+		                  //echo $aufforderungWrz2->toString();
+		                  $aufforderungWrz2->insertAufforderungDatumAbsend();
+		              }
+		          }
+		      }
+		  }
+		
+		?>
+
 		<fieldset class="fieldset1">
 			<span>
     			<label for="erhebungsjahr">Erhebungsjahr:</label>
@@ -237,8 +307,6 @@ function replaceParameterInUrl(key, value)
         		</label>
         		<select name="behoerde" onchange="setNewBehoerde(this)">
         				<?php
-        				
-        				$getBehoerde = !empty(htmlspecialchars($_GET['behoerde'])) ? htmlspecialchars($_GET['behoerde']) : null;
         				
         				if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen))
         				{
@@ -383,11 +451,11 @@ function replaceParameterInUrl(key, value)
         		                      ?>
                 		          	<tr>
                 		          		<td style="background-color: inherit;">
-                		          			<input type="checkbox">
+                		          			<input type="checkbox" name="auswahl_checkbox_<?php echo $wrz->getId(); ?>">
                 		          		</td>
                 		          		<td>
                 		          			<?php 
-                		          			     echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Anlagen'] . '&value_anlage_id=' . $wrz->anlagen[0]->getId() . '&operator_anlage_id==">' . $wrz->anlagen[0]->getName() . '</a>';
+                		          			     echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Anlagen'] . '&value_anlage_id=' . $wrz->anlagen->getId() . '&operator_anlage_id==">' . $wrz->anlagen->getName() . '</a>';
                 		          			?>
                 		          		</td>
                 		          		<td>
@@ -419,6 +487,9 @@ function replaceParameterInUrl(key, value)
                 		          			?>
                 		          		</td>
                 		          		<td>
+                		          			<?php
+                		          			     echo $wrz->getAufforderungDatumAbsend();
+                		          			?>
                 		          		</td>
                 		          		<td>
                 		          			<input type="button" value="Erklärung" id="erklaerung_button" name="erklaerung" />
@@ -437,14 +508,18 @@ function replaceParameterInUrl(key, value)
 		
 		<p style="float: left; margin-top: 20px">
 			<label for="aufforderung" style="float: left">Sammelaufforderung für ausgewählte Entnahmebenutzungen erstellen</label>
-			<br /> 
-			<input type="button" value="Aufforderung erstellen!" id="aufforderung_button" name="aufforderung" style="float: left; margin-top: 10px; font-size: 14px" />
+			<br />
+			<form action="index.php" id="aufforderung_form" accept-charset="" method="POST">
+<!-- 				<input type="hidden" name="post_action" value="aufforderung_date_insert" /> -->
+				<input type="hidden" name="go" value="wasserentnahmebenutzer">
+<!-- 				<input type="submit" name="go_plus" value="Starten"> -->
+				<input type="submit" value="Aufforderung erstellen!" id="aufforderung_button" name="aufforderung" style="float: left; margin-top: 10px; font-size: 14px" />
+			</form>
 		</p>
 		
 		<p style="float: left; margin-top: 100px">
 			<label for="test" style="float: left;">Abgelegte Sammelaufforderungen</label>
 <!-- 			<br /> -->
-<!-- 			<input type="button" name="test"> -->
 		</p>
 </div>
 

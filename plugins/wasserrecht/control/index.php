@@ -90,6 +90,17 @@ $this->layer_names = $layer_names;
 // 	    $this->layers = $layers;
 // 	    echo $this->layers[0]->get('Name');
 
+// print_r($_POST);
+// print_r($_REQUEST);
+
+// if(isset($_POST["post_action"]) && $_POST["post_action"] === "aufforderung_date_insert")
+// {
+//     $parts = parse_url($url);
+//     print_r($_GET);
+    
+//     $this->go="wasserentnahmebenutzer";
+// }
+
 switch($this->go){
 
 	case 'wasserentnahmebenutzer': {

@@ -246,6 +246,7 @@ CREATE TABLE wasserrecht.wasserrechtliche_zulassungen(
 	dokument integer REFERENCES wasserrecht.dokument(id),
 	sachbearbeiter integer REFERENCES wasserrecht.personen(id),
 	adressat integer REFERENCES wasserrecht.personen(id),
+	aufforderung_datum_absend date,
 	anlage integer REFERENCES wasserrecht.anlagen(id)
 )WITH OIDS;
 

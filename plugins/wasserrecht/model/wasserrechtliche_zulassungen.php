@@ -65,8 +65,22 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 					{
 					    $anlage = new Anlage($gui);
 					    $anlagen = $anlage->find_where('id=' . $result->data['anlage']);
-					    $result->anlagen = $anlagen;
+					    if(!empty($anlagen) && count($anlagen) > 0 && !empty($anlagen[0]))
+					    {
+					        $result->anlagen = $anlagen[0];
+					    }
 					}
+					
+					//get the 'Aufforderung'
+// 					if(!empty($result->data['aufforderung']))
+// 					{
+// 					    $aufforderungen = new Aufforderung($gui);
+// 					    $aufforderung = $aufforderungen->find_where('id=' . $result->data['aufforderung']);
+// 					    if(!empty($aufforderung) && count($aufforderung) > 0 && !empty($aufforderung[0]))
+// 					    {
+// 					        $result->aufforderung = $aufforderung[0];
+// 					    }
+// 					}
 					
 					//get the 'Gewaesserbenutzungen'
 					$gewaesserbenutzung = new Gewaesserbenutzungen($gui);
@@ -96,6 +110,41 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	
 	public function getBehoerdeId() {
 	    return !empty($this->behoerde) ?  $this->behoerde->getId() : null;
+	}
+	
+// 	public function insertAufforderungId($aufforderungsId) {
+// 	    if(!empty($aufforderungsId))
+// 	    {
+// 	        $this->set('aufforderung', $aufforderungsId);
+// 	        $this->update();
+// 	    }
+// 	}
+	
+	public function getAufforderungDatumAbsend() {
+	    $datumAbsend = $this->data['aufforderung_datum_absend'];
+	    if(!empty($datumAbsend))
+	    {
+	        // 	        $dateString = DateTime::createFromFormat("d.m.Y", $datumAbsend);
+	        return "<a>" . $datumAbsend . "</a>";
+	    }
+	    
+	    return "<a style=\"color: red;\">Nicht aufgefordert<a>";
+	}
+	
+	public function insertAufforderungDatumAbsend($dateValue = NULL) {
+	    if(empty($dateValue))
+	    {
+	        $dateValue = date("d.m.Y");
+	    }
+	    
+	    $this->set('aufforderung_datum_absend', $dateValue);
+	    $this->update();
+	    
+// 	    $this->create(
+// 	        array(
+// 	            'aufforderung_datum_absend' => $dateValue
+// 	        )
+// 	        );
 	}
 }
 ?>
