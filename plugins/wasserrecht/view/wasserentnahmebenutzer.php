@@ -187,11 +187,6 @@ function replaceParameterInUrl(key, value)
     			<select name="erhebungsjahr" onchange="setNewErhebungsJahr(this)">
         					<?php
         						$wasserrechtlicheZulassung = new WasserrechtlicheZulassungen($this);
-        // 						$wasserrechtlicheZulassung = $wasserrechtlicheZulassung->find_where('gueltigkeit IS NOT NULL');
-        // 						foreach($wasserrechtlicheZulassung AS $wrz)
-        // 						{
-        // 							echo '<option>' . $wrz->data['gueltigkeit'] . "</option>";
-        // 						}
         
                                 $wrzProGueltigkeitsJahr = $wasserrechtlicheZulassung->find_gueltigkeitsjahre($this);
                                 if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->gueltigkeitsJahre))
