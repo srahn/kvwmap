@@ -7,7 +7,7 @@ div.tab {
 }
 
 /* Style the buttons inside the tab */
-div.tab button {
+div.tab div {
     background-color: inherit;
     float: left;
     border: none;
@@ -18,28 +18,44 @@ div.tab button {
 }
 
 /* Change background color of buttons on hover */
-div.tab button:hover {
+div.tab div:hover {
     background-color: #ddd;
 }
 
 /* Create an active/current tablink class */
-div.tab button.active {
+div.tab div.active {
     background-color: #ccc;
 }
 
 /* Style the tab content */
 .tabcontent {
+    display: none;
     padding: 6px 12px;
-    border: 1px solid #ccc;
+    border: 0px solid #ccc;
     border-top: none;
     width: 100%;
-    height: 100%
+    height: 100%;
+     -webkit-animation: fadeEffect 1s;
+    animation: fadeEffect 1s;
+/*     background-color: #D3D3D3; */
+}
+
+/* Fade in tabs */
+@-webkit-keyframes fadeEffect {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+@keyframes fadeEffect {
+    from {opacity: 0;}
+    to {opacity: 1;}
 }
 
 table#wasserentnahmebenutzer_tabelle {
     width: 95%;
 /*     border: 1px solid black; */
     border-collapse: collapse;
+/*     float: left; */
 }
 
 #wasserentnahmebenutzer_tabelle th, #wasserentnahmebenutzer_tabelle td {
@@ -51,37 +67,48 @@ table#wasserentnahmebenutzer_tabelle {
     background-color: white;
 }
 
+#wasserentnahmebenutzer_tabelle th {
+
+    background-color: inherit;
+}
+
 #wasserentnahmebenutzer_tabelle a{
     font-size: 12px;
 }
 
-.fieldset {
+.fieldset1, .fieldset2 {
     display: table; 
     border: 0px solid black;
     float: left;
 }
 
-.fieldset p, .fieldset span {
+.fieldset1 span, .fieldset2 span {
     display: table-row;
+    text-align: left;
 }
 
-.fieldset p {
-/*     margin-bottom: 100px; */
-/*     overflow: visible; */
-    margin: 0;
-    padding: 0;
+.fieldset1 label, .fieldset2 label {
+    display: table-cell;
+}
+
+.fieldset1 select, .fieldset1 input, .fieldset2 select, .fieldset2 input {
+    display: table-cell;
+    margin: 3px;
+    margin-left: 20px;
     background-color: white;
 }
 
-.fieldset label, .fieldset select, .fieldset label, .fieldset select, .fieldset input {
-    display: table-cell;
-    margin: 3px;
-    margin-left: 10px;
+.fieldset2 select, .fieldset2 input {
+    margin-left: 25px;
 }
+
 </style>
 
 <script type="text/javascript">
-function openCity(evt, cityName) {
+function changeTab(evt, tabName) {
+
+// 	alert(tabName);
+	
     // Declare all variables
     var i, tabcontent, tablinks;
 
@@ -98,7 +125,7 @@ function openCity(evt, cityName) {
     }
 
     // Show the current tab, and add an "active" class to the button that opened the tab
-    document.getElementById(cityName).style.display = "block";
+    document.getElementById(tabName).style.display = "block";
     evt.currentTarget.className += " active";
 }
 
@@ -148,181 +175,180 @@ function replaceParameterInUrl(key, value)
 </script>
 
 <div class="tab">
-	<button class="tablinks active" onclick="alert('test1')">Aufforderung zur Erklärung</button>
-	<button class="tablinks" onclick="alert('test2')">Entgeltbescheid</button>
+	<div class="tablinks active" onclick="changeTab(event, 'aufforderung_zur_erklaerung')">Aufforderung zur Erklärung</div>
+	<div class="tablinks" onclick="changeTab(event, 'entgeltbescheid')">Entgeltbescheid</div>
 </div>
 
-<div id="aufforderung_zur_erklaerung" class="tabcontent">
+<div id="aufforderung_zur_erklaerung" class="tabcontent" style="display: block">
 	
-		<fieldset class="fieldset">
-			<p>
-    			<span>
-        			<label for="erhebungsjahr">Erhebungsjahr:</label>
-        			<select name="erhebungsjahr" onchange="setNewErhebungsJahr(this)">
-            					<?php
-            						$wasserrechtlicheZulassung = new WasserrechtlicheZulassungen($this);
-            // 						$wasserrechtlicheZulassung = $wasserrechtlicheZulassung->find_where('gueltigkeit IS NOT NULL');
-            // 						foreach($wasserrechtlicheZulassung AS $wrz)
-            // 						{
-            // 							echo '<option>' . $wrz->data['gueltigkeit'] . "</option>";
-            // 						}
-            
-                                    $wrzProGueltigkeitsJahr = $wasserrechtlicheZulassung->find_gueltigkeitsjahre($this);
-                                    if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->gueltigkeitsJahre))
+		<fieldset class="fieldset1">
+			<span>
+    			<label for="erhebungsjahr">Erhebungsjahr:</label>
+    			<select name="erhebungsjahr" onchange="setNewErhebungsJahr(this)">
+        					<?php
+        						$wasserrechtlicheZulassung = new WasserrechtlicheZulassungen($this);
+        // 						$wasserrechtlicheZulassung = $wasserrechtlicheZulassung->find_where('gueltigkeit IS NOT NULL');
+        // 						foreach($wasserrechtlicheZulassung AS $wrz)
+        // 						{
+        // 							echo '<option>' . $wrz->data['gueltigkeit'] . "</option>";
+        // 						}
+        
+                                $wrzProGueltigkeitsJahr = $wasserrechtlicheZulassung->find_gueltigkeitsjahre($this);
+                                if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->gueltigkeitsJahre))
+                                {
+                                    $gueltigkeitsjahre = $wrzProGueltigkeitsJahr->gueltigkeitsJahre;
+                                    if(!empty($gueltigkeitsjahre) && count($gueltigkeitsjahre) > 0)
                                     {
-                                        $gueltigkeitsjahre = $wrzProGueltigkeitsJahr->gueltigkeitsJahre;
-                                        if(!empty($gueltigkeitsjahre) && count($gueltigkeitsjahre) > 0)
+                                        $getYear = !empty(htmlspecialchars($_GET['year'])) ? htmlspecialchars($_GET['year']) : $gueltigkeitsjahre[0];
+                                        
+                                        foreach($gueltigkeitsjahre AS $gueltigkeitsjahr)
                                         {
-                                            $getYear = !empty(htmlspecialchars($_GET['year'])) ? htmlspecialchars($_GET['year']) : $gueltigkeitsjahre[0];
-                                            
-                                            foreach($gueltigkeitsjahre AS $gueltigkeitsjahr)
-                                            {
-                                                echo '<option value='. $gueltigkeitsjahr . ' ' . ($gueltigkeitsjahr === $getYear ? "selected" : "") . '>' . $gueltigkeitsjahr . "</option>";
-                                            }
-                                            
-                                            $nextyear = date('Y', strtotime('+1 year'));
-                                            echo '<option value='. $nextyear . ' ' . ($nextyear === $getYear ? "selected" : "") . '>' . $nextyear . "</option>";
+                                            echo '<option value='. $gueltigkeitsjahr . ' ' . ($gueltigkeitsjahr === $getYear ? "selected" : "") . '>' . $gueltigkeitsjahr . "</option>";
                                         }
-                                        else
-                                        {
-                                            echo "<option>Keinen Eintrag in der Datenbank gefunden!</option>";
-                                        }
+                                        
+                                        $nextyear = date('Y', strtotime('+1 year'));
+                                        echo '<option value='. $nextyear . ' ' . ($nextyear === $getYear ? "selected" : "") . '>' . $nextyear . "</option>";
                                     }
                                     else
                                     {
                                         echo "<option>Keinen Eintrag in der Datenbank gefunden!</option>";
                                     }
-            					?>
-            		</select>
-    			</span>
-    			<span>
-            		<label for="behoerde">
-            			<?php 
-            			     $getBehoerde = !empty(htmlspecialchars($_GET['behoerde'])) ? htmlspecialchars($_GET['behoerde']) : null;
-            			     
-            			     if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen)
-            			         && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[0]) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[0]->behoerde) && empty($getBehoerde))
-            			     {
-            			         $getBehoerde = $wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[0]->behoerde->getId();
-            			     }
-            			     
-            			     echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Behoerde'] . '&value_id=' . $getBehoerde . '&operator_id==">Behörde: </a>';
-            			?>
-            		</label>
-            		<select name="behoerde" onchange="setNewBehoerde(this)">
-            				<?php
-            				
-            				$getBehoerde = !empty(htmlspecialchars($_GET['behoerde'])) ? htmlspecialchars($_GET['behoerde']) : null;
-            				
-            				if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen))
-            				{
-            				    $wasserrechtlicheZulassungen = $wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen;
-            				    
-            				    $behoerdeArray = array();
-            				    
-            				    //var_dump($wasserrechtlicheZulassungen);
-            				    foreach($wasserrechtlicheZulassungen AS $wrz)
-            				    {
-            				        if(!empty($wrz) && $getYear === $wrz->gueltigkeitsJahr)
-            				        {
-            				            if(!empty($wrz->behoerde))
-            				            {
-            				                if(!in_array($wrz->behoerde->toString(), $behoerdeArray))
-            				                {
-            				                    $behoerdeArray[]=$wrz->behoerde->toString();
-            				                    
-            				                    echo '<option value='. $wrz->behoerde->getId() . ' ' . ($wrz->behoerde->getId() === $getBehoerde ? "selected" : "") . '>' . $wrz->behoerde->getName() . "</option>";
-            				                }
-            				            }
-            				        }
-            				        else
-            				        {
-            				            echo "<option>Keinen Eintrag in der Datenbank gefunden!</option>";
-            				            break;
-            				        }
-            				    }
-            				    
-            				}
-            				
-            				?>
-            			</select>
-            	</span>
-            </p>
-        	<p>
-        		<span>
-                	<label for="adressat">
-            			<?php 
-            			
-            			    $getAdressat = !empty(htmlspecialchars($_GET['adressat'])) ? htmlspecialchars($_GET['adressat']) : null;
-            			    $selectedAdressat = null;
-            			    if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen) 
-            			        && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[0]) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[0]->adressat) && empty($getAdressat))
-            			    {
-            			        $getAdressat = $wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[0]->adressat->getId();
-            			        $selectedAdressat = $wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[0]->adressat;
-            			    }
-            			
-            			    echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Personen'] . '&value_personen_id=' . $getAdressat . '&operator_personen_id==">Adressat:</a>';
-                        ?>
-            		</label>
-            		<select name="adressat" onchange="setNewAdressat(this)">
-            				<?php
-            				
-            				if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen))
-            				{
-            				    $wasserrechtlicheZulassungen = $wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen;
-            				    
-            				    $adressatArray = array();
-            				    
-            				    //var_dump($wasserrechtlicheZulassungen);
-            				    foreach($wasserrechtlicheZulassungen AS $wrz)
-            				    {
-            				        if(!empty($wrz) && $getYear === $wrz->gueltigkeitsJahr)
-            				        {
-            				            if(!empty($wrz->adressat))
-            				            {
-            				                if(!in_array($wrz->adressat->toString(), $adressatArray))
-            				                {
-            				                    $adressatArray[]=$wrz->adressat->toString();
-            				                    
-            				                    echo '<option value='. $wrz->adressat->getId() . ' ' . ($wrz->adressat->getId() === $getAdressat ? "selected" : "") . '>' . $wrz->adressat->getName() . "</option>";
-            				                    
-            				                    if($wrz->adressat->getId() === $getAdressat)
-            				                    {
-            				                        $selectedAdressat = $wrz->adressat;
-            				                    }
-            				                }
-            				            }
-            				        }
-            				        else
-            				        {
-            				            echo "<option>Keinen Eintrag in der Datenbank gefunden!</option>";
-            				            break;
-            				        }
-            				    }
-            				    
-            				}
-            				
-            				?>
-            		</select>
-            	</span>
-            	<span>
-            		<label for="strasse">Straße:</label>
-            		<input type="text" name="strasse" readonly="readonly" value="<?php echo $selectedAdressat->getAdresseStrasse(); ?>" />
-            	</span>
-            	<span>
-            		<label for="hausnummer">Hausnummer:</label>
-            		<input type="text" name="hausnummer" readonly="readonly" value="<?php echo $selectedAdressat->getAdresseHausnummer(); ?>" />
-            	</span>
-            	<span>
-            		<label for="plz">PLZ:</label>
-            		<input type="text" name="plz" readonly="readonly" value="<?php echo $selectedAdressat->getAdressePLZ(); ?>" />
-            	</span>
-            	<span>
-            		<label for="ort">Ort:</label>
-            		<input type="text" name="ort" readonly="readonly" value="<?php echo $selectedAdressat->getAdresseOrt(); ?>" />
-            	</span>
-        	</p>
+                                }
+                                else
+                                {
+                                    echo "<option>Keinen Eintrag in der Datenbank gefunden!</option>";
+                                }
+        					?>
+        		</select>
+			</span>
+			<span>
+        		<label for="behoerde">
+        			<?php 
+        			     $getBehoerde = !empty(htmlspecialchars($_GET['behoerde'])) ? htmlspecialchars($_GET['behoerde']) : null;
+        			     
+        			     if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen)
+        			         && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[0]) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[0]->behoerde) && empty($getBehoerde))
+        			     {
+        			         $getBehoerde = $wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[0]->behoerde->getId();
+        			     }
+        			     
+        			     echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Behoerde'] . '&value_id=' . $getBehoerde . '&operator_id==">Behörde: </a>';
+        			?>
+        		</label>
+        		<select name="behoerde" onchange="setNewBehoerde(this)">
+        				<?php
+        				
+        				$getBehoerde = !empty(htmlspecialchars($_GET['behoerde'])) ? htmlspecialchars($_GET['behoerde']) : null;
+        				
+        				if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen))
+        				{
+        				    $wasserrechtlicheZulassungen = $wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen;
+        				    
+        				    $behoerdeArray = array();
+        				    
+        				    //var_dump($wasserrechtlicheZulassungen);
+        				    foreach($wasserrechtlicheZulassungen AS $wrz)
+        				    {
+        				        if(!empty($wrz) && $getYear === $wrz->gueltigkeitsJahr)
+        				        {
+        				            if(!empty($wrz->behoerde))
+        				            {
+        				                if(!in_array($wrz->behoerde->toString(), $behoerdeArray))
+        				                {
+        				                    $behoerdeArray[]=$wrz->behoerde->toString();
+        				                    
+        				                    echo '<option value='. $wrz->behoerde->getId() . ' ' . ($wrz->behoerde->getId() === $getBehoerde ? "selected" : "") . '>' . $wrz->behoerde->getName() . "</option>";
+        				                }
+        				            }
+        				        }
+        				        else
+        				        {
+        				            echo "<option>Keinen Eintrag in der Datenbank gefunden!</option>";
+        				            break;
+        				        }
+        				    }
+        				    
+        				}
+        				
+        				?>
+        			</select>
+        	</span>
+        </fieldset>
+        
+        <fieldset class="fieldset2">
+    		<span>
+            	<label for="adressat">
+        			<?php 
+        			
+        			    $getAdressat = !empty(htmlspecialchars($_GET['adressat'])) ? htmlspecialchars($_GET['adressat']) : null;
+        			    $selectedAdressat = null;
+        			    if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen) 
+        			        && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[0]) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[0]->adressat) && empty($getAdressat))
+        			    {
+        			        $getAdressat = $wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[0]->adressat->getId();
+        			        $selectedAdressat = $wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[0]->adressat;
+        			    }
+        			
+        			    echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Personen'] . '&value_personen_id=' . $getAdressat . '&operator_personen_id==">Adressat:</a>';
+                    ?>
+        		</label>
+        		<select name="adressat" onchange="setNewAdressat(this)">
+        				<?php
+        				
+        				if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen))
+        				{
+        				    $wasserrechtlicheZulassungen = $wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen;
+        				    
+        				    $adressatArray = array();
+        				    
+        				    //var_dump($wasserrechtlicheZulassungen);
+        				    foreach($wasserrechtlicheZulassungen AS $wrz)
+        				    {
+        				        if(!empty($wrz) && $getYear === $wrz->gueltigkeitsJahr)
+        				        {
+        				            if(!empty($wrz->adressat))
+        				            {
+        				                if(!in_array($wrz->adressat->toString(), $adressatArray))
+        				                {
+        				                    $adressatArray[]=$wrz->adressat->toString();
+        				                    
+        				                    echo '<option value='. $wrz->adressat->getId() . ' ' . ($wrz->adressat->getId() === $getAdressat ? "selected" : "") . '>' . $wrz->adressat->getName() . "</option>";
+        				                    
+        				                    if($wrz->adressat->getId() === $getAdressat)
+        				                    {
+        				                        $selectedAdressat = $wrz->adressat;
+        				                    }
+        				                }
+        				            }
+        				        }
+        				        else
+        				        {
+        				            echo "<option>Keinen Eintrag in der Datenbank gefunden!</option>";
+        				            break;
+        				        }
+        				    }
+        				    
+        				}
+        				
+        				?>
+        		</select>
+        	</span>
+        	<span>
+        		<label for="strasse">Straße:</label>
+        		<input type="text" name="strasse" readonly="readonly" value="<?php echo $selectedAdressat->getAdresseStrasse(); ?>" />
+        	</span>
+        	<span>
+        		<label for="hausnummer">Hausnummer:</label>
+        		<input type="text" name="hausnummer" readonly="readonly" value="<?php echo $selectedAdressat->getAdresseHausnummer(); ?>" />
+        	</span>
+        	<span>
+        		<label for="plz">PLZ:</label>
+        		<input type="text" name="plz" readonly="readonly" value="<?php echo $selectedAdressat->getAdressePLZ(); ?>" />
+        	</span>
+        	<span>
+        		<label for="ort">Ort:</label>
+        		<input type="text" name="ort" readonly="readonly" value="<?php echo $selectedAdressat->getAdresseOrt(); ?>" />
+        	</span>
     	</fieldset>
     	
 		<table id="wasserentnahmebenutzer_tabelle">
@@ -356,7 +382,7 @@ function replaceParameterInUrl(key, value)
 //     		                      var_dump($wrz);
         		                      ?>
                 		          	<tr>
-                		          		<td>
+                		          		<td style="background-color: inherit;">
                 		          			<input type="checkbox">
                 		          		</td>
                 		          		<td>
@@ -389,6 +415,12 @@ function replaceParameterInUrl(key, value)
                 		          		</td>
                 		          		<td>
                 		          		</td>
+                		          		<td>
+                		          		</td>
+                		          		<td>
+                		          		</td>
+                		          		<td>
+                		          		</td>
                 		          	</tr>
                 		       <?php
     		                  }
@@ -398,6 +430,12 @@ function replaceParameterInUrl(key, value)
     		  }
     		?>
 		</table>
+</div>
+
+<div id="entgeltbescheid" class="tabcontent">
+
+	<h1>Entgeltbescheid</h1>
+
 </div>
 
 <?php
