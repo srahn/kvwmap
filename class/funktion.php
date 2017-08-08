@@ -54,7 +54,7 @@ class funktion {
       $sql.=' AND id='.$id;
     }
     if ($order!='') {
-      $sql.=' ORDER BY '.$order;
+      $sql.=' ORDER BY ' . replace_semicolon($order);
     }
     $this->debug->write("<p>file:users.php class:funktion->getFunktionen - Abfragen einer oder aller Funktionen:<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);

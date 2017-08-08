@@ -229,7 +229,6 @@ class GUI {
 		else{
 			$layerset = $this->user->rolle->getLayer('');
 		}
-		$layerset = array_reverse($layerset);
     $anzLayer=count($layerset);
     $map=ms_newMapObj('');
     $map->set('shapepath', SHAPEPATH);

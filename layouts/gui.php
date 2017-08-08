@@ -64,7 +64,7 @@
 				<tr>
 					<td>
 						<div id="log">
-							<?php echo readfile('/var/www/logs/2.6_' . $this->user->login_name . '_debug.htm');  ?>
+							<?php echo readfile('/var/www/logs/' . VERSION . '_' . $this->user->login_name . '_debug.htm');  ?>
 						</div>
 					</td>
 				</tr><?php

@@ -35,5 +35,6 @@
 	$strClearAllQuerys="Click to clear all query checkboxes.";
 	$strInfoQuery="Information Query";
 	$this->layerOptions="Options";
+	$strRotationAngle="Angle";
   
 ?>

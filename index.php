@@ -37,8 +37,32 @@ session_start();
 // $executiontimes['action'][] = 'Start';
 
 ob_start ();    // Ausgabepufferung starten
-$go = $_REQUEST['go'];
-if($_REQUEST['go_plus'] != '') $go = $go.'_'.$_REQUEST['go_plus'];
+# Übergabe aller Formularvariablen an die Benutzeroberfläche an formvars
+# Dabei wird unterschieden zwischen Aufrufen über das Internet oder von der Komandozeile aus
+if (is_array($argc) AND $argc[1]!='') {
+ # Aufruf des PHP-Skriptes über die Komandozeile (CLI)
+ # Wenn die Variable argc > 0 ist, wurde die Datei von der Komandozeile aus aufgerufen
+ # in dem Fall können die übergebenen Parameter hier der formvars-Variable übergeben werden.
+ $arg['go']=$argv[1];
+ $arg['ist_Fortfuehrung']=$argv[2];
+ $arg['WLDGE_lokal']=$argv[3];
+ $arg['WLDGE_Datei_lokal']=$argv[4];
+ $formvars=$arg;
+}
+else {
+  # Übergeben der Variablen aus den Post oder Get Aufrufen
+  # normaler Aufruf des PHP-Skriptes über Apache oder CGI  
+  #$GUI->formvars=stripScript($_REQUEST);
+  foreach($_REQUEST as $key => $value){
+  	#if(is_string($value))$_REQUEST[$key] = addslashes($value);
+		#if(is_string($value))$_REQUEST[$key] = pg_escape_string($value);
+		if(is_string($value))$_REQUEST[$key] = str_replace('<script', '', pg_escape_string($value));
+  }
+  $formvars = $_REQUEST;
+}
+
+$go = $formvars['go'];
+if($formvars['go_plus'] != '') $go = $go.'_'.$formvars['go_plus'];
 ###########################################################################################################
 define(CASE_COMPRESS, false);																																						  #
 #																																																					#
@@ -72,8 +96,11 @@ if (LOG_LEVEL>0) {
  $log_mysql=new LogFile(LOGFILE_MYSQL,'text','Log-Datei MySQL', '#------v: '.date("Y:m:d H:i:s",time()));
  $log_postgres=new LogFile(LOGFILE_POSTGRES,'text', 'Log-Datei-Postgres', '------v: '.date("Y:m:d H:i:s",time()));
 }
-
-if (!$_SESSION['angemeldet'] or !empty($_REQUEST['username'])) {
+if (
+	!$_SESSION['angemeldet'] or
+	!empty($formvars['username']) or
+	$_SESSION['CONTEXT_PREFIX'] != $_SERVER['CONTEXT_PREFIX']
+) {
 	$msg .= '<br>Nicht angemeldet';
 	include(CLASSPATH . 'mysql.php');
 	$userDb = new database();
@@ -82,7 +109,12 @@ if (!$_SESSION['angemeldet'] or !empty($_REQUEST['username'])) {
 	$userDb->passwd = MYSQL_PASSWORD;
 	$userDb->dbName = MYSQL_DBNAME;
 	header('logout: true');		// damit ajax-Requests das auch mitkriegen
-	include(LAYOUTPATH . 'snippets/' . LOGIN);
+	if (file_exists(LAYOUTPATH . 'snippets/' . LOGIN)) {
+		include(LAYOUTPATH . 'snippets/' . LOGIN);
+	}
+	else {
+		include(LAYOUTPATH . 'snippets/login.php');
+	}
 }
 
 function include_($filename){
@@ -176,7 +208,7 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->output();
 	  } break;
 				
-		case 'switch_gle_view' : {
+		case 'toggle_gle_view' : {
 			$GUI->switch_gle_view();
 	  } break;
 				
@@ -1072,7 +1104,13 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->checkCaseAllowed('Daten_Export');
 			$GUI->daten_export_exportieren();
 	  } break;
-
+		
+		case 'get_last_search' : {
+			$GUI->formvars['selected_layer_id'] = $GUI->user->rolle->get_last_search_layer_id();
+			$GUI->formvars['searches'] = '<last_search>';
+			$GUI->GenerischeSuche();
+	  } break;
+		
 	  case 'Layer-Suche_Suchmaske_generieren' : {
 			$GUI->GenerischeSuche_Suchmaske();
 	  } break;
@@ -1165,6 +1203,7 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  case 'sachdaten_druck_editor_Änderungen Speichern' : {
 			$GUI->checkCaseAllowed('sachdaten_druck_editor');
 			$GUI->sachdaten_druck_editor_aendern();
+			$GUI->sachdaten_druck_editor();
 	  } break;
 	  
 	  case 'sachdaten_druck_editor_Löschen' : {
@@ -1186,6 +1225,16 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->checkCaseAllowed('sachdaten_druck_editor');
 			$GUI->sachdaten_druck_editor_Freitextloeschen();
 	  } break;
+		
+		case 'sachdaten_druck_editor_Liniehinzufuegen' :
+			$GUI->checkCaseAllowed('sachdaten_druck_editor'); {
+			$GUI->sachdaten_druck_editor_Liniehinzufuegen();
+	  } break;
+	  
+	  case 'sachdaten_druck_editor_Linieloeschen' : {
+			$GUI->checkCaseAllowed('sachdaten_druck_editor');
+			$GUI->sachdaten_druck_editor_Linieloeschen();
+	  } break;		
 	  
 	  case 'Layer_Export' : {
 			$GUI->checkCaseAllowed($go);

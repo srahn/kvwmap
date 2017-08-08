@@ -8,6 +8,10 @@ graphics/wappen/*
 graphics/custom/*
 plugins/*/config/config.php
 plugins/*/img/*
+<<<<<<< HEAD
 .settings
 .project
 .buildpath
+=======
+vendor/
+>>>>>>> develop

@@ -242,7 +242,7 @@ class database {
 					'400', '150',
 					'1',
 					'0',
-					'0'
+					'0',
 					NULL
 				FROM
 					stelle
