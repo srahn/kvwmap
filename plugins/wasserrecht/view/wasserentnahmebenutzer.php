@@ -55,7 +55,7 @@ table#wasserentnahmebenutzer_tabelle {
     width: 95%;
 /*     border: 1px solid black; */
     border-collapse: collapse;
-/*     float: left; */
+    float: left;
 }
 
 #wasserentnahmebenutzer_tabelle th, #wasserentnahmebenutzer_tabelle td {
@@ -100,6 +100,11 @@ table#wasserentnahmebenutzer_tabelle {
 
 .fieldset2 select, .fieldset2 input {
     margin-left: 25px;
+}
+
+input[type="button"] {
+  font-size: 12px;
+  font-family: SourceSansPro1;
 }
 
 </style>
@@ -413,6 +418,7 @@ function replaceParameterInUrl(key, value)
                 		          		<td>
                 		          		</td>
                 		          		<td>
+                		          			<input type="button" value="Erklärung" id="erklaerung_button" name="erklaerung" />
                 		          		</td>
                 		          		<td>
                 		          		</td>
@@ -425,6 +431,18 @@ function replaceParameterInUrl(key, value)
     		  }
     		?>
 		</table>
+		
+		<p style="float: left; margin-top: 20px">
+			<label for="aufforderung" style="float: left">Sammelaufforderung für ausgewählte Entnahmebenutzungen erstellen</label>
+			<br /> 
+			<input type="button" value="Aufforderung erstellen!" id="aufforderung_button" name="aufforderung" style="float: left; margin-top: 10px; font-size: 14px" />
+		</p>
+		
+		<p style="float: left; margin-top: 100px">
+			<label for="test" style="float: left;">Abgelegte Sammelaufforderungen</label>
+<!-- 			<br /> -->
+<!-- 			<input type="button" name="test"> -->
+		</p>
 </div>
 
 <div id="entgeltbescheid" class="tabcontent">
