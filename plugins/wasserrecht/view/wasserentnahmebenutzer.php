@@ -414,6 +414,9 @@ function replaceParameterInUrl(key, value)
                 		          			?>
                 		          		</td>
                 		          		<td>
+                		          			<?php
+                		          			     echo '<a style="color: red; text-decoration: underline;" href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Wasserrechtliche_Zulassungen'] . '&value_wrz_id=' . $wrz->getId() . '&operator_wrz_id==">' . $wrz->gueltigkeit->getHinweis() . '</a>';
+                		          			?>
                 		          		</td>
                 		          		<td>
                 		          		</td>

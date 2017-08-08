@@ -140,6 +140,7 @@ INSERT INTO wasserrecht.koerperschaft (name, art) VALUES ('MUSTER TRINKWASSER KO
 
 INSERT INTO wasserrecht.wasserrechtliche_zulassungen_gueltigkeit (gueltig_seit, gueltig_bis) VALUES('2017-07-01', '2017-07-06');
 INSERT INTO wasserrecht.wasserrechtliche_zulassungen_gueltigkeit (gueltig_seit, gueltig_bis) VALUES('2017-07-01', current_date);
+INSERT INTO wasserrecht.wasserrechtliche_zulassungen_gueltigkeit (gueltig_seit, gueltig_bis) VALUES('2017-07-01', '2017-12-31');
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 INSERT INTO wasserrecht.anlagen (name, klasse, zustaend_uwb, zustaend_stalu, bearbeiter, objektid_geodin, betreiber, abwasser_koerperschaft, trinkwasser_koerperschaft,kommentar,the_geom) VALUES ('Musterholzwerk Musterstadt', 1, 1, 2, 3, NULL, 4, 1, 2, NULL, ST_Transform(ST_GeomFromText('POINT(12 54)', 4326), 35833));
@@ -156,6 +157,7 @@ INSERT INTO wasserrecht.wasserrechtliche_zulassungen_fassung (auswahl, nummer, d
 INSERT INTO wasserrecht.wasserrechtliche_zulassungen (name, ausstellbehoerde, ausgangsbescheid, status, adresse, gueltigkeit, aktuell, historisch, sachbearbeiter, adressat, anlage) VALUES ('Test Wasserrechtliche Zulassung 1', 1, 1, 2, 1, 1, true, false, 2, 2, 1);
 INSERT INTO wasserrecht.wasserrechtliche_zulassungen (name, ausstellbehoerde, ausgangsbescheid, status, adresse, gueltigkeit, aktuell, historisch, sachbearbeiter, adressat, anlage) VALUES ('Test Wasserrechtliche Zulassung 2', 1, 2, 2, 1, 1, false, true, 2, 2, 2);
 INSERT INTO wasserrecht.wasserrechtliche_zulassungen (name, ausstellbehoerde, ausgangsbescheid, status, adresse, gueltigkeit, aktuell, historisch, sachbearbeiter, adressat, anlage) VALUES ('Test Wasserrechtliche Zulassung 3', 2, 2, 2, 1, 1, false, true, 2, 1, 2);
+INSERT INTO wasserrecht.wasserrechtliche_zulassungen (name, ausstellbehoerde, ausgangsbescheid, status, adresse, gueltigkeit, aktuell, historisch, sachbearbeiter, adressat, anlage) VALUES ('Test Wasserrechtliche Zulassung 4', 2, 2, 2, 1, 3, false, true, 2, 1, 1);
 
 INSERT INTO wasserrecht.gewaesserbenutzungen_umfang(name, max_ent_a) VALUES('Test Umfang', 80000.000);
 INSERT INTO wasserrecht.gewaesserbenutzungen_lage(name, namekurz, namelang, the_geo) VALUES('Test Gewaesserbenutzungen Lage', 'Test Gewaesserbenutzungen Lage (kurz)', 'Test Gewaesserbenutzungen Lage (lang)', ST_Transform(ST_GeomFromText('POINT(13 53)', 4326), 35833));

@@ -4,6 +4,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	protected $tableName = 'wasserrechtliche_zulassungen';
 	
 	public $gueltigkeitsJahr;
+	public $gueltigkeit;
 	public $behoerde;
 	public $adressat;
 	public $anlagen;
@@ -23,9 +24,10 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 			    $this->debug->write('result: ' . var_export($result->data, true), 4);
 			    $wrzGueltigkeit = new WasserrechtlicheZulassungenGueltigkeit($gui);
 			    $wasserrechtlicheZulassungGueltigkeit = $wrzGueltigkeit->find_by_id($gui, 'id', $result->data['gueltigkeit']);
+			    $result->gueltigkeit = $wasserrechtlicheZulassungGueltigkeit;
 				if(!empty($wasserrechtlicheZulassungGueltigkeit))
 				{
-					$datum = $wasserrechtlicheZulassungGueltigkeit->data['gueltig_bis'];
+				    $datum = $wasserrechtlicheZulassungGueltigkeit->getGueltigBis();
 					//var_dump($datum);
 					$date = DateTime::createFromFormat("d.m.Y", $datum);
 					$year = $date->format("Y");
