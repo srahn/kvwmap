@@ -132,6 +132,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	}
 	
 	public function insertAufforderungDatumAbsend($dateValue = NULL) {
+	    //if date is not set --> set it to today's date
 	    if(empty($dateValue))
 	    {
 	        $dateValue = date("d.m.Y");
@@ -145,6 +146,34 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 // 	            'aufforderung_datum_absend' => $dateValue
 // 	        )
 // 	        );
+	}
+	
+	public function getErklaerungDatum() {
+	    $datumErklaerung = $this->data['erklaerung_datum'];
+	    if(!empty($datumErklaerung))
+	    {
+	        // 	        $dateString = DateTime::createFromFormat("d.m.Y", $datumAbsend);
+	        return "<a>" . $datumErklaerung . "</a>";
+	    }
+	    
+	    return "<a style=\"color: red;\">Nicht erklärt<a>";
+	}
+	
+	public function insertErklaerungDatum($dateValue = NULL) {
+	    //if date is not set --> set it to today's date
+	    if(empty($dateValue))
+	    {
+	        $dateValue = date("d.m.Y");
+	    }
+	    
+	    $this->set('erklaerung_datum', $dateValue);
+	    $this->update();
+	    
+	    // 	    $this->create(
+	    // 	        array(
+	    // 	            'aufforderung_datum_absend' => $dateValue
+	    // 	        )
+	    // 	        );
 	}
 }
 ?>

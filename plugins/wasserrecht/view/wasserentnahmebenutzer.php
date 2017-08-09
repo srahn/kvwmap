@@ -61,7 +61,7 @@ table#wasserentnahmebenutzer_tabelle {
 #wasserentnahmebenutzer_tabelle th, #wasserentnahmebenutzer_tabelle td {
 /*     border: 1px solid black; */
 /*     border-collapse: collapse; */
-    padding: 5px;
+    padding: 3px;
     text-align: left;
     font-size: 12px;
     background-color: white;
@@ -102,7 +102,7 @@ table#wasserentnahmebenutzer_tabelle {
     margin-left: 25px;
 }
 
-input[type="button"] {
+button {
   font-size: 12px;
   font-family: SourceSansPro1;
 }
@@ -251,6 +251,18 @@ function replaceParameterInUrl(key, value)
 		                  $aufforderungWrz2->insertAufforderungDatumAbsend();
 		              }
 		          }
+		          elseif(substr($key, 0, strlen($key) - 1) === "erklaerung_")
+		          {
+		              $erklaerungWrz1 = new WasserrechtlicheZulassungen($this);
+		              $erklaerungWrzId = substr($value, strlen($value) - 1, strlen($value));
+		              $erklaerungWrz2 = $erklaerungWrz1->find_by_id($this, 'id', $erklaerungWrzId);
+// 		              echo "<br />erklaerungWrzId: " . $erklaerungWrzId;
+		              if(!empty($erklaerungWrz2))
+		              {
+		                  //echo $erklaerungWrz2->toString();
+		                  $erklaerungWrz2->insertErklaerungDatum();
+		              }
+		          }
 		      }
 		  }
 		
@@ -269,7 +281,7 @@ function replaceParameterInUrl(key, value)
                                     $gueltigkeitsjahre = $wrzProGueltigkeitsJahr->gueltigkeitsJahre;
                                     if(!empty($gueltigkeitsjahre) && count($gueltigkeitsjahre) > 0)
                                     {
-                                        $getYear = !empty(htmlspecialchars($_GET['year'])) ? htmlspecialchars($_GET['year']) : $gueltigkeitsjahre[0];
+                                        $getYear = !empty(htmlspecialchars($_REQUEST['year'])) ? htmlspecialchars($_REQUEST['year']) : $gueltigkeitsjahre[0];
                                         
                                         foreach($gueltigkeitsjahre AS $gueltigkeitsjahr)
                                         {
@@ -294,7 +306,7 @@ function replaceParameterInUrl(key, value)
 			<span>
         		<label for="behoerde">
         			<?php 
-        			     $getBehoerde = !empty(htmlspecialchars($_GET['behoerde'])) ? htmlspecialchars($_GET['behoerde']) : null;
+        			     $getBehoerde = !empty(htmlspecialchars($_REQUEST['behoerde'])) ? htmlspecialchars($_REQUEST['behoerde']) : null;
         			     
         			     if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen)
         			         && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[0]) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[0]->behoerde) && empty($getBehoerde))
@@ -348,7 +360,7 @@ function replaceParameterInUrl(key, value)
             	<label for="adressat">
         			<?php 
         			
-        			    $getAdressat = !empty(htmlspecialchars($_GET['adressat'])) ? htmlspecialchars($_GET['adressat']) : null;
+        			    $getAdressat = !empty(htmlspecialchars($_REQUEST['adressat'])) ? htmlspecialchars($_REQUEST['adressat']) : null;
         			    $selectedAdressat = null;
         			    if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen) 
         			        && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[0]) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[0]->adressat) && empty($getAdressat))
@@ -492,9 +504,12 @@ function replaceParameterInUrl(key, value)
                 		          			?>
                 		          		</td>
                 		          		<td>
-                		          			<input type="button" value="Erklärung" id="erklaerung_button" name="erklaerung" />
+												<button name="erklaerung_<?php echo $wrz->getId(); ?>" value="erklaerung_<?php echo $wrz->getId(); ?>" type="submit" id="erklaerung_button_<?php echo $wrz->getId(); ?>">Erklärung</button>
                 		          		</td>
                 		          		<td>
+                		          			<?php
+                		          			     echo $wrz->getErklaerungDatum();
+                		          			?>
                 		          		</td>
                 		          	</tr>
                 		       <?php
