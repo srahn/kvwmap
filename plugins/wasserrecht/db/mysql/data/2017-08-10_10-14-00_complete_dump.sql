@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 172.17.0.2:3306
--- Generation Time: Aug 10, 2017 at 10:13 AM
+-- Generation Time: Aug 10, 2017 at 10:52 AM
 -- Server version: 5.5.56
 -- PHP Version: 5.6.30-0+deb8u1
 
@@ -1918,7 +1918,7 @@ CREATE TABLE `rolle` (
 --
 
 INSERT INTO `rolle` (`user_id`, `stelle_id`, `nImageWidth`, `nImageHeight`, `auto_map_resize`, `minx`, `miny`, `maxx`, `maxy`, `nZoomFactor`, `selectedButton`, `epsg_code`, `epsg_code2`, `coordtype`, `active_frame`, `last_time_id`, `gui`, `language`, `hidemenue`, `hidelegend`, `fontsize_gle`, `highlighting`, `buttons`, `scrollposition`, `result_color`, `always_draw`, `runningcoords`, `showmapfunctions`, `showlayeroptions`, `singlequery`, `querymode`, `geom_edit_first`, `overlayx`, `overlayy`, `hist_timestamp`, `instant_reload`, `menu_auto_close`, `layer_params`, `menue_buttons`, `visually_impaired`) VALUES
-(1, 1, 1198, 802, 1, 33303381.787194, 5987685.9045419, 33303594.521571, 5987829.4599217, 2, 'zoomin', '35833', '', 'dec', 0, '2017-08-10 10:07:41', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure,', 0, 1, 0, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 1, 0),
+(1, 1, 1198, 802, 1, 33303380.891093, 5987685.9045419, 33303595.417672, 5987829.4599217, 2, 'zoomin', '35833', '', 'dec', 0, '2017-08-10 10:07:41', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure,', 0, 1, 0, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 1, 0),
 (2, 2, 1198, 770, 1, 239608.32867608, 5890464.3996456, 453335.02845224, 6047442.271783, 2, 'zoomin', '35833', NULL, 'dec', 0, '2017-07-12 11:18:57', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure', 0, 1, 0, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 0, 0);
 
 -- --------------------------------------------------------
@@ -2808,6 +2808,7 @@ CREATE TABLE `u_menue2rolle` (
 --
 
 INSERT INTO `u_menue2rolle` (`user_id`, `stelle_id`, `menue_id`, `status`) VALUES
+(1, 1, 41, 0),
 (1, 1, 40, 0),
 (1, 1, 39, 1),
 (1, 1, 38, 0),
@@ -2817,13 +2818,13 @@ INSERT INTO `u_menue2rolle` (`user_id`, `stelle_id`, `menue_id`, `status`) VALUE
 (1, 1, 34, 0),
 (1, 1, 33, 0),
 (1, 1, 32, 0),
-(1, 1, 31, 1),
+(1, 1, 31, 0),
 (1, 1, 30, 0),
 (1, 1, 29, 0),
 (1, 1, 28, 0),
 (1, 1, 27, 0),
 (1, 1, 26, 0),
-(1, 1, 25, 1),
+(1, 1, 25, 0),
 (1, 1, 24, 0),
 (1, 1, 23, 0),
 (1, 1, 22, 0),
@@ -2848,7 +2849,6 @@ INSERT INTO `u_menue2rolle` (`user_id`, `stelle_id`, `menue_id`, `status`) VALUE
 (1, 1, 3, 0),
 (1, 1, 2, 0),
 (1, 1, 1, 0),
-(1, 1, 41, 0),
 (2, 2, 41, 0),
 (2, 2, 38, 0),
 (2, 2, 37, 0),
@@ -2871,7 +2871,8 @@ INSERT INTO `u_menue2rolle` (`user_id`, `stelle_id`, `menue_id`, `status`) VALUE
 (2, 2, 5, 0),
 (2, 2, 4, 0),
 (2, 2, 3, 0),
-(2, 2, 2, 0);
+(2, 2, 2, 0),
+(1, 1, 42, 0);
 
 -- --------------------------------------------------------
 
@@ -2890,47 +2891,47 @@ CREATE TABLE `u_menue2stelle` (
 --
 
 INSERT INTO `u_menue2stelle` (`stelle_id`, `menue_id`, `menue_order`) VALUES
-(1, 33, 39),
-(1, 32, 38),
-(1, 31, 37),
-(1, 30, 36),
-(1, 29, 35),
-(1, 28, 34),
-(1, 27, 33),
-(1, 26, 32),
-(1, 37, 31),
-(1, 25, 30),
-(1, 24, 29),
-(1, 23, 28),
-(1, 22, 27),
-(1, 21, 26),
-(1, 20, 25),
-(1, 19, 24),
-(1, 18, 23),
-(1, 17, 22),
-(1, 16, 21),
-(1, 15, 20),
-(1, 14, 19),
-(1, 13, 18),
-(1, 12, 17),
-(1, 11, 16),
-(1, 40, 15),
-(1, 39, 14),
-(1, 10, 13),
-(1, 9, 12),
-(1, 8, 11),
-(1, 7, 10),
-(1, 6, 9),
-(1, 5, 8),
-(1, 41, 7),
-(1, 4, 6),
-(1, 3, 5),
-(1, 2, 4),
-(1, 1, 3),
-(1, 36, 2),
+(1, 33, 40),
+(1, 32, 39),
+(1, 31, 38),
+(1, 30, 37),
+(1, 29, 36),
+(1, 28, 35),
+(1, 27, 34),
+(1, 26, 33),
+(1, 37, 32),
+(1, 25, 31),
+(1, 24, 30),
+(1, 23, 29),
+(1, 22, 28),
+(1, 21, 27),
+(1, 20, 26),
+(1, 19, 25),
+(1, 18, 24),
+(1, 17, 23),
+(1, 16, 22),
+(1, 15, 21),
+(1, 14, 20),
+(1, 13, 19),
+(1, 12, 18),
+(1, 11, 17),
+(1, 40, 16),
+(1, 39, 15),
+(1, 10, 14),
+(1, 9, 13),
+(1, 8, 12),
+(1, 7, 11),
+(1, 6, 10),
+(1, 5, 9),
+(1, 41, 8),
+(1, 4, 7),
+(1, 3, 6),
+(1, 2, 5),
+(1, 1, 4),
+(1, 36, 3),
+(1, 42, 2),
 (1, 35, 1),
 (1, 38, 0),
-(1, 34, 40),
 (2, 27, 22),
 (2, 26, 21),
 (2, 29, 20),
@@ -2969,7 +2970,8 @@ INSERT INTO `u_menue2stelle` (`stelle_id`, `menue_id`, `menue_order`) VALUES
 (2, 4, 3),
 (2, 3, 2),
 (2, 2, 1),
-(2, 38, 0);
+(2, 38, 0),
+(1, 34, 41);
 
 -- --------------------------------------------------------
 
@@ -3039,7 +3041,8 @@ INSERT INTO `u_menues` (`id`, `name`, `name_low-german`, `name_english`, `name_p
 (38, 'Logout', '', '', '', '', 'index.php?go=logout', '', 0, 1, '', -1, '', 'logout'),
 (39, 'Menüverwaltung', '', '', '', '', 'index.php?go=changemenue', '', 0, 1, '', 10, '', ''),
 (40, 'Menüs Anzeigen', '', '', '', '', 'index.php?go=Menues_Anzeigen', '', 39, 2, '', 0, '', ''),
-(41, 'Letztes Suchergebnis', '', '', '', '', 'index.php?go=get_last_query', '', 4, 2, '', 0, '', '');
+(41, 'Letztes Suchergebnis', '', '', '', '', 'index.php?go=get_last_query', '', 4, 2, '', 0, '', ''),
+(42, 'Wasserrecht Deploy', '', '', '', '', 'index.php?go=wasserrecht_deploy', '', 35, 2, '', 0, '', '');
 
 -- --------------------------------------------------------
 
@@ -3646,7 +3649,7 @@ ALTER TABLE `u_groups`
 -- AUTO_INCREMENT for table `u_menues`
 --
 ALTER TABLE `u_menues`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;COMMIT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
