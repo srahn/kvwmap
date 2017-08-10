@@ -362,6 +362,7 @@ class rolle {
 				WHERE
 					id IN (" . $selectable_layer_params . ")
 			";
+			#echo '<br>Sql: ' . $sql;
 			$params_result = $this->database->execSQL($sql, 4, 1);
 			if ($params_result[0]) {
 				echo '<br>Fehler bei der Abfrage der Layerparameter mit SQL: ' . $sql;
