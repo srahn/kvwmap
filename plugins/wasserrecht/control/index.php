@@ -154,8 +154,9 @@ switch($this->go){
 			# pull git repository
 			{
 				$this->formvars['func'] = 'update_code';
-				$this->adminFunctions();
-				$result['pull_git'] = "Git Repository aktualisiert";
+				$ausgabe = $this->adminFunctions();
+				$result['pull_git'] = $ausgabe[0];
+				$result['pull_git'] .= "<br>Git Repository aktualisiert";
 			}
 
 			# reset pgsql schema

@@ -3468,7 +3468,7 @@ class GUI {
 				$this->showAdminFunctions();
       } break;
 			case "update_code" : {
-        $this->administration->update_code();
+        $result = $this->administration->update_code();
 				$this->administration->get_database_status();
 				$this->showAdminFunctions();
       } break;
@@ -3494,6 +3494,7 @@ class GUI {
         $this->showAdminFunctions();
       }
     }
+		return $result;
   }
 
 	function save_all_layer_attributes(){
