@@ -330,9 +330,7 @@ CREATE TABLE wasserrecht.gewaesserbenutzungen(
 --CREATE VIEW wasserrecht.gewaesserbenutzungen_aktueller_wasserrechtlicher_zulassungen AS SELECT b.id AS gewaesserbenutzungen_id, a.wrz_id AS wrz_id, a.aktuell, a.historisch, a.anlage_id, COALESCE(a.bezeichnung,'') || ' zum ' || COALESCE(c.name,'') || ' von ' || COALESCE(d.max_ent_a::text,'') || ' m³/Jahr' AS bezeichnung, e.namelang AS wrz_ben_lage_namelang
 --  FROM wasserrecht.aktuelle_wasserrechtliche_zulassungen a INNER JOIN wasserrecht.gewaesserbenutzungen b ON b.wasserrechtliche_zulassungen = a.wrz_id LEFT JOIN wasserrecht.gewaesserbenutzungen_art c ON c.id = b.art LEFT JOIN wasserrecht.gewaesserbenutzungen_umfang d ON b.umfang = d.id LEFT JOIN wasserrecht.gewaesserbenutzungen_lage e ON b.lage = e.id;
 
-----------------------------
-
-CREATE VIEW wasserrecht.wasserentnamebenutzer AS SELECT c.oid, a.name AS anlage, b.name AS wasserrechtliche_zulassung, c.kennnummer AS benutzungsnummer FROM wasserrecht.anlagen a INNER JOIN wasserrecht.wasserrechtliche_zulassungen b ON b.anlage=a.id INNER JOIN wasserrecht.gewaesserbenutzungen c ON b.id = c.wasserrechtliche_zulassungen;
+--CREATE VIEW wasserrecht.wasserentnamebenutzer AS SELECT c.oid, a.name AS anlage, b.name AS wasserrechtliche_zulassung, c.kennnummer AS benutzungsnummer FROM wasserrecht.anlagen a INNER JOIN wasserrecht.wasserrechtliche_zulassungen b ON b.anlage=a.id INNER JOIN wasserrecht.gewaesserbenutzungen c ON b.id = c.wasserrechtliche_zulassungen;
 
 ------------------------------------------
 
