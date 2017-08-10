@@ -33,26 +33,7 @@ include(PLUGINS . 'wasserrecht/model/WRZProGueltigkeitsJahr.php');
 
 /**
 * Anwendungsfälle
-* show_elements
-* show_simple_types
-* show_uml
-* xplankonverter_konvertierungen_index
-* xplankonverter_shapefiles_index
-* xplankonverter_shapefiles_delete
-* xplankonverter_konvertierung_status
-* xplankonverter_konvertierung
-* xplankonverter_validierungsergebnisse
-* xplankonverter_gml_generieren
-* xplankonverter_konvertierung_loeschen
-* xplankonverter_inspire_gml_generieren
-* xplankonverter_regeleditor
-* xplankonverter_regeleditor_getxplanattributes
-* xplankonverter_regeleditor_getshapeattributes
-* xplankonverter_download_uploaded_shapes
-* xplankonverter_download_edited_shapes
-* xplankonverter_download_xplan_shapes
-* xplankonverter_download_xplan_gml
-* xplankonverter_download_inspire_gml
+* wasserentnahmebenutzer
 */
 
 $this->actual_link = parse_url((isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]", PHP_URL_PATH);
