@@ -9,14 +9,14 @@ class Gewaesserbenutzungen extends WrPgObject {
 	    $gewaesserbenutzungen = $this->find_where($where, $order, $select);
 	    if(!empty($gewaesserbenutzungen))
 	    {
-	        $gewaesserbenutzungUmfang = new GewaesserbenutzungenUmfang($this->gui);
+	        $gwu = new GewaesserbenutzungenUmfang($this->gui);
 	        
 	        foreach ($gewaesserbenutzungen AS $gewaesserbenutzung)
 	        {
 	            if(!empty($gewaesserbenutzung->data['umfang']))
 	            {
 // 	                echo 'id=' . $gewaesserbenutzung->data['umfang'];
-	                $gewaesserbenutzungUmfang = $gewaesserbenutzungUmfang->find_where('id=' . $gewaesserbenutzung->data['umfang']);
+	                $gewaesserbenutzungUmfang = $gwu->find_where('id=' . $gewaesserbenutzung->data['umfang']);
 	                if(!empty($gewaesserbenutzungUmfang))
 	                {
 	                    $gewaesserbenutzung->gewaesserbenutzungUmfang = $gewaesserbenutzungUmfang[0];
