@@ -1,6 +1,5 @@
 <?php
 $this->goNotExecutedInPlugins = false;
-// include(PLUGINS . 'xplankonverter/model/kvwmap.php');
 include_once(CLASSPATH . 'PgObject.php');
 // include_once(CLASSPATH . 'MyObject.php');
 include_once(CLASSPATH . 'Layer.php');
@@ -20,20 +19,12 @@ include(PLUGINS . 'wasserrecht/model/gewaesserbenutzungen_umfang.php');
 include(PLUGINS . 'wasserrecht/model/wasserrechtliche_zulassungen.php');
 include(PLUGINS . 'wasserrecht/model/wasserrechtliche_zulassungen_gueltigkeit.php');
 include(PLUGINS . 'wasserrecht/model/WRZProGueltigkeitsJahr.php');
-// include(PLUGINS . 'xplankonverter/model/RP_Plan.php');
-// include(PLUGINS . 'xplankonverter/model/RP_Bereich.php');
-// include(PLUGINS . 'xplankonverter/model/RP_Object.php');
-// include(PLUGINS . 'xplankonverter/model/konvertierung.php');
-// include(PLUGINS . 'xplankonverter/model/regel.php');
-// include(PLUGINS . 'xplankonverter/model/shapefiles.php');
-// include(PLUGINS . 'xplankonverter/model/validierung.php');
-// include(PLUGINS . 'xplankonverter/model/validierungsergebnis.php');
-// include(PLUGINS . 'xplankonverter/model/xplan.php');
-// include(PLUGINS . 'xplankonverter/model/converter.php');
 
 /**
 * Anwendungsfälle
 * wasserentnahmebenutzer
+* wasserrecht_deploy
+* wasserrecht_deploy_Starten
 */
 
 $this->actual_link = parse_url((isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]", PHP_URL_PATH);
