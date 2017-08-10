@@ -9016,8 +9016,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         $element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid
         $sql = $newpath." AND ".$element[1].".oid = ".$element[3];
         $oids[] = $element[3];
-        #echo $sql.'<br><br>';
+       # echo $sql.'<br><br>';
         $this->debug->write("<p>file:kvwmap class:generischer_sachdaten_druck :",4);
+				$sql = replace_params($sql, rolle::$layer_params);
         $ret = $layerdb->execSQL($sql,4, 1);
         if (!$ret[0]) {
           while ($rs=pg_fetch_array($ret[1])) {
@@ -9084,6 +9085,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					$oids[] = $element[3];
 					#echo $sql.'<br><br>';
 					$this->debug->write("<p>file:kvwmap class:generischer_sachdaten_druck :",4);
+					$sql = replace_params($sql, rolle::$layer_params);
 					$ret = $layerdb->execSQL($sql,4, 1);
 					if (!$ret[0]) {
 						while ($rs=pg_fetch_array($ret[1])) {
