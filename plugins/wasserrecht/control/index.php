@@ -111,7 +111,7 @@ switch($this->go){
 	}	break;
 
 	case 'wasserrecht_deploy': {
-		$this->checkCaseAllowed($go);
+		$this->checkCaseAllowed($this->go);
 		if ($this->user->funktion == 'admin') {
 			$this->main = PLUGINS . 'wasserrecht/view/deploy_form.php';
 			$this->output();
