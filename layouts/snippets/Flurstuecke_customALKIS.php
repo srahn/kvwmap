@@ -748,7 +748,6 @@ hide_versions = function(flst){
 												</td>
 											</tr>
 								<?	} ?>
-								<tr>kolibri</tr>
 									</table>
 								</td>
 								</tr>
