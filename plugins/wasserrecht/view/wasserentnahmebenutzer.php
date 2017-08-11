@@ -270,7 +270,7 @@ function replaceParameterInUrl(key, value)
 		          }
 		          elseif ($key === "aufforderung")
 		          {
-		              writeWordFile(PLUGINS . 'wasserrecht/templates/Anhang_IV.docx', PLUGINS . 'wasserrecht/results/test.docx');
+// 		              writeWordFile(PLUGINS . 'wasserrecht/templates/Anhang_IV.docx', PLUGINS . 'wasserrecht/results/test.docx');
 		          }
 		      }
 		  }
@@ -472,7 +472,15 @@ function replaceParameterInUrl(key, value)
         		                      ?>
                 		          	<tr>
                 		          		<td style="background-color: inherit;">
-                		          			<input type="checkbox" name="auswahl_checkbox_<?php echo $wrz->getId(); ?>">
+                		          			<?php 
+                    		          			$datumAbsend = $wrz->getAufforderungDatumAbsend();
+                    		          			if(empty($datumAbsend))
+                    		          			{
+                    		          			    ?>
+                    		          				<input type="checkbox" name="auswahl_checkbox_<?php echo $wrz->getId(); ?>">
+                    		          		<?php
+                    		          			} 
+                		          			?>
                 		          		</td>
                 		          		<td>
                 		          			<?php 
@@ -509,7 +517,7 @@ function replaceParameterInUrl(key, value)
                 		          		</td>
                 		          		<td>
                 		          			<?php
-                		          			     echo $wrz->getAufforderungDatumAbsend();
+                		          			     echo $wrz->getAufforderungDatumAbsendHTML();
                 		          			?>
                 		          		</td>
                 		          		<td>

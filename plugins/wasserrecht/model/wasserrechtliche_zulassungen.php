@@ -119,9 +119,13 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 // 	        $this->update();
 // 	    }
 // 	}
+
+    public function getAufforderungDatumAbsend() {
+        return $this->data['aufforderung_datum_absend'];
+    }
 	
-	public function getAufforderungDatumAbsend() {
-	    $datumAbsend = $this->data['aufforderung_datum_absend'];
+	public function getAufforderungDatumAbsendHTML() {
+	    $datumAbsend = $this->getAufforderungDatumAbsend();
 	    if(!empty($datumAbsend))
 	    {
 	        // 	        $dateString = DateTime::createFromFormat("d.m.Y", $datumAbsend);
