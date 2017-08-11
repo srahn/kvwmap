@@ -1,3 +1,8 @@
+<?php 
+// include_once 'create_pdf.php';
+
+?>
+
 <style>
  /* Style the tab */
 div.tab {
@@ -232,7 +237,7 @@ function replaceParameterInUrl(key, value)
 		  
 		  if($_SERVER ["REQUEST_METHOD"] == "POST")
 		  {
-// 		      print_r($_POST); 
+// 		      print_r($_POST);
 
 		      foreach($_POST as $key => $value)
 		      {
@@ -262,6 +267,10 @@ function replaceParameterInUrl(key, value)
 		                  //echo $erklaerungWrz2->toString();
 		                  $erklaerungWrz2->insertErklaerungDatum();
 		              }
+		          }
+		          elseif ($key === "aufforderung")
+		          {
+		              writeWordFile(PLUGINS . 'wasserrecht/templates/Anhang_IV.docx', PLUGINS . 'wasserrecht/results/test.docx');
 		          }
 		      }
 		  }

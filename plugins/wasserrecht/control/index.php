@@ -20,6 +20,10 @@ include(PLUGINS . 'wasserrecht/model/wasserrechtliche_zulassungen.php');
 include(PLUGINS . 'wasserrecht/model/wasserrechtliche_zulassungen_gueltigkeit.php');
 include(PLUGINS . 'wasserrecht/model/WRZProGueltigkeitsJahr.php');
 
+require_once (CLASSPATH . '/../vendor/autoload.php');
+// include(PLUGINS . 'wasserrecht/view/KvwmapJodDocumentConverter.class.php');
+include(PLUGINS . 'wasserrecht/view/create_pdf.php');
+
 /**
 * Anwendungsfälle
 * wasserentnahmebenutzer

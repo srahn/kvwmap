@@ -8,6 +8,7 @@ graphics/wappen/*
 graphics/custom/*
 plugins/*/config/config.php
 plugins/*/img/*
+plugins/wasserrecht/results/
 <<<<<<< HEAD
 .settings
 .project
