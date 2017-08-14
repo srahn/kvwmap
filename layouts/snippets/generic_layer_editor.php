@@ -70,6 +70,7 @@
 				<td></td>
 			  
 			  <?
+					$has_geom = false;
 			  	for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
 						if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
 							if($this->qlayerset[$i]['attributes']['type'][$j] != 'geometry'){
@@ -112,10 +113,11 @@
 									echo '</td>';									
 							}
 							else{
-								echo '<td bgcolor="'.BG_GLEATTRIBUTE.'">&nbsp;</td>';
+								$has_geom = true;
 							}
 						}
 			  	}
+					if($has_geom)echo '<td bgcolor="'.BG_GLEATTRIBUTE.'">&nbsp;</td>';
 			  ?>
 			  </tr>
 <?
