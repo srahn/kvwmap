@@ -16,6 +16,8 @@ include(PLUGINS . 'wasserrecht/model/adresse.php');
 include(PLUGINS . 'wasserrecht/model/behoerde.php');
 include(PLUGINS . 'wasserrecht/model/gewaesserbenutzungen.php');
 include(PLUGINS . 'wasserrecht/model/gewaesserbenutzungen_umfang.php');
+include(PLUGINS . 'wasserrecht/model/gewaesserbenutzungen_art.php');
+include(PLUGINS . 'wasserrecht/model/gewaesserbenutzungen_zweck.php');
 include(PLUGINS . 'wasserrecht/model/wasserrechtliche_zulassungen.php');
 include(PLUGINS . 'wasserrecht/model/wasserrechtliche_zulassungen_gueltigkeit.php');
 include(PLUGINS . 'wasserrecht/model/WRZProGueltigkeitsJahr.php');
@@ -83,6 +85,13 @@ switch($this->go){
 	    $this->debug->write('wasserentnahmebenutzer called!', 4);
 	    
 	    $this->main = PLUGINS . 'wasserrecht/view/wasserentnahmebenutzer.php';
+	    $this->output();
+	}	break;
+	
+	case 'wasserentnahmeentgelt': {
+	    $this->debug->write('wasserentnahmeentgelt called!', 4);
+	    
+	    $this->main = PLUGINS . 'wasserrecht/view/wasserentnahmeentgelt.php';
 	    $this->output();
 	}	break;
 

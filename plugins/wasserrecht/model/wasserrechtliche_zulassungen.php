@@ -22,73 +22,15 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 			{
 // 				var_dump($this->debug);
 			    $this->debug->write('result: ' . var_export($result->data, true), 4);
-			    $wrzGueltigkeit = new WasserrechtlicheZulassungenGueltigkeit($gui);
-			    $wasserrechtlicheZulassungGueltigkeit = $wrzGueltigkeit->find_by_id($gui, 'id', $result->data['gueltigkeit']);
-			    $result->gueltigkeit = $wasserrechtlicheZulassungGueltigkeit;
-				if(!empty($wasserrechtlicheZulassungGueltigkeit))
-				{
-				    $datum = $wasserrechtlicheZulassungGueltigkeit->getGueltigBis();
-					//var_dump($datum);
-					$date = DateTime::createFromFormat("d.m.Y", $datum);
-					$year = $date->format("Y");
-					if (!in_array($year, $wasserrechtlicheZulassungGueltigkeitJahrReturnArray))
-					{
-						$wasserrechtlicheZulassungGueltigkeitJahrReturnArray[] = $year;
-					}
+				
+			    $year = $this->getDependentObjects($gui, $result);
+			    
+			    if (!in_array($year, $wasserrechtlicheZulassungGueltigkeitJahrReturnArray))
+			    {
+			        $wasserrechtlicheZulassungGueltigkeitJahrReturnArray[] = $year;
+			    }
 					
-					$result->gueltigkeitsJahr=$year;
-					
-					//get the 'Adressat'
-					if(!empty($result->data['adressat']))
-					{
-					    $person = new Personen($gui);
-					    $adressat = $person->find_by_id($gui, 'id', $result->data['adressat']);
-					    if(!empty($adressat->data['adresse']))
-					    {
-					        $adress = new AdresseKlasse($gui);
-					        $adresse = $adress->find_by_id($gui, 'id', $adressat->data['adresse']);
-					        $adressat->adresse = $adresse;
-					    }
-					    $result->adressat = $adressat;
-					}
-					
-					//get the 'Behoerde'
-					if(!empty($result->data['ausstellbehoerde']))
-					{
-					    $bh = new Behoerde($gui);
-					    $behoerde = $bh->find_by_id($gui, 'id', $result->data['ausstellbehoerde']);
-					    $result->behoerde = $behoerde;
-					}
-					
-					//get the 'Anlage'
-					if(!empty($result->data['anlage']))
-					{
-					    $anlage = new Anlage($gui);
-					    $anlagen = $anlage->find_where('id=' . $result->data['anlage']);
-					    if(!empty($anlagen) && count($anlagen) > 0 && !empty($anlagen[0]))
-					    {
-					        $result->anlagen = $anlagen[0];
-					    }
-					}
-					
-					//get the 'Aufforderung'
-// 					if(!empty($result->data['aufforderung']))
-// 					{
-// 					    $aufforderungen = new Aufforderung($gui);
-// 					    $aufforderung = $aufforderungen->find_where('id=' . $result->data['aufforderung']);
-// 					    if(!empty($aufforderung) && count($aufforderung) > 0 && !empty($aufforderung[0]))
-// 					    {
-// 					        $result->aufforderung = $aufforderung[0];
-// 					    }
-// 					}
-					
-					//get the 'Gewaesserbenutzungen'
-					$gewaesserbenutzung = new Gewaesserbenutzungen($gui);
-					$gewaesserbenutzungen = $gewaesserbenutzung->find_where_with_umfang('wasserrechtliche_zulassungen=' . $result->getId());
-					$result->gewaesserbenutzungen = $gewaesserbenutzungen;
-					
-					$wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[]=$result;
-				}
+			    $wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[]=$result;
 			}
 			$wrzProGueltigkeitsJahr->gueltigkeitsJahre=$wasserrechtlicheZulassungGueltigkeitJahrReturnArray;
 			return $wrzProGueltigkeitsJahr;
@@ -98,6 +40,77 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 		$wrzProGueltigkeitsJahr->gueltigkeitsJahre=array('n/a');
 		return $wrzProGueltigkeitsJahr;
 // 		return array('n/a');
+	}
+	
+	public function getDependentObjects($gui, &$result) 
+	{
+	    $year = null;
+	    
+	    if(!empty($result))
+	    {
+	        $wrzGueltigkeit = new WasserrechtlicheZulassungenGueltigkeit($gui);
+	        $wasserrechtlicheZulassungGueltigkeit = $wrzGueltigkeit->find_by_id($gui, 'id', $result->data['gueltigkeit']);
+	        $result->gueltigkeit = $wasserrechtlicheZulassungGueltigkeit;
+	        if(!empty($wasserrechtlicheZulassungGueltigkeit))
+	        {
+	            $datum = $wasserrechtlicheZulassungGueltigkeit->getGueltigBis();
+	            //var_dump($datum);
+	            $date = DateTime::createFromFormat("d.m.Y", $datum);
+	            $year = $date->format("Y");
+	            $result->gueltigkeitsJahr=$year;
+	        }
+	        
+	        //get the 'Adressat'
+	        if(!empty($result->data['adressat']))
+	        {
+	            $person = new Personen($gui);
+	            $adressat = $person->find_by_id($gui, 'id', $result->data['adressat']);
+	            if(!empty($adressat->data['adresse']))
+	            {
+	                $adress = new AdresseKlasse($gui);
+	                $adresse = $adress->find_by_id($gui, 'id', $adressat->data['adresse']);
+	                $adressat->adresse = $adresse;
+	            }
+	            $result->adressat = $adressat;
+	        }
+	        
+	        //get the 'Behoerde'
+	        if(!empty($result->data['ausstellbehoerde']))
+	        {
+	            $bh = new Behoerde($gui);
+	            $behoerde = $bh->find_by_id($gui, 'id', $result->data['ausstellbehoerde']);
+	            $result->behoerde = $behoerde;
+	        }
+	        
+	        //get the 'Anlage'
+	        if(!empty($result->data['anlage']))
+	        {
+	            $anlage = new Anlage($gui);
+	            $anlagen = $anlage->find_where('id=' . $result->data['anlage']);
+	            if(!empty($anlagen) && count($anlagen) > 0 && !empty($anlagen[0]))
+	            {
+	                $result->anlagen = $anlagen[0];
+	            }
+	        }
+	        
+	        //get the 'Aufforderung'
+	        // 					if(!empty($result->data['aufforderung']))
+	        // 					{
+	        // 					    $aufforderungen = new Aufforderung($gui);
+	        // 					    $aufforderung = $aufforderungen->find_where('id=' . $result->data['aufforderung']);
+	        // 					    if(!empty($aufforderung) && count($aufforderung) > 0 && !empty($aufforderung[0]))
+	        // 					    {
+	        // 					        $result->aufforderung = $aufforderung[0];
+	        // 					    }
+	        // 					}
+	        
+	        //get the 'Gewaesserbenutzungen'
+	        $gewaesserbenutzung = new Gewaesserbenutzungen($gui);
+	        $gewaesserbenutzungen = $gewaesserbenutzung->find_where_with_umfang('wasserrechtliche_zulassungen=' . $result->getId());
+	        $result->gewaesserbenutzungen = $gewaesserbenutzungen;
+	    }
+	    
+	    return $year;
 	}
 	
 	public function toString() {
@@ -129,10 +142,10 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	    if(!empty($datumAbsend))
 	    {
 	        // 	        $dateString = DateTime::createFromFormat("d.m.Y", $datumAbsend);
-	        return "<a>" . $datumAbsend . "</a>";
+	        return "<div>" . $datumAbsend . "</div>";
 	    }
 	    
-	    return "<a style=\"color: red;\">Nicht aufgefordert<a>";
+	    return "<div style=\"color: red;\">Nicht aufgefordert<div>";
 	}
 	
 	public function insertAufforderungDatumAbsend($dateValue = NULL) {
@@ -153,14 +166,18 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	}
 	
 	public function getErklaerungDatum() {
-	    $datumErklaerung = $this->data['erklaerung_datum'];
+	    return $this->data['erklaerung_datum'];
+	}
+	
+	public function getErklaerungDatumHTML() {
+	    $datumErklaerung = $this->getErklaerungDatum();
 	    if(!empty($datumErklaerung))
 	    {
 	        // 	        $dateString = DateTime::createFromFormat("d.m.Y", $datumAbsend);
-	        return "<a>" . $datumErklaerung . "</a>";
+	        return "<div>" . $datumErklaerung . "</div>";
 	    }
 	    
-	    return "<a style=\"color: red;\">Nicht erklärt<a>";
+	    return "<div style=\"color: red;\">Nicht erklärt<div>";
 	}
 	
 	public function insertErklaerungDatum($dateValue = NULL) {
