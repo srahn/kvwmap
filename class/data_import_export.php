@@ -333,16 +333,20 @@ class data_import_export {
 			# 2. Versuch: Abgleich bestimmter Parameter im prj-String mit spatial_ref_sys_alias
 			$datum = get_first_word_after($prj, 'DATUM[', '"', '"');
 			$projection = get_first_word_after($prj, 'PROJECTION[', '"', '"');
+			if($projection == '')$projection_sql = 'AND projection IS NULL'; else $projection_sql = "AND '".$projection."' = ANY(projection)";
 			$false_easting = get_first_word_after($prj, 'False_Easting"', ',', ']');
+			if($false_easting == '')$false_easting_sql = 'AND false_easting IS NULL'; else $false_easting_sql = "AND false_easting = ".$false_easting;
 			$central_meridian = get_first_word_after($prj, 'Central_Meridian"', ',', ']');
+			if($central_meridian == '')$central_meridian_sql = 'AND central_meridian IS NULL'; else $central_meridian_sql = "AND central_meridian = ".$central_meridian;
 			$scale_factor = get_first_word_after($prj, 'Scale_Factor"', ',', ']');
+			if($scale_factor == '')$scale_factor_sql = 'AND scale_factor IS NULL'; else $scale_factor_sql = "AND scale_factor = ".$scale_factor;
 			$unit = get_first_word_after($prj, 'UNIT[', '"', '"', true);
 			$sql = "SELECT srid FROM spatial_ref_sys_alias
 							WHERE '".$datum."' = ANY(datum) 
-							AND '".$projection."' = ANY(projection) 
-							AND ".$false_easting." = false_easting 
-							AND ".$central_meridian." = central_meridian 
-							AND ".$scale_factor." = scale_factor 
+							".$projection_sql." 
+							".$false_easting_sql." 
+							".$central_meridian_sql." 
+							".$scale_factor_sql." 
 							AND '".$unit."' = ANY(unit)";
 			$ret = $pgdatabase->execSQL($sql,4, 0);
 			if(!$ret[0])$result = pg_fetch_row($ret[1]);
