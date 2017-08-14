@@ -37,29 +37,10 @@ session_start();
 // $executiontimes['action'][] = 'Start';
 
 ob_start ();    // Ausgabepufferung starten
-# Übergabe aller Formularvariablen an die Benutzeroberfläche an formvars
-# Dabei wird unterschieden zwischen Aufrufen über das Internet oder von der Komandozeile aus
-if (is_array($argc) AND $argc[1]!='') {
- # Aufruf des PHP-Skriptes über die Komandozeile (CLI)
- # Wenn die Variable argc > 0 ist, wurde die Datei von der Komandozeile aus aufgerufen
- # in dem Fall können die übergebenen Parameter hier der formvars-Variable übergeben werden.
- $arg['go']=$argv[1];
- $arg['ist_Fortfuehrung']=$argv[2];
- $arg['WLDGE_lokal']=$argv[3];
- $arg['WLDGE_Datei_lokal']=$argv[4];
- $formvars=$arg;
+foreach($_REQUEST as $key => $value){
+	if(is_string($value))$_REQUEST[$key] = str_replace('<script', '', pg_escape_string($value));
 }
-else {
-  # Übergeben der Variablen aus den Post oder Get Aufrufen
-  # normaler Aufruf des PHP-Skriptes über Apache oder CGI  
-  #$GUI->formvars=stripScript($_REQUEST);
-  foreach($_REQUEST as $key => $value){
-  	#if(is_string($value))$_REQUEST[$key] = addslashes($value);
-		#if(is_string($value))$_REQUEST[$key] = pg_escape_string($value);
-		if(is_string($value))$_REQUEST[$key] = str_replace('<script', '', pg_escape_string($value));
-  }
-  $formvars = $_REQUEST;
-}
+$formvars = $_REQUEST;
 
 $go = $formvars['go'];
 if($formvars['go_plus'] != '') $go = $go.'_'.$formvars['go_plus'];
