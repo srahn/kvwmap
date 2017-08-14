@@ -1,5 +1,6 @@
 <?php
 header('Content-Type: text/html; charset=utf-8');
+session_set_cookie_params(0, $_SERVER['CONTEXT_PREFIX']);
 session_start();
 ###################################################################
 # kvwmap - Kartenserver für die Verwaltung raumbezogener Daten.   #
@@ -77,11 +78,7 @@ if (LOG_LEVEL>0) {
  $log_mysql=new LogFile(LOGFILE_MYSQL,'text','Log-Datei MySQL', '#------v: '.date("Y:m:d H:i:s",time()));
  $log_postgres=new LogFile(LOGFILE_POSTGRES,'text', 'Log-Datei-Postgres', '------v: '.date("Y:m:d H:i:s",time()));
 }
-if (
-	!$_SESSION['angemeldet'] or
-	!empty($formvars['username']) or
-	$_SESSION['CONTEXT_PREFIX'] != $_SERVER['CONTEXT_PREFIX']
-) {
+if(!$_SESSION['angemeldet'] or !empty($formvars['username'])){
 	$msg .= '<br>Nicht angemeldet';
 	include(CLASSPATH . 'mysql.php');
 	$userDb = new database();
