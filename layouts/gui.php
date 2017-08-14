@@ -4,7 +4,6 @@
 		<? include(SNIPPETS . 'gui_head.php'); ?>
 	</head>
 	<body onload="onload_functions();">
-	<div id="message_box" class="message_box_hidden"></div>	
 	<div id="waitingdiv" style="position: absolute;height: 100%; width: 100%; display:none; z-index: 1000000; text-align: center">
 			<div style="position: absolute;  top: 50%; left: 50%; transform: translate(-50%,-50%);">
 				<i class="fa fa-spinner fa-7x wobble-fix spinner"></i>
@@ -15,6 +14,7 @@
 			<tr>
 				<td align="center" valign="top">
 					<form name="GUI" enctype="multipart/form-data" method="post" action="index.php" id="GUI">
+						<div id="message_box" class="message_box_hidden"></div>		<!-- muss innerhalb des form stehen -->
 						<table cellpadding=0 cellspacing=0>
 							<tr> 
 								<td colspan="2" id="header"><?php
