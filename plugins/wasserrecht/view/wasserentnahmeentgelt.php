@@ -63,20 +63,20 @@ if(!empty($wrz))
                     <div class="wasserrecht_display_table_row">
                         <div class="wasserrecht_display_table_cell_caption">Erhebungsjahr:</div>
                         <div class="wasserrecht_display_table_cell_spacer"></div>
-                        <div class="wasserrecht_display_table_cell"><?php echo $wrz->gueltigkeitsJahr ?></div>
+                        <div class="wasserrecht_display_table_cell_white"><?php echo $wrz->gueltigkeitsJahr ?></div>
                     </div>
                     <div class="wasserrecht_display_table_row">
                         <div class="wasserrecht_display_table_cell_caption">Behörde:</div>
                         <div class="wasserrecht_display_table_cell_spacer"></div>
                         <?php 
-                            echo '<a class="wasserrecht_display_table_cell" href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Behoerde'] . '&value_id=' . $wrz->behoerde->getId() . '&operator_id==">' . $wrz->behoerde->getName() .'</a>';
+                            echo '<a class="wasserrecht_display_table_cell_white" href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Behoerde'] . '&value_id=' . $wrz->behoerde->getId() . '&operator_id==">' . $wrz->behoerde->getName() .'</a>';
                         ?>
                     </div>
                     <div class="wasserrecht_display_table_row">
                         <div class="wasserrecht_display_table_cell_caption">Adressat:</div>
                         <div class="wasserrecht_display_table_cell_spacer"></div>
                         <?php 
-                            echo '<a class="wasserrecht_display_table_cell" href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Personen'] . '&value_personen_id=' . $wrz->adressat->getId() . '&operator_personen_id==">' . $wrz->adressat->getName() .'</a>';
+                            echo '<a class="wasserrecht_display_table_cell_white" href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Personen'] . '&value_personen_id=' . $wrz->adressat->getId() . '&operator_personen_id==">' . $wrz->adressat->getName() .'</a>';
                         ?>
                     </div>
                     
@@ -90,14 +90,14 @@ if(!empty($wrz))
                         <div class="wasserrecht_display_table_cell_caption">Anlage:</div>
                         <div class="wasserrecht_display_table_cell_spacer"></div>
                         <?php 
-                            echo '<a class="wasserrecht_display_table_cell" href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Anlagen'] . '&value_anlage_id=' . $wrz->anlagen->getId() . '&operator_anlage_id==">' . $wrz->anlagen->getName() . '</a>';
+                            echo '<a class="wasserrecht_display_table_cell_white" href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Anlagen'] . '&value_anlage_id=' . $wrz->anlagen->getId() . '&operator_anlage_id==">' . $wrz->anlagen->getName() . '</a>';
                         ?>
                     </div>
                     <div class="wasserrecht_display_table_row">
                         <div class="wasserrecht_display_table_cell_caption">Wasserrechtliche Zulassung:</div>
                         <div class="wasserrecht_display_table_cell_spacer"></div>
                         <?php 
-                            echo '<a class="wasserrecht_display_table_cell" href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Wasserrechtliche_Zulassungen'] . '&value_wrz_id=' . $wrz->getId() . '&operator_wrz_id==">' . $wrz->getName() . '</a>';
+                            echo '<a class="wasserrecht_display_table_cell_white" href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Wasserrechtliche_Zulassungen'] . '&value_wrz_id=' . $wrz->getId() . '&operator_wrz_id==">' . $wrz->getName() . '</a>';
                         ?>
                     </div>
                     <div class="wasserrecht_display_table_row">
@@ -106,11 +106,11 @@ if(!empty($wrz))
                         <?php
                             if(!empty($wrz->gewaesserbenutzungen) && !empty($wrz->gewaesserbenutzungen[0]) && !empty($wrz->gewaesserbenutzungen[0]->gewaesserbenutzungUmfang))
                     		{
-                    		      echo '<a class="wasserrecht_display_table_cell" href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Gewaesserbenutzungen_Umfang'] . '&value_id=' . $wrz->gewaesserbenutzungen[0]->gewaesserbenutzungUmfang->getId() . '&operator_id==">' . $wrz->gewaesserbenutzungen[0]->gewaesserbenutzungUmfang->getUmfang() . '</a>';
+                    		      echo '<a class="wasserrecht_display_table_cell_white" href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Gewaesserbenutzungen_Umfang'] . '&value_id=' . $wrz->gewaesserbenutzungen[0]->gewaesserbenutzungUmfang->getId() . '&operator_id==">' . $wrz->gewaesserbenutzungen[0]->gewaesserbenutzungUmfang->getUmfang() . '</a>';
                     		}
                     		else
                     		{
-                    		    echo '<div class="wasserrecht_display_table_cell"></div>';
+                    		    echo '<div class="wasserrecht_display_table_cell_white"></div>';
                     		}
                     	?>
                     </div>
@@ -118,7 +118,7 @@ if(!empty($wrz))
                         <div class="wasserrecht_display_table_cell_caption">Hinweise:</div>
                         <div class="wasserrecht_display_table_cell_spacer"></div>
                         <?php
-                    		 echo '<a class="wasserrecht_display_table_cell" style="color: red; text-decoration: underline;" href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Wasserrechtliche_Zulassungen'] . '&value_wrz_id=' . $wrz->getId() . '&operator_wrz_id==">' . $wrz->gueltigkeit->getHinweis() . '</a>';
+                    		 echo '<a class="wasserrecht_display_table_cell_white" style="color: red; text-decoration: underline;" href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Wasserrechtliche_Zulassungen'] . '&value_wrz_id=' . $wrz->getId() . '&operator_wrz_id==">' . $wrz->gueltigkeit->getHinweis() . '</a>';
                     	?>
                     </div>
                     
@@ -133,11 +133,11 @@ if(!empty($wrz))
                          <?php
                              if(!empty($wrz->gewaesserbenutzungen) && !empty($wrz->gewaesserbenutzungen[0]) && !empty($wrz->gewaesserbenutzungen[0]->gewaesserbenutzungArt))
                     		 {
-                    		      echo '<a class="wasserrecht_display_table_cell" href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Gewaesserbenutzungen_Art'] . '&value_id=' . $wrz->gewaesserbenutzungen[0]->gewaesserbenutzungArt->getId() . '&operator_id==">' . $wrz->gewaesserbenutzungen[0]->gewaesserbenutzungArt->getName() . '</a>';
+                    		      echo '<a class="wasserrecht_display_table_cell_white" href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Gewaesserbenutzungen_Art'] . '&value_id=' . $wrz->gewaesserbenutzungen[0]->gewaesserbenutzungArt->getId() . '&operator_id==">' . $wrz->gewaesserbenutzungen[0]->gewaesserbenutzungArt->getName() . '</a>';
                     		 }
                     		 else
                     		 {
-                    		     echo '<div class="wasserrecht_display_table_cell"></div>';
+                    		     echo '<div class="wasserrecht_display_table_cell_white"></div>';
                     		 }
                     	?>
                     </div>
@@ -147,11 +147,11 @@ if(!empty($wrz))
                          <?php
                              if(!empty($wrz->gewaesserbenutzungen) && !empty($wrz->gewaesserbenutzungen[0]) && !empty($wrz->gewaesserbenutzungen[0]->gewaesserbenutzungZweck))
                     		 {
-                    		      echo '<a class="wasserrecht_display_table_cell" href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Gewaesserbenutzungen_Zweck'] . '&value_id=' . $wrz->gewaesserbenutzungen[0]->gewaesserbenutzungZweck->getId() . '&operator_id==">' . $wrz->gewaesserbenutzungen[0]->gewaesserbenutzungZweck->getName() . '</a>';
+                    		      echo '<a class="wasserrecht_display_table_cell_white" href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Gewaesserbenutzungen_Zweck'] . '&value_id=' . $wrz->gewaesserbenutzungen[0]->gewaesserbenutzungZweck->getId() . '&operator_id==">' . $wrz->gewaesserbenutzungen[0]->gewaesserbenutzungZweck->getName() . '</a>';
                     		 }
                     		 else
                     		 {
-                    		     echo '<div class="wasserrecht_display_table_cell"></div>';
+                    		     echo '<div class="wasserrecht_display_table_cell_white"></div>';
                     		 }
                     	?>
                     </div>
@@ -160,11 +160,11 @@ if(!empty($wrz))
                          <?php
                              if(!empty($wrz->gewaesserbenutzungen) && !empty($wrz->gewaesserbenutzungen[0]) && !empty($wrz->gewaesserbenutzungen[0]->gewaesserbenutzungUmfang))
                     		 {
-                    		     echo '<a class="wasserrecht_display_table_cell" href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Gewaesserbenutzungen_Umfang'] . '&value_id=' . $wrz->gewaesserbenutzungen[0]->gewaesserbenutzungUmfang->getId() . '&operator_id==">' . $wrz->gewaesserbenutzungen[0]->gewaesserbenutzungUmfang->getUmfang() . '</a>';
+                    		     echo '<a class="wasserrecht_display_table_cell_white" href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Gewaesserbenutzungen_Umfang'] . '&value_id=' . $wrz->gewaesserbenutzungen[0]->gewaesserbenutzungUmfang->getId() . '&operator_id==">' . $wrz->gewaesserbenutzungen[0]->gewaesserbenutzungUmfang->getUmfang() . '</a>';
                     		 }
                     		 else
                     		 {
-                    		     echo '<div class="wasserrecht_display_table_cell"></div>';
+                    		     echo '<div class="wasserrecht_display_table_cell_white"></div>';
                     		 }
                     	?>
                     </div>
@@ -239,44 +239,59 @@ if(!empty($wrz))
                 </table>
                 
                 <div class="wasserrecht_display_table" style="margin-top: 20px; margin-left: 15px">
+                
                     <div class="wasserrecht_display_table_row">
                         <div class="wasserrecht_display_table_cell_caption">Erklärung oder Schätzung:</div>
                         <div class="wasserrecht_display_table_cell_spacer"></div>
-                        <select class="wasserrecht_display_table_cell" style="margin-left: 18px">
-                        	<option>Erklärung</option>
-                        	<option>Schätzung</option>
-                        </select>
+                        <div class="wasserrecht_display_table_cell_white">
+                            <select class="wasserrecht_display_table_cell_white">
+                            	<option>Erklärung</option>
+                            	<option>Schätzung</option>
+                            </select>
+                         </div>
                     </div>
-                </div>
-                
-                <div class="wasserrecht_display_table" style="margin-top: 30px; margin-left: 15px; width: 100%">
-                	<div class="wasserrecht_display_table_row">
-                		<input type="hidden" name="go" value="wasserentnahmeentgelt">
-    					<button class="wasserrecht_button" name="erklaerung_freigeben_<?php echo $wrz->getId(); ?>" value="erklaerung_freigeben_<?php echo $wrz->getId(); ?>" type="submit" id="erklaerung_freigeben_button_<?php echo $wrz->getId(); ?>">Erklärung freigeben</button>
+                    
+                    <div class="wasserrecht_display_table_row">
+        		   		<div class="wasserrecht_display_table_row_spacer"></div>
+        		   		<div class="wasserrecht_display_table_cell_spacer"></div>
+        		   		<div class="wasserrecht_display_table_row_spacer"></div>
+		   			</div>
+		   			
+		   			<div class="wasserrecht_display_table_row">
+		   				<div class="wasserrecht_display_table_cell_caption">
+                			<input type="hidden" name="go" value="wasserentnahmeentgelt">
+    						<button class="wasserrecht_button" name="erklaerung_freigeben_<?php echo $wrz->getId(); ?>" value="erklaerung_freigeben_<?php echo $wrz->getId(); ?>" type="submit" id="erklaerung_freigeben_button_<?php echo $wrz->getId(); ?>">Erklärung freigeben</button>
+               			</div>
+               			<div class="wasserrecht_display_table_cell_spacer"></div>
+        		   		<div class="wasserrecht_display_table_row_spacer"></div>
                		</div>
-                </div>
-                
-                 <div class="wasserrecht_display_table" style="margin-top: 20px; margin-left: 15px">
-                 	<div class="wasserrecht_display_table_row">
+               		
+               		<div class="wasserrecht_display_table_row">
+        		   		<div class="wasserrecht_display_table_row_spacer"></div>
+        		   		<div class="wasserrecht_display_table_cell_spacer"></div>
+        		   		<div class="wasserrecht_display_table_row_spacer"></div>
+		   			</div>
+		   			
+               		<div class="wasserrecht_display_table_row">
                 		<div class="wasserrecht_display_table_cell_caption">Datum Erklärung:</div>
-                        <div class="wasserrecht_display_table_cell_spacer_bottom"></div>
-                        <div class="wasserrecht_display_table_cell">
+                        <div class="wasserrecht_display_table_cell_spacer"></div>
+                        <div class="wasserrecht_display_table_cell_white">
                         	<?php
                                 echo $wrz->getErklaerungDatumHTML();
                     	    ?>
                         </div>
                     </div>
+                    
                     <div class="wasserrecht_display_table_row">
                 		<div class="wasserrecht_display_table_cell_caption">Bearbeiter Erklärung:</div>
-                        <div class="wasserrecht_display_table_cell_spacer_bottom"></div>
-                        <div class="wasserrecht_display_table_cell">
+                        <div class="wasserrecht_display_table_cell_spacer"></div>
+                        <div class="wasserrecht_display_table_cell_white">
                         <?php 
                             echo $this->user->Vorname . ' ' . $this->user->Name
                         ?>
                         </div>
                     </div>
-                 </div>
-    			
+                </div>
     		</form>
     </div>
     

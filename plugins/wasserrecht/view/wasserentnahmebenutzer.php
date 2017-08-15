@@ -31,11 +31,23 @@
 		              {
 		                  //echo $aufforderungWrz2->toString();
 		                  $aufforderungWrz2->insertAufforderungDatumAbsend();
+		                  
+		                  if(!empty($_POST['aufforderung']) && empty($aufforderungWrz2->getAufforderungDokument()))
+		                  {
+		                      //get a unique word file name
+		                      $uniqid = uniqid();
+		                      $word_file_name = $uniqid . ".docx";
+		                      $word_file = WASSERRECHT_DOCUMENT_PATH . $word_file_name;
+		                      
+		                      //write the word file
+		                      writeWordFile(PLUGINS . 'wasserrecht/templates/Anhang_IV.docx', $word_file);
+		                      
+		                      //write the document path to the database
+		                      $aufforderung_dokument = new Dokument($this);
+		                      $aufforderung_document_identifier = $aufforderung_dokument->createDocument('Test Name' . $aufforderungWrzId, $word_file_name);
+		                      $aufforderungWrz2->insertAufforderungDokument($aufforderung_document_identifier);
+		                  }
 		              }
-		          }
-		          elseif ($key === "aufforderung")
-		          {
-// 		              writeWordFile(PLUGINS . 'wasserrecht/templates/Anhang_IV.docx', PLUGINS . 'wasserrecht/results/test.docx');
 		          }
 		      }
 		  }
@@ -43,11 +55,14 @@
 		?>
 		
 		<form action="index.php" id="aufforderung_form" accept-charset="" method="POST">
-
-    		<fieldset class="fieldset1">
-    			<span>
-        			<label for="erhebungsjahr">Erhebungsjahr:</label>
-        			<select name="erhebungsjahr" onchange="setNewErhebungsJahr(this)">
+		
+			<div class="wasserrecht_display_table">
+			
+				<div class="wasserrecht_display_table_row">
+                        <div class="wasserrecht_display_table_cell_caption">Erhebungsjahr:</div>
+                        <div class="wasserrecht_display_table_cell_spacer"></div>
+                        <div class="wasserrecht_display_table_cell">
+                        	<select name="erhebungsjahr" onchange="setNewErhebungsJahr(this)">
             					<?php
             						$wasserrechtlicheZulassung = new WasserrechtlicheZulassungen($this);
             
@@ -77,11 +92,13 @@
                                         echo "<option>Keinen Eintrag in der Datenbank gefunden!</option>";
                                     }
             					?>
-            		</select>
-    			</span>
-    			<span>
-            		<label for="behoerde">
-            			<?php 
+            				</select>
+                        </div>
+                    </div>
+                    
+                <div class="wasserrecht_display_table_row">
+                        <div class="wasserrecht_display_table_cell_caption">
+                        	<?php 
             			     $getBehoerde = !empty(htmlspecialchars($_REQUEST['behoerde'])) ? htmlspecialchars($_REQUEST['behoerde']) : null;
             			     
             			     if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen)
@@ -91,50 +108,57 @@
             			     }
             			     
             			     echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Behoerde'] . '&value_id=' . $getBehoerde . '&operator_id==">Behörde: </a>';
-            			?>
-            		</label>
-            		<select name="behoerde" onchange="setNewBehoerde(this)">
-            				<?php
-            				
-            				if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen))
-            				{
-            				    $wasserrechtlicheZulassungen = $wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen;
-            				    
-            				    $behoerdeArray = array();
-            				    
-            				    //var_dump($wasserrechtlicheZulassungen);
-            				    foreach($wasserrechtlicheZulassungen AS $wrz)
-            				    {
-            				        if(!empty($wrz) && $getYear === $wrz->gueltigkeitsJahr)
-            				        {
-            				            if(!empty($wrz->behoerde))
-            				            {
-            				                if(!in_array($wrz->behoerde->toString(), $behoerdeArray))
-            				                {
-            				                    $behoerdeArray[]=$wrz->behoerde->toString();
-            				                    
-            				                    echo '<option value='. $wrz->behoerde->getId() . ' ' . ($wrz->behoerde->getId() === $getBehoerde ? "selected" : "") . '>' . $wrz->behoerde->getName() . "</option>";
-            				                }
-            				            }
-            				        }
-            				        else
-            				        {
-            				            echo "<option>Keinen Eintrag in der Datenbank gefunden!</option>";
-            				            break;
-            				        }
-            				    }
-            				    
-            				}
-            				
-            				?>
-            			</select>
-            	</span>
-            </fieldset>
-            
-            <fieldset class="fieldset2">
-        		<span>
-                	<label for="adressat">
-            			<?php 
+            			     ?>
+                        </div>
+                        <div class="wasserrecht_display_table_cell_spacer"></div>
+                        <div class="wasserrecht_display_table_cell">
+                        	<select name="behoerde" onchange="setNewBehoerde(this)">
+                				<?php
+                				
+                				if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen))
+                				{
+                				    $wasserrechtlicheZulassungen = $wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen;
+                				    
+                				    $behoerdeArray = array();
+                				    
+                				    //var_dump($wasserrechtlicheZulassungen);
+                				    foreach($wasserrechtlicheZulassungen AS $wrz)
+                				    {
+                				        if(!empty($wrz) && $getYear === $wrz->gueltigkeitsJahr)
+                				        {
+                				            if(!empty($wrz->behoerde))
+                				            {
+                				                if(!in_array($wrz->behoerde->toString(), $behoerdeArray))
+                				                {
+                				                    $behoerdeArray[]=$wrz->behoerde->toString();
+                				                    
+                				                    echo '<option value='. $wrz->behoerde->getId() . ' ' . ($wrz->behoerde->getId() === $getBehoerde ? "selected" : "") . '>' . $wrz->behoerde->getName() . "</option>";
+                				                }
+                				            }
+                				        }
+                				        else
+                				        {
+                				            echo "<option>Keinen Eintrag in der Datenbank gefunden!</option>";
+                				            break;
+                				        }
+                				    }
+                				    
+                				}
+                				
+                				?>
+            				</select>
+                 		</div>
+                 </div>
+                 
+                <div class="wasserrecht_display_table_row">
+					<div class="wasserrecht_display_table_row_spacer"></div>
+					<div class="wasserrecht_display_table_cell_spacer"></div>
+					<div class="wasserrecht_display_table_row_spacer"></div>
+                </div>
+                
+                <div class="wasserrecht_display_table_row">
+                	<div class="wasserrecht_display_table_cell_caption">
+                		<?php 
             			
             			    $getAdressat = !empty(htmlspecialchars($_REQUEST['adressat'])) ? htmlspecialchars($_REQUEST['adressat']) : null;
             			    $selectedAdressat = null;
@@ -147,8 +171,10 @@
             			
             			    echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Personen'] . '&value_personen_id=' . $getAdressat . '&operator_personen_id==">Adressat:</a>';
                         ?>
-            		</label>
-            		<select name="adressat" onchange="setNewAdressat(this)">
+                	</div>
+                	<div class="wasserrecht_display_table_cell_spacer"></div>
+                    <div class="wasserrecht_display_table_cell">
+                    	<select name="adressat" onchange="setNewAdressat(this)">
             				<?php
             				
             				if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen))
@@ -187,25 +213,43 @@
             				}
             				
             				?>
-            		</select>
-            	</span>
-            	<span>
-            		<label for="strasse">Straße:</label>
-            		<input type="text" name="strasse" readonly="readonly" value="<?php echo $selectedAdressat->getAdresseStrasse(); ?>" />
-            	</span>
-            	<span>
-            		<label for="hausnummer">Hausnummer:</label>
-            		<input type="text" name="hausnummer" readonly="readonly" value="<?php echo $selectedAdressat->getAdresseHausnummer(); ?>" />
-            	</span>
-            	<span>
-            		<label for="plz">PLZ:</label>
-            		<input type="text" name="plz" readonly="readonly" value="<?php echo $selectedAdressat->getAdressePLZ(); ?>" />
-            	</span>
-            	<span>
-            		<label for="ort">Ort:</label>
-            		<input type="text" name="ort" readonly="readonly" value="<?php echo $selectedAdressat->getAdresseOrt(); ?>" />
-            	</span>
-        	</fieldset>
+            			</select>
+                    </div>
+                </div>
+                
+                <div class="wasserrecht_display_table_row">
+                        <div class="wasserrecht_display_table_cell_caption">Straße:</div>
+                        <div class="wasserrecht_display_table_cell_spacer"></div>
+                        <div class="wasserrecht_display_table_cell">
+                      		<input type="text" name="strasse" readonly="readonly" value="<?php echo $selectedAdressat->getAdresseStrasse(); ?>" />
+                        </div>
+                </div>
+                
+                <div class="wasserrecht_display_table_row">
+                        <div class="wasserrecht_display_table_cell_caption">Hausnummer:</div>
+                        <div class="wasserrecht_display_table_cell_spacer"></div>
+                        <div class="wasserrecht_display_table_cell">
+                      		<input type="text" name="hausnummer" readonly="readonly" value="<?php echo $selectedAdressat->getAdresseHausnummer(); ?>" />
+                        </div>
+                </div>
+                
+                <div class="wasserrecht_display_table_row">
+                        <div class="wasserrecht_display_table_cell_caption">PLZ:</div>
+                        <div class="wasserrecht_display_table_cell_spacer"></div>
+                        <div class="wasserrecht_display_table_cell">
+                      		<input type="text" name="plz" readonly="readonly" value="<?php echo $selectedAdressat->getAdressePLZ(); ?>" />
+                        </div>
+                </div>
+                
+                 <div class="wasserrecht_display_table_row">
+                        <div class="wasserrecht_display_table_cell_caption">Ort:</div>
+                        <div class="wasserrecht_display_table_cell_spacer"></div>
+                        <div class="wasserrecht_display_table_cell">
+                      		<input type="text" name="ort" readonly="readonly" value="<?php echo $selectedAdressat->getAdresseOrt(); ?>" />
+                        </div>
+                </div>
+                
+            </div>
         	
     		<table id="wasserentnahmebenutzer_tabelle">
     			<tr>
@@ -308,20 +352,60 @@
         		?>
     		</table>
     		
-    		<p style="float: left; margin-top: 20px">
-    			<label for="aufforderung" style="float: left">Sammelaufforderung für ausgewählte Entnahmebenutzungen erstellen</label>
-    			<br />
-    <!-- 				<input type="hidden" name="post_action" value="aufforderung_date_insert" /> -->
-    				<input type="hidden" name="go" value="wasserentnahmebenutzer">
-    <!-- 				<input type="submit" name="go_plus" value="Starten"> -->
-    				<input type="submit" value="Aufforderung erstellen!" id="aufforderung_button" name="aufforderung" style="float: left; margin-top: 10px; font-size: 14px" />
-    		</p>
-    		
-    		<p style="float: left; margin-top: 100px">
-    			<label for="test" style="float: left;">Abgelegte Sammelaufforderungen</label>
-    <!-- 			<br /> -->
-    		</p>
-		
+    	   <div class="wasserrecht_display_table" style="margin-top: 10px;">
+				<div class="wasserrecht_display_table_row">
+                    <div class="wasserrecht_display_table_cell_caption">Sammelaufforderung für ausgewählte Entnahmebenutzungen erstellen:</div>
+                    <div class="wasserrecht_display_table_cell_spacer"></div>
+                    <div class="wasserrecht_display_table_row_spacer"></div>
+				</div>
+				<div class="wasserrecht_display_table_row">
+					<div class="wasserrecht_display_table_cell_caption">
+						<input type="hidden" name="go" value="wasserentnahmebenutzer">
+           				<input type="submit" value="Aufforderung erstellen!" id="aufforderung_button" name="aufforderung" />
+					</div>
+				</div>
+				<div class="wasserrecht_display_table_row">
+    		   		<div class="wasserrecht_display_table_row_spacer"></div>
+    		   		<div class="wasserrecht_display_table_cell_spacer"></div>
+    		   		<div class="wasserrecht_display_table_row_spacer"></div>
+		   		</div>
+		   		<div class="wasserrecht_display_table_row">
+           			<div class="wasserrecht_display_table_cell_caption">Abgelegte Sammelaufforderungen</div>
+				</div>
+				<?php 
+    				if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen))
+    				{
+    				    $wasserrechtlicheZulassungen = $wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen;
+    				    
+    				    foreach($wasserrechtlicheZulassungen AS $wrz)
+    				    {
+    				        if(!empty($wrz) && $getYear === $wrz->gueltigkeitsJahr)
+    				        {
+    				            if(empty($getBehoerde) || $getBehoerde === $wrz->behoerde->getId())
+    				            {
+    				                if(empty($getAdressat) || $getAdressat === $wrz->adressat->getId())
+    				                {
+    				                    if(!empty($wrz->aufforderung_dokument))
+    				                    {
+    				                    ?>
+        				                    <div class="wasserrecht_display_table_row">
+                            					<div class="wasserrecht_display_table_cell_caption">
+                            					<?php
+                            					   echo '<a href="' . $this->actual_link . WASSERRECHT_DOCUMENT_URL_PATH . $wrz->aufforderung_dokument->getPfad() . '" target="_blank">' . $wrz->aufforderung_dokument->getName() . '</a>';
+                            					?>
+                                       			</div>
+                            				</div>
+    				                    <?php 
+    				                    }   
+    				                }
+    				            }
+    				        }
+    				    }
+    				}
+				                    
+				
+				?>
+           </div>
 		</form>
 </div>
 

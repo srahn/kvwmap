@@ -8,6 +8,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	public $behoerde;
 	public $adressat;
 	public $anlagen;
+	public $aufforderung_dokument;
 	public $gewaesserbenutzungen;
 
 	public function find_gueltigkeitsjahre($gui) {
@@ -93,6 +94,17 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	            }
 	        }
 	        
+	        //get the 'Aufforderung Dokument'
+	        if(!empty($result->getAufforderungDokument()))
+	        {
+	            $dokument = new Dokument($gui);
+	            $dokumente = $dokument->find_where('id=' . $result->getAufforderungDokument());
+	            if(!empty($dokumente))
+	            {
+	                $result->aufforderung_dokument = $dokumente[0];
+	            }
+	        }
+	        
 	        //get the 'Aufforderung'
 	        // 					if(!empty($result->data['aufforderung']))
 	        // 					{
@@ -165,6 +177,18 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 // 	        );
 	}
 	
+	public function getAufforderungDokument() {
+	    return $this->data['aufforderung_dokument'];
+	}
+	
+	public function insertAufforderungDokument($id) {
+	    if(!empty($id))
+	    {
+	        $this->set('aufforderung_dokument', $id);
+	        $this->update();
+	    }
+	}
+	
 	public function getErklaerungDatum() {
 	    return $this->data['erklaerung_datum'];
 	}
@@ -177,7 +201,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	        return "<div>" . $datumErklaerung . "</div>";
 	    }
 	    
-	    return "<div style=\"color: red;\">Nicht erklärt<div>";
+	    return "<div style=\"color: red;\">Nicht erklärt</div>";
 	}
 	
 	public function insertErklaerungDatum($dateValue = NULL) {

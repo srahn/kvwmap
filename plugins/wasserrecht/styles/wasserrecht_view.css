@@ -54,65 +54,7 @@ div.tab div.active {
     to {opacity: 1;}
 }
 
-/* WASSERENTNAHMEBENUTZER */
-
-table#wasserentnahmebenutzer_tabelle {
-    width: 95%;
-/*     border: 1px solid black; */
-    border-collapse: collapse;
-    float: left;
-}
-
-#wasserentnahmebenutzer_tabelle th, #wasserentnahmebenutzer_tabelle td {
-/*     border: 1px solid black; */
-/*     border-collapse: collapse; */
-    padding: 3px;
-    text-align: left;
-    font-size: 12px;
-    background-color: white;
-}
-
-#wasserentnahmebenutzer_tabelle th {
-
-    background-color: inherit;
-}
-
-#wasserentnahmebenutzer_tabelle a{
-    font-size: 12px;
-}
-
-.fieldset1, .fieldset2 {
-    display: table; 
-    border: 0px solid black;
-    float: left;
-}
-
-.fieldset1 span, .fieldset2 span {
-    display: table-row;
-    text-align: left;
-}
-
-.fieldset1 label, .fieldset2 label {
-    display: table-cell;
-}
-
-.fieldset1 select, .fieldset1 input, .fieldset2 select, .fieldset2 input {
-    display: table-cell;
-    margin: 3px;
-    margin-left: 20px;
-    background-color: white;
-}
-
-.fieldset2 select, .fieldset2 input {
-    margin-left: 25px;
-}
-
-button {
-  font-size: 12px;
-  font-family: SourceSansPro1;
-}
-
-/* WASSERENTNAHMEENTGELT */
+/* ALLGEMEIN */
 .wasserrecht_display_table {
   display: table;
 /*   border-collapse: separate; */
@@ -146,10 +88,51 @@ button {
 .wasserrecht_display_table_cell {
   display:table-cell;
   padding:3px;
+  text-align: left;
+}
+
+.wasserrecht_display_table_cell_white {
+  display:table-cell;
+  padding:3px;
   background-color: white;
   text-align: left;
 }
 
+/* WASSERENTNAHMEBENUTZER */
+
+table#wasserentnahmebenutzer_tabelle {
+/*     width: 95%; */
+/*     border: 1px solid black; */
+    border-collapse: collapse;
+    float: left;
+    margin-top: 20px;
+    width: 1000px
+}
+
+#wasserentnahmebenutzer_tabelle th, #wasserentnahmebenutzer_tabelle td {
+/*     border: 1px solid black; */
+/*     border-collapse: collapse; */
+    padding: 3px;
+    text-align: left;
+    font-size: 12px;
+    background-color: white;
+}
+
+#wasserentnahmebenutzer_tabelle th {
+
+    background-color: inherit;
+}
+
+#wasserentnahmebenutzer_tabelle a{
+    font-size: 12px;
+}
+
+button {
+  font-size: 12px;
+  font-family: SourceSansPro1;
+}
+
+/* WASSERENTNAHMEENTGELT */
 .wasserrecht_table {
   float: left;
   width: 95%;
