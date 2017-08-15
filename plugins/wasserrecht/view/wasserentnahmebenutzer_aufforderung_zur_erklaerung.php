@@ -1,12 +1,14 @@
-<link rel="stylesheet" type="text/css" href="<?php echo $this->actual_link ?>/../plugins/wasserrecht/styles/wasserrecht_view.css">
-<script type="text/javascript" src="<?php echo $this->actual_link ?>/../plugins/wasserrecht/javascript/wasserrecht_view.js"></script>
+<?php 
+$tab1_id="wasserentnahmebenutzer_aufforderung_zur_erklaerung";
+$tab1_name="Aufforderung zur Erklärung";
+$tab1_active=true;
+$tab2_id="wasserentnahmebenutzer_entgeltbescheid";
+$tab2_name="Entgeltbescheid";
+$tab2_active=false;
+include_once ('includes/header.php'); 
+?>
 
-<div class="tab">
-	<div class="tablinks active" onclick="changeTab(event, 'aufforderung_zur_erklaerung')">Aufforderung zur Erklärung</div>
-	<div class="tablinks" onclick="changeTab(event, 'entgeltbescheid')">Entgeltbescheid</div>
-</div>
-
-<div id="aufforderung_zur_erklaerung" class="tabcontent" style="display: block">
+<div id="wasserentnahmebenutzer_aufforderung_zur_erklaerung" class="tabcontent" style="display: block">
 
 		<?php
 		
@@ -407,12 +409,6 @@
 				?>
            </div>
 		</form>
-</div>
-
-<div id="entgeltbescheid" class="tabcontent">
-
-	<h1>Entgeltbescheid</h1>
-
 </div>
 
 <?php

@@ -1,10 +1,12 @@
-<link rel="stylesheet" type="text/css" href="<?php echo $this->actual_link ?>/../plugins/wasserrecht/styles/wasserrecht_view.css">
-<script type="text/javascript" src="<?php echo $this->actual_link ?>/../plugins/wasserrecht/javascript/wasserrecht_view.js"></script>
-
-<div class="tab">
-	<div class="tablinks active" onclick="changeTab(event, 'erklaerung_der_entnahme')">Erklärung der Entnahme</div>
-	<div class="tablinks" onclick="changeTab(event, 'festsetzung')">Festsetzung</div>
-</div>
+<?php 
+$tab1_id="wasserentnahmeentgelt_erklaerung_der_entnahme";
+$tab1_name="Erklärung der Entnahme";
+$tab1_active=true;
+$tab2_id="wasserentnahmeentgelt_festsetzung";
+$tab2_name="Festsetzung";
+$tab2_active=false;
+include_once ('includes/header.php'); 
+?>
 
 <?php
 $wrz = null;
@@ -55,7 +57,7 @@ if(!empty($wrz))
     
     ?>
     
-    <div id="erklaerung_der_entnahme" class="tabcontent" style="display: block">
+    <div id="wasserentnahmeentgelt_erklaerung_der_entnahme" class="tabcontent" style="display: block">
     
     		<form action="index.php" id="erklaerung_form" accept-charset="" method="POST">
     		
@@ -293,12 +295,6 @@ if(!empty($wrz))
                     </div>
                 </div>
     		</form>
-    </div>
-    
-    <div id="festsetzung" class="tabcontent">
-    
-    	<h1>Festsetzung</h1>
-    
     </div>
     
     <?php

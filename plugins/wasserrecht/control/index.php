@@ -1,15 +1,8 @@
 <?php
 $this->goNotExecutedInPlugins = false;
 include_once(CLASSPATH . 'PgObject.php');
-// include_once(CLASSPATH . 'MyObject.php');
 include_once(CLASSPATH . 'Layer.php');
-// include_once(CLASSPATH . 'LayerClass.php');
-// include_once(CLASSPATH . 'LayerAttribute.php');
-// include_once(CLASSPATH . 'Style2Class.php');
-// include_once(CLASSPATH . 'Label2Class.php');
-// #include_once(CLASSPATH . 'LayerGroup.php');
-// include_once(CLASSPATH . 'data_import_export.php');
-include(PLUGINS . 'wasserrecht/config/config_sample.php');
+include_once(PLUGINS . 'wasserrecht/config/config_sample.php');
 include(PLUGINS . 'wasserrecht/model/WrPgObject.php');
 include(PLUGINS . 'wasserrecht/model/anlage.php');
 include(PLUGINS . 'wasserrecht/model/personen.php');
@@ -86,14 +79,42 @@ switch($this->go){
 	case 'wasserentnahmebenutzer': {
 	    $this->debug->write('wasserentnahmebenutzer called!', 4);
 	    
-	    $this->main = PLUGINS . 'wasserrecht/view/wasserentnahmebenutzer.php';
+	    $this->main = PLUGINS . 'wasserrecht/view/wasserentnahmebenutzer_aufforderung_zur_erklaerung.php';
+	    $this->output();
+	}	break;
+	
+	case 'wasserentnahmebenutzer_aufforderung_zur_erklaerung': {
+	    $this->debug->write('wasserentnahmebenutzer_aufforderung_zur_erklaerung called!', 4);
+	    
+	    $this->main = PLUGINS . 'wasserrecht/view/wasserentnahmebenutzer_aufforderung_zur_erklaerung.php';
+	    $this->output();
+	}	break;
+	
+	case 'wasserentnahmebenutzer_entgeltbescheid': {
+	    $this->debug->write('wasserentnahmebenutzer_entgeltbescheid called!', 4);
+	    
+	    $this->main = PLUGINS . 'wasserrecht/view/wasserentnahmebenutzer_entgeltbescheid.php';
 	    $this->output();
 	}	break;
 	
 	case 'wasserentnahmeentgelt': {
 	    $this->debug->write('wasserentnahmeentgelt called!', 4);
 	    
-	    $this->main = PLUGINS . 'wasserrecht/view/wasserentnahmeentgelt.php';
+	    $this->main = PLUGINS . 'wasserrecht/view/wasserentnahmeentgelt_erklaerung_der_entnahme.php';
+	    $this->output();
+	}	break;
+	
+	case 'wasserentnahmeentgelt_erklaerung_der_entnahme': {
+	    $this->debug->write('wasserentnahmeentgelt_erklaerung_der_entnahme called!', 4);
+	    
+	    $this->main = PLUGINS . 'wasserrecht/view/wasserentnahmeentgelt_erklaerung_der_entnahme.php';
+	    $this->output();
+	}	break;
+	
+	case 'wasserentnahmeentgelt_festsetzung': {
+	    $this->debug->write('wasserentnahmeentgelt_festsetzung called!', 4);
+	    
+	    $this->main = PLUGINS . 'wasserrecht/view/wasserentnahmeentgelt_festsetzung.php';
 	    $this->output();
 	}	break;
 
