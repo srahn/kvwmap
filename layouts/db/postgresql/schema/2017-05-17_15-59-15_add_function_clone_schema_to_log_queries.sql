@@ -11,7 +11,7 @@ BEGIN
     EXECUTE 'DROP SCHEMA IF EXISTS ' || dest_schema || ' CASCADE';
     EXECUTE 'CREATE SCHEMA ' || dest_schema ;
     EXECUTE 'CREATE TABLE ' || dest_schema || '.queries ( query text, created_at timestamp without time zone default current_timestamp )'; 
-    EXECUTE 'CREATE OR REPLACE FUNCTION ' || dest_schema || '.log_query() RETURNS TRIGGER AS $body$ BEGIN INSERT INTO ' || dest_schema || '.queries VALUES (replace(current_query(), '' alkis_neu.'', '' alkis.'')); RETURN NEW; END; $body$ LANGUAGE plpgsql';
+    EXECUTE 'CREATE OR REPLACE FUNCTION ' || dest_schema || '.log_query() RETURNS TRIGGER AS $body$ BEGIN INSERT INTO ' || dest_schema || '.queries VALUES (replace(current_query(), '' ' || dest_schema || '.'', '' ' || source_schema || '.'')); RETURN NEW; END; $body$ LANGUAGE plpgsql';
  
     FOR source_table IN
         SELECT TABLE_NAME::text FROM information_schema.TABLES WHERE table_schema = source_schema
