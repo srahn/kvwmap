@@ -42,6 +42,12 @@ class MyObject {
 	* @ return all objects
 	*/
 	function find_where($where, $order = '') {
+		$orders = array_map(
+			function ($order) {
+				return trim($order);
+			},
+			explode(',', replace_semicolon($order))
+		);
 		$sql = "
 			SELECT
 				*
