@@ -9,7 +9,11 @@ INSERT INTO wasserrecht.betriebszustand (name) VALUES ('WFBB');
 INSERT INTO wasserrecht.messtischblatt (nummer) VALUES (1445);
 INSERT INTO wasserrecht.wasserbuch (nummer) VALUES (3572);
 
-INSERT INTO wasserrecht.behoerde (name, abkuerzung, status) VALUES ('Untere Wasserbehoerde', 'uwb', DEFAULT);
+INSERT INTO wasserrecht.mengenbestimmung (name) VALUES ('Messung');
+INSERT INTO wasserrecht.mengenbestimmung (name) VALUES ('Berechnung');
+INSERT INTO wasserrecht.mengenbestimmung (name) VALUES ('Schätzung');
+
+INSERT INTO wasserrecht.behoerde (name, abkuerzung, status) VALUES ('Untere Wasserbehörde', 'uwb', DEFAULT);
 INSERT INTO wasserrecht.behoerde (name, abkuerzung, status) VALUES ('Staatliches Amt für Landwirtschaft und Umwelt', 'stalu', DEFAULT);
 
 INSERT INTO wasserrecht.archivnummer (nummer) VALUES (188);
@@ -61,37 +65,62 @@ INSERT INTO wasserrecht.wasserrechtliche_zulassungen_ungueltig_aufgrund (name) V
 INSERT INTO wasserrecht.wasserrechtliche_zulassungen_ungueltig_aufgrund (name) VALUES ('Verzicht');
 INSERT INTO wasserrecht.wasserrechtliche_zulassungen_ungueltig_aufgrund (name) VALUES ('Änderung');
 
-INSERT INTO wasserrecht.gewaesserbenutzungen_art (name,freitext,wgh) VALUES ('Entnehmen und Ableiten von Wasser aus oberirdischen Gewässern (§ 9 Satz 1 Nr. 1 WHG)', DEFAULT, DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art (name,freitext,wgh) VALUES ('Aufstauen und Absenken von oberirdischen Gewässern (§ 9 Satz 1 Nr. 2 WHG)', DEFAULT, DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art (name,freitext,wgh) VALUES ('Entnehmen fester Stoffe aus oberirdischen Gewässern... (§ 9 Satz 1 Nr. 3 WHG)', DEFAULT, DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art (name,freitext,wgh) VALUES ('Einbringen und Einleiten von Stoffen in Gewässer (§ 9 Satz 1 Nr. 4 WHG)', DEFAULT, DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art (name,freitext,wgh) VALUES ('Entnehmen, Zutagefördern, Zutageleiten und Ableiten von Grundwasser (§ 9 Satz 1 Nr. 5 WHG)', DEFAULT, DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art (name,freitext,wgh) VALUES ('Aufstauen, Absenken und Umleiten von Grundwasser  (§ 9 Satz 2 Nr. 1 WHG)', DEFAULT, DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art (name,freitext,wgh) VALUES ('Maßnahmen [...] die [...] nachteilige Veränderungen der Wasserbeschaffenheit herbei [...] führen (§ 9 Satz 2 Nr. 1 WHG)', DEFAULT, DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art (name,freitext,wgh) VALUES ('Entnahme von Wasser aus der Peene', DEFAULT, DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art (name,freitext,wgh) VALUES ('Entnahme von Oberflächenwasser mittels eines stationären Pumpenhauses aus der Peene', DEFAULT, DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art (name,freitext,wgh) VALUES ('Entnahme von Grundwasser', DEFAULT, DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art (name,freitext,wgh) VALUES ('Einleiten von industriellem Abwasser', DEFAULT, DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art (name,freitext,wgh) VALUES ('Entnahme und Zutageförderung von Grundwasser - Ziegeleiwiese Güstrow', DEFAULT, DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art (name,freitext,wgh) VALUES ('Grundwasserabsenkung', DEFAULT, DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art (name,freitext,wgh) VALUES ('Entnahme von Grundwasser aus 7 Brunnen', DEFAULT, DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art (name,freitext,wgh) VALUES ('Entnahme von Grundwasser aus zehn bestehenden Brunnen', DEFAULT, DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art (name,freitext,wgh) VALUES ('Entnahme von Grundwasser aus einem Brunnen', DEFAULT, DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art (name,freitext,wgh) VALUES ('Entnehmen von Grundwasser', DEFAULT, DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art (name,freitext,wgh) VALUES ('Entnahme und Zutageförderung von Grundwasser', DEFAULT, DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art (name,freitext,wgh) VALUES ('Entnahme von Grundwasser aus Brunnen', DEFAULT, DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art (name,freitext,wgh) VALUES ('Entnahme von Grundwasser aus 11 Bohrbrunnen', DEFAULT, DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art (name,freitext,wgh) VALUES ('Entnehmen von Oberflächenwasser ... über einen offenen Zuleitungskanal (Neuer Kanal) aus der Peene', DEFAULT, DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art (name,freitext,wgh) VALUES ('Entnahme von Oberflächengewässer mittels einer mobilen Pumpe', DEFAULT, DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art (name,freitext,wgh) VALUES ('Zutagefördern von Grundwasser aus vier Bohrbrunnen', DEFAULT, DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art (name,freitext,wgh) VALUES ('Entnahme von Oberflächenwasser aus dem Groß Wariner See', DEFAULT, DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art (name,freitext,wgh) VALUES ('Entnahme von Oberflächenwasser', DEFAULT, DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art (name,freitext,wgh) VALUES ('Entnehmen von Brauchwasser aus dem Hafenbecken B des Seehafens Rostock', DEFAULT, DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art (name,freitext,wgh) VALUES ('Grundwasserentnahme', DEFAULT, DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art (name,freitext,wgh) VALUES ('Entnahme und Eileiten von Oberflächenwasser', DEFAULT, DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art (name,freitext,wgh) VALUES ('test', DEFAULT, DEFAULT);
-INSERT INTO wasserrecht.gewaesserbenutzungen_art (name,freitext,wgh) VALUES ('Entnahme von Wasser aus dem Grundwasser', DEFAULT, DEFAULT);
+INSERT INTO wasserrecht.gewaesserbenutzungen_art (name) VALUES ('Entnehmen und Ableiten von Wasser aus oberirdischen Gewässern (§ 9 Satz 1 Nr. 1 WHG)');
+INSERT INTO wasserrecht.gewaesserbenutzungen_art (name) VALUES ('Aufstauen und Absenken von oberirdischen Gewässern (§ 9 Satz 1 Nr. 2 WHG)');
+INSERT INTO wasserrecht.gewaesserbenutzungen_art (name) VALUES ('Entnehmen fester Stoffe aus oberirdischen Gewässern... (§ 9 Satz 1 Nr. 3 WHG)');
+INSERT INTO wasserrecht.gewaesserbenutzungen_art (name) VALUES ('Einbringen und Einleiten von Stoffen in Gewässer (§ 9 Satz 1 Nr. 4 WHG)');
+INSERT INTO wasserrecht.gewaesserbenutzungen_art (name) VALUES ('Entnehmen, Zutagefördern, Zutageleiten und Ableiten von Grundwasser (§ 9 Satz 1 Nr. 5 WHG)');
+INSERT INTO wasserrecht.gewaesserbenutzungen_art (name) VALUES ('Aufstauen, Absenken und Umleiten von Grundwasser  (§ 9 Satz 2 Nr. 1 WHG)');
+/*
+INSERT INTO wasserrecht.gewaesserbenutzungen_art (name) VALUES ('Maßnahmen [...] die [...] nachteilige Veränderungen der Wasserbeschaffenheit herbei [...] führen (§ 9 Satz 2 Nr. 1 WHG)');
+INSERT INTO wasserrecht.gewaesserbenutzungen_art (name) VALUES ('Entnahme von Wasser aus der Peene');
+INSERT INTO wasserrecht.gewaesserbenutzungen_art (name) VALUES ('Entnahme von Oberflächenwasser mittels eines stationären Pumpenhauses aus der Peene');
+INSERT INTO wasserrecht.gewaesserbenutzungen_art (name) VALUES ('Entnahme von Grundwasser');
+INSERT INTO wasserrecht.gewaesserbenutzungen_art (name) VALUES ('Einleiten von industriellem Abwasser');
+INSERT INTO wasserrecht.gewaesserbenutzungen_art (name) VALUES ('Entnahme und Zutageförderung von Grundwasser - Ziegeleiwiese Güstrow');
+INSERT INTO wasserrecht.gewaesserbenutzungen_art (name) VALUES ('Grundwasserabsenkung');
+INSERT INTO wasserrecht.gewaesserbenutzungen_art (name) VALUES ('Entnahme von Grundwasser aus 7 Brunnen');
+INSERT INTO wasserrecht.gewaesserbenutzungen_art (name) VALUES ('Entnahme von Grundwasser aus zehn bestehenden Brunnen');
+INSERT INTO wasserrecht.gewaesserbenutzungen_art (name) VALUES ('Entnahme von Grundwasser aus einem Brunnen');
+INSERT INTO wasserrecht.gewaesserbenutzungen_art (name) VALUES ('Entnehmen von Grundwasser');
+INSERT INTO wasserrecht.gewaesserbenutzungen_art (name) VALUES ('Entnahme und Zutageförderung von Grundwasser');
+INSERT INTO wasserrecht.gewaesserbenutzungen_art (name) VALUES ('Entnahme von Grundwasser aus Brunnen');
+INSERT INTO wasserrecht.gewaesserbenutzungen_art (name) VALUES ('Entnahme von Grundwasser aus 11 Bohrbrunnen');
+INSERT INTO wasserrecht.gewaesserbenutzungen_art (name) VALUES ('Entnehmen von Oberflächenwasser ... über einen offenen Zuleitungskanal (Neuer Kanal) aus der Peene');
+INSERT INTO wasserrecht.gewaesserbenutzungen_art (name) VALUES ('Entnahme von Oberflächengewässer mittels einer mobilen Pumpe');
+INSERT INTO wasserrecht.gewaesserbenutzungen_art (name) VALUES ('Zutagefördern von Grundwasser aus vier Bohrbrunnen');
+INSERT INTO wasserrecht.gewaesserbenutzungen_art (name) VALUES ('Entnahme von Oberflächenwasser aus dem Groß Wariner See');
+INSERT INTO wasserrecht.gewaesserbenutzungen_art (name) VALUES ('Entnahme von Oberflächenwasser');
+INSERT INTO wasserrecht.gewaesserbenutzungen_art (name) VALUES ('Entnehmen von Brauchwasser aus dem Hafenbecken B des Seehafens Rostock');
+INSERT INTO wasserrecht.gewaesserbenutzungen_art (name) VALUES ('Grundwasserentnahme');
+INSERT INTO wasserrecht.gewaesserbenutzungen_art (name) VALUES ('Entnahme und Eileiten von Oberflächenwasser');
+INSERT INTO wasserrecht.gewaesserbenutzungen_art (name) VALUES ('Entnahme von Wasser aus dem Grundwasser');
+*/
 
+INSERT INTO wasserrecht.gewaesserbenutzungen_art_benutzung (name, abkuerzung) VALUES ('Grundwasser', 'GW');
+INSERT INTO wasserrecht.gewaesserbenutzungen_art_benutzung (name, abkuerzung) VALUES ('Oberflächenwasser', 'OW');
+
+INSERT INTO wasserrecht.gewaesserbenutzungen_zweck (nummer, name) VALUES (1, 'Beregnung auf landwirtschaftlich genutzten Flächen');
+INSERT INTO wasserrecht.gewaesserbenutzungen_zweck (nummer, name) VALUES (2, 'Bewässern von öffentlichen Plätzen, Grünanlagen');
+INSERT INTO wasserrecht.gewaesserbenutzungen_zweck (nummer, name) VALUES (3, 'Tränken von Vieh auf der Hofstelle');
+INSERT INTO wasserrecht.gewaesserbenutzungen_zweck (nummer, name) VALUES (4, 'Säubern von Unterkünften und Stallungen');
+INSERT INTO wasserrecht.gewaesserbenutzungen_zweck (nummer, name) VALUES (5, 'Betrieb, Waschen und Reinigen techn. Anlagen und Maschinen');
+INSERT INTO wasserrecht.gewaesserbenutzungen_zweck (nummer, name) VALUES (6, 'Bewässerung nur der Hof- und Hausgärten (Nicht auf Feldern!)');
+INSERT INTO wasserrecht.gewaesserbenutzungen_zweck (nummer, name) VALUES (7, 'Kühlwassernutzung');
+INSERT INTO wasserrecht.gewaesserbenutzungen_zweck (nummer, name) VALUES (8, 'Zwecke der Fischerei');
+INSERT INTO wasserrecht.gewaesserbenutzungen_zweck (nummer, name) VALUES (9, 'Wasserkraftnutzung');
+INSERT INTO wasserrecht.gewaesserbenutzungen_zweck (nummer, name) VALUES (10, 'gewerbliche Nutzung (wenn also keine Gärtnerei betrieben wird)');
+INSERT INTO wasserrecht.gewaesserbenutzungen_zweck (nummer, name) VALUES (11, 'Wasserversorgung betriebszugehöriger Personen auf dem Hof');
+INSERT INTO wasserrecht.gewaesserbenutzungen_zweck (nummer, name) VALUES (12, 'auch außerhalb des Haushalts des Betriebsinhabers wohnen');
+INSERT INTO wasserrecht.gewaesserbenutzungen_zweck (nummer, name) VALUES (13, 'öffentliche Trinkwasserversorgung');
+INSERT INTO wasserrecht.gewaesserbenutzungen_zweck (nummer, name) VALUES (14, 'Wärmegewinnung');
+INSERT INTO wasserrecht.gewaesserbenutzungen_zweck (nummer, name) VALUES (15, 'Heilquellnutzung');
+INSERT INTO wasserrecht.gewaesserbenutzungen_zweck (nummer, name) VALUES (16, 'Brauchwasserversorgung');
+INSERT INTO wasserrecht.gewaesserbenutzungen_zweck (nummer, name) VALUES (17, 'Abfüllen von Mineralwasser');
+INSERT INTO wasserrecht.gewaesserbenutzungen_zweck (nummer, name) VALUES (18, 'Viehtränke außerhalb der Hofstelle');
+INSERT INTO wasserrecht.gewaesserbenutzungen_zweck (nummer, name) VALUES (19, 'Anmachwasser für Pflanzenschutzmittel');
+INSERT INTO wasserrecht.gewaesserbenutzungen_zweck (nummer, name) VALUES (20, 'Sonstiges');
+/*
 INSERT INTO wasserrecht.gewaesserbenutzungen_zweck (name,freitext) VALUES ('Trink- und Brauchwasserversorgung für Aquakultur nicht nach § 16 Satz 2 Nummer 5', DEFAULT);
 INSERT INTO wasserrecht.gewaesserbenutzungen_zweck (name,freitext) VALUES ('Öffentliche Trink- und Brauchwasserversorgung', DEFAULT);
 INSERT INTO wasserrecht.gewaesserbenutzungen_zweck (name,freitext) VALUES ('Bewässerung von öffentlichen Plätzen', DEFAULT);
@@ -117,6 +146,7 @@ INSERT INTO wasserrecht.gewaesserbenutzungen_zweck (name,freitext) VALUES ('Erla
 INSERT INTO wasserrecht.gewaesserbenutzungen_zweck (name,freitext) VALUES ('Erlaubnisfreihe Benutzung nach § 32 Satz 2 LWaG nicht gewerblicher Gartenbau', DEFAULT);
 INSERT INTO wasserrecht.gewaesserbenutzungen_zweck (name,freitext) VALUES ('Erlaubnisfreihe Benutzung nach § 32 Satz 2 LWaG Erhaltung der Bodenfruchtbarkeit', DEFAULT);
 INSERT INTO wasserrecht.gewaesserbenutzungen_zweck (name,freitext) VALUES ('Heilquellennutzung nach § 16 Satz 2 Nummer 2 LWaG', DEFAULT);
+*/
 
 INSERT INTO wasserrecht.gewaesserbenutzungen_wee_satz (jahr,satz_ow,satz_gw) VALUES ('2010-01-01', 0.02, 0.05);
 INSERT INTO wasserrecht.gewaesserbenutzungen_wee_satz (jahr,satz_ow,satz_gw) VALUES ('2011-01-01', 0.02, 0.05);
@@ -130,6 +160,9 @@ INSERT INTO wasserrecht.gewaesserbenutzungen_wee_satz (jahr,satz_ow,satz_gw) VAL
 INSERT INTO wasserrecht.gewaesserbenutzungen_wee_satz (jahr,satz_ow,satz_gw) VALUES ('2018-01-01', 0.02, 0.10);
 INSERT INTO wasserrecht.gewaesserbenutzungen_wee_satz (jahr,satz_ow,satz_gw) VALUES ('2019-01-01', 0.02, 0.10);
 INSERT INTO wasserrecht.gewaesserbenutzungen_wee_satz (jahr,satz_ow,satz_gw) VALUES ('2020-01-01', 0.02, 0.10);
+
+INSERT INTO wasserrecht.teilgewaesserbenutzungen_art (name) VALUES ('Erklärung');
+INSERT INTO wasserrecht.teilgewaesserbenutzungen_art (name) VALUES ('Schätzung');
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 INSERT INTO wasserrecht.koerperschaft_art (name) VALUES ('Trinkwasser');

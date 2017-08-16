@@ -87,6 +87,11 @@ CREATE TABLE wasserrecht.konto(
 	kassenzeichen varchar(255)
 ) WITH OIDS;
 
+CREATE TABLE wasserrecht.mengenbestimmung(
+	id serial PRIMARY KEY,
+	name varchar(255)
+) WITH OIDS;
+
 --PERSONEN
 CREATE TABLE wasserrecht.personen_klasse(
 	id serial PRIMARY KEY,
@@ -256,15 +261,19 @@ CREATE TABLE wasserrecht.wasserrechtliche_zulassungen(
 --GEWÄSSERBENUTZUNGEN
 CREATE TABLE wasserrecht.gewaesserbenutzungen_art(
 	id serial PRIMARY KEY,
+	name varchar(255)
+)WITH OIDS;
+
+CREATE TABLE wasserrecht.gewaesserbenutzungen_art_benutzung(
+	id serial PRIMARY KEY,
 	name varchar(255),
-	freitext text,
-	wgh integer
+	abkuerzung varchar(100)
 )WITH OIDS;
 
 CREATE TABLE wasserrecht.gewaesserbenutzungen_zweck(
 	id serial PRIMARY KEY,
-	name varchar(255),
-	freitext text
+	nummer integer,
+	name varchar(255)
 )WITH OIDS;
 
 CREATE TABLE wasserrecht.gewaesserbenutzungen_umfang(
@@ -307,6 +316,7 @@ CREATE TABLE wasserrecht.gewaesserbenutzungen_lage(
 
 CREATE TABLE wasserrecht.gewaesserbenutzungen_wee_satz(
 	id serial PRIMARY KEY,
+	name varchar(255),
 	jahr date,
 	satz_ow numeric,
 	satz_gw numeric
@@ -315,6 +325,7 @@ CREATE TABLE wasserrecht.gewaesserbenutzungen_wee_satz(
 CREATE TABLE wasserrecht.gewaesserbenutzungen(
 	id serial PRIMARY KEY,
 	kennnummer varchar(255),
+	freitext_art text,
 	art integer REFERENCES wasserrecht.gewaesserbenutzungen_art(id),
 	wasserbuch integer REFERENCES wasserrecht.wasserbuch(id),
 	zweck integer REFERENCES wasserrecht.gewaesserbenutzungen_zweck(id),
@@ -322,6 +333,26 @@ CREATE TABLE wasserrecht.gewaesserbenutzungen(
 	gruppe_wee boolean,
 	lage integer REFERENCES wasserrecht.gewaesserbenutzungen_lage(id),
 	wasserrechtliche_zulassungen integer NOT NULL REFERENCES wasserrecht.wasserrechtliche_zulassungen(id)
+)WITH OIDS;
+
+CREATE TABLE wasserrecht.teilgewaesserbenutzungen_art(
+	id serial PRIMARY KEY,
+	name varchar(255)
+)WITH OIDS;
+
+CREATE TABLE wasserrecht.teilgewaesserbenutzungen(
+	id serial PRIMARY KEY,
+	art integer REFERENCES wasserrecht.gewaesserbenutzungen_art(id),
+	zweck integer REFERENCES wasserrecht.gewaesserbenutzungen_zweck(id),
+	umfang integer REFERENCES wasserrecht.gewaesserbenutzungen_umfang(id),
+	wiedereinleitung_nutzer boolean,
+	wiedereinleitung_bearbeiter boolean,
+	mengenbestimmung integer REFERENCES wasserrecht.mengenbestimmung(id),
+	art_benutzung integer REFERENCES wasserrecht.gewaesserbenutzungen_art_benutzung(id),
+	befreiungstatbestaende boolean,
+	entgeltsatz integer REFERENCES wasserrecht.gewaesserbenutzungen_wee_satz(id),
+	teilgewaesserbenutzungen_art integer REFERENCES wasserrecht.teilgewaesserbenutzungen_art(id),
+	gewaesserbenutzungen integer NOT NULL REFERENCES wasserrecht.gewaesserbenutzungen(id)
 )WITH OIDS;
 
 ------------------------------------------
