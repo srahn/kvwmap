@@ -76,4 +76,7 @@
 	$strClusterMaxdistance="Cluster:Maxdistance";
 	$strTriggerFunction="Triggerfunktion";
 	$strClassification="Klassifizierung";
+	$strWidth="Breite";
+	$strHeight="Höhe";
+	$strImagefile="Grafikdatei";
 ?>  

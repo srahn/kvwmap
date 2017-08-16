@@ -287,7 +287,7 @@ $legendheight = $this->map->height + 20;
 					<td>&nbsp;<span class="fett">Maßstab&nbsp;1:&nbsp;</span><input type="text" id="scale" name="nScale" size="5" value="<?php echo round($this->map->scaledenom); ?>"></td>
 				<? if($this->user->rolle->runningcoords != '0'){ ?>
 				<td width="100px"><span class="fett">&nbsp;<?php echo $this->strCoordinates; ?>:</span>&nbsp;</td>
-				<td><input type="text" style="border:0px;background-color:transparent" name="runningcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?></td>
+				<td><input type="text" style="width: 200px;border:0px;background-color:transparent" name="runningcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?></td>
 				<? }else{ ?>
 				<td colspan="2"></td>
 				<? } ?>

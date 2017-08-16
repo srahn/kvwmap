@@ -242,7 +242,7 @@ class database {
 					'400', '150',
 					'1',
 					'0',
-					'0'
+					'0',
 					NULL
 				FROM
 					stelle
@@ -301,22 +301,43 @@ class database {
 		$rolle->setGroups($new_user_id, array($gast_stelle), $layers['ID'], '0');
 
 		# Menüeinstellungen der Rolle eintragen
+		if ($default_user_id > 0) {
+			# Menueeinstellungen von Defaultrolle abfragen
+			$menue2rolle_select_sql = "
+				SELECT " .
+					$new_user_id . ", " .
+					$gast_stelle . ",
+					`menue_id`,
+					`status`
+				FROM
+					`u_menue2rolle`
+				WHERE
+					`stelle_id` = " . $gast_stelle . " AND
+					`user_id` = " . $default_user_id . "
+			";
+		}
+		else {
+			# Menueeinstellungen mit status 0 von stelle abfragen
+			$menue2rolle_select_sql = "
+				SELECT " .
+					$new_user_id . ", " .
+					$gast_stelle . ",
+					`menue_id`,
+					'0'
+				FROM
+					`u_menue2stelle`
+				WHERE
+					`stelle_id` = " . $gast_stelle . "
+			";
+		}
 		$sql = "
 			INSERT INTO `u_menue2rolle` (
 				`user_id`,
 				`stelle_id`,
 				`menue_id`,
 				`status`
-			)
-			SELECT " .
-				$new_user_id . ", " .
-				$gast_stelle . ",
-				menue_id,
-				'0'
-			FROM
-				u_menue2stelle
-			WHERE
-				stelle_id = " . $gast_stelle . "
+			) " .
+			$menue2rolle_select_sql . "
 		";
 		#echo '<br>sql: ' . $sql;
 		$query = mysql_query($sql);
@@ -407,6 +428,32 @@ class database {
 			";
 		}
 		#echo '<br>sql: ' . $sql;
+		$query = mysql_query($sql);
+
+		# Gespeicherte Themeneinstellungen von default user übernehmen
+		if ($default_user_id > 0) {
+			$sql = "
+				INSERT INTO `rolle_saved_layers` (
+					`user_id`,
+					`stelle_id`,
+					`name`,
+					`layers`,
+					`query`
+				)
+				SELECT " .
+					$new_user_id . "," .
+					$gast_stelle . ",
+					`name`,
+					`layers`,
+					`query`
+				FROM
+					`rolle_saved_layers`
+				WHERE
+					`user_id` = " . $default_user_id . " AND
+					`stelle_id` = " . $gast_stelle . "
+			";
+		}
+		#echo '<br>Sql: ' . $sql;
 		$query = mysql_query($sql);
 
 		$gast['username'] = $loginname;

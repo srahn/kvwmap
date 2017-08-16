@@ -26,6 +26,13 @@
 # stefan.rahn@gdi-service.de                                      #
 ###################################################################
 
+function compare_migration_filenames($a, $b){
+	if ($a['file'] == $b['file']) {
+			return 0;
+	}
+	return ($a['file'] < $b['file']) ? -1 : 1;
+}
+
 class administration{
 
 	var $database;
@@ -111,38 +118,22 @@ class administration{
 	
 	function update_databases(){
 		foreach($this->migrations_to_execute['mysql'] as $component => $component_migration){
-			if($component == 'kvwmap')$prepath = LAYOUTPATH; else $prepath = PLUGINS.$component.'/';
 			foreach($component_migration as $file){
-				$filepath = $prepath.'db/mysql/schema/'.$file;
-				$queryret = $this->database->exec_file($filepath, NULL, NULL);
-				if($queryret[0]){
-					echo $queryret[1].'<br>Fehler beim Ausführen von migration-Datei: '.$filepath.'<br>';
-				}
-				else{
-					$sql = "INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES ('".$component."', 'mysql', '".$file."');";
-					$queryret=$this->database->execSQL($sql,0, 0);
-				}				
+				$migration['component'] = $component;
+				$migration['file'] = $file;
+				$my_migrations[] = $migration;
 			}
 		}
-		foreach($this->migrations_to_execute['postgresql'] as $component => $component_migration){
-			if($component == 'kvwmap')$prepath = LAYOUTPATH; else $prepath = PLUGINS.$component.'/';
+		foreach($this->migrations_to_execute['postgresql'] as $component => $component_migration){			
 			foreach($component_migration as $file){
-				$filepath = $prepath.'db/postgresql/schema/'.$file;
-				$sql = file_get_contents($filepath);
-				if ($sql != '') {
-					$sql = str_replace('$EPSGCODE_ALKIS', EPSGCODE_ALKIS, $sql);
-					$sql = str_replace(':alkis_epsg', EPSGCODE_ALKIS, $sql);
-					$queryret=$this->pgdatabase->execSQL($sql,0, 0);
-					if($queryret[0]){
-						echo $queryret[1].'<br>Fehler beim Ausführen von migration-Datei: '.$filepath.'<br>';
-					}
-					else{
-						$sql = "INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES ('".$component."', 'postgresql', '".$file."');";
-						$queryret=$this->database->execSQL($sql,0, 0);
-					}
-				}
+				$migration['component'] = $component;
+				$migration['file'] = $file;
+				$pg_migrations[] = $migration;
 			}
 		}
+		$this->execute_migrations('postgresql', $pg_migrations);
+		$this->execute_migrations('mysql', $my_migrations);
+		
 		foreach($this->seeds_to_execute['mysql'] as $component => $component_seed){
 			$prepath = PLUGINS.$component.'/';
 			foreach($component_seed as $file){
@@ -156,6 +147,30 @@ class administration{
 					$sql = "INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES ('".$component."', 'mysql', '".$file."');";
 					$queryret=$this->database->execSQL($sql,0, 0);
 				}				
+			}
+		}
+	}
+
+	function execute_migrations($database_type, $migrations){
+		if($migrations != NULL){
+			usort($migrations, 'compare_migration_filenames');		# sortieren, damit die Migrationen in der richtigen Reihenfolge ausgeführt werden
+			foreach($migrations as $migration){
+				$component = $migration['component'];
+				$file = $migration['file'];
+				if($component == 'kvwmap')$prepath = LAYOUTPATH; else $prepath = PLUGINS.$component.'/';
+				$filepath = $prepath.'db/'.$database_type.'/schema/'.$file;			
+				$sql = file_get_contents($filepath);
+				if($sql != ''){
+					if($database_type == 'mysql')$queryret = $this->database->exec_file($filepath, NULL, NULL);		# mysql
+					else $queryret=$this->pgdatabase->execSQL($sql,0, 0);																					# postgresql
+					if($queryret[0]){
+						echo $queryret[1].'<br>Fehler beim Ausführen von migration-Datei: '.$filepath.'<br>';
+					}
+					else{
+						$sql = "INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES ('".$component."', '".$database_type."', '".$file."');";
+						$queryret=$this->database->execSQL($sql,0, 0);
+					}
+				}
 			}
 		}
 	}

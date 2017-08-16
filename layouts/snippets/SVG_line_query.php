@@ -78,6 +78,7 @@ $svg .= $basicfunctions;				# Basisfunktionen
 $svg .= $SVGvars_navscript;			# Funktionen zur Navigation
 $svg .= $linefunctions;					# Funktionen zum Zeichnen einer Linie
 $svg .= $vertex_catch_functions;# Punktfangfunktionen
+$svg .= $flurstqueryfunctions;	# Funktionen zum Hinzufügen und Entfernen von Polygonen
 $svg .= $coord_input_functions;	# Funktionen zum Eingeben von Koordinaten
 $svg .= $transformfunctions;		# Funktionen zum Transformieren (Verschieben, ...) der Geometrie
 $svg .= $measurefunctions;
@@ -96,7 +97,9 @@ $svg .= $canvaswithall;
 $svg .= '<g id="buttons" cursor="pointer" transform="scale(1.1)">';
 $svg .= $navbuttons;
 $svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate(0 26)">';
-$svg .= linebuttons($strUndo, $strDeleteLine, $strDrawLine, $strDelLine, $strSplitLine, $strReverse);
+$svg .= linebuttons($strUndo, $strDeleteLine, $strDrawLine, $strDelLine);
+$svg .= flurstquerybuttons();
+$svg .= linebuttons2($strSplitLine, $strReverse);
 $svg .= transform_buttons($strMoveGeometry);
 $svg .= vertex_edit_buttons($strCornerPoint);
 $svg .= coord_input_buttons();

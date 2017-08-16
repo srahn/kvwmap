@@ -160,6 +160,8 @@
         $GUI->formvars['newpath'] = transformCoordsSVG($nachweis->document['svg_umring']);
         $GUI->formvars['newpathwkt'] = $nachweis->document['wkt_umring'];
         $GUI->formvars['pathwkt'] = $GUI->formvars['newpathwkt'];
+				$GUI->formvars['firstpoly'] = 'true';
+				$this->geomload = true;			# Geometrie wird das erste Mal geladen, deshalb nicht in den Weiterzeichnenmodus gehen
       }
       else{
       	showAlert('Achtung! Nachweis hat noch keine Geometrie!');
@@ -342,18 +344,23 @@
 	};
 
 	$this->getNachweisParameter = function($stelle_id, $user_id) use ($GUI){
-		$sql ='SELECT *,CONCAT(showffr,showkvz,showgn,showan) AS art_einblenden';
-		$sql.=',CONCAT(markffr,markkvz,markgn) AS art_markieren FROM rolle_nachweise';
+		$sql ='SELECT user_id FROM rolle_nachweise';
 		$sql.=' WHERE user_id='.$user_id.' AND stelle_id='.$stelle_id;
 		$GUI->debug->write("<p>file:users.php class:user->getNachweisParameter - Abfragen der aktuellen Parameter für die Nachweissuche<br>".$sql,4);
 		$query=mysql_query($sql,$GUI->database->dbConn);
 		if ($query==0) { $GUI->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		if (mysql_num_rows($query)==0) {
-			echo 'Der User mit der ID:'.$user_id.' fehlt mit der Stellen_ID:'.$stelle_id.' in der Tabelle rolle_nachweise.';
+			$sql ='INSERT INTO rolle_nachweise ';
+			$sql.='SET user_id='.$user_id.', stelle_id='.$stelle_id;
+			$GUI->debug->write("<p>file:users.php class:user->getNachweisParameter - Abfragen der aktuellen Parameter für die Nachweissuche<br>".$sql,4);
+			$query=mysql_query($sql,$GUI->database->dbConn);
 		}
-		else {
-			$rs=mysql_fetch_assoc($query);
-		}
+		$sql ='SELECT *,CONCAT(showffr,showkvz,showgn,showan) AS art_einblenden';
+		$sql.=',CONCAT(markffr,markkvz,markgn) AS art_markieren FROM rolle_nachweise';
+		$sql.=' WHERE user_id='.$user_id.' AND stelle_id='.$stelle_id;
+		$GUI->debug->write("<p>file:users.php class:user->getNachweisParameter - Abfragen der aktuellen Parameter für die Nachweissuche<br>".$sql,4);
+		$query=mysql_query($sql,$GUI->database->dbConn);
+		$rs=mysql_fetch_assoc($query);
 		return $rs;
 	};
 	

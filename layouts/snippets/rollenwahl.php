@@ -30,6 +30,7 @@ Text_fontsizegle=["<? echo $strHelp; ?>:","<? echo $strHintFontSizeGLE; ?>"];
 Text_highlight=["<? echo $strHelp; ?>:","<? echo $strHintHighlight; ?>"];
 Text_histtimestamp=["<? echo $strHelp; ?>:","<? echo $strHinthist_timestamp; ?>"];
 Text_showlayeroptions=["<? echo $strHelp; ?>:","<? echo $strHintShowLayerOptions; ?>"];
+Text_menue_buttons=["<? echo $strHelp; ?>:","<? echo $strHintMenueButtons; ?>"];
 
 	function start1(){
 		document.GUI.submit();
@@ -108,22 +109,12 @@ Text_showlayeroptions=["<? echo $strHelp; ?>:","<? echo $strHintShowLayerOptions
 					</tr>
 					<tr>
 						<td class="rollenwahl-option-header">
-							<? echo $strMenuAutoClose; ?>:
-						</td>
-						<td class="rollenwahl-option-data">
-							<input name="menu_auto_close" type="checkbox" value="1" <? if($this->user->rolle->menu_auto_close == '1'){echo 'checked="true"';} ?> >
-							<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_menueautoclose, Style[0], document.getElementById('Tip7'))" onmouseout="htm()">
-							<div id="Tip7" style="visibility:hidden;position:absolute;z-index:1000;"></div>
-						</td>
-					</tr>
-					<tr>
-						<td class="rollenwahl-option-header">
 							<? echo $strVisuallyImpaired; ?>:
 						</td>
 						<td class="rollenwahl-option-data">
 							<input name="visually_impaired" type="checkbox" value="1" <? if($this->user->rolle->visually_impaired == '1') { echo 'checked="true"';} ?> >
-							<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_visuallyimpaired, Style[0], document.getElementById('Tip8'))" onmouseout="htm()">
-							<div id="Tip8" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+							<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_visuallyimpaired, Style[0], document.getElementById('Tip24'))" onmouseout="htm()">
+							<div id="Tip24" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 						</td>
 					</tr>
 				</table>
@@ -184,6 +175,26 @@ Text_showlayeroptions=["<? echo $strHelp; ?>:","<? echo $strHintShowLayerOptions
 							<input name="showlayeroptions" type="checkbox" value="1" <? if($this->user->rolle->showlayeroptions == '1') { echo 'checked="true"'; } ?> >
 							<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_showlayeroptions, Style[0], document.getElementById('Tip22'))" onmouseout="htm()">
 							<div id="Tip22" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+						</td>
+					</tr>
+					<tr>
+						<td class="rollenwahl-option-header">
+							<? echo $strMenuAutoClose; ?>:
+						</td>
+						<td class="rollenwahl-option-data">
+							<input name="menu_auto_close" type="checkbox" value="1" <? if($this->user->rolle->menu_auto_close == '1'){echo 'checked="true"';} ?> >
+							<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_menueautoclose, Style[0], document.getElementById('Tip7'))" onmouseout="htm()">
+							<div id="Tip7" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+						</td>
+					</tr>
+					<tr>
+						<td class="rollenwahl-option-header">
+							<? echo $strMenueButtons; ?>:
+						</td>
+						<td class="rollenwahl-option-data">
+							<input name="menue_buttons" type="checkbox" value="1" <? if($this->user->rolle->menue_buttons == '1'){echo 'checked="true"';} ?> >
+							<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_menue_buttons, Style[0], document.getElementById('Tip23'))" onmouseout="htm()">
+							<div id="Tip23" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 						</td>
 					</tr>
 				</table>

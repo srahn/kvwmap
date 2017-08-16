@@ -10,6 +10,8 @@
   	<script type="text/javascript">
 	<!--
 	
+		form = '.$this->currentform.';		// das Formular in dem das Kartenfenster eingebettet ist
+		
 		function dec2dms(number, coordtype){
 			number = number+"";
 			part1 = number.split(".");
@@ -42,7 +44,6 @@
 				seconds = parseFloat(seconds)/60;
 			}
 			minutes = (minutes+seconds)/60;
-			console.log(Math.round((degrees + minutes)*10000)/10000);
 			return Math.round((degrees + minutes)*10000)/10000;  
 		}
 		
@@ -88,8 +89,8 @@
 		}					
 			
 		function coords_input(){
-			var mittex  = '.$this->map->width.'/2*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value);
-			var mittey  = parseFloat(top.document.GUI.maxy.value) - '.$this->map->height.'/2*parseFloat(top.document.GUI.pixelsize.value);
+			var mittex  = '.$this->map->width.'/2*parseFloat(form.pixelsize.value) + parseFloat(form.minx.value);
+			var mittey  = parseFloat(form.maxy.value) - '.$this->map->height.'/2*parseFloat(form.pixelsize.value);
 			mittex = format_number(mittex, true, true, false);
 			mittey = format_number(mittey, true, true, false);
 			var Msg = document.getElementById("message_box");
@@ -121,13 +122,14 @@
 				document.getElementById(\'message_box\').className = \'message_box_hidden\';
 				startwaiting();
 				document.GUI.INPUT_COORD.value = coords2[0]+","+coords2[1];
+				document.GUI.go.value = "zoom2coord";
 				document.GUI.CMD.value = "jump_coords";
 				document.GUI.submit();
 			}
 		}
 
 		function coords_anzeige(evt, vertex) {
-			if(top.document.GUI.activated_vertex != undefined && top.document.GUI.activated_vertex.value != 0 && vertex == null)return;
+			if(form.activated_vertex != undefined && form.activated_vertex.value != 0 && vertex == null)return;
 			minx = '.$this->Stelle->MaxGeorefExt->minx.';
 			miny = '.$this->Stelle->MaxGeorefExt->miny.';
 			maxx = '.$this->Stelle->MaxGeorefExt->maxx.';
@@ -135,25 +137,24 @@
 			
 			if(vertex != null){
 				coorxf = top.format_number(vertex.getAttribute("x"), false, false, false);
-				console.log(coorxf);
 				cooryf = top.format_number(vertex.getAttribute("y"), false, false, false);
 			}
 			else{
-				coorxf = top.format_number(evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value), true, true, false);
-				cooryf = top.format_number(top.document.GUI.maxy.value - evt.clientY*parseFloat(top.document.GUI.pixelsize.value), true, true, false);
+				coorxf = top.format_number(evt.clientX*parseFloat(form.pixelsize.value) + parseFloat(form.minx.value), true, true, false);
+				cooryf = top.format_number(form.maxy.value - evt.clientY*parseFloat(form.pixelsize.value), true, true, false);
 			}
 			
 			if(coorxf < minx || coorxf > maxx)coorxf = "undefiniert";
 			if(cooryf < miny || cooryf > maxy)cooryf = "undefiniert";
 		  
-			if(top.document.GUI.lastcoordx != undefined && top.document.GUI.lastcoordx.value != ""){
-				vectorx = top.document.GUI.lastcoordx.value - coorxf;
-				vectory = top.document.GUI.lastcoordy.value - cooryf;
+			if(form.lastcoordx != undefined && form.lastcoordx.value != ""){
+				vectorx = form.lastcoordx.value - coorxf;
+				vectory = form.lastcoordy.value - cooryf;
 				distance = format_number(Math.sqrt(Math.pow(vectorx, 2) + Math.pow(vectory, 2)), false, true, false);
-				if(top.document.GUI.runningcoords != undefined)top.document.GUI.runningcoords.value = coorxf + " / " + cooryf + "   " + distance + " m"; 
+				if(form.runningcoords != undefined)form.runningcoords.value = coorxf + " / " + cooryf + "   " + distance + " m"; 
 			}
 			else{
-				if(top.document.GUI.runningcoords != undefined)top.document.GUI.runningcoords.value = coorxf + " / " + cooryf; 
+				if(form.runningcoords != undefined)form.runningcoords.value = coorxf + " / " + cooryf; 
 			}			
 		}
 		
@@ -163,11 +164,11 @@
 				coory = top.format_number(vertex.getAttribute("y"), false, false, false);
 			}
 			else{
-				coorx = top.format_number(evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value), true, true, false);
-				coory = top.format_number(top.document.GUI.maxy.value - evt.clientY*parseFloat(top.document.GUI.pixelsize.value), true, true, false);
+				coorx = top.format_number(evt.clientX*parseFloat(form.pixelsize.value) + parseFloat(form.minx.value), true, true, false);
+				coory = top.format_number(form.maxy.value - evt.clientY*parseFloat(form.pixelsize.value), true, true, false);
 			}
-			if(top.document.GUI.secondcoords != undefined)top.ahah("index.php", "go=spatial_processing&curSRID='.$this->user->rolle->epsg_code.'&newSRID='.$this->user->rolle->epsg_code2.'&point="+coorx+" "+coory+"&operation=transformPoint&resulttype=wkt&coordtype='.$this->user->rolle->coordtype.'", new Array(top.document.GUI.secondcoords), "");
-			top.document.GUI.firstcoords.value = coorx+" "+coory; 
+			if(form.secondcoords != undefined)top.ahah("index.php", "go=spatial_processing&curSRID='.$this->user->rolle->epsg_code.'&newSRID='.$this->user->rolle->epsg_code2.'&point="+coorx+" "+coory+"&operation=transformPoint&resulttype=wkt&coordtype='.$this->user->rolle->coordtype.'", new Array(form.secondcoords), "");
+			form.firstcoords.value = coorx+" "+coory; 
 			top.document.getElementById("showcoords").style.display="";
 		}
 

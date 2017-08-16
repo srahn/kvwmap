@@ -66,7 +66,7 @@ for($i=0;$i<$anzLayer;$i++){
 	   	$bis = $gesamt;
 	   }
 	   echo'
-	   <table border="0" cellpadding="2" width="100%" cellspacing="0">
+	   <table border="0" cellpadding="2" width="100%" cellspacing="0" id="sachdatenanzeige_paging">
 
 	   	<tr valign="top">
 	   		<td align="right" width="38%">';
@@ -92,7 +92,7 @@ for($i=0;$i<$anzLayer;$i++){
    }
 }
 ?>
-<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<table width="100%" border="0" cellpadding="0" cellspacing="0" id="sachdatenanzeige_footer">
 	<tr>
 		<td align="right">
     <? if ($this->user->rolle->visually_impaired) { ?>
@@ -110,7 +110,7 @@ for($i=0;$i<$anzLayer;$i++){
 </table>
 <?
 	if($this->found != 'false' AND $this->formvars['printversion'] == ''){	?>		
-		<table width="100%" border="0" cellpadding="0" cellspacing="0">
+		<table width="100%" border="0" cellpadding="0" cellspacing="0" id="sachdatenanzeige_footer">
     <tr>
     	<td width="49%" class="px13">
 				<? if($this->user->rolle->querymode == 1){ ?>
@@ -190,7 +190,7 @@ for($i=0;$i<$anzLayer;$i++){
 				}
 			}
 	  	if($this->formvars['printversion'] == '' AND $this->formvars['keinzurueck'] == '' AND $this->formvars['subform_link'] == ''){
-	  		echo '<a href="javascript:currentform.go.value=\'Layer-Suche\';currentform.submit();">'.$strbackToSearch.'</a><br><br>';
+	  		echo '<a href="javascript:currentform.go.value=\'Layer-Suche\';currentform.submit();" id="sachdatenanzeige_footer">'.$strbackToSearch.'</a><br><br>';
 	  	}
   	}
   	else{
@@ -221,7 +221,7 @@ for($i=0;$i<$anzLayer;$i++){
   <INPUT TYPE="HIDDEN" NAME="searchradius" VALUE="<?php echo $this->formvars['searchradius']; ?>">
   <input name="CMD" type="hidden" value="<?php echo $this->formvars['CMD']; ?>">
 	<? if($this->currentform != 'document.GUI2'){ ?>
-  <table width="100%" border="0" cellpadding="2" cellspacing="0">
+  <table width="100%" border="0" cellpadding="2" cellspacing="0" id="sachdatenanzeige_footer">
     <tr bgcolor="<?php echo BG_DEFAULT ?>" align="center">
       <td><a href="index.php?searchradius=<?php echo $this->formvars['searchradius']; ?>"><? echo $strbacktomap;?></a></td>
     </tr>

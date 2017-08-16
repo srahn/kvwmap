@@ -71,14 +71,16 @@ class PgObject {
 	* Search for an record in the database by the given where clause
 	* @ return an array with all found object
 	*/
-	function find_where($where) {
+	function find_where($where, $order = NULL, $select = '*') {
+		$order = (empty($order) ? "" : " ORDER BY " . replace_semicolon($order));
 		$sql = "
 			SELECT
-				*
+				{$this->select}
 			FROM
 				" . $this->schema . '.' . $this->tableName . "
 			WHERE
 				" . $where . "
+			" . $order . "
 		";
 		$this->debug->show('find_where sql: ' . $sql, false);
 		$query = pg_query($this->database->dbConn, $sql);
@@ -102,7 +104,7 @@ class PgObject {
 		return $query;
 	}
 
-	function getAttributes() {
+	function getKeys() {
 		return array_keys($this->data);
 	}
 
@@ -150,7 +152,7 @@ class PgObject {
 
 		$sql = "
 			INSERT INTO " . $this->qualifiedTableName . " (
-				" . implode(', ', $this->getAttributes()) . "
+				" . implode(', ', $this->getKeys()) . "
 			)
 			VALUES (" .
 				"'" . implode("', '", $values) . "'
@@ -191,7 +193,7 @@ class PgObject {
 
 		$sql = "
 			INSERT INTO " . $this->qualifiedTableName . " (
-				" . implode(', ', $this->getAttributes()) . "
+				" . implode(', ', $this->getKeys()) . "
 			)
 			VALUES (" .
 				"'" . implode("', '", $values) . "'

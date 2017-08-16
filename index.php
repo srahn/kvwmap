@@ -1,5 +1,6 @@
 <?php
 header('Content-Type: text/html; charset=utf-8');
+session_set_cookie_params(0, $_SERVER['CONTEXT_PREFIX']);
 session_start();
 ###################################################################
 # kvwmap - Kartenserver für die Verwaltung raumbezogener Daten.   #
@@ -37,8 +38,13 @@ session_start();
 // $executiontimes['action'][] = 'Start';
 
 ob_start ();    // Ausgabepufferung starten
-$go = $_REQUEST['go'];
-if($_REQUEST['go_plus'] != '') $go = $go.'_'.$_REQUEST['go_plus'];
+foreach($_REQUEST as $key => $value){
+	if(is_string($value))$_REQUEST[$key] = str_replace('<script', '', pg_escape_string($value));
+}
+$formvars = $_REQUEST;
+
+$go = $formvars['go'];
+if($formvars['go_plus'] != '') $go = $go.'_'.$formvars['go_plus'];
 ###########################################################################################################
 define(CASE_COMPRESS, false);																																						  #
 #																																																					#
@@ -72,8 +78,7 @@ if (LOG_LEVEL>0) {
  $log_mysql=new LogFile(LOGFILE_MYSQL,'text','Log-Datei MySQL', '#------v: '.date("Y:m:d H:i:s",time()));
  $log_postgres=new LogFile(LOGFILE_POSTGRES,'text', 'Log-Datei-Postgres', '------v: '.date("Y:m:d H:i:s",time()));
 }
-
-if (!$_SESSION['angemeldet'] or !empty($_REQUEST['username'])) {
+if(!$_SESSION['angemeldet'] or !empty($formvars['username'])){
 	$msg .= '<br>Nicht angemeldet';
 	include(CLASSPATH . 'mysql.php');
 	$userDb = new database();
@@ -82,7 +87,12 @@ if (!$_SESSION['angemeldet'] or !empty($_REQUEST['username'])) {
 	$userDb->passwd = MYSQL_PASSWORD;
 	$userDb->dbName = MYSQL_DBNAME;
 	header('logout: true');		// damit ajax-Requests das auch mitkriegen
-	include(LAYOUTPATH . 'snippets/' . LOGIN);
+	if (file_exists(LAYOUTPATH . 'snippets/' . LOGIN)) {
+		include(LAYOUTPATH . 'snippets/' . LOGIN);
+	}
+	else {
+		include(LAYOUTPATH . 'snippets/login.php');
+	}
 }
 
 function include_($filename){
@@ -176,7 +186,7 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->output();
 	  } break;
 				
-		case 'switch_gle_view' : {
+		case 'toggle_gle_view' : {
 			$GUI->switch_gle_view();
 	  } break;
 				
@@ -219,6 +229,10 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 		# Legende für eine Gruppe erzeugen
 	  case 'get_group_legend' : {
 			$GUI->get_group_legend();
+	  } break;
+
+	  case 'close_group_legend' : {
+			$GUI->close_group_legend();
 	  } break;
 		
 		# Legende erzeugen
@@ -1068,7 +1082,13 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->checkCaseAllowed('Daten_Export');
 			$GUI->daten_export_exportieren();
 	  } break;
-
+		
+		case 'get_last_search' : {
+			$GUI->formvars['selected_layer_id'] = $GUI->user->rolle->get_last_search_layer_id();
+			$GUI->formvars['searches'] = '<last_search>';
+			$GUI->GenerischeSuche();
+	  } break;
+		
 	  case 'Layer-Suche_Suchmaske_generieren' : {
 			$GUI->GenerischeSuche_Suchmaske();
 	  } break;
@@ -1115,6 +1135,10 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 		case 'gemerkte_Datensaetze_anzeigen' : {
 			$GUI->gemerkte_Datensaetze_anzeigen($GUI->formvars['layer_id']);
 	  } break;
+				
+		case 'Datensatz_dublizieren' : {
+			$GUI->dublicate_dataset();
+	  } break;
 		
 	  case 'Layer_Datensaetze_Loeschen' : {
 			$GUI->layer_Datensaetze_loeschen();
@@ -1157,6 +1181,7 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  case 'sachdaten_druck_editor_Änderungen Speichern' : {
 			$GUI->checkCaseAllowed('sachdaten_druck_editor');
 			$GUI->sachdaten_druck_editor_aendern();
+			$GUI->sachdaten_druck_editor();
 	  } break;
 	  
 	  case 'sachdaten_druck_editor_Löschen' : {
@@ -1178,6 +1203,16 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->checkCaseAllowed('sachdaten_druck_editor');
 			$GUI->sachdaten_druck_editor_Freitextloeschen();
 	  } break;
+		
+		case 'sachdaten_druck_editor_Liniehinzufuegen' :
+			$GUI->checkCaseAllowed('sachdaten_druck_editor'); {
+			$GUI->sachdaten_druck_editor_Liniehinzufuegen();
+	  } break;
+	  
+	  case 'sachdaten_druck_editor_Linieloeschen' : {
+			$GUI->checkCaseAllowed('sachdaten_druck_editor');
+			$GUI->sachdaten_druck_editor_Linieloeschen();
+	  } break;		
 	  
 	  case 'Layer_Export' : {
 			$GUI->checkCaseAllowed($go);
@@ -1337,7 +1372,32 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->checkCaseAllowed('Stellen_Anzeigen');
 			$GUI->StellenAnzeigen();
 	  } break;
-	  
+
+		case 'Menues_Anzeigen' : {
+			$GUI->checkCaseAllowed('Menues_Anzeigen');
+			$GUI->MenuesAnzeigen();
+	  } break;
+
+		case 'Menueeditor' : {
+			$GUI->checkCaseAllowed('Menues_Anzeigen');
+			$GUI->Menueeditor();
+		} break;
+
+		case 'Menue_Speichern' : {
+			$GUI->checkCaseAllowed('Menues_Anzeigen');
+			$GUI->MenueSpeichern();
+		} break;
+
+		case 'Menue_Ändern' : {
+			$GUI->checkCaseAllowed('Menues_Anzeigen');
+			$GUI->MenueAendern();
+		} break;
+
+	  case 'Menue_Löschen' : {
+			$GUI->checkCaseAllowed('Menues_Anzeigen');
+			$GUI->MenueLoeschen();
+	  } break;
+
 	  case 'Filterverwaltung' : {
 			$GUI->checkCaseAllowed('Filterverwaltung');
 			$GUI->Filterverwaltung();
@@ -1611,6 +1671,7 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  
 	   # Auswählen einer neuen Stelle
 	  case 'Stelle_waehlen' : {
+			$GUI->checkCaseAllowed($go);
 			$GUI->rollenwahl($Stelle_ID);
 			$GUI->output();
 	  } break;

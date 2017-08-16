@@ -4,6 +4,13 @@
 ?>
 <script language="javascript" type="text/javascript">
 
+function Bestaetigung(link,text) {
+	Check = confirm(text);
+	if (Check == true) {
+		window.location.href = link;
+	}
+}
+
 function ImageLoadFailed(id) {
   document.getElementById(id).innerHTML = '';
 }
@@ -58,7 +65,9 @@ function resizemap2window(){
 * @param array or string messages contain the messages as array
 * or as a single string
 */
-function message(messages) {
+function message(messages, t_hide, t_hidden) {
+	if (typeof(t_hide) === 'undefined') t_hide = 1000;
+	if (typeof(t_hidden) === 'undefined') t_hidden = 3000;
 	var msgDiv = $("#message_box");
 	types = {
 		'notice': {
@@ -99,7 +108,6 @@ function message(messages) {
 
 	$.each(messages, function (index, msg) {
 		msg.type = (['notice', 'info', 'error'].indexOf(msg.type) > -1 ? msg.type : 'warning');
-		console.log('type: ' + msg.type);
 		msgDiv.append('<div class="message-box-' + msg.type + '">' + (types[msg.type].icon ? '<div class="message-box-type"><i class="fa ' + types[msg.type].icon + '" style="color: ' + types[msg.type].color + '; cursor: default;"></i></div>' : '') + '<div class="message-box-msg">' + msg.msg + '</div><div style="clear: both"></div></div>');
 		if (types[msg.type].confirm) {
 			confirmMsgDiv = true;
@@ -109,8 +117,8 @@ function message(messages) {
 	msgDiv.attr('class', 'message_box');
 
 	if (!confirmMsgDiv) {
-		setTimeout(function() {msgDiv.addClass('message_box_hide');},1000);
-		setTimeout(function() {msgDiv.addClass('message_box_hidden');},3000);
+		setTimeout(function() {msgDiv.addClass('message_box_hide');}, t_hide);
+//		setTimeout(function() {msgDiv.addClass('message_box_hidden');}, t_hidden);
 	}
 	else {
 		msgDiv.append('<input type="button" onclick="$(\'#message_box\').addClass(\'message_box_hidden\');" value="ok" style="margin-top: 10px;">');
@@ -170,8 +178,9 @@ function resizestart(element, type){
 		dragy = posy - resizeobjekt.parentNode.offsetTop;
 		resizex = posx;
 		resizey = posy;
-		width = parseInt(resizeobjekt.offsetWidth);		// da style.width auf 100% steht
-		height = parseInt(resizeobjekt.offsetHeight);	// da style.height auf 100% steht
+		info = resizeobjekt.getBoundingClientRect();
+		width = parseInt(info.width);
+		height = parseInt(info.height);
 	}
 }
 
@@ -230,6 +239,9 @@ function drag(event) {
 			break;
 			case "e":
 				resizeobjekt.style.width = width + (posx - resizex) + "px";
+			break;
+			case "col_resize":
+				resizeobjekt.style.minWidth = width + (posx - resizex) + "px";
 			break;
 		}
   }
@@ -321,6 +333,35 @@ function getlegend(groupid, layerid, fremde){
 		}
 	}
 	else{																	// eine Klasse wurde auf- oder zugeklappt
+		layer = document.getElementById('classes_'+layerid);
+		if(layer.value == 0){
+			layer.value = 1;
+		}
+		else{
+			layer.value = 0;
+		}
+		ahah('index.php', 'go=get_group_legend&layer_id='+layerid+'&show_classes='+layer.value+'&group='+groupid+'&nurFremdeLayer='+fremde, new Array(groupdiv), "");
+	}
+}
+
+function getlegend(groupid, layerid, fremde) {
+	groupdiv = document.getElementById('groupdiv_' + groupid);
+	if (layerid == '') {														// eine Gruppe wurde auf- oder zugeklappt
+		group = document.getElementById('group_' + groupid);
+		if (group.value == 0) {												// eine Gruppe wurde aufgeklappt -> Layerstruktur per Ajax holen
+			group.value = 1;
+			ahah('index.php', 'go=get_group_legend&' + group.name + '=' + group.value + '&group=' + groupid + '&nurFremdeLayer=' + fremde, new Array(groupdiv), "");
+		}
+		else {																// eine Gruppe wurde zugeklappt -> Layerstruktur verstecken und Einstellung per Ajax senden
+			group.value = 0;
+			layergroupdiv = document.getElementById('layergroupdiv_' + groupid);
+			groupimg = document.getElementById('groupimg_' + groupid);
+			layergroupdiv.style.display = 'none';
+			groupimg.src = 'graphics/plus.gif';
+			ahah('index.php', 'go=close_group_legend&' + group.name + '=' + group.value, '', '');
+		}
+	}
+	else {																	// eine Klasse wurde auf- oder zugeklappt
 		layer = document.getElementById('classes_'+layerid);
 		if(layer.value == 0){
 			layer.value = 1;
@@ -557,9 +598,11 @@ function deactivateAllClasses(class_ids){
 }
 
 /*Anne*/
-function changeClassStatus(classid,imgsrc,instantreload,height){
+function changeClassStatus(classid,imgsrc,instantreload,width,height){
 	selClass = document.getElementsByName("class"+classid)[0];
 	selImg   = document.getElementsByName("imgclass"+classid)[0];
+	if(height < width)height = 12;
+	else height = 18;
 	if(selClass.value=='0'){
 		selClass.value='1';
 		selImg.src=imgsrc;
@@ -574,9 +617,11 @@ function changeClassStatus(classid,imgsrc,instantreload,height){
 }
 
 /*Anne*/
-function mouseOverClassStatus(classid,imgsrc,height){
+function mouseOverClassStatus(classid,imgsrc,width,height){
 	selClass = document.getElementsByName("class"+classid)[0];
 	selImg   = document.getElementsByName("imgclass"+classid)[0];
+	if(height < width)height = 12;
+	else height = 18;
 	if(selClass.value=='0'){
 		selImg.src=imgsrc;	
 	}else if(selClass.value=='1'){
@@ -587,9 +632,11 @@ function mouseOverClassStatus(classid,imgsrc,height){
 }
 
 /*Anne*/
-function mouseOutClassStatus(classid,imgsrc,height){
+function mouseOutClassStatus(classid,imgsrc,width,height){
 	selClass = document.getElementsByName("class"+classid)[0];
 	selImg   = document.getElementsByName("imgclass"+classid)[0];
+	if(height < width)height = 12;
+	else height = 18;	
 	if(selClass.value=='0'){
 		selImg.src="graphics/inactive"+height+".jpg";	
 	}else if(selClass.value=='1'){
@@ -604,7 +651,7 @@ function showMapParameter(epsg_code, width, height) {
 			msg = " \
 				<div style=\"text-align: left\"> \
 					<h2>Daten des aktuellen Kartenausschnitts</h2><br> \
-					Koordinatensystem: EPSG: " + epsg_code + "<br> \
+					Koordinatenreferenzsystem: EPSG: " + epsg_code + "<br> \
 					linke untere Ecke: (" + toFixed(gui.minx.value, 3) + ", " + toFixed(gui.miny.value, 3) + ")<br> \
 					rechte obere Ecke: (" + toFixed(gui.maxx.value, 3) + ", " + toFixed(gui.maxy.value, 3) + ")<br> \
 					Ausdehnung: " + toFixed(gui.maxx.value - gui.minx.value, 3) + " x " + toFixed(gui.maxy.value-gui.miny.value,3) + " m<br> \
@@ -616,6 +663,21 @@ function showMapParameter(epsg_code, width, height) {
 			'type': 'info',
 			'msg': msg
 	}]);
+}
+
+function showExtentURL(epsg_code) {
+	var gui = document.GUI,
+			msg = " \
+				<div style=\"text-align: left\"> \
+					<h2>URL des aktuellen Kartenausschnitts</h2><br> \
+					<input id=\"extenturl\" style=\"width: 350px\" type=\"text\" value=\"<? echo URL.APPLVERSION; ?>index.php?go=zoom2coord&INPUT_COORD="+toFixed(gui.minx.value, 3)+","+toFixed(gui.miny.value, 3)+";"+toFixed(gui.maxx.value, 3)+","+toFixed(gui.maxy.value, 3)+"&epsg_code="+epsg_code+"\"><br> \
+				</div> \
+			";
+	message([{
+			'type': 'info',
+			'msg': msg
+	}]);
+	document.getElementById('extenturl').select();
 }
 
 function toFixed(value, precision) {

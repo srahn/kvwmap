@@ -79,9 +79,9 @@ class anliegerbeitraege {
     $ret = $this->database->execSQL($sql, 4, 0);
     $valid = pg_fetch_array($ret[1]);
     if($valid[0] == 't'){
-      $sql = "INSERT INTO anliegerbeitraege.anliegerbeitraege_bereiche (stelle_id, the_geom, flaeche) select * from (select ".$stelle_id.", bereich, round((amtlicheflaeche*st_area_utm(bereich, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")/st_area_utm(wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID."))::numeric, 2) as flaeche  from (select amtlicheflaeche, wkb_geometry, st_multi(st_transform(st_Intersection(st_transform(st_geometryfromtext('".$umring."', ".$this->clientepsg."), ".EPSGCODE_ALKIS."),f.wkb_geometry), ".$this->layerepsg.")) as bereich ";
+      $sql = "INSERT INTO anliegerbeitraege.anliegerbeitraege_bereiche (stelle_id, the_geom, flaeche) select * from (select ".$stelle_id.", bereich, round((amtlicheflaeche*st_area_utm(bereich, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.")/st_area_utm(wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS."))::numeric, 2) as flaeche  from (select amtlicheflaeche, wkb_geometry, st_multi(st_transform(st_Intersection(st_transform(st_geometryfromtext('".$umring."', ".$this->clientepsg."), ".EPSGCODE_ALKIS."),f.wkb_geometry), ".$this->layerepsg.")) as bereich ";
       $sql.= "from alkis.ax_flurstueck as f "; 
-      $sql.= "where st_transform(st_geometryfromtext('".$umring."', ".$this->clientepsg."), ".EPSGCODE_ALKIS.") && f.wkb_geometry) as foo ) as foofoo ";
+      $sql.= "where f.endet IS NULL AND st_transform(st_geometryfromtext('".$umring."', ".$this->clientepsg."), ".EPSGCODE_ALKIS.") && f.wkb_geometry) as foo ) as foofoo ";
       $sql.= "WHERE flaeche > 0 ";
       $sql.= "AND (GeometryType(bereich) = 'POLYGON' OR GeometryType(bereich) = 'MULTIPOLYGON')";
       $ret = $this->database->execSQL($sql, 4, 1);

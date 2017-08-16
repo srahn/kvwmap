@@ -1,6 +1,5 @@
 <?
 	include(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->language.'.php');
-	
 	$checkbox_names = '';
 	$columnname = '';
 	$geom_tablename = '';
@@ -23,16 +22,16 @@
 <? if($this->new_entry != true AND $layer['requires'] == ''){ ?>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 	<tr>
-		<td width="99%" align="center"><h2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<? echo $layer['Name']; ?></h2></td>
+		<td width="99%" align="center"><h2 id="layername"><? echo $layer['Name']; ?></h2></td>
     <? if (!$this->user->rolle->visually_impaired) { ?>
-			<td valign="top" style="padding: 0 10 0 0">
+			<td valign="top" style="padding: 0 10 0 0" class="layer_header">
 				<? if($layer['template'] == '' OR $layer['template'] == 'generic_layer_editor_2.php'){ ?>
-				<a href="javascript:switch_gle_view(<? echo $layer['Layer_ID']; ?>);"><img title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'columns.png'; ?>"></a>
+				<img onclick="switch_gle_view(<? echo $layer['Layer_ID']; ?>);"" title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border pointer" src="<? echo GRAPHICSPATH.'columns.png'; ?>">
 				<? }else{ ?>
-				<a href="javascript:switch_gle_view(<? echo $layer['Layer_ID']; ?>);"><img title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'rows.png'; ?>"></a>
+				<img onclick="switch_gle_view(<? echo $layer['Layer_ID']; ?>);"" title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border pointer" src="<? echo GRAPHICSPATH.'rows.png'; ?>">
 				<? } ?>
 			</td>
-			<td align="right">			
+			<td align="right" class="layer_header">			
 				<a href="javascript:scrollbottom();"><img class="hover-border" title="nach unten" src="<? echo GRAPHICSPATH; ?>pfeil.gif" width="11" height="11" border="0"></a>&nbsp;
 			</td>
 		<? } ?>
@@ -76,7 +75,8 @@
 				$lock[$k] = true;
 			}
 						
-			for($j = 0; $j < count($attributes['name']); $j++){
+			for($j = 0; $j < count($attributes['name']); $j++) {
+				$attribute_class = (($this->new_entry == true AND $attributes['dont_use_for_new'][$j] == -1) ? 'hidden' : 'visible');
 				if($layer['shape'][$k][$attributes['name'][$j]] == ''){
 					#$layer['shape'][$k][$attributes['name'][$j]] = $this->formvars[$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j]];
 				}
@@ -108,7 +108,7 @@
 						
 						if($attributes['arrangement'][$j] != 1){	# wenn Attribut nicht daneben -> neue Zeile beginnen
 							$attributes_in_row_so_far = 1;					# Attributanzahl in dieser Zeile bis zu diesem Attribut
-							$datapart .= '<tr>';							
+							$datapart .= '<tr class="' . $attribute_class . '">';
 						}
 						else $attributes_in_row_so_far++;
 						if($attributes['labeling'][$j] != 2){
@@ -134,8 +134,9 @@
 							$select_width2 = $select_width;
 						}
 						
-						$td = '	<td class="gle_attribute_value"'; if($attributes['arrangement'][$j+1] != 1){$colspan = 20 - $attributes_in_row_so_far; $td .= 'colspan="'.$colspan.'"';} $td .= '>';
+						$td = '	<td id="row'.$j.'" class="gle_attribute_value"'; if($attributes['arrangement'][$j+1] != 1){$colspan = 20 - $attributes_in_row_so_far; $td .= 'colspan="'.$colspan.'"';} $td .= '>';
 						$td.= 			attribute_value($this, $layer['Layer_ID'], $attributes, $j, $k, $layer['shape'][$k], $size2, $select_width2, $this->user->rolle->fontsize_gle);
+						$td.= '<div onmousedown="resizestart(document.getElementById(\'row'.$j.'\'), \'col_resize\');" style="position: absolute; transform: translate(4px); top: 0px; right: 0px; height: 20px; width: 6px; cursor: e-resize;"></div>';
 						$td.= '	</td>';
 						if($nl)$next_line .= $td; else $datapart .= $td;
 						if($attributes['arrangement'][$j+1] != 1)$datapart .= '</tr>';						# wenn nächstes Attribut nicht daneben -> Zeile abschliessen
@@ -189,7 +190,7 @@
 			    	    <td style="padding-top:5px; padding-bottom:5px;" valign="middle" colspan="19">
 <?						
 							if(!$layer['shape'][$k]['wfs_geom']){		// kein WFS 
-								echo '<input type="hidden" id="'.$columnname.'_'.$k.'" value="'.$layer['shape'][$k][$columnname].'">';						
+								echo '<input type="hidden" id="'.$layer['Layer_ID'].'_'.$columnname.'_'.$k.'" value="'.$layer['shape'][$k][$columnname].'">';						
 ?>								
 								<table cellspacing="0" cellpadding="0">
 									<tr>
@@ -255,7 +256,7 @@
 	}
 	if($this->formvars['printversion'] == ''){
 ?>
-	<tr>
+	<tr id="dataset_operations">
 		<td colspan="2"align="left">
 		<? if($layer['connectiontype'] == 6 AND $this->new_entry != true AND $layer['Layer_ID'] > 0){ ?>
 			<table width="100%" border="0" cellspacing="4" cellpadding="0">

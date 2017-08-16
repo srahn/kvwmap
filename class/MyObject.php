@@ -13,6 +13,7 @@ class MyObject {
 		$this->data = array();
 		$this->children_ids = array();
 		$this->debug->show('<p>New MyObject for table: '. $this->tableName, MyObject::$write_debug);
+		$this->validations = array();
 	}
 
 	/*
@@ -40,15 +41,21 @@ class MyObject {
 	* by the given where clause
 	* @ return all objects
 	*/
-	function find_where($where) {
+	function find_where($where, $order = '') {
+		$orders = array_map(
+			function ($order) {
+				return trim($order);
+			},
+			explode(',', replace_semicolon($order))
+		);
 		$sql = "
 			SELECT
 				*
 			FROM
 				`" . $this->tableName . "`
-				WHERE
-					" . $where . "
-		";
+			WHERE
+				" . $where . 
+			($order != '' ? " ORDER BY `" . implode('`, `', $orders) . "`" : "");
 		$this->debug->show('mysql find_where sql: ' . $sql, MyObject::$write_debug);
 		$query = mysql_query($sql, $this->database->dbConn);
 		$result = array();
@@ -71,7 +78,7 @@ class MyObject {
 				" . (!empty($params['from']) ? $params['from'] : "`" . $this->tableName . "`") . "
 			WHERE
 				" . (!empty($params['where']) ? $params['where'] : '') . "
-				" . (!empty($params['order']) ? 'ORDER BY ' . $params['order'] : '') . "
+				" . (!empty($params['order']) ? 'ORDER BY ' . replace_semicolon($params['order']) : '') . "
 		";
 		$this->debug->show('mysql find_by_sql sql: ' . $sql, MyObject::$write_debug);
 		$this->debug->write('#mysql find_by_sql sql:<br> ' . $sql.';<br>',4);
@@ -83,20 +90,57 @@ class MyObject {
 			}
 			else{
 				$results[$this->data[$this->identifier]] = clone $this;		// create result-array as associative array
-				if($this->data[$hierarchy_key] > 0)$results[$this->data[$hierarchy_key]]->children_ids[] = $this->data[$this->identifier];		// add this id to parents children array
+				if($this->data[$hierarchy_key] > 0 AND $results[$this->data[$hierarchy_key]] != NULL)$results[$this->data[$hierarchy_key]]->children_ids[] = $this->data[$this->identifier];		// add this id to parents children array
 			}
 		}
 		return $results;
 	}
 
 	function getAttributes() {
+		$attributes = [];
+		foreach ($this->data AS $key => $value) {
+			$attribute_validations  = array_filter(
+				$this->validations,
+				function ($validation) use ($key) {
+					return $validation['attribute'] == $key;
+				}
+			);
+			$attributes[] = new MyAttribute($this->debug, $key, 'text', $value, $attribute_validations, $this->identifier);
+		}
+		return $attributes;
+	}
+
+	function getKeys() {
 		return array_keys($this->data);
 	}
 
-	function setAttributes($keys) {
+	function setKeys($keys) {
 		foreach ($keys AS $key) {
 			if (!array_key_exists($key, $this->data)) {
 				$this->set($key, NULL);
+			}
+		}
+	}
+
+	function setKeysFromTable() {
+		$sql = "
+			SHOW COLUMNS
+			FROM
+				`" . $this->tableName . "`
+		";
+		$this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
+		$query = mysql_query($sql, $this->database->dbConn);
+		
+		while($row = mysql_fetch_assoc($query)) {
+			$this->set($row['Field'], NULL);
+		}
+		return $this->getKeys();
+	}
+
+	function setData($formvars) {
+		foreach ($this->data AS $key => $value) {
+			if (array_key_exists($key, $formvars)) {
+				$this->set($key, $formvars[$key]);
 			}
 		}
 	}
@@ -130,7 +174,7 @@ class MyObject {
 
 		$sql = "
 			INSERT INTO `" . $this->tableName . "` (
-				`" . implode('`, `', $this->getAttributes()) . "`
+				`" . implode('`, `', $this->getKeys()) . "`
 			)
 			VALUES (
 				" . implode(
@@ -203,11 +247,16 @@ class MyObject {
 			case 'presence_one_of' :
 				$result = $this->validate_presence_one_of($key, $msg);
 				break;
+				
+			case 'validate_value_is_one_off' :
+				$result = $this->validate_value_is_one_off($key, $option, $msg);
+				break;
 
 			case 'format' :
 				$result = $this->validate_format($key, $msg, $option);
 				break;
 		}
+		
 		return (empty($result) ? '' : array('type' => 'error', 'msg' => $result));
 	}
 
@@ -221,21 +270,26 @@ class MyObject {
 	}
 
 	function validate_not_null($key, $msg = '') {
-		if (empty($msg)) $msg = "Der Parameter <i>{$key}</i> darf nicht leer sein.";
+		if ($msg == '') $msg = "Der Parameter <i>{$key}</i> darf nicht leer sein.";
 
-		return (!empty($this->get($key)) ? '' : $msg);
+		return ($this->get($key) != '' ? '' : $msg);
 	}
 
 	function validate_presence_one_of($keys, $msg = '') {
-		if (empty($msg)) $msg = 'Einer der Parameter <i>' . implode(', ', $keys) . '</i> muss angegeben und darf nicht leer sein.';
+		if ($msg == '') $msg = 'Einer der Parameter <i>' . implode(', ', $keys) . '</i> muss angegeben und darf nicht leer sein.';
 
 		$one_present = false;
 		foreach($keys AS $key) {
-			if (array_key_exists($key, $this->data) AND !empty($this->get($key))) {
+			if (array_key_exists($key, $this->data) AND $this->get($key) != '') {
 				$one_present = true;
 			}
 		}
 		return ($one_present ? '' : $msg);
+	}
+
+	function validate_value_is_one_off($key, $allowed_values, $msg = '') {
+		if ($msg == '') $msg = 'Der angegebene Wert ' . $this->get($key) . ' muss einer von diesen sein: <i>(' . implode(', ', $allowed_values) . '</i>)';
+		return (in_array($this->get($key), $allowed_values) ? '' : $msg);
 	}
 
 	function validate_format($key, $msg, $format) {
@@ -250,7 +304,20 @@ class MyObject {
 			$invalid_msg = 'Der angegebene Wert <i>' . $this->get($key) . ' enthält nur ' . count($value_parts) . ' Bestandteile, muss aber ' . count($format_parts) . ' haben.';
 		}
 
-		return (empty($invalid_msg) ? '' : $msg . '<br>' . $invalid_msg);
+		return ($invalid_msg == '' ? '' : $msg . '<br>' . $invalid_msg);
+	}
+
+	function as_form_html() {
+		$html = implode(
+			"<div class=\"clear\"></div>",
+			array_map(
+				function ($attribute) {
+					return $attribute->as_form_html();
+				},
+				$this->getAttributes()
+			)
+		);
+		return $html;
 	}
 
 }

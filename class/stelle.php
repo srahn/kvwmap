@@ -89,7 +89,14 @@ class stelle {
   }
 
   function readDefaultValues() {
-    $sql ='SELECT * FROM stelle WHERE ID='.$this->id;
+    $sql = "
+			SELECT
+				*
+			FROM
+				stelle
+			WHERE
+				ID = " . $this->id . "
+		";
     $this->debug->write("<p>file:users.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);
     if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
@@ -120,6 +127,7 @@ class stelle {
     $this->useLayerAliases=$rs["use_layer_aliases"];
 		$this->selectable_layer_params = $rs['selectable_layer_params'];
 		$this->hist_timestamp=$rs["hist_timestamp"];
+		$this->default_user_id = $rs['default_user_id'];
   }
 
   function checkClientIpIsOn() {
@@ -586,8 +594,8 @@ class stelle {
 	function copyLayerfromStelle($layer_ids, $alte_stelle_id){
 		# kopieren der Layer von einer Stelle
 		for ($i=0;$i<count($layer_ids);$i++) {
-			$sql ='INSERT IGNORE INTO used_layer ( `Stelle_ID` , `Layer_ID` , `queryable` , `drawingorder` , `minscale` , `maxscale` , `offsite` , `transparency`, `Filter` , `template` , `header` , `footer` , `symbolscale`, `logconsume`, `requires`, `privileg` )';
-			$sql .= ' SELECT '.$this->id.', `Layer_ID` , `queryable` , `drawingorder` , `minscale` , `maxscale` , `offsite` , `transparency`, `Filter` , `template` , `header` , `footer` , `symbolscale`, `logconsume`, `requires`, `privileg` FROM used_layer WHERE Stelle_ID = '.$alte_stelle_id.' AND Layer_ID = '.$layer_ids[$i];
+			$sql ='INSERT IGNORE INTO used_layer ( `Stelle_ID` , `Layer_ID` , `queryable` , `drawingorder` , `minscale` , `maxscale` , `offsite` , `transparency`, `template` , `header` , `footer` , `symbolscale`, `logconsume`, `requires`, `privileg` )';
+			$sql .= ' SELECT '.$this->id.', `Layer_ID` , `queryable` , `drawingorder` , `minscale` , `maxscale` , `offsite` , `transparency`, `template` , `header` , `footer` , `symbolscale`, `logconsume`, `requires`, `privileg` FROM used_layer WHERE Stelle_ID = '.$alte_stelle_id.' AND Layer_ID = '.$layer_ids[$i];
 			$this->debug->write("<p>file:users.php class:stelle->copyLayerfromStelle - kopieren der Layer von einer Stelle:<br>".$sql,4);
 			$query=mysql_query($sql,$this->database->dbConn);
 			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
@@ -628,7 +636,7 @@ class stelle {
 		for ($i=0;$i<count($layer_ids);$i++) {
 			$sql = "
 				SELECT
-					queryable, template, transparency, drawingorder, minscale, maxscale, symbolscale, offsite, requires, privileg, postlabelcache
+					queryable, template, transparency, drawingorder, minscale, maxscale, symbolscale, offsite, requires, privileg, export_privileg, postlabelcache
 				FROM
 					layer
 				WHERE
@@ -649,6 +657,7 @@ class stelle {
 			$symbolscale = $rs['symbolscale'];
 			$offsite = $rs['offsite'];
 			$privileg = $rs['privileg'];
+			$export_privileg = $rs['export_privileg'];
 			$postlabelcache = $rs['postlabelcache'];
 			if($rs['requires'] == '')$rs['requires']='NULL';
 			$requires = $rs['requires'];
@@ -668,6 +677,7 @@ class stelle {
 					`header`,
 					`footer`,
 					`privileg`,
+					`export_privileg`,
 					`postlabelcache`,
 					`requires`
 				)
@@ -686,6 +696,7 @@ class stelle {
 					NULL,
 					NULL,
 					'" . $privileg . "',
+					'" . $export_privileg . "',
 					'" . $postlabelcache . "',
 					" . $requires . "
 				)
@@ -709,22 +720,21 @@ class stelle {
 	
 	function updateLayerParams(){
 		$sql = "UPDATE stelle SET selectable_layer_params = ";
-		$sql.= "(SELECT GROUP_CONCAT(id) ";
+		$sql.= "COALESCE((SELECT GROUP_CONCAT(id) ";
 		$sql.= "FROM `layer_parameter` as p, used_layer as ul, layer as l ";
 		$sql.= "WHERE ul.Stelle_ID = stelle.ID ";
 		$sql.= "AND ul.Layer_ID = l.Layer_ID ";
-		$sql.= "AND locate(concat('$', p.key), concat(l.Data, l.pfad, l.classitem, l.classification)) > 0) ";
+		$sql.= "AND locate(concat('$', p.key), concat(l.Name, l.alias, l.connection, l.Data, l.pfad, l.classitem, l.classification)) > 0), '') ";
 		$sql.= "WHERE stelle.ID = ".$this->id;
 		$this->debug->write("<p>file:users.php class:stelle->updateLayerParams:<br>".$sql,4);
 		$query=mysql_query($sql,$this->database->dbConn);
 		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		$sql = "UPDATE rolle SET layer_params = ";
-		$sql.= "(SELECT GROUP_CONCAT(concat('\"', `key`, '\":\"', default_value, '\"')) ";
+		$sql.= "COALESCE((SELECT GROUP_CONCAT(concat('\"', `key`, '\":\"', default_value, '\"')) ";
 		$sql.= "FROM layer_parameter p, stelle ";
 		$sql.= "WHERE FIND_IN_SET(p.id, stelle.selectable_layer_params) ";
-		$sql.= "AND stelle.ID = rolle.stelle_id) ";
-		$sql.= "WHERE rolle.layer_params IS NULL ";
-		$sql.= "AND rolle.stelle_id = ".$this->id;
+		$sql.= "AND stelle.ID = rolle.stelle_id), '') ";
+		$sql.= "WHERE rolle.stelle_id = ".$this->id;
 		$this->debug->write("<p>file:users.php class:stelle->updateLayerParams:<br>".$sql,4);
 		$query=mysql_query($sql,$this->database->dbConn);
 		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
@@ -946,6 +956,9 @@ class stelle {
 					// }
 				// }
 				
+				$rs['Name'] = replace_params($rs['Name'], rolle::$layer_params);
+				$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);				
+				
 				if($rs['alias'] != '' AND $this->useLayerAliases){
 					$rs['Name'] = $rs['alias'];
 				}
@@ -1029,14 +1042,26 @@ class stelle {
 		return $layer;
 	}
 
-	function get_attributes_privileges($layer_id){
-		$sql = 'SELECT attributename, privileg, tooltip FROM layer_attributes2stelle WHERE stelle_id = '.$this->id.' AND layer_id = '.$layer_id;
-		$this->debug->write("<p>file:users.php class:stelle->get_attributes_privileges - Abfragen der Layerrechte zur Stelle:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-		while ($rs=mysql_fetch_array($query)) {
+	function get_attributes_privileges($layer_id, $with_export_attributes = false) {
+		$sql = "
+			SELECT
+				`attributename`,
+				`privileg`,
+				`tooltip`
+			FROM
+				`layer_attributes2stelle`
+			WHERE
+				`stelle_id` = " . $this->id . " AND
+				`layer_id` = " . $layer_id ." AND
+				`privileg` >= " . ($with_export_attributes ? "-1" : "0") . "
+		";
+		#echo '<br>Sql: ' . $sql;
+		$this->debug->write("<p>file:users.php class:stelle->get_attributes_privileges - Abfragen der Layerrechte zur Stelle:<br>" . $sql, 4);
+		$query = mysql_query($sql, $this->database->dbConn);
+		if ($query == 0) { $this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__, 4); return 0; }
+		while ($rs = mysql_fetch_array($query)) {
 			$privileges[$rs['attributename']] = $rs['privileg'];
-			$privileges['tooltip_'.$rs['attributename']] = $rs['tooltip'];
+			$privileges['tooltip_' . $rs['attributename']] = $rs['tooltip'];
 			$privileges['attributenames'][] = $rs['attributename'];
 		}
 		return $privileges;
@@ -1076,7 +1101,7 @@ class stelle {
 			for($i = 0; $i < $count; $i++){
 				if(strpos(strtolower($fieldstring[$i]), ' as ')){   # Ausdruck AS attributname
 					$explosion = explode(' as ', strtolower($fieldstring[$i]));
-					$attributename = array_pop($explosion);
+					$attributename = trim(array_pop($explosion));
 					$real_attributename = $explosion[0];
 				}
 				else{   # tabellenname.attributname oder attributname
@@ -1109,29 +1134,34 @@ class stelle {
 
 	function set_attributes_privileges($formvars, $attributes){
 		# erst alles löschen zu diesem Layer und Stelle
-		$sql = 'DELETE FROM layer_attributes2stelle WHERE ';
-		$sql.= 'layer_id = '.$formvars['selected_layer_id'].' AND ';
-		$sql.= 'stelle_id = '.$this->id;
-		$this->debug->write("<p>file:users.php class:stelle->set_attributes_privileges - Speichern des Layerrechte zur Stelle:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		$sql = "
+			DELETE FROM
+				`layer_attributes2stelle`
+			WHERE
+				`layer_id` = " . $formvars['selected_layer_id'] . " AND
+				`stelle_id` = " . $this->id . "
+		";
+		#echo '<br>Sql: ' . $sql;
+		$this->debug->write("<p>file:users.php class:stelle->set_attributes_privileges - Speichern des Layerrechte zur Stelle:<br>" . $sql, 4);
+		$query=mysql_query($sql, $this->database->dbConn);
+		if ($query == 0) { $this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__, 4); return 0; }
 		# dann Attributrechte eintragen
-		for($i = 0; $i < count($attributes['type']); $i++){
-			if($formvars['privileg_'.$attributes['name'][$i].$this->id] !== ''){
-				$sql = 'INSERT INTO layer_attributes2stelle SET ';
-				$sql.= 'layer_id = '.$formvars['selected_layer_id'].', ';
-				$sql.= 'stelle_id = '.$this->id.', ';
-				$sql.= 'attributename = "'.$attributes['name'][$i].'", ';
-				$sql.= 'privileg = '.$formvars['privileg_'.$attributes['name'][$i].$this->id];
-				if($formvars['tooltip_'.$attributes['name'][$i].$this->id] == 'on'){
-					$sql.= ', tooltip = 1';
-				}
-				else{
-					$sql.= ', tooltip = 0';
-				}
-				$this->debug->write("<p>file:users.php class:stelle->set_attributes_privileges - Speichern des Layerrechte zur Stelle:<br>".$sql,4);
-				$query=mysql_query($sql,$this->database->dbConn);
-				if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		for ($i = 0; $i < count($attributes['type']); $i++) {
+			if($formvars['privileg_'.$attributes['name'][$i].$this->id] !== '') {
+				$sql = "
+					INSERT INTO
+						layer_attributes2stelle
+					SET 
+						`layer_id` = " . $formvars['selected_layer_id'] . ",
+						`stelle_id` = " . $this->id . ",
+						`attributename` = '" . $attributes['name'][$i] . "',
+						`privileg` = " . $formvars['privileg_' . $attributes['name'][$i] . $this->id] .",
+						`tooltip`= " . ($formvars['tooltip_' . $attributes['name'][$i] . $this->id] == 'on' ? "1" : "0") . "
+				";
+				#echo '<br>Sql: ' . $sql;
+				$this->debug->write("<p>file:users.php class:stelle->set_attributes_privileges - Speichern des Layerrechte zur Stelle:<br>" . $sql, 4);
+				$query=mysql_query($sql, $this->database->dbConn);
+				if ($query==0) { $this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__, 4); return 0; }
 			}
 		}
 	}

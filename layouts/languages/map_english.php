@@ -24,6 +24,7 @@
   $strX="E";  
   $strY="N";
   $strChoose="Load Extent";
+	$strExtentURL="Show Extent URL";
   $strSaveExtent="Save Extent";
 	$strSaveLayers="Save Layer Selection";
 	$strChooseLayers="Load Layer Selection";
@@ -34,5 +35,6 @@
 	$strClearAllQuerys="Click to clear all query checkboxes.";
 	$strInfoQuery="Information Query";
 	$this->layerOptions="Options";
+	$strRotationAngle="Angle";
   
 ?>

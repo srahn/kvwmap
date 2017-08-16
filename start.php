@@ -4,29 +4,7 @@ $GUI=new GUI("map.php", "main.css.php", "html");
 
 $GUI->allowed_documents = array();
 $GUI->document_loader_name = session_id().rand(0,99999999).'.php';
-
-# Übergabe aller Formularvariablen an die Benutzeroberfläche an formvars
-# Dabei wird unterschieden zwischen Aufrufen über das Internet oder von der Komandozeile aus
-if (is_array($argc) AND $argc[1]!='') {
- # Aufruf des PHP-Skriptes über die Komandozeile (CLI)
- # Wenn die Variable argc > 0 ist, wurde die Datei von der Komandozeile aus aufgerufen
- # in dem Fall können die übergebenen Parameter hier der formvars-Variable übergeben werden.
- $arg['go']=$argv[1];
- $arg['ist_Fortfuehrung']=$argv[2];
- $arg['WLDGE_lokal']=$argv[3];
- $arg['WLDGE_Datei_lokal']=$argv[4];
- $GUI->formvars=$arg;
-}
-else {
-  # Übergeben der Variablen aus den Post oder Get Aufrufen
-  # normaler Aufruf des PHP-Skriptes über Apache oder CGI  
-  #$GUI->formvars=stripScript($_REQUEST);
-  foreach($_REQUEST as $key => $value){
-  	#if(is_string($value))$_REQUEST[$key] = addslashes($value);
-		if(is_string($value))$_REQUEST[$key] = pg_escape_string($value);
-  }
-  $GUI->formvars=$_REQUEST;
-}
+$GUI->formvars=$formvars;
 
 #################################################################################
 # Setzen der Konstante, ob in die Datenbank geschrieben werden soll oder nicht.
@@ -265,17 +243,17 @@ $debug->write('Stelle_ID: '.$GUI->Stelle->id,4);
 $debug->write('Stellenbezeichnung: '.$GUI->Stelle->Bezeichnung,4);
 $debug->write('Host_ID: '.getenv("REMOTE_ADDR"),4); 
 
-if(!in_array($go, $non_spatial_cases)){		// für fast_cases, die keinen Raumbezug haben, den PGConnect und Trafos weglassen
+if (!in_array($go, $non_spatial_cases)) {	// für fast_cases, die keinen Raumbezug haben, den PGConnect und Trafos weglassen
 	##############################################################################
 	# Übergeben der Datenbank für die raumbezogenen Daten (PostgreSQL mit PostGIS)
-	if(POSTGRES_DBNAME != ''){																													
-		$PostGISdb=new pgdatabase();											
-		$PostGISdb->host = POSTGRES_HOST;												
-		$PostGISdb->user = POSTGRES_USER;													
-		$PostGISdb->passwd = POSTGRES_PASSWORD;										
-		$PostGISdb->dbName = POSTGRES_DBNAME;												
-	}	
-	else{
+	if(POSTGRES_DBNAME != '') {
+		$PostGISdb=new pgdatabase();
+		$PostGISdb->host = POSTGRES_HOST;
+		$PostGISdb->user = POSTGRES_USER;
+		$PostGISdb->passwd = POSTGRES_PASSWORD;
+		$PostGISdb->dbName = POSTGRES_DBNAME;
+	}
+	else {
 		# pgdbname ist leer, die Informationen zur Verbindung mit der PostGIS Datenbank
 		# mit Geometriedaten werden aus der Tabelle stelle
 		# der kvwmap-Datenbank $GUI->database gelesen
@@ -284,13 +262,14 @@ if(!in_array($go, $non_spatial_cases)){		// für fast_cases, die keinen Raumbezu
 		$PostGISdb->dbName = $GUI->Stelle->pgdbname;
 		$PostGISdb->user = $GUI->Stelle->pgdbuser;
 		$PostGISdb->passwd = $GUI->Stelle->pgdbpasswd;
-		$PostGISdb->port = $GUI->Stelle->port;  
+		$PostGISdb->port = $GUI->Stelle->port;
 	}
-	if ($PostGISdb->dbName!='') {
+
+	if ($PostGISdb->dbName != '') {
 		# Übergeben der GIS-Datenbank für GIS-Daten an die GUI
-		$GUI->pgdatabase=$PostGISdb;
+		$GUI->pgdatabase = $PostGISdb;
 		# Übergeben der GIS-Datenbank für die Bauaktendaten an die GUI
-		$GUI->baudatabase=$PostGISdb;
+		$GUI->baudatabase = $PostGISdb;
 		
 		if (!$GUI->pgdatabase->open()) {
 			echo 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden:';
@@ -301,7 +280,7 @@ if(!in_array($go, $non_spatial_cases)){		// für fast_cases, die keinen Raumbezu
 			exit;
 		}
 		else {
-			$debug->write("Verbindung zur PostGIS Datenbank erfolgreich hergestellt.",4);
+			$debug->write("Verbindung zur PostGIS Datenbank erfolgreich hergestellt.", 4);
 			$GUI->pgdatabase->setClientEncoding();
 		}
 	}
@@ -335,6 +314,7 @@ if(!in_array($go, $non_spatial_cases)){		// für fast_cases, die keinen Raumbezu
 }
 
 if($_SESSION['login_routines'] == true){
+	define('AFTER_LOGIN', true);
 # hier befinden sich Routinen, die beim einloggen des Nutzers einmalig durchgeführt werden
 	# Löschen der Rollenlayer
 	if(DELETE_ROLLENLAYER == 'true'){
@@ -361,6 +341,8 @@ if($_SESSION['login_routines'] == true){
 	# Zurücksetzen der veränderten Klassen
 	$GUI->user->rolle->resetClasses();
 	$_SESSION['login_routines'] = false;
+} else {
+		define('AFTER_LOGIN', false);
 }
 
 # Anpassen der Kartengröße an das Browserfenster

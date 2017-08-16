@@ -260,7 +260,7 @@ chmod(IMAGEPATH.$svgfile, 0666);
 $svg='<?xml version="1.0"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
   "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg id="svgmap" zoomAndPan="disable" width="'.$res_x.'" height="'.$res_y.'" onload="init();" onmousemove="mouse_move(evt);top.drag(evt);" 
+<svg id="svgmap" zoomAndPan="disable" width="'.$res_x.'" height="'.$res_y.'" onload="init();" onmousemove="mouse_move(evt);top.drag(evt);" onmouseup="top.dragstop(evt)"
   xmlns="http://www.w3.org/2000/svg" version="1.1"
   xmlns:xlink="http://www.w3.org/1999/xlink">
 <title> kvwmap </title><desc> kvwmap - WebGIS application - kvwmap.sourceforge.net </desc>
@@ -315,10 +315,22 @@ $svg='<?xml version="1.0"?>
 	var last_x = 0;
 	freehand_measuring = false;
 	var measured_distance = 0;
-	var new_distance = 0;
-  		
-  ';
-	
+	var new_distance = 0,
+			dragVectors = [{
+					\'x0\': 0,
+					\'y0\': 0,
+					\'dx\': 0,
+					\'dy\': 0,
+				}, {
+					\'x0\': 0,
+					\'y0\': 0,
+					\'dx\': 0,
+					\'dy\': 0,
+				}
+			],
+			touchPanZoomThreshold = 17 // differences of drag vectors, to distinguish between pan and zoom on touch gestures;
+	';
+
 if($_SESSION['mobile'] == 'true'){
 	$svg.= '  
   function update_gps_position(){
@@ -409,22 +421,57 @@ function mousewheelchange(evt){
 		var z = 1 + delta*5;
 		var p = getEventPoint(evt);
 		if(p.x > 0 && p.y > 0){
-			zoomTransform(p, z, null);
+			zoomTransform(p, null, z, null);
 			mousewheelloop = window.setTimeout("applyZoom()", 400);
 		}
 	}
 }
 
-function zoomTransform(p, z, ctm){
+function zoomTransform(p, t, z, ctm) {
 	var g = document.getElementById("moveGroup");
-	if(ctm == null)ctm = g.getCTM();
+
+	if (t == null) t = { \'dx\': 0, \'dy\': 0 }
+
+	if(ctm == null) ctm = g.getCTM();
+
 	p = p.matrixTransform(ctm.inverse());
-	var k = root.createSVGMatrix().translate(p.x, p.y).scale(z).translate(-p.x, -p.y);
+	var k = root.createSVGMatrix().translate(p.x, p.y).scale(z).translate(-p.x + t.dx, -p.y + t.dy);
 	setCTM(g, ctm.multiply(k)); 
 }
 
-function getPinchDistance(evt){
-	return (evt.touches[0].pageX-evt.touches[1].pageX) * (evt.touches[0].pageX-evt.touches[1].pageX) + (evt.touches[0].pageY-evt.touches[1].pageY) * (evt.touches[0].pageY-evt.touches[1].pageY);
+/*
+* Returns the pinch distance between first and second touch position on page
+* Returns 0 if only one touch exists 
+*/
+function getPinchDistance(evt) {
+	return (evt.touches.length == 2 ? (Math.pow(evt.touches[0].pageX - evt.touches[1].pageX, 2) + Math.pow(evt.touches[0].pageY - evt.touches[1].pageY, 2)) : 0)
+}
+
+function getTouchPositions(evt) {
+	var touchPositions = [{
+			\'x\': evt.touches[0].pageX,
+			\'y\': evt.touches[0].pageY
+		}, {
+			\'x\': evt.touches[1].pageX,
+			\'y\': evt.touches[1].pageY
+		}
+	]
+	return touchPositions
+}
+
+function startDragVectors(touches) {
+	dragVectors[0].x0 = touches[0].pageX;
+	dragVectors[0].y0 = touches[0].pageY;
+	dragVectors[1].x0 = touches[1].pageX;
+	dragVectors[1].y0 = touches[1].pageY;
+}
+
+function updateDragVectors(touches) {
+	dragVectors[0].dx = touches[0].pageX - dragVectors[0].x0;
+	dragVectors[0].dy = touches[0].pageY - dragVectors[0].y0;
+	dragVectors[1].dx = touches[1].pageX - dragVectors[1].x0;
+	dragVectors[1].dy = touches[1].pageY - dragVectors[1].y0;
+	return dragVectors;
 }
 
 function touchstart(evt){
@@ -439,12 +486,13 @@ function touchstart(evt){
 			var g = document.getElementById("moveGroup");
 			pinching = true;
 			pinch_distance = getPinchDistance(evt);
+			startDragVectors(evt.touches);
 			start_ctm = g.getCTM();
 		}
 	}
 }
 
-function touchmove(evt){
+function touchmove(evt) {
 	prevent(evt);
 	if(top.document.GUI.stopnavigation.value == 0){
 		if(pinching == false && evt.touches.length == 1){		// 1 Finger
@@ -455,8 +503,25 @@ function touchmove(evt){
 		else if(pinching){
 			z = getPinchDistance(evt) / pinch_distance;
 			var p = getEventPoint(evt);
+			
+			if (evt.touches.length == 2) {
+				var v = updateDragVectors(evt.touches),
+						doing = ((Math.abs((v[1].dx - v[0].dx)) + Math.abs((v[1].dx - v[0].dx))) > touchPanZoomThreshold ? \' zoom\' : \'pan\');
+
+/*				console.log(
+					\'v1(\' + v[0].dx + \', \' + v[0].dy + \') \' +
+					\'v2(\' + v[1].dx + \', \' + v[1].dy + \') \' +
+					\'dv(\' + (v[1].dx - v[0].dx) + \', \' + (v[1].dy - v[0].dy) + \') \' +
+					\'s(\' + (Math.abs((v[1].dx - v[0].dx)) + Math.abs((v[1].dy - v[0].dy))) + \')\' +
+					\'doing: \' + doing
+				);
+*/
+			}
 			if(p.x > 0 && p.y > 0){
-				zoomTransform(p, z, start_ctm);
+				if (doing == \'pan\') {
+					t = v[0];
+				}
+				zoomTransform(p, t, z, start_ctm);
 			}
 		}
 	}
@@ -482,15 +547,21 @@ function setCTM(element, matrix) {
 
 function getEventPoint(evt) {
 	var p = root.createSVGPoint();
-	if(evt.clientX != undefined){		// Maus: Mausposition
+	if (evt.clientX != undefined) {		// Maus: Mausposition
 		p.x = evt.clientX;
 		p.y = evt.clientY;
 	}
-	else if(evt.touches[0].pageX != undefined){		// Touch: Mitte zwischen beiden Fingern
-		p.x = evt.touches[0].pageX - ((evt.touches[0].pageX-evt.touches[1].pageX)/2);
-		p.y = evt.touches[0].pageY - ((evt.touches[0].pageY-evt.touches[1].pageY)/2);
+	else if (evt.touches[0].pageX != undefined){		// Touch: Mitte zwischen beiden Fingern
+		if (evt.touches.length == 2) {
+			p.x = evt.touches[0].pageX - ((evt.touches[0].pageX-evt.touches[1].pageX)/2);
+			p.y = evt.touches[0].pageY - ((evt.touches[0].pageY-evt.touches[1].pageY)/2);
+		}
+		else {
+			p.x = 0;
+			p.y = 0;
+		}
 	}
-	if(top.navigator.userAgent.toLowerCase().indexOf("msie") >= 0){
+	if (top.navigator.userAgent.toLowerCase().indexOf("msie") >= 0){
 		p.x = p.x - (top.document.body.clientWidth - resx)/2;
     p.y = p.y - 30;
 	}
@@ -499,21 +570,20 @@ function getEventPoint(evt) {
 
 function init(){
 	startup();
-	if(top.browser == "other"){
+	if (top.browser == "other"){
 	}
-	else{
+	else {
 		document.getElementById("mapimg2").addEventListener("load", function(evt) { moveback_ff(evt); }, true);
 	}
-	if(window.addEventListener){
+	if (window.addEventListener) {
 			window.addEventListener(\'mousewheel\', mousewheelchange, false); // Chrome/Safari//IE9
   		window.addEventListener(\'DOMMouseScroll\', mousewheelchange, false);		//Firefox
-			window.addEventListener(\'touchstart\', touchstart, false);		//touchstart
-			window.addEventListener(\'touchmove\', touchmove, false);		//touchmove
-			window.addEventListener(\'touchend\', touchend, false);		//touchend
-			window.addEventListener(\'touchcancel\', prevent, false);		//touchcancel
-			
+			document.getElementById(\'canvas\').addEventListener(\'touchstart\', touchstart, false);		//touchstart
+			document.getElementById(\'canvas\').addEventListener(\'touchmove\', touchmove, false);		//touchmove
+			document.getElementById(\'canvas\').addEventListener(\'touchend\', touchend, false);		//touchend
+			document.getElementById(\'canvas\').addEventListener(\'touchcancel\', prevent, false);		//touchcancel
   }
-  else{	
+  else {
 		top.document.getElementById("map").onmousewheel = mousewheelchange;		// <=IE8
 	}
 }
@@ -730,12 +800,8 @@ function measure(){
 function save_measure_path(){
 	var length = pathx.length;
 	if(length > 0){
-		var str_pathx = pathx_world[0];
-		var str_pathy = pathy_world[0];
-	  for(var i = 1; i < length; i++){
-	    str_pathx = str_pathx + ";" + pathx_world[i];
-			str_pathy = str_pathy + ";" + pathy_world[i];
-		}
+		var str_pathx = pathx_world.join(";");
+		var str_pathy = pathy_world.join(";");
 		top.document.GUI.str_pathx.value = str_pathx;
 		top.document.GUI.str_pathy.value = str_pathy;
 		top.document.GUI.measured_distance.value = measured_distance;
@@ -759,6 +825,8 @@ function get_measure_path(){
 	  for(var i = 1; i < length; i++){
 	    pathx[i] = (pathx_world[i] - parseFloat(top.document.GUI.minx.value))/parseFloat(top.document.GUI.pixelsize.value);
 			pathy[i] = (pathy_world[i] - parseFloat(top.document.GUI.miny.value))/parseFloat(top.document.GUI.pixelsize.value);
+			document.getElementById("moveGroup").removeChild(document.getElementById("section"+i));
+			showSectionMeasurement(i);
 		}
 		measured_distance = parseFloat(top.document.GUI.measured_distance.value);
 		return true;
@@ -902,6 +970,7 @@ function mousedown(evt){
 			  }
 			  else{
 	      	addpoint(evt);
+					showSectionMeasurement(pathx.length-1);
 					measured_distance = new_distance;
 	      }
 	    }
@@ -1162,7 +1231,9 @@ function polygonarea(){
 		}
 		parts = parts + (polypathx[polypathx.length-1]*(polypathy[0]-polypathy[polypathx.length-2])) + (polypathx[0]*(polypathy[1]-polypathy[polypathx.length-1]));
 		area	= 0.5 * Math.sqrt(parts*parts);
-		k = calculate_reduction(polypathx, polypathy[0]);
+		polypathy2 = polypathy.slice(0);		// copy
+		polypathy2.pop();										// remove last vertex
+		k = calculate_reduction(polypathx, polypathy2);
 		area = area / (k * k);	
 		area = top.format_number(area, false, true, false);
 		label = document.getElementById("polygon_label");
@@ -1359,6 +1430,7 @@ function add_vertex(evt){
 		pathx_world.push(parseFloat(worldx));
 		pathy_world.push(parseFloat(worldy));		
 		if(new_distance > 0){
+			showSectionMeasurement(pathx.length-1);
 			measured_distance = new_distance;
 			showMeasurement(evt);
 		}
@@ -1403,27 +1475,32 @@ function add_current_point(evt){
   deletelast(evt);
 }
 
-function calculate_reduction(pathx, y1){
+function calculate_reduction(pathx, pathy){
 	k = 1;
+	em = 0;
+	hell = 0;
 	r = '.EARTH_RADIUS.';
+	used_nbs = new Array();
 	if(r > 0 && top.nbh.length > 0){
-		em = 0;
-		x = pathx[0] + "";
-		y = y1 + "";
-		x_1 = x.substring(2,3);
-		x_10 = x.substring(1,2);
-		x_100 = x.substring(0,1);
-		y_1 = y.substring(3,4);
-		y_10 = y.substring(2,3);
-		y_100 = y.substring(1,2);
-		y_1000 = y.substring(0,1);
-		nhn = 33+x_100+y_1000+y_100+x_10+x_1+y_10+y_1;
-		if(top.nbh[nhn] > 0){
-			hell = '.M_QUASIGEOID.' + top.nbh[nhn];
-			for(i = 0; i < pathx.length; i++){
-				em = em + parseInt(pathx[i]);
+		for(i = 0; i < pathx.length; i++){
+			x = pathx[i] + "";
+			y = pathy[i] + "";
+			x_1 = x.substring(2,3);
+			x_10 = x.substring(1,2);
+			x_100 = x.substring(0,1);
+			y_1 = y.substring(3,4);
+			y_10 = y.substring(2,3);
+			y_100 = y.substring(1,2);
+			y_1000 = y.substring(0,1);
+			nhn = 33+x_100+y_1000+y_100+x_10+x_1+y_10+y_1;
+			if(top.nbh[nhn] == null)return 1;
+			if(used_nbs[nhn] == null){				// wenn NB nicht schon durch einen anderen Stuetzpunkt verwendet wird
+				used_nbs[nhn] = top.nbh[nhn];
+				hell = hell + top.nbh[nhn];
 			}
+			em = em + parseInt(pathx[i]);
 			em = em / pathx.length;
+			hell = hell / used_nbs.length;
 			k = (1 - (hell / r)) * (1 + (((em - 500000)*(em - 500000))/(2 * r * r))) * 0.9996;
 		}
 	}
@@ -1438,18 +1515,36 @@ function calculate_distance(x1, y1, x2, y2){
 		distance = Math.sqrt(((x1-x2)*(x1-x2))+((y1-y2)*(y1-y2)));
 	}
 	var pathx = new Array(x1, x2);
-	k = calculate_reduction(pathx, y1);
+	var pathy = new Array(y1, y2);
+	k = calculate_reduction(pathx, pathy);
 	distance = distance / k;
 	return distance;
 }
 
+function showSectionMeasurement(j){
+	section_distance = calculate_distance(pathx_world[j-1], pathy_world[j-1], pathx_world[j], pathy_world[j]);
+	section_distance = top.format_number(section_distance, false, freehand_measuring, true);
+  output = section_distance+" m";
+	mittex = pathx[j-1] - ((pathx[j-1] - pathx[j]) / 2);
+	mittey = pathy[j-1] - ((pathy[j-1] - pathy[j]) / 2);	
+  show_tooltip(output, mittex-10, resy-mittey-10);
+	section_box = document.getElementById("tooltip_group").cloneNode(true);
+	section_box.setAttribute("id", "section"+j);
+	section_box.setAttribute("visibility", "visible");
+	section_box.setAttribute("opacity", "0.9");
+	section_rect = section_box.childNodes[1];		// 1, weil zwischen den eigentlichen Nodes noch Text steht (wahrscheinlich die Zeilenumbrueche)
+	section_text = section_box.childNodes[3];		// 3, weil zwischen den eigentlichen Nodes noch Text steht (wahrscheinlich die Zeilenumbrueche)
+	section_rect.setAttribute("id", "");
+	section_text.setAttribute("id", "");
+	document.getElementById("moveGroup").appendChild(section_box);
+}
+
 function showMeasurement(evt){
-  var track = 0, track0 = 0, output = "";
+  var track = 0, output = "";
 	j = pathx_world.length-1;
-  new_distance = measured_distance + calculate_distance(pathx_world[j-1], pathy_world[j-1], pathx_world[j], pathy_world[j]);	
-  track0 = top.format_number(measured_distance, false, freehand_measuring, true);
+  new_distance = measured_distance + calculate_distance(pathx_world[j-1], pathy_world[j-1], pathx_world[j], pathy_world[j]);
   track = top.format_number(new_distance, false, freehand_measuring, true);
-  output = "Strecke: "+track+" m ("+track0+" m)";
+  output = "gesamt: "+track+" m";
   show_tooltip(output, evt.clientX, evt.clientY);
 }
 
@@ -1478,6 +1573,7 @@ function restart(){
     pathy.pop();
 		pathx_world.pop();
   	pathy_world.pop();
+		if(document.getElementById("section"+i) != undefined)document.getElementById("moveGroup").removeChild(document.getElementById("section"+i));
 	}
 	deletepolygon();
   redrawPL();

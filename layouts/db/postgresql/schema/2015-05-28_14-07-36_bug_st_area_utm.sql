@@ -1,6 +1,6 @@
 BEGIN;
 
-DROP FUNCTION st_area_utm(geometry, integer, numeric, integer);
+DROP FUNCTION IF EXISTS st_area_utm(geometry, integer, numeric, integer);
 
 CREATE OR REPLACE FUNCTION st_area_utm(ingeom geometry, srid integer, r numeric, mh integer)
   RETURNS numeric AS

@@ -23,6 +23,7 @@
   $strFreeText="Text Hinzufuegen";
   $strX="R";  
   $strY="H";
+	$strExtentURL="URL des Ausschnitts anzeigen";
   $strSaveExtent="Ausschnitt speichern";
 	$strSaveLayers="Themenauswahl speichern";
 	$strChooseLayers="Themenauswahl laden";
@@ -32,5 +33,6 @@
 	$strDeactivateAllLayer="Hier klicken, um alle Themen zu deaktivieren";
 	$strClearAllQuerys="Hier klicken, um alle Abfragehaken zu entfernen";
 	$strInfoQuery="Informationsabfrage";
+	$strRotationAngle="Richtungswinkel";
   
 ?>

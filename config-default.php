@@ -5,7 +5,7 @@
 #                                                                  #
 ####################################################################
 # aktuelle Versionsnummer
-define('VERSION','2.6');
+define('VERSION','2.7');
 define('APPLVERSION','kvwmap/');
 # Bezeichnung der MySQL-Datenbank mit den Benutzerdaten
 $dbname='kvwmapdb';
@@ -54,19 +54,19 @@ define('HEADER', 'header.php');															# Version 1.8.0
 define('FOOTER', 'footer.php');															# Version 1.8.0
 
 # Höhe von Header und Footer zusammen
-#define('HEADER_FOOTER_HEIGHT', 132);																# Version 2.0 gelöscht in Version 2.7
-# Breiten von Rand, Menü und Legende zusammen
-#$menue_legend_widths = array('gui.php' => 459, 'gui_button.php' => 486);		# Version 2.0 gelöscht in Version 2.7
+#define('HEADER_FOOTER_HEIGHT', 166);																# Version 2.0 gelöscht in 2.7
+# Breite von Menü und Legende zusammen
+#$menue_legend_widths = array('gui.php' => 485, 'gui_button.php' => 486);		# Version 2.0 gelöscht in 2.7
 
 # Höhen und Breiten von Browser, Rand, Header, Footer, Menü und Legende																# Version 2.7
 $sizes = array(
 	'gui.php' => array(
 		'margin' => array(
-			'width'  => 10,
-			'height' => 10
+			'width'  => 0,
+			'height' => 0
 		),
 		'header' => array(
-			'height' => 25
+			'height' => 50
 		),
 		'scale_bar' => array(
 			'height' => 30
@@ -75,42 +75,23 @@ $sizes = array(
 			'height' => 30
 		),
 		'map_functions_bar' => array(
-			'height' => 36
+			'height' => 43
 		),
 		'footer' => array(
-			'height' => 20
-		),
-		'menue' => array(
-			'width'  => 209,
-			'hide_width' => 22
-		),
-		'legend' => array(
-			'width' => 250,
-			'hide_width' => 27,
-			'header_height' => 97
-		)
-	),
-	'gui_button.php' => array(
-		'margin' => array(
-			'width'  => 10,
 			'height' => 22
 		),
-		'header' => array(
-			'height' => 25
-		),
-		'footer' => array(
-			'height' => 107
-		),
 		'menue' => array(
-			'width'  => 209
+			'width'  => 211
 		),
 		'legend' => array(
-			'width' => 250
+			'width' => 252,
+			'hide_width' => 27
 		)
 	)
 );
 
-define('LEGEND_GRAPHIC_FILE', 'custom/legend_graphic.php');		# Version 2.7
+# zusätzliche Legende; muss unterhalb von snippets liegen
+#define('LEGEND_GRAPHIC_FILE', '');		# Version 2.7
 
 # login.php
 define('LOGIN', 'login.php');																# Version 1.8.0
@@ -298,7 +279,7 @@ define('DHK_CALL_PROFILKENNUNG', 'mvaaa');														# Version 2.4
 
 # Parameter für die Strecken- und Flächenreduktion
 define('EARTH_RADIUS', 6384000);																										# Version 2.1
-define('M_QUASIGEOID', 38);																													# Version 2.1
+#define('M_QUASIGEOID', 38);																													# Version 2.1			in Version 2.6 über Bugfix 2.6.61 gelöscht
 
 # auswählbare Treffermengen
 $selectable_limits = array(10, 25, 50, 100, 200);			# Version 2.4
@@ -330,9 +311,9 @@ define('IMAGEPATH',INSTALLPATH.'tmp/');
 # sendEmail async: E-Mails werden erst in einem temporären Verzeichnis MAILQUEUEPATH
 # 	abgelegt und können später durch das Script tools/sendEmailAsync.sh
 # 	versendet werden. Dort muss auch MAILQUEUEPATH eingestellt werden.
-define('MAILMETHOD', 'sendmail');						# Version 2.4
+define('MAILMETHOD', 'sendEmail async');						# Version 2.4
 # SMTP-Server, Muss nur angegeben werden, wenn Methode sendEmail async verwendet wird.
-define('MAILSMTPSERVER', '');						# Version 2.4
+define('MAILSMTPSERVER', 'smtp.p4.net');						# Version 2.4
 # SMTP-Port, Muss nur angegeben werden, wenn Methode sendEmail async verwendet wird.
 define('MAILSMTPPORT', 25);													# Version 2.4
 # Verzeichnis für die JSON-Dateien mit denzu versendenen E-Mails.
@@ -599,19 +580,20 @@ define('SHOW_MAP_IMAGE', 'true');       # true / false                          
 ############################ kvwmap-plugins #################		# Version 1.11.0
 #																																# Version 1.11.0
 $kvwmap_plugins = array();																			# Version 1.11.0
+#$kvwmap_plugins[] = 'alkis';																		# Version 2.8
 #$kvwmap_plugins[] = 'bauleitplanung';													# Version 1.11.0
 #$kvwmap_plugins[] = 'bevoelkerung';														# Version 1.11.0
 #$kvwmap_plugins[] = 'gewaesser';																# Version 1.11.0
 #$kvwmap_plugins[] = 'bodenrichtwerte';													# Version 2.0.0
 #$kvwmap_plugins[] = 'jagdkataster';														# Version 2.0.0
 #$kvwmap_plugins[] = 'fortfuehrungslisten';											# Version 2.6.0
+#$kvwmap_plugins[] = 'kolibri';																	# Version 2.8
 #$kvwmap_plugins[] = 'nachweisverwaltung';											# Version 2.0.0
 #$kvwmap_plugins[] = 'anliegerbeitraege';												# Version 2.0.0
 #$kvwmap_plugins[] = 'probaug';																	# Version 2.0.0
 #$kvwmap_plugins[] = 'geodoc';																	# Version 2.0.0
 #$kvwmap_plugins[] = 'baumfaellantrag';													# Version 2.0.0
-#$kvwmap_plugins[] = 'alkis';																		# Version 2.7
-#																																# Version 1.11.0
+#$kvwmap_plugins[] = 'wasserrecht';														# Version 2.8.0
 #############################################################		# Version 1.11.0
 
 # Festlegung von Fehlermeldungen und Hinweisen
@@ -644,8 +626,8 @@ define('POSTGRES_HOST', 'localhost');																# Version 2.0
 define('POSTGRES_USER', '');																				# Version 2.0
 define('POSTGRES_PASSWORD', '');																		# Version 2.0
 define('POSTGRES_DBNAME', $pgdbname);																# Version 2.0
-define('POSTGRES_ROOT_PASSWORD', getenv('PGSQL_ENV_POSTGRES_PASSWORD'));
-	
+#define('POSTGRES_ROOT_PASSWORD', getenv('PGSQL_ROOT_PASSWORD'));    # in Version 2.7 gelöscht
+
 // if ($pgdbname!='') {																													# in Version 2.0 gelöscht
 	// if(in_array($_REQUEST['go'], $fast_loading_cases)){		# Version 1.7.6			# in Version 2.0 gelöscht
 		// $PostGISdb=new pgdatabase_core();										# Version 1.7.6			# in Version 2.0 gelöscht

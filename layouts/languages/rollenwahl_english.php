@@ -4,12 +4,13 @@
 	$strEnglish="English";
 	$strGerman="German";
 	$strGUI="Graphical User Interface";
-	$strButtons="Buttons";
+	$strButtons="Buttons and Menus";
+	$strMenueButtons="Menus as Buttons";
 	$strMapExtent="Map Extent";
 	$strMapProjection="1.Map Projection (EPSG-Code)";
 	$strSecondMapProjection="2.Map Projection (EPSG-Code)";
 	$strRunningCoords="Coordinates";
-	$strShowMapFunctions="Show map functions bar";
+	$strMapFunctions="Show map functions bar";
 	$strMapSize="Map Size";
 	$strAutoResize="auto fit";
 	$strTask="Task";
@@ -20,7 +21,7 @@
 	$strFontSizeGLE="GLE-Fontsize";
 	$strHighlight="Object-Highlighting";
 	$strPlatt="Lower German";
-	$strSearchColor="Result-Color";
+	$strSearchColor="Result/Import-Color";
 	$strPolish="Polish";
 	$strCoordType="Coordinate Presentation";
 	$strSingleQuery="only one layer queryable";
@@ -42,7 +43,7 @@
 	$strHintLanguage="Choose the language to be used in the user interface.";
 	$strHintGUI="Choose the graphical user interface.";
 	$strHintButtons="Choose the tool buttons you are going to work with.";
-	$strHintColor="Choose the color search results will be highlighted with.";
+	$strHintColor="Choose the color which should be used for search results and imported layers.";
 	$strHintInstantReload="If you activate this option, the map is going to be reloaded immediately after you are activating or disactivating a theme.";
 	$strHintMenuAutoClose="If you activate this option, there will be only one menue opened at the same time.";
 	$strHintVisuallyImpaired="If you select this option, the surface and the work will be simplified in the reading mode. This setting is particularly suitable for people with visually imairance. It, however, some functions are hidden.";
@@ -63,4 +64,5 @@
 	$strMapTools="Maptools";
 	$strShowLayerOptions="Show layer options";
 	$strHintShowLayerOptions="If you activate this option, a button appears on mouse over the layer names in legend. The button shows extended functions and settings for the layer.";
+	$strHintMenueButtons="If you activate this option, often used menu options will be shown as seperate buttons above the menue bar.";
 ?>  

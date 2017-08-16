@@ -52,6 +52,32 @@ function replace_params($str, $params) {
 	return $str;
 }
 
+function umlaute_umwandeln($name){
+  $name = str_replace('ä', 'ae', $name);
+  $name = str_replace('ü', 'ue', $name);
+  $name = str_replace('ö', 'oe', $name);
+  $name = str_replace('Ä', 'Ae', $name);  
+  $name = str_replace('Ü', 'Ue', $name);
+  $name = str_replace('Ö', 'Oe', $name);
+  $name = str_replace('a?', 'ae', $name);
+  $name = str_replace('u?', 'ue', $name);
+  $name = str_replace('o?', 'oe', $name);
+  $name = str_replace('A?', 'ae', $name);
+  $name = str_replace('U?', 'ue', $name);
+  $name = str_replace('O?', 'oe', $name);
+  $name = str_replace('ß', 'ss', $name);
+  $name = str_replace('.', '', $name);
+  $name = str_replace(':', '', $name);
+  $name = str_replace('/', '-', $name);
+  $name = str_replace(' ', '', $name);
+  $name = str_replace('-', '_', $name);
+  $name = str_replace('?', '_', $name);
+	$name = str_replace('+', '_', $name);
+	$name = str_replace(',', '_', $name);
+	$name = str_replace('*', '_', $name);
+  return $name;
+}
+
 function html_umlaute($string){
 	$string = str_replace('ä', '&auml;', $string);
 	$string = str_replace('ü', '&uuml;', $string);
@@ -63,6 +89,11 @@ function html_umlaute($string){
 	$string = str_replace('ø', '&oslash;', $string);
 	$string = str_replace('æ', '&aelig;', $string);
 	return $string;
+}
+
+function compare_legendorder($a, $b){
+	if($a['legendorder'] > $b['legendorder'])return 1;
+	else return 0;
 }
 
 
@@ -85,6 +116,7 @@ class GUI {
   var $FormObject;
   var $StellenForm;
   var $Fehlermeldung;
+  var $messages;
   var $Hinweis;
   var $Stelle;
   var $ALB;
@@ -97,6 +129,7 @@ class GUI {
   var $map_scaledenom;
   var $map_factor;
   var $formatter;
+  var $success;
 
   function GUI($main, $style, $mime_type) {
     # Debugdatei setzen
@@ -125,7 +158,7 @@ class GUI {
     include(LAYOUTPATH.'languages/'.$this->user->rolle->language.'.php');
   }
 
-	function get_group_legend(){
+	function get_group_legend() {
     # Änderungen in den Gruppen werden gesetzt
     $this->formvars = $this->user->rolle->setGroupStatus($this->formvars);
     # Ein- oder Ausblenden der Klassen
@@ -369,6 +402,8 @@ class GUI {
         $map->setMetaData("ows_onlineresource",$ows_onlineresource);
         $bb=$this->Stelle->MaxGeorefExt;
         $map->setMetaData("wms_extent",$bb->minx.' '.$bb->miny.' '.$bb->maxx.' '.$bb->maxy);
+				// enable service types
+        $map->setMetaData("ows_enable_request", '*');
         ///------------------------------////
 
         $map->setSymbolSet(SYMBOLSET);
@@ -458,8 +493,8 @@ class GUI {
 					if($this->class_load_level == 2 OR ($this->class_load_level == 1 AND $layerset[$i]['aktivStatus'] != 0)){      # nur wenn der Layer aktiv ist, sollen seine Parameter gesetzt werden
 						$layer = ms_newLayerObj($map);
 						$layer->setMetaData('wfs_request_method', 'GET');
-						$layer->setMetaData('wms_name', $layerset[$i]['wms_name']);
-						$layer->setMetaData('wfs_typename', $layerset[$i]['wms_name']);
+						$layer->setMetaData('wms_name', umlaute_umwandeln($layerset[$i]['wms_name']));
+						$layer->setMetaData('wfs_typename', umlaute_umwandeln($layerset[$i]['wms_name']));
 						$layer->setMetaData('ows_title', $layerset[$i]['Name']); # required
 						$layer->setMetaData('wms_group_title',$layerset[$i]['Gruppenname']);
 						$layer->setMetaData('wms_queryable',$layerset[$i]['queryable']);
@@ -793,8 +828,10 @@ class GUI {
       if ($classset[$j]['text']!='') {
         $klasse -> settext($classset[$j]['text']);
       }
-      # setzen eines oder mehrerer Styles
-      # Änderung am 12.07.2005 Korduan
+      if ($classset[$j]['legendgraphic'] != '') {
+				$imagename = WWWROOT.APPLVERSION.GRAPHICSPATH . 'custom/' . $classset[$j]['legendgraphic'];
+				$klasse->set('keyimage', $imagename);
+			}
       for ($k=0;$k<count($classset[$j]['Style']);$k++) {
         $dbStyle=$classset[$j]['Style'][$k];
 				if (MAPSERVERVERSION < 600) {
@@ -1023,6 +1060,7 @@ class GUI {
           if ($dbLabel['buffer']!='') {
             $klasse->label->set('buffer',$dbLabel['buffer']);
           }
+					$klasse->label->set('maxlength',$dbLabel['maxlength']);
           $klasse->label->set('wrap',$dbLabel['wrap']);
           $klasse->label->set('force',$dbLabel['the_force']);
           $klasse->label->set('partials',$dbLabel['partials']);
@@ -1132,6 +1170,7 @@ class GUI {
           if ($dbLabel['buffer']!='') {
             $label->buffer = $dbLabel['buffer'];
           }
+					$label->set('maxlength',$dbLabel['maxlength']);
           $label->wrap = $dbLabel['wrap'];
           $label->force = $dbLabel['the_force'];
           $label->partials = $dbLabel['partials'];
@@ -1190,7 +1229,7 @@ class GUI {
     } # end of Schleife Class
   }
 
-	function create_group_legend($group_id){
+	function create_group_legend($group_id) {
 		if($this->groupset[$group_id]['untergruppen'] == NULL AND $this->groups_with_layers[$group_id] == NULL)return;			# wenns keine Layer oder Untergruppen gibt, nix machen
     $groupname = $this->groupset[$group_id]['Gruppenname'];
 	  $groupstatus = $this->groupset[$group_id]['status'];
@@ -1387,7 +1426,7 @@ class GUI {
 							if($layer['requires'] == '' AND $layer['Layer_ID'] > 0){
 								$legend .= '<input id="classes_'.$layer['Layer_ID'].'" name="classes_'.$layer['Layer_ID'].'" type="hidden" value="'.$layer['showclasses'].'">';
 							}
-							if($layer['showclasses'] != 0){
+							if ($layer['showclasses'] != 0) {
 								if($layer['connectiontype'] == 7){      # WMS
 									$layersection = substr($layer['connection'], strpos(strtolower($layer['connection']), 'layers')+7);
 									$pos = strpos($layersection, '&');
@@ -1397,11 +1436,14 @@ class GUI {
 										$legend .=  '<div style="display:inline" id="lg'.$j.'_'.$l.'"><br><img src="'.$layer['connection'].'&layer='.$layers[$l].'&service=WMS&request=GetLegendGraphic" onerror="ImageLoadFailed(\'lg'.$j.'_'.$l.'\')"></div>';
 									}
 								}
-								else{
+								else {
 									$legend .= '<table border="0" cellspacing="0" cellpadding="0">';
 									$maplayer = $this->map->getLayerByName($layer['alias']);
+									if($layer['Class'][0]['legendorder'] != ''){
+										usort($layer['Class'], 'compare_legendorder');
+									}
 									for($k = 0; $k < $maplayer->numclasses; $k++){
-										$class = $maplayer->getClass($k);
+										$class = $maplayer->getClass($layer['Class'][$k]['index']);
 										for($s = 0; $s < $class->numstyles; $s++){
 											$style = $class->getStyle($s);
 											if($maplayer->type > 0){
@@ -1427,42 +1469,52 @@ class GUI {
 										}
 										$legend .= '<tr style="line-height: 15px"><td style="line-height: 14px">';
 										if($s > 0){
-											if($layer['Class'][$k]['Style'][0]['colorrange'] != ''){
-												$height = 18;
-												$newname = rand(0, 1000000).'.jpg';
-												$this->colorramp(IMAGEPATH.$newname, 18, $height, $layer['Class'][$k]['Style'][0]['colorrange']);
+											$width = $height = '';
+											if($layer['Class'][$k]['legendimagewidth'] != '')$width = $layer['Class'][$k]['legendimagewidth'];
+											if($layer['Class'][$k]['legendimageheight'] != '')$height = $layer['Class'][$k]['legendimageheight'];
+											$padding = 1;
+											if($layer['Class'][$k]['legendgraphic'] != ''){								# eigenes Klassenbild
+												$imagename = $original_class_image = GRAPHICSPATH . 'custom/' . $layer['Class'][$k]['legendgraphic'];
+												if($width == ''){
+													$size = getimagesize($imagename);
+													$width = $size[0];
+													$height = $size[1];
+												}
 											}
-											else{
-												if($maplayer->type == 0)$height = 18;			# Punktlayer
-												else $height = 12;
-												$padding = 1;
-												$image = $class->createLegendIcon(18, $height);
-												$filename = $this->map_saveWebImage($image,'jpeg');
-												$newname = $this->user->id.basename($filename);
-												rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
+											else{																													# generiertes Klassenbild
+												if($width == '')$width = 18;
+												if($height == ''){
+													if($maplayer->type == 0)$height = 18;	# Punktlayer
+													else $height = 12;
+												}
+												if($layer['Class'][$k]['Style'][0]['colorrange'] != ''){		# generierte Color-Ramp
+													$padding = 0;
+													$newname = rand(0, 1000000).'.jpg';
+													$this->colorramp(IMAGEPATH.$newname, $width, $height, $layer['Class'][$k]['Style'][0]['colorrange']);
+												}
+												else{																												# vom Mapserver generiertes Klassenbild
+													$image = $class->createLegendIcon($width, $height);
+													$filename = $this->map_saveWebImage($image,'jpeg');
+													$newname = $this->user->id.basename($filename);
+													rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
+												}
+												$imagename = $original_class_image = TEMPPATH_REL.$newname;
 											}
-											#Anne
 											$classid = $layer['Class'][$k]['Class_ID'];
 											if($this->mapDB->disabled_classes['status'][$classid] == '0'){
-												$imagename = 'graphics/inactive'.$height.'.jpg';
+												if($height < $width)$height1 = 12;
+												else $height1 = 18;
+												$imagename = 'graphics/inactive'.$height1.'.jpg';
 												$status = 0;
 											}
 											elseif($this->mapDB->disabled_classes['status'][$classid] == 2){
-												$imagename = TEMPPATH_REL.$newname;												
 												$status = 2;
 											}
 											else{
-												$imagename = TEMPPATH_REL.$newname;
 												$status = 1;
 											}
-											if ($layer['Class'][$k]['legendgraphic'] != '') {
-												$imagename = GRAPHICSPATH . 'custom/' . $layer['Class'][$k]['legendgraphic'];
-												$new_class_image = $imagename;
-											}
-											else {
-												$new_class_image = TEMPPATH_REL . $newname;
-											}
-											$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="'.$status.'"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.$new_class_image.'\','.$height.')" onmouseout="mouseOutClassStatus('.$classid.',\''.$new_class_image.'\','.$height.')" onclick="changeClassStatus('.$classid.',\''.$new_class_image.'\', '.$this->user->rolle->instant_reload.','.$height.')"><img style="vertical-align:middle;padding-bottom: '.$padding.'" border="0" name="imgclass'.$classid.'" src="'.$imagename.'"></a>';
+											# $original_class_image ist das eigentliche Klassenbild bei Status 1, $imagename das Bild, welches entsprechend des Status gerade gesetzt ist
+											$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="'.$status.'"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.$original_class_image.'\', '.$width.', '.$height.')" onmouseout="mouseOutClassStatus('.$classid.',\''.$original_class_image.'\', '.$width.', '.$height.')" onclick="changeClassStatus('.$classid.',\''.$original_class_image.'\', '.$this->user->rolle->instant_reload.', '.$width.', '.$height.')"><img style="vertical-align:middle;padding-bottom: '.$padding.'" border="0" name="imgclass'.$classid.'" width="'.$width.'" height="'.$height.'" src="'.$imagename.'"></a>';
 										}
 										$legend .= '&nbsp;<span class="px13">'.html_umlaute($class->name).'</span></td></tr>';
 									}
@@ -1685,30 +1737,37 @@ class user {
 		}
 	}
 
-  function readUserDaten($id,$login_name) {
-    $sql ='SELECT * FROM user WHERE 1=1';
-    if ($id>0) {
-      $sql.=' AND ID='.$id;
-    }
-    if ($login_name!='') {
-      $sql.=' AND login_name LIKE "'.$login_name.'"';
-    }
-    $this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs=mysql_fetch_array($query);
-    $this->id=$rs['ID'];
-    $this->login_name=$rs['login_name'];
-    $this->Namenszusatz=$rs['Namenszusatz'];
-    $this->Name=$rs['Name'];
-    $this->Vorname=$rs['Vorname'];
-    $this->stelle_id=$rs['stelle_id'];
-    $this->phon=$rs['phon'];
-    $this->email=$rs['email'];
-    if (CHECK_CLIENT_IP) {
-      $this->ips=$rs['ips'];
-    }
-    $this->password_setting_time=$rs['password_setting_time'];
+	function readUserDaten($id, $login_name) {
+		$where = array();
+		if ($id > 0) array_push($where, "ID = " . $id);
+		if ($login_name != '') array_push($where, "login_name LIKE '" . $login_name . "'");
+		$sql = "
+			SELECT
+				*
+			FROM
+				user
+			WHERE " .
+				implode(" AND ", $where) . "
+		";
+		#echo '<br>Sql: ' . $sql;
+
+		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>" . $sql, 4);
+		$query = mysql_query($sql,$this->database->dbConn);
+		if ($query == 0) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
+		$rs = mysql_fetch_array($query);
+		$this->id = $rs['ID'];
+		$this->login_name = $rs['login_name'];
+		$this->Namenszusatz = $rs['Namenszusatz'];
+		$this->Name = $rs['Name'];
+		$this->Vorname = $rs['Vorname'];
+		$this->stelle_id = $rs['stelle_id'];
+		$this->phon = $rs['phon'];
+		$this->email = $rs['email'];
+		if (CHECK_CLIENT_IP) {
+			$this->ips = $rs['ips'];
+		}
+		$this->funktion = $rs['Funktion'];
+		$this->password_setting_time = $rs['password_setting_time'];
   }
 
   function getLastStelle() {
@@ -1729,21 +1788,27 @@ class user {
 	}
 
 	function getStellen($stelle_ID) {
-		$sql ='SELECT s.ID,s.Bezeichnung FROM stelle AS s,rolle AS r';
-		$sql.=' WHERE s.ID=r.stelle_id AND r.user_id='.$this->id;
-		if ($stelle_ID>0) {
-			$sql.=' AND s.ID='.$stelle_ID;
-		}
-		# Zeiteinschränkung
-		$sql.=' AND (';
-		# Zeiteinschränkung wird berücksichtigt
-		$sql.='("'.date('Y-m-d h:i:s').'" >= s.start AND "'.date('Y-m-d h:i:s').'" <= s.stop)';
-		$sql.=' OR ';
-		# Zeiteinschränkung wird nicht berücksichtigt.
-		$sql.='(s.start="0000-00-00 00:00:00" AND s.stop="0000-00-00 00:00:00")';
-		$sql.=')';
-		$sql.=' ORDER BY Bezeichnung';
-		#echo $sql;
+		$sql = "
+			SELECT
+				s.ID,
+				s.Bezeichnung
+			FROM
+				stelle AS s,
+				rolle AS r
+			WHERE
+				s.ID = r.stelle_id AND
+				r.user_id = " . $this->id .
+				($stelle_ID > 0 ? " AND s.ID = " . $stelle_ID : "") . "
+				AND (
+					('" . date('Y-m-d h:i:s') . "' >= s.start AND '" . date('Y-m-d h:i:s') . "' <= s.stop)
+					OR
+					(s.start = '0000-00-00 00:00:00' AND s.stop = '0000-00-00 00:00:00')
+				)
+			ORDER BY
+				Bezeichnung;
+		";
+
+		#echo '<br>sql: ' . $sql;
 		$this->debug->write("<p>file:users.php class:user->getStellen - Abfragen der Stellen die der User einnehmen darf:<br>".$sql,4);
 		$query=mysql_query($sql,$this->database->dbConn);
 		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
@@ -1773,9 +1838,9 @@ class user {
 
 	function setRolle($stelle_id) {
 		# Abfragen und zuweisen der Einstellungen für die Rolle		
-		$rolle=new rolle($this->id,$stelle_id,$this->database);		
+		$rolle = new rolle($this->id, $stelle_id, $this->database);		
 		if ($rolle->readSettings()) {
-			$this->rolle=$rolle;			
+			$this->rolle=$rolle;
 			return 1;
 		}
 		return 0;
@@ -1819,7 +1884,14 @@ class stelle {
   }
 
   function readDefaultValues() {
-    $sql ='SELECT * FROM stelle WHERE ID='.$this->id;
+    $sql = "
+			SELECT
+				*
+			FROM
+				stelle
+			WHERE
+				ID = " . $this->id . "
+		";
     $this->debug->write("<p>file:users.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);
     if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
@@ -1850,6 +1922,7 @@ class stelle {
     $this->useLayerAliases=$rs["use_layer_aliases"];
 		$this->selectable_layer_params = $rs['selectable_layer_params'];
 		$this->hist_timestamp=$rs["hist_timestamp"];
+		$this->default_user_id = $rs['default_user_id'];
   }
 
   function checkClientIpIsOn() {
@@ -1900,7 +1973,7 @@ class rolle {
 				stelle_id = " . $this->stelle_id . "
 		";
     #echo $sql;
-    $this->debug->write("<p>file:users.php class:rolle function:readSettings - Abfragen der Einstellungen der Rolle:<br>".$sql,4);
+    $this->debug->write("<p>file:rolle.php class:rolle function:readSettings - Abfragen der Einstellungen der Rolle:<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);
     if ($query==0) {
       $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4);
@@ -1935,9 +2008,10 @@ class rolle {
 			$this->runningcoords=$rs['runningcoords'];
 			$this->showmapfunctions=$rs['showmapfunctions'];
 			$this->showlayeroptions=$rs['showlayeroptions'];
+			$this->menue_buttons=$rs['menue_buttons'];
 			$this->singlequery=$rs['singlequery'];
 			$this->querymode=$rs['querymode'];
-			$this->geom_edit_first=$rs['geom_edit_first'];
+			$this->geom_edit_first=$rs['geom_edit_first'];		
 			$this->overlayx=$rs['overlayx'];
 			$this->overlayy=$rs['overlayy'];
 			$this->instant_reload=$rs['instant_reload'];
@@ -1973,21 +2047,24 @@ class rolle {
   }
 
 	function setGroupStatus($formvars) {
-		$this->groupset=$this->getGroups('');
+		$this->groupset = $this->getGroups('');
 		# Eintragen des group_status=1 für Gruppen, die angezeigt werden sollen
-		for ($i=0;$i<count($this->groupset);$i++) {
-			if($formvars['group_'.$this->groupset[$i]['id']] !== NULL){
-				if ($formvars['group_'.$this->groupset[$i]['id']] == 1) {
-					$group_status=1;
-				}
-				else {
-					$group_status=0;
-				}
-				$sql ='UPDATE u_groups2rolle set status="'.$group_status.'"';
-				$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-				$sql.=' AND id='.$this->groupset[$i]['id'];
-				$this->debug->write("<p>file:users.php class:rolle->setGroupStatus - Speichern des Status der Gruppen zur Rolle:",4);
-				$this->database->execSQL($sql,4, $this->loglevel);
+		for ($i = 0; $i < count($this->groupset); $i++) {
+			if ($formvars['group_' . $this->groupset[$i]['id']] !== NULL) {
+				$group_status = ($formvars['group_' . $this->groupset[$i]['id']] == 1 ? 1 : 0);
+				$sql = "
+					UPDATE
+						`u_groups2rolle`
+					SET
+						`status` = '" . $group_status . "'
+					WHERE
+						`user_id` = " . $this->user_id . " AND
+						`stelle_id` = " . $this->stelle_id . " AND
+						`id` = " . $this->groupset[$i]['id'] . "
+				";
+				#echo '<br>Sql: ' . $sql;
+				$this->debug->write("<p>file:rolle.php class:rolle->setGroupStatus - Speichern des Status der Gruppen zur Rolle:", 4);
+				$this->database->execSQL($sql, 4, $this->loglevel);
 			}
 		}
 		return $formvars;
@@ -2006,7 +2083,7 @@ class rolle {
     if ($GroupName!='') {
       $sql.=' AND Gruppenname LIKE "'.$GroupName.'"';
     }
-    $this->debug->write("<p>file:users.php class:rolle->getGroups - Abfragen der Gruppen zur Rolle:<br>".$sql,4);
+    $this->debug->write("<p>file:rolle.php class:rolle->getGroups - Abfragen der Gruppen zur Rolle:<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);
     if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
     while ($rs=mysql_fetch_array($query)) {
@@ -2021,7 +2098,7 @@ class rolle {
 			$sql ='UPDATE u_rolle2used_layer set showclasses = "'.$formvars['show_classes'].'"';
 			$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 			$sql.=' AND layer_id='.$formvars['layer_id'];
-			$this->debug->write("<p>file:users.php class:rolle->setClassStatus - Speichern des Status der Klassen zur Rolle:",4);
+			$this->debug->write("<p>file:rolle.php class:rolle->setClassStatus - Speichern des Status der Klassen zur Rolle:",4);
 			$this->database->execSQL($sql,4, $this->loglevel);
 		}
 	}
@@ -2083,69 +2160,84 @@ class pgdatabase {
     return $ret[1];    	
   }  
 
-  function execSQL($sql,$debuglevel, $loglevel) {
-  	switch ($this->loglevel) {
-  		case 0 : {
-  			$logsql=0;
-  		} break;
-  		case 1 : {
-  			$logsql=1;
-  		} break;
-  		case 2 : {
-  			$logsql=$loglevel;
-  		} break;
-  	}
-    # SQL-Statement wird nur ausgeführt, wenn DBWRITE gesetzt oder
-    # wenn keine INSERT, UPDATE und DELETE Anweisungen in $sql stehen.
-    # (lesend immer, aber schreibend nur mit DBWRITE=1)
-    if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
-      #echo "<br>".$sql;
-      $sql = "SET datestyle TO 'German';".$sql;
-      if($this->schema != ''){
-      	$sql = "SET search_path = ".$this->schema.", public;".$sql;
-      }
-      $query=pg_query($this->dbConn,$sql);
-      //$query=0;
-      if ($query==0) {
-				$errormessage = pg_last_error($this->dbConn);
-				header('error: true');		// damit ajax-Requests das auch mitkriegen
-        $ret[0]=1;
-        $ret[1]="Fehler bei SQL Anweisung:<br><br>\n\n".$sql."\n\n<br><br>".$errormessage;
-        echo "<br><b>".$ret[1]."</b>";
-        $this->debug->write("<br><b>".$ret[1]."</b>",$debuglevel);
-        if ($logsql) {
-          $this->logfile->write($this->commentsign." ".$ret[1]);
-        }
-      }
-      else {
-      	# Abfrage wurde erfolgreich ausgeführt
-        $ret[0]=0;
-        $ret[1]=$query;
-        $this->debug->write("<br>".$sql,$debuglevel);
-        # 2006-07-04 pk $logfile ersetzt durch $this->logfile
-        if ($logsql) {
-          $this->logfile->write($sql.';');
-        }
-      }
-      $ret[2]=$sql;
-    }
-    else {
-      # Es werden keine SQL-Kommandos ausgeführt
-      # Die Funktion liefert ret[0]=0, und zeigt damit an, daß kein Datenbankfehler aufgetreten ist,
-      $ret[0]=0;
-      # jedoch hat $ret[1] keine query_ID sondern auch den Wert 0
-      $ret[1]=0;
-      # Wenn $this->loglevel != 0 wird die sql-Anweisung in die logdatei geschrieben
-      # zusätzlich immer in die debugdatei
-      # 2006-07-04 pk $logfile ersetzt durch $this->logfile
-      if ($logsql) {
-        $this->logfile->write($sql.';');
-      }
-      $this->debug->write("<br>".$sql,$debuglevel);
-    }
+	function execSQL($sql, $debuglevel, $loglevel, $suppress_error_msg = false) {
+		$ret = array(); // Array with results to return
 
-    return $ret;
-  }
+		switch ($this->loglevel) {
+			case 0 : {
+				$logsql = 0;
+			} break;
+			case 1 : {
+				$logsql = 1;
+			} break;
+			case 2 : {
+				$logsql = $loglevel;
+			} break;
+		}
+		# SQL-Statement wird nur ausgeführt, wenn DBWRITE gesetzt oder
+		# wenn keine INSERT, UPDATE und DELETE Anweisungen in $sql stehen.
+		# (lesend immer, aber schreibend nur mit DBWRITE=1)
+		if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
+			#echo "<br>".$sql;
+			$sql = "SET datestyle TO 'German';".$sql;
+			if($this->schema != ''){
+				$sql = "SET search_path = " . $this->schema . ", public;" . $sql;
+			}
+			if ($suppress_error_msg) {
+				$query = @pg_query($this->dbConn, $sql);
+			}
+			else {
+				$query = @pg_query($this->dbConn, $sql);
+			}
+
+			//$query=0;
+			if ($query == 0) {
+				$ret[0] = 1;
+				$ret['success'] = false;
+				$errormessage = pg_last_error($this->dbConn);
+				#header('error: true');		// damit ajax-Requests das auch mitkriegen
+				$ret[1] = "Fehler bei SQL Anweisung:<br><br>\n\n" . $sql . "\n\n<br><br>" . $errormessage;
+				$ret['msg'] = $ret[1];
+				$ret['type'] = 'error';
+				if (!$suppress_error_msg) {
+					echo "<br><b>" . $ret[1] . "</b>";
+				}
+				$this->debug->write("<br><b>" . $ret[1] . "</b>", $debuglevel);
+				if ($logsql) {
+					$this->logfile->write($this->commentsign . " " . $ret[1]);
+				}
+			}
+			else {
+				# Abfrage wurde erfolgreich ausgeführt
+				$ret[0] = 0;
+				$ret['success'] = true;
+				$ret[1] = $query;
+				$ret['query'] = $ret[1]; 
+				$this->debug->write("<br>" . $sql, $debuglevel);
+				# 2006-07-04 pk $logfile ersetzt durch $this->logfile
+				if ($logsql) {
+					$this->logfile->write($sql . ';');
+				}
+			}
+			$ret[2] = $sql;
+		}
+		else {
+			# Es werden keine SQL-Kommandos ausgeführt
+			# Die Funktion liefert ret[0]=0, und zeigt damit an, daß kein Datenbankfehler aufgetreten ist,
+			$ret[0] = 0;
+			$ret['success'] = true;
+			# jedoch hat $ret[1] keine query_ID sondern auch den Wert 0
+			$ret[1] = 0;
+			# Wenn $this->loglevel != 0 wird die sql-Anweisung in die logdatei geschrieben
+			# zusätzlich immer in die debugdatei
+			# 2006-07-04 pk $logfile ersetzt durch $this->logfile
+			if ($logsql) {
+				$this->logfile->write($sql . ';');
+			}
+			$this->debug->write("<br>" . $sql, $debuglevel);
+		}
+		return $ret;
+	}
 
 	function read_epsg_codes($order = true){
     global $supportedSRIDs;
@@ -2219,7 +2311,7 @@ class db_mapObj {
 			$sql.=' WHERE g2r.stelle_ID='.$this->Stelle_ID.' AND g2r.user_id='.$this->User_ID;
 			$sql.=' AND g2r.id = g.id';
 		}
-		if($order != '')$sql.=' ORDER BY '.$order;
+		if($order != '')$sql.=' ORDER BY '. replace_semicolon($order);
 		else $sql.=' ORDER BY `order`';
 		#echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Groups - Lesen der Gruppen der Rolle:<br>".$sql,4);
@@ -2239,9 +2331,9 @@ class db_mapObj {
 		if($language != 'german') {
 			$name_column = "
 			CASE
-				WHEN `l.Name_" . $language . "` != \"\" THEN `l.Name_" . $language . "`
-				ELSE `l.Name`
-			END AS l.Name";
+				WHEN l.`Name_" . $language . "` != \"\" THEN l.`Name_" . $language . "`
+				ELSE l.`Name`
+			END AS Name";
 		}
 		else
 			$name_column = "l.Name";
@@ -2297,6 +2389,9 @@ class db_mapObj {
     $this->disabled_classes = $this->read_disabled_classes();
 		$i = 0;
     while ($rs=mysql_fetch_assoc($query)) {
+			$rs['Name'] = replace_params($rs['Name'], rolle::$layer_params);
+			$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);
+			$rs['connection'] = replace_params($rs['connection'], rolle::$layer_params);
 			$rs['classification'] = replace_params($rs['classification'], rolle::$layer_params);
 			if ($withClasses == 2 OR $rs['requires'] != '' OR ($withClasses == 1 AND $rs['aktivStatus'] != '0')) {
 				# bei withclasses == 2 werden für alle Layer die Klassen geladen,
@@ -2328,28 +2423,31 @@ class db_mapObj {
 
 		$sql = "
 			SELECT " .
-				(
-					(!$all_languages AND $language != 'german') ? "
-						CASE
-							WHEN `Name_" . $language . "`IS NOT NULL THEN `Name_" . $language . "`
-							ELSE `Name`
-						END AS Name
-					" : "Name"
-				) . ",
+				((!$all_languages AND $language != 'german') ? "
+					CASE
+						WHEN `Name_" . $language . "`IS NOT NULL THEN `Name_" . $language . "`
+						ELSE `Name`
+					END" : "
+					`Name`"
+				) . " AS Name,
 				`Name_low-german`,
 				`Name_english`,
 				`Name_polish`,
 				`Name_vietnamese`,
-				Class_ID,
-				Layer_ID,
-				Expression,
-				classification,
-				drawingorder,
-				text
+				`Class_ID`,
+				`Layer_ID`,
+				`Expression`,
+				`classification`,
+				`legendgraphic`,
+				`legendimagewidth`,
+				`legendimageheight`,
+				`drawingorder`,
+				`legendorder`,
+				`text`
 			FROM
-				classes
+				`classes`
 			WHERE
-				Layer_ID = " . $Layer_ID .
+				`Layer_ID` = " . $Layer_ID .
 				(
 					(!empty($classification)) ? " AND
 						(
@@ -2362,39 +2460,42 @@ class db_mapObj {
 				drawingorder,
 				Class_ID
 		";
-    #echo $sql.'<br>';
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Class - Lesen der Classen eines Layers:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
-    while($rs=mysql_fetch_assoc($query)) {
-      $rs['Style']=$this->read_Styles($rs['Class_ID']);
-      $rs['Label']=$this->read_Label($rs['Class_ID']);
-      #Anne
-      if($disabled_classes){
-				if($disabled_classes['status'][$rs['Class_ID']] == 2){
+		#echo $sql.'<br>';
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Class - Lesen der Classen eines Layers:<br>" . $sql, 4);
+		$query = mysql_query($sql);
+		if ($query == 0) { echo "<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__; return 0; }
+		$index = 0;
+		while ($rs = mysql_fetch_assoc($query)) {
+			$rs['Style'] = $this->read_Styles($rs['Class_ID']);
+			$rs['Label'] = $this->read_Label($rs['Class_ID']);
+			$rs['index'] = $index;
+			#Anne
+			if($disabled_classes){
+				if($disabled_classes['status'][$rs['Class_ID']] == 2) {
 					$rs['Status'] = 1;
-					for($i = 0; $i < count($rs['Style']); $i++){
-						if($rs['Style'][$i]['color'] != '' AND $rs['Style'][$i]['color'] != '-1 -1 -1'){
+					for($i = 0; $i < count($rs['Style']); $i++) {
+						if ($rs['Style'][$i]['color'] != '' AND $rs['Style'][$i]['color'] != '-1 -1 -1') {
 							$rs['Style'][$i]['outlinecolor'] = $rs['Style'][$i]['color'];
 							$rs['Style'][$i]['color'] = '-1 -1 -1';
-							if($rs['Style'][$i]['width'] == '')$rs['Style'][$i]['width'] = 3;
-							if($rs['Style'][$i]['minwidth'] == '')$rs['Style'][$i]['minwidth'] = 2;
-							if($rs['Style'][$i]['maxwidth'] == '')$rs['Style'][$i]['maxwidth'] = 4;
+							if($rs['Style'][$i]['width'] == '') $rs['Style'][$i]['width'] = 3;
+							if($rs['Style'][$i]['minwidth'] == '') $rs['Style'][$i]['minwidth'] = 2;
+							if($rs['Style'][$i]['maxwidth'] == '') $rs['Style'][$i]['maxwidth'] = 4;
 							$rs['Style'][$i]['symbolname'] = '';
 						}
 					}
 				}
-				elseif($disabled_classes['status'][$rs['Class_ID']] == '0'){
+				elseif ($disabled_classes['status'][$rs['Class_ID']] == '0') {
 					$rs['Status'] = 0;
 				}
 				else $rs['Status'] = 1;
-      }
-      else $rs['Status'] = 1;
+			}
+			else $rs['Status'] = 1;
 
-      $Classes[]=$rs;
-    }
-    return $Classes;
-  }
+			$Classes[] = $rs;
+			$index++;
+		}
+		return $Classes;
+	}
 
   function read_Styles($Class_ID) {
     $sql ='SELECT * FROM styles AS s,u_styles2classes AS s2c';

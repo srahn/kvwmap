@@ -5,7 +5,7 @@
  $strAttributeSelection="Attributauswahl";
  $strNameGeometryField="Geometrie";
  $strButtonGenerateShapeData="Exportieren";
- $strButtonCancel="Abbrechen";
+ $strButtonCancel="zurück zur Karte";
  $strRecordFromGLE="Datensatz aus der Sachdatenanzeige";
  $strRecordsFromGLE="Datens&auml;tze aus der Sachdatenanzeige";
  $strDownloadDocuments="Dokumente herunterladen";

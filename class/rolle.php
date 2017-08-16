@@ -21,22 +21,29 @@ class rolle {
 		$this->loglevel = 0;
 	}
 
+	/*
+	* Speichert den Status der Layergruppen
+	* @param $formvars array mit key group_<group_id> welcher den Status der Gruppe enthält 
+	*/
 	function setGroupStatus($formvars) {
-		$this->groupset=$this->getGroups('');
+		$this->groupset = $this->getGroups('');
 		# Eintragen des group_status=1 für Gruppen, die angezeigt werden sollen
-		for ($i=0;$i<count($this->groupset);$i++) {
-			if($formvars['group_'.$this->groupset[$i]['id']] !== NULL){
-				if ($formvars['group_'.$this->groupset[$i]['id']] == 1) {
-					$group_status=1;
-				}
-				else {
-					$group_status=0;
-				}
-				$sql ='UPDATE u_groups2rolle set status="'.$group_status.'"';
-				$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-				$sql.=' AND id='.$this->groupset[$i]['id'];
-				$this->debug->write("<p>file:rolle.php class:rolle->setGroupStatus - Speichern des Status der Gruppen zur Rolle:",4);
-				$this->database->execSQL($sql,4, $this->loglevel);
+		for ($i = 0; $i < count($this->groupset); $i++) {
+			if ($formvars['group_' . $this->groupset[$i]['id']] !== NULL) {
+				$group_status = ($formvars['group_' . $this->groupset[$i]['id']] == 1 ? 1 : 0);
+				$sql = "
+					UPDATE
+						`u_groups2rolle`
+					SET
+						`status` = '" . $group_status . "'
+					WHERE
+						`user_id` = " . $this->user_id . " AND
+						`stelle_id` = " . $this->stelle_id . " AND
+						`id` = " . $this->groupset[$i]['id'] . "
+				";
+				#echo '<br>Sql: ' . $sql;
+				$this->debug->write("<p>file:rolle.php class:rolle->setGroupStatus - Speichern des Status der Gruppen zur Rolle:", 4);
+				$this->database->execSQL($sql, 4, $this->loglevel);
 			}
 		}
 		return $formvars;
@@ -118,6 +125,9 @@ class rolle {
     if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		$i = 0;
 		while ($rs=mysql_fetch_assoc($query)) {
+			$rs['Name'] = replace_params($rs['Name'], rolle::$layer_params);
+			$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);		
+			$rs['connection'] = replace_params($rs['connection'], rolle::$layer_params);		
 			$layer[$i]=$rs;
 			$layer['layer_ids'][$rs['Layer_ID']] =& $layer[$i];
 			$layer['layer_ids'][$layer[$i]['requires']]['required'] = $rs['Layer_ID'];
@@ -303,6 +313,7 @@ class rolle {
 			$this->runningcoords=$rs['runningcoords'];
 			$this->showmapfunctions=$rs['showmapfunctions'];
 			$this->showlayeroptions=$rs['showlayeroptions'];
+			$this->menue_buttons=$rs['menue_buttons'];
 			$this->singlequery=$rs['singlequery'];
 			$this->querymode=$rs['querymode'];
 			$this->geom_edit_first=$rs['geom_edit_first'];		
@@ -351,6 +362,7 @@ class rolle {
 				WHERE
 					id IN (" . $selectable_layer_params . ")
 			";
+			#echo '<br>Sql: ' . $sql;
 			$params_result = $this->database->execSQL($sql, 4, 1);
 			if ($params_result[0]) {
 				echo '<br>Fehler bei der Abfrage der Layerparameter mit SQL: ' . $sql;
@@ -623,6 +635,15 @@ class rolle {
 		return $last_query;
 	}
 	
+	function get_last_search_layer_id(){
+		$sql = "SELECT layer_id FROM search_attributes2rolle WHERE name = '<last_search>' AND user_id = ".$this->user_id." AND stelle_id = ".$this->stelle_id;
+		$this->debug->write("<p>file:rolle.php class:rolle->get_last_search_layer_id - Abfragen der letzten Suche:<br>".$sql,4);
+		$query=mysql_query($sql,$this->database->dbConn);
+		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		$rs=mysql_fetch_assoc($query);
+		return $rs['layer_id'];
+	}
+	
 	function get_csv_attribute_selections(){
 		$sql = 'SELECT name FROM rolle_csv_attributes WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' ORDER BY name';
 		$this->debug->write("<p>file:rolle.php class:rolle->get_csv_attribute_selections - Abfragen der gespeicherten CSV-Attributlisten der Rolle:<br>".$sql,4);
@@ -679,16 +700,17 @@ class rolle {
 		}
 	}
 
-	function delete_search($search, $layer_id){
+	function delete_search($search, $layer_id = NULL){
 		if($search != ''){
-			$sql = 'DELETE FROM search_attributes2rolle WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' AND layer_id='.$layer_id.' AND name = "'.$search.'"';
+			$sql = 'DELETE FROM search_attributes2rolle WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' AND name = "'.$search.'"';
+			if($layer_id != NULL)$sql.=' AND layer_id='.$layer_id;
 			$this->debug->write("<p>file:rolle.php class:rolle->delete_search - Loeschen einer Suchabfrage:",4);
 			$this->database->execSQL($sql,4, $this->loglevel);
 		}
 	}
 
 	function getsearches($layer_id){
-		$sql = 'SELECT distinct a.name, a.layer_id, b.Name as layername FROM search_attributes2rolle as a, layer as b WHERE a.layer_id = b.Layer_ID AND user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+		$sql = 'SELECT distinct a.name, a.layer_id, b.Name as layername FROM search_attributes2rolle as a, layer as b WHERE a.name != \'<last_search>\' AND a.layer_id = b.Layer_ID AND user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 		if($layer_id != '') $sql.= ' AND a.layer_id='.$layer_id;
 		$sql .= ' ORDER BY b.Name, a.name';
 		$this->debug->write("<p>file:rolle.php class:rolle->getsearches - Abfragen der gespeicherten Suchabfragen der Rolle:<br>".$sql,4);
@@ -1248,6 +1270,7 @@ class rolle {
 		# speichern des Zustandes des Menües
 		# hide=0 Menü ist zu sehen
 		# hide=1 Menü wird nicht angezeigt
+		$this->hideMenue = $hide;
 		$sql ="UPDATE rolle SET hidemenue='".$hide."'";
 		$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 		#echo $sql;
@@ -1303,27 +1326,37 @@ class rolle {
 		return $ret;
 	}
 	
-	function getLayerComments($id) {
-		$sql ='SELECT id, name, layers, query FROM rolle_saved_layers WHERE';
-		$sql.=' user_id='.$this->user_id;
-		$sql.=' AND stelle_id='.$this->stelle_id;
-		if($id!=''){
-			$sql.=' AND id="'.$id.'"';
-		}
-		$sql.=' ORDER BY name';
-		#echo '<br>'.$sql;
-		$queryret=$this->database->execSQL($sql,4, 0);
+	function getLayerComments($id, $user_id) {
+		$where_id = ($id != '' ? " AND id = " . $id : "");
+		$sql = "
+			SELECT
+				`id`,
+				`name`,
+				`layers`,
+				`query`
+			FROM
+				`rolle_saved_layers`
+			WHERE
+				`user_id` = " . $user_id . " AND
+				`stelle_id` = " . $this->stelle_id .
+				$where_id . "
+			ORDER BY
+				`name`
+		";
+		#echo '<br>Sql: ' . $sql;
+
+		$queryret = $this->database->execSQL($sql, 4, 0);
 		if ($queryret[0]) {
 			# Fehler bei Datenbankanfrage
-			$ret[0]=1;
-			$ret[1]='<br>Fehler beim Laden der Themenauswahl.<br>'.$ret[1];
+			$ret[0] = 1;
+			$ret[1] = '<br>Fehler beim Laden der Themenauswahl.<br>' . $ret[1];
 		}
 		else {
-			while ($rs=mysql_fetch_array($queryret[1])) {
-				$layerComments[]=$rs;
+			while ($rs = mysql_fetch_array($queryret[1])) {
+				$layerComments[] = $rs;
 			}
-			$ret[0]=0;
-			$ret[1]=$layerComments;
+			$ret[0] = 0;
+			$ret[1] = $layerComments;
 		}
 		return $ret;
 	}
