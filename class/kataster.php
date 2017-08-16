@@ -2014,8 +2014,8 @@ class flurstueck {
       $errmsg.='in line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
-		if($without_temporal_filter AND $ret[1]['hist_alb'] == 0){
-			if($ret[1]['endet'] != '')rolle::$hist_timestamp = DateTime::createFromFormat('d.m.Y H:i:s', $ret[1]['beginnt'])->format('Y-m-d\TH:i:s\Z');
+		if($without_temporal_filter){
+			if($ret[1]['endet'] != '' OR $ret[1]['hist_alb'])rolle::$hist_timestamp = DateTime::createFromFormat('d.m.Y H:i:s', $ret[1]['beginnt'])->format('Y-m-d\TH:i:s\Z');			
 			else rolle::$hist_timestamp = '';
 		}
     $rs=$ret[1];

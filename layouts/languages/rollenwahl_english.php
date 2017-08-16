@@ -10,7 +10,7 @@
 	$strMapProjection="1.Map Projection (EPSG-Code)";
 	$strSecondMapProjection="2.Map Projection (EPSG-Code)";
 	$strRunningCoords="Coordinates";
-	$strShowMapFunctions="Show map functions bar";
+	$strMapFunctions="Show map functions bar";
 	$strMapSize="Map Size";
 	$strAutoResize="auto fit";
 	$strTask="Task";
