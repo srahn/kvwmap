@@ -183,7 +183,7 @@ if [ $error = "NO"] ; then
 
   if [ $TRANSACTION = "YES" ] ; then
     # copy data from alkis import schema to original schema
-    psql -h $POSTGRES_HOST -U $POSTGRES_USER -c "INSERT SELECT clone_schema('${POSTGRES_SCHEMA}', '${POSTGRES_SCHEMA}_neu', true, false)" $POSTGRES_DBNAME
+    psql -h $POSTGRES_HOST -U $POSTGRES_USER -c "SELECT exec_sql(query) FROM ${POSTGRES_SCHEMA}_neu.queries" $POSTGRES_DBNAME
   fi
   
 fi
