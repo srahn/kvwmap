@@ -7,7 +7,7 @@ POSTGRES_DBNAME="alkis"
 POSTGRES_SCHEMA="aaa_ogr"
 
 DATA_PATH="/var/www/data/alkis/ff/eingang"
-GFS_TEMPLATE="/var/www/data/alkis/NAS_Template.gfs"
+GFS_TEMPLATE="/var/www/apps/kvwmap/alkis-schema.gfs"
 ARCHIV_PATH="/var/www/data/alkis/ff/eingelesen"
 TEMP_PATH="/var/www/data/alkis/ff/temp"
 LOG_PATH="/var/www/data/alkis/ff/logs"
@@ -17,7 +17,7 @@ declare -i LOG_LEVEL=1 # 0 nicht gelogged, 1 nur auf strout, 2 nur in datei, 3 s
 
 UNZIPPASSWORD="secret2"
 
-RENAME="YES"
+RENAME="No" # Bei Verwendung der richtigen gfs Datei muss nicht umbenannt werden.
 RENAME_SCRIPT="/var/www/apps/xmi2db/converter/rename_nas.rb"
 
 OGR_BINPATH="/usr/local/gdal/bin" # inside the gdal container

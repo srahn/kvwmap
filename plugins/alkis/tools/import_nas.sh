@@ -17,9 +17,6 @@ rename_nas_file() {
 }
 
 load_nas_file() {
-  log "Kopiere $CONFIG_PATH/alkis_schema.gfs nach $GFS_FILE"
-  cp $CONFIG_PATH/alkis_schema.gfs $GFS_FILE
-
   log "ogr2ogr import Datei: ${IMPORT_FILE}"
 
   if [ $TRANSACTION = "YES" ] ; then
@@ -28,7 +25,7 @@ load_nas_file() {
     ACTIVE_SCHEMA="${POSTGRES_SCHEMA}"
   fi
 
-  ${OGR_BINPATH}/ogr2ogr -f "PostgreSQL" --config -nlt CONVERT_TO_LINEAR -append PG:"dbname=${POSTGRES_DBNAME} active_schema=${ACTIVE_SCHEMA} user=${POSTGRES_USER} host=pgsql port=5432 password=${POSTGRES_PASSWORD}" -a_srs EPSG:25832 "$IMPORT_FILE"
+  ${OGR_BINPATH}/ogr2ogr -f "PostgreSQL" --config -nlt CONVERT_TO_LINEAR -append PG:"dbname=${POSTGRES_DBNAME} active_schema=${ACTIVE_SCHEMA} user=${POSTGRES_USER} host=pgsql port=5432 password=${POSTGRES_PASSWORD}" -a_srs EPSG:25832 -oo NAS_GFS_TEMPLATE=$GFS_TEMPLATE -oo NAS_NO_RELATION_LAYER "$IMPORT_FILE"
 #  /usr/local/gdal/bin/ogr2ogr -f "PostgreSQL" --config PG_USE_COPY NO -nlt CONVERT_TO_LINEAR -append PG:"dbname=${POSTGRES_DBNAME} active_schema=${POSTGRES_SCHEMA} user=${POSTGRES_USER} host=pgsql port=5432 password=${POSTGRES_PASSWORD}" /var/www/data/alkis/ff/temp/NBA_testpostgis/NBA_testpostgis3_160907_02von24_renamed.xml
 }
 
@@ -160,7 +157,6 @@ find $TEMP_PATH -iname '*.xml' | sort |  while read NAS_FILE ; do
     # Einlesen mit ogr2ogr
     IMPORT_FILENAME=${IMPORT_FILE##*/}
     IMPORT_BASENAME=${IMPORT_FILENAME%.*}
-    GFS_FILE="${NAS_DIR}/${IMPORT_BASENAME}.gfs"
 
     load_nas_file
 
