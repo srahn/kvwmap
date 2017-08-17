@@ -13,6 +13,11 @@ include(PLUGINS . 'wasserrecht/model/gewaesserbenutzungen.php');
 include(PLUGINS . 'wasserrecht/model/gewaesserbenutzungen_umfang.php');
 include(PLUGINS . 'wasserrecht/model/gewaesserbenutzungen_art.php');
 include(PLUGINS . 'wasserrecht/model/gewaesserbenutzungen_zweck.php');
+include(PLUGINS . 'wasserrecht/model/gewaesserbenutzungen_wee_satz.php');
+include(PLUGINS . 'wasserrecht/model/gewaesserbenutzungen_art_benutzung.php');
+include(PLUGINS . 'wasserrecht/model/mengenbestimmung.php');
+include(PLUGINS . 'wasserrecht/model/teilgewaesserbenutzungen.php');
+include(PLUGINS . 'wasserrecht/model/teilgewaesserbenutzungen_art.php');
 include(PLUGINS . 'wasserrecht/model/wasserrechtliche_zulassungen.php');
 include(PLUGINS . 'wasserrecht/model/wasserrechtliche_zulassungen_gueltigkeit.php');
 include(PLUGINS . 'wasserrecht/model/WRZProGueltigkeitsJahr.php');
@@ -20,6 +25,22 @@ include(PLUGINS . 'wasserrecht/model/WRZProGueltigkeitsJahr.php');
 require_once (CLASSPATH . '/../vendor/autoload.php');
 // include(PLUGINS . 'wasserrecht/view/KvwmapJodDocumentConverter.class.php');
 include(PLUGINS . 'wasserrecht/view/create_pdf.php');
+
+function startsWith($haystack, $needle)
+{
+    $length = strlen($needle);
+    return (substr($haystack, 0, $length) === $needle);
+}
+
+function endsWith($haystack, $needle)
+{
+    $length = strlen($needle);
+    if ($length == 0) {
+        return true;
+    }
+    
+    return (substr($haystack, -$length) === $needle);
+}
 
 /**
 * Anwendungsfälle
@@ -66,13 +87,27 @@ $this->layer_names = $layer_names;
 // print_r($_POST);
 // print_r($_REQUEST);
 
-// if(isset($_POST["post_action"]) && $_POST["post_action"] === "aufforderung_date_insert")
+// if(!empty($_POST["post_action"]))
 // {
 //     $parts = parse_url($url);
 //     print_r($_GET);
     
-//     $this->go="wasserentnahmebenutzer";
+//     $this->go=htmlspecialchars($_POST["post_action"]);
 // }
+
+if($_SERVER ["REQUEST_METHOD"] == "POST")
+{
+//     print_r($_POST);
+    
+    foreach($_POST as $key => $value)
+    {
+        if(startsWith($key, "erklaerung_"))
+        {
+            $this->go = "wasserentnahmeentgelt_erklaerung_der_entnahme";
+            break;
+        }
+    }
+}
 
 switch($this->go){
 

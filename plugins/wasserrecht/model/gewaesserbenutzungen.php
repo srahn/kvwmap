@@ -6,51 +6,50 @@ class Gewaesserbenutzungen extends WrPgObject {
 	public $gewaesserbenutzungUmfang;
 	public $gewaesserbenutzungArt;
 	public $gewaesserbenutzungZweck;
+	public $teilgewaesserbenutzungen;
 
-	public function find_where_with_umfang($where, $order = NULL, $select = '*') {
+	public function find_where_with_subtables($where, $order = NULL, $select = '*') {
 	    $gewaesserbenutzungen = $this->find_where($where, $order, $select);
 	    if(!empty($gewaesserbenutzungen))
 	    {
-	        $gwu = new GewaesserbenutzungenUmfang($this->gui);
-	        
 	        foreach ($gewaesserbenutzungen AS $gewaesserbenutzung)
 	        {
-	            if(!empty($gewaesserbenutzung->data['umfang']))
+	            if(!empty($gewaesserbenutzung))
 	            {
-// 	                echo 'id=' . $gewaesserbenutzung->data['umfang'];
-	                $gewaesserbenutzungUmfang = $gwu->find_where('id=' . $gewaesserbenutzung->data['umfang']);
-	                if(!empty($gewaesserbenutzungUmfang))
+	                $gwu = new GewaesserbenutzungenUmfang($this->gui);
+	                if(!empty($gewaesserbenutzung->data['umfang']))
 	                {
-	                    $gewaesserbenutzung->gewaesserbenutzungUmfang = $gewaesserbenutzungUmfang[0];
+	                    // 	                echo 'id=' . $gewaesserbenutzung->data['umfang'];
+	                    $gewaesserbenutzungUmfang = $gwu->find_where('id=' . $gewaesserbenutzung->data['umfang']);
+	                    if(!empty($gewaesserbenutzungUmfang))
+	                    {
+	                        $gewaesserbenutzung->gewaesserbenutzungUmfang = $gewaesserbenutzungUmfang[0];
+	                    }
 	                }
-	            }
-	        }
-	        
-	        $gwa = new GewaesserbenutzungenArt($this->gui);
-	        
-	        foreach ($gewaesserbenutzungen AS $gewaesserbenutzung)
-	        {
-	            if(!empty($gewaesserbenutzung->data['art']))
-	            {
-	                $gewaesserbenutzungArt = $gwa->find_where('id=' . $gewaesserbenutzung->data['art']);
-	                if(!empty($gewaesserbenutzungArt))
+	                
+	                $gwa = new GewaesserbenutzungenArt($this->gui);
+	                if(!empty($gewaesserbenutzung->data['art']))
 	                {
-	                    $gewaesserbenutzung->gewaesserbenutzungArt = $gewaesserbenutzungArt[0];
+	                    $gewaesserbenutzungArt = $gwa->find_where('id=' . $gewaesserbenutzung->data['art']);
+	                    if(!empty($gewaesserbenutzungArt))
+	                    {
+	                        $gewaesserbenutzung->gewaesserbenutzungArt = $gewaesserbenutzungArt[0];
+	                    }
 	                }
-	            }
-	        }
-	        
-	        $gwz = new GewaesserbenutzungenZweck($this->gui);
-	        
-	        foreach ($gewaesserbenutzungen AS $gewaesserbenutzung)
-	        {
-	            if(!empty($gewaesserbenutzung->data['zweck']))
-	            {
-	                $gewaesserbenutzungZweck = $gwz->find_where('id=' . $gewaesserbenutzung->data['zweck']);
-	                if(!empty($gewaesserbenutzungZweck))
+	                
+	                $gwz = new GewaesserbenutzungenZweck($this->gui);
+	                if(!empty($gewaesserbenutzung->data['zweck']))
 	                {
-	                    $gewaesserbenutzung->gewaesserbenutzungZweck = $gewaesserbenutzungZweck[0];
+	                    $gewaesserbenutzungZweck = $gwz->find_where('id=' . $gewaesserbenutzung->data['zweck']);
+	                    if(!empty($gewaesserbenutzungZweck))
+	                    {
+	                        $gewaesserbenutzung->gewaesserbenutzungZweck = $gewaesserbenutzungZweck[0];
+	                    }
 	                }
+	                
+	                $teilgewaesserbenutzung = new Teilgewaesserbenutzungen($this->gui);
+	                $teilgewaesserbenutzungen = $teilgewaesserbenutzung->find_where_with_subtables('gewaesserbenutzungen=' . $gewaesserbenutzung->getId(), 'id');
+	                $gewaesserbenutzung->teilgewaesserbenutzungen = $teilgewaesserbenutzungen;
 	            }
 	        }
 	    }

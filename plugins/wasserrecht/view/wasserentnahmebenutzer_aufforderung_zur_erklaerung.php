@@ -16,18 +16,19 @@ include_once ('includes/header.php');
 		  
 		  if($_SERVER ["REQUEST_METHOD"] == "POST")
 		  {
-// 		      print_r($_POST);
+		      print_r($_POST);
 
 		      foreach($_POST as $key => $value)
 		      {
-		          if(substr($key, 0, strlen($key) - 1) === "auswahl_checkbox_")
+		          if(startsWith($key, "auswahl_checkbox_"))
 		          {
 // 		              echo '<br />Key = ' . $key . '<br />';
 // 		              echo 'Value= ' . $value;
 		              
 		              $aufforderungWrz1 = new WasserrechtlicheZulassungen($this);
-		              $aufforderungWrzId = substr($key, strlen($key) - 1, strlen($key));
-// 		              echo "<br />aufforderungWrzId: " . $aufforderungWrzId;
+		              $lastIndex = strripos($key, "_");
+		              $aufforderungWrzId = substr($key, $lastIndex + 1);
+// 		              echo "<br />lastIndex: " . $lastIndex . " aufforderungWrzId: " . $aufforderungWrzId;
 		              $aufforderungWrz2 = $aufforderungWrz1->find_by_id($this, 'id', $aufforderungWrzId);
 		              if(!empty($aufforderungWrz2) && empty($aufforderungWrz2->getAufforderungDatumAbsend()))
 		              {
@@ -271,7 +272,7 @@ include_once ('includes/header.php');
         		  {
         		      $wasserrechtlicheZulassungen = $wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen;
         		      
-        		      //     		  var_dump($wasserrechtlicheZulassungen);
+        		      //var_dump($wasserrechtlicheZulassungen);
         		      foreach($wasserrechtlicheZulassungen AS $wrz)
         		      {
         		          if(!empty($wrz) && $getYear === $wrz->gueltigkeitsJahr)
@@ -280,72 +281,95 @@ include_once ('includes/header.php');
         		              {
         		                  if(empty($getAdressat) || $getAdressat === $wrz->adressat->getId())
         		                  {
+//         		                      var_dump($wrz);
         		                      
-    //     		                      var_dump($wrz);
-            		                      ?>
-                    		          	<tr>
-                    		          		<td style="background-color: inherit;">
-                    		          			<?php 
-                        		          			$datumAbsend = $wrz->getAufforderungDatumAbsend();
-                        		          			if(empty($datumAbsend))
-                        		          			{
-                        		          			    ?>
-                        		          				<input type="checkbox" name="auswahl_checkbox_<?php echo $wrz->getId(); ?>">
-                        		          		<?php
-                        		          			} 
-                    		          			?>
-                    		          		</td>
-                    		          		<td>
-                    		          			<?php 
-                    		          			     echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Anlagen'] . '&value_anlage_id=' . $wrz->anlagen->getId() . '&operator_anlage_id==">' . $wrz->anlagen->getName() . '</a>';
-                    		          			?>
-                    		          		</td>
-                    		          		<td>
-                    		          			<?php 
-                    		          			     echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Wasserrechtliche_Zulassungen'] . '&value_wrz_id=' . $wrz->getId() . '&operator_wrz_id==">' . $wrz->getName() . '</a>';
-                //     		          			     echo $wrz->getName();
-                //     		          			     var_dump($wrz);
-                    		          			?>
-                    		          		</td>
-                    		          		<td>
-                    		          			<?php
-                    		          			     if(!empty($wrz->gewaesserbenutzungen) && !empty($wrz->gewaesserbenutzungen[0]) && !empty($wrz->gewaesserbenutzungen[0]->gewaesserbenutzungUmfang))
-                    		          			     {
-                    		          			         echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Gewaesserbenutzungen_Umfang'] . '&value_id=' . $wrz->gewaesserbenutzungen[0]->gewaesserbenutzungUmfang->getId() . '&operator_id==">' . $wrz->gewaesserbenutzungen[0]->gewaesserbenutzungUmfang->getUmfang() . '</a>';
-                    		          			     }
-                    		          			?>
-                    		          		</td>
-                    		          		<td>
-                    		          			<?php 
-                        		          			if(!empty($wrz->gewaesserbenutzungen) && !empty($wrz->gewaesserbenutzungen[0]))
-                        		          			{
-                    		          			         echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Gewaesserbenutzungen'] . '&value_id=' . $wrz->gewaesserbenutzungen[0]->getId() . '&operator_id==">' . $wrz->gewaesserbenutzungen[0]->getKennummer() . '</a>';
-                        		          			}
-                    		          			?>
-                    		          		</td>
-                    		          		<td>
-                    		          			<?php
-                    		          			     echo '<a style="color: red; text-decoration: underline;" href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Wasserrechtliche_Zulassungen'] . '&value_wrz_id=' . $wrz->getId() . '&operator_wrz_id==">' . $wrz->gueltigkeit->getHinweis() . '</a>';
-                    		          			?>
-                    		          		</td>
-                    		          		<td>
-                    		          			<?php
-                    		          			     echo $wrz->getAufforderungDatumAbsendHTML();
-                    		          			?>
-                    		          		</td>
-                    		          		<td>
-                    		          				<form action="index.php" id="erklaerung_form_<?php echo $wrz->getId(); ?>" accept-charset="" method="POST">
-                    		          					<input type="hidden" name="go" value="wasserentnahmeentgelt">
-    													<button name="erklaerung_<?php echo $wrz->getId(); ?>" value="erklaerung_<?php echo $wrz->getId(); ?>" type="submit" id="erklaerung_button_<?php echo $wrz->getId(); ?>">Erklärung</button>
-    												</form>
-                    		          		</td>
-                    		          		<td>
-                    		          			<?php
-                    		          			     echo $wrz->getErklaerungDatumHTML();
-                    		          			?>
-                    		          		</td>
-                    		          	</tr>
-                    		       <?php
+        		                      $gewaesserbenutzungen = $wrz->gewaesserbenutzungen;
+//         		                      var_dump($gewaesserbenutzungen);
+        		                      
+        		                      $gewaesserbenutzungen_count = 1;
+        		                      if(!empty($gewaesserbenutzungen))
+        		                      {
+        		                          $gewaesserbenutzungen_count = count($gewaesserbenutzungen);
+        		                      }
+        		                      
+        		                      for ($i = 0; $i < $gewaesserbenutzungen_count; $i++) 
+        		                      {
+        		                          $gewaesserbenutzung = $gewaesserbenutzungen[$i];
+//         		                          echo "wrz_id: ". $wrz->getId() . " i: " . $i;
+        		                          
+        		                          ?>
+        		                          <tr>
+                        		          		<td style="background-color: inherit;">
+                        		          			<?php 
+                            		          			$datumAbsend = $wrz->getAufforderungDatumAbsend();
+                            		          			if(empty($datumAbsend))
+                            		          			{
+                            		          			    ?>
+                            		          				<input type="checkbox" name="auswahl_checkbox_<?php echo (empty($gewaesserbenutzung) ? "0" : $gewaesserbenutzung->getId()) . "_" . $wrz->getId(); ?>">
+                            		          		<?php
+                            		          			} 
+                        		          			?>
+                        		          		</td>
+                        		          		<td>
+                        		          			<?php 
+                        		          			     echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Anlagen'] . '&value_anlage_id=' . $wrz->anlagen->getId() . '&operator_anlage_id==">' . $wrz->anlagen->getName() . '</a>';
+                        		          			?>
+                        		          		</td>
+                        		          		<td>
+                        		          			<?php 
+                        		          			     echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Wasserrechtliche_Zulassungen'] . '&value_wrz_id=' . $wrz->getId() . '&operator_wrz_id==">' . $wrz->getName() . '</a>';
+                    //     		          			     echo $wrz->getName();
+                    //     		          			     var_dump($wrz);
+                        		          			?>
+                        		          		</td>
+                        		          		<td>
+                        		          			<?php
+                        		          			     if(!empty($gewaesserbenutzung) && !empty($gewaesserbenutzung->gewaesserbenutzungUmfang))
+                        		          			     {
+                        		          			         echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Gewaesserbenutzungen_Umfang'] . '&value_id=' . $gewaesserbenutzung->gewaesserbenutzungUmfang->getId() . '&operator_id==">' . $gewaesserbenutzung->gewaesserbenutzungUmfang->getUmfang() . '</a>';
+                        		          			     }
+                        		          			?>
+                        		          		</td>
+                        		          		<td>
+                        		          			<?php 
+                        		          			    if(!empty($gewaesserbenutzung))
+                            		          			{
+                            		          			    echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Gewaesserbenutzungen'] . '&value_id=' . $gewaesserbenutzung->getId() . '&operator_id==">' . $gewaesserbenutzung->getKennummer() . '</a>';
+                            		          			}
+                        		          			?>
+                        		          		</td>
+                        		          		<td>
+                        		          			<?php
+                        		          			     echo '<a style="color: red; text-decoration: underline;" href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Wasserrechtliche_Zulassungen'] . '&value_wrz_id=' . $wrz->getId() . '&operator_wrz_id==">' . $wrz->gueltigkeit->getHinweis() . '</a>';
+                        		          			?>
+                        		          		</td>
+                        		          		<td>
+                        		          			<?php
+                        		          			     echo $wrz->getAufforderungDatumAbsendHTML();
+                        		          			?>
+                        		          		</td>
+                        		          		<td>
+                        		          				<?php 
+                        		          				    if(empty($wrz->getErklaerungDatum()))
+                        		          				    {
+                        		          				?>
+                        		          					<!-- <form action="index.php" id="erklaerung_form_<?php echo (empty($gewaesserbenutzung) ? "0" : $gewaesserbenutzung->getId()) . "_" . $wrz->getId(); ?>" accept-charset="" method="POST"> -->
+                        		          						<!-- <input type="hidden" name="go" value="wasserentnahmeentgelt_erklaerung_der_entnahme"> -->
+<!--                         		          						<input type="hidden" name="post_action_1" value="wasserentnahmeentgelt_erklaerung_der_entnahme"> -->
+        														<button name="erklaerung_<?php echo (empty($gewaesserbenutzung) ? "0" : $gewaesserbenutzung->getId()) . "_" . $wrz->getId(); ?>" value="erklaerung_<?php echo (empty($gewaesserbenutzung) ? "0" : $gewaesserbenutzung->getId()) . "_" . $wrz->getId(); ?>" type="submit" id="erklaerung_button_<?php echo (empty($gewaesserbenutzung) ? "0" : $gewaesserbenutzung->getId()) . "_" . $wrz->getId(); ?>">Erklärung</button>
+        													<!-- </form> -->
+                        		          				<?php
+                        		          				    }
+                        		          				?>
+                        		          		</td>
+                        		          		<td>
+                        		          			<?php
+                        		          			     echo $wrz->getErklaerungDatumHTML();
+                        		          			?>
+                        		          		</td>
+                        		          	</tr>
+                    		           <?php
+        		                      }
         		                  }
         		              }
         		          }
@@ -362,7 +386,8 @@ include_once ('includes/header.php');
 				</div>
 				<div class="wasserrecht_display_table_row">
 					<div class="wasserrecht_display_table_cell_caption">
-						<input type="hidden" name="go" value="wasserentnahmebenutzer">
+ 						<input type="hidden" name="go" value="wasserentnahmebenutzer_aufforderung_zur_erklaerung">
+<!-- 						<input type="hidden" name="post_action_2" value="wasserentnahmebenutzer_aufforderung_zur_erklaerung"> -->
            				<input type="submit" value="Aufforderung erstellen!" id="aufforderung_button" name="aufforderung" />
 					</div>
 				</div>

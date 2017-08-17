@@ -13,7 +13,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 
 	public function find_gueltigkeitsjahre($gui) {
 	    
-		$results = $this->find_where('gueltigkeit IS NOT NULL');
+		$results = $this->find_where('gueltigkeit IS NOT NULL', 'id');
 		$wrzProGueltigkeitsJahr = new WRZProGueltigkeitsJahr();
 		
 		if(!empty($results))
@@ -118,7 +118,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	        
 	        //get the 'Gewaesserbenutzungen'
 	        $gewaesserbenutzung = new Gewaesserbenutzungen($gui);
-	        $gewaesserbenutzungen = $gewaesserbenutzung->find_where_with_umfang('wasserrechtliche_zulassungen=' . $result->getId());
+	        $gewaesserbenutzungen = $gewaesserbenutzung->find_where_with_subtables('wasserrechtliche_zulassungen=' . $result->getId());
 	        $result->gewaesserbenutzungen = $gewaesserbenutzungen;
 	    }
 	    

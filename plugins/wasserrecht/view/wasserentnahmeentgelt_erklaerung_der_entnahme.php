@@ -10,36 +10,52 @@ include_once ('includes/header.php');
 
 <?php
 $wrz = null;
-$erklaerungWrz = new WasserrechtlicheZulassungen($this);
 		
-// 		  print_r($_REQUEST); 
+//print_r($_REQUEST); 
 		  
-// 		  if($_SERVER ["REQUEST_METHOD"] == "POST")
-// 		  {
-// 		      print_r($_POST);
+if($_SERVER ["REQUEST_METHOD"] == "POST")
+{
+    print_r($_POST);
 
-              foreach($_REQUEST as $key => $value)
-		      {
-		          if(substr($key, 0, strlen($key) - 1) === "erklaerung_")
-		          {
-		              $erklaerungWrzId = substr($value, strlen($value) - 1, strlen($value));
-		              $wrz = $erklaerungWrz->find_by_id($this, 'id', $erklaerungWrzId);
-// 		              echo "<br />erklaerungWrzId: " . $erklaerungWrzId;
-		              if(!empty($wrz) && empty($wrz->getErklaerungDatum()))
-		              {
-		                  //echo $erklaerungWrz2->toString();
-		                  $wrz->insertErklaerungDatum();
-		              }
+    foreach($_REQUEST as $key => $value)
+    {
+        if(substr($key, 0, strlen($key) - 1) === "erklaerung_freigeben_")
+        {
+            $erklaerungFreigebenWrzId = substr($value, strlen($value) - 1, strlen($value));
+            $erklaerungFreigebenWrz = new WasserrechtlicheZulassungen($this);
+            $wrz = $erklaerungFreigebenWrz->find_by_id($this, 'id', $erklaerungFreigebenWrzId);
+            if(!empty($wrz))
+            {
+                $gewaesserbenutzungErklaerungFreigegeben = $wrz->gewaesserbenutzungen[0];
+                if(!empty($gewaesserbenutzungErklaerungFreigegeben))
+                {
+                    $gewaesserbenutzungErklaerungFreigegebenId = $gewaesserbenutzungErklaerungFreigegeben->getId();
+                }
+            }
+        }
+        elseif(startsWith($key, "erklaerung_"))
+		{
+		    $lastIndex = strripos($key, "_");
+		    $erklaerungWrzId = substr($key, $lastIndex + 1);
+// 		    echo "<br />lastIndex: " . $lastIndex . " erklaerungWrzId: " . $erklaerungWrzId;
+		    $erklaerungWrz = new WasserrechtlicheZulassungen($this);
+		    $wrz = $erklaerungWrz->find_by_id($this, 'id', $erklaerungWrzId);
+		    if(!empty($wrz) && empty($wrz->getErklaerungDatum()))
+		    {
+		        //echo $erklaerungWrz2->toString();
+		        $wrz->insertErklaerungDatum();
+		    }
 		              
-		              break;
-		          }
-		      }
-// 		  }
+		    break;
+		 }
+    }
+}
 
 //try to find the first WRZ if, no wrz was given
 if(empty($wrz))
 {
-    $results = $erklaerungWrz->find_where('1=1', 'id');
+    $defaultWrz = new WasserrechtlicheZulassungen($this);
+    $results = $defaultWrz->find_where('1=1', 'id');
     
     if(!empty($results) && count($results) > 0)
     {

@@ -105,6 +105,11 @@ $(document).ready(function() {
             e.preventDefault();
         }
     });
+    
+//  $('form').submit(function(e){
+//         alert($('form').attr('id'));
+//         e.preventDefault(e);
+//      });
 });
 
 // function setAuswahlToHiddenForm(id, key, value)
@@ -124,8 +129,6 @@ $(document).ready(function() {
 // $(document).ready(function() {
 //     //option A
 //     $("#aufforderung_form").submit(function(e){
-		
-        
 // //         alert($("form").attr('action'));
 // //         e.preventDefault(e);
 // //         $('form').attr('action', "index.php?go=wasserentnahmebenutzer&request=post").submit();

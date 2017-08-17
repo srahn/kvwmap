@@ -31,4 +31,11 @@ abstract class WrPgObject extends PgObject
     public function toString() {
         return "id: " . $this->getId() . " name: " . $this->getName();
     }
+    
+    public function addToArray(&$array, $key, $value) {
+        if(!empty($value))
+        {
+            $array[$key] = $value;
+        }
+    }
 }
