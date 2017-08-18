@@ -493,6 +493,10 @@ a.menuered:hover {
 	background-image: url(../graphics/use_for_dataset.png);
 }
 
+.copy_dataset{
+	background-image: url(../graphics/copy_dataset.png);
+}
+
 .datensatz_exportieren{
 	background-image: url(../graphics/datensatz_exportieren.png);
 }
@@ -925,7 +929,7 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 	transition: opacity 2s ease-out;
 }
 
-.message_box_hidden {
+.message_box_hidden, .hidden {
 	display: none;
 }
 

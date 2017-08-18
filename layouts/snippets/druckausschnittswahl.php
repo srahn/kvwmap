@@ -261,8 +261,6 @@ function rotate_print_extent(angle){
 								$scale = $this->map_scaledenom;
 								for($i = 0; $i < count($layerset); $i++){
 									if($layerset[$i]['aktivStatus'] != 0 
-									AND ($layerset[$i]['minscale'] < $scale OR $layerset[$i]['minscale'] == 0) 
-									AND ($layerset[$i]['maxscale'] > $scale OR $layerset[$i]['maxscale'] == 0)
 									AND !empty($layerset[$i]['Class'])){
 										if($layerset[$i]['alias'] != '')$name = $layerset[$i]['alias'];
 										else $name = $layerset[$i]['Name'];

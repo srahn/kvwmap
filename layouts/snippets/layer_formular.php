@@ -10,7 +10,7 @@
 	Text[3]=["Hilfe:","Das Data-Feld wird vom Mapserver für die Kartendarstellung verwendet (siehe Mapserver-Doku). Etwaige Schemanamen müssen hier angegeben werden."];
 	Text[4]=["Hilfe:","Bei Punktlayern kann durch Angabe dieses Wertes die Clusterbildung aktiviert werden. Der Wert ist der Radius in Pixeln, in dem Punktobjekte zu einem Cluster zusammengefasst werden. <br>Damit die Cluster dargestellt werden können, muss es eine Klasse mit der Expression \"('[Cluster:FeatureCount]' != '1')\" geben. Cluster:FeatureCount kann auch als Labelitem verwendet werden, um die Anzahl der Punkte pro Cluster anzuzeigen."];
 	Text[5]=["Hilfe:","Für einen Layer lassen sich verschiedene Klassifizierungen erstellen. Klassen mit dem gleichen Eintrag im Klassen-Feld \"Klassifizierung\" gehören zu einer Klassifizierung. Welche Klassifizierung in einem Layer verwendet wird, wird über das Layer-Feld \"Klassifizierung\" festgelegt."];
-	Text[6]=["Hilfe:","Wird hier der Name einer Grafikdatei aus dem Ordner <?php echo GRAPHICSPATH; ?>custom angegeben, wird diese Grafik in seiner vollen Ausdehnung an Stelle der vom MapServer erzeugten Grafik in der Legende angezeigt."];
+	Text[6]=["Hilfe:","Wird hier der Name einer Grafikdatei aus dem Ordner <?php echo GRAPHICSPATH; ?>custom angegeben, wird diese Grafik an Stelle der vom MapServer erzeugten Grafik in der Legende angezeigt. Außerdem kann hier die Höhe und Breite der Legendengrafik angegeben werden."];
 	Text[7]=["Hilfe:","Hier kann die Zeichenreihenfolge in der Karte und optional eine abweichende Reihenfolge für die Legende festgelegt werden."];
 	
 	function testConnection() {
@@ -602,49 +602,61 @@
 					<input type="text" name="classification[<?php echo $this->classes[$i]['Class_ID']; ?>]" size="18" value="<?php echo $this->classes[$i]['classification']; ?>">
 				</td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">
-					<input type="text" name="legendgraphic[<?php echo $this->classes[$i]['Class_ID']; ?>]" size="18" value="<?php echo $this->classes[$i]['legendgraphic']; ?>">
+					<table cellpadding="0" cellspacing="2">
+						<tr>
+							<td colspan="4">
+								<? echo $strImagefile; ?>:
+								<input type="text" name="legendgraphic[<?php echo $this->classes[$i]['Class_ID']; ?>]" size="19" value="<?php echo $this->classes[$i]['legendgraphic']; ?>">
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<? echo $strWidth; ?>:&nbsp;
+							</td>
+							<td>
+								<input size="1" type="text" name="legendimagewidth[<?php echo $this->classes[$i]['Class_ID']; ?>]" value="<?php echo $this->classes[$i]['legendimagewidth']; ?>">
+							</td>
+							<td>
+								<? echo $strHeight; ?>:&nbsp;
+							</td>
+							<td>
+								<input size="1" type="text" name="legendimageheight[<?php echo $this->classes[$i]['Class_ID']; ?>]" value="<?php echo $this->classes[$i]['legendimageheight']; ?>">
+							</td>
+						</tr>
+					</table>
 				</td>
 				<td align="left" style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">
-					<table cellpadding="0" cellspcaing="0">
+					<table cellpadding="0" cellspacing="2">
 						<tr>
+							<td>
+								<?php echo $strMap; ?>:&nbsp;
+							</td>
 							<td>
 								<input size="3" type="text" name="order[<?php echo $this->classes[$i]['Class_ID']; ?>]" value="<?php echo $this->classes[$i]['drawingorder']; ?>">
 							</td>
-							<td>
-								<?php echo $strMap; ?>
-							</td>
 						</tr>
 							<td>
-								<input size="3" type="text" name="legendorder[<?php echo $this->classes[$i]['Class_ID']; ?>]" value="<?php echo $this->classes[$i]['legendorder']; ?>">
+								<?php echo $strLegend; ?>:&nbsp;
 							</td>
 							<td>
-								<?php echo $strLegend; ?>
+								<input size="3" type="text" name="legendorder[<?php echo $this->classes[$i]['Class_ID']; ?>]" value="<?php echo $this->classes[$i]['legendorder']; ?>">
 							</td>
 						</tr>
 					</table>
 				</td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">
-					<a
-						href="javascript:Bestaetigung(
-							'index.php?\
-							go=Layereditor_Klasse_Löschen&\
-							class_id=<?php echo $this->classes[$i]['Class_ID']; ?>&\
-							selected_layer_id=<?php echo $this->formvars['selected_layer_id']; ?>#\
-							Klassen',\
-							'<?php echo $this->strDeleteWarningMessage; ?>'
-						);"
-					><?php echo $this->strDelete; ?></a>
+					<a href="javascript:Bestaetigung('index.php?go=Layereditor_Klasse_Löschen&class_id=<?php echo $this->classes[$i]['Class_ID']; ?>&selected_layer_id=<?php echo $this->formvars['selected_layer_id']; ?>#Klassen',	'<?php echo $this->strDeleteWarningMessage; ?>');"><?php echo $this->strDelete; ?></a>
 				</td>
 			</tr><?php
 			}
 			?>
 			<tr>
-				<td style="border-bottom:1px solid #C3C7C3" colspan="8">
+				<td style="border-bottom:1px solid #C3C7C3" colspan="10">
 					<a href="index.php?go=Layereditor_Klasse_Hinzufügen&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>#Klassen"><?php echo $strAddClass; ?></a>
 				</td>
 			</tr>
 			<tr>
-				<td style="border-bottom:1px solid #C3C7C3" colspan="8">
+				<td style="border-bottom:1px solid #C3C7C3" colspan="10">
 					<a href="javascript:void(0);" onclick="toggleAutoClassForm();"><? echo $strAddAutoClasses; ?></a>
 					<div id="autoClassForm" style="display:none">
 						<table>
@@ -694,7 +706,7 @@
 				</td>
 			</tr>
 			<tr>
-				<td colspan="8"><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>">Styles und Labels bearbeiten</a></td>
+				<td colspan="10"><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>">Styles und Labels bearbeiten</a></td>
 			</tr>
 		</table>
 		<?}?>

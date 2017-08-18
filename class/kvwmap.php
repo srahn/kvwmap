@@ -7560,7 +7560,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 				# order by
 				if ($this->formvars['orderby'.$layerset[0]['Layer_ID']] != '') { # Fall 1: im GLE soll nach einem Attribut sortiert werden
-					$sql_order = ' ORDER BY '.$this->formvars['orderby'.$layerset[0]['Layer_ID']];
+					$sql_order = ' ORDER BY ' . replace_semicolon($this->formvars['orderby' . $layerset[0]['Layer_ID']]);
 				}
 				elseif($attributes['orderby'] != '') { # Fall 2: der Layer hat im Pfad ein ORDER BY
 					$sql_order = $attributes['orderby'];
@@ -7593,9 +7593,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					if ($this->formvars['anzahl'] == ''){
 						$this->formvars['anzahl'] = MAXQUERYROWS;
 					}
-					$sql_limit.=' LIMIT '.$this->formvars['anzahl'];
+					$sql_limit.=' LIMIT ' . intval($this->formvars['anzahl']);
 					if ($this->formvars['offset_'.$layerset[0]['Layer_ID']] != ''){
-						$sql_limit.=' OFFSET '.$this->formvars['offset_'.$layerset[0]['Layer_ID']];
+						$sql_limit .= ' OFFSET ' . $this->formvars['offset_' . $layerset[0]['Layer_ID']];
 					}
 				}
 
@@ -7637,23 +7637,25 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				if (
 					$layerset[0]['count'] != 0 AND
 					$this->formvars['embedded_subformPK'] == '' AND
-					$this->formvars['embedded'] == '' AND
-					$this->formvars['embedded_dataPDF'] == ''
+					$this->formvars['embedded'] == '' AND $this->formvars['embedded_dataPDF'] == ''
 				) {
-					#if($this->formvars['go'] != 'neuer_Layer_Datensatz_speichern'){		// wenns nur die Anzeige des gerade angelegten Datensatzes ist, nicht als last_query speichern (wieder rausgenommen)
-						# last_query speichern
-						$this->user->rolle->delete_last_query();
-						$this->user->rolle->save_last_query('Layer-Suche_Suchen', $this->formvars['selected_layer_id'], $sql, $sql_order, $this->formvars['anzahl'], $this->formvars['offset_'.$layerset[0]['Layer_ID']]);
-					#}
+					# last_query speichern
+					$this->user->rolle->delete_last_query();
+					$this->user->rolle->save_last_query('Layer-Suche_Suchen', $this->formvars['selected_layer_id'], $sql, $sql_order, $this->formvars['anzahl'], $this->formvars['offset_'.$layerset[0]['Layer_ID']]);
 
-					# Querymaps erzeugen und zum Layerset hinzufügen
+					# last_search speichern
+					$this->formvars['search_name'] = '<last_search>';
+					$this->user->rolle->delete_search($this->formvars['search_name']);
+					$this->user->rolle->save_search($attributes, $this->formvars);
+
+					# Querymaps erzeugen
 					if (
 						$layerset[0]['querymap'] == 1 AND
 						$attributes['privileg'][$attributes['the_geom']] >= '0' AND
 						($layerset[0]['Datentyp'] == 1 OR $layerset[0]['Datentyp'] == 2)
 					) {
 						$layerset[0]['attributes'] = $attributes;
-						for ($k = 0; $k < count($layerset[0]['shape']); $k++) {
+						for($k = 0; $k < count($layerset[0]['shape']); $k++){
 							$layerset[0]['querymaps'][$k] = $this->createQueryMap($layerset[0], $k);
 						}
 					}
@@ -7664,11 +7666,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					$layerset[0]['layouts'] = $ddl->load_layouts($this->Stelle->id, NULL, $layerset[0]['Layer_ID'], array(0,1));
 
 					# wenn Attributname/Wert-Paare übergeben wurden, diese im Formular einsetzen
-					if (is_array($this->formvars['attributenames'])) {
+					if(is_array($this->formvars['attributenames'])){
 						$attributenames = array_values($this->formvars['attributenames']);
 						$values = array_values($this->formvars['values']);
 					}
-					for ($i = 0; $i < count($attributenames); $i++){
+					for($i = 0; $i < count($attributenames); $i++){
 						$this->layerset[0]['shape'][0][$attributenames[$i]] = $values[$i];
 					}
 				}

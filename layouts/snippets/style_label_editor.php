@@ -170,6 +170,7 @@ function save_label(label_id){
 	data+= '&minfeaturesize='+document.GUI.label_minfeaturesize.value;
 	data+= '&maxfeaturesize='+document.GUI.label_maxfeaturesize.value;
 	data+= '&partials='+document.GUI.label_partials.value;
+	data+= '&maxlength='+document.GUI.label_maxlength.value;
 	data+= '&wrap='+document.GUI.label_wrap.value;
 	data+= '&the_force='+document.GUI.label_the_force.value;
 	ahah('index.php', data, new Array(document.getElementById('label_div'), document.getElementById('selected_label_div')), "");

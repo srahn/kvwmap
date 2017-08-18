@@ -57,6 +57,10 @@ function strip_pg_escape_string($string){
 	return $string;
 }
 
+function replace_semicolon($text) {
+  return str_replace(';', '', $text);
+}
+
 function InchesPerUnit($unit, $center_y){
 	if($unit == MS_METERS){
 		return 39.3701;
@@ -755,6 +759,7 @@ function umlaute_umwandeln($name){
   $name = str_replace('?', '_', $name);
 	$name = str_replace('+', '_', $name);
 	$name = str_replace(',', '_', $name);
+	$name = str_replace('*', '_', $name);
   return $name;
 }
 

@@ -1,6 +1,5 @@
 <?
 	include(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->language.'.php');
-	
 	$checkbox_names = '';
 	$columnname = '';
 	$geom_tablename = '';
@@ -76,7 +75,8 @@
 				$lock[$k] = true;
 			}
 						
-			for($j = 0; $j < count($attributes['name']); $j++){
+			for($j = 0; $j < count($attributes['name']); $j++) {
+				$attribute_class = (($this->new_entry == true AND $attributes['dont_use_for_new'][$j] == -1) ? 'hidden' : 'visible');
 				if($layer['shape'][$k][$attributes['name'][$j]] == ''){
 					#$layer['shape'][$k][$attributes['name'][$j]] = $this->formvars[$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j]];
 				}
@@ -108,7 +108,7 @@
 						
 						if($attributes['arrangement'][$j] != 1){	# wenn Attribut nicht daneben -> neue Zeile beginnen
 							$attributes_in_row_so_far = 1;					# Attributanzahl in dieser Zeile bis zu diesem Attribut
-							$datapart .= '<tr>';							
+							$datapart .= '<tr class="' . $attribute_class . '">';
 						}
 						else $attributes_in_row_so_far++;
 						if($attributes['labeling'][$j] != 2){
@@ -190,7 +190,7 @@
 			    	    <td style="padding-top:5px; padding-bottom:5px;" valign="middle" colspan="19">
 <?						
 							if(!$layer['shape'][$k]['wfs_geom']){		// kein WFS 
-								echo '<input type="hidden" id="'.$columnname.'_'.$k.'" value="'.$layer['shape'][$k][$columnname].'">';						
+								echo '<input type="hidden" id="'.$layer['Layer_ID'].'_'.$columnname.'_'.$k.'" value="'.$layer['shape'][$k][$columnname].'">';						
 ?>								
 								<table cellspacing="0" cellpadding="0">
 									<tr>

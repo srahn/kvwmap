@@ -41,7 +41,20 @@ class Menue extends MyObject {
 		return $menue->find_where($where, $order);
 	}
 
-	public static function loadMenue($gui) {
+	public static function loadMenue($gui, $type) {
+		switch ($type){
+			case 'button' : {		# es sollen nur die Button-Menüpunkte abgefragt werden
+				$button_where = " AND m.button_class != ''";
+			}break;
+			
+			case 'all-no_buttons' : {		# es sollen alle Menüpunkte abgefragt werden und es gibt keine Button-Menüpunkte
+				$button_where = " ";
+			}break;
+			
+			case 'all-buttons' : {			# es sollen alle Menüpunkte abgefragt werden und es gibt Button-Menüpunkte -> dann Obermenüpunkte mit button_class weglassen
+				$button_where = " AND (m.button_class = '' OR m.button_class IS NULL OR m.menueebene = 2)";
+			}break;
+		}
 		$menue = new Menue($gui);
 		$menues = $menue->find_by_sql(
 			array(
@@ -56,7 +69,7 @@ class Menue extends MyObject {
 					m.obermenue,
 					m.target,
 					m.title,
-					m.button_class
+					".($type == 'button'? "m.button_class" : "'' as button_class")."
 				",
 				'from' => "
 					u_menue2rolle m2r JOIN
@@ -65,10 +78,11 @@ class Menue extends MyObject {
 				",
 				'where' => "
 					m2s.stelle_id = " . $gui->Stelle->id . " AND
-					m2r.user_id = " . $gui->user->id . "
+					m2r.user_id = " . $gui->user->id . " 
+					".$button_where."
 				",
-				'order' => 
-					($gui->user->rolle->menue_buttons ? "CASE WHEN m.button_class != '' THEN 0 ELSE 1 END, " : ""). "m2s.menue_order
+				'order' => "
+					m2s.menue_order
 				"
 			), 'obermenue'
 		);

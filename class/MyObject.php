@@ -42,6 +42,12 @@ class MyObject {
 	* @ return all objects
 	*/
 	function find_where($where, $order = '') {
+		$orders = array_map(
+			function ($order) {
+				return trim($order);
+			},
+			explode(',', replace_semicolon($order))
+		);
 		$sql = "
 			SELECT
 				*
@@ -49,8 +55,7 @@ class MyObject {
 				`" . $this->tableName . "`
 			WHERE
 				" . $where . 
-			($order != '' ? " ORDER BY " . $order : "") . "
-		";
+			($order != '' ? " ORDER BY `" . implode('`, `', $orders) . "`" : "");
 		$this->debug->show('mysql find_where sql: ' . $sql, MyObject::$write_debug);
 		$query = mysql_query($sql, $this->database->dbConn);
 		$result = array();
@@ -73,7 +78,7 @@ class MyObject {
 				" . (!empty($params['from']) ? $params['from'] : "`" . $this->tableName . "`") . "
 			WHERE
 				" . (!empty($params['where']) ? $params['where'] : '') . "
-				" . (!empty($params['order']) ? 'ORDER BY ' . $params['order'] : '') . "
+				" . (!empty($params['order']) ? 'ORDER BY ' . replace_semicolon($params['order']) : '') . "
 		";
 		$this->debug->show('mysql find_by_sql sql: ' . $sql, MyObject::$write_debug);
 		$this->debug->write('#mysql find_by_sql sql:<br> ' . $sql.';<br>',4);
