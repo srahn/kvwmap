@@ -16,18 +16,21 @@ include_once ('includes/header.php');
 		  
 		  if($_SERVER ["REQUEST_METHOD"] == "POST")
 		  {
-		      print_r($_POST);
+// 		      print_r($_POST);
 
 		      foreach($_POST as $key => $value)
 		      {
-		          if(startsWith($key, "auswahl_checkbox_"))
+		          $keyEscaped = htmlspecialchars($key);
+		          $valueEscaped = htmlspecialchars($value);
+		          
+		          if(startsWith($keyEscaped, "auswahl_checkbox_"))
 		          {
-// 		              echo '<br />Key = ' . $key . '<br />';
-// 		              echo 'Value= ' . $value;
+// 		              echo '<br />Key = ' . $keyEscaped . '<br />';
+// 		              echo 'Value= ' . $valueEscaped;
 		              
 		              $aufforderungWrz1 = new WasserrechtlicheZulassungen($this);
-		              $lastIndex = strripos($key, "_");
-		              $aufforderungWrzId = substr($key, $lastIndex + 1);
+		              $lastIndex = strripos($keyEscaped, "_");
+		              $aufforderungWrzId = substr($keyEscaped, $lastIndex + 1);
 // 		              echo "<br />lastIndex: " . $lastIndex . " aufforderungWrzId: " . $aufforderungWrzId;
 		              $aufforderungWrz2 = $aufforderungWrz1->find_by_id($this, 'id', $aufforderungWrzId);
 		              if(!empty($aufforderungWrz2) && empty($aufforderungWrz2->getAufforderungDatumAbsend()))

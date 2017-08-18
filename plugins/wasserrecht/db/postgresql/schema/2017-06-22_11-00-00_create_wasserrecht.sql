@@ -344,7 +344,7 @@ CREATE TABLE wasserrecht.teilgewaesserbenutzungen(
 	id serial PRIMARY KEY,
 	art integer REFERENCES wasserrecht.gewaesserbenutzungen_art(id),
 	zweck integer REFERENCES wasserrecht.gewaesserbenutzungen_zweck(id),
-	umfang integer REFERENCES wasserrecht.gewaesserbenutzungen_umfang(id),
+	umfang numeric(15,3),
 	wiedereinleitung_nutzer boolean,
 	wiedereinleitung_bearbeiter boolean,
 	mengenbestimmung integer REFERENCES wasserrecht.mengenbestimmung(id),

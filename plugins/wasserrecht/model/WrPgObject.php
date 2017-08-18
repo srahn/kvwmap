@@ -38,4 +38,11 @@ abstract class WrPgObject extends PgObject
             $array[$key] = $value;
         }
     }
+    
+    public function updateData($key, $value) {
+        if(!empty($value))
+        {
+            $this->set($key, $value);
+        }
+    }
 }

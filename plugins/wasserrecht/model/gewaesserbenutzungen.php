@@ -9,6 +9,8 @@ class Gewaesserbenutzungen extends WrPgObject {
 	public $teilgewaesserbenutzungen;
 
 	public function find_where_with_subtables($where, $order = NULL, $select = '*') {
+// 	    $this->debug->write('find_where_with_subtables: ' . $where, 4);
+// 	    echo "<br />find_where_with_subtables: " . $where;
 	    $gewaesserbenutzungen = $this->find_where($where, $order, $select);
 	    if(!empty($gewaesserbenutzungen))
 	    {
@@ -19,7 +21,7 @@ class Gewaesserbenutzungen extends WrPgObject {
 	                $gwu = new GewaesserbenutzungenUmfang($this->gui);
 	                if(!empty($gewaesserbenutzung->data['umfang']))
 	                {
-	                    // 	                echo 'id=' . $gewaesserbenutzung->data['umfang'];
+	                    //echo 'id=' . $gewaesserbenutzung->data['umfang'];
 	                    $gewaesserbenutzungUmfang = $gwu->find_where('id=' . $gewaesserbenutzung->data['umfang']);
 	                    if(!empty($gewaesserbenutzungUmfang))
 	                    {
@@ -50,10 +52,15 @@ class Gewaesserbenutzungen extends WrPgObject {
 	                $teilgewaesserbenutzung = new Teilgewaesserbenutzungen($this->gui);
 	                $teilgewaesserbenutzungen = $teilgewaesserbenutzung->find_where_with_subtables('gewaesserbenutzungen=' . $gewaesserbenutzung->getId(), 'id');
 	                $gewaesserbenutzung->teilgewaesserbenutzungen = $teilgewaesserbenutzungen;
+	                
+// 	                echo "<br />gewaesserbenutzung: " . $gewaesserbenutzung->getKennummer();
 	            }
 	        }
+	        
+	        return $gewaesserbenutzungen;
 	    }
-	    return $gewaesserbenutzungen;
+	    
+	    return null;
 	}
 	
 	public function getKennummer() {
