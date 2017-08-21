@@ -6,23 +6,18 @@ POSTGRES_PASSWORD="secret1"
 POSTGRES_DBNAME="kvwmapsp"
 POSTGRES_SCHEMA="alkis"
 
+GFS_TEMPLATE="../config/alkis-schema.gfs"
 DATA_PATH="/var/www/data/alkis/ff/eingang"
-GFS_TEMPLATE="/var/www/apps/kvwmap/alkis-schema.gfs"
 ARCHIV_PATH="/var/www/data/alkis/ff/eingelesen"
 TEMP_PATH="/var/www/data/alkis/ff/temp"
 LOG_PATH="/var/www/data/alkis/ff/logs"
 LOG_FILE="import.log"
 ERROR_FILE="error.log"
-declare -i LOG_LEVEL=1 # 0 nicht gelogged, 1 nur auf strout, 2 nur in datei, 3 stdout und datei
+declare -i LOG_LEVEL=1 # 0 nicht gelogged, 1 nur auf stdout, 2 nur in datei, 3 stdout und datei
 
 UNZIPPASSWORD="secret2"
 
-RENAME="No" # Bei Verwendung der richtigen gfs Datei muss nicht umbenannt werden.
-RENAME_SCRIPT="/var/www/apps/xmi2db/converter/rename_nas.rb"
-
 OGR_BINPATH="/usr/local/gdal/bin" # inside the gdal container
-
-ALKIS_PLUGIN_PATH="/var/www/apps/kvwmap_pet_dev/plugings/alkis"
 
 EPSG_CODE="25833"
 
