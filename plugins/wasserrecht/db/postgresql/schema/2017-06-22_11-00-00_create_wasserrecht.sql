@@ -47,6 +47,7 @@ CREATE TABLE wasserrecht.adresse(
 
 CREATE TABLE wasserrecht.aktenzeichen(
 	id serial PRIMARY KEY,
+	bearbeiterzeichen varchar(255),
 	name varchar(255)
 ) WITH OIDS;
 
@@ -68,11 +69,6 @@ CREATE TABLE wasserrecht.messtischblatt(
 ) WITH OIDS;
 
 CREATE TABLE wasserrecht.archivnummer(
-	id serial PRIMARY KEY,
-	nummer integer
-) WITH OIDS;
-
-CREATE TABLE wasserrecht.wasserbuch(
 	id serial PRIMARY KEY,
 	nummer integer
 ) WITH OIDS;
@@ -168,18 +164,14 @@ CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide_klasse(
 	name varchar(100)
 )WITH OIDS;
 
-CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_bearbeiterzeichen(
-	id serial PRIMARY KEY,
-	name varchar(255)
-)WITH OIDS;
-
 CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide(
 	id serial PRIMARY KEY,
 	name varchar(255),
 	klasse integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide_klasse(id),
-	bearbeiterzeichen integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_bearbeiterzeichen(id),
 	aktenzeichen integer REFERENCES wasserrecht.aktenzeichen(id),
-	datum date,
+	datum_postausgang date,
+	datum_bestand_mat date,
+	datum_bestand_form date,
 	ort integer REFERENCES wasserrecht.ort(id),
 	regnummer varchar(255),
 	ausstellbehoerde integer REFERENCES wasserrecht.behoerde(id)
@@ -207,13 +199,13 @@ CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_fassung(
 
 CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_aenderungsbescheide(
 	id serial PRIMARY KEY,
-	bearbeiterzeichen integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_bearbeiterzeichen(id),
 	aktenzeichen integer REFERENCES wasserrecht.aktenzeichen(id),
 	datum_postausgang date,
 	datum_bestand_mat date,
 	datum_bestand_form date,
 	ort integer REFERENCES wasserrecht.ort(id),
-	nummer integer
+	nummer integer,
+	fassung integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_fassung(id)
 )WITH OIDS;
 
 CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_status(
@@ -240,7 +232,6 @@ CREATE TABLE wasserrecht.wasserrechtliche_zulassungen(
 	name varchar(255),
 	ausstellbehoerde integer REFERENCES wasserrecht.behoerde(id),
 	ausgangsbescheid integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide(id),
-	fassung integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_fassung(id),
 	status integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_status(id),
 	adresse integer REFERENCES wasserrecht.adresse(id),
 	aenderungsbescheid integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_aenderungsbescheide(id),
@@ -327,7 +318,7 @@ CREATE TABLE wasserrecht.gewaesserbenutzungen(
 	kennnummer varchar(255),
 	freitext_art text,
 	art integer REFERENCES wasserrecht.gewaesserbenutzungen_art(id),
-	wasserbuch integer REFERENCES wasserrecht.wasserbuch(id),
+	wasserbuchnummer varchar (255),
 	zweck integer REFERENCES wasserrecht.gewaesserbenutzungen_zweck(id),
 	umfang integer REFERENCES wasserrecht.gewaesserbenutzungen_umfang(id),
 	gruppe_wee boolean,

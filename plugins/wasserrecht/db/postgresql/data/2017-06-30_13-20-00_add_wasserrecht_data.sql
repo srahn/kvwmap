@@ -7,7 +7,6 @@ INSERT INTO wasserrecht.adresse (strasse, hausnummer, plz, ort) VALUES ('Lübeck
 
 INSERT INTO wasserrecht.betriebszustand (name) VALUES ('WFBB');
 INSERT INTO wasserrecht.messtischblatt (nummer) VALUES (1445);
-INSERT INTO wasserrecht.wasserbuch (nummer) VALUES (3572);
 
 INSERT INTO wasserrecht.mengenbestimmung (name) VALUES ('Messung');
 INSERT INTO wasserrecht.mengenbestimmung (name) VALUES ('Berechnung');
@@ -182,9 +181,8 @@ INSERT INTO wasserrecht.anlagen (name, klasse, zustaend_uwb, zustaend_stalu, bea
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 INSERT INTO wasserrecht.aktenzeichen (name) VALUES ('Test Aktenzeichen 1');
 INSERT INTO wasserrecht.aktenzeichen (name) VALUES ('Test Aktenzeichen 2');
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide (name, klasse, aktenzeichen, datum) VALUES ('Test Ausgangsbescheid 1', 1, 1, current_date);
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide (name, klasse, aktenzeichen, datum) VALUES ('Test Ausgangsbescheid 2', 2, 2, current_date);
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen_fassung_auswahl (name) VALUES ('Test Wasserrechtliche Zulassung Auswahl');
+INSERT INTO wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide (name, klasse, aktenzeichen, datum_postausgang) VALUES ('Test Ausgangsbescheid 1', 1, 1, current_date);
+INSERT INTO wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide (name, klasse, aktenzeichen, datum_postausgang) VALUES ('Test Ausgangsbescheid 2', 2, 2, current_date);
 INSERT INTO wasserrecht.wasserrechtliche_zulassungen_fassung (auswahl, nummer, datum) VALUES (1, 1, current_date);
 
 INSERT INTO wasserrecht.wasserrechtliche_zulassungen (name, ausstellbehoerde, ausgangsbescheid, status, adresse, gueltigkeit, aktuell, historisch, sachbearbeiter, adressat, anlage) VALUES ('Test Wasserrechtliche Zulassung 1', 1, 1, 2, 1, 1, true, false, 2, 2, 1);
@@ -195,6 +193,6 @@ INSERT INTO wasserrecht.wasserrechtliche_zulassungen (name, ausstellbehoerde, au
 
 INSERT INTO wasserrecht.gewaesserbenutzungen_umfang(name, max_ent_a) VALUES('Test Umfang', 80000.000);
 INSERT INTO wasserrecht.gewaesserbenutzungen_lage(name, namekurz, namelang, the_geo) VALUES('Test Gewaesserbenutzungen Lage', 'Test Gewaesserbenutzungen Lage (kurz)', 'Test Gewaesserbenutzungen Lage (lang)', ST_Transform(ST_GeomFromText('POINT(13 53)', 4326), 35833));
-INSERT INTO wasserrecht.gewaesserbenutzungen (kennnummer, art, wasserbuch, zweck, umfang, gruppe_wee, lage, wasserrechtliche_zulassungen) VALUES ('1-1-2-1', 4, 1, 6, 1, false, 1, 1);
+INSERT INTO wasserrecht.gewaesserbenutzungen (kennnummer, art, wasserbuchnummer, zweck, umfang, gruppe_wee, lage, wasserrechtliche_zulassungen) VALUES ('1-1-2-1', 4, '3572', 6, 1, false, 1, 1);
 
 COMMIT;
