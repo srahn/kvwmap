@@ -66,5 +66,19 @@ class Gewaesserbenutzungen extends WrPgObject {
 	public function getKennummer() {
 	    return $this->data['kennnummer'];
 	}
+	
+	public function getBezeichnung() {
+	    $fieldname = 'bezeichnung';
+	    $sql = "SELECT COALESCE(a.name,'') ||' (Aktenzeichen: '|| COALESCE(h.name,'') ||')'||' vom '|| COALESCE(f.datum_postausgang::text,'') || ' zum ' || COALESCE(c.name,'') || ' von ' || COALESCE(d.max_ent_a::text,'') || ' m³/Jahr' AS " . $fieldname ." FROM " . $this->schema . '.' . "wasserrechtliche_zulassungen a LEFT JOIN " . $this->schema . '.' . "wasserrechtliche_zulassungen_ausgangsbescheide f ON a.ausgangsbescheid = f.id LEFT JOIN " . $this->schema . '.' . "wasserrechtliche_zulassungen_ausgangsbescheide_klasse g ON f.klasse = g.id LEFT JOIN " . $this->schema . '.' . "aktenzeichen h ON f.aktenzeichen = h.id INNER JOIN " . $this->schema . '.' . $this->tableName . " b ON b.wasserrechtliche_zulassungen = a.id LEFT JOIN " . $this->schema . '.' . "gewaesserbenutzungen_art c ON c.id = b.art LEFT JOIN " . $this->schema . '.' . "gewaesserbenutzungen_umfang d ON b.umfang = d.id LEFT JOIN " . $this->schema . '.' . "gewaesserbenutzungen_lage e ON b.lage = e.id WHERE a.id = '" . $this->getId() . "';";
+	    // 	    echo "sql: " . $sql;
+	    $bezeichnung = $this->getSQLResult($sql, $fieldname);
+	    // 	    echo "bezeichnung: " . $bezeichnung;
+	    if(!empty($bezeichnung) && count($bezeichnung) > 0 && !empty($bezeichnung[0]))
+	    {
+	        return $bezeichnung[0];
+	    }
+	    
+	    return null;
+	}
 }
 ?>

@@ -320,16 +320,16 @@ include_once ('includes/header.php');
                         		          		</td>
                         		          		<td>
                         		          			<?php 
-                        		          			     echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Wasserrechtliche_Zulassungen'] . '&value_wrz_id=' . $wrz->getId() . '&operator_wrz_id==">' . $wrz->getName() . '</a>';
+                        		          			     echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Wasserrechtliche_Zulassungen'] . '&value_wrz_id=' . $wrz->getId() . '&operator_wrz_id==">' . $wrz->getBezeichnung() . '</a>';
                     //     		          			     echo $wrz->getName();
                     //     		          			     var_dump($wrz);
                         		          			?>
                         		          		</td>
                         		          		<td>
                         		          			<?php
-                        		          			     if(!empty($gewaesserbenutzung) && !empty($gewaesserbenutzung->gewaesserbenutzungUmfang))
+                        		          			     if(!empty($gewaesserbenutzung))
                         		          			     {
-                        		          			         echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Gewaesserbenutzungen_Umfang'] . '&value_id=' . $gewaesserbenutzung->gewaesserbenutzungUmfang->getId() . '&operator_id==">' . $gewaesserbenutzung->gewaesserbenutzungUmfang->getUmfang() . '</a>';
+                        		          			         echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Gewaesserbenutzungen'] . '&value_id=' . $gewaesserbenutzung->getId() . '&operator_id==">' . $gewaesserbenutzung->getBezeichnung() . '</a>';
                         		          			     }
                         		          			?>
                         		          		</td>

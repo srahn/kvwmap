@@ -45,4 +45,17 @@ abstract class WrPgObject extends PgObject
             $this->set($key, $value);
         }
     }
+    
+    function getSQLResult($sql, $fieldName) {
+        $query = pg_query($this->database->dbConn, $sql);
+        $results = array();
+        while ($rs = pg_fetch_assoc($query)) {
+            if(!empty($rs))
+            {
+                //             var_dump($rs);
+                $results[] = $rs[$fieldName];
+            }
+        }
+        return $results;
+    }
 }

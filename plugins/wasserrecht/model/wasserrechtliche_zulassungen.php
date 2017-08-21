@@ -220,5 +220,19 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	    // 	        )
 	    // 	        );
 	}
+	
+	public function getBezeichnung() {
+	    $fieldname = 'bezeichnung';
+	    $sql = "SELECT COALESCE(c.name,'') ||' (Aktenzeichen: '|| COALESCE(d.name,'') ||')'||' vom '|| COALESCE(b.datum_postausgang::text,'') AS " . $fieldname ." FROM " . $this->schema . '.' . $this->tableName . " a LEFT JOIN " . $this->schema . '.' . "wasserrechtliche_zulassungen_ausgangsbescheide b ON a.ausgangsbescheid = b.id LEFT JOIN " . $this->schema . '.' . "wasserrechtliche_zulassungen_ausgangsbescheide_klasse c ON b.klasse = c.id LEFT JOIN " . $this->schema . '.' . "aktenzeichen d ON b.aktenzeichen = d.id WHERE a.id = '" . $this->getId() . "';";
+// 	    echo "sql: " . $sql;
+	    $bezeichnung = $this->getSQLResult($sql, $fieldname)[0];
+// 	    echo "bezeichnung: " . $bezeichnung;
+	    if(!empty($bezeichnung) && count($bezeichnung) > 0 && !empty($bezeichnung[0]))
+	    {
+	        return $bezeichnung;
+	    }
+	    
+	    return null;
+	}
 }
 ?>
