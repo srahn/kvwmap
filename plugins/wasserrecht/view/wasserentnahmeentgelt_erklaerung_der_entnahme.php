@@ -60,15 +60,19 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
                             if(!empty($gewaesserbenutzung->teilgewaesserbenutzungen[$i - 1]))
                             {
                                 $teilgewaesserbenutzung = $gewaesserbenutzung->teilgewaesserbenutzungen[$i - 1];
-                                $teilgewaesserbenutzung->updateTeilgewaesserbenutzung($gewaesserbenutzung->getId(),
+                                $teilgewaesserbenutzungId = $teilgewaesserbenutzung->updateTeilgewaesserbenutzung($gewaesserbenutzung->getId(),
                                     $gewaesserbenutzungsart, $gewaesserbenutzungszweck, $gewaesserbenutzungsumfang, $wiedereinleitung, $mengenbestimmung, $teilgewaesserbenutzungsart);
+                                
+                                $this->add_message('notice', 'Teilgewässerbenutzungen (id: ' . $teilgewaesserbenutzungId . ') erfolgreich geändert!');
                             }
                             //else --> if not there --> create one 
                             else
                             {
                                 $teilgewaesserbenutzung = new Teilgewaesserbenutzungen($this);
-                                $teilgewaesserbenutzung->createTeilgewaesserbenutzung($gewaesserbenutzung->getId(),
+                                $teilgewaesserbenutzungId = $teilgewaesserbenutzung->createTeilgewaesserbenutzung($gewaesserbenutzung->getId(),
                                     $gewaesserbenutzungsart, $gewaesserbenutzungszweck, $gewaesserbenutzungsumfang, $wiedereinleitung, $mengenbestimmung, $teilgewaesserbenutzungsart);
+                                
+                                $this->add_message('notice', 'Teilgewässerbenutzungen (id: ' . $teilgewaesserbenutzungId .') erfolgreich eingetragen!');
                             }
                         }
 //                         echo $i;

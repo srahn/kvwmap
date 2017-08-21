@@ -169,6 +169,8 @@ class Teilgewaesserbenutzungen extends WrPgObject {
 	    $this->debug->write('kvp update: ' . var_export($this->getKVP(), true), 4);
 	    
 	    $this->update();
+	    
+	    return $this->getId();
 	}
 }
 ?>
