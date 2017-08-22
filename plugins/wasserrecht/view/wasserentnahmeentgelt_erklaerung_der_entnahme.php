@@ -104,7 +104,7 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
 		        $gewaesserbenutzungId = substr($keyEscaped, strlen("erklaerung_"), $lastIndex - strlen("erklaerung_"));
 // 		        echo "<br />gewaesserbenutzungId: " . $gewaesserbenutzungId;
 		        $gb = new Gewaesserbenutzungen($this);
-		        $gewaesserbenutzungen = $gb->find_where_with_subtables('id=' . $gewaesserbenutzungId)[0];
+		        $gewaesserbenutzungen = $gb->find_where_with_subtables('id=' . $gewaesserbenutzungId);
 		        if(!empty($gewaesserbenutzungen) && count($gewaesserbenutzungen) > 0 && !empty($gewaesserbenutzungen[0]))
 		        {
 		            $gewaesserbenutzung = $gewaesserbenutzungen[0];
