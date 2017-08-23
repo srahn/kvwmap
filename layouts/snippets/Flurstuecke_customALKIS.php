@@ -787,7 +787,7 @@ hide_versions = function(flst){
 													</a>
 											<? }
 											if (in_array('kolibri', $kvwmap_plugins) AND $this->Stelle->isFunctionAllowed('Kolibistart')) { ?>
-												<a href="kolkvw://flurstueckskennzeichen=<?php echo $flst->FlurstKennz; ?>" onclick="message('Öffne Flurstück <?php echo $flst->FlurstKennz; ?> in Kolibri.');">
+												<a href="kolkvw://FlurstKennz=<?php echo $flst->FlurstKennz; ?>" onclick="message('Öffne Flurstück <?php echo $flst->FlurstKennz; ?> in Kolibri.');">
 													<div class="fstanzeigehover">&nbsp;&nbsp;Öffnen in Kolibri&nbsp;&nbsp;</div>
 												</a><?php
 											} ?>
