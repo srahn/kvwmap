@@ -119,6 +119,23 @@ function formatFlurstkennzALKIS($FlurstKennzListe){
   return implode(';', $Flurstuecke);
 }
 
+function formatFlurstkennzALKIS_0To_($FlurstKennzListe){
+	$Flurstuecke = explode(';', $FlurstKennzListe);
+	for ($i = 0; $i < count($Flurstuecke); $i++) {
+		$Flurstuecke[$i] = str_pad(
+			substr(
+				$Flurstuecke[$i],
+				0,
+				(intval(substr($Flurstuecke[$i], 14, 4)) == 0 ? 14 : 18)
+			),
+			20,
+			'_',
+			STR_PAD_RIGHT
+		);
+	}
+  return implode(';', $Flurstuecke);
+}
+
 function formatFlurstkennzALK($FlurstKennz){
 	$gem = substr($FlurstKennz, 0, 6);
 	$flur = substr($FlurstKennz, 6, 3);
