@@ -316,9 +316,10 @@ CREATE TABLE wasserrecht.gewaesserbenutzungen_wee_satz(
 CREATE TABLE wasserrecht.gewaesserbenutzungen(
 	id serial PRIMARY KEY,
 	kennnummer varchar(255),
+	wasserbuchnummer varchar (255),
 	freitext_art text,
 	art integer REFERENCES wasserrecht.gewaesserbenutzungen_art(id),
-	wasserbuchnummer varchar (255),
+	freitext_zweck text,
 	zweck integer REFERENCES wasserrecht.gewaesserbenutzungen_zweck(id),
 	umfang integer REFERENCES wasserrecht.gewaesserbenutzungen_umfang(id),
 	gruppe_wee boolean,

@@ -193,6 +193,7 @@ INSERT INTO wasserrecht.wasserrechtliche_zulassungen (name, ausstellbehoerde, au
 
 INSERT INTO wasserrecht.gewaesserbenutzungen_umfang(name, max_ent_a) VALUES('Test Umfang', 80000.000);
 INSERT INTO wasserrecht.gewaesserbenutzungen_lage(name, namekurz, namelang, the_geo) VALUES('Test Gewaesserbenutzungen Lage', 'Test Gewaesserbenutzungen Lage (kurz)', 'Test Gewaesserbenutzungen Lage (lang)', ST_Transform(ST_GeomFromText('POINT(13 53)', 4326), 35833));
-INSERT INTO wasserrecht.gewaesserbenutzungen (kennnummer, art, wasserbuchnummer, zweck, umfang, gruppe_wee, lage, wasserrechtliche_zulassungen) VALUES ('1-1-2-1', 4, '3572', 6, 1, false, 1, 1);
+INSERT INTO wasserrecht.gewaesserbenutzungen (kennnummer, wasserbuchnummer, freitext_art, art, freitext_zweck, zweck, umfang, gruppe_wee, lage, wasserrechtliche_zulassungen) VALUES ('1-1-2-1', '3572', 'Test Freitext Art 1', 1, 'Test Freitext Zweck 1', 6, 1, false, 1, 1);
+INSERT INTO wasserrecht.gewaesserbenutzungen (kennnummer, wasserbuchnummer, freitext_art, art, freitext_zweck, zweck, umfang, gruppe_wee, lage, wasserrechtliche_zulassungen) VALUES ('2-1-2-2', '0000', 'Test Freitext Art 2', 5, 'Test Freitext Zweck 2', 6, 1, false, 1, 2);
 
 COMMIT;
