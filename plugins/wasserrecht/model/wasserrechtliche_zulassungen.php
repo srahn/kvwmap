@@ -26,12 +26,15 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 				
 			    $year = $this->getDependentObjects($gui, $result);
 			    
-			    if (!in_array($year, $wasserrechtlicheZulassungGueltigkeitJahrReturnArray))
+			    if(!empty($year))
 			    {
-			        $wasserrechtlicheZulassungGueltigkeitJahrReturnArray[] = $year;
+			        if(!in_array($year, $wasserrechtlicheZulassungGueltigkeitJahrReturnArray))
+			        {
+			            $wasserrechtlicheZulassungGueltigkeitJahrReturnArray[] = $year;
+			        }
+			        
+			        $wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[]=$result;
 			    }
-					
-			    $wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[]=$result;
 			}
 			$wrzProGueltigkeitsJahr->gueltigkeitsJahre=$wasserrechtlicheZulassungGueltigkeitJahrReturnArray;
 			return $wrzProGueltigkeitsJahr;
@@ -118,8 +121,13 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	        
 	        //get the 'Gewaesserbenutzungen'
 	        $gewaesserbenutzung = new Gewaesserbenutzungen($gui);
-	        $gewaesserbenutzungen = $gewaesserbenutzung->find_where_with_subtables('wasserrechtliche_zulassungen=' . $result->getId());
+	        $gewaesserbenutzungen = $gewaesserbenutzung->find_where_with_subtables('wasserrechtliche_zulassungen=' . $result->getId() . ' AND (art = 1 OR art = 5)', 'id');
 	        $result->gewaesserbenutzungen = $gewaesserbenutzungen;
+	        
+	        if(empty($result->gewaesserbenutzungen) || empty($result->gewaesserbenutzungen[0]))
+	        {
+	            return null;
+	        }
 	    }
 	    
 	    return $year;
