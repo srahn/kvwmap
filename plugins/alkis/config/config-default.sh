@@ -9,7 +9,7 @@ POSTGRES_SCHEMA="alkis"
 GFS_TEMPLATE="../config/alkis-schema.gfs"
 DATA_PATH="/var/www/data/alkis/ff/eingang"
 ARCHIV_PATH="/var/www/data/alkis/ff/eingelesen"
-TEMP_PATH="/var/www/data/alkis/ff/temp"
+IMPORT_PATH="/var/www/data/alkis/ff/import"
 LOG_PATH="/var/www/data/alkis/ff/logs"
 LOG_FILE="import.log"
 ERROR_FILE="error.log"
@@ -20,5 +20,3 @@ UNZIPPASSWORD="secret2"
 OGR_BINPATH="/usr/local/gdal/bin" # inside the gdal container
 
 EPSG_CODE="25833"
-
-TRANSACTION="YES"
