@@ -1,5 +1,18 @@
 BEGIN;
 
+-- Tabelle zum Loggen der Import-Vorgänge
+
+CREATE TABLE alkis.import
+(
+ id serial NOT NULL,
+ datum timestamp without time zone DEFAULT now(),
+ datei text,
+ status text
+)
+WITH(
+ OIDS=TRUE
+);
+
 -- Tabellen für Adressänderungsfunktionalität
 
 CREATE TABLE alkis.ax_person_temp(											-- am 03.06.2015 hinzugefügt
