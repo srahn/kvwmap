@@ -80,6 +80,7 @@ INSERT INTO `u_funktionen` (`id`, `bezeichnung`, `link`) VALUES
 (19, 'sendeFestpunktskizze', NULL),
 (20, 'Nachweise_bearbeiten', NULL),
 (21, 'ALB-Auszug 30', NULL);
+(22, 'Kolibristart', NULL);
 
 
 ####################################################################################
@@ -108,6 +109,7 @@ INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (18,@stelle_i
 INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (19,@stelle_id);
 INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (20,@stelle_id);
 INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (21,@stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (22,@stelle_id);
 
 ###########################
 # Einträge der Menüpunkte #

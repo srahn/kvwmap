@@ -8399,7 +8399,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				for($i = 0; $i < count($table['attributname']); $i++){
 					if($table['type'][$i] == 'Time'){                       # Typ "Time"
 						if(in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
-							$sql.= "(now())::timestamp(0), ";
+							$sql .= "'" . date("Y-m-d H:i:s") ."', ";
+							#$sql .= "(now())::timestamp(0), ";
 						}
 						else $sql.= "NULL, ";
 					}

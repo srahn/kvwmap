@@ -250,8 +250,10 @@ FROM
 		# (lesend immer, aber schreibend nur mit DBWRITE=1)
 		if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
 			#echo "<br>".$sql;
-			$sql = "SET datestyle TO 'German';".$sql;
-			if($this->schema != ''){
+			if (stristr($sql, 'SELECT')) {
+				$sql = "SET datestyle TO 'German';" . $sql;
+			};
+			if ($this->schema != ''){
 				$sql = "SET search_path = " . $this->schema . ", public;" . $sql;
 			}
 			if ($suppress_error_msg) {
