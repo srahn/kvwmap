@@ -150,6 +150,8 @@ UPDATE alkis.pp_gemeinde a
    );
 
 
+TRUNCATE alkis.pp_amt;
+	 
 INSERT INTO alkis.pp_amt
   (land, regierungsbezirk, kreis, amt, amtsname)
   SELECT DISTINCT g.land, g.regierungsbezirk, g.kreis, a.amt_schluessel,

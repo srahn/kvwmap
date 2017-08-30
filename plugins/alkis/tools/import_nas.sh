@@ -68,16 +68,17 @@ extract_zip_files() {
 }
 
 execute_sql_transaction() {
-	error = "false";
+	error="false"
 	if [ ! "$(ls -A ${IMPORT_PATH}/NAS)" ] ; then
 		# ogr2ogr read all xml files successfully
 		if [ -f "${IMPORT_PATH}/import_transaction.sql" ] ; then
 			# execute transaction sql file
+			log "Lese Transaktionsdatei ein"
 			echo "END;COMMIT;" >> ${IMPORT_PATH}/import_transaction.sql
 			psql -h $POSTGRES_HOST -U $POSTGRES_USER -f ${IMPORT_PATH}/import_transaction.sql $POSTGRES_DBNAME &> ${LOG_PATH}/${ERROR_FILE}
 			if [ -n "$(grep -i 'Error\|Fehler' ${LOG_PATH}/${ERROR_FILE})" ] ; then
 				err "Fehler beim Einlesen der Transaktions-Datei: ${IMPORT_PATH}/import_transaction.sql."
-				$error = "true";
+				error="true"
 				head -n 30 ${LOG_PATH}/${ERROR_FILE}
 			else
 				log "Einlesevorgang erfolgreich"
@@ -85,14 +86,14 @@ execute_sql_transaction() {
 				psql -h $POSTGRES_HOST -U $POSTGRES_USER -c "SELECT ${POSTGRES_SCHEMA}.postprocessing();" $POSTGRES_DBNAME &> ${LOG_PATH}/${ERROR_FILE}
 				if [ -n "$(grep -i 'Error\|Fehler' ${LOG_PATH}/${ERROR_FILE})" ] ; then
 					err "Fehler beim Ausführen der Post-Processing-Funktion : ${POSTGRES_SCHEMA}.postprocessing()"
-					$error = "true";
+					error="true"
 					head -n 30 ${LOG_PATH}/${ERROR_FILE}
 				else
 					find ${POSTPROCESSING_PATH} -iname '*.sql' | sort |  while read PP_FILE ; do
 						psql -h $POSTGRES_HOST -U $POSTGRES_USER -f ${PP_FILE} $POSTGRES_DBNAME &> ${LOG_PATH}/${ERROR_FILE}
 						if [ -n "$(grep -i 'Error\|Fehler' ${LOG_PATH}/${ERROR_FILE})" ] ; then
 							err "Fehler beim Ausführen der Post-Processing-Datei : ${PP_FILE}"
-							$error = "true";
+							error="true"
 						else
 							log "Post-Processing erfolgreich ausgeführt"
 						fi
