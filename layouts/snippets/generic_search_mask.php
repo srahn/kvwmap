@@ -97,7 +97,7 @@ $num_colspan = ($this->user->rolle->visually_impaired) ? 3 : 5;
 							<?php
 							if (!$this->user->rolle->visually_impaired) { ?>
 	            <td width="100px">
-	              <select  style="width:75px" <? if(count($this->attributes['enum_value'][$i]) == 0) { ?>onchange="operatorchange('<? echo $this->attributes['name'][$i]; ?>', <? echo $searchmask_number; ?>);" id="<? echo $prefix; ?>operator_<? echo $this->attributes['name'][$i]; ?>" <? } ?> name="<? echo $prefix; ?>operator_<? echo $this->attributes['name'][$i]; ?>">
+	              <select  style="width:75px" <? if(count($this->attributes['enum_value'][$i]) == 0) { ?>onchange="operatorchange(<? echo $this->formvars['selected_layer_id']; ?>, '<? echo $this->attributes['name'][$i]; ?>', <? echo $searchmask_number; ?>);" id="<? echo $prefix; ?>operator_<? echo $this->attributes['name'][$i]; ?>" <? } ?> name="<? echo $prefix; ?>operator_<? echo $this->attributes['name'][$i]; ?>">
 	                <option title="<? echo $strEqualHint; ?>" value="=" <? if($operator == '='){ echo 'selected';} ?> >=</option>
 								<? if($this->attributes['type'][$i] != 'geometry'){ ?>
 	                <option title="<? echo $strNotEqualHint; ?>" value="!=" <? if($operator == '!='){ echo 'selected';} ?> >!=</option>

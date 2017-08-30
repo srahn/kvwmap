@@ -8350,7 +8350,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				$sql.= ") VALUES (";
 				for($i = 0; $i < count($table['attributname']); $i++){
 					if($table['type'][$i] == 'Time'){                       # Typ "Time"
-						$sql.= "(now())::timestamp(0), ";
+						if (in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
+							$sql .= "'" . date("Y-m-d H:i:s") ."', ";
+							#$sql .= "(now())::timestamp(0), ";
+						}
+						else $sql.= "NULL, ";
 					}
 					elseif($table['type'][$i] == 'User'){                       # Typ "User"
 						$sql.= "'".$this->user->Vorname." ".$this->user->Name."', ";
@@ -14504,7 +14508,7 @@ class db_mapObj{
   }
 
   function read_RollenLayer($id = NULL, $typ = NULL){
-		$sql = "SELECT DISTINCT l.*, g.Gruppenname, -l.id AS Layer_ID, 1 as showclasses, CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable from rollenlayer AS l, u_groups AS g";
+		$sql = "SELECT DISTINCT l.*, l.Name as alias, g.Gruppenname, -l.id AS Layer_ID, 1 as showclasses, CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable from rollenlayer AS l, u_groups AS g";
     $sql.= ' WHERE l.Gruppe = g.id AND l.stelle_id='.$this->Stelle_ID.' AND l.user_id='.$this->User_ID;
     if($id != NULL){
     	$sql .= ' AND l.id = '.$id;

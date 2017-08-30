@@ -1572,7 +1572,9 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 
 	  case "ZoomToFlst" : {
 			$GUI->loadMap('DataBase');
-			if(strpos($GUI->formvars['FlurstKennz'], '/') !== false)$GUI->formvars['FlurstKennz'] = formatFlurstkennzALKIS($GUI->formvars['FlurstKennz']);
+			if (strpos($GUI->formvars['FlurstKennz'], '/') !== false) $GUI->formvars['FlurstKennz'] = formatFlurstkennzALKIS($GUI->formvars['FlurstKennz']);
+			if (substr($GUI->formvars['FlurstKennz'], -1) == '0') $GUI->formvars['FlurstKennz'] = formatFlurstkennzALKIS_0To_($GUI->formvars['FlurstKennz']);
+
 			$explodedFlurstKennz = explode(';',$GUI->formvars['FlurstKennz']);
 			$GUI->zoomToALKFlurst($explodedFlurstKennz,10);
 			$currenttime=date('Y-m-d H:i:s',time());
