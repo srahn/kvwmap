@@ -27,7 +27,7 @@ function changeInputType(object, oType) {
 	}
 }
 
-function operatorchange(attributname, searchmask_number){
+function operatorchange(layer_id, attributname, searchmask_number){
 	if(searchmask_number > 0){						// es ist nicht die erste Suchmaske, sondern eine weitere hinzugefügte
 		prefix = searchmask_number+'_';
 	}
@@ -54,7 +54,7 @@ function operatorchange(attributname, searchmask_number){
 			document.getElementById(prefix+"_avf_"+attributname).style.display = 'none';
 			document.getElementById(prefix+"_text_"+attributname).style.display = 'inline';
 			document.getElementById(prefix+"text_value_"+attributname).value = '';
-			document.getElementById(attributname+"_"+prefix).disabled = true;
+			document.getElementById(layer_id+"_"+attributname+"_"+prefix).disabled = true;
 			document.getElementById(prefix+"text_value_"+attributname).disabled = false;
 		}
 		else{

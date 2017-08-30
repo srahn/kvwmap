@@ -760,7 +760,7 @@ class data_import_export {
 	
 	function getEncoding($dbf){
 		$folder = dirname($dbf);
-		$command = OGR_BINPATH.'ogr2ogr -f CSV '.$folder.'/test.csv '.$dbf;
+		$command = OGR_BINPATH.'ogr2ogr -f CSV '.$folder.'/test.csv "'.$dbf.'"';
 		exec($command, $output, $ret);
 		$command = 'file '.$folder.'/test.csv';
 		exec($command, $output, $ret);
