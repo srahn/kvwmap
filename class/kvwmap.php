@@ -122,6 +122,22 @@ class GUI {
 		return $trigger_result;
 	}
 
+	function get_deltas() {
+		$syncro = new synchro($this->stelle, $this->user, $this->pgdatabase);
+		$this->qlayerset[0]['shape'] = $syncro->get_deltas(
+			$this->formavars['client_id'],
+			$this->user->username,
+			$this->formavars['client_sync_time'],
+			$this->formavars['last_sync_version'],
+			$this->get_layer_name($this->formavars['selected_layer_id']), # ToDo find or create this function get_layer_name(id)
+			$this->formvars['pull_version_from'],
+			$this->formvars['client_deltas']
+		);
+		$this->formvars['format'] = 'json';
+		$this->formvars['content_type'] = 'application/json';
+		$this->output();
+	}
+
 	function show_snippet() {
 		if (empty($this->formvars['snippet'])) {
 			$error_msg = 'Geben Sie im Parameter snippets einen Namen für eine Datei an!';
