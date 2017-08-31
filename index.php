@@ -1298,6 +1298,31 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->LayerAnzeigen();
 		} break;
 
+		case 'Layergruppen_Anzeigen' : {
+			$GUI->checkCaseAllowed($go);
+			$GUI->Layergruppen_Anzeigen();
+		} break;
+
+		case 'Layergruppe_Editor' : {
+			$GUI->checkCaseAllowed('Layergruppen_Anzeigen');
+			$GUI->Layergruppe_Editor();
+		} break;
+
+		case 'Layergruppe_Speichern' : {
+			$GUI->checkCaseAllowed('Layergruppen_Anzeigen');
+			$GUI->Layergruppe_Speichern();
+		} break;
+
+		case 'Layergruppe_Ändern' : {
+			$GUI->checkCaseAllowed('Layergruppen_Anzeigen');
+			$GUI->Layergruppe_Aendern();
+		} break;
+
+		case 'Layergruppe_Löschen' : {
+			$GUI->checkCaseAllowed('Layergruppen_Anzeigen');
+			$GUI->Layergruppe_Loeschen();
+		}
+
 	  case 'Layer_Uebersicht' : {
 			$GUI->LayerUebersicht();
 		} break;

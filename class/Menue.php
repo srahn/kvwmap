@@ -136,7 +136,7 @@ class Menue extends MyObject {
 		);
     return $menues;
 	}
-
+	/*
 	public function validate() {
 		$results = array();
 		foreach($this->validations AS $validation) {
@@ -151,7 +151,7 @@ class Menue extends MyObject {
 		}
 		return $messages;
 	}
-
+*/
 	function is_selected() {
 		$is_selected = true;
 		$formvars = $_REQUEST;
