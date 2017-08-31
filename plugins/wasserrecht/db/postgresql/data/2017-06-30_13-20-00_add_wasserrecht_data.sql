@@ -4,6 +4,7 @@ BEGIN;
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 INSERT INTO wasserrecht.adresse (strasse, hausnummer, plz, ort) VALUES ('Lübecker Str.', '253', 19053, 'Schwerin');
+INSERT INTO wasserrecht.konto (name, iban, bic, verwendungszweck, personenkonto, kassenzeichen) VALUES ('Testkonto', 'DE 124455678990', '123456789', 'Test Verwendungszweck', 'r42551515', '51515');
 
 INSERT INTO wasserrecht.betriebszustand (name) VALUES ('WFBB');
 INSERT INTO wasserrecht.messtischblatt (nummer) VALUES (1445);
@@ -12,34 +13,25 @@ INSERT INTO wasserrecht.mengenbestimmung (name) VALUES ('Messung');
 INSERT INTO wasserrecht.mengenbestimmung (name) VALUES ('Berechnung');
 INSERT INTO wasserrecht.mengenbestimmung (name) VALUES ('Schätzung');
 
-INSERT INTO wasserrecht.behoerde (name, abkuerzung, status) VALUES ('Untere Wasserbehörde', 'uwb', DEFAULT);
-INSERT INTO wasserrecht.behoerde (name, abkuerzung, status) VALUES ('Staatliches Amt für Landwirtschaft und Umwelt', 'stalu', DEFAULT);
+INSERT INTO wasserrecht.behoerde_art(name, abkuerzung) VALUES ('Untere Wasserbehörde', 'UWB');
+INSERT INTO wasserrecht.behoerde_art(name, abkuerzung) VALUES ('Staatliches Amt für Landwirtschaft und Umwelt', 'StALU');
+INSERT INTO wasserrecht.behoerde (name, abkuerzung, art) VALUES ('Landrat Landkreis Rostock', 'LR LRO', 1);
+INSERT INTO wasserrecht.behoerde (name, abkuerzung, art) VALUES ('Landrat Ludwigslust-Parchim', 'LR LUP', 1);
+INSERT INTO wasserrecht.behoerde (name, abkuerzung, art) VALUES ('Landrat Mecklenburgische Seenplatte', 'LR MSE', 1);
+INSERT INTO wasserrecht.behoerde (name, abkuerzung, art) VALUES ('Landrat Nordwestmecklenburg', 'LR NWM', 1);
+INSERT INTO wasserrecht.behoerde (name, abkuerzung, art) VALUES ('Landrat Vorpommern-Greifswald', 'LR VG', 1);
+INSERT INTO wasserrecht.behoerde (name, abkuerzung, art) VALUES ('Landrat Vorpommern-Rügen', 'LR VR', 1);
+INSERT INTO wasserrecht.behoerde (name, abkuerzung, art) VALUES ('Oberbürgermeister Schwerin', 'OB SN', 1);
+INSERT INTO wasserrecht.behoerde (name, abkuerzung, art) VALUES ('Oberbürgermeister Rostock', 'OB HRO', 1);
+INSERT INTO wasserrecht.behoerde (name, abkuerzung, art) VALUES ('Staatliches Amt für Landwirtschaft und Umwelt Mittleres Mecklenburg', 'StALU MM', 2);
+INSERT INTO wasserrecht.behoerde (name, abkuerzung, art) VALUES ('Staatliches Amt für Landwirtschaft und Umwelt Mecklenburgische Seenplatte', 'StALU MS', 2);
+INSERT INTO wasserrecht.behoerde (name, abkuerzung, art) VALUES ('Staatliches Amt für Landwirtschaft und Umwelt Vorpommern', 'StALU VP', 2);
+INSERT INTO wasserrecht.behoerde (name, abkuerzung, art) VALUES ('Staatliches Amt für Landwirtschaft und Umwelt Westmecklenburg', 'StALU WM', 2);
 
 INSERT INTO wasserrecht.archivnummer (nummer) VALUES (188);
 INSERT INTO wasserrecht.archivnummer (nummer) VALUES (189);
 INSERT INTO wasserrecht.archivnummer (nummer) VALUES (209);
 INSERT INTO wasserrecht.archivnummer (nummer) VALUES (210);
-
-INSERT INTO wasserrecht.anlagen_klasse (name) VALUES ('Industriebetrieb');
-INSERT INTO wasserrecht.anlagen_klasse (name) VALUES ('Diensleistungsbetrieb');
-INSERT INTO wasserrecht.anlagen_klasse (name) VALUES ('Wasserwerk');
-INSERT INTO wasserrecht.anlagen_klasse (name) VALUES ('Landwirtschaftsbetrieb');
-INSERT INTO wasserrecht.anlagen_klasse (name) VALUES ('Sport- und Erhohlungsanlage');
-
-INSERT INTO wasserrecht.personen (name, behoerde, adresse) VALUES ('MAX MUSTERMANN', 1, 1);
-INSERT INTO wasserrecht.personen (name, behoerde) VALUES ('FRAU MUSTERMANN', 2);
-INSERT INTO wasserrecht.personen (name, bearbeiter) VALUES ('MUSTER BEARBEITER', true);
-INSERT INTO wasserrecht.personen (name, betreiber) VALUES ('MUSTER BETREIBER', true);
-INSERT INTO wasserrecht.personen (name, wrzaussteller) VALUES ('MUSTER WRZ AUSSTELLER', true);
-
-INSERT INTO wasserrecht.personen_status (name) VALUES ('[aktuell]');
-INSERT INTO wasserrecht.personen_status (name) VALUES ('[historisch 1994–2011]');
-INSERT INTO wasserrecht.personen_status (name) VALUES ('[historisch DDR]');
-
-INSERT INTO wasserrecht.personen_typ (name) VALUES ('Körperschaft des öffentlichen Rechts');
-INSERT INTO wasserrecht.personen_typ (name) VALUES ('Körperschaft des Privatrechts');
-
-INSERT INTO wasserrecht.personen_klasse (name) VALUES ('Kieswerk');
 
 INSERT INTO wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide_klasse (name) VALUES ('Wasserrechtliche Erlaubnis');
 INSERT INTO wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide_klasse (name) VALUES ('Gehobene Wasserrechtliche Erlaubnis');
@@ -175,8 +167,37 @@ INSERT INTO wasserrecht.wasserrechtliche_zulassungen_gueltigkeit (gueltig_seit, 
 INSERT INTO wasserrecht.wasserrechtliche_zulassungen_gueltigkeit (gueltig_seit, gueltig_bis) VALUES('2017-07-01', '2017-12-31');
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-INSERT INTO wasserrecht.anlagen (name, klasse, zustaend_uwb, zustaend_stalu, bearbeiter, objektid_geodin, betreiber, abwasser_koerperschaft, trinkwasser_koerperschaft,kommentar,the_geom) VALUES ('Musterholzwerk Musterstadt', 1, 1, 2, 3, NULL, 4, 1, 2, NULL, ST_Transform(ST_GeomFromText('POINT(12 54)', 4326), 35833));
-INSERT INTO wasserrecht.anlagen (name, klasse, zustaend_uwb, zustaend_stalu, bearbeiter, objektid_geodin, betreiber, abwasser_koerperschaft, trinkwasser_koerperschaft,kommentar,the_geom) VALUES ('Wasserwerk Musterstadt', 3, 1, 2, 3, NULL, 4, 1, 2, NULL, ST_Transform(ST_GeomFromText('POINT(12 53)', 4326), 35833));
+INSERT INTO wasserrecht.anlagen_klasse (name) VALUES ('Industriebetrieb');
+INSERT INTO wasserrecht.anlagen_klasse (name) VALUES ('Diensleistungsbetrieb');
+INSERT INTO wasserrecht.anlagen_klasse (name) VALUES ('Wasserwerk');
+INSERT INTO wasserrecht.anlagen_klasse (name) VALUES ('Landwirtschaftsbetrieb');
+INSERT INTO wasserrecht.anlagen_klasse (name) VALUES ('Sport- und Erhohlungsanlage');
+
+INSERT INTO wasserrecht.anlagen (name, klasse, zustaend_uwb, zustaend_stalu, abwasser_koerperschaft, trinkwasser_koerperschaft,kommentar,the_geom) VALUES ('Musterholzwerk Musterstadt', 1, 1, 1, 1, 2, NULL, ST_Transform(ST_GeomFromText('POINT(12 54)', 4326), 35833));
+INSERT INTO wasserrecht.anlagen (name, klasse, zustaend_uwb, zustaend_stalu, abwasser_koerperschaft, trinkwasser_koerperschaft,kommentar,the_geom) VALUES ('Wasserwerk Musterstadt', 3, 5, 2, 1, 2, NULL, ST_Transform(ST_GeomFromText('POINT(12 53)', 4326), 35833));
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+INSERT INTO wasserrecht.personen (name, abkuerzung, behoerde, adresse) VALUES ('MAX MUSTERMANN', 'MM', 1, 1);
+INSERT INTO wasserrecht.personen (name, abkuerzung, behoerde) VALUES ('FRAU MUSTERMANN', 'FM', 2);
+INSERT INTO wasserrecht.personen (name, abkuerzung, bearbeiter, anlage) VALUES ('MUSTER BEARBEITER', 'MB', 'ja', 1);
+INSERT INTO wasserrecht.personen (name, abkuerzung, betreiber, anlage) VALUES ('MUSTER BETREIBER', 'MB', 'ja', 1);
+INSERT INTO wasserrecht.personen (name, abkuerzung, wrzaussteller) VALUES ('MUSTER WRZ AUSSTELLER', 'MWA', 'ja');
+INSERT INTO wasserrecht.personen (name, abkuerzung, betreiber) VALUES ('Agargenossenschaft Holldorf', 'AH', 'ja');
+INSERT INTO wasserrecht.personen (name, abkuerzung, betreiber) VALUES ('Boddenland', 'BL', 'ja');
+INSERT INTO wasserrecht.personen (name, abkuerzung, betreiber) VALUES ('Danisco Sugar GmbH', 'DSG', 'ja');
+INSERT INTO wasserrecht.personen (name, abkuerzung, betreiber) VALUES ('Denissen Landwirtschaft Wöbbelin', 'DLW', 'ja');
+INSERT INTO wasserrecht.personen (name, abkuerzung, betreiber) VALUES ('DMK Altentreptow', 'DA', 'ja');
+INSERT INTO wasserrecht.personen (name, abkuerzung, betreiber) VALUES ('EURAWASSER Nord', 'EN', 'ja');
+INSERT INTO wasserrecht.personen (name, abkuerzung, betreiber) VALUES ('Gartenbau Warin', 'GW', 'ja');
+
+INSERT INTO wasserrecht.personen_status (name) VALUES ('[aktuell]');
+INSERT INTO wasserrecht.personen_status (name) VALUES ('[historisch 1994–2011]');
+INSERT INTO wasserrecht.personen_status (name) VALUES ('[historisch DDR]');
+
+INSERT INTO wasserrecht.personen_typ (name) VALUES ('Körperschaft des öffentlichen Rechts');
+INSERT INTO wasserrecht.personen_typ (name) VALUES ('Körperschaft des Privatrechts');
+
+INSERT INTO wasserrecht.personen_klasse (name) VALUES ('Kieswerk');
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 INSERT INTO wasserrecht.aktenzeichen (name) VALUES ('Test Aktenzeichen 1');

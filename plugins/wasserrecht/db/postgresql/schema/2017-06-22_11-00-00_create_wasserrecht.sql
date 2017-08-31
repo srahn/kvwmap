@@ -4,11 +4,18 @@ DROP SCHEMA IF EXISTS wasserrecht CASCADE;
 CREATE SCHEMA wasserrecht;
 
 -- GENERELL
+CREATE TABLE wasserrecht.behoerde_art(
+	id serial PRIMARY KEY,
+	name varchar(255),
+  	abkuerzung varchar(100)
+) WITH OIDS;
+
 CREATE TABLE wasserrecht.behoerde(
 	id serial PRIMARY KEY,
 	name varchar(255),
   	abkuerzung varchar(100),
-  	status varchar(100)
+  	status varchar(100),
+  	art integer REFERENCES wasserrecht.behoerde_art(id)
 ) WITH OIDS;
 
 -------------
@@ -33,8 +40,7 @@ CREATE TABLE wasserrecht.weeerklaerer(
 
 CREATE TABLE wasserrecht.ort(
 	id serial PRIMARY KEY,
-	name varchar(255),
-	the_geo geometry(Point, 35833)
+	name varchar(255)
 ) WITH OIDS;
 
 CREATE TABLE wasserrecht.adresse(
@@ -88,6 +94,32 @@ CREATE TABLE wasserrecht.mengenbestimmung(
 	name varchar(255)
 ) WITH OIDS;
 
+-- ANLAGEN
+CREATE TABLE wasserrecht.anlagen_klasse(
+	id serial PRIMARY KEY,
+	name varchar(100)
+)WITH OIDS;
+
+CREATE TABLE wasserrecht.anlagen(
+	id serial PRIMARY KEY,
+	name varchar(255) NOT NULL,
+	klasse integer NOT NULL REFERENCES wasserrecht.anlagen_klasse(id),
+	zustaend_uwb integer NOT NULL REFERENCES wasserrecht.behoerde(id),
+  	zustaend_stalu integer NOT NULL REFERENCES wasserrecht.behoerde(id),
+  	anlage_bearbeiter_name varchar(255),
+  	anlage_bearbeiter_datum varchar(255),
+  	anlage_bearbeiter_stelle varchar(255),
+  	objektid_geodin varchar(255),
+	abwasser_koerperschaft integer REFERENCES wasserrecht.koerperschaft(id),
+	trinkwasser_koerperschaft integer REFERENCES wasserrecht.koerperschaft(id),
+	kommentar text,
+	the_geom geometry(Point, 35833)
+) WITH OIDS;
+COMMENT ON COLUMN wasserrecht.anlagen.id IS 'Primärschlüssel der Fis-WrV Objekte';
+COMMENT ON COLUMN wasserrecht.anlagen.name IS 'Name der Fis-WrV Objekte';
+COMMENT ON COLUMN wasserrecht.anlagen.klasse IS 'Klasse der Fis-WrV Objekte';
+COMMENT ON COLUMN wasserrecht.anlagen.the_geom IS 'Geometrie';
+
 --PERSONEN
 CREATE TABLE wasserrecht.personen_klasse(
 	id serial PRIMARY KEY,
@@ -106,57 +138,33 @@ CREATE TABLE wasserrecht.personen_typ(
 
 CREATE TABLE wasserrecht.personen(
 	id serial PRIMARY KEY,
-	name varchar(255),
-	bezeichnung varchar(255),
+	name varchar(255) NOT NULL,
+	abkuerzung varchar(30) NOT NULL,
+	namenszusatz varchar(255),
 	klasse integer REFERENCES wasserrecht.personen_klasse(id),
 	status integer REFERENCES wasserrecht.personen_status(id),
 	adresse integer REFERENCES wasserrecht.adresse(id),
 	typ integer REFERENCES wasserrecht.personen_typ(id),
-	wrzadressat boolean,
-  	wrzrechtsnachfolger boolean,
-  	betreiber boolean,
-  	bearbeiter boolean,
+	wrzadressat varchar(10),
+  	wrzrechtsnachfolger varchar(10),
+  	betreiber varchar(10),
+  	bearbeiter varchar(10),
   	weeerklaerer integer REFERENCES wasserrecht.weeerklaerer(id),
+  	anlage integer REFERENCES wasserrecht.anlagen(id),
   	telefon varchar(50),
   	fax varchar(50),
   	email varchar(50),
-  	abkuerzung varchar(30),
-  	wrzaussteller boolean,
+  	wrzaussteller varchar(10),
   	abwasser_koerperschaft integer REFERENCES wasserrecht.koerperschaft(id),
   	trinkwasser_koerperschaft integer REFERENCES wasserrecht.koerperschaft(id),
   	kommentar varchar(255),
   	zimmer varchar(255),
+  	verwendungszweck_wee varchar(255),
   	behoerde integer REFERENCES wasserrecht.behoerde(id),
   	register_amtsgericht varchar(255),
   	register_nummer varchar(255),
-  	konto integer REFERENCES wasserrecht.konto(id),
-  	the_geo geometry(Point, 35833)
+  	konto integer REFERENCES wasserrecht.konto(id)
 )WITH OIDS;
-
--- ANLAGEN
-CREATE TABLE wasserrecht.anlagen_klasse(
-	id serial PRIMARY KEY,
-	name varchar(100)
-)WITH OIDS;
-
-CREATE TABLE wasserrecht.anlagen(
-	id serial PRIMARY KEY,
-	name varchar(255) NOT NULL,
-	klasse integer REFERENCES wasserrecht.anlagen_klasse(id),
-	zustaend_uwb integer REFERENCES wasserrecht.personen(id),
-  	zustaend_stalu integer REFERENCES wasserrecht.personen(id),
-  	bearbeiter integer REFERENCES wasserrecht.personen(id),
-  	objektid_geodin varchar(255),
-	betreiber integer REFERENCES wasserrecht.personen(id),
-	abwasser_koerperschaft integer REFERENCES wasserrecht.koerperschaft(id),
-	trinkwasser_koerperschaft integer REFERENCES wasserrecht.koerperschaft(id),
-	kommentar text,
-	the_geom geometry(Point, 35833)
-) WITH OIDS;
-COMMENT ON COLUMN wasserrecht.anlagen.id IS 'Primärschlüssel der Fis-WrV Objekte';
-COMMENT ON COLUMN wasserrecht.anlagen.name IS 'Name der Fis-WrV Objekte';
-COMMENT ON COLUMN wasserrecht.anlagen.klasse IS 'Klasse der Fis-WrV Objekte';
-COMMENT ON COLUMN wasserrecht.anlagen.the_geom IS 'Geometrie';
 
 --WASSERRECHTLICHE ZULASSUNGEN
 CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide_klasse(
