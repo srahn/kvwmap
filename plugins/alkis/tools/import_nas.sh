@@ -25,7 +25,7 @@ convert_nas_files() {
 			log "ogr2ogr konvertiert Datei: ${NAS_FILE}"
 		fi
 
-		${OGR_BINPATH}/ogr2ogr -f PGDump -append -a_srs EPSG:${EPSG_CODE} -nlt CONVERT_TO_LINEAR -lco SCHEMA=${POSTGRES_SCHEMA} -lco CREATE_SCHEMA=OFF -lco CREATE_TABLE=OFF --config PG_USE_COPY YES --config NAS_GFS_TEMPLATE "$SCRIPT_PATH/$GFS_TEMPLATE" --config NAS_NO_RELATION_LAYER YES ${SQL_FILE} ${NAS_FILE} &> ${LOG_PATH}/${ERROR_FILE}
+		${OGR_BINPATH}/ogr2ogr -f PGDump -append -a_srs EPSG:${EPSG_CODE} -nlt CONVERT_TO_LINEAR -lco SCHEMA=${POSTGRES_SCHEMA} -lco CREATE_SCHEMA=OFF -lco CREATE_TABLE=OFF --config PG_USE_COPY YES --config NAS_GFS_TEMPLATE "$SCRIPT_PATH/$GFS_TEMPLATE" --config NAS_NO_RELATION_LAYER YES ${SQL_FILE} ${NAS_FILE} > ${LOG_PATH}/${LOG_FILE} 2> ${LOG_PATH}/${ERROR_FILE}
 	
 		#/usr/local/gdal/bin/ogr2ogr -f PGDump -append -a_srs EPSG:25833 -nlt CONVERT_TO_LINEAR -lco SCHEMA=alkis -lco CREATE_SCHEMA=OFF -lco CREATE_TABLE=OFF --config PG_USE_COPY YES --config NAS_GFS_TEMPLATE "../config/alkis-schema.gfs" --config NAS_NO_RELATION_LAYER YES /var/www/data/alkis/ff/import/NAS/nba_landmv_lro_160112_1207von2024_288000_5986000.sql /var/www/data/alkis/ff/import/NAS/nba_landmv_lro_160112_1207von2024_288000_5986000.xml
 
@@ -68,40 +68,34 @@ extract_zip_files() {
 }
 
 execute_sql_transaction() {
-	error="false"
 	if [ ! "$(ls -A ${IMPORT_PATH}/NAS)" ] ; then
 		# ogr2ogr read all xml files successfully
 		if [ -f "${IMPORT_PATH}/import_transaction.sql" ] ; then
 			# execute transaction sql file
 			log "Lese Transaktionsdatei ein"
 			echo "END;COMMIT;" >> ${IMPORT_PATH}/import_transaction.sql
-			psql -h $POSTGRES_HOST -U $POSTGRES_USER -f ${IMPORT_PATH}/import_transaction.sql $POSTGRES_DBNAME &> ${LOG_PATH}/${ERROR_FILE}
+			psql -h $POSTGRES_HOST -U $POSTGRES_USER -f ${IMPORT_PATH}/import_transaction.sql $POSTGRES_DBNAME > ${LOG_PATH}/${LOG_FILE} 2> ${LOG_PATH}/${ERROR_FILE}
 			if [ -n "$(grep -i 'Error\|Fehler' ${LOG_PATH}/${ERROR_FILE})" ] ; then
 				err "Fehler beim Einlesen der Transaktions-Datei: ${IMPORT_PATH}/import_transaction.sql."
-				error="true"
 				head -n 30 ${LOG_PATH}/${ERROR_FILE}
 			else
 				log "Einlesevorgang erfolgreich"
+				clear_import_folder
 				log "Post-Processing wird ausgeführt"
-				psql -h $POSTGRES_HOST -U $POSTGRES_USER -c "SELECT ${POSTGRES_SCHEMA}.postprocessing();" $POSTGRES_DBNAME &> ${LOG_PATH}/${ERROR_FILE}
+				psql -h $POSTGRES_HOST -U $POSTGRES_USER -c "SELECT ${POSTGRES_SCHEMA}.postprocessing();" $POSTGRES_DBNAME > > ${LOG_PATH}/${LOG_FILE} 2> ${LOG_PATH}/${ERROR_FILE}
 				if [ -n "$(grep -i 'Error\|Fehler' ${LOG_PATH}/${ERROR_FILE})" ] ; then
 					err "Fehler beim Ausführen der Post-Processing-Funktion : ${POSTGRES_SCHEMA}.postprocessing()"
-					error="true"
 					head -n 30 ${LOG_PATH}/${ERROR_FILE}
 				else
 					find ${POSTPROCESSING_PATH} -iname '*.sql' | sort |  while read PP_FILE ; do
-						psql -h $POSTGRES_HOST -U $POSTGRES_USER -f ${PP_FILE} $POSTGRES_DBNAME &> ${LOG_PATH}/${ERROR_FILE}
+						psql -h $POSTGRES_HOST -U $POSTGRES_USER -f ${PP_FILE} $POSTGRES_DBNAME > ${LOG_PATH}/${LOG_FILE} 2> ${LOG_PATH}/${ERROR_FILE}
 						if [ -n "$(grep -i 'Error\|Fehler' ${LOG_PATH}/${ERROR_FILE})" ] ; then
 							err "Fehler beim Ausführen der Post-Processing-Datei : ${PP_FILE}"
-							error="true"
 						else
 							log "Post-Processing erfolgreich ausgeführt"
 						fi
 					done
 				fi				
-			fi
-			if [ $error = "false" ] ; then
-				clear_import_folder
 			fi
 		fi
 	fi
@@ -110,6 +104,7 @@ execute_sql_transaction() {
 clear_import_folder() {
 	if [ ! "${IMPORT_PATH}" = "" ] ; then
 		# import-Ordner leeren
+		log "Leere Import-Ordner"
 		rm -R ${IMPORT_PATH}/*
 	fi
 }
