@@ -31,7 +31,7 @@ function Bestaetigung(link,text) {
 		   <? } ?>
 		      <tr>
 		        <td style="border-right:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><? echo $this->layer['Bezeichnung'][$i]; ?></td>
-		        <td style="border-right:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><textarea disabled style="background-color: transparent; border: 0; overflow: auto; outline: none; resize: none; width: 400px; height: 10px; margin-bottom: 5px"><? echo $this->layer['Kurzbeschreibung'][$i]; ?></textarea></td>
+		        <td style="border-right:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><? echo htmlentities($this->layer['Kurzbeschreibung'][$i]); ?></td>
 		        <td style="border-bottom:1px solid #C3C7C3; width: 200px"><? echo $this->layer['Datenherr'][$i]; ?>&nbsp;</td>
 		      </tr>
 		   <? } ?>
@@ -42,4 +42,3 @@ function Bestaetigung(link,text) {
     <td align="right">&nbsp;</td>
   </tr>
 </table>
-<script>$('textarea:not(:empty)').autosize();</script>
