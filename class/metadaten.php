@@ -1,6 +1,6 @@
 <?php
 ###################################################################
-# kvwmap - Kartenserver für Kreisverwaltungen                     #
+# kvwmap - Kartenserver fÃ¼r Kreisverwaltungen                     #
 ###################################################################
 # Lizenz                                                          #
 #                                                                 # 
@@ -50,7 +50,7 @@ class metadatensatz {
   }
   
   function getMetadaten($md) {
-    # Liesst Metadatenwerte zu einer übergegebenen Metadatensatz_id
+    # Liesst Metadatenwerte zu einer Ã¼bergegebenen Metadatensatz_id
     $ret=$this->database->getMetadata($md);
     if ($ret[0]) {
       $ret[1]='Fehler beim Abfragen der Datenbank'.$ret[1];
@@ -62,7 +62,7 @@ class metadatensatz {
   }
   
   function getMetadatenQuickSearch($md) {
-    # Durchsucht die Datenbank mit der Schnellsuche nach Metadatensätzen
+    # Durchsucht die Datenbank mit der Schnellsuche nach MetadatensÃ¤tzen
     $ret=$this->database->getMetadataQuickSearch($md);
     if ($ret[0]) {
       $ret[1]='Fehler beim Abfragen der Datenbank'.$ret[1];
@@ -75,7 +75,7 @@ class metadatensatz {
   
   function readDefaultValues($user) {
     #2005-11-29_pk
-    # Weißt Standardwerte zu den Metadatenfeldern zu und liefert diese als Array zurück
+    # WeiÃŸt Standardwerte zu den Metadatenfeldern zu und liefert diese als Array zurÃ¼ck
     $md['mdfileid']=rand();
     $md['mddatest']=date('Y-m-d');
     $md['reseddate']=date('Y-m-d');
@@ -96,9 +96,9 @@ class metadatensatz {
   
   function speichern($metadaten) {
     #2005-11-29_pk
-    # Prüfen der Metadaten
+    # PrÃ¼fen der Metadaten
     if ($ret[0]) {
-      $ret[1]='<br>Fehler beim Prüfen der Metadaten.'.$ret[1];
+      $ret[1]='<br>Fehler beim PrÃ¼fen der Metadaten.'.$ret[1];
     }
     else {
       if ($metadaten['id']) {
@@ -115,7 +115,7 @@ class metadatensatz {
   
   function checkMetadata($md) {
     #2005-11-29_pk
-    # Prüft die eingegebenen Metadaten auf Richtigkeit und formt gegebenenfalls Datentypen um
+    # PrÃ¼ft die eingegebenen Metadaten auf Richtigkeit und formt gegebenenfalls Datentypen um
     if ($md['restitle']=='') { $errmsg='<br>Geben Sie einen Titel an.'; }
     if ($md['mdfileid']=='') {
       $errmsg='<br>Geben Sie eine eindeutige Metadatenid an.';
@@ -144,9 +144,9 @@ class metadatensatz {
     if ($md['continfo']=='') { $md['continfo']='NULL'; }
     if ($md['distinfo']=='') { $md['distinfo']='NULL'; }
     if ($md['databinding']=='') { $md['databinding']=0; }
-    # Zusammenfassen der selectierten Schlagwörter
+    # Zusammenfassen der selectierten SchlagwÃ¶rter
     if ($md['selectedthemekeywordids']=='') {
-      $errmsg.='<br>Geben Sie thematische Schlagwörter ein.';
+      $errmsg.='<br>Geben Sie thematische SchlagwÃ¶rter ein.';
     }
     else {
       $keywords=array_unique(explode(", ",$md['selectedthemekeywordids']));
@@ -156,7 +156,7 @@ class metadatensatz {
       }
     }
     if ($md['selectedplacekeywordids']=='') {
-      $errmsg.='<br>Geben Sie räumliche Schlagwörter ein.';
+      $errmsg.='<br>Geben Sie rÃ¤umliche SchlagwÃ¶rter ein.';
     }
     else {
       $keywords=array_unique(explode(", ",$md['selectedplacekeywordids']));

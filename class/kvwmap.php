@@ -5693,6 +5693,8 @@ class GUI {
     else {
       $this->formvars['allthemekeywords']=$ret[1];
     }
+		var_dump($this->formvars['allthemkeywords']);
+
     $ret=$metadatensatz->getKeywords('','','place','','','keyword');
     if ($ret[0]) {
       echo $ret[1];
@@ -5700,8 +5702,28 @@ class GUI {
     else {
       $this->formvars['allplacekeywords']=$ret[1];
     }
-    $this->allthemekeywordsFormObj=new FormObject("allthemekeywords","select",$this->formvars['allthemekeywords']['id'],explode(", ",$this->formvars['selectedthemekeywordids']),$this->formvars['allthemekeywords']['keyword'],4,0,1,NULL);
-    $this->allplacekeywordsFormObj=new FormObject("allplacekeywords","select",$this->formvars['allplacekeywords']['id'],explode(", ",$this->formvars['selectedplacekeywordids']),$this->formvars['allplacekeywords']['keyword'],4,0,1,NULL);
+    $this->allthemekeywordsFormObj = new FormObject(
+			"allthemekeywords",
+			"select",
+			$this->formvars['allthemekeywords']['id'],
+			explode(", ",$this->formvars['selectedthemekeywordids']),
+			$this->formvars['allthemekeywords']['keyword'],
+			4,
+			0,
+			1,
+			'200'
+		);
+    $this->allplacekeywordsFormObj = new FormObject(
+			"allplacekeywords",
+			"select",
+			$this->formvars['allplacekeywords']['id'],
+			explode(", ",$this->formvars['selectedplacekeywordids']),
+			$this->formvars['allplacekeywords']['keyword'],
+			4,
+			0,
+			1,
+			'200'
+		);
     $this->main='metadateneingabeformular.php';
     $this->loadMap('DataBase');
     if ($this->formvars['refmap_x']!='') {
@@ -10412,7 +10434,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     if ($this->formvars['order'] == ''){
       $this->formvars['order'] = 'name';
     }
-    $this->menuedaten = Menue::find($this, 'true', $this->formvars['order']);
+    $this->menuedaten = Menue::find($this, 'true', $this->formvars['view_sort']);
     $this->titel='Menüdaten';
     $this->main='menuedaten.php';
     $this->output();
@@ -10446,7 +10468,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		}
 		if (empty($results)) {
 			$this->add_message('notice', 'Menü erfolgreich angelegt.');
-			$this->menuedaten = Menue::find($this, 'true', $this->formvars['order']);
+			$this->menuedaten = Menue::find($this, '', $this->formvars['order']);
 			$this->titel='Menüdaten';
 			$this->main='menuedaten.php';
 		}

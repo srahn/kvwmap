@@ -109,7 +109,7 @@ else {
       <table border="0" cellspacing="0" cellpadding="0">
         <tr valign="top"> 
           <td> 
-            <select name="selectedthemekeywords" size="4" multiple>
+            <select name="selectedthemekeywords" size="4" style="width: 200px" multiple>
             </select>
           </td>
           <td align="center" valign="middle" width="1"> 
@@ -128,7 +128,7 @@ else {
       <table border="0" cellspacing="0" cellpadding="0">
         <tr valign="top"> 
           <td> 
-            <select name="selectedplacekeywords" size="4" multiple>
+            <select name="selectedplacekeywords" size="4" style="width: 200px" multiple>
             </select>
           </td>
           <td align="center" valign="middle" width="1"> 
