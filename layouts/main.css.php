@@ -184,7 +184,7 @@ input[type="text"].transparent_input{
   float: left;
   text-align: right;
 	font-size: 17px;
-  width: 150px;
+  width: 210px;
   height: 15px;
   margin-right: 10px;
 }
