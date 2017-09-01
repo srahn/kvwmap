@@ -7703,10 +7703,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					$this->user->rolle->delete_last_query();
 					$this->user->rolle->save_last_query('Layer-Suche_Suchen', $this->formvars['selected_layer_id'], $sql, $sql_order, $this->formvars['anzahl'], $this->formvars['offset_'.$layerset[0]['Layer_ID']]);
 
-					# last_search speichern
-					$this->formvars['search_name'] = '<last_search>';
-					$this->user->rolle->delete_search($this->formvars['search_name']);
-					$this->user->rolle->save_search($attributes, $this->formvars);
+					# last_search speichern					
+					if($this->last_query == ''){
+						$this->formvars['search_name'] = '<last_search>';
+						$this->user->rolle->save_search($attributes, $this->formvars);
+					}
 
 					# Querymaps erzeugen
 					if($layerset[0]['querymap'] == 1 AND $attributes['privileg'][$attributes['the_geom']] >= '0' AND ($layerset[0]['Datentyp'] == 1 OR $layerset[0]['Datentyp'] == 2)){
@@ -10346,10 +10347,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
   function MenuesAnzeigen() {
     # Abfragen aller Menues
-    if ($this->formvars['order'] == ''){
-      $this->formvars['order'] = 'name';
+    if ($this->formvars['view_sort'] == ''){
+      $this->formvars['view_sort'] = 'name';
     }
-    $this->menuedaten = Menue::find($this, 'true', $this->formvars['order']);
+    $this->menuedaten = Menue::find($this, 'true', $this->formvars['view_sort']);
     $this->titel='Menüdaten';
     $this->main='menuedaten.php';
     $this->output();
