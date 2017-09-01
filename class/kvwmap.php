@@ -2656,15 +2656,18 @@ class GUI {
 					$all_new_oids[] = $rs[0];
 					# Dokumente kopieren
 					for($p = 0; $p < count($orig_dataset[$d]['document_paths']); $p++){		# diese Schleife durchläuft alle Dokument-Attribute innerhalb eines kopierten Datensatzes
-						$path_parts = explode('&', $orig_dataset[$d]['document_paths'][$p]);		# &original_name=... abtrennen
-						$orig_path = $path_parts[0];
-						$name_parts = explode('.', $orig_path);		# Dateiendung ermitteln
-						$new_file_name = date('Y-m-d_H_i_s',time()).'-'.rand(100000, 999999).'.'.$name_parts[1];;
-						$new_path = dirname($orig_path).'/'.$new_file_name;
-						copy($orig_path, $new_path);
-						$complete_new_path = $new_path.'&'.$path_parts[1];
-						$sql = "UPDATE ".$layerset[0]['maintable']." SET ".$document_attributes[$p]." = '".$complete_new_path."' WHERE oid = ".$rs[0];
-						$ret = $layerdb->execSQL($sql,4, 0);
+						if($orig_dataset[$d]['document_paths'][$p] != ''){
+							$path_parts = explode('&', $orig_dataset[$d]['document_paths'][$p]);		# &original_name=... abtrennen
+							$orig_path = $path_parts[0];
+							$name_parts = explode('.', $orig_path);		# Dateiendung ermitteln
+							$new_file_name = date('Y-m-d_H_i_s',time()).'-'.rand(100000, 999999).'.'.$name_parts[1];;
+							$new_path = dirname($orig_path).'/'.$new_file_name;
+							copy($orig_path, $new_path);
+							$complete_new_path = $new_path.'&'.$path_parts[1];
+							$sql = "UPDATE ".$layerset[0]['maintable']." SET ".$document_attributes[$p]." = '".$complete_new_path."' WHERE oid = ".$rs[0];
+							#echo $sql.'<br>';
+							$ret1 = $layerdb->execSQL($sql,4, 0);
+						}
 					}
 					$d++;
 				}
@@ -2673,13 +2676,13 @@ class GUI {
 			if($new_oids[0] != ''){
 				for($u = 0; $u < count($update_columns); $u++){
 					$sql = "UPDATE ".$layerset[0]['maintable']." SET ".$update_columns[$u]." = '".$update_values[$i][$u]."' WHERE oid IN (".implode(',', $new_oids).")";
+					#echo $sql.'<br>';
 					$ret = $layerdb->execSQL($sql,4, 0);
 				}
 			}
 		}
 
 		if($all_new_oids[0] != ''){
-			$j = 0;
 			# über SubFormEmbeddedPK oder SubFormPK verknüpfte Datensätze auch rekursiv kopieren			
 			for($l = 0; $l < count($layerattributes['name']); $l++){
 	    	if(in_array($layerattributes['form_element_type'][$l], array('SubFormEmbeddedPK', 'SubFormPK'))){
@@ -2690,35 +2693,36 @@ class GUI {
 					$options = explode(';', $layerattributes['options'][$l]);
 	        $subform = explode(',', $options[0]);
 	        $subform_layerid = $subform[0];
-					$subformlayerdb = $mapdb->getlayerdatabase($subform_layerid, $this->Stelle->pgdbhost);
-					$subformlayerattributes = $mapdb->read_layer_attributes($subform_layerid, $subformlayerdb, NULL);
-	        if($layerattributes['form_element_type'][$l] == 'SubFormEmbeddedPK')$minus = 1;
-	        else $minus = 0;
-	        for($k = 1; $k < count($subform)-$minus; $k++){
-	        	$subform_pks_realnames[] = $layerattributes['real_name'][$subform[$k]];											# das sind die richtigen Namen der SubformPK-Schlüssel in der übergeordneten Tabelle
-						$subform_pks_realnames2[] = $subformlayerattributes['real_name'][$subform[$k]];							# das sind die richtigen Namen der SubformPK-Schlüssel in der untergeordneten Tabelle
-	        }
-	        $sql = "SELECT ".implode(',', $subform_pks_realnames)." FROM ".$layerset[0]['maintable']." WHERE ";			# die Werte der SubformPK-Schlüssel aus dem alten Datensatz abfragen
-	        for($n = 0; $n < count($id_names); $n++){
-						$sql.= $id_names[$n]." = '".$id_values[$n]."' AND ";
-					}
-					$sql.= "1=1";
-					#echo $sql.'<br>';
-	    		$ret=$layerdb->execSQL($sql,4, 0);
-					if(!$ret[0]){
-						$pkvalues=pg_fetch_row($ret[1]);
-					}
-	    		$sql = "SELECT ".implode(',', $subform_pks_realnames)." FROM ".$layerset[0]['maintable']." WHERE ";			# die Werte der SubformPK-Schlüssel aus den neuen Datensätzen abfragen
-	        $sql.= "oid IN (".implode(',', $all_new_oids).")";
-	        #echo $sql.'<br>';
-	    		$ret=$layerdb->execSQL($sql,4, 0);
-					if(!$ret[0]){
-						while($rs=pg_fetch_row($ret[1])){
-							$next_update_values[] = $rs;
+					if($subform_layerid != $layer_id){			# Subforms auf den selben Layer werden ignoriert
+						$subformlayerdb = $mapdb->getlayerdatabase($subform_layerid, $this->Stelle->pgdbhost);
+						$subformlayerattributes = $mapdb->read_layer_attributes($subform_layerid, $subformlayerdb, NULL);
+						if($layerattributes['form_element_type'][$l] == 'SubFormEmbeddedPK')$minus = 1;
+						else $minus = 0;
+						for($k = 1; $k < count($subform)-$minus; $k++){
+							$subform_pks_realnames[] = $layerattributes['real_name'][$subform[$k]];											# das sind die richtigen Namen der SubformPK-Schlüssel in der übergeordneten Tabelle
+							$subform_pks_realnames2[] = $subformlayerattributes['real_name'][$subform[$k]];							# das sind die richtigen Namen der SubformPK-Schlüssel in der untergeordneten Tabelle
 						}
+						$sql = "SELECT ".implode(',', $subform_pks_realnames)." FROM ".$layerset[0]['maintable']." WHERE ";			# die Werte der SubformPK-Schlüssel aus dem alten Datensatz abfragen
+						for($n = 0; $n < count($id_names); $n++){
+							$sql.= $id_names[$n]." = '".$id_values[$n]."' AND ";
+						}
+						$sql.= "1=1";
+						#echo $sql.'<br>';
+						$ret=$layerdb->execSQL($sql,4, 0);
+						if(!$ret[0]){
+							$pkvalues=pg_fetch_row($ret[1]);
+						}
+						$sql = "SELECT ".implode(',', $subform_pks_realnames)." FROM ".$layerset[0]['maintable']." WHERE ";			# die Werte der SubformPK-Schlüssel aus den neuen Datensätzen abfragen
+						$sql.= "oid IN (".implode(',', $all_new_oids).")";
+						#echo $sql.'<br>';
+						$ret=$layerdb->execSQL($sql,4, 0);
+						if(!$ret[0]){
+							while($rs=pg_fetch_row($ret[1])){
+								$next_update_values[] = $rs;
+							}
+						}
+						$this->copy_dataset($mapdb, $subform_layerid, $subform_pks_realnames2, $pkvalues, count($next_update_values), $subform_pks_realnames2, $next_update_values, $delete_original);
 					}
-	        $j++;
-	        $this->copy_dataset($mapdb, $subform_layerid, $subform_pks_realnames2, $pkvalues, count($next_update_values), $subform_pks_realnames2, $next_update_values, $delete_original);
 		    }
 			}
 			# Original löschen
