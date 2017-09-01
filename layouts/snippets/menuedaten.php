@@ -32,8 +32,8 @@
 		<td>
 			<table width="100%" border="0" cellspacing="0" cellpadding="2">
 				<tr>
-					<th><a href="index.php?go=Menues_Anzeigen&order=id"><?php echo $this->strID; ?></a></th>
-					<th><a href="index.php?go=Menues_Anzeigen&order=name"><?php echo $this->strName; ?></a></th>
+					<th><a href="index.php?go=Menues_Anzeigen&view_sort=id"><?php echo $this->strID; ?></a></th>
+					<th><a href="index.php?go=Menues_Anzeigen&view_sort=name"><?php echo $this->strName; ?></a></th>
 					<td colspan="3">&nbsp;</td>
 				</tr><?php
 				for ($i = 0; $i < count($this->menuedaten); $i++) { ?>
