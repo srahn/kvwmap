@@ -2499,59 +2499,6 @@ FROM
     return $this->execSQL($sql, 4, 0);
   }
 
-  function getMetadataQuickSearch($md){
-    $sql ="SELECT DISTINCT m.oid,m.* FROM md_metadata AS m, md_keywords AS k, md_keywords2metadata AS k2m";
-    $sql.=" WHERE m.id=k2m.metadata_id AND k2m.keyword_id=k.id";
-    if ($md['was']!='') {
-      $sql.=" AND (";
-      $sql.="restitle LIKE '%".$md['was']."%'";
-      $sql.=" OR (k.keyword LIKE '%".$md['was']."%' AND k.keytyp='theme')";
-      $sql.=")";
-    }
-    if ($md['wer']!='') {
-      $sql.=" AND (rporgname LIKE '%".$md['wer']."%'";
-      $sql.="   OR linkage LIKE '%".$md['wer']."%')";
-    }
-    if ($md['wo']!='') {
-      $sql.=" AND (k.keyword LIKE '%".$md['wo']."%' AND k.keytyp='place')";
-    }
-    if ($md['vonwann']!='') {
-      $sql.=" AND validtill >= '".$md['vonwann']."'";
-    }
-    if ($md['biswann']!='') {
-      $sql.=" AND validfrom <= '".$md['biswann']."'";
-    }
-    if ($md['northbl']!='') {
-      # Umringspolygon fï¿½r die Suche in der Datenbank aus den ï¿½bergebenen Koordinaten zusammensetzen
-      $md['umring'] ='POLYGON(('.$md['eastbl'].' '.$md['southbl'].','.$md['westbl'].' '.$md['southbl'];
-      $md['umring'].=','.$md['westbl'].' '.$md['northbl'].','.$md['eastbl'].' '.$md['northbl'];
-      $md['umring'].=','.$md['eastbl'].' '.$md['southbl'].'))';
-      # sql-Teil fï¿½r rï¿½umliche Abfrage bilden
-      $sql.=" AND the_geom && st_geometryfromtext('".$md['umring']."',".EPSGCODE.") AND st_intersects(the_geom,st_geometryfromtext('".$md['umring']."',".EPSGCODE."))";
-    }
-    $ret=$this->execSQL($sql, 4, 0);
-    if ($ret[0]==0) {
-      while($rs=pg_fetch_assoc($ret[1])) {
-        # Abfragen und Zuweisen der Keywortbezeichnungen
-        $theme=$this->getKeywords('','','theme','',$rs['id'],'keyword');
-        $themes=$theme[1]['keyword'];
-        $rs['themekeywords']=$themes[0];
-        for ($i=1;$i<count($themes);$i++) {
-          $rs['themekeywords'].=', '.$themes[$i];
-        }
-        $place=$this->getKeywords('','','place','',$rs['id'],'keyword');
-        $places=$place[1]['keyword'];
-        $rs['placekeywords']=$places[0];
-        for ($i=1;$i<count($places);$i++) {
-          $rs['placekeywords'].=', '.$places[$i];
-        }
-        $mdresult[]=$rs;
-      }
-      $ret[1]=$mdresult;
-    }
-    return $ret;
-  }
-
   function getKeywords($id,$keyword,$keytyp,$thesaname,$metadata_id,$order) {
     # letzte ï¿½nderung 2005-11-29 pk
     if (is_array($id)) { $idliste=$id; }  else { $idliste=array($id); }

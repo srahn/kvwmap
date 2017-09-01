@@ -887,11 +887,7 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 		case 'Metadaten_Uebersicht' : {
 		$GUI->metadaten_uebersicht();
 	  } break;
-	  
-	  case 'Metadaten_Recherche' : {
-		$GUI->metadaten_suche();
-	  } break;
-	  
+
 	  case 'Metadaten_generieren' : {
 		$GUI->metadaten_generieren($GUI->formvars['layer_id']);
 	  } break;
@@ -900,16 +896,8 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 		$GUI->metadatenSuchForm();
 	  } break;
 
-	  case 'Metadaten_Auswaehlen_Senden' : {
-		$GUI->metadatenSuchen();
-	  } break;
-
 	  case 'Metadatenblattanzeige' : {
 		$GUI->metadatenblattanzeige();
-	  } break;
-
-	  case 'Metadateneingabe' : {
-		$GUI->metadateneingabe();
 	  } break;
 
 	  case 'Metadateneingabe_Senden' : {

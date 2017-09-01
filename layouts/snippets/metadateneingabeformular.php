@@ -32,7 +32,6 @@ else {
 		    echo "<br>(MD_Metadata.mdFileID)";
 			}
 		    ?><input type="text" name="mdfileid" value="<?php echo $this->formvars['mdfileid']; ?>">
-<?php var_dump($this->formvars['mdfileid']); ?>			
           </td>
         </tr>
         <tr> 

@@ -240,7 +240,7 @@ class PgObject {
 		while ($rs = pg_fetch_assoc($query)) {
 			$results[] = $rs;
 		}
-		return $result;
+		return $results;
 	}
 
 }

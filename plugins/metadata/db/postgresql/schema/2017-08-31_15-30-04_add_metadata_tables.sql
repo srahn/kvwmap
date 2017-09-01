@@ -55,7 +55,7 @@ CREATE TABLE md_metadata
 WITH OIDS;
 COMMENT ON TABLE md_metadata IS 'Metadatendokumente';
 
-SELECT AddGeometryColumn('public', 'md_metadata','the_geom',2398,'POLYGON', 2);
+SELECT AddGeometryColumn('public', 'md_metadata','the_geom',25833,'POLYGON', 2);
 CREATE INDEX md_metadata_the_geom_gist ON md_metadata USING GIST (the_geom);
 
 --# Diese Tabellen sind für ein normalisiertes Datenbankmodell für Metadaten geplant
