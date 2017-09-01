@@ -217,7 +217,7 @@ function rotate_print_extent(angle){
         </tr>
         <tr align="left">
           <td>
-          <div align="center"><input type="submit" class="button" name="neuladen" value="<?php echo $strLoadNew; ?>"></div>
+          <div align="center"><input type="button" class="button" name="neuladen_button" onclick="neuLaden();" value="<?php echo $strLoadNew; ?>"></div>
           <br>
         	<div style="width:230; height:<?php echo $this->map->height-59; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
 	          &nbsp;
@@ -326,6 +326,7 @@ function rotate_print_extent(angle){
 <input type="hidden" name="mapheight" value="<?php echo $this->Document->activeframe[0]['mapheight']; ?>">
 <input type="hidden" name="printextent" value="">
 <input type="hidden" name="map_factor" value="<? echo $this->formvars['map_factor'] ?>">
+<input type="hidden" name="neuladen" value="">
 
 <!-- für den externen Druck -->
 <input type="hidden" name="post_width" value="<? echo $this->formvars['post_width'] ?>">
