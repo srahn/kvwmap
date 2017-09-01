@@ -436,7 +436,7 @@ function updateThema(event, thema, query, groupradiolayers, queryradiolayers, in
 			}
 		}
   }
-	if(reload)overlay_submit(currentform);
+	if(reload)neuLaden();
 }
 
 function updateQuery(event, thema, query, radiolayers, instantreload){
@@ -468,7 +468,12 @@ function updateQuery(event, thema, query, radiolayers, instantreload){
   		}
   	}
   }
-	if(instantreload)overlay_submit(currentform);
+	if(instantreload)neuLaden();
+}
+
+function neuLaden(){
+	currentform.neuladen.value='true';
+	overlay_submit(currentform);
 }
 
 function preventDefault(e){
@@ -501,7 +506,7 @@ function selectgroupquery(group, instantreload){
       updateThema('', thema, query, '', '', 0);
     }
   }
-	if(instantreload)overlay_submit(currentform);
+	if(instantreload)neuLaden();
 }
 
 function selectgroupthema(group, instantreload){
@@ -523,7 +528,7 @@ function selectgroupthema(group, instantreload){
       updateQuery('', thema, query, '', 0);
     }
   }
-	if(instantreload)overlay_submit(currentform);
+	if(instantreload)neuLaden();
 }
 
 function zoomToMaxLayerExtent(zoom_layer_id){
@@ -613,7 +618,7 @@ function changeClassStatus(classid,imgsrc,instantreload,width,height){
 		selClass.value='0';
 		selImg.src="graphics/inactive"+height+".jpg";
 	}
-	if(instantreload)overlay_submit(currentform);
+	if(instantreload)neuLaden();
 }
 
 /*Anne*/

@@ -90,7 +90,7 @@ function buildwktpolygonfromsvgpath(svgpath){
 			        </tr>
 			        <tr align="left">
 			          <td>
-			          	<div align="center"><input type="submit" class="button" name="neuladen" value="neu Laden"></div>
+			          	<div align="center"><input type="button" class="button" name="neuladen_button" onclick="neuLaden();" value="neu Laden"></div>
 			          		<br>
 			        			<div style="width:230; height:<?php echo $this->map->height-59; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
 				          		&nbsp;
@@ -165,3 +165,4 @@ function buildwktpolygonfromsvgpath(svgpath){
 <input type="hidden" name="map_miny" value="<? echo $this->map->extent->miny; ?>">
 <input type="hidden" name="map_pixsize" value="<? echo $this->user->rolle->pixsize; ?>">
 <input type="hidden" name="area" value="<?echo $this->formvars['area']?>">
+<input type="hidden" name="neuladen" value="">
