@@ -14011,13 +14011,13 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	    $oPixelPos=ms_newPointObj();
 	    $oPixelPos->setXY($this->map->width/2,$this->map->height/2);
 	    if (MAPSERVERVERSION > 600) {
-				if($layer[0]['maxscale'] > 0)$nScale = $layer[0]['maxscale']-1;
+				if($layer[0]['maxscale'] > 0 AND $layer[0]['maxscale'] < $this->map->scaledenom)$nScale = $layer[0]['maxscale']-1;
 				else $nScale = $this->map->scaledenom;
 				$this->map->zoomscale($nScale,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
 				$this->map_scaledenom = $this->map->scaledenom;
 			}
 			else {
-				if($layer[0]['maxscale'] > 0)$nScale = $layer[0]['maxscale']-1;
+				if($layer[0]['maxscale'] > 0 AND $layer[0]['maxscale'] < $this->map->scale)$nScale = $layer[0]['maxscale']-1;
 				else $nScale = $this->map->scale;
 				$this->map->zoomscale($nScale,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
 				$this->map_scaledenom = $this->map->scale;
