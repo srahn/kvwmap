@@ -1056,7 +1056,7 @@ FROM
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
 		$sql.="WHERE f.flurstueckskennzeichen = '".$FlurstKennz."' ";
 		#$sql.="AND (g.blattart = 1000 OR g.blattart = 2000 OR g.blattart = 3000) ";
-		if(!$hist_alb AND !$without_temporal_filter) $sql.= $this->build_temporal_filter(array('f', 's', 'g'));
+		if(!$without_temporal_filter) $sql.= $this->build_temporal_filter(array('f', 's', 'g'));
 		$sql.="ORDER BY blatt";
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
@@ -1107,7 +1107,7 @@ FROM
 		if ($buchungsstelle!='') {
       $sql.=" AND s.gml_id='".$buchungsstelle."'";
     }		
-		if(!$hist_alb AND !$without_temporal_filter) $sql.= $this->build_temporal_filter(array('f', 's', 'g'));
+		if(!$without_temporal_filter) $sql.= $this->build_temporal_filter(array('f', 's', 'g'));
     $sql.=" ORDER BY g.bezirk,g.buchungsblattnummermitbuchstabenerweiterung,ltrim(s.laufendenummer, '~>a')::integer,f.flurstueckskennzeichen";
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
