@@ -51,12 +51,6 @@ CREATE TABLE wasserrecht.adresse(
 	ort varchar(255)
 ) WITH OIDS;
 
-CREATE TABLE wasserrecht.aktenzeichen(
-	id serial PRIMARY KEY,
-	bearbeiterzeichen varchar(255),
-	name varchar(255)
-) WITH OIDS;
-
 CREATE TABLE wasserrecht.dokument(
 	id serial PRIMARY KEY,
 	name varchar(255),
@@ -167,25 +161,12 @@ CREATE TABLE wasserrecht.personen(
 )WITH OIDS;
 
 --WASSERRECHTLICHE ZULASSUNGEN
-CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide_klasse(
+CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_typus(
 	id serial PRIMARY KEY,
 	name varchar(100)
 )WITH OIDS;
 
-CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide(
-	id serial PRIMARY KEY,
-	name varchar(255),
-	klasse integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide_klasse(id),
-	aktenzeichen integer REFERENCES wasserrecht.aktenzeichen(id),
-	datum_postausgang date,
-	datum_bestand_mat date,
-	datum_bestand_form date,
-	ort integer REFERENCES wasserrecht.ort(id),
-	regnummer varchar(255),
-	ausstellbehoerde integer REFERENCES wasserrecht.behoerde(id)
-)WITH OIDS;
-
-CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_fassung_klasse(
+CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_fassung_typus(
 	id serial PRIMARY KEY,
 	name varchar(255)
 )WITH OIDS;
@@ -193,27 +174,6 @@ CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_fassung_klasse(
 CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_fassung_auswahl(
 	id serial PRIMARY KEY,
 	name varchar(255)
-)WITH OIDS;
-
-CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_fassung(
-	id serial PRIMARY KEY,
-	auswahl integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_fassung_auswahl(id),
-	aktenzeichen integer REFERENCES wasserrecht.aktenzeichen(id),
-	klasse integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_fassung_klasse(id),
-	datum date,
-	ort integer REFERENCES wasserrecht.ort(id),
-	nummer integer
-)WITH OIDS;
-
-CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_aenderungsbescheide(
-	id serial PRIMARY KEY,
-	aktenzeichen integer REFERENCES wasserrecht.aktenzeichen(id),
-	datum_postausgang date,
-	datum_bestand_mat date,
-	datum_bestand_form date,
-	ort integer REFERENCES wasserrecht.ort(id),
-	nummer integer,
-	fassung integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_fassung(id)
 )WITH OIDS;
 
 CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_status(
@@ -226,35 +186,39 @@ CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_ungueltig_aufgrund(
 	name varchar(255)
 )WITH OIDS;
 
-CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_gueltigkeit(
-	id serial PRIMARY KEY,
-	gueltig_seit date,
-	gueltig_bis date,
-	ungueltig_seit date,
-	ungueltig_aufgrund integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_ungueltig_aufgrund(id),
-	abgelaufen boolean
-)WITH OIDS;
-
 CREATE TABLE wasserrecht.wasserrechtliche_zulassungen(
 	id serial PRIMARY KEY,
-	name varchar(255),
+	anlage integer REFERENCES wasserrecht.anlagen(id),
 	ausstellbehoerde integer REFERENCES wasserrecht.behoerde(id),
-	ausgangsbescheid integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide(id),
-	status integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_status(id),
-	adresse integer REFERENCES wasserrecht.adresse(id),
-	aenderungsbescheid integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_aenderungsbescheide(id),
-	gueltigkeit integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_gueltigkeit(id),
-	aktuell boolean DEFAULT true,
-	historisch boolean DEFAULT true,
-	bergamt_aktenzeichen integer REFERENCES wasserrecht.aktenzeichen(id),
-	dokument integer REFERENCES wasserrecht.dokument(id),
-	sachbearbeiter integer REFERENCES wasserrecht.personen(id),
 	adressat integer REFERENCES wasserrecht.personen(id),
+	bearbeiter integer REFERENCES wasserrecht.personen(id),
+	typus integer NOT NULL REFERENCES wasserrecht.wasserrechtliche_zulassungen_typus(id), --Ausgangsbescheid
+	bearbeiterzeichen varchar(255), --Aktenzeichen
+	aktenzeichen varchar(255) NOT NULL, --Aktenzeichen
+	regnummer varchar(255), --Ausgangsbescheid
+	bergamt_aktenzeichen varchar(255), --Aktenzeichen
+	ort integer REFERENCES wasserrecht.ort(id), --Ausgangsbescheid
+	datum date NOT NULL,
+	fassung_auswahl integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_fassung_auswahl(id), --Änderungsbescheid / Fassung
+	fassung_nummer integer, --Änderungsbescheid / Fassung
+	fassung_typus integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_fassung_typus(id), --Änderungsbescheid / Fassung
+	fassung_bearbeiterzeichen varchar(255),
+	fassung_aktenzeichen varchar(255),
+	fassung_datum date, --Änderungsbescheid / Fassung
+	gueltig_seit date, --Gültigkeit
+	befristet_bis date, --Gültigkeit
+	status integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_status(id), --Gültigkeit
+	aktuell varchar(10), --Gültigkeit
+	historisch varchar(10), --Gültigkeit
+	ungueltig_seit date, --Gültigkeit
+	ungueltig_aufgrund integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_ungueltig_aufgrund(id), --Gültigkeit
+	datum_postausgang date, --Ausgangsbescheid
+	datum_bestand_mat date, --Ausgangsbescheid
+	datum_bestand_form date, --Ausgangsbescheid
 	aufforderung_datum_absend date,
 	aufforderung_dokument integer REFERENCES wasserrecht.dokument(id),
 	erklaerung_datum date,
-	erklaerung_dokument integer REFERENCES wasserrecht.dokument(id),
-	anlage integer REFERENCES wasserrecht.anlagen(id)
+	erklaerung_dokument integer REFERENCES wasserrecht.dokument(id)
 )WITH OIDS;
 
 --GEWÄSSERBENUTZUNGEN
@@ -358,12 +322,16 @@ CREATE TABLE wasserrecht.teilgewaesserbenutzungen(
 ------------------------------------------
 --VIEWS
 
---CREATE VIEW wasserrecht.aktuelle_wasserrechtliche_zulassungen AS SELECT a.id as wrz_id, a.name, COALESCE(c.name,'') ||' (Aktenzeichen: '|| COALESCE(d.name,'') ||')'||' vom '|| COALESCE(b.datum::text,'') AS bezeichnung, a.aktuell, a.historisch, a.anlage AS anlage_id FROM wasserrecht.wasserrechtliche_zulassungen a LEFT JOIN wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide b ON a.ausgangsbescheid = b.id LEFT JOIN wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide_klasse c ON b.klasse = c.id LEFT JOIN wasserrecht.aktenzeichen d ON b.aktenzeichen = d.id WHERE a.aktuell = true;
---CREATE VIEW wasserrecht.historische_wasserrechtliche_zulassungen AS SELECT a.id as wrz_id, a.name, COALESCE(c.name,'') ||' (Aktenzeichen: '|| COALESCE(d.name,'') ||')'||' vom '|| COALESCE(b.datum::text,'') AS bezeichnung, a.aktuell, a.historisch, a.anlage AS anlage_id FROM wasserrecht.wasserrechtliche_zulassungen a LEFT JOIN wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide b ON a.ausgangsbescheid = b.id LEFT JOIN wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide_klasse c ON b.klasse = c.id LEFT JOIN wasserrecht.aktenzeichen d ON b.aktenzeichen = d.id WHERE a.historisch = true;
+--CREATE VIEW wasserrecht.aktuelle_wasserrechtliche_zulassungen AS SELECT a.id as wrz_id, a.name, COALESCE(c.name,'') ||' (Aktenzeichen: '|| COALESCE(d.name,'') ||')'||' vom '|| COALESCE(b.datum::text,'') AS bezeichnung, a.aktuell, a.historisch, a.anlage AS anlage_id FROM wasserrecht.wasserrechtliche_zulassungen a LEFT JOIN wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide b ON a.ausgangsbescheid = b.id LEFT JOIN wasserrecht.wasserrechtliche_zulassungen_typus c ON b.typus = c.id LEFT JOIN wasserrecht.aktenzeichen d ON b.aktenzeichen = d.id WHERE a.aktuell = true;
+--CREATE VIEW wasserrecht.historische_wasserrechtliche_zulassungen AS SELECT a.id as wrz_id, a.name, COALESCE(c.name,'') ||' (Aktenzeichen: '|| COALESCE(d.name,'') ||')'||' vom '|| COALESCE(b.datum::text,'') AS bezeichnung, a.aktuell, a.historisch, a.anlage AS anlage_id FROM wasserrecht.wasserrechtliche_zulassungen a LEFT JOIN wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide b ON a.ausgangsbescheid = b.id LEFT JOIN wasserrecht.wasserrechtliche_zulassungen_typus c ON b.typus = c.id LEFT JOIN wasserrecht.aktenzeichen d ON b.aktenzeichen = d.id WHERE a.historisch = true;
 --CREATE VIEW wasserrecht.gewaesserbenutzungen_aktueller_wasserrechtlicher_zulassungen AS SELECT b.id AS gewaesserbenutzungen_id, a.wrz_id AS wrz_id, a.aktuell, a.historisch, a.anlage_id, COALESCE(a.bezeichnung,'') || ' zum ' || COALESCE(c.name,'') || ' von ' || COALESCE(d.max_ent_a::text,'') || ' m³/Jahr' AS bezeichnung, e.namelang AS wrz_ben_lage_namelang
 --  FROM wasserrecht.aktuelle_wasserrechtliche_zulassungen a INNER JOIN wasserrecht.gewaesserbenutzungen b ON b.wasserrechtliche_zulassungen = a.wrz_id LEFT JOIN wasserrecht.gewaesserbenutzungen_art c ON c.id = b.art LEFT JOIN wasserrecht.gewaesserbenutzungen_umfang d ON b.umfang = d.id LEFT JOIN wasserrecht.gewaesserbenutzungen_lage e ON b.lage = e.id;
 
 --CREATE VIEW wasserrecht.wasserentnamebenutzer AS SELECT c.oid, a.name AS anlage, b.name AS wasserrechtliche_zulassung, c.kennnummer AS benutzungsnummer FROM wasserrecht.anlagen a INNER JOIN wasserrecht.wasserrechtliche_zulassungen b ON b.anlage=a.id INNER JOIN wasserrecht.gewaesserbenutzungen c ON b.id = c.wasserrechtliche_zulassungen;
+
+CREATE VIEW wasserrecht.wasserrechtliche_zulassungen_bezeichnung AS SELECT a.id AS "id", COALESCE(b.name,'') ||' (Aktenzeichen: '|| COALESCE(a.aktenzeichen,'') ||')'||' vom '|| COALESCE(a.datum_postausgang::text,'') AS "bezeichnung" FROM wasserrecht.wasserrechtliche_zulassungen a LEFT JOIN wasserrecht.wasserrechtliche_zulassungen_typus b ON a.typus = b.id ORDER BY a.id;
+CREATE VIEW wasserrecht.gewaesserbenutzungen_bezeichnung AS SELECT b.id AS "id", COALESCE(e.name,'') ||' (Aktenzeichen: '|| COALESCE(a.aktenzeichen,'') ||')'||' vom '|| COALESCE(a.datum_postausgang::text,'') || ' zum ' || COALESCE(c.name,'') || ' von ' || COALESCE(d.max_ent_a::text,'') || ' m³/Jahr' AS "bezeichnung" FROM wasserrecht.gewaesserbenutzungen b LEFT JOIN wasserrecht.wasserrechtliche_zulassungen a ON b.wasserrechtliche_zulassungen = a.id LEFT JOIN wasserrecht.gewaesserbenutzungen_art c ON c.id = b.art LEFT JOIN wasserrecht.gewaesserbenutzungen_umfang d ON b.umfang = d.id LEFT JOIN wasserrecht.wasserrechtliche_zulassungen_typus e ON a.typus = e.id ORDER BY b.id;
+CREATE VIEW wasserrecht.personen_bezeichnung AS SELECT a.id AS "id", COALESCE(a.name,'') ||' '|| COALESCE(a.abkuerzung,'') ||' '|| COALESCE(b.ort,'') AS "bezeichnung" FROM wasserrecht.personen a LEFT JOIN wasserrecht.adresse b ON a.adresse=b.id ORDER BY a.id;
 
 ------------------------------------------
 

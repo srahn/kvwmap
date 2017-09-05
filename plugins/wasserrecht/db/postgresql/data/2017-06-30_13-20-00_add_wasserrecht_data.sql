@@ -33,22 +33,29 @@ INSERT INTO wasserrecht.archivnummer (nummer) VALUES (189);
 INSERT INTO wasserrecht.archivnummer (nummer) VALUES (209);
 INSERT INTO wasserrecht.archivnummer (nummer) VALUES (210);
 
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide_klasse (name) VALUES ('Wasserrechtliche Erlaubnis');
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide_klasse (name) VALUES ('Gehobene Wasserrechtliche Erlaubnis');
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide_klasse (name) VALUES ('Wasserrechtliche Bewilligung');
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide_klasse (name) VALUES ('Planfeststellungsverfahren');
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide_klasse (name) VALUES ('Sonstige Zulassungen');
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide_klasse (name) VALUES ('Anzeige einer Gewässerbenutzung');
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide_klasse (name) VALUES ('Wasserrechtliche Nutzungsgenehmigung');
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide_klasse (name) VALUES ('Wasserrechtliche Nutzungsgenehmigung (historisch)');
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide_klasse (name) VALUES ('Anpassungsbescheid nach § 13 LWaG');
+INSERT INTO wasserrecht.wasserrechtliche_zulassungen_typus (name) VALUES ('Wasserrechtliche Erlaubnis');
+INSERT INTO wasserrecht.wasserrechtliche_zulassungen_typus (name) VALUES ('Gehobene Wasserrechtliche Erlaubnis');
+INSERT INTO wasserrecht.wasserrechtliche_zulassungen_typus (name) VALUES ('Wasserrechtliche Bewilligung');
+INSERT INTO wasserrecht.wasserrechtliche_zulassungen_typus (name) VALUES ('Planfeststellungsverfahren');
+INSERT INTO wasserrecht.wasserrechtliche_zulassungen_typus (name) VALUES ('Sonstige Zulassungen');
+INSERT INTO wasserrecht.wasserrechtliche_zulassungen_typus (name) VALUES ('Anzeige einer Gewässerbenutzung');
+INSERT INTO wasserrecht.wasserrechtliche_zulassungen_typus (name) VALUES ('Wasserrechtliche Nutzungsgenehmigung');
+INSERT INTO wasserrecht.wasserrechtliche_zulassungen_typus (name) VALUES ('Wasserrechtliche Nutzungsgenehmigung (historisch)');
+INSERT INTO wasserrecht.wasserrechtliche_zulassungen_typus (name) VALUES ('Anpassungsbescheid nach § 13 LWaG');
 
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen_fassung_klasse (name) VALUES ('Änderungsbescheides vom');
+INSERT INTO wasserrecht.wasserrechtliche_zulassungen_fassung_typus (name) VALUES ('Änderungsbescheides vom');
+INSERT INTO wasserrecht.wasserrechtliche_zulassungen_fassung_typus (name) VALUES ('Anpassungsbescheides vom');
+INSERT INTO wasserrecht.wasserrechtliche_zulassungen_fassung_typus (name) VALUES ('Ergänzungsbescheides vom');
+INSERT INTO wasserrecht.wasserrechtliche_zulassungen_fassung_typus (name) VALUES ('Nachtrags vom');
+INSERT INTO wasserrecht.wasserrechtliche_zulassungen_fassung_typus (name) VALUES ('Berichtigung vom');
+INSERT INTO wasserrecht.wasserrechtliche_zulassungen_fassung_typus (name) VALUES ('Schreibens vom');
+INSERT INTO wasserrecht.wasserrechtliche_zulassungen_fassung_typus (name) VALUES ('Anzeige des Eigentümerwechsels');
+
+INSERT INTO wasserrecht.wasserrechtliche_zulassungen_fassung_auswahl (name) VALUES ('In der Fassung der');
 INSERT INTO wasserrecht.wasserrechtliche_zulassungen_fassung_auswahl (name) VALUES ('In der Fassung des');
 
 INSERT INTO wasserrecht.wasserrechtliche_zulassungen_status (name) VALUES ('Abschriften von WrZ');
 INSERT INTO wasserrecht.wasserrechtliche_zulassungen_status (name) VALUES ('LUNG-Datenbanken');
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen_status (name) VALUES ('[aktuelle]');
 INSERT INTO wasserrecht.wasserrechtliche_zulassungen_status (name) VALUES ('Erstbefüllungsdaten');
 
 INSERT INTO wasserrecht.wasserrechtliche_zulassungen_ungueltig_aufgrund (name) VALUES ('Fristablauf');
@@ -162,10 +169,6 @@ INSERT INTO wasserrecht.koerperschaft_art (name) VALUES ('Abwasser');
 INSERT INTO wasserrecht.koerperschaft (name, art) VALUES ('MUSTER ABWASSER KOERPERSCHAFT', 2);
 INSERT INTO wasserrecht.koerperschaft (name, art) VALUES ('MUSTER TRINKWASSER KOERPERSCHAFT', 1);
 
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen_gueltigkeit (gueltig_seit, gueltig_bis) VALUES('2017-07-01', '2017-07-06');
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen_gueltigkeit (gueltig_seit, gueltig_bis) VALUES('2017-07-01', current_date);
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen_gueltigkeit (gueltig_seit, gueltig_bis) VALUES('2017-07-01', '2017-12-31');
-
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 INSERT INTO wasserrecht.anlagen_klasse (name) VALUES ('Industriebetrieb');
 INSERT INTO wasserrecht.anlagen_klasse (name) VALUES ('Diensleistungsbetrieb');
@@ -200,17 +203,13 @@ INSERT INTO wasserrecht.personen_typ (name) VALUES ('Körperschaft des Privatrec
 INSERT INTO wasserrecht.personen_klasse (name) VALUES ('Kieswerk');
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-INSERT INTO wasserrecht.aktenzeichen (name) VALUES ('Test Aktenzeichen 1');
-INSERT INTO wasserrecht.aktenzeichen (name) VALUES ('Test Aktenzeichen 2');
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide (name, klasse, aktenzeichen, datum_postausgang) VALUES ('Test Ausgangsbescheid 1', 1, 1, current_date);
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide (name, klasse, aktenzeichen, datum_postausgang) VALUES ('Test Ausgangsbescheid 2', 2, 2, current_date);
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen_fassung (auswahl, nummer, datum) VALUES (1, 1, current_date);
+INSERT INTO wasserrecht.ort(name) VALUES ('Güstrow');
 
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen (name, ausstellbehoerde, ausgangsbescheid, status, adresse, gueltigkeit, aktuell, historisch, sachbearbeiter, adressat, anlage) VALUES ('Test Wasserrechtliche Zulassung 1', 1, 1, 2, 1, 1, true, false, 2, 2, 1);
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen (name, ausstellbehoerde, ausgangsbescheid, status, adresse, gueltigkeit, aktuell, historisch, sachbearbeiter, adressat, anlage) VALUES ('Test Wasserrechtliche Zulassung 2', 1, 2, 2, 1, 1, false, true, 2, 2, 2);
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen (name, ausstellbehoerde, ausgangsbescheid, status, adresse, gueltigkeit, aktuell, historisch, sachbearbeiter, adressat, anlage) VALUES ('Test Wasserrechtliche Zulassung 3', 2, 2, 2, 1, 1, false, true, 2, 1, 2);
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen (name, ausstellbehoerde, ausgangsbescheid, status, adresse, gueltigkeit, aktuell, historisch, sachbearbeiter, adressat, anlage) VALUES ('Test Wasserrechtliche Zulassung 4', 2, 2, 2, 1, 3, false, true, 2, 1, 1);
-INSERT INTO wasserrecht.wasserrechtliche_zulassungen (name, ausstellbehoerde, ausgangsbescheid, status, adresse, gueltigkeit, aktuell, historisch, sachbearbeiter, adressat, anlage) VALUES ('Test Wasserrechtliche Zulassung 5', 1, 1, 2, 1, 1, false, true, 2, 2, 1);
+INSERT INTO wasserrecht.wasserrechtliche_zulassungen (typus, aktenzeichen, ort, datum, ausstellbehoerde, status, gueltig_seit, befristet_bis, aktuell, bearbeiter, adressat, anlage) VALUES (1, '§ 1', 1, current_date, 1, 2, '2017-07-01', '2017-07-06', 'ja', 2, 2, 1);
+INSERT INTO wasserrecht.wasserrechtliche_zulassungen (typus, aktenzeichen, ort, datum, ausstellbehoerde, status, gueltig_seit, befristet_bis, historisch, bearbeiter, adressat, anlage) VALUES (1, '§ 2', 1, current_date, 1, 2, '2017-07-01', '2017-07-06', 'ja', 2, 2, 2);
+INSERT INTO wasserrecht.wasserrechtliche_zulassungen (typus, aktenzeichen, ort, datum, ausstellbehoerde, status, gueltig_seit, befristet_bis, historisch, bearbeiter, adressat, anlage) VALUES (1, '§ 3', 1, current_date, 2, 2, '2017-07-01', '2017-07-06', 'ja', 2, 1, 2);
+INSERT INTO wasserrecht.wasserrechtliche_zulassungen (typus, aktenzeichen, ort, datum, ausstellbehoerde, status, gueltig_seit, befristet_bis, historisch, bearbeiter, adressat, anlage) VALUES (1, '§ 4', 1, current_date, 2, 2, '2017-07-01', '2017-12-31', 'ja', 2, 1, 1);
+INSERT INTO wasserrecht.wasserrechtliche_zulassungen (typus, aktenzeichen, ort, datum, ausstellbehoerde, status, gueltig_seit, befristet_bis, historisch, bearbeiter, adressat, anlage) VALUES (1, '§ 5', 1, current_date, 1, 2, '2017-07-01', '2017-07-06', 'ja', 2, 2, 1);
 
 INSERT INTO wasserrecht.gewaesserbenutzungen_umfang(name, max_ent_a) VALUES('Test Umfang', 80000.000);
 INSERT INTO wasserrecht.gewaesserbenutzungen_lage(name, namekurz, namelang, the_geo) VALUES('Test Gewaesserbenutzungen Lage', 'Test Gewaesserbenutzungen Lage (kurz)', 'Test Gewaesserbenutzungen Lage (lang)', ST_Transform(ST_GeomFromText('POINT(13 53)', 4326), 35833));

@@ -4,7 +4,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	protected $tableName = 'wasserrechtliche_zulassungen';
 	
 	public $gueltigkeitsJahr;
-	public $gueltigkeit;
+// 	public $gueltigkeit;
 	public $behoerde;
 	public $adressat;
 	public $anlagen;
@@ -13,7 +13,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 
 	public function find_gueltigkeitsjahre($gui) {
 	    
-		$results = $this->find_where('gueltigkeit IS NOT NULL', 'id');
+		$results = $this->find_where('datum IS NOT NULL', 'id');
 		$wrzProGueltigkeitsJahr = new WRZProGueltigkeitsJahr();
 		
 		if(!empty($results))
@@ -52,17 +52,21 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	    
 	    if(!empty($result))
 	    {
-	        $wrzGueltigkeit = new WasserrechtlicheZulassungenGueltigkeit($gui);
-	        $wasserrechtlicheZulassungGueltigkeit = $wrzGueltigkeit->find_by_id($gui, 'id', $result->data['gueltigkeit']);
-	        $result->gueltigkeit = $wasserrechtlicheZulassungGueltigkeit;
-	        if(!empty($wasserrechtlicheZulassungGueltigkeit))
-	        {
-	            $datum = $wasserrechtlicheZulassungGueltigkeit->getGueltigBis();
-	            //var_dump($datum);
-	            $date = DateTime::createFromFormat("d.m.Y", $datum);
-	            $year = $date->format("Y");
-	            $result->gueltigkeitsJahr=$year;
-	        }
+// 	        $wrzGueltigkeit = new WasserrechtlicheZulassungenGueltigkeit($gui);
+// 	        $wasserrechtlicheZulassungGueltigkeit = $wrzGueltigkeit->find_by_id($gui, 'id', $result->data['gueltigkeit']);
+// 	        $result->gueltigkeit = $wasserrechtlicheZulassungGueltigkeit;
+// 	        if(!empty($wasserrechtlicheZulassungGueltigkeit))
+// 	        {
+// 	            $datum = $wasserrechtlicheZulassungGueltigkeit->getBefristetBis();
+                $datum = $result->getBefristetBis();  
+                if(!empty($datum))
+                {
+                    // 	            var_dump($datum);
+                    $date = DateTime::createFromFormat("d.m.Y", $datum);
+                    $year = $date->format("Y");
+                    $result->gueltigkeitsJahr=$year;
+                }
+// 	        }
 	        
 	        //get the 'Adressat'
 	        if(!empty($result->data['adressat']))
@@ -143,6 +147,60 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	
 	public function getBehoerdeId() {
 	    return !empty($this->behoerde) ?  $this->behoerde->getId() : null;
+	}
+	
+	public function getHinweis() {
+	    
+	    /**
+	     * abgelaufen
+	     */
+	    // 	    $gueltigSeitDate = convertStringToDate($this->getGueltigSeit());
+	    // 	    $befristetBisDate = $this->convertStringToDate($this->getBefristetBis());
+	    $befristetBisDate = $this->getBefristetBis();
+	    $today = date("d.m.Y");
+	    
+	    // 	    if(!empty($gueltigSeitDate) && !empty($befristetBisDate))
+	    $this->debug->write('$befristetBisDate: ' . var_export($befristetBisDate, true), 4);
+	    $this->debug->write('today: ' . var_export($today, true), 4);
+	    
+	    if(!empty($befristetBisDate))
+	    {
+	        if($befristetBisDate < $today)
+	        {
+	            return "abgelaufen";
+	        }
+	    }
+	    
+	    /**
+	     * freigegeben / nicht freigegeben
+	     */
+	    
+	    /**
+	     * geändert
+	     */
+	    
+	    /**
+	     * im Jahr neu angelegt
+	     */
+	    
+	    return "";
+	}
+	
+	public function getBefristetBis() {
+	    return $this->data['befristet_bis'];
+	}
+	
+	public function getGueltigSeit() {
+	    return $this->data['gueltig_seit'];
+	}
+	
+	public function convertStringToDate($inputString) {
+	    if(!empty($inputString))
+	    {
+	        return DateTime::createFromFormat("d.m.Y", $inputString);
+	    }
+	    
+	    return null;
 	}
 	
 // 	public function insertAufforderungId($aufforderungsId) {
@@ -231,7 +289,8 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	
 	public function getBezeichnung() {
 	    $fieldname = 'bezeichnung';
-	    $sql = "SELECT COALESCE(c.name,'') ||' (Aktenzeichen: '|| COALESCE(d.name,'') ||')'||' vom '|| COALESCE(b.datum_postausgang::text,'') AS " . $fieldname ." FROM " . $this->schema . '.' . $this->tableName . " a LEFT JOIN " . $this->schema . '.' . "wasserrechtliche_zulassungen_ausgangsbescheide b ON a.ausgangsbescheid = b.id LEFT JOIN " . $this->schema . '.' . "wasserrechtliche_zulassungen_ausgangsbescheide_klasse c ON b.klasse = c.id LEFT JOIN " . $this->schema . '.' . "aktenzeichen d ON b.aktenzeichen = d.id WHERE a.id = '" . $this->getId() . "';";
+// 	    $sql = "SELECT COALESCE(c.name,'') ||' (Aktenzeichen: '|| COALESCE(a.aktenzeichen,'') ||')'||' vom '|| COALESCE(a.datum_postausgang::text,'') AS " . $fieldname ." FROM " . $this->schema . '.' . $this->tableName . " a LEFT JOIN " . $this->schema . '.' . "wasserrechtliche_zulassungen_ausgangsbescheide_klasse c ON a.klasse = c.id WHERE a.id = '" . $this->getId() . "';";
+	    $sql = "SELECT " . $fieldname ." FROM " . $this->schema . '.' . $this->tableName . "_bezeichnung WHERE id = '" . $this->getId() . "';";
 // 	    echo "sql: " . $sql;
 	    $bezeichnung = $this->getSQLResult($sql, $fieldname)[0];
 // 	    echo "bezeichnung: " . $bezeichnung;
@@ -242,5 +301,14 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	    
 	    return null;
 	}
+	
+    /**
+     * {@inheritDoc}
+     * @see WrPgObject::getName()
+     */
+    public function getName()
+    {
+        return $this->getBezeichnung();
+    }
 }
 ?>

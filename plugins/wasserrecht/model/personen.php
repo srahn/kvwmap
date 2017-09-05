@@ -54,5 +54,19 @@ class Personen extends WrPgObject {
 	        return $this->adresse->getOrt();
 	    }
 	}
+	
+	public function getBezeichnung() {
+	    $fieldname = 'bezeichnung';
+	    $sql = "SELECT " . $fieldname ." FROM " . $this->schema . '.' . $this->tableName . "_bezeichnung WHERE id = '" . $this->getId() . "';";
+	    // 	    echo "sql: " . $sql;
+	    $bezeichnung = $this->getSQLResult($sql, $fieldname);
+	    // 	    echo "bezeichnung: " . $bezeichnung;
+	    if(!empty($bezeichnung) && count($bezeichnung) > 0 && !empty($bezeichnung[0]))
+	    {
+	        return $bezeichnung[0];
+	    }
+	    
+	    return null;
+	}
 }
 ?>

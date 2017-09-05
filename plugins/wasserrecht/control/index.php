@@ -19,7 +19,6 @@ include(PLUGINS . 'wasserrecht/model/mengenbestimmung.php');
 include(PLUGINS . 'wasserrecht/model/teilgewaesserbenutzungen.php');
 include(PLUGINS . 'wasserrecht/model/teilgewaesserbenutzungen_art.php');
 include(PLUGINS . 'wasserrecht/model/wasserrechtliche_zulassungen.php');
-include(PLUGINS . 'wasserrecht/model/wasserrechtliche_zulassungen_gueltigkeit.php');
 include(PLUGINS . 'wasserrecht/model/WRZProGueltigkeitsJahr.php');
 
 require_once (CLASSPATH . '/../vendor/autoload.php');
