@@ -1,6 +1,6 @@
 <?php
 class Behoerde extends WrPgObject {
 
-	protected $tableName = 'behoerde';
+	protected $tableName = 'fiswrv_behoerde';
 }
 ?>

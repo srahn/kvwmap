@@ -1,6 +1,6 @@
 <?php
 class Anlage extends WrPgObject {
 
-	protected $tableName = 'anlagen';
+	protected $tableName = 'fiswrv_anlagen';
 }
 ?>

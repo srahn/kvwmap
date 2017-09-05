@@ -1,7 +1,7 @@
 <?php
 class Dokument extends WrPgObject {
 
-	protected $tableName = 'dokument';
+	protected $tableName = 'fiswrv_dokument';
 	
 	public function createDocument($dokumentName, $pfad) {
 	    if (!empty($dokumentName) && !empty($pfad))

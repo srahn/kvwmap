@@ -4,46 +4,46 @@ DROP SCHEMA IF EXISTS wasserrecht CASCADE;
 CREATE SCHEMA wasserrecht;
 
 -- GENERELL
-CREATE TABLE wasserrecht.behoerde_art(
+CREATE TABLE wasserrecht.fiswrv_behoerde_art(
 	id serial PRIMARY KEY,
 	name varchar(255),
   	abkuerzung varchar(100)
 ) WITH OIDS;
 
-CREATE TABLE wasserrecht.behoerde(
+CREATE TABLE wasserrecht.fiswrv_behoerde(
 	id serial PRIMARY KEY,
 	name varchar(255),
   	abkuerzung varchar(100),
   	status varchar(100),
-  	art integer REFERENCES wasserrecht.behoerde_art(id)
+  	art integer REFERENCES wasserrecht.fiswrv_behoerde_art(id)
 ) WITH OIDS;
 
 -------------
 
-CREATE TABLE wasserrecht.koerperschaft_art(
+CREATE TABLE wasserrecht.fiswrv_koerperschaft_art(
 	id serial PRIMARY KEY,
 	name varchar(255)
 ) WITH OIDS;
 
-CREATE TABLE wasserrecht.koerperschaft(
+CREATE TABLE wasserrecht.fiswrv_koerperschaft(
 	id serial PRIMARY KEY,
 	name varchar(255),
-	art integer REFERENCES wasserrecht.koerperschaft_art(id)
+	art integer REFERENCES wasserrecht.fiswrv_koerperschaft_art(id)
 ) WITH OIDS;
 
-CREATE TABLE wasserrecht.weeerklaerer(
+CREATE TABLE wasserrecht.fiswrv_weeerklaerer(
 	id serial PRIMARY KEY,
 	name varchar(255)
 ) WITH OIDS;
 
 ------------
 
-CREATE TABLE wasserrecht.ort(
+CREATE TABLE wasserrecht.fiswrv_ort(
 	id serial PRIMARY KEY,
 	name varchar(255)
 ) WITH OIDS;
 
-CREATE TABLE wasserrecht.adresse(
+CREATE TABLE wasserrecht.fiswrv_adresse(
 	id serial PRIMARY KEY,
 	strasse varchar(255),
 	hausnummer varchar(10),
@@ -51,29 +51,29 @@ CREATE TABLE wasserrecht.adresse(
 	ort varchar(255)
 ) WITH OIDS;
 
-CREATE TABLE wasserrecht.dokument(
+CREATE TABLE wasserrecht.fiswrv_dokument(
 	id serial PRIMARY KEY,
 	name varchar(255),
 	pfad text,
 	document bytea
 ) WITH OIDS;
 
-CREATE TABLE wasserrecht.betriebszustand(
+CREATE TABLE wasserrecht.fiswrv_betriebszustand(
 	id serial PRIMARY KEY,
 	name varchar(255)
 ) WITH OIDS;
 
-CREATE TABLE wasserrecht.messtischblatt(
+CREATE TABLE wasserrecht.fiswrv_messtischblatt(
 	id serial PRIMARY KEY,
 	nummer integer
 ) WITH OIDS;
 
-CREATE TABLE wasserrecht.archivnummer(
+CREATE TABLE wasserrecht.fiswrv_archivnummer(
 	id serial PRIMARY KEY,
 	nummer integer
 ) WITH OIDS;
 
-CREATE TABLE wasserrecht.konto(
+CREATE TABLE wasserrecht.fiswrv_konto(
 	id serial PRIMARY KEY,
 	name varchar(255),
 	iban varchar(22),
@@ -83,163 +83,163 @@ CREATE TABLE wasserrecht.konto(
 	kassenzeichen varchar(255)
 ) WITH OIDS;
 
-CREATE TABLE wasserrecht.mengenbestimmung(
+CREATE TABLE wasserrecht.fiswrv_mengenbestimmung(
 	id serial PRIMARY KEY,
 	name varchar(255)
 ) WITH OIDS;
 
 -- ANLAGEN
-CREATE TABLE wasserrecht.anlagen_klasse(
+CREATE TABLE wasserrecht.fiswrv_anlagen_klasse(
 	id serial PRIMARY KEY,
 	name varchar(100)
 )WITH OIDS;
 
-CREATE TABLE wasserrecht.anlagen(
+CREATE TABLE wasserrecht.fiswrv_anlagen(
 	id serial PRIMARY KEY,
 	name varchar(255) NOT NULL,
-	klasse integer NOT NULL REFERENCES wasserrecht.anlagen_klasse(id),
-	zustaend_uwb integer NOT NULL REFERENCES wasserrecht.behoerde(id),
-  	zustaend_stalu integer NOT NULL REFERENCES wasserrecht.behoerde(id),
+	klasse integer NOT NULL REFERENCES wasserrecht.fiswrv_anlagen_klasse(id),
+	zustaend_uwb integer NOT NULL REFERENCES wasserrecht.fiswrv_behoerde(id),
+  	zustaend_stalu integer NOT NULL REFERENCES wasserrecht.fiswrv_behoerde(id),
   	anlage_bearbeiter_name varchar(255),
   	anlage_bearbeiter_datum varchar(255),
   	anlage_bearbeiter_stelle varchar(255),
   	objektid_geodin varchar(255),
-	abwasser_koerperschaft integer REFERENCES wasserrecht.koerperschaft(id),
-	trinkwasser_koerperschaft integer REFERENCES wasserrecht.koerperschaft(id),
+	abwasser_koerperschaft integer REFERENCES wasserrecht.fiswrv_koerperschaft(id),
+	trinkwasser_koerperschaft integer REFERENCES wasserrecht.fiswrv_koerperschaft(id),
 	kommentar text,
 	the_geom geometry(Point, 35833)
 ) WITH OIDS;
-COMMENT ON COLUMN wasserrecht.anlagen.id IS 'Primärschlüssel der Fis-WrV Objekte';
-COMMENT ON COLUMN wasserrecht.anlagen.name IS 'Name der Fis-WrV Objekte';
-COMMENT ON COLUMN wasserrecht.anlagen.klasse IS 'Klasse der Fis-WrV Objekte';
-COMMENT ON COLUMN wasserrecht.anlagen.the_geom IS 'Geometrie';
+COMMENT ON COLUMN wasserrecht.fiswrv_anlagen.id IS 'Primärschlüssel der Fis-WrV Objekte';
+COMMENT ON COLUMN wasserrecht.fiswrv_anlagen.name IS 'Name der Fis-WrV Objekte';
+COMMENT ON COLUMN wasserrecht.fiswrv_anlagen.klasse IS 'Klasse der Fis-WrV Objekte';
+COMMENT ON COLUMN wasserrecht.fiswrv_anlagen.the_geom IS 'Geometrie';
 
 --PERSONEN
-CREATE TABLE wasserrecht.personen_klasse(
+CREATE TABLE wasserrecht.fiswrv_personen_klasse(
 	id serial PRIMARY KEY,
 	name varchar(100)
 )WITH OIDS;
 
-CREATE TABLE wasserrecht.personen_status(
+CREATE TABLE wasserrecht.fiswrv_personen_status(
 	id serial PRIMARY KEY,
 	name varchar(100)
 )WITH OIDS;
 
-CREATE TABLE wasserrecht.personen_typ(
+CREATE TABLE wasserrecht.fiswrv_personen_typ(
 	id serial PRIMARY KEY,
 	name varchar(100)
 )WITH OIDS;
 
-CREATE TABLE wasserrecht.personen(
+CREATE TABLE wasserrecht.fiswrv_personen(
 	id serial PRIMARY KEY,
 	name varchar(255) NOT NULL,
 	abkuerzung varchar(30) NOT NULL,
 	namenszusatz varchar(255),
-	klasse integer REFERENCES wasserrecht.personen_klasse(id),
-	status integer REFERENCES wasserrecht.personen_status(id),
-	adresse integer REFERENCES wasserrecht.adresse(id),
-	typ integer REFERENCES wasserrecht.personen_typ(id),
+	klasse integer REFERENCES wasserrecht.fiswrv_personen_klasse(id),
+	status integer REFERENCES wasserrecht.fiswrv_personen_status(id),
+	adresse integer REFERENCES wasserrecht.fiswrv_adresse(id),
+	typ integer REFERENCES wasserrecht.fiswrv_personen_typ(id),
 	wrzadressat varchar(10),
   	wrzrechtsnachfolger varchar(10),
   	betreiber varchar(10),
   	bearbeiter varchar(10),
-  	weeerklaerer integer REFERENCES wasserrecht.weeerklaerer(id),
-  	anlage integer REFERENCES wasserrecht.anlagen(id),
+  	weeerklaerer integer REFERENCES wasserrecht.fiswrv_weeerklaerer(id),
+  	anlage integer REFERENCES wasserrecht.fiswrv_anlagen(id),
   	telefon varchar(50),
   	fax varchar(50),
   	email varchar(50),
   	wrzaussteller varchar(10),
-  	abwasser_koerperschaft integer REFERENCES wasserrecht.koerperschaft(id),
-  	trinkwasser_koerperschaft integer REFERENCES wasserrecht.koerperschaft(id),
+  	abwasser_koerperschaft integer REFERENCES wasserrecht.fiswrv_koerperschaft(id),
+  	trinkwasser_koerperschaft integer REFERENCES wasserrecht.fiswrv_koerperschaft(id),
   	kommentar varchar(255),
   	zimmer varchar(255),
   	verwendungszweck_wee varchar(255),
-  	behoerde integer REFERENCES wasserrecht.behoerde(id),
+  	behoerde integer REFERENCES wasserrecht.fiswrv_behoerde(id),
   	register_amtsgericht varchar(255),
   	register_nummer varchar(255),
-  	konto integer REFERENCES wasserrecht.konto(id)
+  	konto integer REFERENCES wasserrecht.fiswrv_konto(id)
 )WITH OIDS;
 
 --WASSERRECHTLICHE ZULASSUNGEN
-CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_typus(
+CREATE TABLE wasserrecht.fiswrv_wasserrechtliche_zulassungen_typus(
 	id serial PRIMARY KEY,
 	name varchar(100)
 )WITH OIDS;
 
-CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_fassung_typus(
+CREATE TABLE wasserrecht.fiswrv_wasserrechtliche_zulassungen_fassung_typus(
 	id serial PRIMARY KEY,
 	name varchar(255)
 )WITH OIDS;
 
-CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_fassung_auswahl(
+CREATE TABLE wasserrecht.fiswrv_wasserrechtliche_zulassungen_fassung_auswahl(
 	id serial PRIMARY KEY,
 	name varchar(255)
 )WITH OIDS;
 
-CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_status(
+CREATE TABLE wasserrecht.fiswrv_wasserrechtliche_zulassungen_status(
 	id serial PRIMARY KEY,
 	name varchar(100)
 )WITH OIDS;
 
-CREATE TABLE wasserrecht.wasserrechtliche_zulassungen_ungueltig_aufgrund(
+CREATE TABLE wasserrecht.fiswrv_wasserrechtliche_zulassungen_ungueltig_aufgrund(
 	id serial PRIMARY KEY,
 	name varchar(255)
 )WITH OIDS;
 
-CREATE TABLE wasserrecht.wasserrechtliche_zulassungen(
+CREATE TABLE wasserrecht.fiswrv_wasserrechtliche_zulassungen(
 	id serial PRIMARY KEY,
-	anlage integer REFERENCES wasserrecht.anlagen(id),
-	ausstellbehoerde integer REFERENCES wasserrecht.behoerde(id),
-	adressat integer REFERENCES wasserrecht.personen(id),
-	bearbeiter integer REFERENCES wasserrecht.personen(id),
-	typus integer NOT NULL REFERENCES wasserrecht.wasserrechtliche_zulassungen_typus(id), --Ausgangsbescheid
+	anlage integer REFERENCES wasserrecht.fiswrv_anlagen(id),
+	ausstellbehoerde integer REFERENCES wasserrecht.fiswrv_behoerde(id),
+	adressat integer REFERENCES wasserrecht.fiswrv_personen(id),
+	bearbeiter integer REFERENCES wasserrecht.fiswrv_personen(id),
+	typus integer NOT NULL REFERENCES wasserrecht.fiswrv_wasserrechtliche_zulassungen_typus(id), --Ausgangsbescheid
 	bearbeiterzeichen varchar(255), --Aktenzeichen
 	aktenzeichen varchar(255) NOT NULL, --Aktenzeichen
 	regnummer varchar(255), --Ausgangsbescheid
 	bergamt_aktenzeichen varchar(255), --Aktenzeichen
-	ort integer REFERENCES wasserrecht.ort(id), --Ausgangsbescheid
+	ort integer REFERENCES wasserrecht.fiswrv_ort(id), --Ausgangsbescheid
 	datum date NOT NULL,
-	fassung_auswahl integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_fassung_auswahl(id), --Änderungsbescheid / Fassung
+	fassung_auswahl integer REFERENCES wasserrecht.fiswrv_wasserrechtliche_zulassungen_fassung_auswahl(id), --Änderungsbescheid / Fassung
 	fassung_nummer integer, --Änderungsbescheid / Fassung
-	fassung_typus integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_fassung_typus(id), --Änderungsbescheid / Fassung
+	fassung_typus integer REFERENCES wasserrecht.fiswrv_wasserrechtliche_zulassungen_fassung_typus(id), --Änderungsbescheid / Fassung
 	fassung_bearbeiterzeichen varchar(255),
 	fassung_aktenzeichen varchar(255),
 	fassung_datum date, --Änderungsbescheid / Fassung
 	gueltig_seit date, --Gültigkeit
 	befristet_bis date, --Gültigkeit
-	status integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_status(id), --Gültigkeit
+	status integer REFERENCES wasserrecht.fiswrv_wasserrechtliche_zulassungen_status(id), --Gültigkeit
 	aktuell varchar(10), --Gültigkeit
 	historisch varchar(10), --Gültigkeit
 	ungueltig_seit date, --Gültigkeit
-	ungueltig_aufgrund integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_ungueltig_aufgrund(id), --Gültigkeit
+	ungueltig_aufgrund integer REFERENCES wasserrecht.fiswrv_wasserrechtliche_zulassungen_ungueltig_aufgrund(id), --Gültigkeit
 	datum_postausgang date, --Ausgangsbescheid
 	datum_bestand_mat date, --Ausgangsbescheid
 	datum_bestand_form date, --Ausgangsbescheid
 	aufforderung_datum_absend date,
-	aufforderung_dokument integer REFERENCES wasserrecht.dokument(id),
+	aufforderung_dokument integer REFERENCES wasserrecht.fiswrv_dokument(id),
 	erklaerung_datum date,
-	erklaerung_dokument integer REFERENCES wasserrecht.dokument(id)
+	erklaerung_dokument integer REFERENCES wasserrecht.fiswrv_dokument(id)
 )WITH OIDS;
 
 --GEWÄSSERBENUTZUNGEN
-CREATE TABLE wasserrecht.gewaesserbenutzungen_art(
+CREATE TABLE wasserrecht.fiswrv_gewaesserbenutzungen_art(
 	id serial PRIMARY KEY,
 	name varchar(255)
 )WITH OIDS;
 
-CREATE TABLE wasserrecht.gewaesserbenutzungen_art_benutzung(
+CREATE TABLE wasserrecht.fiswrv_gewaesserbenutzungen_art_benutzung(
 	id serial PRIMARY KEY,
 	name varchar(255),
 	abkuerzung varchar(100)
 )WITH OIDS;
 
-CREATE TABLE wasserrecht.gewaesserbenutzungen_zweck(
+CREATE TABLE wasserrecht.fiswrv_gewaesserbenutzungen_zweck(
 	id serial PRIMARY KEY,
 	nummer integer,
 	name varchar(255)
 )WITH OIDS;
 
-CREATE TABLE wasserrecht.gewaesserbenutzungen_umfang(
+CREATE TABLE wasserrecht.fiswrv_gewaesserbenutzungen_umfang(
 	id serial PRIMARY KEY,
 	name varchar(255),
 	max_ent_s numeric(15,3),
@@ -257,10 +257,10 @@ CREATE TABLE wasserrecht.gewaesserbenutzungen_umfang(
 	freitext text
 )WITH OIDS;
 
-CREATE TABLE wasserrecht.gewaesserbenutzungen_lage(
+CREATE TABLE wasserrecht.fiswrv_gewaesserbenutzungen_lage(
 	id serial PRIMARY KEY,
 	name varchar(255),
-	betreiber integer REFERENCES wasserrecht.personen(id),
+	betreiber integer REFERENCES wasserrecht.fiswrv_personen(id),
 	wwident varchar(255),
 	namelang varchar(255),
 	namekurz varchar(100),
@@ -269,15 +269,15 @@ CREATE TABLE wasserrecht.gewaesserbenutzungen_lage(
 	endteufe numeric(6,2),
 	filterok numeric(6,2),
 	filteruk numeric(6,2),
-	betriebszustand integer REFERENCES wasserrecht.betriebszustand(id),
-	messtischblatt integer REFERENCES wasserrecht.messtischblatt(id),
-	archivnummer integer REFERENCES wasserrecht.archivnummer(id),
+	betriebszustand integer REFERENCES wasserrecht.fiswrv_betriebszustand(id),
+	messtischblatt integer REFERENCES wasserrecht.fiswrv_messtischblatt(id),
+	archivnummer integer REFERENCES wasserrecht.fiswrv_archivnummer(id),
 	schichtenverzeichnis boolean,
 	invid varchar(255),
 	the_geo geometry(Point, 35833)
 )WITH OIDS;
 
-CREATE TABLE wasserrecht.gewaesserbenutzungen_wee_satz(
+CREATE TABLE wasserrecht.fiswrv_gewaesserbenutzungen_wee_satz(
 	id serial PRIMARY KEY,
 	name varchar(255),
 	jahr date,
@@ -285,61 +285,61 @@ CREATE TABLE wasserrecht.gewaesserbenutzungen_wee_satz(
 	satz_gw numeric
 )WITH OIDS;
 
-CREATE TABLE wasserrecht.gewaesserbenutzungen(
+CREATE TABLE wasserrecht.fiswrv_gewaesserbenutzungen(
 	id serial PRIMARY KEY,
 	kennnummer varchar(255),
 	wasserbuchnummer varchar (255),
 	freitext_art text,
-	art integer REFERENCES wasserrecht.gewaesserbenutzungen_art(id),
+	art integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_art(id),
 	freitext_zweck text,
-	zweck integer REFERENCES wasserrecht.gewaesserbenutzungen_zweck(id),
-	umfang integer REFERENCES wasserrecht.gewaesserbenutzungen_umfang(id),
+	zweck integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_zweck(id),
+	umfang integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_umfang(id),
 	gruppe_wee boolean,
-	lage integer REFERENCES wasserrecht.gewaesserbenutzungen_lage(id),
-	wasserrechtliche_zulassungen integer NOT NULL REFERENCES wasserrecht.wasserrechtliche_zulassungen(id)
+	lage integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_lage(id),
+	wasserrechtliche_zulassungen integer NOT NULL REFERENCES wasserrecht.fiswrv_wasserrechtliche_zulassungen(id)
 )WITH OIDS;
 
-CREATE TABLE wasserrecht.teilgewaesserbenutzungen_art(
+CREATE TABLE wasserrecht.fiswrv_teilgewaesserbenutzungen_art(
 	id serial PRIMARY KEY,
 	name varchar(255)
 )WITH OIDS;
 
-CREATE TABLE wasserrecht.teilgewaesserbenutzungen(
+CREATE TABLE wasserrecht.fiswrv_teilgewaesserbenutzungen(
 	id serial PRIMARY KEY,
-	art integer REFERENCES wasserrecht.gewaesserbenutzungen_art(id),
-	zweck integer REFERENCES wasserrecht.gewaesserbenutzungen_zweck(id),
+	art integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_art(id),
+	zweck integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_zweck(id),
 	umfang numeric(15,3),
 	wiedereinleitung_nutzer boolean,
 	wiedereinleitung_bearbeiter boolean,
-	mengenbestimmung integer REFERENCES wasserrecht.mengenbestimmung(id),
-	art_benutzung integer REFERENCES wasserrecht.gewaesserbenutzungen_art_benutzung(id),
+	mengenbestimmung integer REFERENCES wasserrecht.fiswrv_mengenbestimmung(id),
+	art_benutzung integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_art_benutzung(id),
 	befreiungstatbestaende boolean,
-	entgeltsatz integer REFERENCES wasserrecht.gewaesserbenutzungen_wee_satz(id),
-	teilgewaesserbenutzungen_art integer REFERENCES wasserrecht.teilgewaesserbenutzungen_art(id),
-	gewaesserbenutzungen integer NOT NULL REFERENCES wasserrecht.gewaesserbenutzungen(id)
+	entgeltsatz integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_wee_satz(id),
+	teilgewaesserbenutzungen_art integer REFERENCES wasserrecht.fiswrv_teilgewaesserbenutzungen_art(id),
+	gewaesserbenutzungen integer NOT NULL REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen(id)
 )WITH OIDS;
 
 ------------------------------------------
 --VIEWS
 
---CREATE VIEW wasserrecht.aktuelle_wasserrechtliche_zulassungen AS SELECT a.id as wrz_id, a.name, COALESCE(c.name,'') ||' (Aktenzeichen: '|| COALESCE(d.name,'') ||')'||' vom '|| COALESCE(b.datum::text,'') AS bezeichnung, a.aktuell, a.historisch, a.anlage AS anlage_id FROM wasserrecht.wasserrechtliche_zulassungen a LEFT JOIN wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide b ON a.ausgangsbescheid = b.id LEFT JOIN wasserrecht.wasserrechtliche_zulassungen_typus c ON b.typus = c.id LEFT JOIN wasserrecht.aktenzeichen d ON b.aktenzeichen = d.id WHERE a.aktuell = true;
---CREATE VIEW wasserrecht.historische_wasserrechtliche_zulassungen AS SELECT a.id as wrz_id, a.name, COALESCE(c.name,'') ||' (Aktenzeichen: '|| COALESCE(d.name,'') ||')'||' vom '|| COALESCE(b.datum::text,'') AS bezeichnung, a.aktuell, a.historisch, a.anlage AS anlage_id FROM wasserrecht.wasserrechtliche_zulassungen a LEFT JOIN wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide b ON a.ausgangsbescheid = b.id LEFT JOIN wasserrecht.wasserrechtliche_zulassungen_typus c ON b.typus = c.id LEFT JOIN wasserrecht.aktenzeichen d ON b.aktenzeichen = d.id WHERE a.historisch = true;
---CREATE VIEW wasserrecht.gewaesserbenutzungen_aktueller_wasserrechtlicher_zulassungen AS SELECT b.id AS gewaesserbenutzungen_id, a.wrz_id AS wrz_id, a.aktuell, a.historisch, a.anlage_id, COALESCE(a.bezeichnung,'') || ' zum ' || COALESCE(c.name,'') || ' von ' || COALESCE(d.max_ent_a::text,'') || ' m³/Jahr' AS bezeichnung, e.namelang AS wrz_ben_lage_namelang
---  FROM wasserrecht.aktuelle_wasserrechtliche_zulassungen a INNER JOIN wasserrecht.gewaesserbenutzungen b ON b.wasserrechtliche_zulassungen = a.wrz_id LEFT JOIN wasserrecht.gewaesserbenutzungen_art c ON c.id = b.art LEFT JOIN wasserrecht.gewaesserbenutzungen_umfang d ON b.umfang = d.id LEFT JOIN wasserrecht.gewaesserbenutzungen_lage e ON b.lage = e.id;
+--CREATE VIEW wasserrecht.fiswrv_aktuelle_wasserrechtliche_zulassungen AS SELECT a.id as wrz_id, a.name, COALESCE(c.name,'') ||' (Aktenzeichen: '|| COALESCE(d.name,'') ||')'||' vom '|| COALESCE(b.datum::text,'') AS bezeichnung, a.aktuell, a.historisch, a.anlage AS anlage_id FROM wasserrecht.fiswrv_wasserrechtliche_zulassungen a LEFT JOIN wasserrecht.fiswrv_wasserrechtliche_zulassungen_ausgangsbescheide b ON a.ausgangsbescheid = b.id LEFT JOIN wasserrecht.fiswrv_wasserrechtliche_zulassungen_typus c ON b.typus = c.id LEFT JOIN wasserrecht.fiswrv_aktenzeichen d ON b.aktenzeichen = d.id WHERE a.aktuell = true;
+--CREATE VIEW wasserrecht.fiswrv_historische_wasserrechtliche_zulassungen AS SELECT a.id as wrz_id, a.name, COALESCE(c.name,'') ||' (Aktenzeichen: '|| COALESCE(d.name,'') ||')'||' vom '|| COALESCE(b.datum::text,'') AS bezeichnung, a.aktuell, a.historisch, a.anlage AS anlage_id FROM wasserrecht.fiswrv_wasserrechtliche_zulassungen a LEFT JOIN wasserrecht.fiswrv_wasserrechtliche_zulassungen_ausgangsbescheide b ON a.ausgangsbescheid = b.id LEFT JOIN wasserrecht.fiswrv_wasserrechtliche_zulassungen_typus c ON b.typus = c.id LEFT JOIN wasserrecht.fiswrv_aktenzeichen d ON b.aktenzeichen = d.id WHERE a.historisch = true;
+--CREATE VIEW wasserrecht.fiswrv_gewaesserbenutzungen_aktueller_wasserrechtlicher_zulassungen AS SELECT b.id AS gewaesserbenutzungen_id, a.wrz_id AS wrz_id, a.aktuell, a.historisch, a.anlage_id, COALESCE(a.bezeichnung,'') || ' zum ' || COALESCE(c.name,'') || ' von ' || COALESCE(d.max_ent_a::text,'') || ' m³/Jahr' AS bezeichnung, e.namelang AS wrz_ben_lage_namelang
+--  FROM wasserrecht.fiswrv_aktuelle_wasserrechtliche_zulassungen a INNER JOIN wasserrecht.fiswrv_gewaesserbenutzungen b ON b.wasserrechtliche_zulassungen = a.wrz_id LEFT JOIN wasserrecht.fiswrv_gewaesserbenutzungen_art c ON c.id = b.art LEFT JOIN wasserrecht.fiswrv_gewaesserbenutzungen_umfang d ON b.umfang = d.id LEFT JOIN wasserrecht.fiswrv_gewaesserbenutzungen_lage e ON b.lage = e.id;
 
---CREATE VIEW wasserrecht.wasserentnamebenutzer AS SELECT c.oid, a.name AS anlage, b.name AS wasserrechtliche_zulassung, c.kennnummer AS benutzungsnummer FROM wasserrecht.anlagen a INNER JOIN wasserrecht.wasserrechtliche_zulassungen b ON b.anlage=a.id INNER JOIN wasserrecht.gewaesserbenutzungen c ON b.id = c.wasserrechtliche_zulassungen;
+--CREATE VIEW wasserrecht.fiswrv_wasserentnamebenutzer AS SELECT c.oid, a.name AS anlage, b.name AS wasserrechtliche_zulassung, c.kennnummer AS benutzungsnummer FROM wasserrecht.fiswrv_anlagen a INNER JOIN wasserrecht.fiswrv_wasserrechtliche_zulassungen b ON b.anlage=a.id INNER JOIN wasserrecht.fiswrv_gewaesserbenutzungen c ON b.id = c.wasserrechtliche_zulassungen;
 
-CREATE VIEW wasserrecht.wasserrechtliche_zulassungen_bezeichnung AS SELECT a.id AS "id", COALESCE(b.name,'') ||' (Aktenzeichen: '|| COALESCE(a.aktenzeichen,'') ||')'||' vom '|| COALESCE(a.datum_postausgang::text,'') AS "bezeichnung" FROM wasserrecht.wasserrechtliche_zulassungen a LEFT JOIN wasserrecht.wasserrechtliche_zulassungen_typus b ON a.typus = b.id ORDER BY a.id;
-CREATE VIEW wasserrecht.gewaesserbenutzungen_bezeichnung AS SELECT b.id AS "id", COALESCE(e.name,'') ||' (Aktenzeichen: '|| COALESCE(a.aktenzeichen,'') ||')'||' vom '|| COALESCE(a.datum_postausgang::text,'') || ' zum ' || COALESCE(c.name,'') || ' von ' || COALESCE(d.max_ent_a::text,'') || ' m³/Jahr' AS "bezeichnung" FROM wasserrecht.gewaesserbenutzungen b LEFT JOIN wasserrecht.wasserrechtliche_zulassungen a ON b.wasserrechtliche_zulassungen = a.id LEFT JOIN wasserrecht.gewaesserbenutzungen_art c ON c.id = b.art LEFT JOIN wasserrecht.gewaesserbenutzungen_umfang d ON b.umfang = d.id LEFT JOIN wasserrecht.wasserrechtliche_zulassungen_typus e ON a.typus = e.id ORDER BY b.id;
-CREATE VIEW wasserrecht.personen_bezeichnung AS SELECT a.id AS "id", COALESCE(a.name,'') ||' '|| COALESCE(a.abkuerzung,'') ||' '|| COALESCE(b.ort,'') AS "bezeichnung" FROM wasserrecht.personen a LEFT JOIN wasserrecht.adresse b ON a.adresse=b.id ORDER BY a.id;
+CREATE VIEW wasserrecht.fiswrv_wasserrechtliche_zulassungen_bezeichnung AS SELECT a.id AS "id", COALESCE(b.name,'') ||' (Aktenzeichen: '|| COALESCE(a.aktenzeichen,'') ||')'||' vom '|| COALESCE(a.datum_postausgang::text,'') AS "bezeichnung" FROM wasserrecht.fiswrv_wasserrechtliche_zulassungen a LEFT JOIN wasserrecht.fiswrv_wasserrechtliche_zulassungen_typus b ON a.typus = b.id ORDER BY a.id;
+CREATE VIEW wasserrecht.fiswrv_gewaesserbenutzungen_bezeichnung AS SELECT b.id AS "id", COALESCE(e.name,'') ||' (Aktenzeichen: '|| COALESCE(a.aktenzeichen,'') ||')'||' vom '|| COALESCE(a.datum_postausgang::text,'') || ' zum ' || COALESCE(c.name,'') || ' von ' || COALESCE(d.max_ent_a::text,'') || ' m³/Jahr' AS "bezeichnung" FROM wasserrecht.fiswrv_gewaesserbenutzungen b LEFT JOIN wasserrecht.fiswrv_wasserrechtliche_zulassungen a ON b.wasserrechtliche_zulassungen = a.id LEFT JOIN wasserrecht.fiswrv_gewaesserbenutzungen_art c ON c.id = b.art LEFT JOIN wasserrecht.fiswrv_gewaesserbenutzungen_umfang d ON b.umfang = d.id LEFT JOIN wasserrecht.fiswrv_wasserrechtliche_zulassungen_typus e ON a.typus = e.id ORDER BY b.id;
+CREATE VIEW wasserrecht.fiswrv_personen_bezeichnung AS SELECT a.id AS "id", COALESCE(a.name,'') ||' '|| COALESCE(a.abkuerzung,'') ||' '|| COALESCE(b.ort,'') AS "bezeichnung" FROM wasserrecht.fiswrv_personen a LEFT JOIN wasserrecht.fiswrv_adresse b ON a.adresse=b.id ORDER BY a.id;
 
 ------------------------------------------
 
 /*
-CREATE TABLE wasserrecht.wasserentnahme_messung
+CREATE TABLE wasserrecht.fiswrv_wasserentnahme_messung
 (
 	id serial PRIMARY KEY,
-	gewaesserbenutzungen integer REFERENCES wasserrecht.gewaesserbenutzungen(id),
+	gewaesserbenutzungen integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen(id),
 	chem_datum date,
 	chem_temp numeric(5,2),
 	chem_farb numeric(6,4),
@@ -378,98 +378,98 @@ CREATE TABLE wasserrecht.wasserentnahme_messung
  
 ---------
  
-CREATE TABLE wasserrecht.erstattung_auswahl(
+CREATE TABLE wasserrecht.fiswrv_erstattung_auswahl(
 	id serial PRIMARY KEY,
 	name varchar(255)
 ) WITH OIDS;
-INSERT INTO wasserrecht.erstattung_auswahl VALUES (1, 'Hiermit beantrage ich gemäß § 18 Abs. 4 LWaG M-V die Erstattung des Verwaltungsaufwandes zum Wasserentnahmeentgelt.');
+INSERT INTO wasserrecht.fiswrv_erstattung_auswahl VALUES (1, 'Hiermit beantrage ich gemäß § 18 Abs. 4 LWaG M-V die Erstattung des Verwaltungsaufwandes zum Wasserentnahmeentgelt.');
 
-CREATE TABLE wasserrecht.erstattung(
+CREATE TABLE wasserrecht.fiswrv_erstattung(
 	id serial PRIMARY KEY,
-	auswahl integer REFERENCES wasserrecht.erstattung_auswahl(id),
+	auswahl integer REFERENCES wasserrecht.fiswrv_erstattung_auswahl(id),
 	datum date,
-	konto integer REFERENCES wasserrecht.konto(id)
+	konto integer REFERENCES wasserrecht.fiswrv_konto(id)
 ) WITH OIDS;
 
-CREATE TABLE wasserrecht.aufforderung(
+CREATE TABLE wasserrecht.fiswrv_aufforderung(
 	id serial PRIMARY KEY,
 	datum_absend date,
 	datum_wiedervorlage date,
-	dokument integer REFERENCES wasserrecht.dokument(id),
+	dokument integer REFERENCES wasserrecht.fiswrv_dokument(id),
 	status varchar(255),
-	aktenzeichen integer REFERENCES wasserrecht.aktenzeichen(id)
+	aktenzeichen integer REFERENCES wasserrecht.fiswrv_aktenzeichen(id)
 ) WITH OIDS;
 
-CREATE TABLE wasserrecht.erklaerung_eingang_check(
+CREATE TABLE wasserrecht.fiswrv_erklaerung_eingang_check(
 	id serial PRIMARY KEY,
 	name varchar(255)
 ) WITH OIDS;
-INSERT INTO wasserrecht.erklaerung_eingang_check VALUES (1, 'nicht fristgemäß erklärt');
-INSERT INTO wasserrecht.erklaerung_eingang_check VALUES (2, 'fristgemäße Erklärung möglich');
-INSERT INTO wasserrecht.erklaerung_eingang_check VALUES (3, 'keine fristgemäße Erklärung möglich');
-INSERT INTO wasserrecht.erklaerung_eingang_check VALUES (4, 'fristgemäß erklärt');
+INSERT INTO wasserrecht.fiswrv_erklaerung_eingang_check VALUES (1, 'nicht fristgemäß erklärt');
+INSERT INTO wasserrecht.fiswrv_erklaerung_eingang_check VALUES (2, 'fristgemäße Erklärung möglich');
+INSERT INTO wasserrecht.fiswrv_erklaerung_eingang_check VALUES (3, 'keine fristgemäße Erklärung möglich');
+INSERT INTO wasserrecht.fiswrv_erklaerung_eingang_check VALUES (4, 'fristgemäß erklärt');
 
-CREATE TABLE wasserrecht.erklaerung_vollstendig_check(
+CREATE TABLE wasserrecht.fiswrv_erklaerung_vollstendig_check(
 	id serial PRIMARY KEY,
 	name varchar(255)
 ) WITH OIDS;
-INSERT INTO wasserrecht.erklaerung_vollstendig_check VALUES (1, 'Wasserentnahmeerklärung vollständig eingegangen');
-INSERT INTO wasserrecht.erklaerung_vollstendig_check VALUES (2, 'WEE-Erklärung vollständig eingegangen');
+INSERT INTO wasserrecht.fiswrv_erklaerung_vollstendig_check VALUES (1, 'Wasserentnahmeerklärung vollständig eingegangen');
+INSERT INTO wasserrecht.fiswrv_erklaerung_vollstendig_check VALUES (2, 'WEE-Erklärung vollständig eingegangen');
 
-CREATE TABLE wasserrecht.erklaerung(
+CREATE TABLE wasserrecht.fiswrv_erklaerung(
 	id serial PRIMARY KEY,
-	eingang_check integer REFERENCES wasserrecht.erklaerung_eingang_check(id),
-	vollstendig_check integer REFERENCES wasserrecht.erklaerung_vollstendig_check(id),
-	dokument integer REFERENCES wasserrecht.dokument(id)
+	eingang_check integer REFERENCES wasserrecht.fiswrv_erklaerung_eingang_check(id),
+	vollstendig_check integer REFERENCES wasserrecht.fiswrv_erklaerung_vollstendig_check(id),
+	dokument integer REFERENCES wasserrecht.fiswrv_dokument(id)
 ) WITH OIDS;
 
-CREATE TABLE wasserrecht.festsetzung(
+CREATE TABLE wasserrecht.fiswrv_festsetzung(
 	id serial PRIMARY KEY,
-	dokument integer REFERENCES wasserrecht.dokument(id),
+	dokument integer REFERENCES wasserrecht.fiswrv_dokument(id),
 	status varchar(255)
 ) WITH OIDS;
 
-CREATE TABLE wasserrecht.bescheid(
+CREATE TABLE wasserrecht.fiswrv_bescheid(
 	id serial PRIMARY KEY,
-	konto integer REFERENCES wasserrecht.konto(id),
+	konto integer REFERENCES wasserrecht.fiswrv_konto(id),
 	datum_zustellurkunde date,
-	ort integer REFERENCES wasserrecht.ort(id)
+	ort integer REFERENCES wasserrecht.fiswrv_ort(id)
 ) WITH OIDS;
 
-CREATE TABLE wasserrecht.entnahme(
+CREATE TABLE wasserrecht.fiswrv_entnahme(
 	id serial PRIMARY KEY,
-	entnahme_zweck integer REFERENCES wasserrecht.gewaesserbenutzungen_zweck(id),
-	entnahme_typ integer REFERENCES wasserrecht.gewaesserbenutzungen_art(id)
+	entnahme_zweck integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_zweck(id),
+	entnahme_typ integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_art(id)
 ) WITH OIDS;
  
-CREATE TABLE wasserrecht.fiswrv_wem
+CREATE TABLE wasserrecht.fiswrv_fiswrv_wem
 (
 	id serial PRIMARY KEY,
   	jahr date,
-  	ausgangsbescheid integer REFERENCES wasserrecht.wasserrechtliche_zulassungen_ausgangsbescheide(id), 
+  	ausgangsbescheid integer REFERENCES wasserrecht.fiswrv_wasserrechtliche_zulassungen_ausgangsbescheide(id), 
   	ent_a numeric(11,3),
-  	anlage integer REFERENCES wasserrecht.anlagen(id),
+  	anlage integer REFERENCES wasserrecht.fiswrv_anlagen(id),
   	ein_a numeric(11,3),
   	ent_erfassung text,
   	wem_absend_per_gid integer,
   	wem_nutzer_per_gid integer,
-  	bescheid integer REFERENCES wasserrecht.bescheid(id), 
-  	wrz_ben_zweck integer REFERENCES wasserrecht.gewaesserbenutzungen_zweck(id),
-  	aufforderung integer REFERENCES wasserrecht.aufforderung(id),
-  	erklaerung integer REFERENCES wasserrecht.erklaerung(id),
+  	bescheid integer REFERENCES wasserrecht.fiswrv_bescheid(id), 
+  	wrz_ben_zweck integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_zweck(id),
+  	aufforderung integer REFERENCES wasserrecht.fiswrv_aufforderung(id),
+  	erklaerung integer REFERENCES wasserrecht.fiswrv_erklaerung(id),
   	datum date,
-  	erstattung integer REFERENCES wasserrecht.erstattung(id),
-  	festsetzung integer REFERENCES wasserrecht.festsetzung(id),
-  	entnahme integer REFERENCES wasserrecht.entnahme(id),
-  	wasserrechtliche_zulassungen integer REFERENCES wasserrecht.wasserrechtliche_zulassungen(id),
-  	gewaesserbenutzungen integer REFERENCES wasserrecht.gewaesserbenutzungen(id),
+  	erstattung integer REFERENCES wasserrecht.fiswrv_erstattung(id),
+  	festsetzung integer REFERENCES wasserrecht.fiswrv_festsetzung(id),
+  	entnahme integer REFERENCES wasserrecht.fiswrv_entnahme(id),
+  	wasserrechtliche_zulassungen integer REFERENCES wasserrecht.fiswrv_wasserrechtliche_zulassungen(id),
+  	gewaesserbenutzungen integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen(id),
   	wem_wee_befreiung numeric(1,0),
   	wee_beschwee_per_gid integer,
-  	bearbeiter integer REFERENCES wasserrecht.personen(id),
+  	bearbeiter integer REFERENCES wasserrecht.fiswrv_personen(id),
   	wee_wee_eingegangen_lk text,
   	wee_wee_eingegangen_land text,
   	kommentar text,
-  	sachbearbeiter integer REFERENCES wasserrecht.personen(id)
+  	sachbearbeiter integer REFERENCES wasserrecht.fiswrv_personen(id)
 )WITH OIDS;
 */
 

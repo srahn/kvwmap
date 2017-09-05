@@ -1,6 +1,6 @@
 <?php
 class TeilgewaesserbenutzungenArt extends WrPgObject {
 
-	protected $tableName = 'teilgewaesserbenutzungen_art';
+	protected $tableName = 'fiswrv_teilgewaesserbenutzungen_art';
 }
 ?>

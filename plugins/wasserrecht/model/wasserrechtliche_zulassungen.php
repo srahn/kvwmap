@@ -1,7 +1,7 @@
 <?php
 class WasserrechtlicheZulassungen extends WrPgObject {
 
-	protected $tableName = 'wasserrechtliche_zulassungen';
+	protected $tableName = 'fiswrv_wasserrechtliche_zulassungen';
 	
 	public $gueltigkeitsJahr;
 // 	public $gueltigkeit;
