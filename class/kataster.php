@@ -1548,7 +1548,19 @@ class flurstueck {
 			if($type != 'Text')$Eigentuemer .= '</table></td></tr>';
 		}
 		return $Eigentuemer;
-	}	
+	}
+	
+	function orderEigentuemer($gml_id, &$Eigentuemerliste, $order){
+		# Diese funktion durchläuft den Rechtsverhältnisbaum und vergibt für jeden Eigentümer eine order, die sich fortlaufend erhöht.
+		# Anschliessend kann man die Eigentümerliste an Hand dieser order sortieren und erhält damit eine lineare Liste ohne Verschachtelung.
+		$Eigentuemerliste[$gml_id]->order = $order;
+		if($Eigentuemerliste[$gml_id]->children != ''){
+			foreach($Eigentuemerliste[$gml_id]->children as $child){
+				$order = $this->orderEigentuemer($child, $Eigentuemerliste, $order+1);
+			}
+		}
+		return $order;
+	}
 		
 	function getSonstigesrecht() {
     if ($this->FlurstKennz=="") { return 0; }
