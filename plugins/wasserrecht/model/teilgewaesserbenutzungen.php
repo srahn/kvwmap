@@ -113,15 +113,104 @@ class Teilgewaesserbenutzungen extends WrPgObject {
 	}
 	
 	public function getWiedereinleitungBearbeiter() {
-	    return $this->data['wiedereinleitung_bearbeiter'];
+	    if(!empty($this->data['wiedereinleitung_bearbeiter']))
+	    {
+	        if($this->data['wiedereinleitung_bearbeiter'] === 't')
+	        {
+	            return true;
+	        }
+	        elseif($this->data['wiedereinleitung_bearbeiter'] === 'f')
+	        {
+	            return false;
+	        }
+	    }
+	    return false;
 	}
 	
 	public function getBefreiungstatbestaende() {
-	    return $this->data['befreiungstatbestaende'];
+	    if(!empty($this->data['befreiungstatbestaende']))
+	    {
+	        if($this->data['befreiungstatbestaende'] === 't')
+	        {
+	            return true;
+	        }
+	        elseif($this->data['befreiungstatbestaende'] === 'f')
+	        {
+	            return false;
+	        }
+	    }
+	    return false;
 	}
 	
 	public function getUmfang() {
 	    return $this->data['umfang'];
+	}
+	
+	public function getEntgeltsatz($artBenutzungId, $befreit, $zugelassen, $ermaessigt)
+	{
+	    if(!empty($this->entgeltsatz))
+	    {
+	        if(!empty($artBenutzungId))
+	        {
+	            if($artBenutzungId === "1") //GW
+	            {
+	                if($befreit)
+	                {
+	                    return $this->entgeltsatz->getSatzGW_Befreit();
+	                }
+	                elseif($zugelassen)
+	                {
+	                    if($ermaessigt)
+	                    {
+	                        return $this->entgeltsatz->getSatzGW_ZugelassenErmaessigt();
+	                    }
+	                    else
+	                    {
+	                        return $this->entgeltsatz->getSatzGW_Zugelassen();
+	                    }
+	                }
+	                else
+	                {
+	                    return $this->entgeltsatz->getSatzGW_NichtZugelassen();
+	                }
+	            }
+	            elseif ($artBenutzungId === "2") //OW
+	            {
+	                if($befreit)
+	                {
+	                    return $this->entgeltsatz->getSatzOW_Befreit();
+	                }
+	                elseif($zugelassen)
+	                {
+	                    if($ermaessigt)
+	                    {
+	                        return $this->entgeltsatz->getSatzOW_ZugelassenErmaessigt();
+	                    }
+	                    else
+	                    {
+	                        return $this->entgeltsatz->getSatzOW_Zugelassen();
+	                    }
+	                }
+	                else
+	                {
+	                    return $this->entgeltsatz->getSatzOW_NichtZugelassen();
+	                }
+	            }
+	        }
+	    }
+	    
+	    return "<div style=\"color: red;\">Fehler</div>";
+	}
+	
+	public function getEntgelt($artBenutzungId, $befreit, $zugelassen, $ermaessigt)
+	{
+	    $entgeltsatz = $this->getEntgeltsatz($artBenutzungId, $befreit, $zugelassen, $ermaessigt);
+	    if(is_numeric($entgeltsatz))
+	    {
+	        return $this->getUmfang() * $entgeltsatz;
+	    }
+	    
+	    return $entgeltsatz;
 	}
 	
 	public function createTeilgewaesserbenutzung($gewaesserbenutzungen, $art = NULL, $zweck = NULL, $umfang = NULL, $wiedereinleitung_nutzer = NULL, $mengenbestimmung = NULL, $teilgewaesserbenutzungen_art = NULL, $wiedereinleitung_bearbeiter = NULL, $art_benutzung = NULL, $befreiungstatbestaende = NULL, $entgeltsatz = NULL) 

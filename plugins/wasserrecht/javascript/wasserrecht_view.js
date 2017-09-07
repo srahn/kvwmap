@@ -22,9 +22,45 @@
 //    evt.currentTarget.className += " active";
 //}
 
-function setNewTab(go)
+function setNewTab()
 {
-	replaceParameterInUrl('go', go);
+	if (arguments.length==1) {
+		var go = arguments[0];
+		replaceParameterInUrl('go', go);
+	}
+	else if (arguments.length > 1)
+	{
+		var url = window.location.href;
+//		console.log("url 0: " + url);
+		for (var i = 0; i < arguments.length; i++)
+		{
+			var go = arguments[i];
+			
+//		    console.log("argument" + i + " :" + arguments[i]);
+//		    console.log("go=" + go);
+		    
+		    if(i > 0)
+		    {
+				for (var key in go) 
+				{
+					if(go.hasOwnProperty(key)) 
+					{
+//					    console.log(key + " -> " + go[key]);
+						url = changeURL(url, key,  go[key]);
+//						console.log("url 1: " + url);
+						break;
+					}
+				}
+		    }
+		    else
+		    {
+		    	url = changeURL(url, 'go', go);
+//		    	console.log("url 2: " + url);
+		    }
+		}
+//		console.log("url 3: " + url);
+		window.location.href = url;
+	}
 }
 
 function setNewErhebungsJahr(selectObject)
@@ -45,43 +81,56 @@ function setNewAdressat(selectObject)
 	replaceParameterInUrl('adressat', value);
 }
 
+function setNewUrlParameter(selectObject, urlParameter)
+{
+	var value = selectObject.value;
+	replaceParameterInUrl(urlParameter, value);
+}
+
+function changeURL(url, key, value) {
+	if(url != null)
+	{
+//		if (url.indexOf('go=wasserentnahmebenutzer') == -1){
+		//
+//				if (url.indexOf('?') > -1){
+//					url += "&go=wasserentnahmebenutzer";
+//				}
+//				else
+//				{
+//					url += "?go=wasserentnahmebenutzer";
+//				}	
+//			}
+		
+//		console.log("key: " + key);
+		
+		if (url.indexOf('?') > -1) {
+			if (url.indexOf(key) > -1) {
+				if (url.indexOf(key + '=' + value) > -1) {
+				} else {
+					var oldValue = url.substring(url.indexOf(key) + key.length + 1,
+							url.length);
+					if (oldValue.indexOf('&') > -1) {
+						oldValue = oldValue.substring(0, oldValue.indexOf('&'));
+					}
+//					console.log("oldValue: " + oldValue);
+//					console.log("url: " + url);
+					url = url.replace(key + '=' + oldValue, key + '=' + value);
+				}
+			} else {
+				url += '&' + key + '=' + value;
+			}
+		} else {
+			url += '?' + key + '=' + value;
+		}
+	}
+	
+	return url;
+}
+
 function replaceParameterInUrl(key, value)
 {
-// 	setAuswahlToHiddenForm(key, key, value);
-	
 	var url = window.location.href;
-	
-//	if (url.indexOf('go=wasserentnahmebenutzer') == -1){
-//
-//		if (url.indexOf('?') > -1){
-//			url += "&go=wasserentnahmebenutzer";
-//		}
-//		else
-//		{
-//			url += "?go=wasserentnahmebenutzer";
-//		}	
-//	}
-	
-	if (url.indexOf('?') > -1){
-	   if (url.indexOf(key) > -1){
-		   if(url.indexOf(key + '=' + value) > -1){
-		   }
-		   else{
-			   var oldValue = url.substring(url.indexOf(key) + key.length + 1, url.length);
-			   if(oldValue.indexOf('&') > -1){
-				   oldValue = oldValue.substring(0, oldValue.indexOf('&'));
-			   }
-// 			   alert(oldValue);
-// 			   alert(url);
-			   url = url.replace(key + '=' + oldValue, key + '=' + value);
-		   }	   	   
-	   } 
-	   else{
-		   url += '&' + key + '=' + value;
-	   }
-	}else{
-	   url += '?' + key + '=' + value;
-	}
+	url = changeURL(url, key, value)
 	window.location.href = url;
 }
 

@@ -1,13 +1,3 @@
-<?php 
-$tab1_id="wasserentnahmeentgelt_erklaerung_der_entnahme";
-$tab1_name="Erklärung der Entnahme";
-$tab1_active=true;
-$tab2_id="wasserentnahmeentgelt_festsetzung";
-$tab2_name="Festsetzung";
-$tab2_active=false;
-include_once ('includes/header.php'); 
-?>
-
 <?php
 $wrz = null;
 $gewaesserbenutzung = null;
@@ -78,15 +68,20 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
 //                         echo $i;
                     }
                     
+//                  if(empty($wrz->getErklaerungDatum()))
+//                  {
+                        //echo $erklaerungWrz2->toString();
+                        $wrz->insertErklaerungDatum();
+//                  }
+                    
+//                  if(empty($wrz->getErklaerungNutzer()))
+//                  {
+                        $wrz->insertErklaerungNutzer($this->user->Vorname . ' ' . $this->user->Name);
+//                  }
+                    
                     //update gewaesserbenutzungen, because teilgewaesserbenutzungen where added
                     $gewaesserbenutzungen = $gb->find_where_with_subtables('id=' . $gewaesserbenutzungId);
                     $gewaesserbenutzung = $gewaesserbenutzungen[0];
-                }
-                
-                if(empty($wrz->getErklaerungDatum()))
-                {
-                    //echo $erklaerungWrz2->toString();
-                    $wrz->insertErklaerungDatum();
                 }
             }
             
@@ -116,6 +111,36 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
 		 }
     }
 }
+elseif($_SERVER ["REQUEST_METHOD"] == "GET")
+{
+    foreach($_REQUEST as $key => $value)
+    {
+        $keyEscaped = htmlspecialchars($key);
+        $valueEscaped = htmlspecialchars($value);
+        
+        if(strtolower($keyEscaped) === "geterklaerung")
+        {
+            $lastIndex = strripos($valueEscaped, "_");
+            $erklaerungWrzId = substr($valueEscaped, $lastIndex + 1);
+            // 		    echo "<br />lastIndex: " . $lastIndex . " erklaerungWrzId: " . $erklaerungWrzId;
+            $erklaerungWrz = new WasserrechtlicheZulassungen($this);
+            $wrz = $erklaerungWrz->find_by_id($this, 'id', $erklaerungWrzId);
+            if(!empty($wrz))
+            {
+                $gewaesserbenutzungId = substr($valueEscaped, 0, $lastIndex);
+                // 		        echo "<br />gewaesserbenutzungId: " . $gewaesserbenutzungId;
+                $gb = new Gewaesserbenutzungen($this);
+                $gewaesserbenutzungen = $gb->find_where_with_subtables('id=' . $gewaesserbenutzungId);
+                if(!empty($gewaesserbenutzungen) && count($gewaesserbenutzungen) > 0 && !empty($gewaesserbenutzungen[0]))
+                {
+                    $gewaesserbenutzung = $gewaesserbenutzungen[0];
+                }
+                // 		        echo "<br />gewaesserbenutzung: " . $gewaesserbenutzung[0]->getId();
+            }
+            break;
+        }
+    }
+}
 
 //try to find the first WRZ if, no wrz was given
 if(empty($wrz))
@@ -129,10 +154,6 @@ if(empty($wrz))
     }
 }
 
-?>
-
-<?php 
-
 if(!empty($wrz))
 {
     $wrz->getDependentObjects($this, $wrz);
@@ -140,6 +161,27 @@ if(!empty($wrz))
     {
         $gewaesserbenutzung = $wrz->gewaesserbenutzungen[0];
     }
+    
+    $tab1_id="wasserentnahmeentgelt_erklaerung_der_entnahme";
+    $tab1_name="Erklärung der Entnahme";
+    $tab1_active=true;
+    $tab1_visible=true;
+    $tab2_id="wasserentnahmeentgelt_festsetzung";
+    $tab2_name="Festsetzung";
+    $tab2_active=false;
+    $tab2_extra_parameter_key="getfestsetzung";
+    $tab2_extra_parameter_value=empty($gewaesserbenutzung) ? "0" . "_" . $wrz->getId() : $gewaesserbenutzung->getId() . "_" . $wrz->getId();
+//     var_dump($tab2_extra_parameter_key);
+//     var_dump($tab2_extra_parameter_value);
+    if($wrz->isErklaerungFreigegeben())
+    {
+        $tab2_visible=true;
+    }
+    else
+    {
+        $tab2_visible=false;
+    }
+    include_once ('includes/header.php'); 
     
     ?>
     
@@ -288,7 +330,7 @@ if(!empty($wrz))
                         <div class="wasserrecht_display_table_cell_spacer"></div>
                         <div class="wasserrecht_display_table_cell_white">
                         <?php 
-                            echo $this->user->Vorname . ' ' . $this->user->Name
+                                echo $wrz->getErklaerungNutzerHTML();
                         ?>
                         </div>
                     </div>

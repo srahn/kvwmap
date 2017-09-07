@@ -218,7 +218,8 @@ CREATE TABLE wasserrecht.fiswrv_wasserrechtliche_zulassungen(
 	aufforderung_datum_absend date,
 	aufforderung_dokument integer REFERENCES wasserrecht.fiswrv_dokument(id),
 	erklaerung_datum date,
-	erklaerung_dokument integer REFERENCES wasserrecht.fiswrv_dokument(id)
+	erklaerung_dokument integer REFERENCES wasserrecht.fiswrv_dokument(id),
+	erklaerung_nutzer varchar(255)
 )WITH OIDS;
 
 --GEWÄSSERBENUTZUNGEN
@@ -281,8 +282,16 @@ CREATE TABLE wasserrecht.fiswrv_gewaesserbenutzungen_wee_satz(
 	id serial PRIMARY KEY,
 	name varchar(255),
 	jahr date,
-	satz_ow numeric,
-	satz_gw numeric
+	satz_gw_befreit numeric,
+	satz_gw_zugelassen numeric,
+	satz_gw_nicht_zugelassen numeric,
+	satz_gw_zugelassen_ermaessigt numeric,
+	satz_gw_nicht_zugelassen_ermaessigt numeric,
+	satz_ow_befreit numeric,
+	satz_ow_zugelassen numeric,
+	satz_ow_nicht_zugelassen numeric,
+	satz_ow_zugelassen_ermaessigt numeric,
+	satz_ow_nicht_zugelassen_ermaessigt numeric
 )WITH OIDS;
 
 CREATE TABLE wasserrecht.fiswrv_gewaesserbenutzungen(

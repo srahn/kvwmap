@@ -255,6 +255,19 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	    }
 	}
 	
+	////////////////////////////////////////////////////////////////////
+	
+	public function isErklaerungFreigegeben()
+	{
+	    $datumErklaerung = $this->getErklaerungDatum();
+	    if(!empty($datumErklaerung))
+	    {
+	        return true;
+	    }
+	    
+	    return false;
+	}
+	
 	public function getErklaerungDatum() {
 	    return $this->data['erklaerung_datum'];
 	}
@@ -286,6 +299,28 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	    // 	        )
 	    // 	        );
 	}
+	
+	public function insertErklaerungNutzer($erklaerungNutzer) {
+	    $this->set('erklaerung_nutzer', $erklaerungNutzer);
+	    $this->update();
+	}
+	
+	public function getErklaerungNutzer() {
+	    return $this->data['erklaerung_nutzer'];
+	}
+	
+	public function getErklaerungNutzerHTML() {
+	    $nutzerErklaerung = $this->getErklaerungNutzer();
+	    if(!empty($nutzerErklaerung))
+	    {
+	        // 	        $dateString = DateTime::createFromFormat("d.m.Y", $datumAbsend);
+	        return "<div>" . $nutzerErklaerung . "</div>";
+	    }
+	    
+	    return "<div style=\"color: red;\">Nicht erklärt</div>";
+	}
+	
+	////////////////////////////////////////////////////////////////////
 	
 	public function getBezeichnung() {
 	    $fieldname = 'bezeichnung';

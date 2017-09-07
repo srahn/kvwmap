@@ -64,11 +64,12 @@ INSERT INTO wasserrecht.fiswrv_wasserrechtliche_zulassungen_ungueltig_aufgrund (
 INSERT INTO wasserrecht.fiswrv_wasserrechtliche_zulassungen_ungueltig_aufgrund (name) VALUES ('Änderung');
 
 INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_art (name) VALUES ('Entnehmen und Ableiten von Wasser aus oberirdischen Gewässern (§ 9 Satz 1 Nr. 1 WHG)');
-INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_art (name) VALUES ('Aufstauen und Absenken von oberirdischen Gewässern (§ 9 Satz 1 Nr. 2 WHG)');
+/*INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_art (name) VALUES ('Aufstauen und Absenken von oberirdischen Gewässern (§ 9 Satz 1 Nr. 2 WHG)');
 INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_art (name) VALUES ('Entnehmen fester Stoffe aus oberirdischen Gewässern... (§ 9 Satz 1 Nr. 3 WHG)');
-INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_art (name) VALUES ('Einbringen und Einleiten von Stoffen in Gewässer (§ 9 Satz 1 Nr. 4 WHG)');
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_art (name) VALUES ('Einbringen und Einleiten von Stoffen in Gewässer (§ 9 Satz 1 Nr. 4 WHG)');*/
 INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_art (name) VALUES ('Entnehmen, Zutagefördern, Zutageleiten und Ableiten von Grundwasser (§ 9 Satz 1 Nr. 5 WHG)');
-INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_art (name) VALUES ('Aufstauen, Absenken und Umleiten von Grundwasser  (§ 9 Satz 2 Nr. 1 WHG)');
+/*INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_art (name) VALUES ('Aufstauen, Absenken und Umleiten von Grundwasser  (§ 9 Satz 2 Nr. 1 WHG)');*/
+
 /*
 INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_art (name) VALUES ('Maßnahmen [...] die [...] nachteilige Veränderungen der Wasserbeschaffenheit herbei [...] führen (§ 9 Satz 2 Nr. 1 WHG)');
 INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_art (name) VALUES ('Entnahme von Wasser aus der Peene');
@@ -146,7 +147,7 @@ INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (name,freitext) VALUES
 INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (name,freitext) VALUES ('Heilquellennutzung nach § 16 Satz 2 Nummer 2 LWaG', DEFAULT);
 */
 
-INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_wee_satz (jahr,satz_ow,satz_gw) VALUES ('2010-01-01', 0.02, 0.05);
+/*INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_wee_satz (jahr,satz_ow,satz_gw) VALUES ('2010-01-01', 0.02, 0.05);
 INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_wee_satz (jahr,satz_ow,satz_gw) VALUES ('2011-01-01', 0.02, 0.05);
 INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_wee_satz (jahr,satz_ow,satz_gw) VALUES ('2012-01-01', 0.02, 0.05);
 INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_wee_satz (jahr,satz_ow,satz_gw) VALUES ('2013-01-01', 0.02, 0.05);
@@ -157,7 +158,10 @@ INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_wee_satz (jahr,satz_ow,satz_
 INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_wee_satz (jahr,satz_ow,satz_gw) VALUES ('2017-01-01', 0.02, 0.10);
 INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_wee_satz (jahr,satz_ow,satz_gw) VALUES ('2018-01-01', 0.02, 0.10);
 INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_wee_satz (jahr,satz_ow,satz_gw) VALUES ('2019-01-01', 0.02, 0.10);
-INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_wee_satz (jahr,satz_ow,satz_gw) VALUES ('2020-01-01', 0.02, 0.10);
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_wee_satz (jahr,satz_ow,satz_gw) VALUES ('2020-01-01', 0.02, 0.10);*/
+
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_wee_satz (jahr,satz_gw_befreit,satz_gw_zugelassen,satz_gw_nicht_zugelassen,satz_gw_zugelassen_ermaessigt,satz_gw_nicht_zugelassen_ermaessigt,satz_ow_befreit,satz_ow_zugelassen,satz_ow_nicht_zugelassen,satz_ow_zugelassen_ermaessigt,satz_ow_nicht_zugelassen_ermaessigt) VALUES ('2015-01-01', 0.00, 0.05, 0.10, 0.005, 0.010, 0.00, 0.02, 0.04, 0.002, 0.004);
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_wee_satz (jahr,satz_gw_befreit,satz_gw_zugelassen,satz_gw_nicht_zugelassen,satz_gw_zugelassen_ermaessigt,satz_gw_nicht_zugelassen_ermaessigt,satz_ow_befreit,satz_ow_zugelassen,satz_ow_nicht_zugelassen,satz_ow_zugelassen_ermaessigt,satz_ow_nicht_zugelassen_ermaessigt) VALUES ('2016-01-01', 0.00, 0.10, 0.20, 0.010, 0.020, 0.00, 0.02, 0.04, 0.002, 0.004);
 
 INSERT INTO wasserrecht.fiswrv_teilgewaesserbenutzungen_art (name) VALUES ('Erklärung');
 INSERT INTO wasserrecht.fiswrv_teilgewaesserbenutzungen_art (name) VALUES ('Schätzung');
@@ -213,7 +217,10 @@ INSERT INTO wasserrecht.fiswrv_wasserrechtliche_zulassungen (typus, aktenzeichen
 
 INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_umfang(name, max_ent_a) VALUES('Test Umfang', 80000.000);
 INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_lage(name, namekurz, namelang, the_geo) VALUES('Test Gewaesserbenutzungen Lage', 'Test Gewaesserbenutzungen Lage (kurz)', 'Test Gewaesserbenutzungen Lage (lang)', ST_Transform(ST_GeomFromText('POINT(13 53)', 4326), 35833));
-INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen (kennnummer, wasserbuchnummer, freitext_art, art, freitext_zweck, zweck, umfang, gruppe_wee, lage, wasserrechtliche_zulassungen) VALUES ('1-1-2-1', '3572', 'Test Freitext Art 1', 1, 'Test Freitext Zweck 1', 6, 1, false, 1, 1);
-INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen (kennnummer, wasserbuchnummer, freitext_art, art, freitext_zweck, zweck, umfang, gruppe_wee, lage, wasserrechtliche_zulassungen) VALUES ('2-1-2-2', '0000', 'Test Freitext Art 2', 5, 'Test Freitext Zweck 2', 6, 1, false, 1, 2);
+
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen(kennnummer, wasserbuchnummer, freitext_art, art, freitext_zweck, zweck, umfang, gruppe_wee, lage, wasserrechtliche_zulassungen) VALUES ('1-1-2-1', '3572', 'Test Freitext Art 1', 1, 'Test Freitext Zweck 1', 6, 1, false, 1, 1);
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen(kennnummer, wasserbuchnummer, freitext_art, art, freitext_zweck, zweck, umfang, gruppe_wee, lage, wasserrechtliche_zulassungen) VALUES ('2-1-2-2', '0000', 'Test Freitext Art 2', 5, 'Test Freitext Zweck 2', 6, 1, false, 1, 2);
+
+INSERT INTO wasserrecht.fiswrv_teilgewaesserbenutzungen(art, zweck, umfang, wiedereinleitung_nutzer, wiedereinleitung_bearbeiter,mengenbestimmung,art_benutzung,befreiungstatbestaende,entgeltsatz,teilgewaesserbenutzungen_art, gewaesserbenutzungen) VALUES(1,1,2,true,true,3,2,false,2,2,1);
 
 COMMIT;

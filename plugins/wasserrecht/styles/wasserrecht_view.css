@@ -138,6 +138,7 @@ button {
   width: 95%;
   border-collapse: collapse;
 /*   margin-top: 20px; */
+/*    empty-cells: hide; */
 }
 
 .wasserrecht_table th, .wasserrecht_table td {
@@ -153,6 +154,11 @@ button {
 .wasserrecht_table td {
   background-color: white;
   border: 1px solid black;
+}
+
+.wasserrecht_table td:empty {
+  visibility: hidden;
+  border: 0px solid black;
 }
 
 .wasserrecht_table_inputfield {

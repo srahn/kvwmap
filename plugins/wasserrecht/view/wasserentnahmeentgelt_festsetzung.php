@@ -1,20 +1,10 @@
-<?php 
-$tab1_id="wasserentnahmeentgelt_erklaerung_der_entnahme";
-$tab1_name="Erklärung der Entnahme";
-$tab1_active=false;
-$tab2_id="wasserentnahmeentgelt_festsetzung";
-$tab2_name="Festsetzung";
-$tab2_active=true;
-include_once ('includes/header.php'); 
-?>
-
 <?php
 $wrz = null;
 $gewaesserbenutzung = null;
 		
-//print_r($_REQUEST); 
+// print_r($_REQUEST); 
 		  
-if($_SERVER ["REQUEST_METHOD"] == "POST")
+if($_SERVER ["REQUEST_METHOD"] == "GET")
 {
 //     print_r($_POST);
 
@@ -23,16 +13,16 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
         $keyEscaped = htmlspecialchars($key);
         $valueEscaped = htmlspecialchars($value);
         
-        if(startsWith($keyEscaped, "erklaerung_"))
+        if(strtolower($keyEscaped) === "getfestsetzung")
 		{
-		    $lastIndex = strripos($keyEscaped, "_");
-		    $erklaerungWrzId = substr($keyEscaped, $lastIndex + 1);
-// 		    echo "<br />lastIndex: " . $lastIndex . " erklaerungWrzId: " . $erklaerungWrzId;
-		    $erklaerungWrz = new WasserrechtlicheZulassungen($this);
-		    $wrz = $erklaerungWrz->find_by_id($this, 'id', $erklaerungWrzId);
+		    $lastIndex = strripos($valueEscaped, "_");
+		    $festsetzungWrzId = substr($valueEscaped, $lastIndex + 1);
+// 		    echo "<br />lastIndex: " . $lastIndex . " festsetzungWrzId: " . $festsetzungWrzId;
+		    $festsetzungWrz = new WasserrechtlicheZulassungen($this);
+		    $wrz = $festsetzungWrz->find_by_id($this, 'id', $festsetzungWrzId);
 		    if(!empty($wrz))
 		    {
-		        $gewaesserbenutzungId = substr($keyEscaped, strlen("erklaerung_"), $lastIndex - strlen("erklaerung_"));
+		        $gewaesserbenutzungId = substr($valueEscaped, 0, $lastIndex);
 // 		        echo "<br />gewaesserbenutzungId: " . $gewaesserbenutzungId;
 		        $gb = new Gewaesserbenutzungen($this);
 		        $gewaesserbenutzungen = $gb->find_where_with_subtables('id=' . $gewaesserbenutzungId);
@@ -42,7 +32,6 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
 		        }
 // 		        echo "<br />gewaesserbenutzung: " . $gewaesserbenutzung[0]->getId();
 		    }
-		              
 		    break;
 		 }
     }
@@ -60,10 +49,6 @@ if(empty($wrz))
     }
 }
 
-?>
-
-<?php 
-
 if(!empty($wrz))
 {
     $wrz->getDependentObjects($this, $wrz);
@@ -71,6 +56,18 @@ if(!empty($wrz))
     {
         $gewaesserbenutzung = $wrz->gewaesserbenutzungen[0];
     }
+    
+    $tab1_id="wasserentnahmeentgelt_erklaerung_der_entnahme";
+    $tab1_name="Erklärung der Entnahme";
+    $tab1_active=false;
+    $tab1_visible=true;
+    $tab2_id="wasserentnahmeentgelt_festsetzung";
+    $tab1_extra_parameter_key="geterklaerung";
+    $tab1_extra_parameter_value=empty($gewaesserbenutzung) ? "0" . "_" . $wrz->getId() : $gewaesserbenutzung->getId() . "_" . $wrz->getId();
+    $tab2_name="Festsetzung";
+    $tab2_active=true;
+    $tab2_visible=true;
+    include_once ('includes/header.php'); 
     
     ?>
 
@@ -97,6 +94,138 @@ if(!empty($wrz))
                     <th>Entgelt</th>
                   </tr>
                   <tr>
+           		  <?php
+                  for ($i = 1; $i <= WASSERRECHT_ERKLAERUNG_ENTNAHME_TEILGEWAESSERBENUTZUNGEN_COUNT; $i++) 
+                      {
+                      
+                          $teilgewaesserbenutzung = null;
+                          if(!empty($gewaesserbenutzung->teilgewaesserbenutzungen) && count($gewaesserbenutzung->teilgewaesserbenutzungen) > 0 
+                              && count($gewaesserbenutzung->teilgewaesserbenutzungen) > ($i - 1) && !empty($gewaesserbenutzung->teilgewaesserbenutzungen[$i -1]))
+                          {
+                              $teilgewaesserbenutzung = $gewaesserbenutzung->teilgewaesserbenutzungen[$i - 1];
+//                               var_dump($teilgewaesserbenutzung->gewaesserbenutzungArt->getName());
+
+                              if(!empty($teilgewaesserbenutzung))
+                              {
+                                  //Art Benutzung
+                                  $getArtBenutzung = !empty(htmlspecialchars($_REQUEST['artbenutzung'])) ? htmlspecialchars($_REQUEST['artbenutzung']) : null;
+                                  if(!empty($getArtBenutzung) && strpos($getArtBenutzung, '_') !== false)
+                                  {
+                                      $lastIndex = strripos($getArtBenutzung, "_");
+                                      $getArtBenutzung = substr($getArtBenutzung, $lastIndex + 1);
+                                  }    
+                                  elseif(!empty($teilgewaesserbenutzung->art_benutzung))
+                                  {
+                                      $getArtBenutzung = $teilgewaesserbenutzung->art_benutzung->getId();
+                                  }
+                                  else
+                                  {
+                                      $getArtBenutzung = "1";
+                                  }    
+                                  
+                                  //Wiedereinleitung Bearbeiter
+                                  $getWiedereinleitungBearbeiter = !empty(htmlspecialchars($_REQUEST['wiedereinleitungbearbeiter'])) ? htmlspecialchars($_REQUEST['wiedereinleitungbearbeiter']) : null;
+                                  if(!empty($getWiedereinleitungBearbeiter) && strpos($getWiedereinleitungBearbeiter, '_') !== false)
+                                  {
+                                      $lastIndex = strripos($getWiedereinleitungBearbeiter, "_");
+                                      $getWiedereinleitungBearbeiter = substr($getWiedereinleitungBearbeiter, $lastIndex + 1);
+                                      $getWiedereinleitungBearbeiter = strtolower($getWiedereinleitungBearbeiter) === 'true'? true: false;
+                                  }
+                                  else
+                                  {
+                                      $getWiedereinleitungBearbeiter = $teilgewaesserbenutzung->getWiedereinleitungBearbeiter();
+                                  }
+                                  
+                                  //Befreiungstatbestände
+                                  $getBefreiungstatbestaende = !empty(htmlspecialchars($_REQUEST['befreiungstatbestaende'])) ? htmlspecialchars($_REQUEST['befreiungstatbestaende']) : null;
+                                  if(!empty($getBefreiungstatbestaende) && strpos($getBefreiungstatbestaende, '_') !== false)
+                                  {
+                                      $lastIndex = strripos($getBefreiungstatbestaende, "_");
+                                      $getBefreiungstatbestaende = substr($getBefreiungstatbestaende, $lastIndex + 1);
+                                      $getBefreiungstatbestaende = strtolower($getBefreiungstatbestaende) === 'true'? true: false;
+                                  }
+                                  else
+                                  {
+                                      $getBefreiungstatbestaende = $teilgewaesserbenutzung->getBefreiungstatbestaende();
+                                  }
+                                  
+                                  ?>
+                                  <td><?php echo $i; ?>.</td>
+                                  <td><?php echo !empty($teilgewaesserbenutzung->gewaesserbenutzungArt) ? $teilgewaesserbenutzung->gewaesserbenutzungArt->getName() : "" ?></td>
+                                  <td><?php echo !empty($teilgewaesserbenutzung->gewaesserbenutzungZweck) ? $teilgewaesserbenutzung->gewaesserbenutzungZweck->getName() : "" ?></td>
+                                  <td><?php echo !empty($teilgewaesserbenutzung->getUmfang()) ? $teilgewaesserbenutzung->getUmfang() : "" ?></td>
+                                  <td><?php echo !empty($teilgewaesserbenutzung->getWiedereinleitungNutzer()) && $teilgewaesserbenutzung->getWiedereinleitungNutzer() === "t" ? "ja" : "nein" ?></td>
+                                  <td><?php echo !empty($teilgewaesserbenutzung->mengenbestimmung) ? $teilgewaesserbenutzung->mengenbestimmung->getName() : "" ?></td>
+                                  <td>
+                                  	<select name="teilgewaesserbenutzung_art_benutzung_<?php echo $i; ?>" onchange="setNewUrlParameter(this,'artbenutzung')">
+                                		<option value="<?php echo $i; ?>_1" <?php echo $getArtBenutzung === "1" ?  'selected' : ''?>>GW</option>
+                                		<option value="<?php echo $i; ?>_2" <?php echo $getArtBenutzung === "2" ?  'selected' : ''?>>OW</option>
+                                	</select>
+                                  </td>
+                                  <td>
+                                  	<select name="teilgewaesserbenutzung_wiedereinleitung_bearbeiter_<?php echo $i; ?>" onchange="setNewUrlParameter(this,'wiedereinleitungbearbeiter')">
+                                		<option value="<?php echo $i; ?>_true" <?php echo $getWiedereinleitungBearbeiter ?  'selected' : ''?>>ja</option>
+                                		<option value="<?php echo $i; ?>_false" <?php echo !$getWiedereinleitungBearbeiter ?  'selected' : ''?>>nein</option>
+                                	</select>
+                                  </td>
+                                  <td>
+                                  	<select name="teilgewaesserbenutzung_befreiungstatbestaende_<?php echo $i; ?>" onchange="setNewUrlParameter(this,'befreiungstatbestaende')">
+                                		<option value="<?php echo $i; ?>_true" <?php echo $getBefreiungstatbestaende ?  'selected' : ''?>>ja</option>
+                                		<option value="<?php echo $i; ?>_false" <?php echo !$getBefreiungstatbestaende ?  'selected' : ''?>>nein</option>
+                                	</select>
+                                  </td>
+                                  <td>
+                                  	<?php echo $teilgewaesserbenutzung->getEntgeltsatz($getArtBenutzung, $getBefreiungstatbestaende, true, $getWiedereinleitungBearbeiter) ?>
+                                  </td>
+                                  <td>
+                                  	<?php echo $teilgewaesserbenutzung->getEntgelt($getArtBenutzung, $getBefreiungstatbestaende, true, $getWiedereinleitungBearbeiter) ?>
+                                  </td>
+                           <?php
+                              }
+                          }
+                      }
+                  ?>
+                  </tr>
+                  <tr>
+                  	<td></td>
+                  	<td></td>
+                  	<td>Zugelassene Entnahmemenge:</td>
+                  	<td><input class="wasserrecht_table_inputfield" type="text" id="zugelassene_entnahmemenge" name="zugelassene_entnahmemenge" value=""></td>
+                  	<td></td>
+                  	<td></td>
+                  	<td></td>
+                  	<td></td>
+                  	<td></td>
+                  	<td>Zugelassene Entnahme Entgelt:</td>
+                  	<td><input class="wasserrecht_table_inputfield" type="text" id="zugelassene_entnahme_entgelt" name="zugelassene_entnahme_entgelt" value=""></td>
+                  </tr>
+                  <tr>
+                  	<td></td>
+                  	<td></td>
+                  	<td>Nicht zugelassene Entnahme:</td>
+                  	<td><input class="wasserrecht_table_inputfield" type="text" id="nicht_zugelassene_entnahmemenge" name="nicht_zugelassene_entnahmemenge" value=""></td>
+                  	<td></td>
+                  	<td></td>
+                  	<td></td>
+                  	<td></td>
+                  	<td></td>
+                  	<td>Nicht zugelassene Entnahmeentgelt:</td>
+                  	<td><input class="wasserrecht_table_inputfield" type="text" id="nicht_zugelassene_entnahme_entgelt" name="nicht_zugelassene_entnahme_entgelt" value=""></td>
+                  </tr>
+                  <tr>
+                  	<td></td>
+                  	<td></td>
+                  	<td>Summe Entnahmemengen:</td>
+                  	<td><input class="wasserrecht_table_inputfield" type="text" id="summe_entnahmemengen" name="summe_zugelassene_entnahmemengen" value=""></td>
+                  	<td></td>
+                  	<td></td>
+                  	<td></td>
+                  	<td></td>
+                  	<td></td>
+                  	<td>Summe Entgelt:</td>
+                  	<td><input class="wasserrecht_table_inputfield" type="text" id="summe_entgelt" name="summe_entgelt" value=""></td>
+                  </tr>
+                  <tr>
                   	<td></td>
                   	<td></td>
                   	<td></td>
@@ -106,8 +235,8 @@ if(!empty($wrz))
                   	<td></td>
                   	<td></td>
                   	<td></td>
-                  	<td></td>
-                  	<td></td>
+                  	<td>Summe gebucht:</td>
+                  	<td><input class="wasserrecht_table_inputfield" type="text" id="summe_gebucht" name="summe_gebucht" value=""></td>
                   </tr>
               </table>
               
@@ -130,8 +259,6 @@ if(!empty($wrz))
                         	<option value="2" <?php echo !empty($teilgewaesserbenutzung) && !empty($teilgewaesserbenutzung->teilgewaesserbenutzungen_art) && $teilgewaesserbenutzung->teilgewaesserbenutzungen_art->getId() === "2" ?  'selected' : ''?>>Schätzung</option>
                         </select>
                      </div>
-                     <div class="wasserrecht_display_table_cell_caption">Zugelassene Entnahmemenge:</div>
-                     <div class="wasserrecht_display_table_cell_spacer"></div>
                 </div>
                 
                 <div class="wasserrecht_display_table_row">

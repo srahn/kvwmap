@@ -2,9 +2,11 @@
 $tab1_id="wasserentnahmebenutzer_aufforderung_zur_erklaerung";
 $tab1_name="Aufforderung zur Erklärung";
 $tab1_active=false;
+$tab1_visible=true;
 $tab2_id="wasserentnahmebenutzer_entgeltbescheid";
 $tab2_name="Entgeltbescheid";
 $tab2_active=true;
+$tab2_visible=true;
 include_once ('includes/header.php'); 
 ?>
 
