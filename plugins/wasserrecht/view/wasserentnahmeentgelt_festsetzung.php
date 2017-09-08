@@ -190,40 +190,40 @@ if(!empty($wrz))
                   	<td></td>
                   	<td></td>
                   	<td>Zugelassene Entnahmemenge:</td>
-                  	<td><input class="wasserrecht_table_inputfield" type="text" id="zugelassene_entnahmemenge" name="zugelassene_entnahmemenge" value=""></td>
+                  	<td><input class="wasserrecht_table_inputfield" type="text" id="zugelassene_entnahmemenge" name="zugelassene_entnahmemenge" readonly="readonly" value=""></td>
                   	<td></td>
                   	<td></td>
                   	<td></td>
                   	<td></td>
                   	<td></td>
                   	<td>Zugelassene Entnahme Entgelt:</td>
-                  	<td><input class="wasserrecht_table_inputfield" type="text" id="zugelassene_entnahme_entgelt" name="zugelassene_entnahme_entgelt" value=""></td>
+                  	<td><input class="wasserrecht_table_inputfield" type="text" id="zugelassene_entnahme_entgelt" name="zugelassene_entnahme_entgelt" readonly="readonly" value=""></td>
                   </tr>
                   <tr>
                   	<td></td>
                   	<td></td>
                   	<td>Nicht zugelassene Entnahme:</td>
-                  	<td><input class="wasserrecht_table_inputfield" type="text" id="nicht_zugelassene_entnahmemenge" name="nicht_zugelassene_entnahmemenge" value=""></td>
+                  	<td><input class="wasserrecht_table_inputfield" type="text" id="nicht_zugelassene_entnahmemenge" name="nicht_zugelassene_entnahmemenge" readonly="readonly" value=""></td>
                   	<td></td>
                   	<td></td>
                   	<td></td>
                   	<td></td>
                   	<td></td>
                   	<td>Nicht zugelassene Entnahmeentgelt:</td>
-                  	<td><input class="wasserrecht_table_inputfield" type="text" id="nicht_zugelassene_entnahme_entgelt" name="nicht_zugelassene_entnahme_entgelt" value=""></td>
+                  	<td><input class="wasserrecht_table_inputfield" type="text" id="nicht_zugelassene_entnahme_entgelt" name="nicht_zugelassene_entnahme_entgelt" readonly="readonly" value=""></td>
                   </tr>
                   <tr>
                   	<td></td>
                   	<td></td>
                   	<td>Summe Entnahmemengen:</td>
-                  	<td><input class="wasserrecht_table_inputfield" type="text" id="summe_entnahmemengen" name="summe_zugelassene_entnahmemengen" value=""></td>
+                  	<td><input class="wasserrecht_table_inputfield" type="text" id="summe_entnahmemengen" name="summe_zugelassene_entnahmemengen" readonly="readonly" value=""></td>
                   	<td></td>
                   	<td></td>
                   	<td></td>
                   	<td></td>
                   	<td></td>
                   	<td>Summe Entgelt:</td>
-                  	<td><input class="wasserrecht_table_inputfield" type="text" id="summe_entgelt" name="summe_entgelt" value=""></td>
+                  	<td><input class="wasserrecht_table_inputfield" type="text" id="summe_entgelt" name="summe_entgelt" readonly="readonly" value=""></td>
                   </tr>
                   <tr>
                   	<td></td>
@@ -236,7 +236,7 @@ if(!empty($wrz))
                   	<td></td>
                   	<td></td>
                   	<td>Summe gebucht:</td>
-                  	<td><input class="wasserrecht_table_inputfield" type="text" id="summe_gebucht" name="summe_gebucht" value=""></td>
+                  	<td><input class="wasserrecht_table_inputfield" type="text" id="summe_gebucht" name="summe_gebucht" readonly="readonly" value=""></td>
                   </tr>
               </table>
               

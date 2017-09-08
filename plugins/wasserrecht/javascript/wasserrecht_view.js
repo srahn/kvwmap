@@ -63,24 +63,6 @@ function setNewTab()
 	}
 }
 
-function setNewErhebungsJahr(selectObject)
-{
-	var value = selectObject.value;
-	replaceParameterInUrl('year', value);
-}
-
-function setNewBehoerde(selectObject)
-{
-	var value = selectObject.value;
-	replaceParameterInUrl('behoerde', value);
-}
-
-function setNewAdressat(selectObject)
-{
-	var value = selectObject.value;
-	replaceParameterInUrl('adressat', value);
-}
-
 function setNewUrlParameter(selectObject, urlParameter)
 {
 	var value = selectObject.value;

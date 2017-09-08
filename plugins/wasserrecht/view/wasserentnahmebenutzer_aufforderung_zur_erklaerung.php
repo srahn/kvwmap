@@ -70,7 +70,7 @@ include_once ('includes/header.php');
                         <div class="wasserrecht_display_table_cell_caption">Erhebungsjahr:</div>
                         <div class="wasserrecht_display_table_cell_spacer"></div>
                         <div class="wasserrecht_display_table_cell">
-                        	<select name="erhebungsjahr" onchange="setNewErhebungsJahr(this)">
+                        	<select name="erhebungsjahr" onchange="setNewUrlParameter(this,'year')">
             					<?php
             						$wasserrechtlicheZulassung = new WasserrechtlicheZulassungen($this);
             
@@ -120,7 +120,7 @@ include_once ('includes/header.php');
                         </div>
                         <div class="wasserrecht_display_table_cell_spacer"></div>
                         <div class="wasserrecht_display_table_cell">
-                        	<select name="behoerde" onchange="setNewBehoerde(this)">
+                        	<select name="behoerde" onchange="setNewUrlParameter(this,'behoerde')">
                 				<?php
                 				
                 				if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen))
@@ -182,7 +182,7 @@ include_once ('includes/header.php');
                 	</div>
                 	<div class="wasserrecht_display_table_cell_spacer"></div>
                     <div class="wasserrecht_display_table_cell">
-                    	<select name="adressat" onchange="setNewAdressat(this)">
+                    	<select name="adressat" onchange="setNewUrlParameter(this,'adressat')">
             				<?php
             				
             				if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen))
