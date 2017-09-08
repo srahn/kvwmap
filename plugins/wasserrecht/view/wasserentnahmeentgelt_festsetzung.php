@@ -96,7 +96,7 @@ if(!empty($wrz))
                   <tr>
            		  <?php
                   for ($i = 1; $i <= WASSERRECHT_ERKLAERUNG_ENTNAHME_TEILGEWAESSERBENUTZUNGEN_COUNT; $i++) 
-                      {
+                  {
                       
                           $teilgewaesserbenutzung = null;
                           if(!empty($gewaesserbenutzung->teilgewaesserbenutzungen) && count($gewaesserbenutzung->teilgewaesserbenutzungen) > 0 
@@ -216,7 +216,7 @@ if(!empty($wrz))
                   	<td></td>
                   	<td></td>
                   	<td>Summe Entnahmemengen:</td>
-                  	<td><input class="wasserrecht_table_inputfield" type="text" id="summe_entnahmemengen" name="summe_zugelassene_entnahmemengen" readonly="readonly" value=""></td>
+                  	<td><input class="wasserrecht_table_inputfield" type="text" id="summe_entnahmemengen" name="summe_zugelassene_entnahmemengen" readonly="readonly" value="<?php echo $gewaesserbenutzung->getUmfangAllerTeilbenutzungen() ?>"></td>
                   	<td></td>
                   	<td></td>
                   	<td></td>

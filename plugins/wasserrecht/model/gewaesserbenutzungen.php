@@ -63,6 +63,28 @@ class Gewaesserbenutzungen extends WrPgObject {
 	    return null;
 	}
 	
+	public function getUmfangAllerTeilbenutzungen()
+	{
+	    $gesamtUmfang = 0;
+	    
+	    for ($i = 1; $i <= WASSERRECHT_ERKLAERUNG_ENTNAHME_TEILGEWAESSERBENUTZUNGEN_COUNT; $i++)
+	    {
+	        $teilgewaesserbenutzung = null;
+	        if(!empty($this->teilgewaesserbenutzungen) && count($this->teilgewaesserbenutzungen) > 0
+	            && count($this->teilgewaesserbenutzungen) > ($i - 1) && !empty($this->teilgewaesserbenutzungen[$i -1]))
+	        {
+	            $teilgewaesserbenutzung = $this->teilgewaesserbenutzungen[$i - 1];
+	            
+	            if(!empty($teilgewaesserbenutzung))
+	            {
+	                $gesamtUmfang = $gesamtUmfang + $teilgewaesserbenutzung->getUmfang();
+	            }
+	        }
+	    }
+	    
+	    return $gesamtUmfang;
+	}
+	
 	public function getKennummer() {
 	    return $this->data['kennnummer'];
 	}
