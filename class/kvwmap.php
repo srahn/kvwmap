@@ -747,6 +747,53 @@ class GUI {
 		}
 	}
 
+	function addRedlining(){
+		if($this->formvars['free_polygons'] != ''){
+			$polygons = explode('||', $this->formvars['free_polygons']);
+			for($i = 0; $i < count($polygons)-1; $i++){
+				$parts = explode('|', $polygons[$i]);
+				$wkt = "POLYGON((".$parts[0]."))";
+				$style = $parts[1];
+				$this->addFeatureLayer('free_polygon'.$i, array($wkt), $style, $this->map_factor);
+			}			
+		}
+	}
+	
+	function addFeatureLayer($name, $features, $css_style_string, $map_factor){
+		if($map_factor == '')$map_factor = 1;
+		$layer = ms_newLayerObj($this->map);
+		$layer->set('name', $name);
+		$layer->set("status", MS_ON);
+    $layer->set("type", MS_LAYER_POLYGON);
+		foreach($features as $feature){
+			$layer->addFeature(ms_shapeObjFromWkt($feature));
+		}		
+		$class = ms_newClassObj($layer);
+    $style = ms_newStyleObj($class);	
+		$css_styles = explode(';', str_replace(' ', '', $css_style_string));
+		foreach($css_styles as $css_style){
+			$parts = explode(':', $css_style);
+			$property = $parts[0];
+			$value = $parts[1];
+			switch($property){
+				case 'opacity' : {   
+					$layer->set('opacity', $value * 100);
+				}break;
+				case 'fill' : {   
+					$rgb = explode(',', substr($value, 4, -1));
+					$style->color->setRGB($rgb[0], $rgb[1], $rgb[2]);
+				}break;
+				case 'stroke' : {   
+					$rgb = explode(',', substr($value, 4, -1));
+					$style->outlinecolor->setRGB($rgb[0], $rgb[1], $rgb[2]);
+				}break;
+				case 'stroke-width' : {   
+					$style->width = $value*$map_factor;
+				}break;
+			}
+		}
+	}
+	
   function loadMap($loadMapSource) {
     $this->debug->write("<p>Funktion: loadMap('".$loadMapSource."','".$connStr."')",4);
     switch ($loadMapSource) {
@@ -4870,6 +4917,9 @@ class GUI {
     else{
       $this->loadMap($loadmapsource);
     }
+		# Redlining Polygone
+		$this->addRedlining();
+		
 		if($saved_scale != NULL)$this->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
 		# zoomToMaxLayerExtent
 		if($this->formvars['zoom_layer_id'] != '')$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
@@ -6166,6 +6216,9 @@ class GUI {
 				$this->user->rolle->setConsumeALK($currenttime, $this->Docu->activeframe[0]['id']);
 			}
 
+			# Redlining Polygone
+			$this->addRedlining();
+			
 			/* *
 			* Problem: Es gibt WMS, die trotz der Einstellung EXCEPTIONS=application/vnd.ogc.se_inimage kein Bild mit Fehlermeldung
 			* schicken, sondern gar kein Bild bzw. nichts.
@@ -6412,7 +6465,7 @@ class GUI {
 					}
 				}
 			}
-
+			
 			# Nutzer
 			if($this->Docu->activeframe[0]['usersize'] > 0){
 				$pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_user']);

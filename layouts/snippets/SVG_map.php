@@ -1151,8 +1151,8 @@ function create_new_freearrow(x, y){
 
 function create_new_freepolygon(){
 	var newpoly = document.createElementNS("http://www.w3.org/2000/svg","polygon");
-	newpoly.setAttributeNS(null, "style", "fill:red;stroke:black;stroke-width:2");
-  newpoly.setAttributeNS(null, "opacity", "0.35");	
+	newpoly.setAttributeNS(null, "style", "opacity:0.35;fill:rgb(255,0,0);stroke:rgb(0,0,0);stroke-width:2");
+	newpoly.setAttributeNS(null, "id", "free_polygon");	
   document.getElementById("redlining").appendChild(newpoly);
 	return newpoly;
 }

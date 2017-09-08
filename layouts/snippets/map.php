@@ -64,6 +64,28 @@ function showMapImage(){
   document.getElementById('MapImageLink').href='index.php?go=showMapImage&svg_string='+document.GUI.svg_string.value;
 }
 
+function printMap(){ 
+	svgdoc = document.SVG.getSVGDocument();	
+	var redlining = svgdoc.getElementById("redlining");
+	for(var i = 0; i < redlining.childNodes.length; i++){
+		child = redlining.childNodes[i];
+		if(child.id != undefined){
+			if(child.transform.baseVal.numberOfItems > 0)child.transform.baseVal.consolidate();
+			for(var j = 0; j < child.points.numberOfItems; j++){
+				point = child.points.getItem(j);
+				if(child.transform.baseVal.numberOfItems > 0)point = point.matrixTransform(child.transform.baseVal.getItem(0).matrix);
+				x = point.x*parseFloat(document.GUI.pixelsize.value) + parseFloat(document.GUI.minx.value);
+				y = document.GUI.maxy.value - (<? echo $this->map->height; ?> - point.y)*parseFloat(document.GUI.pixelsize.value);
+				if(j > 0)document.GUI.free_polygons.value += ','
+				document.GUI.free_polygons.value += x+' '+y;
+			}
+			document.GUI.free_polygons.value += '|'+child.getAttribute('style')+'||';
+		}
+	}
+	document.GUI.go.value = 'Druckausschnittswahl';
+  document.GUI.submit();
+}
+
 function slide_legend_in(evt) {
 	document.getElementById('legenddiv').className = 'slidinglegend_slidein';
 }

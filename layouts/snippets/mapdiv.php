@@ -32,6 +32,7 @@
 			<input type="hidden" name="group_options_open" value="">
 			<input type="hidden" name="hauptkarte" value="<?php echo $this->img['hauptkarte']; ?>">
 			<input type="hidden" name="neuladen" value="">
+			<input type="hidden" name="free_polygons" value="">
 			<?php
 				include(LAYOUTPATH.'snippets/SVG_map.php');
 			?>
