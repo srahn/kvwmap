@@ -328,6 +328,7 @@ function rotate_print_extent(angle){
 <input type="hidden" name="map_factor" value="<? echo $this->formvars['map_factor'] ?>">
 <input type="hidden" name="neuladen" value="">
 <input type="hidden" name="free_polygons" value="<? echo $this->formvars['free_polygons'] ?>">
+<input type="hidden" name="free_texts" value="<? echo $this->formvars['free_texts'] ?>">
 
 <!-- für den externen Druck -->
 <input type="hidden" name="post_width" value="<? echo $this->formvars['post_width'] ?>">

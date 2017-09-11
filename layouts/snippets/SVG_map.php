@@ -1051,10 +1051,11 @@ function addnewtext(evt){
 
 function create_new_freetext(x, y){
 	var newtext = document.createElementNS("http://www.w3.org/2000/svg","text");
-  newtext.setAttributeNS(null, "style", "fill:rgb(255,0,0);font-size:15px;font-family:Arial;font-weight:bold;");
+  newtext.setAttributeNS(null, "style", "fill:rgb(255,0,0);font-size:16px;font-family:Arial;font-weight:bold;");
 	newtext.setAttributeNS(null, "transform", "scale(1,-1)");
 	newtext.setAttributeNS(null, "x", x);
 	newtext.setAttributeNS(null, "y", -y);
+	newtext.setAttributeNS(null, "id", "free_text");
 	document.documentElement.addEventListener("keypress", texttype, true);
 	document.documentElement.addEventListener("keydown", trigger_keypress, true);
 	tspan1 = document.createElementNS("http://www.w3.org/2000/svg", "tspan");

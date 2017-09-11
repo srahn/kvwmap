@@ -33,6 +33,7 @@
 			<input type="hidden" name="hauptkarte" value="<?php echo $this->img['hauptkarte']; ?>">
 			<input type="hidden" name="neuladen" value="">
 			<input type="hidden" name="free_polygons" value="">
+			<input type="hidden" name="free_texts" value="">
 			<?php
 				include(LAYOUTPATH.'snippets/SVG_map.php');
 			?>

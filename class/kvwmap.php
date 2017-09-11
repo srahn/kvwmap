@@ -748,27 +748,46 @@ class GUI {
 	}
 
 	function addRedlining(){
-		if($this->formvars['free_polygons'] != ''){
-			$polygons = explode('||', $this->formvars['free_polygons']);
-			for($i = 0; $i < count($polygons)-1; $i++){
-				$parts = explode('|', $polygons[$i]);
-				$wkt = "POLYGON((".$parts[0]."))";
-				$style = $parts[1];
-				$this->addFeatureLayer('free_polygon'.$i, array($wkt), $style, $this->map_factor);
-			}			
+		$polygons = explode('||', $this->formvars['free_polygons']);
+		for($i = 0; $i < count($polygons)-1; $i++){
+			$parts = explode('|', $polygons[$i]);
+			$wkt = "POLYGON((".$parts[0]."))";
+			$style = $parts[1];
+			$this->addFeatureLayer('free_polygon'.$i, MS_LAYER_POLYGON, array($wkt), NULL, $style, $this->map_factor);
+		}
+		$texts = explode('||', $this->formvars['free_texts']);
+		for($i = 0; $i < count($texts)-1; $i++){
+			$parts = explode('|', $texts[$i]);
+			$wkt = "POINT(".$parts[0].")";
+			$text = $parts[1];
+			$this->addFeatureLayer('free_text'.$i, MS_LAYER_POINT, array($wkt), array($text), $style, $this->map_factor);
 		}
 	}
 	
-	function addFeatureLayer($name, $features, $css_style_string, $map_factor){
+	function addFeatureLayer($name, $type, $features, $texts, $css_style_string, $map_factor){
 		if($map_factor == '')$map_factor = 1;
 		$layer = ms_newLayerObj($this->map);
 		$layer->set('name', $name);
 		$layer->set("status", MS_ON);
-    $layer->set("type", MS_LAYER_POLYGON);
+    $layer->set("type", $type);
+		$i = 0;
 		foreach($features as $feature){
-			$layer->addFeature(ms_shapeObjFromWkt($feature));
+			$shape = ms_shapeObjFromWkt($feature);
+			$shape->set('text', $texts[$i]);
+			$layer->addFeature($shape);
+			$i++;
 		}		
 		$class = ms_newClassObj($layer);
+		if($texts != NULL){
+			$label = new labelObj();
+			$label->set('size', 10*$map_factor);
+			$label->color->setRGB(255, 0, 0);
+			$label->set('type', 'TRUETYPE');
+			$label->set('font', 'arial');
+			$label->set('position', MS_LR);
+			$label->set('offsety', -9);
+			$class->addLabel($label);
+		}
     $style = ms_newStyleObj($class);	
 		$css_styles = explode(';', str_replace(' ', '', $css_style_string));
 		foreach($css_styles as $css_style){

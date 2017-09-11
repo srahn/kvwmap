@@ -64,24 +64,42 @@ function showMapImage(){
   document.getElementById('MapImageLink').href='index.php?go=showMapImage&svg_string='+document.GUI.svg_string.value;
 }
 
-function printMap(){ 
-	svgdoc = document.SVG.getSVGDocument();	
+function addRedlining(){
 	var redlining = svgdoc.getElementById("redlining");
 	for(var i = 0; i < redlining.childNodes.length; i++){
 		child = redlining.childNodes[i];
-		if(child.id != undefined){
-			if(child.transform.baseVal.numberOfItems > 0)child.transform.baseVal.consolidate();
-			for(var j = 0; j < child.points.numberOfItems; j++){
-				point = child.points.getItem(j);
-				if(child.transform.baseVal.numberOfItems > 0)point = point.matrixTransform(child.transform.baseVal.getItem(0).matrix);
-				x = point.x*parseFloat(document.GUI.pixelsize.value) + parseFloat(document.GUI.minx.value);
-				y = document.GUI.maxy.value - (<? echo $this->map->height; ?> - point.y)*parseFloat(document.GUI.pixelsize.value);
-				if(j > 0)document.GUI.free_polygons.value += ','
-				document.GUI.free_polygons.value += x+' '+y;
-			}
-			document.GUI.free_polygons.value += '|'+child.getAttribute('style')+'||';
+		switch(child.id){
+			case 'free_polygon':
+			case 'free_arrow':
+				if(child.transform.baseVal.numberOfItems > 0)child.transform.baseVal.consolidate();
+				for(var j = 0; j < child.points.numberOfItems; j++){		// Punkte in Weltkoordinaten umrechnen
+					point = child.points.getItem(j);
+					if(child.transform.baseVal.numberOfItems > 0)point = point.matrixTransform(child.transform.baseVal.getItem(0).matrix);
+					x = point.x*parseFloat(document.GUI.pixelsize.value) + parseFloat(document.GUI.minx.value);
+					y = document.GUI.maxy.value - (<? echo $this->map->height; ?> - point.y)*parseFloat(document.GUI.pixelsize.value);
+					if(j > 0)document.GUI.free_polygons.value += ','
+					document.GUI.free_polygons.value += x+' '+y;
+				}
+				document.GUI.free_polygons.value += '|'+child.getAttribute('style')+'||';
+				break;
+			case 'free_text':
+				x = child.getAttribute('x')*parseFloat(document.GUI.pixelsize.value) + parseFloat(document.GUI.minx.value);
+				y = document.GUI.maxy.value - (<? echo $this->map->height; ?> - (-1 * child.getAttribute('y')))*parseFloat(document.GUI.pixelsize.value);
+				document.GUI.free_texts.value += x+' '+y+'|';
+				for(var j = 0; j < child.childNodes.length; j++){
+					tspan = child.childNodes[j];
+					if(j > 0)document.GUI.free_texts.value += String.fromCharCode(13);
+					document.GUI.free_texts.value += tspan.textContent;
+				}
+				document.GUI.free_texts.value += '||';
+			break;
 		}
 	}
+}
+
+function printMap(){ 
+	svgdoc = document.SVG.getSVGDocument();	
+	addRedlining();
 	document.GUI.go.value = 'Druckausschnittswahl';
   document.GUI.submit();
 }
