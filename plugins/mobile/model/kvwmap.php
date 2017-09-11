@@ -6,53 +6,56 @@
 	*/
 	$this->mobile_get_layers = function() {
 		# ToDo get more than only the layer with selected_layer_id
-		$layers = array();
-		if ($this->formvars['selected_layer_id'] != '') {
-			# Abfragen der Layerdefinition
-			$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
-			if ($layerset) {
-				# Abfragen der Privilegien der Attribute
-				$privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
+		$layers = $this->Stelle->getLayers('');
+		$mobile_layers = array();
 
-				# Abfragen der Attribute des Layers mit selected_layer_id
-				$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
-				$layerdb = $mapDB->getlayerdatabase(
-					$this->formvars['selected_layer_id'],
-					$this->Stelle->pgdbhost
-				);
-				$layerdb->setClientEncoding();
-				$attributes = $mapDB->read_layer_attributes(
-					$this->formvars['selected_layer_id'],
-					$layerdb,
-					$privileges['attributenames'],
-					false,
-					true
-				);
+		foreach($layers['ID'] AS $layer_id) {
 
-				# Zuordnen der Privilegien zu den Attributen
-				for ($j = 0; $j < count($attributes['name']); $j++) {
-					$attributes['privileg'][$j] = $attributes['privileg'][$attributes['name'][$j]] = ($privileges == NULL ? 0 : $privileges[$attributes['name'][$j]]);
+			if ($layer_id != '') {
+				# Abfragen der Layerdefinition
+				$layerset = $this->user->rolle->getLayer($layer_id);
+				if ($layerset and $layerset[0]['connectiontype'] == '6') {
+					# Abfragen der Privilegien der Attribute
+					$privileges = $this->Stelle->get_attributes_privileges($layer_id);
+
+					# Abfragen der Attribute des Layers mit selected_layer_id
+					$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+					$layerdb = $mapDB->getlayerdatabase(
+						$layer_id,
+						$this->Stelle->pgdbhost
+					);
+					$layerdb->setClientEncoding();
+					$attributes = $mapDB->read_layer_attributes(
+						$layer_id,
+						$layerdb,
+						$privileges['attributenames'],
+						false,
+						true
+					);
+
+					# Zuordnen der Privilegien und Tooltips zu den Attributen
+					for ($j = 0; $j < count($attributes['name']); $j++) {
+						$attributes['privileg'][$j] = $attributes['privileg'][$attributes['name'][$j]] = ($privileges == NULL ? 0 : $privileges[$attributes['name'][$j]]);
+						$attributes['tooltip'][$j] = $attributes['tooltip'][$attributes['name'][$j]] = ($privileges == NULL ? 0 : $privileges['tooltip_' . $attributes['name'][$j]]);
+					}
+
+					$layer = $this->mobile_reformat_layer($layerset[0]);
+					$layer['attributes'] = $this->mobile_reformat_attributes($attributes);
+					$mobile_layers[] = $layer;
 				}
+			}
+		}
 
-				$layer = $this->mobile_reformat_layer($layerset[0]);
-				$layer['attributes'] = $this->mobile_reformat_attributes($attributes);
-				$layers[] = $layer;
-				$result = array(
-					"success" => true,
-					"layers" => $layers
-				);
-			}
-			else {
-				$result = array(
-					"success" => false,
-					"err_msg" => "Es konnten keine Layerdaten zur angegebenen Layer-ID: ". $this->formvars['selected_layer_id'] . " abgefragt werden. Prüfen Sie ob die Layer-ID korrekt ist und ob Sie die Rechte für den Zugriff auf den Layer in der aktuellen Stelle haben."
-				);
-			}
+		if (count($mobile_layers) > 0) {
+			$result = array(
+				"success" => true,
+				"layers" => $mobile_layers
+			);
 		}
 		else {
 			$result = array(
 				"success" => false,
-				"err_msg" => "Es wurde kein Layer zur Abfrage der Daten angegeben. Geben Sie die ID des Layers im Parameter selected_layer_id an."
+				"err_msg" => "Es konnten keine Layerdaten für diese Stelle abgefragt werden. Prüfen Sie ob die Stelle_ID korrekt ist und ob Sie die Rechte für den Zugriff auf den Layer in der Stelle haben."
 			);
 		}
 		return $result;
@@ -84,7 +87,8 @@
 			"title" => $layerset['Name'],
 			"id_attribute" => "id",
 			"title_attribute" => "title",
-			"geometry_type" => $geometry_types[$layerset['Datentyp']]
+			"geometry_type" => $geometry_types[$layerset['Datentyp']],
+			"table_name" => $layerset['maintable']
 		);
 		return $layer;
 	};

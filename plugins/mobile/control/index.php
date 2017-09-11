@@ -96,7 +96,7 @@ switch($this->go) {
 			}]
 		}
 	*/
-	case 'mobile_get_layer' : {
+	case 'mobile_get_layers' : {
 		$result = $this->mobile_get_layers();
 		echo json_encode($result);
 	} break;
