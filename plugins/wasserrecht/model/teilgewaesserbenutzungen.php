@@ -148,8 +148,15 @@ class Teilgewaesserbenutzungen extends WrPgObject {
 	
 	public function getEntgeltsatz($artBenutzungId, $befreit, $zugelassen, $ermaessigt)
 	{
+// 	    var_dump("artBenutzungId: " . $artBenutzungId);
+// 	    var_dump("befreit: " . $befreit);
+// 	    var_dump("zugelassen: " . $zugelassen);
+// 	    var_dump("ermaessigt: " . $ermaessigt);
+	    
 	    if(!empty($this->entgeltsatz))
 	    {
+// 	        echo "Entgeltsatz not null";
+	        
 	        if(!empty($artBenutzungId))
 	        {
 	            if($artBenutzungId === "1") //GW
@@ -198,6 +205,10 @@ class Teilgewaesserbenutzungen extends WrPgObject {
 	            }
 	        }
 	    }
+// 	    else
+// 	    {
+// 	        echo "Entgeltsatz is null";
+// 	    }
 	    
 	    return "<div style=\"color: red;\">Fehler</div>";
 	}

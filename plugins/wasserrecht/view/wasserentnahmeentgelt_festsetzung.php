@@ -93,7 +93,6 @@ if(!empty($wrz))
                     <th>Entgeltsatz</th>
                     <th>Entgelt</th>
                   </tr>
-                  <tr>
            		  <?php
                   for ($i = 1; $i <= WASSERRECHT_ERKLAERUNG_ENTNAHME_TEILGEWAESSERBENUTZUNGEN_COUNT; $i++) 
                   {
@@ -104,11 +103,12 @@ if(!empty($wrz))
                           {
                               $teilgewaesserbenutzung = $gewaesserbenutzung->teilgewaesserbenutzungen[$i - 1];
 //                               var_dump($teilgewaesserbenutzung->gewaesserbenutzungArt->getName());
+//                               echo "<br>teilgewaesserbenutzung: " . var_dump($teilgewaesserbenutzung->gewaesserbenutzungArt->getId());
 
                               if(!empty($teilgewaesserbenutzung))
                               {
                                   //Art Benutzung
-                                  $getArtBenutzung = !empty(htmlspecialchars($_REQUEST['artbenutzung'])) ? htmlspecialchars($_REQUEST['artbenutzung']) : null;
+                                  $getArtBenutzung = !empty(htmlspecialchars($_REQUEST['teilgewaesserbenutzung_art_benutzung_' . $i])) ? htmlspecialchars($_REQUEST['teilgewaesserbenutzung_art_benutzung_' . $i]) : null;
                                   if(!empty($getArtBenutzung) && strpos($getArtBenutzung, '_') !== false)
                                   {
                                       $lastIndex = strripos($getArtBenutzung, "_");
@@ -124,68 +124,91 @@ if(!empty($wrz))
                                   }    
                                   
                                   //Wiedereinleitung Bearbeiter
-                                  $getWiedereinleitungBearbeiter = !empty(htmlspecialchars($_REQUEST['wiedereinleitungbearbeiter'])) ? htmlspecialchars($_REQUEST['wiedereinleitungbearbeiter']) : null;
+                                  $getWiedereinleitungBearbeiter = !empty(htmlspecialchars($_REQUEST['teilgewaesserbenutzung_wiedereinleitung_bearbeiter_' . $i])) ? htmlspecialchars($_REQUEST['teilgewaesserbenutzung_wiedereinleitung_bearbeiter_' . $i]) : null;
                                   if(!empty($getWiedereinleitungBearbeiter) && strpos($getWiedereinleitungBearbeiter, '_') !== false)
                                   {
                                       $lastIndex = strripos($getWiedereinleitungBearbeiter, "_");
                                       $getWiedereinleitungBearbeiter = substr($getWiedereinleitungBearbeiter, $lastIndex + 1);
                                       $getWiedereinleitungBearbeiter = strtolower($getWiedereinleitungBearbeiter) === 'true'? true: false;
+                                      
+//                                       var_dump("getWiedereinleitungBearbeiter(" . $i . ") 1: " . $getWiedereinleitungBearbeiter);
+                                  }
+                                  elseif(!empty($teilgewaesserbenutzung->getWiedereinleitungBearbeiter()))
+                                  {
+                                      $getWiedereinleitungBearbeiter = $teilgewaesserbenutzung->getWiedereinleitungBearbeiter();
+//                                       var_dump("getWiedereinleitungBearbeiter(" . $i . ") 2: " . $getWiedereinleitungBearbeiter);
                                   }
                                   else
                                   {
-                                      $getWiedereinleitungBearbeiter = $teilgewaesserbenutzung->getWiedereinleitungBearbeiter();
+                                      $getWiedereinleitungBearbeiter = "0";
+//                                       $getWiedereinleitungBearbeiter = strtolower($getWiedereinleitungBearbeiter) === '0'? false: true;
+//                                       $getWiedereinleitungBearbeiter = strtolower($getWiedereinleitungBearbeiter) === 'true'? true: false;
+//                                       var_dump("getWiedereinleitungBearbeiter(" . $i . ") 3: " . $getWiedereinleitungBearbeiter);
                                   }
                                   
                                   //Befreiungstatbestände
-                                  $getBefreiungstatbestaende = !empty(htmlspecialchars($_REQUEST['befreiungstatbestaende'])) ? htmlspecialchars($_REQUEST['befreiungstatbestaende']) : null;
+                                  $getBefreiungstatbestaende = !empty(htmlspecialchars($_REQUEST['teilgewaesserbenutzung_befreiungstatbestaende_' . $i])) ? htmlspecialchars($_REQUEST['teilgewaesserbenutzung_befreiungstatbestaende_' . $i]) : null;
                                   if(!empty($getBefreiungstatbestaende) && strpos($getBefreiungstatbestaende, '_') !== false)
                                   {
                                       $lastIndex = strripos($getBefreiungstatbestaende, "_");
                                       $getBefreiungstatbestaende = substr($getBefreiungstatbestaende, $lastIndex + 1);
                                       $getBefreiungstatbestaende = strtolower($getBefreiungstatbestaende) === 'true'? true: false;
+//                                       var_dump("getBefreiungstatbestaende(" . $i . ") 1: " . $getBefreiungstatbestaende);
+                                  }
+                                  elseif(!empty($teilgewaesserbenutzung->getBefreiungstatbestaende()))
+                                  {
+                                      $getBefreiungstatbestaende = $teilgewaesserbenutzung->getBefreiungstatbestaende();
+//                                       var_dump("getBefreiungstatbestaende(" . $i . ") 2: " . $getBefreiungstatbestaende);
                                   }
                                   else
                                   {
-                                      $getBefreiungstatbestaende = $teilgewaesserbenutzung->getBefreiungstatbestaende();
+                                      $getBefreiungstatbestaende = "0";
+//                                       $getBefreiungstatbestaende = strtolower($getBefreiungstatbestaende) === 'true'? true: false;
+//                                       var_dump("getBefreiungstatbestaende(" . $i . ") 3: " . $getBefreiungstatbestaende);
                                   }
                                   
                                   ?>
-                                  <td><?php echo $i; ?>.</td>
-                                  <td><?php echo !empty($teilgewaesserbenutzung->gewaesserbenutzungArt) ? $teilgewaesserbenutzung->gewaesserbenutzungArt->getName() : "" ?></td>
-                                  <td><?php echo !empty($teilgewaesserbenutzung->gewaesserbenutzungZweck) ? $teilgewaesserbenutzung->gewaesserbenutzungZweck->getName() : "" ?></td>
-                                  <td><?php echo !empty($teilgewaesserbenutzung->getUmfang()) ? $teilgewaesserbenutzung->getUmfang() : "" ?></td>
-                                  <td><?php echo !empty($teilgewaesserbenutzung->getWiedereinleitungNutzer()) && $teilgewaesserbenutzung->getWiedereinleitungNutzer() === "t" ? "ja" : "nein" ?></td>
-                                  <td><?php echo !empty($teilgewaesserbenutzung->mengenbestimmung) ? $teilgewaesserbenutzung->mengenbestimmung->getName() : "" ?></td>
-                                  <td>
-                                  	<select name="teilgewaesserbenutzung_art_benutzung_<?php echo $i; ?>" onchange="setNewUrlParameter(this,'artbenutzung')">
-                                		<option value="<?php echo $i; ?>_1" <?php echo $getArtBenutzung === "1" ?  'selected' : ''?>>GW</option>
-                                		<option value="<?php echo $i; ?>_2" <?php echo $getArtBenutzung === "2" ?  'selected' : ''?>>OW</option>
-                                	</select>
-                                  </td>
-                                  <td>
-                                  	<select name="teilgewaesserbenutzung_wiedereinleitung_bearbeiter_<?php echo $i; ?>" onchange="setNewUrlParameter(this,'wiedereinleitungbearbeiter')">
-                                		<option value="<?php echo $i; ?>_true" <?php echo $getWiedereinleitungBearbeiter ?  'selected' : ''?>>ja</option>
-                                		<option value="<?php echo $i; ?>_false" <?php echo !$getWiedereinleitungBearbeiter ?  'selected' : ''?>>nein</option>
-                                	</select>
-                                  </td>
-                                  <td>
-                                  	<select name="teilgewaesserbenutzung_befreiungstatbestaende_<?php echo $i; ?>" onchange="setNewUrlParameter(this,'befreiungstatbestaende')">
-                                		<option value="<?php echo $i; ?>_true" <?php echo $getBefreiungstatbestaende ?  'selected' : ''?>>ja</option>
-                                		<option value="<?php echo $i; ?>_false" <?php echo !$getBefreiungstatbestaende ?  'selected' : ''?>>nein</option>
-                                	</select>
-                                  </td>
-                                  <td>
-                                  	<?php echo $teilgewaesserbenutzung->getEntgeltsatz($getArtBenutzung, $getBefreiungstatbestaende, true, $getWiedereinleitungBearbeiter) ?>
-                                  </td>
-                                  <td>
-                                  	<?php echo $teilgewaesserbenutzung->getEntgelt($getArtBenutzung, $getBefreiungstatbestaende, true, $getWiedereinleitungBearbeiter) ?>
-                                  </td>
+                                  <tr>
+                                      <td><?php echo $i; ?>.</td>
+                                      <td><?php echo !empty($teilgewaesserbenutzung->gewaesserbenutzungArt) ? $teilgewaesserbenutzung->gewaesserbenutzungArt->getName() : "" ?></td>
+                                      <td><?php echo !empty($teilgewaesserbenutzung->gewaesserbenutzungZweck) ? $teilgewaesserbenutzung->gewaesserbenutzungZweck->getName() : "" ?></td>
+                                      <td><?php echo !empty($teilgewaesserbenutzung->getUmfang()) ? $teilgewaesserbenutzung->getUmfang() : "" ?></td>
+                                      <td><?php echo !empty($teilgewaesserbenutzung->getWiedereinleitungNutzer()) && $teilgewaesserbenutzung->getWiedereinleitungNutzer() === "t" ? "ja" : "nein" ?></td>
+                                      <td><?php echo !empty($teilgewaesserbenutzung->mengenbestimmung) ? $teilgewaesserbenutzung->mengenbestimmung->getName() : "" ?></td>
+                                      <td>
+                                      	<select name="teilgewaesserbenutzung_art_benutzung_<?php echo $i; ?>" onchange="setNewUrlParameter(this,'teilgewaesserbenutzung_art_benutzung_<?php echo $i; ?>')">
+                                    		<option value="<?php echo $i; ?>_1" <?php echo $getArtBenutzung === "1" ?  'selected' : ''?>>GW</option>
+                                    		<option value="<?php echo $i; ?>_2" <?php echo $getArtBenutzung === "2" ?  'selected' : ''?>>OW</option>
+                                    	</select>
+                                      </td>
+                                      <td>
+                                      	<select name="teilgewaesserbenutzung_wiedereinleitung_bearbeiter_<?php echo $i; ?>" onchange="setNewUrlParameter(this,'teilgewaesserbenutzung_wiedereinleitung_bearbeiter_<?php echo $i; ?>')">
+                                    		<option value="<?php echo $i; ?>_true" <?php echo $getWiedereinleitungBearbeiter ?  'selected' : ''?>>ja</option>
+                                    		<option value="<?php echo $i; ?>_false" <?php echo !$getWiedereinleitungBearbeiter ?  'selected' : ''?>>nein</option>
+                                    	</select>
+                                      </td>
+                                      <td>
+                                      	<select name="teilgewaesserbenutzung_befreiungstatbestaende_<?php echo $i; ?>" onchange="setNewUrlParameter(this,'teilgewaesserbenutzung_befreiungstatbestaende_<?php echo $i; ?>')">
+                                    		<option value="<?php echo $i; ?>_true" <?php echo $getBefreiungstatbestaende ?  'selected' : ''?>>ja</option>
+                                    		<option value="<?php echo $i; ?>_false" <?php echo !$getBefreiungstatbestaende ?  'selected' : ''?>>nein</option>
+                                    	</select>
+                                      </td>
+                                      <td>
+                                      	<?php 
+//                                       	     var_dump("getBefreiungstatbestaende: " . $getBefreiungstatbestaende);
+//                                       	     var_dump("getWiedereinleitungBearbeiter: " . $getWiedereinleitungBearbeiter);
+                                      	     echo $teilgewaesserbenutzung->getEntgeltsatz($getArtBenutzung, $getBefreiungstatbestaende, true, $getWiedereinleitungBearbeiter) 
+                                      	?>
+                                      </td>
+                                      <td>
+                                      	<?php echo $teilgewaesserbenutzung->getEntgelt($getArtBenutzung, $getBefreiungstatbestaende, true, $getWiedereinleitungBearbeiter) ?>
+                                      </td>
+                                  </tr>
                            <?php
                               }
                           }
                       }
                   ?>
-                  </tr>
                   <tr>
                   	<td></td>
                   	<td></td>
@@ -246,18 +269,15 @@ if(!empty($wrz))
                     <div class="wasserrecht_display_table_cell_caption">Erklärung oder Schätzung:</div>
                     <div class="wasserrecht_display_table_cell_spacer"></div>
                     <div class="wasserrecht_display_table_cell_white">
-                        <select class="wasserrecht_display_table_cell_white" name="teilgewaesserbenutzungsart">
-                        	<?php 
-                            	$teilgewaesserbenutzung = null;
-                            	if(!empty($gewaesserbenutzung->teilgewaesserbenutzungen) && count($gewaesserbenutzung->teilgewaesserbenutzungen) > 0 && !empty($gewaesserbenutzung->teilgewaesserbenutzungen[0]))
-                            	{
-                            	    $teilgewaesserbenutzung = $gewaesserbenutzung->teilgewaesserbenutzungen[0];
-                            	    //var_dump($teilgewaesserbenutzung);
-                            	}
-                        	?>
-                        	<option value="1" <?php echo !empty($teilgewaesserbenutzung) && !empty($teilgewaesserbenutzung->teilgewaesserbenutzungen_art) && $teilgewaesserbenutzung->teilgewaesserbenutzungen_art->getId() === "1" ?  'selected' : ''?>>Erklärung</option>
-                        	<option value="2" <?php echo !empty($teilgewaesserbenutzung) && !empty($teilgewaesserbenutzung->teilgewaesserbenutzungen_art) && $teilgewaesserbenutzung->teilgewaesserbenutzungen_art->getId() === "2" ?  'selected' : ''?>>Schätzung</option>
-                        </select>
+                    	<?php 
+                        	$teilgewaesserbenutzung = null;
+                        	if(!empty($gewaesserbenutzung->teilgewaesserbenutzungen) && count($gewaesserbenutzung->teilgewaesserbenutzungen) > 0 && !empty($gewaesserbenutzung->teilgewaesserbenutzungen[0]))
+                        	{
+                        	    $teilgewaesserbenutzung = $gewaesserbenutzung->teilgewaesserbenutzungen[0];
+                        	    //var_dump($teilgewaesserbenutzung);
+                        	}
+                        	echo !empty($teilgewaesserbenutzung) && !empty($teilgewaesserbenutzung->teilgewaesserbenutzungen_art) ? $teilgewaesserbenutzung->teilgewaesserbenutzungen_art->getName() : "";
+                    	?>
                      </div>
                 </div>
                 
