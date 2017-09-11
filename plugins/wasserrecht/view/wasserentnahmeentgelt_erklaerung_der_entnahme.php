@@ -34,59 +34,69 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
 
                     $teilgewaesserbenutzungsart = htmlspecialchars($_POST["teilgewaesserbenutzungsart"]);
 //                     echo "teilgewaesserbenutzungsart: " . $teilgewaesserbenutzungsart;
-
-                    for ($i = 1; $i <= WASSERRECHT_ERKLAERUNG_ENTNAHME_TEILGEWAESSERBENUTZUNGEN_COUNT; $i++) 
+                    if(empty($teilgewaesserbenutzungsart) || strcmp(WASSERRECHT_ERKLAERUNG_ENTNAHME_BITTE_AUSWAEHLEN_VALUE, $teilgewaesserbenutzungsart) === 0)
                     {
-                        $gewaesserbenutzungsart = htmlspecialchars($_POST["gewaesserbenutzungsart_" . $i]);
-                        $gewaesserbenutzungszweck = htmlspecialchars($_POST["gewaesserbenutzungszweck_" . $i]);
-                        $gewaesserbenutzungsumfang = htmlspecialchars($_POST["gewaesserbenutzungsumfang_" . $i]);
-                        $wiedereinleitung = htmlspecialchars($_POST["wiedereinleitung_" . $i]);
-                        $mengenbestimmung = htmlspecialchars($_POST["mengenbestimmung_" . $i]);
-                        
-                        //check for not filled out lines
-                        if(strcmp(WASSERRECHT_ERKLAERUNG_ENTNAHME_BITTE_AUSWAEHLEN_VALUE, $gewaesserbenutzungsart) === 0
-                            && strcmp(WASSERRECHT_ERKLAERUNG_ENTNAHME_BITTE_AUSWAEHLEN_VALUE, $gewaesserbenutzungszweck)  === 0
-                            && empty($gewaesserbenutzungsumfang)
-                            && strcmp(WASSERRECHT_ERKLAERUNG_ENTNAHME_BITTE_AUSWAEHLEN_VALUE, $wiedereinleitung) === 0
-                            && strcmp(WASSERRECHT_ERKLAERUNG_ENTNAHME_BITTE_AUSWAEHLEN_VALUE, $mengenbestimmung) === 0)
+                        $errorEingabe = -1;
+                    }
+                    else
+                    {
+                        $errorEingabe = null;
+                    }
+
+                    if($errorEingabe === null)
+                    {
+                        for ($i = 1; $i <= WASSERRECHT_ERKLAERUNG_ENTNAHME_TEILGEWAESSERBENUTZUNGEN_COUNT; $i++)
                         {
-                            break;
-                        }
-                        
-                        if(!empty($gewaesserbenutzungsart) && strcmp(WASSERRECHT_ERKLAERUNG_ENTNAHME_BITTE_AUSWAEHLEN_VALUE, $gewaesserbenutzungsart) !== 0
-                            && !empty($gewaesserbenutzungszweck) && strcmp(WASSERRECHT_ERKLAERUNG_ENTNAHME_BITTE_AUSWAEHLEN_VALUE, $gewaesserbenutzungszweck)  !== 0
-                            && !empty($gewaesserbenutzungsumfang) && is_numeric($gewaesserbenutzungsumfang)
-                            && !empty($wiedereinleitung) && strcmp(WASSERRECHT_ERKLAERUNG_ENTNAHME_BITTE_AUSWAEHLEN_VALUE, $wiedereinleitung) !== 0 
-                            && !empty($mengenbestimmung) && strcmp(WASSERRECHT_ERKLAERUNG_ENTNAHME_BITTE_AUSWAEHLEN_VALUE, $mengenbestimmung) !== 0)
-                        {
-                            $errorEingabe = null;
+                            $gewaesserbenutzungsart = htmlspecialchars($_POST["gewaesserbenutzungsart_" . $i]);
+                            $gewaesserbenutzungszweck = htmlspecialchars($_POST["gewaesserbenutzungszweck_" . $i]);
+                            $gewaesserbenutzungsumfang = htmlspecialchars($_POST["gewaesserbenutzungsumfang_" . $i]);
+                            $wiedereinleitung = htmlspecialchars($_POST["wiedereinleitung_" . $i]);
+                            $mengenbestimmung = htmlspecialchars($_POST["mengenbestimmung_" . $i]);
                             
-                            //update an existing teilgewaesserbenutzung
-                            if(!empty($gewaesserbenutzung->teilgewaesserbenutzungen[$i - 1]))
+                            //check for not filled out lines
+                            if(strcmp(WASSERRECHT_ERKLAERUNG_ENTNAHME_BITTE_AUSWAEHLEN_VALUE, $gewaesserbenutzungsart) === 0
+                                && strcmp(WASSERRECHT_ERKLAERUNG_ENTNAHME_BITTE_AUSWAEHLEN_VALUE, $gewaesserbenutzungszweck)  === 0
+                                && empty($gewaesserbenutzungsumfang)
+                                && strcmp(WASSERRECHT_ERKLAERUNG_ENTNAHME_BITTE_AUSWAEHLEN_VALUE, $wiedereinleitung) === 0
+                                && strcmp(WASSERRECHT_ERKLAERUNG_ENTNAHME_BITTE_AUSWAEHLEN_VALUE, $mengenbestimmung) === 0)
                             {
-                                $teilgewaesserbenutzung = $gewaesserbenutzung->teilgewaesserbenutzungen[$i - 1];
-                                $teilgewaesserbenutzungId = $teilgewaesserbenutzung->updateTeilgewaesserbenutzung($gewaesserbenutzung->getId(),
-                                    $gewaesserbenutzungsart, $gewaesserbenutzungszweck, $gewaesserbenutzungsumfang, $wiedereinleitung, $mengenbestimmung, $teilgewaesserbenutzungsart);
-                                
-                                $this->add_message('notice', 'Teilgewässerbenutzungen (id: ' . $teilgewaesserbenutzungId . ') erfolgreich geändert!');
+                                break;
                             }
-                            //else --> if not there --> create one 
+                            
+                            if(!empty($gewaesserbenutzungsart) && strcmp(WASSERRECHT_ERKLAERUNG_ENTNAHME_BITTE_AUSWAEHLEN_VALUE, $gewaesserbenutzungsart) !== 0
+                                && !empty($gewaesserbenutzungszweck) && strcmp(WASSERRECHT_ERKLAERUNG_ENTNAHME_BITTE_AUSWAEHLEN_VALUE, $gewaesserbenutzungszweck)  !== 0
+                                && !empty($gewaesserbenutzungsumfang) && is_numeric($gewaesserbenutzungsumfang)
+                                && !empty($wiedereinleitung) && strcmp(WASSERRECHT_ERKLAERUNG_ENTNAHME_BITTE_AUSWAEHLEN_VALUE, $wiedereinleitung) !== 0
+                                && !empty($mengenbestimmung) && strcmp(WASSERRECHT_ERKLAERUNG_ENTNAHME_BITTE_AUSWAEHLEN_VALUE, $mengenbestimmung) !== 0)
+                            {
+                                $errorEingabe = null;
+                                
+                                //update an existing teilgewaesserbenutzung
+                                if(!empty($gewaesserbenutzung->teilgewaesserbenutzungen[$i - 1]))
+                                {
+                                    $teilgewaesserbenutzung = $gewaesserbenutzung->teilgewaesserbenutzungen[$i - 1];
+                                    $teilgewaesserbenutzungId = $teilgewaesserbenutzung->updateTeilgewaesserbenutzung($gewaesserbenutzung->getId(),
+                                        $gewaesserbenutzungsart, $gewaesserbenutzungszweck, $gewaesserbenutzungsumfang, $wiedereinleitung, $mengenbestimmung, $teilgewaesserbenutzungsart);
+                                    
+                                    $this->add_message('notice', 'Teilgewässerbenutzungen (id: ' . $teilgewaesserbenutzungId . ') erfolgreich geändert!');
+                                }
+                                //else --> if not there --> create one
+                                else
+                                {
+                                    $teilgewaesserbenutzung = new Teilgewaesserbenutzungen($this);
+                                    $teilgewaesserbenutzungId = $teilgewaesserbenutzung->createTeilgewaesserbenutzung($gewaesserbenutzung->getId(),
+                                        $gewaesserbenutzungsart, $gewaesserbenutzungszweck, $gewaesserbenutzungsumfang, $wiedereinleitung, $mengenbestimmung, $teilgewaesserbenutzungsart, WASSERRECHT_ERKLAERUNG_ENTNAHME_TEILGEWAESSERBENUTZUNGEN_ENTGELTSATZ);
+                                    
+                                    $this->add_message('notice', 'Teilgewässerbenutzungen (id: ' . $teilgewaesserbenutzungId .') erfolgreich eingetragen!');
+                                }
+                            }
                             else
                             {
-                                $teilgewaesserbenutzung = new Teilgewaesserbenutzungen($this);
-                                $teilgewaesserbenutzungId = $teilgewaesserbenutzung->createTeilgewaesserbenutzung($gewaesserbenutzung->getId(),
-                                    $gewaesserbenutzungsart, $gewaesserbenutzungszweck, $gewaesserbenutzungsumfang, $wiedereinleitung, $mengenbestimmung, $teilgewaesserbenutzungsart, WASSERRECHT_ERKLAERUNG_ENTNAHME_TEILGEWAESSERBENUTZUNGEN_ENTGELTSATZ);
-                                
-                                $this->add_message('notice', 'Teilgewässerbenutzungen (id: ' . $teilgewaesserbenutzungId .') erfolgreich eingetragen!');
+                                $errorEingabe = $i;
+                                break;
                             }
+                            //                         echo $i;
                         }
-                        else
-                        {
-                            $errorEingabe = $i;
-                            $this->add_message('error', 'Eingabe in Zeile ' . $i . ' ist fehlerhaft oder nicht vollständig! Bitte überprüfen Sie Ihre Angaben!');
-                            break;
-                        }
-//                         echo $i;
                     }
                     
                     if($errorEingabe === null)
@@ -106,10 +116,19 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
                         $gewaesserbenutzungen = $gb->find_where_with_subtables('id=' . $gewaesserbenutzungId);
                         $gewaesserbenutzung = $gewaesserbenutzungen[0];
                     }
+                    else
+                    {
+                        if($errorEingabe > 0)
+                        {
+                            $this->add_message('error', 'Eingabe in Zeile ' . $errorEingabe . ' ist fehlerhaft oder nicht vollständig! Bitte überprüfen Sie Ihre Angaben!');
+                        }
+                        elseif ($errorEingabe === -1)
+                        {
+                            $this->add_message('error', 'Eingabe ob Angaben auf einer Erklärung oder Schätzung beruhen sind fehlerhaft oder nicht vollständig! Bitte überprüfen Sie Ihre Angaben!');
+                        }
+                    }
                 }
             }
-            
-            break;
         }
         elseif(startsWith($keyEscaped, "erklaerung_"))
 		{
@@ -423,7 +442,7 @@ if(!empty($wrz))
                     <div class="wasserrecht_display_table_row">
                         <div class="wasserrecht_display_table_cell_caption">Erklärung oder Schätzung:</div>
                         <div class="wasserrecht_display_table_cell_spacer"></div>
-                        <div class="wasserrecht_display_table_cell_white">
+                        <div class="wasserrecht_display_table_cell_white" <?php echo $errorEingabe === -1 ? "style='border: 3px solid red'" : ""?>>
                             <select class="wasserrecht_display_table_cell_white" name="teilgewaesserbenutzungsart">
                             	<?php 
                                 	$teilgewaesserbenutzung = null;
@@ -433,8 +452,27 @@ if(!empty($wrz))
                                 	    //var_dump($teilgewaesserbenutzung);
                                 	}
                                 	
-                                	$getTeilgewaesserbenutzungsArt = !empty(htmlspecialchars($_REQUEST['teilgewaesserbenutzungsart'])) ? htmlspecialchars($_REQUEST['teilgewaesserbenutzungsart']) : !empty($teilgewaesserbenutzung) && !empty($teilgewaesserbenutzung->teilgewaesserbenutzungen_art) ? $teilgewaesserbenutzung->teilgewaesserbenutzungen_art->getId() : null;
+                                	$getTeilgewaesserbenutzungsArt = null;
+                                	if(!empty(htmlspecialchars($_REQUEST['teilgewaesserbenutzungsart'])))
+                                	{
+                                	    if(strcmp(WASSERRECHT_ERKLAERUNG_ENTNAHME_BITTE_AUSWAEHLEN_VALUE, htmlspecialchars($_REQUEST['teilgewaesserbenutzungsart'])) !== 0)
+                                	    {
+                                	        $getTeilgewaesserbenutzungsArt = htmlspecialchars($_REQUEST['teilgewaesserbenutzungsart']);
+                                	    }
+                                	    else
+                                	    {
+                                	        $getTeilgewaesserbenutzungsArt = WASSERRECHT_ERKLAERUNG_ENTNAHME_BITTE_AUSWAEHLEN_VALUE;
+                                	    }
+                                	}
+                                	else
+                                	{
+                                	    if(!empty($teilgewaesserbenutzung) && !empty($teilgewaesserbenutzung->teilgewaesserbenutzungen_art))
+                                	    {
+                                	        $getTeilgewaesserbenutzungsArt = $teilgewaesserbenutzung->teilgewaesserbenutzungen_art->getId();
+                                	    }
+                                	}
                             	?>
+                            	<option value='<?php echo WASSERRECHT_ERKLAERUNG_ENTNAHME_BITTE_AUSWAEHLEN_VALUE ?>'>Bitte auswählen</option>
                             	<option value="1" <?php echo !empty($getTeilgewaesserbenutzungsArt) && $getTeilgewaesserbenutzungsArt === "1" ?  'selected' : ''?>>Erklärung</option>
                             	<option value="2" <?php echo !empty($getTeilgewaesserbenutzungsArt) && $getTeilgewaesserbenutzungsArt === "2" ?  'selected' : ''?>>Schätzung</option>
                             </select>
