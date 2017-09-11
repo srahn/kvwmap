@@ -21,11 +21,25 @@ abstract class WrPgObject extends PgObject
     }
     
     public function getName() {
-        return $this->data['name'];
+        if(!empty($this->data))
+        {
+            return $this->data['name'];
+        }
+        else
+        {
+            return null;
+        }
     }
     
     public function getId() {
-        return $this->data['id'];
+        if(!empty($this->data))
+        {
+            return $this->data['id'];
+        }
+        else
+        {
+            return null;
+        }
     }
     
     public function toString() {
