@@ -358,10 +358,10 @@ include_once ('includes/header.php');
                         		          				    if(empty($wrz->getErklaerungDatum()))
                         		          				    {
                         		          				?>
-                        		          					<!-- <form action="index.php" id="erklaerung_form_<?php echo (empty($gewaesserbenutzung) ? "0" : $gewaesserbenutzung->getId()) . "_" . $wrz->getId(); ?>" accept-charset="" method="POST"> -->
+                        		          					<!-- <form action="index.php" id="erklaerung_form_<?php echo $wrz->getId(); ?>" accept-charset="" method="POST"> -->
                         		          						<!-- <input type="hidden" name="go" value="wasserentnahmeentgelt_erklaerung_der_entnahme"> -->
 <!--                         		          						<input type="hidden" name="post_action_1" value="wasserentnahmeentgelt_erklaerung_der_entnahme"> -->
-        														<button name="erklaerung_<?php echo (empty($gewaesserbenutzung) ? "0" : $gewaesserbenutzung->getId()) . "_" . $wrz->getId(); ?>" value="erklaerung_<?php echo (empty($gewaesserbenutzung) ? "0" : $gewaesserbenutzung->getId()) . "_" . $wrz->getId(); ?>" type="submit" id="erklaerung_button_<?php echo (empty($gewaesserbenutzung) ? "0" : $gewaesserbenutzung->getId()) . "_" . $wrz->getId(); ?>">Erklärung</button>
+        														<button name="erklaerung_<?php echo $wrz->getId(); ?>" value="<?php echo $wrz->getId(); ?>" type="submit" id="erklaerung_button_<?php echo $wrz->getId(); ?>">Erklärung</button>
         													<!-- </form> -->
                         		          				<?php
                         		          				    }

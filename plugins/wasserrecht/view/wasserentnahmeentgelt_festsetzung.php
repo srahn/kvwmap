@@ -15,17 +15,17 @@ if($_SERVER ["REQUEST_METHOD"] == "GET")
         
         if(strtolower($keyEscaped) === "getfestsetzung")
 		{
-		    $lastIndex = strripos($valueEscaped, "_");
-		    $festsetzungWrzId = substr($valueEscaped, $lastIndex + 1);
-// 		    echo "<br />lastIndex: " . $lastIndex . " festsetzungWrzId: " . $festsetzungWrzId;
+		    $festsetzungWrzId = $valueEscaped;
+// 		    echo "<br />festsetzungWrzId: " . $festsetzungWrzId;
 		    $festsetzungWrz = new WasserrechtlicheZulassungen($this);
 		    $wrz = $festsetzungWrz->find_by_id($this, 'id', $festsetzungWrzId);
+// 		    var_dump($wrz);
+// 		    echo "<br />wrz id: " . $wrz->getId();
 		    if(!empty($wrz))
 		    {
-		        $gewaesserbenutzungId = substr($valueEscaped, 0, $lastIndex);
-// 		        echo "<br />gewaesserbenutzungId: " . $gewaesserbenutzungId;
+		        echo "<br />wrz id: " . $wrz->getId();
 		        $gb = new Gewaesserbenutzungen($this);
-		        $gewaesserbenutzungen = $gb->find_where_with_subtables('id=' . $gewaesserbenutzungId);
+		        $gewaesserbenutzungen = $gb->find_where_with_subtables('wasserrechtliche_zulassungen=' . $wrz->getId());
 		        if(!empty($gewaesserbenutzungen) && count($gewaesserbenutzungen) > 0 && !empty($gewaesserbenutzungen[0]))
 		        {
 		            $gewaesserbenutzung = $gewaesserbenutzungen[0];
@@ -63,7 +63,7 @@ if(!empty($wrz))
     $tab1_visible=true;
     $tab2_id="wasserentnahmeentgelt_festsetzung";
     $tab1_extra_parameter_key="geterklaerung";
-    $tab1_extra_parameter_value=empty($gewaesserbenutzung) ? "0" . "_" . $wrz->getId() : $gewaesserbenutzung->getId() . "_" . $wrz->getId();
+    $tab1_extra_parameter_value=$wrz->getId();
     $tab2_name="Festsetzung";
     $tab2_active=true;
     $tab2_visible=true;

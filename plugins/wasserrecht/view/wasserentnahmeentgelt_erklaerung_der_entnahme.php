@@ -4,7 +4,7 @@ $gewaesserbenutzung = null;
 $errorEingabe = null;
 $speereEingabe = false;
 
-print_r($_REQUEST);
+// print_r($_REQUEST);
 		  
 if($_SERVER ["REQUEST_METHOD"] == "POST")
 {
@@ -18,12 +18,14 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
         if(startsWith($keyEscaped, "erklaerung_freigeben_"))
         {
             erklaerung_freigeben($this, $keyEscaped, "erklaerung_freigeben_", true, $wrz, $gewaesserbenutzung, $errorEingabe, $speereEingabe);
+            break;
         }
         elseif(startsWith($keyEscaped, "erklaerung_speeren_"))
         {
 //             erklaerung_freigeben($this, $keyEscaped, "erklaerung_speeren_", false);
             $speereEingabe = false;
 //             echo var_dump($speereEingabe);
+            break;
         }
         elseif(startsWith($keyEscaped, "erklaerung_"))
 		{
@@ -34,17 +36,20 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
 		    $wrz = $erklaerungWrz->find_by_id($this, 'id', $erklaerungWrzId);
 		    if(!empty($wrz))
 		    {
-		        $gewaesserbenutzungId = substr($keyEscaped, strlen("erklaerung_"), $lastIndex - strlen("erklaerung_"));
-// 		        echo "<br />gewaesserbenutzungId: " . $gewaesserbenutzungId;
 		        $gb = new Gewaesserbenutzungen($this);
-		        $gewaesserbenutzungen = $gb->find_where_with_subtables('id=' . $gewaesserbenutzungId);
+		        $gewaesserbenutzungen = $gb->find_where_with_subtables('wasserrechtliche_zulassungen=' . $wrz->getId());
 		        if(!empty($gewaesserbenutzungen) && count($gewaesserbenutzungen) > 0 && !empty($gewaesserbenutzungen[0]))
 		        {
 		            $gewaesserbenutzung = $gewaesserbenutzungen[0];
 		        }
 // 		        echo "<br />gewaesserbenutzung: " . $gewaesserbenutzung[0]->getId();
+
+		        if($wrz->isErklaerungFreigegeben())
+		        {
+		            $speereEingabe = true;
+		        }
 		    }
-		              
+		    
 		    break;
 		 }
     }
@@ -58,22 +63,24 @@ elseif($_SERVER ["REQUEST_METHOD"] == "GET")
         
         if(strtolower($keyEscaped) === "geterklaerung")
         {
-            $lastIndex = strripos($valueEscaped, "_");
-            $erklaerungWrzId = substr($valueEscaped, $lastIndex + 1);
-            // 		    echo "<br />lastIndex: " . $lastIndex . " erklaerungWrzId: " . $erklaerungWrzId;
+            $erklaerungWrzId = $valueEscaped;
+            // 		    echo "<br />erklaerungWrzId: " . $erklaerungWrzId;
             $erklaerungWrz = new WasserrechtlicheZulassungen($this);
             $wrz = $erklaerungWrz->find_by_id($this, 'id', $erklaerungWrzId);
             if(!empty($wrz))
             {
-                $gewaesserbenutzungId = substr($valueEscaped, 0, $lastIndex);
-                // 		        echo "<br />gewaesserbenutzungId: " . $gewaesserbenutzungId;
                 $gb = new Gewaesserbenutzungen($this);
-                $gewaesserbenutzungen = $gb->find_where_with_subtables('id=' . $gewaesserbenutzungId);
+                $gewaesserbenutzungen = $gb->find_where_with_subtables('wasserrechtliche_zulassungen=' . $wrz->getId());
                 if(!empty($gewaesserbenutzungen) && count($gewaesserbenutzungen) > 0 && !empty($gewaesserbenutzungen[0]))
                 {
                     $gewaesserbenutzung = $gewaesserbenutzungen[0];
                 }
                 // 		        echo "<br />gewaesserbenutzung: " . $gewaesserbenutzung[0]->getId();
+                
+                if($wrz->isErklaerungFreigegeben())
+                {
+                    $speereEingabe = true;
+                }
             }
             break;
         }
@@ -87,11 +94,10 @@ function erklaerung_freigeben($gui, $keyEscaped, $keyName, $insertDate, &$wrz, &
     // echo "<br />lastIndex: " . $lastIndex . " erklaerungFreigebenWrzId: " . $erklaerungFreigebenWrzId;
     $erklaerungFreigebenWrz = new WasserrechtlicheZulassungen($gui);
     $wrz = $erklaerungFreigebenWrz->find_by_id($gui, 'id', $erklaerungFreigebenWrzId);
-    if (! empty($wrz)) {
-        $gewaesserbenutzungId = substr($keyEscaped, strlen($keyName), $lastIndex - strlen($keyName));
-        // echo "<br />gewaesserbenutzungId: " . $gewaesserbenutzungId;
+    if (!empty($wrz)) 
+    {
         $gb = new Gewaesserbenutzungen($gui);
-        $gewaesserbenutzungen = $gb->find_where_with_subtables('id=' . $gewaesserbenutzungId);
+        $gewaesserbenutzungen = $gb->find_where_with_subtables('wasserrechtliche_zulassungen=' . $wrz->getId());
         if (! empty($gewaesserbenutzungen) && count($gewaesserbenutzungen) > 0 && ! empty($gewaesserbenutzungen[0])) {
             $gewaesserbenutzung = $gewaesserbenutzungen[0];
             // $gewaesserbenutzungErklaerungFreigegebenId = $gewaesserbenutzung->getId();
@@ -168,7 +174,7 @@ function erklaerung_freigeben($gui, $keyEscaped, $keyName, $insertDate, &$wrz, &
                     // }
                     
                     // update gewaesserbenutzungen, because teilgewaesserbenutzungen where added
-                    $gewaesserbenutzungen = $gb->find_where_with_subtables('id=' . $gewaesserbenutzungId);
+                    $gewaesserbenutzungen = $gb->find_where_with_subtables('wasserrechtliche_zulassungen=' . $wrz->getId());
                     $gewaesserbenutzung = $gewaesserbenutzungen[0];
                 }
             } else {
@@ -191,6 +197,11 @@ if(empty($wrz))
     if(!empty($results) && count($results) > 0)
     {
         $wrz = $results[0];
+        
+        if($wrz->isErklaerungFreigegeben())
+        {
+            $speereEingabe = true;
+        }
     }
 }
 
@@ -210,7 +221,7 @@ if(!empty($wrz))
     $tab2_name="Festsetzung";
     $tab2_active=false;
     $tab2_extra_parameter_key="getfestsetzung";
-    $tab2_extra_parameter_value=empty($gewaesserbenutzung) ? "0" . "_" . $wrz->getId() : $gewaesserbenutzung->getId() . "_" . $wrz->getId();
+    $tab2_extra_parameter_value=$wrz->getId();
 //     var_dump($tab2_extra_parameter_key);
 //     var_dump($tab2_extra_parameter_value);
     if($wrz->isErklaerungFreigegeben())
@@ -487,7 +498,7 @@ if(!empty($wrz))
 		   			<div class="wasserrecht_display_table_row">
 		   				<div class="wasserrecht_display_table_cell_caption">
                 			<input type="hidden" name="go" value="wasserentnahmeentgelt">
-    						<button class="wasserrecht_button" name="erklaerung_speeren_<?php echo (empty($gewaesserbenutzung) ? "0" : $gewaesserbenutzung->getId()) . "_" . $wrz->getId(); ?>" value="erklaerung_speeren_<?php echo (empty($gewaesserbenutzung) ? "0" : $gewaesserbenutzung->getId()) . "_" . $wrz->getId(); ?>" type="submit" id="erklaerung_speeren_button_<?php echo (empty($gewaesserbenutzung) ? "0" : $gewaesserbenutzung->getId()) . "_" . $wrz->getId(); ?>" <?php echo !$speereEingabe ? "disabled='disabled'" : "" ?>>Erklärung entspeeren</button>
+    						<button class="wasserrecht_button" name="erklaerung_speeren_<?php echo $wrz->getId(); ?>" value="<?php echo $wrz->getId(); ?>" type="submit" id="erklaerung_speeren_button_<?php echo (empty($gewaesserbenutzung) ? "0" : $gewaesserbenutzung->getId()) . "_" . $wrz->getId(); ?>" <?php echo !$speereEingabe ? "disabled='disabled'" : "" ?>>Erklärung entspeeren</button>
                			</div>
                			<div class="wasserrecht_display_table_cell_spacer"></div>
         		   		<div class="wasserrecht_display_table_row_spacer"></div>
@@ -502,7 +513,7 @@ if(!empty($wrz))
 		   			<div class="wasserrecht_display_table_row">
 		   				<div class="wasserrecht_display_table_cell_caption">
                 			<input type="hidden" name="go" value="wasserentnahmeentgelt">
-    						<button class="wasserrecht_button" name="erklaerung_freigeben_<?php echo (empty($gewaesserbenutzung) ? "0" : $gewaesserbenutzung->getId()) . "_" . $wrz->getId(); ?>" value="erklaerung_freigeben_<?php echo (empty($gewaesserbenutzung) ? "0" : $gewaesserbenutzung->getId()) . "_" . $wrz->getId(); ?>" type="submit" id="erklaerung_freigeben_button_<?php echo (empty($gewaesserbenutzung) ? "0" : $gewaesserbenutzung->getId()) . "_" . $wrz->getId(); ?>">Erklärung freigeben</button>
+    						<button class="wasserrecht_button" name="erklaerung_freigeben_<?php echo $wrz->getId(); ?>" value="<?php echo $wrz->getId(); ?>" type="submit" id="erklaerung_freigeben_button_<?php echo $wrz->getId(); ?>">Erklärung freigeben</button>
                			</div>
                			<div class="wasserrecht_display_table_cell_spacer"></div>
         		   		<div class="wasserrecht_display_table_row_spacer"></div>
