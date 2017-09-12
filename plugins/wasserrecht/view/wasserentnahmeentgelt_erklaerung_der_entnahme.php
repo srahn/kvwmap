@@ -50,6 +50,7 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
                             $gewaesserbenutzungsart = htmlspecialchars($_POST["gewaesserbenutzungsart_" . $i]);
                             $gewaesserbenutzungszweck = htmlspecialchars($_POST["gewaesserbenutzungszweck_" . $i]);
                             $gewaesserbenutzungsumfang = htmlspecialchars($_POST["gewaesserbenutzungsumfang_" . $i]);
+                            $gewaesserbenutzungsumfang = str_replace(' ', '', $gewaesserbenutzungsumfang);
                             $wiedereinleitung = htmlspecialchars($_POST["wiedereinleitung_" . $i]);
                             $mengenbestimmung = htmlspecialchars($_POST["mengenbestimmung_" . $i]);
                             
@@ -369,8 +370,14 @@ if(!empty($wrz))
                                 	           $getGewaesserbenutzungsUmfang = $teilgewaesserbenutzung->getUmfang();
                                 	       }
                                 	   }
+                                	   
+                                	   if(!empty($getGewaesserbenutzungsUmfang))
+                                	   {
+                                	       $getGewaesserbenutzungsUmfang = number_format($getGewaesserbenutzungsUmfang, 0, '', ' ');
+                                	   }    
+                                	   
                                 	?>
-                                	<input class="wasserrecht_table_inputfield" type="text" id="numberField" name="gewaesserbenutzungsumfang_<?php echo $i; ?>" value="<?php echo !empty($getGewaesserbenutzungsUmfang) ? $getGewaesserbenutzungsUmfang : '' ?>">
+                                	<input class="wasserrecht_table_inputfield numberField" type="text" name="gewaesserbenutzungsumfang_<?php echo $i; ?>" value="<?php echo !empty($getGewaesserbenutzungsUmfang) ? $getGewaesserbenutzungsUmfang : '' ?>">
                                 </td>
                                 <td>
                                 	<?php 

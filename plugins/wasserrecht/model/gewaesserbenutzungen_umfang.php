@@ -7,7 +7,7 @@ class GewaesserbenutzungenUmfang extends WrPgObject {
 	{
 	    if(!empty($this->data['max_ent_a']))
 	    {
-	        return $this->data['max_ent_a'] . " m³/a";
+	        return number_format($this->data['max_ent_a'], 0, '', ' ')  . " m³/a";
 	    }
 	    
 	    return "";

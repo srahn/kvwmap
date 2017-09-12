@@ -125,7 +125,8 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	        
 	        //get the 'Gewaesserbenutzungen'
 	        $gewaesserbenutzung = new Gewaesserbenutzungen($gui);
-	        $gewaesserbenutzungen = $gewaesserbenutzung->find_where_with_subtables('wasserrechtliche_zulassungen=' . $result->getId() . ' AND (art = 1 OR art = 5)', 'id');
+	        $gewaesserbenutzungen = $gewaesserbenutzung->find_where_with_subtables('wasserrechtliche_zulassungen=' . $result->getId(), 'id');
+// 	        $gewaesserbenutzungen = $gewaesserbenutzung->find_where_with_subtables('wasserrechtliche_zulassungen=' . $result->getId() . ' AND (art = 1 OR art = 2)', 'id');
 	        $result->gewaesserbenutzungen = $gewaesserbenutzungen;
 	        
 	        if(empty($result->gewaesserbenutzungen) || empty($result->gewaesserbenutzungen[0]))

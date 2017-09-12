@@ -117,9 +117,9 @@ function replaceParameterInUrl(key, value)
 }
 
 $(document).ready(function() {
-    $("#numberField").keydown(function (e) {
-        // Allow: backspace, delete, tab, escape, enter and .
-        if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110, 188, 190]) !== -1 ||
+    $(".numberField").keydown(function (e) {
+        // Allow: backspace, delete, tab, escape enter, and space
+        if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110, 32]) !== -1 ||
              // Allow: Ctrl/cmd+A
             (e.keyCode == 65 && (e.ctrlKey === true || e.metaKey === true)) ||
              // Allow: Ctrl/cmd+C
