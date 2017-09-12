@@ -224,7 +224,7 @@ class Teilgewaesserbenutzungen extends WrPgObject {
 	    return $entgeltsatz;
 	}
 	
-	public function createTeilgewaesserbenutzung($gewaesserbenutzungen, $art = NULL, $zweck = NULL, $umfang = NULL, $wiedereinleitung_nutzer = NULL, $mengenbestimmung = NULL, $teilgewaesserbenutzungen_art = NULL, $wiedereinleitung_bearbeiter = NULL, $art_benutzung = NULL, $befreiungstatbestaende = NULL, $entgeltsatz = NULL) 
+	public function createTeilgewaesserbenutzung_Nutzer($gewaesserbenutzungen, $art = NULL, $zweck = NULL, $umfang = NULL, $wiedereinleitung_nutzer = NULL, $mengenbestimmung = NULL, $teilgewaesserbenutzungen_art = NULL, $entgeltsatz = NULL) 
 	{
 	    if (!empty($gewaesserbenutzungen))
 	    {
@@ -237,12 +237,9 @@ class Teilgewaesserbenutzungen extends WrPgObject {
 	        $this->addToArray($teilgewaesserbenutzung_value_array, 'zweck', $zweck);
 	        $this->addToArray($teilgewaesserbenutzung_value_array, 'umfang', $umfang);
 	        $this->addToArray($teilgewaesserbenutzung_value_array, 'wiedereinleitung_nutzer', $wiedereinleitung_nutzer);
-	        $this->addToArray($teilgewaesserbenutzung_value_array, 'wiedereinleitung_bearbeiter', $wiedereinleitung_bearbeiter);
 	        $this->addToArray($teilgewaesserbenutzung_value_array, 'mengenbestimmung', $mengenbestimmung);
-	        $this->addToArray($teilgewaesserbenutzung_value_array, 'art_benutzung', $art_benutzung);
-	        $this->addToArray($teilgewaesserbenutzung_value_array, 'befreiungstatbestaende', $befreiungstatbestaende);
-	        $this->addToArray($teilgewaesserbenutzung_value_array, 'entgeltsatz', $entgeltsatz);
 	        $this->addToArray($teilgewaesserbenutzung_value_array, 'teilgewaesserbenutzungen_art', $teilgewaesserbenutzungen_art);
+	        $this->addToArray($teilgewaesserbenutzung_value_array, 'entgeltsatz', $entgeltsatz);
 	        
 // 	        print_r($teilgewaesserbenutzung_value_array);
 	        $this->debug->write('teilgewaesserbenutzung_value_array: ' . var_export($teilgewaesserbenutzung_value_array, true), 4);
@@ -253,18 +250,50 @@ class Teilgewaesserbenutzungen extends WrPgObject {
 	    }
 	}
 	
-	public function updateTeilgewaesserbenutzung($gewaesserbenutzungen = NULL, $art = NULL, $zweck = NULL, $umfang = NULL, $wiedereinleitung_nutzer = NULL, $mengenbestimmung = NULL, $teilgewaesserbenutzungen_art = NULL, $wiedereinleitung_bearbeiter = NULL, $art_benutzung = NULL, $befreiungstatbestaende = NULL, $entgeltsatz = NULL) 
+// 	public function createTeilgewaesserbenutzung_Bearbeiter($gewaesserbenutzungen, $art_benutzung = NULL, $wiedereinleitung_bearbeiter = NULL, $befreiungstatbestaende = NULL)
+// 	{
+// 	    if (!empty($gewaesserbenutzungen))
+// 	    {
+// 	        $teilgewaesserbenutzung_value_array = array
+// 	        (
+// 	            'gewaesserbenutzungen' => $gewaesserbenutzungen
+// 	        );
+	        
+// 	        $this->addToArray($teilgewaesserbenutzung_value_array, 'art_benutzung', $art_benutzung);
+// 	        $this->addToArray($teilgewaesserbenutzung_value_array, 'wiedereinleitung_bearbeiter', $wiedereinleitung_bearbeiter);
+// 	        $this->addToArray($teilgewaesserbenutzung_value_array, 'befreiungstatbestaende', $befreiungstatbestaende);
+	        
+// // 	        print_r($teilgewaesserbenutzung_value_array);
+// 	        $this->debug->write('teilgewaesserbenutzung_value_array: ' . var_export($teilgewaesserbenutzung_value_array, true), 4);
+	        
+// 	        return $this->create(
+// 	            $teilgewaesserbenutzung_value_array
+// 	            );
+// 	    }
+// 	}
+	
+	public function updateTeilgewaesserbenutzung_Nutzer($art = NULL, $zweck = NULL, $umfang = NULL, $wiedereinleitung_nutzer = NULL, $mengenbestimmung = NULL, $teilgewaesserbenutzungen_art = NULL, $entgeltsatz = NULL) 
 	{
 	    $this->updateData('art', $art);
 	    $this->updateData('zweck', $zweck);
 	    $this->updateData('umfang', $umfang);
 	    $this->updateData('wiedereinleitung_nutzer', $wiedereinleitung_nutzer);
-	    $this->updateData('wiedereinleitung_bearbeiter', $wiedereinleitung_bearbeiter);
 	    $this->updateData('mengenbestimmung', $mengenbestimmung);
-	    $this->updateData('art_benutzung', $art_benutzung);
-	    $this->updateData('befreiungstatbestaende', $befreiungstatbestaende);
 	    $this->updateData('entgeltsatz', $entgeltsatz);
 	    $this->updateData('teilgewaesserbenutzungen_art', $teilgewaesserbenutzungen_art);
+	    
+	    $this->debug->write('kvp update: ' . var_export($this->getKVP(), true), 4);
+	    
+	    $this->update();
+	    
+	    return $this->getId();
+	}
+	
+	public function updateTeilgewaesserbenutzung_Bearbeiter($art_benutzung = NULL, $wiedereinleitung_bearbeiter = NULL, $befreiungstatbestaende = NULL)
+	{
+	    $this->updateData('art_benutzung', $art_benutzung);
+	    $this->updateData('wiedereinleitung_bearbeiter', $wiedereinleitung_bearbeiter);
+	    $this->updateData('befreiungstatbestaende', $befreiungstatbestaende);
 	    
 	    $this->debug->write('kvp update: ' . var_export($this->getKVP(), true), 4);
 	    

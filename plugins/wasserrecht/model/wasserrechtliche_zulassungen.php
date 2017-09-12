@@ -323,6 +323,71 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	
 	////////////////////////////////////////////////////////////////////
 	
+	public function isFestsetzungFreigegeben()
+	{
+	    $datumFestsetzung = $this->getFestsetzungDatum();
+	    if(!empty($datumFestsetzung))
+	    {
+	        return true;
+	    }
+	    
+	    return false;
+	}
+	
+	public function getFestsetzungDatum() {
+	    return $this->data['festsetzung_datum'];
+	}
+	
+	public function getFestsetzungDatumHTML() {
+	    $datumFestsetzung = $this->getFestsetzungDatum();
+	    if(!empty($datumFestsetzung))
+	    {
+	        // 	        $dateString = DateTime::createFromFormat("d.m.Y", $datumAbsend);
+	        return "<div>" . $datumFestsetzung . "</div>";
+	    }
+	    
+	    return "<div style=\"color: red;\">Nicht erklärt</div>";
+	}
+	
+	public function insertFestsetzungDatum($dateValue = NULL) {
+	    //if date is not set --> set it to today's date
+	    if(empty($dateValue))
+	    {
+	        $dateValue = date("d.m.Y");
+	    }
+	    
+	    $this->set('festsetzung_datum', $dateValue);
+	    $this->update();
+	    
+	    // 	    $this->create(
+	    // 	        array(
+	    // 	            'aufforderung_datum_absend' => $dateValue
+	    // 	        )
+	    // 	        );
+	}
+	
+	public function insertFestsetzungNutzer($festsetzungNutzer) {
+	    $this->set('festsetzung_nutzer', $festsetzungNutzer);
+	    $this->update();
+	}
+	
+	public function getFestsetzungNutzer() {
+	    return $this->data['festsetzung_nutzer'];
+	}
+	
+	public function getFestsetzungNutzerHTML() {
+	    $nutzerFestsetzung = $this->getFestsetzungNutzer();
+	    if(!empty($nutzerFestsetzung))
+	    {
+	        // 	        $dateString = DateTime::createFromFormat("d.m.Y", $datumAbsend);
+	        return "<div>" . $nutzerFestsetzung . "</div>";
+	    }
+	    
+	    return "<div style=\"color: red;\">Nicht erklärt</div>";
+	}
+	
+	////////////////////////////////////////////////////////////////////
+	
 	public function getBezeichnung() {
 	    $fieldname = 'bezeichnung';
 // 	    $sql = "SELECT COALESCE(c.name,'') ||' (Aktenzeichen: '|| COALESCE(a.aktenzeichen,'') ||')'||' vom '|| COALESCE(a.datum_postausgang::text,'') AS " . $fieldname ." FROM " . $this->schema . '.' . $this->tableName . " a LEFT JOIN " . $this->schema . '.' . "wasserrechtliche_zulassungen_ausgangsbescheide_klasse c ON a.klasse = c.id WHERE a.id = '" . $this->getId() . "';";
