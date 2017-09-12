@@ -269,11 +269,12 @@ function erklaerung_freigeben($gui, $keyEscaped, $keyName, $insertDate, &$wrz, &
                     // {
                     $wrz->insertErklaerungNutzer($gui->user->Vorname . ' ' . $gui->user->Name);
                     // }
-                    
-                    // update gewaesserbenutzungen, because teilgewaesserbenutzungen where added
-                    $gewaesserbenutzungen = $gb->find_where_with_subtables('wasserrechtliche_zulassungen=' . $wrz->getId());
-                    $gewaesserbenutzung = $gewaesserbenutzungen[0];
                 }
+                
+                // update gewaesserbenutzungen, because teilgewaesserbenutzungen where added
+                $gewaesserbenutzungen = $gb->find_where_with_subtables('wasserrechtliche_zulassungen=' . $wrz->getId());
+                $gewaesserbenutzung = $gewaesserbenutzungen[0];
+                
             } else {
                 if ($errorEingabeErklaerung > 0) {
                     $gui->add_message('error', 'Eingabe in Zeile ' . $errorEingabeErklaerung . ' ist fehlerhaft oder nicht vollständig! Bitte überprüfen Sie Ihre Angaben!');
@@ -599,7 +600,7 @@ if(!empty($wrz))
 		   			<div class="wasserrecht_display_table_row">
 		   				<div class="wasserrecht_display_table_cell_caption">
                 			<input type="hidden" name="go" value="wasserentnahmeentgelt">
-    						<button class="wasserrecht_button" name="erklaerung_entspeeren_<?php echo $wrz->getId(); ?>" value="<?php echo $wrz->getId(); ?>" type="submit" id="erklaerung_entspeeren_button_<?php echo (empty($gewaesserbenutzung) ? "0" : $gewaesserbenutzung->getId()) . "_" . $wrz->getId(); ?>" <?php echo !$speereEingabeErklaerung ? "disabled='disabled'" : "" ?>>Erklärung entspeeren</button>
+    						<button class="wasserrecht_button" name="erklaerung_entspeeren_<?php echo $wrz->getId(); ?>" value="<?php echo $wrz->getId(); ?>" type="submit" id="erklaerung_entspeeren_button_<?php echo (empty($gewaesserbenutzung) ? "0" : $gewaesserbenutzung->getId()) . "_" . $wrz->getId(); ?>" <?php echo !$speereEingabeErklaerung || $wrz->isFestsetzungFreigegeben() ? "disabled='disabled'" : "" ?>>Erklärung entspeeren</button>
                			</div>
                			<div class="wasserrecht_display_table_cell_spacer"></div>
         		   		<div class="wasserrecht_display_table_row_spacer"></div>
@@ -614,7 +615,7 @@ if(!empty($wrz))
 		   			<div class="wasserrecht_display_table_row">
 		   				<div class="wasserrecht_display_table_cell_caption">
                 			<input type="hidden" name="go" value="wasserentnahmeentgelt">
-    						<button class="wasserrecht_button" name="erklaerung_freigeben_<?php echo $wrz->getId(); ?>" value="<?php echo $wrz->getId(); ?>" type="submit" id="erklaerung_freigeben_button_<?php echo $wrz->getId(); ?>">Erklärung freigeben</button>
+    						<button class="wasserrecht_button" name="erklaerung_freigeben_<?php echo $wrz->getId(); ?>" value="<?php echo $wrz->getId(); ?>" type="submit" id="erklaerung_freigeben_button_<?php echo $wrz->getId(); ?>" <?php echo $speereEingabeErklaerung || $wrz->isFestsetzungFreigegeben() ? "disabled='disabled'" : "" ?>>Erklärung freigeben</button>
                			</div>
                			<div class="wasserrecht_display_table_cell_spacer"></div>
         		   		<div class="wasserrecht_display_table_row_spacer"></div>

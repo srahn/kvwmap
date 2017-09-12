@@ -65,7 +65,7 @@ elseif($_SERVER ["REQUEST_METHOD"] == "GET")
     }
 }
 
-function festsetzung_freigeben($gui, $keyEscaped, $keyName, $insertSpeere, &$wrz, &$gewaesserbenutzung, &$errorEingabeFestsetzung, &$speereEingabeFestsetzung)
+function festsetzung_freigeben($gui, $keyEscaped, $keyName, $festsetzungFreigeben, &$wrz, &$gewaesserbenutzung, &$errorEingabeFestsetzung, &$speereEingabeFestsetzung)
 {
     $lastIndex = strripos($keyEscaped, "_");
     $festsetzungFreigebenWrzId = substr($keyEscaped, $lastIndex + 1);
@@ -102,7 +102,7 @@ function festsetzung_freigeben($gui, $keyEscaped, $keyName, $insertSpeere, &$wrz
                         {
                                 
                                 $errorEingabeFestsetzung = null;
-                                if($insertSpeere)
+                                if($festsetzungFreigeben)
                                 {
                                     $speereEingabeFestsetzung = true;
                                 }
@@ -130,8 +130,11 @@ function festsetzung_freigeben($gui, $keyEscaped, $keyName, $insertSpeere, &$wrz
             
             if ($errorEingabeFestsetzung === null)
             {
-                $wrz->insertFestsetzungDatum();
-                $wrz->insertFestsetzungNutzer($gui->user->Vorname . ' ' . $gui->user->Name);
+                if($festsetzungFreigeben)
+                {
+                    $wrz->insertFestsetzungDatum();
+                    $wrz->insertFestsetzungNutzer($gui->user->Vorname . ' ' . $gui->user->Name);
+                }
                 
                 // update gewaesserbenutzungen, because teilgewaesserbenutzungen where added
                 $gewaesserbenutzungen = $gb->find_where_with_subtables('wasserrechtliche_zulassungen=' . $wrz->getId());
