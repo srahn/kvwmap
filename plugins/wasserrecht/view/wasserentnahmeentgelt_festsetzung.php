@@ -20,6 +20,11 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
             festsetzung_freigeben($this, $keyEscaped, "festsetzung_freigeben_", true, $wrz, $gewaesserbenutzung, $errorEingabeFestsetzung, $speereEingabeFestsetzung);
             break;
         }
+        if(startsWith($keyEscaped, "festsetzung_speichern_"))
+        {
+            festsetzung_freigeben($this, $keyEscaped, "festsetzung_speichern_", false, $wrz, $gewaesserbenutzung, $errorEingabeFestsetzung, $speereEingabeFestsetzung);
+            break;
+        }
     }
 }
 elseif($_SERVER ["REQUEST_METHOD"] == "GET")
@@ -49,13 +54,18 @@ elseif($_SERVER ["REQUEST_METHOD"] == "GET")
 		            $gewaesserbenutzung = $gewaesserbenutzungen[0];
 		        }
 // 		        echo "<br />gewaesserbenutzung: " . $gewaesserbenutzung[0]->getId();
+
+		        if($wrz->isFestsetzungFreigegeben())
+		        {
+		            $speereEingabeFestsetzung = true;
+		        }
 		    }
 		    break;
 		 }
     }
 }
 
-function festsetzung_freigeben($gui, $keyEscaped, $keyName, $insertDate, &$wrz, &$gewaesserbenutzung, &$errorEingabeFestsetzung, &$speereEingabeFestsetzung)
+function festsetzung_freigeben($gui, $keyEscaped, $keyName, $insertSpeere, &$wrz, &$gewaesserbenutzung, &$errorEingabeFestsetzung, &$speereEingabeFestsetzung)
 {
     $lastIndex = strripos($keyEscaped, "_");
     $festsetzungFreigebenWrzId = substr($keyEscaped, $lastIndex + 1);
@@ -92,7 +102,10 @@ function festsetzung_freigeben($gui, $keyEscaped, $keyName, $insertDate, &$wrz, 
                         {
                                 
                                 $errorEingabeFestsetzung = null;
-                                $speereEingabeFestsetzung = true;
+                                if($insertSpeere)
+                                {
+                                    $speereEingabeFestsetzung = true;
+                                }
                                 //                         echo var_dump($speereEingabeFestsetzung);
                                 
                                 // update an existing teilgewaesserbenutzung
@@ -117,15 +130,12 @@ function festsetzung_freigeben($gui, $keyEscaped, $keyName, $insertDate, &$wrz, 
             
             if ($errorEingabeFestsetzung === null)
             {
-                if($insertDate)
-                {
-                    $wrz->insertFestsetzungDatum();
-                    $wrz->insertFestsetzungNutzer($gui->user->Vorname . ' ' . $gui->user->Name);
-                    
-                    // update gewaesserbenutzungen, because teilgewaesserbenutzungen where added
-                    $gewaesserbenutzungen = $gb->find_where_with_subtables('wasserrechtliche_zulassungen=' . $wrz->getId());
-                    $gewaesserbenutzung = $gewaesserbenutzungen[0];
-                }
+                $wrz->insertFestsetzungDatum();
+                $wrz->insertFestsetzungNutzer($gui->user->Vorname . ' ' . $gui->user->Name);
+                
+                // update gewaesserbenutzungen, because teilgewaesserbenutzungen where added
+                $gewaesserbenutzungen = $gb->find_where_with_subtables('wasserrechtliche_zulassungen=' . $wrz->getId());
+                $gewaesserbenutzung = $gewaesserbenutzungen[0];
             } else {
                 if ($errorEingabeFestsetzung > 0) {
                     $gui->add_message('error', 'Eingabe in Zeile ' . $errorEingabeFestsetzung . ' ist fehlerhaft oder nicht vollständig! Bitte überprüfen Sie Ihre Angaben!');
@@ -144,6 +154,11 @@ if(empty($wrz))
     if(!empty($results) && count($results) > 0)
     {
         $wrz = $results[0];
+    }
+    
+    if($wrz->isFestsetzungFreigegeben())
+    {
+        $speereEingabeFestsetzung = true;
     }
 }
 
@@ -268,19 +283,19 @@ if(!empty($wrz))
                                       <td><?php echo !empty($teilgewaesserbenutzung->getWiedereinleitungNutzer()) && $teilgewaesserbenutzung->getWiedereinleitungNutzer() === "t" ? "ja" : "nein" ?></td>
                                       <td><?php echo !empty($teilgewaesserbenutzung->mengenbestimmung) ? $teilgewaesserbenutzung->mengenbestimmung->getName() : "" ?></td>
                                       <td>
-                                      	<select name="teilgewaesserbenutzung_art_benutzung_<?php echo $i; ?>" onchange="setNewUrlParameter(this,'teilgewaesserbenutzung_art_benutzung_<?php echo $i; ?>')">
+                                      	<select name="teilgewaesserbenutzung_art_benutzung_<?php echo $i; ?>" onchange="setNewUrlParameter(this,'teilgewaesserbenutzung_art_benutzung_<?php echo $i; ?>')" <?php echo $speereEingabeFestsetzung ? "disabled='disabled'" : "" ?>>
                                     		<option value="1" <?php echo $getArtBenutzung === "1" ?  'selected' : ''?>>GW</option>
                                     		<option value="2" <?php echo $getArtBenutzung === "2" ?  'selected' : ''?>>OW</option>
                                     	</select>
                                       </td>
                                       <td>
-                                      	<select name="teilgewaesserbenutzung_wiedereinleitung_bearbeiter_<?php echo $i; ?>" onchange="setNewUrlParameter(this,'teilgewaesserbenutzung_wiedereinleitung_bearbeiter_<?php echo $i; ?>')">
+                                      	<select name="teilgewaesserbenutzung_wiedereinleitung_bearbeiter_<?php echo $i; ?>" onchange="setNewUrlParameter(this,'teilgewaesserbenutzung_wiedereinleitung_bearbeiter_<?php echo $i; ?>')" <?php echo $speereEingabeFestsetzung ? "disabled='disabled'" : "" ?>>
                                     		<option value="true" <?php echo $getWiedereinleitungBearbeiter ?  'selected' : ''?>>ja</option>
                                     		<option value="false" <?php echo !$getWiedereinleitungBearbeiter ?  'selected' : ''?>>nein</option>
                                     	</select>
                                       </td>
                                       <td>
-                                      	<select name="teilgewaesserbenutzung_befreiungstatbestaende_<?php echo $i; ?>" onchange="setNewUrlParameter(this,'teilgewaesserbenutzung_befreiungstatbestaende_<?php echo $i; ?>')">
+                                      	<select name="teilgewaesserbenutzung_befreiungstatbestaende_<?php echo $i; ?>" onchange="setNewUrlParameter(this,'teilgewaesserbenutzung_befreiungstatbestaende_<?php echo $i; ?>')" <?php echo $speereEingabeFestsetzung ? "disabled='disabled'" : "" ?>>
                                     		<option value="true" <?php echo $getBefreiungstatbestaende ?  'selected' : ''?>>ja</option>
                                     		<option value="false" <?php echo !$getBefreiungstatbestaende ?  'selected' : ''?>>nein</option>
                                     	</select>
@@ -408,7 +423,7 @@ if(!empty($wrz))
 	   			<div class="wasserrecht_display_table_row">
 	   				<div class="wasserrecht_display_table_cell_caption">
             			<input type="hidden" name="go" value="wasserentnahmeentgelt_festsetzung">
-						<button class="wasserrecht_button" name="festsetzung_speichern_<?php echo $wrz->getId(); ?>" value="festsetzung_speichern_<?php echo $wrz->getId(); ?>" type="submit" id="festsetzung_speichern_button_<?php echo $wrz->getId(); ?>">Festsetzung speichern</button>
+						<button class="wasserrecht_button" name="festsetzung_speichern_<?php echo $wrz->getId(); ?>" value="festsetzung_speichern_<?php echo $wrz->getId(); ?>" type="submit" id="festsetzung_speichern_button_<?php echo $wrz->getId(); ?>" <?php echo $speereEingabeFestsetzung ? "disabled='disabled'" : "" ?>>Festsetzung speichern</button>
            			</div>
            			<div class="wasserrecht_display_table_cell_spacer"></div>
     		   		<div class="wasserrecht_display_table_row_spacer"></div>
@@ -422,7 +437,7 @@ if(!empty($wrz))
 	   			
 	   			<div class="wasserrecht_display_table_row">
 	   				<div class="wasserrecht_display_table_cell_caption">
-						<button class="wasserrecht_button" name="festsetzung_freigeben_<?php echo $wrz->getId(); ?>" value="festsetzung_freigeben_<?php echo $wrz->getId(); ?>" type="submit" id="festsetzung_freigeben_button_<?php echo $wrz->getId(); ?>">Festsetzung freigeben</button>
+						<button class="wasserrecht_button" name="festsetzung_freigeben_<?php echo $wrz->getId(); ?>" value="festsetzung_freigeben_<?php echo $wrz->getId(); ?>" type="submit" id="festsetzung_freigeben_button_<?php echo $wrz->getId(); ?>" <?php echo $speereEingabeFestsetzung ? "disabled='disabled'" : "" ?>>Festsetzung freigeben</button>
            			</div>
            			<div class="wasserrecht_display_table_cell_spacer"></div>
     		   		<div class="wasserrecht_display_table_row_spacer"></div>
