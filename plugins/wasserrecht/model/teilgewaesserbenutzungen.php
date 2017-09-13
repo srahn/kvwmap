@@ -146,6 +146,16 @@ class Teilgewaesserbenutzungen extends WrPgObject {
 	    return $this->data['umfang'];
 	}
 	
+	public function getUmfangHTML() 
+	{
+	    if(!empty($this->getUmfang()))
+	    {
+	        return number_format($this->getUmfang(), 0, '', ' ')  . " m³/a";
+	    }
+	    
+	    return "";
+	}
+	
 	public function getEntgeltsatz($artBenutzungId, $befreit, $zugelassen, $ermaessigt)
 	{
 // 	    var_dump("artBenutzungId: " . $artBenutzungId);
@@ -213,12 +223,12 @@ class Teilgewaesserbenutzungen extends WrPgObject {
 	    return "<div style=\"color: red;\">Fehler</div>";
 	}
 	
-	public function getEntgelt($artBenutzungId, $befreit, $zugelassen, $ermaessigt)
+	public function getEntgelt($umfang, $artBenutzungId, $befreit, $zugelassen, $ermaessigt)
 	{
 	    $entgeltsatz = $this->getEntgeltsatz($artBenutzungId, $befreit, $zugelassen, $ermaessigt);
 	    if(is_numeric($entgeltsatz))
 	    {
-	        return $this->getUmfang() * $entgeltsatz;
+	        return $umfang * $entgeltsatz;
 	    }
 	    
 	    return $entgeltsatz;

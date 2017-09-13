@@ -7,11 +7,40 @@ class GewaesserbenutzungenUmfang extends WrPgObject {
 	{
 	    if(!empty($this->data['max_ent_a']))
 	    {
-	        return number_format($this->data['max_ent_a'], 0, '', ' ')  . " m³/a";
+	        return $this->data['max_ent_a'];
+	    }
+	    
+	    return null;
+	}
+	
+	public function getErlaubterUmfang()
+	{
+	    if(!empty($this->data['max_ent_wee']))
+	    {
+	        return $this->data['max_ent_wee'];
+	    }
+	    
+	    return null;
+	}
+	
+	public function getUmfangHTML()
+	{
+	    if(!empty($this->getUmfang()))
+	    {
+	        return number_format($this->getUmfang(), 0, '', ' ')  . " m³/a";
 	    }
 	    
 	    return "";
-// 	    return "m3/a";
+	}
+	
+	public function getErlaubterUmfangHTML()
+	{
+	    if(!empty($this->getErlaubterUmfang()))
+	    {
+	        return number_format($this->getErlaubterUmfang(), 0, '', ' ')  . " m³/a";
+	    }
+	    
+	    return "";
 	}
 }
 ?>

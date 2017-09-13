@@ -71,7 +71,7 @@ class Gewaesserbenutzungen extends WrPgObject {
 	    {
 	        $teilgewaesserbenutzung = null;
 	        if(!empty($this->teilgewaesserbenutzungen) && count($this->teilgewaesserbenutzungen) > 0
-	            && count($this->teilgewaesserbenutzungen) > ($i - 1) && !empty($this->teilgewaesserbenutzungen[$i -1]))
+	            && count($this->teilgewaesserbenutzungen) > ($i - 1) && !empty($this->teilgewaesserbenutzungen[$i - 1]))
 	        {
 	            $teilgewaesserbenutzung = $this->teilgewaesserbenutzungen[$i - 1];
 	            
@@ -83,6 +83,88 @@ class Gewaesserbenutzungen extends WrPgObject {
 	    }
 	    
 	    return $gesamtUmfang;
+	}
+	
+	public function getTeilgewaesserbenutzungNichtZugelasseneMenge($teilgewaesserbenutzungId)
+	{
+	    $gesamtUmfang = 0;
+	    
+	    $zugelassenerUmfang = 0;
+	    if(!empty($this->gewaesserbenutzungUmfang) && !empty($this->gewaesserbenutzungUmfang->getErlaubterUmfang()))
+	    {
+	        $zugelassenerUmfang = $this->gewaesserbenutzungUmfang->getErlaubterUmfang();
+	    }
+	    
+	    if(!empty($teilgewaesserbenutzungId) && !empty($zugelassenerUmfang))
+	    {
+	        for ($i = 1; $i <= WASSERRECHT_ERKLAERUNG_ENTNAHME_TEILGEWAESSERBENUTZUNGEN_COUNT; $i++)
+	        {
+	            $teilgewaesserbenutzung = null;
+	            if(!empty($this->teilgewaesserbenutzungen) && count($this->teilgewaesserbenutzungen) > 0
+	                && count($this->teilgewaesserbenutzungen) > ($i - 1) && !empty($this->teilgewaesserbenutzungen[$i - 1]))
+	            {
+	                $teilgewaesserbenutzung = $this->teilgewaesserbenutzungen[$i - 1];
+	                
+	                if(!empty($teilgewaesserbenutzung))
+	                {
+	                    $gesamtUmfang = $gesamtUmfang + $teilgewaesserbenutzung->getUmfang();
+	                    
+                        if($teilgewaesserbenutzung->getId() === $teilgewaesserbenutzungId)
+                        {
+                            if($gesamtUmfang <= $zugelassenerUmfang)
+                            {
+                                return 0;
+                            }
+                            else
+                            {
+                                return $gesamtUmfang - $zugelassenerUmfang;
+                            }
+                        }
+	                }
+	            }
+	        }
+	    }
+	    
+	    return null;
+	}
+	
+	public function getEntnahmemenge($zugelassen)
+	{
+	    $gesamtUmfang = $this->getUmfangAllerTeilbenutzungen();
+	    
+	    $zugelassenerUmfang = 0;
+	    if(!empty($this->gewaesserbenutzungUmfang) && !empty($this->gewaesserbenutzungUmfang->getErlaubterUmfang()))
+	    {
+	        $zugelassenerUmfang = $this->gewaesserbenutzungUmfang->getErlaubterUmfang();
+	    }
+	    
+	    if(!empty($gesamtUmfang) && !empty($zugelassenerUmfang))
+	    {
+	        if($zugelassen)
+	        {
+	            if($gesamtUmfang > $zugelassenerUmfang)
+	            {
+	                return $zugelassenerUmfang;
+	            }
+	            else
+	            {
+	                return $gesamtUmfang;
+	            }
+	        }
+	        else
+	        {
+	            if($gesamtUmfang > $zugelassenerUmfang)
+	            {
+	                return $gesamtUmfang - $zugelassenerUmfang;
+	            }
+	            else
+	            {
+	                return 0;
+	            }
+	        }
+	    }
+	   
+	    return null;
 	}
 	
 	public function getKennummer() {

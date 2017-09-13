@@ -3,6 +3,8 @@ $wrz = null;
 $gewaesserbenutzung = null;
 $errorEingabeFestsetzung = null;
 $speereEingabeFestsetzung = false;
+$zugelassenesEntnahmeEntgelt = 0;
+$nichtZugelassenesEntnahmeEntgelt = 0;
 		
 // print_r($_REQUEST); 
 
@@ -337,11 +339,56 @@ if(!empty($wrz))
                                       	<?php 
 //                                       	     var_dump("getBefreiungstatbestaende: " . $getBefreiungstatbestaende);
 //                                       	     var_dump("getWiedereinleitungBearbeiter: " . $getWiedereinleitungBearbeiter);
-                                      	     echo $teilgewaesserbenutzung->getEntgeltsatz($getArtBenutzung, $getBefreiungstatbestaende, true, $getWiedereinleitungBearbeiter) 
+                                      	    $teilbenutzungNichtZugelasseneMenge = $gewaesserbenutzung->getTeilgewaesserbenutzungNichtZugelasseneMenge($teilgewaesserbenutzung->getId());
+//                                       	    echo "teilbenutzungNichtZugelasseneMenge: $teilbenutzungNichtZugelasseneMenge";
+                                      	    if($teilbenutzungNichtZugelasseneMenge > 0)
+                                      	    {
+                                      	        if($teilbenutzungNichtZugelasseneMenge === $teilgewaesserbenutzung->getUmfang())
+                                      	        {
+                                      	            echo $teilgewaesserbenutzung->getEntgeltsatz($getArtBenutzung, $getBefreiungstatbestaende, false, $getWiedereinleitungBearbeiter);
+                                      	        }
+                                      	        else
+                                      	        {
+                                      	            echo $teilgewaesserbenutzung->getEntgeltsatz($getArtBenutzung, $getBefreiungstatbestaende, true, $getWiedereinleitungBearbeiter) . " (zugelassener Umfang)<br />"; 
+                                      	            echo $teilgewaesserbenutzung->getEntgeltsatz($getArtBenutzung, $getBefreiungstatbestaende, false, $getWiedereinleitungBearbeiter) . " (nicht zugelassener Umfang)"; 
+                                      	        }
+                                      	    }
+                                      	    else
+                                      	    {
+                                      	        echo $teilgewaesserbenutzung->getEntgeltsatz($getArtBenutzung, $getBefreiungstatbestaende, true, $getWiedereinleitungBearbeiter);
+                                      	    }   
                                       	?>
                                       </td>
                                       <td>
-                                      	<?php echo $teilgewaesserbenutzung->getEntgelt($getArtBenutzung, $getBefreiungstatbestaende, true, $getWiedereinleitungBearbeiter) ?>
+                                      	<?php
+                                      	    if($teilbenutzungNichtZugelasseneMenge > 0)
+                                            {
+                                                if($teilbenutzungNichtZugelasseneMenge === $teilgewaesserbenutzung->getUmfang())
+                                                {
+                                                    $entnahmeEntgeltNichtErlaubt = $teilgewaesserbenutzung->getEntgelt($teilgewaesserbenutzung->getUmfang(), $getArtBenutzung, $getBefreiungstatbestaende, false, $getWiedereinleitungBearbeiter);
+                                                    $nichtZugelassenesEntnahmeEntgelt =  $nichtZugelassenesEntnahmeEntgelt + $entnahmeEntgeltNichtErlaubt;
+                                                    
+                                                    echo $entnahmeEntgeltNichtErlaubt;
+                                                }
+                                                else
+                                                {
+                                                    $entnahmeEntgeltNichtErlaubt = $teilgewaesserbenutzung->getEntgelt($teilbenutzungNichtZugelasseneMenge, $getArtBenutzung, $getBefreiungstatbestaende, false, $getWiedereinleitungBearbeiter);
+                                                    $nichtZugelassenesEntnahmeEntgelt =  $nichtZugelassenesEntnahmeEntgelt + $entnahmeEntgeltNichtErlaubt;
+                                                    
+                                                    $entnahmeEntgeltErlaubt = $teilgewaesserbenutzung->getEntgelt($gewaesserbenutzung->gewaesserbenutzungUmfang->getErlaubterUmfang(), $getArtBenutzung, $getBefreiungstatbestaende, true, $getWiedereinleitungBearbeiter);
+                                                    $zugelassenesEntnahmeEntgelt =  $zugelassenesEntnahmeEntgelt + $entnahmeEntgeltErlaubt;
+                                                    
+                                                    echo $entnahmeEntgeltErlaubt + $entnahmeEntgeltNichtErlaubt;
+                                                }
+                                            }
+                                      	    else
+                                      	    {
+                                      	        $entnahmeEntgeltErlaubt = $teilgewaesserbenutzung->getEntgelt($teilgewaesserbenutzung->getUmfang(), $getArtBenutzung, $getBefreiungstatbestaende, true, $getWiedereinleitungBearbeiter);
+                                      	        $zugelassenesEntnahmeEntgelt =  $zugelassenesEntnahmeEntgelt + $entnahmeEntgeltErlaubt;
+                                      	        
+                                      	        echo $entnahmeEntgeltErlaubt;
+                                      	    }
+                                      	?>
                                       </td>
                                   </tr>
                            <?php
@@ -353,27 +400,27 @@ if(!empty($wrz))
                   	<td></td>
                   	<td></td>
                   	<td>Zugelassene Entnahmemenge:</td>
-                  	<td><input class="wasserrecht_table_inputfield" type="text" id="zugelassene_entnahmemenge" name="zugelassene_entnahmemenge" readonly="readonly" value=""></td>
+                  	<td><input class="wasserrecht_table_inputfield" type="text" id="zugelassene_entnahmemenge" name="zugelassene_entnahmemenge" readonly="readonly" value="<?php echo $gewaesserbenutzung->getEntnahmemenge(true) ?>"></td>
                   	<td></td>
                   	<td></td>
                   	<td></td>
                   	<td></td>
                   	<td></td>
                   	<td>Zugelassene Entnahme Entgelt:</td>
-                  	<td><input class="wasserrecht_table_inputfield" type="text" id="zugelassene_entnahme_entgelt" name="zugelassene_entnahme_entgelt" readonly="readonly" value=""></td>
+                  	<td><input class="wasserrecht_table_inputfield" type="text" id="zugelassene_entnahme_entgelt" name="zugelassene_entnahme_entgelt" readonly="readonly" value="<?php echo $zugelassenesEntnahmeEntgelt ?>"></td>
                   </tr>
                   <tr>
                   	<td></td>
                   	<td></td>
                   	<td>Nicht zugelassene Entnahme:</td>
-                  	<td><input class="wasserrecht_table_inputfield" type="text" id="nicht_zugelassene_entnahmemenge" name="nicht_zugelassene_entnahmemenge" readonly="readonly" value=""></td>
+                  	<td><input class="wasserrecht_table_inputfield" type="text" id="nicht_zugelassene_entnahmemenge" name="nicht_zugelassene_entnahmemenge" readonly="readonly" value="<?php echo $gewaesserbenutzung->getEntnahmemenge(false) ?>"></td>
                   	<td></td>
                   	<td></td>
                   	<td></td>
                   	<td></td>
                   	<td></td>
                   	<td>Nicht zugelassene Entnahmeentgelt:</td>
-                  	<td><input class="wasserrecht_table_inputfield" type="text" id="nicht_zugelassene_entnahme_entgelt" name="nicht_zugelassene_entnahme_entgelt" readonly="readonly" value=""></td>
+                  	<td><input class="wasserrecht_table_inputfield" type="text" id="nicht_zugelassene_entnahme_entgelt" name="nicht_zugelassene_entnahme_entgelt" readonly="readonly" value="<?php echo $nichtZugelassenesEntnahmeEntgelt ?>"></td>
                   </tr>
                   <tr>
                   	<td></td>
@@ -386,7 +433,7 @@ if(!empty($wrz))
                   	<td></td>
                   	<td></td>
                   	<td>Summe Entgelt:</td>
-                  	<td><input class="wasserrecht_table_inputfield" type="text" id="summe_entgelt" name="summe_entgelt" readonly="readonly" value=""></td>
+                  	<td><input class="wasserrecht_table_inputfield" type="text" id="summe_entgelt" name="summe_entgelt" readonly="readonly" value="<?php echo $zugelassenesEntnahmeEntgelt + $nichtZugelassenesEntnahmeEntgelt ?>"></td>
                   </tr>
                   <tr>
                   	<td></td>
@@ -455,7 +502,7 @@ if(!empty($wrz))
                     <div class="wasserrecht_display_table_cell_spacer"></div>
                     <div class="wasserrecht_display_table_cell_white">
                     <?php 
-                        echo $this->user->Vorname . ' ' . $this->user->Name
+                            echo $wrz->getErklaerungNutzer();
                     ?>
                     </div>
                 </div>
