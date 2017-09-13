@@ -48,7 +48,7 @@ include_once ('includes/header.php');
 		                      $word_file = WASSERRECHT_DOCUMENT_PATH . $word_file_name;
 		                      
 		                      //write the word file
-		                      writeWordFile(PLUGINS . 'wasserrecht/templates/Anhang_IV.docx', $word_file);
+		                      writeAufforderungsWordFile(PLUGINS . 'wasserrecht/templates/Anhang_IV.docx', $word_file);
 		                      
 		                      //write the document path to the database
 		                      $aufforderung_dokument = new Dokument($this);

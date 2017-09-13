@@ -129,12 +129,41 @@ function festsetzung_freigeben($gui, $keyEscaped, $keyName, $festsetzungFreigebe
                 }
             }
             
-            if ($errorEingabeFestsetzung === null)
+            if($errorEingabeFestsetzung === null)
             {
                 if($festsetzungFreigeben)
                 {
                     $wrz->insertFestsetzungDatum();
-                    $wrz->insertFestsetzungNutzer($gui->user->Vorname . ' ' . $gui->user->Name);
+                    $festsetzungsNutzer = $gui->user->Vorname . ' ' . $gui->user->Name;
+                    $wrz->insertFestsetzungNutzer($festsetzungsNutzer);
+                    
+                    /**
+                     * Fesetzungsbescheid erstellen
+                     */
+                    //altes Festsetzungsdokument anlegen
+                    if(!empty($wrz->getFestsetzungDokument()))
+                    {
+                        $oldFestsetzungsDocumentId = $wrz->getFestsetzungDokument();
+                        $wrz->deleteFestsetzungDokument();
+                        
+                        $festsetzung_delete_dokument = new Dokument($gui);
+                        $festsetzung_delete_dokument->deleteDocument($oldFestsetzungsDocumentId);
+                    }
+                    
+                    //get a unique word file name
+                    $uniqid = uniqid();
+                    $word_file_name = $uniqid . ".docx";
+                    $word_file = WASSERRECHT_DOCUMENT_PATH . $word_file_name;
+                    
+                    $freitext = htmlspecialchars($_POST["festsetzung_freitext"]);
+                    
+                    //write the word file
+                    writeFestsetzungsWordFile(PLUGINS . 'wasserrecht/templates/Festsetzung_Sammelbescheid.docx', $word_file, $festsetzungsNutzer, $freitext);
+                    
+                    //write the document path to the database
+                    $festsetzung_dokument = new Dokument($gui);
+                    $festsetzung_dokument_identifier = $festsetzung_dokument->createDocument('FestsetzungBescheid_' . $wrz->getId(), $word_file_name);
+                    $wrz->insertFestsetzungDokument($festsetzung_dokument_identifier);
                 }
                 
                 // update gewaesserbenutzungen, because teilgewaesserbenutzungen where added
@@ -495,6 +524,20 @@ if(!empty($wrz))
                 <div class="wasserrecht_display_table_row">
            			<div class="wasserrecht_display_table_cell_caption">Abgelegte Festsetzungen</div>
 				</div>
+				<?php 
+				    if(!empty($wrz->festsetzung_dokument))
+    				{?>
+        				<div class="wasserrecht_display_table_row">
+                            <div class="wasserrecht_display_table_cell_caption">
+            					<?php
+            					   echo '<a href="' . $this->actual_link . WASSERRECHT_DOCUMENT_URL_PATH . $wrz->festsetzung_dokument->getPfad() . '" target="_blank">' . $wrz->festsetzung_dokument->getName() . '</a>';
+            					?>
+                   			</div>
+        				</div>
+    			<?php
+    				}
+				
+				?>
 				
 				<div class="wasserrecht_display_table_row">
     		   		<div class="wasserrecht_display_table_row_spacer"></div>
@@ -507,7 +550,7 @@ if(!empty($wrz))
                     <div class="wasserrecht_display_table_cell_spacer"></div>
                     <div class="wasserrecht_display_table_cell_white">
                     	<?php
-//                             echo $wrz->getErklaerungDatumHTML();
+                    	       echo $wrz->getFestsetzungDatumHTML();
                 	    ?>
                     </div>
                 </div>

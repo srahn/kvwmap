@@ -235,7 +235,7 @@ function erklaerung_freigeben($gui, $keyEscaped, $keyName, $insertDate, &$wrz, &
                                     //                         echo var_dump($speereEingabeErklaerung);
                                     
                                     // update an existing teilgewaesserbenutzung
-                                    if (! empty($gewaesserbenutzung->teilgewaesserbenutzungen[$i - 1])) {
+                                    if (!empty($gewaesserbenutzung->teilgewaesserbenutzungen[$i - 1])) {
                                         $teilgewaesserbenutzung = $gewaesserbenutzung->teilgewaesserbenutzungen[$i - 1];
                                         $teilgewaesserbenutzungId = $teilgewaesserbenutzung->updateTeilgewaesserbenutzung_Nutzer($gewaesserbenutzungsart, $gewaesserbenutzungszweck, $gewaesserbenutzungsumfang, $wiedereinleitung, $mengenbestimmung, $teilgewaesserbenutzungsart);
                                         
@@ -257,6 +257,9 @@ function erklaerung_freigeben($gui, $keyEscaped, $keyName, $insertDate, &$wrz, &
             
             if (!$leerEingabeErklaerung && $errorEingabeErklaerung === null) 
             {
+                /**
+                 * Datum hinzufügen
+                 */
                 if($insertDate)
                 {
                     // if(empty($wrz->getErklaerungDatum()))

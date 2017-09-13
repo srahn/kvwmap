@@ -15,6 +15,13 @@ class Dokument extends WrPgObject {
 	    }
 	}
 	
+	public function deleteDocument($id) {
+	    if(!empty($id))
+	    {
+	        return $this->delete_by('id', $id);
+	    }
+	}
+	
 	public function getPfad() {
 	    return $this->data['pfad'];
 	}

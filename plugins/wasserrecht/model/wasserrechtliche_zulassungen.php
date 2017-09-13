@@ -9,6 +9,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	public $adressat;
 	public $anlagen;
 	public $aufforderung_dokument;
+	public $festsetzung_dokument;
 	public $gewaesserbenutzungen;
 
 	public function find_gueltigkeitsjahre($gui) {
@@ -109,6 +110,17 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	            if(!empty($dokumente))
 	            {
 	                $result->aufforderung_dokument = $dokumente[0];
+	            }
+	        }
+	        
+	        //get the 'Festsetzungs Dokument'
+	        if(!empty($result->getFestsetzungDokument()))
+	        {
+	            $dokument = new Dokument($gui);
+	            $dokumente = $dokument->find_where('id=' . $result->getFestsetzungDokument());
+	            if(!empty($dokumente))
+	            {
+	                $result->festsetzung_dokument = $dokumente[0];
 	            }
 	        }
 	        
@@ -384,6 +396,23 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	    }
 	    
 	    return "<div style=\"color: red;\">Nicht erklärt</div>";
+	}
+	
+	public function getFestsetzungDokument() {
+	    return $this->data['festsetzung_dokument'];
+	}
+	
+	public function insertFestsetzungDokument($id) {
+	    if(!empty($id))
+	    {
+	        $this->set('festsetzung_dokument', $id);
+	        $this->update();
+	    }
+	}
+	
+	public function deleteFestsetzungDokument() {
+	      $this->set('festsetzung_dokument', '');
+	      $this->update();
 	}
 	
 	////////////////////////////////////////////////////////////////////

@@ -59,12 +59,23 @@
 //     }
 // }
 
-function writeWordFile($word_template, $word_file)
+function writeAufforderungsWordFile($word_template, $word_file)
 {
     $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($word_template);
     $templateProcessor->setValue('PLZ', '19053');
     $timestamp = time();
     $datum = date("d.m.Y", $timestamp);
     $templateProcessor->setValue('datum', $datum);
+    $templateProcessor->saveAs($word_file);
+}
+
+function writeFestsetzungsWordFile($word_template, $word_file, $festsetzungsNutzer, $festsetzungsFreitext)
+{
+    $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($word_template);
+    $templateProcessor->setValue('festsetzung_nutzer', $festsetzungsNutzer);
+    $templateProcessor->setValue('festsetzung_freitext', $festsetzungsFreitext);
+//     $timestamp = time();
+//     $datum = date("d.m.Y", $timestamp);
+//     $templateProcessor->setValue('datum', $datum);
     $templateProcessor->saveAs($word_file);
 }
