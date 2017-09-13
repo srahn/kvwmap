@@ -87,6 +87,7 @@ function festsetzung_freigeben($gui, $keyEscaped, $keyName, $festsetzungFreigebe
                     $teilgewaesserbenutzung_art_benutzung = htmlspecialchars($_POST["teilgewaesserbenutzung_art_benutzung_" . $i]);
                     $teilgewaesserbenutzung_wiedereinleitung_bearbeiter = htmlspecialchars($_POST["teilgewaesserbenutzung_wiedereinleitung_bearbeiter_" . $i]);
                     $teilgewaesserbenutzung_befreiungstatbestaende = htmlspecialchars($_POST["teilgewaesserbenutzung_befreiungstatbestaende_" . $i]);
+                    $freitext = htmlspecialchars($_POST["festsetzung_freitext"]);
                     
                     // check for not filled out lines
                     if (empty($teilgewaesserbenutzung_art_benutzung)
@@ -109,9 +110,9 @@ function festsetzung_freigeben($gui, $keyEscaped, $keyName, $festsetzungFreigebe
                                 //                         echo var_dump($speereEingabeFestsetzung);
                                 
                                 // update an existing teilgewaesserbenutzung
-                                if (! empty($gewaesserbenutzung->teilgewaesserbenutzungen[$i - 1])) {
+                                if (!empty($gewaesserbenutzung->teilgewaesserbenutzungen[$i - 1])) {
                                     $teilgewaesserbenutzung = $gewaesserbenutzung->teilgewaesserbenutzungen[$i - 1];
-                                    $teilgewaesserbenutzungId = $teilgewaesserbenutzung->updateTeilgewaesserbenutzung_Bearbeiter($teilgewaesserbenutzung_art_benutzung, $teilgewaesserbenutzung_wiedereinleitung_bearbeiter, $teilgewaesserbenutzung_befreiungstatbestaende);
+                                    $teilgewaesserbenutzungId = $teilgewaesserbenutzung->updateTeilgewaesserbenutzung_Bearbeiter($teilgewaesserbenutzung_art_benutzung, $teilgewaesserbenutzung_wiedereinleitung_bearbeiter, $teilgewaesserbenutzung_befreiungstatbestaende, $freitext);
                                     
                                     $gui->add_message('notice', 'Teilgewässerbenutzungen (id: ' . $teilgewaesserbenutzungId . ') erfolgreich geändert!');
                                 }                        // else --> if not there --> create one
@@ -372,7 +373,20 @@ if(!empty($wrz))
                   	<td><input class="wasserrecht_table_inputfield" type="text" id="summe_gebucht" name="summe_gebucht" readonly="readonly" value=""></td>
                   </tr>
               </table>
-              
+           
+           <div class="wasserrecht_display_table" style="margin-top: 20px; margin-left: 15px">
+               <label for="festsetzung_freitext">Festsetzung Freitext:</label>
+               <?php 
+                   $teilgewaesserbenutzung = null;
+                   if(!empty($gewaesserbenutzung->teilgewaesserbenutzungen) && count($gewaesserbenutzung->teilgewaesserbenutzungen) > 0 && !empty($gewaesserbenutzung->teilgewaesserbenutzungen[0]))
+                   {
+                       $teilgewaesserbenutzung = $gewaesserbenutzung->teilgewaesserbenutzungen[0];
+                       //var_dump($teilgewaesserbenutzung);
+                   }
+               ?>
+               <textarea rows="10" cols="180" id="festsetzung_freitext" name="festsetzung_freitext" style="display: block;"><?php echo !empty($teilgewaesserbenutzung) && !empty($teilgewaesserbenutzung->getFreitext()) ? $teilgewaesserbenutzung->getFreitext() : ""; ?></textarea>
+           </div>
+           
            <div class="wasserrecht_display_table" style="margin-top: 20px; margin-left: 15px">
             
                 <div class="wasserrecht_display_table_row">
@@ -380,12 +394,12 @@ if(!empty($wrz))
                     <div class="wasserrecht_display_table_cell_spacer"></div>
                     <div class="wasserrecht_display_table_cell_white">
                     	<?php 
-                        	$teilgewaesserbenutzung = null;
-                        	if(!empty($gewaesserbenutzung->teilgewaesserbenutzungen) && count($gewaesserbenutzung->teilgewaesserbenutzungen) > 0 && !empty($gewaesserbenutzung->teilgewaesserbenutzungen[0]))
-                        	{
-                        	    $teilgewaesserbenutzung = $gewaesserbenutzung->teilgewaesserbenutzungen[0];
-                        	    //var_dump($teilgewaesserbenutzung);
-                        	}
+//                         	$teilgewaesserbenutzung = null;
+//                         	if(!empty($gewaesserbenutzung->teilgewaesserbenutzungen) && count($gewaesserbenutzung->teilgewaesserbenutzungen) > 0 && !empty($gewaesserbenutzung->teilgewaesserbenutzungen[0]))
+//                         	{
+//                         	    $teilgewaesserbenutzung = $gewaesserbenutzung->teilgewaesserbenutzungen[0];
+//                         	    //var_dump($teilgewaesserbenutzung);
+//                         	}
                         	echo !empty($teilgewaesserbenutzung) && !empty($teilgewaesserbenutzung->teilgewaesserbenutzungen_art) ? $teilgewaesserbenutzung->teilgewaesserbenutzungen_art->getName() : "";
                     	?>
                      </div>

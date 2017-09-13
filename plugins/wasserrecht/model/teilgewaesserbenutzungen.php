@@ -224,6 +224,10 @@ class Teilgewaesserbenutzungen extends WrPgObject {
 	    return $entgeltsatz;
 	}
 	
+	public function getFreitext() {
+	    return $this->data['freitext'];
+	}
+	
 	public function createTeilgewaesserbenutzung_Nutzer($gewaesserbenutzungen, $art = NULL, $zweck = NULL, $umfang = NULL, $wiedereinleitung_nutzer = NULL, $mengenbestimmung = NULL, $teilgewaesserbenutzungen_art = NULL, $entgeltsatz = NULL) 
 	{
 	    if (!empty($gewaesserbenutzungen))
@@ -289,11 +293,12 @@ class Teilgewaesserbenutzungen extends WrPgObject {
 	    return $this->getId();
 	}
 	
-	public function updateTeilgewaesserbenutzung_Bearbeiter($art_benutzung = NULL, $wiedereinleitung_bearbeiter = NULL, $befreiungstatbestaende = NULL)
+	public function updateTeilgewaesserbenutzung_Bearbeiter($art_benutzung = NULL, $wiedereinleitung_bearbeiter = NULL, $befreiungstatbestaende = NULL, $freitext = NULL)
 	{
 	    $this->updateData('art_benutzung', $art_benutzung);
 	    $this->updateData('wiedereinleitung_bearbeiter', $wiedereinleitung_bearbeiter);
 	    $this->updateData('befreiungstatbestaende', $befreiungstatbestaende);
+	    $this->updateData('freitext', $freitext);
 	    
 	    $this->debug->write('kvp update: ' . var_export($this->getKVP(), true), 4);
 	    
