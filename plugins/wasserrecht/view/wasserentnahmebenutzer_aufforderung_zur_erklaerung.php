@@ -271,6 +271,9 @@ include_once ('includes/header.php');
         			<th>Erklärung anlegen</th>
         			<th>Erklärung</th>
         		</tr>
+        		<tr>
+        			<td style="background-color: inherit;"><input type="checkbox" id="select_all_checkboxes" onchange="$('input:checkbox').not(this).prop('checked', this.checked);"></td>
+        		</tr>
         		<?php 
         		
         		  if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen))
