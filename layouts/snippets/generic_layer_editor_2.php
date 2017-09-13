@@ -16,6 +16,16 @@
 	if($layer['alias'] != '' AND $this->Stelle->useLayerAliases){
 		$layer['Name'] = $layer['alias'];
 	}
+	$doit = false;
+  $anzObj = count($layer['shape']);
+  if ($anzObj > 0) {
+  	$this->found = 'true';
+  	$doit = true;
+  }
+  if($this->new_entry == true){
+  	$anzObj = 1;
+  	$doit = true;
+  }
 ?>
 <div id="layer" onclick="remove_calendar();">
 <input type="hidden" value="" id="changed_<? echo $layer['Layer_ID']; ?>" name="changed_<? echo $layer['Layer_ID']; ?>">
@@ -23,7 +33,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 	<tr>
 		<td width="99%" align="center"><h2 id="layername"><? echo $layer['Name']; ?></h2></td>
-    <? if (!$this->user->rolle->visually_impaired) { ?>
+    <? if (!$this->user->rolle->visually_impaired AND $anzObj > 0) { ?>
 			<td valign="top" style="padding: 0 10 0 0" class="layer_header">
 				<? if($layer['template'] == '' OR $layer['template'] == 'generic_layer_editor_2.php'){ ?>
 				<img onclick="switch_gle_view(<? echo $layer['Layer_ID']; ?>);"" title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border pointer" src="<? echo GRAPHICSPATH.'columns.png'; ?>">
@@ -39,16 +49,6 @@
 </table>
 <? }
 
-	$doit = false;
-  $anzObj = count($layer['shape']);
-  if ($anzObj > 0) {
-  	$this->found = 'true';
-  	$doit = true;
-  }
-  if($this->new_entry == true){
-  	$anzObj = 1;
-  	$doit = true;
-  }
   if($doit == true){
 ?>
 <table border="0" cellspacing="0" cellpadding="2">

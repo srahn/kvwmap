@@ -30,4 +30,5 @@
 	$strExtentURL="URL de Utsnitts andüden";
 	$strSaveLayers="Themenutwahl sekern";
 	$strChooseLayers="Themenutwahl laden";
+	$strNoLayer="Du mööst een Layer för de Sachdatenaffraag utwählen!";
 ?>
