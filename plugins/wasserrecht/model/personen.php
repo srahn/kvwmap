@@ -5,6 +5,17 @@ class Personen extends WrPgObject {
 	
 	public $adresse;
 	
+	public function getBehoerde() {
+	    if(!empty($this->data))
+	    {
+	        return $this->data['behoerde'];
+	    }
+	    else
+	    {
+	        return null;
+	    }
+	}
+	
 	public function getAdresseStrasse() {
 	    
 // 	    var_dump($this->adresse);
