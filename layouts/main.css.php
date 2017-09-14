@@ -184,7 +184,7 @@ input[type="text"].transparent_input{
   float: left;
   text-align: right;
 	font-size: 17px;
-  width: 150px;
+  width: 210px;
   height: 15px;
   margin-right: 10px;
 }
@@ -891,7 +891,7 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 
 #layer	h2{
 	font-weight: bold;
-	padding-left: 50px;
+	padding-left: 35px;
 }
 
 #datensatz {

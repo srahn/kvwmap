@@ -14,7 +14,7 @@ function Bestaetigung(link,text) {
     <td><h2><?php echo $this->titel; ?></h2></td>
   </tr>
   <tr>
-    <td>
+    <td width="">
     	<table width="100%" border="0" style="border:2px solid #C3C7C3"cellspacing="0" cellpadding="3">
 	      <tr>
 	        <th style="border-right:1px solid #C3C7C3">Layer</th>
@@ -30,9 +30,9 @@ function Bestaetigung(link,text) {
 	      	</tr>
 		   <? } ?>
 		      <tr>
-		        <td style="border-right:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><? echo $this->layer['Bezeichnung'][$i]; ?></td>
-		        <td style="border-right:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><? echo $this->layer['Kurzbeschreibung'][$i]; ?>&nbsp;</td>
-		        <td style="border-bottom:1px solid #C3C7C3"><? echo $this->layer['Datenherr'][$i]; ?>&nbsp;</td>
+		        <td style="border-right:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3" valign="top"><? echo $this->layer['Bezeichnung'][$i]; ?></td>
+		        <td style="border-right:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3" valign="top"><div style="width: 400px"><? echo htmlentities($this->layer['Kurzbeschreibung'][$i]); ?></div></td>
+		        <td style="border-bottom:1px solid #C3C7C3"><div style="width: 200px" valign="top"><? echo $this->layer['Datenherr'][$i]; ?></div></td>
 		      </tr>
 		   <? } ?>
 	    </table>

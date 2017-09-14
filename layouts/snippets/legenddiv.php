@@ -32,7 +32,7 @@ if ($show_legend_graphic) { ?>
 	<div id="legendcontrol">
 		<a href="index.php?go=reset_querys"><img src="graphics/tool_info.png" border="0" alt="<? echo $strInfoQuery; ?>" title="<? echo $strInfoQuery.' | '.$strClearAllQuerys; ?>" width="17" style="vertical-align: bottom;"></a>
 		<a href="index.php?go=reset_layers"><img src="graphics/layer.png" border="0" alt="<? echo $strLayerControl; ?>" title="<? echo $strLayerControl.' | '.$strDeactivateAllLayer; ?>" width="20" height="20" style="vertical-align: bottom;"></a>
-		<input type="submit" name="neuladen" onclick="startwaiting(true);document.GUI.go.value='neu Laden';" value="<?php echo $strLoadNew; ?>" tabindex="1" style="vertical-align: top; margin-left: 25px">			
+		<input type="submit" name="neuladen_button" onclick="startwaiting(true);document.GUI.go.value='neu Laden';" value="<?php echo $strLoadNew; ?>" tabindex="1" style="vertical-align: top; margin-left: 25px">			
 	</div>
 	<div id="scrolldiv" onscroll="document.GUI.scrollposition.value = this.scrollTop; scrollLayerOptions();">
 		<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">

@@ -21,6 +21,11 @@ function compare_names($a, $b){
 	return strcmp($a['name'], $b['name']);
 }
 
+function compare_orders($a, $b){
+	if($a->order > $b->order)return 1;
+  else return 0;
+}
+
 function compare_groups($a, $b){
   if($a->group > $b->group)return 1;
   else return 0;

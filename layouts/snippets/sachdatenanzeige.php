@@ -20,6 +20,9 @@ if ($anzLayer==0) {
 	<?php	
 }
 for($i=0;$i<$anzLayer;$i++){
+	if($i > 0){
+		echo '<hr style="width: 100%; height: 3px; margin: 15 0; color: '.BG_GLEHEADER.'; background: '.BG_GLEHEADER.';">';
+	}
 	if ($this->qlayerset[$i]['template']=='') {
    	if(GLEVIEW == '2'){
     	include(SNIPPETS.'generic_layer_editor_2.php');			# Attribute zeilenweise

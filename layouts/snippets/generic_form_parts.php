@@ -149,7 +149,7 @@
 		else{
 			switch ($attributes['form_element_type'][$j]){
 				case 'Textfeld' : {
-					$datapart .= '<textarea title="'.$alias.'" id="'.$layer_id.'_'.$name.'_'.$k.'" cols="'.$size.'" onchange="'.$onchange.'"';
+					$datapart .= '<textarea title="'.$alias.'" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" id="'.$layer_id.'_'.$name.'_'.$k.'" cols="'.$size.'" onchange="'.$onchange.'"';
 					if($attribute_privileg == '0' OR $lock[$k]){
 						$datapart .= ' readonly style="display: none"';
 					}

@@ -16,40 +16,6 @@
 	if($layer['alias'] != '' AND $this->Stelle->useLayerAliases){
 		$layer['Name'] = $layer['alias'];
 	}
-
-?>
-<SCRIPT src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></SCRIPT>
-
-<div id="layer" onclick="remove_calendar();">
-<input type="hidden" value="" id="changed_<? echo $layer['Layer_ID']; ?>" name="changed_<? echo $layer['Layer_ID']; ?>">
-<? if($this->new_entry != true AND $layer['requires'] == ''){ ?>
-<table border="0" cellpadding="0" cellspacing="0" width="100%">
-	<tr>
-		<td align="right" valign="top" style="padding: 0 10 0 0">
-			<a href="javascript:scrollbottom();"><img class="hover-border" title="nach unten" src="<? echo GRAPHICSPATH; ?>pfeil.gif" width="11" height="11" border="0"></a>&nbsp;
-		</td>
-		<td valign="top" style="padding: 0 0 0 0">
-			<? if($layer['template'] == '' OR $layer['template'] == 'generic_layer_editor_2.php'){ ?>
-			<img onclick="switch_gle_view(<? echo $layer['Layer_ID']; ?>);"" title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border pointer" src="<? echo GRAPHICSPATH.'columns.png'; ?>">
-			<? }else{ ?>
-			<img onclick="switch_gle_view(<? echo $layer['Layer_ID']; ?>);"" title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border pointer" src="<? echo GRAPHICSPATH.'rows.png'; ?>">
-			<? } ?>
-		</td>
-		<td height="30" width="99%" align="center"><h2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<? echo $layer['Name']; ?></h2></td>
-		<td valign="top" style="padding: 0 10 0 0">
-			<? if($layer['template'] == '' OR $layer['template'] == 'generic_layer_editor_2.php'){ ?>
-			<img onclick="switch_gle_view(<? echo $layer['Layer_ID']; ?>);"" title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border pointer" src="<? echo GRAPHICSPATH.'columns.png'; ?>">
-			<? }else{ ?>
-			<img onclick="switch_gle_view(<? echo $layer['Layer_ID']; ?>);"" title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border pointer" src="<? echo GRAPHICSPATH.'rows.png'; ?>">
-			<? } ?>
-		</td>
-		<td align="right" valign="top">
-			<a href="javascript:scrollbottom();"><img class="hover-border" title="nach unten" src="<? echo GRAPHICSPATH; ?>pfeil.gif" width="11" height="11" border="0"></a>&nbsp;
-		</td>
-	</tr>
-</table>
-<?
-	}
 	$doit = false;
   $anzObj = count($layer['shape']);
   if ($anzObj > 0) {
@@ -60,6 +26,44 @@
   	$anzObj = 1;
   	$doit = true;
   }
+?>
+<SCRIPT src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></SCRIPT>
+
+<div id="layer" onclick="remove_calendar();">
+<input type="hidden" value="" id="changed_<? echo $layer['Layer_ID']; ?>" name="changed_<? echo $layer['Layer_ID']; ?>">
+<? if($this->new_entry != true AND $layer['requires'] == ''){ ?>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+	<tr>
+		<? if (!$this->user->rolle->visually_impaired AND $anzObj > 0) { ?>
+		<td align="right" valign="top" style="padding: 0 10 0 0">
+			<a href="javascript:scrollbottom();"><img class="hover-border" title="nach unten" src="<? echo GRAPHICSPATH; ?>pfeil.gif" width="11" height="11" border="0"></a>&nbsp;
+		</td>
+		<td valign="top" style="padding: 0 0 0 0">
+			<? if($layer['template'] == '' OR $layer['template'] == 'generic_layer_editor_2.php'){ ?>
+			<img onclick="switch_gle_view(<? echo $layer['Layer_ID']; ?>);"" title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border pointer" src="<? echo GRAPHICSPATH.'columns.png'; ?>">
+			<? }else{ ?>
+			<img onclick="switch_gle_view(<? echo $layer['Layer_ID']; ?>);"" title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border pointer" src="<? echo GRAPHICSPATH.'rows.png'; ?>">
+			<? } ?>
+		</td>
+		<? } ?>
+		<td height="30" width="99%" align="center"><h2><? echo $layer['Name']; ?></h2></td>
+		<? if (!$this->user->rolle->visually_impaired AND $anzObj > 0) { ?>
+		<td valign="top" style="padding: 0 10 0 0">
+			<? if($layer['template'] == '' OR $layer['template'] == 'generic_layer_editor_2.php'){ ?>
+			<img onclick="switch_gle_view(<? echo $layer['Layer_ID']; ?>);"" title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border pointer" src="<? echo GRAPHICSPATH.'columns.png'; ?>">
+			<? }else{ ?>
+			<img onclick="switch_gle_view(<? echo $layer['Layer_ID']; ?>);"" title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border pointer" src="<? echo GRAPHICSPATH.'rows.png'; ?>">
+			<? } ?>
+		</td>
+		<td align="right" valign="top">
+			<a href="javascript:scrollbottom();"><img class="hover-border" title="nach unten" src="<? echo GRAPHICSPATH; ?>pfeil.gif" width="11" height="11" border="0"></a>&nbsp;
+		</td>
+		<? } ?>
+	</tr>
+</table>
+<?
+	}
+
   if($doit == true){
 ?>
 <table border="0" cellspacing="1" cellpadding="2" width="100%">

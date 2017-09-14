@@ -591,6 +591,7 @@ $kvwmap_plugins = array();																			# Version 1.11.0
 #$kvwmap_plugins[] = 'geodoc';																	# Version 2.0.0
 #$kvwmap_plugins[] = 'jagdkataster';														# Version 2.0.0
 #$kvwmap_plugins[] = 'kolibri';																	# Version 2.8
+#$kvwmap_plugins[] = 'metadata';																# Version 2.8
 #$kvwmap_plugins[] = 'nachweisverwaltung';											# Version 2.0.0
 #$kvwmap_plugins[] = 'probaug';																	# Version 2.0.0
 #$kvwmap_plugins[] = 'wasserrecht';															# Version 2.8.0

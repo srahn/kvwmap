@@ -887,11 +887,7 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 		case 'Metadaten_Uebersicht' : {
 		$GUI->metadaten_uebersicht();
 	  } break;
-	  
-	  case 'Metadaten_Recherche' : {
-		$GUI->metadaten_suche();
-	  } break;
-	  
+
 	  case 'Metadaten_generieren' : {
 		$GUI->metadaten_generieren($GUI->formvars['layer_id']);
 	  } break;
@@ -900,16 +896,8 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 		$GUI->metadatenSuchForm();
 	  } break;
 
-	  case 'Metadaten_Auswaehlen_Senden' : {
-		$GUI->metadatenSuchen();
-	  } break;
-
 	  case 'Metadatenblattanzeige' : {
 		$GUI->metadatenblattanzeige();
-	  } break;
-
-	  case 'Metadateneingabe' : {
-		$GUI->metadateneingabe();
 	  } break;
 
 	  case 'Metadateneingabe_Senden' : {
@@ -1297,6 +1285,31 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->checkCaseAllowed($go);
 			$GUI->LayerAnzeigen();
 		} break;
+
+		case 'Layergruppen_Anzeigen' : {
+			$GUI->checkCaseAllowed($go);
+			$GUI->Layergruppen_Anzeigen();
+		} break;
+
+		case 'Layergruppe_Editor' : {
+			$GUI->checkCaseAllowed('Layergruppen_Anzeigen');
+			$GUI->Layergruppe_Editor();
+		} break;
+
+		case 'Layergruppe_Speichern' : {
+			$GUI->checkCaseAllowed('Layergruppen_Anzeigen');
+			$GUI->Layergruppe_Speichern();
+		} break;
+
+		case 'Layergruppe_Ändern' : {
+			$GUI->checkCaseAllowed('Layergruppen_Anzeigen');
+			$GUI->Layergruppe_Aendern();
+		} break;
+
+		case 'Layergruppe_Löschen' : {
+			$GUI->checkCaseAllowed('Layergruppen_Anzeigen');
+			$GUI->Layergruppe_Loeschen();
+		}
 
 	  case 'Layer_Uebersicht' : {
 			$GUI->LayerUebersicht();
