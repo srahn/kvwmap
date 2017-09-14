@@ -2195,18 +2195,18 @@ FROM
   }
         
   function getFlurenListeByGemkgIDByFlurID($GemkgID,$FlurID, $historical = false){
-		if(!$historical){
-			$sql ="SELECT gemarkungsteilflur AS FlurID, lpad(gemarkungsteilflur::text, 3, '0') AS Name";
-			$sql.=",schluesselgesamt AS GemFlurID FROM alkis.ax_gemarkungsteilflur WHERE anlass != '300700'";
+		if(!$historical){	# ax_gemarkungsteilflur kann nicht verwendet werden, da dies eine Katalogtabelle ist und Objekte in diesen nicht beendet werden
+			$sql ="SELECT distinct flurnummer, lpad(flurnummer::text, 3, '0') AS FlurID, lpad(flurnummer::text, 3, '0') AS Name, land*10000000 + gemarkungsnummer*1000 + flurnummer AS GemFlurID ";
+			$sql.="FROM alkis.ax_flurstueck WHERE 1=1 ";
 			
 			if ($GemkgID>0) {
-				$sql.=" AND land*10000 + gemarkung=".(int)$GemkgID;
+				$sql.=" AND land*10000 + gemarkungsnummer=".(int)$GemkgID;
 			}
 			if ($FlurID[0]>0) {
-				$sql.=" AND gemarkungsteilflur IN (".implode(',', $FlurID).")";
+				$sql.=" AND flurnummer IN (".implode(',', $FlurID).")";
 			}
-			$sql.= $this->build_temporal_filter(array('ax_gemarkungsteilflur'));
-			$sql.=" ORDER BY gemarkungsteilflur";
+			$sql.= $this->build_temporal_filter(array('ax_flurstueck'));
+			$sql.=" ORDER BY flurnummer";
 		}
 		else{		// die Fluren aller historischen Flurstücke abfragen
 			$sql = "SELECT distinct flurnummer, lpad(flurnummer::text, 3, '0') AS FlurID, lpad(flurnummer::text, 3, '0') AS Name, land*10000000 + gemarkungsnummer*1000 + flurnummer AS GemFlurID ";
