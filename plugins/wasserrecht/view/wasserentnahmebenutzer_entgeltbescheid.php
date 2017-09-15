@@ -12,5 +12,25 @@ include_once ('includes/header.php');
 
 <div id="wasserentnahmebenutzer_entgeltbescheid" class="tabcontent" style="display: block">
 
-		<h1>Entgeltbescheid</h1>
+	<form action="index.php" id="aufforderung_form" accept-charset="" method="POST">
+	
+		<?php 
+		      include_once ('includes/wasserentnahmebenutzer_header.php');
+		?>
+    	
+		<table id="wasserentnahmebenutzer_tabelle">
+			<tr>
+				<th>Auswahl</th>
+				<th>Anlage</th>
+    			<th>Wasserrechtliche Zulassung</th>
+    			<th>Benutzung</th>
+    			<th>Benutzungsnummer</th>
+    			<th>Hinweis</th>
+    			<th>Aufforderung</th>
+    			<th>Erklärung anlegen</th>
+    			<th>Erklärung</th>
+    		</tr>
+    	</table>
+    </form>
+
 </div>
