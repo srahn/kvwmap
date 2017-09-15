@@ -97,7 +97,12 @@ include_once ('includes/header.php');
                     		          		</td>
                     		          		<td>
                     		          			<?php 
-                    		          			     echo $wrz->getFestsetzungDatum();
+                    		          			     if(!empty($wrz->getFestsetzungDatum()))
+                    		          			     {?>
+                    		          			     	<a href="<?php echo $this->actual_link . "?go=wasserentnahmeentgelt_festsetzung&getfestsetzung=" . $wrz->getId() ?>"><?php echo $wrz->getFestsetzungDatum(); ?></a>
+                    		          			     <?php
+                    		          			     }
+                    		          			
                     		          			?>
                     		          		</td>
                     		          		<td>
