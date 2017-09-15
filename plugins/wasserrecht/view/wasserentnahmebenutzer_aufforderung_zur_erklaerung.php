@@ -20,15 +20,14 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
         $keyEscaped = htmlspecialchars($key);
         $valueEscaped = htmlspecialchars($value);
         
-        if(startsWith($keyEscaped, "auswahl_checkbox_"))
+        if(startsWith($keyEscaped, "aufforderung_checkbox_"))
         {
-            // 		              echo '<br />Key = ' . $keyEscaped . '<br />';
-            // 		              echo 'Value= ' . $valueEscaped;
+//             		              echo '<br />Key = ' . $keyEscaped . '<br />';
+//             		              echo 'Value= ' . $valueEscaped;
             
             $aufforderungWrz1 = new WasserrechtlicheZulassungen($this);
-            $lastIndex = strripos($keyEscaped, "_");
-            $aufforderungWrzId = substr($keyEscaped, $lastIndex + 1);
-            // 		              echo "<br />lastIndex: " . $lastIndex . " aufforderungWrzId: " . $aufforderungWrzId;
+            $aufforderungWrzId = $valueEscaped;
+            //echo "<br />aufforderungWrzId: " . $aufforderungWrzId;
             $aufforderungWrz2 = $aufforderungWrz1->find_by_id($this, 'id', $aufforderungWrzId);
             if(!empty($aufforderungWrz2) && empty($aufforderungWrz2->getAufforderungDatumAbsend()))
             {
@@ -118,7 +117,7 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
                         		          			if(empty($datumAbsend))
                         		          			{
                         		          			    ?>
-                        		          				<input type="checkbox" name="auswahl_checkbox_<?php echo (empty($gewaesserbenutzung) ? "0" : $gewaesserbenutzung->getId()) . "_" . $wrz->getId(); ?>">
+                        		          				<input type="checkbox" name="aufforderung_checkbox_<?php echo $wrz->getId(); ?>" value="<?php echo $wrz->getId(); ?>">
                         		          		<?php
                         		          			} 
                     		          			?>
