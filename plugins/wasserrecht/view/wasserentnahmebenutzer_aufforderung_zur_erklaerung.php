@@ -178,9 +178,8 @@ if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrech
                     ?>
             	</div>
             	<div class="wasserrecht_display_table_cell_spacer"></div>
-                <div class="wasserrecht_display_table_cell">
-                	<select name="adressat" onchange="setNewUrlParameter(this,'adressat')">
-        				<?php
+            	<div class="wasserrecht_display_table_cell">
+            		<?php
         				
         				if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen))
         				{
@@ -199,7 +198,7 @@ if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrech
         				                {
         				                    $adressatArray[]=$wrz->adressat->toString();
         				                    
-        				                    echo '<option value='. $wrz->adressat->getId() . ' ' . ($wrz->adressat->getId() === $getAdressat ? "selected" : "") . '>' . $wrz->adressat->getName() . "</option>";
+//         				                    echo '<option value='. $wrz->adressat->getId() . ' ' . ($wrz->adressat->getId() === $getAdressat ? "selected" : "") . '>' . $wrz->adressat->getName() . "</option>";
         				                    
         				                    if($wrz->adressat->getId() === $getAdressat)
         				                    {
@@ -208,21 +207,29 @@ if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrech
         				                }
         				            }
         				        }
-        				        else
-        				        {
-        				            echo "<option>Keinen Eintrag in der Datenbank gefunden!</option>";
-        				            break;
-        				        }
+//         				        else
+//         				        {
+//         				            echo "<option>Keinen Eintrag in der Datenbank gefunden!</option>";
+//         				            break;
+//         				        }
         				    }
         				    
         				}
         				
-        				?>
-        			</select>
-                </div>
+        			?>
+					<input autocomplete="off" title="Adressat"
+						onkeydown="if(this.backup_value==undefined){this.backup_value=this.value; document.getElementById('25_personen_id_0').backup_value=document.getElementById('25_personen_id_0').value;}"
+						onkeyup="autocomplete1('25', 'personen_id', '25_personen_id_0', this.value);"
+						onchange="if(document.getElementById('suggests_25_personen_id_0').style.display=='block'){this.value=this.backup_value; document.getElementById('25_personen_id_0').value=document.getElementById('25_personen_id_0').backup_value;setTimeout(function(){document.getElementById('suggests_25_personen_id_0').style.display = 'none';}, 500);}"
+						id="output_25_personen_id_0" value="<?php echo !empty($selectedAdressat) && !empty($selectedAdressat->getName()) ? $selectedAdressat->getName() : '' ?>" type="text" /> 
+					<input onchange="setNewUrlParameter(this,'adressat')" id="25_personen_id_0" type="hidden" />
+					<div valign="top" style="height: 0px; position: relative;">
+						<div id="suggests_25_personen_id_0" style="z-index: 3000; display: none; left: 0px; top: 0px; width: 400px; vertical-align: top; overflow: hidden; border: 1px solid grey;"></div>
+					</div>
+				</div>
             </div>
-            
-            <div class="wasserrecht_display_table_row">
+
+			<div class="wasserrecht_display_table_row">
                     <div class="wasserrecht_display_table_cell_caption">Straße:</div>
                     <div class="wasserrecht_display_table_cell_spacer"></div>
                     <div class="wasserrecht_display_table_cell">
