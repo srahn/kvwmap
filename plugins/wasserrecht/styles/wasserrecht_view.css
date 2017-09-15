@@ -132,6 +132,12 @@ button {
   font-family: SourceSansPro1;
 }
 
+.wasserentnahmebenutzer_entgeltbescheid_inputfield_small {
+	width: 50px;
+	border: 2px solid black;
+	background-color: inherit;
+}
+
 /* WASSERENTNAHMEENTGELT */
 .wasserrecht_table {
   float: left;

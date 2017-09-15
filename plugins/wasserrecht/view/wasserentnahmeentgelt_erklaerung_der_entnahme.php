@@ -624,7 +624,7 @@ if(!empty($wrz))
         		   		<div class="wasserrecht_display_table_row_spacer"></div>
                		</div>
                		
-               		  <div class="wasserrecht_display_table_row">
+               		<div class="wasserrecht_display_table_row">
         		   		<div class="wasserrecht_display_table_row_spacer"></div>
         		   		<div class="wasserrecht_display_table_cell_spacer"></div>
         		   		<div class="wasserrecht_display_table_row_spacer"></div>
