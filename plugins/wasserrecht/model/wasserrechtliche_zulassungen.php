@@ -226,6 +226,17 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 // 	    }
 // 	}
 
+    public function isAufforderungFreigegeben()
+    {
+        $datumAufforderung = $this->getAufforderungDatumAbsend();
+        if(!empty($datumAufforderung))
+        {
+            return true;
+        }
+        
+        return false;
+    }
+
     public function getAufforderungDatumAbsend() {
         return $this->data['aufforderung_datum_absend'];
     }
@@ -415,6 +426,24 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	public function deleteFestsetzungDokument() {
 	      $this->set('festsetzung_dokument', '');
 	      $this->update();
+	}
+	
+	public function insertFestsetzungSummeZugelasseneEntnahmemengen($festsetzungSummeZugelasseneEntnahmemengen) {
+	    $this->set('festsetzung_summe_zugelassene_entnahmemengen', $festsetzungSummeZugelasseneEntnahmemengen);
+	    $this->update();
+	}
+	
+	public function getFestsetzungSummeZugelasseneEntnahmemengen() {
+	    return $this->data['festsetzung_summe_zugelassene_entnahmemengen'];
+	}
+	
+	public function insertFestsetzungSummeEntgelt($festsetzungSummeEntgelt) {
+	    $this->set('festsetzung_summe_entgelt', $festsetzungSummeEntgelt);
+	    $this->update();
+	}
+	
+	public function getFestsetzungSummeEntgelt() {
+	    return $this->data['festsetzung_summe_entgelt'];
 	}
 	
 	////////////////////////////////////////////////////////////////////

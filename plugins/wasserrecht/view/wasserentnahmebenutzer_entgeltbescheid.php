@@ -7,7 +7,10 @@ $tab2_id="wasserentnahmebenutzer_entgeltbescheid";
 $tab2_name="Entgeltbescheid";
 $tab2_active=true;
 $tab2_visible=true;
-include_once ('includes/header.php'); 
+include_once ('includes/header.php');
+
+$gesamtEntnahmemenge = 0;
+$gesamtEntgelt = 0;
 ?>
 
 <div id="wasserentnahmebenutzer_entgeltbescheid" class="tabcontent" style="display: block">
@@ -60,7 +63,6 @@ include_once ('includes/header.php');
         		                      for ($i = 0; $i < $gewaesserbenutzungen_count; $i++) 
         		                      {
         		                          $gewaesserbenutzung = $gewaesserbenutzungen[$i];
-        		                          
         		                          ?>
     		                          <tr>
                     		          		<td>
@@ -92,12 +94,30 @@ include_once ('includes/header.php');
                     		          			?>
                     		          		</td>
                     		          		<td>
-                    		          		</td>
-                    		          		<td>
+                    		          			<?php 
+                    		          			     if($wrz->isFestsetzungFreigegeben())
+                    		          			     {
+//                     		          			         $gewaesserbenutzung->getUmfangAllerTeilbenutzungen()
+                    		          			         $entnahmemenge = $wrz->getFestsetzungSummeZugelasseneEntnahmemengen();
+                    		          			         $gesamtEntnahmemenge = $gesamtEntnahmemenge + $entnahmemenge;
+                    		          			         
+                    		          			         echo $entnahmemenge;
+                    		          			     }    
+                                                ?>
                     		          		</td>
                     		          		<td>
                     		          			<?php 
-                    		          			     if(!empty($wrz->getFestsetzungDatum()))
+                        		          			if($wrz->isFestsetzungFreigegeben())
+                        		          			{
+                        		          			    $entgelt = $wrz->getFestsetzungSummeEntgelt();
+                        		          			    $gesamtEntgelt = $gesamtEntgelt + $entgelt;
+                        		          			    echo $entgelt;
+                        		          			}
+                                                ?>
+                    		          		</td>
+                    		          		<td>
+                    		          			<?php 
+                    		          			     if($wrz->isFestsetzungFreigegeben())
                     		          			     {?>
                     		          			     	<a href="<?php echo $this->actual_link . "?go=wasserentnahmeentgelt_festsetzung&getfestsetzung=" . $wrz->getId() ?>"><?php echo $wrz->getFestsetzungDatum(); ?></a>
                     		          			     <?php
@@ -131,8 +151,8 @@ include_once ('includes/header.php');
           		<td style="background-color: inherit"></td>
           		<td style="background-color: inherit"></td>
           		<td style="background-color: inherit">Summe:</td>
-          		<td style="background-color: inherit"><input class="wasserentnahmebenutzer_entgeltbescheid_inputfield_small" type="text" id="summe_entnahmemengen" name="summe_zugelassene_entnahmemengen" readonly="readonly" value=""></td>
-          		<td style="background-color: inherit"><input class="wasserentnahmebenutzer_entgeltbescheid_inputfield_small" type="text" id="summe_entgelt" name="summe_entgelt" readonly="readonly" value=""></td>
+          		<td style="background-color: inherit"><input class="wasserentnahmebenutzer_entgeltbescheid_inputfield_small" type="text" id="summe_entnahmemengen" name="summe_zugelassene_entnahmemengen" readonly="readonly" value="<?php echo $gesamtEntnahmemenge === 0 ? "" : $gesamtEntnahmemenge ?>"></td>
+          		<td style="background-color: inherit"><input class="wasserentnahmebenutzer_entgeltbescheid_inputfield_small" type="text" id="summe_entgelt" name="summe_entgelt" readonly="readonly" value="<?php echo $gesamtEntgelt === 0 ? "" : $gesamtEntgelt ?>"></td>
           		<td style="background-color: inherit"></td>
           		<td style="background-color: inherit"></td>
           		<td style="background-color: inherit"></td>

@@ -113,8 +113,7 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
     		                          <tr>
                     		          		<td style="background-color: inherit;">
                     		          			<?php 
-                        		          			$datumAbsend = $wrz->getAufforderungDatumAbsend();
-                        		          			if(empty($datumAbsend))
+                        		          			if(empty($wrz->isAufforderungFreigegeben()))
                         		          			{
                         		          			    ?>
                         		          				<input type="checkbox" name="aufforderung_checkbox_<?php echo $wrz->getId(); ?>" value="<?php echo $wrz->getId(); ?>">

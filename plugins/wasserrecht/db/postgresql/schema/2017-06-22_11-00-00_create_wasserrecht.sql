@@ -222,7 +222,9 @@ CREATE TABLE wasserrecht.fiswrv_wasserrechtliche_zulassungen(
 	erklaerung_nutzer text,
 	festsetzung_datum date,
 	festsetzung_dokument integer REFERENCES wasserrecht.fiswrv_dokument(id),
-	festsetzung_nutzer text
+	festsetzung_nutzer text,
+	festsetzung_summe_zugelassene_entnahmemengen numeric,
+	festsetzung_summe_entgelt numeric
 )WITH OIDS;
 
 --GEWÄSSERBENUTZUNGEN
@@ -246,17 +248,17 @@ CREATE TABLE wasserrecht.fiswrv_gewaesserbenutzungen_zweck(
 CREATE TABLE wasserrecht.fiswrv_gewaesserbenutzungen_umfang_entnahme(
 	id serial PRIMARY KEY,
 	name varchar(255),
-	max_ent_s numeric(15,0),
-	max_ent_h numeric(15,0),
-	max_ent_d numeric(15,0),
-	max_ent_w numeric(15,0),
-	max_ent_m numeric(15,0),
-	max_ent_a numeric(15,0),
-	max_ent_wee numeric(15,0),
+	max_ent_s numeric,
+	max_ent_h numeric,
+	max_ent_d numeric,
+	max_ent_w numeric,
+	max_ent_m numeric,
+	max_ent_a numeric,
+	max_ent_wee numeric,
 	max_ent_wee_beschreib text,
-	max_ent_wb numeric(15,0),
+	max_ent_wb numeric,
 	max_ent_wb_beschreib text,
-	max_ent_frei numeric(15,0),
+	max_ent_frei numeric,
 	max_ent_frei_beschreib text,
 	freitext text
 )WITH OIDS;
@@ -270,9 +272,9 @@ CREATE TABLE wasserrecht.fiswrv_gewaesserbenutzungen_lage(
 	namekurz varchar(100),
 	bohrungsname varchar(255),
 	baujahr date,
-	endteufe numeric(6,2),
-	filterok numeric(6,2),
-	filteruk numeric(6,2),
+	endteufe numeric,
+	filterok numeric,
+	filteruk numeric,
 	betriebszustand integer REFERENCES wasserrecht.fiswrv_betriebszustand(id),
 	messtischblatt integer REFERENCES wasserrecht.fiswrv_messtischblatt(id),
 	archivnummer integer REFERENCES wasserrecht.fiswrv_archivnummer(id),
@@ -320,7 +322,7 @@ CREATE TABLE wasserrecht.fiswrv_teilgewaesserbenutzungen(
 	id serial PRIMARY KEY,
 	art integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_art(id),
 	zweck integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_zweck(id),
-	umfang numeric(15,0),
+	umfang numeric,
 	wiedereinleitung_nutzer boolean,
 	wiedereinleitung_bearbeiter boolean,
 	mengenbestimmung integer REFERENCES wasserrecht.fiswrv_mengenbestimmung(id),

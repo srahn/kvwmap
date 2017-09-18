@@ -9,7 +9,7 @@ $nichtZugelassenesEntnahmeEntgelt = 0;
 $zugelassenerUmfangEntgeltsatz = 0;
 $zugelassenerUmfangEntgelt = 0;
 		
-// print_r($_REQUEST); 
+// print_r($_REQUEST);
 
 if($_SERVER ["REQUEST_METHOD"] == "POST")
 {
@@ -142,10 +142,15 @@ function festsetzung_freigeben($gui, $keyEscaped, $keyName, $festsetzungFreigebe
                     $festsetzungsNutzer = $gui->user->Vorname . ' ' . $gui->user->Name;
                     $wrz->insertFestsetzungNutzer($festsetzungsNutzer);
                     
+                    $summe_zugelassene_entnahmemengen = htmlspecialchars($_POST["summe_zugelassene_entnahmemengen"]);
+                    $wrz->insertFestsetzungSummeZugelasseneEntnahmemengen($summe_zugelassene_entnahmemengen);
+                    $summe_entgelt = htmlspecialchars($_POST["summe_entgelt"]);
+                    $wrz->insertFestsetzungSummeEntgelt($summe_entgelt);
+                    
                     /**
                      * Fesetzungsbescheid erstellen
                      */
-                    //altes Festsetzungsdokument anlegen
+                    //Festsetzungsdokument anlegen
                     if(!empty($wrz->getFestsetzungDokument()))
                     {
                         $oldFestsetzungsDocumentId = $wrz->getFestsetzungDokument();
