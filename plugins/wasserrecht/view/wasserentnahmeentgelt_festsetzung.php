@@ -8,6 +8,10 @@ $zugelassenesEntnahmeEntgelt = 0;
 $nichtZugelassenesEntnahmeEntgelt = 0;
 $zugelassenerUmfangEntgeltsatz = 0;
 $zugelassenerUmfangEntgelt = 0;
+
+// echo '<pre>';
+// var_dump($_SESSION);
+// echo '</pre>';
 		
 // print_r($_REQUEST);
 
@@ -117,7 +121,7 @@ function festsetzung_freigeben($gui, $keyEscaped, $keyName, $festsetzungFreigebe
                                 // update an existing teilgewaesserbenutzung
                                 if (!empty($gewaesserbenutzung->teilgewaesserbenutzungen[$i - 1])) {
                                     $teilgewaesserbenutzung = $gewaesserbenutzung->teilgewaesserbenutzungen[$i - 1];
-                                    $teilgewaesserbenutzungId = $teilgewaesserbenutzung->updateTeilgewaesserbenutzung_Bearbeiter($teilgewaesserbenutzung_art_benutzung, $teilgewaesserbenutzung_wiedereinleitung_bearbeiter, $teilgewaesserbenutzung_befreiungstatbestaende, $freitext);
+                                    $teilgewaesserbenutzungId = $teilgewaesserbenutzung->updateTeilgewaesserbenutzung_Bearbeiter($teilgewaesserbenutzung_art_benutzung, $teilgewaesserbenutzung_wiedereinleitung_bearbeiter, $teilgewaesserbenutzung_befreiungstatbestaende, $freitext, $_SESSION['entgeltsaetze'][$wrz->getId() . " " . $gewaesserbenutzung->getId() . " " . $teilgewaesserbenutzung->getId()], $_SESSION['entgelte'][$wrz->getId() . " " . $gewaesserbenutzung->getId() . " " . $teilgewaesserbenutzung->getId()]);
                                     
                                     $gui->add_message('notice', 'Teilgewässerbenutzungen (id: ' . $teilgewaesserbenutzungId . ') erfolgreich geändert!');
                                 }                        // else --> if not there --> create one
@@ -136,6 +140,9 @@ function festsetzung_freigeben($gui, $keyEscaped, $keyName, $festsetzungFreigebe
             
             if($errorEingabeFestsetzung === null)
             {
+                unset($_SESSION['entgelte']);
+                unset($_SESSION['entgeltsaetze']);
+                
                 if($festsetzungFreigeben)
                 {
                     $wrz->insertFestsetzungDatum();
@@ -351,12 +358,16 @@ if(!empty($wrz))
                                       	<?php
                                       	//var_dump("getBefreiungstatbestaende: " . $getBefreiungstatbestaende);
                                       	//var_dump("getWiedereinleitungBearbeiter: " . $getWiedereinleitungBearbeiter);
-                                      	     echo $gewaesserbenutzung->getTeilgewaesserbenutzungEntgeltsatz($teilgewaesserbenutzung, $getArtBenutzung, $getBefreiungstatbestaende, $getWiedereinleitungBearbeiter, $zugelassenesEntnahmeEntgelt, $nichtZugelassenesEntnahmeEntgelt, $zugelassenerUmfangEntgeltsatz);
+                                      	     $berechneter_entgeltsatz = $gewaesserbenutzung->getTeilgewaesserbenutzungEntgeltsatz($teilgewaesserbenutzung, $getArtBenutzung, $getBefreiungstatbestaende, $getWiedereinleitungBearbeiter, $zugelassenesEntnahmeEntgelt, $nichtZugelassenesEntnahmeEntgelt, $zugelassenerUmfangEntgeltsatz);
+                                      	     $_SESSION['entgeltsaetze'][$wrz->getId() . " " . $gewaesserbenutzung->getId() . " " . $teilgewaesserbenutzung->getId()]=$berechneter_entgeltsatz;
+                                      	     echo $berechneter_entgeltsatz;
                                       	?>
                                       </td>
                                       <td>
                                       	<?php
-                                      	     echo $gewaesserbenutzung->getTeilgewaesserbenutzungEntgelt($teilgewaesserbenutzung, $getArtBenutzung, $getBefreiungstatbestaende, $getWiedereinleitungBearbeiter, $zugelassenesEntnahmeEntgelt, $nichtZugelassenesEntnahmeEntgelt, $zugelassenerUmfangEntgelt);
+                                      	     $berechnetes_entgelt =  $gewaesserbenutzung->getTeilgewaesserbenutzungEntgelt($teilgewaesserbenutzung, $getArtBenutzung, $getBefreiungstatbestaende, $getWiedereinleitungBearbeiter, $zugelassenesEntnahmeEntgelt, $nichtZugelassenesEntnahmeEntgelt, $zugelassenerUmfangEntgelt);
+                                      	     $_SESSION['entgelte'][$wrz->getId() . " " . $gewaesserbenutzung->getId() . " " . $teilgewaesserbenutzung->getId()]=$berechnetes_entgelt;
+                                      	     echo $berechnetes_entgelt;
                                       	?>
                                       </td>
                                   </tr>

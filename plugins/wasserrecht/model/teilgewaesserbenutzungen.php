@@ -10,7 +10,7 @@ class Teilgewaesserbenutzungen extends WrPgObject {
 	public $entgeltsatz;
 	public $teilgewaesserbenutzungen_art;
 	public $gewaesserbenutzungen;
-
+	
 	public function find_where_with_subtables($where, $order = NULL, $select = '*')
 	{
 	    $teilgewaesserbenutzungen = $this->find_where($where, $order, $select);
@@ -303,12 +303,14 @@ class Teilgewaesserbenutzungen extends WrPgObject {
 	    return $this->getId();
 	}
 	
-	public function updateTeilgewaesserbenutzung_Bearbeiter($art_benutzung = NULL, $wiedereinleitung_bearbeiter = NULL, $befreiungstatbestaende = NULL, $freitext = NULL)
+	public function updateTeilgewaesserbenutzung_Bearbeiter($art_benutzung = NULL, $wiedereinleitung_bearbeiter = NULL, $befreiungstatbestaende = NULL, $freitext = NULL, $berechneter_entgeltsatz = NULL, $berechnetes_entgelt = NULL)
 	{
 	    $this->updateData('art_benutzung', $art_benutzung);
 	    $this->updateData('wiedereinleitung_bearbeiter', $wiedereinleitung_bearbeiter);
 	    $this->updateData('befreiungstatbestaende', $befreiungstatbestaende);
 	    $this->updateData('freitext', $freitext);
+	    $this->updateData('berechneter_entgeltsatz', $berechneter_entgeltsatz);
+	    $this->updateData('berechnetes_entgelt', $berechnetes_entgelt);
 	    
 	    $this->debug->write('kvp update: ' . var_export($this->getKVP(), true), 4);
 	    

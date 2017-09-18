@@ -330,6 +330,8 @@ CREATE TABLE wasserrecht.fiswrv_teilgewaesserbenutzungen(
 	befreiungstatbestaende boolean,
 	entgeltsatz integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_wee_satz(id),
 	teilgewaesserbenutzungen_art integer REFERENCES wasserrecht.fiswrv_teilgewaesserbenutzungen_art(id),
+	berechneter_entgeltsatz numeric,
+	berechnetes_entgelt numeric,
 	freitext text,
 	gewaesserbenutzungen integer NOT NULL REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen(id)
 )WITH OIDS;
