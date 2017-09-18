@@ -171,7 +171,8 @@ $gesamtEntgelt = 0;
 			</div>
     		 <div class="wasserrecht_display_table_row">
         		<div class="wasserrecht_display_table_cell_caption">
-        			<input type="submit" value="Entgeltscheid erstellen!" id="entgeltscheid_button" name="entgeltscheid" />
+        			<input type="hidden" name="go" value="wasserentnahmebenutzer_entgeltbescheid">
+        			<input type="submit" value="Entgeltscheid erstellen!" id="entgeltscheid_erstellen" name="entgeltscheid_erstellen" />
         		</div>
              </div>
              
@@ -207,7 +208,7 @@ $gesamtEntgelt = 0;
 			
     		 <div class="wasserrecht_display_table_row">
         		<div class="wasserrecht_display_table_cell_caption">
-        			<input type="submit" value="Verwaltungsaufwand beantragen!" id="entgeltscheid_button" name="verwaltungsaufwand" />
+        			<input type="submit" value="Verwaltungsaufwand beantragen!" id="verwaltungsaufwand_beantragen" name="verwaltungsaufwand_beantragen" />
         		</div>
              </div>
 			

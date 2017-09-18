@@ -100,10 +100,17 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
     
     foreach($_POST as $key => $value)
     {
-        if(startsWith($key, "erklaerung_"))
+        $keyEscaped = htmlspecialchars($key);
+        $valueEscaped = htmlspecialchars($value);
+        
+        if(startsWith($keyEscaped, "erklaerung_"))
         {
             $this->go = "wasserentnahmeentgelt_erklaerung_der_entnahme";
             break;
+        }
+        elseif($keyEscaped === "verwaltungsaufwand_beantragen")
+        {
+            $this->go = "erstattung_des_verwaltungsaufwands";
         }
     }
 }
@@ -151,6 +158,20 @@ switch($this->go){
 	    $this->main = PLUGINS . 'wasserrecht/view/wasserentnahmeentgelt_festsetzung.php';
 	    $this->output();
 	}	break;
+	
+	case 'zentrale_stelle': {
+	    $this->debug->write('zentrale_stelle called!', 4);
+	    
+	    $this->main = PLUGINS . 'wasserrecht/view/zentrale_stelle.php';
+	    $this->output();
+	}	break;
+	
+	case 'erstattung_des_verwaltungsaufwands': {
+	    $this->debug->write('erstattung_des_verwaltungsaufwands called!', 4);
+	    
+	    $this->main = PLUGINS . 'wasserrecht/view/erstattung_des_verwaltungsaufwands.php';
+	    $this->output();
+	}  break;
 
 	case 'wasserrecht_deploy': {
 		$this->checkCaseAllowed($this->go);

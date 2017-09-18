@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 172.17.0.2:3306
--- Generation Time: Sep 13, 2017 at 03:22 PM
+-- Generation Time: Sep 18, 2017 at 04:43 PM
 -- Server version: 5.5.56
 -- PHP Version: 5.6.30-0+deb8u1
 
@@ -708,7 +708,7 @@ INSERT INTO `layer_attributes` (`layer_id`, `name`, `real_name`, `tablename`, `t
 (9, 'bezeichnung', 'bezeichnung', 'fiswrv_personen_bezeichnung', 'd', 'text', '', '', 1, NULL, NULL, '', 'Text', '', 'Bezeichnung', NULL, NULL, NULL, NULL, '', 'Systemdaten', 0, 0, NULL, 0, 0, NULL, 4, 0, 0),
 (9, 'wrzaussteller', 'wrzaussteller', 'fiswrv_personen', 'a', 'varchar', '', '', 1, 10, NULL, '', 'Auswahlfeld', '\'ja\',\'nein\'', 'Aussteller WrZ', NULL, NULL, NULL, NULL, 'Die Person kann Wasserrechtliche Zulassungen erteilen. [Kann nur vom Admin bearbeitet werden]', 'Gruppen', 0, 0, NULL, 0, 0, NULL, 27, 0, 0),
 (2, 'anlage_bearbeiter', '', '', '', 'not_saveable', '', '', NULL, NULL, NULL, '', 'SubFormEmbeddedPK', '9,anlage_id,bearbeiter,<b>Betreiber:</b> bezeichnung;no_new_window', 'Bearbeiter', NULL, NULL, NULL, NULL, '', '<h2>Zugehörige Personen</h2>', 1, 2, NULL, -1, 0, NULL, 15, 0, 0),
-(25, 'personen_id', 'adressat', 'fiswrv_wasserrechtliche_zulassungen', 'a', 'int4', '', '', 1, 32, 0, '', 'Auswahlfeld', 'SELECT id as value, name as output from wasserrecht.fiswrv_personen;layer_id=9 embedded', 'Adressat [Auswahlfeld]', NULL, NULL, NULL, NULL, '', 'Adressat', 0, 0, NULL, 0, 0, NULL, 7, 0, 0),
+(25, 'personen_id', 'adressat', 'fiswrv_wasserrechtliche_zulassungen', 'a', 'int4', '', '', 1, 32, 0, '', 'Autovervollständigungsfeld', 'SELECT id as value, name as output from wasserrecht.fiswrv_personen a WHERE a.behoerde IS NOT NULL;layer_id=9 embedded', 'Adressat [Auswahlfeld]', NULL, NULL, NULL, NULL, '', 'Adressat', 0, 0, NULL, 0, 0, NULL, 7, 0, 0),
 (9, 'abwasser_koerperschaft', 'abwasser_koerperschaft', 'fiswrv_personen', 'a', 'int4', '', '', 1, 32, 0, '', 'Auswahlfeld', 'SELECT\r\n	z.id as value, z.name || \' (\' || coalesce(string_agg(z2b.name, \', \'),  \'keiner Körperschaftsart zugeordnet\') || \')\' AS output FROM\r\n  wasserrecht.fiswrv_koerperschaft z LEFT JOIN	\r\n  wasserrecht.fiswrv_koerperschaft_art z2b ON z.art = z2b.id WHERE z2b.id = 2\r\nGROUP BY\r\n  z.id, z.name ;layer_id=6 embedded', 'Abwasserbeseitigungspflichtige Körperschaft', NULL, NULL, NULL, NULL, 'Die Person ist eine abwasserbeseitigungspflichtige Körperschaft (nach §40 Satz 1 LWaG M-V).', 'Gruppen', 0, 0, NULL, 0, 0, NULL, 34, 0, 0),
 (9, 'trinkwasser_koerperschaft', 'trinkwasser_koerperschaft', 'fiswrv_personen', 'a', 'int4', '', '', 1, 32, 0, '', 'Auswahlfeld', 'SELECT\r\n	z.id as value, z.name || \' (\' || coalesce(string_agg(z2b.name, \', \'),  \'keiner Körperschaftsart zugeordnet\') || \')\' AS output FROM\r\n  wasserrecht.fiswrv_koerperschaft z LEFT JOIN	\r\n  wasserrecht.fiswrv_koerperschaft_art z2b ON z.art = z2b.id WHERE z2b.id = 1\r\nGROUP BY\r\n  z.id, z.name ;layer_id=6 embedded', 'Träger der öffentlichen Wasserversorgung', NULL, NULL, NULL, NULL, 'Die Person ist Träger der öffentlichen Wasserversorgung (nach § 43 Satz 1 LWaG M-V).', 'Gruppen', 0, 0, NULL, 0, 0, NULL, 35, 0, 0),
 (9, 'kommentar', 'kommentar', 'fiswrv_personen', 'a', 'varchar', '', '', 1, 255, NULL, '', 'Textfeld', '', 'Kommentar ans LUNG', NULL, NULL, NULL, NULL, 'KOMMENTARFELD!', 'Sonstiges', 0, 0, NULL, 0, 0, NULL, 37, 0, 0),
@@ -1988,7 +1988,7 @@ CREATE TABLE `rolle` (
 --
 
 INSERT INTO `rolle` (`user_id`, `stelle_id`, `nImageWidth`, `nImageHeight`, `auto_map_resize`, `minx`, `miny`, `maxx`, `maxy`, `nZoomFactor`, `selectedButton`, `epsg_code`, `epsg_code2`, `coordtype`, `active_frame`, `last_time_id`, `gui`, `language`, `hidemenue`, `hidelegend`, `fontsize_gle`, `highlighting`, `buttons`, `scrollposition`, `result_color`, `always_draw`, `runningcoords`, `showmapfunctions`, `showlayeroptions`, `singlequery`, `querymode`, `geom_edit_first`, `overlayx`, `overlayy`, `hist_timestamp`, `instant_reload`, `menu_auto_close`, `layer_params`, `menue_buttons`, `visually_impaired`) VALUES
-(1, 1, 1198, 802, 1, 33303480.937982, 5987789.782571, 33303517.202043, 5987814.253938, 2, 'zoomin', '35833', '', 'dec', 0, '2017-09-13 15:15:55', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure,', 0, 1, 0, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 1, 0),
+(1, 1, 1198, 802, 1, 33179892.898819, 5867814.9999173, 33499172.10119, 6081468.0000002, 2, 'zoomin', '35833', '', 'dec', 0, '2017-09-18 09:31:52', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure,', 0, 1, 0, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 1, 0),
 (2, 2, 1198, 770, 1, 239608.32867608, 5890464.3996456, 453335.02845224, 6047442.271783, 2, 'zoomin', '35833', NULL, 'dec', 0, '2017-07-12 11:18:57', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure', 0, 1, 0, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 0, 0);
 
 -- --------------------------------------------------------
@@ -2051,8 +2051,8 @@ CREATE TABLE `rolle_last_query` (
 --
 
 INSERT INTO `rolle_last_query` (`user_id`, `stelle_id`, `go`, `layer_id`, `sql`, `orderby`, `limit`, `offset`) VALUES
-(2, 2, 'Layer-Suche_Suchen', 25, 'SELECT * FROM (SELECT wasserrechtliche_zulassungen.oid AS wasserrechtliche_zulassungen_oid,   name,  ausstellbehoerde,  ausgangsbescheid,  fassung,  status,  adresse as adress_id,   aenderungsbescheid,  gueltigkeit,  bergamt_aktenzeichen,  dokument,  sachbearbeiter,  adressat,  anlage  FROM wasserrechtliche_zulassungen WHERE 1=1) as query WHERE 1=1  AND ( (1=1)) AND wasserrechtliche_zulassungen_oid = 113298', ' ORDER BY fassung, wasserrechtliche_zulassungen_oid ', 10, NULL),
-(1, 1, 'Layer-Suche_Suchen', 37, 'SELECT * FROM (SELECT fiswrv_gewaesserbenutzungen_umfang.oid AS fiswrv_gewaesserbenutzungen_umfang_oid,   name,  max_ent_s,  max_ent_h,  max_ent_d,  max_ent_w,  max_ent_m,         max_ent_a,  max_ent_wee,  max_ent_wee_beschreib,  max_ent_wb,  max_ent_wb_beschreib,         max_ent_frei,  max_ent_frei_beschreib,  freitext  FROM fiswrv_gewaesserbenutzungen_umfang WHERE 1=1) as query WHERE 1=1  AND ( (1=1 AND query.max_ent_a IS NOT NULL ))', ' ORDER BY fiswrv_gewaesserbenutzungen_umfang_oid ', 10, NULL);
+(1, 1, 'Layer-Suche_Suchen', 9, 'SELECT * FROM (SELECT a.oid AS fiswrv_personen_oid,  a.id AS personen_id,  a.typ,  a.klasse,  a.status,  d.bezeichnung,  a.name,  a.abkuerzung,  a.namenszusatz,  a.adresse as adress_id,  COALESCE(b.strasse,\'\') ||\'  \'|| COALESCE(b.hausnummer,\'\') AS strasse_hausnummer,  COALESCE(b.plz::text,\'\') ||\'  \'|| COALESCE(b.ort,\'\') AS plz_ort,   a.register_amtsgericht,  a.register_nummer,   a.telefon,  a.fax,  a.email,  a.zimmer,  a.verwendungszweck_wee,  a.konto as konto_id,  COALESCE(c.name,\'\') AS kontoname,  COALESCE(c.iban,\'\') AS iban,  COALESCE(c.bic,\'\') AS bic,  COALESCE(c.verwendungszweck,\'\') AS verwendungszweck,  COALESCE(c.personenkonto,\'\') AS personenkonto,  COALESCE(c.kassenzeichen,\'\') AS kassenzeichen,  a.anlage AS anlage_id,  a.behoerde,  a.wrzaussteller,  a.wrzadressat,  a.wrzrechtsnachfolger,  CASE when a.betreiber = \'ja\' then \'Betreiber\' ELSE \'false\' end AS betreiber,  a.betreiber AS betreiber_id,  CASE when a.bearbeiter  = \'ja\' then \'Bearbeiter\' ELSE \'false\' end AS bearbeiter,  a.bearbeiter AS bearbeiter_id,   a.abwasser_koerperschaft,  a.trinkwasser_koerperschaft,  a.weeerklaerer,  a.kommentar,    \'aktuell\' AS aktuell,  \'\' AS per_wrz,  \'\' AS per_wrz_ben  FROM fiswrv_personen a LEFT JOIN fiswrv_personen_bezeichnung d ON a.id=d.id LEFT JOIN fiswrv_adresse b ON a.adresse=b.id LEFT JOIN fiswrv_konto c ON a.konto=c.id WHERE 1=1) as query WHERE 1=1  AND ( (1=1 AND query.personen_id = \'2\'))', ' ORDER BY fiswrv_personen_oid ', 10, NULL),
+(2, 2, 'Layer-Suche_Suchen', 25, 'SELECT * FROM (SELECT wasserrechtliche_zulassungen.oid AS wasserrechtliche_zulassungen_oid,   name,  ausstellbehoerde,  ausgangsbescheid,  fassung,  status,  adresse as adress_id,   aenderungsbescheid,  gueltigkeit,  bergamt_aktenzeichen,  dokument,  sachbearbeiter,  adressat,  anlage  FROM wasserrechtliche_zulassungen WHERE 1=1) as query WHERE 1=1  AND ( (1=1)) AND wasserrechtliche_zulassungen_oid = 113298', ' ORDER BY fassung, wasserrechtliche_zulassungen_oid ', 10, NULL);
 
 -- --------------------------------------------------------
 
@@ -2093,7 +2093,7 @@ CREATE TABLE `search_attributes2rolle` (
 --
 
 INSERT INTO `search_attributes2rolle` (`name`, `user_id`, `stelle_id`, `layer_id`, `attribute`, `operator`, `value1`, `value2`, `searchmask_number`, `searchmask_operator`) VALUES
-('<last_search>', 1, 1, 37, 'max_ent_a', 'IS NOT NULL', '', '', 0, '');
+('<last_search>', 1, 1, 9, 'personen_id', '=', '2', '', 0, '');
 
 -- --------------------------------------------------------
 
@@ -2713,7 +2713,14 @@ INSERT INTO `u_consume` (`user_id`, `stelle_id`, `time_id`, `activity`, `nimagew
 (1, 1, '2017-09-05 11:07:55', 'getMap', 1198, 802, '35833', 33303483.234709, 5987789.9035667, 33303514.905316, 5987814.1329423, '2017-09-05 09:44:26', NULL),
 (1, 1, '2017-09-05 15:12:47', 'getMap', 1198, 802, '35833', 33303483.234709, 5987789.9035667, 33303514.905316, 5987814.1329423, '2017-09-05 11:07:55', NULL),
 (1, 1, '2017-09-05 15:19:30', 'getMap', 1198, 802, '35833', 33303483.234709, 5987789.9035667, 33303514.905316, 5987814.1329423, '2017-09-05 15:12:47', NULL),
-(1, 1, '2017-09-13 15:15:55', 'getMap', 1198, 802, '35833', 33303480.937982, 5987789.782571, 33303517.202043, 5987814.253938, '2017-09-05 15:19:30', NULL);
+(1, 1, '2017-09-13 15:15:55', 'getMap', 1198, 802, '35833', 33303480.937982, 5987789.782571, 33303517.202043, 5987814.253938, '2017-09-05 15:19:30', NULL),
+(1, 1, '2017-09-15 09:59:57', 'getMap', 1198, 802, '35833', 33303480.937982, 5987788.1464719, 33303517.202043, 5987815.8900371, '2017-09-13 15:15:55', NULL),
+(1, 1, '2017-09-15 10:52:17', 'getMap', 1198, 802, '35833', 33303480.937982, 5987788.1464719, 33303517.202043, 5987815.8900371, '2017-09-15 09:59:57', NULL),
+(1, 1, '2017-09-15 10:52:25', 'getMap', 1198, 802, '35833', 33303442.2171, 5987760.4925578, 33303532.462015, 5987829.5337966, '2017-09-15 10:52:17', NULL),
+(1, 1, '2017-09-15 10:52:29', 'getMap', 1198, 802, '35833', 33303443.078216, 5987785.9674587, 33303484.842322, 5987817.9187953, '2017-09-15 10:52:25', NULL),
+(1, 1, '2017-09-15 11:47:00', 'getMap', 1198, 802, '35833', 33303443.078216, 5987785.9674587, 33303484.842322, 5987817.9187953, '2017-09-15 10:52:29', NULL),
+(1, 1, '2017-09-18 09:31:51', 'getMap', 1198, 802, '35833', 33303422.423147, 5987766.3265491, 33303504.939407, 5987821.5441967, '2017-09-15 11:47:00', NULL),
+(1, 1, '2017-09-18 09:31:52', 'getMap', 1198, 802, '35833', 33179892.898819, 5867814.9999175, 33499172.10119, 6081468, '2017-09-18 09:31:51', NULL);
 
 -- --------------------------------------------------------
 
@@ -2964,6 +2971,7 @@ CREATE TABLE `u_menue2rolle` (
 --
 
 INSERT INTO `u_menue2rolle` (`user_id`, `stelle_id`, `menue_id`, `status`) VALUES
+(1, 1, 50, 0),
 (1, 1, 49, 0),
 (1, 1, 48, 0),
 (1, 1, 47, 0),
@@ -2978,7 +2986,7 @@ INSERT INTO `u_menue2rolle` (`user_id`, `stelle_id`, `menue_id`, `status`) VALUE
 (1, 1, 38, 0),
 (1, 1, 37, 0),
 (1, 1, 36, 0),
-(1, 1, 35, 1),
+(1, 1, 35, 0),
 (1, 1, 34, 0),
 (1, 1, 33, 0),
 (1, 1, 32, 0),
@@ -2988,13 +2996,13 @@ INSERT INTO `u_menue2rolle` (`user_id`, `stelle_id`, `menue_id`, `status`) VALUE
 (1, 1, 28, 0),
 (1, 1, 27, 0),
 (1, 1, 26, 0),
-(1, 1, 25, 1),
+(1, 1, 25, 0),
 (1, 1, 24, 0),
 (1, 1, 23, 0),
 (1, 1, 22, 0),
 (1, 1, 21, 0),
 (1, 1, 20, 0),
-(1, 1, 19, 1),
+(1, 1, 19, 0),
 (1, 1, 18, 0),
 (1, 1, 17, 0),
 (1, 1, 16, 0),
@@ -3004,7 +3012,7 @@ INSERT INTO `u_menue2rolle` (`user_id`, `stelle_id`, `menue_id`, `status`) VALUE
 (1, 1, 12, 0),
 (1, 1, 11, 1),
 (1, 1, 10, 0),
-(1, 1, 9, 0),
+(2, 2, 49, 0),
 (2, 2, 48, 0),
 (2, 2, 47, 0),
 (2, 2, 46, 0),
@@ -3027,22 +3035,25 @@ INSERT INTO `u_menue2rolle` (`user_id`, `stelle_id`, `menue_id`, `status`) VALUE
 (2, 2, 19, 0),
 (2, 2, 10, 0),
 (2, 2, 9, 0),
-(2, 2, 8, 0),
+(1, 1, 9, 0),
 (1, 1, 8, 0),
 (1, 1, 7, 0),
-(1, 1, 6, 0),
+(2, 2, 8, 0),
 (2, 2, 7, 0),
-(2, 2, 6, 0),
+(1, 1, 6, 0),
 (1, 1, 5, 0),
-(1, 1, 4, 1),
+(1, 1, 4, 0),
 (1, 1, 3, 0),
-(1, 1, 2, 0),
+(2, 2, 6, 0),
 (2, 2, 5, 0),
 (2, 2, 4, 0),
 (2, 2, 3, 0),
+(1, 1, 2, 0),
 (2, 2, 2, 0),
 (1, 1, 1, 0),
-(2, 2, 49, 0);
+(1, 1, 51, 0),
+(2, 2, 50, 0),
+(2, 2, 51, 0);
 
 -- --------------------------------------------------------
 
@@ -3061,107 +3072,113 @@ CREATE TABLE `u_menue2stelle` (
 --
 
 INSERT INTO `u_menue2stelle` (`stelle_id`, `menue_id`, `menue_order`) VALUES
-(1, 34, 48),
-(1, 33, 47),
-(1, 32, 46),
-(1, 31, 45),
-(1, 30, 44),
-(1, 29, 43),
-(1, 28, 42),
-(1, 27, 41),
-(1, 26, 40),
-(1, 37, 39),
-(1, 25, 38),
-(1, 24, 37),
-(1, 23, 36),
-(1, 22, 35),
-(1, 21, 34),
-(1, 20, 33),
-(1, 19, 32),
-(1, 18, 31),
-(1, 17, 30),
-(1, 16, 29),
-(1, 15, 28),
-(1, 14, 27),
-(1, 13, 26),
-(1, 12, 25),
-(1, 11, 24),
-(1, 40, 23),
-(1, 39, 22),
-(1, 10, 21),
-(1, 9, 20),
-(1, 8, 19),
-(1, 7, 18),
-(1, 6, 17),
-(1, 5, 16),
-(1, 41, 15),
-(1, 4, 14),
-(1, 3, 13),
-(1, 2, 12),
-(1, 1, 11),
-(1, 36, 10),
-(1, 42, 9),
-(1, 35, 8),
-(2, 26, 28),
-(2, 29, 27),
-(2, 37, 26),
-(2, 30, 25),
-(2, 28, 24),
-(2, 25, 23),
-(2, 23, 22),
-(2, 24, 21),
-(2, 20, 20),
-(2, 22, 19),
-(2, 19, 18),
-(2, 8, 17),
-(2, 9, 16),
-(2, 41, 15),
-(2, 5, 14),
-(2, 10, 13),
-(4, 45, 2),
-(4, 25, 15),
-(4, 21, 12),
-(4, 30, 17),
-(4, 28, 16),
-(4, 43, 1),
-(4, 38, 0),
-(4, 22, 10),
-(4, 23, 14),
-(4, 24, 13),
-(4, 20, 11),
+(1, 33, 49),
+(1, 32, 48),
+(1, 31, 47),
+(1, 30, 46),
+(1, 29, 45),
+(1, 28, 44),
+(1, 27, 43),
+(1, 26, 42),
+(1, 37, 41),
+(1, 25, 40),
+(1, 24, 39),
+(1, 23, 38),
+(1, 22, 37),
+(1, 21, 36),
+(1, 20, 35),
+(1, 19, 34),
+(1, 18, 33),
+(1, 17, 32),
+(1, 16, 31),
+(1, 15, 30),
+(1, 14, 29),
+(1, 13, 28),
+(1, 12, 27),
+(1, 11, 26),
+(1, 40, 25),
+(1, 39, 24),
+(1, 10, 23),
+(1, 9, 22),
+(1, 8, 21),
+(1, 7, 20),
+(1, 6, 19),
+(1, 5, 18),
+(1, 41, 17),
+(1, 4, 16),
+(1, 3, 15),
+(1, 2, 14),
+(1, 1, 13),
+(1, 36, 12),
+(1, 42, 11),
+(1, 35, 10),
+(1, 51, 9),
+(2, 29, 29),
+(2, 37, 28),
+(2, 30, 27),
+(2, 28, 26),
+(2, 25, 25),
+(2, 23, 24),
+(2, 24, 23),
+(2, 20, 22),
+(2, 22, 21),
+(2, 19, 20),
+(2, 8, 19),
+(2, 9, 18),
+(2, 41, 17),
+(2, 5, 16),
+(2, 10, 15),
+(2, 7, 14),
 (4, 46, 3),
+(4, 20, 13),
+(4, 25, 17),
+(4, 51, 8),
+(4, 3, 10),
 (4, 48, 5),
-(4, 47, 4),
-(4, 19, 9),
 (4, 44, 6),
-(2, 7, 12),
-(2, 6, 11),
-(2, 4, 10),
-(2, 3, 9),
-(2, 2, 8),
+(4, 23, 16),
+(4, 24, 15),
+(4, 21, 14),
+(4, 28, 18),
+(4, 45, 2),
+(4, 38, 0),
+(4, 43, 1),
+(4, 30, 19),
+(4, 47, 4),
+(2, 6, 13),
+(2, 4, 12),
+(2, 3, 11),
+(2, 2, 10),
+(2, 51, 9),
+(2, 50, 8),
 (2, 49, 7),
-(2, 44, 6),
+(1, 50, 8),
 (1, 49, 7),
 (1, 44, 6),
-(1, 45, 5),
+(2, 44, 6),
 (2, 48, 5),
-(2, 47, 4),
-(4, 3, 8),
-(4, 2, 7),
+(4, 37, 20),
+(4, 29, 21),
+(1, 45, 5),
 (1, 48, 4),
 (1, 47, 3),
 (1, 46, 2),
-(1, 43, 1),
+(2, 47, 4),
 (2, 46, 3),
 (2, 45, 2),
 (2, 43, 1),
+(4, 50, 7),
+(4, 2, 9),
+(4, 22, 12),
+(4, 19, 11),
+(1, 43, 1),
 (2, 38, 0),
-(4, 37, 18),
-(4, 29, 19),
-(4, 26, 20),
-(4, 27, 21),
 (1, 38, 0),
-(2, 27, 29);
+(1, 34, 50),
+(2, 26, 30),
+(2, 27, 31),
+(4, 26, 22),
+(4, 27, 23);
 
 -- --------------------------------------------------------
 
@@ -3239,7 +3256,9 @@ INSERT INTO `u_menues` (`id`, `name`, `name_low-german`, `name_english`, `name_p
 (46, 'Neue FisWrV-WRe Gewässerbenutzung', '', '', '', '', 'index.php?go=neuer_Layer_Datensatz&selected_layer_id=33', '', 43, 2, '', 0, '', ''),
 (47, 'Neue FisWrV-WRe Person', '', '', '', '', 'index.php?go=neuer_Layer_Datensatz&selected_layer_id=9', '', 43, 2, '', 0, '', ''),
 (48, 'Neue FisWrV-WRe WrZ', '', '', '', '', 'index.php?go=neuer_Layer_Datensatz&selected_layer_id=25', '', 43, 2, '', 0, '', ''),
-(49, 'Wasserentnahmeentgelt', '', '', '', '', 'index.php?go=wasserentnahmeentgelt', '', 43, 2, '', 2, '', '');
+(49, 'Wasserentnahmeentgelt', '', '', '', '', 'index.php?go=wasserentnahmeentgelt', '', 43, 2, '', 2, '', ''),
+(50, 'Zentrale Stelle', '', '', '', '', 'index.php?go=zentrale_stelle', '', 43, 2, '', 3, '', ''),
+(51, 'Erstattung des Verwaltungsaufwands', '', '', '', '', 'index.php?go=erstattung_des_verwaltungsaufwands', '', 43, 2, '', 4, '', '');
 
 -- --------------------------------------------------------
 
@@ -3846,7 +3865,7 @@ ALTER TABLE `u_groups`
 -- AUTO_INCREMENT for table `u_menues`
 --
 ALTER TABLE `u_menues`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;COMMIT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
