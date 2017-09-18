@@ -85,18 +85,27 @@ class Gewaesserbenutzungen extends WrPgObject {
 	    return $gesamtUmfang;
 	}
 	
-	public function getTeilgewaesserbenutzungNichtZugelasseneMenge($teilgewaesserbenutzungId)
+	public function getZugelassenerUmfang()
 	{
-	    $gesamtUmfang = 0;
-	    
-	    $zugelassenerUmfang = 0;
 	    if(!empty($this->gewaesserbenutzungUmfang) && !empty($this->gewaesserbenutzungUmfang->getErlaubterUmfang()))
 	    {
 	        $zugelassenerUmfang = $this->gewaesserbenutzungUmfang->getErlaubterUmfang();
+	        return $zugelassenerUmfang;
+	        // 	    echo "zugelassenerUmfang: " . $zugelassenerUmfang . "<br/>";
 	    }
 	    
-	    if(!empty($teilgewaesserbenutzungId) && !empty($zugelassenerUmfang))
+	    return null;
+	}
+	
+	public function getTeilgewaesserbenutzungNichtZugelasseneMenge($teilgewaesserbenutzungId, &$zugelassenerUmfang)
+	{
+// 	    echo "teilgewaesserbenutzungId: " . $teilgewaesserbenutzungId . "<br/>";
+// 	    echo "zugelassenerUmfang: " . $zugelassenerUmfang . "<br/>";
+	    
+	    if(!empty($teilgewaesserbenutzungId))
 	    {
+	        $gesamtUmfang = 0;
+	        $bisZuDieserTeilgewaesserbenutzungKumulierterUmfang = 0;
 	        for ($i = 1; $i <= WASSERRECHT_ERKLAERUNG_ENTNAHME_TEILGEWAESSERBENUTZUNGEN_COUNT; $i++)
 	        {
 	            $teilgewaesserbenutzung = null;
@@ -107,25 +116,132 @@ class Gewaesserbenutzungen extends WrPgObject {
 	                
 	                if(!empty($teilgewaesserbenutzung))
 	                {
-	                    $gesamtUmfang = $gesamtUmfang + $teilgewaesserbenutzung->getUmfang();
+// 	                    echo "teilgewaesserbenutzung->getId(): " . $teilgewaesserbenutzung->getId() . "<br/>";
+// 	                    if($teilgewaesserbenutzung->getId() === $teilgewaesserbenutzungId)
+// 	                    {
+// 	                        $bisZuDieserTeilgewaesserbenutzungKumulierterUmfang = $gesamtUmfang + $teilgewaesserbenutzung->getUmfang();
+// 	                    }
 	                    
-                        if($teilgewaesserbenutzung->getId() === $teilgewaesserbenutzungId)
-                        {
-                            if($gesamtUmfang <= $zugelassenerUmfang)
-                            {
-                                return 0;
-                            }
-                            else
-                            {
-                                return $gesamtUmfang - $zugelassenerUmfang;
-                            }
-                        }
+	                    $gesamtUmfang = $gesamtUmfang + $teilgewaesserbenutzung->getUmfang();
+	                }
+	            }
+	        }
+// 	        echo "gesamtUmfang: " . $gesamtUmfang . "<br/>";
+	        
+	        for ($i = 1; $i <= WASSERRECHT_ERKLAERUNG_ENTNAHME_TEILGEWAESSERBENUTZUNGEN_COUNT; $i++)
+	        {
+	            $teilgewaesserbenutzung = null;
+	            if(!empty($this->teilgewaesserbenutzungen) && count($this->teilgewaesserbenutzungen) > 0
+	                && count($this->teilgewaesserbenutzungen) > ($i - 1) && !empty($this->teilgewaesserbenutzungen[$i - 1]))
+	            {
+	                $teilgewaesserbenutzung = $this->teilgewaesserbenutzungen[$i - 1];
+	                
+	                if(!empty($teilgewaesserbenutzung))
+	                {
+	                    $teilgewaesserbenutzungUmfang = $teilgewaesserbenutzung->getUmfang();
+	                    
+	                    if($teilgewaesserbenutzung->getId() === $teilgewaesserbenutzungId)
+	                    {
+	                        if($gesamtUmfang <= $zugelassenerUmfang)
+	                        {
+// 	                            echo "gesamtUmfang <= zugelassenerUmfang <br>";
+	                            return 0;
+	                        }
+	                        elseif ($zugelassenerUmfang === 0)
+	                        {
+// 	                            echo "zugelassenerUmfang === 0";
+	                            return $teilgewaesserbenutzungUmfang;
+	                        }
+// 	                        elseif($bisZuDieserTeilgewaesserbenutzungKumulierterUmfang <= $zugelassenerUmfang)
+// 	                        {
+// 	                            return 0;
+// 	                        }
+	                        elseif($teilgewaesserbenutzungUmfang <= $zugelassenerUmfang)
+	                        {
+// 	                            echo "teilgewaesserbenutzungUmfang <= zugelassenerUmfang <br>";
+	                            $zugelassenerUmfang = $zugelassenerUmfang - $teilgewaesserbenutzungUmfang;
+	                            return 0;
+	                        }
+	                        elseif($teilgewaesserbenutzungUmfang > $zugelassenerUmfang)
+	                        {
+// 	                            echo "teilgewaesserbenutzungUmfang > zugelassenerUmfang <br>";
+	                            $returnValue = $teilgewaesserbenutzungUmfang - $zugelassenerUmfang;
+	                            $zugelassenerUmfang = 0;
+// 	                            echo "returnValue :" . $returnValue;
+	                            return $returnValue;
+	                        }
+	                    }
 	                }
 	            }
 	        }
 	    }
 	    
 	    return null;
+	}
+	
+	public function getTeilgewaesserbenutzungEntgeltsatz($teilgewaesserbenutzung, $getArtBenutzung, $getBefreiungstatbestaende, $getWiedereinleitungBearbeiter, &$zugelassenesEntnahmeEntgelt, &$nichtZugelassenesEntnahmeEntgelt, &$zugelassenerUmfang)
+	{
+	    if(!empty($teilgewaesserbenutzung))
+	    {
+	        $teilbenutzungNichtZugelasseneMenge = $this->getTeilgewaesserbenutzungNichtZugelasseneMenge($teilgewaesserbenutzung->getId(), $zugelassenerUmfang);
+// 	        echo "teilbenutzungNichtZugelasseneMenge: " . $teilbenutzungNichtZugelasseneMenge . " <br>";
+	        
+	        if($teilbenutzungNichtZugelasseneMenge > 0)
+	        {
+	            if($teilbenutzungNichtZugelasseneMenge === $teilgewaesserbenutzung->getUmfang())
+	            {
+	                return $teilgewaesserbenutzung->getEntgeltsatz($getArtBenutzung, $getBefreiungstatbestaende, false, $getWiedereinleitungBearbeiter);
+	            }
+	            else
+	            {
+	                return $teilgewaesserbenutzung->getEntgeltsatz($getArtBenutzung, $getBefreiungstatbestaende, true, $getWiedereinleitungBearbeiter) . " (zugelassener Umfang)<br />" . $teilgewaesserbenutzung->getEntgeltsatz($getArtBenutzung, $getBefreiungstatbestaende, false, $getWiedereinleitungBearbeiter) . " (nicht zugelassener Umfang)";
+	            }
+	        }
+	        else
+	        {
+	            return $teilgewaesserbenutzung->getEntgeltsatz($getArtBenutzung, $getBefreiungstatbestaende, true, $getWiedereinleitungBearbeiter);
+	        }
+	    }
+	    
+	    return "Error";
+	}
+	
+	public function getTeilgewaesserbenutzungEntgelt($teilgewaesserbenutzung, $getArtBenutzung, $getBefreiungstatbestaende, $getWiedereinleitungBearbeiter, &$zugelassenesEntnahmeEntgelt, &$nichtZugelassenesEntnahmeEntgelt, &$zugelassenerUmfang)
+	{
+	    if(!empty($teilgewaesserbenutzung))
+	    {
+	        $teilbenutzungNichtZugelasseneMenge = $this->getTeilgewaesserbenutzungNichtZugelasseneMenge($teilgewaesserbenutzung->getId(), $zugelassenerUmfang);
+// 	        echo "teilbenutzungNichtZugelasseneMenge: " . $teilbenutzungNichtZugelasseneMenge . "<br/>";
+	        if($teilbenutzungNichtZugelasseneMenge > 0)
+	        {
+	            if($teilbenutzungNichtZugelasseneMenge === $teilgewaesserbenutzung->getUmfang())
+	            {
+	                $entnahmeEntgeltNichtErlaubt = $teilgewaesserbenutzung->getEntgelt($teilgewaesserbenutzung->getUmfang(), $getArtBenutzung, $getBefreiungstatbestaende, false, $getWiedereinleitungBearbeiter);
+	                $nichtZugelassenesEntnahmeEntgelt = $nichtZugelassenesEntnahmeEntgelt + $entnahmeEntgeltNichtErlaubt;
+	                
+	                return $entnahmeEntgeltNichtErlaubt;
+	            }
+	            else
+	            {
+	                $entnahmeEntgeltNichtErlaubt = $teilgewaesserbenutzung->getEntgelt($teilbenutzungNichtZugelasseneMenge, $getArtBenutzung, $getBefreiungstatbestaende, false, $getWiedereinleitungBearbeiter);
+	                $nichtZugelassenesEntnahmeEntgelt =  $nichtZugelassenesEntnahmeEntgelt + $entnahmeEntgeltNichtErlaubt;
+	                
+	                $entnahmeEntgeltErlaubt = $teilgewaesserbenutzung->getEntgelt($this->gewaesserbenutzungUmfang->getErlaubterUmfang(), $getArtBenutzung, $getBefreiungstatbestaende, true, $getWiedereinleitungBearbeiter);
+	                $zugelassenesEntnahmeEntgelt = $zugelassenesEntnahmeEntgelt + $entnahmeEntgeltErlaubt;
+	                
+	                return $entnahmeEntgeltErlaubt + $entnahmeEntgeltNichtErlaubt;
+	            }
+	        }
+	        else
+	        {
+	            $entnahmeEntgeltErlaubt = $teilgewaesserbenutzung->getEntgelt($teilgewaesserbenutzung->getUmfang(), $getArtBenutzung, $getBefreiungstatbestaende, true, $getWiedereinleitungBearbeiter);
+	            $zugelassenesEntnahmeEntgelt = $zugelassenesEntnahmeEntgelt + $entnahmeEntgeltErlaubt;
+	            
+	            return $entnahmeEntgeltErlaubt;
+	        }
+	    }
+	    
+	    return "Error";
 	}
 	
 	public function getEntnahmemenge($zugelassen)

@@ -3,8 +3,11 @@ $wrz = null;
 $gewaesserbenutzung = null;
 $errorEingabeFestsetzung = null;
 $speereEingabeFestsetzung = false;
+
 $zugelassenesEntnahmeEntgelt = 0;
 $nichtZugelassenesEntnahmeEntgelt = 0;
+$zugelassenerUmfangEntgeltsatz = 0;
+$zugelassenerUmfangEntgelt = 0;
 		
 // print_r($_REQUEST); 
 
@@ -242,6 +245,10 @@ if(!empty($wrz))
                     <th>Entgelt</th>
                   </tr>
            		  <?php
+           		  
+           		  $zugelassenerUmfangEntgeltsatz = $gewaesserbenutzung->getZugelassenerUmfang();
+           		  $zugelassenerUmfangEntgelt = $zugelassenerUmfangEntgeltsatz;
+           		  
                   for ($i = 1; $i <= WASSERRECHT_ERKLAERUNG_ENTNAHME_TEILGEWAESSERBENUTZUNGEN_COUNT; $i++) 
                   {
                       
@@ -336,58 +343,15 @@ if(!empty($wrz))
                                     	</select>
                                       </td>
                                       <td>
-                                      	<?php 
-//                                       	     var_dump("getBefreiungstatbestaende: " . $getBefreiungstatbestaende);
-//                                       	     var_dump("getWiedereinleitungBearbeiter: " . $getWiedereinleitungBearbeiter);
-                                      	    $teilbenutzungNichtZugelasseneMenge = $gewaesserbenutzung->getTeilgewaesserbenutzungNichtZugelasseneMenge($teilgewaesserbenutzung->getId());
-//                                       	    echo "teilbenutzungNichtZugelasseneMenge: $teilbenutzungNichtZugelasseneMenge";
-                                      	    if($teilbenutzungNichtZugelasseneMenge > 0)
-                                      	    {
-                                      	        if($teilbenutzungNichtZugelasseneMenge === $teilgewaesserbenutzung->getUmfang())
-                                      	        {
-                                      	            echo $teilgewaesserbenutzung->getEntgeltsatz($getArtBenutzung, $getBefreiungstatbestaende, false, $getWiedereinleitungBearbeiter);
-                                      	        }
-                                      	        else
-                                      	        {
-                                      	            echo $teilgewaesserbenutzung->getEntgeltsatz($getArtBenutzung, $getBefreiungstatbestaende, true, $getWiedereinleitungBearbeiter) . " (zugelassener Umfang)<br />"; 
-                                      	            echo $teilgewaesserbenutzung->getEntgeltsatz($getArtBenutzung, $getBefreiungstatbestaende, false, $getWiedereinleitungBearbeiter) . " (nicht zugelassener Umfang)"; 
-                                      	        }
-                                      	    }
-                                      	    else
-                                      	    {
-                                      	        echo $teilgewaesserbenutzung->getEntgeltsatz($getArtBenutzung, $getBefreiungstatbestaende, true, $getWiedereinleitungBearbeiter);
-                                      	    }   
+                                      	<?php
+                                      	//var_dump("getBefreiungstatbestaende: " . $getBefreiungstatbestaende);
+                                      	//var_dump("getWiedereinleitungBearbeiter: " . $getWiedereinleitungBearbeiter);
+                                      	     echo $gewaesserbenutzung->getTeilgewaesserbenutzungEntgeltsatz($teilgewaesserbenutzung, $getArtBenutzung, $getBefreiungstatbestaende, $getWiedereinleitungBearbeiter, $zugelassenesEntnahmeEntgelt, $nichtZugelassenesEntnahmeEntgelt, $zugelassenerUmfangEntgeltsatz);
                                       	?>
                                       </td>
                                       <td>
                                       	<?php
-                                      	    if($teilbenutzungNichtZugelasseneMenge > 0)
-                                            {
-                                                if($teilbenutzungNichtZugelasseneMenge === $teilgewaesserbenutzung->getUmfang())
-                                                {
-                                                    $entnahmeEntgeltNichtErlaubt = $teilgewaesserbenutzung->getEntgelt($teilgewaesserbenutzung->getUmfang(), $getArtBenutzung, $getBefreiungstatbestaende, false, $getWiedereinleitungBearbeiter);
-                                                    $nichtZugelassenesEntnahmeEntgelt =  $nichtZugelassenesEntnahmeEntgelt + $entnahmeEntgeltNichtErlaubt;
-                                                    
-                                                    echo $entnahmeEntgeltNichtErlaubt;
-                                                }
-                                                else
-                                                {
-                                                    $entnahmeEntgeltNichtErlaubt = $teilgewaesserbenutzung->getEntgelt($teilbenutzungNichtZugelasseneMenge, $getArtBenutzung, $getBefreiungstatbestaende, false, $getWiedereinleitungBearbeiter);
-                                                    $nichtZugelassenesEntnahmeEntgelt =  $nichtZugelassenesEntnahmeEntgelt + $entnahmeEntgeltNichtErlaubt;
-                                                    
-                                                    $entnahmeEntgeltErlaubt = $teilgewaesserbenutzung->getEntgelt($gewaesserbenutzung->gewaesserbenutzungUmfang->getErlaubterUmfang(), $getArtBenutzung, $getBefreiungstatbestaende, true, $getWiedereinleitungBearbeiter);
-                                                    $zugelassenesEntnahmeEntgelt =  $zugelassenesEntnahmeEntgelt + $entnahmeEntgeltErlaubt;
-                                                    
-                                                    echo $entnahmeEntgeltErlaubt + $entnahmeEntgeltNichtErlaubt;
-                                                }
-                                            }
-                                      	    else
-                                      	    {
-                                      	        $entnahmeEntgeltErlaubt = $teilgewaesserbenutzung->getEntgelt($teilgewaesserbenutzung->getUmfang(), $getArtBenutzung, $getBefreiungstatbestaende, true, $getWiedereinleitungBearbeiter);
-                                      	        $zugelassenesEntnahmeEntgelt =  $zugelassenesEntnahmeEntgelt + $entnahmeEntgeltErlaubt;
-                                      	        
-                                      	        echo $entnahmeEntgeltErlaubt;
-                                      	    }
+                                      	     echo $gewaesserbenutzung->getTeilgewaesserbenutzungEntgelt($teilgewaesserbenutzung, $getArtBenutzung, $getBefreiungstatbestaende, $getWiedereinleitungBearbeiter, $zugelassenesEntnahmeEntgelt, $nichtZugelassenesEntnahmeEntgelt, $zugelassenerUmfangEntgelt);
                                       	?>
                                       </td>
                                   </tr>
