@@ -198,7 +198,7 @@ function festsetzung_erstellen(&$gui, &$wrzs, &$gewaesserbenutzungen)
                     		          			<?php
                     		          			     if(!empty($gewaesserbenutzung))
                     		          			     {
-                    		          			         echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['FisWrV-WRe Gewaesserbenutzungen'] . '&value_id=' . $gewaesserbenutzung->getId() . '&operator_id==">' . $gewaesserbenutzung->getBezeichnung() . '</a>';
+                    		          			         echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['FisWrV-WRe Gewässerbenutzungen'] . '&value_id=' . $gewaesserbenutzung->getId() . '&operator_id==">' . $gewaesserbenutzung->getBezeichnung() . '</a>';
                     		          			     }
                     		          			?>
                     		          		</td>

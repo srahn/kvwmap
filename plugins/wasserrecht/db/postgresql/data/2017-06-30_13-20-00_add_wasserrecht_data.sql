@@ -209,7 +209,7 @@ INSERT INTO wasserrecht.fiswrv_personen_klasse (name) VALUES ('Kieswerk');
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 INSERT INTO wasserrecht.fiswrv_ort(name) VALUES ('Güstrow');
 
-INSERT INTO wasserrecht.fiswrv_wasserrechtliche_zulassungen (typus, aktenzeichen, ort, datum, ausstellbehoerde, status, gueltig_seit, befristet_bis, aktuell, bearbeiter, adressat, anlage) VALUES (1, '§ 1', 1, current_date, 1, 2, '2017-07-01', '2017-07-06', 'ja', 2, 2, 1);
+INSERT INTO wasserrecht.fiswrv_wasserrechtliche_zulassungen (typus, aktenzeichen, ort, datum, ausstellbehoerde, status, gueltig_seit, befristet_bis, aktuell, bearbeiter, adressat, anlage, fassung_nummer, fassung_datum) VALUES (1, '§ 1', 1, current_date, 1, 2, '2017-07-01', '2017-07-06', 'ja', 2, 2, 1, 1, '2017-07-01');
 INSERT INTO wasserrecht.fiswrv_wasserrechtliche_zulassungen (typus, aktenzeichen, ort, datum, ausstellbehoerde, status, gueltig_seit, befristet_bis, historisch, bearbeiter, adressat, anlage) VALUES (1, '§ 2', 1, current_date, 1, 2, '2017-07-01', '2017-07-06', 'ja', 2, 2, 2);
 INSERT INTO wasserrecht.fiswrv_wasserrechtliche_zulassungen (typus, aktenzeichen, ort, datum, ausstellbehoerde, status, gueltig_seit, befristet_bis, historisch, bearbeiter, adressat, anlage) VALUES (1, '§ 3', 1, current_date, 2, 2, '2017-07-01', '2017-07-06', 'ja', 2, 1, 2);
 INSERT INTO wasserrecht.fiswrv_wasserrechtliche_zulassungen (typus, aktenzeichen, ort, datum, ausstellbehoerde, status, gueltig_seit, befristet_bis, historisch, bearbeiter, adressat, anlage) VALUES (1, '§ 4', 1, current_date, 2, 2, '2017-07-01', '2017-12-31', 'ja', 2, 1, 1);
@@ -218,9 +218,9 @@ INSERT INTO wasserrecht.fiswrv_wasserrechtliche_zulassungen (typus, aktenzeichen
 INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_umfang_entnahme(name, max_ent_a, max_ent_wee) VALUES('Test Umfang', 80000, 100000);
 INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_lage(name, namekurz, namelang, the_geo) VALUES('Test Gewaesserbenutzungen Lage', 'Test Gewaesserbenutzungen Lage (kurz)', 'Test Gewaesserbenutzungen Lage (lang)', ST_Transform(ST_GeomFromText('POINT(13 53)', 4326), 35833));
 
-INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen(kennnummer, wasserbuchnummer, freitext_art, art, freitext_zweck, zweck, umfang_entnahme, gruppe_wee, lage, wasserrechtliche_zulassungen) VALUES ('1-1-2-1', '3572', 'Test Freitext Art 1', 1, 'Test Freitext Zweck 1', 6, 1, false, 1, 1);
-INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen(kennnummer, wasserbuchnummer, freitext_art, art, freitext_zweck, zweck, umfang_entnahme, gruppe_wee, lage, wasserrechtliche_zulassungen) VALUES ('2-1-2-2', '0000', 'Test Freitext Art 2', 2, 'Test Freitext Zweck 2', 6, 1, false, 1, 2);
-INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen(kennnummer, wasserbuchnummer, freitext_art, art, freitext_zweck, zweck, umfang_entnahme, gruppe_wee, lage, wasserrechtliche_zulassungen) VALUES ('3-1-2-1', '3572', 'Test Freitext Art 3', 1, 'Test Freitext Zweck 3', 6, 1, false, 1, 3);
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen(kennnummer, wasserbuchnummer, freitext_art, art, freitext_zweck, zweck, umfang_entnahme, lage, wasserrechtliche_zulassungen) VALUES ('1-1-2-1', '3572', 'Test Freitext Art 1', 1, 'Test Freitext Zweck 1', 6, 1, 1, 1);
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen(kennnummer, wasserbuchnummer, freitext_art, art, freitext_zweck, zweck, umfang_entnahme, lage, wasserrechtliche_zulassungen) VALUES ('2-1-2-2', '0000', 'Test Freitext Art 2', 2, 'Test Freitext Zweck 2', 6, 1, 1, 2);
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen(kennnummer, wasserbuchnummer, freitext_art, art, freitext_zweck, zweck, umfang_entnahme, lage, wasserrechtliche_zulassungen) VALUES ('3-1-2-1', '3572', 'Test Freitext Art 3', 1, 'Test Freitext Zweck 3', 6, 1, 1, 3);
 
 INSERT INTO wasserrecht.fiswrv_teilgewaesserbenutzungen(art, zweck, umfang, wiedereinleitung_nutzer, wiedereinleitung_bearbeiter,mengenbestimmung,art_benutzung,befreiungstatbestaende,entgeltsatz,teilgewaesserbenutzungen_art, gewaesserbenutzungen) VALUES(1,1,2,true,true,3,2,false,2,2,1);
 
