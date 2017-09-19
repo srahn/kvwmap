@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 172.17.0.2:3306
--- Generation Time: Sep 18, 2017 at 04:43 PM
+-- Generation Time: Sep 19, 2017 at 02:09 PM
 -- Server version: 5.5.56
 -- PHP Version: 5.6.30-0+deb8u1
 
@@ -21,6 +21,8 @@ SET time_zone = "+00:00";
 --
 -- Database: `kvwmapdb`
 --
+CREATE DATABASE IF NOT EXISTS `kvwmapdb` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+USE `kvwmapdb`;
 
 -- --------------------------------------------------------
 
@@ -1988,7 +1990,7 @@ CREATE TABLE `rolle` (
 --
 
 INSERT INTO `rolle` (`user_id`, `stelle_id`, `nImageWidth`, `nImageHeight`, `auto_map_resize`, `minx`, `miny`, `maxx`, `maxy`, `nZoomFactor`, `selectedButton`, `epsg_code`, `epsg_code2`, `coordtype`, `active_frame`, `last_time_id`, `gui`, `language`, `hidemenue`, `hidelegend`, `fontsize_gle`, `highlighting`, `buttons`, `scrollposition`, `result_color`, `always_draw`, `runningcoords`, `showmapfunctions`, `showlayeroptions`, `singlequery`, `querymode`, `geom_edit_first`, `overlayx`, `overlayy`, `hist_timestamp`, `instant_reload`, `menu_auto_close`, `layer_params`, `menue_buttons`, `visually_impaired`) VALUES
-(1, 1, 1198, 802, 1, 33179892.898819, 5867814.9999173, 33499172.10119, 6081468.0000002, 2, 'zoomin', '35833', '', 'dec', 0, '2017-09-18 09:31:52', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure,', 0, 1, 0, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 1, 0),
+(1, 1, 1198, 802, 1, 33164313.205815, 5857389.491065, 33514751.794194, 6091893.5088525, 2, 'zoomin', '35833', '', 'dec', 0, '2017-09-18 17:53:37', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure,', 0, 1, 0, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 1, 0),
 (2, 2, 1198, 770, 1, 239608.32867608, 5890464.3996456, 453335.02845224, 6047442.271783, 2, 'zoomin', '35833', NULL, 'dec', 0, '2017-07-12 11:18:57', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure', 0, 1, 0, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 0, 0);
 
 -- --------------------------------------------------------
@@ -2720,7 +2722,8 @@ INSERT INTO `u_consume` (`user_id`, `stelle_id`, `time_id`, `activity`, `nimagew
 (1, 1, '2017-09-15 10:52:29', 'getMap', 1198, 802, '35833', 33303443.078216, 5987785.9674587, 33303484.842322, 5987817.9187953, '2017-09-15 10:52:25', NULL),
 (1, 1, '2017-09-15 11:47:00', 'getMap', 1198, 802, '35833', 33303443.078216, 5987785.9674587, 33303484.842322, 5987817.9187953, '2017-09-15 10:52:29', NULL),
 (1, 1, '2017-09-18 09:31:51', 'getMap', 1198, 802, '35833', 33303422.423147, 5987766.3265491, 33303504.939407, 5987821.5441967, '2017-09-15 11:47:00', NULL),
-(1, 1, '2017-09-18 09:31:52', 'getMap', 1198, 802, '35833', 33179892.898819, 5867814.9999175, 33499172.10119, 6081468, '2017-09-18 09:31:51', NULL);
+(1, 1, '2017-09-18 09:31:52', 'getMap', 1198, 802, '35833', 33179892.898819, 5867814.9999175, 33499172.10119, 6081468, '2017-09-18 09:31:51', NULL),
+(1, 1, '2017-09-18 17:53:37', 'getMap', 1198, 770, '35833', 33179892.898819, 5857389.4910651, 33499172.10119, 6091893.5088524, '2017-09-18 09:31:52', NULL);
 
 -- --------------------------------------------------------
 
@@ -2996,7 +2999,7 @@ INSERT INTO `u_menue2rolle` (`user_id`, `stelle_id`, `menue_id`, `status`) VALUE
 (1, 1, 28, 0),
 (1, 1, 27, 0),
 (1, 1, 26, 0),
-(1, 1, 25, 0),
+(1, 1, 25, 1),
 (1, 1, 24, 0),
 (1, 1, 23, 0),
 (1, 1, 22, 0),
@@ -3865,7 +3868,2428 @@ ALTER TABLE `u_groups`
 -- AUTO_INCREMENT for table `u_menues`
 --
 ALTER TABLE `u_menues`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;COMMIT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;--
+-- Database: `kvwmapdb_backup`
+--
+CREATE DATABASE IF NOT EXISTS `kvwmapdb_backup` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+USE `kvwmapdb_backup`;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `classes`
+--
+
+CREATE TABLE `classes` (
+  `Class_ID` int(11) NOT NULL,
+  `Name` varchar(50) NOT NULL DEFAULT '',
+  `Name_low-german` varchar(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `Name_english` varchar(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `Name_polish` varchar(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `Name_vietnamese` varchar(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `Layer_ID` int(11) NOT NULL DEFAULT '0',
+  `Expression` text,
+  `drawingorder` int(11) UNSIGNED DEFAULT NULL,
+  `legendorder` int(11) DEFAULT NULL,
+  `text` varchar(255) DEFAULT NULL,
+  `classification` varchar(50) DEFAULT NULL,
+  `legendgraphic` varchar(255) DEFAULT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `colors`
+--
+
+CREATE TABLE `colors` (
+  `id` int(11) NOT NULL,
+  `name` varchar(30) DEFAULT NULL,
+  `red` smallint(3) NOT NULL DEFAULT '0',
+  `green` smallint(3) NOT NULL DEFAULT '0',
+  `blue` smallint(3) NOT NULL DEFAULT '0'
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `colors`
+--
+
+INSERT INTO `colors` (`id`, `name`, `red`, `green`, `blue`) VALUES
+(1, NULL, 166, 206, 227),
+(2, NULL, 31, 120, 180),
+(3, NULL, 178, 223, 138),
+(4, NULL, 51, 160, 44),
+(5, NULL, 251, 154, 153),
+(6, NULL, 227, 26, 28),
+(7, NULL, 253, 191, 111),
+(8, NULL, 255, 127, 0),
+(9, NULL, 202, 178, 214),
+(10, NULL, 106, 61, 154),
+(11, NULL, 0, 0, 0),
+(12, NULL, 122, 12, 45);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `cron_jobs`
+--
+
+CREATE TABLE `cron_jobs` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `bezeichnung` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `beschreibung` text COLLATE utf8_unicode_ci,
+  `time` varchar(25) COLLATE utf8_unicode_ci NOT NULL DEFAULT '0 6 1 * *',
+  `query` text COLLATE utf8_unicode_ci,
+  `function` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `url` varchar(1000) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `stelle_id` int(11) DEFAULT NULL,
+  `aktiv` tinyint(1) NOT NULL DEFAULT '0',
+  `dbname` varchar(68) COLLATE utf8_unicode_ci DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `datatypes`
+--
+
+CREATE TABLE `datatypes` (
+  `id` int(11) NOT NULL,
+  `name` varchar(58) DEFAULT NULL,
+  `schema` varchar(58) NOT NULL DEFAULT 'public',
+  `dbname` varchar(50) NOT NULL,
+  `host` varchar(50) DEFAULT NULL,
+  `port` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `datatype_attributes`
+--
+
+CREATE TABLE `datatype_attributes` (
+  `datatype_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `real_name` varchar(255) DEFAULT NULL,
+  `tablename` varchar(100) DEFAULT NULL,
+  `table_alias_name` varchar(100) DEFAULT NULL,
+  `type` varchar(30) DEFAULT NULL,
+  `geometrytype` varchar(20) DEFAULT NULL,
+  `constraints` varchar(255) DEFAULT NULL,
+  `nullable` tinyint(1) DEFAULT NULL,
+  `length` int(11) DEFAULT NULL,
+  `decimal_length` int(11) DEFAULT NULL,
+  `default` varchar(255) DEFAULT NULL,
+  `form_element_type` enum('Text','Textfeld','Auswahlfeld','Checkbox','Geometrie','SubFormPK','SubFormFK','SubFormEmbeddedPK','Time','Dokument','Link','User','Stelle','FlÃ¤che','dynamicLink','Zahl','UserID','LÃ¤nge','mailto') NOT NULL DEFAULT 'Text',
+  `options` text,
+  `alias` varchar(255) DEFAULT NULL,
+  `alias_low-german` varchar(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `alias_english` varchar(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `alias_polish` varchar(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `alias_vietnamese` varchar(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `tooltip` varchar(255) DEFAULT NULL,
+  `group` varchar(255) DEFAULT NULL,
+  `raster_visibility` tinyint(1) DEFAULT NULL,
+  `mandatory` tinyint(1) DEFAULT NULL,
+  `quicksearch` tinyint(1) DEFAULT NULL,
+  `order` int(11) DEFAULT NULL,
+  `privileg` tinyint(1) DEFAULT '0',
+  `query_tooltip` tinyint(1) DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `datendrucklayouts`
+--
+
+CREATE TABLE `datendrucklayouts` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `layer_id` int(11) NOT NULL,
+  `bgsrc` varchar(255) DEFAULT NULL,
+  `bgposx` int(11) DEFAULT NULL,
+  `bgposy` int(11) DEFAULT NULL,
+  `bgwidth` int(11) DEFAULT NULL,
+  `bgheight` int(11) DEFAULT NULL,
+  `dateposx` int(11) DEFAULT NULL,
+  `dateposy` int(11) DEFAULT NULL,
+  `datesize` int(11) DEFAULT NULL,
+  `userposx` int(11) DEFAULT NULL,
+  `userposy` int(11) DEFAULT NULL,
+  `usersize` int(11) DEFAULT NULL,
+  `font_date` varchar(255) DEFAULT NULL,
+  `font_user` varchar(255) DEFAULT NULL,
+  `type` tinyint(1) NOT NULL DEFAULT '0',
+  `gap` int(11) NOT NULL DEFAULT '20',
+  `no_record_splitting` tinyint(1) NOT NULL DEFAULT '0'
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ddl2freitexte`
+--
+
+CREATE TABLE `ddl2freitexte` (
+  `ddl_id` int(11) NOT NULL,
+  `freitext_id` int(11) NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ddl2stelle`
+--
+
+CREATE TABLE `ddl2stelle` (
+  `stelle_id` int(11) NOT NULL,
+  `ddl_id` int(11) NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ddl_elemente`
+--
+
+CREATE TABLE `ddl_elemente` (
+  `ddl_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `xpos` double DEFAULT NULL,
+  `ypos` double DEFAULT NULL,
+  `offset_attribute` varchar(255) DEFAULT NULL,
+  `width` int(11) DEFAULT NULL,
+  `border` tinyint(1) DEFAULT NULL,
+  `font` varchar(255) DEFAULT NULL,
+  `fontsize` int(11) DEFAULT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `druckausschnitte`
+--
+
+CREATE TABLE `druckausschnitte` (
+  `stelle_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `center_x` float NOT NULL,
+  `center_y` float NOT NULL,
+  `print_scale` int(11) NOT NULL,
+  `angle` int(11) NOT NULL,
+  `frame_id` int(11) NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `druckfreibilder`
+--
+
+CREATE TABLE `druckfreibilder` (
+  `id` int(11) NOT NULL,
+  `src` varchar(255) CHARACTER SET latin1 COLLATE latin1_german2_ci NOT NULL DEFAULT ''
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `druckfreitexte`
+--
+
+CREATE TABLE `druckfreitexte` (
+  `id` int(11) NOT NULL,
+  `text` text,
+  `posx` int(11) NOT NULL,
+  `posy` int(11) NOT NULL,
+  `offset_attribute` varchar(255) DEFAULT NULL,
+  `size` int(11) NOT NULL,
+  `font` varchar(255) NOT NULL,
+  `angle` int(11) DEFAULT NULL,
+  `type` tinyint(1) DEFAULT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `druckrahmen`
+--
+
+CREATE TABLE `druckrahmen` (
+  `Name` varchar(255) NOT NULL,
+  `id` int(11) NOT NULL,
+  `dhk_call` varchar(10) DEFAULT NULL,
+  `headsrc` varchar(255) NOT NULL,
+  `headposx` int(11) NOT NULL,
+  `headposy` int(11) NOT NULL,
+  `headwidth` int(11) NOT NULL,
+  `headheight` int(11) NOT NULL,
+  `mapposx` int(11) NOT NULL,
+  `mapposy` int(11) NOT NULL,
+  `mapwidth` int(11) NOT NULL,
+  `mapheight` int(11) NOT NULL,
+  `refmapsrc` varchar(255) DEFAULT NULL,
+  `refmapfile` varchar(255) DEFAULT NULL,
+  `refmapposx` int(11) DEFAULT NULL,
+  `refmapposy` int(11) DEFAULT NULL,
+  `refmapwidth` int(11) DEFAULT NULL,
+  `refmapheight` int(11) DEFAULT NULL,
+  `refposx` int(11) DEFAULT NULL,
+  `refposy` int(11) DEFAULT NULL,
+  `refwidth` int(11) DEFAULT NULL,
+  `refheight` int(11) DEFAULT NULL,
+  `refzoom` int(11) DEFAULT NULL,
+  `dateposx` int(11) DEFAULT NULL,
+  `dateposy` int(11) DEFAULT NULL,
+  `datesize` int(11) DEFAULT NULL,
+  `scaleposx` int(11) DEFAULT NULL,
+  `scaleposy` int(11) DEFAULT NULL,
+  `scalesize` int(11) DEFAULT NULL,
+  `scalebarposx` int(11) DEFAULT NULL,
+  `scalebarposy` int(11) DEFAULT NULL,
+  `oscaleposx` int(11) DEFAULT NULL,
+  `oscaleposy` int(11) DEFAULT NULL,
+  `oscalesize` int(11) DEFAULT NULL,
+  `lageposx` int(11) DEFAULT NULL,
+  `lageposy` int(11) DEFAULT NULL,
+  `lagesize` int(11) DEFAULT NULL,
+  `gemeindeposx` int(11) DEFAULT NULL,
+  `gemeindeposy` int(11) DEFAULT NULL,
+  `gemeindesize` int(11) DEFAULT NULL,
+  `gemarkungposx` int(11) DEFAULT NULL,
+  `gemarkungposy` int(11) DEFAULT NULL,
+  `gemarkungsize` int(11) DEFAULT NULL,
+  `flurposx` int(11) DEFAULT NULL,
+  `flurposy` int(11) DEFAULT NULL,
+  `flursize` int(11) DEFAULT NULL,
+  `flurstposx` int(11) DEFAULT NULL,
+  `flurstposy` int(11) DEFAULT NULL,
+  `flurstsize` int(11) DEFAULT NULL,
+  `legendposx` int(11) DEFAULT NULL,
+  `legendposy` int(11) DEFAULT NULL,
+  `legendsize` int(11) DEFAULT NULL,
+  `arrowposx` int(11) DEFAULT NULL,
+  `arrowposy` int(11) DEFAULT NULL,
+  `arrowlength` int(11) DEFAULT NULL,
+  `userposx` int(11) DEFAULT NULL,
+  `userposy` int(11) DEFAULT NULL,
+  `usersize` int(11) DEFAULT NULL,
+  `watermarkposx` int(11) DEFAULT NULL,
+  `watermarkposy` int(11) DEFAULT NULL,
+  `watermark` varchar(255) DEFAULT '',
+  `watermarksize` int(11) DEFAULT NULL,
+  `watermarkangle` int(11) DEFAULT NULL,
+  `watermarktransparency` int(11) DEFAULT NULL,
+  `variable_freetexts` tinyint(1) DEFAULT NULL,
+  `format` varchar(10) NOT NULL DEFAULT 'A4hoch',
+  `preis` int(11) DEFAULT NULL,
+  `font_date` varchar(255) DEFAULT NULL,
+  `font_scale` varchar(255) DEFAULT NULL,
+  `font_lage` varchar(255) DEFAULT NULL,
+  `font_gemeinde` varchar(255) DEFAULT NULL,
+  `font_gemarkung` varchar(255) DEFAULT NULL,
+  `font_flur` varchar(255) DEFAULT NULL,
+  `font_flurst` varchar(255) DEFAULT NULL,
+  `font_oscale` varchar(255) DEFAULT NULL,
+  `font_legend` varchar(255) DEFAULT NULL,
+  `font_watermark` varchar(255) DEFAULT NULL,
+  `font_user` varchar(255) DEFAULT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `druckrahmen`
+--
+
+INSERT INTO `druckrahmen` (`Name`, `id`, `dhk_call`, `headsrc`, `headposx`, `headposy`, `headwidth`, `headheight`, `mapposx`, `mapposy`, `mapwidth`, `mapheight`, `refmapsrc`, `refmapfile`, `refmapposx`, `refmapposy`, `refmapwidth`, `refmapheight`, `refposx`, `refposy`, `refwidth`, `refheight`, `refzoom`, `dateposx`, `dateposy`, `datesize`, `scaleposx`, `scaleposy`, `scalesize`, `scalebarposx`, `scalebarposy`, `oscaleposx`, `oscaleposy`, `oscalesize`, `lageposx`, `lageposy`, `lagesize`, `gemeindeposx`, `gemeindeposy`, `gemeindesize`, `gemarkungposx`, `gemarkungposy`, `gemarkungsize`, `flurposx`, `flurposy`, `flursize`, `flurstposx`, `flurstposy`, `flurstsize`, `legendposx`, `legendposy`, `legendsize`, `arrowposx`, `arrowposy`, `arrowlength`, `userposx`, `userposy`, `usersize`, `watermarkposx`, `watermarkposy`, `watermark`, `watermarksize`, `watermarkangle`, `watermarktransparency`, `variable_freetexts`, `format`, `preis`, `font_date`, `font_scale`, `font_lage`, `font_gemeinde`, `font_gemarkung`, `font_flur`, `font_flurst`, `font_oscale`, `font_legend`, `font_watermark`, `font_user`) VALUES
+('A4-hoch-leer', 1, NULL, 'A4-hoch.jpg', 0, 0, 595, 842, 44, 50, 511, 714, '', NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 503, 784, 11, 422, 74, 0, NULL, NULL, 422, 87, 0, NULL, NULL, NULL, NULL, NULL, NULL, 238, 54, 0, 238, 64, 0, NULL, NULL, NULL, 58, 50, 0, 540, 770, 0, 140, 800, 0, 155, 155, '', 120, 45, 77, NULL, 'A4hoch', 0, '/home/fgs/fgs/apps/PDFClass/fonts/Courier-Bold.afm', '/home/fgs/fgs/apps/PDFClass/fonts/Courier-Bold.afm', NULL, NULL, '/home/fgs/fgs/apps/PDFClass/fonts/Courier-Bold.afm', '/home/fgs/fgs/apps/PDFClass/fonts/Courier-Bold.afm', NULL, NULL, '/home/fgs/fgs/apps/PDFClass/fonts/Courier-Bold.afm', '/home/fgs/fgs/apps/PDFClass/fonts/Courier-Bold.afm', '/home/fgs/fgs/apps/PDFClass/fonts/Courier-Bold.afm');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `druckrahmen2freibilder`
+--
+
+CREATE TABLE `druckrahmen2freibilder` (
+  `druckrahmen_id` int(11) NOT NULL,
+  `freibild_id` int(11) NOT NULL,
+  `posx` int(11) NOT NULL,
+  `posy` int(11) NOT NULL,
+  `width` int(11) DEFAULT NULL,
+  `height` int(11) DEFAULT NULL,
+  `angle` int(11) DEFAULT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `druckrahmen2freitexte`
+--
+
+CREATE TABLE `druckrahmen2freitexte` (
+  `druckrahmen_id` int(11) NOT NULL,
+  `freitext_id` int(11) NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `druckrahmen2stelle`
+--
+
+CREATE TABLE `druckrahmen2stelle` (
+  `stelle_id` int(11) NOT NULL,
+  `druckrahmen_id` int(11) NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `druckrahmen2stelle`
+--
+
+INSERT INTO `druckrahmen2stelle` (`stelle_id`, `druckrahmen_id`) VALUES
+(1, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `labels`
+--
+
+CREATE TABLE `labels` (
+  `Label_ID` int(11) NOT NULL,
+  `font` varchar(25) NOT NULL DEFAULT 'arial',
+  `type` int(1) DEFAULT NULL,
+  `color` varchar(11) NOT NULL DEFAULT '',
+  `outlinecolor` varchar(11) DEFAULT NULL,
+  `shadowcolor` varchar(11) DEFAULT NULL,
+  `shadowsizex` int(3) DEFAULT NULL,
+  `shadowsizey` int(3) DEFAULT NULL,
+  `backgroundcolor` varchar(11) DEFAULT NULL,
+  `backgroundshadowcolor` varchar(11) DEFAULT NULL,
+  `backgroundshadowsizex` int(3) DEFAULT NULL,
+  `backgroundshadowsizey` int(3) DEFAULT NULL,
+  `size` int(2) DEFAULT NULL,
+  `minsize` tinyint(3) DEFAULT NULL,
+  `maxsize` tinyint(3) DEFAULT NULL,
+  `position` tinyint(1) DEFAULT NULL,
+  `offsetx` tinyint(3) DEFAULT NULL,
+  `offsety` tinyint(3) DEFAULT NULL,
+  `angle` double DEFAULT NULL,
+  `autoangle` tinyint(1) DEFAULT NULL,
+  `buffer` tinyint(3) DEFAULT NULL,
+  `antialias` tinyint(1) DEFAULT NULL,
+  `minfeaturesize` int(11) DEFAULT NULL,
+  `maxfeaturesize` int(11) DEFAULT NULL,
+  `partials` int(1) DEFAULT NULL,
+  `wrap` tinyint(3) DEFAULT NULL,
+  `the_force` int(1) DEFAULT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `layer`
+--
+
+CREATE TABLE `layer` (
+  `Layer_ID` int(11) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  `Name_low-german` varchar(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `Name_english` varchar(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `Name_polish` varchar(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `Name_vietnamese` varchar(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `alias` varchar(255) DEFAULT NULL,
+  `Datentyp` tinyint(4) NOT NULL DEFAULT '2',
+  `Gruppe` int(11) NOT NULL DEFAULT '0',
+  `pfad` text CHARACTER SET latin1 COLLATE latin1_german2_ci,
+  `maintable` varchar(255) DEFAULT NULL,
+  `maintable_is_view` tinyint(1) NOT NULL DEFAULT '0',
+  `Data` text CHARACTER SET latin1 COLLATE latin1_german2_ci,
+  `schema` varchar(50) CHARACTER SET latin1 COLLATE latin1_german2_ci DEFAULT NULL,
+  `document_path` text CHARACTER SET latin1 COLLATE latin1_german2_ci,
+  `tileindex` varchar(100) CHARACTER SET latin1 COLLATE latin1_german2_ci DEFAULT NULL,
+  `tileitem` varchar(100) CHARACTER SET latin1 COLLATE latin1_german2_ci DEFAULT NULL,
+  `labelangleitem` varchar(25) CHARACTER SET latin1 COLLATE latin1_german2_ci DEFAULT NULL,
+  `labelitem` varchar(100) CHARACTER SET latin1 COLLATE latin1_german2_ci DEFAULT NULL,
+  `labelmaxscale` int(11) DEFAULT NULL,
+  `labelminscale` int(11) DEFAULT NULL,
+  `labelrequires` varchar(255) CHARACTER SET latin1 COLLATE latin1_german2_ci DEFAULT NULL,
+  `postlabelcache` tinyint(1) DEFAULT '0',
+  `connection` text CHARACTER SET latin1 COLLATE latin1_german2_ci NOT NULL,
+  `printconnection` text CHARACTER SET latin1 COLLATE latin1_german2_ci,
+  `connectiontype` tinyint(4) NOT NULL DEFAULT '0',
+  `classitem` varchar(100) CHARACTER SET latin1 COLLATE latin1_german2_ci DEFAULT NULL,
+  `classification` varchar(50) DEFAULT NULL,
+  `filteritem` varchar(100) CHARACTER SET latin1 COLLATE latin1_german2_ci NOT NULL DEFAULT 'ID',
+  `cluster_maxdistance` int(11) DEFAULT NULL,
+  `tolerance` double NOT NULL DEFAULT '3',
+  `toleranceunits` enum('pixels','feet','inches','kilometers','meters','miles','dd') CHARACTER SET latin1 COLLATE latin1_german2_ci NOT NULL DEFAULT 'pixels',
+  `epsg_code` varchar(6) CHARACTER SET latin1 COLLATE latin1_german2_ci DEFAULT '2398',
+  `template` varchar(255) CHARACTER SET latin1 COLLATE latin1_german2_ci DEFAULT NULL,
+  `queryable` enum('0','1') CHARACTER SET latin1 COLLATE latin1_german2_ci NOT NULL DEFAULT '0',
+  `transparency` int(3) DEFAULT NULL,
+  `drawingorder` int(11) DEFAULT NULL,
+  `minscale` int(11) DEFAULT NULL,
+  `maxscale` int(11) DEFAULT NULL,
+  `symbolscale` int(11) DEFAULT NULL,
+  `offsite` varchar(11) CHARACTER SET latin1 COLLATE latin1_german2_ci DEFAULT NULL,
+  `requires` int(11) DEFAULT NULL,
+  `ows_srs` varchar(255) CHARACTER SET latin1 COLLATE latin1_german2_ci NOT NULL DEFAULT 'EPSG:2398',
+  `wms_name` varchar(255) CHARACTER SET latin1 COLLATE latin1_german2_ci DEFAULT NULL,
+  `wms_server_version` varchar(8) CHARACTER SET latin1 COLLATE latin1_german2_ci NOT NULL DEFAULT '1.1.0',
+  `wms_format` varchar(50) CHARACTER SET latin1 COLLATE latin1_german2_ci NOT NULL DEFAULT 'image/png',
+  `wms_connectiontimeout` int(11) NOT NULL DEFAULT '60',
+  `wms_auth_username` varchar(50) CHARACTER SET latin1 COLLATE latin1_german2_ci DEFAULT NULL,
+  `wms_auth_password` varchar(50) CHARACTER SET latin1 COLLATE latin1_german2_ci DEFAULT NULL,
+  `wfs_geom` varchar(100) CHARACTER SET latin1 COLLATE latin1_german2_ci DEFAULT NULL,
+  `selectiontype` varchar(20) CHARACTER SET latin1 COLLATE latin1_german2_ci DEFAULT NULL,
+  `querymap` enum('0','1') CHARACTER SET latin1 COLLATE latin1_german2_ci NOT NULL DEFAULT '0',
+  `logconsume` enum('0','1') CHARACTER SET latin1 COLLATE latin1_german2_ci NOT NULL DEFAULT '0',
+  `processing` varchar(255) CHARACTER SET latin1 COLLATE latin1_german2_ci DEFAULT NULL,
+  `kurzbeschreibung` text,
+  `datenherr` varchar(100) DEFAULT NULL,
+  `metalink` varchar(255) DEFAULT NULL,
+  `privileg` enum('0','1','2') NOT NULL DEFAULT '0',
+  `export_privileg` tinyint(1) NOT NULL DEFAULT '1',
+  `status` varchar(255) DEFAULT NULL,
+  `trigger_function` varchar(255) DEFAULT NULL COMMENT 'Wie heist die Trigger Funktion, die ausgelÃ¶st werden soll.'
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `layer`
+--
+
+INSERT INTO `layer` (`Layer_ID`, `Name`, `Name_low-german`, `Name_english`, `Name_polish`, `Name_vietnamese`, `alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `maintable_is_view`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `printconnection`, `connectiontype`, `classitem`, `classification`, `filteritem`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `logconsume`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `privileg`, `export_privileg`, `status`, `trigger_function`) VALUES
+(1, 'ORKa-MV (OSM)', NULL, NULL, NULL, NULL, '', 3, 1, NULL, NULL, 0, NULL, NULL, NULL, '', '', '', '', NULL, NULL, '', 0, 'http://www.orka-mv.de/geodienste/orkamv/wms?VERSION=1.1.1&LAYERS=orkamv&STYLES=&FORMAT=image/jpeg', '', 7, '', NULL, '', NULL, 3, 'pixels', '25833', '', '0', NULL, NULL, NULL, NULL, NULL, '', NULL, 'EPSG:25833', 'stadtplan', '1.1.1', 'image/png', 60, '', '', '', 'radio', '0', '0', '', '', '', '', '0', 1, NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `layer_attributes`
+--
+
+CREATE TABLE `layer_attributes` (
+  `layer_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `real_name` varchar(255) DEFAULT NULL,
+  `tablename` varchar(100) DEFAULT NULL,
+  `table_alias_name` varchar(100) DEFAULT NULL,
+  `type` varchar(30) DEFAULT NULL,
+  `geometrytype` varchar(20) DEFAULT NULL,
+  `constraints` varchar(255) DEFAULT NULL,
+  `nullable` tinyint(1) DEFAULT NULL,
+  `length` int(11) DEFAULT NULL,
+  `decimal_length` int(11) DEFAULT NULL,
+  `default` varchar(255) DEFAULT NULL,
+  `form_element_type` enum('Text','Textfeld','Auswahlfeld','AutovervollstÃ¤ndigungsfeld','Checkbox','Geometrie','SubFormPK','SubFormFK','SubFormEmbeddedPK','Time','Dokument','Link','dynamicLink','User','UserID','Stelle','StelleID','FlÃ¤che','LÃ¤nge','Zahl','mailto') NOT NULL DEFAULT 'Text',
+  `options` text,
+  `alias` varchar(255) DEFAULT NULL,
+  `alias_low-german` varchar(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `alias_english` varchar(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `alias_polish` varchar(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `alias_vietnamese` varchar(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `tooltip` varchar(255) DEFAULT NULL,
+  `group` varchar(255) DEFAULT NULL,
+  `arrangement` tinyint(1) NOT NULL DEFAULT '0',
+  `labeling` tinyint(1) NOT NULL DEFAULT '0',
+  `raster_visibility` tinyint(1) DEFAULT NULL,
+  `dont_use_for_new` tinyint(1) DEFAULT NULL,
+  `mandatory` tinyint(1) DEFAULT NULL,
+  `quicksearch` tinyint(1) DEFAULT NULL,
+  `order` int(11) DEFAULT NULL,
+  `privileg` tinyint(1) DEFAULT '0',
+  `query_tooltip` tinyint(1) DEFAULT '0'
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `layer_attributes2stelle`
+--
+
+CREATE TABLE `layer_attributes2stelle` (
+  `layer_id` int(11) NOT NULL,
+  `attributename` varchar(255) NOT NULL,
+  `stelle_id` int(11) NOT NULL,
+  `privileg` tinyint(1) NOT NULL,
+  `tooltip` tinyint(1) DEFAULT '0'
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `layer_parameter`
+--
+
+CREATE TABLE `layer_parameter` (
+  `id` int(11) UNSIGNED NOT NULL,
+  `key` varchar(255) NOT NULL,
+  `alias` varchar(255) NOT NULL,
+  `default_value` varchar(255) NOT NULL,
+  `options_sql` text NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `migrations`
+--
+
+CREATE TABLE `migrations` (
+  `component` varchar(50) NOT NULL,
+  `type` enum('mysql','postgresql') NOT NULL,
+  `filename` varchar(255) NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `migrations`
+--
+
+INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES
+('kvwmap', 'mysql', '2014-09-12_16-33-22_Version2.0.sql'),
+('kvwmap', 'mysql', '2014-11-07_11-37-59_layer_attributes_Autovervollstaendigungsfeld.sql'),
+('kvwmap', 'mysql', '2014-11-24_10-29-21_druckrahmen_lage_gemeinde_flurst.sql'),
+('kvwmap', 'mysql', '2014-11-27_11-16-24_druckrahmen_scalebar.sql'),
+('kvwmap', 'mysql', '2014-12-03_10-25-40_zwischenablage.sql'),
+('kvwmap', 'mysql', '2015-01-14_16-44-46_styles_initialgap_opacity.sql'),
+('kvwmap', 'mysql', '2015-02-20_11-11-00_rolle_instant_reload_menu_auto_close.sql'),
+('kvwmap', 'mysql', '2015-03-12_15-03-13_styles_colorrange_datarange.sql'),
+('kvwmap', 'mysql', '2015-03-16_15-15-35_rollenlayer_query.sql'),
+('kvwmap', 'mysql', '2015-03-17_10-29-08_rollenlayer_queryStatus.sql'),
+('kvwmap', 'mysql', '2015-03-27_11-36-34_rollenlayer_Data_longtext.sql'),
+('kvwmap', 'mysql', '2015-05-05_13-53-32_u_polygon2used_layer_loeschen.sql'),
+('kvwmap', 'mysql', '2015-05-07_11-29-06_search_attributes2rolle_PK.sql'),
+('kvwmap', 'mysql', '2015-05-08_14-03-33_rolle_last_query_sql_longtext.sql'),
+('kvwmap', 'mysql', '2015-05-22_14-34-59_layer_postlabelcache.sql'),
+('kvwmap', 'mysql', '2015-05-28_11-08-55_rolle_auto_map_resize.sql'),
+('kvwmap', 'mysql', '2015-06-16_16-16-14_u_rolle2usedlayer_gle_view.sql'),
+('kvwmap', 'mysql', '2015-06-23_16-29-07_layer_requires.sql'),
+('kvwmap', 'mysql', '2015-08-05_14-02-01_rolle_saved_layers.sql'),
+('kvwmap', 'mysql', '2015-09-09_15-10-25_rolle_saved_layers_query.sql'),
+('kvwmap', 'mysql', '2015-10-07_09-19-25_layer_attributes_StelleID.sql'),
+('kvwmap', 'mysql', '2015-10-29_13-50-26_u_consumeALB_format.sql'),
+('kvwmap', 'mysql', '2015-12-08_12-01-43_user_loginname.sql'),
+('kvwmap', 'mysql', '2016-01-07_11-26-53_datendrucklayouts_gap.sql'),
+('kvwmap', 'mysql', '2016-01-18_11-43-24_u_consume_epsg_code.sql'),
+('kvwmap', 'mysql', '2016-01-26_14-04-28_druckrahmen_dhk_call.sql'),
+('kvwmap', 'mysql', '2016-02-09_15-34-14_layer_cluster_maxdistance.sql'),
+('kvwmap', 'mysql', '2016-02-17_13-55-03_rolle_coord_query.sql'),
+('kvwmap', 'mysql', '2016-04-21_10-42-03_stelle_gemeinden_gemarkung_flur.sql'),
+('kvwmap', 'mysql', '2016-04-28_16-35-05_add_layer_params.sql'),
+('kvwmap', 'mysql', '2016-05-31_11-22-56_stelle_hist_timestamp.sql'),
+('kvwmap', 'mysql', '2016-05-31_13-18-54_stelle_wasserzeichen.sql'),
+('kvwmap', 'mysql', '2016-06-22_16-24-48_layer_attributes_arrangement_labeling.sql'),
+('kvwmap', 'mysql', '2016-06-29_10-50-56_layer_maintable_is_view.sql'),
+('kvwmap', 'mysql', '2016-06-30_10-54-02_u_rolle2used_layer_transparency.sql'),
+('kvwmap', 'mysql', '2016-07-12_15-46-25_used_layer_use_geom.sql'),
+('kvwmap', 'mysql', '2016-07-29_14-24-25_add_visually_impaired_to_rolle.sql'),
+('kvwmap', 'mysql', '2016-08-17_13-57-20_add_datatypes_and_datatype_attributes.sql'),
+('kvwmap', 'mysql', '2016-08-29_11-45-00_datatypes_dbname_host_port.sql'),
+('kvwmap', 'mysql', '2016-08-30_14-11-10_add_trigger_function_to_layer.sql'),
+('kvwmap', 'mysql', '2016-10-05_11-09-37_styles_symbolname.sql'),
+('kvwmap', 'mysql', '2016-10-05_12-11-57_styles_rangeitem.sql'),
+('kvwmap', 'mysql', '2016-11-22_15-23-00_set_relative_fonts_pfade.sql'),
+('kvwmap', 'mysql', '2016-11-23_11-47-01_layer_classification.sql'),
+('kvwmap', 'mysql', '2016-11-24_10-56-43_styles_minscale_maxscale.sql'),
+('kvwmap', 'mysql', '2017-01-12_13-19-18_datendrucklayouts_no_record_splitting.sql'),
+('kvwmap', 'postgresql', '2014-09-12_16-33-22_Version2.0.sql'),
+('kvwmap', 'postgresql', '2015-05-06_08-47-01_st_area_utm.sql'),
+('kvwmap', 'postgresql', '2015-05-28_14-07-36_bug_st_area_utm.sql'),
+('kvwmap', 'postgresql', '2015-05-29_09-33-07_bug_st_area_utm.sql'),
+('kvwmap', 'postgresql', '2017-04-28_14-42-46_Bug_st_area_utm.sql'),
+('kvwmap', 'postgresql', '2017-04-28_14-49-32_Bug_st_area_utm.sql'),
+('kvwmap', 'postgresql', '2017-05-03_09-08-07_Bug_st_area_utm.sql'),
+('kvwmap', 'postgresql', '2017-05-03_12-13-08_Bug_st_area_utm.sql'),
+('kvwmap', 'postgresql', '2017-05-15_15-28-45_spatial_ref_sys_srs_params.sql'),
+('kvwmap', 'mysql', '2017-01-10_13-46-46_cronjobs.sql'),
+('kvwmap', 'mysql', '2017-01-23_13:47:15_add_aktiv_to_cronjobs.sql'),
+('kvwmap', 'mysql', '2017-02-02_15-57-57_add_db_to_cronjobs.sql'),
+('kvwmap', 'mysql', '2017-03-24_14-56-40_add_custom_legend_graphic_and_order.sql'),
+('kvwmap', 'mysql', '2017-03-29_16-48-03_add_title_to_menues.sql'),
+('kvwmap', 'mysql', '2017-04-05_16-14-15_add_default_rolle_to_stelle.sql'),
+('kvwmap', 'mysql', '2017-04-06_09-59-50_add_showmapfunctions_to_rolle.sql'),
+('kvwmap', 'mysql', '2017-04-07_12-17-10_add_showlayeroptions.sql'),
+('kvwmap', 'mysql', '2017-04-13_17-00-45_add_onclick_on_menues.sql'),
+('kvwmap', 'mysql', '2017-04-20_15-17-29_u_menues_button_class.sql'),
+('kvwmap', 'mysql', '2017-04-20_15-59-03_rolle_menue_buttons.sql'),
+('kvwmap', 'mysql', '2017-04-21_10-49-49_u_menues_logout.sql'),
+('kvwmap', 'mysql', '2017-06-07_16-01-20_add_dont_use_for_new.sql'),
+('wasserrecht', 'postgresql', '2017-06-20_14-30-00_create_anlage.sql');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `polygon`
+--
+
+CREATE TABLE `polygon` (
+  `polygon_id` int(11) NOT NULL,
+  `polygonname` varchar(25) NOT NULL DEFAULT '',
+  `datei` varchar(30) NOT NULL DEFAULT '',
+  `art` varchar(25) NOT NULL DEFAULT '',
+  `feldname` varchar(25) NOT NULL DEFAULT ''
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `referenzkarten`
+--
+
+CREATE TABLE `referenzkarten` (
+  `ID` int(11) NOT NULL,
+  `Name` varchar(100) NOT NULL DEFAULT '',
+  `Dateiname` varchar(100) NOT NULL DEFAULT '',
+  `epsg_code` int(11) NOT NULL DEFAULT '2398',
+  `xmin` double NOT NULL DEFAULT '0',
+  `ymin` double NOT NULL DEFAULT '0',
+  `xmax` double NOT NULL DEFAULT '0',
+  `ymax` double NOT NULL DEFAULT '0',
+  `width` int(4) UNSIGNED NOT NULL DEFAULT '0',
+  `height` int(4) UNSIGNED NOT NULL DEFAULT '0'
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `referenzkarten`
+--
+
+INSERT INTO `referenzkarten` (`ID`, `Name`, `Dateiname`, `epsg_code`, `xmin`, `ymin`, `xmax`, `ymax`, `width`, `height`) VALUES
+(1, 'Uebersichtskarte', 'uebersicht_mv.png', 25833, 201165, 5867815, 477900, 6081468, 205, 146);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `rolle`
+--
+
+CREATE TABLE `rolle` (
+  `user_id` int(11) NOT NULL DEFAULT '0',
+  `stelle_id` int(11) NOT NULL DEFAULT '0',
+  `nImageWidth` int(3) NOT NULL DEFAULT '500',
+  `nImageHeight` int(3) NOT NULL DEFAULT '500',
+  `auto_map_resize` tinyint(1) NOT NULL DEFAULT '1',
+  `minx` double NOT NULL DEFAULT '4501025',
+  `miny` double NOT NULL DEFAULT '6001879',
+  `maxx` double NOT NULL DEFAULT '4502834',
+  `maxy` double NOT NULL DEFAULT '6003236',
+  `nZoomFactor` int(11) NOT NULL DEFAULT '2',
+  `selectedButton` varchar(20) NOT NULL DEFAULT 'zoomin',
+  `epsg_code` varchar(6) DEFAULT '2398',
+  `epsg_code2` varchar(6) DEFAULT NULL,
+  `coordtype` enum('dec','dms','dmin') NOT NULL DEFAULT 'dec',
+  `active_frame` int(11) NOT NULL DEFAULT '0',
+  `last_time_id` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `gui` varchar(100) CHARACTER SET latin1 COLLATE latin1_german2_ci NOT NULL DEFAULT 'gui.php',
+  `language` enum('german','low-german','english','polish','vietnamese') NOT NULL DEFAULT 'german',
+  `hidemenue` enum('0','1') NOT NULL DEFAULT '0',
+  `hidelegend` enum('0','1') NOT NULL DEFAULT '0',
+  `fontsize_gle` int(2) DEFAULT '15',
+  `highlighting` tinyint(1) NOT NULL DEFAULT '0',
+  `buttons` varchar(255) DEFAULT 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure',
+  `scrollposition` int(11) NOT NULL DEFAULT '0',
+  `result_color` int(11) DEFAULT '1',
+  `always_draw` tinyint(1) DEFAULT NULL,
+  `runningcoords` tinyint(1) NOT NULL DEFAULT '0',
+  `showmapfunctions` tinyint(1) NOT NULL DEFAULT '1' COMMENT 'Schaltet die Menüleiste mit den Kartenfunktionen unter der Karte ein oder aus.',
+  `showlayeroptions` tinyint(1) NOT NULL DEFAULT '1' COMMENT 'Schaltet die Layeroptionen in der Legende ein oder aus.',
+  `singlequery` tinyint(1) NOT NULL DEFAULT '0',
+  `querymode` tinyint(1) NOT NULL DEFAULT '0',
+  `geom_edit_first` tinyint(1) NOT NULL DEFAULT '0',
+  `overlayx` int(11) NOT NULL DEFAULT '400',
+  `overlayy` int(11) NOT NULL DEFAULT '150',
+  `hist_timestamp` timestamp NULL DEFAULT NULL,
+  `instant_reload` tinyint(1) NOT NULL DEFAULT '0',
+  `menu_auto_close` tinyint(1) NOT NULL DEFAULT '0',
+  `layer_params` text,
+  `menue_buttons` tinyint(1) NOT NULL DEFAULT '0',
+  `visually_impaired` tinyint(1) NOT NULL DEFAULT '0'
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `rolle`
+--
+
+INSERT INTO `rolle` (`user_id`, `stelle_id`, `nImageWidth`, `nImageHeight`, `auto_map_resize`, `minx`, `miny`, `maxx`, `maxy`, `nZoomFactor`, `selectedButton`, `epsg_code`, `epsg_code2`, `coordtype`, `active_frame`, `last_time_id`, `gui`, `language`, `hidemenue`, `hidelegend`, `fontsize_gle`, `highlighting`, `buttons`, `scrollposition`, `result_color`, `always_draw`, `runningcoords`, `showmapfunctions`, `showlayeroptions`, `singlequery`, `querymode`, `geom_edit_first`, `overlayx`, `overlayy`, `hist_timestamp`, `instant_reload`, `menu_auto_close`, `layer_params`, `menue_buttons`, `visually_impaired`) VALUES
+(1, 1, 1198, 772, 1, 173681.24124514, 5867815, 505383.75875486, 6081468, 2, 'zoomin', '25833', '', 'dec', 0, '2017-06-28 17:09:08', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure,', 0, 1, NULL, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 1, NULL, 1, 0);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `rollenlayer`
+--
+
+CREATE TABLE `rollenlayer` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `stelle_id` int(11) NOT NULL,
+  `aktivStatus` enum('0','1','2') CHARACTER SET latin1 COLLATE latin1_german2_ci NOT NULL,
+  `queryStatus` enum('0','1','2') NOT NULL,
+  `Name` varchar(255) CHARACTER SET latin1 COLLATE latin1_german2_ci NOT NULL,
+  `Gruppe` int(11) NOT NULL,
+  `Typ` enum('search','import') NOT NULL DEFAULT 'search',
+  `Datentyp` int(11) NOT NULL,
+  `Data` longtext NOT NULL,
+  `query` text,
+  `connectiontype` int(11) NOT NULL,
+  `connection` varchar(255) CHARACTER SET latin1 COLLATE latin1_german2_ci NOT NULL,
+  `epsg_code` int(11) NOT NULL,
+  `transparency` int(11) NOT NULL,
+  `labelitem` varchar(100) DEFAULT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `rolle_csv_attributes`
+--
+
+CREATE TABLE `rolle_csv_attributes` (
+  `user_id` int(11) NOT NULL,
+  `stelle_id` int(11) NOT NULL,
+  `name` varchar(50) NOT NULL,
+  `attributes` text NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `rolle_last_query`
+--
+
+CREATE TABLE `rolle_last_query` (
+  `user_id` int(11) NOT NULL,
+  `stelle_id` int(11) NOT NULL,
+  `go` varchar(50) NOT NULL,
+  `layer_id` int(11) NOT NULL,
+  `sql` longtext NOT NULL,
+  `orderby` text,
+  `limit` int(11) DEFAULT NULL,
+  `offset` int(11) DEFAULT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `rolle_saved_layers`
+--
+
+CREATE TABLE `rolle_saved_layers` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `stelle_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `layers` text NOT NULL,
+  `query` text
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `search_attributes2rolle`
+--
+
+CREATE TABLE `search_attributes2rolle` (
+  `name` varchar(50) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `stelle_id` int(11) NOT NULL,
+  `layer_id` int(11) NOT NULL,
+  `attribute` varchar(50) NOT NULL,
+  `operator` varchar(11) NOT NULL,
+  `value1` text,
+  `value2` text,
+  `searchmask_number` int(11) NOT NULL DEFAULT '0',
+  `searchmask_operator` enum('AND','OR') DEFAULT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `stelle`
+--
+
+CREATE TABLE `stelle` (
+  `ID` int(11) NOT NULL,
+  `Bezeichnung` varchar(255) CHARACTER SET latin1 COLLATE latin1_german2_ci DEFAULT NULL,
+  `Bezeichnung_low-german` varchar(255) DEFAULT NULL,
+  `Bezeichnung_english` varchar(255) CHARACTER SET cp1250 DEFAULT NULL,
+  `Bezeichnung_polish` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `Bezeichnung_vietnamese` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `start` date NOT NULL DEFAULT '0000-00-00',
+  `stop` date NOT NULL DEFAULT '0000-00-00',
+  `minxmax` double DEFAULT NULL,
+  `minymax` double DEFAULT NULL,
+  `maxxmax` double DEFAULT NULL,
+  `maxymax` double DEFAULT NULL,
+  `epsg_code` varchar(6) DEFAULT '2398',
+  `Referenzkarte_ID` int(11) DEFAULT NULL,
+  `Authentifizierung` enum('0','1') NOT NULL DEFAULT '1',
+  `ALB_status` enum('30','35') NOT NULL DEFAULT '30',
+  `wappen` varchar(150) NOT NULL DEFAULT 'stz.gif',
+  `wappen_link` varchar(255) DEFAULT NULL,
+  `alb_raumbezug` set('','Kreis','Amtsverwaltung','Gemeinde') NOT NULL DEFAULT '',
+  `alb_raumbezug_wert` varchar(255) NOT NULL DEFAULT '',
+  `logconsume` enum('0','1') CHARACTER SET latin1 COLLATE latin1_german2_ci DEFAULT NULL,
+  `pgdbhost` varchar(25) NOT NULL DEFAULT 'localhost',
+  `pgdbname` varchar(25) DEFAULT NULL,
+  `pgdbuser` varchar(25) DEFAULT NULL,
+  `pgdbpasswd` varchar(25) DEFAULT NULL,
+  `ows_title` varchar(255) DEFAULT NULL,
+  `wms_accessconstraints` varchar(255) DEFAULT NULL,
+  `ows_abstract` varchar(255) DEFAULT NULL,
+  `ows_contactperson` varchar(255) DEFAULT NULL,
+  `ows_contactorganization` varchar(255) DEFAULT NULL,
+  `ows_contactemailaddress` varchar(255) DEFAULT NULL,
+  `ows_contactposition` varchar(255) DEFAULT NULL,
+  `ows_fees` varchar(255) DEFAULT NULL,
+  `ows_srs` varchar(255) DEFAULT NULL,
+  `check_client_ip` enum('0','1') NOT NULL DEFAULT '0',
+  `check_password_age` enum('0','1') NOT NULL DEFAULT '0',
+  `allowed_password_age` tinyint(4) NOT NULL DEFAULT '6',
+  `use_layer_aliases` enum('0','1') NOT NULL DEFAULT '0',
+  `selectable_layer_params` text,
+  `hist_timestamp` tinyint(1) NOT NULL DEFAULT '0',
+  `default_user_id` int(11) DEFAULT NULL COMMENT 'Nutzer Id der default Rolle. Die Einstellungen dieser Rolle werden für das Anlegen neuer Rollen für diese Stelle verwendet. Ist dieser Wert nicht angegeben oder die angegebene Rolle existiert nicht, werden die Defaultwerte der Rollenoptionen bei der Zuordnung eines Nutzers zu dieser Stelle verwendet. Die Angabe ist nützlich, wenn die Einstellungen in Gaststellen am Anfang immer gleich sein sollen.'
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `stelle`
+--
+
+INSERT INTO `stelle` (`ID`, `Bezeichnung`, `Bezeichnung_low-german`, `Bezeichnung_english`, `Bezeichnung_polish`, `Bezeichnung_vietnamese`, `start`, `stop`, `minxmax`, `minymax`, `maxxmax`, `maxymax`, `epsg_code`, `Referenzkarte_ID`, `Authentifizierung`, `ALB_status`, `wappen`, `wappen_link`, `alb_raumbezug`, `alb_raumbezug_wert`, `logconsume`, `pgdbhost`, `pgdbname`, `pgdbuser`, `pgdbpasswd`, `ows_title`, `wms_accessconstraints`, `ows_abstract`, `ows_contactperson`, `ows_contactorganization`, `ows_contactemailaddress`, `ows_contactposition`, `ows_fees`, `ows_srs`, `check_client_ip`, `check_password_age`, `allowed_password_age`, `use_layer_aliases`, `selectable_layer_params`, `hist_timestamp`, `default_user_id`) VALUES
+(1, 'Administration', NULL, NULL, NULL, NULL, '0000-00-00', '0000-00-00', 201165, 5867815, 477900, 6081468, '25833', 1, '1', '30', 'Logo_GDI-Service_200x47.png', '', '', '', NULL, 'localhost', '', '', '', '', '', '', '', '', '', '', '', '', '0', '0', 6, '0', NULL, 0, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `stelle_gemeinden`
+--
+
+CREATE TABLE `stelle_gemeinden` (
+  `Stelle_ID` int(11) NOT NULL DEFAULT '0',
+  `Gemeinde_ID` int(8) NOT NULL DEFAULT '0',
+  `Gemarkung` int(6) DEFAULT NULL,
+  `Flur` int(3) DEFAULT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `styles`
+--
+
+CREATE TABLE `styles` (
+  `Style_ID` int(11) NOT NULL,
+  `symbol` int(3) DEFAULT NULL,
+  `symbolname` text,
+  `size` varchar(50) DEFAULT NULL,
+  `color` varchar(11) CHARACTER SET latin1 COLLATE latin1_german2_ci DEFAULT NULL,
+  `backgroundcolor` varchar(11) CHARACTER SET latin1 COLLATE latin1_german2_ci DEFAULT NULL,
+  `outlinecolor` varchar(11) CHARACTER SET latin1 COLLATE latin1_german2_ci DEFAULT NULL,
+  `colorrange` varchar(23) DEFAULT NULL,
+  `datarange` varchar(255) DEFAULT NULL,
+  `rangeitem` varchar(50) DEFAULT NULL,
+  `opacity` int(11) DEFAULT NULL,
+  `minsize` int(11) UNSIGNED DEFAULT NULL,
+  `maxsize` int(11) UNSIGNED DEFAULT NULL,
+  `minscale` int(11) UNSIGNED DEFAULT NULL,
+  `maxscale` int(11) UNSIGNED DEFAULT NULL,
+  `angle` varchar(11) DEFAULT NULL,
+  `angleitem` varchar(255) CHARACTER SET latin1 COLLATE latin1_german2_ci DEFAULT NULL,
+  `antialias` tinyint(1) DEFAULT NULL,
+  `width` int(11) DEFAULT NULL,
+  `minwidth` int(11) DEFAULT NULL,
+  `maxwidth` int(11) DEFAULT NULL,
+  `sizeitem` varchar(255) CHARACTER SET latin1 COLLATE latin1_german2_ci DEFAULT NULL,
+  `offsetx` int(11) DEFAULT NULL,
+  `offsety` int(11) DEFAULT NULL,
+  `pattern` varchar(255) DEFAULT NULL,
+  `geomtransform` varchar(20) DEFAULT NULL,
+  `gap` int(11) DEFAULT NULL,
+  `initialgap` decimal(5,2) DEFAULT NULL,
+  `linecap` varchar(8) DEFAULT NULL,
+  `linejoin` varchar(5) DEFAULT NULL,
+  `linejoinmaxsize` int(11) DEFAULT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `used_layer`
+--
+
+CREATE TABLE `used_layer` (
+  `Stelle_ID` int(11) NOT NULL DEFAULT '0',
+  `Layer_ID` int(11) NOT NULL DEFAULT '0',
+  `queryable` enum('0','1') NOT NULL DEFAULT '1',
+  `drawingorder` int(11) NOT NULL DEFAULT '0',
+  `legendorder` int(11) DEFAULT NULL,
+  `minscale` int(11) DEFAULT NULL,
+  `maxscale` int(11) DEFAULT NULL,
+  `offsite` varchar(11) DEFAULT NULL,
+  `transparency` tinyint(3) DEFAULT NULL,
+  `postlabelcache` enum('0','1') NOT NULL DEFAULT '0',
+  `Filter` longtext,
+  `template` varchar(255) DEFAULT NULL,
+  `header` varchar(255) DEFAULT NULL,
+  `footer` varchar(255) DEFAULT NULL,
+  `symbolscale` int(11) UNSIGNED DEFAULT NULL,
+  `requires` int(11) DEFAULT NULL,
+  `logconsume` enum('0','1') NOT NULL DEFAULT '0',
+  `privileg` enum('0','1','2') NOT NULL DEFAULT '0',
+  `export_privileg` tinyint(1) NOT NULL DEFAULT '1',
+  `start_aktiv` enum('0','1') NOT NULL DEFAULT '0',
+  `use_geom` tinyint(1) NOT NULL DEFAULT '1'
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `used_layer`
+--
+
+INSERT INTO `used_layer` (`Stelle_ID`, `Layer_ID`, `queryable`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `offsite`, `transparency`, `postlabelcache`, `Filter`, `template`, `header`, `footer`, `symbolscale`, `requires`, `logconsume`, `privileg`, `export_privileg`, `start_aktiv`, `use_geom`) VALUES
+(1, 1, '0', 0, NULL, 0, 0, '', NULL, '0', NULL, '', NULL, NULL, NULL, NULL, '0', '0', 1, '0', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `user`
+--
+
+CREATE TABLE `user` (
+  `ID` int(11) NOT NULL,
+  `login_name` varchar(100) NOT NULL DEFAULT '',
+  `Name` varchar(100) NOT NULL DEFAULT '',
+  `Vorname` varchar(100) DEFAULT NULL,
+  `Namenszusatz` varchar(50) DEFAULT NULL,
+  `passwort` varchar(32) NOT NULL DEFAULT '',
+  `password_setting_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `start` date NOT NULL DEFAULT '0000-00-00',
+  `stop` date NOT NULL DEFAULT '0000-00-00',
+  `ips` text,
+  `Funktion` enum('admin','user','gast') NOT NULL DEFAULT 'user',
+  `stelle_id` int(11) DEFAULT NULL,
+  `phon` varchar(15) DEFAULT NULL,
+  `email` varchar(50) DEFAULT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `user`
+--
+
+INSERT INTO `user` (`ID`, `login_name`, `Name`, `Vorname`, `Namenszusatz`, `passwort`, `password_setting_time`, `start`, `stop`, `ips`, `Funktion`, `stelle_id`, `phon`, `email`) VALUES
+(1, 'kvwmap', 'kvwmap', 'hans', NULL, '536f8942987f8def483f847fd1631b09', '2017-06-15 07:57:32', '0000-00-00', '0000-00-00', NULL, 'admin', 1, '', 'admin@localhost.de');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `u_attributfilter2used_layer`
+--
+
+CREATE TABLE `u_attributfilter2used_layer` (
+  `Stelle_ID` int(11) NOT NULL,
+  `Layer_ID` int(11) NOT NULL,
+  `attributname` varchar(255) NOT NULL,
+  `attributvalue` text CHARACTER SET latin1 COLLATE latin1_german2_ci NOT NULL,
+  `operator` enum('=','!=','>','<','like','IS','IN','st_within','st_intersects') NOT NULL,
+  `type` varchar(255) NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `u_consume`
+--
+
+CREATE TABLE `u_consume` (
+  `user_id` int(11) NOT NULL,
+  `stelle_id` int(11) NOT NULL,
+  `time_id` datetime NOT NULL,
+  `activity` varchar(255) DEFAULT NULL,
+  `nimagewidth` int(11) DEFAULT NULL,
+  `nimageheight` int(11) DEFAULT NULL,
+  `epsg_code` varchar(6) DEFAULT NULL,
+  `minx` double DEFAULT NULL,
+  `miny` double DEFAULT NULL,
+  `maxx` double DEFAULT NULL,
+  `maxy` double DEFAULT NULL,
+  `prev` datetime DEFAULT NULL,
+  `next` datetime DEFAULT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `u_consume`
+--
+
+INSERT INTO `u_consume` (`user_id`, `stelle_id`, `time_id`, `activity`, `nimagewidth`, `nimageheight`, `epsg_code`, `minx`, `miny`, `maxx`, `maxy`, `prev`, `next`) VALUES
+(1, 1, '2017-06-15 09:58:30', 'getMap', 1194, 798, '25833', 246321.74306602, 5919725.4326488, 335782.64196243, 5979491.0122133, '2017-06-15 09:58:30', NULL),
+(1, 1, '2017-06-15 09:58:32', 'getMap', 1194, 798, '25833', 281836.37127113, 5931086.2068678, 309483.83500042, 5949556.4739191, '2017-06-15 09:58:30', NULL),
+(1, 1, '2017-06-15 09:58:34', 'getMap', 1194, 798, '25833', 292349.93558193, 5934372.8959922, 297789.34887203, 5938006.7705875, '2017-06-15 09:58:32', NULL),
+(1, 1, '2017-06-15 09:58:36', 'getMap', 1194, 798, '25833', 294078.93133986, 5935219.8893189, 295094.56113964, 5935898.3947258, '2017-06-15 09:58:34', NULL),
+(1, 1, '2017-06-15 09:58:39', 'getMap', 1194, 798, '25833', 294418.41155791, 5935390.7910567, 294656.41001977, 5935549.7891909, '2017-06-15 09:58:36', NULL),
+(1, 1, '2017-06-15 09:58:47', 'getMap', 1194, 798, '25833', 236284.99496861, 5895292.3155645, 421919.21065943, 6019307.7974635, '2017-06-15 09:58:39', NULL),
+(1, 1, '2017-06-16 15:35:46', 'getMap', 500, 500, '25833', 235816.81283577, 5895292.3155645, 422387.39279227, 6019307.7974635, '2017-06-15 09:58:47', NULL),
+(1, 1, '2017-06-20 13:42:05', 'getMap', 1194, 794, '25833', 201165, 5867815, 477900, 6081468, '2017-06-16 15:35:46', NULL),
+(1, 1, '2017-06-20 13:42:25', 'getMap', 1194, 794, '25833', 180168.37704918, 5867815, 498896.62295082, 6081468, '2017-06-20 13:42:05', NULL),
+(1, 1, '2017-06-20 13:56:24', 'getMap', 1662, 948, '25833', 201165, 5972613.1487342, 388534.39440338, 6079439.6487342, '2017-06-20 13:42:25', NULL),
+(1, 1, '2017-06-20 13:56:55', 'getMap', 1662, 948, '25833', 201165, 5867815, 477900, 6081468, '2017-06-20 13:56:24', NULL),
+(1, 1, '2017-06-20 14:02:20', 'getMap', 1198, 802, '25833', 298505.73874922, 5944666.2835013, 397691.31539945, 6011038.5866733, '2017-06-20 13:56:55', NULL),
+(1, 1, '2017-06-20 14:02:22', 'getMap', 1198, 802, '25833', 283830.8990563, 5936224.91826, 402927.79470995, 6015921.337156, '2017-06-20 14:02:20', NULL),
+(1, 1, '2017-06-26 15:01:07', 'getMap', 1198, 802, '25833', 280578.57810872, 5934048.5531146, 406180.11565753, 6018097.7023014, '2017-06-20 14:02:22', NULL),
+(1, 1, '2017-06-28 17:09:08', 'getMap', 1198, 772, '25833', 278134.96842878, 5934048.5531146, 408623.72533747, 6018097.7023014, '2017-06-26 15:01:07', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `u_consume2comments`
+--
+
+CREATE TABLE `u_consume2comments` (
+  `user_id` int(11) NOT NULL,
+  `stelle_id` int(11) NOT NULL,
+  `time_id` datetime NOT NULL,
+  `comment` text
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `u_consume2layer`
+--
+
+CREATE TABLE `u_consume2layer` (
+  `user_id` int(11) NOT NULL,
+  `stelle_id` int(11) NOT NULL,
+  `time_id` datetime NOT NULL,
+  `layer_id` int(11) NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `u_consumeALB`
+--
+
+CREATE TABLE `u_consumeALB` (
+  `user_id` int(11) NOT NULL,
+  `stelle_id` int(11) NOT NULL,
+  `time_id` datetime NOT NULL,
+  `format` varchar(50) NOT NULL,
+  `log_number` varchar(255) NOT NULL,
+  `wz` enum('0','1') DEFAULT NULL,
+  `numpages` int(11) DEFAULT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `u_consumeALK`
+--
+
+CREATE TABLE `u_consumeALK` (
+  `user_id` int(11) NOT NULL,
+  `stelle_id` int(11) NOT NULL,
+  `time_id` datetime NOT NULL,
+  `druckrahmen_id` int(11) NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `u_consumeCSV`
+--
+
+CREATE TABLE `u_consumeCSV` (
+  `user_id` int(11) NOT NULL,
+  `stelle_id` int(11) NOT NULL,
+  `time_id` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `art` varchar(20) NOT NULL,
+  `numdatasets` int(11) DEFAULT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `u_consumeShape`
+--
+
+CREATE TABLE `u_consumeShape` (
+  `user_id` int(11) NOT NULL,
+  `stelle_id` int(11) NOT NULL,
+  `time_id` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `layer_id` int(11) NOT NULL,
+  `numdatasets` int(11) DEFAULT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `u_funktion2stelle`
+--
+
+CREATE TABLE `u_funktion2stelle` (
+  `funktion_id` int(11) NOT NULL DEFAULT '0',
+  `stelle_id` int(11) NOT NULL DEFAULT '0'
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `u_funktion2stelle`
+--
+
+INSERT INTO `u_funktion2stelle` (`funktion_id`, `stelle_id`) VALUES
+(1, 1),
+(2, 1),
+(3, 1),
+(4, 1),
+(5, 1),
+(6, 1),
+(7, 1),
+(8, 1),
+(9, 1),
+(10, 1),
+(11, 1),
+(12, 1),
+(13, 1),
+(14, 1),
+(15, 1),
+(16, 1),
+(17, 1),
+(18, 1),
+(19, 1),
+(20, 1),
+(21, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `u_funktionen`
+--
+
+CREATE TABLE `u_funktionen` (
+  `id` int(11) NOT NULL,
+  `bezeichnung` varchar(255) NOT NULL DEFAULT '',
+  `link` varchar(255) DEFAULT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `u_funktionen`
+--
+
+INSERT INTO `u_funktionen` (`id`, `bezeichnung`, `link`) VALUES
+(1, 'ALB-Auszug 35', NULL),
+(2, 'FestpunktDateiAktualisieren', NULL),
+(3, 'FestpunktDateiUebernehmen', NULL),
+(4, 'Antrag_loeschen', NULL),
+(5, 'Nachweisanzeige_zum_Auftrag_hinzufuegen', NULL),
+(6, 'Antrag_Aendern', NULL),
+(7, 'FestpunkteSkizzenZuordnung_Senden', NULL),
+(8, 'Nachweisanzeige_aus_Auftrag_entfernen', NULL),
+(9, 'ohneWasserzeichen', NULL),
+(10, 'Flurstueck_Anzeigen', NULL),
+(11, 'Bauakteneinsicht', NULL),
+(12, 'Namensuche', NULL),
+(13, 'ALB-Auszug 40', NULL),
+(14, 'Nachweisloeschen', NULL),
+(15, 'ALB-Auszug 20', NULL),
+(16, 'ALB-Auszug 25', NULL),
+(17, 'Externer_Druck', NULL),
+(18, 'Adressaenderungen', NULL),
+(19, 'sendeFestpunktskizze', NULL),
+(20, 'Nachweise_bearbeiten', NULL),
+(21, 'ALB-Auszug 30', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `u_groups`
+--
+
+CREATE TABLE `u_groups` (
+  `id` int(11) NOT NULL,
+  `Gruppenname` varchar(255) NOT NULL,
+  `Gruppenname_low-german` varchar(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `Gruppenname_english` varchar(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `Gruppenname_polish` varchar(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `Gruppenname_vietnamese` varchar(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `obergruppe` int(11) DEFAULT NULL,
+  `order` int(11) DEFAULT NULL,
+  `legendorder` int(11) DEFAULT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `u_groups`
+--
+
+INSERT INTO `u_groups` (`id`, `Gruppenname`, `Gruppenname_low-german`, `Gruppenname_english`, `Gruppenname_polish`, `Gruppenname_vietnamese`, `obergruppe`, `order`, `legendorder`) VALUES
+(1, 'Hintergrundkarten', NULL, NULL, NULL, NULL, NULL, 1000, NULL),
+(2, 'Verwaltungsgrenzen', NULL, NULL, NULL, NULL, NULL, 900, NULL),
+(3, 'Kataster', NULL, NULL, NULL, NULL, NULL, 800, NULL),
+(4, 'Umwelt', NULL, NULL, NULL, NULL, NULL, 700, NULL),
+(5, 'Bauen', NULL, NULL, NULL, NULL, NULL, 600, NULL),
+(6, 'Raumordnung', NULL, NULL, NULL, NULL, NULL, 500, NULL),
+(7, 'Soziales', NULL, NULL, NULL, NULL, NULL, 400, NULL),
+(8, 'Verkehr', NULL, NULL, NULL, NULL, NULL, 300, NULL),
+(9, 'Administration', NULL, NULL, NULL, NULL, NULL, 100, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `u_groups2rolle`
+--
+
+CREATE TABLE `u_groups2rolle` (
+  `user_id` int(11) NOT NULL,
+  `stelle_id` int(11) NOT NULL,
+  `id` int(11) NOT NULL,
+  `status` tinyint(1) NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `u_groups2rolle`
+--
+
+INSERT INTO `u_groups2rolle` (`user_id`, `stelle_id`, `id`, `status`) VALUES
+(1, 1, 1, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `u_labels2classes`
+--
+
+CREATE TABLE `u_labels2classes` (
+  `class_id` int(11) NOT NULL DEFAULT '0',
+  `label_id` int(11) NOT NULL DEFAULT '0'
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `u_menue2rolle`
+--
+
+CREATE TABLE `u_menue2rolle` (
+  `user_id` int(11) NOT NULL,
+  `stelle_id` int(11) NOT NULL,
+  `menue_id` int(11) NOT NULL,
+  `status` tinyint(1) NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `u_menue2rolle`
+--
+
+INSERT INTO `u_menue2rolle` (`user_id`, `stelle_id`, `menue_id`, `status`) VALUES
+(1, 1, 1, 0),
+(1, 1, 2, 0),
+(1, 1, 3, 0),
+(1, 1, 4, 0),
+(1, 1, 5, 0),
+(1, 1, 6, 0),
+(1, 1, 7, 0),
+(1, 1, 8, 0),
+(1, 1, 9, 0),
+(1, 1, 10, 0),
+(1, 1, 11, 0),
+(1, 1, 12, 0),
+(1, 1, 13, 0),
+(1, 1, 14, 0),
+(1, 1, 15, 0),
+(1, 1, 16, 0),
+(1, 1, 17, 0),
+(1, 1, 18, 0),
+(1, 1, 19, 1),
+(1, 1, 20, 0),
+(1, 1, 21, 0),
+(1, 1, 22, 0),
+(1, 1, 23, 0),
+(1, 1, 24, 0),
+(1, 1, 25, 0),
+(1, 1, 26, 0),
+(1, 1, 27, 0),
+(1, 1, 28, 0),
+(1, 1, 29, 0),
+(1, 1, 30, 0),
+(1, 1, 31, 0),
+(1, 1, 32, 0),
+(1, 1, 33, 0),
+(1, 1, 34, 0),
+(1, 1, 35, 0),
+(1, 1, 36, 0),
+(1, 1, 37, 0),
+(1, 1, 38, 0);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `u_menue2stelle`
+--
+
+CREATE TABLE `u_menue2stelle` (
+  `stelle_id` int(11) NOT NULL DEFAULT '0',
+  `menue_id` int(11) NOT NULL DEFAULT '0',
+  `menue_order` int(11) NOT NULL DEFAULT '0'
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `u_menue2stelle`
+--
+
+INSERT INTO `u_menue2stelle` (`stelle_id`, `menue_id`, `menue_order`) VALUES
+(1, 33, 35),
+(1, 32, 34),
+(1, 31, 33),
+(1, 30, 32),
+(1, 29, 31),
+(1, 28, 30),
+(1, 27, 29),
+(1, 26, 28),
+(1, 37, 27),
+(1, 25, 26),
+(1, 24, 25),
+(1, 23, 24),
+(1, 22, 23),
+(1, 21, 22),
+(1, 20, 21),
+(1, 19, 20),
+(1, 18, 19),
+(1, 17, 18),
+(1, 16, 17),
+(1, 15, 16),
+(1, 14, 15),
+(1, 13, 14),
+(1, 12, 13),
+(1, 11, 12),
+(1, 10, 11),
+(1, 9, 10),
+(1, 8, 9),
+(1, 7, 8),
+(1, 6, 7),
+(1, 5, 6),
+(1, 4, 5),
+(1, 3, 4),
+(1, 2, 3),
+(1, 1, 2),
+(1, 36, 1),
+(1, 35, 0),
+(1, 34, 36),
+(1, 38, -1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `u_menues`
+--
+
+CREATE TABLE `u_menues` (
+  `id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL DEFAULT '',
+  `name_low-german` varchar(100) DEFAULT NULL,
+  `name_english` varchar(100) CHARACTER SET cp1250 DEFAULT NULL,
+  `name_polish` varchar(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `name_vietnamese` varchar(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `links` varchar(255) NOT NULL DEFAULT '',
+  `onclick` text COMMENT 'JavaScript welches beim Klick auf den Menüpunkt ausgeführt werden soll.',
+  `obermenue` int(11) NOT NULL DEFAULT '0',
+  `menueebene` tinyint(4) NOT NULL DEFAULT '1',
+  `target` varchar(10) DEFAULT NULL,
+  `order` int(11) NOT NULL DEFAULT '0',
+  `title` text,
+  `button_class` varchar(30) DEFAULT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `u_menues`
+--
+
+INSERT INTO `u_menues` (`id`, `name`, `name_low-german`, `name_english`, `name_polish`, `name_vietnamese`, `links`, `onclick`, `obermenue`, `menueebene`, `target`, `order`, `title`, `button_class`) VALUES
+(1, 'Stelle wählen', NULL, NULL, NULL, NULL, 'index.php?go=Stelle Wählen', NULL, 0, 1, NULL, 1, NULL, NULL),
+(2, 'Übersicht', NULL, NULL, NULL, NULL, 'index.php?go=Full_Extent', NULL, 0, 1, NULL, 2, NULL, NULL),
+(3, 'Karte', NULL, NULL, NULL, NULL, 'index.php', NULL, 0, 1, NULL, 3, NULL, NULL),
+(4, 'Suchen', NULL, NULL, NULL, NULL, 'index.php?go=changemenue', NULL, 0, 1, NULL, 4, NULL, NULL),
+(5, 'Layer-Suche', NULL, NULL, NULL, NULL, 'index.php?go=Layer-Suche', NULL, 4, 2, NULL, 0, NULL, NULL),
+(6, 'Adressen', NULL, NULL, NULL, NULL, 'index.php?go=Adresse_Auswaehlen', NULL, 4, 2, NULL, 0, NULL, NULL),
+(7, 'Flurstücke', NULL, NULL, NULL, NULL, 'index.php?go=Flurstueck_Auswaehlen', NULL, 4, 2, NULL, 0, NULL, NULL),
+(8, 'Namen', NULL, NULL, NULL, NULL, 'index.php?go=Namen_Auswaehlen', NULL, 4, 2, NULL, 0, NULL, NULL),
+(9, 'Metadaten', NULL, NULL, NULL, NULL, 'index.php?go=Metadaten_Auswaehlen', NULL, 4, 2, NULL, 0, NULL, NULL),
+(10, 'Grundbuchblatt', NULL, NULL, NULL, NULL, 'index.php?go=Grundbuchblatt_Auswaehlen', NULL, 4, 2, NULL, 0, NULL, NULL),
+(11, 'Stellenverwaltung', NULL, NULL, NULL, NULL, 'index.php?go=changemenue', NULL, 0, 1, NULL, 10, NULL, NULL),
+(12, 'Stellen anlegen', NULL, NULL, NULL, NULL, 'index.php?go=Stelleneditor', NULL, 11, 2, NULL, 0, NULL, NULL),
+(13, 'Stellen anzeigen', NULL, NULL, NULL, NULL, 'index.php?go=Stellen_Anzeigen', NULL, 11, 2, NULL, 0, NULL, NULL),
+(14, 'Layer-Rechte', NULL, NULL, NULL, NULL, 'index.php?go=Layerattribut-Rechteverwaltung', NULL, 11, 2, NULL, 0, NULL, NULL),
+(15, 'Filterverwaltung', NULL, NULL, NULL, NULL, 'index.php?go=Filterverwaltung', NULL, 11, 2, NULL, 0, NULL, NULL),
+(16, 'Nutzerverwaltung', NULL, NULL, NULL, NULL, 'index.php?go=changemenue', NULL, 0, 1, NULL, 20, NULL, NULL),
+(17, 'Nutzer anlegen', NULL, NULL, NULL, NULL, 'index.php?go=Benutzerdaten_Formular', NULL, 16, 2, NULL, 0, NULL, NULL),
+(18, 'Nutzer anzeigen', NULL, NULL, NULL, NULL, 'index.php?go=Benutzerdaten_Anzeigen', NULL, 16, 2, NULL, 0, NULL, NULL),
+(19, 'Layerverwaltung', NULL, NULL, NULL, NULL, 'index.php?go=changemenue', NULL, 0, 1, NULL, 30, NULL, NULL),
+(20, 'Layer anzeigen', NULL, NULL, NULL, NULL, 'index.php?go=Layer_Anzeigen', NULL, 19, 2, NULL, 0, NULL, NULL),
+(21, 'Layer erstellen', NULL, NULL, NULL, NULL, 'index.php?go=Layereditor', NULL, 19, 2, NULL, 0, NULL, NULL),
+(22, 'Attribut-Editor', NULL, NULL, NULL, NULL, 'index.php?go=Attributeditor', NULL, 19, 2, NULL, 0, NULL, NULL),
+(23, 'Style-u.Labeleditor', NULL, NULL, NULL, NULL, 'index.php?go=Style_Label_Editor', NULL, 19, 2, NULL, 0, NULL, NULL),
+(24, 'neuer Datensatz', NULL, NULL, NULL, NULL, 'index.php?go=neuer_Layer_Datensatz', NULL, 19, 2, NULL, 0, NULL, NULL),
+(25, 'Import/Export', NULL, NULL, NULL, NULL, 'index.php?go=changemenue', NULL, 0, 1, NULL, 40, NULL, NULL),
+(26, 'WMS-Export', NULL, NULL, NULL, NULL, 'index.php?go=WMS_Export', NULL, 25, 2, NULL, 0, NULL, NULL),
+(27, 'WMS-Import', NULL, NULL, NULL, NULL, 'index.php?go=WMS_Import', NULL, 25, 2, NULL, 0, NULL, NULL),
+(28, 'Daten-Export', NULL, NULL, NULL, NULL, 'index.php?go=Daten_Export', NULL, 25, 2, NULL, 0, NULL, NULL),
+(29, 'Shape-Anzeigen', NULL, NULL, NULL, NULL, 'index.php?go=SHP_Anzeigen', NULL, 25, 2, NULL, 0, NULL, NULL),
+(30, 'Druckausgabe', NULL, NULL, NULL, NULL, 'index.php?go=Schnelle_Druckausgabe', NULL, 25, 2, '_blank', 0, NULL, 'schnelldruck'),
+(31, 'Druckmanager', NULL, NULL, NULL, NULL, 'index.php?go=changemenue', NULL, 0, 1, NULL, 0, NULL, NULL),
+(32, 'Kartendrucklayouteditor', NULL, NULL, NULL, NULL, 'index.php?go=Druckrahmen', NULL, 31, 2, NULL, 0, NULL, NULL),
+(33, 'Datendrucklayouteditor', NULL, NULL, NULL, NULL, 'index.php?go=sachdaten_druck_editor', NULL, 31, 2, NULL, 0, NULL, NULL),
+(34, 'Drucken', NULL, NULL, NULL, NULL, 'index.php?go=Druckausschnittswahl', NULL, 31, 2, NULL, 0, NULL, 'drucken'),
+(35, 'Administration', NULL, NULL, NULL, NULL, 'index.php?go=changemenue', NULL, 0, 1, NULL, 0, NULL, NULL),
+(36, 'Funktionen', NULL, NULL, NULL, NULL, 'index.php?go=Administratorfunktionen', NULL, 35, 2, NULL, 0, NULL, NULL),
+(37, 'Layer-Export', NULL, NULL, NULL, NULL, 'index.php?go=Layer_Export', NULL, 25, 2, NULL, 0, NULL, NULL),
+(38, 'Logout', NULL, NULL, NULL, NULL, 'index.php?go=logout', NULL, 0, 1, NULL, -1, NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `u_rolle2used_class`
+--
+
+CREATE TABLE `u_rolle2used_class` (
+  `user_id` int(11) NOT NULL DEFAULT '0',
+  `stelle_id` int(11) NOT NULL DEFAULT '0',
+  `class_id` int(11) NOT NULL DEFAULT '0',
+  `status` int(1) NOT NULL DEFAULT '0'
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `u_rolle2used_layer`
+--
+
+CREATE TABLE `u_rolle2used_layer` (
+  `user_id` int(11) NOT NULL DEFAULT '0',
+  `stelle_id` int(11) NOT NULL DEFAULT '0',
+  `layer_id` int(11) NOT NULL DEFAULT '0',
+  `aktivStatus` enum('0','1','2') NOT NULL DEFAULT '0',
+  `queryStatus` enum('0','1','2') NOT NULL DEFAULT '0',
+  `gle_view` tinyint(1) DEFAULT NULL,
+  `showclasses` tinyint(1) NOT NULL DEFAULT '1',
+  `logconsume` enum('0','1') NOT NULL DEFAULT '0',
+  `transparency` tinyint(3) DEFAULT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `u_rolle2used_layer`
+--
+
+INSERT INTO `u_rolle2used_layer` (`user_id`, `stelle_id`, `layer_id`, `aktivStatus`, `queryStatus`, `gle_view`, `showclasses`, `logconsume`, `transparency`) VALUES
+(1, 1, 1, '1', '0', NULL, 1, '', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `u_styles2classes`
+--
+
+CREATE TABLE `u_styles2classes` (
+  `class_id` int(11) NOT NULL DEFAULT '0',
+  `style_id` int(11) NOT NULL DEFAULT '0',
+  `drawingorder` int(11) UNSIGNED DEFAULT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `zwischenablage`
+--
+
+CREATE TABLE `zwischenablage` (
+  `user_id` int(11) NOT NULL,
+  `stelle_id` int(11) NOT NULL,
+  `layer_id` int(11) NOT NULL,
+  `oid` bigint(20) UNSIGNED NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `classes`
+--
+ALTER TABLE `classes`
+  ADD PRIMARY KEY (`Class_ID`),
+  ADD KEY `Layer_ID` (`Layer_ID`);
+
+--
+-- Indexes for table `colors`
+--
+ALTER TABLE `colors`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `cron_jobs`
+--
+ALTER TABLE `cron_jobs`
+  ADD UNIQUE KEY `id` (`id`);
+
+--
+-- Indexes for table `datatypes`
+--
+ALTER TABLE `datatypes`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `datatype_attributes`
+--
+ALTER TABLE `datatype_attributes`
+  ADD PRIMARY KEY (`datatype_id`,`name`);
+
+--
+-- Indexes for table `datendrucklayouts`
+--
+ALTER TABLE `datendrucklayouts`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `ddl2freitexte`
+--
+ALTER TABLE `ddl2freitexte`
+  ADD PRIMARY KEY (`ddl_id`,`freitext_id`);
+
+--
+-- Indexes for table `ddl2stelle`
+--
+ALTER TABLE `ddl2stelle`
+  ADD PRIMARY KEY (`stelle_id`,`ddl_id`);
+
+--
+-- Indexes for table `ddl_elemente`
+--
+ALTER TABLE `ddl_elemente`
+  ADD PRIMARY KEY (`ddl_id`,`name`);
+
+--
+-- Indexes for table `druckausschnitte`
+--
+ALTER TABLE `druckausschnitte`
+  ADD PRIMARY KEY (`id`,`stelle_id`,`user_id`);
+
+--
+-- Indexes for table `druckfreibilder`
+--
+ALTER TABLE `druckfreibilder`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `druckfreitexte`
+--
+ALTER TABLE `druckfreitexte`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `druckrahmen`
+--
+ALTER TABLE `druckrahmen`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `druckrahmen2freibilder`
+--
+ALTER TABLE `druckrahmen2freibilder`
+  ADD PRIMARY KEY (`druckrahmen_id`,`freibild_id`);
+
+--
+-- Indexes for table `druckrahmen2freitexte`
+--
+ALTER TABLE `druckrahmen2freitexte`
+  ADD PRIMARY KEY (`druckrahmen_id`,`freitext_id`);
+
+--
+-- Indexes for table `druckrahmen2stelle`
+--
+ALTER TABLE `druckrahmen2stelle`
+  ADD PRIMARY KEY (`stelle_id`,`druckrahmen_id`);
+
+--
+-- Indexes for table `labels`
+--
+ALTER TABLE `labels`
+  ADD PRIMARY KEY (`Label_ID`);
+
+--
+-- Indexes for table `layer`
+--
+ALTER TABLE `layer`
+  ADD PRIMARY KEY (`Layer_ID`),
+  ADD KEY `Gruppe` (`Gruppe`);
+
+--
+-- Indexes for table `layer_attributes`
+--
+ALTER TABLE `layer_attributes`
+  ADD PRIMARY KEY (`layer_id`,`name`);
+
+--
+-- Indexes for table `layer_attributes2stelle`
+--
+ALTER TABLE `layer_attributes2stelle`
+  ADD PRIMARY KEY (`layer_id`,`attributename`,`stelle_id`);
+
+--
+-- Indexes for table `layer_parameter`
+--
+ALTER TABLE `layer_parameter`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `polygon`
+--
+ALTER TABLE `polygon`
+  ADD PRIMARY KEY (`polygon_id`);
+
+--
+-- Indexes for table `referenzkarten`
+--
+ALTER TABLE `referenzkarten`
+  ADD PRIMARY KEY (`ID`);
+
+--
+-- Indexes for table `rolle`
+--
+ALTER TABLE `rolle`
+  ADD PRIMARY KEY (`user_id`,`stelle_id`);
+
+--
+-- Indexes for table `rollenlayer`
+--
+ALTER TABLE `rollenlayer`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `rolle_csv_attributes`
+--
+ALTER TABLE `rolle_csv_attributes`
+  ADD PRIMARY KEY (`user_id`,`stelle_id`,`name`);
+
+--
+-- Indexes for table `rolle_saved_layers`
+--
+ALTER TABLE `rolle_saved_layers`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `search_attributes2rolle`
+--
+ALTER TABLE `search_attributes2rolle`
+  ADD PRIMARY KEY (`name`,`user_id`,`stelle_id`,`layer_id`,`attribute`,`searchmask_number`);
+
+--
+-- Indexes for table `stelle`
+--
+ALTER TABLE `stelle`
+  ADD PRIMARY KEY (`ID`);
+
+--
+-- Indexes for table `styles`
+--
+ALTER TABLE `styles`
+  ADD PRIMARY KEY (`Style_ID`);
+
+--
+-- Indexes for table `used_layer`
+--
+ALTER TABLE `used_layer`
+  ADD PRIMARY KEY (`Stelle_ID`,`Layer_ID`);
+
+--
+-- Indexes for table `user`
+--
+ALTER TABLE `user`
+  ADD PRIMARY KEY (`ID`);
+
+--
+-- Indexes for table `u_attributfilter2used_layer`
+--
+ALTER TABLE `u_attributfilter2used_layer`
+  ADD PRIMARY KEY (`Stelle_ID`,`Layer_ID`,`attributname`);
+
+--
+-- Indexes for table `u_consume`
+--
+ALTER TABLE `u_consume`
+  ADD PRIMARY KEY (`user_id`,`stelle_id`,`time_id`);
+
+--
+-- Indexes for table `u_consume2comments`
+--
+ALTER TABLE `u_consume2comments`
+  ADD PRIMARY KEY (`user_id`,`stelle_id`,`time_id`);
+
+--
+-- Indexes for table `u_consume2layer`
+--
+ALTER TABLE `u_consume2layer`
+  ADD PRIMARY KEY (`user_id`,`stelle_id`,`time_id`,`layer_id`);
+
+--
+-- Indexes for table `u_consumeALB`
+--
+ALTER TABLE `u_consumeALB`
+  ADD PRIMARY KEY (`user_id`,`stelle_id`,`time_id`,`log_number`);
+
+--
+-- Indexes for table `u_consumeALK`
+--
+ALTER TABLE `u_consumeALK`
+  ADD PRIMARY KEY (`user_id`,`stelle_id`,`time_id`);
+
+--
+-- Indexes for table `u_consumeCSV`
+--
+ALTER TABLE `u_consumeCSV`
+  ADD PRIMARY KEY (`user_id`,`stelle_id`,`time_id`);
+
+--
+-- Indexes for table `u_consumeShape`
+--
+ALTER TABLE `u_consumeShape`
+  ADD PRIMARY KEY (`user_id`,`stelle_id`,`time_id`);
+
+--
+-- Indexes for table `u_funktion2stelle`
+--
+ALTER TABLE `u_funktion2stelle`
+  ADD PRIMARY KEY (`funktion_id`,`stelle_id`);
+
+--
+-- Indexes for table `u_funktionen`
+--
+ALTER TABLE `u_funktionen`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `u_groups`
+--
+ALTER TABLE `u_groups`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `u_groups2rolle`
+--
+ALTER TABLE `u_groups2rolle`
+  ADD PRIMARY KEY (`user_id`,`stelle_id`,`id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `user_id_2` (`user_id`),
+  ADD KEY `user_id_3` (`user_id`);
+
+--
+-- Indexes for table `u_labels2classes`
+--
+ALTER TABLE `u_labels2classes`
+  ADD PRIMARY KEY (`class_id`,`label_id`);
+
+--
+-- Indexes for table `u_menue2rolle`
+--
+ALTER TABLE `u_menue2rolle`
+  ADD PRIMARY KEY (`user_id`,`stelle_id`,`menue_id`);
+
+--
+-- Indexes for table `u_menue2stelle`
+--
+ALTER TABLE `u_menue2stelle`
+  ADD PRIMARY KEY (`stelle_id`,`menue_id`);
+
+--
+-- Indexes for table `u_menues`
+--
+ALTER TABLE `u_menues`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `u_rolle2used_class`
+--
+ALTER TABLE `u_rolle2used_class`
+  ADD PRIMARY KEY (`user_id`,`stelle_id`,`class_id`);
+
+--
+-- Indexes for table `u_rolle2used_layer`
+--
+ALTER TABLE `u_rolle2used_layer`
+  ADD PRIMARY KEY (`user_id`,`stelle_id`,`layer_id`);
+
+--
+-- Indexes for table `u_styles2classes`
+--
+ALTER TABLE `u_styles2classes`
+  ADD PRIMARY KEY (`class_id`,`style_id`);
+
+--
+-- Indexes for table `zwischenablage`
+--
+ALTER TABLE `zwischenablage`
+  ADD PRIMARY KEY (`user_id`,`stelle_id`,`layer_id`,`oid`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `classes`
+--
+ALTER TABLE `classes`
+  MODIFY `Class_ID` int(11) NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `colors`
+--
+ALTER TABLE `colors`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+--
+-- AUTO_INCREMENT for table `cron_jobs`
+--
+ALTER TABLE `cron_jobs`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `datatypes`
+--
+ALTER TABLE `datatypes`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `datendrucklayouts`
+--
+ALTER TABLE `datendrucklayouts`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `druckausschnitte`
+--
+ALTER TABLE `druckausschnitte`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `druckfreibilder`
+--
+ALTER TABLE `druckfreibilder`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `druckfreitexte`
+--
+ALTER TABLE `druckfreitexte`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `druckrahmen`
+--
+ALTER TABLE `druckrahmen`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+--
+-- AUTO_INCREMENT for table `labels`
+--
+ALTER TABLE `labels`
+  MODIFY `Label_ID` int(11) NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `layer`
+--
+ALTER TABLE `layer`
+  MODIFY `Layer_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+--
+-- AUTO_INCREMENT for table `layer_parameter`
+--
+ALTER TABLE `layer_parameter`
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `polygon`
+--
+ALTER TABLE `polygon`
+  MODIFY `polygon_id` int(11) NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `referenzkarten`
+--
+ALTER TABLE `referenzkarten`
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+--
+-- AUTO_INCREMENT for table `rollenlayer`
+--
+ALTER TABLE `rollenlayer`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `rolle_saved_layers`
+--
+ALTER TABLE `rolle_saved_layers`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `stelle`
+--
+ALTER TABLE `stelle`
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+--
+-- AUTO_INCREMENT for table `styles`
+--
+ALTER TABLE `styles`
+  MODIFY `Style_ID` int(11) NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `user`
+--
+ALTER TABLE `user`
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+--
+-- AUTO_INCREMENT for table `u_funktionen`
+--
+ALTER TABLE `u_funktionen`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+--
+-- AUTO_INCREMENT for table `u_groups`
+--
+ALTER TABLE `u_groups`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+--
+-- AUTO_INCREMENT for table `u_menues`
+--
+ALTER TABLE `u_menues`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;--
+-- Database: `phpmyadmin`
+--
+CREATE DATABASE IF NOT EXISTS `phpmyadmin` DEFAULT CHARACTER SET utf8 COLLATE utf8_bin;
+USE `phpmyadmin`;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `pma__bookmark`
+--
+
+CREATE TABLE `pma__bookmark` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `dbase` varchar(255) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `user` varchar(255) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `label` varchar(255) CHARACTER SET utf8 NOT NULL DEFAULT '',
+  `query` text COLLATE utf8_bin NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='Bookmarks';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `pma__central_columns`
+--
+
+CREATE TABLE `pma__central_columns` (
+  `db_name` varchar(64) COLLATE utf8_bin NOT NULL,
+  `col_name` varchar(64) COLLATE utf8_bin NOT NULL,
+  `col_type` varchar(64) COLLATE utf8_bin NOT NULL,
+  `col_length` text COLLATE utf8_bin,
+  `col_collation` varchar(64) COLLATE utf8_bin NOT NULL,
+  `col_isNull` tinyint(1) NOT NULL,
+  `col_extra` varchar(255) COLLATE utf8_bin DEFAULT '',
+  `col_default` text COLLATE utf8_bin
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='Central list of columns';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `pma__column_info`
+--
+
+CREATE TABLE `pma__column_info` (
+  `id` int(5) UNSIGNED NOT NULL,
+  `db_name` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `table_name` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `column_name` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `comment` varchar(255) CHARACTER SET utf8 NOT NULL DEFAULT '',
+  `mimetype` varchar(255) CHARACTER SET utf8 NOT NULL DEFAULT '',
+  `transformation` varchar(255) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `transformation_options` varchar(255) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `input_transformation` varchar(255) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `input_transformation_options` varchar(255) COLLATE utf8_bin NOT NULL DEFAULT ''
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='Column information for phpMyAdmin';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `pma__designer_settings`
+--
+
+CREATE TABLE `pma__designer_settings` (
+  `username` varchar(64) COLLATE utf8_bin NOT NULL,
+  `settings_data` text COLLATE utf8_bin NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='Settings related to Designer';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `pma__export_templates`
+--
+
+CREATE TABLE `pma__export_templates` (
+  `id` int(5) UNSIGNED NOT NULL,
+  `username` varchar(64) COLLATE utf8_bin NOT NULL,
+  `export_type` varchar(10) COLLATE utf8_bin NOT NULL,
+  `template_name` varchar(64) COLLATE utf8_bin NOT NULL,
+  `template_data` text COLLATE utf8_bin NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='Saved export templates';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `pma__favorite`
+--
+
+CREATE TABLE `pma__favorite` (
+  `username` varchar(64) COLLATE utf8_bin NOT NULL,
+  `tables` text COLLATE utf8_bin NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='Favorite tables';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `pma__history`
+--
+
+CREATE TABLE `pma__history` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `username` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `db` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `table` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `timevalue` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `sqlquery` text COLLATE utf8_bin NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='SQL history for phpMyAdmin';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `pma__navigationhiding`
+--
+
+CREATE TABLE `pma__navigationhiding` (
+  `username` varchar(64) COLLATE utf8_bin NOT NULL,
+  `item_name` varchar(64) COLLATE utf8_bin NOT NULL,
+  `item_type` varchar(64) COLLATE utf8_bin NOT NULL,
+  `db_name` varchar(64) COLLATE utf8_bin NOT NULL,
+  `table_name` varchar(64) COLLATE utf8_bin NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='Hidden items of navigation tree';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `pma__pdf_pages`
+--
+
+CREATE TABLE `pma__pdf_pages` (
+  `db_name` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `page_nr` int(10) UNSIGNED NOT NULL,
+  `page_descr` varchar(50) CHARACTER SET utf8 NOT NULL DEFAULT ''
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='PDF relation pages for phpMyAdmin';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `pma__recent`
+--
+
+CREATE TABLE `pma__recent` (
+  `username` varchar(64) COLLATE utf8_bin NOT NULL,
+  `tables` text COLLATE utf8_bin NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='Recently accessed tables';
+
+--
+-- Dumping data for table `pma__recent`
+--
+
+INSERT INTO `pma__recent` (`username`, `tables`) VALUES
+('kvwmap', '[{\"db\":\"kvwmapdb\",\"table\":\"migrations\"},{\"db\":\"kvwmapdb\",\"table\":\"u_menues\"}]'),
+('root', '[{\"db\":\"kvwmapdb\",\"table\":\"layer\"},{\"db\":\"kvwmapdb\",\"table\":\"migrations\"},{\"db\":\"kvwmapdb\",\"table\":\"u_groups\"},{\"db\":\"kvwmapdb\",\"table\":\"u_menues\"},{\"db\":\"mysql\",\"table\":\"user\"}]');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `pma__relation`
+--
+
+CREATE TABLE `pma__relation` (
+  `master_db` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `master_table` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `master_field` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `foreign_db` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `foreign_table` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `foreign_field` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT ''
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='Relation table';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `pma__savedsearches`
+--
+
+CREATE TABLE `pma__savedsearches` (
+  `id` int(5) UNSIGNED NOT NULL,
+  `username` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `db_name` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `search_name` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `search_data` text COLLATE utf8_bin NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='Saved searches';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `pma__table_coords`
+--
+
+CREATE TABLE `pma__table_coords` (
+  `db_name` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `table_name` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `pdf_page_number` int(11) NOT NULL DEFAULT '0',
+  `x` float UNSIGNED NOT NULL DEFAULT '0',
+  `y` float UNSIGNED NOT NULL DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='Table coordinates for phpMyAdmin PDF output';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `pma__table_info`
+--
+
+CREATE TABLE `pma__table_info` (
+  `db_name` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `table_name` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `display_field` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT ''
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='Table information for phpMyAdmin';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `pma__table_uiprefs`
+--
+
+CREATE TABLE `pma__table_uiprefs` (
+  `username` varchar(64) COLLATE utf8_bin NOT NULL,
+  `db_name` varchar(64) COLLATE utf8_bin NOT NULL,
+  `table_name` varchar(64) COLLATE utf8_bin NOT NULL,
+  `prefs` text COLLATE utf8_bin NOT NULL,
+  `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='Tables'' UI preferences';
+
+--
+-- Dumping data for table `pma__table_uiprefs`
+--
+
+INSERT INTO `pma__table_uiprefs` (`username`, `db_name`, `table_name`, `prefs`, `last_update`) VALUES
+('kvwmap', 'kvwmapdb', 'u_menues', '{\"sorted_col\":\"`u_menues`.`id`  DESC\"}', '2017-06-30 08:55:53'),
+('root', 'kvwmapdb', 'migrations', '{\"sorted_col\":\"`migrations`.`component`  DESC\"}', '2017-08-02 09:17:27');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `pma__tracking`
+--
+
+CREATE TABLE `pma__tracking` (
+  `db_name` varchar(64) COLLATE utf8_bin NOT NULL,
+  `table_name` varchar(64) COLLATE utf8_bin NOT NULL,
+  `version` int(10) UNSIGNED NOT NULL,
+  `date_created` datetime NOT NULL,
+  `date_updated` datetime NOT NULL,
+  `schema_snapshot` text COLLATE utf8_bin NOT NULL,
+  `schema_sql` text COLLATE utf8_bin,
+  `data_sql` longtext COLLATE utf8_bin,
+  `tracking` set('UPDATE','REPLACE','INSERT','DELETE','TRUNCATE','CREATE DATABASE','ALTER DATABASE','DROP DATABASE','CREATE TABLE','ALTER TABLE','RENAME TABLE','DROP TABLE','CREATE INDEX','DROP INDEX','CREATE VIEW','ALTER VIEW','DROP VIEW') COLLATE utf8_bin DEFAULT NULL,
+  `tracking_active` int(1) UNSIGNED NOT NULL DEFAULT '1'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='Database changes tracking for phpMyAdmin';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `pma__userconfig`
+--
+
+CREATE TABLE `pma__userconfig` (
+  `username` varchar(64) COLLATE utf8_bin NOT NULL,
+  `timevalue` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `config_data` text COLLATE utf8_bin NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='User preferences storage for phpMyAdmin';
+
+--
+-- Dumping data for table `pma__userconfig`
+--
+
+INSERT INTO `pma__userconfig` (`username`, `timevalue`, `config_data`) VALUES
+('kvwmap', '2017-06-30 08:55:00', '{\"collation_connection\":\"utf8mb4_unicode_ci\"}'),
+('root', '2017-09-18 14:43:43', '{\"collation_connection\":\"utf8mb4_unicode_ci\"}');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `pma__usergroups`
+--
+
+CREATE TABLE `pma__usergroups` (
+  `usergroup` varchar(64) COLLATE utf8_bin NOT NULL,
+  `tab` varchar(64) COLLATE utf8_bin NOT NULL,
+  `allowed` enum('Y','N') COLLATE utf8_bin NOT NULL DEFAULT 'N'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='User groups with configured menu items';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `pma__users`
+--
+
+CREATE TABLE `pma__users` (
+  `username` varchar(64) COLLATE utf8_bin NOT NULL,
+  `usergroup` varchar(64) COLLATE utf8_bin NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='Users and their assignments to user groups';
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `pma__bookmark`
+--
+ALTER TABLE `pma__bookmark`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `pma__central_columns`
+--
+ALTER TABLE `pma__central_columns`
+  ADD PRIMARY KEY (`db_name`,`col_name`);
+
+--
+-- Indexes for table `pma__column_info`
+--
+ALTER TABLE `pma__column_info`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `db_name` (`db_name`,`table_name`,`column_name`);
+
+--
+-- Indexes for table `pma__designer_settings`
+--
+ALTER TABLE `pma__designer_settings`
+  ADD PRIMARY KEY (`username`);
+
+--
+-- Indexes for table `pma__export_templates`
+--
+ALTER TABLE `pma__export_templates`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `u_user_type_template` (`username`,`export_type`,`template_name`);
+
+--
+-- Indexes for table `pma__favorite`
+--
+ALTER TABLE `pma__favorite`
+  ADD PRIMARY KEY (`username`);
+
+--
+-- Indexes for table `pma__history`
+--
+ALTER TABLE `pma__history`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `username` (`username`,`db`,`table`,`timevalue`);
+
+--
+-- Indexes for table `pma__navigationhiding`
+--
+ALTER TABLE `pma__navigationhiding`
+  ADD PRIMARY KEY (`username`,`item_name`,`item_type`,`db_name`,`table_name`);
+
+--
+-- Indexes for table `pma__pdf_pages`
+--
+ALTER TABLE `pma__pdf_pages`
+  ADD PRIMARY KEY (`page_nr`),
+  ADD KEY `db_name` (`db_name`);
+
+--
+-- Indexes for table `pma__recent`
+--
+ALTER TABLE `pma__recent`
+  ADD PRIMARY KEY (`username`);
+
+--
+-- Indexes for table `pma__relation`
+--
+ALTER TABLE `pma__relation`
+  ADD PRIMARY KEY (`master_db`,`master_table`,`master_field`),
+  ADD KEY `foreign_field` (`foreign_db`,`foreign_table`);
+
+--
+-- Indexes for table `pma__savedsearches`
+--
+ALTER TABLE `pma__savedsearches`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `u_savedsearches_username_dbname` (`username`,`db_name`,`search_name`);
+
+--
+-- Indexes for table `pma__table_coords`
+--
+ALTER TABLE `pma__table_coords`
+  ADD PRIMARY KEY (`db_name`,`table_name`,`pdf_page_number`);
+
+--
+-- Indexes for table `pma__table_info`
+--
+ALTER TABLE `pma__table_info`
+  ADD PRIMARY KEY (`db_name`,`table_name`);
+
+--
+-- Indexes for table `pma__table_uiprefs`
+--
+ALTER TABLE `pma__table_uiprefs`
+  ADD PRIMARY KEY (`username`,`db_name`,`table_name`);
+
+--
+-- Indexes for table `pma__tracking`
+--
+ALTER TABLE `pma__tracking`
+  ADD PRIMARY KEY (`db_name`,`table_name`,`version`);
+
+--
+-- Indexes for table `pma__userconfig`
+--
+ALTER TABLE `pma__userconfig`
+  ADD PRIMARY KEY (`username`);
+
+--
+-- Indexes for table `pma__usergroups`
+--
+ALTER TABLE `pma__usergroups`
+  ADD PRIMARY KEY (`usergroup`,`tab`,`allowed`);
+
+--
+-- Indexes for table `pma__users`
+--
+ALTER TABLE `pma__users`
+  ADD PRIMARY KEY (`username`,`usergroup`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `pma__bookmark`
+--
+ALTER TABLE `pma__bookmark`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `pma__column_info`
+--
+ALTER TABLE `pma__column_info`
+  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `pma__export_templates`
+--
+ALTER TABLE `pma__export_templates`
+  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `pma__history`
+--
+ALTER TABLE `pma__history`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `pma__pdf_pages`
+--
+ALTER TABLE `pma__pdf_pages`
+  MODIFY `page_nr` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `pma__savedsearches`
+--
+ALTER TABLE `pma__savedsearches`
+  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT;COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
