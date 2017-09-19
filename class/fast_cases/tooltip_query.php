@@ -487,10 +487,23 @@ class GUI {
 									$output .= '##';
 									$attribcount++;
 								} break;
+								case 'Radiobutton': {
+									$radiobutton_output = '';
+									for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
+										if($attributes['enum_value'][$j][$e] == $layer['shape'][$k][$attributes['name'][$j]]){
+											$radiobutton_output = $attributes['enum_output'][$j][$e];
+											break;
+										}
+									}
+									$output .=  $attributes['alias'][$j].': ';
+									$output .= $radiobutton_output;
+									$output .= '##';
+									$attribcount++;
+								} break;
 								case 'Checkbox': {
 		              $layer['shape'][$k][$attributes['name'][$j]] = str_replace('f', 'nein',  $layer['shape'][$k][$attributes['name'][$j]]);
 									$layer['shape'][$k][$attributes['name'][$j]] = str_replace('t', 'ja',  $layer['shape'][$k][$attributes['name'][$j]]);
-								}
+								} break;
 				        default : {
 		              $output .=  $attributes['alias'][$j].': ';
 		              $attribcount++;
