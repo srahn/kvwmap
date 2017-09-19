@@ -85,12 +85,12 @@ class Bauauskunft {
   }
 	
 	function getbaudaten_db($searchvars){
-    if($searchvars['distinct'] == 1){
-      $sql = 'SELECT DISTINCT feld1, feld2, feld3, feld8, feld11, feld20 FROM probaug.bau_akten WHERE 1 = 1';
-    }
-    else{
+    #if($searchvars['distinct'] == 1){
+      #$sql = 'SELECT DISTINCT feld1, feld2, feld3, feld4, feld5, feld6, feld7, feld8, feld11, feld20 FROM probaug.bau_akten WHERE 1 = 1';
+    #}
+    #else{
       $sql = 'SELECT * FROM probaug.bau_akten WHERE 1 = 1';
-    }
+    #}
     if($searchvars['jahr'] != ''){$sql .= " AND Feld1 = '".$searchvars['jahr']."'";}
     if($searchvars['obergruppe'] != ''){$sql .= " AND Feld2 = '".$searchvars['obergruppe']."'";}
     if($searchvars['nummer'] != ''){$sql .= " AND Feld3 = '".$searchvars['nummer']."'";}
