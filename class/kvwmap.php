@@ -1443,6 +1443,9 @@ class GUI {
 					if($dbStyle['linejoinmaxsize'] != '') {
 	          $style->set('linejoinmaxsize', $dbStyle['linejoinmaxsize']);
 	        }
+					if($dbStyle['polaroffset'] != '') {
+	          $style->updateFromString("STYLE POLAROFFSET ".$dbStyle['polaroffset']." END"); 
+	        }
         }
 
         if($this->map_factor != ''){
@@ -16764,6 +16767,7 @@ class db_mapObj{
 			if($style['sizeitem']){$sql.= ", sizeitem = '".$style['sizeitem']."'";}
 			if($style['offsetx']){$sql.= ", offsetx = ".$style['offsetx'];}
 			if($style['offsety']){$sql.= ", offsety = ".$style['offsety'];}
+			if($style['polaroffset']){$sql.= ", polaroffset = '".$style['polaroffset']."'";}
 			if($style['pattern']){$sql.= ", pattern = '".$style['pattern']."'";}
 			if($style['geomtransform']){$sql.= ", geomtransform = '".$style['geomtransform']."'";}
 			if($style['gap']){$sql.= ", gap = ".$style['gap'];}
@@ -16918,6 +16922,7 @@ class db_mapObj{
     $sql.="sizeitem = '".$formvars["sizeitem"]."',";
     if($formvars["offsetx"] != ''){$sql.="offsetx = '".$formvars["offsetx"]."',";}else{$sql.="offsetx = NULL,";}
     if($formvars["offsety"] != ''){$sql.="offsety = '".$formvars["offsety"]."',";}else{$sql.="offsety = NULL,";}
+		if($formvars["polaroffset"] != ''){$sql.="polaroffset = '".$formvars["polaroffset"]."',";}else{$sql.="polaroffset = NULL,";}
     if($formvars["pattern"] != ''){$sql.="pattern = '".$formvars["pattern"]."',";}else{$sql.="pattern = NULL,";}
   	if($formvars["geomtransform"] != ''){$sql.="geomtransform = '".$formvars["geomtransform"]."',";}else{$sql.="geomtransform = NULL,";}
 		if($formvars["gap"] != ''){$sql.="gap = ".$formvars["gap"].",";}else{$sql.="gap = NULL,";}
