@@ -101,6 +101,10 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
     foreach($_POST as $key => $value)
     {
         $keyEscaped = htmlspecialchars($key);
+        if(is_array($value)) //skip arrays
+        {
+            break;
+        }
         $valueEscaped = htmlspecialchars($value);
         
         if(startsWith($keyEscaped, "erklaerung_"))

@@ -54,8 +54,8 @@ CREATE TABLE wasserrecht.fiswrv_adresse(
 CREATE TABLE wasserrecht.fiswrv_dokument(
 	id serial PRIMARY KEY,
 	name varchar(255),
-	pfad text,
-	document bytea
+	pfad text
+	/* document bytea */
 ) WITH OIDS;
 
 CREATE TABLE wasserrecht.fiswrv_betriebszustand(

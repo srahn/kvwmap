@@ -11,6 +11,125 @@ include_once ('includes/header.php');
 
 $gesamtEntnahmemenge = 0;
 $gesamtEntgelt = 0;
+
+if($_SERVER ["REQUEST_METHOD"] == "POST")
+{
+//     print_r($_POST);
+    
+    $entgeltbescheid_erstellen = htmlspecialchars($_POST["entgeltscheid_erstellen"]);
+    $auswahl_checkbox_array = $_POST["auswahl_checkbox"];
+    if(!empty($entgeltbescheid_erstellen) && !empty($auswahl_checkbox_array) && is_array($auswahl_checkbox_array))
+    {
+        $wrzs = array();
+        $gwb = array();
+        
+        foreach ($auswahl_checkbox_array as $auswahl_checkbox) 
+        {
+            if(!empty($auswahl_checkbox))
+            {
+                $auswahl_checkbox_escaped = htmlspecialchars($auswahl_checkbox);
+                
+                $festsetzungWrz = new WasserrechtlicheZulassungen($this);
+                $wrz = $festsetzungWrz->find_by_id($this, 'id', $auswahl_checkbox_escaped);
+                // 		    var_dump($wrz);
+                // 		    echo "<br />wrz id: " . $wrz->getId();
+                if(!empty($wrz))
+                {
+                    $wrzs[] = $wrz;
+                    
+                    // 		        echo "<br />wrz id: " . $wrz->getId();
+                    $gb = new Gewaesserbenutzungen($this);
+                    $gewaesserbenutzungen = $gb->find_where_with_subtables('wasserrechtliche_zulassungen=' . $wrz->getId());
+                    $gewaesserbenutzung = null;
+                    if(!empty($gewaesserbenutzungen) && count($gewaesserbenutzungen) > 0 && !empty($gewaesserbenutzungen[0]))
+                    {
+                        $gewaesserbenutzung = $gewaesserbenutzungen[0];
+                    }
+                    // 		        echo "<br />gewaesserbenutzung: " . $gewaesserbenutzung[0]->getId();
+                    
+                    if(!empty($gewaesserbenutzung))
+                    {
+                        $gwb[] = $gewaesserbenutzung;
+                    }
+                }
+            }
+        }
+        
+        $returnValue = festsetzung_erstellen($this, $wrzs, $gwb);
+        if($returnValue)
+        {
+            $this->add_message('notice', 'Festetzung erfolgreich erstellt!');
+        }
+        else
+        {
+            $this->add_message('error', 'Der Festsetzungsbescheid konnte nicht erstellt werden!');
+        }
+    }
+}
+
+function festsetzung_erstellen(&$gui, &$wrzs, &$gewaesserbenutzungen)
+{
+    if(count($wrzs) > 0 && count($gewaesserbenutzungen) > 0 && count($wrzs) === count($gewaesserbenutzungen))
+    {
+        foreach ($wrzs as $wrz)
+        {
+            if(!empty($wrz))
+            {
+                foreach ($gewaesserbenutzungen as $gewaesserbenutzung)
+                {
+                    if(!empty($gewaesserbenutzung))
+                    {
+                        $teilgewasserbenutzung = null;
+                        if(!empty($gewaesserbenutzung->teilgewaesserbenutzungen) && count($gewaesserbenutzung->teilgewaesserbenutzungen) > 0)
+                        {
+                            $teilgewasserbenutzung = $gewaesserbenutzung->teilgewaesserbenutzungen[0];
+                        }
+                        
+                        if(!empty($teilgewasserbenutzung))
+                        {
+                            if($wrz->isFestsetzungFreigegeben() && !$wrz->isFestsetzungDokumentErstellt())
+                            {
+                                /**
+                                 * Fesetzungsbescheid erstellen
+                                 */
+                                //Festsetzungsdokument anlegen
+                                if(!empty($wrz->getFestsetzungDokument()))
+                                {
+                                    $oldFestsetzungsDocumentId = $wrz->getFestsetzungDokument();
+                                    $wrz->deleteFestsetzungDokument();
+                                    
+                                    $festsetzung_delete_dokument = new Dokument($gui);
+                                    $festsetzung_delete_dokument->deleteDocument($oldFestsetzungsDocumentId);
+                                }
+                                
+                                //get a unique word file name
+                                $uniqid = uniqid();
+                                $word_file_name = $uniqid . ".docx";
+                                $word_file = WASSERRECHT_DOCUMENT_PATH . $word_file_name;
+                                
+                                //get the parameter
+                                $festsetzungsNutzer = $gui->user->Vorname . ' ' . $gui->user->Name;
+                                $freitext = $teilgewasserbenutzung->getFreitext();
+                                
+                                //write the word file
+                                writeFestsetzungsWordFile(PLUGINS . 'wasserrecht/templates/Festsetzung_Sammelbescheid.docx', $word_file, $festsetzungsNutzer, $freitext);
+                                
+                                //write the document path to the database
+                                $festsetzung_dokument = new Dokument($gui);
+                                $festsetzung_dokument_identifier = $festsetzung_dokument->createDocument('FestsetzungBescheid_' . $wrz->getId(), $word_file_name);
+                                $wrz->insertFestsetzungDokument($festsetzung_dokument_identifier);
+                                
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    return false;
+}
 ?>
 
 <div id="wasserentnahmebenutzer_entgeltbescheid" class="tabcontent" style="display: block">
@@ -129,7 +248,7 @@ $gesamtEntgelt = 0;
                     		          			<?php 
                     		          			     if($wrz->isFestsetzungFreigegeben() && !$wrz->isFestsetzungDokumentErstellt())
                     		          			     {?>
-                    		          			     	<input type="checkbox" name="auswahl_checkbox_<?php echo $wrz->getId(); ?>">
+                    		          			     	<input type="checkbox" name="auswahl_checkbox[]" value="<?php echo $wrz->getId(); ?>" />
                     		          			     <?php
                     		          			     }
                     		          			
@@ -190,23 +309,40 @@ $gesamtEntgelt = 0;
 		   		<div class="wasserrecht_display_table_row_spacer"></div>
    			</div>
     	
-	   		  <div class="wasserrecht_display_table_row">
+       		  <div class="wasserrecht_display_table_row">
            			<div class="wasserrecht_display_table_cell_caption">Abgelegte Sammelbescheide</div>
-			  </div>
-			<?php 
-			    if(!empty($wrz->festsetzung_dokument))
-				{?>
-    				<div class="wasserrecht_display_table_row">
-                        <div class="wasserrecht_display_table_cell_caption">
-        					<?php
-        					   echo '<a href="' . $this->actual_link . WASSERRECHT_DOCUMENT_URL_PATH . $wrz->festsetzung_dokument->getPfad() . '" target="_blank">' . $wrz->festsetzung_dokument->getName() . '</a>';
-        					?>
-               			</div>
-    				</div>
-			<?php
-				}
-			
-			?>
+    		  </div>
+    		  <?php 
+    			if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen))
+    			{
+    			    $wasserrechtlicheZulassungen = $wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen;
+    			    
+    			    foreach($wasserrechtlicheZulassungen AS $wrz)
+    			    {
+    			        if(!empty($wrz) && $getYear === $wrz->gueltigkeitsJahr)
+    			        {
+    			            if(empty($getBehoerde) || $getBehoerde === $wrz->behoerde->getId())
+    			            {
+    			                if(empty($getAdressat) || $getAdressat === $wrz->adressat->getId())
+    			                {
+    			                    if($wrz->isFestsetzungDokumentErstellt())
+    			                    {
+    			                    ?>
+    				                    <div class="wasserrecht_display_table_row">
+                        					<div class="wasserrecht_display_table_cell_caption">
+                        					<?php
+                        					   echo '<a href="' . $this->actual_link . WASSERRECHT_DOCUMENT_URL_PATH . $wrz->festsetzung_dokument->getPfad() . '" target="_blank">' . $wrz->festsetzung_dokument->getName() . '</a>';
+                        					?>
+                                   			</div>
+                        				</div>
+    			                    <?php 
+    			                    }   
+    			                }
+    			            }
+    			        }
+    			    }
+    			}
+    		?>
 			
 			<div class="wasserrecht_display_table_row">
 		   		<div class="wasserrecht_display_table_row_spacer"></div>
