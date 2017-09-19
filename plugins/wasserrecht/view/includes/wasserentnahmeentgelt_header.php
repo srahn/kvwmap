@@ -1,8 +1,8 @@
-<div class="wasserrecht_display_table">
-                    <div class="wasserrecht_display_table_row">
-                        <div class="wasserrecht_display_table_cell_caption">Erhebungsjahr:</div>
-                        <div class="wasserrecht_display_table_cell_spacer"></div>
-                        <div class="wasserrecht_display_table_cell_white"><?php echo $wrz->gueltigkeitsJahr ?></div>
+<div class="wasserrecht_display_table" style="width: 670px">
+    <div class="wasserrecht_display_table_row">
+    	<div class="wasserrecht_display_table_cell_caption">Erhebungsjahr:</div>
+        <div class="wasserrecht_display_table_cell_spacer"></div>
+        <div class="wasserrecht_display_table_cell_white"><?php echo $wrz->gueltigkeitsJahr ?></div>
     </div>
     <div class="wasserrecht_display_table_row">
         <div class="wasserrecht_display_table_cell_caption">Behörde:</div>
