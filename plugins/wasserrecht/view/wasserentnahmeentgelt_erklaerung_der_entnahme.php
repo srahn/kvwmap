@@ -357,7 +357,7 @@ if(!empty($wrz))
                     <th>Erklärter Teil-Benutzungsart</th>
                     <th>Erklärter Teil-Benutzungszweck</th>
                     <th>Erklärter Teil-Benutzungsumfang in m³/a</th>
-                    <th>Wiedereinleitung</th>
+                    <th title="Wiedereinleitung mit einem Verlust von weniger als 1% pro Jahr">Wiedereinleitung</th>
                     <th>Mengenbestimmung</th>
                   </tr>
                   <?php
