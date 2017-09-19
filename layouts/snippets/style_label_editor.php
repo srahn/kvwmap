@@ -129,6 +129,7 @@ function save_style(style_id){
 	data+= '&sizeitem='+document.GUI.style_sizeitem.value;
 	data+= '&offsetx='+document.GUI.style_offsetx.value;
 	data+= '&offsety='+document.GUI.style_offsety.value;
+	data+= '&polaroffset='+document.GUI.style_polaroffset.value;
   data+= '&pattern='+document.GUI.style_pattern.value;
   data+= '&geomtransform='+document.GUI.style_geomtransform.value;  
 	data+= '&gap='+document.GUI.style_gap.value;
