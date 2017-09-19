@@ -411,6 +411,17 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	    return "<div style=\"color: red;\">Nicht erklärt</div>";
 	}
 	
+	public function isFestsetzungDokumentErstellt()
+	{
+	    $datumFestsetzungDokument = $this->getFestsetzungDokumentDatum();
+	    if(!empty($datumFestsetzungDokument))
+	    {
+	        return true;
+	    }
+	    
+	    return false;
+	}
+	
 	public function getFestsetzungDokument() {
 	    return $this->data['festsetzung_dokument'];
 	}
@@ -420,12 +431,29 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	    {
 	        $this->set('festsetzung_dokument', $id);
 	        $this->update();
+	        
+	        $this->insertFestsetzungDokumentDatum();
 	    }
 	}
 	
 	public function deleteFestsetzungDokument() {
 	      $this->set('festsetzung_dokument', '');
 	      $this->update();
+	}
+	
+	public function getFestsetzungDokumentDatum() {
+	    return $this->data['festsetzung_dokument_datum'];
+	}
+	
+	public function insertFestsetzungDokumentDatum($dateValue = NULL) {
+	    //if date is not set --> set it to today's date
+	    if(empty($dateValue))
+	    {
+	        $dateValue = date("d.m.Y");
+	    }
+	    
+	    $this->set('festsetzung_dokument_datum', $dateValue);
+	    $this->update();
 	}
 	
 	public function insertFestsetzungSummeZugelasseneEntnahmemengen($festsetzungSummeZugelasseneEntnahmemengen) {

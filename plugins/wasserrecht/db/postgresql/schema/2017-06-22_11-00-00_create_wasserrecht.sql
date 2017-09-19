@@ -222,6 +222,7 @@ CREATE TABLE wasserrecht.fiswrv_wasserrechtliche_zulassungen(
 	erklaerung_nutzer text,
 	festsetzung_datum date,
 	festsetzung_dokument integer REFERENCES wasserrecht.fiswrv_dokument(id),
+	festsetzung_dokument_datum date,
 	festsetzung_nutzer text,
 	festsetzung_summe_zugelassene_entnahmemengen numeric,
 	festsetzung_summe_entgelt numeric

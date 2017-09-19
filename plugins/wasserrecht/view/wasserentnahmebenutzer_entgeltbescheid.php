@@ -126,9 +126,17 @@ $gesamtEntgelt = 0;
                     		          			?>
                     		          		</td>
                     		          		<td>
-                    		          			<input type="checkbox" name="auswahl_checkbox_<?php echo $wrz->getId(); ?>">
+                    		          			<?php 
+                    		          			     if($wrz->isFestsetzungFreigegeben() && !$wrz->isFestsetzungDokumentErstellt())
+                    		          			     {?>
+                    		          			     	<input type="checkbox" name="auswahl_checkbox_<?php echo $wrz->getId(); ?>">
+                    		          			     <?php
+                    		          			     }
+                    		          			
+                    		          			?>
                     		          		</td>
                     		          		<td>
+                    		          			<?php echo $wrz->getFestsetzungDokumentDatum() ?>
                     		          		</td>
                     		          		<td style="background-color: inherit; width: 10px">
                     		          		</td>
