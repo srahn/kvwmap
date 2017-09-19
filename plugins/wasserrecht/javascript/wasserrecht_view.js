@@ -36,7 +36,7 @@ function setNewTab()
 		{
 			var go = arguments[i];
 			
-//		    console.log("argument" + i + " :" + arguments[i]);
+//		    console.log("argument " + i + " :" + arguments[i]);
 //		    console.log("go=" + go);
 		    
 		    if(i > 0)
@@ -45,10 +45,9 @@ function setNewTab()
 				{
 					if(go.hasOwnProperty(key)) 
 					{
-//					    console.log(key + " -> " + go[key]);
+					    console.log(key + " -> " + go[key]);
 						url = changeURL(url, key,  go[key]);
 //						console.log("url 1: " + url);
-						break;
 					}
 				}
 		    }

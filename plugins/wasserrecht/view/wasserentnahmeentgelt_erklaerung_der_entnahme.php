@@ -5,6 +5,8 @@ $errorEingabeErklaerung = null;
 $leerEingabeErklaerung = false;
 $speereEingabeErklaerung = false;
 
+$isTrue = ["true",1,"t"];
+
 // print_r($_REQUEST);
 		  
 if($_SERVER ["REQUEST_METHOD"] == "POST")
@@ -201,7 +203,7 @@ function erklaerung_freigeben($gui, $keyEscaped, $keyName, $insertDate, &$wrz, &
                 }
                 
                 /**
-                 * Angaben aus der Tablle in DB schreiben
+                 * Angaben aus der Tabelle in DB schreiben
                  */
                 if(!$leerEingabeErklaerung && $errorEingabeErklaerung === null)
                 {
@@ -495,7 +497,6 @@ if(!empty($wrz))
                                 	       if(strcmp(WASSERRECHT_ERKLAERUNG_ENTNAHME_BITTE_AUSWAEHLEN_VALUE, htmlspecialchars($_REQUEST['wiedereinleitung_' . $i])) !== 0)
                                 	       {
                                 	           $getWiedereinleitungNutzer = htmlspecialchars($_REQUEST['wiedereinleitung_' . $i]);
-                                	           $isTrue = ["true",1,"t"];
                                 	           $getWiedereinleitungNutzer = in_array(strtolower($getWiedereinleitungNutzer), $isTrue);
                                 	       }
                                 	   }
@@ -505,7 +506,6 @@ if(!empty($wrz))
                                 	       {
 //                                 	           var_dump("getWiedereinleitungNutzer: " . $teilgewaesserbenutzung->getWiedereinleitungNutzer());
                                 	           $getWiedereinleitungNutzer = $teilgewaesserbenutzung->getWiedereinleitungNutzer();
-                                	           $isTrue = ["true",1,"t"];
                                 	           $getWiedereinleitungNutzer = in_array(strtolower($getWiedereinleitungNutzer), $isTrue);
                                 	       }
                                 	   }    

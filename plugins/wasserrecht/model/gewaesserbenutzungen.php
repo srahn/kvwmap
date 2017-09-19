@@ -181,11 +181,18 @@ class Gewaesserbenutzungen extends WrPgObject {
 	
 	public function getTeilgewaesserbenutzungEntgeltsatz($teilgewaesserbenutzung, $getArtBenutzung, $getBefreiungstatbestaende, $getWiedereinleitungBearbeiter, &$zugelassenesEntnahmeEntgelt, &$nichtZugelassenesEntnahmeEntgelt, &$zugelassenerUmfang)
 	{
+// 	    $this->debug->write('getTeilgewaesserbenutzungEntgeltsatz getArtBenutzung:' . var_export($getArtBenutzung, true), 4);
+// 	    $this->debug->write('getTeilgewaesserbenutzungEntgeltsatz getBefreiungstatbestaende:' . var_export($getBefreiungstatbestaende, true), 4);
+// 	    $this->debug->write('getTeilgewaesserbenutzungEntgeltsatz getWiedereinleitungBearbeiter:' . var_export($getWiedereinleitungBearbeiter, true), 4);
+// 	    $this->debug->write('getTeilgewaesserbenutzungEntgeltsatz zugelassenesEntnahmeEntgelt:' . var_export($zugelassenesEntnahmeEntgelt, true), 4);
+// 	    $this->debug->write('getTeilgewaesserbenutzungEntgeltsatz nichtZugelassenesEntnahmeEntgelt:' . var_export($nichtZugelassenesEntnahmeEntgelt, true), 4);
+// 	    $this->debug->write('getTeilgewaesserbenutzungEntgeltsatz zugelassenerUmfang:' . var_export($zugelassenerUmfang, true), 4);
+	    
 	    if(!empty($teilgewaesserbenutzung))
 	    {
 	        $teilbenutzungNichtZugelasseneMenge = $this->getTeilgewaesserbenutzungNichtZugelasseneMenge($teilgewaesserbenutzung->getId(), $zugelassenerUmfang);
 // 	        echo "teilbenutzungNichtZugelasseneMenge: " . $teilbenutzungNichtZugelasseneMenge . " <br>";
-	        
+
 	        if($teilbenutzungNichtZugelasseneMenge > 0)
 	        {
 	            if($teilbenutzungNichtZugelasseneMenge === $teilgewaesserbenutzung->getUmfang())

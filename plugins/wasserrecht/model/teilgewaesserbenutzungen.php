@@ -124,7 +124,7 @@ class Teilgewaesserbenutzungen extends WrPgObject {
 	            return false;
 	        }
 	    }
-	    return false;
+	    return null;
 	}
 	
 	public function getBefreiungstatbestaende() {
@@ -139,7 +139,7 @@ class Teilgewaesserbenutzungen extends WrPgObject {
 	            return false;
 	        }
 	    }
-	    return false;
+	    return null;
 	}
 	
 	public function getUmfang() {
