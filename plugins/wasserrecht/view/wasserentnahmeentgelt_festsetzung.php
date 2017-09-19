@@ -8,10 +8,6 @@ $zugelassenesEntnahmeEntgelt = 0;
 $nichtZugelassenesEntnahmeEntgelt = 0;
 $zugelassenerUmfangEntgeltsatz = 0;
 $zugelassenerUmfangEntgelt = 0;
-
-// echo '<pre>';
-// var_dump($_SESSION);
-// echo '</pre>';
 		
 // print_r($_REQUEST);
 
@@ -121,7 +117,9 @@ function festsetzung_freigeben($gui, $keyEscaped, $keyName, $festsetzungFreigebe
                                 // update an existing teilgewaesserbenutzung
                                 if (!empty($gewaesserbenutzung->teilgewaesserbenutzungen[$i - 1])) {
                                     $teilgewaesserbenutzung = $gewaesserbenutzung->teilgewaesserbenutzungen[$i - 1];
-                                    $teilgewaesserbenutzungId = $teilgewaesserbenutzung->updateTeilgewaesserbenutzung_Bearbeiter($teilgewaesserbenutzung_art_benutzung, $teilgewaesserbenutzung_wiedereinleitung_bearbeiter, $teilgewaesserbenutzung_befreiungstatbestaende, $freitext, $_SESSION['entgeltsaetze'][$wrz->getId() . " " . $gewaesserbenutzung->getId() . " " . $teilgewaesserbenutzung->getId()], $_SESSION['entgelte'][$wrz->getId() . " " . $gewaesserbenutzung->getId() . " " . $teilgewaesserbenutzung->getId()]);
+                                    $berechneter_entgeltsatz = htmlspecialchars($_POST["teilgewaesserbenutzung_berechneter_entgeltsatz_" . $i]);
+                                    $berechnetes_entgelt = htmlspecialchars($_POST["teilgewaesserbenutzung_berechnetes_entgelt_" . $i]);
+                                    $teilgewaesserbenutzungId = $teilgewaesserbenutzung->updateTeilgewaesserbenutzung_Bearbeiter($teilgewaesserbenutzung_art_benutzung, $teilgewaesserbenutzung_wiedereinleitung_bearbeiter, $teilgewaesserbenutzung_befreiungstatbestaende, $freitext, $berechneter_entgeltsatz, $berechnetes_entgelt);
                                     
                                     $gui->add_message('notice', 'Teilgewässerbenutzungen (id: ' . $teilgewaesserbenutzungId . ') erfolgreich geändert!');
                                 }                        // else --> if not there --> create one
@@ -140,9 +138,6 @@ function festsetzung_freigeben($gui, $keyEscaped, $keyName, $festsetzungFreigebe
             
             if($errorEingabeFestsetzung === null)
             {
-                unset($_SESSION['entgelte']);
-                unset($_SESSION['entgeltsaetze']);
-                
                 if($festsetzungFreigeben)
                 {
                     $wrz->insertFestsetzungDatum();
@@ -331,16 +326,16 @@ if(!empty($wrz))
                                       	//var_dump("getBefreiungstatbestaende: " . $getBefreiungstatbestaende);
                                       	//var_dump("getWiedereinleitungBearbeiter: " . $getWiedereinleitungBearbeiter);
                                       	     $berechneter_entgeltsatz = $gewaesserbenutzung->getTeilgewaesserbenutzungEntgeltsatz($teilgewaesserbenutzung, $getArtBenutzung, $getBefreiungstatbestaende, $getWiedereinleitungBearbeiter, $zugelassenesEntnahmeEntgelt, $nichtZugelassenesEntnahmeEntgelt, $zugelassenerUmfangEntgeltsatz);
-                                      	     $_SESSION['entgeltsaetze'][$wrz->getId() . " " . $gewaesserbenutzung->getId() . " " . $teilgewaesserbenutzung->getId()]=$berechneter_entgeltsatz;
                                       	     echo $berechneter_entgeltsatz;
                                       	?>
+                                      	<input type="hidden" name="teilgewaesserbenutzung_berechneter_entgeltsatz_<?php echo $i; ?>" value="<?php echo $berechneter_entgeltsatz; ?>" />
                                       </td>
                                       <td>
                                       	<?php
                                       	     $berechnetes_entgelt =  $gewaesserbenutzung->getTeilgewaesserbenutzungEntgelt($teilgewaesserbenutzung, $getArtBenutzung, $getBefreiungstatbestaende, $getWiedereinleitungBearbeiter, $zugelassenesEntnahmeEntgelt, $nichtZugelassenesEntnahmeEntgelt, $zugelassenerUmfangEntgelt);
-                                      	     $_SESSION['entgelte'][$wrz->getId() . " " . $gewaesserbenutzung->getId() . " " . $teilgewaesserbenutzung->getId()]=$berechnetes_entgelt;
                                       	     echo $berechnetes_entgelt;
                                       	?>
+                                      	<input type="hidden" name="teilgewaesserbenutzung_berechnetes_entgelt_<?php echo $i; ?>" value="<?php echo $berechnetes_entgelt; ?>" />
                                       </td>
                                   </tr>
                            <?php
