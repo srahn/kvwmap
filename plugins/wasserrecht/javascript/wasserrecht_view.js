@@ -165,6 +165,18 @@ $(document).ready(function() {
     });
 });
 
+add_calendar = function(event, elementid){
+	event.stopPropagation();
+	remove_calendar();
+	calendar = new CalendarJS();
+	calendar.init(elementid);
+	document.getElementById('layer').calendar = calendar;
+}
+ 
+remove_calendar = function(){
+	if(document.getElementById('layer').calendar != undefined)document.getElementById('layer').calendar.destroy();
+}
+
 autocomplete1 = function(layer_id, attribute, field_id, inputvalue)
 {
 	document.getElementById('suggests_'+field_id).style.display='none';

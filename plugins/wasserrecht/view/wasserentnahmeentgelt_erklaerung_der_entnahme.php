@@ -264,16 +264,9 @@ function erklaerung_freigeben($gui, $keyEscaped, $keyName, $insertDate, &$wrz, &
                  */
                 if($insertDate)
                 {
-                    // if(empty($wrz->getErklaerungDatum()))
-                    // {
-                    // echo $erklaerungWrz2->toString();
-                    $wrz->insertErklaerungDatum();
-                    // }
-                    
-                    // if(empty($wrz->getErklaerungNutzer()))
-                    // {
+                    $erklaerungDatum = htmlspecialchars($_POST["datum_erklaerung"]);
+                    $wrz->insertErklaerungDatum($erklaerungDatum);
                     $wrz->insertErklaerungNutzer($gui->user->Vorname . ' ' . $gui->user->Name);
-                    // }
                 }
                 
                 // update gewaesserbenutzungen, because teilgewaesserbenutzungen where added
@@ -594,6 +587,16 @@ if(!empty($wrz))
                          </div>
                     </div>
                     
+                  <?php
+                    if (!$speereEingabeErklaerung && !$wrz->isFestsetzungFreigegeben()) {
+                        ?>
+            			<div id="calendar" class="calendar">
+            				<div id="calendar_datum_erklaerung"></div>
+            			</div>
+            			<?php
+                    }
+                    ?>
+                    
                     <div class="wasserrecht_display_table_row">
         		   		<div class="wasserrecht_display_table_row_spacer"></div>
         		   		<div class="wasserrecht_display_table_cell_spacer"></div>
@@ -634,8 +637,22 @@ if(!empty($wrz))
                 		<div class="wasserrecht_display_table_cell_caption">Datum Erklärung:</div>
                         <div class="wasserrecht_display_table_cell_spacer"></div>
                         <div class="wasserrecht_display_table_cell_white">
+                        	<?php 
+                        	   if(!$speereEingabeErklaerung && !$wrz->isFestsetzungFreigegeben())
+                        	   {?>
+                        	   		<div id="layer" onclick="remove_calendar();"></div>
+                        			<a id="caldbl" href="javascript:;" title="(TT.MM.JJJJ) Datum auf das die Erklärung datiert wird." onclick="$('.calendar').show();add_calendar(event, 'datum_erklaerung');" ondblclick="$('.calendar').hide(); $('#datum_erklaerung').val('08.09.2017')">
+                        				<img src="graphics/calendarsheet.png" border="0">
+                        			</a>
+        							<input onchange="" title="Datum Erklärung" id="datum_erklaerung" name="datum_erklaerung" value="<?php echo $wrz->getErklaerungDatum() === null ? date("d.m.Y") : $wrz->getErklaerungDatum(); ?>" type="text" readonly="readonly">
+                        	   <?php
+                        	   }
+                        	   else
+                        	   {
+                        	       echo $wrz->getErklaerungDatumHTML();
+                        	   }
+                        	?>
                         	<?php
-                                echo $wrz->getErklaerungDatumHTML();
                     	    ?>
                         </div>
                     </div>
