@@ -299,7 +299,7 @@ function festsetzung_erstellen(&$gui, &$wrzs, &$gewaesserbenutzungen)
     		 <div class="wasserrecht_display_table_row">
         		<div class="wasserrecht_display_table_cell_caption">
         			<input type="hidden" name="go" value="wasserentnahmebenutzer_entgeltbescheid">
-        			<input type="submit" value="Entgeltscheid erstellen!" id="entgeltscheid_erstellen" name="entgeltscheid_erstellen" />
+        			<input type="submit" value="Entgeltscheid erstellen!" id="entgeltscheid_erstellen" name="entgeltscheid_erstellen" <?php echo $gesamtEntnahmemenge < 2000 ? "disabled='disabled'" : "" ?> />
         		</div>
              </div>
              
