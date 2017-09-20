@@ -57,7 +57,10 @@
     $GUI->bau = new Bauauskunft($GUI->baudatabase);
     $GUI->bau->getbaudaten($GUI->formvars);
     for($i = 0; $i < count($GUI->bau->baudata); $i++){
-      $GUI->bau->grundstueck[] = '13'.$GUI->bau->baudata[$i]['feld12'].'-'.$GUI->bau->baudata[$i]['feld13'].'-'.$GUI->bau->baudata[$i]['feld14'];
+			$flst = explode(', ', $GUI->bau->baudata[$i]['feld14']);
+			for($j = 0; $j < count($flst); $j++){
+				$GUI->bau->grundstueck[] = '13'.$GUI->bau->baudata[$i]['feld12'].'-'.$GUI->bau->baudata[$i]['feld13'].'-'.$flst[$j];
+			}
     }
     $Gemarkung=new gemarkung($GUI->bau->baudata[0]['feld12'],$GUI->pgdatabase);
     $GUI->bau->baudata[0]['bauort'] = $Gemarkung->getGemkgName();
