@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 172.17.0.2:3306
--- Generation Time: Sep 19, 2017 at 04:25 PM
+-- Generation Time: Sep 20, 2017 at 11:52 AM
 -- Server version: 5.5.56
 -- PHP Version: 5.6.30-0+deb8u1
 
@@ -812,7 +812,7 @@ INSERT INTO `layer_attributes` (`layer_id`, `name`, `real_name`, `tablename`, `t
 (37, 'freitext', 'freitext', 'fiswrv_gewaesserbenutzungen_umfang_entnahme', 'fiswrv_gewaesserbenutzungen_umfang_entnahme', 'text', '', '', 1, NULL, NULL, '', 'Text', '', '', NULL, NULL, NULL, NULL, '', '', 0, 0, NULL, 0, 0, NULL, 14, 0, 0),
 (38, 'id', 'id', 'fiswrv_gewaesserbenutzungen_lage', 'fiswrv_gewaesserbenutzungen_lage', 'int4', '', 'PRIMARY KEY', 1, 32, 0, '', 'Text', '', '', NULL, NULL, NULL, NULL, '', '', 0, 0, NULL, -1, 0, NULL, 0, 0, 0),
 (38, 'name', 'name', 'fiswrv_gewaesserbenutzungen_lage', 'fiswrv_gewaesserbenutzungen_lage', 'varchar', '', '', 1, 255, NULL, '', 'Text', '', 'Name', NULL, NULL, NULL, NULL, '', '', 0, 0, NULL, 0, 0, NULL, 1, 0, 0),
-(38, 'betreiber', 'betreiber', 'fiswrv_gewaesserbenutzungen_lage', 'fiswrv_gewaesserbenutzungen_lage', 'int4', '', '', 1, 32, 0, '', 'Auswahlfeld', 'SELECT id as value, name as output from wasserrecht.fiswrv_personen WHERE betreiber=true;layer_id=9 embedded', 'Betreiber', NULL, NULL, NULL, NULL, '', '', 0, 0, NULL, 0, 0, NULL, 2, 0, 0),
+(38, 'betreiber', 'betreiber', 'fiswrv_gewaesserbenutzungen_lage', 'fiswrv_gewaesserbenutzungen_lage', 'int4', '', '', 1, 32, 0, '', 'Auswahlfeld', 'SELECT id as value, name as output from wasserrecht.fiswrv_personen WHERE betreiber IS NOT NULL;layer_id=9 embedded', 'Betreiber', NULL, NULL, NULL, NULL, '', '', 0, 0, NULL, 0, 0, NULL, 2, 0, 0),
 (38, 'wwident', 'wwident', 'fiswrv_gewaesserbenutzungen_lage', 'fiswrv_gewaesserbenutzungen_lage', 'varchar', '', '', 1, 255, NULL, '', 'Text', '', '', NULL, NULL, NULL, NULL, '', '', 0, 0, NULL, 0, 0, NULL, 3, 0, 0),
 (38, 'namelang', 'namelang', 'fiswrv_gewaesserbenutzungen_lage', 'fiswrv_gewaesserbenutzungen_lage', 'varchar', '', '', 1, 255, NULL, '', 'Text', '', 'Name lang', NULL, NULL, NULL, NULL, '', '', 0, 0, NULL, 0, 0, NULL, 4, 0, 0),
 (38, 'namekurz', 'namekurz', 'fiswrv_gewaesserbenutzungen_lage', 'fiswrv_gewaesserbenutzungen_lage', 'varchar', '', '', 1, 100, NULL, '', 'Text', '', 'Name kurz', NULL, NULL, NULL, NULL, '', '', 0, 0, NULL, 0, 0, NULL, 5, 0, 0),
@@ -1987,7 +1987,7 @@ CREATE TABLE `rolle` (
 --
 
 INSERT INTO `rolle` (`user_id`, `stelle_id`, `nImageWidth`, `nImageHeight`, `auto_map_resize`, `minx`, `miny`, `maxx`, `maxy`, `nZoomFactor`, `selectedButton`, `epsg_code`, `epsg_code2`, `coordtype`, `active_frame`, `last_time_id`, `gui`, `language`, `hidemenue`, `hidelegend`, `fontsize_gle`, `highlighting`, `buttons`, `scrollposition`, `result_color`, `always_draw`, `runningcoords`, `showmapfunctions`, `showlayeroptions`, `singlequery`, `querymode`, `geom_edit_first`, `overlayx`, `overlayy`, `hist_timestamp`, `instant_reload`, `menu_auto_close`, `layer_params`, `menue_buttons`, `visually_impaired`) VALUES
-(1, 1, 1198, 802, 1, 33201165.000009, 5867814.9999175, 33477900, 6081468, 2, 'zoomin', '35833', '', 'dec', 0, '2017-09-19 16:02:21', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure,', 0, 1, 0, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 1, 0),
+(1, 1, 1198, 802, 1, 33181471.535172, 5853718.0684107, 33497593.464837, 6095564.9315068, 2, 'zoomin', '35833', '', 'dec', 0, '2017-09-20 11:51:46', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure,', 0, 1, 0, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 1, 0),
 (2, 2, 1198, 770, 1, 239608.32867608, 5890464.3996456, 453335.02845224, 6047442.271783, 2, 'zoomin', '35833', NULL, 'dec', 0, '2017-07-12 11:18:57', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure', 0, 1, 0, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 0, 0);
 
 -- --------------------------------------------------------
@@ -2051,7 +2051,7 @@ CREATE TABLE `rolle_last_query` (
 
 INSERT INTO `rolle_last_query` (`user_id`, `stelle_id`, `go`, `layer_id`, `sql`, `orderby`, `limit`, `offset`) VALUES
 (2, 2, 'Layer-Suche_Suchen', 25, 'SELECT * FROM (SELECT wasserrechtliche_zulassungen.oid AS wasserrechtliche_zulassungen_oid,   name,  ausstellbehoerde,  ausgangsbescheid,  fassung,  status,  adresse as adress_id,   aenderungsbescheid,  gueltigkeit,  bergamt_aktenzeichen,  dokument,  sachbearbeiter,  adressat,  anlage  FROM wasserrechtliche_zulassungen WHERE 1=1) as query WHERE 1=1  AND ( (1=1)) AND wasserrechtliche_zulassungen_oid = 113298', ' ORDER BY fassung, wasserrechtliche_zulassungen_oid ', 10, NULL),
-(1, 1, 'Layer-Suche_Suchen', 2, 'SELECT * FROM (SELECT a.oid AS fiswrv_anlagen_oid,  a.id AS anlage_id,  a.name,  a.klasse,  a.zustaend_stalu,  a.zustaend_uwb,  a.abwasser_koerperschaft,  a.trinkwasser_koerperschaft,  a.kommentar,  \'aktuell\' AS aktuell,  \'\' AS aktuelle_wasserrechtliche_zulassungen,   \'historisch\' AS historisch, \'\' AS historische_wasserrechtliche_zulassungen,  \'\' AS gewaesserbenutzungen,   \'\' AS wrz_ben_lage,   \'Bearbeiter\' AS bearbeiter,  \'\' AS anlage_bearbeiter,   \'Betreiber\' AS betreiber,  \'\' AS anlage_betreiber,  a.anlage_bearbeiter_name ,  a.anlage_bearbeiter_stelle,  a.anlage_bearbeiter_datum,  a.the_geom  FROM fiswrv_anlagen a LEFT JOIN fiswrv_personen b ON b.anlage=a.id WHERE 1=1) as query WHERE 1=1  AND ( (1=1)) AND (the_geom && st_transform(st_geomfromtext(\'POLYGON((33201165.000009 5867814.9999175, 33477900 5867814.9999175, 33477900 6081468, 33201165.000009 6081468, 33201165.000009 5867814.9999175))\', 35833), 35833) OR the_geom IS NULL)', ' ORDER BY fiswrv_anlagen_oid ', 10, NULL);
+(1, 1, 'Layer-Suche_Suchen', 33, 'SELECT * FROM (SELECT b.oid AS fiswrv_gewaesserbenutzungen_oid,  a.anlage AS anlage_id,  \'\' AS anlage,  b.wasserrechtliche_zulassungen as wrz_id,  \'\' AS wasserrechtliche_zulassungen_link,  b.kennnummer,  b.wasserbuchnummer,  c.bezeichnung,  b.freitext_art,  b.art,  b.freitext_zweck,  b.zweck,  b.umfang_entnahme,  b.lage,   \'\' AS  lage_link,  e.namelang AS wrz_ben_lage_namelang,  a.adressat as personen_id,   CASE WHEN a.aktuell = \'ja\' THEN \'aktuell\' ELSE \'false\' END AS aktuell,  CASE WHEN a.historisch = \'ja\' THEN \'historisch\' ELSE \'false\' END as historisch  FROM fiswrv_gewaesserbenutzungen b LEFT JOIN fiswrv_gewaesserbenutzungen_bezeichnung c ON c.id = b.id LEFT JOIN fiswrv_wasserrechtliche_zulassungen a ON b.wasserrechtliche_zulassungen = a.id LEFT JOIN fiswrv_gewaesserbenutzungen_lage e ON b.lage = e.id  WHERE 1=1) as query WHERE 1=1  AND ( (1=1))', ' ORDER BY fiswrv_gewaesserbenutzungen_oid ', 10, NULL);
 
 -- --------------------------------------------------------
 
@@ -2714,7 +2714,9 @@ INSERT INTO `u_consume` (`user_id`, `stelle_id`, `time_id`, `activity`, `nimagew
 (1, 1, '2017-09-18 09:31:51', 'getMap', 1198, 802, '35833', 33303422.423147, 5987766.3265491, 33303504.939407, 5987821.5441967, '2017-09-15 11:47:00', NULL),
 (1, 1, '2017-09-18 09:31:52', 'getMap', 1198, 802, '35833', 33179892.898819, 5867814.9999175, 33499172.10119, 6081468, '2017-09-18 09:31:51', NULL),
 (1, 1, '2017-09-18 17:53:37', 'getMap', 1198, 770, '35833', 33179892.898819, 5857389.4910651, 33499172.10119, 6091893.5088524, '2017-09-18 09:31:52', NULL),
-(1, 1, '2017-09-19 16:02:21', 'getMap', 1198, 802, '35833', 33201165.000009, 5867814.9999175, 33477900, 6081468, '2017-09-18 17:53:37', NULL);
+(1, 1, '2017-09-19 16:02:21', 'getMap', 1198, 802, '35833', 33201165.000009, 5867814.9999175, 33477900, 6081468, '2017-09-18 17:53:37', NULL),
+(1, 1, '2017-09-20 10:30:11', 'getMap', 1198, 802, '35833', 33199897.861374, 5867814.9999175, 33479167.138635, 6081468, '2017-09-19 16:02:21', NULL),
+(1, 1, '2017-09-20 11:51:46', 'getMap', 1198, 802, '35833', 33181471.535172, 5853718.0684107, 33497593.464837, 6095564.9315068, '2017-09-20 10:30:11', NULL);
 
 -- --------------------------------------------------------
 
