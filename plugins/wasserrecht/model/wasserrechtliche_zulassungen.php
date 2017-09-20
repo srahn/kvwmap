@@ -88,6 +88,18 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	        {
 	            $bh = new Behoerde($gui);
 	            $behoerde = $bh->find_by_id($gui, 'id', $result->data['ausstellbehoerde']);
+	            if(!empty($behoerde->data['adresse']))
+	            {
+	                $adress = new AdresseKlasse($gui);
+	                $adresse = $adress->find_by_id($gui, 'id', $behoerde->data['adresse']);
+	                $behoerde->adresse = $adresse;
+	            }
+	            if(!empty($behoerde->data['art']))
+	            {
+	                $behoerdeArt = new BehoerdeArt($gui);
+	                $art = $behoerdeArt->find_by_id($gui, 'id', $behoerde->data['art']);
+	                $behoerde->art = $art;
+	            }
 	            $result->behoerde = $behoerde;
 	        }
 	        

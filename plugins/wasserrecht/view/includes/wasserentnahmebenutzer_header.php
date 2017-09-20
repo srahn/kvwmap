@@ -3,7 +3,7 @@ $wasserrechtlicheZulassung = new WasserrechtlicheZulassungen($this);
 $wrzProGueltigkeitsJahr = $wasserrechtlicheZulassung->find_gueltigkeitsjahre($this);
 $gueltigkeitsjahre = $wrzProGueltigkeitsJahr->gueltigkeitsJahre;
 
-$getYear = !empty(htmlspecialchars($_REQUEST['year'])) ? htmlspecialchars($_REQUEST['year']) : $gueltigkeitsjahre[0];
+$getYear = !empty(htmlspecialchars($_REQUEST['erhebungsjahr'])) ? htmlspecialchars($_REQUEST['erhebungsjahr']) : $gueltigkeitsjahre[0];
 
 //Get Behörde
 $getBehoerde = !empty(htmlspecialchars($_REQUEST['behoerde'])) ? htmlspecialchars($_REQUEST['behoerde']) : null;

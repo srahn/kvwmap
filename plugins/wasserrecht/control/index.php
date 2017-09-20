@@ -9,6 +9,7 @@ include(PLUGINS . 'wasserrecht/model/anlage.php');
 include(PLUGINS . 'wasserrecht/model/personen.php');
 include(PLUGINS . 'wasserrecht/model/adresse.php');
 include(PLUGINS . 'wasserrecht/model/behoerde.php');
+include(PLUGINS . 'wasserrecht/model/behoerde_art.php');
 include(PLUGINS . 'wasserrecht/model/dokument.php');
 include(PLUGINS . 'wasserrecht/model/gewaesserbenutzungen.php');
 include(PLUGINS . 'wasserrecht/model/gewaesserbenutzungen_umfang.php');

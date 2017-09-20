@@ -59,13 +59,13 @@
 //     }
 // }
 
-function writeAufforderungsWordFile($word_template, $word_file)
+function writeAufforderungsWordFile($word_template, $word_file, &$parameter)
 {
     $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($word_template);
-    $templateProcessor->setValue('PLZ', '19053');
-    $timestamp = time();
-    $datum = date("d.m.Y", $timestamp);
-    $templateProcessor->setValue('datum', $datum);
+    foreach($parameter as $key => $value)
+    {
+        $templateProcessor->setValue($key, $value);
+    }
     $templateProcessor->saveAs($word_file);
 }
 

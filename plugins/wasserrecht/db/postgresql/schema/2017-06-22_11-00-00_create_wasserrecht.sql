@@ -4,40 +4,6 @@ DROP SCHEMA IF EXISTS wasserrecht CASCADE;
 CREATE SCHEMA wasserrecht;
 
 -- GENERELL
-CREATE TABLE wasserrecht.fiswrv_behoerde_art(
-	id serial PRIMARY KEY,
-	name varchar(255),
-  	abkuerzung varchar(100)
-) WITH OIDS;
-
-CREATE TABLE wasserrecht.fiswrv_behoerde(
-	id serial PRIMARY KEY,
-	name varchar(255),
-  	abkuerzung varchar(100),
-  	status varchar(100),
-  	art integer REFERENCES wasserrecht.fiswrv_behoerde_art(id)
-) WITH OIDS;
-
--------------
-
-CREATE TABLE wasserrecht.fiswrv_koerperschaft_art(
-	id serial PRIMARY KEY,
-	name varchar(255)
-) WITH OIDS;
-
-CREATE TABLE wasserrecht.fiswrv_koerperschaft(
-	id serial PRIMARY KEY,
-	name varchar(255),
-	art integer REFERENCES wasserrecht.fiswrv_koerperschaft_art(id)
-) WITH OIDS;
-
-CREATE TABLE wasserrecht.fiswrv_weeerklaerer(
-	id serial PRIMARY KEY,
-	name varchar(255)
-) WITH OIDS;
-
-------------
-
 CREATE TABLE wasserrecht.fiswrv_ort(
 	id serial PRIMARY KEY,
 	name varchar(255)
@@ -84,6 +50,41 @@ CREATE TABLE wasserrecht.fiswrv_konto(
 ) WITH OIDS;
 
 CREATE TABLE wasserrecht.fiswrv_mengenbestimmung(
+	id serial PRIMARY KEY,
+	name varchar(255)
+) WITH OIDS;
+
+-------------
+
+CREATE TABLE wasserrecht.fiswrv_behoerde_art(
+	id serial PRIMARY KEY,
+	name varchar(255),
+  	abkuerzung varchar(100)
+) WITH OIDS;
+
+CREATE TABLE wasserrecht.fiswrv_behoerde(
+	id serial PRIMARY KEY,
+	name varchar(255),
+  	abkuerzung varchar(100),
+  	status varchar(100),
+  	adresse integer REFERENCES wasserrecht.fiswrv_adresse(id),
+  	art integer REFERENCES wasserrecht.fiswrv_behoerde_art(id)
+) WITH OIDS;
+
+-------------
+
+CREATE TABLE wasserrecht.fiswrv_koerperschaft_art(
+	id serial PRIMARY KEY,
+	name varchar(255)
+) WITH OIDS;
+
+CREATE TABLE wasserrecht.fiswrv_koerperschaft(
+	id serial PRIMARY KEY,
+	name varchar(255),
+	art integer REFERENCES wasserrecht.fiswrv_koerperschaft_art(id)
+) WITH OIDS;
+
+CREATE TABLE wasserrecht.fiswrv_weeerklaerer(
 	id serial PRIMARY KEY,
 	name varchar(255)
 ) WITH OIDS;
