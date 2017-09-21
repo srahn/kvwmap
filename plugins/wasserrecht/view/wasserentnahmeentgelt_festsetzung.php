@@ -10,6 +10,8 @@ $nichtZugelassenesEntnahmeEntgelt = 0;
 $zugelassenerUmfangEntgeltsatz = 0;
 $zugelassenerUmfangEntgelt = 0;
 
+$findDefaultWrz = true;
+
 $isTrue = ["true",1,"t"];
 		
 // print_r($_REQUEST);
@@ -52,7 +54,8 @@ elseif($_SERVER ["REQUEST_METHOD"] == "GET")
 		    $wrz = $festsetzungWrz->find_by_id($this, 'id', $festsetzungWrzId);
 // 		    var_dump($wrz);
 // 		    echo "<br />wrz id: " . $wrz->getId();
-		    if(!empty($wrz))
+// 		    echo "<br />wrz isErklaerungFreigegeben: " . var_dump($wrz->isErklaerungFreigegeben());
+		    if((!empty($wrz) && !empty($wrz->getId())) && $wrz->isErklaerungFreigegeben())
 		    {
 // 		        echo "<br />wrz id: " . $wrz->getId();
 		        $gb = new Gewaesserbenutzungen($this);
@@ -67,6 +70,10 @@ elseif($_SERVER ["REQUEST_METHOD"] == "GET")
 		        {
 		            $speereEingabeFestsetzung = true;
 		        }
+		    }
+		    else
+		    {
+		        $findDefaultWrz = false;
 		    }
 		    break;
 		 }
@@ -170,7 +177,7 @@ function festsetzung_freigeben(&$gui, $valueEscaped, $keyName, $festsetzungFreig
 }
 
 //try to find the first WRZ if, no wrz was given
-if(empty($wrz))
+if((empty($wrz) || empty($wrz->getId())) && $findDefaultWrz)
 {
     $defaultWrz = new WasserrechtlicheZulassungen($this);
     $results = $defaultWrz->find_where('1=1', 'id');
@@ -186,27 +193,29 @@ if(empty($wrz))
     }
 }
 
-if(!empty($wrz))
+if(!empty($wrz) && !empty($wrz->getId()))
 {
-    $wrz->getDependentObjects($this, $wrz);
-    if(empty($gewaesserbenutzung) && !empty($wrz->gewaesserbenutzungen) && count($wrz->gewaesserbenutzungen) > 0 && !empty($wrz->gewaesserbenutzungen[0]))
+    if($wrz->isErklaerungFreigegeben())
     {
-        $gewaesserbenutzung = $wrz->gewaesserbenutzungen[0];
-    }
-    
-    $tab1_id="wasserentnahmeentgelt_erklaerung_der_entnahme";
-    $tab1_name="Erklärung der Entnahme";
-    $tab1_active=false;
-    $tab1_visible=true;
-    $tab2_id="wasserentnahmeentgelt_festsetzung";
-    $tab1_extra_parameter_key="geterklaerung";
-    $tab1_extra_parameter_value=$wrz->getId();
-    $tab2_name="Festsetzung";
-    $tab2_active=true;
-    $tab2_visible=true;
-    include_once ('includes/header.php'); 
-    
-    ?>
+        $wrz->getDependentObjects($this, $wrz);
+        if(empty($gewaesserbenutzung) && !empty($wrz->gewaesserbenutzungen) && count($wrz->gewaesserbenutzungen) > 0 && !empty($wrz->gewaesserbenutzungen[0]))
+        {
+            $gewaesserbenutzung = $wrz->gewaesserbenutzungen[0];
+        }
+        
+        $tab1_id="wasserentnahmeentgelt_erklaerung_der_entnahme";
+        $tab1_name="Erklärung der Entnahme";
+        $tab1_active=false;
+        $tab1_visible=true;
+        $tab2_id="wasserentnahmeentgelt_festsetzung";
+        $tab1_extra_parameter_key="geterklaerung";
+        $tab1_extra_parameter_value=$wrz->getId();
+        $tab2_name="Festsetzung";
+        $tab2_active=true;
+        $tab2_visible=true;
+        include_once ('includes/header.php');
+        
+        ?>
 
 	<div id="wasserentnahmeentgelt_festsetzung" class="tabcontent" style="display: block">
 
@@ -628,8 +637,13 @@ if(!empty($wrz))
               
  	</form>
 </div>
+ <?php
+    }
+    else
+    {
+        echo '<h1 style=\"color: red;\">Erklärung wurde noch niccht freigegeben!<h1>';
+    }
     
-    <?php
 }
 else
 {

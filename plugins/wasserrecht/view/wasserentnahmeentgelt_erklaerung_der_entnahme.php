@@ -5,6 +5,8 @@ $errorEingabeErklaerung = null;
 $leerEingabeErklaerung = false;
 $speereEingabeErklaerung = false;
 
+$findDefaultWrz = true;
+
 $isTrue = ["true",1,"t"];
 
 // print_r($_REQUEST);
@@ -83,7 +85,7 @@ elseif($_SERVER ["REQUEST_METHOD"] == "GET")
             // 		    echo "<br />erklaerungWrzId: " . $erklaerungWrzId;
             $erklaerungWrz = new WasserrechtlicheZulassungen($this);
             $wrz = $erklaerungWrz->find_by_id($this, 'id', $erklaerungWrzId);
-            if(!empty($wrz))
+            if(!empty($wrz) && !empty($wrz->getId()))
             {
                 $gb = new Gewaesserbenutzungen($this);
                 $gewaesserbenutzungen = $gb->find_where_with_subtables('wasserrechtliche_zulassungen=' . $wrz->getId());
@@ -97,7 +99,13 @@ elseif($_SERVER ["REQUEST_METHOD"] == "GET")
                 {
                     $speereEingabeErklaerung = true;
                 }
+            
             }
+            else
+            {
+                $findDefaultWrz = false;
+            }
+            
             break;
         }
     }
@@ -257,7 +265,7 @@ function erklaerung_freigeben($gui, $keyEscaped, $keyName, $insertDate, &$wrz, &
                 }
             }
             
-            if (!$leerEingabeErklaerung && $errorEingabeErklaerung === null) 
+            if(!$leerEingabeErklaerung && $errorEingabeErklaerung === null) 
             {
                 /**
                  * Datum hinzufügen
@@ -289,7 +297,7 @@ function erklaerung_freigeben($gui, $keyEscaped, $keyName, $insertDate, &$wrz, &
 }
 
 //try to find the first WRZ if, no wrz was given
-if(empty($wrz))
+if((empty($wrz) || empty($wrz->getId())) && $findDefaultWrz)
 {
     $defaultWrz = new WasserrechtlicheZulassungen($this);
     $results = $defaultWrz->find_where('1=1', 'id');
@@ -303,9 +311,10 @@ if(empty($wrz))
             $speereEingabeErklaerung = true;
         }
     }
+    
 }
 
-if(!empty($wrz))
+if(!empty($wrz) && !empty($wrz->getId()))
 {
     $wrz->getDependentObjects($this, $wrz);
     if(empty($gewaesserbenutzung) && !empty($wrz->gewaesserbenutzungen) && count($wrz->gewaesserbenutzungen) > 0 && !empty($wrz->gewaesserbenutzungen[0]))
