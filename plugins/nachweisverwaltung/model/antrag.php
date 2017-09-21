@@ -257,6 +257,21 @@ class antrag {
     return $pdf;
   }
   
+	function erzeugenUbergabeprotokoll_HTML(){
+		$nachweise_json = json_encode($this->FFR);
+		$html = "
+		<html>
+			<head>
+				<SCRIPT TYPE=\"text/javascript\">	
+					var nachweise = ".$nachweise_json.";
+				</SCRIPT>
+			</head>
+			<body onload=\"alert(nachweise);\">
+			</body>
+		</html>";
+    return $html;
+	}
+	
   function erzeugenUbergabeprotokoll_CSV(){
   	# Überschriften
   	foreach($this->FFR[0] as $key=>$value){
@@ -354,13 +369,13 @@ class antrag {
     $i=0;
     while($rs=pg_fetch_array($query_id)) {      
       if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){
-      	if($formvars['Riss-Nummer'])$FFR[$i]['Riss-Nummer']=$rs['flurid'].'/'.$rs['rissnummer'];
-				if(NACHWEIS_SECONDARY_ATTRIBUTE != '')$FFR[$i]['Riss-Nummer'] .= ' - '.$rs[NACHWEIS_SECONDARY_ATTRIBUTE];
-      	if($formvars['Antrags-Nummer'])$FFR[$i]['Antrags-Nummer']=$rs['stammnr'];
+      	if($formvars['Riss-Nummer'])$FFR[$i]['Rissnummer']=$rs['flurid'].'/'.$rs['rissnummer'];
+				if(NACHWEIS_SECONDARY_ATTRIBUTE != '')$FFR[$i]['Rissnummer'] .= ' - '.$rs[NACHWEIS_SECONDARY_ATTRIBUTE];
+      	if($formvars['Antrags-Nummer'])$FFR[$i]['Antragsnummer']=$rs['stammnr'];
       }
       else{
-      	if($formvars['Antrags-Nummer'])$FFR[$i]['Antrags-Nummer']=$rs['flurid'].'/'.str_pad($rs['stammnr'],ANTRAGSNUMMERMAXLENGTH,'0',STR_PAD_LEFT);
-      	if($formvars['Riss-Nummer'])$FFR[$i]['Riss-Nummer']=$rs['rissnummer'];
+      	if($formvars['Antrags-Nummer'])$FFR[$i]['Antragsnummer']=$rs['flurid'].'/'.str_pad($rs['stammnr'],ANTRAGSNUMMERMAXLENGTH,'0',STR_PAD_LEFT);
+      	if($formvars['Riss-Nummer'])$FFR[$i]['Rissnummer']=$rs['rissnummer'];
       }
 
       # Abfrage der Anzahl der FFR zum Vorgang
@@ -409,14 +424,14 @@ class antrag {
       if($formvars['gemessendurch']){
 	      $ret=$this->getVermessungsStellen($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
 	      if ($ret[0]) { return $ret; }
-	      $FFR[$i]['gemessen durch']=utf8_decode($ret[1]); 
+	      $FFR[$i]['gemessen durch']=$ret[1]; 
       }
             
       # Abfrage der Gültigkeiten der Dokumente im Vorgang
 	  if($formvars['Gueltigkeit']){
 		$ret=$this->getGueltigkeit($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
 		if ($ret[0]) { return $ret; }
-		$FFR[$i][utf8_decode('Gültigkeit')]=utf8_decode($ret[1]); 
+		$FFR[$i]['Gültigkeit']=$ret[1]; 
 	  }
       $i++;
     }

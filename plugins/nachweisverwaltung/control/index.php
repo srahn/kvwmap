@@ -69,6 +69,13 @@
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$this->erzeugenUebergabeprotokollNachweise_CSV();
 	  }break;
+		
+	  case 'Antraganzeige_Uebergabeprotokoll_Erzeugen_HTML' : {
+			include (PLUGINS.'nachweisverwaltung/model/kvwmap.php');						# GUI-Objekt erweitern
+			include (PLUGINS.'nachweisverwaltung/model/nachweis.php');					# nachweis-Klasse einbinden
+			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
+			$this->erzeugenUebergabeprotokollNachweise_HTML();
+	  }break;		
 
 	  case 'Antraganzeige_Zusammenstellen_Zippen' : {
 			include (PLUGINS.'nachweisverwaltung/model/kvwmap.php');						# GUI-Objekt erweitern

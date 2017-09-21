@@ -29,10 +29,12 @@
 				$GUI->formvars['Datei'] = 1;
 				$GUI->formvars['gemessendurch'] = 1;
 				$GUI->formvars['Gueltigkeit'] = 1;
-				$GUI->erzeugenUebergabeprotokollNachweise_PDF(RECHERCHEERGEBNIS_PATH.$antragsnr.'/'.$antrag->nr.'_'.date('Y-m-d_H-i-s',time()).'.pdf');
+				$timestamp = date('Y-m-d_H-i-s',time());
+				$GUI->erzeugenUebergabeprotokollNachweise_PDF(RECHERCHEERGEBNIS_PATH.$antragsnr.'/'.$antrag->nr.'_'.$timestamp.'.pdf');
+				$GUI->erzeugenUebergabeprotokollNachweise_HTML(RECHERCHEERGEBNIS_PATH.$antragsnr.'/'.$antrag->nr.'_'.$timestamp.'.htm');
         $result = exec(ZIP_PATH.' -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr);
 				# Loggen der übergebenen Dokumente
-				$uebergabe_logpath = $antrag->create_uebergabe_logpath($GUI->Stelle->Bezeichnung).'/'.$antr_selected.'_'.date('Y-m-d_H-i-s',time()).'.pdf';
+				$uebergabe_logpath = $antrag->create_uebergabe_logpath($GUI->Stelle->Bezeichnung).'/'.$antr_selected.'_'.$timestamp.'.pdf';
 				$GUI->erzeugenUebergabeprotokollNachweise_PDF($uebergabe_logpath, true);
       }
     }
@@ -522,6 +524,31 @@
     }
   };
   
+	$this->erzeugenUebergabeprotokollNachweise_HTML = function($path) use ($GUI){
+		if($GUI->formvars['antr_selected'] == ''){
+      $GUI->Antraege_Anzeigen();
+      showAlert('Wählen Sie bitte eine Antragsnummer aus! ');
+    }
+    else{
+			$explosion = explode('~', $GUI->formvars['antr_selected']);
+			$antr_selected = $explosion[0];
+			$stelle_id = $explosion[1];
+      $GUI->antrag = new antrag($antr_selected,$stelle_id,$GUI->pgdatabase);
+      $ret=$GUI->antrag->getFFR($GUI->formvars);
+      if ($ret[0]) {
+        $GUI->Fehlermeldung=$ret[1];
+        # Abbruch mit Fehlermeldung und Rücksprung in Auswahl
+        $GUI->Antraege_Anzeigen();
+      }
+      else{
+		    $html_file = $GUI->antrag->erzeugenUbergabeprotokoll_HTML();
+				$fp=fopen($path,'wb');
+				fwrite($fp, $html_file);
+				fclose($fp);
+      }
+    }
+  };	
+	
 	$this->erzeugenUebergabeprotokollNachweise_PDF = function($path = NULL, $with_search_params = false) use ($GUI){
   	# Erzeugen des Übergabeprotokolls mit der Zuordnung der Nachweise zum gewählten Auftrag als PDF-Dokument
   	if($GUI->formvars['antr_selected'] == ''){
