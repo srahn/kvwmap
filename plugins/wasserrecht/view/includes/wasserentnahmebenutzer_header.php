@@ -136,35 +136,50 @@ if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrech
         	<div class="wasserrecht_display_table_cell_spacer"></div>
         	<div class="wasserrecht_display_table_cell">
         		<?php
-        				
-        				if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen))
-        				{
-        				    $wasserrechtlicheZulassungen = $wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen;
-        				    
-        				    $adressatArray = array();
-        				    
-        				    //var_dump($wasserrechtlicheZulassungen);
-        				    foreach($wasserrechtlicheZulassungen AS $wrz)
-        				    {
-        				        if(!empty($wrz) && in_array($getYear, $wrz->gueltigkeitsJahr))
-        				        {
-        				            if(!empty($wrz->adressat))
-        				            {
-        				                if(!in_array($wrz->adressat->toString(), $adressatArray))
-        				                {
-        				                    $adressatArray[]=$wrz->adressat->toString();
-        				                    
-        				                    if($wrz->adressat->getId() === $getAdressat)
-        				                    {
-        				                        $selectedAdressat = $wrz->adressat;
-        				                    }
-        				                }
-        				            }
-        				        }
-        				    }
-        				    
-        				}
-        				
+        		
+//     				if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen))
+//     				{
+//     				    $wasserrechtlicheZulassungen = $wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen;
+    				    
+//     				    $adressatArray = array();
+    				    
+//     				    foreach($wasserrechtlicheZulassungen AS $wrz)
+//     				    {
+//     				        if(!empty($wrz) && in_array($getYear, $wrz->gueltigkeitsJahr))
+//     				        {
+//     				            if(!empty($wrz->adressat))
+//     				            {
+//     				                if(!in_array($wrz->adressat->toString(), $adressatArray))
+//     				                {
+//     				                    $adressatArray[]=$wrz->adressat->toString();
+    				                    
+//     				                    if($wrz->adressat->getId() === $getAdressat)
+//     				                    {
+//     				                        $selectedAdressat = $wrz->adressat;
+//     				                    }
+//     				                }
+//     				            }
+//     				        }
+//     				    }
+//     				}
+
+                    if(empty($selectedAdressat) && !empty($getAdressat))
+                    {
+                        $person = new Personen($this);
+                        $adressat = $person->find_by_id($this, 'id', $getAdressat);
+                        //if(!empty($adressat) && in_array($adressat->toString(), $adressatArray))
+                        if(!empty($adressat) && $adressat->isWrzAdressat())
+                        {
+                            if(!empty($adressat->data['adresse']))
+                            {
+                                $adress = new AdresseKlasse($this);
+                                $adresse = $adress->find_by_id($this, 'id', $adressat->data['adresse']);
+                                $adressat->adresse = $adresse;
+                            }
+                            $selectedAdressat = $adressat;
+                        }
+                    }
+    				
         			?>
 				<input autocomplete="off" title="Adressat"
 					onkeydown="if(this.backup_value==undefined){this.backup_value=this.value; document.getElementById('25_personen_id_0').backup_value=document.getElementById('25_personen_id_0').value;}"

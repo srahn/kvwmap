@@ -5,6 +5,25 @@ class Personen extends WrPgObject {
 	
 	public $adresse;
 	
+	public function isWrzAdressat() {
+	    
+	    if(empty($this->data['wrzadressat']))
+	    {
+	        return false;
+	    }
+	    else
+	    {
+	        if($this->data['wrzadressat'] === 'ja')
+	        {
+	            return true;
+	        }
+	        else
+	        {
+	            return false;
+	        }
+	    }
+	}
+	
 	public function getBehoerde() {
 	    if(!empty($this->data))
 	    {
