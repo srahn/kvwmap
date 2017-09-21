@@ -66,8 +66,8 @@ function resizemap2window(){
 * or as a single string
 */
 function message(messages, t_hide, t_hidden) {
-	if (typeof(t_hide) === 'undefined') t_hide = 1000;
-	if (typeof(t_hidden) === 'undefined') t_hidden = 3000;
+	if (typeof(t_hide) === 'undefined') t_hide = 1000 + <?php echo MSG_BOX_FADE_OUT_DELAY; ?>;
+	if (typeof(t_hidden) === 'undefined') t_hidden = 3000 + <?php echo MSG_BOX_FADE_OUT_DELAY; ?>;
 	var msgDiv = $("#message_box");
 	types = {
 		'notice': {

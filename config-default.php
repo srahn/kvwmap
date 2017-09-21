@@ -143,6 +143,8 @@ define('TXT_GLEHEADER','#000000');						# Version 1.8.0
 # Hintergrundfarbe GLE Attributnamen
 define('BG_GLEATTRIBUTE','#DAE4EC');					# Version 1.8.0
 
+define('MSG_BOX_FADE_OUT_DELAY', 0);				# Version 2.8.0
+
 # Bezeichung des Datenproviders
 define('PUBLISHERNAME','Kartenserver');
 # Auswahl der Art der Lagebezeichung für den aktuell angezeigten Kartenausschnitt
@@ -522,6 +524,8 @@ define('DELETE_ROLLENLAYER', 'true');   # true / false                          
 
 # Definiert, ob das aktuelle Kartenbild separat angezeigt werden darf oder nicht
 define('SHOW_MAP_IMAGE', 'true');       # true / false                            # Version 1.6.7
+
+define('SHOW_STELLE_HIERARCHIE', false);						# Version 2.8.0
 
 // ############################# Klassenbibliotheken lesen														# in Version 2.0 gelöscht
 // # laden der Klassenbibliotheken																										# in Version 2.0 gelöscht

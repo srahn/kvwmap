@@ -1007,6 +1007,7 @@ function showMessages($messages, $fade = true) { ?>
 }
 */
 function showMessage($text, $fade = true, $msg_type = 'warning') {
+	echo '<p>Verzögerungszeit: ' . MSG_BOX_FADE_OUT_DELAY;
   ?>
   <script type="text/javascript">
 		var Msg = document.getElementById("message_box");
@@ -1023,8 +1024,8 @@ function showMessage($text, $fade = true, $msg_type = 'warning') {
 		Msg.style.top = document.body.scrollTop + 350;
 		innerhtml += '<?php echo $text; ?>';
 		<? if($fade == true){ ?>
-			setTimeout(function() {Msg.className = 'message_box_hide';},1000);
-			setTimeout(function() {Msg.className = 'message_box_hidden';},3000);
+			setTimeout(function() {Msg.className = 'message_box_hide';}, 1000 + <?php echo MSG_BOX_FADE_OUT_DELAY; ?>);
+			setTimeout(function() {Msg.className = 'message_box_hidden';}, 3000 + <?php echo MSG_BOX_FADE_OUT_DELAY; ?>);
 		<? }else{ ?>
 			innerhtml += '<br><br><input type="button" onclick="this.parentNode.className = \'message_box_hidden\';" value="ok">';
 		<? } ?>
