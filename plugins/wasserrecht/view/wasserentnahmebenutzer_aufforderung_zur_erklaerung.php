@@ -132,14 +132,15 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
     		</tr>
     		<?php 
         		
+//     		      var_dump($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen);
         		  if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen))
         		  {
         		      $wasserrechtlicheZulassungen = $wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen;
         		      
-        		      //var_dump($wasserrechtlicheZulassungen);
+//         		      var_dump($wasserrechtlicheZulassungen);
         		      foreach($wasserrechtlicheZulassungen AS $wrz)
         		      {
-        		          if(!empty($wrz) && $getYear === $wrz->gueltigkeitsJahr)
+        		          if(!empty($wrz) && in_array($getYear, $wrz->gueltigkeitsJahr))
         		          {
         		              if(empty($getBehoerde) || $getBehoerde === $wrz->behoerde->getId())
         		              {
@@ -269,7 +270,7 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
 				    
 				    foreach($wasserrechtlicheZulassungen AS $wrz)
 				    {
-				        if(!empty($wrz) && $getYear === $wrz->gueltigkeitsJahr)
+				        if(!empty($wrz) && in_array($getYear, $wrz->gueltigkeitsJahr))
 				        {
 				            if(empty($getBehoerde) || $getBehoerde === $wrz->behoerde->getId())
 				            {

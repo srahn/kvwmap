@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 172.17.0.2:3306
--- Generation Time: Sep 21, 2017 at 10:09 AM
+-- Generation Time: Sep 21, 2017 at 03:14 PM
 -- Server version: 5.5.56
 -- PHP Version: 5.6.30-0+deb8u1
 
@@ -708,7 +708,7 @@ INSERT INTO `layer_attributes` (`layer_id`, `name`, `real_name`, `tablename`, `t
 (9, 'bezeichnung', 'bezeichnung', 'fiswrv_personen_bezeichnung', 'd', 'text', '', '', 1, NULL, NULL, '', 'Text', '', 'Bezeichnung', NULL, NULL, NULL, NULL, '', 'Systemdaten', 0, 0, NULL, 0, 0, NULL, 4, 0, 0),
 (9, 'wrzaussteller', 'wrzaussteller', 'fiswrv_personen', 'a', 'varchar', '', '', 1, 10, NULL, '', 'Auswahlfeld', '\'ja\',\'nein\'', 'Aussteller WrZ', NULL, NULL, NULL, NULL, 'Die Person kann Wasserrechtliche Zulassungen erteilen. [Kann nur vom Admin bearbeitet werden]', 'Gruppen', 0, 0, NULL, 0, 0, NULL, 27, 0, 0),
 (2, 'anlage_bearbeiter', '', '', '', 'not_saveable', '', '', NULL, NULL, NULL, '', 'SubFormEmbeddedPK', '9,anlage_id,bearbeiter,<b>Betreiber:</b> bezeichnung;no_new_window', 'Bearbeiter', NULL, NULL, NULL, NULL, '', '<h2>Zugehörige Personen</h2>', 1, 2, NULL, -1, 0, NULL, 15, 0, 0),
-(25, 'personen_id', 'adressat', 'fiswrv_wasserrechtliche_zulassungen', 'a', 'int4', '', '', 1, 32, 0, '', 'Autovervollständigungsfeld', 'SELECT id as value, name as output from wasserrecht.fiswrv_personen a WHERE a.behoerde IS NOT NULL;layer_id=9 embedded', 'Adressat [Auswahlfeld]', NULL, NULL, NULL, NULL, '', 'Adressat', 0, 0, NULL, 0, 0, NULL, 7, 0, 0),
+(25, 'personen_id', 'adressat', 'fiswrv_wasserrechtliche_zulassungen', 'a', 'int4', '', '', 1, 32, 0, '', 'Autovervollständigungsfeld', 'SELECT id as value, name as output from wasserrecht.fiswrv_personen a WHERE a.wrzadressat IS NOT NULL AND a.wrzadressat = \'ja\';layer_id=9 embedded', 'Adressat [Auswahlfeld]', NULL, NULL, NULL, NULL, '', 'Adressat', 0, 0, NULL, 0, 0, NULL, 7, 0, 0),
 (9, 'abwasser_koerperschaft', 'abwasser_koerperschaft', 'fiswrv_personen', 'a', 'int4', '', '', 1, 32, 0, '', 'Auswahlfeld', 'SELECT\r\n	z.id as value, z.name || \' (\' || coalesce(string_agg(z2b.name, \', \'),  \'keiner Körperschaftsart zugeordnet\') || \')\' AS output FROM\r\n  wasserrecht.fiswrv_koerperschaft z LEFT JOIN	\r\n  wasserrecht.fiswrv_koerperschaft_art z2b ON z.art = z2b.id WHERE z2b.id = 2\r\nGROUP BY\r\n  z.id, z.name ;layer_id=6 embedded', 'Abwasserbeseitigungspflichtige Körperschaft', NULL, NULL, NULL, NULL, 'Die Person ist eine abwasserbeseitigungspflichtige Körperschaft (nach §40 Satz 1 LWaG M-V).', 'Gruppen', 0, 0, NULL, 0, 0, NULL, 34, 0, 0),
 (9, 'trinkwasser_koerperschaft', 'trinkwasser_koerperschaft', 'fiswrv_personen', 'a', 'int4', '', '', 1, 32, 0, '', 'Auswahlfeld', 'SELECT\r\n	z.id as value, z.name || \' (\' || coalesce(string_agg(z2b.name, \', \'),  \'keiner Körperschaftsart zugeordnet\') || \')\' AS output FROM\r\n  wasserrecht.fiswrv_koerperschaft z LEFT JOIN	\r\n  wasserrecht.fiswrv_koerperschaft_art z2b ON z.art = z2b.id WHERE z2b.id = 1\r\nGROUP BY\r\n  z.id, z.name ;layer_id=6 embedded', 'Träger der öffentlichen Wasserversorgung', NULL, NULL, NULL, NULL, 'Die Person ist Träger der öffentlichen Wasserversorgung (nach § 43 Satz 1 LWaG M-V).', 'Gruppen', 0, 0, NULL, 0, 0, NULL, 35, 0, 0),
 (9, 'kommentar', 'kommentar', 'fiswrv_personen', 'a', 'varchar', '', '', 1, 255, NULL, '', 'Textfeld', '', 'Kommentar ans LUNG', NULL, NULL, NULL, NULL, 'KOMMENTARFELD!', 'Sonstiges', 0, 0, NULL, 0, 0, NULL, 37, 0, 0),

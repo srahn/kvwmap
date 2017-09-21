@@ -12,6 +12,7 @@ if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrech
 {
     $getBehoerde = $wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[0]->behoerde->getId();
 }
+// print_r($getBehoerde);
 
 //Get Adressat
 $getAdressat = !empty(htmlspecialchars($_REQUEST['adressat'])) ? htmlspecialchars($_REQUEST['adressat']) : null;
@@ -33,7 +34,7 @@ if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrech
                 <div class="wasserrecht_display_table_cell_caption">Erhebungsjahr:</div>
                 <div class="wasserrecht_display_table_cell_spacer"></div>
                 <div class="wasserrecht_display_table_cell">
-                	<select name="erhebungsjahr" onchange="setNewUrlParameter(this,'year')">
+                	<select name="erhebungsjahr" onchange="setNewUrlParameter(this,'erhebungsjahr')">
     					<?php
                             if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->gueltigkeitsJahre))
                             {
@@ -77,26 +78,41 @@ if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrech
             				    
             				    $behoerdeArray = array();
             				    
+            				    $optionSelected = false;
+            				    $options = "";
             				    //var_dump($wasserrechtlicheZulassungen);
             				    foreach($wasserrechtlicheZulassungen AS $wrz)
             				    {
-            				        if(!empty($wrz) && $getYear === $wrz->gueltigkeitsJahr)
+//             				        print_r($wrz->getId());
+            				        if(!empty($wrz) && in_array($getYear, $wrz->gueltigkeitsJahr))
             				        {
             				            if(!empty($wrz->behoerde))
             				            {
             				                if(!in_array($wrz->behoerde->toString(), $behoerdeArray))
             				                {
             				                    $behoerdeArray[]=$wrz->behoerde->toString();
-            				                    
-            				                    echo '<option value='. $wrz->behoerde->getId() . ' ' . ($wrz->behoerde->getId() === $getBehoerde ? "selected" : "") . '>' . $wrz->behoerde->getName() . "</option>";
+            				                    if($wrz->behoerde->getId() === $getBehoerde)
+            				                    {
+            				                        $optionSelected = true;
+            				                    }
+            				                    $options = $options . "<option value='" . $wrz->behoerde->getId() . "' " . ($wrz->behoerde->getId() === $getBehoerde ? "selected" : "") . ">" . $wrz->behoerde->getName() . "</option>";
             				                }
             				            }
             				        }
-            				        else
+            				    }
+            				    
+            				    if(empty($options))
+            				    {
+            				        echo "<option>Keinen Eintrag in der Datenbank gefunden!</option>";
+            				    }
+            				    else
+            				    {
+            				        if(!$optionSelected)
             				        {
-            				            echo "<option>Keinen Eintrag in der Datenbank gefunden!</option>";
-            				            break;
+            				            $options = "<option value='" . WASSERRECHT_ERKLAERUNG_ENTNAHME_BITTE_AUSWAEHLEN_VALUE . "'>" . WASSERRECHT_ERKLAERUNG_ENTNAHME_BITTE_AUSWAEHLEN_TEXT . "</option>" . $options;
             				        }
+            				        
+            				        echo $options;
             				    }
             				    
             				}
@@ -130,15 +146,13 @@ if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrech
         				    //var_dump($wasserrechtlicheZulassungen);
         				    foreach($wasserrechtlicheZulassungen AS $wrz)
         				    {
-        				        if(!empty($wrz) && $getYear === $wrz->gueltigkeitsJahr)
+        				        if(!empty($wrz) && in_array($getYear, $wrz->gueltigkeitsJahr))
         				        {
         				            if(!empty($wrz->adressat))
         				            {
         				                if(!in_array($wrz->adressat->toString(), $adressatArray))
         				                {
         				                    $adressatArray[]=$wrz->adressat->toString();
-        				                    
-//         				                    echo '<option value='. $wrz->adressat->getId() . ' ' . ($wrz->adressat->getId() === $getAdressat ? "selected" : "") . '>' . $wrz->adressat->getName() . "</option>";
         				                    
         				                    if($wrz->adressat->getId() === $getAdressat)
         				                    {
@@ -147,11 +161,6 @@ if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrech
         				                }
         				            }
         				        }
-//         				        else
-//         				        {
-//         				            echo "<option>Keinen Eintrag in der Datenbank gefunden!</option>";
-//         				            break;
-//         				        }
         				    }
         				    
         				}

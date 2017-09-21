@@ -14,7 +14,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 
 	public function find_gueltigkeitsjahre($gui) {
 	    
-		$results = $this->find_where('datum IS NOT NULL', 'id');
+		$results = $this->find_where('1=1', 'id');
 		$wrzProGueltigkeitsJahr = new WRZProGueltigkeitsJahr();
 		
 		if(!empty($results))
@@ -23,21 +23,26 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 			foreach($results AS $result)
 			{
 // 				var_dump($this->debug);
-			    $this->debug->write('result: ' . var_export($result->data, true), 4);
+			    $this->debug->write('result: ' . var_export($result->data['id'], true), 4);
 				
-			    $year = $this->getDependentObjects($gui, $result);
+			    $years = $this->getDependentObjects($gui, $result);
+			    $this->debug->write('years: ' . var_export($years, true), 4);
+// 			    echo print_r($years);
 			    
-			    if(!empty($year))
+			    if(!empty($years))
 			    {
-			        if(!in_array($year, $wasserrechtlicheZulassungGueltigkeitJahrReturnArray))
+			        foreach ($years as $year)
 			        {
-			            $wasserrechtlicheZulassungGueltigkeitJahrReturnArray[] = $year;
+			            if(!in_array($year, $wasserrechtlicheZulassungGueltigkeitJahrReturnArray))
+			            {
+			                $wasserrechtlicheZulassungGueltigkeitJahrReturnArray[] = $year;
+			            }
 			        }
-			        
 			        $wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[]=$result;
 			    }
 			}
 			$wrzProGueltigkeitsJahr->gueltigkeitsJahre=$wasserrechtlicheZulassungGueltigkeitJahrReturnArray;
+// 			print_r($wrzProGueltigkeitsJahr->gueltigkeitsJahre);
 			return $wrzProGueltigkeitsJahr;
 // 			return $wasserrechtlicheZulassungGueltigkeitJahrReturnArray;
 		}
@@ -49,7 +54,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	
 	public function getDependentObjects($gui, &$result) 
 	{
-	    $year = null;
+	    $years = null;
 	    
 	    if(!empty($result))
 	    {
@@ -58,15 +63,32 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 // 	        $result->gueltigkeit = $wasserrechtlicheZulassungGueltigkeit;
 // 	        if(!empty($wasserrechtlicheZulassungGueltigkeit))
 // 	        {
-// 	            $datum = $wasserrechtlicheZulassungGueltigkeit->getBefristetBis();
-                $datum = $result->getBefristetBis();  
-                if(!empty($datum))
+                $gueltigSeit = $result->getGueltigSeit();
+                $gui->debug->write('gueltigSeit: ' . var_export($gueltigSeit, true), 4);
+//                 $gui->addYearToArray($gueltigSeit, $result->gueltigkeitsJahr);
+                $befristetBis = $result->getBefristetBis();
+                $gui->debug->write('befristetBis: ' . var_export($befristetBis, true), 4);
+//                
+                $years = WasserrechtlicheZulassungen::addAllYearsBetweenTwoDates(WasserrechtlicheZulassungen::convertStringToDate($gueltigSeit), WasserrechtlicheZulassungen::convertStringToDate($befristetBis));
+                $gui->debug->write('years: ' . var_export($years, true), 4);
+                
+                //backup, falls andere Dates nicht gesetzt wurden
+                if(empty($years))
                 {
-                    // 	            var_dump($datum);
-                    $date = DateTime::createFromFormat("d.m.Y", $datum);
-                    $year = $date->format("Y");
-                    $result->gueltigkeitsJahr=$year;
+                    $getFassungDatum = $result->getFassungDatum();
+                    if(empty($getFassungDatum))
+                    {
+                        $getDatum = $result->getDatum();
+                        WasserrechtlicheZulassungen::addYearToArray($getDatum, $years);
+                    }
+                    else
+                    {
+                        WasserrechtlicheZulassungen::addYearToArray($getFassungDatum, $years);
+                    }
                 }
+                
+                $result->gueltigkeitsJahr = $years;
+                
 // 	        }
 	        
 	        //get the 'Adressat'
@@ -153,25 +175,15 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 // 	        $gewaesserbenutzungen = $gewaesserbenutzung->find_where_with_subtables('wasserrechtliche_zulassungen=' . $result->getId() . ' AND (art = 1 OR art = 2)', 'id');
 	        $result->gewaesserbenutzungen = $gewaesserbenutzungen;
 	        
+	        $gui->debug->write('gewaesserbenutzungen count: ' . count( $result->gewaesserbenutzungen), 4);
+	        
 	        if(empty($result->gewaesserbenutzungen) || empty($result->gewaesserbenutzungen[0]))
 	        {
 	            return null;
 	        }
 	    }
 	    
-	    return $year;
-	}
-	
-	public function toString() {
-	    return "gueltigkeitsJahr: " . $this->gueltigkeitsJahr . (!empty($this->behoerde) ? " behoerde: " . $this->behoerde->data['id'] : "" ) . (!empty($this->adressat) ? " adressat: " . $this->adressat->data['id'] : "");
-	}
-	
-	public function getBehoerdeName() {
-	    return !empty($this->behoerde) ?  $this->behoerde->getName() : null;
-	}
-	
-	public function getBehoerdeId() {
-	    return !empty($this->behoerde) ?  $this->behoerde->getId() : null;
+	    return $years;
 	}
 	
 	public function getHinweis() {
@@ -211,6 +223,89 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	    return "";
 	}
 	
+	public static function convertStringToDate($inputString) {
+	    if(!empty($inputString))
+	    {
+	        return DateTime::createFromFormat("d.m.Y", $inputString);
+	    }
+	    
+	    return null;
+	}
+	
+// 	public static function getYearFromDate($date) {
+// 	    if(!empty($date))
+// 	    {
+// 	        return $year = $date->format("Y");
+// 	    }
+	    
+// 	    return null;
+// 	}
+	
+	public static function addYearToArray($dateString, &$arrayToFill)
+	{
+	    if(!empty($dateString))
+	    {
+	        $date = WasserrechtlicheZulassungen::convertStringToDate($dateString);
+	        $year = WasserrechtlicheZulassungen::getYearFromDate($date);
+	        if(!empty($year) && !in_array($year, $arrayToFill))
+	        {
+	            $arrayToFill[]=$year;
+	        }
+	    }
+	}
+	
+	public static function addAllYearsBetweenTwoDates($date1, $date2)
+	{
+	    $years = array();
+	    
+	    if(!empty($date1) && !empty($date2))
+	    {
+// 	        print_r($date1->format("Y"));
+// 	        print_r($date2->format("Y"));
+	        $diff = $date1->diff($date2);
+// 	        print_r($diff->y);
+	        $diffY = $diff->y;
+	        if($diffY === 0)
+	        {
+	            $years[] = $date1->format("Y");
+	        }
+	        elseif($diffY > 0)
+	        {
+	            $diffY = $diffY + 1;
+	            $years[] =  $date1->format("Y");
+	            for ($i = 1; $i < $diffY; $i++)
+	            {
+	                $interval = new DateInterval('P' . $i . 'Y');
+	                $nextYear = $date1->add($interval)->format('Y');
+// 	                echo "nextYear: " . $nextYear;
+	                $years[] = $nextYear;
+	            }
+	        }
+	    }
+	    elseif(!empty($date1))
+	    {
+	        $years[] = $date1->format("Y");
+	    }
+	    elseif(!empty($date2))
+	    {
+	        $years[] = $date2->format("Y");
+	    }
+	    
+	    return $years;
+	}
+	
+	public function getBehoerdeName() {
+	    return !empty($this->behoerde) ?  $this->behoerde->getName() : null;
+	}
+	
+	public function getBehoerdeId() {
+	    return !empty($this->behoerde) ?  $this->behoerde->getId() : null;
+	}
+	
+	public function getDatum() {
+	    return $this->data['datum'];
+	}
+	
 	public function getBefristetBis() {
 	    return $this->data['befristet_bis'];
 	}
@@ -219,13 +314,8 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	    return $this->data['gueltig_seit'];
 	}
 	
-	public function convertStringToDate($inputString) {
-	    if(!empty($inputString))
-	    {
-	        return DateTime::createFromFormat("d.m.Y", $inputString);
-	    }
-	    
-	    return null;
+	public function getFassungDatum() {
+	    return $this->data['fassung_datum'];
 	}
 	
 	////////////////////////////////////////////////////////////////////
@@ -487,6 +577,10 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	}
 	
 	////////////////////////////////////////////////////////////////////
+	
+	public function toString() {
+	    return "gueltigkeitsJahr: " . print_r($this->gueltigkeitsJahr) . (!empty($this->behoerde) ? " behoerde: " . $this->behoerde->data['id'] : "" ) . (!empty($this->adressat) ? " adressat: " . $this->adressat->data['id'] : "");
+	}
 	
 	public function getBezeichnung() {
 	    $fieldname = 'bezeichnung';

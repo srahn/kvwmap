@@ -165,7 +165,7 @@ function festsetzung_erstellen(&$gui, &$wrzs, &$gewaesserbenutzungen)
         		      //var_dump($wasserrechtlicheZulassungen);
         		      foreach($wasserrechtlicheZulassungen AS $wrz)
         		      {
-        		          if(!empty($wrz) && $getYear === $wrz->gueltigkeitsJahr)
+        		          if(!empty($wrz) && in_array($getYear, $wrz->gueltigkeitsJahr))
         		          {
         		              if(empty($getBehoerde) || $getBehoerde === $wrz->behoerde->getId())
         		              {
@@ -319,7 +319,7 @@ function festsetzung_erstellen(&$gui, &$wrzs, &$gewaesserbenutzungen)
     			    
     			    foreach($wasserrechtlicheZulassungen AS $wrz)
     			    {
-    			        if(!empty($wrz) && $getYear === $wrz->gueltigkeitsJahr)
+    			        if(!empty($wrz) && in_array($getYear, $wrz->gueltigkeitsJahr))
     			        {
     			            if(empty($getBehoerde) || $getBehoerde === $wrz->behoerde->getId())
     			            {
