@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 172.17.0.2:3306
--- Generation Time: Sep 20, 2017 at 11:52 AM
+-- Generation Time: Sep 21, 2017 at 10:09 AM
 -- Server version: 5.5.56
 -- PHP Version: 5.6.30-0+deb8u1
 
@@ -2050,8 +2050,8 @@ CREATE TABLE `rolle_last_query` (
 --
 
 INSERT INTO `rolle_last_query` (`user_id`, `stelle_id`, `go`, `layer_id`, `sql`, `orderby`, `limit`, `offset`) VALUES
-(2, 2, 'Layer-Suche_Suchen', 25, 'SELECT * FROM (SELECT wasserrechtliche_zulassungen.oid AS wasserrechtliche_zulassungen_oid,   name,  ausstellbehoerde,  ausgangsbescheid,  fassung,  status,  adresse as adress_id,   aenderungsbescheid,  gueltigkeit,  bergamt_aktenzeichen,  dokument,  sachbearbeiter,  adressat,  anlage  FROM wasserrechtliche_zulassungen WHERE 1=1) as query WHERE 1=1  AND ( (1=1)) AND wasserrechtliche_zulassungen_oid = 113298', ' ORDER BY fassung, wasserrechtliche_zulassungen_oid ', 10, NULL),
-(1, 1, 'Layer-Suche_Suchen', 33, 'SELECT * FROM (SELECT b.oid AS fiswrv_gewaesserbenutzungen_oid,  a.anlage AS anlage_id,  \'\' AS anlage,  b.wasserrechtliche_zulassungen as wrz_id,  \'\' AS wasserrechtliche_zulassungen_link,  b.kennnummer,  b.wasserbuchnummer,  c.bezeichnung,  b.freitext_art,  b.art,  b.freitext_zweck,  b.zweck,  b.umfang_entnahme,  b.lage,   \'\' AS  lage_link,  e.namelang AS wrz_ben_lage_namelang,  a.adressat as personen_id,   CASE WHEN a.aktuell = \'ja\' THEN \'aktuell\' ELSE \'false\' END AS aktuell,  CASE WHEN a.historisch = \'ja\' THEN \'historisch\' ELSE \'false\' END as historisch  FROM fiswrv_gewaesserbenutzungen b LEFT JOIN fiswrv_gewaesserbenutzungen_bezeichnung c ON c.id = b.id LEFT JOIN fiswrv_wasserrechtliche_zulassungen a ON b.wasserrechtliche_zulassungen = a.id LEFT JOIN fiswrv_gewaesserbenutzungen_lage e ON b.lage = e.id  WHERE 1=1) as query WHERE 1=1  AND ( (1=1))', ' ORDER BY fiswrv_gewaesserbenutzungen_oid ', 10, NULL);
+(1, 1, 'Layer-Suche_Suchen', 17, 'SELECT * FROM (SELECT fiswrv_behoerde.oid AS fiswrv_behoerde_oid,  id,  name,  abkuerzung,  status  FROM fiswrv_behoerde WHERE 1=1) as query WHERE 1=1  AND ( (1=1 AND query.id = \'1\'))', ' ORDER BY fiswrv_behoerde_oid ', 10, NULL),
+(2, 2, 'Layer-Suche_Suchen', 25, 'SELECT * FROM (SELECT wasserrechtliche_zulassungen.oid AS wasserrechtliche_zulassungen_oid,   name,  ausstellbehoerde,  ausgangsbescheid,  fassung,  status,  adresse as adress_id,   aenderungsbescheid,  gueltigkeit,  bergamt_aktenzeichen,  dokument,  sachbearbeiter,  adressat,  anlage  FROM wasserrechtliche_zulassungen WHERE 1=1) as query WHERE 1=1  AND ( (1=1)) AND wasserrechtliche_zulassungen_oid = 113298', ' ORDER BY fassung, wasserrechtliche_zulassungen_oid ', 10, NULL);
 
 -- --------------------------------------------------------
 
@@ -2086,6 +2086,13 @@ CREATE TABLE `search_attributes2rolle` (
   `searchmask_number` int(11) NOT NULL DEFAULT '0',
   `searchmask_operator` enum('AND','OR') DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `search_attributes2rolle`
+--
+
+INSERT INTO `search_attributes2rolle` (`name`, `user_id`, `stelle_id`, `layer_id`, `attribute`, `operator`, `value1`, `value2`, `searchmask_number`, `searchmask_operator`) VALUES
+('<last_search>', 1, 1, 17, 'id', '=', '1', '', 0, '');
 
 -- --------------------------------------------------------
 
@@ -2405,7 +2412,7 @@ CREATE TABLE `user` (
 --
 
 INSERT INTO `user` (`ID`, `login_name`, `Name`, `Vorname`, `Namenszusatz`, `passwort`, `password_setting_time`, `start`, `stop`, `ips`, `Funktion`, `stelle_id`, `phon`, `email`) VALUES
-(1, 'kvwmap', 'kvwmap', 'hans', NULL, '536f8942987f8def483f847fd1631b09', '2017-06-15 07:57:32', '0000-00-00', '0000-00-00', NULL, 'admin', 1, '', 'admin@localhost.de'),
+(1, 'kvwmap', 'Kvwmap', 'Hans', '', '536f8942987f8def483f847fd1631b09', '2017-06-15 07:57:32', '0000-00-00', '0000-00-00', '', 'admin', 1, '0385 / 4800532', 'admin@localhost.de'),
 (2, 'TEST_DATENEINGEBER', 'Dateneingeber', 'Test', '', '098f6bcd4621d373cade4e832627b4f6', '2017-07-11 12:45:57', '0000-00-00', '0000-00-00', '', 'user', 2, NULL, NULL);
 
 -- --------------------------------------------------------
@@ -3001,7 +3008,7 @@ INSERT INTO `u_menue2rolle` (`user_id`, `stelle_id`, `menue_id`, `status`) VALUE
 (1, 1, 19, 1),
 (1, 1, 18, 0),
 (1, 1, 17, 0),
-(1, 1, 16, 0),
+(1, 1, 16, 1),
 (1, 1, 15, 0),
 (1, 1, 14, 0),
 (1, 1, 13, 0),
