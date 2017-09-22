@@ -874,34 +874,32 @@ FROM
       	if(strpos($fieldstring, '.') !== false AND strpos($fieldstring, "'") === false){
         	$explosion = explode('.', trim($fieldstring));
         	$tablealias = $explosion[0];
-        	if(strpos($tablealias, "'") === false){
-        		$tablename = $tablealias;
-        	}
-	        $sql = "SELECT * FROM information_schema.tables where table_name = '".$tablename."'";
-	        $ret = $this->execSQL($sql,4, 0);
-			    if(pg_num_rows($ret[1]) == 0){
-		        $tables = explode(',', $from);
-		        $i = 0;
-		        $found = false;
-		        while($found == false AND $i < count($tables)){
-		          $tableexplosion = explode(' ', trim($tables[$i]));
-		          if(count($tableexplosion) > 1){
-			          for($j = 0; $j < count($tableexplosion); $j++){
-			          	if($tablealias == $tableexplosion[$j]){
-			          		if(strtolower($tableexplosion[$j-1]) == 'as'){			# Umbenennung mit AS
-			          			$found = true;
-			            		$tablename = $tableexplosion[$j-2];
-			          		}
-			          		else{																								# Umbenennung ohne AS, wie z.B. beim LEFT JOIN
-			          			$found = true;
-			            		$tablename = $tableexplosion[$j-1];
-			          		}
-			          	}
-			          }
-		          }
-		          $i++;
-		        }
-			    }
+					$tables = explode(',', $from);
+					$i = 0;
+					$found = false;
+					while($found == false AND $i < count($tables)){
+						$tables2 = explode('join', strtolower($tables[$i]));
+						$j = 0;
+						while($found == false AND $j < count($tables2)){
+							$index = 1;
+							$tableexplosion = explode(' ', trim($tables2[$j]));
+							if(count($tableexplosion) > 1){
+								if($tableexplosion[1] == 'as')$index = 2;
+								if($tableexplosion[$index] == $tablealias){
+									$tablename = $tableexplosion[0];
+									$found = true;
+								}
+							}
+							else{
+								if($tableexplosion[0] == $tablealias){
+									$tablename = $tableexplosion[0];
+									$found = true;
+								}
+							}
+							$j++;
+						}
+						$i++;
+					}
       	}
       }
     }
