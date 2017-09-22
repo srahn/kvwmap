@@ -54,6 +54,7 @@
 						<input type="hidden" name="browserwidth">
 						<input type="hidden" name="browserheight">
 						<input type="hidden" name="stopnavigation" value="0">
+						<input type="hidden" name="gle_changed" value="">
 					</form><?
 					if ($this->user->rolle->querymode == 1) {
 						include(LAYOUTPATH.'snippets/overlayframe.php');

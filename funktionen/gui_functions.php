@@ -18,6 +18,29 @@ function ImageLoadFailed(id) {
 var currentform;
 var doit;
 
+function preventSubmit(){
+	document.GUI.onsubmit = function(){return false;};
+}
+
+function allowSubmit(){
+	document.GUI.onsubmit = function(){};
+}
+
+function checkForUnsavedChanges(event){
+	var sure = true;
+	if(document.GUI.gle_changed.value == 1){
+		sure = confirm('Es gibt noch ungespeicherte Datensätze. Wollen Sie dennoch fortfahren?');
+	}
+	if(!sure){
+		if(event != undefined)event.preventDefault();
+		preventSubmit();
+	}
+	else{
+		allowSubmit();
+	}
+	return sure;
+}
+
 function startwaiting(lock) {
 	var lock = lock || false;
 	document.GUI.stopnavigation.value = 1;
