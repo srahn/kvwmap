@@ -232,14 +232,14 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	    return null;
 	}
 	
-// 	public static function getYearFromDate($date) {
-// 	    if(!empty($date))
-// 	    {
-// 	        return $year = $date->format("Y");
-// 	    }
+ 	public static function getYearFromDate($date) {
+ 	    if(!empty($date))
+ 	    {
+ 	        return $year = $date->format("Y");
+ 	    }
 	    
-// 	    return null;
-// 	}
+ 	    return null;
+ 	}
 	
 	public static function addYearToArray($dateString, &$arrayToFill)
 	{
