@@ -256,22 +256,7 @@ class antrag {
     }
     return $pdf;
   }
-  
-	function erzeugenUbergabeprotokoll_HTML(){
-		$nachweise_json = json_encode($this->FFR);
-		$html = "
-		<html>
-			<head>
-				<SCRIPT TYPE=\"text/javascript\">	
-					var nachweise = ".$nachweise_json.";
-				</SCRIPT>
-			</head>
-			<body onload=\"alert(nachweise);\">
-			</body>
-		</html>";
-    return $html;
-	}
-	
+  	
   function erzeugenUbergabeprotokoll_CSV(){
   	# Überschriften
   	foreach($this->FFR[0] as $key=>$value){

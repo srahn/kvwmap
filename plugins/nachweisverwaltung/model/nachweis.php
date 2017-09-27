@@ -756,7 +756,7 @@ class Nachweis {
               $errmsg.='\nEs konnte kein Dokument gefunden werden.';
             }
             else {
-              $this->Dokumente[0]=pg_fetch_array($ret[1]);
+              $this->Dokumente[0]=pg_fetch_assoc($ret[1]);
               $this->erg_dokumente=1;
             } # Ende Ergebnis ist korrekt
           } # Ende Abfrage war fehlerfrei
@@ -793,8 +793,8 @@ class Nachweis {
             $errmsg.='\nEs konnte kein Dokument gefunden werden.';
           }
           else {
-            $this->Dokumente[0]=pg_fetch_array($ret[1]);
-            $geom = pg_fetch_array($ret1[1]);
+            $this->Dokumente[0]=pg_fetch_assoc($ret[1]);
+            $geom = pg_fetch_assoc($ret1[1]);
             $this->Dokumente[0]['wkt_umring'] = $geom['wkt_umring'];
             $this->Dokumente[0]['svg_umring'] = $geom['svg_umring'];
             $this->Dokumente[0]['geom'] = $geom['geom'];
@@ -804,7 +804,8 @@ class Nachweis {
       } break;
       
       case "multibleIDs" : {
-				$sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS andere_art, d.art AS andere_art_name";
+				$sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS andere_art, d.art AS andere_art_name, ";
+				$sql.="CASE WHEN n.art = '100' THEN 'FFR' WHEN n.art = '010' THEN 'KVZ' WHEN n.art = '001' THEN 'GN' ELSE d.art END as art_name"; 
 				$sql.=" FROM nachweisverwaltung.n_nachweise AS n";
 				$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
 				$sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id"; 
@@ -857,7 +858,7 @@ class Nachweis {
         $this->debug->write("<br>nachweis.php getNachweise Abfragen der Nachweisdokumente.<br>",4);
         $ret=$this->database->execSQL($sql,4, 1);    
         if (!$ret[0]) {
-          while ($rs=pg_fetch_array($ret[1])) {
+          while ($rs=pg_fetch_assoc($ret[1])) {
             $nachweise[]=$rs;
           }
           $this->erg_dokumente=count($nachweise);
@@ -960,7 +961,7 @@ class Nachweis {
           $this->debug->write("<br>nachweis.php getNachweise Abfragen der Nachweisdokumente.<br>",4);
           $ret=$this->database->execSQL($sql,4, 1);    
           if (!$ret[0]) {
-            while ($rs=pg_fetch_array($ret[1])) {
+            while ($rs=pg_fetch_assoc($ret[1])) {
               $nachweise[]=$rs;
             }
             $this->erg_dokumente=count($nachweise);
@@ -1016,7 +1017,7 @@ class Nachweis {
           #echo $sql;        
           $ret=$this->database->execSQL($sql,4, 1);    
           if (!$ret[0]) {
-            while ($rs=pg_fetch_array($ret[1])) {
+            while ($rs=pg_fetch_assoc($ret[1])) {
               $nachweise[]=$rs;
             }
             $this->erg_dokumente=count($nachweise);
@@ -1064,7 +1065,7 @@ class Nachweis {
         $sql.=" ORDER BY ".$order." ".$richtung;        
         $ret=$this->database->execSQL($sql,4, 1);    
         if (!$ret[0]) {
-          while ($rs=pg_fetch_array($ret[1])) {
+          while ($rs=pg_fetch_assoc($ret[1])) {
             $nachweise[]=$rs;
           }
           $this->erg_dokumente=count($nachweise);
