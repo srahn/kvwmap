@@ -36,5 +36,6 @@
 	$strInfoQuery="Information Query";
 	$this->layerOptions="Options";
 	$strRotationAngle="Angle";
+	$strNoLayer="Please select a layer for the data query!";
   
 ?>

@@ -149,14 +149,17 @@ class ddl {
 						}
 						if($smallest_offset_value != ''){																							# dieses Attribut wurde auch schon geschrieben, d.h. dessen y-Position ist bekannt -> Linie relativ dazu setzen
 							$y = $this->handlePageOverflow($offset_attribute, $smallest_offset_value, $y);		# Seitenüberläufe berücksichtigen
+							$endy = $this->handlePageOverflow($offset_attribute, $smallest_offset_value, $endy);		# Seitenüberläufe berücksichtigen
 						}
 						else{
 							$remaining_lines[] = $this->layout['lines'][$j]['id'];
 							continue;			# die Linie ist abhängig aber das Attribut noch nicht geschrieben, Linie merken und überspringen
 						}
 					}
-					if($offset_attribute == '')$y = $y - $this->offsety;
-					$endy = $endy + $y_orig - $y;		# y-Endposition auch anpassen
+					if($offset_attribute == ''){
+						$y = $y - $this->offsety;
+						$endy = $endy + $y_orig - $y;		# y-Endposition auch anpassen
+					}
 					if($type == 'running'){	# fortlaufende Linien
 						$pagecount = count($this->pdf->objects['3']['info']['pages']);								
 						if($this->layout['type'] == 1 AND $offset_attribute == '' AND $pagecount > 1){
