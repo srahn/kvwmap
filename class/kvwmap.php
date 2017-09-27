@@ -9903,6 +9903,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
   function StelleAendern() {
   	$_files = $_FILES;
+		$results = array();
+
     if (!$this->formvars['bezeichnung'] or !$this->formvars['Referenzkarte_ID']) {
       # Fehler bei der Formulareingabe
       $this->Meldung=$ret[1];
@@ -9928,13 +9930,15 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         $new_stelle = $Stelle;
         $new_stelleid = $stelleid;
       }
-      $menues = explode(', ',$this->formvars['selmenues']);
+      $menues = ($this->formvars['selmenues'] == '' ? array() : explode(', ',$this->formvars['selmenues']));
       $functions = explode(', ',$this->formvars['selfunctions']);
       $frames = explode(', ',$this->formvars['selframes']);
 			$layouts = explode(', ',$this->formvars['sellayouts']);
       $layer = explode(', ',$this->formvars['sellayer']);
       $selectedusers = explode(', ',$this->formvars['selusers']);
       $users= $Stelle->getUser();
+			$selectedparents = ($this->formvars['selparents'] == '' ? array() : explode(', ', $this->formvars['selparents']));
+			
       $stelle_id = explode(',',$stelleid);
       $new_stelle_id = explode(',',$new_stelleid);
       $new_stelle->deleteMenue(0); // erst alle Menüs rausnehmen
@@ -9993,10 +9997,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
           }
         }
       }
-    # /Löschen der in der Selectbox entfernten Layer
-		$new_stelle->updateLayerParams();
-    # Löschen  der User, die nicht mehr zur Stelle gehören sollen
-    # Löschen der in der Selectbox entfernten User
+    	# /Löschen der in der Selectbox entfernten Layer
+			$new_stelle->updateLayerParams();
+    	# Löschen  der User, die nicht mehr zur Stelle gehören sollen
+    	# Löschen der in der Selectbox entfernten User
       for($i = 0; $i < count($users['ID']); $i++){
         $found = false;
         for($j = 0; $j < count($selectedusers); $j++){
@@ -10021,12 +10025,27 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       }
 			# /Löschen der in der Selectbox entfernten User
 
-      if ($ret[0]) {
-				$this->add_message('error', $ret[1]);
-      }
-      else {
-        $this->add_message('notice', 'Daten der Stelle erfolgreich eingetragen!');
-      }
+			if ($ret[0]) {
+				$this->add_messages('error', $ret[1]);
+			}
+
+			# Update parents in stelle
+			$results = array_merge($results, $new_stelle->updateParents($selectedparents));
+			foreach($results AS $result) {
+				$this->add_message($result['type'], $result['message']);
+			}
+
+			if (
+				count(
+					array_map(
+						function($message) {
+							if ($message['type'] == 'error') return $message;
+						},
+						$this->messages
+					)
+				) == 0
+			) $this->add_message('notice', 'Daten der Stelle erfolgreich eingetragen!');
+
     }
     $this->Stelleneditor();
   }
@@ -10157,6 +10176,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$this->formvars['sellayouts'] = $ddl->load_layouts($this->formvars['selected_stelle_id'], NULL, NULL, NULL);
       $this->formvars['sellayer'] = $Stelle->getLayers(NULL, 'Name');
       $this->formvars['selusers'] = $Stelle->getUser();
+			$this->formvars['selparents'] = $Stelle->getParents('Bezeichnung'); // formatted mysql resultset, ordered by Bezeichnung
     }
     # Abfragen aller möglichen Menuepunkte
     $this->formvars['menues'] = Menue::get_all_ober_menues($this);
@@ -10173,6 +10193,20 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->layergruppen = $mapDB->get_Groups();
     # Abfragen aller möglichen User
     $this->formvars['users']=$this->user->getall_Users('Name');
+
+		# Abfragen aller möglichen Oberstellen Kindstellen der ausgewählten Stelle werden ausgenommen
+		$stelle = new MyObject($this, 'stelle');
+		$children_ids = array_map(
+			function($child) {
+				return $child['ID'];
+			},
+			$this->Stelle->getChildren($this->formvars['selected_stelle_id'])
+		);
+		$this->formvars['parents'] = array();
+		foreach($stelle->find_where('ID != ' . $this->formvars['selected_stelle_id'], 'Bezeichnung') AS $parent) {
+			if (!in_array($parent->get('ID'), $children_ids)) $this->formvars['parents'][] = $parent;
+		}
+
     # Abfragen aller möglichen EPSG-Codes
     $this->epsg_codes = read_epsg_codes($this->pgdatabase);
     $this->output();
