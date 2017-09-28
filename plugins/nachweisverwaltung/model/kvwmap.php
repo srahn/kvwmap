@@ -647,7 +647,7 @@
 			columns['vermst'] = 'Vermessungsstelle';
 			columns['gueltigkeit'] = 'Gültigkeit';
 			columns['format'] = 'Format';
-			columns['link_datei'] = 'Dokument';
+			columns['dokument_path'] = 'Dokument';
 			
 			var filters = new Array();
 			
@@ -675,15 +675,15 @@
 						for(var key in columns){
 							var value = arr[i][key];
 							var td = _td_.cloneNode(false);
-							if(key == 'link_datei' && value != null){
-								parts = value.split('/');
-								value = parts[1];
+							if(key == 'dokument_path' && value != null){
+								path_parts = value.split('/');
+								filename = path_parts[path_parts.length-1];
 								a = document.createElement('a');
 								a.href = value;
 								a.target = '_blank';
-								a.onmouseover = function(){showPreview(this.href)};
+								a.setAttribute('onmouseover', \"showPreview('\"+filename+\"')\");
 								a.onmouseout = function(){hidePreview()};
-								a.innerHTML = value;
+								a.innerHTML = filename;
 								cellcontent = a;
 							}
 							else cellcontent = document.createTextNode(value || '');
@@ -702,8 +702,10 @@
 				return table;
 			}					
 			
-			function showPreview(image){
-				document.getElementById('preview_image').innerHTML = '<img src=\"'+image+'\">';
+			function showPreview(filename){
+				file_parts = filename.split('.');								
+				preview_image = file_parts[0]+'_thumb.jpg';
+				document.getElementById('preview_image').innerHTML = '<img src=\"Vorschaubilder/'+preview_image+'\">';
 			}
 			
 			function hidePreview(){

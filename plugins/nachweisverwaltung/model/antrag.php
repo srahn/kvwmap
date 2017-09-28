@@ -105,9 +105,10 @@ class antrag {
   function DokumenteInOrdnerZusammenstellen($nachweis){
 		$antragsnr = $this->nr;
 		if($this->stelle_id != '')$antragsnr.='~'.$this->stelle_id;
-    $auftragspfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Nachweise/';
-    # Erzeuge ein Unterverzeichnis für die Nachweisdokumente
+    $auftragspfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Nachweise/';	# Erzeuge ein Unterverzeichnis für die Nachweisdokumente
     mkdir ($auftragspfad,0777);
+		$vorschaupfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Vorschaubilder/';	# Erzeuge ein Unterverzeichnis für die Vorschaubilder
+    mkdir ($vorschaupfad,0777);
     # Führe in Schleif für alle zum Auftrag gehörenden Dokumente folgendes aus
     for ($i=0; $i<$nachweis->erg_dokumente;$i++){
       # Erzeuge ein Unterverzeichnis für die Flur des Dokumentes, wenn noch nicht vorhanden
@@ -146,6 +147,12 @@ class antrag {
             # Es konnte aus irgendeinem Grund nicht erfolgreich kopiert werden
             $errmsg.='Die Datei '.$ziel.' konnte nicht erstellt werden.\n';
           }
+					else{	# Vorschaubild kopieren
+						$dateinamensteil = explode('.', $nachweis->Dokumente[$i]['link_datei']);
+						$vorschaudatei = $dateinamensteil[0].'_thumb.jpg';
+						$quelle=$quellpfad.$vorschaudatei;
+						$erfolg=copy($quelle,$vorschaupfad.basename($vorschaudatei));
+					}
         }
         else{
           # Die Datei, die kopiert werden soll existiert schon am ziel.

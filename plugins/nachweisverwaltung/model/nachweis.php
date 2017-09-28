@@ -859,6 +859,7 @@ class Nachweis {
         $ret=$this->database->execSQL($sql,4, 1);    
         if (!$ret[0]) {
           while ($rs=pg_fetch_assoc($ret[1])) {
+						$rs['dokument_path']='Nachweise/'.$rs['flurid'].'/'.$this->buildNachweisNr($rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$rs['link_datei'];
             $nachweise[]=$rs;
           }
           $this->erg_dokumente=count($nachweise);
