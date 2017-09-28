@@ -168,7 +168,7 @@
       get_map_ajax('go=navMap_ajax', '', '');
      break;
      case "pquery_point":
-			if(!checkQueryFields())break;
+			if(!checkQueryFields() || !checkForUnsavedChanges())break;
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "pquery";
@@ -176,7 +176,7 @@
       overlay_submit(document.GUI, true);
      break;
      case "pquery_box":
-			if(!checkQueryFields())break;
+			if(!checkQueryFields() || !checkForUnsavedChanges())break;
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "pquery";
@@ -184,7 +184,7 @@
       overlay_submit(document.GUI, true);
      break;
      case "touchquery_point":
-			if(!checkQueryFields())break;
+			if(!checkQueryFields() || !checkForUnsavedChanges())break;
      	top.document.GUI.searchradius.value = "";
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
@@ -193,7 +193,7 @@
       overlay_submit(document.GUI, true);
      break;
      case "touchquery_box":
-			if(!checkQueryFields())break;
+			if(!checkQueryFields() || !checkForUnsavedChanges())break;
      	top.document.GUI.searchradius.value = "";
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
@@ -211,7 +211,7 @@
 			overlay_submit(document.GUI, true);
      break;
      case "ppquery_box":
-			if(!checkQueryFields())break;
+			if(!checkQueryFields() || !checkForUnsavedChanges())break;
       top.document.GUI.searchradius.value = "";
       path = pathx[0]+","+pathy[0]+";"+pathx[2]+","+pathy[2];
       document.GUI.INPUT_COORD.value  = path;
@@ -220,7 +220,7 @@
       overlay_submit(document.GUI, true);
      break;
      case "pquery_polygon":
-			if(!checkQueryFields())break;
+			if(!checkQueryFields() || !checkForUnsavedChanges())break;
       path = pathx[0]+","+pathy[0]+";"+pathx[2]+","+pathy[2];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "pquery";
@@ -228,7 +228,7 @@
       overlay_submit(document.GUI, true);
      break;
      case "polygonquery":
-			if(!checkQueryFields())break;
+			if(!checkQueryFields() || !checkForUnsavedChanges())break;
      	for(i = 0; i < pathx.length-1; i++){
      		path = path+pathx[i]+","+pathy[i]+";";
      	}
