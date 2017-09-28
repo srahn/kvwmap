@@ -404,7 +404,7 @@ class stelle {
 				`check_password_age` =		'" . ($stellendaten['checkPasswordAge'] 		== '1'	? "1" : "0") . "',
 				`use_layer_aliases` = 		'" . ($stellendaten['use_layer_aliases'] 		== '1'	? "1" : "0") . "',
 				`hist_timestamp` = 				'" . ($stellendaten['hist_timestamp'] 			== '1'	? "1" : "0") . "',
-				`allowed_password_age` = 	'" . ($stellendaten['allowed_password_age'] != '' 	? $stellendaten['allowed_password_age'] : "6") . "'
+				`allowed_password_age` = 	'" . ($stellendaten['allowedPasswordAge'] != '' 	? $stellendaten['allowedPasswordAge'] : "6") . "'
 			WHERE
 				ID = " . $this->id . "
 		";

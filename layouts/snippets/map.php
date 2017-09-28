@@ -161,20 +161,28 @@ if($this->formvars['gps_follow'] == ''){
 	$this->formvars['gps_follow'] = 'off';
 }
 ?>
-<div id="map_frame" style="position: relative; width: <?php echo ($map_width + $legend_width); ?>px;">
-	<div id="map" style="float: left; width: <?php echo $map_width; ?>px; height: 100%">
-		<?php include(SNIPPETS . 'mapdiv.php'); ?>
-	</div>
-	<div id="legenddiv" style="height: <? echo $legend_height; ?>px;"<?
-		if (!ie_check() AND $this->user->rolle->hideLegend) { ?>
-			onmouseenter="slide_legend_in(event);"
-			onmouseleave="slide_legend_out(event);"
-			class="slidinglegend_slideout"<?
-		}
-		else { ?>
-			class="normallegend" <?
-		} ?>
-	>
-		<?php include(SNIPPETS . 'legenddiv.php'); ?>
-	</div>
+<div id="map_frame" style="text-align: left;position: relative; width: <?php echo ($map_width + $legend_width); ?>px;">
+	<table cellpadding="0" cellspacing="0" border="0">
+		<tr>
+			<td>
+				<div id="map" style="float: left; width: <?php echo $map_width; ?>px; height: 100%">
+					<?php include(SNIPPETS . 'mapdiv.php'); ?>
+				</div>
+			</td>
+			<td valign="top">
+				<div id="legenddiv" style="height: <? echo $legend_height; ?>px;"<?
+					if (!ie_check() AND $this->user->rolle->hideLegend) { ?>
+						onmouseenter="slide_legend_in(event);"
+						onmouseleave="slide_legend_out(event);"
+						class="slidinglegend_slideout"<?
+					}
+					else { ?>
+						class="normallegend" <?
+					} ?>
+				>
+					<?php include(SNIPPETS . 'legenddiv.php'); ?>
+				</div>
+			</td>
+		</tr>
+	</table>
 </div>
