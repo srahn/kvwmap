@@ -532,16 +532,19 @@
 		<meta http-equiv=Content-Type content=\"text/html; charset=UTF-8\">
 		<style>
 			body{
-				font-family: arial;
+				font-family: \"Trebuchet MS\", Helvetica, sans-serif;
 			}
 			table{
-				border: 1px solid black;
 				border-collapse: collapse;
 			}
 			td, th{
-				border: 1px solid black;
+				border-top: 1px solid #e0e0e0;
+				border-bottom: 1px solid #959595;
+				border-left: 1px solid #f2f2f2;
+				border-right: 1px solid #f2f2f2;
 				padding: 2px;
-			}
+				font-size: 14px;
+				}
 			th{
 				background: rgba(0, 0, 0, 0) linear-gradient(rgb(218, 228, 236) 0%, lightsteelblue 100%);
 			}
@@ -558,9 +561,20 @@
 			a:hover{
 				color: black;
 			}
-			#order_div, #nachweise_table, #filter_div{
+			#order_div, #nachweise_table, #filter_div, #head_div {
 				padding: 8px;
 			}
+			
+			#head_div {
+				font-weight: bold;
+				font-size: 14px;
+			}
+			
+			#head_div #lk {
+				font-size: 20px;
+				margin-bottom: 5px;
+			}
+			
 			#filter_div div{
 				border: 1px solid grey;
 				width: 800px;
@@ -807,7 +821,14 @@
 		</SCRIPT>
 	</head>
 	<body onload=\"output();\">
-		<div id=\"order_div\">sortiert nach: <input type=\"text\" id=\"order_output\" readonly=\"true\" value=\"\"><input type=\"hidden\" id=\"order\" value=\"\"></div></div>
+		<div id=\"head_div\">
+			<div id=\"lk\">Landkreis Vorpommern-Rügen</div>
+			<div id=\"oebvi\">Recherche durch: ÖbVI Schießmichtot</div>
+			<div id=\"datum\">Datum Antragstellung: 01.04.2017</div>
+			<div id=\"antrag\">Antragsnummer: 1234ABC</div>
+			<div id=\"datum\">Datum Download: 27.09.2017</div>
+		</div>
+		<div id=\"order_div\">Sortiert nach: <input type=\"text\" id=\"order_output\" readonly=\"true\" value=\"\"><input type=\"hidden\" id=\"order\" value=\"\"></div></div>
 		<div id=\"nachweise_table\"></div>
 		<div id=\"filter_div\">Filter:<br></div>
 		<div id=\"preview_image\"></div>
