@@ -202,7 +202,7 @@
       overlay_submit(document.GUI, true);
      break;
      case "ppquery_point":
-			if(!checkQueryFields())break;
+			if(!checkQueryFields() || !checkForUnsavedChanges())break;
       document.GUI.searchradius.value = "";
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;

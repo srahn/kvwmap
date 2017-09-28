@@ -283,8 +283,10 @@ function activate_overlay(){
 }
 
 function deactivate_overlay(){
-	document.getElementById('contentdiv').scrollTop = 0;
-	document.getElementById('overlaydiv').style.display='none';
+	if(checkForUnsavedChanges()){
+		document.getElementById('contentdiv').scrollTop = 0;
+		document.getElementById('overlaydiv').style.display='none';
+	}
 }
 
 function urlstring2formdata(formdata, string){
