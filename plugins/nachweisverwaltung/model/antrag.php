@@ -290,7 +290,7 @@ class antrag {
     $sql.=" ,SUBSTRING(a.antr_nr from 4 for 4) AS antr_nr_b";
     $sql.=" FROM nachweisverwaltung.n_antraege AS a";
 		$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle vs ON a.vermstelle=vs.id";
-    $sql.=" LEFT JOIN nachweisverwaltung.n_vermart va ON a.vermart=va.id";
+    $sql.=" LEFT JOIN nachweisverwaltung.n_vermart va ON a.vermart=va.id WHERE 1=1";
     if ($id[0]!='') {
       $sql.=" AND a.antr_nr IN ('".$id[0]."'";
       for ($i=1;$i<count($id);$i++) {
