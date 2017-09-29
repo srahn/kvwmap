@@ -9902,6 +9902,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
   }
 
   function StelleAendern() {
+		#echo '<p><b>StelleAendern</b>';
   	$_files = $_FILES;
 		$results = array();
 
@@ -9931,14 +9932,30 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         $new_stelleid = $stelleid;
       }
       $menues = ($this->formvars['selmenues'] == '' ? array() : explode(', ',$this->formvars['selmenues']));
-      $functions = explode(', ',$this->formvars['selfunctions']);
-      $frames = explode(', ',$this->formvars['selframes']);
-			$layouts = explode(', ',$this->formvars['sellayouts']);
-      $layer = explode(', ',$this->formvars['sellayer']);
+      $functions = (trim($this->formvars['selfunctions']) == '' ? array() : explode(', ', $this->formvars['selfunctions']));
+      $frames = explode(', ', $this->formvars['selframes']);
+			$layouts = (trim($this->formvars['sellayouts']) == '' ? array() : explode(', ', $this->formvars['sellayouts']));
+      $layer = (trim($this->formvars['sellayer']) == '' ? array() : explode(', ', $this->formvars['sellayer']));
       $selectedusers = explode(', ',$this->formvars['selusers']);
       $users= $Stelle->getUser();
 			$selectedparents = ($this->formvars['selparents'] == '' ? array() : explode(', ', $this->formvars['selparents']));
-			
+
+			# menues, functions, frames, layouts, layers und users zusätzlich zuordnen oder entfernen
+			# je nach gesetzten parent Einstellungen, Parameterübergabe erfolgt per Referenz
+			$results = $new_stelle->apply_parent_selection(
+				$selectedparents,
+				$menues,
+				$functions,
+				$frames,
+				$layouts,
+				$layer,
+				$selectedusers
+			);
+
+			foreach($results AS $result) {
+				$this->add_message($result['type'], $result['message']);
+			}
+
       $stelle_id = explode(',',$stelleid);
       $new_stelle_id = explode(',',$new_stelleid);
       $new_stelle->deleteMenue(0); // erst alle Menüs rausnehmen
@@ -9972,9 +9989,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         $this->user->rolle->setLayer($selectedusers[$i], $new_stelle_id, 0); # Hinzufügen der Layer zur Rolle
         $this->selected_user = new user(0,$selectedusers[$i],$this->user->database);
         $this->selected_user->checkstelle();
-      }			
-			# Löschen der in der Selectbox entfernten Layer
+      }
       $stellenlayer = $Stelle->getLayers(NULL);
+			$deletelayer = array();
       for($i = 0; $i < count($stellenlayer['ID']); $i++){
         $found = false;
         for($j = 0; $j < count($layer); $j++){
@@ -9986,7 +10003,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
           $deletelayer[] = $stellenlayer['ID'][$i];
         }
       }
-      if($deletelayer != 0){
+      if(count($deletelayer) > 0) {
         $Stelle->deleteLayer($deletelayer, $this->pgdatabase);
         for($i = 0; $i < count($deletelayer); $i++){
           $layerid = $deletelayer[$i];
@@ -10027,12 +10044,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 			if ($ret[0]) {
 				$this->add_messages('error', $ret[1]);
-			}
-
-			# Update parents in stelle
-			$results = array_merge($results, $new_stelle->updateParents($selectedparents));
-			foreach($results AS $result) {
-				$this->add_message($result['type'], $result['message']);
 			}
 
 			if (
@@ -10113,7 +10124,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       }
     }
     $this->formvars['selected_stelle_id'] = $ret[1];
-    $this->Stelleneditor();
+   # $this->Stelleneditor();
   }
 
   function StellenAnzeigen() {
@@ -10128,6 +10139,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
   }
 
   function Stelleneditor() {
+		#echo '<p><b>Stelleneditor</b>';
 		include_(CLASSPATH.'datendrucklayout.php');
 		include_(CLASSPATH.'funktion.php');
     $this->titel='Stellen Editor';
@@ -10176,7 +10188,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$this->formvars['sellayouts'] = $ddl->load_layouts($this->formvars['selected_stelle_id'], NULL, NULL, NULL);
       $this->formvars['sellayer'] = $Stelle->getLayers(NULL, 'Name');
       $this->formvars['selusers'] = $Stelle->getUser();
-			$this->formvars['selparents'] = $Stelle->getParents('Bezeichnung'); // formatted mysql resultset, ordered by Bezeichnung
+			$this->formvars['selparents'] = $Stelle->getParents("ORDER BY `Bezeichnung`"); // formatted mysql resultset, ordered by Bezeichnung
     }
     # Abfragen aller möglichen Menuepunkte
     $this->formvars['menues'] = Menue::get_all_ober_menues($this);
@@ -17300,7 +17312,7 @@ class Document {
     return $ausschnitte;
   }
 
-  function load_frames($stelle_id, $frameid){
+  function load_frames($stelle_id, $frameid, $return = '') {
     $sql = 'SELECT DISTINCT druckrahmen.* FROM druckrahmen';
     if($frameid AND !$stelle_id){$sql .= ' WHERE druckrahmen.id ='.$frameid;}
     if($stelle_id AND !$frameid){
@@ -17318,10 +17330,15 @@ class Document {
   	if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     $i = 0;
     while($rs=mysql_fetch_array($ret1[1])){
-      $frames[] = $rs;
-      $frames[0]['bilder'] = $this->load_bilder($rs['id']);
-      $frames[0]['texts'] = $this->load_texts($rs['id']);
-      $i++;
+			if ($return == 'only_ids') {
+				$frames[] = $rs['id'];
+			}
+			else {
+	      $frames[] = $rs;
+	      $frames[0]['bilder'] = $this->load_bilder($rs['id']);
+	      $frames[0]['texts'] = $this->load_texts($rs['id']);
+	      $i++;
+			}
     }
     return $frames;
   }
