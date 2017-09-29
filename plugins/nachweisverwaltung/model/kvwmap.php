@@ -594,7 +594,7 @@
 				border: none;
 			}
 			#preview_image{
-				position: absolute;
+				position: fixed;
 				top: 30px;
 				left: 30px;
 			}
