@@ -834,7 +834,6 @@
 	<body onload=\"output();\">
 		<div id=\"head_div\">
 			<div id=\"lk\">".LANDKREIS."</div>
-			<div id=\"oebvi\">Recherche durch: ÖbVI Schießmichtot</div>
 			<div id=\"datum\">Datum Antragstellung: ".$GUI->antrag->antragsliste[0]['datum']."</div>
 			<div id=\"antrag\">Antragsnummer: ".$GUI->antrag->antragsliste[0]['antr_nr']."</div>
 			<div id=\"datum\">Datum Download: ".date('d.m.Y',time())."</div>
