@@ -384,7 +384,7 @@ function sendpath(cmd, pathx, pathy){
 	if(cmd == "polygonquery")deletepolygon();
 }
 
-function prevent(evt){
+function prevent1(evt){
 	if(evt.preventDefault){
 		evt.preventDefault();
 	}else{ // IE fix
@@ -413,7 +413,7 @@ function mousewheelchange(evt){
 	if(!evt)evt = window.event; // For IE
 	if(top.document.GUI.stopnavigation.value == 0){
 		window.clearTimeout(mousewheelloop);
-		prevent(evt);
+		prevent1(evt);
 		if(evt.wheelDelta)
 			delta = evt.wheelDelta / 3600; // Chrome/Safari
 		else if(evt.detail)
@@ -475,7 +475,7 @@ function updateDragVectors(touches) {
 }
 
 function touchstart(evt){
-	prevent(evt);
+	prevent1(evt);
 	if(top.document.GUI.stopnavigation.value == 0){
 		if(evt.touches.length == 1){		// 1 Finger
 			touchx = evt.clientX = evt.touches[0].pageX;
@@ -493,7 +493,7 @@ function touchstart(evt){
 }
 
 function touchmove(evt) {
-	prevent(evt);
+	prevent1(evt);
 	if(top.document.GUI.stopnavigation.value == 0){
 		if(pinching == false && evt.touches.length == 1){		// 1 Finger
 			touchx = evt.clientX = evt.touches[0].pageX;
@@ -528,7 +528,7 @@ function touchmove(evt) {
 }
 
 function touchend(evt){
-	prevent(evt);
+	prevent1(evt);
 	if(pinching == false){		// 1 Finger
 		evt.clientX = touchx;
 		evt.clientY = touchy;
