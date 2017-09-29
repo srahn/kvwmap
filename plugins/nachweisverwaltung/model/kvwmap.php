@@ -14,8 +14,9 @@
 			$explosion = explode('~', $GUI->formvars['antr_selected']);
 			$antr_selected = $explosion[0];
 			$stelle_id = $explosion[1];
-      $antrag=new antrag($antr_selected,$stelle_id,$GUI->pgdatabase);
-			$antragsnr = $antrag->nr;
+      $GUI->antrag=new antrag($antr_selected,$stelle_id,$GUI->pgdatabase);
+			$GUI->antrag->getAntraege(array($antr_selected),'','','',$stelle_id);
+			$antragsnr = $GUI->antrag->nr;
 			if($stelle_id != '')$antragsnr.='~'.$stelle_id;
       if(is_dir(RECHERCHEERGEBNIS_PATH.$antragsnr)){
         chdir(RECHERCHEERGEBNIS_PATH);
@@ -30,16 +31,16 @@
 				$GUI->formvars['gemessendurch'] = 1;
 				$GUI->formvars['Gueltigkeit'] = 1;		
 				$timestamp = date('Y-m-d_H-i-s',time());
-				$GUI->erzeugenUebergabeprotokollNachweise_PDF(RECHERCHEERGEBNIS_PATH.$antragsnr.'/'.$antrag->nr.'_'.$timestamp.'.pdf');
-				$GUI->erzeugenUebergabeprotokollNachweise_HTML(RECHERCHEERGEBNIS_PATH.$antragsnr.'/'.$antrag->nr.'_'.$timestamp.'.htm');
+				$GUI->erzeugenUebergabeprotokollNachweise_PDF(RECHERCHEERGEBNIS_PATH.$antragsnr.'/'.$GUI->antrag->nr.'_'.$timestamp.'.pdf');
+				$GUI->erzeugenUebergabeprotokollNachweise_HTML(RECHERCHEERGEBNIS_PATH.$antragsnr.'/'.$GUI->antrag->nr.'_'.$timestamp.'.htm');
         $result = exec(ZIP_PATH.' -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr);
 				# Loggen der übergebenen Dokumente
-				$uebergabe_logpath = $antrag->create_uebergabe_logpath($GUI->Stelle->Bezeichnung).'/'.$antr_selected.'_'.$timestamp.'.pdf';
+				$uebergabe_logpath = $GUI->antrag->create_uebergabe_logpath($GUI->Stelle->Bezeichnung).'/'.$antr_selected.'_'.$timestamp.'.pdf';
 				$GUI->erzeugenUebergabeprotokollNachweise_PDF($uebergabe_logpath, true);
       }
     }
     $filename = RECHERCHEERGEBNIS_PATH.$antragsnr.'.zip';
-		$dateiname = $antrag->nr.'_'.date('Y-m-d_H-i-s',time()).'.zip';
+		$dateiname = $GUI->antrag->nr.'_'.date('Y-m-d_H-i-s',time()).'.zip';
     $tmpfilename = copy_file_to_tmp($filename, $dateiname);
     unlink($filename);
     return $tmpfilename;
@@ -538,18 +539,21 @@
 				border-collapse: collapse;
 			}
 			td, th{
-				border-top: 1px solid #e0e0e0;
-				border-bottom: 1px solid #959595;
-				border-left: 1px solid #f2f2f2;
-				border-right: 1px solid #f2f2f2;
+				border: 1px solid #aaaaaa;
+				border-left: 1px solid #dddddd;
+				border-right: 1px solid #dddddd;
 				padding: 2px;
-				font-size: 14px;
+				font-size: 15px;
 				}
 			th{
 				background: rgba(0, 0, 0, 0) linear-gradient(rgb(218, 228, 236) 0%, lightsteelblue 100%);
 			}
-			input{
-				font-size: 16px;
+			input[type=\"text\"]{
+				font-size: 15px;
+				line-height: 15px;
+			}			
+			select{
+				height: 20px;
 			}
 			a{
 				border: medium none;
@@ -562,19 +566,20 @@
 				color: black;
 			}
 			#order_div, #nachweise_table, #filter_div, #head_div {
-				padding: 8px;
+				margin: 10px;
 			}
-			
+			#nachweise_table{
+				border: 1px solid #aaaaaa;
+				display: inline-block;
+			}				
 			#head_div {
 				font-weight: bold;
 				font-size: 14px;
 			}
-			
 			#head_div #lk {
 				font-size: 20px;
 				margin-bottom: 5px;
 			}
-			
 			#filter_div div{
 				border: 1px solid grey;
 				width: 800px;
@@ -623,14 +628,18 @@
 				padding: 2 5;
 				color: black;
 				background: rgba(0, 0, 0, 0) linear-gradient(rgb(218, 228, 236) 0%, lightsteelblue 100%);
+				line-height: 20px;
 			}
 			#filterform .content{
 				padding: 5px;
 			}
-			#filterform  .close{
+			#filterform .close{
 				float: right;
 				cursor: pointer;
-			}			
+			}
+			.filter_button{
+				margin-top: 10px;
+			}
 		</style>
 		<SCRIPT TYPE=\"text/javascript\">
 			var nachweise = JSON.parse('".$nachweise_json."');
@@ -748,7 +757,7 @@
 				hideFilterForm();			
 				div = document.createElement('div');
 				div.id = 'filterform';
-				div.innerHTML = '<div class=\"headline\">Zeilen filtern<a class=\"close\" onclick=\"hideFilterForm();\">\u274C</a></div><div class=\"content\"><input id=\"filter_key\" value=\"'+key+'\" type=\"hidden\">'+columns[key]+' <select id=\"filter_operator\"><option value=\"=\">=</option><option value=\"!=\">!=</option></select><input id=\"filter_value\" type=\"text\" value=\"'+value+'\"><br><input type=\"button\" value=\"Filtern\" onclick=\"addFilter()\"></div>';
+				div.innerHTML = '<div class=\"headline\">Zeilen filtern<a class=\"close\" onclick=\"hideFilterForm();\">\u274C</a></div><div class=\"content\"><input id=\"filter_key\" value=\"'+key+'\" type=\"hidden\">'+columns[key]+' <select id=\"filter_operator\"><option value=\"=\">=</option><option value=\"!=\">!=</option></select><input id=\"filter_value\" type=\"text\" value=\"'+value+'\"><br><input class=\"filter_button\" type=\"button\" value=\"Filtern\" onclick=\"addFilter()\"></div>';
 				td.appendChild(div);
 			}
 			
@@ -824,11 +833,11 @@
 	</head>
 	<body onload=\"output();\">
 		<div id=\"head_div\">
-			<div id=\"lk\">Landkreis Vorpommern-Rügen</div>
+			<div id=\"lk\">".LANDKREIS."</div>
 			<div id=\"oebvi\">Recherche durch: ÖbVI Schießmichtot</div>
-			<div id=\"datum\">Datum Antragstellung: 01.04.2017</div>
-			<div id=\"antrag\">Antragsnummer: 1234ABC</div>
-			<div id=\"datum\">Datum Download: 27.09.2017</div>
+			<div id=\"datum\">Datum Antragstellung: ".$GUI->antrag->antragsliste[0]['datum']."</div>
+			<div id=\"antrag\">Antragsnummer: ".$GUI->antrag->antragsliste[0]['antr_nr']."</div>
+			<div id=\"datum\">Datum Download: ".date('d.m.Y',time())."</div>
 		</div>
 		<div id=\"order_div\">Sortiert nach: <input type=\"text\" id=\"order_output\" readonly=\"true\" value=\"\"><input type=\"hidden\" id=\"order\" value=\"\"></div></div>
 		<div id=\"nachweise_table\"></div>
@@ -851,7 +860,7 @@
 			$explosion = explode('~', $GUI->formvars['antr_selected']);
 			$antr_selected = $explosion[0];
 			$stelle_id = $explosion[1];
-      $GUI->antrag = new antrag($antr_selected,$stelle_id,$GUI->pgdatabase);
+			if($GUI->antrag == NULL)$GUI->antrag = new antrag($antr_selected,$stelle_id,$GUI->pgdatabase);
       $ret=$GUI->antrag->getFFR($GUI->formvars, true);
       if ($ret[0]) {
         $GUI->Fehlermeldung=$ret[1];
