@@ -36,7 +36,7 @@ extract_zip_files() {
 
 convert_nas_files() {
 	if [ "$(ls -A ${IMPORT_PATH})" ] ; then
-		find ${IMPORT_PATH} -iname '*.xml' | sort |  while read NAS_FILE ; do
+		find ${IMPORT_PATH} -iname '*.xml' -not -path "${IMPORT_PATH}/METADATA/*" | sort |  while read NAS_FILE ; do
 			NAS_FILE_=${NAS_FILE// /_} # ersetzt Leerzeichen durch _ in Dateiname
 			if [ ! "$NAS_FILE" = "$NAS_FILE_" ] ; then
 				log "Benenne Datei ${NAS_FILE} um in ${NAS_FILE_}"
