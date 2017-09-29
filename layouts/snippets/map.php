@@ -61,7 +61,7 @@ function showMapImage(){
 	catch(e){
 		document.GUI.svg_string.value = printNode(svg);
 	}
-  document.getElementById('MapImageLink').href='index.php?go=showMapImage&svg_string='+document.GUI.svg_string.value;
+  document.getElementById('MapImageLink').href='index.php?go=showMapImage&svg_string='+encodeURI(document.GUI.svg_string.value);
 }
 
 function addRedlining(){
@@ -101,7 +101,7 @@ function printMap(){
 	svgdoc = document.SVG.getSVGDocument();	
 	addRedlining();
 	document.GUI.go.value = 'Druckausschnittswahl';
-  document.GUI.submit();
+	document.GUI.submit();
 }
 
 function slide_legend_in(evt) {
