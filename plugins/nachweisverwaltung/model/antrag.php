@@ -109,6 +109,10 @@ class antrag {
     mkdir ($auftragspfad,0777);
 		$vorschaupfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Vorschaubilder/';	# Erzeuge ein Unterverzeichnis für die Vorschaubilder
     mkdir ($vorschaupfad,0777);
+		$nachweiseUKOpfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Nachweise-UKO/';	# Erzeuge ein Unterverzeichnis für die Nachweis-UKOs
+    mkdir ($nachweiseUKOpfad,0777);
+		$uebersichtspfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokoll-Übersicht/';	# Erzeuge ein Unterverzeichnis für die Protokoll- und Übersichtsdateien
+    mkdir ($uebersichtspfad,0777);		
     # Führe in Schleif für alle zum Auftrag gehörenden Dokumente folgendes aus
     for ($i=0; $i<$nachweis->erg_dokumente;$i++){
       # Erzeuge ein Unterverzeichnis für die Flur des Dokumentes, wenn noch nicht vorhanden
@@ -136,6 +140,7 @@ class antrag {
       # Pfad zum Ziel erstellen
       $ziel=$auftragspfad.$flurid.'/'.$nr.'/'.$nachweis->Dokumente[$i]['link_datei'];
       #echo '<br>von:'.$quelle.' nach:'.$ziel;
+			$dateinamensteil = explode('.', $nachweis->Dokumente[$i]['link_datei']);
       if (!file_exists($quelle)) {
         $errmsg.='Die Datei '.$quelle.' existiert nicht.\n';
       }
@@ -147,11 +152,17 @@ class antrag {
             # Es konnte aus irgendeinem Grund nicht erfolgreich kopiert werden
             $errmsg.='Die Datei '.$ziel.' konnte nicht erstellt werden.\n';
           }
-					else{	# Vorschaubild kopieren
-						$dateinamensteil = explode('.', $nachweis->Dokumente[$i]['link_datei']);
+					else{	
+						# Vorschaubild kopieren
 						$vorschaudatei = $dateinamensteil[0].'_thumb.jpg';
 						$quelle=$quellpfad.$vorschaudatei;
 						$erfolg=copy($quelle,$vorschaupfad.basename($vorschaudatei));
+						# Nachweis-UKOs erzeugen
+						$uko = WKT2UKO($nachweis->Dokumente[$i]['wkt_umring']);
+						$ukofile = $nachweiseUKOpfad.basename($dateinamensteil[0]).'.uko';
+						$fp = fopen($ukofile, 'w');
+						fwrite($fp, $uko);
+						fclose($fp);
 					}
         }
         else{
@@ -267,7 +278,7 @@ class antrag {
   function erzeugenUbergabeprotokoll_CSV(){
   	# Überschriften
   	foreach($this->FFR[0] as $key=>$value){
-  		$csv .= utf8_encode($key).';';
+  		$csv .= $key.';';
   		next($this->FFR[0]);
   	}
   	$csv.= chr(10);
@@ -276,7 +287,7 @@ class antrag {
   		$dateien = explode(', ', $this->FFR[$i]['Datei']);
   		foreach($dateien as $datei){
   			$this->FFR[$i]['Datei'] = $datei;
-  			$csv .= utf8_encode(implode(';', $this->FFR[$i]));
+  			$csv .= implode(';', $this->FFR[$i]);
   			$csv.= chr(10);
   		}
     }
@@ -334,6 +345,27 @@ class antrag {
     }
     return $ret;
   }
+	
+	function getIntersectedFlst(){
+		$this->spatial_ref_code = EPSGCODE_ALKIS.", ".EARTH_RADIUS;
+		$sql ="SELECT DISTINCT n.flurid, n.stammnr, n.rissnummer, f.flurstueckskennzeichen,";
+		if(NACHWEIS_SECONDARY_ATTRIBUTE != '')$sql.=" n.".NACHWEIS_SECONDARY_ATTRIBUTE.",";
+		$sql.=" round(st_area_utm(st_intersection(st_transform(n.the_geom, ".EPSGCODE_ALKIS."), f.wkb_geometry),".$this->spatial_ref_code.")::numeric, 2) as anteil_abs,";
+		$sql.=" round((st_area_utm(st_intersection(st_transform(n.the_geom, ".EPSGCODE_ALKIS."), f.wkb_geometry),".$this->spatial_ref_code.") / st_area_utm(f.wkb_geometry,".$this->spatial_ref_code.") * 100)::numeric, 2) as anteil_pro";
+    $sql.=" FROM nachweisverwaltung.n_nachweise AS n, nachweisverwaltung.n_nachweise2antraege AS n2a, alkis.ax_flurstueck f";
+    $sql.=" WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
+		$sql.=" AND st_intersects(st_transform(n.the_geom, ".EPSGCODE_ALKIS."), f.wkb_geometry)";
+		if($this->stelle_id == '')$sql.=" AND stelle_id IS NULL";
+		else $sql.=" AND stelle_id=".$this->stelle_id;
+		$sql.=" order by n.flurid,n.stammnr,n.rissnummer,f.flurstueckskennzeichen";
+		$ret=$this->database->execSQL($sql,4, 0); 
+    while($rs=pg_fetch_assoc($ret[1])){
+			$rs['anteil_abs'] = str_replace('.', ',', $rs['anteil_abs']);
+			$rs['anteil_pro'] = str_replace('.', ',', $rs['anteil_pro']);
+			$intersections[] = $rs;
+		}
+		return $intersections;
+	}
     
   function getFFR($formvars, $withFileLinks = false) {
     # Abfrage der Vorgänge, die zu einem Auftrag zugeordnet sind
@@ -417,14 +449,14 @@ class antrag {
       if($formvars['gemessendurch']){
 	      $ret=$this->getVermessungsStellen($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
 	      if ($ret[0]) { return $ret; }
-	      $FFR[$i]['gemessen durch']=$ret[1]; 
+	      $FFR[$i]['gemessen durch']=utf8_decode($ret[1]);
       }
             
       # Abfrage der Gültigkeiten der Dokumente im Vorgang
 	  if($formvars['Gueltigkeit']){
 		$ret=$this->getGueltigkeit($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
 		if ($ret[0]) { return $ret; }
-		$FFR[$i]['Gültigkeit']=$ret[1]; 
+		$FFR[$i][utf8_decode('Gültigkeit')]=utf8_decode($ret[1]); 
 	  }
       $i++;
     }

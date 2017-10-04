@@ -1423,3 +1423,17 @@ tbody.gle tr:hover {
 	text-align: right;
 	margin-right: 8px;
 }
+
+.scrolltable thead, .scrolltable tbody {
+	display: block;
+}
+
+.scrolltable tbody {
+  height: 590px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.scrolltable td {
+	padding: 5 0 5 0;
+}

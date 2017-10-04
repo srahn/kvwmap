@@ -1237,6 +1237,15 @@ function buildExpressionString($str) {
   return $expr;
 }
 
+function WKT2UKO($wkt){
+	$uko = str_replace('MULTIPOLYGON(((', 'TYP UPO 2'.chr(10).'KOO ', $wkt);
+	$uko = str_replace(')),((', chr(10).'FL+'.chr(10).'KOO ', $uko);
+	$uko = str_replace('),(', chr(10).'FL-'.chr(10).'KOO ', $uko);
+	$uko = str_replace(',', chr(10).'KOO ', $uko);
+	$uko = str_replace(')))', '', $uko);
+	return $uko;
+}
+
 function rectObj2WKTPolygon($rect) {
   $polygon="";
   if (is_object($rect)) {

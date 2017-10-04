@@ -16,6 +16,7 @@
 			$stelle_id = $explosion[1];
       $GUI->antrag=new antrag($antr_selected,$stelle_id,$GUI->pgdatabase);
 			$GUI->antrag->getAntraege(array($antr_selected),'','','',$stelle_id);
+			$GUI->antrag->searches = $GUI->Suchparameter_abfragen($antr_selected, $stelle_id);
 			$antragsnr = $GUI->antrag->nr;
 			if($stelle_id != '')$antragsnr.='~'.$stelle_id;
       if(is_dir(RECHERCHEERGEBNIS_PATH.$antragsnr)){
@@ -31,8 +32,11 @@
 				$GUI->formvars['gemessendurch'] = 1;
 				$GUI->formvars['Gueltigkeit'] = 1;		
 				$timestamp = date('Y-m-d_H-i-s',time());
-				$GUI->erzeugenUebergabeprotokollNachweise_PDF(RECHERCHEERGEBNIS_PATH.$antragsnr.'/'.$GUI->antrag->nr.'_'.$timestamp.'.pdf');
-				$GUI->erzeugenUebergabeprotokollNachweise_HTML(RECHERCHEERGEBNIS_PATH.$antragsnr.'/'.$GUI->antrag->nr.'_'.$timestamp.'.htm');
+				$GUI->erzeugenUebergabeprotokollNachweise_PDF(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokoll-Übersicht/'.$GUI->antrag->nr.'_'.$timestamp.'.pdf');
+				$GUI->erzeugenUebersicht_HTML(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokoll-Übersicht/'.$GUI->antrag->nr.'_'.$timestamp.'.htm');
+				$GUI->erzeugenUebersicht_CSV(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokoll-Übersicht/'.$GUI->antrag->nr.'_'.$timestamp.'.csv');
+				$GUI->erzeugenZuordnungFlst_CSV(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokoll-Übersicht/');
+				$GUI->create_Recherche_UKO(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokoll-Übersicht/', $antragsnr, $stelle_id);
         $result = exec(ZIP_PATH.' -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr);
 				# Loggen der übergebenen Dokumente
 				$uebergabe_logpath = $GUI->antrag->create_uebergabe_logpath($GUI->Stelle->Bezeichnung).'/'.$antr_selected.'_'.$timestamp.'.pdf';
@@ -45,7 +49,7 @@
     unlink($filename);
     return $tmpfilename;
   };
-
+	
 	$this->DokumenteZumAntragInOrdnerZusammenstellen = function() use ($GUI){
     if ($GUI->formvars['antr_selected']!=''){
       if(strpos($GUI->formvars['antr_selected'], '~') == false)$GUI->formvars['antr_selected'] = str_replace('|', '~', $GUI->formvars['antr_selected']); # für Benutzung im GLE
@@ -402,6 +406,21 @@
 		return $dokauswahlen;
 	};
 	
+	$this->create_Recherche_UKO = function($pfad, $antrag_nr, $stelle_id) use ($GUI){
+		$searches = $GUI->antrag->searches;
+		foreach($searches as $params){
+			if($params['abfrageart'] == 'poly')$polys[] = "st_geometryfromtext('".$params['suchpolygon']."', 25833)";
+		}
+		$sql = "select st_astext(st_multi(st_union(ARRAY[".implode(',', $polys)."])))";
+		$ret = $GUI->pgdatabase->execSQL($sql, 4, 1);
+    $rs=pg_fetch_row($ret[1]);
+		$uko = WKT2UKO($rs[0]);
+		$ukofile = 'Recherche.uko';
+		$fp = fopen($pfad.$ukofile, 'w');
+		fwrite($fp, $uko);
+		fclose($fp);
+	};
+	
 	$this->Suchparameter_loggen = function($formvars, $stelle_id, $user_id) use ($GUI){
 		$sql ='INSERT INTO u_consumeNachweise SELECT ';
 		$sql.='"'.$formvars['suchantrnr'].'", ';
@@ -422,16 +441,24 @@
 		$GUI->database->execSQL($sql,4, 1);
 	};
 	
-	$this->Suchparameter_anhaengen_PDF = function($pdf, $antrag_nr, $stelle_id) use ($GUI){
-		$row = 0;
-		$options = array('aleft'=>30, 'right'=>30, 'justification'=>'left');
+	$this->Suchparameter_abfragen = function($antrag_nr, $stelle_id) use ($GUI){		
 		$sql = "SELECT * FROM u_consumeNachweise ";
 		$sql.= "WHERE antrag_nr='".$antrag_nr."' AND stelle_id=".$stelle_id;
 		$GUI->debug->write("<p>file:users.php class:user->Suchparameter_anhaengen_PDF <br>".$sql,4);
 		$query=mysql_query($sql,$GUI->database->dbConn);
 		if ($query==0) { $GUI->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		while($rs = mysql_fetch_assoc($query)){
-			switch ($rs['abfrageart']){
+			$searches[] = $rs;
+		}
+		return $searches;
+	};	
+	
+	$this->Suchparameter_anhaengen_PDF = function($pdf, $antrag_nr, $stelle_id) use ($GUI){
+		$row = 0;
+		$options = array('aleft'=>30, 'right'=>30, 'justification'=>'left');
+		$searches = $GUI->antrag->searches;
+		foreach($searches as $params){
+			switch ($params['abfrageart']){
 				case 'indiv_nr' : {
 					$keys = array('suchffr'=>0, 'suchkvz'=>0, 'suchgn'=>0, 'suchan'=>0, 'suchgemarkung'=>0, 'suchflur'=>0, 'suchstammnr'=>0, 'suchrissnr'=>0, 'suchfortf'=>0, 'sdatum'=>0, 'sdatum2'=>0, 'sVermStelle'=>0, 'flur_thematisch'=>0, 'such_andere_art'=>0);
 				}break;
@@ -442,13 +469,12 @@
 					$keys = array('suchffr'=>0, 'suchkvz'=>0, 'suchgn'=>0, 'suchan'=>0, 'suchantrnr'=>0, 'such_andere_art'=>0);
 				}break;				
 			}
-			$params = json_encode(array_intersect_key($rs, $keys));
 			if($row < 100){
 				$pdf->ezNewPage();
 				$row = 800;				
 			}
-			$pdf->ezText('<b>Suche '.$rs['time_id'].': '.$rs['abfrageart'].'</b>', 14, $options);
-			#$pdf->ezText('Suchpolygon: '.$rs['suchpolygon'], 16, $options);
+			$pdf->ezText('<b>Suche '.$params['time_id'].': '.$params['abfrageart'].'</b>', 14, $options);
+			$params = json_encode(array_intersect_key($params, $keys));
 			$pdf->ezText($params, 12, $options);
 			$pdf->ezText(' ', 12, $options);
 		}		
@@ -524,8 +550,50 @@
       }
     }
   };
+		
+	$this->erzeugenZuordnungFlst_CSV = function($path) use ($GUI){
+		$intersections = $GUI->antrag->getIntersectedFlst();
+		$csv = utf8_decode('Flur;Antragsnummer;Rissnummer;Flurstück;Anteil [m²];Anteil [%]').chr(10);
+		foreach($intersections as $intersection){
+			$csv .= implode(';', $intersection).chr(10);
+		}
+		$fp=fopen($path.'Zuordnung-Flurstuecke.csv','wb');
+		fwrite($fp, $csv);
+		fclose($fp);
+	};
+	
+	$this->erzeugenUebersicht_CSV = function($path) use ($GUI){
+		$columns['id'] = 'id';
+		$columns['flurid'] = 'Flur';
+		$columns['stammnr'] = 'Antragsnummer';
+		$columns['blattnummer'] = 'Blattnummer';
+		$columns['rissnummer'] = 'Rissnummer';
+		$columns['art_name'] = 'Art';
+		$columns['datum'] = 'Datum';
+		$columns['fortfuehrung'] = 'Fortführung';
+		$columns['vermst'] = 'Vermessungsstelle';
+		$columns['gueltigkeit'] = 'Gültigkeit';
+		$columns['format'] = 'Format';
+		$columns['dokument_path'] = 'Dokument';
+		foreach($columns as $key=>$column){
+			$csv .= utf8_decode($column).';';
+		}
+		$csv.= chr(10);
+		foreach($GUI->nachweis->Dokumente as $nachweis){
+			foreach($columns as $key=>$column){
+				if($key == 'dokument_path' AND $nachweis[$key] != ''){
+					$csv .= '"=HYPERLINK(""'.$nachweis[$key].'"";""'.basename($nachweis[$key]).'"")"';
+				}
+				else $csv .= utf8_decode($nachweis[$key]).';';
+			}
+			$csv.= chr(10);
+		}
+		$fp=fopen($path,'wb');
+		fwrite($fp, $csv);
+		fclose($fp);
+	};
   
-	$this->erzeugenUebergabeprotokollNachweise_HTML = function($path) use ($GUI){
+	$this->erzeugenUebersicht_HTML = function($path) use ($GUI){
 		$nachweise_json = json_encode($GUI->nachweis->Dokumente);
 		$html = "
 <html>
@@ -714,7 +782,7 @@
 			function showPreview(filename){
 				file_parts = filename.split('.');								
 				preview_image = file_parts[0]+'_thumb.jpg';
-				document.getElementById('preview_image').innerHTML = '<img src=\"Vorschaubilder/'+preview_image+'\">';
+				document.getElementById('preview_image').innerHTML = '<img src=\"../Vorschaubilder/'+preview_image+'\">';
 			}
 			
 			function hidePreview(){
@@ -917,7 +985,7 @@
 		    header("Content-disposition:  inline; filename=Übergabeprotokoll_".date('Y-m-d_G-i-s').".csv");
 		    header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 		    header('Pragma: public');
-		    print utf8_decode($csv);
+		    print $csv;
       }
     }
   };
