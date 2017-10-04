@@ -259,7 +259,7 @@ define('POSTGRESBINPATH', '/usr/bin/');         # Version 1.6.4
 define('OGR_BINPATH', '/usr/bin/');					# Version 1.7.4
 
 # Pfad zum Zip-Programm (unter Linux: 'zip -j', unter Windows z.B. 'c:/programme/Zip/bin/zip.exe')
-define('ZIP_PATH', 'zip -j');													# Version 1.7.3  hier wurde das ' -j' angehängt
+define('ZIP_PATH', 'zip');													# Version 1.7.3  hier wurde das ' -j' angehängt		# Version 2.8 das ' -j' wurde wieder entfernt
 
 # EPSG-Code dem die Koordinaten der Flurstücke zugeordnet werden sollen in den Tabellen
 # alb_flurstuecke und alb_x_flurstuecke wenn man postgres verwendet

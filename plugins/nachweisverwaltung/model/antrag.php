@@ -105,9 +105,10 @@ class antrag {
   function DokumenteInOrdnerZusammenstellen($nachweis){
 		$antragsnr = $this->nr;
 		if($this->stelle_id != '')$antragsnr.='~'.$this->stelle_id;
-    $auftragspfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Nachweise/';
-    # Erzeuge ein Unterverzeichnis für die Nachweisdokumente
+    $auftragspfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Nachweise/';	# Erzeuge ein Unterverzeichnis für die Nachweisdokumente
     mkdir ($auftragspfad,0777);
+		$vorschaupfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Vorschaubilder/';	# Erzeuge ein Unterverzeichnis für die Vorschaubilder
+    mkdir ($vorschaupfad,0777);
     # Führe in Schleif für alle zum Auftrag gehörenden Dokumente folgendes aus
     for ($i=0; $i<$nachweis->erg_dokumente;$i++){
       # Erzeuge ein Unterverzeichnis für die Flur des Dokumentes, wenn noch nicht vorhanden
@@ -146,6 +147,12 @@ class antrag {
             # Es konnte aus irgendeinem Grund nicht erfolgreich kopiert werden
             $errmsg.='Die Datei '.$ziel.' konnte nicht erstellt werden.\n';
           }
+					else{	# Vorschaubild kopieren
+						$dateinamensteil = explode('.', $nachweis->Dokumente[$i]['link_datei']);
+						$vorschaudatei = $dateinamensteil[0].'_thumb.jpg';
+						$quelle=$quellpfad.$vorschaudatei;
+						$erfolg=copy($quelle,$vorschaupfad.basename($vorschaudatei));
+					}
         }
         else{
           # Die Datei, die kopiert werden soll existiert schon am ziel.
@@ -256,22 +263,7 @@ class antrag {
     }
     return $pdf;
   }
-  
-	function erzeugenUbergabeprotokoll_HTML(){
-		$nachweise_json = json_encode($this->FFR);
-		$html = "
-		<html>
-			<head>
-				<SCRIPT TYPE=\"text/javascript\">	
-					var nachweise = ".$nachweise_json.";
-				</SCRIPT>
-			</head>
-			<body onload=\"alert(nachweise);\">
-			</body>
-		</html>";
-    return $html;
-	}
-	
+  	
   function erzeugenUbergabeprotokoll_CSV(){
   	# Überschriften
   	foreach($this->FFR[0] as $key=>$value){
@@ -296,8 +288,9 @@ class antrag {
     $sql ="SELECT a.*,a.vermstelle,va.art AS vermart,vs.name AS vermst";
     $sql.=" ,SUBSTRING(a.antr_nr from 1 for 2) AS antr_nr_a";
     $sql.=" ,SUBSTRING(a.antr_nr from 4 for 4) AS antr_nr_b";
-    $sql.=" FROM nachweisverwaltung.n_antraege AS a, nachweisverwaltung.n_vermstelle AS vs, nachweisverwaltung.n_vermart AS va";
-    $sql.=" WHERE a.vermstelle=vs.id AND a.vermart=va.id";
+    $sql.=" FROM nachweisverwaltung.n_antraege AS a";
+		$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle vs ON a.vermstelle=vs.id";
+    $sql.=" LEFT JOIN nachweisverwaltung.n_vermart va ON a.vermart=va.id WHERE 1=1";
     if ($id[0]!='') {
       $sql.=" AND a.antr_nr IN ('".$id[0]."'";
       for ($i=1;$i<count($id);$i++) {

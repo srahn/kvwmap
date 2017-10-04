@@ -168,7 +168,7 @@
       get_map_ajax('go=navMap_ajax', '', '');
      break;
      case "pquery_point":
-			if(!checkQueryFields())break;
+			if(!checkQueryFields() || !checkForUnsavedChanges())break;
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "pquery";
@@ -176,7 +176,7 @@
       overlay_submit(document.GUI, true);
      break;
      case "pquery_box":
-			if(!checkQueryFields())break;
+			if(!checkQueryFields() || !checkForUnsavedChanges())break;
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "pquery";
@@ -184,7 +184,7 @@
       overlay_submit(document.GUI, true);
      break;
      case "touchquery_point":
-			if(!checkQueryFields())break;
+			if(!checkQueryFields() || !checkForUnsavedChanges())break;
      	top.document.GUI.searchradius.value = "";
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
@@ -193,7 +193,7 @@
       overlay_submit(document.GUI, true);
      break;
      case "touchquery_box":
-			if(!checkQueryFields())break;
+			if(!checkQueryFields() || !checkForUnsavedChanges())break;
      	top.document.GUI.searchradius.value = "";
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
@@ -202,7 +202,7 @@
       overlay_submit(document.GUI, true);
      break;
      case "ppquery_point":
-			if(!checkQueryFields())break;
+			if(!checkQueryFields() || !checkForUnsavedChanges())break;
       document.GUI.searchradius.value = "";
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
@@ -211,7 +211,7 @@
 			overlay_submit(document.GUI, true);
      break;
      case "ppquery_box":
-			if(!checkQueryFields())break;
+			if(!checkQueryFields() || !checkForUnsavedChanges())break;
       top.document.GUI.searchradius.value = "";
       path = pathx[0]+","+pathy[0]+";"+pathx[2]+","+pathy[2];
       document.GUI.INPUT_COORD.value  = path;
@@ -220,7 +220,7 @@
       overlay_submit(document.GUI, true);
      break;
      case "pquery_polygon":
-			if(!checkQueryFields())break;
+			if(!checkQueryFields() || !checkForUnsavedChanges())break;
       path = pathx[0]+","+pathy[0]+";"+pathx[2]+","+pathy[2];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "pquery";
@@ -228,7 +228,7 @@
       overlay_submit(document.GUI, true);
      break;
      case "polygonquery":
-			if(!checkQueryFields())break;
+			if(!checkQueryFields() || !checkForUnsavedChanges())break;
      	for(i = 0; i < pathx.length-1; i++){
      		path = path+pathx[i]+","+pathy[i]+";";
      	}
@@ -405,7 +405,7 @@ function sendpath(cmd, pathx, pathy){
 	if(cmd == "polygonquery")deletepolygon();
 }
 
-function prevent(evt){
+function prevent1(evt){
 	if(evt.preventDefault){
 		evt.preventDefault();
 	}else{ // IE fix
@@ -434,7 +434,7 @@ function mousewheelchange(evt){
 	if(!evt)evt = window.event; // For IE
 	if(top.document.GUI.stopnavigation.value == 0){
 		window.clearTimeout(mousewheelloop);
-		prevent(evt);
+		prevent1(evt);
 		if(evt.wheelDelta)
 			delta = evt.wheelDelta / 3600; // Chrome/Safari
 		else if(evt.detail)
@@ -496,7 +496,7 @@ function updateDragVectors(touches) {
 }
 
 function touchstart(evt){
-	prevent(evt);
+	prevent1(evt);
 	if(top.document.GUI.stopnavigation.value == 0){
 		if(evt.touches.length == 1){		// 1 Finger
 			touchx = evt.clientX = evt.touches[0].pageX;
@@ -514,7 +514,7 @@ function touchstart(evt){
 }
 
 function touchmove(evt) {
-	prevent(evt);
+	prevent1(evt);
 	if(top.document.GUI.stopnavigation.value == 0){
 		if(pinching == false && evt.touches.length == 1){		// 1 Finger
 			touchx = evt.clientX = evt.touches[0].pageX;
@@ -549,7 +549,7 @@ function touchmove(evt) {
 }
 
 function touchend(evt){
-	prevent(evt);
+	prevent1(evt);
 	if(pinching == false){		// 1 Finger
 		evt.clientX = touchx;
 		evt.clientY = touchy;
