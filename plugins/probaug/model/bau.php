@@ -96,7 +96,7 @@ class Bauauskunft {
     if($searchvars['nummer'] != ''){$sql .= " AND Feld3 = '".$searchvars['nummer']."'";}
     if($searchvars['vorhaben'] != ''){$sql .= " AND Feld8 LIKE '%".$searchvars['vorhaben']."%'";}
     if($searchvars['verfahrensart'] != ''){$sql .= " AND Feld9 LIKE '%".$searchvars['verfahrensart']."%'";}
-    if($searchvars['gemarkung'] != ''){$sql .= " AND '13'||Feld12 = '".$searchvars['gemarkung']."'";}
+    if($searchvars['gemarkung'] != ''){$sql .= " AND Feld27||Feld12 = '".$searchvars['gemarkung']."'";}
     if($searchvars['flur'] != ''){$sql .= " AND trim(trim(leading '0' from Feld13)) = '".$searchvars['flur']."'";}
     if($searchvars['flurstueck'] != ''){$sql .= " AND trim(trim(leading '0' from Feld14)) LIKE '".$searchvars['flurstueck']."'";}
     if($searchvars['vorname'] != ''){$sql .= " AND Feld19 LIKE '%".$searchvars['vorname']."%'";}
