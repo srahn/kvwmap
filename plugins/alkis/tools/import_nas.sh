@@ -10,10 +10,22 @@ extract_zip_files() {
 			for ZIP_FILE in ${DATA_PATH}/*.zip ; do
 				log "Unzip ${ZIP_FILE} ..."
 				if [ ! "${UNZIP_PASSWORD}" = "" ] ; then
-					unzip $ZIP_FILE -d $IMPORT_PATH -P $UNZIP_PASSWORD
+					echo "unzip -P ${UNZIP_PASSWORD} ${ZIP_FILE} -d ${IMPORT_PATH}"
+					unzip -P $UNZIP_PASSWORD $ZIP_FILE -d $IMPORT_PATH
 				else
+				  echo "unzip ${ZIP_FILE} -d ${IMPORT_PATH}"
 					unzip $ZIP_FILE -d $IMPORT_PATH
 				fi
+				find $IMPORT_PATH -iname '*.xml.gz' | sort | while read GZ_FILE ; do
+					GZ_FILE_=${GZ_FILE// /_} # ersetzt Leerzeichen durch _ in Dateiname
+					if [ ! "$GZ_FILE" = "$GZ_FILE_" ] ; then
+						log "Benenne Datei: ${GZ_FILE} um in ${GZ_FILE_}"
+						mv "$GZ_FILE" "$GZ_FILE_"
+						GZ_FILE="$GZ_FILE_"
+					fi
+					log "Extrahiere: ${GZ_FILE}"
+					gunzip $GZ_FILE
+				done
 				rm $ZIP_FILE
 			done
 		else
@@ -24,10 +36,10 @@ extract_zip_files() {
 
 convert_nas_files() {
 	if [ "$(ls -A ${IMPORT_PATH})" ] ; then
-		find ${IMPORT_PATH}/NAS -iname '*.xml' | sort |  while read NAS_FILE ; do
+		find ${IMPORT_PATH} -iname '*.xml' | sort |  while read NAS_FILE ; do
 			NAS_FILE_=${NAS_FILE// /_} # ersetzt Leerzeichen durch _ in Dateiname
 			if [ ! "$NAS_FILE" = "$NAS_FILE_" ] ; then
-				echo "Benenne Datei ${NAS_FILE} um in ${NAS_FILE_}"
+				log "Benenne Datei ${NAS_FILE} um in ${NAS_FILE_}"
 				mv $NAS_FILE $NAS_FILE_
 				$NAS_FILE=$NAS_FILE_
 			fi
@@ -37,7 +49,7 @@ convert_nas_files() {
 			SQL_FILE="${NAS_DIR}/${NAS_BASENAME}.sql"
 			GFS_FILE="${NAS_DIR}/${NAS_BASENAME}.gfs"
 			
-			check_dublicate=`psql -q -t -h $POSTGRES_HOST -U $POSTGRES_USER -c "SELECT count(*) FROM ${POSTGRES_SCHEMA}.import WHERE datei = '${NAS_FILENAME}' AND status='eingelesen';" $POSTGRES_DBNAME 2> ${LOG_PATH}/${ERROR_FILE}`
+			check_dublicate=`PGPASSWORD=$POSTGRES_PASSWORD psql -q -t -h $POSTGRES_HOST -U $POSTGRES_USER -c "SELECT count(*) FROM ${POSTGRES_SCHEMA}.import WHERE datei = '${NAS_FILENAME}' AND status='eingelesen';" $POSTGRES_DBNAME 2> ${LOG_PATH}/${ERROR_FILE}`
 			if [ -n "$(grep -i 'Error\|Fehler\|FATAL' ${LOG_PATH}/${ERROR_FILE})" ] ; then
 				err "Fehler beim Abfragen der import-Tabelle."
 				head -n 30 ${LOG_PATH}/${ERROR_FILE}
@@ -77,13 +89,13 @@ convert_nas_files() {
 }
 
 execute_sql_transaction() {
-	if [ ! "$(ls -A ${IMPORT_PATH}/NAS)" ] ; then
+	if [ ! "$(find ${IMPORT_PATH} -name *.xml)" ] ; then
 		# ogr2ogr read all xml files successfully
 		if [ -f "${IMPORT_PATH}/import_transaction.sql" ] ; then
 			# execute transaction sql file
 			log "Lese Transaktionsdatei ein"
 			echo "END;COMMIT;" >> ${IMPORT_PATH}/import_transaction.sql
-			psql -h $POSTGRES_HOST -U $POSTGRES_USER -f ${IMPORT_PATH}/import_transaction.sql $POSTGRES_DBNAME >> ${LOG_PATH}/${LOG_FILE} 2> ${LOG_PATH}/${ERROR_FILE}
+			PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -U $POSTGRES_USER -f ${IMPORT_PATH}/import_transaction.sql $POSTGRES_DBNAME >> ${LOG_PATH}/${LOG_FILE} 2> ${LOG_PATH}/${ERROR_FILE}
 			if [ -n "$(grep -i 'Error\|Fehler\|FATAL' ${LOG_PATH}/${ERROR_FILE})" ] ; then
 				err "Fehler beim Einlesen der Transaktions-Datei: ${IMPORT_PATH}/import_transaction.sql."
 				head -n 30 ${LOG_PATH}/${ERROR_FILE}
@@ -91,13 +103,13 @@ execute_sql_transaction() {
 				log "Einlesevorgang erfolgreich"
 				clear_import_folder
 				log "Post-Processing wird ausgeführt"
-				psql -h $POSTGRES_HOST -U $POSTGRES_USER -c "SELECT ${POSTGRES_SCHEMA}.postprocessing();" $POSTGRES_DBNAME >> ${LOG_PATH}/${LOG_FILE} 2> ${LOG_PATH}/${ERROR_FILE}
+				PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -U $POSTGRES_USER -c "SELECT ${POSTGRES_SCHEMA}.postprocessing();" $POSTGRES_DBNAME >> ${LOG_PATH}/${LOG_FILE} 2> ${LOG_PATH}/${ERROR_FILE}
 				if [ -n "$(grep -i 'Error\|Fehler\|FATAL' ${LOG_PATH}/${ERROR_FILE})" ] ; then
 					err "Fehler beim Ausführen der Post-Processing-Funktion : ${POSTGRES_SCHEMA}.postprocessing()"
 					head -n 30 ${LOG_PATH}/${ERROR_FILE}
 				else
 					find ${POSTPROCESSING_PATH} -iname '*.sql' | sort |  while read PP_FILE ; do
-						psql -h $POSTGRES_HOST -U $POSTGRES_USER -f ${PP_FILE} $POSTGRES_DBNAME >> ${LOG_PATH}/${LOG_FILE} 2> ${LOG_PATH}/${ERROR_FILE}
+						PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -U $POSTGRES_USER -f ${PP_FILE} $POSTGRES_DBNAME >> ${LOG_PATH}/${LOG_FILE} 2> ${LOG_PATH}/${ERROR_FILE}
 						if [ -n "$(grep -i 'Error\|Fehler\|FATAL' ${LOG_PATH}/${ERROR_FILE})" ] ; then
 							err "Fehler beim Ausführen der Post-Processing-Datei : ${PP_FILE}"
 						else
@@ -106,7 +118,11 @@ execute_sql_transaction() {
 					done
 				fi				
 			fi
+		else
+		  log "Datei import_transaction.sql existiert nicht."
 		fi
+	else
+	  log "Keine xml Dateien mehr im Verzeichnis ${IMPORT_PATH} find ${IMPORT_PATH} -name *.xml."
 	fi
 }
 
@@ -155,13 +171,16 @@ if [ -e "${CONFIG_PATH}/config.sh" ] ; then
 	if [ "$POSTGRES_DBNAME" = "" ] ; then
 		POSTGRES_DBNAME=$(grep "pgdbname=" $CONFIG_PHP | cut -d"'" -f2)
 	fi
-  log "Konfigurationsdatei: ${CONFIG_PATH}/config.sh gelesen."
-	log " Starte Import ALKIS-Daten mit Script import_nas.sh"
-  log "Loglevel: ${LOG_LEVEL}"
   log "Reset Error Datei: ${LOG_PATH}/${ERROR_FILE}"
   echo `date` > "${LOG_PATH}/${ERROR_FILE}"
 	log "Reset Log Datei: ${LOG_PATH}/${LOG_FILE}"
   echo `date` > "${LOG_PATH}/${LOG_FILE}"
+  log "Konfigurationsdatei: ${CONFIG_PATH}/config.sh gelesen."
+	log "POSTGRES_HOST: ${POSTGRES_HOST}"
+	log "POSTGRES_USER: ${POSTGRES_USER}"
+	log "POSTGRES_USER: ${POSTGRES_USER}"
+	log " Starte Import ALKIS-Daten mit Script import_nas.sh"
+  log "Loglevel: ${LOG_LEVEL}"
 else
   log "Konfigurationsdatei: ${CONFIG_PATH}/config.sh existiert nicht."
   log "Kopieren Sie ${CONFIG_PATH}/config-default.sh nach ${SCRIPT_PATH}/config/config.sh und passen die Parameter darin an."
