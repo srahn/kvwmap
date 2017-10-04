@@ -94,7 +94,7 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
 //                     echo var_export($parameter, true);
                     
                     //write the word file
-                    writeAufforderungsWordFile(PLUGINS . 'wasserrecht/templates/Anhang_IV.docx', $word_file, $parameter);
+                    writeWordFile(PLUGINS . 'wasserrecht/templates/Anhang_IV.docx', $word_file, $parameter);
                     
                     //write the document path to the database
                     $aufforderung_dokument = new Dokument($this);

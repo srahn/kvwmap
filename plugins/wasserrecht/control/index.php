@@ -25,7 +25,7 @@ include(PLUGINS . 'wasserrecht/model/WRZProGueltigkeitsJahr.php');
 
 require_once (CLASSPATH . '/../vendor/autoload.php');
 // include(PLUGINS . 'wasserrecht/view/KvwmapJodDocumentConverter.class.php');
-include(PLUGINS . 'wasserrecht/view/create_pdf.php');
+include(PLUGINS . 'wasserrecht/bescheide/create_bescheide.php');
 
 function startsWith($haystack, $needle)
 {

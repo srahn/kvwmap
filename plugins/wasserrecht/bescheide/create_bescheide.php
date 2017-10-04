@@ -59,7 +59,7 @@
 //     }
 // }
 
-function writeAufforderungsWordFile($word_template, $word_file, &$parameter)
+function writeWordFile($word_template, $word_file, &$parameter)
 {
     $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($word_template);
     foreach($parameter as $key => $value)
