@@ -89,7 +89,7 @@ convert_nas_files() {
 }
 
 execute_sql_transaction() {
-	if [ ! "$(ls -R ${IMPORT_PATH})" ] ; then
+	if [ ! "$(find ${IMPORT_PATH} -name *.xml)" ] ; then
 		# ogr2ogr read all xml files successfully
 		if [ -f "${IMPORT_PATH}/import_transaction.sql" ] ; then
 			# execute transaction sql file
@@ -118,7 +118,11 @@ execute_sql_transaction() {
 					done
 				fi				
 			fi
+		else
+		  log "Datei import_transaction.sql existiert nicht."
 		fi
+	else
+	  log "Keine xml Dateien mehr im Verzeichnis ${IMPORT_PATH} find ${IMPORT_PATH} -name *.xml."
 	fi
 }
 

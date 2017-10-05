@@ -201,6 +201,7 @@ class stelle {
 	}
 
 	function deleteLayer($layer, $pgdatabase) {
+		#echo 'stelle.php deleteLayer ids: ' . implode(', ', $layer);
 		if($layer == 0){
 			# löscht alle Layer der Stelle
 			$sql ='DELETE FROM `used_layer` WHERE `Stelle_ID` = '.$this->id;
@@ -441,9 +442,8 @@ class stelle {
 		return $stellen;
 	}
 
-	function getParents($order = '') {
+	function getParents($order = '', $return = '') {
 		$parents = array();
-		if ($order != '') $order = " ORDER BY `" . $order . "`";
 		$sql = "
 			SELECT
 				s.`ID`,
@@ -452,16 +452,16 @@ class stelle {
 				`stelle` AS s JOIN
 				`stellen_hierarchie` AS h ON (s.`ID` = h.`parent_id`)
 			WHERE
-				h.`child_id`= " . $this->id .
-			$order . "
+				h.`child_id`= " . $this->id . "
+				" . $order . "
 		";
-		#echo '<br>sql: ' . $sql;
+		#echo '<br>stelle.php getParents sql:<br>' . $sql;
 
 		$this->debug->write("<p>file:stelle.php class:stelle->getParents - Abfragen aller Elternstellen<br>" . $sql, 4);
 		$query = mysql_query($sql, $this->database->dbConn);
 		if ($query == 0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return array(); }
 		while($rs = mysql_fetch_assoc($query)) {
-			$parents[] = $rs;
+			$parents[] = ($return == 'only_ids' ? $rs['ID'] : $rs);
 		};
 		return $parents;
 	}
@@ -497,7 +497,7 @@ class stelle {
 	* function collect all distinct menue_ids from parents of this stelle  
 	*/
 	function get_parent_menues() {
-		echo '<p>stelle.php get_parent_menues';
+		#echo '<p>stelle.php get_parent_menues';
 		$parent_menue_ids = array();
 		foreach($this->getParents() AS $parent) {
 			$parent_stelle = new stelle($parent['ID'], $this->database);
@@ -506,11 +506,11 @@ class stelle {
 				if (!in_array($parent_menue_id, $parent_menue_ids)) $parent_menue_ids[] = $parent_menue_id;
 			}
 		}
-		echo '<br>Returned parent_menue_ids: ' . implode(', ', $parent_menue_ids);
+		#echo '<br>Returned parent_menue_ids: ' . implode(', ', $parent_menue_ids);
 		return $parent_menue_ids;
 	}
 
-	function getFunktionen() {
+	function getFunktionen($return = '') {
 		# Abfragen der Funktionen, die in der Stelle ausgeführt werden dürfen
 		$sql ='SELECT f.id,f.bezeichnung, 1 as erlaubt FROM u_funktionen AS f,u_funktion2stelle AS f2s';
 		$sql.=' WHERE f.id=f2s.funktion_id AND f2s.stelle_id='.$this->id.' ORDER BY bezeichnung';
@@ -519,15 +519,21 @@ class stelle {
 		if ($query==0) {
 			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4);
 			$errmsg='Fehler bei der Abfrage der Funktionen für die Stelle';
+			return $errmsg;
 		}
 		else {
 			while($rs=mysql_fetch_array($query)) {
-				$funktionen[$rs['bezeichnung']]=$rs;
-				$funktionen['array'][]=$rs;
+				if ($return == 'only_ids') {
+					$funktionen[] = $rs['id'];
+				}
+				else {
+					$funktionen[$rs['bezeichnung']]=$rs;
+					$funktionen['array'][]=$rs;
+				}
 			}
 		}
 		$this->funktionen=$funktionen;
-		return $errmsg;
+		return $funktionen;
 	}
 
 	function isFunctionAllowed($functionname) {
@@ -583,25 +589,61 @@ class stelle {
 		return $ret;
 	}
 
-	function updateParents($selparents) {
+	/*
+	* Add inheritted menues, functions, layouts, layers and users that not allready exists in formvars
+	* Remove inheritted menues, functions, layouts, layers and users that currently exists in formvars
+	*/
+	function apply_parent_selection(
+		$selected_parents,
+		&$menues,
+		&$functions,
+		&$frames,
+		&$layouts,
+		&$layer,
+		&$selectedusers
+	) {
+		include_once(CLASSPATH . 'datendrucklayout.php');
 		$results = array();
-
-		$old_parents = array_map(
-			function($parent) {
-				return $parent['ID'];
-			},
-			$this->getParents()
-		);
+		$old_parents = $this->getParents('ORDER BY `ID`', 'only_ids');
+		$document = new Document($this->database);
+		$ddl = new ddl($this->database);
 		
-		foreach(array_diff($selparents, $old_parents) AS $new_parent_id) {
-			$results[] = $this->addParent($new_parent_id);
-		}
-
-		foreach(array_diff($old_parents, $selparents) AS $drop_parent_id) {
+		# Entferne Einstellungen der Elternstellen von Stelle
+		foreach(array_diff($old_parents, $selected_parents) AS $drop_parent_id) {
+			# echo '<br>Entferne Elternstelle ' . $drop_parent_id;
+			$parent_stelle = new stelle($drop_parent_id, $this->database);
+			$menues = array_values(array_diff($menues, $parent_stelle->getMenue(0, 'only_ids')));
+			$functions = array_values(array_diff($functions, $parent_stelle->getFunktionen('only_ids')));
+			$layouts = array_values(array_diff($layouts, $ddl->load_layouts($drop_parent_id, '', '', '', 'only_ids')));
+			$frames = array_values(array_diff($frames, $document->load_frames($drop_parent_id, false, 'only_ids')));
+			$parent_layer = $parent_stelle->getLayer('', 'only_ids');
+			$layer = array_values(array_diff($layer, $parent_layer));
+			$selectedusers = array_values(array_diff($selectedusers, $parent_stelle->getUser('only_ids')));
 			$results[] = $this->dropParent($drop_parent_id);
 		}
 
+		# Füge Einstellungen der Elternstellen zur Stelle hinzu
+		foreach(array_diff($selected_parents, $old_parents) AS $new_parent_id) {
+			$parent_stelle = new stelle($new_parent_id, $this->database);
+
+			$menues = $this->merge_menues($menues, $parent_stelle->getMenue(0, 'only_ids'));
+			$functions = array_values(array_unique(array_merge($functions, $parent_stelle->getFunktionen('only_ids'))));
+			$layouts = array_values(array_unique(array_merge($layouts, $ddl->load_layouts($new_parent_id, '', '', '', 'only_ids'))));
+			$frames = array_values(array_unique(array_merge($frames, $document->load_frames($new_parent_id, false, 'only_ids'))));
+			$layer = array_values(array_unique(array_merge($layer, $parent_stelle->getLayer('', 'only_ids'))));
+			$selectedusers = array_values(array_unique(array_merge($selectedusers, $parent_stelle->getUser('only_ids'))));
+			$results[] = $this->addParent($new_parent_id);
+		}
 		return $results;
+	}
+
+	/*
+	* Merge $new_menues in correct order with $menue
+	* ToDo: replace array_merge by correct logig to merge with order not only append
+	*/
+	function merge_menues($menues, $new_menues) {
+		$result = array_values(array_unique(array_merge($menues, $new_menues)));
+		return $result;
 	}
 
 	function addParent($parent_id) {
@@ -626,42 +668,12 @@ class stelle {
 			);
 		}
 
-		# add all menues from parent stelle to this stelle if not allready exists
-		$parent_stelle = new stelle($parent_id, $this->database);
-		$parent_menues = $parent_stelle->getMenue(0);
-		#echo 'Add Menues: ' . implode(', ', $parent_menues['ID']) . ' zu Stelle Id: ' . $this->id;
-		$this->addMenue($parent_menues['ID']);
-
-		# add all functions from parent stelle to this stelle if not all ready exists
-
-		# add all map layouts from parent stelle to this stelle if not all ready exists
-
-		# add all layer from parent stelle to this stelle if not all ready exists
-
-		# add all user from parent stelle to this stelle if not all ready exists
-
-		# add all menues of this stelle to the rolle of users in this stelle
-		$users = $this->getUser();
-		#echo 'Add all Menues of Stelle Id: ' . $this->id . ' to User Ids: ' . implode(', ', $users['ID']);
-		$rolle = new rolle(0, $this->id, $this->database);
-		foreach($users['ID'] AS $user_id) {
-			$rolle->setMenue($user_id, array($this->id)); # Hinzufügen der Obermenüs zur Rolle
-		}
-
 		return array(
 			'type' => 'notice',
 			'message' => 'Elternstelle Id: ' . $parent_id . ' erfolgreich zugewiesen.'
 		);
 	}
 
-	
-	/*
-	* Delete parent in stellen_hierarchie and
-	* drop menues from parent (with drop_parent_id that has to be droped) that do not occure in other
-	* parents that has not to be droped
-	* @param $drop_parent_id integer id of the parent that has to be droped
-	* @param $parent_menue_ids integer[] Array of menues of parents that will not be droped
-	*/
 	function dropParent($drop_parent_id) {
 		$sql = "
 			DELETE FROM `stellen_hierarchie`
@@ -680,23 +692,16 @@ class stelle {
 			);
 		}
 
-
-		$parent_menue_ids = $this->get_parent_menues();
-
-		$parent_stelle = new stelle($drop_parent_id, $this->database);
-		$drop_parent_menues = $parent_stelle->getMenue(0);
-
-		$this->deleteMenue(array_diff($drop_parent_menues['ID'], $parent_menue_ids));
-
-		# drop all from parents inheritted functions, map layouts, layer and users in this stelle
 		return array(
 			'type' => 'notice',
 			'message' => 'Elternstelle Id: ' . $drop_parent_id . ' erfolgreich gelöscht.'
 		);
 	}
 
+	/*
+	* Hinzufügen von Menuepunkten zur Stelle
+	*/
 	function addMenue($menue_ids) {
-		# Hinzufügen von Menuepunkten zur Stelle
 		$sql = "
 			SELECT
 				MAX(menue_order)
@@ -755,7 +760,7 @@ class stelle {
 		return 1;
 	}
 
-	function getMenue($ebene) {
+	function getMenue($ebene, $return = '') {
 		global $language;
 
 		# Lesen der Menuepunkte zur Stelle
@@ -803,7 +808,11 @@ class stelle {
 				}
 			}
 		}
-		return $menue;
+		if ($return == 'only_ids') {
+			return $menue['ID'];
+		} else {
+			return $menue;
+		}
 	}
 
 	function copyLayerfromStelle($layer_ids, $alte_stelle_id){
@@ -847,6 +856,7 @@ class stelle {
 	}
 
 	function addLayer($layer_ids, $drawingorder, $filter = '') {
+		#echo '<br>stelle.php addLayer ids: ' . implode(', ', $layer_ids);
 		# Hinzufügen von Layern zur Stelle
 		for ($i=0;$i<count($layer_ids);$i++) {
 			$sql = "
@@ -856,7 +866,7 @@ class stelle {
 					layer
 				WHERE
 					Layer_ID = " . $layer_ids[$i];
-			#echo '<br>sql: ' . $sql;
+			#echo '<br>stelle.php addLayer sql:<br>' . $sql;
 			$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 			$query=mysql_query($sql,$this->database->dbConn);
 			$rs = mysql_fetch_array($query);
@@ -1012,19 +1022,36 @@ class stelle {
 		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 	}
 
-	function getLayers($group, $order = NULL) {
+	function getLayers($group, $order = NULL, $return = '') {
+		$layer = array(
+			'ID' => array(),
+			'Bezeichnung' => array(),
+			'drawingorder' => array(),
+			'Gruppe' => array()
+		);
+
+		$condition = "
+			stelle_id = " . $this->id .
+			($group != NULL ? " AND layer.Gruppe = " . $group : "") . "
+		";
+		$order = ($order != NULL ? "ORDER BY " . $order : "");
+
 		# Lesen der Layer zur Stelle
-		$sql ='SELECT layer.Layer_ID, layer.Gruppe, Name, used_layer.drawingorder FROM used_layer, layer, u_groups';
-		$sql .=' WHERE stelle_id = '.$this->id;
-		$sql .=' AND layer.Gruppe = u_groups.id';
-		$sql .=' AND layer.Layer_ID = used_layer.Layer_ID';
-		if($group != NULL){
-			$sql .= ' AND layer.Gruppe = '.$group;
-		}
-		if($order != NULL){
-			$sql .= ' ORDER BY '.$order;
-		}
-		#echo $sql;
+		$sql = "
+			SELECT
+				layer.Layer_ID,
+				layer.Gruppe,
+				Name,
+				used_layer.drawingorder
+			FROM
+				used_layer JOIN
+				layer ON used_layer.Layer_ID = layer.Layer_ID JOIN
+				u_groups ON layer.Gruppe = u_groups.id
+			WHERE" .
+				$condition .
+			$order . "
+		";
+		#echo '<br>stelle.php getLayers Sql:<br>' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getLayers - Lesen der Layer zur Stelle:<br>".$sql,4);
 		$query=mysql_query($sql,$this->database->dbConn);
 		if ($query==0) {
@@ -1051,7 +1078,12 @@ class stelle {
 				$layer = $sorted_layer;
 			}
 		}
-		return $layer;
+		if ($return == 'only_ids') {
+			return $layer['ID'];
+		}
+		else {
+			return $layer;
+		}
 	}
 
 	function getqueryablePostgisLayers($privileg, $export_privileg = NULL, $no_subform_layers = false){
@@ -1240,19 +1272,28 @@ class stelle {
 		return 1;
 	}
 
-	function getLayer($Layer_id) {
-		# Abfragen der Layer der Stelle
-		$sql ='SELECT l.*, ul.* FROM layer AS l, used_layer AS ul';
-		$sql.=' WHERE l.Layer_ID=ul.Layer_ID AND Stelle_ID='.$this->id;
-		if ($Layer_id!='') {
-			$sql.=' AND l.Layer_ID = "'.$Layer_id.'"';
-		}
-		#echo $sql;
+	/*
+	* Abfragen der Layer der Stelle
+	*/
+	function getLayer($Layer_id, $result = '') {
+		#echo '<br>stelle.php getLayer';
+		$sql = "
+			SELECT
+				l.*,
+				ul.*
+			FROM
+				layer AS l JOIN
+				used_layer AS ul ON l.Layer_ID = ul.Layer_ID
+			WHERE
+				Stelle_ID = " . $this->id .
+				($Layer_id != '' ? " AND l.Layer_ID = " . $Layer_id : '') . "
+		";
+		#echo '<br>getLayer Sql:<br>'. $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getLayer - Abfragen der Layer zur Stelle:<br>".$sql,4);
 		$query=mysql_query($sql,$this->database->dbConn);
 		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		while ($rs=mysql_fetch_array($query)) {
-			$layer[]=$rs;
+			$layer[] = ($result == 'only_ids' ? $rs['Layer_ID'] : $rs);
 		}
 		return $layer;
 	}
@@ -1430,12 +1471,19 @@ class stelle {
 		return $GemeindeListe;
 	}
 
-	function getUser() {
+	function getUser($result = '') {
 		# Lesen der User zur Stelle
-		$sql ='SELECT user.* FROM user, rolle';
-		$sql .=' WHERE rolle.stelle_id = '.$this->id;
-		$sql .=' AND rolle.user_id = user.ID';
-		$sql .= ' ORDER BY Name';
+		$sql = "
+			SELECT
+				user.*
+			FROM
+				user JOIN
+				rolle ON user.ID = rolle.user_id
+			WHERE
+				rolle.stelle_id = " . $this->id . "
+			ORDER BY Name
+		";
+		#echo "<br>Sql: " . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getUser - Lesen der User zur Stelle:<br>".$sql,4);
 		$query=mysql_query($sql,$this->database->dbConn);
 		if ($query==0) {
@@ -1454,7 +1502,12 @@ class stelle {
 			$user['ID'] = $sorted_arrays['second_array'];
 			$user['email'] = $sorted_arrays2['second_array'];
 		}
-		return $user;
+		if ($result == 'only_ids') {
+			return $user['ID'];
+		}
+		else {
+			return $user;
+		}
 	}
 
 	function getWappen() {
