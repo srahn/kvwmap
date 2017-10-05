@@ -1162,7 +1162,7 @@ class stelle {
 		}
 		if($user_id != NULL){
 			$sql .= ' UNION ';
-			$sql .= 'SELECT -id as Layer_ID, concat(substring( `Name` FROM 1 FOR locate( ")", `Name` )), CASE WHEN Typ = "search" THEN " -Suchergebnis-" ELSE " -Shape-Import-" END), "", Gruppe, " ", `connection` FROM rollenlayer';
+			$sql .= 'SELECT -id as Layer_ID, concat(substring( `Name` FROM 1 FOR locate( ")", `Name` )), CASE WHEN Typ = "search" THEN " -Suchergebnis-" ELSE " -eigener Import-" END), "", Gruppe, " ", `connection` FROM rollenlayer';
 			$sql .= ' WHERE stelle_id = '.$this->id.' AND user_id = '.$user_id.' AND connectiontype = 6';			
 			if($rollenlayer_type != NULL){
 				$sql .=' AND Typ = "'.$rollenlayer_type.'"';
