@@ -137,8 +137,8 @@ $legendheight = $this->map->height + 20;
 						</table></td>
 				</tr>
 				<tr> 
-					<td rowspan="20">&nbsp; </td>
-					<td rowspan="20" colspan="5"> 
+					<td rowspan="21">&nbsp; </td>
+					<td rowspan="21" colspan="5"> 
 						<?php
 							include(LAYOUTPATH.'snippets/SVG_polygon_query_area.php')
 						?>
@@ -217,6 +217,11 @@ $legendheight = $this->map->height + 20;
 				<tr> 
 					<td colspan="2">Bemerkungen:
 						<textarea style="width:260px" name="bemerkungen"><?php echo $this->formvars['bemerkungen']; ?></textarea>
+					</td>
+				</tr>
+				<tr> 
+					<td colspan="2">Bearbeitungshinweise:
+						<textarea style="width:260px" name="bemerkungen_intern"><?php echo $this->formvars['bemerkungen_intern']; ?></textarea>
 					</td>
 				</tr>
 				<tr> 

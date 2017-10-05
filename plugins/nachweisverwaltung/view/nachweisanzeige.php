@@ -221,8 +221,11 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
         }
         ?>>	
 				<? if($this->nachweis->Dokumente[$i]['bemerkungen'] != ''){ ?>
-					<img src="<? echo GRAPHICSPATH.'emblem-important.png'; ?>" title="Bemerkungen: <? echo $this->nachweis->Dokumente[$i]['bemerkungen']; ?>">
+					<i class="fa fa-exclamation-circle" style="font-size: 19px; color: orange"  title="Bemerkungen: <? echo $this->nachweis->Dokumente[$i]['bemerkungen']; ?>"></i>
 				<? } ?>
+				<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten') AND $this->nachweis->Dokumente[$i]['bemerkungen_intern'] != ''){ ?>
+					<i class="fa fa-exclamation-circle" style="font-size: 19px; color: red" title="Bearbeitungshinweis: <? echo $this->nachweis->Dokumente[$i]['bemerkungen_intern']; ?>"></i>
+				<? } ?>				
           </td>
           <td style="width: 45"><?php echo $this->formvars['id']=$this->nachweis->Dokumente[$i]['id']; ?></td>
           <td style="width: 80"><div align="center"><?php echo $this->formvars['flurid']=$this->nachweis->Dokumente[$i]['flurid']; ?></div></td>

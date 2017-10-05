@@ -1237,6 +1237,20 @@ function buildExpressionString($str) {
   return $expr;
 }
 
+function getNumPagesPdf($filepath){
+	$fp = @fopen(preg_replace("/\[(.*?)\]/i", "",$filepath),"r");
+	$max=0;
+	while(!feof($fp)){
+		$line = fgets($fp,255);
+		if(preg_match('/\/Count [0-9]+/', $line, $matches)){
+			preg_match('/[0-9]+/',$matches[0], $matches2);
+			if ($max<$matches2[0]) $max=$matches2[0];
+		}
+	}
+	fclose($fp);
+	return $max;
+}
+
 function WKT2UKO($wkt){
 	$uko = str_replace('MULTIPOLYGON(((', 'TYP UPO 2'.chr(10).'KOO ', $wkt);
 	$uko = str_replace(')),((', chr(10).'FL+'.chr(10).'KOO ', $uko);

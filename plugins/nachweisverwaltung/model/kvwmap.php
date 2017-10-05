@@ -190,6 +190,7 @@
       $GUI->formvars['rissnummer']=$nachweis->document['rissnummer'];
       $GUI->formvars['fortfuehrung']=$nachweis->document['fortfuehrung'];
       $GUI->formvars['bemerkungen']=$nachweis->document['bemerkungen'];
+			$GUI->formvars['bemerkungen_intern']=$nachweis->document['bemerkungen_intern'];
 
       # Abfragen der Gemarkungen
       # 2006-01-26 pk
@@ -1027,7 +1028,7 @@
         else {
           # Speicherung der Bilddatei erfolgreich, Eintragen in Datenbank
           $GUI->nachweis->database->begintransaction();
-          $ret=$GUI->nachweis->eintragenNeuesDokument($GUI->formvars['datum'],$GUI->formvars['flurid'],$GUI->formvars['VermStelle'], $GUI->formvars['art'], $GUI->formvars['andere_art'], $GUI->formvars['gueltigkeit'],$GUI->formvars['stammnr'],$GUI->formvars['Blattformat'],$GUI->formvars['Blattnr'],$GUI->formvars['rissnummer'],$GUI->formvars['fortfuehrung'],$GUI->formvars['bemerkungen'],$GUI->formvars['artname']."/".$GUI->formvars['zieldateiname'],$GUI->formvars['umring'], $GUI->user);
+          $ret=$GUI->nachweis->eintragenNeuesDokument($GUI->formvars['datum'],$GUI->formvars['flurid'],$GUI->formvars['VermStelle'], $GUI->formvars['art'], $GUI->formvars['andere_art'], $GUI->formvars['gueltigkeit'],$GUI->formvars['stammnr'],$GUI->formvars['Blattformat'],$GUI->formvars['Blattnr'],$GUI->formvars['rissnummer'],$GUI->formvars['fortfuehrung'],$GUI->formvars['bemerkungen'],$GUI->formvars['bemerkungen_intern'],$GUI->formvars['artname']."/".$GUI->formvars['zieldateiname'],$GUI->formvars['umring'], $GUI->user);
           if ($ret[0]) {
             $GUI->nachweis->database->rollbacktransaction();
             $errmsg=$ret[1];
