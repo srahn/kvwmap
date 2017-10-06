@@ -7,6 +7,7 @@ class FestsetzungsSammelbescheidDaten
     private $entgelte = array();
     private $zugelassene_entgelte = array();
     private $nicht_zugelassene_entgelte = array();
+    private $erlaubterUmfang = null;
     private $freitext = null;
     
     function __construct($gui) {
@@ -193,11 +194,31 @@ class FestsetzungsSammelbescheidDaten
         }
     }
 
+    /**
+     * @return mixed
+     */
+    public function getErlaubterUmfang()
+    {
+        return $this->erlaubterUmfang;
+    }
+
+    /**
+     * @param mixed $erlaubterUmfang
+     */
+    public function setErlaubterUmfang($erlaubterUmfang)
+    {
+        $this->erlaubterUmfang = $erlaubterUmfang;
+    }
+
     public function toString() {
+        $this->debug->write('*** FestsetzungsSammelbescheidDaten ***', 4);
         $this->debug->write('count anlagen: ' . count($this->getAnlagen()), 4);
         $this->debug->write('entnahmemengen: ' . var_export($this->getEntnahmemengen(), true), 4);
         $this->debug->write('entgelte: ' . var_export($this->getEntgelte(), true), 4);
+        $this->debug->write('zugelassene entgelte: ' . var_export($this->getZugelassene_entgelte(), true), 4);
+        $this->debug->write('nicht zugelassene entgelte: ' . var_export($this->getNicht_zugelassene_entgelte(), true), 4);
         $this->debug->write('freitext: ' . $this->getFreitext(), 4);
+        $this->debug->write('erlaubterUmfang: ' . $this->getErlaubterUmfang(), 4);
     }
     
     public function isValid() 
@@ -212,13 +233,14 @@ class FestsetzungsSammelbescheidDaten
                 $this->debug->write('countEntnahmemengen: ' . $countEntnahmemengen, 4);
                 $countEntgelte = count($this->getEntgelte());
                 $this->debug->write('countEntgelte: ' . $countEntgelte, 4);
-                $countZugelasseneEntgelte = count($this->getZugelassene_entgelte());
-                $this->debug->write('countZugelasseneEntgelte: ' . $countZugelasseneEntgelte, 4);
-                $countNichtZugelasseneEntgelte = count($this->getZugelassene_entgelte());
-                $this->debug->write('countNichtZugelasseneEntgelte: ' . $countNichtZugelasseneEntgelte, 4);
                 
-                if($countAnlagen === $countEntnahmemengen && $countAnlagen === $countEntgelte && $countEntnahmemengen === $countEntgelte
-                    && $countEntgelte === $countZugelasseneEntgelte && $countEntgelte === $countNichtZugelasseneEntgelte)
+//                 $countZugelasseneEntgelte = count($this->getZugelassene_entgelte());
+//                 $this->debug->write('countZugelasseneEntgelte: ' . $countZugelasseneEntgelte, 4);
+//                 $countNichtZugelasseneEntgelte = count($this->getNicht_zugelassene_entgelte());
+//                 $this->debug->write('countNichtZugelasseneEntgelte: ' . $countNichtZugelasseneEntgelte, 4);
+                
+                if($countAnlagen === $countEntnahmemengen && $countAnlagen === $countEntgelte && $countEntnahmemengen === $countEntgelte)
+//                     && $countEntgelte === $countZugelasseneEntgelte && $countEntgelte === $countNichtZugelasseneEntgelte)
                 {
                     return true;
                 }

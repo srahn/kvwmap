@@ -84,6 +84,7 @@ function writeFestsetzungsWordFile(&$gui, $word_template, $word_file, &$paramete
 {
     $gui->debug->write('*** create_bescheide->writeFestsetzungsWordFile ***', 4);
     $gui->debug->write('parameter: ' . var_export($parameter, true), 4);
+    $festsetzungsSammelbescheidDaten->toString();
     
     $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($word_template);
     foreach($parameter as $key => $value)
@@ -122,6 +123,7 @@ function writeFestsetzungsWordFile(&$gui, $word_template, $word_file, &$paramete
             $templateProcessor->setValue('Anlage_ID2#' . $i, $anlage->getId());
             $templateProcessor->setValue('Anlage_Name2#' . $i, $anlage->getName());
             $templateProcessor->setValue('Entnamemenge#' . $i, $entnahmemengen[$i - 1]);
+            $templateProcessor->setValue('Erlaubter_Umfang#' . $i, $festsetzungsSammelbescheidDaten->getErlaubterUmfang());
             $templateProcessor->setValue('Zugelassenes_Entgelt#' . $i, $zugelassene_entgelt[$i - 1]);
             $templateProcessor->setValue('Nicht_Zugelassenes_Entgelt#' . $i, $nicht_zugelassene_entgelt[$i - 1]);
             $templateProcessor->setValue('Entgelt#' . $i, $entgelte[$i - 1]);

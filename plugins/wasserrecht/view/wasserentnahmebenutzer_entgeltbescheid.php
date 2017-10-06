@@ -96,6 +96,12 @@ function festsetzung_erstellen(&$gui, &$wrzs)
                 {
                     if(!empty($gewaesserbenutzung))
                     {
+                        if(!empty($gewaesserbenutzung->gewaesserbenutzungUmfang) && empty($festsetzungsSammelbescheidDaten->getErlaubterUmfang()))
+                        {
+                            $erlaubterUmfang = $gewaesserbenutzung->gewaesserbenutzungUmfang->getErlaubterUmfang();
+                            $festsetzungsSammelbescheidDaten->setErlaubterUmfang($erlaubterUmfang);
+                        }
+                        
                         $teilgewasserbenutzung = null;
                         if(!empty($gewaesserbenutzung->teilgewaesserbenutzungen) && count($gewaesserbenutzung->teilgewaesserbenutzungen) > 0)
                         {
@@ -107,6 +113,7 @@ function festsetzung_erstellen(&$gui, &$wrzs)
                             if(empty($festsetzungsSammelbescheidDaten->getFreitext()))
                             {
                                 $festsetzungsSammelbescheidDaten->setFreitext($teilgewasserbenutzung->getFreitext());
+                                break;
                             }
                         }
                     }
