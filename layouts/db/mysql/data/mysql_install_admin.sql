@@ -79,7 +79,7 @@ INSERT INTO `u_funktionen` (`id`, `bezeichnung`, `link`) VALUES
 (18, 'Adressaenderungen', NULL),
 (19, 'sendeFestpunktskizze', NULL),
 (20, 'Nachweise_bearbeiten', NULL),
-(21, 'ALB-Auszug 30', NULL);
+(21, 'ALB-Auszug 30', NULL),
 (22, 'Kolibristart', NULL);
 
 
