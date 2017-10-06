@@ -111,7 +111,7 @@ class antrag {
     mkdir ($vorschaupfad,0777);
 		$nachweiseUKOpfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Nachweise-UKO/';	# Erzeuge ein Unterverzeichnis für die Nachweis-UKOs
     mkdir ($nachweiseUKOpfad,0777);
-		$uebersichtspfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokoll-Übersicht/';	# Erzeuge ein Unterverzeichnis für die Protokoll- und Übersichtsdateien
+		$uebersichtspfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/';	# Erzeuge ein Unterverzeichnis für die Protokoll- und Übersichtsdateien
     mkdir ($uebersichtspfad,0777);		
     # Führe in Schleif für alle zum Auftrag gehörenden Dokumente folgendes aus
     for ($i=0; $i<$nachweis->erg_dokumente;$i++){
@@ -346,7 +346,7 @@ class antrag {
     return $ret;
   }
 	
-	function getIntersectedFlst(){
+	function getIntersectedFlst(){	# diese Verschneidung mit den Flurstücken kann u.U. sehr lange dauern, deswegen erstmal zurückgestellt
 		$this->spatial_ref_code = EPSGCODE_ALKIS.", ".EARTH_RADIUS;
 		$sql ="SELECT DISTINCT n.flurid, n.stammnr, n.rissnummer, f.flurstueckskennzeichen,";
 		if(NACHWEIS_SECONDARY_ATTRIBUTE != '')$sql.=" n.".NACHWEIS_SECONDARY_ATTRIBUTE.",";

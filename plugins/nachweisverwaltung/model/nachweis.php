@@ -721,7 +721,7 @@ class Nachweis {
     return $errmsg;
   }
   
-  function getNachweise($id,$polygon,$gemarkung,$stammnr,$rissnr,$fortf,$art_einblenden,$richtung,$abfrage_art,$order,$antr_nr, $datum = NULL, $VermStelle = NULL, $gueltigkeit = NULL, $datum2 = NULL, $flur = NULL, $flur_thematisch = NULL, $andere_art = NULL, $suchbemerkung = NULL, $blattnr = NULL) {
+  function getNachweise($id,$polygon,$gemarkung,$stammnr,$rissnr,$fortf,$art_einblenden,$richtung,$abfrage_art,$order,$antr_nr, $datum = NULL, $VermStelle = NULL, $gueltigkeit = NULL, $datum2 = NULL, $flur = NULL, $flur_thematisch = NULL, $andere_art = NULL, $suchbemerkung = NULL, $blattnr = NULL, $stammnr2 = NULL, $rissnr2 = NULL, $fortf2 = NULL) {
 		$explosion = explode('~', $antr_nr);
 		$antr_nr = $explosion[0];
 		$stelle_id = $explosion[1];
@@ -907,20 +907,45 @@ class Nachweis {
           }
 					else{
 						if($gemarkung != ''){
-							$sql.=" AND flur.land*10000 + flur.gemarkung = '".$gemarkung."' AND st_intersects(st_transform(flur.the_geom, ".EPSGCODE."), n.the_geom)";
+							$sql.=" AND flur.land||flur.gemarkung = '".$gemarkung."' AND st_intersects(st_transform(flur.the_geom, ".EPSGCODE."), n.the_geom)";
 						}
 						if($flur != ''){
 							$sql.=" AND flur.flurnummer = ".$flur." ";
 						}
 					}
           if($stammnr!=''){
-            $sql.=" AND lower(n.stammnr)='".strtolower($stammnr)."'";
+						if($stammnr2!=''){
+							$sql.=" AND n.stammnr::integer between ".(int)$stammnr." AND ".(int)$stammnr2;
+						}
+						else{
+							if(is_numeric($stammnr)){
+								$sql.=" AND n.stammnr::integer=".$stammnr;
+							}
+							else{
+								$sql.=" AND lower(n.stammnr)='".strtolower($stammnr)."'";
+							}
+						}
           }
 	        if($rissnr!=''){
-	          $sql.=" AND n.rissnummer='".$rissnr."'";
+						if($rissnr2!=''){
+							$sql.=" AND n.rissnummer::integer between ".(int)$rissnr." AND ".(int)$rissnr2;
+						}
+						else{
+							if(is_numeric($rissnr)){
+								$sql.=" AND n.rissnummer::integer=".$rissnr;
+							}
+							else{
+								$sql.=" AND lower(n.rissnummer)='".strtolower($rissnr)."'";
+							}
+						}
 	        }
 	      	if($fortf!=''){
-	          $sql.=" AND n.fortfuehrung=".(int)$fortf;
+						if($fortf2!=''){
+							$sql.=" AND n.fortfuehrung between ".(int)$fortf." AND ".(int)$fortf2;
+						}
+						else{
+							$sql.=" AND n.fortfuehrung=".(int)$fortf;
+						}
 	        }
 					if($blattnr!=''){
 	          $sql.=" AND n.blattnummer='".$blattnr."'";

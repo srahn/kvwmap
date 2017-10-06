@@ -1437,3 +1437,15 @@ tbody.gle tr:hover {
 .scrolltable td {
 	padding: 5 0 5 0;
 }
+
+.toggle_fa_off i{
+	color: #888888;
+}
+
+.toggle_fa_off:hover i{
+	color: #444444;
+}
+
+.toggle_fa_on i{
+	color: #444444;
+}
