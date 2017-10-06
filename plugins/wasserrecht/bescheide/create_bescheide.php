@@ -59,8 +59,11 @@
 //     }
 // }
 
-function writeWordFile($word_template, $word_file, &$parameter)
+function writeWordFile(&$gui, $word_template, $word_file, &$parameter)
 {
+    $gui->debug->write('*** create_bescheide->writeWordFile ***', 4);
+    $gui->debug->write('parameter: ' . var_export($parameter, true), 4);
+    
     $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($word_template);
     foreach($parameter as $key => $value)
     {
@@ -69,13 +72,64 @@ function writeWordFile($word_template, $word_file, &$parameter)
     $templateProcessor->saveAs($word_file);
 }
 
-function writeFestsetzungsWordFile($word_template, $word_file, $festsetzungsNutzer, $festsetzungsFreitext)
+function writeAufforderungZurErklaerungWordFile(&$gui, $word_template, $word_file, &$parameter)
 {
+    $gui->debug->write('*** create_bescheide->writeAufforderungZurErklaerungWordFile ***', 4);
+    $gui->debug->write('parameter: ' . var_export($parameter, true), 4);
+    
+    writeWordFile($gui, $word_template, $word_file, $parameter);
+}
+
+function writeFestsetzungsWordFile(&$gui, $word_template, $word_file, &$parameter, &$festsetzungsSammelbescheidDaten)
+{
+    $gui->debug->write('*** create_bescheide->writeFestsetzungsWordFile ***', 4);
+    $gui->debug->write('parameter: ' . var_export($parameter, true), 4);
+    
     $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($word_template);
-    $templateProcessor->setValue('festsetzung_nutzer', $festsetzungsNutzer);
-    $templateProcessor->setValue('festsetzung_freitext', $festsetzungsFreitext);
-//     $timestamp = time();
-//     $datum = date("d.m.Y", $timestamp);
-//     $templateProcessor->setValue('datum', $datum);
+    foreach($parameter as $key => $value)
+    {
+        $templateProcessor->setValue($key, $value);
+    }
+    
+    $anlagen = $festsetzungsSammelbescheidDaten->getAnlagen();
+    
+    $templateProcessor->cloneRow('n1', sizeof($anlagen));
+    $i = 1;
+    foreach($anlagen as $anlage)
+    {
+        if(!empty($anlage))
+        {
+            $templateProcessor->setValue('n1#' . $i, $i);
+            $templateProcessor->setValue('Anlage_ID1#' . $i, $anlage->getId());
+            $templateProcessor->setValue('Anlage_Name1#' . $i, $anlage->getName());
+            
+            $i++;
+        }
+    }
+    
+    $entnahmemengen = $festsetzungsSammelbescheidDaten->getEntnahmemengen();
+    $entgelte = $festsetzungsSammelbescheidDaten->getEntgelte();
+    $zugelassene_entgelt = $festsetzungsSammelbescheidDaten->getZugelassene_entgelte();
+    $nicht_zugelassene_entgelt = $festsetzungsSammelbescheidDaten->getNicht_zugelassene_entgelte();
+    
+    $templateProcessor->cloneRow('n2', sizeof($anlagen));
+    $i = 1;
+    foreach($anlagen as $anlage)
+    {
+        if(!empty($anlage))
+        {
+            $templateProcessor->setValue('n2#' . $i, $i);
+            $templateProcessor->setValue('Anlage_ID2#' . $i, $anlage->getId());
+            $templateProcessor->setValue('Anlage_Name2#' . $i, $anlage->getName());
+            $templateProcessor->setValue('Entnamemenge#' . $i, $entnahmemengen[$i - 1]);
+            $templateProcessor->setValue('Zugelassenes_Entgelt#' . $i, $zugelassene_entgelt[$i - 1]);
+            $templateProcessor->setValue('Nicht_Zugelassenes_Entgelt#' . $i, $nicht_zugelassene_entgelt[$i - 1]);
+            $templateProcessor->setValue('Entgelt#' . $i, $entgelte[$i - 1]);
+            
+            $i++;
+        }
+    }
+    
     $templateProcessor->saveAs($word_file);
+
 }

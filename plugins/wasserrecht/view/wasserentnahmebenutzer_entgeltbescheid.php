@@ -21,7 +21,6 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
     if(!empty($entgeltbescheid_erstellen) && !empty($auswahl_checkbox_array) && is_array($auswahl_checkbox_array))
     {
         $wrzs = array();
-        $gwb = array();
         
         foreach ($auswahl_checkbox_array as $auswahl_checkbox) 
         {
@@ -36,29 +35,14 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
                 if(!empty($wrz))
                 {
                     $wrzs[] = $wrz;
-                    
-                    // 		        echo "<br />wrz id: " . $wrz->getId();
-                    $gb = new Gewaesserbenutzungen($this);
-                    $gewaesserbenutzungen = $gb->find_where_with_subtables('wasserrechtliche_zulassungen=' . $wrz->getId());
-                    $gewaesserbenutzung = null;
-                    if(!empty($gewaesserbenutzungen) && count($gewaesserbenutzungen) > 0 && !empty($gewaesserbenutzungen[0]))
-                    {
-                        $gewaesserbenutzung = $gewaesserbenutzungen[0];
-                    }
-                    // 		        echo "<br />gewaesserbenutzung: " . $gewaesserbenutzung[0]->getId();
-                    
-                    if(!empty($gewaesserbenutzung))
-                    {
-                        $gwb[] = $gewaesserbenutzung;
-                    }
                 }
             }
         }
         
-        $returnValue = festsetzung_erstellen($this, $wrzs, $gwb);
+        $returnValue = festsetzung_erstellen($this, $wrzs);
         if($returnValue)
         {
-            $this->add_message('notice', 'Festetzung erfolgreich erstellt!');
+            $this->add_message('notice', 'Festsetzung erfolgreich erstellt!');
         }
         else
         {
@@ -67,14 +51,47 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
     }
 }
 
-function festsetzung_erstellen(&$gui, &$wrzs, &$gewaesserbenutzungen)
+function festsetzung_erstellen(&$gui, &$wrzs)
 {
-    if(count($wrzs) > 0 && count($gewaesserbenutzungen) > 0 && count($wrzs) === count($gewaesserbenutzungen))
+    $gui->debug->write('*** wasserentnahmebenutzer_entgeltbescheid->festsetzung_erstellen ***', 4);
+    
+    if(!empty($wrzs) && count($wrzs) > 0 && !empty($wrzs[0]))
     {
+        $festsetzungsSammelbescheidDaten = new FestsetzungsSammelbescheidDaten($gui);
+        
         foreach ($wrzs as $wrz)
         {
             if(!empty($wrz))
             {
+                //get all dependent objects
+                $wrz->getDependentObjects($gui, $wrz);
+                
+                //alle Daten für den Festsetzungsbescheid sammeln
+                if(empty($festsetzungsSammelbescheidDaten->getWrzs()))
+                {
+                    $festsetzungsSammelbescheidDaten->addWrz($wrz);
+                }
+                $festsetzungsSammelbescheidDaten->addAnlage($wrz->anlagen);
+                $festsetzungsSammelbescheidDaten->addEntnahmemenge($wrz->getFestsetzungSummeEntnahmemengen());
+                $festsetzungsSammelbescheidDaten->addEntgelt($wrz->getFestsetzungSummeEntgelt());
+                $festsetzungsSammelbescheidDaten->addNicht_zugelassenes_entgelt($wrz->getFestsetzungSummeNichtZugelassenesEntgelt());
+                $festsetzungsSammelbescheidDaten->addZugelassenes_entgelt($wrz->getFestsetzungSummeZugelassenesEntgelt());
+                
+                //bestehendes Festsetzungsdokument löschen, wenn vorhanden
+                if($wrz->isFestsetzungFreigegeben() && !$wrz->isFestsetzungDokumentErstellt())
+                {
+                    if(!empty($wrz->getFestsetzungDokument()))
+                    {
+                        $oldFestsetzungsDocumentId = $wrz->getFestsetzungDokument();
+                        $wrz->deleteFestsetzungDokument();
+                        
+                        $festsetzung_delete_dokument = new Dokument($gui);
+                        $festsetzung_delete_dokument->deleteDocument($oldFestsetzungsDocumentId);
+                    }
+                }
+                
+                //Freitext bekommen
+                $gewaesserbenutzungen = $wrz->gewaesserbenutzungen;
                 foreach ($gewaesserbenutzungen as $gewaesserbenutzung)
                 {
                     if(!empty($gewaesserbenutzung))
@@ -87,48 +104,140 @@ function festsetzung_erstellen(&$gui, &$wrzs, &$gewaesserbenutzungen)
                         
                         if(!empty($teilgewasserbenutzung))
                         {
-                            if($wrz->isFestsetzungFreigegeben() && !$wrz->isFestsetzungDokumentErstellt())
+                            if(empty($festsetzungsSammelbescheidDaten->getFreitext()))
                             {
-                                /**
-                                 * Fesetzungsbescheid erstellen
-                                 */
-                                //Festsetzungsdokument anlegen
-                                if(!empty($wrz->getFestsetzungDokument()))
-                                {
-                                    $oldFestsetzungsDocumentId = $wrz->getFestsetzungDokument();
-                                    $wrz->deleteFestsetzungDokument();
-                                    
-                                    $festsetzung_delete_dokument = new Dokument($gui);
-                                    $festsetzung_delete_dokument->deleteDocument($oldFestsetzungsDocumentId);
-                                }
-                                
-                                //get a unique word file name
-                                $uniqid = uniqid();
-                                $word_file_name = $uniqid . ".docx";
-                                $word_file = WASSERRECHT_DOCUMENT_PATH . $word_file_name;
-                                
-                                //get the parameter
-                                $festsetzungsNutzer = $gui->user->Vorname . ' ' . $gui->user->Name;
-                                $freitext = $teilgewasserbenutzung->getFreitext();
-                                
-                                //write the word file
-                                writeFestsetzungsWordFile(PLUGINS . 'wasserrecht/templates/Festsetzung_Sammelbescheid.docx', $word_file, $festsetzungsNutzer, $freitext);
-                                
-                                //write the document path to the database
-                                $festsetzung_dokument = new Dokument($gui);
-                                $festsetzung_dokument_identifier = $festsetzung_dokument->createDocument('FestsetzungBescheid_' . $wrz->getId(), $word_file_name);
-                                $wrz->insertFestsetzungDokument($festsetzung_dokument_identifier);
-                                
-                                return true;
+                                $festsetzungsSammelbescheidDaten->setFreitext($teilgewasserbenutzung->getFreitext());
                             }
                         }
                     }
                 }
             }
         }
+        
+        //write the document path to the database
+        $word_file_name = festsetzung_dokument_erstellen($gui, $festsetzungsSammelbescheidDaten);
+        if(!empty($word_file_name))
+        {
+            $festsetzung_dokument = new Dokument($gui);
+            $festsetzung_dokument_identifier = $festsetzung_dokument->createDocument('FestsetzungBescheid_' . basename($word_file_name, '.docx'), $word_file_name);
+            
+            foreach ($wrzs as $wrz)
+            {
+                $wrz->insertFestsetzungDokument($festsetzung_dokument_identifier);
+            }
+            
+            return true;
+        }
     }
     
     return false;
+}
+
+/**
+ * Fesetzungsbescheid erstellen
+ */
+function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten)
+{
+    $gui->debug->write('*** wasserentnahmebenutzer_entgeltbescheid->festsetzung_dokument_erstellen ***', 4);
+    $festsetzungsSammelbescheidDaten->toString();
+    $gui->debug->write('festsetzungsSammelbescheidDaten->isValid(): ' . var_export($festsetzungsSammelbescheidDaten->isValid(), true), 4);
+    
+    if($festsetzungsSammelbescheidDaten->isValid())
+    {
+        $wrz = $festsetzungsSammelbescheidDaten->getWrzs()[0];
+        
+        //get a unique word file name
+        $uniqid = uniqid();
+        $word_file_name = $uniqid . ".docx";
+        $word_file = WASSERRECHT_DOCUMENT_PATH . $word_file_name;
+        $gui->debug->write('word_file_name: ' . $word_file_name, 4);
+        
+        //get the parameter
+        $datum = date("d.m.Y");
+        $erhebungsjahr = htmlspecialchars($_REQUEST['erhebungsjahr']);
+        
+        $bearbeiter = $gui->user->Name . ' ' . $gui->user->Vorname;
+        $bearbeiter_telefon = $gui->user->phon;
+        $bearbeiter_email = $gui->user->email;
+        if(!empty($wrz->behoerde))
+        {
+            $behoerde_name = $wrz->behoerde->getName();
+            
+            if(!empty($wrz->behoerde->adresse))
+            {
+                $bearbeiter_plz = $wrz->behoerde->adresse->getPLZ();
+                $bearbeiter_ort = $wrz->behoerde->adresse->getOrt();
+                
+                $behoerde_strasse = $wrz->behoerde->adresse->getStrasse();
+                $behoerde_hausnummer = $wrz->behoerde->adresse->getHausnummer();
+                $behoerde_plz = $wrz->behoerde->adresse->getPLZ();
+                $behoerde_ort = $wrz->behoerde->adresse->getOrt();
+            }
+            
+            if(!empty($wrz->behoerde->art))
+            {
+                $behoerde_art_name = $wrz->behoerde->art->getName();
+            }
+            
+            if(!empty($wrz->behoerde->konto))
+            {
+                $behoerde_iban = $wrz->behoerde->konto->getIBAN();
+                $behoerde_bankname = $wrz->behoerde->konto->getBankname();
+                $behoerde_bic = $wrz->behoerde->konto->getBIC();
+            }
+        }
+        
+        if(!empty($wrz->adressat))
+        {
+            $adressat_id = $wrz->adressat->getId();
+            $adressat_name = $wrz->adressat->getName();
+            
+            if(!empty($wrz->adressat->adresse))
+            {
+                $adressat_strasse = $wrz->adressat->adresse->getStrasse();
+                $adressat_hausnummer = $wrz->adressat->adresse->getHausnummer();
+                $adressat_plz = $wrz->adressat->adresse->getPLZ();
+                $adressat_ort = $wrz->adressat->adresse->getOrt();
+            }
+        }
+        
+        $erklaerung_datum = $wrz->getErklaerungDatum();
+        
+        $parameter = [
+            "Datum" => $datum,
+            "Erhebungsjahr" => $erhebungsjahr,
+            "Bearbeiter" => $bearbeiter,
+            "Bearbeiter_Telefon" => $bearbeiter_telefon,
+            "Bearbeiter_EMail" => $bearbeiter_email,
+            "Bearbeiter_PLZ" => $bearbeiter_plz,
+            "Bearbeiter_Ort" => $bearbeiter_ort,
+            "Adressat_ID" => $adressat_id,
+            "Behoerde_Name" => $behoerde_name,
+            "Behoerde_Strasse" => $behoerde_strasse,
+            "Behoerde_Hnr" => $behoerde_hausnummer,
+            "Behoerde_PLZ" => $behoerde_plz,
+            "Behoerde_Ort" => $behoerde_ort,
+            "Behoerde_Art_Name" => $behoerde_art_name,
+            "Behoerde_IBAN" => $behoerde_iban,
+            "Behoerde_Bankname" => $behoerde_bankname,
+            "Behoerde_BIC" => $behoerde_bic,
+            "Adressat_Name" => $adressat_name,
+            "Adressat_Strasse" => $adressat_strasse,
+            "Adressat_Hnr" => $adressat_hausnummer,
+            "Adressat_PLZ" => $adressat_plz,
+            "Adressat_Ort" => $adressat_ort,
+            "Adressat_Ort" => $adressat_ort,
+            "Erklaerung_Datum" => $erklaerung_datum,
+            "Festsetzung_Freitext" => $festsetzungsSammelbescheidDaten->getFreitext()
+        ];
+        
+        //write the word file
+        writeFestsetzungsWordFile($gui, PLUGINS . 'wasserrecht/templates/Festsetzung_Sammelbescheid.docx', $word_file, $parameter, $festsetzungsSammelbescheidDaten);
+        
+        return $word_file_name;
+    }
+    
+    return null;
 }
 ?>
 
@@ -217,7 +326,7 @@ function festsetzung_erstellen(&$gui, &$wrzs, &$gewaesserbenutzungen)
                     		          			     if($wrz->isFestsetzungFreigegeben())
                     		          			     {
 //                     		          			         $gewaesserbenutzung->getUmfangAllerTeilbenutzungen()
-                    		          			         $entnahmemenge = $wrz->getFestsetzungSummeZugelasseneEntnahmemengen();
+                    		          			         $entnahmemenge = $wrz->getFestsetzungSummeEntnahmemengen();
                     		          			         $gesamtEntnahmemenge = $gesamtEntnahmemenge + $entnahmemenge;
                     		          			         
                     		          			         echo $entnahmemenge;
@@ -317,6 +426,8 @@ function festsetzung_erstellen(&$gui, &$wrzs, &$gewaesserbenutzungen)
     			{
     			    $wasserrechtlicheZulassungen = $wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen;
     			    
+    			    $dokumentNames = array();
+    			    
     			    foreach($wasserrechtlicheZulassungen AS $wrz)
     			    {
     			        if(!empty($wrz) && in_array($getYear, $wrz->gueltigkeitsJahr))
@@ -325,8 +436,10 @@ function festsetzung_erstellen(&$gui, &$wrzs, &$gewaesserbenutzungen)
     			            {
     			                if(empty($getAdressat) || $getAdressat === $wrz->adressat->getId())
     			                {
-    			                    if($wrz->isFestsetzungDokumentErstellt())
+    			                    $this->debug->write('dokumentNames: ' . var_export($dokumentNames, true), 4);
+    			                    if($wrz->isFestsetzungDokumentErstellt() && !in_array($wrz->festsetzung_dokument->getId(), $dokumentNames))
     			                    {
+    			                        $dokumentNames[] = $wrz->festsetzung_dokument->getId();
     			                    ?>
     				                    <div class="wasserrecht_display_table_row">
                         					<div class="wasserrecht_display_table_cell_caption">

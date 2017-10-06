@@ -7,7 +7,8 @@ INSERT INTO wasserrecht.fiswrv_adresse (strasse, hausnummer, plz, ort) VALUES ('
 INSERT INTO wasserrecht.fiswrv_adresse (strasse, hausnummer, plz, ort) VALUES ('Marienplatz', '1', 19053, 'Schwerin');
 INSERT INTO wasserrecht.fiswrv_adresse (strasse, hausnummer, plz, ort) VALUES ('Am Wall', '3-5', 18273, 'Güstrow');
 INSERT INTO wasserrecht.fiswrv_adresse (strasse, hausnummer, plz, ort) VALUES ('Putlitzer Str.', '25', 19370, 'Parchim');
-INSERT INTO wasserrecht.fiswrv_konto (name, iban, bic, verwendungszweck, personenkonto, kassenzeichen) VALUES ('Testkonto', 'DE 124455678990', '123456789', 'Test Verwendungszweck', 'r42551515', '51515');
+INSERT INTO wasserrecht.fiswrv_konto (name, iban, bic, bankname, verwendungszweck, personenkonto, kassenzeichen) VALUES ('Testkonto 1', 'DE 124455678990', '123456789', 'Dt. Bundesbank, Filiale Rostock', 'Test Verwendungszweck 1', 'r12345678', '12345');
+INSERT INTO wasserrecht.fiswrv_konto (name, iban, bic, bankname, verwendungszweck, personenkonto, kassenzeichen) VALUES ('Testkonto 2', 'DE 098765432100', '987654332', 'Sparkasse', 'Test Verwendungszweck 2', 'r98765432', '98765');
 
 INSERT INTO wasserrecht.fiswrv_betriebszustand (name) VALUES ('WFBB');
 INSERT INTO wasserrecht.fiswrv_messtischblatt (nummer) VALUES (1445);
@@ -18,8 +19,8 @@ INSERT INTO wasserrecht.fiswrv_mengenbestimmung (name) VALUES ('Schätzung');
 
 INSERT INTO wasserrecht.fiswrv_behoerde_art(name, abkuerzung) VALUES ('Untere Wasserbehörde', 'UWB');
 INSERT INTO wasserrecht.fiswrv_behoerde_art(name, abkuerzung) VALUES ('Staatliches Amt für Landwirtschaft und Umwelt', 'StALU');
-INSERT INTO wasserrecht.fiswrv_behoerde (name, abkuerzung, art, adresse) VALUES ('Landrat Landkreis Rostock', 'LR LRO', 1, 3);
-INSERT INTO wasserrecht.fiswrv_behoerde (name, abkuerzung, art, adresse) VALUES ('Landrat Ludwigslust-Parchim', 'LR LUP', 1, 4);
+INSERT INTO wasserrecht.fiswrv_behoerde (name, abkuerzung, art, adresse, konto) VALUES ('Landrat Landkreis Rostock', 'LR LRO', 1, 3, 1);
+INSERT INTO wasserrecht.fiswrv_behoerde (name, abkuerzung, art, adresse, konto) VALUES ('Landrat Ludwigslust-Parchim', 'LR LUP', 1, 4, 2);
 INSERT INTO wasserrecht.fiswrv_behoerde (name, abkuerzung, art) VALUES ('Landrat Mecklenburgische Seenplatte', 'LR MSE', 1);
 INSERT INTO wasserrecht.fiswrv_behoerde (name, abkuerzung, art) VALUES ('Landrat Nordwestmecklenburg', 'LR NWM', 1);
 INSERT INTO wasserrecht.fiswrv_behoerde (name, abkuerzung, art) VALUES ('Landrat Vorpommern-Greifswald', 'LR VG', 1);

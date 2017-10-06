@@ -5,5 +5,6 @@ class Behoerde extends WrPgObject {
 	
 	public $adresse;
 	public $art;
+	public $konto;
 }
 ?>

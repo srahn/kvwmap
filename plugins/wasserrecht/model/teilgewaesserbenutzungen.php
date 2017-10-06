@@ -158,10 +158,12 @@ class Teilgewaesserbenutzungen extends WrPgObject {
 	
 	public function getEntgeltsatz($artBenutzungId, $befreit, $zugelassen, $ermaessigt)
 	{
-// 	    var_dump("artBenutzungId: " . $artBenutzungId);
-// 	    var_dump("befreit: " . $befreit);
-// 	    var_dump("zugelassen: " . $zugelassen);
-// 	    var_dump("ermaessigt: " . $ermaessigt);
+	    $this->debug->write('*** Teilgewaesserbenutzungen->getEntgeltsatz ***', 4);
+	    
+	    $this->debug->write('artBenutzungId: ' . var_export($artBenutzungId, true), 4);
+	    $this->debug->write('befreit: ' . var_export($befreit, true), 4);
+	    $this->debug->write('zugelassen: ' . var_export($zugelassen, true), 4);
+	    $this->debug->write('ermaessigt: ' . var_export($ermaessigt, true), 4);
 	    
 	    if(!empty($this->entgeltsatz))
 	    {
@@ -303,14 +305,16 @@ class Teilgewaesserbenutzungen extends WrPgObject {
 	    return $this->getId();
 	}
 	
-	public function updateTeilgewaesserbenutzung_Bearbeiter($art_benutzung = NULL, $wiedereinleitung_bearbeiter = NULL, $befreiungstatbestaende = NULL, $freitext = NULL, $berechneter_entgeltsatz = NULL, $berechnetes_entgelt = NULL)
+	public function updateTeilgewaesserbenutzung_Bearbeiter($art_benutzung = NULL, $wiedereinleitung_bearbeiter = NULL, $befreiungstatbestaende = NULL, $freitext = NULL, $berechneter_entgeltsatz_zugelassen = NULL,  $berechneter_entgeltsatz_nicht_zugelassen = NULL, $berechnetes_entgelt_zugelassen = NULL, $berechnetes_entgelt_nicht_zugelassen = NULL)
 	{
 	    $this->updateData('art_benutzung', $art_benutzung);
 	    $this->updateData('wiedereinleitung_bearbeiter', $wiedereinleitung_bearbeiter);
 	    $this->updateData('befreiungstatbestaende', $befreiungstatbestaende);
 	    $this->updateData('freitext', $freitext);
-	    $this->updateData('berechneter_entgeltsatz', $berechneter_entgeltsatz);
-	    $this->updateData('berechnetes_entgelt', $berechnetes_entgelt);
+	    $this->updateData('berechneter_entgeltsatz_zugelassen', $berechneter_entgeltsatz_zugelassen);
+	    $this->updateData('berechneter_entgeltsatz_nicht_zugelassen', $berechneter_entgeltsatz_nicht_zugelassen);
+	    $this->updateData('berechnetes_entgelt_zugelassen', $berechnetes_entgelt_zugelassen);
+	    $this->updateData('berechnetes_entgelt_nicht_zugelassen', $berechnetes_entgelt_nicht_zugelassen);
 	    
 	    $this->debug->write('kvp update: ' . var_export($this->getKVP(), true), 4);
 	    

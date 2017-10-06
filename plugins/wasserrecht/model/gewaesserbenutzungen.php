@@ -99,8 +99,10 @@ class Gewaesserbenutzungen extends WrPgObject {
 	
 	public function getTeilgewaesserbenutzungNichtZugelasseneMenge($teilgewaesserbenutzungId, &$zugelassenerUmfang)
 	{
-// 	    echo "teilgewaesserbenutzungId: " . $teilgewaesserbenutzungId . "<br/>";
-// 	    echo "zugelassenerUmfang: " . $zugelassenerUmfang . "<br/>";
+	    $this->debug->write('*** Gewaesserbenutzungen->getTeilgewaesserbenutzungNichtZugelasseneMenge ***', 4);
+	    
+	    $this->debug->write('teilgewaesserbenutzungId: ' . var_export($teilgewaesserbenutzungId, true), 4);
+	    $this->debug->write('zugelassenerUmfang: ' . var_export($zugelassenerUmfang, true), 4);
 	    
 	    if(!empty($teilgewaesserbenutzungId))
 	    {
@@ -181,12 +183,14 @@ class Gewaesserbenutzungen extends WrPgObject {
 	
 	public function getTeilgewaesserbenutzungEntgeltsatz($teilgewaesserbenutzung, $getArtBenutzung, $getBefreiungstatbestaende, $getWiedereinleitungBearbeiter, &$zugelassenesEntnahmeEntgelt, &$nichtZugelassenesEntnahmeEntgelt, &$zugelassenerUmfang)
 	{
-// 	    $this->debug->write('getTeilgewaesserbenutzungEntgeltsatz getArtBenutzung:' . var_export($getArtBenutzung, true), 4);
-// 	    $this->debug->write('getTeilgewaesserbenutzungEntgeltsatz getBefreiungstatbestaende:' . var_export($getBefreiungstatbestaende, true), 4);
-// 	    $this->debug->write('getTeilgewaesserbenutzungEntgeltsatz getWiedereinleitungBearbeiter:' . var_export($getWiedereinleitungBearbeiter, true), 4);
-// 	    $this->debug->write('getTeilgewaesserbenutzungEntgeltsatz zugelassenesEntnahmeEntgelt:' . var_export($zugelassenesEntnahmeEntgelt, true), 4);
-// 	    $this->debug->write('getTeilgewaesserbenutzungEntgeltsatz nichtZugelassenesEntnahmeEntgelt:' . var_export($nichtZugelassenesEntnahmeEntgelt, true), 4);
-// 	    $this->debug->write('getTeilgewaesserbenutzungEntgeltsatz zugelassenerUmfang:' . var_export($zugelassenerUmfang, true), 4);
+	    $this->debug->write('*** Gewaesserbenutzungen->getTeilgewaesserbenutzungEntgeltsatz ***', 4);
+	    
+	    $this->debug->write('getArtBenutzung: ' . var_export($getArtBenutzung, true), 4);
+	    $this->debug->write('getBefreiungstatbestaende: ' . var_export($getBefreiungstatbestaende, true), 4);
+	    $this->debug->write('getWiedereinleitungBearbeiter: ' . var_export($getWiedereinleitungBearbeiter, true), 4);
+	    $this->debug->write('zugelassenesEntnahmeEntgelt: ' . var_export($zugelassenesEntnahmeEntgelt, true), 4);
+	    $this->debug->write('nichtZugelassenesEntnahmeEntgelt: ' . var_export($nichtZugelassenesEntnahmeEntgelt, true), 4);
+	    $this->debug->write('zugelassenerUmfang: ' . var_export($zugelassenerUmfang, true), 4);
 	    
 	    if(!empty($teilgewaesserbenutzung))
 	    {
@@ -197,28 +201,50 @@ class Gewaesserbenutzungen extends WrPgObject {
 	        {
 	            if($teilbenutzungNichtZugelasseneMenge === $teilgewaesserbenutzung->getUmfang())
 	            {
-	                return $teilgewaesserbenutzung->getEntgeltsatz($getArtBenutzung, $getBefreiungstatbestaende, false, $getWiedereinleitungBearbeiter);
+	                $entgeltsatz_nicht_zugelassen = $teilgewaesserbenutzung->getEntgeltsatz($getArtBenutzung, $getBefreiungstatbestaende, false, $getWiedereinleitungBearbeiter);
+	                $returnArray = array(null, $entgeltsatz_nicht_zugelassen);
+	                $this->debug->write('returnArray: ' . var_export($returnArray, true), 4);
+	                return $returnArray;
 	            }
 	            else
 	            {
-	                return $teilgewaesserbenutzung->getEntgeltsatz($getArtBenutzung, $getBefreiungstatbestaende, true, $getWiedereinleitungBearbeiter) . " (zugelassener Umfang)<br />" . $teilgewaesserbenutzung->getEntgeltsatz($getArtBenutzung, $getBefreiungstatbestaende, false, $getWiedereinleitungBearbeiter) . " (nicht zugelassener Umfang)";
+	                $entgeltsatz_zugelassen = $teilgewaesserbenutzung->getEntgeltsatz($getArtBenutzung, $getBefreiungstatbestaende, true, $getWiedereinleitungBearbeiter);
+	                $entgeltsatz_nicht_zugelassen = $teilgewaesserbenutzung->getEntgeltsatz($getArtBenutzung, $getBefreiungstatbestaende, false, $getWiedereinleitungBearbeiter);
+	                $returnArray = array($entgeltsatz_zugelassen, $entgeltsatz_nicht_zugelassen);
+	                $this->debug->write('returnArray: ' . var_export($returnArray, true), 4);
+	                return $returnArray;
 	            }
 	        }
 	        else
 	        {
-	            return $teilgewaesserbenutzung->getEntgeltsatz($getArtBenutzung, $getBefreiungstatbestaende, true, $getWiedereinleitungBearbeiter);
+	            $entgeltsatz_zugelassen = $teilgewaesserbenutzung->getEntgeltsatz($getArtBenutzung, $getBefreiungstatbestaende, true, $getWiedereinleitungBearbeiter);
+	            $returnArray = array($entgeltsatz_zugelassen);
+	            $this->debug->write('returnArray: ' . var_export($returnArray, true), 4);
+	            return $returnArray;
 	        }
 	    }
 	    
-	    return "Error";
+	    $returnArray = array(null, null, "Error");
+	    $this->debug->write('returnArray: ' . var_export($returnArray, true), 4);
+	    return $returnArray;
 	}
 	
 	public function getTeilgewaesserbenutzungEntgelt($teilgewaesserbenutzung, $getArtBenutzung, $getBefreiungstatbestaende, $getWiedereinleitungBearbeiter, &$zugelassenesEntnahmeEntgelt, &$nichtZugelassenesEntnahmeEntgelt, &$zugelassenerUmfang)
 	{
+	    $this->debug->write('*** Gewaesserbenutzungen->getTeilgewaesserbenutzungEntgelt ***', 4);
+	    
+	    $this->debug->write('getArtBenutzung: ' . var_export($getArtBenutzung, true), 4);
+	    $this->debug->write('getBefreiungstatbestaende: ' . var_export($getBefreiungstatbestaende, true), 4);
+	    $this->debug->write('getWiedereinleitungBearbeiter: ' . var_export($getWiedereinleitungBearbeiter, true), 4);
+	    $this->debug->write('zugelassenesEntnahmeEntgelt: ' . var_export($zugelassenesEntnahmeEntgelt, true), 4);
+	    $this->debug->write('nichtZugelassenesEntnahmeEntgelt: ' . var_export($nichtZugelassenesEntnahmeEntgelt, true), 4);
+	    $this->debug->write('zugelassenerUmfang: ' . var_export($zugelassenerUmfang, true), 4);
+	    
 	    if(!empty($teilgewaesserbenutzung))
 	    {
 	        $teilbenutzungNichtZugelasseneMenge = $this->getTeilgewaesserbenutzungNichtZugelasseneMenge($teilgewaesserbenutzung->getId(), $zugelassenerUmfang);
-// 	        echo "teilbenutzungNichtZugelasseneMenge: " . $teilbenutzungNichtZugelasseneMenge . "<br/>";
+	        $this->debug->write('teilbenutzungNichtZugelasseneMenge: ' . var_export($teilbenutzungNichtZugelasseneMenge, true), 4);
+	        
 	        if($teilbenutzungNichtZugelasseneMenge > 0)
 	        {
 	            if($teilbenutzungNichtZugelasseneMenge === $teilgewaesserbenutzung->getUmfang())
@@ -226,17 +252,21 @@ class Gewaesserbenutzungen extends WrPgObject {
 	                $entnahmeEntgeltNichtErlaubt = $teilgewaesserbenutzung->getEntgelt($teilgewaesserbenutzung->getUmfang(), $getArtBenutzung, $getBefreiungstatbestaende, false, $getWiedereinleitungBearbeiter);
 	                $nichtZugelassenesEntnahmeEntgelt = $nichtZugelassenesEntnahmeEntgelt + $entnahmeEntgeltNichtErlaubt;
 	                
-	                return $entnahmeEntgeltNichtErlaubt;
+	                $returnArray = array(null, $entnahmeEntgeltNichtErlaubt);
+	                $this->debug->write('returnArray: ' . var_export($returnArray, true), 4);
+	                return $returnArray;
 	            }
 	            else
 	            {
 	                $entnahmeEntgeltNichtErlaubt = $teilgewaesserbenutzung->getEntgelt($teilbenutzungNichtZugelasseneMenge, $getArtBenutzung, $getBefreiungstatbestaende, false, $getWiedereinleitungBearbeiter);
 	                $nichtZugelassenesEntnahmeEntgelt =  $nichtZugelassenesEntnahmeEntgelt + $entnahmeEntgeltNichtErlaubt;
 	                
-	                $entnahmeEntgeltErlaubt = $teilgewaesserbenutzung->getEntgelt($this->gewaesserbenutzungUmfang->getErlaubterUmfang(), $getArtBenutzung, $getBefreiungstatbestaende, true, $getWiedereinleitungBearbeiter);
+	                $entnahmeEntgeltErlaubt = $teilgewaesserbenutzung->getEntgelt($teilgewaesserbenutzung->getUmfang() - $teilbenutzungNichtZugelasseneMenge, $getArtBenutzung, $getBefreiungstatbestaende, true, $getWiedereinleitungBearbeiter);
 	                $zugelassenesEntnahmeEntgelt = $zugelassenesEntnahmeEntgelt + $entnahmeEntgeltErlaubt;
 	                
-	                return $entnahmeEntgeltErlaubt + $entnahmeEntgeltNichtErlaubt;
+	                $returnArray = array($entnahmeEntgeltErlaubt, $entnahmeEntgeltNichtErlaubt);
+	                $this->debug->write('returnArray: ' . var_export($returnArray, true), 4);
+	                return $returnArray;
 	            }
 	        }
 	        else
@@ -244,11 +274,15 @@ class Gewaesserbenutzungen extends WrPgObject {
 	            $entnahmeEntgeltErlaubt = $teilgewaesserbenutzung->getEntgelt($teilgewaesserbenutzung->getUmfang(), $getArtBenutzung, $getBefreiungstatbestaende, true, $getWiedereinleitungBearbeiter);
 	            $zugelassenesEntnahmeEntgelt = $zugelassenesEntnahmeEntgelt + $entnahmeEntgeltErlaubt;
 	            
-	            return $entnahmeEntgeltErlaubt;
+	            $returnArray = array($entnahmeEntgeltErlaubt);
+	            $this->debug->write('returnArray: ' . var_export($returnArray, true), 4);
+	            return $returnArray;
 	        }
 	    }
 	    
-	    return "Error";
+	    $returnArray = array(null, null, "Error");
+	    $this->debug->write('returnArray: ' . var_export($returnArray, true), 4);
+	    return $returnArray;
 	}
 	
 	public function getEntnahmemenge($zugelassen)

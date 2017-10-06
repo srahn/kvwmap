@@ -44,6 +44,7 @@ CREATE TABLE wasserrecht.fiswrv_konto(
 	name varchar(255),
 	iban varchar(22),
 	bic varchar(11),
+	bankname varchar(255),
 	verwendungszweck varchar(255),
 	personenkonto varchar(255),
 	kassenzeichen varchar(255)
@@ -68,7 +69,8 @@ CREATE TABLE wasserrecht.fiswrv_behoerde(
   	abkuerzung varchar(100),
   	status varchar(100),
   	adresse integer REFERENCES wasserrecht.fiswrv_adresse(id),
-  	art integer REFERENCES wasserrecht.fiswrv_behoerde_art(id)
+  	art integer REFERENCES wasserrecht.fiswrv_behoerde_art(id),
+  	konto integer REFERENCES wasserrecht.fiswrv_konto(id)
 ) WITH OIDS;
 
 -------------
@@ -225,7 +227,11 @@ CREATE TABLE wasserrecht.fiswrv_wasserrechtliche_zulassungen(
 	festsetzung_dokument integer REFERENCES wasserrecht.fiswrv_dokument(id),
 	festsetzung_dokument_datum date,
 	festsetzung_nutzer text,
+	festsetzung_summe_nicht_zugelassene_entnahmemengen numeric,
 	festsetzung_summe_zugelassene_entnahmemengen numeric,
+	festsetzung_summe_entnahmemengen numeric,
+	festsetzung_summe_zugelassenes_entgelt numeric,
+	festsetzung_summe_nicht_zugelassenes_entgelt numeric,
 	festsetzung_summe_entgelt numeric
 )WITH OIDS;
 
@@ -331,8 +337,10 @@ CREATE TABLE wasserrecht.fiswrv_teilgewaesserbenutzungen(
 	befreiungstatbestaende boolean,
 	entgeltsatz integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_wee_satz(id),
 	teilgewaesserbenutzungen_art integer REFERENCES wasserrecht.fiswrv_teilgewaesserbenutzungen_art(id),
-	berechneter_entgeltsatz numeric,
-	berechnetes_entgelt numeric,
+	berechneter_entgeltsatz_zugelassen numeric,
+	berechneter_entgeltsatz_nicht_zugelassen numeric,
+	berechnetes_entgelt_zugelassen numeric,
+	berechnetes_entgelt_nicht_zugelassen numeric,
 	freitext text,
 	gewaesserbenutzungen integer NOT NULL REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen(id)
 )WITH OIDS;

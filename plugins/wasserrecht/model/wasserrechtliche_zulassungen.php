@@ -11,8 +11,28 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	public $aufforderung_dokument;
 	public $festsetzung_dokument;
 	public $gewaesserbenutzungen;
+	
+	public function getGueltigkeitsJahrString()
+	{
+	    $returnString = "";
+	    foreach ($this->gueltigkeitsJahr as $jahr)
+	    {
+	        if(empty($returnString))
+	        {
+	            $returnString = $jahr;
+	        }
+	        else
+	        {
+	            $returnString = $returnString . ", " . $jahr;
+	        }
+	    }
+	    
+	    return $returnString;
+	}
 
 	public function find_gueltigkeitsjahre($gui) {
+	    
+	    $this->debug->write('*** WasserrechtlicheZulassungen->find_gueltigkeitsjahre ***', 4);
 	    
 		$results = $this->find_where('1=1', 'id');
 		$wrzProGueltigkeitsJahr = new WRZProGueltigkeitsJahr();
@@ -121,6 +141,12 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	                $behoerdeArt = new BehoerdeArt($gui);
 	                $art = $behoerdeArt->find_by_id($gui, 'id', $behoerde->data['art']);
 	                $behoerde->art = $art;
+	            }
+	            if(!empty($behoerde->data['konto']))
+	            {
+	                $account = new KontoKlasse($gui);
+	                $konto = $account->find_by_id($gui, 'id', $behoerde->data['konto']);
+	                $behoerde->konto = $konto;
 	            }
 	            $result->behoerde = $behoerde;
 	        }
@@ -232,14 +258,14 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	    return null;
 	}
 	
-// 	public static function getYearFromDate($date) {
-// 	    if(!empty($date))
-// 	    {
-// 	        return $year = $date->format("Y");
-// 	    }
+	public static function getYearFromDate($date) {
+	    if(!empty($date))
+	    {
+	        return $year = $date->format("Y");
+	    }
 	    
-// 	    return null;
-// 	}
+	    return null;
+	}
 	
 	public static function addYearToArray($dateString, &$arrayToFill)
 	{
@@ -558,22 +584,98 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	    $this->update();
 	}
 	
-	public function insertFestsetzungSummeZugelasseneEntnahmemengen($festsetzungSummeZugelasseneEntnahmemengen) {
+	////////////
+	
+	public function insertFestsetzungSummeZugelasseneEntnahmemengen($festsetzungSummeZugelasseneEntnahmemengen, $update = true) {
 	    $this->set('festsetzung_summe_zugelassene_entnahmemengen', $festsetzungSummeZugelasseneEntnahmemengen);
-	    $this->update();
+	    if($update)
+	    {
+	        $this->update();
+	    }
 	}
 	
 	public function getFestsetzungSummeZugelasseneEntnahmemengen() {
 	    return $this->data['festsetzung_summe_zugelassene_entnahmemengen'];
 	}
 	
-	public function insertFestsetzungSummeEntgelt($festsetzungSummeEntgelt) {
+	public function insertFestsetzungSummeNichtZugelasseneEntnahmemengen($festsetzungSummeNichtZugelasseneEntnahmemengen, $update = true) {
+	    $this->set('festsetzung_summe_nicht_zugelassene_entnahmemengen', $festsetzungSummeNichtZugelasseneEntnahmemengen);
+	    if($update)
+	    {
+	        $this->update();
+	    }
+	}
+	
+	public function getFestsetzungSummeNichtZugelasseneEntnahmemengen() {
+	    return $this->data['festsetzung_summe_nicht_zugelassene_entnahmemengen'];
+	}
+	
+	public function insertFestsetzungSummeEntnahmemengen($festsetzungSummeEntnahmemengen, $update = true) {
+	    $this->set('festsetzung_summe_entnahmemengen', $festsetzungSummeEntnahmemengen);
+	    if($update)
+	    {
+	        $this->update();
+	    }
+	}
+	
+	public function getFestsetzungSummeEntnahmemengen() {
+	    return $this->data['festsetzung_summe_entnahmemengen'];
+	}
+	
+	//////////////
+	
+	public function insertFestsetzungSummeZugelassenesEntgelt($festsetzungSummeZugelassenesEntgelt, $update = true) {
+	    $this->set('festsetzung_summe_zugelassenes_entgelt', $festsetzungSummeZugelassenesEntgelt);
+	    if($update)
+	    {
+	        $this->update();
+	    }
+	}
+	
+	public function getFestsetzungSummeZugelassenesEntgelt() {
+	    return $this->data['festsetzung_summe_zugelassenes_entgelt'];
+	}
+	
+	public function insertFestsetzungSummeNichtZugelassenesEntgelt($festsetzungSummeNichtZugelassenesEntgelt, $update = true) {
+	    $this->set('festsetzung_summe_nicht_zugelassenes_entgelt', $festsetzungSummeNichtZugelassenesEntgelt);
+	    if($update)
+	    {
+	        $this->update();
+	    }
+	}
+	
+	public function getFestsetzungSummeNichtZugelassenesEntgelt() {
+	    return $this->data['festsetzung_summe_nicht_zugelassenes_entgelt'];
+	}
+	
+	public function insertFestsetzungSummeEntgelt($festsetzungSummeEntgelt, $update = true) {
 	    $this->set('festsetzung_summe_entgelt', $festsetzungSummeEntgelt);
-	    $this->update();
+	    if($update)
+	    {
+	        $this->update();
+	    }
 	}
 	
 	public function getFestsetzungSummeEntgelt() {
 	    return $this->data['festsetzung_summe_entgelt'];
+	}
+	
+	public function insertFestsetzungEntnahmemengen($festsetzungSummeNichtZugelasseneEntnahmemengen, $festsetzungSummeZugelasseneEntnahmemengen, $festsetzungSummeEntnahmemengen) 
+	{
+	    $this->insertFestsetzungSummeNichtZugelasseneEntnahmemengen($festsetzungSummeNichtZugelasseneEntnahmemengen, false);
+	    $this->insertFestsetzungSummeZugelasseneEntnahmemengen($festsetzungSummeZugelasseneEntnahmemengen, false);
+	    $this->insertFestsetzungSummeEntnahmemengen($festsetzungSummeEntnahmemengen, false);
+	    
+	    $this->update();
+	}
+	
+	public function insertFestsetzungEntgelte($festsetzungSummeNichtZugelassenesEntgelt, $festsetzungSummeZugelassenesEntgelt, $festsetzungSummeEntgelt)
+	{
+	    $this->insertFestsetzungSummeNichtZugelassenesEntgelt($festsetzungSummeNichtZugelassenesEntgelt, false);
+	    $this->insertFestsetzungSummeZugelassenesEntgelt($festsetzungSummeZugelassenesEntgelt, false);
+	    $this->insertFestsetzungSummeEntgelt($festsetzungSummeEntgelt, false);
+	    
+	    $this->update();
 	}
 	
 	////////////////////////////////////////////////////////////////////
