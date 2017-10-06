@@ -84,6 +84,17 @@ function buildwktpolygonfromsvgpath(svgpath){
 	return wkt;
 }	
 
+function toggleBetweenSearch(secondfield){
+	if(secondfield.style.display == ''){
+		secondfield.style.display = 'none';
+		secondfield.disabled = true;
+	}
+	else{
+		secondfield.style.display = '';
+		secondfield.disabled = false;
+	}
+}
+
 function updateGemarkungsauswahl(){
 	document.GUI.gemschl.value = document.GUI.gemschl1.value+document.GUI.gemschl2.value;
 	selectbyString(document.GUI.suchgemarkung, document.GUI.gemschl.value);
@@ -248,7 +259,9 @@ else {
           <td rowspan="8" valign="top"><input type="radio" name="abfrageart" value="indiv_nr" <?php if ($this->formvars['abfrageart']=='indiv_nr') { ?> checked<?php } ?>>
           </td>
         </tr>
-		<tr><td colspan="3"><span class="fett">Auswahl über Attribute</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:clear();" title="Suchfelder leeren"><img style="vertical-align:top;" src="<? echo GRAPHICSPATH.'edit-clear.png'; ?>"></a></td></tr>
+				<tr>
+					<td colspan="3"><span class="fett">Auswahl über Attribute</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:clear();" title="Suchfelder leeren"><img style="vertical-align:top;" src="<? echo GRAPHICSPATH.'edit-clear.png'; ?>"></a></td>
+				</tr>
         <tr>
           <td colspan="3">
 			Gemarkung:<br>
@@ -271,23 +284,35 @@ else {
 			</td>
 		</tr>
 		<tr>
-        <? if(NACHWEIS_PRIMARY_ATTRIBUTE != 'rissnummer'){ ?>
-          <td align="left">          Antragsnummer<br>
-  					<input type="text" name="suchstammnr" value="<?php echo $this->formvars['suchstammnr']; ?>" size="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>" maxlength="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>">
- 					</td>    
-        <? } ?>
-          <td align="left">          Rissnummer<br>
-  					<input type="text" name="suchrissnr" value="<?php echo $this->formvars['suchrissnr']; ?>" size="<?php echo RISSNUMMERMAXLENGTH; ?>" maxlength="<?php echo RISSNUMMERMAXLENGTH; ?>">
- 					</td>    
+			<td>
+				<div style="width: 320px; display: flex; flex-wrap: wrap">
         <? if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){ ?>
-          <td align="left">          Antragsnummer<br>
+          <div style="border: 1px solid #a3a3a3;padding: 2px;margin: 0 5 5 0">          Rissnummer<br>
+  					<input type="text" name="suchrissnr" value="<?php echo $this->formvars['suchrissnr']; ?>" size="<?php echo RISSNUMMERMAXLENGTH; ?>" maxlength="<?php echo RISSNUMMERMAXLENGTH; ?>">
+						<a href="#" title="von-bis-Suche" onclick="toggleBetweenSearch(GUI.suchrissnr2);"><i class="fa fa-step-backward"></i> <i class="fa fa-step-forward"></i></a>
+						<input type="text" style="display: none" name="suchrissnr2" value="<? echo $this->formvars['suchrissnr2']; ?>" size="<? echo ANTRAGSNUMMERMAXLENGTH; ?>" maxlength="<? echo ANTRAGSNUMMERMAXLENGTH; ?>">
+ 					</div>
+					<div style="border: 1px solid #a3a3a3;padding: 2px;margin: 0 5 5 0">          Antragsnummer<br>
   					<input type="text" name="suchstammnr" value="<?php echo $this->formvars['suchstammnr']; ?>" size="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>" maxlength="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>">
- 					</td>    
-        <? } ?>
-          <td width="50%" align="left">          Fortführungsjahr<br>
-			<input type="text" name="suchfortf" value="<?php echo $this->formvars['suchfortf']; ?>" size="4" maxlength="4">
-		  </td>    
-        </tr>
+ 					</div>					
+				<? }else{ ?>
+					<div style="border: 1px solid #a3a3a3;padding: 2px;margin: 0 5 5 0">          Antragsnummer<br>
+  					<input type="text" name="suchstammnr" value="<?php echo $this->formvars['suchstammnr']; ?>" size="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>" maxlength="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>">
+						<a href="#" title="von-bis-Suche" onclick="toggleBetweenSearch(GUI.suchstammnr2);"><i class="fa fa-step-backward"></i> <i class="fa fa-step-forward"></i></a>
+						<input type="text" style="display: none" name="suchstammnr2" value="<? echo $this->formvars['suchstammnr2']; ?>" size="<? echo ANTRAGSNUMMERMAXLENGTH; ?>" maxlength="<? echo ANTRAGSNUMMERMAXLENGTH; ?>">
+ 					</div>
+					<div style="border: 1px solid #a3a3a3;padding: 2px;margin: 0 5 5 0">          Rissnummer<br>
+  					<input type="text" name="suchrissnr" value="<?php echo $this->formvars['suchrissnr']; ?>" size="<?php echo RISSNUMMERMAXLENGTH; ?>" maxlength="<?php echo RISSNUMMERMAXLENGTH; ?>">
+ 					</div>
+				<? } ?>
+          <div style="border: 1px solid #a3a3a3;padding: 2px;margin: 0 5 5 0">          Fortführungsjahr<br>
+						<input type="text" name="suchfortf" value="<?php echo $this->formvars['suchfortf']; ?>" size="4" maxlength="4">
+						<a href="#" title="von-bis-Suche" onclick="toggleBetweenSearch(GUI.suchfortf2);"><i class="fa fa-step-backward"></i> <i class="fa fa-step-forward"></i></a>
+						<input type="text" style="display: none" name="suchfortf2" value="<?php echo $this->formvars['suchfortf2']; ?>" size="4" maxlength="4">
+					</div>
+				</div>
+			</td>
+    </tr>
         <tr> 
 			    <td colspan="3">
 			    		Datum:<br>
