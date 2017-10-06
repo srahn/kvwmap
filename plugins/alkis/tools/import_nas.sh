@@ -8,12 +8,11 @@ extract_zip_files() {
 		if [ "$(ls -A $DATA_PATH)" ] ; then
 			cd $DATA_PATH
 			for ZIP_FILE in ${DATA_PATH}/*.zip ; do
-				log "Unzip ${ZIP_FILE} ..."
 				if [ ! "${UNZIP_PASSWORD}" = "" ] ; then
-					echo "unzip -P ${UNZIP_PASSWORD} ${ZIP_FILE} -d ${IMPORT_PATH}"
+					log "unzip -P ${UNZIP_PASSWORD} ${ZIP_FILE} -d ${IMPORT_PATH}"
 					unzip -P $UNZIP_PASSWORD $ZIP_FILE -d $IMPORT_PATH
 				else
-				  echo "unzip ${ZIP_FILE} -d ${IMPORT_PATH}"
+				  log "unzip ${ZIP_FILE} -d ${IMPORT_PATH}"
 					unzip $ZIP_FILE -d $IMPORT_PATH
 				fi
 				find $IMPORT_PATH -iname '*.xml.gz' | sort | while read GZ_FILE ; do
@@ -89,7 +88,7 @@ convert_nas_files() {
 }
 
 execute_sql_transaction() {
-	if [ ! "$(find ${IMPORT_PATH} -name *.xml)" ] ; then
+	if [ ! "$(find ${IMPORT_PATH} -name *.xml -not -path ${IMPORT_PATH}/METADATA/*)" ] ; then
 		# ogr2ogr read all xml files successfully
 		if [ -f "${IMPORT_PATH}/import_transaction.sql" ] ; then
 			# execute transaction sql file
@@ -121,8 +120,6 @@ execute_sql_transaction() {
 		else
 		  log "Datei import_transaction.sql existiert nicht."
 		fi
-	else
-	  log "Keine xml Dateien mehr im Verzeichnis ${IMPORT_PATH} find ${IMPORT_PATH} -name *.xml."
 	fi
 }
 
