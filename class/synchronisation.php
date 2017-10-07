@@ -416,6 +416,5 @@ class synchro {
 
 		return $data;
 	}
-
 }
 ?>

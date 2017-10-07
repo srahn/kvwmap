@@ -46,7 +46,7 @@ function setfields(){
 			        </tr>
 			        <tr align="left">
 			          <td>
-			          	<div align="center"><input type="submit" class="button" name="neuladen" value="neu Laden"></div>
+			          	<div align="center"><input type="button" class="button" name="neuladen_button" onclick="neuLaden();" value="neu Laden"></div>
 			          		<br>
 			        			<div style="width:230; height:<?php echo $this->map->height-59; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
 				          		&nbsp;
@@ -104,3 +104,4 @@ function setfields(){
 </table>
 <input type="hidden" name="order" value="<?php echo $this->formvars['order']; ?>">
 <input type="hidden" name="go" value="import_layer">
+<input type="hidden" name="neuladen" value="">

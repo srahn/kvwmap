@@ -41,7 +41,7 @@
         $gemarkungs_searchvars['obergruppe'] = $GUI->bau->baudata[$i]['feld2'];
         $gemarkungs_searchvars['nummer'] = $GUI->bau->baudata[$i]['feld3'];
         $baudata = $GUI->bau->getbaudaten2($gemarkungs_searchvars);
-        $Gemarkung=new gemarkung('13'.$baudata[0]['feld12'],$GUI->pgdatabase);
+        $Gemarkung=new gemarkung($baudata[0]['feld27'].$baudata[0]['feld12'],$GUI->pgdatabase);
         $GUI->bau->baudata[$i]['bauort'] = $Gemarkung->getGemkgName();
       }
       $GUI->main = PLUGINS.'probaug/view/bauauskunftsuchergebnis.php';
@@ -57,7 +57,10 @@
     $GUI->bau = new Bauauskunft($GUI->baudatabase);
     $GUI->bau->getbaudaten($GUI->formvars);
     for($i = 0; $i < count($GUI->bau->baudata); $i++){
-      $GUI->bau->grundstueck[] = '13'.$GUI->bau->baudata[$i]['feld12'].'-'.$GUI->bau->baudata[$i]['feld13'].'-'.$GUI->bau->baudata[$i]['feld14'];
+			$flst = explode(', ', $GUI->bau->baudata[$i]['feld14']);
+			for($j = 0; $j < count($flst); $j++){
+				$GUI->bau->grundstueck[] = $GUI->bau->baudata[$i]['feld27'].$GUI->bau->baudata[$i]['feld12'].'-'.$GUI->bau->baudata[$i]['feld13'].'-'.$flst[$j];
+			}
     }
     $Gemarkung=new gemarkung($GUI->bau->baudata[0]['feld12'],$GUI->pgdatabase);
     $GUI->bau->baudata[0]['bauort'] = $Gemarkung->getGemkgName();

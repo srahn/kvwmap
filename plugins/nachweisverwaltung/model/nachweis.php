@@ -90,7 +90,7 @@ class Nachweis {
         $formvars['zieldateiname']=$this->getZielDateiName($formvars);
 
         # 4. Ändern der Eintragung in der Datenbank
-        $ret=$this->aktualisierenDokument($formvars['id'],$formvars['datum'],$formvars['flurid'],$formvars['VermStelle'],$formvars['art'],$formvars['andere_art'],$formvars['gueltigkeit'],$formvars['stammnr'],$formvars['Blattformat'],$formvars['Blattnr'],$formvars['rissnummer'],$formvars['fortfuehrung'],$formvars['bemerkungen'],$formvars['umring'],$formvars['artname'].'/'.$formvars['zieldateiname'], $user);
+        $ret=$this->aktualisierenDokument($formvars['id'],$formvars['datum'],$formvars['flurid'],$formvars['VermStelle'],$formvars['art'],$formvars['andere_art'],$formvars['gueltigkeit'],$formvars['stammnr'],$formvars['Blattformat'],$formvars['Blattnr'],$formvars['rissnummer'],$formvars['fortfuehrung'],$formvars['bemerkungen'],$formvars['bemerkungen_intern'],$formvars['umring'],$formvars['artname'].'/'.$formvars['zieldateiname'], $user);
         if ($ret[0]) {
           # Aktualisierungsvorgang in der Datenbank nicht erfolgreich
           $errmsg=$ret[1];
@@ -439,9 +439,13 @@ class Nachweis {
   	}
   }
   
-	function CreateNachweisDokumentVorschau($dateiname){
+	function CreateNachweisDokumentVorschau($dateiname){		
 		$dateinamensteil=explode('.',$dateiname);
-		$command = IMAGEMAGICKPATH.'convert '.$dateiname.'[0] -quality 75 -background white -flatten -resize 800x800\> '.$dateinamensteil[0].'_thumb.jpg';
+		if(strtolower($dateinamensteil[1]) == 'pdf'){
+			$pagecount = getNumPagesPdf($dateiname);
+			if($pagecount > 1)$label = "-fill black -undercolor white -gravity North -pointsize 18 -annotate +0+15 ' ".$pagecount." Seiten '";
+		}
+		$command = IMAGEMAGICKPATH.'convert '.$dateiname.'[0] -quality 75 -background white '.$label.' -flatten -resize 800x800\> '.$dateinamensteil[0].'_thumb.jpg';
 		exec($command, $ausgabe, $ret);
 		if($ret == 1){
 			$type = $dateinamensteil[1];
@@ -573,14 +577,14 @@ class Nachweis {
     return $ret;
   }
   
-  function eintragenNeuesDokument($datum,$flurid,$VermStelle,$art,$andere_art,$gueltigkeit,$stammnr,$blattformat,$blattnr,$rissnummer,$fortf,$bemerkungen,$zieldatei,$umring,$user) {
+  function eintragenNeuesDokument($datum,$flurid,$VermStelle,$art,$andere_art,$gueltigkeit,$stammnr,$blattformat,$blattnr,$rissnummer,$fortf,$bemerkungen,$bemerkungen_intern,$zieldatei,$umring,$user) {
     #2005-11-24_pk
     if($fortf == '')$fortf = 'NULL';
     $this->debug->write('Einfügen der Metadaten zum neuen Nachweisdokument in die Sachdatenbank',4);
-    $sql ="INSERT INTO nachweisverwaltung.n_nachweise (flurid,stammnr,art,blattnummer,datum,vermstelle,gueltigkeit,format,link_datei,the_geom,fortfuehrung,rissnummer,bemerkungen,bearbeiter,zeit,erstellungszeit)";
+    $sql ="INSERT INTO nachweisverwaltung.n_nachweise (flurid,stammnr,art,blattnummer,datum,vermstelle,gueltigkeit,format,link_datei,the_geom,fortfuehrung,rissnummer,bemerkungen,bemerkungen_intern,bearbeiter,zeit,erstellungszeit)";
     $sql.=" VALUES (".$flurid.",'".trim($stammnr)."','".$art."','".trim($blattnr)."','".$datum."'";
     $sql.=",'".$VermStelle."','".$gueltigkeit."','".$blattformat."','".$zieldatei."',st_transform(st_geometryfromtext('".$umring."', ".$this->client_epsg."), (select srid from geometry_columns where f_table_name = 'n_nachweise'))";
-    $sql.=",".$fortf.",'".$rissnummer."','".$bemerkungen."','".$user->Vorname." ".$user->Name."', '".date('Y-m-d G:i:s')."', '".date('Y-m-d G:i:s')."')";
+    $sql.=",".$fortf.",'".$rissnummer."','".$bemerkungen."','".$bemerkungen_intern."','".$user->Vorname." ".$user->Name."', '".date('Y-m-d G:i:s')."', '".date('Y-m-d G:i:s')."')";
 		#echo '<br>Polygon-SQL: '.$sql;
     $ret=$this->database->execSQL($sql,4, 1);
     if($andere_art != ''){
@@ -596,13 +600,13 @@ class Nachweis {
     return $ret;
   }
   
-  function aktualisierenDokument($id,$datum,$flurid,$VermStelle,$art,$andere_art,$gueltigkeit,$stammnr,$Blattformat,$Blattnr,$rissnr,$fortf,$bemerkungen,$umring,$zieldateiname,$user) {
+  function aktualisierenDokument($id,$datum,$flurid,$VermStelle,$art,$andere_art,$gueltigkeit,$stammnr,$Blattformat,$Blattnr,$rissnr,$fortf,$bemerkungen,$bemerkungen_intern,$umring,$zieldateiname,$user) {
     if($fortf == '')$fortf = 'NULL';
     $this->debug->write('Aktualisieren der Metadaten zu einem bestehenden Nachweisdokument',4);
     $sql="UPDATE nachweisverwaltung.n_nachweise SET flurid='".$flurid."', stammnr='".trim($stammnr)."', art='".$art."'";
     $sql.=",blattnummer='".trim($Blattnr)."', datum='".$datum."', vermstelle='".$VermStelle."'";
     $sql.=",gueltigkeit='".$gueltigkeit."', format='".$Blattformat."',the_geom=st_transform(st_geometryfromtext('".$umring."', ".$this->client_epsg."), (select srid from geometry_columns where f_table_name = 'n_nachweise')), link_datei='".$zieldateiname."'";
-    $sql.=",fortfuehrung=".(int)$fortf.",rissnummer='".$rissnr."',bemerkungen='".$bemerkungen."'";
+    $sql.=",fortfuehrung=".(int)$fortf.",rissnummer='".$rissnr."',bemerkungen='".$bemerkungen."',bemerkungen_intern='".$bemerkungen_intern."'";
 		$sql.=",bearbeiter='".$user->Vorname." ".$user->Name."', zeit='".date('Y-m-d G:i:s')."'";
     $sql.=" WHERE id = ".$id;
     #echo $sql;
@@ -717,7 +721,7 @@ class Nachweis {
     return $errmsg;
   }
   
-  function getNachweise($id,$polygon,$gemarkung,$stammnr,$rissnr,$fortf,$art_einblenden,$richtung,$abfrage_art,$order,$antr_nr, $datum = NULL, $VermStelle = NULL, $gueltigkeit = NULL, $datum2 = NULL, $flur = NULL, $flur_thematisch = NULL, $andere_art = NULL, $suchbemerkung = NULL, $blattnr = NULL) {
+  function getNachweise($id,$polygon,$gemarkung,$stammnr,$rissnr,$fortf,$art_einblenden,$richtung,$abfrage_art,$order,$antr_nr, $datum = NULL, $VermStelle = NULL, $gueltigkeit = NULL, $datum2 = NULL, $flur = NULL, $flur_thematisch = NULL, $andere_art = NULL, $suchbemerkung = NULL, $blattnr = NULL, $stammnr2 = NULL, $rissnr2 = NULL, $fortf2 = NULL) {
 		$explosion = explode('~', $antr_nr);
 		$antr_nr = $explosion[0];
 		$stelle_id = $explosion[1];
@@ -756,7 +760,7 @@ class Nachweis {
               $errmsg.='\nEs konnte kein Dokument gefunden werden.';
             }
             else {
-              $this->Dokumente[0]=pg_fetch_array($ret[1]);
+              $this->Dokumente[0]=pg_fetch_assoc($ret[1]);
               $this->erg_dokumente=1;
             } # Ende Ergebnis ist korrekt
           } # Ende Abfrage war fehlerfrei
@@ -793,8 +797,8 @@ class Nachweis {
             $errmsg.='\nEs konnte kein Dokument gefunden werden.';
           }
           else {
-            $this->Dokumente[0]=pg_fetch_array($ret[1]);
-            $geom = pg_fetch_array($ret1[1]);
+            $this->Dokumente[0]=pg_fetch_assoc($ret[1]);
+            $geom = pg_fetch_assoc($ret1[1]);
             $this->Dokumente[0]['wkt_umring'] = $geom['wkt_umring'];
             $this->Dokumente[0]['svg_umring'] = $geom['svg_umring'];
             $this->Dokumente[0]['geom'] = $geom['geom'];
@@ -802,9 +806,10 @@ class Nachweis {
           } # Ende Ergebnis ist korrekt
         } # Ende Suche nach Dokument
       } break;
-      
+
       case "multibleIDs" : {
-				$sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS andere_art, d.art AS andere_art_name";
+				$sql ="SELECT distinct n.*,st_astext(st_multi(st_transform(n.the_geom, ".$this->client_epsg."))) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS andere_art, d.art AS andere_art_name, ";
+				$sql.="CASE WHEN n.art = '100' THEN 'FFR' WHEN n.art = '010' THEN 'KVZ' WHEN n.art = '001' THEN 'GN' ELSE d.art END as art_name"; 
 				$sql.=" FROM nachweisverwaltung.n_nachweise AS n";
 				$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
 				$sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id"; 
@@ -857,7 +862,8 @@ class Nachweis {
         $this->debug->write("<br>nachweis.php getNachweise Abfragen der Nachweisdokumente.<br>",4);
         $ret=$this->database->execSQL($sql,4, 1);    
         if (!$ret[0]) {
-          while ($rs=pg_fetch_array($ret[1])) {
+          while ($rs=pg_fetch_assoc($ret[1])) {
+						if($rs['link_datei'] != '')$rs['dokument_path']='../Nachweise/'.$rs['flurid'].'/'.$this->buildNachweisNr($rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$rs['link_datei'];
             $nachweise[]=$rs;
           }
           $this->erg_dokumente=count($nachweise);
@@ -901,20 +907,45 @@ class Nachweis {
           }
 					else{
 						if($gemarkung != ''){
-							$sql.=" AND flur.land*10000 + flur.gemarkung = '".$gemarkung."' AND st_intersects(st_transform(flur.the_geom, ".EPSGCODE."), n.the_geom)";
+							$sql.=" AND flur.land||flur.gemarkung = '".$gemarkung."' AND st_intersects(st_transform(flur.the_geom, ".EPSGCODE."), n.the_geom)";
 						}
 						if($flur != ''){
 							$sql.=" AND flur.flurnummer = ".$flur." ";
 						}
 					}
           if($stammnr!=''){
-            $sql.=" AND lower(n.stammnr)='".strtolower($stammnr)."'";
+						if($stammnr2!=''){
+							$sql.=" AND n.stammnr::integer between ".(int)$stammnr." AND ".(int)$stammnr2;
+						}
+						else{
+							if(is_numeric($stammnr)){
+								$sql.=" AND n.stammnr::integer=".$stammnr;
+							}
+							else{
+								$sql.=" AND lower(n.stammnr)='".strtolower($stammnr)."'";
+							}
+						}
           }
 	        if($rissnr!=''){
-	          $sql.=" AND n.rissnummer='".$rissnr."'";
+						if($rissnr2!=''){
+							$sql.=" AND n.rissnummer::integer between ".(int)$rissnr." AND ".(int)$rissnr2;
+						}
+						else{
+							if(is_numeric($rissnr)){
+								$sql.=" AND n.rissnummer::integer=".$rissnr;
+							}
+							else{
+								$sql.=" AND lower(n.rissnummer)='".strtolower($rissnr)."'";
+							}
+						}
 	        }
 	      	if($fortf!=''){
-	          $sql.=" AND n.fortfuehrung=".(int)$fortf;
+						if($fortf2!=''){
+							$sql.=" AND n.fortfuehrung between ".(int)$fortf." AND ".(int)$fortf2;
+						}
+						else{
+							$sql.=" AND n.fortfuehrung=".(int)$fortf;
+						}
 	        }
 					if($blattnr!=''){
 	          $sql.=" AND n.blattnummer='".$blattnr."'";
@@ -960,7 +991,7 @@ class Nachweis {
           $this->debug->write("<br>nachweis.php getNachweise Abfragen der Nachweisdokumente.<br>",4);
           $ret=$this->database->execSQL($sql,4, 1);    
           if (!$ret[0]) {
-            while ($rs=pg_fetch_array($ret[1])) {
+            while ($rs=pg_fetch_assoc($ret[1])) {
               $nachweise[]=$rs;
             }
             $this->erg_dokumente=count($nachweise);
@@ -1016,7 +1047,7 @@ class Nachweis {
           #echo $sql;        
           $ret=$this->database->execSQL($sql,4, 1);    
           if (!$ret[0]) {
-            while ($rs=pg_fetch_array($ret[1])) {
+            while ($rs=pg_fetch_assoc($ret[1])) {
               $nachweise[]=$rs;
             }
             $this->erg_dokumente=count($nachweise);
@@ -1064,7 +1095,7 @@ class Nachweis {
         $sql.=" ORDER BY ".$order." ".$richtung;        
         $ret=$this->database->execSQL($sql,4, 1);    
         if (!$ret[0]) {
-          while ($rs=pg_fetch_array($ret[1])) {
+          while ($rs=pg_fetch_assoc($ret[1])) {
             $nachweise[]=$rs;
           }
           $this->erg_dokumente=count($nachweise);

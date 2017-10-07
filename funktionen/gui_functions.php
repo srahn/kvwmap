@@ -18,6 +18,29 @@ function ImageLoadFailed(id) {
 var currentform;
 var doit;
 
+function preventSubmit(){
+	document.GUI.onsubmit = function(){return false;};
+}
+
+function allowSubmit(){
+	document.GUI.onsubmit = function(){};
+}
+
+function checkForUnsavedChanges(event){
+	var sure = true;
+	if(document.GUI.gle_changed.value == 1){
+		sure = confirm('Es gibt noch ungespeicherte Datensätze. Wollen Sie dennoch fortfahren?');
+	}
+	if(!sure){
+		if(event != undefined)event.preventDefault();
+		preventSubmit();
+	}
+	else{
+		allowSubmit();
+	}
+	return sure;
+}
+
 function startwaiting(lock) {
 	var lock = lock || false;
 	document.GUI.stopnavigation.value = 1;
@@ -260,8 +283,10 @@ function activate_overlay(){
 }
 
 function deactivate_overlay(){
-	document.getElementById('contentdiv').scrollTop = 0;
-	document.getElementById('overlaydiv').style.display='none';
+	if(checkForUnsavedChanges()){
+		document.getElementById('contentdiv').scrollTop = 0;
+		document.getElementById('overlaydiv').style.display='none';
+	}
 }
 
 function urlstring2formdata(formdata, string){
@@ -436,7 +461,7 @@ function updateThema(event, thema, query, groupradiolayers, queryradiolayers, in
 			}
 		}
   }
-	if(reload)document.GUI.neuladen.click();
+	if(reload)neuLaden();
 }
 
 function updateQuery(event, thema, query, radiolayers, instantreload){
@@ -468,7 +493,12 @@ function updateQuery(event, thema, query, radiolayers, instantreload){
   		}
   	}
   }
-	if(instantreload)document.GUI.neuladen.click();
+	if(instantreload)neuLaden();
+}
+
+function neuLaden(){
+	currentform.neuladen.value='true';
+	overlay_submit(currentform);
 }
 
 function preventDefault(e){
@@ -501,7 +531,7 @@ function selectgroupquery(group, instantreload){
       updateThema('', thema, query, '', '', 0);
     }
   }
-	if(instantreload)document.GUI.neuladen.click();
+	if(instantreload)neuLaden();
 }
 
 function selectgroupthema(group, instantreload){
@@ -523,7 +553,7 @@ function selectgroupthema(group, instantreload){
       updateQuery('', thema, query, '', 0);
     }
   }
-	if(instantreload)document.GUI.neuladen.click();
+	if(instantreload)neuLaden();
 }
 
 function zoomToMaxLayerExtent(zoom_layer_id){
@@ -613,7 +643,7 @@ function changeClassStatus(classid,imgsrc,instantreload,width,height){
 		selClass.value='0';
 		selImg.src="graphics/inactive"+height+".jpg";
 	}
-	if(instantreload)document.GUI.neuladen.click();
+	if(instantreload)neuLaden();
 }
 
 /*Anne*/

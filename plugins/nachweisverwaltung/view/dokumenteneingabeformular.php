@@ -137,8 +137,8 @@ $legendheight = $this->map->height + 20;
 						</table></td>
 				</tr>
 				<tr> 
-					<td rowspan="20">&nbsp; </td>
-					<td rowspan="20" colspan="5"> 
+					<td rowspan="21">&nbsp; </td>
+					<td rowspan="21" colspan="5"> 
 						<?php
 							include(LAYOUTPATH.'snippets/SVG_polygon_query_area.php')
 						?>
@@ -217,6 +217,11 @@ $legendheight = $this->map->height + 20;
 				<tr> 
 					<td colspan="2">Bemerkungen:
 						<textarea style="width:260px" name="bemerkungen"><?php echo $this->formvars['bemerkungen']; ?></textarea>
+					</td>
+				</tr>
+				<tr> 
+					<td colspan="2">Bearbeitungshinweise:
+						<textarea style="width:260px" name="bemerkungen_intern"><?php echo $this->formvars['bemerkungen_intern']; ?></textarea>
 					</td>
 				</tr>
 				<tr> 
@@ -314,6 +319,7 @@ $legendheight = $this->map->height + 20;
 						<input type="hidden" name="such_andere_art" value="<? echo $this->formvars['such_andere_art']; ?>">						
 						<INPUT TYPE="hidden" NAME="reset_layers" VALUE="">
 						<input type="hidden" name="layer_options_open" value="">
+						<input type="hidden" name="neuladen" value="">
 					</td>
 				</tr>
 			</table>
@@ -343,7 +349,7 @@ $legendheight = $this->map->height + 20;
 								<tr align="left">
 									<td><!-- bgcolor=#e3e3e6 -->
 									<div align="center"><?php # 2007-12-30 pk
-									?><input type="submit" name="neuladen" value="<?php echo $strLoadNew; ?>" tabindex="1"></div>
+									?><input type="button" class="button" name="neuladen_button" onclick="neuLaden();" value="<?php echo $strLoadNew; ?>" tabindex="1"></div>
 									<div id="legendcontrol">
 										<a href="index.php?go=reset_querys"><img src="graphics/tool_info.png" border="0" alt="Informationsabfrage." title="Informationsabfrage | Hier klicken, um alle Abfragehaken zu entfernen" width="17"></a>
 										<a href="javascript:document.GUI.reset_layers.value=1;document.GUI.submit();"><img src="graphics/layer.png" border="0" alt="Themensteuerung." title="Themensteuerung | Hier klicken, um alle Themen zu deaktivieren" width="20" height="20"></a><br>

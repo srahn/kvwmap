@@ -148,7 +148,7 @@
 											else{
 												echo 'onchange="set_changed_flag(document.GUI.changed_'.$layer['Layer_ID'].'_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')"';
 											}
-											echo 'id="'.$attributes['name'][$j].'_'.$k.'" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'">';
+											echo 'id="'.$layer['Layer_ID'].'_'.$attributes['name'][$j].'_'.$k.'" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'">';
 											echo '<option value="">-- '.$this->strPleaseSelect.' --</option>';
 											if(is_array($attributes['dependent_options'][$j])){		# mehrere DatensÃ¤tze und ein abhÃ¤ngiges Auswahlfeld --> verschiedene AuswahlmÃ¶glichkeiten
 												for($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++){

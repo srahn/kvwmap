@@ -868,13 +868,7 @@ class data_import_export {
 		$ret = $layerdb->execSQL($sql,4, 1);
 		if(!$ret[0]){
 			$rs=pg_fetch_array($ret[1]);
-			$uko = $rs['geom'];
-			$uko = str_replace('MULTIPOLYGON(((', 'TYP UPO 2'.chr(10).'KOO ', $uko);
-			$uko = str_replace(')),((', chr(10).'FL+'.chr(10).'KOO ', $uko);
-			$uko = str_replace('),(', chr(10).'FL-'.chr(10).'KOO ', $uko);
-			$uko = str_replace(',', chr(10).'KOO ', $uko);
-			$uko = str_replace(')))', '', $uko);			
-			return $uko;
+			return WKT2UKO($rs['geom']);
 		}
   }
 	

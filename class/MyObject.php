@@ -42,6 +42,7 @@ class MyObject {
 	* @ return all objects
 	*/
 	function find_where($where, $order = '') {
+		$where = ($where == '' ? '' : 'WHERE ' . $where);
 		$orders = array_map(
 			function ($order) {
 				return trim($order);
@@ -53,8 +54,7 @@ class MyObject {
 				*
 			FROM
 				`" . $this->tableName . "`
-			WHERE
-				" . $where . 
+			" . $where .
 			($order != '' ? " ORDER BY `" . implode('`, `', $orders) . "`" : "");
 		$this->debug->show('mysql find_where sql: ' . $sql, MyObject::$write_debug);
 		$query = mysql_query($sql, $this->database->dbConn);
@@ -231,6 +231,21 @@ class MyObject {
 		$this->debug->show('MyObject delete sql: ' . $sql, MyObject::$write_debug);
 		$result = mysql_query($sql);
 		return $result;
+	}
+
+	public function validate() {
+		$results = array();
+		foreach($this->validations AS $validation) {
+			$results[] = $this->validates($validation['attribute'], $validation['condition'], $validation['description'], $validation['options']);
+		}
+
+		$messages = array();
+		foreach($results AS $result) {
+			if (!empty($result)) {
+				$messages[] = $result;
+			}
+		}
+		return $messages;
 	}
 
 	public function validates($key, $condition, $msg = '', $option = '') {

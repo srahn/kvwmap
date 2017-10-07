@@ -115,6 +115,19 @@
 		document.getElementById("svghelp").SVGmoveback();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 	}
 	
+	function checkQueryFields(){
+		var selected = false;
+		query_fields = document.getElementsByClassName('info-select-field');
+		for(var i = 0; i < query_fields.length; i++){
+			if(query_fields[i].checked){
+				selected = true;
+				break;
+			}
+		}
+		if(selected == false)message([{ 'type': 'warning', 'msg': '<? echo $strNoLayer; ?>' }]);
+		return selected;
+	}
+	
   function sendpath(cmd,pathx,pathy)   {
     path  = "";
     switch(cmd) 
@@ -155,6 +168,7 @@
       get_map_ajax('go=navMap_ajax', '', '');
      break;
      case "pquery_point":
+			if(!checkQueryFields() || !checkForUnsavedChanges())break;
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "pquery";
@@ -162,6 +176,7 @@
       overlay_submit(document.GUI, true);
      break;
      case "pquery_box":
+			if(!checkQueryFields() || !checkForUnsavedChanges())break;
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "pquery";
@@ -169,6 +184,7 @@
       overlay_submit(document.GUI, true);
      break;
      case "touchquery_point":
+			if(!checkQueryFields() || !checkForUnsavedChanges())break;
      	top.document.GUI.searchradius.value = "";
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
@@ -177,6 +193,7 @@
       overlay_submit(document.GUI, true);
      break;
      case "touchquery_box":
+			if(!checkQueryFields() || !checkForUnsavedChanges())break;
      	top.document.GUI.searchradius.value = "";
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
@@ -185,7 +202,8 @@
       overlay_submit(document.GUI, true);
      break;
      case "ppquery_point":
-      top.document.GUI.searchradius.value = "";
+			if(!checkQueryFields() || !checkForUnsavedChanges())break;
+      document.GUI.searchradius.value = "";
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "ppquery";
@@ -193,6 +211,7 @@
 			overlay_submit(document.GUI, true);
      break;
      case "ppquery_box":
+			if(!checkQueryFields() || !checkForUnsavedChanges())break;
       top.document.GUI.searchradius.value = "";
       path = pathx[0]+","+pathy[0]+";"+pathx[2]+","+pathy[2];
       document.GUI.INPUT_COORD.value  = path;
@@ -201,6 +220,7 @@
       overlay_submit(document.GUI, true);
      break;
      case "pquery_polygon":
+			if(!checkQueryFields() || !checkForUnsavedChanges())break;
       path = pathx[0]+","+pathy[0]+";"+pathx[2]+","+pathy[2];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "pquery";
@@ -208,6 +228,7 @@
       overlay_submit(document.GUI, true);
      break;
      case "polygonquery":
+			if(!checkQueryFields() || !checkForUnsavedChanges())break;
      	for(i = 0; i < pathx.length-1; i++){
      		path = path+pathx[i]+","+pathy[i]+";";
      	}
@@ -384,7 +405,7 @@ function sendpath(cmd, pathx, pathy){
 	if(cmd == "polygonquery")deletepolygon();
 }
 
-function prevent(evt){
+function prevent1(evt){
 	if(evt.preventDefault){
 		evt.preventDefault();
 	}else{ // IE fix
@@ -413,7 +434,7 @@ function mousewheelchange(evt){
 	if(!evt)evt = window.event; // For IE
 	if(top.document.GUI.stopnavigation.value == 0){
 		window.clearTimeout(mousewheelloop);
-		prevent(evt);
+		prevent1(evt);
 		if(evt.wheelDelta)
 			delta = evt.wheelDelta / 3600; // Chrome/Safari
 		else if(evt.detail)
@@ -475,7 +496,7 @@ function updateDragVectors(touches) {
 }
 
 function touchstart(evt){
-	prevent(evt);
+	prevent1(evt);
 	if(top.document.GUI.stopnavigation.value == 0){
 		if(evt.touches.length == 1){		// 1 Finger
 			touchx = evt.clientX = evt.touches[0].pageX;
@@ -493,7 +514,7 @@ function touchstart(evt){
 }
 
 function touchmove(evt) {
-	prevent(evt);
+	prevent1(evt);
 	if(top.document.GUI.stopnavigation.value == 0){
 		if(pinching == false && evt.touches.length == 1){		// 1 Finger
 			touchx = evt.clientX = evt.touches[0].pageX;
@@ -528,7 +549,7 @@ function touchmove(evt) {
 }
 
 function touchend(evt){
-	prevent(evt);
+	prevent1(evt);
 	if(pinching == false){		// 1 Finger
 		evt.clientX = touchx;
 		evt.clientY = touchy;
@@ -1051,10 +1072,11 @@ function addnewtext(evt){
 
 function create_new_freetext(x, y){
 	var newtext = document.createElementNS("http://www.w3.org/2000/svg","text");
-  newtext.setAttributeNS(null, "style", "fill:rgb(255,0,0);font-size:15px;font-family:Arial;font-weight:bold;");
+  newtext.setAttributeNS(null, "style", "fill:rgb(255,0,0);font-size:16px;font-family:Arial;font-weight:bold;");
 	newtext.setAttributeNS(null, "transform", "scale(1,-1)");
 	newtext.setAttributeNS(null, "x", x);
 	newtext.setAttributeNS(null, "y", -y);
+	newtext.setAttributeNS(null, "id", "free_text");
 	document.documentElement.addEventListener("keypress", texttype, true);
 	document.documentElement.addEventListener("keydown", trigger_keypress, true);
 	tspan1 = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
@@ -1151,8 +1173,8 @@ function create_new_freearrow(x, y){
 
 function create_new_freepolygon(){
 	var newpoly = document.createElementNS("http://www.w3.org/2000/svg","polygon");
-	newpoly.setAttributeNS(null, "style", "fill:red;stroke:black;stroke-width:2");
-  newpoly.setAttributeNS(null, "opacity", "0.35");	
+	newpoly.setAttributeNS(null, "style", "opacity:0.35;fill:rgb(255,0,0);stroke:rgb(0,0,0);stroke-width:2");
+	newpoly.setAttributeNS(null, "id", "free_polygon");	
   document.getElementById("redlining").appendChild(newpoly);
 	return newpoly;
 }
