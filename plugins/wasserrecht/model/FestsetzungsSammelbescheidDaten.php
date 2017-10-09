@@ -261,5 +261,44 @@ class FestsetzungsSammelbescheidDaten
         
         return false;
     }
+    
+    public function getSummeEntgelte()
+    {
+        $entgelte = $this->getEntgelte();
+        return $this->getSumme($entgelte);
+    }
+    
+    public function getSummeNichtZugelasseneEntgelte()
+    {
+        $nicht_zugelassene_entgelte = $this->getNicht_zugelassene_entgelte();
+        return $this->getSumme($nicht_zugelassene_entgelte);
+    }
+    
+    public function getSummeZugelasseneEntgelte()
+    {
+        $zugelassene_entgelte = $this->getZugelassene_entgelte();
+        return $this->getSumme($zugelassene_entgelte);
+    }
+    
+    public function getSumme(&$entgelte)
+    {
+        $this->debug->write('entgelte: ' . var_export($entgelte, true), 4);
+        
+        if(!empty($entgelte) && count($entgelte) > 0)
+        {
+            $summe_entgelte = 0;
+            
+            foreach ($entgelte as $entgelt)
+            {
+                $this->debug->write('summe_entgelte: ' . $summe_entgelte . ' + entgelt: ' . $entgelt, 4);
+                $summe_entgelte = $summe_entgelte + $entgelt;
+            }
+            
+            $this->debug->write('summe_entgelte return: ' . $summe_entgelte, 4);
+            return $summe_entgelte;
+        }
+        
+        return null;
+    }
 
 }

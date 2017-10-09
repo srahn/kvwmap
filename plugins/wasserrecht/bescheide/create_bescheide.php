@@ -132,6 +132,10 @@ function writeFestsetzungsWordFile(&$gui, $word_template, $word_file, &$paramete
         }
     }
     
+    $templateProcessor->setValue('Summe_Zugelassenes_Entgelt', $festsetzungsSammelbescheidDaten->getSummeZugelasseneEntgelte());
+    $templateProcessor->setValue('Summe_Nicht_Zugelassenes_Entgelt', $festsetzungsSammelbescheidDaten->getSummeNichtZugelasseneEntgelte());
+    $templateProcessor->setValue('Summe_Entgelt', $festsetzungsSammelbescheidDaten->getSummeEntgelte());
+    
     $templateProcessor->saveAs($word_file);
 
 }
