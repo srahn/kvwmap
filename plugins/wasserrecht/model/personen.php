@@ -87,9 +87,9 @@ class Personen extends WrPgObject {
 	
 	public function getBezeichnung() {
 	    $fieldname = 'bezeichnung';
-	    $sql = "SELECT " . $fieldname ." FROM " . $this->schema . '.' . $this->tableName . "_bezeichnung WHERE id = '" . $this->getId() . "';";
+	    $sql = "SELECT " . $fieldname ." FROM " . $this->schema . '.' . $this->tableName . "_bezeichnung WHERE id = $1;";
 	    // 	    echo "sql: " . $sql;
-	    $bezeichnung = $this->getSQLResult($sql, $fieldname);
+	    $bezeichnung = $this->getSQLResult($sql, array($this->getId()), $fieldname);
 	    // 	    echo "bezeichnung: " . $bezeichnung;
 	    if(!empty($bezeichnung) && count($bezeichnung) > 0 && !empty($bezeichnung[0]))
 	    {

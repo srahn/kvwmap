@@ -60,8 +60,16 @@ abstract class WrPgObject extends PgObject
         }
     }
     
-    function getSQLResult($sql, $fieldName) {
-        $query = pg_query($this->database->dbConn, $sql);
+    function getSQLResult($sql, $sqlreplacements, $fieldName) {
+        
+        $this->debug->write('*** WrPgObject->getSQLResult ***', 4);
+        $this->debug->write('sql: ' . $sql, 4);
+        $this->debug->write('sqlreplacements: ' . var_export($sqlreplacements, true), 4);
+        $this->debug->write('fieldName: ' . var_export($fieldName, true), 4);
+        
+        $query_name = "query_" . uniqid();
+        $query = pg_prepare($this->database->dbConn, $query_name, $sql);
+        $query = pg_execute($this->database->dbConn, $query_name, $sqlreplacements);
         $results = array();
         while ($rs = pg_fetch_assoc($query)) {
             if(!empty($rs))
