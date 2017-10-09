@@ -228,7 +228,7 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
                     		          		</td>
                     		          		<td>
                     		          			<?php
-                    		          			     echo $wrz->getErklaerungDatumHTML();
+                    		          			     echo '<a href="' . $this->actual_link . '?go=wasserentnahmeentgelt_erklaerung_der_entnahme&geterklaerung=' . $wrz->getId() . '">' . $wrz->getErklaerungDatumHTML() . '</a>';
                     		          			?>
                     		          		</td>
                     		          	</tr>
