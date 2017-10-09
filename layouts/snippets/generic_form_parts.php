@@ -319,7 +319,7 @@
 								else{
 									'" ';
 								}
-								$datapart .= ' id="'.$layer_id.'_'.$attributes['real_name'][$name_].'_'.$k.'" name="'.$fieldname_[$f].'" value="'.$dataset[$name_].'">';
+								$datapart .= ' id="'.$layer_id.'_' . $name_ . '_'.$k.'" name="'.$fieldname_[$f].'" value="'.$dataset[$name_].'">';
 							}
 						}
 						$gui->form_field_names .= $fieldname_[$f].'|';
