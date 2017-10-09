@@ -39,14 +39,14 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
             }
         }
         
-        $returnValue = festsetzung_erstellen($this, $wrzs);
-        if($returnValue)
+        $festsetzung_dokument_name = festsetzung_erstellen($this, $wrzs);
+        if(!empty($festsetzung_dokument_name))
         {
-            $this->add_message('notice', 'Festsetzung erfolgreich erstellt!');
+            $this->add_message("notice", "Festsetzungsbescheid: '" . $festsetzung_dokument_name . "' erfolgreich erstellt!");
         }
         else
         {
-            $this->add_message('error', 'Der Festsetzungsbescheid konnte nicht erstellt werden!');
+            $this->add_message("error", "Der Festsetzungsbescheid konnte nicht erstellt werden!");
         }
     }
 }
@@ -126,18 +126,19 @@ function festsetzung_erstellen(&$gui, &$wrzs)
         if(!empty($word_file_name))
         {
             $festsetzung_dokument = new Dokument($gui);
-            $festsetzung_dokument_identifier = $festsetzung_dokument->createDocument('FestsetzungBescheid_' . basename($word_file_name, '.docx'), $word_file_name);
+            $festsetzung_dokument_name = 'FestsetzungBescheid_' . basename($word_file_name, '.docx');
+            $festsetzung_dokument_identifier = $festsetzung_dokument->createDocument($festsetzung_dokument_name, $word_file_name);
             
             foreach ($wrzs as $wrz)
             {
                 $wrz->insertFestsetzungDokument($festsetzung_dokument_identifier);
             }
             
-            return true;
+            return $festsetzung_dokument_name;
         }
     }
     
-    return false;
+    return null;
 }
 
 /**
@@ -433,7 +434,8 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
     			{
     			    $wasserrechtlicheZulassungen = $wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen;
     			    
-    			    $dokumentNames = array();
+    			    $dokumentIds = array();
+    			    $festsetzungDokumente = array();
     			    
     			    foreach($wasserrechtlicheZulassungen AS $wrz)
     			    {
@@ -443,23 +445,39 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
     			            {
     			                if(empty($getAdressat) || $getAdressat === $wrz->adressat->getId())
     			                {
-    			                    $this->debug->write('dokumentNames: ' . var_export($dokumentNames, true), 4);
-    			                    if($wrz->isFestsetzungDokumentErstellt() && !in_array($wrz->festsetzung_dokument->getId(), $dokumentNames))
+    			                    $this->debug->write('dokumentIds: ' . var_export($dokumentIds, true), 4);
+    			                    if($wrz->isFestsetzungDokumentErstellt())
     			                    {
-    			                        $dokumentNames[] = $wrz->festsetzung_dokument->getId();
-    			                    ?>
-    				                    <div class="wasserrecht_display_table_row">
-                        					<div class="wasserrecht_display_table_cell_caption">
-                        					<?php
-                        					   echo '<a href="' . $this->actual_link . WASSERRECHT_DOCUMENT_URL_PATH . $wrz->festsetzung_dokument->getPfad() . '" target="_blank">' . $wrz->festsetzung_dokument->getName() . '</a>';
-                        					?>
-                                   			</div>
-                        				</div>
-    			                    <?php 
+    			                        if(!in_array($wrz->festsetzung_dokument->getId(), $dokumentIds))
+    			                        {
+    			                            $dokumentIds[] = $wrz->festsetzung_dokument->getId();
+    			                            $wrz->festsetzung_dokument->addWrz_id($wrz->getId());
+    			                            $festsetzungDokumente[$wrz->festsetzung_dokument->getId()] = $wrz->festsetzung_dokument;
+    			                        }
+    			                        else
+    			                        {
+    			                            $festsetzungDokumente[$wrz->festsetzung_dokument->getId()]->addWrz_id($wrz->getId());
+    			                        }
     			                    }   
     			                }
     			            }
     			        }
+    			    }
+    			    
+    			    if(count($festsetzungDokumente) > 0)
+    			    {
+    			        foreach ($festsetzungDokumente as $festsetzungDokument)
+    			        {
+    			            ?>
+			                    <div class="wasserrecht_display_table_row">
+                					<div class="wasserrecht_display_table_cell_caption">
+                					<?php
+                					   echo '<a href="' . $this->actual_link . WASSERRECHT_DOCUMENT_URL_PATH . $festsetzungDokument->getPfad() . '" target="_blank">' . $festsetzungDokument->getName() . ', WrZs: (' . $festsetzungDokument->getWrz_idsString() . ')</a>';
+                					?>
+                           			</div>
+                				</div>
+			                <?php 
+    			         }
     			    }
     			}
     		?>

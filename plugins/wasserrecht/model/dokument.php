@@ -1,7 +1,9 @@
 <?php
 class Dokument extends WrPgObject {
 
-	protected $tableName = 'fiswrv_dokument';
+    protected $tableName = 'fiswrv_dokument';
+    
+    private $wrz_ids = array();
 	
 	public function createDocument($dokumentName, $pfad) {
 	    if (!empty($dokumentName) && !empty($pfad))
@@ -25,5 +27,43 @@ class Dokument extends WrPgObject {
 	public function getPfad() {
 	    return $this->data['pfad'];
 	}
+    /**
+     * @return multitype:
+     */
+    public function getWrz_ids()
+    {
+        return $this->wrz_ids;
+    }
+
+    /**
+     * @param multitype: $wrz_ids
+     */
+    public function setWrz_ids($wrz_ids)
+    {
+        $this->wrz_ids = $wrz_ids;
+    }
+    
+    public function addWrz_id($wrz_id)
+    {
+        $this->wrz_ids[] = $wrz_id;
+    }
+    
+    public function getWrz_idsString()
+    {
+        $returnString = "";
+        foreach ($this->wrz_ids as $wrz_id)
+        {
+            if(empty($returnString))
+            {
+                $returnString = $wrz_id;
+            }
+            else
+            {
+                $returnString = $returnString . ", " . $wrz_id;
+            }
+        }
+        
+        return $returnString;
+    }
 }       
 ?>
