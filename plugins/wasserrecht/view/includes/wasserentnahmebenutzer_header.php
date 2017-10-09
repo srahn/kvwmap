@@ -194,34 +194,18 @@ if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrech
         </div>
 
 		<div class="wasserrecht_display_table_row">
-                <div class="wasserrecht_display_table_cell_caption">Straße:</div>
+                <div class="wasserrecht_display_table_cell_caption">Straße Hausnummer:</div>
                 <div class="wasserrecht_display_table_cell_spacer"></div>
                 <div class="wasserrecht_display_table_cell">
-              		<input type="text" name="strasse" readonly="readonly" value="<?php echo !empty($selectedAdressat) ? $selectedAdressat->getAdresseStrasse() : ""; ?>" />
+              		<input type="text" name="strasse_hausnummer" disabled="disabled" value="<?php echo !empty($selectedAdressat) ? $selectedAdressat->getAdresseStrasse() : ""; ?> <?php echo !empty($selectedAdressat) ? $selectedAdressat->getAdresseHausnummer() : ""; ?>" />
                 </div>
         </div>
         
         <div class="wasserrecht_display_table_row">
-                <div class="wasserrecht_display_table_cell_caption">Hausnummer:</div>
+                <div class="wasserrecht_display_table_cell_caption">Postleitzahl Ort:</div>
                 <div class="wasserrecht_display_table_cell_spacer"></div>
                 <div class="wasserrecht_display_table_cell">
-              		<input type="text" name="hausnummer" readonly="readonly" value="<?php echo !empty($selectedAdressat) ? $selectedAdressat->getAdresseHausnummer() : ""; ?>" />
-                </div>
-        </div>
-        
-        <div class="wasserrecht_display_table_row">
-                <div class="wasserrecht_display_table_cell_caption">PLZ:</div>
-                <div class="wasserrecht_display_table_cell_spacer"></div>
-                <div class="wasserrecht_display_table_cell">
-              		<input type="text" name="plz" readonly="readonly" value="<?php echo !empty($selectedAdressat) ? $selectedAdressat->getAdressePLZ() : ""; ?>" />
-                </div>
-        </div>
-        
-         <div class="wasserrecht_display_table_row">
-                <div class="wasserrecht_display_table_cell_caption">Ort:</div>
-                <div class="wasserrecht_display_table_cell_spacer"></div>
-                <div class="wasserrecht_display_table_cell">
-              		<input type="text" name="ort" readonly="readonly" value="<?php echo !empty($selectedAdressat) ? $selectedAdressat->getAdresseOrt() : ""; ?>" />
+              		<input type="text" name="plz_ort" disabled="disabled" value="<?php echo !empty($selectedAdressat) ? $selectedAdressat->getAdressePLZ() : ""; ?> <?php echo !empty($selectedAdressat) ? $selectedAdressat->getAdresseOrt() : ""; ?>" />
                 </div>
         </div>
         
