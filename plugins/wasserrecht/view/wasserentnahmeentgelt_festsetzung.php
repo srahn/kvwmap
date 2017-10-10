@@ -556,7 +556,7 @@ if(!empty($wrz) && !empty($wrz->getId()))
                     <div class="wasserrecht_display_table_cell_spacer"></div>
                     <div class="wasserrecht_display_table_cell_white">
                     	<?php
-                            echo $wrz->getErklaerungDatumHTML();
+                    	    echo '<a href="' . $this->actual_link . '?go=wasserentnahmeentgelt_erklaerung_der_entnahme&geterklaerung=' . $wrz->getId() . '">' . $wrz->getErklaerungDatumHTML() . '</a>';
                 	    ?>
                     </div>
                 </div>
