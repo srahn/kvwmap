@@ -2332,7 +2332,7 @@ FROM
     $sql.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND s.lage = lpad(l.lage,5,'0')";
 		$sql.=" WHERE g.gemeinde = f.gemeindezugehoerigkeit_gemeinde AND g.kreis=f.gemeindezugehoerigkeit_kreis AND f.gemarkungsnummer = gem.gemarkungsnummer AND f.gemeindezugehoerigkeit_gemeinde = l.gemeinde";
     if ($GemID!='') {
-      $sql.=" AND g.schluesselgesamt=".(int)$GemID;
+      $sql.=" AND g.schluesselgesamt='".$GemID."'";
     }
     if ($GemkgID!='') {
       $sql.=" AND f.land||f.gemarkungsnummer='".$GemkgID."'";
