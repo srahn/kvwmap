@@ -112,4 +112,174 @@
 		return $attributes;
 	};
 
+	$this->mobile_prepare_layer_sync = function($layerdb, $id, $sync) {
+		include_once(CLASSPATH . 'Layer.php');
+		$layer = Layer::find($this, 'Layer_ID = ' . $id)[0];
+
+		$sql = "
+			SELECT EXISTS (
+				SELECT 1
+				FROM information_schema.tables 
+				WHERE 
+					table_schema = '" . $layer->get('schema') . "' AND
+					table_name = '" . $layer->get('maintable') . "_deltas'
+			) AS table_exists
+		";
+		#echo '<p>Plugin: Mobile, function: prepare_layer_sync, Query if delta table exists SQL:<br>' . $sql;
+		$ret = $layerdb->execSQL($sql, 4, 0);
+		if ($ret[0]) { echo "<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>"; return 0; }
+
+		$rs = pg_fetch_assoc($ret[1]);
+		if ($rs['table_exists'] == 't' and $sync == 0) {
+			$this->mobile_drop_layer_sync($layerdb, $layer);
+		}
+
+		if ($rs['table_exists'] == 'f' and $sync == 1) {
+			$this->mobile_create_layer_sync($layerdb, $layer);
+		}
+	};
+
+	$this->mobile_drop_layer_sync = function($layerdb, $layer) {
+		$sql = "
+			DROP TRIGGER IF EXISTS create_" . $layer->get('maintable') . "_insert_delta_trigger ON " . $layer->get('schema') . "." . $layer->get('maintable') . ";
+			DROP FUNCTION IF EXISTS " . $layer->get('schema') . ".create_" . $layer->get('maintable') . "_insert_delta();
+
+			DROP TRIGGER IF EXISTS create_" . $layer->get('maintable') . "_update_delta_trigger ON " . $layer->get('schema') . "." . $layer->get('maintable') . ";
+			DROP FUNCTION IF EXISTS " . $layer->get('schema') . ".create_" . $layer->get('maintable') . "_update_delta();
+
+			DROP TRIGGER IF EXISTS create_" . $layer->get('maintable') . "_delete_delta_trigger ON " . $layer->get('schema') . "." . $layer->get('maintable') . ";
+			DROP FUNCTION IF EXISTS " . $layer->get('schema') . ".create_" . $layer->get('maintable') . "_delete_delta();
+
+			DROP TABLE IF EXISTS " . $layer->get('schema') . "." . $layer->get('maintable') . "_deltas;
+		";
+		#echo '<p>Plugin: Mobile, function: mobile_remove_layer_sync, Drop table and trigger for deltas SQL:<br>' . $sql;
+		$ret = $layerdb->execSQL($sql, 4, 0, true);
+		if ($ret[0]) {
+			$this->add_message('error', 'Fehler beim Löschen der Sync-Tabelle!<p>Abbruch in Plugin mobile kvwmap.php  Zeile: ' . __LINE__ . '<br>wegen '  . $ret['msg']);
+			return 0;
+		}
+		$this->add_message('notice', 'Sync-Tabelle und Trigger gelöscht.');
+	};
+
+	$this->mobile_create_layer_sync = function($layerdb, $layer) {
+		# create table for deltas
+		$sql = "
+			CREATE TABLE " . $layer->get('schema') . "." . $layer->get('maintable') . "_deltas (
+				version serial NOT NULL,
+				sql text,
+				created_at timestamp without time zone NOT NULL DEFAULT (now())::timestamp without time zone,
+				username character varying,
+				CONSTRAINT " . $layer->get('maintable') . "_deltas_pkey PRIMARY KEY (version)
+			)
+			WITH (
+				OIDS=TRUE
+			);
+
+			CREATE OR REPLACE FUNCTION " . $layer->get('schema') . ".create_" . $layer->get('maintable') . "_insert_delta()
+			RETURNS trigger AS
+			$$
+				DECLARE
+	  			new_version integer := (SELECT nextval('rebus.haltestellen_deltas_version_seq'));
+					_query TEXT;
+					_sql TEXT;
+				BEGIN
+	  			SET datestyle to 'German';
+					_query := current_query();
+					NEW.version := new_version;
+
+					_sql := (SELECT split_part(_query, ';', (SELECT array_length(regexp_split_to_array(_query, ';'), 1))));
+					--raise notice 'sql nach split_part: %', _sql;
+
+					_sql := substr(_sql, 1 , strpos(lower(_sql), 'values') - 1) || 'VALUES' || substr(_sql, strpos(lower(_sql), 'values') + 6, length(_sql) - strpos(lower(_sql), 'values') - 5);
+					--RAISE notice 'sql nach lower values %', _sql;
+
+					_sql := (SELECT replace(_sql, ') VALUES', ', version) VALUES'));
+					--RAISE notice 'sql nach add column version %', _sql;
+
+					_sql := (SELECT substr(_sql, 1, length(_sql) - 1) || ', ' || NEW.version || ')');
+					--RAISE notice 'sql nach add value version %', _sql;
+
+					INSERT INTO rebus.haltestellen_deltas (version, sql, username) VALUES (new_version, _sql, NEW.user_name);
+					RETURN NEW;
+				END;
+			$$
+			LANGUAGE plpgsql VOLATILE COST 100;
+
+			CREATE TRIGGER create_" . $layer->get('maintable') . "_insert_delta_trigger
+			BEFORE INSERT
+			ON " . $layer->get('schema') . "." . $layer->get('maintable') . "
+			FOR EACH ROW
+			EXECUTE PROCEDURE " . $layer->get('schema') . ".create_" . $layer->get('maintable') . "_insert_delta();
+
+			CREATE OR REPLACE FUNCTION " . $layer->get('schema') . ".create_" . $layer->get('maintable') . "_update_delta()
+			RETURNS trigger AS
+			$$
+				DECLARE
+	  			new_version integer := (SELECT nextval('rebus.haltestellen_deltas_version_seq'));
+					_query TEXT;
+					_sql TEXT;
+				BEGIN
+	  			SET datestyle to 'German';
+					_query := current_query();
+					-- Wie bekomme ich new_version an die geupdateten Datensaetze?
+
+					_sql := (SELECT split_part(_query, ';', (SELECT array_length(regexp_split_to_array(_query, ';'), 1))));
+					--raise notice 'sql nach split_part: %', _sql;
+
+					_sql := substr(_sql, 1 , strpos(lower(_sql), 'where') - 1) || 'WHERE' || substr(_sql, strpos(lower(_sql), 'where') + 5, length(_sql) - strpos(lower(_sql), 'where') - 4);
+					--RAISE notice 'sql nach uppder where %', _sql;
+
+					_sql := (SELECT replace(_sql, ' WHERE', ', version = ' || new_version || ' WHERE'));
+					--RAISE notice 'sql nach add column version %', _sql;
+					INSERT INTO rebus.haltestellen_deltas (version, sql, username) VALUES (new_version, _sql, NULL);
+					RETURN NEW;
+				END;
+			$$
+			LANGUAGE plpgsql VOLATILE COST 100;
+
+			CREATE TRIGGER create_" . $layer->get('maintable') . "_update_delta_trigger
+			BEFORE UPDATE
+			ON " . $layer->get('schema') . "." . $layer->get('maintable') . "
+			FOR EACH STATEMENT
+			EXECUTE PROCEDURE " . $layer->get('schema') . ".create_" . $layer->get('maintable') . "_update_delta();
+
+			CREATE OR REPLACE FUNCTION " . $layer->get('schema') . ".create_" . $layer->get('maintable') . "_delete_delta()
+			RETURNS trigger AS
+			$$
+				DECLARE
+	  			new_version integer := (SELECT nextval('rebus.haltestellen_deltas_version_seq'));
+					_query TEXT;
+					_sql TEXT;
+				BEGIN
+					SET datestyle to 'German';
+					_query := current_query();
+
+					_sql := (SELECT split_part(_query, ';', (SELECT array_length(regexp_split_to_array(_query, ';'), 1))));
+					--raise notice 'sql nach split_part: %', _sql;
+
+					_sql := _sql || ' AND uuid = ' || OLD.uuid;
+					--RAISE notice 'sql nach add uuid: %', _sql;
+
+					INSERT INTO rebus.haltestellen_deltas (version, sql, username) VALUES (new_version, _sql, OLD.user_name);
+					RETURN OLD;
+				END;
+			$$
+			LANGUAGE plpgsql VOLATILE COST 100;
+
+			CREATE TRIGGER create_" . $layer->get('maintable') . "_delete_delta_trigger
+			BEFORE DELETE
+			ON " . $layer->get('schema') . "." . $layer->get('maintable') . "
+			FOR EACH STATEMENT
+			EXECUTE PROCEDURE rebus.create_haltestellen_delete_delta();
+
+
+		";
+		#echo '<p>Plugin: Mobile, function: mobile_create_layer_sync, Create table and trigger for deltas SQL:<br>' . $sql;
+		$ret = $layerdb->execSQL($sql, 4, 0, true);
+		if ($ret[0]) {
+			$this->add_message('error', 'Fehler beim Anlegen der Sync-Tabelle!<p>Abbruch in Plugin mobile kvwmap.php  Zeile: ' . __LINE__ . '<br>wegen ' . $ret['msg']);
+			return 0;
+		}
+		$this->add_message('info', 'Sync-Tabelle ' . $layer->get('schema') . '.' . $layer->get('maintable') . '_delta<br>und Trigger für INSERT, UPDATE und DELETE angelegt.');
+	};
 ?>

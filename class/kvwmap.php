@@ -2452,6 +2452,7 @@ class GUI {
 
 	function loadPlugins(){
   	global $kvwmap_plugins;
+		$this->loaded_plugins = array();
 	  $this->goNotExecutedInPlugins = true;		// wenn es keine Plugins gibt, ist diese Var. immer true
   	if(count($kvwmap_plugins) > 0){
 			$plugins = scandir(PLUGINS, 1);
@@ -2460,10 +2461,15 @@ class GUI {
 					if (file_exists(PLUGINS.$plugins[$i].'/config/config.php'))
 						include(PLUGINS.$plugins[$i].'/config/config.php');
 					include(PLUGINS.$plugins[$i].'/control/index.php');
+					$this->loaded_plugins[] = $plugins[$i];
 				}
 			}
 		}
   }
+
+	function plugin_loaded($plugin) {
+		return in_array($plugin, $this->loaded_plugins);
+	}
 
   function checkCaseAllowed($case){
   	if(!$this->Stelle->isMenueAllowed($case) AND !$this->Stelle->isFunctionAllowed($case)) {
@@ -7273,6 +7279,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$this->user->rolle->readSettings();
     $mapDB->updateLayer($this->formvars);
+
     $old_layer_id = $this->formvars['selected_layer_id'];
     if($this->formvars['id'] != ''){
       $this->formvars['selected_layer_id'] = $this->formvars['id'];
@@ -7289,6 +7296,15 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			    $attributes = $mapDB->load_attributes($layerdb,	replace_params($path,	$all_layer_params));
 			    $mapDB->save_postgis_attributes($this->formvars['selected_layer_id'], $attributes, $this->formvars['maintable'], $this->formvars['schema']);
 			    #---------- Speichern der Layerattribute -------------------
+
+					if ($this->plugin_loaded('mobile')) {
+						$this->mobile_prepare_layer_sync(
+							$layerdb,
+							$this->formvars['selected_layer_id'],
+							$this->formvars['sync']
+						);
+					}
+
 				}
 				if($this->formvars['pfad'] == '' OR $attributes != NULL){
 					$mapDB->delete_old_attributes($this->formvars['selected_layer_id'], $attributes);
@@ -15871,7 +15887,8 @@ class db_mapObj{
     $sql .= "datenherr = '".$formvars['datenherr']."',";
     $sql .= "metalink = '".$formvars['metalink']."', ";
 		$sql .= "status = '".$formvars['status']."', ";
-		$sql .= "trigger_function = '" . $formvars['trigger_function'] . "'";
+		$sql .= "trigger_function = '" . $formvars['trigger_function'] . "',";
+		$sql .= "sync = '" . $formvars['sync'] . "'";
     $sql .= " WHERE Layer_ID = ".$formvars['selected_layer_id'];
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->updateLayer - Aktualisieren eines Layers:<br>".$sql,4);
@@ -15895,7 +15912,7 @@ class db_mapObj{
 					$sql .= "`Name_".$language."`, ";
 				}
 			}
-			$sql.="`alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `printconnection`, `connectiontype`, `classitem`, `classification`, `filteritem`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `status`) VALUES(";
+			$sql.="`alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `printconnection`, `connectiontype`, `classitem`, `classification`, `filteritem`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `status`, `trigger_function`, `sync`) VALUES(";
       if($formvars['id'] != ''){
         $sql.="'".$formvars['id']."', ";
       }
@@ -15993,7 +16010,9 @@ class db_mapObj{
       $sql .= "'".$formvars['kurzbeschreibung']."', ";
       $sql .= "'".$formvars['datenherr']."', ";
       $sql .= "'".$formvars['metalink']."', ";
-			$sql .= "'".$formvars['status']."'";
+			$sql .= "'".$formvars['status']."',";
+			$sql .= "'" . $formvars['trigger_function'] . "',";
+			$sql .= "'" . $formvars['sync'] . "'";
       $sql .= ")";
 
     }
