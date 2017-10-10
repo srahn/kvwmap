@@ -46,6 +46,24 @@ abstract class WrPgObject extends PgObject
         return "id: " . $this->getId() . " name: " . $this->getName();
     }
     
+    public function getToStringFromArray(&$array)
+    {
+        $returnString = "";
+        foreach ($array as $element)
+        {
+            if(empty($returnString))
+            {
+                $returnString = $element;
+            }
+            else
+            {
+                $returnString = $returnString . ", " . $element;
+            }
+        }
+        
+        return $returnString;
+    }
+    
     public function addToArray(&$array, $key, $value) {
         if(!empty($value))
         {

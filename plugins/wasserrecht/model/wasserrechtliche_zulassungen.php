@@ -14,20 +14,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	
 	public function getGueltigkeitsJahrString()
 	{
-	    $returnString = "";
-	    foreach ($this->gueltigkeitsJahre as $jahr)
-	    {
-	        if(empty($returnString))
-	        {
-	            $returnString = $jahr;
-	        }
-	        else
-	        {
-	            $returnString = $returnString . ", " . $jahr;
-	        }
-	    }
-	    
-	    return $returnString;
+	    return $this->getToStringFromArray($this->gueltigkeitsJahre);
 	}
 
 	public function find_gueltigkeitsjahre($gui) {

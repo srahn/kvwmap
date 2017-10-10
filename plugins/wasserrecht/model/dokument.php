@@ -50,20 +50,7 @@ class Dokument extends WrPgObject {
     
     public function getWrz_idsString()
     {
-        $returnString = "";
-        foreach ($this->wrz_ids as $wrz_id)
-        {
-            if(empty($returnString))
-            {
-                $returnString = $wrz_id;
-            }
-            else
-            {
-                $returnString = $returnString . ", " . $wrz_id;
-            }
-        }
-        
-        return $returnString;
+        return $this->getToStringFromArray($this->wrz_ids);
     }
 }       
 ?>
