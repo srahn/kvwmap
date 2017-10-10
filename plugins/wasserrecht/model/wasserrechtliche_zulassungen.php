@@ -29,12 +29,10 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 			$wasserrechtlicheZulassungGueltigkeitJahrReturnArray = array();
 			foreach($results AS $result)
 			{
-// 				var_dump($this->debug);
-			    $this->debug->write('result: ' . var_export($result->data['id'], true), 4);
+			    $this->debug->write('result id: ' . var_export($result->data['id'], true), 4);
 				
 			    $years = $this->getDependentObjects($gui, $result);
 			    $this->debug->write('years: ' . var_export($years, true), 4);
-// 			    echo print_r($years);
 			    
 			    if(!empty($years))
 			    {
@@ -48,15 +46,36 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 			        $wrzProGueltigkeitsJahre->wasserrechtlicheZulassungen[]=$result;
 			    }
 			}
-			$wrzProGueltigkeitsJahre->gueltigkeitsJahre=$wasserrechtlicheZulassungGueltigkeitJahrReturnArray;
-// 			print_r($wrzProGueltigkeitsJahre->gueltigkeitsJahre);
+			
+			//check if all years are added
+			$today = new DateTime('now');
+			$gui->debug->write('today: ' . var_export($today, true), 4);
+			$fourYearsAgo = new DateTime('now');
+			$fourYearsAgo = $fourYearsAgo->modify('-4 years');
+// 			$fourYearsAgo = strtotime("-4 year", time());
+// 			$fourYearsAgoString = date("Y-m-d", $fourYearsAgo);
+			$gui->debug->write('fourYearsAgo: ' . var_export($fourYearsAgo, true), 4);
+			$years = WasserrechtlicheZulassungen::addAllYearsBetweenTwoDates($gui, $fourYearsAgo, $today);
+			$gui->debug->write('years: ' . var_export($years, true), 4);
+            foreach ($years as $year)
+            {
+                if(!in_array($year, $wasserrechtlicheZulassungGueltigkeitJahrReturnArray))
+                {
+                    $wasserrechtlicheZulassungGueltigkeitJahrReturnArray[] = $year;
+                }
+            }
+            
+            //Liste nnach Jahre sortieren
+            sort($wasserrechtlicheZulassungGueltigkeitJahrReturnArray);
+            
+            $wrzProGueltigkeitsJahre->gueltigkeitsJahre=$wasserrechtlicheZulassungGueltigkeitJahrReturnArray;
+            $this->debug->write('wrzProGueltigkeitsJahre->gueltigkeitsJahre: ' . var_export($wrzProGueltigkeitsJahre->gueltigkeitsJahre, true), 4);
+			
 			return $wrzProGueltigkeitsJahre;
-// 			return $wasserrechtlicheZulassungGueltigkeitJahrReturnArray;
 		}
 		
 		$wrzProGueltigkeitsJahre->gueltigkeitsJahre=array('n/a');
 		return $wrzProGueltigkeitsJahre;
-// 		return array('n/a');
 	}
 	
 	public function getDependentObjects($gui, &$result) 
@@ -76,7 +95,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
                 $befristetBis = $result->getBefristetBis();
                 $gui->debug->write('befristetBis: ' . var_export($befristetBis, true), 4);
 //                
-                $years = WasserrechtlicheZulassungen::addAllYearsBetweenTwoDates(WasserrechtlicheZulassungen::convertStringToDate($gueltigSeit), WasserrechtlicheZulassungen::convertStringToDate($befristetBis));
+                $years = WasserrechtlicheZulassungen::addAllYearsBetweenTwoDates($gui, WasserrechtlicheZulassungen::convertStringToDate($gueltigSeit), WasserrechtlicheZulassungen::convertStringToDate($befristetBis));
                 $gui->debug->write('years: ' . var_export($years, true), 4);
                 
                 //backup, falls andere Dates nicht gesetzt wurden
@@ -254,6 +273,18 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	    return null;
 	}
 	
+	public static function getNextYear() {
+	    return date('Y', strtotime('+1 year'));
+	}
+	
+	public static function getThisYear() {
+	    return date("Y");
+	}
+	
+	public static function getLastYear() {
+	    return date("Y", strtotime("-1 year"));
+	}
+	
 	public static function addYearToArray($dateString, &$arrayToFill)
 	{
 	    if(!empty($dateString))
@@ -267,7 +298,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	    }
 	}
 	
-	public static function addAllYearsBetweenTwoDates($date1, $date2)
+	public static function addAllYearsBetweenTwoDates(&$gui, $date1, $date2)
 	{
 	    $years = array();
 	    
@@ -288,9 +319,9 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	            $years[] =  $date1->format("Y");
 	            for ($i = 1; $i < $diffY; $i++)
 	            {
-	                $interval = new DateInterval('P' . $i . 'Y');
+	                $interval = new DateInterval('P1Y');
 	                $nextYear = $date1->add($interval)->format('Y');
-// 	                echo "nextYear: " . $nextYear;
+	                $gui->debug->write('nextYear: ' . var_export($nextYear, true), 4);
 	                $years[] = $nextYear;
 	            }
 	        }

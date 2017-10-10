@@ -3,7 +3,7 @@ $wasserrechtlicheZulassung = new WasserrechtlicheZulassungen($this);
 $wrzProGueltigkeitsJahre = $wasserrechtlicheZulassung->find_gueltigkeitsjahre($this);
 $gueltigkeitsjahre = $wrzProGueltigkeitsJahre->gueltigkeitsJahre;
 
-$getYear = !empty(htmlspecialchars($_REQUEST['erhebungsjahr'])) ? htmlspecialchars($_REQUEST['erhebungsjahr']) : $gueltigkeitsjahre[0];
+$getYear = !empty(htmlspecialchars($_REQUEST['erhebungsjahr'])) ? htmlspecialchars($_REQUEST['erhebungsjahr']) : WasserrechtlicheZulassungen::getLastYear();
 
 //Get Behörde
 $getBehoerde = !empty(htmlspecialchars($_REQUEST['behoerde'])) ? htmlspecialchars($_REQUEST['behoerde']) : null;
@@ -44,9 +44,6 @@ if(!empty($wrzProGueltigkeitsJahre) && !empty($wrzProGueltigkeitsJahre->wasserre
                                     {
                                         echo '<option value='. $gueltigkeitsjahr . ' ' . ($gueltigkeitsjahr === $getYear ? "selected" : "") . '>' . $gueltigkeitsjahr . "</option>";
                                     }
-                                    
-                                    $nextyear = date('Y', strtotime('+1 year'));
-                                    echo '<option value='. $nextyear . ' ' . ($nextyear === $getYear ? "selected" : "") . '>' . $nextyear . "</option>";
                                 }
                                 else
                                 {
