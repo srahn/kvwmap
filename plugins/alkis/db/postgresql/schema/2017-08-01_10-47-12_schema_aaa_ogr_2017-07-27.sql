@@ -9554,7 +9554,7 @@ CREATE TABLE IF NOT EXISTS ap_fpo (
 
 CREATE UNIQUE INDEX ap_fpo_gml ON ap_fpo USING btree (gml_id,beginnt);
 CREATE INDEX ap_fpo_endet ON ap_fpo USING btree (endet);
-SELECT AddGeometryColumn('ap_fpo', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ap_fpo', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ap_fpo_wkb_geometry_idx ON ap_fpo USING gist (wkb_geometry);
 CREATE INDEX ap_fpo_dientzurdarstellungvon ON ap_fpo USING gin (dientzurdarstellungvon);
 CREATE INDEX ap_fpo_istabgeleitetaus ON ap_fpo USING gin (istabgeleitetaus);
@@ -9597,7 +9597,7 @@ CREATE TABLE IF NOT EXISTS aa_antragsgebiet (
 
 CREATE UNIQUE INDEX aa_antragsgebiet_gml ON aa_antragsgebiet USING btree (gml_id,beginnt);
 CREATE INDEX aa_antragsgebiet_endet ON aa_antragsgebiet USING btree (endet);
-SELECT AddGeometryColumn('aa_antragsgebiet', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('aa_antragsgebiet', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX aa_antragsgebiet_wkb_geometry_idx ON aa_antragsgebiet USING gist (wkb_geometry);
 CREATE INDEX aa_antragsgebiet_istabgeleitetaus ON aa_antragsgebiet USING gin (istabgeleitetaus);
 CREATE INDEX aa_antragsgebiet_traegtbeizu ON aa_antragsgebiet USING gin (traegtbeizu);
@@ -9661,7 +9661,7 @@ CREATE TABLE IF NOT EXISTS ax_polder (
 
 CREATE UNIQUE INDEX ax_polder_gml ON ax_polder USING btree (gml_id,beginnt);
 CREATE INDEX ax_polder_endet ON ax_polder USING btree (endet);
-SELECT AddGeometryColumn('ax_polder', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_polder', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_polder_wkb_geometry_idx ON ax_polder USING gist (wkb_geometry);
 CREATE INDEX ax_polder_istabgeleitetaus ON ax_polder USING gin (istabgeleitetaus);
 CREATE INDEX ax_polder_traegtbeizu ON ax_polder USING gin (traegtbeizu);
@@ -9757,7 +9757,7 @@ CREATE TABLE IF NOT EXISTS ax_historischesflurstueck (
 
 CREATE UNIQUE INDEX ax_historischesflurstueck_gml ON ax_historischesflurstueck USING btree (gml_id,beginnt);
 CREATE INDEX ax_historischesflurstueck_endet ON ax_historischesflurstueck USING btree (endet);
-SELECT AddGeometryColumn('ax_historischesflurstueck', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_historischesflurstueck', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_historischesflurstueck_wkb_geometry_idx ON ax_historischesflurstueck USING gist (wkb_geometry);
 CREATE INDEX ax_historischesflurstueck_istabgeleitetaus ON ax_historischesflurstueck USING gin (istabgeleitetaus);
 CREATE INDEX ax_historischesflurstueck_traegtbeizu ON ax_historischesflurstueck USING gin (traegtbeizu);
@@ -9827,7 +9827,7 @@ CREATE TABLE IF NOT EXISTS ax_kondominium (
 
 CREATE UNIQUE INDEX ax_kondominium_gml ON ax_kondominium USING btree (gml_id,beginnt);
 CREATE INDEX ax_kondominium_endet ON ax_kondominium USING btree (endet);
-SELECT AddGeometryColumn('ax_kondominium', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_kondominium', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_kondominium_wkb_geometry_idx ON ax_kondominium USING gist (wkb_geometry);
 CREATE INDEX ax_kondominium_istabgeleitetaus ON ax_kondominium USING gin (istabgeleitetaus);
 CREATE INDEX ax_kondominium_traegtbeizu ON ax_kondominium USING gin (traegtbeizu);
@@ -9867,7 +9867,7 @@ CREATE TABLE IF NOT EXISTS ax_baublock (
 
 CREATE UNIQUE INDEX ax_baublock_gml ON ax_baublock USING btree (gml_id,beginnt);
 CREATE INDEX ax_baublock_endet ON ax_baublock USING btree (endet);
-SELECT AddGeometryColumn('ax_baublock', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_baublock', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_baublock_wkb_geometry_idx ON ax_baublock USING gist (wkb_geometry);
 CREATE INDEX ax_baublock_istabgeleitetaus ON ax_baublock USING gin (istabgeleitetaus);
 CREATE INDEX ax_baublock_traegtbeizu ON ax_baublock USING gin (traegtbeizu);
@@ -9908,7 +9908,7 @@ CREATE TABLE IF NOT EXISTS ax_aussparungsflaeche (
 
 CREATE UNIQUE INDEX ax_aussparungsflaeche_gml ON ax_aussparungsflaeche USING btree (gml_id,beginnt);
 CREATE INDEX ax_aussparungsflaeche_endet ON ax_aussparungsflaeche USING btree (endet);
-SELECT AddGeometryColumn('ax_aussparungsflaeche', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_aussparungsflaeche', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_aussparungsflaeche_wkb_geometry_idx ON ax_aussparungsflaeche USING gist (wkb_geometry);
 CREATE INDEX ax_aussparungsflaeche_istabgeleitetaus ON ax_aussparungsflaeche USING gin (istabgeleitetaus);
 CREATE INDEX ax_aussparungsflaeche_traegtbeizu ON ax_aussparungsflaeche USING gin (traegtbeizu);
@@ -9971,7 +9971,7 @@ CREATE TABLE IF NOT EXISTS ax_soll (
 
 CREATE UNIQUE INDEX ax_soll_gml ON ax_soll USING btree (gml_id,beginnt);
 CREATE INDEX ax_soll_endet ON ax_soll USING btree (endet);
-SELECT AddGeometryColumn('ax_soll', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_soll', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_soll_wkb_geometry_idx ON ax_soll USING gist (wkb_geometry);
 CREATE INDEX ax_soll_istabgeleitetaus ON ax_soll USING gin (istabgeleitetaus);
 CREATE INDEX ax_soll_traegtbeizu ON ax_soll USING gin (traegtbeizu);
@@ -10057,7 +10057,7 @@ CREATE TABLE IF NOT EXISTS ax_duene (
 
 CREATE UNIQUE INDEX ax_duene_gml ON ax_duene USING btree (gml_id,beginnt);
 CREATE INDEX ax_duene_endet ON ax_duene USING btree (endet);
-SELECT AddGeometryColumn('ax_duene', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_duene', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_duene_wkb_geometry_idx ON ax_duene USING gist (wkb_geometry);
 CREATE INDEX ax_duene_istabgeleitetaus ON ax_duene USING gin (istabgeleitetaus);
 CREATE INDEX ax_duene_traegtbeizu ON ax_duene USING gin (traegtbeizu);
@@ -10145,7 +10145,7 @@ CREATE TABLE IF NOT EXISTS ax_transportanlage (
 
 CREATE UNIQUE INDEX ax_transportanlage_gml ON ax_transportanlage USING btree (gml_id,beginnt);
 CREATE INDEX ax_transportanlage_endet ON ax_transportanlage USING btree (endet);
-SELECT AddGeometryColumn('ax_transportanlage', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_transportanlage', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_transportanlage_wkb_geometry_idx ON ax_transportanlage USING gist (wkb_geometry);
 CREATE INDEX ax_transportanlage_istabgeleitetaus ON ax_transportanlage USING gin (istabgeleitetaus);
 CREATE INDEX ax_transportanlage_traegtbeizu ON ax_transportanlage USING gin (traegtbeizu);
@@ -10240,7 +10240,7 @@ CREATE TABLE IF NOT EXISTS ax_wegpfadsteig (
 
 CREATE UNIQUE INDEX ax_wegpfadsteig_gml ON ax_wegpfadsteig USING btree (gml_id,beginnt);
 CREATE INDEX ax_wegpfadsteig_endet ON ax_wegpfadsteig USING btree (endet);
-SELECT AddGeometryColumn('ax_wegpfadsteig', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_wegpfadsteig', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_wegpfadsteig_wkb_geometry_idx ON ax_wegpfadsteig USING gist (wkb_geometry);
 CREATE INDEX ax_wegpfadsteig_istabgeleitetaus ON ax_wegpfadsteig USING gin (istabgeleitetaus);
 CREATE INDEX ax_wegpfadsteig_traegtbeizu ON ax_wegpfadsteig USING gin (traegtbeizu);
@@ -10336,7 +10336,7 @@ CREATE TABLE IF NOT EXISTS ax_gleis (
 
 CREATE UNIQUE INDEX ax_gleis_gml ON ax_gleis USING btree (gml_id,beginnt);
 CREATE INDEX ax_gleis_endet ON ax_gleis USING btree (endet);
-SELECT AddGeometryColumn('ax_gleis', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_gleis', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_gleis_wkb_geometry_idx ON ax_gleis USING gist (wkb_geometry);
 CREATE INDEX ax_gleis_istabgeleitetaus ON ax_gleis USING gin (istabgeleitetaus);
 CREATE INDEX ax_gleis_traegtbeizu ON ax_gleis USING gin (traegtbeizu);
@@ -10429,7 +10429,7 @@ CREATE TABLE IF NOT EXISTS ax_bahnverkehrsanlage (
 
 CREATE UNIQUE INDEX ax_bahnverkehrsanlage_gml ON ax_bahnverkehrsanlage USING btree (gml_id,beginnt);
 CREATE INDEX ax_bahnverkehrsanlage_endet ON ax_bahnverkehrsanlage USING btree (endet);
-SELECT AddGeometryColumn('ax_bahnverkehrsanlage', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_bahnverkehrsanlage', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_bahnverkehrsanlage_wkb_geometry_idx ON ax_bahnverkehrsanlage USING gist (wkb_geometry);
 CREATE INDEX ax_bahnverkehrsanlage_istabgeleitetaus ON ax_bahnverkehrsanlage USING gin (istabgeleitetaus);
 CREATE INDEX ax_bahnverkehrsanlage_traegtbeizu ON ax_bahnverkehrsanlage USING gin (traegtbeizu);
@@ -10523,7 +10523,7 @@ CREATE TABLE IF NOT EXISTS ax_strassenverkehrsanlage (
 
 CREATE UNIQUE INDEX ax_strassenverkehrsanlage_gml ON ax_strassenverkehrsanlage USING btree (gml_id,beginnt);
 CREATE INDEX ax_strassenverkehrsanlage_endet ON ax_strassenverkehrsanlage USING btree (endet);
-SELECT AddGeometryColumn('ax_strassenverkehrsanlage', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_strassenverkehrsanlage', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_strassenverkehrsanlage_wkb_geometry_idx ON ax_strassenverkehrsanlage USING gist (wkb_geometry);
 CREATE INDEX ax_strassenverkehrsanlage_istabgeleitetaus ON ax_strassenverkehrsanlage USING gin (istabgeleitetaus);
 CREATE INDEX ax_strassenverkehrsanlage_traegtbeizu ON ax_strassenverkehrsanlage USING gin (traegtbeizu);
@@ -10616,7 +10616,7 @@ CREATE TABLE IF NOT EXISTS ax_einrichtungenfuerdenschiffsverkehr (
 
 CREATE UNIQUE INDEX ax_einrichtungenfuerdenschiffsverkehr_gml ON ax_einrichtungenfuerdenschiffsverkehr USING btree (gml_id,beginnt);
 CREATE INDEX ax_einrichtungenfuerdenschiffsverkehr_endet ON ax_einrichtungenfuerdenschiffsverkehr USING btree (endet);
-SELECT AddGeometryColumn('ax_einrichtungenfuerdenschiffsverkehr', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_einrichtungenfuerdenschiffsverkehr', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_einrichtungenfuerdenschiffsverkehr_wkb_geometry_idx ON ax_einrichtungenfuerdenschiffsverkehr USING gist (wkb_geometry);
 CREATE INDEX ax_einrichtungenfuerdenschiffsverkehr_istabgeleitetaus ON ax_einrichtungenfuerdenschiffsverkehr USING gin (istabgeleitetaus);
 CREATE INDEX ax_einrichtungenfuerdenschiffsverkehr_traegtbeizu ON ax_einrichtungenfuerdenschiffsverkehr USING gin (traegtbeizu);
@@ -10709,7 +10709,7 @@ CREATE TABLE IF NOT EXISTS ax_flugverkehrsanlage (
 
 CREATE UNIQUE INDEX ax_flugverkehrsanlage_gml ON ax_flugverkehrsanlage USING btree (gml_id,beginnt);
 CREATE INDEX ax_flugverkehrsanlage_endet ON ax_flugverkehrsanlage USING btree (endet);
-SELECT AddGeometryColumn('ax_flugverkehrsanlage', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_flugverkehrsanlage', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_flugverkehrsanlage_wkb_geometry_idx ON ax_flugverkehrsanlage USING gist (wkb_geometry);
 CREATE INDEX ax_flugverkehrsanlage_istabgeleitetaus ON ax_flugverkehrsanlage USING gin (istabgeleitetaus);
 CREATE INDEX ax_flugverkehrsanlage_traegtbeizu ON ax_flugverkehrsanlage USING gin (traegtbeizu);
@@ -10801,7 +10801,7 @@ CREATE TABLE IF NOT EXISTS ax_hafen (
 
 CREATE UNIQUE INDEX ax_hafen_gml ON ax_hafen USING btree (gml_id,beginnt);
 CREATE INDEX ax_hafen_endet ON ax_hafen USING btree (endet);
-SELECT AddGeometryColumn('ax_hafen', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_hafen', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_hafen_wkb_geometry_idx ON ax_hafen USING gist (wkb_geometry);
 CREATE INDEX ax_hafen_istabgeleitetaus ON ax_hafen USING gin (istabgeleitetaus);
 CREATE INDEX ax_hafen_traegtbeizu ON ax_hafen USING gin (traegtbeizu);
@@ -10889,7 +10889,7 @@ CREATE TABLE IF NOT EXISTS ax_testgelaende (
 
 CREATE UNIQUE INDEX ax_testgelaende_gml ON ax_testgelaende USING btree (gml_id,beginnt);
 CREATE INDEX ax_testgelaende_endet ON ax_testgelaende USING btree (endet);
-SELECT AddGeometryColumn('ax_testgelaende', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_testgelaende', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_testgelaende_wkb_geometry_idx ON ax_testgelaende USING gist (wkb_geometry);
 CREATE INDEX ax_testgelaende_istabgeleitetaus ON ax_testgelaende USING gin (istabgeleitetaus);
 CREATE INDEX ax_testgelaende_traegtbeizu ON ax_testgelaende USING gin (traegtbeizu);
@@ -10978,7 +10978,7 @@ CREATE TABLE IF NOT EXISTS ax_schleuse (
 
 CREATE UNIQUE INDEX ax_schleuse_gml ON ax_schleuse USING btree (gml_id,beginnt);
 CREATE INDEX ax_schleuse_endet ON ax_schleuse USING btree (endet);
-SELECT AddGeometryColumn('ax_schleuse', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_schleuse', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_schleuse_wkb_geometry_idx ON ax_schleuse USING gist (wkb_geometry);
 CREATE INDEX ax_schleuse_istabgeleitetaus ON ax_schleuse USING gin (istabgeleitetaus);
 CREATE INDEX ax_schleuse_traegtbeizu ON ax_schleuse USING gin (traegtbeizu);
@@ -11068,7 +11068,7 @@ CREATE TABLE IF NOT EXISTS ax_ortslage (
 
 CREATE UNIQUE INDEX ax_ortslage_gml ON ax_ortslage USING btree (gml_id,beginnt);
 CREATE INDEX ax_ortslage_endet ON ax_ortslage USING btree (endet);
-SELECT AddGeometryColumn('ax_ortslage', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_ortslage', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_ortslage_wkb_geometry_idx ON ax_ortslage USING gist (wkb_geometry);
 CREATE INDEX ax_ortslage_istabgeleitetaus ON ax_ortslage USING gin (istabgeleitetaus);
 CREATE INDEX ax_ortslage_traegtbeizu ON ax_ortslage USING gin (traegtbeizu);
@@ -11155,7 +11155,7 @@ CREATE TABLE IF NOT EXISTS ax_grenzuebergang (
 
 CREATE UNIQUE INDEX ax_grenzuebergang_gml ON ax_grenzuebergang USING btree (gml_id,beginnt);
 CREATE INDEX ax_grenzuebergang_endet ON ax_grenzuebergang USING btree (endet);
-SELECT AddGeometryColumn('ax_grenzuebergang', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_grenzuebergang', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_grenzuebergang_wkb_geometry_idx ON ax_grenzuebergang USING gist (wkb_geometry);
 CREATE INDEX ax_grenzuebergang_istabgeleitetaus ON ax_grenzuebergang USING gin (istabgeleitetaus);
 CREATE INDEX ax_grenzuebergang_traegtbeizu ON ax_grenzuebergang USING gin (traegtbeizu);
@@ -11245,7 +11245,7 @@ CREATE TABLE IF NOT EXISTS ax_gewaessermerkmal (
 
 CREATE UNIQUE INDEX ax_gewaessermerkmal_gml ON ax_gewaessermerkmal USING btree (gml_id,beginnt);
 CREATE INDEX ax_gewaessermerkmal_endet ON ax_gewaessermerkmal USING btree (endet);
-SELECT AddGeometryColumn('ax_gewaessermerkmal', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_gewaessermerkmal', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_gewaessermerkmal_wkb_geometry_idx ON ax_gewaessermerkmal USING gist (wkb_geometry);
 CREATE INDEX ax_gewaessermerkmal_istabgeleitetaus ON ax_gewaessermerkmal USING gin (istabgeleitetaus);
 CREATE INDEX ax_gewaessermerkmal_traegtbeizu ON ax_gewaessermerkmal USING gin (traegtbeizu);
@@ -11338,7 +11338,7 @@ CREATE TABLE IF NOT EXISTS ax_untergeordnetesgewaesser (
 
 CREATE UNIQUE INDEX ax_untergeordnetesgewaesser_gml ON ax_untergeordnetesgewaesser USING btree (gml_id,beginnt);
 CREATE INDEX ax_untergeordnetesgewaesser_endet ON ax_untergeordnetesgewaesser USING btree (endet);
-SELECT AddGeometryColumn('ax_untergeordnetesgewaesser', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_untergeordnetesgewaesser', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_untergeordnetesgewaesser_wkb_geometry_idx ON ax_untergeordnetesgewaesser USING gist (wkb_geometry);
 CREATE INDEX ax_untergeordnetesgewaesser_istabgeleitetaus ON ax_untergeordnetesgewaesser USING gin (istabgeleitetaus);
 CREATE INDEX ax_untergeordnetesgewaesser_traegtbeizu ON ax_untergeordnetesgewaesser USING gin (traegtbeizu);
@@ -11432,7 +11432,7 @@ CREATE TABLE IF NOT EXISTS ax_vegetationsmerkmal (
 
 CREATE UNIQUE INDEX ax_vegetationsmerkmal_gml ON ax_vegetationsmerkmal USING btree (gml_id,beginnt);
 CREATE INDEX ax_vegetationsmerkmal_endet ON ax_vegetationsmerkmal USING btree (endet);
-SELECT AddGeometryColumn('ax_vegetationsmerkmal', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_vegetationsmerkmal', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_vegetationsmerkmal_wkb_geometry_idx ON ax_vegetationsmerkmal USING gist (wkb_geometry);
 CREATE INDEX ax_vegetationsmerkmal_istabgeleitetaus ON ax_vegetationsmerkmal USING gin (istabgeleitetaus);
 CREATE INDEX ax_vegetationsmerkmal_traegtbeizu ON ax_vegetationsmerkmal USING gin (traegtbeizu);
@@ -11531,7 +11531,7 @@ CREATE TABLE IF NOT EXISTS ax_musterlandesmusterundvergleichsstueck (
 
 CREATE UNIQUE INDEX ax_musterlandesmusterundvergleichsstueck_gml ON ax_musterlandesmusterundvergleichsstueck USING btree (gml_id,beginnt);
 CREATE INDEX ax_musterlandesmusterundvergleichsstueck_endet ON ax_musterlandesmusterundvergleichsstueck USING btree (endet);
-SELECT AddGeometryColumn('ax_musterlandesmusterundvergleichsstueck', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_musterlandesmusterundvergleichsstueck', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_musterlandesmusterundvergleichsstueck_wkb_geometry_idx ON ax_musterlandesmusterundvergleichsstueck USING gist (wkb_geometry);
 CREATE INDEX ax_musterlandesmusterundvergleichsstueck_istabgeleitetaus ON ax_musterlandesmusterundvergleichsstueck USING gin (istabgeleitetaus);
 CREATE INDEX ax_musterlandesmusterundvergleichsstueck_traegtbeizu ON ax_musterlandesmusterundvergleichsstueck USING gin (traegtbeizu);
@@ -11602,7 +11602,7 @@ CREATE TABLE IF NOT EXISTS ax_insel (
 
 CREATE UNIQUE INDEX ax_insel_gml ON ax_insel USING btree (gml_id,beginnt);
 CREATE INDEX ax_insel_endet ON ax_insel USING btree (endet);
-SELECT AddGeometryColumn('ax_insel', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_insel', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_insel_wkb_geometry_idx ON ax_insel USING gist (wkb_geometry);
 CREATE INDEX ax_insel_istabgeleitetaus ON ax_insel USING gin (istabgeleitetaus);
 CREATE INDEX ax_insel_traegtbeizu ON ax_insel USING gin (traegtbeizu);
@@ -11642,7 +11642,7 @@ CREATE TABLE IF NOT EXISTS ax_gewann (
 
 CREATE UNIQUE INDEX ax_gewann_gml ON ax_gewann USING btree (gml_id,beginnt);
 CREATE INDEX ax_gewann_endet ON ax_gewann USING btree (endet);
-SELECT AddGeometryColumn('ax_gewann', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_gewann', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_gewann_wkb_geometry_idx ON ax_gewann USING gist (wkb_geometry);
 CREATE INDEX ax_gewann_istabgeleitetaus ON ax_gewann USING gin (istabgeleitetaus);
 CREATE INDEX ax_gewann_traegtbeizu ON ax_gewann USING gin (traegtbeizu);
@@ -11683,7 +11683,7 @@ CREATE TABLE IF NOT EXISTS ax_kleinraeumigerlandschaftsteil (
 
 CREATE UNIQUE INDEX ax_kleinraeumigerlandschaftsteil_gml ON ax_kleinraeumigerlandschaftsteil USING btree (gml_id,beginnt);
 CREATE INDEX ax_kleinraeumigerlandschaftsteil_endet ON ax_kleinraeumigerlandschaftsteil USING btree (endet);
-SELECT AddGeometryColumn('ax_kleinraeumigerlandschaftsteil', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_kleinraeumigerlandschaftsteil', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_kleinraeumigerlandschaftsteil_wkb_geometry_idx ON ax_kleinraeumigerlandschaftsteil USING gist (wkb_geometry);
 CREATE INDEX ax_kleinraeumigerlandschaftsteil_istabgeleitetaus ON ax_kleinraeumigerlandschaftsteil USING gin (istabgeleitetaus);
 CREATE INDEX ax_kleinraeumigerlandschaftsteil_traegtbeizu ON ax_kleinraeumigerlandschaftsteil USING gin (traegtbeizu);
@@ -11725,7 +11725,7 @@ CREATE TABLE IF NOT EXISTS ax_landschaft (
 
 CREATE UNIQUE INDEX ax_landschaft_gml ON ax_landschaft USING btree (gml_id,beginnt);
 CREATE INDEX ax_landschaft_endet ON ax_landschaft USING btree (endet);
-SELECT AddGeometryColumn('ax_landschaft', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_landschaft', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_landschaft_wkb_geometry_idx ON ax_landschaft USING gist (wkb_geometry);
 CREATE INDEX ax_landschaft_istabgeleitetaus ON ax_landschaft USING gin (istabgeleitetaus);
 CREATE INDEX ax_landschaft_traegtbeizu ON ax_landschaft USING gin (traegtbeizu);
@@ -11791,7 +11791,7 @@ CREATE TABLE IF NOT EXISTS ax_felsenfelsblockfelsnadel (
 
 CREATE UNIQUE INDEX ax_felsenfelsblockfelsnadel_gml ON ax_felsenfelsblockfelsnadel USING btree (gml_id,beginnt);
 CREATE INDEX ax_felsenfelsblockfelsnadel_endet ON ax_felsenfelsblockfelsnadel USING btree (endet);
-SELECT AddGeometryColumn('ax_felsenfelsblockfelsnadel', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_felsenfelsblockfelsnadel', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_felsenfelsblockfelsnadel_wkb_geometry_idx ON ax_felsenfelsblockfelsnadel USING gist (wkb_geometry);
 CREATE INDEX ax_felsenfelsblockfelsnadel_istabgeleitetaus ON ax_felsenfelsblockfelsnadel USING gin (istabgeleitetaus);
 CREATE INDEX ax_felsenfelsblockfelsnadel_traegtbeizu ON ax_felsenfelsblockfelsnadel USING gin (traegtbeizu);
@@ -11865,7 +11865,7 @@ CREATE TABLE IF NOT EXISTS ap_lto (
 
 CREATE UNIQUE INDEX ap_lto_gml ON ap_lto USING btree (gml_id,beginnt);
 CREATE INDEX ap_lto_endet ON ap_lto USING btree (endet);
-SELECT AddGeometryColumn('ap_lto', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ap_lto', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ap_lto_wkb_geometry_idx ON ap_lto USING gist (wkb_geometry);
 CREATE INDEX ap_lto_dientzurdarstellungvon ON ap_lto USING gin (dientzurdarstellungvon);
 CREATE INDEX ap_lto_hat ON ap_lto USING btree (hat);
@@ -11941,7 +11941,7 @@ CREATE TABLE IF NOT EXISTS ax_leitung (
 
 CREATE UNIQUE INDEX ax_leitung_gml ON ax_leitung USING btree (gml_id,beginnt);
 CREATE INDEX ax_leitung_endet ON ax_leitung USING btree (endet);
-SELECT AddGeometryColumn('ax_leitung', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_leitung', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_leitung_wkb_geometry_idx ON ax_leitung USING gist (wkb_geometry);
 CREATE INDEX ax_leitung_istabgeleitetaus ON ax_leitung USING gin (istabgeleitetaus);
 CREATE INDEX ax_leitung_traegtbeizu ON ax_leitung USING gin (traegtbeizu);
@@ -12029,7 +12029,7 @@ CREATE TABLE IF NOT EXISTS ax_abschnitt (
 
 CREATE UNIQUE INDEX ax_abschnitt_gml ON ax_abschnitt USING btree (gml_id,beginnt);
 CREATE INDEX ax_abschnitt_endet ON ax_abschnitt USING btree (endet);
-SELECT AddGeometryColumn('ax_abschnitt', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_abschnitt', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_abschnitt_wkb_geometry_idx ON ax_abschnitt USING gist (wkb_geometry);
 CREATE INDEX ax_abschnitt_istabgeleitetaus ON ax_abschnitt USING gin (istabgeleitetaus);
 CREATE INDEX ax_abschnitt_traegtbeizu ON ax_abschnitt USING gin (traegtbeizu);
@@ -12115,7 +12115,7 @@ CREATE TABLE IF NOT EXISTS ax_ast (
 
 CREATE UNIQUE INDEX ax_ast_gml ON ax_ast USING btree (gml_id,beginnt);
 CREATE INDEX ax_ast_endet ON ax_ast USING btree (endet);
-SELECT AddGeometryColumn('ax_ast', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_ast', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_ast_wkb_geometry_idx ON ax_ast USING gist (wkb_geometry);
 CREATE INDEX ax_ast_istabgeleitetaus ON ax_ast USING gin (istabgeleitetaus);
 CREATE INDEX ax_ast_traegtbeizu ON ax_ast USING gin (traegtbeizu);
@@ -12181,7 +12181,7 @@ CREATE TABLE IF NOT EXISTS ap_lpo (
 
 CREATE UNIQUE INDEX ap_lpo_gml ON ap_lpo USING btree (gml_id,beginnt);
 CREATE INDEX ap_lpo_endet ON ap_lpo USING btree (endet);
-SELECT AddGeometryColumn('ap_lpo', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ap_lpo', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ap_lpo_wkb_geometry_idx ON ap_lpo USING gist (wkb_geometry);
 CREATE INDEX ap_lpo_dientzurdarstellungvon ON ap_lpo USING gin (dientzurdarstellungvon);
 CREATE INDEX ap_lpo_istabgeleitetaus ON ap_lpo USING gin (istabgeleitetaus);
@@ -12249,7 +12249,7 @@ CREATE TABLE IF NOT EXISTS ax_seilbahnschwebebahn (
 
 CREATE UNIQUE INDEX ax_seilbahnschwebebahn_gml ON ax_seilbahnschwebebahn USING btree (gml_id,beginnt);
 CREATE INDEX ax_seilbahnschwebebahn_endet ON ax_seilbahnschwebebahn USING btree (endet);
-SELECT AddGeometryColumn('ax_seilbahnschwebebahn', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_seilbahnschwebebahn', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_seilbahnschwebebahn_wkb_geometry_idx ON ax_seilbahnschwebebahn USING gist (wkb_geometry);
 CREATE INDEX ax_seilbahnschwebebahn_istabgeleitetaus ON ax_seilbahnschwebebahn USING gin (istabgeleitetaus);
 CREATE INDEX ax_seilbahnschwebebahn_traegtbeizu ON ax_seilbahnschwebebahn USING gin (traegtbeizu);
@@ -12314,7 +12314,7 @@ CREATE TABLE IF NOT EXISTS ax_gebaeudeausgestaltung (
 
 CREATE UNIQUE INDEX ax_gebaeudeausgestaltung_gml ON ax_gebaeudeausgestaltung USING btree (gml_id,beginnt);
 CREATE INDEX ax_gebaeudeausgestaltung_endet ON ax_gebaeudeausgestaltung USING btree (endet);
-SELECT AddGeometryColumn('ax_gebaeudeausgestaltung', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_gebaeudeausgestaltung', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_gebaeudeausgestaltung_wkb_geometry_idx ON ax_gebaeudeausgestaltung USING gist (wkb_geometry);
 CREATE INDEX ax_gebaeudeausgestaltung_zeigtauf ON ax_gebaeudeausgestaltung USING btree (zeigtauf);
 CREATE INDEX ax_gebaeudeausgestaltung_istabgeleitetaus ON ax_gebaeudeausgestaltung USING gin (istabgeleitetaus);
@@ -12357,7 +12357,7 @@ CREATE TABLE IF NOT EXISTS ax_topographischelinie (
 
 CREATE UNIQUE INDEX ax_topographischelinie_gml ON ax_topographischelinie USING btree (gml_id,beginnt);
 CREATE INDEX ax_topographischelinie_endet ON ax_topographischelinie USING btree (endet);
-SELECT AddGeometryColumn('ax_topographischelinie', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_topographischelinie', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_topographischelinie_wkb_geometry_idx ON ax_topographischelinie USING gist (wkb_geometry);
 CREATE INDEX ax_topographischelinie_istabgeleitetaus ON ax_topographischelinie USING gin (istabgeleitetaus);
 CREATE INDEX ax_topographischelinie_traegtbeizu ON ax_topographischelinie USING gin (traegtbeizu);
@@ -12409,7 +12409,7 @@ CREATE TABLE IF NOT EXISTS ax_geripplinie (
 
 CREATE UNIQUE INDEX ax_geripplinie_gml ON ax_geripplinie USING btree (gml_id,beginnt);
 CREATE INDEX ax_geripplinie_endet ON ax_geripplinie USING btree (endet);
-SELECT AddGeometryColumn('ax_geripplinie', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_geripplinie', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_geripplinie_wkb_geometry_idx ON ax_geripplinie USING gist (wkb_geometry);
 CREATE INDEX ax_geripplinie_istabgeleitetaus ON ax_geripplinie USING gin (istabgeleitetaus);
 CREATE INDEX ax_geripplinie_traegtbeizu ON ax_geripplinie USING gin (traegtbeizu);
@@ -12472,7 +12472,7 @@ CREATE TABLE IF NOT EXISTS ax_gewaesserbegrenzung (
 
 CREATE UNIQUE INDEX ax_gewaesserbegrenzung_gml ON ax_gewaesserbegrenzung USING btree (gml_id,beginnt);
 CREATE INDEX ax_gewaesserbegrenzung_endet ON ax_gewaesserbegrenzung USING btree (endet);
-SELECT AddGeometryColumn('ax_gewaesserbegrenzung', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_gewaesserbegrenzung', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_gewaesserbegrenzung_wkb_geometry_idx ON ax_gewaesserbegrenzung USING gist (wkb_geometry);
 CREATE INDEX ax_gewaesserbegrenzung_istabgeleitetaus ON ax_gewaesserbegrenzung USING gin (istabgeleitetaus);
 CREATE INDEX ax_gewaesserbegrenzung_traegtbeizu ON ax_gewaesserbegrenzung USING gin (traegtbeizu);
@@ -12536,7 +12536,7 @@ CREATE TABLE IF NOT EXISTS ax_strukturierterfasstegelaendepunkte (
 
 CREATE UNIQUE INDEX ax_strukturierterfasstegelaendepunkte_gml ON ax_strukturierterfasstegelaendepunkte USING btree (gml_id,beginnt);
 CREATE INDEX ax_strukturierterfasstegelaendepunkte_endet ON ax_strukturierterfasstegelaendepunkte USING btree (endet);
-SELECT AddGeometryColumn('ax_strukturierterfasstegelaendepunkte', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_strukturierterfasstegelaendepunkte', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_strukturierterfasstegelaendepunkte_wkb_geometry_idx ON ax_strukturierterfasstegelaendepunkte USING gist (wkb_geometry);
 CREATE INDEX ax_strukturierterfasstegelaendepunkte_istabgeleitetaus ON ax_strukturierterfasstegelaendepunkte USING gin (istabgeleitetaus);
 CREATE INDEX ax_strukturierterfasstegelaendepunkte_traegtbeizu ON ax_strukturierterfasstegelaendepunkte USING gin (traegtbeizu);
@@ -12589,7 +12589,7 @@ CREATE TABLE IF NOT EXISTS ax_einschnitt (
 
 CREATE UNIQUE INDEX ax_einschnitt_gml ON ax_einschnitt USING btree (gml_id,beginnt);
 CREATE INDEX ax_einschnitt_endet ON ax_einschnitt USING btree (endet);
-SELECT AddGeometryColumn('ax_einschnitt', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_einschnitt', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_einschnitt_wkb_geometry_idx ON ax_einschnitt USING gist (wkb_geometry);
 CREATE INDEX ax_einschnitt_istabgeleitetaus ON ax_einschnitt USING gin (istabgeleitetaus);
 CREATE INDEX ax_einschnitt_traegtbeizu ON ax_einschnitt USING gin (traegtbeizu);
@@ -12653,7 +12653,7 @@ CREATE TABLE IF NOT EXISTS ax_hoehenlinie (
 
 CREATE UNIQUE INDEX ax_hoehenlinie_gml ON ax_hoehenlinie USING btree (gml_id,beginnt);
 CREATE INDEX ax_hoehenlinie_endet ON ax_hoehenlinie USING btree (endet);
-SELECT AddGeometryColumn('ax_hoehenlinie', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_hoehenlinie', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_hoehenlinie_wkb_geometry_idx ON ax_hoehenlinie USING gist (wkb_geometry);
 CREATE INDEX ax_hoehenlinie_istabgeleitetaus ON ax_hoehenlinie USING gin (istabgeleitetaus);
 CREATE INDEX ax_hoehenlinie_traegtbeizu ON ax_hoehenlinie USING gin (traegtbeizu);
@@ -12720,7 +12720,7 @@ CREATE TABLE IF NOT EXISTS ax_abgeleitetehoehenlinie (
 
 CREATE UNIQUE INDEX ax_abgeleitetehoehenlinie_gml ON ax_abgeleitetehoehenlinie USING btree (gml_id,beginnt);
 CREATE INDEX ax_abgeleitetehoehenlinie_endet ON ax_abgeleitetehoehenlinie USING btree (endet);
-SELECT AddGeometryColumn('ax_abgeleitetehoehenlinie', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_abgeleitetehoehenlinie', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_abgeleitetehoehenlinie_wkb_geometry_idx ON ax_abgeleitetehoehenlinie USING gist (wkb_geometry);
 CREATE INDEX ax_abgeleitetehoehenlinie_istabgeleitetaus ON ax_abgeleitetehoehenlinie USING gin (istabgeleitetaus);
 CREATE INDEX ax_abgeleitetehoehenlinie_traegtbeizu ON ax_abgeleitetehoehenlinie USING gin (traegtbeizu);
@@ -12774,7 +12774,7 @@ CREATE TABLE IF NOT EXISTS ap_pto (
 
 CREATE UNIQUE INDEX ap_pto_gml ON ap_pto USING btree (gml_id,beginnt);
 CREATE INDEX ap_pto_endet ON ap_pto USING btree (endet);
-SELECT AddGeometryColumn('ap_pto', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ap_pto', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ap_pto_wkb_geometry_idx ON ap_pto USING gist (wkb_geometry);
 CREATE INDEX ap_pto_dientzurdarstellungvon ON ap_pto USING gin (dientzurdarstellungvon);
 CREATE INDEX ap_pto_hat ON ap_pto USING btree (hat);
@@ -12851,7 +12851,7 @@ CREATE TABLE IF NOT EXISTS ax_heilquellegasquelle (
 
 CREATE UNIQUE INDEX ax_heilquellegasquelle_gml ON ax_heilquellegasquelle USING btree (gml_id,beginnt);
 CREATE INDEX ax_heilquellegasquelle_endet ON ax_heilquellegasquelle USING btree (endet);
-SELECT AddGeometryColumn('ax_heilquellegasquelle', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_heilquellegasquelle', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_heilquellegasquelle_wkb_geometry_idx ON ax_heilquellegasquelle USING gist (wkb_geometry);
 CREATE INDEX ax_heilquellegasquelle_istabgeleitetaus ON ax_heilquellegasquelle USING gin (istabgeleitetaus);
 CREATE INDEX ax_heilquellegasquelle_traegtbeizu ON ax_heilquellegasquelle USING gin (traegtbeizu);
@@ -12939,7 +12939,7 @@ CREATE TABLE IF NOT EXISTS ax_wasserspiegelhoehe (
 
 CREATE UNIQUE INDEX ax_wasserspiegelhoehe_gml ON ax_wasserspiegelhoehe USING btree (gml_id,beginnt);
 CREATE INDEX ax_wasserspiegelhoehe_endet ON ax_wasserspiegelhoehe USING btree (endet);
-SELECT AddGeometryColumn('ax_wasserspiegelhoehe', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_wasserspiegelhoehe', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_wasserspiegelhoehe_wkb_geometry_idx ON ax_wasserspiegelhoehe USING gist (wkb_geometry);
 CREATE INDEX ax_wasserspiegelhoehe_istabgeleitetaus ON ax_wasserspiegelhoehe USING gin (istabgeleitetaus);
 CREATE INDEX ax_wasserspiegelhoehe_traegtbeizu ON ax_wasserspiegelhoehe USING gin (traegtbeizu);
@@ -13026,7 +13026,7 @@ CREATE TABLE IF NOT EXISTS ax_nullpunkt (
 
 CREATE UNIQUE INDEX ax_nullpunkt_gml ON ax_nullpunkt USING btree (gml_id,beginnt);
 CREATE INDEX ax_nullpunkt_endet ON ax_nullpunkt USING btree (endet);
-SELECT AddGeometryColumn('ax_nullpunkt', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_nullpunkt', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_nullpunkt_wkb_geometry_idx ON ax_nullpunkt USING gist (wkb_geometry);
 CREATE INDEX ax_nullpunkt_istabgeleitetaus ON ax_nullpunkt USING gin (istabgeleitetaus);
 CREATE INDEX ax_nullpunkt_traegtbeizu ON ax_nullpunkt USING gin (traegtbeizu);
@@ -13127,7 +13127,7 @@ CREATE TABLE IF NOT EXISTS ax_punktortau (
 
 CREATE UNIQUE INDEX ax_punktortau_gml ON ax_punktortau USING btree (gml_id,beginnt);
 CREATE INDEX ax_punktortau_endet ON ax_punktortau USING btree (endet);
-SELECT AddGeometryColumn('ax_punktortau', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_punktortau', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_punktortau_wkb_geometry_idx ON ax_punktortau USING gist (wkb_geometry);
 CREATE INDEX ax_punktortau_istabgeleitetaus ON ax_punktortau USING gin (istabgeleitetaus);
 CREATE INDEX ax_punktortau_traegtbeizu ON ax_punktortau USING gin (traegtbeizu);
@@ -13218,7 +13218,7 @@ CREATE TABLE IF NOT EXISTS ax_georeferenziertegebaeudeadresse (
 
 CREATE UNIQUE INDEX ax_georeferenziertegebaeudeadresse_gml ON ax_georeferenziertegebaeudeadresse USING btree (gml_id,beginnt);
 CREATE INDEX ax_georeferenziertegebaeudeadresse_endet ON ax_georeferenziertegebaeudeadresse USING btree (endet);
-SELECT AddGeometryColumn('ax_georeferenziertegebaeudeadresse', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_georeferenziertegebaeudeadresse', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_georeferenziertegebaeudeadresse_wkb_geometry_idx ON ax_georeferenziertegebaeudeadresse USING gist (wkb_geometry);
 CREATE INDEX ax_georeferenziertegebaeudeadresse_hatauch ON ax_georeferenziertegebaeudeadresse USING btree (hatauch);
 CREATE INDEX ax_georeferenziertegebaeudeadresse_istabgeleitetaus ON ax_georeferenziertegebaeudeadresse USING gin (istabgeleitetaus);
@@ -13304,7 +13304,7 @@ CREATE TABLE IF NOT EXISTS ax_grablochderbodenschaetzung (
 
 CREATE UNIQUE INDEX ax_grablochderbodenschaetzung_gml ON ax_grablochderbodenschaetzung USING btree (gml_id,beginnt);
 CREATE INDEX ax_grablochderbodenschaetzung_endet ON ax_grablochderbodenschaetzung USING btree (endet);
-SELECT AddGeometryColumn('ax_grablochderbodenschaetzung', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_grablochderbodenschaetzung', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_grablochderbodenschaetzung_wkb_geometry_idx ON ax_grablochderbodenschaetzung USING gist (wkb_geometry);
 CREATE INDEX ax_grablochderbodenschaetzung_gehoertzu ON ax_grablochderbodenschaetzung USING btree (gehoertzu);
 CREATE INDEX ax_grablochderbodenschaetzung_istabgeleitetaus ON ax_grablochderbodenschaetzung USING gin (istabgeleitetaus);
@@ -13379,7 +13379,7 @@ CREATE TABLE IF NOT EXISTS ax_wohnplatz (
 
 CREATE UNIQUE INDEX ax_wohnplatz_gml ON ax_wohnplatz USING btree (gml_id,beginnt);
 CREATE INDEX ax_wohnplatz_endet ON ax_wohnplatz USING btree (endet);
-SELECT AddGeometryColumn('ax_wohnplatz', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_wohnplatz', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_wohnplatz_wkb_geometry_idx ON ax_wohnplatz USING gist (wkb_geometry);
 CREATE INDEX ax_wohnplatz_istabgeleitetaus ON ax_wohnplatz USING gin (istabgeleitetaus);
 CREATE INDEX ax_wohnplatz_traegtbeizu ON ax_wohnplatz USING gin (traegtbeizu);
@@ -13432,7 +13432,7 @@ CREATE TABLE IF NOT EXISTS ax_markantergelaendepunkt (
 
 CREATE UNIQUE INDEX ax_markantergelaendepunkt_gml ON ax_markantergelaendepunkt USING btree (gml_id,beginnt);
 CREATE INDEX ax_markantergelaendepunkt_endet ON ax_markantergelaendepunkt USING btree (endet);
-SELECT AddGeometryColumn('ax_markantergelaendepunkt', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_markantergelaendepunkt', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_markantergelaendepunkt_wkb_geometry_idx ON ax_markantergelaendepunkt USING gist (wkb_geometry);
 CREATE INDEX ax_markantergelaendepunkt_istabgeleitetaus ON ax_markantergelaendepunkt USING gin (istabgeleitetaus);
 CREATE INDEX ax_markantergelaendepunkt_traegtbeizu ON ax_markantergelaendepunkt USING gin (traegtbeizu);
@@ -13492,7 +13492,7 @@ CREATE TABLE IF NOT EXISTS ax_besondererhoehenpunkt (
 
 CREATE UNIQUE INDEX ax_besondererhoehenpunkt_gml ON ax_besondererhoehenpunkt USING btree (gml_id,beginnt);
 CREATE INDEX ax_besondererhoehenpunkt_endet ON ax_besondererhoehenpunkt USING btree (endet);
-SELECT AddGeometryColumn('ax_besondererhoehenpunkt', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_besondererhoehenpunkt', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_besondererhoehenpunkt_wkb_geometry_idx ON ax_besondererhoehenpunkt USING gist (wkb_geometry);
 CREATE INDEX ax_besondererhoehenpunkt_istabgeleitetaus ON ax_besondererhoehenpunkt USING gin (istabgeleitetaus);
 CREATE INDEX ax_besondererhoehenpunkt_traegtbeizu ON ax_besondererhoehenpunkt USING gin (traegtbeizu);
@@ -13566,7 +13566,7 @@ CREATE TABLE IF NOT EXISTS ax_hoehleneingang (
 
 CREATE UNIQUE INDEX ax_hoehleneingang_gml ON ax_hoehleneingang USING btree (gml_id,beginnt);
 CREATE INDEX ax_hoehleneingang_endet ON ax_hoehleneingang USING btree (endet);
-SELECT AddGeometryColumn('ax_hoehleneingang', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_hoehleneingang', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_hoehleneingang_wkb_geometry_idx ON ax_hoehleneingang USING gist (wkb_geometry);
 CREATE INDEX ax_hoehleneingang_istabgeleitetaus ON ax_hoehleneingang USING gin (istabgeleitetaus);
 CREATE INDEX ax_hoehleneingang_traegtbeizu ON ax_hoehleneingang USING gin (traegtbeizu);
@@ -13635,7 +13635,7 @@ CREATE TABLE IF NOT EXISTS ap_ppo (
 
 CREATE UNIQUE INDEX ap_ppo_gml ON ap_ppo USING btree (gml_id,beginnt);
 CREATE INDEX ap_ppo_endet ON ap_ppo USING btree (endet);
-SELECT AddGeometryColumn('ap_ppo', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ap_ppo', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ap_ppo_wkb_geometry_idx ON ap_ppo USING gist (wkb_geometry);
 CREATE INDEX ap_ppo_dientzurdarstellungvon ON ap_ppo USING gin (dientzurdarstellungvon);
 CREATE INDEX ap_ppo_istabgeleitetaus ON ap_ppo USING gin (istabgeleitetaus);
@@ -13706,7 +13706,7 @@ CREATE TABLE IF NOT EXISTS ax_sickerstrecke (
 
 CREATE UNIQUE INDEX ax_sickerstrecke_gml ON ax_sickerstrecke USING btree (gml_id,beginnt);
 CREATE INDEX ax_sickerstrecke_endet ON ax_sickerstrecke USING btree (endet);
-SELECT AddGeometryColumn('ax_sickerstrecke', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_sickerstrecke', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_sickerstrecke_wkb_geometry_idx ON ax_sickerstrecke USING gist (wkb_geometry);
 CREATE INDEX ax_sickerstrecke_istabgeleitetaus ON ax_sickerstrecke USING gin (istabgeleitetaus);
 CREATE INDEX ax_sickerstrecke_traegtbeizu ON ax_sickerstrecke USING gin (traegtbeizu);
@@ -13770,7 +13770,7 @@ CREATE TABLE IF NOT EXISTS ax_firstlinie (
 
 CREATE UNIQUE INDEX ax_firstlinie_gml ON ax_firstlinie USING btree (gml_id,beginnt);
 CREATE INDEX ax_firstlinie_endet ON ax_firstlinie USING btree (endet);
-SELECT AddGeometryColumn('ax_firstlinie', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_firstlinie', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_firstlinie_wkb_geometry_idx ON ax_firstlinie USING gist (wkb_geometry);
 CREATE INDEX ax_firstlinie_istabgeleitetaus ON ax_firstlinie USING gin (istabgeleitetaus);
 CREATE INDEX ax_firstlinie_traegtbeizu ON ax_firstlinie USING gin (traegtbeizu);
@@ -13809,7 +13809,7 @@ CREATE TABLE IF NOT EXISTS ax_besonderegebaeudelinie (
 
 CREATE UNIQUE INDEX ax_besonderegebaeudelinie_gml ON ax_besonderegebaeudelinie USING btree (gml_id,beginnt);
 CREATE INDEX ax_besonderegebaeudelinie_endet ON ax_besonderegebaeudelinie USING btree (endet);
-SELECT AddGeometryColumn('ax_besonderegebaeudelinie', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_besonderegebaeudelinie', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_besonderegebaeudelinie_wkb_geometry_idx ON ax_besonderegebaeudelinie USING gist (wkb_geometry);
 CREATE INDEX ax_besonderegebaeudelinie_istabgeleitetaus ON ax_besonderegebaeudelinie USING gin (istabgeleitetaus);
 CREATE INDEX ax_besonderegebaeudelinie_traegtbeizu ON ax_besonderegebaeudelinie USING gin (traegtbeizu);
@@ -13861,7 +13861,7 @@ CREATE TABLE IF NOT EXISTS ax_gelaendekante (
 
 CREATE UNIQUE INDEX ax_gelaendekante_gml ON ax_gelaendekante USING btree (gml_id,beginnt);
 CREATE INDEX ax_gelaendekante_endet ON ax_gelaendekante USING btree (endet);
-SELECT AddGeometryColumn('ax_gelaendekante', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_gelaendekante', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_gelaendekante_wkb_geometry_idx ON ax_gelaendekante USING gist (wkb_geometry);
 CREATE INDEX ax_gelaendekante_istabgeleitetaus ON ax_gelaendekante USING gin (istabgeleitetaus);
 CREATE INDEX ax_gelaendekante_traegtbeizu ON ax_gelaendekante USING gin (traegtbeizu);
@@ -13978,7 +13978,7 @@ CREATE TABLE IF NOT EXISTS ax_sonstigesbauwerkodersonstigeeinrichtung (
 
 CREATE UNIQUE INDEX ax_sonstigesbauwerkodersonstigeeinrichtung_gml ON ax_sonstigesbauwerkodersonstigeeinrichtung USING btree (gml_id,beginnt);
 CREATE INDEX ax_sonstigesbauwerkodersonstigeeinrichtung_endet ON ax_sonstigesbauwerkodersonstigeeinrichtung USING btree (endet);
-SELECT AddGeometryColumn('ax_sonstigesbauwerkodersonstigeeinrichtung', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_sonstigesbauwerkodersonstigeeinrichtung', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_sonstigesbauwerkodersonstigeeinrichtung_wkb_geometry1 ON ax_sonstigesbauwerkodersonstigeeinrichtung USING gist (wkb_geometry);
 CREATE INDEX ax_sbose_gzb_ax_sbose ON ax_sonstigesbauwerkodersonstigeeinrichtung USING btree (gehoertzubauwerk_ax_sonstigesbauwerkodersonstigeeinrichtun);
 CREATE INDEX ax_sbose_gzb_ax_boafsfue ON ax_sonstigesbauwerkodersonstigeeinrichtung USING btree (gehoertzubauwerk_ax_bauwerkoderanlagefuersportfreizeitunde);
@@ -14146,7 +14146,7 @@ CREATE TABLE IF NOT EXISTS ax_bauwerkoderanlagefuersportfreizeitunderholung (
 
 CREATE UNIQUE INDEX ax_bauwerkoderanlagefuersportfreizeitunderholung_gml ON ax_bauwerkoderanlagefuersportfreizeitunderholung USING btree (gml_id,beginnt);
 CREATE INDEX ax_bauwerkoderanlagefuersportfreizeitunderholung_endet ON ax_bauwerkoderanlagefuersportfreizeitunderholung USING btree (endet);
-SELECT AddGeometryColumn('ax_bauwerkoderanlagefuersportfreizeitunderholung', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_bauwerkoderanlagefuersportfreizeitunderholung', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_bauwerkoderanlagefuersportfreizeitunderholung_wkb_ge2 ON ax_bauwerkoderanlagefuersportfreizeitunderholung USING gist (wkb_geometry);
 CREATE INDEX ax_boafsfue_istabgeleitetaus ON ax_bauwerkoderanlagefuersportfreizeitunderholung USING gin (istabgeleitetaus);
 CREATE INDEX ax_boafsfue_traegtbeizu ON ax_bauwerkoderanlagefuersportfreizeitunderholung USING gin (traegtbeizu);
@@ -14239,7 +14239,7 @@ CREATE TABLE IF NOT EXISTS ax_bauwerkoderanlagefuerindustrieundgewerbe (
 
 CREATE UNIQUE INDEX ax_bauwerkoderanlagefuerindustrieundgewerbe_gml ON ax_bauwerkoderanlagefuerindustrieundgewerbe USING btree (gml_id,beginnt);
 CREATE INDEX ax_bauwerkoderanlagefuerindustrieundgewerbe_endet ON ax_bauwerkoderanlagefuerindustrieundgewerbe USING btree (endet);
-SELECT AddGeometryColumn('ax_bauwerkoderanlagefuerindustrieundgewerbe', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_bauwerkoderanlagefuerindustrieundgewerbe', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_bauwerkoderanlagefuerindustrieundgewerbe_wkb_geometr3 ON ax_bauwerkoderanlagefuerindustrieundgewerbe USING gist (wkb_geometry);
 CREATE INDEX ax_boafiug_istabgeleitetaus ON ax_bauwerkoderanlagefuerindustrieundgewerbe USING gin (istabgeleitetaus);
 CREATE INDEX ax_bauwerkoderanlagefuerindustrieundgewerbe_traegtbeizu ON ax_bauwerkoderanlagefuerindustrieundgewerbe USING gin (traegtbeizu);
@@ -14330,7 +14330,7 @@ CREATE TABLE IF NOT EXISTS ax_einrichtunginoeffentlichenbereichen (
 
 CREATE UNIQUE INDEX ax_einrichtunginoeffentlichenbereichen_gml ON ax_einrichtunginoeffentlichenbereichen USING btree (gml_id,beginnt);
 CREATE INDEX ax_einrichtunginoeffentlichenbereichen_endet ON ax_einrichtunginoeffentlichenbereichen USING btree (endet);
-SELECT AddGeometryColumn('ax_einrichtunginoeffentlichenbereichen', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_einrichtunginoeffentlichenbereichen', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_einrichtunginoeffentlichenbereichen_wkb_geometry_idx ON ax_einrichtunginoeffentlichenbereichen USING gist (wkb_geometry);
 CREATE INDEX ax_einrichtunginoeffentlichenbereichen_istabgeleitetaus ON ax_einrichtunginoeffentlichenbereichen USING gin (istabgeleitetaus);
 CREATE INDEX ax_einrichtunginoeffentlichenbereichen_traegtbeizu ON ax_einrichtunginoeffentlichenbereichen USING gin (traegtbeizu);
@@ -14418,7 +14418,7 @@ CREATE TABLE IF NOT EXISTS ax_historischesbauwerkoderhistorischeeinrichtung (
 
 CREATE UNIQUE INDEX ax_historischesbauwerkoderhistorischeeinrichtung_gml ON ax_historischesbauwerkoderhistorischeeinrichtung USING btree (gml_id,beginnt);
 CREATE INDEX ax_historischesbauwerkoderhistorischeeinrichtung_endet ON ax_historischesbauwerkoderhistorischeeinrichtung USING btree (endet);
-SELECT AddGeometryColumn('ax_historischesbauwerkoderhistorischeeinrichtung', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_historischesbauwerkoderhistorischeeinrichtung', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_historischesbauwerkoderhistorischeeinrichtung_wkb_ge4 ON ax_historischesbauwerkoderhistorischeeinrichtung USING gist (wkb_geometry);
 CREATE INDEX ax_hbohe_istabgeleitetaus ON ax_historischesbauwerkoderhistorischeeinrichtung USING gin (istabgeleitetaus);
 CREATE INDEX ax_hbohe_traegtbeizu ON ax_historischesbauwerkoderhistorischeeinrichtung USING gin (traegtbeizu);
@@ -14509,7 +14509,7 @@ CREATE TABLE IF NOT EXISTS ax_turm (
 
 CREATE UNIQUE INDEX ax_turm_gml ON ax_turm USING btree (gml_id,beginnt);
 CREATE INDEX ax_turm_endet ON ax_turm USING btree (endet);
-SELECT AddGeometryColumn('ax_turm', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_turm', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_turm_wkb_geometry_idx ON ax_turm USING gist (wkb_geometry);
 CREATE INDEX ax_turm_zeigtauf ON ax_turm USING gin (zeigtauf);
 CREATE INDEX ax_turm_istabgeleitetaus ON ax_turm USING gin (istabgeleitetaus);
@@ -14604,7 +14604,7 @@ CREATE TABLE IF NOT EXISTS ax_vorratsbehaelterspeicherbauwerk (
 
 CREATE UNIQUE INDEX ax_vorratsbehaelterspeicherbauwerk_gml ON ax_vorratsbehaelterspeicherbauwerk USING btree (gml_id,beginnt);
 CREATE INDEX ax_vorratsbehaelterspeicherbauwerk_endet ON ax_vorratsbehaelterspeicherbauwerk USING btree (endet);
-SELECT AddGeometryColumn('ax_vorratsbehaelterspeicherbauwerk', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_vorratsbehaelterspeicherbauwerk', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_vorratsbehaelterspeicherbauwerk_wkb_geometry_idx ON ax_vorratsbehaelterspeicherbauwerk USING gist (wkb_geometry);
 CREATE INDEX ax_vorratsbehaelterspeicherbauwerk_istabgeleitetaus ON ax_vorratsbehaelterspeicherbauwerk USING gin (istabgeleitetaus);
 CREATE INDEX ax_vorratsbehaelterspeicherbauwerk_traegtbeizu ON ax_vorratsbehaelterspeicherbauwerk USING gin (traegtbeizu);
@@ -14697,7 +14697,7 @@ CREATE TABLE IF NOT EXISTS ax_bauwerkimgewaesserbereich (
 
 CREATE UNIQUE INDEX ax_bauwerkimgewaesserbereich_gml ON ax_bauwerkimgewaesserbereich USING btree (gml_id,beginnt);
 CREATE INDEX ax_bauwerkimgewaesserbereich_endet ON ax_bauwerkimgewaesserbereich USING btree (endet);
-SELECT AddGeometryColumn('ax_bauwerkimgewaesserbereich', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_bauwerkimgewaesserbereich', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_bauwerkimgewaesserbereich_wkb_geometry_idx ON ax_bauwerkimgewaesserbereich USING gist (wkb_geometry);
 CREATE INDEX ax_bauwerkimgewaesserbereich_istabgeleitetaus ON ax_bauwerkimgewaesserbereich USING gin (istabgeleitetaus);
 CREATE INDEX ax_bauwerkimgewaesserbereich_traegtbeizu ON ax_bauwerkimgewaesserbereich USING gin (traegtbeizu);
@@ -14791,7 +14791,7 @@ CREATE TABLE IF NOT EXISTS ax_bauwerkimverkehrsbereich (
 
 CREATE UNIQUE INDEX ax_bauwerkimverkehrsbereich_gml ON ax_bauwerkimverkehrsbereich USING btree (gml_id,beginnt);
 CREATE INDEX ax_bauwerkimverkehrsbereich_endet ON ax_bauwerkimverkehrsbereich USING btree (endet);
-SELECT AddGeometryColumn('ax_bauwerkimverkehrsbereich', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_bauwerkimverkehrsbereich', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_bauwerkimverkehrsbereich_wkb_geometry_idx ON ax_bauwerkimverkehrsbereich USING gist (wkb_geometry);
 CREATE INDEX ax_bauwerkimverkehrsbereich_istabgeleitetaus ON ax_bauwerkimverkehrsbereich USING gin (istabgeleitetaus);
 CREATE INDEX ax_bauwerkimverkehrsbereich_traegtbeizu ON ax_bauwerkimverkehrsbereich USING gin (traegtbeizu);
@@ -14883,7 +14883,7 @@ CREATE TABLE IF NOT EXISTS ax_schifffahrtsliniefaehrverkehr (
 
 CREATE UNIQUE INDEX ax_schifffahrtsliniefaehrverkehr_gml ON ax_schifffahrtsliniefaehrverkehr USING btree (gml_id,beginnt);
 CREATE INDEX ax_schifffahrtsliniefaehrverkehr_endet ON ax_schifffahrtsliniefaehrverkehr USING btree (endet);
-SELECT AddGeometryColumn('ax_schifffahrtsliniefaehrverkehr', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_schifffahrtsliniefaehrverkehr', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_schifffahrtsliniefaehrverkehr_wkb_geometry_idx ON ax_schifffahrtsliniefaehrverkehr USING gist (wkb_geometry);
 CREATE INDEX ax_schifffahrtsliniefaehrverkehr_istabgeleitetaus ON ax_schifffahrtsliniefaehrverkehr USING gin (istabgeleitetaus);
 CREATE INDEX ax_schifffahrtsliniefaehrverkehr_traegtbeizu ON ax_schifffahrtsliniefaehrverkehr USING gin (traegtbeizu);
@@ -14994,7 +14994,7 @@ CREATE TABLE IF NOT EXISTS ax_gebaeude (
 
 CREATE UNIQUE INDEX ax_gebaeude_gml ON ax_gebaeude USING btree (gml_id,beginnt);
 CREATE INDEX ax_gebaeude_endet ON ax_gebaeude USING btree (endet);
-SELECT AddGeometryColumn('ax_gebaeude', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_gebaeude', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_gebaeude_wkb_geometry_idx ON ax_gebaeude USING gist (wkb_geometry);
 CREATE INDEX ax_gebaeude_gehoert ON ax_gebaeude USING gin (gehoert);
 CREATE INDEX ax_gebaeude_zeigtauf ON ax_gebaeude USING gin (zeigtauf);
@@ -15112,7 +15112,7 @@ CREATE TABLE IF NOT EXISTS ax_anderefestlegungnachstrassenrecht (
 
 CREATE UNIQUE INDEX ax_anderefestlegungnachstrassenrecht_gml ON ax_anderefestlegungnachstrassenrecht USING btree (gml_id,beginnt);
 CREATE INDEX ax_anderefestlegungnachstrassenrecht_endet ON ax_anderefestlegungnachstrassenrecht USING btree (endet);
-SELECT AddGeometryColumn('ax_anderefestlegungnachstrassenrecht', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_anderefestlegungnachstrassenrecht', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_anderefestlegungnachstrassenrecht_wkb_geometry_idx ON ax_anderefestlegungnachstrassenrecht USING gist (wkb_geometry);
 CREATE INDEX ax_anderefestlegungnachstrassenrecht_istabgeleitetaus ON ax_anderefestlegungnachstrassenrecht USING gin (istabgeleitetaus);
 CREATE INDEX ax_anderefestlegungnachstrassenrecht_traegtbeizu ON ax_anderefestlegungnachstrassenrecht USING gin (traegtbeizu);
@@ -15206,7 +15206,7 @@ CREATE TABLE IF NOT EXISTS ax_naturumweltoderbodenschutzrecht (
 
 CREATE UNIQUE INDEX ax_naturumweltoderbodenschutzrecht_gml ON ax_naturumweltoderbodenschutzrecht USING btree (gml_id,beginnt);
 CREATE INDEX ax_naturumweltoderbodenschutzrecht_endet ON ax_naturumweltoderbodenschutzrecht USING btree (endet);
-SELECT AddGeometryColumn('ax_naturumweltoderbodenschutzrecht', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_naturumweltoderbodenschutzrecht', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_naturumweltoderbodenschutzrecht_wkb_geometry_idx ON ax_naturumweltoderbodenschutzrecht USING gist (wkb_geometry);
 CREATE INDEX ax_naturumweltoderbodenschutzrecht_istabgeleitetaus ON ax_naturumweltoderbodenschutzrecht USING gin (istabgeleitetaus);
 CREATE INDEX ax_naturumweltoderbodenschutzrecht_traegtbeizu ON ax_naturumweltoderbodenschutzrecht USING gin (traegtbeizu);
@@ -15300,7 +15300,7 @@ CREATE TABLE IF NOT EXISTS ax_klassifizierungnachstrassenrecht (
 
 CREATE UNIQUE INDEX ax_klassifizierungnachstrassenrecht_gml ON ax_klassifizierungnachstrassenrecht USING btree (gml_id,beginnt);
 CREATE INDEX ax_klassifizierungnachstrassenrecht_endet ON ax_klassifizierungnachstrassenrecht USING btree (endet);
-SELECT AddGeometryColumn('ax_klassifizierungnachstrassenrecht', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_klassifizierungnachstrassenrecht', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_klassifizierungnachstrassenrecht_wkb_geometry_idx ON ax_klassifizierungnachstrassenrecht USING gist (wkb_geometry);
 CREATE INDEX ax_klassifizierungnachstrassenrecht_istabgeleitetaus ON ax_klassifizierungnachstrassenrecht USING gin (istabgeleitetaus);
 CREATE INDEX ax_klassifizierungnachstrassenrecht_traegtbeizu ON ax_klassifizierungnachstrassenrecht USING gin (traegtbeizu);
@@ -15393,7 +15393,7 @@ CREATE TABLE IF NOT EXISTS ax_sonstigesrecht (
 
 CREATE UNIQUE INDEX ax_sonstigesrecht_gml ON ax_sonstigesrecht USING btree (gml_id,beginnt);
 CREATE INDEX ax_sonstigesrecht_endet ON ax_sonstigesrecht USING btree (endet);
-SELECT AddGeometryColumn('ax_sonstigesrecht', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_sonstigesrecht', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_sonstigesrecht_wkb_geometry_idx ON ax_sonstigesrecht USING gist (wkb_geometry);
 CREATE INDEX ax_sonstigesrecht_istabgeleitetaus ON ax_sonstigesrecht USING gin (istabgeleitetaus);
 CREATE INDEX ax_sonstigesrecht_traegtbeizu ON ax_sonstigesrecht USING gin (traegtbeizu);
@@ -15487,7 +15487,7 @@ CREATE TABLE IF NOT EXISTS ax_denkmalschutzrecht (
 
 CREATE UNIQUE INDEX ax_denkmalschutzrecht_gml ON ax_denkmalschutzrecht USING btree (gml_id,beginnt);
 CREATE INDEX ax_denkmalschutzrecht_endet ON ax_denkmalschutzrecht USING btree (endet);
-SELECT AddGeometryColumn('ax_denkmalschutzrecht', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_denkmalschutzrecht', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_denkmalschutzrecht_wkb_geometry_idx ON ax_denkmalschutzrecht USING gist (wkb_geometry);
 CREATE INDEX ax_denkmalschutzrecht_istabgeleitetaus ON ax_denkmalschutzrecht USING gin (istabgeleitetaus);
 CREATE INDEX ax_denkmalschutzrecht_traegtbeizu ON ax_denkmalschutzrecht USING gin (traegtbeizu);
@@ -15581,7 +15581,7 @@ CREATE TABLE IF NOT EXISTS ax_dammwalldeich (
 
 CREATE UNIQUE INDEX ax_dammwalldeich_gml ON ax_dammwalldeich USING btree (gml_id,beginnt);
 CREATE INDEX ax_dammwalldeich_endet ON ax_dammwalldeich USING btree (endet);
-SELECT AddGeometryColumn('ax_dammwalldeich', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_dammwalldeich', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_dammwalldeich_wkb_geometry_idx ON ax_dammwalldeich USING gist (wkb_geometry);
 CREATE INDEX ax_dammwalldeich_istabgeleitetaus ON ax_dammwalldeich USING gin (istabgeleitetaus);
 CREATE INDEX ax_dammwalldeich_traegtbeizu ON ax_dammwalldeich USING gin (traegtbeizu);
@@ -15685,7 +15685,7 @@ CREATE TABLE IF NOT EXISTS ax_punktortag (
 
 CREATE UNIQUE INDEX ax_punktortag_gml ON ax_punktortag USING btree (gml_id,beginnt);
 CREATE INDEX ax_punktortag_endet ON ax_punktortag USING btree (endet);
-SELECT AddGeometryColumn('ax_punktortag', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_punktortag', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_punktortag_wkb_geometry_idx ON ax_punktortag USING gist (wkb_geometry);
 CREATE INDEX ax_punktortag_istabgeleitetaus ON ax_punktortag USING gin (istabgeleitetaus);
 CREATE INDEX ax_punktortag_traegtbeizu ON ax_punktortag USING gin (traegtbeizu);
@@ -15767,7 +15767,7 @@ CREATE TABLE IF NOT EXISTS ax_bauteil (
 
 CREATE UNIQUE INDEX ax_bauteil_gml ON ax_bauteil USING btree (gml_id,beginnt);
 CREATE INDEX ax_bauteil_endet ON ax_bauteil USING btree (endet);
-SELECT AddGeometryColumn('ax_bauteil', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_bauteil', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_bauteil_wkb_geometry_idx ON ax_bauteil USING gist (wkb_geometry);
 CREATE INDEX ax_bauteil_istabgeleitetaus ON ax_bauteil USING gin (istabgeleitetaus);
 CREATE INDEX ax_bauteil_traegtbeizu ON ax_bauteil USING gin (traegtbeizu);
@@ -15812,7 +15812,7 @@ CREATE TABLE IF NOT EXISTS ax_tagesabschnitt (
 
 CREATE UNIQUE INDEX ax_tagesabschnitt_gml ON ax_tagesabschnitt USING btree (gml_id,beginnt);
 CREATE INDEX ax_tagesabschnitt_endet ON ax_tagesabschnitt USING btree (endet);
-SELECT AddGeometryColumn('ax_tagesabschnitt', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_tagesabschnitt', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_tagesabschnitt_wkb_geometry_idx ON ax_tagesabschnitt USING gist (wkb_geometry);
 CREATE INDEX ax_tagesabschnitt_istabgeleitetaus ON ax_tagesabschnitt USING gin (istabgeleitetaus);
 CREATE INDEX ax_tagesabschnitt_traegtbeizu ON ax_tagesabschnitt USING gin (traegtbeizu);
@@ -15875,7 +15875,7 @@ CREATE TABLE IF NOT EXISTS ax_bewertung (
 
 CREATE UNIQUE INDEX ax_bewertung_gml ON ax_bewertung USING btree (gml_id,beginnt);
 CREATE INDEX ax_bewertung_endet ON ax_bewertung USING btree (endet);
-SELECT AddGeometryColumn('ax_bewertung', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_bewertung', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_bewertung_wkb_geometry_idx ON ax_bewertung USING gist (wkb_geometry);
 CREATE INDEX ax_bewertung_istabgeleitetaus ON ax_bewertung USING gin (istabgeleitetaus);
 CREATE INDEX ax_bewertung_traegtbeizu ON ax_bewertung USING gin (traegtbeizu);
@@ -15964,7 +15964,7 @@ CREATE TABLE IF NOT EXISTS ax_anderefestlegungnachwasserrecht (
 
 CREATE UNIQUE INDEX ax_anderefestlegungnachwasserrecht_gml ON ax_anderefestlegungnachwasserrecht USING btree (gml_id,beginnt);
 CREATE INDEX ax_anderefestlegungnachwasserrecht_endet ON ax_anderefestlegungnachwasserrecht USING btree (endet);
-SELECT AddGeometryColumn('ax_anderefestlegungnachwasserrecht', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_anderefestlegungnachwasserrecht', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_anderefestlegungnachwasserrecht_wkb_geometry_idx ON ax_anderefestlegungnachwasserrecht USING gist (wkb_geometry);
 CREATE INDEX ax_anderefestlegungnachwasserrecht_istabgeleitetaus ON ax_anderefestlegungnachwasserrecht USING gin (istabgeleitetaus);
 CREATE INDEX ax_anderefestlegungnachwasserrecht_traegtbeizu ON ax_anderefestlegungnachwasserrecht USING gin (traegtbeizu);
@@ -16056,7 +16056,7 @@ CREATE TABLE IF NOT EXISTS ax_klassifizierungnachwasserrecht (
 
 CREATE UNIQUE INDEX ax_klassifizierungnachwasserrecht_gml ON ax_klassifizierungnachwasserrecht USING btree (gml_id,beginnt);
 CREATE INDEX ax_klassifizierungnachwasserrecht_endet ON ax_klassifizierungnachwasserrecht USING btree (endet);
-SELECT AddGeometryColumn('ax_klassifizierungnachwasserrecht', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_klassifizierungnachwasserrecht', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_klassifizierungnachwasserrecht_wkb_geometry_idx ON ax_klassifizierungnachwasserrecht USING gist (wkb_geometry);
 CREATE INDEX ax_klassifizierungnachwasserrecht_istabgeleitetaus ON ax_klassifizierungnachwasserrecht USING gin (istabgeleitetaus);
 CREATE INDEX ax_klassifizierungnachwasserrecht_traegtbeizu ON ax_klassifizierungnachwasserrecht USING gin (traegtbeizu);
@@ -16149,7 +16149,7 @@ CREATE TABLE IF NOT EXISTS ax_forstrecht (
 
 CREATE UNIQUE INDEX ax_forstrecht_gml ON ax_forstrecht USING btree (gml_id,beginnt);
 CREATE INDEX ax_forstrecht_endet ON ax_forstrecht USING btree (endet);
-SELECT AddGeometryColumn('ax_forstrecht', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_forstrecht', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_forstrecht_wkb_geometry_idx ON ax_forstrecht USING gist (wkb_geometry);
 CREATE INDEX ax_forstrecht_istabgeleitetaus ON ax_forstrecht USING gin (istabgeleitetaus);
 CREATE INDEX ax_forstrecht_traegtbeizu ON ax_forstrecht USING gin (traegtbeizu);
@@ -16248,7 +16248,7 @@ CREATE TABLE IF NOT EXISTS ax_bauraumoderbodenordnungsrecht (
 
 CREATE UNIQUE INDEX ax_bauraumoderbodenordnungsrecht_gml ON ax_bauraumoderbodenordnungsrecht USING btree (gml_id,beginnt);
 CREATE INDEX ax_bauraumoderbodenordnungsrecht_endet ON ax_bauraumoderbodenordnungsrecht USING btree (endet);
-SELECT AddGeometryColumn('ax_bauraumoderbodenordnungsrecht', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_bauraumoderbodenordnungsrecht', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_bauraumoderbodenordnungsrecht_wkb_geometry_idx ON ax_bauraumoderbodenordnungsrecht USING gist (wkb_geometry);
 CREATE INDEX ax_bauraumoderbodenordnungsrecht_istabgeleitetaus ON ax_bauraumoderbodenordnungsrecht USING gin (istabgeleitetaus);
 CREATE INDEX ax_bauraumoderbodenordnungsrecht_traegtbeizu ON ax_bauraumoderbodenordnungsrecht USING gin (traegtbeizu);
@@ -16322,7 +16322,7 @@ CREATE TABLE IF NOT EXISTS ax_schutzzone (
 
 CREATE UNIQUE INDEX ax_schutzzone_gml ON ax_schutzzone USING btree (gml_id,beginnt);
 CREATE INDEX ax_schutzzone_endet ON ax_schutzzone USING btree (endet);
-SELECT AddGeometryColumn('ax_schutzzone', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_schutzzone', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_schutzzone_wkb_geometry_idx ON ax_schutzzone USING gist (wkb_geometry);
 CREATE INDEX ax_schutzzone_istabgeleitetaus ON ax_schutzzone USING gin (istabgeleitetaus);
 CREATE INDEX ax_schutzzone_traegtbeizu ON ax_schutzzone USING gin (traegtbeizu);
@@ -16363,7 +16363,7 @@ CREATE TABLE IF NOT EXISTS ax_boeschungsflaeche (
 
 CREATE UNIQUE INDEX ax_boeschungsflaeche_gml ON ax_boeschungsflaeche USING btree (gml_id,beginnt);
 CREATE INDEX ax_boeschungsflaeche_endet ON ax_boeschungsflaeche USING btree (endet);
-SELECT AddGeometryColumn('ax_boeschungsflaeche', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_boeschungsflaeche', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_boeschungsflaeche_wkb_geometry_idx ON ax_boeschungsflaeche USING gist (wkb_geometry);
 CREATE INDEX ax_boeschungsflaeche_istabgeleitetaus ON ax_boeschungsflaeche USING gin (istabgeleitetaus);
 CREATE INDEX ax_boeschungsflaeche_traegtbeizu ON ax_boeschungsflaeche USING gin (traegtbeizu);
@@ -16431,7 +16431,7 @@ CREATE TABLE IF NOT EXISTS ax_flurstueck (
 
 CREATE UNIQUE INDEX ax_flurstueck_gml ON ax_flurstueck USING btree (gml_id,beginnt);
 CREATE INDEX ax_flurstueck_endet ON ax_flurstueck USING btree (endet);
-SELECT AddGeometryColumn('ax_flurstueck', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_flurstueck', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_flurstueck_wkb_geometry_idx ON ax_flurstueck USING gist (wkb_geometry);
 CREATE INDEX ax_flurstueck_istgebucht ON ax_flurstueck USING btree (istgebucht);
 CREATE INDEX ax_flurstueck_beziehtsichaufflurstueck ON ax_flurstueck USING gin (beziehtsichaufflurstueck);
@@ -16508,7 +16508,7 @@ CREATE TABLE IF NOT EXISTS ax_gebiet_kreis (
 
 CREATE UNIQUE INDEX ax_gebiet_kreis_gml ON ax_gebiet_kreis USING btree (gml_id,beginnt);
 CREATE INDEX ax_gebiet_kreis_endet ON ax_gebiet_kreis USING btree (endet);
-SELECT AddGeometryColumn('ax_gebiet_kreis', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_gebiet_kreis', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_gebiet_kreis_wkb_geometry_idx ON ax_gebiet_kreis USING gist (wkb_geometry);
 CREATE INDEX ax_gebiet_kreis_istabgeleitetaus ON ax_gebiet_kreis USING gin (istabgeleitetaus);
 CREATE INDEX ax_gebiet_kreis_traegtbeizu ON ax_gebiet_kreis USING gin (traegtbeizu);
@@ -16552,7 +16552,7 @@ CREATE TABLE IF NOT EXISTS ax_gebiet_bundesland (
 
 CREATE UNIQUE INDEX ax_gebiet_bundesland_gml ON ax_gebiet_bundesland USING btree (gml_id,beginnt);
 CREATE INDEX ax_gebiet_bundesland_endet ON ax_gebiet_bundesland USING btree (endet);
-SELECT AddGeometryColumn('ax_gebiet_bundesland', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_gebiet_bundesland', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_gebiet_bundesland_wkb_geometry_idx ON ax_gebiet_bundesland USING gist (wkb_geometry);
 CREATE INDEX ax_gebiet_bundesland_istabgeleitetaus ON ax_gebiet_bundesland USING gin (istabgeleitetaus);
 CREATE INDEX ax_gebiet_bundesland_traegtbeizu ON ax_gebiet_bundesland USING gin (traegtbeizu);
@@ -16595,7 +16595,7 @@ CREATE TABLE IF NOT EXISTS ax_gebiet_regierungsbezirk (
 
 CREATE UNIQUE INDEX ax_gebiet_regierungsbezirk_gml ON ax_gebiet_regierungsbezirk USING btree (gml_id,beginnt);
 CREATE INDEX ax_gebiet_regierungsbezirk_endet ON ax_gebiet_regierungsbezirk USING btree (endet);
-SELECT AddGeometryColumn('ax_gebiet_regierungsbezirk', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_gebiet_regierungsbezirk', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_gebiet_regierungsbezirk_wkb_geometry_idx ON ax_gebiet_regierungsbezirk USING gist (wkb_geometry);
 CREATE INDEX ax_gebiet_regierungsbezirk_istabgeleitetaus ON ax_gebiet_regierungsbezirk USING gin (istabgeleitetaus);
 CREATE INDEX ax_gebiet_regierungsbezirk_traegtbeizu ON ax_gebiet_regierungsbezirk USING gin (traegtbeizu);
@@ -16638,7 +16638,7 @@ CREATE TABLE IF NOT EXISTS ax_gebiet_nationalstaat (
 
 CREATE UNIQUE INDEX ax_gebiet_nationalstaat_gml ON ax_gebiet_nationalstaat USING btree (gml_id,beginnt);
 CREATE INDEX ax_gebiet_nationalstaat_endet ON ax_gebiet_nationalstaat USING btree (endet);
-SELECT AddGeometryColumn('ax_gebiet_nationalstaat', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_gebiet_nationalstaat', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_gebiet_nationalstaat_wkb_geometry_idx ON ax_gebiet_nationalstaat USING gist (wkb_geometry);
 CREATE INDEX ax_gebiet_nationalstaat_istabgeleitetaus ON ax_gebiet_nationalstaat USING gin (istabgeleitetaus);
 CREATE INDEX ax_gebiet_nationalstaat_traegtbeizu ON ax_gebiet_nationalstaat USING gin (traegtbeizu);
@@ -16685,7 +16685,7 @@ CREATE TABLE IF NOT EXISTS ax_kommunalesgebiet (
 
 CREATE UNIQUE INDEX ax_kommunalesgebiet_gml ON ax_kommunalesgebiet USING btree (gml_id,beginnt);
 CREATE INDEX ax_kommunalesgebiet_endet ON ax_kommunalesgebiet USING btree (endet);
-SELECT AddGeometryColumn('ax_kommunalesgebiet', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_kommunalesgebiet', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_kommunalesgebiet_wkb_geometry_idx ON ax_kommunalesgebiet USING gist (wkb_geometry);
 CREATE INDEX ax_kommunalesgebiet_istabgeleitetaus ON ax_kommunalesgebiet USING gin (istabgeleitetaus);
 CREATE INDEX ax_kommunalesgebiet_traegtbeizu ON ax_kommunalesgebiet USING gin (traegtbeizu);
@@ -16736,7 +16736,7 @@ CREATE TABLE IF NOT EXISTS ax_gebiet_verwaltungsgemeinschaft (
 
 CREATE UNIQUE INDEX ax_gebiet_verwaltungsgemeinschaft_gml ON ax_gebiet_verwaltungsgemeinschaft USING btree (gml_id,beginnt);
 CREATE INDEX ax_gebiet_verwaltungsgemeinschaft_endet ON ax_gebiet_verwaltungsgemeinschaft USING btree (endet);
-SELECT AddGeometryColumn('ax_gebiet_verwaltungsgemeinschaft', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_gebiet_verwaltungsgemeinschaft', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_gebiet_verwaltungsgemeinschaft_wkb_geometry_idx ON ax_gebiet_verwaltungsgemeinschaft USING gist (wkb_geometry);
 CREATE INDEX ax_gebiet_verwaltungsgemeinschaft_istabgeleitetaus ON ax_gebiet_verwaltungsgemeinschaft USING gin (istabgeleitetaus);
 CREATE INDEX ax_gebiet_verwaltungsgemeinschaft_traegtbeizu ON ax_gebiet_verwaltungsgemeinschaft USING gin (traegtbeizu);
@@ -16811,7 +16811,7 @@ CREATE TABLE IF NOT EXISTS ax_bodenschaetzung (
 
 CREATE UNIQUE INDEX ax_bodenschaetzung_gml ON ax_bodenschaetzung USING btree (gml_id,beginnt);
 CREATE INDEX ax_bodenschaetzung_endet ON ax_bodenschaetzung USING btree (endet);
-SELECT AddGeometryColumn('ax_bodenschaetzung', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_bodenschaetzung', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_bodenschaetzung_wkb_geometry_idx ON ax_bodenschaetzung USING gist (wkb_geometry);
 CREATE INDEX ax_bodenschaetzung_istabgeleitetaus ON ax_bodenschaetzung USING gin (istabgeleitetaus);
 CREATE INDEX ax_bodenschaetzung_traegtbeizu ON ax_bodenschaetzung USING gin (traegtbeizu);
@@ -16909,7 +16909,7 @@ CREATE TABLE IF NOT EXISTS ax_gewaesserstationierungsachse (
 
 CREATE UNIQUE INDEX ax_gewaesserstationierungsachse_gml ON ax_gewaesserstationierungsachse USING btree (gml_id,beginnt);
 CREATE INDEX ax_gewaesserstationierungsachse_endet ON ax_gewaesserstationierungsachse USING btree (endet);
-SELECT AddGeometryColumn('ax_gewaesserstationierungsachse', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_gewaesserstationierungsachse', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_gewaesserstationierungsachse_wkb_geometry_idx ON ax_gewaesserstationierungsachse USING gist (wkb_geometry);
 CREATE INDEX ax_gewaesserstationierungsachse_istabgeleitetaus ON ax_gewaesserstationierungsachse USING gin (istabgeleitetaus);
 CREATE INDEX ax_gewaesserstationierungsachse_traegtbeizu ON ax_gewaesserstationierungsachse USING gin (traegtbeizu);
@@ -16977,7 +16977,7 @@ CREATE TABLE IF NOT EXISTS ax_besondereflurstuecksgrenze (
 
 CREATE UNIQUE INDEX ax_besondereflurstuecksgrenze_gml ON ax_besondereflurstuecksgrenze USING btree (gml_id,beginnt);
 CREATE INDEX ax_besondereflurstuecksgrenze_endet ON ax_besondereflurstuecksgrenze USING btree (endet);
-SELECT AddGeometryColumn('ax_besondereflurstuecksgrenze', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_besondereflurstuecksgrenze', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_besondereflurstuecksgrenze_wkb_geometry_idx ON ax_besondereflurstuecksgrenze USING gist (wkb_geometry);
 CREATE INDEX ax_besondereflurstuecksgrenze_istabgeleitetaus ON ax_besondereflurstuecksgrenze USING gin (istabgeleitetaus);
 CREATE INDEX ax_besondereflurstuecksgrenze_traegtbeizu ON ax_besondereflurstuecksgrenze USING gin (traegtbeizu);
@@ -17017,7 +17017,7 @@ CREATE TABLE IF NOT EXISTS ax_gebietsgrenze (
 
 CREATE UNIQUE INDEX ax_gebietsgrenze_gml ON ax_gebietsgrenze USING btree (gml_id,beginnt);
 CREATE INDEX ax_gebietsgrenze_endet ON ax_gebietsgrenze USING btree (endet);
-SELECT AddGeometryColumn('ax_gebietsgrenze', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_gebietsgrenze', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_gebietsgrenze_wkb_geometry_idx ON ax_gebietsgrenze USING gist (wkb_geometry);
 CREATE INDEX ax_gebietsgrenze_istabgeleitetaus ON ax_gebietsgrenze USING gin (istabgeleitetaus);
 CREATE INDEX ax_gebietsgrenze_traegtbeizu ON ax_gebietsgrenze USING gin (traegtbeizu);
@@ -17061,7 +17061,7 @@ CREATE TABLE IF NOT EXISTS ax_gewaesserachse (
 
 CREATE UNIQUE INDEX ax_gewaesserachse_gml ON ax_gewaesserachse USING btree (gml_id,beginnt);
 CREATE INDEX ax_gewaesserachse_endet ON ax_gewaesserachse USING btree (endet);
-SELECT AddGeometryColumn('ax_gewaesserachse', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_gewaesserachse', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_gewaesserachse_wkb_geometry_idx ON ax_gewaesserachse USING gist (wkb_geometry);
 CREATE INDEX ax_gewaesserachse_istabgeleitetaus ON ax_gewaesserachse USING gin (istabgeleitetaus);
 CREATE INDEX ax_gewaesserachse_traegtbeizu ON ax_gewaesserachse USING gin (traegtbeizu);
@@ -17113,7 +17113,7 @@ CREATE TABLE IF NOT EXISTS ax_strassenachse (
 
 CREATE UNIQUE INDEX ax_strassenachse_gml ON ax_strassenachse USING btree (gml_id,beginnt);
 CREATE INDEX ax_strassenachse_endet ON ax_strassenachse USING btree (endet);
-SELECT AddGeometryColumn('ax_strassenachse', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_strassenachse', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_strassenachse_wkb_geometry_idx ON ax_strassenachse USING gist (wkb_geometry);
 CREATE INDEX ax_strassenachse_istabgeleitetaus ON ax_strassenachse USING gin (istabgeleitetaus);
 CREATE INDEX ax_strassenachse_traegtbeizu ON ax_strassenachse USING gin (traegtbeizu);
@@ -17168,7 +17168,7 @@ CREATE TABLE IF NOT EXISTS ax_bahnstrecke (
 
 CREATE UNIQUE INDEX ax_bahnstrecke_gml ON ax_bahnstrecke USING btree (gml_id,beginnt);
 CREATE INDEX ax_bahnstrecke_endet ON ax_bahnstrecke USING btree (endet);
-SELECT AddGeometryColumn('ax_bahnstrecke', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_bahnstrecke', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_bahnstrecke_wkb_geometry_idx ON ax_bahnstrecke USING gist (wkb_geometry);
 CREATE INDEX ax_bahnstrecke_istabgeleitetaus ON ax_bahnstrecke USING gin (istabgeleitetaus);
 CREATE INDEX ax_bahnstrecke_traegtbeizu ON ax_bahnstrecke USING gin (traegtbeizu);
@@ -17221,7 +17221,7 @@ CREATE TABLE IF NOT EXISTS ax_fahrwegachse (
 
 CREATE UNIQUE INDEX ax_fahrwegachse_gml ON ax_fahrwegachse USING btree (gml_id,beginnt);
 CREATE INDEX ax_fahrwegachse_endet ON ax_fahrwegachse USING btree (endet);
-SELECT AddGeometryColumn('ax_fahrwegachse', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_fahrwegachse', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_fahrwegachse_wkb_geometry_idx ON ax_fahrwegachse USING gist (wkb_geometry);
 CREATE INDEX ax_fahrwegachse_istabgeleitetaus ON ax_fahrwegachse USING gin (istabgeleitetaus);
 CREATE INDEX ax_fahrwegachse_traegtbeizu ON ax_fahrwegachse USING gin (traegtbeizu);
@@ -17272,7 +17272,7 @@ CREATE TABLE IF NOT EXISTS ax_fahrbahnachse (
 
 CREATE UNIQUE INDEX ax_fahrbahnachse_gml ON ax_fahrbahnachse USING btree (gml_id,beginnt);
 CREATE INDEX ax_fahrbahnachse_endet ON ax_fahrbahnachse USING btree (endet);
-SELECT AddGeometryColumn('ax_fahrbahnachse', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_fahrbahnachse', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_fahrbahnachse_wkb_geometry_idx ON ax_fahrbahnachse USING gist (wkb_geometry);
 CREATE INDEX ax_fahrbahnachse_istabgeleitetaus ON ax_fahrbahnachse USING gin (istabgeleitetaus);
 CREATE INDEX ax_fahrbahnachse_traegtbeizu ON ax_fahrbahnachse USING gin (traegtbeizu);
@@ -17354,7 +17354,7 @@ CREATE TABLE IF NOT EXISTS ax_punktortta (
 
 CREATE UNIQUE INDEX ax_punktortta_gml ON ax_punktortta USING btree (gml_id,beginnt);
 CREATE INDEX ax_punktortta_endet ON ax_punktortta USING btree (endet);
-SELECT AddGeometryColumn('ax_punktortta', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_punktortta', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_punktortta_wkb_geometry_idx ON ax_punktortta USING gist (wkb_geometry);
 CREATE INDEX ax_punktortta_istabgeleitetaus ON ax_punktortta USING gin (istabgeleitetaus);
 CREATE INDEX ax_punktortta_traegtbeizu ON ax_punktortta USING gin (traegtbeizu);
@@ -17466,7 +17466,7 @@ CREATE TABLE IF NOT EXISTS ax_stehendesgewaesser (
 
 CREATE UNIQUE INDEX ax_stehendesgewaesser_gml ON ax_stehendesgewaesser USING btree (gml_id,beginnt);
 CREATE INDEX ax_stehendesgewaesser_endet ON ax_stehendesgewaesser USING btree (endet);
-SELECT AddGeometryColumn('ax_stehendesgewaesser', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_stehendesgewaesser', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_stehendesgewaesser_wkb_geometry_idx ON ax_stehendesgewaesser USING gist (wkb_geometry);
 CREATE INDEX ax_stehendesgewaesser_istabgeleitetaus ON ax_stehendesgewaesser USING gin (istabgeleitetaus);
 CREATE INDEX ax_stehendesgewaesser_traegtbeizu ON ax_stehendesgewaesser USING gin (traegtbeizu);
@@ -17574,7 +17574,7 @@ CREATE TABLE IF NOT EXISTS ax_meer (
 
 CREATE UNIQUE INDEX ax_meer_gml ON ax_meer USING btree (gml_id,beginnt);
 CREATE INDEX ax_meer_endet ON ax_meer USING btree (endet);
-SELECT AddGeometryColumn('ax_meer', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_meer', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_meer_wkb_geometry_idx ON ax_meer USING gist (wkb_geometry);
 CREATE INDEX ax_meer_istabgeleitetaus ON ax_meer USING gin (istabgeleitetaus);
 CREATE INDEX ax_meer_traegtbeizu ON ax_meer USING gin (traegtbeizu);
@@ -17679,7 +17679,7 @@ CREATE TABLE IF NOT EXISTS ax_fliessgewaesser (
 
 CREATE UNIQUE INDEX ax_fliessgewaesser_gml ON ax_fliessgewaesser USING btree (gml_id,beginnt);
 CREATE INDEX ax_fliessgewaesser_endet ON ax_fliessgewaesser USING btree (endet);
-SELECT AddGeometryColumn('ax_fliessgewaesser', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_fliessgewaesser', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_fliessgewaesser_wkb_geometry_idx ON ax_fliessgewaesser USING gist (wkb_geometry);
 CREATE INDEX ax_fliessgewaesser_istabgeleitetaus ON ax_fliessgewaesser USING gin (istabgeleitetaus);
 CREATE INDEX ax_fliessgewaesser_traegtbeizu ON ax_fliessgewaesser USING gin (traegtbeizu);
@@ -17782,7 +17782,7 @@ CREATE TABLE IF NOT EXISTS ax_hafenbecken (
 
 CREATE UNIQUE INDEX ax_hafenbecken_gml ON ax_hafenbecken USING btree (gml_id,beginnt);
 CREATE INDEX ax_hafenbecken_endet ON ax_hafenbecken USING btree (endet);
-SELECT AddGeometryColumn('ax_hafenbecken', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_hafenbecken', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_hafenbecken_wkb_geometry_idx ON ax_hafenbecken USING gist (wkb_geometry);
 CREATE INDEX ax_hafenbecken_istabgeleitetaus ON ax_hafenbecken USING gin (istabgeleitetaus);
 CREATE INDEX ax_hafenbecken_traegtbeizu ON ax_hafenbecken USING gin (traegtbeizu);
@@ -17880,7 +17880,7 @@ CREATE TABLE IF NOT EXISTS ax_bergbaubetrieb (
 
 CREATE UNIQUE INDEX ax_bergbaubetrieb_gml ON ax_bergbaubetrieb USING btree (gml_id,beginnt);
 CREATE INDEX ax_bergbaubetrieb_endet ON ax_bergbaubetrieb USING btree (endet);
-SELECT AddGeometryColumn('ax_bergbaubetrieb', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_bergbaubetrieb', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_bergbaubetrieb_wkb_geometry_idx ON ax_bergbaubetrieb USING gist (wkb_geometry);
 CREATE INDEX ax_bergbaubetrieb_istabgeleitetaus ON ax_bergbaubetrieb USING gin (istabgeleitetaus);
 CREATE INDEX ax_bergbaubetrieb_traegtbeizu ON ax_bergbaubetrieb USING gin (traegtbeizu);
@@ -17973,7 +17973,7 @@ CREATE TABLE IF NOT EXISTS ax_friedhof (
 
 CREATE UNIQUE INDEX ax_friedhof_gml ON ax_friedhof USING btree (gml_id,beginnt);
 CREATE INDEX ax_friedhof_endet ON ax_friedhof USING btree (endet);
-SELECT AddGeometryColumn('ax_friedhof', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_friedhof', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_friedhof_wkb_geometry_idx ON ax_friedhof USING gist (wkb_geometry);
 CREATE INDEX ax_friedhof_istabgeleitetaus ON ax_friedhof USING gin (istabgeleitetaus);
 CREATE INDEX ax_friedhof_traegtbeizu ON ax_friedhof USING gin (traegtbeizu);
@@ -18066,7 +18066,7 @@ CREATE TABLE IF NOT EXISTS ax_flaechegemischternutzung (
 
 CREATE UNIQUE INDEX ax_flaechegemischternutzung_gml ON ax_flaechegemischternutzung USING btree (gml_id,beginnt);
 CREATE INDEX ax_flaechegemischternutzung_endet ON ax_flaechegemischternutzung USING btree (endet);
-SELECT AddGeometryColumn('ax_flaechegemischternutzung', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_flaechegemischternutzung', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_flaechegemischternutzung_wkb_geometry_idx ON ax_flaechegemischternutzung USING gist (wkb_geometry);
 CREATE INDEX ax_flaechegemischternutzung_istabgeleitetaus ON ax_flaechegemischternutzung USING gin (istabgeleitetaus);
 CREATE INDEX ax_flaechegemischternutzung_traegtbeizu ON ax_flaechegemischternutzung USING gin (traegtbeizu);
@@ -18160,7 +18160,7 @@ CREATE TABLE IF NOT EXISTS ax_wohnbauflaeche (
 
 CREATE UNIQUE INDEX ax_wohnbauflaeche_gml ON ax_wohnbauflaeche USING btree (gml_id,beginnt);
 CREATE INDEX ax_wohnbauflaeche_endet ON ax_wohnbauflaeche USING btree (endet);
-SELECT AddGeometryColumn('ax_wohnbauflaeche', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_wohnbauflaeche', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_wohnbauflaeche_wkb_geometry_idx ON ax_wohnbauflaeche USING gist (wkb_geometry);
 CREATE INDEX ax_wohnbauflaeche_istabgeleitetaus ON ax_wohnbauflaeche USING gin (istabgeleitetaus);
 CREATE INDEX ax_wohnbauflaeche_traegtbeizu ON ax_wohnbauflaeche USING gin (traegtbeizu);
@@ -18254,7 +18254,7 @@ CREATE TABLE IF NOT EXISTS ax_flaechebesondererfunktionalerpraegung (
 
 CREATE UNIQUE INDEX ax_flaechebesondererfunktionalerpraegung_gml ON ax_flaechebesondererfunktionalerpraegung USING btree (gml_id,beginnt);
 CREATE INDEX ax_flaechebesondererfunktionalerpraegung_endet ON ax_flaechebesondererfunktionalerpraegung USING btree (endet);
-SELECT AddGeometryColumn('ax_flaechebesondererfunktionalerpraegung', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_flaechebesondererfunktionalerpraegung', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_flaechebesondererfunktionalerpraegung_wkb_geometry_idx ON ax_flaechebesondererfunktionalerpraegung USING gist (wkb_geometry);
 CREATE INDEX ax_flaechebesondererfunktionalerpraegung_istabgeleitetaus ON ax_flaechebesondererfunktionalerpraegung USING gin (istabgeleitetaus);
 CREATE INDEX ax_flaechebesondererfunktionalerpraegung_traegtbeizu ON ax_flaechebesondererfunktionalerpraegung USING gin (traegtbeizu);
@@ -18351,7 +18351,7 @@ CREATE TABLE IF NOT EXISTS ax_industrieundgewerbeflaeche (
 
 CREATE UNIQUE INDEX ax_industrieundgewerbeflaeche_gml ON ax_industrieundgewerbeflaeche USING btree (gml_id,beginnt);
 CREATE INDEX ax_industrieundgewerbeflaeche_endet ON ax_industrieundgewerbeflaeche USING btree (endet);
-SELECT AddGeometryColumn('ax_industrieundgewerbeflaeche', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_industrieundgewerbeflaeche', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_industrieundgewerbeflaeche_wkb_geometry_idx ON ax_industrieundgewerbeflaeche USING gist (wkb_geometry);
 CREATE INDEX ax_industrieundgewerbeflaeche_istabgeleitetaus ON ax_industrieundgewerbeflaeche USING gin (istabgeleitetaus);
 CREATE INDEX ax_industrieundgewerbeflaeche_traegtbeizu ON ax_industrieundgewerbeflaeche USING gin (traegtbeizu);
@@ -18446,7 +18446,7 @@ CREATE TABLE IF NOT EXISTS ax_siedlungsflaeche (
 
 CREATE UNIQUE INDEX ax_siedlungsflaeche_gml ON ax_siedlungsflaeche USING btree (gml_id,beginnt);
 CREATE INDEX ax_siedlungsflaeche_endet ON ax_siedlungsflaeche USING btree (endet);
-SELECT AddGeometryColumn('ax_siedlungsflaeche', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_siedlungsflaeche', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_siedlungsflaeche_wkb_geometry_idx ON ax_siedlungsflaeche USING gist (wkb_geometry);
 CREATE INDEX ax_siedlungsflaeche_istabgeleitetaus ON ax_siedlungsflaeche USING gin (istabgeleitetaus);
 CREATE INDEX ax_siedlungsflaeche_traegtbeizu ON ax_siedlungsflaeche USING gin (traegtbeizu);
@@ -18538,7 +18538,7 @@ CREATE TABLE IF NOT EXISTS ax_tagebaugrubesteinbruch (
 
 CREATE UNIQUE INDEX ax_tagebaugrubesteinbruch_gml ON ax_tagebaugrubesteinbruch USING btree (gml_id,beginnt);
 CREATE INDEX ax_tagebaugrubesteinbruch_endet ON ax_tagebaugrubesteinbruch USING btree (endet);
-SELECT AddGeometryColumn('ax_tagebaugrubesteinbruch', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_tagebaugrubesteinbruch', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_tagebaugrubesteinbruch_wkb_geometry_idx ON ax_tagebaugrubesteinbruch USING gist (wkb_geometry);
 CREATE INDEX ax_tagebaugrubesteinbruch_istabgeleitetaus ON ax_tagebaugrubesteinbruch USING gin (istabgeleitetaus);
 CREATE INDEX ax_tagebaugrubesteinbruch_traegtbeizu ON ax_tagebaugrubesteinbruch USING gin (traegtbeizu);
@@ -18632,7 +18632,7 @@ CREATE TABLE IF NOT EXISTS ax_sportfreizeitunderholungsflaeche (
 
 CREATE UNIQUE INDEX ax_sportfreizeitunderholungsflaeche_gml ON ax_sportfreizeitunderholungsflaeche USING btree (gml_id,beginnt);
 CREATE INDEX ax_sportfreizeitunderholungsflaeche_endet ON ax_sportfreizeitunderholungsflaeche USING btree (endet);
-SELECT AddGeometryColumn('ax_sportfreizeitunderholungsflaeche', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_sportfreizeitunderholungsflaeche', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_sportfreizeitunderholungsflaeche_wkb_geometry_idx ON ax_sportfreizeitunderholungsflaeche USING gist (wkb_geometry);
 CREATE INDEX ax_sportfreizeitunderholungsflaeche_istabgeleitetaus ON ax_sportfreizeitunderholungsflaeche USING gin (istabgeleitetaus);
 CREATE INDEX ax_sportfreizeitunderholungsflaeche_traegtbeizu ON ax_sportfreizeitunderholungsflaeche USING gin (traegtbeizu);
@@ -18725,7 +18725,7 @@ CREATE TABLE IF NOT EXISTS ax_halde (
 
 CREATE UNIQUE INDEX ax_halde_gml ON ax_halde USING btree (gml_id,beginnt);
 CREATE INDEX ax_halde_endet ON ax_halde USING btree (endet);
-SELECT AddGeometryColumn('ax_halde', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_halde', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_halde_wkb_geometry_idx ON ax_halde USING gist (wkb_geometry);
 CREATE INDEX ax_halde_istabgeleitetaus ON ax_halde USING gin (istabgeleitetaus);
 CREATE INDEX ax_halde_traegtbeizu ON ax_halde USING gin (traegtbeizu);
@@ -18814,7 +18814,7 @@ CREATE TABLE IF NOT EXISTS ax_flaechezurzeitunbestimmbar (
 
 CREATE UNIQUE INDEX ax_flaechezurzeitunbestimmbar_gml ON ax_flaechezurzeitunbestimmbar USING btree (gml_id,beginnt);
 CREATE INDEX ax_flaechezurzeitunbestimmbar_endet ON ax_flaechezurzeitunbestimmbar USING btree (endet);
-SELECT AddGeometryColumn('ax_flaechezurzeitunbestimmbar', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_flaechezurzeitunbestimmbar', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_flaechezurzeitunbestimmbar_wkb_geometry_idx ON ax_flaechezurzeitunbestimmbar USING gist (wkb_geometry);
 CREATE INDEX ax_flaechezurzeitunbestimmbar_istabgeleitetaus ON ax_flaechezurzeitunbestimmbar USING gin (istabgeleitetaus);
 CREATE INDEX ax_flaechezurzeitunbestimmbar_traegtbeizu ON ax_flaechezurzeitunbestimmbar USING gin (traegtbeizu);
@@ -18901,7 +18901,7 @@ CREATE TABLE IF NOT EXISTS ax_sumpf (
 
 CREATE UNIQUE INDEX ax_sumpf_gml ON ax_sumpf USING btree (gml_id,beginnt);
 CREATE INDEX ax_sumpf_endet ON ax_sumpf USING btree (endet);
-SELECT AddGeometryColumn('ax_sumpf', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_sumpf', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_sumpf_wkb_geometry_idx ON ax_sumpf USING gist (wkb_geometry);
 CREATE INDEX ax_sumpf_istabgeleitetaus ON ax_sumpf USING gin (istabgeleitetaus);
 CREATE INDEX ax_sumpf_traegtbeizu ON ax_sumpf USING gin (traegtbeizu);
@@ -18991,7 +18991,7 @@ CREATE TABLE IF NOT EXISTS ax_unlandvegetationsloseflaeche (
 
 CREATE UNIQUE INDEX ax_unlandvegetationsloseflaeche_gml ON ax_unlandvegetationsloseflaeche USING btree (gml_id,beginnt);
 CREATE INDEX ax_unlandvegetationsloseflaeche_endet ON ax_unlandvegetationsloseflaeche USING btree (endet);
-SELECT AddGeometryColumn('ax_unlandvegetationsloseflaeche', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_unlandvegetationsloseflaeche', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_unlandvegetationsloseflaeche_wkb_geometry_idx ON ax_unlandvegetationsloseflaeche USING gist (wkb_geometry);
 CREATE INDEX ax_unlandvegetationsloseflaeche_istabgeleitetaus ON ax_unlandvegetationsloseflaeche USING gin (istabgeleitetaus);
 CREATE INDEX ax_unlandvegetationsloseflaeche_traegtbeizu ON ax_unlandvegetationsloseflaeche USING gin (traegtbeizu);
@@ -19083,7 +19083,7 @@ CREATE TABLE IF NOT EXISTS ax_gehoelz (
 
 CREATE UNIQUE INDEX ax_gehoelz_gml ON ax_gehoelz USING btree (gml_id,beginnt);
 CREATE INDEX ax_gehoelz_endet ON ax_gehoelz USING btree (endet);
-SELECT AddGeometryColumn('ax_gehoelz', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_gehoelz', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_gehoelz_wkb_geometry_idx ON ax_gehoelz USING gist (wkb_geometry);
 CREATE INDEX ax_gehoelz_istabgeleitetaus ON ax_gehoelz USING gin (istabgeleitetaus);
 CREATE INDEX ax_gehoelz_traegtbeizu ON ax_gehoelz USING gin (traegtbeizu);
@@ -19175,7 +19175,7 @@ CREATE TABLE IF NOT EXISTS ax_wald (
 
 CREATE UNIQUE INDEX ax_wald_gml ON ax_wald USING btree (gml_id,beginnt);
 CREATE INDEX ax_wald_endet ON ax_wald USING btree (endet);
-SELECT AddGeometryColumn('ax_wald', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_wald', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_wald_wkb_geometry_idx ON ax_wald USING gist (wkb_geometry);
 CREATE INDEX ax_wald_istabgeleitetaus ON ax_wald USING gin (istabgeleitetaus);
 CREATE INDEX ax_wald_traegtbeizu ON ax_wald USING gin (traegtbeizu);
@@ -19265,7 +19265,7 @@ CREATE TABLE IF NOT EXISTS ax_heide (
 
 CREATE UNIQUE INDEX ax_heide_gml ON ax_heide USING btree (gml_id,beginnt);
 CREATE INDEX ax_heide_endet ON ax_heide USING btree (endet);
-SELECT AddGeometryColumn('ax_heide', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_heide', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_heide_wkb_geometry_idx ON ax_heide USING gist (wkb_geometry);
 CREATE INDEX ax_heide_istabgeleitetaus ON ax_heide USING gin (istabgeleitetaus);
 CREATE INDEX ax_heide_traegtbeizu ON ax_heide USING gin (traegtbeizu);
@@ -19353,7 +19353,7 @@ CREATE TABLE IF NOT EXISTS ax_moor (
 
 CREATE UNIQUE INDEX ax_moor_gml ON ax_moor USING btree (gml_id,beginnt);
 CREATE INDEX ax_moor_endet ON ax_moor USING btree (endet);
-SELECT AddGeometryColumn('ax_moor', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_moor', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_moor_wkb_geometry_idx ON ax_moor USING gist (wkb_geometry);
 CREATE INDEX ax_moor_istabgeleitetaus ON ax_moor USING gin (istabgeleitetaus);
 CREATE INDEX ax_moor_traegtbeizu ON ax_moor USING gin (traegtbeizu);
@@ -19442,7 +19442,7 @@ CREATE TABLE IF NOT EXISTS ax_landwirtschaft (
 
 CREATE UNIQUE INDEX ax_landwirtschaft_gml ON ax_landwirtschaft USING btree (gml_id,beginnt);
 CREATE INDEX ax_landwirtschaft_endet ON ax_landwirtschaft USING btree (endet);
-SELECT AddGeometryColumn('ax_landwirtschaft', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_landwirtschaft', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_landwirtschaft_wkb_geometry_idx ON ax_landwirtschaft USING gist (wkb_geometry);
 CREATE INDEX ax_landwirtschaft_istabgeleitetaus ON ax_landwirtschaft USING gin (istabgeleitetaus);
 CREATE INDEX ax_landwirtschaft_traegtbeizu ON ax_landwirtschaft USING gin (traegtbeizu);
@@ -19541,7 +19541,7 @@ CREATE TABLE IF NOT EXISTS ax_bahnverkehr (
 
 CREATE UNIQUE INDEX ax_bahnverkehr_gml ON ax_bahnverkehr USING btree (gml_id,beginnt);
 CREATE INDEX ax_bahnverkehr_endet ON ax_bahnverkehr USING btree (endet);
-SELECT AddGeometryColumn('ax_bahnverkehr', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_bahnverkehr', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_bahnverkehr_wkb_geometry_idx ON ax_bahnverkehr USING gist (wkb_geometry);
 CREATE INDEX ax_bahnverkehr_istabgeleitetaus ON ax_bahnverkehr USING gin (istabgeleitetaus);
 CREATE INDEX ax_bahnverkehr_traegtbeizu ON ax_bahnverkehr USING gin (traegtbeizu);
@@ -19646,7 +19646,7 @@ CREATE TABLE IF NOT EXISTS ax_weg (
 
 CREATE UNIQUE INDEX ax_weg_gml ON ax_weg USING btree (gml_id,beginnt);
 CREATE INDEX ax_weg_endet ON ax_weg USING btree (endet);
-SELECT AddGeometryColumn('ax_weg', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_weg', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_weg_wkb_geometry_idx ON ax_weg USING gist (wkb_geometry);
 CREATE INDEX ax_weg_istabgeleitetaus ON ax_weg USING gin (istabgeleitetaus);
 CREATE INDEX ax_weg_traegtbeizu ON ax_weg USING gin (traegtbeizu);
@@ -19748,7 +19748,7 @@ CREATE TABLE IF NOT EXISTS ax_schiffsverkehr (
 
 CREATE UNIQUE INDEX ax_schiffsverkehr_gml ON ax_schiffsverkehr USING btree (gml_id,beginnt);
 CREATE INDEX ax_schiffsverkehr_endet ON ax_schiffsverkehr USING btree (endet);
-SELECT AddGeometryColumn('ax_schiffsverkehr', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_schiffsverkehr', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_schiffsverkehr_wkb_geometry_idx ON ax_schiffsverkehr USING gist (wkb_geometry);
 CREATE INDEX ax_schiffsverkehr_istabgeleitetaus ON ax_schiffsverkehr USING gin (istabgeleitetaus);
 CREATE INDEX ax_schiffsverkehr_traegtbeizu ON ax_schiffsverkehr USING gin (traegtbeizu);
@@ -19853,7 +19853,7 @@ CREATE TABLE IF NOT EXISTS ax_flugverkehr (
 
 CREATE UNIQUE INDEX ax_flugverkehr_gml ON ax_flugverkehr USING btree (gml_id,beginnt);
 CREATE INDEX ax_flugverkehr_endet ON ax_flugverkehr USING btree (endet);
-SELECT AddGeometryColumn('ax_flugverkehr', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_flugverkehr', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_flugverkehr_wkb_geometry_idx ON ax_flugverkehr USING gist (wkb_geometry);
 CREATE INDEX ax_flugverkehr_istabgeleitetaus ON ax_flugverkehr USING gin (istabgeleitetaus);
 CREATE INDEX ax_flugverkehr_traegtbeizu ON ax_flugverkehr USING gin (traegtbeizu);
@@ -19959,7 +19959,7 @@ CREATE TABLE IF NOT EXISTS ax_platz (
 
 CREATE UNIQUE INDEX ax_platz_gml ON ax_platz USING btree (gml_id,beginnt);
 CREATE INDEX ax_platz_endet ON ax_platz USING btree (endet);
-SELECT AddGeometryColumn('ax_platz', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_platz', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_platz_wkb_geometry_idx ON ax_platz USING gist (wkb_geometry);
 CREATE INDEX ax_platz_istabgeleitetaus ON ax_platz USING gin (istabgeleitetaus);
 CREATE INDEX ax_platz_traegtbeizu ON ax_platz USING gin (traegtbeizu);
@@ -20063,7 +20063,7 @@ CREATE TABLE IF NOT EXISTS ax_strassenverkehr (
 
 CREATE UNIQUE INDEX ax_strassenverkehr_gml ON ax_strassenverkehr USING btree (gml_id,beginnt);
 CREATE INDEX ax_strassenverkehr_endet ON ax_strassenverkehr USING btree (endet);
-SELECT AddGeometryColumn('ax_strassenverkehr', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ax_strassenverkehr', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ax_strassenverkehr_wkb_geometry_idx ON ax_strassenverkehr USING gist (wkb_geometry);
 CREATE INDEX ax_strassenverkehr_istabgeleitetaus ON ax_strassenverkehr USING gin (istabgeleitetaus);
 CREATE INDEX ax_strassenverkehr_traegtbeizu ON ax_strassenverkehr USING gin (traegtbeizu);
@@ -20134,7 +20134,7 @@ CREATE TABLE IF NOT EXISTS ta_compositesolidcomponent_3d (
 
 CREATE UNIQUE INDEX ta_compositesolidcomponent_3d_gml ON ta_compositesolidcomponent_3d USING btree (gml_id,beginnt);
 CREATE INDEX ta_compositesolidcomponent_3d_endet ON ta_compositesolidcomponent_3d USING btree (endet);
-SELECT AddGeometryColumn('ta_compositesolidcomponent_3d', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ta_compositesolidcomponent_3d', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ta_compositesolidcomponent_3d_wkb_geometry_idx ON ta_compositesolidcomponent_3d USING gist (wkb_geometry);
 CREATE INDEX ta_compositesolidcomponent_3d_detailliert ON ta_compositesolidcomponent_3d USING btree (detailliert);
 CREATE INDEX ta_compositesolidcomponent_3d_generalisiert ON ta_compositesolidcomponent_3d USING btree (generalisiert);
@@ -20172,7 +20172,7 @@ CREATE TABLE IF NOT EXISTS ta_surfacecomponent_3d (
 
 CREATE UNIQUE INDEX ta_surfacecomponent_3d_gml ON ta_surfacecomponent_3d USING btree (gml_id,beginnt);
 CREATE INDEX ta_surfacecomponent_3d_endet ON ta_surfacecomponent_3d USING btree (endet);
-SELECT AddGeometryColumn('ta_surfacecomponent_3d', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ta_surfacecomponent_3d', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ta_surfacecomponent_3d_wkb_geometry_idx ON ta_surfacecomponent_3d USING gist (wkb_geometry);
 CREATE INDEX ta_surfacecomponent_3d_detailliert ON ta_surfacecomponent_3d USING btree (detailliert);
 CREATE INDEX ta_surfacecomponent_3d_generalisiert ON ta_surfacecomponent_3d USING btree (generalisiert);
@@ -20210,7 +20210,7 @@ CREATE TABLE IF NOT EXISTS ta_curvecomponent_3d (
 
 CREATE UNIQUE INDEX ta_curvecomponent_3d_gml ON ta_curvecomponent_3d USING btree (gml_id,beginnt);
 CREATE INDEX ta_curvecomponent_3d_endet ON ta_curvecomponent_3d USING btree (endet);
-SELECT AddGeometryColumn('ta_curvecomponent_3d', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ta_curvecomponent_3d', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ta_curvecomponent_3d_wkb_geometry_idx ON ta_curvecomponent_3d USING gist (wkb_geometry);
 CREATE INDEX ta_curvecomponent_3d_detailliert ON ta_curvecomponent_3d USING btree (detailliert);
 CREATE INDEX ta_curvecomponent_3d_generalisiert ON ta_curvecomponent_3d USING btree (generalisiert);
@@ -20248,7 +20248,7 @@ CREATE TABLE IF NOT EXISTS ta_pointcomponent_3d (
 
 CREATE UNIQUE INDEX ta_pointcomponent_3d_gml ON ta_pointcomponent_3d USING btree (gml_id,beginnt);
 CREATE INDEX ta_pointcomponent_3d_endet ON ta_pointcomponent_3d USING btree (endet);
-SELECT AddGeometryColumn('ta_pointcomponent_3d', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ta_pointcomponent_3d', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ta_pointcomponent_3d_wkb_geometry_idx ON ta_pointcomponent_3d USING gist (wkb_geometry);
 CREATE INDEX ta_pointcomponent_3d_detailliert ON ta_pointcomponent_3d USING btree (detailliert);
 CREATE INDEX ta_pointcomponent_3d_generalisiert ON ta_pointcomponent_3d USING btree (generalisiert);
@@ -20286,7 +20286,7 @@ CREATE TABLE IF NOT EXISTS au_trianguliertesoberflaechenobjekt_3d (
 
 CREATE UNIQUE INDEX au_trianguliertesoberflaechenobjekt_3d_gml ON au_trianguliertesoberflaechenobjekt_3d USING btree (gml_id,beginnt);
 CREATE INDEX au_trianguliertesoberflaechenobjekt_3d_endet ON au_trianguliertesoberflaechenobjekt_3d USING btree (endet);
-SELECT AddGeometryColumn('au_trianguliertesoberflaechenobjekt_3d', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('au_trianguliertesoberflaechenobjekt_3d', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX au_trianguliertesoberflaechenobjekt_3d_wkb_geometry_idx ON au_trianguliertesoberflaechenobjekt_3d USING gist (wkb_geometry);
 CREATE INDEX au_trianguliertesoberflaechenobjekt_3d_detailliert ON au_trianguliertesoberflaechenobjekt_3d USING btree (detailliert);
 CREATE INDEX au_trianguliertesoberflaechenobjekt_3d_generalisiert ON au_trianguliertesoberflaechenobjekt_3d USING btree (generalisiert);
@@ -20324,7 +20324,7 @@ CREATE TABLE IF NOT EXISTS au_mehrfachflaechenobjekt_3d (
 
 CREATE UNIQUE INDEX au_mehrfachflaechenobjekt_3d_gml ON au_mehrfachflaechenobjekt_3d USING btree (gml_id,beginnt);
 CREATE INDEX au_mehrfachflaechenobjekt_3d_endet ON au_mehrfachflaechenobjekt_3d USING btree (endet);
-SELECT AddGeometryColumn('au_mehrfachflaechenobjekt_3d', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('au_mehrfachflaechenobjekt_3d', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX au_mehrfachflaechenobjekt_3d_wkb_geometry_idx ON au_mehrfachflaechenobjekt_3d USING gist (wkb_geometry);
 CREATE INDEX au_mehrfachflaechenobjekt_3d_detailliert ON au_mehrfachflaechenobjekt_3d USING btree (detailliert);
 CREATE INDEX au_mehrfachflaechenobjekt_3d_generalisiert ON au_mehrfachflaechenobjekt_3d USING btree (generalisiert);
@@ -20362,7 +20362,7 @@ CREATE TABLE IF NOT EXISTS au_mehrfachlinienobjekt_3d (
 
 CREATE UNIQUE INDEX au_mehrfachlinienobjekt_3d_gml ON au_mehrfachlinienobjekt_3d USING btree (gml_id,beginnt);
 CREATE INDEX au_mehrfachlinienobjekt_3d_endet ON au_mehrfachlinienobjekt_3d USING btree (endet);
-SELECT AddGeometryColumn('au_mehrfachlinienobjekt_3d', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('au_mehrfachlinienobjekt_3d', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX au_mehrfachlinienobjekt_3d_wkb_geometry_idx ON au_mehrfachlinienobjekt_3d USING gist (wkb_geometry);
 CREATE INDEX au_mehrfachlinienobjekt_3d_detailliert ON au_mehrfachlinienobjekt_3d USING btree (detailliert);
 CREATE INDEX au_mehrfachlinienobjekt_3d_generalisiert ON au_mehrfachlinienobjekt_3d USING btree (generalisiert);
@@ -20400,7 +20400,7 @@ CREATE TABLE IF NOT EXISTS au_umringobjekt_3d (
 
 CREATE UNIQUE INDEX au_umringobjekt_3d_gml ON au_umringobjekt_3d USING btree (gml_id,beginnt);
 CREATE INDEX au_umringobjekt_3d_endet ON au_umringobjekt_3d USING btree (endet);
-SELECT AddGeometryColumn('au_umringobjekt_3d', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('au_umringobjekt_3d', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX au_umringobjekt_3d_wkb_geometry_idx ON au_umringobjekt_3d USING gist (wkb_geometry);
 CREATE INDEX au_umringobjekt_3d_detailliert ON au_umringobjekt_3d USING btree (detailliert);
 CREATE INDEX au_umringobjekt_3d_generalisiert ON au_umringobjekt_3d USING btree (generalisiert);
@@ -20445,7 +20445,7 @@ CREATE TABLE IF NOT EXISTS ap_kpo_3d (
 
 CREATE UNIQUE INDEX ap_kpo_3d_gml ON ap_kpo_3d USING btree (gml_id,beginnt);
 CREATE INDEX ap_kpo_3d_endet ON ap_kpo_3d USING btree (endet);
-SELECT AddGeometryColumn('ap_kpo_3d', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('ap_kpo_3d', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX ap_kpo_3d_wkb_geometry_idx ON ap_kpo_3d USING gist (wkb_geometry);
 CREATE INDEX ap_kpo_3d_dientzurdarstellungvon ON ap_kpo_3d USING gin (dientzurdarstellungvon);
 CREATE INDEX ap_kpo_3d_detailliert ON ap_kpo_3d USING btree (detailliert);
@@ -20491,7 +20491,7 @@ CREATE TABLE IF NOT EXISTS au_punkthaufenobjekt_3d (
 
 CREATE UNIQUE INDEX au_punkthaufenobjekt_3d_gml ON au_punkthaufenobjekt_3d USING btree (gml_id,beginnt);
 CREATE INDEX au_punkthaufenobjekt_3d_endet ON au_punkthaufenobjekt_3d USING btree (endet);
-SELECT AddGeometryColumn('au_punkthaufenobjekt_3d', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('au_punkthaufenobjekt_3d', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX au_punkthaufenobjekt_3d_wkb_geometry_idx ON au_punkthaufenobjekt_3d USING gist (wkb_geometry);
 CREATE INDEX au_punkthaufenobjekt_3d_detailliert ON au_punkthaufenobjekt_3d USING btree (detailliert);
 CREATE INDEX au_punkthaufenobjekt_3d_generalisiert ON au_punkthaufenobjekt_3d USING btree (generalisiert);
@@ -20529,7 +20529,7 @@ CREATE TABLE IF NOT EXISTS au_koerperobjekt_3d (
 
 CREATE UNIQUE INDEX au_koerperobjekt_3d_gml ON au_koerperobjekt_3d USING btree (gml_id,beginnt);
 CREATE INDEX au_koerperobjekt_3d_endet ON au_koerperobjekt_3d USING btree (endet);
-SELECT AddGeometryColumn('au_koerperobjekt_3d', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('au_koerperobjekt_3d', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX au_koerperobjekt_3d_wkb_geometry_idx ON au_koerperobjekt_3d USING gist (wkb_geometry);
 CREATE INDEX au_koerperobjekt_3d_detailliert ON au_koerperobjekt_3d USING btree (detailliert);
 CREATE INDEX au_koerperobjekt_3d_generalisiert ON au_koerperobjekt_3d USING btree (generalisiert);
@@ -20567,7 +20567,7 @@ CREATE TABLE IF NOT EXISTS au_geometrieobjekt_3d (
 
 CREATE UNIQUE INDEX au_geometrieobjekt_3d_gml ON au_geometrieobjekt_3d USING btree (gml_id,beginnt);
 CREATE INDEX au_geometrieobjekt_3d_endet ON au_geometrieobjekt_3d USING btree (endet);
-SELECT AddGeometryColumn('au_geometrieobjekt_3d', 'wkb_geometry', 25833, 'GEOMETRY', 2);
+SELECT AddGeometryColumn('au_geometrieobjekt_3d', 'wkb_geometry', :alkis_epsg, 'GEOMETRY', 2);
 CREATE INDEX au_geometrieobjekt_3d_wkb_geometry_idx ON au_geometrieobjekt_3d USING gist (wkb_geometry);
 CREATE INDEX au_geometrieobjekt_3d_detailliert ON au_geometrieobjekt_3d USING btree (detailliert);
 CREATE INDEX au_geometrieobjekt_3d_generalisiert ON au_geometrieobjekt_3d USING btree (generalisiert);
@@ -20599,7 +20599,7 @@ CREATE TABLE "delete" (
         PRIMARY KEY (ogc_fid)
 );
 
-SELECT AddGeometryColumn('delete','dummy',25833,'POINT',2);
+SELECT AddGeometryColumn('delete','dummy',:alkis_epsg,'POINT',2);
 
 CREATE INDEX delete_fid ON "delete"(featureid);
 

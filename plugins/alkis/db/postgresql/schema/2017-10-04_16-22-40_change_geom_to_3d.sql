@@ -4,7 +4,7 @@ CREATE OR REPLACE function kvw_geomto3d(schema_name CHARACTER VARYING, table_nam
 RETURNS void AS
 $$
 BEGIN
-	EXECUTE 'ALTER TABLE ' || schema_name || '.' || table_name || ' ALTER COLUMN wkb_geometry TYPE geometry(GEOMETRYZ, 25833)';
+	EXECUTE 'ALTER TABLE ' || schema_name || '.' || table_name || ' ALTER COLUMN wkb_geometry TYPE geometry(GEOMETRYZ, :alkis_epsg)';
 END;
 $$ LANGUAGE plpgsql VOLATILE COST 100;
 

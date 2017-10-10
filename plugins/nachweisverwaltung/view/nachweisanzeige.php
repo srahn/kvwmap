@@ -204,8 +204,9 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 			}else echo $bgcolor;
             ?>
 			"> 
-          <td align="left" style="width: 80"> 
-              <input type="checkbox" name="id[]" value="<?php echo $this->nachweis->Dokumente[$i]['id']; ?>"<?php 
+          <td align="left" style="width: 80">
+						<a name="<? echo $this->nachweis->Dokumente[$i]['id']; ?>">
+						<input type="checkbox" name="id[]" value="<?php echo $this->nachweis->Dokumente[$i]['id']; ?>"<?php 
         # Püfen ob das Dokument markiert werden soll
                 
         if ($this->art_markieren=='individuell') {
