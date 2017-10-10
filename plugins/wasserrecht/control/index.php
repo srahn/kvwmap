@@ -23,7 +23,7 @@ include(PLUGINS . 'wasserrecht/model/mengenbestimmung.php');
 include(PLUGINS . 'wasserrecht/model/teilgewaesserbenutzungen.php');
 include(PLUGINS . 'wasserrecht/model/teilgewaesserbenutzungen_art.php');
 include(PLUGINS . 'wasserrecht/model/wasserrechtliche_zulassungen.php');
-include(PLUGINS . 'wasserrecht/model/WRZProGueltigkeitsJahr.php');
+include(PLUGINS . 'wasserrecht/model/WRZProGueltigkeitsJahre.php');
 
 require_once (CLASSPATH . '/../vendor/autoload.php');
 // include(PLUGINS . 'wasserrecht/view/KvwmapJodDocumentConverter.class.php');

@@ -1,27 +1,27 @@
 <?php 
 $wasserrechtlicheZulassung = new WasserrechtlicheZulassungen($this);
-$wrzProGueltigkeitsJahr = $wasserrechtlicheZulassung->find_gueltigkeitsjahre($this);
-$gueltigkeitsjahre = $wrzProGueltigkeitsJahr->gueltigkeitsJahre;
+$wrzProGueltigkeitsJahre = $wasserrechtlicheZulassung->find_gueltigkeitsjahre($this);
+$gueltigkeitsjahre = $wrzProGueltigkeitsJahre->gueltigkeitsJahre;
 
 $getYear = !empty(htmlspecialchars($_REQUEST['erhebungsjahr'])) ? htmlspecialchars($_REQUEST['erhebungsjahr']) : $gueltigkeitsjahre[0];
 
 //Get Behörde
 $getBehoerde = !empty(htmlspecialchars($_REQUEST['behoerde'])) ? htmlspecialchars($_REQUEST['behoerde']) : null;
-if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen)
-    && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[0]) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[0]->behoerde) && empty($getBehoerde))
+if(!empty($wrzProGueltigkeitsJahre) && !empty($wrzProGueltigkeitsJahre->wasserrechtlicheZulassungen)
+    && !empty($wrzProGueltigkeitsJahre->wasserrechtlicheZulassungen[0]) && !empty($wrzProGueltigkeitsJahre->wasserrechtlicheZulassungen[0]->behoerde) && empty($getBehoerde))
 {
-    $getBehoerde = $wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[0]->behoerde->getId();
+    $getBehoerde = $wrzProGueltigkeitsJahre->wasserrechtlicheZulassungen[0]->behoerde->getId();
 }
 // print_r($getBehoerde);
 
 //Get Adressat
 $getAdressat = !empty(htmlspecialchars($_REQUEST['adressat'])) ? htmlspecialchars($_REQUEST['adressat']) : null;
 $selectedAdressat = null;
-if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen)
-    && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[0]) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[0]->adressat) && empty($getAdressat))
+if(!empty($wrzProGueltigkeitsJahre) && !empty($wrzProGueltigkeitsJahre->wasserrechtlicheZulassungen)
+    && !empty($wrzProGueltigkeitsJahre->wasserrechtlicheZulassungen[0]) && !empty($wrzProGueltigkeitsJahre->wasserrechtlicheZulassungen[0]->adressat) && empty($getAdressat))
 {
-    $getAdressat = $wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[0]->adressat->getId();
-    $selectedAdressat = $wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[0]->adressat;
+    $getAdressat = $wrzProGueltigkeitsJahre->wasserrechtlicheZulassungen[0]->adressat->getId();
+    $selectedAdressat = $wrzProGueltigkeitsJahre->wasserrechtlicheZulassungen[0]->adressat;
 }
 
 // echo "adressat: " . $getAdressat;
@@ -36,7 +36,7 @@ if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrech
                 <div class="wasserrecht_display_table_cell">
                 	<select name="erhebungsjahr" onchange="setNewUrlParameter(this,'erhebungsjahr')">
     					<?php
-                            if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->gueltigkeitsJahre))
+                            if(!empty($wrzProGueltigkeitsJahre) && !empty($wrzProGueltigkeitsJahre->gueltigkeitsJahre))
                             {
                                 if(!empty($gueltigkeitsjahre) && count($gueltigkeitsjahre) > 0)
                                 {
@@ -72,9 +72,9 @@ if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrech
                 <div class="wasserrecht_display_table_cell">
                 	<select name="behoerde" onchange="setNewUrlParameter(this,'behoerde')">
         				<?php
-            				if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen))
+            				if(!empty($wrzProGueltigkeitsJahre) && !empty($wrzProGueltigkeitsJahre->wasserrechtlicheZulassungen))
             				{
-            				    $wasserrechtlicheZulassungen = $wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen;
+            				    $wasserrechtlicheZulassungen = $wrzProGueltigkeitsJahre->wasserrechtlicheZulassungen;
             				    
             				    $behoerdeArray = array();
             				    
@@ -84,7 +84,7 @@ if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrech
             				    foreach($wasserrechtlicheZulassungen AS $wrz)
             				    {
 //             				        print_r($wrz->getId());
-            				        if(!empty($wrz) && in_array($getYear, $wrz->gueltigkeitsJahr))
+            				        if(!empty($wrz) && in_array($getYear, $wrz->gueltigkeitsJahre))
             				        {
             				            if(!empty($wrz->behoerde))
             				            {

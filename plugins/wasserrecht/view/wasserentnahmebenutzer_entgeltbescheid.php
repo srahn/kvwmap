@@ -275,14 +275,14 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
     		</tr>
     		<?php 
         		
-        		  if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen))
+        		  if(!empty($wrzProGueltigkeitsJahre) && !empty($wrzProGueltigkeitsJahre->wasserrechtlicheZulassungen))
         		  {
-        		      $wasserrechtlicheZulassungen = $wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen;
+        		      $wasserrechtlicheZulassungen = $wrzProGueltigkeitsJahre->wasserrechtlicheZulassungen;
         		      
         		      //var_dump($wasserrechtlicheZulassungen);
         		      foreach($wasserrechtlicheZulassungen AS $wrz)
         		      {
-        		          if(!empty($wrz) && in_array($getYear, $wrz->gueltigkeitsJahr))
+        		          if(!empty($wrz) && in_array($getYear, $wrz->gueltigkeitsJahre))
         		          {
         		              if(empty($getBehoerde) || $getBehoerde === $wrz->behoerde->getId())
         		              {
@@ -430,16 +430,16 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
            			<div class="wasserrecht_display_table_cell_caption">Abgelegte Sammelbescheide</div>
     		  </div>
     		  <?php 
-    			if(!empty($wrzProGueltigkeitsJahr) && !empty($wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen))
+    			if(!empty($wrzProGueltigkeitsJahre) && !empty($wrzProGueltigkeitsJahre->wasserrechtlicheZulassungen))
     			{
-    			    $wasserrechtlicheZulassungen = $wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen;
+    			    $wasserrechtlicheZulassungen = $wrzProGueltigkeitsJahre->wasserrechtlicheZulassungen;
     			    
     			    $dokumentIds = array();
     			    $festsetzungDokumente = array();
     			    
     			    foreach($wasserrechtlicheZulassungen AS $wrz)
     			    {
-    			        if(!empty($wrz) && in_array($getYear, $wrz->gueltigkeitsJahr))
+    			        if(!empty($wrz) && in_array($getYear, $wrz->gueltigkeitsJahre))
     			        {
     			            if(empty($getBehoerde) || $getBehoerde === $wrz->behoerde->getId())
     			            {

@@ -3,7 +3,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 
 	protected $tableName = 'fiswrv_wasserrechtliche_zulassungen';
 	
-	public $gueltigkeitsJahr;
+	public $gueltigkeitsJahre;
 // 	public $gueltigkeit;
 	public $behoerde;
 	public $adressat;
@@ -15,7 +15,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	public function getGueltigkeitsJahrString()
 	{
 	    $returnString = "";
-	    foreach ($this->gueltigkeitsJahr as $jahr)
+	    foreach ($this->gueltigkeitsJahre as $jahr)
 	    {
 	        if(empty($returnString))
 	        {
@@ -35,7 +35,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	    $this->debug->write('*** WasserrechtlicheZulassungen->find_gueltigkeitsjahre ***', 4);
 	    
 		$results = $this->find_where('1=1', 'id');
-		$wrzProGueltigkeitsJahr = new WRZProGueltigkeitsJahr();
+		$wrzProGueltigkeitsJahre = new WRZProGueltigkeitsJahre();
 		
 		if(!empty($results))
 		{
@@ -58,17 +58,17 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 			                $wasserrechtlicheZulassungGueltigkeitJahrReturnArray[] = $year;
 			            }
 			        }
-			        $wrzProGueltigkeitsJahr->wasserrechtlicheZulassungen[]=$result;
+			        $wrzProGueltigkeitsJahre->wasserrechtlicheZulassungen[]=$result;
 			    }
 			}
-			$wrzProGueltigkeitsJahr->gueltigkeitsJahre=$wasserrechtlicheZulassungGueltigkeitJahrReturnArray;
-// 			print_r($wrzProGueltigkeitsJahr->gueltigkeitsJahre);
-			return $wrzProGueltigkeitsJahr;
+			$wrzProGueltigkeitsJahre->gueltigkeitsJahre=$wasserrechtlicheZulassungGueltigkeitJahrReturnArray;
+// 			print_r($wrzProGueltigkeitsJahre->gueltigkeitsJahre);
+			return $wrzProGueltigkeitsJahre;
 // 			return $wasserrechtlicheZulassungGueltigkeitJahrReturnArray;
 		}
 		
-		$wrzProGueltigkeitsJahr->gueltigkeitsJahre=array('n/a');
-		return $wrzProGueltigkeitsJahr;
+		$wrzProGueltigkeitsJahre->gueltigkeitsJahre=array('n/a');
+		return $wrzProGueltigkeitsJahre;
 // 		return array('n/a');
 	}
 	
@@ -107,7 +107,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
                     }
                 }
                 
-                $result->gueltigkeitsJahr = $years;
+                $result->gueltigkeitsJahre = $years;
                 
 // 	        }
 	        
@@ -681,7 +681,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	////////////////////////////////////////////////////////////////////
 	
 	public function toString() {
-	    return "gueltigkeitsJahr: " . print_r($this->gueltigkeitsJahr) . (!empty($this->behoerde) ? " behoerde: " . $this->behoerde->data['id'] : "" ) . (!empty($this->adressat) ? " adressat: " . $this->adressat->data['id'] : "");
+	    return "gueltigkeitsJahre: " . print_r($this->gueltigkeitsJahre) . (!empty($this->behoerde) ? " behoerde: " . $this->behoerde->data['id'] : "" ) . (!empty($this->adressat) ? " adressat: " . $this->adressat->data['id'] : "");
 	}
 	
 	public function getBezeichnung() {

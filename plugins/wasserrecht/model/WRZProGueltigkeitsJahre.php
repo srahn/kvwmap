@@ -1,5 +1,5 @@
 <?php
-class WRZProGueltigkeitsJahr
+class WRZProGueltigkeitsJahre
 {
     public $gueltigkeitsJahre;
     public $wasserrechtlicheZulassungen = array();
