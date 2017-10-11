@@ -85,6 +85,8 @@ namespace myprogram
                         //Extrahiere und Schreibe Nenner (15-18)
                         if (debug) Console.WriteLine("15-18: " + URLvaluesArr[i].Substring(14, 4));
                         tmp = Regex.Replace(URLvaluesArr[i].Substring(14, 4), "(?<=^)0+", " ");
+                        //Wenn kein Nenner vorhanden, schreibe "   0"
+                        if (tmp == "____") tmp = "   0";
                         stringArrToWrite[i+1] += "$" + tmp + "$;";
                     }
 
