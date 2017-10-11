@@ -122,19 +122,19 @@ function writeFestsetzungsWordFile(&$gui, $word_template, $word_file, &$paramete
             $templateProcessor->setValue('n2#' . $i, $i);
             $templateProcessor->setValue('Anlage_ID2#' . $i, $anlage->getId());
             $templateProcessor->setValue('Anlage_Name2#' . $i, $anlage->getName());
-            $templateProcessor->setValue('Entnamemenge#' . $i, $entnahmemengen[$i - 1]);
-            $templateProcessor->setValue('Erlaubter_Umfang#' . $i, $festsetzungsSammelbescheidDaten->getErlaubterUmfang());
-            $templateProcessor->setValue('Zugelassenes_Entgelt#' . $i, $zugelassene_entgelt[$i - 1]);
-            $templateProcessor->setValue('Nicht_Zugelassenes_Entgelt#' . $i, $nicht_zugelassene_entgelt[$i - 1]);
-            $templateProcessor->setValue('Entgelt#' . $i, $entgelte[$i - 1]);
+            $templateProcessor->setValue('Entnamemenge#' . $i, FestsetzungsSammelbescheidDaten::formatNumber($entnahmemengen[$i - 1]));
+            $templateProcessor->setValue('Erlaubter_Umfang#' . $i, FestsetzungsSammelbescheidDaten::formatNumber($festsetzungsSammelbescheidDaten->getErlaubterUmfang()));
+            $templateProcessor->setValue('Zugelassenes_Entgelt#' . $i, FestsetzungsSammelbescheidDaten::formatCurrencyNumber($zugelassene_entgelt[$i - 1]));
+            $templateProcessor->setValue('Nicht_Zugelassenes_Entgelt#' . $i,  FestsetzungsSammelbescheidDaten::formatCurrencyNumber($nicht_zugelassene_entgelt[$i - 1]));
+            $templateProcessor->setValue('Entgelt#' . $i, FestsetzungsSammelbescheidDaten::formatCurrencyNumber($entgelte[$i - 1]));
             
             $i++;
         }
     }
     
-    $templateProcessor->setValue('Summe_Zugelassenes_Entgelt', $festsetzungsSammelbescheidDaten->getSummeZugelasseneEntgelte());
-    $templateProcessor->setValue('Summe_Nicht_Zugelassenes_Entgelt', $festsetzungsSammelbescheidDaten->getSummeNichtZugelasseneEntgelte());
-    $templateProcessor->setValue('Summe_Entgelt', $festsetzungsSammelbescheidDaten->getSummeEntgelte());
+    $templateProcessor->setValue('Summe_Zugelassenes_Entgelt', FestsetzungsSammelbescheidDaten::formatCurrencyNumber($festsetzungsSammelbescheidDaten->getSummeZugelasseneEntgelte()));
+    $templateProcessor->setValue('Summe_Nicht_Zugelassenes_Entgelt', FestsetzungsSammelbescheidDaten::formatCurrencyNumber($festsetzungsSammelbescheidDaten->getSummeNichtZugelasseneEntgelte()));
+    $templateProcessor->setValue('Summe_Entgelt', FestsetzungsSammelbescheidDaten::formatCurrencyNumber($festsetzungsSammelbescheidDaten->getSummeEntgelte()));
     
     $templateProcessor->saveAs($word_file);
 

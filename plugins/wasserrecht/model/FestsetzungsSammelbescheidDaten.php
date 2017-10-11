@@ -300,5 +300,15 @@ class FestsetzungsSammelbescheidDaten
         
         return null;
     }
+    
+    public static function formatNumber(&$number)
+    {
+        return number_format($number, 0, '', ' ');
+    }
+    
+    public static function formatCurrencyNumber(&$number)
+    {
+        return number_format($number, 2, ',', ' ');
+    }
 
 }
