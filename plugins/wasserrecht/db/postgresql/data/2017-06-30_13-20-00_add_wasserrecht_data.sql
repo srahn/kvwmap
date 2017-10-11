@@ -212,6 +212,8 @@ INSERT INTO wasserrecht.fiswrv_personen_klasse (name) VALUES ('Kieswerk');
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 INSERT INTO wasserrecht.fiswrv_ort(name) VALUES ('Güstrow');
+INSERT INTO wasserrecht.fiswrv_ort(name) VALUES ('Rostock');
+INSERT INTO wasserrecht.fiswrv_ort(name) VALUES ('Hansestadt Rostock');
 
 INSERT INTO wasserrecht.fiswrv_wasserrechtliche_zulassungen (typus, aktenzeichen, ort, datum, ausstellbehoerde, status, gueltig_seit, befristet_bis, aktuell, bearbeiter, adressat, anlage, fassung_nummer, fassung_datum) VALUES (1, '§ 1', 1, current_date, 1, 2, '2016-07-01', '2017-07-06', 'ja', 2, 2, 1, 1, '2017-07-01');
 INSERT INTO wasserrecht.fiswrv_wasserrechtliche_zulassungen (typus, aktenzeichen, ort, datum, ausstellbehoerde, status, gueltig_seit, befristet_bis, historisch, bearbeiter, adressat, anlage) VALUES (1, '§ 2', 1, current_date, 1, 2, '2017-07-01', '2017-07-06', 'ja', 2, 2, 2);
