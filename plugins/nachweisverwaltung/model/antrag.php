@@ -724,7 +724,7 @@ class antrag {
     $sql.=" VALUES('".$antr_nr."',".$VermStelle.",".$verm_art.",'".$datum."',".$stelle_id.")";
     $queryret=$this->database->execSQL($sql,4, 1);
     if ($queryret[0]) {
-      $errmsg='Es konnte keine Antragsnummer in die Datenbank eingetragen werden!\n'; 
+      $errmsg='Es konnte keine Antragsnummer in die Datenbank eingetragen werden!'; 
     }
     else {
       $errmsg.='Auftragsnummer erfolgreich übernommen! ';

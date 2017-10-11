@@ -533,12 +533,12 @@ class Nachweis {
             # Datei existiert und kann jetzt im Filesystem gelöscht werden
 						$ret = $this->dokumentenDateiLoeschen($nachweisDatei);
 						if ($ret == '') {
-              $msg.='Datei '.$nachweisDatei.' wurde erfolgreich gelöscht.';
+              $msg.='Datei '.$nachweisDatei.' wurde erfolgreich gelöscht. ';
             }
           }
           else {
             # Datei existiert nicht
-            $msg.='Die Datei '.$nachweisDatei.' konnte nicht gefunden werden.\nWahrscheinlich falscher Pfad/Dateiname\n';
+            $msg.='Die Datei '.$nachweisDatei.' konnte nicht gefunden werden.<br>Wahrscheinlich falscher Pfad/Dateiname<br>';
           }
         }
         else {
@@ -1174,7 +1174,7 @@ class Nachweis {
 			else $sql.=" AND stelle_id=".$stelle_id;
       $ret=$this->database->execSQL($sql,4, 0);
       if ($ret[0]) { # Fehler bei der Abfrage
-        $errmsg='\nFehler beim Abfragen, ob Eintrag existiert.';
+        $errmsg='Fehler beim Abfragen, ob Eintrag existiert.';
       }
       else {
         # 
@@ -1190,7 +1190,7 @@ class Nachweis {
           $ret=$this->database->execSQL($sql,4, 1);    
           if ($ret[0]) {
             $this->debug->write("<br>Fehler beim hinzufuegen der Dokumente zur Auftragsnummer: ".__LINE__,4);
-            $errmsg='\nFehler beim hinzufuegen der Dokumente zur Auftragsnummer';
+            $errmsg='Fehler beim hinzufuegen der Dokumente zur Auftragsnummer';
           }
           else {
             #echo '<br>Dokument mit id: '.$idselected[$i].' zu Antrag id: '.$antrag_id.' zugeordnet.';
@@ -1202,7 +1202,7 @@ class Nachweis {
       $ret[0]=1; $ret[1]=$errmsg;
     }
     else {
-      $ret[0]=0; $ret[1]='\nNachweise erfolgreich zum Auftrag hinzugefügt.';
+      $ret[0]=0; $ret[1]='Nachweise erfolgreich zum Auftrag hinzugefügt.';
     }
     return $ret;
   }
@@ -1218,14 +1218,14 @@ class Nachweis {
       $ret=$this->database->execSQL($sql,4, 1);
       if ($ret[0]) {
         $this->debug->write("<br>Fehler beim entfernen der Dokumente zur Auftragsnummer: ".__LINE__,4);
-        $ret[1].='\nFehler beim entferen aus der Auftragsnummer!';
+        $result[0]='Fehler beim entferen aus der Auftragsnummer!';
       }
       else{
-        $ret[1]='\nDokumente erfolgreich aus Antrag entfernt!';
+        $result[1]='Dokumente erfolgreich aus Antrag entfernt!';
         #echo '<br>Dokument mit id: '.$idselected[$i].' aus Antrag id: '.$antrag_id.' entfernt.';
       }
     }
-    return $ret; 
+    return $result;
   }
   
   function getDocLocation($id){

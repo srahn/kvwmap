@@ -2400,7 +2400,7 @@
     <GeomPropertyDefn>
       <Name>objektkoordinaten</Name>
       <ElementPath>objektkoordinaten</ElementPath>
-      <GeometryType>100</GeometryType>
+      <GeometryType>1</GeometryType>
     </GeomPropertyDefn>
     <PropertyDefn>
       <Name>gml_id</Name>
@@ -2566,8 +2566,8 @@
     <GeomPropertyDefn>
       <Name>objektkoordinaten</Name>
       <ElementPath>objektkoordinaten</ElementPath>
-      <GeometryType>100</GeometryType>
-    </GeomPropertyDefn>
+      <GeometryType>1</GeometryType>
+    </GeomPropertyDefn>		
     <PropertyDefn>
       <Name>gml_id</Name>
       <ElementPath>gml_id</ElementPath>
@@ -8515,7 +8515,7 @@
     <GeomPropertyDefn>
       <Name>objektkoordinaten</Name>
       <ElementPath>objektkoordinaten</ElementPath>
-      <GeometryType>100</GeometryType>
+      <GeometryType>1</GeometryType>
     </GeomPropertyDefn>
     <PropertyDefn>
       <Name>gml_id</Name>
@@ -23904,7 +23904,7 @@
     <GeomPropertyDefn>
       <Name>objektkoordinaten</Name>
       <ElementPath>objektkoordinaten</ElementPath>
-      <GeometryType>100</GeometryType>
+      <GeometryType>1</GeometryType>
     </GeomPropertyDefn>
     <PropertyDefn>
       <Name>gml_id</Name>
