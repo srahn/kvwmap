@@ -128,7 +128,7 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
     			<th>Erklärung</th>
     		</tr>
     		<tr>
-    			<td style="background-color: inherit;"><input type="checkbox" id="select_all_checkboxes" onchange="$('input:checkbox').not(this).prop('checked', this.checked);"></td>
+    			<td style="background-color: inherit;"><input title="Alle auswählen" type="checkbox" id="select_all_checkboxes" onchange="$('input:checkbox').not(this).prop('checked', this.checked);"></td>
     		</tr>
     		<?php 
         		
