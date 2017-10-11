@@ -108,7 +108,7 @@
       # Fehler bei der Abfrage des Nachweises
       # Anzeige des letzten Rechercheergebnisses
       $GUI->nachweisAnzeige();
-      showAlert($ret);
+			$GUI->add_message('error', $ret);
     }
     else {
       # Abfrage war erfolgreich
@@ -171,7 +171,7 @@
 				$this->geomload = true;			# Geometrie wird das erste Mal geladen, deshalb nicht in den Weiterzeichnenmodus gehen
       }
       else{
-      	showAlert('Achtung! Nachweis hat noch keine Geometrie!');
+				$GUI->add_message('error', 'Achtung! Nachweis hat noch keine Geometrie!');
       }
       # Zuweisen der Werte des Dokumentes zum Formular
       $GUI->formvars['flurid']=$nachweis->document['flurid'];
@@ -507,19 +507,15 @@
     #$GUI->nachweis->getAnzahlNachweise($GUI->formvars['suchpolygon']);
     if($ret!=''){
       # Fehler bei der Recherche im Datenbestand
+			$GUI->add_message('error', $ret);
       $GUI->rechercheFormAnzeigen();
-      ?><script type="text/javascript">
-      alert("<?php echo $ret; ?>");
-      </script><?php
     }
     else {
       # Recherche erfolgreich verlaufen
       if ($GUI->nachweis->erg_dokumente==0) {
         # Keine Dokumente zur Auswahl gefunden.
-        $GUI->rechercheFormAnzeigen();
-        ?><script type="text/javascript">
-        alert("Es konnten keine Dokumente zu der Auswahl gefunden werden.\nWählen Sie neue Suchparameter.");
-        </script><?php
+				$GUI->add_message('error', 'Es konnten keine Dokumente zu der Auswahl gefunden werden. Wählen Sie neue Suchparameter.');
+        $GUI->rechercheFormAnzeigen();				
       }
       else {
         # Anzeige des Rechercheergebnisses
@@ -530,8 +526,8 @@
 	
 	$this->erzeugenUebergabeprotokollNachweise = function($antr_nr) use ($GUI){
     if ($antr_nr==''){
+			$GUI->add_message('error', 'Wählen Sie bitte eine Antragsnummer aus!');
       $GUI->Antraege_Anzeigen();
-      showAlert('Wählen Sie bitte eine Antragsnummer aus! ');
     }
     else{
 			$explosion = explode('~', $antr_nr);
@@ -921,8 +917,8 @@
 	$this->erzeugenUebergabeprotokollNachweise_PDF = function($path = NULL, $with_search_params = false) use ($GUI){
   	# Erzeugen des Übergabeprotokolls mit der Zuordnung der Nachweise zum gewählten Auftrag als PDF-Dokument
   	if($GUI->formvars['antr_selected'] == ''){
+			$GUI->add_message('error', 'Wählen Sie bitte eine Antragsnummer aus!');
       $GUI->Antraege_Anzeigen();
-      showAlert('Wählen Sie bitte eine Antragsnummer aus! ');
     }
     else{
 			$explosion = explode('~', $GUI->formvars['antr_selected']);
@@ -965,8 +961,8 @@
 	$this->erzeugenUebergabeprotokollNachweise_CSV = function() use ($GUI){
   	# Erzeugen des Übergabeprotokolls mit der Zuordnung der Nachweise zum gewählten Auftrag als CSV-Dokument
   	if($GUI->formvars['antr_selected'] == ''){
+			$GUI->add_message('error', 'Wählen Sie bitte eine Antragsnummer aus!');
       $GUI->Antraege_Anzeigen();
-      showAlert('Wählen Sie bitte eine Antragsnummer aus! ');
     }
     else {
 			$explosion = explode('~', $GUI->formvars['antr_selected']);
@@ -1042,8 +1038,8 @@
       } # ende Prüfung war erfolgreich
       # Auswertung/Behandlung bei Aufgetretenen Fehlern
       $GUI->Meldung=$errmsg;
+			$GUI->add_message('info', $GUI->Meldung);
       $GUI->nachweisFormAnzeige();
-      showAlert($GUI->Meldung);
     } # ende Fall Eintragen Daten zum neuen Dokument
     else {
       ##################################################
@@ -1052,13 +1048,13 @@
       if ($ret[0]) {
         # Die Änderung wurde auf Grund eines Fehlers nicht durchgeführt
         # 1.3 Zurück zum Änderungsformular mit Anzeige der Fehlermeldung
-        $GUI->nachweisFormAnzeige();
 				$GUI->Meldung=$ret[1];
-        showAlert($GUI->Meldung);
+				$GUI->add_message('error', $GUI->Meldung);
+        $GUI->nachweisFormAnzeige();
       } # end of fehler bei der Änderung
       else {
+				$GUI->add_message('info', $ret[1]);
 				$GUI->nachweisAenderungsformular();
-        showAlert($ret[1]);
 			}
       # 1.4 Zur zur Anzeige der Rechercheergebnisse mit Meldung über Erfolg der Änderung
       # 1.4.1 Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
@@ -1229,15 +1225,15 @@
 		$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur']);
     if ($ret!='') {
       $errmsg.=$ret;
-    }
-    # Anzeige der Rechercheergebnisse
-    $GUI->nachweisAnzeige();
+    }    
     if($errmsg!=''){ # Anzeig der Fehlermeldung
-      showAlert($errmsg);
+			$GUI->add_message('error', $errmsg);
     }
     else { # Ohne Fehler bei der Abfrage der Dokumente Anzeige der Erfolgsmeldung
-      showAlert($okmsg);
+			$GUI->add_message('notice', $okmsg);
     }
+		# Anzeige der Rechercheergebnisse
+    $GUI->nachweisAnzeige();		
   };
 
 	$this->nachweiseZuAuftragEntfernen = function() use ($GUI){
@@ -1265,8 +1261,9 @@
         else {
           # Eingabeparameter in Ordnung
           # Nachweise aus Antrag entfernen
-          $ret=$GUI->nachweis->aus_Auftrag_entfernen($suchantrnr,$stelle_id,$GUI->formvars['id']);
-          $errmsg=$ret[1];
+          $result=$GUI->nachweis->aus_Auftrag_entfernen($suchantrnr,$stelle_id,$GUI->formvars['id']);
+          $errmsg=$result[0];
+					$okmsg=$result[1];
         } # ende Eingabeparameter sind ok
       } # ende Löschvorgang wurde bestätigt
       else { # Löschvorgang wurde abgebrochen
@@ -1276,12 +1273,11 @@
       # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
       $GUI->formvars=$GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id);
       $GUI->nachweis = new nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
-			$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur']);
-      $errmsg.=$ret[1];
-      # Anzeige der Rechercheergebnisse
+			$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur']);
+      # Anzeige der Rechercheergebnisse			
+			if($errmsg)$GUI->add_message('error', $errmsg);
+			if($okmsg)$GUI->add_message('notice', $okmsg);
       $GUI->nachweisAnzeige();
-      showAlert($errmsg);
-
     } # ende Bestätigung ist erfolgt
   };
 
@@ -1289,7 +1285,7 @@
     $GUI->nachweis = new nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
     $ret=$GUI->nachweis->getDocLocation($GUI->formvars['id']);
     if($ret[0]!='') {
-      showAlert($ret[0]);
+			$GUI->add_message('error', $ret[0]);
       return 0;
     }
     else {
@@ -1332,7 +1328,7 @@
           $GUI->Fehlermeldung=$ret[1];
         }
         else {
-          showAlert($ret[1]);
+					$GUI->add_message('info', $ret[1]);
         }
       }
       # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
@@ -1869,13 +1865,13 @@
 					$GUI->vermessungsAntragEingabeForm();
 				}
 				else {
+					$GUI->add_message('info', $ret[1]);
 					$GUI->Antraege_Anzeigen();
-					showAlert($ret[1]);
 				}
 			}
 			else{
+				$GUI->add_message('error', "Änderung dieses Antrags nicht erlaubt!");
 				$GUI->Antraege_Anzeigen();
-				showAlert("Änderung dieses Antrags nicht erlaubt!");
 			}
 		}		
 		else{
@@ -1893,8 +1889,8 @@
     }
     $GUI->Meldung=$ret;
     $GUI->titel='Neuen Antrag anlegen';
+		$GUI->add_message('info', $ret);
     $GUI->vermessungsAntragEingabeForm();
-    showAlert($ret);
   };
 	
 	$this->vermessungsantragAendern = function() use ($GUI){
@@ -1902,17 +1898,17 @@
 		if($GUI->formvars['stelle_id'] == $GUI->Stelle->id OR in_array($GUI->Stelle->id, $admin_stellen)){
 			$GUI->antrag= new antrag('','',$GUI->pgdatabase);
 			$ret=$GUI->antrag->antrag_aendern($GUI->formvars['antr_nr'],$GUI->formvars['VermStelle'],$GUI->formvars['verm_art'],$GUI->formvars['datum'],$GUI->formvars['stelle_id']);
+			$GUI->add_message('info', $ret[1]);
 			if ($ret[0]) {
 				$GUI->vermessungsantragsFormular();
 			}
 			else {
 				$GUI->Antraege_Anzeigen();
 			}
-			showAlert($ret[1]);
 		}
 		else{
+			$GUI->add_message('error', "Änderung dieses Antrags nicht erlaubt!");
 			$GUI->Antraege_Anzeigen();
-			showAlert("Änderung dieses Antrags nicht erlaubt!");
 		}
   };
 	
@@ -1932,7 +1928,7 @@
 				$antragsnummern=$GUI->formvars['id'];
 				$ret=$GUI->antrag->antrag_loeschen($antragsnummern[0],$GUI->formvars['stelle_id']);
 				if($ret == 'Antrag erfolgreich gelöscht')$GUI->Suchparameter_loeschen($antragsnummern[0], $GUI->formvars['stelle_id']);
-				showAlert($ret);
+				$GUI->add_message('info', $ret);
 				if($GUI->formvars['go_next'] != '')echo "<script>window.location.href='index.php?go=".$GUI->formvars['go_next']."';</script>";
 				else $GUI->Antraege_Anzeigen();
 			}
@@ -1949,9 +1945,9 @@
 			}
 		}
 		else{
+			$GUI->add_message('error', "Löschen dieses Antrags nicht erlaubt!");
 			$GUI->Antraege_Anzeigen();
-			showAlert("Löschen dieses Antrags nicht erlaubt!");
-		}		
+		}
   };
 	
 	$this->getFormObjVermStelle = function($name, $VermStelle) use ($GUI){
