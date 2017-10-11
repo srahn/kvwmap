@@ -132,11 +132,8 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
     		</tr>
     		<?php 
         		
-//     		      var_dump($wrzProGueltigkeitsJahre->wasserrechtlicheZulassungen);
-        		  if(!empty($wrzProGueltigkeitsJahre) && !empty($wrzProGueltigkeitsJahre->wasserrechtlicheZulassungen))
+    		      if(!empty($wasserrechtlicheZulassungen))
         		  {
-        		      $wasserrechtlicheZulassungen = $wrzProGueltigkeitsJahre->wasserrechtlicheZulassungen;
-        		      
 //         		      var_dump($wasserrechtlicheZulassungen);
         		      foreach($wasserrechtlicheZulassungen AS $wrz)
         		      {
@@ -288,10 +285,8 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
        			<div class="wasserrecht_display_table_cell_caption">Abgelegte Sammelaufforderungen</div>
 			</div>
 			<?php 
-				if(!empty($wrzProGueltigkeitsJahre) && !empty($wrzProGueltigkeitsJahre->wasserrechtlicheZulassungen))
+			    if(!empty($wasserrechtlicheZulassungen))
 				{
-				    $wasserrechtlicheZulassungen = $wrzProGueltigkeitsJahre->wasserrechtlicheZulassungen;
-				    
 				    foreach($wasserrechtlicheZulassungen AS $wrz)
 				    {
 				        if(!empty($wrz) && in_array($getYear, $wrz->gueltigkeitsJahre))

@@ -1,11 +1,11 @@
 <?php
 class WRZProGueltigkeitsJahre
 {
-    public $gueltigkeitsJahre;
-    public $wasserrechtlicheZulassungen = array();
+    public $gueltigkeitsJahre = array();
+    public $wasserrechtlicheZulassung;
     
     public function toString() {
-        return "gueltigkeitsJahre: " . var_export($this->gueltigkeitsJahre, true);
+        return "gueltigkeitsJahre: " . var_export($this->gueltigkeitsJahre, true) . " wrz: " . $this->wasserrechtlicheZulassung->toString();
     }
 }
 ?>

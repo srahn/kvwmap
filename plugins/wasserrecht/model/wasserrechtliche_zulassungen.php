@@ -22,28 +22,38 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	    $this->debug->write('*** WasserrechtlicheZulassungen->find_gueltigkeitsjahre ***', 4);
 	    
 		$results = $this->find_where('1=1', 'id');
-		$wrzProGueltigkeitsJahre = new WRZProGueltigkeitsJahre();
+		
+		$wrzProGueltigkeitsJahreArray = new WRZProGueltigkeitsJahreArray($gui);
 		
 		if(!empty($results))
 		{
 			$wasserrechtlicheZulassungGueltigkeitJahrReturnArray = array();
+			
 			foreach($results AS $result)
 			{
-			    $this->debug->write('result id: ' . var_export($result->data['id'], true), 4);
-				
-			    $years = $this->getDependentObjects($gui, $result);
-			    $this->debug->write('years: ' . var_export($years, true), 4);
-			    
-			    if(!empty($years))
+			    if(!empty($result))
 			    {
-			        foreach ($years as $year)
+			        $this->debug->write('result id: ' . var_export($result->data['id'], true), 4);
+			        $wrzProGueltigkeitsJahre = new WRZProGueltigkeitsJahre();
+			        
+			        $years = $this->getDependentObjects($gui, $result);
+			        $this->debug->write('years: ' . var_export($years, true), 4);
+			        
+			        if(!empty($years))
 			        {
-			            if(!in_array($year, $wasserrechtlicheZulassungGueltigkeitJahrReturnArray))
+			            foreach ($years as $year)
 			            {
-			                $wasserrechtlicheZulassungGueltigkeitJahrReturnArray[] = $year;
+			                if(!in_array($year, $wasserrechtlicheZulassungGueltigkeitJahrReturnArray))
+			                {
+			                    $wasserrechtlicheZulassungGueltigkeitJahrReturnArray[] = $year;
+			                }
 			            }
+			            
+			            $wrzProGueltigkeitsJahre->gueltigkeitsJahre = $years;
+			            $wrzProGueltigkeitsJahre->wasserrechtlicheZulassung=$result;
 			        }
-			        $wrzProGueltigkeitsJahre->wasserrechtlicheZulassungen[]=$result;
+			        
+			        $wrzProGueltigkeitsJahreArray->wrzProGueltigkeitsJahre[] = $wrzProGueltigkeitsJahre;
 			    }
 			}
 			
@@ -65,17 +75,16 @@ class WasserrechtlicheZulassungen extends WrPgObject {
                 }
             }
             
-            //Liste nnach Jahre sortieren
+            //Liste nach Jahre sortieren
             sort($wasserrechtlicheZulassungGueltigkeitJahrReturnArray);
             
-            $wrzProGueltigkeitsJahre->gueltigkeitsJahre=$wasserrechtlicheZulassungGueltigkeitJahrReturnArray;
-            $this->debug->write('wrzProGueltigkeitsJahre->gueltigkeitsJahre: ' . var_export($wrzProGueltigkeitsJahre->gueltigkeitsJahre, true), 4);
+            $wrzProGueltigkeitsJahreArray->gueltigkeitsJahre=$wasserrechtlicheZulassungGueltigkeitJahrReturnArray;
+            $this->debug->write('wrzProGueltigkeitsJahreArray->gueltigkeitsJahre: ' . var_export($wrzProGueltigkeitsJahreArray->gueltigkeitsJahre, true), 4);
 			
-			return $wrzProGueltigkeitsJahre;
+            return $wrzProGueltigkeitsJahreArray;
 		}
 		
-		$wrzProGueltigkeitsJahre->gueltigkeitsJahre=array('n/a');
-		return $wrzProGueltigkeitsJahre;
+		return $wrzProGueltigkeitsJahreArray;
 	}
 	
 	public function getDependentObjects($gui, &$result) 
