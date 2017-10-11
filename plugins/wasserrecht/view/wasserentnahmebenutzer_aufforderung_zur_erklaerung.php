@@ -250,6 +250,30 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
 			</div>
 			<div class="wasserrecht_display_table_row">
 				<div class="wasserrecht_display_table_cell_caption">
+					<?php 
+                        if(!empty($getYear))
+                        {
+                            ?>
+                            	<input type="hidden" name="erhebungsjahr" value="<?php echo $getYear ?>">
+                            <?php
+                        }
+        			?>
+        			<?php 
+        			     if(!empty($getBehoerde))
+        			     {
+        			         ?>
+        			         	<input type="hidden" name="behoerde" value="<?php echo $getBehoerde ?>">
+        			         <?php
+        			     }
+        			?>
+        			<?php 
+        			     if(!empty($getAdressat))
+        			     {
+        			         ?>
+        			         	<input type="hidden" name="adressat" value="<?php echo $getAdressat ?>">
+        			         <?php
+        			     }
+        			 ?>
 					<input type="hidden" name="go" value="wasserentnahmebenutzer_aufforderung_zur_erklaerung">
 <!-- 						<input type="hidden" name="post_action_2" value="wasserentnahmebenutzer_aufforderung_zur_erklaerung"> -->
        				<input type="submit" value="Aufforderung erstellen!" id="aufforderung_button" name="aufforderung" />

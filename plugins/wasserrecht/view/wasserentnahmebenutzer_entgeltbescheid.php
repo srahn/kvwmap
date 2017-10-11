@@ -416,6 +416,30 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
     		 <div class="wasserrecht_display_table_row">
         		<div class="wasserrecht_display_table_cell_caption">
         			<input type="hidden" name="go" value="wasserentnahmebenutzer_entgeltbescheid">
+        			<?php 
+                        if(!empty($getYear))
+                        {
+                            ?>
+                            	<input type="hidden" name="erhebungsjahr" value="<?php echo $getYear ?>">
+                            <?php
+                        }
+        			?>
+        			<?php 
+        			     if(!empty($getBehoerde))
+        			     {
+        			         ?>
+        			         	<input type="hidden" name="behoerde" value="<?php echo $getBehoerde ?>">
+        			         <?php
+        			     }
+        			?>
+        			<?php 
+        			     if(!empty($getAdressat))
+        			     {
+        			         ?>
+        			         	<input type="hidden" name="adressat" value="<?php echo $getAdressat ?>">
+        			         <?php
+        			     }
+        			 ?>
         			<input type="submit" value="Entgeltscheid erstellen!" id="entgeltscheid_erstellen" name="entgeltscheid_erstellen" <?php echo $gesamtEntnahmemenge < 2000 ? "disabled='disabled'" : "" ?> />
         		</div>
              </div>
