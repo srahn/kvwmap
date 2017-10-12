@@ -104,25 +104,26 @@ INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_art_benutzung (name, abkuerz
 INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_art_benutzung (name, abkuerzung) VALUES ('Oberflächenwasser', 'OW');
 
 INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (nummer, name) VALUES (1, 'Beregnung auf landwirtschaftlich genutzten Flächen');
-INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (nummer, name) VALUES (2, 'Bewässern von öffentlichen Plätzen, Grünanlagen');
-INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (nummer, name) VALUES (3, 'Tränken von Vieh auf der Hofstelle');
-INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (nummer, name) VALUES (4, 'Säubern von Unterkünften und Stallungen');
-INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (nummer, name) VALUES (5, 'Betrieb, Waschen und Reinigen techn. Anlagen und Maschinen');
-INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (nummer, name) VALUES (6, 'Bewässerung nur der Hof- und Hausgärten (Nicht auf Feldern!)');
-INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (nummer, name) VALUES (7, 'Kühlwassernutzung');
-INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (nummer, name) VALUES (8, 'Zwecke der Fischerei');
-INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (nummer, name) VALUES (9, 'Wasserkraftnutzung');
-INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (nummer, name) VALUES (10, 'gewerbliche Nutzung (wenn also keine Gärtnerei betrieben wird)');
-INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (nummer, name) VALUES (11, 'Wasserversorgung betriebszugehöriger Personen auf dem Hof');
-INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (nummer, name) VALUES (12, 'auch außerhalb des Haushalts des Betriebsinhabers wohnen');
-INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (nummer, name) VALUES (13, 'öffentliche Trinkwasserversorgung');
-INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (nummer, name) VALUES (14, 'Wärmegewinnung');
-INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (nummer, name) VALUES (15, 'Heilquellnutzung');
-INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (nummer, name) VALUES (16, 'Brauchwasserversorgung');
-INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (nummer, name) VALUES (17, 'Abfüllen von Mineralwasser');
-INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (nummer, name) VALUES (18, 'Viehtränke außerhalb der Hofstelle');
-INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (nummer, name) VALUES (19, 'Anmachwasser für Pflanzenschutzmittel');
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (nummer, name) VALUES (2, 'Bewässerung nur der Hof- und Hausgärten (Nicht auf Feldern!)');
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (nummer, name) VALUES (3, 'Bewässern von öffentlichen Plätzen, Grünanlagen');
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (nummer, name) VALUES (4, 'Anmachwasser für Pflanzenschutzmittel');
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (nummer, name) VALUES (5, 'Zwecke der Fischerei');
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (nummer, name) VALUES (6, 'Grundwasserabsenkung');
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (nummer, name) VALUES (7, 'öffentliche Trinkwasserversorgung');
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (nummer, name) VALUES (8, 'Wasserversorgung betriebszugehöriger Personen, die auf dem Hof, auch außerhalb des Haushalts des Betriebsinhabers wohnen');
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (nummer, name) VALUES (9, 'Heilquellennutzung');
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (nummer, name) VALUES (10, 'Abfüllen von Mineralwasser');
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (nummer, name) VALUES (11, 'Tränken von Vieh auf der Hofstelle');
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (nummer, name) VALUES (12, 'Viehtränke außerhalb der Hofstelle');
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (nummer, name) VALUES (13, 'Säubern von Unterkünften und Stallungen')
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (nummer, name) VALUES (14, 'Betrieb, Waschen und Reinigen techn. Anlagen und Maschinen');
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (nummer, name) VALUES (15, 'Kühlwassernutzung');
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (nummer, name) VALUES (16, 'Wasserkraftnutzung');
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (nummer, name) VALUES (17, 'Wärmegewinnung');
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (nummer, name) VALUES (18, 'gewerbliche Nutzung (wenn also keine Gärtnerei betrieben wird)');
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (nummer, name) VALUES (19, 'Brauchwasserversorgung');
 INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (nummer, name) VALUES (20, 'Sonstiges');
+
 /*
 INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (name,freitext) VALUES ('Trink- und Brauchwasserversorgung für Aquakultur nicht nach § 16 Satz 2 Nummer 5', DEFAULT);
 INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_zweck (name,freitext) VALUES ('Öffentliche Trink- und Brauchwasserversorgung', DEFAULT);
