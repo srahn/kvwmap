@@ -8,8 +8,8 @@
     $GUI->bau->readverfahrensart();
     $GUI->bau->readaktualitaet();
 
-    # Abfragen für welche Gemeinden die Stelle Zugriffsrechte hat
-    # GemeindenStelle wird eine Liste mit ID´s der Gemeinden zugewiesen, die zur Stelle gehören
+    # Abfragen fÃ¼r welche Gemeinden die Stelle Zugriffsrechte hat
+    # GemeindenStelle wird eine Liste mit IDÂ´s der Gemeinden zugewiesen, die zur Stelle gehÃ¶ren
     $GemeindenStelle=$GUI->Stelle->getGemeindeIDs();
     $Gemarkung=new gemarkung('',$GUI->pgdatabase);
 		if($GemeindenStelle == NULL){
@@ -41,7 +41,7 @@
         $gemarkungs_searchvars['obergruppe'] = $GUI->bau->baudata[$i]['feld2'];
         $gemarkungs_searchvars['nummer'] = $GUI->bau->baudata[$i]['feld3'];
         $baudata = $GUI->bau->getbaudaten2($gemarkungs_searchvars);
-        $Gemarkung=new gemarkung($baudata[0]['feld27'].$baudata[0]['feld12'],$GUI->pgdatabase);
+        $Gemarkung=new gemarkung($baudata[0]['feld39'].$baudata[0]['feld12'],$GUI->pgdatabase);
         $GUI->bau->baudata[$i]['bauort'] = $Gemarkung->getGemkgName();
       }
       $GUI->main = PLUGINS.'probaug/view/bauauskunftsuchergebnis.php';
@@ -59,7 +59,7 @@
     for($i = 0; $i < count($GUI->bau->baudata); $i++){
 			$flst = explode(', ', $GUI->bau->baudata[$i]['feld14']);
 			for($j = 0; $j < count($flst); $j++){
-				$GUI->bau->grundstueck[] = $GUI->bau->baudata[$i]['feld27'].$GUI->bau->baudata[$i]['feld12'].'-'.$GUI->bau->baudata[$i]['feld13'].'-'.$flst[$j];
+				$GUI->bau->grundstueck[] = $GUI->bau->baudata[$i]['feld39'].$GUI->bau->baudata[$i]['feld12'].'-'.$GUI->bau->baudata[$i]['feld13'].'-'.$flst[$j];
 			}
     }
     $Gemarkung=new gemarkung($GUI->bau->baudata[0]['feld12'],$GUI->pgdatabase);
