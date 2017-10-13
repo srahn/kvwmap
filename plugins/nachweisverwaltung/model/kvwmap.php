@@ -1032,13 +1032,13 @@
           else {
             $GUI->nachweis->database->committransaction();
             # Alle Aufgaben erfolgreich ausgeführt
-            $errmsg='Daten zum neuen Dokument erfolgreich eingetragen!';
+            $okmsg='Daten zum neuen Dokument erfolgreich eingetragen!';
           } # ende Speicherung der Metadaten war erfolgreich
         } # ende Speicherung der Bilddatei war erfolgreich
       } # ende Prüfung war erfolgreich
       # Auswertung/Behandlung bei Aufgetretenen Fehlern
-      $GUI->Meldung=$errmsg;
-			$GUI->add_message('info', $GUI->Meldung);
+			if($okmsg)$GUI->add_message('notice', $okmsg);
+			if($errmsg)$GUI->add_message('error', $errmsg);
       $GUI->nachweisFormAnzeige();
     } # ende Fall Eintragen Daten zum neuen Dokument
     else {
