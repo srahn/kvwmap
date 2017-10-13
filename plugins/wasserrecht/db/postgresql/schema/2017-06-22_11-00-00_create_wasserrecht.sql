@@ -91,32 +91,6 @@ CREATE TABLE wasserrecht.fiswrv_weeerklaerer(
 	name varchar(255)
 ) WITH OIDS;
 
--- ANLAGEN
-CREATE TABLE wasserrecht.fiswrv_anlagen_klasse(
-	id serial PRIMARY KEY,
-	name varchar(100)
-)WITH OIDS;
-
-CREATE TABLE wasserrecht.fiswrv_anlagen(
-	id serial PRIMARY KEY,
-	name varchar(255) NOT NULL,
-	klasse integer NOT NULL REFERENCES wasserrecht.fiswrv_anlagen_klasse(id),
-	zustaend_uwb integer NOT NULL REFERENCES wasserrecht.fiswrv_behoerde(id),
-  	zustaend_stalu integer NOT NULL REFERENCES wasserrecht.fiswrv_behoerde(id),
-  	anlage_bearbeiter_name varchar(255),
-  	anlage_bearbeiter_datum varchar(255),
-  	anlage_bearbeiter_stelle varchar(255),
-  	objektid_geodin varchar(255),
-	abwasser_koerperschaft integer REFERENCES wasserrecht.fiswrv_koerperschaft(id),
-	trinkwasser_koerperschaft integer REFERENCES wasserrecht.fiswrv_koerperschaft(id),
-	kommentar text,
-	the_geom geometry(Point, 35833)
-) WITH OIDS;
-COMMENT ON COLUMN wasserrecht.fiswrv_anlagen.id IS 'Primärschlüssel der Fis-WrV Objekte';
-COMMENT ON COLUMN wasserrecht.fiswrv_anlagen.name IS 'Name der Fis-WrV Objekte';
-COMMENT ON COLUMN wasserrecht.fiswrv_anlagen.klasse IS 'Klasse der Fis-WrV Objekte';
-COMMENT ON COLUMN wasserrecht.fiswrv_anlagen.the_geom IS 'Geometrie';
-
 --PERSONEN
 CREATE TABLE wasserrecht.fiswrv_personen_klasse(
 	id serial PRIMARY KEY,
@@ -147,7 +121,6 @@ CREATE TABLE wasserrecht.fiswrv_personen(
   	betreiber varchar(10),
   	bearbeiter varchar(10),
   	weeerklaerer integer REFERENCES wasserrecht.fiswrv_weeerklaerer(id),
-  	anlage integer REFERENCES wasserrecht.fiswrv_anlagen(id),
   	telefon varchar(50),
   	fax varchar(50),
   	email varchar(50),
@@ -162,6 +135,33 @@ CREATE TABLE wasserrecht.fiswrv_personen(
   	register_nummer varchar(255),
   	konto integer REFERENCES wasserrecht.fiswrv_konto(id)
 )WITH OIDS;
+
+-- ANLAGEN
+CREATE TABLE wasserrecht.fiswrv_anlagen_klasse(
+	id serial PRIMARY KEY,
+	name varchar(100)
+)WITH OIDS;
+
+CREATE TABLE wasserrecht.fiswrv_anlagen(
+	id serial PRIMARY KEY,
+	name varchar(255) NOT NULL,
+	klasse integer NOT NULL REFERENCES wasserrecht.fiswrv_anlagen_klasse(id),
+	zustaend_uwb integer NOT NULL REFERENCES wasserrecht.fiswrv_behoerde(id),
+  	zustaend_stalu integer NOT NULL REFERENCES wasserrecht.fiswrv_behoerde(id),
+  	betreiber integer REFERENCES wasserrecht.fiswrv_personen(id),
+  	anlage_bearbeiter_name varchar(255),
+  	anlage_bearbeiter_datum varchar(255),
+  	anlage_bearbeiter_stelle varchar(255),
+  	objektid_geodin varchar(255),
+	abwasser_koerperschaft integer REFERENCES wasserrecht.fiswrv_koerperschaft(id),
+	trinkwasser_koerperschaft integer REFERENCES wasserrecht.fiswrv_koerperschaft(id),
+	kommentar text,
+	the_geom geometry(Point, 35833)
+) WITH OIDS;
+COMMENT ON COLUMN wasserrecht.fiswrv_anlagen.id IS 'Primärschlüssel der Fis-WrV Objekte';
+COMMENT ON COLUMN wasserrecht.fiswrv_anlagen.name IS 'Name der Fis-WrV Objekte';
+COMMENT ON COLUMN wasserrecht.fiswrv_anlagen.klasse IS 'Klasse der Fis-WrV Objekte';
+COMMENT ON COLUMN wasserrecht.fiswrv_anlagen.the_geom IS 'Geometrie';
 
 --WASSERRECHTLICHE ZULASSUNGEN
 CREATE TABLE wasserrecht.fiswrv_wasserrechtliche_zulassungen_typus(

@@ -179,20 +179,10 @@ INSERT INTO wasserrecht.fiswrv_koerperschaft (name, art) VALUES ('MUSTER ABWASSE
 INSERT INTO wasserrecht.fiswrv_koerperschaft (name, art) VALUES ('MUSTER TRINKWASSER KOERPERSCHAFT', 1);
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-INSERT INTO wasserrecht.fiswrv_anlagen_klasse (name) VALUES ('Industriebetrieb');
-INSERT INTO wasserrecht.fiswrv_anlagen_klasse (name) VALUES ('Diensleistungsbetrieb');
-INSERT INTO wasserrecht.fiswrv_anlagen_klasse (name) VALUES ('Wasserwerk');
-INSERT INTO wasserrecht.fiswrv_anlagen_klasse (name) VALUES ('Landwirtschaftsbetrieb');
-INSERT INTO wasserrecht.fiswrv_anlagen_klasse (name) VALUES ('Sport- und Erhohlungsanlage');
-
-INSERT INTO wasserrecht.fiswrv_anlagen (name, klasse, zustaend_uwb, zustaend_stalu, abwasser_koerperschaft, trinkwasser_koerperschaft,kommentar,the_geom) VALUES ('Musterholzwerk Musterstadt', 1, 1, 1, 1, 2, NULL, ST_Transform(ST_GeomFromText('POINT(12 54)', 4326), 35833));
-INSERT INTO wasserrecht.fiswrv_anlagen (name, klasse, zustaend_uwb, zustaend_stalu, abwasser_koerperschaft, trinkwasser_koerperschaft,kommentar,the_geom) VALUES ('Wasserwerk Musterstadt', 3, 5, 2, 1, 2, NULL, ST_Transform(ST_GeomFromText('POINT(12 53)', 4326), 35833));
-
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 INSERT INTO wasserrecht.fiswrv_personen (name, abkuerzung, behoerde, adresse, wrzadressat) VALUES ('MAX MUSTERMANN', 'MM', 1, 1, 'ja');
 INSERT INTO wasserrecht.fiswrv_personen (name, abkuerzung, behoerde, adresse, wrzadressat) VALUES ('FRAU MUSTERMANN', 'FM', 2, 2, 'ja');
-INSERT INTO wasserrecht.fiswrv_personen (name, abkuerzung, bearbeiter, anlage) VALUES ('MUSTER BEARBEITER', 'MB', 'ja', 1);
-INSERT INTO wasserrecht.fiswrv_personen (name, abkuerzung, betreiber, anlage) VALUES ('MUSTER BETREIBER', 'MB', 'ja', 1);
+INSERT INTO wasserrecht.fiswrv_personen (name, abkuerzung, bearbeiter) VALUES ('MUSTER BEARBEITER', 'MB', 'ja');
+INSERT INTO wasserrecht.fiswrv_personen (name, abkuerzung, betreiber) VALUES ('MUSTER BETREIBER', 'MB', 'ja');
 INSERT INTO wasserrecht.fiswrv_personen (name, abkuerzung, wrzaussteller) VALUES ('MUSTER WRZ AUSSTELLER', 'MWA', 'ja');
 INSERT INTO wasserrecht.fiswrv_personen (name, abkuerzung, betreiber) VALUES ('Agargenossenschaft Holldorf', 'AH', 'ja');
 INSERT INTO wasserrecht.fiswrv_personen (name, abkuerzung, betreiber) VALUES ('Boddenland', 'BL', 'ja');
@@ -210,6 +200,16 @@ INSERT INTO wasserrecht.fiswrv_personen_typ (name) VALUES ('Körperschaft des ö
 INSERT INTO wasserrecht.fiswrv_personen_typ (name) VALUES ('Körperschaft des Privatrechts');
 
 INSERT INTO wasserrecht.fiswrv_personen_klasse (name) VALUES ('Kieswerk');
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+INSERT INTO wasserrecht.fiswrv_anlagen_klasse (name) VALUES ('Industriebetrieb');
+INSERT INTO wasserrecht.fiswrv_anlagen_klasse (name) VALUES ('Diensleistungsbetrieb');
+INSERT INTO wasserrecht.fiswrv_anlagen_klasse (name) VALUES ('Wasserwerk');
+INSERT INTO wasserrecht.fiswrv_anlagen_klasse (name) VALUES ('Landwirtschaftsbetrieb');
+INSERT INTO wasserrecht.fiswrv_anlagen_klasse (name) VALUES ('Sport- und Erhohlungsanlage');
+
+INSERT INTO wasserrecht.fiswrv_anlagen (name, klasse, zustaend_uwb, zustaend_stalu, betreiber, abwasser_koerperschaft, trinkwasser_koerperschaft,kommentar,the_geom) VALUES ('Musterholzwerk Musterstadt', 1, 1, 1, 4, 1, 2, NULL, ST_Transform(ST_GeomFromText('POINT(12 54)', 4326), 35833));
+INSERT INTO wasserrecht.fiswrv_anlagen (name, klasse, zustaend_uwb, zustaend_stalu, abwasser_koerperschaft, trinkwasser_koerperschaft,kommentar,the_geom) VALUES ('Wasserwerk Musterstadt', 3, 5, 2, 1, 2, NULL, ST_Transform(ST_GeomFromText('POINT(12 53)', 4326), 35833));
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 INSERT INTO wasserrecht.fiswrv_ort(name) VALUES ('Güstrow');
