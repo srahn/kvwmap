@@ -24,11 +24,8 @@ switch($this->go) {
 		echo json_encode($result);
 	} break;
 
-	case 'mobile_update_data' : {
-		$result = $this->mobile_update_data();
-		if ($result['success']) {
-			$result = $this->mobile_get_layers();
-		}
+	case 'mobile_sync' : {
+		$result = $this->mobile_sync();
 		echo json_encode($result);
 	} break;
 
@@ -46,11 +43,4 @@ function isInStelleAllowed($stelle, $requestStelleId) {
 	}
 }
 */
-function mobile_update_data() {
-	# decode formvars['data'];
-	$data = json_decode($this->formvars['data']);
-	# for each of data do update or insert or delete
-	$success = true;
-	return $succes;
-}
 ?>

@@ -61,13 +61,22 @@
 		return $result;
 	};
 
-	$this->mobile_update_data = function() {
-		if ($this->formvars['selected_layer_id'] != '') {
-			# ToDo update data
+	$this->mobile_sync = function() {
+		# Prüfe ob folgende Parameter mit gültigen Werten übergeben wurden.
+		# $selected_layer_id (existiert und ist in mysql-Datenbank?)
+		# $client_id sollte vorhanden sein, damit das in die syncs Tabelle eingetragen werden kann.
+		# $username muss eigentlich nicht geprüft werden, weil der ja immer da ist nach Anmeldung
+		# $client_time muss eigentlich auch nicht, wen interessiert das?
+		# $last_client_version sollte 1 oder größer sein. ist das leer oder 0, dann wechseln zu DatenExport_Exportieren oder Exeption
+		# $client_deltas Da müssen keine Daten vorhanden sein, aber es könnte geprüft werden ob die die da sind vollständig sind, jeweils mindestens
+		# sql muss vorhanden sein.
+		#		if ($this->formvars['selected_layer_id'] != '')
 
-			$result = array(
-				"success" => true
-			);
+		if ($this->mobile_sync_parameter_valide($this->formvars)) {
+			# Layer DB abfragen $layerdb = new ...
+			$sync = new synchro($this->Stelle, $this->Stelle->user, $layerdb);
+			# ToDo die Parameter vorher abfragen oder aus formvars entnehmen.
+			$result = $sync->sync($client_id, $username, $table_name, $client_time, $last_client_version, $client_deltas);
 		}
 		else {
 			$result = array(
@@ -76,6 +85,10 @@
 			);
 		}
 		return $result;
+	};
+
+	$this->mobile_sync_parameter_valide($params) {
+		return true;
 	};
 
 	$this->mobile_reformat_layer = function($layerset) {
@@ -129,6 +142,8 @@
 		$ret = $layerdb->execSQL($sql, 4, 0);
 		if ($ret[0]) { echo "<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>"; return 0; }
 
+		# ToDo create Table syncs if not exists
+
 		$rs = pg_fetch_assoc($ret[1]);
 		if ($rs['table_exists'] == 't' and $sync == 0) {
 			$this->mobile_drop_layer_sync($layerdb, $layer);
@@ -177,64 +192,78 @@
 
 			CREATE OR REPLACE FUNCTION " . $layer->get('schema') . ".create_" . $layer->get('maintable') . "_insert_delta()
 			RETURNS trigger AS
-			$$
+			$BODY$
 				DECLARE
-	  			new_version integer := (SELECT nextval('rebus.haltestellen_deltas_version_seq'));
+					new_version integer := (SELECT (max(version) + 1)::integer FROM rebus.haltestellen_deltas);
 					_query TEXT;
 					_sql TEXT;
 				BEGIN
-	  			SET datestyle to 'German';
+					SET datestyle to 'German';
 					_query := current_query();
-					NEW.version := new_version;
 
-					_sql := (SELECT split_part(_query, ';', (SELECT array_length(regexp_split_to_array(_query, ';'), 1))));
+					--raise notice '_query=%', split_part(_query, ';', 1);
+					_sql := split_part(_query, ';', 1);
 					--raise notice 'sql nach split_part: %', _sql;
 
-					_sql := substr(_sql, 1 , strpos(lower(_sql), 'values') - 1) || 'VALUES' || substr(_sql, strpos(lower(_sql), 'values') + 6, length(_sql) - strpos(lower(_sql), 'values') - 5);
-					--RAISE notice 'sql nach lower values %', _sql;
+					_sql := kvw_replace_line_feeds(_sql);
+					--RAISE notice 'sql nach remove line feeds %', _sql;
 
-					_sql := (SELECT replace(_sql, ') VALUES', ', version) VALUES'));
+					_sql := replace(_sql, ' ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME || ' ', ' ' || TG_TABLE_NAME || ' ');
+					--RAISE notice 'sql nach remove %', TG_TABLE_SCHEMA || '.';
+
+					_sql := kvw_insert_str_before(_sql, ', version', ')');
 					--RAISE notice 'sql nach add column version %', _sql;
 
-					_sql := (SELECT substr(_sql, 1, length(_sql) - 1) || ', ' || NEW.version || ')');
-					--RAISE notice 'sql nach add value version %', _sql;
+					_sql := substr(_sql, 1 , strpos(lower(_sql), 'values') - 1) || 'VALUES' || substr(_sql, strpos(lower(_sql), 'values') + 6, length(_sql) - strpos(lower(_sql), 'values') - 5);
+					--RAISE notice 'sql nach upper VALUES %', _sql;
 
-					INSERT INTO rebus.haltestellen_deltas (version, sql, username) VALUES (new_version, _sql, NEW.user_name);
+					_sql := substr(_sql, 1, strpos(_sql, 'VALUES') - 1) || regexp_replace(substr(_sql, strpos(_sql, 'VALUES')), '\)+', ', ' || new_version || ')', 'g');
+					--RAISE notice 'sql nach add values for version %', _sql;
+
+					--RAISE notice 'Eintragen des INSERT-Statements mit Version: %', new_version; 
+					INSERT INTO rebus.haltestellen_deltas (version, sql) VALUES (new_version, _sql);
+
 					RETURN NEW;
 				END;
-			$$
+			$BODY$
 			LANGUAGE plpgsql VOLATILE COST 100;
 
 			CREATE TRIGGER create_" . $layer->get('maintable') . "_insert_delta_trigger
 			BEFORE INSERT
 			ON " . $layer->get('schema') . "." . $layer->get('maintable') . "
-			FOR EACH ROW
+			FOR EACH STATEMENT
 			EXECUTE PROCEDURE " . $layer->get('schema') . ".create_" . $layer->get('maintable') . "_insert_delta();
 
 			CREATE OR REPLACE FUNCTION " . $layer->get('schema') . ".create_" . $layer->get('maintable') . "_update_delta()
 			RETURNS trigger AS
-			$$
+			$BODY$
 				DECLARE
-	  			new_version integer := (SELECT nextval('rebus.haltestellen_deltas_version_seq'));
+					new_version integer := (SELECT (max(version) + 1)::integer FROM rebus.haltestellen_deltas);
 					_query TEXT;
 					_sql TEXT;
 				BEGIN
-	  			SET datestyle to 'German';
+					SET datestyle to 'German';
 					_query := current_query();
-					-- Wie bekomme ich new_version an die geupdateten Datensaetze?
 
-					_sql := (SELECT split_part(_query, ';', (SELECT array_length(regexp_split_to_array(_query, ';'), 1))));
+					--raise notice '_query=%', split_part(_query, ';', 1);
+					_sql := split_part(_query, ';', 1);
 					--raise notice 'sql nach split_part: %', _sql;
 
-					_sql := substr(_sql, 1 , strpos(lower(_sql), 'where') - 1) || 'WHERE' || substr(_sql, strpos(lower(_sql), 'where') + 5, length(_sql) - strpos(lower(_sql), 'where') - 4);
-					--RAISE notice 'sql nach uppder where %', _sql;
+					_sql := kvw_replace_line_feeds(_sql);
+					--RAISE notice 'sql nach remove line feeds %', _sql;
 
-					_sql := (SELECT replace(_sql, ' WHERE', ', version = ' || new_version || ' WHERE'));
-					--RAISE notice 'sql nach add column version %', _sql;
-					INSERT INTO rebus.haltestellen_deltas (version, sql, username) VALUES (new_version, _sql, NULL);
+					_sql := kvw_insert_str_after(_sql, 'version = ' || new_version || ', ', ' ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME || ' set ');
+					--RAISE NOTICE 'sql nach insert version value %', _sql;
+
+					_sql := replace(_sql, ' ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME || ' ', ' ' || TG_TABLE_NAME || ' ');
+					--RAISE notice 'sql nach remove table schema %', _sql;
+
+					RAISE notice 'Eintragen des UPDATE-Statements mit Version %', new_version;
+					INSERT INTO rebus.haltestellen_deltas (version, sql) VALUES (new_version, _sql);
+
 					RETURN NEW;
 				END;
-			$$
+			$BODY$
 			LANGUAGE plpgsql VOLATILE COST 100;
 
 			CREATE TRIGGER create_" . $layer->get('maintable') . "_update_delta_trigger
@@ -245,9 +274,9 @@
 
 			CREATE OR REPLACE FUNCTION " . $layer->get('schema') . ".create_" . $layer->get('maintable') . "_delete_delta()
 			RETURNS trigger AS
-			$$
+			$BODY$
 				DECLARE
-	  			new_version integer := (SELECT nextval('rebus.haltestellen_deltas_version_seq'));
+					new_version integer := (SELECT nextval('rebus.haltestellen_deltas_version_seq'));
 					_query TEXT;
 					_sql TEXT;
 				BEGIN
@@ -261,9 +290,10 @@
 					--RAISE notice 'sql nach add uuid: %', _sql;
 
 					INSERT INTO rebus.haltestellen_deltas (version, sql, username) VALUES (new_version, _sql, OLD.user_name);
+
 					RETURN OLD;
 				END;
-			$$
+			$BODY$
 			LANGUAGE plpgsql VOLATILE COST 100;
 
 			CREATE TRIGGER create_" . $layer->get('maintable') . "_delete_delta_trigger
@@ -271,8 +301,6 @@
 			ON " . $layer->get('schema') . "." . $layer->get('maintable') . "
 			FOR EACH STATEMENT
 			EXECUTE PROCEDURE rebus.create_haltestellen_delete_delta();
-
-
 		";
 		#echo '<p>Plugin: Mobile, function: mobile_create_layer_sync, Create table and trigger for deltas SQL:<br>' . $sql;
 		$ret = $layerdb->execSQL($sql, 4, 0, true);

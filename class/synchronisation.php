@@ -293,7 +293,7 @@ class synchro {
 	* 	- Fragt die Syncronisation ab
 	* 	- liefert die Deltas und Sync-Daten zurück
 	*/
-	function get_deltas($client_id, $username, $table_name, $client_time, $last_client_version, $client_deltas) {
+	function sync($client_id, $username, $table_name, $client_time, $last_client_version, $client_deltas) {
 		$pull_from_version = $last_client_version + 1;
 		
 		# Frage ab ob die Syncronisation schon mal abgefragt wurde
