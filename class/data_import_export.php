@@ -561,7 +561,7 @@ class data_import_export {
 					}
         }
       }
-			$sql .= ' FROM '.$importfile;
+			$sql .= ' FROM "'.$importfile.'"';
 			$options = $this->formvars['table_option'];
 			$options.= ' -nlt PROMOTE_TO_MULTI -lco FID=gid';
 			$encoding = $this->getEncoding(UPLOADPATH.$this->formvars['dbffile']);
@@ -747,7 +747,7 @@ class data_import_export {
 		$command = 'export PGCLIENTENCODING='.$encoding.';'.OGR_BINPATH.'ogr2ogr ';
 		if($options != NULL)$command.= $options;
 		$command.= ' -f PostgreSQL -lco GEOMETRY_NAME=the_geom -nln '.$tablename.' -a_srs EPSG:'.$epsg;
-		if($sql != NULL)$command.= ' -sql "'.$sql.'"';
+		if($sql != NULL)$command.= ' -sql \''.$sql.'\'';
 		$command.= ' -append PG:"dbname='.$database->dbName.' user='.$database->user.' active_schema='.$schema;
 		if($database->passwd != '')$command.= ' password='.$database->passwd;
 		if($database->port != '')$command.=' port='.$database->port;
