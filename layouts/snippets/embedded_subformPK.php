@@ -19,9 +19,11 @@
 		$preview_attributes = explode(' ', $this->formvars['preview_attribute']);
 		for ($k=0;$k<$anzObj;$k++){
 			$dataset = $layer['shape'][$k];								# der aktuelle Datensatz
-			for($p = 0; $p < count($preview_attributes); $p++){			
+			for($p = 0; $p < count($preview_attributes); $p++){
+				$output[$p] = $preview_attributes[$p];
 				for($j = 0; $j < count($attributes['name']); $j++){
 					if($preview_attributes[$p] == $attributes['name'][$j]){
+						$output[$p] = '';
 						switch ($attributes['form_element_type'][$j]){
 							case 'Auswahlfeld' : {
 								if(is_array($attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
@@ -88,7 +90,6 @@
 						if($output[$p] == '')$output[$p] = ' ';
 					}
 				}
-				if($output[$p] == '')$output[$p] = $preview_attributes[$p];
 			}
 			if($this->formvars['embedded'] == 'true'){
 				echo '<tr style="border: none">
