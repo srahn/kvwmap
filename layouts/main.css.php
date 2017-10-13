@@ -674,12 +674,6 @@ a.menuered:hover {
 	flex-direction: column;
 }
 
-#legend_layer{
-	flex: 1; 
-	display: flex; 
-	flex-direction: column;
-}
-
 #legendcontrol{
 	margin-top: 5px;
 	margin-bottom: 8px;
@@ -710,6 +704,7 @@ a.menuered:hover {
 }
 
 .slidinglegend_slideout {
+	cursor: pointer;
 	right: -<?php echo $size['legend']['width']; ?>px;
 	position:absolute;
 	border-top: 1px solid #eeeeee;

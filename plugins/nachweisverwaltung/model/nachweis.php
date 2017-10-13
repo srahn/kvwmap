@@ -288,78 +288,78 @@ class Nachweis {
 				$nachweise = $this->getNachweise(NULL,NULL,$gemarkung,NULL,$rissnummer,$test_fortfuehrung,$test_art,NULL,'indiv_nr',NULL,NULL,NULL,NULL,NULL,NULL, $flur, true,NULL,NULL, $test_blattnr);
 			}
 			if($this->Dokumente[0]['id'] != '' AND $id != $this->Dokumente[0]['id']){
-				$errmsg.='Es existiert bereits ein Nachweis mit diesen Parametern.\n';
+				$errmsg.='Es existiert bereits ein Nachweis mit diesen Parametern.<br>';
 			}
 		}
 		
     if ($umring == ''){
-      $errmsg.='Bitte legen Sie das Polygon für den einzuarbeitenden Nachweis fest! \n';
+      $errmsg.='Bitte legen Sie das Polygon für den einzuarbeitenden Nachweis fest! <br>';
     }
             
     # test auf korrekte Vermessungstelle 
     $sql='SELECT * FROM nachweisverwaltung.n_vermstelle WHERE id='.$VermStelle;
     $queryret=$this->database->execSQL($sql,4, 0);
     if ($queryret[0]) {
-      $errmsg.='Fehler bei der Vermessungstellenauswahl! \n';
+      $errmsg.='Fehler bei der Vermessungstellenauswahl! <br>';
     }
     else {
       if (pg_num_rows($queryret[1])==0) {
-        $errmsg.='Die Vermessungsstelle ist nicht bekannt. \n';
+        $errmsg.='Die Vermessungsstelle ist nicht bekannt. <br>';
       }
     }
     
     # test des Datum
     if ($datum=='') {
-      $errmsg.='Bitte geben Sie ein Datum an!\n';
+      $errmsg.='Bitte geben Sie ein Datum an!<br>';
     }
     else{
 			# richtigkeit des Datums checken
 			$explosion = explode('.', $datum);
 			if (checkdate($explosion[1], $explosion[0], $explosion[2])==false) {
-				$errmsg.= 'Datum ist nicht korrekt angegeben! \n' ;
+				$errmsg.= 'Datum ist nicht korrekt angegeben! <br<' ;
 			}
 			# prüfen ob Datum in Zukunft
 			$realtime=time();
 			$Zeit=mktime(0, 0, 0, $explosion[1], $explosion[0], $explosion[2]);
 			if ($realtime < $Zeit) {
-				$errmsg.='Das angegebene Datum liegt in der Zukunft! \n' ;
+				$errmsg.='Das angegebene Datum liegt in der Zukunft! <br>' ;
 			} 
     }    
     
     #Test des Blattformat
     if ($Blattformat==''){
-      $errmsg.='Bitte das Blattformat des Dokuments angeben! \n';
+      $errmsg.='Bitte das Blattformat des Dokuments angeben! <br>';
    }
     else{
       $nums= array ("A4","A3","SF");
       if(!in_array($Blattformat, $nums)){
-        $errmsg.='Die Auswahl des Blattformat ist nicht korrekt! \n';
+        $errmsg.='Die Auswahl des Blattformat ist nicht korrekt! <br>';
       }
     }
     # Test der Dokumentenart  
     if ($art==''){
-        $errmsg.='Bitte wählen Sie die Art des einzugebenden Dokuments aus! \n';
+        $errmsg.='Bitte wählen Sie die Art des einzugebenden Dokuments aus! <br>';
     }
     else{
       $nums = array ("100","010","001","111");
       if (!in_array($art,$nums)) {
-        $errmsg.='Die Auswahl der Dokumentenart ist nicht korrekt! \n';
+        $errmsg.='Die Auswahl der Dokumentenart ist nicht korrekt! <br>';
       }
     }
     if ($gueltigkeit==''){
-      $errmsg.='Bitte wählen Sie die Gültigkeit des einzugebenden Dokuments aus! \n';
+      $errmsg.='Bitte wählen Sie die Gültigkeit des einzugebenden Dokuments aus! <br>';
     }
     else{
       $nums = array("1","0");
       if (!in_array($gueltigkeit,$nums)){
-        $errmsg.='Die Angabe über die Gültigkeit des Dokuments ist nicht korrekt! \n';
+        $errmsg.='Die Angabe über die Gültigkeit des Dokuments ist nicht korrekt! <br>';
       }
     }
     # Testen der Stammnummer
     if(NACHWEIS_PRIMARY_ATTRIBUTE == 'stammnr'){
 	    $stammnr=trim($stammnr);
 	    if ($stammnr == ''){ 
-	      $errmsg.='Bitte geben Sie die Antragsnummer korrekt ein! \n';
+	      $errmsg.='Bitte geben Sie die Antragsnummer korrekt ein! <br>';
 	    }
 	    else{
 	      $nums = array ( "-", "(", ")", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" );
@@ -370,7 +370,7 @@ class Nachweis {
 	        }
 	      }
 	      if ($strenthalten==1) {
-	        $errmsg.='Ungültige Zeichen bei der Antragsnummer ! \n';
+	        $errmsg.='Ungültige Zeichen bei der Antragsnummer ! <br>';
 	      }
 	    }
     }
@@ -378,7 +378,7 @@ class Nachweis {
     if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){
 	    $rissnummer=trim($rissnummer);
 	    if ($rissnummer == ''){ 
-	      $errmsg.='Bitte geben Sie die Rissnummer korrekt ein! \n';
+	      $errmsg.='Bitte geben Sie die Rissnummer korrekt ein! <br>';
 	    }
 	    else{
 	      $nums = array ( "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" );
@@ -389,20 +389,20 @@ class Nachweis {
 	        }
 	      }
 	      if ($strenthalten==1) {
-	        $errmsg.='Ungültige Zeichen bei der Rissnummer ! \n';
+	        $errmsg.='Ungültige Zeichen bei der Rissnummer ! <br>';
 	      }
 	    }
     }
   # Testen der Fortfuehrung
     if(NACHWEIS_SECONDARY_ATTRIBUTE == 'fortfuehrung'){
     	if($fortfuehrung == '' OR $fortfuehrung < 1860 OR $fortfuehrung > date('Y')){
-	      $errmsg.='Bitte geben Sie das Fortführungsjahr korrekt ein! \n';
+	      $errmsg.='Bitte geben Sie das Fortführungsjahr korrekt ein! <br>';
 	    }
     }
     # Test der Blattnummer
     $Blattnr=trim($Blattnr);
     if ($Blattnr ==''){
-      $errmsg.='Bitte geben Sie die Blattnummer ein! \n';
+      $errmsg.='Bitte geben Sie die Blattnummer ein! <br>';
     }
     else{
       $nums = array ( "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" );
@@ -413,7 +413,7 @@ class Nachweis {
         }
       }
       if ($strenthalten==1) {
-        $errmsg.='Die Blattnummer darf nur Ziffern und Buchstaben enthalten ! \n';
+        $errmsg.='Die Blattnummer darf nur Ziffern und Buchstaben enthalten ! <br>';
       }
     }
     # Test der Bilddatei 
@@ -533,12 +533,12 @@ class Nachweis {
             # Datei existiert und kann jetzt im Filesystem gelöscht werden
 						$ret = $this->dokumentenDateiLoeschen($nachweisDatei);
 						if ($ret == '') {
-              $msg.='Datei '.$nachweisDatei.' wurde erfolgreich gelöscht.';
+              $msg.='Datei '.$nachweisDatei.' wurde erfolgreich gelöscht. ';
             }
           }
           else {
             # Datei existiert nicht
-            $msg.='Die Datei '.$nachweisDatei.' konnte nicht gefunden werden.\nWahrscheinlich falscher Pfad/Dateiname\n';
+            $msg.='Die Datei '.$nachweisDatei.' konnte nicht gefunden werden.<br>Wahrscheinlich falscher Pfad/Dateiname<br>';
           }
         }
         else {
@@ -1174,7 +1174,7 @@ class Nachweis {
 			else $sql.=" AND stelle_id=".$stelle_id;
       $ret=$this->database->execSQL($sql,4, 0);
       if ($ret[0]) { # Fehler bei der Abfrage
-        $errmsg='\nFehler beim Abfragen, ob Eintrag existiert.';
+        $errmsg='Fehler beim Abfragen, ob Eintrag existiert.';
       }
       else {
         # 
@@ -1190,7 +1190,7 @@ class Nachweis {
           $ret=$this->database->execSQL($sql,4, 1);    
           if ($ret[0]) {
             $this->debug->write("<br>Fehler beim hinzufuegen der Dokumente zur Auftragsnummer: ".__LINE__,4);
-            $errmsg='\nFehler beim hinzufuegen der Dokumente zur Auftragsnummer';
+            $errmsg='Fehler beim hinzufuegen der Dokumente zur Auftragsnummer';
           }
           else {
             #echo '<br>Dokument mit id: '.$idselected[$i].' zu Antrag id: '.$antrag_id.' zugeordnet.';
@@ -1202,7 +1202,7 @@ class Nachweis {
       $ret[0]=1; $ret[1]=$errmsg;
     }
     else {
-      $ret[0]=0; $ret[1]='\nNachweise erfolgreich zum Auftrag hinzugefügt.';
+      $ret[0]=0; $ret[1]='Nachweise erfolgreich zum Auftrag hinzugefügt.';
     }
     return $ret;
   }
@@ -1218,14 +1218,14 @@ class Nachweis {
       $ret=$this->database->execSQL($sql,4, 1);
       if ($ret[0]) {
         $this->debug->write("<br>Fehler beim entfernen der Dokumente zur Auftragsnummer: ".__LINE__,4);
-        $ret[1].='\nFehler beim entferen aus der Auftragsnummer!';
+        $result[0]='Fehler beim entferen aus der Auftragsnummer!';
       }
       else{
-        $ret[1]='\nDokumente erfolgreich aus Antrag entfernt!';
+        $result[1]='Dokumente erfolgreich aus Antrag entfernt!';
         #echo '<br>Dokument mit id: '.$idselected[$i].' aus Antrag id: '.$antrag_id.' entfernt.';
       }
     }
-    return $ret; 
+    return $result;
   }
   
   function getDocLocation($id){

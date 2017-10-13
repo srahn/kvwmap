@@ -74,7 +74,10 @@ function buildwktpolygonfromsvgpath(svgpath){
 }
 
 function slide_legend_in(evt){
-	document.getElementById('legenddiv').className = 'slidinglegend_slidein';
+	if(document.getElementById('legenddiv').className == 'slidinglegend_slideout'){
+		evt.stopPropagation();
+		document.getElementById('legenddiv').className = 'slidinglegend_slidein';
+	}
 }
 
 function slide_legend_out(evt){
@@ -328,7 +331,7 @@ $legendheight = $this->map->height + 20;
 			<table cellpadding="0" cellspacing="0">
 				<tr>
 					<td valign="top">
-						<div id="legenddiv" onmouseenter="slide_legend_in(event);" onmouseleave="slide_legend_out(event);" class="slidinglegend_slideout">
+						<div id="legenddiv" onmouseleave="slide_legend_out(event);" class="slidinglegend_slideout">
 							<table width="100%" border="0" cellpadding="0" cellspacing="0">
 								<tr>
 									<td bgcolor="<?php echo BG_DEFAULT ?>" align="left"><?php
@@ -342,24 +345,25 @@ $legendheight = $this->map->height + 20;
 									?></td>
 								</tr>
 							</table>
-							<table class="table1" id="legendTable" style="display: <? echo $display; ?>" cellspacing=0 cellpadding=2 border=0>
+							<table class="table1" id="legendTable" onclick="slide_legend_in(event)" style="display: <? echo $display; ?>" cellspacing=0 cellpadding=2 border=0>
 								<tr align="center">
 									<td><?php echo $strAvailableLayer; ?>:</td>
 								</tr>
 								<tr align="left">
-									<td><!-- bgcolor=#e3e3e6 -->
-									<div align="center"><?php # 2007-12-30 pk
-									?><input type="button" class="button" name="neuladen_button" onclick="neuLaden();" value="<?php echo $strLoadNew; ?>" tabindex="1"></div>
-									<div id="legendcontrol">
-										<a href="index.php?go=reset_querys"><img src="graphics/tool_info.png" border="0" alt="Informationsabfrage." title="Informationsabfrage | Hier klicken, um alle Abfragehaken zu entfernen" width="17"></a>
-										<a href="javascript:document.GUI.reset_layers.value=1;document.GUI.submit();"><img src="graphics/layer.png" border="0" alt="Themensteuerung." title="Themensteuerung | Hier klicken, um alle Themen zu deaktivieren" width="20" height="20"></a><br>
-									</div>
-								<div id="scrolldiv" style="height:<?php echo $legendheight; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
-								<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
-								<div onclick="document.GUI.legendtouched.value = 1;" id="legend">
-									<? echo $this->legende; ?>
-								</div>
-								</div>
+									<td>
+										<div id="legend_layer">
+											<div id="legendcontrol">
+												<a href="index.php?go=reset_querys"><img src="graphics/tool_info.png" border="0" alt="Informationsabfrage." title="Informationsabfrage | Hier klicken, um alle Abfragehaken zu entfernen" width="17"></a>
+												<a href="javascript:document.GUI.reset_layers.value=1;document.GUI.submit();"><img src="graphics/layer.png" border="0" alt="Themensteuerung." title="Themensteuerung | Hier klicken, um alle Themen zu deaktivieren" width="20" height="20"></a>
+												<input type="button" class="button" name="neuladen_button" onclick="neuLaden();" value="<?php echo $strLoadNew; ?>" tabindex="1">
+											</div>
+											<div id="scrolldiv" style="height:<?php echo $legendheight; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
+												<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
+												<div onclick="document.GUI.legendtouched.value = 1;" id="legend">
+													<? echo $this->legende; ?>
+												</div>
+											</div>
+										</div>
 									</td>
 								</tr>
 							</table>
