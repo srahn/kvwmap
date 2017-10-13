@@ -1,6 +1,6 @@
 <?php
 ###################################################################
-# kvwmap - Kartenserver für Kreisverwaltungen                     #
+# kvwmap - Kartenserver fÃ¼r Kreisverwaltungen                     #
 ###################################################################
 # Lizenz                                                          #
 #                                                                 # 
@@ -96,7 +96,7 @@ class Bauauskunft {
     if($searchvars['nummer'] != ''){$sql .= " AND Feld3 = '".$searchvars['nummer']."'";}
     if($searchvars['vorhaben'] != ''){$sql .= " AND Feld8 LIKE '%".$searchvars['vorhaben']."%'";}
     if($searchvars['verfahrensart'] != ''){$sql .= " AND Feld9 LIKE '%".$searchvars['verfahrensart']."%'";}
-    if($searchvars['gemarkung'] != ''){$sql .= " AND Feld27||Feld12 = '".$searchvars['gemarkung']."'";}
+    if($searchvars['gemarkung'] != ''){$sql .= " AND Feld39||Feld12 = '".$searchvars['gemarkung']."'";}
     if($searchvars['flur'] != ''){$sql .= " AND trim(trim(leading '0' from Feld13)) = '".$searchvars['flur']."'";}
     if($searchvars['flurstueck'] != ''){$sql .= " AND trim(trim(leading '0' from Feld14)) LIKE '".$searchvars['flurstueck']."'";}
     if($searchvars['vorname'] != ''){$sql .= " AND Feld19 LIKE '%".$searchvars['vorname']."%'";}
@@ -162,7 +162,7 @@ class Bauauskunft {
   	$flurst = trim($explosion[2]);
   	// Flur
   	$flur = str_pad ($flur, 3, '0', STR_PAD_LEFT);
-  	// Flurstück
+  	// FlurstÃ¼ck
   	$explosion = explode('/',$flurst);
   	$zaehler = $explosion[0];
   	$nenner = $explosion[1];
