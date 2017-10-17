@@ -173,6 +173,7 @@ function festsetzung_freigeben(&$gui, $valueEscaped, $festsetzungFreigeben, &$wr
                             {
                                 $teilgewaesserbenutzungId = $teilgewaesserbenutzung->updateTeilgewaesserbenutzung_Bearbeiter($teilgewaesserbenutzung_art_benutzung, $teilgewaesserbenutzung_wiedereinleitung_bearbeiter, $teilgewaesserbenutzung_befreiungstatbestaende, $freitext, $berechneter_entgeltsatz_zugelassen, $berechneter_entgeltsatz_nicht_zugelassen, $berechnetes_entgelt_zugelassen, $berechnetes_entgelt_nicht_zugelassen);
                                 $gui->add_message('notice', 'Teilgewässerbenutzungen (id: ' . $teilgewaesserbenutzungId . ') erfolgreich geändert!');
+                                $gui->debug->write('Teilgewässerbenutzungen (id: ' . $teilgewaesserbenutzungId . ') erfolgreich geändert!', 4);
                             }
                             else
                             {
@@ -218,17 +219,20 @@ function festsetzung_freigeben(&$gui, $valueEscaped, $festsetzungFreigeben, &$wr
             } else {
                 if ($errorEingabeFestsetzung > 0) {
                     $gui->add_message('error', 'Eingabe in Zeile ' . $errorEingabeFestsetzung . ' ist fehlerhaft oder nicht vollständig! Bitte überprüfen Sie Ihre Angaben!');
+                    $gui->debug->write('ERROR: Eingabe in Zeile ' . $errorEingabeFestsetzung . ' ist fehlerhaft oder nicht vollständig! Bitte überprüfen Sie Ihre Angaben!', 4);
                 }
             }
         }
         else
         {
             $gui->add_message('error', 'Keine gültige Gewässerbenutzung gefunden!');
+            $gui->debug->write('ERROR: Keine gültige Gewässerbenutzung gefunden!', 4);
         }
     }
     else
     {
         $gui->add_message('error', 'Keine gültige WrZ gefunden!');
+        $gui->debug->write('ERROR: Keine gültige WrZ gefunden!', 4);
     }
 }
 

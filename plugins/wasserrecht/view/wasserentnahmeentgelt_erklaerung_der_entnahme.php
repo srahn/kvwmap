@@ -153,11 +153,13 @@ function erklaerung_entspeeren($gui, &$valueEscaped, &$wrz, &$gewaesserbenutzung
         else
         {
             $gui->add_message('error', 'Keine gültige Gewässerbenutzung gefunden!');
+            $gui->debug->write('ERROR: Keine gültige WrZ gefunden!', 4);
         }
     }
     else
     {
         $gui->add_message('error', 'Keine gültige WrZ gefunden!');
+        $gui->debug->write('ERROR: Keine gültige WrZ gefunden!', 4);
     }
 }
 
@@ -319,12 +321,14 @@ function erklaerung_freigeben($gui, &$valueEscaped, &$wrz, &$gewaesserbenutzung,
                                         $teilgewaesserbenutzungId = $teilgewaesserbenutzung->updateTeilgewaesserbenutzung_Nutzer($gewaesserbenutzungsart, $gewaesserbenutzungszweck, $gewaesserbenutzungsumfang, $wiedereinleitung, $mengenbestimmung, $teilgewaesserbenutzungsart);
                                         
                                         $gui->add_message('notice', 'Teilgewässerbenutzungen (id: ' . $teilgewaesserbenutzungId . ') erfolgreich geändert!');
+                                        $gui->debug->write('Teilgewässerbenutzungen (id: ' . $teilgewaesserbenutzungId . ') erfolgreich geändert!', 4);
                                     }                        // else --> if not there --> create one
                                     else {
                                         $teilgewaesserbenutzung = new Teilgewaesserbenutzungen($gui);
                                         $teilgewaesserbenutzungId = $teilgewaesserbenutzung->createTeilgewaesserbenutzung_Nutzer($gewaesserbenutzung->getId(), $gewaesserbenutzungsart, $gewaesserbenutzungszweck, $gewaesserbenutzungsumfang, $wiedereinleitung, $mengenbestimmung, $teilgewaesserbenutzungsart, WASSERRECHT_ERKLAERUNG_ENTNAHME_TEILGEWAESSERBENUTZUNGEN_ENTGELTSATZ);
                                         
                                         $gui->add_message('notice', 'Teilgewässerbenutzungen (id: ' . $teilgewaesserbenutzungId . ') erfolgreich eingetragen!');
+                                        $gui->debug->write('Teilgewässerbenutzungen (id: ' . $teilgewaesserbenutzungId . ') erfolgreich eingetragen!', 4);
                                     }
                                     
                                 }
@@ -353,23 +357,28 @@ function erklaerung_freigeben($gui, &$valueEscaped, &$wrz, &$gewaesserbenutzung,
             } else {
                 if ($errorEingabeErklaerung > 0) {
                     $gui->add_message('error', 'Eingabe in Zeile ' . $errorEingabeErklaerung . ' ist fehlerhaft oder nicht vollständig! Bitte überprüfen Sie Ihre Angaben!');
+                    $gui->debug->write('ERROR: Eingabe in Zeile ' . $errorEingabeErklaerung . ' ist fehlerhaft oder nicht vollständig! Bitte überprüfen Sie Ihre Angaben!', 4);
                 } elseif ($errorEingabeErklaerung === - 1) {
                     $gui->add_message('error', 'Eingabe ob Angaben auf einer Erklärung oder Schätzung beruhen sind fehlerhaft oder nicht vollständig! Bitte überprüfen Sie Ihre Angaben!');
+                    $gui->debug->write('ERROR: Eingabe ob Angaben auf einer Erklärung oder Schätzung beruhen sind fehlerhaft oder nicht vollständig! Bitte überprüfen Sie Ihre Angaben!', 4);
                 }
                 elseif ($leerEingabeErklaerung)
                 {
                     $gui->add_message('error', 'Bitte Angaben in der Tabelle machen!');
+                    $gui->debug->write('ERROR: Bitte Angaben in der Tabelle machen!', 4);
                 }
             }
         }
         else
         {
             $gui->add_message('error', 'Keine gültige Gewässerbenutzung gefunden!');
+            $gui->debug->write('ERROR: Keine gültige Gewässerbenutzung gefunden!', 4);
         }
     }
     else
     {
         $gui->add_message('error', 'Keine gültige WrZ gefunden!');
+        $gui->debug->write('ERROR: Keine gültige WrZ gefunden!', 4);
     }
 }
 
