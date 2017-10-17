@@ -220,9 +220,7 @@ CREATE TABLE wasserrecht.fiswrv_wasserrechtliche_zulassungen(
 	datum_bestand_form date, --Ausgangsbescheid,
 	dokument varchar(255),
 	nachfolger integer REFERENCES wasserrecht.fiswrv_wasserrechtliche_zulassungen(id),
-	vorgaenger integer REFERENCES wasserrecht.fiswrv_wasserrechtliche_zulassungen(id),
-	aufforderung_datum_absend date,
-	aufforderung_dokument integer REFERENCES wasserrecht.fiswrv_dokument(id)
+	vorgaenger integer REFERENCES wasserrecht.fiswrv_wasserrechtliche_zulassungen(id)
 )WITH OIDS;
 
 --GEWÄSSERBENUTZUNGEN
@@ -307,6 +305,8 @@ CREATE TABLE wasserrecht.fiswrv_gewaesserbenutzungen(
 	zweck integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_zweck(id),
 	umfang_entnahme integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_umfang_entnahme(id),
 	lage integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_lage(id),
+	aufforderung_datum_absend date,
+	aufforderung_dokument integer REFERENCES wasserrecht.fiswrv_dokument(id),
 	erklaerung_datum date,
 	erklaerung_dokument integer REFERENCES wasserrecht.fiswrv_dokument(id),
 	erklaerung_nutzer text,

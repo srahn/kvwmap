@@ -24,21 +24,50 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
         {
 //             		              echo '<br />Key = ' . $keyEscaped . '<br />';
 //             		              echo 'Value= ' . $valueEscaped;
+            createAufforderungsDokument($this, $valueEscaped);
+        }
+    }
+}
+
+function createAufforderungsDokument(&$gui, &$valueEscaped)
+{
+    $gui->debug->write('*** createAufforderungsDokument ***', 4);
+    
+    $idValues = findIdFromValueString($gui, $valueEscaped);
+    $gui->debug->write('idValues: ' . var_export($idValues, true), 4);
+    
+    $aufforderungWrz1 = new WasserrechtlicheZulassungen($gui);
+    $aufforderungWrz2 = $aufforderungWrz1->find_by_id($gui, 'id', $idValues["wrz_id"]);
+    if(!empty($aufforderungWrz2))
+    {
+        //get all dependent objects
+        $aufforderungWrz2->getDependentObjects($gui, $aufforderungWrz2);
+        
+        $gewaesserbenutzungen = $aufforderungWrz2->gewaesserbenutzungen;
+        $gewaesserbenutzung = null;
+        if(!empty($gewaesserbenutzungen) && count($gewaesserbenutzungen) > 0)
+        {
+            foreach ($gewaesserbenutzungen as $gwb)
+            {
+                if(!empty($gwb) && $gwb->getId() === $idValues["gewaesserbenutzung_id"])
+                {
+                    $gewaesserbenutzung = $gwb;
+                    break;
+                }
+            }
+        }
+        
+        if(!empty($gewaesserbenutzung))
+        {
+            $gui->debug->write('gewaesserbenutzung id: ' . var_export($gewaesserbenutzung->getId(), true), 4);
             
-            $aufforderungWrz1 = new WasserrechtlicheZulassungen($this);
-            $aufforderungWrzId = $valueEscaped;
-//             echo "<br />aufforderungWrzId: " . $aufforderungWrzId;
-            $aufforderungWrz2 = $aufforderungWrz1->find_by_id($this, 'id', $aufforderungWrzId);
-            if(!empty($aufforderungWrz2) && empty($aufforderungWrz2->getAufforderungDatumAbsend()))
+            if(empty($gewaesserbenutzung->getAufforderungDatumAbsend()))
             {
                 //echo $aufforderungWrz2->toString();
-                $aufforderungWrz2->insertAufforderungDatumAbsend();
+                $gewaesserbenutzung->insertAufforderungDatumAbsend();
                 
-                if(!empty($_POST['aufforderung']) && empty($aufforderungWrz2->getAufforderungDokument()))
+                if(!empty($_POST['aufforderung']) && empty($gewaesserbenutzung->getAufforderungDokument()))
                 {
-                    //get all dependent objects
-                    $aufforderungWrz2->getDependentObjects($this, $aufforderungWrz2);
-                    
                     //get a unique word file name
                     $uniqid = uniqid();
                     $word_file_name = $uniqid . ".docx";
@@ -48,10 +77,10 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
                     $datum = date("d.m.Y");
                     $nextyear = date('Y', strtotime('+1 year'));
                     $erhebungsjahr = htmlspecialchars($_REQUEST['erhebungsjahr']);
-//                     var_dump($this->user);
-                    $bearbeiter = $this->user->Name . ' ' . $this->user->Vorname;
-                    $bearbeiter_telefon = $this->user->phon;
-                    $bearbeiter_email = $this->user->email;
+                    //                     var_dump($gui->user);
+                    $bearbeiter = $gui->user->Name . ' ' . $gui->user->Vorname;
+                    $bearbeiter_telefon = $gui->user->phon;
+                    $bearbeiter_email = $gui->user->email;
                     $bearbeiter_plz = $aufforderungWrz2->behoerde->adresse->getPLZ();
                     $bearbeiter_ort = $aufforderungWrz2->behoerde->adresse->getOrt();
                     $adressat_id = $aufforderungWrz2->adressat->getId();
@@ -91,15 +120,15 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
                         "WASSERRECHT_VORDRUCK_ERKLAERUNG_WASSERENTNAHMEMENGE" => WASSERRECHT_VORDRUCK_ERKLAERUNG_WASSERENTNAHMEMENGE
                     ];
                     
-//                     echo var_export($parameter, true);
+                    //                     echo var_export($parameter, true);
                     
                     //write the word file
-                    writeAufforderungZurErklaerungWordFile($this, PLUGINS . 'wasserrecht/templates/Aufforderung_Erklaerung.docx', $word_file, $parameter);
+                    writeAufforderungZurErklaerungWordFile($gui, PLUGINS . 'wasserrecht/templates/Aufforderung_Erklaerung.docx', $word_file, $parameter);
                     
                     //write the document path to the database
-                    $aufforderung_dokument = new Dokument($this);
-                    $aufforderung_document_identifier = $aufforderung_dokument->createDocument('Aufforderung_' . $aufforderungWrzId, $word_file_name);
-                    $aufforderungWrz2->insertAufforderungDokument($aufforderung_document_identifier);
+                    $aufforderung_dokument = new Dokument($gui);
+                    $aufforderung_document_identifier = $aufforderung_dokument->createDocument('Aufforderung_' . $idValues["wrz_id"], $word_file_name);
+                    $gewaesserbenutzung->insertAufforderungDokument($aufforderung_document_identifier);
                 }
             }
         }
@@ -165,10 +194,10 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
         		                          	<tr>
                         		          		<td style="background-color: inherit;">
                         		          			<?php 
-                            		          			if(empty($wrz->isAufforderungFreigegeben()))
+                        		          			    if(empty($gewaesserbenutzung->isAufforderungFreigegeben()))
                             		          			{
                             		          			    ?>
-                            		          				<input type="checkbox" name="aufforderung_checkbox_<?php echo $wrz->getId(); ?>" value="<?php echo $wrz->getId(); ?>">
+                            		          				<input type="checkbox" name="aufforderung_checkbox_<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>" value="<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>">
                             		          		<?php
                             		          			} 
                         		          			?>
@@ -202,7 +231,7 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
                         		          		</td>
                         		          		<td>
                         		          			<?php
-                        		          			     echo $wrz->getAufforderungDatumAbsendHTML();
+                        		          			     echo $gewaesserbenutzung->getAufforderungDatumAbsendHTML();
                         		          			?>
                         		          		</td>
                         		          		<td>
@@ -292,18 +321,28 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
 				            {
 				                if(empty($getAdressat) || $getAdressat === $wrz->adressat->getId())
 				                {
-				                    if(!empty($wrz->aufforderung_dokument))
+				                    $gwbs = $wrz->gewaesserbenutzungen;
+				                    if(!empty($gwbs))
 				                    {
-				                    ?>
-    				                    <div class="wasserrecht_display_table_row">
-                        					<div class="wasserrecht_display_table_cell_caption">
-                        					<?php
-                        					   echo '<a href="' . $this->actual_link . WASSERRECHT_DOCUMENT_URL_PATH . $wrz->aufforderung_dokument->getPfad() . '" target="_blank">' . $wrz->aufforderung_dokument->getName() . '</a>';
-                        					?>
-                                   			</div>
-                        				</div>
-				                    <?php 
-				                    }   
+				                        foreach ($gwbs as $gwb)
+				                        {
+				                            if(!empty($gwb))
+				                            {
+				                                if(!empty($gwb->aufforderung_dokument))
+				                                {
+				                                    ?>
+                				                    <div class="wasserrecht_display_table_row">
+                                    					<div class="wasserrecht_display_table_cell_caption">
+                                    					<?php
+                                    					echo '<a href="' . $this->actual_link . WASSERRECHT_DOCUMENT_URL_PATH . $gwb->aufforderung_dokument->getPfad() . '" target="_blank">' . $gwb->aufforderung_dokument->getName() . '</a>';
+                                    					?>
+                                               			</div>
+                                    				</div>
+            				                    <?php 
+            				                    }
+				                            }
+				                        }
+				                    }
 				                }
 				            }
 				        }

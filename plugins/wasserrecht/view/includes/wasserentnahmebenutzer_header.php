@@ -46,7 +46,6 @@ if(empty($selectedAdressat) && !empty($getAdressat) && !empty($wrzProGueltigkeit
 // echo "adressat: " . $getAdressat;
 ?>
 
-
 <div class="wasserrecht_display_table">
 		
 		<div class="wasserrecht_display_table_row">

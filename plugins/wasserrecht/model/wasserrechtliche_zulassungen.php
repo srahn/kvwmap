@@ -8,7 +8,6 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	public $behoerde;
 	public $adressat;
 	public $anlagen;
-	public $aufforderung_dokument;
 	public $gewaesserbenutzungen;
 	
 	public function getGueltigkeitsJahrString()
@@ -16,7 +15,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	    return $this->getToStringFromArray($this->gueltigkeitsJahre);
 	}
 
-	public function find_gueltigkeitsjahre($gui) {
+	public function find_gueltigkeitsjahre(&$gui) {
 	    
 	    $this->debug->write('*** WasserrechtlicheZulassungen->find_gueltigkeitsjahre ***', 4);
 	    
@@ -86,14 +85,15 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 		return $wrzProGueltigkeitsJahreArray;
 	}
 	
-	public function getDependentObjects($gui, &$result)
+	public function getDependentObjects(&$gui, &$result)
 	{
+	    $gui->debug->write('*** getDependentObjects ***', 4);
 	    return $this->getDependentObjectsInteral($gui, $result, true);
 	}
 	
-	public function getDependentObjectsInteral($gui, &$result, $addGewaesserbenutzungen) 
+	public function getDependentObjectsInteral(&$gui, &$result, $addGewaesserbenutzungen) 
 	{
-	    $gui->debug->write('*** getDependentObjects ***', 4);
+	    $gui->debug->write('*** getDependentObjects Internal ***', 4);
 	    $gui->debug->write('addGewaesserbenutzungen: ' . var_export($addGewaesserbenutzungen, true), 4);
 	    
 	    $years = null;
@@ -144,6 +144,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	                $adresse = $adress->find_by_id($gui, 'id', $adressat->data['adresse']);
 	                $adressat->adresse = $adresse;
 	            }
+	            $gui->debug->write('adressat id: ' . var_export($adressat->getId(), true), 4);
 	            $result->adressat = $adressat;
 	        }
 	        
@@ -170,6 +171,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	                $konto = $account->find_by_id($gui, 'id', $behoerde->data['konto']);
 	                $behoerde->konto = $konto;
 	            }
+	            $gui->debug->write('behoerde id: ' . var_export($behoerde->getId(), true), 4);
 	            $result->behoerde = $behoerde;
 	        }
 	        
@@ -180,31 +182,10 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	            $anlagen = $anlage->find_where('id=' . $result->data['anlage']);
 	            if(!empty($anlagen) && count($anlagen) > 0 && !empty($anlagen[0]))
 	            {
+	                $gui->debug->write('anlagen[0] id: ' . var_export($anlagen[0]->getId(), true), 4);
 	                $result->anlagen = $anlagen[0];
 	            }
 	        }
-	        
-	        //get the 'Aufforderung Dokument'
-	        if(!empty($result->getAufforderungDokument()))
-	        {
-	            $dokument = new Dokument($gui);
-	            $dokumente = $dokument->find_where('id=' . $result->getAufforderungDokument());
-	            if(!empty($dokumente))
-	            {
-	                $result->aufforderung_dokument = $dokumente[0];
-	            }
-	        }
-	        
-	        //get the 'Aufforderung'
-	        // 					if(!empty($result->data['aufforderung']))
-	        // 					{
-	        // 					    $aufforderungen = new Aufforderung($gui);
-	        // 					    $aufforderung = $aufforderungen->find_where('id=' . $result->data['aufforderung']);
-	        // 					    if(!empty($aufforderung) && count($aufforderung) > 0 && !empty($aufforderung[0]))
-	        // 					    {
-	        // 					        $result->aufforderung = $aufforderung[0];
-	        // 					    }
-	        // 					}
 	        
 	        //get the 'Gewaesserbenutzungen'
 	        if($addGewaesserbenutzungen)
@@ -368,71 +349,6 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	
 	public function getFassungDatum() {
 	    return $this->data['fassung_datum'];
-	}
-	
-	////////////////////////////////////////////////////////////////////
-	
-// 	public function insertAufforderungId($aufforderungsId) {
-// 	    if(!empty($aufforderungsId))
-// 	    {
-// 	        $this->set('aufforderung', $aufforderungsId);
-// 	        $this->update();
-// 	    }
-// 	}
-
-    public function isAufforderungFreigegeben()
-    {
-        $datumAufforderung = $this->getAufforderungDatumAbsend();
-        if(!empty($datumAufforderung))
-        {
-            return true;
-        }
-        
-        return false;
-    }
-
-    public function getAufforderungDatumAbsend() {
-        return $this->data['aufforderung_datum_absend'];
-    }
-	
-	public function getAufforderungDatumAbsendHTML() {
-	    $datumAbsend = $this->getAufforderungDatumAbsend();
-	    if(!empty($datumAbsend))
-	    {
-	        // 	        $dateString = DateTime::createFromFormat("d.m.Y", $datumAbsend);
-	        return "<div>" . $datumAbsend . "</div>";
-	    }
-	    
-	    return "<div style=\"color: red;\">Nicht aufgefordert<div>";
-	}
-	
-	public function insertAufforderungDatumAbsend($dateValue = NULL) {
-	    //if date is not set --> set it to today's date
-	    if(empty($dateValue))
-	    {
-	        $dateValue = date("d.m.Y");
-	    }
-	    
-	    $this->set('aufforderung_datum_absend', $dateValue);
-	    $this->update();
-	    
-// 	    $this->create(
-// 	        array(
-// 	            'aufforderung_datum_absend' => $dateValue
-// 	        )
-// 	        );
-	}
-	
-	public function getAufforderungDokument() {
-	    return $this->data['aufforderung_dokument'];
-	}
-	
-	public function insertAufforderungDokument($id) {
-	    if(!empty($id))
-	    {
-	        $this->set('aufforderung_dokument', $id);
-	        $this->update();
-	    }
 	}
 	
 	////////////////////////////////////////////////////////////////////

@@ -334,7 +334,7 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
                     		          		</td>
                     		          		<td>
                     		          			<?php
-                    		          			     echo $wrz->getAufforderungDatumAbsendHTML();
+                    		          			     echo $gewaesserbenutzung->getAufforderungDatumAbsendHTML();
                     		          			?>
                     		          		</td>
                     		          		<td>
