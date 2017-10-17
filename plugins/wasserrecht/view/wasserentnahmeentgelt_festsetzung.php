@@ -27,12 +27,14 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
         
         if(startsWith($keyEscaped, "festsetzung_freigeben_"))
         {
-            festsetzung_freigeben($this, $valueEscaped, "festsetzung_freigeben_", true, $wrz, $gewaesserbenutzung, $errorEingabeFestsetzung, $speereEingabeFestsetzung);
+            $findDefaultWrz = false;
+            festsetzung_freigeben($this, $valueEscaped, true, $wrz, $gewaesserbenutzung, $errorEingabeFestsetzung, $speereEingabeFestsetzung);
             break;
         }
         if(startsWith($keyEscaped, "festsetzung_speichern_"))
         {
-            festsetzung_freigeben($this, $valueEscaped, "festsetzung_speichern_", false, $wrz, $gewaesserbenutzung, $errorEingabeFestsetzung, $speereEingabeFestsetzung);
+            $findDefaultWrz = false;
+            festsetzung_freigeben($this, $valueEscaped, false, $wrz, $gewaesserbenutzung, $errorEingabeFestsetzung, $speereEingabeFestsetzung);
             break;
         }
     }
@@ -46,16 +48,20 @@ elseif($_SERVER ["REQUEST_METHOD"] == "GET")
         $keyEscaped = htmlspecialchars($key);
         $valueEscaped = htmlspecialchars($value);
         
+//         print_r($keyEscaped);
+        
+//         $this->debug->write('keyEscaped: ' . var_export($keyEscaped, true), 4);
+//         $this->debug->write('valueEscaped: ' . var_export($valueEscaped, true), 4);
+        
         if(strtolower($keyEscaped) === "getfestsetzung")
 		{
 		    $findDefaultWrz = false;
 		    
-		    $lastIndex = strripos($valueEscaped, "_");
-		    $gewaesserbenutzungId = substr($valueEscaped, $lastIndex + 1);
-		    $festsetzungWrzId = substr($valueEscaped, 0, $lastIndex);
-// 		    echo "<br />lastIndex: " . $lastIndex . " festsetzungWrzId: " . $festsetzungWrzId . " gewaesserbenutzungId: " . $gewaesserbenutzungId;
+		    $idValues = findIdFromValueString($this, $valueEscaped);
+		    $this->debug->write('idValues: ' . var_export($idValues, true), 4);
+		    
 		    $festsetzungWrz = new WasserrechtlicheZulassungen($this);
-		    $wrz = $festsetzungWrz->find_by_id($this, 'id', $festsetzungWrzId);
+		    $wrz = $festsetzungWrz->find_by_id($this, 'id', $idValues["wrz_id"]);
 // 		    var_dump($wrz);
 // 		    echo "<br />wrz id: " . $wrz->getId();
 // 		    echo "<br />wrz isErklaerungFreigegeben: " . var_dump($wrz->isErklaerungFreigegeben());
@@ -69,7 +75,7 @@ elseif($_SERVER ["REQUEST_METHOD"] == "GET")
 		        {
 		            foreach ($gewaesserbenutzungen as $gwb)
 		            {
-		                if(!empty($gwb) && $gwb->getId() === $gewaesserbenutzungId)
+		                if(!empty($gwb) && $gwb->getId() === $idValues["gewaesserbenutzung_id"])
 		                {
 		                    $gewaesserbenutzung = $gwb;
 		                    break;
@@ -90,119 +96,139 @@ elseif($_SERVER ["REQUEST_METHOD"] == "GET")
     }
 }
 
-function festsetzung_freigeben(&$gui, $valueEscaped, $keyName, $festsetzungFreigeben, &$wrz, &$gewaesserbenutzung, &$errorEingabeFestsetzung, &$speereEingabeFestsetzung)
+function festsetzung_freigeben(&$gui, $valueEscaped, $festsetzungFreigeben, &$wrz, &$gewaesserbenutzung, &$errorEingabeFestsetzung, &$speereEingabeFestsetzung)
 {
+    $gui->debug->write('*** erklaerung_freigeben ***', 4);
+    $gui->debug->write('festsetzungFreigeben: ' . $festsetzungFreigeben, 4);
+    
+    $idValues = findIdFromValueString($gui, $valueEscaped);
+    $gui->debug->write('idValues: ' . var_export($idValues, true), 4);
+    
     $festsetzungFreigebenWrz = new WasserrechtlicheZulassungen($gui);
-    $wrz = $festsetzungFreigebenWrz->find_by_id($gui, 'id', $valueEscaped);
-    if (!empty($wrz))
+    $wrz = $festsetzungFreigebenWrz->find_by_id($gui, 'id', $idValues["wrz_id"]);
+    if(!empty($wrz))
     {
         $gb = new Gewaesserbenutzungen($gui);
         $gewaesserbenutzungen = $gb->find_where_with_subtables('wasserrechtliche_zulassungen=' . $wrz->getId());
-        if(!empty($gewaesserbenutzungen) && count($gewaesserbenutzungen) > 0 && !empty($gewaesserbenutzungen[0])) 
+        if(!empty($gewaesserbenutzungen) && count($gewaesserbenutzungen) > 0)
         {
-            $gewaesserbenutzung = $gewaesserbenutzungen[0];
-            // $gewaesserbenutzungfestsetzungFreigegebenId = $gewaesserbenutzung->getId();
-            
-            if(!empty($gewaesserbenutzung))
+            foreach ($gewaesserbenutzungen as $gwb)
             {
-                if($errorEingabeFestsetzung === null)
+                if(!empty($gwb) && $gwb->getId() === $idValues["gewaesserbenutzung_id"])
                 {
-                    for ($i = 1; $i <= WASSERRECHT_ERKLAERUNG_ENTNAHME_TEILGEWAESSERBENUTZUNGEN_COUNT; $i ++)
+                    $gewaesserbenutzung = $gwb;
+                    break;
+                }
+            }
+        }
+        
+        if(!empty($gewaesserbenutzung))
+        {
+            if($errorEingabeFestsetzung === null)
+            {
+                for ($i = 1; $i <= WASSERRECHT_ERKLAERUNG_ENTNAHME_TEILGEWAESSERBENUTZUNGEN_COUNT; $i ++)
+                {
+                    $teilgewaesserbenutzung_art_benutzung = htmlspecialchars($_POST["teilgewaesserbenutzung_art_benutzung_" . $i]);
+                    //                         var_dump($teilgewaesserbenutzung_art_benutzung);
+                    $teilgewaesserbenutzung_wiedereinleitung_bearbeiter = htmlspecialchars($_POST["teilgewaesserbenutzung_wiedereinleitung_bearbeiter_" . $i]);
+                    //                         var_dump($teilgewaesserbenutzung_wiedereinleitung_bearbeiter);
+                    $teilgewaesserbenutzung_befreiungstatbestaende = htmlspecialchars($_POST["teilgewaesserbenutzung_befreiungstatbestaende_" . $i]);
+                    //                         var_dump($teilgewaesserbenutzung_befreiungstatbestaende);
+                    $freitext = htmlspecialchars($_POST["festsetzung_freitext"]);
+                    
+                    // check for not filled out lines
+                    if (empty($teilgewaesserbenutzung_art_benutzung)
+                        && empty($teilgewaesserbenutzung_wiedereinleitung_bearbeiter)
+                        && empty($teilgewaesserbenutzung_befreiungstatbestaende))
                     {
-                        $teilgewaesserbenutzung_art_benutzung = htmlspecialchars($_POST["teilgewaesserbenutzung_art_benutzung_" . $i]);
-//                         var_dump($teilgewaesserbenutzung_art_benutzung);
-                        $teilgewaesserbenutzung_wiedereinleitung_bearbeiter = htmlspecialchars($_POST["teilgewaesserbenutzung_wiedereinleitung_bearbeiter_" . $i]);
-//                         var_dump($teilgewaesserbenutzung_wiedereinleitung_bearbeiter);
-                        $teilgewaesserbenutzung_befreiungstatbestaende = htmlspecialchars($_POST["teilgewaesserbenutzung_befreiungstatbestaende_" . $i]);
-//                         var_dump($teilgewaesserbenutzung_befreiungstatbestaende);
-                        $freitext = htmlspecialchars($_POST["festsetzung_freitext"]);
+                        break;
+                    }
+                    
+                    if (!empty($teilgewaesserbenutzung_art_benutzung) && strcmp(WASSERRECHT_ERKLAERUNG_ENTNAHME_BITTE_AUSWAEHLEN_VALUE, $teilgewaesserbenutzung_art_benutzung) !== 0
+                        && !empty($teilgewaesserbenutzung_wiedereinleitung_bearbeiter) && strcmp(WASSERRECHT_ERKLAERUNG_ENTNAHME_BITTE_AUSWAEHLEN_VALUE, $teilgewaesserbenutzung_wiedereinleitung_bearbeiter) !== 0
+                        && !empty($teilgewaesserbenutzung_befreiungstatbestaende) && strcmp(WASSERRECHT_ERKLAERUNG_ENTNAHME_BITTE_AUSWAEHLEN_VALUE, $teilgewaesserbenutzung_befreiungstatbestaende) !== 0)
+                    {
                         
-                        // check for not filled out lines
-                        if (empty($teilgewaesserbenutzung_art_benutzung)
-                            && empty($teilgewaesserbenutzung_wiedereinleitung_bearbeiter)
-                            && empty($teilgewaesserbenutzung_befreiungstatbestaende))
+                        $errorEingabeFestsetzung = null;
+                        if($festsetzungFreigeben)
                         {
-                            break;
+                            $speereEingabeFestsetzung = true;
                         }
+                        //                         echo var_dump($speereEingabeFestsetzung);
                         
-                        if (!empty($teilgewaesserbenutzung_art_benutzung) && strcmp(WASSERRECHT_ERKLAERUNG_ENTNAHME_BITTE_AUSWAEHLEN_VALUE, $teilgewaesserbenutzung_art_benutzung) !== 0
-                            && !empty($teilgewaesserbenutzung_wiedereinleitung_bearbeiter) && strcmp(WASSERRECHT_ERKLAERUNG_ENTNAHME_BITTE_AUSWAEHLEN_VALUE, $teilgewaesserbenutzung_wiedereinleitung_bearbeiter) !== 0
-                            && !empty($teilgewaesserbenutzung_befreiungstatbestaende) && strcmp(WASSERRECHT_ERKLAERUNG_ENTNAHME_BITTE_AUSWAEHLEN_VALUE, $teilgewaesserbenutzung_befreiungstatbestaende) !== 0)
-                        {
+                        // update an existing teilgewaesserbenutzung
+                        if (!empty($gewaesserbenutzung->teilgewaesserbenutzungen[$i - 1])) {
                             
-                            $errorEingabeFestsetzung = null;
-                            if($festsetzungFreigeben)
+                            $teilgewaesserbenutzung = $gewaesserbenutzung->teilgewaesserbenutzungen[$i - 1];
+                            
+                            $berechneter_entgeltsatz_zugelassen = htmlspecialchars($_POST["teilgewaesserbenutzung_berechneter_entgeltsatz_zugelassen_" . $i]);
+                            $berechneter_entgeltsatz_nicht_zugelassen = htmlspecialchars($_POST["teilgewaesserbenutzung_berechneter_entgeltsatz_nicht_zugelassen_" . $i]);
+                            $berechnetes_entgelt_zugelassen = htmlspecialchars($_POST["teilgewaesserbenutzung_berechnetes_entgelt_zugelassen_" . $i]);
+                            $berechnetes_entgelt_nicht_zugelassen = htmlspecialchars($_POST["teilgewaesserbenutzung_berechnetes_entgelt_nicht_zugelassen_" . $i]);
+                            
+                            if((empty($berechneter_entgeltsatz_zugelassen) || is_numeric($berechneter_entgeltsatz_zugelassen))
+                                && (empty($berechneter_entgeltsatz_nicht_zugelassen) || is_numeric($berechneter_entgeltsatz_nicht_zugelassen))
+                                && (empty($berechnetes_entgelt_zugelassen) || is_numeric($berechnetes_entgelt_zugelassen))
+                                && (empty($berechnetes_entgelt_nicht_zugelassen) || is_numeric($berechnetes_entgelt_nicht_zugelassen)))
                             {
-                                $speereEingabeFestsetzung = true;
+                                $teilgewaesserbenutzungId = $teilgewaesserbenutzung->updateTeilgewaesserbenutzung_Bearbeiter($teilgewaesserbenutzung_art_benutzung, $teilgewaesserbenutzung_wiedereinleitung_bearbeiter, $teilgewaesserbenutzung_befreiungstatbestaende, $freitext, $berechneter_entgeltsatz_zugelassen, $berechneter_entgeltsatz_nicht_zugelassen, $berechnetes_entgelt_zugelassen, $berechnetes_entgelt_nicht_zugelassen);
+                                $gui->add_message('notice', 'Teilgewässerbenutzungen (id: ' . $teilgewaesserbenutzungId . ') erfolgreich geändert!');
                             }
-                            //                         echo var_dump($speereEingabeFestsetzung);
-                            
-                            // update an existing teilgewaesserbenutzung
-                            if (!empty($gewaesserbenutzung->teilgewaesserbenutzungen[$i - 1])) {
-                                
-                                $teilgewaesserbenutzung = $gewaesserbenutzung->teilgewaesserbenutzungen[$i - 1];
-                                
-                                $berechneter_entgeltsatz_zugelassen = htmlspecialchars($_POST["teilgewaesserbenutzung_berechneter_entgeltsatz_zugelassen_" . $i]);
-                                $berechneter_entgeltsatz_nicht_zugelassen = htmlspecialchars($_POST["teilgewaesserbenutzung_berechneter_entgeltsatz_nicht_zugelassen_" . $i]);
-                                $berechnetes_entgelt_zugelassen = htmlspecialchars($_POST["teilgewaesserbenutzung_berechnetes_entgelt_zugelassen_" . $i]);
-                                $berechnetes_entgelt_nicht_zugelassen = htmlspecialchars($_POST["teilgewaesserbenutzung_berechnetes_entgelt_nicht_zugelassen_" . $i]);
-                                
-                                if((empty($berechneter_entgeltsatz_zugelassen) || is_numeric($berechneter_entgeltsatz_zugelassen))
-                                    && (empty($berechneter_entgeltsatz_nicht_zugelassen) || is_numeric($berechneter_entgeltsatz_nicht_zugelassen))
-                                    && (empty($berechnetes_entgelt_zugelassen) || is_numeric($berechnetes_entgelt_zugelassen))
-                                    && (empty($berechnetes_entgelt_nicht_zugelassen) || is_numeric($berechnetes_entgelt_nicht_zugelassen)))
-                                {
-                                    $teilgewaesserbenutzungId = $teilgewaesserbenutzung->updateTeilgewaesserbenutzung_Bearbeiter($teilgewaesserbenutzung_art_benutzung, $teilgewaesserbenutzung_wiedereinleitung_bearbeiter, $teilgewaesserbenutzung_befreiungstatbestaende, $freitext, $berechneter_entgeltsatz_zugelassen, $berechneter_entgeltsatz_nicht_zugelassen, $berechnetes_entgelt_zugelassen, $berechnetes_entgelt_nicht_zugelassen);
-                                    $gui->add_message('notice', 'Teilgewässerbenutzungen (id: ' . $teilgewaesserbenutzungId . ') erfolgreich geändert!');
-                                }
-                                else
-                                {
-                                    $errorEingabeFestsetzung = $i;
-                                    break;
-                                }
-                            }                        // else --> if not there --> create one
-                            else {
+                            else
+                            {
                                 $errorEingabeFestsetzung = $i;
                                 break;
                             }
-                        }
-                        else
-                        {
+                        }                        // else --> if not there --> create one
+                        else {
                             $errorEingabeFestsetzung = $i;
                             break;
                         }
                     }
-                }
-                
-                if($errorEingabeFestsetzung === null)
-                {
-                    if($festsetzungFreigeben)
+                    else
                     {
-                        $wrz->insertFestsetzungDatum();
-                        $festsetzungsNutzer = $gui->user->Vorname . ' ' . $gui->user->Name;
-                        $wrz->insertFestsetzungNutzer($festsetzungsNutzer);
-                        
-                        $summe_nicht_zugelassene_entnahmemengen = htmlspecialchars($_POST["summe_nicht_zugelassene_entnahmemengen"]);
-                        $summe_zugelassene_entnahmemengen = htmlspecialchars($_POST["summe_zugelassene_entnahmemengen"]);
-                        $summe_entnahmemengen = htmlspecialchars($_POST["summe_entnahmemengen"]);
-                        $wrz->insertFestsetzungEntnahmemengen($summe_nicht_zugelassene_entnahmemengen, $summe_zugelassene_entnahmemengen, $summe_entnahmemengen); 
-                        
-                        $summe_nicht_zugelassenes_entnahme_entgelt = htmlspecialchars($_POST["summe_nicht_zugelassenes_entnahme_entgelt"]);
-                        $summe_zugelassenes_entnahme_entgelt = htmlspecialchars($_POST["summe_zugelassenes_entnahme_entgelt"]);
-                        $summe_ennahme_entgelt = htmlspecialchars($_POST["summe_entnahme_entgelt"]);
-                        $wrz->insertFestsetzungEntgelte($summe_nicht_zugelassenes_entnahme_entgelt, $summe_zugelassenes_entnahme_entgelt, $summe_ennahme_entgelt);
-                    }
-                    
-                    // update gewaesserbenutzungen, because teilgewaesserbenutzungen where added
-                    $gewaesserbenutzungen = $gb->find_where_with_subtables('wasserrechtliche_zulassungen=' . $wrz->getId());
-                    $gewaesserbenutzung = $gewaesserbenutzungen[0];
-                } else {
-                    if ($errorEingabeFestsetzung > 0) {
-                        $gui->add_message('error', 'Eingabe in Zeile ' . $errorEingabeFestsetzung . ' ist fehlerhaft oder nicht vollständig! Bitte überprüfen Sie Ihre Angaben!');
+                        $errorEingabeFestsetzung = $i;
+                        break;
                     }
                 }
             }
+            
+            if($errorEingabeFestsetzung === null)
+            {
+                if($festsetzungFreigeben)
+                {
+                    $wrz->insertFestsetzungDatum();
+                    $festsetzungsNutzer = $gui->user->Vorname . ' ' . $gui->user->Name;
+                    $wrz->insertFestsetzungNutzer($festsetzungsNutzer);
+                    
+                    $summe_nicht_zugelassene_entnahmemengen = htmlspecialchars($_POST["summe_nicht_zugelassene_entnahmemengen"]);
+                    $summe_zugelassene_entnahmemengen = htmlspecialchars($_POST["summe_zugelassene_entnahmemengen"]);
+                    $summe_entnahmemengen = htmlspecialchars($_POST["summe_entnahmemengen"]);
+                    $wrz->insertFestsetzungEntnahmemengen($summe_nicht_zugelassene_entnahmemengen, $summe_zugelassene_entnahmemengen, $summe_entnahmemengen);
+                    
+                    $summe_nicht_zugelassenes_entnahme_entgelt = htmlspecialchars($_POST["summe_nicht_zugelassenes_entnahme_entgelt"]);
+                    $summe_zugelassenes_entnahme_entgelt = htmlspecialchars($_POST["summe_zugelassenes_entnahme_entgelt"]);
+                    $summe_ennahme_entgelt = htmlspecialchars($_POST["summe_entnahme_entgelt"]);
+                    $wrz->insertFestsetzungEntgelte($summe_nicht_zugelassenes_entnahme_entgelt, $summe_zugelassenes_entnahme_entgelt, $summe_ennahme_entgelt);
+                }
+                
+                // update gewaesserbenutzungen, because teilgewaesserbenutzungen where added
+                $gewaesserbenutzungen = $gb->find_where_with_subtables('wasserrechtliche_zulassungen=' . $wrz->getId());
+                $gewaesserbenutzung = $gewaesserbenutzungen[0];
+            } else {
+                if ($errorEingabeFestsetzung > 0) {
+                    $gui->add_message('error', 'Eingabe in Zeile ' . $errorEingabeFestsetzung . ' ist fehlerhaft oder nicht vollständig! Bitte überprüfen Sie Ihre Angaben!');
+                }
+            }
         }
+        else
+        {
+            $gui->add_message('error', 'Keine gültige Gewässerbenutzung gefunden!');
+        }
+    }
+    else
+    {
+        $gui->add_message('error', 'Keine gültige WrZ gefunden!');
     }
 }
 
@@ -592,7 +618,7 @@ if(!empty($wrz) && !empty($wrz->getId()))
         	   			<div class="wasserrecht_display_table_row">
         	   				<div class="wasserrecht_display_table_cell_caption">
                     			<input type="hidden" name="go" value="wasserentnahmeentgelt_festsetzung">
-        						<button class="wasserrecht_button" name="festsetzung_speichern_<?php echo $wrz->getId(); ?>" value="<?php echo $wrz->getId(); ?>" type="submit" id="festsetzung_speichern_button_<?php echo $wrz->getId(); ?>" <?php echo $speereEingabeFestsetzung ? "disabled='disabled'" : "" ?>>Festsetzung speichern</button>
+        						<button class="wasserrecht_button" name="festsetzung_speichern_<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>" value="<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>" type="submit" id="festsetzung_speichern_button_<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>" <?php echo $speereEingabeFestsetzung ? "disabled='disabled'" : "" ?>>Festsetzung speichern</button>
                    			</div>
                    			<div class="wasserrecht_display_table_cell_spacer"></div>
             		   		<div class="wasserrecht_display_table_row_spacer"></div>
@@ -606,7 +632,7 @@ if(!empty($wrz) && !empty($wrz->getId()))
         	   			
         	   			<div class="wasserrecht_display_table_row">
         	   				<div class="wasserrecht_display_table_cell_caption">
-        						<button class="wasserrecht_button" name="festsetzung_freigeben_<?php echo $wrz->getId(); ?>" value="<?php echo $wrz->getId(); ?>" type="submit" id="festsetzung_freigeben_button_<?php echo $wrz->getId(); ?>" <?php echo $speereEingabeFestsetzung ? "disabled='disabled'" : "" ?>>Festsetzung freigeben</button>
+        						<button class="wasserrecht_button" name="festsetzung_freigeben_<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>" value="<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>" type="submit" id="festsetzung_freigeben_button_<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>" <?php echo $speereEingabeFestsetzung ? "disabled='disabled'" : "" ?>>Festsetzung freigeben</button>
                    			</div>
                    			<div class="wasserrecht_display_table_cell_spacer"></div>
             		   		<div class="wasserrecht_display_table_row_spacer"></div>

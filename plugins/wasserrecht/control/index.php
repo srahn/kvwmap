@@ -46,6 +46,24 @@ function endsWith($haystack, $needle)
     return (substr($haystack, -$length) === $needle);
 }
 
+function findIdFromValueString(&$gui, $valueEscaped)
+{
+    $gui->debug->write('*** findIdFromValueString ***', 4);
+    
+    $lastIndex = strripos($valueEscaped, "_");
+    $gewaesserbenutzungId = substr($valueEscaped, $lastIndex + 1);
+    $wrzId = substr($valueEscaped, 0, $lastIndex);
+    
+    $returnArray = array(
+        "wrz_id" => $wrzId,
+        "gewaesserbenutzung_id" => $gewaesserbenutzungId,
+    );
+    
+    $gui->debug->write('returnArray: ' . var_export($returnArray, true), 4);
+    
+    return $returnArray;
+}
+
 /**
 * Anwendungsfälle
 * wasserentnahmebenutzer
