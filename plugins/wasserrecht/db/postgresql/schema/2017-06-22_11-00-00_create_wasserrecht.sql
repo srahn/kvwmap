@@ -222,20 +222,7 @@ CREATE TABLE wasserrecht.fiswrv_wasserrechtliche_zulassungen(
 	nachfolger integer REFERENCES wasserrecht.fiswrv_wasserrechtliche_zulassungen(id),
 	vorgaenger integer REFERENCES wasserrecht.fiswrv_wasserrechtliche_zulassungen(id),
 	aufforderung_datum_absend date,
-	aufforderung_dokument integer REFERENCES wasserrecht.fiswrv_dokument(id),
-	erklaerung_datum date,
-	erklaerung_dokument integer REFERENCES wasserrecht.fiswrv_dokument(id),
-	erklaerung_nutzer text,
-	festsetzung_datum date,
-	festsetzung_dokument integer REFERENCES wasserrecht.fiswrv_dokument(id),
-	festsetzung_dokument_datum date,
-	festsetzung_nutzer text,
-	festsetzung_summe_nicht_zugelassene_entnahmemengen numeric,
-	festsetzung_summe_zugelassene_entnahmemengen numeric,
-	festsetzung_summe_entnahmemengen numeric,
-	festsetzung_summe_zugelassenes_entgelt numeric,
-	festsetzung_summe_nicht_zugelassenes_entgelt numeric,
-	festsetzung_summe_entgelt numeric
+	aufforderung_dokument integer REFERENCES wasserrecht.fiswrv_dokument(id)
 )WITH OIDS;
 
 --GEWÄSSERBENUTZUNGEN
@@ -320,6 +307,19 @@ CREATE TABLE wasserrecht.fiswrv_gewaesserbenutzungen(
 	zweck integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_zweck(id),
 	umfang_entnahme integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_umfang_entnahme(id),
 	lage integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_lage(id),
+	erklaerung_datum date,
+	erklaerung_dokument integer REFERENCES wasserrecht.fiswrv_dokument(id),
+	erklaerung_nutzer text,
+	festsetzung_datum date,
+	festsetzung_dokument integer REFERENCES wasserrecht.fiswrv_dokument(id),
+	festsetzung_dokument_datum date,
+	festsetzung_nutzer text,
+	festsetzung_summe_nicht_zugelassene_entnahmemengen numeric,
+	festsetzung_summe_zugelassene_entnahmemengen numeric,
+	festsetzung_summe_entnahmemengen numeric,
+	festsetzung_summe_zugelassenes_entgelt numeric,
+	festsetzung_summe_nicht_zugelassenes_entgelt numeric,
+	festsetzung_summe_entgelt numeric,
 	wasserrechtliche_zulassungen integer NOT NULL REFERENCES wasserrecht.fiswrv_wasserrechtliche_zulassungen(id)
 )WITH OIDS;
 

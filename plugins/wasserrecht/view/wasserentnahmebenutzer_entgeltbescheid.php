@@ -28,12 +28,20 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
             {
                 $auswahl_checkbox_escaped = htmlspecialchars($auswahl_checkbox);
                 
+                $idValues = findIdFromValueString($this, $auswahl_checkbox_escaped);
+                $this->debug->write('idValues: ' . var_export($idValues, true), 4);
+                
                 $festsetzungWrz = new WasserrechtlicheZulassungen($this);
-                $wrz = $festsetzungWrz->find_by_id($this, 'id', $auswahl_checkbox_escaped);
+                $wrz = $festsetzungWrz->find_by_id($this, 'id', $idValues["wrz_id"]);
                 // 		    var_dump($wrz);
                 // 		    echo "<br />wrz id: " . $wrz->getId();
-                if(!empty($wrz))
+                
+                $gb = new Gewaesserbenutzungen($this);
+                $gwb = $gb->find_where_with_subtables('id=' . $idValues["gewaesserbenutzung_id"], 'id');
+                
+                if(!empty($wrz) && !empty($gwb))
                 {
+                    $wrz->gewaesserbenutzungen = $gwb;
                     $wrzs[] = $wrz;
                 }
             }
@@ -63,58 +71,58 @@ function festsetzung_erstellen(&$gui, &$wrzs)
         {
             if(!empty($wrz))
             {
+                $gewaesserbenutzung = $wrz->gewaesserbenutzungen[0];
+                
                 //get all dependent objects
-                $wrz->getDependentObjects($gui, $wrz);
+                $wrz->getDependentObjectsInteral($gui, $wrz, false);
                 
-                //alle Daten für den Festsetzungsbescheid sammeln
-                if(empty($festsetzungsSammelbescheidDaten->getWrzs()))
+                if(!empty($gewaesserbenutzung))
                 {
-                    $festsetzungsSammelbescheidDaten->addWrz($wrz);
-                }
-                $festsetzungsSammelbescheidDaten->addAnlage($wrz->anlagen);
-                $festsetzungsSammelbescheidDaten->addEntnahmemenge($wrz->getFestsetzungSummeEntnahmemengen());
-                $festsetzungsSammelbescheidDaten->addEntgelt($wrz->getFestsetzungSummeEntgelt());
-                $festsetzungsSammelbescheidDaten->addNicht_zugelassenes_entgelt($wrz->getFestsetzungSummeNichtZugelassenesEntgelt());
-                $festsetzungsSammelbescheidDaten->addZugelassenes_entgelt($wrz->getFestsetzungSummeZugelassenesEntgelt());
-                
-                //bestehendes Festsetzungsdokument löschen, wenn vorhanden
-                if($wrz->isFestsetzungFreigegeben() && !$wrz->isFestsetzungDokumentErstellt())
-                {
-                    if(!empty($wrz->getFestsetzungDokument()))
+                    $gui->debug->write('gewaesserbenutzung id: ' . var_export($gewaesserbenutzung->getId(), true), 4);
+                    
+                    //alle Daten für den Festsetzungsbescheid sammeln
+                    if(empty($festsetzungsSammelbescheidDaten->getWrzs()))
                     {
-                        $oldFestsetzungsDocumentId = $wrz->getFestsetzungDokument();
-                        $wrz->deleteFestsetzungDokument();
-                        
-                        $festsetzung_delete_dokument = new Dokument($gui);
-                        $festsetzung_delete_dokument->deleteDocument($oldFestsetzungsDocumentId);
+                        $festsetzungsSammelbescheidDaten->addWrz($wrz);
                     }
-                }
-                
-                //Freitext bekommen
-                $gewaesserbenutzungen = $wrz->gewaesserbenutzungen;
-                foreach ($gewaesserbenutzungen as $gewaesserbenutzung)
-                {
-                    if(!empty($gewaesserbenutzung))
+                    $festsetzungsSammelbescheidDaten->addAnlage($wrz->anlagen);
+                    $festsetzungsSammelbescheidDaten->addEntnahmemenge($gewaesserbenutzung->getFestsetzungSummeEntnahmemengen());
+                    $festsetzungsSammelbescheidDaten->addEntgelt($gewaesserbenutzung->getFestsetzungSummeEntgelt());
+                    $festsetzungsSammelbescheidDaten->addNicht_zugelassenes_entgelt($gewaesserbenutzung->getFestsetzungSummeNichtZugelassenesEntgelt());
+                    $festsetzungsSammelbescheidDaten->addZugelassenes_entgelt($gewaesserbenutzung->getFestsetzungSummeZugelassenesEntgelt());
+                    
+                    //bestehendes Festsetzungsdokument löschen, wenn vorhanden
+                    if($gewaesserbenutzung->isFestsetzungFreigegeben() && !$gewaesserbenutzung->isFestsetzungDokumentErstellt())
                     {
-                        if(!empty($gewaesserbenutzung->gewaesserbenutzungUmfang) && empty($festsetzungsSammelbescheidDaten->getErlaubterUmfang()))
+                        if(!empty($gewaesserbenutzung->getFestsetzungDokument()))
                         {
-                            $erlaubterUmfang = $gewaesserbenutzung->gewaesserbenutzungUmfang->getErlaubterUmfang();
-                            $festsetzungsSammelbescheidDaten->setErlaubterUmfang($erlaubterUmfang);
+                            $oldFestsetzungsDocumentId = $gewaesserbenutzung->getFestsetzungDokument();
+                            $gewaesserbenutzung->deleteFestsetzungDokument();
+                            
+                            $festsetzung_delete_dokument = new Dokument($gui);
+                            $festsetzung_delete_dokument->deleteDocument($oldFestsetzungsDocumentId);
                         }
-                        
-                        $teilgewasserbenutzung = null;
-                        if(!empty($gewaesserbenutzung->teilgewaesserbenutzungen) && count($gewaesserbenutzung->teilgewaesserbenutzungen) > 0)
+                    }
+                    
+                    //Freitext bekommen
+                    if(!empty($gewaesserbenutzung->gewaesserbenutzungUmfang) && empty($festsetzungsSammelbescheidDaten->getErlaubterUmfang()))
+                    {
+                        $erlaubterUmfang = $gewaesserbenutzung->gewaesserbenutzungUmfang->getErlaubterUmfang();
+                        $festsetzungsSammelbescheidDaten->setErlaubterUmfang($erlaubterUmfang);
+                    }
+                    
+                    $teilgewasserbenutzung = null;
+                    if(!empty($gewaesserbenutzung->teilgewaesserbenutzungen) && count($gewaesserbenutzung->teilgewaesserbenutzungen) > 0)
+                    {
+                        $teilgewasserbenutzung = $gewaesserbenutzung->teilgewaesserbenutzungen[0];
+                    }
+                    
+                    if(!empty($teilgewasserbenutzung))
+                    {
+                        if(empty($festsetzungsSammelbescheidDaten->getFreitext()))
                         {
-                            $teilgewasserbenutzung = $gewaesserbenutzung->teilgewaesserbenutzungen[0];
-                        }
-                        
-                        if(!empty($teilgewasserbenutzung))
-                        {
-                            if(empty($festsetzungsSammelbescheidDaten->getFreitext()))
-                            {
-                                $festsetzungsSammelbescheidDaten->setFreitext($teilgewasserbenutzung->getFreitext());
-                                break;
-                            }
+                            $festsetzungsSammelbescheidDaten->setFreitext($teilgewasserbenutzung->getFreitext());
+                            break;
                         }
                     }
                 }
@@ -131,7 +139,14 @@ function festsetzung_erstellen(&$gui, &$wrzs)
             
             foreach ($wrzs as $wrz)
             {
-                $wrz->insertFestsetzungDokument($festsetzung_dokument_identifier);
+                if(!empty($wrz))
+                {
+                    $gewaesserbenutzung = $wrz->gewaesserbenutzungen[0];
+                    if(!empty($gewaesserbenutzung))
+                    {
+                        $gewaesserbenutzung->insertFestsetzungDokument($festsetzung_dokument_identifier);
+                    }
+                }
             }
             
             return $festsetzung_dokument_name;
@@ -209,7 +224,7 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
             }
         }
         
-        $erklaerung_datum = $wrz->getErklaerungDatum();
+        $erklaerung_datum = $wrz->gewaesserbenutzungen[0]->getErklaerungDatum();
         
         $parameter = [
             "Datum" => $datum,
@@ -297,13 +312,16 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
         		                      for ($i = 0; $i < $gewaesserbenutzungen_count; $i++) 
         		                      {
         		                          $gewaesserbenutzung = $gewaesserbenutzungen[$i];
-        		                          ?>
-    		                          <tr>
-                    		          		<td>
-                    		          			<?php 
-                    		          			     echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['FisWrV-WRe Anlagen'] . '&value_anlage_id=' . $wrz->anlagen->getId() . '&operator_anlage_id==">' . $wrz->anlagen->getName() . '</a>';
-                    		          			?>
-                    		          		</td>
+        		                          
+        		                          if(!empty($gewaesserbenutzung))
+        		                          {
+        		                              ?>
+        		                         <tr>
+        		                           <td>
+        		                              <?php
+        		                              echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['FisWrV-WRe Anlagen'] . '&value_anlage_id=' . $wrz->anlagen->getId() . '&operator_anlage_id==">' . $wrz->anlagen->getName() . '</a>';
+        		                              ?>
+                    		          	    </td>
                     		          		<td>
                     		          			<?php 
                     		          			     echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['FisWrV-WRe WrZ'] . '&value_wrz_id=' . $wrz->getId() . '&operator_wrz_id==">' . $wrz->getBezeichnung() . '</a>';
@@ -311,10 +329,7 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
                     		          		</td>
                     		          		<td>
                     		          			<?php
-                    		          			     if(!empty($gewaesserbenutzung))
-                    		          			     {
-                    		          			         echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['FisWrV-WRe Gewässerbenutzungen'] . '&value_id=' . $gewaesserbenutzung->getId() . '&operator_id==">' . $gewaesserbenutzung->getBezeichnung() . '</a>';
-                    		          			     }
+                    		          			echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['FisWrV-WRe Gewässerbenutzungen'] . '&value_id=' . $gewaesserbenutzung->getId() . '&operator_id==">' . $gewaesserbenutzung->getBezeichnung() . '</a>';
                     		          			?>
                     		          		</td>
                     		          		<td>
@@ -324,15 +339,15 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
                     		          		</td>
                     		          		<td>
                     		          			<?php
-                    		          			     echo $wrz->getErklaerungDatumHTML();
+                    		          			     echo $gewaesserbenutzung->getErklaerungDatumHTML();
                     		          			?>
                     		          		</td>
                     		          		<td>
                     		          			<?php 
-                    		          			     if($wrz->isFestsetzungFreigegeben())
+                    		          			     if($gewaesserbenutzung->isFestsetzungFreigegeben())
                     		          			     {
 //                     		          			         $gewaesserbenutzung->getUmfangAllerTeilbenutzungen()
-                    		          			         $entnahmemenge = $wrz->getFestsetzungSummeEntnahmemengen();
+                    		          			         $entnahmemenge = $gewaesserbenutzung->getFestsetzungSummeEntnahmemengen();
                     		          			         $gesamtEntnahmemenge = $gesamtEntnahmemenge + $entnahmemenge;
                     		          			         
                     		          			         echo $entnahmemenge;
@@ -341,9 +356,9 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
                     		          		</td>
                     		          		<td>
                     		          			<?php 
-                        		          			if($wrz->isFestsetzungFreigegeben())
+                    		          			    if($gewaesserbenutzung->isFestsetzungFreigegeben())
                         		          			{
-                        		          			    $entgelt = $wrz->getFestsetzungSummeEntgelt();
+                        		          			    $entgelt = $gewaesserbenutzung->getFestsetzungSummeEntgelt();
                         		          			    $gesamtEntgelt = $gesamtEntgelt + $entgelt;
                         		          			    echo $entgelt;
                         		          			}
@@ -351,9 +366,9 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
                     		          		</td>
                     		          		<td>
                     		          			<?php 
-                    		          			     if($wrz->isFestsetzungFreigegeben())
+                    		          			     if($gewaesserbenutzung->isFestsetzungFreigegeben())
                     		          			     {?>
-                    		          			     	<a href="<?php echo $this->actual_link . "?go=wasserentnahmeentgelt_festsetzung&getfestsetzung=" . $wrz->getId() ?>"><?php echo $wrz->getFestsetzungDatum(); ?></a>
+                    		          			     	<a href="<?php echo $this->actual_link . "?go=wasserentnahmeentgelt_festsetzung&getfestsetzung=" . $wrz->getId() . "_" . $gewaesserbenutzung->getId() ?>"><?php echo $gewaesserbenutzung->getFestsetzungDatum(); ?></a>
                     		          			     <?php
                     		          			     }
                     		          			
@@ -361,16 +376,18 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
                     		          		</td>
                     		          		<td>
                     		          			<?php 
-                    		          			     if($wrz->isFestsetzungFreigegeben() && !$wrz->isFestsetzungDokumentErstellt())
+                    		          			     if($gewaesserbenutzung->isFestsetzungFreigegeben() && !$gewaesserbenutzung->isFestsetzungDokumentErstellt())
                     		          			     {?>
-                    		          			     	<input type="checkbox" name="auswahl_checkbox[]" value="<?php echo $wrz->getId(); ?>" />
+                    		          			     	<input type="checkbox" name="auswahl_checkbox[]" value="<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>" />
                     		          			     <?php
                     		          			     }
                     		          			
                     		          			?>
                     		          		</td>
                     		          		<td>
-                    		          			<?php echo $wrz->getFestsetzungDokumentDatum() ?>
+                    		          			<?php 
+                    		          			 echo $gewaesserbenutzung->getFestsetzungDokumentDatum();
+                    		          			?>
                     		          		</td>
                     		          		<td style="background-color: inherit; width: 10px">
                     		          		</td>
@@ -379,7 +396,8 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
                     		          		<td>
                     		          		</td>
                     		          	</tr>
-                		           <?php
+                    		          <?php
+        		                      }
     		                      }
     		                  }
     		              }
@@ -466,19 +484,30 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
     			                if(empty($getAdressat) || $getAdressat === $wrz->adressat->getId())
     			                {
     			                    $this->debug->write('dokumentIds: ' . var_export($dokumentIds, true), 4);
-    			                    if($wrz->isFestsetzungDokumentErstellt())
+    			                    
+    			                    $gwbs = $wrz->gewaesserbenutzungen;
+    			                    if(!empty($gwbs))
     			                    {
-    			                        if(!in_array($wrz->festsetzung_dokument->getId(), $dokumentIds))
+    			                        foreach ($gwbs as $gwb)
     			                        {
-    			                            $dokumentIds[] = $wrz->festsetzung_dokument->getId();
-    			                            $wrz->festsetzung_dokument->addWrz_id($wrz->getId());
-    			                            $festsetzungDokumente[$wrz->festsetzung_dokument->getId()] = $wrz->festsetzung_dokument;
+    			                            if(!empty($gwb))
+    			                            {
+    			                                if($gwb->isFestsetzungDokumentErstellt())
+    			                                {
+    			                                    if(!in_array($gwb->festsetzung_dokument->getId(), $dokumentIds))
+    			                                    {
+    			                                        $dokumentIds[] = $gwb->festsetzung_dokument->getId();
+    			                                        $gwb->festsetzung_dokument->addWrz_id($wrz->getId());
+    			                                        $festsetzungDokumente[$gwb->festsetzung_dokument->getId()] = $gwb->festsetzung_dokument;
+    			                                    }
+    			                                    else
+    			                                    {
+    			                                        $festsetzungDokumente[$gwb->festsetzung_dokument->getId()]->addWrz_id($wrz->getId());
+    			                                    }
+    			                                }
+    			                            }
     			                        }
-    			                        else
-    			                        {
-    			                            $festsetzungDokumente[$wrz->festsetzung_dokument->getId()]->addWrz_id($wrz->getId());
-    			                        }
-    			                    }   
+    			                    }
     			                }
     			            }
     			        }

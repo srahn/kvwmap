@@ -64,8 +64,7 @@ elseif($_SERVER ["REQUEST_METHOD"] == "GET")
 		    $wrz = $festsetzungWrz->find_by_id($this, 'id', $idValues["wrz_id"]);
 // 		    var_dump($wrz);
 // 		    echo "<br />wrz id: " . $wrz->getId();
-// 		    echo "<br />wrz isErklaerungFreigegeben: " . var_dump($wrz->isErklaerungFreigegeben());
-		    if((!empty($wrz) && !empty($wrz->getId())) && $wrz->isErklaerungFreigegeben())
+		    if((!empty($wrz) && !empty($wrz->getId())))
 		    {
 // 		        echo "<br />wrz id: " . $wrz->getId();
 
@@ -82,11 +81,15 @@ elseif($_SERVER ["REQUEST_METHOD"] == "GET")
 		                }
 		            }
 		        }
-// 		        echo "<br />gewaesserbenutzung: " . $gewaesserbenutzung->getId();
-
-		        if($wrz->isFestsetzungFreigegeben())
+		        
+		        if(!empty($gewaesserbenutzung))
 		        {
-		            $speereEingabeFestsetzung = true;
+		            //echo "<br />gewaesserbenutzung: " . $gewaesserbenutzung->getId();
+		            
+		            if($gewaesserbenutzung->isErklaerungFreigegeben() && $gewaesserbenutzung->isFestsetzungFreigegeben())
+		            {
+		                $speereEingabeFestsetzung = true;
+		            }
 		        }
 		    }
 		    
@@ -198,19 +201,19 @@ function festsetzung_freigeben(&$gui, $valueEscaped, $festsetzungFreigeben, &$wr
             {
                 if($festsetzungFreigeben)
                 {
-                    $wrz->insertFestsetzungDatum();
+                    $gewaesserbenutzung->insertFestsetzungDatum();
                     $festsetzungsNutzer = $gui->user->Vorname . ' ' . $gui->user->Name;
-                    $wrz->insertFestsetzungNutzer($festsetzungsNutzer);
+                    $gewaesserbenutzung->insertFestsetzungNutzer($festsetzungsNutzer);
                     
                     $summe_nicht_zugelassene_entnahmemengen = htmlspecialchars($_POST["summe_nicht_zugelassene_entnahmemengen"]);
                     $summe_zugelassene_entnahmemengen = htmlspecialchars($_POST["summe_zugelassene_entnahmemengen"]);
                     $summe_entnahmemengen = htmlspecialchars($_POST["summe_entnahmemengen"]);
-                    $wrz->insertFestsetzungEntnahmemengen($summe_nicht_zugelassene_entnahmemengen, $summe_zugelassene_entnahmemengen, $summe_entnahmemengen);
+                    $gewaesserbenutzung->insertFestsetzungEntnahmemengen($summe_nicht_zugelassene_entnahmemengen, $summe_zugelassene_entnahmemengen, $summe_entnahmemengen);
                     
                     $summe_nicht_zugelassenes_entnahme_entgelt = htmlspecialchars($_POST["summe_nicht_zugelassenes_entnahme_entgelt"]);
                     $summe_zugelassenes_entnahme_entgelt = htmlspecialchars($_POST["summe_zugelassenes_entnahme_entgelt"]);
                     $summe_ennahme_entgelt = htmlspecialchars($_POST["summe_entnahme_entgelt"]);
-                    $wrz->insertFestsetzungEntgelte($summe_nicht_zugelassenes_entnahme_entgelt, $summe_zugelassenes_entnahme_entgelt, $summe_ennahme_entgelt);
+                    $gewaesserbenutzung->insertFestsetzungEntgelte($summe_nicht_zugelassenes_entnahme_entgelt, $summe_zugelassenes_entnahme_entgelt, $summe_ennahme_entgelt);
                 }
                 
                 // update gewaesserbenutzungen, because teilgewaesserbenutzungen where added
@@ -242,21 +245,25 @@ if((empty($wrz) || empty($wrz->getId())) && $findDefaultWrz)
     $defaultWrz = new WasserrechtlicheZulassungen($this);
     $results = $defaultWrz->find_where('1=1', 'id');
     
-    if(!empty($results) && count($results) > 0)
+    if(!empty($results) && count($results) > 0 && !empty($results[0]))
     {
         $wrz = $results[0];
-    }
-    
-    if($wrz->isFestsetzungFreigegeben())
-    {
-        $speereEingabeFestsetzung = true;
+        $wrz->getDependentObjects($this, $wrz);
+        
+        if(empty($gewaesserbenutzung) && !empty($wrz->gewaesserbenutzungen) && count($wrz->gewaesserbenutzungen) > 0 && !empty($wrz->gewaesserbenutzungen[0]))
+        {
+            $gewaesserbenutzung = $wrz->gewaesserbenutzungen[0];
+        }
+        
+        if($gewaesserbenutzung->isFestsetzungFreigegeben())
+        {
+            $speereEingabeFestsetzung = true;
+        }
     }
 }
 
 if(!empty($wrz) && !empty($wrz->getId()))
 {
-    if($wrz->isErklaerungFreigegeben())
-    {
         $wrz->getDependentObjects($this, $wrz);
 //         echo "findDefaultWrz: " . $findDefaultWrz;
         if($findDefaultWrz && empty($gewaesserbenutzung) && !empty($wrz->gewaesserbenutzungen) && count($wrz->gewaesserbenutzungen) > 0 && !empty($wrz->gewaesserbenutzungen[0]))
@@ -266,20 +273,22 @@ if(!empty($wrz) && !empty($wrz->getId()))
         
         if(!empty($gewaesserbenutzung))
         {
-            $tab1_id="wasserentnahmeentgelt_erklaerung_der_entnahme";
-            $tab1_name="Erklärung der Entnahme";
-            $tab1_active=false;
-            $tab1_visible=true;
-            $tab2_id="wasserentnahmeentgelt_festsetzung";
-            $tab1_extra_parameter_key="geterklaerung";
-            $tab1_extra_parameter_value=$wrz->getId() . "_" . $gewaesserbenutzung->getId();
-            $tab2_name="Festsetzung";
-            $tab2_active=true;
-            $tab2_visible=true;
-            include_once ('includes/header.php');
-            
-            ?>
-
+            if($gewaesserbenutzung->isErklaerungFreigegeben())
+            {
+                $tab1_id="wasserentnahmeentgelt_erklaerung_der_entnahme";
+                $tab1_name="Erklärung der Entnahme";
+                $tab1_active=false;
+                $tab1_visible=true;
+                $tab2_id="wasserentnahmeentgelt_festsetzung";
+                $tab1_extra_parameter_key="geterklaerung";
+                $tab1_extra_parameter_value=$wrz->getId() . "_" . $gewaesserbenutzung->getId();
+                $tab2_name="Festsetzung";
+                $tab2_active=true;
+                $tab2_visible=true;
+                include_once ('includes/header.php');
+                
+                ?>
+    
         	<div id="wasserentnahmeentgelt_festsetzung" class="tabcontent" style="display: block">
         
             	<form action="index.php" id="festsetzung_freigeben_form" accept-charset="" method="POST">
@@ -422,7 +431,7 @@ if(!empty($wrz) && !empty($wrz->getId()))
                                       <td><?php echo !empty($teilgewaesserbenutzung->getWiedereinleitungNutzer()) && $teilgewaesserbenutzung->getWiedereinleitungNutzer() === "t" ? "ja" : "nein" ?></td>
                                       <td><?php echo !empty($teilgewaesserbenutzung->mengenbestimmung) ? $teilgewaesserbenutzung->mengenbestimmung->getName() : "" ?></td>
                                       <td>
-                                      	<select name="teilgewaesserbenutzung_art_benutzung_<?php echo $i; ?>" onchange="setNewTab('wasserentnahmeentgelt_festsetzung',{'getfestsetzung':'<?php echo $wrz->getId() ?>','teilgewaesserbenutzung_art_benutzung_<?php echo $i; ?>':this.value})" <?php echo $speereEingabeFestsetzung ? "disabled='disabled'" : "" ?>>
+                                      	<select name="teilgewaesserbenutzung_art_benutzung_<?php echo $i; ?>" onchange="setNewTab('wasserentnahmeentgelt_festsetzung',{'getfestsetzung':'<?php echo $wrz->getId() . "_" . $gewaesserbenutzung->getId() ?>','teilgewaesserbenutzung_art_benutzung_<?php echo $i; ?>':this.value})" <?php echo $speereEingabeFestsetzung ? "disabled='disabled'" : "" ?>>
                                     		<option value='<?php echo WASSERRECHT_ERKLAERUNG_ENTNAHME_BITTE_AUSWAEHLEN_VALUE ?>'><?php echo WASSERRECHT_ERKLAERUNG_ENTNAHME_BITTE_AUSWAEHLEN_TEXT ?></option>
                                     		<option value="1" <?php echo!is_null($getArtBenutzung) && $getArtBenutzung === "1" ?  'selected' : ''?>>GW</option>
                                     		<option value="2" <?php echo !is_null($getArtBenutzung) && $getArtBenutzung === "2" ?  'selected' : ''?>>OW</option>
@@ -598,7 +607,7 @@ if(!empty($wrz) && !empty($wrz->getId()))
                             <div class="wasserrecht_display_table_cell_spacer"></div>
                             <div class="wasserrecht_display_table_cell_white">
                             	<?php
-                            	    echo '<a href="' . $this->actual_link . '?go=wasserentnahmeentgelt_erklaerung_der_entnahme&geterklaerung=' . $wrz->getId() . '">' . $wrz->getErklaerungDatumHTML() . '</a>';
+                            	   echo '<a href="' . $this->actual_link . '?go=wasserentnahmeentgelt_erklaerung_der_entnahme&geterklaerung=' . $wrz->getId() . "_" . $gewaesserbenutzung->getId() . '">' . $gewaesserbenutzung->getErklaerungDatumHTML() . '</a>';
                         	    ?>
                             </div>
                         </div>
@@ -608,7 +617,7 @@ if(!empty($wrz) && !empty($wrz->getId()))
                             <div class="wasserrecht_display_table_cell_spacer"></div>
                             <div class="wasserrecht_display_table_cell_white">
                             <?php 
-                                    echo $wrz->getErklaerungNutzer();
+                                    echo $gewaesserbenutzung->getErklaerungNutzer();
                             ?>
                             </div>
                         </div>
@@ -653,7 +662,7 @@ if(!empty($wrz) && !empty($wrz->getId()))
                             <div class="wasserrecht_display_table_cell_spacer"></div>
                             <div class="wasserrecht_display_table_cell_white">
                             <?php
-                                    echo $wrz->getFestsetzungDatumHTML();
+                                    echo $gewaesserbenutzung->getFestsetzungDatumHTML();
                         	 ?>
                             </div>
                         </div>
@@ -663,7 +672,7 @@ if(!empty($wrz) && !empty($wrz->getId()))
                             <div class="wasserrecht_display_table_cell_spacer"></div>
                             <div class="wasserrecht_display_table_cell_white">
                           	<?php 
-                                    echo $wrz->getFestsetzungNutzerHTML();
+                          	         echo $gewaesserbenutzung->getFestsetzungNutzerHTML();
                             ?>
                             </div>
                         </div>
@@ -678,12 +687,12 @@ if(!empty($wrz) && !empty($wrz->getId()))
                    			<div class="wasserrecht_display_table_cell_caption">Abgelegte Festsetzungen</div>
         				</div>
         				<?php 
-        				    if(!empty($wrz->isFestsetzungDokumentErstellt()))
+        				    if(!empty($gewaesserbenutzung->isFestsetzungDokumentErstellt()))
             				{?>
                 				<div class="wasserrecht_display_table_row">
                                     <div class="wasserrecht_display_table_cell_caption">
                     					<?php
-                    					   echo '<a href="' . $this->actual_link . WASSERRECHT_DOCUMENT_URL_PATH . $wrz->festsetzung_dokument->getPfad() . '" target="_blank">' . $wrz->festsetzung_dokument->getName() . '</a>';
+                    					   echo '<a href="' . $this->actual_link . WASSERRECHT_DOCUMENT_URL_PATH . $gewaesserbenutzung->festsetzung_dokument->getPfad() . '" target="_blank">' . $gewaesserbenutzung->festsetzung_dokument->getName() . '</a>';
                     					?>
                            			</div>
                 				</div>
@@ -703,9 +712,9 @@ if(!empty($wrz) && !empty($wrz->getId()))
                             <div class="wasserrecht_display_table_cell_spacer"></div>
                             <div class="wasserrecht_display_table_cell_white">
                             	<?php
-                        	       if($wrz->isFestsetzungDokumentErstellt())
+                            	   if($gewaesserbenutzung->isFestsetzungDokumentErstellt())
                         	       {
-                        	           echo $wrz->getFestsetzungDokumentDatum();
+                        	           echo $gewaesserbenutzung->getFestsetzungDokumentDatum();
                         	       }
                         	    ?>
                             </div>
@@ -722,19 +731,18 @@ if(!empty($wrz) && !empty($wrz->getId()))
                         </div>
                         
                     </div>
-                      
-         	</form>
-        </div>
- <?php
-        }
-        else
-        {
-            echo '<h1 style=\"color: red;\">Keine Gewässerbenutzung gefunden!<h1>';
-        }
+             	</form>
+            </div>
+     <?php
+            }
+            else
+            {
+                echo '<h1 style=\"color: red;\">Erklärung wurde noch nicht freigegeben!<h1>';
+            }
     }
     else
     {
-        echo '<h1 style=\"color: red;\">Erklärung wurde noch nicht freigegeben!<h1>';
+        echo '<h1 style=\"color: red;\">Keine Gewässerbenutzung gefunden!<h1>';
     }
     
 }

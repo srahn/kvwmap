@@ -9,7 +9,6 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	public $adressat;
 	public $anlagen;
 	public $aufforderung_dokument;
-	public $festsetzung_dokument;
 	public $gewaesserbenutzungen;
 	
 	public function getGueltigkeitsJahrString()
@@ -87,8 +86,16 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 		return $wrzProGueltigkeitsJahreArray;
 	}
 	
-	public function getDependentObjects($gui, &$result) 
+	public function getDependentObjects($gui, &$result)
 	{
+	    return $this->getDependentObjectsInteral($gui, $result, true);
+	}
+	
+	public function getDependentObjectsInteral($gui, &$result, $addGewaesserbenutzungen) 
+	{
+	    $gui->debug->write('*** getDependentObjects ***', 4);
+	    $gui->debug->write('addGewaesserbenutzungen: ' . var_export($addGewaesserbenutzungen, true), 4);
+	    
 	    $years = null;
 	    
 	    if(!empty($result))
@@ -188,17 +195,6 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	            }
 	        }
 	        
-	        //get the 'Festsetzungs Dokument'
-	        if(!empty($result->getFestsetzungDokument()))
-	        {
-	            $dokument = new Dokument($gui);
-	            $dokumente = $dokument->find_where('id=' . $result->getFestsetzungDokument());
-	            if(!empty($dokumente))
-	            {
-	                $result->festsetzung_dokument = $dokumente[0];
-	            }
-	        }
-	        
 	        //get the 'Aufforderung'
 	        // 					if(!empty($result->data['aufforderung']))
 	        // 					{
@@ -211,10 +207,13 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	        // 					}
 	        
 	        //get the 'Gewaesserbenutzungen'
-	        $gewaesserbenutzung = new Gewaesserbenutzungen($gui);
-	        $gewaesserbenutzungen = $gewaesserbenutzung->find_where_with_subtables('wasserrechtliche_zulassungen=' . $result->getId(), 'id');
-// 	        $gewaesserbenutzungen = $gewaesserbenutzung->find_where_with_subtables('wasserrechtliche_zulassungen=' . $result->getId() . ' AND (art = 1 OR art = 2)', 'id');
-	        $result->gewaesserbenutzungen = $gewaesserbenutzungen;
+	        if($addGewaesserbenutzungen)
+	        {
+	            $gewaesserbenutzung = new Gewaesserbenutzungen($gui);
+	            $gewaesserbenutzungen = $gewaesserbenutzung->find_where_with_subtables('wasserrechtliche_zulassungen=' . $result->getId(), 'id');
+	            // 	        $gewaesserbenutzungen = $gewaesserbenutzung->find_where_with_subtables('wasserrechtliche_zulassungen=' . $result->getId() . ' AND (art = 1 OR art = 2)', 'id');
+	            $result->gewaesserbenutzungen = $gewaesserbenutzungen;
+	        }
 	        
 	        $gui->debug->write('gewaesserbenutzungen count: ' . count( $result->gewaesserbenutzungen), 4);
 	        
@@ -434,275 +433,6 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	        $this->set('aufforderung_dokument', $id);
 	        $this->update();
 	    }
-	}
-	
-	////////////////////////////////////////////////////////////////////
-	
-	public function isErklaerungFreigegeben()
-	{
-	    $datumErklaerung = $this->getErklaerungDatum();
-	    if(!empty($datumErklaerung))
-	    {
-	        return true;
-	    }
-	    
-	    return false;
-	}
-	
-	public function getErklaerungDatum() {
-	    return $this->data['erklaerung_datum'];
-	}
-	
-	public function getErklaerungDatumHTML() {
-	    $datumErklaerung = $this->getErklaerungDatum();
-	    if(!empty($datumErklaerung))
-	    {
-	        // 	        $dateString = DateTime::createFromFormat("d.m.Y", $datumAbsend);
-	        return "<div>" . $datumErklaerung . "</div>";
-	    }
-	    
-	    return "<div style=\"color: red;\">Nicht erklärt</div>";
-	}
-	
-	public function insertErklaerungDatum($dateValue = NULL) {
-	    //if date is not set --> set it to today's date
-	    if(empty($dateValue))
-	    {
-	        $dateValue = date("d.m.Y");
-	    }
-	    
-	    $this->set('erklaerung_datum', $dateValue);
-	    $this->update();
-	    
-	    // 	    $this->create(
-	    // 	        array(
-	    // 	            'aufforderung_datum_absend' => $dateValue
-	    // 	        )
-	    // 	        );
-	}
-	
-	public function insertErklaerungNutzer($erklaerungNutzer) {
-	    $this->set('erklaerung_nutzer', $erklaerungNutzer);
-	    $this->update();
-	}
-	
-	public function getErklaerungNutzer() {
-	    return $this->data['erklaerung_nutzer'];
-	}
-	
-	public function getErklaerungNutzerHTML() {
-	    $nutzerErklaerung = $this->getErklaerungNutzer();
-	    if(!empty($nutzerErklaerung))
-	    {
-	        // 	        $dateString = DateTime::createFromFormat("d.m.Y", $datumAbsend);
-	        return "<div>" . $nutzerErklaerung . "</div>";
-	    }
-	    
-	    return "<div style=\"color: red;\">Nicht erklärt</div>";
-	}
-	
-	////////////////////////////////////////////////////////////////////
-	
-	public function isFestsetzungFreigegeben()
-	{
-	    $datumFestsetzung = $this->getFestsetzungDatum();
-	    if(!empty($datumFestsetzung))
-	    {
-	        return true;
-	    }
-	    
-	    return false;
-	}
-	
-	public function getFestsetzungDatum() {
-	    return $this->data['festsetzung_datum'];
-	}
-	
-	public function getFestsetzungDatumHTML() {
-	    $datumFestsetzung = $this->getFestsetzungDatum();
-	    if(!empty($datumFestsetzung))
-	    {
-	        // 	        $dateString = DateTime::createFromFormat("d.m.Y", $datumAbsend);
-	        return "<div>" . $datumFestsetzung . "</div>";
-	    }
-	    
-	    return "<div style=\"color: red;\">Nicht erklärt</div>";
-	}
-	
-	public function insertFestsetzungDatum($dateValue = NULL) {
-	    //if date is not set --> set it to today's date
-	    if(empty($dateValue))
-	    {
-	        $dateValue = date("d.m.Y");
-	    }
-	    
-	    $this->set('festsetzung_datum', $dateValue);
-	    $this->update();
-	    
-	    // 	    $this->create(
-	    // 	        array(
-	    // 	            'aufforderung_datum_absend' => $dateValue
-	    // 	        )
-	    // 	        );
-	}
-	
-	public function insertFestsetzungNutzer($festsetzungNutzer) {
-	    $this->set('festsetzung_nutzer', $festsetzungNutzer);
-	    $this->update();
-	}
-	
-	public function getFestsetzungNutzer() {
-	    return $this->data['festsetzung_nutzer'];
-	}
-	
-	public function getFestsetzungNutzerHTML() {
-	    $nutzerFestsetzung = $this->getFestsetzungNutzer();
-	    if(!empty($nutzerFestsetzung))
-	    {
-	        // 	        $dateString = DateTime::createFromFormat("d.m.Y", $datumAbsend);
-	        return "<div>" . $nutzerFestsetzung . "</div>";
-	    }
-	    
-	    return "<div style=\"color: red;\">Nicht erklärt</div>";
-	}
-	
-	public function isFestsetzungDokumentErstellt()
-	{
-	    $datumFestsetzungDokument = $this->getFestsetzungDokumentDatum();
-	    if(!empty($datumFestsetzungDokument))
-	    {
-	        return true;
-	    }
-	    
-	    return false;
-	}
-	
-	public function getFestsetzungDokument() {
-	    return $this->data['festsetzung_dokument'];
-	}
-	
-	public function insertFestsetzungDokument($id) {
-	    if(!empty($id))
-	    {
-	        $this->set('festsetzung_dokument', $id);
-	        $this->update();
-	        
-	        $this->insertFestsetzungDokumentDatum();
-	    }
-	}
-	
-	public function deleteFestsetzungDokument() {
-	      $this->set('festsetzung_dokument', '');
-	      $this->update();
-	}
-	
-	public function getFestsetzungDokumentDatum() {
-	    return $this->data['festsetzung_dokument_datum'];
-	}
-	
-	public function insertFestsetzungDokumentDatum($dateValue = NULL) {
-	    //if date is not set --> set it to today's date
-	    if(empty($dateValue))
-	    {
-	        $dateValue = date("d.m.Y");
-	    }
-	    
-	    $this->set('festsetzung_dokument_datum', $dateValue);
-	    $this->update();
-	}
-	
-	////////////
-	
-	public function insertFestsetzungSummeZugelasseneEntnahmemengen($festsetzungSummeZugelasseneEntnahmemengen, $update = true) {
-	    $this->set('festsetzung_summe_zugelassene_entnahmemengen', $festsetzungSummeZugelasseneEntnahmemengen);
-	    if($update)
-	    {
-	        $this->update();
-	    }
-	}
-	
-	public function getFestsetzungSummeZugelasseneEntnahmemengen() {
-	    return $this->data['festsetzung_summe_zugelassene_entnahmemengen'];
-	}
-	
-	public function insertFestsetzungSummeNichtZugelasseneEntnahmemengen($festsetzungSummeNichtZugelasseneEntnahmemengen, $update = true) {
-	    $this->set('festsetzung_summe_nicht_zugelassene_entnahmemengen', $festsetzungSummeNichtZugelasseneEntnahmemengen);
-	    if($update)
-	    {
-	        $this->update();
-	    }
-	}
-	
-	public function getFestsetzungSummeNichtZugelasseneEntnahmemengen() {
-	    return $this->data['festsetzung_summe_nicht_zugelassene_entnahmemengen'];
-	}
-	
-	public function insertFestsetzungSummeEntnahmemengen($festsetzungSummeEntnahmemengen, $update = true) {
-	    $this->set('festsetzung_summe_entnahmemengen', $festsetzungSummeEntnahmemengen);
-	    if($update)
-	    {
-	        $this->update();
-	    }
-	}
-	
-	public function getFestsetzungSummeEntnahmemengen() {
-	    return $this->data['festsetzung_summe_entnahmemengen'];
-	}
-	
-	//////////////
-	
-	public function insertFestsetzungSummeZugelassenesEntgelt($festsetzungSummeZugelassenesEntgelt, $update = true) {
-	    $this->set('festsetzung_summe_zugelassenes_entgelt', $festsetzungSummeZugelassenesEntgelt);
-	    if($update)
-	    {
-	        $this->update();
-	    }
-	}
-	
-	public function getFestsetzungSummeZugelassenesEntgelt() {
-	    return $this->data['festsetzung_summe_zugelassenes_entgelt'];
-	}
-	
-	public function insertFestsetzungSummeNichtZugelassenesEntgelt($festsetzungSummeNichtZugelassenesEntgelt, $update = true) {
-	    $this->set('festsetzung_summe_nicht_zugelassenes_entgelt', $festsetzungSummeNichtZugelassenesEntgelt);
-	    if($update)
-	    {
-	        $this->update();
-	    }
-	}
-	
-	public function getFestsetzungSummeNichtZugelassenesEntgelt() {
-	    return $this->data['festsetzung_summe_nicht_zugelassenes_entgelt'];
-	}
-	
-	public function insertFestsetzungSummeEntgelt($festsetzungSummeEntgelt, $update = true) {
-	    $this->set('festsetzung_summe_entgelt', $festsetzungSummeEntgelt);
-	    if($update)
-	    {
-	        $this->update();
-	    }
-	}
-	
-	public function getFestsetzungSummeEntgelt() {
-	    return $this->data['festsetzung_summe_entgelt'];
-	}
-	
-	public function insertFestsetzungEntnahmemengen($festsetzungSummeNichtZugelasseneEntnahmemengen, $festsetzungSummeZugelasseneEntnahmemengen, $festsetzungSummeEntnahmemengen) 
-	{
-	    $this->insertFestsetzungSummeNichtZugelasseneEntnahmemengen($festsetzungSummeNichtZugelasseneEntnahmemengen, false);
-	    $this->insertFestsetzungSummeZugelasseneEntnahmemengen($festsetzungSummeZugelasseneEntnahmemengen, false);
-	    $this->insertFestsetzungSummeEntnahmemengen($festsetzungSummeEntnahmemengen, false);
-	    
-	    $this->update();
-	}
-	
-	public function insertFestsetzungEntgelte($festsetzungSummeNichtZugelassenesEntgelt, $festsetzungSummeZugelassenesEntgelt, $festsetzungSummeEntgelt)
-	{
-	    $this->insertFestsetzungSummeNichtZugelassenesEntgelt($festsetzungSummeNichtZugelassenesEntgelt, false);
-	    $this->insertFestsetzungSummeZugelassenesEntgelt($festsetzungSummeZugelassenesEntgelt, false);
-	    $this->insertFestsetzungSummeEntgelt($festsetzungSummeEntgelt, false);
-	    
-	    $this->update();
 	}
 	
 	////////////////////////////////////////////////////////////////////

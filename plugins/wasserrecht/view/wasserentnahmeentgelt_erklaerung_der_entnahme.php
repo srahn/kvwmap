@@ -60,9 +60,12 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
 		        }
 // 		        echo "<br />gewaesserbenutzung: " . $gewaesserbenutzung[0]->getId();
 
-		        if($wrz->isErklaerungFreigegeben())
+		        if(!empty($gewaesserbenutzung))
 		        {
-		            $speereEingabeErklaerung = true;
+		            if($gewaesserbenutzung->isErklaerungFreigegeben())
+		            {
+		                $speereEingabeErklaerung = true;
+		            }
 		        }
 		    }
 		    
@@ -79,12 +82,12 @@ elseif($_SERVER ["REQUEST_METHOD"] == "GET")
         
         if(strtolower($keyEscaped) === "geterklaerung")
         {
-            $gui->debug->write('*** geterklaerung ***', 4);
+            $this->debug->write('*** geterklaerung ***', 4);
             
             $findDefaultWrz = false;
             
             $idValues = findIdFromValueString($this, $valueEscaped);
-            $gui->debug->write('idValues: ' . var_export($idValues, true), 4);
+            $this->debug->write('idValues: ' . var_export($idValues, true), 4);
             
             $erklaerungWrz = new WasserrechtlicheZulassungen($this);
             $wrz = $erklaerungWrz->find_by_id($this, 'id', $idValues["wrz_id"]);
@@ -105,9 +108,12 @@ elseif($_SERVER ["REQUEST_METHOD"] == "GET")
                 }
                 // 		        echo "<br />gewaesserbenutzung: " . $gewaesserbenutzung[0]->getId();
                 
-                if($wrz->isErklaerungFreigegeben())
+                if(!empty($gewaesserbenutzung))
                 {
-                    $speereEingabeErklaerung = true;
+                    if($gewaesserbenutzung->isErklaerungFreigegeben())
+                    {
+                        $speereEingabeErklaerung = true;
+                    }
                 }
             }
             
@@ -346,8 +352,8 @@ function erklaerung_freigeben($gui, &$valueEscaped, &$wrz, &$gewaesserbenutzung,
                 if($insertDate)
                 {
                     $erklaerungDatum = htmlspecialchars($_POST["datum_erklaerung"]);
-                    $wrz->insertErklaerungDatum($erklaerungDatum);
-                    $wrz->insertErklaerungNutzer($gui->user->Vorname . ' ' . $gui->user->Name);
+                    $gewaesserbenutzung->insertErklaerungDatum($erklaerungDatum);
+                    $gewaesserbenutzung->insertErklaerungNutzer($gui->user->Vorname . ' ' . $gui->user->Name);
                 }
                 
                 // update gewaesserbenutzungen, because teilgewaesserbenutzungen where added
@@ -388,11 +394,17 @@ if((empty($wrz) || empty($wrz->getId())) && $findDefaultWrz)
     $defaultWrz = new WasserrechtlicheZulassungen($this);
     $results = $defaultWrz->find_where('1=1', 'id');
     
-    if(!empty($results) && count($results) > 0)
+    if(!empty($results) && count($results) > 0 && !empty($results[0]))
     {
         $wrz = $results[0];
+        $wrz->getDependentObjects($this, $wrz);
         
-        if($wrz->isErklaerungFreigegeben())
+        if(empty($gewaesserbenutzung) && !empty($wrz->gewaesserbenutzungen) && count($wrz->gewaesserbenutzungen) > 0 && !empty($wrz->gewaesserbenutzungen[0]))
+        {
+            $gewaesserbenutzung = $wrz->gewaesserbenutzungen[0];
+        }
+        
+        if(!empty($gewaesserbenutzung) && $gewaesserbenutzung->isErklaerungFreigegeben())
         {
             $speereEingabeErklaerung = true;
         }
@@ -422,7 +434,7 @@ if(!empty($wrz) && !empty($wrz->getId()))
         $tab2_extra_parameter_value=$wrz->getId() . "_" . $gewaesserbenutzung->getId();
         //     var_dump($tab2_extra_parameter_key);
         //     var_dump($tab2_extra_parameter_value);
-        if($wrz->isErklaerungFreigegeben())
+        if($gewaesserbenutzung->isErklaerungFreigegeben())
         {
             $tab2_visible=true;
         }
@@ -683,7 +695,7 @@ if(!empty($wrz) && !empty($wrz->getId()))
                         </div>
                         
                       <?php
-                        if (!$speereEingabeErklaerung && !$wrz->isFestsetzungFreigegeben()) {
+                        if (!$speereEingabeErklaerung && !$gewaesserbenutzung->isFestsetzungFreigegeben()) {
                             ?>
                 			<div id="calendar" class="calendar">
                 				<div id="calendar_datum_erklaerung"></div>
@@ -701,7 +713,7 @@ if(!empty($wrz) && !empty($wrz->getId()))
     		   			<div class="wasserrecht_display_table_row">
     		   				<div class="wasserrecht_display_table_cell_caption">
                     			<input type="hidden" name="go" value="wasserentnahmeentgelt">
-        						<button class="wasserrecht_button" name="erklaerung_entspeeren_<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>" value="<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>" type="submit" id="erklaerung_entspeeren_button_<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>" <?php echo !$speereEingabeErklaerung || $wrz->isFestsetzungFreigegeben() ? "disabled='disabled'" : "" ?>>Erklärung entspeeren</button>
+        						<button class="wasserrecht_button" name="erklaerung_entspeeren_<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>" value="<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>" type="submit" id="erklaerung_entspeeren_button_<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>" <?php echo !$speereEingabeErklaerung || $gewaesserbenutzung->isFestsetzungFreigegeben() ? "disabled='disabled'" : "" ?>>Erklärung entspeeren</button>
                    			</div>
                    			<div class="wasserrecht_display_table_cell_spacer"></div>
             		   		<div class="wasserrecht_display_table_row_spacer"></div>
@@ -716,7 +728,7 @@ if(!empty($wrz) && !empty($wrz->getId()))
     		   			<div class="wasserrecht_display_table_row">
     		   				<div class="wasserrecht_display_table_cell_caption">
                     			<input type="hidden" name="go" value="wasserentnahmeentgelt">
-        						<button class="wasserrecht_button" name="erklaerung_freigeben_<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>" value="<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>" type="submit" id="erklaerung_freigeben_button_<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>" <?php echo $speereEingabeErklaerung || $wrz->isFestsetzungFreigegeben() ? "disabled='disabled'" : "" ?>>Erklärung freigeben</button>
+        						<button class="wasserrecht_button" name="erklaerung_freigeben_<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>" value="<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>" type="submit" id="erklaerung_freigeben_button_<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>" <?php echo $speereEingabeErklaerung || $gewaesserbenutzung->isFestsetzungFreigegeben() ? "disabled='disabled'" : "" ?>>Erklärung freigeben</button>
                    			</div>
                    			<div class="wasserrecht_display_table_cell_spacer"></div>
             		   		<div class="wasserrecht_display_table_row_spacer"></div>
@@ -733,18 +745,18 @@ if(!empty($wrz) && !empty($wrz->getId()))
                             <div class="wasserrecht_display_table_cell_spacer"></div>
                             <div class="wasserrecht_display_table_cell_white">
                             	<?php 
-                            	   if(!$speereEingabeErklaerung && !$wrz->isFestsetzungFreigegeben())
+                            	   if(!$speereEingabeErklaerung && !$gewaesserbenutzung->isFestsetzungFreigegeben())
                             	   {?>
                             	   		<div id="layer" onclick="remove_calendar();"></div>
                             			<a id="caldbl" href="javascript:;" title="(TT.MM.JJJJ) Datum auf das die Erklärung datiert wird." onclick="$('.calendar').show();add_calendar(event, 'datum_erklaerung');" ondblclick="$('.calendar').hide(); $('#datum_erklaerung').val('08.09.2017')">
                             				<img src="graphics/calendarsheet.png" border="0">
                             			</a>
-            							<input onchange="" title="Datum Erklärung" id="datum_erklaerung" name="datum_erklaerung" value="<?php echo $wrz->getErklaerungDatum() === null ? date("d.m.Y") : $wrz->getErklaerungDatum(); ?>" type="text" readonly="readonly">
+            							<input onchange="" title="Datum Erklärung" id="datum_erklaerung" name="datum_erklaerung" value="<?php echo $gewaesserbenutzung->getErklaerungDatum() === null ? date("d.m.Y") : $gewaesserbenutzung->getErklaerungDatum(); ?>" type="text" readonly="readonly">
                             	   <?php
                             	   }
                             	   else
                             	   {
-                            	       echo $wrz->getErklaerungDatumHTML();
+                            	       echo $gewaesserbenutzung->getErklaerungDatumHTML();
                             	   }
                             	?>
                             	<?php
@@ -757,7 +769,7 @@ if(!empty($wrz) && !empty($wrz->getId()))
                             <div class="wasserrecht_display_table_cell_spacer"></div>
                             <div class="wasserrecht_display_table_cell_white">
                             <?php 
-                                    echo $wrz->getErklaerungNutzerHTML();
+                                    echo $gewaesserbenutzung->getErklaerungNutzerHTML();
                             ?>
                             </div>
                         </div>
