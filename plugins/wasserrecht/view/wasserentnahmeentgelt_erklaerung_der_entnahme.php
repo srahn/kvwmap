@@ -47,18 +47,26 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
         }
         elseif(startsWith($keyEscaped, "erklaerung_"))
 		{
-		    $lastIndex = strripos($keyEscaped, "_");
-		    $erklaerungWrzId = substr($keyEscaped, $lastIndex + 1);
-// 		    echo "<br />lastIndex: " . $lastIndex . " erklaerungWrzId: " . $erklaerungWrzId;
+		    $lastIndex = strripos($valueEscaped, "_");
+		    $gewaesserbenutzungId = substr($valueEscaped, $lastIndex + 1);
+		    $erklaerungWrzId = substr($valueEscaped, 0, $lastIndex);
+// 		    echo "<br />lastIndex: " . $lastIndex . " erklaerungWrzId: " . $erklaerungWrzId . " gewaesserbenutzungId: " . $gewaesserbenutzungId;
 		    $erklaerungWrz = new WasserrechtlicheZulassungen($this);
 		    $wrz = $erklaerungWrz->find_by_id($this, 'id', $erklaerungWrzId);
 		    if(!empty($wrz))
 		    {
 		        $gb = new Gewaesserbenutzungen($this);
 		        $gewaesserbenutzungen = $gb->find_where_with_subtables('wasserrechtliche_zulassungen=' . $wrz->getId());
-		        if(!empty($gewaesserbenutzungen) && count($gewaesserbenutzungen) > 0 && !empty($gewaesserbenutzungen[0]))
+		        if(!empty($gewaesserbenutzungen) && count($gewaesserbenutzungen) > 0)
 		        {
-		            $gewaesserbenutzung = $gewaesserbenutzungen[0];
+		            foreach ($gewaesserbenutzungen as $gwb)
+		            {
+		                if(!empty($gwb) && $gwb->getId() === $gewaesserbenutzungId)
+		                {
+		                    $gewaesserbenutzung = $gwb;
+		                    break;
+		                }
+		            }
 		        }
 // 		        echo "<br />gewaesserbenutzung: " . $gewaesserbenutzung[0]->getId();
 
@@ -81,17 +89,26 @@ elseif($_SERVER ["REQUEST_METHOD"] == "GET")
         
         if(strtolower($keyEscaped) === "geterklaerung")
         {
-            $erklaerungWrzId = $valueEscaped;
-            // 		    echo "<br />erklaerungWrzId: " . $erklaerungWrzId;
+            $lastIndex = strripos($valueEscaped, "_");
+            $gewaesserbenutzungId = substr($valueEscaped, $lastIndex + 1);
+            $erklaerungWrzId = substr($valueEscaped, 0, $lastIndex);
+            // 		    echo "<br />lastIndex: " . $lastIndex . " erklaerungWrzId: " . $erklaerungWrzId . " gewaesserbenutzungId: " . $gewaesserbenutzungId;
             $erklaerungWrz = new WasserrechtlicheZulassungen($this);
             $wrz = $erklaerungWrz->find_by_id($this, 'id', $erklaerungWrzId);
             if(!empty($wrz) && !empty($wrz->getId()))
             {
                 $gb = new Gewaesserbenutzungen($this);
                 $gewaesserbenutzungen = $gb->find_where_with_subtables('wasserrechtliche_zulassungen=' . $wrz->getId());
-                if(!empty($gewaesserbenutzungen) && count($gewaesserbenutzungen) > 0 && !empty($gewaesserbenutzungen[0]))
+                if(!empty($gewaesserbenutzungen) && count($gewaesserbenutzungen) > 0)
                 {
-                    $gewaesserbenutzung = $gewaesserbenutzungen[0];
+                    foreach ($gewaesserbenutzungen as $gwb)
+                    {
+                        if(!empty($gwb) && $gwb->getId() === $gewaesserbenutzungId)
+                        {
+                            $gewaesserbenutzung = $gwb;
+                            break;
+                        }
+                    }
                 }
                 // 		        echo "<br />gewaesserbenutzung: " . $gewaesserbenutzung[0]->getId();
                 
@@ -330,7 +347,7 @@ if(!empty($wrz) && !empty($wrz->getId()))
     $tab2_name="Festsetzung";
     $tab2_active=false;
     $tab2_extra_parameter_key="getfestsetzung";
-    $tab2_extra_parameter_value=$wrz->getId();
+    $tab2_extra_parameter_value=$wrz->getId() . "_" . $gewaesserbenutzung->getId();
 //     var_dump($tab2_extra_parameter_key);
 //     var_dump($tab2_extra_parameter_value);
     if($wrz->isErklaerungFreigegeben())
@@ -678,6 +695,13 @@ if(!empty($wrz) && !empty($wrz->getId()))
                 </div>
                 
                 <?php 
+                      }
+                      else
+                      {
+                          ?>
+                          </table>
+                          <h1>Keine Gewässerbenutzung gefunden!</h1>
+                          <?php
                       }
                		?>
     		</form>

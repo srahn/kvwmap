@@ -48,8 +48,10 @@ elseif($_SERVER ["REQUEST_METHOD"] == "GET")
         
         if(strtolower($keyEscaped) === "getfestsetzung")
 		{
-		    $festsetzungWrzId = $valueEscaped;
-// 		    echo "<br />festsetzungWrzId: " . $festsetzungWrzId;
+		    $lastIndex = strripos($valueEscaped, "_");
+		    $gewaesserbenutzungId = substr($valueEscaped, $lastIndex + 1);
+		    $festsetzungWrzId = substr($valueEscaped, 0, $lastIndex);
+		    //echo "<br />lastIndex: " . $lastIndex . " festsetzungWrzId: " . $festsetzungWrzId . " gewaesserbenutzungId: " . $gewaesserbenutzungId;
 		    $festsetzungWrz = new WasserrechtlicheZulassungen($this);
 		    $wrz = $festsetzungWrz->find_by_id($this, 'id', $festsetzungWrzId);
 // 		    var_dump($wrz);
@@ -60,9 +62,16 @@ elseif($_SERVER ["REQUEST_METHOD"] == "GET")
 // 		        echo "<br />wrz id: " . $wrz->getId();
 		        $gb = new Gewaesserbenutzungen($this);
 		        $gewaesserbenutzungen = $gb->find_where_with_subtables('wasserrechtliche_zulassungen=' . $wrz->getId());
-		        if(!empty($gewaesserbenutzungen) && count($gewaesserbenutzungen) > 0 && !empty($gewaesserbenutzungen[0]))
+		        if(!empty($gewaesserbenutzungen) && count($gewaesserbenutzungen) > 0)
 		        {
-		            $gewaesserbenutzung = $gewaesserbenutzungen[0];
+		            foreach ($gewaesserbenutzungen as $gwb)
+		            {
+		                if(!empty($gwb) && $gwb->getId() === $gewaesserbenutzungId)
+		                {
+		                    $gewaesserbenutzung = $gwb;
+		                    break;
+		                }
+		            }
 		        }
 // 		        echo "<br />gewaesserbenutzung: " . $gewaesserbenutzung[0]->getId();
 
@@ -229,7 +238,7 @@ if(!empty($wrz) && !empty($wrz->getId()))
         $tab1_visible=true;
         $tab2_id="wasserentnahmeentgelt_festsetzung";
         $tab1_extra_parameter_key="geterklaerung";
-        $tab1_extra_parameter_value=$wrz->getId();
+        $tab1_extra_parameter_value=$wrz->getId() . "_" . $gewaesserbenutzung->getId();
         $tab2_name="Festsetzung";
         $tab2_active=true;
         $tab2_visible=true;
