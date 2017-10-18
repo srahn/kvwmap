@@ -7,7 +7,7 @@ class Gewaesserbenutzungen extends WrPgObject {
 	public $gewaesserbenutzungArt;
 	public $gewaesserbenutzungZweck;
 	public $teilgewaesserbenutzungen;
-	public $aufforderung_dokument;
+	public $aufforderungen;
 	public $festsetzung_dokument;
 
 	public function find_where_with_subtables($where, $order = NULL, $select = '*') {
@@ -55,16 +55,8 @@ class Gewaesserbenutzungen extends WrPgObject {
 	                $teilgewaesserbenutzungen = $teilgewaesserbenutzung->find_where_with_subtables('gewaesserbenutzungen=' . $gewaesserbenutzung->getId(), 'id');
 	                $gewaesserbenutzung->teilgewaesserbenutzungen = $teilgewaesserbenutzungen;
 	                
-	                //get the 'Aufforderung Dokument'
-	                if(!empty($gewaesserbenutzung->getAufforderungDokument()))
-	                {
-	                    $dokument = new Dokument($this->gui);
-	                    $dokumente = $dokument->find_where('id=' . $gewaesserbenutzung->getAufforderungDokument());
-	                    if(!empty($dokumente))
-	                    {
-	                        $gewaesserbenutzung->aufforderung_dokument = $dokumente[0];
-	                    }
-	                }
+	                //get the Aufforderungen
+	                Gewaesserbenutzungen::getAufforderungen($this->gui, $gewaesserbenutzung);
 	                
 	                //get the 'Festsetzungs Dokument'
 	                if(!empty($gewaesserbenutzung->getFestsetzungDokument()))
@@ -85,6 +77,17 @@ class Gewaesserbenutzungen extends WrPgObject {
 	    }
 	    
 	    return null;
+	}
+	
+	/**
+	 * get the Aufforderungen
+	 * @param $gewaesserbenutzung
+	 */
+	public static function getAufforderungen(&$gui, &$gewaesserbenutzung)
+	{
+	    $aufforderung = new Aufforderung($gui);
+	    $aufforderungen = $aufforderung->find_where_with_subtables('gewaesserbenutzungen=' . $gewaesserbenutzung->getId(), 'id');
+	    $gewaesserbenutzung->aufforderungen = $aufforderungen;
 	}
 	
 	public function getUmfangAllerTeilbenutzungen()
@@ -369,67 +372,114 @@ class Gewaesserbenutzungen extends WrPgObject {
 	
 	////////////////////////////////////////////////////////////////////
 	
-	// 	public function insertAufforderungId($aufforderungsId) {
-	// 	    if(!empty($aufforderungsId))
-	    // 	    {
-	// 	        $this->set('aufforderung', $aufforderungsId);
-	// 	        $this->update();
-	// 	    }
-	// 	}
-	
-	public function isAufforderungFreigegeben()
-	{
-	    $datumAufforderung = $this->getAufforderungDatumAbsend();
-	    if(!empty($datumAufforderung))
+	public function getAufforderungDatum($erhebungsjahr = NULL) {
+	    $aufforderung = $this->getAufforderungForErhebungsjahr($erhebungsjahr);
+	    if(!empty($aufforderung))
 	    {
-	        return true;
+	        return $aufforderung->getDatum();
 	    }
 	    
-	    return false;
+	    return null;
 	}
 	
-	public function getAufforderungDatumAbsend() {
-	    return $this->data['aufforderung_datum_absend'];
-	}
-	
-	public function getAufforderungDatumAbsendHTML() {
-	    $datumAbsend = $this->getAufforderungDatumAbsend();
-	    if(!empty($datumAbsend))
+	public function getAufforderungDatumHTML() {
+	    $aufforderung = $this->getAufforderungForErhebungsjahr($erhebungsjahr);
+	    if(!empty($aufforderung))
 	    {
-	        // 	        $dateString = DateTime::createFromFormat("d.m.Y", $datumAbsend);
-	        return "<div>" . $datumAbsend . "</div>";
+	        return $aufforderung->getDatumHTML();
 	    }
 	    
 	    return "<div style=\"color: red;\">Nicht aufgefordert<div>";
 	}
 	
-	public function insertAufforderungDatumAbsend($dateValue = NULL) {
-	    //if date is not set --> set it to today's date
-	    if(empty($dateValue))
+	public function isAufforderungFreigegeben($erhebungsjahr = NULL) {
+	    $aufforderung = $this->getAufforderungForErhebungsjahr($erhebungsjahr);
+	    if(!empty($aufforderung))
 	    {
-	        $dateValue = date("d.m.Y");
+	        return $aufforderung->isFreigegeben();
 	    }
 	    
-	    $this->set('aufforderung_datum_absend', $dateValue);
-	    $this->update();
+	    return false;
+	}
+	
+	public function insertAufforderung($dokumentId, $erhebungsjahr, $dateVale)
+	{
+	    $this->debug->write('*** insertAufforderung ***', 4);
 	    
-	    // 	    $this->create(
-	    // 	        array(
-	    // 	            'aufforderung_datum_absend' => $dateValue
-	    // 	        )
-	    // 	        );
-	}
-	
-	public function getAufforderungDokument() {
-	    return $this->data['aufforderung_dokument'];
-	}
-	
-	public function insertAufforderungDokument($id) {
-	    if(!empty($id))
+	    $aufforderungen = $this->aufforderungen;
+	    if(!empty($aufforderungen) && !empty($aufforderungen[0]))
 	    {
-	        $this->set('aufforderung_dokument', $id);
-	        $this->update();
+	        $aufforderung = $aufforderungen[0];
+	        
+	        $this->debug->write('aufforderung mit id: ' . $aufforderung->getId() . ' existiert schon: update', 4);
+	        
+	        return $aufforderung->updateAufforderung($erhebungsjahr, $dokumentId, $dateVale, null);
 	    }
+	    else
+	    {
+	        $this->debug->write('aufforderung wird neu angelegt', 4);
+	        
+	        if(!empty($dokumentId))
+	        {
+	            //if date is not set --> set it to today's date
+	            if(empty($dateValue))
+	            {
+	                $dateValue = date("d.m.Y");
+	            }
+	            
+	            $aufforderung = new Aufforderung($this->gui);
+	            $aufforderung_id = $aufforderung->createAufforderung($this->getId(), $erhebungsjahr, $dokumentId, $dateValue, null);
+	            
+	            Gewaesserbenutzungen::getAufforderungen($this->gui, $this);
+	            
+	            return $aufforderung_id;
+	        }
+	    }
+	    
+	    return null;
+	}
+	
+	public function getAufforderungDokument($erhebungsjahr = NULL) {
+	    $aufforderung = $this->getAufforderungForErhebungsjahr($erhebungsjahr);
+	    if(!empty($aufforderung))
+	    {
+	        if(!empty($aufforderung->dokument))
+	        {
+	            return $aufforderung->dokument;
+	        }
+	    }
+	    
+	    return null;
+	}
+	
+	public function getAufforderungForErhebungsjahr($erhebungsjahr = NULL)
+	{
+	    $this->debug->write('*** getAufforderungForErhebungsjahr ***', 4);
+	    
+	    $aufforderungen = $this->aufforderungen;
+	    
+	    if(!empty($aufforderungen))
+	    {
+	        foreach ($aufforderungen as $aufforderung)
+	        {
+	            if(!empty($aufforderung))
+	            {
+	                if(!empty($erhebungsjahr) && !empty($aufforderung->erhebungsjahr))
+	                {
+	                    if($aufforderung->erhebungsjahr === $erhebungsjahr)
+	                    {
+	                        return $aufforderung;
+	                    }
+	                }
+	                else
+	                {
+	                    return $aufforderung;
+	                }
+	            }
+	        }
+	    }
+	    
+	    return null;
 	}
 	
 	////////////////////////////////////////////////////////////////////

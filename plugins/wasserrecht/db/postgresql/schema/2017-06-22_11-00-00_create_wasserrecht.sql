@@ -305,8 +305,6 @@ CREATE TABLE wasserrecht.fiswrv_gewaesserbenutzungen(
 	zweck integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_zweck(id),
 	umfang_entnahme integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_umfang_entnahme(id),
 	lage integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_lage(id),
-	aufforderung_datum_absend date,
-	aufforderung_dokument integer REFERENCES wasserrecht.fiswrv_dokument(id),
 	erklaerung_datum date,
 	erklaerung_dokument integer REFERENCES wasserrecht.fiswrv_dokument(id),
 	erklaerung_nutzer text,
@@ -345,6 +343,40 @@ CREATE TABLE wasserrecht.fiswrv_teilgewaesserbenutzungen(
 	berechnetes_entgelt_zugelassen numeric,
 	berechnetes_entgelt_nicht_zugelassen numeric,
 	freitext text,
+	gewaesserbenutzungen integer NOT NULL REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen(id)
+)WITH OIDS;
+
+CREATE TABLE wasserrecht.fiswrv_festsetzung(
+	id serial PRIMARY KEY,
+	erhebungsjahr varchar(10),
+	datum date,
+	nutzer text,
+	dokument integer REFERENCES wasserrecht.fiswrv_dokument(id),
+	dokument_datum date,
+	summe_nicht_zugelassene_entnahmemengen numeric,
+	summe_zugelassene_entnahmemengen numeric,
+	summe_entnahmemengen numeric,
+	summe_zugelassenes_entgelt numeric,
+	summe_nicht_zugelassenes_entgelt numeric,
+	summe_entgelt numeric,
+	gewaesserbenutzungen integer NOT NULL REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen(id)
+)WITH OIDS;
+
+CREATE TABLE wasserrecht.fiswrv_erklaerung(
+	id serial PRIMARY KEY,
+	erhebungsjahr varchar(10),
+	datum date,
+	nutzer text,
+	dokument integer REFERENCES wasserrecht.fiswrv_dokument(id),
+	gewaesserbenutzungen integer NOT NULL REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen(id)
+)WITH OIDS;
+
+CREATE TABLE wasserrecht.fiswrv_aufforderung(
+	id serial PRIMARY KEY,
+	erhebungsjahr varchar(10),
+	datum date,
+	nutzer text,
+	dokument integer REFERENCES wasserrecht.fiswrv_dokument(id),
 	gewaesserbenutzungen integer NOT NULL REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen(id)
 )WITH OIDS;
 

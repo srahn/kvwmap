@@ -61,12 +61,9 @@ function createAufforderungsDokument(&$gui, &$valueEscaped)
         {
             $gui->debug->write('gewaesserbenutzung id: ' . var_export($gewaesserbenutzung->getId(), true), 4);
             
-            if(empty($gewaesserbenutzung->getAufforderungDatumAbsend()))
+            if(empty($gewaesserbenutzung->getAufforderungDatum()))
             {
-                //echo $aufforderungWrz2->toString();
-                $gewaesserbenutzung->insertAufforderungDatumAbsend();
-                
-                if(!empty($_POST['aufforderung']) && empty($gewaesserbenutzung->getAufforderungDokument()))
+                if(!empty($_POST['aufforderung']) && empty($gewaesserbenutzung->getAufforderungDokument(null)))
                 {
                     //get a unique word file name
                     $uniqid = uniqid();
@@ -128,8 +125,13 @@ function createAufforderungsDokument(&$gui, &$valueEscaped)
                     //write the document path to the database
                     $aufforderung_dokument = new Dokument($gui);
                     $aufforderung_document_identifier = $aufforderung_dokument->createDocument('Aufforderung_' . $idValues["wrz_id"], $word_file_name);
-                    $gewaesserbenutzung->insertAufforderungDokument($aufforderung_document_identifier);
+                    
+                    $gewaesserbenutzung->insertAufforderung($aufforderung_document_identifier, null, null);
                 }
+            }
+            else
+            {
+                $gui->debug->write('Do not write Aufforderung, because it already exists', 4);
             }
         }
     }
@@ -231,7 +233,7 @@ function createAufforderungsDokument(&$gui, &$valueEscaped)
                         		          		</td>
                         		          		<td>
                         		          			<?php
-                        		          			     echo $gewaesserbenutzung->getAufforderungDatumAbsendHTML();
+                        		          			     echo $gewaesserbenutzung->getAufforderungDatumHTML();
                         		          			?>
                         		          		</td>
                         		          		<td>
@@ -328,13 +330,15 @@ function createAufforderungsDokument(&$gui, &$valueEscaped)
 				                        {
 				                            if(!empty($gwb))
 				                            {
-				                                if(!empty($gwb->aufforderung_dokument))
+				                                $auffoderung_dokument = $gwb->getAufforderungDokument(null);
+				                                
+				                                if(!empty($auffoderung_dokument))
 				                                {
 				                                    ?>
                 				                    <div class="wasserrecht_display_table_row">
                                     					<div class="wasserrecht_display_table_cell_caption">
                                     					<?php
-                                    					echo '<a href="' . $this->actual_link . WASSERRECHT_DOCUMENT_URL_PATH . $gwb->aufforderung_dokument->getPfad() . '" target="_blank">' . $gwb->aufforderung_dokument->getName() . '</a>';
+                                    					   echo '<a href="' . $this->actual_link . WASSERRECHT_DOCUMENT_URL_PATH . $auffoderung_dokument->getPfad() . '" target="_blank">' . $auffoderung_dokument->getName() . '</a>';
                                     					?>
                                                			</div>
                                     				</div>
