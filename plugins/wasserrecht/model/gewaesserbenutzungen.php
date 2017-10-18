@@ -399,13 +399,14 @@ class Gewaesserbenutzungen extends WrPgObject {
 	}
 	
 	public function getAufforderungDatumHTML() {
-	    $aufforderung = $this->getAufforderungForErhebungsjahr($erhebungsjahr);
-	    if(!empty($aufforderung))
+	    $datumAufforderung = $this->getAufforderungDatum($erhebungsjahr);
+	    if(!empty($datumAufforderung))
 	    {
-	        return $aufforderung->getDatumHTML();
+	        // 	        $dateString = DateTime::createFromFormat("d.m.Y", $datumAbsend);
+	        return "<div>" . $datumAufforderung . "</div>";
 	    }
 	    
-	    return "<div style=\"color: red;\">Nicht aufgefordert<div>";
+	    return "<div style=\"color: red;\">Nicht aufgefordert</div>";
 	}
 	
 	public function isAufforderungFreigegeben($erhebungsjahr = NULL) {

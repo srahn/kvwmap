@@ -61,16 +61,6 @@ abstract class Bescheid extends WrPgObject
         return $this->data['datum'];
     }
     
-    public function getDatumHTML() {
-        $datum = $this->getDatum();
-        if(!empty($datum))
-        {
-            return "<div>" . $datum . "</div>";
-        }
-        
-        return "<div style=\"color: red;\">Nicht aufgefordert<div>";
-    }
-    
     public function insertDatum($dateValue = NULL) {
         //if date is not set --> set it to today's date
         if(empty($dateValue))
