@@ -8,6 +8,7 @@ class Gewaesserbenutzungen extends WrPgObject {
 	public $gewaesserbenutzungZweck;
 	public $teilgewaesserbenutzungen;
 	public $aufforderungen;
+	public $erklaerungen;
 	public $festsetzung_dokument;
 
 	public function find_where_with_subtables($where, $order = NULL, $select = '*') {
@@ -58,6 +59,9 @@ class Gewaesserbenutzungen extends WrPgObject {
 	                //get the Aufforderungen
 	                Gewaesserbenutzungen::getAufforderungen($this->gui, $gewaesserbenutzung);
 	                
+	                //get the Erklaerungen
+	                Gewaesserbenutzungen::getErklaerungen($this->gui, $gewaesserbenutzung);
+	                
 	                //get the 'Festsetzungs Dokument'
 	                if(!empty($gewaesserbenutzung->getFestsetzungDokument()))
 	                {
@@ -88,6 +92,18 @@ class Gewaesserbenutzungen extends WrPgObject {
 	    $aufforderung = new Aufforderung($gui);
 	    $aufforderungen = $aufforderung->find_where_with_subtables('gewaesserbenutzungen=' . $gewaesserbenutzung->getId(), 'id');
 	    $gewaesserbenutzung->aufforderungen = $aufforderungen;
+	}
+	
+	/**
+	 * get the Erklaerungen
+	 * @param $gui
+	 * @param $gewaesserbenutzung
+	 */
+	public static function getErklaerungen(&$gui, &$gewaesserbenutzung)
+	{
+	    $erklaerung = new Erklaerung($gui);
+	    $erklaerungen = $erklaerung->find_where_with_subtables('gewaesserbenutzungen=' . $gewaesserbenutzung->getId(), 'id');
+	    $gewaesserbenutzung->erklaerungen = $erklaerungen;
 	}
 	
 	public function getUmfangAllerTeilbenutzungen()
@@ -413,6 +429,12 @@ class Gewaesserbenutzungen extends WrPgObject {
 	        
 	        $this->debug->write('aufforderung mit id: ' . $aufforderung->getId() . ' existiert schon: update', 4);
 	        
+	        //if date is not set --> set it to today's date
+	        if(empty($dateValue))
+	        {
+	            $dateValue = date("d.m.Y");
+	        }
+	        
 	        return $aufforderung->updateAufforderung($erhebungsjahr, $dokumentId, $dateVale, null);
 	    }
 	    else
@@ -484,23 +506,79 @@ class Gewaesserbenutzungen extends WrPgObject {
 	
 	////////////////////////////////////////////////////////////////////
 	
-	public function isErklaerungFreigegeben()
-	{
-	    $datumErklaerung = $this->getErklaerungDatum();
-	    if(!empty($datumErklaerung))
+	public function insertErklaerung($erhebungsjahr, $dateValue, $erklaerungNutzer) {
+	    $this->debug->write('*** insertErklaerung ***', 4);
+	    
+	    $this->debug->write('erhebungsjahr: ' . var_export($erhebungsjahr, true), 4);
+	    $this->debug->write('erklaerungNutzer: ' . var_export($erklaerungNutzer, true), 4);
+	    $this->debug->write('dateValue: ' . var_export($dateValue, true), 4);
+	    
+	    $erklaerungen = $this->erklaerungen;
+	    if(!empty($erklaerungen))
 	    {
-	        return true;
+	        foreach ($erklaerungen as $erklaerung)
+	        {
+	            if(!empty($erklaerung))
+	            {
+	                if($erklaerung->compare($erhebungsjahr))
+	                {
+	                    $this->debug->write('erklaerung mit id: ' . $erklaerung->getId() . ' existiert schon: update', 4);
+	                    
+	                    //if date is not set --> set it to today's date
+	                    if(empty($dateValue))
+	                    {
+	                        $dateValue = date("d.m.Y");
+	                    }
+	                    
+	                    return $erklaerung->updateErklaerung($erhebungsjahr, $dateVale, $erklaerungNutzer);
+	                }
+	            }
+	        }
+	    }
+	    
+	    $this->debug->write('erklaerung wird neu angelegt', 4);
+	    
+	    //if date is not set --> set it to today's date
+	    if(empty($dateValue))
+	    {
+	        $dateValue = date("d.m.Y");
+	    }
+	    
+	    $erklaerung = new Erklaerung($this->gui);
+	    $erklaerung_id = $erklaerung->createErklaerung($this->getId(), $erhebungsjahr, $dateValue, $erklaerungNutzer);
+	    
+	    Gewaesserbenutzungen::getErklaerungen($this->gui, $this);
+	    
+	    return $erklaerung_id;
+	}
+	
+	public function isErklaerungFreigegeben($erhebungsjahr) {
+	    $erklaerung = $this->getErklaerungForErhebungsjahr($erhebungsjahr);
+	    if(!empty($erklaerung))
+	    {
+	        $datumErklaerung = $erklaerung->getDatum();
+	        
+	        if(!empty($datumErklaerung))
+	        {
+	            return true;
+	        }
 	    }
 	    
 	    return false;
 	}
 	
-	public function getErklaerungDatum() {
-	    return $this->data['erklaerung_datum'];
+	public function getErklaerungDatum($erhebungsjahr) {
+	    $erklaerung = $this->getErklaerungForErhebungsjahr($erhebungsjahr);
+	    if(!empty($erklaerung))
+	    {
+	        return $erklaerung->getDatum();
+	    }
+	    
+	    return null;
 	}
 	
-	public function getErklaerungDatumHTML() {
-	    $datumErklaerung = $this->getErklaerungDatum();
+	public function getErklaerungDatumHTML($erhebungsjahr) {
+	    $datumErklaerung = $this->getErklaerungDatum($erhebungsjahr);
 	    if(!empty($datumErklaerung))
 	    {
 	        // 	        $dateString = DateTime::createFromFormat("d.m.Y", $datumAbsend);
@@ -510,34 +588,18 @@ class Gewaesserbenutzungen extends WrPgObject {
 	    return "<div style=\"color: red;\">Nicht erklärt</div>";
 	}
 	
-	public function insertErklaerungDatum($dateValue = NULL) {
-	    //if date is not set --> set it to today's date
-	    if(empty($dateValue))
+	public function getErklaerungNutzer($erhebungsjahr) {
+	    $erklaerung = $this->getErklaerungForErhebungsjahr($erhebungsjahr);
+	    if(!empty($erklaerung))
 	    {
-	        $dateValue = date("d.m.Y");
+	        return $erklaerung->getNutzer();
 	    }
 	    
-	    $this->set('erklaerung_datum', $dateValue);
-	    $this->update();
-	    
-	    // 	    $this->create(
-	    // 	        array(
-	    // 	            'aufforderung_datum_absend' => $dateValue
-	    // 	        )
-	    // 	        );
+	    return null;
 	}
 	
-	public function insertErklaerungNutzer($erklaerungNutzer) {
-	    $this->set('erklaerung_nutzer', $erklaerungNutzer);
-	    $this->update();
-	}
-	
-	public function getErklaerungNutzer() {
-	    return $this->data['erklaerung_nutzer'];
-	}
-	
-	public function getErklaerungNutzerHTML() {
-	    $nutzerErklaerung = $this->getErklaerungNutzer();
+	public function getErklaerungNutzerHTML($erhebungsjahr) {
+	    $nutzerErklaerung = $this->getErklaerungNutzer($erhebungsjahr);
 	    if(!empty($nutzerErklaerung))
 	    {
 	        // 	        $dateString = DateTime::createFromFormat("d.m.Y", $datumAbsend);
@@ -545,6 +607,32 @@ class Gewaesserbenutzungen extends WrPgObject {
 	    }
 	    
 	    return "<div style=\"color: red;\">Nicht erklärt</div>";
+	}
+	
+	public function getErklaerungForErhebungsjahr($erhebungsjahr)
+	{
+	    $this->debug->write('*** getErklaerungForErhebungsjahr ***', 4);
+	    
+	    if(!empty($erhebungsjahr))
+	    {
+	        $erklaerungen = $this->erklaerungen;
+	        
+	        if(!empty($erklaerungen))
+	        {
+	            foreach ($erklaerungen as $erklaerung)
+	            {
+	                if(!empty($erklaerung))
+	                {
+	                    if($erklaerung->getErhebungsjahr() === $erhebungsjahr)
+	                    {
+	                        return $erklaerung;
+	                    }
+	                }
+	            }
+	        }
+	    }
+	    
+	    return null;
 	}
 	
 	////////////////////////////////////////////////////////////////////

@@ -28,7 +28,7 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
             {
                 $auswahl_checkbox_escaped = htmlspecialchars($auswahl_checkbox);
                 
-                $idValues = findIdFromValueString($this, $auswahl_checkbox_escaped);
+                $idValues = findIdAndYearFromValueString($this, $auswahl_checkbox_escaped);
                 $this->debug->write('idValues: ' . var_export($idValues, true), 4);
                 
                 $festsetzungWrz = new WasserrechtlicheZulassungen($this);
@@ -224,7 +224,7 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
             }
         }
         
-        $erklaerung_datum = $wrz->gewaesserbenutzungen[0]->getErklaerungDatum();
+        $erklaerung_datum = $wrz->gewaesserbenutzungen[0]->getErklaerungDatum($erhebungsjahr);
         
         $parameter = [
             "Datum" => $datum,
@@ -339,7 +339,7 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
                     		          		</td>
                     		          		<td>
                     		          			<?php
-                    		          			     echo $gewaesserbenutzung->getErklaerungDatumHTML();
+                    		          			     echo $gewaesserbenutzung->getErklaerungDatumHTML($getYear);
                     		          			?>
                     		          		</td>
                     		          		<td>
@@ -378,7 +378,7 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
                     		          			<?php 
                     		          			     if($gewaesserbenutzung->isFestsetzungFreigegeben() && !$gewaesserbenutzung->isFestsetzungDokumentErstellt())
                     		          			     {?>
-                    		          			     	<input type="checkbox" name="auswahl_checkbox[]" value="<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>" />
+                    		          			     	<input type="checkbox" name="auswahl_checkbox[]" value="<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>_<?php echo $getYear; ?>" />
                     		          			     <?php
                     		          			     }
                     		          			

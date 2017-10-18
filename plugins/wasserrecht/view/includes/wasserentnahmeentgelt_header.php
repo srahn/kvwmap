@@ -2,7 +2,7 @@
     <div class="wasserrecht_display_table_row">
     	<div class="wasserrecht_display_table_cell_caption">Erhebungsjahr:</div>
         <div class="wasserrecht_display_table_cell_spacer"></div>
-        <div class="wasserrecht_display_table_cell_white"><?php echo $wrz->getGueltigkeitsJahrString() ?></div>
+        <div class="wasserrecht_display_table_cell_white"><?php echo $erhebungsjahr ?></div>
     </div>
     <div class="wasserrecht_display_table_row">
         <div class="wasserrecht_display_table_cell_caption">Behörde:</div>

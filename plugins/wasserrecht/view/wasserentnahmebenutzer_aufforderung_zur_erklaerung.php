@@ -238,21 +238,17 @@ function createAufforderungsDokument(&$gui, &$valueEscaped)
                         		          		</td>
                         		          		<td>
                         		          				<?php 
-                        		          				    if(empty($gewaesserbenutzung->getErklaerungDatum()))
+                        		          				    if(empty($gewaesserbenutzung->getErklaerungDatum($getYear)))
                         		          				    {
                         		          				?>
-                        		          					<!-- <form action="index.php" id="erklaerung_form_<?php echo $wrz->getId(); ?>" accept-charset="" method="POST"> -->
-                        		          						<!-- <input type="hidden" name="go" value="wasserentnahmeentgelt_erklaerung_der_entnahme"> -->
-    <!--                         		          						<input type="hidden" name="post_action_1" value="wasserentnahmeentgelt_erklaerung_der_entnahme"> -->
-        														<button name="erklaerung_<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>" value="<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>" type="submit" id="erklaerung_button_<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>">Erklärung</button>
-        													<!-- </form> -->
+        														<button name="erklaerung_<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>_<?php echo $getYear; ?>" value="<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>_<?php echo $getYear; ?>" type="submit" id="erklaerung_button_<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>_<?php echo $getYear; ?>">Erklärung</button>
                         		          				<?php
                         		          				    }
                         		          				?>
                         		          		</td>
                         		          		<td>
                         		          			<?php
-                        		          			     echo '<a href="' . $this->actual_link . '?go=wasserentnahmeentgelt_erklaerung_der_entnahme&geterklaerung=' . $wrz->getId() . "_" . $gewaesserbenutzung->getId() . '">' . $gewaesserbenutzung->getErklaerungDatumHTML() . '</a>';
+                        		          			     echo '<a href="' . $this->actual_link . '?go=wasserentnahmeentgelt_erklaerung_der_entnahme&geterklaerung=' . $wrz->getId() . "_" . $gewaesserbenutzung->getId() . "_" . $getYear . '">' . $gewaesserbenutzung->getErklaerungDatumHTML($getYear) . '</a>';
                         		          			?>
                         		          		</td>
                         		          	</tr>

@@ -54,13 +54,39 @@ function findIdFromValueString(&$gui, $valueEscaped)
 {
     $gui->debug->write('*** findIdFromValueString ***', 4);
     
+    $gui->debug->write('valueEscaped: ' . $valueEscaped, 4);
+    
     $lastIndex = strripos($valueEscaped, "_");
     $gewaesserbenutzungId = substr($valueEscaped, $lastIndex + 1);
     $wrzId = substr($valueEscaped, 0, $lastIndex);
     
     $returnArray = array(
         "wrz_id" => $wrzId,
+        "gewaesserbenutzung_id" => $gewaesserbenutzungId
+    );
+    
+    $gui->debug->write('returnArray: ' . var_export($returnArray, true), 4);
+    
+    return $returnArray;
+}
+
+function findIdAndYearFromValueString(&$gui, $valueEscaped)
+{
+    $gui->debug->write('*** findIdAndYearFromValueString ***', 4);
+    
+    $gui->debug->write('valueEscaped: ' . $valueEscaped, 4);
+    
+    $lastIndex = strripos($valueEscaped, "_");
+    $firstIndex = strpos($valueEscaped, "_");
+    
+    $wrzId = substr($valueEscaped, 0, $firstIndex);
+    $gewaesserbenutzungId = substr($valueEscaped, $firstIndex + 1, $lastIndex - 2);
+    $erhebungsjahr = substr($valueEscaped, $lastIndex + 1);
+    
+    $returnArray = array(
+        "wrz_id" => $wrzId,
         "gewaesserbenutzung_id" => $gewaesserbenutzungId,
+        "erhebungsjahr" => $erhebungsjahr
     );
     
     $gui->debug->write('returnArray: ' . var_export($returnArray, true), 4);

@@ -107,7 +107,7 @@ abstract class Bescheid extends WrPgObject
     {
         $this->debug->write('*** createBescheid ***', 4);
         
-        if (!empty($gewaesserbenutzungen))
+        if(!empty($gewaesserbenutzungen))
         {
             $bescheid_value_array = array
             (
@@ -122,9 +122,7 @@ abstract class Bescheid extends WrPgObject
             // 	        print_r($bescheid_value_array);
             $this->debug->write('bescheid_value_array: ' . var_export($bescheid_value_array, true), 4);
             
-            return $this->create(
-                $bescheid_value_array
-                );
+            return $bescheid_value_array;
         }
     }
     
@@ -138,10 +136,6 @@ abstract class Bescheid extends WrPgObject
         $this->updateData('nutzer', $nutzer);
         
         $this->debug->write('kvp update: ' . var_export($this->getKVP(), true), 4);
-        
-        $this->update();
-        
-        return $this->getId();
     }
 }
 ?>

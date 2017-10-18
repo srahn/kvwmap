@@ -86,7 +86,7 @@ elseif($_SERVER ["REQUEST_METHOD"] == "GET")
 		        {
 		            //echo "<br />gewaesserbenutzung: " . $gewaesserbenutzung->getId();
 		            
-		            if($gewaesserbenutzung->isErklaerungFreigegeben() && $gewaesserbenutzung->isFestsetzungFreigegeben())
+		            if($gewaesserbenutzung->isErklaerungFreigegeben($wrz->gueltigkeitsJahre[0]) && $gewaesserbenutzung->isFestsetzungFreigegeben())
 		            {
 		                $speereEingabeFestsetzung = true;
 		            }
@@ -273,7 +273,7 @@ if(!empty($wrz) && !empty($wrz->getId()))
         
         if(!empty($gewaesserbenutzung))
         {
-            if($gewaesserbenutzung->isErklaerungFreigegeben())
+            if($gewaesserbenutzung->isErklaerungFreigegeben($wrz->gueltigkeitsJahre[0]))
             {
                 $tab1_id="wasserentnahmeentgelt_erklaerung_der_entnahme";
                 $tab1_name="Erklärung der Entnahme";
@@ -607,7 +607,7 @@ if(!empty($wrz) && !empty($wrz->getId()))
                             <div class="wasserrecht_display_table_cell_spacer"></div>
                             <div class="wasserrecht_display_table_cell_white">
                             	<?php
-                            	   echo '<a href="' . $this->actual_link . '?go=wasserentnahmeentgelt_erklaerung_der_entnahme&geterklaerung=' . $wrz->getId() . "_" . $gewaesserbenutzung->getId() . '">' . $gewaesserbenutzung->getErklaerungDatumHTML() . '</a>';
+                            	   echo '<a href="' . $this->actual_link . '?go=wasserentnahmeentgelt_erklaerung_der_entnahme&geterklaerung=' . $wrz->getId() . "_" . $gewaesserbenutzung->getId() . '">' . $gewaesserbenutzung->getErklaerungDatumHTML($wrz->gueltigkeitsJahre[0]) . '</a>';
                         	    ?>
                             </div>
                         </div>
@@ -617,7 +617,7 @@ if(!empty($wrz) && !empty($wrz->getId()))
                             <div class="wasserrecht_display_table_cell_spacer"></div>
                             <div class="wasserrecht_display_table_cell_white">
                             <?php 
-                                    echo $gewaesserbenutzung->getErklaerungNutzer();
+                                  echo $gewaesserbenutzung->getErklaerungNutzer($wrz->gueltigkeitsJahre[0]);
                             ?>
                             </div>
                         </div>
