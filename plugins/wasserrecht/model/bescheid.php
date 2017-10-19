@@ -33,17 +33,19 @@ abstract class Bescheid extends WrPgObject
                 }
             }
         }
+        
         return $bescheide;
     }
     
     public function getErhebungsjahr() {
-        return $this->data['erhebungsjahr'];
+//         return $this->data['erhebungsjahr'];
+        return $this->erhebungsjahr;
     }
     
-    public function insertErhebungsjahr($erhebungsjahr) {
-        $this->set('erhebungsjahr', $erhebungsjahr);
-        $this->update();
-    }
+//     public function insertErhebungsjahr($erhebungsjahr) {
+//         $this->set('erhebungsjahr', $erhebungsjahr);
+//         $this->update();
+//     }
     
     public function isFreigegeben()
     {
@@ -58,40 +60,43 @@ abstract class Bescheid extends WrPgObject
     
     
     public function getDatum() {
-        return $this->data['datum'];
+//         return $this->data['datum'];
+        return $this->datum;
     }
     
-    public function insertDatum($dateValue = NULL) {
-        //if date is not set --> set it to today's date
-        if(empty($dateValue))
-        {
-            $dateValue = date("d.m.Y");
-        }
+//     public function insertDatum($dateValue = NULL) {
+//         //if date is not set --> set it to today's date
+//         if(empty($dateValue))
+//         {
+//             $dateValue = date("d.m.Y");
+//         }
         
-        $this->set('datum', $dateValue);
-        $this->update();
-    }
+//         $this->set('datum', $dateValue);
+//         $this->update();
+//     }
     
     public function getNutzer() {
-        return $this->data['nutzer'];
+//         return $this->data['nutzer'];
+        return $this->nutzer;
     }
     
-    public function insertNutzer($nutzer) {
-        $this->set('nutzer', $nutzer);
-        $this->update();
-    }
+//     public function insertNutzer($nutzer) {
+//         $this->set('nutzer', $nutzer);
+//         $this->update();
+//     }
     
     public function getDokument() {
-        return $this->data['dokument'];
+//         return $this->data['dokument'];
+        return $this->dokument;
     }
     
-    public function insertDokument($id) {
-        if(!empty($id))
-        {
-            $this->set('dokument', $id);
-            $this->update();
-        }
-    }
+//     public function insertDokument($id) {
+//         if(!empty($id))
+//         {
+//             $this->set('dokument', $id);
+//             $this->update();
+//         }
+//     }
     
     public function createBescheid($gewaesserbenutzungen, $erhebungsjahr, $dokumentId, $dateVale, $nutzer)
     {
@@ -126,6 +131,20 @@ abstract class Bescheid extends WrPgObject
         $this->updateData('nutzer', $nutzer);
         
         $this->debug->write('kvp update: ' . var_export($this->getKVP(), true), 4);
+    }
+    
+    
+    public function compare($erhebungsjahr)
+    {
+        if(!empty($this->erhebungsjahr) && !empty($erhebungsjahr))
+        {
+            if($this->erhebungsjahr === $erhebungsjahr)
+            {
+                return true;
+            }
+        }
+        
+        return false;
     }
 }
 ?>

@@ -47,7 +47,7 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
             }
         }
         
-        $festsetzung_dokument_name = festsetzung_erstellen($this, $wrzs);
+        $festsetzung_dokument_name = festsetzung_erstellen($this, $wrzs, $idValues["erhebungsjahr"]);
         if(!empty($festsetzung_dokument_name))
         {
             $this->add_message("notice", "Festsetzungsbescheid: '" . $festsetzung_dokument_name . "' erfolgreich erstellt!");
@@ -59,7 +59,7 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
     }
 }
 
-function festsetzung_erstellen(&$gui, &$wrzs)
+function festsetzung_erstellen(&$gui, &$wrzs, &$erhebungsjahr)
 {
     $gui->debug->write('*** wasserentnahmebenutzer_entgeltbescheid->festsetzung_erstellen ***', 4);
     
@@ -86,18 +86,18 @@ function festsetzung_erstellen(&$gui, &$wrzs)
                         $festsetzungsSammelbescheidDaten->addWrz($wrz);
                     }
                     $festsetzungsSammelbescheidDaten->addAnlage($wrz->anlagen);
-                    $festsetzungsSammelbescheidDaten->addEntnahmemenge($gewaesserbenutzung->getFestsetzungSummeEntnahmemengen());
-                    $festsetzungsSammelbescheidDaten->addEntgelt($gewaesserbenutzung->getFestsetzungSummeEntgelt());
-                    $festsetzungsSammelbescheidDaten->addNicht_zugelassenes_entgelt($gewaesserbenutzung->getFestsetzungSummeNichtZugelassenesEntgelt());
-                    $festsetzungsSammelbescheidDaten->addZugelassenes_entgelt($gewaesserbenutzung->getFestsetzungSummeZugelassenesEntgelt());
+                    $festsetzungsSammelbescheidDaten->addEntnahmemenge($gewaesserbenutzung->getFestsetzungSummeEntnahmemengen($erhebungsjahr));
+                    $festsetzungsSammelbescheidDaten->addEntgelt($gewaesserbenutzung->getFestsetzungSummeEntgelt($erhebungsjahr));
+                    $festsetzungsSammelbescheidDaten->addNicht_zugelassenes_entgelt($gewaesserbenutzung->getFestsetzungSummeNichtZugelassenesEntgelt($erhebungsjahr));
+                    $festsetzungsSammelbescheidDaten->addZugelassenes_entgelt($gewaesserbenutzung->getFestsetzungSummeZugelassenesEntgelt($erhebungsjahr));
                     
                     //bestehendes Festsetzungsdokument löschen, wenn vorhanden
-                    if($gewaesserbenutzung->isFestsetzungFreigegeben() && !$gewaesserbenutzung->isFestsetzungDokumentErstellt())
+                    if($gewaesserbenutzung->isFestsetzungFreigegeben($erhebungsjahr) && !$gewaesserbenutzung->isFestsetzungDokumentErstellt($erhebungsjahr))
                     {
-                        if(!empty($gewaesserbenutzung->getFestsetzungDokument()))
+                        if(!empty($gewaesserbenutzung->getFestsetzungDokument($erhebungsjahr)))
                         {
-                            $oldFestsetzungsDocumentId = $gewaesserbenutzung->getFestsetzungDokument();
-                            $gewaesserbenutzung->deleteFestsetzungDokument();
+                            $oldFestsetzungsDocumentId = $gewaesserbenutzung->getFestsetzungDokument($erhebungsjahr);
+                            $gewaesserbenutzung->deleteFestsetzungDokument($erhebungsjahr);
                             
                             $festsetzung_delete_dokument = new Dokument($gui);
                             $festsetzung_delete_dokument->deleteDocument($oldFestsetzungsDocumentId);
@@ -144,7 +144,7 @@ function festsetzung_erstellen(&$gui, &$wrzs)
                     $gewaesserbenutzung = $wrz->gewaesserbenutzungen[0];
                     if(!empty($gewaesserbenutzung))
                     {
-                        $gewaesserbenutzung->insertFestsetzungDokument($festsetzung_dokument_identifier);
+                        $gewaesserbenutzung->insertFestsetzungDokument($erhebungsjahr, $festsetzung_dokument_identifier, null);
                     }
                 }
             }
@@ -344,10 +344,10 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
                     		          		</td>
                     		          		<td>
                     		          			<?php 
-                    		          			     if($gewaesserbenutzung->isFestsetzungFreigegeben())
+                    		          			     if($gewaesserbenutzung->isFestsetzungFreigegeben($getYear))
                     		          			     {
 //                     		          			         $gewaesserbenutzung->getUmfangAllerTeilbenutzungen()
-                    		          			         $entnahmemenge = $gewaesserbenutzung->getFestsetzungSummeEntnahmemengen();
+                    		          			         $entnahmemenge = $gewaesserbenutzung->getFestsetzungSummeEntnahmemengen($getYear);
                     		          			         $gesamtEntnahmemenge = $gesamtEntnahmemenge + $entnahmemenge;
                     		          			         
                     		          			         echo $entnahmemenge;
@@ -356,9 +356,9 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
                     		          		</td>
                     		          		<td>
                     		          			<?php 
-                    		          			    if($gewaesserbenutzung->isFestsetzungFreigegeben())
+                    		          			    if($gewaesserbenutzung->isFestsetzungFreigegeben($getYear))
                         		          			{
-                        		          			    $entgelt = $gewaesserbenutzung->getFestsetzungSummeEntgelt();
+                        		          			    $entgelt = $gewaesserbenutzung->getFestsetzungSummeEntgelt($getYear);
                         		          			    $gesamtEntgelt = $gesamtEntgelt + $entgelt;
                         		          			    echo $entgelt;
                         		          			}
@@ -366,17 +366,17 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
                     		          		</td>
                     		          		<td>
                     		          			<?php 
-                    		          			     if($gewaesserbenutzung->isFestsetzungFreigegeben())
+                    		          			     if($gewaesserbenutzung->isFestsetzungFreigegeben($getYear))
                     		          			     {?>
-                    		          			     	<a href="<?php echo $this->actual_link . "?go=wasserentnahmeentgelt_festsetzung&getfestsetzung=" . $wrz->getId() . "_" . $gewaesserbenutzung->getId() ?>"><?php echo $gewaesserbenutzung->getFestsetzungDatum(); ?></a>
+                    		          			     	<a href="<?php echo $this->actual_link . "?go=wasserentnahmeentgelt_festsetzung&getfestsetzung=" . $wrz->getId() . "_" . $gewaesserbenutzung->getId() . "_" . $getYear ?>"><?php echo $gewaesserbenutzung->getFestsetzungDatum($getYear); ?></a>
                     		          			     <?php
                     		          			     }
                     		          			
                     		          			?>
                     		          		</td>
                     		          		<td>
-                    		          			<?php 
-                    		          			     if($gewaesserbenutzung->isFestsetzungFreigegeben() && !$gewaesserbenutzung->isFestsetzungDokumentErstellt())
+                    		          			<?php
+                    		          			     if($gewaesserbenutzung->isFestsetzungFreigegeben($getYear) && !$gewaesserbenutzung->isFestsetzungDokumentErstellt($getYear))
                     		          			     {?>
                     		          			     	<input type="checkbox" name="auswahl_checkbox[]" value="<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>_<?php echo $getYear; ?>" />
                     		          			     <?php
@@ -386,7 +386,7 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
                     		          		</td>
                     		          		<td>
                     		          			<?php 
-                    		          			 echo $gewaesserbenutzung->getFestsetzungDokumentDatum();
+                    		          			     echo $gewaesserbenutzung->getFestsetzungDokumentDatum($getYear);
                     		          			?>
                     		          		</td>
                     		          		<td style="background-color: inherit; width: 10px">
@@ -492,17 +492,21 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
     			                        {
     			                            if(!empty($gwb))
     			                            {
-    			                                if($gwb->isFestsetzungDokumentErstellt())
+    			                                if($gwb->isFestsetzungDokumentErstellt($getYear))
     			                                {
-    			                                    if(!in_array($gwb->festsetzung_dokument->getId(), $dokumentIds))
+    			                                    $festsetzungDokument = $gwb->getFestsetzungDokument($getYear);
+    			                                    if(!empty($festsetzungDokument))
     			                                    {
-    			                                        $dokumentIds[] = $gwb->festsetzung_dokument->getId();
-    			                                        $gwb->festsetzung_dokument->addWrz_id($wrz->getId());
-    			                                        $festsetzungDokumente[$gwb->festsetzung_dokument->getId()] = $gwb->festsetzung_dokument;
-    			                                    }
-    			                                    else
-    			                                    {
-    			                                        $festsetzungDokumente[$gwb->festsetzung_dokument->getId()]->addWrz_id($wrz->getId());
+    			                                        if(!in_array($festsetzungDokument->getId(), $dokumentIds))
+    			                                        {
+    			                                            $dokumentIds[] = $festsetzungDokument->getId();
+    			                                            $festsetzungDokument->addWrz_id($wrz->getId());
+    			                                            $festsetzungDokumente[$festsetzungDokument->getId()] = $festsetzungDokument;
+    			                                        }
+    			                                        else
+    			                                        {
+    			                                            $festsetzungDokumente[$festsetzungDokument->getId()]->addWrz_id($wrz->getId());
+    			                                        }
     			                                    }
     			                                }
     			                            }
@@ -517,7 +521,9 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
     			    {
     			        foreach ($festsetzungDokumente as $festsetzungDokument)
     			        {
-    			            ?>
+    			            if(!empty($festsetzungDokument))
+    			            {
+    			                ?>
 			                    <div class="wasserrecht_display_table_row">
                 					<div class="wasserrecht_display_table_cell_caption">
                 					<?php
@@ -525,7 +531,8 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
                 					?>
                            			</div>
                 				</div>
-			                <?php 
+			                	<?php 
+    			            }
     			         }
     			    }
     			}

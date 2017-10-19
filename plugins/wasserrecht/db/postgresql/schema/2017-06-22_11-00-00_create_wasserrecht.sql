@@ -305,16 +305,6 @@ CREATE TABLE wasserrecht.fiswrv_gewaesserbenutzungen(
 	zweck integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_zweck(id),
 	umfang_entnahme integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_umfang_entnahme(id),
 	lage integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_lage(id),
-	festsetzung_datum date,
-	festsetzung_dokument integer REFERENCES wasserrecht.fiswrv_dokument(id),
-	festsetzung_dokument_datum date,
-	festsetzung_nutzer text,
-	festsetzung_summe_nicht_zugelassene_entnahmemengen numeric,
-	festsetzung_summe_zugelassene_entnahmemengen numeric,
-	festsetzung_summe_entnahmemengen numeric,
-	festsetzung_summe_zugelassenes_entgelt numeric,
-	festsetzung_summe_nicht_zugelassenes_entgelt numeric,
-	festsetzung_summe_entgelt numeric,
 	wasserrechtliche_zulassungen integer NOT NULL REFERENCES wasserrecht.fiswrv_wasserrechtliche_zulassungen(id)
 )WITH OIDS;
 

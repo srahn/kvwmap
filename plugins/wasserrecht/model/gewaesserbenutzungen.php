@@ -9,7 +9,7 @@ class Gewaesserbenutzungen extends WrPgObject {
 	public $teilgewaesserbenutzungen;
 	public $aufforderungen;
 	public $erklaerungen;
-	public $festsetzung_dokument;
+	public $festsetzungen;
 
 	public function find_where_with_subtables($where, $order = NULL, $select = '*') {
 // 	    $this->debug->write('find_where_with_subtables: ' . $where, 4);
@@ -62,16 +62,8 @@ class Gewaesserbenutzungen extends WrPgObject {
 	                //get the Erklaerungen
 	                Gewaesserbenutzungen::getErklaerungen($this->gui, $gewaesserbenutzung);
 	                
-	                //get the 'Festsetzungs Dokument'
-	                if(!empty($gewaesserbenutzung->getFestsetzungDokument()))
-	                {
-	                    $dokument = new Dokument($this->gui);
-	                    $dokumente = $dokument->find_where('id=' . $gewaesserbenutzung->getFestsetzungDokument());
-	                    if(!empty($dokumente))
-	                    {
-	                        $gewaesserbenutzung->festsetzung_dokument = $dokumente[0];
-	                    }
-	                }
+	                //get the Festsetzungen
+	                Gewaesserbenutzungen::getFestsetzungen($this->gui, $gewaesserbenutzung);
 	                
 // 	                echo "<br />gewaesserbenutzung: " . $gewaesserbenutzung->getKennummer();
 	            }
@@ -104,6 +96,18 @@ class Gewaesserbenutzungen extends WrPgObject {
 	    $erklaerung = new Erklaerung($gui);
 	    $erklaerungen = $erklaerung->find_where_with_subtables('gewaesserbenutzungen=' . $gewaesserbenutzung->getId(), 'id');
 	    $gewaesserbenutzung->erklaerungen = $erklaerungen;
+	}
+	
+	/**
+	 * get the Festsetzungen
+	 * @param $gui
+	 * @param $gewaesserbenutzung
+	 */
+	public static function getFestsetzungen(&$gui, &$gewaesserbenutzung)
+	{
+	    $festsetzung = new Festsetzung($gui);
+	    $festsetzungen = $festsetzung->find_where_with_subtables('gewaesserbenutzungen=' . $gewaesserbenutzung->getId(), 'id');
+	    $gewaesserbenutzung->festsetzungen = $festsetzungen;
 	}
 	
 	public function getUmfangAllerTeilbenutzungen()
@@ -436,7 +440,9 @@ class Gewaesserbenutzungen extends WrPgObject {
 	            $dateValue = date("d.m.Y");
 	        }
 	        
-	        return $aufforderung->updateAufforderung($erhebungsjahr, $dokumentId, $dateVale, null);
+	        $aufforderung_id = $aufforderung->updateAufforderung($erhebungsjahr, $dokumentId, $dateVale, null);
+	        Gewaesserbenutzungen::getAufforderungen($this->gui, $this);
+	        return $aufforderung_id;
 	    }
 	    else
 	    {
@@ -477,7 +483,7 @@ class Gewaesserbenutzungen extends WrPgObject {
 	
 	public function getAufforderungForErhebungsjahr($erhebungsjahr = NULL)
 	{
-	    $this->debug->write('*** getAufforderungForErhebungsjahr ***', 4);
+// 	    $this->debug->write('*** getAufforderungForErhebungsjahr ***', 4);
 	    
 	    $aufforderungen = $this->aufforderungen;
 	    
@@ -531,7 +537,9 @@ class Gewaesserbenutzungen extends WrPgObject {
 	                        $dateValue = date("d.m.Y");
 	                    }
 	                    
-	                    return $erklaerung->updateErklaerung($erhebungsjahr, $dateVale, $erklaerungNutzer);
+	                    $erklaerung_id = $erklaerung->updateErklaerung($erhebungsjahr, $dateVale, $erklaerungNutzer);
+	                    Gewaesserbenutzungen::getErklaerungen($this->gui, $this);
+	                    return $erklaerung_id;
 	                }
 	            }
 	        }
@@ -612,7 +620,7 @@ class Gewaesserbenutzungen extends WrPgObject {
 	
 	public function getErklaerungForErhebungsjahr($erhebungsjahr)
 	{
-	    $this->debug->write('*** getErklaerungForErhebungsjahr ***', 4);
+// 	    $this->debug->write('*** getErklaerungForErhebungsjahr ***', 4);
 	    
 	    if(!empty($erhebungsjahr))
 	    {
@@ -638,73 +646,171 @@ class Gewaesserbenutzungen extends WrPgObject {
 	
 	////////////////////////////////////////////////////////////////////
 	
-	public function isFestsetzungFreigegeben()
+	public function deleteFestsetzungDokument($erhebungsjahr) 
 	{
-	    $datumFestsetzung = $this->getFestsetzungDatum();
-	    if(!empty($datumFestsetzung))
+	    $festsetzung = $this->getFestsetzungForErhebungsjahr($erhebungsjahr);
+	    if(!empty($festsetzung))
 	    {
-	        return true;
+	        $festsetzungId = $festsetzung->deleteFestsetzungDokument();
+	        Gewaesserbenutzungen::getFestsetzungen($this->gui, $this);
+	        return $festsetzungId;
+	    }
+	}
+	
+	public function insertFestsetzungWithoutDokument($erhebungsjahr, $datum, $festsetzungNutzer,
+	    $summeNichtZugelasseneEntnahmemengen, $summeZugelasseneEntnahmemengen, $summeEntnahmemengen,
+	    $summeNichtZugelassenesEntgelt, $summeZugelassenesEntgelt, $summeEntgelt) {
+	    
+        //if date is not set --> set it to today's date
+        if(empty($datum))
+        {
+            $datum = date("d.m.Y");
+        }
+	    
+	    return $this->insertFestsetzung($erhebungsjahr, null, $datum, null, $festsetzungNutzer, 
+	        $summeNichtZugelasseneEntnahmemengen, $summeZugelasseneEntnahmemengen, $summeEntnahmemengen, 
+	        $summeNichtZugelassenesEntgelt, $summeZugelassenesEntgelt, $summeEntgelt);
+	}
+	
+	public function insertFestsetzungDokument($erhebungsjahr, $dokumentId, $dokumentDatum) {
+	    
+	    //if date is not set --> set it to today's date
+	    if(empty($dokumentDatum))
+	    {
+	        $dokumentDatum = date("d.m.Y");
+	    }
+	     
+	    return $this->insertFestsetzung($erhebungsjahr, $dokumentId, null, $dokumentDatum, null, 
+	        null, null, null, 
+	        null, null, null);
+	}
+	
+	public function insertFestsetzung($erhebungsjahr, $dokumentId, $datum, $dokumentDatum, $festsetzungNutzer, 
+	    $summeNichtZugelasseneEntnahmemengen, $summeZugelasseneEntnahmemengen, $summeEntnahmemengen,
+	    $summeNichtZugelassenesEntgelt, $summeZugelassenesEntgelt, $summeEntgelt) {
+	    $this->debug->write('*** insertFestsetzung ***', 4);
+	    
+	    $this->debug->write('erhebungsjahr: ' . var_export($erhebungsjahr, true), 4);
+	    $this->debug->write('dokumentId: ' . var_export($dokumentId, true), 4);
+	    $this->debug->write('datum: ' . var_export($datum, true), 4);
+	    $this->debug->write('dokumentDatum: ' . var_export($dokumentDatum, true), 4);
+	    $this->debug->write('festsetzungNutzer: ' . var_export($festsetzungNutzer, true), 4);
+	    
+	    $this->debug->write('summeNichtZugelasseneEntnahmemengen: ' . var_export($summeNichtZugelasseneEntnahmemengen, true), 4);
+	    $this->debug->write('summeZugelasseneEntnahmemengen: ' . var_export($summeZugelasseneEntnahmemengen, true), 4);
+	    $this->debug->write('summeEntnahmemengen: ' . var_export($summeEntnahmemengen, true), 4);
+	    
+	    $this->debug->write('summeNichtZugelassenesEntgelt: ' . var_export($summeNichtZugelassenesEntgelt, true), 4);
+	    $this->debug->write('summeZugelassenesEntgelt: ' . var_export($summeZugelassenesEntgelt, true), 4);
+	    $this->debug->write('summeEntgelt: ' . var_export($summeEntgelt, true), 4);
+	    
+	    $festsetzungen = $this->festsetzungen;
+	    if(!empty($festsetzungen))
+	    {
+	        foreach ($festsetzungen as $festsetzung)
+	        {
+	            if(!empty($festsetzung))
+	            {
+	                if($festsetzung->compare($erhebungsjahr))
+	                {
+	                    $this->debug->write('Festsetzung mit id: ' . $festsetzung->getId() . ' existiert schon: update', 4);
+	                    
+	                    $festsetzung_id = $festsetzung->updateFestsetzung($erhebungsjahr, $dokumentId, $datum, $dokumentDatum, $festsetzungNutzer,
+	                        $summeNichtZugelasseneEntnahmemengen, $summeZugelasseneEntnahmemengen, $summeEntnahmemengen,
+	                        $summeNichtZugelassenesEntgelt, $summeZugelassenesEntgelt, $summeEntgelt);
+	                    Gewaesserbenutzungen::getFestsetzungen($this->gui, $this);
+	                    return $festsetzung_id;
+	                }
+	            }
+	        }
+	    }
+	    
+	    $this->debug->write('Festsetzung wird neu angelegt', 4);
+	    
+	    $festsetzung = new Festsetzung($this->gui);
+	    $festsetzung_id = $festsetzung->createFestsetzung($this->getId(), $erhebungsjahr, $dokumentId, $datum, $dokumentDatum, $festsetzungNutzer,
+	        $summeNichtZugelasseneEntnahmemengen, $summeZugelasseneEntnahmemengen, $summeEntnahmemengen,
+	        $summeNichtZugelassenesEntgelt, $summeZugelassenesEntgelt, $summeEntgelt);
+	    
+	    Gewaesserbenutzungen::getFestsetzungen($this->gui, $this);
+	    
+	    return $festsetzung_id;
+	}
+	
+	public function isFestsetzungFreigegeben($erhebungsjahr) {
+	    $festsetzung = $this->getFestsetzungForErhebungsjahr($erhebungsjahr);
+	    if(!empty($festsetzung))
+	    {
+	        $datumFestsetzung = $festsetzung->getDatum();
+	        
+	        if(!empty($datumFestsetzung))
+	        {
+	            return true;
+	        }
 	    }
 	    
 	    return false;
 	}
 	
-	public function getFestsetzungDatum() {
-	    return $this->data['festsetzung_datum'];
+	public function getFestsetzungDatum($erhebungsjahr) {
+	    $festsetzung = $this->getFestsetzungForErhebungsjahr($erhebungsjahr);
+	    if(!empty($festsetzung))
+	    {
+	        return $festsetzung->getDatum();
+	    }
+	    
+	    return null;
 	}
 	
-	public function getFestsetzungDatumHTML() {
-	    $datumFestsetzung = $this->getFestsetzungDatum();
+	public function getFestsetzungDatumHTML($erhebungsjahr) {
+	    $datumFestsetzung = $this->getFestsetzungDatum($erhebungsjahr);
 	    if(!empty($datumFestsetzung))
 	    {
 	        // 	        $dateString = DateTime::createFromFormat("d.m.Y", $datumAbsend);
 	        return "<div>" . $datumFestsetzung . "</div>";
 	    }
 	    
-	    return "<div style=\"color: red;\">Nicht erklärt</div>";
+	    return "<div style=\"color: red;\">Nicht festgesetzt</div>";
 	}
 	
-	public function insertFestsetzungDatum($dateValue = NULL) {
-	    //if date is not set --> set it to today's date
-	    if(empty($dateValue))
+	public function getFestsetzungNutzer($erhebungsjahr) {
+	    $festsetzung = $this->getFestsetzungForErhebungsjahr($erhebungsjahr);
+	    if(!empty($festsetzung))
 	    {
-	        $dateValue = date("d.m.Y");
+	        return $festsetzung->getNutzer();
 	    }
 	    
-	    $this->set('festsetzung_datum', $dateValue);
-	    $this->update();
-	    
-	    // 	    $this->create(
-	    // 	        array(
-	    // 	            'aufforderung_datum_absend' => $dateValue
-	    // 	        )
-	    // 	        );
+	    return null;
 	}
 	
-	public function insertFestsetzungNutzer($festsetzungNutzer) {
-	    $this->set('festsetzung_nutzer', $festsetzungNutzer);
-	    $this->update();
-	}
-	
-	public function getFestsetzungNutzer() {
-	    return $this->data['festsetzung_nutzer'];
-	}
-	
-	public function getFestsetzungNutzerHTML() {
-	    $nutzerFestsetzung = $this->getFestsetzungNutzer();
+	public function getFestsetzungNutzerHTML($erhebungsjahr) {
+	    $nutzerFestsetzung = $this->getFestsetzungNutzer($erhebungsjahr);
 	    if(!empty($nutzerFestsetzung))
 	    {
 	        // 	        $dateString = DateTime::createFromFormat("d.m.Y", $datumAbsend);
 	        return "<div>" . $nutzerFestsetzung . "</div>";
 	    }
 	    
-	    return "<div style=\"color: red;\">Nicht erklärt</div>";
+	    return "<div style=\"color: red;\">Nicht festgesetzt</div>";
 	}
 	
-	public function isFestsetzungDokumentErstellt()
+	public function getFestsetzungDokument($erhebungsjahr) {
+	    $festsetzung = $this->getFestsetzungForErhebungsjahr($erhebungsjahr);
+	    if(!empty($festsetzung))
+	    {
+	        if(!empty($festsetzung->dokument))
+	        {
+	            return $festsetzung->dokument;
+	        }
+	    }
+	    
+	    return null;
+	}
+	
+	public function isFestsetzungDokumentErstellt($erhebungsjahr)
 	{
-	    $datumFestsetzungDokument = $this->getFestsetzungDokumentDatum();
-	    if(!empty($datumFestsetzungDokument))
+	    $festsetzungDokument = $this->getFestsetzungDokumentDatum($erhebungsjahr);
+	    if(!empty($festsetzungDokument))
 	    {
 	        return true;
 	    }
@@ -712,132 +818,89 @@ class Gewaesserbenutzungen extends WrPgObject {
 	    return false;
 	}
 	
-	public function getFestsetzungDokument() {
-	    return $this->data['festsetzung_dokument'];
+	public function getFestsetzungDokumentDatum($erhebungsjahr) {
+	    $festsetzung = $this->getFestsetzungForErhebungsjahr($erhebungsjahr);
+	    if(!empty($festsetzung))
+	    {
+	        return $festsetzung->getDokumentDatum();
+	    }
+	    
+	    return null;
 	}
 	
-	public function insertFestsetzungDokument($id) {
-	    if(!empty($id))
+	public function getFestsetzungForErhebungsjahr($erhebungsjahr)
+	{
+// 	    $this->debug->write('*** getFestsetzungForErhebungsjahr ***', 4);
+	    
+	    if(!empty($erhebungsjahr))
 	    {
-	        $this->set('festsetzung_dokument', $id);
-	        $this->update();
+	        $festsetzungen = $this->festsetzungen;
 	        
-	        $this->insertFestsetzungDokumentDatum();
-	    }
-	}
-	
-	public function deleteFestsetzungDokument() {
-	    $this->set('festsetzung_dokument', '');
-	    $this->update();
-	}
-	
-	public function getFestsetzungDokumentDatum() {
-	    return $this->data['festsetzung_dokument_datum'];
-	}
-	
-	public function insertFestsetzungDokumentDatum($dateValue = NULL) {
-	    //if date is not set --> set it to today's date
-	    if(empty($dateValue))
-	    {
-	        $dateValue = date("d.m.Y");
+	        if(!empty($festsetzungen))
+	        {
+	            foreach ($festsetzungen as $festsetzung)
+	            {
+	                if(!empty($festsetzung))
+	                {
+	                    if($festsetzung->getErhebungsjahr() === $erhebungsjahr)
+	                    {
+	                        return $festsetzung;
+	                    }
+	                }
+	            }
+	        }
 	    }
 	    
-	    $this->set('festsetzung_dokument_datum', $dateValue);
-	    $this->update();
+	    return null;
 	}
 	
-	////////////
-	
-	public function insertFestsetzungSummeZugelasseneEntnahmemengen($festsetzungSummeZugelasseneEntnahmemengen, $update = true) {
-	    $this->set('festsetzung_summe_zugelassene_entnahmemengen', $festsetzungSummeZugelasseneEntnahmemengen);
-	    if($update)
+	public function getFestsetzungSummeZugelasseneEntnahmemengen($erhebungsjahr) {
+	    $festsetzung = $this->getFestsetzungForErhebungsjahr($erhebungsjahr);
+	    if(!empty($festsetzung))
 	    {
-	        $this->update();
+	        return $festsetzung->summe_zugelassene_entnahmemengen;
 	    }
 	}
 	
-	public function getFestsetzungSummeZugelasseneEntnahmemengen() {
-	    return $this->data['festsetzung_summe_zugelassene_entnahmemengen'];
-	}
-	
-	public function insertFestsetzungSummeNichtZugelasseneEntnahmemengen($festsetzungSummeNichtZugelasseneEntnahmemengen, $update = true) {
-	    $this->set('festsetzung_summe_nicht_zugelassene_entnahmemengen', $festsetzungSummeNichtZugelasseneEntnahmemengen);
-	    if($update)
+	public function getFestsetzungSummeNichtZugelasseneEntnahmemengen($erhebungsjahr) {
+	    $festsetzung = $this->getFestsetzungForErhebungsjahr($erhebungsjahr);
+	    if(!empty($festsetzung))
 	    {
-	        $this->update();
+	        return $festsetzung->summe_nicht_zugelassene_entnahmemengen;
 	    }
 	}
 	
-	public function getFestsetzungSummeNichtZugelasseneEntnahmemengen() {
-	    return $this->data['festsetzung_summe_nicht_zugelassene_entnahmemengen'];
-	}
-	
-	public function insertFestsetzungSummeEntnahmemengen($festsetzungSummeEntnahmemengen, $update = true) {
-	    $this->set('festsetzung_summe_entnahmemengen', $festsetzungSummeEntnahmemengen);
-	    if($update)
+	public function getFestsetzungSummeEntnahmemengen($erhebungsjahr) {
+	    $festsetzung = $this->getFestsetzungForErhebungsjahr($erhebungsjahr);
+	    if(!empty($festsetzung))
 	    {
-	        $this->update();
+	        return $festsetzung->summe_entnahmemengen;
 	    }
 	}
 	
-	public function getFestsetzungSummeEntnahmemengen() {
-	    return $this->data['festsetzung_summe_entnahmemengen'];
-	}
 	
-	//////////////
-	
-	public function insertFestsetzungSummeZugelassenesEntgelt($festsetzungSummeZugelassenesEntgelt, $update = true) {
-	    $this->set('festsetzung_summe_zugelassenes_entgelt', $festsetzungSummeZugelassenesEntgelt);
-	    if($update)
+	public function getFestsetzungSummeZugelassenesEntgelt($erhebungsjahr) {
+	    $festsetzung = $this->getFestsetzungForErhebungsjahr($erhebungsjahr);
+	    if(!empty($festsetzung))
 	    {
-	        $this->update();
+	        return $festsetzung->summe_zugelassenes_entgelt;
 	    }
 	}
 	
-	public function getFestsetzungSummeZugelassenesEntgelt() {
-	    return $this->data['festsetzung_summe_zugelassenes_entgelt'];
-	}
-	
-	public function insertFestsetzungSummeNichtZugelassenesEntgelt($festsetzungSummeNichtZugelassenesEntgelt, $update = true) {
-	    $this->set('festsetzung_summe_nicht_zugelassenes_entgelt', $festsetzungSummeNichtZugelassenesEntgelt);
-	    if($update)
+	public function getFestsetzungSummeNichtZugelassenesEntgelt($erhebungsjahr) {
+	    $festsetzung = $this->getFestsetzungForErhebungsjahr($erhebungsjahr);
+	    if(!empty($festsetzung))
 	    {
-	        $this->update();
+	        return $festsetzung->summe_nicht_zugelassenes_entgelt;
 	    }
 	}
 	
-	public function getFestsetzungSummeNichtZugelassenesEntgelt() {
-	    return $this->data['festsetzung_summe_nicht_zugelassenes_entgelt'];
-	}
-	
-	public function insertFestsetzungSummeEntgelt($festsetzungSummeEntgelt, $update = true) {
-	    $this->set('festsetzung_summe_entgelt', $festsetzungSummeEntgelt);
-	    if($update)
+	public function getFestsetzungSummeEntgelt($erhebungsjahr) {
+	    $festsetzung = $this->getFestsetzungForErhebungsjahr($erhebungsjahr);
+	    if(!empty($festsetzung))
 	    {
-	        $this->update();
+	        return $festsetzung->summe_entgelt;
 	    }
-	}
-	
-	public function getFestsetzungSummeEntgelt() {
-	    return $this->data['festsetzung_summe_entgelt'];
-	}
-	
-	public function insertFestsetzungEntnahmemengen($festsetzungSummeNichtZugelasseneEntnahmemengen, $festsetzungSummeZugelasseneEntnahmemengen, $festsetzungSummeEntnahmemengen)
-	{
-	    $this->insertFestsetzungSummeNichtZugelasseneEntnahmemengen($festsetzungSummeNichtZugelasseneEntnahmemengen, false);
-	    $this->insertFestsetzungSummeZugelasseneEntnahmemengen($festsetzungSummeZugelasseneEntnahmemengen, false);
-	    $this->insertFestsetzungSummeEntnahmemengen($festsetzungSummeEntnahmemengen, false);
-	    
-	    $this->update();
-	}
-	
-	public function insertFestsetzungEntgelte($festsetzungSummeNichtZugelassenesEntgelt, $festsetzungSummeZugelassenesEntgelt, $festsetzungSummeEntgelt)
-	{
-	    $this->insertFestsetzungSummeNichtZugelassenesEntgelt($festsetzungSummeNichtZugelassenesEntgelt, false);
-	    $this->insertFestsetzungSummeZugelassenesEntgelt($festsetzungSummeZugelassenesEntgelt, false);
-	    $this->insertFestsetzungSummeEntgelt($festsetzungSummeEntgelt, false);
-	    
-	    $this->update();
 	}
 }
 ?>

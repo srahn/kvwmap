@@ -712,7 +712,7 @@ if(!empty($wrz) && !empty($wrz->getId()))
                         </div>
                         
                       <?php
-                        if (!$speereEingabeErklaerung && !$gewaesserbenutzung->isFestsetzungFreigegeben()) {
+                        if (!$speereEingabeErklaerung && !$gewaesserbenutzung->isFestsetzungFreigegeben($erhebungsjahr)) {
                             ?>
                 			<div id="calendar" class="calendar">
                 				<div id="calendar_datum_erklaerung"></div>
@@ -730,7 +730,7 @@ if(!empty($wrz) && !empty($wrz->getId()))
     		   			<div class="wasserrecht_display_table_row">
     		   				<div class="wasserrecht_display_table_cell_caption">
                     			<input type="hidden" name="go" value="wasserentnahmeentgelt">
-        						<button class="wasserrecht_button" name="erklaerung_entspeeren_<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>_<?php echo $erhebungsjahr; ?>" value="<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>_<?php echo $erhebungsjahr; ?>" type="submit" id="erklaerung_entspeeren_button_<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>_<?php echo $erhebungsjahr; ?>" <?php echo !$speereEingabeErklaerung || $gewaesserbenutzung->isFestsetzungFreigegeben() ? "disabled='disabled'" : "" ?>>Erklärung entspeeren</button>
+        						<button class="wasserrecht_button" name="erklaerung_entspeeren_<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>_<?php echo $erhebungsjahr; ?>" value="<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>_<?php echo $erhebungsjahr; ?>" type="submit" id="erklaerung_entspeeren_button_<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>_<?php echo $erhebungsjahr; ?>" <?php echo !$speereEingabeErklaerung || $gewaesserbenutzung->isFestsetzungFreigegeben($erhebungsjahr) ? "disabled='disabled'" : "" ?>>Erklärung entspeeren</button>
                    			</div>
                    			<div class="wasserrecht_display_table_cell_spacer"></div>
             		   		<div class="wasserrecht_display_table_row_spacer"></div>
@@ -745,7 +745,7 @@ if(!empty($wrz) && !empty($wrz->getId()))
     		   			<div class="wasserrecht_display_table_row">
     		   				<div class="wasserrecht_display_table_cell_caption">
                     			<input type="hidden" name="go" value="wasserentnahmeentgelt">
-        						<button class="wasserrecht_button" name="erklaerung_freigeben_<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>_<?php echo $erhebungsjahr; ?>" value="<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>_<?php echo $erhebungsjahr; ?>" type="submit" id="erklaerung_freigeben_button_<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>_<?php echo $erhebungsjahr; ?>" <?php echo $speereEingabeErklaerung || $gewaesserbenutzung->isFestsetzungFreigegeben() ? "disabled='disabled'" : "" ?>>Erklärung freigeben</button>
+        						<button class="wasserrecht_button" name="erklaerung_freigeben_<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>_<?php echo $erhebungsjahr; ?>" value="<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>_<?php echo $erhebungsjahr; ?>" type="submit" id="erklaerung_freigeben_button_<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>_<?php echo $erhebungsjahr; ?>" <?php echo $speereEingabeErklaerung || $gewaesserbenutzung->isFestsetzungFreigegeben($erhebungsjahr) ? "disabled='disabled'" : "" ?>>Erklärung freigeben</button>
                    			</div>
                    			<div class="wasserrecht_display_table_cell_spacer"></div>
             		   		<div class="wasserrecht_display_table_row_spacer"></div>
@@ -762,7 +762,7 @@ if(!empty($wrz) && !empty($wrz->getId()))
                             <div class="wasserrecht_display_table_cell_spacer"></div>
                             <div class="wasserrecht_display_table_cell_white">
                             	<?php 
-                            	   if(!$speereEingabeErklaerung && !$gewaesserbenutzung->isFestsetzungFreigegeben())
+                            	   if(!$speereEingabeErklaerung && !$gewaesserbenutzung->isFestsetzungFreigegeben($erhebungsjahr))
                             	   {?>
                             	   		<div id="layer" onclick="remove_calendar();"></div>
                             			<a id="caldbl" href="javascript:;" title="(TT.MM.JJJJ) Datum auf das die Erklärung datiert wird." onclick="$('.calendar').show();add_calendar(event, 'datum_erklaerung');" ondblclick="$('.calendar').hide(); $('#datum_erklaerung').val('08.09.2017')">

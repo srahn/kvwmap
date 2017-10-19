@@ -15,18 +15,5 @@ class Erklaerung extends Bescheid {
 	    $this->update();
 	    return $this->getId();
 	}
-	
-	public function compare($erhebungsjahr)
-	{
-	    if(!empty($this->erhebungsjahr) && !empty($erhebungsjahr))
-	    {
-	        if($this->erhebungsjahr === $erhebungsjahr)
-	        {
-	            return true;
-	        }
-	    }
-	    
-	    return false;
-	}
 }
 ?>
