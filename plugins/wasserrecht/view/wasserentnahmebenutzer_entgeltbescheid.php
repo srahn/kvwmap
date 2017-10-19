@@ -269,6 +269,7 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
 	<form action="index.php" id="aufforderung_form" accept-charset="" method="POST">
 	
 		<?php 
+		      $go="wasserentnahmebenutzer_entgeltbescheid";
 		      include_once ('includes/wasserentnahmebenutzer_header.php');
 		?>
     	

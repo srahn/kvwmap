@@ -142,7 +142,8 @@ function createAufforderungsDokument(&$gui, &$valueEscaped)
 
 	<form action="index.php" id="aufforderung_form" accept-charset="" method="POST">
 	
-		<?php 
+		<?php
+		      $go="wasserentnahmebenutzer_aufforderung_zur_erklaerung";
 		      include_once ('includes/wasserentnahmebenutzer_header.php');
 		?>
     	

@@ -52,7 +52,7 @@ if(empty($selectedAdressat) && !empty($getAdressat) && !empty($wrzProGueltigkeit
                 <div class="wasserrecht_display_table_cell_caption">Erhebungsjahr:</div>
                 <div class="wasserrecht_display_table_cell_spacer"></div>
                 <div class="wasserrecht_display_table_cell">
-                	<select name="erhebungsjahr" onchange="setNewUrlParameter(this,'erhebungsjahr')">
+                	<select name="erhebungsjahr" onchange="setNewUrlParameterAndKeepGo(this,'erhebungsjahr','<?php echo $go ?>')">
     					<?php
         					if(!empty($gueltigkeitsjahre) && count($gueltigkeitsjahre) > 0)
         					{
@@ -78,7 +78,7 @@ if(empty($selectedAdressat) && !empty($getAdressat) && !empty($wrzProGueltigkeit
                 </div>
                 <div class="wasserrecht_display_table_cell_spacer"></div>
                 <div class="wasserrecht_display_table_cell">
-                	<select name="behoerde" onchange="setNewUrlParameter(this,'behoerde')">
+                	<select name="behoerde" onchange="setNewUrlParameterAndKeepGo(this,'behoerde','<?php echo $go ?>')">
         				<?php
         				    if(!empty($wasserrechtlicheZulassungen))
             				{
@@ -148,7 +148,7 @@ if(empty($selectedAdressat) && !empty($getAdressat) && !empty($wrzProGueltigkeit
 					onkeyup="autocomplete1('25', 'personen_id', '25_personen_id_0', this.value);"
 					onchange="if(document.getElementById('suggests_25_personen_id_0').style.display=='block'){this.value=this.backup_value; document.getElementById('25_personen_id_0').value=document.getElementById('25_personen_id_0').backup_value;setTimeout(function(){document.getElementById('suggests_25_personen_id_0').style.display = 'none';}, 500);}"
 					id="output_25_personen_id_0" value="<?php echo !empty($selectedAdressat) && !empty($selectedAdressat->getName()) ? $selectedAdressat->getName() : '' ?>" type="text" /> 
-				<input onchange="setNewUrlParameter(this,'adressat')" id="25_personen_id_0" type="hidden" />
+				<input onchange="setNewUrlParameterAndKeepGo(this,'adressat','<?php echo $go ?>')" id="25_personen_id_0" type="hidden" />
 				<div valign="top" style="height: 0px; position: relative;">
 					<div id="suggests_25_personen_id_0" style="z-index: 3000; display: none; left: 0px; top: 0px; width: 400px; vertical-align: top; overflow: hidden; border: 1px solid grey;"></div>
 				</div>

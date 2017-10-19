@@ -68,6 +68,16 @@ function setNewUrlParameter(selectObject, urlParameter)
 	replaceParameterInUrl(urlParameter, value);
 }
 
+function setNewUrlParameterAndKeepGo(selectObject, urlParameter, go)
+{
+	var url = window.location.href;
+	url = changeURL(url, 'go', go);
+	var value = selectObject.value;
+	url = changeURL(url, urlParameter, value);
+	window.location.href = url;
+	
+}
+
 function changeURL(url, key, value) {
 	if(url != null)
 	{
@@ -110,8 +120,12 @@ function changeURL(url, key, value) {
 
 function replaceParameterInUrl(key, value)
 {
+//	console.log("*** replaceParameterInUrl ***");
+//	console.log("key: " + value);
+//	console.log("value: " + value);
+	
 	var url = window.location.href;
-	url = changeURL(url, key, value)
+	url = changeURL(url, key, value);
 	window.location.href = url;
 }
 
