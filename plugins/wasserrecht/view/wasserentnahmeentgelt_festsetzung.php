@@ -165,9 +165,10 @@ function festsetzung_freigeben(&$gui, $valueEscaped, &$erhebungsjahr, $festsetzu
                         //                         echo var_dump($speereEingabeFestsetzung);
                         
                         // update an existing teilgewaesserbenutzung
-                        if (!empty($gewaesserbenutzung->teilgewaesserbenutzungen[$i - 1])) {
+                        $teilgewasserbenutzungen = $gewaesserbenutzung->getTeilgewaesserbenutzungenByErhebungsjahr($erhebungsjahr);
+                        if (!empty($teilgewasserbenutzungen[$i - 1])) {
                             
-                            $teilgewaesserbenutzung = $gewaesserbenutzung->teilgewaesserbenutzungen[$i - 1];
+                            $teilgewaesserbenutzung = $teilgewasserbenutzungen[$i - 1];
                             
                             $berechneter_entgeltsatz_zugelassen = htmlspecialchars($_POST["teilgewaesserbenutzung_berechneter_entgeltsatz_zugelassen_" . $i]);
                             $berechneter_entgeltsatz_nicht_zugelassen = htmlspecialchars($_POST["teilgewaesserbenutzung_berechneter_entgeltsatz_nicht_zugelassen_" . $i]);
@@ -179,7 +180,7 @@ function festsetzung_freigeben(&$gui, $valueEscaped, &$erhebungsjahr, $festsetzu
                                 && (empty($berechnetes_entgelt_zugelassen) || is_numeric($berechnetes_entgelt_zugelassen))
                                 && (empty($berechnetes_entgelt_nicht_zugelassen) || is_numeric($berechnetes_entgelt_nicht_zugelassen)))
                             {
-                                $teilgewaesserbenutzungId = $teilgewaesserbenutzung->updateTeilgewaesserbenutzung_Bearbeiter($teilgewaesserbenutzung_art_benutzung, $teilgewaesserbenutzung_wiedereinleitung_bearbeiter, $teilgewaesserbenutzung_befreiungstatbestaende, $freitext, $berechneter_entgeltsatz_zugelassen, $berechneter_entgeltsatz_nicht_zugelassen, $berechnetes_entgelt_zugelassen, $berechnetes_entgelt_nicht_zugelassen);
+                                $teilgewaesserbenutzungId = $teilgewaesserbenutzung->updateTeilgewaesserbenutzung_Bearbeiter($erhebungsjahr, $teilgewaesserbenutzung_art_benutzung, $teilgewaesserbenutzung_wiedereinleitung_bearbeiter, $teilgewaesserbenutzung_befreiungstatbestaende, $freitext, $berechneter_entgeltsatz_zugelassen, $berechneter_entgeltsatz_nicht_zugelassen, $berechnetes_entgelt_zugelassen, $berechnetes_entgelt_nicht_zugelassen);
                                 $gui->add_message('notice', 'Teilgewässerbenutzungen (id: ' . $teilgewaesserbenutzungId . ') erfolgreich geändert!');
                                 $gui->debug->write('Teilgewässerbenutzungen (id: ' . $teilgewaesserbenutzungId . ') erfolgreich geändert!', 4);
                             }
@@ -328,13 +329,14 @@ if(!empty($wrz) && !empty($wrz->getId()))
                        		  $zugelassenerUmfangEntgeltsatz = $gewaesserbenutzung->getZugelassenerUmfang();
                        		  $zugelassenerUmfangEntgelt = $zugelassenerUmfangEntgeltsatz;
                        		  
+                       		  $teilgewasserbenutzungen = $gewaesserbenutzung->getTeilgewaesserbenutzungenByErhebungsjahr($erhebungsjahr);
                               for ($i = 1; $i <= WASSERRECHT_ERKLAERUNG_ENTNAHME_TEILGEWAESSERBENUTZUNGEN_COUNT; $i++) 
                               {
                                       $teilgewaesserbenutzung = null;
-                                      if(!empty($gewaesserbenutzung->teilgewaesserbenutzungen) && count($gewaesserbenutzung->teilgewaesserbenutzungen) > 0 
-                                          && count($gewaesserbenutzung->teilgewaesserbenutzungen) > ($i - 1) && !empty($gewaesserbenutzung->teilgewaesserbenutzungen[$i -1]))
+                                      if(!empty($teilgewasserbenutzungen) && count($teilgewasserbenutzungen) > 0 
+                                          && count($teilgewasserbenutzungen) > ($i - 1) && !empty($teilgewasserbenutzungen[$i -1]))
                                       {
-                                          $teilgewaesserbenutzung = $gewaesserbenutzung->teilgewaesserbenutzungen[$i - 1];
+                                          $teilgewaesserbenutzung = $teilgewasserbenutzungen[$i - 1];
             //                               var_dump($teilgewaesserbenutzung->gewaesserbenutzungArt->getName());
             //                               echo "<br>teilgewaesserbenutzung: " . var_dump($teilgewaesserbenutzung->gewaesserbenutzungArt->getId());
             
@@ -472,7 +474,7 @@ if(!empty($wrz) && !empty($wrz->getId()))
                                                   	    && !is_null($getWiedereinleitungBearbeiter) && strcmp(WASSERRECHT_ERKLAERUNG_ENTNAHME_BITTE_AUSWAEHLEN_VALUE, $getWiedereinleitungBearbeiter) !== 0
                                                   	    && !is_null($getBefreiungstatbestaende) && strcmp(WASSERRECHT_ERKLAERUNG_ENTNAHME_BITTE_AUSWAEHLEN_VALUE, $getBefreiungstatbestaende) !== 0)
                                                       	{
-                                                      	    $berechneter_entgeltsatz = $gewaesserbenutzung->getTeilgewaesserbenutzungEntgeltsatz($teilgewaesserbenutzung, $getArtBenutzung, $getBefreiungstatbestaende, $getWiedereinleitungBearbeiter, $zugelassenesEntnahmeEntgelt, $nichtZugelassenesEntnahmeEntgelt, $zugelassenerUmfangEntgeltsatz);
+                                                      	    $berechneter_entgeltsatz = $gewaesserbenutzung->getTeilgewaesserbenutzungEntgeltsatz($erhebungsjahr, $teilgewaesserbenutzung, $getArtBenutzung, $getBefreiungstatbestaende, $getWiedereinleitungBearbeiter, $zugelassenesEntnahmeEntgelt, $nichtZugelassenesEntnahmeEntgelt, $zugelassenerUmfangEntgeltsatz);
                                                       	    if(count($berechneter_entgeltsatz) === 1) //nur zugelasser Umfang
                                                       	    {
                                                       	        echo $berechneter_entgeltsatz[0] . " (zugelassener Umfang)";
@@ -497,7 +499,7 @@ if(!empty($wrz) && !empty($wrz->getId()))
                                               	    && !is_null($getWiedereinleitungBearbeiter) && strcmp(WASSERRECHT_ERKLAERUNG_ENTNAHME_BITTE_AUSWAEHLEN_VALUE, $getWiedereinleitungBearbeiter) !== 0
                                               	    && !is_null($getBefreiungstatbestaende) && strcmp(WASSERRECHT_ERKLAERUNG_ENTNAHME_BITTE_AUSWAEHLEN_VALUE, $getBefreiungstatbestaende) !== 0)
                                               	{
-                                              	    $berechnetes_entgelt =  $gewaesserbenutzung->getTeilgewaesserbenutzungEntgelt($teilgewaesserbenutzung, $getArtBenutzung, $getBefreiungstatbestaende, $getWiedereinleitungBearbeiter, $zugelassenesEntnahmeEntgelt, $nichtZugelassenesEntnahmeEntgelt, $zugelassenerUmfangEntgelt);
+                                              	    $berechnetes_entgelt =  $gewaesserbenutzung->getTeilgewaesserbenutzungEntgelt($erhebungsjahr, $teilgewaesserbenutzung, $getArtBenutzung, $getBefreiungstatbestaende, $getWiedereinleitungBearbeiter, $zugelassenesEntnahmeEntgelt, $nichtZugelassenesEntnahmeEntgelt, $zugelassenerUmfangEntgelt);
                                               	    if(count($berechnetes_entgelt) === 1) //nur zugelasser Umfang
                                               	    {
                                               	        echo $berechnetes_entgelt[0] . " (zugelassener Umfang)";
@@ -527,7 +529,7 @@ if(!empty($wrz) && !empty($wrz->getId()))
                               	<td></td>
                               	<td></td>
                               	<td>Zugelassene Entnahmemenge:</td>
-                              	<td><input class="wasserrecht_table_inputfield" type="text" id="summe_zugelassene_entnahmemengen" name="summe_zugelassene_entnahmemengen" readonly="readonly" value="<?php echo $gewaesserbenutzung->getEntnahmemenge(true) ?>"></td>
+                              	<td><input class="wasserrecht_table_inputfield" type="text" id="summe_zugelassene_entnahmemengen" name="summe_zugelassene_entnahmemengen" readonly="readonly" value="<?php echo $gewaesserbenutzung->getEntnahmemenge($erhebungsjahr, true) ?>"></td>
                               	<td></td>
                               	<td></td>
                               	<td></td>
@@ -540,7 +542,7 @@ if(!empty($wrz) && !empty($wrz->getId()))
                               	<td></td>
                               	<td></td>
                               	<td>Nicht zugelassene Entnahmemenge:</td>
-                              	<td><input class="wasserrecht_table_inputfield" type="text" id="summe_nicht_zugelassene_entnahmemengen" name="summe_nicht_zugelassene_entnahmemengen" readonly="readonly" value="<?php echo $gewaesserbenutzung->getEntnahmemenge(false) ?>"></td>
+                              	<td><input class="wasserrecht_table_inputfield" type="text" id="summe_nicht_zugelassene_entnahmemengen" name="summe_nicht_zugelassene_entnahmemengen" readonly="readonly" value="<?php echo $gewaesserbenutzung->getEntnahmemenge($erhebungsjahr, false) ?>"></td>
                               	<td></td>
                               	<td></td>
                               	<td></td>
@@ -553,7 +555,7 @@ if(!empty($wrz) && !empty($wrz->getId()))
                               	<td></td>
                               	<td></td>
                               	<td>Summe Entnahmemengen:</td>
-                              	<td><input class="wasserrecht_table_inputfield" type="text" id="summe_entnahmemengen" name="summe_entnahmemengen" readonly="readonly" value="<?php echo $gewaesserbenutzung->getUmfangAllerTeilbenutzungen() ?>"></td>
+                              	<td><input class="wasserrecht_table_inputfield" type="text" id="summe_entnahmemengen" name="summe_entnahmemengen" readonly="readonly" value="<?php echo $gewaesserbenutzung->getUmfangAllerTeilbenutzungen($erhebungsjahr) ?>"></td>
                               	<td></td>
                               	<td></td>
                               	<td></td>
@@ -579,11 +581,12 @@ if(!empty($wrz) && !empty($wrz->getId()))
                        
                        <div class="wasserrecht_display_table" style="margin-top: 20px; margin-left: 15px">
                            <label for="festsetzung_freitext">Festsetzung Freitext:</label>
-                           <?php 
+                           <?php
+                               $teilgewasserbenutzungen = $gewaesserbenutzung->getTeilgewaesserbenutzungenByErhebungsjahr($erhebungsjahr);
                                $teilgewaesserbenutzung = null;
-                               if(!empty($gewaesserbenutzung->teilgewaesserbenutzungen) && count($gewaesserbenutzung->teilgewaesserbenutzungen) > 0 && !empty($gewaesserbenutzung->teilgewaesserbenutzungen[0]))
+                               if(!empty($teilgewasserbenutzungen) && count($teilgewasserbenutzungen) > 0 && !empty($teilgewasserbenutzungen[0]))
                                {
-                                   $teilgewaesserbenutzung = $gewaesserbenutzung->teilgewaesserbenutzungen[0];
+                                   $teilgewaesserbenutzung = $teilgewasserbenutzungen[0];
                                    //var_dump($teilgewaesserbenutzung);
                                }
                            ?>

@@ -108,6 +108,10 @@ class Teilgewaesserbenutzungen extends WrPgObject {
 	    return $teilgewaesserbenutzungen;
 	}
 	
+	public function getErhebungsjahr() {
+	    return $this->data['erhebungsjahr'];
+	}
+	
 	public function getWiedereinleitungNutzer() {
 	    return $this->data['wiedereinleitung_nutzer'];
 	}
@@ -240,13 +244,14 @@ class Teilgewaesserbenutzungen extends WrPgObject {
 	    return $this->data['freitext'];
 	}
 	
-	public function createTeilgewaesserbenutzung_Nutzer($gewaesserbenutzungen, $art = NULL, $zweck = NULL, $umfang = NULL, $wiedereinleitung_nutzer = NULL, $mengenbestimmung = NULL, $teilgewaesserbenutzungen_art = NULL, $entgeltsatz = NULL) 
+	public function createTeilgewaesserbenutzung_Nutzer($gewaesserbenutzungen, $erhebungsjahr, $art = NULL, $zweck = NULL, $umfang = NULL, $wiedereinleitung_nutzer = NULL, $mengenbestimmung = NULL, $teilgewaesserbenutzungen_art = NULL, $entgeltsatz = NULL) 
 	{
-	    if (!empty($gewaesserbenutzungen))
+	    if (!empty($gewaesserbenutzungen) && !empty($erhebungsjahr))
 	    {
 	        $teilgewaesserbenutzung_value_array = array
 	        (
-	            'gewaesserbenutzungen' => $gewaesserbenutzungen
+	            'gewaesserbenutzungen' => $gewaesserbenutzungen,
+	            'erhebungsjahr' => $erhebungsjahr
 	        );
 	        
 	        $this->addToArray($teilgewaesserbenutzung_value_array, 'art', $art);
@@ -288,8 +293,9 @@ class Teilgewaesserbenutzungen extends WrPgObject {
 // 	    }
 // 	}
 	
-	public function updateTeilgewaesserbenutzung_Nutzer($art = NULL, $zweck = NULL, $umfang = NULL, $wiedereinleitung_nutzer = NULL, $mengenbestimmung = NULL, $teilgewaesserbenutzungen_art = NULL, $entgeltsatz = NULL) 
+    public function updateTeilgewaesserbenutzung_Nutzer($erhebungsjahr = NULL, $art = NULL, $zweck = NULL, $umfang = NULL, $wiedereinleitung_nutzer = NULL, $mengenbestimmung = NULL, $teilgewaesserbenutzungen_art = NULL, $entgeltsatz = NULL) 
 	{
+	    $this->updateData('erhebungsjahr', $erhebungsjahr);
 	    $this->updateData('art', $art);
 	    $this->updateData('zweck', $zweck);
 	    $this->updateData('umfang', $umfang);
@@ -305,8 +311,9 @@ class Teilgewaesserbenutzungen extends WrPgObject {
 	    return $this->getId();
 	}
 	
-	public function updateTeilgewaesserbenutzung_Bearbeiter($art_benutzung = NULL, $wiedereinleitung_bearbeiter = NULL, $befreiungstatbestaende = NULL, $freitext = NULL, $berechneter_entgeltsatz_zugelassen = NULL,  $berechneter_entgeltsatz_nicht_zugelassen = NULL, $berechnetes_entgelt_zugelassen = NULL, $berechnetes_entgelt_nicht_zugelassen = NULL)
+	public function updateTeilgewaesserbenutzung_Bearbeiter($erhebungsjahr = NULL, $art_benutzung = NULL, $wiedereinleitung_bearbeiter = NULL, $befreiungstatbestaende = NULL, $freitext = NULL, $berechneter_entgeltsatz_zugelassen = NULL,  $berechneter_entgeltsatz_nicht_zugelassen = NULL, $berechnetes_entgelt_zugelassen = NULL, $berechnetes_entgelt_nicht_zugelassen = NULL)
 	{
+	    $this->updateData('erhebungsjahr', $erhebungsjahr);
 	    $this->updateData('art_benutzung', $art_benutzung);
 	    $this->updateData('wiedereinleitung_bearbeiter', $wiedereinleitung_bearbeiter);
 	    $this->updateData('befreiungstatbestaende', $befreiungstatbestaende);

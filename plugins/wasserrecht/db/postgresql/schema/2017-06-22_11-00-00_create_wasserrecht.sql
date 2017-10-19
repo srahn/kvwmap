@@ -315,6 +315,7 @@ CREATE TABLE wasserrecht.fiswrv_teilgewaesserbenutzungen_art(
 
 CREATE TABLE wasserrecht.fiswrv_teilgewaesserbenutzungen(
 	id serial PRIMARY KEY,
+	erhebungsjahr varchar(10),
 	art integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_art(id),
 	zweck integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_zweck(id),
 	umfang numeric,

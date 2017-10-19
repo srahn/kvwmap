@@ -231,6 +231,6 @@ INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen(kennnummer, wasserbuchnummer
 INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen(kennnummer, wasserbuchnummer, freitext_art, art, freitext_zweck, zweck, umfang_entnahme, lage, wasserrechtliche_zulassungen) VALUES ('2-1-1-4-4', '2425', 'Test Freitext Art 4', 1, 'Test Freitext Zweck 4', 6, 1, 1, 4);
 INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen(kennnummer, wasserbuchnummer, freitext_art, art, freitext_zweck, zweck, umfang_entnahme, lage, wasserrechtliche_zulassungen) VALUES ('1-2-1-5-5', '53535', 'Test Freitext Art 5', 1, 'Test Freitext Zweck 5', 6, 1, 1, 5);
 
-INSERT INTO wasserrecht.fiswrv_teilgewaesserbenutzungen(art, zweck, umfang, wiedereinleitung_nutzer, wiedereinleitung_bearbeiter,mengenbestimmung,art_benutzung,befreiungstatbestaende,entgeltsatz,teilgewaesserbenutzungen_art, gewaesserbenutzungen) VALUES(1,1,2,true,true,3,2,false,2,2,1);
+INSERT INTO wasserrecht.fiswrv_teilgewaesserbenutzungen(erhebungsjahr, art, zweck, umfang, wiedereinleitung_nutzer, wiedereinleitung_bearbeiter,mengenbestimmung,art_benutzung,befreiungstatbestaende,entgeltsatz,teilgewaesserbenutzungen_art, gewaesserbenutzungen) VALUES(2016,1,1,2,true,true,3,2,false,2,2,1);
 
 COMMIT;

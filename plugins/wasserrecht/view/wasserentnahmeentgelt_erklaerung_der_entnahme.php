@@ -302,6 +302,7 @@ function erklaerung_freigeben($gui, &$valueEscaped, &$wrz, &$gewaesserbenutzung,
                  */
                 if(!$leerEingabeErklaerung && $errorEingabeErklaerung === null)
                 {
+                    $teilgewasserbenutzungen = $gewaesserbenutzung->getTeilgewaesserbenutzungenByErhebungsjahr($erhebungsjahr);
                     for ($i = 1; $i <= WASSERRECHT_ERKLAERUNG_ENTNAHME_TEILGEWAESSERBENUTZUNGEN_COUNT; $i ++)
                     {
                         $gewaesserbenutzungsart = htmlspecialchars($_POST["gewaesserbenutzungsart_" . $i]);
@@ -332,16 +333,16 @@ function erklaerung_freigeben($gui, &$valueEscaped, &$wrz, &$gewaesserbenutzung,
                                     //                         echo var_dump($speereEingabeErklaerung);
                                     
                                     // update an existing teilgewaesserbenutzung
-                                    if (!empty($gewaesserbenutzung->teilgewaesserbenutzungen[$i - 1])) {
-                                        $teilgewaesserbenutzung = $gewaesserbenutzung->teilgewaesserbenutzungen[$i - 1];
-                                        $teilgewaesserbenutzungId = $teilgewaesserbenutzung->updateTeilgewaesserbenutzung_Nutzer($gewaesserbenutzungsart, $gewaesserbenutzungszweck, $gewaesserbenutzungsumfang, $wiedereinleitung, $mengenbestimmung, $teilgewaesserbenutzungsart);
+                                    if (!empty($teilgewasserbenutzungen[$i - 1])) {
+                                        $teilgewaesserbenutzung = $teilgewasserbenutzungen[$i - 1];
+                                        $teilgewaesserbenutzungId = $teilgewaesserbenutzung->updateTeilgewaesserbenutzung_Nutzer($erhebungsjahr, $gewaesserbenutzungsart, $gewaesserbenutzungszweck, $gewaesserbenutzungsumfang, $wiedereinleitung, $mengenbestimmung, $teilgewaesserbenutzungsart);
                                         
                                         $gui->add_message('notice', 'Teilgewässerbenutzungen (id: ' . $teilgewaesserbenutzungId . ') erfolgreich geändert!');
                                         $gui->debug->write('Teilgewässerbenutzungen (id: ' . $teilgewaesserbenutzungId . ') erfolgreich geändert!', 4);
                                     }                        // else --> if not there --> create one
                                     else {
                                         $teilgewaesserbenutzung = new Teilgewaesserbenutzungen($gui);
-                                        $teilgewaesserbenutzungId = $teilgewaesserbenutzung->createTeilgewaesserbenutzung_Nutzer($gewaesserbenutzung->getId(), $gewaesserbenutzungsart, $gewaesserbenutzungszweck, $gewaesserbenutzungsumfang, $wiedereinleitung, $mengenbestimmung, $teilgewaesserbenutzungsart, WASSERRECHT_ERKLAERUNG_ENTNAHME_TEILGEWAESSERBENUTZUNGEN_ENTGELTSATZ);
+                                        $teilgewaesserbenutzungId = $teilgewaesserbenutzung->createTeilgewaesserbenutzung_Nutzer($gewaesserbenutzung->getId(), $erhebungsjahr, $gewaesserbenutzungsart, $gewaesserbenutzungszweck, $gewaesserbenutzungsumfang, $wiedereinleitung, $mengenbestimmung, $teilgewaesserbenutzungsart, WASSERRECHT_ERKLAERUNG_ENTNAHME_TEILGEWAESSERBENUTZUNGEN_ENTGELTSATZ);
                                         
                                         $gui->add_message('notice', 'Teilgewässerbenutzungen (id: ' . $teilgewaesserbenutzungId . ') erfolgreich eingetragen!');
                                         $gui->debug->write('Teilgewässerbenutzungen (id: ' . $teilgewaesserbenutzungId . ') erfolgreich eingetragen!', 4);
@@ -480,19 +481,20 @@ if(!empty($wrz) && !empty($wrz->getId()))
                         <th>Mengenbestimmung</th>
                       </tr>
                       <?php
-                          for ($i = 1; $i <= WASSERRECHT_ERKLAERUNG_ENTNAHME_TEILGEWAESSERBENUTZUNGEN_COUNT; $i++) 
+                          $teilgewasserbenutzungen = $gewaesserbenutzung->getTeilgewaesserbenutzungenByErhebungsjahr($erhebungsjahr);
+                          for ($i = 1; $i <= WASSERRECHT_ERKLAERUNG_ENTNAHME_TEILGEWAESSERBENUTZUNGEN_COUNT; $i++)
                           {
-                          
-                              $teilgewaesserbenutzung = null;
-                              if(!empty($gewaesserbenutzung->teilgewaesserbenutzungen) && count($gewaesserbenutzung->teilgewaesserbenutzungen) > 0 
-                                  && count($gewaesserbenutzung->teilgewaesserbenutzungen) > ($i - 1) && !empty($gewaesserbenutzung->teilgewaesserbenutzungen[$i -1]))
-                              {
-                                  $teilgewaesserbenutzung = $gewaesserbenutzung->teilgewaesserbenutzungen[$i - 1];
-    //                               var_dump($teilgewaesserbenutzung);
-                              }
+                            
+                             $teilgewaesserbenutzung = null;
+                             if(!empty($teilgewasserbenutzungen) && count($teilgewasserbenutzungen) > 0
+                                 && count($teilgewasserbenutzungen) > ($i - 1) && !empty($teilgewasserbenutzungen[$i -1]))
+                             {
+                                 $teilgewaesserbenutzung = $teilgewasserbenutzungen[$i - 1];
+//                                  var_dump($teilgewaesserbenutzung);
+                             }
+                             
+//                              var_dump($errorEingabeErklaerung);
                               
-//                               var_dump($errorEingabeErklaerung);
-                          	
                           	 if($errorEingabeErklaerung === $i)
                           	 {
                           	 ?>
@@ -677,10 +679,11 @@ if(!empty($wrz) && !empty($wrz->getId()))
                             <div class="wasserrecht_display_table_cell_white" <?php echo $errorEingabeErklaerung === -1 ? "style='border: 3px solid red'" : ""?>>
                                 <select class="wasserrecht_display_table_cell_white" name="teilgewaesserbenutzungsart" <?php echo $speereEingabeErklaerung ? "disabled='disabled'" : "" ?>>
                                 	<?php 
+                                	    $teilgewasserbenutzungen = $gewaesserbenutzung->getTeilgewaesserbenutzungenByErhebungsjahr($erhebungsjahr);
                                     	$teilgewaesserbenutzung = null;
-                                    	if(!empty($gewaesserbenutzung->teilgewaesserbenutzungen) && count($gewaesserbenutzung->teilgewaesserbenutzungen) > 0 && !empty($gewaesserbenutzung->teilgewaesserbenutzungen[0]))
+                                    	if(!empty($teilgewasserbenutzungen) && count($teilgewasserbenutzungen) > 0 && !empty($teilgewasserbenutzungen[0]))
                                     	{
-                                    	    $teilgewaesserbenutzung = $gewaesserbenutzung->teilgewaesserbenutzungen[0];
+                                    	    $teilgewaesserbenutzung = $teilgewasserbenutzungen[0];
                                     	    //var_dump($teilgewaesserbenutzung);
                                     	}
                                     	

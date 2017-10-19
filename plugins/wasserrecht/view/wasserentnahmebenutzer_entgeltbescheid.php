@@ -111,10 +111,11 @@ function festsetzung_erstellen(&$gui, &$wrzs, &$erhebungsjahr)
                         $festsetzungsSammelbescheidDaten->setErlaubterUmfang($erlaubterUmfang);
                     }
                     
+                    $teilgewasserbenutzungen = $gewaesserbenutzung->getTeilgewaesserbenutzungenByErhebungsjahr($erhebungsjahr);
                     $teilgewasserbenutzung = null;
-                    if(!empty($gewaesserbenutzung->teilgewaesserbenutzungen) && count($gewaesserbenutzung->teilgewaesserbenutzungen) > 0)
+                    if(!empty($teilgewasserbenutzungen) && count($teilgewasserbenutzungen) > 0)
                     {
-                        $teilgewasserbenutzung = $gewaesserbenutzung->teilgewaesserbenutzungen[0];
+                        $teilgewasserbenutzung = $teilgewasserbenutzungen[0];
                     }
                     
                     if(!empty($teilgewasserbenutzung))

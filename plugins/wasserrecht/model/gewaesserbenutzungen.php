@@ -110,27 +110,7 @@ class Gewaesserbenutzungen extends WrPgObject {
 	    $gewaesserbenutzung->festsetzungen = $festsetzungen;
 	}
 	
-	public function getUmfangAllerTeilbenutzungen()
-	{
-	    $gesamtUmfang = 0;
-	    
-	    for ($i = 1; $i <= WASSERRECHT_ERKLAERUNG_ENTNAHME_TEILGEWAESSERBENUTZUNGEN_COUNT; $i++)
-	    {
-	        $teilgewaesserbenutzung = null;
-	        if(!empty($this->teilgewaesserbenutzungen) && count($this->teilgewaesserbenutzungen) > 0
-	            && count($this->teilgewaesserbenutzungen) > ($i - 1) && !empty($this->teilgewaesserbenutzungen[$i - 1]))
-	        {
-	            $teilgewaesserbenutzung = $this->teilgewaesserbenutzungen[$i - 1];
-	            
-	            if(!empty($teilgewaesserbenutzung))
-	            {
-	                $gesamtUmfang = $gesamtUmfang + $teilgewaesserbenutzung->getUmfang();
-	            }
-	        }
-	    }
-	    
-	    return $gesamtUmfang;
-	}
+	////////////////////////////////////////////////////////////////////
 	
 	public function getZugelassenerUmfang()
 	{
@@ -144,47 +124,74 @@ class Gewaesserbenutzungen extends WrPgObject {
 	    return null;
 	}
 	
-	public function getTeilgewaesserbenutzungNichtZugelasseneMenge($teilgewaesserbenutzungId, &$zugelassenerUmfang)
+	////////////////////////////////////////////////////////////////////
+	
+	public function getTeilgewaesserbenutzungenByErhebungsjahr($erhebungsjahr)
+	{
+	    $teilgewaesserbenutzungen = $this->teilgewaesserbenutzungen;
+	    
+	    if(!empty($teilgewaesserbenutzungen) && !empty($erhebungsjahr))
+	    {
+	        $returnArray = array();
+	        
+	        foreach($teilgewaesserbenutzungen as $teilgewaesserbenutzung)
+	        {
+	            if(!empty($teilgewaesserbenutzung))
+	            {
+	                if($teilgewaesserbenutzung->getErhebungsjahr() === $erhebungsjahr)
+	                {
+	                    $returnArray[] = $teilgewaesserbenutzung;
+	                }
+	            }
+	        }
+	        
+	        return $returnArray;
+	    }
+	    
+	    return null;
+	}
+	
+	public function getUmfangAllerTeilbenutzungen($erhebungsjahr)
+	{
+	    $teilgewaesserbenutzungen = $this->getTeilgewaesserbenutzungenByErhebungsjahr($erhebungsjahr);
+	    return $this->getUmfang($teilgewaesserbenutzungen);
+	}
+	
+	public function getUmfang(&$teilgewaesserbenutzungen)
+	{
+	    $gesamtUmfang = 0;
+	    
+	    if(!empty($teilgewaesserbenutzungen))
+	    {
+	        foreach($teilgewaesserbenutzungen as $teilgewaesserbenutzung)
+	        {
+	            if(!empty($teilgewaesserbenutzung))
+	            {
+	                $gesamtUmfang = $gesamtUmfang + $teilgewaesserbenutzung->getUmfang();
+	            }
+	        }
+	    }
+	    
+	    return $gesamtUmfang;
+	}
+	
+	public function getTeilgewaesserbenutzungNichtZugelasseneMenge($erhebungsjahr, $teilgewaesserbenutzungId, &$zugelassenerUmfang)
 	{
 	    $this->debug->write('*** Gewaesserbenutzungen->getTeilgewaesserbenutzungNichtZugelasseneMenge ***', 4);
 	    
+	    $this->debug->write('erhebungsjahr: ' . var_export($erhebungsjahr, true), 4);
 	    $this->debug->write('teilgewaesserbenutzungId: ' . var_export($teilgewaesserbenutzungId, true), 4);
 	    $this->debug->write('zugelassenerUmfang: ' . var_export($zugelassenerUmfang, true), 4);
 	    
 	    if(!empty($teilgewaesserbenutzungId))
 	    {
-	        $gesamtUmfang = 0;
-	        $bisZuDieserTeilgewaesserbenutzungKumulierterUmfang = 0;
-	        for ($i = 1; $i <= WASSERRECHT_ERKLAERUNG_ENTNAHME_TEILGEWAESSERBENUTZUNGEN_COUNT; $i++)
-	        {
-	            $teilgewaesserbenutzung = null;
-	            if(!empty($this->teilgewaesserbenutzungen) && count($this->teilgewaesserbenutzungen) > 0
-	                && count($this->teilgewaesserbenutzungen) > ($i - 1) && !empty($this->teilgewaesserbenutzungen[$i - 1]))
-	            {
-	                $teilgewaesserbenutzung = $this->teilgewaesserbenutzungen[$i - 1];
-	                
-	                if(!empty($teilgewaesserbenutzung))
-	                {
-// 	                    echo "teilgewaesserbenutzung->getId(): " . $teilgewaesserbenutzung->getId() . "<br/>";
-// 	                    if($teilgewaesserbenutzung->getId() === $teilgewaesserbenutzungId)
-// 	                    {
-// 	                        $bisZuDieserTeilgewaesserbenutzungKumulierterUmfang = $gesamtUmfang + $teilgewaesserbenutzung->getUmfang();
-// 	                    }
-	                    
-	                    $gesamtUmfang = $gesamtUmfang + $teilgewaesserbenutzung->getUmfang();
-	                }
-	            }
-	        }
-// 	        echo "gesamtUmfang: " . $gesamtUmfang . "<br/>";
+	        $teilgewaesserbenutzungen = $this->getTeilgewaesserbenutzungenByErhebungsjahr($erhebungsjahr);
+	        $gesamtUmfang = $this->getUmfang($teilgewaesserbenutzungen);
 	        
-	        for ($i = 1; $i <= WASSERRECHT_ERKLAERUNG_ENTNAHME_TEILGEWAESSERBENUTZUNGEN_COUNT; $i++)
+	        if(!empty($teilgewaesserbenutzungen))
 	        {
-	            $teilgewaesserbenutzung = null;
-	            if(!empty($this->teilgewaesserbenutzungen) && count($this->teilgewaesserbenutzungen) > 0
-	                && count($this->teilgewaesserbenutzungen) > ($i - 1) && !empty($this->teilgewaesserbenutzungen[$i - 1]))
+	            foreach($teilgewaesserbenutzungen as $teilgewaesserbenutzung)
 	            {
-	                $teilgewaesserbenutzung = $this->teilgewaesserbenutzungen[$i - 1];
-	                
 	                if(!empty($teilgewaesserbenutzung))
 	                {
 	                    $teilgewaesserbenutzungUmfang = $teilgewaesserbenutzung->getUmfang();
@@ -193,32 +200,32 @@ class Gewaesserbenutzungen extends WrPgObject {
 	                    {
 	                        if($gesamtUmfang <= $zugelassenerUmfang)
 	                        {
-// 	                            echo "gesamtUmfang <= zugelassenerUmfang <br>";
+	                            // 	                            echo "gesamtUmfang <= zugelassenerUmfang <br>";
 	                            return 0;
 	                        }
 	                        elseif ($zugelassenerUmfang === 0)
 	                        {
-// 	                            echo "zugelassenerUmfang === 0";
+	                            // 	                            echo "zugelassenerUmfang === 0";
 	                            return $teilgewaesserbenutzungUmfang;
 	                        }
-// 	                        elseif($bisZuDieserTeilgewaesserbenutzungKumulierterUmfang <= $zugelassenerUmfang)
-// 	                        {
-// 	                            return 0;
-// 	                        }
-	                        elseif($teilgewaesserbenutzungUmfang <= $zugelassenerUmfang)
-	                        {
-// 	                            echo "teilgewaesserbenutzungUmfang <= zugelassenerUmfang <br>";
-	                            $zugelassenerUmfang = $zugelassenerUmfang - $teilgewaesserbenutzungUmfang;
-	                            return 0;
-	                        }
-	                        elseif($teilgewaesserbenutzungUmfang > $zugelassenerUmfang)
-	                        {
-// 	                            echo "teilgewaesserbenutzungUmfang > zugelassenerUmfang <br>";
-	                            $returnValue = $teilgewaesserbenutzungUmfang - $zugelassenerUmfang;
-	                            $zugelassenerUmfang = 0;
-// 	                            echo "returnValue :" . $returnValue;
-	                            return $returnValue;
-	                        }
+	                        // 	                        elseif($bisZuDieserTeilgewaesserbenutzungKumulierterUmfang <= $zugelassenerUmfang)
+	                        // 	                        {
+	                        // 	                            return 0;
+	                        // 	                        }
+	                            elseif($teilgewaesserbenutzungUmfang <= $zugelassenerUmfang)
+	                            {
+	                                // 	                            echo "teilgewaesserbenutzungUmfang <= zugelassenerUmfang <br>";
+	                                $zugelassenerUmfang = $zugelassenerUmfang - $teilgewaesserbenutzungUmfang;
+	                                return 0;
+	                            }
+	                            elseif($teilgewaesserbenutzungUmfang > $zugelassenerUmfang)
+	                            {
+	                                // 	                            echo "teilgewaesserbenutzungUmfang > zugelassenerUmfang <br>";
+	                                $returnValue = $teilgewaesserbenutzungUmfang - $zugelassenerUmfang;
+	                                $zugelassenerUmfang = 0;
+	                                // 	                            echo "returnValue :" . $returnValue;
+	                                return $returnValue;
+	                            }
 	                    }
 	                }
 	            }
@@ -228,10 +235,11 @@ class Gewaesserbenutzungen extends WrPgObject {
 	    return null;
 	}
 	
-	public function getTeilgewaesserbenutzungEntgeltsatz($teilgewaesserbenutzung, $getArtBenutzung, $getBefreiungstatbestaende, $getWiedereinleitungBearbeiter, &$zugelassenesEntnahmeEntgelt, &$nichtZugelassenesEntnahmeEntgelt, &$zugelassenerUmfang)
+	public function getTeilgewaesserbenutzungEntgeltsatz($erhebungsjahr, $teilgewaesserbenutzung, $getArtBenutzung, $getBefreiungstatbestaende, $getWiedereinleitungBearbeiter, &$zugelassenesEntnahmeEntgelt, &$nichtZugelassenesEntnahmeEntgelt, &$zugelassenerUmfang)
 	{
 	    $this->debug->write('*** Gewaesserbenutzungen->getTeilgewaesserbenutzungEntgeltsatz ***', 4);
 	    
+	    $this->debug->write('erhebungsjahr: ' . var_export($erhebungsjahr, true), 4);
 	    $this->debug->write('getArtBenutzung: ' . var_export($getArtBenutzung, true), 4);
 	    $this->debug->write('getBefreiungstatbestaende: ' . var_export($getBefreiungstatbestaende, true), 4);
 	    $this->debug->write('getWiedereinleitungBearbeiter: ' . var_export($getWiedereinleitungBearbeiter, true), 4);
@@ -241,7 +249,7 @@ class Gewaesserbenutzungen extends WrPgObject {
 	    
 	    if(!empty($teilgewaesserbenutzung))
 	    {
-	        $teilbenutzungNichtZugelasseneMenge = $this->getTeilgewaesserbenutzungNichtZugelasseneMenge($teilgewaesserbenutzung->getId(), $zugelassenerUmfang);
+	        $teilbenutzungNichtZugelasseneMenge = $this->getTeilgewaesserbenutzungNichtZugelasseneMenge($erhebungsjahr, $teilgewaesserbenutzung->getId(), $zugelassenerUmfang);
 // 	        echo "teilbenutzungNichtZugelasseneMenge: " . $teilbenutzungNichtZugelasseneMenge . " <br>";
 
 	        if($teilbenutzungNichtZugelasseneMenge > 0)
@@ -276,10 +284,11 @@ class Gewaesserbenutzungen extends WrPgObject {
 	    return $returnArray;
 	}
 	
-	public function getTeilgewaesserbenutzungEntgelt($teilgewaesserbenutzung, $getArtBenutzung, $getBefreiungstatbestaende, $getWiedereinleitungBearbeiter, &$zugelassenesEntnahmeEntgelt, &$nichtZugelassenesEntnahmeEntgelt, &$zugelassenerUmfang)
+	public function getTeilgewaesserbenutzungEntgelt($erhebungsjahr, $teilgewaesserbenutzung, $getArtBenutzung, $getBefreiungstatbestaende, $getWiedereinleitungBearbeiter, &$zugelassenesEntnahmeEntgelt, &$nichtZugelassenesEntnahmeEntgelt, &$zugelassenerUmfang)
 	{
 	    $this->debug->write('*** Gewaesserbenutzungen->getTeilgewaesserbenutzungEntgelt ***', 4);
 	    
+	    $this->debug->write('erhebungsjahr: ' . var_export($erhebungsjahr, true), 4);
 	    $this->debug->write('getArtBenutzung: ' . var_export($getArtBenutzung, true), 4);
 	    $this->debug->write('getBefreiungstatbestaende: ' . var_export($getBefreiungstatbestaende, true), 4);
 	    $this->debug->write('getWiedereinleitungBearbeiter: ' . var_export($getWiedereinleitungBearbeiter, true), 4);
@@ -289,7 +298,7 @@ class Gewaesserbenutzungen extends WrPgObject {
 	    
 	    if(!empty($teilgewaesserbenutzung))
 	    {
-	        $teilbenutzungNichtZugelasseneMenge = $this->getTeilgewaesserbenutzungNichtZugelasseneMenge($teilgewaesserbenutzung->getId(), $zugelassenerUmfang);
+	        $teilbenutzungNichtZugelasseneMenge = $this->getTeilgewaesserbenutzungNichtZugelasseneMenge($erhebungsjahr, $teilgewaesserbenutzung->getId(), $zugelassenerUmfang);
 	        $this->debug->write('teilbenutzungNichtZugelasseneMenge: ' . var_export($teilbenutzungNichtZugelasseneMenge, true), 4);
 	        
 	        if($teilbenutzungNichtZugelasseneMenge > 0)
@@ -332,9 +341,9 @@ class Gewaesserbenutzungen extends WrPgObject {
 	    return $returnArray;
 	}
 	
-	public function getEntnahmemenge($zugelassen)
+	public function getEntnahmemenge($erhebungsjahr, $zugelassen)
 	{
-	    $gesamtUmfang = $this->getUmfangAllerTeilbenutzungen();
+	    $gesamtUmfang = $this->getUmfangAllerTeilbenutzungen($erhebungsjahr);
 	    
 	    $zugelassenerUmfang = 0;
 	    if(!empty($this->gewaesserbenutzungUmfang) && !empty($this->gewaesserbenutzungUmfang->getErlaubterUmfang()))
@@ -368,25 +377,6 @@ class Gewaesserbenutzungen extends WrPgObject {
 	        }
 	    }
 	   
-	    return null;
-	}
-	
-	public function getKennummer() {
-	    return $this->data['kennnummer'];
-	}
-	
-	public function getBezeichnung() {
-	    $fieldname = 'bezeichnung';
-// 	    $sql = "SELECT COALESCE(e.name,'') ||' (Aktenzeichen: '|| COALESCE(a.aktenzeichen,'') ||')'||' vom '|| COALESCE(a.datum_postausgang::text,'') || ' zum ' || COALESCE(c.name,'') || ' von ' || COALESCE(d.max_ent_a::text,'') || ' m³/Jahr' AS " . $fieldname ." FROM " . $this->schema . '.' . "wasserrechtliche_zulassungen a LEFT JOIN " . $this->schema . '.' . $this->tableName . " b ON b.wasserrechtliche_zulassungen = a.id LEFT JOIN " . $this->schema . '.' . "gewaesserbenutzungen_art c ON c.id = b.art LEFT JOIN " . $this->schema . '.' . "gewaesserbenutzungen_umfang_entnahme d ON b.umfang = d.id LEFT JOIN " . $this->schema . '.' . "wasserrechtliche_zulassungen_ausgangsbescheide_klasse e ON a.klasse = e.id WHERE b.id = '" . $this->getId() . "';";
-	    $sql = "SELECT " . $fieldname ." FROM " . $this->schema . '.' . $this->tableName . "_bezeichnung WHERE id = $1;";
-	    // 	    echo "sql: " . $sql;
-	    $bezeichnung = $this->getSQLResult($sql, array($this->getId()), $fieldname);
-	    // 	    echo "bezeichnung: " . $bezeichnung;
-	    if(!empty($bezeichnung) && count($bezeichnung) > 0 && !empty($bezeichnung[0]))
-	    {
-	        return $bezeichnung[0];
-	    }
-	    
 	    return null;
 	}
 	
@@ -905,6 +895,27 @@ class Gewaesserbenutzungen extends WrPgObject {
 	    {
 	        return $festsetzung->summe_entgelt;
 	    }
+	}
+	
+	////////////////////////////////////////////////////////////////////
+	
+	public function getKennummer() {
+	    return $this->data['kennnummer'];
+	}
+	
+	public function getBezeichnung() {
+	    $fieldname = 'bezeichnung';
+	    // 	    $sql = "SELECT COALESCE(e.name,'') ||' (Aktenzeichen: '|| COALESCE(a.aktenzeichen,'') ||')'||' vom '|| COALESCE(a.datum_postausgang::text,'') || ' zum ' || COALESCE(c.name,'') || ' von ' || COALESCE(d.max_ent_a::text,'') || ' m³/Jahr' AS " . $fieldname ." FROM " . $this->schema . '.' . "wasserrechtliche_zulassungen a LEFT JOIN " . $this->schema . '.' . $this->tableName . " b ON b.wasserrechtliche_zulassungen = a.id LEFT JOIN " . $this->schema . '.' . "gewaesserbenutzungen_art c ON c.id = b.art LEFT JOIN " . $this->schema . '.' . "gewaesserbenutzungen_umfang_entnahme d ON b.umfang = d.id LEFT JOIN " . $this->schema . '.' . "wasserrechtliche_zulassungen_ausgangsbescheide_klasse e ON a.klasse = e.id WHERE b.id = '" . $this->getId() . "';";
+	    $sql = "SELECT " . $fieldname ." FROM " . $this->schema . '.' . $this->tableName . "_bezeichnung WHERE id = $1;";
+	    // 	    echo "sql: " . $sql;
+	    $bezeichnung = $this->getSQLResult($sql, array($this->getId()), $fieldname);
+	    // 	    echo "bezeichnung: " . $bezeichnung;
+	    if(!empty($bezeichnung) && count($bezeichnung) > 0 && !empty($bezeichnung[0]))
+	    {
+	        return $bezeichnung[0];
+	    }
+	    
+	    return null;
 	}
 }
 ?>
