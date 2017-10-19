@@ -126,7 +126,8 @@ function createAufforderungsDokument(&$gui, &$valueEscaped)
                     
                     //write the document path to the database
                     $aufforderung_dokument = new Dokument($gui);
-                    $aufforderung_document_identifier = $aufforderung_dokument->createDocument('Aufforderung_' . $idValues["wrz_id"], $word_file_name);
+                    $aufforderung_dokument_name = 'Aufforderung_' . $aufforderungWrz2->getId() . "_" . $gewaesserbenutzung->getId() . "_" . $erhebungsjahr;
+                    $aufforderung_document_identifier = $aufforderung_dokument->createDocument($aufforderung_dokument_name, $word_file_name);
                     
                     $gewaesserbenutzung->insertAufforderung($aufforderung_document_identifier, $erhebungsjahr, null);
                 }
