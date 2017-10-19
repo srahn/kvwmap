@@ -131,7 +131,7 @@ function erklaerung_entspeeren($gui, &$valueEscaped, &$wrz, &$gewaesserbenutzung
 {
     $gui->debug->write('*** erklaerung_entspeeren ***', 4);
     
-    $idValues = findIdFromValueString($gui, $valueEscaped);
+    $idValues = findIdAndYearFromValueString($gui, $valueEscaped);
     $gui->debug->write('idValues: ' . var_export($idValues, true), 4);
     
     $erklaerungEntsperrenWrz = new WasserrechtlicheZulassungen($gui);

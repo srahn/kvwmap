@@ -392,7 +392,60 @@ class Gewaesserbenutzungen extends WrPgObject {
 	
 	////////////////////////////////////////////////////////////////////
 	
-	public function getAufforderungDatum($erhebungsjahr = NULL) {
+	public function insertAufforderung($dokumentId, $erhebungsjahr, $datum)
+	{
+	    $this->debug->write('*** insertAufforderung ***', 4);
+	    
+	    $this->debug->write('erhebungsjahr: ' . var_export($erhebungsjahr, true), 4);
+	    $this->debug->write('datum: ' . var_export($datum, true), 4);
+	    
+	    $aufforderungen = $this->aufforderungen;
+	    if(!empty($aufforderungen))
+	    {
+	        foreach ($aufforderungen as $aufforderung)
+	        {
+	            if(!empty($aufforderung))
+	            {
+	                if($aufforderung->compare($erhebungsjahr))
+	                {
+	                    $this->debug->write('aufforderung mit id: ' . $aufforderung->getId() . ' existiert schon: update', 4);
+	                    
+	                    //if date is not set --> set it to today's date
+	                    if(empty($datum))
+	                    {
+	                        $datum = date("d.m.Y");
+	                    }
+	                    
+	                    $aufforderung_id = $aufforderung->updateAufforderung($erhebungsjahr, $dokumentId, $datum);
+	                    Gewaesserbenutzungen::getAufforderungen($this->gui, $this);
+	                    return $aufforderung_id;
+	                }
+	            }
+	        }
+	    }
+	    
+	    $this->debug->write('aufforderung wird neu angelegt', 4);
+	    
+	    if(!empty($dokumentId))
+	    {
+	        //if date is not set --> set it to today's date
+	        if(empty($datum))
+	        {
+	            $datum = date("d.m.Y");
+	        }
+	        
+	        $aufforderung = new Aufforderung($this->gui);
+	        $aufforderung_id = $aufforderung->createAufforderung($this->getId(), $erhebungsjahr, $dokumentId, $datum);
+	        
+	        Gewaesserbenutzungen::getAufforderungen($this->gui, $this);
+	        
+	        return $aufforderung_id;
+	    }
+	    
+	    return null;
+	}
+	
+	public function getAufforderungDatum($erhebungsjahr) {
 	    $aufforderung = $this->getAufforderungForErhebungsjahr($erhebungsjahr);
 	    if(!empty($aufforderung))
 	    {
@@ -402,7 +455,7 @@ class Gewaesserbenutzungen extends WrPgObject {
 	    return null;
 	}
 	
-	public function getAufforderungDatumHTML() {
+	public function getAufforderungDatumHTML($erhebungsjahr) {
 	    $datumAufforderung = $this->getAufforderungDatum($erhebungsjahr);
 	    if(!empty($datumAufforderung))
 	    {
@@ -413,7 +466,7 @@ class Gewaesserbenutzungen extends WrPgObject {
 	    return "<div style=\"color: red;\">Nicht aufgefordert</div>";
 	}
 	
-	public function isAufforderungFreigegeben($erhebungsjahr = NULL) {
+	public function isAufforderungFreigegeben($erhebungsjahr) {
 	    $aufforderung = $this->getAufforderungForErhebungsjahr($erhebungsjahr);
 	    if(!empty($aufforderung))
 	    {
@@ -423,52 +476,7 @@ class Gewaesserbenutzungen extends WrPgObject {
 	    return false;
 	}
 	
-	public function insertAufforderung($dokumentId, $erhebungsjahr, $dateVale)
-	{
-	    $this->debug->write('*** insertAufforderung ***', 4);
-	    
-	    $aufforderungen = $this->aufforderungen;
-	    if(!empty($aufforderungen) && !empty($aufforderungen[0]))
-	    {
-	        $aufforderung = $aufforderungen[0];
-	        
-	        $this->debug->write('aufforderung mit id: ' . $aufforderung->getId() . ' existiert schon: update', 4);
-	        
-	        //if date is not set --> set it to today's date
-	        if(empty($dateValue))
-	        {
-	            $dateValue = date("d.m.Y");
-	        }
-	        
-	        $aufforderung_id = $aufforderung->updateAufforderung($erhebungsjahr, $dokumentId, $dateVale, null);
-	        Gewaesserbenutzungen::getAufforderungen($this->gui, $this);
-	        return $aufforderung_id;
-	    }
-	    else
-	    {
-	        $this->debug->write('aufforderung wird neu angelegt', 4);
-	        
-	        if(!empty($dokumentId))
-	        {
-	            //if date is not set --> set it to today's date
-	            if(empty($dateValue))
-	            {
-	                $dateValue = date("d.m.Y");
-	            }
-	            
-	            $aufforderung = new Aufforderung($this->gui);
-	            $aufforderung_id = $aufforderung->createAufforderung($this->getId(), $erhebungsjahr, $dokumentId, $dateValue, null);
-	            
-	            Gewaesserbenutzungen::getAufforderungen($this->gui, $this);
-	            
-	            return $aufforderung_id;
-	        }
-	    }
-	    
-	    return null;
-	}
-	
-	public function getAufforderungDokument($erhebungsjahr = NULL) {
+	public function getAufforderungDokument($erhebungsjahr) {
 	    $aufforderung = $this->getAufforderungForErhebungsjahr($erhebungsjahr);
 	    if(!empty($aufforderung))
 	    {
@@ -481,28 +489,24 @@ class Gewaesserbenutzungen extends WrPgObject {
 	    return null;
 	}
 	
-	public function getAufforderungForErhebungsjahr($erhebungsjahr = NULL)
+	public function getAufforderungForErhebungsjahr($erhebungsjahr)
 	{
 // 	    $this->debug->write('*** getAufforderungForErhebungsjahr ***', 4);
 	    
-	    $aufforderungen = $this->aufforderungen;
-	    
-	    if(!empty($aufforderungen))
+	    if(!empty($erhebungsjahr))
 	    {
-	        foreach ($aufforderungen as $aufforderung)
+	        $aufforderungen = $this->aufforderungen;
+	        
+	        if(!empty($aufforderungen))
 	        {
-	            if(!empty($aufforderung))
+	            foreach ($aufforderungen as $aufforderung)
 	            {
-	                if(!empty($erhebungsjahr) && !empty($aufforderung->erhebungsjahr))
+	                if(!empty($aufforderung))
 	                {
-	                    if($aufforderung->erhebungsjahr === $erhebungsjahr)
+	                    if($aufforderung->getErhebungsjahr() === $erhebungsjahr)
 	                    {
 	                        return $aufforderung;
 	                    }
-	                }
-	                else
-	                {
-	                    return $aufforderung;
 	                }
 	            }
 	        }

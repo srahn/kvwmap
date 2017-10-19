@@ -33,7 +33,7 @@ function createAufforderungsDokument(&$gui, &$valueEscaped)
 {
     $gui->debug->write('*** createAufforderungsDokument ***', 4);
     
-    $idValues = findIdFromValueString($gui, $valueEscaped);
+    $idValues = findIdAndYearFromValueString($gui, $valueEscaped);
     $gui->debug->write('idValues: ' . var_export($idValues, true), 4);
     
     $aufforderungWrz1 = new WasserrechtlicheZulassungen($gui);
@@ -61,9 +61,11 @@ function createAufforderungsDokument(&$gui, &$valueEscaped)
         {
             $gui->debug->write('gewaesserbenutzung id: ' . var_export($gewaesserbenutzung->getId(), true), 4);
             
-            if(empty($gewaesserbenutzung->getAufforderungDatum()))
+            $erhebungsjahr = $idValues["erhebungsjahr"];
+            
+            if(empty($gewaesserbenutzung->getAufforderungDatum($erhebungsjahr)))
             {
-                if(!empty($_POST['aufforderung']) && empty($gewaesserbenutzung->getAufforderungDokument(null)))
+                if(!empty($_POST['aufforderung']) && empty($gewaesserbenutzung->getAufforderungDokument($erhebungsjahr)))
                 {
                     //get a unique word file name
                     $uniqid = uniqid();
@@ -73,7 +75,7 @@ function createAufforderungsDokument(&$gui, &$valueEscaped)
                     //get the parameter
                     $datum = date("d.m.Y");
                     $nextyear = date('Y', strtotime('+1 year'));
-                    $erhebungsjahr = htmlspecialchars($_REQUEST['erhebungsjahr']);
+                    $erhebungsjahr_request = htmlspecialchars($_REQUEST['erhebungsjahr']);
                     //                     var_dump($gui->user);
                     $bearbeiter = $gui->user->Name . ' ' . $gui->user->Vorname;
                     $bearbeiter_telefon = $gui->user->phon;
@@ -101,7 +103,7 @@ function createAufforderungsDokument(&$gui, &$valueEscaped)
                         "Bearbeiter_EMail" => $bearbeiter_email,
                         "Bearbeiter_PLZ" => $bearbeiter_plz,
                         "Bearbeiter_Ort" => $bearbeiter_ort,
-                        "Erhebungsjahr" => $erhebungsjahr,
+                        "Erhebungsjahr" => $erhebungsjahr_request,
                         "Adressat_ID" => $adressat_id,
                         "Behoerde_Name" => $behoerde_name,
                         "Behoerde_Strasse" => $behoerde_strasse,
@@ -126,7 +128,7 @@ function createAufforderungsDokument(&$gui, &$valueEscaped)
                     $aufforderung_dokument = new Dokument($gui);
                     $aufforderung_document_identifier = $aufforderung_dokument->createDocument('Aufforderung_' . $idValues["wrz_id"], $word_file_name);
                     
-                    $gewaesserbenutzung->insertAufforderung($aufforderung_document_identifier, null, null);
+                    $gewaesserbenutzung->insertAufforderung($aufforderung_document_identifier, $erhebungsjahr, null);
                 }
             }
             else
@@ -197,10 +199,10 @@ function createAufforderungsDokument(&$gui, &$valueEscaped)
         		                          	<tr>
                         		          		<td style="background-color: inherit;">
                         		          			<?php 
-                        		          			    if(empty($gewaesserbenutzung->isAufforderungFreigegeben()))
+                        		          			    if(empty($gewaesserbenutzung->isAufforderungFreigegeben($getYear)))
                             		          			{
                             		          			    ?>
-                            		          				<input type="checkbox" name="aufforderung_checkbox_<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>" value="<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>">
+                            		          				<input type="checkbox" name="aufforderung_checkbox_<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>_<?php echo $getYear; ?>" value="<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>_<?php echo $getYear; ?>">
                             		          		<?php
                             		          			} 
                         		          			?>
@@ -234,7 +236,7 @@ function createAufforderungsDokument(&$gui, &$valueEscaped)
                         		          		</td>
                         		          		<td>
                         		          			<?php
-                        		          			     echo $gewaesserbenutzung->getAufforderungDatumHTML();
+                        		          			     echo $gewaesserbenutzung->getAufforderungDatumHTML($getYear);
                         		          			?>
                         		          		</td>
                         		          		<td>
@@ -327,7 +329,7 @@ function createAufforderungsDokument(&$gui, &$valueEscaped)
 				                        {
 				                            if(!empty($gwb))
 				                            {
-				                                $auffoderung_dokument = $gwb->getAufforderungDokument(null);
+				                                $auffoderung_dokument = $gwb->getAufforderungDokument($getYear);
 				                                
 				                                if(!empty($auffoderung_dokument))
 				                                {

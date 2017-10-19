@@ -50,25 +50,25 @@ function endsWith($haystack, $needle)
     return (substr($haystack, -$length) === $needle);
 }
 
-function findIdFromValueString(&$gui, $valueEscaped)
-{
-    $gui->debug->write('*** findIdFromValueString ***', 4);
+// function findIdFromValueString(&$gui, $valueEscaped)
+// {
+//     $gui->debug->write('*** findIdFromValueString ***', 4);
     
-    $gui->debug->write('valueEscaped: ' . $valueEscaped, 4);
+//     $gui->debug->write('valueEscaped: ' . $valueEscaped, 4);
     
-    $lastIndex = strripos($valueEscaped, "_");
-    $gewaesserbenutzungId = substr($valueEscaped, $lastIndex + 1);
-    $wrzId = substr($valueEscaped, 0, $lastIndex);
+//     $lastIndex = strripos($valueEscaped, "_");
+//     $gewaesserbenutzungId = substr($valueEscaped, $lastIndex + 1);
+//     $wrzId = substr($valueEscaped, 0, $lastIndex);
     
-    $returnArray = array(
-        "wrz_id" => $wrzId,
-        "gewaesserbenutzung_id" => $gewaesserbenutzungId
-    );
+//     $returnArray = array(
+//         "wrz_id" => $wrzId,
+//         "gewaesserbenutzung_id" => $gewaesserbenutzungId
+//     );
     
-    $gui->debug->write('returnArray: ' . var_export($returnArray, true), 4);
+//     $gui->debug->write('returnArray: ' . var_export($returnArray, true), 4);
     
-    return $returnArray;
-}
+//     return $returnArray;
+// }
 
 function findIdAndYearFromValueString(&$gui, $valueEscaped)
 {

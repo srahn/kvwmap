@@ -335,7 +335,7 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
                     		          		</td>
                     		          		<td>
                     		          			<?php
-                    		          			     echo $gewaesserbenutzung->getAufforderungDatumHTML();
+                    		          			     echo $gewaesserbenutzung->getAufforderungDatumHTML($getYear);
                     		          			?>
                     		          		</td>
                     		          		<td>
