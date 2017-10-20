@@ -8060,10 +8060,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		    if($this->formvars['CMD']== 'Full_Extent' OR $this->formvars['CMD'] == 'recentre' OR $this->formvars['CMD'] == 'zoomin' OR $this->formvars['CMD'] == 'zoomout' OR $this->formvars['CMD'] == 'previous' OR $this->formvars['CMD'] == 'next') {
 		      $this->navMap($this->formvars['CMD']);
 		    }
+				$this->drawMap();
 		    $this->saveMap('');
 		    $currenttime=date('Y-m-d H:i:s',time());
 		    $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-		    $this->drawMap();
 	    	########################################################################
     	}
 			if (empty($this->formvars['anzahl'])) {
