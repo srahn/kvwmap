@@ -7,8 +7,9 @@ class FestsetzungsSammelbescheidDaten
     private $entgelte = array();
     private $zugelassene_entgelte = array();
     private $nicht_zugelassene_entgelte = array();
-    private $erlaubterUmfang = null;
+    private $erlaubterUmfang = array();
     private $freitext = null;
+    private $erklaerung_datum = array();
     
     function __construct($gui) {
         $this->debug = $gui->debug;
@@ -141,6 +142,61 @@ class FestsetzungsSammelbescheidDaten
     /**
      * @return multitype:
      */
+    public function getErklaerung_datum()
+    {
+        return $this->erklaerung_datum;
+    }
+
+    /**
+     * @param multitype: $erklaerung_datum
+     */
+    public function setErklaerung_datum($erklaerung_datum)
+    {
+        $this->erklaerung_datum = $erklaerung_datum;
+    }
+    
+    public function addErklaerung_datum($erklaerung_datum)
+    {
+        $this->debug->write('Erklärung Datum vor Prüfung: ' . $erklaerung_datum, 4);
+        
+        if(!empty($erklaerung_datum) && !in_array($erklaerung_datum, $this->erklaerung_datum))
+        {
+            $this->debug->write('Erklärung Datum hinzugefügt: ' . $erklaerung_datum, 4);
+            $this->erklaerung_datum[] = $erklaerung_datum;
+        }
+    }
+    
+    public function getErklaerung_datum_String()
+    {
+        $daten = $this->erklaerung_datum;
+        if(!empty($daten))
+        {
+            $returnString = null;
+            
+            foreach ($daten as $date)
+            {
+                if(!empty($date))
+                {
+                    if(!empty($returnString))
+                    {
+                        $returnString = $returnString . " " . $date;
+                    }
+                    else
+                    {
+                        $returnString = $date;
+                    }
+                }
+            }
+            
+            return $returnString;
+        }
+        
+        return null;
+    }
+
+    /**
+     * @return multitype:
+     */
     public function getZugelassene_entgelte()
     {
         return $this->zugelassene_entgelte;
@@ -209,6 +265,20 @@ class FestsetzungsSammelbescheidDaten
     {
         $this->erlaubterUmfang = $erlaubterUmfang;
     }
+    
+    public function addErlaubterUmfang($erlaubterUmfang)
+    {
+        if(!empty($erlaubterUmfang))
+        {
+            $this->erlaubterUmfang[] = $erlaubterUmfang;
+        }
+        else
+        {
+            $this->debug->write('Erlaubter Umfang is Null!', 1);
+        }
+        
+    }
+    
 
     public function toString() {
         $this->debug->write('*** FestsetzungsSammelbescheidDaten ***', 4);
@@ -217,8 +287,9 @@ class FestsetzungsSammelbescheidDaten
         $this->debug->write('entgelte: ' . var_export($this->getEntgelte(), true), 4);
         $this->debug->write('zugelassene entgelte: ' . var_export($this->getZugelassene_entgelte(), true), 4);
         $this->debug->write('nicht zugelassene entgelte: ' . var_export($this->getNicht_zugelassene_entgelte(), true), 4);
+        $this->debug->write('erlaubterUmfang: ' . var_export($this->getErlaubterUmfang(), true), 4);
         $this->debug->write('freitext: ' . $this->getFreitext(), 4);
-        $this->debug->write('erlaubterUmfang: ' . $this->getErlaubterUmfang(), 4);
+        $this->debug->write('Erklärung Datum String: ' . $this->getErklaerung_datum_String(), 4);
     }
     
     public function isValid() 

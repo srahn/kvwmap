@@ -112,6 +112,7 @@ function writeFestsetzungsWordFile(&$gui, $word_template, $word_file, &$paramete
     $entgelte = $festsetzungsSammelbescheidDaten->getEntgelte();
     $zugelassene_entgelt = $festsetzungsSammelbescheidDaten->getZugelassene_entgelte();
     $nicht_zugelassene_entgelt = $festsetzungsSammelbescheidDaten->getNicht_zugelassene_entgelte();
+    $erlaubter_umfang = $festsetzungsSammelbescheidDaten->getErlaubterUmfang();
     
     $templateProcessor->cloneRow('n2', sizeof($anlagen));
     $i = 1;
@@ -123,7 +124,7 @@ function writeFestsetzungsWordFile(&$gui, $word_template, $word_file, &$paramete
             $templateProcessor->setValue('Anlage_ID2#' . $i, $anlage->getId());
             $templateProcessor->setValue('Anlage_Name2#' . $i, $anlage->getName());
             $templateProcessor->setValue('Entnamemenge#' . $i, FestsetzungsSammelbescheidDaten::formatNumber($entnahmemengen[$i - 1]));
-            $templateProcessor->setValue('Erlaubter_Umfang#' . $i, FestsetzungsSammelbescheidDaten::formatNumber($festsetzungsSammelbescheidDaten->getErlaubterUmfang()));
+            $templateProcessor->setValue('Erlaubter_Umfang#' . $i, FestsetzungsSammelbescheidDaten::formatNumber($erlaubter_umfang[$i - 1]));
             $templateProcessor->setValue('Zugelassenes_Entgelt#' . $i, FestsetzungsSammelbescheidDaten::formatCurrencyNumber($zugelassene_entgelt[$i - 1]));
             $templateProcessor->setValue('Nicht_Zugelassenes_Entgelt#' . $i,  FestsetzungsSammelbescheidDaten::formatCurrencyNumber($nicht_zugelassene_entgelt[$i - 1]));
             $templateProcessor->setValue('Entgelt#' . $i, FestsetzungsSammelbescheidDaten::formatCurrencyNumber($entgelte[$i - 1]));
