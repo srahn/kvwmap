@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 172.17.0.2:3306
--- Generation Time: Oct 13, 2017 at 02:07 PM
+-- Generation Time: Oct 20, 2017 at 08:56 AM
 -- Server version: 5.5.56
 -- PHP Version: 5.6.30-0+deb8u1
 
@@ -1947,7 +1947,7 @@ CREATE TABLE `rolle` (
 --
 
 INSERT INTO `rolle` (`user_id`, `stelle_id`, `nImageWidth`, `nImageHeight`, `auto_map_resize`, `minx`, `miny`, `maxx`, `maxy`, `nZoomFactor`, `selectedButton`, `epsg_code`, `epsg_code2`, `coordtype`, `active_frame`, `last_time_id`, `gui`, `language`, `hidemenue`, `hidelegend`, `fontsize_gle`, `highlighting`, `buttons`, `scrollposition`, `result_color`, `always_draw`, `runningcoords`, `showmapfunctions`, `showlayeroptions`, `singlequery`, `querymode`, `geom_edit_first`, `overlayx`, `overlayy`, `hist_timestamp`, `instant_reload`, `menu_auto_close`, `layer_params`, `menue_buttons`, `visually_impaired`) VALUES
-(1, 1, 1198, 802, 1, 33320736.489159, 5982503.7405281, 33417398.999968, 6056454.7158462, 2, 'zoomin', '35833', '', 'dec', 0, '2017-10-13 14:07:09', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure,', 0, 1, 0, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 1, 0),
+(1, 1, 1198, 772, 1, 33311662.220922, 5982503.7405283, 33426473.268205, 6056454.715846, 2, 'zoomin', '35833', '', 'dec', 0, '2017-10-17 16:31:47', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure,', 0, 1, 0, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 1, 0),
 (2, 2, 1198, 770, 1, 33201165.000009, 5867814.9999176, 33477900, 6081467.9999999, 2, 'zoomin', '35833', NULL, 'dec', 0, '2017-10-11 17:25:25', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure', 0, 1, 0, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 0, 0);
 
 -- --------------------------------------------------------
@@ -2010,8 +2010,8 @@ CREATE TABLE `rolle_last_query` (
 --
 
 INSERT INTO `rolle_last_query` (`user_id`, `stelle_id`, `go`, `layer_id`, `sql`, `orderby`, `limit`, `offset`) VALUES
-(1, 1, 'Layer-Suche_Suchen', 2, 'SELECT * FROM (SELECT a.oid AS fiswrv_anlagen_oid,  a.id AS anlage_id,  a.name,  a.klasse,  a.zustaend_stalu,  a.zustaend_uwb,  a.abwasser_koerperschaft,  a.trinkwasser_koerperschaft,  \'\' AS wasserrechtliche_zulassungen,  true AS aktuell,  \'\' AS gewaesserbenutzungen,   \'\' AS wrz_ben_lage,   a.betreiber,  a.anlage_bearbeiter_name ,  a.anlage_bearbeiter_stelle,  a.anlage_bearbeiter_datum,  a.kommentar,  a.the_geom  FROM fiswrv_anlagen a WHERE 1=1) as query WHERE 1=1  AND ( (1=1)) AND (the_geom && st_transform(st_geomfromtext(\'POLYGON((33201165.000009 5867814.9999175, 33477900 5867814.9999175, 33477900 6081468, 33201165.000009 6081468, 33201165.000009 5867814.9999175))\', 35833), 35833) OR the_geom IS NULL)', ' ORDER BY fiswrv_anlagen_oid ', 10, NULL),
-(2, 2, 'Layer-Suche_Suchen', 25, 'SELECT * FROM (SELECT wasserrechtliche_zulassungen.oid AS wasserrechtliche_zulassungen_oid,   name,  ausstellbehoerde,  ausgangsbescheid,  fassung,  status,  adresse as adress_id,   aenderungsbescheid,  gueltigkeit,  bergamt_aktenzeichen,  dokument,  sachbearbeiter,  adressat,  anlage  FROM wasserrechtliche_zulassungen WHERE 1=1) as query WHERE 1=1  AND ( (1=1)) AND wasserrechtliche_zulassungen_oid = 113298', ' ORDER BY fassung, wasserrechtliche_zulassungen_oid ', 10, NULL);
+(2, 2, 'Layer-Suche_Suchen', 25, 'SELECT * FROM (SELECT wasserrechtliche_zulassungen.oid AS wasserrechtliche_zulassungen_oid,   name,  ausstellbehoerde,  ausgangsbescheid,  fassung,  status,  adresse as adress_id,   aenderungsbescheid,  gueltigkeit,  bergamt_aktenzeichen,  dokument,  sachbearbeiter,  adressat,  anlage  FROM wasserrechtliche_zulassungen WHERE 1=1) as query WHERE 1=1  AND ( (1=1)) AND wasserrechtliche_zulassungen_oid = 113298', ' ORDER BY fassung, wasserrechtliche_zulassungen_oid ', 10, NULL),
+(1, 1, 'Layer-Suche_Suchen', 2, 'SELECT * FROM (SELECT a.oid AS fiswrv_anlagen_oid,  a.id AS anlage_id,  a.name,  a.klasse,  a.zustaend_stalu,  a.zustaend_uwb,  a.abwasser_koerperschaft,  a.trinkwasser_koerperschaft,  \'\' AS wasserrechtliche_zulassungen,  true AS aktuell,  \'\' AS gewaesserbenutzungen,   \'\' AS wrz_ben_lage,   a.betreiber,  a.anlage_bearbeiter_name ,  a.anlage_bearbeiter_stelle,  a.anlage_bearbeiter_datum,  a.kommentar,  a.the_geom  FROM fiswrv_anlagen a WHERE 1=1) as query WHERE 1=1  AND ( (1=1)) AND (the_geom && st_transform(st_geomfromtext(\'POLYGON((33201165.000009 5867814.9999175, 33477900 5867814.9999175, 33477900 6081468, 33201165.000009 6081468, 33201165.000009 5867814.9999175))\', 35833), 35833) OR the_geom IS NULL)', ' ORDER BY fiswrv_anlagen_oid ', 10, NULL);
 
 -- --------------------------------------------------------
 
@@ -2701,7 +2701,8 @@ INSERT INTO `u_consume` (`user_id`, `stelle_id`, `time_id`, `activity`, `nimagew
 (1, 1, '2017-10-13 14:01:31', 'getMap', 1198, 802, '35833', 33320736.489159, 5982503.7405281, 33417398.999968, 6056454.7158462, '2017-10-13 08:24:15', NULL),
 (1, 1, '2017-10-13 14:03:13', 'getMap', 1198, 802, '35833', 33320736.489159, 5982503.7405281, 33417398.999968, 6056454.7158462, '2017-10-13 14:01:31', NULL),
 (1, 1, '2017-10-13 14:04:01', 'getMap', 1198, 802, '35833', 33320736.489159, 5982503.7405281, 33417398.999968, 6056454.7158462, '2017-10-13 14:03:13', NULL),
-(1, 1, '2017-10-13 14:07:09', 'getMap', 1198, 802, '35833', 33320736.489159, 5982503.7405281, 33417398.999968, 6056454.7158462, '2017-10-13 14:04:01', NULL);
+(1, 1, '2017-10-13 14:07:09', 'getMap', 1198, 802, '35833', 33320736.489159, 5982503.7405281, 33417398.999968, 6056454.7158462, '2017-10-13 14:04:01', NULL),
+(1, 1, '2017-10-17 16:31:47', 'getMap', 1198, 772, '35833', 33318855.895564, 5982503.7405283, 33419279.593563, 6056454.715846, '2017-10-13 14:07:09', NULL);
 
 -- --------------------------------------------------------
 
