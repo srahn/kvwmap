@@ -46,7 +46,7 @@ class Nachweis {
     $this->database=$database;
     $this->client_epsg=$client_epsg;
   }
-    
+    		
   function getZielDateiName($formvars) {
     #2005-11-24_pk
     $pathparts=pathinfo($formvars['Bilddatei_name']);
@@ -810,6 +810,7 @@ class Nachweis {
       case "multibleIDs" : {
 				$sql ="SELECT distinct n.*,st_astext(st_multi(st_transform(n.the_geom, ".$this->client_epsg."))) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS andere_art, d.art AS andere_art_name, ";
 				$sql.="CASE WHEN n.art = '100' THEN 'FFR' WHEN n.art = '010' THEN 'KVZ' WHEN n.art = '001' THEN 'GN' ELSE d.art END as art_name"; 
+				if($art_einblenden != '2222' AND $idselected[0])$sql.=" ,(select distinct 1 from nachweisverwaltung.n_nachweise n2 where n.flurid = n2.flurid AND n.".NACHWEIS_PRIMARY_ATTRIBUTE." = n2.".NACHWEIS_PRIMARY_ATTRIBUTE." ".((NACHWEIS_SECONDARY_ATTRIBUTE) ? "and n.".NACHWEIS_SECONDARY_ATTRIBUTE." = n2.".NACHWEIS_SECONDARY_ATTRIBUTE : "")." and n2.id IN (".implode(',', $idselected).")) as selected";				
 				$sql.=" FROM nachweisverwaltung.n_nachweise AS n";
 				$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
 				$sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id"; 
@@ -832,17 +833,18 @@ class Nachweis {
       	if($fortf!=''){
           $sql.=" AND n.fortfuehrung=".(int)$fortf;
         }
-        if (substr($art_einblenden,0,1)) { $art[]='100'; }
-        if (substr($art_einblenden,1,1)) { $art[]='010'; }
-        if (substr($art_einblenden,2,1)) { $art[]='001'; }
-        if (substr($art_einblenden,3,1)) { $art[]='111'; }
-        if ($art_einblenden!='') {
-          $sql.=" AND n.art IN ('".$art[0]."'";
-          for ($i=1;$i<count($art);$i++) {
-            $sql.=",'".$art[$i]."'";
-          }
-          $sql.=")";
-        }
+				if($art_einblenden!=''){
+					if($art_einblenden == '2222'){
+						$sql.=" AND n.id IN (".implode(',', $idselected).")";
+					}
+					else{
+						if(substr($art_einblenden,0,1)) { $art[]='100'; }
+						if(substr($art_einblenden,1,1)) { $art[]='010'; }
+						if(substr($art_einblenden,2,1)) { $art[]='001'; }
+						if(substr($art_einblenden,3,1)) { $art[]='111'; }
+						$sql.=" AND n.art IN ('".implode("','", $art)."')";
+					}
+				}
 				if($andere_art)$sql.=" AND d.id IN (".$andere_art.")";
 				if($suchbemerkung != ''){
           $sql.=" AND n.bemerkungen LIKE '%".$suchbemerkung."%'";
@@ -884,6 +886,7 @@ class Nachweis {
           # Suche nach individueller Nummer
           #echo '<br>Suche nach individueller Nummer.';
           $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS andere_art, d.art AS andere_art_name";
+					if($art_einblenden != '2222' AND $idselected[0])$sql.=" ,(select distinct 1 from nachweisverwaltung.n_nachweise n2 where n.flurid = n2.flurid AND n.".NACHWEIS_PRIMARY_ATTRIBUTE." = n2.".NACHWEIS_PRIMARY_ATTRIBUTE." ".((NACHWEIS_SECONDARY_ATTRIBUTE) ? "and n.".NACHWEIS_SECONDARY_ATTRIBUTE." = n2.".NACHWEIS_SECONDARY_ATTRIBUTE : "")." and n2.id IN (".implode(',', $idselected).")) as selected";					
           $sql.=" FROM ";
 					if($gemarkung != '' AND $flur_thematisch == ''){
 						$sql.=" alkis.pp_flur as flur, ";
@@ -961,17 +964,18 @@ class Nachweis {
           if($VermStelle!=''){
             $sql.=" AND n.vermstelle = '".$VermStelle."'";
           }
-          if (substr($art_einblenden,0,1)) { $art[]='100'; }
-          if (substr($art_einblenden,1,1)) { $art[]='010'; }
-          if (substr($art_einblenden,2,1)) { $art[]='001'; }
-          if (substr($art_einblenden,3,1)) { $art[]='111'; }
-          if ($art_einblenden!='') {
-            $sql.=" AND n.art IN ('".$art[0]."'";
-            for ($i=1;$i<count($art);$i++) {
-              $sql.=",'".$art[$i]."'";
-            }
-            $sql.=")";
-          }
+					if($art_einblenden!=''){
+						if($art_einblenden == '2222'){
+							$sql.=" AND n.id IN (".implode(',', $idselected).")";
+						}
+						else{
+							if(substr($art_einblenden,0,1)) { $art[]='100'; }
+							if(substr($art_einblenden,1,1)) { $art[]='010'; }
+							if(substr($art_einblenden,2,1)) { $art[]='001'; }
+							if(substr($art_einblenden,3,1)) { $art[]='111'; }
+							$sql.=" AND n.art IN ('".implode("','", $art)."')";
+						}
+					}
 					if($andere_art)$sql.=" AND d.id IN (".$andere_art.")";
 					if($suchbemerkung != ''){
 						$sql.=" AND lower(n.bemerkungen) LIKE '%".strtolower($suchbemerkung)."%'";
@@ -1013,6 +1017,7 @@ class Nachweis {
           #echo '<br>Suche mit Suchpolygon.';
           $this->debug->write('Abfragen der Nachweise die das Polygon schneiden',4);
           $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS andere_art, d.art AS andere_art_name";
+					if($art_einblenden != '2222' AND $idselected[0])$sql.=" ,(select distinct 1 from nachweisverwaltung.n_nachweise n2 where n.flurid = n2.flurid AND n.".NACHWEIS_PRIMARY_ATTRIBUTE." = n2.".NACHWEIS_PRIMARY_ATTRIBUTE." ".((NACHWEIS_SECONDARY_ATTRIBUTE) ? "and n.".NACHWEIS_SECONDARY_ATTRIBUTE." = n2.".NACHWEIS_SECONDARY_ATTRIBUTE : "")." and n2.id IN (".implode(',', $idselected).")) as selected";					
           $sql.=" FROM nachweisverwaltung.n_nachweise AS n";
 					$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
           $sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id"; 
@@ -1021,17 +1026,18 @@ class Nachweis {
           $sql.=" AND st_intersects(st_transform(st_geometryfromtext('".$polygon."',".$this->client_epsg."), (select srid from geometry_columns where f_table_name = 'n_nachweise')),the_geom)";
 		  if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
           
-          if (substr($art_einblenden,0,1)) { $art[]='100'; }
-          if (substr($art_einblenden,1,1)) { $art[]='010'; }
-          if (substr($art_einblenden,2,1)) { $art[]='001'; }
-          if (substr($art_einblenden,3,1)) { $art[]='111'; }
-          if ($art_einblenden!='') {
-            $sql.=" AND n.art IN ('".$art[0]."'";
-            for ($i=1;$i<count($art);$i++) {
-              $sql.=",'".$art[$i]."'";
-            }
-            $sql.=")";						
-          }
+					if($art_einblenden!=''){
+						if($art_einblenden == '2222'){
+							$sql.=" AND n.id IN (".implode(',', $idselected).")";
+						}
+						else{
+							if(substr($art_einblenden,0,1)) { $art[]='100'; }
+							if(substr($art_einblenden,1,1)) { $art[]='010'; }
+							if(substr($art_einblenden,2,1)) { $art[]='001'; }
+							if(substr($art_einblenden,3,1)) { $art[]='111'; }
+							$sql.=" AND n.art IN ('".implode("','", $art)."')";
+						}
+					}
 					if($andere_art)$sql.=" AND d.id IN (".$andere_art.")";
           if ($order=='') {
             $order="flurid, stammnr, datum";
@@ -1061,6 +1067,7 @@ class Nachweis {
         # echo '<br>Suche nach Antragsnummer.';
         $this->debug->write('Abfragen der Nachweise die zum Antrag gehören',4);
 				$sql ="SELECT distinct n.*,v.name AS vermst, n2d.dokumentart_id AS andere_art, d.art AS andere_art_name";
+				if($art_einblenden != '2222' AND $idselected[0])$sql.=" ,(select distinct 1 from nachweisverwaltung.n_nachweise n2 where n.flurid = n2.flurid AND n.".NACHWEIS_PRIMARY_ATTRIBUTE." = n2.".NACHWEIS_PRIMARY_ATTRIBUTE." ".((NACHWEIS_SECONDARY_ATTRIBUTE) ? "and n.".NACHWEIS_SECONDARY_ATTRIBUTE." = n2.".NACHWEIS_SECONDARY_ATTRIBUTE : "")." and n2.id IN (".implode(',', $idselected).")) as selected";
         $sql.=" FROM nachweisverwaltung.n_nachweise2antraege AS n2a, nachweisverwaltung.n_nachweise AS n";
 				$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
         $sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id"; 
@@ -1070,17 +1077,18 @@ class Nachweis {
 				if($stelle_id == '')$sql.=" AND stelle_id IS NULL";
 				else $sql.=" AND stelle_id=".$stelle_id;
 				if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
-        if (substr($art_einblenden,0,1)) { $art[]='100'; }
-        if (substr($art_einblenden,1,1)) { $art[]='010'; }
-        if (substr($art_einblenden,2,1)) { $art[]='001'; }
-        if (substr($art_einblenden,3,1)) { $art[]='111'; }
-        if ($art_einblenden!='') {
-          $sql.=" AND n.art IN ('".$art[0]."'";
-          for ($i=1;$i<count($art);$i++) {
-            $sql.=",'".$art[$i]."'";
-          }
-          $sql.=")";
-        }
+				if($art_einblenden!=''){
+					if($art_einblenden == '2222'){
+						$sql.=" AND n.id IN (".implode(',', $idselected).")";
+					}
+					else{
+						if(substr($art_einblenden,0,1)) { $art[]='100'; }
+						if(substr($art_einblenden,1,1)) { $art[]='010'; }
+						if(substr($art_einblenden,2,1)) { $art[]='001'; }
+						if(substr($art_einblenden,3,1)) { $art[]='111'; }
+						$sql.=" AND n.art IN ('".implode("','", $art)."')";
+					}
+				}
 				if($andere_art)$sql.=" AND d.id IN (".$andere_art.")";
         if ($order=='') {
           $order="flurid, stammnr, datum";

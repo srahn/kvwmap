@@ -119,21 +119,26 @@
 			include (PLUGINS.'nachweisverwaltung/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'nachweisverwaltung/model/nachweis.php');					# nachweis-Klasse einbinden
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
-			if($this->formvars['art_markieren'] AND $this->formvars['art_einblenden']){
-				$this->formvars['showffr']=substr($this->formvars['art_einblenden'],0,1);
-				$this->formvars['showkvz']=substr($this->formvars['art_einblenden'],1,1);
-				$this->formvars['showgn']=substr($this->formvars['art_einblenden'],2,1);
-				$this->formvars['showan']=substr($this->formvars['art_einblenden'],3,1);
-				$this->formvars['markffr']=substr($this->formvars['art_markieren'],0,1);
-				$this->formvars['markkvz']=substr($this->formvars['art_markieren'],1,1);
-				$this->formvars['markgn']=substr($this->formvars['art_markieren'],2,1);
-				$this->setNachweisAnzeigeparameter($this->user->rolle->stelle_id, $this->user->rolle->user_id, $this->formvars['showffr'],$this->formvars['showkvz'],$this->formvars['showgn'],$this->formvars['showan'],$this->formvars['markffr'],$this->formvars['markkvz'],$this->formvars['markgn']);
+			if($this->formvars['art_markieren'] == 222 OR $this->formvars['art_einblenden'] == 2222){		# Nachweise der gleichen Messung finden oder selektierte Nachweise einblenden
+				$ids = $this->formvars['id'];
+			}
+			else{
+				if($this->formvars['art_markieren'] AND $this->formvars['art_einblenden']){
+					$this->formvars['showffr']=substr($this->formvars['art_einblenden'],0,1);
+					$this->formvars['showkvz']=substr($this->formvars['art_einblenden'],1,1);
+					$this->formvars['showgn']=substr($this->formvars['art_einblenden'],2,1);
+					$this->formvars['showan']=substr($this->formvars['art_einblenden'],3,1);
+					$this->formvars['markffr']=substr($this->formvars['art_markieren'],0,1);
+					$this->formvars['markkvz']=substr($this->formvars['art_markieren'],1,1);
+					$this->formvars['markgn']=substr($this->formvars['art_markieren'],2,1);
+					$this->setNachweisAnzeigeparameter($this->user->rolle->stelle_id, $this->user->rolle->user_id, $this->formvars['showffr'],$this->formvars['showkvz'],$this->formvars['showgn'],$this->formvars['showan'],$this->formvars['markffr'],$this->formvars['markkvz'],$this->formvars['markgn']);
+				}
 			}
 			# Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
 			$this->savedformvars=$this->getNachweisParameter($this->user->rolle->stelle_id, $this->user->rolle->user_id);
 			$this->formvars=array_merge($this->savedformvars,$this->formvars);
 			$this->nachweis = new Nachweis($this->pgdatabase, $this->user->rolle->epsg_code);
-			$ret=$this->nachweis->getNachweise(0,$this->formvars['suchpolygon'],$this->formvars['suchgemarkung'],$this->formvars['suchstammnr'],$this->formvars['suchrissnr'],$this->formvars['suchfortf'],$this->formvars['art_einblenden'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'],$this->formvars['suchantrnr'],$this->formvars['sdatum'], $this->formvars['sVermStelle'], $this->formvars['gueltigkeit'], $this->formvars['sdatum2'], $this->formvars['suchflur'], $this->formvars['flur_thematisch'], $this->formvars['such_andere_art']);
+			$ret=$this->nachweis->getNachweise($ids,$this->formvars['suchpolygon'],$this->formvars['suchgemarkung'],$this->formvars['suchstammnr'],$this->formvars['suchrissnr'],$this->formvars['suchfortf'],$this->formvars['art_einblenden'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'],$this->formvars['suchantrnr'],$this->formvars['sdatum'], $this->formvars['sVermStelle'], $this->formvars['gueltigkeit'], $this->formvars['sdatum2'], $this->formvars['suchflur'], $this->formvars['flur_thematisch'], $this->formvars['such_andere_art']);
 			if($ret!=''){
 				$this->nachweisAnzeige();
 				showAlert($ret);

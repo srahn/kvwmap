@@ -379,7 +379,7 @@ class antrag {
     # Dieser Vorgang ist hier mit der Variable FFR belegt, weil zu einem Vorgang
     # meistens mindestens ein Fortführungsriss gehört.
     $this->debug->write('nachweis.php getFFR Abfragen der Risse zum Antrag.',4);                
-    $sql ="SELECT DISTINCT n.flurid,n.stammnr,n.rissnummer";
+    $sql ="SELECT DISTINCT n.flurid, n.".NACHWEIS_PRIMARY_ATTRIBUTE;
 		if(NACHWEIS_SECONDARY_ATTRIBUTE != '')$sql.=",n.".NACHWEIS_SECONDARY_ATTRIBUTE." ";
     $sql.=" FROM nachweisverwaltung.n_nachweise AS n, nachweisverwaltung.n_nachweise2antraege AS n2a";
     $sql.=" WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
@@ -396,12 +396,17 @@ class antrag {
       if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){
       	if($formvars['Riss-Nummer'])$FFR[$i]['Rissnummer']=$rs['flurid'].'/'.$rs['rissnummer'];
 				if(NACHWEIS_SECONDARY_ATTRIBUTE != '')$FFR[$i]['Rissnummer'] .= ' - '.$rs[NACHWEIS_SECONDARY_ATTRIBUTE];
-      	if($formvars['Antrags-Nummer'])$FFR[$i]['Antragsnummer']=$rs['stammnr'];
       }
       else{
       	if($formvars['Antrags-Nummer'])$FFR[$i]['Antragsnummer']=$rs['flurid'].'/'.str_pad($rs['stammnr'],ANTRAGSNUMMERMAXLENGTH,'0',STR_PAD_LEFT);
-      	if($formvars['Riss-Nummer'])$FFR[$i]['Rissnummer']=$rs['rissnummer'];
       }
+			
+      # Abfrage der Riss-/Stammnummern (des nicht primären Ordnungskriteriums)
+			$ret=$this->getNotPrimary($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
+			if ($ret[0]) { return $ret; }
+			if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer')$not_primary = 'Antragsnummer';
+			else $not_primary = 'Rissnummer';
+			$FFR[$i][$not_primary]=$ret[1];
 
       # Abfrage der Anzahl der FFR zum Vorgang
       if($formvars['FFR']){
@@ -465,17 +470,31 @@ class antrag {
     $this->FFR=$FFR;
     return $ret;
   }
+	
+	function getNotPrimary($flurid,$primary,$secondary){
+		if($primary == 'rissnummer')$not_primary = 'stammnr';
+		else $not_primary = 'rissnummer';
+    $this->debug->write('<br>antrag.php getNotPrimary Abfragen der NotPrimary zu einem Vorgang in der Nachweisführung.',4);
+    $sql.="SELECT ".$not_primary." FROM nachweisverwaltung.n_nachweise AS n WHERE (1=1)";
+    $sql.=" AND n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$primary."'";
+    if($secondary != '')$sql.=" AND n.".NACHWEIS_SECONDARY_ATTRIBUTE."='".$secondary."'";
+		$sql.= "order by ".$not_primary;
+    $ret=$this->database->execSQL($sql,4, 0);
+    if (!$ret[0]) {
+      $rs=pg_fetch_array($ret[1]);
+      $notPrimary=$rs[$not_primary];  
+      while($rs=pg_fetch_array($ret[1])) {
+        $notPrimary.=', '.$rs[$not_primary];
+      }
+      $ret[1]=$notPrimary;
+    }     
+    return $ret;  
+  }
   
   function getDatum($flurid,$nr,$secondary) {
     $this->debug->write('<br>nachweis.php getDatum Abfragen der Datum zu einem Vorgang in der Nachweisführung.',4);
     # Abfragen der Datum zu einem Vorgang in der Nachweisführung
-    $sql.="SELECT n.datum FROM nachweisverwaltung.n_nachweise AS n";		
-		if ($this->nr!='') {
-      $sql.=",nachweisverwaltung.n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
-    }
-    else {
-      $sql.=" WHERE (1=1)";
-    }
+    $sql.="SELECT n.datum FROM nachweisverwaltung.n_nachweise AS n WHERE (1=1)";
     $sql.=" AND n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
     if($secondary != '')$sql.=" AND n.".NACHWEIS_SECONDARY_ATTRIBUTE."='".$secondary."'";
 		$sql.= "order by datum";
