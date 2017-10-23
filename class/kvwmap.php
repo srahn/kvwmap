@@ -7713,6 +7713,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					# last_search speichern					
 					if($this->last_query == ''){
 						$this->formvars['search_name'] = '<last_search>';
+						$this->user->rolle->delete_search($this->formvars['search_name']);		# das muss hier stehen bleiben, denn in save_search wird mit der Layer-ID gelöscht
 						$this->user->rolle->save_search($attributes, $this->formvars);
 					}
 
