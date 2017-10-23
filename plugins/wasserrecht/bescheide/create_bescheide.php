@@ -87,14 +87,16 @@ function writeFestsetzungsWordFile(&$gui, $word_template, $word_file, &$paramete
     $festsetzungsSammelbescheidDaten->toString();
     
     $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($word_template);
+    
     foreach($parameter as $key => $value)
     {
         $templateProcessor->setValue($key, $value);
     }
     
     $anlagen = $festsetzungsSammelbescheidDaten->getAnlagen();
+    $sizeAnlagen = sizeof($anlagen);
     
-    $templateProcessor->cloneRow('n1', sizeof($anlagen));
+    $templateProcessor->cloneRow('n1', $sizeAnlagen);
     $i = 1;
     foreach($anlagen as $anlage)
     {
@@ -109,33 +111,114 @@ function writeFestsetzungsWordFile(&$gui, $word_template, $word_file, &$paramete
     }
     
     $entnahmemengen = $festsetzungsSammelbescheidDaten->getEntnahmemengen();
+    $gui->debug->write('entnahmemengen: ' . var_export($entnahmemengen, true), 4);
     $entgelte = $festsetzungsSammelbescheidDaten->getEntgelte();
-    $zugelassene_entgelt = $festsetzungsSammelbescheidDaten->getZugelassene_entgelte();
-    $nicht_zugelassene_entgelt = $festsetzungsSammelbescheidDaten->getNicht_zugelassene_entgelte();
-    $erlaubter_umfang = $festsetzungsSammelbescheidDaten->getErlaubterUmfang();
+    $gui->debug->write('entgelte: ' . var_export($entgelte, true), 4);
+    $zugelassene_entgelte = $festsetzungsSammelbescheidDaten->getZugelassene_entgelte();
+    $gui->debug->write('zugelassene_entgelte: ' . var_export($zugelassene_entgelte, true), 4);
+    $nicht_zugelassene_entgelte = $festsetzungsSammelbescheidDaten->getNicht_zugelassene_entgelte();
+    $gui->debug->write('nicht_zugelassene_entgelte: ' . var_export($nicht_zugelassene_entgelte, true), 4);
+    $erlaubte_umfaenge = $festsetzungsSammelbescheidDaten->getErlaubterUmfang();
+    $gui->debug->write('erlaubte_umfaenge: ' . var_export($erlaubte_umfaenge, true), 4);
     
-    $templateProcessor->cloneRow('n2', sizeof($anlagen));
-    $i = 1;
-    foreach($anlagen as $anlage)
+    $gewaesserbenutzungen = $festsetzungsSammelbescheidDaten->getGewaesserbenutzungen();
+    
+    if(!empty($gewaesserbenutzungen))
     {
-        if(!empty($anlage))
+        $sizeTable = 0;
+        
+        foreach ($gewaesserbenutzungen as $gewaesserbenutzung)
         {
-            $templateProcessor->setValue('n2#' . $i, $i);
-            $templateProcessor->setValue('Anlage_ID2#' . $i, $anlage->getId());
-            $templateProcessor->setValue('Anlage_Name2#' . $i, $anlage->getName());
-            $templateProcessor->setValue('Entnamemenge#' . $i, FestsetzungsSammelbescheidDaten::formatNumber($entnahmemengen[$i - 1]));
-            $templateProcessor->setValue('Erlaubter_Umfang#' . $i, FestsetzungsSammelbescheidDaten::formatNumber($erlaubter_umfang[$i - 1]));
-            $templateProcessor->setValue('Zugelassenes_Entgelt#' . $i, FestsetzungsSammelbescheidDaten::formatCurrencyNumber($zugelassene_entgelt[$i - 1]));
-            $templateProcessor->setValue('Nicht_Zugelassenes_Entgelt#' . $i,  FestsetzungsSammelbescheidDaten::formatCurrencyNumber($nicht_zugelassene_entgelt[$i - 1]));
-            $templateProcessor->setValue('Entgelt#' . $i, FestsetzungsSammelbescheidDaten::formatCurrencyNumber($entgelte[$i - 1]));
-            
-            $i++;
+            if(!empty($gewaesserbenutzung))
+            {
+                $sizeTable = $sizeTable + 1;
+                
+                $teilgewaesserbenutzungen = $gewaesserbenutzung->getTeilgewaesserbenutzungenByErhebungsjahr($festsetzungsSammelbescheidDaten->getErhebungsjahr());
+                if(!empty($teilgewaesserbenutzungen))
+                {
+                    foreach ($teilgewaesserbenutzungen as $teilgewaesserbenutzung)
+                    {
+                        if(!empty($teilgewaesserbenutzung))
+                        {
+                            $sizeTable = $sizeTable + 1;
+                        }
+                    }
+                }
+            }
         }
+        
+        $templateProcessor->cloneRow('n2', $sizeTable);
+        $countRows = 1;
+        $countGewaesserbenutzungen = 1;
+        $countTeilgewaesserbenutzungen = 1;
+        
+        foreach ($gewaesserbenutzungen as $gewaesserbenutzung)
+        {
+            if(!empty($gewaesserbenutzung))
+            {
+                $teilgewaesserbenutzungen = $gewaesserbenutzung->getTeilgewaesserbenutzungenByErhebungsjahr($festsetzungsSammelbescheidDaten->getErhebungsjahr());
+//                 $erlaubterUmfangBerechnet = $erlaubte_umfaenge[$countGewaesserbenutzungen - 1];
+                
+                if(!empty($teilgewaesserbenutzungen))
+                {
+                    $countTeilgewaesserbenutzungen = 1;
+                    
+                    foreach ($teilgewaesserbenutzungen as $teilgewaesserbenutzung)
+                    {
+                        if(!empty($teilgewaesserbenutzung))
+                        {
+//                             $number = $countGewaesserbenutzungen . "." . $countTeilgewaesserbenutzungen;
+                            $templateProcessor->setValue('n2#' . $countRows, "");
+                            $templateProcessor->setValue('Anlage_ID2#' . $countRows, "");
+                            $templateProcessor->setValue('Anlage_Name2#' . $countRows, "");
+                            
+                            $templateProcessor->setValue('Entnamemenge#' . $countRows, FestsetzungsSammelbescheidDaten::formatNumber($teilgewaesserbenutzung->getUmfang()));
+                            $templateProcessor->setValue('Erlaubter_Umfang#' . $countRows, "");
+//                             $templateProcessor->setValue('Erlaubter_Umfang#' . $countRows, $erlaubterUmfangBerechnet);
+//                             $nichtErlaubterUmfangTeilgewasserBenutzung = $gewaesserbenutzung->getTeilgewaesserbenutzungNichtZugelasseneMenge($festsetzungsSammelbescheidDaten->getErhebungsjahr(), $teilgewaesserbenutzung->getId(), $erlaubterUmfangBerechnet);
+//                             if($nichtErlaubterUmfangTeilgewasserBenutzung > 0)
+//                             {
+//                                 $erlaubterUmfangBerechnet - $nichtErlaubterUmfangTeilgewasserBenutzung;
+//                             }
+                            
+                            $berechneter_entgeltsatz_zugelassen = $teilgewaesserbenutzung->getBerechneterEntgeltsatzZugelassen();
+                            $berechneter_entgeltsatz_nicht_zugelassen = $teilgewaesserbenutzung->getBerechneterEntgeltsatzNichtZugelassen();
+                            $templateProcessor->setValue('Entgeltsatz_Zugelassen#' . $countRows, $berechneter_entgeltsatz_zugelassen);
+                            $templateProcessor->setValue('Entgeltsatz_Nicht_Zugelassen#' . $countRows, $berechneter_entgeltsatz_nicht_zugelassen);
+                            
+                            $berechnetes_entgelt_zugelassen = $teilgewaesserbenutzung->getBerechnetesEntgeltZugelassen();
+                            $berechnetes_entgelt_nicht_zugelassen = $teilgewaesserbenutzung->getBerechnetesEntgeltNichtZugelassen();
+                            $templateProcessor->setValue('Zugelassenes_Entgelt#' . $countRows, FestsetzungsSammelbescheidDaten::formatCurrencyNumber($berechnetes_entgelt_zugelassen));
+                            $templateProcessor->setValue('Nicht_Zugelassenes_Entgelt#' . $countRows,  FestsetzungsSammelbescheidDaten::formatCurrencyNumber($berechnetes_entgelt_nicht_zugelassen));
+                            $entgelt = $berechnetes_entgelt_zugelassen + $berechnetes_entgelt_nicht_zugelassen;
+                            $templateProcessor->setValue('Entgelt#' . $countRows, FestsetzungsSammelbescheidDaten::formatCurrencyNumber($entgelt));
+                            
+                            $countTeilgewaesserbenutzungen++;
+                            $countRows++;
+                        }
+                    }
+                }
+                
+                $templateProcessor->setValue('n2#' . $countRows, $countGewaesserbenutzungen);
+                $templateProcessor->setValue('Anlage_ID2#' . $countRows, $anlage->getId());
+                $templateProcessor->setValue('Anlage_Name2#' . $countRows, $anlage->getName());
+                $templateProcessor->setValue('Entnamemenge#' . $countRows, FestsetzungsSammelbescheidDaten::formatNumber($entnahmemengen[$countGewaesserbenutzungen - 1]));
+                $templateProcessor->setValue('Erlaubter_Umfang#' . $countRows, FestsetzungsSammelbescheidDaten::formatNumber($erlaubte_umfaenge[$countGewaesserbenutzungen - 1]));
+                $templateProcessor->setValue('Entgeltsatz_Zugelassen#' . $countRows, "");
+                $templateProcessor->setValue('Entgeltsatz_Nicht_Zugelassen#' . $countRows, "");
+                $templateProcessor->setValue('Zugelassenes_Entgelt#' . $countRows, FestsetzungsSammelbescheidDaten::formatCurrencyNumber($zugelassene_entgelte[$countGewaesserbenutzungen - 1]));
+                $templateProcessor->setValue('Nicht_Zugelassenes_Entgelt#' . $countRows,  FestsetzungsSammelbescheidDaten::formatCurrencyNumber($nicht_zugelassene_entgelte[$countGewaesserbenutzungen - 1]));
+                $templateProcessor->setValue('Entgelt#' . $countRows, FestsetzungsSammelbescheidDaten::formatCurrencyNumber($entgelte[$countGewaesserbenutzungen - 1]));
+                
+                $countGewaesserbenutzungen++;
+                $countRows++;
+            }
+        }
+        
+        $templateProcessor->setValue('Summe_Zugelassenes_Entgelt', FestsetzungsSammelbescheidDaten::formatCurrencyNumber($festsetzungsSammelbescheidDaten->getSummeZugelasseneEntgelte()));
+        $templateProcessor->setValue('Summe_Nicht_Zugelassenes_Entgelt', FestsetzungsSammelbescheidDaten::formatCurrencyNumber($festsetzungsSammelbescheidDaten->getSummeNichtZugelasseneEntgelte()));
+        $templateProcessor->setValue('Summe_Entgelt', FestsetzungsSammelbescheidDaten::formatCurrencyNumber($festsetzungsSammelbescheidDaten->getSummeEntgelte()));
     }
-    
-    $templateProcessor->setValue('Summe_Zugelassenes_Entgelt', FestsetzungsSammelbescheidDaten::formatCurrencyNumber($festsetzungsSammelbescheidDaten->getSummeZugelasseneEntgelte()));
-    $templateProcessor->setValue('Summe_Nicht_Zugelassenes_Entgelt', FestsetzungsSammelbescheidDaten::formatCurrencyNumber($festsetzungsSammelbescheidDaten->getSummeNichtZugelasseneEntgelte()));
-    $templateProcessor->setValue('Summe_Entgelt', FestsetzungsSammelbescheidDaten::formatCurrencyNumber($festsetzungsSammelbescheidDaten->getSummeEntgelte()));
     
     $templateProcessor->saveAs($word_file);
 

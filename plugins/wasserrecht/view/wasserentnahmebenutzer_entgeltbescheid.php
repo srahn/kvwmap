@@ -61,11 +61,13 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
 
 function festsetzung_erstellen(&$gui, &$wrzs, &$erhebungsjahr)
 {
-    $gui->debug->write('*** / ***', 4);
+    $gui->debug->write('*** wasserentnahmebenutzer_entgeltbescheid->festsetzung_erstellen ***', 4);
     
     if(!empty($wrzs) && count($wrzs) > 0 && !empty($wrzs[0]))
     {
         $festsetzungsSammelbescheidDaten = new FestsetzungsSammelbescheidDaten($gui);
+        
+        $festsetzungsSammelbescheidDaten->setErhebungsjahr($erhebungsjahr);
         
         foreach ($wrzs as $wrz)
         {
@@ -81,38 +83,8 @@ function festsetzung_erstellen(&$gui, &$wrzs, &$erhebungsjahr)
                     $gui->debug->write('gewaesserbenutzung id: ' . var_export($gewaesserbenutzung->getId(), true), 4);
                     
                     //alle Daten für den Festsetzungsbescheid sammeln
-                    if(empty($festsetzungsSammelbescheidDaten->getWrzs()))
-                    {
-                        $festsetzungsSammelbescheidDaten->addWrz($wrz);
-                    }
-                    $festsetzungsSammelbescheidDaten->addAnlage($wrz->anlagen);
-                    $festsetzungsSammelbescheidDaten->addErklaerung_datum($gewaesserbenutzung->getErklaerungDatum($erhebungsjahr));
-                    $festsetzungsSammelbescheidDaten->addEntnahmemenge($gewaesserbenutzung->getFestsetzungSummeEntnahmemengen($erhebungsjahr));
-                    $festsetzungsSammelbescheidDaten->addEntgelt($gewaesserbenutzung->getFestsetzungSummeEntgelt($erhebungsjahr));
-                    $festsetzungsSammelbescheidDaten->addNicht_zugelassenes_entgelt($gewaesserbenutzung->getFestsetzungSummeNichtZugelassenesEntgelt($erhebungsjahr));
-                    $festsetzungsSammelbescheidDaten->addZugelassenes_entgelt($gewaesserbenutzung->getFestsetzungSummeZugelassenesEntgelt($erhebungsjahr));
-                    
-                    //erlaubter Umfang
-                    if(!empty($gewaesserbenutzung->gewaesserbenutzungUmfang))
-                    {
-                        $erlaubterUmfang = $gewaesserbenutzung->gewaesserbenutzungUmfang->getErlaubterUmfang();
-                        $festsetzungsSammelbescheidDaten->addErlaubterUmfang($erlaubterUmfang);
-                    }
-                    
-                    //Freitext bekommen
-                    $teilgewasserbenutzungen = $gewaesserbenutzung->getTeilgewaesserbenutzungenByErhebungsjahr($erhebungsjahr);
-                    if(!empty($teilgewasserbenutzungen) && count($teilgewasserbenutzungen) > 0)
-                    {
-                        $teilgewasserbenutzung = $teilgewasserbenutzungen[0];
-                        
-                        if(!empty($teilgewasserbenutzung))
-                        {
-                            if(empty($festsetzungsSammelbescheidDaten->getFreitext()))
-                            {
-                                $festsetzungsSammelbescheidDaten->setFreitext($teilgewasserbenutzung->getFreitext());
-                            }
-                        }
-                    }
+                    $festsetzungsSammelbescheidDaten->addWrz($wrz);
+                    $festsetzungsSammelbescheidDaten->addGewaesserbenutzungen($gewaesserbenutzung);
                     
                     //bestehendes Festsetzungsdokument löschen, wenn vorhanden
                     if($gewaesserbenutzung->isFestsetzungFreigegeben($erhebungsjahr) && !$gewaesserbenutzung->isFestsetzungDokumentErstellt($erhebungsjahr))
@@ -129,6 +101,9 @@ function festsetzung_erstellen(&$gui, &$wrzs, &$erhebungsjahr)
                 }
             }
         }
+        
+        //Freitext bekommen
+        $festsetzungsSammelbescheidDaten->setFreitextFromAllEntries();
         
         //write the document path to the database
         $word_file_name = festsetzung_dokument_erstellen($gui, $festsetzungsSammelbescheidDaten);

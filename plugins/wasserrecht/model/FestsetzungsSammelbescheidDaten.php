@@ -1,15 +1,14 @@
 <?php
 class FestsetzungsSammelbescheidDaten
 {
+    use CommonClassTrait;
+    
+    private $erhebungsjahr = null;
+    
     private $wrzs = array();
-    private $anlagen = array();
-    private $entnahmemengen = array();
-    private $entgelte = array();
-    private $zugelassene_entgelte = array();
-    private $nicht_zugelassene_entgelte = array();
-    private $erlaubterUmfang = array();
+    private $gewaesserbenutzungen = array();
+    
     private $freitext = null;
-    private $erklaerung_datum = array();
     
     function __construct($gui) {
         $this->debug = $gui->debug;
@@ -18,43 +17,27 @@ class FestsetzungsSammelbescheidDaten
     /**
      * @return mixed
      */
-    public function getWrzs()
+    public function getErhebungsjahr()
     {
-        return $this->wrzs;
+        return $this->erhebungsjahr;
     }
 
     /**
-     * @return multitype:
+     * @param mixed $erhebungsjahr
      */
-    public function getAnlagen()
+    public function setErhebungsjahr($erhebungsjahr)
     {
-        return $this->anlagen;
-    }
-
-    /**
-     * @return multitype:
-     */
-    public function getEntnahmemengen()
-    {
-        return $this->entnahmemengen;
-    }
-
-    /**
-     * @return multitype:
-     */
-    public function getEntgelte()
-    {
-        return $this->entgelte;
+        $this->erhebungsjahr = $erhebungsjahr;
     }
 
     /**
      * @return mixed
      */
-    public function getFreitext()
+    public function getWrzs()
     {
-        return $this->freitext;
+        return $this->wrzs;
     }
-
+    
     /**
      * @param mixed $wrz
      */
@@ -69,66 +52,137 @@ class FestsetzungsSammelbescheidDaten
     }
 
     /**
-     * @param multitype: $anlagen
+     * @return multitype:
      */
-    public function setAnlagen($anlagen)
+    public function getGewaesserbenutzungen()
     {
-        $this->anlagen = $anlagen;
+        return $this->gewaesserbenutzungen;
     }
     
-    public function addAnlage($anlage)
-    {
-        if(!empty($anlage))
-        {
-            $this->debug->write('Anlage ID: ' . $anlage->getId(), 4);
-            $this->debug->write('Anlage Name: ' . $anlage->getName(), 4);
+//     public function getGewaesserbenutzungenById($gewaesserbenutzungsId)
+//     {
+//         if(!empty($gewaesserbenutzungsId))
+//         {
+//             $gewaesserbenutzungen = $this->gewaesserbenutzungen;
             
-            $this->anlagen[] = $anlage;
-        }
-        else
+//             if(!empty($gewaesserbenutzungen))
+//             {
+//                 foreach ($gewaesserbenutzungen as $gewaesserbenutzung)
+//                 {
+//                     if(!empty($gewaesserbenutzung) && $gewaesserbenutzung->getId() === $gewaesserbenutzungsId)
+//                     {
+//                         return $gewaesserbenutzung;
+//                     }
+//                 }
+//             }
+//         }
+        
+//         return null;
+//     }
+
+    /**
+     * @param multitype: $gewaesserbenutzungen
+     */
+    public function setGewaesserbenutzungen($gewaesserbenutzungen)
+    {
+        $this->gewaesserbenutzungen = $gewaesserbenutzungen;
+    }
+    
+    public function addGewaesserbenutzungen($gewaesserbenutzung)
+    {
+        $this->gewaesserbenutzungen[] = $gewaesserbenutzung;
+    }
+    
+//     public function getTeilGewaesserbenutzungenByGewaesserbenutzungsId($gewaesserbenutzungsId)
+//     {
+//         $gewaesserbentzung = $this->getGewaesserbenutzungenById($gewaesserbenutzungsId);
+        
+//         if(!empty($gewaesserbentzung))
+//         {
+//             $teilgewaesserbenutzungen = $gewaesserbenutzung->getTeilgewaesserbenutzungenByErhebungsjahr($this->erhebungsjahr);
+            
+//             if(!empty($teilgewaesserbenutzungen) && count($teilgewaesserbenutzungen) > 0)
+//             {
+//                 $teilgewaesserbenutzungenReturnArray = array();
+                
+//                 foreach ($teilgewaesserbenutzungen as $teilgewaesserbenutzung)
+//                 {
+//                     if(!empty($teilgewaesserbenutzung))
+//                     {
+//                         $teilgewaesserbenutzungenReturnArray[] = $teilgewaesserbenutzung;
+//                     }
+//                 }
+                
+//                 return $teilgewaesserbenutzungenReturnArray;
+//             }
+//         }
+        
+//         return null;
+//     }
+    
+    public function getAllTeilGewaesserbenutzungen()
+    {
+        $gewaesserbenutzungen = $this->getGewaesserbenutzungen();
+        
+        if(!empty($gewaesserbenutzungen) && count($gewaesserbenutzungen) > 0)
         {
-            $this->debug->write('Anlage is Null!', 1);
+            $teilgewaesserbenutzungenReturnArray = array();
+            
+            foreach ($gewaesserbenutzungen as $gewaesserbenutzung)
+            {
+                if(!empty($gewaesserbenutzung))
+                {
+                    $teilgewaesserbenutzungen = $gewaesserbenutzung->getTeilgewaesserbenutzungenByErhebungsjahr($this->erhebungsjahr);
+                    
+                    if(!empty($teilgewaesserbenutzungen) && count($teilgewaesserbenutzungen) > 0)
+                    {
+                        foreach ($teilgewaesserbenutzungen as $teilgewaesserbenutzung)
+                        {
+                            if(!empty($teilgewaesserbenutzung))
+                            {
+                                $teilgewaesserbenutzungenReturnArray[] = $teilgewaesserbenutzung;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            return $teilgewaesserbenutzungenReturnArray;
         }
+        
+        return null;
     }
 
     /**
-     * @param multitype: $entnahmemengen
+     * @return multitype:
      */
-    public function setEntnahmemengen($entnahmemengen)
+    public function getAnlagen()
     {
-        $this->entnahmemengen = $entnahmemengen;
-    }
-    
-    public function addEntnahmemenge($entnahmemenge)
-    {
-        if(!empty($entnahmemenge))
-        {
-            $this->entnahmemengen[] = $entnahmemenge;
-        }
-        else
-        {
-            $this->debug->write('Entnahmemenge is Null!', 1);
-        }
+        return $this->getWrZArray("getAnlagen");
     }
 
     /**
-     * @param multitype: $entgelte
+     * @return multitype:
      */
-    public function setEntgelte($entgelte)
+    public function getEntnahmemengen()
     {
-        $this->entgelte = $entgelte;
+        return $this->getGewaesserbenutzungsArrayWithErhebungsjahr("getFestsetzungSummeEntnahmemengen");
     }
-    
-    public function addEntgelt($entgelt)
+
+    /**
+     * @return multitype:
+     */
+    public function getEntgelte()
     {
-        if(!empty($entgelt))
-        {
-            $this->entgelte[] = $entgelt;
-        }
-        else
-        {
-            $this->debug->write('Entgelt is Null!', 1);
-        }
+        return $this->getGewaesserbenutzungsArrayWithErhebungsjahr("getFestsetzungSummeEntgelt");
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getFreitext()
+    {
+        return $this->freitext;
     }
 
     /**
@@ -139,36 +193,41 @@ class FestsetzungsSammelbescheidDaten
         $this->freitext = $freitext;
     }
     
+    public function setFreitextFromAllEntries()
+    {
+        $this->debug->write('*** FestsetzungsSammelbescheidDaten->setFreitextFromAllEntries ***', 4);
+        
+        $teilgewaesserbenutzungen = $this->getAllTeilGewaesserbenutzungen();
+        if(!empty($teilgewaesserbenutzungen) && count($teilgewaesserbenutzungen) > 0)
+        {
+            $this->debug->write('teilgewaesserbenutzungen: ' . count($teilgewaesserbenutzungen), 4);
+            
+            foreach ($teilgewaesserbenutzungen as $teilgewaesserbenutzung)
+            {
+                if(!empty($teilgewaesserbenutzung))
+                {
+                    $freitext = $teilgewaesserbenutzung->getFreitext();
+                    if(!empty($freitext))
+                    {
+                        $this->setFreitext($freitext);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    
     /**
      * @return multitype:
      */
     public function getErklaerung_datum()
     {
-        return $this->erklaerung_datum;
+        return $this->getGewaesserbenutzungsArrayWithErhebungsjahr("getErklaerungDatum");
     }
 
-    /**
-     * @param multitype: $erklaerung_datum
-     */
-    public function setErklaerung_datum($erklaerung_datum)
-    {
-        $this->erklaerung_datum = $erklaerung_datum;
-    }
-    
-    public function addErklaerung_datum($erklaerung_datum)
-    {
-        $this->debug->write('Erklärung Datum vor Prüfung: ' . $erklaerung_datum, 4);
-        
-        if(!empty($erklaerung_datum) && !in_array($erklaerung_datum, $this->erklaerung_datum))
-        {
-            $this->debug->write('Erklärung Datum hinzugefügt: ' . $erklaerung_datum, 4);
-            $this->erklaerung_datum[] = $erklaerung_datum;
-        }
-    }
-    
     public function getErklaerung_datum_String()
     {
-        $daten = $this->erklaerung_datum;
+        $daten = $this->getErklaerung_datum();
         if(!empty($daten))
         {
             $returnString = null;
@@ -199,7 +258,7 @@ class FestsetzungsSammelbescheidDaten
      */
     public function getZugelassene_entgelte()
     {
-        return $this->zugelassene_entgelte;
+        return $this->getGewaesserbenutzungsArrayWithErhebungsjahr("getFestsetzungSummeZugelassenesEntgelt");
     }
 
     /**
@@ -207,47 +266,7 @@ class FestsetzungsSammelbescheidDaten
      */
     public function getNicht_zugelassene_entgelte()
     {
-        return $this->nicht_zugelassene_entgelte;
-    }
-
-    /**
-     * @param multitype: $zugelassene_entgelte
-     */
-    public function setZugelassene_entgelte($zugelassene_entgelte)
-    {
-        $this->zugelassene_entgelte = $zugelassene_entgelte;
-    }
-    
-    public function addZugelassenes_entgelt($zugelassenes_entgelt)
-    {
-        if(!empty($zugelassenes_entgelt))
-        {
-            $this->zugelassene_entgelte[] = $zugelassenes_entgelt;
-        }
-        else
-        {
-            $this->debug->write('Zugelassenes Entgelt is Null!', 1);
-        }
-    }
-
-    /**
-     * @param multitype: $nicht_zugelassene_entgelte
-     */
-    public function setNicht_zugelassene_entgelte($nicht_zugelassene_entgelte)
-    {
-        $this->nicht_zugelassene_entgelte = $nicht_zugelassene_entgelte;
-    }
-    
-    public function addNicht_zugelassenes_entgelt($nicht_zugelassenes_entgelt)
-    {
-        if(!empty($nicht_zugelassenes_entgelt))
-        {
-            $this->nicht_zugelassene_entgelte[] = $nicht_zugelassenes_entgelt;
-        }
-        else
-        {
-            $this->debug->write('Nicht Zugelassenes Entgelt is Null!', 1);
-        }
+        return $this->getGewaesserbenutzungsArrayWithErhebungsjahr("getFestsetzungSummeNichtZugelassenesEntgelt");
     }
 
     /**
@@ -255,30 +274,28 @@ class FestsetzungsSammelbescheidDaten
      */
     public function getErlaubterUmfang()
     {
-        return $this->erlaubterUmfang;
-    }
-
-    /**
-     * @param mixed $erlaubterUmfang
-     */
-    public function setErlaubterUmfang($erlaubterUmfang)
-    {
-        $this->erlaubterUmfang = $erlaubterUmfang;
-    }
-    
-    public function addErlaubterUmfang($erlaubterUmfang)
-    {
-        if(!empty($erlaubterUmfang))
+        $gewaesserbenutzungen = $this->gewaesserbenutzungen;
+        
+        if(!empty($gewaesserbenutzungen))
         {
-            $this->erlaubterUmfang[] = $erlaubterUmfang;
-        }
-        else
-        {
-            $this->debug->write('Erlaubter Umfang is Null!', 1);
+            $returnArray = array();
+            
+            foreach ($gewaesserbenutzungen as $gewaesserbenutzung)
+            {
+                if(!empty($gewaesserbenutzung))
+                {
+                    $erlaubterUmfang = $gewaesserbenutzung->gewaesserbenutzungUmfang->getErlaubterUmfang();
+                    $returnArray[] = $erlaubterUmfang;
+                }
+            }
+            
+            return $returnArray;
         }
         
+        return null;
     }
     
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public function toString() {
         $this->debug->write('*** FestsetzungsSammelbescheidDaten ***', 4);
@@ -333,6 +350,8 @@ class FestsetzungsSammelbescheidDaten
         return false;
     }
     
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
     public function getSummeEntgelte()
     {
         $entgelte = $this->getEntgelte();
@@ -372,6 +391,8 @@ class FestsetzungsSammelbescheidDaten
         return null;
     }
     
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
     public static function formatNumber(&$number)
     {
         return number_format($number, 0, '', ' ');
@@ -381,5 +402,19 @@ class FestsetzungsSammelbescheidDaten
     {
         return number_format($number, 2, ',', ' ');
     }
-
+    
+//     public function getGewaesserbenutzungFirstEntry($functionName, $erhebungsjahr = NULL)
+//     {
+//         return $this->getFirstEntry('getGewaesserbenutzungen', $functionName, $erhebungsjahr);
+//     }
+    
+    public function getGewaesserbenutzungsArrayWithErhebungsjahr($functionName)
+    {
+        return $this->getArray('getGewaesserbenutzungen', $functionName, $this->erhebungsjahr);
+    }
+    
+    public function getWrZArray($functionName)
+    {
+        return $this->getArray('getWrzs', $functionName, null);
+    }
 }

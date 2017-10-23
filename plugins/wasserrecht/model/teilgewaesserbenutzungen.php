@@ -160,6 +160,22 @@ class Teilgewaesserbenutzungen extends WrPgObject {
 	    return "";
 	}
 	
+	public function getBerechneterEntgeltsatzZugelassen() {
+	    return $this->data['berechneter_entgeltsatz_zugelassen'];
+	}
+	
+	public function getBerechneterEntgeltsatzNichtZugelassen() {
+	    return $this->data['berechneter_entgeltsatz_nicht_zugelassen'];
+	}
+	
+	public function getBerechnetesEntgeltZugelassen() {
+	    return $this->data['berechnetes_entgelt_zugelassen'];
+	}
+	
+	public function getBerechnetesEntgeltNichtZugelassen() {
+	    return $this->data['berechnetes_entgelt_nicht_zugelassen'];
+	}
+	
 	public function getEntgeltsatz($artBenutzungId, $befreit, $zugelassen, $ermaessigt)
 	{
 	    $this->debug->write('*** Teilgewaesserbenutzungen->getEntgeltsatz ***', 4);

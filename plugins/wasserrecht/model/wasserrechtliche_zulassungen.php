@@ -350,7 +350,23 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	    return $this->data['fassung_datum'];
 	}
 	
-	////////////////////////////////////////////////////////////////////
+	/**
+     * @return mixed
+     */
+    public function getAnlagen()
+    {
+        return $this->anlagen;
+    }
+
+    /**
+     * @param mixed $anlagen
+     */
+    public function setAnlagen($anlagen)
+    {
+        $this->anlagen = $anlagen;
+    }
+
+    ////////////////////////////////////////////////////////////////////
 	
 	public function toString() {
 	    return "gueltigkeitsJahre: " . print_r($this->gueltigkeitsJahre) . (!empty($this->behoerde) ? " behoerde: " . $this->behoerde->data['id'] : "" ) . (!empty($this->adressat) ? " adressat: " . $this->adressat->data['id'] : "");
