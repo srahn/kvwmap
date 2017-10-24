@@ -87,7 +87,7 @@
 		return $result;
 	};
 
-	$this->mobile_sync_parameter_valide($params) {
+	$this->mobile_sync_parameter_valide = function($params) {
 		return true;
 	};
 
