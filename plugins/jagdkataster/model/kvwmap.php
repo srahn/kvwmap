@@ -171,7 +171,7 @@
         $GUI->formvars['pathwkt']="";
         $GUI->formvars['firstpoly']="";
         $GUI->formvars['secondpoly']="";
-        showMessage('Eintrag erfolgreich!');
+				$this->add_message('notice', 'Eintrag erfolgreich!');
       }
       $GUI->jagdkatastereditor();
     }

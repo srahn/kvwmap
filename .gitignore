@@ -7,6 +7,7 @@ symbols/custom/*
 graphics/wappen/*
 graphics/custom/*
 plugins/*/config/config.php
+plugins/*/config/config.sh
 plugins/*/img/*
 plugins/wasserrecht/results/
 <<<<<<< HEAD

@@ -78,8 +78,12 @@ class FormObject {
 		$this->outputHTML();
 	} # ende constructor
 
-static	function createSelectField($name, $options, $value = '', $size = 1, $style = '', $onchange = '', $id = '') {
-	$id = (empty($id) ? $name : $id);
+static	function createSelectField($name, $options, $value = '', $size = 1, $style = '', $onchange = '', $id = '', $multiple = '') {
+	$id = ($id == '' ? $name : $id);
+	if ($multiple != '') $multiple = ' multiple';
+	if ($style != '') $style = 'style="' . $style . '"';
+	if ($onchange != '') $onchange = 'onchange="' . $onchange . '"';
+
 	$options_html = array();
 	foreach($options AS $option) {
 		$selected = ($option['value'] == $value ? ' selected' : '');
@@ -93,7 +97,7 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 	}
 
 	$html  = "
-<select id=\"{$id}\" name=\"{$name}\" size=\"{$size}\" style=\"{$style}\" onchange=\"{$onchange}\">
+<select id=\"{$id}\" name=\"{$name}\" size=\"{$size}\" {$style} {$onchange} {$multiple}>
 	" . implode('<br>', $options_html) . "
 </select>
 ";

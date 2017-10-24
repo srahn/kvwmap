@@ -215,6 +215,8 @@ function preventflickering(evt){
 <input type="hidden" name="mapwidth" value="<?php echo $this->map->width; ?>">
 <input type="hidden" name="mapheight" value="<?php echo $this->map->height; ?>">
 <input type="hidden" name="aktiverRahmen" value="<?php echo $this->formvars['aktiverRahmen']; ?>">
+<input type="hidden" name="free_polygons" value="<? echo $this->formvars['free_polygons'] ?>">
+<input type="hidden" name="free_texts" value="<? echo $this->formvars['free_texts'] ?>">
 
 <input type="hidden" name="mapwidth" value="<?php echo $this->Document->activeframe[0]['mapwidth']; ?>">
 <input type="hidden" name="mapheight" value="<?php echo $this->Document->activeframe[0]['mapheight']; ?>">

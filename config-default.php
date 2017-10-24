@@ -259,7 +259,7 @@ define('POSTGRESBINPATH', '/usr/bin/');         # Version 1.6.4
 define('OGR_BINPATH', '/usr/bin/');					# Version 1.7.4
 
 # Pfad zum Zip-Programm (unter Linux: 'zip -j', unter Windows z.B. 'c:/programme/Zip/bin/zip.exe')
-define('ZIP_PATH', 'zip -j');													# Version 1.7.3  hier wurde das ' -j' angehängt
+define('ZIP_PATH', 'zip');													# Version 1.7.3  hier wurde das ' -j' angehängt		# Version 2.8 das ' -j' wurde wieder entfernt
 
 # EPSG-Code dem die Koordinaten der Flurstücke zugeordnet werden sollen in den Tabellen
 # alb_flurstuecke und alb_x_flurstuecke wenn man postgres verwendet
@@ -523,6 +523,8 @@ define('DELETE_ROLLENLAYER', 'true');   # true / false                          
 # Definiert, ob das aktuelle Kartenbild separat angezeigt werden darf oder nicht
 define('SHOW_MAP_IMAGE', 'true');       # true / false                            # Version 1.6.7
 
+define('SHOW_STELLE_HIERARCHIE', false);						# Version 2.8.0
+
 // ############################# Klassenbibliotheken lesen														# in Version 2.0 gelöscht
 // # laden der Klassenbibliotheken																										# in Version 2.0 gelöscht
 // include_(CLASSPATH.'kvwmap_core.php');								# Version 1.7.6								# in Version 2.0 gelöscht
@@ -580,20 +582,21 @@ define('SHOW_MAP_IMAGE', 'true');       # true / false                          
 ############################ kvwmap-plugins #################		# Version 1.11.0
 #																																# Version 1.11.0
 $kvwmap_plugins = array();																			# Version 1.11.0
-#$kvwmap_plugins[] = 'bauleitplanung';													# Version 1.11.0
-#$kvwmap_plugins[] = 'bevoelkerung';														# Version 1.11.0
-#$kvwmap_plugins[] = 'gewaesser';																# Version 1.11.0
-#$kvwmap_plugins[] = 'bodenrichtwerte';													# Version 2.0.0
-#$kvwmap_plugins[] = 'jagdkataster';														# Version 2.0.0
-#$kvwmap_plugins[] = 'fortfuehrungslisten';											# Version 2.6.0
-#$kvwmap_plugins[] = 'kolibri';																	# Version 2.8
-#$kvwmap_plugins[] = 'nachweisverwaltung';											# Version 2.0.0
+#$kvwmap_plugins[] = 'alkis';																		# Version 2.8
 #$kvwmap_plugins[] = 'anliegerbeitraege';												# Version 2.0.0
-#$kvwmap_plugins[] = 'probaug';																	# Version 2.0.0
-#$kvwmap_plugins[] = 'geodoc';																	# Version 2.0.0
+#$kvwmap_plugins[] = 'bauleitplanung';													# Version 1.11.0
 #$kvwmap_plugins[] = 'baumfaellantrag';													# Version 2.0.0
-$kvwmap_plugins[] = 'wasserrecht';														# Version 2.8.0
-#																																# Version 1.11.0
+#$kvwmap_plugins[] = 'bevoelkerung';														# Version 1.11.0
+#$kvwmap_plugins[] = 'bodenrichtwerte';													# Version 2.0.0
+#$kvwmap_plugins[] = 'fortfuehrungslisten';											# Version 2.6.0
+#$kvwmap_plugins[] = 'gewaesser';																# Version 1.11.0
+#$kvwmap_plugins[] = 'geodoc';																	# Version 2.0.0
+#$kvwmap_plugins[] = 'jagdkataster';														# Version 2.0.0
+#$kvwmap_plugins[] = 'kolibri';																	# Version 2.8
+#$kvwmap_plugins[] = 'metadata';																# Version 2.8
+#$kvwmap_plugins[] = 'nachweisverwaltung';											# Version 2.0.0
+#$kvwmap_plugins[] = 'probaug';																	# Version 2.0.0
+#$kvwmap_plugins[] = 'wasserrecht';															# Version 2.8.0
 #############################################################		# Version 1.11.0
 
 # Festlegung von Fehlermeldungen und Hinweisen

@@ -129,6 +129,7 @@ function save_style(style_id){
 	data+= '&sizeitem='+document.GUI.style_sizeitem.value;
 	data+= '&offsetx='+document.GUI.style_offsetx.value;
 	data+= '&offsety='+document.GUI.style_offsety.value;
+	data+= '&polaroffset='+document.GUI.style_polaroffset.value;
   data+= '&pattern='+document.GUI.style_pattern.value;
   data+= '&geomtransform='+document.GUI.style_geomtransform.value;  
 	data+= '&gap='+document.GUI.style_gap.value;
@@ -433,7 +434,7 @@ function toLayerEditor(){
 			        </tr>
 			        <tr align="left">
 			          <td>
-			          <div align="center"><input type="submit" class="button" name="neuladen" value="neu Laden"></div>
+			          <div align="center"><input type="button" class="button" name="neuladen_button" onclick="neuLaden();" value="neu Laden"></div>
 			          <br>
 			        	<div style="width:230; height:<?php echo $this->map->height-59; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
 				          &nbsp;
@@ -456,6 +457,7 @@ function toLayerEditor(){
 <input type="hidden" name="selected_style_id" value="<? echo $this->formvars['selected_style_id']; ?>">
 <input type="hidden" name="selected_label_id" value="<? echo $this->formvars['selected_label_id']; ?>">
 <input type="hidden" name="go" value="Style_Label_Editor">
+<input type="hidden" name="neuladen" value="">
 <script type="text/javascript">
 <!--
 browser_check();

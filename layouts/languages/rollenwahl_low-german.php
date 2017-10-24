@@ -6,10 +6,14 @@
   $strGerman="Düütsch";
   $strGUI="Grafische Överflach";
   $strButtons="Schaltknöpp";
+	$strMapTools="Warktüüch för de Koort";
   $strMapExtent="Opstunns Koortutmoot";
   $strMapProjection="1.Koortprojektschoon (EPSG-Code)";
   $strSecondMapProjection="2.Koortprojektschoon (EPSG-Code)";
 	$strRunningCoords="Koordinaten opwiest";
+	$strMapFunctions="Wies up de Koortfunkschoon";
+	$strShowLayerOptions="Wies up Themenopschoon";
+	$strMenueButtons="Knipsflaagspies";	
   $strMapSize="Grött vun de Koortfinster";
   $strTask="Stell";
   $strTitleRoleSelection="Optschoonen";
@@ -33,7 +37,7 @@
 	$strDataPresentation="Tüüchdatenaffraag";
 	$strInstantReload="Kort gliek nieg loden";
 	$strMenuAutoClose="Menüs von süllst sluten";
-	$strVisuallyImpaired="Vereinfachungen im Vorlesemodus";
+	$strVisuallyImpaired="Voerleseort un Wies eenfach";
 	$strdecimal="Dezimal";
 	$strgrad1="Grod, Minüten, Sekunn";
 	$strgrad2="Grod, Dezimalminüten";
@@ -44,7 +48,7 @@
 	$strHintColor="Sök de Faarf ut, för dat wat rutekümt un wat rutekieken sall.";
 	$strHintInstantReload="Deist du de Optschoon ut wähln, ward bi jede Aktivierung un Gegenaktivierung een Sock de Kort gliek nig loden.";
 	$strHintMenuAutoClose="Deist du de Optschoon ut söken, is linkerhand ümmer blot een Överspies apen.";
-	$strHintVisuallyImpaired="Wenn Sie diese Option auswählen, wird die Oberfläche und das Arbeiten im Vorlesemodus vereinfacht. Diese Einstellung ist besonders für Menschen mit Seebehinderungen geeignet. Es werden allerdings auch einige Funktionen ausgeblendet.";
+	$strHintVisuallyImpaired="Sökst du disse Opschoon ut, is de Babenflaag  un de Voerleseort un Wies eenfach. Disse Saak is för Minschen met leeg Oogen afsünnerlich bruukbor. Een poor Funkschoon sünd aver nich mihr dor.";
 	$strHintZoomFactor="Sök de Faktoor ut, mit de du de Rakenlup hen un her trecken daust.";
 	$strHintMapSize="Sök de Grött ut, wenn de von süllmst bereken Grött nix dugt.";
 	$strHintMapExtent="De afsteckt Koordinat unner linkepoot un boben rechtepoot in de eerste Koortprojektschoon.";
@@ -52,12 +56,13 @@
 	$strHintSecondMapProjection="Sök ok noch een Koordinatenreferenztüüch ut, mit dei de Koortkoordinat upwiest ward.";
 	$strHintCoordType="Deist du een geografisch Koortprojektschoon utwähln, denn sök ut wie datt utsehn sall.";
 	$strHintRunningCoords="Deist du de Optschoon utwähln, krüzt unner de Koort de Cursor-Koordinat op un seggt di de utsökt Koortenpositschoon an.";
+	$strHintShowMapFunctions="Med disse  Opschoon kannst du de Spiesliest  ünner de Koort  an- un utknipsen.";
+	$strHintShowLayerOptions="Sökst du disse Opschoon ut, kümmt achtern de aktiven Themen in de Legend en Knoop, de bed  för dat Thema feerne Funkschoon un Instellungen an.";	
 	$strHintSingleQuery="Deist du de Optschoon utwähln, krüzt de Affraaghakenfeller bi de Legend op as Quasselkistpinökel. Es dürt ümmer blot een Thema affraagt warrn.";
 	$strHintQuerymode="Deist du de Optschoon utwähln, krüzen Tüüchdatenaffraag as egen Finster op, de över de Koort fleigen.";
 	$strHintNewDatasetOrder="Sök ut, ob biem Bifaaten nieg Daten de Geometrie-Editor boben or ünern bi de Tüüchdaten sien sall.";
 	$strHintFontSizeGLE="Sök de Grött de Schrift in de Tüüchdatenanzeich.";
 	$strHintHighlight="Deist du de Optschoon utwähln, kieken de affrogen Themenobjekte in de Koort mit blaach Suum rut wenn du mit de Cursor överfleigst.";
 	$strHinthist_timestamp="Deist du een Dach ingeven, warn de ALKIS-Objekt mit düsse verleden Tied vörstellt. Affraag to´n Flurstück ergewen ok düsse verleden Tied.";
-	$strShowMapFunctions="Show map functions bar";
-	$strHintShowMapFunctions="Uncheck this field to hide the menu bar below the map with the options to save map image, store properties and max map extent.";
+	$strHintMenueButtons="Sökst du disse Opschoon ut, warrn fake bruken  Spiespuenkte as egens  Knoop över de Spies anwiest.";
 ?>

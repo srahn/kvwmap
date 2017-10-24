@@ -747,6 +747,72 @@ class GUI {
 		}
 	}
 
+	function addRedlining(){
+		$polygons = explode('||', $this->formvars['free_polygons']);
+		for($i = 0; $i < count($polygons)-1; $i++){
+			$parts = explode('|', $polygons[$i]);
+			$wkt = "POLYGON((".$parts[0]."))";
+			$style = $parts[1];
+			$this->addFeatureLayer('free_polygon'.$i, MS_LAYER_POLYGON, array($wkt), NULL, $style, $this->map_factor);
+		}
+		$texts = explode('||', $this->formvars['free_texts']);
+		for($i = 0; $i < count($texts)-1; $i++){
+			$parts = explode('|', $texts[$i]);
+			$wkt = "POINT(".$parts[0].")";
+			$text = $parts[1];
+			$this->addFeatureLayer('free_text'.$i, MS_LAYER_POINT, array($wkt), array($text), $style, $this->map_factor);
+		}
+	}
+	
+	function addFeatureLayer($name, $type, $features, $texts, $css_style_string, $map_factor){
+		if($map_factor == '')$map_factor = 1;
+		$layer = ms_newLayerObj($this->map);
+		$layer->set('name', $name);
+		$layer->set("status", MS_ON);
+    $layer->set("type", $type);
+		$i = 0;
+		foreach($features as $feature){
+			$shape = ms_shapeObjFromWkt($feature);
+			$shape->set('text', $texts[$i]);
+			$layer->addFeature($shape);
+			$i++;
+		}		
+		$class = ms_newClassObj($layer);
+		if($texts != NULL){
+			$label = new labelObj();
+			$label->set('size', 10*$map_factor);
+			$label->color->setRGB(255, 0, 0);
+			$label->set('type', 'TRUETYPE');
+			$label->set('font', 'arial');
+			$label->set('position', MS_LR);
+			$label->set('offsety', -9);
+			$class->addLabel($label);
+		}
+    $style = ms_newStyleObj($class);	
+		$css_styles = explode(';', str_replace(' ', '', $css_style_string));
+		foreach($css_styles as $css_style){
+			$parts = explode(':', $css_style);
+			$property = $parts[0];
+			$value = $parts[1];
+			switch($property){
+				case 'opacity' : {   
+					$layer->set('opacity', $value * 100);
+				}break;
+				case 'fill' : {   
+					$rgb = explode(',', substr($value, 4, -1));
+					$style->color->setRGB($rgb[0], $rgb[1], $rgb[2]);
+				}break;
+				case 'stroke' : {   
+					$rgb = explode(',', substr($value, 4, -1));
+					$style->outlinecolor->setRGB($rgb[0], $rgb[1], $rgb[2]);
+				}break;
+				case 'stroke-width' : {   
+					$style->width = $value*$map_factor;
+				}break;
+			}
+		}
+	}
+	
   function loadMap($loadMapSource) {
     $this->debug->write("<p>Funktion: loadMap('".$loadMapSource."','".$connStr."')",4);
     switch ($loadMapSource) {
@@ -1044,21 +1110,19 @@ class GUI {
         }
 
         # Layer
+				$mapDB->nurAktiveLayer = $this->formvars['nurAktiveLayer'];
         $mapDB->nurAufgeklappteLayer=$this->formvars['nurAufgeklappteLayer'];
         $mapDB->nurFremdeLayer=$this->formvars['nurFremdeLayer'];
         if($this->class_load_level == ''){
           $this->class_load_level = 1;
         }
-        $layer = $mapDB->read_Layer($this->class_load_level, $this->list_subgroups($this->formvars['group']));     # class_load_level: 2 = für alle Layer die Klassen laden, 1 = nur für aktive Layer laden, 0 = keine Klassen laden
+        $layer = $mapDB->read_Layer($this->class_load_level, $this->Stelle->useLayerAliases, $this->list_subgroups($this->formvars['group']));     # class_load_level: 2 = für alle Layer die Klassen laden, 1 = nur für aktive Layer laden, 0 = keine Klassen laden
         $rollenlayer = $mapDB->read_RollenLayer();
         $layerset = array_merge($layer, $rollenlayer);
         $layerset['anzLayer'] = count($layerset) - 1; # wegen $layerset['layer_ids']
         unset($this->layers_of_group);		# falls loadmap zweimal aufgerufen wird
 				unset($this->groups_with_layers);	# falls loadmap zweimal aufgerufen wird
         for($i=0; $i < $layerset['anzLayer']; $i++){
-					if($layerset[$i]['alias'] == '' OR !$this->Stelle->useLayerAliases){
-						$layerset[$i]['alias'] = $layerset[$i]['Name'];			# kann vielleicht auch in read_layer gesetzt werden
-					}
 					$this->groups_with_layers[$layerset[$i]['Gruppe']][] = $i;			# die $i's pro Gruppe im layerset-Array
 					if($layerset[$i]['requires'] == ''){
 						$this->layers_of_group[$layerset[$i]['Gruppe']][] = $layerset[$i]['Layer_ID'];				# die Layer-IDs in einer Gruppe
@@ -1444,6 +1508,9 @@ class GUI {
 	        }
 					if($dbStyle['linejoinmaxsize'] != '') {
 	          $style->set('linejoinmaxsize', $dbStyle['linejoinmaxsize']);
+	        }
+					if($dbStyle['polaroffset'] != '') {
+	          $style->updateFromString("STYLE POLAROFFSET ".$dbStyle['polaroffset']." END"); 
 	        }
         }
 
@@ -2658,15 +2725,18 @@ class GUI {
 					$all_new_oids[] = $rs[0];
 					# Dokumente kopieren
 					for($p = 0; $p < count($orig_dataset[$d]['document_paths']); $p++){		# diese Schleife durchläuft alle Dokument-Attribute innerhalb eines kopierten Datensatzes
-						$path_parts = explode('&', $orig_dataset[$d]['document_paths'][$p]);		# &original_name=... abtrennen
-						$orig_path = $path_parts[0];
-						$name_parts = explode('.', $orig_path);		# Dateiendung ermitteln
-						$new_file_name = date('Y-m-d_H_i_s',time()).'-'.rand(100000, 999999).'.'.$name_parts[1];;
-						$new_path = dirname($orig_path).'/'.$new_file_name;
-						copy($orig_path, $new_path);
-						$complete_new_path = $new_path.'&'.$path_parts[1];
-						$sql = "UPDATE ".$layerset[0]['maintable']." SET ".$document_attributes[$p]." = '".$complete_new_path."' WHERE oid = ".$rs[0];
-						$ret = $layerdb->execSQL($sql,4, 0);
+						if($orig_dataset[$d]['document_paths'][$p] != ''){
+							$path_parts = explode('&', $orig_dataset[$d]['document_paths'][$p]);		# &original_name=... abtrennen
+							$orig_path = $path_parts[0];
+							$name_parts = explode('.', $orig_path);		# Dateiendung ermitteln
+							$new_file_name = date('Y-m-d_H_i_s',time()).'-'.rand(100000, 999999).'.'.$name_parts[1];;
+							$new_path = dirname($orig_path).'/'.$new_file_name;
+							copy($orig_path, $new_path);
+							$complete_new_path = $new_path.'&'.$path_parts[1];
+							$sql = "UPDATE ".$layerset[0]['maintable']." SET ".$document_attributes[$p]." = '".$complete_new_path."' WHERE oid = ".$rs[0];
+							#echo $sql.'<br>';
+							$ret1 = $layerdb->execSQL($sql,4, 0);
+						}
 					}
 					$d++;
 				}
@@ -2675,13 +2745,13 @@ class GUI {
 			if($new_oids[0] != ''){
 				for($u = 0; $u < count($update_columns); $u++){
 					$sql = "UPDATE ".$layerset[0]['maintable']." SET ".$update_columns[$u]." = '".$update_values[$i][$u]."' WHERE oid IN (".implode(',', $new_oids).")";
+					#echo $sql.'<br>';
 					$ret = $layerdb->execSQL($sql,4, 0);
 				}
 			}
 		}
 
 		if($all_new_oids[0] != ''){
-			$j = 0;
 			# über SubFormEmbeddedPK oder SubFormPK verknüpfte Datensätze auch rekursiv kopieren			
 			for($l = 0; $l < count($layerattributes['name']); $l++){
 	    	if(in_array($layerattributes['form_element_type'][$l], array('SubFormEmbeddedPK', 'SubFormPK'))){
@@ -2692,35 +2762,36 @@ class GUI {
 					$options = explode(';', $layerattributes['options'][$l]);
 	        $subform = explode(',', $options[0]);
 	        $subform_layerid = $subform[0];
-					$subformlayerdb = $mapdb->getlayerdatabase($subform_layerid, $this->Stelle->pgdbhost);
-					$subformlayerattributes = $mapdb->read_layer_attributes($subform_layerid, $subformlayerdb, NULL);
-	        if($layerattributes['form_element_type'][$l] == 'SubFormEmbeddedPK')$minus = 1;
-	        else $minus = 0;
-	        for($k = 1; $k < count($subform)-$minus; $k++){
-	        	$subform_pks_realnames[] = $layerattributes['real_name'][$subform[$k]];											# das sind die richtigen Namen der SubformPK-Schlüssel in der übergeordneten Tabelle
-						$subform_pks_realnames2[] = $subformlayerattributes['real_name'][$subform[$k]];							# das sind die richtigen Namen der SubformPK-Schlüssel in der untergeordneten Tabelle
-	        }
-	        $sql = "SELECT ".implode(',', $subform_pks_realnames)." FROM ".$layerset[0]['maintable']." WHERE ";			# die Werte der SubformPK-Schlüssel aus dem alten Datensatz abfragen
-	        for($n = 0; $n < count($id_names); $n++){
-						$sql.= $id_names[$n]." = '".$id_values[$n]."' AND ";
-					}
-					$sql.= "1=1";
-					#echo $sql.'<br>';
-	    		$ret=$layerdb->execSQL($sql,4, 0);
-					if(!$ret[0]){
-						$pkvalues=pg_fetch_row($ret[1]);
-					}
-	    		$sql = "SELECT ".implode(',', $subform_pks_realnames)." FROM ".$layerset[0]['maintable']." WHERE ";			# die Werte der SubformPK-Schlüssel aus den neuen Datensätzen abfragen
-	        $sql.= "oid IN (".implode(',', $all_new_oids).")";
-	        #echo $sql.'<br>';
-	    		$ret=$layerdb->execSQL($sql,4, 0);
-					if(!$ret[0]){
-						while($rs=pg_fetch_row($ret[1])){
-							$next_update_values[] = $rs;
+					if($subform_layerid != $layer_id){			# Subforms auf den selben Layer werden ignoriert
+						$subformlayerdb = $mapdb->getlayerdatabase($subform_layerid, $this->Stelle->pgdbhost);
+						$subformlayerattributes = $mapdb->read_layer_attributes($subform_layerid, $subformlayerdb, NULL);
+						if($layerattributes['form_element_type'][$l] == 'SubFormEmbeddedPK')$minus = 1;
+						else $minus = 0;
+						for($k = 1; $k < count($subform)-$minus; $k++){
+							$subform_pks_realnames[] = $layerattributes['real_name'][$subform[$k]];											# das sind die richtigen Namen der SubformPK-Schlüssel in der übergeordneten Tabelle
+							$subform_pks_realnames2[] = $subformlayerattributes['real_name'][$subform[$k]];							# das sind die richtigen Namen der SubformPK-Schlüssel in der untergeordneten Tabelle
 						}
+						$sql = "SELECT ".implode(',', $subform_pks_realnames)." FROM ".$layerset[0]['maintable']." WHERE ";			# die Werte der SubformPK-Schlüssel aus dem alten Datensatz abfragen
+						for($n = 0; $n < count($id_names); $n++){
+							$sql.= $id_names[$n]." = '".$id_values[$n]."' AND ";
+						}
+						$sql.= "1=1";
+						#echo $sql.'<br>';
+						$ret=$layerdb->execSQL($sql,4, 0);
+						if(!$ret[0]){
+							$pkvalues=pg_fetch_row($ret[1]);
+						}
+						$sql = "SELECT ".implode(',', $subform_pks_realnames)." FROM ".$layerset[0]['maintable']." WHERE ";			# die Werte der SubformPK-Schlüssel aus den neuen Datensätzen abfragen
+						$sql.= "oid IN (".implode(',', $all_new_oids).")";
+						#echo $sql.'<br>';
+						$ret=$layerdb->execSQL($sql,4, 0);
+						if(!$ret[0]){
+							while($rs=pg_fetch_row($ret[1])){
+								$next_update_values[] = $rs;
+							}
+						}
+						$this->copy_dataset($mapdb, $subform_layerid, $subform_pks_realnames2, $pkvalues, count($next_update_values), $subform_pks_realnames2, $next_update_values, $delete_original);
 					}
-	        $j++;
-	        $this->copy_dataset($mapdb, $subform_layerid, $subform_pks_realnames2, $pkvalues, count($next_update_values), $subform_pks_realnames2, $next_update_values, $delete_original);
 		    }
 			}
 			# Original löschen
@@ -2918,16 +2989,9 @@ class GUI {
       }
       ImageCopy($mainimage, $scaleimage, imagesx($mainimage)-imagesx($scaleimage), imagesy($mainimage)-imagesy($scaleimage), 0, 0, imagesx($scaleimage), imagesy($scaleimage));
       ob_end_clean();
-			header("Content-Type: image/jpeg");
-      header('Content-Disposition: inline; filename="Karte.jpg"');
-      ImageJPEG($mainimage);
+      ImageJPEG($mainimage, IMAGEPATH.$jpgfile);			
     }
-    else{
-    	ob_end_clean();
-      header('Content-Type: image/jpeg');
-      header('Content-Disposition: inline; filename="Karte.jpg"');
-      readfile(IMAGEPATH.$jpgfile);
-    }
+		echo '<img src="'.TEMPPATH_REL.$jpgfile.'">';
   }
 
   # Funktion zu Testzwecken der postgresql-Datenbankanfragens
@@ -4876,6 +4940,9 @@ class GUI {
     else{
       $this->loadMap($loadmapsource);
     }
+		# Redlining Polygone
+		$this->addRedlining();
+		
 		if($saved_scale != NULL)$this->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
 		# zoomToMaxLayerExtent
 		if($this->formvars['zoom_layer_id'] != '')$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
@@ -5239,7 +5306,7 @@ class GUI {
     #$this->map->legend->outlinecolor->setRGB(0,0,0);
     $legendmapDB = new db_mapObj($this->Stelle->id, $this->user->id);
     $legendmapDB->nurAktiveLayer = 1;
-    $layerset = $legendmapDB->read_Layer(1);
+    $layerset = $legendmapDB->read_Layer(1, $this->Stelle->useLayerAliases);
 		$rollenlayer = $legendmapDB->read_RollenLayer();
 		$layerset = array_merge($layerset, $rollenlayer);
     for($i = 0; $i < $this->map->numlayers; $i++){
@@ -5625,25 +5692,6 @@ class GUI {
     $this->notizKatVerwaltung();
   } # END of function notizKategorieLoeschen
 
-  function metadatenSuchen() {
-		include_(CLASSPATH.'metadaten.php');
-    # Zuweisen von Titel und Layoutdatei
-    $this->titel='Metadaten Suchergebnisse';
-    $this->main='Metadaten.php';
-    # Abfragen der Metadaten in der Datenbank
-    $this->metadaten=new metadatensatz('',$this->pgdatabase);
-    $ret=$this->metadaten->getMetadatenQuickSearch($this->formvars);
-    if ($ret[0]) {
-      $errmsg='Suche ergibt kein Ergebnis'.$ret[1];
-    }
-    # Zuweisen von Werten zu Variablen in der Layoutdatei
-    $i=0;
-    $this->qlayerset[0]['Name']=$this->titel;
-    $this->qlayerset[0]['shape']=$ret[1];
-    # Ausgabe an den Client
-    $this->output();
-  }
-
   function metadatenblattanzeige() {
 		include_(CLASSPATH.'metadaten.php');
     # Zuweisen von Titel und Layoutdatei
@@ -5660,66 +5708,6 @@ class GUI {
       $this->metadataset=$ret[1][0];
     }
     # Ausgabe an den Client
-    $this->output();
-  }
-
-  function metadateneingabe() {
-    include_once (CLASSPATH.'metadaten.php');
-		include_once(CLASSPATH.'FormObject.php');
-    $metadatensatz=new metadatensatz($this->formvars['oid'],$this->pgdatabase);
-    if ($this->formvars['oid']!='') {
-      # Es handelt sich um eine Änderung eines Datensatzes
-      # Auslesen der Metadaten aus der Datenbank und Zuweisung zu Formularobjekten
-      $ret=$metadatensatz->getMetadaten($this->formvars);
-      if ($ret[0]) {
-        $errmsg='Suche ergibt kein Ergebnis'.$ret[1];
-      }
-      else {
-        $this->formvars=array_merge($this->formvars,$ret[1][0]);
-      }
-      $this->titel='Metadatenänderung';
-    }
-    else {
-      # Anzeigen des Metadateneingabeformulars
-      $this->titel='Metadateneingabe';
-      # Zuweisen von defaultwerten für die Metadatenelemente wenn nicht vorher
-      # schon ein Formular ausgefüllt wurde
-      if ($this->formvars['mdfileid']=='') {
-        $defaultvalues=$metadatensatz->readDefaultValues($this->user);
-        $this->formvars=array_merge($this->formvars,$defaultvalues);
-      }
-      else {
-        # Wenn das Formular erfolgreich eingetragen wurde neue mdfileid vergeben
-        if ($this->Fehlermeldung=='') {
-          $this->formvars['mdfileid']=rand();
-        }
-      }
-    }
-    # Erzeugen der Formularobjekte für die Schlagworteingabe
-    $ret=$metadatensatz->getKeywords('','','theme','','','keyword');
-    if ($ret[0]) {
-      echo $ret[1];
-    }
-    else {
-      $this->formvars['allthemekeywords']=$ret[1];
-    }
-    $ret=$metadatensatz->getKeywords('','','place','','','keyword');
-    if ($ret[0]) {
-      echo $ret[1];
-    }
-    else {
-      $this->formvars['allplacekeywords']=$ret[1];
-    }
-    $this->allthemekeywordsFormObj=new FormObject("allthemekeywords","select",$this->formvars['allthemekeywords']['id'],explode(", ",$this->formvars['selectedthemekeywordids']),$this->formvars['allthemekeywords']['keyword'],4,0,1,NULL);
-    $this->allplacekeywordsFormObj=new FormObject("allplacekeywords","select",$this->formvars['allplacekeywords']['id'],explode(", ",$this->formvars['selectedplacekeywordids']),$this->formvars['allplacekeywords']['keyword'],4,0,1,NULL);
-    $this->main='metadateneingabeformular.php';
-    $this->loadMap('DataBase');
-    if ($this->formvars['refmap_x']!='') {
-      $this->zoomToRefExt();
-    }
-    $this->navMap($this->formvars['CMD']);
-    $this->saveMap('');
-    $this->drawMap();
     $this->output();
   }
 
@@ -6251,6 +6239,9 @@ class GUI {
 				$this->user->rolle->setConsumeALK($currenttime, $this->Docu->activeframe[0]['id']);
 			}
 
+			# Redlining Polygone
+			$this->addRedlining();
+			
 			/* *
 			* Problem: Es gibt WMS, die trotz der Einstellung EXCEPTIONS=application/vnd.ogc.se_inimage kein Bild mit Fehlermeldung
 			* schicken, sondern gar kein Bild bzw. nichts.
@@ -6497,7 +6488,7 @@ class GUI {
 					}
 				}
 			}
-
+			
 			# Nutzer
 			if($this->Docu->activeframe[0]['usersize'] > 0){
 				$pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$this->Docu->activeframe[0]['font_user']);
@@ -6664,13 +6655,14 @@ class GUI {
 		$this->map->setMetaData("wms_enable_request",'*');
     $this->saveMap(WMS_MAPFILE_PATH.$this->formvars['mapfile_name']);
     $getMapRequestExample=$this->wms_onlineresource.'request=getMap&VERSION='.SUPORTED_WMS_VERSION;
-    $getMapRequestExample.='&layers='.$this->mapDB->Layer[0]['Name'];
-    for ($i=1;$i<$this->mapDB->anzLayer;$i++) {
-      $getMapRequestExample.=','.$this->mapDB->Layer[$i]['Name'];
+    $getMapRequestExample.='&layers='.$this->layerset[0]['alias'];
+    for ($i=1; $i < $this->mapDB->anzLayer; $i++){
+      $getMapRequestExample.=','.$this->layerset[$i]['alias'];
     }
-    $getMapRequestExample.='&srs=EPSG:'.EPSGCODE;
+    $getMapRequestExample.='&srs=EPSG:'.$this->user->rolle->epsg_code;
     $getMapRequestExample.='&bbox='.$this->map->extent->minx.','.$this->map->extent->miny.','.$this->map->extent->maxx.','.$this->map->extent->maxy;
     $getMapRequestExample.='&width='.$this->map->width.'&height='.$this->map->height;
+		$getMapRequestExample.='&format=image/jpeg';
     $this->getMapRequestExample=$getMapRequestExample;
     $this->output();
   }
@@ -7446,6 +7438,75 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->output();
 	}
 
+	function Layergruppen_Anzeigen() {
+		include_once(CLASSPATH . 'LayerGroup.php');
+		$this->layergruppen = LayerGroup::find(
+			$this,
+			'', # default alle
+			($this->formvars['order'] == '' ? 'Gruppenname' : '')  # default nach Name
+		);
+		$this->main = 'layergroups.php';
+		$this->output();
+	}
+
+	function Layergruppe_Editor() {
+		include_once(CLASSPATH . 'LayerGroup.php');
+		$this->layergruppe = new LayerGroup($this);
+		if ($this->formvars['selected_group_id'] != '') {
+			$this->layergruppe = LayerGroup::find_by_id($this, $this->formvars['selected_group_id']);
+		}
+		else {
+			$this->layergruppe->setKeysFromTable();
+		}
+		$this->main = 'layergruppe_formular.php';
+		$this->output();
+	}
+
+	function Layergruppe_Speichern() {
+		include_once(CLASSPATH . 'LayerGroup.php');
+		$this->layergruppe = new LayerGroup($this);
+		$this->layergruppe->data = formvars_strip($this->formvars, $this->layergruppe->setKeysFromTable(), 'keep');
+
+		$this->layergruppe->set('Gruppenname', strip_pg_escape_string($this->formvars['Gruppenname']));
+		$results = $this->layergruppe->validate();
+		if (empty($results)) {
+			$results = $this->layergruppe->create();
+		}
+		if (empty($results)) {
+			$this->add_message('notice', 'Layergruppe erfolgreich angelegt.');
+			$this->Layergruppen_Anzeigen();
+		}
+		else {
+			$this->add_message('array', $results);
+			$this->Layergruppe_Editor();
+		}
+		$this->output();
+	}
+
+	function Layergruppe_Aendern() {
+		include_once(CLASSPATH . 'LayerGroup.php');
+		$this->layergruppe = LayerGroup::find_by_id($this, $this->formvars['selected_group_id']);
+		$this->layergruppe->setData($this->formvars);
+		$results = $this->layergruppe->validate();
+		if (empty($results)) {
+			$results = $this->layergruppe->update();
+		}
+		if (empty($results)) {
+			$this->add_message('notice', 'Layergruppe erfolgreich aktualisiert.');
+		}
+		else {
+			$this->add_message('array', $results);
+		}
+		$this->Layergruppe_Editor();
+	}
+
+	function Layergruppe_Loeschen(){
+		include_once(CLASSPATH . 'LayerGroup.php');
+		$this->layergruppe = LayerGroup::find_by_id($this, $this->formvars['selected_group_id']);
+		$this->layergruppe->delete();
+		$this->add_message('notice', 'Layergruppe erfolgreich gelöscht.');
+	}
+
   function GenerischeSuche_Suchen(){
 		if($this->last_query != ''){
 			$this->formvars['selected_layer_id'] = $this->last_query['layer_ids'][0];
@@ -7705,10 +7766,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					$this->user->rolle->delete_last_query();
 					$this->user->rolle->save_last_query('Layer-Suche_Suchen', $this->formvars['selected_layer_id'], $sql, $sql_order, $this->formvars['anzahl'], $this->formvars['offset_'.$layerset[0]['Layer_ID']]);
 
-					# last_search speichern
-					$this->formvars['search_name'] = '<last_search>';
-					$this->user->rolle->delete_search($this->formvars['search_name']);
-					$this->user->rolle->save_search($attributes, $this->formvars);
+					# last_search speichern					
+					if($this->last_query == ''){
+						$this->formvars['search_name'] = '<last_search>';
+						$this->user->rolle->delete_search($this->formvars['search_name']);		# das muss hier stehen bleiben, denn in save_search wird mit der Layer-ID gelöscht
+						$this->user->rolle->save_search($attributes, $this->formvars);
+					}
 
 					# Querymaps erzeugen
 					if($layerset[0]['querymap'] == 1 AND $attributes['privileg'][$attributes['the_geom']] >= '0' AND ($layerset[0]['Datentyp'] == 1 OR $layerset[0]['Datentyp'] == 2)){
@@ -7999,10 +8062,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		    if($this->formvars['CMD']== 'Full_Extent' OR $this->formvars['CMD'] == 'recentre' OR $this->formvars['CMD'] == 'zoomin' OR $this->formvars['CMD'] == 'zoomout' OR $this->formvars['CMD'] == 'previous' OR $this->formvars['CMD'] == 'next') {
 		      $this->navMap($this->formvars['CMD']);
 		    }
+				$this->drawMap();
 		    $this->saveMap('');
 		    $currenttime=date('Y-m-d H:i:s',time());
 		    $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-		    $this->drawMap();
 	    	########################################################################
     	}
 			if (empty($this->formvars['anzahl'])) {
@@ -8408,7 +8471,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				for($i = 0; $i < count($table['attributname']); $i++){
 					if($table['type'][$i] == 'Time'){                       # Typ "Time"
 						if(in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
-							$sql.= "(now())::timestamp(0), ";
+							$sql .= "'" . date("Y-m-d H:i:s") ."', ";
+							#$sql .= "(now())::timestamp(0), ";
 						}
 						else $sql.= "NULL, ";
 					}
@@ -9840,7 +9904,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
   }
 
   function StelleAendern() {
+		#echo '<p><b>StelleAendern</b>';
   	$_files = $_FILES;
+		$results = array();
+
     if (!$this->formvars['bezeichnung'] or !$this->formvars['Referenzkarte_ID']) {
       # Fehler bei der Formulareingabe
       $this->Meldung=$ret[1];
@@ -9866,13 +9933,31 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         $new_stelle = $Stelle;
         $new_stelleid = $stelleid;
       }
-      $menues = explode(', ',$this->formvars['selmenues']);
-      $functions = explode(', ',$this->formvars['selfunctions']);
-      $frames = explode(', ',$this->formvars['selframes']);
-			$layouts = explode(', ',$this->formvars['sellayouts']);
-      $layer = explode(', ',$this->formvars['sellayer']);
+      $menues = ($this->formvars['selmenues'] == '' ? array() : explode(', ',$this->formvars['selmenues']));
+      $functions = (trim($this->formvars['selfunctions']) == '' ? array() : explode(', ', $this->formvars['selfunctions']));
+      $frames = explode(', ', $this->formvars['selframes']);
+			$layouts = (trim($this->formvars['sellayouts']) == '' ? array() : explode(', ', $this->formvars['sellayouts']));
+      $layer = (trim($this->formvars['sellayer']) == '' ? array() : explode(', ', $this->formvars['sellayer']));
       $selectedusers = explode(', ',$this->formvars['selusers']);
       $users= $Stelle->getUser();
+			$selectedparents = ($this->formvars['selparents'] == '' ? array() : explode(', ', $this->formvars['selparents']));
+
+			# menues, functions, frames, layouts, layers und users zusätzlich zuordnen oder entfernen
+			# je nach gesetzten parent Einstellungen, Parameterübergabe erfolgt per Referenz
+			$results = $new_stelle->apply_parent_selection(
+				$selectedparents,
+				$menues,
+				$functions,
+				$frames,
+				$layouts,
+				$layer,
+				$selectedusers
+			);
+
+			foreach($results AS $result) {
+				$this->add_message($result['type'], $result['message']);
+			}
+
       $stelle_id = explode(',',$stelleid);
       $new_stelle_id = explode(',',$new_stelleid);
       $new_stelle->deleteMenue(0); // erst alle Menüs rausnehmen
@@ -9906,9 +9991,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         $this->user->rolle->setLayer($selectedusers[$i], $new_stelle_id, 0); # Hinzufügen der Layer zur Rolle
         $this->selected_user = new user(0,$selectedusers[$i],$this->user->database);
         $this->selected_user->checkstelle();
-      }			
-			# Löschen der in der Selectbox entfernten Layer
+      }
       $stellenlayer = $Stelle->getLayers(NULL);
+			$deletelayer = array();
       for($i = 0; $i < count($stellenlayer['ID']); $i++){
         $found = false;
         for($j = 0; $j < count($layer); $j++){
@@ -9920,7 +10005,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
           $deletelayer[] = $stellenlayer['ID'][$i];
         }
       }
-      if($deletelayer != 0){
+      if(count($deletelayer) > 0) {
         $Stelle->deleteLayer($deletelayer, $this->pgdatabase);
         for($i = 0; $i < count($deletelayer); $i++){
           $layerid = $deletelayer[$i];
@@ -9931,10 +10016,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
           }
         }
       }
-    # /Löschen der in der Selectbox entfernten Layer
-		$new_stelle->updateLayerParams();
-    # Löschen  der User, die nicht mehr zur Stelle gehören sollen
-    # Löschen der in der Selectbox entfernten User
+    	# /Löschen der in der Selectbox entfernten Layer
+			$new_stelle->updateLayerParams();
+    	# Löschen  der User, die nicht mehr zur Stelle gehören sollen
+    	# Löschen der in der Selectbox entfernten User
       for($i = 0; $i < count($users['ID']); $i++){
         $found = false;
         for($j = 0; $j < count($selectedusers); $j++){
@@ -9959,12 +10044,21 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       }
 			# /Löschen der in der Selectbox entfernten User
 
-      if ($ret[0]) {
-				$this->add_message('error', $ret[1]);
-      }
-      else {
-        $this->add_message('notice', 'Daten der Stelle erfolgreich eingetragen!');
-      }
+			if ($ret[0]) {
+				$this->add_messages('error', $ret[1]);
+			}
+
+			if (
+				count(
+					array_map(
+						function($message) {
+							if ($message['type'] == 'error') return $message;
+						},
+						$this->messages
+					)
+				) == 0
+			) $this->add_message('notice', 'Daten der Stelle erfolgreich eingetragen!');
+
     }
     $this->Stelleneditor();
   }
@@ -10032,7 +10126,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       }
     }
     $this->formvars['selected_stelle_id'] = $ret[1];
-    $this->Stelleneditor();
+   # $this->Stelleneditor();
   }
 
   function StellenAnzeigen() {
@@ -10047,6 +10141,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
   }
 
   function Stelleneditor() {
+		#echo '<p><b>Stelleneditor</b>';
 		include_(CLASSPATH.'datendrucklayout.php');
 		include_(CLASSPATH.'funktion.php');
     $this->titel='Stellen Editor';
@@ -10095,6 +10190,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$this->formvars['sellayouts'] = $ddl->load_layouts($this->formvars['selected_stelle_id'], NULL, NULL, NULL);
       $this->formvars['sellayer'] = $Stelle->getLayers(NULL, 'Name');
       $this->formvars['selusers'] = $Stelle->getUser();
+			$this->formvars['selparents'] = $Stelle->getParents("ORDER BY `Bezeichnung`"); // formatted mysql resultset, ordered by Bezeichnung
     }
     # Abfragen aller möglichen Menuepunkte
     $this->formvars['menues'] = Menue::get_all_ober_menues($this);
@@ -10111,6 +10207,20 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->layergruppen = $mapDB->get_Groups();
     # Abfragen aller möglichen User
     $this->formvars['users']=$this->user->getall_Users('Name');
+
+		# Abfragen aller möglichen Oberstellen Kindstellen der ausgewählten Stelle werden ausgenommen
+		$stelle = new MyObject($this, 'stelle');
+		$children_ids = array_map(
+			function($child) {
+				return $child['ID'];
+			},
+			$this->Stelle->getChildren($this->formvars['selected_stelle_id'])
+		);
+		$this->formvars['parents'] = array();
+		foreach($stelle->find_where('ID != ' . $this->formvars['selected_stelle_id'], 'Bezeichnung') AS $parent) {
+			if (!in_array($parent->get('ID'), $children_ids)) $this->formvars['parents'][] = $parent;
+		}
+
     # Abfragen aller möglichen EPSG-Codes
     $this->epsg_codes = read_epsg_codes($this->pgdatabase);
     $this->output();
@@ -10348,10 +10458,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
   function MenuesAnzeigen() {
     # Abfragen aller Menues
-    if ($this->formvars['order'] == ''){
-      $this->formvars['order'] = 'name';
+    if ($this->formvars['view_sort'] == ''){
+      $this->formvars['view_sort'] = 'name';
     }
-    $this->menuedaten = Menue::find($this, 'true', $this->formvars['order']);
+    $this->menuedaten = Menue::find($this, 'true', $this->formvars['view_sort']);
     $this->titel='Menüdaten';
     $this->main='menuedaten.php';
     $this->output();
@@ -10385,7 +10495,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		}
 		if (empty($results)) {
 			$this->add_message('notice', 'Menü erfolgreich angelegt.');
-			$this->menuedaten = Menue::find($this, 'true', $this->formvars['order']);
+			$this->menuedaten = Menue::find($this, '', $this->formvars['order']);
 			$this->titel='Menüdaten';
 			$this->main='menuedaten.php';
 		}
@@ -13276,10 +13386,23 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 									$output .= '##';
 									$attribcount++;
 								} break;
+								case 'Radiobutton': {
+									$radiobutton_output = '';
+									for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
+										if($attributes['enum_value'][$j][$e] == $layer['shape'][$k][$attributes['name'][$j]]){
+											$radiobutton_output = $attributes['enum_output'][$j][$e];
+											break;
+										}
+									}
+									$output .=  $attributes['alias'][$j].': ';
+									$output .= $radiobutton_output;
+									$output .= '##';
+									$attribcount++;
+								} break;
 								case 'Checkbox': {
 		              $layer['shape'][$k][$attributes['name'][$j]] = str_replace('f', 'nein',  $layer['shape'][$k][$attributes['name'][$j]]);
 									$layer['shape'][$k][$attributes['name'][$j]] = str_replace('t', 'ja',  $layer['shape'][$k][$attributes['name'][$j]]);
-								}
+								} break;
 				        default : {
 		              $output .=  $attributes['alias'][$j].': ';
 		              $attribcount++;
@@ -14008,13 +14131,13 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	    $oPixelPos=ms_newPointObj();
 	    $oPixelPos->setXY($this->map->width/2,$this->map->height/2);
 	    if (MAPSERVERVERSION > 600) {
-				if($layer[0]['maxscale'] > 0)$nScale = $layer[0]['maxscale']-1;
+				if($layer[0]['maxscale'] > 0 AND $layer[0]['maxscale'] < $this->map->scaledenom)$nScale = $layer[0]['maxscale']-1;
 				else $nScale = $this->map->scaledenom;
 				$this->map->zoomscale($nScale,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
 				$this->map_scaledenom = $this->map->scaledenom;
 			}
 			else {
-				if($layer[0]['maxscale'] > 0)$nScale = $layer[0]['maxscale']-1;
+				if($layer[0]['maxscale'] > 0 AND $layer[0]['maxscale'] < $this->map->scale)$nScale = $layer[0]['maxscale']-1;
 				else $nScale = $this->map->scale;
 				$this->map->zoomscale($nScale,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
 				$this->map_scaledenom = $this->map->scale;
@@ -14575,7 +14698,7 @@ class db_mapObj{
   }
 
   function read_RollenLayer($id = NULL, $typ = NULL){
-		$sql = "SELECT DISTINCT l.*, g.Gruppenname, -l.id AS Layer_ID, 1 as showclasses, CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable from rollenlayer AS l, u_groups AS g";
+		$sql = "SELECT DISTINCT l.*, l.Name as alias, g.Gruppenname, -l.id AS Layer_ID, 1 as showclasses, CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable from rollenlayer AS l, u_groups AS g";
     $sql.= ' WHERE l.Gruppe = g.id AND l.stelle_id='.$this->Stelle_ID.' AND l.user_id='.$this->User_ID;
     if($id != NULL){
     	$sql .= ' AND l.id = '.$id;
@@ -14594,7 +14717,7 @@ class db_mapObj{
     return $Layer;
   }
 
-  function read_Layer($withClasses, $groups = NULL){
+  function read_Layer($withClasses, $useLayerAliases = false, $groups = NULL){
 		global $language;
 
 		if($language != 'german') {
@@ -14654,10 +14777,13 @@ class db_mapObj{
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Layer - Lesen der Layer der Rolle:<br>".$sql,4);
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
-    $this->Layer = array();
+    $layer = array();
     $this->disabled_classes = $this->read_disabled_classes();
 		$i = 0;
-    while ($rs=mysql_fetch_assoc($query)) {
+    while ($rs=mysql_fetch_assoc($query)){
+			if($rs['alias'] == '' OR !$useLayerAliases){
+				$rs['alias'] = $rs['Name'];
+			}
 			$rs['Name'] = replace_params($rs['Name'], rolle::$layer_params);
 			$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);
 			$rs['connection'] = replace_params($rs['connection'], rolle::$layer_params);
@@ -14669,11 +14795,11 @@ class db_mapObj{
 			}
 			if($rs['maxscale'] > 0)$rs['maxscale'] = $rs['maxscale']+0.3;
 			if($rs['minscale'] > 0)$rs['minscale'] = $rs['minscale']-0.3;
-      $this->Layer[$i]=$rs;
-			$this->Layer['layer_ids'][$rs['Layer_ID']] =& $this->Layer[$i];		# damit man mit einer Layer-ID als Schlüssel auf dieses Array zugreifen kann
+      $layer[$i]=$rs;
+			$layer['layer_ids'][$rs['Layer_ID']] =& $layer[$i];		# damit man mit einer Layer-ID als Schlüssel auf dieses Array zugreifen kann
 			$i++;
     }
-    return $this->Layer;
+    return $layer;
   }
 
   function read_Groups($all = false, $order = '') {
@@ -16758,6 +16884,7 @@ class db_mapObj{
 			if($style['sizeitem']){$sql.= ", sizeitem = '".$style['sizeitem']."'";}
 			if($style['offsetx']){$sql.= ", offsetx = ".$style['offsetx'];}
 			if($style['offsety']){$sql.= ", offsety = ".$style['offsety'];}
+			if($style['polaroffset']){$sql.= ", polaroffset = '".$style['polaroffset']."'";}
 			if($style['pattern']){$sql.= ", pattern = '".$style['pattern']."'";}
 			if($style['geomtransform']){$sql.= ", geomtransform = '".$style['geomtransform']."'";}
 			if($style['gap']){$sql.= ", gap = ".$style['gap'];}
@@ -16912,6 +17039,7 @@ class db_mapObj{
     $sql.="sizeitem = '".$formvars["sizeitem"]."',";
     if($formvars["offsetx"] != ''){$sql.="offsetx = '".$formvars["offsetx"]."',";}else{$sql.="offsetx = NULL,";}
     if($formvars["offsety"] != ''){$sql.="offsety = '".$formvars["offsety"]."',";}else{$sql.="offsety = NULL,";}
+		if($formvars["polaroffset"] != ''){$sql.="polaroffset = '".$formvars["polaroffset"]."',";}else{$sql.="polaroffset = NULL,";}
     if($formvars["pattern"] != ''){$sql.="pattern = '".$formvars["pattern"]."',";}else{$sql.="pattern = NULL,";}
   	if($formvars["geomtransform"] != ''){$sql.="geomtransform = '".$formvars["geomtransform"]."',";}else{$sql.="geomtransform = NULL,";}
 		if($formvars["gap"] != ''){$sql.="gap = ".$formvars["gap"].",";}else{$sql.="gap = NULL,";}
@@ -17186,7 +17314,7 @@ class Document {
     return $ausschnitte;
   }
 
-  function load_frames($stelle_id, $frameid){
+  function load_frames($stelle_id, $frameid, $return = '') {
     $sql = 'SELECT DISTINCT druckrahmen.* FROM druckrahmen';
     if($frameid AND !$stelle_id){$sql .= ' WHERE druckrahmen.id ='.$frameid;}
     if($stelle_id AND !$frameid){
@@ -17204,10 +17332,15 @@ class Document {
   	if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     $i = 0;
     while($rs=mysql_fetch_array($ret1[1])){
-      $frames[] = $rs;
-      $frames[0]['bilder'] = $this->load_bilder($rs['id']);
-      $frames[0]['texts'] = $this->load_texts($rs['id']);
-      $i++;
+			if ($return == 'only_ids') {
+				$frames[] = $rs['id'];
+			}
+			else {
+	      $frames[] = $rs;
+	      $frames[0]['bilder'] = $this->load_bilder($rs['id']);
+	      $frames[0]['texts'] = $this->load_texts($rs['id']);
+	      $i++;
+			}
     }
     return $frames;
   }

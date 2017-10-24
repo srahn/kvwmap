@@ -184,7 +184,7 @@ input[type="text"].transparent_input{
   float: left;
   text-align: right;
 	font-size: 17px;
-  width: 150px;
+  width: 210px;
   height: 15px;
   margin-right: 10px;
 }
@@ -674,12 +674,6 @@ a.menuered:hover {
 	flex-direction: column;
 }
 
-#legend_layer{
-	flex: 1; 
-	display: flex; 
-	flex-direction: column;
-}
-
 #legendcontrol{
 	margin-top: 5px;
 	margin-bottom: 8px;
@@ -710,6 +704,7 @@ a.menuered:hover {
 }
 
 .slidinglegend_slideout {
+	cursor: pointer;
 	right: -<?php echo $size['legend']['width']; ?>px;
 	position:absolute;
 	border-top: 1px solid #eeeeee;
@@ -891,7 +886,7 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 
 #layer	h2{
 	font-weight: bold;
-	padding-left: 50px;
+	padding-left: 35px;
 }
 
 #datensatz {
@@ -1422,4 +1417,30 @@ tbody.gle tr:hover {
 	position: relative;
 	text-align: right;
 	margin-right: 8px;
+}
+
+.scrolltable thead, .scrolltable tbody {
+	display: block;
+}
+
+.scrolltable tbody {
+  height: 590px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.scrolltable td {
+	padding: 5 0 5 0;
+}
+
+.toggle_fa_off i{
+	color: #888888;
+}
+
+.toggle_fa_off:hover i{
+	color: #444444;
+}
+
+.toggle_fa_on i{
+	color: #444444;
 }

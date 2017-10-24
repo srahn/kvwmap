@@ -14,8 +14,10 @@
 			$explosion = explode('~', $GUI->formvars['antr_selected']);
 			$antr_selected = $explosion[0];
 			$stelle_id = $explosion[1];
-      $antrag=new antrag($antr_selected,$stelle_id,$GUI->pgdatabase);
-			$antragsnr = $antrag->nr;
+      $GUI->antrag=new antrag($antr_selected,$stelle_id,$GUI->pgdatabase);
+			$GUI->antrag->getAntraege(array($antr_selected),'','','',$stelle_id);
+			$GUI->antrag->searches = $GUI->Suchparameter_abfragen($antr_selected, $stelle_id);
+			$antragsnr = $GUI->antrag->nr;
 			if($stelle_id != '')$antragsnr.='~'.$stelle_id;
       if(is_dir(RECHERCHEERGEBNIS_PATH.$antragsnr)){
         chdir(RECHERCHEERGEBNIS_PATH);
@@ -28,21 +30,26 @@
 				$GUI->formvars['Datum'] = 1;
 				$GUI->formvars['Datei'] = 1;
 				$GUI->formvars['gemessendurch'] = 1;
-				$GUI->formvars['Gueltigkeit'] = 1;
-				$GUI->erzeugenUebergabeprotokollNachweise_PDF(RECHERCHEERGEBNIS_PATH.$antragsnr.'/'.$antrag->nr.'_'.date('Y-m-d_H-i-s',time()).'.pdf');
+				$GUI->formvars['Gueltigkeit'] = 1;		
+				$timestamp = date('Y-m-d_H-i-s',time());
+				$GUI->erzeugenUebergabeprotokollNachweise_PDF(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/'.$GUI->antrag->nr.'_'.$timestamp.'.pdf');
+				$GUI->erzeugenUebersicht_HTML(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/'.$GUI->antrag->nr.'_'.$timestamp.'.htm');
+				$GUI->erzeugenUebersicht_CSV(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/'.$GUI->antrag->nr.'_'.$timestamp.'.csv');
+				#$GUI->erzeugenZuordnungFlst_CSV(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/');
+				$GUI->create_Recherche_UKO(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/', $antragsnr, $stelle_id);
         $result = exec(ZIP_PATH.' -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr);
 				# Loggen der übergebenen Dokumente
-				$uebergabe_logpath = $antrag->create_uebergabe_logpath($GUI->Stelle->Bezeichnung).'/'.$antr_selected.'_'.date('Y-m-d_H-i-s',time()).'.pdf';
+				$uebergabe_logpath = $GUI->antrag->create_uebergabe_logpath($GUI->Stelle->Bezeichnung).'/'.$antr_selected.'_'.$timestamp.'.pdf';
 				$GUI->erzeugenUebergabeprotokollNachweise_PDF($uebergabe_logpath, true);
       }
     }
     $filename = RECHERCHEERGEBNIS_PATH.$antragsnr.'.zip';
-		$dateiname = $antrag->nr.'_'.date('Y-m-d_H-i-s',time()).'.zip';
+		$dateiname = $GUI->antrag->nr.'_'.date('Y-m-d_H-i-s',time()).'.zip';
     $tmpfilename = copy_file_to_tmp($filename, $dateiname);
     unlink($filename);
     return $tmpfilename;
   };
-
+	
 	$this->DokumenteZumAntragInOrdnerZusammenstellen = function() use ($GUI){
     if ($GUI->formvars['antr_selected']!=''){
       if(strpos($GUI->formvars['antr_selected'], '~') == false)$GUI->formvars['antr_selected'] = str_replace('|', '~', $GUI->formvars['antr_selected']); # für Benutzung im GLE
@@ -52,12 +59,12 @@
       $antrag=new antrag($antr_selected,$stelle_id,$GUI->pgdatabase);
       $msg = $antrag->clearRecherchePfad();			
       # Zusammenstellen der Dokumente der Nachweisverwaltung
-      $nachweis=new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
-      $ret=$nachweis->getNachw2Antr($antr_selected,$stelle_id);
+      $GUI->nachweis=new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
+      $ret=$GUI->nachweis->getNachw2Antr($antr_selected,$stelle_id);
       if($ret==''){
-        $ret=$nachweis->getNachweise($nachweis->nachweise_id,'','','','','','','','multibleIDs','','');
+        $ret=$GUI->nachweis->getNachweise($GUI->nachweis->nachweise_id,'','','','','','','','multibleIDs','','');
         if ($ret==''){
-          $ret=$antrag->DokumenteInOrdnerZusammenstellen($nachweis);
+          $ret=$antrag->DokumenteInOrdnerZusammenstellen($GUI->nachweis);
           $msg.=$ret;
         }
       }
@@ -101,7 +108,7 @@
       # Fehler bei der Abfrage des Nachweises
       # Anzeige des letzten Rechercheergebnisses
       $GUI->nachweisAnzeige();
-      showAlert($ret);
+			$GUI->add_message('error', $ret);
     }
     else {
       # Abfrage war erfolgreich
@@ -164,7 +171,7 @@
 				$this->geomload = true;			# Geometrie wird das erste Mal geladen, deshalb nicht in den Weiterzeichnenmodus gehen
       }
       else{
-      	showAlert('Achtung! Nachweis hat noch keine Geometrie!');
+				$GUI->add_message('error', 'Achtung! Nachweis hat noch keine Geometrie!');
       }
       # Zuweisen der Werte des Dokumentes zum Formular
       $GUI->formvars['flurid']=$nachweis->document['flurid'];
@@ -183,6 +190,7 @@
       $GUI->formvars['rissnummer']=$nachweis->document['rissnummer'];
       $GUI->formvars['fortfuehrung']=$nachweis->document['fortfuehrung'];
       $GUI->formvars['bemerkungen']=$nachweis->document['bemerkungen'];
+			$GUI->formvars['bemerkungen_intern']=$nachweis->document['bemerkungen_intern'];
 
       # Abfragen der Gemarkungen
       # 2006-01-26 pk
@@ -399,6 +407,21 @@
 		return $dokauswahlen;
 	};
 	
+	$this->create_Recherche_UKO = function($pfad, $antrag_nr, $stelle_id) use ($GUI){
+		$searches = $GUI->antrag->searches;
+		foreach($searches as $params){
+			if($params['abfrageart'] == 'poly')$polys[] = "st_geometryfromtext('".$params['suchpolygon']."', 25833)";
+		}
+		$sql = "select st_astext(st_multi(st_union(ARRAY[".implode(',', $polys)."])))";
+		$ret = $GUI->pgdatabase->execSQL($sql, 4, 1);
+    $rs=pg_fetch_row($ret[1]);
+		$uko = WKT2UKO($rs[0]);
+		$ukofile = 'Recherche.uko';
+		$fp = fopen($pfad.$ukofile, 'w');
+		fwrite($fp, $uko);
+		fclose($fp);
+	};
+	
 	$this->Suchparameter_loggen = function($formvars, $stelle_id, $user_id) use ($GUI){
 		$sql ='INSERT INTO u_consumeNachweise SELECT ';
 		$sql.='"'.$formvars['suchantrnr'].'", ';
@@ -419,16 +442,24 @@
 		$GUI->database->execSQL($sql,4, 1);
 	};
 	
-	$this->Suchparameter_anhaengen_PDF = function($pdf, $antrag_nr, $stelle_id) use ($GUI){
-		$row = 0;
-		$options = array('aleft'=>30, 'right'=>30, 'justification'=>'left');
+	$this->Suchparameter_abfragen = function($antrag_nr, $stelle_id) use ($GUI){		
 		$sql = "SELECT * FROM u_consumeNachweise ";
 		$sql.= "WHERE antrag_nr='".$antrag_nr."' AND stelle_id=".$stelle_id;
 		$GUI->debug->write("<p>file:users.php class:user->Suchparameter_anhaengen_PDF <br>".$sql,4);
 		$query=mysql_query($sql,$GUI->database->dbConn);
 		if ($query==0) { $GUI->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		while($rs = mysql_fetch_assoc($query)){
-			switch ($rs['abfrageart']){
+			$searches[] = $rs;
+		}
+		return $searches;
+	};	
+	
+	$this->Suchparameter_anhaengen_PDF = function($pdf, $antrag_nr, $stelle_id) use ($GUI){
+		$row = 0;
+		$options = array('aleft'=>30, 'right'=>30, 'justification'=>'left');
+		$searches = $GUI->antrag->searches;
+		foreach($searches as $params){
+			switch ($params['abfrageart']){
 				case 'indiv_nr' : {
 					$keys = array('suchffr'=>0, 'suchkvz'=>0, 'suchgn'=>0, 'suchan'=>0, 'suchgemarkung'=>0, 'suchflur'=>0, 'suchstammnr'=>0, 'suchrissnr'=>0, 'suchfortf'=>0, 'sdatum'=>0, 'sdatum2'=>0, 'sVermStelle'=>0, 'flur_thematisch'=>0, 'such_andere_art'=>0);
 				}break;
@@ -439,13 +470,12 @@
 					$keys = array('suchffr'=>0, 'suchkvz'=>0, 'suchgn'=>0, 'suchan'=>0, 'suchantrnr'=>0, 'such_andere_art'=>0);
 				}break;				
 			}
-			$params = json_encode(array_intersect_key($rs, $keys));
 			if($row < 100){
 				$pdf->ezNewPage();
 				$row = 800;				
 			}
-			$pdf->ezText('<b>Suche '.$rs['time_id'].': '.$rs['abfrageart'].'</b>', 14, $options);
-			#$pdf->ezText('Suchpolygon: '.$rs['suchpolygon'], 16, $options);
+			$pdf->ezText('<b>Suche '.$params['time_id'].': '.$params['abfrageart'].'</b>', 14, $options);
+			$params = json_encode(array_intersect_key($params, $keys));
 			$pdf->ezText($params, 12, $options);
 			$pdf->ezText(' ', 12, $options);
 		}		
@@ -473,23 +503,19 @@
     # Suchparameter in Ordnung
     # Recherchieren nach den Nachweisen
 		if($GUI->formvars['such_andere_art'] != NULL)$GUI->formvars['such_andere_art'] = implode(',', $GUI->formvars['such_andere_art']);
-    $ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['such_andere_art'], $GUI->formvars['suchbemerkung']);
+    $ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['such_andere_art'], $GUI->formvars['suchbemerkung'], NULL, $GUI->formvars['suchstammnr2'], $GUI->formvars['suchrissnr2'], $GUI->formvars['suchfortf2']);
     #$GUI->nachweis->getAnzahlNachweise($GUI->formvars['suchpolygon']);
     if($ret!=''){
       # Fehler bei der Recherche im Datenbestand
+			$GUI->add_message('error', $ret);
       $GUI->rechercheFormAnzeigen();
-      ?><script type="text/javascript">
-      alert("<?php echo $ret; ?>");
-      </script><?php
     }
     else {
       # Recherche erfolgreich verlaufen
       if ($GUI->nachweis->erg_dokumente==0) {
         # Keine Dokumente zur Auswahl gefunden.
-        $GUI->rechercheFormAnzeigen();
-        ?><script type="text/javascript">
-        alert("Es konnten keine Dokumente zu der Auswahl gefunden werden.\nWählen Sie neue Suchparameter.");
-        </script><?php
+				$GUI->add_message('error', 'Es konnten keine Dokumente zu der Auswahl gefunden werden. Wählen Sie neue Suchparameter.');
+        $GUI->rechercheFormAnzeigen();				
       }
       else {
         # Anzeige des Rechercheergebnisses
@@ -500,8 +526,8 @@
 	
 	$this->erzeugenUebergabeprotokollNachweise = function($antr_nr) use ($GUI){
     if ($antr_nr==''){
+			$GUI->add_message('error', 'Wählen Sie bitte eine Antragsnummer aus!');
       $GUI->Antraege_Anzeigen();
-      showAlert('Wählen Sie bitte eine Antragsnummer aus! ');
     }
     else{
 			$explosion = explode('~', $antr_nr);
@@ -521,18 +547,384 @@
       }
     }
   };
+		
+	$this->erzeugenZuordnungFlst_CSV = function($path) use ($GUI){
+		$intersections = $GUI->antrag->getIntersectedFlst();
+		$csv = utf8_decode('Flur;Antragsnummer;Rissnummer;Flurstück;Anteil [m²];Anteil [%]').chr(10);
+		foreach($intersections as $intersection){
+			$csv .= implode(';', $intersection).chr(10);
+		}
+		$fp=fopen($path.'Zuordnung-Flurstuecke.csv','wb');
+		fwrite($fp, $csv);
+		fclose($fp);
+	};
+	
+	$this->erzeugenUebersicht_CSV = function($path) use ($GUI){
+		$columns['id'] = 'id';
+		$columns['flurid'] = 'Flur';
+		$columns['stammnr'] = 'Antragsnummer';
+		$columns['blattnummer'] = 'Blattnummer';
+		$columns['rissnummer'] = 'Rissnummer';
+		$columns['art_name'] = 'Art';
+		$columns['datum'] = 'Datum';
+		$columns['fortfuehrung'] = 'Fortführung';
+		$columns['vermst'] = 'Vermessungsstelle';
+		$columns['gueltigkeit'] = 'Gültigkeit';
+		$columns['format'] = 'Format';
+		$columns['dokument_path'] = 'Dokument';
+		foreach($columns as $key=>$column){
+			$csv .= utf8_decode($column).';';
+		}
+		$csv.= chr(10);
+		foreach($GUI->nachweis->Dokumente as $nachweis){
+			foreach($columns as $key=>$column){
+				if($key == 'dokument_path' AND $nachweis[$key] != ''){
+					$csv .= '"=HYPERLINK(""'.$nachweis[$key].'"";""'.basename($nachweis[$key]).'"")"';
+				}
+				else $csv .= utf8_decode($nachweis[$key]).';';
+			}
+			$csv.= chr(10);
+		}
+		$fp=fopen($path,'wb');
+		fwrite($fp, $csv);
+		fclose($fp);
+	};
   
+	$this->erzeugenUebersicht_HTML = function($path) use ($GUI){
+		$nachweise_json = json_encode($GUI->nachweis->Dokumente);
+		$html = "
+<html>
+	<head>
+		<meta http-equiv=Content-Type content=\"text/html; charset=UTF-8\">
+		<style>
+			body{
+				font-family: \"Trebuchet MS\", Helvetica, sans-serif;
+			}
+			table{
+				border-collapse: collapse;
+			}
+			td, th{
+				border: 1px solid #aaaaaa;
+				border-left: 1px solid #dddddd;
+				border-right: 1px solid #dddddd;
+				padding: 2px;
+				font-size: 15px;
+				}
+			th{
+				background: rgba(0, 0, 0, 0) linear-gradient(rgb(218, 228, 236) 0%, lightsteelblue 100%);
+			}
+			input[type=\"text\"]{
+				font-size: 15px;
+				line-height: 15px;
+			}			
+			select{
+				height: 20px;
+			}
+			a{
+				border: medium none;
+				color: firebrick;
+				font-size: 15px;
+				outline: medium none;
+				text-decoration: none;
+			}
+			a:hover{
+				color: black;
+			}
+			#order_div, #nachweise_table, #filter_div, #head_div {
+				margin: 10px;
+			}
+			#nachweise_table{
+				border: 1px solid #aaaaaa;
+				display: inline-block;
+			}				
+			#head_div {
+				font-weight: bold;
+				font-size: 14px;
+			}
+			#head_div #lk {
+				font-size: 20px;
+				margin-bottom: 5px;
+			}
+			#filter_div div{
+				border: 1px solid grey;
+				width: 800px;
+				padding: 3px;
+			}
+			.removeFilter{
+				float: right;
+				cursor: pointer;
+			}
+			#order_output{
+				width: 400px;
+				border: none;
+			}
+			#preview_image{
+				position: fixed;
+				top: 30px;
+				left: 30px;
+			}
+			#preview_image img{
+				max-width: 600px;
+				box-shadow: 10px 9px 11px #777;
+			}
+			.options{
+				margin: 4 2 5 10;
+				padding: 1px;
+				color: grey;
+				border: 1px solid lightgrey;
+				border-radius: 3px;
+				font-size: 10px;
+				line-height: 10px;
+				float: right;
+			}
+			.options:hover{
+				border: 1px solid grey;
+				color: black;
+				cursor: pointer;
+			}
+			#filterform{
+				padding: 0px;
+				background-color: white;
+				border: 1px solid grey;
+				position: absolute;
+				box-shadow: 10px 9px 11px #777;
+			}
+			#filterform .headline{
+				padding: 2 5;
+				color: black;
+				background: rgba(0, 0, 0, 0) linear-gradient(rgb(218, 228, 236) 0%, lightsteelblue 100%);
+				line-height: 20px;
+			}
+			#filterform .content{
+				padding: 5px;
+			}
+			#filterform .close{
+				float: right;
+				cursor: pointer;
+			}
+			.filter_button{
+				margin-top: 10px;
+			}
+		</style>
+		<SCRIPT TYPE=\"text/javascript\">
+			var nachweise = JSON.parse('".$nachweise_json."');
+			
+			var columns = new Array();
+			columns['id'] = 'ID';
+			columns['flurid'] = 'Flur';
+			columns['stammnr'] = 'Antragsnummer';
+			columns['blattnummer'] = 'Blattnummer';
+			columns['rissnummer'] = 'Rissnummer';
+			columns['art_name'] = 'Art';
+			columns['datum'] = 'Datum';
+			columns['fortfuehrung'] = 'Fortführung';
+			columns['vermst'] = 'Vermessungsstelle';
+			columns['gueltigkeit'] = 'Gültigkeit';
+			columns['format'] = 'Format';
+			columns['dokument_path'] = 'Dokument';
+			
+			var filters = new Array();
+			
+			var _table_ = document.createElement('table'),
+					_tr_ = document.createElement('tr'),
+					_th_ = document.createElement('th'),
+					_td_ = document.createElement('td');
+								
+			function buildHtmlTable(arr) {
+				var table = _table_.cloneNode(false);
+				var tr = _tr_.cloneNode(false);
+				for(var key in columns){		// Ueberschriften
+					var th = _th_.cloneNode(false);
+					a = document.createElement('a');
+					a.href = 'javascript:changeOrder(\''+key+'\');';
+					a.title = 'sortieren nach '+columns[key];
+					a.innerHTML = columns[key];
+					th.appendChild(a);
+					tr.appendChild(th);
+					table.appendChild(tr);
+				}
+				for(var i=0; i < arr.length; ++i){		// Datenzeilen
+					if(!arr[i]['filtered']){
+						var tr = _tr_.cloneNode(false);
+						for(var key in columns){
+							var value = arr[i][key];
+							var td = _td_.cloneNode(false);
+							if(key == 'dokument_path' && value != null){
+								path_parts = value.split('/');
+								filename = path_parts[path_parts.length-1];
+								a = document.createElement('a');
+								a.href = value;
+								a.target = '_blank';
+								a.setAttribute('onmouseover', \"showPreview('\"+filename+\"')\");
+								a.onmouseout = function(){hidePreview()};
+								a.innerHTML = filename;
+								cellcontent = a;
+							}
+							else cellcontent = document.createTextNode(value || '');
+							td.appendChild(cellcontent);
+							options = document.createElement('input');
+							options.className='options';
+							options.type='button';
+							options.setAttribute('onclick', \"showFilterForm(this.parentNode, '\"+key+\"', '\"+value+\"')\");
+							options.value= '\u25BD';	// 2630
+							td.appendChild(options);
+							tr.appendChild(td);
+						}
+						table.appendChild(tr);
+					}
+				}
+				return table;
+			}					
+			
+			function showPreview(filename){
+				file_parts = filename.split('.');								
+				preview_image = file_parts[0]+'_thumb.jpg';
+				document.getElementById('preview_image').innerHTML = '<img src=\"../Vorschaubilder/'+preview_image+'\">';
+			}
+			
+			function hidePreview(){
+				document.getElementById('preview_image').innerHTML = '';
+			}
+			
+			function changeOrder(column){
+				var found = false;
+				var orderstring = document.getElementById('order').value;
+				var order_output = new Array();
+				if(orderstring == '')var order_columns = new Array();
+				else var order_columns = orderstring.split(';');
+				for(var i = 0; i < order_columns.length; i++){
+					if(order_columns[i] == column){	// wenn schon im order-String vorhanden -> entfernen
+						order_columns.splice(i, 1);
+						found = true;
+					}
+				}
+				if(found == false)order_columns.push(column);		// zum order-String hinzufuegen
+				for(var key in order_columns){
+					order_output.push(columns[order_columns[key]]);
+				}
+				document.getElementById('order').value = order_columns.join(';');
+				document.getElementById('order_output').value = order_output.join(', ');
+				nachweise.sort(sortByColumns(order_columns));
+				output();
+			}
+			
+			function sortByColumns(order_columns){
+				return function(a, b){
+					for(var col in order_columns){
+						var ax = a[order_columns[col]];
+						var bx = b[order_columns[col]];
+						if(ax != bx)return (ax < bx) ? -1 : 1;
+					}
+				}
+			}
+								
+			function showFilterForm(td, key, value){
+				hideFilterForm();			
+				div = document.createElement('div');
+				div.id = 'filterform';
+				div.innerHTML = '<div class=\"headline\">Zeilen filtern<a class=\"close\" onclick=\"hideFilterForm();\">\u274C</a></div><div class=\"content\"><input id=\"filter_key\" value=\"'+key+'\" type=\"hidden\">'+columns[key]+' <select id=\"filter_operator\"><option value=\"=\">=</option><option value=\"!=\">!=</option></select><input id=\"filter_value\" type=\"text\" value=\"'+value+'\"><br><input class=\"filter_button\" type=\"button\" value=\"Filtern\" onclick=\"addFilter()\"></div>';
+				td.appendChild(div);
+			}
+			
+			function hideFilterForm(){
+				if(document.getElementById('filterform') != undefined)document.getElementById('filterform').outerHTML = '';
+			}
+			
+			function addFilter(){
+				var filter = new Array();
+				if(filters.length == 0)filter['id'] = 0;
+				else filter['id'] = filters[filters.length - 1]['id'] + 1;
+				filter['key'] = document.getElementById('filter_key').value;
+				filter['operator'] = document.getElementById('filter_operator').value;
+				filter['value'] = document.getElementById('filter_value').value;
+				filters.push(filter);
+				filter_output = document.createElement('div');
+				filter_output.id = filter['id'];
+				filter_output.innerHTML = columns[filter['key']]+' '+filter['operator']+' '+filter['value'];
+				filter_remove = document.createElement('a');
+				filter_remove.innerHTML = '\u274C';
+				filter_remove.title = 'Filter entfernen';
+				filter_remove.className = 'removeFilter';
+				filter_remove.setAttribute('onclick',  'removeFilter('+filter_output.id+');');
+				filter_output.appendChild(filter_remove);						
+				document.getElementById('filter_div').appendChild(filter_output);
+				filterRows(nachweise, filters);
+				hideFilterForm();
+				output();
+			}
+			
+			function removeFilter(id){
+				for(var j=0; j < filters.length; j++){
+					if(filters[j]['id'] == id){
+						filters.splice(j, 1);
+						break;
+					}
+				}
+				document.getElementById('filter_div').removeChild(document.getElementById(id));						
+				filterRows(nachweise, filters);
+				output();
+			}
+
+			function filterRows(arr, filters){
+				for(var i=0; i < arr.length; i++){		// Datenzeilen
+					arr[i]['filtered'] = false;
+					for(var key in arr[i]){		// Spalten
+						if(!arr[i]['filtered']){
+							for(var j=0; j < filters.length; j++){	// Filter
+								if(filters[j]['key'] == key){
+									match = false;
+									switch(filters[j]['operator']){
+										case '=':
+											if(filters[j]['value'] == arr[i][key])match = true;
+										break;
+										case '!=':
+											if(filters[j]['value'] != arr[i][key])match = true;
+										break;										
+									}
+									arr[i]['filtered'] = !match;
+								}
+							}
+						}
+					}
+				}
+			}
+				
+			function output(){
+				document.getElementById('nachweise_table').innerHTML = '';
+				document.getElementById('nachweise_table').appendChild(buildHtmlTable(nachweise));
+			}
+			
+		</SCRIPT>
+	</head>
+	<body onload=\"output();\">
+		<div id=\"head_div\">
+			<div id=\"lk\">".LANDKREIS."</div>
+			<div id=\"datum\">Datum Antragstellung: ".$GUI->antrag->antragsliste[0]['datum']."</div>
+			<div id=\"antrag\">Antragsnummer: ".$GUI->antrag->antragsliste[0]['antr_nr']."</div>
+			<div id=\"datum\">Datum Download: ".date('d.m.Y',time())."</div>
+		</div>
+		<div id=\"order_div\">Sortiert nach: <input type=\"text\" id=\"order_output\" readonly=\"true\" value=\"\"><input type=\"hidden\" id=\"order\" value=\"\"></div></div>
+		<div id=\"nachweise_table\"></div>
+		<div id=\"filter_div\">Filter:<br></div>
+		<div id=\"preview_image\"></div>
+	</body>
+</html>";
+		$fp=fopen($path,'wb');
+		fwrite($fp, $html);
+		fclose($fp);
+  };	
+	
 	$this->erzeugenUebergabeprotokollNachweise_PDF = function($path = NULL, $with_search_params = false) use ($GUI){
   	# Erzeugen des Übergabeprotokolls mit der Zuordnung der Nachweise zum gewählten Auftrag als PDF-Dokument
   	if($GUI->formvars['antr_selected'] == ''){
+			$GUI->add_message('error', 'Wählen Sie bitte eine Antragsnummer aus!');
       $GUI->Antraege_Anzeigen();
-      showAlert('Wählen Sie bitte eine Antragsnummer aus! ');
     }
     else{
 			$explosion = explode('~', $GUI->formvars['antr_selected']);
 			$antr_selected = $explosion[0];
 			$stelle_id = $explosion[1];
-      $GUI->antrag = new antrag($antr_selected,$stelle_id,$GUI->pgdatabase);
+			if($GUI->antrag == NULL)$GUI->antrag = new antrag($antr_selected,$stelle_id,$GUI->pgdatabase);
       $ret=$GUI->antrag->getFFR($GUI->formvars, true);
       if ($ret[0]) {
         $GUI->Fehlermeldung=$ret[1];
@@ -569,8 +961,8 @@
 	$this->erzeugenUebergabeprotokollNachweise_CSV = function() use ($GUI){
   	# Erzeugen des Übergabeprotokolls mit der Zuordnung der Nachweise zum gewählten Auftrag als CSV-Dokument
   	if($GUI->formvars['antr_selected'] == ''){
+			$GUI->add_message('error', 'Wählen Sie bitte eine Antragsnummer aus!');
       $GUI->Antraege_Anzeigen();
-      showAlert('Wählen Sie bitte eine Antragsnummer aus! ');
     }
     else {
 			$explosion = explode('~', $GUI->formvars['antr_selected']);
@@ -590,7 +982,7 @@
 		    header("Content-disposition:  inline; filename=Übergabeprotokoll_".date('Y-m-d_G-i-s').".csv");
 		    header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 		    header('Pragma: public');
-		    print utf8_decode($csv);
+		    print $csv;
       }
     }
   };
@@ -632,7 +1024,7 @@
         else {
           # Speicherung der Bilddatei erfolgreich, Eintragen in Datenbank
           $GUI->nachweis->database->begintransaction();
-          $ret=$GUI->nachweis->eintragenNeuesDokument($GUI->formvars['datum'],$GUI->formvars['flurid'],$GUI->formvars['VermStelle'], $GUI->formvars['art'], $GUI->formvars['andere_art'], $GUI->formvars['gueltigkeit'],$GUI->formvars['stammnr'],$GUI->formvars['Blattformat'],$GUI->formvars['Blattnr'],$GUI->formvars['rissnummer'],$GUI->formvars['fortfuehrung'],$GUI->formvars['bemerkungen'],$GUI->formvars['artname']."/".$GUI->formvars['zieldateiname'],$GUI->formvars['umring'], $GUI->user);
+          $ret=$GUI->nachweis->eintragenNeuesDokument($GUI->formvars['datum'],$GUI->formvars['flurid'],$GUI->formvars['VermStelle'], $GUI->formvars['art'], $GUI->formvars['andere_art'], $GUI->formvars['gueltigkeit'],$GUI->formvars['stammnr'],$GUI->formvars['Blattformat'],$GUI->formvars['Blattnr'],$GUI->formvars['rissnummer'],$GUI->formvars['fortfuehrung'],$GUI->formvars['bemerkungen'],$GUI->formvars['bemerkungen_intern'],$GUI->formvars['artname']."/".$GUI->formvars['zieldateiname'],$GUI->formvars['umring'], $GUI->user);
           if ($ret[0]) {
             $GUI->nachweis->database->rollbacktransaction();
             $errmsg=$ret[1];
@@ -640,14 +1032,14 @@
           else {
             $GUI->nachweis->database->committransaction();
             # Alle Aufgaben erfolgreich ausgeführt
-            $errmsg='Daten zum neuen Dokument erfolgreich eingetragen!';
+            $okmsg='Daten zum neuen Dokument erfolgreich eingetragen!';
           } # ende Speicherung der Metadaten war erfolgreich
         } # ende Speicherung der Bilddatei war erfolgreich
       } # ende Prüfung war erfolgreich
       # Auswertung/Behandlung bei Aufgetretenen Fehlern
-      $GUI->Meldung=$errmsg;
+			if($okmsg)$GUI->add_message('notice', $okmsg);
+			if($errmsg)$GUI->add_message('error', $errmsg);
       $GUI->nachweisFormAnzeige();
-      showAlert($GUI->Meldung);
     } # ende Fall Eintragen Daten zum neuen Dokument
     else {
       ##################################################
@@ -656,13 +1048,13 @@
       if ($ret[0]) {
         # Die Änderung wurde auf Grund eines Fehlers nicht durchgeführt
         # 1.3 Zurück zum Änderungsformular mit Anzeige der Fehlermeldung
-        $GUI->nachweisFormAnzeige();
 				$GUI->Meldung=$ret[1];
-        showAlert($GUI->Meldung);
+				$GUI->add_message('error', $GUI->Meldung);
+        $GUI->nachweisFormAnzeige();
       } # end of fehler bei der Änderung
       else {
+				$GUI->add_message('info', $ret[1]);
 				$GUI->nachweisAenderungsformular();
-        showAlert($ret[1]);
 			}
       # 1.4 Zur zur Anzeige der Rechercheergebnisse mit Meldung über Erfolg der Änderung
       # 1.4.1 Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
@@ -833,15 +1225,15 @@
 		$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur']);
     if ($ret!='') {
       $errmsg.=$ret;
-    }
-    # Anzeige der Rechercheergebnisse
-    $GUI->nachweisAnzeige();
+    }    
     if($errmsg!=''){ # Anzeig der Fehlermeldung
-      showAlert($errmsg);
+			$GUI->add_message('error', $errmsg);
     }
     else { # Ohne Fehler bei der Abfrage der Dokumente Anzeige der Erfolgsmeldung
-      showAlert($okmsg);
+			$GUI->add_message('notice', $okmsg);
     }
+		# Anzeige der Rechercheergebnisse
+    $GUI->nachweisAnzeige();		
   };
 
 	$this->nachweiseZuAuftragEntfernen = function() use ($GUI){
@@ -869,8 +1261,9 @@
         else {
           # Eingabeparameter in Ordnung
           # Nachweise aus Antrag entfernen
-          $ret=$GUI->nachweis->aus_Auftrag_entfernen($suchantrnr,$stelle_id,$GUI->formvars['id']);
-          $errmsg=$ret[1];
+          $result=$GUI->nachweis->aus_Auftrag_entfernen($suchantrnr,$stelle_id,$GUI->formvars['id']);
+          $errmsg=$result[0];
+					$okmsg=$result[1];
         } # ende Eingabeparameter sind ok
       } # ende Löschvorgang wurde bestätigt
       else { # Löschvorgang wurde abgebrochen
@@ -880,12 +1273,11 @@
       # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
       $GUI->formvars=$GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id);
       $GUI->nachweis = new nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
-			$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur']);
-      $errmsg.=$ret[1];
-      # Anzeige der Rechercheergebnisse
+			$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur']);
+      # Anzeige der Rechercheergebnisse			
+			if($errmsg)$GUI->add_message('error', $errmsg);
+			if($okmsg)$GUI->add_message('notice', $okmsg);
       $GUI->nachweisAnzeige();
-      showAlert($errmsg);
-
     } # ende Bestätigung ist erfolgt
   };
 
@@ -893,7 +1285,7 @@
     $GUI->nachweis = new nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
     $ret=$GUI->nachweis->getDocLocation($GUI->formvars['id']);
     if($ret[0]!='') {
-      showAlert($ret[0]);
+			$GUI->add_message('error', $ret[0]);
       return 0;
     }
     else {
@@ -936,7 +1328,7 @@
           $GUI->Fehlermeldung=$ret[1];
         }
         else {
-          showAlert($ret[1]);
+					$GUI->add_message('info', $ret[1]);
         }
       }
       # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
@@ -1473,13 +1865,13 @@
 					$GUI->vermessungsAntragEingabeForm();
 				}
 				else {
+					$GUI->add_message('info', $ret[1]);
 					$GUI->Antraege_Anzeigen();
-					showAlert($ret[1]);
 				}
 			}
 			else{
+				$GUI->add_message('error', "Änderung dieses Antrags nicht erlaubt!");
 				$GUI->Antraege_Anzeigen();
-				showAlert("Änderung dieses Antrags nicht erlaubt!");
 			}
 		}		
 		else{
@@ -1497,8 +1889,8 @@
     }
     $GUI->Meldung=$ret;
     $GUI->titel='Neuen Antrag anlegen';
+		$GUI->add_message('info', $ret);
     $GUI->vermessungsAntragEingabeForm();
-    showAlert($ret);
   };
 	
 	$this->vermessungsantragAendern = function() use ($GUI){
@@ -1506,17 +1898,17 @@
 		if($GUI->formvars['stelle_id'] == $GUI->Stelle->id OR in_array($GUI->Stelle->id, $admin_stellen)){
 			$GUI->antrag= new antrag('','',$GUI->pgdatabase);
 			$ret=$GUI->antrag->antrag_aendern($GUI->formvars['antr_nr'],$GUI->formvars['VermStelle'],$GUI->formvars['verm_art'],$GUI->formvars['datum'],$GUI->formvars['stelle_id']);
+			$GUI->add_message('info', $ret[1]);
 			if ($ret[0]) {
 				$GUI->vermessungsantragsFormular();
 			}
 			else {
 				$GUI->Antraege_Anzeigen();
 			}
-			showAlert($ret[1]);
 		}
 		else{
+			$GUI->add_message('error', "Änderung dieses Antrags nicht erlaubt!");
 			$GUI->Antraege_Anzeigen();
-			showAlert("Änderung dieses Antrags nicht erlaubt!");
 		}
   };
 	
@@ -1536,7 +1928,7 @@
 				$antragsnummern=$GUI->formvars['id'];
 				$ret=$GUI->antrag->antrag_loeschen($antragsnummern[0],$GUI->formvars['stelle_id']);
 				if($ret == 'Antrag erfolgreich gelöscht')$GUI->Suchparameter_loeschen($antragsnummern[0], $GUI->formvars['stelle_id']);
-				showAlert($ret);
+				$GUI->add_message('info', $ret);
 				if($GUI->formvars['go_next'] != '')echo "<script>window.location.href='index.php?go=".$GUI->formvars['go_next']."';</script>";
 				else $GUI->Antraege_Anzeigen();
 			}
@@ -1553,9 +1945,9 @@
 			}
 		}
 		else{
+			$GUI->add_message('error', "Löschen dieses Antrags nicht erlaubt!");
 			$GUI->Antraege_Anzeigen();
-			showAlert("Löschen dieses Antrags nicht erlaubt!");
-		}		
+		}
   };
 	
 	$this->getFormObjVermStelle = function($name, $VermStelle) use ($GUI){

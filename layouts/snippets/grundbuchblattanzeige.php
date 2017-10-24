@@ -91,10 +91,14 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 									<a href="javascript:flurstanzeige('<?php echo $this->buchungen[$i]['flurstkennz']; ?>');" title="Flurstücksdaten anzeigen">
 								<? echo $this->buchungen[$i]['gemkgname'].', Flur '.$this->buchungen[$i]['flur'].', '.$this->buchungen[$i]['flurstuecksnr']; ?>
 									</a>
-								<? if($this->buchungen[$i]['anteil'] != '')echo '<br><br>zu '.$this->buchungen[$i]['anteil'];	?>
+								<? echo '<br><br>'.$this->buchungen[$i]['buchungsart'].' - '.$this->buchungen[$i]['bezeichnung'] ?>
+								<? if($this->buchungen[$i]['anteil'] != ''){
+										if($this->buchungen[$i]['anteil'] == '99999/99999')echo '<br>Anteil nicht ermittelbar an Miteigentumsanteil am Grundstück';
+										else echo 'zu '.$this->buchungen[$i]['anteil'];
+									 } ?>
 								<? if(in_array($this->buchungen[$i]['buchungsart'], array(2101, 2203, 2303)))echo ' - belastet mit Erbbaurecht - '; if(in_array($this->buchungen[$i]['buchungsart'], array(2103)))echo ' - belastet mit Nutzungsrecht - '; ?>
 								</td>
-								<td>
+								<td valign="top">
 									<? echo $Adressbezeichnung; ?>
 								</td>
 							</tr>

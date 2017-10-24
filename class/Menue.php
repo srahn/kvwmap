@@ -136,7 +136,7 @@ class Menue extends MyObject {
 		);
     return $menues;
 	}
-
+	/*
 	public function validate() {
 		$results = array();
 		foreach($this->validations AS $validation) {
@@ -151,7 +151,7 @@ class Menue extends MyObject {
 		}
 		return $messages;
 	}
-
+*/
 	function is_selected() {
 		$is_selected = true;
 		$formvars = $_REQUEST;
@@ -174,6 +174,7 @@ class Menue extends MyObject {
 		if (count($this->children_ids) > 0) {
 			# Obermenue
 			$class = 'obermenue	' . ($this->get('status') == 1 ? 'menue-auf' : 'menue-zu');
+			$this->obermenue = true;
 		}
 		else {
 			if ($this->get('menueebene') == 1) {
@@ -205,7 +206,7 @@ class Menue extends MyObject {
 
 	function get_href($class, $target) {
 		# define click events
-		if(strpos($class, 'obermenu') !== false){
+		if($this->obermenue){
 			$href .= "javascript:changemenue(".$this->get('id').", ".$this->gui->user->rolle->menu_auto_close.");";
 		}
 		else {
@@ -232,6 +233,7 @@ class Menue extends MyObject {
 		$target = $this->get_target();
 		$href = $this->get_href($class, $target);
 		$onclick = $this->get('onclick');
+		if(!$this->obermenue)$onclick = 'checkForUnsavedChanges(event);'.$onclick;
 		$style = $this->get_style();
 
 		$html .= '<div class="'.$style.'-menue" id="menue_div_'.$this->get('id').'">';

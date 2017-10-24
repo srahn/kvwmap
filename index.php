@@ -1,5 +1,6 @@
 <?php
 header('Content-Type: text/html; charset=utf-8');
+session_set_cookie_params(0, $_SERVER['CONTEXT_PREFIX']);
 session_start();
 ###################################################################
 # kvwmap - Kartenserver für die Verwaltung raumbezogener Daten.   #
@@ -37,29 +38,10 @@ session_start();
 // $executiontimes['action'][] = 'Start';
 
 ob_start ();    // Ausgabepufferung starten
-# Übergabe aller Formularvariablen an die Benutzeroberfläche an formvars
-# Dabei wird unterschieden zwischen Aufrufen über das Internet oder von der Komandozeile aus
-if (is_array($argc) AND $argc[1]!='') {
- # Aufruf des PHP-Skriptes über die Komandozeile (CLI)
- # Wenn die Variable argc > 0 ist, wurde die Datei von der Komandozeile aus aufgerufen
- # in dem Fall können die übergebenen Parameter hier der formvars-Variable übergeben werden.
- $arg['go']=$argv[1];
- $arg['ist_Fortfuehrung']=$argv[2];
- $arg['WLDGE_lokal']=$argv[3];
- $arg['WLDGE_Datei_lokal']=$argv[4];
- $formvars=$arg;
+foreach($_REQUEST as $key => $value){
+	if(is_string($value))$_REQUEST[$key] = str_replace('<script', '', pg_escape_string($value));
 }
-else {
-  # Übergeben der Variablen aus den Post oder Get Aufrufen
-  # normaler Aufruf des PHP-Skriptes über Apache oder CGI  
-  #$GUI->formvars=stripScript($_REQUEST);
-  foreach($_REQUEST as $key => $value){
-  	#if(is_string($value))$_REQUEST[$key] = addslashes($value);
-		#if(is_string($value))$_REQUEST[$key] = pg_escape_string($value);
-		if(is_string($value))$_REQUEST[$key] = str_replace('<script', '', pg_escape_string($value));
-  }
-  $formvars = $_REQUEST;
-}
+$formvars = $_REQUEST;
 
 $go = $formvars['go'];
 if($formvars['go_plus'] != '') $go = $go.'_'.$formvars['go_plus'];
@@ -96,11 +78,7 @@ if (LOG_LEVEL>0) {
  $log_mysql=new LogFile(LOGFILE_MYSQL,'text','Log-Datei MySQL', '#------v: '.date("Y:m:d H:i:s",time()));
  $log_postgres=new LogFile(LOGFILE_POSTGRES,'text', 'Log-Datei-Postgres', '------v: '.date("Y:m:d H:i:s",time()));
 }
-if (
-	!$_SESSION['angemeldet'] or
-	!empty($formvars['username']) or
-	$_SESSION['CONTEXT_PREFIX'] != $_SERVER['CONTEXT_PREFIX']
-) {
+if(!$_SESSION['angemeldet'] or !empty($formvars['username'])){
 	$msg .= '<br>Nicht angemeldet';
 	include(CLASSPATH . 'mysql.php');
 	$userDb = new database();
@@ -909,11 +887,7 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 		case 'Metadaten_Uebersicht' : {
 		$GUI->metadaten_uebersicht();
 	  } break;
-	  
-	  case 'Metadaten_Recherche' : {
-		$GUI->metadaten_suche();
-	  } break;
-	  
+
 	  case 'Metadaten_generieren' : {
 		$GUI->metadaten_generieren($GUI->formvars['layer_id']);
 	  } break;
@@ -922,16 +896,8 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 		$GUI->metadatenSuchForm();
 	  } break;
 
-	  case 'Metadaten_Auswaehlen_Senden' : {
-		$GUI->metadatenSuchen();
-	  } break;
-
 	  case 'Metadatenblattanzeige' : {
 		$GUI->metadatenblattanzeige();
-	  } break;
-
-	  case 'Metadateneingabe' : {
-		$GUI->metadateneingabe();
 	  } break;
 
 	  case 'Metadateneingabe_Senden' : {
@@ -1320,6 +1286,31 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->LayerAnzeigen();
 		} break;
 
+		case 'Layergruppen_Anzeigen' : {
+			$GUI->checkCaseAllowed($go);
+			$GUI->Layergruppen_Anzeigen();
+		} break;
+
+		case 'Layergruppe_Editor' : {
+			$GUI->checkCaseAllowed('Layergruppen_Anzeigen');
+			$GUI->Layergruppe_Editor();
+		} break;
+
+		case 'Layergruppe_Speichern' : {
+			$GUI->checkCaseAllowed('Layergruppen_Anzeigen');
+			$GUI->Layergruppe_Speichern();
+		} break;
+
+		case 'Layergruppe_Ändern' : {
+			$GUI->checkCaseAllowed('Layergruppen_Anzeigen');
+			$GUI->Layergruppe_Aendern();
+		} break;
+
+		case 'Layergruppe_Löschen' : {
+			$GUI->checkCaseAllowed('Layergruppen_Anzeigen');
+			$GUI->Layergruppe_Loeschen();
+		}
+
 	  case 'Layer_Uebersicht' : {
 			$GUI->LayerUebersicht();
 		} break;
@@ -1594,7 +1585,9 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 
 	  case "ZoomToFlst" : {
 			$GUI->loadMap('DataBase');
-			if(strpos($GUI->formvars['FlurstKennz'], '/') !== false)$GUI->formvars['FlurstKennz'] = formatFlurstkennzALKIS($GUI->formvars['FlurstKennz']);
+			if (strpos($GUI->formvars['FlurstKennz'], '/') !== false) $GUI->formvars['FlurstKennz'] = formatFlurstkennzALKIS($GUI->formvars['FlurstKennz']);
+			if (substr($GUI->formvars['FlurstKennz'], -1) == '0') $GUI->formvars['FlurstKennz'] = formatFlurstkennzALKIS_0To_($GUI->formvars['FlurstKennz']);
+
 			$explodedFlurstKennz = explode(';',$GUI->formvars['FlurstKennz']);
 			$GUI->zoomToALKFlurst($explodedFlurstKennz,10);
 			$currenttime=date('Y-m-d H:i:s',time());

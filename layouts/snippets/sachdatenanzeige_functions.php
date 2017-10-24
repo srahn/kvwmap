@@ -189,6 +189,7 @@ include('funktionen/input_check_functions.php');
 		currentform.go.value = 'Sachdaten_speichern';
 		document.getElementById('loader').style.display = '';
 		setTimeout('document.getElementById(\'loaderimg\').src=\'graphics/ajax-loader.gif\'', 50);
+		document.GUI.gle_changed.value = '';
 		overlay_submit(currentform, false);
 	}
 
@@ -213,6 +214,7 @@ include('funktionen/input_check_functions.php');
   	}
   	currentform.go.value = 'neuer_Layer_Datensatz_speichern';
 		document.getElementById('go_plus').disabled = true;
+		document.GUI.gle_changed.value = '';
   	overlay_submit(currentform, false);
 	}
 
@@ -356,12 +358,12 @@ include('funktionen/input_check_functions.php');
 				attributevalues += encodeURIComponent(document.getElementById(layer_id+'_'+attributenamesarray[i]+'_'+k).value) + '|';
 			}
 			else if(attributenamesarray[i] == geom_attribute ){	// wenn es das Geometrieattribut ist, handelt es sich um eine Neuerfassung --> aktuelle Geometrie nehmen
-				if(document.GUI.loc_x != undefined && document.GUI.loc_x.value != ''){		// Punktgeometrie
-					geom = 'POINT('+document.GUI.loc_x.value+' '+document.GUI.loc_y.value+')';
+				if(currentform.loc_x != undefined && currentform.loc_x.value != ''){		// Punktgeometrie
+					geom = 'POINT('+currentform.loc_x.value+' '+currentform.loc_y.value+')';
 				}
-				else if(document.GUI.newpathwkt.value == ''){		// Polygon- oder Liniengeometrie
-					if(document.GUI.newpath.value != ''){
-						geom = buildwktpolygonfromsvgpath(document.GUI.newpath.value);
+				else if(currentform.newpathwkt.value == ''){		// Polygon- oder Liniengeometrie
+					if(currentform.newpath.value != ''){
+						geom = buildwktpolygonfromsvgpath(currentform.newpath.value);
 					}
 				}
 				attributenames += attributenamesarray[i] + '|';

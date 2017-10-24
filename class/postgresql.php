@@ -55,6 +55,7 @@ class pgdatabase {
     # und der Einlesevorgang muss wiederholt werden bis er fehlerfrei durchgelaufen ist.
     # Dazu Fehlerausschriften bearchten.
     $this->blocktransaction=0;
+		$this->spatial_ref_code = EPSGCODE_ALKIS . ", " . EARTH_RADIUS;
   }
 	
   function open() {
@@ -250,8 +251,10 @@ FROM
 		# (lesend immer, aber schreibend nur mit DBWRITE=1)
 		if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
 			#echo "<br>".$sql;
-			$sql = "SET datestyle TO 'German';".$sql;
-			if($this->schema != ''){
+			if (stristr($sql, 'SELECT')) {
+				$sql = "SET datestyle TO 'German';" . $sql;
+			};
+			if ($this->schema != ''){
 				$sql = "SET search_path = " . $this->schema . ", public;" . $sql;
 			}
 			if ($suppress_error_msg) {
@@ -874,34 +877,32 @@ FROM
       	if(strpos($fieldstring, '.') !== false AND strpos($fieldstring, "'") === false){
         	$explosion = explode('.', trim($fieldstring));
         	$tablealias = $explosion[0];
-        	if(strpos($tablealias, "'") === false){
-        		$tablename = $tablealias;
-        	}
-	        $sql = "SELECT * FROM information_schema.tables where table_name = '".$tablename."'";
-	        $ret = $this->execSQL($sql,4, 0);
-			    if(pg_num_rows($ret[1]) == 0){
-		        $tables = explode(',', $from);
-		        $i = 0;
-		        $found = false;
-		        while($found == false AND $i < count($tables)){
-		          $tableexplosion = explode(' ', trim($tables[$i]));
-		          if(count($tableexplosion) > 1){
-			          for($j = 0; $j < count($tableexplosion); $j++){
-			          	if($tablealias == $tableexplosion[$j]){
-			          		if(strtolower($tableexplosion[$j-1]) == 'as'){			# Umbenennung mit AS
-			          			$found = true;
-			            		$tablename = $tableexplosion[$j-2];
-			          		}
-			          		else{																								# Umbenennung ohne AS, wie z.B. beim LEFT JOIN
-			          			$found = true;
-			            		$tablename = $tableexplosion[$j-1];
-			          		}
-			          	}
-			          }
-		          }
-		          $i++;
-		        }
-			    }
+					$tables = explode(',', $from);
+					$i = 0;
+					$found = false;
+					while($found == false AND $i < count($tables)){
+						$tables2 = explode('join', strtolower($tables[$i]));
+						$j = 0;
+						while($found == false AND $j < count($tables2)){
+							$index = 1;
+							$tableexplosion = explode(' ', trim($tables2[$j]));
+							if(count($tableexplosion) > 1){
+								if($tableexplosion[1] == 'as')$index = 2;
+								if($tableexplosion[$index] == $tablealias){
+									$tablename = $tableexplosion[0];
+									$found = true;
+								}
+							}
+							else{
+								if($tableexplosion[0] == $tablealias){
+									$tablename = $tableexplosion[0];
+									$found = true;
+								}
+							}
+							$j++;
+						}
+						$i++;
+					}
       	}
       }
     }
@@ -1020,11 +1021,11 @@ FROM
   
 	function getBezeichnungFromPosition($position, $epsgcode) {
     $this->debug->write("<p>kataster.php Flur->getBezeichnungFromPosition:",4);
-		$sql ="SELECT gm.bezeichnung as gemeindename, fl.gemeinde, gk.bezeichnung as gemkgname, fl.land::text||fl.gemarkungsnummer::text as gemkgschl, fl.flurnummer as flur, CASE WHEN fl.nenner IS NULL THEN fl.zaehler::text ELSE fl.zaehler::text||'/'||fl.nenner::text end as flurst, s.bezeichnung as strasse, l.hausnummer ";
+		$sql ="SELECT gm.bezeichnung as gemeindename, fl.gemeindezugehoerigkeit_gemeinde gemeinde, gk.bezeichnung as gemkgname, fl.land::text||fl.gemarkungsnummer::text as gemkgschl, fl.flurnummer as flur, CASE WHEN fl.nenner IS NULL THEN fl.zaehler::text ELSE fl.zaehler::text||'/'||fl.nenner::text end as flurst, s.bezeichnung as strasse, l.hausnummer ";
     $sql.="FROM alkis.ax_gemarkung as gk, alkis.ax_gemeinde as gm, alkis.ax_flurstueck as fl ";
 		$sql.="LEFT JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(fl.weistauf) ";
 		$sql.="LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND s.lage = lpad(l.lage,5,'0') ";
-    $sql.="WHERE gk.gemarkungsnummer = fl.gemarkungsnummer AND gm.kreis = fl.kreis AND gm.gemeinde = fl.gemeinde ";
+    $sql.="WHERE gk.gemarkungsnummer = fl.gemarkungsnummer AND gm.kreis = fl.gemeindezugehoerigkeit_kreis AND gm.gemeinde = fl.gemeindezugehoerigkeit_gemeinde ";
     $sql.=" AND ST_WITHIN(st_transform(st_geomfromtext('POINT(".$position['rw']." ".$position['hw'].")',".$epsgcode."), ".EPSGCODE_ALKIS."),fl.wkb_geometry) ";
 		$sql.= $this->build_temporal_filter(array('gk', 'gm', 'fl'));
     #echo $sql;
@@ -1042,19 +1043,19 @@ FROM
 	
   function getGrundbuecher($FlurstKennz, $hist_alb = false, $fiktiv = false, $without_temporal_filter = false) {
 		if(rolle::$hist_timestamp != '')$sql = 'SET enable_mergejoin = OFF;';
-    $sql.="SET enable_seqscan = OFF;SELECT distinct g.land * 10000 + g.bezirk as bezirk, g.buchungsblattnummermitbuchstabenerweiterung AS blatt, g.blattart ";
+    $sql.="SET enable_seqscan = OFF;SELECT distinct g.land || g.bezirk as bezirk, g.buchungsblattnummermitbuchstabenerweiterung AS blatt, g.blattart ";
 		if($hist_alb) $sql.="FROM alkis.ax_historischesflurstueckohneraumbezug f ";
 		else $sql.="FROM alkis.ax_flurstueck f ";
 		if($fiktiv){
 			$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON ARRAY[f.istgebucht] <@ s.an ";
 		}
 		else{
-			$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR ARRAY[f.gml_id] <@ s.verweistauf ";
+			$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR ARRAY[f.gml_id::char] <@ s.verweistauf ";
 		}
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
-		$sql.="WHERE f.flurstueckskennzeichen = '".$FlurstKennz."' ";
+		$sql.="WHERE f.flurstueckskennzeichen = '" . $FlurstKennz . "' ";
 		#$sql.="AND (g.blattart = 1000 OR g.blattart = 2000 OR g.blattart = 3000) ";
-		if(!$hist_alb AND !$without_temporal_filter) $sql.= $this->build_temporal_filter(array('f', 's', 'g'));
+		if(!$without_temporal_filter) $sql.= $this->build_temporal_filter(array('f', 's', 'g'));
 		$sql.="ORDER BY blatt";
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
@@ -1071,7 +1072,7 @@ FROM
   }
   
   function getBuchungenFromGrundbuch($FlurstKennz,$Bezirk,$Blatt,$hist_alb = false, $fiktiv = false, $buchungsstelle = NULL, $without_temporal_filter = false) {
-    $sql ="set enable_seqscan = off;SELECT DISTINCT gem.bezeichnung as gemarkungsname, g.land * 10000 + g.bezirk as bezirk, g.bezirk as gbezirk, g.buchungsblattnummermitbuchstabenerweiterung AS blatt, g.blattart, s.gml_id, s.laufendenummer AS bvnr, ltrim(s.laufendenummer, '~>a')::integer, s.buchungsart, art.bezeichner as bezeichnung, f.flurstueckskennzeichen as flurstkennz, s.zaehler::text||'/'||s.nenner::text as anteil, s.nummerimaufteilungsplan as auftplannr, s.beschreibungdessondereigentums as sondereigentum "; 
+    $sql ="set enable_seqscan = off;SELECT DISTINCT gem.bezeichnung as gemarkungsname, g.land || g.bezirk as bezirk, g.bezirk as gbezirk, g.buchungsblattnummermitbuchstabenerweiterung AS blatt, g.blattart, s.gml_id, s.laufendenummer AS bvnr, ltrim(s.laufendenummer, '~>a')::integer, s.buchungsart, art.beschreibung as bezeichnung, f.flurstueckskennzeichen as flurstkennz, s.zaehler::text||'/'||s.nenner::text as anteil, s.nummerimaufteilungsplan as auftplannr, s.beschreibungdessondereigentums as sondereigentum "; 
 		if($FlurstKennz!='') {
 			if($hist_alb) $sql.="FROM alkis.ax_historischesflurstueckohneraumbezug f ";
 			else $sql.="FROM alkis.ax_flurstueck f ";  
@@ -1079,9 +1080,9 @@ FROM
 			if($fiktiv){
 				$sql.="JOIN alkis.ax_buchungsstelle s ON ARRAY[f.istgebucht] <@ s.an ";
 			}
-			else $sql.="JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR ARRAY[f.gml_id] <@ s.verweistauf ";
+			else $sql.="JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR ARRAY[f.gml_id::char] <@ s.verweistauf ";
 			
-			$sql.="LEFT JOIN alkis.ax_buchungsstelle_buchungsart art ON s.buchungsart = art.wert ";
+			$sql.="LEFT JOIN alkis.ax_buchungsart_buchungsstelle art ON s.buchungsart = art.wert ";
 			$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
 		}
 		else{
@@ -1090,22 +1091,22 @@ FROM
 			$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON s.istbestandteilvon = g.gml_id ";
 			$sql.="LEFT JOIN alkis.ax_flurstueck f ON f.istgebucht = s.gml_id OR f.gml_id = ANY(s.verweistauf) OR f.istgebucht = ANY(s.an) ";
 			$sql.="LEFT JOIN alkis.ax_gemarkung gem ON f.land = gem.land AND f.gemarkungsnummer = gem.gemarkungsnummer ";
-			$sql.="LEFT JOIN alkis.ax_buchungsstelle_buchungsart art ON s.buchungsart = art.wert ";		
+			$sql.="LEFT JOIN alkis.ax_buchungsart_buchungsstelle art ON s.buchungsart = art.wert ";		
 		}
 		$sql.="WHERE 1=1 ";
 		if ($Bezirk!='') {
-      $sql.=" AND b.schluesselgesamt=".$Bezirk;
+      $sql.=" AND b.schluesselgesamt='".$Bezirk."'";
 		}
 		if ($Blatt!='') {
 			$sql.=" AND g.buchungsblattnummermitbuchstabenerweiterung='".$Blatt."'";
 		}
     if ($FlurstKennz!='') {
-      $sql.=" AND f.flurstueckskennzeichen='".$FlurstKennz."'";
+      $sql.=" AND f.flurstueckskennzeichen='" . $FlurstKennz . "'";
     }
 		if ($buchungsstelle!='') {
       $sql.=" AND s.gml_id='".$buchungsstelle."'";
     }		
-		if(!$hist_alb AND !$without_temporal_filter) $sql.= $this->build_temporal_filter(array('f', 's', 'g'));
+		if(!$without_temporal_filter) $sql.= $this->build_temporal_filter(array('f', 's', 'g'));
     $sql.=" ORDER BY g.bezirk,g.buchungsblattnummermitbuchstabenerweiterung,ltrim(s.laufendenummer, '~>a')::integer,f.flurstueckskennzeichen";
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
@@ -1124,10 +1125,10 @@ FROM
 		if($ganzeGemID[0]!='' OR $GemkgID[0]!=''){
 			$sql.="AND (FALSE ";
 			if($ganzeGemID[0]!=''){
-				$sql.=" OR gem.schluesselgesamt IN (".implode(',', $ganzeGemID).")";
+				$sql.=" OR gem.schluesselgesamt IN ('".implode("','", $ganzeGemID)."')";
 			}
 			if($GemkgID[0]!=''){
-				$sql.=" OR pp.schluesselgesamt IN (".implode(',', $GemkgID).")";
+				$sql.=" OR pp.schluesselgesamt IN ('".implode("','", $GemkgID)."')";
 			}
 			$sql.=")";
 		}
@@ -1167,7 +1168,7 @@ FROM
 			$sql ="SELECT flurstueckskennzeichen as flurstkennz, zaehler, nenner";
 			$sql.=" FROM alkis.ax_flurstueck WHERE 1=1";
 			if ($GemkgID>0) {
-				$sql.=" AND land*10000 + gemarkungsnummer= ".$GemkgID;
+				$sql.=" AND land||gemarkungsnummer= '".$GemkgID."'";
 			}
 			if ($FlurID!='') {
 				$sql.=" AND flurnummer=".$FlurID;
@@ -1178,7 +1179,7 @@ FROM
 		else{
 			$sql = "SELECT distinct flurstueckskennzeichen as flurstkennz, zaehler, nenner ";
 			$sql.= "FROM alkis.ax_flurstueck, alkis.ax_fortfuehrungsfall WHERE 1=1 ";
-			$sql.= "AND land*10000 + gemarkungsnummer = ".$GemkgID." ";
+			$sql.= "AND land||gemarkungsnummer = '".$GemkgID."' ";
 			$sql.= "AND flurnummer = ".$FlurID." ";
 			$sql.= "AND flurstueckskennzeichen = ANY(zeigtaufaltesflurstueck) ";
 			$sql.= "AND NOT flurstueckskennzeichen = ANY(zeigtaufneuesflurstueck) ";
@@ -1186,7 +1187,7 @@ FROM
 			$sql.= "UNION ";
 			$sql.= "SELECT flurstueckskennzeichen as flurstkennz, zaehler, nenner ";
 			$sql.= "FROM alkis.ax_historischesflurstueckohneraumbezug WHERE 1=1 ";
-			$sql.= "AND land*10000 + gemarkungsnummer = ".$GemkgID." ";
+			$sql.= "AND land||gemarkungsnummer = '".$GemkgID."' ";
 			$sql.= "AND flurnummer = ".$FlurID." ";
 			$sql.= "ORDER BY flurstkennz";
 		}
@@ -1202,7 +1203,7 @@ FROM
   }
 	
 	function getFlurstueckByLatLng($latitude, $longitude) {
-		$sql  = "SELECT flst.land, flst.kreis, flst.gemeinde, flst.gemarkungsnummer, gemkg.bezeichnung AS gemarkungname, flst.flurnummer, flst.zaehler, flst.nenner, lpad(flst.land::text,2,'0')||lpad(flst.gemarkungsnummer::text,4,'0')||'-'||lpad(flst.flurnummer::text,3,'0')||'-'||lpad(flst.zaehler::text,5,'0')||'/'||CASE WHEN flst.nenner IS NULL THEN '000' ELSE lpad(flst.nenner::text,3,'0') END||'.00' AS flurstkennz, flst.flurstueckskennzeichen, flst.zaehler::text||CASE WHEN flst.nenner IS NULL THEN '' ELSE '/'||flst.nenner::text END AS flurstuecksnummer FROM alkis.ax_flurstueck AS flst, alkis.ax_gemarkung AS gemkg WHERE (flst.land::text||lpad(flst.gemarkungsnummer::text,4,'0'))::integer = gemkg.schluesselgesamt AND flst.gemarkungsnummer = gemkg.gemarkungsnummer AND ST_within(ST_transform(ST_GeomFromText('POINT(".$longitude." ".$latitude.")', 4326), ST_srid(flst.wkb_geometry)), flst.wkb_geometry);";
+		$sql  = "SELECT flst.land, flst.kreis, flst.gemeindezugehoerigkeit_gemeinde gemeinde, flst.gemarkungsnummer, gemkg.bezeichnung AS gemarkungname, flst.flurnummer, flst.zaehler, flst.nenner, lpad(flst.land::text,2,'0')||lpad(flst.gemarkungsnummer::text,4,'0')||'-'||lpad(flst.flurnummer::text,3,'0')||'-'||lpad(flst.zaehler::text,5,'0')||'/'||CASE WHEN flst.nenner IS NULL THEN '000' ELSE lpad(flst.nenner::text,3,'0') END||'.00' AS flurstkennz, flst.flurstueckskennzeichen, flst.zaehler::text||CASE WHEN flst.nenner IS NULL THEN '' ELSE '/'||flst.nenner::text END AS flurstuecksnummer FROM alkis.ax_flurstueck AS flst, alkis.ax_gemarkung AS gemkg WHERE (flst.land::text||lpad(flst.gemarkungsnummer::text,4,'0'))::integer = gemkg.schluesselgesamt AND flst.gemarkungsnummer = gemkg.gemarkungsnummer AND ST_within(ST_transform(ST_GeomFromText('POINT(".$longitude." ".$latitude.")', 4326), ST_srid(flst.wkb_geometry)), flst.wkb_geometry);";
 		$sql.= $this->build_temporal_filter(array('flst', 'gemkg'));
 		#echo $sql.'<br>';
     $queryret = $this->execSQL($sql, 4, 0);
@@ -1250,7 +1251,7 @@ FROM
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON g.land = b.land AND g.bezirk = b.bezirk ";
 		$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON s.istbestandteilvon = g.gml_id ";
 		$sql.="LEFT JOIN alkis.ax_flurstueck f ON f.istgebucht = s.gml_id OR f.gml_id = ANY(s.verweistauf) OR f.istgebucht = ANY(s.an) ";
-    $sql.="WHERE f.flurstueckskennzeichen IS NOT NULL AND b.schluesselgesamt = ".$bezirk." AND g.buchungsblattnummermitbuchstabenerweiterung = '".$blatt."'";
+    $sql.="WHERE f.flurstueckskennzeichen IS NOT NULL AND b.schluesselgesamt = '".$bezirk."' AND g.buchungsblattnummermitbuchstabenerweiterung = '".$blatt."'";
 		$sql.= $this->build_temporal_filter(array('b', 'g', 's', 'f'));
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
@@ -1266,17 +1267,17 @@ FROM
   function getALBData($FlurstKennz, $without_temporal_filter = false){		
 		$sql ="SELECT distinct f.gml_id, 0 as hist_alb, lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, CASE WHEN f.abweichenderrechtszustand = 'true' THEN 'ja' ELSE 'nein' END AS abweichenderrechtszustand, zaehler, nenner, k.schluesselgesamt AS kreisid, k.bezeichnung as kreisname, gem.schluesselgesamt as gemkgschl, gem.bezeichnung as gemkgname, g.schluesselgesamt as gemeinde, g.bezeichnung as gemeindename,d.stelle as finanzamt, d.bezeichnung AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp ";
 		$sql.="FROM alkis.ax_kreisregion AS k, alkis.ax_gemeinde as g, alkis.ax_gemarkung AS gem, alkis.ax_flurstueck AS f ";
-		$sql.="LEFT JOIN alkis.ax_dienststelle as d ON d.stellenart = 1200 AND d.stelle::integer = ANY(f.stelle) ";
-		$sql.="WHERE f.gemarkungsnummer=gem.gemarkungsnummer AND f.land = gem.land AND f.kreis = g.kreis AND f.gemeinde = g.gemeinde AND f.kreis = k.kreis AND f.flurstueckskennzeichen='".$FlurstKennz."'";
+		$sql.="LEFT JOIN alkis.ax_dienststelle as d ON d.stellenart = 1200 AND d.stelle = ANY(f.zustaendigestelle_stelle) ";
+		$sql.="WHERE f.gemarkungsnummer=gem.gemarkungsnummer AND f.land = gem.land AND f.gemeindezugehoerigkeit_kreis = g.kreis AND f.gemeindezugehoerigkeit_gemeinde = g.gemeinde AND f.gemeindezugehoerigkeit_kreis = k.kreis AND f.flurstueckskennzeichen='" . $FlurstKennz . "'";
 		if(!$without_temporal_filter)$sql.= $this->build_temporal_filter(array('k', 'g', 'gem', 'f'));
 		else{
 			$sql.= " UNION ";
-			$sql.= "SELECT distinct f.gml_id, 1 as hist_alb, lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, '' as abweichenderrechtszustand, zaehler, nenner, 0 AS kreisid, '' as kreisname, gem.schluesselgesamt as gemkgschl, gem.bezeichnung as gemkgname, g.schluesselgesamt as gemeinde, g.bezeichnung as gemeindename, '' as finanzamt, '' AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp ";
+			$sql.= "SELECT distinct f.gml_id, 1 as hist_alb, lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, '' as abweichenderrechtszustand, zaehler, nenner, '0' AS kreisid, '' as kreisname, gem.schluesselgesamt as gemkgschl, gem.bezeichnung as gemkgname, g.schluesselgesamt as gemeinde, g.bezeichnung as gemeindename, '' as finanzamt, '' AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp ";
 			$sql.= "FROM alkis.ax_historischesflurstueckohneraumbezug as f ";
 			$sql.= "LEFT JOIN alkis.ax_gemarkung AS gem ON f.gemarkungsnummer=gem.gemarkungsnummer AND f.land = gem.land ";
 			$sql.= "LEFT JOIN alkis.pp_gemarkung ppg ON gem.land = ppg.land AND gem.gemarkungsnummer = ppg.gemarkung ";
-			$sql.= "LEFT JOIN alkis.ax_gemeinde g ON f.gemeinde=g.gemeinde AND ppg.kreis = g.kreis ";
-			$sql.= "WHERE f.flurstueckskennzeichen='".$FlurstKennz."'";
+			$sql.= "LEFT JOIN alkis.ax_gemeinde g ON f.gemeindezugehoerigkeit_gemeinde=g.gemeinde AND ppg.kreis = g.kreis ";
+			$sql.= "WHERE f.flurstueckskennzeichen='" . $FlurstKennz . "'";
 			$sql.=" order by endet DESC";		# damit immer die jüngste Version eines Flurstücks gefunden wird
 		}		
     #echo $sql.'<br><br>';
@@ -1300,10 +1301,10 @@ FROM
 		if($GemeindenStelle != NULL){
 			$sql.="AND (FALSE";
 			if($GemeindenStelle['ganze_gemeinde'] != NULL)$sql.=" OR (g.land::text||g.regierungsbezirk::text||lpad(g.kreis::text, 2, '0')||lpad(g.gemeinde::text, 3, '0'))::integer IN (".implode(',', array_keys($GemeindenStelle['ganze_gemeinde'])).")";
-			if($GemeindenStelle['ganze_gemarkung'] != NULL)$sql.=" OR f.land*10000 + f.gemarkungsnummer IN (".implode(',', array_keys($GemeindenStelle['ganze_gemarkung'])).")";
+			if($GemeindenStelle['ganze_gemarkung'] != NULL)$sql.=" OR f.land||f.gemarkungsnummer IN (".implode(',', array_keys($GemeindenStelle['ganze_gemarkung'])).")";
 			if($GemeindenStelle['eingeschr_gemarkung'] != NULL){
 				foreach($GemeindenStelle['eingeschr_gemarkung'] as $eingeschr_gemkg_id => $fluren){
-					$sql.=" OR (f.land*10000 + f.gemarkungsnummer = ".$eingeschr_gemkg_id." AND flurnummer IN (".implode(',', $fluren)."))";
+					$sql.=" OR (f.land||f.gemarkungsnummer = ".$eingeschr_gemkg_id." AND flurnummer IN (".implode(',', $fluren)."))";
 				}
 			}
 			$sql .= ")";
@@ -1313,11 +1314,11 @@ FROM
 		$sql.="WHERE f.flurstueckskennzeichen IN ('".implode("','", $FlurstKennz)."') ";
 		if($GemeindenStelle != NULL){
 			$sql.="AND (FALSE";
-			if($GemeindenStelle['ganze_gemeinde'] != NULL)$sql.=" OR (f.land::text||f.regierungsbezirk::text||lpad(f.kreis::text, 2, '0')||lpad(f.gemeinde::text, 3, '0'))::integer IN (".implode(',', array_keys($GemeindenStelle['ganze_gemeinde'])).")";
-			if($GemeindenStelle['ganze_gemarkung'] != NULL)$sql.=" OR f.land*10000 + f.gemarkungsnummer IN (".implode(',', array_keys($GemeindenStelle['ganze_gemarkung'])).")";
+			if($GemeindenStelle['ganze_gemeinde'] != NULL)$sql.=" OR (f.land||f.regierungsbezirk||f.kreis||f.gemeindezugehoerigkeit_gemeinde)::integer IN (".implode(',', array_keys($GemeindenStelle['ganze_gemeinde'])).")";
+			if($GemeindenStelle['ganze_gemarkung'] != NULL)$sql.=" OR f.land||f.gemarkungsnummer IN (".implode(',', array_keys($GemeindenStelle['ganze_gemarkung'])).")";
 			if($GemeindenStelle['eingeschr_gemarkung'] != NULL){
 				foreach($GemeindenStelle['eingeschr_gemarkung'] as $eingeschr_gemkg_id => $fluren){
-					$sql.=" OR (f.land*10000 + f.gemarkungsnummer = ".$eingeschr_gemkg_id." AND flurnummer IN (".implode(',', $fluren)."))";
+					$sql.=" OR (f.land||f.gemarkungsnummer = ".$eingeschr_gemkg_id." AND flurnummer IN (".implode(',', $fluren)."))";
 				}
 			}
 			$sql .= ") ORDER BY flurstkennz";
@@ -1341,7 +1342,7 @@ FROM
     $sql.="FROM alkis.ax_gemeinde as g, alkis.ax_flurstueck as f ";
     $sql.="JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(f.weistauf) ";
     $sql.="LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND s.lage = l.lage ";
-    $sql.="WHERE g.gemeinde = l.gemeinde AND g.kreis = l.kreis AND f.flurstueckskennzeichen = '".$FlurstKennz."'";
+    $sql.="WHERE g.gemeinde = l.gemeinde AND g.kreis = l.kreis AND f.flurstueckskennzeichen = '" . $FlurstKennz . "'";
 		$sql.= $this->build_temporal_filter(array('g', 'f', 'l', 's'));
     #echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
@@ -1381,7 +1382,7 @@ FROM
     $sql ="SELECT DISTINCT ".HAUSNUMMER_TYPE."(l.hausnummer) AS hausnr ";
     $sql.="FROM alkis.ax_flurstueck as f ";
     $sql.="JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(f.weistauf) ";
-    $sql.="WHERE l.lage='".$Strasse."' AND f.flurstueckskennzeichen = '".$FlurstKennz."'";
+    $sql.="WHERE l.lage='".$Strasse."' AND f.flurstueckskennzeichen = '" . $FlurstKennz . "'";
 		$sql.= $this->build_temporal_filter(array('f', 'l'));
     #echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
@@ -1405,7 +1406,7 @@ FROM
 		$sql.= "FROM alkis.ax_flurstueck as f ";
 		$sql.= "JOIN alkis.ax_lagebezeichnungohnehausnummer l ON l.gml_id = ANY(f.zeigtauf)  ";
 		$sql.= "LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND l.lage=s.lage ";
-		$sql.= "WHERE f.flurstueckskennzeichen = '".$FlurstKennz."'";
+		$sql.= "WHERE f.flurstueckskennzeichen = '" . $FlurstKennz . "'";
 		$sql.= $this->build_temporal_filter(array('f', 'l', 's'));
 		#echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
@@ -1426,7 +1427,7 @@ FROM
   }
   
   function getNutzung($FlurstKennz) {
-    $sql ="SELECT round((st_area_utm(st_intersection(n.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.")::numeric * amtlicheflaeche / st_area_utm(f.wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS."))::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche, nas.nutzungsartengruppe::text||nas.nutzungsart::text||nas.untergliederung1::text||nas.untergliederung2::text as nutzungskennz, nag.gruppe||' '||coalesce(na.nutzungsart, '')||' '||coalesce(nu1.untergliederung1, '')||' '||coalesce(nu2.untergliederung2, '') as bezeichnung, nag.bereich, nag.gruppe, na.nutzungsart, nu1.untergliederung1, nu2.untergliederung2, n.info, n.zustand, n.name, amtlicheflaeche";
+    $sql ="SELECT round((st_area_utm(st_intersection(n.wkb_geometry,f.wkb_geometry), " . $this->spatial_ref_code . ")::numeric * amtlicheflaeche / st_area_utm(f.wkb_geometry, " . $this->spatial_ref_code . "))::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche, nas.nutzungsartengruppe::text||nas.nutzungsart::text||nas.untergliederung1::text||nas.untergliederung2::text as nutzungskennz, nag.gruppe||' '||coalesce(na.nutzungsart, '')||' '||coalesce(nu1.untergliederung1, '')||' '||coalesce(nu2.untergliederung2, '') as bezeichnung, nag.bereich, nag.gruppe, na.nutzungsart, nu1.untergliederung1, nu2.untergliederung2, n.info, n.zustand, n.name, amtlicheflaeche";
 		$sql.=" FROM alkis.ax_flurstueck f, alkis.n_nutzung n";
 		$sql.=" left join alkis.n_nutzungsartenschluessel nas on n.nutzungsartengruppe = nas.nutzungsartengruppe and n.werteart1 = nas.werteart1 and n.werteart2 = nas.werteart2";
 		$sql.=" left join alkis.n_nutzungsartengruppe nag on nas.nutzungsartengruppe = nag.schluessel";
@@ -1434,8 +1435,8 @@ FROM
 		$sql.=" left join alkis.n_untergliederung1 nu1 on nas.nutzungsartengruppe = nu1.nutzungsartengruppe and nas.nutzungsart = nu1.nutzungsart and nas.untergliederung1 = nu1.schluessel";
 		$sql.=" left join alkis.n_untergliederung2 nu2 on nas.nutzungsartengruppe = nu2.nutzungsartengruppe and nas.nutzungsart = nu2.nutzungsart and nas.untergliederung1 = nu2.untergliederung1 and nas.untergliederung2 = nu2.schluessel";
 		$sql.=" WHERE st_intersects(n.wkb_geometry,f.wkb_geometry) = true";
-		$sql.=" AND st_area_utm(st_intersection(n.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") > 0.001";
-		$sql.=" AND f.flurstueckskennzeichen = '".$FlurstKennz."'";
+		$sql.=" AND st_area_utm(st_intersection(n.wkb_geometry,f.wkb_geometry), " . $this->spatial_ref_code . ") > 0.001";
+		$sql.=" AND f.flurstueckskennzeichen = '" . $FlurstKennz . "'";
 		$sql.= $this->build_temporal_filter(array('f','n'));
 		$sql.=" ORDER BY nutzungskennz";
 		#echo $sql;
@@ -1464,11 +1465,50 @@ FROM
   }
 
 	function getSonstigesrecht($FlurstKennz) {
-    $sql ="SELECT round((st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.")::numeric / st_area_utm(f.wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") * f.amtlicheflaeche)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche,  a.bezeichner as art, fo.name";
-    $sql.=" FROM alkis.ax_flurstueck f, alkis.ax_sonstigesrecht fo ";
-		$sql.=" LEFT JOIN alkis.ax_sonstigesrecht_artdf a ON a.wert=fo.artderfestlegung";		
-    $sql.=" WHERE st_intersects(fo.wkb_geometry,f.wkb_geometry) = true AND st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") > 0.001 AND f.flurstueckskennzeichen='".$FlurstKennz."'";
-		$sql.= $this->build_temporal_filter(array('f', 'fo'));
+		$sql = "
+			SELECT
+				round(
+					(
+						st_area_utm(
+							st_intersection(
+								fo.wkb_geometry,
+								f.wkb_geometry
+							),
+							" . $this->spatial_ref_code . "
+						)::numeric /
+						st_area_utm(
+							f.wkb_geometry,
+							" . $this->spatial_ref_code . "
+						) *
+						f.amtlicheflaeche
+					)::numeric,
+					CASE
+						WHEN amtlicheflaeche > 0.5
+						THEN 0
+						ELSE 2
+					END
+				) AS flaeche,
+				a.beschreibung as art,
+				fo.name
+			FROM
+				alkis.ax_flurstueck f,
+				alkis.ax_sonstigesrecht fo LEFT JOIN
+				alkis.ax_artderfestlegung_sonstigesrecht a ON a.wert=fo.artderfestlegung
+			WHERE
+				st_intersects(
+					fo.wkb_geometry,
+					f.wkb_geometry
+				) = true AND
+				st_area_utm(
+					st_intersection(
+						fo.wkb_geometry,
+						f.wkb_geometry
+					),
+					" . $this->spatial_ref_code . "
+				) > 0.001 AND
+				f.flurstueckskennzeichen = '" . $FlurstKennz . "'
+		";
+		$sql .= $this->build_temporal_filter(array('f', 'fo'));
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
@@ -1482,12 +1522,53 @@ FROM
   }
 	
 	function getDenkmalschutzrecht($FlurstKennz) {
-    $sql ="SELECT round((sum(st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.")::numeric / st_area_utm(f.wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") * f.amtlicheflaeche))::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche,  a.bezeichner as art, fo.name";
-    $sql.=" FROM alkis.ax_flurstueck f, alkis.ax_denkmalschutzrecht fo ";
-		$sql.=" LEFT JOIN alkis.ax_denkmalschutzrecht_artdf a ON a.wert=fo.artderfestlegung";		
-    $sql.=" WHERE st_intersects(fo.wkb_geometry,f.wkb_geometry) = true AND st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") > 0.001 AND f.flurstueckskennzeichen='".$FlurstKennz."'";
-		$sql.= $this->build_temporal_filter(array('f', 'fo'));
-		$sql.=" GROUP BY a.bezeichner, fo.name, f.amtlicheflaeche ";
+		$sql = "
+			SELECT
+				round(
+					(
+						sum(
+							st_area_utm(
+								st_intersection(
+									fo.wkb_geometry,
+									f.wkb_geometry
+								),
+								" . $this->spatial_ref_code . "
+							)::numeric /
+							st_area_utm(
+								f.wkb_geometry,
+								" . $this->spatial_ref_code . "
+							) *
+							f.amtlicheflaeche
+						)
+					)::numeric,
+					CASE
+						WHEN amtlicheflaeche > 0.5
+						THEN 0
+						ELSE 2
+					END
+				) AS flaeche,
+				a.beschreibung as art,
+				fo.name
+			FROM
+				alkis.ax_flurstueck f,
+				alkis.ax_denkmalschutzrecht fo LEFT JOIN
+				alkis.ax_artderfestlegung_denkmalschutzrecht a ON a.wert = fo.artderfestlegung
+			WHERE
+				st_intersects(
+					fo.wkb_geometry,
+					f.wkb_geometry
+				) = true AND
+				st_area_utm(
+					st_intersection(
+						fo.wkb_geometry,
+						f.wkb_geometry
+					),
+					" . $this->spatial_ref_code . "
+				) > 0.001 AND
+				f.flurstueckskennzeichen = '" . $FlurstKennz . "'
+		";
+		$sql .= $this->build_temporal_filter(array('f', 'fo'));
+		$sql.=" GROUP BY a.beschreibung, fo.name, f.amtlicheflaeche ";
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
@@ -1501,12 +1582,52 @@ FROM
   }
 	
 	function getBauBodenrecht($FlurstKennz) {
-    $sql ="SELECT distinct round((st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.")::numeric / st_area_utm(f.wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") * f.amtlicheflaeche)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche,  a.bezeichner as art, fo.bezeichnung, s.bezeichnung as stelle";
-    $sql.=" FROM alkis.ax_flurstueck f, alkis.ax_bauraumoderbodenordnungsrecht fo ";
-		$sql.=" LEFT JOIN alkis.ax_bauraumoderbodenordnungsrecht_artderfestlegung a ON a.wert=fo.artderfestlegung";
-		$sql.=" LEFT JOIN alkis.ax_dienststelle s ON s.stelle = fo.stelle";
-    $sql.=" WHERE st_intersects(fo.wkb_geometry,f.wkb_geometry) = true AND st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") > 0.001 AND f.flurstueckskennzeichen='".$FlurstKennz."'";
-		$sql.= $this->build_temporal_filter(array('f', 'fo'));
+		$sql = "
+			SELECT distinct
+				round(
+					(
+						st_area_utm(
+							st_intersection(
+								fo.wkb_geometry,
+								f.wkb_geometry
+							),
+							" . $this->spatial_ref_code . "
+						)::numeric /
+						st_area_utm(
+							f.wkb_geometry,
+							" . $this->spatial_ref_code . "
+						) *
+						f.amtlicheflaeche
+					)::numeric,
+					CASE
+						WHEN amtlicheflaeche > 0.5
+						THEN 0
+						ELSE 2
+					END
+				) AS flaeche,
+				a.beschreibung as art,
+				fo.bezeichnung,
+				s.bezeichnung as stelle
+			FROM
+				alkis.ax_flurstueck f,
+				alkis.ax_bauraumoderbodenordnungsrecht fo LEFT JOIN
+				alkis.ax_artderfestlegung_bauraumoderbodenordnungsrecht a ON a.wert=fo.artderfestlegung LEFT JOIN
+				alkis.ax_dienststelle s ON s.stelle = fo.stelle
+			WHERE
+				st_intersects(
+					fo.wkb_geometry,
+					f.wkb_geometry
+				) = true AND
+				st_area_utm(
+					st_intersection(
+						fo.wkb_geometry,
+						f.wkb_geometry
+					),
+					" . $this->spatial_ref_code . "
+				) > 0.001 AND
+				f.flurstueckskennzeichen = '" . $FlurstKennz . "'
+		";
+		$sql .= $this->build_temporal_filter(array('f', 'fo'));
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
@@ -1520,11 +1641,20 @@ FROM
   }
 	
 	function getNaturUmweltrecht($FlurstKennz) {
-    $sql ="SELECT round((st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.")::numeric / st_area_utm(f.wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") * f.amtlicheflaeche)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche,  a.bezeichner as art";
-    $sql.=" FROM alkis.ax_flurstueck f, alkis.ax_naturumweltoderbodenschutzrecht fo ";
-		$sql.=" LEFT JOIN alkis.ax_naturumweltoderbodenschutzrecht_artdf a ON a.wert=fo.artderfestlegung";		
-    $sql.=" WHERE st_intersects(fo.wkb_geometry,f.wkb_geometry) = true AND st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") > 0.001 AND f.flurstueckskennzeichen='".$FlurstKennz."'";
-		$sql.= $this->build_temporal_filter(array('f', 'fo'));
+    $sql ="
+			SELECT
+				round((st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), " . $this->spatial_ref_code . ")::numeric / st_area_utm(f.wkb_geometry, " . $this->spatial_ref_code . ") * f.amtlicheflaeche)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche,
+				a.beschreibung as art
+		FROM
+			alkis.ax_flurstueck f,
+			alkis.ax_naturumweltoderbodenschutzrecht fo LEFT JOIN
+			alkis.ax_artderfestlegung_naturumweltoderbodenschutzrecht a ON a.wert=fo.artderfestlegung
+		WHERE
+			st_intersects(fo.wkb_geometry,f.wkb_geometry) = true AND
+			st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), " . $this->spatial_ref_code . ") > 0.001 AND
+			f.flurstueckskennzeichen = '" . $FlurstKennz . "'
+		";
+		$sql .= $this->build_temporal_filter(array('f', 'fo'));
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
@@ -1538,13 +1668,20 @@ FROM
   }
 	
 	function getSchutzgebiet($FlurstKennz) {
-    $sql ="SELECT round((st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.")::numeric / st_area_utm(f.wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") * f.amtlicheflaeche)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche,  coalesce(a.bezeichner, b.bezeichner) as art";
-    $sql.=" FROM alkis.ax_flurstueck f, alkis.ax_schutzzone fo ";
-		$sql.=" LEFT JOIN alkis.ax_schutzgebietnachwasserrecht c ON fo.istteilvon = c.gml_id";
-		$sql.=" LEFT JOIN alkis.ax_schutzgebietnachwasserrecht_artdf a ON a.wert = c.artderfestlegung";
-		$sql.=" LEFT JOIN alkis.ax_schutzgebietnachnaturumweltoderbodenschutzrecht d ON fo.istteilvon = d.gml_id";
-		$sql.=" LEFT JOIN alkis.ax_schutzgebietnachnaturumweltoderbodenschutzrecht_artdf b ON b.wert = d.artderfestlegung";
-    $sql.=" WHERE st_intersects(fo.wkb_geometry,f.wkb_geometry) = true AND st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") > 0.001 AND f.flurstueckskennzeichen='".$FlurstKennz."'";
+    $sql ="
+			SELECT
+				round((st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), " . $this->spatial_ref_code . ")::numeric / st_area_utm(f.wkb_geometry, " . $this->spatial_ref_code . ") * f.amtlicheflaeche)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche,
+				coalesce(a.beschreibung, b.beschreibung) as art
+			FROM
+				alkis.ax_flurstueck f, alkis.ax_schutzzone fo LEFT JOIN
+				alkis.ax_schutzgebietnachwasserrecht c ON c.gml_id = ANY(fo.istteilvon) LEFT JOIN
+				alkis.ax_artderfestlegung_schutzgebietnachwasserrecht a ON a.wert = c.artderfestlegung LEFT JOIN
+				alkis.ax_schutzgebietnachnaturumweltoderbodenschutzrecht d ON d.gml_id = ANY(fo.istteilvon) LEFT JOIN
+				alkis.ax_artderfestlegung_schutzgebietnachnaturumweltoderbodensc b ON b.wert = d.artderfestlegung
+			WHERE
+				st_intersects(fo.wkb_geometry,f.wkb_geometry) = true AND
+				st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), " . $this->spatial_ref_code . ") > 0.001 AND f.flurstueckskennzeichen='" . $FlurstKennz . "'
+		";
 		$sql.= $this->build_temporal_filter(array('f', 'fo'));
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
@@ -1559,16 +1696,33 @@ FROM
   }
 		
 	function getWasserrecht($FlurstKennz) {
-    $sql ="SELECT round((st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.")::numeric / st_area_utm(f.wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") * f.amtlicheflaeche)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche,  a.bezeichner as art, '' as bezeichnung";
-    $sql.=" FROM alkis.ax_flurstueck f, alkis.ax_klassifizierungnachwasserrecht fo ";
-		$sql.=" LEFT JOIN alkis.ax_klassifizierungnachwasserrecht_artdf a ON a.wert=fo.artderfestlegung";
-    $sql.=" WHERE st_intersects(fo.wkb_geometry,f.wkb_geometry) = true AND st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") > 0.001 AND f.flurstueckskennzeichen='".$FlurstKennz."'";
-		$sql.= $this->build_temporal_filter(array('f', 'fo'));
-		$sql.=" UNION SELECT round((st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.")::numeric / st_area_utm(f.wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") * f.amtlicheflaeche)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche,  a.bezeichner as art, s.bezeichnung";
-    $sql.=" FROM alkis.ax_flurstueck f, alkis.ax_anderefestlegungnachwasserrecht fo ";
-		$sql.=" LEFT JOIN alkis.ax_anderefestlegungnachwasserrecht_artdf a ON a.wert=fo.artderfestlegung";
-		$sql.=" LEFT JOIN alkis.ax_dienststelle s ON s.stelle = fo.stelle";
-    $sql.=" WHERE st_intersects(fo.wkb_geometry,f.wkb_geometry) = true AND st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") > 0.001 AND f.flurstueckskennzeichen='".$FlurstKennz."'";
+    $sql ="
+			SELECT
+				round((st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), " . $this->spatial_ref_code . ")::numeric / st_area_utm(f.wkb_geometry, " . $this->spatial_ref_code . ") * f.amtlicheflaeche)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche,
+				a.beschreibung as art,
+				'' as bezeichnung
+			FROM
+				alkis.ax_flurstueck f,
+				alkis.ax_klassifizierungnachwasserrecht fo LEFT JOIN
+				alkis.ax_artderfestlegung_klassifizierungnachwasserrecht a ON a.wert=fo.artderfestlegung
+			WHERE
+				st_intersects(fo.wkb_geometry,f.wkb_geometry) = true AND
+				st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), " . $this->spatial_ref_code . ") > 0.001 AND f.flurstueckskennzeichen='" . $FlurstKennz . "'
+				" . $this->build_temporal_filter(array('f', 'fo')) . "
+			UNION
+			SELECT
+				round((st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), " . $this->spatial_ref_code . ")::numeric / st_area_utm(f.wkb_geometry, " . $this->spatial_ref_code . ") * f.amtlicheflaeche)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche,
+				a.beschreibung as art,
+				s.bezeichnung
+			FROM
+				alkis.ax_flurstueck f,
+				alkis.ax_anderefestlegungnachwasserrecht fo LEFT JOIN
+				alkis.ax_artderfestlegung_anderefestlegungnachwasserrecht a ON a.wert=fo.artderfestlegung LEFT JOIN
+				alkis.ax_dienststelle s ON s.stelle = fo.stelle
+			WHERE
+				st_intersects(fo.wkb_geometry,f.wkb_geometry) = true AND st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), " . $this->spatial_ref_code . ") > 0.001 AND
+				f.flurstueckskennzeichen='" . $FlurstKennz . "'
+		";
 		$sql.= $this->build_temporal_filter(array('f', 'fo'));
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
@@ -1583,10 +1737,19 @@ FROM
   }
 	
 	function getStrassenrecht($FlurstKennz) {
-    $sql ="SELECT round((st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.")::numeric / st_area_utm(f.wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") * f.amtlicheflaeche)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche,  a.bezeichner as art, bezeichnung";
-    $sql.=" FROM alkis.ax_flurstueck f, alkis.ax_klassifizierungnachstrassenrecht fo ";
-		$sql.=" LEFT JOIN alkis.ax_klassifizierungnachstrassenrecht_artdf a ON a.wert=fo.artderfestlegung";
-    $sql.=" WHERE st_intersects(fo.wkb_geometry,f.wkb_geometry) = true AND st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") > 0.001 AND f.flurstueckskennzeichen='".$FlurstKennz."'";
+    $sql ="
+			SELECT
+				round((st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), " . $this->spatial_ref_code . ")::numeric / st_area_utm(f.wkb_geometry, " . $this->spatial_ref_code . ") * f.amtlicheflaeche)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche,
+				a.beschreibung as art,
+				bezeichnung
+			FROM
+				alkis.ax_flurstueck f,
+				alkis.ax_klassifizierungnachstrassenrecht fo LEFT JOIN
+				alkis.ax_artderfestlegung_klassifizierungnachstrassenrecht a ON a.wert=fo.artderfestlegung
+			WHERE
+				st_intersects(fo.wkb_geometry,f.wkb_geometry) = true AND st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), " . $this->spatial_ref_code . ") > 0.001 AND
+				f.flurstueckskennzeichen='" . $FlurstKennz . "'
+		";
 		$sql.= $this->build_temporal_filter(array('f', 'fo'));
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
@@ -1601,11 +1764,11 @@ FROM
   }
 	
 	function getForstrecht($FlurstKennz) {
-    $sql ="SELECT round((st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.")::numeric / st_area_utm(f.wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") * f.amtlicheflaeche)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche,  a.bezeichner as art, b.bezeichner as funktion ";
+    $sql ="SELECT round((st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), " . $this->spatial_ref_code . ")::numeric / st_area_utm(f.wkb_geometry, " . $this->spatial_ref_code . ") * f.amtlicheflaeche)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche,  a.beschreibung as art, b.beschreibung as funktion ";
     $sql.=" FROM alkis.ax_flurstueck f, alkis.ax_forstrecht fo ";
-		$sql.=" LEFT JOIN alkis.ax_forstrecht_artderfestlegung a ON a.wert=fo.artderfestlegung";
-		$sql.=" LEFT JOIN alkis.ax_forstrecht_besonderefunktion b ON b.wert=fo.besonderefunktion";
-    $sql.=" WHERE st_intersects(fo.wkb_geometry,f.wkb_geometry) = true AND st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") > 0.001 AND f.flurstueckskennzeichen='".$FlurstKennz."'";
+		$sql.=" LEFT JOIN alkis.ax_artderfestlegung_forstrecht a ON a.wert=fo.artderfestlegung";
+		$sql.=" LEFT JOIN alkis.ax_besonderefunktion_forstrecht b ON b.wert=fo.besonderefunktion";
+    $sql.=" WHERE st_intersects(fo.wkb_geometry,f.wkb_geometry) = true AND st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), " . $this->spatial_ref_code . ") > 0.001 AND f.flurstueckskennzeichen='" . $FlurstKennz . "'";
 		$sql.= $this->build_temporal_filter(array('f', 'fo'));
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
@@ -1622,7 +1785,7 @@ FROM
 	function getStrittigeGrenze($FlurstKennz) {
     $sql ="SELECT bf.gml_id";
     $sql.=" FROM alkis.ax_flurstueck f, alkis.ax_besondereflurstuecksgrenze bf ";
-    $sql.=" WHERE st_covers(f.wkb_geometry, bf.wkb_geometry) = true  AND f.flurstueckskennzeichen='".$FlurstKennz."'";
+    $sql.=" WHERE st_covers(f.wkb_geometry, bf.wkb_geometry) = true  AND f.flurstueckskennzeichen='" . $FlurstKennz . "'";
 		$sql.=" AND 1000 = ANY(artderflurstuecksgrenze)";
 		$sql.= $this->build_temporal_filter(array('f', 'bf'));
 		#echo $sql;
@@ -1638,18 +1801,18 @@ FROM
   }
 
   function getKlassifizierung($FlurstKennz) {
-    $sql ="SELECT amtlicheflaeche, round((fl_geom / flstflaeche * amtlicheflaeche)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche, fl_geom, flstflaeche, n.wert, objart, ARRAY_TO_STRING(ARRAY[k.kurz, b.kurz, z.kurz, e1.kurz, e2.kurz, s.kurz, n.bodenzahlodergruenlandgrundzahl || '/' || n.wert], ' ') as label ";
-		$sql.=" FROM (SELECT amtlicheflaeche, st_area_utm(st_intersection(n.wkb_geometry, st_intersection(be.wkb_geometry,f.wkb_geometry)), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") as fl_geom, st_area_utm(f.wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") as flstflaeche, n.bodenzahlodergruenlandgrundzahl, n.ackerzahlodergruenlandzahl as wert, n.kulturart as objart, n.kulturart, n.bodenart, n.entstehungsartoderklimastufewasserverhaeltnisse, n.zustandsstufeoderbodenstufe, n.sonstigeangaben";
+    $sql ="SELECT amtlicheflaeche, round((fl_geom / flstflaeche * amtlicheflaeche)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche, fl_geom, flstflaeche, n.wert, objart, ARRAY_TO_STRING(ARRAY[k.beschreibung, b.beschreibung, z.beschreibung, e1.beschreibung, e2.beschreibung, s.beschreibung, n.bodenzahlodergruenlandgrundzahl || '/' || n.wert], ' ') as label ";
+		$sql.=" FROM (SELECT amtlicheflaeche, st_area_utm(st_intersection(n.wkb_geometry, st_intersection(be.wkb_geometry,f.wkb_geometry)), ".$this->spatial_ref_code.") as fl_geom, st_area_utm(f.wkb_geometry, ".$this->spatial_ref_code.") as flstflaeche, n.bodenzahlodergruenlandgrundzahl, n.ackerzahlodergruenlandzahl as wert, n.kulturart as objart, n.kulturart, n.bodenart, n.entstehungsartoderklimastufewasserverhaeltnisse, n.zustandsstufeoderbodenstufe, n.sonstigeangaben";
     $sql.=" FROM alkis.ax_flurstueck f, alkis.ax_bewertung be, alkis.ax_bodenschaetzung n ";		
-    $sql.=" WHERE st_intersects(n.wkb_geometry,f.wkb_geometry) = true AND st_intersects(be.wkb_geometry,f.wkb_geometry) = true AND st_area_utm(st_intersection(n.wkb_geometry, st_intersection(be.wkb_geometry,f.wkb_geometry)), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") > 0.001 AND f.flurstueckskennzeichen='".$FlurstKennz."'";
+    $sql.=" WHERE st_intersects(n.wkb_geometry,f.wkb_geometry) = true AND st_intersects(be.wkb_geometry,f.wkb_geometry) = true AND st_area_utm(st_intersection(n.wkb_geometry, st_intersection(be.wkb_geometry,f.wkb_geometry)), " . $this->spatial_ref_code . ") > 0.001 AND f.flurstueckskennzeichen='" . $FlurstKennz . "'";
 		$sql.= $this->build_temporal_filter(array('f', 'be', 'n'));
 		$sql.=" ) as n";
-		$sql.=" LEFT JOIN alkis.ax_bodenschaetzung_kulturart k ON k.wert=n.kulturart";
-		$sql.=" LEFT JOIN alkis.ax_bodenschaetzung_bodenart b ON b.wert=n.bodenart";
-		$sql.=" LEFT JOIN alkis.ax_bodenschaetzung_entstehungsartoderklimastufe e1 ON e1.wert=n.entstehungsartoderklimastufewasserverhaeltnisse[1]";
-		$sql.=" LEFT JOIN alkis.ax_bodenschaetzung_entstehungsartoderklimastufe e2 ON e2.wert=n.entstehungsartoderklimastufewasserverhaeltnisse[2]";
-		$sql.=" LEFT JOIN alkis.ax_bodenschaetzung_zustandsstufe z ON z.wert=n.zustandsstufeoderbodenstufe";
-		$sql.=" LEFT JOIN alkis.ax_bodenschaetzung_sonstigeangaben s ON s.wert=n.sonstigeangaben[1]";
+		$sql.=" LEFT JOIN alkis.ax_kulturart_bodenschaetzung k ON k.wert=n.kulturart";
+		$sql.=" LEFT JOIN alkis.ax_bodenart_bodenschaetzung b ON b.wert=n.bodenart";
+		$sql.=" LEFT JOIN alkis.ax_entstehungsartoderklimastufewasserverhaeltnisse_bodensc e1 ON e1.wert=n.entstehungsartoderklimastufewasserverhaeltnisse[1]";
+		$sql.=" LEFT JOIN alkis.ax_entstehungsartoderklimastufewasserverhaeltnisse_bodensc e2 ON e2.wert=n.entstehungsartoderklimastufewasserverhaeltnisse[2]";
+		$sql.=" LEFT JOIN alkis.ax_zustandsstufeoderbodenstufe_bodenschaetzung z ON z.wert=n.zustandsstufeoderbodenstufe";
+		$sql.=" LEFT JOIN alkis.ax_sonstigeangaben_bodenschaetzung s ON s.wert=n.sonstigeangaben[1]";
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
@@ -1679,7 +1842,7 @@ FROM
 	  
 	function getNachfolger($FlurstKennz) {
 		$sql = "SELECT DISTINCT ON (nachfolger) nachfolger, c.endet FROM (";
-    $sql.= "SELECT unnest(zeigtaufneuesflurstueck) as nachfolger FROM alkis.ax_fortfuehrungsfall WHERE ARRAY['".$FlurstKennz."'::varchar] <@ zeigtaufaltesflurstueck AND NOT ARRAY['".$FlurstKennz."'::varchar] <@ zeigtaufneuesflurstueck) as foo ";
+    $sql.= "SELECT unnest(zeigtaufneuesflurstueck) as nachfolger FROM alkis.ax_fortfuehrungsfall WHERE ARRAY['" . $FlurstKennz . "'::varchar] <@ zeigtaufaltesflurstueck AND NOT ARRAY['" . $FlurstKennz . "'::varchar] <@ zeigtaufneuesflurstueck) as foo ";
 		$sql.= "LEFT JOIN alkis.ax_flurstueck c ON c.flurstueckskennzeichen = nachfolger ORDER BY nachfolger, c.endet DESC";
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret[0]) {
@@ -1688,8 +1851,8 @@ FROM
     }
     else {
 			if(pg_num_rows($queryret[1]) == 0){		# kein Fortführungsfall unter ALKIS -> Suche in ALB-Historie
-				$sql = "SELECT nachfolger, bool_and(CASE WHEN b.flurstueckskennzeichen IS NULL THEN NULL ELSE TRUE END) as hist_alb, min(CASE WHEN c.endet IS NULL THEN '' ELSE c.endet END) as endet FROM (";
-				$sql.= "SELECT unnest(a.nachfolgerflurstueckskennzeichen) as nachfolger FROM alkis.ax_historischesflurstueckohneraumbezug as a WHERE a.flurstueckskennzeichen = '".$FlurstKennz."') as foo ";
+				$sql = "SELECT nachfolger, bool_and(CASE WHEN b.flurstueckskennzeichen IS NULL THEN NULL ELSE TRUE END) as hist_alb, min(c.endet) as endet FROM (";
+				$sql.= "SELECT unnest(a.nachfolgerflurstueckskennzeichen) as nachfolger FROM alkis.ax_historischesflurstueckohneraumbezug as a WHERE a.flurstueckskennzeichen = '" . $FlurstKennz . "') as foo ";
 				$sql.= "LEFT JOIN alkis.ax_historischesflurstueckohneraumbezug b ON b.flurstueckskennzeichen = nachfolger ";
 				$sql.= "LEFT JOIN alkis.ax_flurstueck c ON c.flurstueckskennzeichen = nachfolger ";			# falls ein Nachfolger in ALKIS historisch ist (endet IS NOT NULL)
 				$sql.= "GROUP BY nachfolger ORDER BY nachfolger";																														# damit aber immer nur die jüngste Version eines Flurstücks gefunden wird
@@ -1710,7 +1873,7 @@ FROM
   }
 
   function getVorgaenger($FlurstKennz) {
-    $sql = "SELECT unnest(zeigtaufaltesflurstueck) as vorgaenger, array_to_string(array_agg(bezeichner), ';') as anlass FROM alkis.ax_fortfuehrungsfall, alkis.ax_fortfuehrungsanlaesse WHERE ARRAY['".$FlurstKennz."'::varchar] <@ zeigtaufneuesflurstueck AND NOT ARRAY['".$FlurstKennz."'::varchar] <@ zeigtaufaltesflurstueck AND wert = ANY(ueberschriftimfortfuehrungsnachweis) GROUP BY zeigtaufaltesflurstueck ORDER BY vorgaenger";
+    $sql = "SELECT unnest(zeigtaufaltesflurstueck) as vorgaenger, array_to_string(array_agg(value), ';') as anlass FROM alkis.ax_fortfuehrungsfall, alkis.aa_anlassart WHERE ARRAY['" . $FlurstKennz . "'::varchar] <@ zeigtaufneuesflurstueck AND NOT ARRAY['" . $FlurstKennz . "'::varchar] <@ zeigtaufaltesflurstueck AND id = ANY(ueberschriftimfortfuehrungsnachweis) GROUP BY zeigtaufaltesflurstueck ORDER BY vorgaenger";
     $queryret=$this->execSQL($sql, 4, 0);
     if($queryret[0]) {
       $ret[0]=1;
@@ -1718,7 +1881,7 @@ FROM
     }
     else{
 			if(pg_num_rows($queryret[1]) == 0){			# kein Vorgänger unter ALKIS -> Suche in ALB-Historie
-				$sql = "SELECT flurstueckskennzeichen as vorgaenger, TRUE as hist_alb FROM alkis.ax_historischesflurstueckohneraumbezug WHERE ARRAY['".$FlurstKennz."'::varchar] <@ nachfolgerflurstueckskennzeichen ORDER BY vorgaenger";
+				$sql = "SELECT flurstueckskennzeichen as vorgaenger, TRUE as hist_alb FROM alkis.ax_historischesflurstueckohneraumbezug WHERE ARRAY['" . $FlurstKennz . "'::varchar] <@ nachfolgerflurstueckskennzeichen ORDER BY vorgaenger";
 				$queryret=$this->execSQL($sql, 4, 0);
 				while($rs=pg_fetch_assoc($queryret[1])) {
 					$Vorgaenger[]=$rs;
@@ -1737,8 +1900,8 @@ FROM
 	
 	function getVersionen($table, $gml_ids, $start){
 		$versionen = array();
-		$sql = "SELECT beginnt::timestamp, endet::timestamp, bezeichner as anlass, '".$table."' as table ";
-		$sql.= "FROM alkis.".$table." LEFT JOIN alkis.ax_fortfuehrungsanlaesse ON wert = NULLIF(anlass, '')::integer ";
+		$sql = "SELECT beginnt::timestamp, endet::timestamp, value as anlass, '".$table."' as table ";
+		$sql.= "FROM alkis.".$table." LEFT JOIN alkis.aa_anlassart ON id = anlass[1] ";
 		$sql.= "WHERE gml_id IN ('".implode("','", $gml_ids)."') ";
 		if($start)$sql.= "AND beginnt::timestamp > '".$start."' ";
 		$sql.= "ORDER BY beginnt";
@@ -1750,19 +1913,19 @@ FROM
 	}
   
   function getEigentuemerliste($FlurstKennz,$Bezirk,$Blatt,$BVNR, $without_temporal_filter = false) {
-    $sql = "SELECT distinct coalesce(n.laufendenummernachdin1421, '0') as order1, coalesce(bestehtausrechtsverhaeltnissenzu, '0') as order2, bestehtausrechtsverhaeltnissenzu, n.laufendenummernachdin1421 AS namensnr, n.gml_id as n_gml_id, p.gml_id, p.nachnameoderfirma, p.vorname, p.akademischergrad, p.namensbestandteil, p.geburtsname, p.geburtsdatum::date, anschrift.gml_id as anschrift_gml_id, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, 'OT '||anschrift.ortsteil as ortsteil, anschrift.bestimmungsland, w.bezeichner as Art, n.zaehler||'/'||n.nenner as anteil, coalesce(NULLIF(n.beschriebderrechtsgemeinschaft, ''),adrg.artderrechtsgemeinschaft) as zusatz_eigentuemer ";
+    $sql = "SELECT distinct coalesce(n.laufendenummernachdin1421, '0') as order1, coalesce(bestehtausrechtsverhaeltnissenzu, '0') as order2, bestehtausrechtsverhaeltnissenzu, CASE WHEN n.beschriebderrechtsgemeinschaft is null and n.artderrechtsgemeinschaft is null THEN n.laufendenummernachdin1421 ELSE NULL END AS namensnr, n.gml_id as n_gml_id, p.gml_id, p.nachnameoderfirma, p.vorname, p.akademischergrad, p.namensbestandteil, p.geburtsname, p.geburtsdatum::date, anschrift.gml_id as anschrift_gml_id, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, 'OT '||anschrift.ortsteil as ortsteil, anschrift.bestimmungsland, w.beschreibung as Art, n.zaehler||'/'||n.nenner as anteil, coalesce(NULLIF(n.beschriebderrechtsgemeinschaft, ''),adrg.beschreibung) as zusatz_eigentuemer ";
 		$sql.= "FROM alkis.ax_buchungsstelle s ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
 		$sql.= "LEFT JOIN alkis.ax_namensnummer n ON n.istbestandteilvon = g.gml_id ";
-		$sql.= "LEFT JOIN alkis.lk_ax_artderrechtsgemeinschaft adrg ON n.artderrechtsgemeinschaft = adrg.wert ";
-		$sql.= "LEFT JOIN alkis.ax_namensnummer_eigentuemerart w ON w.wert = n.eigentuemerart ";
+		$sql.= "LEFT JOIN alkis.ax_artderrechtsgemeinschaft_namensnummer adrg ON n.artderrechtsgemeinschaft = adrg.wert ";
+		$sql.= "LEFT JOIN alkis.ax_eigentuemerart_namensnummer w ON w.wert = n.eigentuemerart ";
 		$sql.= "LEFT JOIN alkis.ax_person p ON n.benennt = p.gml_id ";
 		$sql.= "LEFT JOIN alkis.ax_anschrift anschrift ON anschrift.gml_id = ANY(p.hat) ";
 		$sql.= $this->build_temporal_filter(array('anschrift'));
 		$sql.= " WHERE 1=1"; 
     if ($Bezirk!="") {
-      $sql.=" AND b.schluesselgesamt=".(int)$Bezirk;
+      $sql.=" AND b.schluesselgesamt='".$Bezirk."'";
     }
     if ($Blatt!="") {
       $sql.=" AND g.buchungsblattnummermitbuchstabenerweiterung='".$Blatt."'";
@@ -1876,7 +2039,7 @@ FROM
 		$sql.= "FROM alkis.ax_person p ";
 		$sql.= "LEFT JOIN alkis.ax_anschrift anschrift ON anschrift.gml_id = ANY(p.hat) ";
 		$sql.= "LEFT JOIN alkis.ax_namensnummer n ON n.benennt = p.gml_id ";
-		$sql.= "LEFT JOIN alkis.ax_namensnummer_eigentuemerart w ON w.wert = n.eigentuemerart ";
+		$sql.= "LEFT JOIN alkis.ax_eigentuemerart_namensnummer w ON w.wert = n.eigentuemerart ";
 		$sql.= "LEFT JOIN alkis.ax_buchungsblatt g ON n.istbestandteilvon = g.gml_id ";
 		$sql.= "LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
 		$sql.= "LEFT JOIN alkis.ax_buchungsstelle s ON s.istbestandteilvon = g.gml_id ";
@@ -1898,7 +2061,7 @@ FROM
       $sql.=" AND g.buchungsblattnummermitbuchstabenerweiterung= '".$blatt."'";
     }   
     if ($gemkgschl>0) {
-      $sql.=" AND f.land*10000 + f.gemarkungsnummer = ".$gemkgschl;
+      $sql.=" AND f.land||f.gemarkungsnummer = '".$gemkgschl."'";
     }    
     if ($flur>0) {
       $sql.=" AND f.flurnummer = ".$flur;
@@ -1906,11 +2069,11 @@ FROM
 		if($ganze_gemkg_ids[0] != '' OR count($eingeschr_gemkg_ids) > 0){
 			$sql.=" AND (FALSE ";
 			if($ganze_gemkg_ids[0] != ''){
-				$sql.="OR f.land*10000 + f.gemarkungsnummer IN (".implode(',', $ganze_gemkg_ids).")";
+				$sql.="OR f.land||f.gemarkungsnummer IN (".implode(',', $ganze_gemkg_ids).")";
 			}
 			if(count($eingeschr_gemkg_ids) > 0){
 				foreach($eingeschr_gemkg_ids as $eingeschr_gemkg_id => $fluren){
-					$sql.=" OR (f.land*10000 + f.gemarkungsnummer = ".$eingeschr_gemkg_id." AND flurnummer IN (".implode(',', $fluren)."))";
+					$sql.=" OR (f.land||f.gemarkungsnummer = ".$eingeschr_gemkg_id." AND flurnummer IN (".implode(',', $fluren)."))";
 				}
 			}
 			$sql.=")";
@@ -1954,7 +2117,7 @@ FROM
 
   function getForstamt($FlurstKennz) {
     $sql ="SELECT distinct d.stelle as schluessel, d.bezeichnung as name FROM alkis.ax_dienststelle as d, alkis.ax_flurstueck as f";
-    $sql.=" WHERE d.stellenart = 1400 AND d.stelle::integer = ANY(f.stelle) AND f.flurstueckskennzeichen = '".$FlurstKennz."'";
+    $sql.=" WHERE d.stellenart = 1400 AND d.stelle = ANY(f.zustaendigestelle_stelle) AND f.flurstueckskennzeichen = '" . $FlurstKennz . "'";
 		$sql.= $this->build_temporal_filter(array('d', 'f'));
 		#echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
@@ -1977,11 +2140,20 @@ FROM
   }
 	
 	function getAmtsgerichtby($flurstkennz, $bezirk){
-		$sql ="SELECT a.bezeichnung as name, a.stelle as schluessel";
-		$sql.=" FROM alkis.ax_buchungsblattbezirk b , alkis.ax_dienststelle a";
-		$sql.=" WHERE b.land=a.land AND b.stelle=a.stelle AND a.stellenart=1000";
-		$sql.=" AND b.schluesselgesamt = ".$bezirk['schluessel'];
-		$sql.= $this->build_temporal_filter(array('b', 'a'));
+		$sql ="
+			SELECT
+				a.bezeichnung as name,
+				a.stelle as schluessel
+			FROM
+				alkis.ax_buchungsblattbezirk b,
+				alkis.ax_dienststelle a
+			WHERE
+				b.gehoertzu_land=a.land AND
+				b.gehoertzu_stelle=a.stelle AND
+				a.stellenart=1000 AND
+				b.schluesselgesamt = '" . $bezirk['schluessel'] . "'
+				" . $this->build_temporal_filter(array('b', 'a')) . "
+		";
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret[0]) {
       $ret[0]=1;
@@ -1995,7 +2167,7 @@ FROM
 	}
   
   function getGemarkungName($GemkgSchl) {
-    $sql ="SELECT bezeichnung as gemkgname FROM alkis.ax_gemarkung WHERE land*10000 + gemarkungsnummer = ".$GemkgSchl;
+    $sql ="SELECT bezeichnung as gemkgname FROM alkis.ax_gemarkung WHERE schluesselgesamt = ".$GemkgSchl;
 		$sql.= $this->build_temporal_filter(array('ax_gemarkung'));
     $this->debug->write("<p>postgres.sql getGemarkungName Abfragen des Gemarkungsnamen:<br>".$sql,4);
     $queryret=$this->execSQL($sql, 4, 0);
@@ -2012,7 +2184,7 @@ FROM
   }
 	
 	function getGrundbuchblattliste($bezirk){
-		$sql = "SELECT buchungsblattnummermitbuchstabenerweiterung as blatt FROM alkis.ax_buchungsblatt WHERE land*10000 + bezirk = ".$bezirk." AND (blattart = 1000 OR blattart = 2000 OR blattart = 3000) ";
+		$sql = "SELECT buchungsblattnummermitbuchstabenerweiterung as blatt FROM alkis.ax_buchungsblatt WHERE land||bezirk = '".$bezirk."' AND (blattart = 1000 OR blattart = 2000 OR blattart = 3000) ";
 		$sql.= $this->build_temporal_filter(array('ax_buchungsblatt'));
 		$sql.= " ORDER BY rtrim(ltrim(buchungsblattnummermitbuchstabenerweiterung,'PF0'),'ABCDEFGHIJKLMNOPQRSTUVWXYZ')::integer";
 		$ret=$this->execSQL($sql, 4, 0);
@@ -2029,13 +2201,13 @@ FROM
 		$sql.="FROM alkis.ax_flurstueck f ";
 		$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR f.istgebucht = ANY(s.an) OR f.gml_id = ANY(s.verweistauf) ";		
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
-		$sql.="WHERE g.land*10000 + g.bezirk = ".$bezirk." AND (blattart = 1000 OR blattart = 2000 OR blattart = 3000) AND (FALSE ";		
+		$sql.="WHERE g.land||g.bezirk = ".$bezirk." AND (blattart = 1000 OR blattart = 2000 OR blattart = 3000) AND (FALSE ";		
 		if($ganze_gemkg_ids[0] != ''){
-			$sql.="OR f.land*10000 + f.gemarkungsnummer IN (".implode(',', $ganze_gemkg_ids).")";
+			$sql.="OR f.land||f.gemarkungsnummer IN (".implode(',', $ganze_gemkg_ids).")";
 		}
 		if(count($eingeschr_gemkg_ids) > 0){
 			foreach($eingeschr_gemkg_ids as $eingeschr_gemkg_id => $fluren){
-				$sql.=" OR (f.land*10000 + f.gemarkungsnummer = ".$eingeschr_gemkg_id." AND flurnummer IN (".implode(',', $fluren)."))";
+				$sql.=" OR (f.land||f.gemarkungsnummer = ".$eingeschr_gemkg_id." AND flurnummer IN (".implode(',', $fluren)."))";
 			}
 		}
 		$sql.= ")";
@@ -2074,11 +2246,11 @@ FROM
 		$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
 		$sql.="WHERE (g.blattart = 1000 OR g.blattart = 2000 OR g.blattart = 3000) AND (FALSE ";
 		if($ganze_gemkg_ids[0] != ''){
-			$sql.="OR f.land*10000 + f.gemarkungsnummer IN (".implode(',', $ganze_gemkg_ids).")";
+			$sql.="OR f.land||f.gemarkungsnummer IN (".implode(',', $ganze_gemkg_ids).")";
 		}
 		if(count($eingeschr_gemkg_ids) > 0){
 			foreach($eingeschr_gemkg_ids as $eingeschr_gemkg_id => $fluren){
-				$sql.=" OR (f.land*10000 + f.gemarkungsnummer = ".$eingeschr_gemkg_id." AND flurnummer IN (".implode(',', $fluren)."))";
+				$sql.=" OR (f.land||f.gemarkungsnummer = ".$eingeschr_gemkg_id." AND flurnummer IN (".implode(',', $fluren)."))";
 			}
 		}
 		$sql.= ")";
@@ -2102,10 +2274,10 @@ FROM
 		//$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON array[f.istgebucht] <@ s2.an ";
 		//$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR array[f.istgebucht] <@ s.an OR array[f.istgebucht] <@ s2.an AND array[s2.gml_id] <@ s.an ";
 		$sql.="JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id ";
-		$sql.="LEFT JOIN alkis.ax_buchungsstelle_buchungsart art ON s.buchungsart = art.wert ";
+		$sql.="LEFT JOIN alkis.ax_buchungsart_buchungsstelle art ON s.buchungsart = art.wert ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id "; 
 		$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
-		$sql.="WHERE f.flurstueckskennzeichen = '".$FlurstKennz."'";
+		$sql.="WHERE f.flurstueckskennzeichen = '" . $FlurstKennz . "'";
 		if(!$hist_alb) $sql.= $this->build_temporal_filter(array('f', 's', 'g', 'b'));
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
@@ -2131,7 +2303,7 @@ FROM
     $sql.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND l.lage = lpad(s.lage,5,'0')";
     $sql.=" WHERE g.gemeinde = l.gemeinde";
     if ($GemID!='') {
-      $sql.=" AND g.schluesselgesamt=".(int)$GemID;
+      $sql.=" AND g.schluesselgesamt='".$GemID."'";
     }
     if ($StrID!='') {
       $sql.=" AND l.lage='".$StrID."'";
@@ -2152,18 +2324,18 @@ FROM
   function getStrassenListe($GemID,$GemkgID,$PolygonWKTString) {		
 	# Hier bitte nicht auf die Idee kommen, die Strassen ohne die Flurstücke abfragen zu können. 
 	# Die Flurstücke müssen miteinbezogen werden, weil wir ja auch über die Gemarkung auswählen wollen.	
-  	$sql ="set enable_seqscan = off;SELECT -1 AS gemeinde,'-1' AS strasse,'--Auswahl--' AS strassenname, '' as gemkgname";
+  	$sql ="set enable_seqscan = off;SELECT '-1' AS gemeinde,'-1' AS strasse,'--Auswahl--' AS strassenname, '' as gemkgname";
     $sql.=" UNION";
     $sql.=" SELECT DISTINCT g.gemeinde, l.lage as strasse, s.bezeichnung as strassenname, gem.bezeichnung as gemkgname";
     $sql.=" FROM alkis.ax_gemeinde as g, alkis.ax_gemarkung as gem, alkis.ax_flurstueck as f";
     $sql.=" JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(f.weistauf)";
     $sql.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND s.lage = lpad(l.lage,5,'0')";
-		$sql.=" WHERE g.gemeinde = f.gemeinde AND g.kreis=f.kreis AND f.gemarkungsnummer = gem.gemarkungsnummer AND f.gemeinde = l.gemeinde";
+		$sql.=" WHERE g.gemeinde = f.gemeindezugehoerigkeit_gemeinde AND g.kreis=f.gemeindezugehoerigkeit_kreis AND f.gemarkungsnummer = gem.gemarkungsnummer AND f.gemeindezugehoerigkeit_gemeinde = l.gemeinde";
     if ($GemID!='') {
-      $sql.=" AND g.schluesselgesamt=".(int)$GemID;
+      $sql.=" AND g.schluesselgesamt='".$GemID."'";
     }
     if ($GemkgID!='') {
-      $sql.=" AND f.land*10000 + f.gemarkungsnummer=".(int)$GemkgID;
+      $sql.=" AND f.land||f.gemarkungsnummer='".$GemkgID."'";
     }
 		$sql.= $this->build_temporal_filter(array('g', 'gem', 'f', 'l', 's'));
     $sql.=" ORDER BY gemeinde, strassenname";
@@ -2195,25 +2367,25 @@ FROM
   }
         
   function getFlurenListeByGemkgIDByFlurID($GemkgID,$FlurID, $historical = false){
-		if(!$historical){
-			$sql ="SELECT gemarkungsteilflur AS FlurID, lpad(gemarkungsteilflur::text, 3, '0') AS Name";
-			$sql.=",schluesselgesamt AS GemFlurID FROM alkis.ax_gemarkungsteilflur WHERE anlass != '300700'";
+		if(!$historical){	# ax_gemarkungsteilflur kann nicht verwendet werden, da dies eine Katalogtabelle ist und Objekte in diesen nicht beendet werden
+			$sql ="SELECT distinct flurnummer, lpad(flurnummer::text, 3, '0') AS FlurID, lpad(flurnummer::text, 3, '0') AS Name, land||gemarkungsnummer||flurnummer::text AS GemFlurID ";
+			$sql.="FROM alkis.ax_flurstueck WHERE 1=1 ";
 			
 			if ($GemkgID>0) {
-				$sql.=" AND land*10000 + gemarkung=".(int)$GemkgID;
+				$sql.=" AND land || gemarkungsnummer='".$GemkgID."'";
 			}
 			if ($FlurID[0]>0) {
-				$sql.=" AND gemarkungsteilflur IN (".implode(',', $FlurID).")";
+				$sql.=" AND flurnummer IN (".implode(',', $FlurID).")";
 			}
-			$sql.= $this->build_temporal_filter(array('ax_gemarkungsteilflur'));
-			$sql.=" ORDER BY gemarkungsteilflur";
+			$sql.= $this->build_temporal_filter(array('ax_flurstueck'));
+			$sql.=" ORDER BY flurnummer";
 		}
 		else{		// die Fluren aller historischen Flurstücke abfragen
-			$sql = "SELECT distinct flurnummer, lpad(flurnummer::text, 3, '0') AS FlurID, lpad(flurnummer::text, 3, '0') AS Name, land*10000000 + gemarkungsnummer*1000 + flurnummer AS GemFlurID ";
-			$sql.= "FROM alkis.ax_historischesflurstueckohneraumbezug WHERE 1=1 AND land*10000 + gemarkungsnummer = ".(int)$GemkgID." ";
+			$sql = "SELECT distinct flurnummer, lpad(flurnummer::text, 3, '0') AS FlurID, lpad(flurnummer::text, 3, '0') AS Name, land||gemarkungsnummer||flurnummer::text AS GemFlurID ";
+			$sql.= "FROM alkis.ax_historischesflurstueckohneraumbezug WHERE 1=1 AND land||gemarkungsnummer = '".$GemkgID."' ";
 			$sql.= "UNION ";
-			$sql.= "SELECT flurnummer, lpad(flurnummer::text, 3, '0') AS FlurID, lpad(flurnummer::text, 3, '0') AS Name, land*10000000 + gemarkungsnummer*1000 + flurnummer AS GemFlurID ";
-			$sql.= "FROM alkis.ax_flurstueck, alkis.ax_fortfuehrungsfall WHERE ax_flurstueck.endet is NOT NULL AND land*10000 + gemarkungsnummer = ".(int)$GemkgID." ";
+			$sql.= "SELECT flurnummer, lpad(flurnummer::text, 3, '0') AS FlurID, lpad(flurnummer::text, 3, '0') AS Name, land||gemarkungsnummer||flurnummer::text AS GemFlurID ";
+			$sql.= "FROM alkis.ax_flurstueck, alkis.ax_fortfuehrungsfall WHERE ax_flurstueck.endet is NOT NULL AND land||gemarkungsnummer = '".$GemkgID."' ";
 			$sql.= "AND flurstueckskennzeichen = ANY(zeigtaufaltesflurstueck) ";
 			$sql.= "AND NOT flurstueckskennzeichen = ANY(zeigtaufneuesflurstueck) ";
 			$sql.= "ORDER BY flurnummer";
@@ -2229,7 +2401,7 @@ FROM
   }
 			
 	function check_poly_in_flur($polygon, $epsg){
-		$sql = "SELECT f.land * 10000 + f.gemarkungsnummer, f.flurnummer FROM alkis.ax_flurstueck f WHERE st_intersects(wkb_geometry, st_transform(st_geomfromtext('".$polygon."', ".$epsg."), ".EPSGCODE_ALKIS."))";
+		$sql = "SELECT f.land||f.gemarkungsnummer, f.flurnummer FROM alkis.ax_flurstueck f WHERE st_intersects(wkb_geometry, st_transform(st_geomfromtext('".$polygon."', ".$epsg."), ".EPSGCODE_ALKIS."))";
 		$sql.= $this->build_temporal_filter(array('f'));
   	return $this->execSQL($sql,4, 1);
 	}
@@ -2284,7 +2456,7 @@ FROM
     $sql ="SELECT MIN(st_xmin(st_envelope(st_transform(the_geom, ".$epsgcode.")))) AS minx,MAX(st_xmax(st_envelope(st_transform(the_geom, ".$epsgcode.")))) AS maxx";
     $sql.=",MIN(st_ymin(st_envelope(st_transform(the_geom, ".$epsgcode.")))) AS miny,MAX(st_ymax(st_envelope(st_transform(the_geom, ".$epsgcode.")))) AS maxy";
     $sql.=" FROM alkis.pp_gemarkung";
-    $sql.=" WHERE land*10000 + gemarkung = ".$Gemarkung;
+    $sql.=" WHERE schluesselgesamt = ".$Gemarkung;
     #echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) {
@@ -2308,7 +2480,7 @@ FROM
     $sql ="SELECT MIN(st_xmin(st_envelope(st_transform(the_geom, ".$epsgcode.")))) AS minx,MAX(st_xmax(st_envelope(st_transform(the_geom, ".$epsgcode.")))) AS maxx";
     $sql.=",MIN(st_ymin(st_envelope(st_transform(the_geom, ".$epsgcode.")))) AS miny,MAX(st_ymax(st_envelope(st_transform(the_geom, ".$epsgcode.")))) AS maxy";
     $sql.=" FROM alkis.pp_flur";
-    $sql.=" WHERE land*10000 + gemarkung = ".$Gemarkung;
+    $sql.=" WHERE land||gemarkung = ".$Gemarkung;
     $sql.=" AND flurnummer = ".(int)$Flur;
     #echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
@@ -2495,59 +2667,6 @@ FROM
     $sql.=",onlinelink='".$md['onlinelink']."',accessrights='".$md['accessrights']."'";
     $sql.=" WHERE mdfileid='".$md['mdfileid']."'";
     return $this->execSQL($sql, 4, 0);
-  }
-
-  function getMetadataQuickSearch($md){
-    $sql ="SELECT DISTINCT m.oid,m.* FROM md_metadata AS m, md_keywords AS k, md_keywords2metadata AS k2m";
-    $sql.=" WHERE m.id=k2m.metadata_id AND k2m.keyword_id=k.id";
-    if ($md['was']!='') {
-      $sql.=" AND (";
-      $sql.="restitle LIKE '%".$md['was']."%'";
-      $sql.=" OR (k.keyword LIKE '%".$md['was']."%' AND k.keytyp='theme')";
-      $sql.=")";
-    }
-    if ($md['wer']!='') {
-      $sql.=" AND (rporgname LIKE '%".$md['wer']."%'";
-      $sql.="   OR linkage LIKE '%".$md['wer']."%')";
-    }
-    if ($md['wo']!='') {
-      $sql.=" AND (k.keyword LIKE '%".$md['wo']."%' AND k.keytyp='place')";
-    }
-    if ($md['vonwann']!='') {
-      $sql.=" AND validtill >= '".$md['vonwann']."'";
-    }
-    if ($md['biswann']!='') {
-      $sql.=" AND validfrom <= '".$md['biswann']."'";
-    }
-    if ($md['northbl']!='') {
-      # Umringspolygon fï¿½r die Suche in der Datenbank aus den ï¿½bergebenen Koordinaten zusammensetzen
-      $md['umring'] ='POLYGON(('.$md['eastbl'].' '.$md['southbl'].','.$md['westbl'].' '.$md['southbl'];
-      $md['umring'].=','.$md['westbl'].' '.$md['northbl'].','.$md['eastbl'].' '.$md['northbl'];
-      $md['umring'].=','.$md['eastbl'].' '.$md['southbl'].'))';
-      # sql-Teil fï¿½r rï¿½umliche Abfrage bilden
-      $sql.=" AND the_geom && st_geometryfromtext('".$md['umring']."',".EPSGCODE.") AND st_intersects(the_geom,st_geometryfromtext('".$md['umring']."',".EPSGCODE."))";
-    }
-    $ret=$this->execSQL($sql, 4, 0);
-    if ($ret[0]==0) {
-      while($rs=pg_fetch_assoc($ret[1])) {
-        # Abfragen und Zuweisen der Keywortbezeichnungen
-        $theme=$this->getKeywords('','','theme','',$rs['id'],'keyword');
-        $themes=$theme[1]['keyword'];
-        $rs['themekeywords']=$themes[0];
-        for ($i=1;$i<count($themes);$i++) {
-          $rs['themekeywords'].=', '.$themes[$i];
-        }
-        $place=$this->getKeywords('','','place','',$rs['id'],'keyword');
-        $places=$place[1]['keyword'];
-        $rs['placekeywords']=$places[0];
-        for ($i=1;$i<count($places);$i++) {
-          $rs['placekeywords'].=', '.$places[$i];
-        }
-        $mdresult[]=$rs;
-      }
-      $ret[1]=$mdresult;
-    }
-    return $ret;
   }
 
   function getKeywords($id,$keyword,$keytyp,$thesaname,$metadata_id,$order) {

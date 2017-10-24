@@ -299,7 +299,7 @@ class jagdkataster {
   }
 	
 	function getIntersectedFlurstWithJagdbezirke($oids){
-		$sql = "SELECT f.land*10000 + f.gemarkungsnummer as gemkgschl, f.flurnummer as flur, f.zaehler, f.nenner, g.bezeichnung as gemkgname, f.flurstueckskennzeichen as flurstkennz, st_area_utm(f.wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") AS flurstflaeche, st_area_utm(st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.")), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") AS schnittflaeche, jagdbezirke.name, jagdbezirke.art, f.amtlicheflaeche AS albflaeche";
+		$sql = "SELECT f.land||f.gemarkungsnummer as gemkgschl, f.flurnummer as flur, f.zaehler, f.nenner, g.bezeichnung as gemkgname, f.flurstueckskennzeichen as flurstkennz, st_area_utm(f.wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") AS flurstflaeche, st_area_utm(st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.")), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") AS schnittflaeche, jagdbezirke.name, jagdbezirke.art, f.amtlicheflaeche AS albflaeche";
 		$sql.= " FROM alkis.ax_gemarkung AS g, jagdkataster.jagdbezirke, alkis.ax_flurstueck AS f";
 		$sql.= " WHERE f.gemarkungsnummer = g.gemarkungsnummer";
 		$sql.= " AND jagdbezirke.oid IN (".implode(',', $oids).")";
@@ -315,11 +315,11 @@ class jagdkataster {
 		$sql.= " FROM(SELECT distinct st_area_utm(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") as j_flaeche, f.amtlicheflaeche as flaeche, array_to_string(array(";
 		$sql.= "SELECT distinct array_to_string(array[p.nachnameoderfirma, p.vorname], ' ') as name ";
 		$sql.= "FROM alkis.ax_flurstueck ff ";		
-		$sql.= "LEFT JOIN alkis.ax_buchungsstelle s ON ff.istgebucht = s.gml_id OR ARRAY[ff.gml_id] <@ s.verweistauf OR ARRAY[ff.istgebucht] <@ s.an ";
+		$sql.= "LEFT JOIN alkis.ax_buchungsstelle s ON ff.istgebucht = s.gml_id OR ARRAY[ff.gml_id::char] <@ s.verweistauf OR ARRAY[ff.istgebucht] <@ s.an ";
 		$sql.= "LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
 		$sql.= "LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
 		$sql.= "LEFT JOIN alkis.ax_namensnummer n ON n.istbestandteilvon = g.gml_id ";
-		$sql.= "LEFT JOIN alkis.ax_namensnummer_eigentuemerart w ON w.wert = n.eigentuemerart ";
+		$sql.= "LEFT JOIN alkis.ax_eigentuemerart_namensnummer w ON w.wert = n.eigentuemerart ";
 		$sql.= "LEFT JOIN alkis.ax_person p ON n.benennt = p.gml_id ";
 		$sql.= " WHERE n.laufendenummernachdin1421 IS NOT NULL AND f.flurstueckskennzeichen = ff.flurstueckskennzeichen ";
 		$sql.= $this->database->build_temporal_filter(array('ff', 's', 'g', 'b', 'n', 'p'));

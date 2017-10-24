@@ -47,8 +47,8 @@ function create_protocol(){
         </tr>
         <? for($i=0; $i < count($this->antrag->FFR); $i++){ ?>
         <tr bgcolor="#ffffff"> 
-          <td valign="top" align="center" <? if($this->formvars['Riss-Nummer'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['Riss-Nummer']; ?></td>
-          <td valign="top" align="center" <? if($this->formvars['Antrags-Nummer'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['Antrags-Nummer']; ?></td>
+          <td valign="top" align="center" <? if($this->formvars['Riss-Nummer'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['Rissnummer']; ?></td>
+          <td valign="top" align="center" <? if($this->formvars['Antrags-Nummer'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['Antragsnummer']; ?></td>
           <td valign="top" align="center" <? if($this->formvars['FFR'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['FFR']; ?></td>
           <td valign="top" align="center" <? if($this->formvars['KVZ'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['KVZ']; ?></td>
           <td valign="top" align="center" <? if($this->formvars['GN'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['GN']; ?></td>

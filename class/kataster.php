@@ -1548,7 +1548,19 @@ class flurstueck {
 			if($type != 'Text')$Eigentuemer .= '</table></td></tr>';
 		}
 		return $Eigentuemer;
-	}	
+	}
+	
+	function orderEigentuemer($gml_id, &$Eigentuemerliste, $order){
+		# Diese funktion durchläuft den Rechtsverhältnisbaum und vergibt für jeden Eigentümer eine order, die sich fortlaufend erhöht.
+		# Anschliessend kann man die Eigentümerliste an Hand dieser order sortieren und erhält damit eine lineare Liste ohne Verschachtelung.
+		$Eigentuemerliste[$gml_id]->order = $order;
+		if($Eigentuemerliste[$gml_id]->children != ''){
+			foreach($Eigentuemerliste[$gml_id]->children as $child){
+				$order = $this->orderEigentuemer($child, $Eigentuemerliste, $order+1);
+			}
+		}
+		return $order;
+	}
 		
 	function getSonstigesrecht() {
     if ($this->FlurstKennz=="") { return 0; }
@@ -2014,8 +2026,8 @@ class flurstueck {
       $errmsg.='in line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
-		if($without_temporal_filter AND $ret[1]['hist_alb'] == 0){
-			if($ret[1]['endet'] != '')rolle::$hist_timestamp = DateTime::createFromFormat('d.m.Y H:i:s', $ret[1]['beginnt'])->format('Y-m-d\TH:i:s\Z');
+		if($without_temporal_filter){
+			if($ret[1]['endet'] != '' OR $ret[1]['hist_alb'])rolle::$hist_timestamp = DateTime::createFromFormat('d.m.Y H:i:s', $ret[1]['beginnt'])->format('Y-m-d\TH:i:s\Z');			
 			else rolle::$hist_timestamp = '';
 		}
     $rs=$ret[1];

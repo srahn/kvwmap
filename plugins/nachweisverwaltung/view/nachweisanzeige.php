@@ -78,14 +78,14 @@ function getvorschau(url){
 <input type="hidden" name="value_id" value="">
 <input type="hidden" name="operator_id" value="IN">
 	
-<table width="0%" border="0" cellpadding="5" cellspacing="0">
+<table width="0%" border="0" cellpadding="8" cellspacing="0">
   <tr> 
-    <td bgcolor="<?php echo BG_FORM ?>"><table width="100%" border="0" cellpadding="5" cellspacing="0">
+    <td bgcolor="<? echo BG_FORM ?>"><table width="100%" border="0" cellpadding="5" cellspacing="0">
         <tr> 
-          <td><div align="center"><h2><?php echo $this->titel; ?></h2></div></td>
+          <td><div align="center"><h2><? echo $this->titel; ?></h2></div></td>
         </tr>
         <tr> 
-          <td><hr><?php
+          <td><hr><?
 		    if ($this->Fehlermeldung!='') {
 
 include(LAYOUTPATH."snippets/Fehlermeldung.php");
@@ -97,7 +97,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
         </tr>
         <tr> 
           <td>Gesucht nach:<span class="fett"> 
-            <?php
+            <?
 						if($this->formvars['gueltigkeit'] == 1){ echo ' nur gültige '; }
 						if($this->formvars['gueltigkeit'] == '0'){ echo ' nur ungültige '; }
 						if($this->formvars['gueltigkeit'] == ''){ echo ' alle '; }
@@ -117,10 +117,10 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 								if($this->formvars['VermStelle'] != '')echo ' von Vermessungsstelle '.$this->formvars['VermStelle'];
               } break;
               case 'antr_nr' : { 
-                ?> aus Vorbereitungsnummer - <?php echo $suchantrnr;
+                ?> aus Vorbereitungsnummer - <? echo $suchantrnr;
               } break;
               case 'poly' : {
-                ?> in Suchpolygon<?php 
+                ?> in Suchpolygon<? 
               } break;
             }
               ?></span>                </td>
@@ -133,57 +133,60 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
       </table></td>
   </tr>
   <tr>
-    <td bgcolor="<?php echo BG_FORM ?>"><?php
+    <td bgcolor="<? echo BG_FORM ?>"><?
 	 if ($this->nachweis->erg_dokumente > 0) { ?>
-	 <table border="0" cellspacing="0" cellpadding="5">
+		<table class="scrolltable" style="width: 1247px" border="0" cellspacing="0" cellpadding="0">
+			<thead>
         <tr style="outline: 1px solid grey;" bgcolor="#FFFFFF"> 
-          <td height="40" width="56"><div align="center"><span class="fett">Auswahl</span></div></td>
-          <td width="18"><span class="fett">ID</span></td>
+          <th height="40" style="width: 80"><div align="center"><span class="fett">Auswahl</span></div></th>
+          <th style="width:45"><span class="fett">ID</span></th>
 			<? if(strpos($this->formvars['order'], 'flurid') === false){ ?>
-				<td align="center" width="65"><a href="javascript:add_to_order('flurid');" title="nach individueller Nummer sortieren"><span class="fett">Flur</span></a></td>
-			<? }else{echo '<td align="center" width="65"><span class="fett">Flur</span></td>';} ?>
+				<th align="center" style="width: 80"><a href="javascript:add_to_order('flurid');" title="nach individueller Nummer sortieren"><span class="fett">Flur</span></a></th>
+			<? }else{echo '<th align="center" style="width: 80"><span class="fett">Flur</span></th>';} ?>
 			
       <? if(NACHWEIS_PRIMARY_ATTRIBUTE != 'rissnummer'){			
 				if(strpos($this->formvars['order'], 'stammnr') === false){ ?>
-					<td align="center" width="64"><a href="javascript:add_to_order('stammnr');" title="nach Antragsnr. sortieren"><span class="fett">Antragsnr.</span></a></td>
-				<? }else{echo '<td align="center" width="64"><span class="fett">Antragsnr.</span></td>';}
+					<th align="center" style="width: 90"><a href="javascript:add_to_order('stammnr');" title="nach Antragsnr. sortieren"><span class="fett">Antragsnr.</span></a></th>
+				<? }else{echo '<th align="center" style="width: 90"><span class="fett">Antragsnr.</span></th>';}
 				if(strpos($this->formvars['order'], 'blattnummer') === false){ ?>
-				<td align="center" width="87"><a href="javascript:add_to_order('blattnummer');" title="nach Blattnummer sortieren"><span class="fett">Blattnr.</span></a></td>
-			<? }else{echo '<td align="center" width="137"><span class="fett">Blattnr.</span></td>';}
+				<th align="center" style="width: 70"><a href="javascript:add_to_order('blattnummer');" title="nach Blattnummer sortieren"><span class="fett">Blattnr.</span></a></th>
+			<? }else{echo '<th align="center" style="width: 137"><span class="fett">Blattnr.</span></th>';}
 				} ?>
 			<? if(strpos($this->formvars['order'], 'rissnummer') === false){ ?>
-				<td align="center" width="64"><a href="javascript:add_to_order('rissnummer');" title="nach Rissnr. sortieren"><span class="fett">Rissnr.</span></a></td>
-			<? }else{echo '<td align="center" width="64"><span class="fett">Rissnr.</span></td>';} ?>
+				<th align="center" style="width: 70"><a href="javascript:add_to_order('rissnummer');" title="nach Rissnr. sortieren"><span class="fett">Rissnr.</span></a></th>
+			<? }else{echo '<th align="center" style="width: 70"><span class="fett">Rissnr.</span></th>';} ?>
           <? if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){
 						if(strpos($this->formvars['order'], 'blattnummer') === false){ ?>
-				<td align="center" width="87"><a href="javascript:add_to_order('blattnummer');" title="nach Blattnummer sortieren"><span class="fett">Blattnr.</span></a></td>
-			<? }else{echo '<td align="center" width="137"><span class="fett">Blattnr.</span></td>';} 
+				<th align="center" style="width: 70"><a href="javascript:add_to_order('blattnummer');" title="nach Blattnummer sortieren"><span class="fett">Blattnr.</span></a></th>
+			<? }else{echo '<th align="center" style="width: 137"><span class="fett">Blattnr.</span></th>';} 
 				if(strpos($this->formvars['order'], 'stammnr') === false){ ?>
-					<td align="center" width="64"><a href="javascript:add_to_order('stammnr');" title="nach Antragsnr. sortieren"><span class="fett">Antragsnr.</span></a></td>
-				<? }else{echo '<td align="center" width="64"><span class="fett">Antragsnr.</span></td>';}
+					<th align="center" style="width: 90"><a href="javascript:add_to_order('stammnr');" title="nach Antragsnr. sortieren"><span class="fett">Antragsnr.</span></a></th>
+				<? }else{echo '<th align="center" style="width: 90"><span class="fett">Antragsnr.</span></th>';}
 			} ?>            
 			
 			<? if(strpos($this->formvars['order'], 'art') === false){ ?>
-				<td align="center" width="137"><a href="javascript:add_to_order('art');" title="nach Dokumentenart sortieren"><span class="fett">Dokumentart</span></a></td>
-			<? }else{echo '<td align="center" width="137"><span class="fett">Dokumentart</span></td>';} ?>
+				<th align="center" style="width: 137"><a href="javascript:add_to_order('art');" title="nach Dokumentenart sortieren"><span class="fett">Dokumentart</span></a></th>
+			<? }else{echo '<th align="center" style="width: 137"><span class="fett">Dokumentart</span></th>';} ?>
 			<? if(strpos($this->formvars['order'], 'datum') === false){ ?>
-				<td align="center" width="45"><a href="javascript:add_to_order('datum');" title="nach Datum sortieren"><span class="fett">Datum</span></a></td>
-			<? }else{echo '<td align="center" width="137"><span class="fett">Datum</span></td>';} ?>
+				<th align="center" style="width: 80"><a href="javascript:add_to_order('datum');" title="nach Datum sortieren"><span class="fett">Datum</span></a></th>
+			<? }else{echo '<th align="center" style="width: 80"><span class="fett">Datum</span></th>';} ?>
 			<? if(strpos($this->formvars['order'], 'fortfuehrung') === false){ ?>
-				<td align="center" width="45"><a href="javascript:add_to_order('fortfuehrung');" title="nach Fortführung sortieren"><span class="fett">Fortführung</span></a></td>
-			<? }else{echo '<td align="center" width="137"><span class="fett">Fortführung</span></td>';} ?>
+				<th align="center" style="width: 120"><a href="javascript:add_to_order('fortfuehrung');" title="nach Fortführung sortieren"><span class="fett">Fortführung</span></a></th>
+			<? }else{echo '<th align="center" style="width: 120"><span class="fett">Fortführung</span></th>';} ?>
 			<? if(strpos($this->formvars['order'], 'vermst') === false){ ?>
-				<td align="center" width="137"><a href="javascript:add_to_order('vermst');" title="nach Vermessungsstelle sortieren"><span class="fett">VermStelle</span></a></td>
-			<? }else{echo '<td align="center" width="137"><span class="fett">VermStelle</span></td>';} ?>
+				<th align="center" style="width: 120"><a href="javascript:add_to_order('vermst');" title="nach Vermessungsstelle sortieren"><span class="fett">VermStelle</span></a></th>
+			<? }else{echo '<th align="center" style="width: 120"><span class="fett">VermStelle</span></th>';} ?>
 			<? if(strpos($this->formvars['order'], 'gueltigkeit') === false){ ?>
-				<td align="center" width="137"><a href="javascript:add_to_order('gueltigkeit');" title="nach Gültigkeit sortieren"><span class="fett">Gültigkeit</span></a></td>
-			<? }else{echo '<td align="center" width="137"><span class="fett">Gültigkeit</span></td>';} ?>
+				<th align="center" style="width: 120"><a href="javascript:add_to_order('gueltigkeit');" title="nach Gültigkeit sortieren"><span class="fett">Gültigkeit</span></a></th>
+			<? }else{echo '<th align="center" style="width: 120"><span class="fett">Gültigkeit</span></th>';} ?>
 			<? if(strpos($this->formvars['order'], 'format') === false){ ?>
-				<td align="center" width="137"><a href="javascript:add_to_order('format');" title="nach Blattformat sortieren"><span class="fett">Format</span></a></td>
-			<? }else{echo '<td align="center" width="137"><span class="fett">Format</span></td>';} ?>	
-          <td colspan="3"><div align="center"><?php    echo $this->nachweis->erg_dokumente.' Treffer';   ?></div></td>
+				<th align="center" style="width: 120"><a href="javascript:add_to_order('format');" title="nach Blattformat sortieren"><span class="fett">Format</span></a></th>
+			<? }else{echo '<th align="center" style="width: 120"><span class="fett">Format</span></th>';} ?>	
+          <th colspan="3" style="width: 100"><div align="center"><?    echo $this->nachweis->erg_dokumente.' Treffer';   ?></div></th>
         </tr>
-        <?php
+			</thead>
+			<tbody>
+        <?
 		$bgcolor = '#FFFFFF';
      for ($i=0;$i<$this->nachweis->erg_dokumente;$i++) {
         ?>
@@ -201,62 +204,67 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 			}else echo $bgcolor;
             ?>
 			"> 
-          <td align="left"> 
-              <input type="checkbox" name="id[]" value="<?php echo $this->nachweis->Dokumente[$i]['id']; ?>"<?php 
+				<td align="left" style="width: 80">
+					<a name="<? echo $this->nachweis->Dokumente[$i]['id']; ?>">
+					<input type="checkbox" name="id[]" onchange="document.GUI.art_markieren.value='individuell';" value="<? echo $this->nachweis->Dokumente[$i]['id']; ?>"<? 
         # Püfen ob das Dokument markiert werden soll
                 
-        if ($this->art_markieren=='individuell') {
-          if ($this->formvars['id'][$this->nachweis->Dokumente[$i]['id']]!=0) {
-            ?> checked<?php
-          }
-        }
-        else {
-
-        if ($this->nachweis->Dokumente[$i]['art'] == ($this->nachweis->Dokumente[$i]['art'] & $this->formvars['art_markieren'])) {
-            ?> checked<?php 
-          }
-        }
+				switch ($this->formvars['art_markieren']) {
+					case 'individuell' : {			# Nutzer hat selber selektiert
+						if (in_array($this->nachweis->Dokumente[$i]['id'], $this->formvars['id']))echo ' checked';
+					}break;
+					case '222' : {			# alle der Messung
+						if($this->nachweis->Dokumente[$i]['selected'] == 1)echo ' checked';
+					}break;
+					default : {		# Selektion nach Art
+						if($this->nachweis->Dokumente[$i]['art'] == ($this->nachweis->Dokumente[$i]['art'] & $this->formvars['art_markieren']))echo ' checked';
+					}
+				}
+				
         ?>>	
 				<? if($this->nachweis->Dokumente[$i]['bemerkungen'] != ''){ ?>
-					<img src="<? echo GRAPHICSPATH.'emblem-important.png'; ?>" title="Bemerkungen: <? echo $this->nachweis->Dokumente[$i]['bemerkungen']; ?>">
+					<i class="fa fa-exclamation-circle" style="font-size: 19px; color: orange"  title="Bemerkungen: <? echo $this->nachweis->Dokumente[$i]['bemerkungen']; ?>"></i>
 				<? } ?>
+				<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten') AND $this->nachweis->Dokumente[$i]['bemerkungen_intern'] != ''){ ?>
+					<i class="fa fa-exclamation-circle" style="font-size: 19px; color: red" title="Bearbeitungshinweis: <? echo $this->nachweis->Dokumente[$i]['bemerkungen_intern']; ?>"></i>
+				<? } ?>				
           </td>
-          <td><?php echo $this->formvars['id']=$this->nachweis->Dokumente[$i]['id']; ?></td>
-          <td><div align="center"><?php echo $this->formvars['flurid']=$this->nachweis->Dokumente[$i]['flurid']; ?></div></td>
+          <td style="width: 45"><? echo $this->nachweis->Dokumente[$i]['id']; ?></td>
+          <td style="width: 80"><div align="center"><? echo $this->formvars['flurid']=$this->nachweis->Dokumente[$i]['flurid']; ?></div></td>
           <? if(NACHWEIS_PRIMARY_ATTRIBUTE != 'rissnummer'){ ?>  
-          <td><div align="center"><?php echo $this->formvars['stammnr']=$this->nachweis->Dokumente[$i]['stammnr']; ?></div></td>
-					<td><div align="center"><?php echo $this->formvars['blattnummer']=str_pad($this->nachweis->Dokumente[$i]['blattnummer'],BLATTNUMMERMAXLENGTH,'0',STR_PAD_LEFT); ?></div></td>
+          <td style="width: 90"><div align="center"><? echo $this->formvars['stammnr']=$this->nachweis->Dokumente[$i]['stammnr']; ?></div></td>
+					<td style="width: 70"><div align="center"><? echo $this->formvars['blattnummer']=str_pad($this->nachweis->Dokumente[$i]['blattnummer'],BLATTNUMMERMAXLENGTH,'0',STR_PAD_LEFT); ?></div></td>
           <? } ?>
-          <td><div align="center"><?php echo $this->formvars['rissnummer']=$this->nachweis->Dokumente[$i]['rissnummer']; ?></div></td>
+          <td style="width: 70"><div align="center"><? echo $this->formvars['rissnummer']=$this->nachweis->Dokumente[$i]['rissnummer']; ?></div></td>
           <? if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){ ?>
-					<td><div align="center"><?php echo $this->formvars['blattnummer']=str_pad($this->nachweis->Dokumente[$i]['blattnummer'],BLATTNUMMERMAXLENGTH,'0',STR_PAD_LEFT); ?></div></td>
-          <td><div align="center"><?php echo $this->formvars['stammnr']=$this->nachweis->Dokumente[$i]['stammnr']; ?></div></td>
+					<td style="width: 70"><div align="center"><? echo $this->formvars['blattnummer']=str_pad($this->nachweis->Dokumente[$i]['blattnummer'],BLATTNUMMERMAXLENGTH,'0',STR_PAD_LEFT); ?></div></td>
+          <td style="width: 64"><div align="center"><? echo $this->formvars['stammnr']=$this->nachweis->Dokumente[$i]['stammnr']; ?></div></td>
           <? } ?>
-          <td><div align="center"> 
-              <?php if ($this->formvars['art']=$this->nachweis->Dokumente[$i]['art']=='100'){?>
+          <td style="width: 137"><div align="center"> 
+              <? if ($this->formvars['art']=$this->nachweis->Dokumente[$i]['art']=='100'){?>
               FFR 
-              <?php               
+              <?               
                     }
                     elseif($this->formvars['art']=$this->nachweis->Dokumente[$i]['art']=='010'){?>
               KVZ 
-              <?php               
+              <?               
                     }
                     elseif($this->formvars['art']=$this->nachweis->Dokumente[$i]['art']=='001'){?>
               GN 
-              <?php
+              <?
                     }
                     elseif($this->formvars['art']=$this->nachweis->Dokumente[$i]['art']=='111'){
                     	echo $this->nachweis->Dokumente[$i]['andere_art_name'];
                     }
                 ?>
             </div></td>          
-          <td><div align="center"><?php echo $this->nachweis->Dokumente[$i]['datum']; ?></div></td>
-          <td><div align="center"><?php echo $this->formvars['fortf']=$this->nachweis->Dokumente[$i]['fortfuehrung']; ?></div></td>
-          <td><div align="center"><?php echo $this->formvars['vermstelle']=$this->nachweis->Dokumente[$i]['vermst']; ?></div></td>
-          <td><div align="center"><?php echo $this->formvars['gueltigkeit']=$this->nachweis->Dokumente[$i]['gueltigkeit']; ?></div></td>
-          <td><div align="center"><?php echo $this->formvars['format']=$this->nachweis->Dokumente[$i]['format']; ?> 
+          <td style="width: 80"><div align="center"><? echo $this->nachweis->Dokumente[$i]['datum']; ?></div></td>
+          <td style="width: 120"><div align="center"><? echo $this->formvars['fortf']=$this->nachweis->Dokumente[$i]['fortfuehrung']; ?></div></td>
+          <td style="width: 120"><div align="center"><? echo $this->formvars['vermstelle']=$this->nachweis->Dokumente[$i]['vermst']; ?></div></td>
+          <td style="width: 120"><div align="center"><? echo $this->formvars['gueltigkeit']=$this->nachweis->Dokumente[$i]['gueltigkeit']; ?></div></td>
+          <td style="width: 120"><div align="center"><? echo $this->formvars['format']=$this->nachweis->Dokumente[$i]['format']; ?> 
             </div></td>
-          <td width="16">
+          <td style="width: 40">
 					<? 
 						$dateiname = NACHWEISDOCPATH.$this->nachweis->Dokumente[$i]['flurid'].'/'.$this->nachweis->buildNachweisNr($this->nachweis->Dokumente[$i][NACHWEIS_PRIMARY_ATTRIBUTE], $this->nachweis->Dokumente[$i][NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$this->nachweis->Dokumente[$i]['link_datei'];
 						$dateinamensteil=explode('.',$dateiname);
@@ -264,41 +272,37 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 						$this->allowed_documents[] = addslashes($thumbname);
 						$url = IMAGEURL.$this->document_loader_name.'?dokument='.$thumbname;
 					?>
-					<a target="_blank" onmouseover="getvorschau('<? echo $url; ?>');" href="index.php?go=document_anzeigen&ohnesession=1&id=<?php echo $this->nachweis->Dokumente[$i]['id']; ?>&file=1" title="Ansicht"><img src="graphics/button_ansicht.png" border="0"></a></td>
-          <td width="15">
+					<a target="_blank" onmouseover="getvorschau('<? echo $url; ?>');" href="index.php?go=document_anzeigen&ohnesession=1&id=<? echo $this->nachweis->Dokumente[$i]['id']; ?>&file=1" title="Ansicht"><img src="graphics/button_ansicht.png" border="0"></a></td>
+          <td style="width: 30">
           	<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten')){ ?>
-          	<a href="index.php?go=Nachweisformular&id=<?php echo $this->nachweis->Dokumente[$i]['id'];?>&order=<? echo $this->formvars['order'] ?>&richtung=<? echo $this->formvars['richtung'] ?>&flur_thematisch=<? echo $this->formvars['flur_thematisch']; ?>&such_andere_art=<? echo $this->formvars['such_andere_art']; ?>" title="bearbeiten"><img src="graphics/button_edit.png" border="0"></a></td>
+          	<a href="index.php?go=Nachweisformular&id=<? echo $this->nachweis->Dokumente[$i]['id'];?>&order=<? echo $this->formvars['order'] ?>&richtung=<? echo $this->formvars['richtung'] ?>&flur_thematisch=<? echo $this->formvars['flur_thematisch']; ?>&such_andere_art=<? echo $this->formvars['such_andere_art']; ?>" title="bearbeiten"><img src="graphics/button_edit.png" border="0"></a></td>
           	<? } ?>
-          <td width="30">
+          <td style="width: 30">
           	<? if($this->Stelle->isFunctionAllowed('Nachweisloeschen')){ ?>
-          	<a href="index.php?go=Nachweisloeschen&id=<?php echo $this->nachweis->Dokumente[$i]['id']; ?>&order=<? echo $this->formvars['order'] ?>&richtung=<? echo $this->formvars['richtung'] ?>&flur_thematisch=<? echo $this->formvars['flur_thematisch']; ?>"  title="löschen"><img src="graphics/button_drop.png" border="0"></a>
+          	<a href="index.php?go=Nachweisloeschen&id=<? echo $this->nachweis->Dokumente[$i]['id']; ?>&order=<? echo $this->formvars['order'] ?>&richtung=<? echo $this->formvars['richtung'] ?>&flur_thematisch=<? echo $this->formvars['flur_thematisch']; ?>"  title="löschen"><img src="graphics/button_drop.png" border="0"></a>
           	<? } ?>
           </td>
         </tr>
-        <?php
+        <?
     }
     ?>
+				</tbody>
       </table>
       <table width="0%" border="0" cellspacing="0" cellpadding="5">
         <tr> 
           <td>markieren</td>
           <td colspan="3">
           	<select name="art_markieren" onChange="document.GUI.submit()">
-	            <option value="">---</option>
-	            <option value="111"<?php if ($this->formvars['art_markieren']=='111') { ?> selected<?php } ?>>alle</option>
-	            <option value="000"<?php if ($this->formvars['art_markieren']=='000') { ?> selected<?php } ?>>keine</option>
-	            <option value="100"<?php if ($this->formvars['art_markieren']=='100') { ?> selected<?php } ?>>nur
-	            FFR</option>
-	            <option value="010"<?php if ($this->formvars['art_markieren']=='010') { ?> selected<?php } ?>>nur
-	            KVZ</option>
-	            <option value="001"<?php if ($this->formvars['art_markieren']=='001') { ?> selected<?php } ?>>nur
-	            GN</option>
-	            <option value="110"<?php if ($this->formvars['art_markieren']=='110') { ?> selected<?php } ?>>FFR
-	            + KVZ</option>
-	            <option value="101"<?php if ($this->formvars['art_markieren']=='101') { ?> selected<?php } ?>>FFR
-	            + GN</option>
-	            <option value="011"<?php if ($this->formvars['art_markieren']=='011') { ?> selected<?php } ?>>KVZ
-	            + GN</option>
+	            <option value="individuell">---</option>
+	            <option value="111"<? if ($this->formvars['art_markieren']=='111')echo ' selected '; ?>>alle</option>
+							<option value="222"<? if ($this->formvars['art_markieren']=='222')echo ' selected '; ?>>alle der Messung</option>
+	            <option value="000"<? if ($this->formvars['art_markieren']=='000')echo ' selected '; ?>>keine</option>
+	            <option value="100"<? if ($this->formvars['art_markieren']=='100')echo ' selected '; ?>>nur FFR</option>
+	            <option value="010"<? if ($this->formvars['art_markieren']=='010')echo ' selected '; ?>>nur KVZ</option>
+	            <option value="001"<? if ($this->formvars['art_markieren']=='001')echo ' selected '; ?>>nur GN</option>
+	            <option value="110"<? if ($this->formvars['art_markieren']=='110')echo ' selected '; ?>>FFR + KVZ</option>
+	            <option value="101"<? if ($this->formvars['art_markieren']=='101')echo ' selected '; ?>>FFR + GN</option>
+	            <option value="011"<? if ($this->formvars['art_markieren']=='011')echo ' selected '; ?>>KVZ + GN</option>
           	</select>
           </td>
           <td>
@@ -311,20 +315,21 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
           <td>einblenden</td>
           <td colspan="3"><select name="art_einblenden" onChange="document.GUI.submit()">
               <option value="">---</option>
-              <option value="1111"<?php if ($this->formvars['art_einblenden']==='1111') { ?> selected<?php } ?>>alle</option>
-              <option value="0001"<?php if ($this->formvars['art_einblenden']==='0001') { ?> selected<?php } ?>>nur Andere</option>
-              <option value="1000"<?php if ($this->formvars['art_einblenden']==='1000') { ?> selected<?php } ?>>nur FFR</option>
-              <option value="0100"<?php if ($this->formvars['art_einblenden']==='0100') { ?> selected<?php } ?>>nur KVZ</option>
-              <option value="0010"<?php if ($this->formvars['art_einblenden']==='0010') { ?> selected<?php } ?>>nur GN</option>
-              <option value="1100"<?php if ($this->formvars['art_einblenden']==='1100') { ?> selected<?php } ?>>FFR + KVZ</option>
-              <option value="1010"<?php if ($this->formvars['art_einblenden']==='1010') { ?> selected<?php } ?>>FFR + GN</option>
-              <option value="0110"<?php if ($this->formvars['art_einblenden']==='0110') { ?> selected<?php } ?>>KVZ + GN</option>
-							<option value="1001"<?php if ($this->formvars['art_einblenden']==='1001') { ?> selected<?php } ?>>FFR + Andere</option>
-              <option value="0101"<?php if ($this->formvars['art_einblenden']==='0101') { ?> selected<?php } ?>>KVZ + Andere</option>
-              <option value="0011"<?php if ($this->formvars['art_einblenden']==='0011') { ?> selected<?php } ?>>GN + Andere</option>
-              <option value="1101"<?php if ($this->formvars['art_einblenden']==='1101') { ?> selected<?php } ?>>FFR + KVZ + Andere</option>
-              <option value="1011"<?php if ($this->formvars['art_einblenden']==='1011') { ?> selected<?php } ?>>FFR + GN + Andere</option>
-              <option value="0111"<?php if ($this->formvars['art_einblenden']==='0111') { ?> selected<?php } ?>>KVZ + GN + Andere</option>
+              <option value="1111"<? if ($this->formvars['art_einblenden']==='1111')echo ' selected '; ?>>alle</option>
+							<option value="2222"<? if ($this->formvars['art_einblenden']==='2222')echo ' selected '; ?>>alle ausgewählten</option>
+              <option value="0001"<? if ($this->formvars['art_einblenden']==='0001')echo ' selected '; ?>>nur Andere</option>
+              <option value="1000"<? if ($this->formvars['art_einblenden']==='1000')echo ' selected '; ?>>nur FFR</option>
+              <option value="0100"<? if ($this->formvars['art_einblenden']==='0100')echo ' selected '; ?>>nur KVZ</option>
+              <option value="0010"<? if ($this->formvars['art_einblenden']==='0010')echo ' selected '; ?>>nur GN</option>
+              <option value="1100"<? if ($this->formvars['art_einblenden']==='1100')echo ' selected '; ?>>FFR + KVZ</option>
+              <option value="1010"<? if ($this->formvars['art_einblenden']==='1010')echo ' selected '; ?>>FFR + GN</option>
+              <option value="0110"<? if ($this->formvars['art_einblenden']==='0110')echo ' selected '; ?>>KVZ + GN</option>
+							<option value="1001"<? if ($this->formvars['art_einblenden']==='1001')echo ' selected '; ?>>FFR + Andere</option>
+              <option value="0101"<? if ($this->formvars['art_einblenden']==='0101')echo ' selected '; ?>>KVZ + Andere</option>
+              <option value="0011"<? if ($this->formvars['art_einblenden']==='0011')echo ' selected '; ?>>GN + Andere</option>
+              <option value="1101"<? if ($this->formvars['art_einblenden']==='1101')echo ' selected '; ?>>FFR + KVZ + Andere</option>
+              <option value="1011"<? if ($this->formvars['art_einblenden']==='1011')echo ' selected '; ?>>FFR + GN + Andere</option>
+              <option value="0111"<? if ($this->formvars['art_einblenden']==='0111')echo ' selected '; ?>>KVZ + GN + Andere</option>
             </select>
 					</td>
 					<td>
@@ -337,15 +342,15 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
           <td>Vorbereitungsnummer:</td>
           <td colspan="3">
 						<span class="fett">
-            <?php $this->FormObjAntr_nr->outputHTML();
+            <? $this->FormObjAntr_nr->outputHTML();
     					echo $this->FormObjAntr_nr->html;?>
 						</span>
 						&nbsp;
 						<select name="go_plus" onChange="document.GUI.submit()">
               <option value="">---</option>
-              <option value="zum_Auftrag_hinzufuegen"<?php if ($this->formvars['nachweisaction']=='markierte_zum_Auftrag_hinzufuegen') { ?> selected<?php } ?>>zu 
+              <option value="zum_Auftrag_hinzufuegen"<? if ($this->formvars['nachweisaction']=='markierte_zum_Auftrag_hinzufuegen')echo ' selected '; ?>>zu 
               Auftrag hinzufügen</option>
-              <option value="aus_Auftrag_entfernen"<?php if ($this->formvars['nachweisaction']=='markierte_aus_Auftrag_entfernen') { ?> selected<?php } ?>>aus 
+              <option value="aus_Auftrag_entfernen"<? if ($this->formvars['nachweisaction']=='markierte_aus_Auftrag_entfernen')echo ' selected '; ?>>aus 
               Auftrag entfernen</option>
             </select>
 						<span class="fett">&nbsp;</span>
@@ -357,17 +362,17 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 					</td>
         </tr>
       </table>
-	  <?php 
+	  <? 
 	  } else {
 	  ?>
 	  <span class="fett">Es konnten keine Dokumente zu der Auswahl gefunden werden.<br>
 Wählen Sie neue Suchparameter.</span><br>
-	  <?php } ?>
+	  <? } ?>
          <a href="index.php?go=Nachweisrechercheformular&datum=<? echo $this->formvars['datum']; ?>&datum2=<? echo $this->formvars['datum2']; ?>&VermStelle=<? echo $this->formvars['VermStelle']; ?>&flur_thematisch=<? echo $this->formvars['flur_thematisch']; ?>&such_andere_art=<? echo $this->formvars['such_andere_art']; ?>">&lt;&lt; zur&uuml;ck
          zur Suche</a></td>
   </tr>
   <tr> 
-    <td bgcolor="<?php echo BG_FORM ?>"> 
+    <td bgcolor="<? echo BG_FORM ?>"> 
     </td>
   </tr>
 </table>
