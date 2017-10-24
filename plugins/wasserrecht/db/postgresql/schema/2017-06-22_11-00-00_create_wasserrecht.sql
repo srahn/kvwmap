@@ -220,7 +220,8 @@ CREATE TABLE wasserrecht.fiswrv_wasserrechtliche_zulassungen(
 	datum_bestand_form date, --Ausgangsbescheid,
 	dokument varchar(255),
 	nachfolger integer REFERENCES wasserrecht.fiswrv_wasserrechtliche_zulassungen(id),
-	vorgaenger integer REFERENCES wasserrecht.fiswrv_wasserrechtliche_zulassungen(id)
+	vorgaenger integer REFERENCES wasserrecht.fiswrv_wasserrechtliche_zulassungen(id),
+	freigegeben boolean DEFAULT false
 )WITH OIDS;
 
 --GEWÄSSERBENUTZUNGEN
@@ -522,5 +523,42 @@ CREATE TABLE wasserrecht.fiswrv_fiswrv_wem
   	sachbearbeiter integer REFERENCES wasserrecht.fiswrv_personen(id)
 )WITH OIDS;
 */
+
+---------
+
+CREATE OR REPLACE FUNCTION wasserrecht.wrz_freigegeben_copy_function()
+RETURNS trigger AS '
+BEGIN
+  IF NEW.freigegeben IS NOT NULL THEN
+    NEW.freigegeben := false;
+  END IF;
+  RETURN NEW;
+END' LANGUAGE 'plpgsql';
+
+CREATE TRIGGER wrz_freigegeben_copy_trigger
+BEFORE INSERT ON wasserrecht.fiswrv_wasserrechtliche_zulassungen
+FOR EACH ROW
+EXECUTE PROCEDURE wasserrecht.wrz_freigegeben_copy_function();
+
+CREATE OR REPLACE FUNCTION wasserrecht.wrz_vorgaenger_nachfolger_function()
+RETURNS trigger AS '
+BEGIN
+  IF NEW.vorgaenger IS NOT NULL THEN
+    UPDATE wasserrecht.fiswrv_wasserrechtliche_zulassungen SET nachfolger = NEW.id WHERE id = NEW.vorgaenger;
+  ELSIF OLD.vorgaenger IS NOT NULL AND NEW.vorgaenger IS NULL THEN
+    UPDATE wasserrecht.fiswrv_wasserrechtliche_zulassungen SET nachfolger = NULL WHERE id = OLD.vorgaenger;
+  ELSIF NEW.nachfolger IS NOT NULL THEN
+	UPDATE wasserrecht.fiswrv_wasserrechtliche_zulassungen SET vorgaenger = NEW.id WHERE id = NEW.nachfolger;
+  ELSIF OLD.nachfolger IS NOT NULL AND NEW.nachfolger IS NULL THEN
+	UPDATE wasserrecht.fiswrv_wasserrechtliche_zulassungen SET vorgaenger = NULL WHERE id = OLD.nachfolger;
+  END IF;
+  RETURN NEW;
+END' LANGUAGE 'plpgsql';
+
+CREATE TRIGGER wrz_vorgaenger_nachfolger_trigger
+BEFORE UPDATE ON wasserrecht.fiswrv_wasserrechtliche_zulassungen
+FOR EACH ROW
+WHEN ((OLD.vorgaenger IS DISTINCT FROM NEW.vorgaenger OR OLD.nachfolger IS DISTINCT FROM NEW.nachfolger) AND pg_trigger_depth() = 0)
+EXECUTE PROCEDURE wasserrecht.wrz_vorgaenger_nachfolger_function();
 
 COMMIT;

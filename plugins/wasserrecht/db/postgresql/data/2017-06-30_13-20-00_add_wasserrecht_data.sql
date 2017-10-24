@@ -222,6 +222,12 @@ INSERT INTO wasserrecht.fiswrv_wasserrechtliche_zulassungen (typus, aktenzeichen
 INSERT INTO wasserrecht.fiswrv_wasserrechtliche_zulassungen (typus, aktenzeichen, ort, datum, ausstellbehoerde, status, gueltig_seit, befristet_bis, aktuell, bearbeiter, adressat, anlage) VALUES (1, '§ 4', 1, current_date, 2, 2, '2017-07-01', '2017-12-31', false, 2, 1, 1);
 INSERT INTO wasserrecht.fiswrv_wasserrechtliche_zulassungen (typus, aktenzeichen, ort, datum, ausstellbehoerde, status, gueltig_seit, aktuell, bearbeiter, adressat, anlage) VALUES (1, '§ 5', 1, current_date, 1, 2, '2017-07-01', false, 2, 2, 1);
 
+UPDATE wasserrecht.fiswrv_wasserrechtliche_zulassungen SET freigegeben = true WHERE id = 1;
+UPDATE wasserrecht.fiswrv_wasserrechtliche_zulassungen SET freigegeben = true WHERE id = 2;
+UPDATE wasserrecht.fiswrv_wasserrechtliche_zulassungen SET freigegeben = true WHERE id = 3;
+UPDATE wasserrecht.fiswrv_wasserrechtliche_zulassungen SET freigegeben = true WHERE id = 4;
+UPDATE wasserrecht.fiswrv_wasserrechtliche_zulassungen SET freigegeben = true WHERE id = 5;
+
 INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_umfang_entnahme(name, max_ent_a, max_ent_wee) VALUES('Test Umfang', 80000, 100000);
 INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_lage(name, namekurz, namelang, the_geo) VALUES('Test Gewaesserbenutzungen Lage', 'Test Gewaesserbenutzungen Lage (kurz)', 'Test Gewaesserbenutzungen Lage (lang)', ST_Transform(ST_GeomFromText('POINT(13 53)', 4326), 35833));
 
