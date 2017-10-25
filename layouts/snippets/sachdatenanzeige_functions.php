@@ -94,6 +94,7 @@ include('funktionen/input_check_functions.php');
 		}
 		if(sure){
 			currentform.target = '';
+			currentform.go.value = 'get_last_query';
 			if(currentform.go_backup.value != ''){
 				currentform.go.value = currentform.go_backup.value;
 			}
@@ -113,6 +114,7 @@ include('funktionen/input_check_functions.php');
 		}
 		if(sure){
 			currentform.target = '';
+			currentform.go.value = 'get_last_query';
 			if(currentform.go_backup.value != ''){
 				currentform.go.value = currentform.go_backup.value;
 			}
@@ -132,6 +134,7 @@ include('funktionen/input_check_functions.php');
 		}
 		if(sure){
 			currentform.target = '';
+			currentform.go.value = 'get_last_query';
 			if(currentform.go_backup.value != ''){
 				currentform.go.value = currentform.go_backup.value;
 			}
@@ -148,6 +151,7 @@ include('funktionen/input_check_functions.php');
 		}
 		if(sure){
 			currentform.target = '';
+			currentform.go.value = 'get_last_query';
 			if(currentform.go_backup.value != ''){
 				currentform.go.value = currentform.go_backup.value;
 			}
