@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 172.17.0.2:3306
--- Generation Time: Oct 25, 2017 at 09:52 AM
+-- Generation Time: Oct 25, 2017 at 11:50 AM
 -- Server version: 5.5.56
 -- PHP Version: 5.6.30-0+deb8u1
 
@@ -53,7 +53,8 @@ CREATE TABLE `classes` (
 INSERT INTO `classes` (`Class_ID`, `Name`, `Name_low-german`, `Name_english`, `Name_polish`, `Name_vietnamese`, `Layer_ID`, `Expression`, `drawingorder`, `legendorder`, `text`, `classification`, `legendgraphic`, `legendimagewidth`, `legendimageheight`) VALUES
 (1, 'alle', NULL, NULL, NULL, NULL, 2, '', 1, NULL, '', '', '', NULL, NULL),
 (2, 'alle', NULL, NULL, NULL, NULL, 3, '', 1, NULL, '', '', '', NULL, NULL),
-(8, 'alle', NULL, NULL, NULL, NULL, 6, '', 1, NULL, '', '', '', NULL, NULL);
+(8, 'alle', NULL, NULL, NULL, NULL, 6, '', 1, NULL, '', '', '', NULL, NULL),
+(9, 'alle', NULL, NULL, NULL, NULL, 38, '', 1, NULL, '', '', '', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -619,7 +620,7 @@ INSERT INTO `layer` (`Layer_ID`, `Name`, `Name_low-german`, `Name_english`, `Nam
 (34, 'Gewaesserbenutzungen_Art', NULL, NULL, NULL, NULL, '', 5, 11, 'SELECT id, name FROM fiswrv_gewaesserbenutzungen_art WHERE 1=1', 'fiswrv_gewaesserbenutzungen_art', 0, '', 'wasserrecht', '', '', '', '', 'name', NULL, NULL, '', 0, 'host=pgsql user=kvwmap_wr password=gdi0DVZ dbname=kvwmapsp_wr', '', 6, '', '', 'id', NULL, 10, 'pixels', '35833', '', '1', NULL, 100, NULL, NULL, NULL, '', NULL, 'epsg:35833', '', '', '', 60, '', '', '', '', '0', '0', '', '', '', '', '0', 1, '', ''),
 (36, 'Gewaesserbenutzungen_Zweck', NULL, NULL, NULL, NULL, '', 5, 11, 'SELECT id, nummer, name FROM fiswrv_gewaesserbenutzungen_zweck WHERE 1=1', 'fiswrv_gewaesserbenutzungen_zweck', 0, '', 'wasserrecht', '', '', '', '', 'name', NULL, NULL, '', 0, 'host=pgsql user=kvwmap_wr password=gdi0DVZ dbname=kvwmapsp_wr', '', 6, '', '', 'id', NULL, 10, 'pixels', '35833', '', '1', NULL, 100, NULL, NULL, NULL, '', NULL, 'epsg:35833', '', '', '', 60, '', '', '', '', '0', '0', '', '', '', '', '0', 1, '', ''),
 (37, 'Gewaesserbenutzungen_Umfang_Entnahme', NULL, NULL, NULL, NULL, '', 5, 11, 'SELECT id, name, max_ent_s, max_ent_h, max_ent_d, max_ent_w, max_ent_m,        max_ent_a, max_ent_wee, max_ent_wee_beschreib, max_ent_wb, max_ent_wb_beschreib,        max_ent_frei, max_ent_frei_beschreib, freitext FROM fiswrv_gewaesserbenutzungen_umfang_entnahme WHERE 1=1', 'fiswrv_gewaesserbenutzungen_umfang_entnahme', 0, '', 'wasserrecht', '', '', '', '', 'name', NULL, NULL, '', 0, 'host=pgsql user=kvwmap_wr password=gdi0DVZ dbname=kvwmapsp_wr', '', 6, '', '', 'id', NULL, 10, 'pixels', '35833', '', '1', NULL, 100, NULL, NULL, NULL, '', NULL, 'epsg:35833', '', '', '', 60, '', '', '', '', '0', '0', '', '', '', '', '0', 1, '', ''),
-(38, 'Gewaesserbenutzungen_Lage', NULL, NULL, NULL, NULL, '', 0, 11, 'SELECT id, name, gewaesserbenutzungen as gwb_id, the_geo FROM fiswrv_gewaesserbenutzungen_lage WHERE 1=1', 'fiswrv_gewaesserbenutzungen_lage', 0, '', 'wasserrecht', '', '', '', '', 'name', NULL, NULL, '', 0, 'host=pgsql user=kvwmap_wr password=gdi0DVZ dbname=kvwmapsp_wr', '', 6, '', '', 'id', NULL, 10, 'pixels', '35833', '', '1', NULL, 100, NULL, NULL, NULL, '', NULL, 'epsg:35833', '', '', '', 60, '', '', '', '', '0', '0', '', '', '', '', '0', 1, '', ''),
+(38, 'Gewaesserbenutzungen_Lage', NULL, NULL, NULL, NULL, '', 0, 11, 'SELECT id, name, gewaesserbenutzungen as gwb_id, the_geo FROM fiswrv_gewaesserbenutzungen_lage WHERE 1=1', 'fiswrv_gewaesserbenutzungen_lage', 0, 'the_geo from (SELECT id, name, gewaesserbenutzungen as gwb_id, the_geo FROM wasserrecht.fiswrv_gewaesserbenutzungen_lage WHERE 1=1) as foo using unique id using srid=35833', 'wasserrecht', '', '', '', '', 'name', NULL, NULL, '', 0, 'host=pgsql user=kvwmap_wr password=gdi0DVZ dbname=kvwmapsp_wr', '', 6, '', '', 'id', NULL, 10, 'pixels', '35833', '', '1', NULL, 100, NULL, NULL, NULL, '', NULL, 'epsg:35833', '', '', '', 60, '', '', '', '', '0', '0', '', '', '', '', '0', 1, '', ''),
 (39, 'Betriebszustand', NULL, NULL, NULL, NULL, '', 5, 11, 'SELECT id, name FROM fiswrv_betriebszustand WHERE 1=1', 'fiswrv_betriebszustand', 0, '', 'wasserrecht', '', '', '', '', 'name', NULL, NULL, '', 0, 'host=pgsql user=kvwmap_wr password=gdi0DVZ dbname=kvwmapsp_wr', '', 6, '', '', 'id', NULL, 10, 'pixels', '35833', '', '1', NULL, NULL, NULL, NULL, NULL, '', NULL, '', '', '', '', 60, '', '', '', '', '0', '0', '', '', '', '', '0', 1, '', ''),
 (40, 'Messtischblatt', NULL, NULL, NULL, NULL, '', 5, 11, 'SELECT id, nummer FROM fiswrv_messtischblatt WHERE 1=1', 'fiswrv_messtischblatt ', 0, '', 'wasserrecht', '', '', '', '', 'nummer', NULL, NULL, '', 0, 'host=pgsql user=kvwmap_wr password=gdi0DVZ dbname=kvwmapsp_wr', '', 6, '', '', 'id', NULL, 10, 'pixels', '35833', '', '1', NULL, NULL, NULL, NULL, NULL, '', NULL, '', '', '', '', 60, '', '', '', '', '0', '0', '', '', '', '', '0', 1, '', ''),
 (41, 'Archivnummer', NULL, NULL, NULL, NULL, '', 5, 11, 'SELECT id, nummer FROM fiswrv_archivnummer WHERE 1=1', 'fiswrv_archivnummer', 0, '', 'wasserrecht', '', '', '', '', 'nummer', NULL, NULL, '', 0, 'host=pgsql user=kvwmap_wr password=gdi0DVZ dbname=kvwmapsp_wr', '', 6, '', '', 'id', NULL, 10, 'pixels', '35833', '', '1', NULL, NULL, NULL, NULL, NULL, '', NULL, '', '', '', '', 60, '', '', '', '', '0', '0', '', '', '', '', '0', 1, '', ''),
@@ -1822,6 +1823,10 @@ INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES
 ('kvwmap', 'mysql', '2017-07-13_10-37-26_layer_attributes_Winkel.sql'),
 ('kvwmap', 'mysql', '2017-07-14_13-51-46_classes_legendimageheight_width.sql'),
 ('kvwmap', 'mysql', '2017-07-17_09-31-55_label_maxlength.sql'),
+('kvwmap', 'mysql', '2017-08-31_14-16-16_delete_legend_order_in_group_and_used_layer.sql'),
+('kvwmap', 'mysql', '2017-09-11_15-40-24_u_menues_Druckausschnittswahl.sql'),
+('kvwmap', 'mysql', '2017-09-13_10-39-04_add_stellen_hierarchie.sql'),
+('kvwmap', 'mysql', '2017-09-19_12-04-37_styles_polaroffset.sql'),
 ('kvwmap', 'postgresql', '2014-09-12_16-33-22_Version2.0.sql'),
 ('kvwmap', 'postgresql', '2015-05-06_08-47-01_st_area_utm.sql'),
 ('kvwmap', 'postgresql', '2015-05-28_14-07-36_bug_st_area_utm.sql'),
@@ -1931,7 +1936,7 @@ CREATE TABLE `rolle` (
 --
 
 INSERT INTO `rolle` (`user_id`, `stelle_id`, `nImageWidth`, `nImageHeight`, `auto_map_resize`, `minx`, `miny`, `maxx`, `maxy`, `nZoomFactor`, `selectedButton`, `epsg_code`, `epsg_code2`, `coordtype`, `active_frame`, `last_time_id`, `gui`, `language`, `hidemenue`, `hidelegend`, `fontsize_gle`, `highlighting`, `buttons`, `scrollposition`, `result_color`, `always_draw`, `runningcoords`, `showmapfunctions`, `showlayeroptions`, `singlequery`, `querymode`, `geom_edit_first`, `overlayx`, `overlayy`, `hist_timestamp`, `instant_reload`, `menu_auto_close`, `layer_params`, `menue_buttons`, `visually_impaired`) VALUES
-(1, 1, 1198, 768, 1, 33365637.312722, 5874041.6305345, 33365936.189127, 5874241.6305345, 2, 'zoomin', '35833', '', 'dec', 0, '2017-10-25 09:20:42', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure,', 0, 1, 0, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 1, 0),
+(1, 1, 1198, 802, 1, 33179892.898819, 5867814.9999173, 33499172.10119, 6081468.0000002, 2, 'zoomin', '35833', '', 'dec', 0, '2017-10-25 11:48:43', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure,', 2, 1, 0, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 1, 0),
 (2, 2, 1198, 770, 1, 33194087.317244, 5867814.9999176, 33484977.682765, 6081467.9999999, 2, 'zoomin', '35833', NULL, 'dec', 0, '2017-10-25 09:52:01', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure', 0, 1, 0, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 0, 0);
 
 -- --------------------------------------------------------
@@ -1994,7 +1999,7 @@ CREATE TABLE `rolle_last_query` (
 --
 
 INSERT INTO `rolle_last_query` (`user_id`, `stelle_id`, `go`, `layer_id`, `sql`, `orderby`, `limit`, `offset`) VALUES
-(1, 1, 'Layer-Suche_Suchen', 25, 'SELECT * FROM (SELECT a.oid AS fiswrv_wasserrechtliche_zulassungen_oid,  COALESCE(d.name,\'\') AS anlage_klasse,  a.anlage AS anlage_id,  b.name AS anlage_anzeige,  a.id as wrz_id,  COALESCE(b.id::text,\'\') ||\' -\'|| COALESCE(a.id::text,\'\') AS wrz_wid,  a.ausstellbehoerde,  \'\' AS ausstellbehoerde_link,  a.adressat AS personen_id,  \'\' AS adressat_link,  COALESCE(e.name,\'\') AS adressat_name,  COALESCE(e.namenszusatz,\'\') AS adressat_namenszusatz,  COALESCE(f.strasse,\'\') ||\'  \'|| COALESCE(f.hausnummer,\'\') AS adressat_strasse_hausnummer,  COALESCE(f.plz::text,\'\') ||\'  \'|| COALESCE(f.ort,\'\') AS adressat_plz_ort,  a.bearbeiter,  \'\' AS bearbeiter_link,  COALESCE(g.name,\'\') AS bearbeiter_name,  COALESCE(g.namenszusatz,\'\') AS bearbeiter_namenszusatz,  COALESCE(h.strasse,\'\') ||\'  \'|| COALESCE(h.hausnummer,\'\') AS bearbeiter_strasse_hausnummer,  COALESCE(h.plz::text,\'\') ||\'  \'|| COALESCE(h.ort,\'\') AS bearbeiter_plz_ort,  COALESCE(g.zimmer,\'\') AS bearbeiter_zimmer,  COALESCE(g.telefon,\'\') AS bearbeiter_telefon,  COALESCE(g.fax,\'\') AS bearbeiter_fax,  COALESCE(g.email,\'\') AS bearbeiter_email,   c.bezeichnung,  a.typus,  a.bearbeiterzeichen,  a.aktenzeichen,  a.regnummer,  a.bergamt_aktenzeichen,  a.ort,   a.datum,  a.fassung_auswahl,  a.fassung_nummer,  a.fassung_typus,  a.fassung_bearbeiterzeichen,  a.fassung_aktenzeichen,  a.fassung_datum,  a.gueltig_seit,  a.befristet_bis,  a.status,  a.aktuell,  CASE WHEN a.befristet_bis < current_date THEN \'nein\' ELSE \'ja\' END AS wirksam,  a.ungueltig_seit,  a.ungueltig_aufgrund,  a.datum_postausgang, a.datum_bestand_mat,  a.datum_bestand_form,  a.dokument AS dokument,  a.nachfolger AS nachfolger,  a.vorgaenger AS vorgaenger,  a.freigegeben,  \'\' AS wrz_ben   FROM fiswrv_wasserrechtliche_zulassungen a LEFT JOIN fiswrv_wasserrechtliche_zulassungen_bezeichnung c ON a.id = c.id LEFT JOIN fiswrv_anlagen b ON a.anlage=b.id LEFT JOIN fiswrv_anlagen_klasse d ON b.klasse=d.id LEFT JOIN fiswrv_personen e ON a.adressat=e.id LEFT JOIN fiswrv_adresse f ON e.adresse=f.id LEFT JOIN fiswrv_personen g ON a.bearbeiter=g.id LEFT JOIN fiswrv_adresse h ON g.adresse=h.id WHERE 1=1) as query WHERE 1=1  AND ( (1=1))', ' ORDER BY fiswrv_wasserrechtliche_zulassungen_oid ', 10, NULL),
+(1, 1, 'Layer-Suche_Suchen', 33, 'SELECT * FROM (SELECT b.oid AS fiswrv_gewaesserbenutzungen_oid,  f.name AS anlage_anzeige,  a.anlage AS anlage_id,  b.id as gwb_id,  b.wasserrechtliche_zulassungen as wrz_id,  \'\' AS wasserrechtliche_zulassungen_link,  b.kennnummer,  b.wasserbuchnummer,  c.bezeichnung,  b.freitext_art,  b.art,  b.freitext_zweck,  b.zweck,  b.umfang_entnahme,  a.adressat as personen_id,  a.aktuell,  \'\' AS gewaesserbenutzungen_lage  FROM fiswrv_gewaesserbenutzungen b LEFT JOIN fiswrv_gewaesserbenutzungen_bezeichnung c ON c.id = b.id LEFT JOIN fiswrv_wasserrechtliche_zulassungen a ON b.wasserrechtliche_zulassungen = a.id  LEFT JOIN fiswrv_anlagen f ON a.anlage=f.id WHERE 1=1) as query WHERE 1=1  AND ( (1=1))', ' ORDER BY fiswrv_gewaesserbenutzungen_oid ', 10, NULL),
 (2, 2, 'Layer-Suche_Suchen', 33, 'SELECT * FROM (SELECT b.oid AS fiswrv_gewaesserbenutzungen_oid,  f.name AS anlage_anzeige,  a.anlage AS anlage_id,  b.id as gwb_id,  b.wasserrechtliche_zulassungen as wrz_id,  \'\' AS wasserrechtliche_zulassungen_link,  b.kennnummer,  b.wasserbuchnummer,  c.bezeichnung,  b.freitext_art,  b.art,  b.freitext_zweck,  b.zweck,  b.umfang_entnahme,  a.adressat as personen_id,  a.aktuell,  \'\' AS gewaesserbenutzungen_lage  FROM fiswrv_gewaesserbenutzungen b LEFT JOIN fiswrv_gewaesserbenutzungen_bezeichnung c ON c.id = b.id LEFT JOIN fiswrv_wasserrechtliche_zulassungen a ON b.wasserrechtliche_zulassungen = a.id  LEFT JOIN fiswrv_anlagen f ON a.anlage=f.id WHERE 1=1) as query WHERE 1=1  AND ( (1=1))', ' ORDER BY fiswrv_gewaesserbenutzungen_oid ', 10, NULL);
 
 -- --------------------------------------------------------
@@ -2093,6 +2098,17 @@ INSERT INTO `stelle` (`ID`, `Bezeichnung`, `Bezeichnung_low-german`, `Bezeichnun
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `stellen_hierarchie`
+--
+
+CREATE TABLE `stellen_hierarchie` (
+  `parent_id` int(11) NOT NULL DEFAULT '0',
+  `child_id` int(11) NOT NULL DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `stelle_gemeinden`
 --
 
@@ -2134,6 +2150,7 @@ CREATE TABLE `styles` (
   `sizeitem` varchar(255) CHARACTER SET latin1 COLLATE latin1_german2_ci DEFAULT NULL,
   `offsetx` int(11) DEFAULT NULL,
   `offsety` int(11) DEFAULT NULL,
+  `polaroffset` varchar(255) DEFAULT NULL,
   `pattern` varchar(255) DEFAULT NULL,
   `geomtransform` varchar(20) DEFAULT NULL,
   `gap` int(11) DEFAULT NULL,
@@ -2147,10 +2164,11 @@ CREATE TABLE `styles` (
 -- Dumping data for table `styles`
 --
 
-INSERT INTO `styles` (`Style_ID`, `symbol`, `symbolname`, `size`, `color`, `backgroundcolor`, `outlinecolor`, `colorrange`, `datarange`, `rangeitem`, `opacity`, `minsize`, `maxsize`, `minscale`, `maxscale`, `angle`, `angleitem`, `antialias`, `width`, `minwidth`, `maxwidth`, `sizeitem`, `offsetx`, `offsety`, `pattern`, `geomtransform`, `gap`, `initialgap`, `linecap`, `linejoin`, `linejoinmaxsize`) VALUES
-(1, NULL, 'circle', '8', '30 149 255', NULL, '0 0 0', NULL, NULL, NULL, NULL, NULL, 10, 6, NULL, '360', '', NULL, NULL, NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(2, NULL, 'circle', '8', '30 149 255', NULL, '0 0 0', NULL, NULL, NULL, NULL, NULL, 10, NULL, NULL, '360', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(8, NULL, 'circle', '8', '30 149 255', NULL, '0 0 0', NULL, NULL, NULL, NULL, NULL, 10, NULL, NULL, '360', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `styles` (`Style_ID`, `symbol`, `symbolname`, `size`, `color`, `backgroundcolor`, `outlinecolor`, `colorrange`, `datarange`, `rangeitem`, `opacity`, `minsize`, `maxsize`, `minscale`, `maxscale`, `angle`, `angleitem`, `antialias`, `width`, `minwidth`, `maxwidth`, `sizeitem`, `offsetx`, `offsety`, `polaroffset`, `pattern`, `geomtransform`, `gap`, `initialgap`, `linecap`, `linejoin`, `linejoinmaxsize`) VALUES
+(1, NULL, 'circle', '8', '30 149 255', NULL, '0 0 0', NULL, NULL, NULL, NULL, NULL, 10, 6, NULL, '360', '', NULL, NULL, NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(2, NULL, 'circle', '8', '30 149 255', NULL, '0 0 0', NULL, NULL, NULL, NULL, NULL, 10, NULL, NULL, '360', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(9, NULL, 'circle', '6', '255 255 255', NULL, '0 0 0', NULL, NULL, NULL, NULL, NULL, 8, NULL, NULL, '360', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(8, NULL, 'circle', '8', '30 149 255', NULL, '0 0 0', NULL, NULL, NULL, NULL, NULL, 10, NULL, NULL, '360', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -2163,7 +2181,6 @@ CREATE TABLE `used_layer` (
   `Layer_ID` int(11) NOT NULL DEFAULT '0',
   `queryable` enum('0','1') NOT NULL DEFAULT '1',
   `drawingorder` int(11) NOT NULL DEFAULT '0',
-  `legendorder` int(11) DEFAULT NULL,
   `minscale` int(11) DEFAULT NULL,
   `maxscale` int(11) DEFAULT NULL,
   `offsite` varchar(11) DEFAULT NULL,
@@ -2186,143 +2203,143 @@ CREATE TABLE `used_layer` (
 -- Dumping data for table `used_layer`
 --
 
-INSERT INTO `used_layer` (`Stelle_ID`, `Layer_ID`, `queryable`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `offsite`, `transparency`, `postlabelcache`, `Filter`, `template`, `header`, `footer`, `symbolscale`, `requires`, `logconsume`, `privileg`, `export_privileg`, `start_aktiv`, `use_geom`) VALUES
-(1, 1, '0', 0, NULL, 0, 0, '', NULL, '0', NULL, '', NULL, NULL, NULL, NULL, '0', '0', 1, '0', 1),
-(0, 2, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '0', 1, '0', 1),
-(1, 2, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', '', '', 0, NULL, '0', '2', 1, '0', 1),
-(0, 3, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '0', 1, '0', 1),
-(1, 3, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(0, 4, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '0', 1, '0', 1),
-(0, 5, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '0', 1, '0', 1),
-(1, 43, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(0, 6, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '0', 1, '0', 1),
-(1, 6, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(0, 7, '0', 0, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '0', 1, '0', 1),
-(4, 1, '0', 0, NULL, 0, 0, '', NULL, '0', NULL, '', NULL, NULL, 0, NULL, '0', '0', 1, '0', 1),
-(2, 1, '1', 0, NULL, 0, 0, '', NULL, '0', '', '', '', '', 0, NULL, '0', '0', 1, '0', 1),
-(1, 9, '1', 0, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(1, 10, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 2, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(1, 11, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(1, 12, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(1, 13, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(1, 14, '1', 0, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(0, 49, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '0', 1, '0', 1),
-(1, 16, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(0, 43, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '0', 1, '0', 1),
-(1, 17, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(1, 49, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 13, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(1, 20, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(1, 48, '1', 0, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 13, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(1, 24, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(1, 25, '1', 100, NULL, -1, 0, '', NULL, '0', '', '', '', '', 0, NULL, '0', '2', 1, '0', 1),
-(1, 26, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(1, 31, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(0, 32, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '0', 1, '0', 1),
-(2, 50, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(1, 30, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(1, 32, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(0, 33, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '0', 1, '0', 1),
-(1, 33, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(0, 34, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '0', 1, '0', 1),
-(1, 34, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '0', 1, '0', 1),
-(1, 36, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(1, 37, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(1, 38, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(1, 39, '1', 0, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(1, 40, '1', 0, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(1, 41, '1', 0, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(1, 42, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 33, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 9, '1', 0, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 43, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 38, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 25, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 3, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 12, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 12, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 23, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 23, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 2, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 3, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 41, '1', 0, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 41, '1', 0, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 17, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 17, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 39, '1', 0, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 39, '1', 0, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 24, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 24, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 33, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 34, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 34, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 38, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 37, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 37, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 36, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 36, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 16, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 16, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 6, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 6, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 42, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 42, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 40, '1', 0, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 40, '1', 0, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 30, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 30, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 9, '1', 0, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 10, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 10, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 11, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 11, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 35, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 35, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 43, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 25, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 21, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 21, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 18, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 18, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 26, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 26, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 29, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 29, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 19, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 19, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 31, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 31, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 22, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 22, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 32, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 32, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 20, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 20, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 14, '1', 0, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 14, '1', 0, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 15, '1', 0, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 15, '1', 0, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(0, 44, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '0', 1, '0', 1),
-(1, 46, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 44, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 44, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(1, 44, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 45, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 45, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(1, 45, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 46, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 46, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(0, 47, '1', 100, NULL, -1, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '0', 1, '0', 1),
-(1, 47, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 47, '1', 100, NULL, -1, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 47, '1', 100, NULL, -1, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 48, '1', 100, NULL, -1, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 48, '1', 100, NULL, -1, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 50, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(2, 49, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
-(4, 49, '1', 100, NULL, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1);
+INSERT INTO `used_layer` (`Stelle_ID`, `Layer_ID`, `queryable`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `transparency`, `postlabelcache`, `Filter`, `template`, `header`, `footer`, `symbolscale`, `requires`, `logconsume`, `privileg`, `export_privileg`, `start_aktiv`, `use_geom`) VALUES
+(1, 1, '0', 0, 0, 0, '', NULL, '0', NULL, '', NULL, NULL, NULL, NULL, '0', '0', 1, '0', 1),
+(0, 2, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '0', 1, '0', 1),
+(1, 2, '1', 100, 0, 0, '', NULL, '0', '', '', '', '', 0, NULL, '0', '2', 1, '0', 1),
+(0, 3, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '0', 1, '0', 1),
+(1, 3, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(0, 4, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '0', 1, '0', 1),
+(0, 5, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '0', 1, '0', 1),
+(1, 43, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(0, 6, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '0', 1, '0', 1),
+(1, 6, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(0, 7, '0', 0, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '0', 1, '0', 1),
+(4, 1, '0', 0, 0, 0, '', NULL, '0', NULL, '', NULL, NULL, 0, NULL, '0', '0', 1, '0', 1),
+(2, 1, '1', 0, 0, 0, '', NULL, '0', '', '', '', '', 0, NULL, '0', '0', 1, '0', 1),
+(1, 9, '1', 0, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(1, 10, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 2, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(1, 11, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(1, 12, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(1, 13, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(1, 14, '1', 0, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(0, 49, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '0', 1, '0', 1),
+(1, 16, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(0, 43, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '0', 1, '0', 1),
+(1, 17, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(1, 49, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 13, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(1, 20, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(1, 48, '1', 0, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 13, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(1, 24, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(1, 25, '1', 100, -1, 0, '', NULL, '0', '', '', '', '', 0, NULL, '0', '2', 1, '0', 1),
+(1, 26, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(1, 31, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(0, 32, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '0', 1, '0', 1),
+(2, 50, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(1, 30, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(1, 32, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(0, 33, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '0', 1, '0', 1),
+(1, 33, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(0, 34, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '0', 1, '0', 1),
+(1, 34, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '0', 1, '0', 1),
+(1, 36, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(1, 37, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(1, 38, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(1, 39, '1', 0, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(1, 40, '1', 0, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(1, 41, '1', 0, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(1, 42, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 33, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 9, '1', 0, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 43, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 38, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 25, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 3, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 12, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 12, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 23, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 23, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 2, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 3, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 41, '1', 0, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 41, '1', 0, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 17, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 17, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 39, '1', 0, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 39, '1', 0, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 24, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 24, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 33, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 34, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 34, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 38, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 37, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 37, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 36, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 36, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 16, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 16, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 6, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 6, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 42, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 42, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 40, '1', 0, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 40, '1', 0, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 30, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 30, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 9, '1', 0, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 10, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 10, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 11, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 11, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 35, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 35, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 43, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 25, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 21, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 21, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 18, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 18, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 26, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 26, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 29, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 29, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 19, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 19, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 31, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 31, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 22, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 22, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 32, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 32, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 20, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 20, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 14, '1', 0, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 14, '1', 0, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 15, '1', 0, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 15, '1', 0, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(0, 44, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '0', 1, '0', 1),
+(1, 46, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 44, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 44, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(1, 44, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 45, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 45, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(1, 45, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 46, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 46, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(0, 47, '1', 100, -1, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '0', 1, '0', 1),
+(1, 47, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 47, '1', 100, -1, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 47, '1', 100, -1, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 48, '1', 100, -1, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 48, '1', 100, -1, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 50, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(2, 49, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1),
+(4, 49, '1', 100, 0, 0, '', NULL, '0', '', '', NULL, NULL, 0, NULL, '0', '2', 1, '0', 1);
 
 -- --------------------------------------------------------
 
@@ -2699,7 +2716,24 @@ INSERT INTO `u_consume` (`user_id`, `stelle_id`, `time_id`, `activity`, `nimagew
 (1, 1, '2017-10-25 08:57:30', 'getMap', 1198, 768, '35833', 33309117.517136, 5975561.5353152, 33429017.971991, 6063396.9210591, '2017-10-25 08:53:48', NULL),
 (1, 1, '2017-10-25 09:20:42', 'getMap', 1198, 802, '35833', 33365637.312722, 5874041.6305345, 33365936.189127, 5874241.6305345, '2017-10-25 08:57:30', NULL),
 (2, 2, '2017-10-25 09:47:36', 'getMap', 1198, 770, '35833', 33194087.317244, 5867814.9999176, 33484977.682765, 6081467.9999999, '2017-10-24 17:23:02', NULL),
-(2, 2, '2017-10-25 09:52:01', 'getMap', 1198, 770, '35833', 33194087.317244, 5867814.9999176, 33484977.682765, 6081467.9999999, '2017-10-25 09:47:36', NULL);
+(2, 2, '2017-10-25 09:52:01', 'getMap', 1198, 770, '35833', 33194087.317244, 5867814.9999176, 33484977.682765, 6081467.9999999, '2017-10-25 09:47:36', NULL),
+(1, 1, '2017-10-25 10:33:43', 'getMap', 1198, 802, '35833', 33365637.312722, 5874041.6305345, 33365936.189127, 5874241.6305345, '2017-10-25 09:20:42', NULL),
+(1, 1, '2017-10-25 10:34:11', 'getMap', 1198, 802, '35833', 33179892.898819, 5867814.9999173, 33499172.10119, 6081468.0000002, '2017-10-25 10:33:43', NULL),
+(1, 1, '2017-10-25 10:36:25', 'getMap', 500, 500, '35833', 33179892.898819, 5867814.9999173, 33499172.10119, 6081468.0000002, '2017-10-25 10:34:11', NULL),
+(1, 1, '2017-10-25 10:37:16', 'getMap', 500, 500, '35833', 33179892.898819, 5815001.8987732, 33499172.10119, 6134281.1011443, '2017-10-25 10:36:25', NULL),
+(1, 1, '2017-10-25 10:38:14', 'getMap', 1198, 802, '35833', 33100969.949918, 5815001.898773, 33578095.050091, 6134281.1011445, '2017-10-25 10:37:16', NULL),
+(1, 1, '2017-10-25 10:38:46', 'getMap', 1198, 802, '35833', 33248579.708227, 5867814.9999175, 33411278.123748, 5976688.3757172, '2017-10-25 10:38:14', NULL),
+(1, 1, '2017-10-25 10:39:17', 'getMap', 1198, 802, '35833', 33201165.000009, 5867814.9999175, 33477900, 6081468, '2017-10-25 10:38:46', NULL),
+(1, 1, '2017-10-25 10:52:17', 'getMap', 1198, 802, '35833', 33201165.000009, 5867814.9999175, 33477900, 6081468, '2017-10-25 10:39:17', NULL),
+(1, 1, '2017-10-25 10:52:36', 'getMap', 1198, 802, '35833', 33248579.708227, 5767814.9999271, 33411278.123748, 5876688.3757268, '2017-10-25 10:52:17', NULL),
+(1, 1, '2017-10-25 10:54:13', 'getMap', 1198, 802, '35833', 33248579.708227, 5765278.2547348, 33411278.123748, 5874151.6305345, '2017-10-25 10:52:36', NULL),
+(1, 1, '2017-10-25 10:54:18', 'getMap', 1198, 802, '35833', 33217207.977021, 5744589.6209492, 33451477.398368, 5901356.3765874, '2017-10-25 10:54:13', NULL),
+(1, 1, '2017-10-25 10:55:54', 'getMap', 1198, 802, '35833', 33217207.977021, 5744589.6209492, 33451477.398368, 5901356.3765874, '2017-10-25 10:54:18', NULL),
+(1, 1, '2017-10-25 10:55:58', 'getMap', 1198, 802, '35833', 33217207.977021, 5744589.6209492, 33451477.398368, 5901356.3765874, '2017-10-25 10:55:54', NULL),
+(1, 1, '2017-10-25 10:56:15', 'getMap', 1198, 802, '35833', 33217207.977021, 5744589.6209492, 33451477.398368, 5901356.3765874, '2017-10-25 10:55:58', NULL),
+(1, 1, '2017-10-25 11:44:15', 'getMap', 1198, 802, '35833', 33217207.977021, 5744589.6209492, 33451477.398368, 5901356.3765874, '2017-10-25 10:56:15', NULL),
+(1, 1, '2017-10-25 11:48:28', 'getMap', 1198, 802, '35833', 33179892.898819, 5867814.9999175, 33499172.10119, 6081468, '2017-10-25 11:44:15', NULL),
+(1, 1, '2017-10-25 11:48:43', 'getMap', 1198, 802, '35833', 33179892.898819, 5867814.9999173, 33499172.10119, 6081468.0000002, '2017-10-25 11:48:28', NULL);
 
 -- --------------------------------------------------------
 
@@ -2875,26 +2909,25 @@ CREATE TABLE `u_groups` (
   `Gruppenname_polish` varchar(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
   `Gruppenname_vietnamese` varchar(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
   `obergruppe` int(11) DEFAULT NULL,
-  `order` int(11) DEFAULT NULL,
-  `legendorder` int(11) DEFAULT NULL
+  `order` int(11) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `u_groups`
 --
 
-INSERT INTO `u_groups` (`id`, `Gruppenname`, `Gruppenname_low-german`, `Gruppenname_english`, `Gruppenname_polish`, `Gruppenname_vietnamese`, `obergruppe`, `order`, `legendorder`) VALUES
-(1, 'Hintergrundkarten', NULL, NULL, NULL, NULL, NULL, 1000, NULL),
-(2, 'Verwaltungsgrenzen', NULL, NULL, NULL, NULL, NULL, 900, NULL),
-(3, 'Kataster', NULL, NULL, NULL, NULL, NULL, 800, NULL),
-(4, 'Umwelt', NULL, NULL, NULL, NULL, NULL, 700, NULL),
-(5, 'Bauen', NULL, NULL, NULL, NULL, NULL, 600, NULL),
-(6, 'Raumordnung', NULL, NULL, NULL, NULL, NULL, 500, NULL),
-(7, 'Soziales', NULL, NULL, NULL, NULL, NULL, 400, NULL),
-(8, 'Verkehr', NULL, NULL, NULL, NULL, NULL, 300, NULL),
-(9, 'Administration', NULL, NULL, NULL, NULL, NULL, 100, NULL),
-(10, 'Suchergebnis', NULL, NULL, NULL, NULL, NULL, 0, NULL),
-(11, 'Wasserwirtschaft', NULL, NULL, NULL, NULL, NULL, 10, NULL);
+INSERT INTO `u_groups` (`id`, `Gruppenname`, `Gruppenname_low-german`, `Gruppenname_english`, `Gruppenname_polish`, `Gruppenname_vietnamese`, `obergruppe`, `order`) VALUES
+(1, 'Hintergrundkarten', NULL, NULL, NULL, NULL, NULL, 1000),
+(2, 'Verwaltungsgrenzen', NULL, NULL, NULL, NULL, NULL, 900),
+(3, 'Kataster', NULL, NULL, NULL, NULL, NULL, 800),
+(4, 'Umwelt', NULL, NULL, NULL, NULL, NULL, 700),
+(5, 'Bauen', NULL, NULL, NULL, NULL, NULL, 600),
+(6, 'Raumordnung', NULL, NULL, NULL, NULL, NULL, 500),
+(7, 'Soziales', NULL, NULL, NULL, NULL, NULL, 400),
+(8, 'Verkehr', NULL, NULL, NULL, NULL, NULL, 300),
+(9, 'Administration', NULL, NULL, NULL, NULL, NULL, 100),
+(10, 'Suchergebnis', NULL, NULL, NULL, NULL, NULL, 0),
+(11, 'Wasserwirtschaft', NULL, NULL, NULL, NULL, NULL, 10);
 
 -- --------------------------------------------------------
 
@@ -3220,7 +3253,7 @@ INSERT INTO `u_menues` (`id`, `name`, `name_low-german`, `name_english`, `name_p
 (31, 'Druckmanager', NULL, NULL, NULL, NULL, 'index.php?go=changemenue', NULL, 0, 1, NULL, 0, NULL, NULL),
 (32, 'Kartendrucklayouteditor', NULL, NULL, NULL, NULL, 'index.php?go=Druckrahmen', NULL, 31, 2, NULL, 0, NULL, NULL),
 (33, 'Datendrucklayouteditor', NULL, NULL, NULL, NULL, 'index.php?go=sachdaten_druck_editor', NULL, 31, 2, NULL, 0, NULL, NULL),
-(34, 'Drucken', NULL, NULL, NULL, NULL, 'index.php?go=Druckausschnittswahl', NULL, 31, 2, NULL, 0, NULL, 'drucken'),
+(34, 'Drucken', NULL, NULL, NULL, NULL, '#', 'printMap();', 31, 2, NULL, 0, NULL, 'drucken'),
 (35, 'Administration', NULL, NULL, NULL, NULL, 'index.php?go=changemenue', NULL, 0, 1, NULL, 0, NULL, NULL),
 (36, 'Funktionen', NULL, NULL, NULL, NULL, 'index.php?go=Administratorfunktionen', NULL, 35, 2, NULL, 0, NULL, NULL),
 (37, 'Layer-Export', NULL, NULL, NULL, NULL, 'index.php?go=Layer_Export', NULL, 25, 2, NULL, 0, NULL, NULL),
@@ -3308,7 +3341,7 @@ INSERT INTO `u_rolle2used_layer` (`user_id`, `stelle_id`, `layer_id`, `aktivStat
 (1, 1, 34, '0', '0', NULL, 1, '0', NULL),
 (1, 1, 36, '0', '0', NULL, 1, '0', NULL),
 (1, 1, 37, '0', '0', NULL, 1, '0', NULL),
-(1, 1, 38, '0', '0', NULL, 1, '0', NULL),
+(1, 1, 38, '1', '1', NULL, 1, '0', NULL),
 (1, 1, 39, '0', '0', NULL, 1, '0', NULL),
 (1, 1, 40, '0', '0', NULL, 1, '0', NULL),
 (1, 1, 41, '0', '0', NULL, 1, '0', NULL),
@@ -3374,6 +3407,7 @@ CREATE TABLE `u_styles2classes` (
 INSERT INTO `u_styles2classes` (`class_id`, `style_id`, `drawingorder`) VALUES
 (1, 1, 1),
 (2, 2, 1),
+(9, 9, 1),
 (8, 8, 1);
 
 -- --------------------------------------------------------
@@ -3588,6 +3622,12 @@ ALTER TABLE `stelle`
   ADD PRIMARY KEY (`ID`);
 
 --
+-- Indexes for table `stellen_hierarchie`
+--
+ALTER TABLE `stellen_hierarchie`
+  ADD PRIMARY KEY (`parent_id`,`child_id`);
+
+--
 -- Indexes for table `styles`
 --
 ALTER TABLE `styles`
@@ -3736,7 +3776,7 @@ ALTER TABLE `zwischenablage`
 -- AUTO_INCREMENT for table `classes`
 --
 ALTER TABLE `classes`
-  MODIFY `Class_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `Class_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 --
 -- AUTO_INCREMENT for table `colors`
 --
@@ -3826,7 +3866,7 @@ ALTER TABLE `stelle`
 -- AUTO_INCREMENT for table `styles`
 --
 ALTER TABLE `styles`
-  MODIFY `Style_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `Style_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 --
 -- AUTO_INCREMENT for table `user`
 --
