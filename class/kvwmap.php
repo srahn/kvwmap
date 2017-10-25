@@ -7668,7 +7668,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				if($this->last_query != ''){
 					$sql = $this->last_query[$layerset[0]['Layer_ID']]['sql'];
 					if($this->formvars['orderby'.$layerset[0]['Layer_ID']] == '')$sql_order = $this->last_query[$layerset[0]['Layer_ID']]['orderby'];
-					$this->formvars['anzahl'] = $this->last_query[$layerset[0]['Layer_ID']]['limit'];
+					if($this->formvars['anzahl'] == '')$this->formvars['anzahl'] = $this->last_query[$layerset[0]['Layer_ID']]['limit'];
 					if($this->formvars['offset_'.$layerset[0]['Layer_ID']] == '')$this->formvars['offset_'.$layerset[0]['Layer_ID']] = $this->last_query[$layerset[0]['Layer_ID']]['offset'];
 				}
 
@@ -12552,7 +12552,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							if($this->last_query != '' AND $this->last_query[$layerset[$i]['Layer_ID']]['sql'] != ''){
 								$sql = $this->last_query[$layerset[$i]['Layer_ID']]['sql'];
 								if($this->formvars['orderby'.$layerset[$i]['Layer_ID']] == '')$sql_order = $this->last_query[$layerset[$i]['Layer_ID']]['orderby'];
-								$this->formvars['anzahl'] = $this->last_query[$layerset[$i]['Layer_ID']]['limit'];
+								if($this->formvars['anzahl'] == '')$this->formvars['anzahl'] = $this->last_query[$layerset[$i]['Layer_ID']]['limit'];
 								if($this->formvars['offset_'.$layerset[$i]['Layer_ID']] == '')$this->formvars['offset_'.$layerset[$i]['Layer_ID']] = $this->last_query[$layerset[$i]['Layer_ID']]['offset'];
 							}
 
