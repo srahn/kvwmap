@@ -6,6 +6,7 @@ class WRZProGueltigkeitsJahreArray
     
     function __construct($gui) {
         $this->debug = $gui->debug;
+        $this->log = $gui->log;
     }
     
     public function getAllWrZs()
@@ -68,13 +69,13 @@ class WRZProGueltigkeitsJahreArray
         return null;
     }
     
-    public function getAdressatInYearAndBehoerde(&$wasserrechtlicheZulassungen = null, $getYear = null, $getBehoerde = null, $getAdressat = null)
+    public function getAdressatInYearAndBehoerde(&$wasserrechtlicheZulassungen, $getYear, $getBehoerde, $getAdressat, $collectAdressaten = false)
     {
-        $this->debug->write('*** WRZProGueltigkeitsJahreArray->getAdressatInYearAndBehoerde ***', 4);
-        $this->debug->write('wasserrechtlicheZulassungen count: ' . count($wasserrechtlicheZulassungen), 4);
-        $this->debug->write('getYear: ' . var_export($getYear, true), 4);
-        $this->debug->write('getBehoerde: ' . var_export($getBehoerde, true), 4);
-        $this->debug->write('getAdressat: ' . var_export($getAdressat, true), 4);
+        $this->log->log_debug('*** WRZProGueltigkeitsJahreArray->getAdressatInYearAndBehoerde ***');
+        $this->log->log_debug('wasserrechtlicheZulassungen count: ' . count($wasserrechtlicheZulassungen));
+        $this->log->log_debug('getYear: ' . var_export($getYear, true));
+        $this->log->log_debug('getBehoerde: ' . var_export($getBehoerde, true));
+        $this->log->log_debug('getAdressat: ' . var_export($getAdressat, true));
         
         $allWrZs = null;
         if(!empty($wasserrechtlicheZulassungen))
@@ -88,34 +89,94 @@ class WRZProGueltigkeitsJahreArray
         
         if(!empty($allWrZs))
         {
+            $adressaten = array();
+            
             foreach ($allWrZs as $wrz)
             {
                 if(!empty($wrz) && !empty($wrz->adressat) && !empty($wrz->behoerde))
                 {
-//                     $this->debug->write('1');
+                    $this->log->log_trace('wrz id: ' . var_export($wrz->getId(), true));
                     
                     if(empty($getYear) || in_array($getYear, $wrz->gueltigkeitsJahre))
                     {
-//                         $this->debug->write('2');
-                        
                         if(empty($getBehoerde) || $getBehoerde === $wrz->behoerde->getId())
                         {
-//                             $this->debug->write('3');
-                            
                             if(empty($getAdressat) || $getAdressat === $wrz->adressat->getId())
                             {
-//                                 $this->debug->write('4');
-                                
                                 if($wrz->adressat->isWrzAdressat())
                                 {
-                                    $this->debug->write('5');
-                                    return $wrz->adressat;
+                                    if(!$collectAdressaten)
+                                    {
+                                        return $wrz->adressat;
+                                    }
+                                    else
+                                    {
+                                        if(!in_array($wrz->adressat->getId(), $adressaten))
+                                        {
+                                            $adressaten[$wrz->adressat->getId()] = $wrz->adressat;
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
+            
+            if(!empty($adressaten))
+            {
+                return $adressaten;
+            }
+        }
+        
+        return null;
+    }
+    
+    public function getWrZForAdressatInYearAndBehoerde(&$wasserrechtlicheZulassungen, $getYear, $getBehoerde, $getAdressat)
+    {
+        $this->log->log_debug('*** WRZProGueltigkeitsJahreArray->getWrZForAdressatInYearAndBehoerde ***');
+        $this->log->log_debug('wasserrechtlicheZulassungen count: ' . count($wasserrechtlicheZulassungen));
+        $this->log->log_debug('getYear: ' . var_export($getYear, true));
+        $this->log->log_debug('getBehoerde: ' . var_export($getBehoerde, true));
+        $this->log->log_debug('getAdressat: ' . var_export($getAdressat, true));
+        
+        $allWrZs = null;
+        if(!empty($wasserrechtlicheZulassungen))
+        {
+            $allWrZs = $wasserrechtlicheZulassungen;
+        }
+        else
+        {
+            $allWrZs = $this->getAllWrZs();
+        }
+        
+        if(!empty($allWrZs))
+        {
+            $returnWRZs = array();
+            
+            foreach ($allWrZs as $wrz)
+            {
+                if(!empty($wrz) && !empty($wrz->adressat) && !empty($wrz->behoerde))
+                {
+                    $this->log->log_trace('wrz id: ' . var_export($wrz->getId(), true));
+                    
+                    if(empty($getYear) || in_array($getYear, $wrz->gueltigkeitsJahre))
+                    {
+                        if(empty($getBehoerde) || $getBehoerde === $wrz->behoerde->getId())
+                        {
+                            if(empty($getAdressat) || $getAdressat === $wrz->adressat->getId())
+                            {
+                                if($wrz->adressat->isWrzAdressat())
+                                {
+                                    $returnWRZs[] = $wrz;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            return $returnWRZs;
         }
         
         return null;

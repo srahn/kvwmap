@@ -147,6 +147,7 @@ function createAufforderungsDokument(&$gui, &$valueEscaped)
 	
 		<?php
 		      $go="wasserentnahmebenutzer_aufforderung_zur_erklaerung";
+		      $showAdressat=true;
 		      include_once ('includes/wasserentnahmebenutzer_header.php');
 		?>
     	

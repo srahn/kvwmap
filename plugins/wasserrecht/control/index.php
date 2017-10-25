@@ -4,7 +4,7 @@ include_once(CLASSPATH . 'PgObject.php');
 include_once(CLASSPATH . 'Layer.php');
 // include('funktionen/input_check_functions.php');
 include_once(PLUGINS . 'wasserrecht/config/config_sample.php');
-include(PLUGINS . 'wasserrecht/model/Log.php');
+include(PLUGINS . 'wasserrecht/helper/Log.php');
 include(PLUGINS . 'wasserrecht/model/WrPgObject.php');
 include(PLUGINS . 'wasserrecht/model/CommonClassTrait.php');
 include(PLUGINS . 'wasserrecht/model/FestsetzungsSammelbescheidDaten.php');

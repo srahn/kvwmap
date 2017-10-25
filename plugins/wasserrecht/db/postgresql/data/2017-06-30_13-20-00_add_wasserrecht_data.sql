@@ -181,6 +181,7 @@ INSERT INTO wasserrecht.fiswrv_koerperschaft (name, art) VALUES ('MUSTER TRINKWA
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 INSERT INTO wasserrecht.fiswrv_personen (name, abkuerzung, behoerde, adresse, wrzadressat) VALUES ('MAX MUSTERMANN', 'MM', 1, 1, 'ja');
 INSERT INTO wasserrecht.fiswrv_personen (name, abkuerzung, behoerde, adresse, wrzadressat) VALUES ('FRAU MUSTERMANN', 'FM', 2, 2, 'ja');
+INSERT INTO wasserrecht.fiswrv_personen (name, abkuerzung, behoerde, adresse, wrzadressat) VALUES ('TEST ADRESSAT', 'TA', 1, 3, 'ja');
 INSERT INTO wasserrecht.fiswrv_personen (name, abkuerzung, bearbeiter) VALUES ('MUSTER BEARBEITER', 'MB', 'ja');
 INSERT INTO wasserrecht.fiswrv_personen (name, abkuerzung, betreiber) VALUES ('MUSTER BETREIBER', 'MB', 'ja');
 INSERT INTO wasserrecht.fiswrv_personen (name, abkuerzung, wrzaussteller) VALUES ('MUSTER WRZ AUSSTELLER', 'MWA', 'ja');
@@ -221,6 +222,7 @@ INSERT INTO wasserrecht.fiswrv_wasserrechtliche_zulassungen (typus, aktenzeichen
 INSERT INTO wasserrecht.fiswrv_wasserrechtliche_zulassungen (typus, aktenzeichen, ort, datum, ausstellbehoerde, status, gueltig_seit, befristet_bis, aktuell, bearbeiter, adressat, anlage) VALUES (1, '§ 3', 1, current_date, 2, 2, '2017-07-01', '2017-07-06', false, 2, 1, 2);
 INSERT INTO wasserrecht.fiswrv_wasserrechtliche_zulassungen (typus, aktenzeichen, ort, datum, ausstellbehoerde, status, gueltig_seit, befristet_bis, aktuell, bearbeiter, adressat, anlage) VALUES (1, '§ 4', 1, current_date, 2, 2, '2017-07-01', '2017-12-31', false, 2, 1, 1);
 INSERT INTO wasserrecht.fiswrv_wasserrechtliche_zulassungen (typus, aktenzeichen, ort, datum, ausstellbehoerde, status, gueltig_seit, aktuell, bearbeiter, adressat, anlage) VALUES (1, '§ 5', 1, current_date, 1, 2, '2017-07-01', false, 2, 2, 1);
+INSERT INTO wasserrecht.fiswrv_wasserrechtliche_zulassungen (typus, aktenzeichen, ort, datum, ausstellbehoerde, status, gueltig_seit, befristet_bis, aktuell, bearbeiter, adressat, anlage, fassung_nummer, fassung_datum) VALUES (1, '§ 6', 1, current_date, 1, 2, '2016-01-01', '2019-07-06', true, 2, 3, 1, 15, '2017-09-01');
 
 UPDATE wasserrecht.fiswrv_wasserrechtliche_zulassungen SET freigegeben = true WHERE id = 1;
 UPDATE wasserrecht.fiswrv_wasserrechtliche_zulassungen SET freigegeben = true WHERE id = 2;
@@ -235,6 +237,7 @@ INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen(kennnummer, wasserbuchnummer
 INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen(kennnummer, wasserbuchnummer, freitext_art, art, freitext_zweck, zweck, umfang_entnahme, wasserrechtliche_zulassungen) VALUES ('2-1-2-3-3', '3572', 'Test Freitext Art 3', 1, 'Test Freitext Zweck 3', 6, 1, 3);
 INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen(kennnummer, wasserbuchnummer, freitext_art, art, freitext_zweck, zweck, umfang_entnahme, wasserrechtliche_zulassungen) VALUES ('2-1-1-4-4', '2425', 'Test Freitext Art 4', 1, 'Test Freitext Zweck 4', 6, 1, 4);
 INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen(kennnummer, wasserbuchnummer, freitext_art, art, freitext_zweck, zweck, umfang_entnahme, wasserrechtliche_zulassungen) VALUES ('1-2-1-5-5', '53535', 'Test Freitext Art 5', 1, 'Test Freitext Zweck 5', 6, 1, 5);
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen(kennnummer, wasserbuchnummer, freitext_art, art, freitext_zweck, zweck, umfang_entnahme, wasserrechtliche_zulassungen) VALUES ('1-2-1-6-6', '53536', 'Test Freitext Art 6', 1, 'Test Freitext Zweck 6', 6, 1, 6);
 
 INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_lage(name, gewaesserbenutzungen, the_geo) VALUES('Test Gewaesserbenutzungen Lage 1', 1, ST_Transform(ST_GeomFromText('POINT(12.5 54)', 4326), 35833));
 INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_lage(name, gewaesserbenutzungen, the_geo) VALUES('Test Gewaesserbenutzungen Lage 2', 1, ST_Transform(ST_GeomFromText('POINT(12.5 53.5)', 4326), 35833));
