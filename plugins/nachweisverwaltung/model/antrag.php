@@ -274,26 +274,7 @@ class antrag {
     }
     return $pdf;
   }
-  	
-  function erzeugenUbergabeprotokoll_CSV(){
-  	# Überschriften
-  	foreach($this->FFR[0] as $key=>$value){
-  		$csv .= $key.';';
-  		next($this->FFR[0]);
-  	}
-  	$csv.= chr(10);
-  	# Daten
-  	for($i=0; $i < count($this->FFR); $i++){
-  		$dateien = explode(', ', $this->FFR[$i]['Datei']);
-  		foreach($dateien as $datei){
-  			$this->FFR[$i]['Datei'] = $datei;
-  			$csv .= implode(';', $this->FFR[$i]);
-  			$csv.= chr(10);
-  		}
-    }
-    return $csv;
-  }
-    
+  	    
   function getAntraege($id,$nr,$richtung,$order,$current_stelle_id) {
 		global $admin_stellen;
     $sql ="SELECT a.*,a.vermstelle,va.art AS vermart,vs.name AS vermst";

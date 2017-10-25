@@ -49,33 +49,19 @@
 			$this->DokumenteZuAntraegeAnzeigen();
 	  } break;
 
+	  case 'Antraganzeige_Uebergabeprotokoll_Zusammenstellen' : {
+			include (PLUGINS.'nachweisverwaltung/model/kvwmap.php');						# GUI-Objekt erweitern
+			include (PLUGINS.'nachweisverwaltung/model/nachweis.php');					# nachweis-Klasse einbinden
+			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
+			$this->zusammenstellenUebergabeprotokollNachweise($this->formvars['antr_selected']);
+	  }break;
+	  
 	  case 'Antraganzeige_Uebergabeprotokoll_Erzeugen' : {
 			include (PLUGINS.'nachweisverwaltung/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'nachweisverwaltung/model/nachweis.php');					# nachweis-Klasse einbinden
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
-			$this->erzeugenUebergabeprotokollNachweise($this->formvars['antr_selected']);
+			$this->erzeugenUebergabeprotokollNachweise();
 	  }break;
-	  
-	  case 'Antraganzeige_Uebergabeprotokoll_Erzeugen_PDF' : {
-			include (PLUGINS.'nachweisverwaltung/model/kvwmap.php');						# GUI-Objekt erweitern
-			include (PLUGINS.'nachweisverwaltung/model/nachweis.php');					# nachweis-Klasse einbinden
-			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
-			$this->erzeugenUebergabeprotokollNachweise_PDF();
-	  }break;
-	  
-	  case 'Antraganzeige_Uebergabeprotokoll_Erzeugen_CSV' : {
-			include (PLUGINS.'nachweisverwaltung/model/kvwmap.php');						# GUI-Objekt erweitern
-			include (PLUGINS.'nachweisverwaltung/model/nachweis.php');					# nachweis-Klasse einbinden
-			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
-			$this->erzeugenUebergabeprotokollNachweise_CSV();
-	  }break;
-		
-	  case 'Antraganzeige_Uebergabeprotokoll_Erzeugen_HTML' : {
-			include (PLUGINS.'nachweisverwaltung/model/kvwmap.php');						# GUI-Objekt erweitern
-			include (PLUGINS.'nachweisverwaltung/model/nachweis.php');					# nachweis-Klasse einbinden
-			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
-			$this->erzeugenUebergabeprotokollNachweise_HTML();
-	  }break;		
 
 	  case 'Antraganzeige_Zusammenstellen_Zippen' : {
 			include (PLUGINS.'nachweisverwaltung/model/kvwmap.php');						# GUI-Objekt erweitern
