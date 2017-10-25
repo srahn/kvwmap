@@ -260,26 +260,6 @@ CREATE TABLE wasserrecht.fiswrv_gewaesserbenutzungen_umfang_entnahme(
 	freitext text
 )WITH OIDS;
 
-CREATE TABLE wasserrecht.fiswrv_gewaesserbenutzungen_lage(
-	id serial PRIMARY KEY,
-	name varchar(255),
-	betreiber integer REFERENCES wasserrecht.fiswrv_personen(id),
-	wwident varchar(255),
-	namelang varchar(255),
-	namekurz varchar(100),
-	bohrungsname varchar(255),
-	baujahr date,
-	endteufe numeric,
-	filterok numeric,
-	filteruk numeric,
-	betriebszustand integer REFERENCES wasserrecht.fiswrv_betriebszustand(id),
-	messtischblatt integer REFERENCES wasserrecht.fiswrv_messtischblatt(id),
-	archivnummer integer REFERENCES wasserrecht.fiswrv_archivnummer(id),
-	schichtenverzeichnis boolean,
-	invid varchar(255),
-	the_geo geometry(Point, 35833)
-)WITH OIDS;
-
 CREATE TABLE wasserrecht.fiswrv_gewaesserbenutzungen_wee_satz(
 	id serial PRIMARY KEY,
 	name varchar(255),
@@ -305,8 +285,30 @@ CREATE TABLE wasserrecht.fiswrv_gewaesserbenutzungen(
 	freitext_zweck text,
 	zweck integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_zweck(id),
 	umfang_entnahme integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_umfang_entnahme(id),
-	lage integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_lage(id),
 	wasserrechtliche_zulassungen integer NOT NULL REFERENCES wasserrecht.fiswrv_wasserrechtliche_zulassungen(id)
+)WITH OIDS;
+
+CREATE TABLE wasserrecht.fiswrv_gewaesserbenutzungen_lage(
+	id serial PRIMARY KEY,
+	name varchar(255),
+	/*
+	betreiber integer REFERENCES wasserrecht.fiswrv_personen(id),
+	wwident varchar(255),
+	namelang varchar(255),
+	namekurz varchar(100),
+	bohrungsname varchar(255),
+	baujahr date,
+	endteufe numeric,
+	filterok numeric,
+	filteruk numeric,
+	betriebszustand integer REFERENCES wasserrecht.fiswrv_betriebszustand(id),
+	messtischblatt integer REFERENCES wasserrecht.fiswrv_messtischblatt(id),
+	archivnummer integer REFERENCES wasserrecht.fiswrv_archivnummer(id),
+	schichtenverzeichnis boolean,
+	invid varchar(255),
+	*/
+	gewaesserbenutzungen integer NOT NULL REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen(id),
+	the_geo geometry(Point, 35833)
 )WITH OIDS;
 
 CREATE TABLE wasserrecht.fiswrv_teilgewaesserbenutzungen_art(
@@ -547,11 +549,14 @@ BEGIN
     UPDATE wasserrecht.fiswrv_wasserrechtliche_zulassungen SET nachfolger = NEW.id WHERE id = NEW.vorgaenger;
   ELSIF OLD.vorgaenger IS NOT NULL AND NEW.vorgaenger IS NULL THEN
     UPDATE wasserrecht.fiswrv_wasserrechtliche_zulassungen SET nachfolger = NULL WHERE id = OLD.vorgaenger;
-  ELSIF NEW.nachfolger IS NOT NULL THEN
+  END IF;
+
+  IF NEW.nachfolger IS NOT NULL THEN
 	UPDATE wasserrecht.fiswrv_wasserrechtliche_zulassungen SET vorgaenger = NEW.id WHERE id = NEW.nachfolger;
   ELSIF OLD.nachfolger IS NOT NULL AND NEW.nachfolger IS NULL THEN
 	UPDATE wasserrecht.fiswrv_wasserrechtliche_zulassungen SET vorgaenger = NULL WHERE id = OLD.nachfolger;
   END IF;
+
   RETURN NEW;
 END' LANGUAGE 'plpgsql';
 
