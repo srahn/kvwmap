@@ -6,7 +6,8 @@ abstract class WrPgObject extends PgObject
     protected $tableName = null;
     protected $write_debug = true;
     
-    function WrPgObject($gui) {
+    function WrPgObject(&$gui) {
+        $this->log = $gui->log;
         parent::__construct($gui, $this->schema, $this->tableName);
     }
     
@@ -80,10 +81,10 @@ abstract class WrPgObject extends PgObject
     
     function getSQLResult($sql, $sqlreplacements, $fieldName) {
         
-        $this->debug->write('*** WrPgObject->getSQLResult ***', 4);
-        $this->debug->write('sql: ' . $sql, 4);
-        $this->debug->write('sqlreplacements: ' . var_export($sqlreplacements, true), 4);
-        $this->debug->write('fieldName: ' . var_export($fieldName, true), 4);
+        $this->log->log_info('*** WrPgObject->getSQLResult ***');
+        $this->log->log_debug('sql: ' . $sql);
+        $this->log->log_debug('sqlreplacements: ' . var_export($sqlreplacements, true));
+        $this->log->log_debug('fieldName: ' . var_export($fieldName, true));
         
         $query_name = "query_" . uniqid();
         $query = pg_prepare($this->database->dbConn, $query_name, $sql);

@@ -13,6 +13,9 @@ class Teilgewaesserbenutzungen extends WrPgObject {
 	
 	public function find_where_with_subtables($where, $order = NULL, $select = '*')
 	{
+	    $this->log->log_info('*** Teilgewaesserbenutzungen->find_where_with_subtables ***');
+	    $this->log->log_debug('where: ' . $where);
+	    
 	    $teilgewaesserbenutzungen = $this->find_where($where, $order, $select);
 	    
 	    if(!empty($teilgewaesserbenutzungen))
@@ -178,12 +181,12 @@ class Teilgewaesserbenutzungen extends WrPgObject {
 	
 	public function getEntgeltsatz($artBenutzungId, $befreit, $zugelassen, $ermaessigt)
 	{
-	    $this->debug->write('*** Teilgewaesserbenutzungen->getEntgeltsatz ***', 4);
+	    $this->log->log_info('*** Teilgewaesserbenutzungen->getEntgeltsatz ***');
 	    
-	    $this->debug->write('artBenutzungId: ' . var_export($artBenutzungId, true), 4);
-	    $this->debug->write('befreit: ' . var_export($befreit, true), 4);
-	    $this->debug->write('zugelassen: ' . var_export($zugelassen, true), 4);
-	    $this->debug->write('ermaessigt: ' . var_export($ermaessigt, true), 4);
+	    $this->log->log_debug('artBenutzungId: ' . var_export($artBenutzungId, true));
+	    $this->log->log_debug('befreit: ' . var_export($befreit, true));
+	    $this->log->log_debug('zugelassen: ' . var_export($zugelassen, true));
+	    $this->log->log_debug('ermaessigt: ' . var_export($ermaessigt, true));
 	    
 	    if(!empty($this->entgeltsatz))
 	    {
@@ -279,7 +282,7 @@ class Teilgewaesserbenutzungen extends WrPgObject {
 	        $this->addToArray($teilgewaesserbenutzung_value_array, 'entgeltsatz', $entgeltsatz);
 	        
 // 	        print_r($teilgewaesserbenutzung_value_array);
-	        $this->debug->write('teilgewaesserbenutzung_value_array: ' . var_export($teilgewaesserbenutzung_value_array, true), 4);
+	        $this->log->log_debug('teilgewaesserbenutzung_value_array: ' . var_export($teilgewaesserbenutzung_value_array, true));
 	        
 	        return $this->create(
 	               $teilgewaesserbenutzung_value_array
@@ -301,7 +304,7 @@ class Teilgewaesserbenutzungen extends WrPgObject {
 // 	        $this->addToArray($teilgewaesserbenutzung_value_array, 'befreiungstatbestaende', $befreiungstatbestaende);
 	        
 // // 	        print_r($teilgewaesserbenutzung_value_array);
-// 	        $this->debug->write('teilgewaesserbenutzung_value_array: ' . var_export($teilgewaesserbenutzung_value_array, true), 4);
+// 	        $this->log->log_debug('teilgewaesserbenutzung_value_array: ' . var_export($teilgewaesserbenutzung_value_array, true));
 	        
 // 	        return $this->create(
 // 	            $teilgewaesserbenutzung_value_array
@@ -320,7 +323,7 @@ class Teilgewaesserbenutzungen extends WrPgObject {
 	    $this->updateData('entgeltsatz', $entgeltsatz);
 	    $this->updateData('teilgewaesserbenutzungen_art', $teilgewaesserbenutzungen_art);
 	    
-	    $this->debug->write('kvp update: ' . var_export($this->getKVP(), true), 4);
+	    $this->log->log_debug('kvp update: ' . var_export($this->getKVP(), true));
 	    
 	    $this->update();
 	    
@@ -339,7 +342,7 @@ class Teilgewaesserbenutzungen extends WrPgObject {
 	    $this->updateData('berechnetes_entgelt_zugelassen', $berechnetes_entgelt_zugelassen);
 	    $this->updateData('berechnetes_entgelt_nicht_zugelassen', $berechnetes_entgelt_nicht_zugelassen);
 	    
-	    $this->debug->write('kvp update: ' . var_export($this->getKVP(), true), 4);
+	    $this->log->log_debug('kvp update: ' . var_export($this->getKVP(), true));
 	    
 	    $this->update();
 	    

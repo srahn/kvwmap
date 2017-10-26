@@ -13,6 +13,9 @@ class Festsetzung extends Bescheid {
 	
 	public function find_where_with_subtables($where, $order = NULL, $select = '*')
 	{
+	    $this->log->log_info('*** Festsetzung->find_where_with_subtables ***');
+	    $this->log->log_debug('where: ' . $where);
+	    
 	    $bescheide = parent::find_where_with_subtables($where, $order, $select);
 	    
 	    if(!empty($bescheide))

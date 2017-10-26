@@ -35,12 +35,12 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
         }
         elseif(startsWith($keyEscaped, "erklaerung_"))
 		{
-		    $this->debug->write('*** erklaerung ***', 4);
+		    $this->log->log_info('*** erklaerung ***');
 		    
             $findDefaultWrz = false;
             
             $idValues = findIdAndYearFromValueString($this, $valueEscaped);
-            $this->debug->write('idValues: ' . var_export($idValues, true), 4);
+            $this->log->log_debug('idValues: ' . var_export($idValues, true));
 		    
 		    $erklaerungWrz = new WasserrechtlicheZulassungen($this);
 		    $wrz = $erklaerungWrz->find_by_id($this, 'id', $idValues["wrz_id"]);
@@ -85,12 +85,12 @@ elseif($_SERVER ["REQUEST_METHOD"] == "GET")
         
         if(strtolower($keyEscaped) === "geterklaerung")
         {
-            $this->debug->write('*** geterklaerung ***', 4);
+            $this->log->log_info('*** geterklaerung ***');
             
             $findDefaultWrz = false;
             
             $idValues = findIdAndYearFromValueString($this, $valueEscaped);
-            $this->debug->write('idValues: ' . var_export($idValues, true), 4);
+            $this->log->log_debug('idValues: ' . var_export($idValues, true));
             
             $erklaerungWrz = new WasserrechtlicheZulassungen($this);
             $wrz = $erklaerungWrz->find_by_id($this, 'id', $idValues["wrz_id"]);
@@ -129,17 +129,17 @@ elseif($_SERVER ["REQUEST_METHOD"] == "GET")
 
 function erklaerung_entspeeren($gui, &$valueEscaped, &$wrz, &$gewaesserbenutzung, &$erhebungsjahr)
 {
-    $gui->debug->write('*** erklaerung_entspeeren ***', 4);
+    $gui->log->log_info('*** erklaerung_entspeeren ***');
     
     $idValues = findIdAndYearFromValueString($gui, $valueEscaped);
-    $gui->debug->write('idValues: ' . var_export($idValues, true), 4);
+    $gui->log->log_debug('idValues: ' . var_export($idValues, true));
     
     $erklaerungEntsperrenWrz = new WasserrechtlicheZulassungen($gui);
     $wrz = $erklaerungEntsperrenWrz->find_by_id($gui, 'id', $idValues["wrz_id"]);
     
     if(!empty($wrz))
     {
-        $gui->debug->write('wrz id: ' . var_export($wrz->getId(), true), 4);
+        $gui->log->log_debug('wrz id: ' . var_export($wrz->getId(), true));
         
         $gb = new Gewaesserbenutzungen($gui);
         $gewaesserbenutzungen = $gb->find_where_with_subtables('wasserrechtliche_zulassungen=' . $wrz->getId());
@@ -158,7 +158,7 @@ function erklaerung_entspeeren($gui, &$valueEscaped, &$wrz, &$gewaesserbenutzung
         
         if(!empty($gewaesserbenutzung))
         {
-            $gui->debug->write('gewaesserbenutzung id: ' . var_export($gewaesserbenutzung->getId(), true), 4);
+            $gui->log->log_debug('gewaesserbenutzung id: ' . var_export($gewaesserbenutzung->getId(), true));
             
             $erhebungsjahr = $idValues["erhebungsjahr"];
             
@@ -167,34 +167,34 @@ function erklaerung_entspeeren($gui, &$valueEscaped, &$wrz, &$gewaesserbenutzung
         else
         {
             $gui->add_message('error', 'Keine gültige Gewässerbenutzung gefunden!');
-            $gui->debug->write('ERROR: Keine gültige WrZ gefunden!', 4);
+            $gui->log->log_error('ERROR: Keine gültige WrZ gefunden!');
         }
     }
     else
     {
         $gui->add_message('error', 'Keine gültige WrZ gefunden!');
-        $gui->debug->write('ERROR: Keine gültige WrZ gefunden!', 4);
+        $gui->log->log_error('Keine gültige WrZ gefunden!');
     }
 }
 
 function erklaerung_freigeben($gui, &$valueEscaped, &$wrz, &$gewaesserbenutzung, &$erhebungsjahr, $insertDate, &$errorEingabeErklaerung, &$speereEingabeErklaerung)
 {
-    $gui->debug->write('*** erklaerung_freigeben ***', 4);
+    $gui->log->log_info('*** erklaerung_freigeben ***');
     
     $idValues = findIdAndYearFromValueString($gui, $valueEscaped);
-    $gui->debug->write('idValues: ' . var_export($idValues, true), 4);
+    $gui->log->log_debug('idValues: ' . var_export($idValues, true));
     
     $erklaerungFreigebenWrz = new WasserrechtlicheZulassungen($gui);
     $wrz = $erklaerungFreigebenWrz->find_by_id($gui, 'id', $idValues["wrz_id"]);
     
     if(!empty($wrz)) 
     {
-        $gui->debug->write('wrz id: ' . var_export($wrz->getId(), true), 4);
+        $gui->log->log_debug('wrz id: ' . var_export($wrz->getId(), true));
         
         $gb = new Gewaesserbenutzungen($gui);
         $gewaesserbenutzungen = $gb->find_where_with_subtables('wasserrechtliche_zulassungen=' . $wrz->getId());
         $gewaesserbenutzung = null;
-        $gui->debug->write('count gewaesserbenutzungen: ' . count($gewaesserbenutzungen), 4);
+        $gui->log->log_debug('count gewaesserbenutzungen: ' . count($gewaesserbenutzungen));
         if(!empty($gewaesserbenutzungen) && count($gewaesserbenutzungen) > 0)
         {
             foreach ($gewaesserbenutzungen as $gwb)
@@ -209,7 +209,7 @@ function erklaerung_freigeben($gui, &$valueEscaped, &$wrz, &$gewaesserbenutzung,
         
         if(!empty($gewaesserbenutzung)) 
         {
-            $gui->debug->write('gewaesserbenutzung id: ' . var_export($gewaesserbenutzung->getId(), true), 4);
+            $gui->log->log_debug('gewaesserbenutzung id: ' . var_export($gewaesserbenutzung->getId(), true));
             
             $erhebungsjahr = $idValues["erhebungsjahr"];
             
@@ -338,14 +338,14 @@ function erklaerung_freigeben($gui, &$valueEscaped, &$wrz, &$gewaesserbenutzung,
                                         $teilgewaesserbenutzungId = $teilgewaesserbenutzung->updateTeilgewaesserbenutzung_Nutzer($erhebungsjahr, $gewaesserbenutzungsart, $gewaesserbenutzungszweck, $gewaesserbenutzungsumfang, $wiedereinleitung, $mengenbestimmung, $teilgewaesserbenutzungsart);
                                         
                                         $gui->add_message('notice', 'Teilgewässerbenutzungen (id: ' . $teilgewaesserbenutzungId . ') erfolgreich geändert!');
-                                        $gui->debug->write('Teilgewässerbenutzungen (id: ' . $teilgewaesserbenutzungId . ') erfolgreich geändert!', 4);
+                                        $gui->log->log_success('Teilgewässerbenutzungen (id: ' . $teilgewaesserbenutzungId . ') erfolgreich geändert!');
                                     }                        // else --> if not there --> create one
                                     else {
                                         $teilgewaesserbenutzung = new Teilgewaesserbenutzungen($gui);
                                         $teilgewaesserbenutzungId = $teilgewaesserbenutzung->createTeilgewaesserbenutzung_Nutzer($gewaesserbenutzung->getId(), $erhebungsjahr, $gewaesserbenutzungsart, $gewaesserbenutzungszweck, $gewaesserbenutzungsumfang, $wiedereinleitung, $mengenbestimmung, $teilgewaesserbenutzungsart, WASSERRECHT_ERKLAERUNG_ENTNAHME_TEILGEWAESSERBENUTZUNGEN_ENTGELTSATZ);
                                         
                                         $gui->add_message('notice', 'Teilgewässerbenutzungen (id: ' . $teilgewaesserbenutzungId . ') erfolgreich eingetragen!');
-                                        $gui->debug->write('Teilgewässerbenutzungen (id: ' . $teilgewaesserbenutzungId . ') erfolgreich eingetragen!', 4);
+                                        $gui->log->log_success('Teilgewässerbenutzungen (id: ' . $teilgewaesserbenutzungId . ') erfolgreich eingetragen!');
                                     }
                                     
                                 }
@@ -374,28 +374,28 @@ function erklaerung_freigeben($gui, &$valueEscaped, &$wrz, &$gewaesserbenutzung,
             } else {
                 if ($errorEingabeErklaerung > 0) {
                     $gui->add_message('error', 'Eingabe in Zeile ' . $errorEingabeErklaerung . ' ist fehlerhaft oder nicht vollständig! Bitte überprüfen Sie Ihre Angaben!');
-                    $gui->debug->write('ERROR: Eingabe in Zeile ' . $errorEingabeErklaerung . ' ist fehlerhaft oder nicht vollständig! Bitte überprüfen Sie Ihre Angaben!', 4);
+                    $gui->log->log_error('Eingabe in Zeile ' . $errorEingabeErklaerung . ' ist fehlerhaft oder nicht vollständig! Bitte überprüfen Sie Ihre Angaben!');
                 } elseif ($errorEingabeErklaerung === - 1) {
                     $gui->add_message('error', 'Eingabe ob Angaben auf einer Erklärung oder Schätzung beruhen sind fehlerhaft oder nicht vollständig! Bitte überprüfen Sie Ihre Angaben!');
-                    $gui->debug->write('ERROR: Eingabe ob Angaben auf einer Erklärung oder Schätzung beruhen sind fehlerhaft oder nicht vollständig! Bitte überprüfen Sie Ihre Angaben!', 4);
+                    $gui->log->log_error('Eingabe ob Angaben auf einer Erklärung oder Schätzung beruhen sind fehlerhaft oder nicht vollständig! Bitte überprüfen Sie Ihre Angaben!');
                 }
                 elseif ($leerEingabeErklaerung)
                 {
                     $gui->add_message('error', 'Bitte Angaben in der Tabelle machen!');
-                    $gui->debug->write('ERROR: Bitte Angaben in der Tabelle machen!', 4);
+                    $gui->log->log_error('Bitte Angaben in der Tabelle machen!');
                 }
             }
         }
         else
         {
             $gui->add_message('error', 'Keine gültige Gewässerbenutzung gefunden!');
-            $gui->debug->write('ERROR: Keine gültige Gewässerbenutzung gefunden!', 4);
+            $gui->log->log_error('Keine gültige Gewässerbenutzung gefunden!');
         }
     }
     else
     {
         $gui->add_message('error', 'Keine gültige WrZ gefunden!');
-        $gui->debug->write('ERROR: Keine gültige WrZ gefunden!', 4);
+        $gui->log->log_error('Keine gültige WrZ gefunden!');
     }
 }
 

@@ -196,12 +196,12 @@ class FestsetzungsSammelbescheidDaten
     
     public function setFreitextFromAllEntries()
     {
-        $this->debug->write('*** FestsetzungsSammelbescheidDaten->setFreitextFromAllEntries ***', 4);
+        $this->log->log_info('*** FestsetzungsSammelbescheidDaten->setFreitextFromAllEntries ***');
         
         $teilgewaesserbenutzungen = $this->getAllTeilGewaesserbenutzungen();
         if(!empty($teilgewaesserbenutzungen) && count($teilgewaesserbenutzungen) > 0)
         {
-            $this->debug->write('teilgewaesserbenutzungen: ' . count($teilgewaesserbenutzungen), 4);
+            $this->log->log_debug('teilgewaesserbenutzungen: ' . count($teilgewaesserbenutzungen));
             
             foreach ($teilgewaesserbenutzungen as $teilgewaesserbenutzung)
             {
@@ -299,15 +299,15 @@ class FestsetzungsSammelbescheidDaten
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public function toString() {
-        $this->debug->write('*** FestsetzungsSammelbescheidDaten ***', 4);
-        $this->debug->write('count anlagen: ' . count($this->getAnlagen()), 4);
-        $this->debug->write('entnahmemengen: ' . var_export($this->getEntnahmemengen(), true), 4);
-        $this->debug->write('entgelte: ' . var_export($this->getEntgelte(), true), 4);
-        $this->debug->write('zugelassene entgelte: ' . var_export($this->getZugelassene_entgelte(), true), 4);
-        $this->debug->write('nicht zugelassene entgelte: ' . var_export($this->getNicht_zugelassene_entgelte(), true), 4);
-        $this->debug->write('erlaubterUmfang: ' . var_export($this->getErlaubterUmfang(), true), 4);
-        $this->debug->write('freitext: ' . $this->getFreitext(), 4);
-        $this->debug->write('Erklärung Datum String: ' . $this->getErklaerung_datum_String(), 4);
+        $this->log->log_info('*** FestsetzungsSammelbescheidDaten ***');
+        $this->log->log_debug('count anlagen: ' . count($this->getAnlagen()));
+        $this->log->log_debug('entnahmemengen: ' . var_export($this->getEntnahmemengen(), true));
+        $this->log->log_debug('entgelte: ' . var_export($this->getEntgelte(), true));
+        $this->log->log_debug('zugelassene entgelte: ' . var_export($this->getZugelassene_entgelte(), true));
+        $this->log->log_debug('nicht zugelassene entgelte: ' . var_export($this->getNicht_zugelassene_entgelte(), true));
+        $this->log->log_debug('erlaubterUmfang: ' . var_export($this->getErlaubterUmfang(), true));
+        $this->log->log_debug('freitext: ' . $this->getFreitext());
+        $this->log->log_debug('Erklärung Datum String: ' . $this->getErklaerung_datum_String());
     }
     
     public function isValid() 
@@ -317,16 +317,16 @@ class FestsetzungsSammelbescheidDaten
             if(!empty($this->getAnlagen()) && !empty($this->getEntnahmemengen()) && !empty($this->getEntgelte()))
             {
                 $countAnlagen = count($this->getAnlagen());
-                $this->debug->write('countAnlagen: ' . $countAnlagen, 4);
+                $this->log->log_debug('countAnlagen: ' . $countAnlagen);
                 $countEntnahmemengen = count($this->getEntnahmemengen());
-                $this->debug->write('countEntnahmemengen: ' . $countEntnahmemengen, 4);
+                $this->log->log_debug('countEntnahmemengen: ' . $countEntnahmemengen);
                 $countEntgelte = count($this->getEntgelte());
-                $this->debug->write('countEntgelte: ' . $countEntgelte, 4);
+                $this->log->log_debug('countEntgelte: ' . $countEntgelte);
                 
 //                 $countZugelasseneEntgelte = count($this->getZugelassene_entgelte());
-//                 $this->debug->write('countZugelasseneEntgelte: ' . $countZugelasseneEntgelte, 4);
+//                 $this->log->log_debug('countZugelasseneEntgelte: ' . $countZugelasseneEntgelte, 4);
 //                 $countNichtZugelasseneEntgelte = count($this->getNicht_zugelassene_entgelte());
-//                 $this->debug->write('countNichtZugelasseneEntgelte: ' . $countNichtZugelasseneEntgelte, 4);
+//                 $this->log->log_debug('countNichtZugelasseneEntgelte: ' . $countNichtZugelasseneEntgelte, 4);
                 
                 if($countAnlagen === $countEntnahmemengen && $countAnlagen === $countEntgelte && $countEntnahmemengen === $countEntgelte)
 //                     && $countEntgelte === $countZugelasseneEntgelte && $countEntgelte === $countNichtZugelasseneEntgelte)
@@ -335,17 +335,17 @@ class FestsetzungsSammelbescheidDaten
                 }
                 else
                 {
-                    $this->debug->write('Counts are not equal', 1);
+                    $this->log->log_error('Counts are not equal');
                 }
             }
             else
             {
-                $this->debug->write('Arrays are empty', 1);
+                $this->log->log_error('Arrays are empty');
             }
         }
         else
         {
-            $this->debug->write('WrZs are null', 1);
+            $this->log->log_error('WrZs are null');
         }
         
         return false;
@@ -373,7 +373,7 @@ class FestsetzungsSammelbescheidDaten
     
     public function getSumme(&$entgelte)
     {
-        $this->debug->write('entgelte: ' . var_export($entgelte, true), 4);
+        $this->log->log_debug('entgelte: ' . var_export($entgelte, true));
         
         if(!empty($entgelte) && count($entgelte) > 0)
         {
@@ -381,11 +381,11 @@ class FestsetzungsSammelbescheidDaten
             
             foreach ($entgelte as $entgelt)
             {
-                $this->debug->write('summe_entgelte: ' . $summe_entgelte . ' + entgelt: ' . $entgelt, 4);
+                $this->log->log_debug('summe_entgelte: ' . $summe_entgelte . ' + entgelt: ' . $entgelt);
                 $summe_entgelte = $summe_entgelte + $entgelt;
             }
             
-            $this->debug->write('summe_entgelte return: ' . $summe_entgelte, 4);
+            $this->log->log_debug('summe_entgelte return: ' . $summe_entgelte);
             return $summe_entgelte;
         }
         

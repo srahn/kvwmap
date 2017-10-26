@@ -17,7 +17,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 
 	public function find_gueltigkeitsjahre(&$gui) {
 	    
-	    $this->debug->write('*** WasserrechtlicheZulassungen->find_gueltigkeitsjahre ***', 4);
+	    $this->log->log_info('*** WasserrechtlicheZulassungen->find_gueltigkeitsjahre ***');
 	    
 		$results = $this->find_where('1=1', 'id');
 		
@@ -31,11 +31,11 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 			{
 			    if(!empty($result))
 			    {
-			        $this->debug->write('result id: ' . var_export($result->data['id'], true), 4);
+			        $this->log->log_debug('result id: ' . var_export($result->data['id'], true));
 			        $wrzProGueltigkeitsJahre = new WRZProGueltigkeitsJahre();
 			        
 			        $years = $this->getDependentObjects($gui, $result);
-			        $this->debug->write('years: ' . var_export($years, true), 4);
+			        $this->log->log_debug('years: ' . var_export($years, true));
 			        
 			        if(!empty($years))
 			        {
@@ -57,14 +57,14 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 			
 			//check if all years are added
 			$today = new DateTime('now');
-			$gui->debug->write('today: ' . var_export($today, true), 4);
+			$gui->log->log_debug('today: ' . var_export($today, true));
 			$fourYearsAgo = new DateTime('now');
 			$fourYearsAgo = $fourYearsAgo->modify('-4 years');
 // 			$fourYearsAgo = strtotime("-4 year", time());
 // 			$fourYearsAgoString = date("Y-m-d", $fourYearsAgo);
-			$gui->debug->write('fourYearsAgo: ' . var_export($fourYearsAgo, true), 4);
+			$gui->log->log_debug('fourYearsAgo: ' . var_export($fourYearsAgo, true));
 			$years = WasserrechtlicheZulassungen::addAllYearsBetweenTwoDates($gui, $fourYearsAgo, $today);
-			$gui->debug->write('years: ' . var_export($years, true), 4);
+			$gui->log->log_debug('years: ' . var_export($years, true));
             foreach ($years as $year)
             {
                 if(!in_array($year, $wasserrechtlicheZulassungGueltigkeitJahrReturnArray))
@@ -77,7 +77,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
             sort($wasserrechtlicheZulassungGueltigkeitJahrReturnArray);
             
             $wrzProGueltigkeitsJahreArray->gueltigkeitsJahre=$wasserrechtlicheZulassungGueltigkeitJahrReturnArray;
-            $this->debug->write('wrzProGueltigkeitsJahreArray->gueltigkeitsJahre: ' . var_export($wrzProGueltigkeitsJahreArray->gueltigkeitsJahre, true), 4);
+            $this->log->log_debug('wrzProGueltigkeitsJahreArray->gueltigkeitsJahre: ' . var_export($wrzProGueltigkeitsJahreArray->gueltigkeitsJahre, true));
 			
             return $wrzProGueltigkeitsJahreArray;
 		}
@@ -87,14 +87,14 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	
 	public function getDependentObjects(&$gui, &$result)
 	{
-	    $gui->debug->write('*** getDependentObjects ***', 4);
+	    $gui->log->log_info('*** getDependentObjects ***');
 	    return $this->getDependentObjectsInteral($gui, $result, true);
 	}
 	
 	public function getDependentObjectsInteral(&$gui, &$result, $addGewaesserbenutzungen) 
 	{
-	    $gui->debug->write('*** getDependentObjects Internal ***', 4);
-	    $gui->debug->write('addGewaesserbenutzungen: ' . var_export($addGewaesserbenutzungen, true), 4);
+	    $gui->log->log_info('*** getDependentObjects Internal ***');
+	    $gui->log->log_debug('addGewaesserbenutzungen: ' . var_export($addGewaesserbenutzungen, true));
 	    
 	    $years = null;
 	    
@@ -106,13 +106,13 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 // 	        if(!empty($wasserrechtlicheZulassungGueltigkeit))
 // 	        {
                 $gueltigSeit = $result->getGueltigSeit();
-                $gui->debug->write('gueltigSeit: ' . var_export($gueltigSeit, true), 4);
+                $gui->log->log_debug('gueltigSeit: ' . var_export($gueltigSeit, true));
 //                 $gui->addYearToArray($gueltigSeit, $result->gueltigkeitsJahr);
                 $befristetBis = $result->getBefristetBis();
-                $gui->debug->write('befristetBis: ' . var_export($befristetBis, true), 4);
+                $gui->log->log_debug('befristetBis: ' . var_export($befristetBis, true));
 //                
                 $years = WasserrechtlicheZulassungen::addAllYearsBetweenTwoDates($gui, WasserrechtlicheZulassungen::convertStringToDate($gueltigSeit), WasserrechtlicheZulassungen::convertStringToDate($befristetBis));
-                $gui->debug->write('years: ' . var_export($years, true), 4);
+                $gui->log->log_debug('years: ' . var_export($years, true));
                 
                 //backup, falls andere Dates nicht gesetzt wurden
                 if(empty($years))
@@ -144,7 +144,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	                $adresse = $adress->find_by_id($gui, 'id', $adressat->data['adresse']);
 	                $adressat->adresse = $adresse;
 	            }
-	            $gui->debug->write('adressat id: ' . var_export($adressat->getId(), true), 4);
+	            $gui->log->log_debug('adressat id: ' . var_export($adressat->getId(), true));
 	            $result->adressat = $adressat;
 	        }
 	        
@@ -171,7 +171,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	                $konto = $account->find_by_id($gui, 'id', $behoerde->data['konto']);
 	                $behoerde->konto = $konto;
 	            }
-	            $gui->debug->write('behoerde id: ' . var_export($behoerde->getId(), true), 4);
+	            $gui->log->log_debug('behoerde id: ' . var_export($behoerde->getId(), true));
 	            $result->behoerde = $behoerde;
 	        }
 	        
@@ -182,7 +182,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	            $anlagen = $anlage->find_where('id=' . $result->data['anlage']);
 	            if(!empty($anlagen) && count($anlagen) > 0 && !empty($anlagen[0]))
 	            {
-	                $gui->debug->write('anlagen[0] id: ' . var_export($anlagen[0]->getId(), true), 4);
+	                $gui->log->log_debug('anlagen[0] id: ' . var_export($anlagen[0]->getId(), true));
 	                $result->anlagen = $anlagen[0];
 	            }
 	        }
@@ -194,7 +194,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	            $gewaesserbenutzungen = $gewaesserbenutzung->find_where_with_subtables('wasserrechtliche_zulassungen=' . $result->getId(), 'id');
 	            // 	        $gewaesserbenutzungen = $gewaesserbenutzung->find_where_with_subtables('wasserrechtliche_zulassungen=' . $result->getId() . ' AND (art = 1 OR art = 2)', 'id');
 	            $result->gewaesserbenutzungen = $gewaesserbenutzungen;
-	            $gui->debug->write('gewaesserbenutzungen count: ' . count( $result->gewaesserbenutzungen), 4);
+	            $gui->log->log_debug('gewaesserbenutzungen count: ' . count( $result->gewaesserbenutzungen));
 	        }
 	        
 	        if(empty($result->gewaesserbenutzungen) || empty($result->gewaesserbenutzungen[0]))
@@ -217,8 +217,8 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	    $today = date("d.m.Y");
 	    
 	    // 	    if(!empty($gueltigSeitDate) && !empty($befristetBisDate))
-	    $this->debug->write('befristetBisDate: ' . var_export($befristetBisDate, true), 4);
-	    $this->debug->write('today: ' . var_export($today, true), 4);
+	    $this->log->log_debug('befristetBisDate: ' . var_export($befristetBisDate, true));
+	    $this->log->log_debug('today: ' . var_export($today, true));
 	    
 	    if(!empty($befristetBisDate))
 	    {
@@ -309,7 +309,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	            {
 	                $interval = new DateInterval('P1Y');
 	                $nextYear = $date1->add($interval)->format('Y');
-	                $gui->debug->write('nextYear: ' . var_export($nextYear, true), 4);
+	                $gui->log->log_debug('nextYear: ' . var_export($nextYear, true));
 	                $years[] = $nextYear;
 	            }
 	        }

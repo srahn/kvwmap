@@ -11,7 +11,7 @@ class Log
     {
         if($log_level >= DEBUG_LEVEL) 
         {
-            $this->debug->write(date("d-m-Y H:i:s") . " " . $this->prefix . "[". $log_level_name ."] " .  $log_message, $log_level);
+            $this->debug->write(date("d-m-Y H:i:s") . " " . $this->prefix . "[". $log_level_name ."] " . $this->pretty_var($log_message), $log_level);
         }
     }
     
@@ -53,5 +53,9 @@ class Log
         $this->log($log_message, "failure", 7);
 //         $this->debug->write("<p><font face='verdana' color='red'>" . $log_message . "</font></p>", 7);
 //         $this->debug->write($this->prefix . "[failure] " . $log_message, 7);
+    }
+    
+    function pretty_var($myString){
+        return str_replace("\n", " ", $myString);
     }
 }

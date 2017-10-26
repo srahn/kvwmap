@@ -54,9 +54,9 @@ function endsWith($haystack, $needle)
 
 // function findIdFromValueString(&$gui, $valueEscaped)
 // {
-//     $gui->debug->write('*** findIdFromValueString ***', 4);
+//     $gui->log->log_info('*** findIdFromValueString ***');
     
-//     $gui->debug->write('valueEscaped: ' . $valueEscaped, 4);
+//     $gui->log->log_debug('valueEscaped: ' . $valueEscaped);
     
 //     $lastIndex = strripos($valueEscaped, "_");
 //     $gewaesserbenutzungId = substr($valueEscaped, $lastIndex + 1);
@@ -67,16 +67,15 @@ function endsWith($haystack, $needle)
 //         "gewaesserbenutzung_id" => $gewaesserbenutzungId
 //     );
     
-//     $gui->debug->write('returnArray: ' . var_export($returnArray, true), 4);
+//     $gui->log->log_debug('returnArray: ' . var_export($returnArray, true));
     
 //     return $returnArray;
 // }
 
 function findIdAndYearFromValueString(&$gui, $valueEscaped)
 {
-    $gui->debug->write('*** findIdAndYearFromValueString ***', 4);
-    
-    $gui->debug->write('valueEscaped: ' . $valueEscaped, 4);
+    $gui->log->log_info('*** findIdAndYearFromValueString ***');
+    $gui->log->log_debug('valueEscaped: ' . $valueEscaped);
     
     $lastIndex = strripos($valueEscaped, "_");
     $firstIndex = strpos($valueEscaped, "_");
@@ -91,7 +90,7 @@ function findIdAndYearFromValueString(&$gui, $valueEscaped)
         "erhebungsjahr" => $erhebungsjahr
     );
     
-    $gui->debug->write('returnArray: ' . var_export($returnArray, true), 4);
+    $gui->log->log_debug('returnArray: ' . var_export($returnArray, true));
     
     return $returnArray;
 }
@@ -116,7 +115,7 @@ $this->log = new Log($this->debug);
 
 //$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
 //$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-//$this->debug->write(var_dump($layerdb), 4);
+//$this->log->log_debug(var_dump($layerdb));
 
 /*        $this->loadMap('DataBase');
  $layer_names = array();
@@ -183,56 +182,56 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
 switch($this->go){
 
 	case 'wasserentnahmebenutzer': {
-	    $this->debug->write('wasserentnahmebenutzer called!', 4);
+	    $this->log->log_debug('wasserentnahmebenutzer called!');
 	    
 	    $this->main = PLUGINS . 'wasserrecht/view/wasserentnahmebenutzer_aufforderung_zur_erklaerung.php';
 	    $this->output();
 	}	break;
 	
 	case 'wasserentnahmebenutzer_aufforderung_zur_erklaerung': {
-	    $this->debug->write('wasserentnahmebenutzer_aufforderung_zur_erklaerung called!', 4);
+	    $this->log->log_debug('wasserentnahmebenutzer_aufforderung_zur_erklaerung called!');
 	    
 	    $this->main = PLUGINS . 'wasserrecht/view/wasserentnahmebenutzer_aufforderung_zur_erklaerung.php';
 	    $this->output();
 	}	break;
 	
 	case 'wasserentnahmebenutzer_entgeltbescheid': {
-	    $this->debug->write('wasserentnahmebenutzer_entgeltbescheid called!', 4);
+	    $this->log->log_debug('wasserentnahmebenutzer_entgeltbescheid called!', 4);
 	    
 	    $this->main = PLUGINS . 'wasserrecht/view/wasserentnahmebenutzer_entgeltbescheid.php';
 	    $this->output();
 	}	break;
 	
 	case 'wasserentnahmeentgelt': {
-	    $this->debug->write('wasserentnahmeentgelt called!', 4);
+	    $this->log->log_debug('wasserentnahmeentgelt called!', 4);
 	    
 	    $this->main = PLUGINS . 'wasserrecht/view/wasserentnahmeentgelt_erklaerung_der_entnahme.php';
 	    $this->output();
 	}	break;
 	
 	case 'wasserentnahmeentgelt_erklaerung_der_entnahme': {
-	    $this->debug->write('wasserentnahmeentgelt_erklaerung_der_entnahme called!', 4);
+	    $this->log->log_debug('wasserentnahmeentgelt_erklaerung_der_entnahme called!');
 	    
 	    $this->main = PLUGINS . 'wasserrecht/view/wasserentnahmeentgelt_erklaerung_der_entnahme.php';
 	    $this->output();
 	}	break;
 	
 	case 'wasserentnahmeentgelt_festsetzung': {
-	    $this->debug->write('wasserentnahmeentgelt_festsetzung called!', 4);
+	    $this->log->log_debug('wasserentnahmeentgelt_festsetzung called!');
 	    
 	    $this->main = PLUGINS . 'wasserrecht/view/wasserentnahmeentgelt_festsetzung.php';
 	    $this->output();
 	}	break;
 	
 	case 'zentrale_stelle': {
-	    $this->debug->write('zentrale_stelle called!', 4);
+	    $this->log->log_debug('zentrale_stelle called!', 4);
 	    
 	    $this->main = PLUGINS . 'wasserrecht/view/zentrale_stelle.php';
 	    $this->output();
 	}	break;
 	
 	case 'erstattung_des_verwaltungsaufwands': {
-	    $this->debug->write('erstattung_des_verwaltungsaufwands called!', 4);
+	    $this->log->log_debug('erstattung_des_verwaltungsaufwands called!');
 	    
 	    $this->main = PLUGINS . 'wasserrecht/view/erstattung_des_verwaltungsaufwands.php';
 	    $this->output();

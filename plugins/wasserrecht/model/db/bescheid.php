@@ -8,6 +8,9 @@ abstract class Bescheid extends WrPgObject
     
     public function find_where_with_subtables($where, $order = NULL, $select = '*')
     {
+        $this->log->log_info('*** Bescheid->find_where_with_subtables ***');
+        $this->log->log_debug('where: ' . $where);
+        
         $bescheide = $this->find_where($where, $order, $select);
         
         if(!empty($bescheide))
@@ -100,7 +103,7 @@ abstract class Bescheid extends WrPgObject
     
     public function createBescheid($gewaesserbenutzungen, $erhebungsjahr, $dokumentId, $dateVale, $nutzer)
     {
-        $this->debug->write('*** createBescheid ***', 4);
+        $this->log->log_info('*** createBescheid ***');
         
         if(!empty($gewaesserbenutzungen))
         {
@@ -115,7 +118,7 @@ abstract class Bescheid extends WrPgObject
             $this->addToArray($bescheid_value_array, 'nutzer', $nutzer);
             
             // 	        print_r($bescheid_value_array);
-            $this->debug->write('bescheid_value_array: ' . var_export($bescheid_value_array, true), 4);
+            $this->log->log_debug('bescheid_value_array: ' . var_export($bescheid_value_array, true), 4);
             
             return $bescheid_value_array;
         }
@@ -123,14 +126,14 @@ abstract class Bescheid extends WrPgObject
     
     public function updateBescheid($erhebungsjahr, $dokumentId, $dateVale, $nutzer)
     {
-        $this->debug->write('*** updateBescheid ***', 4);
+        $this->log->log_info('*** updateBescheid ***');
         
         $this->updateData('erhebungsjahr', $erhebungsjahr);
         $this->updateData('dokument', $dokumentId);
         $this->updateData('datum', $dateVale);
         $this->updateData('nutzer', $nutzer);
         
-        $this->debug->write('kvp update: ' . var_export($this->getKVP(), true), 4);
+        $this->log->log_debug('kvp update: ' . var_export($this->getKVP(), true));
     }
     
     

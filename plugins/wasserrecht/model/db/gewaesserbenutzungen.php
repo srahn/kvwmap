@@ -12,7 +12,8 @@ class Gewaesserbenutzungen extends WrPgObject {
 	public $festsetzungen;
 
 	public function find_where_with_subtables($where, $order = NULL, $select = '*') {
-// 	    $this->debug->write('find_where_with_subtables: ' . $where, 4);
+	    $this->log->log_info('*** Gewaesserbenutzungen->find_where_with_subtables ***');
+	    $this->log->log_debug('where: ' . $where);
 // 	    echo "<br />find_where_with_subtables: " . $where;
 	    $gewaesserbenutzungen = $this->find_where($where, $order, $select);
 	    if(!empty($gewaesserbenutzungen))
@@ -177,11 +178,11 @@ class Gewaesserbenutzungen extends WrPgObject {
 	
 	public function getTeilgewaesserbenutzungNichtZugelasseneMenge($erhebungsjahr, $teilgewaesserbenutzungId, &$zugelassenerUmfang)
 	{
-	    $this->debug->write('*** Gewaesserbenutzungen->getTeilgewaesserbenutzungNichtZugelasseneMenge ***', 4);
+	    $this->log->log_info('*** Gewaesserbenutzungen->getTeilgewaesserbenutzungNichtZugelasseneMenge ***');
 	    
-	    $this->debug->write('erhebungsjahr: ' . var_export($erhebungsjahr, true), 4);
-	    $this->debug->write('teilgewaesserbenutzungId: ' . var_export($teilgewaesserbenutzungId, true), 4);
-	    $this->debug->write('zugelassenerUmfang: ' . var_export($zugelassenerUmfang, true), 4);
+	    $this->log->log_debug('erhebungsjahr: ' . var_export($erhebungsjahr, true));
+	    $this->log->log_debug('teilgewaesserbenutzungId: ' . var_export($teilgewaesserbenutzungId, true));
+	    $this->log->log_debug('zugelassenerUmfang: ' . var_export($zugelassenerUmfang, true));
 	    
 	    if(!empty($teilgewaesserbenutzungId))
 	    {
@@ -237,15 +238,15 @@ class Gewaesserbenutzungen extends WrPgObject {
 	
 	public function getTeilgewaesserbenutzungEntgeltsatz($erhebungsjahr, $teilgewaesserbenutzung, $getArtBenutzung, $getBefreiungstatbestaende, $getWiedereinleitungBearbeiter, &$zugelassenesEntnahmeEntgelt, &$nichtZugelassenesEntnahmeEntgelt, &$zugelassenerUmfang)
 	{
-	    $this->debug->write('*** Gewaesserbenutzungen->getTeilgewaesserbenutzungEntgeltsatz ***', 4);
+	    $this->log->log_info('*** Gewaesserbenutzungen->getTeilgewaesserbenutzungEntgeltsatz ***');
 	    
-	    $this->debug->write('erhebungsjahr: ' . var_export($erhebungsjahr, true), 4);
-	    $this->debug->write('getArtBenutzung: ' . var_export($getArtBenutzung, true), 4);
-	    $this->debug->write('getBefreiungstatbestaende: ' . var_export($getBefreiungstatbestaende, true), 4);
-	    $this->debug->write('getWiedereinleitungBearbeiter: ' . var_export($getWiedereinleitungBearbeiter, true), 4);
-	    $this->debug->write('zugelassenesEntnahmeEntgelt: ' . var_export($zugelassenesEntnahmeEntgelt, true), 4);
-	    $this->debug->write('nichtZugelassenesEntnahmeEntgelt: ' . var_export($nichtZugelassenesEntnahmeEntgelt, true), 4);
-	    $this->debug->write('zugelassenerUmfang: ' . var_export($zugelassenerUmfang, true), 4);
+	    $this->log->log_debug('erhebungsjahr: ' . var_export($erhebungsjahr, true));
+	    $this->log->log_debug('getArtBenutzung: ' . var_export($getArtBenutzung, true));
+	    $this->log->log_debug('getBefreiungstatbestaende: ' . var_export($getBefreiungstatbestaende, true));
+	    $this->log->log_debug('getWiedereinleitungBearbeiter: ' . var_export($getWiedereinleitungBearbeiter, true));
+	    $this->log->log_debug('zugelassenesEntnahmeEntgelt: ' . var_export($zugelassenesEntnahmeEntgelt, true));
+	    $this->log->log_debug('nichtZugelassenesEntnahmeEntgelt: ' . var_export($nichtZugelassenesEntnahmeEntgelt, true));
+	    $this->log->log_debug('zugelassenerUmfang: ' . var_export($zugelassenerUmfang, true));
 	    
 	    if(!empty($teilgewaesserbenutzung))
 	    {
@@ -258,7 +259,7 @@ class Gewaesserbenutzungen extends WrPgObject {
 	            {
 	                $entgeltsatz_nicht_zugelassen = $teilgewaesserbenutzung->getEntgeltsatz($getArtBenutzung, $getBefreiungstatbestaende, false, $getWiedereinleitungBearbeiter);
 	                $returnArray = array(null, $entgeltsatz_nicht_zugelassen);
-	                $this->debug->write('returnArray: ' . var_export($returnArray, true), 4);
+	                $this->log->log_debug('returnArray: ' . var_export($returnArray, true));
 	                return $returnArray;
 	            }
 	            else
@@ -266,7 +267,7 @@ class Gewaesserbenutzungen extends WrPgObject {
 	                $entgeltsatz_zugelassen = $teilgewaesserbenutzung->getEntgeltsatz($getArtBenutzung, $getBefreiungstatbestaende, true, $getWiedereinleitungBearbeiter);
 	                $entgeltsatz_nicht_zugelassen = $teilgewaesserbenutzung->getEntgeltsatz($getArtBenutzung, $getBefreiungstatbestaende, false, $getWiedereinleitungBearbeiter);
 	                $returnArray = array($entgeltsatz_zugelassen, $entgeltsatz_nicht_zugelassen);
-	                $this->debug->write('returnArray: ' . var_export($returnArray, true), 4);
+	                $this->log->log_debug('returnArray: ' . var_export($returnArray, true));
 	                return $returnArray;
 	            }
 	        }
@@ -274,32 +275,32 @@ class Gewaesserbenutzungen extends WrPgObject {
 	        {
 	            $entgeltsatz_zugelassen = $teilgewaesserbenutzung->getEntgeltsatz($getArtBenutzung, $getBefreiungstatbestaende, true, $getWiedereinleitungBearbeiter);
 	            $returnArray = array($entgeltsatz_zugelassen);
-	            $this->debug->write('returnArray: ' . var_export($returnArray, true), 4);
+	            $this->log->log_debug('returnArray: ' . var_export($returnArray, true));
 	            return $returnArray;
 	        }
 	    }
 	    
 	    $returnArray = array(null, null, "Error");
-	    $this->debug->write('returnArray: ' . var_export($returnArray, true), 4);
+	    $this->log->log_debug('returnArray: ' . var_export($returnArray, true));
 	    return $returnArray;
 	}
 	
 	public function getTeilgewaesserbenutzungEntgelt($erhebungsjahr, $teilgewaesserbenutzung, $getArtBenutzung, $getBefreiungstatbestaende, $getWiedereinleitungBearbeiter, &$zugelassenesEntnahmeEntgelt, &$nichtZugelassenesEntnahmeEntgelt, &$zugelassenerUmfang)
 	{
-	    $this->debug->write('*** Gewaesserbenutzungen->getTeilgewaesserbenutzungEntgelt ***', 4);
+	    $this->log->log_info('*** Gewaesserbenutzungen->getTeilgewaesserbenutzungEntgelt ***');
 	    
-	    $this->debug->write('erhebungsjahr: ' . var_export($erhebungsjahr, true), 4);
-	    $this->debug->write('getArtBenutzung: ' . var_export($getArtBenutzung, true), 4);
-	    $this->debug->write('getBefreiungstatbestaende: ' . var_export($getBefreiungstatbestaende, true), 4);
-	    $this->debug->write('getWiedereinleitungBearbeiter: ' . var_export($getWiedereinleitungBearbeiter, true), 4);
-	    $this->debug->write('zugelassenesEntnahmeEntgelt: ' . var_export($zugelassenesEntnahmeEntgelt, true), 4);
-	    $this->debug->write('nichtZugelassenesEntnahmeEntgelt: ' . var_export($nichtZugelassenesEntnahmeEntgelt, true), 4);
-	    $this->debug->write('zugelassenerUmfang: ' . var_export($zugelassenerUmfang, true), 4);
+	    $this->log->log_debug('erhebungsjahr: ' . var_export($erhebungsjahr, true));
+	    $this->log->log_debug('getArtBenutzung: ' . var_export($getArtBenutzung, true));
+	    $this->log->log_debug('getBefreiungstatbestaende: ' . var_export($getBefreiungstatbestaende, true));
+	    $this->log->log_debug('getWiedereinleitungBearbeiter: ' . var_export($getWiedereinleitungBearbeiter, true));
+	    $this->log->log_debug('zugelassenesEntnahmeEntgelt: ' . var_export($zugelassenesEntnahmeEntgelt, true));
+	    $this->log->log_debug('nichtZugelassenesEntnahmeEntgelt: ' . var_export($nichtZugelassenesEntnahmeEntgelt, true));
+	    $this->log->log_debug('zugelassenerUmfang: ' . var_export($zugelassenerUmfang, true));
 	    
 	    if(!empty($teilgewaesserbenutzung))
 	    {
 	        $teilbenutzungNichtZugelasseneMenge = $this->getTeilgewaesserbenutzungNichtZugelasseneMenge($erhebungsjahr, $teilgewaesserbenutzung->getId(), $zugelassenerUmfang);
-	        $this->debug->write('teilbenutzungNichtZugelasseneMenge: ' . var_export($teilbenutzungNichtZugelasseneMenge, true), 4);
+	        $this->log->log_debug('teilbenutzungNichtZugelasseneMenge: ' . var_export($teilbenutzungNichtZugelasseneMenge, true));
 	        
 	        if($teilbenutzungNichtZugelasseneMenge > 0)
 	        {
@@ -309,7 +310,7 @@ class Gewaesserbenutzungen extends WrPgObject {
 	                $nichtZugelassenesEntnahmeEntgelt = $nichtZugelassenesEntnahmeEntgelt + $entnahmeEntgeltNichtErlaubt;
 	                
 	                $returnArray = array(null, $entnahmeEntgeltNichtErlaubt);
-	                $this->debug->write('returnArray: ' . var_export($returnArray, true), 4);
+	                $this->log->log_debug('returnArray: ' . var_export($returnArray, true));
 	                return $returnArray;
 	            }
 	            else
@@ -321,7 +322,7 @@ class Gewaesserbenutzungen extends WrPgObject {
 	                $zugelassenesEntnahmeEntgelt = $zugelassenesEntnahmeEntgelt + $entnahmeEntgeltErlaubt;
 	                
 	                $returnArray = array($entnahmeEntgeltErlaubt, $entnahmeEntgeltNichtErlaubt);
-	                $this->debug->write('returnArray: ' . var_export($returnArray, true), 4);
+	                $this->log->log_debug('returnArray: ' . var_export($returnArray, true));
 	                return $returnArray;
 	            }
 	        }
@@ -331,13 +332,13 @@ class Gewaesserbenutzungen extends WrPgObject {
 	            $zugelassenesEntnahmeEntgelt = $zugelassenesEntnahmeEntgelt + $entnahmeEntgeltErlaubt;
 	            
 	            $returnArray = array($entnahmeEntgeltErlaubt);
-	            $this->debug->write('returnArray: ' . var_export($returnArray, true), 4);
+	            $this->log->log_debug('returnArray: ' . var_export($returnArray, true));
 	            return $returnArray;
 	        }
 	    }
 	    
 	    $returnArray = array(null, null, "Error");
-	    $this->debug->write('returnArray: ' . var_export($returnArray, true), 4);
+	    $this->log->log_debug('returnArray: ' . var_export($returnArray, true));
 	    return $returnArray;
 	}
 	
@@ -384,10 +385,10 @@ class Gewaesserbenutzungen extends WrPgObject {
 	
 	public function insertAufforderung($dokumentId, $erhebungsjahr, $datum)
 	{
-	    $this->debug->write('*** insertAufforderung ***', 4);
+	    $this->log->log_info('*** insertAufforderung ***');
 	    
-	    $this->debug->write('erhebungsjahr: ' . var_export($erhebungsjahr, true), 4);
-	    $this->debug->write('datum: ' . var_export($datum, true), 4);
+	    $this->log->log_debug('erhebungsjahr: ' . var_export($erhebungsjahr, true));
+	    $this->log->log_debug('datum: ' . var_export($datum, true));
 	    
 	    $aufforderungen = $this->aufforderungen;
 	    if(!empty($aufforderungen))
@@ -398,7 +399,7 @@ class Gewaesserbenutzungen extends WrPgObject {
 	            {
 	                if($aufforderung->compare($erhebungsjahr))
 	                {
-	                    $this->debug->write('aufforderung mit id: ' . $aufforderung->getId() . ' existiert schon: update', 4);
+	                    $this->log->log_debug('aufforderung mit id: ' . $aufforderung->getId() . ' existiert schon: update');
 	                    
 	                    //if date is not set --> set it to today's date
 	                    if(empty($datum))
@@ -414,7 +415,7 @@ class Gewaesserbenutzungen extends WrPgObject {
 	        }
 	    }
 	    
-	    $this->debug->write('aufforderung wird neu angelegt', 4);
+	    $this->log->log_debug('aufforderung wird neu angelegt');
 	    
 	    if(!empty($dokumentId))
 	    {
@@ -481,7 +482,7 @@ class Gewaesserbenutzungen extends WrPgObject {
 	
 	public function getAufforderungForErhebungsjahr($erhebungsjahr)
 	{
-// 	    $this->debug->write('*** getAufforderungForErhebungsjahr ***', 4);
+	    $this->log->log_info('*** getAufforderungForErhebungsjahr ***');
 	    
 	    if(!empty($erhebungsjahr))
 	    {
@@ -508,11 +509,11 @@ class Gewaesserbenutzungen extends WrPgObject {
 	////////////////////////////////////////////////////////////////////
 	
 	public function insertErklaerung($erhebungsjahr, $dateValue, $erklaerungNutzer) {
-	    $this->debug->write('*** insertErklaerung ***', 4);
+	    $this->log->log_info('*** insertErklaerung ***');
 	    
-	    $this->debug->write('erhebungsjahr: ' . var_export($erhebungsjahr, true), 4);
-	    $this->debug->write('erklaerungNutzer: ' . var_export($erklaerungNutzer, true), 4);
-	    $this->debug->write('dateValue: ' . var_export($dateValue, true), 4);
+	    $this->log->log_debug('erhebungsjahr: ' . var_export($erhebungsjahr, true));
+	    $this->log->log_debug('erklaerungNutzer: ' . var_export($erklaerungNutzer, true));
+	    $this->log->log_debug('dateValue: ' . var_export($dateValue, true));
 	    
 	    $erklaerungen = $this->erklaerungen;
 	    if(!empty($erklaerungen))
@@ -523,7 +524,7 @@ class Gewaesserbenutzungen extends WrPgObject {
 	            {
 	                if($erklaerung->compare($erhebungsjahr))
 	                {
-	                    $this->debug->write('erklaerung mit id: ' . $erklaerung->getId() . ' existiert schon: update', 4);
+	                    $this->log->log_info('erklaerung mit id: ' . $erklaerung->getId() . ' existiert schon: update');
 	                    
 	                    //if date is not set --> set it to today's date
 	                    if(empty($dateValue))
@@ -539,7 +540,7 @@ class Gewaesserbenutzungen extends WrPgObject {
 	        }
 	    }
 	    
-	    $this->debug->write('erklaerung wird neu angelegt', 4);
+	    $this->log->log_info('erklaerung wird neu angelegt');
 	    
 	    //if date is not set --> set it to today's date
 	    if(empty($dateValue))
@@ -614,7 +615,7 @@ class Gewaesserbenutzungen extends WrPgObject {
 	
 	public function getErklaerungForErhebungsjahr($erhebungsjahr)
 	{
-// 	    $this->debug->write('*** getErklaerungForErhebungsjahr ***', 4);
+	    $this->log->log_info('*** getErklaerungForErhebungsjahr ***');
 	    
 	    if(!empty($erhebungsjahr))
 	    {
@@ -682,21 +683,21 @@ class Gewaesserbenutzungen extends WrPgObject {
 	public function insertFestsetzung($erhebungsjahr, $dokumentId, $datum, $dokumentDatum, $festsetzungNutzer, 
 	    $summeNichtZugelasseneEntnahmemengen, $summeZugelasseneEntnahmemengen, $summeEntnahmemengen,
 	    $summeNichtZugelassenesEntgelt, $summeZugelassenesEntgelt, $summeEntgelt) {
-	    $this->debug->write('*** insertFestsetzung ***', 4);
+	    $this->log->log_info('*** insertFestsetzung ***');
 	    
-	    $this->debug->write('erhebungsjahr: ' . var_export($erhebungsjahr, true), 4);
-	    $this->debug->write('dokumentId: ' . var_export($dokumentId, true), 4);
-	    $this->debug->write('datum: ' . var_export($datum, true), 4);
-	    $this->debug->write('dokumentDatum: ' . var_export($dokumentDatum, true), 4);
-	    $this->debug->write('festsetzungNutzer: ' . var_export($festsetzungNutzer, true), 4);
+	    $this->log->log_debug('erhebungsjahr: ' . var_export($erhebungsjahr, true));
+	    $this->log->log_debug('dokumentId: ' . var_export($dokumentId, true));
+	    $this->log->log_debug('datum: ' . var_export($datum, true));
+	    $this->log->log_debug('dokumentDatum: ' . var_export($dokumentDatum, true));
+	    $this->log->log_debug('festsetzungNutzer: ' . var_export($festsetzungNutzer, true));
 	    
-	    $this->debug->write('summeNichtZugelasseneEntnahmemengen: ' . var_export($summeNichtZugelasseneEntnahmemengen, true), 4);
-	    $this->debug->write('summeZugelasseneEntnahmemengen: ' . var_export($summeZugelasseneEntnahmemengen, true), 4);
-	    $this->debug->write('summeEntnahmemengen: ' . var_export($summeEntnahmemengen, true), 4);
+	    $this->log->log_debug('summeNichtZugelasseneEntnahmemengen: ' . var_export($summeNichtZugelasseneEntnahmemengen, true));
+	    $this->log->log_debug('summeZugelasseneEntnahmemengen: ' . var_export($summeZugelasseneEntnahmemengen, true));
+	    $this->log->log_debug('summeEntnahmemengen: ' . var_export($summeEntnahmemengen, true));
 	    
-	    $this->debug->write('summeNichtZugelassenesEntgelt: ' . var_export($summeNichtZugelassenesEntgelt, true), 4);
-	    $this->debug->write('summeZugelassenesEntgelt: ' . var_export($summeZugelassenesEntgelt, true), 4);
-	    $this->debug->write('summeEntgelt: ' . var_export($summeEntgelt, true), 4);
+	    $this->log->log_debug('summeNichtZugelassenesEntgelt: ' . var_export($summeNichtZugelassenesEntgelt, true));
+	    $this->log->log_debug('summeZugelassenesEntgelt: ' . var_export($summeZugelassenesEntgelt, true));
+	    $this->log->log_debug('summeEntgelt: ' . var_export($summeEntgelt, true));
 	    
 	    $festsetzungen = $this->festsetzungen;
 	    if(!empty($festsetzungen))
@@ -707,7 +708,7 @@ class Gewaesserbenutzungen extends WrPgObject {
 	            {
 	                if($festsetzung->compare($erhebungsjahr))
 	                {
-	                    $this->debug->write('Festsetzung mit id: ' . $festsetzung->getId() . ' existiert schon: update', 4);
+	                    $this->log->log_info('Festsetzung mit id: ' . $festsetzung->getId() . ' existiert schon: update');
 	                    
 	                    $festsetzung_id = $festsetzung->updateFestsetzung($erhebungsjahr, $dokumentId, $datum, $dokumentDatum, $festsetzungNutzer,
 	                        $summeNichtZugelasseneEntnahmemengen, $summeZugelasseneEntnahmemengen, $summeEntnahmemengen,
@@ -719,7 +720,7 @@ class Gewaesserbenutzungen extends WrPgObject {
 	        }
 	    }
 	    
-	    $this->debug->write('Festsetzung wird neu angelegt', 4);
+	    $this->log->log_info('Festsetzung wird neu angelegt');
 	    
 	    $festsetzung = new Festsetzung($this->gui);
 	    $festsetzung_id = $festsetzung->createFestsetzung($this->getId(), $erhebungsjahr, $dokumentId, $datum, $dokumentDatum, $festsetzungNutzer,
@@ -824,7 +825,7 @@ class Gewaesserbenutzungen extends WrPgObject {
 	
 	public function getFestsetzungForErhebungsjahr($erhebungsjahr)
 	{
-// 	    $this->debug->write('*** getFestsetzungForErhebungsjahr ***', 4);
+	    $this->log->log_info('*** getFestsetzungForErhebungsjahr ***');
 	    
 	    if(!empty($erhebungsjahr))
 	    {

@@ -51,15 +51,15 @@ elseif($_SERVER ["REQUEST_METHOD"] == "GET")
         
 //         print_r($keyEscaped);
         
-//         $this->debug->write('keyEscaped: ' . var_export($keyEscaped, true), 4);
-//         $this->debug->write('valueEscaped: ' . var_export($valueEscaped, true), 4);
+        $this->log->log_trace('keyEscaped: ' . var_export($keyEscaped, true));
+        $this->log->log_trace('valueEscaped: ' . var_export($valueEscaped, true));
         
         if(strtolower($keyEscaped) === "getfestsetzung")
 		{
 		    $findDefaultWrz = false;
 		    
 		    $idValues = findIdAndYearFromValueString($this, $valueEscaped);
-		    $this->debug->write('idValues: ' . var_export($idValues, true), 4);
+		    $this->log->log_debug('idValues: ' . var_export($idValues, true));
 		    
 		    $festsetzungWrz = new WasserrechtlicheZulassungen($this);
 		    $wrz = $festsetzungWrz->find_by_id($this, 'id', $idValues["wrz_id"]);
@@ -104,11 +104,11 @@ elseif($_SERVER ["REQUEST_METHOD"] == "GET")
 
 function festsetzung_freigeben(&$gui, $valueEscaped, &$erhebungsjahr, $festsetzungFreigeben, &$wrz, &$gewaesserbenutzung, &$errorEingabeFestsetzung, &$speereEingabeFestsetzung)
 {
-    $gui->debug->write('*** erklaerung_freigeben ***', 4);
-    $gui->debug->write('festsetzungFreigeben: ' . $festsetzungFreigeben, 4);
+    $gui->log->log_info('*** erklaerung_freigeben ***');
+    $gui->log->log_debug('festsetzungFreigeben: ' . $festsetzungFreigeben);
     
     $idValues = findIdAndYearFromValueString($gui, $valueEscaped);
-    $gui->debug->write('idValues: ' . var_export($idValues, true), 4);
+    $gui->log->log_debug('idValues: ' . var_export($idValues, true));
     
     $festsetzungFreigebenWrz = new WasserrechtlicheZulassungen($gui);
     $wrz = $festsetzungFreigebenWrz->find_by_id($gui, 'id', $idValues["wrz_id"]);
@@ -182,7 +182,7 @@ function festsetzung_freigeben(&$gui, $valueEscaped, &$erhebungsjahr, $festsetzu
                             {
                                 $teilgewaesserbenutzungId = $teilgewaesserbenutzung->updateTeilgewaesserbenutzung_Bearbeiter($erhebungsjahr, $teilgewaesserbenutzung_art_benutzung, $teilgewaesserbenutzung_wiedereinleitung_bearbeiter, $teilgewaesserbenutzung_befreiungstatbestaende, $freitext, $berechneter_entgeltsatz_zugelassen, $berechneter_entgeltsatz_nicht_zugelassen, $berechnetes_entgelt_zugelassen, $berechnetes_entgelt_nicht_zugelassen);
                                 $gui->add_message('notice', 'Teilgewässerbenutzungen (id: ' . $teilgewaesserbenutzungId . ') erfolgreich geändert!');
-                                $gui->debug->write('Teilgewässerbenutzungen (id: ' . $teilgewaesserbenutzungId . ') erfolgreich geändert!', 4);
+                                $gui->log->log_success('Teilgewässerbenutzungen (id: ' . $teilgewaesserbenutzungId . ') erfolgreich geändert!');
                             }
                             else
                             {
@@ -228,20 +228,20 @@ function festsetzung_freigeben(&$gui, $valueEscaped, &$erhebungsjahr, $festsetzu
             } else {
                 if ($errorEingabeFestsetzung > 0) {
                     $gui->add_message('error', 'Eingabe in Zeile ' . $errorEingabeFestsetzung . ' ist fehlerhaft oder nicht vollständig! Bitte überprüfen Sie Ihre Angaben!');
-                    $gui->debug->write('ERROR: Eingabe in Zeile ' . $errorEingabeFestsetzung . ' ist fehlerhaft oder nicht vollständig! Bitte überprüfen Sie Ihre Angaben!', 4);
+                    $gui->log->log_error('Eingabe in Zeile ' . $errorEingabeFestsetzung . ' ist fehlerhaft oder nicht vollständig! Bitte überprüfen Sie Ihre Angaben!');
                 }
             }
         }
         else
         {
             $gui->add_message('error', 'Keine gültige Gewässerbenutzung gefunden!');
-            $gui->debug->write('ERROR: Keine gültige Gewässerbenutzung gefunden!', 4);
+            $gui->log->log_error('Keine gültige Gewässerbenutzung gefunden!');
         }
     }
     else
     {
         $gui->add_message('error', 'Keine gültige WrZ gefunden!');
-        $gui->debug->write('ERROR: Keine gültige WrZ gefunden!', 4);
+        $gui->log->log_error('Keine gültige WrZ gefunden!');
     }
 }
 

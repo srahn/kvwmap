@@ -61,8 +61,8 @@
 
 function writeWordFile(&$gui, $word_template, $word_file, &$parameter)
 {
-    $gui->debug->write('*** create_bescheide->writeWordFile ***', 4);
-    $gui->debug->write('parameter: ' . var_export($parameter, true), 4);
+    $gui->log->log_info('*** create_bescheide->writeWordFile ***');
+    $gui->log->log_debug('parameter: ' . var_export($parameter, true));
     
     $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($word_template);
     foreach($parameter as $key => $value)
@@ -74,16 +74,16 @@ function writeWordFile(&$gui, $word_template, $word_file, &$parameter)
 
 function writeAufforderungZurErklaerungWordFile(&$gui, $word_template, $word_file, &$parameter)
 {
-    $gui->debug->write('*** create_bescheide->writeAufforderungZurErklaerungWordFile ***', 4);
-    $gui->debug->write('parameter: ' . var_export($parameter, true), 4);
+    $gui->log->log_info('*** create_bescheide->writeAufforderungZurErklaerungWordFile ***');
+    $gui->log->log_debug('parameter: ' . var_export($parameter, true));
     
     writeWordFile($gui, $word_template, $word_file, $parameter);
 }
 
 function writeFestsetzungsWordFile(&$gui, $word_template, $word_file, &$parameter, &$festsetzungsSammelbescheidDaten)
 {
-    $gui->debug->write('*** create_bescheide->writeFestsetzungsWordFile ***', 4);
-    $gui->debug->write('parameter: ' . var_export($parameter, true), 4);
+    $gui->log->log_info('*** create_bescheide->writeFestsetzungsWordFile ***');
+    $gui->log->log_debug('parameter: ' . var_export($parameter, true));
     $festsetzungsSammelbescheidDaten->toString();
     
     $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($word_template);
@@ -111,15 +111,15 @@ function writeFestsetzungsWordFile(&$gui, $word_template, $word_file, &$paramete
     }
     
     $entnahmemengen = $festsetzungsSammelbescheidDaten->getEntnahmemengen();
-    $gui->debug->write('entnahmemengen: ' . var_export($entnahmemengen, true), 4);
+    $gui->log->log_debug('entnahmemengen: ' . var_export($entnahmemengen, true));
     $entgelte = $festsetzungsSammelbescheidDaten->getEntgelte();
-    $gui->debug->write('entgelte: ' . var_export($entgelte, true), 4);
+    $gui->log->log_debug('entgelte: ' . var_export($entgelte, true), 4);
     $zugelassene_entgelte = $festsetzungsSammelbescheidDaten->getZugelassene_entgelte();
-    $gui->debug->write('zugelassene_entgelte: ' . var_export($zugelassene_entgelte, true), 4);
+    $gui->log->log_debug('zugelassene_entgelte: ' . var_export($zugelassene_entgelte, true));
     $nicht_zugelassene_entgelte = $festsetzungsSammelbescheidDaten->getNicht_zugelassene_entgelte();
-    $gui->debug->write('nicht_zugelassene_entgelte: ' . var_export($nicht_zugelassene_entgelte, true), 4);
+    $gui->log->log_debug('nicht_zugelassene_entgelte: ' . var_export($nicht_zugelassene_entgelte, true));
     $erlaubte_umfaenge = $festsetzungsSammelbescheidDaten->getErlaubterUmfang();
-    $gui->debug->write('erlaubte_umfaenge: ' . var_export($erlaubte_umfaenge, true), 4);
+    $gui->log->log_debug('erlaubte_umfaenge: ' . var_export($erlaubte_umfaenge, true));
     
     $gewaesserbenutzungen = $festsetzungsSammelbescheidDaten->getGewaesserbenutzungen();
     

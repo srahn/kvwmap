@@ -71,7 +71,7 @@ class WRZProGueltigkeitsJahreArray
     
     public function getAdressatInYearAndBehoerde(&$wasserrechtlicheZulassungen, $getYear, $getBehoerde, $getAdressat, $collectAdressaten = false)
     {
-        $this->log->log_debug('*** WRZProGueltigkeitsJahreArray->getAdressatInYearAndBehoerde ***');
+        $this->log->log_info('*** WRZProGueltigkeitsJahreArray->getAdressatInYearAndBehoerde ***');
         $this->log->log_debug('wasserrechtlicheZulassungen count: ' . count($wasserrechtlicheZulassungen));
         $this->log->log_debug('getYear: ' . var_export($getYear, true));
         $this->log->log_debug('getBehoerde: ' . var_export($getBehoerde, true));
@@ -134,7 +134,7 @@ class WRZProGueltigkeitsJahreArray
     
     public function getWrZForAdressatInYearAndBehoerde(&$wasserrechtlicheZulassungen, $getYear, $getBehoerde, $getAdressat)
     {
-        $this->log->log_debug('*** WRZProGueltigkeitsJahreArray->getWrZForAdressatInYearAndBehoerde ***');
+        $this->log->log_info('*** WRZProGueltigkeitsJahreArray->getWrZForAdressatInYearAndBehoerde ***');
         $this->log->log_debug('wasserrechtlicheZulassungen count: ' . count($wasserrechtlicheZulassungen));
         $this->log->log_debug('getYear: ' . var_export($getYear, true));
         $this->log->log_debug('getBehoerde: ' . var_export($getBehoerde, true));

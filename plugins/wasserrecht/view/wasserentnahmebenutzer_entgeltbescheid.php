@@ -29,7 +29,7 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
                 $auswahl_checkbox_escaped = htmlspecialchars($auswahl_checkbox);
                 
                 $idValues = findIdAndYearFromValueString($this, $auswahl_checkbox_escaped);
-                $this->debug->write('idValues: ' . var_export($idValues, true), 4);
+                $this->log->log_debug('idValues: ' . var_export($idValues, true));
                 
                 $festsetzungWrz = new WasserrechtlicheZulassungen($this);
                 $wrz = $festsetzungWrz->find_by_id($this, 'id', $idValues["wrz_id"]);
@@ -61,7 +61,7 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
 
 function festsetzung_erstellen(&$gui, &$wrzs, &$erhebungsjahr)
 {
-    $gui->debug->write('*** wasserentnahmebenutzer_entgeltbescheid->festsetzung_erstellen ***', 4);
+    $gui->log->log_info('*** wasserentnahmebenutzer_entgeltbescheid->festsetzung_erstellen ***');
     
     if(!empty($wrzs) && count($wrzs) > 0 && !empty($wrzs[0]))
     {
@@ -80,7 +80,7 @@ function festsetzung_erstellen(&$gui, &$wrzs, &$erhebungsjahr)
                 
                 if(!empty($gewaesserbenutzung))
                 {
-                    $gui->debug->write('gewaesserbenutzung id: ' . var_export($gewaesserbenutzung->getId(), true), 4);
+                    $gui->log->log_debug('gewaesserbenutzung id: ' . var_export($gewaesserbenutzung->getId(), true));
                     
                     //alle Daten für den Festsetzungsbescheid sammeln
                     $festsetzungsSammelbescheidDaten->addWrz($wrz);
@@ -137,9 +137,9 @@ function festsetzung_erstellen(&$gui, &$wrzs, &$erhebungsjahr)
  */
 function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten)
 {
-    $gui->debug->write('*** wasserentnahmebenutzer_entgeltbescheid->festsetzung_dokument_erstellen ***', 4);
+    $gui->log->log_info('*** wasserentnahmebenutzer_entgeltbescheid->festsetzung_dokument_erstellen ***');
     $festsetzungsSammelbescheidDaten->toString();
-    $gui->debug->write('festsetzungsSammelbescheidDaten->isValid(): ' . var_export($festsetzungsSammelbescheidDaten->isValid(), true), 4);
+    $gui->log->log_debug('festsetzungsSammelbescheidDaten->isValid(): ' . var_export($festsetzungsSammelbescheidDaten->isValid(), true));
     
     if($festsetzungsSammelbescheidDaten->isValid())
     {
@@ -149,7 +149,7 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
         $uniqid = uniqid();
         $word_file_name = $uniqid . ".docx";
         $word_file = WASSERRECHT_DOCUMENT_PATH . $word_file_name;
-        $gui->debug->write('word_file_name: ' . $word_file_name, 4);
+        $gui->log->log_debug('word_file_name: ' . $word_file_name);
         
         //get the parameter
         $datum = date("d.m.Y");
@@ -461,7 +461,7 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
     			            {
     			                if(empty($getAdressat) || $getAdressat === $wrz->adressat->getId())
     			                {
-    			                    $this->debug->write('dokumentIds: ' . var_export($dokumentIds, true), 4);
+    			                    $this->log->log_debug('dokumentIds: ' . var_export($dokumentIds, true));
     			                    
     			                    $gwbs = $wrz->gewaesserbenutzungen;
     			                    if(!empty($gwbs))

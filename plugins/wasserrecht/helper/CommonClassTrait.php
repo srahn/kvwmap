@@ -3,9 +3,9 @@ trait CommonClassTrait
 {
     public function getArray($fieldName, $functionName, $parameter)
     {
-        //         $this->debug->write('fieldName: ' . $fieldName, 4);
-        //         $this->debug->write('functionName: ' . $functionName, 4);
-        //         $this->debug->write('parameter: ' . $parameter, 4);
+        //         $this->log->log_trace('fieldName: ' . $fieldName);
+        //         $this->log->log_trace('functionName: ' . $functionName);
+        //         $this->log->log_trace('parameter: ' . $parameter);
         
         $fields = $this->$fieldName();
         
@@ -20,7 +20,7 @@ trait CommonClassTrait
                     $result = $field->$functionName($parameter);
                     //                     if(is_numeric($result))
                         //                     {
-                        //                         $this->debug->write('result: ' . $result, 4);
+                        //                         $this->log->log_trace('result: ' . $result);
                         //                     }
                             $returnArray[] = $result;
                 }

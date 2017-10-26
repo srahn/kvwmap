@@ -31,10 +31,10 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
 
 function createAufforderungsDokument(&$gui, &$valueEscaped)
 {
-    $gui->debug->write('*** createAufforderungsDokument ***', 4);
+    $gui->log->log_info('*** createAufforderungsDokument ***');
     
     $idValues = findIdAndYearFromValueString($gui, $valueEscaped);
-    $gui->debug->write('idValues: ' . var_export($idValues, true), 4);
+    $gui->log->log_debug('idValues: ' . var_export($idValues, true));
     
     $aufforderungWrz1 = new WasserrechtlicheZulassungen($gui);
     $aufforderungWrz2 = $aufforderungWrz1->find_by_id($gui, 'id', $idValues["wrz_id"]);
@@ -59,7 +59,7 @@ function createAufforderungsDokument(&$gui, &$valueEscaped)
         
         if(!empty($gewaesserbenutzung))
         {
-            $gui->debug->write('gewaesserbenutzung id: ' . var_export($gewaesserbenutzung->getId(), true), 4);
+            $gui->log->log_debug('gewaesserbenutzung id: ' . var_export($gewaesserbenutzung->getId(), true));
             
             $erhebungsjahr = $idValues["erhebungsjahr"];
             
@@ -134,7 +134,7 @@ function createAufforderungsDokument(&$gui, &$valueEscaped)
             }
             else
             {
-                $gui->debug->write('Do not write Aufforderung, because it already exists', 4);
+                $gui->log->log_debug('Do not write Aufforderung, because it already exists');
             }
         }
     }
