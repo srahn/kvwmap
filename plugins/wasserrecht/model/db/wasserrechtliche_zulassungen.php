@@ -217,7 +217,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	    $today = date("d.m.Y");
 	    
 	    // 	    if(!empty($gueltigSeitDate) && !empty($befristetBisDate))
-	    $this->debug->write('$befristetBisDate: ' . var_export($befristetBisDate, true), 4);
+	    $this->debug->write('befristetBisDate: ' . var_export($befristetBisDate, true), 4);
 	    $this->debug->write('today: ' . var_export($today, true), 4);
 	    
 	    if(!empty($befristetBisDate))
@@ -240,7 +240,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	     * im Jahr neu angelegt
 	     */
 	    
-	    return "";
+	    return "keine";
 	}
 	
 	public static function convertStringToDate($inputString) {
