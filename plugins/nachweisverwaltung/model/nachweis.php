@@ -46,7 +46,36 @@ class Nachweis {
     $this->database=$database;
     $this->client_epsg=$client_epsg;
   }
-    		
+
+	function check_documentpath($old_dataset){		
+		$ret=$this->getNachweise($old_dataset['id'],'','','','','','','','bySingleID','','');
+		if ($ret=='') {
+			$this->Dokumente[0]['artname'] = ArtCode2Abk($this->Dokumente[0]['art']);
+			$this->Dokumente[0]['Bilddatei_name'] = $this->Dokumente[0]['link_datei'];
+			$this->Dokumente[0]['Blattnr'] = $this->Dokumente[0]['blattnummer'];
+			$formvars['zieldateiname']=$this->getZielDateiName($this->Dokumente[0]);
+			$oldpath = NACHWEISDOCPATH.$old_dataset['flurid'].'/'.$this->buildNachweisNr($old_dataset[NACHWEIS_PRIMARY_ATTRIBUTE], $old_dataset[NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$old_dataset['link_datei'];
+			$newpath = NACHWEISDOCPATH.$this->Dokumente[0]['flurid'].'/'.$this->buildNachweisNr($this->Dokumente[0][NACHWEIS_PRIMARY_ATTRIBUTE], $this->Dokumente[0][NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$this->Dokumente[0]['artname'].'/'.$formvars['zieldateiname'];
+			#echo $oldpath.'<br>';
+			#echo $newpath.'<br>';
+			if($oldpath != $newpath){
+				$this->adjust_documentpath($oldpath, $newpath);
+				$this->aktualisierenDokument($old_dataset['id'],NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,$this->Dokumente[0]['artname'].'/'.$formvars['zieldateiname'],NULL);
+			}
+		}
+	}
+	
+	function adjust_documentpath($doclocation, $zieldatei){
+		#echo '<br>Speicherort der Datei muss geändert werden.';
+		#echo '<br>von:&nbsp; '.$doclocation;
+		#echo '<br>nach: '.$zieldatei; 
+		$errmsg = $this->dokumentenDateiHochladen($doclocation, $zieldatei);
+		if($errmsg == ''){
+			$errmsg = $this->dokumentenDateiLoeschen($doclocation);		
+		}
+		return $errmsg;
+	}
+				
   function getZielDateiName($formvars) {
     #2005-11-24_pk
     $pathparts=pathinfo($formvars['Bilddatei_name']);
@@ -88,6 +117,7 @@ class Nachweis {
         }
         # Zusammensetzen des Dateinamen unter dem das Dokument gespeichert werden soll
         $formvars['zieldateiname']=$this->getZielDateiName($formvars);
+				$zieldatei=NACHWEISDOCPATH.$formvars['flurid'].'/'.$this->buildNachweisNr($formvars[NACHWEIS_PRIMARY_ATTRIBUTE], $formvars[NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$formvars['artname'].'/'.$formvars['zieldateiname'];
 
         # 4. Ändern der Eintragung in der Datenbank
         $ret=$this->aktualisierenDokument($formvars['id'],$formvars['datum'],$formvars['flurid'],$formvars['VermStelle'],$formvars['art'],$formvars['andere_art'],$formvars['gueltigkeit'],$formvars['stammnr'],$formvars['Blattformat'],$formvars['Blattnr'],$formvars['rissnummer'],$formvars['fortfuehrung'],$formvars['bemerkungen'],$formvars['bemerkungen_intern'],$formvars['umring'],$formvars['artname'].'/'.$formvars['zieldateiname'], $user);
@@ -111,7 +141,7 @@ class Nachweis {
               # 5.2 Löschen der alten Datei war erfolgreich
               #echo '<br>Alte Datei: '.$doclocation.' gelöscht';
               # Speichern der neuen Bilddatei auf dem Server
-              $ret=$this->dokumentenDateiHochladen($formvars['flurid'],$this->buildNachweisNr($formvars[NACHWEIS_PRIMARY_ATTRIBUTE], $formvars[NACHWEIS_SECONDARY_ATTRIBUTE]),$formvars['artname'],$formvars['Bilddatei'],$formvars['zieldateiname']);
+              $ret=$this->dokumentenDateiHochladen($formvars['Bilddatei'], $zieldatei);
               if ($ret!='') {
                 # Neue Datei konnte nicht hochgeladen werden
                 $errmsg=$ret;
@@ -131,53 +161,14 @@ class Nachweis {
             # Prüfen, ob sich der Speicherort auf Grund von geänderten Sachdaten ändern muss
             # $doclocation... alter Speicherort
             # Zusammensetzen des neuen Speicherortes
-            $zieldatei=NACHWEISDOCPATH.$formvars['flurid'].'/'.$this->buildNachweisNr($formvars[NACHWEIS_PRIMARY_ATTRIBUTE], $formvars[NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$formvars['artname'].'/'.$formvars['zieldateiname'];
             if ($doclocation!=$zieldatei) {
-              #echo '<br>Speicherort der Datei muss geändert werden.';
-              #echo '<br>von:&nbsp; '.$doclocation;
-              #echo '<br>nach: '.$zieldatei; 
-              # Datei muss an neuen Speicherort.
-              # Speichern der Bilddatei unter neuem Pfad und Namen auf dem Server
-              $ret=$this->dokumentenDateiHochladen($formvars['flurid'],$this->buildNachweisNr($formvars[NACHWEIS_PRIMARY_ATTRIBUTE], $formvars[NACHWEIS_SECONDARY_ATTRIBUTE]),$formvars['artname'],$doclocation,$formvars['zieldateiname']);
-              if ($ret!='') {
-                # bestehende Datei konnte nicht an neuen Ort geschrieben werden
-                $errmsg=$ret;
-              }
-              else {
-                # vorhandene Datei wurde an neuen Ort geschrieben
-                #echo '<br>Alte Dateian an neuen Ort:'.$zieldatei.' geschrieben.';
-                # 7 Löschen der bestehenden Bilddatei auf dem Server
-                $ret=$this->dokumentenDateiLoeschen($doclocation);
-                if ($ret!='') {
-                  # Alte Datei konnte nicht gelöscht werden   
-                  $errmsg=$ret;
-                }
-                else {
-                  # 7.1 Löschen der alten Datei war erfolgreich
-                  # Test ob Verzeichnisse leer, dann löschen
-                  $directory = dirname($doclocation);
-		              if(is_dir_empty($directory)){
-		              	rmdir($directory);
-		              	#echo '<br>Altes Verzeichnis: '.$directory.' gelöscht';
-		              	$directory = dirname($directory);
-		              	if(is_dir_empty($directory)){
-		              		rmdir($directory);
-		              		#echo '<br>Altes Verzeichnis: '.$directory.' gelöscht';
-		              		$directory = dirname($directory);
-			              	if(is_dir_empty($directory)){
-			              		rmdir($directory);
-			              		#echo '<br>Altes Verzeichnis: '.$directory.' gelöscht';
-			              	}
-		              	}
-		              }
-                  #echo '<br>Alte Datei: '.$doclocation.' gelöscht';
-                  # 7.2 Umspeicherung der neuen Bilddatei war erfolgreich
-                  # Erfolgreiches abschließen der Transaktion
-                  $this->database->committransaction();
-                  $ret[0]=0;
-                  $ret[1]='Änderung des Datenbankeintrages und der Datei erfolgreich.';
-                }
-              }
+              $errmsg = $this->adjust_documentpath($doclocation, $zieldatei);
+							if($errmsg == ''){
+								# Erfolgreiches abschließen der Transaktion
+								$this->database->committransaction();
+								$ret[0]=0;
+								$ret[1]='Änderung des Datenbankeintrages und der Datei erfolgreich.';
+							}
             }
             else {
               # Erfolgreiches abschließen der Transaktion
@@ -463,47 +454,50 @@ class Nachweis {
 		}
   }
 	
-  function dokumentenDateiHochladen($flurid,$nr,$artname,$quelldatei,$zieldateiname) {
-    #2005-11-24_pk
-    # Speicherort für die Nachweisdatei bestimmen
-    $pfad=NACHWEISDOCPATH.$flurid.'/';
-    if (!is_dir($pfad)) {
-      mkdir ($pfad, 0777);
-    }
-    $pfad.=$nr.'/';
-    if (!is_dir($pfad)) {
-      mkdir ($pfad, 0777);
-    }
-    $zielpfad=$pfad.$artname.'/';
-    if (!is_dir($zielpfad)) {
-      mkdir ($zielpfad, 0777);
-    }
-    if (is_file($zielpfad.$zieldateiname)){
+  function dokumentenDateiHochladen($quelldatei,$zieldatei) {
+		if(is_file($zieldatei)){
       $errmsg=' Eine entsprechende Datei existiert bereits auf dem Server!';
     }
-    else {
-      copy($quelldatei,$zielpfad.$zieldateiname);
-      if(!file_exists($zielpfad.$zieldateiname) OR filesize($zielpfad.$zieldateiname) == 0){
+    else{
+			$zielordner = dirname($zieldatei);
+			if(!is_dir($zielordner)){
+				mkdir($zielordner, 0777, true);
+			}
+      copy($quelldatei,$zieldatei);
+      if(!file_exists($zieldatei) OR filesize($zieldatei) == 0){
       	$errmsg=' Beim Laden der Datei auf den Server sind Fehler aufgetreten!';
       }
 			else{
-				$errmsg = $this->CreateNachweisDokumentVorschau($zielpfad.$zieldateiname);
+				$errmsg = $this->CreateNachweisDokumentVorschau($zieldatei);
 			}
     }
-    $this->link_datei=$artname.'/'.$zieldateiname;
     return $errmsg;     
   }
   
   function dokumentenDateiLoeschen($doclocation){
-    if (file_exists($doclocation)) {
+    if(file_exists($doclocation)){
       $erfolg=unlink($doclocation);
-      if (!$erfolg){  
+      if(!$erfolg){  
         $errmsg.= 'Die Datei konnte nicht gelöscht werden, weil sie nicht existiert oder keine Zugriffsrechte bestehen! ';      
       }
       else{
 				$dateinamensteil = explode('.', $doclocation);
 				unlink($dateinamensteil[0].'_thumb.jpg');
-        #echo '<br>Datei: '.$doclocation.' gelöscht.';
+				$directory = dirname($doclocation);
+				if(is_dir_empty($directory)){
+					rmdir($directory);
+					#echo '<br>Altes Verzeichnis: '.$directory.' gelöscht';
+					$directory = dirname($directory);
+					if(is_dir_empty($directory)){
+						rmdir($directory);
+						#echo '<br>Altes Verzeichnis: '.$directory.' gelöscht';
+						$directory = dirname($directory);
+						if(is_dir_empty($directory)){
+							rmdir($directory);
+							#echo '<br>Altes Verzeichnis: '.$directory.' gelöscht';
+						}
+					}
+				}
       }
     }
     return $errmsg;
@@ -600,44 +594,57 @@ class Nachweis {
     return $ret;
   }
   
-  function aktualisierenDokument($id,$datum,$flurid,$VermStelle,$art,$andere_art,$gueltigkeit,$stammnr,$Blattformat,$Blattnr,$rissnr,$fortf,$bemerkungen,$bemerkungen_intern,$umring,$zieldateiname,$user) {
-    if($fortf == '')$fortf = 'NULL';
+  function aktualisierenDokument($id,$datum,$flurid,$VermStelle,$art,$andere_art,$gueltigkeit,$stammnr,$Blattformat,$Blattnr,$rissnr,$fortf,$bemerkungen,$bemerkungen_intern,$umring,$zieldateiname,$user){
+    if($fortf === '')$fortf = 'NULL';
     $this->debug->write('Aktualisieren der Metadaten zu einem bestehenden Nachweisdokument',4);
-    $sql="UPDATE nachweisverwaltung.n_nachweise SET flurid='".$flurid."', stammnr='".trim($stammnr)."', art='".$art."'";
-    $sql.=",blattnummer='".trim($Blattnr)."', datum='".$datum."', vermstelle='".$VermStelle."'";
-    $sql.=",gueltigkeit='".$gueltigkeit."', format='".$Blattformat."',the_geom=st_transform(st_geometryfromtext('".$umring."', ".$this->client_epsg."), (select srid from geometry_columns where f_table_name = 'n_nachweise')), link_datei='".$zieldateiname."'";
-    $sql.=",fortfuehrung=".(int)$fortf.",rissnummer='".$rissnr."',bemerkungen='".$bemerkungen."',bemerkungen_intern='".$bemerkungen_intern."'";
-		$sql.=",bearbeiter='".$user->Vorname." ".$user->Name."', zeit='".date('Y-m-d G:i:s')."'";
+    $sql="UPDATE nachweisverwaltung.n_nachweise SET ";
+		if($flurid != NULL)$sql.="flurid='".$flurid."', ";
+		if($stammnr != NULL)$sql.="stammnr='".trim($stammnr)."', ";
+		if($art != NULL)$sql.="art='".$art."'";
+    if($Blattnr != NULL)$sql.=",blattnummer='".trim($Blattnr)."', ";
+		if($art != NULL)$sql.="datum='".$datum."', ";
+		if($VermStelle != NULL)$sql.="vermstelle='".$VermStelle."', ";
+    if($gueltigkeit != NULL)$sql.="gueltigkeit='".$gueltigkeit."', ";
+		if($Blattformat != NULL)$sql.="format='".$Blattformat."', ";
+		if($umring != NULL)$sql.="the_geom=st_transform(st_geometryfromtext('".$umring."', ".$this->client_epsg."), (select srid from geometry_columns where f_table_name = 'n_nachweise')), ";
+		if($zieldateiname != NULL)$sql.="link_datei='".$zieldateiname."', ";
+    if($fortf != NULL)$sql.="fortfuehrung=".(int)$fortf.", ";
+		if($rissnr != NULL)$sql.="rissnummer='".$rissnr."', ";
+		if($bemerkungen != NULL)$sql.="bemerkungen='".$bemerkungen."', ";
+		if($bemerkungen_intern != NULL)$sql.="bemerkungen_intern='".$bemerkungen_intern."', ";
+		$sql.=" bearbeiter='".$user->Vorname." ".$user->Name."', zeit='".date('Y-m-d G:i:s')."'";
     $sql.=" WHERE id = ".$id;
     #echo $sql;
     $ret=$this->database->execSQL($sql,4, 1);
-		if($art != '111'){
-			$sql = "DELETE FROM nachweisverwaltung.n_nachweise2dokumentarten WHERE nachweis_id = ".$id;
-			#echo $sql;
-			$ret=$this->database->execSQL($sql,4, 1);	
-		}
-		else{
-			if($andere_art != ''){
-				$sql = "SELECT dokumentart_id FROM nachweisverwaltung.n_nachweise2dokumentarten WHERE nachweis_id = ".$id.";";
-				$query=@pg_query($this->database->dbConn,$sql);
-				$rs=pg_fetch_array($query);
-				if ($rs[0]!=''){
-					$sql = "UPDATE nachweisverwaltung.n_nachweise2dokumentarten SET dokumentart_id = ".$andere_art." WHERE nachweis_id = ".$id.";";
-					#echo $sql;
-					$ret=$this->database->execSQL($sql,4, 1);
+		if($art != NULL){
+			if($art != '111'){
+				$sql = "DELETE FROM nachweisverwaltung.n_nachweise2dokumentarten WHERE nachweis_id = ".$id;
+				#echo $sql;
+				$ret=$this->database->execSQL($sql,4, 1);	
+			}
+			else{
+				if($andere_art != ''){
+					$sql = "SELECT dokumentart_id FROM nachweisverwaltung.n_nachweise2dokumentarten WHERE nachweis_id = ".$id.";";
+					$query=@pg_query($this->database->dbConn,$sql);
+					$rs=pg_fetch_array($query);
+					if ($rs[0]!=''){
+						$sql = "UPDATE nachweisverwaltung.n_nachweise2dokumentarten SET dokumentart_id = ".$andere_art." WHERE nachweis_id = ".$id.";";
+						#echo $sql;
+						$ret=$this->database->execSQL($sql,4, 1);
+					}
+					else{
+						$sql = "INSERT INTO nachweisverwaltung.n_nachweise2dokumentarten";
+						$sql .= " SELECT id, ".$andere_art." FROM nachweisverwaltung.n_nachweise WHERE id = ".$id;
+						#echo $sql;
+						$ret=$this->database->execSQL($sql,4, 1);	
+					}	
 				}
-				else{
-					$sql = "INSERT INTO nachweisverwaltung.n_nachweise2dokumentarten";
-					$sql .= " SELECT id, ".$andere_art." FROM nachweisverwaltung.n_nachweise WHERE id = ".$id;
-					#echo $sql;
-					$ret=$this->database->execSQL($sql,4, 1);	
-				}	
+			}
+			if ($ret[0]) {
+				# Fehler beim Eintragen in Datenbank
+				$ret[1]='Auf Grund eines Datenbankfehlers konnte das Dokument nicht aktualisiert werden!'.$ret[1];
 			}
 		}
-    if ($ret[0]) {
-      # Fehler beim Eintragen in Datenbank
-      $ret[1]='Auf Grund eines Datenbankfehlers konnte das Dokument nicht aktualisiert werden!'.$ret[1];
-    }
     return $ret; 
   }
   

@@ -1,6 +1,26 @@
 <?
 
 	$GUI = $this;
+	
+	/**
+	* Trigger für Bearbeitung im GLE
+	*/
+	$this->trigger_functions['check_documentpath'] = function($fired, $event, $layer = '', $oid = 0, $old_dataset = array()) use ($GUI) {
+		$executed = true;
+		$success = true;
+
+		switch(true) {
+			case ($fired == 'AFTER' AND $event == 'UPDATE') : {
+				$nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
+				$nachweis->check_documentpath($old_dataset);
+			} break;
+
+			default : {
+				$executed = false;
+			}
+		}
+		return array('executed' => $executed, 'success' => $success);
+	};	
 
 	$this->Datei_Download = function($filename) use ($GUI){
     $GUI->formvars['filename'] = $filename;
@@ -990,7 +1010,8 @@
         # 2.1 Speichern der Bilddatei zum Nachweis auf dem Server
         # Zusammensetzen des Dateinamen unter dem das Dokument gespeichert werden soll.
         $GUI->formvars['zieldateiname']=$GUI->nachweis->getZielDateiName($GUI->formvars);
-        $ret=$GUI->nachweis->dokumentenDateiHochladen($GUI->formvars['flurid'], $GUI->nachweis->buildNachweisNr($GUI->formvars[NACHWEIS_PRIMARY_ATTRIBUTE], $GUI->formvars[NACHWEIS_SECONDARY_ATTRIBUTE]),$GUI->formvars['artname'],$GUI->formvars['Bilddatei'],$GUI->formvars['zieldateiname']);
+				$zieldatei = NACHWEISDOCPATH.$GUI->formvars['flurid'].'/'.$this->nachweis->buildNachweisNr($GUI->formvars[NACHWEIS_PRIMARY_ATTRIBUTE], $GUI->formvars[NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$GUI->formvars['artname'].'/'.$GUI->formvars['zieldateiname'];
+        $ret=$GUI->nachweis->dokumentenDateiHochladen($GUI->formvars['Bilddatei'], $zieldatei);
         if ($ret!='') { $errmsg=$ret; }
         else {
           # Speicherung der Bilddatei erfolgreich, Eintragen in Datenbank
