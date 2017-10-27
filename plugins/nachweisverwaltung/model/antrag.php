@@ -112,7 +112,19 @@ class antrag {
 		$nachweiseUKOpfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Nachweise-UKO/';	# Erzeuge ein Unterverzeichnis für die Nachweis-UKOs
     mkdir ($nachweiseUKOpfad,0777);
 		$uebersichtspfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/';	# Erzeuge ein Unterverzeichnis für die Protokoll- und Übersichtsdateien
-    mkdir ($uebersichtspfad,0777);		
+    mkdir ($uebersichtspfad,0777);
+		$gesamtpolygonpfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Gesamtpolygon/';	# Erzeuge ein Unterverzeichnis für die Gesamtpolygondateien
+    mkdir ($gesamtpolygonpfad,0777);
+		$gesamtpolygonSHPpfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Gesamtpolygon/Shape/';	# Erzeuge ein Unterverzeichnis für die Gesamtpolygondateien
+    mkdir ($gesamtpolygonSHPpfad,0777);
+		$gesamtpolygonUKOpfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Gesamtpolygon/UKO/';	# Erzeuge ein Unterverzeichnis für die Gesamtpolygondateien
+    mkdir ($gesamtpolygonUKOpfad,0777);
+		$gesamtpolygonGMLpfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Gesamtpolygon/GML/';	# Erzeuge ein Unterverzeichnis für die Gesamtpolygondateien
+    mkdir ($gesamtpolygonGMLpfad,0777);
+		$gesamtpolygonGeoJSONpfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Gesamtpolygon/GeoJSON/';	# Erzeuge ein Unterverzeichnis für die Gesamtpolygondateien
+    mkdir ($gesamtpolygonGeoJSONpfad,0777);
+		$gesamtpolygonDXFpfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Gesamtpolygon/DXF/';	# Erzeuge ein Unterverzeichnis für die Gesamtpolygondateien
+    mkdir ($gesamtpolygonDXFpfad,0777);
     # Führe in Schleif für alle zum Auftrag gehörenden Dokumente folgendes aus
     for ($i=0; $i<$nachweis->erg_dokumente;$i++){
       # Erzeuge ein Unterverzeichnis für die Flur des Dokumentes, wenn noch nicht vorhanden

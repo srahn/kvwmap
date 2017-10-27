@@ -75,7 +75,48 @@ class Nachweis {
 		}
 		return $errmsg;
 	}
-				
+
+	function create_Gesamtpolygon($pfad){
+		include_(CLASSPATH.'data_import_export.php');
+    $io = new data_import_export();
+		$sql = "SELECT st_multi(st_union(n.the_geom)) as the_geom FROM nachweisverwaltung.n_nachweise n ";
+		$sql.= "LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id "; 
+		$sql.= "LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n2d.dokumentart_id = d.id ";
+		$sql.= "WHERE n.id IN (".implode(',', $this->nachweise_id).") ";
+		$sql.= "AND n.art < '111' OR d.geometrie_relevant";
+		# temp. Tabelle erzeugen für den Export
+		$temp_table = 'nwv_'.rand(1, 10000);
+    $sql = 'CREATE TABLE public.'.$temp_table.' AS '.$sql;
+    $ret = $this->database->execSQL($sql,4, 0);
+		$sql = 'SELECT the_geom FROM public.'.$temp_table;
+		$io->ogr2ogr_export($sql, '"ESRI Shapefile"', $pfad.'Shape/gesamtpolygon.shp', $this->database);
+		$io->ogr2ogr_export($sql, 'GeoJSON', $pfad.'GeoJSON/gesamtpolygon.json', $this->database);
+		$io->ogr2ogr_export($sql, 'GML', $pfad.'GML/gesamtpolygon.xml', $this->database);
+		$io->ogr2ogr_export($sql, 'DXF', $pfad.'DXF/gesamtpolygon.dxf', $this->database);
+		$io->create_uko($this->database, $temp_table, 'the_geom', EPSGCODE, $pfad.'UKO/gesamtpolygon.uko');
+		# temp. Tabelle wieder löschen
+		$sql = 'DROP TABLE '.$temp_table;
+		$ret = $this->database->execSQL($sql,4, 0);
+		# Readme-Datei mit ignorierten Dokumentarten schreiben
+		$sql = "SELECT d.art FROM nachweisverwaltung.n_nachweise n ";
+		$sql.= "LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id "; 
+		$sql.= "LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n2d.dokumentart_id = d.id ";
+		$sql.= "WHERE n.id IN (".implode(',', $this->nachweise_id).") ";
+		$sql.= "AND NOT d.geometrie_relevant";
+		$ret = $this->database->execSQL($sql,4, 0);
+		if(!$ret[0]){
+      while($rs=pg_fetch_array($ret[1])){
+				$art[] = $rs['art'];
+      }
+			if(count($art) > 0){
+				$fp = fopen($pfad.'readme.txt', 'w');
+				fwrite($fp, 'Diese Dokumentarten wurden bei der Erzeugung des Gesamtpolygons nicht berücksichtigt:'.chr(10).chr(10));
+				fwrite($fp, implode(chr(10), $art));
+				fclose($fp);
+			}
+    }
+	}
+	
   function getZielDateiName($formvars) {
     #2005-11-24_pk
     $pathparts=pathinfo($formvars['Bilddatei_name']);

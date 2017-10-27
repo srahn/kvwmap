@@ -52,11 +52,12 @@
 				$GUI->formvars['gemessendurch'] = 1;
 				$GUI->formvars['Gueltigkeit'] = 1;		
 				$timestamp = date('Y-m-d_H-i-s',time());
-				$GUI->erzeugenUebergabeprotokollNachweise(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/'.$GUI->antrag->nr.'_'.$timestamp.'.pdf');
-				$GUI->erzeugenUebersicht_HTML(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/'.$GUI->antrag->nr.'_'.$timestamp.'.htm');
-				$GUI->erzeugenUebersicht_CSV(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/'.$GUI->antrag->nr.'_'.$timestamp.'.csv');
+				$GUI->erzeugenUebergabeprotokollNachweise(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Uebergabeprotokoll.pdf');
+				$GUI->erzeugenUebersicht_HTML(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Uebersicht.htm');
+				$GUI->erzeugenUebersicht_CSV(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Uebersicht.csv');
 				#$GUI->erzeugenZuordnungFlst_CSV(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/');
-				$GUI->create_Recherche_UKO(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/', $antragsnr, $stelle_id);
+				$GUI->create_Recherche_UKO(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/');
+				$GUI->nachweis->create_Gesamtpolygon(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Gesamtpolygon/');
         $result = exec(ZIP_PATH.' -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr);
 				# Loggen der übergebenen Dokumente
 				$uebergabe_logpath = $GUI->antrag->create_uebergabe_logpath($GUI->Stelle->Bezeichnung).'/'.$antr_selected.'_'.$timestamp.'.pdf';
@@ -427,7 +428,7 @@
 		return $dokauswahlen;
 	};
 	
-	$this->create_Recherche_UKO = function($pfad, $antrag_nr, $stelle_id) use ($GUI){
+	$this->create_Recherche_UKO = function($pfad) use ($GUI){
 		$searches = $GUI->antrag->searches;
 		foreach($searches as $params){
 			if($params['abfrageart'] == 'poly')$polys[] = "st_geometryfromtext('".$params['suchpolygon']."', 25833)";
@@ -441,7 +442,7 @@
 		fwrite($fp, $uko);
 		fclose($fp);
 	};
-	
+		
 	$this->Suchparameter_loggen = function($formvars, $stelle_id, $user_id) use ($GUI){
 		$sql ='INSERT INTO u_consumeNachweise SELECT ';
 		$sql.='"'.$formvars['suchantrnr'].'", ';
