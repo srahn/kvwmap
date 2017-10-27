@@ -196,14 +196,14 @@ switch($this->go){
 	}	break;
 	
 	case 'wasserentnahmebenutzer_entgeltbescheid': {
-	    $this->log->log_debug('wasserentnahmebenutzer_entgeltbescheid called!', 4);
+	    $this->log->log_debug('wasserentnahmebenutzer_entgeltbescheid called!');
 	    
 	    $this->main = PLUGINS . 'wasserrecht/view/wasserentnahmebenutzer_entgeltbescheid.php';
 	    $this->output();
 	}	break;
 	
 	case 'wasserentnahmeentgelt': {
-	    $this->log->log_debug('wasserentnahmeentgelt called!', 4);
+	    $this->log->log_debug('wasserentnahmeentgelt called!');
 	    
 	    $this->main = PLUGINS . 'wasserrecht/view/wasserentnahmeentgelt_erklaerung_der_entnahme.php';
 	    $this->output();
@@ -224,10 +224,22 @@ switch($this->go){
 	}	break;
 	
 	case 'zentrale_stelle': {
-	    $this->log->log_debug('zentrale_stelle called!', 4);
+	    $this->log->log_debug('zentrale_stelle called!');
 	    
-	    $this->main = PLUGINS . 'wasserrecht/view/zentrale_stelle.php';
-	    $this->output();
+	    if ($this->user->funktion === 'admin') 
+	    {
+	        $this->log->log_debug('zentrale_stelle Zugriff erlaubt');
+	        
+	        $this->main = PLUGINS . 'wasserrecht/view/zentrale_stelle.php';
+	        $this->output();
+	    }
+	    else 
+	    {
+	        $this->log->log_debug('zentrale_stelle Zugriff verweigert');
+	        
+	        echo 'Zugriff verweigert';
+	    }
+	    
 	}	break;
 	
 	case 'erstattung_des_verwaltungsaufwands': {
