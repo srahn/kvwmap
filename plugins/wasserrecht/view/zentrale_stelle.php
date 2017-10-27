@@ -18,7 +18,7 @@ include_once ('includes/header.php');
 	
     	<table id="wasserentnahmebenutzer_tabelle">
     			<tr>
-    				<th>Auswahl</th>
+<!--     				<th>Auswahl</th> -->
     				<th>Benutzer</th>
     				<th>Benutzungen</th>
         			<th>Aufforderungen</th>
@@ -34,9 +34,9 @@ include_once ('includes/header.php');
 <!--         			<th>Erstattung beantragt</th> -->
 <!--         			<th>Antrag stattgegeben</th> -->
         		</tr>
-        		<tr>
+        		<!-- <tr>
         			<td style="background-color: inherit;"><input title="Alle auswählen" type="checkbox" id="select_all_checkboxes" onchange="$('input:checkbox').not(this).prop('checked', this.checked);"></td>
-        		</tr>
+        		</tr> -->
         		<?php 
         		     $adressaten = $wrzProGueltigkeitsJahreArray->getAdressatInYearAndBehoerde($wasserrechtlicheZulassungen, $getYear, $getBehoerde, null, true);
         		     $this->log->log_trace("count adressaten: " . count($adressaten));
@@ -123,10 +123,17 @@ include_once ('includes/header.php');
         		                                                     {
         		                                                         if($festsetzung->getErhebungsjahr() === $getYear)
         		                                                         {
-        		                                                             if(!in_array($festsetzung->getId(), $festsetzungenCount))
+        		                                                             if(!empty($festsetzung->getDokument())) //Sammelfestsetzungsbescheid wurde erstellt
         		                                                             {
-        		                                                                 $festsetzungenCount[$festsetzung->getId()] = $festsetzung->getId();
-        		                                                                 $summe_entgelt_festsetzungen = $summe_entgelt_festsetzungen + $festsetzung->summe_entgelt;
+        		                                                                 if(!in_array($festsetzung->getId(), $festsetzungenCount))
+        		                                                                 {
+        		                                                                     $festsetzungenCount[$festsetzung->getId()] = $festsetzung->getId();
+        		                                                                     $summe_entgelt_festsetzungen = $summe_entgelt_festsetzungen + $festsetzung->summe_entgelt;
+        		                                                                 }
+        		                                                             }
+        		                                                             else
+        		                                                             {
+        		                                                                 $jedeGewaesserbenutzungFestgesetzt = false;
         		                                                             }
         		                                                         }
         		                                                     }
@@ -146,6 +153,7 @@ include_once ('includes/header.php');
         		                 
         		                 ?>
         		             <tr>
+        		             	<!--
         		             	<td style="background-color: inherit;">
         		             		<?php 
         		             		   if(count($festsetzungenCount) > 0)
@@ -156,6 +164,7 @@ include_once ('includes/header.php');
         		             		   }
         		             		?>
                         		 </td>
+                        		 -->
                         		 <td>
                         		 	<a href="<?php echo $this->actual_link . '?go=' . WASSERENTNAHMEBENUTZER_ENTGELTBESCHEID_URL . '&erhebungsjahr=' . $getYear. '&adressat=' . $adressat->getId() . '&behoerde=' . $getBehoerde ?>"><?php echo $adressat->getName(); ?></a>
                         		 </td>
