@@ -97,6 +97,9 @@ class Nachweis {
 		# temp. Tabelle wieder löschen
 		$sql = 'DROP TABLE '.$temp_table;
 		$ret = $this->database->execSQL($sql,4, 0);
+	}
+	
+	function writeIgnoredDokumentarten($pfad){
 		# Readme-Datei mit ignorierten Dokumentarten schreiben
 		$sql = "SELECT d.art FROM nachweisverwaltung.n_nachweise n ";
 		$sql.= "LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id "; 
@@ -110,7 +113,7 @@ class Nachweis {
       }
 			if(count($art) > 0){
 				$fp = fopen($pfad.'readme.txt', 'w');
-				fwrite($fp, 'Diese Dokumentarten wurden bei der Erzeugung des Gesamtpolygons nicht berücksichtigt:'.chr(10).chr(10));
+				fwrite($fp, 'Diese Dokumentarten wurden bei der Berechnung der Flurstückszuordnung und des Gesamtpolygons nicht berücksichtigt:'.chr(10).chr(10));
 				fwrite($fp, implode(chr(10), $art));
 				fclose($fp);
 			}

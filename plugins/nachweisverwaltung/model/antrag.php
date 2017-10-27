@@ -341,16 +341,29 @@ class antrag {
 	
 	function getIntersectedFlst(){	# diese Verschneidung mit den Flurstücken kann u.U. sehr lange dauern, deswegen erstmal zurückgestellt
 		$this->spatial_ref_code = EPSGCODE_ALKIS.", ".EARTH_RADIUS;
-		$sql ="SELECT DISTINCT n.flurid, n.stammnr, n.rissnummer, f.flurstueckskennzeichen,";
+		$sql ="SELECT flurid, stammnr, rissnummer, flurstueckskennzeichen,";
+		if(NACHWEIS_SECONDARY_ATTRIBUTE != '')$sql.=" ".NACHWEIS_SECONDARY_ATTRIBUTE.",";
+		$sql.=" round(inter::numeric, 2) as anteil_abs,";
+		$sql.=" round((inter / f_area * 100)::numeric, 2) as anteil_pro";
+		$sql.=" from (";
+		$sql.=" SELECT DISTINCT n.flurid, n.stammnr, n.rissnummer, f.flurstueckskennzeichen,";
 		if(NACHWEIS_SECONDARY_ATTRIBUTE != '')$sql.=" n.".NACHWEIS_SECONDARY_ATTRIBUTE.",";
-		$sql.=" round(st_area_utm(st_intersection(st_transform(n.the_geom, ".EPSGCODE_ALKIS."), f.wkb_geometry),".$this->spatial_ref_code.")::numeric, 2) as anteil_abs,";
-		$sql.=" round((st_area_utm(st_intersection(st_transform(n.the_geom, ".EPSGCODE_ALKIS."), f.wkb_geometry),".$this->spatial_ref_code.") / st_area_utm(f.wkb_geometry,".$this->spatial_ref_code.") * 100)::numeric, 2) as anteil_pro";
-    $sql.=" FROM nachweisverwaltung.n_nachweise AS n, nachweisverwaltung.n_nachweise2antraege AS n2a, alkis.ax_flurstueck f";
-    $sql.=" WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
-		$sql.=" AND st_intersects(st_transform(n.the_geom, ".EPSGCODE_ALKIS."), f.wkb_geometry)";
+		$sql.=" st_area(st_intersection(st_transform(n.the_geom, 25833), f.wkb_geometry)) as inter,";
+		$sql.=" st_area(f.wkb_geometry) as f_area";
+		$sql.=" FROM alkis.ax_flurstueck f,";
+		$sql.=" (SELECT DISTINCT n.flurid, n.stammnr, n.rissnummer, n.the_geom";
+		$sql.=" FROM nachweisverwaltung.n_nachweise2antraege AS n2a, nachweisverwaltung.n_nachweise AS n";
+		$sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id";
+		$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n2d.dokumentart_id = d.id";
+		$sql.=" WHERE  n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
 		if($this->stelle_id == '')$sql.=" AND stelle_id IS NULL";
-		else $sql.=" AND stelle_id=".$this->stelle_id;
-		$sql.=" order by n.flurid,n.stammnr,n.rissnummer,f.flurstueckskennzeichen";
+		else $sql.=" AND stelle_id=".$this->stelle_id;    
+		$sql.=" AND n.art < '111' OR d.geometrie_relevant";
+		$sql.=" )as n";
+		$sql.=" WHERE f.endet is null";
+		$sql.=" AND st_intersects(st_transform(n.the_geom, ".EPSGCODE_ALKIS."), f.wkb_geometry)";
+		$sql.=" order by n.flurid,n.stammnr,n.rissnummer,f.flurstueckskennzeichen) as foo";
+		#echo $sql;
 		$ret=$this->database->execSQL($sql,4, 0); 
     while($rs=pg_fetch_assoc($ret[1])){
 			$rs['anteil_abs'] = str_replace('.', ',', $rs['anteil_abs']);
