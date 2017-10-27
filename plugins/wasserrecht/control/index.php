@@ -6,6 +6,7 @@ include_once(CLASSPATH . 'Layer.php');
 include_once(PLUGINS . 'wasserrecht/config/config_sample.php');
 include(PLUGINS . 'wasserrecht/helper/Log.php');
 include(PLUGINS . 'wasserrecht/helper/CommonClassTrait.php');
+include(PLUGINS . 'wasserrecht/helper/DateHelper.php');
 include(PLUGINS . 'wasserrecht/model/FestsetzungsSammelbescheidDaten.php');
 include(PLUGINS . 'wasserrecht/model/WRZProGueltigkeitsJahre.php');
 include(PLUGINS . 'wasserrecht/model/WRZProGueltigkeitsJahreArray.php');
@@ -95,19 +96,17 @@ function findIdAndYearFromValueString(&$gui, $valueEscaped)
     return $returnArray;
 }
 
-/**
-* Anwendungsfälle
-* wasserentnahmebenutzer
-* wasserrecht_deploy
-* wasserrecht_deploy_Starten
-*/
-
 $this->actual_link = parse_url((isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]", PHP_URL_PATH);
 
 /**
  * LOG
  */
 $this->log = new Log($this->debug);
+
+/**
+ * Date
+ */
+$this->date = new DateHelper($this);
 
 
 //$anlage = new Anlage($this);
@@ -179,6 +178,12 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
     }
 }
 
+/**
+ * Anwendungsfälle
+ * wasserentnahmebenutzer
+ * wasserrecht_deploy
+ * wasserrecht_deploy_Starten
+ */
 switch($this->go){
 
 	case 'wasserentnahmebenutzer': {

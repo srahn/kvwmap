@@ -5,7 +5,6 @@ class WRZProGueltigkeitsJahreArray
     public $wrzProGueltigkeitsJahre = array();
     
     function __construct($gui) {
-        $this->debug = $gui->debug;
         $this->log = $gui->log;
     }
     

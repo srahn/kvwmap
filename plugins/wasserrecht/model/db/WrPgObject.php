@@ -8,6 +8,8 @@ abstract class WrPgObject extends PgObject
     
     function WrPgObject(&$gui) {
         $this->log = $gui->log;
+        $this->date = $gui->date;
+        $this->isTrue = ["true",1,"t"];
         parent::__construct($gui, $this->schema, $this->tableName);
     }
     

@@ -76,7 +76,7 @@ function festsetzung_erstellen(&$gui, &$wrzs, &$erhebungsjahr)
                 $gewaesserbenutzung = $wrz->gewaesserbenutzungen[0];
                 
                 //get all dependent objects
-                $wrz->getDependentObjectsInteral($gui, $wrz, false);
+                $wrz->getDependentObjectsInternal($gui, $wrz, false);
                 
                 if(!empty($gewaesserbenutzung))
                 {

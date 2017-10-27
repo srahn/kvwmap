@@ -9,6 +9,8 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	public $adressat;
 	public $anlagen;
 	public $gewaesserbenutzungen;
+	public $vorgaenger;
+	public $nachfolger;
 	
 	public function getGueltigkeitsJahrString()
 	{
@@ -57,12 +59,12 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 			
 			//check if all years are added
 			$today = new DateTime('now');
-			$gui->log->log_debug('today: ' . var_export($today, true));
+			$this->log->log_debug('today: ' . var_export($today, true));
 			$fourYearsAgo = new DateTime('now');
 			$fourYearsAgo = $fourYearsAgo->modify('-4 years');
-			$gui->log->log_debug('fourYearsAgo: ' . var_export($fourYearsAgo, true));
-			$years = WasserrechtlicheZulassungen::addAllYearsBetweenTwoDates($gui, $fourYearsAgo, $today);
-			$gui->log->log_debug('years: ' . var_export($years, true));
+			$this->log->log_debug('fourYearsAgo: ' . var_export($fourYearsAgo, true));
+			$years = $this->date->addAllYearsBetweenTwoDates($fourYearsAgo, $today);
+			$this->log->log_debug('years: ' . var_export($years, true));
             foreach ($years as $year)
             {
                 if(!in_array($year, $wasserrechtlicheZulassungGueltigkeitJahrReturnArray))
@@ -85,14 +87,14 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	
 	public function getDependentObjects(&$gui, &$result)
 	{
-	    $gui->log->log_info('*** getDependentObjects ***');
-	    return $this->getDependentObjectsInteral($gui, $result, true);
+	    $this->log->log_info('*** getDependentObjects ***');
+	    return $this->getDependentObjectsInternal($gui, $result, true);
 	}
 	
-	public function getDependentObjectsInteral(&$gui, &$result, $addGewaesserbenutzungen) 
+	public function getDependentObjectsInternal(&$gui, &$result, $addGewaesserbenutzungen) 
 	{
-	    $gui->log->log_info('*** getDependentObjects Internal ***');
-	    $gui->log->log_debug('addGewaesserbenutzungen: ' . var_export($addGewaesserbenutzungen, true));
+	    $this->log->log_info('*** getDependentObjects Internal ***');
+	    $this->log->log_debug('addGewaesserbenutzungen: ' . var_export($addGewaesserbenutzungen, true));
 	    
 	    $years = null;
 	    
@@ -104,13 +106,13 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 // 	        if(!empty($wasserrechtlicheZulassungGueltigkeit))
 // 	        {
                 $gueltigSeit = $result->getGueltigSeit();
-                $gui->log->log_debug('gueltigSeit: ' . var_export($gueltigSeit, true));
+                $this->log->log_debug('gueltigSeit: ' . var_export($gueltigSeit, true));
 //                 $gui->addYearToArray($gueltigSeit, $result->gueltigkeitsJahr);
                 $befristetBis = $result->getBefristetBis();
-                $gui->log->log_debug('befristetBis: ' . var_export($befristetBis, true));
+                $this->log->log_debug('befristetBis: ' . var_export($befristetBis, true));
 //                
-                $years = WasserrechtlicheZulassungen::addAllYearsBetweenTwoDates($gui, WasserrechtlicheZulassungen::convertStringToDate($gueltigSeit), WasserrechtlicheZulassungen::convertStringToDate($befristetBis));
-                $gui->log->log_debug('years: ' . var_export($years, true));
+                $years = $this->date->addAllYearsBetweenTwoDates($this->date->convertStringToDate($gueltigSeit), $this->date->convertStringToDate($befristetBis));
+                $this->log->log_debug('years: ' . var_export($years, true));
                 
                 //backup, falls andere Dates nicht gesetzt wurden
                 if(empty($years))
@@ -119,11 +121,11 @@ class WasserrechtlicheZulassungen extends WrPgObject {
                     if(empty($getFassungDatum))
                     {
                         $getDatum = $result->getDatum();
-                        WasserrechtlicheZulassungen::addYearToArray($getDatum, $years);
+                        $this->date->addYearToArray($getDatum, $years);
                     }
                     else
                     {
-                        WasserrechtlicheZulassungen::addYearToArray($getFassungDatum, $years);
+                        $this->date->addYearToArray($getFassungDatum, $years);
                     }
                 }
                 
@@ -142,7 +144,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	                $adresse = $adress->find_by_id($gui, 'id', $adressat->data['adresse']);
 	                $adressat->adresse = $adresse;
 	            }
-	            $gui->log->log_debug('adressat id: ' . var_export($adressat->getId(), true));
+	            $this->log->log_debug('adressat id: ' . var_export($adressat->getId(), true));
 	            $result->adressat = $adressat;
 	        }
 	        
@@ -169,7 +171,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	                $konto = $account->find_by_id($gui, 'id', $behoerde->data['konto']);
 	                $behoerde->konto = $konto;
 	            }
-	            $gui->log->log_debug('behoerde id: ' . var_export($behoerde->getId(), true));
+	            $this->log->log_debug('behoerde id: ' . var_export($behoerde->getId(), true));
 	            $result->behoerde = $behoerde;
 	        }
 	        
@@ -180,7 +182,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	            $anlagen = $anlage->find_where('id=' . $result->data['anlage']);
 	            if(!empty($anlagen) && count($anlagen) > 0 && !empty($anlagen[0]))
 	            {
-	                $gui->log->log_debug('anlagen[0] id: ' . var_export($anlagen[0]->getId(), true));
+	                $this->log->log_debug('anlagen[0] id: ' . var_export($anlagen[0]->getId(), true));
 	                $result->anlagen = $anlagen[0];
 	            }
 	        }
@@ -192,7 +194,31 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	            $gewaesserbenutzungen = $gewaesserbenutzung->find_where_with_subtables('wasserrechtliche_zulassungen=' . $result->getId(), 'id');
 	            // 	        $gewaesserbenutzungen = $gewaesserbenutzung->find_where_with_subtables('wasserrechtliche_zulassungen=' . $result->getId() . ' AND (art = 1 OR art = 2)', 'id');
 	            $result->gewaesserbenutzungen = $gewaesserbenutzungen;
-	            $gui->log->log_debug('gewaesserbenutzungen count: ' . count( $result->gewaesserbenutzungen));
+	            $this->log->log_debug('gewaesserbenutzungen count: ' . count( $result->gewaesserbenutzungen));
+	        }
+	        
+	        //get the Vorgaenger
+	        if(!empty($result->data['vorgaenger']))
+	        {
+	            $wasserrechtlicheZulassungClass = new WasserrechtlicheZulassungen($gui);
+	            $wasserrechtlicheZulassung = $wasserrechtlicheZulassungClass->find_by_id($gui, 'id', $result->data['vorgaenger']);
+	            if(!empty($wasserrechtlicheZulassung))
+	            {
+	                $result->vorgaenger=$wasserrechtlicheZulassung;
+	                $this->log->log_debug('Vorgänger ' . $result->vorgaenger->getId());
+	            }
+	        }
+	        
+	        //get the Nachfolger
+	        if(!empty($result->data['nachfolger']))
+	        {
+	            $wasserrechtlicheZulassungClass = new WasserrechtlicheZulassungen($gui);
+	            $wasserrechtlicheZulassungen = $wasserrechtlicheZulassungClass->find_by_id($gui, 'id', $result->data['nachfolger']);
+	            if(!empty($wasserrechtlicheZulassung))
+	            {
+	                $result->nachfolger=$wasserrechtlicheZulassung;
+	                $this->log->log_debug('Nachfolger ' . $result->nachfolger->getId());
+	            }
 	        }
 	        
 	        if(empty($result->gewaesserbenutzungen) || empty($result->gewaesserbenutzungen[0]))
@@ -204,7 +230,11 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	    return $years;
 	}
 	
-	public function getHinweis() {
+	public function getHinweis() 
+	{
+	    $this->log->log_info('*** getHinweis ***');
+	    
+	    $hinweise = array();
 	    
 	    /**
 	     * abgelaufen
@@ -222,106 +252,97 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	    {
 	        if($befristetBisDate < $today)
 	        {
-	            return "abgelaufen";
+	            $hinweise[] = "abgelaufen";
 	        }
 	    }
 	    
 	    /**
 	     * freigegeben / nicht freigegeben
 	     */
+	    if(!$this->isFreigegeben())
+	    {
+	        $hinweise[] = "nicht freigegeben";
+	    }
 	    
 	    /**
 	     * geändert
 	     */
+	    $vorgaengerYear = null;
+	    if(!empty($this->getVorgaenger()) && !empty($this->vorgaenger))
+	    {
+	        $vorgaengerDatum = $this->vorgaenger->getDatum();
+	        if(!empty($vorgaengerDatum))
+	        {
+	            $vorgaengerYear = $this->date->getYearFromDateString($vorgaengerDatum);
+	        }
+	    }
+	    
+	    $nachfolgerYear = null;
+	    if(!empty($this->getNachfolger()) && !empty($this->nachfolger))
+	    {
+	        $nachfolgerDatum = $this->nachfolger->getDatum();
+	        if(!empty($nachfolgerDatum))
+	        {
+	            $nachfolgerYear = $this->date->getYearFromDateString($nachfolgerDatum);
+	        }
+	    }
+	    
+	    if(!empty($vorgaengerYear) || !empty($nachfolgerYear))
+	    {
+	        $erhebungsYear = $this->date->getYearFromDateString($this->getDatum());
+	        if(!empty($erhebungsYear))
+	        {
+	            if((!empty($vorgaengerYear) && $vorgaengerYear === $erhebungsYear) || (!empty($nachfolgerYear) && $nachfolgerYear === $erhebungsYear))
+	            {
+	                $this->log->log_debug('WrZ id: ' . var_export($this->getId(), true));
+	                $this->log->log_debug('erhebungsYear: ' . var_export($erhebungsYear, true));
+	                $this->log->log_debug('vorgaengerYear: ' . var_export($vorgaengerYear, true));
+	                $this->log->log_debug('nachfolgerYear: ' . var_export($nachfolgerYear, true));
+	                
+	                $hinweise[] = "geändert";
+	            }
+	        }
+	    }
 	    
 	    /**
 	     * im Jahr neu angelegt
 	     */
-	    
-	    return "keine";
-	}
-	
-	public static function convertStringToDate($inputString) {
-	    if(!empty($inputString))
+	    $gueltigSeit = $this->getGueltigSeit();
+	    $this->log->log_debug('gueltigSeit: ' . var_export($gueltigSeit, true));
+// 	    $gueltigSeitDate = $this->date->convertStringToDate($gueltigSeit);
+// 	    $this->log->log_debug('gueltigSeit Date: ' . var_export($gueltigSeit, true));
+	    if(!empty($gueltigSeit))
 	    {
-	        return DateTime::createFromFormat("d.m.Y", $inputString);
-	    }
-	    
-	    return null;
-	}
-	
-	public static function getYearFromDate($date) {
-	    if(!empty($date))
-	    {
-	        return $year = $date->format("Y");
-	    }
-	    
-	    return null;
-	}
-	
-	public static function getNextYear() {
-	    return date('Y', strtotime('+1 year'));
-	}
-	
-	public static function getThisYear() {
-	    return date("Y");
-	}
-	
-	public static function getLastYear() {
-	    return date("Y", strtotime("-1 year"));
-	}
-	
-	public static function addYearToArray($dateString, &$arrayToFill)
-	{
-	    if(!empty($dateString))
-	    {
-	        $date = WasserrechtlicheZulassungen::convertStringToDate($dateString);
-	        $year = WasserrechtlicheZulassungen::getYearFromDate($date);
-	        if(!empty($year) && !in_array($year, $arrayToFill))
+	        if($gueltigSeit < $today)
 	        {
-	            $arrayToFill[]=$year;
+	            $hinweise[] = "Im Jahr neu angelegt";
 	        }
 	    }
+	    
+	    $this->log->log_debug('hinweise: ' . var_export($hinweise, true));
+	    
+	    return $hinweise;
 	}
 	
-	public static function addAllYearsBetweenTwoDates(&$gui, $date1, $date2)
+	public function getHinweisHTML()
 	{
-	    $years = array();
-	    
-	    if(!empty($date1) && !empty($date2))
+	    $hinweise = $this->getHinweis();
+	    if(!empty($hinweise))
 	    {
-// 	        print_r($date1->format("Y"));
-// 	        print_r($date2->format("Y"));
-	        $diff = $date1->diff($date2);
-// 	        print_r($diff->y);
-	        $diffY = $diff->y;
-	        if($diffY === 0)
+	        $hinweisString = "";
+	        foreach ($hinweise as $hinweis)
 	        {
-	            $years[] = $date1->format("Y");
-	        }
-	        elseif($diffY > 0)
-	        {
-	            $diffY = $diffY + 1;
-	            $years[] =  $date1->format("Y");
-	            for ($i = 1; $i < $diffY; $i++)
+	            if(!empty($hinweis))
 	            {
-	                $interval = new DateInterval('P1Y');
-	                $nextYear = $date1->add($interval)->format('Y');
-	                $gui->log->log_debug('nextYear: ' . var_export($nextYear, true));
-	                $years[] = $nextYear;
+	                $hinweisString = $hinweisString . $hinweis . "\n";
 	            }
 	        }
+	        return "<div style='color: red; text-decoration: underline;' title='" . $hinweisString ."' >vorhanden</div>";
 	    }
-	    elseif(!empty($date1))
+	    else
 	    {
-	        $years[] = $date1->format("Y");
+	        return "keine";
 	    }
-	    elseif(!empty($date2))
-	    {
-	        $years[] = $date2->format("Y");
-	    }
-	    
-	    return $years;
 	}
 	
 	public function getBehoerdeName() {
@@ -346,6 +367,37 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	
 	public function getFassungDatum() {
 	    return $this->data['fassung_datum'];
+	}
+	
+	public function getVorgaenger() {
+	    return $this->data['vorgaenger'];
+	}
+	
+	public function getNachfolger() {
+	    return $this->data['nachfolger'];
+	}
+	
+	public function getFreigegeben() {
+	    return $this->data['freigegeben'];
+	}
+	
+	public function isFreigegeben() {
+	    $freigegeben = $this->getFreigegeben();
+	    if(empty($freigegeben))
+	    {
+	        return false;
+	    }
+	    else
+	    {
+	        if(in_array(strtolower($freigegeben), $this->isTrue))
+	        {
+	            return true;
+	        }
+	        else
+	        {
+	            return false;
+	        }
+	    }
 	}
 	
 	/**

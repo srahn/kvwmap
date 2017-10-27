@@ -57,7 +57,7 @@
         <div class="wasserrecht_display_table_cell_caption">Hinweise:</div>
         <div class="wasserrecht_display_table_cell_spacer"></div>
         <?php
-    		 echo '<a class="wasserrecht_display_table_cell_white" style="color: red; text-decoration: underline;" href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['FisWrV-WRe WrZ'] . '&value_wrz_id=' . $wrz->getId() . '&operator_wrz_id==">' . $wrz->getHinweis() . '</a>';
+    		 echo '<a class="wasserrecht_display_table_cell_white" href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['FisWrV-WRe WrZ'] . '&value_wrz_id=' . $wrz->getId() . '&operator_wrz_id==">' . $wrz->getHinweisHTML() . '</a>';
     	?>
     </div>
     

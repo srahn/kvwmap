@@ -12,7 +12,7 @@ if(!empty($wrzProGueltigkeitsJahreArray))
     $firstWrZ = $wrzProGueltigkeitsJahreArray->getFirstWrZ($wasserrechtlicheZulassungen);
 }
 
-$getYear = !empty(htmlspecialchars($_REQUEST['erhebungsjahr'])) ? htmlspecialchars($_REQUEST['erhebungsjahr']) : WasserrechtlicheZulassungen::getLastYear();
+$getYear = !empty(htmlspecialchars($_REQUEST['erhebungsjahr'])) ? htmlspecialchars($_REQUEST['erhebungsjahr']) : $this->date->getLastYear();
 
 //Get Behörde
 $getBehoerde = !empty(htmlspecialchars($_REQUEST['behoerde'])) ? htmlspecialchars($_REQUEST['behoerde']) : null;
