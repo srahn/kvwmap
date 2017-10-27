@@ -44,6 +44,10 @@ class DateHelper
         return date("Y");
     }
     
+    public function getToday() {
+        return date("d.m.Y");
+    }
+    
     public function getLastYear() {
         return date("Y", strtotime("-1 year"));
     }

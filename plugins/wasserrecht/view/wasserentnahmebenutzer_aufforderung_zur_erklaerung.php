@@ -167,7 +167,6 @@ function createAufforderungsDokument(&$gui, &$valueEscaped)
     			<td style="background-color: inherit;"><input title="Alle auswählen" type="checkbox" id="select_all_checkboxes" onchange="$('input:checkbox').not(this).prop('checked', this.checked);"></td>
     		</tr>
     		<?php 
-        		
     		      if(!empty($wasserrechtlicheZulassungen))
         		  {
 //         		      var_dump($wasserrechtlicheZulassungen);
@@ -175,6 +174,9 @@ function createAufforderungsDokument(&$gui, &$valueEscaped)
         		      {
         		          if(!empty($wrz) && in_array($getYear, $wrz->gueltigkeitsJahre))
         		          {
+        		              $this->log->log_debug("wrz id: " . $wrz->getId());
+        		              $this->log->log_debug("wrz gueltigkeitsJahre: " . var_export($wrz->gueltigkeitsJahre, true));
+        		              
         		              if(empty($getBehoerde) || $getBehoerde === $wrz->behoerde->getId())
         		              {
         		                  if(empty($getAdressat) || $getAdressat === $wrz->adressat->getId())

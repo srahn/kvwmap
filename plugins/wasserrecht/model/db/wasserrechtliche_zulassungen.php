@@ -36,12 +36,12 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 			        $this->log->log_debug('result id: ' . var_export($result->data['id'], true));
 			        $wrzProGueltigkeitsJahre = new WRZProGueltigkeitsJahre();
 			        
-			        $years = $this->getDependentObjects($gui, $result);
-			        $this->log->log_debug('years: ' . var_export($years, true));
+			        $resultYears = $this->getDependentObjects($gui, $result);
+			        $this->log->log_debug('result years: ' . var_export($resultYears, true));
 			        
-			        if(!empty($years))
+			        if(!empty($resultYears))
 			        {
-// 			            foreach ($years as $year)
+// 			            foreach ($resultYears as $year)
 // 			            {
 // 			                if(!in_array($year, $wasserrechtlicheZulassungGueltigkeitJahrReturnArray))
 // 			                {
@@ -49,7 +49,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 // 			                }
 // 			            }
 			            
-			            $wrzProGueltigkeitsJahre->gueltigkeitsJahre = $years;
+			            $wrzProGueltigkeitsJahre->gueltigkeitsJahre = $resultYears;
 			            $wrzProGueltigkeitsJahre->wasserrechtlicheZulassung=$result;
 			        }
 			        
@@ -100,6 +100,8 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	    
 	    if(!empty($result))
 	    {
+	        $this->log->log_debug('result id: ' . var_export($result->getId(), true));
+	        
 // 	        $wrzGueltigkeit = new WasserrechtlicheZulassungenGueltigkeit($gui);
 // 	        $wasserrechtlicheZulassungGueltigkeit = $wrzGueltigkeit->find_by_id($gui, 'id', $result->data['gueltigkeit']);
 // 	        $result->gueltigkeit = $wasserrechtlicheZulassungGueltigkeit;
@@ -107,27 +109,35 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 // 	        {
                 $gueltigSeit = $result->getGueltigSeit();
                 $this->log->log_debug('gueltigSeit: ' . var_export($gueltigSeit, true));
-//                 $gui->addYearToArray($gueltigSeit, $result->gueltigkeitsJahr);
-                $befristetBis = $result->getBefristetBis();
-                $this->log->log_debug('befristetBis: ' . var_export($befristetBis, true));
-//                
-                $years = $this->date->addAllYearsBetweenTwoDates($this->date->convertStringToDate($gueltigSeit), $this->date->convertStringToDate($befristetBis));
-                $this->log->log_debug('years: ' . var_export($years, true));
-                
                 //backup, falls andere Dates nicht gesetzt wurden
-                if(empty($years))
+                if(empty($gueltigSeit))
                 {
                     $getFassungDatum = $result->getFassungDatum();
+                    $this->log->log_debug('getFassungDatum: ' . var_export($getFassungDatum, true));
                     if(empty($getFassungDatum))
                     {
-                        $getDatum = $result->getDatum();
-                        $this->date->addYearToArray($getDatum, $years);
+                        $gueltigSeit = $result->getDatum();
+                        $this->log->log_debug('gueltigSeit set for datum: ' . var_export($gueltigSeit, true));
+//                         $this->date->addYearToArray($getDatum, $years);
                     }
                     else
                     {
-                        $this->date->addYearToArray($getFassungDatum, $years);
+                        $gueltigSeit = $getFassungDatum;
+                        $this->log->log_debug('gueltigSeit set for Fassung datum: ' . var_export($gueltigSeit, true));
+//                         $this->date->addYearToArray($getFassungDatum, $years);
                     }
                 }
+                
+                $befristetBis = $result->getBefristetBis();
+                $this->log->log_debug('befristetBis: ' . var_export($befristetBis, true));
+                if(empty($befristetBis))
+                {
+                    $befristetBis = $this->date->getToday();
+                    $this->log->log_debug('befristetBis set for today: ' . var_export($befristetBis, true));
+                }
+//                
+                $years = $this->date->addAllYearsBetweenTwoDates($this->date->convertStringToDate($gueltigSeit), $this->date->convertStringToDate($befristetBis));
+                $this->log->log_debug('years: ' . var_export($years, true));
                 
                 $result->gueltigkeitsJahre = $years;
                 
