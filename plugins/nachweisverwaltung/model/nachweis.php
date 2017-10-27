@@ -114,7 +114,7 @@ class Nachweis {
 			if(count($art) > 0){
 				$fp = fopen($pfad.'readme.txt', 'w');
 				fwrite($fp, 'Diese Dokumentarten wurden bei der Berechnung der Flurstückszuordnung und des Gesamtpolygons nicht berücksichtigt:'.chr(10).chr(10));
-				fwrite($fp, implode(chr(10), $art));
+				fwrite($fp, implode(chr(10), array_unique($art)));
 				fclose($fp);
 			}
     }

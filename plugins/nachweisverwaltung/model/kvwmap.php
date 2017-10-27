@@ -98,7 +98,7 @@
       if ($ret[0]) {
         $errmsg="Festpunkte konnten nicht abgefragt werden.";
       }
-      else {
+      elseif(count($festpunkte->liste) > 0){
         $ret=$antrag->EinmessungsskizzenInOrdnerZusammenstellen($festpunkte);
         $msg.=$ret;
       }
