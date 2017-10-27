@@ -39,13 +39,13 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 			        
 			        if(!empty($years))
 			        {
-			            foreach ($years as $year)
-			            {
-			                if(!in_array($year, $wasserrechtlicheZulassungGueltigkeitJahrReturnArray))
-			                {
-			                    $wasserrechtlicheZulassungGueltigkeitJahrReturnArray[] = $year;
-			                }
-			            }
+// 			            foreach ($years as $year)
+// 			            {
+// 			                if(!in_array($year, $wasserrechtlicheZulassungGueltigkeitJahrReturnArray))
+// 			                {
+// 			                    $wasserrechtlicheZulassungGueltigkeitJahrReturnArray[] = $year;
+// 			                }
+// 			            }
 			            
 			            $wrzProGueltigkeitsJahre->gueltigkeitsJahre = $years;
 			            $wrzProGueltigkeitsJahre->wasserrechtlicheZulassung=$result;
@@ -60,8 +60,6 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 			$gui->log->log_debug('today: ' . var_export($today, true));
 			$fourYearsAgo = new DateTime('now');
 			$fourYearsAgo = $fourYearsAgo->modify('-4 years');
-// 			$fourYearsAgo = strtotime("-4 year", time());
-// 			$fourYearsAgoString = date("Y-m-d", $fourYearsAgo);
 			$gui->log->log_debug('fourYearsAgo: ' . var_export($fourYearsAgo, true));
 			$years = WasserrechtlicheZulassungen::addAllYearsBetweenTwoDates($gui, $fourYearsAgo, $today);
 			$gui->log->log_debug('years: ' . var_export($years, true));
