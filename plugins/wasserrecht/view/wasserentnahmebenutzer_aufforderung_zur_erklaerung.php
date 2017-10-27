@@ -223,12 +223,12 @@ function createAufforderungsDokument(&$gui, &$valueEscaped)
                         		          		</td>
                         		          		<td>
                         		          			<?php
-                        		          			     echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['FisWrV-WRe Gewässerbenutzungen'] . '&value_id=' . $gewaesserbenutzung->getId() . '&operator_id==">' . $gewaesserbenutzung->getBezeichnung() . '</a>';
+                        		          			     echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['FisWrV-WRe Gewässerbenutzungen'] . '&value_gwb_id=' . $gewaesserbenutzung->getId() . '&operator_gwb_id==">' . $gewaesserbenutzung->getBezeichnung() . '</a>';
                         		          			?>
                         		          		</td>
                         		          		<td>
                         		          			<?php 
-                        		          			     echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['FisWrV-WRe Gewässerbenutzungen'] . '&value_id=' . $gewaesserbenutzung->getId() . '&operator_id==">' . $gewaesserbenutzung->getKennummer() . '</a>';
+                        		          			     echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['FisWrV-WRe Gewässerbenutzungen'] . '&value_gwb_id=' . $gewaesserbenutzung->getId() . '&operator_gwb_id==">' . $gewaesserbenutzung->getKennummer() . '</a>';
                         		          			?>
                         		          		</td>
                         		          		<td>

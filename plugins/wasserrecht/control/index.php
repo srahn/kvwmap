@@ -342,5 +342,4 @@ switch($this->go){
 		$this->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
 	}
 }
-
 ?>
