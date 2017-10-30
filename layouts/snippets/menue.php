@@ -17,12 +17,13 @@ function changemenue(id, auto_close){
 }
 
 function hideMenue() {
-  ahah('index.php', 'go=hideMenueWithAjax', new Array("", ""), new Array("", "execute_function"));
-	document.all.menue_options.innerHTML='';
-	document.all.imgMinMax.src='<?php echo GRAPHICSPATH; ?>maximize_menue.png';
-	document.all.linkMinMax.href="javascript:showMenue()";
-	document.all.linkMinMax.title="Menü zeigen";
-	
+	if(document.getElementById('menue-switch').style.display != 'none'){
+		ahah('index.php', 'go=hideMenueWithAjax', new Array("", ""), new Array("", "execute_function"));
+		document.all.menue_options.innerHTML='';
+		document.all.imgMinMax.src='<?php echo GRAPHICSPATH; ?>maximize_menue.png';
+		document.all.linkMinMax.href="javascript:showMenue()";
+		document.all.linkMinMax.title="Menü zeigen";
+	}
 }
 
 function showMenue() {
@@ -35,7 +36,7 @@ function showMenue() {
   document.all.linkMinMax.title="Menü verstecken";
 }
 </script>
-<table class="menue-switch" width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="<?php echo BG_DEFAULT ?>">
+<table id="menue-switch" width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="<?php echo BG_DEFAULT ?>">
     <tr>
       <td bgcolor="<?php echo BG_DEFAULT ?>" align="right"><?php
         if ($this->user->rolle->hideMenue) {
