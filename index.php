@@ -133,7 +133,6 @@ if(!FAST_CASE)$GUI->loadPlugins();
 if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	if($go == 'get_last_query'){
 		$GUI->last_query = $GUI->user->rolle->get_last_query();
-		$GUI->formvars['keinzurueck'] = true;
 		$GUI->last_query_requested = true;		# get_last_query wurde direkt aufgerufen
 		$GUI->formvars['go'] = $go = $GUI->last_query['go'];
 	}
@@ -887,11 +886,7 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 		case 'Metadaten_Uebersicht' : {
 		$GUI->metadaten_uebersicht();
 	  } break;
-	  
-	  case 'Metadaten_Recherche' : {
-		$GUI->metadaten_suche();
-	  } break;
-	  
+
 	  case 'Metadaten_generieren' : {
 		$GUI->metadaten_generieren($GUI->formvars['layer_id']);
 	  } break;
@@ -900,16 +895,8 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 		$GUI->metadatenSuchForm();
 	  } break;
 
-	  case 'Metadaten_Auswaehlen_Senden' : {
-		$GUI->metadatenSuchen();
-	  } break;
-
 	  case 'Metadatenblattanzeige' : {
 		$GUI->metadatenblattanzeige();
-	  } break;
-
-	  case 'Metadateneingabe' : {
-		$GUI->metadateneingabe();
 	  } break;
 
 	  case 'Metadateneingabe_Senden' : {
@@ -1298,6 +1285,31 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->LayerAnzeigen();
 		} break;
 
+		case 'Layergruppen_Anzeigen' : {
+			$GUI->checkCaseAllowed($go);
+			$GUI->Layergruppen_Anzeigen();
+		} break;
+
+		case 'Layergruppe_Editor' : {
+			$GUI->checkCaseAllowed('Layergruppen_Anzeigen');
+			$GUI->Layergruppe_Editor();
+		} break;
+
+		case 'Layergruppe_Speichern' : {
+			$GUI->checkCaseAllowed('Layergruppen_Anzeigen');
+			$GUI->Layergruppe_Speichern();
+		} break;
+
+		case 'Layergruppe_Ändern' : {
+			$GUI->checkCaseAllowed('Layergruppen_Anzeigen');
+			$GUI->Layergruppe_Aendern();
+		} break;
+
+		case 'Layergruppe_Löschen' : {
+			$GUI->checkCaseAllowed('Layergruppen_Anzeigen');
+			$GUI->Layergruppe_Loeschen();
+		}
+
 	  case 'Layer_Uebersicht' : {
 			$GUI->LayerUebersicht();
 		} break;
@@ -1572,7 +1584,9 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 
 	  case "ZoomToFlst" : {
 			$GUI->loadMap('DataBase');
-			if(strpos($GUI->formvars['FlurstKennz'], '/') !== false)$GUI->formvars['FlurstKennz'] = formatFlurstkennzALKIS($GUI->formvars['FlurstKennz']);
+			if (strpos($GUI->formvars['FlurstKennz'], '/') !== false) $GUI->formvars['FlurstKennz'] = formatFlurstkennzALKIS($GUI->formvars['FlurstKennz']);
+			if (substr($GUI->formvars['FlurstKennz'], -1) == '0') $GUI->formvars['FlurstKennz'] = formatFlurstkennzALKIS_0To_($GUI->formvars['FlurstKennz']);
+
 			$explodedFlurstKennz = explode(';',$GUI->formvars['FlurstKennz']);
 			$GUI->zoomToALKFlurst($explodedFlurstKennz,10);
 			$currenttime=date('Y-m-d H:i:s',time());

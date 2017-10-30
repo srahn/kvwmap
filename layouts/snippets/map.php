@@ -61,7 +61,47 @@ function showMapImage(){
 	catch(e){
 		document.GUI.svg_string.value = printNode(svg);
 	}
-  document.getElementById('MapImageLink').href='index.php?go=showMapImage&svg_string='+document.GUI.svg_string.value;
+  document.getElementById('MapImageLink').href='index.php?go=showMapImage&svg_string='+encodeURI(document.GUI.svg_string.value);
+}
+
+function addRedlining(){
+	var redlining = svgdoc.getElementById("redlining");
+	for(var i = 0; i < redlining.childNodes.length; i++){
+		child = redlining.childNodes[i];
+		switch(child.id){
+			case 'free_polygon':
+			case 'free_arrow':
+				if(child.transform.baseVal.numberOfItems > 0)child.transform.baseVal.consolidate();
+				for(var j = 0; j < child.points.numberOfItems; j++){		// Punkte in Weltkoordinaten umrechnen
+					point = child.points.getItem(j);
+					if(child.transform.baseVal.numberOfItems > 0)point = point.matrixTransform(child.transform.baseVal.getItem(0).matrix);
+					x = point.x*parseFloat(document.GUI.pixelsize.value) + parseFloat(document.GUI.minx.value);
+					y = document.GUI.maxy.value - (<? echo $this->map->height; ?> - point.y)*parseFloat(document.GUI.pixelsize.value);
+					if(j > 0)document.GUI.free_polygons.value += ','
+					document.GUI.free_polygons.value += x+' '+y;
+				}
+				document.GUI.free_polygons.value += '|'+child.getAttribute('style')+'||';
+				break;
+			case 'free_text':
+				x = child.getAttribute('x')*parseFloat(document.GUI.pixelsize.value) + parseFloat(document.GUI.minx.value);
+				y = document.GUI.maxy.value - (<? echo $this->map->height; ?> - (-1 * child.getAttribute('y')))*parseFloat(document.GUI.pixelsize.value);
+				document.GUI.free_texts.value += x+' '+y+'|';
+				for(var j = 0; j < child.childNodes.length; j++){
+					tspan = child.childNodes[j];
+					if(j > 0)document.GUI.free_texts.value += String.fromCharCode(13);
+					document.GUI.free_texts.value += tspan.textContent;
+				}
+				document.GUI.free_texts.value += '||';
+			break;
+		}
+	}
+}
+
+function printMap(){ 
+	svgdoc = document.SVG.getSVGDocument();	
+	addRedlining();
+	document.GUI.go.value = 'Druckausschnittswahl';
+	document.GUI.submit();
 }
 
 function slide_legend_in(evt) {
@@ -121,20 +161,28 @@ if($this->formvars['gps_follow'] == ''){
 	$this->formvars['gps_follow'] = 'off';
 }
 ?>
-<div id="map_frame" style="position: relative; width: <?php echo ($map_width + $legend_width); ?>px;">
-	<div id="map" style="float: left; width: <?php echo $map_width; ?>px; height: 100%">
-		<?php include(SNIPPETS . 'mapdiv.php'); ?>
-	</div>
-	<div id="legenddiv" style="height: <? echo $legend_height; ?>px;"<?
-		if (!ie_check() AND $this->user->rolle->hideLegend) { ?>
-			onmouseenter="slide_legend_in(event);"
-			onmouseleave="slide_legend_out(event);"
-			class="slidinglegend_slideout"<?
-		}
-		else { ?>
-			class="normallegend" <?
-		} ?>
-	>
-		<?php include(SNIPPETS . 'legenddiv.php'); ?>
-	</div>
+<div id="map_frame" style="text-align: left;position: relative; width: <?php echo ($map_width + $legend_width); ?>px;">
+	<table cellpadding="0" cellspacing="0" border="0">
+		<tr>
+			<td>
+				<div id="map" style="float: left; width: <?php echo $map_width; ?>px; height: 100%">
+					<?php include(SNIPPETS . 'mapdiv.php'); ?>
+				</div>
+			</td>
+			<td valign="top">
+				<div id="legenddiv" style="height: <? echo $legend_height; ?>px;"<?
+					if (!ie_check() AND $this->user->rolle->hideLegend) { ?>
+						onmouseenter="slide_legend_in(event);"
+						onmouseleave="slide_legend_out(event);"
+						class="slidinglegend_slideout"<?
+					}
+					else { ?>
+						class="normallegend" <?
+					} ?>
+				>
+					<?php include(SNIPPETS . 'legenddiv.php'); ?>
+				</div>
+			</td>
+		</tr>
+	</table>
 </div>

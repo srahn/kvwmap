@@ -149,14 +149,17 @@ class ddl {
 						}
 						if($smallest_offset_value != ''){																							# dieses Attribut wurde auch schon geschrieben, d.h. dessen y-Position ist bekannt -> Linie relativ dazu setzen
 							$y = $this->handlePageOverflow($offset_attribute, $smallest_offset_value, $y);		# Seitenüberläufe berücksichtigen
+							$endy = $this->handlePageOverflow($offset_attribute, $smallest_offset_value, $endy);		# Seitenüberläufe berücksichtigen
 						}
 						else{
 							$remaining_lines[] = $this->layout['lines'][$j]['id'];
 							continue;			# die Linie ist abhängig aber das Attribut noch nicht geschrieben, Linie merken und überspringen
 						}
 					}
-					if($offset_attribute == '')$y = $y - $this->offsety;
-					$endy = $endy + $y_orig - $y;		# y-Endposition auch anpassen
+					if($offset_attribute == ''){
+						$y = $y - $this->offsety;
+						$endy = $endy + $y_orig - $y;		# y-Endposition auch anpassen
+					}
 					if($type == 'running'){	# fortlaufende Linien
 						$pagecount = count($this->pdf->objects['3']['info']['pages']);								
 						if($this->layout['type'] == 1 AND $offset_attribute == '' AND $pagecount > 1){
@@ -481,7 +484,8 @@ class ddl {
   	return $text;
   }
   
-  function get_result_value_output($i, $j, $preview){		# $i ist der result-counter, $j ist der attribute-counter
+  function get_result_value_output($i, $j, $preview){
+				# $i ist der result-counter, $j ist der attribute-counter
 		if($this->result[$i][$this->attributes['name'][$j]] == '')$this->result[$i][$this->attributes['name'][$j]] = ' ';		# wenns der result-value leer ist, ein Leerzeichen setzen, wegen der relativen Positionierung
 		switch ($this->attributes['form_element_type'][$j]){
 			case 'Auswahlfeld' : {
@@ -912,9 +916,16 @@ class ddl {
     }
   }
  	
- 	function load_layouts($stelle_id, $ddl_id, $layer_id, $types){
-    $sql = 'SELECT DISTINCT datendrucklayouts.* FROM datendrucklayouts';
-    if($ddl_id AND !$stelle_id){$sql .= ' WHERE datendrucklayouts.id ='.$ddl_id;}
+	function load_layouts($stelle_id, $ddl_id, $layer_id, $types, $return = '') {
+		$sql = "
+			SELECT DISTINCT
+				datendrucklayouts.*
+			FROM
+				datendrucklayouts
+		";
+    if($ddl_id AND !$stelle_id){
+			$sql .= ' WHERE datendrucklayouts.id ='.$ddl_id;
+		}
     if($stelle_id AND !$layer_id AND !$ddl_id){
     	$sql.= ', ddl2stelle WHERE ddl2stelle.ddl_id = datendrucklayouts.id';
     	$sql .= ' AND ddl2stelle.stelle_id = '.$stelle_id;
@@ -942,12 +953,17 @@ class ddl {
     if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     $i = 0;
     while($rs=mysql_fetch_array($query)){
-      $layouts[] = $rs;
-      #$layouts[0]['bilder'] = $this->load_bilder($rs['id']);
-      $layouts[0]['elements'] = $this->load_elements($rs['id']);
-      $layouts[0]['texts'] = $this->load_texts($rs['id']);
-			$layouts[0]['lines'] = $this->load_lines($rs['id']);
-      $i++;
+			if ($return == 'only_ids') {
+				$layouts[] = $rs['id'];
+			}
+			else {
+				$layouts[] = $rs;
+				#$layouts[0]['bilder'] = $this->load_bilder($rs['id']);
+				$layouts[0]['elements'] = $this->load_elements($rs['id']);
+				$layouts[0]['texts'] = $this->load_texts($rs['id']);
+				$layouts[0]['lines'] = $this->load_lines($rs['id']);
+				$i++;
+			}
     }
     return $layouts;
   }

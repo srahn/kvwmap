@@ -47,8 +47,8 @@ function create_protocol(){
         </tr>
         <? for($i=0; $i < count($this->antrag->FFR); $i++){ ?>
         <tr bgcolor="#ffffff"> 
-          <td valign="top" align="center" <? if($this->formvars['Riss-Nummer'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['Riss-Nummer']; ?></td>
-          <td valign="top" align="center" <? if($this->formvars['Antrags-Nummer'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['Antrags-Nummer']; ?></td>
+          <td valign="top" align="center" <? if($this->formvars['Riss-Nummer'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['Rissnummer']; ?></td>
+          <td valign="top" align="center" <? if($this->formvars['Antrags-Nummer'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['Antragsnummer']; ?></td>
           <td valign="top" align="center" <? if($this->formvars['FFR'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['FFR']; ?></td>
           <td valign="top" align="center" <? if($this->formvars['KVZ'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['KVZ']; ?></td>
           <td valign="top" align="center" <? if($this->formvars['GN'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['GN']; ?></td>
@@ -64,12 +64,7 @@ function create_protocol(){
   </tr>
   <tr> 
     <td bgcolor="<? echo BG_FORM ?>">
-    	Übergabeprotokoll erzeugen als: 
-    	<select name="go_plus" onchange="create_protocol();">
-    		<option value="">--- bitte auswählen ---</option>
-				<option value="PDF">PDF</option>
-				<option value="CSV">CSV</option>
-      </select>
+    	<a href="javascript:create_protocol();">Übergabeprotokoll erzeugen</a> 
       <input type="hidden" name="go" value="Antraganzeige_Uebergabeprotokoll_Erzeugen">
       <input type="hidden" name="order" value="<? echo $this->formvars['order']; ?>">
       <input type="hidden" name="antr_selected" value="<? echo $this->formvars['antr_selected']; ?>">

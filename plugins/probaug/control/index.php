@@ -28,7 +28,7 @@
 	  } break;
 		
 		default : {
-			$this->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgef¸hrt
+			$this->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgef√ºhrt
 		}
 	}
 	

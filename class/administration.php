@@ -150,7 +150,7 @@ class administration{
 			}
 		}
 	}
-	
+
 	function execute_migrations($database_type, $migrations){
 		if($migrations != NULL){
 			usort($migrations, 'compare_migration_filenames');		# sortieren, damit die Migrationen in der richtigen Reihenfolge ausgeführt werden
@@ -160,9 +160,13 @@ class administration{
 				if($component == 'kvwmap')$prepath = LAYOUTPATH; else $prepath = PLUGINS.$component.'/';
 				$filepath = $prepath.'db/'.$database_type.'/schema/'.$file;			
 				$sql = file_get_contents($filepath);
-				if($sql != ''){
-					if($database_type == 'mysql')$queryret = $this->database->exec_file($filepath, NULL, NULL);		# mysql
-					else $queryret=$this->pgdatabase->execSQL($sql,0, 0);																					# postgresql
+				if ($sql != '') {
+					$sql = str_replace('$EPSGCODE_ALKIS', EPSGCODE_ALKIS, $sql);
+					$sql = str_replace(':alkis_epsg', EPSGCODE_ALKIS, $sql);
+					if ($database_type == 'mysql')
+						$queryret = $this->database->exec_file($filepath, NULL, NULL);	# mysql
+					else
+						$queryret=$this->pgdatabase->execSQL($sql,0, 0);	# postgresql
 					if($queryret[0]){
 						echo $queryret[1].'<br>Fehler beim Ausführen von migration-Datei: '.$filepath.'<br>';
 					}

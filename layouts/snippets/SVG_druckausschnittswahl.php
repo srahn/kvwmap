@@ -358,9 +358,6 @@ function highlight(evt){
   evt.target.style.setProperty("fill",highlighted, "");
 }
 
-// ------------------------------------------------------------------------------------
-// --------------------------scripte fuer die FS bodenrichtwerte-------------------------------
-// ------------------------------------------------------------------------------------
 function task(evt) {
 	if(refpoint_setting){
 		choose_refpoint(evt)

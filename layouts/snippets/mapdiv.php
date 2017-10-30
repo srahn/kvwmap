@@ -31,6 +31,9 @@
 			<input type="hidden" name="layer_options_open" value="">
 			<input type="hidden" name="group_options_open" value="">
 			<input type="hidden" name="hauptkarte" value="<?php echo $this->img['hauptkarte']; ?>">
+			<input type="hidden" name="neuladen" value="">
+			<input type="hidden" name="free_polygons" value="">
+			<input type="hidden" name="free_texts" value="">
 			<?php
 				include(LAYOUTPATH.'snippets/SVG_map.php');
 			?>
@@ -71,7 +74,7 @@
 			</div>
 			<div id="running_coordinates_div" style="float: left; padding: 4 0 0 5; <? if($this->user->rolle->runningcoords == '0') { echo 'display:none';} ?>">
 				<span class="fett"><?php echo $this->strCoordinates; ?></span>&nbsp;
-				<input type="text" style="width: 140px" class="transparent_input" name="runningcoords" value="">
+				<input type="text" style="width: 200px" class="transparent_input" name="runningcoords" value="">
 			</div>
 			<div id="epsg_code_div" style="float: left; margin-top: 8px;<? if($this->user->rolle->runningcoords == '0') { echo 'display:none';} ?>">
 				<span title="<? echo $this->epsg_codes[$this->user->rolle->epsg_code]['srtext']; ?>">EPSG:<?php echo $this->user->rolle->epsg_code; ?></span>

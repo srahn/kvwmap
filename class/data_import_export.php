@@ -333,16 +333,20 @@ class data_import_export {
 			# 2. Versuch: Abgleich bestimmter Parameter im prj-String mit spatial_ref_sys_alias
 			$datum = get_first_word_after($prj, 'DATUM[', '"', '"');
 			$projection = get_first_word_after($prj, 'PROJECTION[', '"', '"');
+			if($projection == '')$projection_sql = 'AND projection IS NULL'; else $projection_sql = "AND '".$projection."' = ANY(projection)";
 			$false_easting = get_first_word_after($prj, 'False_Easting"', ',', ']');
+			if($false_easting == '')$false_easting_sql = 'AND false_easting IS NULL'; else $false_easting_sql = "AND false_easting = ".$false_easting;
 			$central_meridian = get_first_word_after($prj, 'Central_Meridian"', ',', ']');
+			if($central_meridian == '')$central_meridian_sql = 'AND central_meridian IS NULL'; else $central_meridian_sql = "AND central_meridian = ".$central_meridian;
 			$scale_factor = get_first_word_after($prj, 'Scale_Factor"', ',', ']');
+			if($scale_factor == '')$scale_factor_sql = 'AND scale_factor IS NULL'; else $scale_factor_sql = "AND scale_factor = ".$scale_factor;
 			$unit = get_first_word_after($prj, 'UNIT[', '"', '"', true);
 			$sql = "SELECT srid FROM spatial_ref_sys_alias
 							WHERE '".$datum."' = ANY(datum) 
-							AND '".$projection."' = ANY(projection) 
-							AND ".$false_easting." = false_easting 
-							AND ".$central_meridian." = central_meridian 
-							AND ".$scale_factor." = scale_factor 
+							".$projection_sql." 
+							".$false_easting_sql." 
+							".$central_meridian_sql." 
+							".$scale_factor_sql." 
 							AND '".$unit."' = ANY(unit)";
 			$ret = $pgdatabase->execSQL($sql,4, 0);
 			if(!$ret[0])$result = pg_fetch_row($ret[1]);
@@ -557,7 +561,7 @@ class data_import_export {
 					}
         }
       }
-			$sql .= ' FROM '.$importfile;
+			$sql .= ' FROM "'.$importfile.'"';
 			$options = $this->formvars['table_option'];
 			$options.= ' -nlt PROMOTE_TO_MULTI -lco FID=gid';
 			$encoding = $this->getEncoding(UPLOADPATH.$this->formvars['dbffile']);
@@ -743,7 +747,7 @@ class data_import_export {
 		$command = 'export PGCLIENTENCODING='.$encoding.';'.OGR_BINPATH.'ogr2ogr ';
 		if($options != NULL)$command.= $options;
 		$command.= ' -f PostgreSQL -lco GEOMETRY_NAME=the_geom -nln '.$tablename.' -a_srs EPSG:'.$epsg;
-		if($sql != NULL)$command.= ' -sql "'.$sql.'"';
+		if($sql != NULL)$command.= ' -sql \''.$sql.'\'';
 		$command.= ' -append PG:"dbname='.$database->dbName.' user='.$database->user.' active_schema='.$schema;
 		if($database->passwd != '')$command.= ' password='.$database->passwd;
 		if($database->port != '')$command.=' port='.$database->port;
@@ -756,7 +760,7 @@ class data_import_export {
 	
 	function getEncoding($dbf){
 		$folder = dirname($dbf);
-		$command = OGR_BINPATH.'ogr2ogr -f CSV '.$folder.'/test.csv '.$dbf;
+		$command = OGR_BINPATH.'ogr2ogr -f CSV '.$folder.'/test.csv "'.$dbf.'"';
 		exec($command, $output, $ret);
 		$command = 'file '.$folder.'/test.csv';
 		exec($command, $output, $ret);
@@ -858,19 +862,16 @@ class data_import_export {
 		return utf8_decode($csv);
 	}
   
-	function create_uko($layerdb, $table, $column, $epsg){
+	function create_uko($layerdb, $table, $column, $epsg, $exportfile){
 		$sql.= "SELECT st_astext(st_multi(st_union(st_transform(".$column.", ".$epsg.")))) as geom FROM ".$table;
 		#echo $sql;
 		$ret = $layerdb->execSQL($sql,4, 1);
 		if(!$ret[0]){
 			$rs=pg_fetch_array($ret[1]);
-			$uko = $rs['geom'];
-			$uko = str_replace('MULTIPOLYGON(((', 'TYP UPO 2'.chr(10).'KOO ', $uko);
-			$uko = str_replace(')),((', chr(10).'FL+'.chr(10).'KOO ', $uko);
-			$uko = str_replace('),(', chr(10).'FL-'.chr(10).'KOO ', $uko);
-			$uko = str_replace(',', chr(10).'KOO ', $uko);
-			$uko = str_replace(')))', '', $uko);			
-			return $uko;
+			$uko = WKT2UKO($rs['geom']);
+			$fp = fopen($exportfile, 'w');
+			fwrite($fp, $uko);
+			fclose($fp);
 		}
   }
 	
@@ -1037,6 +1038,11 @@ class data_import_export {
 					}
 					$zip = true;
 				}break;
+
+				case 'DXF' : {
+					$exportfile = $exportfile.'.dxf';
+					$this->ogr2ogr_export($sql, 'DXF', $exportfile, $layerdb);
+				}break;
 				
 				case 'GML' : {
 					$this->ogr2ogr_export($sql, 'GML', $exportfile.'.xml', $layerdb);
@@ -1069,11 +1075,7 @@ class data_import_export {
 				}break;
 				
 				case 'UKO' : {
-					$uko = $this->create_uko($layerdb, $temp_table, $this->attributes['the_geom'], $this->formvars['epsg']);
-					$exportfile = $exportfile.'.uko';
-					$fp = fopen($exportfile, 'w');
-					fwrite($fp, $uko);
-					fclose($fp);
+					$this->create_uko($layerdb, $temp_table, $this->attributes['the_geom'], $this->formvars['epsg'], $exportfile.'.uko');
 					$contenttype = 'text/uko';
 				}break;
 				

@@ -24,4 +24,5 @@
   $strX="Đông"; 
   $strY="Bắc";
   $strMap="Map";
+	$strNoLayer="Please select a layer for the data query!";
 ?>

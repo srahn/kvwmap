@@ -2,6 +2,7 @@
 
 	checknumbers = function(input, type, length, decimal_length){
 		var val;
+		val = input.value.replace(String.fromCharCode(126), '');		// Tilde entfernen
 		if(type == 'Zahl'){
 			val = input.value.replace(/[^(0-9| |\.|,|\-)]/g, '');
 		}

@@ -34,5 +34,6 @@
 	$strClearAllQuerys="Hier klicken, um alle Abfragehaken zu entfernen";
 	$strInfoQuery="Informationsabfrage";
 	$strRotationAngle="Richtungswinkel";
+	$strNoLayer="Es wurde kein Thema zur Sachdatenabfrage ausgewählt!";
   
 ?>

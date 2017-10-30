@@ -21,6 +21,11 @@ function compare_names($a, $b){
 	return strcmp($a['name'], $b['name']);
 }
 
+function compare_orders($a, $b){
+	if($a->order > $b->order)return 1;
+  else return 0;
+}
+
 function compare_groups($a, $b){
   if($a->group > $b->group)return 1;
   else return 0;
@@ -115,6 +120,23 @@ function formatFlurstkennzALKIS($FlurstKennzListe){
 		else $vorkomma = '';
 		$FlurstKennz = $gem.$flur.$zaehler.$vorkomma;
 		$Flurstuecke[$i] = str_pad($FlurstKennz, 20, '_', STR_PAD_RIGHT);
+	}
+  return implode(';', $Flurstuecke);
+}
+
+function formatFlurstkennzALKIS_0To_($FlurstKennzListe){
+	$Flurstuecke = explode(';', $FlurstKennzListe);
+	for ($i = 0; $i < count($Flurstuecke); $i++) {
+		$Flurstuecke[$i] = str_pad(
+			substr(
+				$Flurstuecke[$i],
+				0,
+				(intval(substr($Flurstuecke[$i], 14, 4)) == 0 ? 14 : 18)
+			),
+			20,
+			'_',
+			STR_PAD_RIGHT
+		);
 	}
   return implode(';', $Flurstuecke);
 }
@@ -940,76 +962,6 @@ function showAlert($text) {
   </script><?php
 }
 
-/**
-* Funktion gibt Meldungen aus
-* ToDo: Funktion wie folgt umbauen:
-* Funktion gibt Liste von Meldungen aus. Je nach Typ wird die Meldung
-* unterschiedlich dargestellt.
-* @param array[][] $messages Liste der Meldungen
-* 	Eine Meldung besteht aus einen assoziativen Array mit folgenden
-*		Bestandteilen:
-*		type: Type der Meldung. 'success' (default), 'warning', 'error'
-*		msg: Die Meldung, die als Text ausgegeben werden soll.
-*		Die Klassen zum Stylen der Meldungen lauten: 'message_' + type
-* @param boolean $fade Ob das Fenster zur Anzeige der Message von allein
-* 	verschwinden soll oder nicht.
-*/
-/*
-function showMessages($messages, $fade = true) { ?>
-	<script type="text/javascript">
-	var Msg = document.getElementById("message_box");
-			innerhtml = '';
-	if(Msg == undefined){
-		document.write('<div id="message_box" class="message_box_hidden"></div>');
-		var Msg = document.getElementById("message_box");
-	}
-	Msg.className = 'message_box_visible'; <?php
-	Msg.style.top = document.body.scrollTop + 350; <?php
-	$html = array_map($messages, function($m) {
-		return = "
-			<div class=\"message_row\">
-				<div class=\"message_type\">{$m['type']}</div>
-				<div class=\"message_{$m['type']}\">{$m['msg']}</div>
-			</div>
-		";
-	});
- 	if ($fade){ ?>
-		setTimeout(function() {Msg.className = 'message_box_hide';}, 1000);
-		setTimeout(function() {Msg.className = 'message_box_hidden';}, 3000);<?php
-	}
-	else {
-		$html .= "<br><br><input type=\"button\" onclick=\"this.parentNode.className = 'message_box_hidden';\" value=\"ok\">";
-	} ?>
-	Msg.innerHTML = <?php echo $html; ?>
-  </script><?php
-}
-*/
-function showMessage($text, $fade = true, $msg_type = 'warning') {
-  ?>
-  <script type="text/javascript">
-		var Msg = document.getElementById("message_box");
-				innerhtml = '';
-		if(Msg == undefined){
-			document.write('<div id="message_box" class="message_box_hidden"></div>');
-			var Msg = document.getElementById("message_box");
-		}
-		Msg.className = 'message_box_<?php echo $msg_type; ?>';<?php
-		if ($msg_type == 'error') { ?>
-			innerhtml += '<h2>Eingabefehler</h2>';
-			Msg.className = 'message_box_error';<?php
-		} ?>
-		Msg.style.top = document.body.scrollTop + 350;
-		innerhtml += '<?php echo $text; ?>';
-		<? if($fade == true){ ?>
-			setTimeout(function() {Msg.className = 'message_box_hide';},1000);
-			setTimeout(function() {Msg.className = 'message_box_hidden';},3000);
-		<? }else{ ?>
-			innerhtml += '<br><br><input type="button" onclick="this.parentNode.className = \'message_box_hidden\';" value="ok">';
-		<? } ?>
-		Msg.innerHTML = innerhtml;
-  </script><?php
-}
-
 function ArtCode2Abk($code) {
   switch ($code) {
     case '100' : {
@@ -1283,6 +1235,29 @@ function buildExpressionString($str) {
   # Beenden des Ausdrucks
   $expr.=')';
   return $expr;
+}
+
+function getNumPagesPdf($filepath){
+	$fp = @fopen(preg_replace("/\[(.*?)\]/i", "",$filepath),"r");
+	$max=0;
+	while(!feof($fp)){
+		$line = fgets($fp,255);
+		if(preg_match('/\/Count [0-9]+/', $line, $matches)){
+			preg_match('/[0-9]+/',$matches[0], $matches2);
+			if ($max<$matches2[0]) $max=$matches2[0];
+		}
+	}
+	fclose($fp);
+	return $max;
+}
+
+function WKT2UKO($wkt){
+	$uko = str_replace('MULTIPOLYGON(((', 'TYP UPO 2'.chr(10).'KOO ', $wkt);
+	$uko = str_replace(')),((', chr(10).'FL+'.chr(10).'KOO ', $uko);
+	$uko = str_replace('),(', chr(10).'FL-'.chr(10).'KOO ', $uko);
+	$uko = str_replace(',', chr(10).'KOO ', $uko);
+	$uko = str_replace(')))', '', $uko);
+	return $uko;
 }
 
 function rectObj2WKTPolygon($rect) {

@@ -480,6 +480,9 @@ class ALB {
 			$flst->Buchungen=$flst->getBuchungen(NULL,NULL,0);
 				for($b = 0; $b < count($flst->Buchungen); $b++){
 					$Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
+					reset($Eigentuemerliste);
+					$flst->orderEigentuemer(key($Eigentuemerliste), $Eigentuemerliste, 0);
+					usort($Eigentuemerliste, 'compare_orders');
 					foreach($Eigentuemerliste as $eigentuemer){
 						if($eigentuemer->zusatz_eigentuemer != '' or $eigentuemer->Nr != ''){
 							if($formvars['flurstkennz']){ $csv .= $flst->FlurstKennz.';';}

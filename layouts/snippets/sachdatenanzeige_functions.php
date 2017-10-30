@@ -94,6 +94,7 @@ include('funktionen/input_check_functions.php');
 		}
 		if(sure){
 			currentform.target = '';
+			currentform.go.value = 'get_last_query';
 			if(currentform.go_backup.value != ''){
 				currentform.go.value = currentform.go_backup.value;
 			}
@@ -113,6 +114,7 @@ include('funktionen/input_check_functions.php');
 		}
 		if(sure){
 			currentform.target = '';
+			currentform.go.value = 'get_last_query';
 			if(currentform.go_backup.value != ''){
 				currentform.go.value = currentform.go_backup.value;
 			}
@@ -132,6 +134,7 @@ include('funktionen/input_check_functions.php');
 		}
 		if(sure){
 			currentform.target = '';
+			currentform.go.value = 'get_last_query';
 			if(currentform.go_backup.value != ''){
 				currentform.go.value = currentform.go_backup.value;
 			}
@@ -148,6 +151,7 @@ include('funktionen/input_check_functions.php');
 		}
 		if(sure){
 			currentform.target = '';
+			currentform.go.value = 'get_last_query';
 			if(currentform.go_backup.value != ''){
 				currentform.go.value = currentform.go_backup.value;
 			}
@@ -189,6 +193,7 @@ include('funktionen/input_check_functions.php');
 		currentform.go.value = 'Sachdaten_speichern';
 		document.getElementById('loader').style.display = '';
 		setTimeout('document.getElementById(\'loaderimg\').src=\'graphics/ajax-loader.gif\'', 50);
+		document.GUI.gle_changed.value = '';
 		overlay_submit(currentform, false);
 	}
 
@@ -213,6 +218,7 @@ include('funktionen/input_check_functions.php');
   	}
   	currentform.go.value = 'neuer_Layer_Datensatz_speichern';
 		document.getElementById('go_plus').disabled = true;
+		document.GUI.gle_changed.value = '';
   	overlay_submit(currentform, false);
 	}
 

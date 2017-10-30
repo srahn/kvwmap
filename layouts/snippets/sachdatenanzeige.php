@@ -20,6 +20,9 @@ if ($anzLayer==0) {
 	<?php	
 }
 for($i=0;$i<$anzLayer;$i++){
+	if($i > 0){
+		echo '<hr style="width: 100%; height: 3px; margin: 15 0; color: '.BG_GLEHEADER.'; background: '.BG_GLEHEADER.';">';
+	}
 	if ($this->qlayerset[$i]['template']=='') {
    	if(GLEVIEW == '2'){
     	include(SNIPPETS.'generic_layer_editor_2.php');			# Attribute zeilenweise
@@ -122,7 +125,7 @@ for($i=0;$i<$anzLayer;$i++){
 					</script>
 				<? }else{
 							echo '&nbsp;'.$strLimit; ?>&nbsp;
-							<select name="anzahl" id="anzahl" onchange="javascript:overlay_submit(currentform, false);">
+							<select name="anzahl" id="anzahl" onchange="javascript:currentform.go.value = 'get_last_query';overlay_submit(currentform, false);">
 								<? foreach($selectable_limits as $limit){
 								if($this->formvars['anzahl'] != '' AND $custom_limit != true AND !in_array($this->formvars['anzahl'], $selectable_limits) AND $this->formvars['anzahl'] < $limit){
 									$custom_limit = true;	?>
@@ -162,7 +165,7 @@ for($i=0;$i<$anzLayer;$i++){
   <br><div align="center">
 
   <?
-  	if($this->search == true){			# wenn man von der Suche kam -> Hidden Felder zum Speichern der Suchparameter
+  	if($this->search == true){			# wenn man von der Suche kam -> Hidden Felder zum Speichern der Suchparameter (die können evtl. weg, da jetzt immer get_last_query verwendet wird)
 		echo '<input name="go" type="hidden" value="Layer-Suche_Suchen">';
 		echo '		<input name="search" type="hidden" value="true">
   					<input name="selected_layer_id" type="hidden" value="'.$this->formvars['selected_layer_id'].'">
@@ -190,7 +193,7 @@ for($i=0;$i<$anzLayer;$i++){
 				}
 			}
 	  	if($this->formvars['printversion'] == '' AND $this->formvars['keinzurueck'] == '' AND $this->formvars['subform_link'] == ''){
-	  		echo '<a href="javascript:currentform.go.value=\'Layer-Suche\';currentform.submit();" id="sachdatenanzeige_footer">'.$strbackToSearch.'</a><br><br>';
+	  		echo '<a href="javascript:currentform.go.value=\'get_last_search\';currentform.submit();" id="sachdatenanzeige_footer">'.$strbackToSearch.'</a><br><br>';
 	  	}
   	}
   	else{
