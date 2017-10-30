@@ -285,7 +285,8 @@ CREATE TABLE wasserrecht.fiswrv_gewaesserbenutzungen(
 	freitext_zweck text,
 	zweck integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_zweck(id),
 	umfang_entnahme integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_umfang_entnahme(id),
-	wasserrechtliche_zulassungen integer NOT NULL REFERENCES wasserrecht.fiswrv_wasserrechtliche_zulassungen(id)
+	wasserrechtliche_zulassungen integer NOT NULL REFERENCES wasserrecht.fiswrv_wasserrechtliche_zulassungen(id),
+	freigegeben boolean DEFAULT false
 )WITH OIDS;
 
 CREATE TABLE wasserrecht.fiswrv_gewaesserbenutzungen_lage(
@@ -308,6 +309,7 @@ CREATE TABLE wasserrecht.fiswrv_gewaesserbenutzungen_lage(
 	invid varchar(255),
 	*/
 	gewaesserbenutzungen integer NOT NULL REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen(id),
+	freigegeben boolean DEFAULT false,
 	the_geo geometry(Point, 35833)
 )WITH OIDS;
 
@@ -526,7 +528,7 @@ CREATE TABLE wasserrecht.fiswrv_fiswrv_wem
 )WITH OIDS;
 */
 
----------
+--------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION wasserrecht.wrz_freigegeben_copy_function()
 RETURNS trigger AS '
@@ -565,5 +567,37 @@ BEFORE UPDATE ON wasserrecht.fiswrv_wasserrechtliche_zulassungen
 FOR EACH ROW
 WHEN ((OLD.vorgaenger IS DISTINCT FROM NEW.vorgaenger OR OLD.nachfolger IS DISTINCT FROM NEW.nachfolger) AND pg_trigger_depth() = 0)
 EXECUTE PROCEDURE wasserrecht.wrz_vorgaenger_nachfolger_function();
+
+-------
+
+CREATE OR REPLACE FUNCTION wasserrecht.gewaesserbenutzungen_freigegeben_copy_function()
+RETURNS trigger AS '
+BEGIN
+  IF NEW.freigegeben IS NOT NULL THEN
+    NEW.freigegeben := false;
+  END IF;
+  RETURN NEW;
+END' LANGUAGE 'plpgsql';
+
+CREATE TRIGGER gewaesserbenutzungen_freigegeben_copy_trigger
+BEFORE INSERT ON wasserrecht.fiswrv_gewaesserbenutzungen
+FOR EACH ROW
+EXECUTE PROCEDURE wasserrecht.gewaesserbenutzungen_freigegeben_copy_function();
+
+-------
+
+CREATE OR REPLACE FUNCTION wasserrecht.gewaesserbenutzungen_lage_freigegeben_copy_function()
+RETURNS trigger AS '
+BEGIN
+  IF NEW.freigegeben IS NOT NULL THEN
+    NEW.freigegeben := false;
+  END IF;
+  RETURN NEW;
+END' LANGUAGE 'plpgsql';
+
+CREATE TRIGGER gewaesserbenutzungen_lage_freigegeben_copy_trigger
+BEFORE INSERT ON wasserrecht.fiswrv_gewaesserbenutzungen_lage
+FOR EACH ROW
+EXECUTE PROCEDURE wasserrecht.gewaesserbenutzungen_lage_freigegeben_copy_function();
 
 COMMIT;
