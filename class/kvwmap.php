@@ -2205,7 +2205,6 @@ class GUI {
     rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
     $this->img['scalebar'] = IMAGEURL.$newname;
     $this->debug->write("Name des Scalebars: ".$this->img['scalebar'],4);
-
 		$this->calculatePixelSize();
 		$this->drawReferenceMap();
   }
