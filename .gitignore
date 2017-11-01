@@ -10,3 +10,4 @@ plugins/*/config/config.php
 plugins/*/config/config.sh
 plugins/*/img/*
 vendor/
+robots.txt
