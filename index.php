@@ -38,8 +38,8 @@ session_start();
 // $executiontimes['action'][] = 'Start';
 
 ob_start ();    // Ausgabepufferung starten
-foreach($_REQUEST as $key => $value){
-	if(is_string($value))$_REQUEST[$key] = str_replace('<script', '', pg_escape_string($value));
+foreach($_REQUEST as $key => $value) {
+	if (is_string($value)) $_REQUEST[$key] = pg_escape_string(replace_tags($value, 'script|embed'));
 }
 $formvars = $_REQUEST;
 

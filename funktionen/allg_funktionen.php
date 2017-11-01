@@ -66,6 +66,16 @@ function replace_semicolon($text) {
   return str_replace(';', '', $text);
 }
 
+/*
+* Replace in $tags defined tags from $text recursively
+*/
+function replace_tags($text, $tags) {
+	$new_text = preg_replace("#<\s*\/?(" . $tags . ")\s*[^>]*?>#im", '', $text);
+	if ($new_text != $text) $new_text = replace_tags($new_text, $tags);
+
+	return $new_text;
+}
+
 function InchesPerUnit($unit, $center_y){
 	if($unit == MS_METERS){
 		return 39.3701;
