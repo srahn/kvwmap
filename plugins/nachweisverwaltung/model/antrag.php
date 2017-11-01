@@ -359,7 +359,7 @@ class antrag {
 		$sql.=" WHERE  n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
 		if($this->stelle_id == '')$sql.=" AND stelle_id IS NULL";
 		else $sql.=" AND stelle_id=".$this->stelle_id;    
-		$sql.=" AND n.art < '111' OR d.geometrie_relevant";
+		$sql.=" AND (n.art < '111' OR d.geometrie_relevant)";
 		$sql.=" )as n";
 		$sql.=" WHERE f.endet is null";
 		$sql.=" AND st_intersects(st_transform(n.the_geom, ".EPSGCODE_ALKIS."), f.wkb_geometry)";
