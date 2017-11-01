@@ -97,9 +97,9 @@
     <div class="wasserrecht_display_table_cell_caption">Benutzungsumfang:</div>
         <div class="wasserrecht_display_table_cell_spacer"></div>
          <?php
-             if(!empty($gewaesserbenutzung) && !empty($gewaesserbenutzung->gewaesserbenutzungUmfang))
+             if(!empty($gewaesserbenutzung) && !empty($gewaesserbenutzung->getErlaubterUmfangHTML()))
     		 {
-    		     echo '<a class="wasserrecht_display_table_cell_white" href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Gewaesserbenutzungen_Umfang_Entnahme'] . '&value_id=' . $gewaesserbenutzung->gewaesserbenutzungUmfang->getId() . '&operator_id==">' . $gewaesserbenutzung->gewaesserbenutzungUmfang->getErlaubterUmfangHTML() . '</a>';
+    		     echo '<a class="wasserrecht_display_table_cell_white" href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['FisWrV-WRe Gewässerbenutzungen'] . '&value_gwb_id=' . $gewaesserbenutzung->getId() . '&operator_gwb_id==">' . $gewaesserbenutzung->getErlaubterUmfangHTML() . '</a>';
     		 }
     		 else
     		 {

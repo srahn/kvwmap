@@ -23,6 +23,8 @@ include(PLUGINS . 'wasserrecht/model/db/aufforderung.php');
 include(PLUGINS . 'wasserrecht/model/db/erklaerung.php');
 include(PLUGINS . 'wasserrecht/model/db/festsetzung.php');
 include(PLUGINS . 'wasserrecht/model/db/gewaesserbenutzungen.php');
+include(PLUGINS . 'wasserrecht/model/db/gewaesserbenutzungen_umfang_name.php');
+include(PLUGINS . 'wasserrecht/model/db/gewaesserbenutzungen_umfang_einheiten.php');
 include(PLUGINS . 'wasserrecht/model/db/gewaesserbenutzungen_umfang.php');
 include(PLUGINS . 'wasserrecht/model/db/gewaesserbenutzungen_art.php');
 include(PLUGINS . 'wasserrecht/model/db/gewaesserbenutzungen_zweck.php');

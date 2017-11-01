@@ -1,46 +1,53 @@
 <?php
 class GewaesserbenutzungenUmfang extends WrPgObject {
 
-	protected $tableName = 'fiswrv_gewaesserbenutzungen_umfang_entnahme';
-
-	public function getUmfang()
+	protected $tableName = 'fiswrv_gewaesserbenutzungen_umfang';
+	
+	public $name;
+	public $einheit;
+	
+	public function find_where_with_subtables($where, $order = NULL, $select = '*')
 	{
-	    if(!empty($this->data['max_ent_a']))
+	    $this->log->log_info('*** GewaesserbenutzungenUmfang->find_where_with_subtables ***');
+	    $this->log->log_debug('where: ' . $where);
+	    
+	    $gewaesserbenutzungenUmfang = $this->find_where($where, $order, $select);
+	    
+	    if(!empty($gewaesserbenutzungenUmfang))
 	    {
-	        return $this->data['max_ent_a'];
+	        foreach ($gewaesserbenutzungenUmfang AS $gewaesserbenutzungUmfang)
+	        {
+	            if(!empty($gewaesserbenutzungUmfang))
+	            {
+	                $gun = new GewaesserbenutzungenUmfangName($this->gui);
+	                if(!empty($gewaesserbenutzungUmfang->data['name']))
+	                {
+	                    $gewaesserbenutzungUmfangName = $gun->find_where('id=' . $gewaesserbenutzungUmfang->data['name']);
+	                    if(!empty($gewaesserbenutzungUmfangName))
+	                    {
+	                        $gewaesserbenutzungUmfang->name = $gewaesserbenutzungUmfangName[0];
+	                    }
+	                }
+	                
+	                $gue = new GewaesserbenutzungenUmfangEinheiten($this->gui);
+	                if(!empty($gewaesserbenutzungUmfang->data['name']))
+	                {
+	                    $gewaesserbenutzungUmfangEinheit = $gue->find_where('id=' . $gewaesserbenutzungUmfang->data['einheit']);
+	                    if(!empty($gewaesserbenutzungUmfangEinheit))
+	                    {
+	                        $gewaesserbenutzungUmfang->einheit = $gewaesserbenutzungUmfangEinheit[0];
+	                    }
+	                }
+	            }
+	        }
 	    }
 	    
-	    return null;
+	    return $gewaesserbenutzungenUmfang;
 	}
 	
-	public function getErlaubterUmfang()
+	public function getWert()
 	{
-	    if(!empty($this->data['max_ent_wee']))
-	    {
-	        return $this->data['max_ent_wee'];
-	    }
-	    
-	    return null;
-	}
-	
-	public function getUmfangHTML()
-	{
-	    if(!empty($this->getUmfang()))
-	    {
-	        return number_format($this->getUmfang(), 0, '', ' ')  . " m³/a";
-	    }
-	    
-	    return "";
-	}
-	
-	public function getErlaubterUmfangHTML()
-	{
-	    if(!empty($this->getErlaubterUmfang()))
-	    {
-	        return number_format($this->getErlaubterUmfang(), 0, '', ' ')  . " m³/a";
-	    }
-	    
-	    return "";
+	    return $this->data['wert'];
 	}
 }
 ?>

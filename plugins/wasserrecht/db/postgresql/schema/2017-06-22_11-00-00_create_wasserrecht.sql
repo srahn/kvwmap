@@ -242,7 +242,7 @@ CREATE TABLE wasserrecht.fiswrv_gewaesserbenutzungen_zweck(
 	name varchar(255)
 )WITH OIDS;
 
-CREATE TABLE wasserrecht.fiswrv_gewaesserbenutzungen_umfang_entnahme(
+/*CREATE TABLE wasserrecht.fiswrv_gewaesserbenutzungen_umfang_entnahme(
 	id serial PRIMARY KEY,
 	name varchar(255),
 	max_ent_s numeric,
@@ -258,7 +258,7 @@ CREATE TABLE wasserrecht.fiswrv_gewaesserbenutzungen_umfang_entnahme(
 	max_ent_frei numeric,
 	max_ent_frei_beschreib text,
 	freitext text
-)WITH OIDS;
+)WITH OIDS;*/
 
 CREATE TABLE wasserrecht.fiswrv_gewaesserbenutzungen_wee_satz(
 	id serial PRIMARY KEY,
@@ -284,7 +284,14 @@ CREATE TABLE wasserrecht.fiswrv_gewaesserbenutzungen(
 	art integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_art(id),
 	freitext_zweck text,
 	zweck integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_zweck(id),
-	umfang_entnahme integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_umfang_entnahme(id),
+	ent_wb_alt text,
+	ent_datum_von date,
+	ent_datum_bis date,
+	max_ent_wee numeric,
+	max_ent_wee_beschreib text,
+	max_ent_wee_reduziert numeric,
+	max_ent_wb numeric,
+	max_ent_wb_beschreib text,
 	wasserrechtliche_zulassungen integer NOT NULL REFERENCES wasserrecht.fiswrv_wasserrechtliche_zulassungen(id),
 	freigegeben boolean DEFAULT false
 )WITH OIDS;
@@ -311,6 +318,27 @@ CREATE TABLE wasserrecht.fiswrv_gewaesserbenutzungen_lage(
 	gewaesserbenutzungen integer NOT NULL REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen(id),
 	freigegeben boolean DEFAULT false,
 	the_geo geometry(Point, 35833)
+)WITH OIDS;
+
+CREATE TABLE wasserrecht.fiswrv_gewaesserbenutzungen_umfang_name(
+	id serial PRIMARY KEY,
+	name varchar(255) NOT NULL,
+	abkuerzung varchar(100) NOT NULL,
+	beschreibung text
+)WITH OIDS;
+
+CREATE TABLE wasserrecht.fiswrv_gewaesserbenutzungen_umfang_einheiten(
+	id serial PRIMARY KEY,
+	name varchar(255) NOT NULL,
+	abkuerzung varchar (100) NOT NULL
+)WITH OIDS;
+
+CREATE TABLE wasserrecht.fiswrv_gewaesserbenutzungen_umfang(
+	id serial PRIMARY KEY,
+	name integer REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_umfang_name(id),
+	wert numeric,
+	einheit integer NOT NULL REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen_umfang_einheiten(id),
+	gewaesserbenutzungen integer NOT NULL REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen(id)
 )WITH OIDS;
 
 CREATE TABLE wasserrecht.fiswrv_teilgewaesserbenutzungen_art(
@@ -376,16 +404,11 @@ CREATE TABLE wasserrecht.fiswrv_aufforderung(
 ------------------------------------------
 --VIEWS
 
---CREATE VIEW wasserrecht.fiswrv_aktuelle_wasserrechtliche_zulassungen AS SELECT a.id as wrz_id, a.name, COALESCE(c.name,'') ||' (Aktenzeichen: '|| COALESCE(d.name,'') ||')'||' vom '|| COALESCE(b.datum::text,'') AS bezeichnung, a.aktuell, a.historisch, a.anlage AS anlage_id FROM wasserrecht.fiswrv_wasserrechtliche_zulassungen a LEFT JOIN wasserrecht.fiswrv_wasserrechtliche_zulassungen_ausgangsbescheide b ON a.ausgangsbescheid = b.id LEFT JOIN wasserrecht.fiswrv_wasserrechtliche_zulassungen_typus c ON b.typus = c.id LEFT JOIN wasserrecht.fiswrv_aktenzeichen d ON b.aktenzeichen = d.id WHERE a.aktuell = true;
---CREATE VIEW wasserrecht.fiswrv_historische_wasserrechtliche_zulassungen AS SELECT a.id as wrz_id, a.name, COALESCE(c.name,'') ||' (Aktenzeichen: '|| COALESCE(d.name,'') ||')'||' vom '|| COALESCE(b.datum::text,'') AS bezeichnung, a.aktuell, a.historisch, a.anlage AS anlage_id FROM wasserrecht.fiswrv_wasserrechtliche_zulassungen a LEFT JOIN wasserrecht.fiswrv_wasserrechtliche_zulassungen_ausgangsbescheide b ON a.ausgangsbescheid = b.id LEFT JOIN wasserrecht.fiswrv_wasserrechtliche_zulassungen_typus c ON b.typus = c.id LEFT JOIN wasserrecht.fiswrv_aktenzeichen d ON b.aktenzeichen = d.id WHERE a.historisch = true;
---CREATE VIEW wasserrecht.fiswrv_gewaesserbenutzungen_aktueller_wasserrechtlicher_zulassungen AS SELECT b.id AS gewaesserbenutzungen_id, a.wrz_id AS wrz_id, a.aktuell, a.historisch, a.anlage_id, COALESCE(a.bezeichnung,'') || ' zum ' || COALESCE(c.name,'') || ' von ' || COALESCE(d.max_ent_a::text,'') || ' m³/Jahr' AS bezeichnung, e.namelang AS wrz_ben_lage_namelang
---  FROM wasserrecht.fiswrv_aktuelle_wasserrechtliche_zulassungen a INNER JOIN wasserrecht.fiswrv_gewaesserbenutzungen b ON b.wasserrechtliche_zulassungen = a.wrz_id LEFT JOIN wasserrecht.fiswrv_gewaesserbenutzungen_art c ON c.id = b.art LEFT JOIN wasserrecht.fiswrv_gewaesserbenutzungen_umfang_entnahme d ON b.umfang_entnahme = d.id LEFT JOIN wasserrecht.fiswrv_gewaesserbenutzungen_lage e ON b.lage = e.id;
-
---CREATE VIEW wasserrecht.fiswrv_wasserentnamebenutzer AS SELECT c.oid, a.name AS anlage, b.name AS wasserrechtliche_zulassung, c.kennnummer AS benutzungsnummer FROM wasserrecht.fiswrv_anlagen a INNER JOIN wasserrecht.fiswrv_wasserrechtliche_zulassungen b ON b.anlage=a.id INNER JOIN wasserrecht.fiswrv_gewaesserbenutzungen c ON b.id = c.wasserrechtliche_zulassungen;
-
 CREATE VIEW wasserrecht.fiswrv_wasserrechtliche_zulassungen_bezeichnung AS SELECT a.id AS "id", a.anlage AS "anlage", COALESCE(b.name,'') ||' (Aktenzeichen: '|| COALESCE(a.aktenzeichen,'') ||')'||' vom '|| COALESCE(a.datum::text,'') || CASE WHEN a.fassung_nummer IS NOT NULL THEN ' in der Fassung vom ' || COALESCE(a.fassung_datum::text,'') ELSE '' END AS "bezeichnung" FROM wasserrecht.fiswrv_wasserrechtliche_zulassungen a LEFT JOIN wasserrecht.fiswrv_wasserrechtliche_zulassungen_typus b ON a.typus = b.id ORDER BY a.id;
---CREATE VIEW wasserrecht.fiswrv_gewaesserbenutzungen_bezeichnung AS SELECT b.id AS "id", COALESCE(e.name,'') ||' (Aktenzeichen: '|| COALESCE(a.aktenzeichen,'') ||')'||' vom '|| COALESCE(a.datum::text,'') || CASE WHEN a.fassung_nummer IS NOT NULL THEN ' in der Fassung vom ' || COALESCE(a.fassung_datum::text,'') ELSE '' END || ' zum ' || COALESCE(c.name,'') || ' von ' || COALESCE(d.max_ent_a::text,'') || ' m³/Jahr' AS "bezeichnung" FROM wasserrecht.fiswrv_gewaesserbenutzungen b LEFT JOIN wasserrecht.fiswrv_wasserrechtliche_zulassungen a ON b.wasserrechtliche_zulassungen = a.id LEFT JOIN wasserrecht.fiswrv_gewaesserbenutzungen_art c ON c.id = b.art LEFT JOIN wasserrecht.fiswrv_gewaesserbenutzungen_umfang_entnahme d ON b.umfang_entnahme = d.id LEFT JOIN wasserrecht.fiswrv_wasserrechtliche_zulassungen_typus e ON a.typus = e.id ORDER BY b.id;
-CREATE VIEW wasserrecht.fiswrv_gewaesserbenutzungen_bezeichnung AS SELECT a.id AS "id", a.wasserrechtliche_zulassungen as "wasserrechtliche_zulassungen", COALESCE(c.name,'') || ' für ' || COALESCE(b.name::text,'') || ' von ' || COALESCE(d.max_ent_a::text,'') || ' m³/Jahr' AS "bezeichnung" FROM wasserrecht.fiswrv_gewaesserbenutzungen a LEFT JOIN wasserrecht.fiswrv_gewaesserbenutzungen_zweck b ON b.id = a.zweck LEFT JOIN wasserrecht.fiswrv_gewaesserbenutzungen_art c ON c.id = a.art LEFT JOIN wasserrecht.fiswrv_gewaesserbenutzungen_umfang_entnahme d ON a.umfang_entnahme = d.id ORDER BY a.id; 
+
+/*CREATE VIEW wasserrecht.fiswrv_gewaesserbenutzungen_bezeichnung AS SELECT a.id AS "id", a.wasserrechtliche_zulassungen as "wasserrechtliche_zulassungen", COALESCE(c.name,'') || ' für ' || COALESCE(b.name::text,'') || ' von ' || COALESCE(d.max_ent_a::text,'') || ' m³/Jahr' AS "bezeichnung" FROM wasserrecht.fiswrv_gewaesserbenutzungen a LEFT JOIN wasserrecht.fiswrv_gewaesserbenutzungen_zweck b ON b.id = a.zweck LEFT JOIN wasserrecht.fiswrv_gewaesserbenutzungen_art c ON c.id = a.art LEFT JOIN wasserrecht.fiswrv_gewaesserbenutzungen_umfang_entnahme d ON a.umfang_entnahme = d.id ORDER BY a.id; */ 
+CREATE VIEW wasserrecht.fiswrv_gewaesserbenutzungen_bezeichnung AS SELECT a.id AS "id", a.wasserrechtliche_zulassungen as "wasserrechtliche_zulassungen", COALESCE(c.name,'') || ' für ' || COALESCE(b.name::text,'') || ' von ' || COALESCE(d.wert::text,'') || ' m³/Jahr' AS "bezeichnung" FROM wasserrecht.fiswrv_gewaesserbenutzungen a LEFT JOIN wasserrecht.fiswrv_gewaesserbenutzungen_zweck b ON b.id = a.zweck LEFT JOIN wasserrecht.fiswrv_gewaesserbenutzungen_art c ON c.id = a.art LEFT JOIN wasserrecht.fiswrv_gewaesserbenutzungen_umfang d ON a.id = d.gewaesserbenutzungen LEFT JOIN wasserrecht.fiswrv_gewaesserbenutzungen_umfang_name e ON d.name = e.id WHERE e.abkuerzung = 'max_ent_a' ORDER BY a.id; 
+
 CREATE VIEW wasserrecht.fiswrv_personen_bezeichnung AS SELECT a.id AS "id", COALESCE(a.name,'') ||' '|| COALESCE(a.abkuerzung,'') ||' '|| COALESCE(b.ort,'') AS "bezeichnung" FROM wasserrecht.fiswrv_personen a LEFT JOIN wasserrecht.fiswrv_adresse b ON a.adresse=b.id ORDER BY a.id;
 
 ------------------------------------------

@@ -284,7 +284,7 @@ class FestsetzungsSammelbescheidDaten
             {
                 if(!empty($gewaesserbenutzung))
                 {
-                    $erlaubterUmfang = $gewaesserbenutzung->gewaesserbenutzungUmfang->getErlaubterUmfang();
+                    $erlaubterUmfang = $gewaesserbenutzung->getErlaubterUmfang();
                     $returnArray[] = $erlaubterUmfang;
                 }
             }

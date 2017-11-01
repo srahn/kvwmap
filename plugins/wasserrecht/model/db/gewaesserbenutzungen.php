@@ -3,7 +3,7 @@ class Gewaesserbenutzungen extends WrPgObject {
 
 	protected $tableName = 'fiswrv_gewaesserbenutzungen';
 	
-	public $gewaesserbenutzungUmfang;
+	public $gewaesserbenutzungenUmfang;
 	public $gewaesserbenutzungArt;
 	public $gewaesserbenutzungZweck;
 	public $teilgewaesserbenutzungen;
@@ -22,17 +22,6 @@ class Gewaesserbenutzungen extends WrPgObject {
 	        {
 	            if(!empty($gewaesserbenutzung))
 	            {
-	                $gwu = new GewaesserbenutzungenUmfang($this->gui);
-	                if(!empty($gewaesserbenutzung->data['umfang_entnahme']))
-	                {
-	                    //echo 'id=' . $gewaesserbenutzung->data['umfang'];
-	                    $gewaesserbenutzungUmfang = $gwu->find_where('id=' . $gewaesserbenutzung->data['umfang_entnahme']);
-	                    if(!empty($gewaesserbenutzungUmfang))
-	                    {
-	                        $gewaesserbenutzung->gewaesserbenutzungUmfang = $gewaesserbenutzungUmfang[0];
-	                    }
-	                }
-	                
 	                $gwa = new GewaesserbenutzungenArt($this->gui);
 	                if(!empty($gewaesserbenutzung->data['art']))
 	                {
@@ -52,6 +41,11 @@ class Gewaesserbenutzungen extends WrPgObject {
 	                        $gewaesserbenutzung->gewaesserbenutzungZweck = $gewaesserbenutzungZweck[0];
 	                    }
 	                }
+	                
+	                $gewaesserbenutzungUmfang = new GewaesserbenutzungenUmfang($this->gui);
+	                $gewaesserbenutzungenUmfang = $gewaesserbenutzungUmfang->find_where_with_subtables('gewaesserbenutzungen=' . $gewaesserbenutzung->getId(), 'id');
+	                $this->log->log_debug('gewaesserbenutzungenUmfang size: ' . count($gewaesserbenutzungenUmfang));
+	                $gewaesserbenutzung->gewaesserbenutzungenUmfang = $gewaesserbenutzungenUmfang;
 	                
 	                $teilgewaesserbenutzung = new Teilgewaesserbenutzungen($this->gui);
 	                $teilgewaesserbenutzungen = $teilgewaesserbenutzung->find_where_with_subtables('gewaesserbenutzungen=' . $gewaesserbenutzung->getId(), 'id');
@@ -113,16 +107,57 @@ class Gewaesserbenutzungen extends WrPgObject {
 	
 	////////////////////////////////////////////////////////////////////
 	
-	public function getZugelassenerUmfang()
+	public function getUmfang()
 	{
-	    if(!empty($this->gewaesserbenutzungUmfang) && !empty($this->gewaesserbenutzungUmfang->getErlaubterUmfang()))
+	    $gewaesserbenutzungenUmfang = $this->gewaesserbenutzungenUmfang;
+	    if(!empty($gewaesserbenutzungenUmfang))
 	    {
-	        $zugelassenerUmfang = $this->gewaesserbenutzungUmfang->getErlaubterUmfang();
-	        return $zugelassenerUmfang;
-	        // 	    echo "zugelassenerUmfang: " . $zugelassenerUmfang . "<br/>";
+	        foreach ($gewaesserbenutzungenUmfang as $gewaesserbenutzungUmfang)
+	        {
+	            if(!empty($gewaesserbenutzungUmfang))
+	            {
+	                if(!empty($gewaesserbenutzungUmfang->name))
+	                {
+	                    if($gewaesserbenutzungUmfang->name->getAbkuerzung() === "max_ent_a")
+	                    {
+	                        return $gewaesserbenutzungUmfang->getWert();
+	                    }
+	                }
+	            }
+	        }
 	    }
 	    
 	    return null;
+	}
+	
+	public function getUmfangHTML()
+	{
+	    if(!empty($this->getUmfang()))
+	    {
+	        return number_format($this->getUmfang(), 0, '', ' ')  . " m³/a";
+	    }
+	    
+	    return "";
+	}
+	
+	public function getErlaubterUmfang()
+	{
+	    if(!empty($this->data['max_ent_wee']))
+	    {
+	        return $this->data['max_ent_wee'];
+	    }
+	    
+	    return null;
+	}
+	
+	public function getErlaubterUmfangHTML()
+	{
+	    if(!empty($this->getErlaubterUmfang()))
+	    {
+	        return number_format($this->getErlaubterUmfang(), 0, '', ' ')  . " m³/a";
+	    }
+	    
+	    return "";
 	}
 	
 	////////////////////////////////////////////////////////////////////
@@ -155,10 +190,10 @@ class Gewaesserbenutzungen extends WrPgObject {
 	public function getUmfangAllerTeilbenutzungen($erhebungsjahr)
 	{
 	    $teilgewaesserbenutzungen = $this->getTeilgewaesserbenutzungenByErhebungsjahr($erhebungsjahr);
-	    return $this->getUmfang($teilgewaesserbenutzungen);
+	    return $this->getTeilgewaesserbenutzungUmfang($teilgewaesserbenutzungen);
 	}
 	
-	public function getUmfang(&$teilgewaesserbenutzungen)
+	public function getTeilgewaesserbenutzungUmfang(&$teilgewaesserbenutzungen)
 	{
 	    $gesamtUmfang = 0;
 	    
@@ -187,7 +222,7 @@ class Gewaesserbenutzungen extends WrPgObject {
 	    if(!empty($teilgewaesserbenutzungId))
 	    {
 	        $teilgewaesserbenutzungen = $this->getTeilgewaesserbenutzungenByErhebungsjahr($erhebungsjahr);
-	        $gesamtUmfang = $this->getUmfang($teilgewaesserbenutzungen);
+	        $gesamtUmfang = $this->getTeilgewaesserbenutzungUmfang($teilgewaesserbenutzungen);
 	        
 	        if(!empty($teilgewaesserbenutzungen))
 	        {
@@ -347,9 +382,9 @@ class Gewaesserbenutzungen extends WrPgObject {
 	    $gesamtUmfang = $this->getUmfangAllerTeilbenutzungen($erhebungsjahr);
 	    
 	    $zugelassenerUmfang = 0;
-	    if(!empty($this->gewaesserbenutzungUmfang) && !empty($this->gewaesserbenutzungUmfang->getErlaubterUmfang()))
+	    if(!empty($this->getErlaubterUmfang()))
 	    {
-	        $zugelassenerUmfang = $this->gewaesserbenutzungUmfang->getErlaubterUmfang();
+	        $zugelassenerUmfang = $this->getErlaubterUmfang();
 	    }
 	    
 	    if(!empty($gesamtUmfang) && !empty($zugelassenerUmfang))

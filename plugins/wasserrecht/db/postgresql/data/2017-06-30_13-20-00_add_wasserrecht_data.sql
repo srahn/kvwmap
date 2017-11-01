@@ -213,9 +213,9 @@ INSERT INTO wasserrecht.fiswrv_anlagen (name, klasse, zustaend_uwb, zustaend_sta
 INSERT INTO wasserrecht.fiswrv_anlagen (name, klasse, zustaend_uwb, zustaend_stalu, abwasser_koerperschaft, trinkwasser_koerperschaft,kommentar,the_geom) VALUES ('Wasserwerk Musterstadt', 3, 5, 2, 1, 2, NULL, ST_Transform(ST_GeomFromText('POINT(12 53.5)', 4326), 35833));
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-INSERT INTO wasserrecht.fiswrv_ort(name) VALUES ('Güstrow');
-INSERT INTO wasserrecht.fiswrv_ort(name) VALUES ('Rostock');
-INSERT INTO wasserrecht.fiswrv_ort(name) VALUES ('Hansestadt Rostock');
+INSERT INTO wasserrecht.fiswrv_ort (name) VALUES ('Güstrow');
+INSERT INTO wasserrecht.fiswrv_ort (name) VALUES ('Rostock');
+INSERT INTO wasserrecht.fiswrv_ort (name) VALUES ('Hansestadt Rostock');
 
 INSERT INTO wasserrecht.fiswrv_wasserrechtliche_zulassungen (typus, aktenzeichen, ort, datum, ausstellbehoerde, status, gueltig_seit, befristet_bis, aktuell, bearbeiter, adressat, anlage, fassung_nummer, fassung_datum) VALUES (1, '§ 1', 1, current_date, 1, 2, '2016-07-01', '2017-07-06', true, 2, 2, 1, 1, '2017-07-01');
 INSERT INTO wasserrecht.fiswrv_wasserrechtliche_zulassungen (typus, aktenzeichen, ort, datum, ausstellbehoerde, status, gueltig_seit, befristet_bis, aktuell, bearbeiter, adressat, anlage) VALUES (1, '§ 2', 1, current_date, 1, 2, '2017-07-01', '2017-07-06', false, 2, 2, 2);
@@ -230,18 +230,43 @@ UPDATE wasserrecht.fiswrv_wasserrechtliche_zulassungen SET freigegeben = true WH
 UPDATE wasserrecht.fiswrv_wasserrechtliche_zulassungen SET freigegeben = true WHERE id = 4;
 UPDATE wasserrecht.fiswrv_wasserrechtliche_zulassungen SET freigegeben = true WHERE id = 5;
 
-INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_umfang_entnahme(name, max_ent_a, max_ent_wee) VALUES('Test Umfang', 80000, 100000);
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen (kennnummer, wasserbuchnummer, freitext_art, art, freitext_zweck, zweck, max_ent_wee, wasserrechtliche_zulassungen) VALUES ('1-2-1-1-1', '3572', 'Test Freitext Art 1', 1, 'Test Freitext Zweck 1', 6, 100000, 1);
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen (kennnummer, wasserbuchnummer, freitext_art, art, freitext_zweck, zweck, max_ent_wee, wasserrechtliche_zulassungen) VALUES ('1-2-2-2-2', '0000', 'Test Freitext Art 2', 2, 'Test Freitext Zweck 2', 6, 100000, 2);
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen (kennnummer, wasserbuchnummer, freitext_art, art, freitext_zweck, zweck, max_ent_wee, wasserrechtliche_zulassungen) VALUES ('2-1-2-3-3', '3572', 'Test Freitext Art 3', 1, 'Test Freitext Zweck 3', 6, 100000, 3);
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen (kennnummer, wasserbuchnummer, freitext_art, art, freitext_zweck, zweck, max_ent_wee, wasserrechtliche_zulassungen) VALUES ('2-1-1-4-4', '2425', 'Test Freitext Art 4', 1, 'Test Freitext Zweck 4', 6, 100000, 4);
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen (kennnummer, wasserbuchnummer, freitext_art, art, freitext_zweck, zweck, max_ent_wee, wasserrechtliche_zulassungen) VALUES ('1-2-1-5-5', '53535', 'Test Freitext Art 5', 1, 'Test Freitext Zweck 5', 6, 100000, 5);
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen (kennnummer, wasserbuchnummer, freitext_art, art, freitext_zweck, zweck, max_ent_wee, wasserrechtliche_zulassungen) VALUES ('1-2-1-6-6', '53536', 'Test Freitext Art 6', 1, 'Test Freitext Zweck 6', 6, 100000, 6);
 
-INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen(kennnummer, wasserbuchnummer, freitext_art, art, freitext_zweck, zweck, umfang_entnahme, wasserrechtliche_zulassungen) VALUES ('1-2-1-1-1', '3572', 'Test Freitext Art 1', 1, 'Test Freitext Zweck 1', 6, 1, 1);
-INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen(kennnummer, wasserbuchnummer, freitext_art, art, freitext_zweck, zweck, umfang_entnahme, wasserrechtliche_zulassungen) VALUES ('1-2-2-2-2', '0000', 'Test Freitext Art 2', 2, 'Test Freitext Zweck 2', 6, 1, 2);
-INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen(kennnummer, wasserbuchnummer, freitext_art, art, freitext_zweck, zweck, umfang_entnahme, wasserrechtliche_zulassungen) VALUES ('2-1-2-3-3', '3572', 'Test Freitext Art 3', 1, 'Test Freitext Zweck 3', 6, 1, 3);
-INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen(kennnummer, wasserbuchnummer, freitext_art, art, freitext_zweck, zweck, umfang_entnahme, wasserrechtliche_zulassungen) VALUES ('2-1-1-4-4', '2425', 'Test Freitext Art 4', 1, 'Test Freitext Zweck 4', 6, 1, 4);
-INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen(kennnummer, wasserbuchnummer, freitext_art, art, freitext_zweck, zweck, umfang_entnahme, wasserrechtliche_zulassungen) VALUES ('1-2-1-5-5', '53535', 'Test Freitext Art 5', 1, 'Test Freitext Zweck 5', 6, 1, 5);
-INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen(kennnummer, wasserbuchnummer, freitext_art, art, freitext_zweck, zweck, umfang_entnahme, wasserrechtliche_zulassungen) VALUES ('1-2-1-6-6', '53536', 'Test Freitext Art 6', 1, 'Test Freitext Zweck 6', 6, 1, 6);
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_lage (name, gewaesserbenutzungen, the_geo) VALUES('Test Gewaesserbenutzungen Lage 1', 1, ST_Transform(ST_GeomFromText('POINT(12.5 54)', 4326), 35833));
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_lage (name, gewaesserbenutzungen, the_geo) VALUES('Test Gewaesserbenutzungen Lage 2', 1, ST_Transform(ST_GeomFromText('POINT(12.5 53.5)', 4326), 35833));
 
-INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_lage(name, gewaesserbenutzungen, the_geo) VALUES('Test Gewaesserbenutzungen Lage 1', 1, ST_Transform(ST_GeomFromText('POINT(12.5 54)', 4326), 35833));
-INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_lage(name, gewaesserbenutzungen, the_geo) VALUES('Test Gewaesserbenutzungen Lage 2', 1, ST_Transform(ST_GeomFromText('POINT(12.5 53.5)', 4326), 35833));
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_umfang_einheiten (name, abkuerzung) VALUES ('Kubikmeter pro Stunde', 'm³/h');
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_umfang_einheiten (name, abkuerzung) VALUES ('Kubikmeter pro Tag', 'm³/d');
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_umfang_einheiten (name, abkuerzung) VALUES ('Kubikmeter pro Woche', 'm³/wo');
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_umfang_einheiten (name, abkuerzung) VALUES ('Kubikmeter pro Monat', 'm³/mon');
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_umfang_einheiten (name, abkuerzung) VALUES ('Kubikmeter pro Jahr', 'm³/a');
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_umfang_einheiten (name, abkuerzung) VALUES ('Liter pro Sekunde', 'l/s');
 
-INSERT INTO wasserrecht.fiswrv_teilgewaesserbenutzungen(erhebungsjahr, art, zweck, umfang, wiedereinleitung_nutzer, wiedereinleitung_bearbeiter,mengenbestimmung,art_benutzung,befreiungstatbestaende,entgeltsatz,teilgewaesserbenutzungen_art, gewaesserbenutzungen) VALUES(2016,1,1,2,true,true,3,2,false,2,2,1);
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_umfang_name (name, abkuerzung) VALUES ('Maximale Entnahmemenge pro Sekunde', 'max_ent_s');
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_umfang_name (name, abkuerzung) VALUES ('Maximale Entnahmemenge pro Stunde', 'max_ent_h');
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_umfang_name (name, abkuerzung) VALUES ('Maximale Entnahmemenge pro Tag', 'max_ent_d');
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_umfang_name (name, abkuerzung) VALUES ('Maximale Entnahmemenge pro Woche', 'max_ent_w');
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_umfang_name (name, abkuerzung) VALUES ('Maximale Entnahmemenge pro Monat', 'max_ent_m');
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_umfang_name (name, abkuerzung) VALUES ('Maximale Entnahmemenge pro Jahr', 'max_ent_a');
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_umfang_name (name, abkuerzung) VALUES ('Mittlere Entnahmemenge pro Sekunde', 'max_ent_s');
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_umfang_name (name, abkuerzung) VALUES ('Mittlere Entnahmemenge pro Stunde', 'max_ent_h');
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_umfang_name (name, abkuerzung) VALUES ('Mittlere Entnahmemenge pro Tag', 'max_ent_d');
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_umfang_name (name, abkuerzung) VALUES ('Mittlere Entnahmemenge pro Woche', 'max_ent_w');
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_umfang_name (name, abkuerzung) VALUES ('Mittlere Entnahmemenge pro Monat', 'max_ent_m');
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_umfang_name (name, abkuerzung) VALUES ('Mittlere Entnahmemenge pro Jahr', 'max_ent_a');
+
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_umfang (name, wert, einheit, gewaesserbenutzungen) VALUES(6, 80000, 5, 1);
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_umfang (name, wert, einheit, gewaesserbenutzungen) VALUES(6, 80000, 5, 2);
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_umfang (name, wert, einheit, gewaesserbenutzungen) VALUES(6, 80000, 5, 3);
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_umfang (name, wert, einheit, gewaesserbenutzungen) VALUES(6, 80000, 5, 4);
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_umfang (name, wert, einheit, gewaesserbenutzungen) VALUES(6, 80000, 5, 5);
+INSERT INTO wasserrecht.fiswrv_gewaesserbenutzungen_umfang (name, wert, einheit, gewaesserbenutzungen) VALUES(6, 80000, 5, 6);
+
+INSERT INTO wasserrecht.fiswrv_teilgewaesserbenutzungen (erhebungsjahr, art, zweck, umfang, wiedereinleitung_nutzer, wiedereinleitung_bearbeiter,mengenbestimmung,art_benutzung,befreiungstatbestaende,entgeltsatz,teilgewaesserbenutzungen_art, gewaesserbenutzungen) VALUES(2016,1,1,2,true,true,3,2,false,2,2,1);
 
 COMMIT;
