@@ -38,6 +38,17 @@ session_start();
 // $executiontimes['action'][] = 'Start';
 
 ob_start ();    // Ausgabepufferung starten
+
+/*
+* Replace in $tags defined tags from $text recursively
+*/
+function replace_tags($text, $tags) {
+	$new_text = preg_replace("#<\s*\/?(" . $tags . ")\s*[^>]*?>#im", '', $text);
+	if ($new_text != $text) $new_text = replace_tags($new_text, $tags);
+
+	return $new_text;
+}
+
 foreach($_REQUEST as $key => $value) {
 	if (is_string($value)) $_REQUEST[$key] = pg_escape_string(replace_tags($value, 'script|embed'));
 }
@@ -110,7 +121,7 @@ if(!CASE_COMPRESS AND FAST_CASE){
 	include (CLASSPATH.'fast_cases/'.$go.'.php');
 }
 else{
-	include_(WWWROOT.APPLVERSION.'funktionen/allg_funktionen.php');	
+	include_(WWWROOT.APPLVERSION.'funktionen/allg_funktionen.php');
 	if($userDb == NULL)include_(CLASSPATH.'mysql.php');
 	include_(CLASSPATH . 'kvwmap.php');
 	include_(CLASSPATH . 'Menue.php');
