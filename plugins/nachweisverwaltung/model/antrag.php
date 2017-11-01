@@ -352,7 +352,7 @@ class antrag {
 		$sql.=" st_area(st_intersection(st_transform(n.the_geom, 25833), f.wkb_geometry)) as inter,";
 		$sql.=" st_area(f.wkb_geometry) as f_area";
 		$sql.=" FROM alkis.ax_flurstueck f,";
-		$sql.=" (SELECT DISTINCT n.flurid, n.stammnr, n.rissnummer, n.the_geom";
+		$sql.=" (SELECT n.flurid, n.stammnr, n.art, n.blattnummer, n.rissnummer, n.the_geom";
 		if(NACHWEIS_SECONDARY_ATTRIBUTE != '')$sql.=", n.".NACHWEIS_SECONDARY_ATTRIBUTE;		
 		$sql.=" FROM nachweisverwaltung.n_nachweise2antraege AS n2a, nachweisverwaltung.n_nachweise AS n";
 		$sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id";
@@ -368,6 +368,8 @@ class antrag {
 		#echo $sql;
 		$ret=$this->database->execSQL($sql,4, 0); 
     while($rs=pg_fetch_assoc($ret[1])){
+			$rs['stammnr'] = utf8_decode($rs['stammnr']);
+			$rs['rissnummer'] = utf8_decode($rs['rissnummer']);		
 			$rs['anteil_abs'] = str_replace('.', ',', $rs['anteil_abs']);
 			$rs['anteil_pro'] = str_replace('.', ',', $rs['anteil_pro']);
 			$intersections[] = $rs;
