@@ -352,6 +352,7 @@ class antrag {
 		$sql.=" st_area(f.wkb_geometry) as f_area";
 		$sql.=" FROM alkis.ax_flurstueck f,";
 		$sql.=" (SELECT DISTINCT n.flurid, n.stammnr, n.rissnummer, n.the_geom";
+		if(NACHWEIS_SECONDARY_ATTRIBUTE != '')$sql.=", n.".NACHWEIS_SECONDARY_ATTRIBUTE;		
 		$sql.=" FROM nachweisverwaltung.n_nachweise2antraege AS n2a, nachweisverwaltung.n_nachweise AS n";
 		$sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id";
 		$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n2d.dokumentart_id = d.id";
