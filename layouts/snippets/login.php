@@ -9,7 +9,7 @@
 
 #	session_start(); wird schon in index.php geöffnet
 	$msg .= '<br>gast: ' . $formvars['gast'];
-	if ($_REQUEST['gast'] != '' AND $_REQUEST['username'] != '' AND in_array($_REQUEST['gast'], $gast_stellen)) {
+	if ($_REQUEST['gast'] != '' AND $_REQUEST['username'] == '' AND in_array($_REQUEST['gast'], $gast_stellen)) {
 		$msg .= '<br>Erzeuge neue Gastrolle.';
 		$gast = $userDb->create_new_gast($formvars['gast']);
 		$username = $gast['username'];
