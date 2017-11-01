@@ -133,7 +133,6 @@ if(!FAST_CASE)$GUI->loadPlugins();
 if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	if($go == 'get_last_query'){
 		$GUI->last_query = $GUI->user->rolle->get_last_query();
-		$GUI->formvars['keinzurueck'] = true;
 		$GUI->last_query_requested = true;		# get_last_query wurde direkt aufgerufen
 		$GUI->formvars['go'] = $go = $GUI->last_query['go'];
 	}

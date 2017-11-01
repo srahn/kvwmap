@@ -94,6 +94,7 @@ include('funktionen/input_check_functions.php');
 		}
 		if(sure){
 			currentform.target = '';
+			currentform.go.value = 'get_last_query';
 			if(currentform.go_backup.value != ''){
 				currentform.go.value = currentform.go_backup.value;
 			}
@@ -113,6 +114,7 @@ include('funktionen/input_check_functions.php');
 		}
 		if(sure){
 			currentform.target = '';
+			currentform.go.value = 'get_last_query';
 			if(currentform.go_backup.value != ''){
 				currentform.go.value = currentform.go_backup.value;
 			}
@@ -132,6 +134,7 @@ include('funktionen/input_check_functions.php');
 		}
 		if(sure){
 			currentform.target = '';
+			currentform.go.value = 'get_last_query';
 			if(currentform.go_backup.value != ''){
 				currentform.go.value = currentform.go_backup.value;
 			}
@@ -148,6 +151,7 @@ include('funktionen/input_check_functions.php');
 		}
 		if(sure){
 			currentform.target = '';
+			currentform.go.value = 'get_last_query';
 			if(currentform.go_backup.value != ''){
 				currentform.go.value = currentform.go_backup.value;
 			}
@@ -320,7 +324,7 @@ include('funktionen/input_check_functions.php');
 		document.getElementById(subformid).innerHTML = '';
 	}
 	
-	switch_gle_view = function(layer_id){
+	switch_gle_view1 = function(layer_id){
 		currentform.chosen_layer_id.value = layer_id;
 		currentform.go.value='toggle_gle_view';
 		overlay_submit(currentform, false);

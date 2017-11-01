@@ -112,7 +112,19 @@ class antrag {
 		$nachweiseUKOpfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Nachweise-UKO/';	# Erzeuge ein Unterverzeichnis für die Nachweis-UKOs
     mkdir ($nachweiseUKOpfad,0777);
 		$uebersichtspfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/';	# Erzeuge ein Unterverzeichnis für die Protokoll- und Übersichtsdateien
-    mkdir ($uebersichtspfad,0777);		
+    mkdir ($uebersichtspfad,0777);
+		$gesamtpolygonpfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Gesamtpolygon/';	# Erzeuge ein Unterverzeichnis für die Gesamtpolygondateien
+    mkdir ($gesamtpolygonpfad,0777);
+		$gesamtpolygonSHPpfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Gesamtpolygon/Shape/';	# Erzeuge ein Unterverzeichnis für die Gesamtpolygondateien
+    mkdir ($gesamtpolygonSHPpfad,0777);
+		$gesamtpolygonUKOpfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Gesamtpolygon/UKO/';	# Erzeuge ein Unterverzeichnis für die Gesamtpolygondateien
+    mkdir ($gesamtpolygonUKOpfad,0777);
+		$gesamtpolygonGMLpfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Gesamtpolygon/GML/';	# Erzeuge ein Unterverzeichnis für die Gesamtpolygondateien
+    mkdir ($gesamtpolygonGMLpfad,0777);
+		$gesamtpolygonGeoJSONpfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Gesamtpolygon/GeoJSON/';	# Erzeuge ein Unterverzeichnis für die Gesamtpolygondateien
+    mkdir ($gesamtpolygonGeoJSONpfad,0777);
+		$gesamtpolygonDXFpfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Gesamtpolygon/DXF/';	# Erzeuge ein Unterverzeichnis für die Gesamtpolygondateien
+    mkdir ($gesamtpolygonDXFpfad,0777);
     # Führe in Schleif für alle zum Auftrag gehörenden Dokumente folgendes aus
     for ($i=0; $i<$nachweis->erg_dokumente;$i++){
       # Erzeuge ein Unterverzeichnis für die Flur des Dokumentes, wenn noch nicht vorhanden
@@ -274,26 +286,7 @@ class antrag {
     }
     return $pdf;
   }
-  	
-  function erzeugenUbergabeprotokoll_CSV(){
-  	# Überschriften
-  	foreach($this->FFR[0] as $key=>$value){
-  		$csv .= $key.';';
-  		next($this->FFR[0]);
-  	}
-  	$csv.= chr(10);
-  	# Daten
-  	for($i=0; $i < count($this->FFR); $i++){
-  		$dateien = explode(', ', $this->FFR[$i]['Datei']);
-  		foreach($dateien as $datei){
-  			$this->FFR[$i]['Datei'] = $datei;
-  			$csv .= implode(';', $this->FFR[$i]);
-  			$csv.= chr(10);
-  		}
-    }
-    return $csv;
-  }
-    
+  	    
   function getAntraege($id,$nr,$richtung,$order,$current_stelle_id) {
 		global $admin_stellen;
     $sql ="SELECT a.*,a.vermstelle,va.art AS vermart,vs.name AS vermst";
@@ -348,16 +341,29 @@ class antrag {
 	
 	function getIntersectedFlst(){	# diese Verschneidung mit den Flurstücken kann u.U. sehr lange dauern, deswegen erstmal zurückgestellt
 		$this->spatial_ref_code = EPSGCODE_ALKIS.", ".EARTH_RADIUS;
-		$sql ="SELECT DISTINCT n.flurid, n.stammnr, n.rissnummer, f.flurstueckskennzeichen,";
+		$sql ="SELECT flurid, stammnr, rissnummer, flurstueckskennzeichen,";
+		if(NACHWEIS_SECONDARY_ATTRIBUTE != '')$sql.=" ".NACHWEIS_SECONDARY_ATTRIBUTE.",";
+		$sql.=" round(inter::numeric, 2) as anteil_abs,";
+		$sql.=" round((inter / f_area * 100)::numeric, 2) as anteil_pro";
+		$sql.=" from (";
+		$sql.=" SELECT DISTINCT n.flurid, n.stammnr, n.rissnummer, f.flurstueckskennzeichen,";
 		if(NACHWEIS_SECONDARY_ATTRIBUTE != '')$sql.=" n.".NACHWEIS_SECONDARY_ATTRIBUTE.",";
-		$sql.=" round(st_area_utm(st_intersection(st_transform(n.the_geom, ".EPSGCODE_ALKIS."), f.wkb_geometry),".$this->spatial_ref_code.")::numeric, 2) as anteil_abs,";
-		$sql.=" round((st_area_utm(st_intersection(st_transform(n.the_geom, ".EPSGCODE_ALKIS."), f.wkb_geometry),".$this->spatial_ref_code.") / st_area_utm(f.wkb_geometry,".$this->spatial_ref_code.") * 100)::numeric, 2) as anteil_pro";
-    $sql.=" FROM nachweisverwaltung.n_nachweise AS n, nachweisverwaltung.n_nachweise2antraege AS n2a, alkis.ax_flurstueck f";
-    $sql.=" WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
-		$sql.=" AND st_intersects(st_transform(n.the_geom, ".EPSGCODE_ALKIS."), f.wkb_geometry)";
+		$sql.=" st_area(st_intersection(st_transform(n.the_geom, 25833), f.wkb_geometry)) as inter,";
+		$sql.=" st_area(f.wkb_geometry) as f_area";
+		$sql.=" FROM alkis.ax_flurstueck f,";
+		$sql.=" (SELECT DISTINCT n.flurid, n.stammnr, n.rissnummer, n.the_geom";
+		$sql.=" FROM nachweisverwaltung.n_nachweise2antraege AS n2a, nachweisverwaltung.n_nachweise AS n";
+		$sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id";
+		$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n2d.dokumentart_id = d.id";
+		$sql.=" WHERE  n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
 		if($this->stelle_id == '')$sql.=" AND stelle_id IS NULL";
-		else $sql.=" AND stelle_id=".$this->stelle_id;
-		$sql.=" order by n.flurid,n.stammnr,n.rissnummer,f.flurstueckskennzeichen";
+		else $sql.=" AND stelle_id=".$this->stelle_id;    
+		$sql.=" AND n.art < '111' OR d.geometrie_relevant";
+		$sql.=" )as n";
+		$sql.=" WHERE f.endet is null";
+		$sql.=" AND st_intersects(st_transform(n.the_geom, ".EPSGCODE_ALKIS."), f.wkb_geometry)";
+		$sql.=" order by n.flurid,n.stammnr,n.rissnummer,f.flurstueckskennzeichen) as foo";
+		#echo $sql;
 		$ret=$this->database->execSQL($sql,4, 0); 
     while($rs=pg_fetch_assoc($ret[1])){
 			$rs['anteil_abs'] = str_replace('.', ',', $rs['anteil_abs']);

@@ -1,6 +1,4 @@
-<script language="JavaScript">
-<!--
-
+<script type="text/javascript">
 
 update_form = function(art){
 	if(art == 'jbe' || art == 'jbf' || art == 'agf' || art == 'atf' || art == 'apf'){
@@ -49,7 +47,6 @@ function save(){
 
 <? } ?>
 
-//-->
 </script>
 
 <?php

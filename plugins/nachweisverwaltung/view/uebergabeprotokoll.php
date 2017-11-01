@@ -64,12 +64,7 @@ function create_protocol(){
   </tr>
   <tr> 
     <td bgcolor="<? echo BG_FORM ?>">
-    	Übergabeprotokoll erzeugen als: 
-    	<select name="go_plus" onchange="create_protocol();">
-    		<option value="">--- bitte auswählen ---</option>
-				<option value="PDF">PDF</option>
-				<option value="CSV">CSV</option>
-      </select>
+    	<a href="javascript:create_protocol();">Übergabeprotokoll erzeugen</a> 
       <input type="hidden" name="go" value="Antraganzeige_Uebergabeprotokoll_Erzeugen">
       <input type="hidden" name="order" value="<? echo $this->formvars['order']; ?>">
       <input type="hidden" name="antr_selected" value="<? echo $this->formvars['antr_selected']; ?>">

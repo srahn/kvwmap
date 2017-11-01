@@ -2205,7 +2205,6 @@ class GUI {
     rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
     $this->img['scalebar'] = IMAGEURL.$newname;
     $this->debug->write("Name des Scalebars: ".$this->img['scalebar'],4);
-
 		$this->calculatePixelSize();
 		$this->drawReferenceMap();
   }
@@ -7723,7 +7722,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				if($this->last_query != ''){
 					$sql = $this->last_query[$layerset[0]['Layer_ID']]['sql'];
 					if($this->formvars['orderby'.$layerset[0]['Layer_ID']] == '')$sql_order = $this->last_query[$layerset[0]['Layer_ID']]['orderby'];
-					$this->formvars['anzahl'] = $this->last_query[$layerset[0]['Layer_ID']]['limit'];
+					if($this->formvars['anzahl'] == '')$this->formvars['anzahl'] = $this->last_query[$layerset[0]['Layer_ID']]['limit'];
 					if($this->formvars['offset_'.$layerset[0]['Layer_ID']] == '')$this->formvars['offset_'.$layerset[0]['Layer_ID']] = $this->last_query[$layerset[0]['Layer_ID']]['offset'];
 				}
 
@@ -8255,8 +8254,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 				# Before Delete trigger
 				if (!empty($layer['trigger_function'])) {
-					$this->exec_trigger_function('BEFORE', 'DELETE', $layer, $element[3]);
-					$sql = "
+					$sql_old = "
 						SELECT
 							oid, *
 						FROM
@@ -8264,9 +8262,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						WHERE
 							oid = {$element[3]}
 					";
-					#echo '<br>sql before delete: ' . $sql; #pk
-					$ret = $layerdb->execSQL($sql, 4, 1);
-					$old_dataset = ($ret[0] == 0 ? pg_fetch_assoc($ret[1]) : array());
+					#echo '<br>sql before delete: ' . $sql_old; #pk
+					$ret = $layerdb->execSQL($sql_old, 4, 1);
+					$old_dataset = ($ret[0] == 0 ? pg_fetch_assoc($ret[1]) : array());					
+					$this->exec_trigger_function('BEFORE', 'DELETE', $layer, $element[3], $old_dataset);
 				}
 
 				if (!empty($layer['trigger_function'])) {
@@ -12130,7 +12129,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							if($this->formvars[$form_fields[$i]] == '')$eintrag = 'NULL';
 						} break;
             default : {
-              if($tablename AND $formtype != 'Text_not_saveable' AND $formtype != 'Auswahlfeld_not_saveable' AND $formtype != 'SubFormPK' AND $formtype != 'SubFormFK' AND $formtype != 'SubFormEmbeddedPK' AND $attributname != 'the_geom'){							
+              if($tablename AND $formtype != 'dynamicLink' AND $formtype != 'Text_not_saveable' AND $formtype != 'Auswahlfeld_not_saveable' AND $formtype != 'SubFormPK' AND $formtype != 'SubFormFK' AND $formtype != 'SubFormEmbeddedPK' AND $attributname != 'the_geom'){							
 								if(POSTGRESVERSION >= 930 AND (substr($datatype, 0, 1) == '_' OR is_numeric($datatype))){
               		$this->formvars[$form_fields[$i]] = JSON_to_PG(json_decode($this->formvars[$form_fields[$i]]));		# bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln									
               	}
@@ -12196,8 +12195,19 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							#}
 
 							# Before Update trigger
-							if (!empty($layer['trigger_function'])) {
-								$this->exec_trigger_function('BEFORE', 'UPDATE', $layerset[$layer_id][0], $oid);
+							if (!empty($layerset[$layer_id][0]['trigger_function'])) {
+								$sql_old = "
+									SELECT
+										oid, *
+									FROM
+										{$element[2]}
+									WHERE
+										oid = {$element[3]}
+								";
+								#echo '<br>sql before update: ' . $sql_old; #pk
+								$ret = $layerdb[$layer_id]->execSQL($sql_old, 4, 1);
+								$old_dataset = ($ret[0] == 0 ? pg_fetch_assoc($ret[1]) : array());							
+								$this->exec_trigger_function('BEFORE', 'UPDATE', $layerset[$layer_id][0], $oid, $old_dataset);
 							}
 
 							#echo '<br>sql for update: ' . $sql;
@@ -12210,7 +12220,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 								if (pg_affected_rows($ret['query']) > 0) {
 									# After Update trigger
 									if (!empty($layerset[$layer_id][0]['trigger_function'])) {
-										$this->exec_trigger_function('AFTER', 'UPDATE', $layerset[$layer_id][0], $oid);
+										$this->exec_trigger_function('AFTER', 'UPDATE', $layerset[$layer_id][0], $oid, $old_dataset);
 									}
 								}
 								else {
@@ -12655,7 +12665,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							if($this->last_query != '' AND $this->last_query[$layerset[$i]['Layer_ID']]['sql'] != ''){
 								$sql = $this->last_query[$layerset[$i]['Layer_ID']]['sql'];
 								if($this->formvars['orderby'.$layerset[$i]['Layer_ID']] == '')$sql_order = $this->last_query[$layerset[$i]['Layer_ID']]['orderby'];
-								$this->formvars['anzahl'] = $this->last_query[$layerset[$i]['Layer_ID']]['limit'];
+								if($this->formvars['anzahl'] == '')$this->formvars['anzahl'] = $this->last_query[$layerset[$i]['Layer_ID']]['limit'];
 								if($this->formvars['offset_'.$layerset[$i]['Layer_ID']] == '')$this->formvars['offset_'.$layerset[$i]['Layer_ID']] = $this->last_query[$layerset[$i]['Layer_ID']]['offset'];
 							}
 
