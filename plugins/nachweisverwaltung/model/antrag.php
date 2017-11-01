@@ -341,10 +341,11 @@ class antrag {
 	
 	function getIntersectedFlst(){	# diese Verschneidung mit den Flurstücken kann u.U. sehr lange dauern, deswegen erstmal zurückgestellt
 		$this->spatial_ref_code = EPSGCODE_ALKIS.", ".EARTH_RADIUS;
-		$sql ="SELECT flurid, stammnr, rissnummer, flurstueckskennzeichen,";
+		$sql ="SELECT flurid, stammnr, rissnummer, ";
 		if(NACHWEIS_SECONDARY_ATTRIBUTE != '')$sql.=" ".NACHWEIS_SECONDARY_ATTRIBUTE.",";
-		$sql.=" round(inter::numeric, 2) as anteil_abs,";
-		$sql.=" round((inter / f_area * 100)::numeric, 2) as anteil_pro";
+		$sql.=" flurstueckskennzeichen,";
+		$sql.=" round(inter::numeric) as anteil_abs,";
+		$sql.=" round((inter / f_area * 100)::numeric, 1) as anteil_pro";
 		$sql.=" from (";
 		$sql.=" SELECT DISTINCT n.flurid, n.stammnr, n.rissnummer, f.flurstueckskennzeichen,";
 		if(NACHWEIS_SECONDARY_ATTRIBUTE != '')$sql.=" n.".NACHWEIS_SECONDARY_ATTRIBUTE.",";

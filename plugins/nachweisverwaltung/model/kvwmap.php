@@ -572,7 +572,7 @@
 		
 	$this->erzeugenZuordnungFlst_CSV = function($path) use ($GUI){
 		$intersections = $GUI->antrag->getIntersectedFlst();
-		$csv = utf8_decode('Flur;Antragsnummer;Rissnummer;Flurstück;Anteil [m²];Anteil [%]').chr(10);
+		$csv = utf8_decode('Flur;Antragsnummer;Rissnummer;'.(NACHWEIS_SECONDARY_ATTRIBUTE != '' ? NACHWEIS_SECONDARY_ATTRIBUTE.';' : '').'Flurstück;Anteil [m²];Anteil [%]').chr(10);
 		foreach($intersections as $intersection){
 			$csv .= implode(';', $intersection).chr(10);
 		}
