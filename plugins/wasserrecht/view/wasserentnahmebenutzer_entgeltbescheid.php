@@ -158,31 +158,31 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
         $bearbeiter = $gui->user->Name . ' ' . $gui->user->Vorname;
         $bearbeiter_telefon = $gui->user->phon;
         $bearbeiter_email = $gui->user->email;
-        if(!empty($wrz->behoerde))
+        if(!empty($wrz->ausstellbehoerde))
         {
-            $behoerde_name = $wrz->behoerde->getName();
+            $behoerde_name = $wrz->ausstellbehoerde->getName();
             
-            if(!empty($wrz->behoerde->adresse))
+            if(!empty($wrz->ausstellbehoerde->adresse))
             {
-                $bearbeiter_plz = $wrz->behoerde->adresse->getPLZ();
-                $bearbeiter_ort = $wrz->behoerde->adresse->getOrt();
+                $bearbeiter_plz = $wrz->ausstellbehoerde->adresse->getPLZ();
+                $bearbeiter_ort = $wrz->ausstellbehoerde->adresse->getOrt();
                 
-                $behoerde_strasse = $wrz->behoerde->adresse->getStrasse();
-                $behoerde_hausnummer = $wrz->behoerde->adresse->getHausnummer();
-                $behoerde_plz = $wrz->behoerde->adresse->getPLZ();
-                $behoerde_ort = $wrz->behoerde->adresse->getOrt();
+                $behoerde_strasse = $wrz->ausstellbehoerde->adresse->getStrasse();
+                $behoerde_hausnummer = $wrz->ausstellbehoerde->adresse->getHausnummer();
+                $behoerde_plz = $wrz->ausstellbehoerde->adresse->getPLZ();
+                $behoerde_ort = $wrz->ausstellbehoerde->adresse->getOrt();
             }
             
-            if(!empty($wrz->behoerde->art))
+            if(!empty($wrz->ausstellbehoerde->art))
             {
-                $behoerde_art_name = $wrz->behoerde->art->getName();
+                $behoerde_art_name = $wrz->ausstellbehoerde->art->getName();
             }
             
-            if(!empty($wrz->behoerde->konto))
+            if(!empty($wrz->ausstellbehoerde->konto))
             {
-                $behoerde_iban = $wrz->behoerde->konto->getIBAN();
-                $behoerde_bankname = $wrz->behoerde->konto->getBankname();
-                $behoerde_bic = $wrz->behoerde->konto->getBIC();
+                $behoerde_iban = $wrz->ausstellbehoerde->konto->getIBAN();
+                $behoerde_bankname = $wrz->ausstellbehoerde->konto->getBankname();
+                $behoerde_bic = $wrz->ausstellbehoerde->konto->getBIC();
             }
         }
         
@@ -275,7 +275,7 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
         		      {
         		          if(!empty($wrz) && in_array($getYear, $wrz->gueltigkeitsJahre))
         		          {
-        		              if(empty($getBehoerde) || $getBehoerde === $wrz->behoerde->getId())
+        		              if(empty($getBehoerde) || $getBehoerde === $wrz->ausstellbehoerde->getId())
         		              {
         		                  if(empty($getAdressat) || $getAdressat === $wrz->adressat->getId())
         		                  {
@@ -457,7 +457,7 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
     			    {
     			        if(!empty($wrz) && in_array($getYear, $wrz->gueltigkeitsJahre))
     			        {
-    			            if(empty($getBehoerde) || $getBehoerde === $wrz->behoerde->getId())
+    			            if(empty($getBehoerde) || $getBehoerde === $wrz->ausstellbehoerde->getId())
     			            {
     			                if(empty($getAdressat) || $getAdressat === $wrz->adressat->getId())
     			                {

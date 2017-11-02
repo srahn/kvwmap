@@ -80,15 +80,15 @@ function createAufforderungsDokument(&$gui, &$valueEscaped)
                     $bearbeiter = $gui->user->Name . ' ' . $gui->user->Vorname;
                     $bearbeiter_telefon = $gui->user->phon;
                     $bearbeiter_email = $gui->user->email;
-                    $bearbeiter_plz = $aufforderungWrz2->behoerde->adresse->getPLZ();
-                    $bearbeiter_ort = $aufforderungWrz2->behoerde->adresse->getOrt();
+                    $bearbeiter_plz = $aufforderungWrz2->ausstellbehoerde->adresse->getPLZ();
+                    $bearbeiter_ort = $aufforderungWrz2->ausstellbehoerde->adresse->getOrt();
                     $adressat_id = $aufforderungWrz2->adressat->getId();
-                    $behoerde_name = $aufforderungWrz2->behoerde->getName();
-                    $behoerde_strasse = $aufforderungWrz2->behoerde->adresse->getStrasse();
-                    $behoerde_hausnummer = $aufforderungWrz2->behoerde->adresse->getHausnummer();
-                    $behoerde_plz = $aufforderungWrz2->behoerde->adresse->getPLZ();
-                    $behoerde_ort = $aufforderungWrz2->behoerde->adresse->getOrt();
-                    $behoerde_art_name = $aufforderungWrz2->behoerde->art->getName();
+                    $behoerde_name = $aufforderungWrz2->ausstellbehoerde->getName();
+                    $behoerde_strasse = $aufforderungWrz2->ausstellbehoerde->adresse->getStrasse();
+                    $behoerde_hausnummer = $aufforderungWrz2->ausstellbehoerde->adresse->getHausnummer();
+                    $behoerde_plz = $aufforderungWrz2->ausstellbehoerde->adresse->getPLZ();
+                    $behoerde_ort = $aufforderungWrz2->ausstellbehoerde->adresse->getOrt();
+                    $behoerde_art_name = $aufforderungWrz2->ausstellbehoerde->art->getName();
                     $adressat_name = $aufforderungWrz2->adressat->getName();
                     $adressat_strasse = $aufforderungWrz2->adressat->adresse->getStrasse();
                     $adressat_hausnummer = $aufforderungWrz2->adressat->adresse->getHausnummer();
@@ -177,7 +177,7 @@ function createAufforderungsDokument(&$gui, &$valueEscaped)
         		              $this->log->log_debug("wrz id: " . $wrz->getId());
         		              $this->log->log_debug("wrz gueltigkeitsJahre: " . var_export($wrz->gueltigkeitsJahre, true));
         		              
-        		              if(empty($getBehoerde) || $getBehoerde === $wrz->behoerde->getId())
+        		              if(empty($getBehoerde) || $getBehoerde === $wrz->ausstellbehoerde->getId())
         		              {
         		                  if(empty($getAdressat) || $getAdressat === $wrz->adressat->getId())
         		                  {
@@ -322,7 +322,7 @@ function createAufforderungsDokument(&$gui, &$valueEscaped)
 				    {
 				        if(!empty($wrz) && in_array($getYear, $wrz->gueltigkeitsJahre))
 				        {
-				            if(empty($getBehoerde) || $getBehoerde === $wrz->behoerde->getId())
+				            if(empty($getBehoerde) || $getBehoerde === $wrz->ausstellbehoerde->getId())
 				            {
 				                if(empty($getAdressat) || $getAdressat === $wrz->adressat->getId())
 				                {

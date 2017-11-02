@@ -4,7 +4,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	protected $tableName = 'fiswrv_wasserrechtliche_zulassungen';
 	
 	public $gueltigkeitsJahre;
-	public $behoerde;
+	public $ausstellbehoerde;
 	public $zustaendigeBehoerde;
 	public $adressat;
 	public $anlagen;
@@ -159,7 +159,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	        }
 	        
 	        //get the 'Ausstellbehoerde'
-	        $result->behoerde = $this->getBehoerde($result->data['ausstellbehoerde'], $gui);
+	        $result->ausstellbehoerde = $this->getBehoerde($result->data['ausstellbehoerde'], $gui);
 
 	        //get the Zuständige Behörde
 	        $result->zustaendigeBehoerde = $this->getBehoerde($result->data['zustaendige_behoerde'], $gui);
@@ -221,8 +221,8 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	
 	/**
 	 * Get the Behörde with all subclasses.
-	 * @param unknown $behoerdeId
-	 * @return unknown|NULL
+	 * @param $behoerdeId
+	 * @return NULL
 	 */
 	public function getBehoerde($behoerdeId, &$gui)
 	{
@@ -376,11 +376,11 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	}
 	
 	public function getBehoerdeName() {
-	    return !empty($this->behoerde) ?  $this->behoerde->getName() : null;
+	    return !empty($this->ausstellbehoerde) ?  $this->ausstellbehoerde->getName() : null;
 	}
 	
 	public function getBehoerdeId() {
-	    return !empty($this->behoerde) ?  $this->behoerde->getId() : null;
+	    return !empty($this->ausstellbehoerde) ?  $this->ausstellbehoerde->getId() : null;
 	}
 	
 	public function getDatum() {
@@ -449,7 +449,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
     ////////////////////////////////////////////////////////////////////
 	
 	public function toString() {
-	    return "gueltigkeitsJahre: " . print_r($this->gueltigkeitsJahre) . (!empty($this->behoerde) ? " behoerde: " . $this->behoerde->data['id'] : "" ) . (!empty($this->adressat) ? " adressat: " . $this->adressat->data['id'] : "");
+	    return "gueltigkeitsJahre: " . print_r($this->gueltigkeitsJahre) . (!empty($this->ausstellbehoerde) ? " ausstellbehoerde: " . $this->ausstellbehoerde->data['id'] : "" ) . (!empty($this->adressat) ? " adressat: " . $this->adressat->data['id'] : "");
 	}
 	
 	public function getBezeichnung() {
