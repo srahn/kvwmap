@@ -594,6 +594,11 @@ function resetLayerOptions(layer_id){
 	document.GUI.submit();
 }
 
+function saveLegendOptions(){	
+	document.GUI.go.value = 'saveLegendOptions';
+	document.GUI.submit();
+}
+
 function home() {
 	document.GUI.go.value = '';
 	document.GUI.submit();

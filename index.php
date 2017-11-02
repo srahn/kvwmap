@@ -180,21 +180,15 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 
 		case 'saveLayerOptions' : {
 			$GUI->saveLayerOptions();
-			$GUI->neuLaden();
-			$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-			$GUI->drawMap();
-			$GUI->saveMap('');
-			$GUI->output();
 	  } break;
 		
 		case 'resetLayerOptions' : {
 			$GUI->resetLayerOptions();
-			$GUI->neuLaden();
-			$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-			$GUI->drawMap();
-			$GUI->saveMap('');
-			$GUI->output();
 	  } break;
+		
+		case 'saveLegendOptions' : {
+			$GUI->saveLegendOptions();
+	  } break;		
 				
 		case 'toggle_gle_view' : {
 			$GUI->switch_gle_view();

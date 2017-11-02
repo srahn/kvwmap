@@ -104,6 +104,45 @@ function printMap(){
 	document.GUI.submit();
 }
 
+function openLegendOptions(){
+	document.getElementById('legendOptions').style.display = 'inline-block';
+}
+
+function closeLegendOptions(){
+	document.getElementById('legendOptions').style.display = 'none';
+}
+
+<?
+	if($this->user->rolle->legendtype == 1){ # alphabetisch sortierte Legende
+		echo 'layernames = new Array();';
+		$layercount = count($this->sorted_layerset);
+		for($j = 0; $j < $layercount; $j++){
+			echo 'layernames['.$j.'] = \''.$this->sorted_layerset[$j]['alias'].'\';';
+		}
+?>
+		function jumpToLayer(searchtext){
+			if(searchtext.length > 1){
+				found = false;
+				legend_top = document.getElementById('scrolldiv').getBoundingClientRect().top;
+				for(var i = 0; i < layernames.length; i++){
+					if(layernames[i].toLowerCase().search(searchtext.toLowerCase()) != -1){
+						layer = document.getElementById(layernames[i].replace('-', '_'));
+						layer.classList.remove('legend_layer_highlight');
+						void layer.offsetWidth;
+						layer.classList.add('legend_layer_highlight');
+						if(!found){
+							document.getElementById('scrolldiv').style.scrollBehavior = 'smooth';		// erst hier und nicht im css, damit das Scrollen beim Laden nicht animiert wird
+							document.getElementById('scrolldiv').scrollTop = document.getElementById('scrolldiv').scrollTop + (layer.getBoundingClientRect().top - legend_top);
+						}
+						found = true;
+					}
+				}
+			}
+		}
+<?
+	}
+?>
+
 function slide_legend_in(evt) {
 	document.getElementById('legenddiv').className = 'slidinglegend_slidein';
 }

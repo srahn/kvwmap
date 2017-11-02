@@ -680,6 +680,16 @@ a.menuered:hover {
 	flex-direction: column;
 }
 
+.legend_layer_highlight{
+	background-color: none;
+	animation: highlight 3s ease-in-out;
+}
+
+@keyframes highlight{
+  0%,100% { background-color: none }
+  10%,60% { background-color: lightsteelblue }
+}
+
 #legendcontrol{
 	margin-top: 5px;
 	margin-bottom: 8px;
@@ -687,6 +697,14 @@ a.menuered:hover {
 	flex-direction: row;
 	justify-content: flex-start;
 	padding-left: 20px;
+}
+
+#layersearchdiv{
+	margin: 7px;
+}
+
+#layer_search{
+	width: 145px;
 }
 
 #scrolldiv{
@@ -1228,13 +1246,10 @@ tbody.gle tr:hover {
 	cursor: pointer;
 }
 
-.layerOptions{
+.layerOptions, #legendOptions{
 	border: 1px solid #cccccc;
 	background: #EDEFEF;
 	padding:0px;
-	right:210px;
-	top:300px;
-	width: 200px;
 	position:absolute;
 	z-index: 1000;
 	-moz-box-shadow: 6px 5px 7px #777;
@@ -1242,12 +1257,26 @@ tbody.gle tr:hover {
 	box-shadow: 6px 5px 7px #777;
 }
 
-.layerOptionsHeader{
+.layerOptions{
+	top:300px;
+	width: 200px;
+	right:210px;
+}
+
+#legendOptions{
+	border: 1px solid #cccccc;
+	background: #EDEFEF;
+	position: absolute;
+	right: 100px;
+	display: none;
+}
+
+.layerOptionsHeader, #legendOptionsHeader{
 	background-color: #c7d9e6;
 	padding: 2px 2px 2px 8px;
 }
 
-.layerOptions ul{
+.layerOptions ul, #legendOptions ul{
 	color: lightsteelblue;
 	margin: 5px;
 	padding: 0px;
@@ -1255,8 +1284,16 @@ tbody.gle tr:hover {
 	list-style: square inside none;
 }
 
-.layerOptions span{
+.layerOptions li, #legendOptions li{
+	margin-bottom: 5px;
+}
+
+.layerOptions span, #legendOptions span, label{
 	color: #252525;
+}
+
+#legendOptions label{
+	margin-left: 12px;
 }
 
 .groupOptions{

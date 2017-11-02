@@ -1,4 +1,4 @@
-﻿BEGIN;
+BEGIN;
 
 CREATE INDEX ix_nachweisid_n2d
   ON nachweisverwaltung.n_nachweise2dokumentarten
