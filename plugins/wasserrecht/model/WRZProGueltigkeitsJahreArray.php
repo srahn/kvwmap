@@ -92,13 +92,13 @@ class WRZProGueltigkeitsJahreArray
             
             foreach ($allWrZs as $wrz)
             {
-                if(!empty($wrz) && !empty($wrz->adressat) && !empty($wrz->ausstellbehoerde))
+                if(!empty($wrz) && !empty($wrz->adressat) && !empty($wrz->zustaendigeBehoerde))
                 {
                     $this->log->log_trace('wrz id: ' . var_export($wrz->getId(), true));
                     
                     if(empty($getYear) || in_array($getYear, $wrz->gueltigkeitsJahre))
                     {
-                        if(empty($getBehoerde) || $getBehoerde === $wrz->ausstellbehoerde->getId())
+                        if(empty($getBehoerde) || $getBehoerde === $wrz->zustaendigeBehoerde->getId())
                         {
                             if(empty($getAdressat) || $getAdressat === $wrz->adressat->getId())
                             {
@@ -155,13 +155,13 @@ class WRZProGueltigkeitsJahreArray
             
             foreach ($allWrZs as $wrz)
             {
-                if(!empty($wrz) && !empty($wrz->adressat) && !empty($wrz->ausstellbehoerde))
+                if(!empty($wrz) && !empty($wrz->adressat) && !empty($wrz->zustaendigeBehoerde))
                 {
                     $this->log->log_trace('wrz id: ' . var_export($wrz->getId(), true));
                     
                     if(empty($getYear) || in_array($getYear, $wrz->gueltigkeitsJahre))
                     {
-                        if(empty($getBehoerde) || $getBehoerde === $wrz->ausstellbehoerde->getId())
+                        if(empty($getBehoerde) || $getBehoerde === $wrz->zustaendigeBehoerde->getId())
                         {
                             if(empty($getAdressat) || $getAdressat === $wrz->adressat->getId())
                             {

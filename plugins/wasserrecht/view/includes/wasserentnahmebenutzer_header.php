@@ -16,9 +16,9 @@ $getYear = !empty(htmlspecialchars($_REQUEST['erhebungsjahr'])) ? htmlspecialcha
 
 //Get Behörde
 $getBehoerde = !empty(htmlspecialchars($_REQUEST['behoerde'])) ? htmlspecialchars($_REQUEST['behoerde']) : null;
-if(!empty($firstWrZ) && !empty($firstWrZ->ausstellbehoerde) && empty($getBehoerde))
+if(!empty($firstWrZ) && !empty($firstWrZ->zustaendigeBehoerde) && empty($getBehoerde))
 {
-    $getBehoerde = $firstWrZ->ausstellbehoerde->getId();
+    $getBehoerde = $firstWrZ->zustaendigeBehoerde->getId();
 }
 // print_r("getBehoerde: " . $getBehoerde);
 
@@ -95,18 +95,18 @@ if($showAdressat)
 //             				        print_r($wrz->getId());
             				        if(!empty($wrz) && in_array($getYear, $wrz->gueltigkeitsJahre))
             				        {
-            				            if(!empty($wrz->ausstellbehoerde))
+            				            if(!empty($wrz->zustaendigeBehoerde))
             				            {
-            				                if(!in_array($wrz->ausstellbehoerde->toString(), $behoerdeArray))
+            				                if(!in_array($wrz->zustaendigeBehoerde->toString(), $behoerdeArray))
             				                {
-            				                    $behoerdeArray[]=$wrz->ausstellbehoerde->toString();
+            				                    $behoerdeArray[]=$wrz->zustaendigeBehoerde->toString();
 //             				                    echo "getBehörde: " . $getBehoerde;
-//             				                    echo "wrz->ausstellbehoerde->getId(): " . $wrz->ausstellbehoerde->getId();
-            				                    if($wrz->ausstellbehoerde->getId() === $getBehoerde)
+//             				                    echo "wrz->zustaendigeBehoerde->getId(): " . $wrz->zustaendigeBehoerde->getId();
+            				                    if($wrz->zustaendigeBehoerde->getId() === $getBehoerde)
             				                    {
             				                        $optionSelected = true;
             				                    }
-            				                    $options = $options . "<option value='" . $wrz->ausstellbehoerde->getId() . "' " . ($wrz->ausstellbehoerde->getId() === $getBehoerde ? "selected" : "") . ">" . $wrz->ausstellbehoerde->getName() . "</option>";
+            				                    $options = $options . "<option value='" . $wrz->zustaendigeBehoerde->getId() . "' " . ($wrz->zustaendigeBehoerde->getId() === $getBehoerde ? "selected" : "") . ">" . $wrz->zustaendigeBehoerde->getName() . "</option>";
             				                }
             				            }
             				        }

@@ -8,7 +8,7 @@
         <div class="wasserrecht_display_table_cell_caption">Behörde:</div>
         <div class="wasserrecht_display_table_cell_spacer"></div>
         <?php
-            echo '<a class="wasserrecht_display_table_cell_white" href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Behoerde'] . '&value_id=' . $wrz->ausstellbehoerde->getId() . '&operator_id==">' . $wrz->ausstellbehoerde->getName() .'</a>';
+            echo '<a class="wasserrecht_display_table_cell_white" href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['Behoerde'] . '&value_id=' . $wrz->zustaendigeBehoerde->getId() . '&operator_id==">' . $wrz->zustaendigeBehoerde->getName() .'</a>';
         ?>
     </div>
     <div class="wasserrecht_display_table_row">
