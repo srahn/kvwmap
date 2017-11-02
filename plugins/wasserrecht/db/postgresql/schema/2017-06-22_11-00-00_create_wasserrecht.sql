@@ -67,7 +67,7 @@ CREATE TABLE wasserrecht.fiswrv_behoerde(
 	id serial PRIMARY KEY,
 	name varchar(255),
   	abkuerzung varchar(100),
-  	status varchar(100),
+  	aktuell boolean DEFAULT true,
   	adresse integer REFERENCES wasserrecht.fiswrv_adresse(id),
   	art integer REFERENCES wasserrecht.fiswrv_behoerde_art(id),
   	konto integer REFERENCES wasserrecht.fiswrv_konto(id)
@@ -193,6 +193,7 @@ CREATE TABLE wasserrecht.fiswrv_wasserrechtliche_zulassungen(
 	id serial PRIMARY KEY,
 	anlage integer NOT NULL REFERENCES wasserrecht.fiswrv_anlagen(id),
 	ausstellbehoerde integer REFERENCES wasserrecht.fiswrv_behoerde(id),
+	zustaendige_behoerde integer REFERENCES wasserrecht.fiswrv_behoerde(id),
 	adressat integer REFERENCES wasserrecht.fiswrv_personen(id),
 	bearbeiter integer REFERENCES wasserrecht.fiswrv_personen(id),
 	typus integer NOT NULL REFERENCES wasserrecht.fiswrv_wasserrechtliche_zulassungen_typus(id), --Ausgangsbescheid
@@ -212,7 +213,6 @@ CREATE TABLE wasserrecht.fiswrv_wasserrechtliche_zulassungen(
 	befristet_bis date, --Gültigkeit
 	status integer REFERENCES wasserrecht.fiswrv_wasserrechtliche_zulassungen_status(id), --Gültigkeit
 	aktuell boolean, --Gültigkeit
-	historisch varchar(10), --Gültigkeit
 	ungueltig_seit date, --Gültigkeit
 	ungueltig_aufgrund integer REFERENCES wasserrecht.fiswrv_wasserrechtliche_zulassungen_ungueltig_aufgrund(id), --Gültigkeit
 	datum_postausgang date, --Ausgangsbescheid

@@ -45,8 +45,19 @@ abstract class WrPgObject extends PgObject
         }
     }
     
+    public function getAbkuerzung() {
+        if(!empty($this->data))
+        {
+            return $this->data['abkuerzung'];
+        }
+        else
+        {
+            return null;
+        }
+    }
+    
     public function toString() {
-        return "id: " . $this->getId() . " name: " . $this->getName();
+        return "[" . get_class($this) . "]" .  " Id: " . $this->getId() . " Name: " . $this->getName();
     }
     
     public function getToStringFromArray(&$array)

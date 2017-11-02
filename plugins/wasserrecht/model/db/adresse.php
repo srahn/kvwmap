@@ -18,5 +18,13 @@ class AdresseKlasse extends WrPgObject {
 	public function getOrt() {
 	    return $this->data['ort'];
 	}
+    /**
+     * {@inheritDoc}
+     * @see WrPgObject::toString()
+     */
+    public function toString()
+    {
+        return parent::toString() . " Strasse: " . $this->getStrasse() . " Hausnummer: " . $this->getHausnummer() . " PLZ: " . $this->getPLZ() . " Ort: " . $this->getOrt();
+    }
 }
 ?>

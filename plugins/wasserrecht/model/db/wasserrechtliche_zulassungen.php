@@ -4,8 +4,8 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	protected $tableName = 'fiswrv_wasserrechtliche_zulassungen';
 	
 	public $gueltigkeitsJahre;
-// 	public $gueltigkeit;
 	public $behoerde;
+	public $zustaendigeBehoerde;
 	public $adressat;
 	public $anlagen;
 	public $gewaesserbenutzungen;
@@ -158,32 +158,11 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	            $result->adressat = $adressat;
 	        }
 	        
-	        //get the 'Behoerde'
-	        if(!empty($result->data['ausstellbehoerde']))
-	        {
-	            $bh = new Behoerde($gui);
-	            $behoerde = $bh->find_by_id($gui, 'id', $result->data['ausstellbehoerde']);
-	            if(!empty($behoerde->data['adresse']))
-	            {
-	                $adress = new AdresseKlasse($gui);
-	                $adresse = $adress->find_by_id($gui, 'id', $behoerde->data['adresse']);
-	                $behoerde->adresse = $adresse;
-	            }
-	            if(!empty($behoerde->data['art']))
-	            {
-	                $behoerdeArt = new BehoerdeArt($gui);
-	                $art = $behoerdeArt->find_by_id($gui, 'id', $behoerde->data['art']);
-	                $behoerde->art = $art;
-	            }
-	            if(!empty($behoerde->data['konto']))
-	            {
-	                $account = new KontoKlasse($gui);
-	                $konto = $account->find_by_id($gui, 'id', $behoerde->data['konto']);
-	                $behoerde->konto = $konto;
-	            }
-	            $this->log->log_debug('behoerde id: ' . var_export($behoerde->getId(), true));
-	            $result->behoerde = $behoerde;
-	        }
+	        //get the 'Ausstellbehoerde'
+	        $result->behoerde = $this->getBehoerde($result->data['ausstellbehoerde'], $gui);
+
+	        //get the Zuständige Behörde
+	        $result->zustaendigeBehoerde = $this->getBehoerde($result->data['zustaendige_behoerde'], $gui);
 	        
 	        //get the 'Anlage'
 	        if(!empty($result->data['anlage']))
@@ -238,6 +217,47 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	    }
 	    
 	    return $years;
+	}
+	
+	/**
+	 * Get the Behörde with all subclasses.
+	 * @param unknown $behoerdeId
+	 * @return unknown|NULL
+	 */
+	public function getBehoerde($behoerdeId, &$gui)
+	{
+	    $this->log->log_info('*** getBehoerde ***');
+	    $this->log->log_debug('behoerdeId: ' . var_export($behoerdeId, true));
+	    
+	    if(!empty($behoerdeId))
+	    {
+	        $bh = new Behoerde($gui);
+	        $behoerde = $bh->find_by_id($gui, 'id', $behoerdeId);
+	        if(!empty($behoerde->data['adresse']))
+	        {
+	            $adress = new AdresseKlasse($gui);
+	            $adresse = $adress->find_by_id($gui, 'id', $behoerde->data['adresse']);
+	            $behoerde->adresse = $adresse;
+	        }
+	        if(!empty($behoerde->data['art']))
+	        {
+	            $behoerdeArt = new BehoerdeArt($gui);
+	            $art = $behoerdeArt->find_by_id($gui, 'id', $behoerde->data['art']);
+	            $behoerde->art = $art;
+	        }
+	        if(!empty($behoerde->data['konto']))
+	        {
+	            $account = new KontoKlasse($gui);
+	            $konto = $account->find_by_id($gui, 'id', $behoerde->data['konto']);
+	            $behoerde->konto = $konto;
+	        }
+	        $this->log->log_debug('behoerde mit id: ' . var_export($behoerde->getId(), true) . ' gefunden');
+	        $this->log->log_trace(var_export($behoerde->toString(), true));
+	        
+	        return $behoerde;
+	    }
+	    
+	    return null;
 	}
 	
 	public function getHinweis() 

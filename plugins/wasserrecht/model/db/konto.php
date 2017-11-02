@@ -26,5 +26,14 @@ class KontoKlasse extends WrPgObject {
 	public function getKassenzeichen() {
 	    return $this->data['kassenzeichen'];
 	}
+	
+    /**
+     * {@inheritDoc}
+     * @see WrPgObject::toString()
+     */
+    public function toString()
+    {
+        return parent::toString() . " IBAN: " . $this->getIBAN() . " BIC: " . $this->getBIC() . " Bankname: " . $this->getBankname() . " Verwendungszweck: " . $this->getVerwendungszweck() . " Personenkonto: " . $this->getPersonenkonto() . " Kassenzeichen: " . $this->getKassenzeichen();
+    }
 }
 ?>
