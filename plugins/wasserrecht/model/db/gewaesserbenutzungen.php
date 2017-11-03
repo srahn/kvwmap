@@ -14,7 +14,6 @@ class Gewaesserbenutzungen extends WrPgObject {
 	public function find_where_with_subtables($where, $order = NULL, $select = '*') {
 	    $this->log->log_info('*** Gewaesserbenutzungen->find_where_with_subtables ***');
 	    $this->log->log_debug('where: ' . $where);
-// 	    echo "<br />find_where_with_subtables: " . $where;
 	    $gewaesserbenutzungen = $this->find_where($where, $order, $select);
 	    if(!empty($gewaesserbenutzungen))
 	    {
@@ -22,6 +21,9 @@ class Gewaesserbenutzungen extends WrPgObject {
 	        {
 	            if(!empty($gewaesserbenutzung))
 	            {
+	                $this->log->log_trace('gewaesserbenutzung id: ' . $gewaesserbenutzung->getId());
+	                $this->log->log_trace('gewaesserbenutzung kennummer: ' . var_export($gewaesserbenutzung->getKennummer(), true));
+	                
 	                $gwa = new GewaesserbenutzungenArt($this->gui);
 	                if(!empty($gewaesserbenutzung->data['art']))
 	                {
@@ -59,8 +61,6 @@ class Gewaesserbenutzungen extends WrPgObject {
 	                
 	                //get the Festsetzungen
 	                Gewaesserbenutzungen::getFestsetzungen($this->gui, $gewaesserbenutzung);
-	                
-// 	                echo "<br />gewaesserbenutzung: " . $gewaesserbenutzung->getKennummer();
 	            }
 	        }
 	        
@@ -211,13 +211,14 @@ class Gewaesserbenutzungen extends WrPgObject {
 	    return $gesamtUmfang;
 	}
 	
-	public function getTeilgewaesserbenutzungNichtZugelasseneMenge($erhebungsjahr, $teilgewaesserbenutzungId, &$zugelassenerUmfang)
+	public function getTeilgewaesserbenutzungNichtZugelasseneMenge($erhebungsjahr, $teilgewaesserbenutzungId, &$zugelassenerUmfang, $alwaysRecalculateZugelassenerUmfang = false)
 	{
 	    $this->log->log_info('*** Gewaesserbenutzungen->getTeilgewaesserbenutzungNichtZugelasseneMenge ***');
 	    
 	    $this->log->log_debug('erhebungsjahr: ' . var_export($erhebungsjahr, true));
 	    $this->log->log_debug('teilgewaesserbenutzungId: ' . var_export($teilgewaesserbenutzungId, true));
 	    $this->log->log_debug('zugelassenerUmfang: ' . var_export($zugelassenerUmfang, true));
+	    $this->log->log_debug('alwaysRecalculateZugelassenerUmfang: ' . var_export($alwaysRecalculateZugelassenerUmfang, true));
 	    
 	    if(!empty($teilgewaesserbenutzungId))
 	    {
@@ -236,32 +237,39 @@ class Gewaesserbenutzungen extends WrPgObject {
 	                    {
 	                        if($gesamtUmfang <= $zugelassenerUmfang)
 	                        {
-	                            // 	                            echo "gesamtUmfang <= zugelassenerUmfang <br>";
+	                            $this->log->log_trace('gesamtUmfang <= zugelassenerUmfang');
+	                            if($alwaysRecalculateZugelassenerUmfang)
+	                            {
+	                                $zugelassenerUmfang = $zugelassenerUmfang - $teilgewaesserbenutzungUmfang;
+	                                $this->log->log_trace('new zugelassenerUmfang : ' . var_export($zugelassenerUmfang, true));
+	                            }
 	                            return 0;
 	                        }
 	                        elseif ($zugelassenerUmfang === 0)
 	                        {
-	                            // 	                            echo "zugelassenerUmfang === 0";
+	                            $this->log->log_trace('zugelassenerUmfang === 0');
 	                            return $teilgewaesserbenutzungUmfang;
 	                        }
 	                        // 	                        elseif($bisZuDieserTeilgewaesserbenutzungKumulierterUmfang <= $zugelassenerUmfang)
 	                        // 	                        {
 	                        // 	                            return 0;
 	                        // 	                        }
-	                            elseif($teilgewaesserbenutzungUmfang <= $zugelassenerUmfang)
-	                            {
-	                                // 	                            echo "teilgewaesserbenutzungUmfang <= zugelassenerUmfang <br>";
-	                                $zugelassenerUmfang = $zugelassenerUmfang - $teilgewaesserbenutzungUmfang;
-	                                return 0;
-	                            }
-	                            elseif($teilgewaesserbenutzungUmfang > $zugelassenerUmfang)
-	                            {
-	                                // 	                            echo "teilgewaesserbenutzungUmfang > zugelassenerUmfang <br>";
-	                                $returnValue = $teilgewaesserbenutzungUmfang - $zugelassenerUmfang;
-	                                $zugelassenerUmfang = 0;
-	                                // 	                            echo "returnValue :" . $returnValue;
-	                                return $returnValue;
-	                            }
+                            elseif($teilgewaesserbenutzungUmfang <= $zugelassenerUmfang)
+                            {
+                                $this->log->log_trace('teilgewaesserbenutzungUmfang <= zugelassenerUmfang');
+                                $zugelassenerUmfang = $zugelassenerUmfang - $teilgewaesserbenutzungUmfang;
+                                $this->log->log_trace('new zugelassenerUmfang : ' . var_export($zugelassenerUmfang, true));
+                                return 0;
+                            }
+                            elseif($teilgewaesserbenutzungUmfang > $zugelassenerUmfang)
+                            {
+                                $this->log->log_trace('teilgewaesserbenutzungUmfang > zugelassenerUmfang');
+                                $returnValue = $teilgewaesserbenutzungUmfang - $zugelassenerUmfang;
+                                $zugelassenerUmfang = 0;
+                                $this->log->log_trace('new zugelassenerUmfang : ' . var_export($zugelassenerUmfang, true));
+                                $this->log->log_trace('returnValue: ' . var_export(returnValue, true));
+                                return $returnValue;
+                            }
 	                    }
 	                }
 	            }

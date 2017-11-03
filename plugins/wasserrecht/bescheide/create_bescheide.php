@@ -157,7 +157,7 @@ function writeFestsetzungsWordFile(&$gui, $word_template, $word_file, &$paramete
             if(!empty($gewaesserbenutzung))
             {
                 $teilgewaesserbenutzungen = $gewaesserbenutzung->getTeilgewaesserbenutzungenByErhebungsjahr($festsetzungsSammelbescheidDaten->getErhebungsjahr());
-//                 $erlaubterUmfangBerechnet = $erlaubte_umfaenge[$countGewaesserbenutzungen - 1];
+                $erlaubterUmfangBerechnet = $erlaubte_umfaenge[$countGewaesserbenutzungen - 1];
                 
                 if(!empty($teilgewaesserbenutzungen))
                 {
@@ -167,19 +167,16 @@ function writeFestsetzungsWordFile(&$gui, $word_template, $word_file, &$paramete
                     {
                         if(!empty($teilgewaesserbenutzung))
                         {
-//                             $number = $countGewaesserbenutzungen . "." . $countTeilgewaesserbenutzungen;
-                            $templateProcessor->setValue('n2#' . $countRows, "");
+                            $number = (string)$countGewaesserbenutzungen . "." . (string)$countTeilgewaesserbenutzungen;
+                            $templateProcessor->setValue('n2#' . $countRows, $number);
                             $templateProcessor->setValue('Anlage_ID2#' . $countRows, "");
                             $templateProcessor->setValue('Anlage_Name2#' . $countRows, "");
                             
                             $templateProcessor->setValue('Entnamemenge#' . $countRows, FestsetzungsSammelbescheidDaten::formatNumber($teilgewaesserbenutzung->getUmfang()));
-                            $templateProcessor->setValue('Erlaubter_Umfang#' . $countRows, "");
-//                             $templateProcessor->setValue('Erlaubter_Umfang#' . $countRows, $erlaubterUmfangBerechnet);
-//                             $nichtErlaubterUmfangTeilgewasserBenutzung = $gewaesserbenutzung->getTeilgewaesserbenutzungNichtZugelasseneMenge($festsetzungsSammelbescheidDaten->getErhebungsjahr(), $teilgewaesserbenutzung->getId(), $erlaubterUmfangBerechnet);
-//                             if($nichtErlaubterUmfangTeilgewasserBenutzung > 0)
-//                             {
-//                                 $erlaubterUmfangBerechnet - $nichtErlaubterUmfangTeilgewasserBenutzung;
-//                             }
+//                             $templateProcessor->setValue('Erlaubter_Umfang#' . $countRows, "");
+                            $erlaubterUmfangBerechnetAlt = $erlaubterUmfangBerechnet;
+                            $nichtErlaubterUmfangTeilgewaesserbenutzung = $gewaesserbenutzung->getTeilgewaesserbenutzungNichtZugelasseneMenge($festsetzungsSammelbescheidDaten->getErhebungsjahr(), $teilgewaesserbenutzung->getId(), $erlaubterUmfangBerechnet, true);
+                            $templateProcessor->setValue('Erlaubter_Umfang#' . $countRows, FestsetzungsSammelbescheidDaten::formatNumber($erlaubterUmfangBerechnetAlt));
                             
                             $berechneter_entgeltsatz_zugelassen = $teilgewaesserbenutzung->getBerechneterEntgeltsatzZugelassen();
                             $berechneter_entgeltsatz_nicht_zugelassen = $teilgewaesserbenutzung->getBerechneterEntgeltsatzNichtZugelassen();
@@ -199,7 +196,7 @@ function writeFestsetzungsWordFile(&$gui, $word_template, $word_file, &$paramete
                     }
                 }
                 
-                $templateProcessor->setValue('n2#' . $countRows, $countGewaesserbenutzungen);
+                $templateProcessor->setValue('n2#' . $countRows, $countGewaesserbenutzungen . " Summe:");
                 $templateProcessor->setValue('Anlage_ID2#' . $countRows, $anlage->getId());
                 $templateProcessor->setValue('Anlage_Name2#' . $countRows, $anlage->getName());
                 $templateProcessor->setValue('Entnamemenge#' . $countRows, FestsetzungsSammelbescheidDaten::formatNumber($entnahmemengen[$countGewaesserbenutzungen - 1]));
