@@ -15260,7 +15260,7 @@ class db_mapObj{
 			if($rs[1] == ''){
 				$rs[1] = 'public';
 			}
-			$layerdb->schema = $rs[1];
+			$layerdb->schema = $rs['schema'];
 			$connection = explode(' ', trim($connectionstring));
 			for($j = 0; $j < count($connection); $j++){
 				if($connection[$j] != ''){
@@ -15286,10 +15286,11 @@ class db_mapObj{
 				$layerdb->host = $host;
 			}
 			if (!$layerdb->open()) {
-				echo 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden:';
-				echo '<br>Host: '.$layerdb->host;
-				echo '<br>User: '.$layerdb->user;
-				echo '<br>Datenbankname: '.$layerdb->dbName;
+				$e  = 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden:';
+				$e .= '<br>Host: ' . $layerdb->host;
+				$e .= '<br>User: ' . $layerdb->user;
+				$e .= '<br>Datenbankname: ' . $layerdb->dbName;
+				$this->add_message('error', $e);
 				exit;
 			}
 		}

@@ -62,6 +62,7 @@
 	};
 
 	$this->mobile_sync = function() {
+		include_once(CLASSPATH . 'synchronisation.php');
 		# Prüfe ob folgende Parameter mit gültigen Werten übergeben wurden.
 		# $selected_layer_id (existiert und ist in mysql-Datenbank?)
 		# $client_id sollte vorhanden sein, damit das in die syncs Tabelle eingetragen werden kann.
@@ -72,23 +73,101 @@
 		# sql muss vorhanden sein.
 		#		if ($this->formvars['selected_layer_id'] != '')
 
-		if ($this->mobile_sync_parameter_valide($this->formvars)) {
+		$this->formvars['client_deltas'] = json_decode(file_get_contents($_FILES['client_deltas']['tmp_name']));
+		move_uploaded_file($_FILES['file']['tmp_name'], '/var/www/logs/upload_file.json');
+
+		$result = $this->mobile_sync_parameter_valide($this->formvars);
+		if ($result['success']) {
+
 			# Layer DB abfragen $layerdb = new ...
-			$sync = new synchro($this->Stelle, $this->Stelle->user, $layerdb);
-			# ToDo die Parameter vorher abfragen oder aus formvars entnehmen.
-			$result = $sync->sync($client_id, $username, $table_name, $client_time, $last_client_version, $client_deltas);
+			$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+			$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+			$result['msg'] = 'Layerdb abgefragt mit layer_id: ' . $this->formvars['selected_layer_id'];
+			$sync = new synchro($this->Stelle, $this->user, $layerdb);
+			$result = $sync->sync($this->formvars['device_id'], $this->formvars['username'], $layerdb->schema, $this->formvars['table_name'], $this->formvars['client_time'], $this->formvars['last_client_version'], $this->formvars['client_deltas']);
 		}
 		else {
-			$result = array(
-				"success" => false,
-				"err_msg" => "Es wurde kein Layer zur Aktualisierung angegeben. Geben Sie die ID des Layers im Parameter selected_layer_id an."
-			);
+			$result['err_msg'] = ' Syncronisation auf dem Server abgebrochen wegen folgenden Fehlern: ' . $result['err_msg'];
 		}
 		return $result;
 	};
 
 	$this->mobile_sync_parameter_valide = function($params) {
-		return true;
+		$result = array(
+			"success" => true,
+			"msg" => 'Validierung durchgeführt für Parameter: ',
+			'err_msg' => ''
+		);
+		$err_msg = array();
+
+		if (!array_key_exists('client_time', $params) || $params['client_time'] == '') {
+			$err_msg[] = 'Der Parameter client_time wurde nicht übergeben oder ist leer.';
+		}
+		$result['msg'] .= ' client_time';
+
+		if (!array_key_exists('last_client_version', $params) || $params['last_client_version'] == '') {
+			$err_msg[] = 'Der Parameter client_time wurde nicht übergeben oder ist leer.';
+		}
+		$result['msg'] .= ' last_client_version';
+
+		if (!array_key_exists('table_name', $params) || $params['table_name'] == '') {
+			$err_msg[] = 'Der Parameter table_name wurde nicht übergeben oder ist leer.';
+		}
+		$result['msg'] .= ' table_name';
+
+		if (!array_key_exists('device_id', $params) || $params['device_id'] == '') {
+			$err_msg[] = 'Der Parameter device_id wurde nicht übergeben oder ist leer.';
+		}
+		$result['msg'] .= ' device_id';
+
+		if (!array_key_exists('selected_layer_id', $params) || $params['selected_layer_id'] == '' || $params['selected_layer_id'] == 0) {
+			$err_msg[] = 'Der Parameter selected_layer_id wurde nicht übergeben oder ist leer.';
+		}
+		$result['msg'] .= ' selected_layer_id';
+
+		if (array_key_exists('client_deltas', $params)) {
+			$deltas = $params['client_deltas'];
+			if (property_exists($deltas, 'rows')) {
+				$rows = $deltas->rows;
+				if (count($rows) > 0) {
+					$first_row = $rows[0];
+					if (array_key_exists('version', $first_row)) {
+						$version = $first_row->version;
+						if ($version == '' || $version == 0) {
+							$err_msg[] = 'Die Version in der ersten row der Deltas ist ' . $version . ' (leer oder 0)';
+						}
+					}
+					else {
+						$err_msg[] = 'Die erste row enthält kein Schlüssel version: ' . print_r($first_row, true);
+					}
+					if (array_key_exists('sql', $first_row)) {
+						$sql = $first_row->sql;
+						if ($sql == '') {
+							$err_msg[] = 'Das Attribut sql in der ersten row der Deltas ist leer';
+						}
+					}
+					else {
+						$err_msg[] = 'Die erste row enthält kein Schlüssel sql: ' . print_r($first_row, true);
+					}
+				}
+				else {
+					$err_msg[] = 'Anzahl der rows im Objekt der Deltas ist 0.' . print_r($rows, true);
+				}
+			}
+			else {
+				$err_msg[] = 'Das Objekt der Deltas enthält kein Attribut rows: ' . print_r($deltas, true);
+			}
+		}
+		else {
+			$err_msg[] = 'Die Deltas wurde nicht übertragen.';
+		}
+		$result['msg'] .= ' deltas';
+
+		if (count($err_msg) > 0) {
+			$result['success'] = false;
+			$result['err_msg'] = implode("\n", $err_msg);
+		}
+		return $result;
 	};
 
 	$this->mobile_reformat_layer = function($layerset) {
@@ -101,7 +180,8 @@
 			"id_attribute" => "id",
 			"title_attribute" => "title",
 			"geometry_type" => $geometry_types[$layerset['Datentyp']],
-			"table_name" => $layerset['maintable']
+			"table_name" => $layerset['maintable'],
+			"schema_name" => $layerset['schema']
 		);
 		return $layer;
 	};
