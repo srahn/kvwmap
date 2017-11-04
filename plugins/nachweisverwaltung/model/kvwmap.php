@@ -1,6 +1,26 @@
 <?
 
 	$GUI = $this;
+	
+	/**
+	* Trigger für Bearbeitung im GLE
+	*/
+	$this->trigger_functions['check_documentpath'] = function($fired, $event, $layer = '', $oid = 0, $old_dataset = array()) use ($GUI) {
+		$executed = true;
+		$success = true;
+
+		switch(true) {
+			case ($fired == 'AFTER' AND $event == 'UPDATE') : {
+				$nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
+				$nachweis->check_documentpath($old_dataset);
+			} break;
+
+			default : {
+				$executed = false;
+			}
+		}
+		return array('executed' => $executed, 'success' => $success);
+	};	
 
 	$this->Datei_Download = function($filename) use ($GUI){
     $GUI->formvars['filename'] = $filename;
@@ -32,15 +52,17 @@
 				$GUI->formvars['gemessendurch'] = 1;
 				$GUI->formvars['Gueltigkeit'] = 1;		
 				$timestamp = date('Y-m-d_H-i-s',time());
-				$GUI->erzeugenUebergabeprotokollNachweise_PDF(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/'.$GUI->antrag->nr.'_'.$timestamp.'.pdf');
-				$GUI->erzeugenUebersicht_HTML(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/'.$GUI->antrag->nr.'_'.$timestamp.'.htm');
-				$GUI->erzeugenUebersicht_CSV(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/'.$GUI->antrag->nr.'_'.$timestamp.'.csv');
+				$GUI->erzeugenUebergabeprotokollNachweise(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Uebergabeprotokoll.pdf');
+				$GUI->erzeugenUebersicht_HTML(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Uebersicht.htm');
+				$GUI->erzeugenUebersicht_CSV(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Uebersicht.csv');
 				#$GUI->erzeugenZuordnungFlst_CSV(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/');
-				$GUI->create_Recherche_UKO(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/', $antragsnr, $stelle_id);
+				$GUI->create_Recherche_UKO(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/');
+				$GUI->nachweis->create_Gesamtpolygon(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Gesamtpolygon/');
+				$GUI->nachweis->writeIgnoredDokumentarten(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/');
         $result = exec(ZIP_PATH.' -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr);
 				# Loggen der übergebenen Dokumente
 				$uebergabe_logpath = $GUI->antrag->create_uebergabe_logpath($GUI->Stelle->Bezeichnung).'/'.$antr_selected.'_'.$timestamp.'.pdf';
-				$GUI->erzeugenUebergabeprotokollNachweise_PDF($uebergabe_logpath, true);
+				$GUI->erzeugenUebergabeprotokollNachweise($uebergabe_logpath, true);
       }
     }
     $filename = RECHERCHEERGEBNIS_PATH.$antragsnr.'.zip';
@@ -76,7 +98,7 @@
       if ($ret[0]) {
         $errmsg="Festpunkte konnten nicht abgefragt werden.";
       }
-      else {
+      elseif(count($festpunkte->liste) > 0){
         $ret=$antrag->EinmessungsskizzenInOrdnerZusammenstellen($festpunkte);
         $msg.=$ret;
       }
@@ -407,7 +429,7 @@
 		return $dokauswahlen;
 	};
 	
-	$this->create_Recherche_UKO = function($pfad, $antrag_nr, $stelle_id) use ($GUI){
+	$this->create_Recherche_UKO = function($pfad) use ($GUI){
 		$searches = $GUI->antrag->searches;
 		foreach($searches as $params){
 			if($params['abfrageart'] == 'poly')$polys[] = "st_geometryfromtext('".$params['suchpolygon']."', 25833)";
@@ -421,7 +443,7 @@
 		fwrite($fp, $uko);
 		fclose($fp);
 	};
-	
+		
 	$this->Suchparameter_loggen = function($formvars, $stelle_id, $user_id) use ($GUI){
 		$sql ='INSERT INTO u_consumeNachweise SELECT ';
 		$sql.='"'.$formvars['suchantrnr'].'", ';
@@ -524,7 +546,7 @@
     }
   };
 	
-	$this->erzeugenUebergabeprotokollNachweise = function($antr_nr) use ($GUI){
+	$this->zusammenstellenUebergabeprotokollNachweise = function($antr_nr) use ($GUI){
     if ($antr_nr==''){
 			$GUI->add_message('error', 'Wählen Sie bitte eine Antragsnummer aus!');
       $GUI->Antraege_Anzeigen();
@@ -550,7 +572,7 @@
 		
 	$this->erzeugenZuordnungFlst_CSV = function($path) use ($GUI){
 		$intersections = $GUI->antrag->getIntersectedFlst();
-		$csv = utf8_decode('Flur;Antragsnummer;Rissnummer;Flurstück;Anteil [m²];Anteil [%]').chr(10);
+		$csv = utf8_decode('Flur;Antragsnummer;Rissnummer;'.(NACHWEIS_SECONDARY_ATTRIBUTE != '' ? NACHWEIS_SECONDARY_ATTRIBUTE.';' : '').'Flurstück;Anteil [m²];Anteil [%]').chr(10);
 		foreach($intersections as $intersection){
 			$csv .= implode(';', $intersection).chr(10);
 		}
@@ -914,7 +936,7 @@
 		fclose($fp);
   };	
 	
-	$this->erzeugenUebergabeprotokollNachweise_PDF = function($path = NULL, $with_search_params = false) use ($GUI){
+	$this->erzeugenUebergabeprotokollNachweise = function($path = NULL, $with_search_params = false) use ($GUI){
   	# Erzeugen des Übergabeprotokolls mit der Zuordnung der Nachweise zum gewählten Auftrag als PDF-Dokument
   	if($GUI->formvars['antr_selected'] == ''){
 			$GUI->add_message('error', 'Wählen Sie bitte eine Antragsnummer aus!');
@@ -958,35 +980,6 @@
     }
   };
   
-	$this->erzeugenUebergabeprotokollNachweise_CSV = function() use ($GUI){
-  	# Erzeugen des Übergabeprotokolls mit der Zuordnung der Nachweise zum gewählten Auftrag als CSV-Dokument
-  	if($GUI->formvars['antr_selected'] == ''){
-			$GUI->add_message('error', 'Wählen Sie bitte eine Antragsnummer aus!');
-      $GUI->Antraege_Anzeigen();
-    }
-    else {
-			$explosion = explode('~', $GUI->formvars['antr_selected']);
-			$GUI->formvars['antr_selected'] = $explosion[0];
-			$stelle_id = $explosion[1];
-      $GUI->antrag = new antrag($GUI->formvars['antr_selected'],$stelle_id,$GUI->pgdatabase);
-      $ret=$GUI->antrag->getFFR($GUI->formvars);
-      if ($ret[0]) {
-        $GUI->Fehlermeldung=$ret[1];
-        # Abbruch mit Fehlermeldung und Rücksprung in Auswahl
-        $GUI->Antraege_Anzeigen();
-      }
-      else{
-		    $csv=$GUI->antrag->erzeugenUbergabeprotokoll_CSV($GUI->formvars);
-		    ob_end_clean();
-		    header("Content-type: application/vnd.ms-excel");
-		    header("Content-disposition:  inline; filename=Übergabeprotokoll_".date('Y-m-d_G-i-s').".csv");
-		    header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-		    header('Pragma: public');
-		    print $csv;
-      }
-    }
-  };
-
 	$this->check_nachweis_poly = function() use ($GUI){
 		$GUI->nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
 		echo $GUI->nachweis->check_poly_in_flur($GUI->formvars['umring'], $GUI->formvars['flur'], $GUI->formvars['gemkgschl'], $GUI->user->rolle->epsg_code);
@@ -1019,7 +1012,8 @@
         # 2.1 Speichern der Bilddatei zum Nachweis auf dem Server
         # Zusammensetzen des Dateinamen unter dem das Dokument gespeichert werden soll.
         $GUI->formvars['zieldateiname']=$GUI->nachweis->getZielDateiName($GUI->formvars);
-        $ret=$GUI->nachweis->dokumentenDateiHochladen($GUI->formvars['flurid'], $GUI->nachweis->buildNachweisNr($GUI->formvars[NACHWEIS_PRIMARY_ATTRIBUTE], $GUI->formvars[NACHWEIS_SECONDARY_ATTRIBUTE]),$GUI->formvars['artname'],$GUI->formvars['Bilddatei'],$GUI->formvars['zieldateiname']);
+				$zieldatei = NACHWEISDOCPATH.$GUI->formvars['flurid'].'/'.$this->nachweis->buildNachweisNr($GUI->formvars[NACHWEIS_PRIMARY_ATTRIBUTE], $GUI->formvars[NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$GUI->formvars['artname'].'/'.$GUI->formvars['zieldateiname'];
+        $ret=$GUI->nachweis->dokumentenDateiHochladen($GUI->formvars['Bilddatei'], $zieldatei);
         if ($ret!='') { $errmsg=$ret; }
         else {
           # Speicherung der Bilddatei erfolgreich, Eintragen in Datenbank

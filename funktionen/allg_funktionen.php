@@ -17,6 +17,20 @@ function MapserverErrorHandler($errno, $errstr, $errfile, $errline){
 	return true;
 }
 
+function compare_layers($a, $b){
+	$a['alias'] = strtoupper($a['alias']);
+	$b['alias'] = strtoupper($b['alias']);
+	$a['alias'] = str_replace('Ä', 'A', $a['alias']);
+	$a['alias'] = str_replace('Ü', 'U', $a['alias']);
+	$a['alias'] = str_replace('Ö', 'O', $a['alias']);
+	$a['alias'] = str_replace('ß', 's', $a['alias']);
+	$b['alias'] = str_replace('Ä', 'A', $b['alias']);
+	$b['alias'] = str_replace('Ü', 'U', $b['alias']);
+	$b['alias'] = str_replace('Ö', 'O', $b['alias']);
+	$b['alias'] = str_replace('ß', 's', $b['alias']);	
+	return strcmp($a['alias'], $b['alias']);
+}
+
 function compare_names($a, $b){
 	return strcmp($a['name'], $b['name']);
 }

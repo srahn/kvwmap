@@ -29,11 +29,14 @@
 	$strChooseLayers="Themenauswahl laden";
   $strMap="Kartenausschnitt";
   $strMapSize="Größe anpassen";
-	$strLayerControl="Themensteuerung";
-	$strDeactivateAllLayer="Hier klicken, um alle Themen zu deaktivieren";
-	$strClearAllQuerys="Hier klicken, um alle Abfragehaken zu entfernen";
-	$strInfoQuery="Informationsabfrage";
+	$strDeactivateAllLayer="alle Themen deaktivieren";
+	$strClearAllQuerys="alle Abfragehaken entfernen";
 	$strRotationAngle="Richtungswinkel";
 	$strNoLayer="Es wurde kein Thema zur Sachdatenabfrage ausgewählt!";
+	$strLayerSearch="Themensuche";
+	$strLegendOptions="Legenden-Optionen";
+	$strLegendType="Legendendarstellung";
+	$strLegendTypeGroups="Themen in Gruppen";
+	$strLegendTypeAlphabetical="Themen alphabetisch";
   
 ?>

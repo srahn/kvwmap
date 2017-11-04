@@ -786,7 +786,7 @@ hide_versions = function(flst){
 														<div class="fstanzeigehover">&nbsp;&nbsp;Kartenausschnitt&nbsp;&nbsp;</div>
 													</a>
 											<? }
-											if (in_array('kolibri', $kvwmap_plugins) AND $this->Stelle->isFunctionAllowed('Kolibistart')) { ?>
+											if (in_array('kolibri', $kvwmap_plugins) AND $this->Stelle->isFunctionAllowed('Kolibristart')) { ?>
 												<a href="kvwkol://FlurstKennz=<?php echo $flst->FlurstKennz; ?>" onclick="message('Öffne Flurstück <?php echo $flst->FlurstKennz; ?> in Kolibri.');">
 													<div class="fstanzeigehover">&nbsp;&nbsp;Öffnen in Kolibri&nbsp;&nbsp;</div>
 												</a><?php
@@ -881,7 +881,7 @@ hide_versions = function(flst){
             </a><?
 
 						global $kvwmap_plugins;
-						if (in_array('kolibri', $kvwmap_plugins) AND $this->Stelle->isFunctionAllowed('Kolibistart')) { ?>
+						if (in_array('kolibri', $kvwmap_plugins) AND $this->Stelle->isFunctionAllowed('Kolibristart')) { ?>
 							<a href="javascript:send_selected_flurst('kvwkol', '', '', '_blank');">
 								<div class="fstanzeigehover">
 									&nbsp;&nbsp;

@@ -8,6 +8,11 @@
 			"geom_attribute" => "the_geom",
 			"geom_type" => ""
 		),
+		"DXF" => array(
+			"export_privileg" => 1,
+			"geom_attribute" => "the_geom",
+			"geom_type" => ""
+		),		
 		"GML" => array(
 			"export_privileg" => 1,
 			"geom_attribute" => "the_geom",

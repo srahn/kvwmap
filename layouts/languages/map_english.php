@@ -30,12 +30,15 @@
 	$strChooseLayers="Load Layer Selection";
   $strMap="Map";
 	$strMapSize="Adjust Mapsize";
-	$strLayerControl="Layer Control";
-	$strDeactivateAllLayer="Click to deactivate all layers.";
-	$strClearAllQuerys="Click to clear all query checkboxes.";
-	$strInfoQuery="Information Query";
+	$strDeactivateAllLayer="deactivate all layers.";
+	$strClearAllQuerys="clear all query checkboxes.";
 	$this->layerOptions="Options";
 	$strRotationAngle="Angle";
 	$strNoLayer="Please select a layer for the data query!";
+	$strLayerSearch="Search Layer";
+	$strLegendOptions="Legend-Options";
+	$strLegendType="Legend Type";
+	$strLegendTypeGroups="layers in groups";
+	$strLegendTypeAlphabetical="layers alphabetical";
   
 ?>

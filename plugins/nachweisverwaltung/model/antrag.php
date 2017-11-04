@@ -112,7 +112,19 @@ class antrag {
 		$nachweiseUKOpfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Nachweise-UKO/';	# Erzeuge ein Unterverzeichnis für die Nachweis-UKOs
     mkdir ($nachweiseUKOpfad,0777);
 		$uebersichtspfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/';	# Erzeuge ein Unterverzeichnis für die Protokoll- und Übersichtsdateien
-    mkdir ($uebersichtspfad,0777);		
+    mkdir ($uebersichtspfad,0777);
+		$gesamtpolygonpfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Gesamtpolygon/';	# Erzeuge ein Unterverzeichnis für die Gesamtpolygondateien
+    mkdir ($gesamtpolygonpfad,0777);
+		$gesamtpolygonSHPpfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Gesamtpolygon/Shape/';	# Erzeuge ein Unterverzeichnis für die Gesamtpolygondateien
+    mkdir ($gesamtpolygonSHPpfad,0777);
+		$gesamtpolygonUKOpfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Gesamtpolygon/UKO/';	# Erzeuge ein Unterverzeichnis für die Gesamtpolygondateien
+    mkdir ($gesamtpolygonUKOpfad,0777);
+		$gesamtpolygonGMLpfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Gesamtpolygon/GML/';	# Erzeuge ein Unterverzeichnis für die Gesamtpolygondateien
+    mkdir ($gesamtpolygonGMLpfad,0777);
+		$gesamtpolygonGeoJSONpfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Gesamtpolygon/GeoJSON/';	# Erzeuge ein Unterverzeichnis für die Gesamtpolygondateien
+    mkdir ($gesamtpolygonGeoJSONpfad,0777);
+		$gesamtpolygonDXFpfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Gesamtpolygon/DXF/';	# Erzeuge ein Unterverzeichnis für die Gesamtpolygondateien
+    mkdir ($gesamtpolygonDXFpfad,0777);
     # Führe in Schleif für alle zum Auftrag gehörenden Dokumente folgendes aus
     for ($i=0; $i<$nachweis->erg_dokumente;$i++){
       # Erzeuge ein Unterverzeichnis für die Flur des Dokumentes, wenn noch nicht vorhanden
@@ -274,26 +286,7 @@ class antrag {
     }
     return $pdf;
   }
-  	
-  function erzeugenUbergabeprotokoll_CSV(){
-  	# Überschriften
-  	foreach($this->FFR[0] as $key=>$value){
-  		$csv .= $key.';';
-  		next($this->FFR[0]);
-  	}
-  	$csv.= chr(10);
-  	# Daten
-  	for($i=0; $i < count($this->FFR); $i++){
-  		$dateien = explode(', ', $this->FFR[$i]['Datei']);
-  		foreach($dateien as $datei){
-  			$this->FFR[$i]['Datei'] = $datei;
-  			$csv .= implode(';', $this->FFR[$i]);
-  			$csv.= chr(10);
-  		}
-    }
-    return $csv;
-  }
-    
+  	    
   function getAntraege($id,$nr,$richtung,$order,$current_stelle_id) {
 		global $admin_stellen;
     $sql ="SELECT a.*,a.vermstelle,va.art AS vermart,vs.name AS vermst";
@@ -348,18 +341,35 @@ class antrag {
 	
 	function getIntersectedFlst(){	# diese Verschneidung mit den Flurstücken kann u.U. sehr lange dauern, deswegen erstmal zurückgestellt
 		$this->spatial_ref_code = EPSGCODE_ALKIS.", ".EARTH_RADIUS;
-		$sql ="SELECT DISTINCT n.flurid, n.stammnr, n.rissnummer, f.flurstueckskennzeichen,";
+		$sql ="SELECT flurid, stammnr, rissnummer, ";
+		if(NACHWEIS_SECONDARY_ATTRIBUTE != '')$sql.=" ".NACHWEIS_SECONDARY_ATTRIBUTE.",";
+		$sql.=" flurstueckskennzeichen,";
+		$sql.=" round(inter::numeric) as anteil_abs,";
+		$sql.=" round((inter / f_area * 100)::numeric, 1) as anteil_pro";
+		$sql.=" from (";
+		$sql.=" SELECT DISTINCT n.flurid, n.stammnr, n.rissnummer, f.flurstueckskennzeichen,";
 		if(NACHWEIS_SECONDARY_ATTRIBUTE != '')$sql.=" n.".NACHWEIS_SECONDARY_ATTRIBUTE.",";
-		$sql.=" round(st_area_utm(st_intersection(st_transform(n.the_geom, ".EPSGCODE_ALKIS."), f.wkb_geometry),".$this->spatial_ref_code.")::numeric, 2) as anteil_abs,";
-		$sql.=" round((st_area_utm(st_intersection(st_transform(n.the_geom, ".EPSGCODE_ALKIS."), f.wkb_geometry),".$this->spatial_ref_code.") / st_area_utm(f.wkb_geometry,".$this->spatial_ref_code.") * 100)::numeric, 2) as anteil_pro";
-    $sql.=" FROM nachweisverwaltung.n_nachweise AS n, nachweisverwaltung.n_nachweise2antraege AS n2a, alkis.ax_flurstueck f";
-    $sql.=" WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
-		$sql.=" AND st_intersects(st_transform(n.the_geom, ".EPSGCODE_ALKIS."), f.wkb_geometry)";
+		$sql.=" st_area(st_intersection(st_transform(n.the_geom, 25833), f.wkb_geometry)) as inter,";
+		$sql.=" st_area(f.wkb_geometry) as f_area";
+		$sql.=" FROM alkis.ax_flurstueck f,";
+		$sql.=" (SELECT n.flurid, n.stammnr, n.art, n.blattnummer, n.rissnummer, n.the_geom";
+		if(NACHWEIS_SECONDARY_ATTRIBUTE != '')$sql.=", n.".NACHWEIS_SECONDARY_ATTRIBUTE;		
+		$sql.=" FROM nachweisverwaltung.n_nachweise2antraege AS n2a, nachweisverwaltung.n_nachweise AS n";
+		$sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id";
+		$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n2d.dokumentart_id = d.id";
+		$sql.=" WHERE  n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
 		if($this->stelle_id == '')$sql.=" AND stelle_id IS NULL";
-		else $sql.=" AND stelle_id=".$this->stelle_id;
-		$sql.=" order by n.flurid,n.stammnr,n.rissnummer,f.flurstueckskennzeichen";
+		else $sql.=" AND stelle_id=".$this->stelle_id;    
+		$sql.=" AND (n.art < '111' OR d.geometrie_relevant)";
+		$sql.=" )as n";
+		$sql.=" WHERE f.endet is null";
+		$sql.=" AND st_intersects(st_transform(n.the_geom, ".EPSGCODE_ALKIS."), f.wkb_geometry)";
+		$sql.=" order by n.flurid,n.stammnr,n.rissnummer,f.flurstueckskennzeichen) as foo";
+		#echo $sql;
 		$ret=$this->database->execSQL($sql,4, 0); 
     while($rs=pg_fetch_assoc($ret[1])){
+			$rs['stammnr'] = utf8_decode($rs['stammnr']);
+			$rs['rissnummer'] = utf8_decode($rs['rissnummer']);		
 			$rs['anteil_abs'] = str_replace('.', ',', $rs['anteil_abs']);
 			$rs['anteil_pro'] = str_replace('.', ',', $rs['anteil_pro']);
 			$intersections[] = $rs;
@@ -379,7 +389,7 @@ class antrag {
     # Dieser Vorgang ist hier mit der Variable FFR belegt, weil zu einem Vorgang
     # meistens mindestens ein Fortführungsriss gehört.
     $this->debug->write('nachweis.php getFFR Abfragen der Risse zum Antrag.',4);                
-    $sql ="SELECT DISTINCT n.flurid,n.stammnr,n.rissnummer";
+    $sql ="SELECT DISTINCT n.flurid, n.".NACHWEIS_PRIMARY_ATTRIBUTE;
 		if(NACHWEIS_SECONDARY_ATTRIBUTE != '')$sql.=",n.".NACHWEIS_SECONDARY_ATTRIBUTE." ";
     $sql.=" FROM nachweisverwaltung.n_nachweise AS n, nachweisverwaltung.n_nachweise2antraege AS n2a";
     $sql.=" WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
@@ -396,12 +406,17 @@ class antrag {
       if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){
       	if($formvars['Riss-Nummer'])$FFR[$i]['Rissnummer']=$rs['flurid'].'/'.$rs['rissnummer'];
 				if(NACHWEIS_SECONDARY_ATTRIBUTE != '')$FFR[$i]['Rissnummer'] .= ' - '.$rs[NACHWEIS_SECONDARY_ATTRIBUTE];
-      	if($formvars['Antrags-Nummer'])$FFR[$i]['Antragsnummer']=$rs['stammnr'];
       }
       else{
       	if($formvars['Antrags-Nummer'])$FFR[$i]['Antragsnummer']=$rs['flurid'].'/'.str_pad($rs['stammnr'],ANTRAGSNUMMERMAXLENGTH,'0',STR_PAD_LEFT);
-      	if($formvars['Riss-Nummer'])$FFR[$i]['Rissnummer']=$rs['rissnummer'];
       }
+			
+      # Abfrage der Riss-/Stammnummern (des nicht primären Ordnungskriteriums)
+			$ret=$this->getNotPrimary($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
+			if ($ret[0]) { return $ret; }
+			if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer')$not_primary = 'Antragsnummer';
+			else $not_primary = 'Rissnummer';
+			$FFR[$i][$not_primary]=$ret[1];
 
       # Abfrage der Anzahl der FFR zum Vorgang
       if($formvars['FFR']){
@@ -465,17 +480,31 @@ class antrag {
     $this->FFR=$FFR;
     return $ret;
   }
+	
+	function getNotPrimary($flurid,$primary,$secondary){
+		if($primary == 'rissnummer')$not_primary = 'stammnr';
+		else $not_primary = 'rissnummer';
+    $this->debug->write('<br>antrag.php getNotPrimary Abfragen der NotPrimary zu einem Vorgang in der Nachweisführung.',4);
+    $sql.="SELECT ".$not_primary." FROM nachweisverwaltung.n_nachweise AS n WHERE (1=1)";
+    $sql.=" AND n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$primary."'";
+    if($secondary != '')$sql.=" AND n.".NACHWEIS_SECONDARY_ATTRIBUTE."='".$secondary."'";
+		$sql.= "order by ".$not_primary;
+    $ret=$this->database->execSQL($sql,4, 0);
+    if (!$ret[0]) {
+      $rs=pg_fetch_array($ret[1]);
+      $notPrimary=$rs[$not_primary];  
+      while($rs=pg_fetch_array($ret[1])) {
+        $notPrimary.=', '.$rs[$not_primary];
+      }
+      $ret[1]=$notPrimary;
+    }     
+    return $ret;  
+  }
   
   function getDatum($flurid,$nr,$secondary) {
     $this->debug->write('<br>nachweis.php getDatum Abfragen der Datum zu einem Vorgang in der Nachweisführung.',4);
     # Abfragen der Datum zu einem Vorgang in der Nachweisführung
-    $sql.="SELECT n.datum FROM nachweisverwaltung.n_nachweise AS n";		
-		if ($this->nr!='') {
-      $sql.=",nachweisverwaltung.n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
-    }
-    else {
-      $sql.=" WHERE (1=1)";
-    }
+    $sql.="SELECT n.datum FROM nachweisverwaltung.n_nachweise AS n WHERE (1=1)";
     $sql.=" AND n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
     if($secondary != '')$sql.=" AND n.".NACHWEIS_SECONDARY_ATTRIBUTE."='".$secondary."'";
 		$sql.= "order by datum";

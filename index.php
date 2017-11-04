@@ -38,8 +38,19 @@ session_start();
 // $executiontimes['action'][] = 'Start';
 
 ob_start ();    // Ausgabepufferung starten
-foreach($_REQUEST as $key => $value){
-	if(is_string($value))$_REQUEST[$key] = str_replace('<script', '', pg_escape_string($value));
+
+/*
+* Replace in $tags defined tags from $text recursively
+*/
+function replace_tags($text, $tags) {
+	$new_text = preg_replace("#<\s*\/?(" . $tags . ")\s*[^>]*?>#im", '', $text);
+	if ($new_text != $text) $new_text = replace_tags($new_text, $tags);
+
+	return $new_text;
+}
+
+foreach($_REQUEST as $key => $value) {
+	if (is_string($value)) $_REQUEST[$key] = pg_escape_string(replace_tags($value, 'script|embed'));
 }
 $formvars = $_REQUEST;
 
@@ -110,7 +121,7 @@ if(!CASE_COMPRESS AND FAST_CASE){
 	include (CLASSPATH.'fast_cases/'.$go.'.php');
 }
 else{
-	include_(WWWROOT.APPLVERSION.'funktionen/allg_funktionen.php');	
+	include_(WWWROOT.APPLVERSION.'funktionen/allg_funktionen.php');
 	if($userDb == NULL)include_(CLASSPATH.'mysql.php');
 	include_(CLASSPATH . 'kvwmap.php');
 	include_(CLASSPATH . 'Menue.php');
@@ -133,7 +144,6 @@ if(!FAST_CASE)$GUI->loadPlugins();
 if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	if($go == 'get_last_query'){
 		$GUI->last_query = $GUI->user->rolle->get_last_query();
-		$GUI->formvars['keinzurueck'] = true;
 		$GUI->last_query_requested = true;		# get_last_query wurde direkt aufgerufen
 		$GUI->formvars['go'] = $go = $GUI->last_query['go'];
 	}
@@ -170,21 +180,15 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 
 		case 'saveLayerOptions' : {
 			$GUI->saveLayerOptions();
-			$GUI->neuLaden();
-			$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-			$GUI->drawMap();
-			$GUI->saveMap('');
-			$GUI->output();
 	  } break;
 		
 		case 'resetLayerOptions' : {
 			$GUI->resetLayerOptions();
-			$GUI->neuLaden();
-			$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-			$GUI->drawMap();
-			$GUI->saveMap('');
-			$GUI->output();
 	  } break;
+		
+		case 'saveLegendOptions' : {
+			$GUI->saveLegendOptions();
+	  } break;		
 				
 		case 'toggle_gle_view' : {
 			$GUI->switch_gle_view();
@@ -1585,7 +1589,7 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 
 	  case "ZoomToFlst" : {
 			$GUI->loadMap('DataBase');
-			if (strpos($GUI->formvars['FlurstKennz'], '/') !== false) $GUI->formvars['FlurstKennz'] = formatFlurstkennzALKIS($GUI->formvars['FlurstKennz']);
+			if (strpos($GUI->formvars['FlurstKennz'], '/') !== false)$GUI->formvars['FlurstKennz'] = formatFlurstkennzALKIS($GUI->formvars['FlurstKennz']);
 			if (substr($GUI->formvars['FlurstKennz'], -1) == '0') $GUI->formvars['FlurstKennz'] = formatFlurstkennzALKIS_0To_($GUI->formvars['FlurstKennz']);
 
 			$explodedFlurstKennz = explode(';',$GUI->formvars['FlurstKennz']);
