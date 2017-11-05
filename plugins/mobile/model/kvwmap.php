@@ -276,7 +276,7 @@
 			RETURNS trigger AS
 			$$
 				DECLARE
-					new_version integer := (SELECT (max(version) + 1)::integer FROM rebus.haltestellen_deltas);
+					new_version integer := (SELECT (coalesce(max(version), 1) + 1)::integer FROM rebus.haltestellen_deltas);
 					_query TEXT;
 					_sql TEXT;
 				BEGIN
@@ -320,7 +320,7 @@
 			RETURNS trigger AS
 			$$
 				DECLARE
-					new_version integer := (SELECT (max(version) + 1)::integer FROM rebus.haltestellen_deltas);
+					new_version integer := (SELECT (coalesce(max(version), 1) + 1)::integer FROM rebus.haltestellen_deltas);
 					_query TEXT;
 					_sql TEXT;
 				BEGIN
@@ -358,7 +358,7 @@
 			RETURNS trigger AS
 			$$
 				DECLARE
-					new_version integer := (SELECT nextval('rebus.haltestellen_deltas_version_seq'));
+					new_version integer := (SELECT (coalesce(max(version), 1) + 1)::integer FROM rebus.haltestellen_deltas);
 					_query TEXT;
 					_sql TEXT;
 				BEGIN

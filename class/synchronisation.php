@@ -339,8 +339,8 @@ class synchro {
 					'" . $schema_name . "',
 					'" . $table_name . "',
 					" . $pull_from_version  . ",
-					(SELECT max(version) FROM " . $schema_name . "." . $table_name . "_deltas),
-					(SELECT max(version) FROM " . $schema_name . "." . $table_name . "_deltas) + 1
+					(SELECT coalesce(max(version), 1) FROM " . $schema_name . "." . $table_name . "_deltas),
+					(SELECT coalesce(max(version), 1) FROM " . $schema_name . "." . $table_name . "_deltas) + 1
 				);
 			";
 
@@ -359,7 +359,7 @@ class synchro {
 			$sql .= "
 				UPDATE syncs
 				SET
-					push_to_version = (SELECT max(version) FROM " . $schema_name . "." . $table_name . "_deltas)
+					push_to_version = (SELECT coalesce(max(version), 1) FROM " . $schema_name . "." . $table_name . "_deltas)
 				WHERE
 					client_id = '" . $client_id . "' AND
 					username = '" . $username . "' AND
