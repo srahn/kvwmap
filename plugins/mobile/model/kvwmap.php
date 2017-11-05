@@ -181,8 +181,10 @@
 			"title_attribute" => "title",
 			"geometry_type" => $geometry_types[$layerset['Datentyp']],
 			"table_name" => $layerset['maintable'],
-			"schema_name" => $layerset['schema']
+			"schema_name" => $layerset['schema'],
+			"document_path" => $layerset['document_path']
 		);
+		# ToDo use $mapDB->getDocument_Path(...) to get the calculated document_path
 		return $layer;
 	};
 

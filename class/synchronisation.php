@@ -310,6 +310,7 @@ class synchro {
 				pull_from_version = " . $pull_from_version . "
 		";
 		#echo '<br>Sql: ' . $sql;
+		$log = $sql;
 		$res = $this->database->execSQL($sql, 0, 1, true);
 		if ($res[0]) {
 			# Liefer error message
@@ -319,6 +320,7 @@ class synchro {
 			);
 			return $result;
 		}
+
 
 		$rs = pg_fetch_array($res[1]);
 		if ($rs['num_sync'] == 0) {
@@ -370,7 +372,7 @@ class synchro {
 			$sql .= "
 				COMMIT;
 			";
-
+			$log .= $sql;
 			#echo '<br>Sql: ' . $sql;
 			$res = $this->database->execSQL($sql, 0, 1, true);
 			if ($res[0]) {
@@ -403,6 +405,7 @@ class synchro {
 						pull_from_version = " . $pull_from_version . "
 				);
 		";
+		$log.=$sql;
 		#echo '<br>Sql: ' . $sql;
 		$res = $this->database->execSQL($sql, 0, 1, true);
 		if ($res[0]) {
@@ -412,7 +415,10 @@ class synchro {
 			);
 			return $result;
 		}
-		$deltas = $res[1];
+		$deltas = array();
+		while($rs = pg_fetch_assoc($res[1])) {
+			$deltas[] = $rs;
+		}
 
 		# Frage Daten der Syncronisation ab
 		$sql = "
@@ -424,9 +430,10 @@ class synchro {
 				client_id = '" . $client_id . "' AND
 				username = '" . $username . "' AND
 				schema_name = '" . $schema_name ."' AND
-				table_name = '" . $schema_name ."' AND
+				table_name = '" . $table_name ."' AND
 				pull_from_version = " . $pull_from_version . "
 		";
+		$log.=$sql;
 		#echo '<br>Sql: ' . $sql;
 		$res = $this->database->execSQL($sql, 0, 1, true);
 		if ($res[0]) {
@@ -437,13 +444,17 @@ class synchro {
 			);
 			return $result;
 		}
-		$sync_data = $res[1];
+		$sync_data = array();
+		while($rs = pg_fetch_assoc($res[1])) {
+			$sync_data[] = $rs;
+		}
 
 		# Liefer deltas und syncro data ab
 		$result = array(
 			'success' => true,
 			'syncData' => $sync_data,
-			'deltas' => $deltas
+			'deltas' => $deltas,
+			'log'	=> $log
 		);
 
 		return $result;
