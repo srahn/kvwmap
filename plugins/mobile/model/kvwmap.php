@@ -274,7 +274,7 @@
 
 			CREATE OR REPLACE FUNCTION " . $layer->get('schema') . ".create_" . $layer->get('maintable') . "_insert_delta()
 			RETURNS trigger AS
-			$BODY$
+			$$
 				DECLARE
 					new_version integer := (SELECT (max(version) + 1)::integer FROM rebus.haltestellen_deltas);
 					_query TEXT;
@@ -307,7 +307,7 @@
 
 					RETURN NEW;
 				END;
-			$BODY$
+			$$
 			LANGUAGE plpgsql VOLATILE COST 100;
 
 			CREATE TRIGGER create_" . $layer->get('maintable') . "_insert_delta_trigger
@@ -318,7 +318,7 @@
 
 			CREATE OR REPLACE FUNCTION " . $layer->get('schema') . ".create_" . $layer->get('maintable') . "_update_delta()
 			RETURNS trigger AS
-			$BODY$
+			$$
 				DECLARE
 					new_version integer := (SELECT (max(version) + 1)::integer FROM rebus.haltestellen_deltas);
 					_query TEXT;
@@ -345,7 +345,7 @@
 
 					RETURN NEW;
 				END;
-			$BODY$
+			$$
 			LANGUAGE plpgsql VOLATILE COST 100;
 
 			CREATE TRIGGER create_" . $layer->get('maintable') . "_update_delta_trigger
@@ -356,7 +356,7 @@
 
 			CREATE OR REPLACE FUNCTION " . $layer->get('schema') . ".create_" . $layer->get('maintable') . "_delete_delta()
 			RETURNS trigger AS
-			$BODY$
+			$$
 				DECLARE
 					new_version integer := (SELECT nextval('rebus.haltestellen_deltas_version_seq'));
 					_query TEXT;
@@ -375,7 +375,7 @@
 
 					RETURN OLD;
 				END;
-			$BODY$
+			$$
 			LANGUAGE plpgsql VOLATILE COST 100;
 
 			CREATE TRIGGER create_" . $layer->get('maintable') . "_delete_delta_trigger
