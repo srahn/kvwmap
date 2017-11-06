@@ -276,7 +276,7 @@
 			RETURNS trigger AS
 			$$
 				DECLARE
-					new_version integer := (SELECT (coalesce(max(version), 1) + 1)::integer FROM rebus.haltestellen_deltas);
+					new_version integer := (SELECT (coalesce(max(version), 1) + 1)::integer FROM " . $layer->get('schema') . "." . $layer->get('maintable') . "_deltas);
 					_query TEXT;
 					_sql TEXT;
 				BEGIN
@@ -303,7 +303,7 @@
 					--RAISE notice 'sql nach add values for version %', _sql;
 
 					--RAISE notice 'Eintragen des INSERT-Statements mit Version: %', new_version; 
-					INSERT INTO rebus.haltestellen_deltas (version, sql) VALUES (new_version, _sql);
+					INSERT INTO " . $layer->get('schema') . "." . $layer->get('maintable') . "_deltas (version, sql) VALUES (new_version, _sql);
 
 					RETURN NEW;
 				END;
@@ -320,7 +320,7 @@
 			RETURNS trigger AS
 			$$
 				DECLARE
-					new_version integer := (SELECT (coalesce(max(version), 1) + 1)::integer FROM rebus.haltestellen_deltas);
+					new_version integer := (SELECT (coalesce(max(version), 1) + 1)::integer FROM " . $layer->get('schema') . "." . $layer->get('maintable') . "_deltas);
 					_query TEXT;
 					_sql TEXT;
 				BEGIN
@@ -341,7 +341,7 @@
 					--RAISE notice 'sql nach remove table schema %', _sql;
 
 					RAISE notice 'Eintragen des UPDATE-Statements mit Version %', new_version;
-					INSERT INTO rebus.haltestellen_deltas (version, sql) VALUES (new_version, _sql);
+					INSERT INTO " . $layer->get('schema') . "." . $layer->get('maintable') . "_deltas (version, sql) VALUES (new_version, _sql);
 
 					RETURN NEW;
 				END;
@@ -358,7 +358,7 @@
 			RETURNS trigger AS
 			$$
 				DECLARE
-					new_version integer := (SELECT (coalesce(max(version), 1) + 1)::integer FROM rebus.haltestellen_deltas);
+					new_version integer := (SELECT (coalesce(max(version), 1) + 1)::integer FROM " . $layer->get('schema') . "." . $layer->get('maintable') . "_deltas);
 					_query TEXT;
 					_sql TEXT;
 				BEGIN
@@ -371,7 +371,7 @@
 					_sql := _sql || ' AND uuid = ' || OLD.uuid;
 					--RAISE notice 'sql nach add uuid: %', _sql;
 
-					INSERT INTO rebus.haltestellen_deltas (version, sql, username) VALUES (new_version, _sql, OLD.user_name);
+					INSERT INTO " . $layer->get('schema') . "." . $layer->get('maintable') . "_deltas (version, sql, username) VALUES (new_version, _sql, OLD.user_name);
 
 					RETURN OLD;
 				END;
@@ -382,7 +382,7 @@
 			BEFORE DELETE
 			ON " . $layer->get('schema') . "." . $layer->get('maintable') . "
 			FOR EACH STATEMENT
-			EXECUTE PROCEDURE rebus.create_haltestellen_delete_delta();
+			EXECUTE PROCEDURE " . $layer->get('schema') . ".create_" . $layer->get('maintable') . "_delete_delta();
 		";
 		#echo '<p>Plugin: Mobile, function: mobile_create_layer_sync, Create table and trigger for deltas SQL:<br>' . $sql;
 		$ret = $layerdb->execSQL($sql, 4, 0, true);
