@@ -54,7 +54,7 @@ elseif($_SERVER ["REQUEST_METHOD"] == "GET")
         $this->log->log_trace('keyEscaped: ' . var_export($keyEscaped, true));
         $this->log->log_trace('valueEscaped: ' . var_export($valueEscaped, true));
         
-        if(strtolower($keyEscaped) === "getfestsetzung")
+        if(strtolower($keyEscaped) === GET_FESTSETZUNG_URL)
 		{
 		    $findDefaultWrz = false;
 		    
@@ -290,12 +290,12 @@ if(!empty($wrz) && !empty($wrz->getId()))
                 {
                     if($gewaesserbenutzung->isErklaerungFreigegeben($erhebungsjahr))
                     {
-                        $tab1_id="wasserentnahmeentgelt_erklaerung_der_entnahme";
+                        $tab1_id=WASSERENTNAHMEENTGELT_ERKLAERUNG_DER_ENTNAHME_URL;
                         $tab1_name="Erklärung der Entnahme";
                         $tab1_active=false;
                         $tab1_visible=true;
-                        $tab2_id="wasserentnahmeentgelt_festsetzung";
-                        $tab1_extra_parameter_key="geterklaerung";
+                        $tab2_id=WASSERENTNAHMEENTGELT_FESTSETZUNG_URL;
+                        $tab1_extra_parameter_key=GET_ERKLAERUNG_URL;
                         $tab1_extra_parameter_value=$wrz->getId() . "_" . $gewaesserbenutzung->getId() . "_" . $erhebungsjahr;
                         $tab2_name="Festsetzung";
                         $tab2_active=true;
@@ -304,7 +304,7 @@ if(!empty($wrz) && !empty($wrz->getId()))
                         
                         ?>
     
-                	<div id="wasserentnahmeentgelt_festsetzung" class="tabcontent" style="display: block">
+                	<div id="<?php echo WASSERENTNAHMEENTGELT_FESTSETZUNG_URL ?>" class="tabcontent" style="display: block">
                 
                     	<form action="index.php" id="festsetzung_freigeben_form" accept-charset="" method="POST">
                         		
@@ -447,7 +447,7 @@ if(!empty($wrz) && !empty($wrz->getId()))
                                               <td><?php echo !empty($teilgewaesserbenutzung->getWiedereinleitungNutzer()) && $teilgewaesserbenutzung->getWiedereinleitungNutzer() === "t" ? "ja" : "nein" ?></td>
                                               <td><?php echo !empty($teilgewaesserbenutzung->mengenbestimmung) ? $teilgewaesserbenutzung->mengenbestimmung->getName() : "" ?></td>
                                               <td>
-                                              	<select name="teilgewaesserbenutzung_art_benutzung_<?php echo $i; ?>" onchange="setNewTab('wasserentnahmeentgelt_festsetzung',{'getfestsetzung':'<?php echo $wrz->getId() . "_" . $gewaesserbenutzung->getId() . "_" . $erhebungsjahr ?>','teilgewaesserbenutzung_art_benutzung_<?php echo $i; ?>':this.value})" <?php echo $speereEingabeFestsetzung ? "disabled='disabled'" : "" ?>>
+                                              	<select name="teilgewaesserbenutzung_art_benutzung_<?php echo $i; ?>" onchange="setNewTab('<?php echo WASSERENTNAHMEENTGELT_FESTSETZUNG_URL ?>',{'<?php echo GET_FESTSETZUNG_URL ?>':'<?php echo $wrz->getId() . "_" . $gewaesserbenutzung->getId() . "_" . $erhebungsjahr ?>','teilgewaesserbenutzung_art_benutzung_<?php echo $i; ?>':this.value})" <?php echo $speereEingabeFestsetzung ? "disabled='disabled'" : "" ?>>
                                             		<option value='<?php echo WASSERRECHT_ERKLAERUNG_ENTNAHME_BITTE_AUSWAEHLEN_VALUE ?>'><?php echo WASSERRECHT_ERKLAERUNG_ENTNAHME_BITTE_AUSWAEHLEN_TEXT ?></option>
                                             		<option value="1" <?php echo!is_null($getArtBenutzung) && $getArtBenutzung === "1" ?  'selected' : ''?>>GW</option>
                                             		<option value="2" <?php echo !is_null($getArtBenutzung) && $getArtBenutzung === "2" ?  'selected' : ''?>>OW</option>
@@ -624,7 +624,7 @@ if(!empty($wrz) && !empty($wrz->getId()))
                                     <div class="wasserrecht_display_table_cell_spacer"></div>
                                     <div class="wasserrecht_display_table_cell_white">
                                     	<?php
-                                    	   echo '<a href="' . $this->actual_link . '?go=wasserentnahmeentgelt_erklaerung_der_entnahme&geterklaerung=' . $wrz->getId() . "_" . $gewaesserbenutzung->getId() . "_" . $erhebungsjahr .'">' . $gewaesserbenutzung->getErklaerungDatumHTML($erhebungsjahr) . '</a>';
+                                            echo '<a href="' . $this->actual_link . '?go=' . WASSERENTNAHMEENTGELT_ERKLAERUNG_DER_ENTNAHME_URL . '&' . GET_ERKLAERUNG_URL . '=' . $wrz->getId() . "_" . $gewaesserbenutzung->getId() . "_" . $erhebungsjahr .'">' . $gewaesserbenutzung->getErklaerungDatumHTML($erhebungsjahr) . '</a>';
                                 	    ?>
                                     </div>
                                 </div>
@@ -647,7 +647,7 @@ if(!empty($wrz) && !empty($wrz->getId()))
                 	   			
                 	   			<div class="wasserrecht_display_table_row">
                 	   				<div class="wasserrecht_display_table_cell_caption">
-                            			<input type="hidden" name="go" value="wasserentnahmeentgelt_festsetzung">
+                            			<input type="hidden" name="go" value="<?php echo WASSERENTNAHMEENTGELT_FESTSETZUNG_URL ?>">
                 						<button class="wasserrecht_button" name="festsetzung_speichern_<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>_<?php echo $erhebungsjahr; ?>" value="<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>_<?php echo $erhebungsjahr; ?>" type="submit" id="festsetzung_speichern_button_<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>_<?php echo $erhebungsjahr; ?>" <?php echo $speereEingabeFestsetzung ? "disabled='disabled'" : "" ?>>Festsetzung speichern</button>
                            			</div>
                            			<div class="wasserrecht_display_table_cell_spacer"></div>

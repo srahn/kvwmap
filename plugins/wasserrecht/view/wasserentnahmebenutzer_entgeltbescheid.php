@@ -1,9 +1,9 @@
 <?php 
-$tab1_id="wasserentnahmebenutzer_aufforderung_zur_erklaerung";
+$tab1_id=WASSERENTNAHMEBENUTZER_AUFFORDERUNG_ZUR_ERKLAERUNG_URL;
 $tab1_name="Aufforderung zur Erklärung";
 $tab1_active=false;
 $tab1_visible=true;
-$tab2_id="wasserentnahmebenutzer_entgeltbescheid";
+$tab2_id=WASSERENTNAHMEBENUTZER_ENTGELTBESCHEID_URL;
 $tab2_name="Entgeltbescheid";
 $tab2_active=true;
 $tab2_visible=true;
@@ -16,13 +16,13 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
 {
 //     print_r($_POST);
     
-    $entgeltbescheid_erstellen = htmlspecialchars($_POST["entgeltscheid_erstellen"]);
-    $auswahl_checkbox_array = $_POST["auswahl_checkbox"];
+    $entgeltbescheid_erstellen = htmlspecialchars($_POST[ENTGELTBESCHEID_ERSTELLEN_URL]);
+    $auswahl_checkbox_array = $_POST[AUSWAHL_CHECKBOX_URL];
     if(!empty($entgeltbescheid_erstellen) && !empty($auswahl_checkbox_array) && is_array($auswahl_checkbox_array))
     {
         $wrzs = array();
         
-        foreach ($auswahl_checkbox_array as $auswahl_checkbox) 
+        foreach ($auswahl_checkbox_array as $auswahl_checkbox)
         {
             if(!empty($auswahl_checkbox))
             {
@@ -153,7 +153,7 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
         
         //get the parameter
         $datum = date("d.m.Y");
-        $erhebungsjahr = htmlspecialchars($_REQUEST['erhebungsjahr']);
+        $erhebungsjahr = htmlspecialchars($_REQUEST[ERHEBUNGSJAHR_URL]);
         
         $bearbeiter = $gui->user->Name . ' ' . $gui->user->Vorname;
         $bearbeiter_telefon = $gui->user->phon;
@@ -240,12 +240,12 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
 }
 ?>
 
-<div id="wasserentnahmebenutzer_entgeltbescheid" class="tabcontent" style="display: block">
+<div id="<?php echo WASSERENTNAHMEBENUTZER_ENTGELTBESCHEID_URL ?>" class="tabcontent" style="display: block">
 
 	<form action="index.php" id="aufforderung_form" accept-charset="" method="POST">
 	
 		<?php
-		      $go="wasserentnahmebenutzer_entgeltbescheid";
+		      $go=WASSERENTNAHMEBENUTZER_ENTGELTBESCHEID_URL;
 		      $showAdressat=true;
 		      include_once ('includes/wasserentnahmebenutzer_header.php');
 		?>
@@ -297,17 +297,17 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
         		                         <tr>
         		                           <td>
         		                              <?php
-        		                              echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['FisWrV-WRe Anlagen'] . '&value_anlage_id=' . $wrz->anlagen->getId() . '&operator_anlage_id==">' . $wrz->anlagen->getName() . '</a>';
+        		                              echo '<a href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . $this->layer_names[ANLAGEN_LAYER_NAME] . '&value_' . ANLAGEN_LAYER_ID . '=' . $wrz->anlagen->getId() . '&operator_' . ANLAGEN_LAYER_ID . '==">' . $wrz->anlagen->getName() . '</a>';
         		                              ?>
                     		          	    </td>
                     		          		<td>
                     		          			<?php 
-                    		          			     echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['FisWrV-WRe WrZ'] . '&value_wrz_id=' . $wrz->getId() . '&operator_wrz_id==">' . $wrz->getBezeichnung() . '</a>';
+                    		          			     echo '<a href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . $this->layer_names[WRZ_LAYER_NAME] . '&value_' . WRZ_LAYER_ID . '=' . $wrz->getId() . '&operator_' . WRZ_LAYER_ID . '==">' . $wrz->getBezeichnung() . '</a>';
                     		          			?>
                     		          		</td>
                     		          		<td>
                     		          			<?php
-                    		          			echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['FisWrV-WRe Gewässerbenutzungen'] . '&value_gwb_id=' . $gewaesserbenutzung->getId() . '&operator_gwb_id==">' . $gewaesserbenutzung->getBezeichnung() . '</a>';
+                    		          			echo '<a href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . $this->layer_names[GEWAESSERBENUTZUNGEN_LAYER_NAME] . '&value_' . GEWAESSERBENUTZUNGEN_LAYER_ID . '=' . $gewaesserbenutzung->getId() . '&operator_' . GEWAESSERBENUTZUNGEN_LAYER_ID . '==">' . $gewaesserbenutzung->getBezeichnung() . '</a>';
                     		          			?>
                     		          		</td>
                     		          		<td>
@@ -346,7 +346,7 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
                     		          			<?php 
                     		          			     if($gewaesserbenutzung->isFestsetzungFreigegeben($getYear))
                     		          			     {?>
-                    		          			     	<a href="<?php echo $this->actual_link . "?go=wasserentnahmeentgelt_festsetzung&getfestsetzung=" . $wrz->getId() . "_" . $gewaesserbenutzung->getId() . "_" . $getYear ?>"><?php echo $gewaesserbenutzung->getFestsetzungDatum($getYear); ?></a>
+                    		          			     	<a href="<?php echo $this->actual_link . "?go=' . WASSERENTNAHMEENTGELT_FESTSETZUNG_URL . '&' . GET_FESTSETZUNG_URL . '=" . $wrz->getId() . "_" . $gewaesserbenutzung->getId() . "_" . $getYear ?>"><?php echo $gewaesserbenutzung->getFestsetzungDatum($getYear); ?></a>
                     		          			     <?php
                     		          			     }
                     		          			
@@ -356,7 +356,7 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
                     		          			<?php
                     		          			     if($gewaesserbenutzung->isFestsetzungFreigegeben($getYear) && !$gewaesserbenutzung->isFestsetzungDokumentErstellt($getYear))
                     		          			     {?>
-                    		          			     	<input type="checkbox" name="auswahl_checkbox[]" value="<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>_<?php echo $getYear; ?>" />
+                    		          			     	<input type="checkbox" name="<?php echo AUSWAHL_CHECKBOX_URL ?>[]" value="<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>_<?php echo $getYear; ?>" />
                     		          			     <?php
                     		          			     }
                     		          			
@@ -409,12 +409,12 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
 			</div>
     		 <div class="wasserrecht_display_table_row">
         		<div class="wasserrecht_display_table_cell_caption">
-        			<input type="hidden" name="go" value="wasserentnahmebenutzer_entgeltbescheid">
+        			<input type="hidden" name="go" value="<?php echo WASSERENTNAHMEBENUTZER_ENTGELTBESCHEID_URL ?>">
         			<?php 
                         if(!empty($getYear))
                         {
                             ?>
-                            	<input type="hidden" name="erhebungsjahr" value="<?php echo $getYear ?>">
+                            	<input type="hidden" name="<?php echo ERHEBUNGSJAHR_URL ?>" value="<?php echo $getYear ?>">
                             <?php
                         }
         			?>
@@ -422,7 +422,7 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
         			     if(!empty($getBehoerde))
         			     {
         			         ?>
-        			         	<input type="hidden" name="behoerde" value="<?php echo $getBehoerde ?>">
+        			         	<input type="hidden" name="<?php echo BEHOERDE_URL ?>" value="<?php echo $getBehoerde ?>">
         			         <?php
         			     }
         			?>
@@ -430,11 +430,11 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
         			     if(!empty($getAdressat))
         			     {
         			         ?>
-        			         	<input type="hidden" name="adressat" value="<?php echo $getAdressat ?>">
+        			         	<input type="hidden" name="<?php echo ADRESSAT_URL ?>" value="<?php echo $getAdressat ?>">
         			         <?php
         			     }
         			 ?>
-        			<input type="submit" value="Entgeltscheid erstellen!" id="entgeltscheid_erstellen" name="entgeltscheid_erstellen" <?php echo $gesamtEntnahmemenge < 2000 ? "disabled='disabled'" : "" ?> />
+        			<input type="submit" value="Entgeltscheid erstellen!" id="<?php echo ENTGELTBESCHEID_ERSTELLEN_URL ?>" name="<?php echo ENTGELTBESCHEID_ERSTELLEN_URL ?>" <?php echo $gesamtEntnahmemenge < 2000 ? "disabled='disabled'" : "" ?> />
         		</div>
              </div>
              
@@ -524,7 +524,7 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
 			
     		 <div class="wasserrecht_display_table_row">
         		<div class="wasserrecht_display_table_cell_caption">
-        			<input type="submit" value="Verwaltungsaufwand beantragen!" id="verwaltungsaufwand_beantragen" name="verwaltungsaufwand_beantragen" />
+        			<input type="submit" value="Verwaltungsaufwand beantragen!" id="<?php echo VERWALTUNGSAUFWAND_BEANTRAGEN_URL ?>" name="<?php echo VERWALTUNGSAUFWAND_BEANTRAGEN_URL ?>" />
         		</div>
              </div>
 			

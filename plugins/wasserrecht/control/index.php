@@ -168,14 +168,14 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
         }
         $valueEscaped = htmlspecialchars($value);
         
-        if(startsWith($keyEscaped, "erklaerung_"))
+        if(startsWith($keyEscaped, ERKLAERUNG_URL))
         {
-            $this->go = "wasserentnahmeentgelt_erklaerung_der_entnahme";
+            $this->go = WASSERENTNAHMEENTGELT_ERKLAERUNG_DER_ENTNAHME_URL;
             break;
         }
-        elseif($keyEscaped === "verwaltungsaufwand_beantragen")
+        elseif($keyEscaped === VERWALTUNGSAUFWAND_BEANTRAGEN_URL)
         {
-            $this->go = "erstattung_des_verwaltungsaufwands";
+            $this->go = ERSTATTUNG_DES_VERWALTUNGSAUFWANDS_URL;
         }
     }
 }
@@ -188,71 +188,71 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
  */
 switch($this->go){
 
-	case 'wasserentnahmebenutzer': {
-	    $this->log->log_debug('wasserentnahmebenutzer called!');
+    case WASSERENTNAHMEBENUTZER: {
+        $this->log->log_debug(WASSERENTNAHMEBENUTZER . ' called!');
 	    
-	    $this->main = PLUGINS . 'wasserrecht/view/wasserentnahmebenutzer_aufforderung_zur_erklaerung.php';
+	    $this->main = PLUGINS . 'wasserrecht/view/'. WASSERENTNAHMEBENUTZER_AUFFORDERUNG_ZUR_ERKLAERUNG_URL . '.php';
 	    $this->output();
 	}	break;
 	
-	case 'wasserentnahmebenutzer_aufforderung_zur_erklaerung': {
-	    $this->log->log_debug('wasserentnahmebenutzer_aufforderung_zur_erklaerung called!');
+	case WASSERENTNAHMEBENUTZER_AUFFORDERUNG_ZUR_ERKLAERUNG_URL: {
+	    $this->log->log_debug(WASSERENTNAHMEBENUTZER_AUFFORDERUNG_ZUR_ERKLAERUNG_URL . ' called!');
 	    
-	    $this->main = PLUGINS . 'wasserrecht/view/wasserentnahmebenutzer_aufforderung_zur_erklaerung.php';
+	    $this->main = PLUGINS . 'wasserrecht/view/'. WASSERENTNAHMEBENUTZER_AUFFORDERUNG_ZUR_ERKLAERUNG_URL . '.php';
 	    $this->output();
 	}	break;
 	
-	case 'wasserentnahmebenutzer_entgeltbescheid': {
-	    $this->log->log_debug('wasserentnahmebenutzer_entgeltbescheid called!');
+	case WASSERENTNAHMEBENUTZER_ENTGELTBESCHEID_URL: {
+	    $this->log->log_debug(WASSERENTNAHMEBENUTZER_ENTGELTBESCHEID_URL . ' called!');
 	    
-	    $this->main = PLUGINS . 'wasserrecht/view/wasserentnahmebenutzer_entgeltbescheid.php';
+	    $this->main = PLUGINS . 'wasserrecht/view/' . WASSERENTNAHMEBENUTZER_ENTGELTBESCHEID_URL .'.php';
 	    $this->output();
 	}	break;
 	
-	case 'wasserentnahmeentgelt': {
-	    $this->log->log_debug('wasserentnahmeentgelt called!');
+	case WASSERENTNAHMEENTGELT_URL: {
+	    $this->log->log_debug(WASSERENTNAHMEENTGELT_URL . ' called!');
 	    
-	    $this->main = PLUGINS . 'wasserrecht/view/wasserentnahmeentgelt_erklaerung_der_entnahme.php';
+	    $this->main = PLUGINS . 'wasserrecht/view/' . WASSERENTNAHMEENTGELT_ERKLAERUNG_DER_ENTNAHME_URL . '.php';
 	    $this->output();
 	}	break;
 	
-	case 'wasserentnahmeentgelt_erklaerung_der_entnahme': {
-	    $this->log->log_debug('wasserentnahmeentgelt_erklaerung_der_entnahme called!');
+	case WASSERENTNAHMEENTGELT_ERKLAERUNG_DER_ENTNAHME_URL: {
+	    $this->log->log_debug(WASSERENTNAHMEENTGELT_ERKLAERUNG_DER_ENTNAHME_URL . ' called!');
 	    
-	    $this->main = PLUGINS . 'wasserrecht/view/wasserentnahmeentgelt_erklaerung_der_entnahme.php';
+	    $this->main = PLUGINS . 'wasserrecht/view/' . WASSERENTNAHMEENTGELT_ERKLAERUNG_DER_ENTNAHME_URL .'.php';
 	    $this->output();
 	}	break;
 	
-	case 'wasserentnahmeentgelt_festsetzung': {
-	    $this->log->log_debug('wasserentnahmeentgelt_festsetzung called!');
+	case WASSERENTNAHMEENTGELT_FESTSETZUNG_URL: {
+	    $this->log->log_debug(WASSERENTNAHMEENTGELT_FESTSETZUNG_URL . 'called!');
 	    
-	    $this->main = PLUGINS . 'wasserrecht/view/wasserentnahmeentgelt_festsetzung.php';
+	    $this->main = PLUGINS . 'wasserrecht/view/' . WASSERENTNAHMEENTGELT_FESTSETZUNG_URL . '.php';
 	    $this->output();
 	}	break;
 	
-	case 'zentrale_stelle': {
-	    $this->log->log_debug('zentrale_stelle called!');
+	case ZENTRALE_STELLE_URL: {
+	    $this->log->log_debug(ZENTRALE_STELLE_URL . ' called!');
 	    
 	    if ($this->user->funktion === 'admin') 
 	    {
-	        $this->log->log_debug('zentrale_stelle Zugriff erlaubt');
+	        $this->log->log_debug(ZENTRALE_STELLE_URL . ' Zugriff erlaubt');
 	        
-	        $this->main = PLUGINS . 'wasserrecht/view/zentrale_stelle.php';
+	        $this->main = PLUGINS . 'wasserrecht/view/' . ZENTRALE_STELLE_URL . '.php';
 	        $this->output();
 	    }
 	    else 
 	    {
-	        $this->log->log_debug('zentrale_stelle Zugriff verweigert');
+	        $this->log->log_debug(ZENTRALE_STELLE_URL . ' Zugriff verweigert');
 	        
 	        echo 'Zugriff verweigert';
 	    }
 	    
 	}	break;
 	
-	case 'erstattung_des_verwaltungsaufwands': {
-	    $this->log->log_debug('erstattung_des_verwaltungsaufwands called!');
+	case ERSTATTUNG_DES_VERWALTUNGSAUFWANDS_URL: {
+	    $this->log->log_debug(ERSTATTUNG_DES_VERWALTUNGSAUFWANDS_URL . ' called!');
 	    
-	    $this->main = PLUGINS . 'wasserrecht/view/erstattung_des_verwaltungsaufwands.php';
+	    $this->main = PLUGINS . 'wasserrecht/view/'. ERSTATTUNG_DES_VERWALTUNGSAUFWANDS_URL . '.php';
 	    $this->output();
 	}  break;
 

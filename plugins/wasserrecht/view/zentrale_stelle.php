@@ -1,17 +1,17 @@
 <?php 
-$tab1_id="zentrale_stelle";
+$tab1_id=ZENTRALE_STELLE_URL;
 $tab1_name="Zentrale Stelle";
 $tab1_active=true;
 $tab1_visible=true;
 include_once ('includes/header.php');
 ?>
 
-<div id="zentrale_stelle" class="tabcontent" style="display: block">
+<div id="<?php echo ZENTRALE_STELLE_URL ?>" class="tabcontent" style="display: block">
 	
-	<form action="index.php" id="zentrale_stelle_form" accept-charset="" method="POST">
+	<form action="index.php" id="<?php echo ZENTRALE_STELLE_URL ?>_form" accept-charset="" method="POST">
 	
 		<?php
-		      $go="zentrale_stelle";
+		      $go=ZENTRALE_STELLE_URL;
 		      $showAdressat=false;
 		      include_once ('includes/wasserentnahmebenutzer_header.php');
 		?>
@@ -166,7 +166,7 @@ include_once ('includes/header.php');
                         		 </td>
                         		 -->
                         		 <td>
-                        		 	<a href="<?php echo $this->actual_link . '?go=' . WASSERENTNAHMEBENUTZER_ENTGELTBESCHEID_URL . '&erhebungsjahr=' . $getYear. '&adressat=' . $adressat->getId() . '&behoerde=' . $getBehoerde ?>"><?php echo $adressat->getName(); ?></a>
+                        		 	<a href="<?php echo $this->actual_link . '?go=' . WASSERENTNAHMEBENUTZER_ENTGELTBESCHEID_URL . '&' . ERHEBUNGSJAHR_URL .'=' . $getYear. '&' . ADRESSAT_URL . '=' . $adressat->getId() . '&' . BEHOERDE_URL . '=' . $getBehoerde ?>"><?php echo $adressat->getName(); ?></a>
                         		 </td>
                         		 <td>
       								<?php

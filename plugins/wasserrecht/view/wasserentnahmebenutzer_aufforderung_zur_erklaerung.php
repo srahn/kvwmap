@@ -1,9 +1,9 @@
 <?php 
-$tab1_id="wasserentnahmebenutzer_aufforderung_zur_erklaerung";
+$tab1_id=WASSERENTNAHMEBENUTZER_AUFFORDERUNG_ZUR_ERKLAERUNG_URL;
 $tab1_name="Aufforderung zur Erklärung";
 $tab1_active=true;
 $tab1_visible=true;
-$tab2_id="wasserentnahmebenutzer_entgeltbescheid";
+$tab2_id=WASSERENTNAHMEBENUTZER_ENTGELTBESCHEID_URL;
 $tab2_name="Entgeltbescheid";
 $tab2_active=false;
 $tab2_visible=true;
@@ -20,7 +20,7 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
         $keyEscaped = htmlspecialchars($key);
         $valueEscaped = htmlspecialchars($value);
         
-        if(startsWith($keyEscaped, "aufforderung_checkbox_"))
+        if(startsWith($keyEscaped, AUFFORDERUNG_CHECKBOX_URL))
         {
 //             		              echo '<br />Key = ' . $keyEscaped . '<br />';
 //             		              echo 'Value= ' . $valueEscaped;
@@ -75,7 +75,7 @@ function createAufforderungsDokument(&$gui, &$valueEscaped)
                     //get the parameter
                     $datum = date("d.m.Y");
                     $nextyear = date('Y', strtotime('+1 year'));
-                    $erhebungsjahr_request = htmlspecialchars($_REQUEST['erhebungsjahr']);
+                    $erhebungsjahr_request = htmlspecialchars($_REQUEST[ERHEBUNGSJAHR_URL]);
                     //                     var_dump($gui->user);
                     $bearbeiter = $gui->user->Name . ' ' . $gui->user->Vorname;
                     $bearbeiter_telefon = $gui->user->phon;
@@ -141,12 +141,12 @@ function createAufforderungsDokument(&$gui, &$valueEscaped)
 }
 ?>
 
-<div id="wasserentnahmebenutzer_aufforderung_zur_erklaerung" class="tabcontent" style="display: block">
+<div id="<?php echo WASSERENTNAHMEBENUTZER_AUFFORDERUNG_ZUR_ERKLAERUNG_URL ?>" class="tabcontent" style="display: block">
 
 	<form action="index.php" id="aufforderung_form" accept-charset="" method="POST">
 	
 		<?php
-		      $go="wasserentnahmebenutzer_aufforderung_zur_erklaerung";
+		      $go=WASSERENTNAHMEBENUTZER_AUFFORDERUNG_ZUR_ERKLAERUNG_URL;
 		      $showAdressat=true;
 		      include_once ('includes/wasserentnahmebenutzer_header.php');
 		?>
@@ -206,36 +206,36 @@ function createAufforderungsDokument(&$gui, &$valueEscaped)
                         		          			    if(empty($gewaesserbenutzung->isAufforderungFreigegeben($getYear)))
                             		          			{
                             		          			    ?>
-                            		          				<input type="checkbox" name="aufforderung_checkbox_<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>_<?php echo $getYear; ?>" value="<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>_<?php echo $getYear; ?>">
+                            		          				<input type="checkbox" name="<?php echo AUFFORDERUNG_CHECKBOX_URL ?><?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>_<?php echo $getYear; ?>" value="<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>_<?php echo $getYear; ?>">
                             		          		<?php
                             		          			} 
                         		          			?>
                         		          		</td>
                         		          		<td>
                         		          			<?php 
-                        		          			     echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['FisWrV-WRe Anlagen'] . '&value_anlage_id=' . $wrz->anlagen->getId() . '&operator_anlage_id==">' . $wrz->anlagen->getName() . '</a>';
+                        		          			     echo '<a href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . $this->layer_names[ANLAGEN_LAYER_NAME] . '&value_' . ANLAGEN_LAYER_ID . '=' . $wrz->anlagen->getId() . '&operator_' . ANLAGEN_LAYER_ID . '==">' . $wrz->anlagen->getName() . '</a>';
                         		          			?>
                         		          		</td>
                         		          		<td>
                         		          			<?php 
-                        		          			     echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['FisWrV-WRe WrZ'] . '&value_wrz_id=' . $wrz->getId() . '&operator_wrz_id==">' . $wrz->getBezeichnung() . '</a>';
+                        		          			     echo '<a href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . $this->layer_names[WRZ_LAYER_NAME] . '&value_' . WRZ_LAYER_ID . '=' . $wrz->getId() . '&operator_' . WRZ_LAYER_ID . '==">' . $wrz->getBezeichnung() . '</a>';
                     //     		          			     echo $wrz->getName();
                     //     		          			     var_dump($wrz);
                         		          			?>
                         		          		</td>
                         		          		<td>
                         		          			<?php
-                        		          			     echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['FisWrV-WRe Gewässerbenutzungen'] . '&value_gwb_id=' . $gewaesserbenutzung->getId() . '&operator_gwb_id==">' . $gewaesserbenutzung->getBezeichnung() . '</a>';
+                        		          			     echo '<a href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . $this->layer_names[GEWAESSERBENUTZUNGEN_LAYER_NAME] . '&value_' . GEWAESSERBENUTZUNGEN_LAYER_ID . '=' . $gewaesserbenutzung->getId() . '&operator_' . GEWAESSERBENUTZUNGEN_LAYER_ID . '==">' . $gewaesserbenutzung->getBezeichnung() . '</a>';
                         		          			?>
                         		          		</td>
                         		          		<td>
                         		          			<?php 
-                        		          			     echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['FisWrV-WRe Gewässerbenutzungen'] . '&value_gwb_id=' . $gewaesserbenutzung->getId() . '&operator_gwb_id==">' . $gewaesserbenutzung->getKennummer() . '</a>';
+                        		          			     echo '<a href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . $this->layer_names[GEWAESSERBENUTZUNGEN_LAYER_NAME] . '&value_' . GEWAESSERBENUTZUNGEN_LAYER_ID . '=' . $gewaesserbenutzung->getId() . '&operator_' . GEWAESSERBENUTZUNGEN_LAYER_ID . '==">' . $gewaesserbenutzung->getKennummer() . '</a>';
                         		          			?>
                         		          		</td>
                         		          		<td>
                         		          			<?php
-                        		          			     echo '<a href="' . $this->actual_link . '?go=Layer-Suche_Suchen&selected_layer_id=' . $this->layer_names['FisWrV-WRe WrZ'] . '&value_wrz_id=' . $wrz->getId() . '&operator_wrz_id==">' . $wrz->getHinweisHTML() . '</a>';
+                        		          			     echo '<a href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . $this->layer_names[WRZ_LAYER_NAME] . '&value_' . WRZ_LAYER_ID . '=' . $wrz->getId() . '&operator_' . WRZ_LAYER_ID . '==">' . $wrz->getHinweisHTML() . '</a>';
                         		          			?>
                         		          		</td>
                         		          		<td>
@@ -248,14 +248,14 @@ function createAufforderungsDokument(&$gui, &$valueEscaped)
                         		          				    if(empty($gewaesserbenutzung->getErklaerungDatum($getYear)))
                         		          				    {
                         		          				?>
-        														<button name="erklaerung_<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>_<?php echo $getYear; ?>" value="<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>_<?php echo $getYear; ?>" type="submit" id="erklaerung_button_<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>_<?php echo $getYear; ?>">Erklärung</button>
+        														<button name="<?php echo ERKLAERUNG_URL ?><?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>_<?php echo $getYear; ?>" value="<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>_<?php echo $getYear; ?>" type="submit" id="<?php echo ERKLAERUNG_URL ?>button_<?php echo $wrz->getId(); ?>_<?php echo $gewaesserbenutzung->getId(); ?>_<?php echo $getYear; ?>">Erklärung</button>
                         		          				<?php
                         		          				    }
                         		          				?>
                         		          		</td>
                         		          		<td>
                         		          			<?php
-                        		          			     echo '<a href="' . $this->actual_link . '?go=wasserentnahmeentgelt_erklaerung_der_entnahme&geterklaerung=' . $wrz->getId() . "_" . $gewaesserbenutzung->getId() . "_" . $getYear . '">' . $gewaesserbenutzung->getErklaerungDatumHTML($getYear) . '</a>';
+                        		          			     echo '<a href="' . $this->actual_link . '?go=' . WASSERENTNAHMEENTGELT_ERKLAERUNG_DER_ENTNAHME_URL .'&' . GET_ERKLAERUNG_URL .'=' . $wrz->getId() . "_" . $gewaesserbenutzung->getId() . "_" . $getYear . '">' . $gewaesserbenutzung->getErklaerungDatumHTML($getYear) . '</a>';
                         		          			?>
                         		          		</td>
                         		          	</tr>
@@ -282,7 +282,7 @@ function createAufforderungsDokument(&$gui, &$valueEscaped)
                         if(!empty($getYear))
                         {
                             ?>
-                            	<input type="hidden" name="erhebungsjahr" value="<?php echo $getYear ?>">
+                            	<input type="hidden" name="<?php echo ERHEBUNGSJAHR_URL ?>" value="<?php echo $getYear ?>">
                             <?php
                         }
         			?>
@@ -290,7 +290,7 @@ function createAufforderungsDokument(&$gui, &$valueEscaped)
         			     if(!empty($getBehoerde))
         			     {
         			         ?>
-        			         	<input type="hidden" name="behoerde" value="<?php echo $getBehoerde ?>">
+        			         	<input type="hidden" name="<?php echo BEHOERDE_URL ?>" value="<?php echo $getBehoerde ?>">
         			         <?php
         			     }
         			?>
@@ -298,12 +298,12 @@ function createAufforderungsDokument(&$gui, &$valueEscaped)
         			     if(!empty($getAdressat))
         			     {
         			         ?>
-        			         	<input type="hidden" name="adressat" value="<?php echo $getAdressat ?>">
+        			         	<input type="hidden" name="<?php echo ADRESSAT_URL ?>" value="<?php echo $getAdressat ?>">
         			         <?php
         			     }
         			 ?>
-					<input type="hidden" name="go" value="wasserentnahmebenutzer_aufforderung_zur_erklaerung">
-<!-- 						<input type="hidden" name="post_action_2" value="wasserentnahmebenutzer_aufforderung_zur_erklaerung"> -->
+					<input type="hidden" name="go" value="<?php echo WASSERENTNAHMEBENUTZER_AUFFORDERUNG_ZUR_ERKLAERUNG_URL ?>">
+<!-- 						<input type="hidden" name="post_action_2" value="<?php echo WASSERENTNAHMEBENUTZER_AUFFORDERUNG_ZUR_ERKLAERUNG_URL ?>"> -->
        				<input type="submit" value="Aufforderung erstellen!" id="aufforderung_button" name="aufforderung" />
 				</div>
 			</div>
