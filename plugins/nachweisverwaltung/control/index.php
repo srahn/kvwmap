@@ -143,7 +143,6 @@
 	  } break;
 	  
 	  case 'Nachweisformular_Vorlage' : {
-			include (PLUGINS.'nachweisverwaltung/model/nachweis.php');					# nachweis-Klasse einbinden		
 			$this->nachweisFormAnzeigeVorlage();
 	  } break;
 

@@ -230,28 +230,37 @@ class antrag {
 			return $errmsg;     
 		}
   }  
-  	
-  function erzeugenUbergabeprotokoll_PDF() {
+  
+	function Seitenkopf(&$pdf, $row_start){
+		$pdf->ezSetMargins(0,0,0,0);
+		$pages = $pdf->objects['3']['info']['pages'];
+		$pagecount = count($pages);
+		for($i = 0; $i < $pagecount; $i++){
+			$row = $row_start;
+			$pagenumber = $i + 1;
+			$pdf->reopenObject($pages[$i]+1);		# die Page-IDs sind komischerweise alle um 1 größer
+			$pdf->addText(395,10,10, 'Seite '.$pagenumber.' von '.$pagecount);
+			$pdf->addText(748,$row+10,14, date('d.m.Y',time()));
+			$pdf->addText(100,$row-=12,20,'<b>Anlage der Vermessungsvorbereitung zur Auftragsnummer '.$this->nr.'</b>');
+			$pdf->addText(330,$row-=20,16,utf8_decode('Liste der ausgegebenen Unterlagen'));
+			$row-=3; $pdf->line(330,$row,557,$row);
+			$row-=3; $pdf->line(330,$row,557,$row);
+		}
+	}
+	
+  function erzeugenUbergabeprotokoll_PDF(){
     $pdf=new Cezpdf('A4', 'landscape');
     $tmp = array('b'=>'Times-Bold.afm','i'=>'Times-Italic.afm','bi'=>'Times-BoldItalic.afm');
-    $row=560;
+		$pageheight = 595;
+		$margin = 40;
+    $row = $pageheight - $margin;
+		$table_row = $row - 60;
+		$table_margin = $pageheight - $table_row;
     $rowGap=3;
     $colGap=3;
-    $pdf->selectFont(WWWROOT . APPLVERSION . 'fonts/PDFClass/Times-Roman.afm',$tmp);
-    $pdf->addText(100,$row-=12,20,'<b>Anlage der Vermessungsvorbereitung zur Auftragsnummer '.$this->nr.'</b>');
-    $pdf->addText(330,$row-=20,16,utf8_decode('Liste der Fortführungsrisse'));
-    $row-=3; $pdf->line(330,$row,505,$row);
-    $row-=3; $pdf->line(330,$row,505,$row);
-    
-    $rowtab=$row-=15;
-
-    $anzTab=0;
-    for ($i=0;$i<count($this->FFR);$i++) {
-      $row=$row-18;
-      $tabledata[$anzTab][]=$this->FFR[$i];
-      if ($row < 100) { $anzTab++; $row=560;}
-    }
-        
+		$pdf->ezSetMargins($table_margin,30,30,30);
+    $pdf->selectFont(WWWROOT . APPLVERSION . 'fonts/PDFClass/Times-Roman.afm',$tmp);		
+            
     $cols='';
     $title='';
     # Konfiguration der Tabelle
@@ -264,26 +273,15 @@ class antrag {
     $options['cols']['KVZ']=array('justification'=>'centre');
     $options['cols']['GN']=array('justification'=>'centre');
     $options['cols']['andere']=array('justification'=>'centre');
-    $options['cols']['Datum']=array('justification'=>'left','width'=>75);
-		$options['cols']['Datei']=array('justification'=>'left','width'=>200);
+    $options['cols']['Datum']=array('justification'=>'left','width'=>70);
+		$options['cols']['Datei']=array('justification'=>'left','width'=>210);
     $options['cols']['gemessen durch']=array('justification'=>'left');
-    $options['cols'][utf8_decode('Gültigkeit')]=array('justification'=>'centre','width'=>60);
-    $pdf->ezSetY($rowtab);
-    $pdf->ezTable($tabledata[0],$cols,$title,$options);
-    $zahl=$anzTab+1;
-    $pdf->addText(395,10,10,"Seite 1 von $zahl");
-    for ($j=1;$j<=$anzTab;$j++){
-      $row=560; $k=$j+1;
-      $pdf->ezNewPage();
-      $pdf->ezSetY(560);
-      $pdf->addText(285,$row-=20,16,'<b>weiter zur Auftragsnummer '.$this->nr.'</b>');
-      $pdf->addText(330,$row-=20,16,utf8_decode('Liste der Fortführungsrisse'));
-      $row-=3; $pdf->line(330,$row,505,$row);
-      $row-=3; $pdf->line(330,$row,505,$row);
-      $pdf->ezSetY($row-=15);
-      $pdf->ezTable($tabledata[$j],$cols,$title,$options);
-      $pdf->addText(395,10,10,"Seite $k von $zahl");
-    }
+    $options['cols'][utf8_decode('Gültigkeit')]=array('justification'=>'centre','width'=>62);
+    $pdf->ezSetY($table_row);
+    $pdf->ezTable($this->FFR,$cols,$title,$options);
+		
+		$this->Seitenkopf($pdf, $row);
+		
     return $pdf;
   }
   	    
@@ -389,13 +387,15 @@ class antrag {
     # Dieser Vorgang ist hier mit der Variable FFR belegt, weil zu einem Vorgang
     # meistens mindestens ein Fortführungsriss gehört.
     $this->debug->write('nachweis.php getFFR Abfragen der Risse zum Antrag.',4);                
-    $sql ="SELECT DISTINCT n.flurid, n.".NACHWEIS_PRIMARY_ATTRIBUTE;
+    $sql ="SELECT DISTINCT max(datum) as datum, n.flurid, n.".NACHWEIS_PRIMARY_ATTRIBUTE;
 		if(NACHWEIS_SECONDARY_ATTRIBUTE != '')$sql.=",n.".NACHWEIS_SECONDARY_ATTRIBUTE." ";
     $sql.=" FROM nachweisverwaltung.n_nachweise AS n, nachweisverwaltung.n_nachweise2antraege AS n2a";
     $sql.=" WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
 		if($this->stelle_id == '')$sql.=" AND stelle_id IS NULL";
 		else $sql.=" AND stelle_id=".$this->stelle_id;
-    if($formvars['order'] != '')$sql.=" ORDER BY ".$formvars['order'];
+		$sql.=" GROUP BY n.flurid, n.".NACHWEIS_PRIMARY_ATTRIBUTE;
+		if(NACHWEIS_SECONDARY_ATTRIBUTE != '')$sql.=",n.".NACHWEIS_SECONDARY_ATTRIBUTE." ";
+    $sql.=" ORDER BY datum";
 		if(NACHWEIS_SECONDARY_ATTRIBUTE != '' AND $formvars['order'] == NACHWEIS_PRIMARY_ATTRIBUTE)$sql.=", ".NACHWEIS_SECONDARY_ATTRIBUTE;
     #echo $sql;
     $ret=$this->database->execSQL($sql,4, 0);    
@@ -488,13 +488,13 @@ class antrag {
     $sql.="SELECT ".$not_primary." FROM nachweisverwaltung.n_nachweise AS n WHERE (1=1)";
     $sql.=" AND n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$primary."'";
     if($secondary != '')$sql.=" AND n.".NACHWEIS_SECONDARY_ATTRIBUTE."='".$secondary."'";
-		$sql.= "order by ".$not_primary;
+		$sql.= "order by art, blattnummer";
     $ret=$this->database->execSQL($sql,4, 0);
     if (!$ret[0]) {
       $rs=pg_fetch_array($ret[1]);
       $notPrimary=$rs[$not_primary];  
       while($rs=pg_fetch_array($ret[1])) {
-        $notPrimary.=', '.$rs[$not_primary];
+        $notPrimary.=','.chr(10).$rs[$not_primary];
       }
       $ret[1]=$notPrimary;
     }     
@@ -507,13 +507,13 @@ class antrag {
     $sql.="SELECT n.datum FROM nachweisverwaltung.n_nachweise AS n WHERE (1=1)";
     $sql.=" AND n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
     if($secondary != '')$sql.=" AND n.".NACHWEIS_SECONDARY_ATTRIBUTE."='".$secondary."'";
-		$sql.= "order by datum";
+		$sql.= "order by art, blattnummer";
     $ret=$this->database->execSQL($sql,4, 0);
     if (!$ret[0]) {
       $rs=pg_fetch_array($ret[1]);
       $datum=$rs['datum'];  
       while($rs=pg_fetch_array($ret[1])) {
-        $datum.=', '.$rs['datum'];
+        $datum.=','.chr(10).$rs['datum'];
       }
       $ret[1]=$datum;
     }     
@@ -532,17 +532,14 @@ class antrag {
     }
     $sql.=" AND n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
     if($secondary != '')$sql.=" AND n.".NACHWEIS_SECONDARY_ATTRIBUTE."='".$secondary."'";
-		$sql.= "order by datum";
+		$sql.= "order by art, blattnummer";
     $ret=$this->database->execSQL($sql,4, 0);
     if (!$ret[0]) {
-      $rs=pg_fetch_array($ret[1]);
-      if($withFileLinks)$datei= '<c:alink:'.basename($rs['link_datei']).'>'.basename($rs['link_datei']).'</c:alink>';
-			else $datei= basename($rs['link_datei']);
       while($rs=pg_fetch_array($ret[1])) {
-				if($withFileLinks)$datei.=', <c:alink:'.basename($rs['link_datei']).'>'.basename($rs['link_datei']).'</c:alink>';
-        else $datei.=', '.basename($rs['link_datei']);
+				if($withFileLinks)$dateien[] = '<c:alink:../Nachweise/'.$flurid.'/'.Nachweis::buildNachweisNr($nr, $secondary).'/'.$rs['link_datei'].'>'.basename($rs['link_datei']).'</c:alink>';
+        else $dateien[] =basename($rs['link_datei']);
       }
-      $ret[1]=$datei;
+      $ret[1] = implode(','.chr(10), $dateien);
     }     
     return $ret;  
   }
