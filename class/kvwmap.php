@@ -2923,16 +2923,9 @@ class GUI {
       }
       ImageCopy($mainimage, $scaleimage, imagesx($mainimage)-imagesx($scaleimage), imagesy($mainimage)-imagesy($scaleimage), 0, 0, imagesx($scaleimage), imagesy($scaleimage));
       ob_end_clean();
-			header("Content-Type: image/jpeg");
-      header('Content-Disposition: inline; filename="Karte.jpg"');
-      ImageJPEG($mainimage);
+      ImageJPEG($mainimage, IMAGEPATH.$jpgfile);			
     }
-    else{
-    	ob_end_clean();
-      header('Content-Type: image/jpeg');
-      header('Content-Disposition: inline; filename="Karte.jpg"');
-      readfile(IMAGEPATH.$jpgfile);
-    }
+		echo '<img src="'.TEMPPATH_REL.$jpgfile.'">';
   }
 
   # Funktion zu Testzwecken der postgresql-Datenbankanfragens
