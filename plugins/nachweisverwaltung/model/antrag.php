@@ -482,7 +482,7 @@ class antrag {
   }
 	
 	function getNotPrimary($flurid,$primary,$secondary){
-		if($primary == 'rissnummer')$not_primary = 'stammnr';
+		if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer')$not_primary = 'stammnr';
 		else $not_primary = 'rissnummer';
     $this->debug->write('<br>antrag.php getNotPrimary Abfragen der NotPrimary zu einem Vorgang in der Nachweisführung.',4);
     $sql.="SELECT ".$not_primary." FROM nachweisverwaltung.n_nachweise AS n WHERE (1=1)";
