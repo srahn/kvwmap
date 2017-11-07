@@ -494,7 +494,7 @@ class antrag {
       $rs=pg_fetch_array($ret[1]);
       $notPrimary=$rs[$not_primary];  
       while($rs=pg_fetch_array($ret[1])) {
-        $notPrimary.=','.chr(10).$rs[$not_primary];
+        $notPrimary.=','.chr(10).utf8_decode($rs[$not_primary]);
       }
       $ret[1]=$notPrimary;
     }     
