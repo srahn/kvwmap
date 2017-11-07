@@ -273,7 +273,6 @@ class antrag {
     $options['cols']['KVZ']=array('justification'=>'centre');
     $options['cols']['GN']=array('justification'=>'centre');
     $options['cols']['andere']=array('justification'=>'centre');
-    $options['cols']['Datum']=array('justification'=>'left','width'=>70);
 		$options['cols']['Datei']=array('justification'=>'left','width'=>210);
     $options['cols']['gemessen durch']=array('justification'=>'left');
     $options['cols'][utf8_decode('Gültigkeit')]=array('justification'=>'centre','width'=>62);
@@ -445,13 +444,6 @@ class antrag {
 	      if ($ret[0]) { return $ret; }
 	      $FFR[$i]['andere']=$ret[1];
       }            
-            
-      # Abfrage der Datumsangaben im Vorgang
-      if($formvars['Datum']){
-	      $ret=$this->getDatum($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
-	      if ($ret[0]) { return $ret; }
-	      $FFR[$i]['Datum']=$ret[1];
-      }
       
     	# Abfrage der Dateinamen im Vorgang
       if($formvars['Datei']){
@@ -500,30 +492,11 @@ class antrag {
     }     
     return $ret;  
   }
-  
-  function getDatum($flurid,$nr,$secondary) {
-    $this->debug->write('<br>nachweis.php getDatum Abfragen der Datum zu einem Vorgang in der Nachweisführung.',4);
-    # Abfragen der Datum zu einem Vorgang in der Nachweisführung
-    $sql.="SELECT n.datum FROM nachweisverwaltung.n_nachweise AS n WHERE (1=1)";
-    $sql.=" AND n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
-    if($secondary != '')$sql.=" AND n.".NACHWEIS_SECONDARY_ATTRIBUTE."='".$secondary."'";
-		$sql.= "order by art, blattnummer";
-    $ret=$this->database->execSQL($sql,4, 0);
-    if (!$ret[0]) {
-      $rs=pg_fetch_array($ret[1]);
-      $datum=$rs['datum'];  
-      while($rs=pg_fetch_array($ret[1])) {
-        $datum.=','.chr(10).$rs['datum'];
-      }
-      $ret[1]=$datum;
-    }     
-    return $ret;  
-  }
-  
+    
 	function getDatei($flurid,$nr,$secondary, $withFileLinks) {
     $this->debug->write('<br>nachweis.php getDatei Abfragen der Dateien zu einem Vorgang in der Nachweisführung.',4);
     # Abfragen der Datum zu einem Vorgang in der Nachweisführung
-    $sql.="SELECT n.link_datei FROM nachweisverwaltung.n_nachweise AS n";
+    $sql.="SELECT n.link_datei, datum FROM nachweisverwaltung.n_nachweise AS n";
     if ($this->nr!='') {
       $sql.=",nachweisverwaltung.n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
     }
@@ -536,8 +509,8 @@ class antrag {
     $ret=$this->database->execSQL($sql,4, 0);
     if (!$ret[0]) {
       while($rs=pg_fetch_array($ret[1])) {
-				if($withFileLinks)$dateien[] = '<c:alink:../Nachweise/'.$flurid.'/'.Nachweis::buildNachweisNr($nr, $secondary).'/'.$rs['link_datei'].'>'.basename($rs['link_datei']).'</c:alink>';
-        else $dateien[] =basename($rs['link_datei']);
+				if($withFileLinks)$dateien[] = '<c:alink:../Nachweise/'.$flurid.'/'.Nachweis::buildNachweisNr($nr, $secondary).'/'.$rs['link_datei'].'>'.basename($rs['link_datei']).'</c:alink> '.$rs['datum'];
+        else $dateien[] =basename($rs['link_datei']).' '.$rs['datum'];
       }
       $ret[1] = implode(','.chr(10), $dateien);
     }     
