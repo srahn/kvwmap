@@ -449,7 +449,7 @@ class antrag {
       if($formvars['Datei']){
 	      $ret=$this->getDatei($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE], $withFileLinks);
 	      if ($ret[0]) { return $ret; }
-				$FFR[$i]['Datei'] = $ret[1];
+				$FFR[$i]['Datei - Datum'] = $ret[1];
       }
 
       # Abfrage der Vermessungsstellen im Vorgang
@@ -477,18 +477,18 @@ class antrag {
 		if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer')$not_primary = 'stammnr';
 		else $not_primary = 'rissnummer';
     $this->debug->write('<br>antrag.php getNotPrimary Abfragen der NotPrimary zu einem Vorgang in der Nachweisführung.',4);
-    $sql.="SELECT ".$not_primary." FROM nachweisverwaltung.n_nachweise AS n WHERE (1=1)";
+    $sql.="SELECT ".$not_primary." FROM nachweisverwaltung.n_nachweise AS n";
+		$sql.=",nachweisverwaltung.n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
     $sql.=" AND n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$primary."'";
     if($secondary != '')$sql.=" AND n.".NACHWEIS_SECONDARY_ATTRIBUTE."='".$secondary."'";
 		$sql.= "order by art, blattnummer";
     $ret=$this->database->execSQL($sql,4, 0);
     if (!$ret[0]) {
-      $rs=pg_fetch_array($ret[1]);
-      $notPrimary=$rs[$not_primary];  
       while($rs=pg_fetch_array($ret[1])) {
-        $notPrimary.=','.chr(10).utf8_decode($rs[$not_primary]);
+        $notPrimary[] = utf8_decode($rs[$not_primary]);
       }
-      $ret[1]=$notPrimary;
+			if(count(array_unique($notPrimary)) == 1)$ret[1] = $notPrimary[0];
+      else $ret[1] = implode(chr(10), $notPrimary);
     }     
     return $ret;  
   }
@@ -509,10 +509,10 @@ class antrag {
     $ret=$this->database->execSQL($sql,4, 0);
     if (!$ret[0]) {
       while($rs=pg_fetch_array($ret[1])) {
-				if($withFileLinks)$dateien[] = '<c:alink:../Nachweise/'.$flurid.'/'.Nachweis::buildNachweisNr($nr, $secondary).'/'.$rs['link_datei'].'>'.basename($rs['link_datei']).'</c:alink> '.$rs['datum'];
+				if($withFileLinks)$dateien[] = '<c:alink:../Nachweise/'.$flurid.'/'.Nachweis::buildNachweisNr($nr, $secondary).'/'.$rs['link_datei'].'>'.basename($rs['link_datei']).'</c:alink>   '.$rs['datum'];
         else $dateien[] =basename($rs['link_datei']).' '.$rs['datum'];
       }
-      $ret[1] = implode(','.chr(10), $dateien);
+      $ret[1] = implode(chr(10), $dateien);
     }     
     return $ret;  
   }
