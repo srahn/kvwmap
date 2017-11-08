@@ -1065,7 +1065,7 @@ class data_import_export {
 				case 'GeoJSONPlus': {
 					$exportfile = $exportfile.'.json';
 					if (in_array('mobile', $kvwmap_plugins)) {
-						$sql = str_replace('version FROM', '(SELECT max(version) FROM ' . $layerset[0]['schema'] . '.' . $layerset[0]['maintable'] . '_deltas) AS version FROM', $sql);
+						$sql = str_replace('version FROM', '(SELECT coalesce(max(version), 1) FROM ' . $layerset[0]['schema'] . '.' . $layerset[0]['maintable'] . '_deltas) AS version FROM', $sql);
 					}
 					$exportfile = $exportfile.'.json';
 					$this->ogr2ogr_export($sql, 'GeoJSON', $exportfile, $layerdb);

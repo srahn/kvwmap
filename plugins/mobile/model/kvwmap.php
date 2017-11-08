@@ -279,18 +279,22 @@
 					new_version integer := (SELECT (coalesce(max(version), 1) + 1)::integer FROM " . $layer->get('schema') . "." . $layer->get('maintable') . "_deltas);
 					_query TEXT;
 					_sql TEXT;
+					part TEXT;
 				BEGIN
 					SET datestyle to 'German';
 					_query := current_query();
 
-					--raise notice '_query=%', split_part(_query, ';', 1);
-					_sql := split_part(_query, ';', 1);
-					--raise notice 'sql nach split_part: %', _sql;
+					--raise notice '_query: %', _query;
+					foreach part in array string_to_array(_query, ';')
+					loop
+						IF strpos(lower(ltrim(part)), 'insert') = 1 THEN _sql := trim(part); END IF;
+					end loop;
+					--raise notice 'sql nach split by ; und select by update: %', _sql;
 
 					_sql := kvw_replace_line_feeds(_sql);
 					--RAISE notice 'sql nach remove line feeds %', _sql;
 
-					_sql := replace(_sql, ' ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME || ' ', ' ' || TG_TABLE_NAME || ' ');
+					_sql := replace(_sql, ' ' || TG_TABLE_NAME || ' ', ' ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME || ' ');
 					--RAISE notice 'sql nach remove %', TG_TABLE_SCHEMA || '.';
 
 					_sql := kvw_insert_str_before(_sql, ', version', ')');
@@ -323,22 +327,26 @@
 					new_version integer := (SELECT (coalesce(max(version), 1) + 1)::integer FROM " . $layer->get('schema') . "." . $layer->get('maintable') . "_deltas);
 					_query TEXT;
 					_sql TEXT;
+					part TEXT;
 				BEGIN
 					SET datestyle to 'German';
 					_query := current_query();
 
-					--raise notice '_query=%', split_part(_query, ';', 1);
-					_sql := split_part(_query, ';', 1);
-					--raise notice 'sql nach split_part: %', _sql;
+					--raise notice '_query: %', _query;
+					foreach part in array string_to_array(_query, ';')
+					loop
+						IF strpos(lower(ltrim(part)), 'update') = 1 THEN _sql := trim(part); END IF;
+					end loop;
+					--raise notice 'sql nach split by ; und select by update: %', _sql;
 
 					_sql := kvw_replace_line_feeds(_sql);
 					--RAISE notice 'sql nach remove line feeds %', _sql;
 
+					_sql := replace(_sql, ' ' || TG_TABLE_NAME || ' ', ' ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME || ' ');
+					--RAISE notice 'sql nach remove %', TG_TABLE_SCHEMA || '.';
+
 					_sql := kvw_insert_str_after(_sql, 'version = ' || new_version || ', ', ' ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME || ' set ');
 					--RAISE NOTICE 'sql nach insert version value %', _sql;
-
-					_sql := replace(_sql, ' ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME || ' ', ' ' || TG_TABLE_NAME || ' ');
-					--RAISE notice 'sql nach remove table schema %', _sql;
 
 					RAISE notice 'Eintragen des UPDATE-Statements mit Version %', new_version;
 					INSERT INTO " . $layer->get('schema') . "." . $layer->get('maintable') . "_deltas (version, sql) VALUES (new_version, _sql);
@@ -361,17 +369,19 @@
 					new_version integer := (SELECT (coalesce(max(version), 1) + 1)::integer FROM " . $layer->get('schema') . "." . $layer->get('maintable') . "_deltas);
 					_query TEXT;
 					_sql TEXT;
+					part TEXT;
 				BEGIN
 					SET datestyle to 'German';
 					_query := current_query();
 
-					_sql := (SELECT split_part(_query, ';', (SELECT array_length(regexp_split_to_array(_query, ';'), 1))));
-					--raise notice 'sql nach split_part: %', _sql;
+					--raise notice '_query: %', _query;
+					foreach part in array string_to_array(_query, ';')
+					loop
+						IF strpos(lower(ltrim(part)), 'delete') = 1 THEN _sql := trim(part); END IF;
+					end loop;
+					--raise notice 'sql nach split by ; und select by update: %', _sql;
 
-					_sql := _sql || ' AND uuid = ' || OLD.uuid;
-					--RAISE notice 'sql nach add uuid: %', _sql;
-
-					INSERT INTO " . $layer->get('schema') . "." . $layer->get('maintable') . "_deltas (version, sql, username) VALUES (new_version, _sql, OLD.user_name);
+					INSERT INTO " . $layer->get('schema') . "." . $layer->get('maintable') . "_deltas (version, sql) VALUES (new_version, _sql);
 
 					RETURN OLD;
 				END;

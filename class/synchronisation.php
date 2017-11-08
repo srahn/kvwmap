@@ -296,6 +296,7 @@ class synchro {
 	function sync($client_id, $username, $schema_name, $table_name, $client_time, $last_client_version, $client_deltas) {
 		$pull_from_version = $last_client_version + 1;
 
+		/*
 		# Frage ab ob die Syncronisation schon mal abgefragt wurde
 		$sql = "
 			SELECT
@@ -324,6 +325,8 @@ class synchro {
 
 		$rs = pg_fetch_array($res[1]);
 		if ($rs['num_sync'] == 0) {
+*/
+		if ($pull_from_version > 1) {
 			$sql = "
 				START TRANSACTION;
 			";
@@ -362,6 +365,7 @@ class synchro {
 					push_to_version = (SELECT coalesce(max(version), 1) FROM " . $schema_name . "." . $table_name . "_deltas)
 				WHERE
 					client_id = '" . $client_id . "' AND
+					client_time = '" . $client_time . "' AND
 					username = '" . $username . "' AND
 					schema_name = '" . $schema_name ."' AND
 					table_name = '" . $table_name . "' AND
@@ -399,6 +403,7 @@ class synchro {
 						syncs
 					WHERE
 						client_id = '" . $client_id . "' AND
+						client_time = '" . $client_time . "' AND
 						username = '" . $username . "' AND
 						schema_name = '" . $schema_name ."' AND
 						table_name = '" . $table_name . "' AND
