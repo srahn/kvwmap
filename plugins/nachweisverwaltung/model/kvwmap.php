@@ -600,6 +600,12 @@
 		$csv.= chr(10);
 		foreach($GUI->nachweis->Dokumente as $nachweis){
 			foreach($columns as $key=>$column){
+				if($key != 'dokument_path'){
+					$strpos = strpos($nachweis[$key], '/');
+					if ($strpos !== false AND $strpos < 3) {		# Excel-Datumsproblem
+						$nachweis[$key] = $nachweis[$key]."\t";
+					}
+				}
 				if($key == 'dokument_path' AND $nachweis[$key] != ''){
 					$csv .= '"=HYPERLINK(""'.$nachweis[$key].'"";""'.basename($nachweis[$key]).'"")"';
 				}
