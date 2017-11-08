@@ -30,7 +30,9 @@ if ($show_legend_graphic) { ?>
 				include(SNIPPETS.'schnellsprung.php');
 			} ?>
 	<div id="legendcontrol">
-		<input type="submit" name="neuladen_button" onclick="if(checkForUnsavedChanges()){startwaiting(true);document.GUI.go.value='neu Laden';}" value="<?php echo $strLoadNew; ?>" tabindex="1" style="vertical-align: top; margin-left: 60px">
+		<a href="index.php?go=reset_querys"><img src="graphics/tool_info.png" border="0" alt="<? echo $strInfoQuery; ?>" title="<? echo $strClearAllQuerys; ?>" width="17" style="vertical-align: bottom;"></a>
+		<a href="index.php?go=reset_layers"><img src="graphics/layer.png" border="0" alt="<? echo $strLayerControl; ?>" title="<? echo $strDeactivateAllLayer; ?>" width="20" height="20" style="vertical-align: bottom;"></a>
+		<input type="submit" name="neuladen_button" onclick="if(checkForUnsavedChanges()){startwaiting(true);document.GUI.go.value='neu Laden';}" value="<?php echo $strLoadNew; ?>" tabindex="1" style="vertical-align: top; margin-left: 30px">
 		<i id="legendOptionsIcon" class="fa fa-bars pointer" style="font-size: 1.1em;margin: 5 5 5 45" title="<? echo $strLegendOptions; ?>" onclick="openLegendOptions();"></i>
 		<div id="legendOptions">
 			<div style="position: absolute;top: 0px;right: 0px"><a href="javascript:closeLegendOptions(159);" title="Schlie&szlig;en"><img style="border:none" src="graphics/exit2.png"></img></a></div>
