@@ -65,7 +65,7 @@ class ddl {
     for($j = 0; $j < count($this->layout['texts']); $j++){
 			if($type != 'everypage' AND $this->page_overflow){
 				$this->pdf->reopenObject($this->page_id_before_sublayout);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
-				if($this->layout['type'] == 0)$this->page_overflow = false;			# if ???							
+				#if($this->layout['type'] == 0)$this->page_overflow = false;			# if ???							wegen dem Geometrie-Attribut auskommentiert
 			}
 			# der Freitext wurde noch nicht geschrieben und ist entweder ein fester Freitext oder ein fortlaufender oder einer, der auf jeder Seite erscheinen soll
     	if(in_array($this->layout['texts'][$j]['id'], $this->remaining_freetexts) AND $this->layout['texts'][$j]['posy'] != ''){	# nur Freitexte mit einem y-Wert werden geschrieben
@@ -158,7 +158,7 @@ class ddl {
 					}
 					if($offset_attribute == ''){
 						$y = $y - $this->offsety;
-						$endy = $endy + $y_orig - $y;		# y-Endposition auch anpassen
+						$endy = $endy - ($y_orig - $y);		# y-Endposition auch anpassen
 					}
 					if($type == 'running'){	# fortlaufende Linien
 						$pagecount = count($this->pdf->objects['3']['info']['pages']);								
@@ -360,6 +360,7 @@ class ddl {
 					}
 				}
 				elseif($attributes['name'][$j] == $attributes['the_geom'] AND $this->layout['elements'][$attributes['name'][$j]]['xpos'] > 0){		# Geometrie
+					if($this->page_overflow)$this->pdf->reopenObject($this->page_id_before_sublayout);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
 					$this->gui->map->set('width', $this->layout['elements'][$attributes['name'][$j]]['width']*MAPFACTOR);
 					$this->gui->map->set('height', $this->layout['elements'][$attributes['name'][$j]]['width']*MAPFACTOR);
 					if($oids[$i] != ''){
