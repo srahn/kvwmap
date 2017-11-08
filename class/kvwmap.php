@@ -2432,11 +2432,19 @@ class GUI {
     $attributenames[0] = $this->formvars['attribute'];
     $attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
 		# value und output ermitteln
-		$options = explode(';', $attributes['options'][0]);
-		$sql = $options[0];
+		$optionen = explode(';', $attributes['options'][0]);
+		$sql = $optionen[0];
+		if($optionen[1] != ''){
+			$further_options = explode(' ', $optionen[1]);      # die weiteren Optionen exploden (opt1 opt2 opt3)
+			for($k = 0; $k < count($further_options); $k++){
+				if($further_options[$k] == 'anywhere'){       # der eingegebene Text kann überall in den Auswahlmöglichkeiten vorkommen
+					$wildcard = '%';
+				}
+			}
+		}
 		if(strpos(strtolower($sql), 'order by') === false)$orderby = 'ORDER BY output';	# nur sortieren, wenn noch nicht sortiert
 		$sql = 'SELECT * FROM ('.$sql.') as foo WHERE';
-		$sql .= " lower(output::text) like lower('".$this->formvars['inputvalue']."%') ".$orderby." LIMIT 15";
+		$sql .= " lower(output::text) like lower('".$wildcard.$this->formvars['inputvalue']."%') ".$orderby." LIMIT 15";
 		#echo $sql;
   	$ret=$layerdb->execSQL($sql,4, 1);
 		$count = pg_num_rows($ret[1]);
@@ -15490,6 +15498,9 @@ class db_mapObj{
                     elseif($further_options[$k] == 'embedded'){       # Subformular soll embedded angezeigt werden
                       $attributes['embedded'][$i] = true;
                     }
+                    elseif($further_options[$k] == 'anywhere'){       # der eingegebene Text kann überall in den Auswahlmöglichkeiten vorkommen
+                      $attributes['anywhere'][$i] = true;
+                    }										
                   }
                 }
               }
