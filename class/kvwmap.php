@@ -3009,7 +3009,30 @@ class GUI {
       ob_end_clean();
       ImageJPEG($mainimage, IMAGEPATH.$jpgfile);			
     }
-		echo '<img src="'.TEMPPATH_REL.$jpgfile.'">';
+		echo "
+			<html>
+				<head>
+					<title>Kartenbild</title>
+				</head>
+				<body style=\"text-align:center\">
+					<script>
+						function copyImage(){
+							var img=document.getElementById('mapimg');
+							var r = document.createRange();
+							r.setStartBefore(img);
+							r.setEndAfter(img);
+							r.selectNode(img);
+							var sel = window.getSelection();
+							sel.addRange(r);
+							document.execCommand('Copy');
+							sel.removeAllRanges();
+						}
+					</script>
+					<img id=\"mapimg\" src=\"".TEMPPATH_REL.$jpgfile."\" style=\"box-shadow:  0px 0px 14px #777;\"><br><br>
+					<input type=\"button\" onclick=\"copyImage();\" value=\"Bild kopieren\">
+				</body>
+			</html>
+			";
   }
 
   # Funktion zu Testzwecken der postgresql-Datenbankanfragens
