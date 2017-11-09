@@ -430,7 +430,7 @@ class GUI {
 			}
 	  }
     $legend .= '</table></div></td></tr></table>';
-    $legend .= '<input type="hidden" name="radiolayers_'.$group_id.'" value="'.$radiolayers[$group_id].'">';
+    $legend .= '<input type="hidden" name="radiolayers_'.$group_id.'" value="'.$this->radiolayers[$group_id].'">';
 	  $legend .= '</div>';
     return $legend;
   }
@@ -503,8 +503,8 @@ class GUI {
 				$legend .=  '<input id="thema_'.$layer['Layer_ID'].'" ';
 				if($layer['selectiontype'] == 'radio'){
 					$legend .=  'type="radio" ';
-					$legend .=  ' onClick="this.checked = this.checked2;" onMouseUp="this.checked = this.checked2;" onMouseDown="updateQuery(event, document.getElementById(\'thema_'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), document.GUI.radiolayers_'.$group_id.', '.$this->user->rolle->instant_reload.')"';
-					$radiolayers[$layer['Gruppe']] .= $layer['Layer_ID'].'|';
+					$legend .=  ' onClick="this.checked = this.checked2;" onMouseUp="this.checked = this.checked2;" onMouseDown="updateQuery(event, document.getElementById(\'thema_'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), document.GUI.radiolayers_'.$layer['Gruppe'].', '.$this->user->rolle->instant_reload.')"';
+					$this->radiolayers[$layer['Gruppe']] .= $layer['Layer_ID'].'|';
 				}
 				else{
 					$legend .=  'type="checkbox" ';
@@ -676,7 +676,7 @@ class GUI {
 			$legend .=  '<input ';
 			if($layer['selectiontype'] == 'radio'){
 				$legend .=  'type="radio" ';
-				$radiolayers[$group_id] .= $layer['Layer_ID'].'|';
+				$this->radiolayers[$layer['Gruppe']] .= $layer['Layer_ID'].'|';
 			}
 			else{
 				$legend .=  'type="checkbox" ';
