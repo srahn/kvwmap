@@ -346,16 +346,21 @@ $legendheight = $this->map->height + 20;
 								</tr>
 							</table>
 							<table class="table1" id="legendTable" onclick="slide_legend_in(event)" style="display: <? echo $display; ?>" cellspacing=0 cellpadding=2 border=0>
-								<tr align="center">
-									<td><?php echo $strAvailableLayer; ?>:</td>
-								</tr>
 								<tr align="left">
 									<td>
-										<div id="legend_layer">
+										<div id="legend_layer" style="display: inline-block">
 											<div id="legendcontrol">
-												<a href="index.php?go=reset_querys"><img src="graphics/tool_info.png" border="0" alt="Informationsabfrage." title="Informationsabfrage | Hier klicken, um alle Abfragehaken zu entfernen" width="17"></a>
-												<a href="javascript:document.GUI.reset_layers.value=1;document.GUI.submit();"><img src="graphics/layer.png" border="0" alt="Themensteuerung." title="Themensteuerung | Hier klicken, um alle Themen zu deaktivieren" width="20" height="20"></a>
-												<input type="button" class="button" name="neuladen_button" onclick="neuLaden();" value="<?php echo $strLoadNew; ?>" tabindex="1">
+												<a href="index.php?go=reset_querys">
+													<div class="button_background" style="width: 26px; height: 26px">
+														<div class="emboss tool_info" style="width: 26px; height: 26px" title="<? echo $strClearAllQuerys; ?>"></div>
+													</div>
+												</a>
+												<a href="index.php?go=reset_layers" style="padding: 0 0 0 6">
+													<div class="button_background" style="width: 26px; height: 26px">
+														<div class="emboss layer" style="width: 26px; height: 26px" title="<? echo $strDeactivateAllLayer; ?>"></div>
+													</div>
+												</a>
+												<input type="button" class="button" name="neuladen_button" onclick="neuLaden();" value="<?php echo $strLoadNew; ?>" tabindex="1" style="height: 27px; vertical-align: top; margin-left: 30px">
 											</div>
 											<div id="scrolldiv" style="height:<?php echo $legendheight; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
 												<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
