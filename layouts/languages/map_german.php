@@ -38,5 +38,6 @@
 	$strLegendType="Legendendarstellung";
 	$strLegendTypeGroups="Themen in Gruppen";
 	$strLegendTypeAlphabetical="Themen alphabetisch";
+	$strDrawingOrder="Zeichenreihenfolge anpassen";
   
 ?>

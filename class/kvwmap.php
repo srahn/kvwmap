@@ -146,6 +146,17 @@ class GUI {
 		}
 		$this->output();
 	}
+	
+	function loadDrawingOrderForm(){
+		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$mapDB->nurAktiveLayer = true;
+		$layer = array_reverse($mapDB->read_Layer(0, $this->Stelle->useLayerAliases, NULL));     # class_load_level: 0 = keine Klassen laden
+		echo '<div class="drawingOrderFormDropZone" ondragenter="handleDragEnter(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)"></div>';
+		for($i = 0; $i < count($layer)-1; $i++){
+			echo '<div class="drawingOrderFormLayer" draggable="true" ondragstart="handleDragStart(event)" ondragend="handleDragEnd(event)"><span>'.$layer[$i]['alias'].'</span><input name="active_layers[]" type="hidden" value="'.$layer[$i]['Layer_ID'].'"></div>';
+			echo '<div class="drawingOrderFormDropZone" ondragenter="handleDragEnter(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)"></div>';
+		}
+	}
 
 	function getLayerOptions() {
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
@@ -252,8 +263,10 @@ class GUI {
 		';
 	}
 		
-	function saveLegendOptions(){	
-		$this->user->rolle->saveLegendOptions($this->formvars);
+	function saveLegendOptions(){
+		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$layer = $mapDB->read_Layer(0, $this->Stelle->useLayerAliases, NULL);     # class_load_level: 0 = keine Klassen laden
+		$this->user->rolle->saveLegendOptions($layer, $this->formvars);
 		$this->user->rolle->readSettings();
 		$this->neuLaden();
 		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
@@ -261,6 +274,15 @@ class GUI {
 		$this->saveMap('');
 		$this->output();
 	}
+	
+	function resetLegendOptions(){	
+		$this->user->rolle->removeDrawingOrders();
+		$this->neuLaden();
+		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
+		$this->drawMap();
+		$this->saveMap('');
+		$this->output();		
+	}	
 	
 	function saveLayerOptions(){	
 		$this->user->rolle->setTransparency($this->formvars);
@@ -14782,7 +14804,7 @@ class db_mapObj{
 		$sql = "
 			SELECT DISTINCT
 				coalesce(rl.transparency, ul.transparency, 100) as transparency, rl.`aktivStatus`, rl.`queryStatus`, rl.`gle_view`, rl.`showclasses`, rl.`logconsume`, 
-				ul.`queryable`, ul.`drawingorder`, ul.`minscale`, ul.`maxscale`, ul.`offsite`, ul.`postlabelcache`, ul.`Filter`, ul.`template`, ul.`header`, ul.`footer`, ul.`symbolscale`, ul.`logconsume`, ul.`requires`, ul.`privileg`, ul.`export_privileg`,
+				ul.`queryable`, COALESCE(rl.drawingorder, ul.drawingorder) as drawingorder, ul.`minscale`, ul.`maxscale`, ul.`offsite`, ul.`postlabelcache`, ul.`Filter`, ul.`template`, ul.`header`, ul.`footer`, ul.`symbolscale`, ul.`logconsume`, ul.`requires`, ul.`privileg`, ul.`export_privileg`,
 				l.Layer_ID," .
 				$name_column . ",
 				l.alias,
@@ -14821,7 +14843,7 @@ class db_mapObj{
     if($this->nurFremdeLayer){			# entweder fremde (mit host=...) Postgis-Layer oder aktive nicht-Postgis-Layer
     	$sql.=' AND (l.connection like "%host=%" AND l.connection NOT like "%host=localhost%" OR l.connectiontype != 6 AND rl.aktivStatus != "0")';
     }
-    $sql.=' ORDER BY ul.drawingorder';
+    $sql.=' ORDER BY drawingorder';
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Layer - Lesen der Layer der Rolle:<br>".$sql,4);
     $query=mysql_query($sql);
@@ -14833,6 +14855,7 @@ class db_mapObj{
 			if($rs['alias'] == '' OR !$useLayerAliases){
 				$rs['alias'] = $rs['Name'];
 			}
+			$rs['id'] = $i;
 			$rs['Name'] = replace_params($rs['Name'], rolle::$layer_params);
 			$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);
 			$rs['connection'] = replace_params($rs['connection'], rolle::$layer_params);

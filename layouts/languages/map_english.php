@@ -40,5 +40,6 @@
 	$strLegendType="Legend Type";
 	$strLegendTypeGroups="layers in groups";
 	$strLegendTypeAlphabetical="layers alphabetical";
+	$strDrawingOrder="Change Drawingorder";
   
 ?>

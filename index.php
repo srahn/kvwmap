@@ -161,6 +161,10 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
       $GUI->output();
 		}break;
 
+		case 'loadDrawingOrderForm' : {
+			$GUI->loadDrawingOrderForm();
+	  } break;
+		
 	  case 'show_snippet' : {
 			$GUI->checkCaseAllowed($go);
 			$GUI->show_snippet();
@@ -188,7 +192,11 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 		
 		case 'saveLegendOptions' : {
 			$GUI->saveLegendOptions();
-	  } break;		
+	  } break;
+
+		case 'resetLegendOptions' : {
+			$GUI->resetLegendOptions();
+	  } break;
 				
 		case 'toggle_gle_view' : {
 			$GUI->switch_gle_view();
