@@ -118,7 +118,7 @@ if($this->formvars['gps_follow'] == ''){
 <div id="map_frame" style="text-align: left;position: relative; width: <?php echo ($map_width + $legend_width); ?>px;">
 	<table cellpadding="0" cellspacing="0" border="0">
 		<tr>
-			<td>
+			<td valign="top">
 				<div id="map" style="float: left; width: <?php echo $map_width; ?>px; height: 100%">
 					<?php include(SNIPPETS . 'mapdiv.php'); ?>
 				</div>

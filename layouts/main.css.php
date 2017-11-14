@@ -665,6 +665,7 @@ a.menuered:hover {
 	background: <? echo BG_MENUETOP; ?>;
 	border-top: 1px solid #aaaaaa;
 	height: <? echo ($size['lagebezeichnung_bar']['height'] - 1); ?>;
+	text-align: center;
 }
 
 #lagebezeichnung{
