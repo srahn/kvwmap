@@ -55,7 +55,7 @@
 									$dateiname = $pfadteil[0];
 									$original_name = $pfadteil[1];
 									$dateinamensteil=explode('.', $dateiname);
-									$type = $dateinamensteil[1];
+									$type = strtolower($dateinamensteil[1]);
 									$thumbname = $this->get_dokument_vorschau($dateinamensteil);
 									$this->allowed_documents[] = addslashes($dateiname);
 									$this->allowed_documents[] = addslashes($thumbname);
