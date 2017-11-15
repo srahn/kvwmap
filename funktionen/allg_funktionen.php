@@ -1252,17 +1252,8 @@ function buildExpressionString($str) {
 }
 
 function getNumPagesPdf($filepath){
-	$fp = @fopen(preg_replace("/\[(.*?)\]/i", "",$filepath),"r");
-	$max=0;
-	while(!feof($fp)){
-		$line = fgets($fp,255);
-		if(preg_match('/\/Count [0-9]+/', $line, $matches)){
-			preg_match('/[0-9]+/',$matches[0], $matches2);
-			if ($max<$matches2[0]) $max=$matches2[0];
-		}
-	}
-	fclose($fp);
-	return $max;
+	exec('gs -q -dNODISPLAY -c "('.$filepath.') (r) file runpdfbegin pdfpagecount = quit"', $output);
+	return $output[0];
 }
 
 function WKT2UKO($wkt){
