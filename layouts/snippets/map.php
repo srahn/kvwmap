@@ -104,52 +104,6 @@ function printMap(){
 	document.GUI.submit();
 }
 
-function slide_legend_in(evt) {
-	document.getElementById('legenddiv').className = 'slidinglegend_slidein';
-}
-
-function slide_legend_out(evt) {
-	if(window.outerWidth - evt.pageX > 100) {
-		document.getElementById('legenddiv').className = 'slidinglegend_slideout';
-	}
-}
-
-<? if (!ie_check()){ ?>					// Firefox, Chrome
-
-function switchlegend(){
-	if (document.getElementById('legenddiv').className == 'normallegend') {
-		document.getElementById('legenddiv').className = 'slidinglegend_slideout';
-		ahah('index.php', 'go=changeLegendDisplay&hide=1', new Array('', ''), new Array("", "execute_function"));
-		document.getElementById('LegendMinMax').src='<?php echo GRAPHICSPATH; ?>maximize_legend.png';
-		document.getElementById('LegendMinMax').title="Legende zeigen";
-	}
-	else {
-		document.getElementById('legenddiv').className = 'normallegend';
-		ahah('index.php', 'go=changeLegendDisplay&hide=0', new Array('', ''), new Array("", "execute_function"));
-		document.getElementById('LegendMinMax').src='<?php echo GRAPHICSPATH; ?>minimize_legend.png';
-		document.getElementById('LegendMinMax').title="Legende verstecken";
-	}
-}
-
-<? }else{ ?>						// IE
-
-function switchlegend(){
-	if(document.getElementById('legendTable').style.display == 'none'){
-		document.getElementById('legendTable').style.display='';
-		ahah('index.php', 'go=changeLegendDisplay&hide=0', new Array('', ''), new Array("", "execute_function"));
-		document.getElementById('LegendMinMax').src='<?php echo GRAPHICSPATH; ?>maximize.png';
-		document.getElementById('LegendMinMax').title="Legende verstecken";
-	}
-	else{
-		document.getElementById('legendTable').style.display='none';
-		ahah('index.php', 'go=changeLegendDisplay&hide=1', new Array('', ''), new Array("", "execute_function"));
-		document.getElementById('LegendMinMax').src='<?php echo GRAPHICSPATH; ?>minimize.png';
-		document.getElementById('LegendMinMax').title="Legende zeigen";
-	}
-}
-
-<? } ?>
-
 </script>
 <?
 
@@ -164,7 +118,7 @@ if($this->formvars['gps_follow'] == ''){
 <div id="map_frame" style="text-align: left;position: relative; width: <?php echo ($map_width + $legend_width); ?>px;">
 	<table cellpadding="0" cellspacing="0" border="0">
 		<tr>
-			<td>
+			<td valign="top">
 				<div id="map" style="float: left; width: <?php echo $map_width; ?>px; height: 100%">
 					<?php include(SNIPPETS . 'mapdiv.php'); ?>
 				</div>

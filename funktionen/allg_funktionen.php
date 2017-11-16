@@ -17,6 +17,20 @@ function MapserverErrorHandler($errno, $errstr, $errfile, $errline){
 	return true;
 }
 
+function compare_layers($a, $b){
+	$a['alias'] = strtoupper($a['alias']);
+	$b['alias'] = strtoupper($b['alias']);
+	$a['alias'] = str_replace('Ä', 'A', $a['alias']);
+	$a['alias'] = str_replace('Ü', 'U', $a['alias']);
+	$a['alias'] = str_replace('Ö', 'O', $a['alias']);
+	$a['alias'] = str_replace('ß', 's', $a['alias']);
+	$b['alias'] = str_replace('Ä', 'A', $b['alias']);
+	$b['alias'] = str_replace('Ü', 'U', $b['alias']);
+	$b['alias'] = str_replace('Ö', 'O', $b['alias']);
+	$b['alias'] = str_replace('ß', 's', $b['alias']);	
+	return strcmp($a['alias'], $b['alias']);
+}
+
 function compare_names($a, $b){
 	return strcmp($a['name'], $b['name']);
 }
@@ -1238,17 +1252,8 @@ function buildExpressionString($str) {
 }
 
 function getNumPagesPdf($filepath){
-	$fp = @fopen(preg_replace("/\[(.*?)\]/i", "",$filepath),"r");
-	$max=0;
-	while(!feof($fp)){
-		$line = fgets($fp,255);
-		if(preg_match('/\/Count [0-9]+/', $line, $matches)){
-			preg_match('/[0-9]+/',$matches[0], $matches2);
-			if ($max<$matches2[0]) $max=$matches2[0];
-		}
-	}
-	fclose($fp);
-	return $max;
+	exec('gs -q -dNODISPLAY -c "('.$filepath.') (r) file runpdfbegin pdfpagecount = quit"', $output);
+	return $output[0];
 }
 
 function WKT2UKO($wkt){

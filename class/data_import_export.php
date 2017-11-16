@@ -862,13 +862,16 @@ class data_import_export {
 		return utf8_decode($csv);
 	}
   
-	function create_uko($layerdb, $table, $column, $epsg){
+	function create_uko($layerdb, $table, $column, $epsg, $exportfile){
 		$sql.= "SELECT st_astext(st_multi(st_union(st_transform(".$column.", ".$epsg.")))) as geom FROM ".$table;
 		#echo $sql;
 		$ret = $layerdb->execSQL($sql,4, 1);
 		if(!$ret[0]){
 			$rs=pg_fetch_array($ret[1]);
-			return WKT2UKO($rs['geom']);
+			$uko = WKT2UKO($rs['geom']);
+			$fp = fopen($exportfile, 'w');
+			fwrite($fp, $uko);
+			fclose($fp);
 		}
   }
 	
@@ -1035,6 +1038,11 @@ class data_import_export {
 					}
 					$zip = true;
 				}break;
+
+				case 'DXF' : {
+					$exportfile = $exportfile.'.dxf';
+					$this->ogr2ogr_export($sql, 'DXF', $exportfile, $layerdb);
+				}break;
 				
 				case 'GML' : {
 					$this->ogr2ogr_export($sql, 'GML', $exportfile.'.xml', $layerdb);
@@ -1067,11 +1075,7 @@ class data_import_export {
 				}break;
 				
 				case 'UKO' : {
-					$uko = $this->create_uko($layerdb, $temp_table, $this->attributes['the_geom'], $this->formvars['epsg']);
-					$exportfile = $exportfile.'.uko';
-					$fp = fopen($exportfile, 'w');
-					fwrite($fp, $uko);
-					fclose($fp);
+					$this->create_uko($layerdb, $temp_table, $this->attributes['the_geom'], $this->formvars['epsg'], $exportfile.'.uko');
 					$contenttype = 'text/uko';
 				}break;
 				

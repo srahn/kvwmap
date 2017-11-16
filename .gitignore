@@ -10,10 +10,8 @@ plugins/*/config/config.php
 plugins/*/config/config.sh
 plugins/*/img/*
 plugins/wasserrecht/results/
-<<<<<<< HEAD
 .settings
 .project
 .buildpath
-=======
 vendor/
->>>>>>> develop
+robots.txt
