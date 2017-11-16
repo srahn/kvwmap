@@ -1,12 +1,12 @@
 BEGIN;
 
-ALTER TABLE alkis.ax_punktortau ALTER COLUMN processstep_description RENAME TO processstep_ax_datenerhebung_punktort;
-ALTER TABLE alkis.ax_punktortau ALTER COLUMN herkunft_source_source_description RENAME TO herkunft_source_source_ax_datenerhebung_punktort;
+ALTER TABLE alkis.ax_punktortau RENAME COLUMN processstep_description TO processstep_ax_datenerhebung_punktort;
+ALTER TABLE alkis.ax_punktortau RENAME COLUMN herkunft_source_source_description TO herkunft_source_source_ax_datenerhebung_punktort;
 
-ALTER TABLE alkis.ax_punktortag ALTER COLUMN processstep_description RENAME TO processstep_ax_datenerhebung_punktort;
-ALTER TABLE alkis.ax_punktortag ALTER COLUMN herkunft_source_source_description RENAME TO herkunft_source_source_ax_datenerhebung_punktort;
+ALTER TABLE alkis.ax_punktortag RENAME COLUMN processstep_description TO processstep_ax_datenerhebung_punktort;
+ALTER TABLE alkis.ax_punktortag RENAME COLUMN herkunft_source_source_description TO herkunft_source_source_ax_datenerhebung_punktort;
 
-ALTER TABLE alkis.ax_punktortta ALTER COLUMN processstep_description RENAME TO processstep_ax_datenerhebung_punktort;
-ALTER TABLE alkis.ax_punktortta ALTER COLUMN herkunft_source_source_description RENAME TO herkunft_source_source_ax_datenerhebung_punktort;
+ALTER TABLE alkis.ax_punktortta RENAME COLUMN processstep_description TO processstep_ax_datenerhebung_punktort;
+ALTER TABLE alkis.ax_punktortta RENAME COLUMN herkunft_source_source_description TO herkunft_source_source_ax_datenerhebung_punktort;
 
 COMMIT;
