@@ -679,6 +679,9 @@ class ddl {
 				for($j = 0; $j < count($this->attributes['name']); $j++){
 					$dateiname = str_replace('${'.$this->attributes['name'][$j].'}', $this->get_result_value_output(0, $j, true), $dateiname);
 				}
+				for($j = 0; $j < count($this->attributes['name']); $j++){
+					$dateiname = str_replace('$'.$this->attributes['name'][$j], $this->get_result_value_output(0, $j, true), $dateiname);
+				}
 			}
 			else{
 				$currenttime = date('Y-m-d_H_i_s',time());
