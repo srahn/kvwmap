@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 172.17.0.2:3306
--- Generation Time: Nov 02, 2017 at 02:54 PM
+-- Generation Time: Nov 16, 2017 at 08:05 AM
 -- Server version: 5.5.56
 -- PHP Version: 5.6.30-0+deb8u1
 
@@ -2479,7 +2479,7 @@ CREATE TABLE `rolle` (
 --
 
 INSERT INTO `rolle` (`user_id`, `stelle_id`, `nImageWidth`, `nImageHeight`, `auto_map_resize`, `minx`, `miny`, `maxx`, `maxy`, `nZoomFactor`, `selectedButton`, `epsg_code`, `epsg_code2`, `coordtype`, `active_frame`, `last_time_id`, `gui`, `language`, `hidemenue`, `hidelegend`, `fontsize_gle`, `highlighting`, `buttons`, `scrollposition`, `result_color`, `always_draw`, `runningcoords`, `showmapfunctions`, `showlayeroptions`, `singlequery`, `querymode`, `geom_edit_first`, `overlayx`, `overlayy`, `hist_timestamp`, `instant_reload`, `menu_auto_close`, `layer_params`, `menue_buttons`, `visually_impaired`) VALUES
-(1, 1, 1198, 802, 1, 33272426.037387, 5885404.5488323, 33420192.364762, 5998452.1402624, 2, 'zoomin', '35833', '', 'dec', 0, '2017-11-01 13:43:53', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure,', 2, 1, 0, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 1, 0),
+(1, 1, 1198, 802, 1, 33261841.056916, 5885404.5488323, 33430777.345233, 5998452.1402624, 2, 'zoomin', '35833', '', 'dec', 0, '2017-11-02 15:28:26', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure,', 2, 1, 0, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 1, 0),
 (2, 2, 1198, 770, 1, 33147405.240231, 5851211.3723348, 33531659.759778, 6098071.6275827, 2, 'zoomin', '35833', NULL, 'dec', 0, '2017-10-25 14:16:41', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure', 0, 1, 0, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 0, 0),
 (5, 5, 500, 500, 1, 4501025, 6001879, 4502834, 6003236, 2, 'zoomin', '25833', NULL, 'dec', 0, '0000-00-00 00:00:00', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure', 0, 1, NULL, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 0, 0),
 (5, 1, 1198, 770, 1, 477213.69136765, 6003065.4938312, 477741.75671226, 6003404.7438312, 2, 'zoomin', '25833', NULL, 'dec', 0, '2017-10-27 13:28:49', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure', 0, 1, NULL, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 0, 0),
@@ -2548,7 +2548,7 @@ CREATE TABLE `rolle_last_query` (
 --
 
 INSERT INTO `rolle_last_query` (`user_id`, `stelle_id`, `go`, `layer_id`, `sql`, `orderby`, `limit`, `offset`) VALUES
-(1, 1, 'Layer-Suche_Suchen', 17, 'SELECT * FROM (SELECT fiswrv_behoerde.oid AS fiswrv_behoerde_oid,  id,  name,  abkuerzung,  aktuell,  adresse as adress_id,  art,  konto as konto_id  FROM fiswrv_behoerde WHERE 1=1) as query WHERE 1=1  AND ( (1=1 AND query.id = \'1\'))', ' ORDER BY fiswrv_behoerde_oid ', 10, NULL),
+(1, 1, 'Layer-Suche_Suchen', 33, 'SELECT * FROM (SELECT b.oid AS fiswrv_gewaesserbenutzungen_oid,  COALESCE(g.name,\'\') AS anlage_klasse,  f.name AS anlage_anzeige,  a.anlage AS anlage_id,  b.wasserrechtliche_zulassungen as wrz_id,  \'\' AS wasserrechtliche_zulassungen_link,  a.ausstellbehoerde,  \'\' AS ausstellbehoerde_link,   a.zustaendige_behoerde,   \'\' AS zustaendige_behoerde_link,  a.adressat AS personen_id,  \'\' AS adressat_link,  COALESCE(e.name,\'\') AS adressat_name,  COALESCE(e.namenszusatz,\'\') AS adressat_namenszusatz,  COALESCE(h.strasse,\'\') ||\'  \'|| COALESCE(h.hausnummer,\'\') AS adressat_strasse_hausnummer,  COALESCE(h.plz::text,\'\') ||\'  \'|| COALESCE(h.ort,\'\') AS adressat_plz_ort,  a.bearbeiter,  \'\' AS bearbeiter_link,  COALESCE(e.name,\'\') AS bearbeiter_name,  COALESCE(e.namenszusatz,\'\') AS bearbeiter_namenszusatz,  COALESCE(h.strasse,\'\') ||\'  \'|| COALESCE(h.hausnummer,\'\') AS bearbeiter_strasse_hausnummer,  COALESCE(h.plz::text,\'\') ||\'  \'|| COALESCE(h.ort,\'\') AS bearbeiter_plz_ort,  COALESCE(e.zimmer,\'\') AS bearbeiter_zimmer,  COALESCE(e.telefon,\'\') AS bearbeiter_telefon,  COALESCE(e.fax,\'\') AS bearbeiter_fax,  COALESCE(e.email,\'\') AS bearbeiter_email,   i.bezeichnung as wrz_bezeichnung,  a.typus,  a.bearbeiterzeichen,  a.aktenzeichen,  a.regnummer,  a.bergamt_aktenzeichen,  a.ort,   a.datum,  a.fassung_auswahl,  a.fassung_nummer,  a.fassung_typus,  a.fassung_bearbeiterzeichen,  a.fassung_aktenzeichen,  a.fassung_datum,  a.gueltig_seit,  a.befristet_bis,  a.status,  a.aktuell,  CASE WHEN a.befristet_bis < current_date THEN \'nein\' ELSE \'ja\' END AS wirksam,  a.ungueltig_seit,  a.ungueltig_aufgrund,  a.datum_postausgang, a.datum_bestand_mat,  a.datum_bestand_form,  a.dokument AS dokument,  a.nachfolger AS nachfolger,  a.vorgaenger AS vorgaenger,  a.freigegeben as wrz_freigegeben,  b.id as gwb_id,  b.kennnummer,  b.wasserbuchnummer,  c.bezeichnung,  b.freitext_art,  b.art,  b.freitext_zweck,  b.zweck,  b.ent_wb_alt,  b.ent_datum_von,  b.ent_datum_bis,  b.max_ent_wee,  b.max_ent_wee_beschreib,  b.max_ent_wee_reduziert,  b.max_ent_wb,  b.max_ent_wb_beschreib,  b.freigegeben,  \'\' AS gewaesserbenutzungen_lage,  \'\' AS gewaesserbenutzungen_umfang  FROM fiswrv_gewaesserbenutzungen b LEFT JOIN fiswrv_gewaesserbenutzungen_bezeichnung c ON c.id = b.id LEFT JOIN fiswrv_wasserrechtliche_zulassungen a ON b.wasserrechtliche_zulassungen = a.id LEFT JOIN fiswrv_wasserrechtliche_zulassungen_bezeichnung i ON a.id = i.id LEFT JOIN fiswrv_anlagen f ON a.anlage=f.id  LEFT JOIN fiswrv_anlagen_klasse g ON f.klasse=g.id LEFT JOIN fiswrv_personen e ON a.adressat=e.id LEFT JOIN fiswrv_adresse h ON e.adresse=h.id  WHERE 1=1) as query WHERE 1=1  AND ( (1=1 AND query.gwb_id = \'1\'))', ' ORDER BY fiswrv_gewaesserbenutzungen_oid ', 10, NULL),
 (2, 2, 'Layer-Suche_Suchen', 2, 'SELECT * FROM (SELECT a.oid AS fiswrv_anlagen_oid,  a.id AS anlage_id,  a.name,  a.klasse,  a.zustaend_stalu,  a.zustaend_uwb,  a.abwasser_koerperschaft,  a.trinkwasser_koerperschaft,  \'\' AS wasserrechtliche_zulassungen,  true AS aktuell,  \'\' AS gewaesserbenutzungen,   a.betreiber,  a.anlage_bearbeiter_name ,  a.anlage_bearbeiter_stelle,  a.anlage_bearbeiter_datum,  a.kommentar,  a.the_geom  FROM fiswrv_anlagen a WHERE 1=1) as query WHERE 1=1  AND ( (1=1)) AND (the_geom && st_transform(st_geomfromtext(\'POLYGON((33201165.000009 5867814.9999175, 33477900 5867814.9999175, 33477900 6081468, 33201165.000009 6081468, 33201165.000009 5867814.9999175))\', 35833), 35833) OR the_geom IS NULL)', ' ORDER BY fiswrv_anlagen_oid ', 10, NULL);
 
 -- --------------------------------------------------------
@@ -2590,7 +2590,7 @@ CREATE TABLE `search_attributes2rolle` (
 --
 
 INSERT INTO `search_attributes2rolle` (`name`, `user_id`, `stelle_id`, `layer_id`, `attribute`, `operator`, `value1`, `value2`, `searchmask_number`, `searchmask_operator`) VALUES
-('<last_search>', 1, 1, 17, 'id', '=', '1', '', 0, '');
+('<last_search>', 1, 1, 33, 'gwb_id', '=', '1', '', 0, '');
 
 -- --------------------------------------------------------
 
@@ -3376,7 +3376,8 @@ INSERT INTO `u_consume` (`user_id`, `stelle_id`, `time_id`, `activity`, `nimagew
 (1, 1, '2017-10-30 11:19:05', 'getMap', 1198, 802, '35833', 33272426.037387, 5885404.5488323, 33420192.364762, 5998452.1402624, '2017-10-30 11:18:40', NULL),
 (1, 1, '2017-10-30 11:19:34', 'getMap', 1198, 802, '35833', 33272426.037387, 5885404.5488323, 33420192.364762, 5998452.1402624, '2017-10-30 11:19:05', NULL),
 (1, 1, '2017-10-30 11:36:52', 'getMap', 1198, 802, '35833', 33272426.037387, 5885404.5488323, 33420192.364762, 5998452.1402624, '2017-10-30 11:19:34', NULL),
-(1, 1, '2017-11-01 13:43:53', 'getMap', 1198, 802, '35833', 33272426.037387, 5885404.5488323, 33420192.364762, 5998452.1402624, '2017-10-30 11:36:52', NULL);
+(1, 1, '2017-11-01 13:43:53', 'getMap', 1198, 802, '35833', 33272426.037387, 5885404.5488323, 33420192.364762, 5998452.1402624, '2017-10-30 11:36:52', NULL),
+(1, 1, '2017-11-02 15:28:26', 'getMap', 1198, 802, '35833', 33272426.037387, 5885404.5488323, 33420192.364762, 5998452.1402624, '2017-11-01 13:43:53', NULL);
 
 -- --------------------------------------------------------
 
