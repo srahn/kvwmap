@@ -479,8 +479,15 @@ class ddl {
 		$text = str_replace('$pagenumber', $pagenumber, $text);
 		$text = str_replace('$pagecount', $pagecount, $text);		
 		$text = str_replace(';', chr(10), $text);
-		for($j = 0; $j < count($this->attributes['name']); $j++){
-			$text = str_replace('$'.$this->attributes['name'][$j], $this->get_result_value_output($i, $j, true), $text);
+		if(strpos($text, '${') !== false){
+			for($j = 0; $j < count($this->attributes['name']); $j++){
+				$text = str_replace('${'.$this->attributes['name'][$j].'}', $this->get_result_value_output($i, $j, true), $text);
+			}
+		}
+		if(strpos($text, '$') !== false){
+			for($j = 0; $j < count($this->attributes['name']); $j++){
+				$text = str_replace('$'.$this->attributes['name'][$j], $this->get_result_value_output($i, $j, true), $text);
+			}
 		}
   	return $text;
   }
