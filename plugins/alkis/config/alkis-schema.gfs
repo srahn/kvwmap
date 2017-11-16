@@ -1,4 +1,3 @@
-
 <GMLFeatureClassList>
   <GMLFeatureClass>
     <Name>ax_benutzer</Name>
@@ -2398,6 +2397,11 @@
       <Type>String</Type>
       <Width>28</Width>
     </PropertyDefn>
+    <GeomPropertyDefn>
+      <Name>objektkoordinaten</Name>
+      <ElementPath>objektkoordinaten</ElementPath>
+      <GeometryType>1</GeometryType>
+    </GeomPropertyDefn>
     <PropertyDefn>
       <Name>gml_id</Name>
       <ElementPath>gml_id</ElementPath>
@@ -2559,6 +2563,11 @@
       <Type>String</Type>
       <Width>28</Width>
     </PropertyDefn>
+    <GeomPropertyDefn>
+      <Name>objektkoordinaten</Name>
+      <ElementPath>objektkoordinaten</ElementPath>
+      <GeometryType>1</GeometryType>
+    </GeomPropertyDefn>
     <PropertyDefn>
       <Name>gml_id</Name>
       <ElementPath>gml_id</ElementPath>
@@ -8503,6 +8512,11 @@
         <ElementPath>position</ElementPath>
         <GeometryType>0</GeometryType>
       </GeomPropertyDefn>
+    <GeomPropertyDefn>
+      <Name>objektkoordinaten</Name>
+      <ElementPath>objektkoordinaten</ElementPath>
+      <GeometryType>1</GeometryType>
+    </GeomPropertyDefn>
     <PropertyDefn>
       <Name>gml_id</Name>
       <ElementPath>gml_id</ElementPath>
@@ -23887,6 +23901,11 @@
         <ElementPath>position</ElementPath>
         <GeometryType>0</GeometryType>
       </GeomPropertyDefn>
+    <GeomPropertyDefn>
+      <Name>objektkoordinaten</Name>
+      <ElementPath>objektkoordinaten</ElementPath>
+      <GeometryType>1</GeometryType>
+    </GeomPropertyDefn>
     <PropertyDefn>
       <Name>gml_id</Name>
       <ElementPath>gml_id</ElementPath>
