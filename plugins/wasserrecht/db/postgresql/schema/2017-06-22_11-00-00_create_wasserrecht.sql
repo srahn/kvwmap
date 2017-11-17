@@ -133,7 +133,12 @@ CREATE TABLE wasserrecht.fiswrv_personen(
   	behoerde integer REFERENCES wasserrecht.fiswrv_behoerde(id),
   	register_amtsgericht varchar(255),
   	register_nummer varchar(255),
-  	konto integer REFERENCES wasserrecht.fiswrv_konto(id)
+  	konto integer REFERENCES wasserrecht.fiswrv_konto(id),
+  	bearbeiter_name varchar(255),
+  	bearbeiter_id varchar(10),
+  	bearbeitungs_datum date,
+  	stelle_name varchar(255),
+  	stelle_id varchar(10)
 )WITH OIDS;
 
 -- ANLAGEN
@@ -149,14 +154,16 @@ CREATE TABLE wasserrecht.fiswrv_anlagen(
 	zustaend_uwb integer NOT NULL REFERENCES wasserrecht.fiswrv_behoerde(id),
   	zustaend_stalu integer NOT NULL REFERENCES wasserrecht.fiswrv_behoerde(id),
   	betreiber integer REFERENCES wasserrecht.fiswrv_personen(id),
-  	anlage_bearbeiter_name varchar(255),
-  	anlage_bearbeiter_datum varchar(255),
-  	anlage_bearbeiter_stelle varchar(255),
   	objektid_geodin varchar(255),
 	abwasser_koerperschaft integer REFERENCES wasserrecht.fiswrv_koerperschaft(id),
 	trinkwasser_koerperschaft integer REFERENCES wasserrecht.fiswrv_koerperschaft(id),
 	kommentar text,
-	the_geom geometry(Point, 35833)
+	the_geom geometry(Point, 35833),
+	bearbeiter_name varchar(255),
+  	bearbeiter_id varchar(10),
+  	bearbeitungs_datum date,
+  	stelle_name varchar(255),
+  	stelle_id varchar(10)
 ) WITH OIDS;
 COMMENT ON COLUMN wasserrecht.fiswrv_anlagen.id IS 'Primärschlüssel der Fis-WrV Objekte';
 COMMENT ON COLUMN wasserrecht.fiswrv_anlagen.name IS 'Name der Fis-WrV Objekte';
@@ -221,7 +228,12 @@ CREATE TABLE wasserrecht.fiswrv_wasserrechtliche_zulassungen(
 	dokument varchar(255),
 	nachfolger integer REFERENCES wasserrecht.fiswrv_wasserrechtliche_zulassungen(id),
 	vorgaenger integer REFERENCES wasserrecht.fiswrv_wasserrechtliche_zulassungen(id),
-	freigegeben boolean DEFAULT false
+	freigegeben boolean DEFAULT false,
+	bearbeiter_name varchar(255),
+  	bearbeiter_id varchar(10),
+  	bearbeitungs_datum date,
+  	stelle_name varchar(255),
+  	stelle_id varchar(10)
 )WITH OIDS;
 
 --GEWÄSSERBENUTZUNGEN
@@ -293,7 +305,12 @@ CREATE TABLE wasserrecht.fiswrv_gewaesserbenutzungen(
 	max_ent_wb numeric,
 	max_ent_wb_beschreib text,
 	wasserrechtliche_zulassungen integer NOT NULL REFERENCES wasserrecht.fiswrv_wasserrechtliche_zulassungen(id),
-	freigegeben boolean DEFAULT false
+	freigegeben boolean DEFAULT false,
+	bearbeiter_name varchar(255),
+  	bearbeiter_id varchar(10),
+  	bearbeitungs_datum date,
+  	stelle_name varchar(255),
+  	stelle_id varchar(10)
 )WITH OIDS;
 
 CREATE TABLE wasserrecht.fiswrv_gewaesserbenutzungen_lage(
@@ -317,7 +334,12 @@ CREATE TABLE wasserrecht.fiswrv_gewaesserbenutzungen_lage(
 	*/
 	gewaesserbenutzungen integer NOT NULL REFERENCES wasserrecht.fiswrv_gewaesserbenutzungen(id),
 	freigegeben boolean DEFAULT false,
-	the_geo geometry(Point, 35833)
+	the_geo geometry(Point, 35833),
+	bearbeiter_name varchar(255),
+  	bearbeiter_id varchar(10),
+  	bearbeitungs_datum date,
+  	stelle_name varchar(255),
+  	stelle_id varchar(10)
 )WITH OIDS;
 
 CREATE TABLE wasserrecht.fiswrv_gewaesserbenutzungen_umfang_name(

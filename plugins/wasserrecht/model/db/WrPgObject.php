@@ -24,31 +24,42 @@ abstract class WrPgObject extends PgObject
     }
     
     public function getName() {
-        if(!empty($this->data))
-        {
-            return $this->data['name'];
-        }
-        else
-        {
-            return null;
-        }
+        return $this->getDataValue('name');
     }
     
     public function getId() {
-        if(!empty($this->data))
-        {
-            return $this->data['id'];
-        }
-        else
-        {
-            return null;
-        }
+        return $this->getDataValue('id');
     }
     
     public function getAbkuerzung() {
+        return $this->getDataValue('abkuerzung');
+    }
+    
+    public function getBearbeiterName() {
+        return $this->getDataValue('bearbeiter_name');
+    }
+    
+    public function getBearbeiterId() {
+        return $this->getDataValue('bearbeiter_id');
+    }
+    
+    public function getBearbeitungsDatum() {
+        return $this->getDataValue('bearbeitungs_datum');
+    }
+    
+    public function getStelleName() {
+        return $this->getDataValue('stelle_name');
+    }
+    
+    public function getStelleId() {
+        return $this->getDataValue('stelle_id');
+    }
+    
+    public function getDataValue($dataFieldName)
+    {
         if(!empty($this->data))
         {
-            return $this->data['abkuerzung'];
+            return $this->data[$dataFieldName];
         }
         else
         {
