@@ -93,6 +93,20 @@ $sizes = array(
 # zusätzliche Legende; muss unterhalb von snippets liegen
 #define('LEGEND_GRAPHIC_FILE', '');		# Version 2.7
 
+# Höhe und Breite der generierten Legendenbilder für verschiedene Layertypen			# Version 2.8
+$legendicon_size = array(
+	'width' => array(
+		0 => 18,			# Punktlayer
+		1 => 18,			# Linienlayer
+		2 => 18				# Flächenlayer
+	),
+	'height' => array(
+		0 => 18,			# Punktlayer
+		1 => 12,			# Linienlayer
+		2 => 12				# Flächenlayer
+	)
+);
+
 # login.php
 define('LOGIN', 'login.php');																# Version 1.8.0
 # Seite zur Fehlerbehandlung, die durch fehlerhafte Layer verursacht werden; unterhalb von /snippets

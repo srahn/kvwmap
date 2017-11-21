@@ -1337,7 +1337,6 @@ class rolle {
 	}
 	
 	function saveOverlayPosition($x, $y){
-		if($x < 0)$x = 10;
 		$sql ="UPDATE rolle SET overlayx = ".$x.", overlayy=".abs($y);
 		$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 		#echo $sql;

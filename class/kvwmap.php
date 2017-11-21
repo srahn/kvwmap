@@ -178,7 +178,8 @@ class GUI {
 						<ul>';
 						if ($layer[0]['connectiontype']==6) {
 							echo '<li><a href="javascript:zoomToMaxLayerExtent('.$this->formvars['layer_id'].')">'.$this->FullLayerExtent.'</a></li>';
-						}
+							echo '<li><a href="index.php?go=Layer-Suche&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->strSearch.'</a></li>';
+						}						
 						if($layer[0]['Class'][0]['Name'] != ''){
 							if($layer[0]['showclasses'] != ''){
 								echo '<li><a href="javascript:getlegend(\''.$layer[0]['Gruppe'].'\', '.$this->formvars['layer_id'].', document.GUI.nurFremdeLayer.value);closeLayerOptions('.$this->formvars['layer_id'].')">';
@@ -458,6 +459,7 @@ class GUI {
   }
 	
 	function create_layer_legend($layer){
+		global $legendicon_size;
 		$visible = $this->check_layer_visibility($layer);
 		# sichtbare Layer
 		if ($visible) {
@@ -614,7 +616,8 @@ class GUI {
 								if($layer['Class'][$k]['legendimagewidth'] != '')$width = $layer['Class'][$k]['legendimagewidth'];
 								if($layer['Class'][$k]['legendimageheight'] != '')$height = $layer['Class'][$k]['legendimageheight'];
 								$padding = 1;
-								if($layer['Class'][$k]['legendgraphic'] != ''){								# eigenes Klassenbild
+								###### eigenes Klassenbild ######
+								if($layer['Class'][$k]['legendgraphic'] != ''){
 									$imagename = $original_class_image = GRAPHICSPATH . 'custom/' . $layer['Class'][$k]['legendgraphic'];
 									if($width == ''){
 										$size = getimagesize($imagename);
@@ -622,12 +625,10 @@ class GUI {
 										$height = $size[1];
 									}
 								}
-								else{																													# generiertes Klassenbild
-									if($width == '')$width = 18;
-									if($height == ''){
-										if($maplayer->type == 0)$height = 18;	# Punktlayer
-										else $height = 12;
-									}
+								###### generiertes Klassenbild ######
+								else{
+									if($width == '')$width = $legendicon_size['width'][$maplayer->type];
+									if($height == '')$height = $legendicon_size['height'][$maplayer->type];
 									if($layer['Class'][$k]['Style'][0]['colorrange'] != ''){		# generierte Color-Ramp
 										$padding = 0;
 										$newname = rand(0, 1000000).'.jpg';
@@ -641,6 +642,7 @@ class GUI {
 									}
 									$imagename = $original_class_image = TEMPPATH_REL.$newname;
 								}
+								####################################
 								$classid = $layer['Class'][$k]['Class_ID'];
 								if($this->mapDB->disabled_classes['status'][$classid] == '0'){
 									if($height < $width)$height1 = 12;
