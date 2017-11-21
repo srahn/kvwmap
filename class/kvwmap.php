@@ -7305,7 +7305,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				}
 			}
 			$expression = @array_values($this->formvars['expression']);
+			$classification = @array_values($this->formvars['classification']);
+			$legendgraphic = @array_values($this->formvars['legendgraphic']);
+			$legendimagewidth = @array_values($this->formvars['legendimagewidth']);
+			$legendimageheight = @array_values($this->formvars['legendimageheight']);
 			$order = @array_values($this->formvars['order']);
+			$legendorder = @array_values($this->formvars['legendorder']);
 			$ID = @array_values($this->formvars['ID']);
 			for($i = 0; $i < count($name); $i++){
 				$attrib['name'] = $name[$i];
@@ -7316,7 +7321,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				}
 				$attrib['layer_id'] = $this->formvars['selected_layer_id'];
 				$attrib['expression'] = $expression[$i];
+				$attrib['classification'] = $classification[$i];
+				$attrib['legendgraphic'] = $legendgraphic[$i];
+				$attrib['legendimagewidth'] = $legendimagewidth[$i];
+				$attrib['legendimageheight'] = $legendimageheight[$i];
 				$attrib['order'] = $order[$i];
+				$attrib['legendorder'] = $legendorder[$i];
 				$class_id = $mapDB->new_Class($attrib);
 				# Styles übernehmen (in u_styles2classes eintragen)
 				$styles = $mapDB->read_Styles($ID[$i]);
@@ -16834,20 +16844,22 @@ class db_mapObj{
 		global $supportedLanguages;
     if(is_array($classdata)){
       $attrib = $classdata;         # Attributarray wurde übergeben
-      # attrib:(Name, Layer_ID, Expression, drawingorder)
+			if($attrib['legendimagewidth'] == '')$attrib['legendimagewidth'] = 'NULL';
+			if($attrib['legendimageheight'] == '')$attrib['legendimageheight'] = 'NULL';
+      # attrib:(Name, Layer_ID, Expression, classification, legendgraphic, legendimagewidth, legendimageheight, drawingorder, legendorder)
       $sql = 'INSERT INTO classes (Name, ';
 			foreach($supportedLanguages as $language){
 				if($language != 'german'){
 					$sql.= '`Name_'.$language.'`, ';
 				}
 			}
-			$sql.= 'Layer_ID, Expression, classification, drawingorder) VALUES ("'.$attrib['name'].'",';
+			$sql.= 'Layer_ID, Expression, classification, legendgraphic, legendimagewidth, legendimageheight, drawingorder, legendorder) VALUES ("'.$attrib['name'].'",';
 			foreach($supportedLanguages as $language){
 				if($language != 'german'){
 					$sql.= '"'.$attrib['name_'.$language].'",';
 				}
 			}
-			$sql.= $attrib['layer_id'].', "'.$attrib['expression'].'", "' . $attrib['classification'] . '", "'.$attrib['order'].'")';
+			$sql.= $attrib['layer_id'].', "'.$attrib['expression'].'", "'.$attrib['classification'].'", "'.$attrib['legendgraphic'].'", '.$attrib['legendimagewidth'].', '.$attrib['legendimageheight'].', "'.$attrib['order'].'", "'.$attrib['legendorder'].'")';
     }
     else{
       $class = $classdata;        # Classobjekt wurde übergeben
