@@ -10870,20 +10870,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->output();
   }
 
- /**
-  * Läd das Formular zur Eingabe von Benutzerdaten
-  *
-  * Die Funktion läd das Template userdaten_formular.php trägt existierende Werte vom Benutzer ein, wenn es um eine Änderung geht und stellt die Stellenname zur Auswahl bereit, zu der der Nutzer Zugang hat
-  *
-  * Reihenfolge: Übersichtssatz - Kommentar - Tags.
-  *
-  * @see    BenutzerLöschen(), BenutzerdatenAnzeigen(), BenutzerdatenAnlegen(), BenutzerdatenAendern(), $postgres, $alb
-  */
   function BenutzerdatenFormular() {
     $this->titel='Benutzerdaten Editor';
     $this->main='userdaten_formular.php';
     # Abfragen der Benutzerdaten wenn eine user_id zur Änderung selektiert ist
-    if ($this->formvars['selected_user_id']>0) {
+    if($this->formvars['selected_user_id']>0){
       $this->userdaten=$this->user->getUserDaten($this->formvars['selected_user_id'],'','');
       $this->formvars['nachname']=$this->userdaten[0]['Name'];
       $this->formvars['vorname']=$this->userdaten[0]['Vorname'];
@@ -10898,6 +10889,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     # Abfragen der Stellen des Nutzers
       $this->selected_user=new user(0,$this->formvars['selected_user_id'],$this->user->database);
       $this->formvars['selstellen']=$this->selected_user->getStellen(0);
+		# Abfragen der aktiven Layer des Nutzers
+			$mapDB = new db_mapObj($this->userdaten[0]['stelle_id'], $this->formvars['selected_user_id']);
+			$mapDB->nurAktiveLayer = true;
+			$this->active_layers = array_reverse($mapDB->read_Layer(0, $this->Stelle->useLayerAliases, NULL));
     }
     # Abfragen aller möglichen Stellen
     $this->formvars['stellen']=$this->Stelle->getStellen('Bezeichnung');
@@ -11015,7 +11010,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     }
     $this->BenutzerdatenFormular();
   }
-
+	
+	function BenutzerdatenLayerDeaktivieren(){
+		$user_rolle = new rolle($this->formvars['user_id'], $this->formvars['stelle_id'], $this->database);
+		$user_rolle->setOneLayer($this->formvars['layer_id'], 0);
+	}
+	
 	function BenutzerNachStellenAnzeigen(){
     $this->titel='Benutzer-Stellen-Übersicht';
     $this->main='userstellendaten.php';

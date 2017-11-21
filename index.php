@@ -1473,6 +1473,17 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->checkCaseAllowed('Benutzerdaten_Formular');
 			$GUI->BenutzerdatenAendern();
 	  } break;
+		
+		case 'Benutzerdaten_Layer_Deaktivieren' : {
+			$GUI->checkCaseAllowed('Benutzerdaten_Formular');
+			$GUI->BenutzerdatenLayerDeaktivieren();
+	  } break;
+		
+		case 'als_nutzer_anmelden' : {
+			$GUI->checkCaseAllowed('Benutzerdaten_Formular');
+			$_SESSION['login_name'] = $GUI->formvars['loginname'];
+			header('location: index.php');
+	  } break;		
 
 		case 'cronjobs_anzeigen' : {
 			$GUI->checkCaseAllowed('cronjobs_anzeigen');
