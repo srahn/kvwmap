@@ -610,7 +610,7 @@ class rolle {
 		if($limit == '')$limit = 'NULL';
 		if($offset == '')$offset = 'NULL';
 		$sql = "INSERT INTO rolle_last_query (user_id, stelle_id, go, layer_id, `sql`, orderby, `limit`, `offset`) VALUES (";
-		$sql.= $this->user_id.", ".$this->stelle_id.", '".$go."', ".$layer_id.", '".addslashes($query)."', '".$sql_order."', ".$limit.", ".$offset.")";
+		$sql.= $this->user_id.", ".$this->stelle_id.", '".$go."', ".$layer_id.", '".addslashes($query)."', '".addslashes($sql_order)."', ".$limit.", ".$offset.")";
 		$this->debug->write("<p>file:rolle.php class:rolle->save_last_query - Speichern der letzten Abfrage:",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
