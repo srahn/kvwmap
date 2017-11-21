@@ -21,7 +21,7 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
         $keyEscaped = htmlspecialchars($key);
         $valueEscaped = htmlspecialchars($value);
         
-        if(startsWith($keyEscaped, ERKLAERUNG_FREIGEBEN_UR))
+        if(startsWith($keyEscaped, ERKLAERUNG_FREIGEBEN_URL))
         {
             $findDefaultWrz = false;
             erklaerung_freigeben($this, $valueEscaped, $wrz, $gewaesserbenutzung, $erhebungsjahr, true, $errorEingabeErklaerung, $speereEingabeErklaerung);
