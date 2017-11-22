@@ -1472,7 +1472,8 @@ class flurstueck {
 	}
 	
 	function outputEigentuemerShort($eigentuemer, $adressAenderungen = NULL, $indent = NULL, $database = NULL){
-		$Eigentuemer .= '<tr><td colspan="2"><table cellpadding="0" cellspacing="0"><tr><td valign="top" style="padding-right: 4">'.$eigentuemer->Nr.'</td><td valign="top" style="padding-right: 4">'.$eigentuemer->Name[0];
+		$Eigentuemer .= '<tr><td colspan="2"><table cellpadding="0" cellspacing="0"><tr><td valign="top" style="padding-right: 4">'.$eigentuemer->Nr.'</td><td valign="top" style="padding-right: 4">';
+		$Eigentuemer .= '<a href="index.php?go=Namen_Auswaehlen_Suchen&gml_id='.$eigentuemer->gml_id.'&withflurst=on&anzahl='.MAXQUERYROWS.'">'.$eigentuemer->Name[0].'</a>';
 		if($eigentuemer->zusatz_eigentuemer != ''){
 			$Eigentuemer .= '</td></tr><tr><td colspan="2">'.$eigentuemer->zusatz_eigentuemer; if($eigentuemer->Anteil != '')$Eigentuemer .= ' zu '.$eigentuemer->Anteil; $Eigentuemer .= '</td></tr><tr><td>';
 		}
@@ -1497,7 +1498,9 @@ class flurstueck {
 												<tr>
 													<td>';
 			for ($n=0;$n<$anzNamenszeilen;$n++){
+				if($n == 0)$Eigentuemer .= '<a href="index.php?go=Namen_Auswaehlen_Suchen&gml_id='.$eigentuemer->gml_id.'&withflurst=on&anzahl='.MAXQUERYROWS.'">';
 				if(!($eigentuemer->Name_bearb[$n]=="" OR $eigentuemer->Name_bearb[$n]==' '))$Eigentuemer .= $eigentuemer->Name_bearb[$n].'<br>';
+				if($n == 0)$Eigentuemer .= '</a>';
 			}
 			if($adressaenderungen['user_id'] != ''){
 					$Eigentuemer .= '<span class="fett"><u>Aktualisierte Anschrift ('.$aendatum.' - '.$user->Name.'):</u></span><br>';
@@ -2168,7 +2171,7 @@ class flurstueck {
   }
 
   function getNamen($formvars,$ganze_gemkg_ids, $eingeschr_gemkg_ids) {
-    if ($formvars['name1']=='' AND $formvars['name2']=='' AND $formvars['name3']=='' AND $formvars['name4']=='' AND $formvars['name5']=='' AND $formvars['name6']=='' AND $formvars['name7']=='' AND $formvars['name8']=='') {
+    if ($formvars['name1']=='' AND $formvars['name2']=='' AND $formvars['name3']=='' AND $formvars['name4']=='' AND $formvars['name5']=='' AND $formvars['name6']=='' AND $formvars['name7']=='' AND $formvars['name8']=='' AND $formvars['gml_id']=='') {
       $ret[0]=1;
       $ret[1]='<br>Geben Sie mindestens einen Suchbegriff ein!';
     }

@@ -3757,12 +3757,14 @@ class GUI {
 	      } # Ende mit Flurstücke erfolgreich abgefragt
 	    } # Ende mit Suchparameter sind in Ordnung
   	}
+		$this->user->rolle->delete_last_query();
+		$this->user->rolle->save_last_query('Grundbuchblatt_Auswaehlen_Suchen', 0, $this->formvars['selBlatt'], NULL, NULL, NULL);
   	$this->grundbuchblattanzeige($gbblaetter);
   }
 
   function grundbuchblattanzeige($gbblaetter) {
     $this->main='grundbuchblattanzeige.php';
-    $this->titel='Buchungen zum Grundbuchblatt';
+    $this->titel='Buchungen zum Grundbuchblatt';		
     $this->gbblaetter=$gbblaetter;
     $this->output();
   }

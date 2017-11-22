@@ -729,6 +729,9 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  #2006-01-03 pk
 	  case 'Grundbuchblatt_Auswaehlen_Suchen' : {
 			$GUI->checkCaseAllowed('Grundbuchblatt_Auswaehlen');
+			if($GUI->last_query != ''){
+				$GUI->formvars['selBlatt'] = $GUI->last_query[0]['sql'];
+			}
 			$GUI->grundbuchblattSuchen();
 	  } break;
 

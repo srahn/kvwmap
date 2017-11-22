@@ -2025,7 +2025,8 @@ FROM
 		$n5 = '%'.$formvars['name5'].'%';
 		$n6 = '%'.$formvars['name6'].'%';
 		$n7 = '%'.$formvars['name7'].'%';
-		$n8 = '%'.$formvars['name8'].'%';		
+		$n8 = '%'.$formvars['name8'].'%';
+		$gml_id = $formvars['gml_id'];
 		$bezirk = $formvars['bezirk'];
 		$blatt = $formvars['blatt'];		
 		$gemkgschl = $formvars['GemkgID'];
@@ -2053,6 +2054,7 @@ FROM
 		if($n6 != '%%')$sql.=" AND lower(replace(hausnummer, ' ', '')) LIKE lower(replace('".$n6."', ' ', '')) ";
 		if($n7 != '%%')$sql.=" AND lower(postleitzahlpostzustellung) LIKE lower('".$n7."') ";
 		if($n8 != '%%')$sql.=" AND lower(ort_post) LIKE lower('".$n8."') ";
+		if($gml_id != '')$sql.=" AND p.gml_id = '".$gml_id."'";
 
     if($bezirk!='') {
       $sql.=" AND b.schluesselgesamt=".(int)$bezirk;

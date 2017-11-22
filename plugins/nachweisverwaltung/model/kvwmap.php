@@ -1090,6 +1090,8 @@
     $GUI->formvars['Bilddatei']=NACHWEISDOCPATH.$nachweis->document['link_datei'];
     $GUI->formvars['andere_art']=$nachweis->document['andere_art'];
 		$GUI->formvars['fortfuehrung']=$nachweis->document['fortfuehrung'];
+		$GUI->formvars['bemerkungen']=$nachweis->document['bemerkungen'];
+		$GUI->formvars['bemerkungen_intern']=$nachweis->document['bemerkungen_intern'];
     $GUI->formvars['id'] = '';
     $GUI->nachweisFormAnzeige($nachweis);
 	};
