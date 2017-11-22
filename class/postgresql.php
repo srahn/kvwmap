@@ -2169,7 +2169,7 @@ FROM
 	}
   
   function getGemarkungName($GemkgSchl) {
-    $sql ="SELECT bezeichnung as gemkgname FROM alkis.ax_gemarkung WHERE schluesselgesamt = ".$GemkgSchl;
+    $sql ="SELECT bezeichnung as gemkgname FROM alkis.ax_gemarkung WHERE schluesselgesamt = '".$GemkgSchl."'";
 		$sql.= $this->build_temporal_filter(array('ax_gemarkung'));
     $this->debug->write("<p>postgres.sql getGemarkungName Abfragen des Gemarkungsnamen:<br>".$sql,4);
     $queryret=$this->execSQL($sql, 4, 0);

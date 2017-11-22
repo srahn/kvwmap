@@ -57,7 +57,13 @@
     if (isset ($mime_type)) $this->mime_type=$mime_type;
 		$this->scaleUnitSwitchScale = 239210;
   }
-	function loadMultiLingualText($language) {
+
+	public function __call($method, $arguments){
+		if(isset($this->{$method}) && is_callable($this->{$method})){
+			return call_user_func_array($this->{$method}, $arguments);
+    }
+	}
+		function loadMultiLingualText($language) {
     #echo 'In der Rolle eingestellte Sprache: '.$GUI->user->rolle->language;
     $this->Stelle->language=$language;
     $this->Stelle->getName();
