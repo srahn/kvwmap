@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 172.17.0.2:3306
--- Generation Time: Nov 17, 2017 at 04:09 PM
+-- Generation Time: Nov 22, 2017 at 05:23 PM
 -- Server version: 5.5.56
 -- PHP Version: 5.6.30-0+deb8u1
 
@@ -2579,7 +2579,7 @@ CREATE TABLE `rolle` (
 --
 
 INSERT INTO `rolle` (`user_id`, `stelle_id`, `nImageWidth`, `nImageHeight`, `auto_map_resize`, `minx`, `miny`, `maxx`, `maxy`, `nZoomFactor`, `selectedButton`, `epsg_code`, `epsg_code2`, `coordtype`, `active_frame`, `last_time_id`, `gui`, `language`, `hidemenue`, `hidelegend`, `fontsize_gle`, `highlighting`, `buttons`, `scrollposition`, `result_color`, `always_draw`, `runningcoords`, `showmapfunctions`, `showlayeroptions`, `singlequery`, `querymode`, `geom_edit_first`, `overlayx`, `overlayy`, `hist_timestamp`, `instant_reload`, `menu_auto_close`, `layer_params`, `menue_buttons`, `legendtype`, `visually_impaired`) VALUES
-(1, 1, 1198, 802, 1, 33304623.840347, 5882446.4235432, 33433865.824576, 5981322.0962914, 2, 'zoomin', '35833', '', 'dec', 0, '2017-11-17 16:05:26', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure,', 2, 1, 0, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 1, 0, 0),
+(1, 1, 1198, 768, 1, 33292090.868785, 5882446.4235431, 33446398.796138, 5981322.0962915, 2, 'zoomin', '35833', '', 'dec', 0, '2017-11-17 16:05:26', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure,', 2, 1, 0, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 1, 0, 0),
 (2, 2, 1198, 770, 1, 33147405.240231, 5851211.3723348, 33531659.759778, 6098071.6275827, 2, 'zoomin', '35833', NULL, 'dec', 0, '2017-10-25 14:16:41', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure', 0, 1, 0, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 0, 0, 0),
 (5, 5, 500, 500, 1, 4501025, 6001879, 4502834, 6003236, 2, 'zoomin', '25833', NULL, 'dec', 0, '0000-00-00 00:00:00', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure', 0, 1, NULL, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 0, 0, 0),
 (5, 1, 1198, 770, 1, 477213.69136765, 6003065.4938312, 477741.75671226, 6003404.7438312, 2, 'zoomin', '25833', NULL, 'dec', 0, '2017-10-27 13:28:49', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure', 0, 1, NULL, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 0, 0, 0),
