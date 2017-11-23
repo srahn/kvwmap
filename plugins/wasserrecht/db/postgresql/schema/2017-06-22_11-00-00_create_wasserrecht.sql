@@ -13,7 +13,7 @@ CREATE TABLE wasserrecht.fiswrv_adresse(
 	id serial PRIMARY KEY,
 	strasse varchar(255),
 	hausnummer varchar(10),
-	plz integer,
+	plz varchar(100),
 	ort varchar(255)
 ) WITH OIDS;
 
@@ -110,7 +110,7 @@ CREATE TABLE wasserrecht.fiswrv_personen_typ(
 CREATE TABLE wasserrecht.fiswrv_personen(
 	id serial PRIMARY KEY,
 	name varchar(255) NOT NULL,
-	abkuerzung varchar(30) NOT NULL,
+	abkuerzung varchar(100) NOT NULL,
 	namenszusatz varchar(255),
 	klasse integer REFERENCES wasserrecht.fiswrv_personen_klasse(id),
 	status integer REFERENCES wasserrecht.fiswrv_personen_status(id),
