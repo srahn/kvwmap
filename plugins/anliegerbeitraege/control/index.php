@@ -2,10 +2,10 @@
 
 	$this->goNotExecutedInPlugins = false;
 	
-	switch($this->go){
+	switch($go){
 		# Anliegerbeiträge
 	  case 'anliegerbeitraege' : {
-			$this->checkCaseAllowed($this->go);
+			$this->checkCaseAllowed($go);
 			include(PLUGINS.'anliegerbeitraege/model/kvwmap.php');
 			$this->Anliegerbeiträge_editor();
 	  }break;

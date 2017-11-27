@@ -140,19 +140,19 @@ $debug->write("<br><b>Anwendungsfall go: ".$go."</b>",4);
 $GUI->go=$go;
 $GUI->requeststring = $QUERY_STRING;
 
-$GUI->go_switch = function($go) use ($GUI){
+function go_switch($go){
+	global $GUI;
 	global $Stelle_ID;
 	global $newPassword;
 	global $passwort;
 	global $username;
-	if(!FAST_CASE)$GUI->loadPlugins();
+	if(!FAST_CASE)$GUI->loadPlugins($go);
 	if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 		if($go == 'get_last_query'){
 			$GUI->last_query = $GUI->user->rolle->get_last_query();
 			$GUI->last_query_requested = true;		# get_last_query wurde direkt aufgerufen
 			$GUI->formvars['go'] = $go = $GUI->last_query['go'];
 		}
-		#echo '<br>go: ' . $go;
 		switch($go){
 			case 'navMap_ajax' : {   
 				$GUI->formvars['nurAufgeklappteLayer'] = true;		
@@ -1734,7 +1734,7 @@ $GUI->go_switch = function($go) use ($GUI){
 	}
 };
 
-$GUI->go_switch($go);
+go_switch($go);
 
 include('end.php');
 

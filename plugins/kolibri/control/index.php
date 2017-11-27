@@ -2,7 +2,7 @@
 
 	$this->goNotExecutedInPlugins = false;
 	
-	switch($this->go) {
+	switch($go) {
 
 
 		default : {

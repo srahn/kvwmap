@@ -2,9 +2,9 @@
 
 	$this->goNotExecutedInPlugins = false;
 	
-	switch($this->go){		
+	switch($go){		
 		case 'Bauauskunft_Suche' : {
-			$this->checkCaseAllowed($this->go);
+			$this->checkCaseAllowed($go);
 			include_once(PLUGINS.'probaug/model/kvwmap.php');
 			include_once(PLUGINS.'probaug/model/bau.php');
 			$this->bauauskunftSuche();

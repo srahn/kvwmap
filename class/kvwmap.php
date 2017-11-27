@@ -2496,7 +2496,7 @@ class GUI {
 		}
 	}
 
-	function loadPlugins(){
+	function loadPlugins($go){
   	global $kvwmap_plugins;
 	  $this->goNotExecutedInPlugins = true;		// wenn es keine Plugins gibt, ist diese Var. immer true
   	if(count($kvwmap_plugins) > 0){
@@ -11998,7 +11998,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
             # Zoom auf Flurstücke
             if($this->formvars['ALK_Suche'] == 1){
 		          $this->zoomToALKFlurst($FlurstKennz,10);
-							if($this->formvars['go_next'] != '')header('location: index.php?go='.$this->formvars['go_next']);
+							if($this->formvars['go_next'] != ''){
+								$this->saveMap('');
+								go_switch($this->formvars['go_next']);
+								exit();
+							}
 		          $currenttime=date('Y-m-d H:i:s',time());
 		          $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
 		          $this->drawMap();
@@ -14715,7 +14719,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	        if($ret[0]){
 	        	$this->zoomToALKFlurst($FlurstKennz,100);
 	        }
-					if($this->formvars['go_next'] != '')header('location: index.php?go='.$this->formvars['go_next']);
+					if($this->formvars['go_next'] != ''){
+						$this->saveMap('');
+						go_switch($this->formvars['go_next']);
+						exit();
+					}
 	        $currenttime=date('Y-m-d H:i:s',time());
           $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
           $this->drawMap();

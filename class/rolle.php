@@ -262,7 +262,10 @@ class rolle {
 		$query=mysql_query($sql,$this->database->dbConn);
 		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		$this->debug->write('Neue Werte für Rolle eingestellt: '.$formvars['nZoomFactor'].', '.$formvars['mapsize'],4);
-		if($go_next != '')echo "<script>window.location.href='index.php?go=".$go_next."';</script>";
+		if($go_next != ''){
+			go_switch($go_next);
+			exit();
+		}
 	}
 	
   function readSettings() {

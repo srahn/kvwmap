@@ -1931,7 +1931,10 @@
 				$ret=$GUI->antrag->antrag_loeschen($antragsnummern[0],$GUI->formvars['stelle_id']);
 				if($ret == 'Antrag erfolgreich gelöscht')$GUI->Suchparameter_loeschen($antragsnummern[0], $GUI->formvars['stelle_id']);
 				$GUI->add_message('info', $ret);
-				if($GUI->formvars['go_next'] != '')echo "<script>window.location.href='index.php?go=".$GUI->formvars['go_next']."';</script>";
+				if($GUI->formvars['go_next'] != ''){
+					go_switch($GUI->formvars['go_next']);
+					exit();
+				}
 				else $GUI->Antraege_Anzeigen();
 			}
 			else {

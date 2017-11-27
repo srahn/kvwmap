@@ -46,7 +46,7 @@ include(PLUGINS . 'xplankonverter/model/converter.php');
 * xplankonverter_download_inspire_gml
 */
 
-switch($this->go){
+switch($go){
 
 	case 'show_elements': {
 		$packages = array();

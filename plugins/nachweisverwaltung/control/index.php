@@ -2,10 +2,10 @@
 
 	$this->goNotExecutedInPlugins = false;
 	
-	include (PLUGINS.'nachweisverwaltung/model/kvwmap.php');						# GUI-Objekt immer erweitern, damit Triggerfunktion bei GLE-Speicherung vorhanden
-	include (PLUGINS.'nachweisverwaltung/model/nachweis.php');					# nachweis-Klasse immer einbinden, damit Triggerfunktion bei GLE-Speicherung vorhanden
+	include_once(PLUGINS.'nachweisverwaltung/model/kvwmap.php');						# GUI-Objekt immer erweitern, damit Triggerfunktion bei GLE-Speicherung vorhanden
+	include_once(PLUGINS.'nachweisverwaltung/model/nachweis.php');					# nachweis-Klasse immer einbinden, damit Triggerfunktion bei GLE-Speicherung vorhanden
 	
-	switch($this->go){
+	switch($go){
 		case 'Antraege_Anzeigen' : {
 			$this->checkCaseAllowed('Antraege_Anzeigen');
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
@@ -13,7 +13,7 @@
 	  } break;
 
 	  case 'Antrag_loeschen' : {
-			$this->checkCaseAllowed($this->go);
+			$this->checkCaseAllowed($go);
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$this->Antrag_Loeschen();
 	  } break;
@@ -36,7 +36,7 @@
 
 	  case 'Antraganzeige_Zugeordnete_Dokumente_Anzeigen' : {
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
-			$this->checkCaseAllowed($this->go);
+			$this->checkCaseAllowed($go);
 			$this->DokumenteZuAntraegeAnzeigen();
 	  } break;
 
@@ -59,7 +59,7 @@
 	  } break;
 
 	  case 'Nachweisloeschen':{
-			$this->checkCaseAllowed($this->go);
+			$this->checkCaseAllowed($go);
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$this->nachweisLoeschen();
 	  } break;
@@ -68,13 +68,13 @@
 		#Documente die in der Ergebnisliste ausgewählt wurden sollen weiterverarbeitet werden!
 		# 2006-01-26 pk
 	  case 'Nachweisanzeige_zum_Auftrag_hinzufuegen' : {
-			$this->checkCaseAllowed($this->go);
+			$this->checkCaseAllowed($go);
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$this->nachweiseZuAuftrag();
 	  } break;
 
 	  case 'Nachweisanzeige_aus_Auftrag_entfernen':{
-			$this->checkCaseAllowed($this->go);
+			$this->checkCaseAllowed($go);
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$this->nachweiseZuAuftragEntfernen();
 	  } break;
@@ -120,7 +120,7 @@
 	  } break;
 
 	  case 'Nachweisformular' : {
-			$this->checkCaseAllowed($this->go);		
+			$this->checkCaseAllowed($go);		
 			# Unterscheidung ob vorhandene Dokumente geändert werden sollen oder neu eingegeben
 			if ($this->formvars['id']!='') {
 				# Ein Nachweis soll geändert werden
@@ -151,13 +151,13 @@
 	  } break;
 
 	  case 'Antrag_Aendern' : {
-			$this->checkCaseAllowed($this->go);
+			$this->checkCaseAllowed($go);
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$this->vermessungsantragAendern();
 	  } break;
 
 	  case 'Nachweis_antragsnr_form_aufrufen' : {
-			$this->checkCaseAllowed($this->go);
+			$this->checkCaseAllowed($go);
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$this->vermessungsantragsFormular();
 	  } break;
@@ -168,7 +168,7 @@
 	  } break;
 
 	  case 'Nachweisrechercheformular':{
-			$this->checkCaseAllowed($this->go);
+			$this->checkCaseAllowed($go);
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$this->rechercheFormAnzeigen();
 	  } break;
@@ -205,7 +205,7 @@
 	  } break;
 
 	  case 'Festpunkte_Auswaehlen' : {
-			$this->checkCaseAllowed($this->go);
+			$this->checkCaseAllowed($go);
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$this->festpunkteWahl();
 	  } break;
@@ -245,7 +245,7 @@
 	  } break;
 
 	  case 'sendeFestpunktskizze' : {
-			$this->checkCaseAllowed($this->go);
+			$this->checkCaseAllowed($go);
 			$this->sendeFestpunktskizze($this->formvars['name'],PUNKTDATEIPATH);
 	  } break;
 
@@ -255,7 +255,7 @@
 	  } break;
 
 	  case 'FestpunkteSkizzenZuordnung_Senden' : {
-			$this->checkCaseAllowed($this->go);
+			$this->checkCaseAllowed($go);
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$this->ordneFestpunktSkizzen();
 	  } break;

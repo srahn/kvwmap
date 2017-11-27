@@ -111,12 +111,6 @@ class GUI {
 		$this->scaleUnitSwitchScale = 239210;
 		$this->trigger_functions = array();
   }
-
-	public function __call($method, $arguments){
-		if(isset($this->{$method}) && is_callable($this->{$method})){
-			return call_user_func_array($this->{$method}, $arguments);
-    }
-	}
 	
 	function loadMultiLingualText($language) {
     #echo 'In der Rolle eingestellte Sprache: '.$GUI->user->rolle->language;
