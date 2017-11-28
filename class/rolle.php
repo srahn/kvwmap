@@ -262,7 +262,10 @@ class rolle {
 		$query=mysql_query($sql,$this->database->dbConn);
 		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		$this->debug->write('Neue Werte für Rolle eingestellt: '.$formvars['nZoomFactor'].', '.$formvars['mapsize'],4);
-		if($go_next != '')echo "<script>window.location.href='index.php?go=".$go_next."';</script>";
+		if($go_next != ''){
+			go_switch($go_next);
+			exit();
+		}
 	}
 	
   function readSettings() {
@@ -611,7 +614,7 @@ class rolle {
 		if($limit == '')$limit = 'NULL';
 		if($offset == '')$offset = 'NULL';
 		$sql = "INSERT INTO rolle_last_query (user_id, stelle_id, go, layer_id, `sql`, orderby, `limit`, `offset`) VALUES (";
-		$sql.= $this->user_id.", ".$this->stelle_id.", '".$go."', ".$layer_id.", '".addslashes($query)."', '".$sql_order."', ".$limit.", ".$offset.")";
+		$sql.= $this->user_id.", ".$this->stelle_id.", '".$go."', ".$layer_id.", '".addslashes($query)."', '".addslashes($sql_order)."', ".$limit.", ".$offset.")";
 		$this->debug->write("<p>file:rolle.php class:rolle->save_last_query - Speichern der letzten Abfrage:",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
@@ -1337,7 +1340,6 @@ class rolle {
 	}
 	
 	function saveOverlayPosition($x, $y){
-		if($x < 0)$x = 10;
 		$sql ="UPDATE rolle SET overlayx = ".$x.", overlayy=".abs($y);
 		$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 		#echo $sql;

@@ -178,7 +178,8 @@ class GUI {
 						<ul>';
 						if ($layer[0]['connectiontype']==6) {
 							echo '<li><a href="javascript:zoomToMaxLayerExtent('.$this->formvars['layer_id'].')">'.$this->FullLayerExtent.'</a></li>';
-						}
+							echo '<li><a href="index.php?go=Layer-Suche&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->strSearch.'</a></li>';
+						}						
 						if($layer[0]['Class'][0]['Name'] != ''){
 							if($layer[0]['showclasses'] != ''){
 								echo '<li><a href="javascript:getlegend(\''.$layer[0]['Gruppe'].'\', '.$this->formvars['layer_id'].', document.GUI.nurFremdeLayer.value);closeLayerOptions('.$this->formvars['layer_id'].')">';
@@ -458,6 +459,7 @@ class GUI {
   }
 	
 	function create_layer_legend($layer){
+		global $legendicon_size;
 		$visible = $this->check_layer_visibility($layer);
 		# sichtbare Layer
 		if ($visible) {
@@ -614,7 +616,8 @@ class GUI {
 								if($layer['Class'][$k]['legendimagewidth'] != '')$width = $layer['Class'][$k]['legendimagewidth'];
 								if($layer['Class'][$k]['legendimageheight'] != '')$height = $layer['Class'][$k]['legendimageheight'];
 								$padding = 1;
-								if($layer['Class'][$k]['legendgraphic'] != ''){								# eigenes Klassenbild
+								###### eigenes Klassenbild ######
+								if($layer['Class'][$k]['legendgraphic'] != ''){
 									$imagename = $original_class_image = GRAPHICSPATH . 'custom/' . $layer['Class'][$k]['legendgraphic'];
 									if($width == ''){
 										$size = getimagesize($imagename);
@@ -622,12 +625,10 @@ class GUI {
 										$height = $size[1];
 									}
 								}
-								else{																													# generiertes Klassenbild
-									if($width == '')$width = 18;
-									if($height == ''){
-										if($maplayer->type == 0)$height = 18;	# Punktlayer
-										else $height = 12;
-									}
+								###### generiertes Klassenbild ######
+								else{
+									if($width == '')$width = $legendicon_size['width'][$maplayer->type];
+									if($height == '')$height = $legendicon_size['height'][$maplayer->type];
 									if($layer['Class'][$k]['Style'][0]['colorrange'] != ''){		# generierte Color-Ramp
 										$padding = 0;
 										$newname = rand(0, 1000000).'.jpg';
@@ -641,6 +642,7 @@ class GUI {
 									}
 									$imagename = $original_class_image = TEMPPATH_REL.$newname;
 								}
+								####################################
 								$classid = $layer['Class'][$k]['Class_ID'];
 								if($this->mapDB->disabled_classes['status'][$classid] == '0'){
 									if($height < $width)$height1 = 12;
@@ -1178,8 +1180,8 @@ class GUI {
 					if($this->class_load_level == 2 OR ($this->class_load_level == 1 AND $layerset[$i]['aktivStatus'] != 0)){      # nur wenn der Layer aktiv ist, sollen seine Parameter gesetzt werden
 						$layer = ms_newLayerObj($map);
 						$layer->setMetaData('wfs_request_method', 'GET');
-						$layer->setMetaData('wms_name', umlaute_umwandeln($layerset[$i]['wms_name']));
-						$layer->setMetaData('wfs_typename', umlaute_umwandeln($layerset[$i]['wms_name']));
+						$layer->setMetaData('wms_name', $layerset[$i]['wms_name']);
+						$layer->setMetaData('wfs_typename', $layerset[$i]['wms_name']);
 						$layer->setMetaData('ows_title', $layerset[$i]['Name']); # required
 						$layer->setMetaData('wms_group_title',$layerset[$i]['Gruppenname']);
 						$layer->setMetaData('wms_queryable',$layerset[$i]['queryable']);
@@ -2494,7 +2496,7 @@ class GUI {
 		}
 	}
 
-	function loadPlugins(){
+	function loadPlugins($go){
   	global $kvwmap_plugins;
 	  $this->goNotExecutedInPlugins = true;		// wenn es keine Plugins gibt, ist diese Var. immer true
   	if(count($kvwmap_plugins) > 0){
@@ -3756,12 +3758,14 @@ class GUI {
 	      } # Ende mit Flurstücke erfolgreich abgefragt
 	    } # Ende mit Suchparameter sind in Ordnung
   	}
+		$this->user->rolle->delete_last_query();
+		$this->user->rolle->save_last_query('Grundbuchblatt_Auswaehlen_Suchen', 0, $this->formvars['selBlatt'], NULL, NULL, NULL);
   	$this->grundbuchblattanzeige($gbblaetter);
   }
 
   function grundbuchblattanzeige($gbblaetter) {
     $this->main='grundbuchblattanzeige.php';
-    $this->titel='Buchungen zum Grundbuchblatt';
+    $this->titel='Buchungen zum Grundbuchblatt';		
     $this->gbblaetter=$gbblaetter;
     $this->output();
   }
@@ -7304,7 +7308,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				}
 			}
 			$expression = @array_values($this->formvars['expression']);
+			$classification = @array_values($this->formvars['classification']);
+			$legendgraphic = @array_values($this->formvars['legendgraphic']);
+			$legendimagewidth = @array_values($this->formvars['legendimagewidth']);
+			$legendimageheight = @array_values($this->formvars['legendimageheight']);
 			$order = @array_values($this->formvars['order']);
+			$legendorder = @array_values($this->formvars['legendorder']);
 			$ID = @array_values($this->formvars['ID']);
 			for($i = 0; $i < count($name); $i++){
 				$attrib['name'] = $name[$i];
@@ -7315,7 +7324,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				}
 				$attrib['layer_id'] = $this->formvars['selected_layer_id'];
 				$attrib['expression'] = $expression[$i];
+				$attrib['classification'] = $classification[$i];
+				$attrib['legendgraphic'] = $legendgraphic[$i];
+				$attrib['legendimagewidth'] = $legendimagewidth[$i];
+				$attrib['legendimageheight'] = $legendimageheight[$i];
 				$attrib['order'] = $order[$i];
+				$attrib['legendorder'] = $legendorder[$i];
 				$class_id = $mapDB->new_Class($attrib);
 				# Styles übernehmen (in u_styles2classes eintragen)
 				$styles = $mapDB->read_Styles($ID[$i]);
@@ -10871,20 +10885,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->output();
   }
 
- /**
-  * Läd das Formular zur Eingabe von Benutzerdaten
-  *
-  * Die Funktion läd das Template userdaten_formular.php trägt existierende Werte vom Benutzer ein, wenn es um eine Änderung geht und stellt die Stellenname zur Auswahl bereit, zu der der Nutzer Zugang hat
-  *
-  * Reihenfolge: Übersichtssatz - Kommentar - Tags.
-  *
-  * @see    BenutzerLöschen(), BenutzerdatenAnzeigen(), BenutzerdatenAnlegen(), BenutzerdatenAendern(), $postgres, $alb
-  */
   function BenutzerdatenFormular() {
     $this->titel='Benutzerdaten Editor';
     $this->main='userdaten_formular.php';
     # Abfragen der Benutzerdaten wenn eine user_id zur Änderung selektiert ist
-    if ($this->formvars['selected_user_id']>0) {
+    if($this->formvars['selected_user_id']>0){
       $this->userdaten=$this->user->getUserDaten($this->formvars['selected_user_id'],'','');
       $this->formvars['nachname']=$this->userdaten[0]['Name'];
       $this->formvars['vorname']=$this->userdaten[0]['Vorname'];
@@ -10899,6 +10904,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     # Abfragen der Stellen des Nutzers
       $this->selected_user=new user(0,$this->formvars['selected_user_id'],$this->user->database);
       $this->formvars['selstellen']=$this->selected_user->getStellen(0);
+		# Abfragen der aktiven Layer des Nutzers
+			$mapDB = new db_mapObj($this->userdaten[0]['stelle_id'], $this->formvars['selected_user_id']);
+			$mapDB->nurAktiveLayer = true;
+			$this->active_layers = array_reverse($mapDB->read_Layer(0, $this->Stelle->useLayerAliases, NULL));
     }
     # Abfragen aller möglichen Stellen
     $this->formvars['stellen']=$this->Stelle->getStellen('Bezeichnung');
@@ -11016,7 +11025,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     }
     $this->BenutzerdatenFormular();
   }
-
+	
+	function BenutzerdatenLayerDeaktivieren(){
+		$user_rolle = new rolle($this->formvars['user_id'], $this->formvars['stelle_id'], $this->database);
+		$user_rolle->setOneLayer($this->formvars['layer_id'], 0);
+	}
+	
 	function BenutzerNachStellenAnzeigen(){
     $this->titel='Benutzer-Stellen-Übersicht';
     $this->main='userstellendaten.php';
@@ -11985,7 +11999,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
             # Zoom auf Flurstücke
             if($this->formvars['ALK_Suche'] == 1){
 		          $this->zoomToALKFlurst($FlurstKennz,10);
-							if($this->formvars['go_next'] != '')header('location: index.php?go='.$this->formvars['go_next']);
+							if($this->formvars['go_next'] != ''){
+								$this->saveMap('');
+								go_switch($this->formvars['go_next']);
+								exit();
+							}
 		          $currenttime=date('Y-m-d H:i:s',time());
 		          $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
 		          $this->drawMap();
@@ -14702,7 +14720,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	        if($ret[0]){
 	        	$this->zoomToALKFlurst($FlurstKennz,100);
 	        }
-					if($this->formvars['go_next'] != '')header('location: index.php?go='.$this->formvars['go_next']);
+					if($this->formvars['go_next'] != ''){
+						$this->saveMap('');
+						go_switch($this->formvars['go_next']);
+						exit();
+					}
 	        $currenttime=date('Y-m-d H:i:s',time());
           $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
           $this->drawMap();
@@ -16833,20 +16855,22 @@ class db_mapObj{
 		global $supportedLanguages;
     if(is_array($classdata)){
       $attrib = $classdata;         # Attributarray wurde übergeben
-      # attrib:(Name, Layer_ID, Expression, drawingorder)
+			if($attrib['legendimagewidth'] == '')$attrib['legendimagewidth'] = 'NULL';
+			if($attrib['legendimageheight'] == '')$attrib['legendimageheight'] = 'NULL';
+      # attrib:(Name, Layer_ID, Expression, classification, legendgraphic, legendimagewidth, legendimageheight, drawingorder, legendorder)
       $sql = 'INSERT INTO classes (Name, ';
 			foreach($supportedLanguages as $language){
 				if($language != 'german'){
 					$sql.= '`Name_'.$language.'`, ';
 				}
 			}
-			$sql.= 'Layer_ID, Expression, classification, drawingorder) VALUES ("'.$attrib['name'].'",';
+			$sql.= 'Layer_ID, Expression, classification, legendgraphic, legendimagewidth, legendimageheight, drawingorder, legendorder) VALUES ("'.$attrib['name'].'",';
 			foreach($supportedLanguages as $language){
 				if($language != 'german'){
 					$sql.= '"'.$attrib['name_'.$language].'",';
 				}
 			}
-			$sql.= $attrib['layer_id'].', "'.$attrib['expression'].'", "' . $attrib['classification'] . '", "'.$attrib['order'].'")';
+			$sql.= $attrib['layer_id'].', "'.$attrib['expression'].'", "'.$attrib['classification'].'", "'.$attrib['legendgraphic'].'", '.$attrib['legendimagewidth'].', '.$attrib['legendimageheight'].', "'.$attrib['order'].'", "'.$attrib['legendorder'].'")';
     }
     else{
       $class = $classdata;        # Classobjekt wurde übergeben

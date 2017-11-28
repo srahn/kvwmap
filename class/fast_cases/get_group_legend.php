@@ -1,40 +1,5 @@
 <?
 
-function in_subnet($ip,$net) {
-	$ipparts=explode('.',$ip);
-	$netparts=explode('.',$net);
-
-	# Direkter Vergleich
-	if ($ip==$net) {
-		return 1;
-	}
-
-  # Test auf C-Netz
-	if (trim($netparts[3],'0')=='' OR $netparts[3]=='*') {
-		# C-Netzvergleich
-	  if ($ipparts[0].'.'.$ipparts[1].'.'.$ipparts[2]==$netparts[0].'.'.$netparts[1].'.'.$netparts[2]) {
-	  	return 1;
-	  }
-	}
-
-  # Test auf B-Netz
-	if ((trim($netparts[3],'0')=='' OR $netparts[3]=='*') AND (trim($netparts[2],'0')=='' OR $netparts[2]=='*')) {
-		# B-Netzvergleich
-	  if ($ipparts[0].'.'.$ipparts[1]==$netparts[0].'.'.$netparts[1]) {
-	  	return 1;
-	  }
-	}
-
-  # Test auf A-Netz
-	if ((trim($netparts[3],'0')=='' OR $netparts[3]=='*') AND (trim($netparts[2],'0')=='' OR $netparts[2]=='*') AND (trim($netparts[1],'0')=='' OR $netparts[1]=='*')) {
-		# A-Netzvergleich
-	  if ($ipparts[0]==$netparts[0]) {
-	  	return 1;
-	  }
-	}
-	return 0;
-}
-
 function checkPasswordAge($passwordSettingTime,$allowedPassordAgeMonth) {
   $passwordSettingUnixTime=strtotime($passwordSettingTime); # Unix Zeit in Sekunden an dem das Passwort gesetzt wurde
   $allowedPasswordAgeDays=round($allowedPassordAgeMonth*30.5); # Zeitintervall, wie alt das Password sein darf in Tagen
@@ -75,6 +40,7 @@ function umlaute_umwandeln($name){
 	$name = str_replace('+', '_', $name);
 	$name = str_replace(',', '_', $name);
 	$name = str_replace('*', '_', $name);
+	$name = str_replace('$', '', $name);
   return $name;
 }
 
@@ -89,11 +55,6 @@ function html_umlaute($string){
 	$string = str_replace('ø', '&oslash;', $string);
 	$string = str_replace('æ', '&aelig;', $string);
 	return $string;
-}
-
-function compare_legendorder($a, $b){
-	if($a['legendorder'] > $b['legendorder'])return 1;
-	else return 0;
 }
 
 
@@ -150,7 +111,7 @@ class GUI {
 		$this->scaleUnitSwitchScale = 239210;
 		$this->trigger_functions = array();
   }
-
+	
 	function loadMultiLingualText($language) {
     #echo 'In der Rolle eingestellte Sprache: '.$GUI->user->rolle->language;
     $this->Stelle->language=$language;
@@ -464,21 +425,19 @@ class GUI {
         }
 
         # Layer
+				$mapDB->nurAktiveLayer = $this->formvars['nurAktiveLayer'];
         $mapDB->nurAufgeklappteLayer=$this->formvars['nurAufgeklappteLayer'];
         $mapDB->nurFremdeLayer=$this->formvars['nurFremdeLayer'];
         if($this->class_load_level == ''){
           $this->class_load_level = 1;
         }
-        $layer = $mapDB->read_Layer($this->class_load_level, $this->list_subgroups($this->formvars['group']));     # class_load_level: 2 = für alle Layer die Klassen laden, 1 = nur für aktive Layer laden, 0 = keine Klassen laden
+        $layer = $mapDB->read_Layer($this->class_load_level, $this->Stelle->useLayerAliases, $this->list_subgroups($this->formvars['group']));     # class_load_level: 2 = für alle Layer die Klassen laden, 1 = nur für aktive Layer laden, 0 = keine Klassen laden
         $rollenlayer = $mapDB->read_RollenLayer();
         $layerset = array_merge($layer, $rollenlayer);
         $layerset['anzLayer'] = count($layerset) - 1; # wegen $layerset['layer_ids']
         unset($this->layers_of_group);		# falls loadmap zweimal aufgerufen wird
 				unset($this->groups_with_layers);	# falls loadmap zweimal aufgerufen wird
         for($i=0; $i < $layerset['anzLayer']; $i++){
-					if($layerset[$i]['alias'] == '' OR !$this->Stelle->useLayerAliases){
-						$layerset[$i]['alias'] = $layerset[$i]['Name'];			# kann vielleicht auch in read_layer gesetzt werden
-					}
 					$this->groups_with_layers[$layerset[$i]['Gruppe']][] = $i;			# die $i's pro Gruppe im layerset-Array
 					if($layerset[$i]['requires'] == ''){
 						$this->layers_of_group[$layerset[$i]['Gruppe']][] = $layerset[$i]['Layer_ID'];				# die Layer-IDs in einer Gruppe
@@ -877,6 +836,9 @@ class GUI {
 	        }
 					if($dbStyle['linejoinmaxsize'] != '') {
 	          $style->set('linejoinmaxsize', $dbStyle['linejoinmaxsize']);
+	        }
+					if($dbStyle['polaroffset'] != '') {
+	          $style->updateFromString("STYLE POLAROFFSET ".$dbStyle['polaroffset']." END"); 
 	        }
         }
 
@@ -1285,319 +1247,293 @@ class GUI {
 				}
 				for($j = 0; $j < $layercount; $j++){
 					$layer = $this->layerset[$this->groups_with_layers[$group_id][$j]];
-					$visible = $this->check_layer_visibility($layer);
-					# sichtbare Layer
-					if ($visible) {
-						if ($layer['requires'] == '') {
-							$legend .= '<tr><td valign="top">';
-
-							if ($layer['queryable'] == 1 AND !$this->formvars['nurFremdeLayer']) {
-								$input_attr['id'] = 'qLayer' . $layer['Layer_ID'];
-								$input_attr['name'] = 'qLayer' . $layer['Layer_ID'];
-								$input_attr['title'] = ($layer['queryStatus'] == 1 ? $this->deactivatequery : $this->activatequery);
-								$input_attr['value'] = 1;
-								$input_attr['class'] = 'info-select-field';
-								$input_attr['type'] = (($this->user->rolle->singlequery or $layer['selectiontype'] == 'radio') ? 'radio' : 'checkbox');
-								$input_attr['style'] = ((
-									$this->user->rolle->query or
-									$this->user->rolle->touchquery or
-									$this->user->rolle->queryradius or
-									$this->user->rolle->polyquery
-								) ? '' : 'display: none');
-								$input_attr['onClick'] = ($input_attr['type'] == 'radio' ?
-									"this.checked = this.checked2;" :
-									"updateThema(
-										event,
-										document.getElementById('thema_" . $layer['Layer_ID'] . "'),
-										document.getElementById('qLayer" . $layer['Layer_ID'] . "'),
-										'',
-										''," .
-										$this->user->rolle->instant_reload . "
-									)"
-								);
-								$input_attr['onMouseUp'] = ($input_attr['type'] == 'radio' ?
-									"this.checked = this.checked2;" :
-									""
-								);
-								
-								$input_attr['onMouseDown'] = ($input_attr['type'] == 'radio' ?
-									"updateThema(
-										event,
-										document.getElementById('thema_" . $layer['Layer_ID'] . "'),
-										document.getElementById('qLayer" . $layer['Layer_ID'] . "')," .
-										($layer['selectiontype'] == 'radio' ? "document.GUI.radiolayers_" . $group_id : "''") . "," .
-										($this->user->rolle->singlequery ? "document.GUI.layers" : "''") . "," .
-										$this->user->rolle->instant_reload . "
-									)" :
-									""
-								);
-
-								# die sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen, welches immer den value 0 hat,
-								# damit sie beim Neuladen ausgeschaltet werden können, denn eine nicht angehakte Checkbox/Radiobutton wird ja nicht übergeben
-								$legend .= '<input type="hidden" name="qLayer'.$layer['Layer_ID'].'" value="0">';
-								$legend .= '<input';
-								foreach ($input_attr AS $key => $value) {
-									$legend .= ($value != '' ? ' ' . $key . '="' . $value . '"' : '');
-								}
-								$legend .= ($layer['queryStatus'] == 1 ? ' checked' : '');
-								$legend .= '>';
-
-/*############################################
-							if($layer['queryable'] == 1 AND !$this->formvars['nurFremdeLayer']){
-								// die sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen, welches immer den value 0 hat, damit sie beim Neuladen ausgeschaltet werden können, denn eine nicht angehakte Checkbox/Radiobutton wird ja nicht übergeben
-								$legend .=  '<input type="hidden" name="qLayer'.$layer['Layer_ID'].'" value="0">';
-								$legend .=  '<input id="qLayer'.$layer['Layer_ID'].'"';
-								if($this->user->rolle->singlequery){			# singlequery-Modus
-									$legend .=  'type="radio" ';
-									if($layer['selectiontype'] == 'radio') {
-										$legend .=  ' onClick="this.checked = this.checked2;" onMouseUp="this.checked = this.checked2;" onMouseDown="updateThema(event, document.getElementById(\'thema_'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), document.GUI.radiolayers_'.$group_id.', document.GUI.layers, '.$this->user->rolle->instant_reload.')"';
-									}
-									else{
-										$legend .=  ' onClick="this.checked = this.checked2;" onMouseUp="this.checked = this.checked2;" onMouseDown="updateThema(event, document.getElementById(\'thema_'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), \'\', document.GUI.layers, '.$this->user->rolle->instant_reload.')"';
-									}
-								}
-								else{			# normaler Modus
-									if($layer['selectiontype'] == 'radio'){
-										$legend .=  'type="radio" ';
-										$legend .=  ' onClick="this.checked = this.checked2;" onMouseUp="this.checked = this.checked2;" onMouseDown="updateThema(event, document.getElementById(\'thema_'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), document.GUI.radiolayers_'.$group_id.', \'\', '.$this->user->rolle->instant_reload.')"';
-									}
-									else{
-										$legend .=  'type="checkbox" ';
-										$legend .=  ' onClick="updateThema(event, document.getElementById(\'thema_'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), \'\', \'\', '.$this->user->rolle->instant_reload.')"';
-									}
-								}
-								$legend .=  ' name="qLayer'.$layer['Layer_ID'].'" value="1" ';
-								if($layer['queryStatus'] == 1){
-									$legend .=  'checked title="'.$this->deactivatequery.'"';
-								}
-								$legend .=  ' title="'.$this->activatequery.'">';
-##################################################################*/
-
-							}
-							else{
-								$legend .= '<img src="'.GRAPHICSPATH.'leer.gif" width="17" height="1" border="0">';
-							}
-							$legend .=  '</td><td valign="top">';
-							// die sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen, welches immer den value 0 hat, damit sie beim Neuladen ausgeschaltet werden können, denn eine nicht angehakte Checkbox/Radiobutton wird ja nicht übergeben
-							$legend .=  '<input type="hidden" id="thema'.$layer['Layer_ID'].'" name="thema'.$layer['Layer_ID'].'" value="0">';
-
-							$legend .=  '<input id="thema_'.$layer['Layer_ID'].'" ';
-							if($layer['selectiontype'] == 'radio'){
-								$legend .=  'type="radio" ';
-								$legend .=  ' onClick="this.checked = this.checked2;" onMouseUp="this.checked = this.checked2;" onMouseDown="updateQuery(event, document.getElementById(\'thema_'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), document.GUI.radiolayers_'.$group_id.', '.$this->user->rolle->instant_reload.')"';
-								$radiolayers[$group_id] .= $layer['Layer_ID'].'|';
-							}
-							else{
-								$legend .=  'type="checkbox" ';
-								$legend .=  ' onClick="updateQuery(event, document.getElementById(\'thema_'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), \'\', '.$this->user->rolle->instant_reload.')"';
-							}
-							$legend .=  ' name="thema'.$layer['Layer_ID'].'" value="1" ';
-							if($layer['aktivStatus'] == 1){
-								$legend .=  'checked title="'.$this->deactivatelayer.'"';
-							}
-							else{
-								$legend .=  ' title="'.$this->activatelayer.'"';
-							}
-							$legend .= ' ></td><td valign="middle">';
-
-							$legend .= '<a';
-							# Bei eingeschalteter Rollenoption Layeroptionen anzeigen wird das Optionsfeld mit einem Rechtsklick geöffnet.
-							if ($this->user->rolle->showlayeroptions) {
-								$legend .= ' oncontextmenu="getLayerOptions(' . $layer['Layer_ID'] . '); return false;"';
-							}
-							if($layer['metalink'] != '' AND substr($layer['metalink'], 0, 10) != 'javascript')
-								$legend .= ' target="_blank"';
-							if($layer['metalink'] != '')
-								$legend .= ' class="metalink boldhover" href="'.$layer['metalink'].'">';
-							else
-								$legend .= ' class="visiblelayerlink boldhover" href="javascript:void(0)"';
-							$legend .= '<span';
-							if($layer['minscale'] != -1 AND $layer['maxscale'] > 0){
-								$legend .= ' title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
-							}			  
-							$legend .=' class="legend_layer">'.html_umlaute($layer['alias']).'</span>';
-							$legend .= '</a>';
-
-							# Bei eingeschalteten Layern und eingeschalteter Rollenoption ist ein Optionen-Button sichtbar
-							if($layer['aktivStatus'] == 1 and $this->user->rolle->showlayeroptions) $legend.='&nbsp;<a href="javascript:getLayerOptions('.$layer['Layer_ID'].')"><img src="graphics/rows.png" border="0" title="'.$this->layerOptions.'"></a>';
-							$legend.='<div style="position:static" id="options_'.$layer['Layer_ID'].'"> </div>';
-						}
-						if($layer['aktivStatus'] == 1 AND $layer['Class'][0]['Name'] != ''){
-							if($layer['requires'] == '' AND $layer['Layer_ID'] > 0){
-								$legend .= '<input id="classes_'.$layer['Layer_ID'].'" name="classes_'.$layer['Layer_ID'].'" type="hidden" value="'.$layer['showclasses'].'">';
-							}
-							if ($layer['showclasses'] != 0) {
-								if($layer['connectiontype'] == 7){      # WMS
-									$layersection = substr($layer['connection'], strpos(strtolower($layer['connection']), 'layers')+7);
-									$pos = strpos($layersection, '&');
-									if($pos !== false)$layersection = substr($layersection, 0, $pos);
-									$layers = explode(',', $layersection);
-									for($l = 0; $l < count($layers); $l++){
-										$legend .=  '<div style="display:inline" id="lg'.$j.'_'.$l.'"><br><img src="'.$layer['connection'].'&layer='.$layers[$l].'&service=WMS&request=GetLegendGraphic" onerror="ImageLoadFailed(\'lg'.$j.'_'.$l.'\')"></div>';
-									}
-								}
-								else {
-									$legend .= '<table border="0" cellspacing="0" cellpadding="0">';
-									$maplayer = $this->map->getLayerByName($layer['alias']);
-									if($layer['Class'][0]['legendorder'] != ''){
-										usort($layer['Class'], 'compare_legendorder');
-									}
-									for($k = 0; $k < $maplayer->numclasses; $k++){
-										$class = $maplayer->getClass($layer['Class'][$k]['index']);
-										for($s = 0; $s < $class->numstyles; $s++){
-											$style = $class->getStyle($s);
-											if($maplayer->type > 0){
-												$symbol = $this->map->getSymbolObjectById($style->symbol);
-												if($symbol->type == 1006){ 	# 1006 == hatch
-													$style->set('size', 2*$style->width);					# size und maxsize beim Typ Hatch auf die doppelte Linienbreite setzen, damit man was in der Legende erkennt
-													$style->set('maxsize', 2*$style->width);
-												}
-												else{
-													$style->set('size', 2);					# size und maxsize bei Linien und Polygonlayern immer auf 2 setzen, damit man was in der Legende erkennt
-													$style->set('maxsize', 2);
-												}
-											}
-											else{		# Punktlayer
-												if($style->size > 14)$style->set('size', 14);
-												$style->set('maxsize', $style->size);		# maxsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
-												$style->set('minsize', $style->size);		# minsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
-												if($class->numstyles == 1){							# wenn es nur einen Style in der Klasse gibt, die Offsets auf 0 setzen, damit man was in der Legende erkennt
-													$style->set('offsety', 0);
-													$style->set('offsetx', 0);
-												}
-											}
-										}
-										$legend .= '<tr style="line-height: 15px"><td style="line-height: 14px">';
-										if($s > 0){
-											$width = $height = '';
-											if($layer['Class'][$k]['legendimagewidth'] != '')$width = $layer['Class'][$k]['legendimagewidth'];
-											if($layer['Class'][$k]['legendimageheight'] != '')$height = $layer['Class'][$k]['legendimageheight'];
-											$padding = 1;
-											if($layer['Class'][$k]['legendgraphic'] != ''){								# eigenes Klassenbild
-												$imagename = $original_class_image = GRAPHICSPATH . 'custom/' . $layer['Class'][$k]['legendgraphic'];
-												if($width == ''){
-													$size = getimagesize($imagename);
-													$width = $size[0];
-													$height = $size[1];
-												}
-											}
-											else{																													# generiertes Klassenbild
-												if($width == '')$width = 18;
-												if($height == ''){
-													if($maplayer->type == 0)$height = 18;	# Punktlayer
-													else $height = 12;
-												}
-												if($layer['Class'][$k]['Style'][0]['colorrange'] != ''){		# generierte Color-Ramp
-													$padding = 0;
-													$newname = rand(0, 1000000).'.jpg';
-													$this->colorramp(IMAGEPATH.$newname, $width, $height, $layer['Class'][$k]['Style'][0]['colorrange']);
-												}
-												else{																												# vom Mapserver generiertes Klassenbild
-													$image = $class->createLegendIcon($width, $height);
-													$filename = $this->map_saveWebImage($image,'jpeg');
-													$newname = $this->user->id.basename($filename);
-													rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
-												}
-												$imagename = $original_class_image = TEMPPATH_REL.$newname;
-											}
-											$classid = $layer['Class'][$k]['Class_ID'];
-											if($this->mapDB->disabled_classes['status'][$classid] == '0'){
-												if($height < $width)$height1 = 12;
-												else $height1 = 18;
-												$imagename = 'graphics/inactive'.$height1.'.jpg';
-												$status = 0;
-											}
-											elseif($this->mapDB->disabled_classes['status'][$classid] == 2){
-												$status = 2;
-											}
-											else{
-												$status = 1;
-											}
-											# $original_class_image ist das eigentliche Klassenbild bei Status 1, $imagename das Bild, welches entsprechend des Status gerade gesetzt ist
-											$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="'.$status.'"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.$original_class_image.'\', '.$width.', '.$height.')" onmouseout="mouseOutClassStatus('.$classid.',\''.$original_class_image.'\', '.$width.', '.$height.')" onclick="changeClassStatus('.$classid.',\''.$original_class_image.'\', '.$this->user->rolle->instant_reload.', '.$width.', '.$height.')"><img style="vertical-align:middle;padding-bottom: '.$padding.'" border="0" name="imgclass'.$classid.'" width="'.$width.'" height="'.$height.'" src="'.$imagename.'"></a>';
-										}
-										$legend .= '&nbsp;<span class="px13">'.html_umlaute($class->name).'</span></td></tr>';
-									}
-									$legend .= '</table>';
-								}
-							}
-						}
-						if($j+1 < $count AND $current_groupgetMetaData_off_requires != 1){		// todo
-							$legend .= '</td></tr>';
-						}
-					}
-
-					# unsichtbare Layer
-					if($layer['requires'] == '' AND !$visible){
-						$legend .=  '
-									<tr>
-										<td valign="top">';
-						if($layer['queryable'] == 1){
-							$style = ((
-									$this->user->rolle->query or
-									$this->user->rolle->touchquery or
-									$this->user->rolle->queryradius or
-									$this->user->rolle->polyquery
-								) ? '' : 'style="display: none"');
-							$legend .=  '<input ';
-							if($layer['selectiontype'] == 'radio'){
-								$legend .=  'type="radio" ';
-							}
-							else{
-								$legend .=  'type="checkbox" ';
-							}
-							if($layer['queryStatus'] == 1){
-								$legend .=  'checked="true"';
-							}
-							$legend .=' type="checkbox" name="pseudoqLayer'.$layer['Layer_ID'].'" disabled '.$style.'>';
-						}
-						$legend .=  '</td><td valign="top">';
-						// die nicht sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen nur bei Radiolayern, damit sie beim Neuladen ausgeschaltet werden können, denn ein disabledtes input-Feld wird ja nicht übergeben
-						$legend .=  '<input type="hidden" id="thema'.$layer['Layer_ID'].'" name="thema'.$layer['Layer_ID'].'" value="'.$layer['aktivStatus'].'">';
-						$legend .=  '<input ';
-						if($layer['selectiontype'] == 'radio'){
-							$legend .=  'type="radio" ';
-							$radiolayers[$group_id] .= $layer['Layer_ID'].'|';
-						}
-						else{
-							$legend .=  'type="checkbox" ';
-						}
-						if($layer['aktivStatus'] == 1){
-							$legend .=  'checked="true" ';
-						}
-						$legend .= 'id="thema_'.$layer['Layer_ID'].'" name="thema'.$layer['Layer_ID'].'" disabled="true"></td><td>';
-						$legend .= '<a ';
-						if ($this->user->rolle->showlayeroptions) {
-							$legend .= ' oncontextmenu="getLayerOptions(' . $layer['Layer_ID'] . '); return false;"';
-						}
-						$legend .= 'class="invisiblelayerlink boldhover" href="javascript:void(0)"';
-						$legend .= '<span class="legend_layer_hidden" ';
-						if($layer['minscale'] != -1 AND $layer['maxscale'] != -1){
-							$legend .= 'title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
-						}
-						$legend .= ' >'.html_umlaute($layer['alias']).'</span></a>';
-						$legend.='<div style="position:static" id="options_'.$layer['Layer_ID'].'"> </div>';
-						if($layer['status'] != ''){
-							$legend .= '&nbsp;<img title="Thema nicht verfügbar: '.$layer['status'].'" src="'.GRAPHICSPATH.'warning.png">';
-						}
-						if($layer['queryable'] == 1){
-							$legend .=  '<input type="hidden" name="qLayer'.$layer['Layer_ID'].'"';
-							if($layer['queryStatus'] != 0){
-								$legend .=  ' value="1"';
-							}
-							$legend .=  '>';
-						}
-						$legend .=  '</td>
-								</tr>';
-					}
+					$legend .= $this->create_layer_legend($layer);
 				}
 			}
 	  }
     $legend .= '</table></div></td></tr></table>';
-    $legend .= '<input type="hidden" name="radiolayers_'.$group_id.'" value="'.$radiolayers[$group_id].'">';
+    $legend .= '<input type="hidden" name="radiolayers_'.$group_id.'" value="'.$this->radiolayers[$group_id].'">';
 	  $legend .= '</div>';
     return $legend;
   }
+
+	function create_layer_legend($layer){
+		global $legendicon_size;
+		$visible = $this->check_layer_visibility($layer);
+		# sichtbare Layer
+		if ($visible) {
+			if ($layer['requires'] == '') {
+				$legend .= '<tr><td valign="top">';
+
+				if ($layer['queryable'] == 1 AND !$this->formvars['nurFremdeLayer']) {
+					$input_attr['id'] = 'qLayer' . $layer['Layer_ID'];
+					$input_attr['name'] = 'qLayer' . $layer['Layer_ID'];
+					$input_attr['title'] = ($layer['queryStatus'] == 1 ? $this->deactivatequery : $this->activatequery);
+					$input_attr['value'] = 1;
+					$input_attr['class'] = 'info-select-field';
+					$input_attr['type'] = (($this->user->rolle->singlequery or $layer['selectiontype'] == 'radio') ? 'radio' : 'checkbox');
+					$input_attr['style'] = ((
+						$this->user->rolle->query or
+						$this->user->rolle->touchquery or
+						$this->user->rolle->queryradius or
+						$this->user->rolle->polyquery
+					) ? '' : 'display: none');
+					$input_attr['onClick'] = ($input_attr['type'] == 'radio' ?
+						"this.checked = this.checked2;" :
+						"updateThema(
+							event,
+							document.getElementById('thema_" . $layer['Layer_ID'] . "'),
+							document.getElementById('qLayer" . $layer['Layer_ID'] . "'),
+							'',
+							''," .
+							$this->user->rolle->instant_reload . "
+						)"
+					);
+					$input_attr['onMouseUp'] = ($input_attr['type'] == 'radio' ?
+						"this.checked = this.checked2;" :
+						""
+					);
+					
+					$input_attr['onMouseDown'] = ($input_attr['type'] == 'radio' ?
+						"updateThema(
+							event,
+							document.getElementById('thema_" . $layer['Layer_ID'] . "'),
+							document.getElementById('qLayer" . $layer['Layer_ID'] . "')," .
+							($layer['selectiontype'] == 'radio' ? "document.GUI.radiolayers_" . $layer['Gruppe'] : "''") . "," .
+							($this->user->rolle->singlequery ? "document.GUI.layers" : "''") . "," .
+							$this->user->rolle->instant_reload . "
+						)" :
+						""
+					);
+
+					# die sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen, welches immer den value 0 hat,
+					# damit sie beim Neuladen ausgeschaltet werden können, denn eine nicht angehakte Checkbox/Radiobutton wird ja nicht übergeben
+					$legend .= '<input type="hidden" name="qLayer'.$layer['Layer_ID'].'" value="0">';
+					$legend .= '<input';
+					foreach ($input_attr AS $key => $value) {
+						$legend .= ($value != '' ? ' ' . $key . '="' . $value . '"' : '');
+					}
+					$legend .= ($layer['queryStatus'] == 1 ? ' checked' : '');
+					$legend .= '>';
+				}
+				else{
+					$legend .= '<img src="'.GRAPHICSPATH.'leer.gif" width="17" height="1" border="0">';
+				}
+				$legend .=  '</td><td valign="top">';
+				// die sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen, welches immer den value 0 hat, damit sie beim Neuladen ausgeschaltet werden können, denn eine nicht angehakte Checkbox/Radiobutton wird ja nicht übergeben
+				$legend .=  '<input type="hidden" id="thema'.$layer['Layer_ID'].'" name="thema'.$layer['Layer_ID'].'" value="0">';
+
+				$legend .=  '<input id="thema_'.$layer['Layer_ID'].'" ';
+				if($layer['selectiontype'] == 'radio'){
+					$legend .=  'type="radio" ';
+					$legend .=  ' onClick="this.checked = this.checked2;" onMouseUp="this.checked = this.checked2;" onMouseDown="updateQuery(event, document.getElementById(\'thema_'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), document.GUI.radiolayers_'.$layer['Gruppe'].', '.$this->user->rolle->instant_reload.')"';
+					$this->radiolayers[$layer['Gruppe']] .= $layer['Layer_ID'].'|';
+				}
+				else{
+					$legend .=  'type="checkbox" ';
+					$legend .=  ' onClick="updateQuery(event, document.getElementById(\'thema_'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), \'\', '.$this->user->rolle->instant_reload.')"';
+				}
+				$legend .=  ' name="thema'.$layer['Layer_ID'].'" value="1" ';
+				if($layer['aktivStatus'] == 1){
+					$legend .=  'checked title="'.$this->deactivatelayer.'"';
+				}
+				else{
+					$legend .=  ' title="'.$this->activatelayer.'"';
+				}
+				$legend .= ' ></td><td valign="middle">';
+
+				$legend .= '<a';
+				# Bei eingeschalteter Rollenoption Layeroptionen anzeigen wird das Optionsfeld mit einem Rechtsklick geöffnet.
+				if ($this->user->rolle->showlayeroptions) {
+					$legend .= ' oncontextmenu="getLayerOptions(' . $layer['Layer_ID'] . '); return false;"';
+				}
+				if($layer['metalink'] != '' AND substr($layer['metalink'], 0, 10) != 'javascript')
+					$legend .= ' target="_blank"';
+				if($layer['metalink'] != '')
+					$legend .= ' class="metalink boldhover" href="'.$layer['metalink'].'">';
+				else
+					$legend .= ' class="visiblelayerlink boldhover" href="javascript:void(0)">';
+				$legend .= '<span id="'.str_replace('-', '_', $layer['alias']).'"';
+				if($layer['minscale'] != -1 AND $layer['maxscale'] > 0){
+					$legend .= ' title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
+				}			  
+				$legend .=' >'.html_umlaute($layer['alias']).'</span>';
+				$legend .= '</a>';
+
+				# Bei eingeschalteten Layern und eingeschalteter Rollenoption ist ein Optionen-Button sichtbar
+				if($layer['aktivStatus'] == 1 and $this->user->rolle->showlayeroptions) $legend.='&nbsp;<a href="javascript:getLayerOptions('.$layer['Layer_ID'].')"><img src="graphics/rows.png" border="0" title="'.$this->layerOptions.'"></a>';
+				$legend.='<div style="position:static" id="options_'.$layer['Layer_ID'].'"> </div>';
+			}
+			if($layer['aktivStatus'] == 1 AND $layer['Class'][0]['Name'] != ''){
+				if($layer['requires'] == '' AND $layer['Layer_ID'] > 0){
+					$legend .= '<input id="classes_'.$layer['Layer_ID'].'" name="classes_'.$layer['Layer_ID'].'" type="hidden" value="'.$layer['showclasses'].'">';
+				}
+				if ($layer['showclasses'] != 0) {
+					if($layer['connectiontype'] == 7){      # WMS
+						$layersection = substr($layer['connection'], strpos(strtolower($layer['connection']), 'layers')+7);
+						$pos = strpos($layersection, '&');
+						if($pos !== false)$layersection = substr($layersection, 0, $pos);
+						$layers = explode(',', $layersection);
+						for($l = 0; $l < count($layers); $l++){
+							$legend .=  '<div style="display:inline" id="lg'.$j.'_'.$l.'"><br><img src="'.$layer['connection'].'&layer='.$layers[$l].'&service=WMS&request=GetLegendGraphic" onerror="ImageLoadFailed(\'lg'.$j.'_'.$l.'\')"></div>';
+						}
+					}
+					else {
+						$legend .= '<table border="0" cellspacing="0" cellpadding="0">';
+						$maplayer = $this->map->getLayerByName($layer['alias']);
+						if($layer['Class'][0]['legendorder'] != ''){
+							usort($layer['Class'], 'compare_legendorder');
+						}
+						for($k = 0; $k < $maplayer->numclasses; $k++){
+							$class = $maplayer->getClass($layer['Class'][$k]['index']);
+							for($s = 0; $s < $class->numstyles; $s++){
+								$style = $class->getStyle($s);
+								if($maplayer->type > 0){
+									$symbol = $this->map->getSymbolObjectById($style->symbol);
+									if($symbol->type == 1006){ 	# 1006 == hatch
+										$style->set('size', 2*$style->width);					# size und maxsize beim Typ Hatch auf die doppelte Linienbreite setzen, damit man was in der Legende erkennt
+										$style->set('maxsize', 2*$style->width);
+									}
+									else{
+										$style->set('size', 2);					# size und maxsize bei Linien und Polygonlayern immer auf 2 setzen, damit man was in der Legende erkennt
+										$style->set('maxsize', 2);
+									}
+								}
+								else{		# Punktlayer
+									if($style->size > 14)$style->set('size', 14);
+									$style->set('maxsize', $style->size);		# maxsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
+									$style->set('minsize', $style->size);		# minsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
+									if($class->numstyles == 1){							# wenn es nur einen Style in der Klasse gibt, die Offsets auf 0 setzen, damit man was in der Legende erkennt
+										$style->set('offsety', 0);
+										$style->set('offsetx', 0);
+									}
+								}
+							}
+							$legend .= '<tr style="line-height: 15px"><td style="line-height: 14px">';
+							if($s > 0){
+								$width = $height = '';
+								if($layer['Class'][$k]['legendimagewidth'] != '')$width = $layer['Class'][$k]['legendimagewidth'];
+								if($layer['Class'][$k]['legendimageheight'] != '')$height = $layer['Class'][$k]['legendimageheight'];
+								$padding = 1;
+								###### eigenes Klassenbild ######
+								if($layer['Class'][$k]['legendgraphic'] != ''){
+									$imagename = $original_class_image = GRAPHICSPATH . 'custom/' . $layer['Class'][$k]['legendgraphic'];
+									if($width == ''){
+										$size = getimagesize($imagename);
+										$width = $size[0];
+										$height = $size[1];
+									}
+								}
+								###### generiertes Klassenbild ######
+								else{
+									if($width == '')$width = $legendicon_size['width'][$maplayer->type];
+									if($height == '')$height = $legendicon_size['height'][$maplayer->type];
+									if($layer['Class'][$k]['Style'][0]['colorrange'] != ''){		# generierte Color-Ramp
+										$padding = 0;
+										$newname = rand(0, 1000000).'.jpg';
+										$this->colorramp(IMAGEPATH.$newname, $width, $height, $layer['Class'][$k]['Style'][0]['colorrange']);
+									}
+									else{																												# vom Mapserver generiertes Klassenbild
+										$image = $class->createLegendIcon($width, $height);
+										$filename = $this->map_saveWebImage($image,'jpeg');
+										$newname = $this->user->id.basename($filename);
+										rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
+									}
+									$imagename = $original_class_image = TEMPPATH_REL.$newname;
+								}
+								####################################
+								$classid = $layer['Class'][$k]['Class_ID'];
+								if($this->mapDB->disabled_classes['status'][$classid] == '0'){
+									if($height < $width)$height1 = 12;
+									else $height1 = 18;
+									$imagename = 'graphics/inactive'.$height1.'.jpg';
+									$status = 0;
+								}
+								elseif($this->mapDB->disabled_classes['status'][$classid] == 2){
+									$status = 2;
+								}
+								else{
+									$status = 1;
+								}
+								# $original_class_image ist das eigentliche Klassenbild bei Status 1, $imagename das Bild, welches entsprechend des Status gerade gesetzt ist
+								$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="'.$status.'"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.$original_class_image.'\', '.$width.', '.$height.')" onmouseout="mouseOutClassStatus('.$classid.',\''.$original_class_image.'\', '.$width.', '.$height.')" onclick="changeClassStatus('.$classid.',\''.$original_class_image.'\', '.$this->user->rolle->instant_reload.', '.$width.', '.$height.')"><img style="vertical-align:middle;padding-bottom: '.$padding.'" border="0" name="imgclass'.$classid.'" width="'.$width.'" height="'.$height.'" src="'.$imagename.'"></a>';
+							}
+							$legend .= '&nbsp;<span class="px13">'.html_umlaute($class->name).'</span></td></tr>';
+						}
+						$legend .= '</table>';
+					}
+				}
+			}
+			if($j+1 < $count AND $current_groupgetMetaData_off_requires != 1){		// todo
+				$legend .= '</td></tr>';
+			}
+		}
+
+		# unsichtbare Layer
+		if($layer['requires'] == '' AND !$visible){
+			$legend .=  '
+						<tr>
+							<td valign="top">';
+			if($layer['queryable'] == 1){
+				$style = ((
+						$this->user->rolle->query or
+						$this->user->rolle->touchquery or
+						$this->user->rolle->queryradius or
+						$this->user->rolle->polyquery
+					) ? '' : 'style="display: none"');
+				$legend .=  '<input ';
+				if($layer['selectiontype'] == 'radio'){
+					$legend .=  'type="radio" ';
+				}
+				else{
+					$legend .=  'type="checkbox" ';
+				}
+				if($layer['queryStatus'] == 1){
+					$legend .=  'checked="true"';
+				}
+				$legend .=' type="checkbox" name="pseudoqLayer'.$layer['Layer_ID'].'" disabled '.$style.'>';
+			}
+			$legend .=  '</td><td valign="top">';
+			// die nicht sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen nur bei Radiolayern, damit sie beim Neuladen ausgeschaltet werden können, denn ein disabledtes input-Feld wird ja nicht übergeben
+			$legend .=  '<input type="hidden" id="thema'.$layer['Layer_ID'].'" name="thema'.$layer['Layer_ID'].'" value="'.$layer['aktivStatus'].'">';
+			$legend .=  '<input ';
+			if($layer['selectiontype'] == 'radio'){
+				$legend .=  'type="radio" ';
+				$this->radiolayers[$layer['Gruppe']] .= $layer['Layer_ID'].'|';
+			}
+			else{
+				$legend .=  'type="checkbox" ';
+			}
+			if($layer['aktivStatus'] == 1){
+				$legend .=  'checked="true" ';
+			}
+			$legend .= 'id="thema_'.$layer['Layer_ID'].'" name="thema'.$layer['Layer_ID'].'" disabled="true"></td><td>';
+			$legend .= '<a ';
+			if ($this->user->rolle->showlayeroptions) {
+				$legend .= ' oncontextmenu="getLayerOptions(' . $layer['Layer_ID'] . '); return false;"';
+			}
+			$legend .= 'class="invisiblelayerlink boldhover" href="javascript:void(0)">';
+			$legend .= '<span class="legend_layer_hidden" id="'.str_replace('-', '_', $layer['alias']).'"';
+			if($layer['minscale'] != -1 AND $layer['maxscale'] != -1){
+				$legend .= 'title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
+			}
+			$legend .= ' >'.html_umlaute($layer['alias']).'</span></a>';
+			$legend.='<div style="position:static" id="options_'.$layer['Layer_ID'].'"> </div>';
+			if($layer['status'] != ''){
+				$legend .= '&nbsp;<img title="Thema nicht verfügbar: '.$layer['status'].'" src="'.GRAPHICSPATH.'warning.png">';
+			}
+			if($layer['queryable'] == 1){
+				$legend .=  '<input type="hidden" name="qLayer'.$layer['Layer_ID'].'"';
+				if($layer['queryStatus'] != 0){
+					$legend .=  ' value="1"';
+				}
+				$legend .=  '>';
+			}
+			$legend .=  '</td>
+					</tr>';
+		}
+		return $legend;
+	}
 
 	function check_layer_visibility(&$layer){
 		if($layer['status'] != '' OR ($this->map_scaledenom < $layer['minscale'] OR ($layer['maxscale'] > 0 AND $this->map_scaledenom > $layer['maxscale']))) {
@@ -1819,23 +1755,6 @@ class user {
 		return $stellen;
 	}
 
-	function clientIpIsValide($remote_addr) {
-    # Prüfen ob die übergebene IP Adresse zu den für den Nutzer eingetragenen Adressen passt
-    $ips=explode(';',$this->ips);
-    foreach ($ips AS $ip) {
-      if (trim($ip)!='') {
-        $ip=trim($ip);
-				if(!is_numeric(array_pop(explode('.', $ip))))$ip = gethostbyname($ip);			# für dyndns-Hosts
-        if (in_subnet($remote_addr, $ip)) {
-          $this->debug->write('<br>IP:'.$remote_addr.' paßt zu '.$ip,4);
-          #echo '<br>IP:'.$remote_addr.' paßt zu '.$ip;
-          return 1;
-        }
-      }
-    }
-    return 0;
-  }
-
 	function setRolle($stelle_id) {
 		# Abfragen und zuweisen der Einstellungen für die Rolle		
 		$rolle = new rolle($this->id, $stelle_id, $this->database);		
@@ -1859,7 +1778,7 @@ class stelle {
   var $selectedButton;
   var $database;
 
-	function stelle($id,$database) {
+	function stelle($id, $database) {
 		global $debug;
 		$this->debug=$debug;
 		$this->id=$id;
@@ -1875,7 +1794,7 @@ class stelle {
     }
     $sql.='Bezeichnung FROM stelle WHERE ID='.$this->id;
     #echo $sql;
-    $this->debug->write("<p>file:users.php class:stelle->getName - Abfragen des Namens der Stelle:<br>".$sql,4);
+    $this->debug->write("<p>file:stelle.php class:stelle->getName - Abfragen des Namens der Stelle:<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);
     if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     $rs=mysql_fetch_array($query);
@@ -1892,7 +1811,7 @@ class stelle {
 			WHERE
 				ID = " . $this->id . "
 		";
-    $this->debug->write("<p>file:users.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>".$sql,4);
+    $this->debug->write("<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);
     if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     $rs=mysql_fetch_array($query);    
@@ -1927,7 +1846,7 @@ class stelle {
 
   function checkClientIpIsOn() {
     $sql ='SELECT check_client_ip FROM stelle WHERE ID = '.$this->id;
-    $this->debug->write("<p>file:users.php class:stelle->checkClientIpIsOn- Abfragen ob IP's der Nutzer in der Stelle getestet werden sollen<br>".$sql,4);
+    $this->debug->write("<p>file:stelle.php class:stelle->checkClientIpIsOn- Abfragen ob IP's der Nutzer in der Stelle getestet werden sollen<br>".$sql,4);
     #echo '<br>'.$sql;
     $query=mysql_query($sql,$this->database->dbConn);
     if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
@@ -2018,6 +1937,7 @@ class rolle {
 			$this->menu_auto_close=$rs['menu_auto_close'];
 			rolle::$layer_params = (array)json_decode('{' . $rs['layer_params'] . '}');
 			$this->visually_impaired = $rs['visually_impaired'];
+			$this->legendtype = $rs['legendtype'];
 			if($rs['hist_timestamp'] != ''){
 				$this->hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');			# der wird zur Anzeige des Timestamps benutzt
 				rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');	# der hat die Form, wie der timestamp in der PG-DB steht und wird für die Abfragen benutzt
@@ -2134,6 +2054,7 @@ class pgdatabase {
     # und der Einlesevorgang muss wiederholt werden bis er fehlerfrei durchgelaufen ist.
     # Dazu Fehlerausschriften bearchten.
     $this->blocktransaction=0;
+		$this->spatial_ref_code = EPSGCODE_ALKIS . ", " . EARTH_RADIUS;
   }
 
   function open() {
@@ -2179,8 +2100,10 @@ class pgdatabase {
 		# (lesend immer, aber schreibend nur mit DBWRITE=1)
 		if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
 			#echo "<br>".$sql;
-			$sql = "SET datestyle TO 'German';".$sql;
-			if($this->schema != ''){
+			if (stristr($sql, 'SELECT')) {
+				$sql = "SET datestyle TO 'German';" . $sql;
+			};
+			if ($this->schema != ''){
 				$sql = "SET search_path = " . $this->schema . ", public;" . $sql;
 			}
 			if ($suppress_error_msg) {
@@ -2325,7 +2248,7 @@ class db_mapObj {
     return $groups;
   }
 
-  function read_Layer($withClasses, $groups = NULL){
+  function read_Layer($withClasses, $useLayerAliases = false, $groups = NULL){
 		global $language;
 
 		if($language != 'german') {
@@ -2341,7 +2264,7 @@ class db_mapObj {
 		$sql = "
 			SELECT DISTINCT
 				coalesce(rl.transparency, ul.transparency, 100) as transparency, rl.`aktivStatus`, rl.`queryStatus`, rl.`gle_view`, rl.`showclasses`, rl.`logconsume`, 
-				ul.`queryable`, ul.`drawingorder`, ul.`minscale`, ul.`maxscale`, ul.`offsite`, ul.`postlabelcache`, ul.`Filter`, ul.`template`, ul.`header`, ul.`footer`, ul.`symbolscale`, ul.`logconsume`, ul.`requires`, ul.`privileg`, ul.`export_privileg`,
+				ul.`queryable`, COALESCE(rl.drawingorder, ul.drawingorder) as drawingorder, ul.`minscale`, ul.`maxscale`, ul.`offsite`, ul.`postlabelcache`, ul.`Filter`, ul.`template`, ul.`header`, ul.`footer`, ul.`symbolscale`, ul.`logconsume`, ul.`requires`, ul.`privileg`, ul.`export_privileg`,
 				l.Layer_ID," .
 				$name_column . ",
 				l.alias,
@@ -2380,15 +2303,19 @@ class db_mapObj {
     if($this->nurFremdeLayer){			# entweder fremde (mit host=...) Postgis-Layer oder aktive nicht-Postgis-Layer
     	$sql.=' AND (l.connection like "%host=%" AND l.connection NOT like "%host=localhost%" OR l.connectiontype != 6 AND rl.aktivStatus != "0")';
     }
-    $sql.=' ORDER BY ul.drawingorder';
+    $sql.=' ORDER BY drawingorder';
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Layer - Lesen der Layer der Rolle:<br>".$sql,4);
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
-    $this->Layer = array();
+    $layer = array();
     $this->disabled_classes = $this->read_disabled_classes();
 		$i = 0;
-    while ($rs=mysql_fetch_assoc($query)) {
+    while ($rs=mysql_fetch_assoc($query)){
+			if($rs['alias'] == '' OR !$useLayerAliases){
+				$rs['alias'] = $rs['Name'];
+			}
+			$rs['id'] = $i;
 			$rs['Name'] = replace_params($rs['Name'], rolle::$layer_params);
 			$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);
 			$rs['connection'] = replace_params($rs['connection'], rolle::$layer_params);
@@ -2400,11 +2327,11 @@ class db_mapObj {
 			}
 			if($rs['maxscale'] > 0)$rs['maxscale'] = $rs['maxscale']+0.3;
 			if($rs['minscale'] > 0)$rs['minscale'] = $rs['minscale']-0.3;
-      $this->Layer[$i]=$rs;
-			$this->Layer['layer_ids'][$rs['Layer_ID']] =& $this->Layer[$i];		# damit man mit einer Layer-ID als Schlüssel auf dieses Array zugreifen kann
+			$layer[$i]=$rs;			
+			$layer['layer_ids'][$rs['Layer_ID']] =& $layer[$i];		# damit man mit einer Layer-ID als Schlüssel auf dieses Array zugreifen kann
 			$i++;
     }
-    return $this->Layer;
+    return $layer;
   }
 
   function read_disabled_classes(){
@@ -2523,7 +2450,7 @@ class db_mapObj {
   }
 
   function read_RollenLayer($id = NULL, $typ = NULL){
-		$sql = "SELECT DISTINCT l.*, g.Gruppenname, -l.id AS Layer_ID, 1 as showclasses, CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable from rollenlayer AS l, u_groups AS g";
+		$sql = "SELECT DISTINCT l.*, l.Name as alias, g.Gruppenname, -l.id AS Layer_ID, 1 as showclasses, CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable from rollenlayer AS l, u_groups AS g";
     $sql.= ' WHERE l.Gruppe = g.id AND l.stelle_id='.$this->Stelle_ID.' AND l.user_id='.$this->User_ID;
     if($id != NULL){
     	$sql .= ' AND l.id = '.$id;

@@ -65,10 +65,9 @@ Text_menue_buttons=["<? echo $strHelp; ?>:","<? echo $strHintMenueButtons; ?>"];
 									<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_task, Style[0], document.getElementById('Tip1'))" onmouseout="htm()">
 									<div id="Tip1" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 								</div>
-								<div style="align-self: center;">
+								<div style="z-index: 1; position: fixed; top: 250px; left: 50%; margin-left: 380px">
 									<i id="sign_in_stelle" title="<? echo $this->strEnter; ?>" class="fa fa-sign-out fa-2x" onclick="document.GUI.submit();" style="cursor: pointer;display: none;"></i>
 								</div>
-								<div style="clear: both;">
 							</div>
 						</td>
 					</tr>

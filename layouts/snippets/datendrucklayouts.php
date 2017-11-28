@@ -4,7 +4,8 @@
 
 var counter = 0;
 
-Text[0]=["Hilfe:","In Freitexten können folgende Schlüsselwörter verwendet werden, die dann durch andere Texte ersetzt werden:<ul><li>$stelle: die aktuelle Stellenbezeichung</li><li>$user: der Name des Nutzers</li><li>$pagenumber: die aktuelle Seitennummer<br>(Platzierung \"auf jeder Seite\" erforderlich)</li><li>$pagecount: die Gesamtseitenzahl<br>(Platzierung \"auf jeder Seite\" erforderlich)</li><li>$<i>&lt;attributname&gt;</i>: der Wert des Attributs</li></ul>"]
+Text[0]=["Hilfe:","In Freitexten können folgende Schlüsselwörter verwendet werden, die dann durch andere Texte ersetzt werden:<ul><li>$stelle: die aktuelle Stellenbezeichung</li><li>$user: der Name des Nutzers</li><li>$pagenumber: die aktuelle Seitennummer<br>(Platzierung \"auf jeder Seite\" erforderlich)</li><li>$pagecount: die Gesamtseitenzahl<br>(Platzierung \"auf jeder Seite\" erforderlich)</li><li>${<i>&lt;attributname&gt;</i>}: der Wert des Attributs</li></ul>"]
+Text[1]=["Hilfe:","Hier kann der Name der erzeugten PDF-Datei angegeben werden. Im Dateinamen können auch Attribute in der Form ${<i>&lt;attributname&gt;</i>} verwendet werden, wodurch der Dateiname dynamisch wird. Wird kein Dateiname angegeben, erhält die PDF-Datei einen automatisch generierten Namen."]
 
 function image_coords(event){
 	document.getElementById('coords').style.visibility='';
@@ -203,9 +204,11 @@ function save_layout(){
           <td class="fett" style="border-top:1px solid #C3C7C3;border-bottom:1px solid #C3C7C3" colspan=8 >&nbsp;Layoutdaten</td>
         </tr>
         <tr>
-          <td colspan=8 style="border-bottom:1px solid #C3C7C3">
+          <td style="border-bottom:1px solid #C3C7C3">
           	&nbsp;<span class="fett">Name:</span> 
-          	<input type="text" name="name" value="<? echo $this->ddl->selectedlayout[0]['name'] ?>" size="40">
+					</td>
+					<td colspan=7 style="border-bottom:1px solid #C3C7C3">
+          	<input type="text" name="name" value="<? echo $this->ddl->selectedlayout[0]['name'] ?>" size="35">
           	&nbsp;&nbsp;&nbsp;<span class="fett">Typ:</span> 
           	<select name="type" onchange="update_options();">
           		<option value="0" <? if($this->ddl->selectedlayout[0]['type'] == 0)echo 'selected' ?>>neue Seite für jeden Datensatz</option>
@@ -214,6 +217,18 @@ function save_layout(){
           	</select>
 					</td>
 				</tr>
+        <tr>
+          <td style="border-bottom:1px solid #C3C7C3">
+          	&nbsp;<span class="fett">Dateiname:</span>
+					</td>
+					<td colspan=7 style="border-bottom:1px solid #C3C7C3">
+          	<input type="text" name="filename" value="<? echo $this->ddl->selectedlayout[0]['filename'] ?>" size="35">
+						<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[1], Style[0], document.getElementById('Tip2'))" onmouseout="htm()">
+						<div style="position:relative">
+							<div id="Tip2" style="visibility:hidden;position:absolute;bottom:20px;z-index:1000;"></div>
+						</div>
+					</td>
+				</tr>				
 				<tr id="list_type_options" style="display:<? if($this->ddl->selectedlayout[0]['type'] == 0)echo 'none' ?>">
           <td colspan=8 style="border-bottom:1px solid #C3C7C3">
 						&nbsp;<span class="fett">Datensätze:</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="fett">Abstand:</span>

@@ -2,7 +2,7 @@
 		
 	$this->goNotExecutedInPlugins = false;	
 		
-	switch($this->go){		
+	switch($go){		
 		case 'Bodenrichtwertzone_Loeschen' : {
 			include(PLUGINS.'bodenrichtwerte/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'bodenrichtwerte/model/bodenrichtwerte.php');	# bodenrichtwert-Klasse einbinden

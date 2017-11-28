@@ -137,6 +137,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 ?><p>
 
 <table border="0" cellpadding="0" cellspacing="2" width="100%" style="padding: 10px">
+<? if($this->formvars['gml_id'] == ''){ ?>
   <tr>
     <td colspan="3" class="menu"><span class="fett">&nbsp;Person</span></td>
   </tr>
@@ -255,14 +256,13 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
   </tr>
   <tr>
     <td width="290px">&nbsp;</td>
-    <td>
-      <input type="hidden" name="go" value="Namen_Auswaehlen">
+    <td>      
       <input type="submit" onclick="save();" style="width: 0px;height: 0px;border: none">
       <input type="button" name="go_plus" onclick="save();" value="<?php echo $strSearch; ?>" tabindex="0"><br>
    </td>
   </tr>
+<? }
 
-<?php
   $anzNamen=count($this->namen);
   if ($anzNamen>0) {
    ?>
@@ -271,7 +271,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 	<span class="fett"><br>
 	<?php echo $strTotalHits; ?>: <?php echo $this->anzNamenGesamt; ?>
     <br>
-    <br>
+		<br>
 </span>	<table border="1" cellpadding="3" cellspacing="0">
       <tr bgcolor="<?php echo BG_DEFAULT ?>">
       	<td class="menu">&nbsp;</td>
@@ -439,6 +439,13 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
   ?>
 
 </table>
+<? if($this->formvars['gml_id'] != ''){ ?>
+		<a href="index.php?go=get_last_query">zurück</a>
+		<input name="anzahl" type="hidden" value="<?php echo $this->formvars['anzahl']; ?>">
+		<input name="withflurst" type="hidden" value="<?php echo $this->formvars['withflurst']; ?>">
+<? } ?>
+<input type="hidden" name="go" value="Namen_Auswaehlen">
+<input name="gml_id" type="hidden" value="<? echo $this->formvars['gml_id']; ?>">
 <input type="hidden" name="go_backup" value="">
 <input name="namensuche" type="hidden" value="true">
 <input name="selBlatt" type="hidden" value="">

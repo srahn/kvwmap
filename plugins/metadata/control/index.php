@@ -7,7 +7,7 @@ include_once(CLASSPATH.'FormObject.php');
 /**
 * Anwendungsfälle
 */
-switch($this->go) {
+switch($go) {
 	case 'Metadaten_Recherche' : {
 		$this->metadaten_suche();
 	} break;

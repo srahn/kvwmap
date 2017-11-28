@@ -99,7 +99,7 @@
 			content+= \'<div style="height: 30px">Koordinatenzoom</div>\';
 			content+= \'<table style="padding: 5px"><tr><td align="left" style="width: 300px" class="px15">Koordinate (Rechtswert Hochwert):</td></tr>\';
 			content+= \'<tr><td><input style="width: 310px" type="text" id="input_coords" name="input_coords" value="\'+mittex+\' \'+mittey+\'"></td></tr>\';
-			content+= \'<tr><td>Koordinatenreferenzsystemsystem:&nbsp;<select name="epsg_code" id="epsg_code" style="width: 310px">'.$epsg_codes.'</select></td></tr></table>\';
+			content+= \'<tr><td>Koordinatenreferenzsystem:&nbsp;<select name="epsg_code" id="epsg_code" style="width: 310px">'.$epsg_codes.'</select></td></tr></table>\';
 			content+= \'<br><input type="button" value="OK" onclick="coords_input_submit()">\';
 			Msg.innerHTML = content;
 			document.getElementById(\'input_coords\').select();
