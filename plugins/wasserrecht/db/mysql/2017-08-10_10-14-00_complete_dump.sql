@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 172.17.0.2:3306
--- Generation Time: Nov 27, 2017 at 05:37 PM
+-- Generation Time: Nov 28, 2017 at 02:23 PM
 -- Server version: 5.5.56
 -- PHP Version: 5.6.30-0+deb8u1
 
@@ -184,16 +184,17 @@ CREATE TABLE `datendrucklayouts` (
   `font_user` varchar(255) DEFAULT NULL,
   `type` tinyint(1) NOT NULL DEFAULT '0',
   `gap` int(11) NOT NULL DEFAULT '20',
-  `no_record_splitting` tinyint(1) NOT NULL DEFAULT '0'
+  `no_record_splitting` tinyint(1) NOT NULL DEFAULT '0',
+  `filename` varchar(255) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `datendrucklayouts`
 --
 
-INSERT INTO `datendrucklayouts` (`id`, `name`, `layer_id`, `bgsrc`, `bgposx`, `bgposy`, `bgwidth`, `bgheight`, `dateposx`, `dateposy`, `datesize`, `userposx`, `userposy`, `usersize`, `font_date`, `font_user`, `type`, `gap`, `no_record_splitting`) VALUES
-(1, 'Test Wasserentnahmebenutzer Layout', 43, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', 0, 20, 0),
-(2, 'test', 43, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', 0, 20, 0);
+INSERT INTO `datendrucklayouts` (`id`, `name`, `layer_id`, `bgsrc`, `bgposx`, `bgposy`, `bgwidth`, `bgheight`, `dateposx`, `dateposy`, `datesize`, `userposx`, `userposy`, `usersize`, `font_date`, `font_user`, `type`, `gap`, `no_record_splitting`, `filename`) VALUES
+(1, 'Test Wasserentnahmebenutzer Layout', 43, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', 0, 20, 0, NULL),
+(2, 'test', 43, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', 0, 20, 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -2469,6 +2470,7 @@ INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES
 ('kvwmap', 'mysql', '2017-09-19_12-04-37_styles_polaroffset.sql'),
 ('kvwmap', 'mysql', '2017-11-02_12-14-38_rolle_legendtype.sql'),
 ('kvwmap', 'mysql', '2017-11-14_10-08-33_u_rolle2used_layer_drawingorder.sql'),
+('kvwmap', 'mysql', '2017-11-16_14-01-29_datendrucklayouts_filename.sql'),
 ('kvwmap', 'postgresql', '2014-09-12_16-33-22_Version2.0.sql'),
 ('kvwmap', 'postgresql', '2015-05-06_08-47-01_st_area_utm.sql'),
 ('kvwmap', 'postgresql', '2015-05-28_14-07-36_bug_st_area_utm.sql'),
@@ -2579,12 +2581,12 @@ CREATE TABLE `rolle` (
 --
 
 INSERT INTO `rolle` (`user_id`, `stelle_id`, `nImageWidth`, `nImageHeight`, `auto_map_resize`, `minx`, `miny`, `maxx`, `maxy`, `nZoomFactor`, `selectedButton`, `epsg_code`, `epsg_code2`, `coordtype`, `active_frame`, `last_time_id`, `gui`, `language`, `hidemenue`, `hidelegend`, `fontsize_gle`, `highlighting`, `buttons`, `scrollposition`, `result_color`, `always_draw`, `runningcoords`, `showmapfunctions`, `showlayeroptions`, `singlequery`, `querymode`, `geom_edit_first`, `overlayx`, `overlayy`, `hist_timestamp`, `instant_reload`, `menu_auto_close`, `layer_params`, `menue_buttons`, `legendtype`, `visually_impaired`) VALUES
-(1, 1, 1198, 768, 1, 33315438.965767, 5917391.0883834, 33384930.984448, 5961919.3910804, 2, 'zoomin', '35833', '', 'dec', 0, '2017-11-27 15:54:19', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure,', 2, 1, 0, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 1, 0, 0),
-(2, 2, 1198, 770, 1, 33233326.659774, 5878358.9142073, 33459616.697369, 6044564.2999858, 2, 'zoomin', '35833', NULL, 'dec', 0, '2017-11-27 17:23:23', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure', 0, 1, 0, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 0, 0, 0),
+(1, 1, 1198, 768, 1, 33214727.578393, 5872415.2896779, 33477900, 6041047.9107075, 2, 'zoomin', '35833', '', 'dec', 0, '2017-11-28 14:07:23', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure,', 0, 1, 0, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 1, 0, 0),
+(2, 2, 1198, 810, 1, 33217116.771694, 5874036.2773857, 33475826.585449, 6048886.9368074, 2, 'zoomin', '35833', NULL, 'dec', 0, '2017-11-28 13:00:26', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure', 0, 1, 0, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 0, 0, 0),
 (5, 5, 500, 500, 1, 4501025, 6001879, 4502834, 6003236, 2, 'zoomin', '25833', NULL, 'dec', 0, '0000-00-00 00:00:00', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure', 0, 1, NULL, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 0, 0, 0),
 (5, 1, 1198, 770, 1, 477213.69136765, 6003065.4938312, 477741.75671226, 6003404.7438312, 2, 'zoomin', '25833', NULL, 'dec', 0, '2017-10-27 13:28:49', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure', 0, 1, NULL, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 0, 0, 0),
 (3, 5, 1198, 770, 1, 173249.89856957, 5867815, 505815.10143043, 6081468, 2, 'zoomin', '25833', NULL, 'dec', 0, '2017-11-23 10:29:37', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure', 0, 1, NULL, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 0, 0, 0),
-(4, 4, 500, 500, 1, 4501025, 6001879, 4502834, 6003236, 2, 'zoomin', '25833', NULL, 'dec', 0, '0000-00-00 00:00:00', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure', 0, 1, NULL, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 0, 0, 0),
+(4, 4, 1198, 810, 1, 181471.53522868, 5867815, 497593.46477132, 6081468, 2, 'zoomin', '25833', NULL, 'dec', 0, '2017-11-28 12:58:40', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure', 0, 1, NULL, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 0, 0, 0),
 (5, 2, 500, 500, 1, 4501025, 6001879, 4502834, 6003236, 2, 'zoomin', '25833', NULL, 'dec', 0, '0000-00-00 00:00:00', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure', 0, 1, NULL, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 0, 0, 0),
 (5, 4, 500, 500, 1, 4501025, 6001879, 4502834, 6003236, 2, 'zoomin', '25833', NULL, 'dec', 0, '0000-00-00 00:00:00', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure', 0, 1, NULL, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 0, 0, 0);
 
@@ -2648,7 +2650,7 @@ CREATE TABLE `rolle_last_query` (
 --
 
 INSERT INTO `rolle_last_query` (`user_id`, `stelle_id`, `go`, `layer_id`, `sql`, `orderby`, `limit`, `offset`) VALUES
-(1, 1, 'Layer-Suche_Suchen', 37, 'SELECT * FROM (SELECT fiswrv_gewaesserbenutzungen_umfang.oid AS fiswrv_gewaesserbenutzungen_umfang_oid,  id,  name,  wert,  einheit,  gewaesserbenutzungen as gwb_id   FROM fiswrv_gewaesserbenutzungen_umfang WHERE 1=1) as query WHERE 1=1  AND ( (1=1)) AND fiswrv_gewaesserbenutzungen_umfang_oid = 256713', ' ORDER BY fiswrv_gewaesserbenutzungen_umfang_oid ', 10, NULL),
+(1, 1, 'Layer-Suche_Suchen', 9, 'SELECT * FROM (SELECT a.oid AS fiswrv_personen_oid,  a.id AS personen_id,  a.typ,  a.klasse,  a.status,  d.bezeichnung,  a.name,  a.abkuerzung,  a.namenszusatz,  a.adresse as adress_id,  COALESCE(b.strasse,\'\') ||\'  \'|| COALESCE(b.hausnummer,\'\') AS strasse_hausnummer,  COALESCE(b.plz::text,\'\') ||\'  \'|| COALESCE(b.ort,\'\') AS plz_ort,   a.register_amtsgericht,  a.register_nummer,   a.telefon,  a.fax,  a.email,  a.zimmer,  a.verwendungszweck_wee,  a.konto as konto_id,  COALESCE(c.name,\'\') AS kontoname,  COALESCE(c.iban,\'\') AS iban,  COALESCE(c.bic,\'\') AS bic,  COALESCE(c.verwendungszweck,\'\') AS verwendungszweck,  COALESCE(c.personenkonto,\'\') AS personenkonto,  COALESCE(c.kassenzeichen,\'\') AS kassenzeichen,  a.behoerde,  a.wrzaussteller,  a.wrzadressat,  a.wrzrechtsnachfolger,  CASE when a.betreiber = \'ja\' then \'Betreiber\' ELSE \'false\' end AS betreiber,  a.betreiber AS betreiber_id,  CASE when a.bearbeiter  = \'ja\' then \'Bearbeiter\' ELSE \'false\' end AS bearbeiter,  a.bearbeiter AS bearbeiter_id,   a.abwasser_koerperschaft,  a.trinkwasser_koerperschaft,  a.weeerklaerer,  a.kommentar,  a.bearbeiter_name ,  a.bearbeiter_id,  a.stelle_name,  a.stelle_id,  a.bearbeitungs_datum,   true AS aktuell,  \'\' AS per_wrz,  \'\' AS per_wrz_ben  FROM fiswrv_personen a LEFT JOIN fiswrv_personen_bezeichnung d ON a.id=d.id LEFT JOIN fiswrv_adresse b ON a.adresse=b.id LEFT JOIN fiswrv_konto c ON a.konto=c.id WHERE 1=1) as query WHERE 1=1  AND ( (1=1)) AND fiswrv_personen_oid = 256716', ' ORDER BY fiswrv_personen_oid ', 10, NULL),
 (2, 2, 'Layer-Suche_Suchen', 2, 'SELECT * FROM (SELECT a.oid AS fiswrv_anlagen_oid,  a.id AS anlage_id,  a.name,  a.klasse,  a.zustaend_stalu,  a.zustaend_uwb,  a.betreiber,  a.abwasser_koerperschaft,  a.trinkwasser_koerperschaft,  \'\' AS wasserrechtliche_zulassungen,  true AS aktuell,  \'\' AS gewaesserbenutzungen,   a.bearbeiter_name ,  a.bearbeiter_id,  a.stelle_name,  a.stelle_id,  a.bearbeitungs_datum,  a.kommentar,  a.the_geom  FROM fiswrv_anlagen a WHERE 1=1) as query WHERE 1=1  AND ( (1=1)) AND (the_geom && st_transform(st_geomfromtext(\'POLYGON((33201165.000009 5867814.9999175, 33477900 5867814.9999175, 33477900 6081468, 33201165.000009 6081468, 33201165.000009 5867814.9999175))\', 35833), 35833) OR the_geom IS NULL)', ' ORDER BY fiswrv_anlagen_oid ', 10, NULL);
 
 -- --------------------------------------------------------
@@ -3489,7 +3491,49 @@ INSERT INTO `u_consume` (`user_id`, `stelle_id`, `time_id`, `activity`, `nimagew
 (1, 1, '2017-11-27 15:54:19', 'getMap', 500, 500, '35833', 33327920.823759, 5925212.8730481, 33372449.126456, 5954097.6064157, '2017-11-27 13:17:22', NULL),
 (2, 2, '2017-11-27 17:19:55', 'getMap', 1198, 770, '35833', 33201165.000009, 5867814.9999175, 33477900, 6081468, '2017-10-25 14:16:41', NULL),
 (2, 2, '2017-11-27 17:20:02', 'getMap', 1198, 770, '35833', 33201165.000009, 5867814.9999175, 33477900, 6081468, '2017-11-27 17:19:55', NULL),
-(2, 2, '2017-11-27 17:23:23', 'getMap', 1198, 770, '35833', 33233326.659774, 5878358.9142073, 33459616.697369, 6044564.2999858, '2017-11-27 17:20:02', NULL);
+(2, 2, '2017-11-27 17:23:23', 'getMap', 1198, 770, '35833', 33233326.659774, 5878358.9142073, 33459616.697369, 6044564.2999858, '2017-11-27 17:20:02', NULL),
+(4, 4, '2017-11-28 12:58:31', 'getMap', 1198, 810, '25833', 181471.53522868, 5867815, 497593.46477132, 6081468, '2017-11-28 12:58:31', NULL),
+(4, 4, '2017-11-28 12:58:40', 'getMap', 1198, 810, '25833', 181471.53522868, 5867815, 497593.46477132, 6081468, '2017-11-28 12:58:31', NULL),
+(2, 2, '2017-11-28 13:00:26', 'getMap', 1198, 810, '35833', 33217116.771694, 5874036.2773857, 33475826.585449, 6048886.9368074, '2017-11-27 17:23:23', NULL),
+(1, 1, '2017-11-28 13:10:15', 'getMap', 1198, 768, '35833', 33319793.102276, 5917391.0883834, 33380576.847939, 5961919.3910804, '2017-11-27 15:54:19', NULL),
+(1, 1, '2017-11-28 13:10:16', 'getMap', 1198, 768, '35833', 33319793.102276, 5917391.0883834, 33380576.847939, 5961919.3910804, '2017-11-28 13:10:15', NULL),
+(1, 1, '2017-11-28 13:10:17', 'getMap', 1198, 768, '35833', 33319793.102276, 5917391.0883834, 33380576.847939, 5961919.3910804, '2017-11-28 13:10:16', NULL),
+(1, 1, '2017-11-28 13:10:18', 'getMap', 1198, 768, '35833', 33319793.102276, 5917391.0883834, 33380576.847939, 5961919.3910804, '2017-11-28 13:10:17', NULL),
+(1, 1, '2017-11-28 13:10:19', 'getMap', 1198, 768, '35833', 33319793.102276, 5917391.0883834, 33380576.847939, 5961919.3910804, '2017-11-28 13:10:18', NULL),
+(1, 1, '2017-11-28 13:10:20', 'getMap', 1198, 768, '35833', 33319793.102276, 5917391.0883834, 33380576.847939, 5961919.3910804, '2017-11-28 13:10:19', NULL),
+(1, 1, '2017-11-28 13:10:21', 'getMap', 1198, 768, '35833', 33319793.102276, 5917391.0883834, 33380576.847939, 5961919.3910804, '2017-11-28 13:10:20', NULL),
+(1, 1, '2017-11-28 13:10:22', 'getMap', 1198, 768, '35833', 33319793.102276, 5917391.0883834, 33380576.847939, 5961919.3910804, '2017-11-28 13:10:21', NULL),
+(1, 1, '2017-11-28 13:10:23', 'getMap', 1198, 768, '35833', 33319793.102276, 5917391.0883834, 33380576.847939, 5961919.3910804, '2017-11-28 13:10:22', NULL),
+(1, 1, '2017-11-28 13:10:24', 'getMap', 1198, 768, '35833', 33319793.102276, 5917391.0883834, 33380576.847939, 5961919.3910804, '2017-11-28 13:10:23', NULL),
+(1, 1, '2017-11-28 13:10:28', 'getMap', 1198, 768, '35833', 33319793.102276, 5917391.0883834, 33380576.847939, 5961919.3910804, '2017-11-28 13:10:24', NULL),
+(1, 1, '2017-11-28 13:10:29', 'getMap', 1198, 768, '35833', 33319793.102276, 5917391.0883834, 33380576.847939, 5961919.3910804, '2017-11-28 13:10:28', NULL),
+(1, 1, '2017-11-28 13:10:30', 'getMap', 1198, 768, '35833', 33319793.102276, 5917391.0883834, 33380576.847939, 5961919.3910804, '2017-11-28 13:10:29', NULL),
+(1, 1, '2017-11-28 13:10:31', 'getMap', 1198, 768, '35833', 33319793.102276, 5917391.0883834, 33380576.847939, 5961919.3910804, '2017-11-28 13:10:30', NULL),
+(1, 1, '2017-11-28 13:10:32', 'getMap', 1198, 768, '35833', 33319793.102276, 5917391.0883834, 33380576.847939, 5961919.3910804, '2017-11-28 13:10:31', NULL),
+(1, 1, '2017-11-28 13:10:33', 'getMap', 1198, 768, '35833', 33319793.102276, 5917391.0883834, 33380576.847939, 5961919.3910804, '2017-11-28 13:10:32', NULL),
+(1, 1, '2017-11-28 13:10:34', 'getMap', 1198, 768, '35833', 33319793.102276, 5917391.0883834, 33380576.847939, 5961919.3910804, '2017-11-28 13:10:33', NULL),
+(1, 1, '2017-11-28 13:10:35', 'getMap', 1198, 768, '35833', 33319793.102276, 5917391.0883834, 33380576.847939, 5961919.3910804, '2017-11-28 13:10:34', NULL),
+(1, 1, '2017-11-28 13:10:36', 'getMap', 1198, 768, '35833', 33319793.102276, 5917391.0883834, 33380576.847939, 5961919.3910804, '2017-11-28 13:10:35', NULL),
+(1, 1, '2017-11-28 13:10:37', 'getMap', 1198, 768, '35833', 33319793.102276, 5917391.0883834, 33380576.847939, 5961919.3910804, '2017-11-28 13:10:36', NULL),
+(1, 1, '2017-11-28 13:23:30', 'getMap', 1198, 768, '35833', 33220295.940888, 5856426.4266605, 33480074.009327, 6022884.0528033, '2017-11-28 13:10:37', NULL),
+(1, 1, '2017-11-28 13:23:31', 'getMap', 1198, 768, '35833', 33220295.940888, 5856426.4266605, 33480074.009327, 6022884.0528033, '2017-11-28 13:23:30', NULL),
+(1, 1, '2017-11-28 13:23:32', 'getMap', 1198, 768, '35833', 33220295.940888, 5856426.4266605, 33480074.009327, 6022884.0528033, '2017-11-28 13:23:31', NULL),
+(1, 1, '2017-11-28 13:23:33', 'getMap', 1198, 768, '35833', 33220295.940888, 5856426.4266605, 33480074.009327, 6022884.0528033, '2017-11-28 13:23:32', NULL),
+(1, 1, '2017-11-28 13:23:34', 'getMap', 1198, 768, '35833', 33220295.940888, 5856426.4266605, 33480074.009327, 6022884.0528033, '2017-11-28 13:23:33', NULL),
+(1, 1, '2017-11-28 13:23:35', 'getMap', 1198, 768, '35833', 33220295.940888, 5856426.4266605, 33480074.009327, 6022884.0528033, '2017-11-28 13:23:34', NULL),
+(1, 1, '2017-11-28 13:23:36', 'getMap', 1198, 768, '35833', 33220295.940888, 5856426.4266605, 33480074.009327, 6022884.0528033, '2017-11-28 13:23:35', NULL),
+(1, 1, '2017-11-28 13:23:37', 'getMap', 1198, 768, '35833', 33220295.940888, 5856426.4266605, 33480074.009327, 6022884.0528033, '2017-11-28 13:23:36', NULL),
+(1, 1, '2017-11-28 13:23:38', 'getMap', 1198, 768, '35833', 33220295.940888, 5856426.4266605, 33480074.009327, 6022884.0528033, '2017-11-28 13:23:37', NULL),
+(1, 1, '2017-11-28 13:25:28', 'getMap', 1198, 768, '35833', 33220295.940888, 5856426.4266605, 33480074.009327, 6022884.0528033, '2017-11-28 13:23:38', NULL),
+(1, 1, '2017-11-28 13:25:31', 'getMap', 1198, 768, '35833', 33262873.14572, 5886987.0064602, 33459397.960516, 6012913.9345708, '2017-11-28 13:25:28', NULL),
+(1, 1, '2017-11-28 13:25:50', 'getMap', 1198, 768, '35833', 33262873.14572, 5886987.0064601, 33459397.960516, 6012913.9345709, '2017-11-28 13:25:31', NULL),
+(1, 1, '2017-11-28 13:26:24', 'getMap', 1198, 768, '35833', 33262873.14572, 5886987.0064601, 33459397.960516, 6012913.9345709, '2017-11-28 13:25:50', NULL),
+(1, 1, '2017-11-28 13:29:37', 'getMap', 500, 500, '35833', 33262873.14572, 5886987.0064601, 33459397.960516, 6012913.9345709, '2017-11-28 13:26:24', NULL),
+(1, 1, '2017-11-28 13:30:21', 'getMap', 1198, 768, '35833', 33207784.703502, 5851688.0631174, 33514486.402734, 6048212.8779136, '2017-11-28 13:29:37', NULL),
+(1, 1, '2017-11-28 13:32:50', 'getMap', 1198, 768, '35833', 33207784.703502, 5851688.0631174, 33514486.402734, 6048212.8779136, '2017-11-28 13:30:21', NULL),
+(1, 1, '2017-11-28 14:07:16', 'getMap', 1198, 768, '35833', 33207784.703502, 5851688.0631174, 33514486.402734, 6048212.8779136, '2017-11-28 13:32:50', NULL),
+(1, 1, '2017-11-28 14:07:20', 'getMap', 1198, 768, '35833', 33207784.703502, 5851688.0631174, 33514486.402734, 6048212.8779136, '2017-11-28 14:07:16', NULL),
+(1, 1, '2017-11-28 14:07:23', 'getMap', 1198, 768, '35833', 33214727.578393, 5872415.2896779, 33477900, 6041047.9107075, '2017-11-28 14:07:20', NULL);
 
 -- --------------------------------------------------------
 
@@ -3736,8 +3780,8 @@ INSERT INTO `u_groups2rolle` (`user_id`, `stelle_id`, `id`, `status`) VALUES
 (5, 4, 11, 0),
 (5, 1, 11, 0),
 (5, 1, 1, 0),
-(4, 4, 1, 0),
-(4, 4, 11, 0),
+(4, 4, 1, 1),
+(4, 4, 11, 1),
 (5, 2, 11, 0),
 (5, 2, 1, 0),
 (5, 5, 11, 0),
@@ -3973,7 +4017,7 @@ INSERT INTO `u_menue2rolle` (`user_id`, `stelle_id`, `menue_id`, `status`) VALUE
 (4, 4, 49, 0),
 (4, 4, 45, 0),
 (4, 4, 44, 0),
-(4, 4, 43, 0),
+(4, 4, 43, 1),
 (4, 4, 38, 0),
 (4, 4, 37, 0),
 (4, 4, 30, 0),
@@ -4356,12 +4400,12 @@ CREATE TABLE `u_rolle2used_layer` (
 
 INSERT INTO `u_rolle2used_layer` (`user_id`, `stelle_id`, `layer_id`, `aktivStatus`, `queryStatus`, `gle_view`, `showclasses`, `logconsume`, `transparency`, `drawingorder`) VALUES
 (1, 1, 1, '1', '0', NULL, 1, '', NULL, NULL),
-(1, 1, 2, '1', '1', 1, 1, '0', NULL, NULL),
+(1, 1, 2, '1', '0', 1, 1, '0', NULL, NULL),
 (1, 1, 3, '0', '0', NULL, 1, '0', NULL, NULL),
 (2, 2, 9, '0', '0', NULL, 1, '0', NULL, NULL),
 (1, 1, 6, '0', '0', NULL, 1, '0', NULL, NULL),
 (1, 1, 43, '0', '0', NULL, 1, '0', NULL, NULL),
-(2, 2, 1, '1', '1', NULL, 1, '0', 51, NULL),
+(2, 2, 1, '1', '1', NULL, 1, '0', 100, NULL),
 (1, 1, 9, '0', '0', 1, 1, '0', NULL, NULL),
 (1, 1, 10, '0', '0', NULL, 1, '0', NULL, NULL),
 (2, 2, 25, '0', '0', NULL, 1, '0', NULL, NULL),
@@ -4391,7 +4435,7 @@ INSERT INTO `u_rolle2used_layer` (`user_id`, `stelle_id`, `layer_id`, `aktivStat
 (3, 5, 2, '0', '0', NULL, 1, '0', NULL, NULL),
 (1, 1, 36, '0', '0', NULL, 1, '0', NULL, NULL),
 (1, 1, 37, '0', '0', NULL, 1, '0', NULL, NULL),
-(1, 1, 38, '1', '1', NULL, 1, '0', NULL, NULL),
+(1, 1, 38, '0', '0', NULL, 1, '0', NULL, NULL),
 (1, 1, 39, '0', '0', NULL, 1, '0', NULL, NULL),
 (1, 1, 40, '0', '0', NULL, 1, '0', NULL, NULL),
 (1, 1, 41, '0', '0', NULL, 1, '0', NULL, NULL),
@@ -4557,7 +4601,7 @@ INSERT INTO `u_rolle2used_layer` (`user_id`, `stelle_id`, `layer_id`, `aktivStat
 (5, 1, 3, '0', '0', NULL, 1, '0', NULL, NULL),
 (5, 1, 2, '0', '0', NULL, 1, '0', NULL, NULL),
 (5, 1, 1, '0', '0', NULL, 1, '0', NULL, NULL),
-(4, 4, 1, '0', '0', NULL, 1, '0', NULL, NULL),
+(4, 4, 1, '1', '0', NULL, 1, '0', NULL, NULL),
 (4, 4, 2, '0', '0', NULL, 1, '0', NULL, NULL),
 (4, 4, 3, '0', '0', NULL, 1, '0', NULL, NULL),
 (4, 4, 6, '0', '0', NULL, 1, '0', NULL, NULL),
