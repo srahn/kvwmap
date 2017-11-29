@@ -15298,7 +15298,6 @@ class db_mapObj{
                       if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
                       while($rs = pg_fetch_array($ret[1])){
                         $attributes['enum_value'][$i][$k][] = $rs['value'];
-                        $attributes[$attributes['name'][$i]]['enum_value'][$k][] = $rs['value'];
                         $attributes['enum_output'][$i][$k][] = $rs['output'];
                       }
                     }
@@ -15310,7 +15309,6 @@ class db_mapObj{
                   if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
                   while($rs = pg_fetch_array($ret[1])){
                     $attributes['enum_value'][$i][] = $rs['value'];
-                    $attributes[$attributes['name'][$i]]['enum_value'][] = $rs['value'];
                     $attributes['enum_output'][$i][] = $rs['output'];
                   }
                 }
@@ -15383,7 +15381,6 @@ class db_mapObj{
                   if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
                   while($rs = pg_fetch_array($ret[1])){
                     $attributes['enum_value'][$i][] = $rs['value'];
-                    $attributes[$attributes['name'][$i]]['enum_value'][] = $rs['value'];
                     $attributes['enum_output'][$i][] = $rs['output'];
                   }
                 }
