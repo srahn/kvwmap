@@ -17,15 +17,21 @@ send_selected_flurst = function(go, formnummer, wz, target){
       semi = true;
     }
   }
-  currentform.target = '';
-  if(target == '_blank'){
-    currentform.target = '_blank';
-  }
-  currentform.go.value=go;
-  currentform.FlurstKennz.value=flurstkennz;
-  currentform.formnummer.value=formnummer;
-  currentform.wz.value=wz;
-  currentform.submit();
+	if (go == 'kvwkol') {
+		message('Öffne folgende Flurstücke in Kolibri:<br>' + flurstkennz.replace(';', '<br>'));
+		window.location.href = 'kvwkol://FlurstKennz=' + flurstkennz.replace(';', ',');
+	}
+	else {
+		currentform.target = '';
+		if(target == '_blank'){
+			currentform.target = '_blank';
+		}
+		currentform.go.value=go;
+		currentform.FlurstKennz.value=flurstkennz;
+		currentform.formnummer.value=formnummer;
+		currentform.wz.value=wz;
+		currentform.submit();
+	}
 }
 
 backto = function(go){
@@ -779,7 +785,13 @@ hide_versions = function(flst){
 													<a href="index.php?go=<? echo $zoomlink;?>">
 														<div class="fstanzeigehover">&nbsp;&nbsp;Kartenausschnitt&nbsp;&nbsp;</div>
 													</a>
-											<? } ?>
+											<? }
+											if (in_array('kolibri', $kvwmap_plugins) AND $this->Stelle->isFunctionAllowed('Kolibristart')) { ?>
+												<a href="kvwkol://FlurstKennz=<?php echo $flst->FlurstKennz; ?>" onclick="message('Öffne Flurstück <?php echo $flst->FlurstKennz; ?> in Kolibri.');">
+													<div class="fstanzeigehover">&nbsp;&nbsp;Öffnen in Kolibri&nbsp;&nbsp;</div>
+												</a><?php
+											} ?>
+
 											<div class="fstanzeigehover">
 												&nbsp;&nbsp;
 												Auszug:
@@ -866,7 +878,18 @@ hide_versions = function(flst){
               CSV-Export Klassifizierung
               &nbsp;&nbsp;
             </div>
-            </a>
+            </a><?
+
+						global $kvwmap_plugins;
+						if (in_array('kolibri', $kvwmap_plugins) AND $this->Stelle->isFunctionAllowed('Kolibristart')) { ?>
+							<a href="javascript:send_selected_flurst('kvwkol', '', '', '_blank');">
+								<div class="fstanzeigehover">
+									&nbsp;&nbsp;
+									Öffnen in Kolibri
+									&nbsp;&nbsp;
+								</div>
+							</a><?
+						} ?>
 
           </div>
   		  </td>

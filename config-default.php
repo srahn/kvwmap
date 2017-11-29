@@ -580,20 +580,22 @@ define('SHOW_MAP_IMAGE', 'true');       # true / false                          
 ############################ kvwmap-plugins #################		# Version 1.11.0
 #																																# Version 1.11.0
 $kvwmap_plugins = array();																			# Version 1.11.0
-#$kvwmap_plugins[] = 'bauleitplanung';													# Version 1.11.0
-#$kvwmap_plugins[] = 'bevoelkerung';														# Version 1.11.0
-#$kvwmap_plugins[] = 'gewaesser';																# Version 1.11.0
-#$kvwmap_plugins[] = 'bodenrichtwerte';													# Version 2.0.0
-#$kvwmap_plugins[] = 'jagdkataster';														# Version 2.0.0
-#$kvwmap_plugins[] = 'fortfuehrungslisten';											# Version 2.6.0
-#$kvwmap_plugins[] = 'nachweisverwaltung';											# Version 2.0.0
+#$kvwmap_plugins[] = 'alkis';																		# Version 2.8
 #$kvwmap_plugins[] = 'anliegerbeitraege';												# Version 2.0.0
-#$kvwmap_plugins[] = 'probaug';																	# Version 2.0.0
-#$kvwmap_plugins[] = 'geodoc';																	# Version 2.0.0
+#$kvwmap_plugins[] = 'bauleitplanung';													# Version 1.11.0
 #$kvwmap_plugins[] = 'baumfaellantrag';													# Version 2.0.0
-$kvwmap_plugins[] = 'wasserrecht';														# Version 2.8.0
-#																																# Version 1.11.0
-#############################################################		# Version 1.11.0
+#$kvwmap_plugins[] = 'bevoelkerung';														# Version 1.11.0
+#$kvwmap_plugins[] = 'bodenrichtwerte';													# Version 2.0.0
+#$kvwmap_plugins[] = 'fortfuehrungslisten';											# Version 2.6.0
+#$kvwmap_plugins[] = 'gewaesser';																# Version 1.11.0
+#$kvwmap_plugins[] = 'geodoc';																	# Version 2.0.0
+#$kvwmap_plugins[] = 'jagdkataster';														# Version 2.0.0
+#$kvwmap_plugins[] = 'kolibri';																	# Version 2.8
+#$kvwmap_plugins[] = 'metadata';																# Version 2.8
+#$kvwmap_plugins[] = 'nachweisverwaltung';											# Version 2.0.0
+#$kvwmap_plugins[] = 'probaug';																	# Version 2.0.0
+#$kvwmap_plugins[] = 'wasserrecht';															# Version 2.8.0
+############################################################
 
 # Festlegung von Fehlermeldungen und Hinweisen
 define ('INFO1','Prüfen Sie ob Ihr Datenbankmodell aktuell ist.');
