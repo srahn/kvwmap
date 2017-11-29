@@ -140,24 +140,46 @@ class Gewaesserbenutzungen extends WrPgObject {
 	    return "";
 	}
 	
-	public function getErlaubterUmfang()
+	public function getErlaubterOderReduzierterUmfang()
 	{
-	    if(!empty($this->data['max_ent_wee']))
-	    {
-	        return $this->data['max_ent_wee'];
-	    }
+	    $this->log->log_info('*** Gewaesserbenutzungen->getErlaubterOderReduzierterUmfang ***');
 	    
-	    return null;
+	    $erlaubterUmfang = $this->getErlaubterUmfang();
+	    $erlaubterUmfangReduziert = $this->getErlaubterUmfangReduziert();
+	    
+	    $this->log->log_debug('erlaubterUmfang: ' . var_export($erlaubterUmfang, true));
+	    $this->log->log_debug('erlaubterUmfangReduziert: ' . var_export($erlaubterUmfangReduziert, true));
+	    
+	    if(!empty($erlaubterUmfangReduziert))
+	    {
+	        $this->log->log_debug('erlaubterUmfangReduziert returned');
+	        return $erlaubterUmfangReduziert;
+	    }
+	    else
+	    {
+	        $this->log->log_debug('erlaubterUmfang returned');
+	        return $erlaubterUmfang;
+	    }
 	}
 	
-	public function getErlaubterUmfangHTML()
+	public function getErlaubterOderReduzierterUmfangHTML()
 	{
-	    if(!empty($this->getErlaubterUmfang()))
+	    if(!empty($this->getErlaubterOderReduzierterUmfang()))
 	    {
-	        return number_format($this->getErlaubterUmfang(), 0, '', ' ')  . " m³/a";
+	        return number_format($this->getErlaubterOderReduzierterUmfang(), 0, '', ' ')  . " m³/a";
 	    }
 	    
 	    return "";
+	}
+	
+	public function getErlaubterUmfang()
+	{
+	    return $this->getDataValue('max_ent_wee');
+	}
+	
+	public function getErlaubterUmfangReduziert()
+	{
+	    return $this->getDataValue('max_ent_wee_reduziert');
 	}
 	
 	////////////////////////////////////////////////////////////////////
@@ -390,9 +412,9 @@ class Gewaesserbenutzungen extends WrPgObject {
 	    $gesamtUmfang = $this->getUmfangAllerTeilbenutzungen($erhebungsjahr);
 	    
 	    $zugelassenerUmfang = 0;
-	    if(!empty($this->getErlaubterUmfang()))
+	    if(!empty($this->getErlaubterOderReduzierterUmfang()))
 	    {
-	        $zugelassenerUmfang = $this->getErlaubterUmfang();
+	        $zugelassenerUmfang = $this->getErlaubterOderReduzierterUmfang();
 	    }
 	    
 	    if(!empty($gesamtUmfang) && !empty($zugelassenerUmfang))

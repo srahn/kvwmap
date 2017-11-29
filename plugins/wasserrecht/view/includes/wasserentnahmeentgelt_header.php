@@ -97,9 +97,9 @@
     <div class="wasserrecht_display_table_cell_caption">Benutzungsumfang:</div>
         <div class="wasserrecht_display_table_cell_spacer"></div>
          <?php
-             if(!empty($gewaesserbenutzung) && !empty($gewaesserbenutzung->getErlaubterUmfangHTML()))
+             if(!empty($gewaesserbenutzung) && !empty($gewaesserbenutzung->getErlaubterOderReduzierterUmfangHTML()))
     		 {
-    		     echo '<a class="wasserrecht_display_table_cell_white" href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . $this->layer_names[GEWAESSERBENUTZUNGEN_LAYER_NAME] . '&value_' . GEWAESSERBENUTZUNGEN_LAYER_ID . '=' . $gewaesserbenutzung->getId() . '&operator_' . GEWAESSERBENUTZUNGEN_LAYER_ID . '==">' . $gewaesserbenutzung->getErlaubterUmfangHTML() . '</a>';
+    		     echo '<a class="wasserrecht_display_table_cell_white" href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . $this->layer_names[GEWAESSERBENUTZUNGEN_LAYER_NAME] . '&value_' . GEWAESSERBENUTZUNGEN_LAYER_ID . '=' . $gewaesserbenutzung->getId() . '&operator_' . GEWAESSERBENUTZUNGEN_LAYER_ID . '==">' . $gewaesserbenutzung->getErlaubterOderReduzierterUmfangHTML() . '</a>';
     		 }
     		 else
     		 {

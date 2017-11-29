@@ -328,7 +328,7 @@ if(!empty($wrz) && !empty($wrz->getId()))
                                   </tr>
                            		  <?php
                            		  
-                           		  $zugelassenerUmfangEntgeltsatz = $gewaesserbenutzung->getErlaubterUmfang();
+                           		  $zugelassenerUmfangEntgeltsatz = $gewaesserbenutzung->getErlaubterOderReduzierterUmfang();
                            		  $zugelassenerUmfangEntgelt = $zugelassenerUmfangEntgeltsatz;
                            		  
                            		  $teilgewasserbenutzungen = $gewaesserbenutzung->getTeilgewaesserbenutzungenByErhebungsjahr($erhebungsjahr);

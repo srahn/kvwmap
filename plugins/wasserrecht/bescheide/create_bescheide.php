@@ -118,7 +118,7 @@ function writeFestsetzungsWordFile(&$gui, $word_template, $word_file, &$paramete
     $gui->log->log_debug('zugelassene_entgelte: ' . var_export($zugelassene_entgelte, true));
     $nicht_zugelassene_entgelte = $festsetzungsSammelbescheidDaten->getNicht_zugelassene_entgelte();
     $gui->log->log_debug('nicht_zugelassene_entgelte: ' . var_export($nicht_zugelassene_entgelte, true));
-    $erlaubte_umfaenge = $festsetzungsSammelbescheidDaten->getErlaubterUmfang();
+    $erlaubte_umfaenge = $festsetzungsSammelbescheidDaten->getErlaubterOderReduzierterUmfang();
     $gui->log->log_debug('erlaubte_umfaenge: ' . var_export($erlaubte_umfaenge, true));
     
     $gewaesserbenutzungen = $festsetzungsSammelbescheidDaten->getGewaesserbenutzungen();
