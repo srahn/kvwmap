@@ -2,6 +2,10 @@
 <script type="text/javascript">
 <!--
 
+function toggle_vertices(){	
+	document.getElementById("vertices").SVGtoggle_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+}
+
 function save(){	
 	document.GUI.result2.value = '';
 	if(document.getElementsByName('art')[3].checked==true && document.GUI.andere_art.value == ''){
@@ -299,7 +303,10 @@ $legendheight = $this->map->height + 20;
 				<? }else{ ?>
 				<td colspan="2"></td>
 				<? } ?>
-					<td align="right"><input type="checkbox" name="always_draw" value="1" <?if($always_draw == 1 OR $always_draw == 'true')echo 'checked'; ?>>&nbsp;weiterzeichnen&nbsp;&nbsp;</td>
+					<td align="right">
+						<input type="checkbox" name="always_draw" value="1" <?if($always_draw == 1 OR $always_draw == 'true')echo 'checked'; ?>>&nbsp;weiterzeichnen&nbsp;&nbsp;
+						<input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;Punktfang
+						</td>
 					<td colspan="2" align="center">
 						<table border="0">
 							<tr> 
@@ -316,6 +323,7 @@ $legendheight = $this->map->height + 20;
 						<INPUT TYPE="HIDDEN" NAME="orderby" VALUE="<? echo $this->formvars['orderby']; ?>">						
 						<INPUT TYPE="hidden" NAME="result2" VALUE="">
 						<INPUT TYPE="hidden" NAME="check" VALUE="">
+						<INPUT TYPE="HIDDEN" NAME="oid" VALUE="<?php echo $this->formvars['oid']; ?>">
 						<input type="hidden" name="order" value="<?php echo $this->formvars['order']; ?>">
 						<INPUT TYPE="HIDDEN" NAME="richtung" VALUE="<? echo $this->formvars['richtung']; ?>">
 						<input type="hidden" name="flur_thematisch" value="<? echo $this->formvars['flur_thematisch']; ?>">

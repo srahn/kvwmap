@@ -902,7 +902,9 @@ INSERT INTO u_styles2classes (
 						}
 					}
 					#echo $query_to_execute.'<br><br>';
-					if (!empty($query_to_execute)) {		
+					if (!empty($query_to_execute)) {
+						$query_to_execute = str_replace('$EPSGCODE_ALKIS', EPSGCODE_ALKIS, $query_to_execute);
+						$query_to_execute = str_replace(':alkis_epsg', EPSGCODE_ALKIS, $query_to_execute);
 						$ret=$this->execSQL($query_to_execute, 0, 0);
 						if($ret[0] == 1){
 							return $ret;

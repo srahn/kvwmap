@@ -212,6 +212,8 @@ function dragstop(){
 	if(dragobjekt){
 		document.GUI.overlayx.value = parseInt(dragobjekt.style.left);
 		document.GUI.overlayy.value = parseInt(dragobjekt.style.top);
+		if(document.GUI.overlayx.value < 0)document.GUI.overlayx.value = 10;
+		if(window.innerHeight - 20 - document.GUI.overlayy.value < 0)document.GUI.overlayy.value = window.innerHeight - 20;
 		ahah('index.php', 'go=saveOverlayPosition&overlayx='+document.GUI.overlayx.value+'&overlayy='+document.GUI.overlayy.value, new Array(''), new Array(""));
 	}
   dragobjekt = null;
@@ -766,7 +768,7 @@ function scrollLayerOptions(){
 		legend_top = document.getElementById('legenddiv').getBoundingClientRect().top;
 		legend_bottom = document.getElementById('legenddiv').getBoundingClientRect().bottom;
 		posy = document.getElementById('options_'+layer_id).getBoundingClientRect().top;
-		if(posy < legend_bottom - 150 && posy > legend_top + 10)document.getElementById('options_content_'+layer_id).style.top = posy - (13+legend_top);		
+		if(posy < legend_bottom - 180 && posy > legend_top + 10)document.getElementById('options_content_'+layer_id).style.top = posy - (13+legend_top);		
 	}
 }
 

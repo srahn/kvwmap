@@ -18,4 +18,8 @@
   $strAllowedIps="erlaubte IP-Adressen";
   $strStart="Start";
   $strStop="Stop";
+	$strActiveLayers="aktive Themen";
+	$strActiveStelle="aktive Stelle";
+	$strChangeUser="Nutzer wechseln";
+	$strLoginAsUser="als dieser Nutzer anmelden";
 ?>  

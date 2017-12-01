@@ -239,6 +239,10 @@ textarea {
 	font-family: SourceSansPro1;
 }
 
+tr.tr_hover:hover{
+	background-color: #DAE4EC;
+}
+
 td {	
 	font-size: 15px;
 	line-height: 16px;
@@ -1250,6 +1254,9 @@ tbody.gle tr:hover {
 .rollenwahl-gruppe {
 	margin: 10px;
 	border: 1px solid #cccccc;
+	background: url('../graphics/bg.gif'); 
+	position: relative; 
+	z-index: 2;
 }
 
 .rollenwahl-table {

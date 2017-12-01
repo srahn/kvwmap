@@ -18,5 +18,9 @@
   $strAllowedIps="allowed IP-Adresses";
   $strStart="Start";
   $strStop="Stop";
+	$strActiveLayers="active layers";
+	$strActiveStelle="active Stelle";
+	$strChangeUser="Change User";
+	$strLoginAsUser="login as this user";
   
 ?>  

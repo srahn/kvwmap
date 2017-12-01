@@ -2,7 +2,7 @@
 
 	$this->goNotExecutedInPlugins = false;
 		
-	switch($this->go){
+	switch($go){
 		case 'bevoelkerung_bericht' : {
 			$this->main = PLUGINS.'bevoelkerung/view/bevoelkerung_bericht.php';
 			$this->output();

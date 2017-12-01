@@ -75,6 +75,9 @@ if($this->formvars['selected_layer_id'] AND $this->Fehler == ''){
 <table width="100%" border="0" cellpadding="2" cellspacing="0">
 	<tr align="center"> 
   	<td>
+		<? if($this->formvars['subform'] == 'true'){ ?>
+			<input type="button" name="abort" value="<? echo $this->strCancel; ?>" onclick="currentform.go.value='get_last_query';currentform.submit();">&nbsp;&nbsp;&nbsp;&nbsp;
+		<? } ?>
   		<input type="button" name="go_plus" id="go_plus" value="<? echo $strSave; ?>" onclick="save_new_dataset();">&nbsp;&nbsp;&nbsp;&nbsp;
   		<input type="checkbox" name="weiter_erfassen" value="1" <? if($this->formvars['weiter_erfassen'] == 1)echo 'checked="true"'; ?>><? echo $strCreateAnotherOne; ?>
   	</td>

@@ -479,8 +479,15 @@ class ddl {
 		$text = str_replace('$pagenumber', $pagenumber, $text);
 		$text = str_replace('$pagecount', $pagecount, $text);		
 		$text = str_replace(';', chr(10), $text);
-		for($j = 0; $j < count($this->attributes['name']); $j++){
-			$text = str_replace('$'.$this->attributes['name'][$j], $this->get_result_value_output($i, $j, true), $text);
+		if(strpos($text, '${') !== false){
+			for($j = 0; $j < count($this->attributes['name']); $j++){
+				$text = str_replace('${'.$this->attributes['name'][$j].'}', $this->get_result_value_output($i, $j, true), $text);
+			}
+		}
+		if(strpos($text, '$') !== false){
+			for($j = 0; $j < count($this->attributes['name']); $j++){
+				$text = str_replace('$'.$this->attributes['name'][$j], $this->get_result_value_output($i, $j, true), $text);
+			}
 		}
   	return $text;
   }
@@ -667,9 +674,20 @@ class ddl {
 			# Freitexte hinzufügen, die auf jeder Seite erscheinen sollen (Seitennummerierung etc.)
 			$this->add_everypage_elements();
 			$dateipfad=IMAGEPATH;
-			$currenttime = date('Y-m-d_H_i_s',time());
-			$name = umlaute_umwandeln($this->user->Name);    
-			$dateiname = $name.'-'.$currenttime.'.pdf';
+			if($this->layout['filename'] != ''){
+				$dateiname = $this->layout['filename'];
+				for($j = 0; $j < count($this->attributes['name']); $j++){
+					$dateiname = str_replace('${'.$this->attributes['name'][$j].'}', $this->get_result_value_output(0, $j, true), $dateiname);
+				}
+				for($j = 0; $j < count($this->attributes['name']); $j++){
+					$dateiname = str_replace('$'.$this->attributes['name'][$j], $this->get_result_value_output(0, $j, true), $dateiname);
+				}
+			}
+			else{
+				$currenttime = date('Y-m-d_H_i_s',time());
+				$dateiname = $this->user->Name.'-'.$currenttime;
+			}
+			$dateiname = umlaute_umwandeln($dateiname).'.pdf';
 			$this->outputfile = $dateiname;
 			$fp=fopen($dateipfad.$dateiname,'wb');
 			fwrite($fp,$this->pdf->ezOutput());
@@ -725,6 +743,8 @@ class ddl {
       if($formvars['type'] != '')$sql .= ", `type` = ".(int)$formvars['type'];
       else $sql .= ", `type` = NULL";
 			$sql .= ", `no_record_splitting` = ".(int)$formvars['no_record_splitting'];
+			if($formvars['filename'])$sql .= ", `filename` = '".$formvars['filename']."'";
+      else $sql .= ", `filename` = NULL";			
       if($_files['bgsrc']['name']){
         $nachDatei = DRUCKRAHMEN_PATH.$_files['bgsrc']['name'];
         if (move_uploaded_file($_files['bgsrc']['tmp_name'],$nachDatei)) {
@@ -831,6 +851,8 @@ class ddl {
       if($formvars['type'])$sql .= ", `type` = ".(int)$formvars['type'];
       else $sql .= ", `type` = NULL";
 			$sql .= ", `no_record_splitting` = ".(int)$formvars['no_record_splitting'];
+			if($formvars['filename'])$sql .= ", `filename` = '".$formvars['filename']."'";
+      else $sql .= ", `filename` = NULL";			
       if($_files['bgsrc']['name']){
         $nachDatei = DRUCKRAHMEN_PATH.$_files['bgsrc']['name'];
         if (move_uploaded_file($_files['bgsrc']['tmp_name'],$nachDatei)) {
