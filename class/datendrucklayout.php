@@ -685,9 +685,9 @@ class ddl {
 			}
 			else{
 				$currenttime = date('Y-m-d_H_i_s',time());
-				$dateiname = $this->user->Name.'-'.$currenttime;
+				$dateiname = umlaute_umwandeln($this->user->Name.'-'.$currenttime);
 			}
-			$dateiname = umlaute_umwandeln($dateiname).'.pdf';
+			$dateiname = $dateiname.'.pdf';
 			$this->outputfile = $dateiname;
 			$fp=fopen($dateipfad.$dateiname,'wb');
 			fwrite($fp,$this->pdf->ezOutput());
