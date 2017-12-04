@@ -179,8 +179,8 @@ if [ -e "${CONFIG_PATH}/config.sh" ] ; then
 	log " Starte Import ALKIS-Daten mit Script import_nas.sh"
   log "Loglevel: ${LOG_LEVEL}"
 else
-  log "Konfigurationsdatei: ${CONFIG_PATH}/config.sh existiert nicht."
-  log "Kopieren Sie ${CONFIG_PATH}/config-default.sh nach ${SCRIPT_PATH}/config/config.sh und passen die Parameter darin an."
+  echo "Konfigurationsdatei: ${CONFIG_PATH}/config.sh existiert nicht."
+  echo "Kopieren Sie ${CONFIG_PATH}/config-default.sh nach ${SCRIPT_PATH}/config/config.sh und passen die Parameter darin an."
 	exit
 fi
 
