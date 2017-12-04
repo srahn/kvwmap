@@ -683,7 +683,7 @@ class ddl {
 					$dateiname = str_replace('$'.$this->attributes['name'][$j], $this->get_result_value_output(0, $j, true), $dateiname);
 				}
 			}
-			else{
+			if($dateiname == ''){
 				$currenttime = date('Y-m-d_H_i_s',time());
 				$dateiname = umlaute_umwandeln($this->user->Name.'-'.$currenttime);
 			}
