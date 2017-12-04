@@ -1,6 +1,6 @@
 <?
 	$this->goNotExecutedInPlugins = false;
-	switch($this->go) {
+	switch($go) {
 		case 'baumfaellantrag_get_flurstueck' : {
 			# example for request
 			# http://myserver.de/kvwmap/index.php?Stelle_IDgo=baumfaellantrag_get_flurstueck&latitude=53.71181&longitude=11.97404
@@ -98,14 +98,14 @@
 		} break;
 
 		case 'upload_temp_file' : {
-			$this->checkCaseAllowed($this->go);
+			$this->checkCaseAllowed($go);
 			include(PLUGINS.'baumfaellantrag/model/kvwmap.php');
 			header('Content-Type: text/plain; charset=utf-8');
 			echo utf8_decode(json_encode($this->uploadTempFile()));
 		} break;
 
 		case 'pack_and_mail' : {
-			$this->checkCaseAllowed($this->go);
+			$this->checkCaseAllowed($go);
 			include(PLUGINS.'baumfaellantrag/model/kvwmap.php');
 			$strip_list = "go, go_plus, username, passwort, Stelle_ID, format, version, callback, _dc, file";
 			$application_data = formvars_strip($this->formvars, $strip_list);

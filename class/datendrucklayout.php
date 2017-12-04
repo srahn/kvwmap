@@ -65,7 +65,7 @@ class ddl {
     for($j = 0; $j < count($this->layout['texts']); $j++){
 			if($type != 'everypage' AND $this->page_overflow){
 				$this->pdf->reopenObject($this->page_id_before_sublayout);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
-				if($this->layout['type'] == 0)$this->page_overflow = false;			# if ???							
+				#if($this->layout['type'] == 0)$this->page_overflow = false;			# if ???							wegen dem Geometrie-Attribut auskommentiert
 			}
 			# der Freitext wurde noch nicht geschrieben und ist entweder ein fester Freitext oder ein fortlaufender oder einer, der auf jeder Seite erscheinen soll
     	if(in_array($this->layout['texts'][$j]['id'], $this->remaining_freetexts) AND $this->layout['texts'][$j]['posy'] != ''){	# nur Freitexte mit einem y-Wert werden geschrieben
@@ -158,7 +158,7 @@ class ddl {
 					}
 					if($offset_attribute == ''){
 						$y = $y - $this->offsety;
-						$endy = $endy + $y_orig - $y;		# y-Endposition auch anpassen
+						$endy = $endy - ($y_orig - $y);		# y-Endposition auch anpassen
 					}
 					if($type == 'running'){	# fortlaufende Linien
 						$pagecount = count($this->pdf->objects['3']['info']['pages']);								
@@ -360,6 +360,7 @@ class ddl {
 					}
 				}
 				elseif($attributes['name'][$j] == $attributes['the_geom'] AND $this->layout['elements'][$attributes['name'][$j]]['xpos'] > 0){		# Geometrie
+					if($this->page_overflow)$this->pdf->reopenObject($this->page_id_before_sublayout);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
 					$this->gui->map->set('width', $this->layout['elements'][$attributes['name'][$j]]['width']*MAPFACTOR);
 					$this->gui->map->set('height', $this->layout['elements'][$attributes['name'][$j]]['width']*MAPFACTOR);
 					if($oids[$i] != ''){
@@ -478,8 +479,15 @@ class ddl {
 		$text = str_replace('$pagenumber', $pagenumber, $text);
 		$text = str_replace('$pagecount', $pagecount, $text);		
 		$text = str_replace(';', chr(10), $text);
-		for($j = 0; $j < count($this->attributes['name']); $j++){
-			$text = str_replace('$'.$this->attributes['name'][$j], $this->get_result_value_output($i, $j, true), $text);
+		if(strpos($text, '${') !== false){
+			for($j = 0; $j < count($this->attributes['name']); $j++){
+				$text = str_replace('${'.$this->attributes['name'][$j].'}', $this->get_result_value_output($i, $j, true), $text);
+			}
+		}
+		if(strpos($text, '$') !== false){
+			for($j = 0; $j < count($this->attributes['name']); $j++){
+				$text = str_replace('$'.$this->attributes['name'][$j], $this->get_result_value_output($i, $j, true), $text);
+			}
 		}
   	return $text;
   }
@@ -666,9 +674,20 @@ class ddl {
 			# Freitexte hinzufügen, die auf jeder Seite erscheinen sollen (Seitennummerierung etc.)
 			$this->add_everypage_elements();
 			$dateipfad=IMAGEPATH;
-			$currenttime = date('Y-m-d_H_i_s',time());
-			$name = umlaute_umwandeln($this->user->Name);    
-			$dateiname = $name.'-'.$currenttime.'.pdf';
+			if($this->layout['filename'] != ''){
+				$dateiname = $this->layout['filename'];
+				for($j = 0; $j < count($this->attributes['name']); $j++){
+					$dateiname = str_replace('${'.$this->attributes['name'][$j].'}', $this->get_result_value_output(0, $j, true), $dateiname);
+				}
+				for($j = 0; $j < count($this->attributes['name']); $j++){
+					$dateiname = str_replace('$'.$this->attributes['name'][$j], $this->get_result_value_output(0, $j, true), $dateiname);
+				}
+			}
+			if($dateiname == ''){
+				$currenttime = date('Y-m-d_H_i_s',time());
+				$dateiname = umlaute_umwandeln($this->user->Name.'-'.$currenttime);
+			}
+			$dateiname = $dateiname.'.pdf';
 			$this->outputfile = $dateiname;
 			$fp=fopen($dateipfad.$dateiname,'wb');
 			fwrite($fp,$this->pdf->ezOutput());
@@ -724,6 +743,8 @@ class ddl {
       if($formvars['type'] != '')$sql .= ", `type` = ".(int)$formvars['type'];
       else $sql .= ", `type` = NULL";
 			$sql .= ", `no_record_splitting` = ".(int)$formvars['no_record_splitting'];
+			if($formvars['filename'])$sql .= ", `filename` = '".$formvars['filename']."'";
+      else $sql .= ", `filename` = NULL";			
       if($_files['bgsrc']['name']){
         $nachDatei = DRUCKRAHMEN_PATH.$_files['bgsrc']['name'];
         if (move_uploaded_file($_files['bgsrc']['tmp_name'],$nachDatei)) {
@@ -830,6 +851,8 @@ class ddl {
       if($formvars['type'])$sql .= ", `type` = ".(int)$formvars['type'];
       else $sql .= ", `type` = NULL";
 			$sql .= ", `no_record_splitting` = ".(int)$formvars['no_record_splitting'];
+			if($formvars['filename'])$sql .= ", `filename` = '".$formvars['filename']."'";
+      else $sql .= ", `filename` = NULL";			
       if($_files['bgsrc']['name']){
         $nachDatei = DRUCKRAHMEN_PATH.$_files['bgsrc']['name'];
         if (move_uploaded_file($_files['bgsrc']['tmp_name'],$nachDatei)) {

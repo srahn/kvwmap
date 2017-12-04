@@ -2,9 +2,9 @@
 
 	$this->goNotExecutedInPlugins = false;
 	
-	switch($this->go){
+	switch($go){
 		case 'migrationGewaesser' : {
-			if($this->Stelle->isFunctionAllowed($this->go)){
+			if($this->Stelle->isFunctionAllowed($go)){
 				include(PLUGINS.'gewaesser/model/wasserverband.php');
 				$gewaesser = new gewaesser($this->pgdatabase);
 				

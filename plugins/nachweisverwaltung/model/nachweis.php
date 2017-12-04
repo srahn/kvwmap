@@ -465,7 +465,7 @@ class Nachweis {
     return $ret;
   }
 
-  function buildNachweisNr($primary, $secondary){
+  static function buildNachweisNr($primary, $secondary){
   	if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){
   		return $secondary.str_pad($primary, RISSNUMMERMAXLENGTH,'0',STR_PAD_LEFT);
   	}
@@ -480,7 +480,7 @@ class Nachweis {
 			$pagecount = getNumPagesPdf($dateiname);
 			if($pagecount > 1)$label = "-fill black -undercolor white -gravity North -pointsize 18 -annotate +0+15 ' ".$pagecount." Seiten '";
 		}
-		$command = IMAGEMAGICKPATH.'convert '.$dateiname.'[0] -quality 75 -background white '.$label.' -flatten -resize 800x800\> '.$dateinamensteil[0].'_thumb.jpg';
+		$command = IMAGEMAGICKPATH.'convert '.$dateiname.'[0] -quality 75 -background white '.$label.' -flatten -resize 1000x1000\> '.$dateinamensteil[0].'_thumb.jpg';
 		exec($command, $ausgabe, $ret);
 		if($ret == 1){
 			$type = $dateinamensteil[1];

@@ -30,11 +30,21 @@ if ($show_legend_graphic) { ?>
 				include(SNIPPETS.'schnellsprung.php');
 			} ?>
 	<div id="legendcontrol">
-		<input type="submit" name="neuladen_button" onclick="if(checkForUnsavedChanges()){startwaiting(true);document.GUI.go.value='neu Laden';}" value="<?php echo $strLoadNew; ?>" tabindex="1" style="vertical-align: top; margin-left: 60px">
+		<a href="index.php?go=reset_querys">
+			<div class="button_background" style="width: 26px; height: 26px">
+				<div class="emboss tool_info" style="width: 26px; height: 26px" title="<? echo $strClearAllQuerys; ?>"></div>
+			</div>
+		</a>
+		<a href="index.php?go=reset_layers" style="padding: 0 0 0 6">
+			<div class="button_background" style="width: 26px; height: 26px">
+				<div class="emboss layer" style="width: 26px; height: 26px" title="<? echo $strDeactivateAllLayer; ?>"></div>
+			</div>
+		</a>
+		<input type="submit" name="neuladen_button" onclick="if(checkForUnsavedChanges()){startwaiting(true);document.GUI.go.value='neu Laden';}" value="<?php echo $strLoadNew; ?>" tabindex="1" style="height: 27px; vertical-align: top; margin-left: 30px">
 		<i id="legendOptionsIcon" class="fa fa-bars pointer" style="font-size: 1.1em;margin: 5 5 5 45" title="<? echo $strLegendOptions; ?>" onclick="openLegendOptions();"></i>
 		<div id="legendOptions">
 			<div style="position: absolute;top: 0px;right: 0px"><a href="javascript:closeLegendOptions(159);" title="Schlie&szlig;en"><img style="border:none" src="graphics/exit2.png"></img></a></div>
-			<table cellspacing="0" cellpadding="0" style="padding-bottom: 8px">
+			<table cellspacing="0" cellpadding="0" style="padding: 0 5 8 0">
 				<tr>
 					<td id="legendOptionsHeader">
 						<span class="fett"><? echo $strLegendOptions; ?></span>
@@ -43,12 +53,14 @@ if ($show_legend_graphic) { ?>
 				<tr>
 					<td>
 						<ul>
-							<li><a href="index.php?go=reset_querys"><? echo $strClearAllQuerys; ?></a></li>
-							<li><a href="index.php?go=reset_layers"><? echo $strDeactivateAllLayer; ?></a></li>
 							<li>
 								<span><? echo $strLegendType; ?>:</span><br>
 								<label><input type="radio" name="legendtype" value="0" <? if($this->user->rolle->legendtype == 0)echo 'checked'; ?>><? echo $strLegendTypeGroups; ?></label><br>
 								<label><input type="radio" name="legendtype" value="1" <? if($this->user->rolle->legendtype == 1)echo 'checked'; ?>><? echo $strLegendTypeAlphabetical; ?></label>
+							</li>
+							<li>
+								<a href="javascript:toggleDrawingOrderForm();"><? echo $strDrawingOrder; ?></a>
+								<div id="drawingOrderForm"></div>
 							</li>
 					</td>
 				</tr>
@@ -56,6 +68,9 @@ if ($show_legend_graphic) { ?>
 					<td align="center">
 						<table cellspacing="0" cellpadding="0">
 							<tr>
+								<td>
+									<input type="button" onmouseup="resetLegendOptions()" value="<? echo $this->strReset; ?>">
+								</td>
 								<td>
 									<input type="button" onmouseup="saveLegendOptions()" value="<? echo $this->strSave; ?>">
 								</td>

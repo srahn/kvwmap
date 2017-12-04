@@ -123,18 +123,35 @@ class MyObject {
 	}
 
 	function setKeysFromTable() {
+		$columns = $this->getColumnsFromTable();
+		foreach($columns AS $column) {
+			$this->set($column['Field'], NULL);
+		}
+		return $this->getKeys();
+	}
+
+	function getColumnsFromTable() {
+		$columns = array();
 		$sql = "
 			SHOW COLUMNS
 			FROM
 				`" . $this->tableName . "`
 		";
 		$this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
-		$query = mysql_query($sql, $this->database->dbConn);
-		
-		while($row = mysql_fetch_assoc($query)) {
-			$this->set($row['Field'], NULL);
+		$result = mysql_query($sql, $this->database->dbConn);
+		while ($column = mysql_fetch_assoc($result)) {
+			$columns[] = $column;
+		};
+		return $columns;
+	}
+
+	function getTypesFromColumns() {
+		$types = array();
+		$columns = $this->getColumnsFromTable();
+		foreach ($columns AS $column) {
+			$types[$column['Field']] = $column['Type'];
 		}
-		return $this->getKeys();
+		return $types;
 	}
 
 	function setData($formvars) {
@@ -150,10 +167,11 @@ class MyObject {
 	}
 
 	function getKVP() {
+		$types = $this->getTypesFromColumns();
 		$kvp = array();
 		if (is_array($this->data)) {
 			foreach($this->data AS $key => $value) {
-				$kvp[] = "`" . $key . "` = '" . $value . "'";
+				$kvp[] = "`" . $key . "` = " . ((stripos($types[$key], 'int') !== false AND $value == '') ? 'NULL' : "'" . $value . "'");
 			}
 		}
 		return $kvp;

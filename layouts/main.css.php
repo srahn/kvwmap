@@ -38,6 +38,10 @@ body {
 	font-size: 15px;
 }
 
+.gui-table {
+  width: 900px;
+}
+
 form {
 	margin: 0;
 	padding: 0;
@@ -233,6 +237,10 @@ select {
 textarea {
 	font-size: 14px;
 	font-family: SourceSansPro1;
+}
+
+tr.tr_hover:hover{
+	background-color: #DAE4EC;
 }
 
 td {	
@@ -593,6 +601,18 @@ a.menuered:hover {
 	background-image: url(../graphics/load_layers.png);
 }
 
+.tool_info{
+	background-image: url(../graphics/tool_info.png);
+	background-repeat: no-repeat;
+  background-position: center center;
+}
+
+.layer{
+	background-image: url(../graphics/layer.png);
+	background-repeat: no-repeat;
+  background-position: center center;
+}
+
 .button_background{
 	background: linear-gradient(#eff3f6, #DAE4EC);
 	width: 30px;
@@ -653,6 +673,7 @@ a.menuered:hover {
 	background: <? echo BG_MENUETOP; ?>;
 	border-top: 1px solid #aaaaaa;
 	height: <? echo ($size['lagebezeichnung_bar']['height'] - 1); ?>;
+	text-align: center;
 }
 
 #lagebezeichnung{
@@ -696,7 +717,65 @@ a.menuered:hover {
 	display: flex; 
 	flex-direction: row;
 	justify-content: flex-start;
-	padding-left: 20px;
+	padding-left: 7px;
+}
+
+#drawingOrderForm{
+	margin: 5 0 10 0;
+	position: relative;
+}
+
+.drawingOrderFormDropZone{
+	position: relative;
+	z-index: 1000;
+	margin: 0;
+	height: 0px;
+	width: 177px;
+}
+
+.drawingOrderFormDropZone.ready{
+	margin: -12 0 -12 15;
+	height: 24px;
+	transition: height 0.1s ease, margin 0.1s ease;
+}
+
+.drawingOrderFormDropZone.over{
+	height: 51px;
+	margin: -13 0 -13 15;
+	transition: height 0.1s ease, margin 0.1s ease;
+}
+
+.drawingOrderFormLayer{
+	background-color: #f6f6f6;
+	box-shadow: 1px 1px 4px #aaa;
+	z-index: 100;
+	margin: 3 0 0 15;
+	padding: 2 2 2 3;
+	height: 16px;
+	width: 177px;
+	border: 1px solid grey;
+	cursor: pointer;
+}
+
+.drawingOrderFormLayer:hover{
+	background-color: #fcfcfc;
+}
+
+.drawingOrderFormLayer.dragging{
+	box-shadow: 3px 3px 6px #aaa;
+}
+
+.drawingOrderFormLayer.picked{
+	visibility: hidden;
+	height: 0px;
+	margin: 0 0 0 0;
+	padding: 0 0 0 0;
+	border: none;
+	transition: height 0.15s ease, margin 0.15s ease, padding 0.15s ease;
+}
+
+.drawingOrderFormLayer.over{
+	border: 1px dashed #000;
 }
 
 #layersearchdiv{
@@ -716,7 +795,7 @@ a.menuered:hover {
 }
 
 #legend{
-	margin-left:5px;
+	margin-left:7px;
 }
 
 .normallegend {
@@ -1175,6 +1254,9 @@ tbody.gle tr:hover {
 .rollenwahl-gruppe {
 	margin: 10px;
 	border: 1px solid #cccccc;
+	background: url('../graphics/bg.gif'); 
+	position: relative; 
+	z-index: 2;
 }
 
 .rollenwahl-table {

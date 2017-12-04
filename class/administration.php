@@ -139,6 +139,7 @@ class administration{
 			foreach($component_seed as $file){
 				$filepath = $prepath.'db/mysql/data/'.$file;
 				$connection = 'user='.$this->pgdatabase->user.' password='.$this->pgdatabase->passwd.' dbname='.$this->pgdatabase->dbName;
+				if($this->pgdatabase->host != '')$connection .= ' host='.$this->pgdatabase->host;
 				$queryret = $this->database->exec_file($filepath, 'user=xxxx password=xxxx dbname=kvwmapsp', $connection);
 				if($queryret[0]){
 					echo $queryret[1].'<br>Fehler beim Ausführen von seed-Datei: '.$filepath.'<br>';
