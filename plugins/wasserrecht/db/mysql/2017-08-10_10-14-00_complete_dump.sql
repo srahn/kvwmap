@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 172.17.0.2:3306
--- Generation Time: Nov 29, 2017 at 02:42 PM
+-- Generation Time: Dec 04, 2017 at 05:19 PM
 -- Server version: 5.5.56
 -- PHP Version: 5.6.30-0+deb8u1
 
@@ -2586,7 +2586,7 @@ CREATE TABLE `rolle` (
 --
 
 INSERT INTO `rolle` (`user_id`, `stelle_id`, `nImageWidth`, `nImageHeight`, `auto_map_resize`, `minx`, `miny`, `maxx`, `maxy`, `nZoomFactor`, `selectedButton`, `epsg_code`, `epsg_code2`, `coordtype`, `active_frame`, `last_time_id`, `gui`, `language`, `hidemenue`, `hidelegend`, `fontsize_gle`, `highlighting`, `buttons`, `scrollposition`, `result_color`, `always_draw`, `runningcoords`, `showmapfunctions`, `showlayeroptions`, `singlequery`, `querymode`, `geom_edit_first`, `overlayx`, `overlayy`, `hist_timestamp`, `instant_reload`, `menu_auto_close`, `layer_params`, `menue_buttons`, `legendtype`, `visually_impaired`) VALUES
-(1, 1, 1198, 802, 1, 33214727.639031, 5868677.7102324, 33477899.939362, 6044785.490153, 2, 'zoomin', '35833', '', 'dec', 0, '2017-11-28 14:07:23', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure,', 0, 1, 0, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 1, 0, 0),
+(1, 1, 1198, 802, 1, 33231217.131533, 5868677.7102323, 33461410.44686, 6044785.4901531, 2, 'zoomin', '35833', '', 'dec', 0, '2017-12-04 15:32:51', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure,', 0, 1, 0, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 1, 0, 0),
 (2, 2, 1198, 810, 1, 33217116.771694, 5874036.2773857, 33475826.585449, 6048886.9368074, 2, 'zoomin', '35833', NULL, 'dec', 0, '2017-11-28 13:00:26', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure', 0, 1, 0, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 0, 0, 0),
 (5, 5, 500, 500, 1, 4501025, 6001879, 4502834, 6003236, 2, 'zoomin', '25833', NULL, 'dec', 0, '0000-00-00 00:00:00', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure', 0, 1, NULL, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 0, 0, 0),
 (5, 1, 1198, 770, 1, 477213.69136765, 6003065.4938312, 477741.75671226, 6003404.7438312, 2, 'zoomin', '25833', NULL, 'dec', 0, '2017-10-27 13:28:49', 'gui.php', 'german', '0', '0', 15, 0, 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure', 0, 1, NULL, 0, 1, 1, 0, 0, 0, 400, 150, NULL, 0, 0, '', 0, 0, 0),
@@ -3538,7 +3538,8 @@ INSERT INTO `u_consume` (`user_id`, `stelle_id`, `time_id`, `activity`, `nimagew
 (1, 1, '2017-11-28 13:32:50', 'getMap', 1198, 768, '35833', 33207784.703502, 5851688.0631174, 33514486.402734, 6048212.8779136, '2017-11-28 13:30:21', NULL),
 (1, 1, '2017-11-28 14:07:16', 'getMap', 1198, 768, '35833', 33207784.703502, 5851688.0631174, 33514486.402734, 6048212.8779136, '2017-11-28 13:32:50', NULL),
 (1, 1, '2017-11-28 14:07:20', 'getMap', 1198, 768, '35833', 33207784.703502, 5851688.0631174, 33514486.402734, 6048212.8779136, '2017-11-28 14:07:16', NULL),
-(1, 1, '2017-11-28 14:07:23', 'getMap', 1198, 768, '35833', 33214727.578393, 5872415.2896779, 33477900, 6041047.9107075, '2017-11-28 14:07:20', NULL);
+(1, 1, '2017-11-28 14:07:23', 'getMap', 1198, 768, '35833', 33214727.578393, 5872415.2896779, 33477900, 6041047.9107075, '2017-11-28 14:07:20', NULL),
+(1, 1, '2017-12-04 15:32:51', 'getMap', 1198, 802, '35833', 33231217.131533, 5868677.7102323, 33461410.44686, 6044785.4901531, '2017-11-28 14:07:23', NULL);
 
 -- --------------------------------------------------------
 
@@ -3960,7 +3961,7 @@ INSERT INTO `u_menue2rolle` (`user_id`, `stelle_id`, `menue_id`, `status`) VALUE
 (1, 1, 42, 0),
 (1, 1, 41, 0),
 (1, 1, 40, 0),
-(1, 1, 39, 0),
+(1, 1, 39, 1),
 (1, 1, 38, 0),
 (1, 1, 37, 0),
 (1, 1, 36, 0),
