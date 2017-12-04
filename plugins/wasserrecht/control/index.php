@@ -8,6 +8,7 @@ include(PLUGINS . 'wasserrecht/helper/Log.php');
 include(PLUGINS . 'wasserrecht/helper/CommonClassTrait.php');
 include(PLUGINS . 'wasserrecht/helper/DateHelper.php');
 include(PLUGINS . 'wasserrecht/model/FestsetzungsSammelbescheidDaten.php');
+include(PLUGINS . 'wasserrecht/model/AufforderungsBescheidDaten.php');
 include(PLUGINS . 'wasserrecht/model/WRZProGueltigkeitsJahre.php');
 include(PLUGINS . 'wasserrecht/model/WRZProGueltigkeitsJahreArray.php');
 include(PLUGINS . 'wasserrecht/model/db/WrPgObject.php');

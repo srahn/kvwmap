@@ -72,12 +72,61 @@ function writeWordFile(&$gui, $word_template, $word_file, &$parameter)
     $templateProcessor->saveAs($word_file);
 }
 
-function writeAufforderungZurErklaerungWordFile(&$gui, $word_template, $word_file, &$parameter)
+function writeAufforderungZurErklaerungWordFile(&$gui, $word_template, $word_file, &$aufforderungsBescheidDaten)
 {
     $gui->log->log_info('*** create_bescheide->writeAufforderungZurErklaerungWordFile ***');
-    $gui->log->log_debug('parameter: ' . var_export($parameter, true));
+    $aufforderungsBescheidDaten->toString();
     
-    writeWordFile($gui, $word_template, $word_file, $parameter);
+//     writeWordFile($gui, $word_template, $word_file, $parameter);
+
+    $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($word_template);
+    
+    foreach($aufforderungsBescheidDaten->getParameter() as $key => $value)
+    {
+        $templateProcessor->setValue($key, $value);
+    }
+    
+    $wrzs = $aufforderungsBescheidDaten->getWrzs();
+    $templateProcessor->cloneRow('n', sizeof($wrzs));
+    
+    $i = 1;
+    foreach($wrzs as $wrz)
+    {
+        if(!empty($wrz))
+        {
+            $gewaesserbenutzung = $wrz->gewaesserbenutzungen;
+            
+            if(!empty($gewaesserbenutzung))
+            {
+                $anlage_name = $wrz->anlagen->getName();
+                $benutzungsnummer = $gewaesserbenutzung->getKennummer();
+                $aktenzeichen = $wrz->getAktenzeichen();
+                $wasserbuchnummer = $gewaesserbenutzung->getWasserbuchnummer();
+                if(empty($wasserbuchnummer))
+                {
+                    $wasserbuchnummer = "";
+                }
+                $datum_ausgangsbescheid = $wrz->getDatum();
+                $datum_fassung = $wrz->getFassungDatum();
+                if(empty($datum_fassung))
+                {
+                    $datum_fassung = "";
+                }
+                
+                $templateProcessor->setValue('n#' . $i, $i);
+                $templateProcessor->setValue('Benutzungsnummer#' . $i, $benutzungsnummer);
+                $templateProcessor->setValue('Aktenzeichen#' . $i, $aktenzeichen);
+                $templateProcessor->setValue('Wasserbuchnummer#' . $i, $wasserbuchnummer);
+                $templateProcessor->setValue('Anlage_Name#' . $i, $anlage_name);
+                $templateProcessor->setValue('Datum_Ausgangsbescheid#' . $i, $datum_ausgangsbescheid);
+                $templateProcessor->setValue('Datum_Fassung#' . $i, $datum_fassung);
+                
+                $i++;
+            }
+        }
+    }
+    
+    $templateProcessor->saveAs($word_file);
 }
 
 function writeFestsetzungsWordFile(&$gui, $word_template, $word_file, &$parameter, &$festsetzungsSammelbescheidDaten)

@@ -15,6 +15,9 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
 {
     // 		      print_r($_POST);
     
+    $wrzs = array();
+    $erhebungsjahr = null;
+    
     foreach($_POST as $key => $value)
     {
         $keyEscaped = htmlspecialchars($key);
@@ -22,28 +25,39 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
         
         if(startsWith($keyEscaped, AUFFORDERUNG_CHECKBOX_URL))
         {
-//             		              echo '<br />Key = ' . $keyEscaped . '<br />';
-//             		              echo 'Value= ' . $valueEscaped;
-            createAufforderungsDokument($this, $valueEscaped);
+            findAufforderungWrzsGewaesserbenutzungen($this, $wrzs, $valueEscaped, $erhebungsjahr);
         }
+    }
+    
+    if(!empty($wrzs) && !empty($erhebungsjahr))
+    {
+        createAufforderungsDokument($this, $wrzs, $erhebungsjahr);
     }
 }
 
-function createAufforderungsDokument(&$gui, &$valueEscaped)
+function findAufforderungWrzsGewaesserbenutzungen(&$gui, &$wrzs, &$valueEscaped, &$erhebungsjahr)
 {
-    $gui->log->log_info('*** createAufforderungsDokument ***');
+    $gui->log->log_info('*** findAufforderungWrzsGewaesserbenutzungen ***');
+    
+    $gui->log->log_debug('wrzs length: ' . sizeof($wrzs));
+    $gui->log->log_debug('valueEscaped: ' . var_export($valueEscaped, true));
+    $gui->log->log_debug('erhebungsjahr: ' . var_export($erhebungsjahr, true));
     
     $idValues = findIdAndYearFromValueString($gui, $valueEscaped);
     $gui->log->log_debug('idValues: ' . var_export($idValues, true));
     
-    $aufforderungWrz1 = new WasserrechtlicheZulassungen($gui);
-    $aufforderungWrz2 = $aufforderungWrz1->find_by_id($gui, 'id', $idValues["wrz_id"]);
-    if(!empty($aufforderungWrz2))
+    $erhebungsjahr = $idValues["erhebungsjahr"];
+    
+    $wrzClass = new WasserrechtlicheZulassungen($gui);
+    $wrz = $wrzClass->find_by_id($gui, 'id', $idValues["wrz_id"]);
+    if(!empty($wrz))
     {
-        //get all dependent objects
-        $aufforderungWrz2->getDependentObjects($gui, $aufforderungWrz2);
+        $gui->log->log_debug('wrz id: ' . var_export($wrz->getId(), true));
         
-        $gewaesserbenutzungen = $aufforderungWrz2->gewaesserbenutzungen;
+        //get all dependent objects
+        $wrz->getDependentObjects($gui, $wrz);
+        
+        $gewaesserbenutzungen = $wrz->gewaesserbenutzungen;
         $gewaesserbenutzung = null;
         if(!empty($gewaesserbenutzungen) && count($gewaesserbenutzungen) > 0)
         {
@@ -61,80 +75,108 @@ function createAufforderungsDokument(&$gui, &$valueEscaped)
         {
             $gui->log->log_debug('gewaesserbenutzung id: ' . var_export($gewaesserbenutzung->getId(), true));
             
-            $erhebungsjahr = $idValues["erhebungsjahr"];
-            
             if(empty($gewaesserbenutzung->getAufforderungDatum($erhebungsjahr)))
             {
-                if(!empty($_POST['aufforderung']) && empty($gewaesserbenutzung->getAufforderungDokument($erhebungsjahr)))
-                {
-                    //get a unique word file name
-                    $uniqid = uniqid();
-                    $word_file_name = $uniqid . ".docx";
-                    $word_file = WASSERRECHT_DOCUMENT_PATH . $word_file_name;
-                    
-                    //get the parameter
-                    $datum = date("d.m.Y");
-                    $nextyear = date('Y', strtotime('+1 year'));
-                    $erhebungsjahr_request = htmlspecialchars($_REQUEST[ERHEBUNGSJAHR_URL]);
-                    //                     var_dump($gui->user);
-                    $bearbeiter = $gui->user->Name . ' ' . $gui->user->Vorname;
-                    $bearbeiter_telefon = $gui->user->phon;
-                    $bearbeiter_email = $gui->user->email;
-                    $bearbeiter_plz = $aufforderungWrz2->zustaendigeBehoerde->adresse->getPLZ();
-                    $bearbeiter_ort = $aufforderungWrz2->zustaendigeBehoerde->adresse->getOrt();
-                    $adressat_id = $aufforderungWrz2->adressat->getId();
-                    $behoerde_name = $aufforderungWrz2->zustaendigeBehoerde->getName();
-                    $behoerde_strasse = $aufforderungWrz2->zustaendigeBehoerde->adresse->getStrasse();
-                    $behoerde_hausnummer = $aufforderungWrz2->zustaendigeBehoerde->adresse->getHausnummer();
-                    $behoerde_plz = $aufforderungWrz2->zustaendigeBehoerde->adresse->getPLZ();
-                    $behoerde_ort = $aufforderungWrz2->zustaendigeBehoerde->adresse->getOrt();
-                    $behoerde_art_name = $aufforderungWrz2->zustaendigeBehoerde->art->getName();
-                    $adressat_name = $aufforderungWrz2->adressat->getName();
-                    $adressat_strasse = $aufforderungWrz2->adressat->adresse->getStrasse();
-                    $adressat_hausnummer = $aufforderungWrz2->adressat->adresse->getHausnummer();
-                    $adressat_plz = $aufforderungWrz2->adressat->adresse->getPLZ();
-                    $adressat_ort = $aufforderungWrz2->adressat->adresse->getOrt();
-                    
-                    $parameter = [
-                        "Datum" => $datum,
-                        "Next_Year" => $nextyear,
-                        "Bearbeiter" => $bearbeiter,
-                        "Bearbeiter_Telefon" => $bearbeiter_telefon,
-                        "Bearbeiter_EMail" => $bearbeiter_email,
-                        "Bearbeiter_PLZ" => $bearbeiter_plz,
-                        "Bearbeiter_Ort" => $bearbeiter_ort,
-                        "Erhebungsjahr" => $erhebungsjahr_request,
-                        "Adressat_ID" => $adressat_id,
-                        "Behoerde_Name" => $behoerde_name,
-                        "Behoerde_Strasse" => $behoerde_strasse,
-                        "Behoerde_Hnr" => $behoerde_hausnummer,
-                        "Behoerde_PLZ" => $behoerde_plz,
-                        "Behoerde_Ort" => $behoerde_ort,
-                        "Behoerde_Art_Name" => $behoerde_art_name,
-                        "Adressat_Name" => $adressat_name,
-                        "Adressat_Strasse" => $adressat_strasse,
-                        "Adressat_Hnr" => $adressat_hausnummer,
-                        "Adressat_PLZ" => $adressat_plz,
-                        "Adressat_Ort" => $adressat_ort,
-                        "WASSERRECHT_VORDRUCK_ERKLAERUNG_WASSERENTNAHMEMENGE" => WASSERRECHT_VORDRUCK_ERKLAERUNG_WASSERENTNAHMEMENGE
-                    ];
-                    
-                    //                     echo var_export($parameter, true);
-                    
-                    //write the word file
-                    writeAufforderungZurErklaerungWordFile($gui, PLUGINS . 'wasserrecht/templates/Aufforderung_Erklaerung.docx', $word_file, $parameter);
-                    
-                    //write the document path to the database
-                    $aufforderung_dokument = new Dokument($gui);
-                    $aufforderung_dokument_name = 'Aufforderung_' . $aufforderungWrz2->getId() . "_" . $gewaesserbenutzung->getId() . "_" . $erhebungsjahr;
-                    $aufforderung_document_identifier = $aufforderung_dokument->createDocument($aufforderung_dokument_name, $word_file_name);
-                    
-                    $gewaesserbenutzung->insertAufforderung($aufforderung_document_identifier, $erhebungsjahr, null);
-                }
+                $wrz->gewaesserbenutzungen = $gewaesserbenutzung;
+                $wrzs[] = $wrz;
             }
             else
             {
                 $gui->log->log_debug('Do not write Aufforderung, because it already exists');
+            }
+        }
+        
+    }
+}
+
+function createAufforderungsDokument(&$gui, &$wrzs, &$erhebungsjahr)
+{
+    $gui->log->log_info('*** createAufforderungsDokument ***');
+    
+    $gui->log->log_debug('wrzs length: ' . sizeof($wrzs));
+    $gui->log->log_debug('erhebungsjahr: ' . var_export($erhebungsjahr, true));
+    
+    if(!empty($wrzs) && !empty($wrzs[0]))
+    {
+        $wrz = $wrzs[0];
+        
+        //get a unique word file name
+        $uniqid = uniqid();
+        $word_file_name = $uniqid . ".docx";
+        $word_file = WASSERRECHT_DOCUMENT_PATH . $word_file_name;
+        
+        //get the parameter
+        $datum = $gui->date->getToday();
+        //                     $year = $gui->date->getThisYear();
+        $nextyear = $gui->date->getNextYear();
+        
+        //                     var_dump($gui->user);
+        $bearbeiter = $gui->user->Name . ' ' . $gui->user->Vorname;
+        $bearbeiter_telefon = $gui->user->phon;
+        $bearbeiter_email = $gui->user->email;
+        $bearbeiter_plz = $wrz->zustaendigeBehoerde->adresse->getPLZ();
+        $bearbeiter_ort = $wrz->zustaendigeBehoerde->adresse->getOrt();
+        $adressat_id = $wrz->adressat->getId();
+        $behoerde_name = $wrz->zustaendigeBehoerde->getName();
+        $behoerde_strasse = $wrz->zustaendigeBehoerde->adresse->getStrasse();
+        $behoerde_hausnummer = $wrz->zustaendigeBehoerde->adresse->getHausnummer();
+        $behoerde_plz = $wrz->zustaendigeBehoerde->adresse->getPLZ();
+        $behoerde_ort = $wrz->zustaendigeBehoerde->adresse->getOrt();
+        $behoerde_art_name = $wrz->zustaendigeBehoerde->art->getName();
+        $adressat_name = $wrz->adressat->getName();
+        $adressat_strasse = $wrz->adressat->adresse->getStrasse();
+        $adressat_hausnummer = $wrz->adressat->adresse->getHausnummer();
+        $adressat_plz = $wrz->adressat->adresse->getPLZ();
+        $adressat_ort = $wrz->adressat->adresse->getOrt();
+        
+        $parameter = [
+            "Datum" => $datum,
+            "Next_Year" => $nextyear,
+            "Bearbeiter" => $bearbeiter,
+            "Bearbeiter_Telefon" => $bearbeiter_telefon,
+            "Bearbeiter_EMail" => $bearbeiter_email,
+            "Bearbeiter_PLZ" => $bearbeiter_plz,
+            "Bearbeiter_Ort" => $bearbeiter_ort,
+            "Erhebungsjahr" => $erhebungsjahr,
+            "Adressat_ID" => $adressat_id,
+            "Behoerde_Name" => $behoerde_name,
+            "Behoerde_Strasse" => $behoerde_strasse,
+            "Behoerde_Hnr" => $behoerde_hausnummer,
+            "Behoerde_PLZ" => $behoerde_plz,
+            "Behoerde_Ort" => $behoerde_ort,
+            "Behoerde_Art_Name" => $behoerde_art_name,
+            "Adressat_Name" => $adressat_name,
+            "Adressat_Strasse" => $adressat_strasse,
+            "Adressat_Hnr" => $adressat_hausnummer,
+            "Adressat_PLZ" => $adressat_plz,
+            "Adressat_Ort" => $adressat_ort,
+            "WASSERRECHT_VORDRUCK_ERKLAERUNG_WASSERENTNAHMEMENGE" => WASSERRECHT_VORDRUCK_ERKLAERUNG_WASSERENTNAHMEMENGE
+        ];
+        
+        //                     echo var_export($parameter, true);
+        
+        $aufforderungsBescheidDaten = new AufforderungsBescheidDaten($gui);
+        $aufforderungsBescheidDaten->setWrzs($wrzs);
+        $aufforderungsBescheidDaten->setParameter($parameter);
+        
+        //write the word file
+        writeAufforderungZurErklaerungWordFile($gui, PLUGINS . 'wasserrecht/templates/Aufforderung_Erklaerung.docx', $word_file, $aufforderungsBescheidDaten);
+        
+        //write the document path to the database
+        $aufforderung_dokument = new Dokument($gui);
+        $aufforderung_dokument_name = 'Aufforderung_' . $uniqid;
+        $aufforderung_document_identifier = $aufforderung_dokument->createDocument($aufforderung_dokument_name, $word_file_name);
+        
+        foreach ($wrzs as $wrz)
+        {
+            if(!empty($wrz) && !empty($wrz->gewaesserbenutzungen))
+            {
+                $gewaesserbenutzung = $wrz->gewaesserbenutzungen;
+                
+                if(!empty($gewaesserbenutzung))
+                {
+                    $gewaesserbenutzung->insertAufforderung($aufforderung_document_identifier, $erhebungsjahr, null);
+                }
             }
         }
     }
@@ -318,6 +360,8 @@ function createAufforderungsDokument(&$gui, &$valueEscaped)
 			<?php 
 			    if(!empty($wasserrechtlicheZulassungen))
 				{
+				    $dokumentIds = array();
+				    
 				    foreach($wasserrechtlicheZulassungen AS $wrz)
 				    {
 				        if(!empty($wrz) && in_array($getYear, $wrz->gueltigkeitsJahre))
@@ -326,6 +370,8 @@ function createAufforderungsDokument(&$gui, &$valueEscaped)
 				            {
 				                if(empty($getAdressat) || $getAdressat === $wrz->adressat->getId())
 				                {
+				                    $this->log->log_debug('dokumentIds: ' . var_export($dokumentIds, true));
+				                    
 				                    $gwbs = $wrz->gewaesserbenutzungen;
 				                    if(!empty($gwbs))
 				                    {
@@ -337,15 +383,20 @@ function createAufforderungsDokument(&$gui, &$valueEscaped)
 				                                
 				                                if(!empty($auffoderung_dokument))
 				                                {
-				                                    ?>
-                				                    <div class="wasserrecht_display_table_row">
-                                    					<div class="wasserrecht_display_table_cell_caption">
-                                    					<?php
-                                    					   echo '<a href="' . $this->actual_link . WASSERRECHT_DOCUMENT_URL_PATH . $auffoderung_dokument->getPfad() . '" target="_blank">' . $auffoderung_dokument->getName() . '</a>';
-                                    					?>
-                                               			</div>
-                                    				</div>
-            				                    <?php 
+				                                    if(!in_array($auffoderung_dokument->getId(), $dokumentIds))
+				                                    {
+				                                        $dokumentIds[] = $auffoderung_dokument->getId();
+				                                        
+				                                        ?>
+                    				                    <div class="wasserrecht_display_table_row">
+                                        					<div class="wasserrecht_display_table_cell_caption">
+                                        					<?php
+                                        					   echo '<a href="' . $this->actual_link . WASSERRECHT_DOCUMENT_URL_PATH . $auffoderung_dokument->getPfad() . '" target="_blank">' . $auffoderung_dokument->getName() . '</a>';
+                                        					?>
+                                                   			</div>
+                                        				</div>
+                                    				<?php 
+				                                    }
             				                    }
 				                            }
 				                        }

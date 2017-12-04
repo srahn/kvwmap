@@ -272,7 +272,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	    // 	    $gueltigSeitDate = convertStringToDate($this->getGueltigSeit());
 	    // 	    $befristetBisDate = $this->convertStringToDate($this->getBefristetBis());
 	    $befristetBisDate = $this->getBefristetBis();
-	    $today = date("d.m.Y");
+	    $today = $this->date->getToday();
 	    
 	    // 	    if(!empty($gueltigSeitDate) && !empty($befristetBisDate))
 	    $this->log->log_debug('befristetBisDate: ' . var_export($befristetBisDate, true));
@@ -384,31 +384,35 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	}
 	
 	public function getDatum() {
-	    return $this->data['datum'];
+	    return $this->getDataValue('datum');
 	}
 	
 	public function getBefristetBis() {
-	    return $this->data['befristet_bis'];
+	    return $this->getDataValue('befristet_bis');
 	}
 	
 	public function getGueltigSeit() {
-	    return $this->data['gueltig_seit'];
+	    return $this->getDataValue('gueltig_seit');
 	}
 	
 	public function getFassungDatum() {
-	    return $this->data['fassung_datum'];
+	    return $this->getDataValue('fassung_datum');
 	}
 	
 	public function getVorgaenger() {
-	    return $this->data['vorgaenger'];
+	    return $this->getDataValue('vorgaenger');
 	}
 	
 	public function getNachfolger() {
-	    return $this->data['nachfolger'];
+	    return $this->getDataValue('nachfolger');
+	}
+	
+	public function getAktenzeichen() {
+	    return $this->getDataValue('aktenzeichen');
 	}
 	
 	public function getFreigegeben() {
-	    return $this->data['freigegeben'];
+	    return $this->getDataValue('freigegeben');
 	}
 	
 	public function isFreigegeben() {
@@ -447,9 +451,14 @@ class WasserrechtlicheZulassungen extends WrPgObject {
     }
 
     ////////////////////////////////////////////////////////////////////
-	
-	public function toString() {
-	    return "gueltigkeitsJahre: " . print_r($this->gueltigkeitsJahre) . (!empty($this->zustaendigeBehoerde) ? " zustaendigeBehoerde: " . $this->zustaendigeBehoerde->data['id'] : "" ) . (!empty($this->adressat) ? " adressat: " . $this->adressat->data['id'] : "");
+    
+	public function toString()
+	{
+	    return parent::toString() 
+	    . " gueltigkeitsJahre: " . var_export($this->gueltigkeitsJahre, true)
+	    . " ausstellbehoerde: " . var_export($this->ausstellbehoerde->getId(), true) 
+	    . " zustaendigeBehoerde: " . var_export($this->zustaendigeBehoerde->getId(), true) 
+	    . " adressat: " . var_export($this->adressat->getId(), true);
 	}
 	
 	public function getBezeichnung() {

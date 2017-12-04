@@ -469,7 +469,7 @@ class Gewaesserbenutzungen extends WrPgObject {
 	                    //if date is not set --> set it to today's date
 	                    if(empty($datum))
 	                    {
-	                        $datum = date("d.m.Y");
+	                        $datum = $this->date->getToday();
 	                    }
 	                    
 	                    $aufforderung_id = $aufforderung->updateAufforderung($erhebungsjahr, $dokumentId, $datum);
@@ -487,7 +487,7 @@ class Gewaesserbenutzungen extends WrPgObject {
 	        //if date is not set --> set it to today's date
 	        if(empty($datum))
 	        {
-	            $datum = date("d.m.Y");
+	            $datum = $this->date->getToday();
 	        }
 	        
 	        $aufforderung = new Aufforderung($this->gui);
@@ -594,7 +594,7 @@ class Gewaesserbenutzungen extends WrPgObject {
 	                    //if date is not set --> set it to today's date
 	                    if(empty($dateValue))
 	                    {
-	                        $dateValue = date("d.m.Y");
+	                        $dateValue = $this->date->getToday();
 	                    }
 	                    
 	                    $erklaerung_id = $erklaerung->updateErklaerung($erhebungsjahr, $dateVale, $erklaerungNutzer);
@@ -610,7 +610,7 @@ class Gewaesserbenutzungen extends WrPgObject {
 	    //if date is not set --> set it to today's date
 	    if(empty($dateValue))
 	    {
-	        $dateValue = date("d.m.Y");
+	        $dateValue = $this->date->getToday();
 	    }
 	    
 	    $erklaerung = new Erklaerung($this->gui);
@@ -724,7 +724,7 @@ class Gewaesserbenutzungen extends WrPgObject {
         //if date is not set --> set it to today's date
         if(empty($datum))
         {
-            $datum = date("d.m.Y");
+            $datum = $this->date->getToday();
         }
 	    
 	    return $this->insertFestsetzung($erhebungsjahr, null, $datum, null, $festsetzungNutzer, 
@@ -737,7 +737,7 @@ class Gewaesserbenutzungen extends WrPgObject {
 	    //if date is not set --> set it to today's date
 	    if(empty($dokumentDatum))
 	    {
-	        $dokumentDatum = date("d.m.Y");
+	        $dokumentDatum = $this->date->getToday();
 	    }
 	     
 	    return $this->insertFestsetzung($erhebungsjahr, $dokumentId, null, $dokumentDatum, null, 
@@ -966,7 +966,11 @@ class Gewaesserbenutzungen extends WrPgObject {
 	////////////////////////////////////////////////////////////////////
 	
 	public function getKennummer() {
-	    return $this->data['kennnummer'];
+	    return $this->getDataValue('kennnummer');
+	}
+	
+	public function getWasserbuchnummer() {
+	    return $this->getDataValue('wasserbuchnummer');
 	}
 	
 	public function getBezeichnung() {

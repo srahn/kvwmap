@@ -152,7 +152,7 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
         $gui->log->log_debug('word_file_name: ' . $word_file_name);
         
         //get the parameter
-        $datum = date("d.m.Y");
+        $datum = $this->date->getToday();
         $erhebungsjahr = htmlspecialchars($_REQUEST[ERHEBUNGSJAHR_URL]);
         
         $bearbeiter = $gui->user->Name . ' ' . $gui->user->Vorname;
