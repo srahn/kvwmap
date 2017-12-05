@@ -346,7 +346,7 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
                     		          			<?php 
                     		          			     if($gewaesserbenutzung->isFestsetzungFreigegeben($getYear))
                     		          			     {?>
-                    		          			     	<a href="<?php echo $this->actual_link . "?go=' . WASSERENTNAHMEENTGELT_FESTSETZUNG_URL . '&' . GET_FESTSETZUNG_URL . '=" . $wrz->getId() . "_" . $gewaesserbenutzung->getId() . "_" . $getYear ?>"><?php echo $gewaesserbenutzung->getFestsetzungDatum($getYear); ?></a>
+                    		          			     	<a href="<?php echo $this->actual_link . '?go=' . WASSERENTNAHMEENTGELT_FESTSETZUNG_URL . '&' . GET_FESTSETZUNG_URL . '=' . $wrz->getId() . '_' . $gewaesserbenutzung->getId() . '_' . $getYear ?>"><?php echo $gewaesserbenutzung->getFestsetzungDatum($getYear); ?></a>
                     		          			     <?php
                     		          			     }
                     		          			
