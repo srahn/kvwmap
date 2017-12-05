@@ -75,6 +75,7 @@ convert_nas_files() {
 					echo "BEGIN; SET search_path = ${POSTGRES_SCHEMA},public;" > ${IMPORT_PATH}/import_transaction.sql
 				fi
 				sed -i -e "s/BEGIN;//g" -e "s/END;//g" -e "s/COMMIT;//g" ${SQL_FILE}
+				sed -i -e "s/\"\"/\"objektkoordinaten\"/g" ${SQL_FILE}		# OGR Bug-Workaround
 				cat ${SQL_FILE} >> ${IMPORT_PATH}/import_transaction.sql
 				echo "INSERT INTO ${POSTGRES_SCHEMA}.import (datei, status) VALUES ('${NAS_FILENAME}', 'eingelesen');" >> ${IMPORT_PATH}/import_transaction.sql
 				rm ${NAS_FILE}
