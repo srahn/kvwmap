@@ -43,6 +43,10 @@ define('AUSWAHL_CHECKBOX_URL', 'auswahl_checkbox');
 
 define('AUFFORDERUNG_CHECKBOX_URL', 'aufforderung_checkbox_');
 
+//TEMPLATE PFADE
+define('AUFFORDERUNG_BESCHEID_PATH', 'wasserrecht/templates/Aufforderung_Erklaerung.docx');
+define('FESTSETZUNG_BESCHEID_PATH', 'wasserrecht/templates/Festsetzung_Sammelbescheid.docx');
+
 //LAYER NAMES
 define('SELECTED_LAYER_URL', 'Layer-Suche_Suchen&selected_layer_id');
 define('BEHOERDE_LAYER_NAME', 'Behoerde');

@@ -160,7 +160,7 @@ function createAufforderungsDokument(&$gui, &$wrzs, &$erhebungsjahr)
         $aufforderungsBescheidDaten->setParameter($parameter);
         
         //write the word file
-        writeAufforderungZurErklaerungWordFile($gui, PLUGINS . 'wasserrecht/templates/Aufforderung_Erklaerung.docx', $word_file, $aufforderungsBescheidDaten);
+        writeAufforderungZurErklaerungWordFile($gui, PLUGINS . AUFFORDERUNG_BESCHEID_PATH, $word_file, $aufforderungsBescheidDaten);
         
         //write the document path to the database
         $aufforderung_dokument = new Dokument($gui);

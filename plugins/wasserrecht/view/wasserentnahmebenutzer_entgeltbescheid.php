@@ -231,7 +231,7 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
         ];
         
         //write the word file
-        writeFestsetzungsWordFile($gui, PLUGINS . 'wasserrecht/templates/Festsetzung_Sammelbescheid.docx', $word_file, $parameter, $festsetzungsSammelbescheidDaten);
+        writeFestsetzungsWordFile($gui, PLUGINS . FESTSETZUNG_BESCHEID_PATH, $word_file, $parameter, $festsetzungsSammelbescheidDaten);
         
         return $word_file_name;
     }
