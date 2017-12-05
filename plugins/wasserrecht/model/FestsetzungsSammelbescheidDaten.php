@@ -158,7 +158,7 @@ class FestsetzungsSammelbescheidDaten
      */
     public function getAnlagen()
     {
-        return $this->getWrZArray("getAnlagen");
+        return $this->getWrZArray("getAnlage");
     }
 
     /**

@@ -7,7 +7,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	public $ausstellbehoerde;
 	public $zustaendigeBehoerde;
 	public $adressat;
-	public $anlagen;
+	public $anlage;
 	public $gewaesserbenutzungen;
 	public $vorgaenger;
 	public $nachfolger;
@@ -172,7 +172,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	            if(!empty($anlagen) && count($anlagen) > 0 && !empty($anlagen[0]))
 	            {
 	                $this->log->log_debug('anlagen[0] id: ' . var_export($anlagen[0]->getId(), true));
-	                $result->anlagen = $anlagen[0];
+	                $result->anlage = $anlagen[0];
 	            }
 	        }
 	        
@@ -437,17 +437,17 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	/**
      * @return mixed
      */
-    public function getAnlagen()
+    public function getAnlage()
     {
-        return $this->anlagen;
+        return $this->anlage;
     }
 
     /**
-     * @param mixed $anlagen
+     * @param mixed $anlage
      */
-    public function setAnlagen($anlagen)
+    public function setAnlage($anlage)
     {
-        $this->anlagen = $anlagen;
+        $this->anlage = $anlage;
     }
 
     ////////////////////////////////////////////////////////////////////

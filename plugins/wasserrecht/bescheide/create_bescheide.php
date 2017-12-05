@@ -98,7 +98,7 @@ function writeAufforderungZurErklaerungWordFile(&$gui, $word_template, $word_fil
             
             if(!empty($gewaesserbenutzung))
             {
-                $anlage_name = $wrz->anlagen->getName();
+                $anlage_name = $wrz->anlage->getName();
                 $benutzungsnummer = $gewaesserbenutzung->getKennummer();
                 $aktenzeichen = $wrz->getAktenzeichen();
                 $wasserbuchnummer = $gewaesserbenutzung->getWasserbuchnummer();

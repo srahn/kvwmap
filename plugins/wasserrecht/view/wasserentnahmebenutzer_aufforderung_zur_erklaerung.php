@@ -255,7 +255,7 @@ function createAufforderungsDokument(&$gui, &$wrzs, &$erhebungsjahr)
                         		          		</td>
                         		          		<td>
                         		          			<?php 
-                        		          			     echo '<a href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . $this->layer_names[ANLAGEN_LAYER_NAME] . '&value_' . ANLAGEN_LAYER_ID . '=' . $wrz->anlagen->getId() . '&operator_' . ANLAGEN_LAYER_ID . '==">' . $wrz->anlagen->getName() . '</a>';
+                        		          			     echo '<a href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . $this->layer_names[ANLAGEN_LAYER_NAME] . '&value_' . ANLAGEN_LAYER_ID . '=' . $wrz->anlage->getId() . '&operator_' . ANLAGEN_LAYER_ID . '==">' . $wrz->anlage->getName() . '</a>';
                         		          			?>
                         		          		</td>
                         		          		<td>

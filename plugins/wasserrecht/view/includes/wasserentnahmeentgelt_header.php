@@ -29,7 +29,7 @@
         <div class="wasserrecht_display_table_cell_caption">Anlage:</div>
         <div class="wasserrecht_display_table_cell_spacer"></div>
         <?php 
-            echo '<a class="wasserrecht_display_table_cell_white" href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . $this->layer_names[ANLAGEN_LAYER_NAME] . '&value_' . ANLAGEN_LAYER_ID . '=' . $wrz->anlagen->getId() . '&operator_' . ANLAGEN_LAYER_ID . '==">' . $wrz->anlagen->getName() . '</a>';
+            echo '<a class="wasserrecht_display_table_cell_white" href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . $this->layer_names[ANLAGEN_LAYER_NAME] . '&value_' . ANLAGEN_LAYER_ID . '=' . $wrz->anlage->getId() . '&operator_' . ANLAGEN_LAYER_ID . '==">' . $wrz->anlage->getName() . '</a>';
         ?>
     </div>
     <div class="wasserrecht_display_table_row">
