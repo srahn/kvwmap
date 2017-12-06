@@ -83,6 +83,14 @@ convert_nas_files() {
 				rm -f ${GFS_FILE}
 			fi
 		done
+			if [ -n "$(grep -i 'Error\|Fehler\|FATAL' ${LOG_PATH}/${ERROR_FILE})" ] ; then
+				err "Fehler beim Konvertieren der Datei: ${NAS_FILE}."
+				head -n 30 ${LOG_PATH}/${ERROR_FILE}
+				break
+			else
+				echo "SELECT alkis.execute_hist_operations();" >> ${IMPORT_PATH}/import_transaction.sql
+				echo "END;COMMIT;" >> ${IMPORT_PATH}/import_transaction.sql
+			fi
 	else
 		log "${IMPORT_PATH} ist leer, keine NAS-Dateien zum Konvertieren vorhanden"
 	fi
@@ -94,7 +102,6 @@ execute_sql_transaction() {
 		if [ -f "${IMPORT_PATH}/import_transaction.sql" ] ; then
 			# execute transaction sql file
 			log "Lese Transaktionsdatei ein"
-			echo "END;COMMIT;" >> ${IMPORT_PATH}/import_transaction.sql
 			PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -U $POSTGRES_USER -f ${IMPORT_PATH}/import_transaction.sql $POSTGRES_DBNAME >> ${LOG_PATH}/${LOG_FILE} 2> ${LOG_PATH}/${ERROR_FILE}
 			if [ -n "$(grep -i 'Error\|Fehler\|FATAL' ${LOG_PATH}/${ERROR_FILE})" ] ; then
 				err "Fehler beim Einlesen der Transaktions-Datei: ${IMPORT_PATH}/import_transaction.sql."
