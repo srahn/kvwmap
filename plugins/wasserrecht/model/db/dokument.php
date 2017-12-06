@@ -52,5 +52,13 @@ class Dokument extends WrPgObject {
     {
         return $this->getToStringFromArray($this->wrz_ids);
     }
+    /**
+     * {@inheritDoc}
+     * @see WrPgObject::toString()
+     */
+    public function toString()
+    {
+        return parent::toString() . " Pfad: " . var_export($this->getPfad(), true);
+    }
 }       
 ?>

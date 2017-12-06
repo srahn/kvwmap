@@ -89,5 +89,14 @@ class Festsetzung extends Bescheid {
 	    $this->update();
 	    return $this->getId();
 	}
+    /**
+     * {@inheritDoc}
+     * @see Bescheid::toString()
+     */
+    public function toString()
+    {
+        return parent::toString() . " Dokument Datum: " . var_export($this->getDokumentDatum(), true);
+    }
+
 }
 ?>

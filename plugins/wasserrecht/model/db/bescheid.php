@@ -149,5 +149,13 @@ abstract class Bescheid extends WrPgObject
         
         return false;
     }
+    /**
+     * {@inheritDoc}
+     * @see WrPgObject::toString()
+     */
+    public function toString()
+    {
+        return parent::toString() . " Erhebungsjahr: " . var_export($this->getErhebungsjahr(), true) . " Datum: " . var_export($this->getDatum(), true) . " Nutzer: " . var_export($this->getNutzer(), true) . (!empty($this->getDokument()) ? " Dokument: " . var_export($this->getDokument()->toString(), true) : "");
+    }
 }
 ?>

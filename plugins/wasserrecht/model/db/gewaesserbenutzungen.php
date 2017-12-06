@@ -708,6 +708,9 @@ class Gewaesserbenutzungen extends WrPgObject {
 	
 	public function deleteFestsetzungDokument($erhebungsjahr) 
 	{
+	    $this->log->log_info('*** deleteFestsetzungDokument ***');
+	    $this->log->log_debug('erhebungsjahr: ' . var_export($erhebungsjahr, true));
+	    
 	    $festsetzung = $this->getFestsetzungForErhebungsjahr($erhebungsjahr);
 	    if(!empty($festsetzung))
 	    {
@@ -721,10 +724,14 @@ class Gewaesserbenutzungen extends WrPgObject {
 	    $summeNichtZugelasseneEntnahmemengen, $summeZugelasseneEntnahmemengen, $summeEntnahmemengen,
 	    $summeNichtZugelassenesEntgelt, $summeZugelassenesEntgelt, $summeEntgelt) {
 	    
+	    $this->log->log_info('*** insertFestsetzungWithoutDokument ***');
+	    
         //if date is not set --> set it to today's date
         if(empty($datum))
         {
-            $datum = $this->date->getToday();
+            $today = $this->date->getToday();
+            $this->log->log_trace("today: " . $today);
+            $datum = $today;
         }
 	    
 	    return $this->insertFestsetzung($erhebungsjahr, null, $datum, null, $festsetzungNutzer, 
@@ -734,10 +741,14 @@ class Gewaesserbenutzungen extends WrPgObject {
 	
 	public function insertFestsetzungDokument($erhebungsjahr, $dokumentId, $dokumentDatum) {
 	    
+	    $this->log->log_info('*** insertFestsetzungDokument ***');
+	    
 	    //if date is not set --> set it to today's date
 	    if(empty($dokumentDatum))
 	    {
-	        $dokumentDatum = $this->date->getToday();
+	        $today = $this->date->getToday();
+	        $this->log->log_trace("today: " . $today);
+	        $dokumentDatum = $today;
 	    }
 	     
 	    return $this->insertFestsetzung($erhebungsjahr, $dokumentId, null, $dokumentDatum, null, 
@@ -798,6 +809,10 @@ class Gewaesserbenutzungen extends WrPgObject {
 	}
 	
 	public function isFestsetzungFreigegeben($erhebungsjahr) {
+	    
+	    $this->log->log_info('*** isFestsetzungFreigegeben ***');
+	    $this->log->log_debug('erhebungsjahr: ' . var_export($erhebungsjahr, true));
+	    
 	    $festsetzung = $this->getFestsetzungForErhebungsjahr($erhebungsjahr);
 	    if(!empty($festsetzung))
 	    {
@@ -882,8 +897,11 @@ class Gewaesserbenutzungen extends WrPgObject {
 	    $festsetzung = $this->getFestsetzungForErhebungsjahr($erhebungsjahr);
 	    if(!empty($festsetzung))
 	    {
+	        $this->log->log_debug('festsetzung: ' . var_export($festsetzung->toString(), true));
 	        return $festsetzung->getDokumentDatum();
 	    }
+	    
+	    $this->log->log_debug('festsetzung is null');
 	    
 	    return null;
 	}
@@ -891,6 +909,7 @@ class Gewaesserbenutzungen extends WrPgObject {
 	public function getFestsetzungForErhebungsjahr($erhebungsjahr)
 	{
 	    $this->log->log_info('*** getFestsetzungForErhebungsjahr ***');
+	    $this->log->log_debug('erhebungsjahr: ' . var_export($erhebungsjahr, true));
 	    
 	    if(!empty($erhebungsjahr))
 	    {

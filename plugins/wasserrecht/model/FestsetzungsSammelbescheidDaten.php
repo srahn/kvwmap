@@ -272,7 +272,7 @@ class FestsetzungsSammelbescheidDaten
     /**
      * @return mixed
      */
-    public function getErlaubterUmfang()
+    public function getErlaubterOderReduzierterUmfang()
     {
         $gewaesserbenutzungen = $this->gewaesserbenutzungen;
         
@@ -284,8 +284,8 @@ class FestsetzungsSammelbescheidDaten
             {
                 if(!empty($gewaesserbenutzung))
                 {
-                    $erlaubterUmfang = $gewaesserbenutzung->getErlaubterOderReduzierterUmfang();
-                    $returnArray[] = $erlaubterUmfang;
+                    $erlaubterOderReduzierterUmfang = $gewaesserbenutzung->getErlaubterOderReduzierterUmfang();
+                    $returnArray[] = $erlaubterOderReduzierterUmfang;
                 }
             }
             
@@ -304,7 +304,7 @@ class FestsetzungsSammelbescheidDaten
         $this->log->log_debug('entgelte: ' . var_export($this->getEntgelte(), true));
         $this->log->log_debug('zugelassene entgelte: ' . var_export($this->getZugelassene_entgelte(), true));
         $this->log->log_debug('nicht zugelassene entgelte: ' . var_export($this->getNicht_zugelassene_entgelte(), true));
-        $this->log->log_debug('erlaubterUmfang: ' . var_export($this->getErlaubterUmfang(), true));
+        $this->log->log_debug('erlaubterOderReduzierterUmfang: ' . var_export($this->getErlaubterOderReduzierterUmfang(), true));
         $this->log->log_debug('freitext: ' . $this->getFreitext());
         $this->log->log_debug('Erklärung Datum String: ' . $this->getErklaerung_datum_String());
     }

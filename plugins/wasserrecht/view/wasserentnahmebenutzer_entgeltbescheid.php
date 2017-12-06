@@ -152,7 +152,7 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
         $gui->log->log_debug('word_file_name: ' . $word_file_name);
         
         //get the parameter
-        $datum = $this->date->getToday();
+        $datum = $gui->date->getToday();
         $erhebungsjahr = htmlspecialchars($_REQUEST[ERHEBUNGSJAHR_URL]);
         
         $bearbeiter = $gui->user->Name . ' ' . $gui->user->Vorname;
@@ -464,13 +464,20 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
     			                    $this->log->log_debug('dokumentIds: ' . var_export($dokumentIds, true));
     			                    
     			                    $gwbs = $wrz->gewaesserbenutzungen;
+    			                    $this->log->log_debug('gwbs count: ' . var_export(sizeof($gwbs), true));
+    			                    
     			                    if(!empty($gwbs))
     			                    {
     			                        foreach ($gwbs as $gwb)
     			                        {
     			                            if(!empty($gwb))
     			                            {
-    			                                if($gwb->isFestsetzungDokumentErstellt($getYear))
+    			                                $this->log->log_debug('gwb id: ' . var_export($gwb->getId(), true));
+    			                                
+    			                                $festsetzungsDokumentErstellt = $gwb->isFestsetzungDokumentErstellt($getYear);
+    			                                $this->log->log_debug('festsetzungsDokumentErstellt: ' . var_export($festsetzungsDokumentErstellt, true));
+    			                                
+    			                                if($festsetzungsDokumentErstellt)
     			                                {
     			                                    $festsetzungDokument = $gwb->getFestsetzungDokument($getYear);
     			                                    if(!empty($festsetzungDokument))
