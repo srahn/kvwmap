@@ -107,7 +107,7 @@ BEGIN
 		RAISE NOTICE '%', s;
 		GET DIAGNOSTICS n = ROW_COUNT;
 		IF n<>1 THEN
-			RAISE EXCEPTION 'Beenden des Objektes % schlug fehl: %', r.featureid, s;
+			RAISE NOTICE 'Beenden des Objektes % schlug fehl: %', r.featureid, s;
 		ELSE
 			s := 'DELETE FROM alkis.delete WHERE ogc_fid = ' || r.ogc_fid;
 			EXECUTE s;
