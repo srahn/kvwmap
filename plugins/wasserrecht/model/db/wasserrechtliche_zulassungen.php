@@ -458,7 +458,7 @@ class WasserrechtlicheZulassungen extends WrPgObject {
 	    . " gueltigkeitsJahre: " . var_export($this->gueltigkeitsJahre, true)
 	    . " ausstellbehoerde: " . var_export($this->ausstellbehoerde->getId(), true) 
 	    . " zustaendigeBehoerde: " . var_export($this->zustaendigeBehoerde->getId(), true) 
-	    . " adressat: " . var_export($this->adressat->getId(), true);
+	    . " adressat: " . var_export($this->adressat->toString(), true);
 	}
 	
 	public function getBezeichnung() {

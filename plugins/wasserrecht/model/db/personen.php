@@ -98,5 +98,10 @@ class Personen extends WrPgObject {
 	    
 	    return null;
 	}
+	
+	public function toString()
+	{
+	    return parent::toString() . " isWrzAdressat: " . $this->isWrzAdressat() . " Behoerde: " . $this->getBehoerde() . (!empty($this->adresse) ? " " . $this->adresse->toString() : "");
+	}
 }
 ?>
