@@ -51,7 +51,7 @@ function showtooltip(result, showdata){
 	document.getElementById("svghelp").SVGshowtooltip(result, showdata);			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 }
 
-function showMapImage(){ 
+function showMapImage(){
 	svgdoc = document.SVG.getSVGDocument();	
 	var svg = svgdoc.getElementById("moveGroup");
 	try{
@@ -61,7 +61,10 @@ function showMapImage(){
 	catch(e){
 		document.GUI.svg_string.value = printNode(svg);
 	}
-  document.getElementById('MapImageLink').href='index.php?go=showMapImage&svg_string='+encodeURI(document.GUI.svg_string.value);
+  document.GUI.go.value = 'showMapImage';
+	document.GUI.target = '_blank';
+	document.GUI.submit();
+	document.GUI.target = '';
 }
 
 function slide_legend_in(evt) {
