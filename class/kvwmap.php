@@ -8439,37 +8439,56 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		for($i = 0; $i < count($form_fields); $i++){
 			if($form_fields[$i] != ''){
 				$element = explode(';', $form_fields[$i]);
-				$tablename[$element[2]]['tablename'] = $element[2];
-				$tablename[$element[2]]['attributname'][] = $attributenames[] = $element[1];
+				$layer_id = $element[0];
+        $attributname = $element[1];
+        $table_name = $element[2];
+        $formtype = $element[4];
+				$tablename[$table_name]['tablename'] = $table_name;
+				$tablename[$table_name]['attributname'][] = $attributenames[] = $attributname;
 				$attributevalues[] = $this->formvars[$form_fields[$i]];
 				if($this->formvars['embedded'] != '')$formfieldstring .= '&'.$form_fields[$i].'='.$this->formvars[$form_fields[$i]];
-				$tablename[$element[2]]['type'][] = $element[4];
-				$tablename[$element[2]]['datatype'][] = $element[6];
-				$tablename[$element[2]]['formfield'][] = $form_fields[$i];
+				$tablename[$table_name]['type'][] = $formtype;
+				$tablename[$table_name]['datatype'][] = $element[6];
+				$tablename[$table_name]['formfield'][] = $form_fields[$i];
 				# Dokumente sammeln
-				if($element[4] == 'Dokument'){
-					if($_files[$form_fields[$i]]['name']){
-						$document_attributes[$i] = $element[1];
+				if($formtype == 'Dokument'){
+					if($_files[$form_fields[$i]]['name'] OR $this->formvars[$form_fields[$i]]){
+						$document_attributes[$i] = $attributname;
 					}
 				}
 			}
 		}
 
 		# Dokumente speichern
-		if(count($document_attributes) > 0){
-			foreach($document_attributes as $i => $attribute_name){
-				# Dateiname erzeugen
-				$name_array=explode('.',basename($_files[$form_fields[$i]]['name']));
-				$datei_name=$name_array[0];
-				$datei_erweiterung=array_pop($name_array);
-				$doc_path = $mapdb->getDocument_Path($layerset[0]['document_path'], $attributes['options'][$attribute_name], $attributenames, $attributevalues, $layerdb);
-				$nachDatei = $doc_path.'.'.$datei_erweiterung;
-				# Bild in das Datenverzeichnis kopieren
-				if(move_uploaded_file($_files[$form_fields[$i]]['tmp_name'],$nachDatei)){
-					$this->formvars[$form_fields[$i]] = $nachDatei."&original_name=".$_files[$form_fields[$i]]['name'];
+		if(count($document_attributes)> 0){
+			foreach($document_attributes as $i => $document_attribute){
+				$error[$i] = false;
+				if($this->formvars[$form_fields[$i]] == '[]'){		# ein Array aus Dokumenten
+					$filename = $document_attribute.'_';
 				}
 				else{
-					echo '<br>Datei: '.$_files[$form_fields[$i]]['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
+					$filename = $form_fields[$i];
+					$_files[$filename]['name'] = array($_files[$filename]['name']);
+					$_files[$filename]['tmp_name'] = array($_files[$filename]['tmp_name']);
+				}
+				for($a = 0; $a < count($_files[$filename]['name']); $a++){
+					# Dateiname erzeugen
+					$name_array=explode('.',basename($_files[$filename]['name'][$a]));
+					$datei_name=$name_array[0];
+					$datei_erweiterung=array_pop($name_array);
+					$doc_path = $mapdb->getDocument_Path($layerset[0]['document_path'], $attributes['options'][$attribute_name], $attributenames, $attributevalues, $layerdb);
+					$nachDatei = $doc_path.'.'.$datei_erweiterung;
+					$doc_eintrag[$i][$a] = $nachDatei."&original_name=".$_files[$filename]['name'][$a];
+					# Bild in das Datenverzeichnis kopieren
+					if(!move_uploaded_file($_files[$filename]['tmp_name'][$a],$nachDatei)){
+						$error[$i] = true;
+						echo '<br>Datei: '.$_files[$filename]['tmp_name'][$a].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
+					}
+				}
+				if($error[$i] == false){
+					$insert = implode(',', $doc_eintrag[$i]);
+					if(count($doc_eintrag[$i]) > 1)$insert = '{'.$insert.'}';
+					$this->formvars[$form_fields[$i]] = $insert;
 				}
 			}
 		}
@@ -12173,7 +12192,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
           switch($formtype) {
             case 'Dokument' : {
               # Prüfen ob ein neues Bild angegebeben wurde
-              if($_files[$form_fields[$i]]['name']){			# die Dokument-Attribute werden hier zusammen gesammelt, weil der Datei-Upload gemacht werden muss, nachdem alle Attribute durchlaufen worden sind (wegen dem DocumentPath)
+              if($_files[$form_fields[$i]]['name'] OR $this->formvars[$form_fields[$i]]){			# die Dokument-Attribute werden hier zusammen gesammelt, weil der Datei-Upload gemacht werden muss, nachdem alle Attribute durchlaufen worden sind (wegen dem DocumentPath)
 								$attr_oid['layer_id'] = $layer_id;
 								$attr_oid['tablename'] = $tablename;
 								$attr_oid['attributename'] = $attributname;
@@ -12229,26 +12248,42 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     }
 		if(count($document_attributes)> 0){
 			foreach($document_attributes as $i => $attr_oid){
-				# Dateiname erzeugen
-				$name_array=explode('.',basename($_files[$form_fields[$i]]['name']));
-				$datei_name=$name_array[0];
-				$datei_erweiterung=array_pop($name_array);
-				$doc_path = $mapdb->getDocument_Path($layerset[$attr_oid['layer_id']][0]['document_path'], $attributes['options'][$attr_oid['attributename']], $attributenames[$attr_oid['oid']], $$attributevalues[$attr_oid['oid']], $layerdb[$attr_oid['layer_id']]);
-				$nachDatei = $doc_path.'.'.$datei_erweiterung;
-				$eintrag = $nachDatei."&original_name=".$_files[$form_fields[$i]]['name'];
-				if($datei_name == 'delete')$eintrag = '';
-				# Bild in das Datenverzeichnis kopieren
-				if (move_uploaded_file($_files[$form_fields[$i]]['tmp_name'],$nachDatei) OR $datei_name == 'delete') {
-					#echo '<br>Lade '.$_files[$form_fields[$i]]['tmp_name'].' nach '.$nachDatei.' hoch';
-					# Wenn eine alte Datei existiert, die nicht so heißt wie die neue --> löschen
-					$old = $this->formvars[str_replace(';Dokument;', ';Dokument_alt;', $form_fields[$i])];
-					if ($old != '' AND $old != $eintrag) {
-						$this->deleteDokument($old);
+				$error[$i] = false;
+				if($this->formvars[$form_fields[$i]] == '[]'){		# ein Array aus Dokumenten
+					$filename = $attr_oid['attributename'].'_'.$attr_oid['oid'];
+				}
+				else{
+					$filename = $form_fields[$i];
+					$_files[$filename]['name'] = array($_files[$filename]['name']);
+					$_files[$filename]['tmp_name'] = array($_files[$filename]['tmp_name']);
+				}
+				for($a = 0; $a < count($_files[$filename]['name']); $a++){
+					# Dateiname erzeugen
+					$name_array=explode('.',basename($_files[$filename]['name'][$a]));
+					$datei_name=$name_array[0];
+					$datei_erweiterung=array_pop($name_array);
+					$doc_path = $mapdb->getDocument_Path($layerset[$attr_oid['layer_id']][0]['document_path'], $attributes['options'][$attr_oid['attributename']], $attributenames[$attr_oid['oid']], $$attributevalues[$attr_oid['oid']], $layerdb[$attr_oid['layer_id']]);
+					$nachDatei = $doc_path.'.'.$datei_erweiterung;
+					$doc_eintrag[$i][$a] = $nachDatei."&original_name=".$_files[$filename]['name'][$a];
+					if($datei_name == 'delete')$doc_eintrag[$i][$a] = '';
+					# Bild in das Datenverzeichnis kopieren
+					if (move_uploaded_file($_files[$filename]['tmp_name'][$a],$nachDatei) OR $datei_name == 'delete'){
+						#echo '<br>Lade '.$_files[$filename]['tmp_name'][$a].' nach '.$nachDatei.' hoch';
+						# Wenn eine alte Datei existiert, die nicht so heißt wie die neue --> löschen
+						$old = $this->formvars[str_replace(';Dokument;', ';Dokument_alt;', $form_fields[$i])];
+						if ($old != '' AND $old != $doc_eintrag[$i][$a]) {
+							$this->deleteDokument($old);
+						}
+					} # ende von Datei wurde erfolgreich in Datenverzeichnis kopiert
+					else {
+						$error[$i] = true;
+						echo '<br>Datei: '.$_files[$filename]['tmp_name'][$a].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
 					}
-					$updates[$attr_oid['layer_id']][$attr_oid['tablename']][$attr_oid['oid']][$attr_oid['attributename']] = $eintrag;
-				} # ende von Datei wurde erfolgreich in Datenverzeichnis kopiert
-				else {
-					echo '<br>Datei: '.$_files[$form_fields[$i]]['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
+				}
+				if($error[$i] == false){
+					$update = implode(',', $doc_eintrag[$i]);
+					if(count($doc_eintrag[$i]) > 1)$update = '{'.$update.'}';
+					$updates[$attr_oid['layer_id']][$attr_oid['tablename']][$attr_oid['oid']][$attr_oid['attributename']] = $update;
 				}
 			}
 		}

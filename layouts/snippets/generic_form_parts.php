@@ -96,7 +96,7 @@
 			}
 			$datapart .= '</div>';
 			if($attributes['privileg'][$j] == '1' AND !$lock[$k]){
-				$datapart .= '<div style="padding: 3px 10px 3px 3px;float: right"><a href="javascript:addArrayElement(\''.$id.'\')" class="buttonlink"><span>'.$strNewEmbeddedPK.'</span></a></div>';
+				$datapart .= '<div style="padding: 3px 10px 3px 3px;float: right"><a href="javascript:addArrayElement(\''.$id.'\', \''.$attributes['form_element_type'][$j].'\', \''.$oid.'\')" class="buttonlink"><span>'.$strNewEmbeddedPK.'</span></a></div>';
 			}
 			return $datapart;
 		}
