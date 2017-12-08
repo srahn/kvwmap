@@ -322,8 +322,8 @@ class Nachweis {
 			else{
 				$nachweise = $this->getNachweise(NULL,NULL,$gemarkung,NULL,$rissnummer,$test_fortfuehrung,$test_art,NULL,'indiv_nr',NULL,NULL,NULL,NULL,NULL,NULL, $flur, true,NULL,NULL, $test_blattnr);
 			}
-			if($this->Dokumente[0]['id'] != '' AND $id != $this->Dokumente[0]['id']){
-				$errmsg.='Es existiert bereits ein Nachweis mit diesen Parametern.<br>';
+			if(($this->Dokumente[0]['id'] != '' AND $id != $this->Dokumente[0]['id']) OR ($this->Dokumente[1]['id'] != '' AND $id != $this->Dokumente[1]['id'])){
+				$errmsg.='Es existiert bereits ein Nachweis mit diesen Parametern.\n';
 			}
 		}
 		
