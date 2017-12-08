@@ -39,7 +39,7 @@ body {
 }
 
 .gui-table {
-  width: 100%;
+  width: 900px;
 }
 
 form {

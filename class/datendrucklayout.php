@@ -683,11 +683,11 @@ class ddl {
 					$dateiname = str_replace('$'.$this->attributes['name'][$j], $this->get_result_value_output(0, $j, true), $dateiname);
 				}
 			}
-			else{
+			if($dateiname == ''){
 				$currenttime = date('Y-m-d_H_i_s',time());
-				$dateiname = $this->user->Name.'-'.$currenttime;
+				$dateiname = umlaute_umwandeln($this->user->Name.'-'.$currenttime);
 			}
-			$dateiname = umlaute_umwandeln($dateiname).'.pdf';
+			$dateiname = $dateiname.'.pdf';
 			$this->outputfile = $dateiname;
 			$fp=fopen($dateipfad.$dateiname,'wb');
 			fwrite($fp,$this->pdf->ezOutput());
