@@ -753,7 +753,7 @@ class data_import_export {
 		if($database->port != '')$command.=' port='.$database->port;
 		if($database->host != '') $command .= ' host=' . $database->host;
 		$command .= '" "'.$importfile.'" '.$layer;
-		#echo $command;
+		echo '<br>command: ' . $command;
 		exec($command, $output, $ret);
 		return $ret;
 	}
@@ -770,7 +770,27 @@ class data_import_export {
 		if(strpos($output[0], 'ASCII') !== false)$encoding = 'LATIN1';
 		return $encoding;
 	}
-	
+
+	/* Das ist ein Versuch zur Identifizierung des Encodings im dbf
+	* aber die codepageid steht nicht zwangsläufig in dem dbf header
+	*/
+	function getDbfEncoding($dbf) {
+		$folder = dirname($dbf);
+		$command = "file " . $dbf . " | awk -F',' '{print $4}' | awk -F'=' '{print $2}'";
+		exec($command, $output, $ret);
+
+		# convert code page id of shapes dbf file to database pgclientencoding
+		# http://webhelp.esri.com/arcpad/8.0/referenceguide/index.htm#locales/task_code.htm
+		echo '<br>DBF CodePageId: ' . $output[0];
+		switch ($output[0]) {
+			case '0x00': $encoding = 'UTF8'; break;
+			case '0x57': $encoding = 'SQL_ASCII'; break;
+			case '0x58': $encoding = 'SQL_ASCII'; break;
+			default : $encoding = 'LATIN1';
+		}
+		return $encoding;
+	}
+
 	function create_csv($result, $attributes, $groupnames){
 		# Gruppennamen in die erste Zeile schreiben
 		if($groupnames != ''){

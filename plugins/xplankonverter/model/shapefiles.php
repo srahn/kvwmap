@@ -120,6 +120,27 @@ class ShapeFile extends PgObject {
 	function loadIntoDataTable() {
 		$this->debug->show('<p>Lade Daten in die Tabelle: ' . $this->qualifiedDataTableName());
 
+		#$encoding = $this->importer->getEncoding($this->uploadShapePath() . $this->get('filename') . '.dbf');
+		/* wenn die dbf Datei eine Spalte vom Typ date beinhaltet, wirft die Konvertierung mit
+		* ogr2ogr nach csv einen Fehler und das encoding wird als '' zurückgeliefert.
+		* Dadurch wird enconding auf default LATIN1 gesetzt und das wirft beim Import Fehler wenn
+		* die Daten doch in UTF-8 sind. Die Katze beißt sich in den Schwanz.
+		* Sie auch Ansatz importer->getDbfEncoding
+		* Wir gehen jetzt einfach erstmal davon aus, dass alle Shape-Files in UTF8 codiert sind.
+		*/
+		$encoding = 'UTF8';
+		return $this->importer->ogr2ogr_import(
+			$this->dataSchemaName(),
+			$this->dataTableName(),
+			$this->get('epsg_code'),
+			$this->uploadShapePath() . $this->get('filename') . '.shp',
+			$this->database,
+			NULL,
+			NULL,
+			NULL,
+			$encoding
+		);
+/*
 		return $this->importer->load_shp_into_pgsql(
 			$this->database,
 			$this->uploadShapePath(),
@@ -128,6 +149,7 @@ class ShapeFile extends PgObject {
 			$this->dataSchemaName(),
 			$this->dataTableName()
 		);
+*/
 	}
 
 	function update_geometry_srid() {
