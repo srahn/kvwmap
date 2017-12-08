@@ -77,6 +77,8 @@ function getvorschau(url){
 <input type="hidden" name="selected_layer_id" value="<? echo LAYER_ID_NACHWEISE; ?>">
 <input type="hidden" name="value_id" value="">
 <input type="hidden" name="operator_id" value="IN">
+<input type="hidden" name="keinzurueck" value="true">
+
 	
 <table width="0%" border="0" cellpadding="5" cellspacing="0">
   <tr> 
