@@ -2512,8 +2512,10 @@ class GUI {
   }
 
   function checkCaseAllowed($case){
+		global $log_loginfail;
   	if(!$this->Stelle->isMenueAllowed($case) AND !$this->Stelle->isFunctionAllowed($case)) {
       $this->add_message('error', $this->TaskChangeWarning . '<br>(' . $case . ')');
+			$log_loginfail->write(date("Y:m:d H:i:s",time()) . ' case: ' . $case . ' not allowed in Stelle: ' . $this->Stelle->id . ' for User: ' . $this->user->Name);
 			$this->loadMap('DataBase');
       $this->user->rolle->newtime = $this->user->rolle->last_time_id;
      	$this->saveMap('');
