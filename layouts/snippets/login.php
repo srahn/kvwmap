@@ -143,7 +143,8 @@
 									<td>&nbsp;</td>
 								</tr>
 								<?php
-					if($username != '' OR $passwort != ''){
+					if($username != '' OR $passwort != '') {
+						$log_loginfail->write(date("Y:m:d H:i:s",time()) . ' IP: ' . $_SERVER['REMOTE_ADDR'] . ' Port: ' . $_SERVER['REMOTE_PORT'] . ' User: ' . $username . ' Password: ' . $passwort . ' User agent: ' . getenv('HTTP_USER_AGENT'));
 						  ?><tr>
 									<td align="center" colspan="2"><span class="fett red">Anmeldung nicht erfolgreich.</span><br><br></td>
 								</tr><?php														
