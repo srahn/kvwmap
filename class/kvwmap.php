@@ -12241,7 +12241,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
             } # end of default case
           } # end of switch for type
 					if($eintrag !== NULL){
-						$updates[$layer_id][$tablename][$oid][$attributname] = $eintrag;
+						$updates[$layer_id][$tablename][$oid][$attributname]['value'] = $eintrag;
 					}
         }
       }
@@ -12282,8 +12282,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				}
 				if($error[$i] == false){
 					$update = implode(',', $doc_eintrag[$i]);
-					if(count($doc_eintrag[$i]) > 1)$update = '{'.$update.'}';
-					$updates[$attr_oid['layer_id']][$attr_oid['tablename']][$attr_oid['oid']][$attr_oid['attributename']] = $update;
+					if($this->formvars[$form_fields[$i]] == '[]'){	# ein Array aus Dokumenten
+						$update = '{'.$update.'}';
+						$updates[$attr_oid['layer_id']][$attr_oid['tablename']][$attr_oid['oid']][$attr_oid['attributename']]['append'] = true;		# die Einträge für die neuen Dokumente müssen angehängt werden, damit die bereits enthaltenen bestehen bleiben
+					}
+					$updates[$attr_oid['layer_id']][$attr_oid['tablename']][$attr_oid['oid']][$attr_oid['attributename']]['value'] = $update;
 				}
 			}
 		}
@@ -12296,11 +12299,14 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							else $sql = '';
 							$sql .= "UPDATE ".$tablename." SET ";
 							$i = 0;
-							foreach($attributes as $attribute => $value) {
+							foreach($attributes as $attribute => $properties) {
 								if($i > 0)$sql .= ', ';
 								$sql .= $attribute." = ";
-								if($value == 'NULL')$sql .= 'NULL';
-								else $sql .= "'".$value."'";
+								if($properties['value'] == 'NULL')$sql .= 'NULL';
+								else{
+									if($properties['append'])$sql .= $attribute.' || ';		# anhängen statt ersetzen
+									$sql .= "'".$properties['value']."'";
+								}
 								$i++;
 							}
 							$sql .= " WHERE oid = ".$oid;
