@@ -141,14 +141,14 @@
 								</tr>
 								<tr>
 									<td>&nbsp;</td>
-								</tr>
-								<?php
-					if($username != '' OR $passwort != ''){
-						  ?><tr>
-									<td align="center" colspan="2"><span class="fett red">Anmeldung nicht erfolgreich.</span><br><br></td>
-								</tr><?php														
-					}								
-			        ?><tr>
+								</tr><?php
+								if($username != '' OR $passwort != '') {
+									$log_loginfail->write(date("Y:m:d H:i:s",time()) . ' IP: ' . $_SERVER['REMOTE_ADDR'] . ' Port: ' . $_SERVER['REMOTE_PORT'] . ' User: ' . $username . ' User agent: ' . getenv('HTTP_USER_AGENT')); ?>
+									<tr>
+										<td align="center" colspan="2"><span class="fett red">Anmeldung nicht erfolgreich.</span><br><br></td>
+									</tr><?php
+								} ?>
+								<tr>
 									<td><span class="px16">Nutzername: </span></td>
   								<td><input style="width: 130px" type="text" value="<? echo $username; ?>" name="username"/></td>
 								</tr>
