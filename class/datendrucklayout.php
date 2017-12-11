@@ -63,15 +63,16 @@ class ddl {
 	function add_freetexts($i, $offsetx, $type, $pagenumber = NULL, $pagecount = NULL){
 		if(count($this->remaining_freetexts) == 0)return;
     for($j = 0; $j < count($this->layout['texts']); $j++){
-			if($type != 'everypage' AND $this->page_overflow){
-				$this->pdf->reopenObject($this->page_id_before_sublayout);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
-				#if($this->layout['type'] == 0)$this->page_overflow = false;			# if ???							wegen dem Geometrie-Attribut auskommentiert
-			}
 			# der Freitext wurde noch nicht geschrieben und ist entweder ein fester Freitext oder ein fortlaufender oder einer, der auf jeder Seite erscheinen soll
     	if(in_array($this->layout['texts'][$j]['id'], $this->remaining_freetexts) AND $this->layout['texts'][$j]['posy'] != ''){	# nur Freitexte mit einem y-Wert werden geschrieben
 				if(($type == 'fixed' AND $this->layout['texts'][$j]['type'] != 2 AND ($this->layout['type'] == 0 OR $this->layout['texts'][$j]['type'] == 1)) 
 				OR ($type == 'running' AND $this->layout['type'] != 0 AND $this->layout['texts'][$j]['type'] == 0)
-				OR ($type == 'everypage' AND $this->layout['texts'][$j]['type'] == 2)){									
+				OR ($type == 'everypage' AND $this->layout['texts'][$j]['type'] == 2)){
+					if($type != 'everypage' AND $this->page_overflow){
+						$this->pdf->reopenObject($this->page_id_before_sublayout);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
+						$this->i_on_page = 0;		# evtl. nicht 0 setzen, sondern ein eigenes i_on_page für jede Seite machen
+						$this->page_overflow = false;
+					}
 					$this->pdf->selectFont(WWWROOT . APPLVERSION . 'fonts/PDFClass/' . $this->layout['texts'][$j]['font']);								
 					$x = $this->layout['texts'][$j]['posx'];
 					$y = $this->layout['texts'][$j]['posy'];
@@ -108,13 +109,13 @@ class ddl {
 					}
 					$text = $this->substituteFreitext($this->layout['texts'][$j]['text'], $i, $pagenumber, $pagecount);					
 					$y = $this->putText($text, $this->layout['texts'][$j]['size'], NULL, $x, $y, $offsetx);
-					if(!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $y)$this->miny[$this->pdf->currentContents] = $y;		# miny ist die unterste y-Position das aktuellen Datensatzes 
+					if(!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $y)$this->miny[$this->pdf->currentContents] = $y;		# miny ist die unterste y-Position das aktuellen Datensatzes 					
+					if($type != 'everypage' AND $this->pdf->currentContents != end($this->pdf->objects['3']['info']['pages'])+1){echo $this->pdf->currentContents.' '.end($this->pdf->objects['3']['info']['pages']).'zurück<br>';$this->pdf->closeObject();}			# falls in eine alte Seite geschrieben wurde, zurückkehren
 				}
 				else{
 					$remaining_freetexts[] = $this->layout['texts'][$j]['id'];
 				}
-			}
-			if($type != 'everypage' AND $this->pdf->currentContents != end($this->pdf->objects['3']['info']['pages'])+1)$this->pdf->closeObject();			# falls in eine alte Seite geschrieben wurde, zurückkehren
+			}			
 	  }
 		return $remaining_freetexts;
 	}
@@ -403,6 +404,7 @@ class ddl {
 					# Rechteck um die Karte
 					$this->pdf->rectangle($x, $y, $this->layout['elements'][$attributes['name'][$j]]['width'], $this->layout['elements'][$attributes['name'][$j]]['width']);
 					if(!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $y)$this->miny[$this->pdf->currentContents] = $y;
+					if($this->pdf->currentContents != end($this->pdf->objects['3']['info']['pages'])+1)$this->pdf->closeObject();									# falls in eine alte Seite geschrieben wurde, zurückkehren
 				}
 				unset($this->remaining_attributes[$attributes['name'][$j]]);		# das Attribut aus den remaining_attributes entfernen
 			}
@@ -608,6 +610,13 @@ class ddl {
 					$this->remaining_lines[] = $this->layout['lines'][$j]['id'];		# zu Beginn jedes Datensatzes sind alle Linien noch zu schreiben, bei fortlaufenden Layouts aber nur die fortlaufenden Linien
 				}
 			}
+
+			################# fortlaufende Freitexte schreiben ###############
+			# (die festen Freitexte werden vor jedem Attribut geschrieben, da ein Attribut zu einem Seitenüberlauf führen können)
+			$this->remaining_freetexts = $this->add_freetexts($i, $offsetx, 'running');
+			$this->remaining_lines = $this->add_lines($offsetx, 'running');
+			################# fortlaufende Freitexte schreiben ###############			
+			
 			################# Daten schreiben ###############
 			for($j = 0; $j < count($this->attributes['name']); $j++){
 				if($this->layout['elements'][$attributes['name'][$j]]['ypos'] > 0){
