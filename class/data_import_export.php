@@ -531,7 +531,7 @@ class data_import_export {
 		}
 	}
 
-	function shp_import_speichern($formvars, $database, $upload_path = UPLOADPATH) {
+	function shp_import_speichern($formvars, $database, $upload_path = UPLOADPATH, $encoding = 'LATIN1') {
 		$this->formvars = $formvars;
 		if (file_exists($upload_path . $this->formvars['dbffile'])) {
 			$importfile = basename($this->formvars['dbffile'], '.dbf');
@@ -556,7 +556,7 @@ class data_import_export {
 			}
 			$options = $this->formvars['table_option'];
 			$options.= ' -nlt PROMOTE_TO_MULTI -lco FID=gid';
-			$encoding = $this->getEncoding($upload_path.$this->formvars['dbffile']);
+			if ($encoding == '') $encoding = $this->getEncoding($upload_path.$this->formvars['dbffile']);
 			$ret = $this->ogr2ogr_import($this->formvars['schema_name'], $this->formvars['table_name'], $this->formvars['epsg'], $upload_path.$importfile.'.shp', $database, NULL, $sql, $options, $encoding);
 
       // # erzeugte SQL-Datei anpassen
@@ -770,7 +770,7 @@ class data_import_export {
 		if($database->port != '')$command.=' port='.$database->port;
 		if($database->host != '') $command .= ' host=' . $database->host;
 		$command .= '" "'.$importfile.'" '.$layer;
-		#echo $command;
+		#echo '<br>Exec Command: ' . $command;
 		exec($command, $output, $ret);
 		return $ret;
 	}
@@ -778,13 +778,17 @@ class data_import_export {
 	function getEncoding($dbf){
 		$folder = dirname($dbf);
 		$command = OGR_BINPATH.'ogr2ogr -f CSV '.$folder.'/test.csv "'.$dbf.'"';
+		#echo '<br>Command ogr2ogr: ' . $command;
 		exec($command, $output, $ret);
 		$command = 'file '.$folder.'/test.csv';
+		#echo '<br>Command file: ' . $command;
 		exec($command, $output, $ret);
 		unlink($folder.'/test.csv');
+		#echo '<br>output: ' . $output[0];
 		if(strpos($output[0], 'UTF') !== false)$encoding = 'UTF-8';
 		if(strpos($output[0], 'ISO-8859') !== false)$encoding = 'LATIN1';
 		if(strpos($output[0], 'ASCII') !== false)$encoding = 'LATIN1';
+		#echo '<br>encoding: ' . $encoding;
 		return $encoding;
 	}
 	

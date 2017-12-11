@@ -130,7 +130,8 @@ class ShapeFile extends PgObject {
 				'table_name' => $this->dataTableName()
 			),
 			$this->database,
-			$this->uploadShapePath()
+			$this->uploadShapePath(),
+			'UTF8'
 		);
 /*
 		return $this->importer->load_shp_into_pgsql(
