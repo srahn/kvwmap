@@ -1598,4 +1598,17 @@ function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last =
 		return $parts[0];
 	}
 }
+
+function geometrytype_to_datatype($geometrytype) {
+	if (stripos($geometrytype, 'POINT') !== false) {
+		$datatype = 0;
+	}
+	elseif (stripos($geometrytype, 'LINESTRING') !== false) {
+		$datatype = 1;
+	}
+	elseif( stripos($geometrytype, 'POLYGON') !== false) {
+		$datatype = 2;
+	}
+	return $datatype;
+}
 ?>
