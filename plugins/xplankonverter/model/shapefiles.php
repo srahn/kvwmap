@@ -120,6 +120,20 @@ class ShapeFile extends PgObject {
 	function loadIntoDataTable() {
 		$this->debug->show('<p>Lade Daten in die Tabelle: ' . $this->qualifiedDataTableName());
 
+		return $this->importer->shp_import_speichern(
+			array(
+				'dbffile' => $this->get('filename') . '.dbf',
+				'import_all_columns' => true,
+				'table_option' => '',
+				'epsg' => $this->get('epsg_code'),
+				'schema_name' => $this->dataSchemaName(),
+				'table_name' => $this->dataTableName()
+			),
+			$this->database,
+			$this->uploadShapePath(),
+			'UTF8'
+		);
+/*
 		return $this->importer->load_shp_into_pgsql(
 			$this->database,
 			$this->uploadShapePath(),
@@ -128,6 +142,7 @@ class ShapeFile extends PgObject {
 			$this->dataSchemaName(),
 			$this->dataTableName()
 		);
+*/
 	}
 
 	function update_geometry_srid() {

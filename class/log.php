@@ -83,6 +83,7 @@ class LogFile {
 		$this->name=$filename;
 		$this->fp=fopen($filename,"a");
 		$this->format=$format;
+    $ret = true;
 		if ($format=="html") {
 			# fügt HEML header ein zum loggen in einer HTML-Datei
 			# Wenn title gesetzt ist wird er als Titel im header gesetzt, sonst default.
