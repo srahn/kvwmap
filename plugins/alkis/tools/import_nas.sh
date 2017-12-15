@@ -81,16 +81,12 @@ convert_nas_files() {
 				rm ${NAS_FILE}
 				rm ${SQL_FILE}
 				rm -f ${GFS_FILE}
+				if [ ! "$(find ${IMPORT_PATH} -name *.xml -not -path ${IMPORT_PATH}/METADATA/*)" ] ; then		# nach der letzten NAS-Datei die Transaktionsdatei abschliessen
+					echo "SELECT alkis.execute_hist_operations();" >> ${IMPORT_PATH}/import_transaction.sql
+					echo "END;COMMIT;" >> ${IMPORT_PATH}/import_transaction.sql
+				fi
 			fi
 		done
-			if [ -n "$(grep -i 'Error\|Fehler\|FATAL' ${LOG_PATH}/${ERROR_FILE})" ] ; then
-				err "Fehler beim Konvertieren der Datei: ${NAS_FILE}."
-				head -n 30 ${LOG_PATH}/${ERROR_FILE}
-				break
-			else
-				echo "SELECT alkis.execute_hist_operations();" >> ${IMPORT_PATH}/import_transaction.sql
-				echo "END;COMMIT;" >> ${IMPORT_PATH}/import_transaction.sql
-			fi
 	else
 		log "${IMPORT_PATH} ist leer, keine NAS-Dateien zum Konvertieren vorhanden"
 	fi
