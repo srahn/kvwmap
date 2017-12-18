@@ -38,6 +38,10 @@ body {
 	font-size: 15px;
 }
 
+.gui-table {
+  width: 900px;
+}
+
 form {
 	margin: 0;
 	padding: 0;

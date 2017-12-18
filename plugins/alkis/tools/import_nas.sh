@@ -75,6 +75,7 @@ convert_nas_files() {
 					echo "BEGIN; SET search_path = ${POSTGRES_SCHEMA},public;" > ${IMPORT_PATH}/import_transaction.sql
 				fi
 				sed -i -e "s/BEGIN;//g" -e "s/END;//g" -e "s/COMMIT;//g" ${SQL_FILE}
+				sed -i -e "s/\"\"/\"objektkoordinaten\"/g" ${SQL_FILE}		# OGR Bug-Workaround
 				cat ${SQL_FILE} >> ${IMPORT_PATH}/import_transaction.sql
 				echo "INSERT INTO ${POSTGRES_SCHEMA}.import (datei, status) VALUES ('${NAS_FILENAME}', 'eingelesen');" >> ${IMPORT_PATH}/import_transaction.sql
 				rm ${NAS_FILE}
@@ -82,6 +83,14 @@ convert_nas_files() {
 				rm -f ${GFS_FILE}
 			fi
 		done
+			if [ -n "$(grep -i 'Error\|Fehler\|FATAL' ${LOG_PATH}/${ERROR_FILE})" ] ; then
+				err "Fehler beim Konvertieren der Datei: ${NAS_FILE}."
+				head -n 30 ${LOG_PATH}/${ERROR_FILE}
+				break
+			else
+				echo "SELECT alkis.execute_hist_operations();" >> ${IMPORT_PATH}/import_transaction.sql
+				echo "END;COMMIT;" >> ${IMPORT_PATH}/import_transaction.sql
+			fi
 	else
 		log "${IMPORT_PATH} ist leer, keine NAS-Dateien zum Konvertieren vorhanden"
 	fi
@@ -93,7 +102,6 @@ execute_sql_transaction() {
 		if [ -f "${IMPORT_PATH}/import_transaction.sql" ] ; then
 			# execute transaction sql file
 			log "Lese Transaktionsdatei ein"
-			echo "END;COMMIT;" >> ${IMPORT_PATH}/import_transaction.sql
 			PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -U $POSTGRES_USER -f ${IMPORT_PATH}/import_transaction.sql $POSTGRES_DBNAME >> ${LOG_PATH}/${LOG_FILE} 2> ${LOG_PATH}/${ERROR_FILE}
 			if [ -n "$(grep -i 'Error\|Fehler\|FATAL' ${LOG_PATH}/${ERROR_FILE})" ] ; then
 				err "Fehler beim Einlesen der Transaktions-Datei: ${IMPORT_PATH}/import_transaction.sql."
@@ -179,8 +187,8 @@ if [ -e "${CONFIG_PATH}/config.sh" ] ; then
 	log " Starte Import ALKIS-Daten mit Script import_nas.sh"
   log "Loglevel: ${LOG_LEVEL}"
 else
-  log "Konfigurationsdatei: ${CONFIG_PATH}/config.sh existiert nicht."
-  log "Kopieren Sie ${CONFIG_PATH}/config-default.sh nach ${SCRIPT_PATH}/config/config.sh und passen die Parameter darin an."
+  echo "Konfigurationsdatei: ${CONFIG_PATH}/config.sh existiert nicht."
+  echo "Kopieren Sie ${CONFIG_PATH}/config-default.sh nach ${SCRIPT_PATH}/config/config.sh und passen die Parameter darin an."
 	exit
 fi
 

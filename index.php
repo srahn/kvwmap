@@ -87,7 +87,8 @@ if(DEBUG_LEVEL>0) $debug=new Debugger(DEBUGFILE);	# öffnen der Debug-log-datei
 # Öffnen der Log-Dateien. Derzeit werden in den Log-Dateien nur die SQL-Statements gespeichert, die über execSQL in den Klassen mysql und postgres ausgeführt werden.
 if (LOG_LEVEL>0) {
  $log_mysql=new LogFile(LOGFILE_MYSQL,'text','Log-Datei MySQL', '#------v: '.date("Y:m:d H:i:s",time()));
- $log_postgres=new LogFile(LOGFILE_POSTGRES,'text', 'Log-Datei-Postgres', '------v: '.date("Y:m:d H:i:s",time()));
+ $log_postgres=new LogFile(LOGFILE_POSTGRES,'text', 'Log-Datei Postgres', '------v: '.date("Y:m:d H:i:s",time()));
+ $log_loginfail = new LogFile(LOGPATH . 'login_fail.log', 'text', 'Log-Datei Login Failure', '');
 }
 if(!$_SESSION['angemeldet'] or !empty($formvars['username'])){
 	$msg .= '<br>Nicht angemeldet';

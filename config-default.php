@@ -98,12 +98,14 @@ $legendicon_size = array(
 	'width' => array(
 		0 => 18,			# Punktlayer
 		1 => 18,			# Linienlayer
-		2 => 18				# Flächenlayer
+		2 => 18,			# Flächenlayer
+		3 => 18				# Rasterlayer
 	),
 	'height' => array(
 		0 => 18,			# Punktlayer
 		1 => 12,			# Linienlayer
-		2 => 12				# Flächenlayer
+		2 => 12,			# Flächenlayer
+		3 => 18				# Rasterlayer
 	)
 );
 

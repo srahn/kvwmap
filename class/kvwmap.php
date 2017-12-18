@@ -2512,8 +2512,10 @@ class GUI {
   }
 
   function checkCaseAllowed($case){
+		global $log_loginfail;
   	if(!$this->Stelle->isMenueAllowed($case) AND !$this->Stelle->isFunctionAllowed($case)) {
       $this->add_message('error', $this->TaskChangeWarning . '<br>(' . $case . ')');
+			$log_loginfail->write(date("Y:m:d H:i:s",time()) . ' case: ' . $case . ' not allowed in Stelle: ' . $this->Stelle->id . ' for User: ' . $this->user->Name);
 			$this->loadMap('DataBase');
       $this->user->rolle->newtime = $this->user->rolle->last_time_id;
      	$this->saveMap('');
@@ -8440,37 +8442,56 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		for($i = 0; $i < count($form_fields); $i++){
 			if($form_fields[$i] != ''){
 				$element = explode(';', $form_fields[$i]);
-				$tablename[$element[2]]['tablename'] = $element[2];
-				$tablename[$element[2]]['attributname'][] = $attributenames[] = $element[1];
+				$layer_id = $element[0];
+        $attributname = $element[1];
+        $table_name = $element[2];
+        $formtype = $element[4];
+				$tablename[$table_name]['tablename'] = $table_name;
+				$tablename[$table_name]['attributname'][] = $attributenames[] = $attributname;
 				$attributevalues[] = $this->formvars[$form_fields[$i]];
 				if($this->formvars['embedded'] != '')$formfieldstring .= '&'.$form_fields[$i].'='.$this->formvars[$form_fields[$i]];
-				$tablename[$element[2]]['type'][] = $element[4];
-				$tablename[$element[2]]['datatype'][] = $element[6];
-				$tablename[$element[2]]['formfield'][] = $form_fields[$i];
+				$tablename[$table_name]['type'][] = $formtype;
+				$tablename[$table_name]['datatype'][] = $element[6];
+				$tablename[$table_name]['formfield'][] = $form_fields[$i];
 				# Dokumente sammeln
-				if($element[4] == 'Dokument'){
-					if($_files[$form_fields[$i]]['name']){
-						$document_attributes[$i] = $element[1];
+				if($formtype == 'Dokument'){
+					if($_files[$form_fields[$i]]['name'] OR $this->formvars[$form_fields[$i]]){
+						$document_attributes[$i] = $attributname;
 					}
 				}
 			}
 		}
 
 		# Dokumente speichern
-		if(count($document_attributes) > 0){
-			foreach($document_attributes as $i => $attribute_name){
-				# Dateiname erzeugen
-				$name_array=explode('.',basename($_files[$form_fields[$i]]['name']));
-				$datei_name=$name_array[0];
-				$datei_erweiterung=array_pop($name_array);
-				$doc_path = $mapdb->getDocument_Path($layerset[0]['document_path'], $attributes['options'][$attribute_name], $attributenames, $attributevalues, $layerdb);
-				$nachDatei = $doc_path.'.'.$datei_erweiterung;
-				# Bild in das Datenverzeichnis kopieren
-				if(move_uploaded_file($_files[$form_fields[$i]]['tmp_name'],$nachDatei)){
-					$this->formvars[$form_fields[$i]] = $nachDatei."&original_name=".$_files[$form_fields[$i]]['name'];
+		if(count($document_attributes)> 0){
+			foreach($document_attributes as $i => $document_attribute){
+				$error[$i] = false;
+				if($this->formvars[$form_fields[$i]] == '[]'){		# ein Array aus Dokumenten
+					$filename = $document_attribute.'_';
 				}
 				else{
-					echo '<br>Datei: '.$_files[$form_fields[$i]]['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
+					$filename = $form_fields[$i];
+					$_files[$filename]['name'] = array($_files[$filename]['name']);
+					$_files[$filename]['tmp_name'] = array($_files[$filename]['tmp_name']);
+				}
+				for($a = 0; $a < count($_files[$filename]['name']); $a++){
+					# Dateiname erzeugen
+					$name_array=explode('.',basename($_files[$filename]['name'][$a]));
+					$datei_name=$name_array[0];
+					$datei_erweiterung=array_pop($name_array);
+					$doc_path = $mapdb->getDocument_Path($layerset[0]['document_path'], $attributes['options'][$attribute_name], $attributenames, $attributevalues, $layerdb);
+					$nachDatei = $doc_path.'.'.$datei_erweiterung;
+					$doc_eintrag[$i][$a] = $nachDatei."&original_name=".$_files[$filename]['name'][$a];
+					# Bild in das Datenverzeichnis kopieren
+					if(!move_uploaded_file($_files[$filename]['tmp_name'][$a],$nachDatei)){
+						$error[$i] = true;
+						echo '<br>Datei: '.$_files[$filename]['tmp_name'][$a].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
+					}
+				}
+				if($error[$i] == false){
+					$insert = implode(',', $doc_eintrag[$i]);
+					if(count($doc_eintrag[$i]) > 1)$insert = '{'.$insert.'}';
+					$this->formvars[$form_fields[$i]] = $insert;
 				}
 			}
 		}
@@ -9117,8 +9138,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$pdf_file = $output;
 			# in jpg umwandeln
 			$currenttime = date('Y-m-d_H_i_s',time());
-			exec(IMAGEMAGICKPATH.'convert '.$pdf_file.'[0] -resize 595x1000 '.dirname($pdf_file).'/'.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg');
-			#echo IMAGEMAGICKPATH.'convert '.$pdf_file.'[0] -resize 595x1000 '.dirname($pdf_file).'/'.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg';
+			exec(IMAGEMAGICKPATH.'convert "'.$pdf_file.'[0]" -resize 595x1000 "'.dirname($pdf_file).'/'.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg"');
+			#echo IMAGEMAGICKPATH.'convert "'.$pdf_file.'[0]" -resize 595x1000 "'.dirname($pdf_file).'/'.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg"';
 			if(!file_exists(IMAGEPATH.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg')){
 				return TEMPPATH_REL.basename($pdf_file, ".pdf").'-'.$currenttime.'-0.jpg';
 			}
@@ -9181,8 +9202,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	    $pdf_file = $this->ddl->createDataPDF(NULL, NULL, NULL, $layerdb, $layerset, $attributes, $this->formvars['chosen_layer_id'], $this->ddl->selectedlayout[0], $oids, $result, $this->Stelle, $this->user);
 	    # in jpg umwandeln
 	    $currenttime = date('Y-m-d_H_i_s',time());
-	    exec(IMAGEMAGICKPATH.'convert '.$pdf_file.'[0] -resize 595x1000 '.dirname($pdf_file).'/'.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg');
-	    #echo IMAGEMAGICKPATH.'convert '.$pdf_file.'[0] -resize 595x1000 '.dirname($pdf_file).'/'.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg';
+	    exec(IMAGEMAGICKPATH.'convert "'.$pdf_file.'[0]" -resize 595x1000 "'.dirname($pdf_file).'/'.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg"');
+	    #echo IMAGEMAGICKPATH.'convert "'.$pdf_file.'[0]" -resize 595x1000 "'.dirname($pdf_file).'/'.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg"';
 	    if(!file_exists(IMAGEPATH.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg')){
 	    	$this->previewfile = TEMPPATH_REL.basename($pdf_file, ".pdf").'-'.$currenttime.'-0.jpg';
 	    }
@@ -10223,9 +10244,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->main='stelle_formular.php';
     $document = new Document($this->database);
 		$ddl = new ddl($this->database, $this);
+		$where = '';
+		$this->formvars['selparents'] = array();
+
     # Abfragen der Stellendaten wenn eine stelle_id zur Änderung selektiert ist
-    if ($this->formvars['selected_stelle_id']>0) {
-      $Stelle = new stelle($this->formvars['selected_stelle_id'],$this->user->database);
+    if ($this->formvars['selected_stelle_id'] > 0) {
+      $Stelle = new stelle($this->formvars['selected_stelle_id'], $this->user->database);
       $Stelle->language = $this->Stelle->language;
       $this->stellendaten = $Stelle->getstellendaten();
       $this->formvars['bezeichnung'] = $this->stellendaten['Bezeichnung'];
@@ -10266,7 +10290,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $this->formvars['sellayer'] = $Stelle->getLayers(NULL, 'Name');
       $this->formvars['selusers'] = $Stelle->getUser();
 			$this->formvars['selparents'] = $Stelle->getParents("ORDER BY `Bezeichnung`"); // formatted mysql resultset, ordered by Bezeichnung
+			$where = 'ID != ' . $this->formvars['selected_stelle_id'];
     }
+
     # Abfragen aller möglichen Menuepunkte
     $this->formvars['menues'] = Menue::get_all_ober_menues($this);
     # Abfragen aller möglichen Funktionen
@@ -10283,7 +10309,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     # Abfragen aller möglichen User
     $this->formvars['users']=$this->user->getall_Users('Name');
 
-		# Abfragen aller möglichen Oberstellen Kindstellen der ausgewählten Stelle werden ausgenommen
+		# Abfragen aller möglichen Oberstellen Kindstellen der ausgewählten Stelle werden ausgenommen;
 		$stelle = new MyObject($this, 'stelle');
 		$children_ids = array_map(
 			function($child) {
@@ -10292,7 +10318,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$this->Stelle->getChildren($this->formvars['selected_stelle_id'])
 		);
 		$this->formvars['parents'] = array();
-		foreach($stelle->find_where('ID != ' . $this->formvars['selected_stelle_id'], 'Bezeichnung') AS $parent) {
+		foreach ($stelle->find_where($where, 'Bezeichnung') AS $parent) {
 			if (!in_array($parent->get('ID'), $children_ids)) $this->formvars['parents'][] = $parent;
 		}
 
@@ -12174,7 +12200,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
           switch($formtype) {
             case 'Dokument' : {
               # Prüfen ob ein neues Bild angegebeben wurde
-              if($_files[$form_fields[$i]]['name']){			# die Dokument-Attribute werden hier zusammen gesammelt, weil der Datei-Upload gemacht werden muss, nachdem alle Attribute durchlaufen worden sind (wegen dem DocumentPath)
+              if($_files[$form_fields[$i]]['name'] OR $this->formvars[$form_fields[$i]]){			# die Dokument-Attribute werden hier zusammen gesammelt, weil der Datei-Upload gemacht werden muss, nachdem alle Attribute durchlaufen worden sind (wegen dem DocumentPath)
 								$attr_oid['layer_id'] = $layer_id;
 								$attr_oid['tablename'] = $tablename;
 								$attr_oid['attributename'] = $attributname;
@@ -12223,33 +12249,52 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
             } # end of default case
           } # end of switch for type
 					if($eintrag !== NULL){
-						$updates[$layer_id][$tablename][$oid][$attributname] = $eintrag;
+						$updates[$layer_id][$tablename][$oid][$attributname]['value'] = $eintrag;
 					}
         }
       }
     }
 		if(count($document_attributes)> 0){
 			foreach($document_attributes as $i => $attr_oid){
-				# Dateiname erzeugen
-				$name_array=explode('.',basename($_files[$form_fields[$i]]['name']));
-				$datei_name=$name_array[0];
-				$datei_erweiterung=array_pop($name_array);
-				$doc_path = $mapdb->getDocument_Path($layerset[$attr_oid['layer_id']][0]['document_path'], $attributes['options'][$attr_oid['attributename']], $attributenames[$attr_oid['oid']], $$attributevalues[$attr_oid['oid']], $layerdb[$attr_oid['layer_id']]);
-				$nachDatei = $doc_path.'.'.$datei_erweiterung;
-				$eintrag = $nachDatei."&original_name=".$_files[$form_fields[$i]]['name'];
-				if($datei_name == 'delete')$eintrag = '';
-				# Bild in das Datenverzeichnis kopieren
-				if (move_uploaded_file($_files[$form_fields[$i]]['tmp_name'],$nachDatei) OR $datei_name == 'delete') {
-					#echo '<br>Lade '.$_files[$form_fields[$i]]['tmp_name'].' nach '.$nachDatei.' hoch';
-					# Wenn eine alte Datei existiert, die nicht so heißt wie die neue --> löschen
-					$old = $this->formvars[str_replace(';Dokument;', ';Dokument_alt;', $form_fields[$i])];
-					if ($old != '' AND $old != $eintrag) {
-						$this->deleteDokument($old);
+				$error[$i] = false;
+				if($this->formvars[$form_fields[$i]] == '[]'){		# ein Array aus Dokumenten
+					$filename = $attr_oid['attributename'].'_'.$attr_oid['oid'];
+				}
+				else{
+					$filename = $form_fields[$i];
+					$_files[$filename]['name'] = array($_files[$filename]['name']);
+					$_files[$filename]['tmp_name'] = array($_files[$filename]['tmp_name']);
+				}
+				for($a = 0; $a < count($_files[$filename]['name']); $a++){
+					# Dateiname erzeugen
+					$name_array=explode('.',basename($_files[$filename]['name'][$a]));
+					$datei_name=$name_array[0];
+					$datei_erweiterung=array_pop($name_array);
+					$doc_path = $mapdb->getDocument_Path($layerset[$attr_oid['layer_id']][0]['document_path'], $attributes['options'][$attr_oid['attributename']], $attributenames[$attr_oid['oid']], $$attributevalues[$attr_oid['oid']], $layerdb[$attr_oid['layer_id']]);
+					$nachDatei = $doc_path.'.'.$datei_erweiterung;
+					$doc_eintrag[$i][$a] = $nachDatei."&original_name=".$_files[$filename]['name'][$a];
+					if($datei_name == 'delete')$doc_eintrag[$i][$a] = '';
+					# Bild in das Datenverzeichnis kopieren
+					if (move_uploaded_file($_files[$filename]['tmp_name'][$a],$nachDatei) OR $datei_name == 'delete'){
+						#echo '<br>Lade '.$_files[$filename]['tmp_name'][$a].' nach '.$nachDatei.' hoch';
+						# Wenn eine alte Datei existiert, die nicht so heißt wie die neue --> löschen
+						$old = $this->formvars[str_replace(';Dokument;', ';Dokument_alt;', $form_fields[$i])];
+						if ($old != '' AND $old != $doc_eintrag[$i][$a]) {
+							$this->deleteDokument($old);
+						}
+					} # ende von Datei wurde erfolgreich in Datenverzeichnis kopiert
+					else {
+						$error[$i] = true;
+						echo '<br>Datei: '.$_files[$filename]['tmp_name'][$a].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
 					}
-					$updates[$attr_oid['layer_id']][$attr_oid['tablename']][$attr_oid['oid']][$attr_oid['attributename']] = $eintrag;
-				} # ende von Datei wurde erfolgreich in Datenverzeichnis kopiert
-				else {
-					echo '<br>Datei: '.$_files[$form_fields[$i]]['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
+				}
+				if($error[$i] == false){
+					$update = implode(',', $doc_eintrag[$i]);
+					if($this->formvars[$form_fields[$i]] == '[]'){	# ein Array aus Dokumenten
+						$update = '{'.$update.'}';
+						$updates[$attr_oid['layer_id']][$attr_oid['tablename']][$attr_oid['oid']][$attr_oid['attributename']]['append'] = true;		# die Einträge für die neuen Dokumente müssen angehängt werden, damit die bereits enthaltenen bestehen bleiben
+					}
+					$updates[$attr_oid['layer_id']][$attr_oid['tablename']][$attr_oid['oid']][$attr_oid['attributename']]['value'] = $update;
 				}
 			}
 		}
@@ -12262,11 +12307,14 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							else $sql = '';
 							$sql .= "UPDATE ".$tablename." SET ";
 							$i = 0;
-							foreach($attributes as $attribute => $value) {
+							foreach($attributes as $attribute => $properties) {
 								if($i > 0)$sql .= ', ';
 								$sql .= $attribute." = ";
-								if($value == 'NULL')$sql .= 'NULL';
-								else $sql .= "'".$value."'";
+								if($properties['value'] == 'NULL')$sql .= 'NULL';
+								else{
+									if($properties['append'])$sql .= $attribute.' || ';		# anhängen statt ersetzen
+									$sql .= "'".$properties['value']."'";
+								}
 								$i++;
 							}
 							$sql .= " WHERE oid = ".$oid;
