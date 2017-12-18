@@ -7,7 +7,7 @@ extract_zip_files() {
 	if [ ! "$(ls -A ${IMPORT_PATH})" ] ; then
 		if [ "$(ls -A $DATA_PATH)" ] ; then
 			cd $DATA_PATH
-			for ZIP_FILE in ${DATA_PATH}/*.zip ; do
+			find ${DATA_PATH} -iname '*.zip' | sort | while read ZIP_FILE ; do			
 				if [ ! "${UNZIP_PASSWORD}" = "" ] ; then
 					log "unzip -P ${UNZIP_PASSWORD} ${ZIP_FILE} -d ${IMPORT_PATH}"
 					unzip -P $UNZIP_PASSWORD $ZIP_FILE -d $IMPORT_PATH
