@@ -1460,20 +1460,27 @@ class flurstueck {
 		if($eigentuemer->Nr != '' OR $eigentuemer->zusatz_eigentuemer != ''){
 			$Eigentuemer .= $indent;
 			$Eigentuemer .= $eigentuemer->Nr;
-			$anzNamenszeilen = count($eigentuemer->Name);
-			for($n=0;$n<$anzNamenszeilen;$n++){
-				$Eigentuemer .= ' '.str_replace('"', '\'', $eigentuemer->Name[$n]);
-			}						
-			$Eigentuemer .= str_replace('"', '\'', $eigentuemer->zusatz_eigentuemer);
+			if($eigentuemer->vorname != '')$Eigentuemer .= $eigentuemer->vorname.' ';
+			$Eigentuemer .= $eigentuemer->nachnameoderfirma;
+			if($Eigentuemer->namensbestandteil != '')$Eigentuemer .= ', '.$Eigentuemer->namensbestandteil;
+			if($Eigentuemer->akademischergrad != '')$Eigentuemer .= ', '.$Eigentuemer->akademischergrad;
+			$Eigentuemer .= ' ';
+			if($eigentuemer->geburtsname != '')$Eigentuemer .= 'geb. '.$eigentuemer->geburtsname.' ';
+			$Eigentuemer .= $eigentuemer->geburtsdatum;
+			foreach($eigentuemer->anschriften as $anschrift){
+				$Eigentuemer .= ' '.$anschrift['strasse'].' '.$anschrift['hausnummer'].' ';
+				$Eigentuemer .= $anschrift['postleitzahlpostzustellung'].' '.$anschrift['ort_post'].' '.$anschrift['ortsteil'].' ';
+			}
+			$Eigentuemer .= $eigentuemer->zusatz_eigentuemer;
 			if($eigentuemer->Anteil != '')$Eigentuemer .= '  zu '.$eigentuemer->Anteil;
 			$Eigentuemer .= "\n";
-			return $Eigentuemer;
+			return str_replace('"', '\'', $Eigentuemer);
 		}
 	}
 	
 	function outputEigentuemerShort($eigentuemer, $adressAenderungen = NULL, $indent = NULL, $database = NULL){
 		$Eigentuemer .= '<tr><td colspan="2"><table cellpadding="0" cellspacing="0"><tr><td valign="top" style="padding-right: 4">'.$eigentuemer->Nr.'</td><td valign="top" style="padding-right: 4">';
-		$Eigentuemer .= '<a href="index.php?go=Namen_Auswaehlen_Suchen&gml_id='.$eigentuemer->gml_id.'&withflurst=on&anzahl='.MAXQUERYROWS.'">'.$eigentuemer->Name[0].'</a>';
+		$Eigentuemer .= '<a href="index.php?go=Namen_Auswaehlen_Suchen&gml_id='.$eigentuemer->gml_id.'&withflurst=on&anzahl='.MAXQUERYROWS.'">'.$eigentuemer->vorname.' '.$eigentuemer->nachnameoderfirma.'</a>';
 		if($eigentuemer->zusatz_eigentuemer != ''){
 			$Eigentuemer .= '</td></tr><tr><td colspan="2">'.$eigentuemer->zusatz_eigentuemer; if($eigentuemer->Anteil != '')$Eigentuemer .= ' zu '.$eigentuemer->Anteil; $Eigentuemer .= '</td></tr><tr><td>';
 		}
@@ -1484,34 +1491,48 @@ class flurstueck {
 	
 	function outputEigentuemerLong($eigentuemer, $adressAenderungen, $indent = NULL, $database){
 		if($eigentuemer->Nr != ''){
-			$Eigentuemer .= '<tr><td colspan="2"><table><tr>
-												<td valign="top">'.$eigentuemer->Nr.'&nbsp;&nbsp;&nbsp;</td>
-												<td valign="top">';
-			$anzNamenszeilen=count($eigentuemer->Name);
-			$eigentuemer->Name_bearb = $eigentuemer->Name;
-			if($adressAenderungen) {
-				$adressaenderungen =  $eigentuemer->getAdressaenderungen($eigentuemer->gml_id);
-				$aendatum=substr($adressaenderungen['datum'],0,10);
-			}
-			if($adressaenderungen['user_id'] != '')$user = new user(NULL, $adressaenderungen['user_id'], $database);
-			$Eigentuemer .= '<table border="0" cellspacing="0" cellpadding="0">
-												<tr>
-													<td>';
-			for ($n=0;$n<$anzNamenszeilen;$n++){
-				if($n == 0)$Eigentuemer .= '<a href="index.php?go=Namen_Auswaehlen_Suchen&gml_id='.$eigentuemer->gml_id.'&withflurst=on&anzahl='.MAXQUERYROWS.'">';
-				if(!($eigentuemer->Name_bearb[$n]=="" OR $eigentuemer->Name_bearb[$n]==' '))$Eigentuemer .= $eigentuemer->Name_bearb[$n].'<br>';
-				if($n == 0)$Eigentuemer .= '</a>';
-			}
-			if($adressaenderungen['user_id'] != ''){
-					$Eigentuemer .= '<span class="fett"><u>Aktualisierte Anschrift ('.$aendatum.' - '.$user->Name.'):</u></span><br>';
-					$Eigentuemer .= '&nbsp;&nbsp;<span class="fett">'.$adressaenderungen['strasse'].' '.$adressaenderungen['hausnummer'].'</span><br>';
-					$Eigentuemer .= '&nbsp;&nbsp;<span class="fett">'.$adressaenderungen['postleitzahlpostzustellung'].' '.$adressaenderungen['ort_post'].' '.$adressaenderungen['ortsteil'].'</span><br>';
-			}
-			$Eigentuemer .=	'</td>
-												<td valign="bottom">';
-			if($adressAenderungen AND $eigentuemer->Nr != ''){
-				if($adressaenderungen['user_id'] == '')$Eigentuemer .= '<img src="'.GRAPHICSPATH.'pfeil_links.gif" width="12" height="12" border="0">&nbsp;<a class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz&reload=true&selected_layer_id='.LAYER_ID_ADRESSAENDERUNGEN_PERSON.'&attributenames[0]=gml_id&attributenames[1]=hat&values[0]='.urlencode($eigentuemer->gml_id).'&values[1]='.urlencode($eigentuemer->anschrift_gml_id).'&embedded=true&fromobject=subform_ax_person_temp'.$eigentuemer->gml_id.'&targetlayer_id=0&targetattribute=leer\', new Array(document.getElementById(\'subform_ax_person_temp'.$eigentuemer->gml_id.'\')), new Array(\'sethtml\'));"><span> Anschrift aktualisieren</span></a>';
-				else	$Eigentuemer .= '<img src="'.GRAPHICSPATH.'pfeil_links.gif" width="12" height="12" border="0">&nbsp;<a class="buttonlink" href="javascript:ahah(\'index.php\', \'go=Layer-Suche_Suchen&reload=true&selected_layer_id='.LAYER_ID_ADRESSAENDERUNGEN_PERSON.'&value_gml_id='.urlencode($eigentuemer->gml_id).'&operator_gml_id==&attributenames[0]=user_id&values[0]='.$this->user->id.'&embedded=true&fromobject=subform_ax_person_temp'.$eigentuemer->gml_id.'&targetlayer_id=0&targetattribute=leer\', new Array(document.getElementById(\'subform_ax_person_temp'.$eigentuemer->gml_id.'\')), \'\');">Anschrift &auml;ndern</a>';
+			$Eigentuemer .= '<tr>
+												<td colspan="2">
+													<table>
+														<tr>
+															<td valign="top">'.$eigentuemer->Nr.'&nbsp;&nbsp;&nbsp;</td>
+															<td valign="top">
+																<table border="0" cellspacing="0" cellpadding="0">
+																	<tr>
+																		<td>
+																			<a href="index.php?go=Namen_Auswaehlen_Suchen&gml_id='.$eigentuemer->gml_id.'&withflurst=on&anzahl='.MAXQUERYROWS.'">';
+			if($eigentuemer->vorname != '')$Eigentuemer .= $eigentuemer->vorname.' ';
+			$Eigentuemer .= $eigentuemer->nachnameoderfirma;
+			if($Eigentuemer->namensbestandteil != '')$Eigentuemer .= ', '.$Eigentuemer->namensbestandteil;
+			if($Eigentuemer->akademischergrad != '')$Eigentuemer .= ', '.$Eigentuemer->akademischergrad;
+			$Eigentuemer .= '</a><br>';
+			if($eigentuemer->geburtsname != '')$Eigentuemer .= 'geb. '.$eigentuemer->geburtsname.' ';
+			$Eigentuemer .= $eigentuemer->geburtsdatum;
+			foreach($eigentuemer->anschriften as $anschrift){
+				$Eigentuemer .= '<table style="margin-top: 2px" cellspacing="0" cellpadding="0">
+													<tr>
+														<td>';
+				$Eigentuemer .= $anschrift['strasse'].' '.$anschrift['hausnummer'].'<br>';
+				$Eigentuemer .= $anschrift['postleitzahlpostzustellung'].' '.$anschrift['ort_post'].' '.$anschrift['ortsteil'];
+				$Eigentuemer .= '</td>';
+				# Adressänderungen
+				if($adressAenderungen){
+					$Eigentuemer .= '<td style="padding-left: 30px">';
+					$adressaenderungen =  $eigentuemer->getAdressaenderungen($eigentuemer->gml_id);
+					$aendatum=substr($adressaenderungen['datum'],0,10);
+					if($adressaenderungen['user_id'] != ''){
+						$user = new user(NULL, $adressaenderungen['user_id'], $database);
+						$Eigentuemer .= '<span class="fett"><u>Aktualisierte Anschrift ('.$aendatum.' - '.$user->Name.'):</u></span><br>';
+						$Eigentuemer .= '&nbsp;&nbsp;<span class="fett">'.$adressaenderungen['strasse'].' '.$adressaenderungen['hausnummer'].'</span><br>';
+						$Eigentuemer .= '&nbsp;&nbsp;<span class="fett">'.$adressaenderungen['postleitzahlpostzustellung'].' '.$adressaenderungen['ort_post'].' '.$adressaenderungen['ortsteil'].'</span><br>';
+					}
+					if($eigentuemer->Nr != ''){
+						if($adressaenderungen['user_id'] == '')$Eigentuemer .= '<img src="'.GRAPHICSPATH.'pfeil_links.gif" width="12" height="12" border="0">&nbsp;<a class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz&reload=true&selected_layer_id='.LAYER_ID_ADRESSAENDERUNGEN_PERSON.'&attributenames[0]=gml_id&attributenames[1]=hat&values[0]='.urlencode($eigentuemer->gml_id).'&values[1]='.urlencode($eigentuemer->anschrift_gml_id).'&embedded=true&fromobject=subform_ax_person_temp'.$eigentuemer->gml_id.'&targetlayer_id=0&targetattribute=leer\', new Array(document.getElementById(\'subform_ax_person_temp'.$eigentuemer->gml_id.'\')), new Array(\'sethtml\'));"><span> Anschrift aktualisieren</span></a>';
+						else	$Eigentuemer .= '<img src="'.GRAPHICSPATH.'pfeil_links.gif" width="12" height="12" border="0">&nbsp;<a class="buttonlink" href="javascript:ahah(\'index.php\', \'go=Layer-Suche_Suchen&reload=true&selected_layer_id='.LAYER_ID_ADRESSAENDERUNGEN_PERSON.'&value_gml_id='.urlencode($eigentuemer->gml_id).'&operator_gml_id==&attributenames[0]=user_id&values[0]='.$this->user->id.'&embedded=true&fromobject=subform_ax_person_temp'.$eigentuemer->gml_id.'&targetlayer_id=0&targetattribute=leer\', new Array(document.getElementById(\'subform_ax_person_temp'.$eigentuemer->gml_id.'\')), \'\');">Anschrift &auml;ndern</a>';
+					}
+					$Eigentuemer .= '</td>';
+				}
+				$Eigentuemer .= '</tr></table>';
 			}
 			$Eigentuemer .=	   '</td>
 														<tr>
