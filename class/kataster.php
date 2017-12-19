@@ -1459,7 +1459,7 @@ class flurstueck {
 	function outputEigentuemerText($eigentuemer, $adressAenderungen = NULL, $indent, $database = NULL){
 		if($eigentuemer->Nr != '' OR $eigentuemer->zusatz_eigentuemer != ''){
 			$Eigentuemer .= $indent;
-			$Eigentuemer .= $eigentuemer->Nr;
+			$Eigentuemer .= $eigentuemer->Nr.' ';
 			if($eigentuemer->vorname != '')$Eigentuemer .= $eigentuemer->vorname.' ';
 			$Eigentuemer .= $eigentuemer->nachnameoderfirma;
 			if($Eigentuemer->namensbestandteil != '')$Eigentuemer .= ', '.$Eigentuemer->namensbestandteil;
