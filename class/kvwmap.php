@@ -10930,9 +10930,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $this->selected_user=new user(0,$this->formvars['selected_user_id'],$this->user->database);
       $this->formvars['selstellen']=$this->selected_user->getStellen(0);
 		# Abfragen der aktiven Layer des Nutzers
-			$mapDB = new db_mapObj($this->userdaten[0]['stelle_id'], $this->formvars['selected_user_id']);
-			$mapDB->nurAktiveLayer = true;
-			$this->active_layers = array_reverse($mapDB->read_Layer(0, $this->Stelle->useLayerAliases, NULL));
+			if($this->userdaten[0]['stelle_id'] != ''){
+				$mapDB = new db_mapObj($this->userdaten[0]['stelle_id'], $this->formvars['selected_user_id']);
+				$mapDB->nurAktiveLayer = true;
+				$this->active_layers = array_reverse($mapDB->read_Layer(0, $this->Stelle->useLayerAliases, NULL));
+			}
     }
     # Abfragen aller möglichen Stellen
     $this->formvars['stellen']=$this->Stelle->getStellen('Bezeichnung');
