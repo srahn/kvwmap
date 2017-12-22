@@ -10247,9 +10247,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->main='stelle_formular.php';
     $document = new Document($this->database);
 		$ddl = new ddl($this->database, $this);
+		$where = '';
+		$this->formvars['selparents'] = array();
+
     # Abfragen der Stellendaten wenn eine stelle_id zur Änderung selektiert ist
-    if ($this->formvars['selected_stelle_id']>0) {
-      $Stelle = new stelle($this->formvars['selected_stelle_id'],$this->user->database);
+    if ($this->formvars['selected_stelle_id'] > 0) {
+      $Stelle = new stelle($this->formvars['selected_stelle_id'], $this->user->database);
       $Stelle->language = $this->Stelle->language;
       $this->stellendaten = $Stelle->getstellendaten();
       $this->formvars['bezeichnung'] = $this->stellendaten['Bezeichnung'];
@@ -10290,7 +10293,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $this->formvars['sellayer'] = $Stelle->getLayers(NULL, 'Name');
       $this->formvars['selusers'] = $Stelle->getUser();
 			$this->formvars['selparents'] = $Stelle->getParents("ORDER BY `Bezeichnung`"); // formatted mysql resultset, ordered by Bezeichnung
+			$where = 'ID != ' . $this->formvars['selected_stelle_id'];
     }
+
     # Abfragen aller möglichen Menuepunkte
     $this->formvars['menues'] = Menue::get_all_ober_menues($this);
     # Abfragen aller möglichen Funktionen
@@ -10307,7 +10312,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     # Abfragen aller möglichen User
     $this->formvars['users']=$this->user->getall_Users('Name');
 
-		# Abfragen aller möglichen Oberstellen Kindstellen der ausgewählten Stelle werden ausgenommen
+		# Abfragen aller möglichen Oberstellen Kindstellen der ausgewählten Stelle werden ausgenommen;
 		$stelle = new MyObject($this, 'stelle');
 		$children_ids = array_map(
 			function($child) {
@@ -10316,7 +10321,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$this->Stelle->getChildren($this->formvars['selected_stelle_id'])
 		);
 		$this->formvars['parents'] = array();
-		foreach($stelle->find_where('ID != ' . $this->formvars['selected_stelle_id'], 'Bezeichnung') AS $parent) {
+		foreach ($stelle->find_where($where, 'Bezeichnung') AS $parent) {
 			if (!in_array($parent->get('ID'), $children_ids)) $this->formvars['parents'][] = $parent;
 		}
 
@@ -10929,9 +10934,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $this->selected_user=new user(0,$this->formvars['selected_user_id'],$this->user->database);
       $this->formvars['selstellen']=$this->selected_user->getStellen(0);
 		# Abfragen der aktiven Layer des Nutzers
-			$mapDB = new db_mapObj($this->userdaten[0]['stelle_id'], $this->formvars['selected_user_id']);
-			$mapDB->nurAktiveLayer = true;
-			$this->active_layers = array_reverse($mapDB->read_Layer(0, $this->Stelle->useLayerAliases, NULL));
+			if($this->userdaten[0]['stelle_id'] != ''){
+				$mapDB = new db_mapObj($this->userdaten[0]['stelle_id'], $this->formvars['selected_user_id']);
+				$mapDB->nurAktiveLayer = true;
+				$this->active_layers = array_reverse($mapDB->read_Layer(0, $this->Stelle->useLayerAliases, NULL));
+			}
     }
     # Abfragen aller möglichen Stellen
     $this->formvars['stellen']=$this->Stelle->getStellen('Bezeichnung');

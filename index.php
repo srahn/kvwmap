@@ -46,9 +46,21 @@ function replace_tags($text, $tags) {
 	$new_text = preg_replace("#<\s*\/?(" . $tags . ")\s*[^>]*?>#im", '', $text);
 	if ($new_text != $text) $new_text = replace_tags($new_text, $tags);
 
+	$first_right = strpos($new_text, '>');
+	if ($first_right !== false) {
+		$first_left = strpos($new_text, '<');
+		if ($first_left !== false and $first_right < $first_left) {
+			# >...<
+			$last_right = strrpos($new_text, '>');
+			if ($last_right !== false and $last_right > $first_left) {
+				# >...<...>
+				# entferne $first_right, $last_right und alles dazwischen
+				$new_text = substr_replace($new_text, '', $first_right, $last_right - $first_right + 1);
+			}
+		}
+	}
 	return $new_text;
 }
-
 foreach($_REQUEST as $key => $value) {
 	if (is_string($value)) $_REQUEST[$key] = pg_escape_string(replace_tags($value, 'script|embed'));
 }
@@ -138,6 +150,7 @@ include(WWWROOT . APPLVERSION.'start.php');
 
 # Übergeben des Anwendungsfalles
 $debug->write("<br><b>Anwendungsfall go: ".$go."</b>",4);
+
 $GUI->go=$go;
 $GUI->requeststring = $QUERY_STRING;
 

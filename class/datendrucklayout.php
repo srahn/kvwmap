@@ -71,7 +71,7 @@ class ddl {
 					if($type != 'everypage' AND $this->page_overflow){
 						$this->pdf->reopenObject($this->page_id_before_sublayout);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
 						$this->i_on_page = 0;		# evtl. nicht 0 setzen, sondern ein eigenes i_on_page für jede Seite machen
-						$this->page_overflow = false;
+						#$this->page_overflow = false;		# muss auskommentiert bleiben, da sonst Fehler in EN-Liste1
 					}
 					$this->pdf->selectFont(WWWROOT . APPLVERSION . 'fonts/PDFClass/' . $this->layout['texts'][$j]['font']);								
 					$x = $this->layout['texts'][$j]['posx'];
