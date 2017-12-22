@@ -40,7 +40,7 @@ WITH (
 COMMENT ON TABLE xplan_gml.rp_textabschnitt_zu_rp_objekt IS 'Association RP_TextAbschnitt _zu_ RP_Objekt';
 COMMENT ON COLUMN xplan_gml.rp_textabschnitt_zu_rp_objekt.rp_objekt_gml_id IS 'refTextInhalt';
 
-DROP TABLE xp_bereich_zu_xp_objekt;
+DROP TABLE xplan_gml.xp_bereich_zu_xp_objekt;
 
 DROP TYPE xplan_gml.xp_externereferenz_alt;
 DROP TABLE xplan_gml.xp_externereferenzart_alt;

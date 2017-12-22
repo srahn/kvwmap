@@ -123,10 +123,10 @@ ALTER TABLE xplan_gml.xp_plan ADD COLUMN inverszu_verbundenerplan_xp_verbundener
 COMMENT ON COLUMN xplan_gml.xp_plan.inverszu_verbundenerplan_xp_verbundenerplan IS 'Assoziation zu: FeatureType XP_VerbundenerPlan (xp_verbundenerplan) 0..*';
 
 
-ALTER TABLE xplan_gml.rp_plan ALTER COLUMN auslegungstartdatum TYPE date[] USING (auslegungstartdatum ::text::date[]);
-ALTER TABLE xplan_gml.rp_plan ALTER COLUMN auslegungenddatum TYPE date[] USING (auslegungenddatum ::text::date[]);
-ALTER TABLE xplan_gml.rp_plan ALTER COLUMN traegerbeteiligungsstartdatum TYPE date[] USING (traegerbeteiligungsstartdatum ::text::date[]);
-ALTER TABLE xplan_gml.rp_plan ALTER COLUMN traegerbeteiligungsenddatum TYPE date[] USING (traegerbeteiligungsenddatum ::text::date[]);
+ALTER TABLE xplan_gml.rp_plan ALTER COLUMN auslegungstartdatum TYPE date[] USING (ARRAY[auslegungstartdatum]::date[]);
+ALTER TABLE xplan_gml.rp_plan ALTER COLUMN auslegungenddatum TYPE date[] USING (ARRAY[auslegungenddatum]::date[]);
+ALTER TABLE xplan_gml.rp_plan ALTER COLUMN traegerbeteiligungsstartdatum TYPE date[] USING (ARRAY[traegerbeteiligungsstartdatum]::date[]);
+ALTER TABLE xplan_gml.rp_plan ALTER COLUMN traegerbeteiligungsenddatum TYPE date[] USING (ARRAY[traegerbeteiligungsenddatum]::date[]);
 
 INSERT INTO xplan_gml.enum_xp_zweckbestimmunggruen(wert,beschreibung) VALUES
   (10000,'ParkanlageHistorisch'),
