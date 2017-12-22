@@ -112,7 +112,7 @@ class PgObject {
 		return array_values($this->data);
 	}
 
-	function getKVP() {
+	function getKVP($escaped = false) {
 		$kvp = array();
 		foreach($this->data AS $key => $value) {
 			if (is_array($value))
@@ -120,7 +120,7 @@ class PgObject {
 			if ('' . $value == '')
 				$value = 'NULL';
 
-			$kvp[] = "\"" . $key . "\" = " . ($value == 'NULL' ? $value : "'{$value}'");
+			$kvp[] = "\"" . $key . "\" = " . ($value == 'NULL' ? $value : "'" . ($escaped ? pg_escape_string($value) : $value) . "'");
 		}
 		return $kvp;
 	}
@@ -212,7 +212,7 @@ class PgObject {
 			UPDATE
 				\"" . $this->schema . "\".\"" . $this->tableName . "\"
 			SET
-				" . implode(', ', $this->getKVP()) . "
+				" . implode(', ', $this->getKVP(true)) . "
 			WHERE
 				id = " . $this->get('id') . "
 		";

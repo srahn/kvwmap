@@ -481,9 +481,12 @@ switch($go){
 					// Erzeuge Layergruppe, falls noch nicht vorhanden
 					$layer_group_id = $this->konvertierung->create_layer_group('GML');
 					// vorhandene Layer dieser Konvertierung löschen
-					// Neue Layer erzeugen
-					$this->layer_generator_erzeugen($layer_group_id); # Funktion aus kvwmap.php
-
+					// Neue Layer von Vorlagen GML kopieren
+					/*
+					$this->formvars['group_id'] = $layer_group_id;
+					$this->formvars['pg_schema'] = XPLANKONVERTER_CONTENT_SCHEMA;
+					$this->layer_generator_erzeugen(); # Funktion aus kvwmap.php
+					*/
 					$response['success'] = true;
 					$response['msg'] = 'XPlan-GML-Datei erfolgreich erstellt.';
 				} else {

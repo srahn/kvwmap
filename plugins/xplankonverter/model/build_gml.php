@@ -37,9 +37,6 @@ class Gml_builder {
       "updated_at"
   );
 
-  static $STRUCTURE_SCHEMA = 'xplan_uml';
-  static $CONTENT_SCHEMA = 'xplan_gml';
-
   function Gml_builder($database) {
     global $debug;
     $this->debug = $debug;
@@ -70,9 +67,6 @@ class Gml_builder {
 
 		# clear tempfile
 		ftruncate($this->tmpFile, 0);
-
-		$contentScheme   = CONTENT_SCHEME;
-		$structureScheme = STRUCTURE_SCHEME;
 
 		$xplan_ns_prefix = XPLAN_NS_PREFIX ? XPLAN_NS_PREFIX.':' : '';
 
@@ -160,8 +154,8 @@ class Gml_builder {
 						32,
 						null,
 						'GML_' || b.gml_id::text || '_envelope' ) AS envelope
-						FROM $contentScheme.rp_bereich b
-						JOIN $contentScheme.rp_plan p ON b.gehoertzuplan = p.gml_id::text
+						FROM " . XPLANKONVERTER_CONTENT_SCHEMA . ".rp_bereich b
+						JOIN " . XPLANKONVERTER_CONTENT_SCHEMA . ".rp_plan p ON b.gehoertzuplan = p.gml_id::text
 						WHERE p.konvertierung_id = {$konvertierung->get('id')}";
 		#echo $sql."\n";
 		$bereiche = pg_query($this->database->dbConn, $sql);
@@ -194,18 +188,15 @@ class Gml_builder {
 			// alle gml_ids von RP_Objekten finden die mit dem Bereich verknüpft sind
 			// und im RP_Bereich Element verlinken
 			$sql = "
-				SELECT gml_id
-				FROM $contentScheme.xp_objekt
-				WHERE '{$bereich['gml_id']}' = ANY (gehoertzubereich)";
-			$_sql = "
-				SELECT b2o.xp_objekt_gml_id AS gml_id
+				SELECT
+					gml_id
 				FROM
-					$contentScheme.xp_bereich AS b JOIN
-					$contentScheme.xp_bereich_zu_xp_objekt AS b2o ON b.gml_id = b2o.xp_bereich_gml_id
+					" . XPLANKONVERTER_CONTENT_SCHEMA . ".xp_objekt
 				WHERE
-					b.gml_id = '" . $bereich['gml_id'] . "'
+					gehoertzubereich = $1
 			";
-			$rp_objekte = pg_query($this->database->dbConn, $sql);
+			#echo '<br>Sql: ' . $sql;
+			$rp_objekte = pg_query_params($this->database->dbConn, $sql, array($bereich['gml_id']));
 			# complete RP_Bereich element by iteratively inserting
 			# xlink-references to each associated RP_Objekt element
 			while ($rp_objekt = pg_fetch_array($rp_objekte, NULL, PGSQL_ASSOC)) {

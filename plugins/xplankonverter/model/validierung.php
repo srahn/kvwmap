@@ -61,7 +61,7 @@ class Validierung extends PgObject {
 				'konvertierung_id' => $this->konvertierung_id,
 				'validierung_id' => $this->get('id'),
 				'status' => ($regeln_existieren ? 'Erfolg' : 'Warnung'),
-				'msg' => 'Es sind' . ($regeln_existieren ? '' : ' keine') . ' Regeln zur Konvertierung vorhanden.'
+				'msg' => 'Es sind' . ($regeln_existieren ? ' ' . count($regeln) : ' keine') . ' Regeln zur Konvertierung vorhanden.'
 			)
 		);
 		return $regeln_existieren;
@@ -81,7 +81,6 @@ class Validierung extends PgObject {
 
 		if (!$result) {
 			$validierungsergebnis = new Validierungsergebnis($this->gui);
-					echo '<p>==' .$sql . '<br>==<p>';
 			$validierungsergebnis->create(
 				array(
 					'konvertierung_id' => $this->konvertierung_id,
@@ -277,7 +276,8 @@ class Validierung extends PgObject {
 					'konvertierung_id' => $konvertierung->get('id'),
 					'validierung_id' => $this->get('id'),
 					'status' => 'Erfolg',
-					'msg' => 'Alle Geometrien der Regel sind valide.'
+					'msg' => 'Alle Geometrien der Regel sind valide.',
+					'regel_id' => $regel->get('id')
 				)
 			);
 		}
@@ -390,7 +390,8 @@ class Validierung extends PgObject {
 					'konvertierung_id' => $konvertierung->get('id'),
 					'validierung_id' => $this->get('id'),
 					'status' => 'Erfolg',
-					'msg' => 'Alle Objekte der Regel liegen im Planbereich.'
+					'msg' => 'Alle Objekte der Regel liegen im Planbereich.',
+					'regel_id' => $regel->get('id')
 				)
 			);
 		}
