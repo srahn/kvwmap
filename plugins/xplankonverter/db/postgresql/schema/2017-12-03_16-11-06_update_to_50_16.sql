@@ -122,11 +122,10 @@ ALTER TABLE xplan_gml.rp_sonstgrenzetypen ADD COLUMN value text;
 ALTER TABLE xplan_gml.xp_plan ADD COLUMN inverszu_verbundenerplan_xp_verbundenerplan text[];
 COMMENT ON COLUMN xplan_gml.xp_plan.inverszu_verbundenerplan_xp_verbundenerplan IS 'Assoziation zu: FeatureType XP_VerbundenerPlan (xp_verbundenerplan) 0..*';
 
-
-ALTER TABLE xplan_gml.rp_plan ALTER COLUMN auslegungstartdatum TYPE date[] USING (ARRAY[auslegungstartdatum]::date[]);
-ALTER TABLE xplan_gml.rp_plan ALTER COLUMN auslegungenddatum TYPE date[] USING (ARRAY[auslegungenddatum]::date[]);
-ALTER TABLE xplan_gml.rp_plan ALTER COLUMN traegerbeteiligungsstartdatum TYPE date[] USING (ARRAY[traegerbeteiligungsstartdatum]::date[]);
-ALTER TABLE xplan_gml.rp_plan ALTER COLUMN traegerbeteiligungsenddatum TYPE date[] USING (ARRAY[traegerbeteiligungsenddatum]::date[]);
+ALTER TABLE xplan_gml.rp_plan ALTER COLUMN auslegungstartdatum TYPE date[] USING CASE WHEN auslegungstartdatum IS NULL THEN NULL ELSE ARRAY[auslegungstartdatum]::date[] END;
+ALTER TABLE xplan_gml.rp_plan ALTER COLUMN auslegungenddatum TYPE date[] USING CASE WHEN auslegungenddatum IS NULL THEN NULL ELSE ARRAY[auslegungenddatum]::date[] END;
+ALTER TABLE xplan_gml.rp_plan ALTER COLUMN traegerbeteiligungsstartdatum TYPE date[] USING CASE WHEN traegerbeteiligungsstartdatum IS NULL THEN NULL ELSE ARRAY[traegerbeteiligungsstartdatum]::date[] END;
+ALTER TABLE xplan_gml.rp_plan ALTER COLUMN traegerbeteiligungsenddatum TYPE date[] USING CASE WHEN traegerbeteiligungsenddatum IS NULL THEN NULL ELSE ARRAY[traegerbeteiligungsenddatum]::date[] END;
 
 INSERT INTO xplan_gml.enum_xp_zweckbestimmunggruen(wert,beschreibung) VALUES
   (10000,'ParkanlageHistorisch'),
