@@ -523,7 +523,7 @@ switch($go){
 		$xsl = PLUGINS . 'xplankonverter/model/xplan2inspire.xsl';
 		$fileinput = $this->konvertierung->get_file_name('xplan_gml');
 		$fileoutput = $this->konvertierung->get_file_name('inspire_gml');
-		echo 'test' . $fileinput;
+		#echo 'test' . $fileinput;
 
 		if (!file_exists($fileinput)) {
 			$success = false;
