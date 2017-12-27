@@ -6872,6 +6872,7 @@ class GUI {
 	* Klassen, Styles und die Zugehörigkeit zwischen Styles und Klassen.
 	*/
 	function layer_generator_erzeugen() {
+		$this->debug->write("<p>layer_generator_erzeugen:", 4);
 		$group_id = ($this->formvars['group_id'] == '') ? 1 : $this->formvars['group_id']; 
 		$pg_schema = $this->formvars['pg_schema'];
 		$this->sql = "
@@ -6879,7 +6880,9 @@ class GUI {
 SET @group_id = {$group_id};
 SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user} password={$this->pgdatabase->passwd_} dbname={$this->pgdatabase->dbName}';
 ";
+		$this->debug->write('<p>pg_schema: ' . $pg_schema . ', group_id: ' . $group_id, 4);
 		if (!empty($pg_schema)) {
+			$this->debug->write('<p>pg_schema ' . $pg_schema . ' erzeugen.', 4);
 			$tables = $this->pgdatabase->get_tables($pg_schema);
 			foreach ($tables AS $table) {
 				$this->sql .= $this->generate_layer($pg_schema, $table);
@@ -6896,7 +6899,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	* @params $table associatives Array mit Attribut name.
 	*/
 	function generate_layer($schema, $table, $group_id = 0, $connection = '', $epsg_code = '25832', $geometrie_column = '', $geometrietyp = '', $layertyp = '') {
-		#echo "schema: $schema, table: {$table['name']}, group_id: {$group_id}, connection: {$connection}, epsg_code: {$epsg_code}, geometrie_column: $geometrie_column, geometrietype: $geometrietyp, layertype: $layertype";
+		$this->debug->write("<p>schema: {$schema}, table: {$table['name']}, group_id: {$group_id}, connection: {$connection}, epsg_code: {$epsg_code}, geometrie_column: {$geometrie_column}, geometrietype: {$geometrietyp}, layertype: {$layertype}", 4);
 		$sql = $this->database->generate_layer($schema, $table, $group_id, $connection, $epsg_code, $geometrie_column, $geometrietyp, $layertyp);
 		$table_attributes = $this->pgdatabase->get_attribute_information($schema, $table['name']);
 		$sql .= $this->generate_layer_attributes($schema, $table_attributes);
@@ -6923,6 +6926,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	*
 	*/
 	function generate_layer_attribute($schema, $table_attribute) {
+		$this->debug->write("<p>generate_layer_attribute: {$table_attribute}", 4);
 		if ($table_attribute['type_type'] == 'e')
 			$enum_options = $this->pgdatabase->get_enum_options($schema, $table_attribute);
 		else

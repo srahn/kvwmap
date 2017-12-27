@@ -101,10 +101,6 @@ class pgdatabase {
 			ORDER BY table_name
 		";
 
-		$msg = '<br>Get Tables from Schema: ' . $schema;
-		$msg .= '<br>' . $sql;
-		$this->debug->write($msg, 4);
-
 		$ret = $this->execSQL($sql, 4, 0);
 		if($ret[0]==0){
 			while($row = pg_fetch_assoc($ret[1])){

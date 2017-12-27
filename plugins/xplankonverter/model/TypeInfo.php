@@ -3,8 +3,6 @@
 # Klasse TypeInfo #
 #############################
 
-include ('constants.php');
-
 class TypeInfo {
 
   static $schema = 'xplan_gml';//CONTENT_SCHEME;

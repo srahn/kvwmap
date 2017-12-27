@@ -1,14 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Namespaces (XPlan) müssen noch  auf neues Schema verweisen (selber Namespace wie Input) -->
+<!-- Hinweise: -->
+<!-- XPlan2INSPIRE für XPlan5.0 /INSPIRE PLU 4.0 fuer die Raumordnung-->
 <!-- Benötigt noch timeStamp Generierung, XSLT 2.0 erlaubt dies durch <xsl:value-of  select="current-dateTime()"/>, funktioniert aber mit vielen Online-Konvertern und EA nicht-->
 <!-- Geometrie-gml:ids sind direkt von XPlan übernommen. Es handelt sich um die exakt gleichen Geometrien-->
-<!-- Getestete Transformationen durch Enterprise Architect XSLT-Processor sind valide -->
-<!-- Getestete Transformationen durch http://www.shell-tools.net/index.php?op=xslt sind valide -->
-<!-- Validiert durch http://www.validome.org/xml/validate/ -->
+
+<!-- Fixes 2017-10-26:
+		- ValidFrom nun korrekt datumDesInkrafttretens statt genehmigungsDatum
+		- legislationCitation von OfficialDocumentation greift nun korrekt auf referenzName der ExternenReferenz zu (falls vorhanden) und befüllt oder voided weitere vorgeschriebene Werte
+		- Ueberfuehrung von generischen Attributen XP_DatumAttribut auf Planebene nach INSPIRE ordinance (nur XP_Datum, nicht XP_DoubleAttribute, XP_IntegerAttribute oder XP_StringAttribute) XP_URL sollte auf officialDocumentation DocumentCitation gemappt werden
+		- Einfuehrung eines Mappings aller Datumsangaben, die nicht anderweitig gemappt werden, auf SpatialPlan.ordinance (hier mit Zusatz T00:00:00 für DateTime statt Date)
+		- Anpassung der Mappigns fuer Rechtscharakter an die Vorgaben der AG Modellierung 
+		- Mapping von startBedingung und endeBedingung auf validFrom und validTo (otherwise voided) für SupplementaryRegulation und ZoningElement
+		- 
+
+		-->
 <xsl:stylesheet version="1.0"
-    xmlns="http://www.xplan-raumordnung.de/model/xplangml/raumordnungsmodell"
+    xmlns="http://www.xplanung.de/xplangml/5/0"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-    xmlns:xplan="http://www.xplan-raumordnung.de/model/xplangml/raumordnungsmodell"
+    xmlns:xplan="http://www.xplanung.de/xplangml/5/0"
     xmlns:wfs="http://www.opengis.net/wfs/2.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:gml="http://www.opengis.net/gml/3.2"
@@ -16,7 +25,7 @@
     xmlns:plu="http://inspire.ec.europa.eu/schemas/plu/4.0"
     xmlns:base="http://inspire.ec.europa.eu/schemas/base/3.3"
     xmlns:base2="http://inspire.ec.europa.eu/schemas/base2/1.0"
-    xsi:schemaLocation="http://www.xplan-raumordnung.de/model/xplangml/raumordnungsmodell http://xplan-raumordnung.de/model/xplangml/raumordnungsmodell/XPlanung-Operationen.xsd
+    xsi:schemaLocation="http://www.xplanung.de/xplangml/5/0 http://www.xplanungwiki.de/upload/XPlanGML/5.0/Schema/XPlanung-Operationen.xsd
                                         http://inspire.ec.europa.eu/schemas/plu/4.0 http://inspire.ec.europa.eu/schemas/plu/4.0/PlannedLandUse.xsd
                                         http://www.opengis.net/wfs/2.0 http://schemas.opengis.net/wfs/2.0/wfs.xsd
                                         http://inspire.ec.europa.eu/schemas/base/3.3 http://inspire.ec.europa.eu/schemas/base/3.3/BaseTypes.xsd"
@@ -62,21 +71,28 @@
         <plu:SpatialPlan gml:id="{concat('GML_', generate-id(/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan))}">
           <plu:inspireId>
             <base:Identifier>
-              <!-- LocalId derzeit inspirelocalid_ + Feature-gml:id)-->
+              <!-- LocalId derzeit inspirelocalid_ + Feature-gml:id oder alternativ wird der Wert internalId aus XPlanung RP_Plan übernommen, falls dieser befüllt ist-->
               <base:localId>
-                <xsl:value-of select="concat('inspirelocalid_' , generate-id(/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan))"/>
+				<xsl:choose>
+					<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:internalId">
+						<xsl:value-of select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:internalId"/>
+                      </xsl:when>
+                      <xsl:otherwise>
+                        <xsl:value-of select="concat('inspirelocalid_' , generate-id(/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan))"/>
+                      </xsl:otherwise>  
+				</xsl:choose>
               </base:localId>
               <!--Namespace derzeit DE_ + bundesland ID von INSPIRE-->
               <base:namespace>
                 <xsl:value-of select="concat('DE_', xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland)"/>
               </base:namespace>
-              <base:versionId nilReason="Unpopulated" xsi:nil="true" />
+              <base:versionId nilReason="unknown" xsi:nil="true" />
             </base:Identifier>
           </plu:inspireId>
           <plu:extent>
             <xsl:copy-of select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:raeumlicherGeltungsbereich/*"/> 
           </plu:extent>
-          <plu:beginLifespanVersion nilReason="Unpopulated" xsi:nil="true" />
+          <plu:beginLifespanVersion nilReason="unknown" xsi:nil="true" />
           <!-- officialTitle-->
           <xsl:choose> 
             <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:name">
@@ -93,20 +109,20 @@
           <!-- levelOfSpatialPlan-->
           <xsl:choose>
             <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=1000 or 
-                                      xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=2000">
+                                        xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=2000">
               <plu:levelOfSpatialPlan xlink:href="http://inspire.ec.europa.eu/codelist/LevelOfSpatialPlanValue/regional"/>
             </xsl:when>
             <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=2001 or
-                                      xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=3000 or
-                                      xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=4000">
+                                        xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=3000 or
+                                        xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=4000">
               <plu:levelOfSpatialPlan xlink:href="http://inspire.ec.europa.eu/codelist/LevelOfSpatialPlanValue/supraRegional"/>
             </xsl:when>
             <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=5000 or
-                                      xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=5001">
+                                        xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=5001">
               <plu:levelOfSpatialPlan xlink:href="http://inspire.ec.europa.eu/codelist/LevelOfSpatialPlanValue/national"/>
             </xsl:when>
             <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=6000 or
-                                      xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=9999">
+                                        xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=9999">
               <plu:levelOfSpatialPlan xlink:href="http://inspire.ec.europa.eu/codelist/LevelOfSpatialPlanValue/other"/>
             </xsl:when>
             <xsl:otherwise>
@@ -115,16 +131,16 @@
               </xsl:message>
             </xsl:otherwise>
           </xsl:choose>
-          <plu:endLifespanVersion nilReason="Unpopulated" xsi:nil="true" />
+          <plu:endLifespanVersion nilReason="unknown" xsi:nil="true" />
           <!--validFrom-->
           <xsl:choose> 
-            <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:genehmigungsDatum">
+            <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:datumDesInkrafttretens">
               <plu:validFrom>
-                <xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:genehmigungsDatum"/>
+                <xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:datumDesInkrafttretens"/>
               </plu:validFrom>
             </xsl:when>
             <xsl:otherwise>
-              <plu:validFrom nilReason="Unpopulated" xsi:nil="true"/>
+              <plu:validFrom nilReason="unknown" xsi:nil="true"/>
             </xsl:otherwise>
           </xsl:choose>
           <!--validTo-->
@@ -135,7 +151,7 @@
               </plu:validTo>
             </xsl:when>
             <xsl:otherwise>
-              <plu:validTo nilReason="Unpopulated" xsi:nil="true"/>
+              <plu:validTo nilReason="unknown" xsi:nil="true"/>
             </xsl:otherwise>
           </xsl:choose>
           <!-- AlternativeTitle-->
@@ -146,7 +162,7 @@
               </plu:alternativeTitle>
             </xsl:when>
             <xsl:otherwise>
-              <plu:alternativeTitle nilReason="Unpopulated" xsi:nil="true"/>
+              <plu:alternativeTitle nilReason="unknown" xsi:nil="true"/>
             </xsl:otherwise>
           </xsl:choose>
           <!-- planTypeName-->
@@ -191,43 +207,147 @@
               <plu:processStepGeneral xlink:href="http://inspire.ec.europa.eu/codelist/ProcessStepGeneralValue/adoption"/>
             </xsl:when>
             <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=2000 or
-                                      xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=2001 or
-                                      xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=2002 or
-                                      xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=2003 or
-                                      xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=2004 or
-                                      xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=3000">
+                                        xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=2001 or
+                                        xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=2002 or
+                                        xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=2003 or
+                                        xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=2004 or
+                                        xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=3000">
               <plu:processStepGeneral xlink:href="http://inspire.ec.europa.eu/codelist/ProcessStepGeneralValue/elaboration"/>
             </xsl:when>
             <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=4000">
               <plu:processStepGeneral xlink:href="http://inspire.ec.europa.eu/codelist/ProcessStepGeneralValue/legalForce"/>
             </xsl:when>
             <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=6000 or
-                                      xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=7000">
+                                        xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=7000">
               <plu:processStepGeneral xlink:href="http://inspire.ec.europa.eu/codelist/ProcessStepGeneralValue/obsolete"/>
             </xsl:when>
             <xsl:otherwise>
-              <plu:processStepGeneral nilReason="Unpopulated" xsi:nil="true"/>
+              <plu:processStepGeneral nilReason="unknown" xsi:nil="true"/>
             </xsl:otherwise>
           </xsl:choose>
-          <plu:backgroundMap nilReason="Unpopulated" xsi:nil="true" />
+          <plu:backgroundMap nilReason="unknown" xsi:nil="true" />
           <!-- ordinance -->
-          <xsl:choose> 
-            <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsverbindlich">
-              <plu:ordinance>
-                <xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsverbindlich"/>
-              </plu:ordinance>
-            </xsl:when>
-            <xsl:otherwise>
-              <plu:ordinance nilReason="Unpopulated" xsi:nil="true"/>
-            </xsl:otherwise>
-          </xsl:choose>
+					<xsl:choose>
+					<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:technHerstellDatum">
+						<plu:ordinance>
+							<plu:OrdinanceValue>
+								<plu:ordinanceDate><xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:technHerstellDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
+								<plu:ordinanceReference>technHerstellDatum</plu:ordinanceReference>
+							</plu:OrdinanceValue>
+						</plu:ordinance>
+					</xsl:when>
+					</xsl:choose>
+					<xsl:choose>
+					<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:genehmigungsDatum">
+						<plu:ordinance>
+							<plu:OrdinanceValue>
+								<plu:ordinanceDate><xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:genehmigungsDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
+								<plu:ordinanceReference>genehmigungsDatum</plu:ordinanceReference>
+							</plu:OrdinanceValue>
+						</plu:ordinance>
+					</xsl:when>
+					</xsl:choose>
+					<xsl:choose>
+					<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:aufstellungsbeschlussDatum">
+						<plu:ordinance>
+							<plu:OrdinanceValue>
+								<plu:ordinanceDate><xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:aufstellungsbeschlussDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
+								<plu:ordinanceReference>aufstellungsbeschlussDatum</plu:ordinanceReference>
+							</plu:OrdinanceValue>
+						</plu:ordinance>
+					</xsl:when>
+					</xsl:choose>
+					<xsl:choose>
+					<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:auslegungStartDatum">
+						<plu:ordinance>
+							<plu:OrdinanceValue>
+								<plu:ordinanceDate><xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:auslegungStartDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
+								<plu:ordinanceReference>auslegungStartDatum</plu:ordinanceReference>
+							</plu:OrdinanceValue>
+						</plu:ordinance>
+					</xsl:when>
+					</xsl:choose>
+					<xsl:choose>
+					<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:auslegungEndDatum">
+						<plu:ordinance>
+							<plu:OrdinanceValue>
+								<plu:ordinanceDate><xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:auslegungEndDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
+								<plu:ordinanceReference>auslegungEndDatum</plu:ordinanceReference>
+							</plu:OrdinanceValue>
+						</plu:ordinance>
+					</xsl:when>
+					</xsl:choose>
+					<xsl:choose>
+					<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:traegerbeteiligungsStartDatum">
+						<plu:ordinance>
+							<plu:OrdinanceValue>
+								<plu:ordinanceDate><xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:traegerbeteiligungsStartDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
+								<plu:ordinanceReference>traegerbeteiligungsStartDatum</plu:ordinanceReference>
+							</plu:OrdinanceValue>
+						</plu:ordinance>
+					</xsl:when>
+					</xsl:choose>
+					<xsl:choose>
+					<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:traegerbeteiligungsEndDatum">
+						<plu:ordinance>
+							<plu:OrdinanceValue>
+								<plu:ordinanceDate><xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:traegerbeteiligungsEndDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
+								<plu:ordinanceReference>traegerbeteiligungsEndDatum</plu:ordinanceReference>
+							</plu:OrdinanceValue>
+						</plu:ordinance>
+					</xsl:when>
+					</xsl:choose>
+					<xsl:choose>
+					<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:aenderungenBisDatum">
+						<plu:ordinance>
+							<plu:OrdinanceValue>
+								<plu:ordinanceDate><xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:aenderungenBisDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
+								<plu:ordinanceReference>traegerbeteiligungsEndDatum</plu:ordinanceReference>
+							</plu:OrdinanceValue>
+						</plu:ordinance>
+					</xsl:when>
+					</xsl:choose>
+					<xsl:choose>
+					<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:entwurfsbeschlussDatum">
+						<plu:ordinance>
+							<plu:OrdinanceValue>
+								<plu:ordinanceDate><xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:entwurfsbeschlussDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
+								<plu:ordinanceReference>entwurfsbeschlussDatum</plu:ordinanceReference>
+							</plu:OrdinanceValue>
+						</plu:ordinance>
+					</xsl:when>
+					</xsl:choose>
+					<xsl:choose>
+					<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planbeschlussDatum">
+						<plu:ordinance>
+							<plu:OrdinanceValue>
+								<plu:ordinanceDate><xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planbeschlussDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
+								<plu:ordinanceReference>planbeschlussDatum</plu:ordinanceReference>
+							</plu:OrdinanceValue>
+						</plu:ordinance>
+					</xsl:when>
+					</xsl:choose>
+					<xsl:choose>
+						<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:hatGenerAttribut/xplan:XP_DatumAttribut">
+							<plu:ordinance>
+								<plu:OrdinanceValue>
+									<plu:ordinanceDate>
+										<xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:hatGenerAttribut/xplan:XP_DatumAttribut/wert"></xsl:apply-templates>
+									</plu:ordinanceDate>
+									<plu:ordinanceReference>
+										<xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:hatGenerAttribut/xplan:XP_DatumAttribut/name"></xsl:apply-templates>
+									</plu:ordinanceReference>
+								</plu:OrdinanceValue>
+							</plu:ordinance>
+						</xsl:when>
+					</xsl:choose>
           <!-- Association SpatialPlan zu OfficialDocumentation-->
           <!-- Setzt Verknüpfung für jedes existierende RP_TextAbschnitt-Element, für welches auf RP_Plan eine Relation über +texte besteht. Setzt nilReason falls keine Relation vorhanden ist-->
           <xsl:for-each select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:texte">
             <plu:officialDocument xlink:href="{concat('#', 'GML_' , generate-id(.))}"/>
           </xsl:for-each>
           <xsl:if test="not(xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:texte)">
-            <plu:officialDocument nilReason="Unpopulated" xsi:nil="true" />
+            <plu:officialDocument nilReason="unknown" xsi:nil="true" />
           </xsl:if>
           <!--Association SpatialPlan zu ZoningElement-->
           <!-- muss doppelt stattfinden, um Ordnung für XSLT zu behalten-->
@@ -286,18 +406,25 @@
                 <base:namespace>
                   <xsl:value-of select="concat('DE_', /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland)"/>
                 </base:namespace>
-                <base:versionId nilReason="Unpopulated" xsi:nil="true" />
+                <base:versionId nilReason="unknown" xsi:nil="true" />
               </base:Identifier>
             </plu:inspireId>
             <!--plu:legislationCitation-->
             <xsl:choose> 
-              <xsl:when test="xplan:XPlanAuszug/gml:featureMember/RP_TextAbschnitt/xplan:refText">
+              <xsl:when test="xplan:XPlanAuszug/gml:featureMember/RP_TextAbschnitt/xplan:refText/xplan:XP_ExterneReferenz/xplan:referenzName">
                 <plu:legislationCitation>
-                  <xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/RP_TextAbschnitt/xplan:refText"/>
-                </plu:legislationCitation>
+									<base2:LegislationCitation>
+										<base2:name>
+											<xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/RP_TextAbschnitt/xplan:refText/xplan:XP_ExterneReferenz/xplan:referenzName"/>
+										</base2:name>
+										<base2:date nilReason="unknown" xsi:nil="true" /> <!-- Keine zuordbare Entsprechung in XPlanung-->
+										<base2:link nilReason="unknown" xsi:nil="true" /> <!-- Hier koennte ggf. noch ein Mapping auf ExterneReferenz URL stattfinden, falls diese vorhanden ist?-->
+										<base2:level xlink:href="http://inspire.ec.europa.eu/codelist/LegislationLevelValue/sub-national"/><!-- Wird hier für Raumordnungsplaene und durch Foederalismusprinzip vorausgesetzt -->
+										</base2:LegislationCitation>
+								</plu:legislationCitation>
               </xsl:when>
               <xsl:otherwise>
-                <plu:legislationCitation nilReason="Unpopulated" xsi:nil="true"/>
+                <plu:legislationCitation nilReason="unknown" xsi:nil="true"/>
               </xsl:otherwise>
             </xsl:choose>
             <!--plu:regulationText-->
@@ -308,10 +435,10 @@
                 </plu:regulationText>
               </xsl:when>
               <xsl:otherwise>
-                <plu:regulationText nilReason="Unpopulated" xsi:nil="true"/>
+                <plu:regulationText nilReason="unknown" xsi:nil="true"/>
               </xsl:otherwise>
             </xsl:choose>
-            <plu:planDocument nilReason="Unpopulated" xsi:nil="true" />
+            <plu:planDocument nilReason="unknown" xsi:nil="true" />
           </plu:OfficialDocumentation>
         </wfs:member>
       </xsl:for-each>
@@ -332,7 +459,7 @@
                     <base:namespace>
                       <xsl:value-of select="concat('DE_', /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland)"/>
                     </base:namespace>
-                    <base:versionId nilReason="Unpopulated" xsi:nil="true" />
+                    <base:versionId nilReason="unknown" xsi:nil="true" />
                   </base:Identifier>
                 </plu:inspireId>
                 <!-- geometry: GM_MultiSurface aus RP_Geometrieobjekt-->
@@ -342,8 +469,26 @@
                 <plu:geometry>
                   <xsl:copy-of select="xplan:position/*"/>  
                 </plu:geometry>
-                <plu:validFrom nilReason="Unpopulated" xsi:nil="true" />
-                <plu:validTo nilReason="Unpopulated" xsi:nil="true" />
+								<xsl:choose>
+									<xsl:when test="child::xplan:startBedingung/xplan:XP_WirksamkeitBedingung/xplan:datumAbsolut">
+										<plu:validFrom>
+											<xsl:apply-templates select="child::xplan:startBedingung/xplan:XP_WirksamkeitBedingung/xplan:datumAbsolut"/>
+										</plu:validFrom>
+									</xsl:when>
+									<xsl:otherwise>
+										<plu:validFrom nilReason="unknown" xsi:nil="true" />
+									</xsl:otherwise>
+								</xsl:choose>
+								<xsl:choose>
+									<xsl:when test="child::xplan:endeBedingung/xplan:XP_WirksamkeitBedingung/xplan:datumAbsolut">
+										<plu:validTo>
+											<xsl:apply-templates select="child::xplan:endeBedingung/xplan:XP_WirksamkeitBedingung/xplan:datumAbsolut"/>
+										</plu:validTo>
+									</xsl:when>
+									<xsl:otherwise>
+										<plu:validTo nilReason="unknown" xsi:nil="true" />
+									</xsl:otherwise>
+								</xsl:choose>
                 <!-- hilucsLandUse-->
                 <!-- Mapping auf HILUCS-->
                 <xsl:choose>
@@ -359,35 +504,35 @@
                   <xsl:when test="self::xplan:RP_Energieversorgung">
                     <xsl:choose>
                       <xsl:when test="child::xplan:primaerenergieTyp=1000 or
-                                                child::xplan:primaerenergieTyp=2000 or
-                                                child::xplan:primaerenergieTyp=2001 or
-                                                child::xplan:primaerenergieTyp=4000 or
-                                                child::xplan:primaerenergieTyp=5000">
+                                                  child::xplan:primaerenergieTyp=2000 or
+                                                  child::xplan:primaerenergieTyp=2001 or
+                                                  child::xplan:primaerenergieTyp=4000 or
+                                                  child::xplan:primaerenergieTyp=5000">
                         <plu:hilucsLandUse xlink:href="{concat($hilucs,'2_4_2_FossilFuelBasedEnergyProduction')}"/>
                       </xsl:when>
                       <xsl:when test="child::xplan:primaerenergieTyp=6000 or
-                                                child::xplan:primaerenergieTyp=9000 or
-                                                child::xplan:primaerenergieTyp=9001">
+                                                  child::xplan:primaerenergieTyp=9000 or
+                                                  child::xplan:primaerenergieTyp=9001">
                         <plu:hilucsLandUse xlink:href="{concat($hilucs,'2_4_4_RenewableEnergyProduction')}"/>
                       </xsl:when>
                       <xsl:when test="child::xplan:primaerenergieTyp=7000">
                         <plu:hilucsLandUse xlink:href="{concat($hilucs,'2_4_1_NuclearBasedEnergyProduction')}"/>
                       </xsl:when>
                       <xsl:when test="child::xplan:spannung=1000 or
-                                                child::xplan:spannung=2000 or 
-                                                child::xplan:spannung=3000 or 
-                                                child::xplan:spannung=4000 or
-                                                child::xplan:typ=1000 or
-                                                child::xplan:typ=1001 or
-                                                child::xplan:typ=1002 or
-                                                child::xplan:typ=2000 or
-                                                child::xplan:typ=2001 or
-                                                child::xplan:typ=4000 or
-                                                child::xplan:typ=4001 or
-                                                child::xplan:typ=4002 or
-                                                child::xplan:typ=5000 or
-                                                child::xplan:typ=6000 or
-                                                child::xplan:typ=7000">
+                                                  child::xplan:spannung=2000 or 
+                                                  child::xplan:spannung=3000 or 
+                                                  child::xplan:spannung=4000 or
+                                                  child::xplan:typ=1000 or
+                                                  child::xplan:typ=1001 or
+                                                  child::xplan:typ=1002 or
+                                                  child::xplan:typ=2000 or
+                                                  child::xplan:typ=2001 or
+                                                  child::xplan:typ=4000 or
+                                                  child::xplan:typ=4001 or
+                                                  child::xplan:typ=4002 or
+                                                  child::xplan:typ=5000 or
+                                                  child::xplan:typ=6000 or
+                                                  child::xplan:typ=7000">
                         <plu:hilucsLandUse xlink:href="{concat($hilucs,'4_3_1_ElectricityGasAndThemalPowerDistributionServices')}"/>
                       </xsl:when>
                       <xsl:otherwise>
@@ -398,18 +543,18 @@
                   <xsl:when test="self::xplan:RP_Entsorgung">
                     <xsl:choose>
                       <xsl:when test="child::xplan:abfallTyp=1000 or
-                                                child::xplan:abfallTyp=2000 or
-                                                child::xplan:abfallTyp=3000 or
-                                                child::xplan:abfallTyp=4000 or
-                                                child::xplan:abfallTyp=5000 or
-                                                child::xplan:abfallTyp=9999 or
-                                                child::xplan:typAW=1000 or
-                                                child::xplan:typAW=1001 or
-                                                child::xplan:typAW=1002 or
-                                                child::xplan:typAW=2000 or
-                                                child::xplan:typAW=3000 or
-                                                child::xplan:typAW=4000 or
-                                                child::xplan:typAW=9999">
+                                                  child::xplan:abfallTyp=2000 or
+                                                  child::xplan:abfallTyp=3000 or
+                                                  child::xplan:abfallTyp=4000 or
+                                                  child::xplan:abfallTyp=5000 or
+                                                  child::xplan:abfallTyp=9999 or
+                                                  child::xplan:typAW=1000 or
+                                                  child::xplan:typAW=1001 or
+                                                  child::xplan:typAW=1002 or
+                                                  child::xplan:typAW=2000 or
+                                                  child::xplan:typAW=3000 or
+                                                  child::xplan:typAW=4000 or
+                                                  child::xplan:typAW=9999">
                         <plu:hilucsLandUse xlink:href="{concat($hilucs,'4_3_2_WaterAndSewageInfrastructure')}"/>
                       </xsl:when>
                       <xsl:otherwise>
@@ -528,13 +673,13 @@
                       <xsl:when test="child::xplan:rohstoffTyp">
                         <xsl:choose>
                           <xsl:when test="child::xplan:rohstoffTyp=1600 or
-                                                    child::xplan:rohstoffTyp=1900 or
-                                                    child::xplan:rohstoffTyp=2000 or
-                                                    child::xplan:rohstoffTyp=6200">
+                                                      child::xplan:rohstoffTyp=1900 or
+                                                      child::xplan:rohstoffTyp=2000 or
+                                                      child::xplan:rohstoffTyp=6200">
                             <plu:hilucsLandUse xlink:href="{concat($hilucs,'1_3_1_MiningOfEnergyProducingMaterials')}"/>
                           </xsl:when>
                           <xsl:when test="child::xplan:rohstoffTyp=2100 or
-                                                    child::xplan:rohstoffTyp=4100">
+                                                      child::xplan:rohstoffTyp=4100">
                             <plu:hilucsLandUse xlink:href="{concat($hilucs,'1_3_2_MiningOfMetalOres')}"/>
                           </xsl:when>
                           <xsl:otherwise>
@@ -571,7 +716,7 @@
                         <plu:hilucsLandUse xlink:href="{concat($hilucs,'3_4_1_CulturalServices')}"/>
                       </xsl:when>
                       <xsl:when test="child::xplan:typ=4000 or
-                                                child::xplan:typ=4001">
+                                                  child::xplan:typ=4001">
                         <plu:hilucsLandUse xlink:href="{concat($hilucs,'3_3_2_EducationalServices')}"/>
                       </xsl:when>
                       <xsl:when test="child::xplan:typ=5000">
@@ -615,28 +760,29 @@
 
                   <!-- Ende mapping auf HILUCS -->
                 </xsl:choose>
-                <plu:beginLifespanVersion nilReason="Unpopulated" xsi:nil="true" />
-                <plu:hilucsPresence nilReason="Unpopulated" xsi:nil="true" />
+                <plu:beginLifespanVersion nilReason="unknown" xsi:nil="true" />
+                <plu:hilucsPresence nilReason="unknown" xsi:nil="true" />
                 <!-- Für specificLandUse ggf. Nationale Codeliste einbinden-->
                 <!-- Es kann auch die selbe Nationale Codeliste, wie INSPIRE eingebunden werden, da diese den Anspruch hat, alle Raumordnungselemente (auch Flaechenschlusselemente) abzudecken -->
-                <plu:specificLandUse nilReason="Unpopulated" xsi:nil="true" />
-                <plu:specificPresence nilReason="Unpopulated" xsi:nil="true" /> 
+                <plu:specificLandUse nilReason="unknown" xsi:nil="true" />
+                <plu:specificPresence nilReason="unknown" xsi:nil="true" /> 
                 <!--plu:regulationNature-->
                 <xsl:choose>
-                  <xsl:when test="xplan:rechtscharakter=1000">
+                  <xsl:when test="xplan:rechtscharakter=1000 or
+																							xplan:rechtscharakter=2000 or
+																							xplan:rechtscharakter=7000 or
+																							xplan:rechtscharakter=8000">
                     <plu:regulationNature xlink:href="http://inspire.ec.europa.eu/codelist/RegulationNatureValue/generallyBinding"/>
                   </xsl:when>
-                  <xsl:when test="xplan:rechtscharakter=2000 or
-                                            xplan:rechtscharakter=3000 or
-                                            xplan:rechtscharakter=4000 or
-                                            xplan:rechtscharakter=5000 or
-                                            xplan:rechtscharakter=6000 or
-                                            xplan:rechtscharakter=9000">
+                  <xsl:when test="xplan:rechtscharakter=3000 or
+                                              xplan:rechtscharakter=4000 or
+                                              xplan:rechtscharakter=5000">
+                    <plu:regulationNature xlink:href="http://inspire.ec.europa.eu/codelist/RegulationNatureValue/bindingForDevelopers"/>
+                  </xsl:when>
+                  <xsl:when test="xplan:rechtscharakter=6000 or
+                                              xplan:rechtscharakter=9000 or
+																							xplan:rechtscharakter=9998">
                     <plu:regulationNature xlink:href="http://inspire.ec.europa.eu/codelist/RegulationNatureValue/nonBinding"/>
-                  </xsl:when>
-                  <xsl:when test="xplan:rechtscharakter=7000 or
-                                            xplan:rechtscharakter=8000">
-                    <plu:regulationNature xlink:href="http://inspire.ec.europa.eu/codelist/RegulationNatureValue/generallyBinding"/>
                   </xsl:when>
                   <xsl:otherwise>
                     <xsl:message terminate="yes">
@@ -644,7 +790,7 @@
                     </xsl:message>
                   </xsl:otherwise>
                 </xsl:choose>
-                <plu:endLifespanVersion nilReason="Unpopulated" xsi:nil="true" />
+                <plu:endLifespanVersion nilReason="unknown" xsi:nil="true" />
                 <!--ProcessStepGeneral-->
                 <!-- Bei 4000 auch 0, da nicht zuordbar -->
                 <xsl:choose>
@@ -652,32 +798,32 @@
                     <plu:processStepGeneral xlink:href="http://inspire.ec.europa.eu/codelist/ProcessStepGeneralValue/adoption"/>
                   </xsl:when>
                   <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=2000 or 
-                                            /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=2001 or 
-                                            /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=2002 or 
-                                            /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=2003 or
-                                            /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=2004 or
-                                            /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=3000">
+                                              /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=2001 or 
+                                              /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=2002 or 
+                                              /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=2003 or
+                                              /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=2004 or
+                                              /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=3000">
                     <plu:processStepGeneral xlink:href="http://inspire.ec.europa.eu/codelist/ProcessStepGeneralValue/elaboration"/>
                   </xsl:when>
                   <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=4000">
                     <plu:processStepGeneral xlink:href="http://inspire.ec.europa.eu/codelist/ProcessStepGeneralValue/legalForce"/>
                   </xsl:when>
                   <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=6000 or
-                                            /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=7000">
+                                             /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=7000">
                     <plu:processStepGeneral xlink:href="http://inspire.ec.europa.eu/codelist/ProcessStepGeneralValue/obsolete"/>
                   </xsl:when>
                   <xsl:otherwise>
-                    <plu:processStepGeneral nilReason="Unpopulated" xsi:nil="true"/>
+                    <plu:processStepGeneral nilReason="unknown" xsi:nil="true"/>
                   </xsl:otherwise>
                 </xsl:choose>
-                <plu:backgroundMap nilReason="Unpopulated" xsi:nil="true" />
-                <plu:dimensioningIndication nilReason="Unpopulated" xsi:nil="true" />
+                <plu:backgroundMap nilReason="unknown" xsi:nil="true" />
+                <plu:dimensioningIndication nilReason="unknown" xsi:nil="true" />
                 <!-- Association Dokumente (falls refTextInhalt existiert, dann Association (die selbe, die bereits in OD generiert wurde)-->
                 <xsl:for-each select="./xplan:refTextInhalt">
                   <plu:officialDocument xlink:href="{concat('#', 'GML_' , generate-id(.))}"/>
                 </xsl:for-each>
                 <xsl:if test="not(./xplan:refTextInhalt)">
-                  <plu:officialDocument nilReason="Unpopulated" xsi:nil="true" />
+                  <plu:officialDocument nilReason="unknown" xsi:nil="true" />
                 </xsl:if>
                 <!-- Association Plan (immer 1, d.h. immer mit dem Plan verbunden)-->
                 <plu:plan xlink:href="{concat('#', 'GML_', generate-id(/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan))}"/>
@@ -685,11 +831,30 @@
             </wfs:member>
           </xsl:when>
           <xsl:otherwise>
+
             <!-- SUPPLEMENTARY REGULATION -->
             <wfs:member>
               <plu:SupplementaryRegulation gml:id="{concat('GML_' , generate-id(.))}">
-                <plu:validFrom nilReason="Unpopulated" xsi:nil="true" />
-                <plu:validTo nilReason="Unpopulated" xsi:nil="true" />
+								<xsl:choose>
+									<xsl:when test="child::xplan:startBedingung/xplan:XP_WirksamkeitBedingung/xplan:datumAbsolut">
+										<plu:validFrom>
+											<xsl:apply-templates select="child::xplan:startBedingung/xplan:XP_WirksamkeitBedingung/xplan:datumAbsolut"/>
+										</plu:validFrom>
+									</xsl:when>
+									<xsl:otherwise>
+										<plu:validFrom nilReason="unknown" xsi:nil="true" />
+									</xsl:otherwise>
+								</xsl:choose>
+								<xsl:choose>
+									<xsl:when test="child::xplan:endeBedingung/xplan:XP_WirksamkeitBedingung/xplan:datumAbsolut">
+										<plu:validTo>
+											<xsl:apply-templates select="child::xplan:endeBedingung/xplan:XP_WirksamkeitBedingung/xplan:datumAbsolut"/>
+										</plu:validTo>
+									</xsl:when>
+									<xsl:otherwise>
+										<plu:validTo nilReason="unknown" xsi:nil="true" />
+									</xsl:otherwise>
+								</xsl:choose>
 
                 <!-- Anfang Nationale Codeliste Zuordnung -->
                 <!--Hier choose für Featuretypes, da diese eindeutig sind und if für Attribute, da mehrere zulässig sind-->
@@ -899,12 +1064,6 @@
                     <xsl:if test="child::xplan:tiefe=2000">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_2_2_Tiefliegend')}"/>
                     </xsl:if>
-                    <xsl:if test="child::xplan:bergbauplanungTyp=1900">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_3_10_Bergbaufolgelandschaft')}"/>
-                    </xsl:if>
-                    <xsl:if test="child::xplan:bergbauplanungTyp=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_3_11_SonstigeBergbauplanung')}"/>
-                    </xsl:if>
                     <xsl:if test="child::xplan:bergbauplanungTyp=1000">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_3_1_Lagerstaette')}"/>
                     </xsl:if>
@@ -935,8 +1094,8 @@
                     <xsl:if test="child::xplan:bergbauplanungTyp=1900">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_3_10_Bergbaufolgelandschaft')}"/>
                     </xsl:if>
-                    <xsl:if test="child::xplan:folgenutzung=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_4_11_SonstigeFolgenutzung')}"/>
+                    <xsl:if test="child::xplan:bergbauplanungTyp=9999">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_3_11_SonstigeBergbauplanung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:folgenutzung=1000">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_4_1_FolgenutzungLandwirtschaft')}"/>
@@ -964,6 +1123,39 @@
                     </xsl:if>
                     <xsl:if test="child::xplan:folgenutzung=9000">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_4_9_FolgenutzungAltbergbau')}"/>
+                    </xsl:if>
+                    <xsl:if test="child::xplan:folgenutzung=9999">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_4_11_SonstigeFolgenutzung')}"/>
+                    </xsl:if>
+                    <xsl:if test="child::xplan:rohstoffTyp=1000">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_1_Anhydritstein')}"/>
+                    </xsl:if>
+                    <xsl:if test="child::xplan:rohstoffTyp=1100">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_2_Baryt')}"/>
+                    </xsl:if>
+                    <xsl:if test="child::xplan:rohstoffTyp=1200">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_3_BasaltDiabas')}"/>
+                    </xsl:if>
+                    <xsl:if test="child::xplan:rohstoffTyp=1300">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_4_Bentonit')}"/>
+                    </xsl:if>
+                    <xsl:if test="child::xplan:rohstoffTyp=1400">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_5_Blaehton')}"/>
+                    </xsl:if>
+                    <xsl:if test="child::xplan:rohstoffTyp=1500">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_6_Braunkohle')}"/>
+                    </xsl:if>
+                    <xsl:if test="child::xplan:rohstoffTyp=1600">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_7_Buntsandstein')}"/>
+                    </xsl:if>
+                    <xsl:if test="child::xplan:rohstoffTyp=1700">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_8_Dekostein')}"/>
+                    </xsl:if>
+                    <xsl:if test="child::xplan:rohstoffTyp=1800">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_9_Diorit')}"/>
+                    </xsl:if>
+                    <xsl:if test="child::xplan:rohstoffTyp=1900">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_10_Dolomitstein')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=2000">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_11_Erdgas')}"/>
@@ -994,9 +1186,6 @@
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=2900">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_20_Granit')}"/>
-                    </xsl:if>
-                    <xsl:if test="child::xplan:rohstoffTyp=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_1_Anhydritstein')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=3000">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_21_Grauwacke')}"/>
@@ -1031,9 +1220,6 @@
                     <xsl:if test="child::xplan:rohstoffTyp=4000">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_31_KiesSand')}"/>
                     </xsl:if>
-                    <xsl:if test="child::xplan:rohstoffTyp=1100">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_2_Baryt')}"/>
-                    </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=4100">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_32_Klei')}"/>
                     </xsl:if>
@@ -1063,9 +1249,6 @@
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=5000">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_41_Muschelkalk')}"/>
-                    </xsl:if>
-                    <xsl:if test="child::xplan:rohstoffTyp=1200">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_3_BasaltDiabas')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=5100">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_42_Naturstein')}"/>
@@ -1097,9 +1280,6 @@
                     <xsl:if test="child::xplan:rohstoffTyp=6000">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_51_Sand')}"/>
                     </xsl:if>
-                    <xsl:if test="child::xplan:rohstoffTyp=1300">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_4_Bentonit')}"/>
-                    </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=6100">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_52_Sandstein')}"/>
                     </xsl:if>
@@ -1130,29 +1310,11 @@
                     <xsl:if test="child::xplan:rohstoffTyp=7000">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_61_Vulkanit')}"/>
                     </xsl:if>
-                    <xsl:if test="child::xplan:rohstoffTyp=1400">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_5_Blaehton')}"/>
-                    </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=7100">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_62_Werkstein')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=9999">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_63_SonstigerRohstoff')}"/>
-                    </xsl:if>
-                    <xsl:if test="child::xplan:rohstoffTyp=1500">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_6_Braunkohle')}"/>
-                    </xsl:if>
-                    <xsl:if test="child::xplan:rohstoffTyp=1600">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_7_Buntsandstein')}"/>
-                    </xsl:if>
-                    <xsl:if test="child::xplan:rohstoffTyp=1700">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_8_Dekostein')}"/>
-                    </xsl:if>
-                    <xsl:if test="child::xplan:rohstoffTyp=1800">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_9_Diorit')}"/>
-                    </xsl:if>
-                    <xsl:if test="child::xplan:rohstoffTyp=1900">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_10_Dolomitstein')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:rohstoffTyp or child::xplan:tiefe or child::xplan:zeitstufe or child::xplan:folgenutzung or child::xplan:bergbauplanungTyp)">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_Rohstoff')}"/>
@@ -1232,6 +1394,33 @@
                     </xsl:if>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_NaturLandschaft">
+                  <xsl:if test=" child::xplan:typ=1000">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_1_NaturLandschaft')}"/>
+                    </xsl:if>
+                  <xsl:if test=" child::xplan:typ=1100">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_2_NaturschutzLandschaftspflege')}"/>
+                    </xsl:if>
+                    <xsl:if test=" child::xplan:typ=1101">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_3_NaturschutzLandschaftspflegeAufGewaessern')}"/>
+                    </xsl:if>
+                    <xsl:if test=" child::xplan:typ=1200">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_4_Flurdurchgruenung')}"/>
+                    </xsl:if>
+                    <xsl:if test=" child::xplan:typ=1300">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_5_UnzerschnitteneRaeume')}"/>
+                    </xsl:if>
+                    <xsl:if test=" child::xplan:typ=1301">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_6_UnzerschnitteneVerkehrsarmeRaeume')}"/>
+                    </xsl:if>
+                    <xsl:if test=" child::xplan:typ=1400">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_7_Feuchtgebiet')}"/>
+                    </xsl:if>
+                    <xsl:if test=" child::xplan:typ=1500">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_8_OekologischesVerbundssystem')}"/>
+                    </xsl:if>
+                    <xsl:if test=" child::xplan:typ=1501">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_9_OekologischerRaum')}"/>
+                    </xsl:if>
                     <xsl:if test=" child::xplan:typ=1600">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_10_VerbesserungLandschaftsstrukturNaturhaushalt')}"/>
                     </xsl:if>
@@ -1262,9 +1451,6 @@
                     <xsl:if test=" child::xplan:typ=2100">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_19_LandschaftsgebErholung')}"/>
                     </xsl:if>
-                    <xsl:if test=" child::xplan:typ=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_1_NaturLandschaft')}"/>
-                    </xsl:if>
                     <xsl:if test=" child::xplan:typ=2200">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_20_Landschaftspraegend')}"/>
                     </xsl:if>
@@ -1280,47 +1466,11 @@
                     <xsl:if test=" child::xplan:typ=9999">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_24_SonstigerNaturLandschaftSchutz')}"/>
                     </xsl:if>
-                    <xsl:if test=" child::xplan:typ=1100">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_2_NaturschutzLandschaftspflege')}"/>
-                    </xsl:if>
-                    <xsl:if test=" child::xplan:typ=1101">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_3_NaturschutzLandschaftspflegeAufGewaessern')}"/>
-                    </xsl:if>
-                    <xsl:if test=" child::xplan:typ=1200">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_4_Flurdurchgruenung')}"/>
-                    </xsl:if>
-                    <xsl:if test=" child::xplan:typ=1300">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_5_UnzerschnitteneRaeume')}"/>
-                    </xsl:if>
-                    <xsl:if test=" child::xplan:typ=1301">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_6_UnzerschnitteneVerkehrsarmeRaeume')}"/>
-                    </xsl:if>
-                    <xsl:if test=" child::xplan:typ=1400">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_7_Feuchtgebiet')}"/>
-                    </xsl:if>
-                    <xsl:if test=" child::xplan:typ=1500">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_8_OekologischesVerbundssystem')}"/>
-                    </xsl:if>
-                    <xsl:if test=" child::xplan:typ=1501">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_9_OekologischerRaum')}"/>
-                    </xsl:if>
                     <xsl:if test=" not(child::xplan:typ)">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_AllgemeineNaturLandschaft')}"/>
                     </xsl:if>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_NaturschutzrechtlichesSchutzgebiet">
-                    <xsl:if test="child::xplan:typ=18000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_5_10_GebietGemeinschaftlicherBedeutung')}"/>
-                    </xsl:if>
-                    <xsl:if test="child::xplan:typ=18001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_5_11_EuropaeischesSchutzgebiet')}"/>
-                    </xsl:if>
-                    <xsl:if test="child::xplan:typ=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_5_12_NationalesNaturmonument')}"/>
-                    </xsl:if>
-                    <xsl:if test="child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_5_13_SonstigesNaturschutzrechtlichesSchutzgebiet')}"/>
-                    </xsl:if>
                     <xsl:if test="child::xplan:typ=1000">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_5_1_Naturschutzgebiet')}"/>
                     </xsl:if>
@@ -1348,6 +1498,18 @@
                     <xsl:if test="child::xplan:typ=1800">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_5_9_Natura2000')}"/>
                     </xsl:if>
+                    <xsl:if test="child::xplan:typ=18000">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_5_10_GebietGemeinschaftlicherBedeutung')}"/>
+                    </xsl:if>
+                    <xsl:if test="child::xplan:typ=18001">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_5_11_EuropaeischesSchutzgebiet')}"/>
+                    </xsl:if>
+                    <xsl:if test="child::xplan:typ=2000">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_5_12_NationalesNaturmonument')}"/>
+                    </xsl:if>
+                    <xsl:if test="child::xplan:typ=9999">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_5_13_SonstigesNaturschutzrechtlichesSchutzgebiet')}"/>
+                    </xsl:if>
                     <xsl:if test="not(child::xplan:typ)">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_5_NaturschutzrechtlichesSchutzgebiet')}"/>
                     </xsl:if>
@@ -1356,12 +1518,6 @@
                     <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_6_Gewaesser')}"/>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_Wasserschutz">
-                    <xsl:if test="child::xplan:typ=9000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_7_10_Wasserversorgung')}"/>
-                    </xsl:if>
-                    <xsl:if test="child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_7_11_SonstigerWasserschutz')}"/>
-                    </xsl:if>
                     <xsl:if test="child::xplan:zone=1000">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_7_12_Zone1')}"/>
                     </xsl:if>
@@ -1397,6 +1553,12 @@
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=8000">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_7_9_Heilquelle')}"/>
+                    </xsl:if>
+                    <xsl:if test="child::xplan:typ=9000">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_7_10_Wasserversorgung')}"/>
+                    </xsl:if>
+                    <xsl:if test="child::xplan:typ=9999">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_7_11_SonstigerWasserschutz')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typ or child::xplan:zone)">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_7_Wasserschutz')}"/>
@@ -1672,6 +1834,7 @@
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_4_2_Laermschutzbereich')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2000">
+
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_4_3_Siedlungsbeschraenkungsbereich')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=3000">
@@ -2599,11 +2762,11 @@
                     <plu:processStepGeneral xlink:href="http://inspire.ec.europa.eu/codelist/ProcessStepGeneralValue/adoption"/>
                   </xsl:when>
                   <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=2000 or
-                                            /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=2001 or
-                                            /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=2002 or
-                                            /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=2003  or
-                                            /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=2004 or
-                                            /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=3000">
+                                             /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=2001 or
+                                             /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=2002 or
+                                             /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=2003  or
+                                             /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=2004 or
+                                             /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=3000">
                     <plu:processStepGeneral xlink:href="http://inspire.ec.europa.eu/codelist/ProcessStepGeneralValue/elaboration"/>
                   </xsl:when>
                   <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=4000">
@@ -2614,12 +2777,12 @@
                     <plu:processStepGeneral xlink:href="http://inspire.ec.europa.eu/codelist/ProcessStepGeneralValue/obsolete"/>
                   </xsl:when>
                   <xsl:otherwise>
-                    <plu:processStepGeneral nilReason="Unpopulated" xsi:nil="true"/>
+                    <plu:processStepGeneral nilReason="unknown" xsi:nil="true"/>
                   </xsl:otherwise>
                 </xsl:choose>
-                <plu:backgroundMap nilReason="Unpopulated" xsi:nil="true" />
-                <plu:beginLifespanVersion nilReason="Unpopulated" xsi:nil="true" />
-                <plu:dimensioningIndication nilReason="Unpopulated" xsi:nil="true" />
+                <plu:backgroundMap nilReason="unknown" xsi:nil="true" />
+                <plu:beginLifespanVersion nilReason="unknown" xsi:nil="true" />
+                <plu:dimensioningIndication nilReason="unknown" xsi:nil="true" />
                 <plu:inspireId>
                   <base:Identifier>
                     <base:localId>
@@ -2628,10 +2791,10 @@
                     <base:namespace>
                       <xsl:value-of select="concat('DE_', /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland)"/>
                     </base:namespace>
-                    <base:versionId nilReason="Unpopulated" xsi:nil="true" />
+                    <base:versionId nilReason="unknown" xsi:nil="true" />
                   </base:Identifier>
                 </plu:inspireId>
-                <plu:endLifespanVersion nilReason="Unpopulated" xsi:nil="true" />
+                <plu:endLifespanVersion nilReason="unknown" xsi:nil="true" />
                 <!-- geometry: GM_Object aus RP_Geometrieobjekt-->
                 <!-- In Xplan sind im Raumordnungsschema derzeit GM_Point, GM_Multipoint, GM_Curve, GM_MultiCurve, GM_Surface und GM_MultiSurface erlaubt -->
                 <!-- Da SupplementaryRegulation:geometry auf GM_Object verweist, kann es tendenziell mehr Geometrien abdecken als XPlan -->
@@ -2639,7 +2802,7 @@
                 <plu:geometry>
                   <xsl:copy-of select="xplan:position/*"/>  
                 </plu:geometry>
-                <plu:inheritedFromOtherPlans nilReason="Unpopulated" xsi:nil="true" />
+                <plu:inheritedFromOtherPlans nilReason="unknown" xsi:nil="true" />
                 <!-- specificRegulationNature-->
                 <!-- schreibt den Rechtscharakter des Elements aus (genauer als die INSPIRE-Klassifikation-->
                 <xsl:choose>
@@ -2652,7 +2815,7 @@
                   <xsl:when test="xplan:rechtscharakter=7000"><plu:specificRegulationNature>Textliches Ziel</plu:specificRegulationNature></xsl:when>
                   <xsl:when test="xplan:rechtscharakter=8000"><plu:specificRegulationNature>Ziel und Grundsatz</plu:specificRegulationNature></xsl:when>
                   <xsl:when test="xplan:rechtscharakter=9000"><plu:specificRegulationNature>Vorschlag</plu:specificRegulationNature></xsl:when>
-                  <xsl:otherwise><plu:specificRegulationNature nilReason="Unpopulated" xsi:nil="true" /></xsl:otherwise>
+                  <xsl:otherwise><plu:specificRegulationNature nilReason="unknown" xsi:nil="true" /></xsl:otherwise>
                 </xsl:choose>
                 <plu:name>
                   <!-- Wird aus Name des FeatureTypes hergeleitet, schneidet xplan:RP_ ab-->
@@ -2661,16 +2824,19 @@
                 <!--plu:regulationNature-->
                 <xsl:choose>
                   <xsl:when test="xplan:rechtscharakter=1000 or
+																						xplan:rechtscharakter=2000 or
                                             xplan:rechtscharakter=7000 or
                                             xplan:rechtscharakter=8000">
                     <plu:regulationNature xlink:href="http://inspire.ec.europa.eu/codelist/RegulationNatureValue/generallyBinding"/>
                   </xsl:when>
-                  <xsl:when test="xplan:rechtscharakter=2000 or
-                                            xplan:rechtscharakter=3000 or
+									  <xsl:when test="xplan:rechtscharakter=3000 or
                                             xplan:rechtscharakter=4000 or
-                                            xplan:rechtscharakter=5000 or
-                                            xplan:rechtscharakter=6000 or
-                                            xplan:rechtscharakter=9000">
+                                            xplan:rechtscharakter=5000">
+                    <plu:regulationNature xlink:href="http://inspire.ec.europa.eu/codelist/RegulationNatureValue/bindingForDevelopers"/>
+                  </xsl:when>
+                  <xsl:when test="xplan:rechtscharakter=6000 or
+                                            xplan:rechtscharakter=9000 or
+																						xplan:rechtscharakter=9998">
                     <plu:regulationNature xlink:href="http://inspire.ec.europa.eu/codelist/RegulationNatureValue/nonBinding"/>
                   </xsl:when>
                   <xsl:otherwise>
@@ -2935,19 +3101,19 @@
                                                 child::xplan:typ=1001">
                         <plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_1_4_7_PeriUrbanAreas')}"/>
                       </xsl:when>
-                      <xsl:when test="child::xplan:typ=1900 or
-                                                child::xplan:typ=2400 or
-                                                child::xplan:typ=9999 or
-                                                child::xplan:typ=2500 or
-                                                child::xplan:typ=1202 or
-                                                child::xplan:typ=1700 or
-                                                child::xplan:typ=1600 or
-                                                child::xplan:typ=2300 or
-                                                child::xplan:typ=2200 or
-                                                child::xplan:typ=2100 or
-                                                child::xplan:besondererTyp=2000 or
-                                                child::xplan:besondererTyp=3000 or
-                                                child::xplan:besondererTyp=1000">
+                      <xsl:when test="child::xplan:typ=1202 or
+                                                  child::xplan:typ=1600 or
+                                                  child::xplan:typ=1700 or
+                                                  child::xplan:typ=1900 or
+                                                  child::xplan:typ=2100 or
+                                                  child::xplan:typ=2200 or
+                                                  child::xplan:typ=2300 or
+                                                  child::xplan:typ=2400 or
+                                                  child::xplan:typ=2500 or
+                                                  child::xplan:typ=9999 or
+                                                  child::xplan:besondererTyp=1000 or
+                                                  child::xplan:besondererTyp=2000 or
+                                                  child::xplan:besondererTyp=3000">
                         <plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_1_6_OtherSettlementStructureDevelopmentPolicies')}"/>
                       </xsl:when>
                       <xsl:otherwise>
@@ -2957,16 +3123,16 @@
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_Rohstoff">
                     <xsl:choose>
-                      <xsl:when test="child::xplan:bergbauplanungTyp=1300 or
-                                                child::xplan:bergbauplanungTyp=1200 or
-                                                child::xplan:bergbauplanungTyp=1800 or
-                                                child::xplan:bergbauplanungTyp=1100 or
-                                                child::xplan:bergbauplanungTyp=1500 or
-                                                child::xplan:bergbauplanungTyp=1400">
+                      <xsl:when test="child::xplan:bergbauplanungTyp=1100 or
+                                                  child::xplan:bergbauplanungTyp=1200 or
+                                                  child::xplan:bergbauplanungTyp=1300 or
+                                                  child::xplan:bergbauplanungTyp=1400 or
+                                                  child::xplan:bergbauplanungTyp=1500 or
+                                                  child::xplan:bergbauplanungTyp=1800">
                         <plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_2_7_1_ProspectingAndMiningPermitArea')}"/>
                       </xsl:when>
-                      <xsl:when test="child::xplan:bergbauplanungTyp=1900 or
-                                                child::xplan:bergbauplanungTyp=1700">
+                      <xsl:when test="child::xplan:bergbauplanungTyp=1700 or
+                                                child::xplan:bergbauplanungTyp=1900">
                         <plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_2_8_Recultivation')}"/>
                       </xsl:when>
                       <xsl:when test="child::xplan:folgenutzung">
@@ -3013,12 +3179,12 @@
                   <xsl:when test="self::xplan:RP_Wasserschutz">
                     <xsl:choose>
                       <xsl:when test="child::xplan:typ=3000 or
-                                                child::xplan:typ=4000 or
-                                                child::xplan:typ=5000">
+                                                  child::xplan:typ=4000 or
+                                                  child::xplan:typ=5000">
                         <plu:supplementaryRegulation xlink:href="{concat($hsrcl,'1_6_5_DrinkingWaterProtectionArea')}"/>
                       </xsl:when>
                       <xsl:when test="child::xplan:zone=2000 or
-                                                child::xplan:zone=3000">
+                                                  child::xplan:zone=3000">
                         <plu:supplementaryRegulation xlink:href="{concat($hsrcl,'9_1_RestrictedActivities')}"/>
                       </xsl:when>
                       <xsl:when test="child::xplan:zone=1000">
@@ -3034,20 +3200,20 @@
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_Wasserverkehr">
                     <xsl:choose>
-                      <xsl:when test="child::xplan:typ=1003 or
-                                                child::xplan:typ=1002 or
-                                                child::xplan:typ=1000 or
-                                                child::xplan:typ=1001 or
-                                                child::xplan:typ=2000 or
-                                                child::xplan:typ=1004">
+                      <xsl:when test="child::xplan:typ=1000 or
+                                                  child::xplan:typ=1001 or
+                                                  child::xplan:typ=1002 or
+                                                  child::xplan:typ=1003 or
+                                                  child::xplan:typ=1004 or
+                                                  child::xplan:typ=2000">
                         <plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_1_3_9_HarborActivities')}"/>
                       </xsl:when>
-                      <xsl:when test="child::xplan:typ=5000 or
-                                                child::xplan:typ=4000 or
-                                                child::xplan:typ=4003 or
-                                                child::xplan:typ=4001 or
-                                                child::xplan:typ=3000 or
-                                                child::xplan:typ=4002">
+                      <xsl:when test="child::xplan:typ=3000 or
+                                                  child::xplan:typ=4000 or
+                                                  child::xplan:typ=4001 or
+                                                  child::xplan:typ=4002 or
+                                                  child::xplan:typ=4003 or
+                                                  child::xplan:typ=5000">
                         <plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_3_1_5_RegulatedFairwayAtSeaOrLargeInlandWater')}"/>
                       </xsl:when>
                       <xsl:otherwise>
@@ -3076,9 +3242,9 @@
                         <plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_1_1_3_MiddleOrderCentre')}"/>
                       </xsl:when>
                       <xsl:when test="child::xplan:typ=1000 or
-                                                child::xplan:typ=1001 or
-                                                child::xplan:typ=1500 or
-                                                child::xplan:typ=9000">
+                                                  child::xplan:typ=1001 or
+                                                  child::xplan:typ=1500 or
+                                                  child::xplan:typ=9000">
                         <plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_1_1_4_HighOrderCentre')}"/>
                       </xsl:when>
                       <xsl:otherwise>
@@ -3092,7 +3258,7 @@
                   <officialDocument xlink:href="{concat('#', 'GML_' , generate-id(.))}"/>
                 </xsl:for-each>
                 <xsl:if test="not(./xplan:refTextInhalt)">
-                  <plu:officialDocument nilReason="Unpopulated" xsi:nil="true" />
+                  <plu:officialDocument nilReason="unknown" xsi:nil="true" />
                 </xsl:if>
                 <!-- Association Plan (immer 1, d.h. immer mit dem Plan verbunden)-->
                 <plu:plan xlink:href="{concat('#', 'GML_', generate-id(/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan))}"/>

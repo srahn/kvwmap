@@ -1,0 +1,1 @@
+ALTER TYPE xplan_gml.rp_rohstofftypen ADD VALUE '7100' AFTER '7000';
