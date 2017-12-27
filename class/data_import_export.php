@@ -417,16 +417,9 @@ class data_import_export {
 	      LIMIT 1;
 	    ";
 	    $ret = $pgdatabase->execSQL($sql,4, 0);
-	    if(!$ret[0]){
-	      $result = pg_fetch_assoc($ret[1]);
-	      if(strpos($result['geometrytype'], 'POINT') !== false){
-	      	$datatype = 0;
-	      }elseif(strpos($result['geometrytype'], 'LINESTRING') !== false){
-	      	$datatype = 1;
-	      }elseif(strpos($result['geometrytype'], 'POLYGON') !== false){
-	      	$datatype = 2;
-	      }
-				$custom_table['datatype'] = $datatype;
+			if (!$ret[0]) {
+				$rs = pg_fetch_assoc($ret[1]);
+				$custom_table['datatype'] = geometrytype_to_datatype($rs['geometrytype']);
 				$custom_table['tablename'] = $tablename;
 				return array($custom_table);
 			}
@@ -523,15 +516,9 @@ class data_import_export {
 						ALTER TABLE '.$schema.'.'.$tablename.' SET WITH OIDS; 
 						SELECT geometrytype(the_geom) AS geometrytype FROM '.$schema.'.'.$tablename.' LIMIT 1;';
 					$ret = $pgdatabase->execSQL($sql,4, 0);
-					if(!$ret[0]){
-						$result = pg_fetch_assoc($ret[1]);
-						if(strpos($result['geometrytype'], 'POINT') !== false){
-							$datatype = 0;
-						}elseif(strpos($result['geometrytype'], 'LINESTRING') !== false){
-							$datatype = 1;
-						}elseif(strpos($result['geometrytype'], 'POLYGON') !== false){
-							$datatype = 2;
-						}
+					if(!$ret[0]) {
+						$rs = pg_fetch_assoc($ret[1]);
+						$datatype = geometrytype_to_datatype($rs['geometrytype']);
 					}
 					$custom_tables[0]['datatype'] = $datatype;
 					$custom_tables[0]['tablename'] = $tablename;
@@ -542,35 +529,39 @@ class data_import_export {
 				}
 			}
 		}
-	}	
-	
-  function shp_import_speichern($formvars, $database){
-   	$this->formvars = $formvars;
-    if(file_exists(UPLOADPATH.$this->formvars['dbffile'])){
+	}
+
+	function shp_import_speichern($formvars, $database, $upload_path = UPLOADPATH, $encoding = 'LATIN1') {
+		$this->formvars = $formvars;
+		if (file_exists($upload_path . $this->formvars['dbffile'])) {
 			$importfile = basename($this->formvars['dbffile'], '.dbf');
 			include_(CLASSPATH.'dbf.php');
-      $this->dbf = new dbf();
-      $this->dbf->header = $this->dbf->get_dbf_header(UPLOADPATH.$this->formvars['dbffile']);
-      $this->dbf->header = $this->dbf->get_sql_types($this->dbf->header);
-			$sql = 'SELECT ';
-      for($i = 0; $i < count($this->dbf->header); $i++){
-        if($this->formvars['check_'.$this->dbf->header[$i][0]]){
-					if($this->formvars['primary_key'] != $this->formvars['sql_name_'.$this->dbf->header[$i][0]]){
-						if($i > 0)$sql .= ', ';
-						$sql .= $this->formvars['dbf_name_'.$this->dbf->header[$i][0]].' as '.strtolower($this->formvars['sql_name_'.$this->dbf->header[$i][0]]);
+			$this->dbf = new dbf();
+			$this->dbf->header = $this->dbf->get_dbf_header($upload_path.$this->formvars['dbffile']);
+			$this->dbf->header = $this->dbf->get_sql_types($this->dbf->header);
+			if ($this->formvars['import_all_columns']) {
+				$sql = '';
+			}
+			else {
+				$sql = 'SELECT ';
+				for($i = 0; $i < count($this->dbf->header); $i++){
+					if($this->formvars['check_'.$this->dbf->header[$i][0]]){
+						if($this->formvars['primary_key'] != $this->formvars['sql_name_'.$this->dbf->header[$i][0]]){
+							if($i > 0)$sql .= ', ';
+							$sql .= $this->formvars['dbf_name_'.$this->dbf->header[$i][0]].' as '.strtolower($this->formvars['sql_name_'.$this->dbf->header[$i][0]]);
+						}
 					}
-        }
-      }
-			$sql .= ' FROM "'.$importfile.'"';
+				}
+				$sql .= ' FROM "'.$importfile.'"';
+			}
 			$options = $this->formvars['table_option'];
 			$options.= ' -nlt PROMOTE_TO_MULTI -lco FID=gid';
-			$encoding = $this->getEncoding(UPLOADPATH.$this->formvars['dbffile']);
-			$ret = $this->ogr2ogr_import($this->formvars['schema_name'], $this->formvars['table_name'], $formvars['epsg'], UPLOADPATH.$importfile.'.shp', $database, NULL, $sql, $options, $encoding);
-			
-      
+			if ($encoding == '') $encoding = $this->getEncoding($upload_path.$this->formvars['dbffile']);
+			$ret = $this->ogr2ogr_import($this->formvars['schema_name'], $this->formvars['table_name'], $this->formvars['epsg'], $upload_path.$importfile.'.shp', $database, NULL, $sql, $options, $encoding);
+
       // # erzeugte SQL-Datei anpassen
       // if($this->formvars['table_option'] == '-u') {
-        // $oldsqld = UPLOADPATH.$this->formvars['table_name'].'.sql';
+        // $oldsqld = $upload_path.$this->formvars['table_name'].'.sql';
         // # Shared lock auf die Quelldatei
         // $oldsql = fopen($oldsqld, "r");
         // flock($oldsql, 1) or die("Kann die Quelldatei $oldsqld nicht locken.");
@@ -626,26 +617,52 @@ class data_import_export {
         // rename($oldsqld.".new", $oldsqld);
         // fclose($newsql);
       // }
-			
-			if($ret == 0){
-				$sql = 'ALTER TABLE '.$this->formvars['schema_name'].'.'.$this->formvars['table_name'].' SET WITH OIDS;SELECT count(*) FROM '.$this->formvars['schema_name'].'.'.$this->formvars['table_name'];
+
+			if ($ret == 0) {
+				$table = $this->formvars['schema_name'] . "." . $this->formvars['table_name'];
+				$sql = "
+					ALTER TABLE " . $table . "
+					SET WITH OIDS;
+				";
+				$sql .= "
+					SELECT
+						count(*),
+						max(geometrytype(the_geom)) AS geometrytype
+					FROM
+						" . $table . ";
+				";
 				$ret = $database->execSQL($sql,4, 0);
 				if (!$ret[0]) {
-					$count = pg_fetch_row($ret[1]);
+					$rs = pg_fetch_assoc($ret[1]);
 					$alert = 'Import erfolgreich.';
 					if($this->formvars['table_option'] == ''){
 						$alert.= ' Die Tabelle '.$this->formvars['schema_name'].'.'.$this->formvars['table_name'].' wurde erzeugt.';
 					}
-					$alert .= ' Die Tabelle enthält jetzt '.$count[0].' Datensätze.';
+					$alert .= ' Die Tabelle enthält jetzt ' . $rs['count'] . ' Datensätze.';
+					$result = array(
+						'success' => true,
+						'datatype' => geometrytype_to_datatype($rs['geometrytype'])
+					);
 					showAlert($alert);
 				}
 			}
-      else{
-        showAlert('Import fehlgeschlagen.');
-      }
-    }
-  }
-  
+      else {
+				$result = array(
+					'success' => false,
+					'err_msg' => $ret[1]
+				);
+				showAlert('Import fehlgeschlagen.');
+			}
+		}
+		else {
+			$result = array(
+				'success' => false,
+				'datatype' => 'Fehler beim hochladen oder weiterverarbeiten. DBF-Datei ' . $upload_path . $this->formvars['dbffile'] . ' auf Server erwartet, aber nicht  gefunden.'
+			);
+		}
+		return $result;
+	}
+
   function shp_import($formvars, $pgdatabase){
 		include_(CLASSPATH.'dbf.php');
   	$_files = $_FILES;
@@ -753,7 +770,7 @@ class data_import_export {
 		if($database->port != '')$command.=' port='.$database->port;
 		if($database->host != '') $command .= ' host=' . $database->host;
 		$command .= '" "'.$importfile.'" '.$layer;
-		#echo $command;
+		#echo '<br>Exec Command: ' . $command;
 		exec($command, $output, $ret);
 		return $ret;
 	}
@@ -761,13 +778,17 @@ class data_import_export {
 	function getEncoding($dbf){
 		$folder = dirname($dbf);
 		$command = OGR_BINPATH.'ogr2ogr -f CSV '.$folder.'/test.csv "'.$dbf.'"';
+		#echo '<br>Command ogr2ogr: ' . $command;
 		exec($command, $output, $ret);
 		$command = 'file '.$folder.'/test.csv';
+		#echo '<br>Command file: ' . $command;
 		exec($command, $output, $ret);
 		unlink($folder.'/test.csv');
+		#echo '<br>output: ' . $output[0];
 		if(strpos($output[0], 'UTF') !== false)$encoding = 'UTF-8';
 		if(strpos($output[0], 'ISO-8859') !== false)$encoding = 'LATIN1';
 		if(strpos($output[0], 'ASCII') !== false)$encoding = 'LATIN1';
+		#echo '<br>encoding: ' . $encoding;
 		return $encoding;
 	}
 	

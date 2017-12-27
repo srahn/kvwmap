@@ -269,7 +269,7 @@ class jagdkataster {
 	        $Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
 	        foreach($Eigentuemerliste as $eigentuemer){
 						if($eigentuemer->Nr != ''){
-							$rs['eigentuemer'][] = rtrim($eigentuemer->Name[0], ',');						
+							$rs['eigentuemer'][] = $eigentuemer->vorname.' '.$eigentuemer->nachnameoderfirma;						
 							$rs['eigentuemer_nr'][] = $eigentuemer->Nr;
 						}
 	        }

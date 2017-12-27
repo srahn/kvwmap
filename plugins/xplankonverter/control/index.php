@@ -195,14 +195,14 @@ switch($go){
 							$shapeFile->createDataTableSchema();
 
 							# load into database table
-							$created_tables = $shapeFile->loadIntoDataTable();
+							$created_table = $shapeFile->loadIntoDataTable();
 
 							# add gml_id column if not exists
 							if (!$shapeFile->gmlIdColumnExists())
 								$shapeFile->addGmlIdColumn();
 
 							# Set datatype for shapefile
-							$shapeFile->set('datatype', $created_tables[0]['datatype']);
+							$shapeFile->set('datatype', $created_table['datatype']);
 							$shapeFile->update();
 
 							# create layer

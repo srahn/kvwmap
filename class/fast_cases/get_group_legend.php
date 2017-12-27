@@ -17,6 +17,11 @@ function replace_params($str, $params) {
 	return $str;
 }
 
+function compare_legendorder($a, $b){
+	if($a['legendorder'] > $b['legendorder'])return 1;
+	else return 0;
+}
+
 function umlaute_umwandeln($name){
   $name = str_replace('ä', 'ae', $name);
   $name = str_replace('ü', 'ue', $name);

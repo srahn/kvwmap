@@ -7,7 +7,7 @@ extract_zip_files() {
 	if [ ! "$(ls -A ${IMPORT_PATH})" ] ; then
 		if [ "$(ls -A $DATA_PATH)" ] ; then
 			cd $DATA_PATH
-			for ZIP_FILE in ${DATA_PATH}/*.zip ; do
+			find ${DATA_PATH} -iname '*.zip' | sort | while read ZIP_FILE ; do			
 				if [ ! "${UNZIP_PASSWORD}" = "" ] ; then
 					log "unzip -P ${UNZIP_PASSWORD} ${ZIP_FILE} -d ${IMPORT_PATH}"
 					unzip -P $UNZIP_PASSWORD $ZIP_FILE -d $IMPORT_PATH
@@ -75,11 +75,16 @@ convert_nas_files() {
 					echo "BEGIN; SET search_path = ${POSTGRES_SCHEMA},public;" > ${IMPORT_PATH}/import_transaction.sql
 				fi
 				sed -i -e "s/BEGIN;//g" -e "s/END;//g" -e "s/COMMIT;//g" ${SQL_FILE}
+				sed -i -e "s/\"\"/\"objektkoordinaten\"/g" ${SQL_FILE}		# OGR Bug-Workaround
 				cat ${SQL_FILE} >> ${IMPORT_PATH}/import_transaction.sql
 				echo "INSERT INTO ${POSTGRES_SCHEMA}.import (datei, status) VALUES ('${NAS_FILENAME}', 'eingelesen');" >> ${IMPORT_PATH}/import_transaction.sql
 				rm ${NAS_FILE}
 				rm ${SQL_FILE}
 				rm -f ${GFS_FILE}
+				if [ ! "$(find ${IMPORT_PATH} -name *.xml -not -path ${IMPORT_PATH}/METADATA/*)" ] ; then		# nach der letzten NAS-Datei die Transaktionsdatei abschliessen
+					echo "SELECT alkis.execute_hist_operations();" >> ${IMPORT_PATH}/import_transaction.sql
+					echo "END;COMMIT;" >> ${IMPORT_PATH}/import_transaction.sql
+				fi
 			fi
 		done
 	else
@@ -93,7 +98,6 @@ execute_sql_transaction() {
 		if [ -f "${IMPORT_PATH}/import_transaction.sql" ] ; then
 			# execute transaction sql file
 			log "Lese Transaktionsdatei ein"
-			echo "END;COMMIT;" >> ${IMPORT_PATH}/import_transaction.sql
 			PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -U $POSTGRES_USER -f ${IMPORT_PATH}/import_transaction.sql $POSTGRES_DBNAME >> ${LOG_PATH}/${LOG_FILE} 2> ${LOG_PATH}/${ERROR_FILE}
 			if [ -n "$(grep -i 'Error\|Fehler\|FATAL' ${LOG_PATH}/${ERROR_FILE})" ] ; then
 				err "Fehler beim Einlesen der Transaktions-Datei: ${IMPORT_PATH}/import_transaction.sql."
@@ -102,7 +106,7 @@ execute_sql_transaction() {
 				log "Einlesevorgang erfolgreich"
 				clear_import_folder
 				log "Post-Processing wird ausgeführt"
-				PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -U $POSTGRES_USER -c "SELECT ${POSTGRES_SCHEMA}.postprocessing();" $POSTGRES_DBNAME >> ${LOG_PATH}/${LOG_FILE} 2> ${LOG_PATH}/${ERROR_FILE}
+				PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -U $POSTGRES_USER -c "SELECT ${POSTGRES_SCHEMA}.postprocessing();" $POSTGRES_DBNAME >> ${LOG_PATH}/${LOG_FILE} 2>> ${LOG_PATH}/${ERROR_FILE}
 				if [ -n "$(grep -i 'Error\|Fehler\|FATAL' ${LOG_PATH}/${ERROR_FILE})" ] ; then
 					err "Fehler beim Ausführen der Post-Processing-Funktion : ${POSTGRES_SCHEMA}.postprocessing()"
 					head -n 30 ${LOG_PATH}/${ERROR_FILE}

@@ -31,10 +31,10 @@ class stelle {
 
 	function stelle($id, $database) {
 		global $debug;
-		$this->debug=$debug;
-		$this->id=$id;
-		$this->database=$database;
-		$this->Bezeichnung=$this->getName();
+		$this->debug = $debug;
+		$this->id = $id;
+		$this->database = $database;
+		$this->Bezeichnung = $this->getName();
 		$this->readDefaultValues();
 	}
 
