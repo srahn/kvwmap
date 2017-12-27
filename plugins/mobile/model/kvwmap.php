@@ -402,4 +402,98 @@
 		}
 		$this->add_message('info', 'Sync-Tabelle ' . $layer->get('schema') . '.' . $layer->get('maintable') . '_delta<br>und Trigger für INSERT, UPDATE und DELETE angelegt.');
 	};
+
+	$this->mobile_upload_image = function($layer_id, $files) {
+		# Bestimme den Uploadpfad des Layers
+		if (intval($layer_id) == 0) {
+			return array(
+				"success" => false,
+				"msg" => "Sie müssen eine korrekte Layer_id angeben!"
+			);
+		}
+		$layer = $this->Stelle->getLayer($layer_id);
+		if (count($layer) == 0) {
+			return array(
+				"success" => false,
+				"msg" => "Der Layer mit der ID " . $layer_id . " wurde in der Stelle mit ID: " . $this->Stelle->id . " nicht gefunden!"
+			);
+		}
+		$doc_path = $layer[0]['document_path'];
+
+		# Kopiere Temporäre Datei in den Uploadpfad
+		if ($files['image'] == '') {
+			return array(
+				"success" => false,
+				"msg" => "Es wurde keine Datei hochgeladen!"
+			);
+		}
+		if(!move_uploaded_file($files['image']['tmp_name'], $doc_path . $files['image']['name'])) {
+			$success = false;
+			$msg = 'Konnte hochgeladene Datei: ' . $files['image']['tmp_name'] . ' nicht nach ' . $doc_path . $files['image']['name'] . ' kopieren!';
+		}
+		else {
+			$vorschaubild = $this->get_dokument_vorschau(explode('.', $doc_path . $files['image']['name']));
+			$success = true;
+			$msg = 'Datei erfolgreich auf dem Server gespeichert unter: ' . $doc_path . $files['image']['name'];
+		}
+
+		return array(
+			"success" => $success,
+			"msg" => $msg
+		);
+	};
+
+	$this->mobile_delete_images = function($layer_id, $images) {
+		# Bestimme den Uploadpfad des Layers
+		if (intval($layer_id) == 0) {
+			return array(
+				"success" => false,
+				"msg" => "Sie müssen eine korrekte Layer_id angeben!"
+			);
+		}
+		$layer = $this->Stelle->getLayer($layer_id);
+		if (count($layer) == 0) {
+			return array(
+				"success" => false,
+				"msg" => "Der Layer mit der ID " . $layer_id . " wurde in der Stelle mit ID: " . $this->Stelle->id . " nicht gefunden!"
+			);
+		}
+		$doc_path = $layer[0]['document_path'];
+
+		/*
+		Prüfe ob die zu löschende Datei in im document_path liegt, wenn ja lösche, wenn nicht lösche nicht.
+		$this->deleteDokument(image);
+		*/
+		if ($images == '') {
+			return array(
+				"success" => false,
+				"msg" => "Es wurden keine Bilder zum Löschen angegeben!"
+			);
+		}
+
+		$images = explode(',', $images);
+		$abgelehnt = array();
+		foreach ($images AS $image) {
+			$image = trim($image);
+			if (strpos($image, $doc_path) === false) {
+				$abgelehnt[] = $image;
+			}
+			else {
+				if (file_exists($image)) unlink($image);
+			}
+		}
+
+		if (count($abgelehnt) > 0) {
+			return array(
+				"success" => false,
+				"msg" => "Folgende Dateien konnten nicht gelöscht werden: " . implode(', ', $abgelehnt)
+			);
+		}
+		else {
+			return array(
+				"success" => true,
+				"msg" => "Bilder erfolgreich gelöscht."
+			);
+		}
+	};
 ?>

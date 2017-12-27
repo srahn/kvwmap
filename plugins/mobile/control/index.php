@@ -15,7 +15,10 @@ include_once(CLASSPATH . 'data_import_export.php');
 /**
 * Anwendungsfälle
 * mobile_get_layer
+* mobile_sync
 */
+
+#echo '<br>go: ' . $this->go;
 
 switch($this->go) {
 
@@ -26,6 +29,18 @@ switch($this->go) {
 
 	case 'mobile_sync' : {
 		$result = $this->mobile_sync();
+		echo json_encode($result);
+	} break;
+
+	case 'mobile_delete_images' : {
+		$this->checkCaseAllowed($this->go);
+		$result = $this->mobile_delete_images($this->formvars['selected_layer_id'], $this->formvars['images']);
+		echo json_encode($result);
+	} break;
+
+	case 'mobile_upload_image' : {
+		$this->checkCaseAllowed($this->go);
+		$result = $this->mobile_upload_image($this->formvars['selected_layer_id'], $_FILES);
 		echo json_encode($result);
 	} break;
 

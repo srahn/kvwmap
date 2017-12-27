@@ -6039,7 +6039,7 @@ class GUI {
   function get_dokument_vorschau($dateinamensteil){
 		$type = strtolower($dateinamensteil[1]);
   	$dokument = $dateinamensteil[0].'.'.$dateinamensteil[1];
-		if(in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf')) ){			// für Bilder und PDFs werden automatisch Thumbnails erzeugt
+		if(in_array(strtolower($type), array('jpg', 'png', 'gif', 'tif', 'pdf')) ){			// für Bilder und PDFs werden automatisch Thumbnails erzeugt
 			$thumbname = $dateinamensteil[0].'_thumb.jpg';
 			if(!file_exists($thumbname)){
 				exec(IMAGEMAGICKPATH.'convert -filter Hanning '.$dokument.'[0] -quality 75 -background white -flatten -resize '.PREVIEW_IMAGE_WIDTH.'x1000\> '.$thumbname);
