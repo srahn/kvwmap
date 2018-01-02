@@ -110,7 +110,7 @@ class ddl {
 					$text = $this->substituteFreitext($this->layout['texts'][$j]['text'], $i, $pagenumber, $pagecount);					
 					$y = $this->putText($text, $this->layout['texts'][$j]['size'], NULL, $x, $y, $offsetx);
 					if(!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $y)$this->miny[$this->pdf->currentContents] = $y;		# miny ist die unterste y-Position das aktuellen Datensatzes 					
-					if($type != 'everypage' AND $this->pdf->currentContents != end($this->pdf->objects['3']['info']['pages'])+1){echo $this->pdf->currentContents.' '.end($this->pdf->objects['3']['info']['pages']).'zurück<br>';$this->pdf->closeObject();}			# falls in eine alte Seite geschrieben wurde, zurückkehren
+					if($type != 'everypage' AND $this->pdf->currentContents != end($this->pdf->objects['3']['info']['pages'])+1)$this->pdf->closeObject();			# falls in eine alte Seite geschrieben wurde, zurückkehren
 				}
 				else{
 					$remaining_freetexts[] = $this->layout['texts'][$j]['id'];
