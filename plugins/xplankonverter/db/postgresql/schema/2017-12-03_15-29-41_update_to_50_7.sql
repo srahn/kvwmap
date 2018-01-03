@@ -1,0 +1,1 @@
+ALTER TYPE xplan_gml.xp_anpflanzungbindungerhaltungsgegenstand ADD VALUE '2050' AFTER '2000';

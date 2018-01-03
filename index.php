@@ -145,6 +145,7 @@ include(WWWROOT . APPLVERSION.'start.php');
 
 # Übergeben des Anwendungsfalles
 $debug->write("<br><b>Anwendungsfall go: ".$go."</b>",4);
+
 $GUI->go=$go;
 $GUI->requeststring = $QUERY_STRING;
 
