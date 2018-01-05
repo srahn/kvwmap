@@ -508,11 +508,13 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
     			        {
     			            if(!empty($festsetzungDokument))
     			            {
+    			                $absoluteURL = getDocumentUrlFromPath($this, $festsetzungDokument->getPfad())
+    			                
     			                ?>
 			                    <div class="wasserrecht_display_table_row">
                 					<div class="wasserrecht_display_table_cell_caption">
                 					<?php
-                					   echo '<a href="' . $this->actual_link . WASSERRECHT_DOCUMENT_URL_PATH . $festsetzungDokument->getPfad() . '" target="_blank">' . $festsetzungDokument->getName() . ', WrZs: (' . $festsetzungDokument->getWrz_idsString() . ')</a>';
+                					   echo '<a href="' . $absoluteURL . '" target="_blank">' . $festsetzungDokument->getName() . ', WrZs: (' . $festsetzungDokument->getWrz_idsString() . ')</a>';
                 					?>
                            			</div>
                 				</div>

@@ -99,6 +99,20 @@ function findIdAndYearFromValueString(&$gui, $valueEscaped)
     return $returnArray;
 }
 
+function getDocumentUrlFromPath(&$gui, $documentPath) 
+{
+    $document_full_path = WASSERRECHT_DOCUMENT_PATH . $documentPath;
+    $gui->log->log_debug('dokument_full_path: ' . var_export($document_full_path, true));
+    $gui->allowed_documents[] = addslashes($document_full_path);
+    $gui->log->log_debug('this->allowed_documents: ' . var_export($gui->allowed_documents, true));
+    $url = IMAGEURL . $gui->document_loader_name . '?dokument=';
+    $gui->log->log_debug('url: ' . var_export($url, true));
+    $absoluteURL = $url . $document_full_path;
+    $gui->log->log_debug('absoluteURL: ' . var_export($absoluteURL, true));
+    
+    return $absoluteURL;
+}
+
 $this->actual_link = parse_url((isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]", PHP_URL_PATH);
 
 /**

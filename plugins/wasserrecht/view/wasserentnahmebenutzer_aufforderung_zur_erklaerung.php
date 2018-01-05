@@ -387,11 +387,13 @@ function createAufforderungsDokument(&$gui, &$wrzs, &$erhebungsjahr)
 				                                    {
 				                                        $dokumentIds[] = $auffoderung_dokument->getId();
 				                                        
+				                                        $absoluteURL = getDocumentUrlFromPath($this, $auffoderung_dokument->getPfad())
+				                                        
 				                                        ?>
                     				                    <div class="wasserrecht_display_table_row">
                                         					<div class="wasserrecht_display_table_cell_caption">
                                         					<?php
-                                        					   echo '<a href="' . $this->actual_link . WASSERRECHT_DOCUMENT_URL_PATH . $auffoderung_dokument->getPfad() . '" target="_blank">' . $auffoderung_dokument->getName() . '</a>';
+                                        					echo '<a href="' . $absoluteURL . '" target="_blank">' . $auffoderung_dokument->getName() . '</a>';
                                         					?>
                                                    			</div>
                                         				</div>

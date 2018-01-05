@@ -709,11 +709,13 @@ if(!empty($wrz) && !empty($wrz->getId()))
                     				    $festsetzungDokument = $gewaesserbenutzung->getFestsetzungDokument($erhebungsjahr);
                     				    if(!empty($festsetzungDokument))
                     				    {
+                    				        $absoluteURL = getDocumentUrlFromPath($this, $festsetzungDokument->getPfad())
+                    				        
                     				        ?>
                             				<div class="wasserrecht_display_table_row">
                                                 <div class="wasserrecht_display_table_cell_caption">
                                 					<?php
-                                					   echo '<a href="' . $this->actual_link . WASSERRECHT_DOCUMENT_URL_PATH . $festsetzungDokument->getPfad() . '" target="_blank">' . $festsetzungDokument->getName() . '</a>';
+                                					   echo '<a href="' . $absoluteURL . '" target="_blank">' . $festsetzungDokument->getName() . '</a>';
                                 					?>
                                        			</div>
                             				</div>
