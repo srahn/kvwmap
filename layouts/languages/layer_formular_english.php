@@ -46,7 +46,8 @@
   $strButtonSaveAsNewLayer="Save as new layer";
   $strCommonData="general information";
   $strtransparency="transparency";
-  $strdrawingorder="drawingorder";
+  $strDrawingOrder="drawingorder";
+	$strLegendOrder="legend order";	
 	$strLegend="legend";
 	$strLegendGraphic="legendgraphic";
 	$strMap="Map";

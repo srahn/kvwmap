@@ -965,7 +965,7 @@ class rolle {
 		}
 	}
 	
-	function saveLegendOptions($layer, $formvars){
+	function saveLegendOptions($layerset, $formvars){
 		$sql ="UPDATE rolle SET legendtype=".$formvars['legendtype'];
 		$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 		#echo $sql;
@@ -975,17 +975,17 @@ class rolle {
 			$active_layers = $formvars['active_layers'];		// $active_layers ist ein Array mit den Layer-IDs der aktiven Layern in der neuen Reihenfolge
 			$active_layer_count = count($active_layers);
 			for($i = $active_layer_count-2; $i >= 0; $i--){		# von hinten beginnen
-				$layer_oben = &$layer['layer_ids'][$active_layers[$i]];
-				$layer_unten = $layer['layer_ids'][$active_layers[$i+1]];
+				$layer_oben = &$layerset['layer_ids'][$active_layers[$i]];
+				$layer_unten = $layerset['layer_ids'][$active_layers[$i+1]];
 				if($layer_oben['drawingorder'] < $layer_unten['drawingorder']){		// drawingorder muss erhöht werden
 					$newdrawingorder = $layer_unten['drawingorder'] + 1;
 					$layer_oben['drawingorder'] = $newdrawingorder;
 					$layers_changed[$layer_oben['id']] = true;
 					$next_id = $layer_unten['id'] + 1;		// id des nächsten Layers im Layer-Array
-					if($layer[$next_id]['drawingorder'] <= $newdrawingorder){		// wenn erforderlich auch die drawingorders der Layer darüber erhöhen
-						$increase = $newdrawingorder - $layer[$next_id]['drawingorder'] + 1;		// um wieviel muss erhöht werden?
-						for($j = $next_id; $j < count($layer)-1; $j++){
-							$layer[$j]['drawingorder'] += $increase;
+					if($layerset['list'][$next_id]['drawingorder'] <= $newdrawingorder){		// wenn erforderlich auch die drawingorders der Layer darüber erhöhen
+						$increase = $newdrawingorder - $layer['list'][$next_id]['drawingorder'] + 1;		// um wieviel muss erhöht werden?
+						for($j = $next_id; $j < count($layer['list']); $j++){
+							$layer['list'][$j]['drawingorder'] += $increase;
 							$layers_changed[$j] = true;
 						}
 					}

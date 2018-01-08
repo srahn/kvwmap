@@ -46,6 +46,7 @@
 	$strCommonData="Allgemeine Angaben";
 	$strtransparency="Transparenz";
 	$strDrawingOrder="Zeichenreihenfolge";
+	$strLegendOrder="Legendenreihenfolge";
 	$strLegend="Legende";
 	$strLegendGraphic="Legendengrafik";
 	$strMap="Karte";

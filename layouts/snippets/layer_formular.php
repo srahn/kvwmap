@@ -379,6 +379,12 @@
 					</td>
 				</tr>
 				<tr>
+					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLegendOrder; ?></th>
+					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
+							<input name="legendorder" type="text" value="<?php echo $this->layerdata['legendorder']; ?>" size="25" maxlength="15">
+					</td>
+				</tr>				
+				<tr>
 					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strminscale; ?></th>
 					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<input name="minscale" type="text" value="<?php echo $this->layerdata['minscale']; ?>" size="25" maxlength="15">
@@ -639,7 +645,7 @@
 								<?php echo $strLegend; ?>:&nbsp;
 							</td>
 							<td>
-								<input size="3" type="text" name="legendorder[<?php echo $this->classes[$i]['Class_ID']; ?>]" value="<?php echo $this->classes[$i]['legendorder']; ?>">
+								<input size="3" type="text" name="classlegendorder[<?php echo $this->classes[$i]['Class_ID']; ?>]" value="<?php echo $this->classes[$i]['legendorder']; ?>">
 							</td>
 						</tr>
 					</table>
