@@ -420,13 +420,21 @@
 		}
 		$doc_path = $layer[0]['document_path'];
 
-		# Kopiere Temporäre Datei in den Uploadpfad
 		if ($files['image'] == '') {
 			return array(
 				"success" => false,
 				"msg" => "Es wurde keine Datei hochgeladen!"
 			);
 		}
+
+		if (file_exists($doc_path . $files['image']['name'])) {
+			return array(
+				"success" => true,
+				"msg" => "Datei existiert schon auf dem Server!"
+			);
+		}
+
+		# Kopiere Temporäre Datei in den Uploadpfad
 		if(!move_uploaded_file($files['image']['tmp_name'], $doc_path . $files['image']['name'])) {
 			$success = false;
 			$msg = 'Konnte hochgeladene Datei: ' . $files['image']['tmp_name'] . ' nicht nach ' . $doc_path . $files['image']['name'] . ' kopieren!';
@@ -476,24 +484,27 @@
 		foreach ($images AS $image) {
 			$image = trim($image);
 			if (strpos($image, $doc_path) === false) {
-				$abgelehnt[] = $image;
+				$msg[] = 'Bild ' . $image . ' nicht im richtigen Pfad: ' . $doc_path;
 			}
 			else {
-				if (file_exists($image)) unlink($image);
+				if (file_exists($image)) {
+					unlink($image);
+					$msg[] = 'Bild ' + $image + ' erfolgreich gelöscht';
+					$fp = pathinfo($image);
+					$thumb = $fp['dirname']. '/' . $fp['filename'] . '_thumb.' . $fp['extension'];
+					if (file_exists($thumb)) {
+						unlink($thumb);
+					}
+				}
+				else {
+					$msg[] = 'Bild ' . $image . ' nicht oder noch nicht auf dem Server';
+				};
 			}
 		}
 
-		if (count($abgelehnt) > 0) {
-			return array(
-				"success" => false,
-				"msg" => "Folgende Dateien konnten nicht gelöscht werden: " . implode(', ', $abgelehnt)
-			);
-		}
-		else {
-			return array(
-				"success" => true,
-				"msg" => "Bilder erfolgreich gelöscht."
-			);
-		}
+		return array(
+			"success" => true,
+			"msg" => implode(', ', $msg)
+		);
 	};
 ?>

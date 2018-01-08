@@ -33,6 +33,7 @@ switch($this->go) {
 	} break;
 
 	case 'mobile_delete_images' : {
+		#var_dump($this->formvars['images']);
 		$this->checkCaseAllowed($this->go);
 		$result = $this->mobile_delete_images($this->formvars['selected_layer_id'], $this->formvars['images']);
 		echo json_encode($result);
