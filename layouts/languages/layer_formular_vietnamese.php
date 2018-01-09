@@ -1,7 +1,6 @@
 ﻿<?php
 	$strAsteriskRequired="Cần điền đủ thông tin cho những trường có dấu *";  
 	$strDataBankID="Số ID cơ sở dữ liệu*";
-	$strDatasetStyle="Ghi Phong cách";
 	$strLayerID="Id lớp*";
 	$strName="Tên*";
 	$strDataType="Kiểu dữ liệu*";

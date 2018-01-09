@@ -4,7 +4,6 @@
 	$strLayerID="Layer ID*";
 	$strName="Name";
 	$strDataType="Datentyp*";
-	$strDataSetStyle="Sachdaten-Style";
 	$strGroup="Gruppe*";
 	$strPath="Query";
 	$strData="Data";

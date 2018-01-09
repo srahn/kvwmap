@@ -1,7 +1,6 @@
 ﻿<?php
 	$strAsteriskRequired="wartości oznaczone * muszą zostać wpisane";
 	$strDataBankID="warstwa ID*";
-	$strDataSetStyle="record Style";
 	$strName="nazwa*";
 	$strDataType="rodzaj danych*";
 	$strGroup="grupa*";
