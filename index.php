@@ -59,6 +59,7 @@ function replace_tags($text, $tags) {
 foreach($_REQUEST as $key => $value) {
 	if (is_string($value)) $_REQUEST[$key] = pg_escape_string(replace_tags($value, 'script|embed'));
 }
+reset($_REQUEST);
 $formvars = $_REQUEST;
 
 $go = $formvars['go'];
