@@ -928,6 +928,8 @@ class data_import_export {
 	
 	function export_exportieren($formvars, $stelle, $user){
 		global $language;
+		global $kvwmap_plugins;
+
 		$currenttime=date('Y-m-d H:i:s',time());
   	$this->formvars = $formvars;
   	$layerset = $user->rolle->getLayer($this->formvars['selected_layer_id']);
@@ -959,7 +961,7 @@ class data_import_export {
 		
 		# Zusammensammeln der Attribute, die abgefragt werden müssen
     for ($i = 0; $i < count($this->attributes['name']); $i++) {
-    	if ($this->formvars['check_'.$this->attributes['name'][$i]]) {		# Entweder das Attribut wurde angehakt
+    	if ($this->formvars['check_'.$this->attributes['name'][$i]] or $this->formvars['all'] == 1) {		# Entweder das Attribut oder alle wurde angehakt
     		$selection[$this->attributes['name'][$i]] = 1;
 				$selected_attributes[] = $this->attributes['name'][$i];						# Zusammensammeln der angehakten Attribute, denn nur die sollen weiter unten auch exportiert werden
 				$selected_attr_types[] = $this->attributes['type'][$i];
@@ -1079,8 +1081,17 @@ class data_import_export {
 				case 'GeoJSON' : {
 					$exportfile = $exportfile.'.json';
 					$this->ogr2ogr_export($sql, 'GeoJSON', $exportfile, $layerdb);
-				}break;
-				
+				} break;
+
+				case 'GeoJSONPlus': {
+					$exportfile = $exportfile.'.json';
+					if (in_array('mobile', $kvwmap_plugins)) {
+						$sql = str_replace('version FROM', '(SELECT coalesce(max(version), 1) FROM ' . $layerset[0]['schema'] . '.' . $layerset[0]['maintable'] . '_deltas) AS version FROM', $sql);
+					}
+					$exportfile = $exportfile.'.json';
+					$this->ogr2ogr_export($sql, 'GeoJSON', $exportfile, $layerdb);
+				} break;
+
 				case 'CSV' : {
 					while($rs=pg_fetch_assoc($ret[1])){
 						$result[] = $rs;
@@ -1147,7 +1158,7 @@ class data_import_export {
       $sql = 'DROP TABLE '.$temp_table;
       $ret = $layerdb->execSQL($sql,4, 0);
     	if($this->formvars['export_format'] != 'CSV')$user->rolle->setConsumeShape($currenttime,$this->formvars['selected_layer_id'],$count);
-			
+
 	    ob_end_clean();
 			header('Content-type: '.$contenttype);
 			header("Content-disposition:  attachment; filename=".basename($exportfile));
@@ -1155,6 +1166,7 @@ class data_import_export {
 			header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 			header('Pragma: public');
 			readfile($exportfile);
+
     }
     else{
       showAlert('Abfrage fehlgeschlagen.');

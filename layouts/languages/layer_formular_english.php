@@ -2,6 +2,7 @@
 	$strTitle="Layer Editor";
   $strAsteriskRequired="Fields marked with an asterisk * are required";
 	$strClassItem="Classitem";
+	$strDataSetStyle="Dataset Style";
   $strLayerID="Layer ID*";
   $strName="Name";
   $strDataType="Datatype*";
@@ -81,4 +82,6 @@
 	$strWidth="Width";
 	$strHeight="Height";
 	$strImagefile="Imagefile";
+	$strSync="Sync - Mode";
+	$strSyncHelp="In Sync - Mode all changes on the layer will be stored in a table named 'Main Table'_deltas with a serialised version number. The mode must be switched on, to enable the layer in the mobile App kvmobile."
 ?>  

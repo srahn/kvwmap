@@ -4,6 +4,7 @@
 	$strLayerID="Layer ID*";
 	$strName="Name";
 	$strDataType="Datentyp*";
+	$strDataSetStyle="Sachdaten-Style";
 	$strGroup="Gruppe*";
 	$strPath="Query";
 	$strData="Data";
@@ -80,4 +81,6 @@
 	$strWidth="Breite";
 	$strHeight="Höhe";
 	$strImagefile="Grafikdatei";
-?>  
+	$strSync="Sync - Modus";
+	$strSyncHelp="Im Sync - Modus werden alle Änderungen am Layer mit einer fortlaufenden Versionsnummer in einer Tabelle mit dem Namen (Haupttabelle)_deltas gespeichert. Der Modus muss eingeschaltet sein, wenn der Layer in der App kvmobile verfügbar gemacht werden soll."
+?>
