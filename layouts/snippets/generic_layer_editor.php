@@ -154,8 +154,8 @@
 				$attributes['form_element_type'][$j] .= '_not_saveable';
 			}
 			if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
-				if($attributes['type'][$j] != 'geometry'){
-					echo '<td style="position: relative; text-align: right">';
+				if($attributes['type'][$j] != 'geometry') {
+					echo '<td' . get_td_class_or_style($layer['shape'][$k][$attributes['style']] != '' ? $layer['shape'][$k][$attributes['style']] : 'position: relative; text-align: right') . '>';
 					echo attribute_value($this, $layer['Layer_ID'], $attributes, $j, $k, $layer['shape'][$k], $size, $select_width, $this->user->rolle->fontsize_gle);
 					echo '<div onmousedown="resizestart(document.getElementById(\'column'.$j.'\'), \'col_resize\');" style="position: absolute; transform: translate(4px); top: 0px; right: 0px; height: 100%; width: 8px; cursor: e-resize;"></div>';
 					echo '</td>';

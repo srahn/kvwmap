@@ -2,6 +2,7 @@
 	$strTitle="Layer Editor";
   $strAsteriskRequired="Fields marked with an asterisk * are required";
 	$strClassItem="Classitem";
+	$strDataSetStyle="Dataset Style";
   $strLayerID="Layer ID*";
   $strName="Name";
   $strDataType="Datatype*";

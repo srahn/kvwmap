@@ -2498,6 +2498,7 @@ class GUI {
 
 	function loadPlugins($go){
   	global $kvwmap_plugins;
+		$this->loaded_plugins = array();
 	  $this->goNotExecutedInPlugins = true;		// wenn es keine Plugins gibt, ist diese Var. immer true
   	if(count($kvwmap_plugins) > 0){
 			$plugins = scandir(PLUGINS, 1);
@@ -2506,10 +2507,15 @@ class GUI {
 					if (file_exists(PLUGINS.$plugins[$i].'/config/config.php'))
 						include(PLUGINS.$plugins[$i].'/config/config.php');
 					include(PLUGINS.$plugins[$i].'/control/index.php');
+					$this->loaded_plugins[] = $plugins[$i];
 				}
 			}
 		}
   }
+
+	function plugin_loaded($plugin) {
+		return in_array($plugin, $this->loaded_plugins);
+	}
 
   function checkCaseAllowed($case){
 		global $log_loginfail;
@@ -6033,7 +6039,7 @@ class GUI {
   function get_dokument_vorschau($dateinamensteil){
 		$type = strtolower($dateinamensteil[1]);
   	$dokument = $dateinamensteil[0].'.'.$dateinamensteil[1];
-		if(in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf')) ){			// für Bilder und PDFs werden automatisch Thumbnails erzeugt
+		if(in_array(strtolower($type), array('jpg', 'png', 'gif', 'tif', 'pdf')) ){			// für Bilder und PDFs werden automatisch Thumbnails erzeugt
 			$thumbname = $dateinamensteil[0].'_thumb.jpg';
 			if(!file_exists($thumbname)){
 				exec(IMAGEMAGICKPATH.'convert -filter Hanning '.$dokument.'[0] -quality 75 -background white -flatten -resize '.PREVIEW_IMAGE_WIDTH.'x1000\> '.$thumbname);
@@ -7373,6 +7379,13 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			    $attributes = $mapDB->load_attributes($layerdb,	replace_params($path,	$all_layer_params));
 			    $mapDB->save_postgis_attributes($this->formvars['selected_layer_id'], $attributes, $this->formvars['maintable'], $this->formvars['schema']);
 			    #---------- Speichern der Layerattribute -------------------
+					if ($this->plugin_loaded('mobile')) {
+						$this->mobile_prepare_layer_sync(
+							$layerdb,
+							$this->formvars['selected_layer_id'],
+							$this->formvars['sync']
+						);
+					}
 				}
 				if($this->formvars['pfad'] == '' OR $attributes != NULL){
 					$mapDB->delete_old_attributes($this->formvars['selected_layer_id'], $attributes);
@@ -12322,7 +12335,15 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 								}
 								$i++;
 							}
-							$sql .= " WHERE oid = ".$oid;
+							$sql .= " WHERE";
+
+							if ($this->plugin_loaded('mobile') AND array_key_exists('uuid', $attributes)) {
+								$sql .= " uuid = '" . $attributes['uuid'] . "'";
+							}
+							else {
+								$sql .= " oid = " . $oid;
+							}
+
 							#if($filter != ''){							# erstmal wieder rausgenommen, weil der Filter sich auf Attribute beziehen kann, die zu anderen Tabellen gehören
 							#  $sql .= " AND ".$filter;
 							#}
@@ -14826,7 +14847,9 @@ class db_mapObj{
 
   function db_mapObj($Stelle_ID, $User_ID, $database = NULL) {
     global $debug;
+		global $GUI;
     $this->debug=$debug;
+		$this->GUI = $GUI;
     $this->Stelle_ID=$Stelle_ID;
     $this->User_ID=$User_ID;
 		$this->rolle = new rolle($User_ID, $Stelle_ID, $database);
@@ -14887,7 +14910,7 @@ class db_mapObj{
 				l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem,
 				l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.classification, l.filteritem,
 				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version,
-				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status,
+				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, l.trigger_function, l.sync,
 				g.*
 			FROM
 				u_rolle2used_layer AS rl,
@@ -15811,7 +15834,7 @@ class db_mapObj{
 		$sql .= 'SET @group_id = 1;'.chr(10);
 		$sql .= 'SET @connection = \'user=xxxx password=xxxx dbname=kvwmapsp\';'.chr(10).chr(10);
 		for($i = 0; $i < count($layer_ids); $i++){
-			$layer = $database->create_insert_dump('layer', '', 'SELECT `Name`, `alias`, `Datentyp`, \'@group_id\' AS `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `printconnection`, `connectiontype`, `classitem`, `filteritem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, wms_auth_username, wms_auth_password, `wfs_geom`, `selectiontype`, `querymap`, `logconsume`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `privileg` FROM layer WHERE Layer_ID='.$layer_ids[$i]);
+			$layer = $database->create_insert_dump('layer', '', 'SELECT `Name`, `alias`, `Datentyp`, \'@group_id\' AS `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `printconnection`, `connectiontype`, `classitem`, `filteritem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, wms_auth_username, wms_auth_password, `wfs_geom`, `selectiontype`, `querymap`, `logconsume`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `privileg`, `trigger_function`, `sync` FROM layer WHERE Layer_ID='.$layer_ids[$i]);
 			$sql .= $layer['insert'][0];
 			$last_layer_id = '@last_layer_id'.$layer_ids[$i];
 			$sql .= chr(10).'SET '.$last_layer_id.'=LAST_INSERT_ID();'.chr(10);
@@ -16042,12 +16065,13 @@ class db_mapObj{
     $sql .= "datenherr = '".$formvars['datenherr']."',";
     $sql .= "metalink = '".$formvars['metalink']."', ";
 		$sql .= "status = '".$formvars['status']."', ";
-		$sql .= "trigger_function = '" . $formvars['trigger_function'] . "'";
+		$sql .= "trigger_function = '" . $formvars['trigger_function'] . "', ";
+		$sql .= "sync = '" . $formvars['sync'] . "'";
     $sql .= " WHERE Layer_ID = ".$formvars['selected_layer_id'];
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->updateLayer - Aktualisieren eines Layers:<br>".$sql,4);
     $query=mysql_query($sql);
-    if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+    if ($query==0) { $this->GUI->add_message('error', "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1); return 0; }
   }
 
   function newLayer($layerdata) {
@@ -16066,7 +16090,7 @@ class db_mapObj{
 					$sql .= "`Name_".$language."`, ";
 				}
 			}
-			$sql.="`alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `printconnection`, `connectiontype`, `classitem`, `classification`, `filteritem`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `status`) VALUES(";
+			$sql.="`alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `printconnection`, `connectiontype`, `classitem`, `classification`, `filteritem`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `status`, `trigger_function`, `sync`) VALUES(";
       if($formvars['id'] != ''){
         $sql.="'".$formvars['id']."', ";
       }
@@ -16165,13 +16189,15 @@ class db_mapObj{
       $sql .= "'".$formvars['datenherr']."', ";
       $sql .= "'".$formvars['metalink']."', ";
 			$sql .= "'".$formvars['status']."'";
+			$sql .= "'" . $formvars['trigger_function'] . "',";
+			$sql .= "'" . $formvars['sync'] . "'";
       $sql .= ")";
 
     }
     else{
       $layer = $layerdata;      # ein Layerobject wurde übergeben
       $projection = explode('epsg:', $layer->getProjection());
-      $sql = "INSERT INTO layer (`Name`, `Datentyp`, `Gruppe`, `pfad`, `Data`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `connectiontype`, `classitem`, `filteritem`, `tolerance`, `toleranceunits`, `epsg_code`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`) VALUES(";
+      $sql = "INSERT INTO layer (`Name`, `Datentyp`, `Gruppe`, `pfad`, `Data`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `connectiontype`, `classitem`,  `filteritem`, `tolerance`, `toleranceunits`, `epsg_code`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `trigger_function`, `sync`) VALUES(";
       $sql .= "'".$layer->name."', ";
       $sql .= "'".$layer->type."', ";
       $sql .= "'".$layer->group."', ";
@@ -16196,6 +16222,8 @@ class db_mapObj{
       $sql .= "'', ";               # wms_server_version
       $sql .= "'', ";               # wms_format
       $sql .= "60";                 # wms_connectiontimeout
+      $sql .= "'" . $layer->trigger_function . "', ";
+      $sql .= "'" . $layer->sync . "'";
       $sql .= ")";
     }
 
@@ -16453,71 +16481,76 @@ class db_mapObj{
 		$query=mysql_query($sql);
 		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
 		$i = 0;
-		while ($rs = mysql_fetch_array($query)) {
-			$attributes['name'][$i] = $rs['name'];
-			$attributes['indizes'][$rs['name']] = $i;
-			$attributes['real_name'][$rs['name']] = $rs['real_name'];
-			if ($rs['tablename']){
-				if (strpos($rs['tablename'], '.') !== false){
-					$explosion = explode('.', $rs['tablename']);
-					$rs['tablename'] = $explosion[1];		# Tabellenname ohne Schema
-					$attributes['schema_name'][$rs['tablename']] = $explosion[0];
+		while ($rs = mysql_fetch_array($query)){
+			if ($rs['form_element_type'] == 'Style') {
+				$attributes['style'] = $rs['name'];
+			}
+			else {
+				$attributes['name'][$i] = $rs['name'];
+				$attributes['indizes'][$rs['name']] = $i;
+				$attributes['real_name'][$rs['name']] = $rs['real_name'];
+				if ($rs['tablename']){
+					if (strpos($rs['tablename'], '.') !== false){
+						$explosion = explode('.', $rs['tablename']);
+						$rs['tablename'] = $explosion[1];		# Tabellenname ohne Schema
+						$attributes['schema_name'][$rs['tablename']] = $explosion[0];
+					}
+					$attributes['table_name'][$i]= $rs['tablename'];
+					$attributes['table_name'][$rs['name']] = $rs['tablename'];
 				}
-				$attributes['table_name'][$i]= $rs['tablename'];
-				$attributes['table_name'][$rs['name']] = $rs['tablename'];
-			}
-			if ($rs['table_alias_name'])$attributes['table_alias_name'][$i] = $rs['table_alias_name'];
-			if ($rs['table_alias_name'])$attributes['table_alias_name'][$rs['name']] = $rs['table_alias_name'];
-			$attributes['table_alias_name'][$rs['tablename']] = $rs['table_alias_name'];
-			$attributes['type'][$i] = $rs['type'];
-			$attributes['typename'][$i] = $rs['typename'];
-			$type = ltrim($rs['type'], '_');
-			if ($recursive AND is_numeric($type)){
-				$attributes['type_attributes'][$i] = $this->read_datatype_attributes($type, $layerdb, NULL, $all_languages, true);
-			}
-			if ($rs['type'] == 'geometry'){
-				$attributes['the_geom'] = $rs['name'];
-			}
-			$attributes['geomtype'][$i]= $rs['geometrytype'];
-			$attributes['geomtype'][$rs['name']]= $rs['geometrytype'];
-			$attributes['constraints'][$i]= $rs['constraints'];
-			$attributes['constraints'][$rs['real_name']]= $rs['constraints'];
-			$attributes['nullable'][$i]= $rs['nullable'];
-			$attributes['length'][$i]= $rs['length'];
-			$attributes['decimal_length'][$i]= $rs['decimal_length'];
+				if ($rs['table_alias_name'])$attributes['table_alias_name'][$i] = $rs['table_alias_name'];
+				if ($rs['table_alias_name'])$attributes['table_alias_name'][$rs['name']] = $rs['table_alias_name'];
+				$attributes['table_alias_name'][$rs['tablename']] = $rs['table_alias_name'];
+				$attributes['type'][$i] = $rs['type'];
+				$attributes['typename'][$i] = $rs['typename'];
+				$type = ltrim($rs['type'], '_');
+				if ($recursive AND is_numeric($type)){
+					$attributes['type_attributes'][$i] = $this->read_datatype_attributes($type, $layerdb, NULL, $all_languages, true);
+				}
+				if ($rs['type'] == 'geometry'){
+					$attributes['the_geom'] = $rs['name'];
+				}
+				$attributes['geomtype'][$i]= $rs['geometrytype'];
+				$attributes['geomtype'][$rs['name']]= $rs['geometrytype'];
+				$attributes['constraints'][$i]= $rs['constraints'];
+				$attributes['constraints'][$rs['real_name']]= $rs['constraints'];
+				$attributes['nullable'][$i]= $rs['nullable'];
+				$attributes['length'][$i]= $rs['length'];
+				$attributes['decimal_length'][$i]= $rs['decimal_length'];
 
-			if (substr($rs['default'], 0, 6) == 'SELECT'){					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
-				$ret1 = $layerdb->execSQL($rs['default'], 4, 0);
-				if ($ret1[0] == 0) {
-					$attributes['default'][$i] = array_pop(pg_fetch_row($ret1[1]));
+				if (substr($rs['default'], 0, 6) == 'SELECT'){					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
+					$ret1 = $layerdb->execSQL($rs['default'], 4, 0);
+					if ($ret1[0] == 0) {
+						$attributes['default'][$i] = array_pop(pg_fetch_row($ret1[1]));
+					}
 				}
+				else {															# das sind die alten Defaultwerte ohne 'SELECT ' davor, ab Version 1.13 haben Defaultwerte immer ein SELECT, wenn man den Layer in dieser Version einmal gespeichert hat
+					$attributes['default'][$i] = $rs['default'];
+				}
+				$attributes['form_element_type'][$i] = $rs['form_element_type'];
+				$attributes['form_element_type'][$rs['name']] = $rs['form_element_type'];
+				$rs['options'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $rs['options']);
+				$rs['options'] = str_replace('$language', $this->user->rolle->language, $rs['options']);
+				$attributes['options'][$i] = $rs['options'];
+				$attributes['options'][$rs['name']] = $rs['options'];
+				$attributes['alias'][$i] = $rs['alias'];
+				$attributes['alias'][$attributes['name'][$i]] = $rs['alias'];
+				$attributes['alias_low-german'][$i] = $rs['alias_low-german'];
+				$attributes['alias_english'][$i] = $rs['alias_english'];
+				$attributes['alias_polish'][$i] = $rs['alias_polish'];
+				$attributes['alias_vietnamese'][$i] = $rs['alias_vietnamese'];
+				$attributes['tooltip'][$i] = $rs['tooltip'];
+				$attributes['group'][$i] = $rs['group'];
+				$attributes['arrangement'][$i] = $rs['arrangement'];
+				$attributes['labeling'][$i] = $rs['labeling'];
+				$attributes['raster_visibility'][$i] = $rs['raster_visibility'];
+				$attributes['dont_use_for_new'][$i] = $rs['dont_use_for_new'];
+				$attributes['mandatory'][$i] = $rs['mandatory'];
+				$attributes['quicksearch'][$i] = $rs['quicksearch'];
+				$attributes['privileg'][$i] = $rs['privileg'];
+				$attributes['query_tooltip'][$i] = $rs['query_tooltip'];
+				$i++;
 			}
-			else {															# das sind die alten Defaultwerte ohne 'SELECT ' davor, ab Version 1.13 haben Defaultwerte immer ein SELECT, wenn man den Layer in dieser Version einmal gespeichert hat
-				$attributes['default'][$i] = $rs['default'];
-			}
-			$attributes['form_element_type'][$i] = $rs['form_element_type'];
-			$attributes['form_element_type'][$rs['name']] = $rs['form_element_type'];
-			$rs['options'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $rs['options']);
-			$rs['options'] = str_replace('$language', $this->user->rolle->language, $rs['options']);
-			$attributes['options'][$i] = $rs['options'];
-			$attributes['options'][$rs['name']] = $rs['options'];
-			$attributes['alias'][$i] = $rs['alias'];
-			$attributes['alias'][$attributes['name'][$i]] = $rs['alias'];
-			$attributes['alias_low-german'][$i] = $rs['alias_low-german'];
-			$attributes['alias_english'][$i] = $rs['alias_english'];
-			$attributes['alias_polish'][$i] = $rs['alias_polish'];
-			$attributes['alias_vietnamese'][$i] = $rs['alias_vietnamese'];
-			$attributes['tooltip'][$i] = $rs['tooltip'];
-			$attributes['group'][$i] = $rs['group'];
-			$attributes['arrangement'][$i] = $rs['arrangement'];
-			$attributes['labeling'][$i] = $rs['labeling'];
-			$attributes['raster_visibility'][$i] = $rs['raster_visibility'];
-			$attributes['dont_use_for_new'][$i] = $rs['dont_use_for_new'];
-			$attributes['mandatory'][$i] = $rs['mandatory'];
-			$attributes['quicksearch'][$i] = $rs['quicksearch'];
-			$attributes['privileg'][$i] = $rs['privileg'];
-			$attributes['query_tooltip'][$i] = $rs['query_tooltip'];
-			$i++;
 		}
 		if ($attributes['table_name'] != NULL) {
 			$attributes['all_table_names'] = array_unique($attributes['table_name']);

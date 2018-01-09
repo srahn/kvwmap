@@ -1,4 +1,5 @@
-<? 
+<?
+	include(SNIPPETS.'generic_form_parts.php');
 	# dies ist das Snippet für die SubformEmbeddedPK-Liste mit Links untereinander
 	# Variablensubstitution
 	$layer = $this->qlayerset[$i];
@@ -99,7 +100,8 @@
 			}
 			else{
 				echo '<tr style="border: none">
-								<td><a style="font-size: '.$this->user->rolle->fontsize_gle.'px;"';
+								<td' . get_td_class_or_style($dataset[$attributes['style']]) . '>';
+				echo '<a style="font-size: '.$this->user->rolle->fontsize_gle.'px;"';
 								if($this->formvars['no_new_window'] != true){
 									echo 	' target="_blank"';
 								}
