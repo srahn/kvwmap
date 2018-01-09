@@ -785,4 +785,13 @@
 		return $ha;
 	}
 
+	/*
+	* Diese Funktion erzeugt ein class oder ein style Attribut eines html elementes
+	* geführt von einem Leerzeichen je nach dem ob der übergebene Text ein : enthält (style) oder nicht.
+	* @param string $class_or_style Der Text, der den Klassennamen oder den Styletext enthält
+	* @return string Text in der Form ' class="class_name"' oder ' style="css-text"'
+	*/
+	function get_td_class_or_style($class_or_style) {
+		return ' ' . (strpos($class_or_style, ':') === false ? 'class' : 'style') . '="' . $class_or_style . '"';
+	}
 ?>

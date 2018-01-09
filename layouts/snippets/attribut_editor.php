@@ -215,7 +215,8 @@ function toLayerEditor(){
 							  		echo ' >Länge</option>
 										<option value="Winkel" ';
 							  		if($this->attributes['form_element_type'][$i] == 'Winkel'){echo 'selected';}
-							  		echo ' >Winkel</option>';
+							  		echo ' >Winkel</option>
+										<option value="Style"' . ($this->attributes['form_element_type'][$i] == 'Style' ? ' selected' : '') . '>Styledefinierer</option>';
 							  	}
 							  	echo'
 							  	</select>';
