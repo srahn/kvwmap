@@ -353,6 +353,27 @@
 							<input name="trigger_function" type="text" value="<?php echo $this->layerdata['trigger_function']; ?>" size="25" maxlength="100">
 					</td>
 				</tr>
+				<tr>
+					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strSync; ?></th>
+					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
+						<input name="sync" type="checkbox" value="1"<?php if ($this->layerdata['sync']) echo ' checked'; ?>>
+						<img
+							src="<?php echo GRAPHICSPATH;?>icon_i.png"
+							onMouseOver="
+								stm(
+									[
+										'<?php echo $strHelp; ?>:',
+										'<?php echo $strSyncHelp; ?>'
+									],
+									Style[0],
+									$('#TipSync')[0]
+								);
+							"
+							onmouseout="htm()"
+						>
+						<div id="TipSync" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+					</td>
+				</tr>
 			</table>
 			<br>
 

@@ -280,5 +280,189 @@ class synchro {
 		return true;
 	}
 
+	/*
+	* Die Funktion führt folgende Schritte innerhalb einer Transaktion aus:
+	* - Fragt ob die angefragte Syncronisation schon mal abgearbeitet wurde
+	* - Wenn ja:
+	* 	- Legt eine neue Syncronisation in der Datenbank an mit
+	* 		$client_id, $user_name, $pull_version_from, $pull_version_to und $push_version_from.
+	* 	- Trägt alle mitgesendeten Änderungen ($client_deltas) in die Datenbank ein
+	* 	- Trägt die neue letzte Version $push_version_to in die aktuelle Syncronisation ein.
+	* - Ansonsten immer:
+	* 	- Fragt alle Änderungen (deltas) am Layer $layer_id von $pull_version_from bis $pull_version_to ab.
+	* 	- Fragt die Syncronisation ab
+	* 	- liefert die Deltas und Sync-Daten zurück
+	*/
+	function sync($client_id, $username, $schema_name, $table_name, $client_time, $last_client_version, $client_deltas) {
+		$pull_from_version = $last_client_version + 1;
+
+		/*
+		# Frage ab ob die Syncronisation schon mal abgefragt wurde
+		$sql = "
+			SELECT
+				count(*) num_sync
+			FROM
+				syncs
+			WHERE
+				client_id = '" . $client_id . "' AND
+				username = '" . $username . "' AND
+				schema_name = '" . $schema_name . "' AND
+				table_name = '" . $table_name . "' AND
+				pull_from_version = " . $pull_from_version . "
+		";
+		#echo '<br>Sql: ' . $sql;
+		$log = $sql;
+		$res = $this->database->execSQL($sql, 0, 1, true);
+		if ($res[0]) {
+			# Liefer error message
+			$result = array(
+				'success' => false,
+				'err_msg' => 'Fehler bei der Syncronisation auf dem Server. Es konnte nicht abgefragt werden ob die angefragte Syncronisation schon einmal auf dem Server durchgeführt wurde. ' . $res[1]
+			);
+			return $result;
+		}
+
+
+		$rs = pg_fetch_array($res[1]);
+		if ($rs['num_sync'] == 0) {
+*/
+		if ($pull_from_version > 1) {
+			$sql = "
+				START TRANSACTION;
+			";
+
+			# Lege Datensatz für Synchronisation auf dem Server an und trage ein:
+			# gepullt von bis und gepusht von
+			$sql .= "
+				INSERT INTO syncs (client_id, username, client_time, schema_name, table_name, pull_from_version, pull_to_version, push_from_version)
+				VALUES (
+					'" . $client_id . "',
+					'" . $username . "',
+					'" . $client_time . "',
+					'" . $schema_name . "',
+					'" . $table_name . "',
+					" . $pull_from_version  . ",
+					(SELECT coalesce(max(version), 1) FROM " . $schema_name . "." . $table_name . "_deltas),
+					(SELECT coalesce(max(version), 1) FROM " . $schema_name . "." . $table_name . "_deltas) + 1
+				);
+			";
+
+			# Trage gepushte Datensätze ein
+			$sql .= implode(
+				'; ',
+				array_map(
+					function($row) {
+						return $row->sql;
+					},
+					$client_deltas->rows
+				)
+			) . ';';
+
+			# Trage gepusht bis ein
+			$sql .= "
+				UPDATE syncs
+				SET
+					push_to_version = (SELECT coalesce(max(version), 1) FROM " . $schema_name . "." . $table_name . "_deltas)
+				WHERE
+					client_id = '" . $client_id . "' AND
+					client_time = '" . $client_time . "' AND
+					username = '" . $username . "' AND
+					schema_name = '" . $schema_name ."' AND
+					table_name = '" . $table_name . "' AND
+					pull_from_version = " . $pull_from_version . ";
+			";
+
+			# Schließe Transaktion ab
+			$sql .= "
+				COMMIT;
+			";
+			$log .= $sql;
+			#echo '<br>Sql: ' . $sql;
+			$res = $this->database->execSQL($sql, 0, 1, true);
+			if ($res[0]) {
+				$result = array(
+					'success' => false,
+					'err_msg' => 'Fehler bei der Syncronisation auf dem Server. ' . $res[1]
+				);
+				return $result;
+			}
+		}
+
+		# Frage deltas von pull_from bis pull_to ab
+		$sql = "
+			SELECT
+				*
+			FROM
+				" . $schema_name . "." . $table_name . "_deltas
+			WHERE
+				version > " . $last_client_version . " AND
+				version <= (
+					SELECT
+						pull_to_version
+					FROM
+						syncs
+					WHERE
+						client_id = '" . $client_id . "' AND
+						client_time = '" . $client_time . "' AND
+						username = '" . $username . "' AND
+						schema_name = '" . $schema_name ."' AND
+						table_name = '" . $table_name . "' AND
+						pull_from_version = " . $pull_from_version . "
+				);
+		";
+		$log.=$sql;
+		#echo '<br>Sql: ' . $sql;
+		$res = $this->database->execSQL($sql, 0, 1, true);
+		if ($res[0]) {
+			$result = array(
+				'success' => false,
+				'err_msg' => 'Fehler bei der Syncronisation auf dem Server. ' . $res[1]
+			);
+			return $result;
+		}
+		$deltas = array();
+		while($rs = pg_fetch_assoc($res[1])) {
+			$deltas[] = $rs;
+		}
+
+		# Frage Daten der Syncronisation ab
+		$sql = "
+			SELECT
+				*
+			FROM
+				syncs
+			WHERE
+				client_id = '" . $client_id . "' AND
+				username = '" . $username . "' AND
+				schema_name = '" . $schema_name ."' AND
+				table_name = '" . $table_name ."' AND
+				pull_from_version = " . $pull_from_version . "
+		";
+		$log.=$sql;
+		#echo '<br>Sql: ' . $sql;
+		$res = $this->database->execSQL($sql, 0, 1, true);
+		if ($res[0]) {
+			# Liefer error message
+			$result = array(
+				'success' => false,
+				'err_msg' => 'Fehler bei der Syncronisation auf dem Server. ' . $res[1]
+			);
+			return $result;
+		}
+		$sync_data = array();
+		while($rs = pg_fetch_assoc($res[1])) {
+			$sync_data[] = $rs;
+		}
+
+		# Liefer deltas und syncro data ab
+		$result = array(
+			'success' => true,
+			'syncData' => $sync_data,
+			'deltas' => $deltas,
+			'log'	=> $log
+		);
+
+		return $result;
+	}
 }
 ?>
