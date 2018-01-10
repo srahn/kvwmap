@@ -973,7 +973,8 @@ class user {
 			if($formvars['measure']){$buttons .= 'measure,';}
 			if($formvars['freepolygon']){$buttons .= 'freepolygon,';}
 			if($formvars['freearrow']){$buttons .= 'freearrow,';}
-			if($formvars['freetext']){$buttons .= 'freetext';}
+			if($formvars['freetext']){$buttons .= 'freetext,';}
+			if($formvars['gps']){$buttons .= 'gps';}
 			if($buttons != '')$sql.=",buttons = '".$buttons."'";
 			$sql.=",selectedButton='zoomin'";
 

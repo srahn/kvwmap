@@ -453,11 +453,6 @@ function go_switch($go){
 			$GUI->getlayerfromgroup();
 			} break;
 
-			# GPS-Position auslesen
-			case 'get_gps_position' : {
-			$GUI->get_gps_position();
-			} break;
-
 			# Eigentuemerfortführung
 			case 'Adressaenderungen_Export' : {
 			$GUI->checkCaseAllowed($go);

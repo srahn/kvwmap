@@ -352,9 +352,18 @@ $svg='<?xml version="1.0"?>
 			touchPanZoomThreshold = 17 // differences of drag vectors, to distinguish between pan and zoom on touch gestures;
 	';
 
-if($_SESSION['mobile'] == 'true'){
+if($this->user->rolle->gps){
 	$svg.= '  
   function update_gps_position(){
+		navigator.geolocation.getCurrentPosition(
+			function(position){		//success
+				var Projection = "'.$this->epsg_codes[$this->user->rolle->epsg_code]['proj4text'].'";
+				pos = top.proj4(Projection,[position.coords.longitude,position.coords.latitude]);
+				top.document.GUI.gps_posx.value = pos[0];
+				top.document.GUI.gps_posy.value = pos[1];
+			},
+			function(){}		// error
+		)
 		posx = top.document.GUI.gps_posx.value+"";
 		posy = top.document.GUI.gps_posy.value+"";
 		if(posx != "" && posy != ""){
@@ -376,15 +385,13 @@ if($_SESSION['mobile'] == 'true'){
 				}
 			}
 		}
-  	top.ahah("index.php", "go=get_gps_position&srs='.$this->user->rolle->epsg_code.'", new Array(top.document.GUI.gps_posx, top.document.GUI.gps_posy), "");
  	}
- 	
- 	window.setInterval("update_gps_position()", 2000);';
+ 	window.setInterval("update_gps_position()", 1000);';
 }
 $svg .='
 
 function startup(){';
-	if($_SESSION['mobile'] == 'true'){
+	if($this->user->rolle->gps){
 		$svg .='update_gps_position();';
 	}
 	$svg .='
@@ -616,7 +623,7 @@ top.document.getElementById("svghelp").SVGmoveback = moveback;
 function moveback_ff(evt){
 	// beim Firefox wird diese Funktion beim onload des Kartenbildes ausgefuehrt
 	document.getElementById("mapimg2").setAttribute("style", "display:block");	
-	window.setTimeout(\'document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");document.getElementById("mapimg").setAttribute("xlink:href", document.getElementById("mapimg2").getAttribute("xlink:href"));\', 200);
+	window.setTimeout(\'document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");document.getElementById("mapimg").setAttribute("xlink:href", document.getElementById("mapimg2").getAttribute("xlink:href"));\', 0);
 	// Redlining-Sachen loeschen
 	while(child = document.getElementById("redlining").firstChild){
   	document.getElementById("redlining").removeChild(child);
@@ -646,7 +653,7 @@ function sleep(milliseconds) {
 
 function moveback(evt){
 	// bei allen anderen Browsern gibt es kein onload für das Kartenbild, deswegen wird diese Funktion als erstes ausgefuehrt
-	document.getElementById("mapimg").setAttribute("xlink:href", "'.dirname($_SERVER['SCRIPT_NAME']).'/'.GRAPHICSPATH.'leer.gif")
+	document.getElementById("mapimg").setAttribute("xlink:href", "'.dirname($_SERVER['SCRIPT_NAME']).'/'.GRAPHICSPATH.'leer.gif");
 	document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");
 	// Redlining-Sachen loeschen
 	while(child = document.getElementById("redlining").firstChild){
@@ -1805,7 +1812,7 @@ function highlight(evt){
       <circle id="suchkreis" cx="-100" cy="-100" r="'.$radius.'" style="fill-opacity:0.25;fill:yellow;stroke:grey;stroke-width:2"/>
 			<g id="redlining">
 			</g>';
-if($_SESSION['mobile'] == 'true'){
+if(true){
 	 $svg.=' <use id="gps_position" xlink:href="#crosshair_red" x="-100" y="-100"/>';
 }
 $svg.='
