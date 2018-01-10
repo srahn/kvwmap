@@ -14883,7 +14883,7 @@ class db_mapObj{
 
   function read_Layer($withClasses, $useLayerAliases = false, $groups = NULL){
 		global $language;
-		$layer['list'] = array();
+
 		if($language != 'german') {
 			$name_column = "
 			CASE
@@ -14942,6 +14942,7 @@ class db_mapObj{
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
     $layer = array();
+		$layer['list'] = array();		
     $this->disabled_classes = $this->read_disabled_classes();
 		$i = 0;
     while ($rs=mysql_fetch_assoc($query)){
