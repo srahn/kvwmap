@@ -3340,18 +3340,6 @@ class GUI {
     echo '</select>';
   }
 
-  function get_gps_position(){
-    // erzeuge GPS Objekt
-		include_(CLASSPATH.'gps.php');
-    $gps = new gps(GPSPATH);
-    // frage aktuelle GPS-Position
-    $gps->readPosition();
-    // transformiere in gewünschtes Koordinatensystem
-    $point=transform($gps->lon,$gps->lat,'4326',$this->formvars['srs']);
-    // Ausgabe der Koordinaten im Format Rechtswert~Hochwert
-    echo $point->x.'~'.$point->y;
- }
-
   function export_Adressaenderungen(){
     $this->titel='Adressänderungen der Eigentümer exportieren';
     $this->main='Adressaenderungen_Export.php';
@@ -14895,7 +14883,7 @@ class db_mapObj{
 
   function read_Layer($withClasses, $useLayerAliases = false, $groups = NULL){
 		global $language;
-
+		$layer['list'] = array();
 		if($language != 'german') {
 			$name_column = "
 			CASE
