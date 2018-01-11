@@ -353,7 +353,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 						<span class="fett">&nbsp;</span>
 					</td>
 					<td>
-          	<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten')){ ?>
+						<? if($this->Stelle->isFunctionAllowed('Nachweisloeschen')){ ?>
           		<a href="javascript:loeschen();"><span class="fett">--> markierte löschen</span></a>
           	<? } ?>
 					</td>
