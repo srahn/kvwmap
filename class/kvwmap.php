@@ -369,7 +369,7 @@ class GUI {
 
   function create_dynamic_legend(){
 		if($this->user->rolle->legendtype == 1){ # alphabetische Reihenfolge ohne Gruppen
-			$this->sorted_layerset = $this->layerset;
+			$this->sorted_layerset = $this->layerset['list'];
 			unset($this->sorted_layerset['layer_ids']);		# layer_ids Array entfernen
 			unset($this->sorted_layerset['anzLayer']);		# anzLayer entfernen
 			usort($this->sorted_layerset, 'compare_layers');
