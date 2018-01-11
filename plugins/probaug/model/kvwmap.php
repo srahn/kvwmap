@@ -13,11 +13,13 @@
 				}
 			}		
 			$GUI->zoomToALKFlurst($GUI->bau->grundstueck, 10);
-			$GUI->formvars['oid'] = $GUI->bau->baudata[0]['geom_oid'];
-			$GUI->formvars['layer_tablename'] = 'bau_geometrien';
-			$GUI->formvars['layer_columnname'] = 'the_geom';
-			$GUI->formvars['layer_id'] = LAYER_ID_BAUAKTEN_GEOMETRIEN;
-			$GUI->formvars['selektieren'] = 'zoomonly';
+			if($GUI->bau->baudata[0]['geom_status'] == 't'){
+				$GUI->formvars['oid'] = $GUI->bau->baudata[0]['geom_oid'];
+				$GUI->formvars['layer_tablename'] = 'bau_geometrien';
+				$GUI->formvars['layer_columnname'] = 'the_geom';
+				$GUI->formvars['layer_id'] = LAYER_ID_BAUAKTEN_GEOMETRIEN;
+				$GUI->formvars['selektieren'] = 'zoomonly';
+			}
 			$GUI->zoom_toPoint();
 		}
 		else{
