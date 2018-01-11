@@ -623,7 +623,7 @@ top.document.getElementById("svghelp").SVGmoveback = moveback;
 function moveback_ff(evt){
 	// beim Firefox wird diese Funktion beim onload des Kartenbildes ausgefuehrt
 	document.getElementById("mapimg2").setAttribute("style", "display:block");	
-	window.setTimeout(\'document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");document.getElementById("mapimg").setAttribute("xlink:href", document.getElementById("mapimg2").getAttribute("xlink:href"));\', 0);
+	window.setTimeout(\'document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");document.getElementById("mapimg").setAttribute("xlink:href", document.getElementById("mapimg2").getAttribute("xlink:href"));startup();\', 200);
 	// Redlining-Sachen loeschen
 	while(child = document.getElementById("redlining").firstChild){
   	document.getElementById("redlining").removeChild(child);
@@ -634,8 +634,7 @@ function moveback_ff(evt){
 	// Navigation wieder erlauben
 	top.stopwaiting();
 	window.setTimeout(\'document.getElementById("mapimg2").setAttribute("xlink:href", "")\', 400);
-	window.setTimeout(\'document.getElementById("mapimg2").setAttribute("style", "display:none")\', 400);
-	startup();
+	window.setTimeout(\'document.getElementById("mapimg2").setAttribute("style", "display:none")\', 400);	
 }
 
 
@@ -1812,7 +1811,7 @@ function highlight(evt){
       <circle id="suchkreis" cx="-100" cy="-100" r="'.$radius.'" style="fill-opacity:0.25;fill:yellow;stroke:grey;stroke-width:2"/>
 			<g id="redlining">
 			</g>';
-if(true){
+if($this->user->rolle->gps){
 	 $svg.=' <use id="gps_position" xlink:href="#crosshair_red" x="-100" y="-100"/>';
 }
 $svg.='
