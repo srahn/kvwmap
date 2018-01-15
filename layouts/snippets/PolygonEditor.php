@@ -124,8 +124,13 @@ function buildwktpolygonfromsvgpath(svgpath){
   		</select> 
   	</td>
   </tr>
+	<tr>
+		<td>
+			<input type="checkbox" name="singlegeom" value="true" <? if($this->formvars['singlegeom'])echo 'checked="true"'; ?>><? echo $strSingleGeoms; ?>
+		</td>
+	</tr>
   <tr> 
-    <td colspan="2" style="border-top:1px solid #999999"><img width="240px" height="1px" src="<? echo GRAPHICSPATH; ?>leer.gif"></td>
+    <td colspan="2" style="border-top:1px solid #999999"></td>
   </tr>
   <tr>  
   	<td width="160"><? echo $strArea; ?>:<br><input size="12" type="text" name="area" value="<?echo $this->formvars['area']?>">&nbsp;m<SUP>2</SUP></td>
