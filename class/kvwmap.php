@@ -16188,8 +16188,8 @@ class db_mapObj{
       $sql .= "'".$formvars['kurzbeschreibung']."', ";
       $sql .= "'".$formvars['datenherr']."', ";
       $sql .= "'".$formvars['metalink']."', ";
-			$sql .= "'".$formvars['status']."'";
-			$sql .= "'" . $formvars['trigger_function'] . "',";
+			$sql .= "'".$formvars['status']."', ";
+			$sql .= "'" . $formvars['trigger_function'] . "', ";
 			$sql .= "'" . $formvars['sync'] . "'";
       $sql .= ")";
 
