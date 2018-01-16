@@ -453,6 +453,17 @@ include('funktionen/input_check_functions.php');
 			window.location.href = 'index.php?'+params;		// aus normaler Sachdatenanzeige heraus --> normalen Kartenzoom machen
 		}
 	}
+	
+	zoom2wkt = function(wkt, epsg){
+		params = 'go=zoom2wkt&wkt='+wkt+'&epsg='+epsg;
+		if(currentform.id == 'GUI2'){					// aus overlay heraus --> Kartenzoom per Ajax machen
+			startwaiting();
+			get_map_ajax(params, '', '');
+		}
+		else{
+			window.location.href = 'index.php?'+params;		// aus normaler Sachdatenanzeige heraus --> normalen Kartenzoom machen
+		}
+	}	
 
 	check_for_selection = function(layer_id){
 		go = 'false';
