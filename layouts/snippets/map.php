@@ -68,6 +68,7 @@ function showMapImage(){
 }
 
 function addRedlining(){
+	svgdoc = document.SVG.getSVGDocument();
 	var redlining = svgdoc.getElementById("redlining");
 	for(var i = 0; i < redlining.childNodes.length; i++){
 		child = redlining.childNodes[i];
@@ -98,13 +99,6 @@ function addRedlining(){
 			break;
 		}
 	}
-}
-
-function printMap(){ 
-	svgdoc = document.SVG.getSVGDocument();	
-	addRedlining();
-	document.GUI.go.value = 'Druckausschnittswahl';
-	document.GUI.submit();
 }
 
 </script>
