@@ -5382,7 +5382,7 @@ class GUI {
     $backgroundColor = ImageColorAllocate($legendimage, 255, 255, 255);
     imagefill ($legendimage, 0, 0, $backgroundColor);
 
-    for($i = 0; $i < count($layerset); $i++){
+    for($i = 0; $i < count($layerset['list']); $i++){
       if($layerset['list'][$i]['aktivStatus'] != 0){
         if(($layerset['list'][$i]['minscale'] < $scale OR $layerset['list'][$i]['minscale'] == 0) AND ($layerset['list'][$i]['maxscale'] > $scale OR $layerset['list'][$i]['maxscale'] == 0)){
 					if($this->formvars['legendlayer'.$layerset['list'][$i]['Layer_ID']] == 'on'){
