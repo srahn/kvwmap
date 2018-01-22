@@ -631,6 +631,7 @@ class data_import_export {
 					FROM
 						" . $table . ";
 				";
+				#echo '<br>Sql: ' . $sql; exit;
 				$ret = $database->execSQL($sql,4, 0);
 				if (!$ret[0]) {
 					$rs = pg_fetch_assoc($ret[1]);
@@ -649,9 +650,9 @@ class data_import_export {
       else {
 				$result = array(
 					'success' => false,
-					'err_msg' => $ret[1]
+					'err_msg' => $ret
 				);
-				showAlert('Import fehlgeschlagen.');
+				#showAlert('Import fehlgeschlagen.');
 			}
 		}
 		else {
@@ -751,7 +752,7 @@ class data_import_export {
 			$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
 		}
 	}
-	
+
 	function ogr2ogr_export($sql, $exportformat, $exportfile, $layerdb){
 		$command = 'export PGCLIENTENCODING=UTF-8;'.OGR_BINPATH.'ogr2ogr -f '.$exportformat.' -lco ENCODING=UTF-8 -sql "'.$sql.'" '.$exportfile.' PG:"dbname='.$layerdb->dbName.' user='.$layerdb->user;
 		if($layerdb->passwd != '')$command.= ' password='.$layerdb->passwd;
@@ -759,22 +760,24 @@ class data_import_export {
 		if($layerdb->host != '') $command .= ' host=' . $layerdb->host;
 		exec($command.'"');
 	}
-	
-	function ogr2ogr_import($schema, $tablename, $epsg, $importfile, $database, $layer, $sql = NULL, $options = NULL, $encoding = 'LATIN1'){
+
+	function ogr2ogr_import($schema, $tablename, $epsg, $importfile, $database, $layer, $sql = NULL, $options = NULL, $encoding = 'LATIN1') {
 		$command = 'export PGCLIENTENCODING='.$encoding.';'.OGR_BINPATH.'ogr2ogr ';
-		if($options != NULL)$command.= $options;
-		$command.= ' -f PostgreSQL -lco GEOMETRY_NAME=the_geom -nln '.$tablename.' -a_srs EPSG:'.$epsg;
-		if($sql != NULL)$command.= ' -sql \''.$sql.'\'';
-		$command.= ' -append PG:"dbname='.$database->dbName.' user='.$database->user.' active_schema='.$schema;
-		if($database->passwd != '')$command.= ' password='.$database->passwd;
-		if($database->port != '')$command.=' port='.$database->port;
-		if($database->host != '') $command .= ' host=' . $database->host;
-		$command .= '" "'.$importfile.'" '.$layer;
-		#echo '<br>Exec Command: ' . $command;
+		if ($options != NULL) $command.= $options;
+		$command .= ' -f PostgreSQL -lco GEOMETRY_NAME=the_geom -nln ' . $tablename . ' -a_srs EPSG:' . $epsg;
+		if ($sql != NULL) $command.= ' -sql \''.$sql.'\'';
+		$command .= ' -append PG:"dbname=' . $database->dbName . ' user=' . $database->user . ' active_schema=' . $schema;
+		if ($database->passwd != '') $command .= ' password=' . $database->passwd;
+		if ($database->port != '') $command .= ' port=' . $database->port;
+		if ($database->host != '') $command .= ' host=' . $database->host;
+		$command .= '" "' . $importfile . '" ' . $layer;
+		$command .= ' 2> ' . IMAGEPATH . $tablename . '.err';
+		$output = array();
 		exec($command, $output, $ret);
+		if ($ret != 0) { $ret = 'Fehler beim Importieren der Datei ' . basename($importfile) . '!<br><a href="' . IMAGEURL . $tablename . '.err" target="_blank">Fehlerprotokoll</a>'; }
 		return $ret;
 	}
-	
+
 	function getEncoding($dbf){
 		$folder = dirname($dbf);
 		$command = OGR_BINPATH.'ogr2ogr -f CSV '.$folder.'/test.csv "'.$dbf.'"';
@@ -791,7 +794,7 @@ class data_import_export {
 		#echo '<br>encoding: ' . $encoding;
 		return $encoding;
 	}
-	
+
 	function create_csv($result, $attributes, $groupnames){
 		# Gruppennamen in die erste Zeile schreiben
 		if($groupnames != ''){
@@ -928,8 +931,6 @@ class data_import_export {
 	
 	function export_exportieren($formvars, $stelle, $user){
 		global $language;
-		global $kvwmap_plugins;
-
 		$currenttime=date('Y-m-d H:i:s',time());
   	$this->formvars = $formvars;
   	$layerset = $user->rolle->getLayer($this->formvars['selected_layer_id']);
@@ -961,12 +962,12 @@ class data_import_export {
 		
 		# Zusammensammeln der Attribute, die abgefragt werden müssen
     for ($i = 0; $i < count($this->attributes['name']); $i++) {
-    	if ($this->formvars['check_'.$this->attributes['name'][$i]] or $this->formvars['all'] == 1) {		# Entweder das Attribut oder alle wurde angehakt
+    	if ($this->formvars['check_'.$this->attributes['name'][$i]]) {		# Entweder das Attribut wurde angehakt
     		$selection[$this->attributes['name'][$i]] = 1;
 				$selected_attributes[] = $this->attributes['name'][$i];						# Zusammensammeln der angehakten Attribute, denn nur die sollen weiter unten auch exportiert werden
 				$selected_attr_types[] = $this->attributes['type'][$i];
     	}
-			if (strpos($where, $this->attributes['name'][$i])) {			# oder es kommt in der Where-Bedingung des Sachdatenabfrage-SQLs vor
+			if (strpos($where, 'query.'.$this->attributes['name'][$i])) {			# oder es kommt in der Where-Bedingung des Sachdatenabfrage-SQLs vor
 				$selection[$this->attributes['name'][$i]] = 1;
 			}
 			if (strpos($orderby, $this->attributes['name'][$i])) {						# oder es kommt im ORDER BY des Layer-Query vor
@@ -1081,17 +1082,8 @@ class data_import_export {
 				case 'GeoJSON' : {
 					$exportfile = $exportfile.'.json';
 					$this->ogr2ogr_export($sql, 'GeoJSON', $exportfile, $layerdb);
-				} break;
-
-				case 'GeoJSONPlus': {
-					$exportfile = $exportfile.'.json';
-					if (in_array('mobile', $kvwmap_plugins)) {
-						$sql = str_replace('version FROM', '(SELECT coalesce(max(version), 1) FROM ' . $layerset[0]['schema'] . '.' . $layerset[0]['maintable'] . '_deltas) AS version FROM', $sql);
-					}
-					$exportfile = $exportfile.'.json';
-					$this->ogr2ogr_export($sql, 'GeoJSON', $exportfile, $layerdb);
-				} break;
-
+				}break;
+				
 				case 'CSV' : {
 					while($rs=pg_fetch_assoc($ret[1])){
 						$result[] = $rs;
@@ -1158,7 +1150,7 @@ class data_import_export {
       $sql = 'DROP TABLE '.$temp_table;
       $ret = $layerdb->execSQL($sql,4, 0);
     	if($this->formvars['export_format'] != 'CSV')$user->rolle->setConsumeShape($currenttime,$this->formvars['selected_layer_id'],$count);
-
+			
 	    ob_end_clean();
 			header('Content-type: '.$contenttype);
 			header("Content-disposition:  attachment; filename=".basename($exportfile));
@@ -1166,12 +1158,10 @@ class data_import_export {
 			header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 			header('Pragma: public');
 			readfile($exportfile);
-
     }
     else{
       showAlert('Abfrage fehlgeschlagen.');
     }
   }
- 
 }
 ?>
