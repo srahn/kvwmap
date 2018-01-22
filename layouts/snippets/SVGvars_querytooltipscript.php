@@ -1,7 +1,7 @@
 <?php
 #$layerset=$this->user->rolle->getLayer('');
 
-$layerset = $this->layerset;
+$layerset = $this->layerset['list'];
 
 $SVGvars_querytooltipscript = '
 
