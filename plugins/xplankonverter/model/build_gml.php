@@ -323,47 +323,53 @@ class Gml_builder {
           }
           break;
         case 'b': // built-in datatype
-          // geometrie attribute
-          if ($uml_attribute['type'] == "geometry") {
-            $gml_value = $gml_object['gml_'.$uml_attribute['col_name']];
-            // unify gml_ids by appending a sequential number to the id
-            $seq_number = 0; $unified_gml = "";
-            $haystack = $gml_value;
-            while (!empty($haystack)) {
-              $currpos = strpos($haystack, "_geom");
-              if (!$currpos) break;
-              $unified_gml .= substr($haystack, 0, $currpos);
-              $unified_gml .= "_geom_". $seq_number++;
-              $currpos = strpos($haystack, '"', $currpos);
-							if (substr($haystack, $currpos + 1, 1) == '"') {
-								$currpos++;
+					switch ($uml_attribute['type']) {
+						case 'geometry' : {
+							$gml_value = $gml_object['gml_'.$uml_attribute['col_name']];
+							// unify gml_ids by appending a sequential number to the id
+							$seq_number = 0; $unified_gml = "";
+							$haystack = $gml_value;
+							while (!empty($haystack)) {
+								$currpos = strpos($haystack, "_geom");
+								if (!$currpos) break;
+								$unified_gml .= substr($haystack, 0, $currpos);
+								$unified_gml .= "_geom_". $seq_number++;
+								$currpos = strpos($haystack, '"', $currpos);
+								if (substr($haystack, $currpos + 1, 1) == '"') {
+									$currpos++;
+								}
+								if (!$currpos) { // should never happen!!!
+									$currpos += 5;
+									$unified_gml .= '"';
+									continue;
+								}
+								$haystack = substr($haystack, $currpos);
 							}
-              if (!$currpos) { // should never happen!!!
-                $currpos += 5;
-                $unified_gml .= '"';
-                continue;
-              }
-              $haystack = substr($haystack, $currpos);
-            }
-            $unified_gml .= $haystack;
-            #echo $unified_str . "\n";
-            $gmlStr .= $this->wrapWithElement("{$xplan_ns_prefix}{$uml_attribute['uml_name']}", $unified_gml);
-            break;
-          }
-          // date attribute
-          if ($uml_attribute['type'] == "date") {
-            $gml_value = $gml_object[$uml_attribute['col_name']];
-            $timestamp = strtotime($gml_value);
-            if (!$timestamp) {
-              echo "Ungueltige Datumsangabe: " . $gml_value;
-              break;
-            }
-            $iso_date_str = date("Y-m-d", $timestamp);
-            $gmlStr .= $this->wrapWithElement("{$xplan_ns_prefix}{$uml_attribute['uml_name']}", $iso_date_str);
-            break;
-          }
+							$unified_gml .= $haystack;
+							#echo $unified_str . "\n";
+							$gmlStr .= $this->wrapWithElement("{$xplan_ns_prefix}{$uml_attribute['uml_name']}", $unified_gml);
+						} break;
+						case 'date' : {
+							$gml_value = $gml_object[$uml_attribute['col_name']];
+							$timestamp = strtotime($gml_value);
+							if (!$timestamp) {
+								echo "Ungueltige Datumsangabe: " . $gml_value;
+								break;
+							}
+							$iso_date_str = date("Y-m-d", $timestamp);
+							$gmlStr .= $this->wrapWithElement("{$xplan_ns_prefix}{$uml_attribute['uml_name']}", $iso_date_str);
+						} break;
+						case 'bool' : {
+							switch ($gml_object[$uml_attribute['col_name']]) {
+								case 't' : $value = 'true'; break;
+								case 'f' : $value = 'false'; break;
+								default : $value = '';
+							};
+							$gmlStr .= $this->wrapWithElement("{$xplan_ns_prefix}{$uml_attribute['uml_name']}", $value);
+						} break;
+					} break;
         case 'e': // enum type
-        default:
+        default: {
           $gml_value = trim($gml_object[$uml_attribute['col_name']]);
           // check for array values
           if ($gml_value[0] == '{' && substr($gml_value,-1) == '}') {
@@ -377,6 +383,7 @@ class Gml_builder {
           $gmlStr .= $this->wrapWithElement(
               "{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
               htmlspecialchars($gml_value,ENT_QUOTES|ENT_XML1,"UTF-8"));
+				}
       }
     }
     return $gmlStr;
