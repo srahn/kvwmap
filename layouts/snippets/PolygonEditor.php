@@ -74,8 +74,8 @@ function buildwktpolygonfromsvgpath(svgpath){
     <td align="center" colspan="5"><a name="geoedit_anchor"><h2><?php echo $this->titel; ?></h2></a></td>
   </tr>
   <tr> 
-    <td rowspan="8">&nbsp;</td>
-    <td colspan="4" rowspan="8"> 
+    <td rowspan="9">&nbsp;</td>
+    <td colspan="4" rowspan="9"> 
       <?
 				include(LAYOUTPATH.'snippets/SVG_polygon_query_area.php');
 			?>
