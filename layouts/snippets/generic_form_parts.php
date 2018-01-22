@@ -136,6 +136,7 @@
 			}
 			else{
 				$datapart .= '<select id="'.$layer_id.'_'.$attributes['name'][$j].'_'.$k.'" onchange="'.$onchange.'" title="'.$attributes['alias'][$j].'"  style="'.$select_width.'font-size: '.$fontsize.'px" name="'.$fieldname.'">';
+				if($attributes['nullable'][$j] != '0' OR $gui->new_entry == true)$datapart .= '<option value="">-- '.$gui->strPleaseSelect.' --</option>';
 				for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
 					$datapart .= '<option ';
 					if($attributes['enum_value'][$j][$e] == $dataset[$attributes['name'][$j]]){
