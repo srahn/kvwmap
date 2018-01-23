@@ -44,6 +44,7 @@ function checkForUnsavedChanges(event){
 		preventSubmit();
 	}
 	else{
+		document.GUI.gle_changed.value = 0;
 		allowSubmit();
 	}
 	return sure;
