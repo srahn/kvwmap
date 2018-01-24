@@ -2055,6 +2055,7 @@ class flurstueck {
 			else rolle::$hist_timestamp = '';
 		}
     $rs=$ret[1];
+		$this->oid=$rs['oid'];
 		$this->gml_id=$rs['gml_id'];
     $this->Zaehler=intval($rs['zaehler']);
     $this->Nenner=intval($rs['nenner']);
@@ -2103,9 +2104,6 @@ class flurstueck {
     $this->Nachfolger=$this->getNachfolger();	
     # Abfragen der Nutzungen
     $this->Nutzung=$this->getNutzung();
-    if(ALKIS){}		# ALKIS TODO
-    else $updateDate = $this->database->readLastUpdateDate('');
-    $this->updateDate = $updateDate[1]['lastupdate'];
   }
 
   function is_ALK_Flurstueck($FlurstKennz) {
