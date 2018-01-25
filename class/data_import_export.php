@@ -1025,7 +1025,7 @@ class data_import_export {
       $this->formvars['layer_name'] = str_replace('/', '_', $this->formvars['layer_name']);
       $this->formvars['layer_name'] = str_replace('[', '_', $this->formvars['layer_name']);
       $this->formvars['layer_name'] = str_replace(']', '_', $this->formvars['layer_name']);
-      $folder = 'Export_'.$this->formvars['layer_name'].rand(0,10000);
+      $folder = 'Export_'.umlaute_umwandeln($this->formvars['layer_name']).rand(0,10000);
 			$old = umask(0);
       mkdir(IMAGEPATH.$folder, 0777);                       # Ordner erzeugen
 			umask($old); 
