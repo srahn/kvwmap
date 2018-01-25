@@ -1436,10 +1436,10 @@ class rolle {
 		$sql.=' user_id='.$this->user_id;
 		$sql.=', stelle_id='.$this->stelle_id;
 		$sql.=', name="'.$comment.'"';
-		for($i=0; $i < count($layerset); $i++){
-			if($layerset[$i]['Layer_ID'] > 0 AND $layerset[$i]['aktivStatus'] == 1){
-				$layers[] = $layerset[$i]['Layer_ID'];
-				if($layerset[$i]['queryStatus'] == 1)$query[] = $layerset[$i]['Layer_ID'];
+		for($i=0; $i < count($layerset['list']); $i++){
+			if($layerset['list'][$i]['Layer_ID'] > 0 AND $layerset['list'][$i]['aktivStatus'] == 1){
+				$layers[] = $layerset['list'][$i]['Layer_ID'];
+				if($layerset['list'][$i]['queryStatus'] == 1)$query[] = $layerset['list'][$i]['Layer_ID'];
 			}
 		}
 		$sql.=', layers="'.implode(',', $layers).'"';
