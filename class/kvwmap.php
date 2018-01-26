@@ -602,9 +602,11 @@ class GUI {
 										$style->set('size', 2*$style->width);					# size und maxsize beim Typ Hatch auf die doppelte Linienbreite setzen, damit man was in der Legende erkennt
 										$style->set('maxsize', 2*$style->width);
 									}
-									else{
-										$style->set('size', 2);					# size und maxsize bei Linien und Polygonlayern immer auf 2 setzen, damit man was in der Legende erkennt
+									elseif($style->symbolname == ''){
+										$style->set('size', 2);					# size und width bei Linien und Polygonlayern immer auf 2 setzen, damit man was in der Legende erkennt
 										$style->set('maxsize', 2);
+										$style->set('width', 2);
+										$style->set('maxwidth', 2);
 									}
 								}
 								else{		# Punktlayer
