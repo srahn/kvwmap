@@ -1812,7 +1812,7 @@ function highlight(evt){
 			<g id="redlining">
 			</g>';
 if($this->user->rolle->gps){
-	 $svg.=' <use id="gps_position" xlink:href="#crosshair_red" x="-100" y="-100"/>';
+	 $svg.=' <use id="gps_position" xlink:href="#crosshair_red" x="-100000" y="-100000"/>';
 }
 $svg.='
     </g>
