@@ -287,7 +287,11 @@
 					--raise notice '_query: %', _query;
 					foreach part in array string_to_array(_query, ';')
 					loop
-						IF strpos(lower(ltrim(part)), 'insert') = 1 THEN _sql := trim(part); END IF;
+						-- replace horizontal tabs, new lines and carriage returns
+						part = trim(regexp_replace(part, E'[\\t\\n\\r]+', ' ', 'g'));
+						IF strpos(lower(part), 'insert into ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME) = 1 THEN
+						  _sql := part;
+						END IF;
 					end loop;
 					--raise notice 'sql nach split by ; und select by update: %', _sql;
 
@@ -335,7 +339,11 @@
 					--raise notice '_query: %', _query;
 					foreach part in array string_to_array(_query, ';')
 					loop
-						IF strpos(lower(ltrim(part)), 'update') = 1 THEN _sql := trim(part); END IF;
+						-- replace horizontal tabs, new lines and carriage returns
+						part = trim(regexp_replace(part, E'[\\t\\n\\r]+', ' ', 'g'));
+						IF strpos(lower(part), 'update ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME) = 1 THEN
+							_sql := part;
+						END IF;
 					end loop;
 					--raise notice 'sql nach split by ; und select by update: %', _sql;
 
@@ -377,7 +385,11 @@
 					--raise notice '_query: %', _query;
 					foreach part in array string_to_array(_query, ';')
 					loop
-						IF strpos(lower(ltrim(part)), 'delete') = 1 THEN _sql := trim(part); END IF;
+						-- replace horizontal tabs, new lines and carriage returns
+						part = trim(regexp_replace(part, E'[\\t\\n\\r]+', ' ', 'g'));
+						IF strpos(lower(part), 'delete from ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME) = 1 THEN
+							_sql := part;
+						END IF;
 					end loop;
 					--raise notice 'sql nach split by ; und select by update: %', _sql;
 
