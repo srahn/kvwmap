@@ -74,7 +74,7 @@
 		#		if ($this->formvars['selected_layer_id'] != '')
 
 		$this->formvars['client_deltas'] = json_decode(file_get_contents($_FILES['client_deltas']['tmp_name']));
-		move_uploaded_file($_FILES['file']['tmp_name'], '/var/www/logs/upload_file.json');
+		//move_uploaded_file($_FILES['client_deltas']['tmp_name'], '/var/www/logs/upload_file.json');
 
 		$result = $this->mobile_sync_parameter_valide($this->formvars);
 		if ($result['success']) {

@@ -14,8 +14,10 @@ include_once(CLASSPATH . 'data_import_export.php');
 
 /**
 * Anwendungsfälle
-* mobile_get_layer
+* mobile_get_layers
 * mobile_sync
+* mobile_delete_images
+* mobile_upload_images
 */
 
 #echo '<br>go: ' . $this->go;
