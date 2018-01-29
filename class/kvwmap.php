@@ -13313,8 +13313,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 									$attribcount++;
 								} break;
 								case 'Checkbox': {
+									$output .=  $attributes['alias'][$j].': ';
 		              $layer['shape'][$k][$attributes['name'][$j]] = str_replace('f', 'nein',  $layer['shape'][$k][$attributes['name'][$j]]);
 									$layer['shape'][$k][$attributes['name'][$j]] = str_replace('t', 'ja',  $layer['shape'][$k][$attributes['name'][$j]]);
+									$output .= $layer['shape'][$k][$attributes['name'][$j]].'  ';
+		              $output .= '##';
 								} break;
 				        default : {
 		              $output .=  $attributes['alias'][$j].': ';
