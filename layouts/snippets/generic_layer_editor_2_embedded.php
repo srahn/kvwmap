@@ -26,7 +26,7 @@
 <?
 	$checkbox_names = '';
 	$columnname = '';
-	$tablename = '';
+	$geom_tablename = '';
 	$geomtype = '';
 	$dimension = '';
 	$privileg = '';
@@ -98,7 +98,7 @@
 					}
 		  		else {
 		  			$columnname = $attributes['name'][$j];
-		  			$tablename = $attributes['table_name'][$attributes['name'][$j]];
+		  			$geom_tablename = $attributes['table_name'][$attributes['name'][$j]];
 		  			$geomtype = $attributes['geomtype'][$attributes['name'][$j]];
 		  			$dimension = $attributes['dimension'][$j];
 		  			$privileg = $attributes['privileg'][$j];
@@ -126,33 +126,34 @@
 							</td>
 						</tr>';
 					}
-					else{
-							if($this->formvars['printversion'] == '' AND !$lock[$k]){
-	?>
-								<tr>
-						    	<td colspan="2" align="center">
-						    		<table border="0" cellspacing="0" cellpadding="2">
-						    			<tr>
-						    				<td align="center">
-													<a title="<? echo $strEditGeom; ?>" href="index.php?go=<? echo $geomtype; ?>Editor&oid=<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>&layer_tablename=<? echo $geom_tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>&selected_layer_id=<? echo $layer['Layer_ID'];?>&dimension=<? echo $dimension; ?>"><div class="emboss edit_geom"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
-												</td>
-											</tr>
-										</table>
-									</td>
-								</tr>
-	<?
-						}
-					}
 				}
- if($this->new_entry != true AND $this->formvars['printversion'] == '' AND $layer['shape'][$k]['the_geom']){ ?>
+				if($this->new_entry != true AND $this->formvars['printversion'] == '' AND $layer['shape'][$k]['the_geom']){
+ 					if($attributes['group'][0] != ''){ ?>
+						<tr><td colspan="2"><table width="100%" class="tgle" border="2" cellpadding="0" cellspacing="0"><tbody class="gle">
+					<? } ?>
 					<tr>
 						<? if($layer['querymaps'][$k] != ''){ ?>
-						<td bgcolor="<? echo BG_GLEATTRIBUTE; ?>" style="padding-top:5px; padding-bottom:5px;" align="center"><img style="border:1px solid grey" src="<? echo $layer['querymaps'][$k]; ?>"></td>
+						<td <? if($attributes['group'][0] != '')echo 'width="200px"'; ?> bgcolor="<? echo BG_GLEATTRIBUTE; ?>" style="padding-top:5px; padding-bottom:5px;" align="center"><img style="border:1px solid grey" src="<? echo $layer['querymaps'][$k]; ?>"></td>
 						<? } else { ?>
-			    	    <td bgcolor="<? echo BG_GLEATTRIBUTE; ?>" style="padding-top:5px; padding-bottom:5px;">&nbsp;</td>
+			    	    <td <? if($attributes['group'][0] != '')echo 'width="200px"'; ?> bgcolor="<? echo BG_GLEATTRIBUTE; ?>" style="padding-top:5px; padding-bottom:5px;">&nbsp;</td>
 			    	    <? } ?>
-			    	    <td style="padding-top:5px; padding-bottom:5px;">&nbsp;&nbsp;
-			    				<a title="<? echo $strMapZoom; ?>" href="javascript:zoom2object(<? echo $layer['Layer_ID'];?>, '<? echo $geomtype; ?>', '<? echo $geom_tablename; ?>', '<? echo $columnname; ?>', '<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>', 'zoomonly');"><div class="emboss zoom_normal"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
+			    	    <td style="padding-top:5px; padding-bottom:5px;" valign="middle" colspan="19">
+<?						
+								echo '<input type="hidden" id="'.$layer['Layer_ID'].'_'.$columnname.'_'.$k.'" value="'.$layer['shape'][$k][$columnname].'">';						
+?>								
+									<table cellspacing="0" cellpadding="0">
+										<tr>
+	<?								if($privileg == 1 AND !$lock[$k]) { ?>
+											<td style="padding: 0 0 0 10;"><a onclick="checkForUnsavedChanges(event);" title="<? echo $strEditGeom; ?>" href="index.php?go=<? echo $geomtype; ?>Editor&oid=<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>&layer_tablename=<? echo $geom_tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>&selected_layer_id=<? echo $layer['Layer_ID'];?>&dimension=<? echo $dimension; ?>"><div class="emboss edit_geom"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+	<?								} 
+									if($layer['shape'][$k][$attributes['the_geom']]){ ?>
+											<td style="padding: 0 0 0 10;"><a title="<? echo $strMapZoom; ?>" href="javascript:zoom2object(<? echo $layer['Layer_ID'];?>, '<? echo $geomtype; ?>', '<? echo $geom_tablename; ?>', '<? echo $columnname; ?>', '<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>', 'zoomonly');"><div class="emboss zoom_normal"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+									<? if($layer['Layer_ID'] > 0){ ?>
+											<td style="padding: 0 0 0 10;"><a title="<? echo $strMapZoom.$strAndHighlight; ?>" href="javascript:zoom2object(<? echo $layer['Layer_ID'];?>, '<? echo $geomtype; ?>', '<? echo $geom_tablename; ?>', '<? echo $columnname; ?>', '<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>', 'false');"><div class="emboss zoom_highlight"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+											<td style="padding: 0 0 0 10;"><a title="<? echo $strMapZoom.$strAndHide; ?>" href="javascript:zoom2object(<? echo $layer['Layer_ID'];?>, '<? echo $geomtype; ?>', '<? echo $geom_tablename; ?>', '<? echo $columnname; ?>', '<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>', 'true');"><div class="emboss zoom_select"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+									<? }} ?>
+										</tr>
+									</table>
 								</td>
 			        </tr>
 <? } ?>
