@@ -15688,7 +15688,7 @@ class db_mapObj{
               $attributes['subform_layer_privileg'][$i] = $layer['privileg'];
               for($k = 1; $k < count($subform); $k++){
                 $attributes['subform_fkeys'][$i][] = $subform[$k];
-                $attributes['invisible'][$subform[$k]] = 'true';
+                $attributes['visible'][$attributes['indizes'][$subform[$k]]] = 0;
               }
               if($options[1] != ''){
                 if($options[1] == 'no_new_window'){
@@ -16297,7 +16297,8 @@ class db_mapObj{
 				`raster_visibility` = " . ($formvars['raster_visibility_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['raster_visibility_' . $attributes['name'][$i]]) . ",
 				`dont_use_for_new`= " . ($formvars['dont_use_for_new_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['dont_use_for_new_' . $attributes['name'][$i]]) . ",
 				`mandatory` = " . ($formvars['mandatory_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['mandatory_' . $attributes['name'][$i]]) . ",
-				`quicksearch`= " . ($formvars['quicksearch_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['quicksearch_' . $attributes['name'][$i]]) . "
+				`quicksearch`= " . ($formvars['quicksearch_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['quicksearch_' . $attributes['name'][$i]]) . ",
+				`visible`= ".($formvars['visible_'.$attributes['name'][$i]] == '' ? "0" : $formvars['visible_'.$attributes['name'][$i]])."
 			";
 			$sql = "
 				INSERT INTO
@@ -16469,6 +16470,7 @@ class db_mapObj{
 				`dont_use_for_new`,
 				`mandatory`,
 				`quicksearch`,
+				`visible`,
 				`order`,
 				`privileg`,
 				`query_tooltip`
@@ -16487,75 +16489,75 @@ class db_mapObj{
 		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
 		$i = 0;
 		while ($rs = mysql_fetch_array($query)){
-			if ($rs['form_element_type'] == 'Style') {
-				$attributes['style'] = $rs['name'];
+			$attributes['name'][$i] = $rs['name'];
+			$attributes['indizes'][$rs['name']] = $i;
+			$attributes['real_name'][$rs['name']] = $rs['real_name'];
+			if ($rs['tablename']){
+				if (strpos($rs['tablename'], '.') !== false){
+					$explosion = explode('.', $rs['tablename']);
+					$rs['tablename'] = $explosion[1];		# Tabellenname ohne Schema
+					$attributes['schema_name'][$rs['tablename']] = $explosion[0];
+				}
+				$attributes['table_name'][$i]= $rs['tablename'];
+				$attributes['table_name'][$rs['name']] = $rs['tablename'];
 			}
-			else {
-				$attributes['name'][$i] = $rs['name'];
-				$attributes['indizes'][$rs['name']] = $i;
-				$attributes['real_name'][$rs['name']] = $rs['real_name'];
-				if ($rs['tablename']){
-					if (strpos($rs['tablename'], '.') !== false){
-						$explosion = explode('.', $rs['tablename']);
-						$rs['tablename'] = $explosion[1];		# Tabellenname ohne Schema
-						$attributes['schema_name'][$rs['tablename']] = $explosion[0];
-					}
-					$attributes['table_name'][$i]= $rs['tablename'];
-					$attributes['table_name'][$rs['name']] = $rs['tablename'];
-				}
-				if ($rs['table_alias_name'])$attributes['table_alias_name'][$i] = $rs['table_alias_name'];
-				if ($rs['table_alias_name'])$attributes['table_alias_name'][$rs['name']] = $rs['table_alias_name'];
-				$attributes['table_alias_name'][$rs['tablename']] = $rs['table_alias_name'];
-				$attributes['type'][$i] = $rs['type'];
-				$attributes['typename'][$i] = $rs['typename'];
-				$type = ltrim($rs['type'], '_');
-				if ($recursive AND is_numeric($type)){
-					$attributes['type_attributes'][$i] = $this->read_datatype_attributes($type, $layerdb, NULL, $all_languages, true);
-				}
-				if ($rs['type'] == 'geometry'){
-					$attributes['the_geom'] = $rs['name'];
-				}
-				$attributes['geomtype'][$i]= $rs['geometrytype'];
-				$attributes['geomtype'][$rs['name']]= $rs['geometrytype'];
-				$attributes['constraints'][$i]= $rs['constraints'];
-				$attributes['constraints'][$rs['real_name']]= $rs['constraints'];
-				$attributes['nullable'][$i]= $rs['nullable'];
-				$attributes['length'][$i]= $rs['length'];
-				$attributes['decimal_length'][$i]= $rs['decimal_length'];
+			if ($rs['table_alias_name'])$attributes['table_alias_name'][$i] = $rs['table_alias_name'];
+			if ($rs['table_alias_name'])$attributes['table_alias_name'][$rs['name']] = $rs['table_alias_name'];
+			$attributes['table_alias_name'][$rs['tablename']] = $rs['table_alias_name'];
+			$attributes['type'][$i] = $rs['type'];
+			$attributes['typename'][$i] = $rs['typename'];
+			$type = ltrim($rs['type'], '_');
+			if ($recursive AND is_numeric($type)){
+				$attributes['type_attributes'][$i] = $this->read_datatype_attributes($type, $layerdb, NULL, $all_languages, true);
+			}
+			if ($rs['type'] == 'geometry'){
+				$attributes['the_geom'] = $rs['name'];
+			}
+			$attributes['geomtype'][$i]= $rs['geometrytype'];
+			$attributes['geomtype'][$rs['name']]= $rs['geometrytype'];
+			$attributes['constraints'][$i]= $rs['constraints'];
+			$attributes['constraints'][$rs['real_name']]= $rs['constraints'];
+			$attributes['nullable'][$i]= $rs['nullable'];
+			$attributes['length'][$i]= $rs['length'];
+			$attributes['decimal_length'][$i]= $rs['decimal_length'];
 
-				if (substr($rs['default'], 0, 6) == 'SELECT'){					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
-					$ret1 = $layerdb->execSQL($rs['default'], 4, 0);
-					if ($ret1[0] == 0) {
-						$attributes['default'][$i] = array_pop(pg_fetch_row($ret1[1]));
-					}
+			if (substr($rs['default'], 0, 6) == 'SELECT'){					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
+				$ret1 = $layerdb->execSQL($rs['default'], 4, 0);
+				if ($ret1[0] == 0) {
+					$attributes['default'][$i] = array_pop(pg_fetch_row($ret1[1]));
 				}
-				else {															# das sind die alten Defaultwerte ohne 'SELECT ' davor, ab Version 1.13 haben Defaultwerte immer ein SELECT, wenn man den Layer in dieser Version einmal gespeichert hat
-					$attributes['default'][$i] = $rs['default'];
-				}
-				$attributes['form_element_type'][$i] = $rs['form_element_type'];
-				$attributes['form_element_type'][$rs['name']] = $rs['form_element_type'];
-				$rs['options'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $rs['options']);
-				$rs['options'] = str_replace('$language', $this->user->rolle->language, $rs['options']);
-				$attributes['options'][$i] = $rs['options'];
-				$attributes['options'][$rs['name']] = $rs['options'];
-				$attributes['alias'][$i] = $rs['alias'];
-				$attributes['alias'][$attributes['name'][$i]] = $rs['alias'];
-				$attributes['alias_low-german'][$i] = $rs['alias_low-german'];
-				$attributes['alias_english'][$i] = $rs['alias_english'];
-				$attributes['alias_polish'][$i] = $rs['alias_polish'];
-				$attributes['alias_vietnamese'][$i] = $rs['alias_vietnamese'];
-				$attributes['tooltip'][$i] = $rs['tooltip'];
-				$attributes['group'][$i] = $rs['group'];
-				$attributes['arrangement'][$i] = $rs['arrangement'];
-				$attributes['labeling'][$i] = $rs['labeling'];
-				$attributes['raster_visibility'][$i] = $rs['raster_visibility'];
-				$attributes['dont_use_for_new'][$i] = $rs['dont_use_for_new'];
-				$attributes['mandatory'][$i] = $rs['mandatory'];
-				$attributes['quicksearch'][$i] = $rs['quicksearch'];
-				$attributes['privileg'][$i] = $rs['privileg'];
-				$attributes['query_tooltip'][$i] = $rs['query_tooltip'];
-				$i++;
 			}
+			else {															# das sind die alten Defaultwerte ohne 'SELECT ' davor, ab Version 1.13 haben Defaultwerte immer ein SELECT, wenn man den Layer in dieser Version einmal gespeichert hat
+				$attributes['default'][$i] = $rs['default'];
+			}
+			$attributes['form_element_type'][$i] = $rs['form_element_type'];
+			$attributes['form_element_type'][$rs['name']] = $rs['form_element_type'];
+			$rs['options'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $rs['options']);
+			$rs['options'] = str_replace('$language', $this->user->rolle->language, $rs['options']);
+			$attributes['options'][$i] = $rs['options'];
+			$attributes['options'][$rs['name']] = $rs['options'];
+			$attributes['alias'][$i] = $rs['alias'];
+			$attributes['alias'][$attributes['name'][$i]] = $rs['alias'];
+			$attributes['alias_low-german'][$i] = $rs['alias_low-german'];
+			$attributes['alias_english'][$i] = $rs['alias_english'];
+			$attributes['alias_polish'][$i] = $rs['alias_polish'];
+			$attributes['alias_vietnamese'][$i] = $rs['alias_vietnamese'];
+			$attributes['tooltip'][$i] = $rs['tooltip'];
+			$attributes['group'][$i] = $rs['group'];
+			$attributes['arrangement'][$i] = $rs['arrangement'];
+			$attributes['labeling'][$i] = $rs['labeling'];
+			$attributes['raster_visibility'][$i] = $rs['raster_visibility'];
+			$attributes['dont_use_for_new'][$i] = $rs['dont_use_for_new'];
+			$attributes['mandatory'][$i] = $rs['mandatory'];
+			$attributes['quicksearch'][$i] = $rs['quicksearch'];
+			$attributes['visible'][$i] = $rs['visible'];
+			$attributes['privileg'][$i] = $rs['privileg'];
+			$attributes['query_tooltip'][$i] = $rs['query_tooltip'];
+			if($rs['form_element_type'] == 'Style'){
+				$attributes['style'] = $rs['name'];
+				$attributes['visible'][$i] = 0;
+			}
+			$i++;
 		}
 		if ($attributes['table_name'] != NULL) {
 			$attributes['all_table_names'] = array_unique($attributes['table_name']);

@@ -69,7 +69,7 @@
 											</tr>';
 				}
 
-				if($attributes['invisible'][$attributes['name'][$j]] != 'true'  AND $attributes['name'][$j] != 'lock'){
+				if($attributes['visible'][$j]){
 					if($attributes['type'][$j] != 'geometry'){
 						if($attributes['privileg'][$j] != '0' AND !$lock[$k])$this->editable = $layer['Layer_ID'];
 						if($attributes['alias'][$j] == '')$attributes['alias'][$j] = $attributes['name'][$j];
@@ -96,7 +96,7 @@
 							$this->form_field_names .= $layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'|';
 						}
 					}
-		  		else {
+		  		else{
 		  			$columnname = $attributes['name'][$j];
 		  			$geom_tablename = $attributes['table_name'][$attributes['name'][$j]];
 		  			$geomtype = $attributes['geomtype'][$attributes['name'][$j]];
@@ -104,12 +104,15 @@
 		  			$privileg = $attributes['privileg'][$j];
 		  			$this->form_field_names .= $layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].'|';
 		  		}
-					}
-					if($attributes['group'][$j] != $attributes['group'][$j+1]){		# wenn die nächste Gruppe anders ist, Tabelle schliessen
-						$datapart .= '</table></td></tr>';
-					}
-					echo $datapart;
 				}
+				else{
+					$invisible_attributes[$layer['Layer_ID']][] = '<input type="hidden" id="'.$layer['Layer_ID'].'_'.$attributes['name'][$j].'_'.$k.'" value="'.htmlspecialchars($layer['shape'][$k][$attributes['name'][$j]]).'">';
+				}
+				if($attributes['group'][$j] != $attributes['group'][$j+1]){		# wenn die nächste Gruppe anders ist, Tabelle schliessen
+					$datapart .= '</table></td></tr>';
+				}
+				echo $datapart;
+			}
 				
 				if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON' OR $geomtype == 'GEOMETRY')$geomtype = 'Polygon';
 				elseif($geomtype == 'POINT')$geomtype = 'Point';
@@ -165,6 +168,15 @@
 	}
 ?>
 </table>
+
+<?
+
+	for($l = 0; $l < count($invisible_attributes[$layer['Layer_ID']]); $l++){
+		echo $invisible_attributes[$layer['Layer_ID']][$l]."\n";
+	}
+
+?>
+
 <input type="hidden" name="checkbox_names_<? echo $layer['Layer_ID']; ?>" value="<? echo $checkbox_name; ?>">
 <?
   }

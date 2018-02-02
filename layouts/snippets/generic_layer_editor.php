@@ -76,7 +76,7 @@
 			  <?
 					$has_geom = false;
 			  	for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
-						if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
+						if($attributes['visible'][$j] AND $attributes['name'][$j] != 'lock'){
 							if($this->qlayerset[$i]['attributes']['type'][$j] != 'geometry'){
 								echo '<td id="column'.$j.'"';
 									//if($attributes['group'][0] != '')echo 'width="10%"';
@@ -153,7 +153,7 @@
 			if(($attributes['privileg'][$j] == '0' AND $attributes['form_element_type'][$j] == 'Auswahlfeld') OR ($attributes['form_element_type'][$j] == 'Text' AND $attributes['type'][$j] == 'not_saveable')){				# entweder ist es ein nicht speicherbares Attribut oder ein nur lesbares Auswahlfeld, dann ist es auch nicht speicherbar
 				$attributes['form_element_type'][$j] .= '_not_saveable';
 			}
-			if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
+			if($attributes['visible'][$j]){
 				if($attributes['type'][$j] != 'geometry') {
 					echo '<td' . get_td_class_or_style($layer['shape'][$k][$attributes['style']] != '' ? $layer['shape'][$k][$attributes['style']] : 'position: relative; text-align: right') . '>';
 					echo attribute_value($this, $layer['Layer_ID'], $attributes, $j, $k, $layer['shape'][$k], $size, $select_width, $this->user->rolle->fontsize_gle);
@@ -172,6 +172,9 @@
 					$nullable = $attributes['nullable'][$j];
 					$this->form_field_names .= $layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';Geometrie;'.$attributes['nullable'][$j].'|';
 				}
+			}
+			else{
+				$invisible_attributes[$layer['Layer_ID']][] = '<input type="hidden" id="'.$layer['Layer_ID'].'_'.$attributes['name'][$j].'_'.$k.'" value="'.htmlspecialchars($layer['shape'][$k][$attributes['name'][$j]]).'">';
 			}
 		}
 				if(($columnname != '' OR $layer['shape'][$k]['geom'] != '') AND $this->new_entry != true AND $this->formvars['printversion'] == ''){
@@ -227,7 +230,7 @@
 						&Sigma;
 					</td><?
 					for ($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
-						if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){ ?>
+						if($attributes['visible'][$j] AND $attributes['name'][$j] != 'lock'){ ?>
 							<td valign="top">
 								<div class="statistic_row_<? echo $layer['Layer_ID']; ?>" style="display:none"><?php
 								$column_name = $this->qlayerset[$i]['attributes']['name'][$j];
@@ -271,7 +274,7 @@
 				<td></td>
 			  <?
 			  	for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
-						if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
+						if($attributes['visible'][$j] AND $attributes['name'][$j] != 'lock'){
 							if($this->qlayerset[$i]['attributes']['type'][$j] != 'geometry'){
 								echo '<td ';
 									echo ' valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';
@@ -314,7 +317,7 @@
 							if(($attributes['privileg'][$j] == '0' AND $attributes['form_element_type'][$j] == 'Auswahlfeld') OR ($attributes['form_element_type'][$j] == 'Text' AND $attributes['type'][$j] == 'not_saveable')){				# entweder ist es ein nicht speicherbares Attribut oder ein nur lesbares Auswahlfeld, dann ist es auch nicht speicherbar
 								$attributes['form_element_type'][$j] .= '_not_saveable';
 							}
-							if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
+							if($attributes['visible'][$j] AND $attributes['name'][$j] != 'lock'){
 								if($attributes['type'][$j] != 'geometry'){
 									echo '<td>';
 									if(!in_array($attributes['form_element_type'][$j], array('Dokument', 'SubFormPK', 'SubFormEmbeddedPK'))){
@@ -470,9 +473,14 @@
 		</td>
 	</tr>
 </table>
-	<? } ?>
-
-
+	<? } 
+	
+	for($l = 0; $l < count($invisible_attributes[$layer['Layer_ID']]); $l++){
+		echo $invisible_attributes[$layer['Layer_ID']][$l]."\n";
+	}
+	
+?>
+	
 <input type="hidden" name="checkbox_names_<? echo $layer['Layer_ID']; ?>" value="<? echo $checkbox_names; ?>">
 <input type="hidden" name="orderby<? echo $layer['Layer_ID']; ?>" id="orderby<? echo $layer['Layer_ID']; ?>" value="<? echo $this->formvars['orderby'.$layer['Layer_ID']]; ?>">
 

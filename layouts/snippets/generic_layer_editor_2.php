@@ -101,7 +101,7 @@
 											</tr>';
 				}
 				
-				if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
+				if($attributes['visible'][$j]){
 					if($attributes['type'][$j] != 'geometry'){
 						if($attributes['privileg'][$j] != '0' AND !$lock[$k])$this->editable = $layer['Layer_ID'];
 						if($attributes['alias'][$j] == '')$attributes['alias'][$j] = $attributes['name'][$j];
@@ -169,6 +169,9 @@
 						$nullable = $attributes['nullable'][$j];
 						$this->form_field_names .= $layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';Geometrie;'.$attributes['nullable'][$j].'|';
 					}
+				}
+				else{
+					$invisible_attributes[$layer['Layer_ID']][] = '<input type="hidden" id="'.$layer['Layer_ID'].'_'.$attributes['name'][$j].'_'.$k.'" value="'.htmlspecialchars($layer['shape'][$k][$attributes['name'][$j]]).'">';
 				}
 				if($attributes['group'][$j] != $attributes['group'][$j+1]){		# wenn die nächste Gruppe anders ist, Tabelle schliessen
 					$datapart .= '</table></td></tr>';
@@ -400,6 +403,13 @@
 	<? } ?>
 </table>
 
+<?
+	
+	for($l = 0; $l < count($invisible_attributes[$layer['Layer_ID']]); $l++){
+		echo $invisible_attributes[$layer['Layer_ID']][$l]."\n";
+	}
+	
+?>
 
 <input type="hidden" name="checkbox_names_<? echo $layer['Layer_ID']; ?>" value="<? echo $checkbox_names; ?>">
 <input type="hidden" name="orderby<? echo $layer['Layer_ID']; ?>" id="orderby<? echo $layer['Layer_ID']; ?>" value="<? echo $this->formvars['orderby'.$layer['Layer_ID']]; ?>">
