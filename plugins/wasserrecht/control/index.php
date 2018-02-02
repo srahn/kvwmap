@@ -248,19 +248,19 @@ switch($this->go){
 	case ZENTRALE_STELLE_URL: {
 	    $this->log->log_debug(ZENTRALE_STELLE_URL . ' called!');
 	    
-	    if ($this->user->funktion === 'admin') 
-	    {
+// 	    if ($this->user->funktion === 'admin') 
+// 	    {
 	        $this->log->log_debug(ZENTRALE_STELLE_URL . ' Zugriff erlaubt');
 	        
 	        $this->main = PLUGINS . 'wasserrecht/view/' . ZENTRALE_STELLE_URL . '.php';
 	        $this->output();
-	    }
-	    else 
-	    {
-	        $this->log->log_debug(ZENTRALE_STELLE_URL . ' Zugriff verweigert');
+// 	    }
+// 	    else 
+// 	    {
+// 	        $this->log->log_debug(ZENTRALE_STELLE_URL . ' Zugriff verweigert');
 	        
-	        echo 'Zugriff verweigert';
-	    }
+// 	        echo 'Zugriff verweigert';
+// 	    }
 	    
 	}	break;
 	
