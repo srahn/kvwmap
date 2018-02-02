@@ -50,17 +50,17 @@ define('FESTSETZUNG_BESCHEID_PATH', 'wasserrecht/templates/Festsetzung_Sammelbes
 //LAYER NAMES
 define('SELECTED_LAYER_URL', 'Layer-Suche_Suchen&selected_layer_id');
 define('BEHOERDE_LAYER_NAME', 'Behoerde');
-define('BEHOERDE_LAYER_ID', 'id');
+define('BEHOERDE_OPERATOR_ID', 'id');
 define('PERSONEN_LAYER_NAME', 'FisWrV-WRe Personen');
-define('PERSONEN_LAYER_ID', 'personen_id');
+define('PERSONEN_OPERATOR_ID', 'personen_id');
 define('ANLAGEN_LAYER_NAME', 'FisWrV-WRe Anlagen');
-define('ANLAGEN_LAYER_ID', 'anlage_id');
+define('ANLAGEN_OPERATOR_ID', 'anlage_id');
 define('WRZ_LAYER_NAME', 'FisWrV-WRe WrZ');
-define('WRZ_LAYER_ID', 'wrz_id');
+define('WRZ_OPERATOR_ID', 'wrz_id');
 define('GEWAESSERBENUTZUNGEN_LAYER_NAME', 'FisWrV-WRe Gewässerbenutzungen');
-define('GEWAESSERBENUTZUNGEN_LAYER_ID', 'gwb_id');
+define('GEWAESSERBENUTZUNGEN_OPERATOR_ID', 'gwb_id');
 define('GEWAESSERBENUTZUNGEN_ART_LAYER_NAME', 'Gewaesserbenutzungen_Art');
-define('GEWAESSERBENUTZUNGEN_ART_LAYER_ID', 'id');
+define('GEWAESSERBENUTZUNGEN_ART_OPERATOR_ID', 'id');
 define('GEWAESSERBENUTZUNGEN_ZWECK_LAYER_NAME', 'Gewaesserbenutzungen_Zweck');
-define('GEWAESSERBENUTZUNGEN_ZWECK_LAYER_ID', 'id');
+define('GEWAESSERBENUTZUNGEN_ZWECK_OPERATOR_ID', 'id');
 ?>
