@@ -76,7 +76,7 @@ if($showAdressat)
         <div class="wasserrecht_display_table_row">
                 <div class="wasserrecht_display_table_cell_caption">
                 	<?php 
-                	echo '<a href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . $this->layer_names[BEHOERDE_LAYER_NAME] . '&value_' . BEHOERDE_OPERATOR_ID . '=' . $getBehoerde . '&operator_' . BEHOERDE_OPERATOR_ID . '==">Behörde: </a>';
+                	echo '<a href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . BEHOERDE_LAYER_ID . '&value_' . BEHOERDE_OPERATOR_ID . '=' . $getBehoerde . '&operator_' . BEHOERDE_OPERATOR_ID . '==">Behörde: </a>';
     			     ?>
                 </div>
                 <div class="wasserrecht_display_table_cell_spacer"></div>
@@ -146,7 +146,7 @@ if($showAdressat)
             <div class="wasserrecht_display_table_row">
             	<div class="wasserrecht_display_table_cell_caption">
             		<?php 
-        			    echo '<a href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . $this->layer_names[PERSONEN_LAYER_NAME] . '&value_' . PERSONEN_OPERATOR_ID . '=' . $getAdressat . '&operator_' . PERSONEN_OPERATOR_ID . '==">Adressat:</a>';
+        			    echo '<a href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . PERSONEN_LAYER_ID . '&value_' . PERSONEN_OPERATOR_ID . '=' . $getAdressat . '&operator_' . PERSONEN_OPERATOR_ID . '==">Adressat:</a>';
                     ?>
             	</div>
             	<div class="wasserrecht_display_table_cell_spacer"></div>

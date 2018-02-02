@@ -7,6 +7,7 @@ include_once(PLUGINS . 'wasserrecht/config/config.php');
 include(PLUGINS . 'wasserrecht/helper/Log.php');
 include(PLUGINS . 'wasserrecht/helper/CommonClassTrait.php');
 include(PLUGINS . 'wasserrecht/helper/DateHelper.php');
+// include(PLUGINS . 'wasserrecht/helper/LayerNames.php');
 include(PLUGINS . 'wasserrecht/model/FestsetzungsSammelbescheidDaten.php');
 include(PLUGINS . 'wasserrecht/model/AufforderungsBescheidDaten.php');
 include(PLUGINS . 'wasserrecht/model/WRZProGueltigkeitsJahre.php');
@@ -125,39 +126,10 @@ $this->log = new Log($this->debug);
  */
 $this->date = new DateHelper($this);
 
-
-//$anlage = new Anlage($this);
-//$anlagen = $anlage->find_where('true');
-
-//$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
-//$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-//$this->log->log_debug(var_dump($layerdb));
-
-/*        $this->loadMap('DataBase');
- $layer_names = array();
- foreach($this->layerset['layer_ids'] AS $id => $layer) {
- $layer_names[$layer['Name']] = $id;
- }
- $this->layer_names = $layer_names;
+/**
+ * Layer Names
  */
-
-// 	    $layer_name = 'Wasserrechtliche_Zulassungen';
-// 	    $this->layers = Layer::find($this, "Name = '" . $layer_name . "'");
-$this->layers = Layer::find($this, "true");
-// 	    var_dump(count($this->layers));
-$layer_names = array();
-for ($i = 0; $i <= count($this->layers); $i++) {
-    if(isset($this->layers[$i]))
-    {
-        //echo $this->layers[$i]->get('Name');
-        $layer_name = $this->layers[$i]->get('Name');
-        $layer_id = $this->layers[$i]->get('Layer_ID');
-        $layer_names[$layer_name] = $layer_id;
-    }
-}
-$this->layer_names = $layer_names;
-// 	    $this->layers = $layers;
-// 	    echo $this->layers[0]->get('Name');
+// $this->layer_names = new LayerNames($this, Layer::find($this, "true"));
 
 // print_r($_POST);
 // print_r($_REQUEST);
