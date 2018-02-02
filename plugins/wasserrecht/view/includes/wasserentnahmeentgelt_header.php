@@ -8,14 +8,14 @@
         <div class="wasserrecht_display_table_cell_caption">Behörde:</div>
         <div class="wasserrecht_display_table_cell_spacer"></div>
         <?php
-            echo '<a class="wasserrecht_display_table_cell_white" href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . $this->layer_names[BEHOERDE_LAYER_NAME] . '&value_' . BEHOERDE_LAYER_ID . '=' . $wrz->zustaendigeBehoerde->getId() . '&operator_' . BEHOERDE_LAYER_ID . '==">' . $wrz->zustaendigeBehoerde->getName() .'</a>';
+            echo '<a class="wasserrecht_display_table_cell_white" href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . BEHOERDE_LAYER_ID . '&value_' . BEHOERDE_OPERATOR_ID . '=' . $wrz->zustaendigeBehoerde->getId() . '&operator_' . BEHOERDE_OPERATOR_ID . '==">' . $wrz->zustaendigeBehoerde->getName() .'</a>';
         ?>
     </div>
     <div class="wasserrecht_display_table_row">
         <div class="wasserrecht_display_table_cell_caption">Adressat:</div>
         <div class="wasserrecht_display_table_cell_spacer"></div>
         <?php 
-            echo '<a class="wasserrecht_display_table_cell_white" href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . $this->layer_names[PERSONEN_LAYER_NAME] . '&value_' . PERSONEN_LAYER_ID . '=' . $wrz->adressat->getId() . '&operator_' . PERSONEN_LAYER_ID . '==">' . $wrz->adressat->getName() .'</a>';
+            echo '<a class="wasserrecht_display_table_cell_white" href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . PERSONEN_LAYER_ID . '&value_' . PERSONEN_OPERATOR_ID . '=' . $wrz->adressat->getId() . '&operator_' . PERSONEN_OPERATOR_ID . '==">' . $wrz->adressat->getName() .'</a>';
         ?>
     </div>
     
@@ -29,14 +29,14 @@
         <div class="wasserrecht_display_table_cell_caption">Anlage:</div>
         <div class="wasserrecht_display_table_cell_spacer"></div>
         <?php 
-            echo '<a class="wasserrecht_display_table_cell_white" href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . $this->layer_names[ANLAGEN_LAYER_NAME] . '&value_' . ANLAGEN_LAYER_ID . '=' . $wrz->anlage->getId() . '&operator_' . ANLAGEN_LAYER_ID . '==">' . $wrz->anlage->getName() . '</a>';
+            echo '<a class="wasserrecht_display_table_cell_white" href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . ANLAGEN_LAYER_ID . '&value_' . ANLAGEN_OPERATOR_ID . '=' . $wrz->anlage->getId() . '&operator_' . ANLAGEN_OPERATOR_ID . '==">' . $wrz->anlage->getName() . '</a>';
         ?>
     </div>
     <div class="wasserrecht_display_table_row">
         <div class="wasserrecht_display_table_cell_caption">Wasserrechtliche Zulassung:</div>
         <div class="wasserrecht_display_table_cell_spacer"></div>
         <?php 
-            echo '<a class="wasserrecht_display_table_cell_white" href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . $this->layer_names[WRZ_LAYER_NAME] . '&value_' . WRZ_LAYER_ID . '=' . $wrz->getId() . '&operator_' . WRZ_LAYER_ID . '==">' . $wrz->getBezeichnung() . '</a>';
+            echo '<a class="wasserrecht_display_table_cell_white" href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . WRZ_LAYER_ID . '&value_' . WRZ_OPERATOR_ID . '=' . $wrz->getId() . '&operator_' . WRZ_OPERATOR_ID . '==">' . $wrz->getBezeichnung() . '</a>';
         ?>
     </div>
     <div class="wasserrecht_display_table_row">
@@ -45,7 +45,7 @@
         <?php
             if(!empty($gewaesserbenutzung) && !empty($gewaesserbenutzung->getBezeichnung()))
     		{
-    		    echo '<a class="wasserrecht_display_table_cell_white" href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . $this->layer_names[GEWAESSERBENUTZUNGEN_LAYER_NAME] . '&value_' . GEWAESSERBENUTZUNGEN_LAYER_ID . '=' . $gewaesserbenutzung->getId() . '&operator_' . GEWAESSERBENUTZUNGEN_LAYER_ID . '==">' . $gewaesserbenutzung->getBezeichnung() . '</a>';
+    		    echo '<a class="wasserrecht_display_table_cell_white" href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . GEWAESSERBENUTZUNGEN_LAYER_ID . '&value_' . GEWAESSERBENUTZUNGEN_OPERATOR_ID . '=' . $gewaesserbenutzung->getId() . '&operator_' . GEWAESSERBENUTZUNGEN_OPERATOR_ID . '==">' . $gewaesserbenutzung->getBezeichnung() . '</a>';
     		}
     		else
     		{
@@ -57,7 +57,7 @@
         <div class="wasserrecht_display_table_cell_caption">Hinweise:</div>
         <div class="wasserrecht_display_table_cell_spacer"></div>
         <?php
-    		 echo '<a class="wasserrecht_display_table_cell_white" href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . $this->layer_names[WRZ_LAYER_NAME] . '&value_' . WRZ_LAYER_ID . '=' . $wrz->getId() . '&operator_' . WRZ_LAYER_ID . '==">' . $wrz->getHinweisHTML() . '</a>';
+    		 echo '<a class="wasserrecht_display_table_cell_white" href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . WRZ_LAYER_ID . '&value_' . WRZ_OPERATOR_ID . '=' . $wrz->getId() . '&operator_' . WRZ_OPERATOR_ID . '==">' . $wrz->getHinweisHTML() . '</a>';
     	?>
     </div>
     
@@ -72,7 +72,7 @@
          <?php
              if(!empty($gewaesserbenutzung) && !empty($gewaesserbenutzung->gewaesserbenutzungArt))
     		 {
-    		     echo '<a class="wasserrecht_display_table_cell_white" href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . $this->layer_names[GEWAESSERBENUTZUNGEN_ART_LAYER_NAME] . '&value_' . GEWAESSERBENUTZUNGEN_ART_LAYER_ID . '=' . $gewaesserbenutzung->gewaesserbenutzungArt->getId() . '&operator_' . GEWAESSERBENUTZUNGEN_ART_LAYER_ID . '==">' . $gewaesserbenutzung->gewaesserbenutzungArt->getName() . '</a>';
+    		     echo '<a class="wasserrecht_display_table_cell_white" href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . GEWAESSERBENUTZUNGEN_ART_LAYER_ID . '&value_' . GEWAESSERBENUTZUNGEN_ART_OPERATOR_ID . '=' . $gewaesserbenutzung->gewaesserbenutzungArt->getId() . '&operator_' . GEWAESSERBENUTZUNGEN_ART_OPERATOR_ID . '==">' . $gewaesserbenutzung->gewaesserbenutzungArt->getName() . '</a>';
     		 }
     		 else
     		 {
@@ -86,7 +86,7 @@
          <?php
              if(!empty($gewaesserbenutzung) && !empty($gewaesserbenutzung->gewaesserbenutzungZweck))
     		 {
-    		      echo '<a class="wasserrecht_display_table_cell_white" href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . $this->layer_names[GEWAESSERBENUTZUNGEN_ZWECK_LAYER_NAME] . '&value_' . GEWAESSERBENUTZUNGEN_ZWECK_LAYER_ID . '=' . $gewaesserbenutzung->gewaesserbenutzungZweck->getId() . '&operator_' . GEWAESSERBENUTZUNGEN_ZWECK_LAYER_ID . '==">' . $gewaesserbenutzung->gewaesserbenutzungZweck->getName() . '</a>';
+    		      echo '<a class="wasserrecht_display_table_cell_white" href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . GEWAESSERBENUTZUNGEN_ZWECK_LAYER_ID . '&value_' . GEWAESSERBENUTZUNGEN_ZWECK_OPERATOR_ID . '=' . $gewaesserbenutzung->gewaesserbenutzungZweck->getId() . '&operator_' . GEWAESSERBENUTZUNGEN_ZWECK_OPERATOR_ID . '==">' . $gewaesserbenutzung->gewaesserbenutzungZweck->getName() . '</a>';
     		 }
     		 else
     		 {
@@ -99,7 +99,7 @@
          <?php
              if(!empty($gewaesserbenutzung) && !empty($gewaesserbenutzung->getErlaubterOderReduzierterUmfangHTML()))
     		 {
-    		     echo '<a class="wasserrecht_display_table_cell_white" href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . $this->layer_names[GEWAESSERBENUTZUNGEN_LAYER_NAME] . '&value_' . GEWAESSERBENUTZUNGEN_LAYER_ID . '=' . $gewaesserbenutzung->getId() . '&operator_' . GEWAESSERBENUTZUNGEN_LAYER_ID . '==">' . $gewaesserbenutzung->getErlaubterOderReduzierterUmfangHTML() . '</a>';
+    		     echo '<a class="wasserrecht_display_table_cell_white" href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . GEWAESSERBENUTZUNGEN_LAYER_ID . '&value_' . GEWAESSERBENUTZUNGEN_OPERATOR_ID . '=' . $gewaesserbenutzung->getId() . '&operator_' . GEWAESSERBENUTZUNGEN_OPERATOR_ID . '==">' . $gewaesserbenutzung->getErlaubterOderReduzierterUmfangHTML() . '</a>';
     		 }
     		 else
     		 {

@@ -297,17 +297,17 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
         		                         <tr>
         		                           <td>
         		                              <?php
-        		                              echo '<a href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . $this->layer_names[ANLAGEN_LAYER_NAME] . '&value_' . ANLAGEN_LAYER_ID . '=' . $wrz->anlage->getId() . '&operator_' . ANLAGEN_LAYER_ID . '==">' . $wrz->anlage->getName() . '</a>';
+        		                              echo '<a href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . ANLAGEN_LAYER_ID . '&value_' . ANLAGEN_OPERATOR_ID . '=' . $wrz->anlage->getId() . '&operator_' . ANLAGEN_OPERATOR_ID . '==">' . $wrz->anlage->getName() . '</a>';
         		                              ?>
                     		          	    </td>
                     		          		<td>
                     		          			<?php 
-                    		          			     echo '<a href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . $this->layer_names[WRZ_LAYER_NAME] . '&value_' . WRZ_LAYER_ID . '=' . $wrz->getId() . '&operator_' . WRZ_LAYER_ID . '==">' . $wrz->getBezeichnung() . '</a>';
+                    		          			     echo '<a href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . WRZ_LAYER_ID . '&value_' . WRZ_OPERATOR_ID . '=' . $wrz->getId() . '&operator_' . WRZ_OPERATOR_ID . '==">' . $wrz->getBezeichnung() . '</a>';
                     		          			?>
                     		          		</td>
                     		          		<td>
                     		          			<?php
-                    		          			echo '<a href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . $this->layer_names[GEWAESSERBENUTZUNGEN_LAYER_NAME] . '&value_' . GEWAESSERBENUTZUNGEN_LAYER_ID . '=' . $gewaesserbenutzung->getId() . '&operator_' . GEWAESSERBENUTZUNGEN_LAYER_ID . '==">' . $gewaesserbenutzung->getBezeichnung() . '</a>';
+                    		          			echo '<a href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . GEWAESSERBENUTZUNGEN_LAYER_ID . '&value_' . GEWAESSERBENUTZUNGEN_OPERATOR_ID . '=' . $gewaesserbenutzung->getId() . '&operator_' . GEWAESSERBENUTZUNGEN_OPERATOR_ID . '==">' . $gewaesserbenutzung->getBezeichnung() . '</a>';
                     		          			?>
                     		          		</td>
                     		          		<td>
@@ -508,11 +508,13 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
     			        {
     			            if(!empty($festsetzungDokument))
     			            {
+    			                $absoluteURL = getDocumentUrlFromPath($this, $festsetzungDokument->getPfad())
+    			                
     			                ?>
 			                    <div class="wasserrecht_display_table_row">
                 					<div class="wasserrecht_display_table_cell_caption">
                 					<?php
-                					   echo '<a href="' . $this->actual_link . WASSERRECHT_DOCUMENT_URL_PATH . $festsetzungDokument->getPfad() . '" target="_blank">' . $festsetzungDokument->getName() . ', WrZs: (' . $festsetzungDokument->getWrz_idsString() . ')</a>';
+                					   echo '<a href="' . $absoluteURL . '" target="_blank">' . $festsetzungDokument->getName() . ', WrZs: (' . $festsetzungDokument->getWrz_idsString() . ')</a>';
                 					?>
                            			</div>
                 				</div>

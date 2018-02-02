@@ -76,7 +76,7 @@ if($showAdressat)
         <div class="wasserrecht_display_table_row">
                 <div class="wasserrecht_display_table_cell_caption">
                 	<?php 
-                	echo '<a href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . $this->layer_names[BEHOERDE_LAYER_NAME] . '&value_' . BEHOERDE_LAYER_ID . '=' . $getBehoerde . '&operator_' . BEHOERDE_LAYER_ID . '==">Behörde: </a>';
+                	echo '<a href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . BEHOERDE_LAYER_ID . '&value_' . BEHOERDE_OPERATOR_ID . '=' . $getBehoerde . '&operator_' . BEHOERDE_OPERATOR_ID . '==">Behörde: </a>';
     			     ?>
                 </div>
                 <div class="wasserrecht_display_table_cell_spacer"></div>
@@ -146,19 +146,19 @@ if($showAdressat)
             <div class="wasserrecht_display_table_row">
             	<div class="wasserrecht_display_table_cell_caption">
             		<?php 
-        			    echo '<a href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . $this->layer_names[PERSONEN_LAYER_NAME] . '&value_' . PERSONEN_LAYER_ID . '=' . $getAdressat . '&operator_' . PERSONEN_LAYER_ID . '==">Adressat:</a>';
+        			    echo '<a href="' . $this->actual_link . '?go=' . SELECTED_LAYER_URL . '=' . PERSONEN_LAYER_ID . '&value_' . PERSONEN_OPERATOR_ID . '=' . $getAdressat . '&operator_' . PERSONEN_OPERATOR_ID . '==">Adressat:</a>';
                     ?>
             	</div>
             	<div class="wasserrecht_display_table_cell_spacer"></div>
             	<div class="wasserrecht_display_table_cell">
     				<input autocomplete="off" title="Adressat"
-    					onkeydown="if(this.backup_value==undefined){this.backup_value=this.value; document.getElementById('25_<?php echo PERSONEN_LAYER_ID ?>_0').backup_value=document.getElementById('25_<?php echo PERSONEN_LAYER_ID ?>_0').value;}"
-    					onkeyup="autocomplete1('25', '<?php echo PERSONEN_LAYER_ID ?>', '25_<?php echo PERSONEN_LAYER_ID ?>_0', this.value);"
-    					onchange="if(document.getElementById('suggests_25_<?php echo PERSONEN_LAYER_ID ?>_0').style.display=='block'){this.value=this.backup_value; document.getElementById('25_<?php echo PERSONEN_LAYER_ID ?>_0').value=document.getElementById('25_<?php echo PERSONEN_LAYER_ID ?>_0').backup_value;setTimeout(function(){document.getElementById('suggests_25_<?php echo PERSONEN_LAYER_ID ?>_0').style.display = 'none';}, 500);}"
-    					id="output_25_<?php echo PERSONEN_LAYER_ID ?>_0" value="<?php echo !empty($selectedAdressat) && !empty($selectedAdressat->getName()) ? $selectedAdressat->getName() : '' ?>" type="text" /> 
-    				<input onchange="setNewUrlParameterAndKeepGo(this,'<?php echo ADRESSAT_URL ?>','<?php echo $go ?>')" id="25_<?php echo PERSONEN_LAYER_ID ?>_0" type="hidden" />
+    					onkeydown="if(this.backup_value==undefined){this.backup_value=this.value; document.getElementById('25_<?php echo PERSONEN_OPERATOR_ID ?>_0').backup_value=document.getElementById('25_<?php echo PERSONEN_OPERATOR_ID ?>_0').value;}"
+    					onkeyup="autocomplete1('25', '<?php echo PERSONEN_OPERATOR_ID ?>', '25_<?php echo PERSONEN_OPERATOR_ID ?>_0', this.value);"
+    					onchange="if(document.getElementById('suggests_25_<?php echo PERSONEN_OPERATOR_ID ?>_0').style.display=='block'){this.value=this.backup_value; document.getElementById('25_<?php echo PERSONEN_OPERATOR_ID ?>_0').value=document.getElementById('25_<?php echo PERSONEN_OPERATOR_ID ?>_0').backup_value;setTimeout(function(){document.getElementById('suggests_25_<?php echo PERSONEN_OPERATOR_ID ?>_0').style.display = 'none';}, 500);}"
+    					id="output_25_<?php echo PERSONEN_OPERATOR_ID ?>_0" value="<?php echo !empty($selectedAdressat) && !empty($selectedAdressat->getName()) ? $selectedAdressat->getName() : '' ?>" type="text" /> 
+    				<input onchange="setNewUrlParameterAndKeepGo(this,'<?php echo ADRESSAT_URL ?>','<?php echo $go ?>')" id="25_<?php echo PERSONEN_OPERATOR_ID ?>_0" type="hidden" />
     				<div valign="top" style="height: 0px; position: relative;">
-    					<div id="suggests_25_<?php echo PERSONEN_LAYER_ID ?>_0" style="z-index: 3000; display: none; left: 0px; top: 0px; width: 400px; vertical-align: top; overflow: hidden; border: 1px solid grey;"></div>
+    					<div id="suggests_25_<?php echo PERSONEN_OPERATOR_ID ?>_0" style="z-index: 3000; display: none; left: 0px; top: 0px; width: 400px; vertical-align: top; overflow: hidden; border: 1px solid grey;"></div>
     				</div>
     			</div>
             </div>

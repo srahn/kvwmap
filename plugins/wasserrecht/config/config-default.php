@@ -1,9 +1,9 @@
 <?php
-// define('WASSERRECHT_DOCUMENT_PATH', SHAPEPATH . 'wasserrecht/');
-// define('WASSERRECHT_DOCUMENT_URL_PATH', '/../../../data/wasserrecht/');
+define('WASSERRECHT_DOCUMENT_PATH', SHAPEPATH . 'wasserrecht/');
+define('WASSERRECHT_DOCUMENT_URL_PATH', '/../../../data/wasserrecht/');
 
-define('WASSERRECHT_DOCUMENT_PATH', PLUGINS . 'wasserrecht/results/');
-define('WASSERRECHT_DOCUMENT_URL_PATH', '/../plugins/wasserrecht/results/');
+// define('WASSERRECHT_DOCUMENT_PATH', PLUGINS . 'wasserrecht/results/');
+// define('WASSERRECHT_DOCUMENT_URL_PATH', '/../plugins/wasserrecht/results/');
 
 define('WASSERRECHT_ERKLAERUNG_ENTNAHME_TEILGEWAESSERBENUTZUNGEN_COUNT', 6);
 define('WASSERRECHT_ERKLAERUNG_ENTNAHME_TEILGEWAESSERBENUTZUNGEN_ENTGELTSATZ', 2);
@@ -49,18 +49,25 @@ define('FESTSETZUNG_BESCHEID_PATH', 'wasserrecht/templates/Festsetzung_Sammelbes
 
 //LAYER NAMES
 define('SELECTED_LAYER_URL', 'Layer-Suche_Suchen&selected_layer_id');
-define('BEHOERDE_LAYER_NAME', 'Behoerde');
-define('BEHOERDE_LAYER_ID', 'id');
-define('PERSONEN_LAYER_NAME', 'FisWrV-WRe Personen');
-define('PERSONEN_LAYER_ID', 'personen_id');
-define('ANLAGEN_LAYER_NAME', 'FisWrV-WRe Anlagen');
-define('ANLAGEN_LAYER_ID', 'anlage_id');
-define('WRZ_LAYER_NAME', 'FisWrV-WRe WrZ');
-define('WRZ_LAYER_ID', 'wrz_id');
-define('GEWAESSERBENUTZUNGEN_LAYER_NAME', 'FisWrV-WRe Gewässerbenutzungen');
-define('GEWAESSERBENUTZUNGEN_LAYER_ID', 'gwb_id');
-define('GEWAESSERBENUTZUNGEN_ART_LAYER_NAME', 'Gewaesserbenutzungen_Art');
-define('GEWAESSERBENUTZUNGEN_ART_LAYER_ID', 'id');
-define('GEWAESSERBENUTZUNGEN_ZWECK_LAYER_NAME', 'Gewaesserbenutzungen_Zweck');
-define('GEWAESSERBENUTZUNGEN_ZWECK_LAYER_ID', 'id');
+// define('BEHOERDE_LAYER_NAME', 'Behoerde');
+define('BEHOERDE_LAYER_ID', '17');
+define('BEHOERDE_OPERATOR_ID', 'id');
+// define('PERSONEN_LAYER_NAME', 'FisWrV-WRe Personen');
+define('PERSONEN_LAYER_ID', '9');
+define('PERSONEN_OPERATOR_ID', 'personen_id');
+// define('ANLAGEN_LAYER_NAME', 'FisWrV-WRe Anlagen');
+define('ANLAGEN_LAYER_ID', '2');
+define('ANLAGEN_OPERATOR_ID', 'anlage_id');
+// define('WRZ_LAYER_NAME', 'FisWrV-WRe WrZ');
+define('WRZ_LAYER_ID', '25');
+define('WRZ_OPERATOR_ID', 'wrz_id');
+// define('GEWAESSERBENUTZUNGEN_LAYER_NAME', 'FisWrV-WRe Gewässerbenutzungen');
+define('GEWAESSERBENUTZUNGEN_LAYER_ID', '33');
+define('GEWAESSERBENUTZUNGEN_OPERATOR_ID', 'gwb_id');
+// define('GEWAESSERBENUTZUNGEN_ART_LAYER_NAME', 'Gewaesserbenutzungen_Art');
+define('GEWAESSERBENUTZUNGEN_ART_LAYER_ID', '34');
+define('GEWAESSERBENUTZUNGEN_ART_OPERATOR_ID', 'id');
+// define('GEWAESSERBENUTZUNGEN_ZWECK_LAYER_NAME', 'Gewaesserbenutzungen_Zweck');
+define('GEWAESSERBENUTZUNGEN_ZWECK_LAYER_ID', '36');
+define('GEWAESSERBENUTZUNGEN_ZWECK_OPERATOR_ID', 'id');
 ?>

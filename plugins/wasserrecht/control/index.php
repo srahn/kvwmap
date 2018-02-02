@@ -7,6 +7,7 @@ include_once(PLUGINS . 'wasserrecht/config/config.php');
 include(PLUGINS . 'wasserrecht/helper/Log.php');
 include(PLUGINS . 'wasserrecht/helper/CommonClassTrait.php');
 include(PLUGINS . 'wasserrecht/helper/DateHelper.php');
+// include(PLUGINS . 'wasserrecht/helper/LayerNames.php');
 include(PLUGINS . 'wasserrecht/model/FestsetzungsSammelbescheidDaten.php');
 include(PLUGINS . 'wasserrecht/model/AufforderungsBescheidDaten.php');
 include(PLUGINS . 'wasserrecht/model/WRZProGueltigkeitsJahre.php');
@@ -99,6 +100,20 @@ function findIdAndYearFromValueString(&$gui, $valueEscaped)
     return $returnArray;
 }
 
+function getDocumentUrlFromPath(&$gui, $documentPath) 
+{
+    $document_full_path = WASSERRECHT_DOCUMENT_PATH . $documentPath;
+    $gui->log->log_debug('dokument_full_path: ' . var_export($document_full_path, true));
+    $gui->allowed_documents[] = addslashes($document_full_path);
+    $gui->log->log_debug('this->allowed_documents: ' . var_export($gui->allowed_documents, true));
+    $url = IMAGEURL . $gui->document_loader_name . '?dokument=';
+    $gui->log->log_debug('url: ' . var_export($url, true));
+    $absoluteURL = $url . $document_full_path;
+    $gui->log->log_debug('absoluteURL: ' . var_export($absoluteURL, true));
+    
+    return $absoluteURL;
+}
+
 $this->actual_link = parse_url((isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]", PHP_URL_PATH);
 
 /**
@@ -111,39 +126,10 @@ $this->log = new Log($this->debug);
  */
 $this->date = new DateHelper($this);
 
-
-//$anlage = new Anlage($this);
-//$anlagen = $anlage->find_where('true');
-
-//$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
-//$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-//$this->log->log_debug(var_dump($layerdb));
-
-/*        $this->loadMap('DataBase');
- $layer_names = array();
- foreach($this->layerset['layer_ids'] AS $id => $layer) {
- $layer_names[$layer['Name']] = $id;
- }
- $this->layer_names = $layer_names;
+/**
+ * Layer Names
  */
-
-// 	    $layer_name = 'Wasserrechtliche_Zulassungen';
-// 	    $this->layers = Layer::find($this, "Name = '" . $layer_name . "'");
-$this->layers = Layer::find($this, "true");
-// 	    var_dump(count($this->layers));
-$layer_names = array();
-for ($i = 0; $i <= count($this->layers); $i++) {
-    if(isset($this->layers[$i]))
-    {
-        //echo $this->layers[$i]->get('Name');
-        $layer_name = $this->layers[$i]->get('Name');
-        $layer_id = $this->layers[$i]->get('Layer_ID');
-        $layer_names[$layer_name] = $layer_id;
-    }
-}
-$this->layer_names = $layer_names;
-// 	    $this->layers = $layers;
-// 	    echo $this->layers[0]->get('Name');
+// $this->layer_names = new LayerNames($this, Layer::find($this, "true"));
 
 // print_r($_POST);
 // print_r($_REQUEST);
@@ -234,19 +220,19 @@ switch($this->go){
 	case ZENTRALE_STELLE_URL: {
 	    $this->log->log_debug(ZENTRALE_STELLE_URL . ' called!');
 	    
-	    if ($this->user->funktion === 'admin') 
-	    {
+// 	    if ($this->user->funktion === 'admin') 
+// 	    {
 	        $this->log->log_debug(ZENTRALE_STELLE_URL . ' Zugriff erlaubt');
 	        
 	        $this->main = PLUGINS . 'wasserrecht/view/' . ZENTRALE_STELLE_URL . '.php';
 	        $this->output();
-	    }
-	    else 
-	    {
-	        $this->log->log_debug(ZENTRALE_STELLE_URL . ' Zugriff verweigert');
+// 	    }
+// 	    else 
+// 	    {
+// 	        $this->log->log_debug(ZENTRALE_STELLE_URL . ' Zugriff verweigert');
 	        
-	        echo 'Zugriff verweigert';
-	    }
+// 	        echo 'Zugriff verweigert';
+// 	    }
 	    
 	}	break;
 	
