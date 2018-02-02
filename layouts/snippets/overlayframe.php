@@ -13,10 +13,14 @@
 						<div style="position:absolute;left:0px;top:0px;width:10px;height:10px;border: 1px solid #bbbbbb;background-color: #dddddd;cursor:nw-resize;" onmousedown="resizestart(document.getElementById('contentdiv'), 'nw');"></div>
 						<div style="position:absolute;right:0px;top:0px;width:10px;height:10px;border: 1px solid #bbbbbb;background-color: #dddddd;cursor:ne-resize;" onmousedown="resizestart(document.getElementById('contentdiv'), 'ne');"></div>
 						<div style="position:absolute;left:0px;bottom:0px;width:10px;height:10px;border: 1px solid #bbbbbb;background-color: #dddddd;cursor:sw-resize;" onmousedown="resizestart(document.getElementById('contentdiv'), 'sw');"></div>
-						<div style="position:absolute;right:0px;bottom:0px;width:10px;height:10px;border: 1px solid #bbbbbb;background-color: #dddddd;cursor:se-resize;" onmousedown="resizestart(document.getElementById('contentdiv'), 'se');"></div>
-						<div id="dragdiv" align="right" onmousedown="dragstart(document.getElementById('overlaydiv'))" style="cursor:default; background-color:<? echo BG_DEFAULT; ?>; border: 1px solid #cccccc;height:20px;position:relative;">
-							<a href="javascript:deactivate_overlay();" title="Schlie&szlig;en"><img style="border:none" src="<? echo GRAPHICSPATH."exit.png"; ?>"></img></a>
-						</div>
+						<div style="position:absolute;right:0px;bottom:0px;width:10px;height:10px;border: 1px solid #bbbbbb;background-color: #dddddd;cursor:se-resize;" onmousedown="resizestart(document.getElementById('contentdiv'), 'se');"></div>						
+						<div align="right" style="display:flex;cursor:default; background-color:<? echo BG_DEFAULT; ?>; border: 1px solid #cccccc;height:20px;position:relative;">
+							<div id="dragdiv" align="right" onmousedown="dragstart(document.getElementById('overlaydiv'))" style="width: 100%">
+							</div>
+							<div>
+								<a href="javascript:deactivate_overlay();" title="Schlie&szlig;en"><img style="border:none" src="<? echo GRAPHICSPATH."exit.png"; ?>"></img></a>
+							</div>
+						</div>						
 						<div id="contentdiv" style="background: url(<? echo GRAPHICSPATH; ?>bg.gif);border: 1px solid #cccccc;max-width:<? echo $width; ?>px;height:100%;max-height:<? echo $this->user->rolle->nImageHeight+30; ?>px;position:relative;overflow-y: scroll;overflow-x: auto;">
 						<? if($this->overlaymain != '')include(LAYOUTPATH.'snippets/overlay.php'); ?>
 						</div>

@@ -195,61 +195,65 @@ switch($go){
 							$shapeFile->createDataTableSchema();
 
 							# load into database table
-							$created_table = $shapeFile->loadIntoDataTable();
+							$result = $shapeFile->loadIntoDataTable();
 
-							# add gml_id column if not exists
-							if (!$shapeFile->gmlIdColumnExists())
-								$shapeFile->addGmlIdColumn();
+							if ($result['success']) {
+								# add gml_id column if not exists
+								if (!$shapeFile->gmlIdColumnExists())
+									$shapeFile->addGmlIdColumn();
 
-							# Set datatype for shapefile
-							$shapeFile->set('datatype', $created_table['datatype']);
-							$shapeFile->update();
+								# Set datatype for shapefile
+								$shapeFile->set('datatype', $result['datatype']);
+								$shapeFile->update();
 
-							# create layer
-							$this->formvars['Name'] = $shapeFile->get('filename');
-							$this->formvars['Datentyp'] = $shapeFile->get('datatype');
-							$this->formvars['Gruppe'] = $layer_group_id;
-							$this->formvars['pfad'] = 'Select * from ' . $shapeFile->dataTableName() . ' where 1=1';
-							$this->formvars['Data'] = 'the_geom from (select oid, * from ' .
-								$shapeFile->dataSchemaName() . '.' . $shapeFile->dataTableName() .
-								' where 1=1) as foo using unique oid using srid=' . $shapeFile->get('epsg_code');
-							$this->formvars['maintable'] = $shapeFile->dataTableName();
-							$this->formvars['schema'] = $shapeFile->dataSchemaName();
-							$this->formvars['connection'] = $this->pgdatabase->connect_string;
-							$this->formvars['connectiontype'] = '6';
-							$this->formvars['filteritem'] = 'oid';
-							$this->formvars['tolerance'] = '5';
-							$this->formvars['toleranceunits'] = 'pixels';
-							$this->formvars['epsg_code'] = $shapeFile->get('epsg_code');
-							$this->formvars['querymap'] = '1';
-							$this->formvars['queryable'] = '1';
-							$this->formvars['transparency'] = '75';
-							$this->formvars['postlabelcache'] = '0';
-							$this->formvars['allstellen'] = '2300';
-							$this->formvars['ows_srs'] = 'EPSG:' . $shapeFile->get('epsg_code') . ' EPSG:25833 EPSG:4326 EPSG:2398';
-							$this->formvars['wms_server_version'] = '1.1.0';
-							$this->formvars['wms_format'] = 'image/png';
-							$this->formvars['wms_connectiontimeout'] = '60';
-							$this->formvars['selstellen'] = '1, ' . $this->konvertierung->get('stelle_id') . ', 1, ' . $this->konvertierung->get('stelle_id');
-							$this->LayerAnlegen();
+								# create layer
+								$this->formvars['Name'] = $shapeFile->get('filename');
+								$this->formvars['Datentyp'] = $shapeFile->get('datatype');
+								$this->formvars['Gruppe'] = $layer_group_id;
+								$this->formvars['pfad'] = 'Select * from ' . $shapeFile->dataTableName() . ' where 1=1';
+								$this->formvars['Data'] = 'the_geom from (select oid, * from ' .
+									$shapeFile->dataSchemaName() . '.' . $shapeFile->dataTableName() .
+									' where 1=1) as foo using unique oid using srid=' . $shapeFile->get('epsg_code');
+								$this->formvars['maintable'] = $shapeFile->dataTableName();
+								$this->formvars['schema'] = $shapeFile->dataSchemaName();
+								$this->formvars['connection'] = $this->pgdatabase->connect_string;
+								$this->formvars['connectiontype'] = '6';
+								$this->formvars['filteritem'] = 'oid';
+								$this->formvars['tolerance'] = '5';
+								$this->formvars['toleranceunits'] = 'pixels';
+								$this->formvars['epsg_code'] = $shapeFile->get('epsg_code');
+								$this->formvars['querymap'] = '1';
+								$this->formvars['queryable'] = '1';
+								$this->formvars['transparency'] = '75';
+								$this->formvars['postlabelcache'] = '0';
+								$this->formvars['allstellen'] = '2300';
+								$this->formvars['ows_srs'] = 'EPSG:' . $shapeFile->get('epsg_code') . ' EPSG:25833 EPSG:4326 EPSG:2398';
+								$this->formvars['wms_server_version'] = '1.1.0';
+								$this->formvars['wms_format'] = 'image/png';
+								$this->formvars['wms_connectiontimeout'] = '60';
+								$this->formvars['selstellen'] = '1, ' . $this->konvertierung->get('stelle_id') . ', 1, ' . $this->konvertierung->get('stelle_id');
+								$this->LayerAnlegen();
 
-							# Assign layer_id to shape file record
-							$shapeFile->set('layer_id', $this->formvars['selected_layer_id']);
-							$shapeFile->update();
+								# Assign layer_id to shape file record
+								$shapeFile->set('layer_id', $this->formvars['selected_layer_id']);
+								$shapeFile->update();
 
-							# Ordne layer zur Stelle
-							$this->Stellenzuweisung(
-								array($shapeFile->get('layer_id')),
-								array($this->konvertierung->get('stelle_id'))
-							);
+								# Ordne layer zur Stelle
+								$this->Stellenzuweisung(
+									array($shapeFile->get('layer_id')),
+									array($this->konvertierung->get('stelle_id'))
+								);
 
-							# Füge eine Klasse zum neuen Layer hinzu.
-							$this->formvars['class_name'] = 'alle';
-							$this->formvars['class_id'] = $this->Layereditor_KlasseHinzufuegen();
+								# Füge eine Klasse zum neuen Layer hinzu.
+								$this->formvars['class_name'] = 'alle';
+								$this->formvars['class_id'] = $this->Layereditor_KlasseHinzufuegen();
 
-							# Füge einen Style zur Klasse hinzu
-							$this->add_style();
-
+								# Füge einen Style zur Klasse hinzu
+								$this->add_style();
+							}
+							else {
+								$this->add_message('error', $result['err_msg']);
+							}
 						}
 					}
 				} # end of upload files
@@ -481,9 +485,12 @@ switch($go){
 					// Erzeuge Layergruppe, falls noch nicht vorhanden
 					$layer_group_id = $this->konvertierung->create_layer_group('GML');
 					// vorhandene Layer dieser Konvertierung löschen
-					// Neue Layer erzeugen
-					$this->layer_generator_erzeugen($layer_group_id); # Funktion aus kvwmap.php
-
+					// Neue Layer von Vorlagen GML kopieren
+					/*
+					$this->formvars['group_id'] = $layer_group_id;
+					$this->formvars['pg_schema'] = XPLANKONVERTER_CONTENT_SCHEMA;
+					$this->layer_generator_erzeugen(); # Funktion aus kvwmap.php
+					*/
 					$response['success'] = true;
 					$response['msg'] = 'XPlan-GML-Datei erfolgreich erstellt.';
 				} else {
@@ -520,7 +527,7 @@ switch($go){
 		$xsl = PLUGINS . 'xplankonverter/model/xplan2inspire.xsl';
 		$fileinput = $this->konvertierung->get_file_name('xplan_gml');
 		$fileoutput = $this->konvertierung->get_file_name('inspire_gml');
-		echo 'test' . $fileinput;
+		#echo 'test' . $fileinput;
 
 		if (!file_exists($fileinput)) {
 			$success = false;

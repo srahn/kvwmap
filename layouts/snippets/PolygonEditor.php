@@ -74,8 +74,8 @@ function buildwktpolygonfromsvgpath(svgpath){
     <td align="center" colspan="5"><a name="geoedit_anchor"><h2><?php echo $this->titel; ?></h2></a></td>
   </tr>
   <tr> 
-    <td rowspan="8">&nbsp;</td>
-    <td colspan="4" rowspan="8"> 
+    <td rowspan="9">&nbsp;</td>
+    <td colspan="4" rowspan="9"> 
       <?
 				include(LAYOUTPATH.'snippets/SVG_polygon_query_area.php');
 			?>
@@ -124,8 +124,13 @@ function buildwktpolygonfromsvgpath(svgpath){
   		</select> 
   	</td>
   </tr>
+	<tr>
+		<td>
+			<input type="checkbox" name="singlegeom" value="true" <? if($this->formvars['singlegeom'])echo 'checked="true"'; ?>><? echo $strSingleGeoms; ?>
+		</td>
+	</tr>
   <tr> 
-    <td colspan="2" style="border-top:1px solid #999999"><img width="240px" height="1px" src="<? echo GRAPHICSPATH; ?>leer.gif"></td>
+    <td colspan="2" style="border-top:1px solid #999999"></td>
   </tr>
   <tr>  
   	<td width="160"><? echo $strArea; ?>:<br><input size="12" type="text" name="area" value="<?echo $this->formvars['area']?>">&nbsp;m<SUP>2</SUP></td>

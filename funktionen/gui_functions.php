@@ -26,6 +26,14 @@ function allowSubmit(){
 	document.GUI.onsubmit = function(){};
 }
 
+function printMap(){
+	if(typeof addRedlining != 'undefined'){
+		addRedlining();
+	}
+	document.GUI.go.value = 'Druckausschnittswahl';
+	document.GUI.submit();
+}
+
 function checkForUnsavedChanges(event){
 	var sure = true;
 	if(document.GUI.gle_changed.value == 1){
@@ -36,6 +44,7 @@ function checkForUnsavedChanges(event){
 		preventSubmit();
 	}
 	else{
+		document.GUI.gle_changed.value = 0;
 		allowSubmit();
 	}
 	return sure;

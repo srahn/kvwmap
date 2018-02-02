@@ -324,6 +324,8 @@ $j=0;
   </tr>
   <tr<?php if ($simple) echo ' style="display: none;"'; ?>>
     <td align="right">
+			<input type="checkbox" name="singlegeom" value="true" <? if($this->formvars['singlegeom'])echo 'checked="true"'; ?>>
+			<? echo $strSingleGeoms; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 			<? echo $this->strUseGeometryOf; ?>:
   		<select name="layer_id" onchange="document.GUI.submit();">
   			<option value=""><?php echo $this->strPleaseSelect; ?></option>

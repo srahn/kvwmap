@@ -39,19 +39,27 @@ session_start();
 
 ob_start ();    // Ausgabepufferung starten
 
-/*
-* Replace in $tags defined tags from $text recursively
-*/
 function replace_tags($text, $tags) {
-	$new_text = preg_replace("#<\s*\/?(" . $tags . ")\s*[^>]*?>#im", '', $text);
-	if ($new_text != $text) $new_text = replace_tags($new_text, $tags);
-
-	return $new_text;
+	$first_right = strpos($text, '>');
+	if ($first_right !== false) {
+		$text = preg_replace("#<\s*\/?(" . $tags . ")\s*[^>]*?>#im", '', $text);
+		$first_left = strpos($text, '<');
+		if ($first_left !== false and $first_right < $first_left) {
+			# >...<
+			$last_right = strrpos($text, '>');
+			if ($last_right !== false and $last_right > $first_left) {
+				# >...<...>
+				# entferne $first_right, $last_right und alles dazwischen
+				$text = substr_replace($text, '', $first_right, $last_right - $first_right + 1);
+			}
+		}
+	}
+	return $text;
 }
-
 foreach($_REQUEST as $key => $value) {
 	if (is_string($value)) $_REQUEST[$key] = pg_escape_string(replace_tags($value, 'script|embed'));
 }
+reset($_REQUEST);
 $formvars = $_REQUEST;
 
 $go = $formvars['go'];
@@ -138,6 +146,7 @@ include(WWWROOT . APPLVERSION.'start.php');
 
 # Übergeben des Anwendungsfalles
 $debug->write("<br><b>Anwendungsfall go: ".$go."</b>",4);
+
 $GUI->go=$go;
 $GUI->requeststring = $QUERY_STRING;
 
@@ -442,11 +451,6 @@ function go_switch($go){
 			# Layer zu einer Gruppe abfragen
 			case 'getlayerfromgroup' : {
 			$GUI->getlayerfromgroup();
-			} break;
-
-			# GPS-Position auslesen
-			case 'get_gps_position' : {
-			$GUI->get_gps_position();
 			} break;
 
 			# Eigentuemerfortführung

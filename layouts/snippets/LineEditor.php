@@ -68,8 +68,8 @@ function buildwktlinefromsvgpath(svgpath){
     <td align="center" colspan="5"><a name="geoedit_anchor"><h2><?php echo $this->titel; ?></h2></a></td>
   </tr>
   <tr> 
-    <td rowspan="8">&nbsp;</td>
-    <td colspan="4" rowspan="8"> 
+    <td rowspan="9">&nbsp;</td>
+    <td colspan="4" rowspan="9"> 
       <?php
 				include(LAYOUTPATH.'snippets/SVG_line_query.php')
 			?>
@@ -117,6 +117,11 @@ function buildwktlinefromsvgpath(svgpath){
   		</select> 
   	</td>
   </tr>
+	<tr>
+		<td>
+			<input type="checkbox" name="singlegeom" value="true" <? if($this->formvars['singlegeom'])echo 'checked="true"'; ?>><? echo $strSingleGeoms; ?>
+		</td>
+	</tr>	
 	<tr> 
     <td colspan="2" style="border-top:1px solid #999999"><img width="240px" height="1px" src="<? echo GRAPHICSPATH; ?>leer.gif"></td>
   </tr>

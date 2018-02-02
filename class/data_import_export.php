@@ -618,7 +618,7 @@ class data_import_export {
         // fclose($newsql);
       // }
 
-			if ($ret == 0) {
+			if ($ret == '') {
 				$table = $this->formvars['schema_name'] . "." . $this->formvars['table_name'];
 				$sql = "
 					ALTER TABLE " . $table . "
@@ -631,6 +631,7 @@ class data_import_export {
 					FROM
 						" . $table . ";
 				";
+				#echo '<br>Sql: ' . $sql; exit;
 				$ret = $database->execSQL($sql,4, 0);
 				if (!$ret[0]) {
 					$rs = pg_fetch_assoc($ret[1]);
@@ -649,9 +650,9 @@ class data_import_export {
       else {
 				$result = array(
 					'success' => false,
-					'err_msg' => $ret[1]
+					'err_msg' => $ret
 				);
-				showAlert('Import fehlgeschlagen.');
+				#showAlert('Import fehlgeschlagen.');
 			}
 		}
 		else {
@@ -746,12 +747,12 @@ class data_import_export {
 			$this->layerset = $user->rolle->getLayer($this->formvars['selected_layer_id']);
 			$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $stelle->pgdbhost);
 			$path = $this->layerset[0]['pfad'];
-			$privileges = $stelle->get_attributes_privileges($this->formvars['selected_layer_id'], true);
+			$privileges = $stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
 			$newpath = $stelle->parse_path($layerdb, $path, $privileges);
 			$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
 		}
 	}
-	
+
 	function ogr2ogr_export($sql, $exportformat, $exportfile, $layerdb){
 		$command = 'export PGCLIENTENCODING=UTF-8;'.OGR_BINPATH.'ogr2ogr -f '.$exportformat.' -lco ENCODING=UTF-8 -sql "'.$sql.'" '.$exportfile.' PG:"dbname='.$layerdb->dbName.' user='.$layerdb->user;
 		if($layerdb->passwd != '')$command.= ' password='.$layerdb->passwd;
@@ -759,22 +760,24 @@ class data_import_export {
 		if($layerdb->host != '') $command .= ' host=' . $layerdb->host;
 		exec($command.'"');
 	}
-	
-	function ogr2ogr_import($schema, $tablename, $epsg, $importfile, $database, $layer, $sql = NULL, $options = NULL, $encoding = 'LATIN1'){
+
+	function ogr2ogr_import($schema, $tablename, $epsg, $importfile, $database, $layer, $sql = NULL, $options = NULL, $encoding = 'LATIN1') {
 		$command = 'export PGCLIENTENCODING='.$encoding.';'.OGR_BINPATH.'ogr2ogr ';
-		if($options != NULL)$command.= $options;
-		$command.= ' -f PostgreSQL -lco GEOMETRY_NAME=the_geom -nln '.$tablename.' -a_srs EPSG:'.$epsg;
-		if($sql != NULL)$command.= ' -sql \''.$sql.'\'';
-		$command.= ' -append PG:"dbname='.$database->dbName.' user='.$database->user.' active_schema='.$schema;
-		if($database->passwd != '')$command.= ' password='.$database->passwd;
-		if($database->port != '')$command.=' port='.$database->port;
-		if($database->host != '') $command .= ' host=' . $database->host;
-		$command .= '" "'.$importfile.'" '.$layer;
-		#echo '<br>Exec Command: ' . $command;
+		if ($options != NULL) $command.= $options;
+		$command .= ' -f PostgreSQL -lco GEOMETRY_NAME=the_geom -nln ' . $tablename . ' -a_srs EPSG:' . $epsg;
+		if ($sql != NULL) $command.= ' -sql \''.$sql.'\'';
+		$command .= ' -append PG:"dbname=' . $database->dbName . ' user=' . $database->user . ' active_schema=' . $schema;
+		if ($database->passwd != '') $command .= ' password=' . $database->passwd;
+		if ($database->port != '') $command .= ' port=' . $database->port;
+		if ($database->host != '') $command .= ' host=' . $database->host;
+		$command .= '" "' . $importfile . '" ' . $layer;
+		$command .= ' 2> ' . IMAGEPATH . $tablename . '.err';
+		$output = array();
 		exec($command, $output, $ret);
+		if ($ret != 0) { $ret = 'Fehler beim Importieren der Datei ' . basename($importfile) . '!<br>Befehl: ' . $command . '<br><a href="' . IMAGEURL . $tablename . '.err" target="_blank">Fehlerprotokoll</a>'; }
 		return $ret;
 	}
-	
+
 	function getEncoding($dbf){
 		$folder = dirname($dbf);
 		$command = OGR_BINPATH.'ogr2ogr -f CSV '.$folder.'/test.csv "'.$dbf.'"';
@@ -791,7 +794,7 @@ class data_import_export {
 		#echo '<br>encoding: ' . $encoding;
 		return $encoding;
 	}
-	
+
 	function create_csv($result, $attributes, $groupnames){
 		# Gruppennamen in die erste Zeile schreiben
 		if($groupnames != ''){
@@ -936,7 +939,7 @@ class data_import_export {
 		$sql = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[0]['pfad']);
 		$sql = str_replace('$language', $language, $sql);
 		$sql = replace_params($sql, rolle::$layer_params);
-    $privileges = $stelle->get_attributes_privileges($this->formvars['selected_layer_id'], true);
+    $privileges = $stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
     $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
 		$filter = $mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id);
 		
@@ -1138,8 +1141,8 @@ class data_import_export {
 			}
 			# bei Bedarf zippen
 			if($zip){
-				exec(ZIP_PATH.' '.IMAGEPATH.$folder.' '.IMAGEPATH.$folder.'/*'); # Ordner zippen
-				#echo ZIP_PATH.' '.IMAGEPATH.$folder.' '.IMAGEPATH.$folder.'/*';
+				exec(ZIP_PATH.' -j '.IMAGEPATH.$folder.' '.IMAGEPATH.$folder.'/*'); # Ordner zippen
+				#echo ZIP_PATH.' -j '.IMAGEPATH.$folder.' '.IMAGEPATH.$folder.'/*';
 				$exportfile = IMAGEPATH.$folder.'.zip';
 				$contenttype = 'application/octet-stream';
 			}
@@ -1160,6 +1163,5 @@ class data_import_export {
       showAlert('Abfrage fehlgeschlagen.');
     }
   }
- 
 }
 ?>

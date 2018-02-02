@@ -21,6 +21,7 @@
   $strFreePolygon="Draw Polygon";
   $strFreeArrow="Draw Arrow";
   $strFreeText="Add Text";
+	$strGPS="GPS-Follow-Mode";
   $strX="E";  
   $strY="N";
   $strChoose="Load Extent";

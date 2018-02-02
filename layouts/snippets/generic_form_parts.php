@@ -136,6 +136,7 @@
 			}
 			else{
 				$datapart .= '<select id="'.$layer_id.'_'.$attributes['name'][$j].'_'.$k.'" onchange="'.$onchange.'" title="'.$attributes['alias'][$j].'"  style="'.$select_width.'font-size: '.$fontsize.'px" name="'.$fieldname.'">';
+				if($attributes['nullable'][$j] != '0' OR $gui->new_entry == true)$datapart .= '<option value="">-- '.$gui->strPleaseSelect.' --</option>';
 				for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
 					$datapart .= '<option ';
 					if($attributes['enum_value'][$j][$e] == $dataset[$attributes['name'][$j]]){
@@ -785,4 +786,13 @@
 		return $ha;
 	}
 
+	/*
+	* Diese Funktion erzeugt ein class oder ein style Attribut eines html elementes
+	* geführt von einem Leerzeichen je nach dem ob der übergebene Text ein : enthält (style) oder nicht.
+	* @param string $class_or_style Der Text, der den Klassennamen oder den Styletext enthält
+	* @return string Text in der Form ' class="class_name"' oder ' style="css-text"'
+	*/
+	function get_td_class_or_style($class_or_style) {
+		return ' ' . (strpos($class_or_style, ':') === false ? 'class' : 'style') . '="' . $class_or_style . '"';
+	}
 ?>

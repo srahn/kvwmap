@@ -166,8 +166,23 @@ class administration{
 					$sql = str_replace(':alkis_epsg', EPSGCODE_ALKIS, $sql);
 					if ($database_type == 'mysql')
 						$queryret = $this->database->exec_file($filepath, NULL, NULL);	# mysql
-					else
-						$queryret=$this->pgdatabase->execSQL($sql,0, 0);	# postgresql
+					else {
+						if (stripos($sql, '-- exec statements separated') !== false) {
+							$sql = str_ireplace('-- exec statements separated', '', $sql);
+							$sql = str_ireplace('BEGIN;', '', $sql);
+							$sql = str_ireplace('COMMIT;', '', $sql);
+							$sql_parts = explode(';', $sql);
+						}
+						else {
+							$sql_parts = array($sql);
+						}
+						foreach ($sql_parts AS $sql) {
+							$sql = trim($sql);
+							if ($sql != '') {
+								$queryret = $this->pgdatabase->execSQL($sql,0, 0);	# postgresql
+							}
+						}
+					}
 					if($queryret[0]){
 						echo $queryret[1].'<br>Fehler beim Ausführen von migration-Datei: '.$filepath.'<br>';
 					}

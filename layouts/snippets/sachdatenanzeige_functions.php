@@ -453,6 +453,17 @@ include('funktionen/input_check_functions.php');
 			window.location.href = 'index.php?'+params;		// aus normaler Sachdatenanzeige heraus --> normalen Kartenzoom machen
 		}
 	}
+	
+	zoom2wkt = function(wkt, epsg){
+		params = 'go=zoom2wkt&wkt='+wkt+'&epsg='+epsg;
+		if(currentform.id == 'GUI2'){					// aus overlay heraus --> Kartenzoom per Ajax machen
+			startwaiting();
+			get_map_ajax(params, '', '');
+		}
+		else{
+			window.location.href = 'index.php?'+params;		// aus normaler Sachdatenanzeige heraus --> normalen Kartenzoom machen
+		}
+	}	
 
 	check_for_selection = function(layer_id){
 		go = 'false';
@@ -571,10 +582,12 @@ include('funktionen/input_check_functions.php');
 	
 	dublicate_dataset = function(layer_id){
 		if(check_for_selection(layer_id)){
-			currentform.chosen_layer_id.value = layer_id;
-			currentform.go_backup.value = currentform.go.value;
-			currentform.go.value = 'Datensatz_dublizieren';
-			currentform.submit();
+			if(confirm('Der Datensatz und alle mit ihm verknüpften Objekte werden kopiert. Wollen Sie fortfahren?')){
+				currentform.chosen_layer_id.value = layer_id;
+				currentform.go_backup.value = currentform.go.value;
+				currentform.go.value = 'Datensatz_dublizieren';
+				currentform.submit();
+			}
 		}
 	}	
 

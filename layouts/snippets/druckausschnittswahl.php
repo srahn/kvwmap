@@ -257,7 +257,7 @@ function rotate_print_extent(angle){
 								<input type="checkbox" name="legend_extra" value="1" <? if($this->formvars['legend_extra']) echo 'checked="true"'; ?>>&nbsp;<? echo $strLegendExtra; ?><br>
 								<div class="fett" style="margin-top: 5px">&nbsp;<? echo $strLayers; ?>:</div>
 								<?
-								$layerset = $this->layerset;
+								$layerset = $this->layerset['list'];
 								$scale = $this->map_scaledenom;
 								for($i = 0; $i < count($layerset); $i++){
 									if($layerset[$i]['aktivStatus'] != 0 

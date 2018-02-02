@@ -21,6 +21,7 @@
   $strFreePolygon="Polygon zeichnen";
   $strFreeArrow="Pfeil zeichnen";
   $strFreeText="Text Hinzufuegen";
+	$strGPS="GPS-Verfolgungsmodus";
   $strX="R";  
   $strY="H";
 	$strExtentURL="URL des Ausschnitts anzeigen";

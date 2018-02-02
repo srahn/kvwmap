@@ -829,7 +829,7 @@ function mouseup(evt){
 		endPoint(evt);
 		top.currentform.secondpoly.value = "true";
 		if(top.currentform.last_doing.value == "add_geom"){
-			top.ahah("index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&input_coord="+top.currentform.INPUT_COORD.value+"&pixsize='.$pixelsize.'&operation=add_geometry&resulttype=svgwkt&fromwhere="+top.currentform.fromwhere.value+"&orderby="+top.currentform.orderby.value+"&columnname="+top.currentform.columnname.value+"&layer_id="+top.currentform.layer_id.value,new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
+			top.ahah("index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&input_coord="+top.currentform.INPUT_COORD.value+"&pixsize='.$pixelsize.'&operation=add_geometry&resulttype=svgwkt&fromwhere="+top.currentform.fromwhere.value+"&singlegeom="+top.currentform.singlegeom.checked+"&orderby="+top.currentform.orderby.value+"&columnname="+top.currentform.columnname.value+"&layer_id="+top.currentform.layer_id.value,new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
 			if(polygonfunctions == true){
 				top.currentform.firstpoly.value = "true";
 			}
@@ -839,7 +839,7 @@ function mouseup(evt){
 		}
 		else{
 			if(top.currentform.last_doing.value == "subtract_geom"){
-				top.ahah("index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&input_coord="+top.currentform.INPUT_COORD.value+"&pixsize='.$pixelsize.'&operation=subtract_geometry&resulttype=svgwkt&fromwhere="+top.currentform.fromwhere.value+"&orderby="+top.currentform.orderby.value+"&columnname="+top.currentform.columnname.value+"&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
+				top.ahah("index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&input_coord="+top.currentform.INPUT_COORD.value+"&pixsize='.$pixelsize.'&operation=subtract_geometry&resulttype=svgwkt&fromwhere="+top.currentform.fromwhere.value+"&singlegeom="+top.currentform.singlegeom.checked+"&orderby="+top.currentform.orderby.value+"&columnname="+top.currentform.columnname.value+"&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
 			}
 		}
 	}

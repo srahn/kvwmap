@@ -120,6 +120,7 @@ function buildwktpolygonfromsvgpath(svgpath){
   				}
   			?>
   		</select> 
+			<input type="hidden" name="singlegeom">
   	</td>
   </tr>
   

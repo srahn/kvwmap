@@ -1,0 +1,1 @@
+ALTER TYPE xplan_gml.xp_variablegeometrie ADD ATTRIBUTE abweichenderbezugspunkt CHARACTER VARYING;

@@ -1,3 +1,7 @@
+<?
+  include(LAYOUTPATH.'languages/PolygonEditor_'.$this->user->rolle->language.'.php');
+?>
+
 <script type="text/javascript" src="funktionen/calendar.js"></script>
 <script type="text/javascript">
 <!--
@@ -144,8 +148,8 @@ $legendheight = $this->map->height + 20;
 						</table></td>
 				</tr>
 				<tr> 
-					<td rowspan="21">&nbsp; </td>
-					<td rowspan="21" colspan="5"> 
+					<td rowspan="22">&nbsp; </td>
+					<td rowspan="22" colspan="5"> 
 						<?php
 							include(LAYOUTPATH.'snippets/SVG_polygon_query_area.php')
 						?>
@@ -290,6 +294,11 @@ $legendheight = $this->map->height + 20;
 						</select> 
 					</td>
 				</tr>
+				<tr>
+					<td colspan="2" style="padding-top: 5px">
+						<input type="checkbox" name="singlegeom" value="true" <? if($this->formvars['singlegeom'])echo 'checked="true"'; ?>><? echo $strSingleGeoms; ?>
+					</td>
+				</tr>	
 				<tr> 
 					<td colspan="2" style="border-top:1px solid #999999"><img width="290px" height="1px" src="<? echo GRAPHICSPATH; ?>leer.gif"></td>
 				</tr>

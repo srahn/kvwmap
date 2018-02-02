@@ -1279,7 +1279,7 @@ tbody.gle tr:hover {
 }
 
 .rollenwahl-option-data {
-	width: 440px;
+	width: 460px;
 	padding : 4px;
 }
 
