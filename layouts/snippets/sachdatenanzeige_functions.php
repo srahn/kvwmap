@@ -65,7 +65,7 @@ include('funktionen/input_check_functions.php');
 		if(field.onchange)field.onchange();
 	}
 	
-	addArrayElement = function(fieldname){
+	addArrayElement = function(fieldname, form_element_type, oid){
 		outer_div = document.getElementById(fieldname+'_elements');
 		first_element = document.getElementById('div_'+fieldname+'_-1');
 		new_element = first_element.cloneNode(true);
@@ -75,6 +75,11 @@ include('funktionen/input_check_functions.php');
 		new_element.id = 'div_'+fieldname+'_'+new_id;
 		var regex = new RegExp(fieldname+'_-1', "g");
 		new_element.innerHTML = new_element.innerHTML.replace(regex, fieldname+'_'+new_id);
+		if(form_element_type == 'Dokument'){		// beim Typ Dokument die Namen der input-Felder anpassen und als Array definieren, damit sie unterschiedlich sind
+			regex = new RegExp('"'+fieldname+'"', "g");
+			parts = fieldname.split('_');
+			new_element.innerHTML = new_element.innerHTML.replace(regex, parts[1]+'_'+oid+'[]');
+		}
 		new_element.style.display = 'block';
 		outer_div.appendChild(new_element);
 		buildJSONString(fieldname, true);
@@ -448,6 +453,17 @@ include('funktionen/input_check_functions.php');
 			window.location.href = 'index.php?'+params;		// aus normaler Sachdatenanzeige heraus --> normalen Kartenzoom machen
 		}
 	}
+	
+	zoom2wkt = function(wkt, epsg){
+		params = 'go=zoom2wkt&wkt='+wkt+'&epsg='+epsg;
+		if(currentform.id == 'GUI2'){					// aus overlay heraus --> Kartenzoom per Ajax machen
+			startwaiting();
+			get_map_ajax(params, '', '');
+		}
+		else{
+			window.location.href = 'index.php?'+params;		// aus normaler Sachdatenanzeige heraus --> normalen Kartenzoom machen
+		}
+	}	
 
 	check_for_selection = function(layer_id){
 		go = 'false';
@@ -566,10 +582,12 @@ include('funktionen/input_check_functions.php');
 	
 	dublicate_dataset = function(layer_id){
 		if(check_for_selection(layer_id)){
-			currentform.chosen_layer_id.value = layer_id;
-			currentform.go_backup.value = currentform.go.value;
-			currentform.go.value = 'Datensatz_dublizieren';
-			currentform.submit();
+			if(confirm('Der Datensatz und alle mit ihm verknüpften Objekte werden kopiert. Wollen Sie fortfahren?')){
+				currentform.chosen_layer_id.value = layer_id;
+				currentform.go_backup.value = currentform.go.value;
+				currentform.go.value = 'Datensatz_dublizieren';
+				currentform.submit();
+			}
 		}
 	}	
 

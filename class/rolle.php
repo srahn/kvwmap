@@ -85,7 +85,7 @@ class rolle {
 				$name_column . ",
 				l.Layer_ID,
 				alias, Datentyp, Gruppe, pfad, maintable, maintable_is_view, Data, `schema`, document_path, labelitem, connection, printconnection,
-				connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
+				classitem, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, trigger_function, ul.`queryable`, ul.`drawingorder`,
 				ul.`minscale`, ul.`maxscale`,
 				ul.`offsite`,
@@ -351,6 +351,7 @@ class rolle {
 			$this->freepolygon = in_array('freepolygon', $buttons);
 			$this->freetext = in_array('freetext', $buttons);
 			$this->freearrow = in_array('freearrow', $buttons);
+			$this->gps = in_array('gps', $buttons);
 			return 1;
 		}else return 0;
   }
@@ -965,7 +966,7 @@ class rolle {
 		}
 	}
 	
-	function saveLegendOptions($layer, $formvars){
+	function saveLegendOptions($layerset, $formvars){
 		$sql ="UPDATE rolle SET legendtype=".$formvars['legendtype'];
 		$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 		#echo $sql;
@@ -975,17 +976,17 @@ class rolle {
 			$active_layers = $formvars['active_layers'];		// $active_layers ist ein Array mit den Layer-IDs der aktiven Layern in der neuen Reihenfolge
 			$active_layer_count = count($active_layers);
 			for($i = $active_layer_count-2; $i >= 0; $i--){		# von hinten beginnen
-				$layer_oben = &$layer['layer_ids'][$active_layers[$i]];
-				$layer_unten = $layer['layer_ids'][$active_layers[$i+1]];
+				$layer_oben = &$layerset['layer_ids'][$active_layers[$i]];
+				$layer_unten = $layerset['layer_ids'][$active_layers[$i+1]];
 				if($layer_oben['drawingorder'] < $layer_unten['drawingorder']){		// drawingorder muss erhöht werden
 					$newdrawingorder = $layer_unten['drawingorder'] + 1;
 					$layer_oben['drawingorder'] = $newdrawingorder;
 					$layers_changed[$layer_oben['id']] = true;
 					$next_id = $layer_unten['id'] + 1;		// id des nächsten Layers im Layer-Array
-					if($layer[$next_id]['drawingorder'] <= $newdrawingorder){		// wenn erforderlich auch die drawingorders der Layer darüber erhöhen
-						$increase = $newdrawingorder - $layer[$next_id]['drawingorder'] + 1;		// um wieviel muss erhöht werden?
-						for($j = $next_id; $j < count($layer)-1; $j++){
-							$layer[$j]['drawingorder'] += $increase;
+					if($layerset['list'][$next_id]['drawingorder'] <= $newdrawingorder){		// wenn erforderlich auch die drawingorders der Layer darüber erhöhen
+						$increase = $newdrawingorder - $layer['list'][$next_id]['drawingorder'] + 1;		// um wieviel muss erhöht werden?
+						for($j = $next_id; $j < count($layer['list']); $j++){
+							$layer['list'][$j]['drawingorder'] += $increase;
 							$layers_changed[$j] = true;
 						}
 					}
@@ -1435,10 +1436,10 @@ class rolle {
 		$sql.=' user_id='.$this->user_id;
 		$sql.=', stelle_id='.$this->stelle_id;
 		$sql.=', name="'.$comment.'"';
-		for($i=0; $i < count($layerset); $i++){
-			if($layerset[$i]['Layer_ID'] > 0 AND $layerset[$i]['aktivStatus'] == 1){
-				$layers[] = $layerset[$i]['Layer_ID'];
-				if($layerset[$i]['queryStatus'] == 1)$query[] = $layerset[$i]['Layer_ID'];
+		for($i=0; $i < count($layerset['list']); $i++){
+			if($layerset['list'][$i]['Layer_ID'] > 0 AND $layerset['list'][$i]['aktivStatus'] == 1){
+				$layers[] = $layerset['list'][$i]['Layer_ID'];
+				if($layerset['list'][$i]['queryStatus'] == 1)$query[] = $layerset['list'][$i]['Layer_ID'];
 			}
 		}
 		$sql.=', layers="'.implode(',', $layers).'"';

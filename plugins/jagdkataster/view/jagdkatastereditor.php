@@ -174,6 +174,7 @@ function update_form(art){
   				}
   			?>
   		</select>
+			<input type="hidden" name="singlegeom">
   	</td>
   </tr>
   <tr>

@@ -101,10 +101,6 @@ class pgdatabase {
 			ORDER BY table_name
 		";
 
-		$msg = '<br>Get Tables from Schema: ' . $schema;
-		$msg .= '<br>' . $sql;
-		$this->debug->write($msg, 4);
-
 		$ret = $this->execSQL($sql, 4, 0);
 		if($ret[0]==0){
 			while($row = pg_fetch_assoc($ret[1])){
@@ -129,8 +125,8 @@ SELECT EXISTS (
 		#echo '<br>' . $sql;
 		$ret = $this->execSQL($sql, 4, 0);
 		if($ret[0]==0) {
-			$row = pg_fetch_assoc($ret[1]);
-			if ($row['exists'] == 't') $table_exists = true;
+			$row = pg_fetch_row($ret[1]);
+			if ($row[0] == 't') $table_exists = true;
 		}
 		return $table_exists;
 	}
@@ -186,7 +182,7 @@ FROM
 
 	function read_epsg_codes($order = true){
     global $supportedSRIDs;
-    $sql ="SELECT spatial_ref_sys.srid, coalesce(alias, substr(srtext, 9, 35)) as srtext, minx, miny, maxx, maxy FROM spatial_ref_sys ";
+    $sql ="SELECT spatial_ref_sys.srid, coalesce(alias, substr(srtext, 9, 35)) as srtext, proj4text, minx, miny, maxx, maxy FROM spatial_ref_sys ";
     $sql.="LEFT JOIN spatial_ref_sys_alias ON spatial_ref_sys_alias.srid = spatial_ref_sys.srid";
     # Wenn zu unterstützende SRIDs angegeben sind, ist die Abfrage diesbezüglich eingeschränkt
     $anzSupportedSRIDs = count($supportedSRIDs);
@@ -1265,14 +1261,14 @@ FROM
   }
   
   function getALBData($FlurstKennz, $without_temporal_filter = false){		
-		$sql ="SELECT distinct f.gml_id, 0 as hist_alb, lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, CASE WHEN f.abweichenderrechtszustand = 'true' THEN 'ja' ELSE 'nein' END AS abweichenderrechtszustand, zaehler, nenner, k.schluesselgesamt AS kreisid, k.bezeichnung as kreisname, gem.schluesselgesamt as gemkgschl, gem.bezeichnung as gemkgname, g.schluesselgesamt as gemeinde, g.bezeichnung as gemeindename,d.stelle as finanzamt, d.bezeichnung AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp ";
+		$sql ="SELECT distinct f.oid, f.gml_id, 0 as hist_alb, lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, CASE WHEN f.abweichenderrechtszustand = 'true' THEN 'ja' ELSE 'nein' END AS abweichenderrechtszustand, zaehler, nenner, k.schluesselgesamt AS kreisid, k.bezeichnung as kreisname, gem.schluesselgesamt as gemkgschl, gem.bezeichnung as gemkgname, g.schluesselgesamt as gemeinde, g.bezeichnung as gemeindename,d.stelle as finanzamt, d.bezeichnung AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp ";
 		$sql.="FROM alkis.ax_kreisregion AS k, alkis.ax_gemeinde as g, alkis.ax_gemarkung AS gem, alkis.ax_flurstueck AS f ";
 		$sql.="LEFT JOIN alkis.ax_dienststelle as d ON d.stellenart = 1200 AND d.stelle = ANY(f.zustaendigestelle_stelle) ";
 		$sql.="WHERE f.gemarkungsnummer=gem.gemarkungsnummer AND f.land = gem.land AND f.gemeindezugehoerigkeit_kreis = g.kreis AND f.gemeindezugehoerigkeit_gemeinde = g.gemeinde AND f.gemeindezugehoerigkeit_kreis = k.kreis AND f.flurstueckskennzeichen='" . $FlurstKennz . "'";
 		if(!$without_temporal_filter)$sql.= $this->build_temporal_filter(array('k', 'g', 'gem', 'f'));
 		else{
 			$sql.= " UNION ";
-			$sql.= "SELECT distinct f.gml_id, 1 as hist_alb, lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, '' as abweichenderrechtszustand, zaehler, nenner, '0' AS kreisid, '' as kreisname, gem.schluesselgesamt as gemkgschl, gem.bezeichnung as gemkgname, g.schluesselgesamt as gemeinde, g.bezeichnung as gemeindename, '' as finanzamt, '' AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp ";
+			$sql.= "SELECT distinct f.oid, f.gml_id, 1 as hist_alb, lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, '' as abweichenderrechtszustand, zaehler, nenner, '0' AS kreisid, '' as kreisname, gem.schluesselgesamt as gemkgschl, gem.bezeichnung as gemkgname, g.schluesselgesamt as gemeinde, g.bezeichnung as gemeindename, '' as finanzamt, '' AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp ";
 			$sql.= "FROM alkis.ax_historischesflurstueckohneraumbezug as f ";
 			$sql.= "LEFT JOIN alkis.ax_gemarkung AS gem ON f.gemarkungsnummer=gem.gemarkungsnummer AND f.land = gem.land ";
 			$sql.= "LEFT JOIN alkis.pp_gemarkung ppg ON gem.land = ppg.land AND gem.gemarkungsnummer = ppg.gemarkung ";
@@ -1911,9 +1907,21 @@ FROM
 		}
 		return $versionen;
 	}
+	
+	function getAnschriften($gml_ids, $without_temporal_filter = false){
+		$sql = "SELECT DISTINCT ON (strasse, hausnummer, postleitzahlpostzustellung, ort_post, ortsteil, bestimmungsland) anschrift.gml_id as anschrift_gml_id, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, 'OT '||anschrift.ortsteil as ortsteil, anschrift.bestimmungsland ";
+		$sql.= "FROM alkis.ax_anschrift as anschrift ";
+		$sql.= "WHERE gml_id IN ('".implode("','", $gml_ids)."')";
+		if(!$without_temporal_filter)$sql.= $this->build_temporal_filter(array('anschrift'));
+		$ret=$this->execSQL($sql, 4, 0);
+		while($rs=pg_fetch_assoc($ret[1])){
+			$anschriften[] = $rs;
+		}
+		return $anschriften;
+	}
   
   function getEigentuemerliste($FlurstKennz,$Bezirk,$Blatt,$BVNR, $without_temporal_filter = false) {
-    $sql = "SELECT distinct coalesce(n.laufendenummernachdin1421, '0') as order1, coalesce(bestehtausrechtsverhaeltnissenzu, '0') as order2, bestehtausrechtsverhaeltnissenzu, CASE WHEN n.beschriebderrechtsgemeinschaft is null and n.artderrechtsgemeinschaft is null THEN n.laufendenummernachdin1421 ELSE NULL END AS namensnr, n.gml_id as n_gml_id, p.gml_id, p.nachnameoderfirma, p.vorname, p.akademischergrad, p.namensbestandteil, p.geburtsname, p.geburtsdatum::date, anschrift.gml_id as anschrift_gml_id, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, 'OT '||anschrift.ortsteil as ortsteil, anschrift.bestimmungsland, w.beschreibung as Art, n.zaehler||'/'||n.nenner as anteil, coalesce(NULLIF(n.beschriebderrechtsgemeinschaft, ''),adrg.beschreibung) as zusatz_eigentuemer ";
+    $sql = "SELECT distinct coalesce(n.laufendenummernachdin1421, '0') as order1, coalesce(bestehtausrechtsverhaeltnissenzu, '0') as order2, bestehtausrechtsverhaeltnissenzu, CASE WHEN n.beschriebderrechtsgemeinschaft is null and n.artderrechtsgemeinschaft is null THEN n.laufendenummernachdin1421 ELSE NULL END AS namensnr, n.gml_id as n_gml_id, p.gml_id, p.nachnameoderfirma, p.vorname, p.akademischergrad, p.namensbestandteil, p.geburtsname, p.geburtsdatum::date, array_to_string(p.hat, ',') as hat, anschrift.gml_id as anschrift_gml_id, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, 'OT '||anschrift.ortsteil as ortsteil, anschrift.bestimmungsland, w.beschreibung as Art, n.zaehler||'/'||n.nenner as anteil, coalesce(NULLIF(n.beschriebderrechtsgemeinschaft, ''),adrg.beschreibung) as zusatz_eigentuemer ";
 		$sql.= "FROM alkis.ax_buchungsstelle s ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
@@ -1921,8 +1929,8 @@ FROM
 		$sql.= "LEFT JOIN alkis.ax_artderrechtsgemeinschaft_namensnummer adrg ON n.artderrechtsgemeinschaft = adrg.wert ";
 		$sql.= "LEFT JOIN alkis.ax_eigentuemerart_namensnummer w ON w.wert = n.eigentuemerart ";
 		$sql.= "LEFT JOIN alkis.ax_person p ON n.benennt = p.gml_id ";
-		$sql.= "LEFT JOIN alkis.ax_anschrift anschrift ON anschrift.gml_id = ANY(p.hat) ";
-		$sql.= $this->build_temporal_filter(array('anschrift'));
+		$sql.= "LEFT JOIN alkis.ax_anschrift anschrift ON anschrift.gml_id = p.hat[1] ";		# da die meisten Eigentümer nur eine Anschrift haben, diese gleiche in dieser Abfrage mit abfragen
+		if(!$without_temporal_filter)$sql.= $this->build_temporal_filter(array('anschrift'));
 		$sql.= " WHERE 1=1"; 
     if ($Bezirk!="") {
       $sql.=" AND b.schluesselgesamt='".$Bezirk."'";
@@ -1940,7 +1948,7 @@ FROM
     if ($ret[0] OR pg_num_rows($ret[1])==0) { return; }
 		$wurzel = new eigentuemer($Grundbuch,NULL, $this);
 		$Eigentuemerliste['wurzel'] = $wurzel;
-    while ($rs=pg_fetch_assoc($ret[1])) {
+    while($rs=pg_fetch_assoc($ret[1])){
       $Grundbuch = new grundbuch("","",$this->debug);
       
 			$newparts = array();
@@ -1956,20 +1964,26 @@ FROM
 
 			$Eigentuemer->gml_id = $rs['gml_id'];
       $Eigentuemer->lfd_nr=$rs['lfd_nr_name'];
-      $Eigentuemer->Name[0]=$rs['nachnameoderfirma'];
-      if($rs['vorname'] != '')$Eigentuemer->Name[0] .= ', '.$rs['vorname']; 
-			if($rs['namensbestandteil'] != '')$Eigentuemer->Name[0] .= ', '.$rs['namensbestandteil']; 
-			if($rs['akademischergrad'] != '')$Eigentuemer->Name[0] .= ', '.$rs['akademischergrad']; 				
-      $Eigentuemer->Name[1] = $rs['geburtsdatum'];
-			if($rs['geburtsname'] != '')$Eigentuemer->Name[1] = 'geb. '.$rs['geburtsname'].' '.$Eigentuemer->Name[1];
-      $Eigentuemer->Name[2] = $rs['strasse'].' '.$rs['hausnummer'];
-      $Eigentuemer->Name[3] = $rs['postleitzahlpostzustellung'].' '.$rs['ort_post'].' '.$rs['ortsteil'];
-			$Eigentuemer->postleitzahlpostzustellung = $rs['postleitzahlpostzustellung'];
-			$Eigentuemer->ort_post = $rs['ort_post'];
-			$Eigentuemer->ortsteil = $rs['ortsteil'];
-			$Eigentuemer->Name[4] = $Eigentuemer->bestimmungsland = $rs['bestimmungsland'];			
-			$Eigentuemer->strasse = $rs['strasse'];
-			$Eigentuemer->hausnummer = $rs['hausnummer'];
+      $Eigentuemer->nachnameoderfirma = $rs['nachnameoderfirma'];
+      $Eigentuemer->vorname  = $rs['vorname']; 
+			$Eigentuemer->namensbestandteil = $rs['namensbestandteil'];
+			$Eigentuemer->akademischergrad = $rs['akademischergrad'];
+      $Eigentuemer->geburtsdatum = $rs['geburtsdatum'];
+			$Eigentuemer->geburtsname = $rs['geburtsname'];
+			
+			$anschriften_gml_ids = explode(',', $rs['hat']);
+			if(count($anschriften_gml_ids) > 1){
+				$Eigentuemer->anschriften = $this->getAnschriften($anschriften_gml_ids, $without_temporal_filter);
+			}
+			else{
+				$Eigentuemer->anschriften[0]['postleitzahlpostzustellung'] = $rs['postleitzahlpostzustellung'];
+				$Eigentuemer->anschriften[0]['ort_post'] = $rs['ort_post'];
+				$Eigentuemer->anschriften[0]['ortsteil'] = $rs['ortsteil'];
+				$Eigentuemer->anschriften[0]['bestimmungsland'] = $rs['bestimmungsland'];
+				$Eigentuemer->anschriften[0]['strasse'] = $rs['strasse'];
+				$Eigentuemer->anschriften[0]['hausnummer'] = $rs['hausnummer'];
+			}
+			
       $Eigentuemer->Anteil=$rs['anteil'];
 			$Eigentuemer->anschrift_gml_id=$rs['anschrift_gml_id'];
 			$Eigentuemer->zusatz_eigentuemer=$rs['zusatz_eigentuemer'];
@@ -2036,9 +2050,9 @@ FROM
 		$caseSensitive = $formvars['caseSensitive'];
 		$order = $formvars['order'];
 			
-    $sql = "set enable_seqscan = off;set enable_mergejoin = off;set enable_hashjoin = off;SELECT distinct p.nachnameoderfirma, p.vorname, p.namensbestandteil, p.akademischergrad, p.geburtsname, p.geburtsdatum, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, 'OT '||anschrift.ortsteil as ortsteil, anschrift.bestimmungsland, g.buchungsblattnummermitbuchstabenerweiterung as blatt, b.schluesselgesamt as bezirk ";
+    $sql = "set enable_seqscan = off;set enable_mergejoin = off;set enable_hashjoin = off;SELECT distinct p.nachnameoderfirma, p.vorname, p.namensbestandteil, p.akademischergrad, p.geburtsname, p.geburtsdatum, array_to_string(p.hat, ',') as hat, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, 'OT '||anschrift.ortsteil as ortsteil, anschrift.bestimmungsland, g.buchungsblattnummermitbuchstabenerweiterung as blatt, b.schluesselgesamt as bezirk ";
 		$sql.= "FROM alkis.ax_person p ";
-		$sql.= "LEFT JOIN alkis.ax_anschrift anschrift ON anschrift.gml_id = ANY(p.hat) ";
+		$sql.= "LEFT JOIN alkis.ax_anschrift anschrift ON anschrift.gml_id = p.hat[1] ";		# da die meisten Eigentümer nur eine Anschrift haben, diese gleiche in dieser Abfrage mit abfragen
 		$sql.= "LEFT JOIN alkis.ax_namensnummer n ON n.benennt = p.gml_id ";
 		$sql.= "LEFT JOIN alkis.ax_eigentuemerart_namensnummer w ON w.wert = n.eigentuemerart ";
 		$sql.= "LEFT JOIN alkis.ax_buchungsblatt g ON n.istbestandteilvon = g.gml_id ";
@@ -2108,8 +2122,23 @@ FROM
 				if($rs['akademischergrad'] != '')$namen[$i]['name1'] .= ', '.$rs['akademischergrad']; 				
 	      $namen[$i]['name2'] = $rs['geburtsdatum'];
 				if($rs['geburtsname'] != '')$namen[$i]['name2'] .= ' geb. '.$rs['geburtsname'];
-	      $namen[$i]['name3'] = $rs['strasse'].' '.$rs['hausnummer'];
-	      $namen[$i]['name4'] = $rs['postleitzahlpostzustellung'].' '.$rs['ort_post'].' '.$rs['ortsteil'].' '.$rs['bestimmungsland'];
+				
+				$anschriften_gml_ids = explode(',', $rs['hat']);
+				if(count($anschriften_gml_ids) > 1){
+					$anschriften = $this->getAnschriften($anschriften_gml_ids, $without_temporal_filter);
+				}
+				else{
+					$anschriften[0]['postleitzahlpostzustellung'] = $rs['postleitzahlpostzustellung'];
+					$anschriften[0]['ort_post'] = $rs['ort_post'];
+					$anschriften[0]['ortsteil'] = $rs['ortsteil'];
+					$anschriften[0]['bestimmungsland'] = $rs['bestimmungsland'];
+					$anschriften[0]['strasse'] = $rs['strasse'];
+					$anschriften[0]['hausnummer'] = $rs['hausnummer'];
+				}
+				foreach($anschriften as $anschrift){
+					$namen[$i]['name3'] .= $anschrift['strasse'].' '.$anschrift['hausnummer'].'<br>';
+					$namen[$i]['name4'] .= $anschrift['postleitzahlpostzustellung'].' '.$anschrift['ort_post'].' '.$anschrift['ortsteil'].' '.$anschrift['bestimmungsland'].'<br>';
+				}
         $i++;
       }
       $ret[1]=$namen;
@@ -2328,10 +2357,10 @@ FROM
 	# Die Flurstücke müssen miteinbezogen werden, weil wir ja auch über die Gemarkung auswählen wollen.	
   	$sql ="set enable_seqscan = off;SELECT '-1' AS gemeinde,'-1' AS strasse,'--Auswahl--' AS strassenname, '' as gemkgname";
     $sql.=" UNION";
-    $sql.=" SELECT DISTINCT g.gemeinde, l.lage as strasse, s.bezeichnung as strassenname, gem.bezeichnung as gemkgname";
+    $sql.=" SELECT DISTINCT g.gemeinde, s.lage as strasse, s.bezeichnung as strassenname, array_to_string(array_agg(distinct gem.bezeichnung), ', ') as gemkgname";
     $sql.=" FROM alkis.ax_gemeinde as g, alkis.ax_gemarkung as gem, alkis.ax_flurstueck as f";
     $sql.=" JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(f.weistauf)";
-    $sql.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND s.lage = lpad(l.lage,5,'0')";
+    $sql.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND s.lage = l.lage";
 		$sql.=" WHERE g.gemeinde = f.gemeindezugehoerigkeit_gemeinde AND g.kreis=f.gemeindezugehoerigkeit_kreis AND f.gemarkungsnummer = gem.gemarkungsnummer AND f.gemeindezugehoerigkeit_gemeinde = l.gemeinde";
     if ($GemID!='') {
       $sql.=" AND g.schluesselgesamt='".$GemID."'";
@@ -2340,29 +2369,25 @@ FROM
       $sql.=" AND f.land||f.gemarkungsnummer='".$GemkgID."'";
     }
 		$sql.= $this->build_temporal_filter(array('g', 'gem', 'f', 'l', 's'));
-    $sql.=" ORDER BY gemeinde, strassenname";
+		$sql.=" GROUP BY g.gemeinde, s.bezeichnung, s.lage";
+    $sql.=" ORDER BY gemeinde, strassenname, strasse";
     #echo $sql;
     $this->debug->write("<p>postgres getStrassenListe Abfragen der Strassendaten:<br>".$sql,4);
     $queryret=$this->execSQL($sql, 4, 0);
     $i = 0;
     while ($rs=pg_fetch_assoc($queryret[1])) {
-    	if($namen[$i-1] == $rs['strassenname'] AND $Liste['StrID'][$i-1] == $rs['strasse']){
-    		# Strasse doppelt drin -> ï¿½berspringen
-    		$i = $i-1;
-    	}
-    	else{
-	      $Liste['Gemeinde'][]=$rs['gemeinde'];
-	      $Liste['StrID'][]=$rs['strasse'];
-	      $Liste['Gemarkung'][]=$rs['gemkgname'];
-	      $namen[]=$rs['strassenname'];		# eigentlichen Strassennamen sichern
-	      if($Liste['Name'][$i-1] == $rs['strassenname']){
-	      	$Liste['Name'][$i-1]=$Liste['Name'][$i-1].' ('.$Liste['Gemarkung'][$i-1].')';
-	      	$Liste['Name'][$i]=$rs['strassenname'].' ('.$rs['gemkgname'].')';
-	      }
-	      else{
-	      	$Liste['Name'][]=$rs['strassenname'];
-	      }
-    	}
+			$Liste['Gemeinde'][]=$rs['gemeinde'];
+			$Liste['StrID'][]=$rs['strasse'];
+			$Liste['Gemarkung'][]=$rs['gemkgname'];
+			$Liste['gemkgschl'][]=$rs['gemkgschl'];
+			$namen[]=$rs['strassenname'];		# eigentlichen Strassennamen sichern
+			if($namen[$i-1] == $rs['strassenname'] AND $Liste['Gemarkung'][$i-1] != $rs['gemkgname']){
+				$Liste['Name'][$i-1]=$namen[$i-1].' ('.$Liste['Gemarkung'][$i-1].')';
+				$Liste['Name'][$i]=$rs['strassenname'].' ('.$rs['gemkgname'].')';
+			}
+			else{
+				$Liste['Name'][]=$rs['strassenname'];
+			}
       $i++;
     }
     return $Liste;

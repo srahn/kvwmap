@@ -155,7 +155,7 @@
 					</div>
 					<div style="float: left; padding: 0 0 0 10;"><?
 						if (SHOW_MAP_IMAGE == 'true') { ?>
-							<a title="<? echo $strMapImageURL ?>" id="MapImageLink" target="_blank"	href="" onmouseover="javascript:showMapImage();">
+							<a title="<? echo $strMapImageURL ?>" id="MapImageLink" href="javascript:showMapImage();">
 								<div class="button_background">
 									<div class="emboss save_image">
 										<img src="<? echo GRAPHICSPATH.'leer.gif'; ?>">

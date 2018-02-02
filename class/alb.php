@@ -657,10 +657,16 @@ class ALB {
 					$csv .= $eigentuemer->zusatz_eigentuemer;
 					if($eigentuemer->Anteil !=''){$csv .= '  zu '.$eigentuemer->Anteil;}
 					$csv .= ';';
-					$anzNamenszeilen = count($eigentuemer->Name);
-					for($n=0;$n<$anzNamenszeilen;$n++) {
-						$csv .= $eigentuemer->Name[$n].';';
-					}
+					if($eigentuemer->vorname != '')$csv .= $eigentuemer->vorname.' ';
+					$csv .= $eigentuemer->nachnameoderfirma;
+					if($Eigentuemer->namensbestandteil != '')$csv .= ', '.$Eigentuemer->namensbestandteil;
+					if($Eigentuemer->akademischergrad != '')$csv .= ', '.$Eigentuemer->akademischergrad;
+					$csv .= ';';
+					if($eigentuemer->geburtsname != '')$csv .= 'geb. '.$eigentuemer->geburtsname.' ';
+					$csv .= $eigentuemer->geburtsdatum;
+					$csv .= ';';
+					$csv .= $eigentuemer->anschriften[0]['strasse'].' '.$eigentuemer->anschriften[0]['hausnummer'].';';
+					$csv .= $eigentuemer->anschriften[0]['postleitzahlpostzustellung'].' '.$eigentuemer->anschriften[0]['ort_post'].' '.$eigentuemer->anschriften[0]['ortsteil'].';';
 					$csv .= chr(10);
 				}
 			}
@@ -1216,10 +1222,20 @@ class ALB {
 		elseif($eigentuemer->Anteil != ''){
 			$pdf->addText($_col1,$row-=12,$fontSize,utf8_decode($eigentuemer->Anteil));
 		}
-		$anzNamenszeilen=count($eigentuemer->Name);
+		unset($namenszeilen);
+		if($eigentuemer->vorname != '')$namenszeilen[0] = $eigentuemer->vorname.' ';
+		$namenszeilen[0] .= $eigentuemer->nachnameoderfirma;
+		if($Eigentuemer->namensbestandteil != '')$namenszeilen[0] .= ', '.$Eigentuemer->namensbestandteil;
+		if($Eigentuemer->akademischergrad != '')$namenszeilen[0] .= ', '.$Eigentuemer->akademischergrad;
+		if($eigentuemer->geburtsname != '')$namenszeilen[1] .= 'geb. '.$eigentuemer->geburtsname.' ';
+		$namenszeilen[1] .= $eigentuemer->geburtsdatum;
+		$namenszeilen[2] .= $eigentuemer->anschriften[0]['strasse'].' '.$eigentuemer->anschriften[0]['hausnummer'];
+		$namenszeilen[3] .= $eigentuemer->anschriften[0]['postleitzahlpostzustellung'].' '.$eigentuemer->anschriften[0]['ort_post'].' '.$eigentuemer->anschriften[0]['ortsteil'];		
+		$anzNamenszeilen=count($namenszeilen);
 		for ($k=0;$k<$anzNamenszeilen;$k++) {
-			if(trim($eigentuemer->Name[$k]) != '')$pdf->addText($_col1,$row-=12,$fontSize,utf8_decode($eigentuemer->Name[$k]));
+			if($namenszeilen[$k] != '')$pdf->addText($_col1,$row-=12,$fontSize,utf8_decode($namenszeilen[$k]));
 		}
+		
 		if($eigentuemer->children != ''){
 			$indent = $indent + 20;
 			foreach($eigentuemer->children as $child){

@@ -31,10 +31,10 @@ class stelle {
 
 	function stelle($id, $database) {
 		global $debug;
-		$this->debug=$debug;
-		$this->id=$id;
-		$this->database=$database;
-		$this->Bezeichnung=$this->getName();
+		$this->debug = $debug;
+		$this->id = $id;
+		$this->database = $database;
+		$this->Bezeichnung = $this->getName();
 		$this->readDefaultValues();
 	}
 
@@ -861,7 +861,7 @@ class stelle {
 		for ($i=0;$i<count($layer_ids);$i++) {
 			$sql = "
 				SELECT
-					queryable, template, transparency, drawingorder, minscale, maxscale, symbolscale, offsite, requires, privileg, export_privileg, postlabelcache
+					queryable, template, transparency, drawingorder, legendorder, minscale, maxscale, symbolscale, offsite, requires, privileg, export_privileg, postlabelcache
 				FROM
 					layer
 				WHERE
@@ -877,6 +877,7 @@ class stelle {
 			}
 			$transparency = $rs['transparency'];
 			$drawingorder = $rs['drawingorder'];
+			$legendorder = $rs['legendorder'];
 			$minscale = $rs['minscale'];
 			$maxscale = $rs['maxscale'];
 			$symbolscale = $rs['symbolscale'];
@@ -892,6 +893,7 @@ class stelle {
 					`Layer_ID`,
 					`queryable`,
 					`drawingorder`,
+					`legendorder`,
 					`minscale`,
 					`maxscale`,
 					`symbolscale`,
@@ -911,6 +913,7 @@ class stelle {
 					'" . $layer_ids[$i] . "',
 					'" . $queryable . "',
 					'" . $drawingorder . "',
+					'" . $legendorder . "',
 					'" . $minscale . "',
 					'" . $maxscale . "',
 					'" . $symbolscale . "',
@@ -1011,10 +1014,12 @@ class stelle {
 		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 	}
 
-	function updateLayerdrawingorder($formvars){
+	function updateLayerOrder($formvars){
 		# Aktualisieren der LayerzuStelle-Eigenschaften
+		if($formvars['legendorder'] == '')$formvars['legendorder'] = 'NULL';
 		$sql = 'UPDATE used_layer SET Layer_ID = '.$formvars['selected_layer_id'];
 		$sql .= ', drawingorder = '.$formvars['drawingorder'];
+		$sql .= ', legendorder = '.$formvars['legendorder'];
 		$sql .= ' WHERE Stelle_ID = '.$formvars['selected_stelle_id'].' AND Layer_ID = '.$formvars['selected_layer_id'];
 		#echo $sql.'<br>';
 		$this->debug->write("<p>file:stelle.php class:stelle->updateLayerdrawingorder - Aktualisieren der LayerzuStelle-Eigenschaften:<br>".$sql,4);
@@ -1022,7 +1027,28 @@ class stelle {
 		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 	}
 
-	function getLayers($group, $order = NULL, $return = '') {
+  function getGroups() {
+		global $language;
+		$sql = 'SELECT DISTINCT';
+		if($language != 'german') {
+			$sql.=' CASE WHEN `Gruppenname_'.$language.'` IS NOT NULL THEN `Gruppenname_'.$language.'` ELSE `Gruppenname` END AS';
+		}
+		$sql.=' Gruppenname, obergruppe, g.id FROM u_groups AS g, u_groups2rolle AS g2r';
+		$sql.=' WHERE g2r.stelle_ID='.$this->id;
+		$sql.=' AND g2r.id = g.id';
+		$sql.=' ORDER BY `order`';
+		#echo $sql;
+    $this->debug->write("<p>file:kvwmap class:stelle->getGroups - Lesen der Gruppen der Stelle:<br>".$sql,4);
+    $query=mysql_query($sql);
+    if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+    while ($rs=mysql_fetch_assoc($query)) {
+      $groups[$rs['id']]=$rs;
+			if($rs['obergruppe'])$groups[$rs['obergruppe']]['untergruppen'][] = $rs['id'];
+    }
+    return $groups;
+  }
+	
+	function getLayers($group, $order = 'legendorder, drawingorder desc', $return = '') {
 		$layer = array(
 			'ID' => array(),
 			'Bezeichnung' => array(),
@@ -1034,7 +1060,7 @@ class stelle {
 			stelle_id = " . $this->id .
 			($group != NULL ? " AND layer.Gruppe = " . $group : "") . "
 		";
-		$order = ($order != NULL ? "ORDER BY " . $order : "");
+		$order = ($order != NULL ? 'ORDER BY '.$order : 'ORDER BY legendorder, drawingorder desc');
 
 		# Lesen der Layer zur Stelle
 		$sql = "
@@ -1042,11 +1068,11 @@ class stelle {
 				layer.Layer_ID,
 				layer.Gruppe,
 				Name,
-				used_layer.drawingorder
+				used_layer.drawingorder,
+				used_layer.legendorder
 			FROM
 				used_layer JOIN
-				layer ON used_layer.Layer_ID = layer.Layer_ID JOIN
-				u_groups ON layer.Gruppe = u_groups.id
+				layer ON used_layer.Layer_ID = layer.Layer_ID 
 			WHERE" .
 				$condition .
 			$order . "
@@ -1058,11 +1084,15 @@ class stelle {
 			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
 		}
 		else{
-			while($rs=mysql_fetch_array($query)) {
+			$i = 0;
+			while($rs=mysql_fetch_assoc($query)) {
 				$layer['ID'][]=$rs['Layer_ID'];
 				$layer['Bezeichnung'][]=$rs['Name'];
 				$layer['drawingorder'][]=$rs['drawingorder'];
+				$layer['legendorder'][]=$rs['legendorder'];
 				$layer['Gruppe'][]=$rs['Gruppe'];
+				$layer['layers_of_group'][$rs['Gruppe']][] = $i;
+				$i++;
 			}
 			if($order == 'Name'){
 				// Sortieren der Layer unter Berücksichtigung von Umlauten
@@ -1072,6 +1102,9 @@ class stelle {
 				
 				$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['drawingorder']);
 				$sorted_layer['drawingorder'] = $sorted_arrays['second_array'];
+				
+				$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['legendorder']);
+				$sorted_layer['legendorder'] = $sorted_arrays['second_array'];
 				
 				$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['Gruppe']);
 				$sorted_layer['Gruppe'] = $sorted_arrays['second_array'];
@@ -1298,7 +1331,7 @@ class stelle {
 		return $layer;
 	}
 
-	function get_attributes_privileges($layer_id, $with_export_attributes = false) {
+	function get_attributes_privileges($layer_id) {
 		$sql = "
 			SELECT
 				`attributename`,
@@ -1308,9 +1341,7 @@ class stelle {
 				`layer_attributes2stelle`
 			WHERE
 				`stelle_id` = " . $this->id . " AND
-				`layer_id` = " . $layer_id ." AND
-				`privileg` >= " . ($with_export_attributes ? "-1" : "0") . "
-		";
+				`layer_id` = " . $layer_id;
 		#echo '<br>Sql: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->get_attributes_privileges - Abfragen der Layerrechte zur Stelle:<br>" . $sql, 4);
 		$query = mysql_query($sql, $this->database->dbConn);

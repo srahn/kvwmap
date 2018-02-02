@@ -1,3 +1,6 @@
+<?
+  include(LAYOUTPATH.'languages/PolygonEditor_'.$this->user->rolle->language.'.php');
+?>
 
 <script type="text/javascript" src="funktionen/calendar.js"></script>
 <script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
@@ -171,8 +174,8 @@ else {
     </div></td>
   </tr>
   <tr> 
-    <td rowspan="17">&nbsp;</td>
-    <td rowspan="17"> 
+    <td rowspan="18">&nbsp;</td>
+    <td rowspan="18"> 
       <?php
 				include(LAYOUTPATH.'snippets/SVG_polygon_box_query_area.php')
 			?>
@@ -379,6 +382,11 @@ else {
   		</select> 
   	</td>
   </tr>
+	<tr>
+		<td colspan="2" style="padding-top: 5px">
+			<input type="checkbox" name="singlegeom" value="true" <? if($this->formvars['singlegeom'])echo 'checked="true"'; ?>><? echo $strSingleGeoms; ?>
+		</td>
+	</tr>	
   <tr> 
     <td colspan="2"><hr align="center" noshade></td>
   </tr>

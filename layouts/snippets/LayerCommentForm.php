@@ -10,7 +10,7 @@
 </td>
 </tr>
 <tr><td align="center">
-    <textarea name="comment" cols="35" rows="4" wrap="VIRTUAL"><?php echo $this->formvars['comment']; ?></textarea>
+    <textarea name="comment" cols="35" autofocus rows="4" wrap="VIRTUAL"><?php echo $this->formvars['comment']; ?></textarea>
 <br>	<input type="hidden" name="go" value="Layerauswahl">
 	<input type="hidden" name="consumetime" value="<?php echo $this->user->rolle->newtime; ?>">
     <input type="hidden" name="go_plus" id="go_plus" value="">

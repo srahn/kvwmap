@@ -89,6 +89,8 @@ function showmap(){
   </tr>
   <tr id="map2" style="<? if($this->formvars['map_flag'] == '')echo 'display:none'; ?>"> 
     <td align="right" colspan="5" align="center">
+			<input type="checkbox" name="singlegeom" value="true" <? if($this->formvars['singlegeom'])echo 'checked="true"'; ?>>
+			<? echo $strSingleGeoms; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     	Geometrie übernehmen von: 
   		<select name="layer_id" onchange="document.GUI.submit();">
   			<option value="">--- Auswahl ---</option>

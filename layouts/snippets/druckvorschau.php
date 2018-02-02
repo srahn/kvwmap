@@ -253,7 +253,7 @@ function preventflickering(evt){
 <?	$i++;
 	}
 	
-	$layerset = $this->layerset;
+	$layerset = $this->layerset['list'];
 	$scale = $this->map_scaledenom;
 	for($i = 0; $i < count($layerset); $i++){
 		if($layerset[$i]['aktivStatus'] != 0 

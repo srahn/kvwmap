@@ -225,7 +225,7 @@ class Konvertierung extends PgObject {
 	}
 
 	function set_status($new_status = '') {
-		#echo '<br>Setze status in Konvertierung.';
+		$this->debug->show('<br>Setze status in Konvertierung.', false);
 		if ($new_status == '') {
 			$sql = "
 				SELECT DISTINCT
@@ -240,7 +240,7 @@ class Konvertierung extends PgObject {
 				WHERE
 					k.id = {$this->get('id')}
 			";
-			#echo '<br>Setze Status mit sql: ' . $sql;
+			$this->debug->show('<br>Setze Status mit sql: ' . $sql, false);
 			$query = pg_query($this->database->dbConn, $sql);
 			$result = pg_fetch_assoc($query);
 			$plan_or_regel_assigned = $result['plan_or_regel_assigned'];
@@ -323,10 +323,11 @@ class Konvertierung extends PgObject {
 				DELETE FROM
 					xplan_gml." . strtolower($class_name) . "
 				WHERE
-					konvertierung_id = " . $this->get('id') . "
+					konvertierung_id = $1
 			";
 			$this->debug->show("Delete Objekte von {$class_name} with konvertierung_id " . $this->get('id') . ' und sql: ' . $sql . ' in reset Mapping.', Konvertierung::$write_debug);
-			$query = pg_query($this->database->dbConn, $sql);
+			#echo '<br>sql: ' . $sql;
+			$query = pg_query_params($this->database->dbConn, $sql, array($this->get('id')));
 		}
 
 		# Lösche vorhandene xplan_shapes Export-Dateien
@@ -340,9 +341,8 @@ class Konvertierung extends PgObject {
 	* und den in den Regeln definierten XPlan GML Features durch.
 	* Jedes im Mapping erzeugte Feature bekommt eine eindeutige gml_id.
 	* Darüber hinaus muss die Zuordnung zum überordneten Objekt
-	* abgebildet werden. Das kann zu einem oder mehreren Bereichen
-	* in n:m Beziehung sein rp_bereich2rp_object oder zur Konvertierung
-	* (gml_id des documentes oder konvertierung_id)
+	* abgebildet werden. Das ist der Bereich oder die Konvertierung über die 
+	* gml_id des objektes oder die konvertierung_id.
 	* Derzeit umgesetzt in index.php xplankonverter_regeln_anwenden
 	* $this->converter->regeln_anwenden($this->formvars['konvertierung_id']);
 	*/
@@ -370,7 +370,7 @@ class Konvertierung extends PgObject {
 			$validierung->alle_sql_ausfuehrbar($success);
 		}
 	}
-	
+
 	function validierung_erfolgreich() {
 		$sql = "
 			SELECT DISTINCT

@@ -46,7 +46,8 @@
   $strButtonSaveAsNewLayer="Save as new layer";
   $strCommonData="general information";
   $strtransparency="transparency";
-  $strdrawingorder="drawingorder";
+  $strDrawingOrder="drawingorder";
+	$strLegendOrder="legend order";	
 	$strLegend="legend";
 	$strLegendGraphic="legendgraphic";
 	$strMap="Map";
@@ -80,4 +81,6 @@
 	$strWidth="Width";
 	$strHeight="Height";
 	$strImagefile="Imagefile";
+	$strSync="Sync - Mode";
+	$strSyncHelp="In Sync - Mode all changes on the layer will be stored in a table named 'Main Table'_deltas with a serialised version number. The mode must be switched on, to enable the layer in the mobile App kvmobile."
 ?>  

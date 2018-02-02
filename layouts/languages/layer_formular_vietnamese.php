@@ -1,6 +1,7 @@
 ﻿<?php
 	$strAsteriskRequired="Cần điền đủ thông tin cho những trường có dấu *";  
 	$strDataBankID="Số ID cơ sở dữ liệu*";
+	$strLayerID="Id lớp*";
 	$strName="Tên*";
 	$strDataType="Kiểu dữ liệu*";
 	$strGroup="Nhóm";
@@ -61,4 +62,6 @@
 	$strDescribtion="Short Description";
 	$strDataOwner="Data-Owner";
 	$strTriggerFunction="Trigger function";
+	$strSync="Sync - Mode";
+	$strSyncHelp="In Sync - Mode all changes on the layer will be stored in a table named (Main Table)_deltas with a serialised version number. The mode must be switched on, to enable the layer in the mobile App kvmobile."
 ?>

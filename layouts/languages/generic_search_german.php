@@ -30,4 +30,5 @@ $strInHint="Sucht nach mehreren exakten Suchbegriffen, zur Trennung '|' verwende
 $strBetweenHint="Sucht zwischen zwei Zahlwerten";
 $strAndOrHint="Bitte beachten Sie, dass Sie mit \"und\" bzw. \"oder\" die Suchkriterien verknüpfen und nicht die Ergebnismengen. Bedingungen, die mit \"und\" verknüpft sind, müssen <b>alle</b> zutreffen. Bei Bedingungen, die mit \"oder\" verknüpft sind, reicht es, wenn eine Bedingung erfüllt ist.";
 $strWithin="nur innenliegend";
+$strSingleGeoms="Einzelgeometrien abfragen";
 ?>

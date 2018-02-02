@@ -94,11 +94,7 @@
 								$privilege_options = array(
 									array(
 										value => '',
-										output => 'nicht sichtbar'
-									),
-									array(
-										value => '-1',
-										output => 'nur exportieren'
+										output => 'kein Zugriff'
 									),
 									array(
 										value => '0',

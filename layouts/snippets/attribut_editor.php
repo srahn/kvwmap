@@ -102,34 +102,29 @@ function toLayerEditor(){
 						<td align="center"><span class="fett">Anordnung</span></td>
 
 						<td align="center"><span class="fett">Beschriftung</span></td>
-
+						
 						<td align="center"><span class="fett">Bei der Suche</span></td>
 
-						<?php
-						$msg = "Verwende Wert des Attributes nicht für neuen Datensatz"; ?>
 						<td align="center">
-							<span
-								class="fett"
-								title="<?php echo $msg; ?>"
-								onmouseover="message([{ 'type': 'notice', 'msg' : '<?php echo $msg; ?>' }], 3000, 6000);"
-								style="cursor: pointer"
-							>F&uuml;r neuen<br>Datensatz
-							</span>
+							<span	class="fett" style="cursor: pointer">F&uuml;r neuen<br>Datensatz</span>
 						</td>
 
 						<?php
-						if (in_array($this->formvars['selected_layer_id'], $quicksearch_layer_ids)) { ?>
-							<td align="center"><span class="fett">Schnell-<br>suche</span></td><?php
+						if (in_array($this->formvars['selected_layer_id'], $quicksearch_layer_ids)){
+							$msg = "Für die Schnellsuche verwenden."; ?>
+							<td align="center">
+								<i class="fa fa-search" style="font-size:20px" title="<?php echo $msg; ?>"style="cursor: pointer"></i>
+							</td>	<?
 						}
 
-						$msg = "Zeigt Attribut im Rastertemplate an."; ?>
+						$msg = "In der Sachdatenanzeige sichtbar."; ?>
 						<td align="center">
-							<i
-								class="fa fa-windows"
-								title="<?php echo $msg; ?>"
-								onmouseover="message([{ 'type': 'notice', 'msg': '<?php echo $msg; ?>' }], 3000, 6000);"
-								style="cursor: pointer"
-							></i>
+							<i class="fa fa-eye" style="font-size:23px" title="<?php echo $msg; ?>"style="cursor: pointer"></i>
+						</td>						
+						
+						<? $msg = "Im Rastertemplate als Vorschau-Attribut verwenden."; ?>
+						<td align="center">
+							<i class="fa fa-windows" style="font-size:20px" title="<?php echo $msg; ?>"style="cursor: pointer"></i>
 						</td>
 
 					</tr><?php
@@ -215,7 +210,8 @@ function toLayerEditor(){
 							  		echo ' >Länge</option>
 										<option value="Winkel" ';
 							  		if($this->attributes['form_element_type'][$i] == 'Winkel'){echo 'selected';}
-							  		echo ' >Winkel</option>';
+							  		echo ' >Winkel</option>
+										<option value="Style"' . ($this->attributes['form_element_type'][$i] == 'Style' ? ' selected' : '') . '>Style</option>';
 							  	}
 							  	echo'
 							  	</select>';
@@ -287,7 +283,7 @@ function toLayerEditor(){
 											"this.setAttribute('style', 'outline: 1px solid lightgrey; border: none; width: 59px; height: 18px;' + this.options[this.selectedIndex].getAttribute('style'));"
 										); ?>
 							</td>
-
+							
 						  <td align="center" valign="top"><?php
 								echo FormObject::createSelectField(
 											'mandatory_' . $this->attributes['name'][$i],
@@ -316,16 +312,20 @@ function toLayerEditor(){
 										); ?>
 							</td>
 
-							<td align="center" valign="top">
-						  	<input name="raster_visibility_<?php echo $this->attributes['name'][$i]; ?>" type="checkbox" value="1"<?php echo ($this->attributes['raster_visibility'][$i] ? ' checked="true"' : ''); ?>>
-						  </td>
-
 							<?php
 							if (in_array($this->formvars['selected_layer_id'], $quicksearch_layer_ids)) { ?>
 								<td align="center" valign="top">
 						  		<input name="quicksearch_<?php echo $this->attributes['name'][$i]; ?>" type="checkbox" value="1"<?php echo ($this->attributes['quicksearch'][$i] ? ' checked="true"' : ''); ?>>
 						  	</td><?php
-							} ?>
+							} ?>							
+							
+							<td align="center" valign="top">
+								<input type="checkbox" value="1" name="visible_<? echo $this->attributes['name'][$i]; ?>" <? echo ($this->attributes['visible'][$i] ? ' checked="true"' : ''); ?>>
+							</td>							
+							
+							<td align="center" valign="top">
+						  	<input name="raster_visibility_<?php echo $this->attributes['name'][$i]; ?>" type="checkbox" value="1"<?php echo ($this->attributes['raster_visibility'][$i] ? ' checked="true"' : ''); ?>>
+						  </td>
 
 						</tr><?php
 					}

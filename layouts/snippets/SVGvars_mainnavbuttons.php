@@ -361,7 +361,7 @@ else {
   	return $freearrow;
 	}
 
-	function mobile($gps_follow){
+	function mobile($strGPS, $gps_follow){
 		global $last_x;
 		$mobile .= '
 		<g id="gps" transform="translate('.$last_x.' 0)">
@@ -374,7 +374,7 @@ else {
         </g>
 				<text transform="scale(0.45 0.45)" x="22" y="19" style="text-anchor:middle;fill:rgb(0,0,0);font-size:20;font-family:Arial;font-weight:bold;">GPS</text>
 				<text id="gps_text" transform="scale(0.45 0.45)" x="16" y="50" style="text-anchor:middle;fill:rgb(0,0,0);font-size:20;font-family:Arial;font-weight:bold;">'.$gps_follow.'</text>	
-        <rect id="gps0" onmouseover="show_tooltip(\'GPS-Verfolgungsmodus\',evt.clientX,evt.clientY)" onmousedown="hide_tooltip();switch_gps_follow();highlight(evt);noMeasuring();" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;fill-opacity:0.25"/>
+        <rect id="gps0" onmouseover="show_tooltip(\''.$strGPS.'\',evt.clientX,evt.clientY)" onmousedown="hide_tooltip();switch_gps_follow();highlight(evt);noMeasuring();" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;fill-opacity:0.25"/>
       </g>';
    	$last_x += 26;
   	return $mobile;
@@ -396,7 +396,6 @@ if($this->user->rolle->measure){$SVGvars_mainnavbuttons .= dist($strRuler);}
 if($this->user->rolle->freepolygon){$SVGvars_mainnavbuttons .= freepolygon($strFreePolygon);}
 if($this->user->rolle->freetext){$SVGvars_mainnavbuttons .= freetext($strFreeText);}
 if($this->user->rolle->freearrow){$SVGvars_mainnavbuttons .= freearrow($strFreeArrow);}
-
-if($_SESSION['mobile'] == 'true'){$SVGvars_mainnavbuttons .= mobile($this->formvars['gps_follow']);}
+if($this->user->rolle->gps){$SVGvars_mainnavbuttons .= mobile($strGPS, $this->formvars['gps_follow']);}
 
 ?>

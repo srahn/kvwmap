@@ -49,8 +49,9 @@ public static	function find_by_id($gui, $by, $id) {
 			$sql_ausfuehrbar = $validierung->sql_ausfuehrbar($this, $konvertierung_id);
 
 			$this->debug->show('<br>bereich_gml_id: ' . $this->get('bereich_gml_id'), Regel::$write_debug);
-			if ($sql_ausfuehrbar and !empty($this->get('bereich_gml_id'))) {
+			if ($sql_ausfuehrbar) {
 
+					$this->debug->show('<br>SQL der Regel: ' . $this->get('name') . ' ausfuehrbar', Regel::$write_debug);
 					# Prüft ob die erzeugten Geometrien valide sind.
 					$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'geometrie_isvalid');
 					$validierung->konvertierung_id = $konvertierung_id;
@@ -68,12 +69,16 @@ public static	function find_by_id($gui, $by, $id) {
 						$validierung->geom_within_bereich($this, $konvertierung);
 				}
 			}
+			else {
+				$this->debug->show('<br>Regel->validate(): SQL der Regel: ' . $this->get('name') . ' nicht ausfuehrbar', true);
+				$success = false;
+			}
 
 		}
 		else {
 			$success = false;
 		}
-		$this->debug->show('<br>Die Validierungen sind' . ($success ? '' : ' nicht') . ' erfolgreich verlaufen.', Validierung::$write_debug);
+		$this->debug->show('<br>Die Validierungen sind' . ($success ? '' : ' nicht') . ' erfolgreich verlaufen.', Regel::$write_debug);
 		return $success;
 	}
 

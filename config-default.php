@@ -98,12 +98,14 @@ $legendicon_size = array(
 	'width' => array(
 		0 => 18,			# Punktlayer
 		1 => 18,			# Linienlayer
-		2 => 18				# Flächenlayer
+		2 => 18,			# Flächenlayer
+		3 => 18				# Rasterlayer
 	),
 	'height' => array(
 		0 => 18,			# Punktlayer
 		1 => 12,			# Linienlayer
-		2 => 12				# Flächenlayer
+		2 => 12,			# Flächenlayer
+		3 => 18				# Rasterlayer
 	)
 );
 
@@ -265,6 +267,7 @@ define('FONTAWESOME_PATH', THIRDPARTY_PATH . 'font-awesome-4.6.3/');								# Ve
 define('JQUERY_PATH', THIRDPARTY_PATH . 'jQuery-1.12.0/');													# Version 2.6
 define('BOOTSTRAP_PATH', THIRDPARTY_PATH . 'bootstrap-3.3.6/');											# Version 2.6
 define('BOOTSTRAPTABLE_PATH', THIRDPARTY_PATH . 'bootstrap-table-1.11.0/');					# Version 2.6
+define('PROJ4JS_PATH', THIRDPARTY_PATH . 'proj4js-2.4.3/');					# Version 2.8
 
 # Bin-Pfad der Postgres-tools (shp2pgsql, pgsql2shp)
 define('POSTGRESBINPATH', '/usr/bin/');         # Version 1.6.4
@@ -603,11 +606,12 @@ $kvwmap_plugins = array();																			# Version 1.11.0
 #$kvwmap_plugins[] = 'bevoelkerung';														# Version 1.11.0
 #$kvwmap_plugins[] = 'bodenrichtwerte';													# Version 2.0.0
 #$kvwmap_plugins[] = 'fortfuehrungslisten';											# Version 2.6.0
-#$kvwmap_plugins[] = 'gewaesser';																# Version 1.11.0
 #$kvwmap_plugins[] = 'geodoc';																	# Version 2.0.0
+#$kvwmap_plugins[] = 'gewaesser';																# Version 1.11.0
 #$kvwmap_plugins[] = 'jagdkataster';														# Version 2.0.0
 #$kvwmap_plugins[] = 'kolibri';																	# Version 2.8
 #$kvwmap_plugins[] = 'metadata';																# Version 2.8
+#$kvwmap_plugins[] = 'mobile';																	# Version 2.7
 #$kvwmap_plugins[] = 'nachweisverwaltung';											# Version 2.0.0
 #$kvwmap_plugins[] = 'probaug';																	# Version 2.0.0
 #$kvwmap_plugins[] = 'wasserrecht';															# Version 2.8.0

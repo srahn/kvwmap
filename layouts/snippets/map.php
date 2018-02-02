@@ -51,7 +51,7 @@ function showtooltip(result, showdata){
 	document.getElementById("svghelp").SVGshowtooltip(result, showdata);			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 }
 
-function showMapImage(){ 
+function showMapImage(){
 	svgdoc = document.SVG.getSVGDocument();	
 	var svg = svgdoc.getElementById("moveGroup");
 	try{
@@ -61,10 +61,14 @@ function showMapImage(){
 	catch(e){
 		document.GUI.svg_string.value = printNode(svg);
 	}
-  document.getElementById('MapImageLink').href='index.php?go=showMapImage&svg_string='+encodeURI(document.GUI.svg_string.value);
+  document.GUI.go.value = 'showMapImage';
+	document.GUI.target = '_blank';
+	document.GUI.submit();
+	document.GUI.target = '';
 }
 
 function addRedlining(){
+	svgdoc = document.SVG.getSVGDocument();
 	var redlining = svgdoc.getElementById("redlining");
 	for(var i = 0; i < redlining.childNodes.length; i++){
 		child = redlining.childNodes[i];
@@ -97,13 +101,6 @@ function addRedlining(){
 	}
 }
 
-function printMap(){ 
-	svgdoc = document.SVG.getSVGDocument();	
-	addRedlining();
-	document.GUI.go.value = 'Druckausschnittswahl';
-	document.GUI.submit();
-}
-
 </script>
 <?
 
@@ -115,6 +112,7 @@ if($this->formvars['gps_follow'] == ''){
 	$this->formvars['gps_follow'] = 'off';
 }
 ?>
+
 <div id="map_frame" style="text-align: left;position: relative; width: <?php echo ($map_width + $legend_width); ?>px;">
 	<table cellpadding="0" cellspacing="0" border="0">
 		<tr>
