@@ -1331,7 +1331,7 @@ class stelle {
 		return $layer;
 	}
 
-	function get_attributes_privileges($layer_id, $with_export_attributes = false) {
+	function get_attributes_privileges($layer_id) {
 		$sql = "
 			SELECT
 				`attributename`,
@@ -1341,9 +1341,7 @@ class stelle {
 				`layer_attributes2stelle`
 			WHERE
 				`stelle_id` = " . $this->id . " AND
-				`layer_id` = " . $layer_id ." AND
-				`privileg` >= " . ($with_export_attributes ? "-1" : "0") . "
-		";
+				`layer_id` = " . $layer_id;
 		#echo '<br>Sql: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->get_attributes_privileges - Abfragen der Layerrechte zur Stelle:<br>" . $sql, 4);
 		$query = mysql_query($sql, $this->database->dbConn);
