@@ -508,7 +508,7 @@ class data_import_export {
       if(move_uploaded_file($_files['file1']['tmp_name'],$importfile)){
 				if(file_exists($importfile)){
 					$json = json_decode(file_get_contents($importfile));
-					if($json->crs->properties->name != '')$epsg = array_pop(explode('EPSG::', $json->crs->properties->name));
+					if(strpos($json->crs->properties->name, 'EPSG::') !== false)$epsg = array_pop(explode('EPSG::', $json->crs->properties->name));
 					else $epsg = 4326;
 					if($tablename == NULL)$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($importfile), 0, 15))).rand(1,1000000);
 					$this->ogr2ogr_import($schema, $tablename, $epsg, $importfile, $pgdatabase, NULL, NULL, NULL, 'UTF8');
