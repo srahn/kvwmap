@@ -793,6 +793,30 @@ class ddl {
         $this->debug->write("<p>file:kvwmap class:ddl->save_layout :",4);
         $this->database->execSQL($sql,4, 1);
       }
+			
+			for($i = 0; $i < $formvars['linecount']; $i++){
+        $sql = "INSERT INTO druckfreilinien SET `breite` = '".$formvars['breite'.$i]."'";
+        if($formvars['lineposx'.$i])$sql .= ", `posx` = ".(int)$formvars['lineposx'.$i];
+        else $sql .= ", `posx` = NULL";
+        if($formvars['lineposy'.$i])$sql .= ", `posy` = ".(int)$formvars['lineposy'.$i];
+        else $sql .= ", `posy` = NULL";
+				if($formvars['lineendposx'.$i])$sql .= ", `endposx` = ".(int)$formvars['lineendposx'.$i];
+        else $sql .= ", `endposx` = NULL";
+        if($formvars['lineendposy'.$i])$sql .= ", `endposy` = ".(int)$formvars['lineendposy'.$i];
+        else $sql .= ", `endposy` = NULL";
+				if($formvars['lineoffset_attribute'.$i])$sql .= ", `offset_attribute` = '".$formvars['lineoffset_attribute'.$i]."'";
+        else $sql .= ", `offset_attribute` = NULL";
+        if($formvars['linetype'.$i] == '')$formvars['linetype'.$i] = 0;
+        $sql .= ", `type` = '".$formvars['linetype'.$i]."'";
+        #echo $sql;
+        $this->debug->write("<p>file:kvwmap class:ddl->save_layout :",4);
+        $this->database->execSQL($sql,4, 1);
+        $lastline_id = mysql_insert_id();
+				
+				$sql = 'INSERT INTO ddl2freilinien (ddl_id, line_id) VALUES('.$lastddl_id.', '.$lastline_id.')';
+        $this->debug->write("<p>file:kvwmap class:ddl->save_layout :",4);
+        $this->database->execSQL($sql,4, 1);
+      }
     }
     return $lastddl_id;
   } 
