@@ -407,15 +407,9 @@ class data_import_export {
 				$command = 'export PGPASSWORD="' . $pgdatabase->passwd . '"; ' . $command;
 	    exec($command);
 	   	#echo $command;
-	    $sql = "
-	      ALTER TABLE " . $schemaname . "." . $tablename . "
-	      SET WITH OIDS;
-	      SELECT
-	        geometrytype(the_geom) AS geometrytype
-	      FROM
-	        " . $schemaname . "." . $tablename . "
-	      LIMIT 1;
-	    ";
+	    $sql = 'ALTER TABLE '.$schemaname.'.'.$tablename.' SET WITH OIDS;
+			'.$this->rename_reserved_attribute_names($schemaname, $tablename).'
+	      SELECT geometrytype(the_geom) AS geometrytype FROM '.$schemaname.'.'.$tablename.' LIMIT 1;';
 	    $ret = $pgdatabase->execSQL($sql,4, 0);
 	    if(!$ret[0]){
 	      $result = pg_fetch_assoc($ret[1]);
@@ -432,6 +426,15 @@ class data_import_export {
 			}
 		}
 	}
+	
+	function rename_reserved_attribute_names($schema, $table){
+		$reserved_words = array('desc', 'number', 'end');
+		foreach($reserved_words as $word){
+			$sql .= "SELECT rename_if_exists('".$schema."', '".$table."', '".$word."');
+			";
+		}
+		return $sql;
+	}	
 
 	function import_custom_gpx($formvars, $pgdatabase){
 		$_files = $_FILES;	
@@ -442,11 +445,8 @@ class data_import_export {
 					if($formvars['tracks']){
 						$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($importfile), 0, 15))).rand(1,1000000);
 						$this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $formvars['epsg'], $importfile, $pgdatabase, 'tracks', NULL, NULL, 'UTF8');
-						$sql = '
-							ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' SET WITH OIDS;
-							ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' RENAME "desc" TO desc_;
-							ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' RENAME "number" TO number_;
-						';
+						$sql = 'ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' SET WITH OIDS;
+							'.$this->rename_reserved_attribute_names(CUSTOM_SHAPE_SCHEMA, $tablename);
 						$ret = $pgdatabase->execSQL($sql,4, 0);
 						$custom_table['datatype'] = 1;
 						$custom_table['tablename'] = $tablename;
@@ -455,11 +455,8 @@ class data_import_export {
 					if($formvars['waypoints']){
 						$tablename = 'a'.strtolower(umlaute_umwandeln(basename($importfile))).rand(1,1000000);
 						$this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $formvars['epsg'], $importfile, $pgdatabase, 'waypoints', NULL, NULL, 'UTF8');
-						$sql = '
-							ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' SET WITH OIDS;
-							ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' RENAME "desc" TO desc_;
-							ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' RENAME "time" TO time_;
-						';
+						$sql = 'ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' SET WITH OIDS;
+							'.$this->rename_reserved_attribute_names(CUSTOM_SHAPE_SCHEMA, $tablename);
 						$ret = $pgdatabase->execSQL($sql,4, 0);
 						$custom_table['datatype'] = 0;
 						$custom_table['tablename'] = $tablename;
