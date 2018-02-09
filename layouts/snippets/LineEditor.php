@@ -163,7 +163,7 @@ function buildwktlinefromsvgpath(svgpath){
 	<? } ?>
   	<td align="right">
   		<input type="checkbox" name="always_draw" value="1" <?if($always_draw == 1 OR $always_draw == 'true')echo 'checked'; ?>>&nbsp;weiterzeichnen&nbsp;&nbsp;
-  		<input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;Punktfang
+			<input type="checkbox" onclick="toggle_vertices()" name="punktfang" <? if($this->formvars['punktfang'] == 'on')echo 'checked="true"'; ?>>&nbsp;Punktfang
   	</td>
 		<td align="center">
 			<? if($this->new_entry != true){ ?>
