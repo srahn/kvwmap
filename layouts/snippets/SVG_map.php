@@ -82,8 +82,10 @@
 			
 			if(browser != 'firefox'){
 				code2execute_before += 'moveback()';
-				code2execute_after += 'startup()';
+				code2execute_after += 'startup();';
 			}
+			
+			if(document.GUI.punktfang.checked)code2execute_after += 'toggle_vertices();';
 			
   		ahah("index.php", postdata+"&mime_type=map_ajax&INPUT_COORD="+input_coord+"&CMD="+cmd+"&code2execute_before="+code2execute_before+"&code2execute_after="+code2execute_after, 
   		new Array(
@@ -409,7 +411,7 @@ function mousewheelchange(evt){
 	if(doing == "measure"){
 		save_measure_path();
 	}
-	deactivate_vertices();
+	remove_vertices();
 	if(!evt)evt = window.event; // For IE
 	if(top.document.GUI.stopnavigation.value == 0){
 		window.clearTimeout(mousewheelloop);
@@ -914,15 +916,15 @@ function mousedown(evt){
 	   case "next":
 	   break;
 	   case "zoomin":
-			deactivate_vertices();
+			remove_vertices();
 	    startPoint(evt);
 	   break;
 	   case "zoomout":
-			deactivate_vertices();
+			remove_vertices();
 	    selectPoint(evt);
 	   break;
 	   case "recentre":
-			deactivate_vertices();
+			remove_vertices();
 	    startMove(evt);
 	   break;
 		case "showcoords":
@@ -1261,10 +1263,6 @@ function toggle_vertices(){
 	}
 }
 
-function deactivate_vertices(){
-	top.document.GUI.punktfang.checked = false;
-	remove_vertices();
-}
 
 function request_vertices(){
 	top.ahah("index.php", "go=getSVG_vertices&scale="+top.document.getElementById("scale").value, new Array(top.document.GUI.vertices, ""), new Array("setvalue", "execute_function"));
@@ -1697,7 +1695,7 @@ if (!moving) return;
 }
 
 function moveMap(){
-	deactivate_vertices();
+	remove_vertices();
   //kartenausschnitt verschieben
   move_x = pathx[1]-pathx[0];
   move_y = pathy[1]-pathy[0];
