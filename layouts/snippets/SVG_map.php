@@ -1453,17 +1453,23 @@ function add_vertex(evt){
 			restart();	
 			measuring = true;
 		}
-		pathx.push(imgx);
-		pathy.push(imgy);
-		pathx_world.push(parseFloat(worldx));
-		pathy_world.push(parseFloat(worldy));		
-		if(new_distance > 0){
-			showSectionMeasurement(pathx.length-1);
-			measured_distance = new_distance;
-			showMeasurement(evt);
+		if(imgx == pathx[pathx.length-1] && imgy == pathy[pathy.length-1]){
+			evt.preventDefault();
+			recentre();		// Streckenmessung bei Doppelklick beenden
 		}
-	  redrawPL();
-		vertex.setAttribute("opacity", "0.8");
+		else{
+			pathx.push(imgx);
+			pathy.push(imgy);
+			pathx_world.push(parseFloat(worldx));
+			pathy_world.push(parseFloat(worldy));		
+			if(new_distance > 0){
+				showSectionMeasurement(pathx.length-1);
+				measured_distance = new_distance;
+				showMeasurement(evt);
+			}
+			redrawPL();
+			vertex.setAttribute("opacity", "0.8");
+		}
 	}
 	if(doing == "polygonquery"){
 		if(!polydrawing){
