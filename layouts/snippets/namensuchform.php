@@ -168,6 +168,16 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 		</td>
   </tr>
   <tr>
+    <td height="28" align="right"><span class="fett">Namensbestandteil:&nbsp;</span>
+      </td>
+    <td><input name="name9" type="text" value="<?php echo $this->formvars['name9']; ?>" size="25"  tabindex="3"></td>
+  </tr>
+	<tr>
+    <td height="28" align="right"><span class="fett">akademischer Grad:&nbsp;</span>
+      </td>
+    <td><input name="name10" type="text" value="<?php echo $this->formvars['name10']; ?>" size="25"  tabindex="3"></td>
+  </tr>
+  <tr>
     <td height="28" align="right"><span class="fett"><?php echo $strName3; ?>:&nbsp;</span>
       </td>
     <td><input name="name3" type="text" value="<?php echo $this->formvars['name3']; ?>" size="25"  tabindex="3"></td>
