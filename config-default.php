@@ -194,7 +194,7 @@ define('PASSWORD_CHECK', '01010');															# Version 2.3
 # Dort muss dann eine Zeile in dieser Form hinzugefügt werden: 
 # www-data        ALL=(fgs) NOPASSWD: /usr/bin/git
 # Dann kann man die Aktualität des Quellcodes in der Administrationsoberfläche überprüfen und ihn aktualisieren.
-define('GIT_USER', '');																	# Version 2.1
+define('GIT_USER', 'gisadmin');																	# Version 2.1
 
 ########################## Pfadeinstellungen
 # Installationspfad
