@@ -53,14 +53,14 @@
 							<a
 								title="<?php echo $this->strChange; ?>"
 								href="index.php?go=Layergruppe_Editor&selected_group_id=<?php echo $this->layergruppen[$i]->get('id'); ?>"
-							>Ändern</a>
+							><i class="fa fa-pencil" style="color: firebrick"></i></a>
 						</td>
 						<td>&nbsp;
 							<span
 								title="<?php echo $this->strDelete; ?>"
 								onclick="group_delete(<?php echo $this->layergruppen[$i]->get('id'); ?>);"
 								style="cursor: pointer; color: firebrick;"
-							>Löschen</span>
+							><i class="fa fa-trash" style="color: firebrick"></i></span>
 						</td>
 					</tr><?php
 				} ?>

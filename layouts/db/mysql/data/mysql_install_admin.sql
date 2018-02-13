@@ -276,6 +276,12 @@ SET @last_level1menue_id=LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_level1menue_id,75);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_level1menue_id,0);
 
+# Layergruppen anzeigen
+INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Gruppen anzeigen', 'index.php?go=Layergruppen_Anzeigen', @last_level1menue_id, 2, NULL);
+SET @last_menue_id=LAST_INSERT_ID();
+INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,75);
+INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
+
 # Layer anzeigen
 INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Layer anzeigen', 'index.php?go=Layer_Anzeigen', @last_level1menue_id, 2, NULL);
 SET @last_menue_id=LAST_INSERT_ID();

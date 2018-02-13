@@ -58,14 +58,14 @@
 								title="<?php echo $this->strChange; ?>"
 								href="index.php?go=Menueeditor&selected_menue_id=<?php echo $this->menuedaten[$i]->get('id'); ?>"
 								style="font-size: <?php echo $font_size; ?>"
-							>Ändern</a>
+							><i class="fa fa-pencil" style="color: firebrick"></i></a>
 						</td>
 						<td>&nbsp;
 							<span
 								title="<?php echo $this->strDelete; ?>"
 								onclick="menuedaten_delete(<?php echo $this->menuedaten[$i]->get('id'); ?>);"
 								style="cursor: pointer; color: firebrick; font-size: <?php echo $font_size; ?>"
-							>Löschen</span>
+							><i class="fa fa-trash" style="color: firebrick"></i></span>
 						</td>
 					</tr><?php
 				} ?>
