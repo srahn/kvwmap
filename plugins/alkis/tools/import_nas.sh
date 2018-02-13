@@ -112,11 +112,12 @@ execute_sql_transaction() {
 					head -n 30 ${LOG_PATH}/${ERROR_FILE}
 				else
 					find ${POSTPROCESSING_PATH} -iname '*.sql' | sort |  while read PP_FILE ; do
+						log "${PP_FILE} wird ausgeführt"
 						PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -U $POSTGRES_USER -f ${PP_FILE} $POSTGRES_DBNAME >> ${LOG_PATH}/${LOG_FILE} 2> ${LOG_PATH}/${ERROR_FILE}
 						if [ -n "$(grep -i 'Error\|Fehler\|FATAL' ${LOG_PATH}/${ERROR_FILE})" ] ; then
 							err "Fehler beim Ausführen der Post-Processing-Datei : ${PP_FILE}"
 						else
-							log "Post-Processing erfolgreich ausgeführt"
+							log "Post-Processing-Datei erfolgreich ausgeführt"
 						fi
 					done
 				fi				

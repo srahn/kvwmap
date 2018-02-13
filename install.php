@@ -90,10 +90,10 @@ function install() {
   Datenbankname: <?php echo $mysqlRootDb->dbName; ?><br><?php
   
   if (mysql_exists($mysqlRootDb)) { ?>
-    MySQL-Server läuft, Verbindung zur Datenbank <?php echo $mysqlRootDb->dbName; ?> kann mit Nutzer <?php echo $mysqlRootDb->user; ?>@<?php echo $mysqlRootDb->host; ?> hergestellt werden!<br><?php
+    MySQL-Server läuft, Verbindung hergestellt zu Host: <?php echo $mysqlRootDb->host; ?> Datenbank: <?php echo $mysqlRootDb->dbName; ?> mit Nutzer: <?php echo $mysqlRootDb->user; ?>!<br><?php
   }
   else { ?>
-    Es kann keine Verbindung zur MySQL Datenbank <?php echo $mysqlRootDb->dbName; ?> mit Nutzer <?php echo $mysqlRootDb->user; ?>@<?php echo $mysqlRootDb->host; ?> hergestellt werden.<br>
+    Es kann keine Verbindung zu Host: <?php echo $mysqlRootDb->host; ?> MySQL Datenbank: <?php echo $mysqlRootDb->dbName; ?> mit Nutzer: <?php echo $mysqlRootDb->user; ?> hergestellt werden!<br>
     Das kann folgende Gründe haben:
     <ul>
       <li><b>MySQL ist noch nicht installiert:</b> => Installieren sie MySQL</li>
@@ -122,14 +122,13 @@ function install() {
   Datenbankname: <?php echo $mysqlKvwmapDb->dbName; ?><br>
   Debugfilename: <?php echo $mysqlKvwmapDb->debug->filename; ?><br>
   Logfilename: <?php echo $mysqlKvwmapDb->logfile->name; ?><br><?php
-  
+
   if (kvwmapdb_exists($mysqlRootDb, $mysqlKvwmapDb)) { ?>
     kvwmap Datenbank <?php echo $mysqlKvwmapDb->dbName; ?> existiert schon auf MySQL-Server.<br><?php
     $kvwmapdb_installed = true;
   }
   else { ?>
     Die MySQL Datenbank <?php echo $mysqlKvwmapDb->dbName; ?> existiert nicht oder die Verbindung kann mit dem Nutzer <?php echo $mysqlKvwmapDb->user; ?>@<?php echo $mysqlKvwmapDb->host; ?> nicht hergestellt werden.<br>
-    
     <h1>Installiere kvwmap Datenbank auf MySQL-Server</h1><?php
     $kvwmapdb_installed = install_kvwmapdb($mysqlRootDb, $mysqlKvwmapDb);
   } ?>
@@ -140,16 +139,15 @@ function install() {
   #
   include(CLASSPATH . 'postgresql.php');
   $pgsqlPostgresDb = new pgdatabase();
-  $pgsqlPostgresDb->host = POSTGRES_HOST;                        
-  $pgsqlPostgresDb->user = 'postgres';                          
-  $pgsqlPostgresDb->passwd = getenv('PGSQL_ROOT_PASSWORD');                    
+  $pgsqlPostgresDb->host = POSTGRES_HOST;
+  $pgsqlPostgresDb->user = 'postgres';
+  $pgsqlPostgresDb->passwd = getenv('PGSQL_ROOT_PASSWORD');
   $pgsqlPostgresDb->dbName = 'postgres'; ?>
   Verbindungsdaten für Zugang zu PostgreSQL postgres Nutzer wie folgt gesetzt:<br>
   Host: <?php echo $pgsqlPostgresDb->host; ?><br>
   User: <?php echo $pgsqlPostgresDb->user; ?><br>
   Password: <?php #echo $pgsqlPostgresDb->passwd; ?><br>
   Datenbankname: <?php echo $pgsqlPostgresDb->dbName; ?><br><?php
-  
   if (postgres_exists($pgsqlPostgresDb)) { ?>
     PostgreSQL-Server läuft, Verbindung zur Datenbank <?php echo $pgsqlPostgresDb->dbName; ?> kann mit Nutzer: <?php echo $pgsqlPostgresDb->user; ?> host: <?php echo $pgsqlPostgresDb->host; ?> hergestellt werden!<br><?php
   }
@@ -400,11 +398,9 @@ function kvwmapdb_exists($mysqlRootDb, $mysqlKvwmapDb) { ?>
 /*
 * Installiert kvwmap-Datenbank
 */
-function install_kvwmapdb ($mysqlRootDb, $mysqlKvwmapDb) {
+function install_kvwmapdb($mysqlRootDb, $mysqlKvwmapDb) {
   # Abfragen ob user mysqlKvwmapDb->user existiert
   $sql = "
-    USE mysql;
-
     SELECT
       User
     FROM
@@ -413,13 +409,13 @@ function install_kvwmapdb ($mysqlRootDb, $mysqlKvwmapDb) {
       User = '" . $mysqlKvwmapDb->user . "' AND
       Host = '" . MYSQL_HOSTS_ALLOWED . "'
   ";
-  $mysqlRootDb->execSQL($sql, 0, 1);
+  $ret = $mysqlRootDb->execSQL($sql, 0, 1);
   if ($ret[0]) { ?>
-    Fehler beim Abfragen ob User <?php echo $mysqlKvwmapDb; ?> mit Host <?php echo MYSQL_HOSTS_ALLOWED; ?> schon in Datenbank <?php echo $mysqlKvwmapDb->dbName; ?> existiert.<br><?php
+    Fehler beim Abfragen ob User <?php echo $mysqlKvwmapDb->user; ?> mit Host <?php echo MYSQL_HOSTS_ALLOWED; ?> schon in MySQL existiert.<br><?php
     return false;
   }
   if (mysql_num_rows($ret[1]) > 0 ) { ?>
-    User <?php echo $mysqlKvwmapDb; ?> mit Host <?php echo MYSQL_HOSTS_ALLOWED; ?> existiert schon in Datenbank <?php echo $mysqlKvwmapDb->dbName;
+    User <?php echo $mysqlKvwmapDb->user; ?> mit Host <?php echo MYSQL_HOSTS_ALLOWED; ?> existiert schon in Datenbank. <?php
   }
   else  { ?>
     Erzeuge Nutzer: <?php echo $mysqlKvwmapDb->user; ?><br><?php
@@ -460,8 +456,7 @@ function install_kvwmapdb ($mysqlRootDb, $mysqlKvwmapDb) {
 * Testet ob die postgre Datenbank auf PostgreSQL-Server läuft
 */
 function postgres_exists($pgsqlPostgresDb) { ?>
-  Prüfe ob Datenbank postgres schon existiert<br><?php
-  echo $pgsqlPostgresDb->host;
+  Prüfe ob Datenbank postgres schon existiert auf Server: <?php echo $pgsqlPostgresDb->host; 
   return $pgsqlPostgresDb->open();
 }
 
