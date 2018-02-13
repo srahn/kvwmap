@@ -91,7 +91,7 @@
 									//if($attributes['group'][0] != '')echo 'width="200px"';
 									echo 'width="100%"';
 									echo '><tr><td>';
-									if($attributes['form_element_type'][$j] != 'SubFormPK' AND $attributes['form_element_type'][$j] != 'SubFormEmbeddedPK'){
+									if($this->formvars['printversion'] == '' AND $attributes['form_element_type'][$j] != 'SubFormPK' AND $attributes['form_element_type'][$j] != 'SubFormEmbeddedPK'){
 										echo '<a style="font-size: '.$this->user->rolle->fontsize_gle.'px" title="Sortieren nach '.$attributes['alias'][$j].'" href="javascript:change_orderby(\''.$attributes['name'][$j].'\', '.$layer['Layer_ID'].');">
 														'.$attributes['alias'][$j].'</a>';
 									}
