@@ -2851,6 +2851,8 @@ $vertex_catch_functions = '
 			remove_foreign_vertices();
 		}
 	}
+	
+	if(top.currentform.punktfang.checked)toggle_vertices();		// am Anfang einmal aufrufen, damit die Vertices nach Navigation geladen werden, falls der Punktfang an war
 
 	function request_foreign_vertices(){
 		top.ahah("index.php", "go=getSVG_foreign_vertices&layer_id="+top.currentform.layer_id.value+"&oid="+top.currentform.oid.value, new Array(top.currentform.vertices, ""), new Array("setvalue", "execute_function"));

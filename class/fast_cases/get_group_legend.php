@@ -450,6 +450,7 @@ class GUI {
         $layerset['anzLayer'] = count($layerset['list']);
         unset($this->layer_ids_of_group);		# falls loadmap zweimal aufgerufen wird
         for($i=0; $i < $layerset['anzLayer']; $i++){
+					$layerset['layers_of_group'][$layerset['list'][$i]['Gruppe']][] = $i;
 					if($layerset['list'][$i]['requires'] == ''){
 						$this->layer_ids_of_group[$layerset['list'][$i]['Gruppe']][] = $layerset['list'][$i]['Layer_ID'];				# die Layer-IDs in einer Gruppe
 					}
@@ -2343,6 +2344,7 @@ class db_mapObj {
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
     $layer = array();
+		$layer['list'] = array();
     $this->disabled_classes = $this->read_disabled_classes();
 		$i = 0;
     while ($rs=mysql_fetch_assoc($query)){
@@ -2363,7 +2365,6 @@ class db_mapObj {
 			if($rs['minscale'] > 0)$rs['minscale'] = $rs['minscale']-0.3;
 			$layer['list'][$i]=$rs;			
 			$layer['layer_ids'][$rs['Layer_ID']] =& $layer[$i];		# damit man mit einer Layer-ID als Schlüssel auf dieses Array zugreifen kann
-			$layer['layers_of_group'][$rs['Gruppe']][] = $i;
 			$i++;
     }
     return $layer;

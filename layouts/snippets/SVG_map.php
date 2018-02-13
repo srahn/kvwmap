@@ -82,8 +82,10 @@
 			
 			if(browser != 'firefox'){
 				code2execute_before += 'moveback()';
-				code2execute_after += 'startup()';
+				code2execute_after += 'startup();';
 			}
+			
+			if(document.GUI.punktfang.checked)code2execute_after += 'toggle_vertices();';
 			
   		ahah("index.php", postdata+"&mime_type=map_ajax&INPUT_COORD="+input_coord+"&CMD="+cmd+"&code2execute_before="+code2execute_before+"&code2execute_after="+code2execute_after, 
   		new Array(
@@ -437,7 +439,7 @@ function mousewheelchange(evt){
 	if(doing == "measure"){
 		save_measure_path();
 	}
-	deactivate_vertices();
+	remove_vertices();
 	if(!evt)evt = window.event; // For IE
 	if(top.document.GUI.stopnavigation.value == 0){
 		window.clearTimeout(mousewheelloop);
@@ -941,15 +943,15 @@ function mousedown(evt){
 	   case "next":
 	   break;
 	   case "zoomin":
-			deactivate_vertices();
+			remove_vertices();
 	    startPoint(evt);
 	   break;
 	   case "zoomout":
-			deactivate_vertices();
+			remove_vertices();
 	    selectPoint(evt);
 	   break;
 	   case "recentre":
-			deactivate_vertices();
+			remove_vertices();
 	    startMove(evt);
 	   break;
 		case "showcoords":
@@ -1289,10 +1291,6 @@ function toggle_vertices(){
 	}
 }
 
-function deactivate_vertices(){
-	top.document.GUI.punktfang.checked = false;
-	remove_vertices();
-}
 
 function request_vertices(){
 	top.ahah("index.php", "go=getSVG_vertices&scale="+top.document.getElementById("scale").value, new Array(top.document.GUI.vertices, ""), new Array("setvalue", "execute_function"));
@@ -1453,17 +1451,23 @@ function add_vertex(evt){
 			restart();	
 			measuring = true;
 		}
-		pathx.push(imgx);
-		pathy.push(imgy);
-		pathx_world.push(parseFloat(worldx));
-		pathy_world.push(parseFloat(worldy));		
-		if(new_distance > 0){
-			showSectionMeasurement(pathx.length-1);
-			measured_distance = new_distance;
-			showMeasurement(evt);
+		if(imgx == pathx[pathx.length-1] && imgy == pathy[pathy.length-1]){
+			evt.preventDefault();
+			recentre();		// Streckenmessung bei Doppelklick beenden
 		}
-	  redrawPL();
-		vertex.setAttribute("opacity", "0.8");
+		else{
+			pathx.push(imgx);
+			pathy.push(imgy);
+			pathx_world.push(parseFloat(worldx));
+			pathy_world.push(parseFloat(worldy));		
+			if(new_distance > 0){
+				showSectionMeasurement(pathx.length-1);
+				measured_distance = new_distance;
+				showMeasurement(evt);
+			}
+			redrawPL();
+			vertex.setAttribute("opacity", "0.8");
+		}
 	}
 	if(doing == "polygonquery"){
 		if(!polydrawing){
@@ -1719,7 +1723,7 @@ if (!moving) return;
 }
 
 function moveMap(){
-	deactivate_vertices();
+	remove_vertices();
   //kartenausschnitt verschieben
   move_x = pathx[1]-pathx[0];
   move_y = pathy[1]-pathy[0];
@@ -1812,7 +1816,7 @@ function highlight(evt){
 			<g id="redlining">
 			</g>';
 if($this->user->rolle->gps){
-	 $svg.=' <use id="gps_position" xlink:href="#crosshair_red" x="-100" y="-100"/>';
+	 $svg.=' <use id="gps_position" xlink:href="#crosshair_red" x="-100000" y="-100000"/>';
 }
 $svg.='
     </g>

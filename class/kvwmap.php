@@ -177,9 +177,11 @@ class GUI {
 				<tr>
 					<td>
 						<ul>';
-						if ($layer[0]['connectiontype']==6) {
+						if($layer[0]['connectiontype']==6){
 							echo '<li><a href="javascript:zoomToMaxLayerExtent('.$this->formvars['layer_id'].')">'.$this->FullLayerExtent.'</a></li>';
-							echo '<li><a href="index.php?go=Layer-Suche&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->strSearch.'</a></li>';
+							if($layer[0]['queryable']){
+								echo '<li><a href="index.php?go=Layer-Suche&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->strSearch.'</a></li>';
+							}
 						}						
 						if($layer[0]['Class'][0]['Name'] != ''){
 							if($layer[0]['showclasses'] != ''){
@@ -602,9 +604,11 @@ class GUI {
 										$style->set('size', 2*$style->width);					# size und maxsize beim Typ Hatch auf die doppelte Linienbreite setzen, damit man was in der Legende erkennt
 										$style->set('maxsize', 2*$style->width);
 									}
-									else{
-										$style->set('size', 2);					# size und maxsize bei Linien und Polygonlayern immer auf 2 setzen, damit man was in der Legende erkennt
+									elseif($style->symbolname == ''){
+										$style->set('size', 2);					# size und width bei Linien und Polygonlayern immer auf 2 setzen, damit man was in der Legende erkennt
 										$style->set('maxsize', 2);
+										$style->set('width', 2);
+										$style->set('maxwidth', 2);
 									}
 								}
 								else{		# Punktlayer
@@ -1172,6 +1176,7 @@ class GUI {
         $layerset['anzLayer'] = count($layerset['list']);
         unset($this->layer_ids_of_group);		# falls loadmap zweimal aufgerufen wird
         for($i=0; $i < $layerset['anzLayer']; $i++){
+					$layerset['layers_of_group'][$layerset['list'][$i]['Gruppe']][] = $i;
 					if($layerset['list'][$i]['requires'] == ''){
 						$this->layer_ids_of_group[$layerset['list'][$i]['Gruppe']][] = $layerset['list'][$i]['Layer_ID'];				# die Layer-IDs in einer Gruppe
 					}
@@ -7565,7 +7570,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$this->add_message('array', $results);
 			$this->Layergruppe_Editor();
 		}
-		$this->output();
 	}
 
 	function Layergruppe_Aendern() {
@@ -7846,17 +7850,17 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         # Steht an dieser Stelle, weil die Auswahlmöglichkeiten von Auswahlfeldern abhängig sein können
         $attributes = $mapDB->add_attribute_values($attributes, $layerdb, $layerset[0]['shape'], true, $this->Stelle->id);
 
+				# last_search speichern					
+				if($this->last_query == ''){
+					$this->formvars['search_name'] = '<last_search>';
+					$this->user->rolle->delete_search($this->formvars['search_name']);		# das muss hier stehen bleiben, denn in save_search wird mit der Layer-ID gelöscht
+					$this->user->rolle->save_search($attributes, $this->formvars);
+				}
+				
 				if($layerset[0]['count'] != 0 AND $this->formvars['embedded_subformPK'] == '' AND $this->formvars['embedded'] == '' AND $this->formvars['embedded_dataPDF'] == ''){
 					# last_query speichern
 					$this->user->rolle->delete_last_query();
 					$this->user->rolle->save_last_query('Layer-Suche_Suchen', $this->formvars['selected_layer_id'], $sql, $sql_order, $this->formvars['anzahl'], $this->formvars['offset_'.$layerset[0]['Layer_ID']]);
-
-					# last_search speichern					
-					if($this->last_query == ''){
-						$this->formvars['search_name'] = '<last_search>';
-						$this->user->rolle->delete_search($this->formvars['search_name']);		# das muss hier stehen bleiben, denn in save_search wird mit der Layer-ID gelöscht
-						$this->user->rolle->save_search($attributes, $this->formvars);
-					}
 
 					# Querymaps erzeugen
 					if($layerset[0]['querymap'] == 1 AND $attributes['privileg'][$attributes['the_geom']] >= '0' AND ($layerset[0]['Datentyp'] == 1 OR $layerset[0]['Datentyp'] == 2)){
@@ -13558,8 +13562,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 									$attribcount++;
 								} break;
 								case 'Checkbox': {
+									$output .=  $attributes['alias'][$j].': ';
 		              $layer['shape'][$k][$attributes['name'][$j]] = str_replace('f', 'nein',  $layer['shape'][$k][$attributes['name'][$j]]);
 									$layer['shape'][$k][$attributes['name'][$j]] = str_replace('t', 'ja',  $layer['shape'][$k][$attributes['name'][$j]]);
+									$output .= $layer['shape'][$k][$attributes['name'][$j]].'  ';
+		              $output .= '##';
 								} break;
 				        default : {
 		              $output .=  $attributes['alias'][$j].': ';
@@ -14963,7 +14970,6 @@ class db_mapObj{
 			if($rs['minscale'] > 0)$rs['minscale'] = $rs['minscale']-0.3;
 			$layer['list'][$i]=$rs;			
 			$layer['layer_ids'][$rs['Layer_ID']] =& $layer[$i];		# damit man mit einer Layer-ID als Schlüssel auf dieses Array zugreifen kann
-			$layer['layers_of_group'][$rs['Gruppe']][] = $i;
 			$i++;
     }
     return $layer;
@@ -15683,7 +15689,7 @@ class db_mapObj{
               $attributes['subform_layer_privileg'][$i] = $layer['privileg'];
               for($k = 1; $k < count($subform); $k++){
                 $attributes['subform_fkeys'][$i][] = $subform[$k];
-                $attributes['invisible'][$subform[$k]] = 'true';
+                $attributes['visible'][$attributes['indizes'][$subform[$k]]] = 0;
               }
               if($options[1] != ''){
                 if($options[1] == 'no_new_window'){
@@ -16292,7 +16298,8 @@ class db_mapObj{
 				`raster_visibility` = " . ($formvars['raster_visibility_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['raster_visibility_' . $attributes['name'][$i]]) . ",
 				`dont_use_for_new`= " . ($formvars['dont_use_for_new_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['dont_use_for_new_' . $attributes['name'][$i]]) . ",
 				`mandatory` = " . ($formvars['mandatory_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['mandatory_' . $attributes['name'][$i]]) . ",
-				`quicksearch`= " . ($formvars['quicksearch_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['quicksearch_' . $attributes['name'][$i]]) . "
+				`quicksearch`= " . ($formvars['quicksearch_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['quicksearch_' . $attributes['name'][$i]]) . ",
+				`visible`= ".($formvars['visible_'.$attributes['name'][$i]] == '' ? "0" : $formvars['visible_'.$attributes['name'][$i]])."
 			";
 			$sql = "
 				INSERT INTO
@@ -16464,6 +16471,7 @@ class db_mapObj{
 				`dont_use_for_new`,
 				`mandatory`,
 				`quicksearch`,
+				`visible`,
 				`order`,
 				`privileg`,
 				`query_tooltip`
@@ -16482,75 +16490,75 @@ class db_mapObj{
 		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
 		$i = 0;
 		while ($rs = mysql_fetch_array($query)){
-			if ($rs['form_element_type'] == 'Style') {
-				$attributes['style'] = $rs['name'];
+			$attributes['name'][$i] = $rs['name'];
+			$attributes['indizes'][$rs['name']] = $i;
+			$attributes['real_name'][$rs['name']] = $rs['real_name'];
+			if ($rs['tablename']){
+				if (strpos($rs['tablename'], '.') !== false){
+					$explosion = explode('.', $rs['tablename']);
+					$rs['tablename'] = $explosion[1];		# Tabellenname ohne Schema
+					$attributes['schema_name'][$rs['tablename']] = $explosion[0];
+				}
+				$attributes['table_name'][$i]= $rs['tablename'];
+				$attributes['table_name'][$rs['name']] = $rs['tablename'];
 			}
-			else {
-				$attributes['name'][$i] = $rs['name'];
-				$attributes['indizes'][$rs['name']] = $i;
-				$attributes['real_name'][$rs['name']] = $rs['real_name'];
-				if ($rs['tablename']){
-					if (strpos($rs['tablename'], '.') !== false){
-						$explosion = explode('.', $rs['tablename']);
-						$rs['tablename'] = $explosion[1];		# Tabellenname ohne Schema
-						$attributes['schema_name'][$rs['tablename']] = $explosion[0];
-					}
-					$attributes['table_name'][$i]= $rs['tablename'];
-					$attributes['table_name'][$rs['name']] = $rs['tablename'];
-				}
-				if ($rs['table_alias_name'])$attributes['table_alias_name'][$i] = $rs['table_alias_name'];
-				if ($rs['table_alias_name'])$attributes['table_alias_name'][$rs['name']] = $rs['table_alias_name'];
-				$attributes['table_alias_name'][$rs['tablename']] = $rs['table_alias_name'];
-				$attributes['type'][$i] = $rs['type'];
-				$attributes['typename'][$i] = $rs['typename'];
-				$type = ltrim($rs['type'], '_');
-				if ($recursive AND is_numeric($type)){
-					$attributes['type_attributes'][$i] = $this->read_datatype_attributes($type, $layerdb, NULL, $all_languages, true);
-				}
-				if ($rs['type'] == 'geometry'){
-					$attributes['the_geom'] = $rs['name'];
-				}
-				$attributes['geomtype'][$i]= $rs['geometrytype'];
-				$attributes['geomtype'][$rs['name']]= $rs['geometrytype'];
-				$attributes['constraints'][$i]= $rs['constraints'];
-				$attributes['constraints'][$rs['real_name']]= $rs['constraints'];
-				$attributes['nullable'][$i]= $rs['nullable'];
-				$attributes['length'][$i]= $rs['length'];
-				$attributes['decimal_length'][$i]= $rs['decimal_length'];
+			if ($rs['table_alias_name'])$attributes['table_alias_name'][$i] = $rs['table_alias_name'];
+			if ($rs['table_alias_name'])$attributes['table_alias_name'][$rs['name']] = $rs['table_alias_name'];
+			$attributes['table_alias_name'][$rs['tablename']] = $rs['table_alias_name'];
+			$attributes['type'][$i] = $rs['type'];
+			$attributes['typename'][$i] = $rs['typename'];
+			$type = ltrim($rs['type'], '_');
+			if ($recursive AND is_numeric($type)){
+				$attributes['type_attributes'][$i] = $this->read_datatype_attributes($type, $layerdb, NULL, $all_languages, true);
+			}
+			if ($rs['type'] == 'geometry'){
+				$attributes['the_geom'] = $rs['name'];
+			}
+			$attributes['geomtype'][$i]= $rs['geometrytype'];
+			$attributes['geomtype'][$rs['name']]= $rs['geometrytype'];
+			$attributes['constraints'][$i]= $rs['constraints'];
+			$attributes['constraints'][$rs['real_name']]= $rs['constraints'];
+			$attributes['nullable'][$i]= $rs['nullable'];
+			$attributes['length'][$i]= $rs['length'];
+			$attributes['decimal_length'][$i]= $rs['decimal_length'];
 
-				if (substr($rs['default'], 0, 6) == 'SELECT'){					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
-					$ret1 = $layerdb->execSQL($rs['default'], 4, 0);
-					if ($ret1[0] == 0) {
-						$attributes['default'][$i] = array_pop(pg_fetch_row($ret1[1]));
-					}
+			if (substr($rs['default'], 0, 6) == 'SELECT'){					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
+				$ret1 = $layerdb->execSQL($rs['default'], 4, 0);
+				if ($ret1[0] == 0) {
+					$attributes['default'][$i] = array_pop(pg_fetch_row($ret1[1]));
 				}
-				else {															# das sind die alten Defaultwerte ohne 'SELECT ' davor, ab Version 1.13 haben Defaultwerte immer ein SELECT, wenn man den Layer in dieser Version einmal gespeichert hat
-					$attributes['default'][$i] = $rs['default'];
-				}
-				$attributes['form_element_type'][$i] = $rs['form_element_type'];
-				$attributes['form_element_type'][$rs['name']] = $rs['form_element_type'];
-				$rs['options'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $rs['options']);
-				$rs['options'] = str_replace('$language', $this->user->rolle->language, $rs['options']);
-				$attributes['options'][$i] = $rs['options'];
-				$attributes['options'][$rs['name']] = $rs['options'];
-				$attributes['alias'][$i] = $rs['alias'];
-				$attributes['alias'][$attributes['name'][$i]] = $rs['alias'];
-				$attributes['alias_low-german'][$i] = $rs['alias_low-german'];
-				$attributes['alias_english'][$i] = $rs['alias_english'];
-				$attributes['alias_polish'][$i] = $rs['alias_polish'];
-				$attributes['alias_vietnamese'][$i] = $rs['alias_vietnamese'];
-				$attributes['tooltip'][$i] = $rs['tooltip'];
-				$attributes['group'][$i] = $rs['group'];
-				$attributes['arrangement'][$i] = $rs['arrangement'];
-				$attributes['labeling'][$i] = $rs['labeling'];
-				$attributes['raster_visibility'][$i] = $rs['raster_visibility'];
-				$attributes['dont_use_for_new'][$i] = $rs['dont_use_for_new'];
-				$attributes['mandatory'][$i] = $rs['mandatory'];
-				$attributes['quicksearch'][$i] = $rs['quicksearch'];
-				$attributes['privileg'][$i] = $rs['privileg'];
-				$attributes['query_tooltip'][$i] = $rs['query_tooltip'];
-				$i++;
 			}
+			else {															# das sind die alten Defaultwerte ohne 'SELECT ' davor, ab Version 1.13 haben Defaultwerte immer ein SELECT, wenn man den Layer in dieser Version einmal gespeichert hat
+				$attributes['default'][$i] = $rs['default'];
+			}
+			$attributes['form_element_type'][$i] = $rs['form_element_type'];
+			$attributes['form_element_type'][$rs['name']] = $rs['form_element_type'];
+			$rs['options'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $rs['options']);
+			$rs['options'] = str_replace('$language', $this->user->rolle->language, $rs['options']);
+			$attributes['options'][$i] = $rs['options'];
+			$attributes['options'][$rs['name']] = $rs['options'];
+			$attributes['alias'][$i] = $rs['alias'];
+			$attributes['alias'][$attributes['name'][$i]] = $rs['alias'];
+			$attributes['alias_low-german'][$i] = $rs['alias_low-german'];
+			$attributes['alias_english'][$i] = $rs['alias_english'];
+			$attributes['alias_polish'][$i] = $rs['alias_polish'];
+			$attributes['alias_vietnamese'][$i] = $rs['alias_vietnamese'];
+			$attributes['tooltip'][$i] = $rs['tooltip'];
+			$attributes['group'][$i] = $rs['group'];
+			$attributes['arrangement'][$i] = $rs['arrangement'];
+			$attributes['labeling'][$i] = $rs['labeling'];
+			$attributes['raster_visibility'][$i] = $rs['raster_visibility'];
+			$attributes['dont_use_for_new'][$i] = $rs['dont_use_for_new'];
+			$attributes['mandatory'][$i] = $rs['mandatory'];
+			$attributes['quicksearch'][$i] = $rs['quicksearch'];
+			$attributes['visible'][$i] = $rs['visible'];
+			$attributes['privileg'][$i] = $rs['privileg'];
+			$attributes['query_tooltip'][$i] = $rs['query_tooltip'];
+			if($rs['form_element_type'] == 'Style'){
+				$attributes['style'] = $rs['name'];
+				$attributes['visible'][$i] = 0;
+			}
+			$i++;
 		}
 		if ($attributes['table_name'] != NULL) {
 			$attributes['all_table_names'] = array_unique($attributes['table_name']);

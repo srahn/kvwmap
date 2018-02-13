@@ -686,6 +686,7 @@ class rolle {
 	}
 
 	function save_search($attributes, $formvars){
+		$search_params_set = false;
 		# alle anderen Suchabfragen unter dem Namen löschen
 		$this->delete_search($formvars['search_name'], $formvars['selected_layer_id']);
 		for($m = 0; $m <= $formvars['searchmask_count']; $m++){
@@ -697,10 +698,16 @@ class rolle {
 			}
 			for($i = 0; $i < count($attributes['name']); $i++){
 				if($formvars[$prefix.'value_'.$attributes['name'][$i]] != '' OR $formvars[$prefix.'operator_'.$attributes['name'][$i]] == 'IS NULL' OR $formvars[$prefix.'operator_'.$attributes['name'][$i]] == 'IS NOT NULL'){
+					$search_params_set = true;
 					$sql = 'INSERT INTO search_attributes2rolle VALUES ("'.$formvars['search_name'].'", '.$this->user_id.', '.$this->stelle_id.', '.$formvars['selected_layer_id'].', "'.$attributes['name'][$i].'", "'.$formvars[$prefix.'operator_'.$attributes['name'][$i]].'", "'.$formvars[$prefix.'value_'.$attributes['name'][$i]].'", "'.$formvars[$prefix.'value2_'.$attributes['name'][$i]].'", '.$m.', "'.$formvars['boolean_operator_'.$m].'");';
 					$this->debug->write("<p>file:rolle.php class:rolle->save_search - Speichern einer Suchabfrage:",4);
 					$this->database->execSQL($sql,4, $this->loglevel);
 				}
+			}
+			if(!$search_params_set){		# keine Suchparameter gesetzt -> erstes Attribut speichern, damit Suche mit der Auswahl des Layers trotzdem gespeichert ist
+				$sql = 'INSERT INTO search_attributes2rolle VALUES ("'.$formvars['search_name'].'", '.$this->user_id.', '.$this->stelle_id.', '.$formvars['selected_layer_id'].', "'.$attributes['name'][0].'", "'.$formvars[$prefix.'operator_'.$attributes['name'][0]].'", NULL, NULL, 0, NULL);';
+				$this->debug->write("<p>file:rolle.php class:rolle->save_search - Speichern einer Suchabfrage:",4);
+				$this->database->execSQL($sql,4, $this->loglevel);
 			}
 		}
 	}
@@ -1436,10 +1443,10 @@ class rolle {
 		$sql.=' user_id='.$this->user_id;
 		$sql.=', stelle_id='.$this->stelle_id;
 		$sql.=', name="'.$comment.'"';
-		for($i=0; $i < count($layerset); $i++){
-			if($layerset[$i]['Layer_ID'] > 0 AND $layerset[$i]['aktivStatus'] == 1){
-				$layers[] = $layerset[$i]['Layer_ID'];
-				if($layerset[$i]['queryStatus'] == 1)$query[] = $layerset[$i]['Layer_ID'];
+		for($i=0; $i < count($layerset['list']); $i++){
+			if($layerset['list'][$i]['Layer_ID'] > 0 AND $layerset['list'][$i]['aktivStatus'] == 1){
+				$layers[] = $layerset['list'][$i]['Layer_ID'];
+				if($layerset['list'][$i]['queryStatus'] == 1)$query[] = $layerset['list'][$i]['Layer_ID'];
 			}
 		}
 		$sql.=', layers="'.implode(',', $layers).'"';

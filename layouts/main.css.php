@@ -956,7 +956,8 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 .raster_record .tr_hide div{min-width: 0.0001px !important;}
 /* Attribute, die eingeblendet werden sollen: */
 .raster_record .tr_show{visibility:visible;}
-.raster_record .tr_show #formelement{width: 125px;overflow: hidden}
+.raster_record .tr_show #formelement{width: 125px;overflow: hidden;}
+.raster_record .tr_show .readonly_text{word-wrap: break-word;min-width: 122px !important;}
 .raster_record .tr_show td{border:none;padding: 0.0001px;transition: all 0.25s ease;}
 .raster_record .tr_show select{width: 112%;height:22px;transition: all 0.25s ease;}									/* Selectfelder werden auf 130px Breite verkleinert*/
 .raster_record .tr_show input{width:130px;font-size: 15px;height:22px;transition: all 0.25s ease;}		/* normale Inputfelder werden auf 130px Breite verkleinert*/

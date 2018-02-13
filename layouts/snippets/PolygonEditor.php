@@ -74,8 +74,8 @@ function buildwktpolygonfromsvgpath(svgpath){
     <td align="center" colspan="5"><a name="geoedit_anchor"><h2><?php echo $this->titel; ?></h2></a></td>
   </tr>
   <tr> 
-    <td rowspan="8">&nbsp;</td>
-    <td colspan="4" rowspan="8"> 
+    <td rowspan="9">&nbsp;</td>
+    <td colspan="4" rowspan="9"> 
       <?
 				include(LAYOUTPATH.'snippets/SVG_polygon_query_area.php');
 			?>
@@ -175,7 +175,7 @@ function buildwktpolygonfromsvgpath(svgpath){
 		<? } ?>
   	<td align="right">
   		<input type="checkbox" name="always_draw" value="1" <?if($always_draw == 1 OR $always_draw == 'true')echo 'checked'; ?>>&nbsp;weiterzeichnen&nbsp;&nbsp;
-  		<input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;Punktfang
+  		<input type="checkbox" onclick="toggle_vertices()" name="punktfang" <? if($this->formvars['punktfang'] == 'on')echo 'checked="true"'; ?>>&nbsp;Punktfang
   	</td>
 		<td align="center">
 			  <? if($this->new_entry != true){ ?>

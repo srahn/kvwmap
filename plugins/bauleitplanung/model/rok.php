@@ -125,7 +125,7 @@ class rok {
 																7 => 'ver_entsorgungsflaeche',	      #"Ver- und Entsorgungsfläche"
 																8 => 'verkehrsflaeche',	      #"Verkehrsfläche"
 																9 => 'landwirtschaft',	      #"Landwirtschaftsfläche"
-																10 => 'waldgebiete',	      #"Waldfläche"
+																10 => 'waldgebiet',	      #"Waldfläche"
 																11 => 'gruenflaeche',	      #"Grünfläche"
 																12 => 'wasserflaeche',	      #"Wasserfläche"
 																13 => 'rohstoffgebiet',	      #"Aufschüttung"
@@ -149,6 +149,7 @@ class rok {
 																32 => 'so_beherbergung',	      #"Wochenendhaus"
 																33 => 'so_wohnen_ferienwohnen',	      #"Wohnen+Ferienwohnen"
 																35 => 'so_beherbergung',	      #"Camping und Caravan"
+																36 => 'so_sonst_paragraf11',					#"Sonder"
 															);
 
 		$gebiet2rok_konkret = array(1 => array('WA','WB', 'WR', 'WS'),														#"Wohngebiet"
