@@ -7568,7 +7568,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$this->add_message('array', $results);
 			$this->Layergruppe_Editor();
 		}
-		$this->output();
 	}
 
 	function Layergruppe_Aendern() {
