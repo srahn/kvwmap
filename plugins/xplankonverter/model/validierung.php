@@ -221,14 +221,14 @@ class Validierung extends PgObject {
 		$sql = str_ireplace(
 			'where',
 			"where
-				NOT st_isvalid(the_geom) AND
+				NOT st_isvalid(the_geom) AND (
 			",
 			$sql
 		);
 		$this->debug->show('<br>sql mit where st_isvalid: ' . $sql, Validierung::$write_debug);
 
 #		$sql = "SET search_path=xplan_shapes_" . $konvertierung->get('id') . ", public; " . substr($sql, 0, stripos($sql, 'returning'));
-		$sql = substr($sql, 0, stripos($sql, 'returning'));
+		$sql = substr($sql, 0, stripos($sql, 'returning')) . ')';
 
 		$this->debug->show('Sql für Prüfung geom_isvalid:<br>' . $sql, Validierung::$write_debug);
 
@@ -332,14 +332,14 @@ class Validierung extends PgObject {
 		$sql = str_ireplace(
 			'where',
 			"where
-				rp_plan.konvertierung_id = " . $konvertierung->get('id') . " AND
+				rp_plan.konvertierung_id = " . $konvertierung->get('id') . " AND (
 			",
 			$sql
 		);
 		$this->debug->show('<br>sql mit where Klausel für rp_plan: ' . $sql, Validierung::$write_debug);
 
 		#$sql = "SET search_path=xplan_shapes_" . $konvertierung->get('id') . ", public; " . 
-		$sql = substr($sql, 0, stripos($sql, 'returning'));
+		$sql = substr($sql, 0, stripos($sql, 'returning')) . ')';
 		$this->debug->show('<br>sql ohne returning: ' . $sql, Validierung::$write_debug);
 
 		$this->debug->show('Sql für Prüfung geom_within_plan:<br>' . $sql, false);
