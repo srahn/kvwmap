@@ -335,11 +335,11 @@ include('funktionen/input_check_functions.php');
 		overlay_submit(currentform, false);
 	}
 	
-	add_calendar = function(event, elementid){
+	add_calendar = function(event, elementid, type, setnow){
 		event.stopPropagation();
 		remove_calendar();
 		calendar = new CalendarJS();
-		calendar.init(elementid);
+		calendar.init(elementid, type, setnow);
 		document.getElementById('layer').calendar = calendar;
 	}
 	 

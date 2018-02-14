@@ -104,12 +104,8 @@
 									if($attributes['tooltip'][$j]!='' AND $attributes['form_element_type'][$j] != 'Time'){
 										echo '<td align="right"><a href="javascript:void(0);" title="'.$attributes['tooltip'][$j].'"><img src="'.GRAPHICSPATH.'emblem-important.png" border="0"></a></td>';
 									}
-									if($attributes['type'][$j] == 'date' OR $attributes['type'][$j] == 'timestamp' OR $attributes['type'][$j] == 'timestamptz'){
-										echo '<td align="right"><a href="javascript:;" title=" (TT.MM.JJJJ) '.$attributes['tooltip'][$j].'" ';
-										if($attributes['privileg'][$j] == '1' AND !$lock[$k]){
-										echo 'onclick="add_calendar(event, \''.$attributes['name'][$j].'_'.$k.'\');"';
-										}
-										echo '><img src="'.GRAPHICSPATH.'calendarsheet.png" border="0"></a><div id="calendar"><input type="hidden" id=calendar_'.$attributes['name'][$j].'_'.$k.'"></div></td>';
+									if($attributes['type'][$j] == 'date' OR $attributes['type'][$j] == 'timestamp' OR $attributes['type'][$j] == 'time'){
+										echo '<td align="right"><a href="javascript:;" title="(TT.MM.JJJJ)"><img src="'.GRAPHICSPATH.'calendarsheet.png" border="0"></a><div id="calendar"><input type="hidden" id=calendar_'.$attributes['name'][$j].'_'.$k.'"></div></td>';
 									}
 									echo '</td>';
 									echo '<td><div onmousedown="resizestart(document.getElementById(\'column'.$j.'\'), \'col_resize\');" style="transform: translate(8px); float: right; right: 0px; height: 20px; width: 6px; cursor: e-resize;"></div></td>';

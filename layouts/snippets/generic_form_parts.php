@@ -27,16 +27,15 @@
 			else $title_link = 'href="javascript:void(0);"';
 			$datapart .= '<td align="right"><a '.$title_link.' title="'.$attributes['tooltip'][$j].'"><img src="'.GRAPHICSPATH.'emblem-important.png" border="0"></a></td>';
 		}
-		if($attributes['type'][$j] == 'date') {
+		$date_types = array('date' => 'TT.MM.JJJJ', 'timestamp' => 'TT.MM.JJJJ hh:mm:ss', 'time' => 'hh:mm:ss');
+		if(array_key_exists($attributes['type'][$j], $date_types)){
 			$datapart .= '
-				<td align="right">
-						<a id="caldbl" href="javascript:;" title=" (TT.MM.JJJJ) ' . $attributes['tooltip'][$j] . '"
-						onclick="$(\'.calendar\').show();' . (($attributes['privileg'][$j] == '1' AND !$lock[$k]) ? 'add_calendar(event, \''.$layer_id.'_'.$attributes['name'][$j].'_'.$k.'\');' : '').'"
-						ondblclick="$(\'.calendar\').hide(); $(\'#' . $layer_id.'_'.$attributes['name'][$j].'_'.$k.'\').val(\'' . date('d.m.Y') . '\')"
+				<td width="16px" align="right">
+						<a id="caldbl" href="javascript:;" title="('.$date_types[$attributes['type'][$j]].')"'.
+						(($attributes['privileg'][$j] == '1') ? 'onclick="add_calendar(event, \''.$layer_id.'_'.$attributes['name'][$j].'_'.$k.'\', \''.$attributes['type'][$j].'\');" 
+																										 ondblclick="add_calendar(event, \''.$layer_id.'_'.$attributes['name'][$j].'_'.$k.'\', \''.$attributes['type'][$j].'\', true);"' : '').'
 					><img src="' . GRAPHICSPATH . 'calendarsheet.png" border="0"></a>
-					<div id="calendar" class="calendar">
-						<input type="hidden" id="calendar_'.$layer_id.'_'.$attributes['name'][$j] . '_' . $k . '">
-					</div>
+					<div id="calendar_'.$layer_id.'_'.$attributes['name'][$j].'_'.$k.'" class="calendar"></div>
 				</td>
 			';
 		}
