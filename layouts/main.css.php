@@ -1110,17 +1110,60 @@ tbody.gle tr:hover {
 }
 
 
-#calendar { /* Fuer IE <= 6 */
+.calendar { /* Fuer IE <= 6 */
 	text-align: center;
 	position: absolute;
 	z-index: 1000000;
 }
 
-#calendar tr { 
+.timepicker{
+	min-width: 180px;
+	font-size: 18px;
+	line-height: 24px;
+	border: solid #112A5D 2px;
+	padding: 3 0 3 0;
+	margin-top: 7px;
+	margin-left:auto;
+	margin-right:auto;
+	background-color: #F6F6F6;
+	display: flex;
+	justify-content: center;
+}
+
+.timepicker .time{
+	flex: 0 0 auto;
+	cursor: n-resize;
+	width: 25px;
+	font-size: 18px;
+	border: 1px solid white;
+}
+
+.timepicker .time:focus{
+	border: 1px solid grey;
+}
+
+.timepicker .time:hover{ 
+	background-color: #CCD2D8;
+}
+
+.timepicker .submit{
+	cursor: pointer;
+	position: absolute;
+	right: 8px;
+	margin: 3 0 3 0;
+	font-size: 1.2em;
+	color: silver;
+}
+
+.timepicker .submit:hover{
+	color: gray;
+}
+
+.calendar tr { 
  border:none;
 }
 
-#calendar table thead th{ 
+.calendar table thead th{ 
 	font-weight: bold; 
 	font-size: 15px;
 	line-height: 1.2em;				
@@ -1129,7 +1172,7 @@ tbody.gle tr:hover {
 	background-color: #112A5D;
 }
 
-#calendar table thead th.weekday{ 
+.calendar table thead th.weekday{ 
 	font-weight: bold; 
 	font-size: 14px;
 	line-height: 1.2em;
@@ -1139,7 +1182,7 @@ tbody.gle tr:hover {
 	border: solid #112A5D 1px;
 }
 
-#calendar table tbody td, #calendar table tfoot td{ 
+.calendar table tbody td, .calendar table tfoot td{ 
 	font-weight: normal; 
 	font-size: 14px;
 	line-height: 1.2em;
@@ -1151,39 +1194,39 @@ tbody.gle tr:hover {
 	border: 1px solid #CCD2D8;
 }
 
-#calendar table tfoot td {
+.calendar table tfoot td {
 	font-size: 7px;
 	border: none;
 }
 
-#calendar table tfoot td.calendar_week {
+.calendar table tfoot td.calendar_week {
 	text-align: left;
 }
 
-#calendar table tbody td:hover{ 
+.calendar table tbody td:hover{ 
 	background-color: #CCD2D8;
 	font-weight: bold;
 }
 
-#calendar table tbody td.saturday{ 
+.calendar table tbody td.saturday{ 
 	color: #9A2525;
 	font-weight: normal;
 }
 
-#calendar table tbody td.sunday{ 
+.calendar table tbody td.sunday{ 
 	color: #9A2525;
 	font-weight: bold;
 }
 
-#calendar table tbody td.weekend{ 
+.calendar table tbody td.weekend{ 
 	color: #9A2525;
 }
 
-#calendar table tbody td.today{
+.calendar table tbody td.today{
 	background-color: #A7B5C7;
 }
 
-#calendar table thead th.prev_year, #calendar table thead th.next_year {
+.calendar table thead th.prev_year, .calendar table thead th.next_year {
 	border:none;
 	margin: 0.1em;
 	padding: 0.1em;
@@ -1191,11 +1234,11 @@ tbody.gle tr:hover {
 	font-size: 11px;
 }
 
-#calendar table tbody td.last_month, #calendar table tbody td.next_month {
+.calendar table tbody td.last_month, .calendar table tbody td.next_month {
 	color:	 #a3afc4;
 }
 
-#calendar table{
+.calendar table{
 	border-collapse: collapse;
 	border: solid #112A5D 2px;
 	padding: 0;

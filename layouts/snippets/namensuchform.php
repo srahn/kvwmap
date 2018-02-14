@@ -3,7 +3,6 @@
 	include('funktionen/input_check_functions.php');
  ?>
 
-<script type="text/javascript" src="funktionen/calendar.js"></script>
 <script src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
 Text[0]=["Hilfe:","Zeigt auch die zum Grundbuchblatt geh&ouml;renden Flurst&uuml;cke an"]

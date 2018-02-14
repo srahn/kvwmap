@@ -149,7 +149,7 @@ class rok {
 																32 => 'so_beherbergung',	      #"Wochenendhaus"
 																33 => 'so_wohnen_ferienwohnen',	      #"Wohnen+Ferienwohnen"
 																35 => 'so_beherbergung',	      #"Camping und Caravan"
-																36 => 'so_sonst_paragraf11',					#"Sonder"
+																36 => 'so_sonst_paragraf11',					#"Sonstige nach §11"
 															);
 
 		$gebiet2rok_konkret = array(1 => array('WA','WB', 'WR', 'WS'),														#"Wohngebiet"
