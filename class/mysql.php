@@ -789,9 +789,12 @@ INSERT INTO u_styles2classes (
 		# dieses Feld wird jedoch auch mit abgefragt und separat zurückgeliefert
 		$this->debug->write("<p>file:kvwmap class:database->create_insert_dump :<br>".$sql,4);
     $query = mysql_query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    if ($query==0) {
+			$this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0;
+		}
 
     $feld_anzahl = mysql_num_fields($query);
+		#echo '<br>Anzahl Felder: ' . $feld_anzahl;
     for ($i = 0; $i < $feld_anzahl; $i++) {
     	$meta = mysql_fetch_field($query, $i);
 			#echo '<br>Meta name: ' . $meta->name;
@@ -814,7 +817,7 @@ INSERT INTO u_styles2classes (
     	for ($i = 0; $i < $feld_anzahl; $i++) {
     		if($felder[$i] != $extra) {
     			$insert .= "`".$felder[$i]."`";
-    			if ($feld_anzahl-1 > $i){$insert .= ',';}
+    			if ($feld_anzahl-1 > $i){$insert .= ', ';}
     		}
     	}
     	$insert .= ') VALUES (';
@@ -830,7 +833,7 @@ INSERT INTO u_styles2classes (
     					$insert .= "'".addslashes($rs[$i])."'";
 	    			}
 	    		}
-	    		if ($feld_anzahl - 1 > $i) { $insert .= ','; }
+	    		if ($feld_anzahl - 1 > $i) { $insert .= ', '; }
     		}
     		else {
     			$dump['extra'][] = $rs[$i];
@@ -839,7 +842,8 @@ INSERT INTO u_styles2classes (
     	$insert .= ');';
     	$dump['insert'][] = $insert;
     }
-   return $dump;
+		#echo '<br>insert: ' . $insert;
+		return $dump;
 	}
 
   function create_update_dump($table){

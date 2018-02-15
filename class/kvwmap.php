@@ -6851,16 +6851,25 @@ class GUI {
     $this->output();
   }
 
-	function layer_export_exportieren(){
-		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-		$export_layer_ids = explode(', ', $this->formvars['selected_layers']);
-		$result = $mapDB->create_layer_dumpfile($this->database, $export_layer_ids, true);
-		if ($result['success']) {
-			$this->add_message('notice', 'Export erfolgreich.<br>Sie können die Datei jetzt herunterladen.');
-			$this->layer_dumpfile = $result['layer_dumpfile'];
+	function layer_export_exportieren() {
+		if ($this->formvars['layer']) {
+			$export_layer_ids = $this->formvars['layer'];
+			$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+			$result = $mapDB->create_layer_dumpfile(
+				$this->database,
+				$export_layer_ids,
+				($this->formvars['with_privileges'] != '')
+			);
+			if ($result['success']) {
+				$this->add_message('notice', 'Export erfolgreich.<br>Sie können die Datei jetzt herunterladen.');
+				$this->layer_dumpfile = $result['layer_dumpfile'];
+			}
+			else {
+				$this->add_message('error', 'Fehler beim Export: ' . $result['err_msg']);
+			}
 		}
 		else {
-			$this->add_message('error', 'Fehler beim Export: ' . $result['err_msg']);
+			$this->add_message('warning', 'Sie müssen mindestens einen Layer zum Export auswählen!');
 		}
 		$this->layer_export();
 	}
@@ -15841,8 +15850,9 @@ class db_mapObj{
 
 	function create_layer_dumpfile($database, $layer_ids, $with_privileges = false) {
 		$success = true;
-		$dump_text .= 'SET @group_id = 1;' . chr(10);
-		$dump_text .= 'SET @connection = \'host=pgsql dbname=kvwmapsp user=kvwmap password=*****\';' . chr(10) . chr(10);
+		$dump_text .= "--Layerdump aus kvwmap vom " . date("d.m.Y H:i:s") . "\n";
+		$dump_text .= "\nSET @group_id = 1;";
+		$dump_text .= "\nSET @connection = 'host=pgsql dbname=kvwmapsp user=kvwmap password=*****';";
 
 		if ($with_privileges) {
 			# Write vars for stellen that are related with dumped layers
@@ -15869,7 +15879,7 @@ class db_mapObj{
 						'id' => $rs['ID'],
 						'var' => $stelle_id_var
 					);
-					$dump_text .= 'SET ' . $stelle_id_var . ' = ' . $rs['ID'] . ';';
+					$dump_text .= "\nSET " . $stelle_id_var . " = " . $rs['ID'] . ";";
 				}
 			}
 		}
@@ -15882,7 +15892,8 @@ class db_mapObj{
 
 			if ($with_privileges) {
 				for ($s = 0; $s < count($stellen); $s++) {
-					$used_layers = $database->create_insert_dump(
+					# Zuordnung des Layers zur Stelle
+					$used_layer = $database->create_insert_dump(
 						'used_layer',
 						'',
 						"
@@ -15896,16 +15907,69 @@ class db_mapObj{
 							FROM
 								`used_layer`
 							WHERE
-								`Layer_ID` = " . $layer_ids[$i] . "
+								`Layer_ID` = " . $layer_ids[$i] . " AND
+								`Stelle_ID` = " . $stellen[$s]['id'] . "
 						"
 					);
-					$dump_text .= "\n\n-- Zuordnung Layer " . $layer_ids[$i] . " zu Stelle " . $stellen[$s]['id'] . "\n" . implode("\n", $used_layers['insert']);
+					if (count($used_layer['insert']) > 0) {
+						$dump_text .= "\n\n-- Zuordnung Layer " . $layer_ids[$i] . " zu Stelle " . $stellen[$s]['id'] . "\n" . implode("\n", $used_layer['insert']);
+					}
+
+					# Attributfilter des Layers in der Stelle
+					$attributfilter2used_layer = $database->create_insert_dump(
+						'u_attributfilter2used_layer',
+						'',
+						"
+							SELECT
+								'" . $stellen[$s]['var'] . "' AS Stelle_ID,
+								'" . $last_layer_id . "' AS Layer_ID,
+								`attributname`,
+								`attributvalue`,
+								`operator`,
+								`type`
+							FROM
+								`u_attributfilter2used_layer`
+							WHERE
+								`Layer_ID` = " . $layer_ids[$i] . " AND
+								`Stelle_ID` = " . $stellen[$s]['id'] . "
+						"
+					);
+					if (count($attributfilter2used_layer['insert']) > 0) {
+						$dump_text .= "\n\n-- Zuordnung der Attributfilter des Layers " . $layer_ids[$i] . " zur Stelle " . $stellen[$s]['id'] . "\n" . implode("\n", $attributfilter2used_layer['insert']);
+					}
 				}
 			}
 
 			$layer_attributes = $database->create_insert_dump('layer_attributes', 'layer_attribut_id', 'SELECT `name` AS layer_attribut_id, \''.$last_layer_id.'\' AS `layer_id`, `name`, real_name, tablename, table_alias_name, `type`, geometrytype, constraints, nullable, length, decimal_length, `default`, form_element_type, options, alias, `alias_low-german`, alias_english, alias_polish, alias_vietnamese, tooltip, `group`, `raster_visibility`, `mandatory`, `order`, `privileg`, query_tooltip FROM layer_attributes WHERE layer_id = ' . $layer_ids[$i]);
 			for($j = 0; $j < count($layer_attributes['insert']); $j++){
+				# Attribut des Layers
 				$dump_text .= "\n\n-- Attribut " . $layer_attributes['extra'][$j] . " des Layers " . $layer_ids[$i] . "\n" . $layer_attributes['insert'][$j];
+
+				if ($with_privileges) {
+					for ($s = 0; $s < count($stellen); $s++) {
+						# Attributrechte in der Stelle
+						$layer_attributes2stelle = $database->create_insert_dump(
+							'layer_attributes2stelle',
+							'',
+							"
+								SELECT
+									'". $last_layer_id . "' AS layer_id,
+									'" . $stellen[$s]['var'] . "' AS stelle_id,
+									`attributename`,
+									`privileg`,
+									`tooltip`
+								FROM
+									`layer_attributes2stelle`
+								WHERE
+									`layer_id` = " . $layer_ids[$i] . " AND
+									`stelle_id` = " . $stellen[$s]['id'] . "
+							"
+						);
+						if (count($layer_attributes2stelle['insert']) > 0) {
+							$dump_text .= "\n\n-- Zuordnung der Layerattribute des Layers " . $layer_ids[$i] . " zur Stelle " . $stellen[$s]['id'] . "\n" . implode("\n", $layer_attributes2stelle['insert']);
+						}
+					}
+				}
 			}
 
 			$classes = $database->create_insert_dump('classes', 'Class_ID', 'SELECT `Class_ID`, `Name`, \''.$last_layer_id.'\' AS `Layer_ID`, `Expression`, `drawingorder`, `text` FROM classes WHERE Layer_ID=' . $layer_ids[$i]);
@@ -15929,8 +15993,6 @@ class db_mapObj{
 					$dump_text .=	"\nINSERT INTO u_labels2classes (label_id, class_id) VALUES (@last_label_id, @last_class_id);";
 				}
 			}
-
-			$dump_text .= chr(10);
 		}
 		for ($i = 0; $i < count($layer_ids); $i++) {
 			$dump_text .= "\n\n-- Replace attribute options for Layer " . $layer_ids[$i];
