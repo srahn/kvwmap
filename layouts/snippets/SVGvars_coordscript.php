@@ -29,7 +29,7 @@
 				minutes = part2[0];
 				if(part2[1] != undefined)seconds = Math.round(parseFloat("."+part2[1]) * 60);
 				else seconds = "00";
-				return degrees+"°"+minutes+"\'"+seconds+\'"\';
+				return degrees+"°"+minutes+"\'"+seconds+"\'\'";
 			}			
 		}
 		
@@ -41,7 +41,7 @@
 			part2 = part1[1].split("\'");
 			minutes = parseFloat(part2[0]);
 			if(coordtype == "dms"){
-				seconds = part2[1].replace(/"/g, "");
+				seconds = part2[1].replace(/\'\'/g, "");
 				seconds = parseFloat(seconds)/60;
 			}
 			minutes = (minutes+seconds)/60;

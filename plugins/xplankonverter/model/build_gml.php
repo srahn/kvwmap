@@ -269,6 +269,7 @@ class Gml_builder {
       if (empty($gml_object[$uml_attribute['col_name']])) continue;
 
       $lowercaseName = strtolower($uml_attribute['name']);
+	  //$gmlStr .= '<note>attributname: ' . $uml_attribute['name'] . ' type_type: ' . $uml_attribute['type_type'] . ' stereotype: ' . $uml_attribute['stereotype'] . '</note>';
       switch ($uml_attribute['type_type']) {
         case 'c': // custom datatype
           switch ($uml_attribute['stereotype']){
@@ -367,7 +368,24 @@ class Gml_builder {
 							};
 							$gmlStr .= $this->wrapWithElement("{$xplan_ns_prefix}{$uml_attribute['uml_name']}", $value);
 						} break;
+						default: {
+							$gml_value = trim($gml_object[$uml_attribute['col_name']]);
+							 // check for array values
+							if ($gml_value[0] == '{' && substr($gml_value,-1) == '}') {
+								$gml_value_array = explode(',',substr($gml_value, 1, -1));
+								for ($j = 0; $j < count($gml_value_array); $j++){
+									$gmlStr .= $this->wrapWithElement(
+									"{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
+									htmlspecialchars($gml_value_array[$j],ENT_QUOTES|ENT_XML1,"UTF-8"));
+								}
+							} else {
+								$gmlStr .= $this->wrapWithElement(
+								"{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
+								htmlspecialchars($gml_value,ENT_QUOTES|ENT_XML1,"UTF-8"));
+							}
+						}
 					} break;
+					
         case 'e': // enum type
         default: {
           $gml_value = trim($gml_object[$uml_attribute['col_name']]);
@@ -383,7 +401,7 @@ class Gml_builder {
           $gmlStr .= $this->wrapWithElement(
               "{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
               htmlspecialchars($gml_value,ENT_QUOTES|ENT_XML1,"UTF-8"));
-				}
+		}
       }
     }
     return $gmlStr;

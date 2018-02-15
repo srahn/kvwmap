@@ -322,7 +322,7 @@ $j=0;
   		<input id="go_plus" type="hidden" name="go_plus" value="">
   	</td>
   </tr>
-  <tr<?php if ($simple) echo ' style="display: none;"'; ?>>
+  <tr<?php if ($simple OR $this->data_import_export->attributes['the_geom'] == '') echo ' style="display: none;"'; ?>>
     <td align="right">
 			<input type="checkbox" name="singlegeom" value="true" <? if($this->formvars['singlegeom'])echo 'checked="true"'; ?>>
 			<? echo $strSingleGeoms; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;

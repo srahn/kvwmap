@@ -4,6 +4,7 @@
  
 	# Variablensubstitution
 	$layer = $this->qlayerset[$i];
+	$layer_id = $layer['Layer_ID'];
 	$attributes = $layer['attributes'];
 	if($this->currentform == 'document.GUI2')$size = 40;
 	else $size = 61;
@@ -202,16 +203,15 @@
 						if($attributes['tooltip'][$j]!='' AND $attributes['form_element_type'][$j] != 'Time') {
 						  echo '<td align="right"><a href="#" title="'.$attributes['tooltip'][$j].'"><img src="'.GRAPHICSPATH.'emblem-important.png" border="0"></a></td>';
 						}
-						if($attributes['type'][$j] == 'date') {
+						$date_types = array('date' => 'TT.MM.JJJJ', 'timestamp' => 'TT.MM.JJJJ hh:mm:ss', 'time' => 'hh:mm:ss');
+						if(array_key_exists($attributes['type'][$j], $date_types)){
 							echo '
-								<td align="right">
-										<a id="caldbl" href="javascript:;" title=" (TT.MM.JJJJ) ' . $attributes['tooltip'][$j] . '"
-										onclick="$(\'.calendar\').show();' . (($attributes['privileg'][$j] == '1' AND !$lock[$k]) ? 'add_calendar(event, \''.$layer['Layer_ID'].'_'.$attributes['name'][$j].'_'.$k.'\');' : '').'"
-										ondblclick="$(\'.calendar\').hide(); $(\'#' . $layer['Layer_ID'].'_'.$attributes['name'][$j].'_'.$k.'\').val(\'' . date('d.m.Y') . '\')"
+								<td width="16px" align="right">
+										<a id="caldbl" href="javascript:;" title="('.$date_types[$attributes['type'][$j]].')"'.
+										(($attributes['privileg'][$j] == '1') ? 'onclick="add_calendar(event, \''.$layer_id.'_'.$attributes['name'][$j].'_'.$k.'\', \''.$attributes['type'][$j].'\');" 
+																														 ondblclick="add_calendar(event, \''.$layer_id.'_'.$attributes['name'][$j].'_'.$k.'\', \''.$attributes['type'][$j].'\', true);"' : '').'
 									><img src="' . GRAPHICSPATH . 'calendarsheet.png" border="0"></a>
-									<div id="calendar" class="calendar">
-										<input type="hidden" id="calendar_'.$layer['Layer_ID'].'_'.$attributes['name'][$j] . '_' . $k . '">
-									</div>
+									<div id="calendar_'.$layer_id.'_'.$attributes['name'][$j].'_'.$k.'" class="calendar"></div>
 								</td>
 							';
 						}

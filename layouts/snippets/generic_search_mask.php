@@ -71,9 +71,10 @@ $num_colspan = ($this->user->rolle->visually_impaired) ? 3 : 5;
 	              else{
 	                echo $this->attributes['name'][$i];
 	              }
-	              if(strpos($this->attributes['type'][$i], 'time') !== false OR $this->attributes['type'][$i] == 'date'){
+								$date_types = array('date' => 'TT.MM.JJJJ', 'timestamp' => 'TT.MM.JJJJ hh:mm:ss', 'time' => 'hh:mm:ss');
+								if(array_key_exists($this->attributes['type'][$i], $date_types)){
 	              ?>
-	                <img src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0">
+	                <a href="javascript:;" onclick="new CalendarJS().init('<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>', '<? echo $this->attributes['type'][$i]; ?>');"><img title="<? echo $date_types[$this->attributes['type'][$i]]; ?>" src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar_<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" class="calendar"></div>
 	              <?
 	              }
 	          ?></td>

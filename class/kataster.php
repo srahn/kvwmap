@@ -1462,8 +1462,8 @@ class flurstueck {
 			$Eigentuemer .= $eigentuemer->Nr.' ';
 			if($eigentuemer->vorname != '')$Eigentuemer .= $eigentuemer->vorname.' ';
 			$Eigentuemer .= $eigentuemer->nachnameoderfirma;
-			if($Eigentuemer->namensbestandteil != '')$Eigentuemer .= ', '.$Eigentuemer->namensbestandteil;
-			if($Eigentuemer->akademischergrad != '')$Eigentuemer .= ', '.$Eigentuemer->akademischergrad;
+			if($eigentuemer->namensbestandteil != '')$Eigentuemer .= ', '.$eigentuemer->namensbestandteil;
+			if($eigentuemer->akademischergrad != '')$Eigentuemer .= ', '.$eigentuemer->akademischergrad;
 			$Eigentuemer .= ' ';
 			if($eigentuemer->geburtsname != '')$Eigentuemer .= 'geb. '.$eigentuemer->geburtsname.' ';
 			$Eigentuemer .= $eigentuemer->geburtsdatum;
@@ -1480,7 +1480,10 @@ class flurstueck {
 	
 	function outputEigentuemerShort($eigentuemer, $adressAenderungen = NULL, $indent = NULL, $database = NULL){
 		$Eigentuemer .= '<tr><td colspan="2"><table cellpadding="0" cellspacing="0"><tr><td valign="top" style="padding-right: 4">'.$eigentuemer->Nr.'</td><td valign="top" style="padding-right: 4">';
-		$Eigentuemer .= '<a href="index.php?go=Namen_Auswaehlen_Suchen&gml_id='.$eigentuemer->gml_id.'&withflurst=on&anzahl='.MAXQUERYROWS.'">'.$eigentuemer->vorname.' '.$eigentuemer->nachnameoderfirma.'</a>';
+		$Eigentuemer .= '<a href="index.php?go=Namen_Auswaehlen_Suchen&gml_id='.$eigentuemer->gml_id.'&withflurst=on&anzahl='.MAXQUERYROWS.'">'.$eigentuemer->vorname.' '.$eigentuemer->nachnameoderfirma;
+		if($eigentuemer->namensbestandteil != '')$Eigentuemer .= ', '.$eigentuemer->namensbestandteil;
+		if($eigentuemer->akademischergrad != '')$Eigentuemer .= ', '.$eigentuemer->akademischergrad;
+		$Eigentuemer .= '</a>';
 		if($eigentuemer->zusatz_eigentuemer != ''){
 			$Eigentuemer .= '</td></tr><tr><td colspan="2">'.$eigentuemer->zusatz_eigentuemer; if($eigentuemer->Anteil != '')$Eigentuemer .= ' zu '.$eigentuemer->Anteil; $Eigentuemer .= '</td></tr><tr><td>';
 		}
@@ -1503,8 +1506,8 @@ class flurstueck {
 																			<a href="index.php?go=Namen_Auswaehlen_Suchen&gml_id='.$eigentuemer->gml_id.'&withflurst=on&anzahl='.MAXQUERYROWS.'">';
 			if($eigentuemer->vorname != '')$Eigentuemer .= $eigentuemer->vorname.' ';
 			$Eigentuemer .= $eigentuemer->nachnameoderfirma;
-			if($Eigentuemer->namensbestandteil != '')$Eigentuemer .= ', '.$Eigentuemer->namensbestandteil;
-			if($Eigentuemer->akademischergrad != '')$Eigentuemer .= ', '.$Eigentuemer->akademischergrad;
+			if($eigentuemer->namensbestandteil != '')$Eigentuemer .= ', '.$eigentuemer->namensbestandteil;
+			if($eigentuemer->akademischergrad != '')$Eigentuemer .= ', '.$eigentuemer->akademischergrad;
 			$Eigentuemer .= '</a><br>';
 			if($eigentuemer->geburtsname != '')$Eigentuemer .= 'geb. '.$eigentuemer->geburtsname.' ';
 			$Eigentuemer .= $eigentuemer->geburtsdatum;
