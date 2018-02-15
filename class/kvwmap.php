@@ -15850,14 +15850,16 @@ class db_mapObj{
 
 	function create_layer_dumpfile($database, $layer_ids, $with_privileges = false) {
 		$success = true;
-		$dump_text .= "--Layerdump aus kvwmap vom " . date("d.m.Y H:i:s") . "\n";
-		$dump_text .= "\nSET @group_id = 1;";
+		$dump_text .= "-- Layerdump aus kvwmap vom " . date("d.m.Y H:i:s");
+		$dump_text .= "\n-- Achtung: Die Datenbank in die der Dump eingespielt wird, sollte die gleiche Migrationsversion haben,";
+		$dump_text .= "\n-- wie die Datenbank aus der exportiert wurde! Anderenfalls kann es zu Fehlern bei der Ausführung des SQL kommen.";
+		$dump_text .= "\n\nSET @group_id = 1;";
 		$dump_text .= "\nSET @connection = 'host=pgsql dbname=kvwmapsp user=kvwmap password=*****';";
 
 		if ($with_privileges) {
-			# Write vars for stellen that are related with dumped layers
+			# Frage Stellen der Layer ab
 			$sql = "
-				SELECT
+				SELECT DISTINCT
 					ID,
 					Bezeichnung
 				FROM
@@ -15879,7 +15881,26 @@ class db_mapObj{
 						'id' => $rs['ID'],
 						'var' => $stelle_id_var
 					);
-					$dump_text .= "\nSET " . $stelle_id_var . " = " . $rs['ID'] . ";";
+
+					$stelle = $database->create_insert_dump(
+						'stelle',
+						'ID',
+						"
+							SELECT
+								*
+							FROM
+								`stelle`
+							WHERE
+								`ID` = " . $rs['ID'] . "
+						"
+					);
+					# Stelle
+					$dump_text .= "\n\n-- Stelle " . $rs['Bezeichnung'] . " (id=" . $rs['ID'] . ")";
+					$dump_text .= "\n" . $stelle['insert'][0];
+
+					# Variable für Stelle
+					$dump_text .= "\n-- Falls Stelle schon existiert, INSERT mit /* */ auskommentieren und statt LAST_INSERT_ID() die vorhandene Stellen-ID eintragen.";
+					$dump_text .= "\nSET " . $stelle_id_var . " = LAST_INSERT_ID();";
 				}
 			}
 		}
@@ -15888,7 +15909,7 @@ class db_mapObj{
 			$layer = $database->create_insert_dump('layer', '', 'SELECT `Name`, `alias`, `Datentyp`, \'@group_id\' AS `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `printconnection`, `connectiontype`, `classitem`, `filteritem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, wms_auth_username, wms_auth_password, `wfs_geom`, `selectiontype`, `querymap`, `logconsume`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `privileg`, `trigger_function`, `sync` FROM layer WHERE Layer_ID='.$layer_ids[$i]);
 			$dump_text .= "\n\n-- Layer " . $layer_ids[$i] . "\n" . $layer['insert'][0];
 			$last_layer_id = '@last_layer_id'.$layer_ids[$i];
-			$dump_text .= chr(10).'SET '.$last_layer_id.'=LAST_INSERT_ID();';
+			$dump_text .= "\nSET " . $last_layer_id . "=LAST_INSERT_ID();";
 
 			if ($with_privileges) {
 				for ($s = 0; $s < count($stellen); $s++) {
