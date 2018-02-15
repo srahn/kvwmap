@@ -5,11 +5,11 @@
 ?>
 <table border="0" cellpadding="5" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
 	<tr align="center"> 
-		<td colspan="5"><h2><?php echo $this->titel; ?></h2></td>
+		<td><h2><?php echo $this->titel; ?></h2></td>
 	</tr>
 	<tr>
-		<td colspan="5">
-			<div style="margin-bottom: 10px;padding: 5px; border: 1px solid #C3C7C3;">
+		<td>
+			<div style="margin-bottom: 10px;padding: 5px; text-align: center">
 				<?php echo $strLayer;?><br><?
 				$layerSelectField = new FormObject(
 					"layer[]",
@@ -25,20 +25,21 @@
 					"margin-top: 5px;"
 				);
 				echo $layerSelectField->html; ?>
+				<p>
+				<input type="checkbox" name="with_privileges" value="true"<? echo ($this->formvars['with_privileges'] != '' ? ' checked' : ''); ?>>
+					Mit Stellenzugehörigkeit
+				</input>
+				<p>
+				<i>Derzeit wird davon ausgegangen, dass alle auf ein mal exportierten Layer zu jeweils einer Gruppe gehören. Die Gruppen-ID kann im Dumpfile manuell gesetzt werden. Erfolgt der Export mit Stellenzuordnung, kann die Erstellung der Stelle im Dumpfile nachträglich manuell unterbunden werden und statt dessen die Stellen_ID des Zielsystems eingetragen werden.</i>
+				<p>
+				<input type="submit" value="Exportieren" name="go_plus"/>
+				<p><?
+				if($this->layer_dumpfile != ''){ ?>
+					Layer wurden exportiert. <a href="<? echo TEMPPATH_REL.$this->layer_dumpfile; ?>"><span class="fett">Herunterladen</span></a><?
+				} ?>
 			</div>
-			<input type="checkbox" name="with_privileges" value="true"<? echo ($this->formvars['with_privileges'] != '' ? ' checked' : ''); ?>>
-				Mit Stellenzugehörigkeit
-			</input>
 		</td>
 	</tr>
-	<tr>
-		<td><input type="submit" value="Exportieren" name="go_plus"/></td>
-	</tr>
-	<? if($this->layer_dumpfile != ''){ ?>
-	<tr>
-		<td>Layer wurden exportiert. <a href="<? echo TEMPPATH_REL.$this->layer_dumpfile; ?>"><span class="fett">Herunterladen</span></a></td>
-	</tr>	
-	<? } ?>
 </table>
 
 <input type="hidden" name="go" value="Layer_Export">
