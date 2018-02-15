@@ -1133,7 +1133,8 @@ tbody.gle tr:hover {
 .timepicker .time{
 	flex: 0 0 auto;
 	cursor: n-resize;
-	width: 25px;
+	width: 33px;
+	padding: 0 5 0 5;
 	font-size: 18px;
 	border: 1px solid white;
 }
