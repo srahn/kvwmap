@@ -6851,20 +6851,25 @@ class GUI {
     $this->output();
   }
 
-	function layer_export_exportieren(){
-		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-		$export_layer_ids = explode(', ', $this->formvars['selected_layers']);
-		$result = $mapDB->create_layer_dumpfile(
-			$this->database,
-			$export_layer_ids,
-			($this->formvars['with_privileges'] != '')
-		);
-		if ($result['success']) {
-			$this->add_message('notice', 'Export erfolgreich.<br>Sie können die Datei jetzt herunterladen.');
-			$this->layer_dumpfile = $result['layer_dumpfile'];
+	function layer_export_exportieren() {
+		if ($this->formvars['layer']) {
+			$export_layer_ids = $this->formvars['layer'];
+			$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+			$result = $mapDB->create_layer_dumpfile(
+				$this->database,
+				$export_layer_ids,
+				($this->formvars['with_privileges'] != '')
+			);
+			if ($result['success']) {
+				$this->add_message('notice', 'Export erfolgreich.<br>Sie können die Datei jetzt herunterladen.');
+				$this->layer_dumpfile = $result['layer_dumpfile'];
+			}
+			else {
+				$this->add_message('error', 'Fehler beim Export: ' . $result['err_msg']);
+			}
 		}
 		else {
-			$this->add_message('error', 'Fehler beim Export: ' . $result['err_msg']);
+			$this->add_message('warning', 'Sie müssen mindestens einen Layer zum Export auswählen!');
 		}
 		$this->layer_export();
 	}

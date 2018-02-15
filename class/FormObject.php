@@ -156,7 +156,7 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 			case "select" : {
 				$this->html ="<select name='".$this->select["name"]."' size='".$this->select["size"]."' ";
 				if ($this->width > 0) {
-					$this->style .= ($this->style != '' ? ';' : '') . ' width: ' . $this->width . 'px';
+					$this->style .= (substr(trim($this->style), -1) != ';' ? ';' : '') . ' width: ' . $this->width . 'px;';
 				}
 				if ($this->disabled) {
 					$this->html.=' disabled="true" ';
