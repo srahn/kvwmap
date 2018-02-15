@@ -289,7 +289,7 @@ function CalendarJS() {
 							td.onclick = function(e){
 								this.Instanz.setDate(this.Instanz.yy, this.Instanz.mm, this.dd);
 								old_today = document.querySelector('.calendar table tbody td.today');
-								old_today.classList.remove('today');
+								if(old_today != null)old_today.classList.remove('today');
 								this.classList.add('today');
 							}
 						}
