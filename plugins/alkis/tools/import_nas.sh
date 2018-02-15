@@ -36,7 +36,7 @@ extract_zip_files() {
 convert_nas_files() {
 	if [ "$(ls -A ${IMPORT_PATH})" ] ; then
 		NAS_FILES_CONVERTED=false
-		find ${IMPORT_PATH} -iname '*.xml' -not -path "${IMPORT_PATH}/METADATA/*" | sort |  while read NAS_FILE ; do
+		while read NAS_FILE ; do
 			NAS_FILES_CONVERTED=true
 			NAS_FILE_=${NAS_FILE// /_} # ersetzt Leerzeichen durch _ in Dateiname
 			if [ ! "$NAS_FILE" = "$NAS_FILE_" ] ; then
@@ -83,12 +83,12 @@ convert_nas_files() {
 				rm ${NAS_FILE}
 				rm ${SQL_FILE}
 				rm -f ${GFS_FILE}
-				if [ ! "$(find ${IMPORT_PATH} -name *.xml -not -path ${IMPORT_PATH}/METADATA/*)" ] ; then		# nach der letzten NAS-Datei die Transaktionsdatei abschliessen
+				if [ ! "$(find ${IMPORT_PATH} -name "*.xml" -not -path ${IMPORT_PATH}/METADATA/*)" ] ; then		# nach der letzten NAS-Datei die Transaktionsdatei abschliessen
 					echo "SELECT alkis.execute_hist_operations();" >> ${IMPORT_PATH}/import_transaction.sql
 					echo "END;COMMIT;" >> ${IMPORT_PATH}/import_transaction.sql
 				fi
 			fi
-		done
+		done < <(find ${IMPORT_PATH} -iname "*.xml" -not -path "${IMPORT_PATH}/METADATA/*" | sort)
 		if [ "$NAS_FILES_CONVERTED" = "false" ] ; then
 			log "keine NAS-Dateien zum Konvertieren vorhanden"
 			clear_import_folder
@@ -99,7 +99,7 @@ convert_nas_files() {
 }
 
 execute_sql_transaction() {
-	if [ ! "$(find ${IMPORT_PATH} -name *.xml -not -path ${IMPORT_PATH}/METADATA/*)" ] ; then
+	if [ ! "$(find ${IMPORT_PATH} -name "*.xml" -not -path ${IMPORT_PATH}/METADATA/*)" ] ; then
 		# ogr2ogr read all xml files successfully
 		if [ -f "${IMPORT_PATH}/import_transaction.sql" ] ; then
 			# execute transaction sql file
