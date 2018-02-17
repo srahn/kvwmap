@@ -47,6 +47,14 @@ switch($this->go) {
 		echo json_encode($result);
 	} break;
 
+	case 'mobile_download_image' : {
+		$this->checkCaseAllowed($this->go);
+		$file = $this->formvars['image'];
+		header('Content-Type: image/jpeg');
+		header('Content-Length: ' . filesize($file));
+		readfile($file);
+	} break;
+
 	default : {
 		$this->goNotExecutedInPlugins = true; // in diesem Plugin wurde go nicht ausgeführt
 	}
