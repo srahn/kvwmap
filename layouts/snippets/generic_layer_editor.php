@@ -76,7 +76,7 @@
 			  <?
 					$has_geom = false;
 			  	for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
-						if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
+						if($attributes['visible'][$j] AND $attributes['name'][$j] != 'lock'){
 							if($this->qlayerset[$i]['attributes']['type'][$j] != 'geometry'){
 								echo '<td id="column'.$j.'"';
 									//if($attributes['group'][0] != '')echo 'width="10%"';
@@ -91,7 +91,7 @@
 									//if($attributes['group'][0] != '')echo 'width="200px"';
 									echo 'width="100%"';
 									echo '><tr><td>';
-									if($attributes['form_element_type'][$j] != 'SubFormPK' AND $attributes['form_element_type'][$j] != 'SubFormEmbeddedPK'){
+									if($this->formvars['printversion'] == '' AND $attributes['form_element_type'][$j] != 'SubFormPK' AND $attributes['form_element_type'][$j] != 'SubFormEmbeddedPK'){
 										echo '<a style="font-size: '.$this->user->rolle->fontsize_gle.'px" title="Sortieren nach '.$attributes['alias'][$j].'" href="javascript:change_orderby(\''.$attributes['name'][$j].'\', '.$layer['Layer_ID'].');">
 														'.$attributes['alias'][$j].'</a>';
 									}
@@ -104,12 +104,8 @@
 									if($attributes['tooltip'][$j]!='' AND $attributes['form_element_type'][$j] != 'Time'){
 										echo '<td align="right"><a href="javascript:void(0);" title="'.$attributes['tooltip'][$j].'"><img src="'.GRAPHICSPATH.'emblem-important.png" border="0"></a></td>';
 									}
-									if($attributes['type'][$j] == 'date' OR $attributes['type'][$j] == 'timestamp' OR $attributes['type'][$j] == 'timestamptz'){
-										echo '<td align="right"><a href="javascript:;" title=" (TT.MM.JJJJ) '.$attributes['tooltip'][$j].'" ';
-										if($attributes['privileg'][$j] == '1' AND !$lock[$k]){
-										echo 'onclick="add_calendar(event, \''.$attributes['name'][$j].'_'.$k.'\');"';
-										}
-										echo '><img src="'.GRAPHICSPATH.'calendarsheet.png" border="0"></a><div id="calendar"><input type="hidden" id=calendar_'.$attributes['name'][$j].'_'.$k.'"></div></td>';
+									if($attributes['type'][$j] == 'date' OR $attributes['type'][$j] == 'timestamp' OR $attributes['type'][$j] == 'time'){
+										echo '<td align="right"><a href="javascript:;" title="(TT.MM.JJJJ)"><img src="'.GRAPHICSPATH.'calendarsheet.png" border="0"></a><div id="calendar"><input type="hidden" id=calendar_'.$attributes['name'][$j].'_'.$k.'"></div></td>';
 									}
 									echo '</td>';
 									echo '<td><div onmousedown="resizestart(document.getElementById(\'column'.$j.'\'), \'col_resize\');" style="transform: translate(8px); float: right; right: 0px; height: 20px; width: 6px; cursor: e-resize;"></div></td>';
@@ -153,7 +149,7 @@
 			if(($attributes['privileg'][$j] == '0' AND $attributes['form_element_type'][$j] == 'Auswahlfeld') OR ($attributes['form_element_type'][$j] == 'Text' AND $attributes['type'][$j] == 'not_saveable')){				# entweder ist es ein nicht speicherbares Attribut oder ein nur lesbares Auswahlfeld, dann ist es auch nicht speicherbar
 				$attributes['form_element_type'][$j] .= '_not_saveable';
 			}
-			if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
+			if($attributes['visible'][$j]){
 				if($attributes['type'][$j] != 'geometry') {
 					echo '<td' . get_td_class_or_style($layer['shape'][$k][$attributes['style']] != '' ? $layer['shape'][$k][$attributes['style']] : 'position: relative; text-align: right') . '>';
 					echo attribute_value($this, $layer['Layer_ID'], $attributes, $j, $k, $layer['shape'][$k], $size, $select_width, $this->user->rolle->fontsize_gle);
@@ -172,6 +168,9 @@
 					$nullable = $attributes['nullable'][$j];
 					$this->form_field_names .= $layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';Geometrie;'.$attributes['nullable'][$j].'|';
 				}
+			}
+			else{
+				$invisible_attributes[$layer['Layer_ID']][] = '<input type="hidden" id="'.$layer['Layer_ID'].'_'.$attributes['name'][$j].'_'.$k.'" value="'.htmlspecialchars($layer['shape'][$k][$attributes['name'][$j]]).'">';
 			}
 		}
 				if(($columnname != '' OR $layer['shape'][$k]['geom'] != '') AND $this->new_entry != true AND $this->formvars['printversion'] == ''){
@@ -227,7 +226,7 @@
 						&Sigma;
 					</td><?
 					for ($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
-						if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){ ?>
+						if($attributes['visible'][$j] AND $attributes['name'][$j] != 'lock'){ ?>
 							<td valign="top">
 								<div class="statistic_row_<? echo $layer['Layer_ID']; ?>" style="display:none"><?php
 								$column_name = $this->qlayerset[$i]['attributes']['name'][$j];
@@ -271,7 +270,7 @@
 				<td></td>
 			  <?
 			  	for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
-						if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
+						if($attributes['visible'][$j] AND $attributes['name'][$j] != 'lock'){
 							if($this->qlayerset[$i]['attributes']['type'][$j] != 'geometry'){
 								echo '<td ';
 									echo ' valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';
@@ -314,7 +313,7 @@
 							if(($attributes['privileg'][$j] == '0' AND $attributes['form_element_type'][$j] == 'Auswahlfeld') OR ($attributes['form_element_type'][$j] == 'Text' AND $attributes['type'][$j] == 'not_saveable')){				# entweder ist es ein nicht speicherbares Attribut oder ein nur lesbares Auswahlfeld, dann ist es auch nicht speicherbar
 								$attributes['form_element_type'][$j] .= '_not_saveable';
 							}
-							if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
+							if($attributes['visible'][$j] AND $attributes['name'][$j] != 'lock'){
 								if($attributes['type'][$j] != 'geometry'){
 									echo '<td>';
 									if(!in_array($attributes['form_element_type'][$j], array('Dokument', 'SubFormPK', 'SubFormEmbeddedPK'))){
@@ -470,9 +469,14 @@
 		</td>
 	</tr>
 </table>
-	<? } ?>
-
-
+	<? } 
+	
+	for($l = 0; $l < count($invisible_attributes[$layer['Layer_ID']]); $l++){
+		echo $invisible_attributes[$layer['Layer_ID']][$l]."\n";
+	}
+	
+?>
+	
 <input type="hidden" name="checkbox_names_<? echo $layer['Layer_ID']; ?>" value="<? echo $checkbox_names; ?>">
 <input type="hidden" name="orderby<? echo $layer['Layer_ID']; ?>" id="orderby<? echo $layer['Layer_ID']; ?>" value="<? echo $this->formvars['orderby'.$layer['Layer_ID']]; ?>">
 

@@ -10,10 +10,10 @@ extract_zip_files() {
 			find ${DATA_PATH} -iname '*.zip' | sort | while read ZIP_FILE ; do			
 				if [ ! "${UNZIP_PASSWORD}" = "" ] ; then
 					log "unzip -P ${UNZIP_PASSWORD} ${ZIP_FILE} -d ${IMPORT_PATH}"
-					unzip -P $UNZIP_PASSWORD $ZIP_FILE -d $IMPORT_PATH
+					unzip -o -P $UNZIP_PASSWORD $ZIP_FILE -d $IMPORT_PATH >> ${LOG_PATH}/${LOG_FILE} 2> ${LOG_PATH}/${ERROR_FILE}
 				else
 				  log "unzip ${ZIP_FILE} -d ${IMPORT_PATH}"
-					unzip $ZIP_FILE -d $IMPORT_PATH
+					unzip -o $ZIP_FILE -d $IMPORT_PATH >> ${LOG_PATH}/${LOG_FILE} 2> ${LOG_PATH}/${ERROR_FILE}
 				fi
 				find $IMPORT_PATH -iname '*.xml.gz' | sort | while read GZ_FILE ; do
 					GZ_FILE_=${GZ_FILE// /_} # ersetzt Leerzeichen durch _ in Dateiname
@@ -35,7 +35,9 @@ extract_zip_files() {
 
 convert_nas_files() {
 	if [ "$(ls -A ${IMPORT_PATH})" ] ; then
-		find ${IMPORT_PATH} -iname '*.xml' -not -path "${IMPORT_PATH}/METADATA/*" | sort |  while read NAS_FILE ; do
+		NAS_FILES_CONVERTED=false
+		while read NAS_FILE ; do
+			NAS_FILES_CONVERTED=true
 			NAS_FILE_=${NAS_FILE// /_} # ersetzt Leerzeichen durch _ in Dateiname
 			if [ ! "$NAS_FILE" = "$NAS_FILE_" ] ; then
 				log "Benenne Datei ${NAS_FILE} um in ${NAS_FILE_}"
@@ -81,19 +83,23 @@ convert_nas_files() {
 				rm ${NAS_FILE}
 				rm ${SQL_FILE}
 				rm -f ${GFS_FILE}
-				if [ ! "$(find ${IMPORT_PATH} -name *.xml -not -path ${IMPORT_PATH}/METADATA/*)" ] ; then		# nach der letzten NAS-Datei die Transaktionsdatei abschliessen
+				if [ ! "$(find ${IMPORT_PATH} -name "*.xml" -not -path ${IMPORT_PATH}/METADATA/*)" ] ; then		# nach der letzten NAS-Datei die Transaktionsdatei abschliessen
 					echo "SELECT alkis.execute_hist_operations();" >> ${IMPORT_PATH}/import_transaction.sql
 					echo "END;COMMIT;" >> ${IMPORT_PATH}/import_transaction.sql
 				fi
 			fi
-		done
+		done < <(find ${IMPORT_PATH} -iname "*.xml" -not -path "${IMPORT_PATH}/METADATA/*" | sort)
+		if [ "$NAS_FILES_CONVERTED" = "false" ] && [ ! -f "${IMPORT_PATH}/import_transaction.sql" ]; then
+			log "keine NAS-Dateien zum Konvertieren vorhanden"
+			clear_import_folder
+		fi
 	else
-		log "${IMPORT_PATH} ist leer, keine NAS-Dateien zum Konvertieren vorhanden"
+		log "${IMPORT_PATH} ist leer"
 	fi
 }
 
 execute_sql_transaction() {
-	if [ ! "$(find ${IMPORT_PATH} -name *.xml -not -path ${IMPORT_PATH}/METADATA/*)" ] ; then
+	if [ ! "$(find ${IMPORT_PATH} -name "*.xml" -not -path ${IMPORT_PATH}/METADATA/*)" ] ; then
 		# ogr2ogr read all xml files successfully
 		if [ -f "${IMPORT_PATH}/import_transaction.sql" ] ; then
 			# execute transaction sql file
@@ -112,11 +118,21 @@ execute_sql_transaction() {
 					head -n 30 ${LOG_PATH}/${ERROR_FILE}
 				else
 					find ${POSTPROCESSING_PATH} -iname '*.sql' | sort |  while read PP_FILE ; do
+						log "${PP_FILE} wird ausgeführt"
 						PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -U $POSTGRES_USER -f ${PP_FILE} $POSTGRES_DBNAME >> ${LOG_PATH}/${LOG_FILE} 2> ${LOG_PATH}/${ERROR_FILE}
 						if [ -n "$(grep -i 'Error\|Fehler\|FATAL' ${LOG_PATH}/${ERROR_FILE})" ] ; then
 							err "Fehler beim Ausführen der Post-Processing-Datei : ${PP_FILE}"
 						else
-							log "Post-Processing erfolgreich ausgeführt"
+							log "Post-Processing-Datei erfolgreich ausgeführt"
+						fi
+					done
+					find ${POSTPROCESSING_PATH} -iname '*.sh' | sort |  while read PP_FILE ; do
+						log "${PP_FILE} wird ausgeführt"
+						"$PP_FILE" >> ${LOG_PATH}/${LOG_FILE} 2> ${LOG_PATH}/${ERROR_FILE}
+						if [ -n "$(grep -i 'Error\|Fehler\|FATAL' ${LOG_PATH}/${ERROR_FILE})" ] ; then
+							err "Fehler beim Ausführen der Post-Processing-Datei : ${PP_FILE}"
+						else
+							log "Post-Processing-Datei erfolgreich ausgeführt"
 						fi
 					done
 				fi				

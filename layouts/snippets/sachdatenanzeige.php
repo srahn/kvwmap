@@ -223,7 +223,7 @@ for($i=0;$i<$anzLayer;$i++){
 	<input name="INPUT_COORD" type="hidden" value="<?php echo $this->formvars['INPUT_COORD']; ?>">
   <INPUT TYPE="HIDDEN" NAME="searchradius" VALUE="<?php echo $this->formvars['searchradius']; ?>">
   <input name="CMD" type="hidden" value="<?php echo $this->formvars['CMD']; ?>">
-	<? if($this->currentform != 'document.GUI2'){ ?>
+	<? if($this->formvars['printversion'] == '' AND $this->currentform != 'document.GUI2'){ ?>
   <table width="100%" border="0" cellpadding="2" cellspacing="0" id="sachdatenanzeige_footer">
     <tr bgcolor="<?php echo BG_DEFAULT ?>" align="center">
       <td><a href="index.php?searchradius=<?php echo $this->formvars['searchradius']; ?>"><? echo $strbacktomap;?></a></td>

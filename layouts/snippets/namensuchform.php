@@ -3,7 +3,6 @@
 	include('funktionen/input_check_functions.php');
  ?>
 
-<script type="text/javascript" src="funktionen/calendar.js"></script>
 <script src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
 Text[0]=["Hilfe:","Zeigt auch die zum Grundbuchblatt geh&ouml;renden Flurst&uuml;cke an"]
@@ -166,6 +165,16 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 				</div>
 			</div>
 		</td>
+  </tr>
+  <tr>
+    <td height="28" align="right"><span class="fett">Namensbestandteil:&nbsp;</span>
+      </td>
+    <td><input name="name9" type="text" value="<?php echo $this->formvars['name9']; ?>" size="25"  tabindex="3"></td>
+  </tr>
+	<tr>
+    <td height="28" align="right"><span class="fett">akademischer Grad:&nbsp;</span>
+      </td>
+    <td><input name="name10" type="text" value="<?php echo $this->formvars['name10']; ?>" size="25"  tabindex="3"></td>
   </tr>
   <tr>
     <td height="28" align="right"><span class="fett"><?php echo $strName3; ?>:&nbsp;</span>

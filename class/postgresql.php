@@ -2040,6 +2040,8 @@ FROM
 		$n6 = '%'.$formvars['name6'].'%';
 		$n7 = '%'.$formvars['name7'].'%';
 		$n8 = '%'.$formvars['name8'].'%';
+		$n9 = '%'.$formvars['name9'].'%';
+		$n10 = '%'.$formvars['name10'].'%';
 		$gml_id = $formvars['gml_id'];
 		$bezirk = $formvars['bezirk'];
 		$blatt = $formvars['blatt'];		
@@ -2068,6 +2070,8 @@ FROM
 		if($n6 != '%%')$sql.=" AND lower(replace(hausnummer, ' ', '')) LIKE lower(replace('".$n6."', ' ', '')) ";
 		if($n7 != '%%')$sql.=" AND lower(postleitzahlpostzustellung) LIKE lower('".$n7."') ";
 		if($n8 != '%%')$sql.=" AND lower(ort_post) LIKE lower('".$n8."') ";
+		if($n9 != '%%')$sql.=" AND lower(namensbestandteil) LIKE lower('".$n9."') ";
+		if($n10 != '%%')$sql.=" AND lower(akademischergrad) LIKE lower('".$n10."') ";
 		if($gml_id != '')$sql.=" AND p.gml_id = '".$gml_id."'";
 
     if($bezirk!='') {

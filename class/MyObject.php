@@ -66,8 +66,7 @@ class MyObject {
 	}
 
 	/*
-	* Search for an record in the database
-	* by the given sql clause
+	* Search for a records in the database by the given sql clause
 	* @ return all found objects
 	*/
 	function find_by_sql($params, $hierarchy_key = NULL) {

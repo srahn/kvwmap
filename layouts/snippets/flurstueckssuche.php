@@ -52,7 +52,7 @@ if ($this->Fehlermeldung!='') {
     <td align="right"><span class="fett"><?php echo $strGemkgschl; ?>:&nbsp;</span></td>
     <td colspan="3">
     	<input name="gemschl1" type="text" value="13" style="width:23px" onkeyup="updateGemarkungsauswahl();">
-    	<input name="gemschl2" type="text" value="<? echo substr($this->formvars['GemkgID'], 2, 4); ?>" style="width:46px" onkeyup="updateGemarkungsauswahl();">
+    	<input name="gemschl2" type="text" maxlength="4" value="<? echo substr($this->formvars['GemkgID'], 2, 4); ?>" style="width:46px" onkeyup="updateGemarkungsauswahl();">
     	<input name="gemschl" type="hidden" value="<? echo $this->formvars['GemkgID']; ?>">
     </td>
   </tr>
