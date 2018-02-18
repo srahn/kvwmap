@@ -9942,12 +9942,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->output();
   }
 
-  function daten_export_exportieren() {
+	function daten_export_exportieren() {
 		include_(CLASSPATH . 'data_import_export.php');
-    $this->data_import_export = new data_import_export();
-    $this->formvars['filename'] = $this->data_import_export->export_exportieren($this->formvars, $this->Stelle, $this->user);
-    $this->daten_export();
-  }
+		$this->data_import_export = new data_import_export();
+		$this->formvars['filename'] = $this->data_import_export->export_exportieren($this->formvars, $this->Stelle, $this->user);
+		$this->daten_export();
+	}
 
 	function Attributeditor(){
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);

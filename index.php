@@ -142,12 +142,12 @@ else{
 	include_(CLASSPATH . 'bauleitplanung.php');
 }
 
-include(WWWROOT . APPLVERSION.'start.php');
+include(WWWROOT . APPLVERSION . 'start.php');
 
 # Übergeben des Anwendungsfalles
-$debug->write("<br><b>Anwendungsfall go: ".$go."</b>",4);
+$debug->write("<br><b>Anwendungsfall go: " . $go . "</b>", 4);
 
-$GUI->go=$go;
+$GUI->go = $go;
 $GUI->requeststring = $QUERY_STRING;
 
 function go_switch($go){
