@@ -178,6 +178,7 @@
 			"id" => $layerset['Layer_ID'],
 			"title" => $layerset['Name'],
 			"id_attribute" => "id",
+			"name_attribute" => $layerset['labelitem'],
 			"title_attribute" => "title",
 			"geometry_type" => $geometry_types[$layerset['Datentyp']],
 			"table_name" => $layerset['maintable'],
