@@ -135,20 +135,17 @@ class administration{
 		$this->execute_migrations('postgresql', $pg_migrations);
 		$this->execute_migrations('mysql', $my_migrations);
 
-		foreach ($this->seeds_to_execute['mysql'] as $component => $component_seed){
-			$prepath = PLUGINS . $component . '/';
-			foreach ($component_seed as $file) {
-				$filepath = $prepath . 'db/mysql/data/' . $file;
-				$sql = file_get_contents($filepath);
-				foreach (get_defined_constants(true)['user'] AS $key => $value) {
-					$sql = str_replace('$' . $key, $value, $sql);
+		foreach($this->seeds_to_execute['mysql'] as $component => $component_seed){
+			$prepath = PLUGINS.$component.'/';
+			foreach($component_seed as $file){
+				$filepath = $prepath.'db/mysql/data/'.$file;
+				$connection = 'user='.$this->pgdatabase->user.' password='.$this->pgdatabase->passwd.' dbname='.$this->pgdatabase->dbName;
+				if($this->pgdatabase->host != '')$connection .= ' host='.$this->pgdatabase->host;
+				$queryret = $this->database->exec_file($filepath, 'user=xxxx password=xxxx dbname=kvwmapsp', $connection, true); # replace known constants
+				if($queryret[0]){
+					echo $queryret[1].'<br>Fehler beim Ausführen von seed-Datei: '.$filepath.'<br>';
 				}
-				#echo '<p>Exec SQL from file ' . $filepath . '<br>' . $sql;
-				$queryret = $this->database->execSQL($sql, 4, 0);
-				if ($queryret[0]) {
-					echo $queryret[1] . '<br>Fehler beim Ausführen von seed-Datei: ' . $filepath . '<br>';
-				}
-				else {
+				else{
 					$sql = "
 						INSERT INTO `migrations`
 							(`component`, `type`, `filename`)

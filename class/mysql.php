@@ -898,7 +898,7 @@ INSERT INTO u_styles2classes (
     return mysql_close($this->dbConn);
   }
 
-	function exec_file($filename, $search, $replace){
+	function exec_file($filename, $search, $replace, $replace_constants = false) {
     if($file = file_get_contents($filename)){
 			foreach(explode(';'.chr(10), $file) as $query2){		// verschiedene Varianten des Zeilenumbruchs berücksichtigen
 				foreach(explode(';'.chr(13), $query2) as $query){
@@ -914,6 +914,13 @@ INSERT INTO u_styles2classes (
 					if (!empty($query_to_execute)) {
 						$query_to_execute = str_replace('$EPSGCODE_ALKIS', EPSGCODE_ALKIS, $query_to_execute);
 						$query_to_execute = str_replace(':alkis_epsg', EPSGCODE_ALKIS, $query_to_execute);
+
+						if ($replace_constants) {
+							foreach (get_defined_constants(true)['user'] AS $key => $value) {
+								$query_to_execute = str_replace('$' . $key, $value, $query_to_execute);
+							}
+						}
+
 						$ret=$this->execSQL($query_to_execute, 0, 0);
 						if($ret[0] == 1){
 							return $ret;
