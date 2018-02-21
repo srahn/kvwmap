@@ -17,7 +17,7 @@ INSERT INTO `u_menues` (`name`, `name_low-german`, `name_english`, `name_polish`
 ('Erstattung des Verwaltungsaufwands', '', '', '', '', 'index.php?go=erstattung_des_verwaltungsaufwands', '', @menue_id_wasserrecht, 2, '', 7, '', '');
 
 # Zuordnung der Menuepunkte zur Stelle Dateneingeber
-INSERT INTO `u_menue2stelle` (`stelle_id`, `menue_id`, `order`) VALUES
+INSERT INTO `u_menue2stelle` (`stelle_id`, `menue_id`, `menue_order`) VALUES
 ($WASSERRECHT_STELLE_DATENEINGEBER, (SELECT id FROM u_menues WHERE links like 'index.php?go=logout'), 0),
 ($WASSERRECHT_STELLE_DATENEINGEBER, (SELECT id FROM u_menues WHERE name like 'Wasserrecht'), 10),
 ($WASSERRECHT_STELLE_DATENEINGEBER, (SELECT id FROM u_menues WHERE name like 'Neue FisWrV-WRe Anlage'), 11),
@@ -39,7 +39,7 @@ INSERT INTO `u_menue2stelle` (`stelle_id`, `menue_id`, `order`) VALUES
 ($WASSERRECHT_STELLE_DATENEINGEBER, (SELECT id FROM u_menues WHERE links like 'index.php?go=SHP_Anzeigen'), 62);
 
 # Zuordnung der Menuepunkte zur Stelle Entscheider
-INSERT INTO `u_menue2stelle` (`stelle_id`, `menue_id`, `order`) VALUES
+INSERT INTO `u_menue2stelle` (`stelle_id`, `menue_id`, `menue_order`) VALUES
 ($WASSERRECHT_STELLE_ENTSCHEIDER, (SELECT id FROM u_menues WHERE links like 'index.php?go=logout'), 0),
 ($WASSERRECHT_STELLE_ENTSCHEIDER, (SELECT id FROM u_menues WHERE name like 'Wasserrecht'), 10),
 ($WASSERRECHT_STELLE_ENTSCHEIDER, (SELECT id FROM u_menues WHERE name like 'Neue FisWrV-WRe Anlage'), 11),
@@ -61,7 +61,7 @@ INSERT INTO `u_menue2stelle` (`stelle_id`, `menue_id`, `order`) VALUES
 ($WASSERRECHT_STELLE_ENTSCHEIDER, (SELECT id FROM u_menues WHERE links like 'index.php?go=SHP_Anzeigen'), 62);
 
 # Zuordnung der Menuepunkte zur Stelle Administration
-INSERT INTO `u_menue2stelle` (`stelle_id`, `menue_id`, `order`) VALUES
+INSERT INTO `u_menue2stelle` (`stelle_id`, `menue_id`, `menue_order`) VALUES
 ($WASSERRECHT_STELLE_ADMINISTRATION, (SELECT id FROM u_menues WHERE links like 'index.php?go=logout'), 0),
 ($WASSERRECHT_STELLE_ADMINISTRATION, (SELECT id FROM u_menues WHERE links like 'index.php?go=Stelle Wählen'), 5),
 ($WASSERRECHT_STELLE_ADMINISTRATION, (SELECT id FROM u_menues WHERE name like 'Wasserrecht'), 10),
