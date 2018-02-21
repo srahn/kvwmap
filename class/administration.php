@@ -147,7 +147,6 @@ class administration{
 				$queryret = $this->database->execSQL($sql, 4, 0);
 				if ($queryret[0]) {
 					echo $queryret[1] . '<br>Fehler beim Ausführen von seed-Datei: ' . $filepath . '<br>';
-					echo $sql;
 				}
 				else {
 					$sql = "
