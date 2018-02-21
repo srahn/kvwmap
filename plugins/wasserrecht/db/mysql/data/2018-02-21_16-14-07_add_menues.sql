@@ -63,7 +63,7 @@ INSERT INTO `u_menue2stelle` (`stelle_id`, `menue_id`, `menue_order`) VALUES
 # Zuordnung der Menuepunkte zur Stelle Administration
 INSERT INTO `u_menue2stelle` (`stelle_id`, `menue_id`, `menue_order`) VALUES
 ($WASSERRECHT_STELLE_ADMINISTRATION, (SELECT id FROM u_menues WHERE links like 'index.php?go=logout' ORDER BY id LIMIT 1),  0),
-($WASSERRECHT_STELLE_ADMINISTRATION, (SELECT id FROM u_menues WHERE links like 'index.php?go=Stelle Wählen' ORDER BY id LIMIT 1),  5),
+($WASSERRECHT_STELLE_ADMINISTRATION, (SELECT id FROM u_menues WHERE links like 'index.php?go=Stelle_waehlen' ORDER BY id LIMIT 1),  5),
 ($WASSERRECHT_STELLE_ADMINISTRATION, (SELECT id FROM u_menues WHERE name like 'Wasserrecht' ORDER BY id LIMIT 1),  10),
 ($WASSERRECHT_STELLE_ADMINISTRATION, (SELECT id FROM u_menues WHERE name like 'Neue FisWrV-WRe Gewässerbenutzung' ORDER BY id LIMIT 1),  11),
 ($WASSERRECHT_STELLE_ADMINISTRATION, (SELECT id FROM u_menues WHERE name like 'Neue FisWrV-WRe Person' ORDER BY id LIMIT 1),  12),
