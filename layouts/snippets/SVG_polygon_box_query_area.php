@@ -37,6 +37,9 @@
 		$this->formvars['last_doing'] = 'draw_polygon';
 	}
 	?>
+	<input name="gps_posx" type="hidden" value="<? echo $this->formvars['gps_posx']; ?>">
+	<input name="gps_posy" type="hidden" value="<? echo $this->formvars['gps_posy']; ?>">
+	<input name="gps_follow" type="hidden" value="<? echo $this->formvars['gps_follow'] ?>">
 	<input name="last_button" type="hidden" value="<? echo $this->formvars['last_button']; ?>">
 	<input name="last_doing" type="hidden" value="<? echo $this->formvars['last_doing']; ?>">
 	<input name="last_doing2" type="hidden" value="<? echo $this->formvars['last_doing2']; ?>">
@@ -65,6 +68,9 @@ $svg .= $polygonfunctions;			# Funktionen zum Zeichnen eines Polygons
 $svg .= $boxfunctions;
 $svg .= $flurstqueryfunctions;
 $svg .= $bufferfunctions;				# Funktionen zum Erzeugen eines Puffers
+if($this->user->rolle->gps){
+	$svg .= $gps_functions;
+}
 $svg .= $SVGvars_coordscript;
 $svg .= $SVGvars_tooltipscript;
 $svg .= ']]></script>';
@@ -74,10 +80,11 @@ $svg .='
 '.$SVGvars_defs.'
   </defs>';
 $svg .= $canvaswithall;
-$svg .= '<g id="buttons" cursor="pointer" transform="scale(1.1)">';
+$svg .= '<g id="buttons" cursor="pointer" transform="scale(1)">';
 $svg .= $navbuttons;
-$svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate(0 26)">';
-$svg .= polygonbuttons($strUndo, $strDeletePolygon, $strDrawPolygon, $strCutByPolygon);
+$svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate(0 36)">';
+$svg .= deletebuttons($strUndo, $strDelete);
+$svg .= polygonbuttons($strDrawPolygon, $strCutByPolygon);
 $svg .= boxbuttons();
 $svg .= flurstquerybuttons();
 $svg .= bufferbuttons($strBuffer, $strBufferedLine, $strParallelPolygon);

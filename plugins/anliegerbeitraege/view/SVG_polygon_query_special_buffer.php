@@ -85,7 +85,7 @@ $svg .= $special_buffer_functions;
 $svg .= $flurstqueryfunctions;	# Funktionen zum Hinzufügen und Entfernen von Polygonen
 $svg .= $coord_input_functions;	# Funktionen zum Eingeben von Koordinaten
 $svg .= $measurefunctions;
-if($_SESSION['mobile'] == 'true'){
+if($this->user->rolle->gps){
 	$svg .= $gps_functions;
 }
 $svg .= $SVGvars_coordscript;
@@ -98,8 +98,9 @@ $svg .='
   </defs>';
 $svg .= $canvaswithall;
 $svg .= $navbuttons;
-$svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate(0 26)">';
-$svg .= polygonbuttons($strUndo, $strDeletePolygon, $strDrawPolygon, $strCutByPolygon);
+$svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate(0 36)">';
+$svg .= deletebuttons($strUndo, $strDelete);
+$svg .= polygonbuttons($strDrawPolygon, $strCutByPolygon);
 $svg .= flurstquerybuttons();
 $svg .= special_bufferbuttons($strSpecialBuffer);
 $svg .= vertex_edit_buttons($strCornerPoint);
