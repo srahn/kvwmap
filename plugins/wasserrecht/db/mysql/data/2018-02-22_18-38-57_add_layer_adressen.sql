@@ -1,16 +1,16 @@
 BEGIN;
 
-SET @group_id = (SELECT id FROM `u_groups` WHERE `Gruppenname` LIKE 'Wasserwirtschaft');
+SET @group_id = (SELECT id FROM `u_groups` WHERE `Gruppenname` LIKE 'Wasserwirtschaft' ORDER BY id LIMIT 1);
 SET @connection = 'user=xxxx password=xxxx dbname=kvwmapsp';
 
 -- Stelle Wasserrecht Dateneingeber (id=2)
-SET @stelle_id_Wasserrecht Dateneingeber_2 = $WASSERRECHT_STELLE_DATENEINGEBER;
+SET @stelle_id_Wasserrecht_Dateneingeber_2 = $WASSERRECHT_STELLE_DATENEINGEBER;
 
 -- Stelle Wasseerrecht Entscheider (id=4)
-SET @stelle_id_Wasseerrecht Entscheider_4 = $WASSERRECHT_STELLE_ENTSCHEIDER;
+SET @stelle_id_Wasseerrecht_Entscheider_4 = $WASSERRECHT_STELLE_ENTSCHEIDER;
 
 -- Stelle Wasserrecht Administration (id=5)
-SET @stelle_id_Wasserrecht Administration_5 = $WASSERRECHT_STELLE_ADMINISTRATION;
+SET @stelle_id_Wasserrecht_Administration_5 = $WASSERRECHT_STELLE_ADMINISTRATION;
 
 -- Layer 12
 INSERT INTO layer (`Name`, `alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `printconnection`, `connectiontype`, `classitem`, `filteritem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `logconsume`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `privileg`, `trigger_function`, `sync`) VALUES ('Adresse', '', '5', @group_id, 'SELECT id as adress_id, strasse, hausnummer, plz, ort FROM fiswrv_adresse WHERE 1=1', 'fiswrv_adresse', '', 'wasserrecht', '', '', '', '', 'name', NULL, NULL, '', @connection, '', '6', '', 'id', '10', 'pixels', '35833', '', '1', NULL, '100', '-1', NULL, '', 'epsg:35833', '', '', '', '60', '', '', '', '', '0', '0', '', '', '', '', '0', '', '0');
