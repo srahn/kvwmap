@@ -316,6 +316,7 @@ $svg='<?xml version="1.0"?>
   moving  = false;
   moved  = false;
   var doing = "'.$this->user->rolle->selectedButton.'";
+	var doing_save;
 	mouse_down = false;
   var cmd   = ""; 
   var data="";
@@ -933,6 +934,12 @@ function mousedown(evt){
 	cleartooltip();
 	if(top.document.GUI.stopnavigation.value == 0){
 		if(evt.button == 1){			// mittlere Maustaste -> Pan
+			if(doing == "polygonquery"){
+				save_polygon_path();
+			}
+			if(doing == "measure"){
+				save_measure_path();
+			}
 			doing_save = doing;
 			doing = "recentre";
 		}
@@ -1011,17 +1018,10 @@ function mousedown(evt){
 	    alert("Fehlerhafte Eingabe! \nUebergebene Daten: "+cmd+", "+doing);
 	   break;
 	  }
-		if(evt.button == 1){
-			doing = doing_save;
-		}
 	}
 }
 
 function mousemove(evt){
-	if(evt.button == 1){
-		doing_save = doing;
-		doing = "recentre";
-	}
   switch(doing) {
 	 case "measure":
 	    if (measuring){
@@ -1057,17 +1057,10 @@ function mousemove(evt){
 	  moveVector(evt);
 	 break;
   }
-	if(evt.button == 1){
-		doing = doing_save;
-	}
 }
 
 function mouseup(evt){
 	mouse_down = false;
-	if(evt.button == 1){
-		doing_save = doing;
-		doing = "recentre";
-	}
   switch(doing){
 		case "measure":
 		break;
