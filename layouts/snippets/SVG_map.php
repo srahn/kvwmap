@@ -932,6 +932,10 @@ function mousedown(evt){
 	tooltipstate = "tooltip_paused";
 	cleartooltip();
 	if(top.document.GUI.stopnavigation.value == 0){
+		if(evt.button == 1){			// mittlere Maustaste -> Pan
+			doing_save = doing;
+			doing = "recentre";
+		}
 	  switch(doing){
 	   case "previous":
 	   break;
@@ -1007,10 +1011,17 @@ function mousedown(evt){
 	    alert("Fehlerhafte Eingabe! \nUebergebene Daten: "+cmd+", "+doing);
 	   break;
 	  }
+		if(evt.button == 1){
+			doing = doing_save;
+		}
 	}
 }
 
 function mousemove(evt){
+	if(evt.button == 1){
+		doing_save = doing;
+		doing = "recentre";
+	}
   switch(doing) {
 	 case "measure":
 	    if (measuring){
@@ -1046,21 +1057,30 @@ function mousemove(evt){
 	  moveVector(evt);
 	 break;
   }
+	if(evt.button == 1){
+		doing = doing_save;
+	}
 }
 
 function mouseup(evt){
 	mouse_down = false;
-  switch(doing) 
-  {
-   case "measure":
-   break;
-	 case "drawarrow":
-	   finisharrowdraw();
-	 break;
-   default:
-    hide_tooltip();
-    endPoint(evt);
-    endMove(evt);
+	if(evt.button == 1){
+		doing_save = doing;
+		doing = "recentre";
+	}
+  switch(doing){
+		case "measure":
+		break;
+		case "drawarrow":
+		 finisharrowdraw();
+		break;
+		default:
+		hide_tooltip();
+		endPoint(evt);
+		endMove(evt);
+		if(evt.button == 1){
+			doing = doing_save;
+		}
    break;
   }
 }
