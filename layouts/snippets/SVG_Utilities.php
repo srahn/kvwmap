@@ -3128,7 +3128,7 @@ $measurefunctions = '
 	  </g>
 	  
 
-	  <g id="buttons" filter="url(#Schatten)" onmouseout="hide_tooltip()" transform="translate(0 0)">
+	  <g id="allebuttons" filter="url(#Schatten)" onmouseout="hide_tooltip()" transform="translate(0 0)">
 	  ';
 
 	$navbuttons ='
