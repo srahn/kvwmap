@@ -85,7 +85,7 @@ $svg .= $coord_input_functions;	# Funktionen zum Eingeben von Koordinaten
 $svg .= $bufferfunctions;				# Funktionen zum Erzeugen eines Puffers
 $svg .= $transformfunctions;		# Funktionen zum Transformieren (Verschieben, ...) der Geometrie
 $svg .= $measurefunctions;
-if($_SESSION['mobile'] == 'true'){
+if($this->user->rolle->gps){
 	$svg .= $gps_functions;
 }
 $svg .= $SVGvars_coordscript;
@@ -97,18 +97,19 @@ $svg .='
 '.$SVGvars_defs.'
   </defs>';
 $svg .= $canvaswithall;
-$svg .= '<g id="buttons" cursor="pointer" transform="scale(1.1)">';
+$svg .= '<g id="buttons" cursor="pointer">';
 $svg .= $navbuttons;
-$svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate(0 26)">';
-$svg .= polygonbuttons($strUndo, $strDeletePolygon, $strDrawPolygon, $strCutByPolygon);
+$svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate(0 36)">';
+$svg .= deletebuttons($strUndo, $strDelete);
+$svg .= polygonbuttons($strDrawPolygon, $strCutByPolygon);
 $svg .= flurstquerybuttons();
 $svg .= polygonbuttons2($strSplitPolygon);
 $svg .= bufferbuttons($strBuffer, $strBufferedLine, $strParallelPolygon);
 $svg .= transform_buttons($strMoveGeometry);
 $svg .= vertex_edit_buttons($strCornerPoint);
 $svg .= coord_input_buttons();
-if($_SESSION['mobile'] == 'true'){
-	$svg .= gpsbuttons($strSetGPSPosition, $this->formvars['gps_follow']);
+if($this->user->rolle->gps){
+	$svg .= gpsbuttons($strSetGPSPosition, $strGPSFollow, $this->formvars['gps_follow']);
 }
 $svg .= measure_buttons($strRuler);
 $svg .= '</g>';

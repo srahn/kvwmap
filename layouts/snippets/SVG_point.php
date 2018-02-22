@@ -66,7 +66,7 @@ $svg .= $vertex_catch_functions;# Punktfangfunktionen
 $svg .= $pointfunctions;
 $svg .= $coord_input_functions;	# Funktionen zum Eingeben von Koordinaten
 $svg .= $measurefunctions;
-if($_SESSION['mobile'] == 'true'){
+if($this->user->rolle->gps){
 	$svg .= $gps_functions;
 }
 $svg .= $SVGvars_coordscript;
@@ -78,13 +78,13 @@ $svg .='
 '.$SVGvars_defs.'
   </defs>';
 $svg .= $canvaswithall;
-$svg .= '<g id="buttons" cursor="pointer" transform="scale(1.1)">';
+$svg .= '<g id="buttons" cursor="pointer" transform="scale(1)">';
 $svg .= $navbuttons;
-$svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate(0 26)">';
+$svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate(0 36)">';
 $svg .= pointbuttons($strSetPosition);
 $svg .= coord_input_buttons();
-if($_SESSION['mobile'] == 'true'){
-	$svg .= gpsbuttons($strSetGPSPosition, $this->formvars['gps_follow']);
+if($this->user->rolle->gps){
+	$svg .= gpsbuttons($strSetGPSPosition, $strGPSFollow, $this->formvars['gps_follow']);
 }
 $svg .= measure_buttons($strRuler);
 $svg .= '</g>';
