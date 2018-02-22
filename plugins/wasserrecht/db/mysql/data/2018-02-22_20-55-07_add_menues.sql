@@ -7,12 +7,12 @@ SET @menue_id_wasserrecht = LAST_INSERT_ID();
 
 # Neue Untermenuepunkte zu Wasserrecht
 INSERT INTO `u_menues` (`name`, `name_low-german`, `name_english`, `name_polish`, `name_vietnamese`, `links`, `onclick`, `obermenue`, `menueebene`, `target`, `order`, `title`, `button_class`) VALUES
-('Neue FisWrV-WRe Anlage', '', '', '', '', 'index.php?go=neuer_Layer_Datensatz&selected_layer_id=$ANLAGEN_LAYER_ID', '', @menue_id_wasserrecht, 2, '', 0, '', ''),
+('Neue FisWrV-WRe Anlage', '', '', '', '', concat('index.php?go=neuer_Layer_Datensatz&selected_layer_id=', (SELECT `Layer_ID` FROM `layer` WHERE `Name` LIKE 'FisWrV-WRe Anlagen' ORDER BY `Layer_ID` LIMIT 1)), '', @menue_id_wasserrecht, 2, '', 0, '', ''),
 ('Wasserentnahmebenutzer', '', '', '', '', 'index.php?go=wasserentnahmebenutzer', '', @menue_id_wasserrecht, 2, '', 1, '', ''),
 ('Wasserentnahmeentgelt', '', '', '', '', 'index.php?go=wasserentnahmeentgelt', '', @menue_id_wasserrecht, 2, '', 2, '', ''),
-('Neue FisWrV-WRe Gewässerbenutzung', '', '', '', '', 'index.php?go=neuer_Layer_Datensatz&selected_layer_id=$GEWAESSERBENUTZUNGEN_LAYER_ID', '', @menue_id_wasserrecht, 2, '', 3, '', ''),
-('Neue FisWrV-WRe Person', '', '', '', '', 'index.php?go=neuer_Layer_Datensatz&selected_layer_id=$PERSONEN_LAYER_ID', '', @menue_id_wasserrecht, 2, '', 4, '', ''),
-('Neue FisWrV-WRe WrZ', '', '', '', '', 'index.php?go=neuer_Layer_Datensatz&selected_layer_id=$WRZ_LAYER_ID', '', @menue_id_wasserrecht, 2, '', 5, '', ''),
+('Neue FisWrV-WRe Gewässerbenutzung', '', '', '', '', concat('index.php?go=neuer_Layer_Datensatz&selected_layer_id=', (SELECT `Layer_ID` FROM `layer` WHERE `Name` LIKE 'FisWrV-WRe Gewässerbenutzungen' ORDER BY `Layer_ID` LIMIT 1)), '', @menue_id_wasserrecht, 2, '', 3, '', ''),
+('Neue FisWrV-WRe Person', '', '', '', '', concat('index.php?go=neuer_Layer_Datensatz&selected_layer_id=', (SELECT `Layer_ID` FROM `layer` WHERE `Name` LIKE 'FisWrV-WRe Personen' ORDER BY `Layer_ID` LIMIT 1)), '', @menue_id_wasserrecht, 2, '', 4, '', ''),
+('Neue FisWrV-WRe WrZ', '', '', '', '', concat('index.php?go=neuer_Layer_Datensatz&selected_layer_id=' (SELECT `Layer_ID` FROM `layer` WHERE `Name` LIKE 'FisWrV-WRe WrZ' ORDER BY `Layer_ID` LIMIT 1)), '', @menue_id_wasserrecht, 2, '', 5, '', ''),
 ('Zentrale Stelle', '', '', '', '', 'index.php?go=zentrale_stelle', '', @menue_id_wasserrecht, 2, '', 6, '', ''),
 ('Erstattung des Verwaltungsaufwands', '', '', '', '', 'index.php?go=erstattung_des_verwaltungsaufwands', '', @menue_id_wasserrecht, 2, '', 7, '', '');
 
