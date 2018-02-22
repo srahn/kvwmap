@@ -15877,7 +15877,7 @@ class db_mapObj{
 			}
 			else {
 				while($rs = mysql_fetch_assoc($ret[1])) {
-					$stelle_id_var = '@stelle_id_' . $rs['Bezeichnung'] . '_' . $rs['ID'];
+					$stelle_id_var = '@stelle_id_' . $rs['ID'];
 					$stellen[] = array(
 						'id' => $rs['ID'],
 						'var' => $stelle_id_var
@@ -15922,8 +15922,10 @@ class db_mapObj{
 							SELECT
 								'" . $last_layer_id . "' AS Layer_ID,
 								'" . $stellen[$s]['var'] . "' AS Stelle_ID,
-								`queryable`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `offsite`, `transparency`, `postlabelcache`,
-								`Filter`, `template`, `header`, `footer`, `symbolscale`, `used_layer_id`, `logconsume`, `requires`, `privileg`, `export_privileg`,
+								`queryable`,
+								`drawingorder`,
+								`legendorder`, `minscale`, `maxscale`, `offsite`, `transparency`, `postlabelcache`, `Filter`,
+								`template`, `header`, `footer`, `symbolscale`, `requires`, `logconsume`, `privileg`, `export_privileg`,
 								`start_aktiv`,
 								`use_geom`
 							FROM
@@ -15966,30 +15968,30 @@ class db_mapObj{
 			for($j = 0; $j < count($layer_attributes['insert']); $j++){
 				# Attribut des Layers
 				$dump_text .= "\n\n-- Attribut " . $layer_attributes['extra'][$j] . " des Layers " . $layer_ids[$i] . "\n" . $layer_attributes['insert'][$j];
+			}
 
-				if ($with_privileges) {
-					for ($s = 0; $s < count($stellen); $s++) {
-						# Attributrechte in der Stelle
-						$layer_attributes2stelle = $database->create_insert_dump(
-							'layer_attributes2stelle',
-							'',
-							"
-								SELECT
-									'". $last_layer_id . "' AS layer_id,
-									'" . $stellen[$s]['var'] . "' AS stelle_id,
-									`attributename`,
-									`privileg`,
-									`tooltip`
-								FROM
-									`layer_attributes2stelle`
-								WHERE
-									`layer_id` = " . $layer_ids[$i] . " AND
-									`stelle_id` = " . $stellen[$s]['id'] . "
-							"
-						);
-						if (count($layer_attributes2stelle['insert']) > 0) {
-							$dump_text .= "\n\n-- Zuordnung der Layerattribute des Layers " . $layer_ids[$i] . " zur Stelle " . $stellen[$s]['id'] . "\n" . implode("\n", $layer_attributes2stelle['insert']);
-						}
+			if ($with_privileges) {
+				for ($s = 0; $s < count($stellen); $s++) {
+					# Attributrechte in der Stelle
+					$layer_attributes2stelle = $database->create_insert_dump(
+						'layer_attributes2stelle',
+						'',
+						"
+							SELECT
+								'". $last_layer_id . "' AS layer_id,
+								'" . $stellen[$s]['var'] . "' AS stelle_id,
+								`attributename`,
+								`privileg`,
+								`tooltip`
+							FROM
+								`layer_attributes2stelle`
+							WHERE
+								`layer_id` = " . $layer_ids[$i] . " AND
+								`stelle_id` = " . $stellen[$s]['id'] . "
+						"
+					);
+					if (count($layer_attributes2stelle['insert']) > 0) {
+						$dump_text .= "\n\n-- Zuordnung der Layerattribute des Layers " . $layer_ids[$i] . " zur Stelle " . $stellen[$s]['id'] . "\n" . implode("\n", $layer_attributes2stelle['insert']);
 					}
 				}
 			}
