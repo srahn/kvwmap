@@ -314,8 +314,8 @@ $legendheight = $this->map->height + 20;
 				<? } ?>
 					<td align="right">
 						<input type="checkbox" name="always_draw" value="1" <?if($always_draw == 1 OR $always_draw == 'true')echo 'checked'; ?>>&nbsp;weiterzeichnen&nbsp;&nbsp;
-						<input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;Punktfang
-						</td>
+						<input type="checkbox" onclick="toggle_vertices()" name="punktfang" <? if($this->formvars['punktfang'] == 'on')echo 'checked="true"'; ?>>&nbsp;Punktfang
+					</td>
 					<td colspan="2" align="center">
 						<table border="0">
 							<tr> 
@@ -327,6 +327,7 @@ $legendheight = $this->map->height + 20;
 						<input type="hidden" name="go" value="Nachweisformular">
 						<input type="hidden" name="go_plus" value="">
 						<input type="hidden" name="area" value="">
+						<INPUT TYPE="HIDDEN" NAME="oid" VALUE="<?php echo $this->formvars['oid']; ?>">
 						<INPUT TYPE="HIDDEN" NAME="columnname" VALUE="<?php echo $this->formvars['columnname']; ?>">
 						<INPUT TYPE="HIDDEN" NAME="fromwhere" VALUE="<? echo $this->formvars['fromwhere']; ?>">
 						<INPUT TYPE="HIDDEN" NAME="orderby" VALUE="<? echo $this->formvars['orderby']; ?>">						
