@@ -78,7 +78,6 @@ $svg .='
 '.$SVGvars_defs.'
   </defs>';
 $svg .= $canvaswithall;
-$svg .= '<g id="buttons" cursor="pointer" transform="scale(1)">';
 $svg .= $navbuttons;
 $svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate(0 36)">';
 $svg .= pointbuttons($strSetPosition);
@@ -87,7 +86,6 @@ if($this->user->rolle->gps){
 	$svg .= gpsbuttons($strSetGPSPosition, $strGPSFollow, $this->formvars['gps_follow']);
 }
 $svg .= measure_buttons($strRuler);
-$svg .= '</g>';
 $svg .= '</g>';
 $svg .= $SVG_end;
 

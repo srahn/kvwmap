@@ -62,7 +62,7 @@ $svg .= '<script id="pscript" type="text/ecmascript"><![CDATA[';
 $svg .= $scriptdefinitions;	
 $svg .= $SVGvars_navscript;
 $svg .= $basicfunctions;
-if($_SESSION['mobile'] == 'true'){
+if($this->user->rolle->gps){
 	$svg .= $gps_functions;
 }
 $svg .= $SVGvars_coordscript;

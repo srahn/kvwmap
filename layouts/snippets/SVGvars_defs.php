@@ -42,7 +42,7 @@ $SVGvars_defs = '
 			#filter: drop-shadow( -3px 0px 3px #ccc );
 		}		
 		.active{
-			fill: #F2F272 !important;
+			fill: #cbdfef !important;
 		}
     ]]></style>
 		

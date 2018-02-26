@@ -80,7 +80,6 @@ $svg .='
 '.$SVGvars_defs.'
   </defs>';
 $svg .= $canvaswithall;
-$svg .= '<g id="buttons" cursor="pointer" transform="scale(1)">';
 $svg .= $navbuttons;
 $svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate(0 36)">';
 $svg .= deletebuttons($strUndo, $strDelete);
@@ -89,7 +88,6 @@ $svg .= boxbuttons();
 $svg .= flurstquerybuttons();
 $svg .= bufferbuttons($strBuffer, $strBufferedLine, $strParallelPolygon);
 $svg .= vertex_edit_buttons($strCornerPoint);
-$svg .= '</g>';
 $svg .= '</g>';
 $svg .= $SVG_end;
 
