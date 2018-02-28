@@ -370,12 +370,12 @@ $legendheight = $this->map->height + 20;
 											<div id="legendcontrol">
 												<a href="index.php?go=reset_querys">
 													<div class="button_background" style="width: 26px; height: 26px">
-														<div class="emboss tool_info" style="width: 26px; height: 26px" title="<? echo $strClearAllQuerys; ?>"></div>
+														<div class="button tool_info" style="width: 26px; height: 26px" title="<? echo $strClearAllQuerys; ?>"></div>
 													</div>
 												</a>
 												<a href="index.php?go=reset_layers" style="padding: 0 0 0 6">
 													<div class="button_background" style="width: 26px; height: 26px">
-														<div class="emboss layer" style="width: 26px; height: 26px" title="<? echo $strDeactivateAllLayer; ?>"></div>
+														<div class="button layer" style="width: 26px; height: 26px" title="<? echo $strDeactivateAllLayer; ?>"></div>
 													</div>
 												</a>
 												<input type="button" class="button" name="neuladen_button" onclick="neuLaden();" value="<?php echo $strLoadNew; ?>" tabindex="1" style="height: 27px; vertical-align: top; margin-left: 30px">

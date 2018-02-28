@@ -240,7 +240,7 @@ class Menue extends MyObject {
 		$html .= '<a href="'.$href.'" target="'.$target.'" onclick="'.$onclick.'">';
 		if($style == 'button'){		# Button-Menüpunkt
 			$html .= '<div class="button_background">';
-			$html .= '	<div class="emboss '.$this->get('button_class').'" title="'.$this->get('name').'"></div>';
+			$html .= '	<div class="button '.$this->get('button_class').'" title="'.$this->get('name').'"></div>';
 			$html .= '</div>';
 		}
 		else{				# textueller Menüpunkt

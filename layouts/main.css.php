@@ -372,7 +372,6 @@ a.invisiblelayerlink:hover{
 }
 
 #menueTable{
-	padding-top: 6px;
 	margin-bottom: 2px;
 	width: <? echo ($size['menue']['width'] - 2); ?>px;
 	text-align: center;
@@ -490,7 +489,7 @@ a.menuered:hover {
 
 .button-menue{
 	flex: 0 0 auto;
-	padding: 0 0 6 4;
+	margin: 0 0 2 0;
 }
 
 .text-menue{
@@ -614,41 +613,33 @@ a.menuered:hover {
 }
 
 .button_background{
-	background: linear-gradient(#eff3f6, #DAE4EC);
-	width: 30px;
-	height: 29px;
+	background: linear-gradient(#fdfdfd, #DAE4EC);
+	#box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);
+	width: 36px;
+	height: 36px;
 }
 
-.emboss{
-	width:30px;
-	height:30px;
-	box-shadow:
-	2px 3px 3px rgba(0, 0, 0, 0.2), 
-	0px 3px 1px rgba(255, 255, 255, 0.6) inset, 
-	-1px -1px 3px rgba(0, 0, 0, 0.7) inset,	 
-	0px 1px 1px rgba(0, 0, 0, 0.8) inset;
+.button{
+	position: relative;
+	background-repeat: no-repeat;
+	background-position: center; 
+	width:36px;
+	height:36px;
 }
 
-.emboss:hover{
-	box-shadow:
-	2px 0 7px rgba( 255, 255, 255 ,0.1), 
-	0 2px 7px rgba( 255, 255, 255 ,0.1), 
-	-2px 0 7px rgba( 255, 255, 255 ,0.1),
-	0 -2px 7px rgba( 255, 255, 255 ,0.1),
-	2px 3px 3px rgba(0, 0, 0, 0.2), 
-	0px 3px 1px rgba(255, 255, 255, 0.6) inset, 
-	-1px -1px 3px rgba(0, 0, 0, 0.7) inset,	 
-	0px 1px 1px rgba(0, 0, 0, 0.8) inset;
+.button::after {
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.3);
+  content: '';
+	opacity: 0;
+  position: absolute;
+  height: 36;
+	width: 36;
+  left: 0;
+  top: 0;
 }
 
-.emboss:active{
-	box-shadow:
-	2px 0 7px rgba( 255, 255, 255 ,0.2), 
-	0 2px 7px rgba( 255, 255, 255 ,0.2), 
-	-2px 0 7px rgba( 255, 255, 255 ,0.2),
-	0 -2px 7px rgba( 255, 255, 255 ,0.2),
-	-1px -1px 3px rgba(0, 0, 0, 0.7) inset,	 
-	0px 0px 1px rgba(0, 0, 0, 0.8) inset;
+.button:hover::after{
+  opacity: 1;
 }
 
 #header{
@@ -660,7 +651,7 @@ a.menuered:hover {
 #footer{
 	height: <? echo ($size['footer']['height'] - 2); ?>;
 	border: 1px solid; 
-	border-color: #cccccc #cccccc #cccccc;
+	border-color: #aaa #cccccc #cccccc;
 }
 
 #scale_bar {
@@ -683,10 +674,11 @@ a.menuered:hover {
 }
 
 #map_functions_bar{
+	background: #DAE4EC;
 	border-top: 1px solid #aaaaaa;
-	padding-top: 6px;
-	padding-bottom: 6px;
-	height: <? echo ($size['map_functions_bar']['height'] - 13); ?>;
+	#padding-top: 6px;
+	#padding-bottom: 6px;
+	height: 36px;
 }
 
 #legenddiv {

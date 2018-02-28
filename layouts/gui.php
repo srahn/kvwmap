@@ -26,8 +26,8 @@
 								<td id="menuebar" valign="top" align="center" background="<?php echo GRAPHICSPATH."bg.gif"; ?>" style="border: 1px solid; border-color: #FFFFFF #CCCCCC #CCCCCC; border-bottom: 0px"><?php
 									include(SNIPPETS . "menue.php"); ?>
 								</td>
-								<td align="center" width="100%" valign="top" background="<?php echo GRAPHICSPATH; ?>bg.gif" style="border-right: 1px solid; border-color: #FFFFFF #CCCCCC #CCCCCC;">
-									<div style=" position: relative; overflow: hidden; ">
+								<td align="center" width="100%" height="100%" valign="top" background="<?php echo GRAPHICSPATH; ?>bg.gif" style="border-right: 1px solid; border-color: #FFFFFF #CCCCCC #CCCCCC;">
+									<div style="height:100%; position: relative; overflow: hidden; ">
 										<script type="text/javascript">
 											currentform = document.GUI;
 											<? $this->currentform = 'document.GUI'; ?>
