@@ -20,12 +20,12 @@ if ($show_legend_graphic) { ?>
 			} ?>
 	<div id="legendcontrol">
 		<a href="index.php?go=reset_querys">
-			<div style="width: 26px; height: 26px">
+			<div>
 				<div class="button tool_info" style="width: 26px; height: 26px" title="<? echo $strClearAllQuerys; ?>"></div>
 			</div>
 		</a>
 		<a href="index.php?go=reset_layers">
-			<div style="width: 26px; height: 26px">
+			<div>
 				<div class="button layer" style="width: 26px; height: 26px" title="<? echo $strDeactivateAllLayer; ?>"></div>
 			</div>
 		</a>

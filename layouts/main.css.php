@@ -648,10 +648,10 @@ a.menuered:hover {
   content: '';
 	opacity: 0;
   position: absolute;
-  height: 100%;
-	width: 100%;
-  left: 0;
-  top: 0;
+  height: calc(100% - 2px);
+	width: calc(100% - 2px);
+  left: 1;
+  top: 1;
 }
 
 .button:active{
@@ -806,7 +806,7 @@ a.menuered:hover {
 }
 
 #legend{
-	margin-left:7px;
+	margin: 4px 0 4px 7px;
 }
 
 .normallegend {
@@ -1409,7 +1409,7 @@ tbody.gle tr:hover {
 
 #legendOptionsIcon{
 	font-size: 1.1em;
-	margin: 0 0 0 40;
+	margin: 0 0 0 42;
 	height: 16px;
 	width: 16px;
 	padding: 5px;
