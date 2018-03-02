@@ -3146,7 +3146,7 @@ $measurefunctions = '
 	      <g id="new" onmousedown="restart();" transform="translate('.$last_x.' 0 )">
 					<rect x="0" y="0" width="36" height="36" class="navbutton_bg"/>
 					<rect id="new0" onmouseover="show_tooltip(\''.$strDelete.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
-					<g class="navbutton" transform="translate(5 5) scale(0.8)">
+					<g class="navbutton" transform="translate(4 5) scale(0.8)">
 						<path
 							d="M153.245 92.3923 C153.245 92.3923 198.593 158.983 242.478 202.712 C268.178 171.839
 								355.521 99.5384 355.521 99.5384 C355.521 99.5384 359.726 95.6673 364.892 97.8494
@@ -3431,7 +3431,7 @@ $measurefunctions = '
       <g id="buffer_add" transform="translate('.$last_x.' 0)">
 				<rect x="0" y="0" width="36" height="36" class="navbutton_bg"/>
 				<rect id="buffer0" onmouseover="show_tooltip(\''.$strBuffer.'\',evt.clientX,evt.clientY)" onmousedown="add_buffer();hide_tooltip();highlightbyid(\'buffer0\');" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
-        <g class="navbutton navbutton_stroke" transform="translate(5 3) scale(1.1)">
+        <g class="navbutton navbutton_stroke" transform="translate(3.5 3) scale(1.1)">
 					<polygon class="navbutton_nofill" points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284	379.5,218 378.5,139 357.5,138 260.5,91"
 						transform="translate(-4 -4) scale(0.07)"
 						 style="stroke-width:18"/>
