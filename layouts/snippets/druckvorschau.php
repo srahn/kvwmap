@@ -171,7 +171,7 @@ function preventflickering(evt){
   </tr>
 	<tr align="center"> 
     <td colspan="2"> 
-      <input class="button" type="button" value="Freitext hinzufügen" onclick="addfreetext();">
+      <input type="button" value="Freitext hinzufügen" onclick="addfreetext();">
     </td>
   </tr>
 <? } ?>
@@ -180,8 +180,8 @@ function preventflickering(evt){
   </tr>
   <tr align="center"> 
     <td colspan="2"> 
-      <input class="button" type="button" name="zurueck" value="zurück zum Druckausschnitt" onclick="goback();">
-      <input class="button" type="button" name="drucken" value="Drucken" onclick="print('<? echo $this->Docu->activeframe[0]['Name']; ?>', '<? echo $this->Docu->activeframe[0]['format']; ?>', <? echo $this->Docu->activeframe[0]['preis']; ?>);">
+      <input type="button" name="zurueck" value="zurück zum Druckausschnitt" onclick="goback();">
+      <input type="button" name="drucken" value="Drucken" onclick="print('<? echo $this->Docu->activeframe[0]['Name']; ?>', '<? echo $this->Docu->activeframe[0]['format']; ?>', <? echo $this->Docu->activeframe[0]['preis']; ?>);">
     </td>
   </tr>
   <tr>

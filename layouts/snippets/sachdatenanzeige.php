@@ -143,7 +143,7 @@ for($i=0;$i<$anzLayer;$i++){
 								if(document.getElementById('savebutton') != undefined)document.getElementById('savebutton').style.display = 'block';
 							</script>
 				<?  }else{ ?>
-							<input type="button" class="button" name="savebutton" value="<? echo $strSave; ?>" onclick="save();">
+							<input type="button" name="savebutton" value="<? echo $strSave; ?>" onclick="save();">
 				<? 	}
 					}?>
 			</td>

@@ -248,7 +248,7 @@ function add_searchmask(layer_id){
 <?php if ($this->user->rolle->visually_impaired) { ?>
 					<tr>
 						<td align="center"><br>
-							<input class="button" type="button" name="suchen" onclick="suche();" value="<? echo $this->strSearch; ?>">
+							<input type="button" name="suchen" onclick="suche();" value="<? echo $this->strSearch; ?>">
 						</td>
 					</tr>
 <?php } ?>
@@ -269,7 +269,7 @@ function add_searchmask(layer_id){
 <?php if (!$this->user->rolle->visually_impaired) { ?>
 					<tr>
 						<td align="center"><br>
-							<input class="button" type="button" name="suchen" onclick="suche();" value="<? echo $this->strSearch; ?>">
+							<input type="button" name="suchen" onclick="suche();" value="<? echo $this->strSearch; ?>">
 						</td>
 					</tr>
 <?php } ?>

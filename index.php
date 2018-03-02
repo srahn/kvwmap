@@ -755,11 +755,7 @@ function go_switch($go){
 				$GUI->flurstAnzeige($explodedFlurstKennz);
 				$GUI->output();
 			} break;
-		
-			case 'changeLegendDisplay' : {
-				$GUI->changeLegendDisplay();
-			} break;
-			
+					
 			case 'saveOverlayPosition' : {
 				$GUI->saveOverlayPosition();
 			} break;

@@ -83,7 +83,7 @@ function buildwktlinefromsvgpath(svgpath){
 				</tr>
 				<tr align="left">
 					<td>
-					<div align="center"><input type="button" class="button" name="neuladen_button" onclick="neuLaden();" value="<?php echo $strLoadNew; ?>"></div>
+					<div align="center"><input type="button" name="neuladen_button" onclick="neuLaden();" value="<?php echo $strLoadNew; ?>"></div>
 					<br>
 					<div style="width:260px; height:<?php echo $this->map->height-247; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
 						&nbsp;

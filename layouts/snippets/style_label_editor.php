@@ -333,7 +333,7 @@ function toLayerEditor(){
 							}
 							echo'
 									<tr>
-										<td height="30" colspan="2" valign="bottom" align="center"><input class="button" type="button" name="style_save" value="Speichern" onclick="save_style('.$this->styledaten['Style_ID'].')"></td>
+										<td height="30" colspan="2" valign="bottom" align="center"><input type="button" name="style_save" value="Speichern" onclick="save_style('.$this->styledaten['Style_ID'].')"></td>
 									</tr>
 								</table>';
 				  	}
@@ -358,7 +358,7 @@ function toLayerEditor(){
 							}
 							echo'
 									<tr>
-										<td height="30" colspan="2" valign="bottom" align="center"><input class="button" type="button" name="label_save" value="Speichern" onclick="save_label('.$this->labeldaten['Label_ID'].')"></td>
+										<td height="30" colspan="2" valign="bottom" align="center"><input type="button" name="label_save" value="Speichern" onclick="save_label('.$this->labeldaten['Label_ID'].')"></td>
 									</tr>
 								</table>';
 				  	}
@@ -434,7 +434,7 @@ function toLayerEditor(){
 			        </tr>
 			        <tr align="left">
 			          <td>
-			          <div align="center"><input type="button" class="button" name="neuladen_button" onclick="neuLaden();" value="neu Laden"></div>
+			          <div align="center"><input type="button" name="neuladen_button" onclick="neuLaden();" value="neu Laden"></div>
 			          <br>
 			        	<div style="width:230; height:<?php echo $this->map->height-59; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
 				          &nbsp;

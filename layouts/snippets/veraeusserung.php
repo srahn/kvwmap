@@ -68,7 +68,7 @@ function go_back(){
 	   	echo'
 	   		<table width="100%" border="0" cellpadding="2" cellspacing="0">
 					<tr align="center"> 
-				  	<td><input type="button" class="button" name="back" value="zurück" onclick="go_back();"></td>
+				  	<td><input type="button" name="back" value="zurück" onclick="go_back();"></td>
 				  </tr>
 				</table><br>
 			';

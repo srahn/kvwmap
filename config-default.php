@@ -81,7 +81,8 @@ $sizes = array(
 			'height' => 22
 		),
 		'menue' => array(
-			'width'  => 211
+			'width'  => 211,				# Version 2.8 (neu ist nur das Komma, der Wert müsste aber gegebenenfalls auch angepasst werden, da die Button-Menüs jetzt breiter sind)
+			'hide_width' => 22			# Version 2.8
 		),
 		'legend' => array(
 			'width' => 252,

@@ -28,7 +28,7 @@ function save(){
 		<td align="center" height="35"><input name="table_name" type="text" value="" size="15" class="input"></td>
 	</tr>
 	<tr>
-		<td colspan="6" align="center"><input class="button" type="button" name="save1" value="<? echo $strImport; ?>" onclick="save();"></td>
+		<td colspan="6" align="center"><input type="button" name="save1" value="<? echo $strImport; ?>" onclick="save();"></td>
 	</tr>
   <tr> 
     <td colspan="6">&nbsp;</td>

@@ -361,6 +361,14 @@ a.invisiblelayerlink:hover{
 	background: linear-gradient(#DAE4EC, #84accf);
 }
 
+#openLayerParamBarIcon{
+	width: 16px; 
+	height: 16px; 
+	padding: 5px; 
+	font-size: 1.1em;
+	margin: 0 5px 0 40px;
+}
+
 #layerParamsBar {
 	display: none;
 	position: absolute;
@@ -369,6 +377,19 @@ a.invisiblelayerlink:hover{
 	right: 5;
 	width: 350;
 	z-index: 9999;
+}
+
+#menuebar{
+	background: url('../graphics/bg.gif');
+	border: 1px solid;
+	border-color: #CCC; 
+	border-top: none;
+	border-bottom: none;
+}
+
+#menue_switch{
+	min-width: <? echo $size['menue']['hide_width']; ?>px;
+	background: linear-gradient(90deg, #DAE4EC, #c1d6f2);
 }
 
 #menueTable{
@@ -602,21 +623,15 @@ a.menuered:hover {
 
 .tool_info{
 	background-image: url(../graphics/tool_info.png);
-	background-repeat: no-repeat;
-  background-position: center center;
 }
 
 .layer{
 	background-image: url(../graphics/layer.png);
-	background-repeat: no-repeat;
-  background-position: center center;
 }
 
 .button_background{
 	background: linear-gradient(#fdfdfd, #DAE4EC);
-	#box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);
-	width: 36px;
-	height: 36px;
+	box-shadow: 0px 1px 0px #bbb;
 }
 
 .button{
@@ -628,14 +643,19 @@ a.menuered:hover {
 }
 
 .button::after {
-  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.3);
+	border-radius: 3px;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
   content: '';
 	opacity: 0;
   position: absolute;
-  height: 36;
-	width: 36;
+  height: 100%;
+	width: 100%;
   left: 0;
   top: 0;
+}
+
+.button:active{
+	background-color: #e3e8ed;
 }
 
 .button:hover::after{
@@ -674,10 +694,9 @@ a.menuered:hover {
 }
 
 #map_functions_bar{
-	background: #DAE4EC;
-	border-top: 1px solid #aaaaaa;
-	#padding-top: 6px;
-	#padding-bottom: 6px;
+	background: linear-gradient(#fdfdfd, #DAE4EC);
+	border-top: 1px solid #ccc;
+	box-shadow: 0px 1px 0px #bbb;
 	height: 36px;
 }
 
@@ -991,6 +1010,12 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 	padding:0px 0px 0px 0px;
 }
 
+.datensatz_header{
+	background: linear-gradient(#DAE4EC 0%, lightsteelblue 100%);
+	#background-color:<? echo BG_GLEHEADER; ?>;
+	border-bottom: 1px solid #bbb;
+}
+
 .message_box {
 	opacity: 1;
 	position: fixed;
@@ -1056,7 +1081,7 @@ table.tgle {
 }
 
 thead.gle th { 
- padding:4px 4px 4px 4px;
+ padding: 0;
  text-align:left;
 }
 
@@ -1366,6 +1391,7 @@ tbody.gle tr:hover {
 }
 
 .layerOptions, #legendOptions{
+	width: 220px;
 	border: 1px solid #cccccc;
 	background: #EDEFEF;
 	padding:0px;
@@ -1378,8 +1404,15 @@ tbody.gle tr:hover {
 
 .layerOptions{
 	top:300px;
-	width: 200px;
 	right:210px;
+}
+
+#legendOptionsIcon{
+	font-size: 1.1em;
+	margin: 0 0 0 40;
+	height: 16px;
+	width: 16px;
+	padding: 5px;
 }
 
 #legendOptions{

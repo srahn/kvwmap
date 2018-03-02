@@ -36,7 +36,10 @@
 	$strNoLayer="Es wurde kein Thema zur Sachdatenabfrage ausgewählt!";
 	$strLayerSearch="Themensuche";
 	$strLegendOptions="Legenden-Optionen";
-	$strLegendType="Legendendarstellung";
+	$strLegendVisibility="Legenden-Anzeige";
+	$strLegendVisible="Legende immer sichtbar";
+	$strLegendHide="Legende ausblenden";
+	$strLegendType="Themendarstellung";
 	$strLegendTypeGroups="Themen in Gruppen";
 	$strLegendTypeAlphabetical="Themen alphabetisch";
 	$strDrawingOrder="Zeichenreihenfolge anpassen";

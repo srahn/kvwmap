@@ -172,7 +172,7 @@ function save_layout(){
           </select> 
           </td>
           <td>
-            <input class="button" type="submit" name="go_plus" value="übernehmen >>">
+            <input type="submit" name="go_plus" value="übernehmen >>">
           </td>
           <td style="border-left:1px solid #C3C7C3">
           	&nbsp;<select  name="stelle">
@@ -265,7 +265,7 @@ function save_layout(){
 					<td><input type="text" name="bgwidth" value="<? echo $this->ddl->selectedlayout[0]['bgwidth'] ?>" size="5"></td>
         </tr>
         <tr>
-        	<td width="50%" style="border-bottom:1px solid #C3C7C3" colspan=4><input class="button" type="file" name="bgsrc" size="10"></td>
+        	<td width="50%" style="border-bottom:1px solid #C3C7C3" colspan=4><input type="file" name="bgsrc" size="10"></td>
         	<td>&nbsp;y:</td>
         	<td style="border-right:1px solid #C3C7C3"><input type="text" name="bgposy" value="<? echo $this->ddl->selectedlayout[0]['bgposy'] ?>" size="5"></td>
         	<td>&nbsp;Höhe:</td>
@@ -612,9 +612,9 @@ function save_layout(){
   
   <tr align="center"> 
     <td colspan="3"> 
-    <input class="button" type="button" name="go_plus" value="Layout löschen" onclick="Bestaetigung('index.php?go=sachdaten_druck_editor_Löschen&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&selected_layout_id=<? echo $this->ddl->selectedlayout[0]['id']; ?>', 'Wollen Sie dieses Layout wirklich löschen?');">&nbsp;
-    <input class="button" type="submit" name="go_plus" value="Änderungen Speichern">&nbsp;
-    <input class="button" type="button" name="go_plus" onclick="save_layout();" value="als neues Layout speichern">
+    <input type="button" name="go_plus" value="Layout löschen" onclick="Bestaetigung('index.php?go=sachdaten_druck_editor_Löschen&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&selected_layout_id=<? echo $this->ddl->selectedlayout[0]['id']; ?>', 'Wollen Sie dieses Layout wirklich löschen?');">&nbsp;
+    <input type="submit" name="go_plus" value="Änderungen Speichern">&nbsp;
+    <input type="button" name="go_plus" onclick="save_layout();" value="als neues Layout speichern">
     </td>
   </tr>
 <? } ?>  

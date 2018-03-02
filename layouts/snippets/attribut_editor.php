@@ -332,7 +332,7 @@ function toLayerEditor(){
 					if (count($this->attributes) > 0){ ?>
 						<tr>
 							<td align="center" colspan="19"><br><br>
-								<input class="button" type="submit" name="go_plus" value="speichern">
+								<input type="submit" name="go_plus" value="speichern">
 							</td>
 						</tr><?php
 					}

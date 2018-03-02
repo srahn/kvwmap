@@ -271,6 +271,7 @@ class GUI {
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$layerset = $mapDB->read_Layer(0, $this->Stelle->useLayerAliases, NULL);     # class_load_level: 0 = keine Klassen laden
 		$this->user->rolle->saveLegendOptions($layerset, $this->formvars);
+		$this->resizeMap2Window();
 		$this->user->rolle->readSettings();
 		$this->neuLaden();
 		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
@@ -2668,15 +2669,18 @@ class GUI {
 		$this->user->rolle->resetQuerys('');
 	}
 
-	function resizeMap2Window() {
+	function resizeMap2Window(){
 		global $sizes;
 
 		$size = $sizes[$this->user->rolle->gui];
-
+		
+		if($this->formvars['legenddisplay'] !== NULL)$hideLegend = $this->formvars['legenddisplay'];		// falls die Legende gerade ein/ausgeblendet wurde
+		else $hideLegend = $this->user->rolle->hideLegend;
+		
 		$width = $this->formvars['browserwidth'] -
 			$size['margin']['width'] -
 			($this->user->rolle->hideMenue  == 1 ? $size['menue']['hide_width'] : $size['menue']['width']) -
-			($this->user->rolle->hideLegend == 1 ? $size['legend']['hide_width'] : $size['legend']['width'])
+			($hideLegend == 1 ? $size['legend']['hide_width'] : $size['legend']['width'])
 			- 18;	# Breite für möglichen Scrollbalken
 
 		$height = $this->formvars['browserheight'] -
@@ -3288,7 +3292,7 @@ class GUI {
       }
       echo'
           <tr>
-            <td height="30" colspan="2" valign="bottom" align="center"><input class="button" type="button" name="style_save" value="Speichern" onclick="save_style('.$this->styledaten['Style_ID'].')"></td>
+            <td height="30" colspan="2" valign="bottom" align="center"><input type="button" name="style_save" value="Speichern" onclick="save_style('.$this->styledaten['Style_ID'].')"></td>
           </tr>
         </table>';
     }
@@ -3320,7 +3324,7 @@ class GUI {
       }
       echo'
           <tr>
-            <td height="30" colspan="2" valign="bottom" align="center"><input class="button" type="button" name="label_save" value="Speichern" onclick="save_label('.$this->labeldaten['Label_ID'].')"></td>
+            <td height="30" colspan="2" valign="bottom" align="center"><input type="button" name="label_save" value="Speichern" onclick="save_label('.$this->labeldaten['Label_ID'].')"></td>
           </tr>
         </table>';
     }
@@ -3787,11 +3791,6 @@ class GUI {
     $this->user->rolle->hideMenue(1);
 		echo '~if(typeof resizemap2window != "undefined")resizemap2window();';
   }
-
-	function changeLegendDisplay(){
-		$this->user->rolle->changeLegendDisplay($this->formvars['hide']);
-		echo 'hide: ' . $this->formvars['hide'] . '~resizemap2window();';
-	}
 
 	function saveOverlayPosition(){
   	$this->user->rolle->saveOverlayPosition($this->formvars['overlayx'],$this->formvars['overlayy']);
