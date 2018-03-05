@@ -420,10 +420,15 @@
 ?>
 <table border="0" cellspacing="10" cellpadding="2">
   <tr>
-	<td>
-      <span style="font-size:12px; color:#FF0000;"><? echo $strNoMatch; ?></span>
-	</td>
+		<td>
+				<span style="color:#FF0000;"><? echo $strNoMatch; ?></span>
+		</td>
   </tr>
+	<? if($layer['privileg'] > 0){ ?>
+	<tr align="center">
+		<td><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id=<? echo $layer['Layer_ID']; ?>"><? echo $strNewDataset; ?></a></td>
+	</tr>
+	<? } ?>
 </table>
 
 <?
