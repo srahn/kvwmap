@@ -1,5 +1,5 @@
 <?php
-    
+
 if($this->user->rolle->back){$SVGvars_mainnavbuttons .= previous($prev_disabled, $strPreviousView, $prevmouseupfunction);}
 if($this->user->rolle->forward){$SVGvars_mainnavbuttons .= forward($next_disabled, $strNextView, $mouseupfunction);}
 if($this->user->rolle->zoomall){$SVGvars_mainnavbuttons .= zoomall($strZoomToFullExtent);}

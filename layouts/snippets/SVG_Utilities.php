@@ -23,6 +23,9 @@
  
 <?php
 
+	global $last_x;$last_x = 0;
+	global $events;$events = true;
+
 	include(LAYOUTPATH.'snippets/SVGvars_defs.php'); 					# zuweisen von: $SVGvars_defs
 	include(LAYOUTPATH.'snippets/SVGvars_navbuttons.php'); 		# zuweisen von: $SVGvars_navbuttons	
 	include(LAYOUTPATH.'snippets/SVGvars_coordscript.php'); 	# zuweisen von: $SVGvars_coordscript
@@ -3130,8 +3133,6 @@ $measurefunctions = '
 
 	  <g id="buttons" filter="url(#Schatten)" onmouseout="hide_tooltip()" transform="translate(0 0)">
 	  ';
-
-	global $last_x;
 		
 	$navbuttons ='
 	    <g id="buttons_NAV" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()">

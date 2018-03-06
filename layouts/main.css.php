@@ -1317,7 +1317,6 @@ tbody.gle tr:hover {
 	margin: 10px;
 	border: 1px solid #cccccc;
 	background: url('../graphics/bg.gif'); 
-	position: relative; 
 	z-index: 2;
 }
 
@@ -1343,6 +1342,16 @@ tbody.gle tr:hover {
 .rollenwahl-option-data {
 	width: 460px;
 	padding : 4px;
+}
+
+.button_selection{
+	width: 390px;
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.button_selection div{
+	padding: 0 0 3px 4px;
 }
 
 .hover-border{

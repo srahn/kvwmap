@@ -257,6 +257,10 @@
 #
   $randomnumber = rand(0, 1000000);
   $svgfile  = $randomnumber.'SVG_map.svg';
+	
+	global $last_x;$last_x = 0;
+	global $events;$events = true;
+	
   include(LAYOUTPATH.'snippets/SVGvars_defs.php');            # zuweisen von: $SVGvars_defs 
 	include(LAYOUTPATH.'snippets/SVGvars_mainnavbuttons.php');  # zuweisen von: $SVGvars_mainnavbuttons
   include(LAYOUTPATH.'snippets/SVGvars_coordscript.php');     # zuweisen von: $SVGvars_coordscript
@@ -271,8 +275,7 @@
   $dx       = $this->map->extent->maxx-$this->map->extent->minx;
   $dy       = $this->map->extent->maxy-$this->map->extent->miny;
   $scale    = ($dx/$res_x+$dy/$res_y)/2;
-  $radius = $this->formvars['searchradius'] / $scale;
-	global $last_x;
+  $radius = $this->formvars['searchradius'] / $scale;	
 
 
 $fpsvg = fopen(IMAGEPATH.$svgfile,'w') or die('fail: fopen('.$svgfile.')');
