@@ -99,18 +99,21 @@ $svg .='
 $svg .= $canvaswithall;
 $svg .= $navbuttons;
 $svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate(0 36)">';
-$svg .= deletebuttons($strUndo, $strDelete);
-$svg .= polygonbuttons($strDrawPolygon, $strCutByPolygon);
-$svg .= flurstquerybuttons();
-$svg .= polygonbuttons2($strSplitPolygon);
-$svg .= bufferbuttons($strBuffer, $strBufferedLine, $strParallelPolygon);
-$svg .= transform_buttons($strMoveGeometry);
-$svg .= vertex_edit_buttons($strCornerPoint);
-$svg .= coord_input_buttons();
+$buttons_fs = deletebuttons($strUndo, $strDelete);
+$buttons_fs .= polygonbuttons($strDrawPolygon, $strCutByPolygon);
+$buttons_fs .= flurstquerybuttons();
+$buttons_fs .= polygonbuttons2($strSplitPolygon);
+$buttons_fs .= bufferbuttons($strBuffer, $strBufferedLine, $strParallelPolygon);
+$buttons_fs .= transform_buttons($strMoveGeometry);
+$buttons_fs .= vertex_edit_buttons($strCornerPoint);
+$buttons_fs .= coord_input_buttons();
 if($this->user->rolle->gps){
-	$svg .= gpsbuttons($strSetGPSPosition, $strGPSFollow, $this->formvars['gps_follow']);
+	$buttons_fs .= gpsbuttons($strSetGPSPosition, $strGPSFollow, $this->formvars['gps_follow']);
 }
-$svg .= measure_buttons($strRuler);
+$buttons_fs .= measure_buttons($strRuler);
+global $last_x;
+$svg .= '<rect x="0" y="0" rx="3" ry="3" width="'.$last_x.'" height="36" class="navbutton_bg"/>';
+$svg .= $buttons_fs;
 $svg .= '</g>';
 $svg .= $SVG_end;
 

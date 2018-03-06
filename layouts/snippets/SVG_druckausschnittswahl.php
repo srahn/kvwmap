@@ -552,20 +552,22 @@ function deletelast(evt) {
 	</g>
 	<g id="buttons" filter="url(#Schatten)" cursor="pointer">
 		<g id="buttons_NAV" cursor="pointer" onmouseout="hide_tooltip()" onmousedown="focus_NAV();hide_tooltip()">
+			<rect x="0" y="0" rx="3" ry="3" width="216" height="36" class="navbutton_bg"/>
 	'.$SVGvars_navbuttons.'
 		</g>
 
     <g id="buttons_FS" cursor="pointer" onmouseout="hide_tooltip()" onmousedown="focus_FS();hide_tooltip()" transform="translate(0 36)">
+			<rect x="0" y="0" rx="3" ry="3" width="108" height="36" class="navbutton_bg"/>
 
 			<g id="extent" onmousedown="set_printextent_on();highlightbyid(\'extent0\');" transform="translate(0 0 )">
-				<rect id="extent0" onmouseover="show_tooltip(\''.$strSetPrintExtent.'\',evt.clientX,evt.clientY)" x="0" y="0" width="36.5" height="36" class="navbuttonbg"/>
+				<rect id="extent0" onmouseover="show_tooltip(\''.$strSetPrintExtent.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" width="36" height="36" class="navbutton_frame"/>
 				<g class="navbutton" transform="translate(5 5) scale(0.8)">
 					<path d="M3,1.0 L3,29 L27.0,29 L27,1 Z M6,4.0 L6,26 L24.0,26 L24,4 Z" style="fill-rule: evenodd;"/>
 				</g>
 	    </g>
 	    		
 	    <g id="mapscale" onmousedown="get_map_scale();" transform="translate(36 0 )">
-        <rect id="mapscale0" onmouseover="show_tooltip(\''.$strUseMapscale.'\',evt.clientX,evt.clientY)" x="0" y="0" width="36.5" height="36" class="navbuttonbg"/>
+        <rect id="mapscale0" onmouseover="show_tooltip(\''.$strUseMapscale.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" width="36" height="36" class="navbutton_frame"/>
 				<g class="navbutton" transform="translate(5 5) scale(0.8)">
 					<path d="M3,1.0 L3,29 L27.0,29 L27,1 Z M6,4.0 L6,26 L24.0,26 L24,4 Z" style="fill-rule: evenodd;"/>
 					<path d="M19.4,14.2 C20.6,14.2 21.5,13.2 21.5,12.06 C21.5,10.9 20.6,10 19.4,10 C18.2,10 17.3,10.9 17.3,12.1 C17.3,13.2 18.2,14.2 19.4,14.2"/>
@@ -575,7 +577,7 @@ function deletelast(evt) {
 	    </g>
 
 			<g id="refpoint" onmousedown="set_refpoint_on();highlightbyid(\'refpoint0\');" transform="translate(72 0 )">
-        <rect id="refpoint0" onmouseover="show_tooltip(\''.$strSetRefPoint.'\',evt.clientX,evt.clientY)" x="0" y="0" width="36.5" height="36" class="navbuttonbg"/>
+        <rect id="refpoint0" onmouseover="show_tooltip(\''.$strSetRefPoint.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" width="36" height="36" class="navbutton_frame"/>
 				<g class="navbutton" transform="translate(5 5) scale(0.8)">
 					<path d="M3,1.0 L3,29 L27.0,29 L27,1 Z M6,4.0 L6,26 L24.0,26 L24,4 Z" style="fill-rule: evenodd;"/>
 					<path d="M10,12.5 C10,13.9 11.1,15 12.5,15 C13.9,15 15,13.9 15,12.5 C15,11.1 13.9,10 12.5,10 C11.1,10 10,11.1 10,12.5"/>

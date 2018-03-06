@@ -3131,20 +3131,21 @@ $measurefunctions = '
 	  <g id="buttons" filter="url(#Schatten)" onmouseout="hide_tooltip()" transform="translate(0 0)">
 	  ';
 
+	global $last_x;
+		
 	$navbuttons ='
 	    <g id="buttons_NAV" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()">
+				<rect x="0" y="0" rx="3" ry="3" width="'.$last_x.'" height="36" class="navbutton_bg"/>
 	'.$SVGvars_navbuttons.'
 			</g>
 	';
-	
-	global $last_x;
-	$last_x = 0;
-	
+		
+	$last_x = 0;	
+		
 	function deletebuttons($strUndo, $strDelete){
 		global $last_x;
 		$deletebuttons = '
 	      <g id="new" onmousedown="restart();" transform="translate('.$last_x.' 0 )">
-					<rect x="0" y="0" width="36" height="36" class="navbutton_bg"/>
 					<rect id="new0" onmouseover="show_tooltip(\''.$strDelete.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
 					<g class="navbutton" transform="translate(4 5) scale(0.8)">
 						<path
@@ -3169,7 +3170,6 @@ $measurefunctions = '
 		$last_x += 36;
 		$deletebuttons.= '
 	      <g id="undo" onmousedown="deletelast(evt);" transform="translate('.$last_x.' 0)">
-					<rect x="0" y="0" width="36" height="36" class="navbutton_bg"/>
 					<rect id="undo0" onmouseover="show_tooltip(\''.$strUndo.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
 					<g class="navbutton" transform="translate(5 5) scale(1)">
 						<g class="navbutton_stroke" transform="translate(0 -4.5)">
@@ -3190,7 +3190,6 @@ $measurefunctions = '
 		global $last_x;
 		$polygonbuttons = '
 				<g id="pgon" onmousedown="draw_pgon_on();add_polygon();highlightbyid(\'pgon0\');" transform="translate('.$last_x.' 0 )">
-					<rect x="0" y="0" width="36" height="36" class="navbutton_bg"/>
 		      <rect id="pgon0" onmouseover="show_tooltip(\''.$strDrawPolygon.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
 					<g class="navbutton" transform="translate(5 5) scale(0.8)">
 						<g transform="translate(9 -8)">
@@ -3213,7 +3212,6 @@ $measurefunctions = '
 		$last_x += 36;
 		$polygonbuttons.= '
 				<g id="pgon_subtr" onmousedown="draw_pgon_on();subtr_polygon();highlightbyid(\'pgon_subtr0\');" transform="translate('.$last_x.' 0 )">
-					<rect x="0" y="0" width="36" height="36" class="navbutton_bg"/>
 		      <rect id="pgon_subtr0" onmouseover="show_tooltip(\''.$strCutByPolygon.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
 					<g class="navbutton" transform="translate(5 5) scale(0.8)">
 						<g transform="translate(9 -8)">
@@ -3240,7 +3238,6 @@ $measurefunctions = '
 		global $last_x;
 		$polygonbuttons = '				
 				<g id="line" onmousedown="split_geometry();highlightbyid(\'split0\');" transform="translate('.$last_x.' 0 )">
-					<rect x="0" y="0" width="36" height="36" class="navbutton_bg"/>
 					<rect id="split0" onmouseover="show_tooltip(\''.$strSplitPolygon.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
 					<g class="navbutton" transform="translate(9 5) scale(0.8)">
 						<g class="navbutton_stroke" transform="translate(-5 -2) scale(1.4)">
@@ -3260,7 +3257,6 @@ $measurefunctions = '
 		global $last_x;
 		$gpsbuttons = '
 			<g id="gps" onmousedown="set_gps_position();" transform="translate('.$last_x.' 0 )">
-				<rect x="0" y="0" width="36" height="36" class="navbutton_bg"/>
         <rect id="gps1" onmouseover="show_tooltip(\''.$strSetGPSPosition.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
 				<g class="navbutton" transform="translate(4 8) scale(0.6)">
 					<text x="23" y="15" style="text-anchor:middle;font-size:10;font-family:Arial;font-weight:bold">
@@ -3277,7 +3273,6 @@ $measurefunctions = '
 		global $last_x;
 		$pointbuttons = '
 				<g id="text" onmousedown="draw_point();highlightbyid(\'text0\');" transform="translate('.$last_x.' 0 )">
-					<rect x="0" y="0" width="36" height="36" class="navbutton_bg"/>
 	        <rect id="text0" onmouseover="show_tooltip(\''.$strSetPosition.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
 					<g class="navbutton" transform="translate(4 4) scale(1)">
 						<circle cx="14" cy="12" r="3"/>
@@ -3296,7 +3291,6 @@ $measurefunctions = '
 		global $last_x;
 		$boxbuttons = '
 				<g id="box" onmousedown="draw_box_on();highlightbyid(\'box0\');" transform="translate('.$last_x.' 0)">
-					<rect x="0" y="0" width="36" height="36" class="navbutton_bg"/>
 	        <rect id="box0" onmouseover="show_tooltip(\'Fenster aufziehen\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
 					<g class="navbutton navbutton_nofill navbutton_stroke" transform="translate(-3 2) scale(0.9)">
 						<g transform="matrix(-1 0 0 1 118 0) scale(0.5)">
@@ -3313,7 +3307,6 @@ $measurefunctions = '
 		global $last_x;
 		$linebuttons = '
 				<g id="line" onmousedown="add_line();highlightbyid(\'line0\');" transform="translate('.$last_x.' 0 )">
-					<rect x="0" y="0" width="36" height="36" class="navbutton_bg"/>
 		      <rect id="line0" onmouseover="show_tooltip(\''.$strDrawLine.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
 					<g class="navbutton navbutton_stroke" transform="translate(4 4) scale(1.1)">
 						<line	x1="81.5" y1="391" x2="127.5" y2="250" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="stroke-width:35"/>
@@ -3324,7 +3317,6 @@ $measurefunctions = '
 		$last_x += 36;
 		$linebuttons.= '
 				<g id="line" onmousedown="delete_lines();highlightbyid(\'del0\');" transform="translate('.$last_x.' 0 )">
-					<rect x="0" y="0" width="36" height="36" class="navbutton_bg"/>
 		      <rect id="del0" onmouseover="show_tooltip(\''.$strDelLine.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
 					<g class="navbutton navbutton_stroke" transform="translate(4 4) scale(1.1)">
 						<line	x1="81.5" y1="391" x2="127.5" y2="250" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="stroke-width:35"/>
@@ -3348,7 +3340,6 @@ $measurefunctions = '
 		global $last_x;
 		$linebuttons = '				
 				<g id="line" onmousedown="split_geometry();highlightbyid(\'split0\');" transform="translate('.$last_x.' 0 )">
-					<rect x="0" y="0" width="36" height="36" class="navbutton_bg"/>
 		      <rect id="split0" onmouseover="show_tooltip(\''.$strSplitLine.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
 					<g class="navbutton navbutton_stroke" transform="translate(4 4) scale(1.1)">
 						<line	x1="81.5" y1="391" x2="127.5" y2="250" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="stroke-width:35"/>
@@ -3361,7 +3352,6 @@ $measurefunctions = '
 		$last_x += 36;
 		$linebuttons.= '
 				<g id="line" onmousedown="reverse_geom();highlightbyid(\'reverse0\');" transform="translate('.$last_x.' 0 )">
-					<rect x="0" y="0" width="36" height="36" class="navbutton_bg"/>
 		      <rect id="reverse0" onmouseover="show_tooltip(\''.$strReverse.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
 					<g class="navbutton navbutton_stroke" transform="translate(4 4) scale(1.1)">
 						<g transform="scale(0.9 0.9) translate(8 3) rotate(20 0 0)">
@@ -3387,7 +3377,6 @@ $measurefunctions = '
   	global $last_x;
     $flurstquerybuttons = '
       <g id="query_add" transform="translate('.$last_x.' 0)">
-				<rect x="0" y="0" width="36" height="36" class="navbutton_bg"/>
         <rect id="ppquery0" onmouseover="show_tooltip(\'vorhandene Geometrie hinzuf\u00fcgen\',evt.clientX,evt.clientY)" onmousedown="add_geometry();hide_tooltip();highlightbyid(\'ppquery0\');" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
 				<g class="navbutton" transform="translate(5 5) scale(0.8)">
 					<g transform="translate(9 -8)">
@@ -3406,7 +3395,6 @@ $measurefunctions = '
     $last_x += 36;
     $flurstquerybuttons .= '
 		  <g id="query_subtract" transform="translate('.$last_x.' 0)">
-				<rect x="0" y="0" width="36" height="36" class="navbutton_bg"/>
         <rect id="ppquery1" onmouseover="show_tooltip(\'mit vorhandener Geometrie ausschneiden\',evt.clientX,evt.clientY)" onmousedown="subtract_geometry();hide_tooltip();highlightbyid(\'ppquery1\');" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
         <g class="navbutton" transform="translate(5 5) scale(0.8)">
 					<g transform="translate(9 -8)">
@@ -3429,7 +3417,6 @@ $measurefunctions = '
   	global $last_x;
     $bufferbuttons = '
       <g id="buffer_add" transform="translate('.$last_x.' 0)">
-				<rect x="0" y="0" width="36" height="36" class="navbutton_bg"/>
 				<rect id="buffer0" onmouseover="show_tooltip(\''.$strBuffer.'\',evt.clientX,evt.clientY)" onmousedown="add_buffer();hide_tooltip();highlightbyid(\'buffer0\');" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
         <g class="navbutton navbutton_stroke" transform="translate(3.5 3) scale(1.1)">
 					<polygon class="navbutton_nofill" points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284	379.5,218 378.5,139 357.5,138 260.5,91"
@@ -3443,7 +3430,6 @@ $measurefunctions = '
 		$last_x += 36;
 		$bufferbuttons .= '
       <g id="buffer_add_line" transform="translate('.$last_x.' 0)">
-				<rect x="0" y="0" width="36" height="36" class="navbutton_bg"/>
         <rect id="buffer1" onmouseover="show_tooltip(\''.$strBufferedLine.'\',evt.clientX,evt.clientY)" onmousedown="add_buffered_line();hide_tooltip();highlightbyid(\'buffer1\');" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
 				<g class="navbutton navbutton_semifill navbutton_stroke" transform="translate(5 3) scale(1.1)">
 					<polygon points="221 339 212 344 204 351 197 359 192 368 189 378 188 389 189 399 192 410 197 419 322 607 329 615 337 622 346 627 356 630 366 631 377 630 387 627 396 622 404 616 499 525 506 517 511 508 515 498 516 487 515 477 512 466 507 457 501 449 493 442 484 437 474 433 463 432 453 433 442 436 433 441 425 447 376 493 323 414 524 331 533 326 541 319 548 311 553 302 556 292 557 281 556 270 553 260 548 251 541 243 533 236 524 231 514 228 503 227 492 228 482 231 221 339"
@@ -3455,7 +3441,6 @@ $measurefunctions = '
 			$last_x += 36;
 		$bufferbuttons .= '
       <g id="parallel_polygon" transform="translate('.$last_x.' 0)">
-				<rect x="0" y="0" width="36" height="36" class="navbutton_bg"/>
         <rect id="buffer2" onmouseover="show_tooltip(\''.$strParallelPolygon.'\',evt.clientX,evt.clientY)" onmousedown="add_parallel_polygon();hide_tooltip();highlightbyid(\'buffer2\');" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
 				<g class="navbutton navbutton_semifill navbutton_stroke" transform="translate(5 3) scale(1.1)">
 					<polyline class="navbutton_nofill" points="476 285 677 517" transform="translate(0 -41) scale(0.070) rotate(94 197 419)" style="stroke-width:20"/>
@@ -3472,7 +3457,6 @@ $measurefunctions = '
   	global $last_x;
     $special_bufferbuttons = '
       <g id="buffer_add" transform="translate('.$last_x.' 0)">
-				<rect x="0" y="0" width="36" height="36" class="navbutton_bg"/>
 				<rect id="buffer0" onmouseover="show_tooltip(\''.$strSpecialBuffer.'\',evt.clientX,evt.clientY)" onmousedown="add_buffer();hide_tooltip();highlightbyid(\'buffer0\');" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
         <g class="navbutton navbutton_stroke" transform="translate(5 3) scale(1.1)">
 					<polygon class="navbutton_nofill" points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284	379.5,218 378.5,139 357.5,138 260.5,91"
@@ -3491,7 +3475,6 @@ $measurefunctions = '
 		global $last_x;
 		$transform_buttons ='
 			<g id="vertex_edit" transform="translate('.$last_x.' 0)">
-				<rect x="0" y="0" width="36" height="36" class="navbutton_bg"/>
         <rect id="move1" onmouseover="show_tooltip(\''.$strMoveGeometry.'\',evt.clientX,evt.clientY)" onmousedown="highlightbyid(\'move1\');move_geometry();hide_tooltip();" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
 				<g class="navbutton navbutton_stroke" transform="translate(5 5) scale(1.1)">
 					<polygon class="navbutton_nofill" points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284	379.5,218 378.5,139 357.5,138 260.5,91"
@@ -3511,7 +3494,6 @@ $measurefunctions = '
 		global $last_x;
 		$vertex_edit_buttons ='
 			<g id="vertex_edit" transform="translate('.$last_x.' 0)">
-				<rect x="0" y="0" width="36" height="36" class="navbutton_bg"/>
 				<rect id="vertex_edit1" onmouseover="show_tooltip(\''.$strCornerPoint.'\',evt.clientX,evt.clientY)" onmousedown="highlightbyid(\'vertex_edit1\');edit_vertices();hide_tooltip();" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
 				<g class="navbutton" transform="translate(4 4) scale(1)">
 					<g transform="translate(-10.8 -9.5)">
@@ -3535,7 +3517,6 @@ $measurefunctions = '
 		global $last_x;
 		$vertex_edit_buttons ='
 			<g id="vertex_edit" transform="translate('.$last_x.' 0)">
-				<rect x="0" y="0" width="36" height="36" class="navbutton_bg"/>
 				<rect id="coord_input1" onmouseover="show_tooltip(\'Koordinate eingeben\',evt.clientX,evt.clientY)" onmousedown="coord_input();hide_tooltip();" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
 				<g class="navbutton" transform="translate(4 4) scale(1)">
 					<circle cx="178.579" cy="57.7353" r="3" transform="translate(-166 -41)"/>

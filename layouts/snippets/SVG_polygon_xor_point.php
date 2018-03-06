@@ -76,10 +76,13 @@ $svg .='
 $svg .= $canvaswithall;
 $svg .= $navbuttons;
 $svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate(0 36)">';
-$svg .= deletebuttons($strUndo, $strDelete);
-$svg .= polygonbuttons($strDrawPolygon, $strCutByPolygon);
-$svg .= vertex_edit_buttons($strCornerPoint);
-$svg .= pointbuttons($strSetPosition);
+$buttons_fs .= deletebuttons($strUndo, $strDelete);
+$buttons_fs .= polygonbuttons($strDrawPolygon, $strCutByPolygon);
+$buttons_fs .= vertex_edit_buttons($strCornerPoint);
+$buttons_fs .= pointbuttons($strSetPosition);
+global $last_x;
+$svg .= '<rect x="0" y="0" rx="3" ry="3" width="'.$last_x.'" height="36" class="navbutton_bg"/>';
+$svg .= $buttons_fs;
 $svg .= '</g>';
 $svg .= $SVG_end;
 

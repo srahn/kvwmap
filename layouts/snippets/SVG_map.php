@@ -272,6 +272,7 @@
   $dy       = $this->map->extent->maxy-$this->map->extent->miny;
   $scale    = ($dx/$res_x+$dy/$res_y)/2;
   $radius = $this->formvars['searchradius'] / $scale;
+	global $last_x;
 
 
 $fpsvg = fopen(IMAGEPATH.$svgfile,'w') or die('fail: fopen('.$svgfile.')');
@@ -1827,6 +1828,7 @@ $svg.='
 			<line stroke="#111" stroke-width="14" id="linie" x1="-5000" y1="-5000" x2="-5001" y2="-5001" opacity="0.8" onmouseover="activate_line(evt)" onmousemove="activate_line(evt)" />
 		</g>
     <g id="buttons" onmouseout="hide_tooltip()" onmousemove="get_bbox();" onmousedown="hide_tooltip()" cursor="pointer">
+			<rect x="0" y="0" rx="3" ry="3" width="'.$last_x.'" height="36" class="navbutton_bg"/>
 '.$SVGvars_mainnavbuttons.'
     </g>
 		<g id="tooltipgroup" onmouseover="prevent=1;" onmouseout="prevent=0;">
