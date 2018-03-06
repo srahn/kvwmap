@@ -1478,7 +1478,7 @@ function add_vertex(evt){
 			vertex.setAttribute("opacity", "0.8");
 		}
 	}
-	if(doing == "polygonquery"){
+	if(doing == "polygonquery" || doing == "drawpolygon"){
 		if(!polydrawing){
 			restart();
 			polydrawing = true;
@@ -1486,7 +1486,7 @@ function add_vertex(evt){
   	polypathx.push(parseFloat(worldx));
   	polypathy.push(parseFloat(worldy));
 		redrawPolygon();
-		polygonarea();
+		if(doing == "polygonquery")polygonarea();
 		vertex.setAttribute("opacity", "0.8");
 	}
 	if(doing == "pquery" || doing == "ppquery"){

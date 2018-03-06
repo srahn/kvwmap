@@ -348,7 +348,7 @@ $SVGvars_defs = '
       <g id="ppquery" transform="translate('.$last_x.' 0)">
 				<rect x="0" y="0" width="36" height="36" class="navbutton_bg"/>
         <rect id="ppquery0" onmouseover="show_tooltip(\''.$strInfo.'\',evt.clientX,evt.clientY)" onmousedown="ppquery();hide_tooltip();highlightbyid(this.id);noMeasuring();" x="0" y="0" rx="3" ry="3"   width="36" height="36" class="navbutton_frame"/>
-				<g class="navbutton" transform="translate(5 5) scale(0.8)">
+				<g class="navbutton" transform="translate(6 5) scale(0.8)">
 					<text transform="scale(1.3 1)" x="11" y="25" style="text-anchor:middle;font-size:27px;font-family:Times;stroke: #5c88a8;">i</text>
 				</g>
       </g>';
