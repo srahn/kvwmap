@@ -40,6 +40,7 @@ body {
 
 .gui-table {
   width: 900px;
+	margin: auto;
 }
 
 form {
