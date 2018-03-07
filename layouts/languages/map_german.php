@@ -6,7 +6,7 @@
   $strChoose="Ausschnitt laden";
   $strMapSettingsFrom="Karteneinstellungen vom";
   $strPreviousView="vorherige Ansicht";
-  $strNextView="n\u00e4chste Ansicht";
+  $strNextView="nächste Ansicht";
   $strZoomIn="Hereinzoomen";
   $strZoomOut="Herauszoomen";
   $strZoomToFullExtent="Gesamtansicht";
@@ -20,7 +20,7 @@
   $strRuler="Wegstrecke messen";
   $strFreePolygon="Polygon zeichnen";
   $strFreeArrow="Pfeil zeichnen";
-  $strFreeText="Text Hinzuf\u00fcgen";
+  $strFreeText="Text Hinzufügen";
 	$strGPS="GPS-Verfolgungsmodus";
   $strX="R";  
   $strY="H";
