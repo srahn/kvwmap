@@ -75,13 +75,13 @@ $sizes = array(
 			'height' => 30
 		),
 		'map_functions_bar' => array(
-			'height' => 43
+			'height' => 37
 		),
 		'footer' => array(
-			'height' => 22
+			'height' => 23
 		),
 		'menue' => array(
-			'width'  => 211,				# Version 2.8 (neu ist nur das Komma, der Wert müsste aber gegebenenfalls auch angepasst werden, da die Button-Menüs jetzt breiter sind)
+			'width'  => 218,				# Version 2.8 (neu ist nur das Komma, der Wert müsste aber gegebenenfalls auch angepasst werden, da die Button-Menüs jetzt breiter sind)
 			'hide_width' => 22			# Version 2.8
 		),
 		'legend' => array(

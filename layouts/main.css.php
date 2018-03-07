@@ -663,13 +663,13 @@ a.menuered:hover {
 }
 
 #header{
-	height: <? echo ($size['header']['height'] - 2); ?>;
+	height: <? echo ($size['header']['height'] - 2); ?>px;
 	border: 1px solid; 
 	border-color: #ffffff #cccccc #bbbbbb;
 }
 
 #footer{
-	height: <? echo ($size['footer']['height'] - 2); ?>;
+	height: <? echo ($size['footer']['height'] - 2); ?>px;
 	border: 1px solid; 
 	border-color: #aaa #cccccc #cccccc;
 }
@@ -677,13 +677,13 @@ a.menuered:hover {
 #scale_bar {
 	background: <? echo BG_MENUETOP; ?>;
 	border-top: 1px solid #aaaaaa;
-	height: <? echo ($size['scale_bar']['height'] - 1); ?>;
+	height: <? echo ($size['scale_bar']['height'] - 1); ?>px;
 }
 
 #lagebezeichnung_bar{
 	background: <? echo BG_MENUETOP; ?>;
 	border-top: 1px solid #aaaaaa;
-	height: <? echo ($size['lagebezeichnung_bar']['height'] - 1); ?>;
+	height: <? echo ($size['lagebezeichnung_bar']['height'] - 1); ?>px;
 	text-align: center;
 }
 
@@ -697,7 +697,7 @@ a.menuered:hover {
 	background: linear-gradient(#fdfdfd, #DAE4EC);
 	border-top: 1px solid #ccc;
 	box-shadow: 0px 1px 0px #bbb;
-	height: 36px;
+	height: <? echo ($size['map_functions_bar']['height'] - 1); ?>px;
 }
 
 #legenddiv {
@@ -814,7 +814,6 @@ a.menuered:hover {
 	width: <?php echo ($size['legend']['width'] - 1); ?>px;
 	vertical-align: top;
 	background-image: url(../graphics/bg.gif);
-	border-top: 1px solid #eeeeee;
 }
 
 .slidinglegend_slideout {

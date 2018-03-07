@@ -261,7 +261,7 @@ echo'
   <input type="hidden" name="hoehe2" value = "257">
 ';
 #                  >>> object-tag: wmode="transparent" (hoehere anforderungen beim rendern!) <<<
-//echo '<EMBED align="center" SRC="'.TEMPPATH_REL.$svgfile.'" TYPE="image/svg+xml" width="'.($res_x+1).'" height="'.($res_y+1).'" PLUGINSPAGE="http://www.adobe.com/svg/viewer/install/"/>';
+//echo '<EMBED align="center" SRC="'.TEMPPATH_REL.$svgfile.'" TYPE="image/svg+xml" width="'.$res_x.'" height="'.$res_y.'" PLUGINSPAGE="http://www.adobe.com/svg/viewer/install/"/>';
 # echo '<iframe src="'.TEMPPATH_REL.$svgfile.'" width="'.$res_x.'" height="'.$res_y.'" name="map"></iframe>';
 echo '<script src="funktionen/Embed2.js" language="JavaScript" type="text/javascript"></script>';
 

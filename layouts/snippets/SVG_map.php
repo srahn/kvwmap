@@ -1857,11 +1857,11 @@ $svg.='
 # Variablen die dann in Embed.js benutzt werden:
 echo'
   <input type="hidden" name="srcpath1" value = "'.TEMPPATH_REL.$svgfile.'">
-  <input type="hidden" name="breite1" value = "'.($res_x + 1).'">			<!-- muss seltsamerweise um 1 größer sein, da das SVG sonst unscharf wird -->
-  <input type="hidden" name="hoehe1" value = "'.($res_y + 1).'">
+  <input type="hidden" name="breite1" value = "'.$res_x.'">
+  <input type="hidden" name="hoehe1" value = "'.$res_y.'">
 ';
 #                  >>> object-tag: wmode="transparent" (hoehere anforderungen beim rendern!) <<<
-#echo '<EMBED align="center" SRC="'.TEMPPATH_REL.$svgfile.'" TYPE="image/svg+xml" width="'.($res_x+1).'" height="'.($res_y+1).'" PLUGINSPAGE="http://www.adobe.com/svg/viewer/install/"/>';
+#echo '<EMBED align="center" SRC="'.TEMPPATH_REL.$svgfile.'" TYPE="image/svg+xml" width="'.$res_x.'" height="'.$res_y.'" PLUGINSPAGE="http://www.adobe.com/svg/viewer/install/"/>';
 # echo '<iframe src="'.TEMPPATH_REL.$svgfile.'" width="'.$res_x.'" height="'.$res_y.'" name="map"></iframe>';
 echo '<script src="funktionen/Embed.js" language="JavaScript" type="text/javascript"></script>';
 
