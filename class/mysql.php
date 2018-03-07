@@ -907,7 +907,7 @@ INSERT INTO u_styles2classes (
 					if ($search != NULL) $query = str_replace($search, $replace, $query);
 					foreach (explode(chr(10), $query) as $line) {
 						if (strpos($line, "--") !== 0 && strpos($line, "#") !== 0) { // Zeilen mit Kommentarzeichen ignorieren
-							$query_to_execute .= ' ' . $line;
+							$query_to_execute .= $line;
 						}
 					}
 					if (!empty($query_to_execute)) {
