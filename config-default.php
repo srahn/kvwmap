@@ -616,6 +616,7 @@ $kvwmap_plugins = array();																			# Version 1.11.0
 #$kvwmap_plugins[] = 'nachweisverwaltung';											# Version 2.0.0
 #$kvwmap_plugins[] = 'probaug';																	# Version 2.0.0
 #$kvwmap_plugins[] = 'wasserrecht';															# Version 2.8.0
+#$kvwmap_plugins[] = 'xplankonverter';															# Version 2.8.0
 #############################################################		# Version 1.11.0
 
 # Festlegung von Fehlermeldungen und Hinweisen
