@@ -40,6 +40,13 @@
   </table>
   
   <input name="sub_<? echo $this->formvars['selected_layer_id']; ?>_form_field_names" id="sub_<? echo $this->formvars['selected_layer_id']; ?>_form_field_names" type="hidden" value="<?php echo $this->form_field_names; ?>">
+
+<?	// für das eingebettete Rasterlayout
+		if($anzObj > 1){ ?>
+		<script type="text/javascript">
+			document.getElementById('show_all_<? echo $this->formvars['targetobject'];?>').style.display = '';
+		</script>
+<? } ?>
 	
 ~
 var overlay_bottom = parseInt(<? echo $this->user->rolle->nImageHeight+30; ?>) + parseInt(document.GUI.overlayy.value);
