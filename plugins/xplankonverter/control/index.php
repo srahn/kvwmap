@@ -30,8 +30,8 @@ include(PLUGINS . 'xplankonverter/model/converter.php');
 * xplankonverter_konvertierungen_index
 * xplankonverter_shapefiles_index
 * xplankonverter_shapefiles_delete
-* xplankonverter_konvertierung_status
 * xplankonverter_konvertierung
+* xplankonverter_konvertierung_status
 * xplankonverter_validierungsergebnisse
 * xplankonverter_gml_generieren
 * xplankonverter_konvertierung_loeschen
@@ -414,6 +414,7 @@ switch($go){
 				$this->konvertierung->set_status(
 					($this->konvertierung->validierung_erfolgreich() ? 'Konvertierung abgeschlossen' : 'Konvertierung abgebrochen')
 				);
+
 				# Validierungsergebnisse anzeigen.
 				$this->main = '../../plugins/xplankonverter/view/validierungsergebnisse.php';
 			}

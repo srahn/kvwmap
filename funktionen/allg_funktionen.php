@@ -51,13 +51,16 @@ function compare_legendorder($a, $b){
 }
 
 function JSON_to_PG($json, $quote = ''){
-	if(is_array($json)){
+	if(is_string($json) AND (strpos($json, '{') !== false OR strpos($json, '[') !== false)){			// bei Bedarf den JSON-String decodieren
+		$json = json_decode($json);
+	}
+	if(is_array($json)){		// entspricht Array-Datentyp
 		for($i = 0; $i < count($json); $i++){
 			$elems[] = JSON_to_PG($json[$i], '"');
 		}
 		$pg = '{'.@implode(',', $elems).'}';
 	}
-	elseif(is_object($json)){
+	elseif(is_object($json)){		// entspricht Nutzer-Datentyp
 		if($quote == '')$new_quote = '"';
 		else $new_quote = '\\'.$quote;
 		foreach($json as $elem){

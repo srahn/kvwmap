@@ -135,28 +135,37 @@ class Gml_builder {
 		// Zugehörigkeit zur Konvertierung auszuwählen?
 		$sql = "
 			SELECT
-		b.*,
-		ST_AsGML(
-			3,
-			ST_Reverse(ST_Transform(
-				b.geltungsbereich,
-				{$konvertierung->get('output_epsg')})),
-				{$konvertierung->get('geom_precision')},
-				0,
-				null,
-				'GML_' || b.gml_id::text || '_geom' ) AS gml_geltungsbereich,
+				b.*,
+				ST_AsGML(
+					3,
+					ST_Reverse(
+						ST_Transform(
+							b.geltungsbereich,
+							{$konvertierung->get('output_epsg')}
+						)
+					),
+					{$konvertierung->get('geom_precision')},
+					0,
+					null,
+					'GML_' || b.gml_id::text || '_geom'
+				) AS gml_geltungsbereich,
 				ST_AsGML(
 					3,
 					ST_Transform(
 						b.geltungsbereich,
-						{$konvertierung->get('output_epsg')}),
-						{$konvertierung->get('geom_precision')},
-						32,
-						null,
-						'GML_' || b.gml_id::text || '_envelope' ) AS envelope
-						FROM " . XPLANKONVERTER_CONTENT_SCHEMA . ".rp_bereich b
-						JOIN " . XPLANKONVERTER_CONTENT_SCHEMA . ".rp_plan p ON b.gehoertzuplan = p.gml_id::text
-						WHERE p.konvertierung_id = {$konvertierung->get('id')}";
+						{$konvertierung->get('output_epsg')}
+					),
+					{$konvertierung->get('geom_precision')},
+					32,
+					null,
+					'GML_' || b.gml_id::text || '_envelope'
+				) AS envelope
+			FROM
+				" . XPLANKONVERTER_CONTENT_SCHEMA . ".rp_bereich b JOIN
+				" . XPLANKONVERTER_CONTENT_SCHEMA . ".rp_plan p ON (b.gehoertzuplan = p.gml_id::text)
+			WHERE
+				p.konvertierung_id = " .$konvertierung->get('id') . " 
+		";
 		#echo $sql."\n";
 		$bereiche = pg_query($this->database->dbConn, $sql);
 
@@ -266,10 +275,10 @@ class Gml_builder {
     $gmlStr = '';
     foreach ($uml_attribute_info as  $uml_attribute) {
       // leere Felder auslassen
-      if (empty($gml_object[$uml_attribute['col_name']])) continue;
+      if ($gml_object[$uml_attribute['col_name']] == '') continue;
 
       $lowercaseName = strtolower($uml_attribute['name']);
-	  //$gmlStr .= '<note>attributname: ' . $uml_attribute['name'] . ' type_type: ' . $uml_attribute['type_type'] . ' stereotype: ' . $uml_attribute['stereotype'] . '</note>';
+	  #$gmlStr .= '<note>attributname: ' . $uml_attribute['name'] . ' type_type: ' . $uml_attribute['type_type'] . ' stereotype: ' . $uml_attribute['stereotype'] . '</note>';
       switch ($uml_attribute['type_type']) {
         case 'c': // custom datatype
           switch ($uml_attribute['stereotype']){
@@ -324,7 +333,7 @@ class Gml_builder {
           }
           break;
         case 'b': // built-in datatype
-					switch ($uml_attribute['type']) {
+          switch ($uml_attribute['type']) {
 						case 'geometry' : {
 							$gml_value = $gml_object['gml_'.$uml_attribute['col_name']];
 							// unify gml_ids by appending a sequential number to the id

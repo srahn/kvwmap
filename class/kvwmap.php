@@ -8643,7 +8643,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						}
 						if (substr($table['datatype'][$i], 0, 1) == '_' OR is_numeric($table['datatype'][$i])){
 							# bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln
-							$this->formvars[$table['formfield'][$i]] = JSON_to_PG(json_decode($this->formvars[$table['formfield'][$i]]));
+							$this->formvars[$table['formfield'][$i]] = JSON_to_PG($this->formvars[$table['formfield'][$i]]);
 						}
 						$sql .= "'" . $this->formvars[$table['formfield'][$i]] . "', "; # Typ "normal"
 					}
@@ -12268,7 +12268,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
             default : {
               if($tablename AND $formtype != 'dynamicLink' AND $formtype != 'Text_not_saveable' AND $formtype != 'Auswahlfeld_not_saveable' AND $formtype != 'SubFormPK' AND $formtype != 'SubFormFK' AND $formtype != 'SubFormEmbeddedPK' AND $attributname != 'the_geom'){							
 								if(POSTGRESVERSION >= 930 AND (substr($datatype, 0, 1) == '_' OR is_numeric($datatype))){
-              		$this->formvars[$form_fields[$i]] = JSON_to_PG(json_decode($this->formvars[$form_fields[$i]]));		# bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln									
+              		$this->formvars[$form_fields[$i]] = JSON_to_PG($this->formvars[$form_fields[$i]]);		# bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln									
               	}
                 if($this->formvars[$form_fields[$i]] == ''){
 									$eintrag = 'NULL';

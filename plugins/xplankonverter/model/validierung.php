@@ -311,8 +311,8 @@ class Validierung extends PgObject {
 			'select',
 			"select
 				gid,
-				NOT st_within(st_transform(the_geom, " . $konvertierung->get('output_epsg') . "), st_transform(rp_plan.raeumlichergeltungsbereich, " . $konvertierung->get('output_epsg') . ")) AS ausserhalb,
-				st_distance(st_transform(the_geom, " . $konvertierung->get('output_epsg') . "), st_transform(rp_plan.raeumlichergeltungsbereich, " . $konvertierung->get('output_epsg') . "))/1000 AS distance,
+				NOT st_within(the_geom, rp_plan.raeumlichergeltungsbereich) AS ausserhalb,
+				st_distance(ST_Transform(the_geom, 25832), rp_plan.raeumlichergeltungsbereich)/1000 AS distance,
 			",
 			$sql
 		);
@@ -332,7 +332,8 @@ class Validierung extends PgObject {
 		$sql = str_ireplace(
 			'where',
 			"where
-				rp_plan.konvertierung_id = " . $konvertierung->get('id') . " AND (
+				rp_plan.konvertierung_id = " . $konvertierung->get('id') . " AND 
+				NOT st_within(the_geom, raeumlichergeltungsbereich) AND (
 			",
 			$sql
 		);
