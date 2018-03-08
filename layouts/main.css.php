@@ -703,8 +703,10 @@ a.menuered:hover {
 
 #legenddiv {
 	border-left: 1px solid #ccc;
+	box-shadow: 0px 1px 0px #bbb;
 	display: flex; 
 	flex-direction: column;
+	background-image: url(../graphics/bg.gif);
 }
 
 #legend_layer{
@@ -814,17 +816,12 @@ a.menuered:hover {
 	float: right;
 	width: <?php echo ($size['legend']['width'] - 1); ?>px;
 	vertical-align: top;
-	background-image: url(../graphics/bg.gif);
 }
 
 .slidinglegend_slideout {
 	cursor: pointer;
 	right: -<?php echo $size['legend']['width']; ?>px;
 	position:absolute;
-	border-top: 1px solid #eeeeee;
-	border-left:1px solid #CCCCCC;
-	border-bottom: 1px solid #aaaaaa;
-	background-image: url(../graphics/bg.gif);
 	transform: translate3d(-<? echo ($size['legend']['hide_width'] + 2); ?>px,0px,0px);
 	transition: all 0.3s ease;
 }
@@ -838,10 +835,6 @@ a.menuered:hover {
 .slidinglegend_slidein {
 	right: -<?php echo $size['legend']['width']; ?>px;
 	position: absolute;
-	border-top: 1px solid #eeeeee;
-	border-left:1px solid #CCCCCC;
-	border-bottom: 1px solid #aaaaaa;
-	background-image: url(../graphics/bg.gif);
 	transform: translate3d(-<?php echo $size['legend']['width']; ?>px,0px,0px);
 	transition: all 0.3s ease;
 }
