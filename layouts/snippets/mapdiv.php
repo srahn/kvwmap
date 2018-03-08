@@ -107,69 +107,55 @@
 		</div><?
 		if ($this->user->rolle->showmapfunctions) { ?>
 			<div id="map_functions_bar">
-				<div id="maptime">
-					<div style="float: left; padding: 0 0 0 5;">
+				<div id="mapbuttons">
+					<div style="float: left;">
 						<a title="<? echo $strExtentURL ?>" href="javascript:showExtentURL(<? echo $this->user->rolle->epsg_code; ?>);">
-							<div class="button_background">
-								<div class="emboss url_extent">
-									<img src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
-								</div>
+							<div class="button url_extent">
+								<img src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
 							</div>
 						</a>
 					</div>
-					<div style="float: left; padding: 0 0 0 10;">
+					<div style="float: left;">
 						<a title="<? echo $strSaveExtent; ?>" href="index.php?go=Kartenkommentar_Formular">
-							<div class="button_background">
-								<div class="emboss save_extent">
-									<img src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
-								</div>
+							<div class="button save_extent">
+								<img src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
 							</div>
 						</a>
 					</div>				
-					<div style="float: left; padding: 0 0 0 10;">
+					<div style="float: left;">
 						<a title="<? echo $strChoose ?>" href="index.php?go=Kartenkommentar_Waehlen">
-							<div class="button_background">
-								<div class="emboss load_extent">
-									<img src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
-								</div>
+							<div class="button load_extent">
+								<img src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
 							</div>
 						</a>
 					</div>
-					<div style="float: left; padding: 0 0 0 10;">
+					<div style="float: left;">
 						<a title="<? echo $strSaveLayers; ?>" href="javascript:document.GUI.go.value='Layerauswahl_Formular';document.GUI.submit();">
-							<div class="button_background">
-								<div class="emboss save_layers">
-									<img src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
-								</div>
+							<div class="button save_layers">
+								<img src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
 							</div>
 						</a>
 					</div>
-					<div style="float: left; padding: 0 0 0 10;">
+					<div style="float: left;">
 						<a title="<? echo $strChooseLayers ?>" href="index.php?go=Layerauswahl_Waehlen">
-							<div class="button_background">
-								<div class="emboss load_layers">
-									<img src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
-								</div>
+							<div class="button load_layers">
+								<img src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
 							</div>
 						</a>
 					</div>
-					<div style="float: left; padding: 0 0 0 10;"><?
+					<div style="float: left;"><?
 						if (SHOW_MAP_IMAGE == 'true') { ?>
 							<a title="<? echo $strMapImageURL ?>" id="MapImageLink" href="javascript:showMapImage();">
-								<div class="button_background">
-									<div class="emboss save_image">
-										<img src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
-									</div>
+								<div class="button save_image">
+									<img src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
 								</div>
 							</a><?
 						} ?>
 					</div>
-					<div style="float: left; padding: 0 0 0 10;">
+					<div style="float: left;">
 						<a title="<? echo $strMapSize; ?>" href="javascript:resizemap2window();" >
-							<div class="button_background">
-								<div class="emboss resize_map">
-									<img src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
-								</div>
+							<div class="button resize_map">
+								<img src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
 							</div>
 						</a>
 					</div>

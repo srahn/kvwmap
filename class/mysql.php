@@ -781,60 +781,69 @@ INSERT INTO u_styles2classes (
 	}
 
 	function create_insert_dump($table, $extra, $sql){
+		#echo '<br>Create_insert_dump for table: ' . $table;
+		#echo '<br>sql: ' . $sql;
+		#echo '<br>extra: ' . $extra;
 		# Funktion liefert das Ergebnis einer SQL-Abfrage als INSERT-Dump für die Tabelle "$table" 
 		# über $extra kann ein Feld angegeben werden, welches nicht mit in das INSERT aufgenommen wird
 		# dieses Feld wird jedoch auch mit abgefragt und separat zurückgeliefert
 		$this->debug->write("<p>file:kvwmap class:database->create_insert_dump :<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    $query = mysql_query($sql);
+    if ($query==0) {
+			$this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0;
+		}
 
     $feld_anzahl = mysql_num_fields($query);
-    for($i = 0; $i < $feld_anzahl; $i++){
-    	$meta = mysql_fetch_field($query,$i);
+		#echo '<br>Anzahl Felder: ' . $feld_anzahl;
+    for ($i = 0; $i < $feld_anzahl; $i++) {
+    	$meta = mysql_fetch_field($query, $i);
+			#echo '<br>Meta name: ' . $meta->name;
     	# array mit feldnamen
     	$felder[$i] = $meta->name;
-    	if($meta->name == 'connectiontype'){
+    	if ($meta->name == 'connectiontype'){
     		$connectiontype = $i;
     	}
     	if($meta->name == 'connection'){
     		$connection = $i;
     	}
     }
-    while($rs = mysql_fetch_array($query)){
+
+    while ($rs = mysql_fetch_array($query)) {
     	$insert = '';
-    	if($rs[$connectiontype] == 6){
+    	if ($rs[$connectiontype] == 6) {
     		$rs[$connection] = '@connection';
     	}
     	$insert .= 'INSERT INTO '.$table.' (';
-    	for($i = 0; $i < $feld_anzahl; $i++){
-    		if($felder[$i] != $extra){
+    	for ($i = 0; $i < $feld_anzahl; $i++) {
+    		if($felder[$i] != $extra) {
     			$insert .= "`".$felder[$i]."`";
-    			if($feld_anzahl-1 > $i){$insert .= ',';}
+    			if ($feld_anzahl-1 > $i){$insert .= ', ';}
     		}
     	}
-    	$insert .= ') VALUES(';
-    	for($i = 0; $i < $feld_anzahl; $i++){
-    		if($felder[$i] != $extra){
-    			if(strpos($rs[$i], '@') === 0){
+    	$insert .= ') VALUES (';
+    	for ($i = 0; $i < $feld_anzahl; $i++) {
+    		if ($felder[$i] != $extra) {
+    			if (strpos($rs[$i], '@') === 0) {
 	    			$insert .= addslashes($rs[$i]);
 	    		}
-	    		else{
-	    			if(mysql_field_type($query, $i) != 'string' AND mysql_field_type($query, $i) != 'blob' AND $rs[$i] == ''){
+	    		else {
+	    			if (mysql_field_type($query, $i) != 'string' AND mysql_field_type($query, $i) != 'blob' AND $rs[$i] == '') {
 	    				$insert .= "NULL";
-	    			}else{
+	    			} else{
     					$insert .= "'".addslashes($rs[$i])."'";
 	    			}
 	    		}
-	    		if($feld_anzahl-1 > $i){$insert .= ',';}
+	    		if ($feld_anzahl - 1 > $i) { $insert .= ', '; }
     		}
-    		else{
+    		else {
     			$dump['extra'][] = $rs[$i];
     		}
     	}
     	$insert .= ');';
     	$dump['insert'][] = $insert;
     }
-   return $dump;
+		#echo '<br>insert: ' . $insert;
+		return $dump;
 	}
 
   function create_update_dump($table){
@@ -889,32 +898,37 @@ INSERT INTO u_styles2classes (
     return mysql_close($this->dbConn);
   }
 
-	function exec_file($filename, $search, $replace){
-    if($file = file_get_contents($filename)){
-			foreach(explode(';'.chr(10), $file) as $query2){		// verschiedene Varianten des Zeilenumbruchs berücksichtigen
-				foreach(explode(';'.chr(13), $query2) as $query){
+	function exec_file($filename, $search, $replace, $replace_constants = false) {
+		if ($file = file_get_contents($filename)) {
+			foreach (explode(';' . chr(10), $file) as $query2) { // verschiedene Varianten des Zeilenumbruchs berücksichtigen
+				foreach (explode(';' . chr(13), $query2) as $query) {
 					$query_to_execute = '';
 					$query = trim($query);
-					if($search != NULL)$query = str_replace($search, $replace, $query);
-					foreach(explode(chr(10), $query) as $line){
-						if(strpos($line, "--") !== 0 && strpos($line, "#") !== 0){					// Zeilen mit Kommentarzeichen ignorieren
+					if ($search != NULL) $query = str_replace($search, $replace, $query);
+					foreach (explode(chr(10), $query) as $line) {
+						if (strpos($line, "--") !== 0 && strpos($line, "#") !== 0) { // Zeilen mit Kommentarzeichen ignorieren
 							$query_to_execute .= $line;
 						}
 					}
-					#echo $query_to_execute.'<br><br>';
 					if (!empty($query_to_execute)) {
 						$query_to_execute = str_replace('$EPSGCODE_ALKIS', EPSGCODE_ALKIS, $query_to_execute);
 						$query_to_execute = str_replace(':alkis_epsg', EPSGCODE_ALKIS, $query_to_execute);
+						if ($replace_constants) {
+							foreach (get_defined_constants(true)['user'] AS $key => $value) {
+								$query_to_execute = str_replace('$' . $key, $value, $query_to_execute);
+							}
+						}
+						#echo '<br>exec sql: ' . $query_to_execute;
 						$ret=$this->execSQL($query_to_execute, 0, 0);
-						if($ret[0] == 1){
+						if($ret[0] == 1) {
 							return $ret;
 						}
 					}
 				}
 			}
-    }
+		}
 	}
-	
+
   function begintransaction() {
     # Starten einer Transaktion
     # initiates a transaction block, that is, all statements

@@ -62,10 +62,10 @@ function back(){
           </select> 
           </td>
           <td align="left"> 
-			    	<input class="button" type="button" name="zurueck" value="zurück" onclick="back();">
+			    	<input type="button" name="zurueck" value="zurück" onclick="back();">
 			    </td>
           <td align="left"> 
-			    	<input class="button" type="button" name="drucken" value="Drucken" onclick="print();">
+			    	<input type="button" name="drucken" value="Drucken" onclick="print();">
 			    </td>
         </tr>
       </table> 

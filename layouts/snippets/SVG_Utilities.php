@@ -23,8 +23,11 @@
  
 <?php
 
-	include(LAYOUTPATH.'snippets/SVGvars_navbuttons.php'); 		# zuweisen von: $SVGvars_navbuttons
+	global $last_x;$last_x = 0;
+	global $events;$events = true;
+
 	include(LAYOUTPATH.'snippets/SVGvars_defs.php'); 					# zuweisen von: $SVGvars_defs
+	include(LAYOUTPATH.'snippets/SVGvars_navbuttons.php'); 		# zuweisen von: $SVGvars_navbuttons	
 	include(LAYOUTPATH.'snippets/SVGvars_coordscript.php'); 	# zuweisen von: $SVGvars_coordscript
 	include(LAYOUTPATH.'snippets/SVGvars_tooltipscript.php');	# zuweisen von: $SVGvars_tooltipscript
 	include(LAYOUTPATH.'snippets/SVGvars_tooltipblank.php');	# zuweisen von: $SVGvars_tooltipblank
@@ -127,9 +130,8 @@
 	var moving  = false;
 	var movinggeom  = false;
 	var moved  = false;
-	var highlighted  = "yellow";
 	var must_redraw = false;
-	var mobile = '.$_SESSION['mobile'].';
+	var mobile = '.$this->user->rolle->gps.';
 	var gps_follow_cooldown = 0;
 	var selected_vertex;
 	var last_selected_vertex;
@@ -431,7 +433,7 @@
 				if(linefunctions == true){
   				top.currentform.firstline.value = false;
   				top.currentform.secondline.value = false;
-  				restartline();
+  				restart();
 				}
 	  	}
 	  	top.currentform.newpath.value = paths[0];
@@ -605,17 +607,6 @@
 	  document.getElementById("canvas").setAttribute("visibility", "visible");
 		// --------------- FS-leiste ohne highlight ---------------------
 	 		document.getElementById("text0").style.setProperty("fill","ghostwhite", "");
-	//  document.getElementById("pgon0").style.setProperty("fill","ghostwhite", "");
-	//  document.getElementById("pgon1").style.setProperty("fill","ghostwhite", "");
-	//  document.getElementById("pgon2").style.setProperty("fill","ghostwhite", "");
-	//	var obj = document.getElementById("text0");
-	//	obj.setAttributeNS(null,"fill","none");
-	//	var obj = document.getElementById("pgon0");
-	//	obj.setAttributeNS(null,"fill","none");
-	//	var obj = document.getElementById("pgon1");
-	//	obj.setAttributeNS(null,"fill","none");
-	//	var obj = document.getElementById("pgon2");
-	//	obj.setAttributeNS(null,"fill","none");
 	}
 
 	function focus_FS(){
@@ -858,65 +849,19 @@ function mouseup(evt){
 
 	function highlightbyid(id){
 		if(id != ""){
-			document.getElementById("previous0").style.setProperty("fill","ghostwhite", "");
-			document.getElementById("next0").style.setProperty("fill","ghostwhite", "");
-			document.getElementById("zoomin0").style.setProperty("fill","ghostwhite", "");
-		  document.getElementById("zoomout0").style.setProperty("fill","ghostwhite", "");
-		  document.getElementById("recentre0").style.setProperty("fill","ghostwhite", "");
+			document.querySelector(".active").classList.remove("active");
+			document.getElementById(id).classList.add("active");
 		  if(polygonfunctions == true){
-		  	document.getElementById("pgon0").style.setProperty("fill","ghostwhite", "");
-		  	document.getElementById("undo0").style.setProperty("fill","ghostwhite", "");
-		  	document.getElementById("new0").style.setProperty("fill","ghostwhite", "");
-		  	document.getElementById("pgon_subtr0").style.setProperty("fill","ghostwhite", "");
-				document.getElementById("vertex_edit1").style.setProperty("fill","ghostwhite", "");
 				remove_vertices();
 				remove_in_between_vertices();
 		  }
-			if (polygonfunctions2 == true) {
-				document.getElementById("split0").style.setProperty("fill","ghostwhite", "");
-			}
 			if(linefunctions == true){
-				document.getElementById("undo0").style.setProperty("fill","ghostwhite", "");
-		  	document.getElementById("new0").style.setProperty("fill","ghostwhite", "");
-				document.getElementById("line0").style.setProperty("fill","ghostwhite", "");
-				document.getElementById("del0").style.setProperty("fill","ghostwhite", "");
-				document.getElementById("split0").style.setProperty("fill","ghostwhite", "");
-				document.getElementById("vertex_edit1").style.setProperty("fill","ghostwhite", "");
-				document.getElementById("reverse0").style.setProperty("fill","ghostwhite", "");
 				remove_vertices();
 				remove_in_between_vertices();
 			}
-			if(coord_input_functions == true){
-		  	document.getElementById("coord_input1").style.setProperty("fill","ghostwhite", "");
-		  }
-			if(transformfunctions == true){
-		  	document.getElementById("move1").style.setProperty("fill","ghostwhite", "");
-		  }
-			if(bufferfunctions == true){
-		  	document.getElementById("buffer0").style.setProperty("fill","ghostwhite", "");
-				document.getElementById("buffer1").style.setProperty("fill","ghostwhite", "");
-				document.getElementById("buffer2").style.setProperty("fill","ghostwhite", "");
-		  }
-			if(special_bufferfunctions == true){			
-				document.getElementById("buffer3").style.setProperty("fill","ghostwhite", "");
-			}
-		  if(flurstuecksqueryfunctions == true){
-		  	document.getElementById("ppquery0").style.setProperty("fill","ghostwhite", "");
-		  	document.getElementById("ppquery1").style.setProperty("fill","ghostwhite", "");
-		  }
-		  if(boxfunctions == true){
-		  	document.getElementById("box0").style.setProperty("fill","ghostwhite", "");
-		  }
-		  if(pointfunctions == true){
-		  	document.getElementById("text0").style.setProperty("fill","ghostwhite", "");
-		  }
-			if(measurefunctions == true){
-				document.getElementById("measure0").style.setProperty("fill","ghostwhite", "");
-			}
-			document.getElementById(id).style.setProperty("fill",highlighted, "");
 			top.currentform.last_button.value = id;
 			if(id == "recentre0"){
-				document.getElementById("canvas").setAttribute("cursor", "move");
+				document.getElementById("canvas").setAttribute("cursor", "grab");
 			}
 			else{
 				document.getElementById("canvas").setAttribute("cursor", "crosshair");
@@ -929,7 +874,7 @@ function mouseup(evt){
 		dragdone  = false;
 		moving  = false;
 		moved  = false;
-		highlightbyid(top.currentform.last_button.value);
+		document.getElementById(top.currentform.last_button.value).classList.add("active");
 		if(top.currentform.last_doing.value == "recentre"){
 	  	document.getElementById("canvas").setAttribute("cursor", "move");
 		}
@@ -1117,7 +1062,6 @@ function mouseup(evt){
 	
 	function draw_point() {
 	  //document.getElementById("canvas_FS").setAttribute("cursor", "text");
-	  document.getElementById("text0").style.setProperty("fill",highlighted, "");
 	  if(polygonfunctions == true){
 		 	if(top.currentform.secondpoly.value == "true"){
 				applypolygons();
@@ -1254,7 +1198,8 @@ function mouseup(evt){
 		remove_second_line();
 	}
 	
-	function restartline(){
+	function restart(){
+		highlightbyid(\'line0\');
 		top.currentform.last_doing.value = "draw_line";
 		top.currentform.newpath.value = "";
 		top.currentform.pathwkt.value = "";
@@ -2664,6 +2609,7 @@ function mouseup(evt){
 	}
 
 	function restart(){
+		highlightbyid(\'pgon0\');
 		top.currentform.last_doing.value = "draw_polygon";
 		top.currentform.last_doing2.value = "draw_polygon";
 		textx = -1000000;
@@ -2936,16 +2882,25 @@ $vertex_catch_functions = '
 
 $gps_functions = '  
   function update_gps_position(){
-		posx = top.currentform.gps_posx.value+"";
-		posy = top.currentform.gps_posy.value+"";
+		navigator.geolocation.getCurrentPosition(
+			function(position){		//success
+				var Projection = "'.$this->epsg_codes[$this->user->rolle->epsg_code]['proj4text'].'";
+				pos = top.proj4(Projection,[position.coords.longitude,position.coords.latitude]);
+				top.document.GUI.gps_posx.value = pos[0];
+				top.document.GUI.gps_posy.value = pos[1];
+			},
+			function(){}		// error
+		)
+		posx = top.document.GUI.gps_posx.value+"";
+		posy = top.document.GUI.gps_posy.value+"";
 		if(posx != "" && posy != ""){
-			x = (posx - minx)/scale;
-			y = (posy - miny)/scale;
+			x = Math.round((posx - parseFloat(top.document.GUI.minx.value))/parseFloat(top.document.GUI.pixelsize.value));
+			y = Math.round((posy - top.document.GUI.miny.value)/parseFloat(top.document.GUI.pixelsize.value));
 			//alert(x+" "+y);
 	  	var pos = document.getElementById("gps_position");
 	  	pos.setAttribute("x", x);
 	  	pos.setAttribute("y", y);
-			if(top.currentform.gps_follow.value == "on"){
+			if(top.document.GUI.gps_follow.value == "on"){
 				if(gps_follow_cooldown == 0 && (x < 50 || x > resx-50 || y < 50 || y > resy-50)){
 					gps_follow_cooldown = 3;
 					pathx[0] = x;
@@ -2957,7 +2912,6 @@ $gps_functions = '
 				}
 			}
 		}
-  	top.ahah("index.php", "go=get_gps_position&srs='.$this->user->rolle->epsg_code.'", new Array(top.currentform.gps_posx, top.currentform.gps_posy), "");
  	}
 
 	function set_gps_position() {
@@ -3177,512 +3131,407 @@ $measurefunctions = '
 	  </g>
 	  
 
-	  <g id="alleButtons" onmouseout="hide_tooltip()" transform="translate(0 0)">
+	  <g id="buttons" filter="url(#Schatten)" onmouseout="hide_tooltip()" transform="translate(0 0)">
 	  ';
-
+		
 	$navbuttons ='
 	    <g id="buttons_NAV" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()">
+				<rect x="0" y="0" rx="3" ry="3" width="'.$last_x.'" height="36" class="navbutton_bg"/>
 	'.$SVGvars_navbuttons.'
 			</g>
 	';
-
-	$last_x = 0;
-	function polygonbuttons($strUndo, $strDeletePolygon, $strDrawPolygon, $strCutByPolygon){
+		
+	$last_x = 0;	
+		
+	function deletebuttons($strUndo, $strDelete){
 		global $last_x;
-		$polygonbuttons = '
-	      <g id="new" onmousedown="restart();highlightbyid(\'pgon0\');" transform="translate(0 0 )">
-	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-	        	<set attributeName="filter" begin="new0.mousedown" fill="freeze" to="none"/>
-						<set attributeName="filter" begin="new0.mouseup;new0.mouseout" fill="freeze" to="url(#Schatten)"/>
-					</rect>
-					<path
-						d="M153.245 92.3923 C153.245 92.3923 198.593 158.983 242.478 202.712 C268.178 171.839
-							355.521 99.5384 355.521 99.5384 C355.521 99.5384 359.726 95.6673 364.892 97.8494
-							C370.059 100.031 369.612 108.695 369.612 108.695 C369.612 108.695 382.322
-							102.528 382.138 102.36 C399.506 105.821 402.66 122.15 402.66 122.15 C402.66
-							122.15 322.203 196.362 285.632 240.453 C314.809 273.344 401.918 327.398 408.194
-							337.179 C409.657 339.459 396.571 356.768 409.721 364.549 C422.871 372.333
-							402.255 381.996 395.718 384.985 C394.3 384.345 384.14 378.487 384.14 378.487
-							C382.185 390.247 369.745 392.867 369.745 392.867 C369.745 392.867 279.597 315.208
-							246.866 283.273 C218.575 317.649 164.421 399 164.421 399 C142.608 400.165
-							135.679 389.138 135.679 389.138 C135.679 389.138 128.054 398.628 119.9 394.204
-							C111.747 389.78 112.548 379.796 112.548 379.796 C112.548 379.796 98.637
-							382.887 94 373.273 C114.297 334.079 197.862 244.808 197.862 244.808 C160.996
-							217.608 96.482 122.942 96.482 122.942 C96.482 122.942 96.6355 104.726 106.055
-							98.6784 C104.503 99.1631 119.583 106.53 123.756 104.003 C131.237 99.4715 127.702
-							105.026 130.236 95.2056 C132.77 85.3855 153.245 92.3923 153.245 92.3923 z"
-						transform="matrix(1 0 0 1 0 0) translate(2 2) scale(0.042)" style="fill:rgb(0,0,0)"/>
-	        <rect id="new0" onmouseover="show_tooltip(\''.$strDeletePolygon.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="1" ry="1" width="25" height="25" opacity="0.2"/>
-	      </g>
-	      
-	      <g id="undo" onmousedown="deletelast(evt);" transform="translate(26 0)">
-	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-	        	<set attributeName="filter" begin="undo0.mousedown" fill="freeze" to="none"/>
-						<set attributeName="filter" begin="undo0.mouseup;undo0.mouseout" fill="freeze" to="url(#Schatten)"/>
-					</rect>
-					<g transform="translate(0 -4.5)">
-						<polygon points="178.579,57.7353 164.258,51.2544 178.96,44.515 174.48,51.1628"
-							 style="fill:rgb(0,0,0);stroke:rgb(0,0,0);stroke-width:2" transform="scale(0.36) translate(-139 136) rotate(-45 0 0)"/>
-						<path d="M137.5 355 C230.674 287.237 311.196 227.137 396.5 349"
-							transform="matrix(1 0 0 1 0 0) scale(0.05)"
-							 style="fill:none;stroke:rgb(0,0,0);stroke-width:30"/>
+		$deletebuttons = '
+	      <g id="new" onmousedown="restart();" transform="translate('.$last_x.' 0 )">
+					<rect id="new0" onmouseover="show_tooltip(\''.$strDelete.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+					<g class="navbutton" transform="translate(4 5) scale(0.8)">
+						<path
+							d="M153.245 92.3923 C153.245 92.3923 198.593 158.983 242.478 202.712 C268.178 171.839
+								355.521 99.5384 355.521 99.5384 C355.521 99.5384 359.726 95.6673 364.892 97.8494
+								C370.059 100.031 369.612 108.695 369.612 108.695 C369.612 108.695 382.322
+								102.528 382.138 102.36 C399.506 105.821 402.66 122.15 402.66 122.15 C402.66
+								122.15 322.203 196.362 285.632 240.453 C314.809 273.344 401.918 327.398 408.194
+								337.179 C409.657 339.459 396.571 356.768 409.721 364.549 C422.871 372.333
+								402.255 381.996 395.718 384.985 C394.3 384.345 384.14 378.487 384.14 378.487
+								C382.185 390.247 369.745 392.867 369.745 392.867 C369.745 392.867 279.597 315.208
+								246.866 283.273 C218.575 317.649 164.421 399 164.421 399 C142.608 400.165
+								135.679 389.138 135.679 389.138 C135.679 389.138 128.054 398.628 119.9 394.204
+								C111.747 389.78 112.548 379.796 112.548 379.796 C112.548 379.796 98.637
+								382.887 94 373.273 C114.297 334.079 197.862 244.808 197.862 244.808 C160.996
+								217.608 96.482 122.942 96.482 122.942 C96.482 122.942 96.6355 104.726 106.055
+								98.6784 C104.503 99.1631 119.583 106.53 123.756 104.003 C131.237 99.4715 127.702
+								105.026 130.236 95.2056 C132.77 85.3855 153.245 92.3923 153.245 92.3923 z"
+							transform="matrix(1 0 0 1 0 0) translate(2 2) scale(0.06)"/>
 					</g>
-	        <rect id="undo0" onmouseover="show_tooltip(\''.$strUndo.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="1" ry="1" width="25" height="25" transform="translate(0 0)" opacity="0.2"/>
+	      </g>';
+		$last_x += 36;
+		$deletebuttons.= '
+	      <g id="undo" onmousedown="deletelast(evt);" transform="translate('.$last_x.' 0)">
+					<rect id="undo0" onmouseover="show_tooltip(\''.$strUndo.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+					<g class="navbutton" transform="translate(5 5) scale(1)">
+						<g class="navbutton_stroke" transform="translate(0 -4.5)">
+							<polygon points="178.579,57.7353 164.258,51.2544 178.96,44.515 174.48,51.1628"
+								 style="stroke-width:4" transform="scale(0.36) translate(-139 136) rotate(-45 0 0)"/>
+							<path d="M137.5 355 C230.674 287.237 311.196 227.137 396.5 349"
+								transform="matrix(1 0 0 1 0 0) scale(0.05)"
+								 style="fill:none;stroke-width:40"/>
+						</g>
+					</g>
 	      </g>
-
-				<g id="pgon" onmousedown="draw_pgon_on();add_polygon();highlightbyid(\'pgon0\');" transform="translate(52 0 )">
-		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-		      	<set attributeName="filter" begin="pgon0.mousedown" fill="freeze" to="none"/>
-						<set attributeName="filter" begin="pgon0.mouseup;pgon0.mouseout" fill="freeze" to="url(#Schatten)"/>
-					</rect>
-					<polygon
-						points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284
-							379.5,218 378.5,139 357.5,138 260.5,91"
-						transform="matrix(1 0 0 1 0 0) scale(0.05)"
-						 style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
-					<rect id="pgon0" onmouseover="show_tooltip(\''.$strDrawPolygon.'\',evt.clientX,evt.clientY)" x="0" y="0" width="25" height="25" opacity="0.2"/>
-				</g>
-
-				<g id="pgon_subtr" onmousedown="draw_pgon_on();subtr_polygon();highlightbyid(\'pgon_subtr0\');" transform="translate(78 0 )">
-		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(111,111,111);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-		      	<set attributeName="filter" begin="pgon_subtr0.mousedown" fill="freeze" to="none"/>
-						<set attributeName="filter" begin="pgon_subtr0.mouseup;pgon_subtr0.mouseout" fill="freeze" to="url(#Schatten)"/>
-					</rect>
-					<polygon
-						points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284
-							379.5,218 378.5,139 357.5,138 260.5,91"
-						transform="matrix(1 0 0 1 0 0) scale(0.05)"
-						 style="fill:rgb(244,244,244);stroke:rgb(0,0,0);stroke-width:25"/>
-					<rect id="pgon_subtr0" onmouseover="show_tooltip(\''.$strCutByPolygon.'\',evt.clientX,evt.clientY)" x="0" y="0" width="25" height="25" opacity="0.2"/>
-				</g>
 		';
-		$last_x = 78;
-		return $polygonbuttons;
+		$last_x += 36;
+		return $deletebuttons;
 	}
 	
-	function polygonbuttons2($strSplitPolygon){
+	function polygonbuttons($strDrawPolygon, $strCutByPolygon){
 		global $last_x;
-		$last_x += 26;
-		$polygonbuttons = '				
-				<g id="line" onmousedown="split_geometry();highlightbyid(\'split0\');" transform="translate('.$last_x.' 0 )">
-		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-		      	<set attributeName="filter" begin="del0.mousedown" fill="freeze" to="none"/>
-						<set attributeName="filter" begin="del0.mouseup;del0.mouseout" fill="freeze" to="url(#Schatten)"/>
-					</rect>
-						<polygon
-						points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284
-							379.5,218 378.5,139 357.5,138 260.5,91"
-						transform="matrix(1 0 0 1 0 0) scale(0.05)"
-						 style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
-						<line x1="380" y1="420" x2="70" y2="80" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="fill:rgb(222,222,222);stroke:rgb(0,0,0);stroke-width:30"/>
-					<rect id="split0" onmouseover="show_tooltip(\''.$strSplitPolygon.'\',evt.clientX,evt.clientY)" x="0" y="0" width="25" height="25" style="fill:white;opacity:0.25"/>
+		$polygonbuttons = '
+				<g id="pgon" onmousedown="draw_pgon_on();add_polygon();highlightbyid(\'pgon0\');" transform="translate('.$last_x.' 0 )">
+		      <rect id="pgon0" onmouseover="show_tooltip(\''.$strDrawPolygon.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+					<g class="navbutton" transform="translate(5 5) scale(0.8)">
+						<g transform="translate(9 -8)">
+							<path d="M23,12 L16,12 C15.4,12 15,11.6 15,11 L15,10 C15,9.4 15.4,9 16,9 L23,9 C23.6,9 24,9.4 24,10 L24,11 C24,11.6 23.6,12 23,12"/>
+							<path d="M18,14 L18,7 C18,6.4 18.4,6 19,6 L20,6 C20.6,6 21,6.4 21,7 L21,14 C21,14.6 20.6,15 20,15 L19.0,15 C18.4,15 18,14.6 18,14"/>
+						</g>
+						<g transform="translate(-2 2)">
+							<path d="M16.25,29 C17.5,29 18.5,28 18.5,26.75 C18.5,25.5 17.5,24.5 16.25,24.5 C15.0,24.5 14.0,25.5 14,26.75 C14,28 15.0,29 16.25,29"/>
+							<path d="M14.95,5.5 C16.2,5.5 17.2,4.5 17.2,3.25 C17.2,2.0 16.2,1 14.95,1 C13.7,1 12.7,2.0 12.7,3.2 C12.7,4.5 13.7,5.5 14.95,5.5"/>
+							<path d="M8.3,29 C9.5,29 10.5,28 10.5,26.75 C10.5,25.5 9.5,24.5 8.3,24.5 C7.0,24.5 6,25.5 6,26.7 C6,28 7.0,29 8.25,29"/>
+							<path d="M3.3,23.2 C4.5,23.2 5.5,22.2 5.5,20.95 C5.5,19.7 4.5,18.7 3.2,18.7 C2.0,18.7 1.0,19.7 1.0,20.9 C1,22.2 2.0,23.2 3.3,23.2"/>
+							<path d="M5.3,11.2 C6.5,11.2 7.5,10.2 7.5,8.9 C7.5,7.7 6.5,6.7 5.3,6.7 C4.0,6.7 3,7.7 3,8.9 C3,10.2 4.0,11.2 5.3,11.2"/>
+							<path d="M26.7,9.6 C27.9,9.6 28.9,8.6 28.9,7.4 C28.9,6.1 27.9,5.1 26.7,5.1 C25.4,5.1 24.4,6.1 24.4,7.4 C24.4,8.6 25.4,9.6 26.7,9.6"/>
+							<path d="M24.6,23.9 C25.9,23.9 26.9,22.9 26.9,21.7 C26.9,20.4 25.9,19.4 24.6,19.4 C23.4,19.4 22.4,20.4 22.4,21.7 C22.4,22.9 23.4,23.9 24.6,23.9"/>
+							<path d="M10.3,27.8 L14.2,27.8 L18.5,26.5 L23.4,23.5 L25.9,19.8 L27.3,9.5 L25.1,5.8 L17.2,3 L12.7,3.4 L6.5,7.1 L3.9,10.8 L2.6,18.8 L3.8,23.1 L6.2,25.9 Z M10.3,25.8 L14.2,25.8 L17.4,24.8 L22.4,21.8 L23.9,19.5 L25.4,9.2 L24.4,7.6 L16.5,4.8 L13.7,5.1 L7.5,8.8 L5.9,11.1 L4.6,19.1 L5.3,21.8 L7.7,24.6 Z" style="fill-rule: evenodd;"/>
+							<path d="M10.3,25.8 L14.2,25.8 L17.4,24.8 L22.4,21.8 L23.9,19.5 L25.4,9.2 L24.4,7.6 L16.5,4.8 L13.7,5.1 L7.5,8.8 L5.9,11.1 L4.6,19.1 L5.3,21.8 L7.7,24.6 Z" class="navbutton_semifill"/>
+						</g>
+					</g>
+				</g>';
+		$last_x += 36;
+		$polygonbuttons.= '
+				<g id="pgon_subtr" onmousedown="draw_pgon_on();subtr_polygon();highlightbyid(\'pgon_subtr0\');" transform="translate('.$last_x.' 0 )">
+		      <rect id="pgon_subtr0" onmouseover="show_tooltip(\''.$strCutByPolygon.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+					<g class="navbutton" transform="translate(5 5) scale(0.8)">
+						<g transform="translate(9 -8)">
+							<path d="M23,12 L16,12 C15.4,12 15,11.6 15,11 L15,10 C15,9.4 15.4,9 16,9 L23,9 C23.6,9 24,9.4 24,10 L24,11 C24,11.6 23.6,12 23,12"/>
+						</g>
+						<g transform="translate(-2 2)">
+							<path d="M16.25,29 C17.5,29 18.5,28 18.5,26.75 C18.5,25.5 17.5,24.5 16.25,24.5 C15.0,24.5 14.0,25.5 14,26.75 C14,28 15.0,29 16.25,29"/>
+							<path d="M14.95,5.5 C16.2,5.5 17.2,4.5 17.2,3.25 C17.2,2.0 16.2,1 14.95,1 C13.7,1 12.7,2.0 12.7,3.2 C12.7,4.5 13.7,5.5 14.95,5.5"/>
+							<path d="M8.3,29 C9.5,29 10.5,28 10.5,26.75 C10.5,25.5 9.5,24.5 8.3,24.5 C7.0,24.5 6,25.5 6,26.7 C6,28 7.0,29 8.25,29"/>
+							<path d="M3.3,23.2 C4.5,23.2 5.5,22.2 5.5,20.95 C5.5,19.7 4.5,18.7 3.2,18.7 C2.0,18.7 1.0,19.7 1.0,20.9 C1,22.2 2.0,23.2 3.3,23.2"/>
+							<path d="M5.3,11.2 C6.5,11.2 7.5,10.2 7.5,8.9 C7.5,7.7 6.5,6.7 5.3,6.7 C4.0,6.7 3,7.7 3,8.9 C3,10.2 4.0,11.2 5.3,11.2"/>
+							<path d="M26.7,9.6 C27.9,9.6 28.9,8.6 28.9,7.4 C28.9,6.1 27.9,5.1 26.7,5.1 C25.4,5.1 24.4,6.1 24.4,7.4 C24.4,8.6 25.4,9.6 26.7,9.6"/>
+							<path d="M24.6,23.9 C25.9,23.9 26.9,22.9 26.9,21.7 C26.9,20.4 25.9,19.4 24.6,19.4 C23.4,19.4 22.4,20.4 22.4,21.7 C22.4,22.9 23.4,23.9 24.6,23.9"/>
+							<path d="M10.3,27.8 L14.2,27.8 L18.5,26.5 L23.4,23.5 L25.9,19.8 L27.3,9.5 L25.1,5.8 L17.2,3 L12.7,3.4 L6.5,7.1 L3.9,10.8 L2.6,18.8 L3.8,23.1 L6.2,25.9 Z M10.3,25.8 L14.2,25.8 L17.4,24.8 L22.4,21.8 L23.9,19.5 L25.4,9.2 L24.4,7.6 L16.5,4.8 L13.7,5.1 L7.5,8.8 L5.9,11.1 L4.6,19.1 L5.3,21.8 L7.7,24.6 Z" style="fill-rule: evenodd;"/>
+						</g>
+					</g>
 				</g>
-				';
+		';
+		$last_x += 36;
 		return $polygonbuttons;
 	}	
 	
-	function gpsbuttons($strSetGPSPosition, $gps_follow){
+	function polygonbuttons2($strSplitPolygon){
 		global $last_x;
-		$last_x += 26;
+		$polygonbuttons = '				
+				<g id="line" onmousedown="split_geometry();highlightbyid(\'split0\');" transform="translate('.$last_x.' 0 )">
+					<rect id="split0" onmouseover="show_tooltip(\''.$strSplitPolygon.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+					<g class="navbutton" transform="translate(9 5) scale(0.8)">
+						<g class="navbutton_stroke" transform="translate(-5 -2) scale(1.4)">
+							<polygon class="navbutton_semifill" points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284	379.5,218 378.5,139 357.5,138 260.5,91"
+							transform="matrix(1 0 0 1 0 0) scale(0.05)"
+							 style="stroke-width:25"/>
+							<line x1="380" y1="420" x2="70" y2="80" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="stroke-width:30"/>
+						</g>
+					</g>
+				</g>
+				';
+		$last_x += 36;
+		return $polygonbuttons;
+	}	
+	
+	function gpsbuttons($strSetGPSPosition, $strGPSFollow, $gps_follow){
+		global $last_x;
 		$gpsbuttons = '
 			<g id="gps" onmousedown="set_gps_position();" transform="translate('.$last_x.' 0 )">
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-        	<set attributeName="filter" begin="gps1.mousedown" fill="freeze" to="none"/>
-					<set attributeName="filter" begin="gps1.mouseup;gps1.mouseout" fill="freeze" to="url(#Schatten)"/>
-				</rect>
-				<g transform="scale(0.5) translate(2 8)">
-					<text x="23" y="15" style="text-anchor:middle;fill:black;font-size:10;font-family:Arial;font-weight:bold">
+        <rect id="gps1" onmouseover="show_tooltip(\''.$strSetGPSPosition.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+				<g class="navbutton" transform="translate(4 8) scale(0.6)">
+					<text x="23" y="15" style="text-anchor:middle;font-size:10;font-family:Arial;font-weight:bold">
 					GPS</text>
 					<circle cx="23" cy="21" r="3"/>
-				</g>
-				<rect id="gps1" onmouseover="show_tooltip(\'GPS-Position \'+unescape(\'%FC\')+\'bernehmen\',evt.clientX,evt.clientY)" x="0" y="0" rx="1" ry="1" width="25" height="25" fill="none" opacity="0.2"/>
+				</g>				
 	    </g>';
-		$last_x += 26;
-		$gpsbuttons.= '
-			<g id="gps_f" transform="translate('.$last_x.' 0 )">
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-          <set attributeName="filter" begin="gps0.mousedown" fill="freeze" to="none"/>
-          <set attributeName="filter" begin="gps0.mouseup;gps0.mouseout" fill="freeze" to="url(#Schatten)"/>
-        </rect>
-        <g transform="scale(0.6) translate(8 8)">
-          <use xlink:href="#1move" transform="translate(2.1 -5.9) scale(0.9)"/> 
-        </g>
-				<text transform="scale(0.45 0.45)" x="22" y="19" style="text-anchor:middle;fill:rgb(0,0,0);font-size:20;font-family:Arial;font-weight:bold;">GPS</text>
-				<text id="gps_text" transform="scale(0.45 0.45)" x="16" y="50" style="text-anchor:middle;fill:rgb(0,0,0);font-size:20;font-family:Arial;font-weight:bold;">'.$gps_follow.'</text>	
-        <rect id="gps0" onmouseover="show_tooltip(\'GPS-Verfolgungsmodus\',evt.clientX,evt.clientY)" onmousedown="hide_tooltip();switch_gps_follow();" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;fill-opacity:0.25"/>
-      </g>
-		';
+		$last_x += 36;
+		$gpsbuttons.= gps_follow($strGPSFollow, $gps_follow);
 		return $gpsbuttons;
 	}
 
 	function pointbuttons($strSetPosition){
 		global $last_x;
-		$last_x += 26;
 		$pointbuttons = '
 				<g id="text" onmousedown="draw_point();highlightbyid(\'text0\');" transform="translate('.$last_x.' 0 )">
-	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-	        	<set attributeName="filter" begin="text0.mousedown" fill="freeze" to="none"/>
-						<set attributeName="filter" begin="text0.mouseup;text0.mouseout" fill="freeze" to="url(#Schatten)"/>
-					</rect>
-					<g transform="scale(0.5) translate(2 8)">
-						<text x="23" y="15" style="text-anchor:middle;fill:black;font-size:10;font-family:Arial;font-weight:bold">
-						Punkt</text>
-						<circle cx="23" cy="21" r="3"/>
+	        <rect id="text0" onmouseover="show_tooltip(\''.$strSetPosition.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+					<g class="navbutton" transform="translate(4 4) scale(1)">
+						<circle cx="14" cy="12" r="3"/>
+						<g transform="scale(1.12)">
+							<polygon class="navbutton_stroke navbutton_whitefill" points="178.579,57.7353 164.258,51.2544 178.96,44.515 176.48,49.1628 185.48,49.1628 185.48,53.1628 176.48,53.1628"
+								 style="stroke-width:1.7" transform="scale(0.7) translate(-46 -154) rotate(60.992 13.3045 25.4374)"/>
+						</g>
 					</g>
-					<rect id="text0" onmouseover="show_tooltip(\''.$strSetPosition.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="1" ry="1" width="25" height="25" fill="none" opacity="0.2"/>
 		    </g>
 		';
+		$last_x += 36;
 		return $pointbuttons;
 	}
 
 	function boxbuttons(){
 		global $last_x;
-		$last_x += 26;
 		$boxbuttons = '
 				<g id="box" onmousedown="draw_box_on();highlightbyid(\'box0\');" transform="translate('.$last_x.' 0)">
-	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-	          <set attributeName="filter" begin="box0.mousedown" fill="freeze" to="none"/>
-	          <set attributeName="filter" begin="box0.mouseup;box0.mouseout" fill="freeze" to="url(#Schatten)"/>
-	        </rect>
-	        <g transform="scale(0.7) translate(-5 0)">
-	          <g transform="matrix(-1 0 0 1 118 0) scale(0.5)">
-	            <rect x="170" y="30" width="40" height="14" style="fill:none;stroke:rgb(0,0,0);stroke-width:4"/>
-	          </g>
-	        </g>
-	        <rect id="box0" onmouseover="show_tooltip(\'Fenster aufziehen\',evt.clientX,evt.clientY)" x="0" y="0" rx="1" ry="1" width="25" height="25" fill="none" opacity="0.2"/>
+	        <rect id="box0" onmouseover="show_tooltip(\'Fenster aufziehen\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+					<g class="navbutton navbutton_nofill navbutton_stroke" transform="translate(-3 2) scale(0.9)">
+						<g transform="matrix(-1 0 0 1 118 0) scale(0.5)">
+							<rect x="170" y="30" width="40" height="14" style="stroke-width:4"/>
+						</g>
+					</g>
 	      </g>
 		';
+		$last_x += 36;
 		return $boxbuttons;
 	}
 
-	function linebuttons($strUndo, $strDeleteLine, $strDrawLine, $strDelLine){
+	function linebuttons($strDrawLine, $strDelLine){
 		global $last_x;
 		$linebuttons = '
-				 <g id="undo" onmousedown="deletelastline(evt);" transform="translate(0 0)">
-	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-	        	<set attributeName="filter" begin="undo0.mousedown" fill="freeze" to="none"/>
-						<set attributeName="filter" begin="undo0.mouseup;undo0.mouseout" fill="freeze" to="url(#Schatten)"/>
-					</rect>
-					<g transform="translate(0 -4.5)">
-						<polygon points="178.579,57.7353 164.258,51.2544 178.96,44.515 174.48,51.1628"
-							 style="fill:rgb(0,0,0);stroke:rgb(0,0,0);stroke-width:2" transform="scale(0.36) translate(-139 136) rotate(-45 0 0)"/>
-						<path d="M137.5 355 C230.674 287.237 311.196 227.137 396.5 349"
-							transform="matrix(1 0 0 1 0 0) scale(0.05)"
-							 style="fill:none;stroke:rgb(0,0,0);stroke-width:30"/>
+				<g id="line" onmousedown="add_line();highlightbyid(\'line0\');" transform="translate('.$last_x.' 0 )">
+		      <rect id="line0" onmouseover="show_tooltip(\''.$strDrawLine.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+					<g class="navbutton navbutton_stroke" transform="translate(4 4) scale(1.1)">
+						<line	x1="81.5" y1="391" x2="127.5" y2="250" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="stroke-width:35"/>
+						<line	x1="127.5" y1="250" x2="310.5" y2="243" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="stroke-width:35"/>
+						<line	x1="310.5" y1="243" x2="370.5" y2="103" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="stroke-width:35"/>
 					</g>
-	        <rect id="undo0" onmouseover="show_tooltip(\''.$strUndo.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="1" ry="1" width="25" height="25" transform="translate(0 0)" style="fill:white;opacity:0.25"/>
-	      </g>
-				
-	      <g id="new" onmousedown="restartline();highlightbyid(\'line0\');" transform="translate(26 0 )">
-	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-	        	<set attributeName="filter" begin="new0.mousedown" fill="freeze" to="none"/>
-						<set attributeName="filter" begin="new0.mouseup;new0.mouseout" fill="freeze" to="url(#Schatten)"/>
-					</rect>
-					<path
-						d="M153.245 92.3923 C153.245 92.3923 198.593 158.983 242.478 202.712 C268.178 171.839
-							355.521 99.5384 355.521 99.5384 C355.521 99.5384 359.726 95.6673 364.892 97.8494
-							C370.059 100.031 369.612 108.695 369.612 108.695 C369.612 108.695 382.322
-							102.528 382.138 102.36 C399.506 105.821 402.66 122.15 402.66 122.15 C402.66
-							122.15 322.203 196.362 285.632 240.453 C314.809 273.344 401.918 327.398 408.194
-							337.179 C409.657 339.459 396.571 356.768 409.721 364.549 C422.871 372.333
-							402.255 381.996 395.718 384.985 C394.3 384.345 384.14 378.487 384.14 378.487
-							C382.185 390.247 369.745 392.867 369.745 392.867 C369.745 392.867 279.597 315.208
-							246.866 283.273 C218.575 317.649 164.421 399 164.421 399 C142.608 400.165
-							135.679 389.138 135.679 389.138 C135.679 389.138 128.054 398.628 119.9 394.204
-							C111.747 389.78 112.548 379.796 112.548 379.796 C112.548 379.796 98.637
-							382.887 94 373.273 C114.297 334.079 197.862 244.808 197.862 244.808 C160.996
-							217.608 96.482 122.942 96.482 122.942 C96.482 122.942 96.6355 104.726 106.055
-							98.6784 C104.503 99.1631 119.583 106.53 123.756 104.003 C131.237 99.4715 127.702
-							105.026 130.236 95.2056 C132.77 85.3855 153.245 92.3923 153.245 92.3923 z"
-						transform="matrix(1 0 0 1 0 0) translate(2 2) scale(0.042)" style="fill:rgb(0,0,0)"/>
-	        <rect id="new0" onmouseover="show_tooltip(\''.$strDeleteLine.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;opacity:0.25"/>
-	      </g>
-
-				<g id="line" onmousedown="add_line();highlightbyid(\'line0\');" transform="translate(52 0 )">
-		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-		      	<set attributeName="filter" begin="line0.mousedown" fill="freeze" to="none"/>
-						<set attributeName="filter" begin="line0.mouseup;line0.mouseout" fill="freeze" to="url(#Schatten)"/>
-					</rect>
-					<line	x1="81.5" y1="391" x2="127.5" y2="250" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
-					<line	x1="127.5" y1="250" x2="310.5" y2="243" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
-					<line	x1="310.5" y1="243" x2="370.5" y2="103" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
-					<rect id="line0" onmouseover="show_tooltip(\''.$strDrawLine.'\',evt.clientX,evt.clientY)" x="0" y="0" width="25" height="25" style="fill:white;opacity:0.25"/>
-				</g>
-
-				<g id="line" onmousedown="delete_lines();highlightbyid(\'del0\');" transform="translate(78 0 )">
-		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-		      	<set attributeName="filter" begin="del0.mousedown" fill="freeze" to="none"/>
-						<set attributeName="filter" begin="del0.mouseup;del0.mouseout" fill="freeze" to="url(#Schatten)"/>
-					</rect>
-					<line	x1="81.5" y1="391" x2="127.5" y2="250" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
-					<line	x1="127.5" y1="250" x2="310.5" y2="243" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
-					<line	x1="310.5" y1="243" x2="370.5" y2="103" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
-					<polygon points="
-										425.5,261 
-										227.5,93 
-										145.5,162  
-										335.5,350" 
-						transform="matrix(1 0 0 1 0 0) scale(0.05)"
-						 style="fill:rgb(222,222,222);stroke:rgb(0,0,0);stroke-width:25"/>
-					<rect id="del0" onmouseover="show_tooltip(\''.$strDelLine.'\',evt.clientX,evt.clientY)" x="0" y="0" width="25" height="25" style="fill:white;opacity:0.25"/>
+				</g>';
+		$last_x += 36;
+		$linebuttons.= '
+				<g id="line" onmousedown="delete_lines();highlightbyid(\'del0\');" transform="translate('.$last_x.' 0 )">
+		      <rect id="del0" onmouseover="show_tooltip(\''.$strDelLine.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+					<g class="navbutton navbutton_stroke" transform="translate(4 4) scale(1.1)">
+						<line	x1="81.5" y1="391" x2="127.5" y2="250" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="stroke-width:35"/>
+						<line	x1="127.5" y1="250" x2="310.5" y2="243" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="stroke-width:35"/>
+						<line	x1="310.5" y1="243" x2="370.5" y2="103" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="stroke-width:35"/>
+						<polygon points="
+											425.5,261 
+											227.5,93 
+											145.5,162  
+											335.5,350" 
+							transform="matrix(1 0 0 1 0 0) scale(0.05)"
+							 style="fill:white;stroke-width:25"/>					
+					</g>
 				</g>
 		';
-		$last_x = 78;
+		$last_x += 36;
 		return $linebuttons;
 	}
 		
 	function linebuttons2($strSplitLine, $strReverse){
 		global $last_x;
-		$last_x += 26;
 		$linebuttons = '				
 				<g id="line" onmousedown="split_geometry();highlightbyid(\'split0\');" transform="translate('.$last_x.' 0 )">
-		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-		      	<set attributeName="filter" begin="del0.mousedown" fill="freeze" to="none"/>
-						<set attributeName="filter" begin="del0.mouseup;del0.mouseout" fill="freeze" to="url(#Schatten)"/>
-					</rect>
-						<line	x1="81.5" y1="391" x2="127.5" y2="250" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
-						<line	x1="127.5" y1="250" x2="310.5" y2="243" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
-						<line	x1="310.5" y1="243" x2="370.5" y2="103" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
-						<line x1="300" y1="340" x2="150" y2="160" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="fill:rgb(222,222,222);stroke:rgb(111,111,111);stroke-width:35"/>
-					<rect id="split0" onmouseover="show_tooltip(\''.$strSplitLine.'\',evt.clientX,evt.clientY)" x="0" y="0" width="25" height="25" style="fill:white;opacity:0.25"/>
+		      <rect id="split0" onmouseover="show_tooltip(\''.$strSplitLine.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+					<g class="navbutton navbutton_stroke" transform="translate(4 4) scale(1.1)">
+						<line	x1="81.5" y1="391" x2="127.5" y2="250" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="stroke-width:35"/>
+						<line	x1="127.5" y1="250" x2="310.5" y2="243" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="stroke-width:35"/>
+						<line	x1="310.5" y1="243" x2="370.5" y2="103" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="stroke-width:35"/>
+						<line x1="300" y1="340" x2="150" y2="160" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="stroke-width:45"/>
+					</g>
 				</g>
 				';
-		$last_x += 26;
+		$last_x += 36;
 		$linebuttons.= '
 				<g id="line" onmousedown="reverse_geom();highlightbyid(\'reverse0\');" transform="translate('.$last_x.' 0 )">
-		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-		      	<set attributeName="filter" begin="del0.mousedown" fill="freeze" to="none"/>
-						<set attributeName="filter" begin="del0.mouseup;del0.mouseout" fill="freeze" to="url(#Schatten)"/>
-					</rect>
-					<g transform="scale(0.9 0.9) translate(8 3) rotate(20 0 0)">
-						<line	x1="81.5" y1="391" x2="127.5" y2="250" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
-						<line	x1="127.5" y1="250" x2="310.5" y2="243" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
-						<line	x1="310.5" y1="243" x2="370.5" y2="103" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
+		      <rect id="reverse0" onmouseover="show_tooltip(\''.$strReverse.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+					<g class="navbutton navbutton_stroke" transform="translate(4 4) scale(1.1)">
+						<g transform="scale(0.9 0.9) translate(8 3) rotate(20 0 0)">
+							<line	x1="81.5" y1="391" x2="127.5" y2="250" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="stroke-width:35"/>
+							<line	x1="127.5" y1="250" x2="310.5" y2="243" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="stroke-width:35"/>
+							<line	x1="310.5" y1="243" x2="370.5" y2="103" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="stroke-width:35"/>
+						</g>
+						<g transform="translate(-2 -6) rotate(-5 0 0)">
+							<polygon points="178.579,57.7353 164.258,51.2544 178.96,44.515 174.48,51.1628"
+								 style="stroke-width:2" transform="scale(0.36) translate(-139 136) rotate(-45 0 0)"/>
+							<path class="navbutton_nofill" d="M137.5 355 C230.674 287.237 311.196 227.137 430 349"
+								transform="matrix(1 0 0 1 0 0) scale(0.05)"
+								 style="stroke-width:30"/>
+						</g>
 					</g>
-					<g transform="translate(-2 -6) rotate(-5 0 0)">
-						<polygon points="178.579,57.7353 164.258,51.2544 178.96,44.515 174.48,51.1628"
-							 style="fill:rgb(0,0,0);stroke:rgb(0,0,0);stroke-width:2" transform="scale(0.36) translate(-139 136) rotate(-45 0 0)"/>
-						<path d="M137.5 355 C230.674 287.237 311.196 227.137 430 349"
-							transform="matrix(1 0 0 1 0 0) scale(0.05)"
-							 style="fill:none;stroke:rgb(0,0,0);stroke-width:30"/>
-					</g>
-					<rect id="reverse0" onmouseover="show_tooltip(\''.$strReverse.'\',evt.clientX,evt.clientY)" x="0" y="0" width="25" height="25" style="fill:white;opacity:0.25"/>
 				</g>
 		';
+		$last_x += 36;
 		return $linebuttons;
 	}
 
   function flurstquerybuttons(){
   	global $last_x;
-  	$last_x += 26;
     $flurstquerybuttons = '
       <g id="query_add" transform="translate('.$last_x.' 0)">
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-          <set attributeName="filter" begin="ppquery0.mousedown" fill="freeze" to="none"/>
-          <set attributeName="filter" begin="ppquery0.mouseup;ppquery0.mouseout" fill="freeze" to="url(#Schatten)"/>
-        </rect>
-        <polygon
-					points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284
-						379.5,218 378.5,139 357.5,138 260.5,91"
-					transform="matrix(1 0 0 1 0 0) scale(0.05)"
-					 style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
-				<polygon points="178.579,57.7353 164.258,51.2544 178.96,44.515 176.48,49.1628 185.48,49.1628 185.48,53.1628 176.48,53.1628"
-						 style="fill:rgb(255,255,255);stroke:rgb(0,0,0);stroke-width:1.7" transform="scale(0.7) translate(-46 -154) rotate(60.992 13.3045 25.4374)"/>
-        <rect id="ppquery0" onmouseover="show_tooltip(\'vorhandene Geometrie hinzufuegen\',evt.clientX,evt.clientY)" onmousedown="add_geometry();hide_tooltip();highlightbyid(\'ppquery0\');" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;opacity:0.25"/>
+        <rect id="ppquery0" onmouseover="show_tooltip(\'vorhandene Geometrie hinzuf\u00fcgen\',evt.clientX,evt.clientY)" onmousedown="add_geometry();hide_tooltip();highlightbyid(\'ppquery0\');" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+				<g class="navbutton" transform="translate(5 5) scale(0.8)">
+					<g transform="translate(9 -8)">
+						<path d="M23,12 L16,12 C15.4,12 15,11.6 15,11 L15,10 C15,9.4 15.4,9 16,9 L23,9 C23.6,9 24,9.4 24,10 L24,11 C24,11.6 23.6,12 23,12"/>
+						<path d="M18,14 L18,7 C18,6.4 18.4,6 19,6 L20,6 C20.6,6 21,6.4 21,7 L21,14 C21,14.6 20.6,15 20,15 L19.0,15 C18.4,15 18,14.6 18,14"/>
+					</g>
+					<g transform="translate(-5 -2) scale(1.4)">
+						<polygon class="navbutton_stroke navbutton_semifill" points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284	379.5,218 378.5,139 357.5,138 260.5,91"
+							transform="matrix(1 0 0 1 0 0) scale(0.05)"
+							 style="stroke-width:25"/>
+						<polygon class="navbutton_stroke navbutton_whitefill" points="178.579,57.7353 164.258,51.2544 178.96,44.515 176.48,49.1628 185.48,49.1628 185.48,53.1628 176.48,53.1628"
+								 style="stroke-width:1.7" transform="scale(0.7) translate(-46 -154) rotate(60.992 13.3045 25.4374)"/>
+					</g>
+				</g>
       </g>';
-    $last_x += 26;
+    $last_x += 36;
     $flurstquerybuttons .= '
-			  <g id="query_subtract" transform="translate('.$last_x.' 0)">
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(111,111,111);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-          <set attributeName="filter" begin="ppquery1.mousedown" fill="freeze" to="none"/>
-          <set attributeName="filter" begin="ppquery1.mouseup;ppquery1.mouseout" fill="freeze" to="url(#Schatten)"/>
-        </rect>
-        <polygon
-					points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284
-						379.5,218 378.5,139 357.5,138 260.5,91"
-					transform="matrix(1 0 0 1 0 0) scale(0.05)"
-					 style="fill:rgb(244,244,244);stroke:rgb(0,0,0);stroke-width:25"/>
-				<polygon points="178.579,57.7353 164.258,51.2544 178.96,44.515 176.48,49.1628 185.48,49.1628 185.48,53.1628 176.48,53.1628"
-						 style="fill:rgb(255,255,255);stroke:rgb(0,0,0);stroke-width:1.7" transform="scale(0.7) translate(-46 -154) rotate(60.992 13.3045 25.4374)"/>
-        <rect id="ppquery1" onmouseover="show_tooltip(\'mit vorhandener Geometrie ausschneiden\',evt.clientX,evt.clientY)" onmousedown="subtract_geometry();hide_tooltip();highlightbyid(\'ppquery1\');" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;opacity:0.25"/>
+		  <g id="query_subtract" transform="translate('.$last_x.' 0)">
+        <rect id="ppquery1" onmouseover="show_tooltip(\'mit vorhandener Geometrie ausschneiden\',evt.clientX,evt.clientY)" onmousedown="subtract_geometry();hide_tooltip();highlightbyid(\'ppquery1\');" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+        <g class="navbutton" transform="translate(5 5) scale(0.8)">
+					<g transform="translate(9 -8)">
+						<path d="M23,12 L16,12 C15.4,12 15,11.6 15,11 L15,10 C15,9.4 15.4,9 16,9 L23,9 C23.6,9 24,9.4 24,10 L24,11 C24,11.6 23.6,12 23,12"/>
+					</g>
+					<g transform="translate(-5 -2) scale(1.4)">
+						<polygon class="navbutton_stroke navbutton_nofill" points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284	379.5,218 378.5,139 357.5,138 260.5,91"
+							transform="matrix(1 0 0 1 0 0) scale(0.05)"
+							 style="stroke-width:25"/>
+						<polygon class="navbutton_stroke navbutton_whitefill" points="178.579,57.7353 164.258,51.2544 178.96,44.515 176.48,49.1628 185.48,49.1628 185.48,53.1628 176.48,53.1628"
+								 style="stroke-width:1.7" transform="scale(0.7) translate(-46 -154) rotate(60.992 13.3045 25.4374)"/>
+					</g>
+				</g>
       </g>';
+		$last_x += 36;
     return $flurstquerybuttons;
   }
   
   function bufferbuttons($strBuffer, $strBufferedLine, $strParallelPolygon){
   	global $last_x;
-  	$last_x += 26;
     $bufferbuttons = '
       <g id="buffer_add" transform="translate('.$last_x.' 0)">
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-          <set attributeName="filter" begin="buffer0.mousedown" fill="freeze" to="none"/>
-          <set attributeName="filter" begin="buffer0.mouseup;buffer0.mouseout" fill="freeze" to="url(#Schatten)"/>
-        </rect>
-				<polygon
-					points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284
-						379.5,218 378.5,139 357.5,138 260.5,91"
-					transform="translate(-3 -3) scale(0.065)"
-					 style="fill:rgb(222,222,222);stroke:rgb(0,0,0);stroke-width:15"/>
-        <polygon
-					points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284
-						379.5,218 378.5,139 357.5,138 260.5,91"
-					transform="translate(3 3) scale(0.04)"
-					 style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
-        <rect id="buffer0" onmouseover="show_tooltip(\''.$strBuffer.'\',evt.clientX,evt.clientY)" onmousedown="add_buffer();hide_tooltip();highlightbyid(\'buffer0\');" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;opacity:0.25"/>
+				<rect id="buffer0" onmouseover="show_tooltip(\''.$strBuffer.'\',evt.clientX,evt.clientY)" onmousedown="add_buffer();hide_tooltip();highlightbyid(\'buffer0\');" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+        <g class="navbutton navbutton_stroke" transform="translate(3.5 3) scale(1.1)">
+					<polygon class="navbutton_nofill" points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284	379.5,218 378.5,139 357.5,138 260.5,91"
+						transform="translate(-4 -4) scale(0.07)"
+						 style="stroke-width:18"/>
+					<polygon class="navbutton_semifill" points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284 379.5,218 378.5,139 357.5,138 260.5,91"
+						transform="translate(3 3) scale(0.04)"
+						 style="stroke-width:25"/>        
+				</g>
       </g>';
-		$last_x += 26;
+		$last_x += 36;
 		$bufferbuttons .= '
       <g id="buffer_add_line" transform="translate('.$last_x.' 0)">
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-          <set attributeName="filter" begin="buffer1.mousedown" fill="freeze" to="none"/>
-          <set attributeName="filter" begin="buffer1.mouseup;buffer1.mouseout" fill="freeze" to="url(#Schatten)"/>
-        </rect>
-        <polygon
-					points="221 339 212 344 204 351 197 359 192 368 189 378 188 389 189 399 192 410 197 419 322 607 329 615 337 622 346 627 356 630 366 631 377 630 387 627 396 622 404 616 499 525 506 517 511 508 515 498 516 487 515 477 512 466 507 457 501 449 493 442 484 437 474 433 463 432 453 433 442 436 433 441 425 447 376 493 323 414 524 331 533 326 541 319 548 311 553 302 556 292 557 281 556 270 553 260 548 251 541 243 533 236 524 231 514 228 503 227 492 228 482 231 221 339"
-					transform="translate(2.5 -17) scale(0.050) rotate(88 197 419)"
-					 style="fill:rgb(164,164,164);stroke:rgb(0,0,0);stroke-width:21"/>
-				<polyline points="503 281 242 389 367 577 462 486" transform="translate(2.5 -17) scale(0.050) rotate(88 197 419)" style="fill:none;stroke-dasharray:2,2;stroke:black;stroke-width:15"/>
-        <rect id="buffer1" onmouseover="show_tooltip(\''.$strBufferedLine.'\',evt.clientX,evt.clientY)" onmousedown="add_buffered_line();hide_tooltip();highlightbyid(\'buffer1\');" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;opacity:0.25"/>
+        <rect id="buffer1" onmouseover="show_tooltip(\''.$strBufferedLine.'\',evt.clientX,evt.clientY)" onmousedown="add_buffered_line();hide_tooltip();highlightbyid(\'buffer1\');" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+				<g class="navbutton navbutton_semifill navbutton_stroke" transform="translate(5 3) scale(1.1)">
+					<polygon points="221 339 212 344 204 351 197 359 192 368 189 378 188 389 189 399 192 410 197 419 322 607 329 615 337 622 346 627 356 630 366 631 377 630 387 627 396 622 404 616 499 525 506 517 511 508 515 498 516 487 515 477 512 466 507 457 501 449 493 442 484 437 474 433 463 432 453 433 442 436 433 441 425 447 376 493 323 414 524 331 533 326 541 319 548 311 553 302 556 292 557 281 556 270 553 260 548 251 541 243 533 236 524 231 514 228 503 227 492 228 482 231 221 339"
+						transform="translate(2.5 -17) scale(0.050) rotate(88 197 419)"
+						 style="stroke-width:21"/>
+					<polyline class="navbutton_nofill" points="503 281 242 389 367 577 462 486" transform="translate(2.5 -17) scale(0.050) rotate(88 197 419)" style="stroke-dasharray:2,2;stroke-width:15"/>
+				</g>
       </g>';
-			$last_x += 26;
+			$last_x += 36;
 		$bufferbuttons .= '
       <g id="parallel_polygon" transform="translate('.$last_x.' 0)">
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-          <set attributeName="filter" begin="buffer2.mousedown" fill="freeze" to="none"/>
-          <set attributeName="filter" begin="buffer2.mouseup;buffer2.mouseout" fill="freeze" to="url(#Schatten)"/>
-        </rect>
-				<polyline points="476 285 677 517" transform="translate(0 -41) scale(0.070) rotate(94 197 419)" style="fill:none;stroke:#4A4A4A;stroke-width:20"/>
-        <polygon
-					points="574 546 647 483 506 320 433 383 574 546"
-					transform="translate(0 -41) scale(0.070) rotate(94 197 419)"
-					 style="fill:rgb(164,164,164);stroke:rgb(0,0,0);stroke-width:20"/>
-        <rect id="buffer2" onmouseover="show_tooltip(\''.$strParallelPolygon.'\',evt.clientX,evt.clientY)" onmousedown="add_parallel_polygon();hide_tooltip();highlightbyid(\'buffer2\');" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;opacity:0.25"/>
+        <rect id="buffer2" onmouseover="show_tooltip(\''.$strParallelPolygon.'\',evt.clientX,evt.clientY)" onmousedown="add_parallel_polygon();hide_tooltip();highlightbyid(\'buffer2\');" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+				<g class="navbutton navbutton_semifill navbutton_stroke" transform="translate(5 3) scale(1.1)">
+					<polyline class="navbutton_nofill" points="476 285 677 517" transform="translate(0 -41) scale(0.070) rotate(94 197 419)" style="stroke-width:20"/>
+					<polygon points="574 546 647 483 506 320 433 383 574 546"
+						transform="translate(0 -41) scale(0.070) rotate(94 197 419)"
+						 style="stroke-width:20"/>
+				</g>
       </g>';
+		$last_x += 36;
     return $bufferbuttons;
   }
 	
 	 function special_bufferbuttons($strSpecialBuffer){
   	global $last_x;
-  	$last_x += 26;
     $special_bufferbuttons = '
       <g id="buffer_add" transform="translate('.$last_x.' 0)">
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-          <set attributeName="filter" begin="buffer3.mousedown" fill="freeze" to="none"/>
-          <set attributeName="filter" begin="buffer3.mouseup;buffer3.mouseout" fill="freeze" to="url(#Schatten)"/>
-        </rect>
-				<polygon
-					points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284
-						379.5,218 378.5,139 357.5,138 260.5,91"
-					transform="translate(-3 -3) scale(0.065)"
-					 style="fill:rgb(222,222,222);stroke:rgb(0,0,0);stroke-width:15"/>
-        <polygon
-					points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284
-						379.5,218 378.5,139 357.5,138 260.5,91"
-					transform="translate(3 3) scale(0.04)"
-					 style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
-        <rect id="buffer3" onmouseover="show_tooltip(\''.$strSpecialBuffer.'\',evt.clientX,evt.clientY)" onmousedown="add_buffer_within_polygon();hide_tooltip();highlightbyid(\'buffer3\');" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;opacity:0.25"/>
+				<rect id="buffer0" onmouseover="show_tooltip(\''.$strSpecialBuffer.'\',evt.clientX,evt.clientY)" onmousedown="add_buffer();hide_tooltip();highlightbyid(\'buffer0\');" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+        <g class="navbutton navbutton_stroke" transform="translate(5 3) scale(1.1)">
+					<polygon class="navbutton_nofill" points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284	379.5,218 378.5,139 357.5,138 260.5,91"
+						transform="translate(-4 -4) scale(0.07)"
+						 style="stroke-width:18"/>
+					<polygon class="navbutton_semifill" points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284 379.5,218 378.5,139 357.5,138 260.5,91"
+						transform="translate(3 3) scale(0.04)"
+						 style="stroke-width:25"/>        
+				</g>
       </g>';
+		$last_x += 36;
     return $special_bufferbuttons;
   }
 
 	function transform_buttons($strMoveGeometry){
 		global $last_x;
-		$last_x += 26;
 		$transform_buttons ='
 			<g id="vertex_edit" transform="translate('.$last_x.' 0)">
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-          <set attributeName="filter" begin="move1.mousedown" fill="freeze" to="none"/>
-          <set attributeName="filter" begin="move1.mouseup;move1.mouseout" fill="freeze" to="url(#Schatten)"/>
-        </rect>
-				<polygon points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284
-						379.5,218 378.5,139 357.5,138 260.5,91"
-					transform="translate(4 4) scale(0.045)"
-					 style="fill:none;stroke:rgb(0,0,0);stroke-dasharray:23,23;stroke-width:25"/>
-				<polygon points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284
-						379.5,218 378.5,139 357.5,138 260.5,91"
-					transform="translate(-2 0) scale(0.045)"
-					 style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
-        <rect id="move1" onmouseover="show_tooltip(\''.$strMoveGeometry.'\',evt.clientX,evt.clientY)" onmousedown="highlightbyid(\'move1\');move_geometry();hide_tooltip();" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;opacity:0.25"/>
+        <rect id="move1" onmouseover="show_tooltip(\''.$strMoveGeometry.'\',evt.clientX,evt.clientY)" onmousedown="highlightbyid(\'move1\');move_geometry();hide_tooltip();" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+				<g class="navbutton navbutton_stroke" transform="translate(5 5) scale(1.1)">
+					<polygon class="navbutton_nofill" points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284	379.5,218 378.5,139 357.5,138 260.5,91"
+						transform="translate(4 4) scale(0.045)"
+						 style="stroke-dasharray:23,23;stroke-width:25"/>
+					<polygon class="navbutton_semifill" points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284	379.5,218 378.5,139 357.5,138 260.5,91"
+						transform="translate(-2 0) scale(0.045)"
+						 style="stroke-width:25"/>
+				</g>
       </g>
     ';
+		$last_x += 36;
     return $transform_buttons;
 	}
 	
 	function vertex_edit_buttons($strCornerPoint){
 		global $last_x;
-		$last_x += 26;
 		$vertex_edit_buttons ='
 			<g id="vertex_edit" transform="translate('.$last_x.' 0)">
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-          <set attributeName="filter" begin="vertex_edit1.mousedown" fill="freeze" to="none"/>
-          <set attributeName="filter" begin="vertex_edit1.mouseup;vertex_edit1.mouseout" fill="freeze" to="url(#Schatten)"/>
-        </rect>
-        <circle cx="178.579" cy="57.7353" r="3" transform="translate(-167 -47)"/>
-				<polygon points="178.579,57.7353 164.258,51.2544 178.96,44.515 176.48,49.1628 185.48,49.1628 185.48,53.1628 176.48,53.1628"
-						 style="fill:rgb(255,255,255);stroke:rgb(0,0,0);stroke-width:1.7" transform="scale(0.7) translate(-46 -154) rotate(60.992 13.3045 25.4374)"/>
-        <rect id="vertex_edit1" onmouseover="show_tooltip(\''.$strCornerPoint.'\',evt.clientX,evt.clientY)" onmousedown="highlightbyid(\'vertex_edit1\');edit_vertices();hide_tooltip();" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;opacity:0.25"/>
+				<rect id="vertex_edit1" onmouseover="show_tooltip(\''.$strCornerPoint.'\',evt.clientX,evt.clientY)" onmousedown="highlightbyid(\'vertex_edit1\');edit_vertices();hide_tooltip();" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+				<g class="navbutton" transform="translate(4 4) scale(1)">
+					<g transform="translate(-10.8 -9.5)">
+						<path d="M16.25,29 C17.5,29 18.5,28 18.5,26.75 C18.5,25.5 17.5,24.5 16.25,24.5 C15.0,24.5 14.0,25.5 14,26.75 C14,28 15.0,29 16.25,29"/>
+						<path d="M26.7,15.6 C27.9,15.6 28.9,14.6 28.9,13.4 C28.9,12.1 27.9,11.1 26.7,11.1 C25.4,11.1 24.4,12.1 24.4,13.4 C24.4,14.6 25.4,15.6 26.7,15.6"/>
+						<path d="M24.6,23.9 C25.9,23.9 26.9,22.9 26.9,21.7 C26.9,20.4 25.9,19.4 24.6,19.4 C23.4,19.4 22.4,20.4 22.4,21.7 C22.4,22.9 23.4,23.9 24.6,23.9"/>
+						<polyline class="navbutton_stroke navbutton_nofill" style="stroke-width:1.7" points="15 27.5 25 21.5 26.7 13" />
+					</g>
+					<g transform="scale(1.12)">
+						<polygon class="navbutton_stroke navbutton_whitefill" points="178.579,57.7353 164.258,51.2544 178.96,44.515 176.48,49.1628 185.48,49.1628 185.48,53.1628 176.48,53.1628"
+							 style="stroke-width:1.7" transform="scale(0.7) translate(-46 -154) rotate(60.992 13.3045 25.4374)"/>
+					</g>
+				</g>
       </g>
     ';
+		$last_x += 36;
     return $vertex_edit_buttons;
 	}
 	
 	function coord_input_buttons(){
 		global $last_x;
-		$last_x += 26;
 		$vertex_edit_buttons ='
 			<g id="vertex_edit" transform="translate('.$last_x.' 0)">
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-          <!--set attributeName="filter" begin="coord_input1.mousedown" fill="freeze" to="none"/-->
-          <!--set attributeName="filter" begin="coord_input1.mouseup;coord_input1.mouseout" fill="freeze" to="url(#Schatten)"/-->
-        </rect>
-        <circle cx="178.579" cy="57.7353" r="3" transform="translate(-166 -41)"/>
-				<text transform="scale(0.7 0.7)" x="18" y="14" style="text-anchor:middle;fill:rgb(0,0,0);font-size:15;font-family:Arial;font-weight:bold">x,y</text>
-        <rect id="coord_input1" onmouseover="show_tooltip(\'Koordinate eingeben\',evt.clientX,evt.clientY)" onmousedown="coord_input();hide_tooltip();" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;opacity:0.25"/>
+				<rect id="coord_input1" onmouseover="show_tooltip(\'Koordinate eingeben\',evt.clientX,evt.clientY)" onmousedown="coord_input();hide_tooltip();" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+				<g class="navbutton" transform="translate(4 4) scale(1)">
+					<circle cx="178.579" cy="57.7353" r="3" transform="translate(-166 -41)"/>
+					<text transform="scale(0.7 0.7)" x="18" y="14" style="text-anchor:middle;font-size:15;font-family:Arial;font-weight:bold">x,y</text>
+				</g>
       </g>
     ';
+		$last_x += 36;
     return $vertex_edit_buttons;
 	}
 	
 	function measure_buttons($strRuler){
 		global $last_x;
-		$last_x += 26;
-		$measure_buttons ='
-			<g id="dist" transform="translate('.$last_x.' 0)">
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-          <set attributeName="filter" begin="measure0.mousedown" fill="freeze" to="none"/>
-          <set attributeName="filter" begin="measure0.mouseup;measure0.mouseout" fill="freeze" to="url(#Schatten)"/>
-        </rect>
-        <g transform="scale(0.8) rotate(-30) translate(-20 -5)">
-          <line x1="13" y1="28" x2="37" y2="28" style="fill:none;stroke:black;stroke-width:3"/>
-          <line x1="13" y1="26" x2="33" y2="26" style="stroke-dasharray:1,5;fill:none;stroke:black;stroke-width:7"/>
-          <line x1="13" y1="26" x2="35" y2="26" style="stroke-dasharray:1,2.0;fill:none;stroke:black;stroke-width:3"/>
-        </g>
-        <rect id="measure0" onmouseover="show_tooltip(\''.$strRuler.'\',evt.clientX,evt.clientY)" onmousedown="measure();highlightbyid(\'measure0\')" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;fill-opacity:0.25"/>
-      </g>
-		';
+		$measure_buttons .= dist($strRuler);
 		return $measure_buttons;
 	}
 ?>

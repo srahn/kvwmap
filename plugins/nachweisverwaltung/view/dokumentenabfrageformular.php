@@ -218,12 +218,12 @@ else {
 							<tr align="center"> 
 								<td colspan="2"  align="right">
 									Name:&nbsp;<input type="text" name="dokauswahl_name" value="<? echo $this->formvars['dokauswahl_name']; ?>">
-									<input class="button" type="button" style="width:74px" name="speichern" value="Speichern" onclick="save_dokauswahl();">
+									<input type="button" style="width:74px" name="speichern" value="Speichern" onclick="save_dokauswahl();">
 								</td>
 							</tr>
 							<tr>
 								<td align="right"  colspan="2">
-									<input class="button" type="button" style="width:74px" name="delete" value="Löschen" onclick="delete_dokauswahl();">
+									<input type="button" style="width:74px" name="delete" value="Löschen" onclick="delete_dokauswahl();">
 									<select name="dokauswahlen">
 										<option value="">  -- Auswahl --  </option>
 										<?
@@ -234,7 +234,7 @@ else {
 											}
 										?>
 									</select>
-									<input class="button" type="button" style="width:74px" name="laden" value="Laden" onclick="document.GUI.submit();">
+									<input type="button" style="width:74px" name="laden" value="Laden" onclick="document.GUI.submit();">
 								</td>
 							</tr>
 						</table>

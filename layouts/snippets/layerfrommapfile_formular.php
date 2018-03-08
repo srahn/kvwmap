@@ -25,13 +25,13 @@ function selectall(count){
 		<table border="0" cellspacing="0" cellpadding="5" style="border:1px solid #C3C7C3">
 			<tr>
 	    	<td align="right" style="border-bottom:1px solid #C3C7C3"><span class="fett"><?php echo $strMapdata; ?> </span></td>
-	    	<td style="border-bottom:1px solid #C3C7C3">&nbsp;<input class="button" type="file" name="mapfile" size="12"></td>
-	    	<td style="border-bottom:1px solid #C3C7C3"><input class="button" type="submit" name="go_plus" value="<?php echo $strButtonDataLoad; ?>"></td>
+	    	<td style="border-bottom:1px solid #C3C7C3">&nbsp;<input type="file" name="mapfile" size="12"></td>
+	    	<td style="border-bottom:1px solid #C3C7C3"><input type="submit" name="go_plus" value="<?php echo $strButtonDataLoad; ?>"></td>
 	  	</tr>
 			<tr>
 	    	<td align="right" style="border-bottom:1px solid #C3C7C3"><span class="fett"><?php echo $strZipArchives; ?> </span></td>
-	    	<td style="border-bottom:1px solid #C3C7C3">&nbsp;<input class="button" type="file" name="zipfile" size="12"></td>
-	    	<td style="border-bottom:1px solid #C3C7C3"><input class="button" type="submit" name="go_plus" value="<?php echo $strButtonDataLoad; ?>"></td>
+	    	<td style="border-bottom:1px solid #C3C7C3">&nbsp;<input type="file" name="zipfile" size="12"></td>
+	    	<td style="border-bottom:1px solid #C3C7C3"><input type="submit" name="go_plus" value="<?php echo $strButtonDataLoad; ?>"></td>
 	  	</tr>
 			<?
 			if(count($this->mapfiles) > 0){
@@ -49,7 +49,7 @@ function selectall(count){
 					</tr>
 					';
 				}
-				echo '<tr><td colspan="3" align="right"><input class="button" type="submit" name="go_plus" value="Datei laden"></td></tr>';
+				echo '<tr><td colspan="3" align="right"><input type="submit" name="go_plus" value="Datei laden"></td></tr>';
 			}
 			if(count($this->layers) > 0){
 				if($this->mapobject->fontsetfilename != '' OR $this->mapobject->symbolsetfilename != ''){
@@ -80,7 +80,7 @@ function selectall(count){
 						<td colspan="3" align="center"><span class="fett">'.count($this->layers).' Layer in '.basename($this->formvars['mapfile']).' gefunden:</span></td>
 					</tr>
 					<tr>
-						<td colspan="3" align="right"><input class="button" type="button" value="alle auswählen" name="alleauswaehlen" onClick="selectall('.count($this->layers).')"></td>
+						<td colspan="3" align="right"><input type="button" value="alle auswählen" name="alleauswaehlen" onClick="selectall('.count($this->layers).')"></td>
 					</tr>
 				';
 				for($i = 0; $i < count($this->layers); $i++){
@@ -103,7 +103,7 @@ function selectall(count){
 				}
 				echo '
 				<tr>
-					<td colspan="3" align="right"><input class="button" type="submit" name="go_plus" value="Layer hinzufügen"></td>
+					<td colspan="3" align="right"><input type="submit" name="go_plus" value="Layer hinzufügen"></td>
 				</tr>
 				<input type="hidden" name="mapfilename" value="'.$this->formvars['mapfile'].'">
 				';

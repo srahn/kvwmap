@@ -38,7 +38,7 @@ function DruckAufloesung(pixel,breite) {
 		<td>&nbsp;</td>
 	</tr>
   <tr>
-  	<td colspan="3" align="center"><input class="button" type="submit" name="go_plus" value="TIF-Datei erzeugen"></td>
+  	<td colspan="3" align="center"><input type="submit" name="go_plus" value="TIF-Datei erzeugen"></td>
   </tr>
   <?if($this->tif->tifimage != ''){
   		if($this->tif->tifimage == 'error'){ ?>

@@ -37,6 +37,9 @@
 		$this->formvars['last_doing'] = 'draw_polygon';
 	}
 	?>
+	<input name="gps_posx" type="hidden" value="<? echo $this->formvars['gps_posx']; ?>">
+	<input name="gps_posy" type="hidden" value="<? echo $this->formvars['gps_posy']; ?>">
+	<input name="gps_follow" type="hidden" value="<? echo $this->formvars['gps_follow'] ?>">
 	<input name="last_button" type="hidden" value="<? echo $this->formvars['last_button']; ?>">
 	<input name="last_doing" type="hidden" value="<? echo $this->formvars['last_doing']; ?>">
 	<input name="last_doing2" type="hidden" value="<? echo $this->formvars['last_doing2']; ?>">
@@ -65,6 +68,9 @@ $svg .= $polygonfunctions;			# Funktionen zum Zeichnen eines Polygons
 $svg .= $boxfunctions;
 $svg .= $flurstqueryfunctions;
 $svg .= $bufferfunctions;				# Funktionen zum Erzeugen eines Puffers
+if($this->user->rolle->gps){
+	$svg .= $gps_functions;
+}
 $svg .= $SVGvars_coordscript;
 $svg .= $SVGvars_tooltipscript;
 $svg .= ']]></script>';
@@ -74,15 +80,17 @@ $svg .='
 '.$SVGvars_defs.'
   </defs>';
 $svg .= $canvaswithall;
-$svg .= '<g id="buttons" cursor="pointer" transform="scale(1.1)">';
 $svg .= $navbuttons;
-$svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate(0 26)">';
-$svg .= polygonbuttons($strUndo, $strDeletePolygon, $strDrawPolygon, $strCutByPolygon);
-$svg .= boxbuttons();
-$svg .= flurstquerybuttons();
-$svg .= bufferbuttons($strBuffer, $strBufferedLine, $strParallelPolygon);
-$svg .= vertex_edit_buttons($strCornerPoint);
-$svg .= '</g>';
+$svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate(0 36)">';
+$buttons_fs .= deletebuttons($strUndo, $strDelete);
+$buttons_fs .= polygonbuttons($strDrawPolygon, $strCutByPolygon);
+$buttons_fs .= boxbuttons();
+$buttons_fs .= flurstquerybuttons();
+$buttons_fs .= bufferbuttons($strBuffer, $strBufferedLine, $strParallelPolygon);
+$buttons_fs .= vertex_edit_buttons($strCornerPoint);
+global $last_x;
+$svg .= '<rect x="0" y="0" rx="3" ry="3" width="'.$last_x.'" height="36" class="navbutton_bg"/>';
+$svg .= $buttons_fs;
 $svg .= '</g>';
 $svg .= $SVG_end;
 

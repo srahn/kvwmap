@@ -18,12 +18,12 @@
   	<td>&nbsp;</td>
 		<td colspan="2" align="center" style="border-bottom:1px solid #C3C7C3">
 			<span class="fett">OVL-Datei</span>
-			<input class="button" type="file" name="file1" size="12">
+			<input type="file" name="file1" size="12">
 		<td>&nbsp;</td>
 	</tr>
 	<tr>
 		<td>&nbsp;</td>
-		<td colspan="2" align="center" style="border-top:1px solid #C3C7C3"><input class="button" type="submit" name="go_plus" value="Laden"></td>
+		<td colspan="2" align="center" style="border-top:1px solid #C3C7C3"><input type="submit" name="go_plus" value="Laden"></td>
 		<td>&nbsp;</td>
 	</tr>	
 </table>

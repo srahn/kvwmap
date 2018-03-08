@@ -154,7 +154,7 @@
 									</td>
 								</tr>
 								<tr>
-									<td align="center" colspan="5"><input class="button" type="button" onclick="save(\''.implode('|', $this->stellen['ID']).'\');" name="speichern" value="speichern">
+									<td align="center" colspan="5"><input type="button" onclick="save(\''.implode('|', $this->stellen['ID']).'\');" name="speichern" value="speichern">
 									</td>
 								</tr>';
 							}
@@ -163,7 +163,7 @@
 									</td>
 								</tr>
 								<tr>
-									<td align="center" colspan="5"><input class="button" type="button" onclick="save(\'\');" name="speichern" value="speichern">
+									<td align="center" colspan="5"><input type="button" onclick="save(\'\');" name="speichern" value="speichern">
 									</td>
 								</tr>';
 							}

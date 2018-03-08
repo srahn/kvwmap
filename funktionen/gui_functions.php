@@ -98,7 +98,7 @@ function resizemap2window(){
 * or as a single string
 */
 function message(messages, t_hide, t_hidden) {
-	if (typeof(t_hide) === 'undefined') t_hide = 1000;
+	if (typeof(t_hide) === 'undefined') t_hide = 3000;
 	if (typeof(t_hidden) === 'undefined') t_hidden = 3000;
 	var msgDiv = $("#message_box");
 	types = {
@@ -149,8 +149,7 @@ function message(messages, t_hide, t_hidden) {
 	msgDiv.attr('class', 'message_box');
 
 	if (!confirmMsgDiv) {
-		setTimeout(function() {msgDiv.addClass('message_box_hide');}, t_hide);
-//		setTimeout(function() {msgDiv.addClass('message_box_hidden');}, t_hidden);
+		msgDiv.fadeOut(t_hide);
 	}
 	else {
 		msgDiv.append('<input type="button" onclick="$(\'#message_box\').addClass(\'message_box_hidden\');" value="ok" style="margin-top: 10px;">');
@@ -729,42 +728,6 @@ function slide_legend_out(evt) {
 		document.getElementById('legenddiv').className = 'slidinglegend_slideout';
 	}
 }
-
-<? if (!ie_check()){ ?>					// Firefox, Chrome
-
-function switchlegend(){
-	if (document.getElementById('legenddiv').className == 'normallegend') {
-		document.getElementById('legenddiv').className = 'slidinglegend_slideout';
-		ahah('index.php', 'go=changeLegendDisplay&hide=1', new Array('', ''), new Array("", "execute_function"));
-		document.getElementById('LegendMinMax').src='<?php echo GRAPHICSPATH; ?>maximize_legend.png';
-		document.getElementById('LegendMinMax').title="Legende zeigen";
-	}
-	else {
-		document.getElementById('legenddiv').className = 'normallegend';
-		ahah('index.php', 'go=changeLegendDisplay&hide=0', new Array('', ''), new Array("", "execute_function"));
-		document.getElementById('LegendMinMax').src='<?php echo GRAPHICSPATH; ?>minimize_legend.png';
-		document.getElementById('LegendMinMax').title="Legende verstecken";
-	}
-}
-
-<? }else{ ?>						// IE
-
-function switchlegend(){
-	if(document.getElementById('legendTable').style.display == 'none'){
-		document.getElementById('legendTable').style.display='';
-		ahah('index.php', 'go=changeLegendDisplay&hide=0', new Array('', ''), new Array("", "execute_function"));
-		document.getElementById('LegendMinMax').src='<?php echo GRAPHICSPATH; ?>maximize.png';
-		document.getElementById('LegendMinMax').title="Legende verstecken";
-	}
-	else{
-		document.getElementById('legendTable').style.display='none';
-		ahah('index.php', 'go=changeLegendDisplay&hide=1', new Array('', ''), new Array("", "execute_function"));
-		document.getElementById('LegendMinMax').src='<?php echo GRAPHICSPATH; ?>minimize.png';
-		document.getElementById('LegendMinMax').title="Legende zeigen";
-	}
-}
-
-<? } ?>
 
 function home() {
 	document.GUI.go.value = '';

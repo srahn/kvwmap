@@ -700,12 +700,12 @@ $checkbox_names = 'check;'.$attributes['table_alias_name'][$layer['maintable']].
 <table width="100%" border="0" cellpadding="2" cellspacing="0">
   <tr align="center"> 
     <td>
-    	<input type="button" class="button" name="savebutton" value="<? echo $strSave; ?>" onclick="save();">&nbsp;&nbsp;
-    	<input type="button" class="button" name="savebutton2" value="Datensatz kopieren" onclick="copy_dataset(<? echo $this->qlayerset[$i]['shape'][$k]['plan_id']; ?>);">&nbsp;&nbsp;
-    	<input type="button" class="button" name="deletebutton" value="Löschen" onclick="delete_dataset(<? echo $this->qlayerset[$i]['shape'][$k]['plan_id']; ?>);">&nbsp;&nbsp;
-			<input type="button" class="button" name="rokbutton" value="Flächen aus ROK holen" onclick="update_bplan_from_rok(<? echo $this->qlayerset[$i]['shape'][$k]['plan_id']; ?>);">&nbsp;&nbsp;
-    	<input type="button" class="button" name="mapbutton" value="In die Karte" onclick="zoom_to('<? echo $this->qlayerset[$i]['shape'][$k]['lfd_rok_nr']; ?>', '<? echo $this->qlayerset[$i]['shape'][$k]['art']; ?>');">
-			<input type="button" class="button" name="printbutton" value="Drucken" onclick="print_data(<?php echo $this->qlayerset[$i]['Layer_ID']; ?>);">
+    	<input type="button" name="savebutton" value="<? echo $strSave; ?>" onclick="save();">&nbsp;&nbsp;
+    	<input type="button" name="savebutton2" value="Datensatz kopieren" onclick="copy_dataset(<? echo $this->qlayerset[$i]['shape'][$k]['plan_id']; ?>);">&nbsp;&nbsp;
+    	<input type="button" name="deletebutton" value="Löschen" onclick="delete_dataset(<? echo $this->qlayerset[$i]['shape'][$k]['plan_id']; ?>);">&nbsp;&nbsp;
+			<input type="button" name="rokbutton" value="Flächen aus ROK holen" onclick="update_bplan_from_rok(<? echo $this->qlayerset[$i]['shape'][$k]['plan_id']; ?>);">&nbsp;&nbsp;
+    	<input type="button" name="mapbutton" value="In die Karte" onclick="zoom_to('<? echo $this->qlayerset[$i]['shape'][$k]['lfd_rok_nr']; ?>', '<? echo $this->qlayerset[$i]['shape'][$k]['art']; ?>');">
+			<input type="button" name="printbutton" value="Drucken" onclick="print_data(<?php echo $this->qlayerset[$i]['Layer_ID']; ?>);">
     </td>
   </tr>
 	<tr>

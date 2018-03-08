@@ -48,7 +48,7 @@ function save(){
   </tr>
 	
 	<tr>
-		<td colspan="3" align="center"><input class="button" type="button" name="save1" value="Laden" onclick="save();"></td>
+		<td colspan="3" align="center"><input type="button" name="save1" value="Laden" onclick="save();"></td>
 	</tr>
 	<? }
 			else{ ?> 

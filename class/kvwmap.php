@@ -271,6 +271,7 @@ class GUI {
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$layerset = $mapDB->read_Layer(0, $this->Stelle->useLayerAliases, NULL);     # class_load_level: 0 = keine Klassen laden
 		$this->user->rolle->saveLegendOptions($layerset, $this->formvars);
+		$this->resizeMap2Window();
 		$this->user->rolle->readSettings();
 		$this->neuLaden();
 		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
@@ -2668,15 +2669,18 @@ class GUI {
 		$this->user->rolle->resetQuerys('');
 	}
 
-	function resizeMap2Window() {
+	function resizeMap2Window(){
 		global $sizes;
 
 		$size = $sizes[$this->user->rolle->gui];
-
+		
+		if($this->formvars['legenddisplay'] !== NULL)$hideLegend = $this->formvars['legenddisplay'];		// falls die Legende gerade ein/ausgeblendet wurde
+		else $hideLegend = $this->user->rolle->hideLegend;
+		
 		$width = $this->formvars['browserwidth'] -
 			$size['margin']['width'] -
 			($this->user->rolle->hideMenue  == 1 ? $size['menue']['hide_width'] : $size['menue']['width']) -
-			($this->user->rolle->hideLegend == 1 ? $size['legend']['hide_width'] : $size['legend']['width'])
+			($hideLegend == 1 ? $size['legend']['hide_width'] : $size['legend']['width'])
 			- 18;	# Breite für möglichen Scrollbalken
 
 		$height = $this->formvars['browserheight'] -
@@ -3288,7 +3292,7 @@ class GUI {
       }
       echo'
           <tr>
-            <td height="30" colspan="2" valign="bottom" align="center"><input class="button" type="button" name="style_save" value="Speichern" onclick="save_style('.$this->styledaten['Style_ID'].')"></td>
+            <td height="30" colspan="2" valign="bottom" align="center"><input type="button" name="style_save" value="Speichern" onclick="save_style('.$this->styledaten['Style_ID'].')"></td>
           </tr>
         </table>';
     }
@@ -3320,7 +3324,7 @@ class GUI {
       }
       echo'
           <tr>
-            <td height="30" colspan="2" valign="bottom" align="center"><input class="button" type="button" name="label_save" value="Speichern" onclick="save_label('.$this->labeldaten['Label_ID'].')"></td>
+            <td height="30" colspan="2" valign="bottom" align="center"><input type="button" name="label_save" value="Speichern" onclick="save_label('.$this->labeldaten['Label_ID'].')"></td>
           </tr>
         </table>';
     }
@@ -3787,11 +3791,6 @@ class GUI {
     $this->user->rolle->hideMenue(1);
 		echo '~if(typeof resizemap2window != "undefined")resizemap2window();';
   }
-
-	function changeLegendDisplay(){
-		$this->user->rolle->changeLegendDisplay($this->formvars['hide']);
-		echo 'hide: ' . $this->formvars['hide'] . '~resizemap2window();';
-	}
 
 	function saveOverlayPosition(){
   	$this->user->rolle->saveOverlayPosition($this->formvars['overlayx'],$this->formvars['overlayy']);
@@ -6851,12 +6850,28 @@ class GUI {
     $this->output();
   }
 
-  function layer_export_exportieren(){
-  	$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-  	$export_layer_ids = explode(', ', $this->formvars['selected_layers']);
-  	$this->layer_dumpfile = $mapDB->create_layer_dumpfile($this->database, $export_layer_ids);
-  	$this->layer_export();
-  }
+	function layer_export_exportieren() {
+		if ($this->formvars['layer']) {
+			$export_layer_ids = $this->formvars['layer'];
+			$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+			$result = $mapDB->create_layer_dumpfile(
+				$this->database,
+				$export_layer_ids,
+				($this->formvars['with_privileges'] != '')
+			);
+			if ($result['success']) {
+				$this->add_message('notice', 'Export erfolgreich.<br>Sie können die Datei jetzt herunterladen.');
+				$this->layer_dumpfile = $result['layer_dumpfile'];
+			}
+			else {
+				$this->add_message('error', 'Fehler beim Export: ' . $result['err_msg']);
+			}
+		}
+		else {
+			$this->add_message('warning', 'Sie müssen mindestens einen Layer zum Export auswählen!');
+		}
+		$this->layer_export();
+	}
 
 	function layer_generator(){
 		$this->titel='Layer-Generator';
@@ -11914,7 +11929,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		include_once(CLASSPATH.'FormObject.php');
     $this->user->Stellen = $this->user->getStellen(0);
     $this->Hinweis.='Aktuelle Stellen_ID: '.$Stelle_ID;
-    $StellenFormObj=new FormObject("Stelle_ID", "select", $this->user->Stellen['ID'], $Stelle_ID, $this->user->Stellen['Bezeichnung'], 'Anzahl Werte', "", "", NULL , NULL, "vertical-align: middle");
+    $StellenFormObj=new FormObject("Stelle_ID", "select", $this->user->Stellen['ID'], $Stelle_ID, $this->user->Stellen['Bezeichnung'], 'Anzahl Werte', "", "", NULL , NULL, "vertical-align: middle; max-height: 200px");
     # hinzufügen von Javascript welches dafür sorgt, dass die Angegebenen Werte abgefragt werden
     # und die genannten Formularobjekte mit diesen Werten bestückt werden
     # übergebene Werte
@@ -14969,7 +14984,7 @@ class db_mapObj{
 			if($rs['maxscale'] > 0)$rs['maxscale'] = $rs['maxscale']+0.3;
 			if($rs['minscale'] > 0)$rs['minscale'] = $rs['minscale']-0.3;
 			$layer['list'][$i]=$rs;			
-			$layer['layer_ids'][$rs['Layer_ID']] =& $layer[$i];		# damit man mit einer Layer-ID als Schlüssel auf dieses Array zugreifen kann
+			$layer['layer_ids'][$rs['Layer_ID']] =& $layer['list'][$i];		# damit man mit einer Layer-ID als Schlüssel auf dieses Array zugreifen kann
 			$i++;
     }
     return $layer;
@@ -15832,44 +15847,188 @@ class db_mapObj{
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
   }
 
-	function create_layer_dumpfile($database, $layer_ids){
-		$sql .= 'SET @group_id = 1;'.chr(10);
-		$sql .= 'SET @connection = \'user=xxxx password=xxxx dbname=kvwmapsp\';'.chr(10).chr(10);
-		for($i = 0; $i < count($layer_ids); $i++){
+	function create_layer_dumpfile($database, $layer_ids, $with_privileges = false) {
+		$success = true;
+		$dump_text .= "-- Layerdump aus kvwmap vom " . date("d.m.Y H:i:s");
+		$dump_text .= "\n-- Achtung: Die Datenbank in die der Dump eingespielt wird, sollte die gleiche Migrationsversion haben,";
+		$dump_text .= "\n-- wie die Datenbank aus der exportiert wurde! Anderenfalls kann es zu Fehlern bei der Ausführung des SQL kommen.";
+		$dump_text .= "\n\nSET @group_id = 1;";
+		$dump_text .= "\nSET @connection = 'host=pgsql dbname=kvwmapsp user=kvwmap password=*****';";
+
+		if ($with_privileges) {
+			# Frage Stellen der Layer ab
+			$sql = "
+				SELECT DISTINCT
+					ID,
+					Bezeichnung
+				FROM
+					`stelle` AS s JOIN
+					`used_layer` AS ul ON (s.`ID` = ul.`Stelle_ID`)
+				WHERE
+					ul.`Layer_ID` IN (" . implode(', ', $layer_ids) . ")
+			";
+			#echo '<br>Sql: ' . $sql;
+			$ret = $database->execSQL($sql, 4, 0);
+			if ($ret[0] == 1) {
+				$success = false;
+				$err_msg = $ret[1];
+			}
+			else {
+				while($rs = mysql_fetch_assoc($ret[1])) {
+					$stelle_id_var = '@stelle_id_' . $rs['Bezeichnung'] . '_' . $rs['ID'];
+					$stellen[] = array(
+						'id' => $rs['ID'],
+						'var' => $stelle_id_var
+					);
+
+					$stelle = $database->create_insert_dump(
+						'stelle',
+						'ID',
+						"
+							SELECT
+								*
+							FROM
+								`stelle`
+							WHERE
+								`ID` = " . $rs['ID'] . "
+						"
+					);
+					# Stelle
+					$dump_text .= "\n\n-- Stelle " . $rs['Bezeichnung'] . " (id=" . $rs['ID'] . ")";
+					$dump_text .= "\n" . $stelle['insert'][0];
+
+					# Variable für Stelle
+					$dump_text .= "\n-- Falls Stelle schon existiert, INSERT mit /* */ auskommentieren und statt LAST_INSERT_ID() die vorhandene Stellen-ID eintragen.";
+					$dump_text .= "\nSET " . $stelle_id_var . " = LAST_INSERT_ID();";
+				}
+			}
+		}
+
+		for($i = 0; $i < count($layer_ids); $i++) {
 			$layer = $database->create_insert_dump('layer', '', 'SELECT `Name`, `alias`, `Datentyp`, \'@group_id\' AS `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `printconnection`, `connectiontype`, `classitem`, `filteritem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, wms_auth_username, wms_auth_password, `wfs_geom`, `selectiontype`, `querymap`, `logconsume`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `privileg`, `trigger_function`, `sync` FROM layer WHERE Layer_ID='.$layer_ids[$i]);
-			$sql .= $layer['insert'][0];
+			$dump_text .= "\n\n-- Layer " . $layer_ids[$i] . "\n" . $layer['insert'][0];
 			$last_layer_id = '@last_layer_id'.$layer_ids[$i];
-			$sql .= chr(10).'SET '.$last_layer_id.'=LAST_INSERT_ID();'.chr(10);
-			$classes = $database->create_insert_dump('classes', 'Class_ID', 'SELECT `Class_ID`, `Name`, \''.$last_layer_id.'\' AS `Layer_ID`, `Expression`, `drawingorder`, `text` FROM classes WHERE Layer_ID='.$layer_ids[$i]);
-			$layer_attributes = $database->create_insert_dump('layer_attributes', '', 'SELECT \''.$last_layer_id.'\' AS `layer_id`, `name`, real_name, tablename, table_alias_name, `type`, geometrytype, constraints, nullable, length, decimal_length, `default`, form_element_type, options, alias, `alias_low-german`, alias_english, alias_polish, alias_vietnamese, tooltip, `group`, `raster_visibility`, `mandatory`, `order`, `privileg`, query_tooltip FROM layer_attributes WHERE layer_id = '.$layer_ids[$i]);
+			$dump_text .= "\nSET " . $last_layer_id . "=LAST_INSERT_ID();";
+
+			if ($with_privileges) {
+				for ($s = 0; $s < count($stellen); $s++) {
+					# Zuordnung des Layers zur Stelle
+					$used_layer = $database->create_insert_dump(
+						'used_layer',
+						'',
+						"
+							SELECT
+								'" . $last_layer_id . "' AS Layer_ID,
+								'" . $stellen[$s]['var'] . "' AS Stelle_ID,
+								`queryable`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `offsite`, `transparency`, `postlabelcache`,
+								`Filter`, `template`, `header`, `footer`, `symbolscale`, `used_layer_id`, `logconsume`, `requires`, `privileg`, `export_privileg`,
+								`start_aktiv`,
+								`use_geom`
+							FROM
+								`used_layer`
+							WHERE
+								`Layer_ID` = " . $layer_ids[$i] . " AND
+								`Stelle_ID` = " . $stellen[$s]['id'] . "
+						"
+					);
+					if (count($used_layer['insert']) > 0) {
+						$dump_text .= "\n\n-- Zuordnung Layer " . $layer_ids[$i] . " zu Stelle " . $stellen[$s]['id'] . "\n" . implode("\n", $used_layer['insert']);
+					}
+
+					# Attributfilter des Layers in der Stelle
+					$attributfilter2used_layer = $database->create_insert_dump(
+						'u_attributfilter2used_layer',
+						'',
+						"
+							SELECT
+								'" . $stellen[$s]['var'] . "' AS Stelle_ID,
+								'" . $last_layer_id . "' AS Layer_ID,
+								`attributname`,
+								`attributvalue`,
+								`operator`,
+								`type`
+							FROM
+								`u_attributfilter2used_layer`
+							WHERE
+								`Layer_ID` = " . $layer_ids[$i] . " AND
+								`Stelle_ID` = " . $stellen[$s]['id'] . "
+						"
+					);
+					if (count($attributfilter2used_layer['insert']) > 0) {
+						$dump_text .= "\n\n-- Zuordnung der Attributfilter des Layers " . $layer_ids[$i] . " zur Stelle " . $stellen[$s]['id'] . "\n" . implode("\n", $attributfilter2used_layer['insert']);
+					}
+				}
+			}
+
+			$layer_attributes = $database->create_insert_dump('layer_attributes', 'layer_attribut_id', 'SELECT `name` AS layer_attribut_id, \''.$last_layer_id.'\' AS `layer_id`, `name`, real_name, tablename, table_alias_name, `type`, geometrytype, constraints, nullable, length, decimal_length, `default`, form_element_type, options, alias, `alias_low-german`, alias_english, alias_polish, alias_vietnamese, tooltip, `group`, `raster_visibility`, `mandatory`, `order`, `privileg`, query_tooltip FROM layer_attributes WHERE layer_id = ' . $layer_ids[$i]);
 			for($j = 0; $j < count($layer_attributes['insert']); $j++){
-				$sql .= $layer_attributes['insert'][$j].chr(10);
-			}
-			for($j = 0; $j < count($classes['insert']); $j++){
-				$sql .= $classes['insert'][$j];
-				$sql .= chr(10).'SET @last_class_id=LAST_INSERT_ID();'.chr(10);
-				$styles = $database->create_insert_dump('styles', '', 'SELECT `symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`,`sizeitem` FROM styles, u_styles2classes WHERE u_styles2classes.style_id = styles.Style_ID AND Class_ID='.$classes['extra'][$j].' ORDER BY drawingorder');
-				for($k = 0; $k < count($styles['insert']); $k++){
-					$sql .= $styles['insert'][$k];
-					$sql .= chr(10).' SET @last_style_id=LAST_INSERT_ID();'.chr(10);
-					$sql .= 'INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, '.$k.');'.chr(10);
+				# Attribut des Layers
+				$dump_text .= "\n\n-- Attribut " . $layer_attributes['extra'][$j] . " des Layers " . $layer_ids[$i] . "\n" . $layer_attributes['insert'][$j];
+
+				if ($with_privileges) {
+					for ($s = 0; $s < count($stellen); $s++) {
+						# Attributrechte in der Stelle
+						$layer_attributes2stelle = $database->create_insert_dump(
+							'layer_attributes2stelle',
+							'',
+							"
+								SELECT
+									'". $last_layer_id . "' AS layer_id,
+									'" . $stellen[$s]['var'] . "' AS stelle_id,
+									`attributename`,
+									`privileg`,
+									`tooltip`
+								FROM
+									`layer_attributes2stelle`
+								WHERE
+									`layer_id` = " . $layer_ids[$i] . " AND
+									`stelle_id` = " . $stellen[$s]['id'] . "
+							"
+						);
+						if (count($layer_attributes2stelle['insert']) > 0) {
+							$dump_text .= "\n\n-- Zuordnung der Layerattribute des Layers " . $layer_ids[$i] . " zur Stelle " . $stellen[$s]['id'] . "\n" . implode("\n", $layer_attributes2stelle['insert']);
+						}
+					}
 				}
-				$labels = $database->create_insert_dump('labels', '', 'SELECT `font`,`type`,`color`,`outlinecolor`,`shadowcolor`,`shadowsizex`,`shadowsizey`,`backgroundcolor`,`backgroundshadowcolor`,`backgroundshadowsizex`,`backgroundshadowsizey`,`size`,`minsize`,`maxsize`,`position`,`offsetx`,`offsety`,`angle`,`autoangle`,`buffer`,`antialias`,`minfeaturesize`,`maxfeaturesize`,`partials`,`wrap`,`the_force` FROM labels, u_labels2classes WHERE u_labels2classes.label_id = labels.Label_ID AND Class_ID='.$classes['extra'][$j]);
-				for($k = 0; $k < count($labels['insert']); $k++){
-					$sql .= $labels['insert'][$k];
-					$sql .= chr(10).' SET @last_label_id=LAST_INSERT_ID();'.chr(10);
-					$sql .= 'INSERT INTO u_labels2classes (label_id, class_id) VALUES (@last_label_id, @last_class_id);'.chr(10);
+			}
+
+			$classes = $database->create_insert_dump('classes', 'Class_ID', 'SELECT `Class_ID`, `Name`, \''.$last_layer_id.'\' AS `Layer_ID`, `Expression`, `drawingorder`, `text` FROM classes WHERE Layer_ID=' . $layer_ids[$i]);
+			for ($j = 0; $j < count($classes['insert']); $j++) {
+				$dump_text .= "\n\n-- Class " . $classes['extra'][$j] . " des Layers " . $layer_ids[$i] . "\n" . $classes['insert'][$j];
+				$dump_text .= "\nSET @last_class_id=LAST_INSERT_ID();";
+
+				$styles = $database->create_insert_dump('styles', 'Style_ID', 'SELECT styles.Style_ID, `symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`,`sizeitem` FROM styles, u_styles2classes WHERE u_styles2classes.style_id = styles.Style_ID AND Class_ID='.$classes['extra'][$j].' ORDER BY drawingorder');
+				for ($k = 0; $k < count($styles['insert']); $k++) {
+					$dump_text .= "\n\n-- Style " . $styles['extra'][$k] . " der Class " . $classes['extra'][$j];
+					$dump_text .= "\n" . $styles['insert'][$k] . "\nSET @last_style_id=LAST_INSERT_ID();";
+					$dump_text .= "\n-- Zuordnung Style " . $styles['extra'][$k] . " zu Class " . $classes['extra'][$j];
+					$dump_text .= "\nINSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, " . $k . ");";
+				}
+
+				$labels = $database->create_insert_dump('labels', 'Label_ID', 'SELECT labels.Label_ID, `font`,`type`,`color`,`outlinecolor`,`shadowcolor`,`shadowsizex`,`shadowsizey`,`backgroundcolor`,`backgroundshadowcolor`,`backgroundshadowsizex`,`backgroundshadowsizey`,`size`,`minsize`,`maxsize`,`position`,`offsetx`,`offsety`,`angle`,`autoangle`,`buffer`,`antialias`,`minfeaturesize`,`maxfeaturesize`,`partials`,`wrap`,`the_force` FROM labels, u_labels2classes WHERE u_labels2classes.label_id = labels.Label_ID AND Class_ID='.$classes['extra'][$j]);
+				for ($k = 0; $k < count($labels['insert']); $k++) {
+					$dump_text .= "\n\n-- Label " . $labels['extra'][$k] . " der Class " . $classes['extra'][$j];
+					$dump_text .= "\n" . $labels['insert'][$k] . "\nSET @last_label_id=LAST_INSERT_ID();";
+					$dump_text .= "\n-- Zuordnung Label " . $labels['extra'][$k] . " zu Class " . $classes['extra'][$j];
+					$dump_text .=	"\nINSERT INTO u_labels2classes (label_id, class_id) VALUES (@last_label_id, @last_class_id);";
 				}
 			}
-			$sql .= chr(10);
 		}
-		for($i = 0; $i < count($layer_ids); $i++){
-			$sql .= 'UPDATE layer_attributes SET options = REPLACE(options, \''.$layer_ids[$i].'\', @last_layer_id'.$layer_ids[$i].') WHERE layer_id IN(@last_layer_id'.implode(', @last_layer_id', $layer_ids).') AND form_element_type IN (\'SubFormPK\', \'SubFormFK\', \'SubFormEmbeddedPK\', \'Autovervollständigungsfeld\', \'Auswahlfeld\');'.chr(10);
+		for ($i = 0; $i < count($layer_ids); $i++) {
+			$dump_text .= "\n\n-- Replace attribute options for Layer " . $layer_ids[$i];
+			$dump_text .= "\nUPDATE layer_attributes SET options = REPLACE(options, '" . $layer_ids[$i] . "', @last_layer_id" . $layer_ids[$i] . ") WHERE layer_id IN (@last_layer_id" . implode(', @last_layer_id', $layer_ids) . ") AND form_element_type IN ('SubFormPK', 'SubFormFK', 'SubFormEmbeddedPK', 'Autovervollständigungsfeld', 'Auswahlfeld');";
 		}
+
 		$filename = rand(0, 1000000).'.sql';
-		$fp = fopen(IMAGEPATH.$filename, 'w');
-		fwrite($fp, utf8_decode($sql));
-		return $filename;
+		$fp = fopen(IMAGEPATH . $filename, 'w');
+		#fwrite($fp, $dump_text);
+		fwrite($fp, str_replace('', '', $dump_text));
+		#fwrite($fp, utf8_decode($dump_text));
+
+		return array(
+			'success' => $success,
+			'layer_dumpfile' => $filename
+		);
 	}
 
   function deleteLayer($id){

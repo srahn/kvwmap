@@ -974,8 +974,10 @@ class rolle {
 	}
 	
 	function saveLegendOptions($layerset, $formvars){
-		$sql ="UPDATE rolle SET legendtype=".$formvars['legendtype'];
-		$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+		$sql ="	UPDATE rolle SET 
+						legendtype=".$formvars['legendtype'].", 
+						hidelegend='".$formvars['legenddisplay']."'
+						WHERE user_id=".$this->user_id." AND stelle_id=".$this->stelle_id;
 		#echo $sql;
 		$this->debug->write("<p>file:rolle.php class:rolle function:saveLegendOptions - :",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
@@ -1328,18 +1330,6 @@ class rolle {
 		# hide=1 Menü wird nicht angezeigt
 		$this->hideMenue = $hide;
 		$sql ="UPDATE rolle SET hidemenue='".$hide."'";
-		$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-		#echo $sql;
-		$this->debug->write("<p>file:rolle.php class:rolle function:hideMenue - :",4);
-		$this->database->execSQL($sql,4, $this->loglevel);
-		return 1;
-	}
-
-	function changeLegendDisplay($hide) {
-		# speichern des Zustandes der Legende
-		# hide=0 Legende ist zu sehen
-		# hide=1 Legende wird nicht angezeigt
-		$sql ="UPDATE rolle SET hidelegend='".$hide."'";
 		$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 		#echo $sql;
 		$this->debug->write("<p>file:rolle.php class:rolle function:hideMenue - :",4);

@@ -150,7 +150,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
  		<input type="hidden" name="offset" value="<? echo $this->formvars['offset'] ?>">
  		<input type="hidden" name="anzahl" value="<? echo $this->formvars['anzahl']; ?>">
  		<input type="hidden" name="distinct" value="<? echo $this->formvars['distinct']; ?>">
- 		<input class="button" type="submit" name="zurueck" value="zurück zur Suche">
+ 		<input type="submit" name="zurueck" value="zurück zur Suche">
  		 
  		
     </td>

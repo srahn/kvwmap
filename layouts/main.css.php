@@ -40,6 +40,7 @@ body {
 
 .gui-table {
   width: 900px;
+	margin: auto;
 }
 
 form {
@@ -361,6 +362,14 @@ a.invisiblelayerlink:hover{
 	background: linear-gradient(#DAE4EC, #84accf);
 }
 
+#openLayerParamBarIcon{
+	width: 16px; 
+	height: 16px; 
+	padding: 5px; 
+	font-size: 1.1em;
+	margin: 0 5px 0 40px;
+}
+
 #layerParamsBar {
 	display: none;
 	position: absolute;
@@ -371,8 +380,20 @@ a.invisiblelayerlink:hover{
 	z-index: 9999;
 }
 
+#menuebar{
+	background: url('../graphics/bg.gif');
+	border: 1px solid;
+	border-color: #CCC; 
+	border-top: none;
+	border-bottom: none;
+}
+
+#menue_switch{
+	min-width: <? echo $size['menue']['hide_width']; ?>px;
+	background: linear-gradient(90deg, #DAE4EC, #c1d6f2);
+}
+
 #menueTable{
-	padding-top: 6px;
 	margin-bottom: 2px;
 	width: <? echo ($size['menue']['width'] - 2); ?>px;
 	text-align: center;
@@ -490,7 +511,7 @@ a.menuered:hover {
 
 .button-menue{
 	flex: 0 0 auto;
-	padding: 0 0 6 4;
+	margin: 0 0 2 0;
 }
 
 .text-menue{
@@ -603,76 +624,67 @@ a.menuered:hover {
 
 .tool_info{
 	background-image: url(../graphics/tool_info.png);
-	background-repeat: no-repeat;
-  background-position: center center;
 }
 
 .layer{
 	background-image: url(../graphics/layer.png);
-	background-repeat: no-repeat;
-  background-position: center center;
 }
 
 .button_background{
-	background: linear-gradient(#eff3f6, #DAE4EC);
-	width: 30px;
-	height: 29px;
+	background: linear-gradient(#fdfdfd, #DAE4EC);
+	box-shadow: 0px 1px 0px #bbb;
 }
 
-.emboss{
-	width:30px;
-	height:30px;
-	box-shadow:
-	2px 3px 3px rgba(0, 0, 0, 0.2), 
-	0px 3px 1px rgba(255, 255, 255, 0.6) inset, 
-	-1px -1px 3px rgba(0, 0, 0, 0.7) inset,	 
-	0px 1px 1px rgba(0, 0, 0, 0.8) inset;
+.button{
+	position: relative;
+	background-repeat: no-repeat;
+	background-position: center; 
+	width:36px;
+	height:36px;
 }
 
-.emboss:hover{
-	box-shadow:
-	2px 0 7px rgba( 255, 255, 255 ,0.1), 
-	0 2px 7px rgba( 255, 255, 255 ,0.1), 
-	-2px 0 7px rgba( 255, 255, 255 ,0.1),
-	0 -2px 7px rgba( 255, 255, 255 ,0.1),
-	2px 3px 3px rgba(0, 0, 0, 0.2), 
-	0px 3px 1px rgba(255, 255, 255, 0.6) inset, 
-	-1px -1px 3px rgba(0, 0, 0, 0.7) inset,	 
-	0px 1px 1px rgba(0, 0, 0, 0.8) inset;
+.button::after {
+	border-radius: 3px;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
+  content: '';
+	opacity: 0;
+  position: absolute;
+  height: calc(100% - 2px);
+	width: calc(100% - 2px);
+  left: 1;
+  top: 1;
 }
 
-.emboss:active{
-	box-shadow:
-	2px 0 7px rgba( 255, 255, 255 ,0.2), 
-	0 2px 7px rgba( 255, 255, 255 ,0.2), 
-	-2px 0 7px rgba( 255, 255, 255 ,0.2),
-	0 -2px 7px rgba( 255, 255, 255 ,0.2),
-	-1px -1px 3px rgba(0, 0, 0, 0.7) inset,	 
-	0px 0px 1px rgba(0, 0, 0, 0.8) inset;
+.button:active{
+	background-color: #e3e8ed;
+}
+
+.button:hover::after{
+  opacity: 1;
 }
 
 #header{
-	height: <? echo ($size['header']['height'] - 2); ?>;
+	height: <? echo ($size['header']['height'] - 2); ?>px;
 	border: 1px solid; 
 	border-color: #ffffff #cccccc #bbbbbb;
 }
 
 #footer{
-	height: <? echo ($size['footer']['height'] - 2); ?>;
+	height: <? echo ($size['footer']['height'] - 2); ?>px;
 	border: 1px solid; 
-	border-color: #cccccc #cccccc #cccccc;
+	border-color: #aaa #cccccc #cccccc;
 }
 
 #scale_bar {
 	background: <? echo BG_MENUETOP; ?>;
 	border-top: 1px solid #aaaaaa;
-	height: <? echo ($size['scale_bar']['height'] - 1); ?>;
+	height: <? echo ($size['scale_bar']['height'] - 1); ?>px;
 }
 
 #lagebezeichnung_bar{
 	background: <? echo BG_MENUETOP; ?>;
 	border-top: 1px solid #aaaaaa;
-	height: <? echo ($size['lagebezeichnung_bar']['height'] - 1); ?>;
+	height: <? echo ($size['lagebezeichnung_bar']['height'] - 1); ?>px;
 	text-align: center;
 }
 
@@ -683,16 +695,18 @@ a.menuered:hover {
 }
 
 #map_functions_bar{
-	border-top: 1px solid #aaaaaa;
-	padding-top: 6px;
-	padding-bottom: 6px;
-	height: <? echo ($size['map_functions_bar']['height'] - 13); ?>;
+	background: linear-gradient(#fdfdfd, #DAE4EC);
+	border-top: 1px solid #ccc;
+	box-shadow: 0px 1px 0px #bbb;
+	height: <? echo ($size['map_functions_bar']['height'] - 1); ?>px;
 }
 
 #legenddiv {
 	border-left: 1px solid #ccc;
+	box-shadow: 0px 1px 0px #bbb;
 	display: flex; 
 	flex-direction: column;
+	background-image: url(../graphics/bg.gif);
 }
 
 #legend_layer{
@@ -795,25 +809,19 @@ a.menuered:hover {
 }
 
 #legend{
-	margin-left:7px;
+	margin: 4px 0 4px 7px;
 }
 
 .normallegend {
 	float: right;
 	width: <?php echo ($size['legend']['width'] - 1); ?>px;
 	vertical-align: top;
-	background-image: url(../graphics/bg.gif);
-	border-top: 1px solid #eeeeee;
 }
 
 .slidinglegend_slideout {
 	cursor: pointer;
 	right: -<?php echo $size['legend']['width']; ?>px;
 	position:absolute;
-	border-top: 1px solid #eeeeee;
-	border-left:1px solid #CCCCCC;
-	border-bottom: 1px solid #aaaaaa;
-	background-image: url(../graphics/bg.gif);
 	transform: translate3d(-<? echo ($size['legend']['hide_width'] + 2); ?>px,0px,0px);
 	transition: all 0.3s ease;
 }
@@ -827,10 +835,6 @@ a.menuered:hover {
 .slidinglegend_slidein {
 	right: -<?php echo $size['legend']['width']; ?>px;
 	position: absolute;
-	border-top: 1px solid #eeeeee;
-	border-left:1px solid #CCCCCC;
-	border-bottom: 1px solid #aaaaaa;
-	background-image: url(../graphics/bg.gif);
 	transform: translate3d(-<?php echo $size['legend']['width']; ?>px,0px,0px);
 	transition: all 0.3s ease;
 }
@@ -999,6 +1003,12 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 	padding:0px 0px 0px 0px;
 }
 
+.datensatz_header{
+	background: linear-gradient(#DAE4EC 0%, lightsteelblue 100%);
+	#background-color:<? echo BG_GLEHEADER; ?>;
+	border-bottom: 1px solid #bbb;
+}
+
 .message_box {
 	opacity: 1;
 	position: fixed;
@@ -1064,7 +1074,7 @@ table.tgle {
 }
 
 thead.gle th { 
- padding:4px 4px 4px 4px;
+ padding: 0;
  text-align:left;
 }
 
@@ -1110,17 +1120,61 @@ tbody.gle tr:hover {
 }
 
 
-#calendar { /* Fuer IE <= 6 */
+.calendar { /* Fuer IE <= 6 */
 	text-align: center;
 	position: absolute;
 	z-index: 1000000;
 }
 
-#calendar tr { 
+.timepicker{
+	min-width: 180px;
+	font-size: 18px;
+	line-height: 24px;
+	border: solid #112A5D 2px;
+	padding: 3 0 3 0;
+	margin-top: 7px;
+	margin-left:auto;
+	margin-right:auto;
+	background-color: #F6F6F6;
+	display: flex;
+	justify-content: center;
+}
+
+.timepicker .time{
+	flex: 0 0 auto;
+	cursor: n-resize;
+	width: 33px;
+	padding: 0 5 0 5;
+	font-size: 18px;
+	border: 1px solid white;
+}
+
+.timepicker .time:focus{
+	border: 1px solid grey;
+}
+
+.timepicker .time:hover{ 
+	background-color: #CCD2D8;
+}
+
+.timepicker .submit{
+	cursor: pointer;
+	position: absolute;
+	right: 8px;
+	margin: 3 0 3 0;
+	font-size: 1.2em;
+	color: silver;
+}
+
+.timepicker .submit:hover{
+	color: gray;
+}
+
+.calendar tr { 
  border:none;
 }
 
-#calendar table thead th{ 
+.calendar table thead th{ 
 	font-weight: bold; 
 	font-size: 15px;
 	line-height: 1.2em;				
@@ -1129,7 +1183,7 @@ tbody.gle tr:hover {
 	background-color: #112A5D;
 }
 
-#calendar table thead th.weekday{ 
+.calendar table thead th.weekday{ 
 	font-weight: bold; 
 	font-size: 14px;
 	line-height: 1.2em;
@@ -1139,7 +1193,7 @@ tbody.gle tr:hover {
 	border: solid #112A5D 1px;
 }
 
-#calendar table tbody td, #calendar table tfoot td{ 
+.calendar table tbody td, .calendar table tfoot td{ 
 	font-weight: normal; 
 	font-size: 14px;
 	line-height: 1.2em;
@@ -1151,39 +1205,39 @@ tbody.gle tr:hover {
 	border: 1px solid #CCD2D8;
 }
 
-#calendar table tfoot td {
+.calendar table tfoot td {
 	font-size: 7px;
 	border: none;
 }
 
-#calendar table tfoot td.calendar_week {
+.calendar table tfoot td.calendar_week {
 	text-align: left;
 }
 
-#calendar table tbody td:hover{ 
+.calendar table tbody td:hover{ 
 	background-color: #CCD2D8;
 	font-weight: bold;
 }
 
-#calendar table tbody td.saturday{ 
+.calendar table tbody td.saturday{ 
 	color: #9A2525;
 	font-weight: normal;
 }
 
-#calendar table tbody td.sunday{ 
+.calendar table tbody td.sunday{ 
 	color: #9A2525;
 	font-weight: bold;
 }
 
-#calendar table tbody td.weekend{ 
+.calendar table tbody td.weekend{ 
 	color: #9A2525;
 }
 
-#calendar table tbody td.today{
+.calendar table tbody td.today{
 	background-color: #A7B5C7;
 }
 
-#calendar table thead th.prev_year, #calendar table thead th.next_year {
+.calendar table thead th.prev_year, .calendar table thead th.next_year {
 	border:none;
 	margin: 0.1em;
 	padding: 0.1em;
@@ -1191,11 +1245,11 @@ tbody.gle tr:hover {
 	font-size: 11px;
 }
 
-#calendar table tbody td.last_month, #calendar table tbody td.next_month {
+.calendar table tbody td.last_month, .calendar table tbody td.next_month {
 	color:	 #a3afc4;
 }
 
-#calendar table{
+.calendar table{
 	border-collapse: collapse;
 	border: solid #112A5D 2px;
 	padding: 0;
@@ -1256,7 +1310,6 @@ tbody.gle tr:hover {
 	margin: 10px;
 	border: 1px solid #cccccc;
 	background: url('../graphics/bg.gif'); 
-	position: relative; 
 	z-index: 2;
 }
 
@@ -1282,6 +1335,16 @@ tbody.gle tr:hover {
 .rollenwahl-option-data {
 	width: 460px;
 	padding : 4px;
+}
+
+.button_selection{
+	width: 390px;
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.button_selection div{
+	padding: 0 0 3px 4px;
 }
 
 .hover-border{
@@ -1330,6 +1393,7 @@ tbody.gle tr:hover {
 }
 
 .layerOptions, #legendOptions{
+	width: 220px;
 	border: 1px solid #cccccc;
 	background: #EDEFEF;
 	padding:0px;
@@ -1342,8 +1406,15 @@ tbody.gle tr:hover {
 
 .layerOptions{
 	top:300px;
-	width: 200px;
 	right:210px;
+}
+
+#legendOptionsIcon{
+	font-size: 1.1em;
+	margin: 0 0 0 42;
+	height: 16px;
+	width: 16px;
+	padding: 5px;
 }
 
 #legendOptions{

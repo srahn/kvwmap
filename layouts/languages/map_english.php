@@ -38,6 +38,9 @@
 	$strNoLayer="Please select a layer for the data query!";
 	$strLayerSearch="Search Layer";
 	$strLegendOptions="Legend-Options";
+	$strLegendVisibility="Legend-Display";
+	$strLegendVisible="always visible";
+	$strLegendHide="hide";
 	$strLegendType="Legend Type";
 	$strLegendTypeGroups="layers in groups";
 	$strLegendTypeAlphabetical="layers alphabetical";

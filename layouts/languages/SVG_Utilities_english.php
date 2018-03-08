@@ -2,7 +2,7 @@
   $strCornerPoint="edit vertices";
   $strCutByPolygon="cut by polygon";
   $strDrawPolygon="draw polygon";
-  $strDeletePolygon="delete polygon";
+  $strDelete="delete all";
   $strSplitLine="split lines";
 	$strSplitPolygon="split polygons";
   $strUndo="undo";

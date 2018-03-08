@@ -347,24 +347,24 @@ function go_switch($go){
 
 			# auslesen der Layer vom mobilen Client
 			case 'import_layer' : {
-			$GUI->checkCaseAllowed($go);
-			$GUI->import_layer();
+				$GUI->checkCaseAllowed($go);
+				$GUI->import_layer();
 			} break;
 
 			# auslesen der Layer vom mobilen Client
 			case 'import_layer_importieren' : {
-			$GUI->import_layer_importieren();
+				$GUI->import_layer_importieren();
 			} break;
 
 			# auslesen der Layer von der Primärdatenbank
 			case 'export_layer' : {
-			$GUI->checkCaseAllowed($go);
-			$GUI->export_layer();
+				$GUI->checkCaseAllowed($go);
+				$GUI->export_layer();
 			} break;
 
 			# auslesen der Layer von der Primärdatenbank
 			case 'export_layer_einlesen' : {
-			$GUI->export_layer_exportieren();
+				$GUI->export_layer_exportieren();
 			} break;
 
 			# liefert die options für ein Selectfeld für abhängige Attribute
@@ -379,84 +379,84 @@ function go_switch($go){
 			
 			# Kartenbild anzeigen
 			case 'showMapImage' : {
-			$GUI->showMapImage();
+				$GUI->showMapImage();
 			} break;
 
 			# Klassen abfragen
 			case 'getclasses' : {
-			$GUI->get_classes();
+				$GUI->get_classes();
 			} break;
 
 			# Styles und Labels abfragen
 			case 'getstyles_labels' : {
-			$GUI->get_styles_labels();
+				$GUI->get_styles_labels();
 			} break;
 
 			# Style abfragen
 			case 'get_style' : {
-			$GUI->get_style();
+				$GUI->get_style();
 			} break;
 
 			# Style speichern
 			case 'save_style' : {
-			$GUI->save_style();
+				$GUI->save_style();
 			} break;
 
 			# Style löschen
 			case 'delete_style' : {
-			$GUI->delete_style();
+				$GUI->delete_style();
 			} break;
 
 			# neuen Style hinzufügen
 			case 'add_style' : {
-			$GUI->add_style();
-			$GUI->get_styles();
+				$GUI->add_style();
+				$GUI->get_styles();
 			} break;
 			
 			# Style in der Drawingorder nach oben verschieben
 			case 'moveup_style' : {
-			$GUI->moveup_style();
+				$GUI->moveup_style();
 			} break;
 			
 			# Style in der Drawingorder nach unten verschieben
 			case 'movedown_style' : {
-			$GUI->movedown_style();
+				$GUI->movedown_style();
 			} break;
 
 			# Label abfragen
 			case 'get_label' : {
-			$GUI->get_label();
+				$GUI->get_label();
 			} break;
 
 			# Label speichern
 			case 'save_label' : {
-			$GUI->save_label();
+				$GUI->save_label();
 			} break;
 
 			# Label Löschen
 			case 'delete_label' : {
-			$GUI->delete_label();
+				$GUI->delete_label();
 			} break;
 
 			# neues Label hinzufügen
 			case 'add_label' : {
-			$GUI->add_label();
+				$GUI->add_label();
 			} break;
 
 			# Untermenues abfragen
 			case 'getsubmenues' : {
-			$GUI->get_sub_menues();
+				$GUI->get_sub_menues();
 			} break;
 			
 			# Layer zu einer Gruppe abfragen
 			case 'getlayerfromgroup' : {
-			$GUI->getlayerfromgroup();
+				$GUI->getlayerfromgroup();
 			} break;
 
 			# Eigentuemerfortführung
 			case 'Adressaenderungen_Export' : {
-			$GUI->checkCaseAllowed($go);
-			$GUI->export_Adressaenderungen();
+				$GUI->checkCaseAllowed($go);
+				$GUI->export_Adressaenderungen();
 			} break;
 
 			# Eigentuemerfortführung
@@ -553,27 +553,27 @@ function go_switch($go){
 
 			# PolygonEditor
 			case 'PolygonEditor' : {
-			$GUI->PolygonEditor();
+				$GUI->PolygonEditor();
 			}break;
 
 			# PolygonEditor
 			case 'PolygonEditor_Senden' : {
-			$GUI->PolygonEditor_Senden();
+				$GUI->PolygonEditor_Senden();
 			}break;
 
 			# LineEditor
 			case 'LineEditor' : {
-			$GUI->LineEditor();
+				$GUI->LineEditor();
 			}break;
 
 			# LineEditor
 			case 'LineEditor_Senden' : {
-			$GUI->LineEditor_Senden();
+				$GUI->LineEditor_Senden();
 			}break;
 
 			# Sachdaten speichern
 			case 'Sachdaten_speichern' : {
-			$GUI->sachdaten_speichern();
+				$GUI->sachdaten_speichern();
 			}break;
 
 			# Sachdaten anzeigen
@@ -585,75 +585,75 @@ function go_switch($go){
 
 			# gibt die Koordinaten des in der Variable FlurstKennz übergebenen Flurstückes aus
 			case 'showFlurstuckKoordinaten' : {
-			$GUI->showFlurstueckKoordinaten();
+				$GUI->showFlurstueckKoordinaten();
 			} break;
 
 			# Export der geloggten Zugriffe in eine Georg-Datei
 			case 'georg_export' : {
-			$GUI->export_georg($GUI->formvars);
+				$GUI->export_georg($GUI->formvars);
 			}break;
 
 			# Bauleitplanungsänderung
 			case 'bauleitplanung' : {
-			$GUI->bauleitplanung();
+				$GUI->bauleitplanung();
 			}break;
 
 			# Bauleitplanungsänderung
 			case 'bauleitplanung_Senden' : {
-			$GUI->bauleitplanungSenden();
+				$GUI->bauleitplanungSenden();
 			}break;
 
 			# Bauleitplanungsänderung
 			case 'bauleitplanung_Loeschen' : {
-			$GUI->bauleitplanungLoeschen();
-			$GUI->loadMap('DataBase');
-			$currenttime=date('Y-m-d H:i:s',time());
-			$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
-			$GUI->drawMap();
-			$GUI->output();
+				$GUI->bauleitplanungLoeschen();
+				$GUI->loadMap('DataBase');
+				$currenttime=date('Y-m-d H:i:s',time());
+				$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+				$GUI->drawMap();
+				$GUI->output();
 			}break;
 
 			# spatial processing include
 			case 'spatial_processing' : {
-			$GUI->spatial_processing();
+				$GUI->spatial_processing();
 			}break;
 
 			# Abfrage einer Zeile in der MySQL Datenbank
 			# Beliebige Tabelle, Einschränkung über c1,c2,c3 und v1,v2,v3 (Werte beliebig)
 			case 'getRow' : {
-			# Derzeit nur für die Tabelle Rolle
-			if ($GUI->formvars['from'] == 'rolle') {
-				$GUI->getRow();
-			}
+				# Derzeit nur für die Tabelle Rolle
+				if ($GUI->formvars['from'] == 'rolle') {
+					$GUI->getRow();
+				}
 			} break;
 
 			# layer aus mapfile laden
 			case 'layerfrommapfile_Layer hinzufügen' : {
-			$GUI->layerfromMapfile_addlayer($GUI->formvars);
-			$GUI->output();
+				$GUI->layerfromMapfile_addlayer($GUI->formvars);
+				$GUI->output();
 			}break;
 
 			# layer aus mapfile laden
 			case 'layerfrommapfile' : {
-			$GUI->checkCaseAllowed($go);
-			$GUI->layerfromMapfile();
-			$GUI->output();
+				$GUI->checkCaseAllowed($go);
+				$GUI->layerfromMapfile();
+				$GUI->output();
 			}break;
 
 			# layer aus mapfile laden
 			case 'layerfrommapfile_Datei laden' : {
-			$GUI->layerfromMapfile_load($GUI->formvars);
-			$GUI->output();
+				$GUI->layerfromMapfile_load($GUI->formvars);
+				$GUI->output();
 			}break;
 
 			# https_proxy
 			case 'https_Proxy' : {
-			$GUI->https_proxy();
+				$GUI->https_proxy();
 			}break;
 
 			# OWS
 			case 'OWS' : {
-			$GUI->createOWSResponse();
+				$GUI->createOWSResponse();
 			}break;
 
 			# OWS-Proxy erstellt bild nur neu, wenn noch nicht vorher schon mal gefordert
@@ -732,8 +732,8 @@ function go_switch($go){
 
 			#2006-01-03 pk
 			case 'Grundbuchblatt_Auswaehlen' : {
-			$GUI->checkCaseAllowed($go);
-			$GUI->grundbuchblattWahl();
+				$GUI->checkCaseAllowed($go);
+				$GUI->grundbuchblattWahl();
 			} break;
 
 			#2006-01-03 pk
@@ -755,11 +755,7 @@ function go_switch($go){
 				$GUI->flurstAnzeige($explodedFlurstKennz);
 				$GUI->output();
 			} break;
-		
-			case 'changeLegendDisplay' : {
-				$GUI->changeLegendDisplay();
-			} break;
-			
+					
 			case 'saveOverlayPosition' : {
 				$GUI->saveOverlayPosition();
 			} break;
@@ -841,7 +837,7 @@ function go_switch($go){
 			} break;
 
 			case 'Druckausschnitt_speichern' : {
-			$GUI->druckausschnitt_speichern($GUI->formvars['loadmapsource']);
+				$GUI->druckausschnitt_speichern($GUI->formvars['loadmapsource']);
 			} break;
 
 			case 'Druckausschnittswahl' : {
@@ -898,69 +894,69 @@ function go_switch($go){
 			} break;
 
 			case 'NotizKategorie_hinzufuegen' : {
-			$GUI->notizKategoriehinzufügen();
+				$GUI->notizKategoriehinzufügen();
 			} break;
 
 			case 'NotizKategorie_aendern' : {
-			$GUI->notizKategorieAendern();
+				$GUI->notizKategorieAendern();
 			} break;
 
 			case 'NotizKategorie_loeschen' : {
-			$GUI->notizKategorieLoeschen();
+				$GUI->notizKategorieLoeschen();
 			} break;
 
 			case 'Metadaten_Uebersicht' : {
-			$GUI->metadaten_uebersicht();
+				$GUI->metadaten_uebersicht();
 			} break;
 
 			case 'Metadaten_generieren' : {
-			$GUI->metadaten_generieren($GUI->formvars['layer_id']);
+				$GUI->metadaten_generieren($GUI->formvars['layer_id']);
 			} break;
 			
 			case 'Metadaten_Auswaehlen' : {
-			$GUI->metadatenSuchForm();
+				$GUI->metadatenSuchForm();
 			} break;
 
 			case 'Metadatenblattanzeige' : {
-			$GUI->metadatenblattanzeige();
+				$GUI->metadatenblattanzeige();
 			} break;
 
 			case 'Metadateneingabe_Senden' : {
-			$GUI->metadatensatzspeichern();
+				$GUI->metadatensatzspeichern();
 			} break;
 
 			case 'Nutzung_auswaehlen' : {
-			$GUI->checkCaseAllowed($go);
-			$GUI->nutzungWahl();
+				$GUI->checkCaseAllowed($go);
+				$GUI->nutzungWahl();
 			} break;
 
 			case 'Nutzung_auswaehlen_Suchen' : {
-			$GUI->nutzungsuchen();
+				$GUI->nutzungsuchen();
 			} break;
 
 			case 'Namen_Auswaehlen' : {
-			$GUI->namenWahl();
+				$GUI->namenWahl();
 			} break;
 
 			case 'Namen_Auswaehlen_Suchen' : {
-			$GUI->checkCaseAllowed('Namensuche');
-			$GUI->nameSuchen();    
+				$GUI->checkCaseAllowed('Namensuche');
+				$GUI->nameSuchen();    
 			} break;
 
 			case 'Suche_Flurstuecke_zu_Grundbuechern' : {
-			$GUI->flurstuecksSucheByGrundbuecher();
+				$GUI->flurstuecksSucheByGrundbuecher();
 			} break;
 
 			case 'Zeige_Flurstuecke_zu_Grundbuechern' : {
-			$GUI->flurstuecksAnzeigeByGrundbuecher();
+				$GUI->flurstuecksAnzeigeByGrundbuecher();
 			} break;
 
 			case 'Suche_Flurstuecke_zu_Namen' : {
-			$GUI->flurstuecksSucheByNamen();
+				$GUI->flurstuecksSucheByNamen();
 			} break;
 
 			case 'Zeige_Flurstuecke_zu_Namen' : {
-			$GUI->flurstuecksAnzeigeByNamen();
+				$GUI->flurstuecksAnzeigeByNamen();
 			} break;
 			
 			case "Suche_Flurstueck_zu_LatLng" : {
@@ -969,7 +965,7 @@ function go_switch($go){
 			} break;
 
 			case 'ExportMapToPDF' : {
-			$GUI->exportMapToPDF();
+				$GUI->exportMapToPDF();
 			} break;
 
 			case 'TIF_Export' : {
@@ -1178,7 +1174,7 @@ function go_switch($go){
 			} break;
 			
 			case 'generischer_sachdaten_druck_Drucken' : {
-			$GUI->generischer_sachdaten_druck_drucken();
+				$GUI->generischer_sachdaten_druck_drucken();
 			} break;
 			
 			case 'sachdaten_druck_editor' : {
