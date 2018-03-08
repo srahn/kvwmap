@@ -1,4 +1,4 @@
-BEGIN;
+
 
 DO
 $$
@@ -11,4 +11,4 @@ END IF;
 END
 $$
 
-COMMIT;
+
