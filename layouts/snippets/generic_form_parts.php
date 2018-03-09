@@ -469,7 +469,9 @@
 						$datapart .= '<input type="hidden" name="'.$layer_id.';'.$attributes['real_name'][$name].';'.$tablename.';'.$oid.';'.$attributes['form_element_type'][$j].'_alt'.';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$value.'">';
 					}
 					if($attribute_privileg != '0' AND !$lock[$k]){
-						$datapart .= '<input tabindex="1" onchange="'.$onchange.'" style="font-size: '.$fontsize.'px" size="43" type="file" onchange="this.title=this.value;" id="'.$layer_id.'_'.$name.'_'.$k.'" name="'.$fieldname.'">';
+						//$datapart .= '<input tabindex="1" onchange="'.$onchange.'" style="font-size: '.$fontsize.'px" size="43" type="file" onchange="this.title=this.value;" id="'.$layer_id.'_'.$name.'_'.$k.'" name="'.$fieldname.'">';
+						if($name == '')$name = array_pop(explode('_', $fieldname));		// bei Array-Attributen ist $name leer und wird deswegen aus $fieldname ermittelt
+						$datapart .= '<input tabindex="1" onchange="'.$onchange.'" style="font-size: '.$fontsize.'px" size="43" type="file" onchange="this.title=this.value;" id="'.$layer_id.'_'.$name.'_'.$k.'" name="'.$layer_id.'_'.$name.'_'.$oid.'[]">';
 					}
 					else{
 						$datapart .= '&nbsp;';
