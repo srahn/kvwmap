@@ -49,22 +49,37 @@ include('funktionen/input_check_functions.php');
 	buildJSONString = function(id, is_array){
 		var field = document.getElementById(id);		
 		values = new Array();
-		elements = document.getElementsByName(id);
+		elements = document.getElementsByClassName(id);
 		for(i = 0; i < elements.length; i++){
 			value = elements[i].value;
-			if(!is_array){
+			name = elements[i].name;
+			type = elements[i].type;
+			if(type == 'file'){		// Spezialfall bei Datei-Upload-Feldern:
+				if(value != ''){
+					value = 'file:'+name;		// wenn value vorhanden, wurde eine Datei ausgewählt, dann den Namen des Input-Feldes einsammeln + einem Prefix "file:"
+				}
+				else{
+					old_file_path = document.getElementsByName(name+'_alt');
+					if(old_file_path[0] != undefined)value = old_file_path[0].value;			// ansonsten den gespeicherten alten Dateipfad
+				}
+			}
+			if(!is_array){		// Datentyp
 				if(value == '')value = 'null';
 				else if(value.substring(0,1) != '{')value = '"'+value+'"';
 				values.push('"'+elements[i].title+'":'+value);
 			}			
-			else if(i > 0 && value != '')values.push(value);		// bei Arrays ist das erste Element ein Dummy
+			else if(i > 0){		// Array (hier ist das erste Element ein Dummy -> auslassen)
+				if(value != ''){
+					values.push(value);
+				}
+			}
 		}
 		if(!is_array)json = '{'+values.join()+'}';
 		else json = JSON.stringify(values);
-		field.value = json;		
+		field.value = json;
 		if(field.onchange)field.onchange();
 	}
-	
+
 	addArrayElement = function(fieldname, form_element_type, oid){
 		outer_div = document.getElementById(fieldname+'_elements');
 		first_element = document.getElementById('div_'+fieldname+'_-1');
@@ -501,13 +516,16 @@ include('funktionen/input_check_functions.php');
 
 	delete_document = function(attributename, layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data, reload){
 		if(confirm('Wollen Sie das ausgewählte Dokument wirklich löschen?')){
-			currentform.document_attributename.value = attributename;
+			field = document.getElementsByName(attributename);
+			field[0].type = 'hidden'; // bei einem Typ "file" kann man sonst den value nicht setzen
+			field[0].value = 'file:'+attributename;	// damit der JSON-String eines evtl. vorhandenen übergeordneten Attributs richtig gebildet wird
+			field[0].onchange(); // --||--
+			field[0].value = 'delete';
 			if(targetlayer_id != ''){		// SubForm-Layer
 				subsave_data(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data, reload);
-				currentform.document_attributename.value = '';
 			}
 			else{												// normaler Layer
-				currentform.go.value = 'Dokument_Loeschen';
+				currentform.go.value = 'Sachdaten_speichern';
 				currentform.submit();
 			}
 		}

@@ -8342,11 +8342,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->GenerischeSuche_Suchen();
 	}
 
-	function dokument_loeschen(){
-		$_FILES[$this->formvars['document_attributename']]['name'] = 'delete';
-		$this->sachdaten_speichern();
-	}
-
   function layer_Datensaetze_loeschen($output = true) {
 		$layers = $this->user->rolle->getLayer($this->formvars['chosen_layer_id']);
 		$layer = $layers[0];
@@ -8491,37 +8486,19 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			}
 		}
 
-		# Dokumente speichern
+		# Dokumente speichern		
 		if(count($document_attributes)> 0){
 			foreach($document_attributes as $i => $document_attribute){
-				$error[$i] = false;
-				$filename = $document_attribute['layer_id'].'_'.$document_attribute['attributename'].'_';
-				if(count($_files[$filename]['name']) > 1)$a = 1;		// bei Dokumenten in einem Array das erste Array-Element weglassen, das ist der Dummy
-				else $a = 0;
-				for($a; $a < count($_files[$filename]['name']); $a++){
-					if($_files[$filename]['name'][$a] != ''){
-						# Dateiname erzeugen
-						$name_array=explode('.',basename($_files[$filename]['name'][$a]));
-						$datei_name=$name_array[0];
-						$datei_erweiterung=array_pop($name_array);
-						$doc_path = $mapdb->getDocument_Path($layerset[0]['document_path'], $attributes['options'][$attribute_name], $attributenames, $attributevalues, $layerdb);
-						$nachDatei = $doc_path.'.'.$datei_erweiterung;
-						$current_doc_eintrag = $nachDatei."&original_name=".$_files[$filename]['name'][$a];
-						# Bild in das Datenverzeichnis kopieren
-						if(!move_uploaded_file($_files[$filename]['tmp_name'][$a],$nachDatei)){
-							$error[$i] = true;
-							echo '<br>Datei: '.$_files[$filename]['tmp_name'][$a].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
-						}
-					}
-					else $current_doc_eintrag = NULL;
-					$doc_eintrag[$i][] = $current_doc_eintrag;
+				$doc_path = $layerset[0]['document_path'];
+				$options = $attributes['options'][$attribute_name];
+				if(substr($attr_oid['datatype'], 0, 1) == '_'){
+					// ein Array aus Dokumenten, hier enthält der JSON-String eine Mischung aus bereits vorhandenen, 
+					// nicht geänderten Datei-Pfaden und File-input-Feldnamen, die noch verarbeitet werden müssen
+					$insert = $this->processJSON($this->formvars[$form_fields[$i]], $doc_path, $options, $attributenames, $attributevalues, $layerdb);
 				}
+				else $insert = $this->save_uploaded_file($form_fields[$i], $doc_path, $options, $attributenames, $attributevalues, $layerdb);	// normales Dokument-Attribut
 			}
-			if($error[$i] == false){
-				$insert = implode(',', $doc_eintrag[$i]);
-				if(count($_files[$filename]['name']) > 1)$insert = '{'.$insert.'}';
-				$this->formvars[$form_fields[$i]] = $insert;
-			}
+			$this->formvars[$form_fields[$i]] = $insert;
 		}
 
 		if ($this->formvars['geomtype'] == 'GEOMETRY') {
@@ -8641,9 +8618,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						if ($table['type'][$i] == 'Checkbox' AND $this->formvars[$table['formfield'][$i]] == '') {
 							$this->formvars[$table['formfield'][$i]] = 'f';
 						}
-						if (substr($table['datatype'][$i], 0, 1) == '_' OR is_numeric($table['datatype'][$i])){
+						if($table['type'][$i] != 'Dokument' AND (substr($table['datatype'][$i], 0, 1) == '_' OR is_numeric($table['datatype'][$i]))){		// bei Dokumenten wurde das JSON schon weiter oben verarbeitet
 							# bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln
-							$this->formvars[$table['formfield'][$i]] = JSON_to_PG($this->formvars[$table['formfield'][$i]]);
+							$this->formvars[$table['formfield'][$i]] = $this->processJSON($this->formvars[$table['formfield'][$i]]);
 						}
 						$sql .= "'" . $this->formvars[$table['formfield'][$i]] . "', "; # Typ "normal"
 					}
@@ -12230,10 +12207,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				if(($this->formvars['go'] == 'Dokument_Loeschen' OR $this->formvars['changed_'.$layer_id.'_'.$oid] == 1 OR $this->formvars['embedded']) AND $attributname != 'oid' AND $tablename != '' AND $datatype != 'not_saveable' AND $tablename == $layerset[$layer_id][0]['maintable']){		# nur Attribute aus der Haupttabelle werden gespeichert
           switch($formtype) {
             case 'Dokument' : {
-              if($_files[$layer_id.'_'.$attributname.'_'.$oid]['name']){			# die Dokument-Attribute werden hier zusammen gesammelt, weil der Datei-Upload gemacht werden muss, nachdem alle Attribute durchlaufen worden sind (wegen dem DocumentPath)
+							# die Dokument-Attribute werden hier zusammen gesammelt, weil der Datei-Upload gemacht werden muss, nachdem alle Attribute durchlaufen worden sind (wegen dem DocumentPath)
+              if($_files[$form_fields[$i]]['name'] OR $this->formvars[$form_fields[$i]]){
 								$attr_oid['layer_id'] = $layer_id;
 								$attr_oid['tablename'] = $tablename;
 								$attr_oid['attributename'] = $attributname;
+								$attr_oid['datatype'] = $datatype;
 								$attr_oid['oid'] = $oid;
 								$document_attributes[$i] = $attr_oid;
               }
@@ -12267,7 +12246,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
             default : {
               if($tablename AND $formtype != 'dynamicLink' AND $formtype != 'Text_not_saveable' AND $formtype != 'Auswahlfeld_not_saveable' AND $formtype != 'SubFormPK' AND $formtype != 'SubFormFK' AND $formtype != 'SubFormEmbeddedPK' AND $attributname != 'the_geom'){							
 								if(POSTGRESVERSION >= 930 AND (substr($datatype, 0, 1) == '_' OR is_numeric($datatype))){
-              		$this->formvars[$form_fields[$i]] = JSON_to_PG($this->formvars[$form_fields[$i]]);		# bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln									
+              		$this->formvars[$form_fields[$i]] = $this->processJSON($this->formvars[$form_fields[$i]]);		# bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln									
               	}
                 if($this->formvars[$form_fields[$i]] == ''){
 									$eintrag = 'NULL';
@@ -12286,42 +12265,18 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     }
 		if(count($document_attributes)> 0){
 			foreach($document_attributes as $i => $attr_oid){
-				$error[$i] = false;
-				$filename = $attr_oid['layer_id'].'_'.$attr_oid['attributename'].'_'.$attr_oid['oid'];
-				if(count($_files[$filename]['name']) > 1)$a = 1;		// bei Dokumenten in einem Array das erste Array-Element weglassen, das ist der Dummy
-				else $a = 0;
-				for($a; $a < count($_files[$filename]['name']); $a++){
-					if($_files[$filename]['name'][$a] != ''){
-						# Dateiname erzeugen
-						$name_array=explode('.',basename($_files[$filename]['name'][$a]));
-						$datei_name=$name_array[0];
-						$datei_erweiterung=array_pop($name_array);
-						$doc_path = $mapdb->getDocument_Path($layerset[$attr_oid['layer_id']][0]['document_path'], $attributes['options'][$attr_oid['attributename']], $attributenames[$attr_oid['oid']], $$attributevalues[$attr_oid['oid']], $layerdb[$attr_oid['layer_id']]);
-						$nachDatei = $doc_path.'.'.$datei_erweiterung;
-						$current_doc_eintrag = $nachDatei."&original_name=".$_files[$filename]['name'][$a];
-						if($datei_name == 'delete')$current_doc_eintrag = '';
-						# Bild in das Datenverzeichnis kopieren
-						if (move_uploaded_file($_files[$filename]['tmp_name'][$a],$nachDatei) OR $datei_name == 'delete'){
-							#echo '<br>Lade '.$_files[$filename]['tmp_name'][$a].' nach '.$nachDatei.' hoch';
-							# Wenn eine alte Datei existiert, die nicht so heißt wie die neue --> löschen
-							$old = $this->formvars[str_replace(';Dokument;', ';Dokument_alt;', $form_fields[$i])];
-							if ($old != '' AND $old != $current_doc_eintrag) {
-								$this->deleteDokument($old);
-							}
-						} # ende von Datei wurde erfolgreich in Datenverzeichnis kopiert
-						else {
-							$error[$i] = true;
-							echo '<br>Datei: '.$_files[$filename]['tmp_name'][$a].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
-						}
-					}
-					else $current_doc_eintrag = NULL;
-					$doc_eintrag[$i][] = $current_doc_eintrag;
+				$doc_path = $layerset[$attr_oid['layer_id']][0]['document_path'];
+				$options = $attributes['options'][$attr_oid['attributename']];
+				$attribute_names = $attributenames[$attr_oid['oid']];
+				$attribute_values = $attributevalues[$attr_oid['oid']];
+				$layer_db = $layerdb[$attr_oid['layer_id']];
+				if(substr($attr_oid['datatype'], 0, 1) == '_'){
+					// ein Array aus Dokumenten, hier enthält der JSON-String eine Mischung aus bereits vorhandenen, 
+					// nicht geänderten Datei-Pfaden und File-input-Feldnamen, die noch verarbeitet werden müssen
+					$update = $this->processJSON($this->formvars[$form_fields[$i]], $doc_path, $options, $attribute_names, $attribute_values, $layer_db);
 				}
-				if($error[$i] == false){
-					if(count($_files[$filename]['name']) == 1)$update = $doc_eintrag[$i][0];		// normales Dokument-Attribut
-					else $update = $doc_eintrag[$i];																						// Array-Dokument-Attribut
-					$updates[$attr_oid['layer_id']][$attr_oid['tablename']][$attr_oid['oid']][$attr_oid['attributename']]['value'] = $update;
-				}
+				else $update = $this->save_uploaded_file($form_fields[$i], $doc_path, $options, $attribute_names, $attribute_values, $layer_db);	// normales Dokument-Attribut
+				$updates[$attr_oid['layer_id']][$attr_oid['tablename']][$attr_oid['oid']][$attr_oid['attributename']]['value'] = $update;
 			}
 		}
 		if($updates != NULL){
@@ -12448,6 +12403,62 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       }
     }
   }
+	
+	function processJSON($json, $doc_path = NULL, $options = NULL, $attribute_names = NULL, $attribute_values = NULL, $layer_db = NULL, $quote = ''){
+		# Diese Funktion wandelt den übergebenen JSON-String in ein PostgeSQL-Struct um.
+		# Wenn der JSON-String mit "file:" gekennzeichnete File-Input-Feld-Namen von Datei-Uploads enthält, 
+		# werden diese Uploads gespeichert und der entstandene Dateipfad an die enstdprechende Stelle im String eingefügt
+		$json = strip_pg_escape_string($json);
+		if(is_string($json) AND (strpos($json, '{') !== false OR strpos($json, '[') !== false)){			// bei Bedarf den JSON-String decodieren
+			$json = json_decode($json);
+		}
+		if(is_array($json)){		// Array-Datentyp
+			for($i = 0; $i < count($json); $i++){
+				$elems[] = $this->processJSON($json[$i], $doc_path, $options, $attribute_names, $attribute_values, $layer_db, '"');
+			}
+			$result = '{'.@implode(',', $elems).'}';
+		}
+		elseif(is_object($json)){		// Nutzer-Datentyp
+			if($quote == '')$new_quote = '"';
+			else $new_quote = '\\'.$quote;
+			foreach($json as $elem){
+				$elems[] = $this->processJSON($elem, $doc_path, $options, $attribute_names, $attribute_values, $layer_db, $new_quote);
+			}
+			$result = $quote.'('.implode(',', $elems).')'.$quote;
+		}
+		else{		// normaler Datentyp
+			if(substr($json, 0, 5) == 'file:')$json = $this->save_uploaded_file(substr($json, 5), $doc_path, $options, $attribute_names, $attribute_values, $layer_db);		// Datei-Uploads verarbeiten
+			$result = $json;
+		}
+		return $result;
+	}
+		
+	function save_uploaded_file($input_name, $doc_path, $options, $attribute_names, $attribute_values, $layer_db){
+		$_files = $_FILES;
+		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
+		if($_files[$input_name]['name'] != '' OR $this->formvars[$input_name] == 'delete'){
+			# Dateiname erzeugen
+			$name_array=explode('.',basename($_files[$input_name]['name']));
+			$datei_name=$name_array[0];
+			$datei_erweiterung=array_pop($name_array);
+			$doc_path = $mapdb->getDocument_Path($doc_path, $options, $attribute_names, $attribute_values, $layer_db);
+			$nachDatei = $doc_path.'.'.$datei_erweiterung;
+			$file_path = $nachDatei."&original_name=".$_files[$input_name]['name'];
+			if($this->formvars[$input_name] == 'delete')$file_path = '';
+			# Bild in das Datenverzeichnis kopieren
+			if(move_uploaded_file($_files[$input_name]['tmp_name'],$nachDatei) OR $this->formvars[$input_name] == 'delete'){
+				# Wenn eine alte Datei existiert, die nicht so heißt wie die neue --> löschen
+				$old = $this->formvars[$input_name.'_alt'];
+				if ($old != '' AND $old != $file_path) {
+					$this->deleteDokument($old);
+				}
+			}
+			else {
+				echo '<br>Datei: '.$_files[$input_name]['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
+			}
+			return $file_path;
+		}
+	}
 
 	function queryMap() {
 		# scale ausrechnen, da wir uns das loadmap sparen
