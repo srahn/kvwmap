@@ -11908,7 +11908,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		include_once(CLASSPATH.'FormObject.php');
     $this->user->Stellen = $this->user->getStellen(0);
     $this->Hinweis.='Aktuelle Stellen_ID: '.$Stelle_ID;
-    $StellenFormObj=new FormObject("Stelle_ID", "select", $this->user->Stellen['ID'], $Stelle_ID, $this->user->Stellen['Bezeichnung'], 'Anzahl Werte', "", "", NULL , NULL, "vertical-align: middle; max-height: 200px");
+    $StellenFormObj=new FormObject("Stelle_ID", "select", $this->user->Stellen['ID'], $Stelle_ID, $this->user->Stellen['Bezeichnung'], 'max12', "", "", NULL , NULL, "vertical-align: middle;");
     # hinzufügen von Javascript welches dafür sorgt, dass die Angegebenen Werte abgefragt werden
     # und die genannten Formularobjekte mit diesen Werten bestückt werden
     # übergebene Werte
