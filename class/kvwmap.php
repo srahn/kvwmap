@@ -4950,6 +4950,8 @@ class GUI {
       $rect->miny = $this->Document->ausschnitt[0]['center_y'] - $height/2;
       $rect->maxx = $this->Document->ausschnitt[0]['center_x'] + $width/2;
       $rect->maxy = $this->Document->ausschnitt[0]['center_y'] + $height/2;
+			$this->formvars['refpoint_x'] = $this->Document->ausschnitt[0]['center_x'];
+			$this->formvars['refpoint_y'] = $this->Document->ausschnitt[0]['center_y'];
       if($this->user->rolle->epsg_code == 4326)$rand = 10/10000;
 			else $rand = 10;
       $this->map->setextent($rect->minx-$rand,$rect->miny-$rand,$rect->maxx+$rand,$rect->maxy+$rand);
