@@ -38,9 +38,9 @@ body {
 	font-size: 15px;
 }
 
-.gui-table {
+#gui-table {
   width: 900px;
-	margin: auto;
+	margin: auto;	
 }
 
 form {
@@ -673,6 +673,10 @@ a.menuered:hover {
 	height: <? echo ($size['footer']['height'] - 2); ?>px;
 	border: 1px solid; 
 	border-color: #aaa #cccccc #cccccc;
+}
+
+#map{
+	transform: translate(0, 0);		/* ansonsten wird das SVG unscharf */
 }
 
 #scale_bar {
