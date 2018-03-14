@@ -381,6 +381,7 @@ a.invisiblelayerlink:hover{
 }
 
 #menuebar{
+	width: <? echo ($size['menue']['width'] - 2); ?>px;
 	background: url('../graphics/bg.gif');
 	border: 1px solid;
 	border-color: #CCC; 
