@@ -405,7 +405,8 @@ function startup(){';
 	if(doing == "polygonquery"){polygonarea()};
 	set_suchkreis();
 	eval(doing+"()");	
-  document.getElementById(doing+"0").classList.add("active");
+  //document.getElementById(doing+"0").classList.add("active");				// das kann der IE nicht
+	document.getElementById(doing+"0").className.baseVal += " active";	// deswegen dieser workaround
 	pinching = false;
 }
 
@@ -1780,8 +1781,10 @@ function redraw()
 
 // ----------------------ausgewaehlten button highlighten---------------------------
 function highlightbyid(id){
-	document.querySelector(".active").classList.remove("active");
-  document.getElementById(id).classList.add("active");
+	//document.querySelector(".active").classList.remove("active");		// kann der IE nicht
+	document.querySelector(".active").className.baseVal = "navbutton_frame";	// deswegen dieser workaround
+  //document.getElementById(id).classList.add("active");						// kann der IE nicht
+	document.getElementById(id).className.baseVal += " active";				// deswegen dieser workaround
   document.getElementById("suchkreis").setAttribute("cx", -10000);
 	if(top.document.GUI.orthofang != undefined){
 		options1 = top.document.getElementById("options").innerHTML="";
