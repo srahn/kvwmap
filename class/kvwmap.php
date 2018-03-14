@@ -7681,32 +7681,33 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						$value = $this->formvars[$prefix.'value_'.$attributes['name'][$i]];
 						$operator = $this->formvars[$prefix.'operator_'.$attributes['name'][$i]];
 						if($value != ''){
-							if($operator == 'LIKE' OR $operator == 'NOT LIKE'){
-								################  Autovervollständigungsfeld ########################################
-								if($attributes['form_element_type'][$i] == 'Autovervollständigungsfeld' AND $attributes['options'][$i] != ''){
-									$optionen = explode(';', $attributes['options'][$i]);  # SQL; weitere Optionen
-									if(strpos($value, '%') === false)$value2 = '%'.$value.'%';else $value2 = $value;
-									$sql = 'SELECT * FROM ('.$optionen[0].') as foo WHERE LOWER(CAST(output AS TEXT)) '.$operator.' LOWER(\''.$value2.'\')';
-									$ret=$layerdb->execSQL($sql,4,0);
-									if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
-									while($rs = pg_fetch_assoc($ret[1])){
-										$keys[] = $rs['value'];
+							switch($operator){
+								case 'LIKE' : case 'NOT LIKE' : {
+									################  Autovervollständigungsfeld ########################################
+									if($attributes['form_element_type'][$i] == 'Autovervollständigungsfeld' AND $attributes['options'][$i] != ''){
+										$optionen = explode(';', $attributes['options'][$i]);  # SQL; weitere Optionen
+										if(strpos($value, '%') === false)$value2 = '%'.$value.'%';else $value2 = $value;
+										$sql = 'SELECT * FROM ('.$optionen[0].') as foo WHERE LOWER(CAST(output AS TEXT)) '.$operator.' LOWER(\''.$value2.'\')';
+										$ret=$layerdb->execSQL($sql,4,0);
+										if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
+										while($rs = pg_fetch_assoc($ret[1])){
+											$keys[] = $rs['value'];
+										}
+										$value_like = $value;					# Value sichern
+										$operator_like = $operator;			# Operator sichern
+										if($keys == NULL)$keys[0] = '####';		# Dummy-Wert, damit in der IN-Suche nichts gefunden wird
+										$this->formvars[$prefix.'value_'.$attributes['name'][$i]] = implode('|', $keys);
+										$this->formvars[$prefix.'operator_'.$attributes['name'][$i]] = 'IN';
+										$i--;
+										continue;		# dieses Attribut nochmal behandeln aber diesmal mit dem Operator IN und den gefundenen Schlüsseln der LIKE-Suche
 									}
-									$value_like = $value;					# Value sichern
-									$operator_like = $operator;			# Operator sichern
-									if($keys == NULL)$keys[0] = '####';		# Dummy-Wert, damit in der IN-Suche nichts gefunden wird
-									$this->formvars[$prefix.'value_'.$attributes['name'][$i]] = implode('|', $keys);
-									$this->formvars[$prefix.'operator_'.$attributes['name'][$i]] = 'IN';
-									$i--;
-									continue;		# dieses Attribut nochmal behandeln aber diesmal mit dem Operator IN und den gefundenen Schlüsseln der LIKE-Suche
-								}
-								#####################################################################################
-								if(strpos($value, '%') === false)$value = '%'.$value.'%';
-								$sql_where .= ' AND LOWER(CAST(query.'.$attributes['name'][$i].' AS TEXT)) '.$operator.' ';
-								$sql_where.='LOWER(\''.$value.'\')';
-							}
-							else{
-								if($operator == 'IN'){
+									#####################################################################################
+									if(strpos($value, '%') === false)$value = '%'.$value.'%';
+									$sql_where .= ' AND LOWER(CAST(query.'.$attributes['name'][$i].' AS TEXT)) '.$operator.' ';
+									$sql_where.='LOWER(\''.$value.'\')';
+								}break;
+							
+								case 'IN' : {
 									$parts = explode('|', $value);
 									for($j = 0; $j < count($parts); $j++){
 										if(substr($parts[$j], 0, 1) != '\''){$parts[$j] = '\''.$parts[$j];}
@@ -7721,10 +7722,16 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 										$value_like = '';
 										$operator_like = '';
 									}
-								}
-								elseif($operator != 'IS NULL' AND $operator != 'IS NOT NULL'){
-									$sql_where .= ' AND query.'.$attributes['name'][$i].' '.$operator.' ';
-									$sql_where.='\''.$value.'\'';
+								}break;
+								
+								default : {
+									if($operator != 'IS NULL' AND $operator != 'IS NOT NULL'){
+										$sql_where .= ' AND (query.'.$attributes['name'][$i].' '.$operator.' \''.$value.'\'';
+										if($operator == '!='){
+											$sql_where .= ' OR query.'.$attributes['name'][$i].' IS NULL';
+										}
+										$sql_where .= ')';
+									}
 								}
 							}
 						}
@@ -7868,7 +7875,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         $attributes = $mapDB->add_attribute_values($attributes, $layerdb, $layerset[0]['shape'], true, $this->Stelle->id);
 
 				# last_search speichern					
-				if($this->last_query == ''){
+				if($this->last_query == '' AND $this->formvars['embedded'] == ''){
 					$this->formvars['search_name'] = '<last_search>';
 					$this->user->rolle->delete_search($this->formvars['search_name']);		# das muss hier stehen bleiben, denn in save_search wird mit der Layer-ID gelöscht
 					$this->user->rolle->save_search($attributes, $this->formvars);
@@ -16036,7 +16043,8 @@ class db_mapObj{
 		$filename = rand(0, 1000000).'.sql';
 		$fp = fopen(IMAGEPATH . $filename, 'w');
 		#fwrite($fp, $dump_text);
-		fwrite($fp, str_replace('', '', $dump_text));
+		fwrite($fp, str_replace('
+', '', $dump_text));
 		#fwrite($fp, utf8_decode($dump_text));
 
 		return array(
