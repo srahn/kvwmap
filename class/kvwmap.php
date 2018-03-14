@@ -6028,7 +6028,6 @@ class GUI {
   }
 
 	function deleteDokument($path){
-		$path = array_pop(explode('&dokument=', $path));
 		$path = array_shift(explode('&original_name', $path));
 		$dateinamensteil = explode('.', $path);
 		if(file_exists($path))unlink($path);
@@ -12286,6 +12285,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				}
 				else $update = $this->save_uploaded_file($form_fields[$i], $doc_path, $options, $attribute_names, $attribute_values, $layer_db);	// normales Dokument-Attribut
 				$updates[$attr_oid['layer_id']][$attr_oid['tablename']][$attr_oid['oid']][$attr_oid['attributename']]['value'] = $update;
+			}
+		}
+		if($this->formvars['delete_documents'] != ''){		// in diesem input-Feld stehen die Pfade von Dokumenten, die zu entfernten Array-Elementen gehörten und gelöscht werden müssen
+			$documents = explode('|', $this->formvars['delete_documents']);
+			foreach($documents as $path){
+				$this->deleteDokument($path);
 			}
 		}
 		if($updates != NULL){

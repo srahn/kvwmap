@@ -96,10 +96,24 @@ include('funktionen/input_check_functions.php');
 	}
 	
 	removeArrayElement = function(fieldname, remove_element_id){
+		getFileAttributesInArray(remove_element_id);
 		outer_div = document.getElementById(fieldname+'_elements');
-		remove_element = document.getElementById(remove_element_id);
+		remove_element = document.getElementById('div_'+remove_element_id);
 		outer_div.removeChild(remove_element);
 		buildJSONString(fieldname, false);
+	}
+	
+	function getFileAttributesInArray(id){
+		elements = document.getElementsByClassName(id);
+		for(i = 0; i < elements.length; i++){
+			if(elements[i].type == 'file'){
+				old_file_path = document.getElementsByName(elements[i].name+'_alt');
+				if(old_file_path[0] != undefined)currentform.delete_documents.value += old_file_path[0].value+'|';
+			}
+			else{
+				getFileAttributesInArray(elements[i].id);
+			}
+		}
 	}
 	
 	nextdatasets = function(layer_id){
