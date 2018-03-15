@@ -319,16 +319,17 @@ class Gml_builder {
                 $single_value = array_combine($value_array_keys, $single_value);
                 // generate GML output (!!! recursive !!!)
                 $gml_attrib_str .= $this->generateGmlForAttributes($single_value, $datatype_attribs,$depth-1);
-              }
+								// leere Datentypen auslassen
+                if (strlen($gml_attrib_str) == 0) break;
 
-              // leere Datentypen auslassen
-              if (strlen($gml_attrib_str) == 0) break;
-
-              $typeElementName = end($datatype_attribs)['origin'];
-              $gmlStr .= $this->wrapWithElement(
+                $typeElementName = end($datatype_attribs)['origin'];
+                $gmlStr .= $this->wrapWithElement(
                 "{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
                 // wrap all data-types with their data-type-element-tag
                 $this->wrapWithElement("{$xplan_ns_prefix}{$typeElementName}", $gml_attrib_str));
+								$gml_attrib_str = '';
+              }
+
             default:
           }
           break;
