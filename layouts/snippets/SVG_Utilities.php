@@ -131,7 +131,7 @@
 	var movinggeom  = false;
 	var moved  = false;
 	var must_redraw = false;
-	var mobile = '.$this->user->rolle->gps.';
+	var mobile = '.($this->user->rolle->gps ? 1 : 0).';
 	var gps_follow_cooldown = 0;
 	var selected_vertex;
 	var last_selected_vertex;
