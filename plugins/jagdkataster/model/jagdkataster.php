@@ -152,6 +152,7 @@ class jagdkataster {
 			if($oid != ''){
 				$sql = "UPDATE jagdkataster.jagdbezirke SET";
 				if($umring != ''){$sql.= " the_geom = st_multi(st_transform(st_geometryfromtext('".$umring."', ".$this->clientepsg."), ".$this->layerepsg.")),";}
+				$sql.= " id = '".$nummer."',";
 				$sql.= " name = '".$name."',";
 				$sql.= " flaeche = ".(float)$flaeche.",";
 				$sql.= " jb_zuordnung = '".$jb_zuordnung."',";
