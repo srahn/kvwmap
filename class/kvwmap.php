@@ -13020,7 +13020,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       } # ende der Behandlung der zur Abfrage ausgewählten Layer
     } # ende der Schleife zur Abfrage der Layer der Stelle
 
-		if($this->last_query_requested AND $this->last_query != '' AND $this->user->rolle->querymode == 1){		# bei get_last_query und aktivierter Datenabfrage in extra Fenster --> Laden der Karte und zoom auf Treffer (das Zeichnen der Karte passiert in einem separaten Ajax-Request aus dem Overlay heraus)
+		if($this->formvars['mime_type'] != 'overlay_html' AND $this->last_query != '' AND $this->user->rolle->querymode == 1){		# bei get_last_query (nicht aus Overlay) und aktivierter Datenabfrage in extra Fenster --> Laden der Karte und zoom auf Treffer
 			$attributes = $this->qlayerset[0]['attributes'];
 			$geometrie_tabelle = $attributes['table_name'][$attributes['the_geom']];
 			$this->loadMap('DataBase');
@@ -13049,11 +13049,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			}
 			$this->user->rolle->newtime = $this->user->rolle->last_time_id;
 			$this->saveMap('');
-			if($this->formvars['mime_type'] != 'overlay_html'){		// bei Suche aus normaler Suchmaske (nicht aus Overlay) heraus --> Zeichnen der Karte und Darstellung der Sachdaten im Overlay
-				$this->drawMap();
-				$this->main = 'map.php';
-				$this->overlaymain = 'sachdatenanzeige.php';
-			}
+			$this->drawMap();
+			$this->main = 'map.php';
+			$this->overlaymain = 'sachdatenanzeige.php';
 		}
 		else $this->main='sachdatenanzeige.php';
   }
