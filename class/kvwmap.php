@@ -2485,13 +2485,9 @@ class GUI {
 			$rollenlayer = $mapDB->read_RollenLayer(-$this->formvars['layer_id'], NULL);
 			$layer = $rollenlayer[0];
 		}
-		$offset = 0;
 		if($layer['connectiontype'] == MS_POSTGIS){
 			$layerdb = $mapDB->getlayerdatabase($layer['Layer_ID'], $this->Stelle->pgdbhost);
     	$data_attributes = $mapDB->getDataAttributes($layerdb, $layer['Layer_ID']);
-    	if(in_array($data_attributes['geomtype'][$data_attributes['the_geom']] , array('MULTIPOLYGON', 'POLYGON', 'GEOMETRY'))){
-    		$offset = 1;
-    	}
     	$select = $mapDB->getSelectFromData($layer['Data']);
 			$select = str_replace(' FROM ', ' from ', $select);
 
@@ -2506,14 +2502,31 @@ class GUI {
 			if($layer['Filter'] != ''){
 				$layer['Filter'] = str_replace('$userid', $this->user->id, $layer['Filter']);
 				$fromwhere .= " AND ".$layer['Filter'];
-			}
-			# LINE / POLYGON
-			$sql = 'SELECT st_x(the_geom), st_y(the_geom) FROM (SELECT st_transform(st_pointn(foo.linestring, foo.count1), '.$this->user->rolle->epsg_code.') AS the_geom
-					FROM (SELECT generate_series(1, st_npoints(foo4.linestring)) AS count1, foo4.linestring FROM (
-					SELECT CASE WHEN st_GeometryN(foo2.linestring, foo2.count2) IS NULL THEN foo2.linestring ELSE st_GeometryN(foo2.linestring, foo2.count2) END as linestring FROM (
+			}					
+			switch($layer['Datentyp']){
+				case MS_LAYER_POINT : {
+					$sql = 'SELECT st_x(the_geom), st_y(the_geom) FROM (SELECT st_transform('.$data_attributes['the_geom'].', '.$this->user->rolle->epsg_code.') as the_geom '.$fromwhere.') foo LIMIT 10000';
+				}break;
+
+				case MS_LAYER_LINE : {
+					$sql = 'SELECT st_x(the_geom), st_y(the_geom) FROM (SELECT st_transform(st_pointn(foo.linestring, foo.count1), '.$this->user->rolle->epsg_code.') AS the_geom
+					FROM (SELECT generate_series(0, st_npoints(foo4.linestring)) AS count1, foo4.linestring FROM (
+					SELECT st_GeometryN(foo2.linestring, foo2.count2) as linestring FROM (
+					SELECT generate_series(1, st_NumGeometries(foo5.linestring)) AS count2, foo5.linestring FROM (SELECT st_multi(st_intersection('.$data_attributes['the_geom'].', '.$extent.')) AS linestring '.$fromwhere.') foo5) foo2
+					) foo4) foo
+					WHERE (foo.count1) <= st_npoints(foo.linestring)) foo3 LIMIT 10000';
+				}break;
+
+				case MS_LAYER_POLYGON : {
+					$sql = 'SELECT st_x(the_geom), st_y(the_geom) FROM (SELECT st_transform(st_pointn(foo.linestring, foo.count1), '.$this->user->rolle->epsg_code.') AS the_geom
+					FROM (SELECT generate_series(0, st_npoints(foo4.linestring)) AS count1, foo4.linestring FROM (
+					SELECT st_GeometryN(foo2.linestring, foo2.count2) as linestring FROM (
 					SELECT generate_series(1, st_NumGeometries(foo5.linestring)) AS count2, foo5.linestring FROM (SELECT st_multi(linefrompoly(st_intersection('.$data_attributes['the_geom'].', '.$extent.'))) AS linestring '.$fromwhere.') foo5) foo2
 					) foo4) foo
-					WHERE (foo.count1 + '.$offset.') <= st_npoints(foo.linestring)) foo3 LIMIT 10000';
+					WHERE (foo.count1 +1) <= st_npoints(foo.linestring)) foo3 LIMIT 10000';
+				}break;
+			}
+					
 			#echo $sql;
 			$ret=$layerdb->execSQL($sql,4, 0);
       if(!$ret[0]){
