@@ -17249,7 +17249,7 @@ class db_mapObj{
   function new_Style($style){
     if(is_array($style)){
       $sql = "INSERT INTO styles SET ";
-      if($style['color']){$sql.= "color = '".$style['color']."'";}
+      $sql.= "color = '".$style['color']."'";
 			if($style['colorred'] != ''){$sql.= "color = '".$style['colorred']." ".$style['colorgreen']." ".$style['colorblue']."'";}
       if($style['symbol']){$sql.= ", symbol = '".$style['symbol']."'";}
       if($style['symbolname']){$sql.= ", symbolname = '".$style['symbolname']."'";}
