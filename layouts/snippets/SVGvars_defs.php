@@ -30,7 +30,7 @@ $SVGvars_defs = '
 		.navbutton_bg{
 			filter: url(#Schatten);
 			fill: url(#LinearGradient);
-			opacity: 0.8;
+			opacity: 0.7;
 			transition: all 1s cubic-bezier(0.09, 0.93, 0.76, 0.84);
 		}
 		.navbutton_frame{
