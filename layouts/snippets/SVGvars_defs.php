@@ -3,14 +3,14 @@ $SVGvars_defs = '
 
 	<style type="text/css"><![CDATA[
 		#buttons{
-			filter: url(#Schatten);
-			transition: all 1s cubic-bezier(0.09, 0.93, 0.76, 0.84);
-			opacity: 0.6;	
 		}
-		#buttons:hover{
+		#buttons:hover .navbutton_bg{
 			transition: all 0.15s ease;
 			opacity: 1;
 		}
+		#buttons:hover .navbutton_frame{
+			opacity: 1;
+		}		
     .navbutton{			
 			fill: #5c88a8;
 			pointer-events: none;
@@ -28,16 +28,21 @@ $SVGvars_defs = '
 			fill: white;
 		}
 		.navbutton_bg{
+			filter: url(#Schatten);
 			fill: url(#LinearGradient);
+			opacity: 0.8;
+			transition: all 1s cubic-bezier(0.09, 0.93, 0.76, 0.84);
 		}
 		.navbutton_frame{
-			fill: url(#LinearGradient);		
+			fill: url(#LinearGradient);
+			opacity: 0.0;
 		}
 		.navbutton_frame:hover{
 			filter: url(#innershadow);
 		}                             
 		.active{
-			fill: #9fc8ea !important;
+			fill: #b0d4f2 !important;
+			opacity: 1 !important;
 			filter: url(#innershadow);
 		}		
 		.disabled{			
