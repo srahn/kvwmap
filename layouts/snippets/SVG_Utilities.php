@@ -149,6 +149,7 @@
 	var mousewheelloop = 0;
 	var measured_distance = 0;
 	var new_distance = 0;
+	var doing_save;
 	';
 
 	$polygonANDpoint = '
@@ -198,7 +199,7 @@
 	function recentre(){
 		top.currentform.last_doing2.value = top.currentform.last_doing.value;
 		top.currentform.last_doing.value = "recentre";
-	  document.getElementById("canvas").setAttribute("cursor", "move");
+	  document.getElementById("canvas").setAttribute("cursor", "grab");
 		if(measurefunctions == true){
 			save_measure_path();
 		}
@@ -306,8 +307,7 @@
 	  document.getElementById("moveGroup").setAttribute("transform", path);
 	}
 
-	function endMove(evt) {
-	  cmd = top.currentform.last_doing.value;
+	function endMove(cmd) {
 	  if (moved){
 	  	move_x[0]=resx_m-move_dx;
 	  	move_y[0]=resy_m-move_dy;
@@ -634,6 +634,14 @@
 	  	client_x = (world_x - minx)/scale;
 	  	client_y = (world_y - miny)/scale;
 		}
+		if(evt.button == 1){			// mittlere Maustaste -> Pan
+			if(top.currentform.last_doing.value == "measure"){
+				save_measure_path();
+			}
+			top.currentform.always_draw.checked = true;
+			top.currentform.last_doing2.value = top.currentform.last_doing.value;
+			top.currentform.last_doing.value = "recentre";
+		}
 
 	  switch(top.currentform.last_doing.value){
 			case "zoomin":
@@ -643,6 +651,7 @@
 				selectPoint(client_x, client_y);
 			break;
 			case "recentre":
+				document.getElementById("canvas").setAttribute("cursor", "grabbing");
 				startMove(client_x, client_y);
 			break;
 			case "pquery":
@@ -835,7 +844,7 @@ function mouseup(evt){
 		}
 	}
 	if(moving){
-		endMove(evt);
+		endMove(top.currentform.last_doing.value);
 	}
 	if(draggingFS){
     endpointFS(evt);
@@ -876,7 +885,7 @@ function mouseup(evt){
 		moved  = false;
 		document.getElementById(top.currentform.last_button.value).classList.add("active");
 		if(top.currentform.last_doing.value == "recentre"){
-	  	document.getElementById("canvas").setAttribute("cursor", "move");
+	  	document.getElementById("canvas").setAttribute("cursor", "grab");
 		}
 		else{
 	  	document.getElementById("canvas").setAttribute("cursor", "crosshair");
