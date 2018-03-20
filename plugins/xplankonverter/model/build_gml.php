@@ -362,13 +362,27 @@ class Gml_builder {
 						} break;
 						case 'date' : {
 							$gml_value = $gml_object[$uml_attribute['col_name']];
-							$timestamp = strtotime($gml_value);
-							if (!$timestamp) {
-								echo "Ungueltige Datumsangabe: " . $gml_value;
-								break;
+							// check for array values
+							if($gml_value[0] == '{' && substr ($gml_value,-1) == '}') {
+								$gml_value_array = explode(',', substr($gml_value,1,-1));
+								for ($j = 0; $j < count($gml_value_array); $j++) {
+									$timestamp = strtotime($gml_value_array[$j]);
+									if (!$timestamp) {
+										echo "Ungueltige Datumsangabe: " . $gml_value_array[$j];
+										break;
+									}
+									$iso_date_str = date("Y-m-d", $timestamp);
+									$gmlStr .= $this->wrapWithElement("{$xplan_ns_prefix}{$uml_attribute['uml_name']}", $iso_date_str);
+								}
+							} else {
+								$timestamp = strtotime($gml_value);
+								if (!$timestamp) {
+									echo "Ungueltige Datumsangabe: " . $gml_value;
+									break;
+								}
+								$iso_date_str = date("Y-m-d", $timestamp);
+								$gmlStr .= $this->wrapWithElement("{$xplan_ns_prefix}{$uml_attribute['uml_name']}", $iso_date_str);
 							}
-							$iso_date_str = date("Y-m-d", $timestamp);
-							$gmlStr .= $this->wrapWithElement("{$xplan_ns_prefix}{$uml_attribute['uml_name']}", $iso_date_str);
 						} break;
 						case 'bool' : {
 							switch ($gml_object[$uml_attribute['col_name']]) {
@@ -475,8 +489,14 @@ class Gml_builder {
     $curr_value = '';
     // prepare data string
     $value_str = substr($data_string, 1, -1);
+    // Kommata innerhalb Text werden derzeit über die Konverteroberflaeche nicht zugelassen,
+    //d.h. \", oder ,\" innerhalb eines CompositeDataTypes ist derzeit nicht moeglich
     $value_str = str_replace('\"(', '(', $value_str);
     $value_str = str_replace(')\"', ')', $value_str);
+    $value_str = str_replace('(\"','(', $value_str);
+    $value_str = str_replace('\")',')', $value_str);
+    $value_str = str_replace(',\"',',', $value_str);
+    $value_str = str_replace('\",',',', $value_str);
     $value_str = str_replace('\"', '&quot;', $value_str);
     $value_str = str_replace('"', '', $value_str);
     // return if no data
