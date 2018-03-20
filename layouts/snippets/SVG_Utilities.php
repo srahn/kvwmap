@@ -131,7 +131,7 @@
 	var movinggeom  = false;
 	var moved  = false;
 	var must_redraw = false;
-	var mobile = '.$this->user->rolle->gps.';
+	var mobile = '.($this->user->rolle->gps ? 1 : 0).';
 	var gps_follow_cooldown = 0;
 	var selected_vertex;
 	var last_selected_vertex;
@@ -3131,7 +3131,7 @@ $measurefunctions = '
 	  </g>
 	  
 
-	  <g id="buttons" filter="url(#Schatten)" onmouseout="hide_tooltip()" transform="translate(0 0)">
+	  <g id="buttons" onmouseout="hide_tooltip()" transform="translate(0 0)">
 	  ';
 		
 	$navbuttons ='
