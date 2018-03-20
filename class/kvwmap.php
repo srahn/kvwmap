@@ -12434,9 +12434,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	function processJSON($json, $doc_path = NULL, $options = NULL, $attribute_names = NULL, $attribute_values = NULL, $layer_db = NULL, $quote = ''){
 		# Diese Funktion wandelt den übergebenen JSON-String in ein PostgeSQL-Struct um.
 		# Wenn der JSON-String mit "file:" gekennzeichnete File-Input-Feld-Namen von Datei-Uploads enthält, 
-		# werden diese Uploads gespeichert und der entstandene Dateipfad an die enstdprechende Stelle im String eingefügt
-		$json = strip_pg_escape_string($json);
+		# werden diese Uploads gespeichert und der entstandene Dateipfad an die enstdprechende Stelle im String eingefügt		
 		if(is_string($json) AND (strpos($json, '{') !== false OR strpos($json, '[') !== false)){			// bei Bedarf den JSON-String decodieren
+			$json = strip_pg_escape_string($json);
 			$json = json_decode($json);
 		}
 		if(is_array($json)){		// Array-Datentyp
