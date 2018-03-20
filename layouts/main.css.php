@@ -1295,7 +1295,7 @@ tbody.gle tr:hover {
 }
 
 .fstanzeigehover:hover{
-								background-color:rgba(255,255,255,0.2);
+								background-color:rgba(255,255,255,0.4);
 }
 
 .flexcontainer1{

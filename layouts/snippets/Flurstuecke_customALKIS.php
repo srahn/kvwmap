@@ -145,7 +145,7 @@ hide_versions = function(flst){
   </tr>
   <tr>
     <td>
-			<div style="position:relative; top:0px; right:0px; padding:=px; border-color:<?php echo BG_DEFAULT ?>; border-width:1px; border-style:solid;">
+			<div style="position:relative; top:0px; right:0px; padding:0px; border: 1px solid <?php echo BG_DEFAULT ?>;">
 				<table width="100%" border="0" cellspacing="0" cellpadding="0">
 					<tr>
 						<td colspan="2">
@@ -761,10 +761,10 @@ hide_versions = function(flst){
 					</tr>
 					<tr>
 						<td colspan="2">
-							<table width="100%" cellspacing="0" cellpading="0" border="0">
-								<tr align="center" valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
+							<table width="100%" cellspacing="0" cellpadding="0" border="0" style="border-top: 1px solid <?php echo BG_DEFAULT ?>;">
+								<tr align="center" valign="top">
 									<td colspan="2">
-										<div class="fstanzeigecontainer">
+										<div class="fstanzeigecontainer button_background">
 											<a href="index.php?go=Flurstueck_<? if($flst->endet!="" OR $flst->hist_alb == 1)echo 'hist_';?>Auswaehlen&searchInExtent=<?php echo $this->searchInExtent;
 											?>&GemID=<?php echo $flst->GemeindeID;
 											?>&GemkgID=<?php echo $flst->GemkgSchl; ?>&FlurID=<?php echo $flst->FlurID;
