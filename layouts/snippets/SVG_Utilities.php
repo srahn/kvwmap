@@ -199,6 +199,7 @@
 	function recentre(){
 		top.currentform.last_doing2.value = top.currentform.last_doing.value;
 		top.currentform.last_doing.value = "recentre";
+		document.getElementById("canvas").setAttribute("cursor", "move");
 	  document.getElementById("canvas").setAttribute("cursor", "grab");
 		if(measurefunctions == true){
 			save_measure_path();
@@ -281,7 +282,9 @@
 	}
 
 	// ----------------------------vektor aufziehen---------------------------------
-	function startMove(clientx, clienty) {
+	function startMove(clientx, clienty){
+		document.getElementById("canvas").setAttribute("cursor", "move");
+		document.getElementById("canvas").setAttribute("cursor", "grabbing");
 	  moving  = true;
 	  // neuen punkt setzen
 	  move_x[0] = clientx;
@@ -475,11 +478,8 @@
 		if(!evt)evt = window.event; // For IE
 		if(top.document.GUI.stopnavigation.value == 0){
 			window.clearTimeout(mousewheelloop);
-			if(evt.preventDefault){
-				evt.preventDefault();
-			}else{ // IE fix
-	    	evt.returnValue = false;
-	    };
+			if(evt.preventDefault)evt.preventDefault();
+			else evt.returnValue = false; // IE fix
 			if(evt.wheelDelta)
 				delta = evt.wheelDelta / 3600; // Chrome/Safari
 			else
@@ -635,6 +635,8 @@
 	  	client_y = (world_y - miny)/scale;
 		}
 		if(evt.button == 1){			// mittlere Maustaste -> Pan
+			if(evt.preventDefault)evt.preventDefault();
+			else evt.returnValue = false; // IE fix
 			if(top.currentform.last_doing.value == "measure"){
 				save_measure_path();
 			}
@@ -650,8 +652,7 @@
 			case "zoomout":
 				selectPoint(client_x, client_y);
 			break;
-			case "recentre":
-				document.getElementById("canvas").setAttribute("cursor", "grabbing");
+			case "recentre":				
 				startMove(client_x, client_y);
 			break;
 			case "pquery":
@@ -857,9 +858,11 @@ function mouseup(evt){
 	// ----------------------ausgewaehlten button highlighten---------------------------
 
 	function highlightbyid(id){
-		if(id != ""){
-			document.querySelector(".active").classList.remove("active");
-			document.getElementById(id).classList.add("active");
+		if(id != ""){			
+			//document.querySelector(".active").classList.remove("active");		// kann der IE nicht
+			document.querySelector(".active").className.baseVal = "navbutton_frame";	// deswegen dieser workaround
+			//document.getElementById(id).classList.add("active");						// kann der IE nicht
+			document.getElementById(id).className.baseVal += " active";				// deswegen dieser workaround
 		  if(polygonfunctions == true){
 				remove_vertices();
 				remove_in_between_vertices();
@@ -870,6 +873,7 @@ function mouseup(evt){
 			}
 			top.currentform.last_button.value = id;
 			if(id == "recentre0"){
+				document.getElementById("canvas").setAttribute("cursor", "move");
 				document.getElementById("canvas").setAttribute("cursor", "grab");
 			}
 			else{
@@ -883,8 +887,10 @@ function mouseup(evt){
 		dragdone  = false;
 		moving  = false;
 		moved  = false;
-		document.getElementById(top.currentform.last_button.value).classList.add("active");
+		//document.getElementById(top.currentform.last_button.value).classList.add("active");						// kann der IE nicht
+		document.getElementById(top.currentform.last_button.value).className.baseVal += " active";				// deswegen dieser workaround		
 		if(top.currentform.last_doing.value == "recentre"){
+			document.getElementById("canvas").setAttribute("cursor", "move");
 	  	document.getElementById("canvas").setAttribute("cursor", "grab");
 		}
 		else{
