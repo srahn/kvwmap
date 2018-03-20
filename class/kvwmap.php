@@ -3805,6 +3805,11 @@ class GUI {
 		echo '~if(typeof resizemap2window != "undefined")resizemap2window();';
   }
 
+	function changeLegendDisplay(){
+		$this->user->rolle->changeLegendDisplay($this->formvars['hide']);
+		echo 'hide: ' . $this->formvars['hide'] . '~resizemap2window();';
+	}	
+	
 	function saveOverlayPosition(){
   	$this->user->rolle->saveOverlayPosition($this->formvars['overlayx'],$this->formvars['overlayy']);
   }
