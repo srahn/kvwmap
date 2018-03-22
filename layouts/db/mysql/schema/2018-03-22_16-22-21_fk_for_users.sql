@@ -1,0 +1,48 @@
+BEGIN;
+
+ALTER TABLE user ENGINE=INNODB;
+ALTER TABLE rolle ENGINE=INNODB;
+ALTER TABLE u_consume ENGINE=INNODB;
+ALTER TABLE u_consume2comments ENGINE=INNODB;
+ALTER TABLE u_consume2layer ENGINE=INNODB;
+ALTER TABLE u_consumeALB ENGINE=INNODB;
+ALTER TABLE u_consumeALK ENGINE=INNODB;
+ALTER TABLE u_consumeCSV ENGINE=INNODB;
+ALTER TABLE u_consumeShape ENGINE=INNODB;
+ALTER TABLE druckausschnitte ENGINE=INNODB;
+ALTER TABLE rollenlayer ENGINE=INNODB;
+ALTER TABLE rolle_csv_attributes ENGINE=INNODB;
+ALTER TABLE rolle_last_query ENGINE=INNODB;
+ALTER TABLE rolle_nachweise ENGINE=INNODB;
+ALTER TABLE rolle_nachweise_dokumentauswahl ENGINE=INNODB;
+ALTER TABLE rolle_saved_layers ENGINE=INNODB;
+ALTER TABLE search_attributes2rolle ENGINE=INNODB;
+ALTER TABLE u_groups2rolle ENGINE=INNODB;
+ALTER TABLE u_menue2rolle ENGINE=INNODB;
+ALTER TABLE u_rolle2used_class ENGINE=INNODB;
+ALTER TABLE u_rolle2used_layer ENGINE=INNODB;
+ALTER TABLE zwischenablage ENGINE=INNODB;
+
+ALTER TABLE u_consume ADD FOREIGN KEY (user_id) REFERENCES user (user_id) ON DELETE CASCADE;
+ALTER TABLE u_consume2comments ADD FOREIGN KEY (user_id) REFERENCES user (user_id) ON DELETE CASCADE;
+ALTER TABLE u_consume2layer ADD FOREIGN KEY (user_id) REFERENCES user (user_id) ON DELETE CASCADE;
+ALTER TABLE u_consumeALB ADD FOREIGN KEY (user_id) REFERENCES user (user_id) ON DELETE CASCADE;
+ALTER TABLE u_consumeALK ADD FOREIGN KEY (user_id) REFERENCES user (user_id) ON DELETE CASCADE;
+ALTER TABLE u_consumeCSV ADD FOREIGN KEY (user_id) REFERENCES user (user_id) ON DELETE CASCADE;
+ALTER TABLE u_consumeShape ADD FOREIGN KEY (user_id) REFERENCES user (user_id) ON DELETE CASCADE;
+ALTER TABLE druckausschnitte ADD FOREIGN KEY (user_id) REFERENCES user (user_id) ON DELETE CASCADE;
+ALTER TABLE rolle ADD FOREIGN KEY (user_id) REFERENCES user (ID) ON DELETE CASCADE;
+ALTER TABLE rollenlayer ADD FOREIGN KEY (user_id, stelle_id) REFERENCES rolle (user_id, stelle_id) ON DELETE CASCADE;
+ALTER TABLE rolle_csv_attributes ADD FOREIGN KEY (user_id, stelle_id) REFERENCES rolle (user_id, stelle_id) ON DELETE CASCADE;
+ALTER TABLE rolle_last_query ADD FOREIGN KEY (user_id, stelle_id) REFERENCES rolle (user_id, stelle_id) ON DELETE CASCADE;
+ALTER TABLE rolle_nachweise ADD FOREIGN KEY (user_id, stelle_id) REFERENCES rolle (user_id, stelle_id) ON DELETE CASCADE;
+ALTER TABLE rolle_nachweise_dokumentauswahl ADD FOREIGN KEY (user_id, stelle_id) REFERENCES rolle (user_id, stelle_id) ON DELETE CASCADE;
+ALTER TABLE rolle_saved_layers ADD FOREIGN KEY (user_id, stelle_id) REFERENCES rolle (user_id, stelle_id) ON DELETE CASCADE;
+ALTER TABLE search_attributes2rolle ADD FOREIGN KEY (user_id, stelle_id) REFERENCES rolle (user_id, stelle_id) ON DELETE CASCADE;
+ALTER TABLE u_groups2rolle ADD FOREIGN KEY (user_id, stelle_id) REFERENCES rolle (user_id, stelle_id) ON DELETE CASCADE;
+ALTER TABLE u_menue2rolle ADD FOREIGN KEY (user_id, stelle_id) REFERENCES rolle (user_id, stelle_id) ON DELETE CASCADE;
+ALTER TABLE u_rolle2used_class ADD FOREIGN KEY (user_id, stelle_id) REFERENCES rolle (user_id, stelle_id) ON DELETE CASCADE;
+ALTER TABLE u_rolle2used_layer ADD FOREIGN KEY (user_id, stelle_id) REFERENCES rolle (user_id, stelle_id) ON DELETE CASCADE;
+ALTER TABLE zwischenablage ADD FOREIGN KEY (user_id, stelle_id) REFERENCES rolle (user_id, stelle_id) ON DELETE CASCADE;
+
+COMMIT;
