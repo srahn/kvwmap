@@ -10252,7 +10252,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       }
     }
     $this->formvars['selected_stelle_id'] = $ret[1];
-   # $this->Stelleneditor();
+		$this->Stelleneditor();
   }
 
   function StellenAnzeigen() {
