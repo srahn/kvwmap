@@ -860,34 +860,6 @@ class stelle {
 		# Hinzufügen von Layern zur Stelle
 		for ($i=0;$i<count($layer_ids);$i++) {
 			$sql = "
-				SELECT
-					queryable, template, transparency, drawingorder, legendorder, minscale, maxscale, symbolscale, offsite, requires, privileg, export_privileg, postlabelcache
-				FROM
-					layer
-				WHERE
-					Layer_ID = " . $layer_ids[$i];
-			#echo '<br>stelle.php addLayer sql:<br>' . $sql;
-			$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
-			$query=mysql_query($sql,$this->database->dbConn);
-			$rs = mysql_fetch_array($query);
-			$queryable = $rs['queryable'];
-			$template = $rs['template'];
-			if($rs['transparency'] == ''){
-				$rs['transparency'] = 'NULL';
-			}
-			$transparency = $rs['transparency'];
-			$drawingorder = $rs['drawingorder'];
-			$legendorder = $rs['legendorder'];
-			$minscale = $rs['minscale'];
-			$maxscale = $rs['maxscale'];
-			$symbolscale = $rs['symbolscale'];
-			$offsite = $rs['offsite'];
-			$privileg = $rs['privileg'];
-			$export_privileg = $rs['export_privileg'];
-			$postlabelcache = $rs['postlabelcache'];
-			if($rs['requires'] == '')$rs['requires']='NULL';
-			$requires = $rs['requires'];
-			$sql = "
 				INSERT IGNORE INTO used_layer (
 					`Stelle_ID`,
 					`Layer_ID`,
@@ -908,27 +880,29 @@ class stelle {
 					`postlabelcache`,
 					`requires`
 				)
-				VALUES (
+				SELECT
 					'" . $this->id . "',
 					'" . $layer_ids[$i] . "',
-					'" . $queryable . "',
-					'" . $drawingorder . "',
-					'" . $legendorder . "',
-					'" . $minscale . "',
-					'" . $maxscale . "',
-					'" . $symbolscale . "',
-					'" . $offsite . "',
-					" . $transparency . ",
+					queryable, 
+					drawingorder, 
+					legendorder, 
+					minscale, 
+					maxscale, 
+					symbolscale, 
+					offsite, 
+					transparency, 
 					'" . $filter . "',
-					'" . $template . "',
+					template, 
 					NULL,
 					NULL,
-					'" . $privileg . "',
-					'" . $export_privileg . "',
-					'" . $postlabelcache . "',
-					" . $requires . "
-				)
-			";
+					privileg, 
+					export_privileg, 
+					postlabelcache,
+					requires
+				FROM
+					layer
+				WHERE
+					Layer_ID = " . $layer_ids[$i];
 			#echo '<br>' . $sql;
 			$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 			$query=mysql_query($sql,$this->database->dbConn);

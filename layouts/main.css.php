@@ -706,6 +706,10 @@ a.menuered:hover {
 	height: <? echo ($size['map_functions_bar']['height'] - 1); ?>px;
 }
 
+#legend_switch{
+	background: linear-gradient(90deg, #c1d6f2, #DAE4EC);
+}
+
 #legenddiv {
 	border-left: 1px solid #ccc;
 	box-shadow: 0px 1px 0px #bbb;
@@ -1291,7 +1295,7 @@ tbody.gle tr:hover {
 }
 
 .fstanzeigehover:hover{
-								background-color:rgba(255,255,255,0.2);
+								background-color:rgba(255,255,255,0.4);
 }
 
 .flexcontainer1{

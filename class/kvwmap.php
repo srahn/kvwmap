@@ -2620,13 +2620,9 @@ class GUI {
 			$rollenlayer = $mapDB->read_RollenLayer(-$this->formvars['layer_id'], NULL);
 			$layer = $rollenlayer[0];
 		}
-		$offset = 0;
 		if($layer['connectiontype'] == MS_POSTGIS){
 			$layerdb = $mapDB->getlayerdatabase($layer['Layer_ID'], $this->Stelle->pgdbhost);
     	$data_attributes = $mapDB->getDataAttributes($layerdb, $layer['Layer_ID']);
-    	if(in_array($data_attributes['geomtype'][$data_attributes['the_geom']] , array('MULTIPOLYGON', 'POLYGON', 'GEOMETRY'))){
-    		$offset = 1;
-    	}
     	$select = $mapDB->getSelectFromData($layer['Data']);
 			$select = str_replace(' FROM ', ' from ', $select);
 
@@ -2641,14 +2637,31 @@ class GUI {
 			if($layer['Filter'] != ''){
 				$layer['Filter'] = str_replace('$userid', $this->user->id, $layer['Filter']);
 				$fromwhere .= " AND ".$layer['Filter'];
-			}
-			# LINE / POLYGON
-			$sql = 'SELECT st_x(the_geom), st_y(the_geom) FROM (SELECT st_transform(st_pointn(foo.linestring, foo.count1), '.$this->user->rolle->epsg_code.') AS the_geom
-					FROM (SELECT generate_series(1, st_npoints(foo4.linestring)) AS count1, foo4.linestring FROM (
-					SELECT CASE WHEN st_GeometryN(foo2.linestring, foo2.count2) IS NULL THEN foo2.linestring ELSE st_GeometryN(foo2.linestring, foo2.count2) END as linestring FROM (
+			}					
+			switch($layer['Datentyp']){
+				case MS_LAYER_POINT : {
+					$sql = 'SELECT st_x(the_geom), st_y(the_geom) FROM (SELECT st_transform('.$data_attributes['the_geom'].', '.$this->user->rolle->epsg_code.') as the_geom '.$fromwhere.') foo LIMIT 10000';
+				}break;
+
+				case MS_LAYER_LINE : {
+					$sql = 'SELECT st_x(the_geom), st_y(the_geom) FROM (SELECT st_transform(st_pointn(foo.linestring, foo.count1), '.$this->user->rolle->epsg_code.') AS the_geom
+					FROM (SELECT generate_series(0, st_npoints(foo4.linestring)) AS count1, foo4.linestring FROM (
+					SELECT st_GeometryN(foo2.linestring, foo2.count2) as linestring FROM (
+					SELECT generate_series(1, st_NumGeometries(foo5.linestring)) AS count2, foo5.linestring FROM (SELECT st_multi(st_intersection('.$data_attributes['the_geom'].', '.$extent.')) AS linestring '.$fromwhere.') foo5) foo2
+					) foo4) foo
+					WHERE (foo.count1) <= st_npoints(foo.linestring)) foo3 LIMIT 10000';
+				}break;
+
+				case MS_LAYER_POLYGON : {
+					$sql = 'SELECT st_x(the_geom), st_y(the_geom) FROM (SELECT st_transform(st_pointn(foo.linestring, foo.count1), '.$this->user->rolle->epsg_code.') AS the_geom
+					FROM (SELECT generate_series(0, st_npoints(foo4.linestring)) AS count1, foo4.linestring FROM (
+					SELECT st_GeometryN(foo2.linestring, foo2.count2) as linestring FROM (
 					SELECT generate_series(1, st_NumGeometries(foo5.linestring)) AS count2, foo5.linestring FROM (SELECT st_multi(linefrompoly(st_intersection('.$data_attributes['the_geom'].', '.$extent.'))) AS linestring '.$fromwhere.') foo5) foo2
 					) foo4) foo
-					WHERE (foo.count1 + '.$offset.') <= st_npoints(foo.linestring)) foo3 LIMIT 10000';
+					WHERE (foo.count1 +1) <= st_npoints(foo.linestring)) foo3 LIMIT 10000';
+				}break;
+			}
+					
 			#echo $sql;
 			$ret=$layerdb->execSQL($sql,4, 0);
       if(!$ret[0]){
@@ -3792,6 +3805,11 @@ class GUI {
 		echo '~if(typeof resizemap2window != "undefined")resizemap2window();';
   }
 
+	function changeLegendDisplay(){
+		$this->user->rolle->changeLegendDisplay($this->formvars['hide']);
+		echo 'hide: ' . $this->formvars['hide'] . '~resizemap2window();';
+	}	
+	
 	function saveOverlayPosition(){
   	$this->user->rolle->saveOverlayPosition($this->formvars['overlayx'],$this->formvars['overlayy']);
   }
@@ -7726,6 +7744,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 								default : {
 									if($operator != 'IS NULL' AND $operator != 'IS NOT NULL'){
 										$sql_where .= ' AND (query.'.$attributes['name'][$i].' '.$operator.' \''.$value.'\'';
+										if($this->formvars[$prefix.'value2_'.$attributes['name'][$i]] != ''){
+											$sql_where.=' AND \''.$this->formvars[$prefix.'value2_'.$attributes['name'][$i]].'\'';
+										}
 										if($operator == '!='){
 											$sql_where .= ' OR query.'.$attributes['name'][$i].' IS NULL';
 										}
@@ -7746,9 +7767,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							else{
 								$sql_where .= ' AND query.'.$attributes['name'][$i].' '.$operator.' ';
 							}
-						}
-						if($this->formvars[$prefix.'value2_'.$attributes['name'][$i]] != ''){
-							$sql_where.=' AND \''.$this->formvars[$prefix.'value2_'.$attributes['name'][$i]].'\'';
 						}
 						# räumliche Einschränkung
 						if($m == 0 AND $attributes['name'][$i] == $attributes['the_geom']){		// nur einmal machen, also nur bei $m == 0
@@ -10234,7 +10252,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       }
     }
     $this->formvars['selected_stelle_id'] = $ret[1];
-   # $this->Stelleneditor();
+		$this->Stelleneditor();
   }
 
   function StellenAnzeigen() {
@@ -12421,9 +12439,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	function processJSON($json, $doc_path = NULL, $options = NULL, $attribute_names = NULL, $attribute_values = NULL, $layer_db = NULL, $quote = ''){
 		# Diese Funktion wandelt den übergebenen JSON-String in ein PostgeSQL-Struct um.
 		# Wenn der JSON-String mit "file:" gekennzeichnete File-Input-Feld-Namen von Datei-Uploads enthält, 
-		# werden diese Uploads gespeichert und der entstandene Dateipfad an die enstdprechende Stelle im String eingefügt
-		$json = strip_pg_escape_string($json);
+		# werden diese Uploads gespeichert und der entstandene Dateipfad an die enstdprechende Stelle im String eingefügt		
 		if(is_string($json) AND (strpos($json, '{') !== false OR strpos($json, '[') !== false)){			// bei Bedarf den JSON-String decodieren
+			$json = strip_pg_escape_string($json);
 			$json = json_decode($json);
 		}
 		if(is_array($json)){		// Array-Datentyp
@@ -13020,7 +13038,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       } # ende der Behandlung der zur Abfrage ausgewählten Layer
     } # ende der Schleife zur Abfrage der Layer der Stelle
 
-		if($this->last_query_requested AND $this->last_query != '' AND $this->user->rolle->querymode == 1){		# bei get_last_query und aktivierter Datenabfrage in extra Fenster --> Laden der Karte und zoom auf Treffer (das Zeichnen der Karte passiert in einem separaten Ajax-Request aus dem Overlay heraus)
+		if($this->formvars['mime_type'] != 'overlay_html' AND $this->last_query != '' AND $this->user->rolle->querymode == 1){		# bei get_last_query (nicht aus Overlay) und aktivierter Datenabfrage in extra Fenster --> Laden der Karte und zoom auf Treffer
 			$attributes = $this->qlayerset[0]['attributes'];
 			$geometrie_tabelle = $attributes['table_name'][$attributes['the_geom']];
 			$this->loadMap('DataBase');
@@ -13049,11 +13067,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			}
 			$this->user->rolle->newtime = $this->user->rolle->last_time_id;
 			$this->saveMap('');
-			if($this->formvars['mime_type'] != 'overlay_html'){		// bei Suche aus normaler Suchmaske (nicht aus Overlay) heraus --> Zeichnen der Karte und Darstellung der Sachdaten im Overlay
-				$this->drawMap();
-				$this->main = 'map.php';
-				$this->overlaymain = 'sachdatenanzeige.php';
-			}
+			$this->drawMap();
+			$this->main = 'map.php';
+			$this->overlaymain = 'sachdatenanzeige.php';
 		}
 		else $this->main='sachdatenanzeige.php';
   }
@@ -17238,8 +17254,8 @@ class db_mapObj{
   function new_Style($style){
     if(is_array($style)){
       $sql = "INSERT INTO styles SET ";
-      if($style['color']){$sql.= "color = '".$style['color']."'";}
 			if($style['colorred'] != ''){$sql.= "color = '".$style['colorred']." ".$style['colorgreen']." ".$style['colorblue']."'";}
+      else $sql.= "color = '".$style['color']."'";			
       if($style['symbol']){$sql.= ", symbol = '".$style['symbol']."'";}
       if($style['symbolname']){$sql.= ", symbolname = '".$style['symbolname']."'";}
       if($style['size']){$sql.= ", size = '".$style['size']."'";}
