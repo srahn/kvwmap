@@ -7744,6 +7744,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 								default : {
 									if($operator != 'IS NULL' AND $operator != 'IS NOT NULL'){
 										$sql_where .= ' AND (query.'.$attributes['name'][$i].' '.$operator.' \''.$value.'\'';
+										if($this->formvars[$prefix.'value2_'.$attributes['name'][$i]] != ''){
+											$sql_where.=' AND \''.$this->formvars[$prefix.'value2_'.$attributes['name'][$i]].'\'';
+										}
 										if($operator == '!='){
 											$sql_where .= ' OR query.'.$attributes['name'][$i].' IS NULL';
 										}
@@ -7764,9 +7767,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							else{
 								$sql_where .= ' AND query.'.$attributes['name'][$i].' '.$operator.' ';
 							}
-						}
-						if($this->formvars[$prefix.'value2_'.$attributes['name'][$i]] != ''){
-							$sql_where.=' AND \''.$this->formvars[$prefix.'value2_'.$attributes['name'][$i]].'\'';
 						}
 						# räumliche Einschränkung
 						if($m == 0 AND $attributes['name'][$i] == $attributes['the_geom']){		// nur einmal machen, also nur bei $m == 0
