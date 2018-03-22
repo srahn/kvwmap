@@ -1144,21 +1144,51 @@ class data_import_export {
 				$contenttype = 'application/octet-stream';
 			}
 			# temp. Tabelle wieder löschen
-      $sql = 'DROP TABLE '.$temp_table;
-      $ret = $layerdb->execSQL($sql,4, 0);
-    	if($this->formvars['export_format'] != 'CSV')$user->rolle->setConsumeShape($currenttime,$this->formvars['selected_layer_id'],$count);
+			$sql = 'DROP TABLE '.$temp_table;
+			$ret = $layerdb->execSQL($sql,4, 0);
+			if($this->formvars['export_format'] != 'CSV')$user->rolle->setConsumeShape($currenttime,$this->formvars['selected_layer_id'],$count);
 			
-	    ob_end_clean();
+			ob_end_clean();
 			header('Content-type: '.$contenttype);
-			header("Content-disposition:  attachment; filename=".basename($exportfile));
+			header("Content-disposition:	attachment; filename=".basename($exportfile));
 			header("Content-Length: ".filesize($exportfile));
 			header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 			header('Pragma: public');
 			readfile($exportfile);
-    }
-    else{
-      showAlert('Abfrage fehlgeschlagen.');
-    }
-  }
+
+			// Update timestamp formular_element_types having option export
+			$time_attributes = array();
+			foreach($this->attributes['name'] AS $key => $value) {
+				if (
+					$this->attributes['form_element_type'][$value] == 'Time' AND
+					trim(strtolower($this->attributes['options'][$value])) == 'export'
+				) {
+					$time_attributes[] = $value . " = '" . $currenttime . "'";
+				}
+			};
+
+			if (!$layerset[0]['maintable_is_view'] AND count($time_attributes) > 0) {
+				$update_table = $layerset[0]['schema'] . '.' . $layerset[0]['maintable'];
+				$sql = "
+					UPDATE
+						" . $update_table . " AS update_table
+					SET
+						" . implode(", ", $time_attributes) . "
+					FROM
+						(" . $data_sql . ") AS data_table
+					WHERE
+						update_table.oid = data_table." . $layerset[0]['maintable'] . "_oid
+				";
+				#echo '<br>sql: ' . $sql;
+				$ret = $layerdb->execSQL($sql, 4, 0);
+				if ($ret[0]) {
+					$this->add_message('error', 'Speicherung der Zeitstempel ' . implode(", ", $time_attributes) . ' fehlgeschlagen.<br>' . $ret[1]);
+				}
+			}
+		}
+		else{
+			showAlert('Abfrage fehlgeschlagen.');
+		}
+	}
 }
 ?>
