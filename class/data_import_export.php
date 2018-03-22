@@ -1017,6 +1017,7 @@ class data_import_export {
     	$sql.= " AND ST_INTERSECTS(".$this->attributes['the_geom'].", st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code']."))";
     }
     $sql.= $orderby;
+		$data_sql = $sql;
 		#echo $sql;
 
     $temp_table = 'shp_export_'.rand(1, 10000);
@@ -1186,6 +1187,7 @@ class data_import_export {
 					$GUI->add_message('error', 'Speicherung der Zeitstempel ' . implode(", ", $time_attributes) . ' fehlgeschlagen.<br>' . $ret[1]);
 				}
 			}
+
 		}
 		else{
 			$GUI->add_message('error', 'Abfrage fehlgeschlagen!');
