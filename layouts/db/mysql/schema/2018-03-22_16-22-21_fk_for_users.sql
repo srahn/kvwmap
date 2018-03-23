@@ -37,7 +37,9 @@ DELETE u_consumeCSV, user FROM u_consumeCSV LEFT JOIN user ON u_consumeCSV.user_
 ALTER TABLE u_consumeCSV ADD FOREIGN KEY (user_id) REFERENCES user (ID) ON DELETE CASCADE;
 DELETE u_consumeShape, user FROM u_consumeShape LEFT JOIN user ON u_consumeShape.user_id = user.ID WHERE user.ID IS NULL;
 ALTER TABLE u_consumeShape ADD FOREIGN KEY (user_id) REFERENCES user (ID) ON DELETE CASCADE;
+
 DELETE druckausschnitte, user FROM druckausschnitte LEFT JOIN user ON druckausschnitte.user_id = user.ID WHERE user.ID IS NULL;
+ALTER TABLE druckausschnitte MODIFY COLUMN id INT;
 ALTER TABLE druckausschnitte DROP PRIMARY KEY;
 ALTER TABLE druckausschnitte ADD PRIMARY KEY (id);
 ALTER TABLE druckausschnitte MODIFY COLUMN id INT AUTO_INCREMENT;
