@@ -662,14 +662,14 @@ include('funktionen/input_check_functions.php');
 		// attributes ist eine Liste von zu aktualisierenden Attributen, k die Nummer des Datensatzes und attributenamesarray ein Array aller Attribute im Formular
 		var attributenames = '';
 		var attributevalues = '';
-		for(i = 0; i < attributenamesarray.length; i++){
+		for(var i = 0; i < attributenamesarray.length; i++){
 			if(document.getElementById(layer_id+'_'+attributenamesarray[i]+'_'+k) != undefined){
 				attributenames += attributenamesarray[i] + '|';
 				attributevalues += document.getElementById(layer_id+'_'+attributenamesarray[i]+'_'+k).value + '|';
 			}
 		}
 		attribute = attributes.split(',');
-		for(i = 0; i < attribute.length; i++){
+		for(var i = 0; i < attribute.length; i++){
 			type = document.getElementById(layer_id+'_'+attribute[i]+'_'+k).type;
 			if(type == 'text'){action = 'setvalue'};
 			if(type == 'select-one'){action = 'sethtml'};
