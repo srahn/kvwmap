@@ -84,52 +84,58 @@ class Konvertierung extends PgObject {
 				WHERE
 					konvertierung_id = " . $this->get('id') . "
 			";
-			$query = pg_query($this->database->dbConn, $sql);
-			$result = pg_fetch_assoc($query);
-			if (in_array("ST_MultiPoint", $result)) {
-				$this->debug->show('Klasse: ' . $class_name, Konvertierung::$write_debug);
-				$sql = "
-					SELECT
-						*
-					FROM
-						xplan_gml. " . strtolower($class_name) . "
-					WHERE
-						konvertierung_id = " . $this->get('id') . "
-					AND
-						ST_GeometryType(position) = 'ST_MultiPoint'
-				";
-				$this->debug->show('Objektabfrage sql: ' . $sql, Konvertierung::$write_debug);
-				$export_class->ogr2ogr_export($sql, '"ESRI Shapefile"', $path . '/' . $class_name . '_point.shp', $this->database);
-			}
-			if (in_array("ST_MultiLineString", $result)) {
-				$this->debug->show('Klasse: ' . $class_name, Konvertierung::$write_debug);
-				$sql = "
-					SELECT
-						*
-					FROM
-						xplan_gml. " . strtolower($class_name) . "
-					WHERE
-						konvertierung_id = " . $this->get('id') . "
-					AND
-						ST_GeometryType(position) = 'ST_MultiLineString'
-				";
-				$this->debug->show('Objektabfrage sql: ' . $sql, Konvertierung::$write_debug);
-				$export_class->ogr2ogr_export($sql, '"ESRI Shapefile"', $path . '/' . $class_name . '_line.shp', $this->database);
-			}
-			if (in_array("ST_MultiPolygon", $result)) {
-				$this->debug->show('Klasse: ' . $class_name, Konvertierung::$write_debug);
-				$sql = "
-					SELECT
-						*
-					FROM
-						xplan_gml. " . strtolower($class_name) . "
-					WHERE
-						konvertierung_id = " . $this->get('id') . "
-					AND
-						ST_GeometryType(position) = 'ST_MultiPolygon'
-				";
-				$this->debug->show('Objektabfrage sql: ' . $sql, Konvertierung::$write_debug);
-				$export_class->ogr2ogr_export($sql, '"ESRI Shapefile"', $path . '/' . $class_name . '_poly.shp', $this->database);
+			$result = pg_query($this->database->dbConn, $sql);
+			//$result = pg_fetch_assoc($query);
+			if(pg_num_rows($result) == 0) {
+				continue;
+			} else {
+				while($row = pg_fetch_array($result)){
+					if ($row[0] == 'ST_MultiPoint') {
+						$this->debug->show('Klasse: ' . $class_name, Konvertierung::$write_debug);
+						$sql_point = "
+							SELECT
+								*
+							FROM
+								xplan_gml. " . strtolower($class_name) . "
+							WHERE
+								konvertierung_id = " . $this->get('id') . "
+							AND
+								ST_GeometryType(position) = 'ST_MultiPoint'
+						";
+						$this->debug->show('Objektabfrage sql: ' . $sql, Konvertierung::$write_debug);
+						$export_class->ogr2ogr_export($sql_point, '"ESRI Shapefile"', $path . '/' . $class_name . '_point.shp', $this->database);
+					}
+					if ($row[0] == 'ST_MultiLineString') {
+						$this->debug->show('Klasse: ' . $class_name, Konvertierung::$write_debug);
+						$sql_line = "
+							SELECT
+								*
+							FROM
+								xplan_gml. " . strtolower($class_name) . "
+							WHERE
+								konvertierung_id = " . $this->get('id') . "
+							AND
+								ST_GeometryType(position) = 'ST_MultiLineString'
+						";
+						$this->debug->show('Objektabfrage sql: ' . $sql, Konvertierung::$write_debug);
+						$export_class->ogr2ogr_export($sql_line, '"ESRI Shapefile"', $path . '/' . $class_name . '_line.shp', $this->database);
+					}
+					if ($row[0] == 'ST_MultiPolygon') {
+						$this->debug->show('Klasse: ' . $class_name, Konvertierung::$write_debug);
+						$sql_poly = "
+							SELECT
+								*
+							FROM
+								xplan_gml. " . strtolower($class_name) . "
+							WHERE
+								konvertierung_id = " . $this->get('id') . "
+							AND
+								ST_GeometryType(position) = 'ST_MultiPolygon'
+						";
+						$this->debug->show('Objektabfrage sql: ' . $sql, Konvertierung::$write_debug);
+						$export_class->ogr2ogr_export($sql_poly, '"ESRI Shapefile"', $path . '/' . $class_name . '_poly.shp', $this->database);
+					}
+				}
 			}
 		}
 
