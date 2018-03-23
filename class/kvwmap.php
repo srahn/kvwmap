@@ -8498,7 +8498,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				$tablename[$table_name]['tablename'] = $table_name;
 				$tablename[$table_name]['attributname'][] = $attributenames[] = $attributname;
 				$attributevalues[] = $this->formvars[$form_fields[$i]];
-				if($this->formvars['embedded'] != '')$formfieldstring .= '&'.$form_fields[$i].'='.$this->formvars[$form_fields[$i]];
+				if($this->formvars['embedded'] != ''){
+					$formfieldstring .= '&'.$form_fields[$i].'='.$this->formvars[$form_fields[$i]];
+					$insert_data[0][$attributname] = $this->formvars[$form_fields[$i]];
+				}
 				$tablename[$table_name]['type'][] = $formtype;
 				$tablename[$table_name]['datatype'][] = $element[6];
 				$tablename[$table_name]['formfield'][] = $form_fields[$i];
@@ -8596,32 +8599,32 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				$sql.= ") VALUES (";
 				for($i = 0; $i < count($table['attributname']); $i++){
 					if($table['type'][$i] == 'Time'){                       # Typ "Time"
-						if(in_array(trim(strtolower($attributes['options'][$table['attributname'][$i]])), array('', 'insert'))){
+						if(in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
 							$sql .= "'" . date("Y-m-d H:i:s") ."', ";
 							#$sql .= "(now())::timestamp(0), ";
 						}
 						else $sql.= "NULL, ";
 					}
 					elseif($table['type'][$i] == 'User'){                       # Typ "User"
-						if(in_array(trim(strtolower($attributes['options'][$table['attributname'][$i]])), array('', 'insert'))){
+						if(in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
 							$sql.= "'".$this->user->Vorname." ".$this->user->Name."', ";
 						}
 						else $sql.= "NULL, ";
 					}
 					elseif($table['type'][$i] == 'UserID'){                       # Typ "UserID"
-						if(in_array(trim(strtolower($attributes['options'][$table['attributname'][$i]])), array('', 'insert'))){
+						if(in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
 							$sql.= "'".$this->user->id."', ";
 						}
 						else $sql.= "NULL, ";
 					}
 					elseif($table['type'][$i] == 'Stelle'){                       # Typ "Stelle"
-						if(in_array(trim(strtolower($attributes['options'][$table['attributname'][$i]])), array('', 'insert'))){
+						if(in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
 							$sql.= "'".$this->Stelle->Bezeichnung."', ";
 						}
 						else $sql.= "NULL, ";
 					}
 					elseif($table['type'][$i] == 'StelleID'){                       # Typ "StelleID"
-						if(in_array(trim(strtolower($attributes['options'][$table['attributname'][$i]])), array('', 'insert'))){
+						if(in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
 							$sql.= "'".$this->Stelle->id."', ";
 						}
 						else $sql.= "NULL, ";
@@ -8717,26 +8720,29 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		if ($this->formvars['embedded'] != '') {    # wenn es ein neuer Datensatz aus einem embedded-Formular ist, muss das entsprechende Attribut des Hauptformulars aktualisiert werden
 			header('Content-type: text/html; charset=UTF-8');
 			$attributename[0] = $this->formvars['targetattribute'];
-			$attributes = $mapdb->read_layer_attributes($this->formvars['targetlayer_id'], $layerdb, $attributename);
+			$attributes = $mapdb->read_layer_attributes($this->formvars['targetlayer_id'], $layerdb, NULL);
 
-			switch ($attributes['form_element_type'][0]){
+			switch ($attributes['form_element_type'][$this->formvars['targetattribute']]){
 				case 'Auswahlfeld' : {
-					if (strpos($attributes['options'][0], '<requires>') !== false) {
-						# wenn <requires> verwendet wird, muss komplett neu geladen werden
-						echo "~~currentform.go.value='get_last_query';overlay_submit(currentform, false);";
+					# das Auswahlfeld wird ausgetauscht und die Option gleich selektiert
+					$attributes = $mapdb->add_attribute_values($attributes, $layerdb, $insert_data, true, $this->Stelle->id);
+					$index = $attributes['indizes'][$this->formvars['targetattribute']];
+					if(is_array($attributes['dependent_options'][$index])){
+						$enum_output = $attributes['enum_output'][$index][0];
+						$enum_value = $attributes['enum_value'][$index][0];
+						$enum_oid = $attributes['enum_oid'][$index][0];
 					}
-					else { # andernfalls wird nur das Auswahlfeld ausgetauscht und die Option gleich selektiert
-						list($sql) = explode(';', $attributes['options'][0]);
-						$sql = str_replace(' from ', ',oid from ', strtolower($sql));    # auch die oid abfragen
-						$re=$layerdb->execSQL($sql,4,0);
-						if ($re[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; var_dump($layerdb); return 0; }
-						while($rs = pg_fetch_array($re[1])){
-							$html .= '<option ';
-							if($rs['oid'] == $last_oid){$html .= 'selected ';}
-							$html .= 'value="'.$rs['value'].'">'.$rs['output'].'</option>';
-						}
-						echo '~'.$html;
+					else{
+						$enum_output = $attributes['enum_output'][$index];
+						$enum_value = $attributes['enum_value'][$index];
+						$enum_oid = $attributes['enum_oid'][$index];
 					}
+					for($e = 0; $e < count($enum_value); $e++){
+						$html .= '<option ';
+						if($last_oid == $enum_oid[$e]){$html .= 'selected ';}
+						$html .= 'value="'.$enum_value[$e].'">'.$enum_output[$e].'</option>';
+					}
+					echo '~'.$html.'~document.getElementById("'.$this->formvars['targetobject'].'").onchange();';
         } break;
 
         case 'SubFormEmbeddedPK' : {
@@ -12244,19 +12250,19 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
               }
             } break; # ende case Bild
             case 'Time' : {
-							if(in_array(trim(strtolower($attributes['options'][$attributname])), array('', 'update')))$eintrag = date('Y-m-d G:i:s');
+							if(in_array($attributes['options'][$attributname], array('', 'update')))$eintrag = date('Y-m-d G:i:s');
             } break;
             case 'User' : {
-							if(in_array(trim(strtolower($attributes['options'][$attributname])), array('', 'update')))$eintrag = $this->user->Vorname." ".$this->user->Name;
+							if(in_array($attributes['options'][$attributname], array('', 'update')))$eintrag = $this->user->Vorname." ".$this->user->Name;
             } break;
             case 'UserID' : {
-							if(in_array(trim(strtolower($attributes['options'][$attributname])), array('', 'update')))$eintrag = $this->user->id;
+							if(in_array($attributes['options'][$attributname], array('', 'update')))$eintrag = $this->user->id;
             } break;
             case 'Stelle' : {
-							if(in_array(trim(strtolower($attributes['options'][$attributname])), array('', 'update')))$eintrag = $this->Stelle->Bezeichnung;
+							if(in_array($attributes['options'][$attributname], array('', 'update')))$eintrag = $this->Stelle->Bezeichnung;
             } break;
 						case 'StelleID' : {
-							if(in_array(trim(strtolower($attributes['options'][$attributname])), array('', 'update')))$eintrag = $this->Stelle->id;
+							if(in_array($attributes['options'][$attributname], array('', 'update')))$eintrag = $this->Stelle->id;
             } break;
             case 'Geometrie' : {
               # nichts machen
@@ -15566,7 +15572,26 @@ class db_mapObj{
               }
               elseif(strpos(strtolower($attributes['options'][$i]), "select") === 0){     # SQl-Abfrage wie select attr1 as value, atrr2 as output from table1
                 $optionen = explode(';', $attributes['options'][$i]);  # SQL; weitere Optionen
-                $attributes['options'][$i] = $optionen[0];
+								# --------- weitere Optionen -----------
+                if($optionen[1] != ''){
+                  $further_options = explode(' ', $optionen[1]);      # die weiteren Optionen exploden (opt1 opt2 opt3)
+                  for($k = 0; $k < count($further_options); $k++){
+                    if(strpos($further_options[$k], 'layer_id') !== false){     #layer_id=XX bietet die Möglichkeit hier eine Layer_ID zu definieren, für die man einen neuen Datensatz erzeugen kann
+                      $attributes['subform_layer_id'][$i] = array_pop(explode('=', $further_options[$k]));
+                      $layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
+                      $attributes['subform_layer_privileg'][$i] = $layer['privileg'];
+                    }
+                    elseif($further_options[$k] == 'embedded'){       # Subformular soll embedded angezeigt werden
+                      $attributes['embedded'][$i] = true;
+                    }
+                  }
+                }
+								# --------- weitere Optionen -----------
+								if($attributes['subform_layer_id'][$i] != NULL){
+									$attributes['options'][$i] = str_replace(' from ', ',oid from ', strtolower($optionen[0]));    # auch die oid abfragen
+								}
+								# ------------ SQL ---------------------
+								else $attributes['options'][$i] = $optionen[0];
                 # ------<required by>------
                 $req_by_start = strpos(strtolower($attributes['options'][$i]), "<required by>");
                 if($req_by_start > 0){
@@ -15583,10 +15608,15 @@ class db_mapObj{
 										$attribute_value_column = array_pop(explode(' ', $explo1[0]));
 									}
                   if($query_result != NULL){
+										foreach($attributes['name'] as $attributename){
+											if(strpos($attributes['options'][$i], '<requires>'.$attributename.'</requires>') !== false){
+												$attributes['req'][$i][] = $attributename;			# die Attribute, die in <requires>-Tags verwendet werden zusammen sammeln
+											}
+										}
                     for($k = 0; $k < count($query_result); $k++){
 											$options = $attributes['options'][$i];
-											foreach($attributes['name'] as $attributename){
-												if(strpos($options, '<requires>'.$attributename.'</requires>') !== false AND $query_result[$k][$attributename] != ''){
+											foreach($attributes['req'][$i] as $attributename){
+												if($query_result[$k][$attributename] != ''){
 													if($only_current_enums){	# in diesem Fall werden nicht alle Auswahlmöglichkeiten abgefragt, sondern nur die aktuellen Werte des Datensatzes (wird z.B. beim Daten-Export verwendet, da hier nur lesend zugegriffen wird und die Datenmengen sehr groß sein können)
 														$options = str_ireplace('where', 'where '.$attribute_value_column.'::text = \''.$query_result[$k][$attributes['name'][$i]].'\' AND ', $options);
 													}
@@ -15616,6 +15646,7 @@ class db_mapObj{
                       while($rs = pg_fetch_array($ret[1])){
                         $attributes['enum_value'][$i][$k][] = $rs['value'];
                         $attributes['enum_output'][$i][$k][] = $rs['output'];
+												$attributes['enum_oid'][$i][$k][] = $rs['oid'];
                       }
                     }
                   }
@@ -15627,20 +15658,7 @@ class db_mapObj{
                   while($rs = pg_fetch_array($ret[1])){
                     $attributes['enum_value'][$i][] = $rs['value'];
                     $attributes['enum_output'][$i][] = $rs['output'];
-                  }
-                }
-								# weitere Optionen
-                if($optionen[1] != ''){
-                  $further_options = explode(' ', $optionen[1]);      # die weiteren Optionen exploden (opt1 opt2 opt3)
-                  for($k = 0; $k < count($further_options); $k++){
-                    if(strpos($further_options[$k], 'layer_id') !== false){     #layer_id=XX bietet die Möglichkeit hier eine Layer_ID zu definieren, für die man einen neuen Datensatz erzeugen kann
-                      $attributes['subform_layer_id'][$i] = array_pop(explode('=', $further_options[$k]));
-                      $layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
-                      $attributes['subform_layer_privileg'][$i] = $layer['privileg'];
-                    }
-                    elseif($further_options[$k] == 'embedded'){       # Subformular soll embedded angezeigt werden
-                      $attributes['embedded'][$i] = true;
-                    }
+										$attributes['enum_oid'][$i][] = $rs['oid'];
                   }
                 }
               }
@@ -16063,9 +16081,9 @@ class db_mapObj{
 
 		$filename = rand(0, 1000000).'.sql';
 		$fp = fopen(IMAGEPATH . $filename, 'w');
-		#fwrite($fp, $dump_text);
-		fwrite($fp, str_replace('
-', '', $dump_text));
+		fwrite($fp, $dump_text);
+		//fwrite($fp, str_replace('
+//', '', $dump_text));
 		#fwrite($fp, utf8_decode($dump_text));
 
 		return array(
