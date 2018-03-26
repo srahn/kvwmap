@@ -3,14 +3,14 @@ $SVGvars_defs = '
 
 	<style type="text/css"><![CDATA[
 		#buttons{
-			transition: all 1s cubic-bezier(0.09, 0.93, 0.76, 0.84);
-			#filter: drop-shadow( 3px 3px 3px #444 );
-			opacity: 0.5;
 		}
-		#buttons:hover{
+		#buttons:hover .navbutton_bg{
 			transition: all 0.15s ease;
 			opacity: 1;
-		}				
+		}
+		#buttons:hover .navbutton_frame{
+			opacity: 1;
+		}		
     .navbutton{			
 			fill: #5c88a8;
 			pointer-events: none;
@@ -26,6 +26,24 @@ $SVGvars_defs = '
 		}
 		.navbutton_whitefill{
 			fill: white;
+		}
+		.navbutton_bg{
+			filter: url(#Schatten);
+			fill: url(#LinearGradient);
+			opacity: 0.5;
+			transition: all 1s cubic-bezier(0.09, 0.93, 0.76, 0.84);
+		}
+		.navbutton_frame{
+			fill: url(#LinearGradient);
+			opacity: 0.0;
+		}
+		.navbutton_frame:hover{
+			filter: url(#innershadow);
+		}                             
+		.active{
+			fill: #b0d4f2 !important;
+			opacity: 1 !important;
+			filter: url(#innershadow);
 		}		
 		.disabled{			
 			fill: #ccc;
@@ -34,17 +52,19 @@ $SVGvars_defs = '
 			fill: rgb(180,30,30);
 			stroke:rgb(180,30,30);
 		}
-		.navbuttonbg{
-			fill: #f8f8f8;
-		}
-		.navbuttonbg:hover {
-			fill: #fff;
-			#filter: drop-shadow( -3px 0px 3px #ccc );
-		}		
-		.active{
-			fill: #F2F272 !important;
-		}
     ]]></style>
+				
+		<filter id="innershadow">
+			<feOffset dx="-0.5" dy="0"/>
+			<feGaussianBlur stdDeviation="1.3"  result="offset-blur"/>                           <!-- Shadow Blur -->
+			<feComposite operator="out" in="SourceGraphic" in2="offset-blur" result="inverse"/> <!-- Invert the drop shadow to create an inner shadow -->
+			<feFlood flood-color="black" flood-opacity="1" result="color"/>                     <!-- Color & Opacity -->
+			<feComposite operator="in" in="color" in2="inverse" result="shadow"/>               <!-- Clip color inside shadow -->
+			<feComponentTransfer in="shadow" result="shadow">                                   <!-- Shadow Opacity -->
+				<feFuncA type="linear" slope=".7"/>
+			</feComponentTransfer>
+			<feComposite operator="over" in="shadow" in2="SourceGraphic"/>                       <!-- Put shadow over original object -->
+		</filter>
 		
     <filter id="Schatten" width = "150%" height = "150%">
       <feGaussianBlur in="SourceAlpha" stdDeviation="3" result="blur"/>
@@ -57,6 +77,11 @@ $SVGvars_defs = '
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
+		
+		<linearGradient id="LinearGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+			<stop offset="0%" stop-color="#fdfdfd" stop-opacity="0%" />
+			<stop offset="100%" stop-color="#DAE4EC" stop-opacity="100%" />
+		</linearGradient>
 
     <g id="1move">
         <g id="12move" style="stroke:#5c88a8;stroke-width:1.5">
@@ -121,14 +146,12 @@ $SVGvars_defs = '
 		$prevmouseupfunction='';
 		$prev_disabled='disabled';
 	}
-
-	$last_x = 0;
 	
 	function previous($prev_disabled, $strPreviousView, $prevmouseupfunction){
-		global $last_x;
+		global $last_x;global $events;
 		$previous ='
       <g id="previous" transform="translate('.$last_x.' 0)">
-				<rect id="previous0" onmouseover="show_tooltip(\''.$strPreviousView.'\',evt.clientX,evt.clientY)" onmousedown="hide_tooltip();highlightbyid(this.id);noMeasuring();" onmouseup="'.$prevmouseupfunction.'" x="0" y="0"   width="36.5" height="36" class="navbuttonbg"/>
+				<rect id="previous0" '.(($events == true)? 'onmouseover="show_tooltip(\''.$strPreviousView.'\',evt.clientX,evt.clientY)" onmousedown="hide_tooltip();highlightbyid(this.id);noMeasuring();" onmouseup="'.$prevmouseupfunction.'"' : '').' x="0" y="0" rx="3" ry="3" width="36" height="36" class="navbutton_frame"/>
 				<g class="navbutton '.$prev_disabled.'" transform="translate(5 5) scale(0.8)">
 					<path d="M6.1,15.7 L18.7,28.3 L18.7,28.3 C18.9,28.5 19.1,28.6 19.4,28.6 C19.7,28.6 19.9,28.5 20.1,28.3 L21.7,26.7 L21.7,26.7 C21.9,26.5 22.0,26.3 22.0,26.0 C22.0,25.7 21.9,25.5 21.7,25.3 L12.1,15.7 L12.1,15.7 C11.9,15.5 11.8,15.3 11.8,15.0 C11.8,14.7 11.9,14.5 12.1,14.3 L21.7,4.7 L21.7,4.7 C21.9,4.5 22.0,4.3 22.0,4.0 C22.0,3.7 21.9,3.5 21.7,3.3 L20.1,1.7 L20.1,1.7 C19.9,1.5 19.7,1.4 19.4,1.4 C19.1,1.4 18.9,1.5 18.7,1.7 L6.1,14.3 L6.1,14.3 C5.9,14.5 5.8,14.7 5.8,15.0 C5.8,15.3 5.9,15.5 6.1,15.7"/>
 				</g>        
@@ -138,10 +161,10 @@ $SVGvars_defs = '
 	}
 
 	function forward($next_disabled, $strNextView, $mouseupfunction){
-		global $last_x;
+		global $last_x;global $events;
 		$next ='
       <g id="next" transform="translate('.$last_x.' 0)">
-				<rect id="next0" onmouseover="show_tooltip(\''.$strNextView.'\',evt.clientX,evt.clientY)" onmousedown="hide_tooltip();highlightbyid(this.id);noMeasuring();" onmouseup="'.$mouseupfunction.'" x="0" y="0" width="36.5" height="36" class="navbuttonbg"/>
+				<rect id="next0" '.(($events == true)? 'onmouseover="show_tooltip(\''.$strNextView.'\',evt.clientX,evt.clientY)" onmousedown="hide_tooltip();highlightbyid(this.id);noMeasuring();" onmouseup="'.$mouseupfunction.'"' : '').' x="0" y="0" rx="3" ry="3" width="36" height="36" class="navbutton_frame"/>
 				<g class="navbutton '.$next_disabled.'" transform="translate(5 5) scale(0.8)">
 					<path d="M23.9,14.3 L11.3,1.7 L11.3,1.7 C11.1,1.5 10.9,1.4 10.6,1.4 C10.3,1.4 10.1,1.5 9.9,1.7 L8.3,3.3 L8.3,3.3 C8.1,3.5 8,3.7 8,4 C8,4.3 8.1,4.5 8.3,4.7 L17.9,14.3 L17.9,14.3 C18.1,14.5 18.2,14.7 18.2,15 C18.2,15.3 18.1,15.5 17.9,15.7 L8.3,25.3 L8.3,25.3 C8.1,25.5 8.0,25.7 8.0,26.0 C8.0,26.3 8.1,26.5 8.3,26.7 L9.9,28.3 L9.9,28.3 C10.1,28.5 10.3,28.6 10.6,28.6 C10.9,28.6 11.1,28.5 11.3,28.3 L23.9,15.7 L23.9,15.7 C24.1,15.5 24.2,15.3 24.2,15 C24.2,14.7 24.1,14.5 23.9,14.3"/>
 				</g>
@@ -151,10 +174,10 @@ $SVGvars_defs = '
 	}
 
 	function zoomin($strZoomIn){
-		global $last_x;
+		global $last_x;global $events;
 		$zoomin ='
       <g id="zoomin" transform="translate('.$last_x.' 0)">
-				<rect id="zoomin0" onmouseover="show_tooltip(\''.$strZoomIn.'\',evt.clientX,evt.clientY)" onmousedown="zoomin();highlightbyid(this.id);" x="0" y="0" width="36.5" height="36" class="navbuttonbg"/>
+				<rect id="zoomin0" '.(($events == true)? 'onmouseover="show_tooltip(\''.$strZoomIn.'\',evt.clientX,evt.clientY)" onmousedown="zoomin();highlightbyid(this.id);"' : '').' x="0" y="0" rx="3" ry="3" width="36" height="36" class="navbutton_frame"/>
 				<g class="navbutton" transform="translate(5 5) scale(0.8)">
 					<path d="M19.5,20 C24.7,20 29,15.7 29.0,10.5 C29,5.3 24.7,1 19.5,1 C14.3,1 10,5.3 10,10.5 C10,15.7 14.3,20 19.5,20 M12.9,10.6 L12.9,10.5 L12.9,10.5 C12.9,10.5 12.9,10.5 12.9,10.4 C12.9,6.8 15.8,3.9 19.4,3.9 C19.5,3.9 19.5,3.9 19.5,3.9 L19.6,3.9 L19.6,3.9 C23.1,4 26,6.9 26,10.4 L26,10.5 C26,14.1 23.0898508737,17 19.5,17 L19.4,17 C15.9,17 13,14.1 12.9,10.6" style="fill-rule: evenodd;"/>
 					<path d="M13.9,18.1 L5.7,26.3 L5.7,26.3 C5.5,26.5 5.3,26.6 5.0,26.6 C4.7,26.6 4.5,26.5 4.3,26.3 L3.7,25.7 L3.7,25.7 C3.5,25.5 3.4,25.3 3.4,25 C3.4,24.7 3.5,24.5 3.7,24.3 L11.9,16.1 Z"/>
@@ -167,10 +190,10 @@ $SVGvars_defs = '
 	}
 
 	function zoomout($strZoomOut){
-		global $last_x;
+		global $last_x;global $events;
 		$zoomout ='
       <g id="zoomout" transform="translate('.$last_x.' 0)">
-				<rect id="zoomout0" onmouseover="show_tooltip(\''.$strZoomOut.'\',evt.clientX,evt.clientY)" onmousedown="zoomout();highlightbyid(this.id);" x="0" y="0"   width="36.5" height="36" class="navbuttonbg"/>
+				<rect id="zoomout0" '.(($events == true)? 'onmouseover="show_tooltip(\''.$strZoomOut.'\',evt.clientX,evt.clientY)" onmousedown="zoomout();highlightbyid(this.id);"' : '').' x="0" y="0" rx="3" ry="3" width="36" height="36" class="navbutton_frame"/>
 				<g class="navbutton" transform="translate(5 5) scale(0.8)">
 					<path d="M19.5,20 C24.7,20 29,15.7 29.0,10.5 C29,5.3 24.7,1 19.5,1 C14.3,1 10,5.3 10,10.5 C10,15.7 14.3,20 19.5,20 M12.9,10.6 L12.9,10.5 L12.9,10.5 C12.9,10.5 12.9,10.5 12.9,10.4 C12.9,6.8 15.8,3.9 19.4,3.9 C19.5,3.9 19.5,3.9 19.5,3.9 L19.6,3.9 L19.6,3.9 C23.1,4 26,6.9 26,10.4 L26,10.5 C26,14.1 23.0898508737,17 19.5,17 L19.4,17 C15.9,17 13,14.1 12.9,10.6" style="fill-rule: evenodd;"/>
 					<path d="M13.9,18.1 L5.7,26.3 L5.7,26.3 C5.5,26.5 5.3,26.6 5.0,26.6 C4.7,26.6 4.5,26.5 4.3,26.3 L3.7,25.7 L3.7,25.7 C3.5,25.5 3.4,25.3 3.4,25 C3.4,24.7 3.5,24.5 3.7,24.3 L11.9,16.1 Z"/>
@@ -182,10 +205,10 @@ $SVGvars_defs = '
 	}
 	
 	function zoomall($strZoomToFullExtent){
-		global $last_x;
+		global $last_x;global $events;
 		$zoomall ='
       <g id="zoomall" transform="translate('.$last_x.' 0)">
-				<rect id="zoomall0" onmouseover="show_tooltip(\''.$strZoomToFullExtent.'\',evt.clientX,evt.clientY)" onmousedown="zoomall();noMeasuring();" x="0" y="0"   width="36.5" height="36" class="navbuttonbg"/>
+				<rect id="zoomall0" '.(($events == true)? 'onmouseover="show_tooltip(\''.$strZoomToFullExtent.'\',evt.clientX,evt.clientY)" onmousedown="zoomall();noMeasuring();"' : '').' x="0" y="0" rx="3" ry="3"   width="36" height="36" class="navbutton_frame"/>
 				<g class="navbutton" transform="translate(5 5) scale(0.8)">
 					<path d="M1,20 L1,29 L10,29 Z"/>
 					<path d="M20,29 L29,29 L29,20 Z"/>
@@ -198,10 +221,10 @@ $SVGvars_defs = '
 	}
 
 	function recentre($strPan){
-		global $last_x;
+		global $last_x;global $events;
 		$recentre ='
       <g id="recentre" transform="translate('.$last_x.' 0)">
-				<rect id="recentre0" onmouseover="show_tooltip(\''.$strPan.'\',evt.clientX,evt.clientY)" onmousedown="recentre();highlightbyid(this.id)" x="0" y="0"   width="36.5" height="36" class="navbuttonbg"/>
+				<rect id="recentre0" '.(($events == true)? 'onmouseover="show_tooltip(\''.$strPan.'\',evt.clientX,evt.clientY)" onmousedown="recentre();highlightbyid(this.id);"' : '').' x="0" y="0" rx="3" ry="3"   width="36" height="36" class="navbutton_frame"/>
 				<g class="navbutton" transform="translate(2 4) scale(0.058 0.052)">
 					<path d="M 284.00,21.09
            C 293.71,25.03 301.73,33.56 306.00,43.00
@@ -281,10 +304,10 @@ $SVGvars_defs = '
 	}
 
 	function coords1($strCoordinatesZoom){
-		global $last_x;
+		global $last_x;global $events;
 		$coords1 ='
       <g id="coords1" transform="translate('.$last_x.' 0)">
-				<rect id="coords0" onmouseover="show_tooltip(\''.$strCoordinatesZoom.'\',evt.clientX,evt.clientY)" onmousedown="hide_tooltip();highlightbyid(this.id);noMeasuring();" onmouseup="top.coords_input();" x="0" y="0" width="36.5" height="36" class="navbuttonbg"/>
+				<rect id="coords0" '.(($events == true)? 'onmouseover="show_tooltip(\''.$strCoordinatesZoom.'\',evt.clientX,evt.clientY)" onmousedown="hide_tooltip();highlightbyid(this.id);noMeasuring();" onmouseup="top.coords_input();"' : '').' x="0" y="0" rx="3" ry="3" width="36" height="36" class="navbutton_frame"/>
 				<g class="navbutton" transform="translate(5 5) scale(0.8)">
 					<path d="M15,26 C21.8,26 26,21.8 26,15 C26,8.9 21.8,4 15,4 C8.9,4 4,8.9 4,15 C4,21.8 8.9,26 15,26 M15,24 C20,24 24,20 24,15 C24,10.0 20,6 15,6 C10.0,6 6,10.0 6,15 C6,20 10.0,24 15,24" style="fill-rule: evenodd;"/>
 					<path d="M20,16 L20,14 C20,13.4 20.4,13 21,13 L28,13 C28.6,13 29,13.4 29,14 L29,16 C29,16.6 28.6,17 28,17 L21,17 C20.4,17 20,16.6 20,16"/>
@@ -298,10 +321,10 @@ $SVGvars_defs = '
 	}
 	
 	function coords2($strCoordinatesQuery){
-		global $last_x;
+		global $last_x;global $events;
 		$coords2 ='
       <g id="coords2" transform="translate('.$last_x.' 0)">
-				<rect id="coords02" onmouseover="show_tooltip(\''.$strCoordinatesQuery.'\',evt.clientX,evt.clientY)" onmousedown="hide_tooltip();highlightbyid(this.id);noMeasuring();" onmouseup="showcoords();" x="0" y="0" width="36.5" height="36" class="navbuttonbg"/>
+				<rect id="coords02" '.(($events == true)? 'onmouseover="show_tooltip(\''.$strCoordinatesQuery.'\',evt.clientX,evt.clientY)" onmousedown="hide_tooltip();highlightbyid(this.id);noMeasuring();" onmouseup="showcoords();"' : '').' x="0" y="0" rx="3" ry="3" width="36" height="36" class="navbutton_frame"/>
 				<g class="navbutton" transform="translate(5 5) scale(0.8)">
 					<path d="M2,25 L28,25 C28.6,25 29,24.6 29,24 C29,23.4 28.6,23 28,23 L2,23 C1.4,23 1,23.4 1,24 C1,24.6 1.4,25 2,25"/>
 					<path d="M7,28 L7,2 C7,1.4 6.6,1 6,1 C5.4,1 5,1.4 5,2 L5,28 C5,28.6 5.4,29 6,29 C6.6,29 7,28.6 7,28"/>
@@ -315,11 +338,11 @@ $SVGvars_defs = '
 	}
 	
 	function ppquery($strInfo){
-		global $last_x;
+		global $last_x;global $events;
 		$ppquery ='
       <g id="ppquery" transform="translate('.$last_x.' 0)">
-        <rect id="ppquery0" onmouseover="show_tooltip(\''.$strInfo.'\',evt.clientX,evt.clientY)" onmousedown="ppquery();hide_tooltip();highlightbyid(this.id);noMeasuring();" x="0" y="0"   width="36.5" height="36" class="navbuttonbg"/>
-				<g class="navbutton" transform="translate(5 5) scale(0.8)">
+        <rect id="ppquery0" '.(($events == true)? 'onmouseover="show_tooltip(\''.$strInfo.'\',evt.clientX,evt.clientY)" onmousedown="ppquery();hide_tooltip();highlightbyid(this.id);noMeasuring();"' : '').' x="0" y="0" rx="3" ry="3"   width="36" height="36" class="navbutton_frame"/>
+				<g class="navbutton" transform="translate(6 5) scale(0.8)">
 					<text transform="scale(1.3 1)" x="11" y="25" style="text-anchor:middle;font-size:27px;font-family:Times;stroke: #5c88a8;">i</text>
 				</g>
       </g>';
@@ -328,10 +351,10 @@ $SVGvars_defs = '
 	}
 
 	function touchquery($strTouchInfo){
-		global $last_x;
+		global $last_x;global $events;
 		$touchquery ='
 			<g id="touchquery" transform="translate('.$last_x.' 0)">
-				<rect id="touchquery0" onmouseover="show_tooltip(\''.$strTouchInfo.'\',evt.clientX,evt.clientY)" onmousedown="touchquery();hide_tooltip();highlightbyid(this.id);noMeasuring();" x="0" y="0"   width="36.5" height="36" class="navbuttonbg"/>
+				<rect id="touchquery0" '.(($events == true)? 'onmouseover="show_tooltip(\''.$strTouchInfo.'\',evt.clientX,evt.clientY)" onmousedown="touchquery();hide_tooltip();highlightbyid(this.id);noMeasuring();"' : '').' x="0" y="0" rx="3" ry="3"   width="36" height="36" class="navbutton_frame"/>
 				<g class="navbutton" transform="translate(5 5) scale(0.8)">
 					<text transform="scale(1.3 1)" x="11" y="22" style="text-anchor:middle;font-size:21px;font-family:Times;stroke: #5c88a8;">i</text>
 					<path d="M1,10 L1,1 L9,1 Z"/>
@@ -345,10 +368,10 @@ $SVGvars_defs = '
 	}
 		
 	function pquery($strInfoWithRadius){
-		global $last_x;
+		global $last_x;global $events;
 		$pquery ='
       <g id="pquery" transform="translate('.$last_x.' 0)">
-				<rect id="pquery0" onmouseover="show_tooltip(\''.$strInfoWithRadius.'\',evt.clientX,evt.clientY)" onmousedown="pquery();pquery_prompt();highlightbyid(this.id);noMeasuring();" x="0" y="0"   width="36.5" height="36" class="navbuttonbg"/>
+				<rect id="pquery0" '.(($events == true)? 'onmouseover="show_tooltip(\''.$strInfoWithRadius.'\',evt.clientX,evt.clientY)" onmousedown="pquery();pquery_prompt();highlightbyid(this.id);noMeasuring();"' : '').' x="0" y="0" rx="3" ry="3"   width="36" height="36" class="navbutton_frame"/>
         <g class="navbutton" style="stroke: #5c88a8;" transform="translate(5 5) scale(0.8)">
 					<text transform="scale(1.3 1)" x="11" y="22" style="text-anchor:middle;font-size:21px;font-family:Times;">i</text>
 					<circle cx="15" cy="16" r="13" style="fill:none;stroke-width: 2px"/>
@@ -359,10 +382,10 @@ $SVGvars_defs = '
 	}
 	
 	function polygonquery($strInfoInPolygon){
-		global $last_x;
+		global $last_x;global $events;
 		$polygonquery ='
 			<g id="polygonquery" transform="translate('.$last_x.' 0)">
-				<rect id="polygonquery0" onmouseover="show_tooltip(\''.$strInfoInPolygon.'\',evt.clientX,evt.clientY)" onmousedown="polygonquery();highlightbyid(this.id);hidetooltip(evt);noMeasuring();" x="0" y="0" width="36.5" height="36" class="navbuttonbg"/>
+				<rect id="polygonquery0" '.(($events == true)? 'onmouseover="show_tooltip(\''.$strInfoInPolygon.'\',evt.clientX,evt.clientY)" onmousedown="polygonquery();highlightbyid(this.id);hidetooltip(evt);noMeasuring();"' : '').' x="0" y="0" rx="3" ry="3" width="36" height="36" class="navbutton_frame"/>
 				<g class="navbutton" transform="translate(5 5) scale(0.8)">
 					<text transform="scale(1.3 1)" x="11" y="22" style="text-anchor:middle;font-size:21px;font-family:Times;stroke: #5c88a8;">i</text>
 					<path d="M16.25,29 C17.5,29 18.5,28 18.5,26.75 C18.5,25.5 17.5,24.5 16.25,24.5 C15.0,24.5 14.0,25.5 14,26.75 C14,28 15.0,29 16.25,29"/>
@@ -381,10 +404,10 @@ $SVGvars_defs = '
 	}
 		
 	function dist($strRuler){
-		global $last_x;
+		global $last_x;global $events;
 		$dist ='
       <g id="dist" transform="translate('.$last_x.' 0)">
-				<rect id="measure0" onmouseover="show_tooltip(\''.$strRuler.'\',evt.clientX,evt.clientY)" onmousedown="hide_tooltip();highlightbyid(this.id);measure();" x="0" y="0"   width="36.5" height="36" class="navbuttonbg"/>
+				<rect id="measure0" '.(($events == true)? 'onmouseover="show_tooltip(\''.$strRuler.'\',evt.clientX,evt.clientY)" onmousedown="hide_tooltip();highlightbyid(this.id);measure();"' : '').' x="0" y="0" rx="3" ry="3"   width="36" height="36" class="navbutton_frame"/>
 				<g class="navbutton" transform="translate(5 5) scale(0.8)">
 					<path d="M9.9,28.5 L28.5,9.9 L28.5,9.9 C28.7,9.8 28.8,9.5 28.8,9.2 C28.8,9 28.7,8.7 28.5,8.5 L21.5,1.5 L21.5,1.5 C21.3,1.3 21.0,1.2 20.8,1.2 C20.5,1.2 20.2,1.3 20.1,1.5 L1.5,20.1 L1.5,20.1 C1.3,20.2 1.2,20.5 1.2,20.8 C1.2,21.0 1.3,21.3 1.5,21.5 L8.5,28.5 L8.5,28.5 C8.7,28.7 9,28.8 9.2,28.8 C9.5,28.8 9.8,28.7 9.9,28.5 M9.2,25.7 L25.7,9.2 L20.8,4.3 L4.3,20.8 Z" style="fill-rule: evenodd;"/>
 					<path d="M6.3,18.7 L8.3,20.7 L9.7,19.3 L7.7,17.3 Z"/>
@@ -399,10 +422,10 @@ $SVGvars_defs = '
 	}
 	
 	function freepolygon($strFreePolygon){
-		global $last_x;
+		global $last_x;global $events;
 		$freepolygon ='
 			<g id="freepolygon" transform="translate('.$last_x.' 0)">
-				<rect id="freepolygon0" onmouseover="show_tooltip(\''.$strFreePolygon.'\',evt.clientX,evt.clientY)" onmousedown="drawpolygon();highlightbyid(this.id);hidetooltip(evt);noMeasuring();" x="0" y="0"   width="36.5" height="36" class="navbuttonbg"/>
+				<rect id="freepolygon0" '.(($events == true)? 'onmouseover="show_tooltip(\''.$strFreePolygon.'\',evt.clientX,evt.clientY)" onmousedown="drawpolygon();highlightbyid(this.id);hidetooltip(evt);noMeasuring();"' : '').' x="0" y="0" rx="3" ry="3"   width="36" height="36" class="navbutton_frame"/>
         <g class="navbutton redlining" style="stroke:none" transform="translate(5 5) scale(0.8)">
 					<path d="M16.25,29 C17.5,29 18.5,28 18.5,26.75 C18.5,25.5 17.5,24.5 16.25,24.5 C15.0,24.5 14.0,25.5 14,26.75 C14,28 15.0,29 16.25,29"/>
 					<path d="M14.95,5.5 C16.2,5.5 17.2,4.5 17.2,3.25 C17.2,2.0 16.2,1 14.95,1 C13.7,1 12.7,2.0 12.7,3.2 C12.7,4.5 13.7,5.5 14.95,5.5"/>
@@ -420,10 +443,10 @@ $SVGvars_defs = '
 	}
 	
 	function freetext($strFreeText){
-		global $last_x;
+		global $last_x;global $events;
 		$freetext ='
 			<g id="freetext" transform="translate('.$last_x.' 0)">
-				<rect id="freetext0" onmouseover="show_tooltip(\''.$strFreeText.'\',evt.clientX,evt.clientY)" onmousedown="addfreetext();highlightbyid(this.id);hidetooltip(evt);noMeasuring();" x="0" y="0"   width="36.5" height="36" class="navbuttonbg"/>
+				<rect id="freetext0" '.(($events == true)? 'onmouseover="show_tooltip(\''.$strFreeText.'\',evt.clientX,evt.clientY)" onmousedown="addfreetext();highlightbyid(this.id);hidetooltip(evt);noMeasuring();"' : '').' x="0" y="0" rx="3" ry="3"   width="36" height="36" class="navbutton_frame"/>
         <g class="navbutton redlining" transform="translate(5 5) scale(0.8)">
 					<text transform="scale(1.3 1)" x="13" y="25" style="text-anchor:middle;font-size:28px;font-family:Times;">A</text>
 				</g>				
@@ -433,12 +456,12 @@ $SVGvars_defs = '
 	}
 	
 	function freearrow($strFreeArrow){
-		global $last_x;
+		global $last_x;global $events;
 		$freearrow ='
 			<g id="freepolygon" transform="translate('.$last_x.' 0)">
-				<rect id="freearrow0" onmouseover="show_tooltip(\''.$strFreeArrow.'\',evt.clientX,evt.clientY)" onmousedown="drawarrow();highlightbyid(this.id);hidetooltip(evt);noMeasuring();" x="0" y="0"   width="36.5" height="36" class="navbuttonbg"/>
+				<rect id="freearrow0" '.(($events == true)? 'onmouseover="show_tooltip(\''.$strFreeArrow.'\',evt.clientX,evt.clientY)" onmousedown="drawarrow();highlightbyid(this.id);hidetooltip(evt);noMeasuring();"' : '').' x="0" y="0" rx="3" ry="3"   width="36" height="36" class="navbutton_frame"/>
         <g class="navbutton redlining" transform="translate(5 5) scale(0.8)">
-					<polygon points="-5 -40, 5 -40, 5 -20, 15 -20, 0 0, -15 -20, -5 -20, -5 -40" transform="translate(6 6) scale(0.65) rotate(135)" style="fill:rgb(222,222,222);stroke-width:2"/>
+					<polygon points="-5 -40, 5 -40, 5 -20, 15 -20, 0 0, -15 -20, -5 -20, -5 -40" transform="translate(6 6) scale(0.65) rotate(135)" style="fill-opacity:0.15;stroke-width:2"/>
 				</g>        
       </g>';
     $last_x += 36;
@@ -446,10 +469,10 @@ $SVGvars_defs = '
 	}
 
 	function gps_follow($strGPS, $gps_follow){
-		global $last_x;
+		global $last_x;global $events;
 		$mobile .= '
 		<g id="gps" transform="translate('.$last_x.' 0)">
-			<rect id="gps0" onmouseover="show_tooltip(\''.$strGPS.'\',evt.clientX,evt.clientY)" onmousedown="hide_tooltip();switch_gps_follow();highlightbyid(this.id);noMeasuring();" x="0" y="0" width="36.5" height="36" class="navbuttonbg"/>
+			<rect id="gps0" '.(($events == true)? 'onmouseover="show_tooltip(\''.$strGPS.'\',evt.clientX,evt.clientY)" onmousedown="hide_tooltip();switch_gps_follow();highlightbyid(this.id);noMeasuring();"' : '').' x="0" y="0" rx="3" ry="3" width="36" height="36" class="navbutton_frame"/>
 			<g class="navbutton" transform="translate(5 5) scale(0.8)">
         <g transform="scale(0.9) translate(5 5)">
           <use xlink:href="#1move" transform="translate(2.1 -5.9) scale(0.9)"/> 

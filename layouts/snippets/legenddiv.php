@@ -1,6 +1,6 @@
-<table width="100%" border="0" cellpadding="0" cellspacing="0" class="legend-switch">
+<table width="100%" border="0" cellpadding="0" cellspacing="0" id="legend_switch">
 	<tr>
-		<td bgcolor="<?php echo BG_DEFAULT ?>" align="left"><?php
+		<td align="left"><?php
 			if ($this->user->rolle->hideLegend) {
 				if (ie_check()){$display = 'none';}
 				?><a id="linkLegend" href="javascript:switchlegend()"><img title="Legende zeigen" id="LegendMinMax" src="<?php  echo GRAPHICSPATH; ?>maximize_legend.png" border="0"></a><?php
@@ -26,22 +26,23 @@ if ($show_legend_graphic) { ?>
 </div><?php
 } ?>
 <div id="legend_layer">
+	<div class="button_background" style="box-shadow: none; border-bottom: 1px solid #bbb">
 	<?	if(defined('LAYER_ID_SCHNELLSPRUNG') AND LAYER_ID_SCHNELLSPRUNG != ''){
 				include(SNIPPETS.'schnellsprung.php');
 			} ?>
 	<div id="legendcontrol">
 		<a href="index.php?go=reset_querys">
-			<div class="button_background" style="width: 26px; height: 26px">
-				<div class="emboss tool_info" style="width: 26px; height: 26px" title="<? echo $strClearAllQuerys; ?>"></div>
+			<div>
+				<div class="button tool_info" style="width: 26px; height: 26px" title="<? echo $strClearAllQuerys; ?>"></div>
 			</div>
 		</a>
-		<a href="index.php?go=reset_layers" style="padding: 0 0 0 6">
-			<div class="button_background" style="width: 26px; height: 26px">
-				<div class="emboss layer" style="width: 26px; height: 26px" title="<? echo $strDeactivateAllLayer; ?>"></div>
+		<a href="index.php?go=reset_layers">
+			<div>
+				<div class="button layer" style="width: 26px; height: 26px" title="<? echo $strDeactivateAllLayer; ?>"></div>
 			</div>
 		</a>
 		<input type="submit" name="neuladen_button" onclick="if(checkForUnsavedChanges()){startwaiting(true);document.GUI.go.value='neu Laden';}" value="<?php echo $strLoadNew; ?>" tabindex="1" style="height: 27px; vertical-align: top; margin-left: 30px">
-		<i id="legendOptionsIcon" class="fa fa-bars pointer" style="font-size: 1.1em;margin: 5 5 5 45" title="<? echo $strLegendOptions; ?>" onclick="openLegendOptions();"></i>
+		<i id="legendOptionsIcon" class="fa fa-bars pointer button" title="<? echo $strLegendOptions; ?>" onclick="openLegendOptions();"></i>
 		<div id="legendOptions">
 			<div style="position: absolute;top: 0px;right: 0px"><a href="javascript:closeLegendOptions(159);" title="Schlie&szlig;en"><img style="border:none" src="graphics/exit2.png"></img></a></div>
 			<table cellspacing="0" cellpadding="0" style="padding: 0 5 8 0">
@@ -87,6 +88,7 @@ if ($show_legend_graphic) { ?>
 		<input type="text" autocomplete="off" id="layer_search" onkeyup="jumpToLayer(this.value);" value="">
 	</div>
 	<? } ?>
+	</div>
 	<div id="scrolldiv" onscroll="document.GUI.scrollposition.value = this.scrollTop; scrollLayerOptions();">
 		<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
 		<div onclick="document.GUI.legendtouched.value = 1;" id="legend">

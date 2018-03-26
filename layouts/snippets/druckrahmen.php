@@ -168,7 +168,7 @@ function art_hide(){
                   </select>
                  </td>
 								 <td align="center">
-                  <input class="button" type="submit" name="go_plus" value="zu Stelle &raquo;">
+                  <input type="submit" name="go_plus" value="zu Stelle &raquo;">
                  </td>
 								 <td align="right">
                   <select style="width: 260px" name="stelle">
@@ -253,15 +253,15 @@ function art_hide(){
         </tr>
         <tr>
           <td width="50%" style="border-bottom:1px solid #C3C7C3" colspan=4>&nbsp;<span class="fett">Hintergrund:</span> <? echo $this->Document->selectedframe[0]['headsrc'] ?></td>
-          <td width="50%" style="border-bottom:1px solid #C3C7C3" colspan=4>&nbsp;wählen:&nbsp;<input class="button" type="file" name="headsrc" size="10"></td>
+          <td width="50%" style="border-bottom:1px solid #C3C7C3" colspan=4>&nbsp;wählen:&nbsp;<input type="file" name="headsrc" size="10"></td>
         </tr>
         <tr>
           <td width="50%" style="border-bottom:2px solid #C3C7C3" colspan=4>&nbsp;<span class="fett">Ref.hintergrund:</span> <? echo $this->Document->selectedframe[0]['refmapsrc'] ?></td>
-          <td width="50%" style="border-bottom:2px solid #C3C7C3" colspan=4>&nbsp;wählen:&nbsp;<input class="button" type="file" name="refmapsrc" size="10"></td>
+          <td width="50%" style="border-bottom:2px solid #C3C7C3" colspan=4>&nbsp;wählen:&nbsp;<input type="file" name="refmapsrc" size="10"></td>
         </tr>
         <tr>
           <td width="50%" style="border-bottom:2px solid #C3C7C3" colspan=4>&nbsp;<span class="fett">Ref.Mapfile:</span> <? echo $this->Document->selectedframe[0]['refmapfile'] ?></td>
-          <td width="50%" style="border-bottom:2px solid #C3C7C3" colspan=4>&nbsp;wählen:&nbsp;<input class="button" type="file" name="refmapfile" size="10"></td>
+          <td width="50%" style="border-bottom:2px solid #C3C7C3" colspan=4>&nbsp;wählen:&nbsp;<input type="file" name="refmapfile" size="10"></td>
         </tr>
         <tr>
           <td style="border-bottom:1px solid #C3C7C3" colspan=8>&nbsp;</td>
@@ -523,7 +523,7 @@ function art_hide(){
 
   <tr align="center">
     <td colspan="3">
-    <input class="button" type="button" name="go_plus" value="Layout löschen" onclick="Bestaetigung('index.php?go=Druckrahmen_Löschen&selected_frame_id=<? echo $this->Document->selectedframe[0]['id']; ?>', 'Wollen Sie dieses Layout wirklich löschen?');">&nbsp;<input class="button" type="submit" name="go_plus" value="Änderungen Speichern">&nbsp;<input class="button" type="submit" name="go_plus" value="als neues Layout speichern">
+    <input type="button" name="go_plus" value="Layout löschen" onclick="Bestaetigung('index.php?go=Druckrahmen_Löschen&selected_frame_id=<? echo $this->Document->selectedframe[0]['id']; ?>', 'Wollen Sie dieses Layout wirklich löschen?');">&nbsp;<input type="submit" name="go_plus" value="Änderungen Speichern">&nbsp;<input type="submit" name="go_plus" value="als neues Layout speichern">
     </td>
   </tr>
 

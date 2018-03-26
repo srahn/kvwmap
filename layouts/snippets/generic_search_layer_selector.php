@@ -47,12 +47,12 @@
     		<tr align="center"> 
 			    <td colspan="2"  align="right">
 			    	<? echo $this->strName; ?>:&nbsp;<input type="text" name="search_name" value="<? echo $this->formvars['searches']; ?>">
-			    	<input class="button" type="button" style="width:74px" name="speichern" value="<? echo $this->strSave; ?>" onclick="save_search();">
+			    	<input type="button" style="width:74px" name="speichern" value="<? echo $this->strSave; ?>" onclick="save_search();">
 			    </td>
 			  </tr>
     		<tr>
 			  	<td align="right"  colspan="2">
-			  		<input class="button" type="button" style="width:74px" name="delete" value="<? echo $this->strDelete; ?>" onclick="delete_search();">
+			  		<input type="button" style="width:74px" name="delete" value="<? echo $this->strDelete; ?>" onclick="delete_search();">
 			  		<select name="searches">
 			  			<option value="">  -- <? echo $this->strPleaseSelect; ?> --  </option>
 			  			<?
@@ -63,7 +63,7 @@
 			  				}
 			  			?>
 			  		</select>
-			  		<input class="button" type="button" style="width:74px" name="laden" value="<? echo $this->strLoad; ?>" onclick="document.GUI.submit();">
+			  		<input type="button" style="width:74px" name="laden" value="<? echo $this->strLoad; ?>" onclick="document.GUI.submit();">
 			    </td>
 			  </tr>
     	</table>

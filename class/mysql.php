@@ -74,7 +74,7 @@ class database {
   }
 
   
-  function read_colors(){
+  function read_colors(){	
   	$sql = "SELECT * FROM colors";
   	#echo $sql;
   	$ret=$this->execSQL($sql, 4, 0);
@@ -890,7 +890,7 @@ INSERT INTO u_styles2classes (
     return mysql_select_db($this->dbName,$this->dbConn);
   }
 
-  function close() {
+  function close() {	
     $this->debug->write("<br>MySQL Verbindung mit ID: ".$this->dbConn." schließen.",4);
     if (LOG_LEVEL>0){
     	$this->logfile->close();
@@ -905,11 +905,12 @@ INSERT INTO u_styles2classes (
 					$query_to_execute = '';
 					$query = trim($query);
 					if ($search != NULL) $query = str_replace($search, $replace, $query);
-					foreach (explode(chr(10), $query) as $line) {
-						if (strpos($line, "--") !== 0 && strpos($line, "#") !== 0) { // Zeilen mit Kommentarzeichen ignorieren
-							$query_to_execute .= ' ' . $line;
-						}
-					}
+					// foreach (explode(chr(10), $query) as $line) {
+						// if ($line != '' AND strpos($line, "--") !== 0 && strpos($line, "#") !== 0) { // Zeilen mit Kommentarzeichen ignorieren
+							// $query_to_execute .= ' '.$line;
+						// }
+					// }
+					$query_to_execute = $query;
 					if (!empty($query_to_execute)) {
 						$query_to_execute = str_replace('$EPSGCODE_ALKIS', EPSGCODE_ALKIS, $query_to_execute);
 						$query_to_execute = str_replace(':alkis_epsg', EPSGCODE_ALKIS, $query_to_execute);

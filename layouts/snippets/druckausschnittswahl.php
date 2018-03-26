@@ -165,8 +165,8 @@ function rotate_print_extent(angle){
   </tr>
   <tr align="center"> 
     <td colspan="5"> 
-      <input class="button" type="button" name="vorschau" value="<?php echo $strButtonPrintPreview; ?>" onclick="preview();">
-      <input class="button" type="button" name="drucken" value="<?php echo $strButtonPrint; ?>" onclick="druck_pdf('<? echo $this->Document->activeframe[0]['Name']; ?>', '<? echo $this->Document->activeframe[0]['format']; ?>', <? echo $this->Document->activeframe[0]['preis']; ?>);">
+      <input type="button" name="vorschau" value="<?php echo $strButtonPrintPreview; ?>" onclick="preview();">
+      <input type="button" name="drucken" value="<?php echo $strButtonPrint; ?>" onclick="druck_pdf('<? echo $this->Document->activeframe[0]['Name']; ?>', '<? echo $this->Document->activeframe[0]['format']; ?>', <? echo $this->Document->activeframe[0]['preis']; ?>);">
       <br>
     </td>
   </tr>
@@ -217,7 +217,7 @@ function rotate_print_extent(angle){
         </tr>
         <tr align="left">
           <td>
-          <div align="center"><input type="button" class="button" name="neuladen_button" onclick="neuLaden();" value="<?php echo $strLoadNew; ?>"></div>
+          <div align="center"><input type="button" name="neuladen_button" onclick="neuLaden();" value="<?php echo $strLoadNew; ?>"></div>
           <br>
         	<div style="width:230; height:<?php echo $this->map->height-59; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
 	          &nbsp;
@@ -279,8 +279,8 @@ function rotate_print_extent(angle){
 				</div>
 				<div style="width: 320px;margin-left: 10px"> 
 					<?php echo $strPrintDetail; ?>
-					<input type="text" name="name" value="" style="width:120px" >&nbsp;<input class="button" type="button" style="width:84px" name="speichern" value="<?php echo $this->strSave; ?>" onclick="save();">
-					<input class="button" type="button" style="width:84px" name="delete" value="<?php echo $this->strDelete; ?>" onclick="remove();">&nbsp;
+					<input type="text" name="name" value="" style="width:120px" >&nbsp;<input type="button" style="width:84px" name="speichern" value="<?php echo $this->strSave; ?>" onclick="save();">
+					<input type="button" style="width:84px" name="delete" value="<?php echo $this->strDelete; ?>" onclick="remove();">&nbsp;
 					<select name="druckausschnitt" style="width:120px">
 						<option value=""><?php echo $this->strPleaseSelect; ?></option>
 						<?
@@ -289,7 +289,7 @@ function rotate_print_extent(angle){
 							}
 						?>
 					</select>
-					<input class="button" type="button" style="width:84px" name="laden" value="<?php echo $strLoad; ?>" onclick="load();">
+					<input type="button" style="width:84px" name="laden" value="<?php echo $strLoad; ?>" onclick="load();">
 				</div>
 			</div>
 		</td>

@@ -156,12 +156,12 @@ function delete_selection(){
         <tr align="center"> 
 			    <td colspan="2"  align="left"> 
 			      Attributauswahl
-			    	<input type="text" name="name" value="<? echo $this->selection['name']; ?>" style="width:220px" >&nbsp;<input class="button" type="button" style="width:84px" name="speichern" value="speichern" onclick="save_selection();">
+			    	<input type="text" name="name" value="<? echo $this->selection['name']; ?>" style="width:220px" >&nbsp;<input type="button" style="width:84px" name="speichern" value="speichern" onclick="save_selection();">
 			    </td>
 			  </tr>
 			  <tr>
 			  	<td align="left"  colspan="2">
-			  		<input class="button" type="button" style="width:84px" name="delete" value="löschen" onclick="delete_selection();">&nbsp;			
+			  		<input type="button" style="width:84px" name="delete" value="löschen" onclick="delete_selection();">&nbsp;			
 			  		<select name="selection" onchange="load_selection();" style="width:220px">
 			  			<option value="">-- Auswahl --</option>
 			  			<?

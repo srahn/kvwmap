@@ -135,28 +135,37 @@ class Gml_builder {
 		// Zugehörigkeit zur Konvertierung auszuwählen?
 		$sql = "
 			SELECT
-		b.*,
-		ST_AsGML(
-			3,
-			ST_Reverse(ST_Transform(
-				b.geltungsbereich,
-				{$konvertierung->get('output_epsg')})),
-				{$konvertierung->get('geom_precision')},
-				0,
-				null,
-				'GML_' || b.gml_id::text || '_geom' ) AS gml_geltungsbereich,
+				b.*,
+				ST_AsGML(
+					3,
+					ST_Reverse(
+						ST_Transform(
+							b.geltungsbereich,
+							{$konvertierung->get('output_epsg')}
+						)
+					),
+					{$konvertierung->get('geom_precision')},
+					0,
+					null,
+					'GML_' || b.gml_id::text || '_geom'
+				) AS gml_geltungsbereich,
 				ST_AsGML(
 					3,
 					ST_Transform(
 						b.geltungsbereich,
-						{$konvertierung->get('output_epsg')}),
-						{$konvertierung->get('geom_precision')},
-						32,
-						null,
-						'GML_' || b.gml_id::text || '_envelope' ) AS envelope
-						FROM " . XPLANKONVERTER_CONTENT_SCHEMA . ".rp_bereich b
-						JOIN " . XPLANKONVERTER_CONTENT_SCHEMA . ".rp_plan p ON b.gehoertzuplan = p.gml_id::text
-						WHERE p.konvertierung_id = {$konvertierung->get('id')}";
+						{$konvertierung->get('output_epsg')}
+					),
+					{$konvertierung->get('geom_precision')},
+					32,
+					null,
+					'GML_' || b.gml_id::text || '_envelope'
+				) AS envelope
+			FROM
+				" . XPLANKONVERTER_CONTENT_SCHEMA . ".rp_bereich b JOIN
+				" . XPLANKONVERTER_CONTENT_SCHEMA . ".rp_plan p ON (b.gehoertzuplan = p.gml_id::text)
+			WHERE
+				p.konvertierung_id = " .$konvertierung->get('id') . " 
+		";
 		#echo $sql."\n";
 		$bereiche = pg_query($this->database->dbConn, $sql);
 
@@ -266,10 +275,10 @@ class Gml_builder {
     $gmlStr = '';
     foreach ($uml_attribute_info as  $uml_attribute) {
       // leere Felder auslassen
-      if (empty($gml_object[$uml_attribute['col_name']])) continue;
+      if ($gml_object[$uml_attribute['col_name']] == '') continue;
 
       $lowercaseName = strtolower($uml_attribute['name']);
-	  //$gmlStr .= '<note>attributname: ' . $uml_attribute['name'] . ' type_type: ' . $uml_attribute['type_type'] . ' stereotype: ' . $uml_attribute['stereotype'] . '</note>';
+	  #$gmlStr .= '<note>attributname: ' . $uml_attribute['name'] . ' type_type: ' . $uml_attribute['type_type'] . ' stereotype: ' . $uml_attribute['stereotype'] . '</note>';
       switch ($uml_attribute['type_type']) {
         case 'c': // custom datatype
           switch ($uml_attribute['stereotype']){
@@ -310,21 +319,22 @@ class Gml_builder {
                 $single_value = array_combine($value_array_keys, $single_value);
                 // generate GML output (!!! recursive !!!)
                 $gml_attrib_str .= $this->generateGmlForAttributes($single_value, $datatype_attribs,$depth-1);
-              }
+								// leere Datentypen auslassen
+                if (strlen($gml_attrib_str) == 0) break;
 
-              // leere Datentypen auslassen
-              if (strlen($gml_attrib_str) == 0) break;
-
-              $typeElementName = end($datatype_attribs)['origin'];
-              $gmlStr .= $this->wrapWithElement(
+                $typeElementName = end($datatype_attribs)['origin'];
+                $gmlStr .= $this->wrapWithElement(
                 "{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
                 // wrap all data-types with their data-type-element-tag
                 $this->wrapWithElement("{$xplan_ns_prefix}{$typeElementName}", $gml_attrib_str));
+								$gml_attrib_str = '';
+              }
+
             default:
           }
           break;
         case 'b': // built-in datatype
-					switch ($uml_attribute['type']) {
+          switch ($uml_attribute['type']) {
 						case 'geometry' : {
 							$gml_value = $gml_object['gml_'.$uml_attribute['col_name']];
 							// unify gml_ids by appending a sequential number to the id
@@ -352,13 +362,27 @@ class Gml_builder {
 						} break;
 						case 'date' : {
 							$gml_value = $gml_object[$uml_attribute['col_name']];
-							$timestamp = strtotime($gml_value);
-							if (!$timestamp) {
-								echo "Ungueltige Datumsangabe: " . $gml_value;
-								break;
+							// check for array values
+							if($gml_value[0] == '{' && substr ($gml_value,-1) == '}') {
+								$gml_value_array = explode(',', substr($gml_value,1,-1));
+								for ($j = 0; $j < count($gml_value_array); $j++) {
+									$timestamp = strtotime($gml_value_array[$j]);
+									if (!$timestamp) {
+										echo "Ungueltige Datumsangabe: " . $gml_value_array[$j];
+										break;
+									}
+									$iso_date_str = date("Y-m-d", $timestamp);
+									$gmlStr .= $this->wrapWithElement("{$xplan_ns_prefix}{$uml_attribute['uml_name']}", $iso_date_str);
+								}
+							} else {
+								$timestamp = strtotime($gml_value);
+								if (!$timestamp) {
+									echo "Ungueltige Datumsangabe: " . $gml_value;
+									break;
+								}
+								$iso_date_str = date("Y-m-d", $timestamp);
+								$gmlStr .= $this->wrapWithElement("{$xplan_ns_prefix}{$uml_attribute['uml_name']}", $iso_date_str);
 							}
-							$iso_date_str = date("Y-m-d", $timestamp);
-							$gmlStr .= $this->wrapWithElement("{$xplan_ns_prefix}{$uml_attribute['uml_name']}", $iso_date_str);
 						} break;
 						case 'bool' : {
 							switch ($gml_object[$uml_attribute['col_name']]) {
@@ -465,8 +489,14 @@ class Gml_builder {
     $curr_value = '';
     // prepare data string
     $value_str = substr($data_string, 1, -1);
+    // Kommata innerhalb Text werden derzeit über die Konverteroberflaeche nicht zugelassen,
+    //d.h. \", oder ,\" innerhalb eines CompositeDataTypes ist derzeit nicht moeglich
     $value_str = str_replace('\"(', '(', $value_str);
     $value_str = str_replace(')\"', ')', $value_str);
+    $value_str = str_replace('(\"','(', $value_str);
+    $value_str = str_replace('\")',')', $value_str);
+    $value_str = str_replace(',\"',',', $value_str);
+    $value_str = str_replace('\",',',', $value_str);
     $value_str = str_replace('\"', '&quot;', $value_str);
     $value_str = str_replace('"', '', $value_str);
     // return if no data

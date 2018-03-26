@@ -974,8 +974,9 @@ class rolle {
 	}
 	
 	function saveLegendOptions($layerset, $formvars){
-		$sql ="UPDATE rolle SET legendtype=".$formvars['legendtype'];
-		$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+		$sql ="	UPDATE rolle SET 
+						legendtype=".$formvars['legendtype']." 
+						WHERE user_id=".$this->user_id." AND stelle_id=".$this->stelle_id;
 		#echo $sql;
 		$this->debug->write("<p>file:rolle.php class:rolle function:saveLegendOptions - :",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
@@ -1334,7 +1335,7 @@ class rolle {
 		$this->database->execSQL($sql,4, $this->loglevel);
 		return 1;
 	}
-
+	
 	function changeLegendDisplay($hide) {
 		# speichern des Zustandes der Legende
 		# hide=0 Legende ist zu sehen
@@ -1345,7 +1346,7 @@ class rolle {
 		$this->debug->write("<p>file:rolle.php class:rolle function:hideMenue - :",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 		return 1;
-	}
+	}	
 	
 	function saveOverlayPosition($x, $y){
 		$sql ="UPDATE rolle SET overlayx = ".$x.", overlayy=".abs($y);

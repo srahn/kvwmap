@@ -33,4 +33,5 @@
  $strSwitchGLEViewRows="zur zeilenweisen Darstellung wechseln";
  $strEditAll="mehrere bearbeiten";
  $strCopyDataset="Datensatz kopieren";
+ $strNewDataset="neuen Datensatz anlegen";
 ?>

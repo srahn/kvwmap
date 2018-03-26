@@ -257,6 +257,10 @@
 #
   $randomnumber = rand(0, 1000000);
   $svgfile  = $randomnumber.'SVG_map.svg';
+	
+	global $last_x;$last_x = 0;
+	global $events;$events = true;
+	
   include(LAYOUTPATH.'snippets/SVGvars_defs.php');            # zuweisen von: $SVGvars_defs 
 	include(LAYOUTPATH.'snippets/SVGvars_mainnavbuttons.php');  # zuweisen von: $SVGvars_mainnavbuttons
   include(LAYOUTPATH.'snippets/SVGvars_coordscript.php');     # zuweisen von: $SVGvars_coordscript
@@ -271,7 +275,7 @@
   $dx       = $this->map->extent->maxx-$this->map->extent->minx;
   $dy       = $this->map->extent->maxy-$this->map->extent->miny;
   $scale    = ($dx/$res_x+$dy/$res_y)/2;
-  $radius = $this->formvars['searchradius'] / $scale;
+  $radius = $this->formvars['searchradius'] / $scale;	
 
 
 $fpsvg = fopen(IMAGEPATH.$svgfile,'w') or die('fail: fopen('.$svgfile.')');
@@ -401,7 +405,8 @@ function startup(){';
 	if(doing == "polygonquery"){polygonarea()};
 	set_suchkreis();
 	eval(doing+"()");	
-  document.getElementById(doing+"0").classList.add("active");
+  //document.getElementById(doing+"0").classList.add("active");				// das kann der IE nicht
+	document.getElementById(doing+"0").className.baseVal += " active";	// deswegen dieser workaround
 	pinching = false;
 }
 
@@ -692,6 +697,7 @@ function recentre(){
 	}
   doing = "recentre";
 	top.document.GUI.last_button.value = doing = "recentre";
+	document.getElementById("canvas").setAttribute("cursor", "move");
   document.getElementById("canvas").setAttribute("cursor", "grab");
 }
 
@@ -934,6 +940,8 @@ function mousedown(evt){
 	cleartooltip();
 	if(top.document.GUI.stopnavigation.value == 0){
 		if(evt.button == 1){			// mittlere Maustaste -> Pan
+			if(evt.preventDefault)evt.preventDefault();
+			else evt.returnValue = false; // IE fix
 			if(doing == "polygonquery"){
 				save_polygon_path();
 			}
@@ -956,8 +964,7 @@ function mousedown(evt){
 			remove_vertices();
 	    selectPoint(evt);
 	   break;
-	   case "recentre":
-			document.getElementById("canvas").setAttribute("cursor", "grabbing");
+	   case "recentre":			
 			remove_vertices();
 	    startMove(evt);
 	   break;
@@ -1478,7 +1485,7 @@ function add_vertex(evt){
 			vertex.setAttribute("opacity", "0.8");
 		}
 	}
-	if(doing == "polygonquery"){
+	if(doing == "polygonquery" || doing == "drawpolygon"){
 		if(!polydrawing){
 			restart();
 			polydrawing = true;
@@ -1486,7 +1493,7 @@ function add_vertex(evt){
   	polypathx.push(parseFloat(worldx));
   	polypathy.push(parseFloat(worldy));
 		redrawPolygon();
-		polygonarea();
+		if(doing == "polygonquery")polygonarea();
 		vertex.setAttribute("opacity", "0.8");
 	}
 	if(doing == "pquery" || doing == "ppquery"){
@@ -1708,6 +1715,8 @@ function endPoint(evt) {
 
 // ----------------------------vektor aufziehen---------------------------------
 function startMove(evt) {
+	document.getElementById("canvas").setAttribute("cursor", "move");
+	document.getElementById("canvas").setAttribute("cursor", "grabbing");
   moving  = true;
   var alle = pathx.length;
   for(var i = 0; i < alle; ++i)
@@ -1742,6 +1751,7 @@ function moveMap(){
 
 function endMove(evt) {
   if (!moving) return;
+	document.getElementById("canvas").setAttribute("cursor", "move");
 	document.getElementById("canvas").setAttribute("cursor", "grab");
   cmd = doing;
   if (moved){ 
@@ -1776,8 +1786,10 @@ function redraw()
 
 // ----------------------ausgewaehlten button highlighten---------------------------
 function highlightbyid(id){
-	document.querySelector(".active").classList.remove("active");
-  document.getElementById(id).classList.add("active");
+	//document.querySelector(".active").classList.remove("active");		// kann der IE nicht
+	document.querySelector(".active").className.baseVal = "navbutton_frame";	// deswegen dieser workaround
+  //document.getElementById(id).classList.add("active");						// kann der IE nicht
+	document.getElementById(id).className.baseVal += " active";				// deswegen dieser workaround
   document.getElementById("suchkreis").setAttribute("cx", -10000);
 	if(top.document.GUI.orthofang != undefined){
 		options1 = top.document.getElementById("options").innerHTML="";
@@ -1826,7 +1838,8 @@ $svg.='
 			<circle id="kreis" cx="-500" cy="-500" r="7" opacity="0.1" onmouseover="activate_vertex(evt)" onmouseout="deactivate_vertex(evt)" onmousedown="add_vertex(evt)" />
 			<line stroke="#111" stroke-width="14" id="linie" x1="-5000" y1="-5000" x2="-5001" y2="-5001" opacity="0.8" onmouseover="activate_line(evt)" onmousemove="activate_line(evt)" />
 		</g>
-    <g id="buttons" filter="url(#Schatten)" onmouseout="hide_tooltip()" onmousemove="get_bbox();" onmousedown="hide_tooltip()" cursor="pointer">
+    <g id="buttons" onmouseout="hide_tooltip()" onmousemove="get_bbox();" onmousedown="hide_tooltip()" cursor="pointer">
+			<rect x="0" y="0" rx="3" ry="3" width="'.$last_x.'" height="36" class="navbutton_bg"/>
 '.$SVGvars_mainnavbuttons.'
     </g>
 		<g id="tooltipgroup" onmouseover="prevent=1;" onmouseout="prevent=0;">

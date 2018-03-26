@@ -78,16 +78,17 @@ $svg .='
 '.$SVGvars_defs.'
   </defs>';
 $svg .= $canvaswithall;
-$svg .= '<g id="buttons" cursor="pointer" transform="scale(1)">';
 $svg .= $navbuttons;
 $svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate(0 36)">';
-$svg .= pointbuttons($strSetPosition);
-$svg .= coord_input_buttons();
+$buttons_fs .= pointbuttons($strSetPosition);
+$buttons_fs .= coord_input_buttons();
 if($this->user->rolle->gps){
-	$svg .= gpsbuttons($strSetGPSPosition, $strGPSFollow, $this->formvars['gps_follow']);
+	$buttons_fs .= gpsbuttons($strSetGPSPosition, $strGPSFollow, $this->formvars['gps_follow']);
 }
-$svg .= measure_buttons($strRuler);
-$svg .= '</g>';
+$buttons_fs .= measure_buttons($strRuler);
+global $last_x;
+$svg .= '<rect x="0" y="0" rx="3" ry="3" width="'.$last_x.'" height="36" class="navbutton_bg"/>';
+$svg .= $buttons_fs;
 $svg .= '</g>';
 $svg .= $SVG_end;
 

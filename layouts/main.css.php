@@ -38,8 +38,9 @@ body {
 	font-size: 15px;
 }
 
-.gui-table {
+#gui-table {
   width: 900px;
+	margin: auto;	
 }
 
 form {
@@ -361,6 +362,14 @@ a.invisiblelayerlink:hover{
 	background: linear-gradient(#DAE4EC, #84accf);
 }
 
+#openLayerParamBarIcon{
+	width: 16px; 
+	height: 16px; 
+	padding: 5px; 
+	font-size: 1.1em;
+	margin: 0 5px 0 40px;
+}
+
 #layerParamsBar {
 	display: none;
 	position: absolute;
@@ -371,8 +380,21 @@ a.invisiblelayerlink:hover{
 	z-index: 9999;
 }
 
+#menuebar{
+	width: <? echo ($size['menue']['width'] - 2); ?>px;
+	background: url('../graphics/bg.gif');
+	border: 1px solid;
+	border-color: #CCC; 
+	border-top: none;
+	border-bottom: none;
+}
+
+#menue_switch{
+	min-width: <? echo $size['menue']['hide_width']; ?>px;
+	background: linear-gradient(90deg, #DAE4EC, #c1d6f2);
+}
+
 #menueTable{
-	padding-top: 6px;
 	margin-bottom: 2px;
 	width: <? echo ($size['menue']['width'] - 2); ?>px;
 	text-align: center;
@@ -490,7 +512,7 @@ a.menuered:hover {
 
 .button-menue{
 	flex: 0 0 auto;
-	padding: 0 0 6 4;
+	margin: 0 0 2 0;
 }
 
 .text-menue{
@@ -603,76 +625,71 @@ a.menuered:hover {
 
 .tool_info{
 	background-image: url(../graphics/tool_info.png);
-	background-repeat: no-repeat;
-  background-position: center center;
 }
 
 .layer{
 	background-image: url(../graphics/layer.png);
-	background-repeat: no-repeat;
-  background-position: center center;
 }
 
 .button_background{
-	background: linear-gradient(#eff3f6, #DAE4EC);
-	width: 30px;
-	height: 29px;
+	background: linear-gradient(#fdfdfd, #DAE4EC);
+	box-shadow: 0px 1px 0px #bbb;
 }
 
-.emboss{
-	width:30px;
-	height:30px;
-	box-shadow:
-	2px 3px 3px rgba(0, 0, 0, 0.2), 
-	0px 3px 1px rgba(255, 255, 255, 0.6) inset, 
-	-1px -1px 3px rgba(0, 0, 0, 0.7) inset,	 
-	0px 1px 1px rgba(0, 0, 0, 0.8) inset;
+.button{
+	position: relative;
+	background-repeat: no-repeat;
+	background-position: center; 
+	width:36px;
+	height:36px;
 }
 
-.emboss:hover{
-	box-shadow:
-	2px 0 7px rgba( 255, 255, 255 ,0.1), 
-	0 2px 7px rgba( 255, 255, 255 ,0.1), 
-	-2px 0 7px rgba( 255, 255, 255 ,0.1),
-	0 -2px 7px rgba( 255, 255, 255 ,0.1),
-	2px 3px 3px rgba(0, 0, 0, 0.2), 
-	0px 3px 1px rgba(255, 255, 255, 0.6) inset, 
-	-1px -1px 3px rgba(0, 0, 0, 0.7) inset,	 
-	0px 1px 1px rgba(0, 0, 0, 0.8) inset;
+.button::after {
+	border-radius: 3px;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
+  content: '';
+	opacity: 0;
+  position: absolute;
+  height: calc(100% - 2px);
+	width: calc(100% - 2px);
+  left: 1;
+  top: 1;
 }
 
-.emboss:active{
-	box-shadow:
-	2px 0 7px rgba( 255, 255, 255 ,0.2), 
-	0 2px 7px rgba( 255, 255, 255 ,0.2), 
-	-2px 0 7px rgba( 255, 255, 255 ,0.2),
-	0 -2px 7px rgba( 255, 255, 255 ,0.2),
-	-1px -1px 3px rgba(0, 0, 0, 0.7) inset,	 
-	0px 0px 1px rgba(0, 0, 0, 0.8) inset;
+.button:active{
+	background-color: #e3e8ed;
+}
+
+.button:hover::after{
+  opacity: 1;
 }
 
 #header{
-	height: <? echo ($size['header']['height'] - 2); ?>;
+	height: <? echo ($size['header']['height'] - 2); ?>px;
 	border: 1px solid; 
 	border-color: #ffffff #cccccc #bbbbbb;
 }
 
 #footer{
-	height: <? echo ($size['footer']['height'] - 2); ?>;
+	height: <? echo ($size['footer']['height'] - 2); ?>px;
 	border: 1px solid; 
-	border-color: #cccccc #cccccc #cccccc;
+	border-color: #aaa #cccccc #cccccc;
+}
+
+#map{
+	transform: translate(0, 0);		/* ansonsten wird das SVG unscharf */
 }
 
 #scale_bar {
 	background: <? echo BG_MENUETOP; ?>;
 	border-top: 1px solid #aaaaaa;
-	height: <? echo ($size['scale_bar']['height'] - 1); ?>;
+	height: <? echo ($size['scale_bar']['height'] - 1); ?>px;
 }
 
 #lagebezeichnung_bar{
 	background: <? echo BG_MENUETOP; ?>;
 	border-top: 1px solid #aaaaaa;
-	height: <? echo ($size['lagebezeichnung_bar']['height'] - 1); ?>;
+	height: <? echo ($size['lagebezeichnung_bar']['height'] - 1); ?>px;
 	text-align: center;
 }
 
@@ -683,16 +700,22 @@ a.menuered:hover {
 }
 
 #map_functions_bar{
-	border-top: 1px solid #aaaaaa;
-	padding-top: 6px;
-	padding-bottom: 6px;
-	height: <? echo ($size['map_functions_bar']['height'] - 13); ?>;
+	background: linear-gradient(#fdfdfd, #DAE4EC);
+	border-top: 1px solid #ccc;
+	box-shadow: 0px 1px 0px #bbb;
+	height: <? echo ($size['map_functions_bar']['height'] - 1); ?>px;
+}
+
+#legend_switch{
+	background: linear-gradient(90deg, #c1d6f2, #DAE4EC);
 }
 
 #legenddiv {
 	border-left: 1px solid #ccc;
+	box-shadow: 0px 1px 0px #bbb;
 	display: flex; 
 	flex-direction: column;
+	background-image: url(../graphics/bg.gif);
 }
 
 #legend_layer{
@@ -795,25 +818,19 @@ a.menuered:hover {
 }
 
 #legend{
-	margin-left:7px;
+	margin: 4px 0 4px 7px;
 }
 
 .normallegend {
 	float: right;
 	width: <?php echo ($size['legend']['width'] - 1); ?>px;
 	vertical-align: top;
-	background-image: url(../graphics/bg.gif);
-	border-top: 1px solid #eeeeee;
 }
 
 .slidinglegend_slideout {
 	cursor: pointer;
 	right: -<?php echo $size['legend']['width']; ?>px;
 	position:absolute;
-	border-top: 1px solid #eeeeee;
-	border-left:1px solid #CCCCCC;
-	border-bottom: 1px solid #aaaaaa;
-	background-image: url(../graphics/bg.gif);
 	transform: translate3d(-<? echo ($size['legend']['hide_width'] + 2); ?>px,0px,0px);
 	transition: all 0.3s ease;
 }
@@ -827,10 +844,6 @@ a.menuered:hover {
 .slidinglegend_slidein {
 	right: -<?php echo $size['legend']['width']; ?>px;
 	position: absolute;
-	border-top: 1px solid #eeeeee;
-	border-left:1px solid #CCCCCC;
-	border-bottom: 1px solid #aaaaaa;
-	background-image: url(../graphics/bg.gif);
 	transform: translate3d(-<?php echo $size['legend']['width']; ?>px,0px,0px);
 	transition: all 0.3s ease;
 }
@@ -953,11 +966,12 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 .raster_record .tr_hide input{width:0.0001px;font-size: 0.0001px;height:0.0001px;transition: all 0.25s ease;}
 .raster_record .tr_hide input[type=checkbox]{display:none;width:12px;font-size: 15px;height:12px;transition: all 0.25s ease;}
 .raster_record .tr_hide textarea{font-size: 0.0001px !important;transition: all 0.25s ease;}
-.raster_record .tr_hide div{min-width: 0.0001px !important;}
+.raster_record .tr_hide div{min-width: 0.0001px !important; transition: all 0.25s ease;}
+.raster_record .tr_hide .readonly_text{font-size: 0.0001px !important;word-wrap: break-word;min-width: 0.0001px !important;max-width: 0.0001px !important; transition: all 0.25s ease;}
 /* Attribute, die eingeblendet werden sollen: */
 .raster_record .tr_show{visibility:visible;}
-.raster_record .tr_show #formelement{width: 125px;overflow: hidden;}
-.raster_record .tr_show .readonly_text{word-wrap: break-word;min-width: 122px !important;}
+.raster_record .tr_show #formelement{width: 125px;}
+.raster_record .tr_show .readonly_text{font-size: 15px;word-wrap: break-word;min-width: 122px !important;max-width: 122px !important;transition: all 0.25s ease;}
 .raster_record .tr_show td{border:none;padding: 0.0001px;transition: all 0.25s ease;}
 .raster_record .tr_show select{width: 112%;height:22px;transition: all 0.25s ease;}									/* Selectfelder werden auf 130px Breite verkleinert*/
 .raster_record .tr_show input{width:130px;font-size: 15px;height:22px;transition: all 0.25s ease;}		/* normale Inputfelder werden auf 130px Breite verkleinert*/
@@ -978,9 +992,10 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 .raster_record_open input[type=checkbox]{width:12px;font-size: 15px;height:12px;transition: all 0.25s ease;}
 .raster_record_open textarea{font-size: 15px;transition: all 0.25s ease;}
 .raster_record_open .tr_show #formelement{width: 100%;overflow: visible}
+.raster_record_open .readonly_text{font-size: 15px;word-wrap: break-word;min-width: 400px !important;max-width: 400px !important;transition: all 0.25s ease;}
 .raster_record_open .tr_show input[type=file]{width:290px;font-size: 15px;height:22px;transition: all 0.25s ease;}
 .raster_record_open select{font-size: 15px;display:inline;width:290px;transition: all 0.25s ease;}
-.raster_record_open select:focus{font-size: 15px;display:inline;width:290px;}
+.raster_record_open select:focus{font-size: 15px;display:inline;width:290px;transition: all 0.25s ease;}
 .raster_record_open span{line-height:16px;font-size: 15px;transition: all 0.25s ease;}
 .raster_record_open img{width: auto; transition: all 0.25s ease;}
 .raster_record_open .tr_hide{visibility:visible;}
@@ -997,6 +1012,12 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 	border:0px solid gray;
 	border-collapse:collapse;
 	padding:0px 0px 0px 0px;
+}
+
+.datensatz_header{
+	background: linear-gradient(#DAE4EC 0%, lightsteelblue 100%);
+	#background-color:<? echo BG_GLEHEADER; ?>;
+	border-bottom: 1px solid #bbb;
 }
 
 .message_box {
@@ -1064,7 +1085,7 @@ table.tgle {
 }
 
 thead.gle th { 
- padding:4px 4px 4px 4px;
+ padding: 0;
  text-align:left;
 }
 
@@ -1274,7 +1295,7 @@ tbody.gle tr:hover {
 }
 
 .fstanzeigehover:hover{
-								background-color:rgba(255,255,255,0.2);
+								background-color:rgba(255,255,255,0.4);
 }
 
 .flexcontainer1{
@@ -1300,7 +1321,6 @@ tbody.gle tr:hover {
 	margin: 10px;
 	border: 1px solid #cccccc;
 	background: url('../graphics/bg.gif'); 
-	position: relative; 
 	z-index: 2;
 }
 
@@ -1326,6 +1346,16 @@ tbody.gle tr:hover {
 .rollenwahl-option-data {
 	width: 460px;
 	padding : 4px;
+}
+
+.button_selection{
+	width: 390px;
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.button_selection div{
+	padding: 0 0 3px 4px;
 }
 
 .hover-border{
@@ -1374,6 +1404,7 @@ tbody.gle tr:hover {
 }
 
 .layerOptions, #legendOptions{
+	width: 220px;
 	border: 1px solid #cccccc;
 	background: #EDEFEF;
 	padding:0px;
@@ -1386,8 +1417,15 @@ tbody.gle tr:hover {
 
 .layerOptions{
 	top:300px;
-	width: 200px;
 	right:210px;
+}
+
+#legendOptionsIcon{
+	font-size: 1.1em;
+	margin: 0 0 0 42;
+	height: 16px;
+	width: 16px;
+	padding: 5px;
 }
 
 #legendOptions{

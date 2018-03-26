@@ -311,8 +311,8 @@ $j=0;
 			} ?>
 
 			<div style="margin-top:30px; margin-bottom:10px; text-align: center;">
-				<input class="button" name="cancel" type="button" onclick="home();" value="<? echo $strButtonCancel; ?>">
-				<input class="button" name="create" type="button" onclick="data_export();" value="<? echo $strButtonGenerateShapeData; ?>">
+				<input name="cancel" type="button" onclick="home();" value="<? echo $strButtonCancel; ?>">
+				<input name="create" type="button" onclick="data_export();" value="<? echo $strButtonGenerateShapeData; ?>">
 			</div>
 
 		</td>
