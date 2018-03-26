@@ -9,7 +9,6 @@ ALTER TABLE u_consumeALB ENGINE=INNODB;
 ALTER TABLE u_consumeALK ENGINE=INNODB;
 ALTER TABLE u_consumeCSV ENGINE=INNODB;
 ALTER TABLE u_consumeShape ENGINE=INNODB;
-ALTER TABLE druckausschnitte ENGINE=INNODB;
 ALTER TABLE rollenlayer ENGINE=INNODB;
 ALTER TABLE rolle_csv_attributes ENGINE=INNODB;
 ALTER TABLE rolle_last_query ENGINE=INNODB;
@@ -42,6 +41,7 @@ ALTER TABLE druckausschnitte DROP PRIMARY KEY;
 ALTER TABLE druckausschnitte ADD PRIMARY KEY (id);
 ALTER TABLE druckausschnitte MODIFY COLUMN id INT AUTO_INCREMENT;
 ALTER TABLE druckausschnitte ADD INDEX(stelle_id, user_id, id);
+ALTER TABLE druckausschnitte ENGINE=INNODB;
 ALTER TABLE druckausschnitte ADD FOREIGN KEY (user_id) REFERENCES user (ID) ON DELETE CASCADE;
 
 DELETE rolle, user FROM rolle LEFT JOIN user ON rolle.user_id = user.ID WHERE user.ID IS NULL;
