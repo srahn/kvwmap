@@ -985,16 +985,17 @@ class GUI {
           else{
             $layer->setProjection('+init='.strtolower($this->formvars['post_epsg']));
           }
-          #$layer->set('connection',"http://www.kartenserver.niedersachsen.de/wmsconnector/com.esri.wms.Esrimap/Biotope?LAYERS=7&REQUEST=GetMap&TRANSPARENT=true&FORMAT=image/png&SERVICE=WMS&VERSION=1.1.1&STYLES=&EXCEPTIONS=application/vnd.ogc.se_xml&SRS=EPSG:31467");
-          #echo '<br>Name: '.$layerset[$i][name];
-          #echo '<br>Connection: '.$layerset[$i][connection];
-          $layer->set('connection', $layerset[$i][connection]);
-          if (MAPSERVERVERSION < 540) {
-			      $layer->set('connectiontype', 7);
-			    }
-			    else {
-			      $layer->setConnectionType(7);
-			    }
+
+					#$layer->set('connection',"http://www.kartenserver.niedersachsen.de/wmsconnector/com.esri.wms.Esrimap/Biotope?LAYERS=7&REQUEST=GetMap&TRANSPARENT=true&FORMAT=image/png&SERVICE=WMS&VERSION=1.1.1&STYLES=&EXCEPTIONS=application/vnd.ogc.se_xml&SRS=EPSG:31467");
+					#echo '<br>Name: '.$layerset[$i][name];
+					$layer->set('connection', replace_params($layerset[$i][connection], rolle::$layer_params));
+					#echo '<br>Connection: ' . replace_params($layerset[$i][connection], rolle::$layer_params);
+					if (MAPSERVERVERSION < 540) {
+						$layer->set('connectiontype', 7);
+					}
+					else {
+						$layer->setConnectionType(7);
+					}
           if($layerset[$i]['transparency'] != ''){
             if(MAPSERVERVERSION > 500){
               $layer->set('opacity',$layerset[$i]['transparency']);
@@ -1229,26 +1230,32 @@ class GUI {
 						$layer->set('debug',MS_ON);
 
 						# fremde Layer werden auf Verbindung getestet
-						if($layerset['list'][$i]['aktivStatus'] != 0 AND $layerset['list'][$i]['connectiontype'] == 6 AND strpos($layerset['list'][$i]['connection'], 'host') !== false AND strpos($layerset['list'][$i]['connection'], 'host=localhost') === false AND strpos($layerset['list'][$i]['connection'], 'host=pgsql') === false){
-						$connection = explode(' ', trim($layerset['list'][$i]['connection']));
-								for($j = 0; $j < count($connection); $j++){
-								if($connection[$j] != ''){
+						if (
+							$layerset['list'][$i]['aktivStatus'] != 0 AND
+							$layerset['list'][$i]['connectiontype'] == 6 AND
+							strpos($layerset['list'][$i]['connection'], 'host') !== false AND
+							strpos($layerset['list'][$i]['connection'], 'host=localhost') === false AND
+							strpos($layerset['list'][$i]['connection'], 'host=pgsql') === false
+						) {
+							$connection = explode(' ', trim($layerset['list'][$i]['connection']));
+							for ($j = 0; $j < count($connection); $j++) {
+								if ($connection[$j] != '') {
 									$value = explode('=', $connection[$j]);
-									if(strtolower($value[0]) == 'host'){
-									$host = $value[1];
+									if (strtolower($value[0]) == 'host') {
+										$host = $value[1];
 									}
-									if(strtolower($value[0]) == 'port'){
-									$port = $value[1];
+									if(strtolower($value[0]) == 'port') {
+										$port = $value[1];
 									}
 								}
-								}
-								if($port == '')$port = '5432';
-						$fp = @fsockopen($host, $port, $errno, $errstr, 5);
-						if(!$fp){			# keine Verbindung --> Layer ausschalten
-							$layer->set('status', 0);
-							$layer->setMetaData('queryStatus', 0);
-									$this->Fehlermeldung = $errstr.' für Layer: '.$layerset['list'][$i]['Name'].'<br>';
-						}
+							}
+							if ($port == '') $port = '5432';
+							$fp = @fsockopen($host, $port, $errno, $errstr, 5);
+							if(!$fp) {			# keine Verbindung --> Layer ausschalten
+								$layer->set('status', 0);
+								$layer->setMetaData('queryStatus', 0);
+								$this->Fehlermeldung = $errstr.' für Layer: '.$layerset['list'][$i]['Name'].'<br>';
+							}
 						}
 
 						if($layerset['list'][$i]['aktivStatus'] != 0){
@@ -1303,35 +1310,44 @@ class GUI {
 								}
 							}
 						}
-            $layer->setProjection('+init=epsg:'.$layerset['list'][$i]['epsg_code']); # recommended
-            if ($layerset['list'][$i]['connection']!='') {
-              if($this->map_factor != '' AND $layerset['list'][$i]['connectiontype'] == 7){		# WMS-Layer
-              	if($layerset['list'][$i]['printconnection']!=''){
-              		$layerset['list'][$i]['connection'] = $layerset['list'][$i]['printconnection']; 		# wenn es eine Druck-Connection gibt, wird diese verwendet
-              	}
-              	else{
-                	//$layerset['list'][$i]['connection'] .= '&mapfactor='.$this->map_factor;			# bei WMS-Layern wird der map_factor durchgeschleift (für die eigenen WMS) erstmal rausgenommen, weil einige WMS-Server der zusätzliche Parameter mapfactor stört
-              	}
-              }
-              if($layerset['list'][$i]['connectiontype'] == 6)$layerset['list'][$i]['connection'] .= " options='-c client_encoding=".MYSQL_CHARSET."'";		# z.B. für Klassen mit Umlauten
-              $layer->set('connection', $layerset['list'][$i]['connection']);
-            }
-            if ($layerset['list'][$i]['connectiontype']>0) {
-              if (MAPSERVERVERSION >= 540) {
-                $layer->setConnectionType($layerset['list'][$i]['connectiontype']);
-              }
-              else {
-                $layer->set('connectiontype',$layerset['list'][$i]['connectiontype']);
-              }
-            }
+						$layer->setProjection('+init=epsg:'.$layerset['list'][$i]['epsg_code']); # recommended
+						if ($layerset['list'][$i]['connection']!='') {
+							if ($this->map_factor != '' AND $layerset['list'][$i]['connectiontype'] == 7) {		# WMS-Layer
+								if ($layerset['list'][$i]['printconnection']!=''){
+									$layerset['list'][$i]['connection'] = $layerset['list'][$i]['printconnection']; 		# wenn es eine Druck-Connection gibt, wird diese verwendet
+								}
+								else{
+									//$layerset['list'][$i]['connection'] .= '&mapfactor='.$this->map_factor;			# bei WMS-Layern wird der map_factor durchgeschleift (für die eigenen WMS) erstmal rausgenommen, weil einige WMS-Server der zusätzliche Parameter mapfactor stört
+								}
+							}
+							if ($layerset['list'][$i]['connectiontype'] == 6) {
+								# z.B. für Klassen mit Umlauten
+								$layerset['list'][$i]['connection'] .= " options='-c client_encoding=".MYSQL_CHARSET."'";
+							}
+							$layer->set('connection', replace_params($layerset['list'][$i]['connection'], rolle::$layer_params));
+							#echo '<br>Connection: ' . replace_params($layerset['list'][$i]['connection'], rolle::$layer_params);
+						}
 
-						if($layerset['list'][$i]['connectiontype'] == 6)$layerset['list'][$i]['processing'] = 'CLOSE_CONNECTION=DEFER;'.$layerset['list'][$i]['processing'];		# DB-Connection erst am Ende schliessen und nicht für jeden Layer neu aufmachen
-            if ($layerset['list'][$i]['processing'] != "") {
-              $processings = explode(";",$layerset['list'][$i]['processing']);
-              foreach ($processings as $processing) {
-                $layer->setProcessing($processing);
-              }
-            }
+						if ($layerset['list'][$i]['connectiontype'] > 0) {
+							if (MAPSERVERVERSION >= 540) {
+								$layer->setConnectionType($layerset['list'][$i]['connectiontype']);
+							}
+							else {
+								$layer->set('connectiontype',$layerset['list'][$i]['connectiontype']);
+							}
+						}
+
+						if ($layerset['list'][$i]['connectiontype'] == 6) {
+							$layerset['list'][$i]['processing'] = 'CLOSE_CONNECTION=DEFER;' . $layerset['list'][$i]['processing'];		# DB-Connection erst am Ende schliessen und nicht für jeden Layer neu aufmachen
+						}
+
+						if ($layerset['list'][$i]['processing'] != "") {
+							$processings = explode(";",$layerset['list'][$i]['processing']);
+							foreach ($processings as $processing) {
+								$layer->setProcessing($processing);
+							}
+						}
+
 						if ($layerset['list'][$i]['postlabelcache'] != 0) {
 							$layer->set('postlabelcache',$layerset['list'][$i]['postlabelcache']);
 						}
@@ -5523,7 +5539,7 @@ class GUI {
     else {
       $layer->setConnectionType($layerset['connectiontype']);
     }
-    $layer->set('connection', $layerset['connection']);
+		$layer->set('connection', replace_params($layerset['connection'], rolle::$layer_params));
     $klasse=ms_newClassObj($layer);
     $klasse->set('status', MS_ON);
     $dbStyle = $mapDB->get_Style($style_id);
@@ -12600,43 +12616,46 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 									}
 									$count++;
 								}
-              }
-              $this->qlayerset[]=$layerset[$i];
-            }
-          } break; # ende Layer ist ein Shapefile
-          case MS_OGR : { # OGR Layer (4)
-            $layer=ms_newLayerObj($map);
-            if (MAPSERVERVERSION < '540') {
-				      $layer->set('connectiontype',$layerset[$i]['connectiontype']);
-				    }
-				    else {
-				      $layer->setConnectionType($layerset[$i]['connectiontype']);
-				    }
-            $layer->set('connection', $layerset[$i]['connection']);
-            $layer->set('type',$layerset[$i]['Datentyp']);
-            $layer->set('status',MS_ON);
-            if ($layerset[$i]['template']!='') {
-              $layer->set('template',$layerset[$i]['template']);
-            }
-            else {
-              $layer->set('template',DEFAULTTEMPLATE);
-            }
-            @$layer->queryByRect($rect);
-            $layer->open();
-            $anzResult=$layer->getNumResults();
-            for ($j=0;$j<$anzResult;$j++) {
-              $result=$layer->getResult($j);
-              $shapeindex=$result->shapeindex;
-              if(MAPSERVERVERSION > 500){
-                $layerset[$i]['shape'][$j]=$layer->getFeature($shapeindex,-1);
-              }
-              else{
-                $layerset[$i]['shape'][$j]=$layer->getShape(-1,$shapeindex);
-              }
-            }
-            $this->qlayerset[]=$layerset[$i];
-          } break;
-          case MS_POSTGIS : { # PostGIS Layer (6)
+							}
+							$this->qlayerset[] = $layerset[$i];
+						}
+					} break; # ende Layer ist ein Shapefile
+
+					case MS_OGR : { # OGR Layer (4)
+						$layer=ms_newLayerObj($map);
+						if (MAPSERVERVERSION < '540') {
+							$layer->set('connectiontype',$layerset[$i]['connectiontype']);
+						}
+						else {
+							$layer->setConnectionType($layerset[$i]['connectiontype']);
+						}
+
+						$layer->set('connection', replace_params($layerset[$i]['connection'], rolle::$layer_params));
+						$layer->set('type',$layerset[$i]['Datentyp']);
+						$layer->set('status',MS_ON);
+						if ($layerset[$i]['template']!='') {
+							$layer->set('template',$layerset[$i]['template']);
+						}
+						else {
+							$layer->set('template',DEFAULTTEMPLATE);
+						}
+						@$layer->queryByRect($rect);
+						$layer->open();
+						$anzResult=$layer->getNumResults();
+						for ($j=0;$j<$anzResult;$j++) {
+							$result=$layer->getResult($j);
+							$shapeindex=$result->shapeindex;
+							if(MAPSERVERVERSION > 500){
+								$layerset[$i]['shape'][$j]=$layer->getFeature($shapeindex,-1);
+							}
+							else{
+								$layerset[$i]['shape'][$j]=$layer->getShape(-1,$shapeindex);
+							}
+						}
+						$this->qlayerset[]=$layerset[$i];
+					} break;
+
+					case MS_POSTGIS : { # PostGIS Layer (6)
 						if($layerset[$i]['pfad'] != ''){
 							# Für die performante Suche wird immer zunächst ein Suchrechteck (searchbox) gebildet, egal ob punktuell
 							# oder in einem Suchfenster gesucht wird

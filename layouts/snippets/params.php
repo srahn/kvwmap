@@ -1,5 +1,6 @@
-<? $params = $this->user->rolle->get_layer_params($this->Stelle->selectable_layer_params, $this->pgdatabase); ?>
-<script language="javascript" type="text/javascript">
+<?php
+	$params = $this->user->rolle->get_layer_params($this->Stelle->selectable_layer_params, $this->pgdatabase);
+?><script language="javascript" type="text/javascript">
 	function toggleLayerParamsBar() {
 		var openLayerParamBarIcon = $('#openLayerParamBarIcon'),
 				layerParamsBar = $('#layerParamsBar');
