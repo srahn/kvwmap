@@ -50,32 +50,9 @@ function compare_legendorder($a, $b){
 	else return 0;
 }
 
-function JSON_to_PG($json, $quote = ''){
-	if(is_string($json) AND (strpos($json, '{') !== false OR strpos($json, '[') !== false)){			// bei Bedarf den JSON-String decodieren
-		$json = json_decode($json);
-	}
-	if(is_array($json)){		// entspricht Array-Datentyp
-		for($i = 0; $i < count($json); $i++){
-			$elems[] = JSON_to_PG($json[$i], '"');
-		}
-		$pg = '{'.@implode(',', $elems).'}';
-	}
-	elseif(is_object($json)){		// entspricht Nutzer-Datentyp
-		if($quote == '')$new_quote = '"';
-		else $new_quote = '\\'.$quote;
-		foreach($json as $elem){
-			$elems[] = JSON_to_PG($elem, $new_quote);
-		}
-		$pg = $quote.'('.implode(',', $elems).')'.$quote;
-	}
-	else{
-		$pg = $json;
-	}
-	return $pg;
-}
-
 function strip_pg_escape_string($string){
 	$string = str_replace("''", "'", $string);
+	$string = str_replace('\\\\', '\\', $string);		# \\ wir durch \ ersetzt
 	return $string;
 }
 

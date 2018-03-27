@@ -405,7 +405,8 @@ function startup(){';
 	if(doing == "polygonquery"){polygonarea()};
 	set_suchkreis();
 	eval(doing+"()");	
-  document.getElementById(doing+"0").classList.add("active");
+  //document.getElementById(doing+"0").classList.add("active");				// das kann der IE nicht
+	document.getElementById(doing+"0").className.baseVal += " active";	// deswegen dieser workaround
 	pinching = false;
 }
 
@@ -696,6 +697,7 @@ function recentre(){
 	}
   doing = "recentre";
 	top.document.GUI.last_button.value = doing = "recentre";
+	document.getElementById("canvas").setAttribute("cursor", "move");
   document.getElementById("canvas").setAttribute("cursor", "grab");
 }
 
@@ -938,6 +940,8 @@ function mousedown(evt){
 	cleartooltip();
 	if(top.document.GUI.stopnavigation.value == 0){
 		if(evt.button == 1){			// mittlere Maustaste -> Pan
+			if(evt.preventDefault)evt.preventDefault();
+			else evt.returnValue = false; // IE fix
 			if(doing == "polygonquery"){
 				save_polygon_path();
 			}
@@ -960,8 +964,7 @@ function mousedown(evt){
 			remove_vertices();
 	    selectPoint(evt);
 	   break;
-	   case "recentre":
-			document.getElementById("canvas").setAttribute("cursor", "grabbing");
+	   case "recentre":			
 			remove_vertices();
 	    startMove(evt);
 	   break;
@@ -1712,6 +1715,8 @@ function endPoint(evt) {
 
 // ----------------------------vektor aufziehen---------------------------------
 function startMove(evt) {
+	document.getElementById("canvas").setAttribute("cursor", "move");
+	document.getElementById("canvas").setAttribute("cursor", "grabbing");
   moving  = true;
   var alle = pathx.length;
   for(var i = 0; i < alle; ++i)
@@ -1746,6 +1751,7 @@ function moveMap(){
 
 function endMove(evt) {
   if (!moving) return;
+	document.getElementById("canvas").setAttribute("cursor", "move");
 	document.getElementById("canvas").setAttribute("cursor", "grab");
   cmd = doing;
   if (moved){ 
@@ -1780,8 +1786,10 @@ function redraw()
 
 // ----------------------ausgewaehlten button highlighten---------------------------
 function highlightbyid(id){
-	document.querySelector(".active").classList.remove("active");
-  document.getElementById(id).classList.add("active");
+	//document.querySelector(".active").classList.remove("active");		// kann der IE nicht
+	document.querySelector(".active").className.baseVal = "navbutton_frame";	// deswegen dieser workaround
+  //document.getElementById(id).classList.add("active");						// kann der IE nicht
+	document.getElementById(id).className.baseVal += " active";				// deswegen dieser workaround
   document.getElementById("suchkreis").setAttribute("cx", -10000);
 	if(top.document.GUI.orthofang != undefined){
 		options1 = top.document.getElementById("options").innerHTML="";

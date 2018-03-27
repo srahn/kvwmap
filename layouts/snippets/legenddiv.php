@@ -1,4 +1,16 @@
-<?php
+<table width="100%" border="0" cellpadding="0" cellspacing="0" id="legend_switch">
+	<tr>
+		<td align="left"><?php
+			if ($this->user->rolle->hideLegend) {
+				if (ie_check()){$display = 'none';}
+				?><a id="linkLegend" href="javascript:switchlegend()"><img title="Legende zeigen" id="LegendMinMax" src="<?php  echo GRAPHICSPATH; ?>maximize_legend.png" border="0"></a><?php
+			}
+			else {
+				?><a id="linkLegend" href="javascript:switchlegend()"><img title="Legende verstecken" id="LegendMinMax" src="<?php  echo GRAPHICSPATH; ?>minimize_legend.png" border="0"></a><?php
+			}
+		?></td>
+	</tr>
+</table><?php
 if ($show_legend_graphic) { ?>
 	<div style="padding-top: 1px;" class="table1">
 		<div class="half-width"><div
@@ -42,11 +54,6 @@ if ($show_legend_graphic) { ?>
 				<tr>
 					<td>
 						<ul>
-							<li>
-								<span><? echo $strLegendVisibility; ?>:</span><br>
-								<label><input type="radio" name="legenddisplay" value="0" <? if($this->user->rolle->hideLegend == 0)echo 'checked'; ?>><? echo $strLegendVisible; ?></label><br>
-								<label><input type="radio" name="legenddisplay" value="1" <? if($this->user->rolle->hideLegend == 1)echo 'checked'; ?>><? echo $strLegendHide; ?></label>
-							</li>
 							<li>
 								<span><? echo $strLegendType; ?>:</span><br>
 								<label><input type="radio" name="legendtype" value="0" <? if($this->user->rolle->legendtype == 0)echo 'checked'; ?>><? echo $strLegendTypeGroups; ?></label><br>

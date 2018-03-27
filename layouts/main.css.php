@@ -38,9 +38,9 @@ body {
 	font-size: 15px;
 }
 
-.gui-table {
+#gui-table {
   width: 900px;
-	margin: auto;
+	margin: auto;	
 }
 
 form {
@@ -381,6 +381,7 @@ a.invisiblelayerlink:hover{
 }
 
 #menuebar{
+	width: <? echo ($size['menue']['width'] - 2); ?>px;
 	background: url('../graphics/bg.gif');
 	border: 1px solid;
 	border-color: #CCC; 
@@ -675,6 +676,10 @@ a.menuered:hover {
 	border-color: #aaa #cccccc #cccccc;
 }
 
+#map{
+	transform: translate(0, 0);		/* ansonsten wird das SVG unscharf */
+}
+
 #scale_bar {
 	background: <? echo BG_MENUETOP; ?>;
 	border-top: 1px solid #aaaaaa;
@@ -699,6 +704,10 @@ a.menuered:hover {
 	border-top: 1px solid #ccc;
 	box-shadow: 0px 1px 0px #bbb;
 	height: <? echo ($size['map_functions_bar']['height'] - 1); ?>px;
+}
+
+#legend_switch{
+	background: linear-gradient(90deg, #c1d6f2, #DAE4EC);
 }
 
 #legenddiv {
@@ -957,11 +966,12 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 .raster_record .tr_hide input{width:0.0001px;font-size: 0.0001px;height:0.0001px;transition: all 0.25s ease;}
 .raster_record .tr_hide input[type=checkbox]{display:none;width:12px;font-size: 15px;height:12px;transition: all 0.25s ease;}
 .raster_record .tr_hide textarea{font-size: 0.0001px !important;transition: all 0.25s ease;}
-.raster_record .tr_hide div{min-width: 0.0001px !important;}
+.raster_record .tr_hide div{min-width: 0.0001px !important; transition: all 0.25s ease;}
+.raster_record .tr_hide .readonly_text{font-size: 0.0001px !important;word-wrap: break-word;min-width: 0.0001px !important;max-width: 0.0001px !important; transition: all 0.25s ease;}
 /* Attribute, die eingeblendet werden sollen: */
 .raster_record .tr_show{visibility:visible;}
-.raster_record .tr_show #formelement{width: 125px;overflow: hidden;}
-.raster_record .tr_show .readonly_text{word-wrap: break-word;min-width: 122px !important;}
+.raster_record .tr_show #formelement{width: 125px;}
+.raster_record .tr_show .readonly_text{font-size: 15px;word-wrap: break-word;min-width: 122px !important;max-width: 122px !important;transition: all 0.25s ease;}
 .raster_record .tr_show td{border:none;padding: 0.0001px;transition: all 0.25s ease;}
 .raster_record .tr_show select{width: 112%;height:22px;transition: all 0.25s ease;}									/* Selectfelder werden auf 130px Breite verkleinert*/
 .raster_record .tr_show input{width:130px;font-size: 15px;height:22px;transition: all 0.25s ease;}		/* normale Inputfelder werden auf 130px Breite verkleinert*/
@@ -982,9 +992,10 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 .raster_record_open input[type=checkbox]{width:12px;font-size: 15px;height:12px;transition: all 0.25s ease;}
 .raster_record_open textarea{font-size: 15px;transition: all 0.25s ease;}
 .raster_record_open .tr_show #formelement{width: 100%;overflow: visible}
+.raster_record_open .readonly_text{font-size: 15px;word-wrap: break-word;min-width: 400px !important;max-width: 400px !important;transition: all 0.25s ease;}
 .raster_record_open .tr_show input[type=file]{width:290px;font-size: 15px;height:22px;transition: all 0.25s ease;}
 .raster_record_open select{font-size: 15px;display:inline;width:290px;transition: all 0.25s ease;}
-.raster_record_open select:focus{font-size: 15px;display:inline;width:290px;}
+.raster_record_open select:focus{font-size: 15px;display:inline;width:290px;transition: all 0.25s ease;}
 .raster_record_open span{line-height:16px;font-size: 15px;transition: all 0.25s ease;}
 .raster_record_open img{width: auto; transition: all 0.25s ease;}
 .raster_record_open .tr_hide{visibility:visible;}
@@ -1284,7 +1295,7 @@ tbody.gle tr:hover {
 }
 
 .fstanzeigehover:hover{
-								background-color:rgba(255,255,255,0.2);
+								background-color:rgba(255,255,255,0.4);
 }
 
 .flexcontainer1{

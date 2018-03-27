@@ -263,7 +263,7 @@ define('DRUCKRAHMEN_PATH',SHAPEPATH.'druckrahmen/');
 #define('PDFCLASSPATH', '../PDFClass/');																						# in Version 2.6 gelöscht
 
 # 3rdparty Pfade
-define('THIRDPARTY_PATH', 'http://gdi-service.de/3rdparty/');												# Version 2.6
+define('THIRDPARTY_PATH', '../3rdparty/');												# Version 2.6
 define('FONTAWESOME_PATH', THIRDPARTY_PATH . 'font-awesome-4.6.3/');								# Version 2.6
 define('JQUERY_PATH', THIRDPARTY_PATH . 'jQuery-1.12.0/');													# Version 2.6
 define('BOOTSTRAP_PATH', THIRDPARTY_PATH . 'bootstrap-3.3.6/');											# Version 2.6

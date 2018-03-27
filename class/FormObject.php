@@ -46,8 +46,9 @@ class FormObject {
 					$this->AnzValues=count($value);
 				}
 				$this->select['name']=$name;
-				if ($size=='Anzahl Werte') {
-					$this->select['size']=$this->AnzValues;
+				if(substr($size, 0, 3) == 'max'){
+					$maxsize = substr($size, 3);
+					$this->select['size'] = ($this->AnzValues < $maxsize) ? $this->AnzValues : $maxsize;
 				}
 				else {
 					$this->select['size']=$size;
