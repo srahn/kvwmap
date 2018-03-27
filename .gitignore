@@ -15,3 +15,5 @@ plugins/wasserrecht/results/
 .buildpath
 vendor/
 robots.txt
+.idea
+*.iml
