@@ -47,11 +47,6 @@ define('AUFFORDERUNG_CHECKBOX_URL', 'aufforderung_checkbox_');
 define('AUFFORDERUNG_BESCHEID_PATH', 'wasserrecht/templates/Aufforderung_Erklaerung.docx');
 define('FESTSETZUNG_BESCHEID_PATH', 'wasserrecht/templates/Festsetzung_Sammelbescheid.docx');
 
-// Stellen
-define('WASSERRECHT_STELLE_DATENEINGEBER', 1010);
-define('WASSERRECHT_STELLE_ENTSCHEIDER', 1011);
-define('WASSERRECHT_STELLE_ADMINISTRATION', 1012);
-
 //LAYER NAMES
 define('SELECTED_LAYER_URL', 'Layer-Suche_Suchen&selected_layer_id');
 // define('BEHOERDE_LAYER_NAME', 'Behoerde');
