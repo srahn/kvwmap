@@ -1324,8 +1324,7 @@ class GUI {
 								# z.B. für Klassen mit Umlauten
 								$layerset['list'][$i]['connection'] .= " options='-c client_encoding=".MYSQL_CHARSET."'";
 							}
-							$layer->set('connection', replace_params($layerset['list'][$i]['connection'], rolle::$layer_params));
-							#echo '<br>Connection: ' . replace_params($layerset['list'][$i]['connection'], rolle::$layer_params);
+							$layer->set('connection', $layerset['list'][$i]['connection']);
 						}
 
 						if ($layerset['list'][$i]['connectiontype'] > 0) {
