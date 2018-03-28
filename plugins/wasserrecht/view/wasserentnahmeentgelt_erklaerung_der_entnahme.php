@@ -465,7 +465,7 @@ if(!empty($wrz) && !empty($wrz->getId()))
                 include_once ('includes/header.php');
                 
                 ?>
-            	<div id="<?php echo WASSERENTNAHMEENTGELT_ERKLAERUNG_DER_ENTNAHME_URL ?>" class="tabcontent" style="display: block">
+            	<div id="<?php echo WASSERENTNAHMEENTGELT_ERKLAERUNG_DER_ENTNAHME_URL ?>" class="tabcontent" style="display: inline">
             
             		<form action="index.php" id="<?php echo ERKLAERUNG_FREIGEBEN_URL ?>form" accept-charset="" method="POST">
             		

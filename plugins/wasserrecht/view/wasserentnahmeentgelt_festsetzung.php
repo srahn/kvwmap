@@ -304,7 +304,7 @@ if(!empty($wrz) && !empty($wrz->getId()))
                         
                         ?>
     
-                	<div id="<?php echo WASSERENTNAHMEENTGELT_FESTSETZUNG_URL ?>" class="tabcontent" style="display: block">
+                	<div id="<?php echo WASSERENTNAHMEENTGELT_FESTSETZUNG_URL ?>" class="tabcontent" style="display: inline">
                 
                     	<form action="index.php" id="festsetzung_freigeben_form" accept-charset="" method="POST">
                         		

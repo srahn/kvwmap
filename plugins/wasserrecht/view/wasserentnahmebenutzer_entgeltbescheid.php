@@ -240,7 +240,7 @@ function festsetzung_dokument_erstellen(&$gui, &$festsetzungsSammelbescheidDaten
 }
 ?>
 
-<div id="<?php echo WASSERENTNAHMEBENUTZER_ENTGELTBESCHEID_URL ?>" class="tabcontent" style="display: block">
+<div id="<?php echo WASSERENTNAHMEBENUTZER_ENTGELTBESCHEID_URL ?>" class="tabcontent" style="display: inline">
 
 	<form action="index.php" id="aufforderung_form" accept-charset="" method="POST">
 	

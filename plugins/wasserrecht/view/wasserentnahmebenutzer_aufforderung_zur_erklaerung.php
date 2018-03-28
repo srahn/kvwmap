@@ -183,7 +183,7 @@ function createAufforderungsDokument(&$gui, &$wrzs, &$erhebungsjahr)
 }
 ?>
 
-<div id="<?php echo WASSERENTNAHMEBENUTZER_AUFFORDERUNG_ZUR_ERKLAERUNG_URL ?>" class="tabcontent" style="display: block">
+<div id="<?php echo WASSERENTNAHMEBENUTZER_AUFFORDERUNG_ZUR_ERKLAERUNG_URL ?>" class="tabcontent" style="display: inline">
 
 	<form action="index.php" id="aufforderung_form" accept-charset="" method="POST">
 	
