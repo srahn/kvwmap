@@ -39,7 +39,7 @@ body {
 }
 
 #gui-table {
-  width: 900px;
+	width: 900px;
 	margin: auto;	
 }
 
@@ -127,106 +127,106 @@ input[type="text"].transparent_input{
 }
 
 .search-form {
-  display: inline-block;
+	display: inline-block;
 }
 
 .search-form h2 {
-  color: black;
-  margin-bottom: 10px
+	color: black;
+	margin-bottom: 10px
 }
 
 .search-form label {
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  background-color: #eee;  
-  padding: 3px;
-  float: left;
-  text-align: left;
-  width: 150px;
-  height: 15px;
-  margin-right: 10px;
+	border: 1px solid #ddd;
+	border-radius: 5px;
+	background-color: #eee;	
+	padding: 3px;
+	float: left;
+	text-align: left;
+	width: 150px;
+	height: 15px;
+	margin-right: 10px;
 }
 
 .search-form select {
-  float: left;
-  text-align: left;
-  width: 150px;
+	float: left;
+	text-align: left;
+	width: 150px;
 }
 
 .search-form input[type=text] {
-  float: left;
-  text-align: left;
-  width: 150px;
+	float: left;
+	text-align: left;
+	width: 150px;
 }
 
 .search-form input[type=reset] {
-  float: none;
-  text-align: center;
-  width: 80px;
+	float: none;
+	text-align: center;
+	width: 80px;
 }
 
 .search-form input[type=button] {
-  float: none;
-  text-align: center;
-  width: 80px;
+	float: none;
+	text-align: center;
+	width: 80px;
 }
 
 .search-form .clear {
-  clear: both;
-  padding-top: 10px;
+	clear: both;
+	padding-top: 10px;
 }
 
 .input-form {
-  display: inline-block;
+	display: inline-block;
 }
 
 .input-form h2 {
-  color: black;
-  margin-bottom: 10px
+	color: black;
+	margin-bottom: 10px
 }
 
 .input-form label {
-  float: left;
-  text-align: right;
+	float: left;
+	text-align: right;
 	font-size: 17px;
-  width: 210px;
-  height: 15px;
-  margin-right: 10px;
+	width: 210px;
+	height: 15px;
+	margin-right: 10px;
 }
 
 .input-form select {
-  float: left;
-  text-align: left;
-  width: 150px;
+	float: left;
+	text-align: left;
+	width: 150px;
 }
 
 .input-form input {
 }
 
 .input-form input[type=text] {
-  float: left;
-  text-align: left;
-  width: 400px;
+	float: left;
+	text-align: left;
+	width: 400px;
 }
 
 .input-form input[type=reset] {
-  float: none;
-  text-align: center;
+	float: none;
+	text-align: center;
 }
 
 .input-form input[type=button] {
-  float: none;
-  text-align: center;
+	float: none;
+	text-align: center;
 }
 
 .input-form .clear {
-  clear: both;
-  padding-top: 10px;
+	clear: both;
+	padding-top: 10px;
 }
 
 .center-outerdiv {
-  padding: 30px;
-  text-align: center;
+	padding: 30px;
+	text-align: center;
 }
 
 select {
@@ -261,11 +261,11 @@ th a {
 }
 
 pre {
-	white-space: pre-wrap;       /* Since CSS 2.1 */
-	white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
-	white-space: -pre-wrap;      /* Opera 4-6 */
-	white-space: -o-pre-wrap;    /* Opera 7 */
-	word-wrap: break-word;       /* Internet Explorer 5.5+ */
+	white-space: pre-wrap;			/* Since CSS 2.1 */
+	white-space: -moz-pre-wrap;	/* Mozilla, since 1999 */
+	white-space: -pre-wrap;			/* Opera 4-6 */
+	white-space: -o-pre-wrap;		/* Opera 7 */
+	word-wrap: break-word;			/* Internet Explorer 5.5+ */
 	background: inherit;
 	font: inherit;
 	margin: 0;
@@ -441,7 +441,7 @@ a.menuered:hover {
 	height: 17px;
 	width: 17px;
 	box-sizing:border-box;
-  padding-left: 17;
+	padding-left: 17;
 	padding-right: 3px;
 }
 
@@ -485,7 +485,7 @@ a.menuered:hover {
 
 .untermenue {
 	display: flex;
-  align-items: top;
+	align-items: top;
 	cursor: pointer;
 	background: rgb(237, 239, 239);
 	margin-bottom: 0px;
@@ -646,14 +646,14 @@ a.menuered:hover {
 
 .button::after {
 	border-radius: 3px;
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
-  content: '';
+	box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
+	content: '';
 	opacity: 0;
-  position: absolute;
-  height: calc(100% - 2px);
+	position: absolute;
+	height: calc(100% - 2px);
 	width: calc(100% - 2px);
-  left: 1;
-  top: 1;
+	left: 1;
+	top: 1;
 }
 
 .button:active{
@@ -661,7 +661,7 @@ a.menuered:hover {
 }
 
 .button:hover::after{
-  opacity: 1;
+	opacity: 1;
 }
 
 #header{
@@ -730,8 +730,8 @@ a.menuered:hover {
 }
 
 @keyframes highlight{
-  0%,100% { background-color: none }
-  10%,60% { background-color: lightsteelblue }
+	0%,100% { background-color: none }
+	10%,60% { background-color: lightsteelblue }
 }
 
 #legendcontrol{
@@ -1636,9 +1636,9 @@ tbody.gle tr:hover {
 }
 
 .scrolltable tbody {
-  height: 590px;
-  overflow-y: auto;
-  overflow-x: hidden;
+	height: 590px;
+	overflow-y: auto;
+	overflow-x: hidden;
 }
 
 .scrolltable td {
