@@ -671,22 +671,21 @@ class user {
 	var $database;
 	var $remote_addr;
 
-	
 	function user($login_name,$id,$database) {
 		global $debug;
-		$this->debug=$debug;
-		$this->database=$database;
-		if($login_name){
-			$this->login_name=$login_name;
-			$this->readUserDaten(0,$login_name);
-			$this->remote_addr=getenv('REMOTE_ADDR');
+		$this->debug = $debug;
+		$this->database = $database;
+		if ($login_name) {
+			$this->login_name = $login_name;
+			$this->readUserDaten(0, $login_name);
+			$this->remote_addr = getenv('REMOTE_ADDR');
 		}
-		else{
+		else {
 			$this->id = $id;
-			$this->readUserDaten($id,0);
+			$this->readUserDaten($id, 0);
 		}
 	}
-	
+
 	function clientIpIsValide($remote_addr) {
     # Prüfen ob die übergebene IP Adresse zu den für den Nutzer eingetragenen Adressen passt
     $ips=explode(';',$this->ips);
@@ -736,16 +735,31 @@ class user {
 		$this->funktion = $rs['Funktion'];
 		$this->password_setting_time = $rs['password_setting_time'];
   }
-  
-  function getLastStelle() {
-    $sql = 'SELECT stelle_id FROM user WHERE ID='.$this->id;
-    $this->debug->write("<p>file:users.php class:user->getLastStelle - Abfragen der zuletzt genutzten Stelle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs=mysql_fetch_array($query);
-    return $rs['stelle_id'];
-  }
-  
+
+	/*
+	* Liefert die ID der vom Nutzer zuletzt verwendeten Stelle
+	* wird keine gefunden wird eine 0 zurückgegeben
+	* @return integer
+	*/
+	function getLastStelle() {
+		$sql = "
+			SELECT
+				stelle_id
+			FROM
+				user
+			WHERE
+				ID= " . $this->id ."
+		";
+		$this->debug->write("<p>file:users.php class:user->getLastStelle - Abfragen der zuletzt genutzten Stelle:<br>" . $sql, 4);
+		$query = mysql_query($sql, $this->database->dbConn);
+		if ($query == 0) {
+			$this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4);
+			return 0;
+		}
+		$rs = mysql_fetch_array($query);
+		return $rs['stelle_id'];
+	}
+
 	function setSize($mapsize) {
 		$this->rolle->setSize($mapsize);
 		return 1;
