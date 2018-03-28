@@ -55,25 +55,34 @@ class database {
     $this->blocktransaction=0;
   }
 
-  function login_user($username, $passwort){
-  	$sql = "SELECT login_name FROM user WHERE login_name = '".addslashes($username)."' AND passwort = '".md5($passwort)."'";
-  	$sql.=' AND (("'.date('Y-m-d h:i:s').'" >= start AND "'.date('Y-m-d h:i:s').'" <= stop)';
-    $sql.=' OR ';
-    $sql.='(start="0000-00-00 00:00:00" AND stop="0000-00-00 00:00:00"))';		# Zeiteinschränkung wird nicht berücksichtigt.
-  	#echo $sql;
-		$this->execSQL("SET NAMES '".MYSQL_CHARSET."'",0,0);
-  	$ret=$this->execSQL($sql, 4, 0);
-    if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $ret = mysql_fetch_array($ret[1]);
-    if($ret[0] != ''){
-    	return true;
-    }
-    else{
-    	return false;
-    }
-  }
+	function login_user($username, $passwort){
+		$sql = "
+			SELECT
+				login_name
+			FROM
+				user
+			WHERE
+				login_name = '" . addslashes($username) . "' AND
+				passwort = '" . md5($passwort) . "' AND
+				(
+					(
+						'" . date('Y-m-d h:i:s') . "' >= start AND
+						'" . date('Y-m-d h:i:s') . "' <= stop
+					) OR
+					(
+						start = '0000-00-00 00:00:00' AND
+						stop = '0000-00-00 00:00:00'
+					)
+				)
+		";	# Zeiteinschränkung wird nicht berücksichtigt.
+		#echo $sql;
+		$this->execSQL("SET NAMES '" . MYSQL_CHARSET . "'", 0, 0);
+		$ret=$this->execSQL($sql, 4, 0);
+		if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
+		$ret = mysql_fetch_array($ret[1]);
+		return ($ret[0] != '' ? true : false);
+	}
 
-  
   function read_colors(){	
   	$sql = "SELECT * FROM colors";
   	#echo $sql;
