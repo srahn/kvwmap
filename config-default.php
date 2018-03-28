@@ -506,6 +506,8 @@ define('DEBUG_LEVEL',1);
 define('LOGFILE_MYSQL',LOGPATH.VERSION.'_log_mysql.sql');         # Version 1.6.0
 # postgreSQL-Log-Datei zur Speicherung der SQL-Statements         # Version 1.6.0
 define('LOGFILE_POSTGRES',LOGPATH.VERSION.'_log_postgres.sql');   # Version 1.6.0
+# Log-Datei zur Speicherung der Login Vorgänge
+define('LOGFILE_LOGIN', LOGPATH . 'login_fail.log'); # Version 2.8.0
 # Log-Level zur Speicherung der SQL-Statements                    # Version 1.6.0
 define('LOG_LEVEL',2);                                            # Version 1.6.0
 # Loglevel

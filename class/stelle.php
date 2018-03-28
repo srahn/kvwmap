@@ -31,7 +31,9 @@ class stelle {
 
 	function stelle($id, $database) {
 		global $debug;
+		global $log_mysql;
 		$this->debug = $debug;
+		$this->log = $log_mysql;
 		$this->id = $id;
 		$this->database = $database;
 		$this->Bezeichnung = $this->getName();

@@ -368,13 +368,13 @@ class rolle {
 					id IN (" . $selectable_layer_params . ")
 			";
 			#echo '<br>Sql: ' . $sql;
-			$params_result = $this->database->execSQL($sql, 4, 1);
+			$params_result = $this->database->execSQL($sql, 4, 0);
 			if ($params_result[0]) {
 				echo '<br>Fehler bei der Abfrage der Layerparameter mit SQL: ' . $sql;
 			}
 			else {
 				while ($param = mysql_fetch_assoc($params_result[1])) {
-					$options_result = $pgdatabase->execSQL($param['options_sql'], 4, 1);
+					$options_result = $pgdatabase->execSQL($param['options_sql'], 4, 0);
 					$param['options'] = array();
 					while ($option = pg_fetch_assoc($options_result[1])) {
 						$param['options'][] = $option;
