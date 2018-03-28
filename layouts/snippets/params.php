@@ -1,6 +1,5 @@
 <?php
 	$params = $this->user->rolle->get_layer_params($this->Stelle->selectable_layer_params, $this->pgdatabase);
-	global $log_postgres;
 ?><script language="javascript" type="text/javascript">
 	function toggleLayerParamsBar() {
 		var openLayerParamBarIcon = $('#openLayerParamBarIcon'),
@@ -30,47 +29,49 @@
 		updateLayerParameterButton.fadeOut();
 		layerParamsBar.fadeOut();
 	}
-</script>
-<?
-	if(!empty($params)){ ?>
-		<table>
-			<tr width="100%" align="center">
-				<td>
+</script><?
+if (!empty($params)) { ?>
+	<table>
+		<tr width="100%" align="center">
+			<td>
+				<div style="position: relative;">
 					<div style="position: relative;">
-						<div style="position: relative;">
-							<i id="openLayerParamBarIcon" class="fa fa-bars button pointer" onclick="toggleLayerParamsBar();"></i>
-						</div>
-						<div id="layerParamsBar" class="layerOptions">
-							<div style="position: absolute; top: 2px; right: 2px;">
-								<img style="border:none" src="graphics/exit2.png" onclick="toggleLayerParamsBar();">
-							</div>
-							<table><tr height="22px"><td class="layerOptionsHeader" colspan="2" width="350"><span class="fett">Themenparameter</span></td><?php
-								foreach($params AS $param) { ?>
-									<tr>
-										<td>&nbsp;&nbsp;<?php echo $param['alias']; ?></td>
-										<td><?php
-											echo FormObject::createSelectField(
-												'layer_parameter_' . $param['key'],		# name
-												$param['options'],										# options
-												rolle::$layer_params[$param['key']],	# value
-												1,																		# size
-												'',																		# style
-												'onLayerParameterChanged(this);',			# onchange
-												'layer_parameter_' . $param['key'],		# id
-												''																		# multiple
-											); ?>
-										</td>
-									</tr><?php
-								} ?>
-								<tr>
-									<td colspan="2" align="center">
-										<input type="button" id="update_layer_parameter_button" value="Speichern" style="display: none" onclick="updateLayerParams();">
-									</td>
-								</tr>
-							</table>
-						</div>
+						<i id="openLayerParamBarIcon" class="fa fa-bars button pointer" onclick="toggleLayerParamsBar();"></i>
 					</div>
-				</td>
-			</tr>
-		</table>
-<? } ?>
+					<div id="layerParamsBar" class="layerOptions">
+						<div style="position: absolute; top: 2px; right: 2px;">
+							<img style="border:none" src="graphics/exit2.png" onclick="toggleLayerParamsBar();">
+						</div>
+						<table>
+							<tr height="22px">
+								<td class="layerOptionsHeader" colspan="2" width="350"><span class="fett">Themenparameter</span></td>
+							</tr><?php
+							foreach($params AS $param) { ?>
+								<tr>
+									<td class="layerOptionHeader"><?php echo $param['alias']; ?></td>
+									<td><?php
+										echo FormObject::createSelectField(
+											'layer_parameter_' . $param['key'],		# name
+											$param['options'],										# options
+											rolle::$layer_params[$param['key']],	# value
+											1,																		# size
+											'',																		# style
+											'onLayerParameterChanged(this);',			# onchange
+											'layer_parameter_' . $param['key'],		# id
+											''																		# multiple
+										); ?>
+									</td>
+								</tr><?php
+							} ?>
+							<tr>
+								<td colspan="2" align="center">
+									<input type="button" id="update_layer_parameter_button" value="Speichern" style="display: none" onclick="updateLayerParams();">
+								</td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</td>
+		</tr>
+	</table><?
+} ?>

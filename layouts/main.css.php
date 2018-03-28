@@ -1441,6 +1441,10 @@ tbody.gle tr:hover {
 	padding: 2px 2px 2px 8px;
 }
 
+.layerOptionHeader {
+	padding-left: 9px;
+}
+
 .layerOptions ul, #legendOptions ul{
 	color: lightsteelblue;
 	margin: 5px;
