@@ -181,48 +181,48 @@ $GUI->Stelle=new stelle($Stelle_ID,$GUI->database);
 
 # Prüfung ob Client-IP-Adressen nach Vorgabe aus der Configurationsdatei überhaupt geprüft werden sollen
 if (CHECK_CLIENT_IP) {
-	$GUI->debug->write('<br>Es wird geprüft ob IP-Adressprüfung in der Stelle durchgeführt werden muss.',4);
-	#echo 'Es wird geprüft ob IP-Adressprüfung in der Stelle durchgefürht werden muss.';
+	$GUI->debug->write('<br>Es wird geprüft ob IP-Adressprüfung in der Stelle durchgeführt werden muss.', 4);
+	# echo 'Es wird geprüft ob IP-Adressprüfung in der Stelle durchgefürht werden muss.';
 	# Prüfen ob IP in dieser Stelle geprüft werden muss
 	if ($GUI->Stelle->checkClientIpIsOn()) {
-		#echo '<br>IP-Adresse des Clients wird in dieser Stelle geprüft.';
-    $GUI->debug->write('<br>IP-Adresse des Clients wird in dieser Stelle geprüft.',4);
+		# echo '<br>IP-Adresse des Clients wird in dieser Stelle geprüft.';
+		$GUI->debug->write('<br>IP-Adresse des Clients wird in dieser Stelle geprüft.', 4);
 		# Remote_Address mit ips des Users vergleichen
-	  if ($GUI->formvars['go'] != 'logout' AND $GUI->user->clientIpIsValide(getenv('REMOTE_ADDR'))==false) {
-	  	# Remote_Addr stimmt nicht mit den ips des Users überein
-	  	# bzw. ist nicht innerhalb eines angegebenen Subnetzes
-	    # Nutzer ist nicht berechtigt in die gewünschte Stelle zu wechseln
-	    $Stelle_ID=$alteStelle;
-      $GUI->Stelle=new stelle($Stelle_ID,$GUI->database);
-	    $GUI->Fehlermeldung='Sie haben keine Berechtigung von dem Rechner mit der IP: '.getenv('REMOTE_ADDR'). ' auf die Stelle zuzugreifen.';
-	    if($GUI->formvars['go'] == 'OWS'){
-	      $GUI->formvars['go_plus'] = 'Exception';
-	    }
-	    else{
-	      $go='Stelle Wählen';
-	    }
+		if ($GUI->formvars['go'] != 'logout' AND $GUI->user->clientIpIsValide(getenv('REMOTE_ADDR')) == false) {
+			# Remote_Addr stimmt nicht mit den ips des Users überein
+			# bzw. ist nicht innerhalb eines angegebenen Subnetzes
+			# Nutzer ist nicht berechtigt in die gewünschte Stelle zu wechseln
+			$Stelle_ID=$alteStelle;
+			$GUI->Stelle = new stelle($Stelle_ID, $GUI->database);
+			$GUI->Fehlermeldung = 'Sie haben keine Berechtigung von dem Rechner mit der IP: ' . getenv('REMOTE_ADDR') . ' auf die Stelle zuzugreifen.';
+			if ($GUI->formvars['go'] == 'OWS') {
+				$GUI->formvars['go_plus'] = 'Exception';
+			}
+			else {
+				$go = 'Stelle Wählen';
+			}
 		}
 	} # end of IP-Adressen werden in der Stelle geprüft
 } # End of IP-Adressenprüfung verfügbar
 
 # Püfung ob das Alter der Passwörter in der Stelle geprüft werden müssen
-if ($GUI->Stelle->checkPasswordAge==true){
+if ($GUI->Stelle->checkPasswordAge == true) {
 	# Das Alter des Passwortes des Nutzers muß geprüft werden
-	$remainingDays=checkPasswordAge($GUI->user->password_setting_time,$GUI->Stelle->allowedPasswordAge);
-	#echo 'Verbleibende Tage '.$remainingDays;
-	if ($remainingDays<=0) {
+	$remainingDays = checkPasswordAge($GUI->user->password_setting_time, $GUI->Stelle->allowedPasswordAge);
+	# echo 'Verbleibende Tage '.$remainingDays;
+	if ($remainingDays <= 0) {
 		# Der Geltungszeitraum des Passwortes ist abgelaufen
-    $GUI->Fehlermeldung.='Das Passwort des Nutzers '.$GUI->user->login_name.' ist in der Stelle '.$GUI->Stelle->Bezeichnung.' abgelaufen. Passwörter haben in dieser Stelle nur eine Gütligkeit von '.$GUI->Stelle->allowedPasswordAge.' Monaten. Geben Sie ein neues Passwort ein und notieren Sie es sich.';
-    if($GUI->formvars['go'] == 'OWS'){
-    	 $GUI->Fehlermeldung.=' Melden Sie sich unter '.URL.' mit Ihrem alten Password an. Daraufhin werden Sie aufgefordert ein neues Passwort einzugeben. Ist dies erfolgt, können Sie diesen Dienst weiter nutzen.';
-      $GUI->formvars['go_plus'] = 'Exception';
-    }
-    else{
-    	# Setzen eines zufälligen Passwortes
-    	$newPassword='xxx';
-    	$go='logout';
-    }
-  }
+		$GUI->Fehlermeldung .= 'Das Passwort des Nutzers ' . $GUI->user->login_name . ' ist in der Stelle ' . $GUI->Stelle->Bezeichnung . ' abgelaufen. Passwörter haben in dieser Stelle nur eine Gütligkeit von ' . $GUI->Stelle->allowedPasswordAge . ' Monaten. Geben Sie ein neues Passwort ein und notieren Sie es sich.';
+		if ($GUI->formvars['go'] == 'OWS') {
+			$GUI->Fehlermeldung .= ' Melden Sie sich unter ' . URL . ' mit Ihrem alten Password an. Daraufhin werden Sie aufgefordert ein neues Passwort einzugeben. Ist dies erfolgt, können Sie diesen Dienst weiter nutzen.';
+			$GUI->formvars['go_plus'] = 'Exception';
+		}
+		else {
+			# Setzen eines zufälligen Passwortes
+			$newPassword = 'xxx';
+			$go = 'logout';
+		}
+	}
 }
 
 # Abfragen der Einstellungen des Benutzers in der ausgewählten Stelle
