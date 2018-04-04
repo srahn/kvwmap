@@ -38,7 +38,7 @@ ALTER TABLE u_consumeShape ADD FOREIGN KEY (user_id) REFERENCES user (ID) ON DEL
 DELETE druckausschnitte, user FROM druckausschnitte LEFT JOIN user ON druckausschnitte.user_id = user.ID WHERE user.ID IS NULL;
 ALTER TABLE druckausschnitte MODIFY COLUMN id INT;
 ALTER TABLE druckausschnitte DROP PRIMARY KEY;
-ALTER TABLE druckausschnitte ADD PRIMARY KEY (id);
+ALTER TABLE druckausschnitte ADD PRIMARY KEY (stelle_id, user_id);
 ALTER TABLE druckausschnitte MODIFY COLUMN id INT AUTO_INCREMENT;
 ALTER TABLE druckausschnitte ADD INDEX(stelle_id, user_id, id);
 ALTER TABLE druckausschnitte ENGINE=INNODB;
