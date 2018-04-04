@@ -182,7 +182,7 @@ class administration{
 						foreach ($sql_parts AS $sql) {
 							$sql = trim($sql);
 							if ($sql != '') {
-								$queryret = $this->pgdatabase->execSQL($sql,0, 0);	# postgresql
+								$queryret = $this->pgdatabase->execSQL($sql, 0, 0, true);	# postgresql
 							}
 						}
 					}

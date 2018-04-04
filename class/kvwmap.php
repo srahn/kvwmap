@@ -17714,15 +17714,31 @@ class Document {
   }
 
   function save_ausschnitt($stelle_id, $user_id, $name, $center_x, $center_y, $print_scale, $angle, $frame_id){
-    $sql = 'INSERT INTO druckausschnitte SET ';
-    $sql.= 'stelle_id = '.$stelle_id.', ';
-    $sql.= 'user_id = '.$user_id.', ';
-    $sql.= 'name = "'.$name.'", ';
-    $sql.= 'center_x = '.$center_x.', ';
-    $sql.= 'center_y = '.$center_y.', ';
-    $sql.= 'print_scale = '.$print_scale.', ';
-    $sql.= 'angle = '.$angle.', ';
-    $sql.= 'frame_id = '.$frame_id;
+    $sql = "
+			INSERT INTO
+				druckausschnitte
+			SET
+				id = COALESCE(
+					(
+						SELECT
+							max(id) + 1 AS new_id
+						FROM
+							druckausschnitte
+						WHERE
+							stelle_id = " . $stelle_id . " AND
+							user_id = " . $user_id . "
+					),
+					1
+				),
+				stelle_id = " . $stelle_id . ",
+				user_id = " . $user_id . ",
+				name = '" . $name . "',
+				center_x = " . $center_x . ",
+				center_y = " . $center_y . ",
+				print_scale = " . $print_scale . ",
+				angle = " . $angle . ",
+				frame_id = " . $frame_id . "
+		";
     $this->debug->write("<p>file:kvwmap class:Document->save_ausschnitt :",4);
     $this->database->execSQL($sql,4, 1);
   }
