@@ -77,13 +77,13 @@ class database {
 		";	# Zeiteinschränkung wird nicht berücksichtigt.
 		#echo $sql;
 		$this->execSQL("SET NAMES '" . MYSQL_CHARSET . "'", 0, 0);
-		$ret=$this->execSQL($sql, 4, 0);
+		$ret=$this->execSQL($sql, 3, 0);
 		if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
 		$ret = mysql_fetch_array($ret[1]);
 		return ($ret[0] != '' ? true : false);
 	}
 
-  function read_colors(){	
+  function read_colors(){
   	$sql = "SELECT * FROM colors";
   	#echo $sql;
   	$ret=$this->execSQL($sql, 4, 0);
@@ -95,7 +95,7 @@ class database {
     }
     return $colors;
   }
-  
+
   function read_color($id){
   	$sql = "SELECT * FROM colors WHERE id = ".$id;
   	#echo $sql;
@@ -135,7 +135,7 @@ class database {
 				'd4061b1486fe2da19dd578e8d970f7eb',
 				'',
 				'gast',
-				'" . $gast_stelle . 
+				'" . $gast_stelle .
 				"'
 			);
 		";
@@ -153,12 +153,12 @@ class database {
 		# ID des Defaultnutzers abfragen
 		$sql = "
 			SELECT
-				`default_user_id`
+				s.default_user_id
 			FROM
-				`stelle` s JOIN
-				`rolle` r ON (s.ID = r.stelle_id AND s.default_user_id = r.user_id)
+				stelle s JOIN
+				rolle r ON (s.ID = r.stelle_id AND s.default_user_id = r.user_id)
 			WHERE
-				`ID` = " . $gast_stelle . "
+				s.ID = " . $gast_stelle . "
 		";
 		#echo '<br>sql: ' . $sql;
 		$query = mysql_query($sql);
@@ -302,8 +302,8 @@ class database {
 		#echo '<br>sql: ' . $sql;
 		$query = mysql_query($sql);
 
-		include(CLASSPATH . 'stelle.php');
-		include(CLASSPATH . 'rolle.php');
+		include_once(CLASSPATH . 'stelle.php');
+		include_once(CLASSPATH . 'rolle.php');
 		$stelle = new stelle($gast_stelle, $this);
 		$rolle = new rolle(NULL, $gast_stelle, $this);
 		$layers = $stelle->getLayers(NULL);
@@ -397,7 +397,7 @@ class database {
 				`queryStatus`,
 				`showclasses`,
 				`logconsume`
-			) " . 
+			) " .
 			$rolle2used_layer_select_sql . "
 		";
 		#echo '<br>sql: ' . $sql;
@@ -793,7 +793,7 @@ INSERT INTO u_styles2classes (
 		#echo '<br>Create_insert_dump for table: ' . $table;
 		#echo '<br>sql: ' . $sql;
 		#echo '<br>extra: ' . $extra;
-		# Funktion liefert das Ergebnis einer SQL-Abfrage als INSERT-Dump für die Tabelle "$table" 
+		# Funktion liefert das Ergebnis einer SQL-Abfrage als INSERT-Dump für die Tabelle "$table"
 		# über $extra kann ein Feld angegeben werden, welches nicht mit in das INSERT aufgenommen wird
 		# dieses Feld wird jedoch auch mit abgefragt und separat zurückgeliefert
 		$this->debug->write("<p>file:kvwmap class:database->create_insert_dump :<br>".$sql,4);
@@ -888,7 +888,7 @@ INSERT INTO u_styles2classes (
    return $dump;
 	}
 
- 
+
 ####################################################
 # database Funktionen
 ###########################################################
@@ -899,7 +899,7 @@ INSERT INTO u_styles2classes (
     return mysql_select_db($this->dbName,$this->dbConn);
   }
 
-  function close() {	
+  function close() {
     $this->debug->write("<br>MySQL Verbindung mit ID: ".$this->dbConn." schließen.",4);
     if (LOG_LEVEL>0){
     	$this->logfile->close();
@@ -1029,7 +1029,7 @@ INSERT INTO u_styles2classes (
       if ($query==0) {
         $ret[0]=1;
         $ret[1]="<b>Fehler bei SQL Anweisung:</b><br>".$sql."<br>".mysql_error($this->dbConn);
-        $this->debug->write($ret[1],$debuglevel);
+        $this->debug->write($ret[1], $debuglevel);
         if ($logsql) {
           $this->logfile->write("#".$ret[1]);
         }

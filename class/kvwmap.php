@@ -88,6 +88,10 @@ class GUI {
     # Logdatei für PostgreSQL setzten
     global $log_postgres;
     $this->log_postgres=$log_postgres;
+
+		global $log_loginfail;
+		$this->log_loginfail = $log_loginfail;
+
     # layout Templatedatei zur Anzeige der Daten
     if ($main!="") $this->main=$main;
     # Stylesheetdatei
@@ -102,6 +106,59 @@ class GUI {
 		if(isset($this->{$method}) && is_callable($this->{$method})){
 			return call_user_func_array($this->{$method}, $arguments);
     }
+	}
+
+	function login() {
+		$this->title = 'kvwmap Anmeldung';
+		$this->expect = array('login_name', 'passwort', 'mobile');
+		if ($this->formvars['go'] == 'logout') {
+			$this->expect[] = 'go';
+		}
+		$this->user->rolle->gui = 'snippets/' . (file_exists(LAYOUTPATH . 'snippets/' . LOGIN) ? LOGIN : 'login.php');
+		$this->output();
+	}
+
+	function login_failed() {
+		$this->login_failed = $failed;
+		$this->title = 'kvwmap Anmeldung';
+		$this->expect = array('login_name', 'passwort', 'mobile');
+		if ($this->formvars['go'] == 'logout') {
+			$this->expect[] = 'go';
+		}
+		$this->add_message('error', 'Benutzername oder Passwort ' . ($this->formvars['num_failed'] > 0 ? $this->formvars['num_failed'] . ' mal' : '') . ' falsch eingegeben!<br>Versuchen Sie es noch einmal.');
+		$this->log_loginfail->write(
+			date("Y:m:d H:i:s", time()) .
+			' IP: ' . $_SERVER['REMOTE_ADDR'] .
+			' Port: ' . $_SERVER['REMOTE_PORT'] .
+			' User: ' . $login_name .
+			' User agent: ' .
+			getenv('HTTP_USER_AGENT')
+		);
+		$this->user->rolle->gui = 'snippets/' . (file_exists(LAYOUTPATH . 'snippets/' . LOGIN) ? LOGIN : 'login.php');
+		$this->output();
+	}
+
+	function login_browser_size() {
+		$this->user->rolle->gui = 'snippets/login_browser_size.php';
+		$this->output();
+	}
+
+	function login_new_password() {
+		$this->title = 'kvwmap Passwort Änderung';
+		$this->expect = array('passwort', 'new_password', 'new_password_2');
+		if ($this->formvars['go'] == 'logout') {
+			$this->expect[] = 'go';
+		}
+		$this->user->rolle->gui = 'snippets/login_new_password.php';
+		$this->output();
+	}
+
+	function login_registration() {
+		$this->title='kvwmap Registrierung';
+		$this->user->rolle->gui = 'snippets/user_registration_form.php';
+		$login_name = $this->formvars['login_name'];
+		$passwort = $this->formvars['passwort'];
+		$this->output();
 	}
 
 	/**

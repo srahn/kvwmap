@@ -62,13 +62,13 @@ class account {
 			# die Statistik zur Anfrage
 			$BezeichnungStelle = new stelle($stelle,$this->database);
 			$UserName = new user('','',$this->database);
-	
+
 			$this->epoch=$this->epoch();
 			#$this->getLayer=$this->getLayer('');
 			#$this->getLoggedLayer=$this->getLayer(1);
 			#$this->allLayerAccess=$this->getAllAccess('2layer');
 			#$this->allAccess=$this->getAllAccess('');
-	
+
 			$day_d=str_pad($day_d, 2, "0", STR_PAD_LEFT);
 			$month_d=str_pad($month_d, 2, "0", STR_PAD_LEFT);
 			$month_e1=str_pad($month_e1, 2, "0", STR_PAD_LEFT);
@@ -77,7 +77,7 @@ class account {
 			$day_e2=str_pad($day_e2, 2, "0", STR_PAD_LEFT);
 			$date1=$year_e1.'-'.$month_e1.'-'.$day_e1;
 			$date2=$year_e2.'-'.$month_e2.'-'.$day_e2 ;
-	
+
 			if ($zeitraum=='month') {
 				if ($nutzung=='stelle'){
 					$this->Bezeichnung=$BezeichnungStelle->getName();
@@ -654,9 +654,7 @@ class account {
 #########################
 # class_user #
 class user {
-	# todo
-	# Beim Anlegen eines neuen Benutzers müssen die Einstellungen für die Karte
-	# aus der Stellenbeschreibung als Anfangswerte übernommen werden
+	# // TODO: Beim Anlegen eines neuen Benutzers müssen die Einstellungen für die Karte aus der Stellenbeschreibung als Anfangswerte übernommen werden
 
 	var $id;
 	var $Name;
@@ -671,13 +669,13 @@ class user {
 	var $database;
 	var $remote_addr;
 
-	function user($login_name,$id,$database) {
+	function user($login_name, $id, $database, $passwort = '') {
 		global $debug;
 		$this->debug = $debug;
 		$this->database = $database;
 		if ($login_name) {
 			$this->login_name = $login_name;
-			$this->readUserDaten(0, $login_name);
+			$this->readUserDaten(0, $login_name, $passwort);
 			$this->remote_addr = getenv('REMOTE_ADDR');
 		}
 		else {
@@ -703,21 +701,22 @@ class user {
     return 0;
   }
 
-	function readUserDaten($id, $login_name) {
+	function readUserDaten($id, $login_name, $passwort = '') {
 		$where = array();
 		if ($id > 0) array_push($where, "ID = " . $id);
 		if ($login_name != '') array_push($where, "login_name LIKE '" . $login_name . "'");
+		if ($passwort != '') array_push($where, "passwort = md5('" . $passwort . "')");
 		$sql = "
 			SELECT
 				*
 			FROM
 				user
-			WHERE " .
-				implode(" AND ", $where) . "
+			WHERE
+				" . implode(" AND ", $where) . "
 		";
 		#echo '<br>Sql: ' . $sql;
 
-		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>" . $sql, 4);
+		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>" . $sql, 3);
 		$query = mysql_query($sql,$this->database->dbConn);
 		if ($query == 0) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
 		$rs = mysql_fetch_array($query);
@@ -734,7 +733,7 @@ class user {
 		}
 		$this->funktion = $rs['Funktion'];
 		$this->password_setting_time = $rs['password_setting_time'];
-  }
+	}
 
 	/*
 	* Liefert die ID der vom Nutzer zuletzt verwendeten Stelle
@@ -766,8 +765,8 @@ class user {
 	}
 
 	function setRolle($stelle_id) {
-		# Abfragen und zuweisen der Einstellungen für die Rolle		
-		$rolle = new rolle($this->id, $stelle_id, $this->database);		
+		# Abfragen und zuweisen der Einstellungen für die Rolle
+		$rolle = new rolle($this->id, $stelle_id, $this->database);
 		if ($rolle->readSettings()) {
 			$this->rolle=$rolle;
 			return 1;
@@ -839,7 +838,7 @@ class user {
 		}
 		return $user;
 	}
-	
+
 	function getUserDaten($id,$login_name,$order) {
 		$sql ='SELECT * FROM user WHERE 1=1';
 		if ($id>0) {
@@ -1001,7 +1000,7 @@ class user {
 		}
 		return 1;
 	}
-	
+
 	function checkstelle(){
 		# Funktion wird nach Änderungen im Nutzer- und Stelleneditor aufgerufen und überprüft
 		# ob die letzte Stellen_ID leer ist und ob die letzte Stellen_ID nicht mehr zu den dem Nutzer
@@ -1057,7 +1056,7 @@ class user {
 
 	function loginname_exists($login) {
 		$Meldung='';
-		# testen ob es einen user unter dieser id in der Datenbanktabelle gibt
+		# testen ob es einen user mit diesem login_namen in der Datenbanktabelle gibt
 		$sql ="SELECT * FROM user WHERE login_name='".$login."'";
 		$ret=$this->database->execSQL($sql,4, 0);
 		if ($ret[0]) {

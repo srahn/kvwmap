@@ -3,11 +3,11 @@
  * Funktionenumfang nicht existieren, in älteren Versionen nicht existiert haben,
  * nicht gefunden wurden, nicht verstanden wurden oder zu umfrangreich waren.
  */
- 
+
 $errors = array();
-  
+
 function MapserverErrorHandler($errno, $errstr, $errfile, $errline){
-	global $errors;	
+	global $errors;
 	if(!(error_reporting() & $errno)){
 		// This error code is not included in error_reporting
 		return;
@@ -27,7 +27,7 @@ function compare_layers($a, $b){
 	$b['alias'] = str_replace('Ä', 'A', $b['alias']);
 	$b['alias'] = str_replace('Ü', 'U', $b['alias']);
 	$b['alias'] = str_replace('Ö', 'O', $b['alias']);
-	$b['alias'] = str_replace('ß', 's', $b['alias']);	
+	$b['alias'] = str_replace('ß', 's', $b['alias']);
 	return strcmp($a['alias'], $b['alias']);
 }
 
@@ -81,8 +81,8 @@ function ie_check(){
 	else{
 			return FALSE;
 	}
-} 
- 
+}
+
 if(!function_exists('mb_strrpos')){		# Workaround, falls es die Funktion nicht gibt
 	function mb_strrpos($str, $search, $offset = 0, $encoding){
 		return strrpos($str, $search, $offset);
@@ -139,7 +139,7 @@ function formatFlurstkennzALK($FlurstKennz){
 	$gem = substr($FlurstKennz, 0, 6);
 	$flur = substr($FlurstKennz, 6, 3);
 	$zaehler = substr($FlurstKennz, 9, 5);
-	$vorkomma = str_pad(intval(substr($FlurstKennz, 15, 3)), 3, '0', STR_PAD_LEFT);  
+	$vorkomma = str_pad(intval(substr($FlurstKennz, 15, 3)), 3, '0', STR_PAD_LEFT);
   $FlurstKennz = $gem.'-'.$flur.'-'.$zaehler.'/'.$vorkomma.'.00';
   return $FlurstKennz;
 }
@@ -169,7 +169,7 @@ function transformCoordsSVG($path){
     if($svgcoords[$i] == 'M'){
     	$newsvgcoords[] = 'M';
     	$last_startcoordx = $svgcoords[$i+1];
-    	$last_startcoordy = -1 * $svgcoords[$i+2]; 
+    	$last_startcoordy = -1 * $svgcoords[$i+2];
     }
     if($svgcoords[$i] != 'M' AND $svgcoords[$i] != 'Z' AND $svgcoords[$i] != ''){
     	$newsvgcoords[] = $svgcoords[$i];
@@ -196,7 +196,7 @@ function dms2dec($number){
 	$seconds = trim($part2[1], '"');
 	$seconds = $seconds / 60;
 	$minutes = ($minutes+$seconds) / 60;
-	return $degrees + $minutes;  
+	return $degrees + $minutes;
 }
 
 function dec2dms($number){
@@ -215,7 +215,7 @@ function dec2dmin($number){
 	$degrees = $part1[0];
 	$minutes = ('0.'.$part1[1]) * 60;
 	return $degrees."°".round($minutes,3);
-} 
+}
 
 function allocateImageColors($image, $colors) {
 	$imageColors = Array();
@@ -245,23 +245,23 @@ function rgb2hsl($r, $g, $b){
 		$s = $d / ( 1 - abs( 2 * $l - 1 ) );
 		switch($max){
 			case $r:
-				$h = 60 * fmod( ( ( $g - $b ) / $d ), 6 ); 
+				$h = 60 * fmod( ( ( $g - $b ) / $d ), 6 );
 				if($b > $g)$h += 360;
 			break;
-			case $g: 
-				$h = 60 * ( ( $b - $r ) / $d + 2 ); 
+			case $g:
+				$h = 60 * ( ( $b - $r ) / $d + 2 );
 			break;
-			case $b: 
-				$h = 60 * ( ( $r - $g ) / $d + 4 ); 
+			case $b:
+				$h = 60 * ( ( $r - $g ) / $d + 4 );
 			break;
-		}     	        
+		}
 	}
 	return array(round($h, 2), round($s, 2), round($l, 2));
 }
 
 function hsl2rgb($h, $s, $l){
-	$r; 
-	$g; 
+	$r;
+	$g;
 	$b;
 	$c = ( 1 - abs( 2 * $l - 1 ) ) * $s;
 	$x = $c * ( 1 - abs( fmod( ( $h / 60 ), 2 ) - 1 ) );
@@ -274,12 +274,12 @@ function hsl2rgb($h, $s, $l){
 	elseif($h < 120){
 		$r = $x;
 		$g = $c;
-		$b = 0;			
+		$b = 0;
 	}
 	elseif($h < 180){
 		$r = 0;
 		$g = $c;
-		$b = $x;					
+		$b = $x;
 	}
 	elseif($h < 240){
 		$r = 0;
@@ -301,7 +301,7 @@ function hsl2rgb($h, $s, $l){
 	$b = ($b + $m) * 255;
   return array(floor($r), floor($g), floor($b));
 }
- 
+
 if(!function_exists('imagerotate')){
 	function imagerotate($source_image, $angle, $bgd_color){
 		$angle = 360-$angle; // GD rotates CCW, imagick rotates CW
@@ -327,7 +327,7 @@ if(!function_exists('imagerotate')){
 	}
 }
 
- 
+
 function st_transform($x,$y,$from_epsg,$to_epsg) {
 	#$x = 12.099281283333;
 	#$y = 54.075214183333;
@@ -337,32 +337,33 @@ function st_transform($x,$y,$from_epsg,$to_epsg) {
   $projTO = ms_newprojectionobj("init=epsg:".$to_epsg);
   $point->project($projFROM, $projTO);
   return $point;
-} 
+}
 
 function checkPasswordAge($passwordSettingTime,$allowedPassordAgeMonth) {
   $passwordSettingUnixTime=strtotime($passwordSettingTime); # Unix Zeit in Sekunden an dem das Passwort gesetzt wurde
   $allowedPasswordAgeDays=round($allowedPassordAgeMonth*30.5); # Zeitintervall, wie alt das Password sein darf in Tagen
   $passwordAgeDays=round((time()-$passwordSettingUnixTime)/60/60/24); # Zeitinterval zwischen setzen des Passwortes und aktueller Zeit in Tagen
   $allowedPasswordAgeRemainDays=$allowedPasswordAgeDays-$passwordAgeDays; # Zeitinterval wie lange das Passwort noch gilt in Tagen
-	return $allowedPasswordAgeRemainDays; // Passwort ist abgelaufen wenn Wert < 1  
+	return $allowedPasswordAgeRemainDays; // Passwort ist abgelaufen wenn Wert < 1
 }
 
 /**
 * Prüft ob ein Passwort ein gutes Passwort ist.
-* 
+*
 * Diese Funktion prüft die Länge, Anzahl wiederholter Zeichen und einfachheit von Passwörtern
 * Code wurde abgeleitet von http://scripts.franciscocharrua.com/check-password.php und
 * http://www.vbforums.com/showthread.php?p=2347960 und wurde stark verändert und ergänzt.
 * Vielen Dank trotzdem an die Autoren.
-* 
+*
 * Reihenfolge: Übersichtssatz - Kommentar - Tags.
-* 
+*
 * @param string password Zu prüfendes Password als Text
 * @return string Fehlermeldung zur Beschreibung, was an dem Password schlecht ist, oder leerer String, wenn Password gut ist.
 * @see    createRandomPassword(), checkPasswordAge, $GUI, $user, $stelle
 */
 # Passwortprüfung
-function isPasswordValide($oldPassword,$newPassword,$newPassword2) {
+function isPasswordValide($oldPassword, $newPassword, $newPassword2) {
+	echo 'allg_funktionen isPasswortValide old: ' . $oldPassword . ' new1: ' . $newPassword . ' new2: ' . $newPassword2;
   $password_errors = array();
   $check = 0;
 
@@ -395,7 +396,7 @@ function isPasswordValide($oldPassword,$newPassword,$newPassword2) {
     $password_errors[] = "ist zu lang (maximal ".PASSWORD_MAXLENGTH." Zeichen)";
     $check = 1;
   }
-	
+
   if($check == 0 and $strlen < PASSWORD_MINLENGTH) {
     $password_errors[] = "ist zu kurz (mindestens ".PASSWORD_MINLENGTH." Zeichen)";
     $check = 1;
@@ -474,18 +475,19 @@ function isPasswordValide($oldPassword,$newPassword,$newPassword2) {
     }
     $return_string.=$password_errors[$i];
   }
+
   return $return_string;
 }
 
 /**
 * Erzeugen eines zufälligen Passwortes
-* 
+*
 * Diese Funktion erzeugt ein zufälliges sicheres Password. Die Funktion wurde von Totally PHP übernommen und mit zusätzlichen Zeichen versehen
 * siehe: http://www.totallyphp.co.uk/code/create_a_random_password.htm
-* Vielen Dank an den Autor. 
-* 
+* Vielen Dank an den Autor.
+*
 * Reihenfolge: Übersichtssatz - Kommentar - Tags.
-* 
+*
 * @return string ein achtstelliges Password
 * @see    isPasswordValide(), checkPasswordAge, $GUI, $user, $stelle
 */
@@ -517,7 +519,7 @@ function createRandomPassword($passwordLength) {
   }
   return $password;
 }
- 
+
 function in_subnet($ip,$net) {
 	$ipparts=explode('.',$ip);
 	$netparts=explode('.',$net);
@@ -561,7 +563,7 @@ function stripScript($request) {
 			$ret[$key]=stripScript($value);
 		}
 		else {
-			$ret[$key]=preg_replace($search, '', $value); 
+			$ret[$key]=preg_replace($search, '', $value);
 		}
 	}
 	return $ret;
@@ -681,7 +683,7 @@ function unzip($src_file, $dest_dir=false, $create_zip_name_dir=true, $overwrite
 	            chmod($file_name, 0777);
 	          }
 	          zip_entry_close($zip_entry);
-	        }      
+	        }
 	      }
 	      zip_close($zip);
 	    }
@@ -719,10 +721,10 @@ function umlaute_html($string){
 
 function umlaute_sortieren($array, $second_array){
 	// Diese Funktion sortiert das Array $array unter Berücksichtigung von Umlauten.
-	// Zusätzlich läßt sich ein zweites Array $second_array übergeben, welches genauso viele 
+	// Zusätzlich läßt sich ein zweites Array $second_array übergeben, welches genauso viele
 	// Elemente haben muß wie das erste und dessen Elemente entsprechend der Sortierung des
 	// ersten Arrays angeordnet werden, dadurch bleiben die Index-Beziehungen beider Arrays erhalten.
-	// Außerdem werden alle Array-Elemente unabhängig von Groß/Kleinschreibung sortiert. 
+	// Außerdem werden alle Array-Elemente unabhängig von Groß/Kleinschreibung sortiert.
 	if(is_array($array)){
 		$oldarray = $array;
 		for($i = 0; $i < count($array); $i++){
@@ -757,7 +759,7 @@ function umlaute_umwandeln($name){
   $name = str_replace('ä', 'ae', $name);
   $name = str_replace('ü', 'ue', $name);
   $name = str_replace('ö', 'oe', $name);
-  $name = str_replace('Ä', 'Ae', $name);  
+  $name = str_replace('Ä', 'Ae', $name);
   $name = str_replace('Ü', 'Ue', $name);
   $name = str_replace('Ö', 'Oe', $name);
   $name = str_replace('a?', 'ae', $name);
@@ -836,7 +838,7 @@ function searchdir($path, $recursive){
     # liefert ein Array mit den Pfaden aller Dateien im Verzeichnis
     if (substr($path, strlen($path) - 1 ) != '/' ){
       $path .= '/';
-    }     
+    }
     $dirlist = array() ;
     //$dirlist[] = $path ;
     if ($handle = opendir($path)){
@@ -846,7 +848,7 @@ function searchdir($path, $recursive){
           if (!is_dir($file)){
             $dirlist[] = $file;
           }
-          elseif($recursive == true){ 
+          elseif($recursive == true){
             $result = searchdir($file . '/', true) ;
             $dirlist = array_merge($dirlist,$result) ;
           }
@@ -876,7 +878,7 @@ function get_select_parts($select){
   return $column;
 }
 
-  
+
 function microtime_float(){
    list($usec, $sec) = explode(" ", microtime());
    return ((float)$usec + (float)$sec);
@@ -898,12 +900,12 @@ function copy_file_to_tmp($frompath, $dateiname = ''){
 
 function read_epsg_codes($database){
   $epsg_codes = $database->read_epsg_codes();
-  return $epsg_codes; 
+  return $epsg_codes;
 }
 
 function read_colors($database){
   $colors = $database->read_colors();
-  return $colors; 
+  return $colors;
 }
 
 function delete_files($target, $exceptions, $output){
@@ -978,13 +980,13 @@ function ArtCode2Abk($code) {
 
 ########### Funktion wandelt UNIX Zeichen in DOS Zeichen um für Konvertierung WLDGE-Dateien
 function unix2dos($text) {
-   $search  = array ("{", "|", "}", "~","'","[","\\","]","@"); 
+   $search  = array ("{", "|", "}", "~","'","[","\\","]","@");
    $replace = array ("ä", "ö", "ü", "ß","\"","Ä","Ö","Ü","§");
    return str_replace($search, $replace, $text);
 }
 
 function ANSII2DOS($text) {
-  $search  = array ('"',chr(132),chr(142),chr(148),chr(153),chr(129),chr(154),chr(225)); 
+  $search  = array ('"',chr(132),chr(142),chr(148),chr(153),chr(129),chr(154),chr(225));
   $replace = array ('\'','ä','Ä','ö','Ö','ü','Ü','ß');
   return str_replace($search, $replace, $text);
 }
@@ -994,7 +996,7 @@ function convertDBFCodePage($filename) {
   if ($dbfid==0) {
     echo "<b>Fehler beim öffnen der dbf-Tabelle!</b>";
     return 0;
-  }  
+  }
   echo "<br>Beginne mit schreiben der Tabelle ".$filename."...";
   for ($i=1;$i<=dbase_numrecords($dbfid);$i++) {
     $dbfrs=dbase_get_record ($dbfid,$i);
@@ -1014,8 +1016,8 @@ function convertDBFCodePage($filename) {
   dbase_close ($dbfid);
 }
 
-# Funktion bricht $text in Wörtern in ein Array von Zeilen der Länge $laenge um 
-# Beispiel: 
+# Funktion bricht $text in Wörtern in ein Array von Zeilen der Länge $laenge um
+# Beispiel:
 # $block=zeilenumbruch('Dies ist ein Beilspiel.',12);
 # echo $block[0]; # liefert "Dies ist ein"
 # echo $block[1]; # liefert "Beispiel"
@@ -1047,7 +1049,7 @@ function runLenComp($liste) {
   $intervalwidth=0;
   for ($i=1;$i<$anz;$i++) {
     if ($liste[$i]==$liste[$i-1]+1) {
-      # der nächste Wert ist eins größer im gleichen Intervall 
+      # der nächste Wert ist eins größer im gleichen Intervall
       $intervalwidth++;
       # wenn das letzte Element erreicht ist Intervall schließen
       if ($i==$anz-1) {
@@ -1183,12 +1185,12 @@ function emailcheck($email) {
   if (strstr(trim($email)," ")) {
     $Meldung.='<br>E-Mail enthält Leerzeichen.';
   }
-  
+
   # hat die Adresse ein @
   if (!strstr($email,"@")) {
     $Meldung.='<br>E-Mail enthält kein @.';
   }
-  
+
   $postfix=strlen(strrchr($email,"."))-1;
   if (!($postfix >1 AND $postfix < 4)) {
     #echo " postfix ist zu kurz oder zu lang";
@@ -1278,9 +1280,9 @@ function getArrayOfChars() {
 	for ($i=97; $i<=122; $i++) {
 	  $characterNumbers[]=$i; # Kleinbuchstaben
 	}
-	
+
 	array_push($characterNumbers,223,196,228,214,246,220,252); # Sonderzeichen
-	
+
 	foreach ($characterNumbers as $characterNumber) {
 	  $characters[] = chr($characterNumber);
 	}
@@ -1303,7 +1305,7 @@ function url_get_contents($url, $username = NULL, $password = NULL) {
 		if ($response === false) {
 			throw new Exception("Fehler beim Abfragen der URL mit file_get_contents(".$url.")");
 		}
-	}	
+	}
 	catch (Exception $e) {
 		$response = curl_get_contents($url, $username, $password);
 	}
@@ -1315,10 +1317,10 @@ function curl_get_contents($url, $username = NULL, $password = NULL) {
 	parse_str($url_parts[1], $get_array);
   $ch = curl_init($url_parts[0]);		# url
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-	if($username)curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);	
+	if($username)curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
 	curl_setopt($ch, CURLOPT_POST, true);
 	#curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: multipart/form-data'));
-	curl_setopt($ch, CURLOPT_POSTFIELDS, $get_array);	
+	curl_setopt($ch, CURLOPT_POSTFIELDS, $get_array);
 	$result = curl_exec($ch);
   if (curl_getinfo($ch, CURLINFO_HTTP_CODE)==404) {
 		$result = "Fehler 404: File not found. Die Resource konnte mit der URL: ".$url." nicht auf dem Server gefunden werden!";
@@ -1347,34 +1349,34 @@ function formatBytes($size, $precision = 2) {
   return round(pow(1024, $base - floor($base)), $precision) . $suffixes[floor($base)];
 }
 
-function get_upload_error_message($code) { 
-  switch ($code) { 
-    case UPLOAD_ERR_INI_SIZE: 
+function get_upload_error_message($code) {
+  switch ($code) {
+    case UPLOAD_ERR_INI_SIZE:
         $message = "The uploaded file exceeds the upload_max_filesize directive in php.ini";
-        break; 
-    case UPLOAD_ERR_FORM_SIZE: 
-        $message = "The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form"; 
-        break; 
-    case UPLOAD_ERR_PARTIAL: 
-        $message = "The uploaded file was only partially uploaded"; 
-        break; 
-    case UPLOAD_ERR_NO_FILE: 
-        $message = "No file was uploaded"; 
-        break; 
-    case UPLOAD_ERR_NO_TMP_DIR: 
-        $message = "Missing a temporary folder"; 
-        break; 
-    case UPLOAD_ERR_CANT_WRITE: 
-        $message = "Failed to write file to disk"; 
-        break; 
-    case UPLOAD_ERR_EXTENSION: 
-        $message = "File upload stopped by extension"; 
-        break; 
+        break;
+    case UPLOAD_ERR_FORM_SIZE:
+        $message = "The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form";
+        break;
+    case UPLOAD_ERR_PARTIAL:
+        $message = "The uploaded file was only partially uploaded";
+        break;
+    case UPLOAD_ERR_NO_FILE:
+        $message = "No file was uploaded";
+        break;
+    case UPLOAD_ERR_NO_TMP_DIR:
+        $message = "Missing a temporary folder";
+        break;
+    case UPLOAD_ERR_CANT_WRITE:
+        $message = "Failed to write file to disk";
+        break;
+    case UPLOAD_ERR_EXTENSION:
+        $message = "File upload stopped by extension";
+        break;
 
-    default: 
-        $message = "Unknown upload error"; 
-        break; 
-	} 
+    default:
+        $message = "Unknown upload error";
+        break;
+	}
   return $message;
 }
 
@@ -1412,7 +1414,7 @@ function formvars_strip($formvars, $strip_list, $strip_type = 'remove') {
 			#echo "<br>Keep {$key} in formvars.";
 			$pos = strpos($value, '[');
 			if ($pos === false) {
-				$stripped_formvars[$key] = stripslashes($value);	
+				$stripped_formvars[$key] = stripslashes($value);
 			} else {
 				$stripped_formvars[$key] = arrStrToArr(stripslashes($value), ',');
 			}
@@ -1443,23 +1445,23 @@ function replace_params($str, $params) {
 * Funktion sendet e-mail mit Dateien im Anhang
 * siehe http://www.php-einfach.de/codeschnipsel_1114.php
 * @param $anhang Array mit den Elementen "name", "size" und "data" oder Array mit Elementen solcher Arrays
-* $pfad = array(); 
-* $pfad[] = "ordner/datei1.exe"; 
-* $pfad[] = "ordner/datei2.zip"; 
-* $pfad[] = "ordner/datei3.gif"; 
-* 
-* $anhang = array(); 
+* $pfad = array();
+* $pfad[] = "ordner/datei1.exe";
+* $pfad[] = "ordner/datei2.zip";
+* $pfad[] = "ordner/datei3.gif";
+*
+* $anhang = array();
 * foreach($pfad AS $name) {
-*   $name = basename($name); 
-*   $size = filesize($name); 
-*   $data = implode("",file($name)); 
-*   if (function_exists("mime_content_type")) 
-*     $type = mime_content_type($name); 
-*   else 
-*     $type = "application/octet-stream"; 
-*     $anhang[] = array("name"=>$name, "size"=>$size, "type"=>$type, "data"=>$data); 
+*   $name = basename($name);
+*   $size = filesize($name);
+*   $data = implode("",file($name));
+*   if (function_exists("mime_content_type"))
+*     $type = mime_content_type($name);
+*   else
+*     $type = "application/octet-stream";
+*     $anhang[] = array("name"=>$name, "size"=>$size, "type"=>$type, "data"=>$data);
 * }
-* mail_att("empf@domain","Email mit Anhang","Im Anhang sind mehrere Datei",$anhang); 
+* mail_att("empf@domain","Email mit Anhang","Im Anhang sind mehrere Datei",$anhang);
 **/
 function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $subject, $message, $attachement, $mode, $smtp_server, $smtp_port) {
 	$success = false;
@@ -1511,7 +1513,7 @@ function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $
 			#  echo 'to_email: '.$to_email.'<br>';
 			#  echo 'subject: '.$subject.'<br>';
 			#  echo 'botschaft: '.$botschaft.'<br>';
-			#  echo 'headers: '.$headers.'<br>';  
+			#  echo 'headers: '.$headers.'<br>';
 			$success = @mail($to_email, $subject, $botschaft, $headers);
 		}
 	}
@@ -1591,5 +1593,51 @@ function geometrytype_to_datatype($geometrytype) {
 		$datatype = 2;
 	}
 	return $datatype;
+}
+
+/*
+* Function erzeugt von den übergebenen formvars hidden input fields
+* außer von denen, dessen keys im except array stehen.
+*/
+function hidden_formvars_fields($formvars, $except = array()) {
+	$params = array();
+	foreach ($formvars AS $key => $value) {
+		if (!in_array($key, $except)) {
+			if (is_array($value)) {
+				$params = array_merge($params, values_from_array($key, $value));
+			}
+			else {
+				$params[$key] = $value;
+			}
+		}
+	}
+	foreach($params AS $key => $value) {
+		$html = '<input type="hidden" name="' . $key . '" value="' . $value .'">';
+	}
+	return $html;
+}
+
+/*
+* Function liefert eine Liste von Parametern von einem verschachtelten array
+* z.B. wir aus:
+* Array('a' => 1, 'b' => Array(0 => 2, 1 => Array('c' => 3, 'd' => 4)))
+* Array('a' => 1, 'b[0]' => 2, 'b[1][c]' => 3, 'b[1][d]' => 4)
+* Diese Funktion kann verwendet werden, um formvars in Parameter zu wandeln,
+* die in hidden input Feldern ausgegeben werden soll.
+* @param $array_key String Name des Layer_Parameter_speichern
+* @params $array Array Das Array mit den default-Werten
+* @return Die Liste der Parameter
+*/
+function values_from_array($array_key, $array) {
+	$params = array();
+	foreach ($array AS $key => $value) {
+		if (is_array($value)) {
+			$params = array_merge($params, values_from_array($array_key . '[' . $key . ']', $value));
+		}
+		else {
+			$params[$array_key . '[' . $key . ']'] = $value;
+		}
+	}
+	return $params;
 }
 ?>

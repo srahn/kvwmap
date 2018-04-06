@@ -113,6 +113,10 @@ class MyObject {
 		return array_keys($this->data);
 	}
 
+	function has_key($key) {
+		return in_array($key, $this->getKeys());
+	}
+
 	function setKeys($keys) {
 		foreach ($keys AS $key) {
 			if (!array_key_exists($key, $this->data)) {
@@ -195,7 +199,7 @@ class MyObject {
 			)
 			VALUES (
 				" . implode(
-					", ", 
+					", ",
 					array_map(
 						function ($value) {
 							if ($value === NULL) {
@@ -222,14 +226,18 @@ class MyObject {
 		return NULL;
 	}
 
-	function update() {
+	function update($data = array()) {
+		$quote = ($this->identifier_type == 'text') ? "'" : "";
+		if (!empty($data))
+			$this->data = $data;
+
 		$sql = "
 			UPDATE
 				`" . $this->tableName . "`
 			SET
 				" . implode(', ', $this->getKVP()) . "
 			WHERE
-				`id` = " . $this->get('id') . "
+				" . $this->identifier . " = {$quote}" . $this->get($this->identifier) . "{$quote}
 		";
 		$this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
 		$query = mysql_query($sql);
@@ -279,7 +287,7 @@ class MyObject {
 			case 'presence_one_of' :
 				$result = $this->validate_presence_one_of($key, $msg);
 				break;
-				
+
 			case 'validate_value_is_one_off' :
 				$result = $this->validate_value_is_one_off($key, $option, $msg);
 				break;
@@ -288,7 +296,7 @@ class MyObject {
 				$result = $this->validate_format($key, $msg, $option);
 				break;
 		}
-		
+
 		return (empty($result) ? '' : array('type' => 'error', 'msg' => $result));
 	}
 
