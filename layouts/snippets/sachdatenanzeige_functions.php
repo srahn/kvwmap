@@ -81,17 +81,16 @@ include('funktionen/input_check_functions.php');
 	}
 
 	addArrayElement = function(fieldname, form_element_type, oid){
-		outer_div = document.getElementById(fieldname+'_elements');
-		first_element = document.getElementById('div_'+fieldname+'_-1');
-		new_element = first_element.cloneNode(true);
-		last_id = outer_div.lastChild.id;
-		parts = last_id.split('div_'+fieldname+'_');
-		new_id = parseInt(parts[1])+1;
-		new_element.id = 'div_'+fieldname+'_'+new_id;
-		var regex = new RegExp(fieldname+'_-1', "g");
-		new_element.innerHTML = new_element.innerHTML.replace(regex, fieldname+'_'+new_id);
-		new_element.style.display = 'block';
-		outer_div.appendChild(new_element);
+		var outer_div = $('#' + fieldname + '_elements'),
+				first_element = $('#div_' + fieldname + '_-1'),
+				new_element = first_element.clone(true),
+				last_id = outer_div.children().attr('id'),
+				new_id = parseInt(last_id.split('_').pop()) + 1,
+				regex = new RegExp(fieldname + '_-1', "g");
+
+		new_element.attr('id', 'div_' + fieldname + '_' + new_id);
+		new_element.html(new_element.html().replace(regex, fieldname + '_' + new_id)).show();
+		outer_div.append(new_element);
 		buildJSONString(fieldname, true);
 	}
 	
