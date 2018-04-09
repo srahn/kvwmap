@@ -8541,8 +8541,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					$insert = $this->processJSON($this->formvars[$form_fields[$i]], $doc_path, $options, $attributenames, $attributevalues, $layerdb);
 				}
 				else $insert = $this->save_uploaded_file($form_fields[$i], $doc_path, $options, $attributenames, $attributevalues, $layerdb);	// normales Dokument-Attribut
+				$this->formvars[$form_fields[$i]] = $insert;
 			}
-			$this->formvars[$form_fields[$i]] = $insert;
 		}
 
 		if ($this->formvars['geomtype'] == 'GEOMETRY') {
