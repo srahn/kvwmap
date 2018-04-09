@@ -52,8 +52,8 @@ function replace_tags($text, $tags) {
 				# entferne $first_right, $last_right und alles dazwischen
 				$text = substr_replace($text, '', $first_right, $last_right - $first_right + 1);
 			}
-		}
-	}*/
+		}*/
+	}
 	return $text;
 }
 foreach($_REQUEST as $key => $value) {
