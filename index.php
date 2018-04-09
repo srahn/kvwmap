@@ -43,7 +43,7 @@ function replace_tags($text, $tags) {
 	$first_right = strpos($text, '>');
 	if ($first_right !== false) {
 		$text = preg_replace("#<\s*\/?(" . $tags . ")\s*[^>]*?>#im", '', $text);
-		$first_left = strpos($text, '<');
+/*		$first_left = strpos($text, '<');
 		if ($first_left !== false and $first_right < $first_left) {
 			# >...<
 			$last_right = strrpos($text, '>');
@@ -53,7 +53,7 @@ function replace_tags($text, $tags) {
 				$text = substr_replace($text, '', $first_right, $last_right - $first_right + 1);
 			}
 		}
-	}
+	}*/
 	return $text;
 }
 foreach($_REQUEST as $key => $value) {
