@@ -5,7 +5,7 @@
 			<? if($this->user->rolle->hist_timestamp != '') echo '<a href="index.php?go=setHistTimestamp" title="Zeitpunkt auf aktuell setzen"><h2 style="color: #a82e2e;">Zeitpunkt ALKIS-Historie: '.$this->user->rolle->hist_timestamp.'</h2></a>'; ?>
 		</td>
 		<td width="5%" align="right">
-			<? include(SNIPPETS.'params.php'); ?>
+			<? include(SNIPPETS . 'params.php'); ?>
 		</td>
 	</tr>
 </table>

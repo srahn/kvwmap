@@ -329,7 +329,7 @@ function toLayerEditor(){
 
 						</tr><?php
 					}
-					if (count($this->attributes) > 0){ ?>
+					if(count($this->attributes) > 0 AND $this->layer['editable']){ ?>
 						<tr>
 							<td align="center" colspan="19"><br><br>
 								<input type="submit" name="go_plus" value="speichern">

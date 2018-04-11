@@ -84,7 +84,7 @@ include('funktionen/input_check_functions.php');
 		outer_div = document.getElementById(fieldname+'_elements');
 		first_element = document.getElementById('div_'+fieldname+'_-1');
 		new_element = first_element.cloneNode(true);
-		last_id = outer_div.lastChild.id;
+		last_id = outer_div.lastElementChild.id;
 		parts = last_id.split('div_'+fieldname+'_');
 		new_id = parseInt(parts[1])+1;
 		new_element.id = 'div_'+fieldname+'_'+new_id;

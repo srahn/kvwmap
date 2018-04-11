@@ -35,8 +35,9 @@ function get_style(style_id){
 	}
 	if(document.getElementById('td1_style_'+style_id))document.getElementById('td1_style_'+style_id).style.backgroundColor='lightsteelblue';
 	if(document.getElementById('td2_style_'+style_id))document.getElementById('td2_style_'+style_id).style.backgroundColor='lightsteelblue';
+	layer_id = document.GUI.layer.options[document.GUI.layer.selectedIndex].value;
 	document.GUI.selected_style_id.value = style_id;
-	ahah('index.php', 'go=get_style&style_id='+style_id, new Array(document.getElementById('selected_style_div')), "");
+	ahah('index.php', 'go=get_style&style_id='+style_id+'&layer_id='+layer_id, new Array(document.getElementById('selected_style_div')), "");
 }
 
 function get_label(label_id){
@@ -46,8 +47,9 @@ function get_label(label_id){
 	}
 	document.getElementById('td1_label_'+label_id).style.backgroundColor='lightsteelblue';
 	document.getElementById('td2_label_'+label_id).style.backgroundColor='lightsteelblue';
+	layer_id = document.GUI.layer.options[document.GUI.layer.selectedIndex].value;
 	document.GUI.selected_label_id.value = label_id;
-	ahah('index.php', 'go=get_label&label_id='+label_id, new Array(document.getElementById('selected_label_div')), "");
+	ahah('index.php', 'go=get_label&label_id='+label_id+'&layer_id='+layer_id, new Array(document.getElementById('selected_label_div')), "");
 }
 
 function add_label(){
