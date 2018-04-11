@@ -3150,11 +3150,15 @@ class GUI {
 
   function get_styles(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$this->layer = $mapDB->get_Layer($this->formvars['layer_id']);
     $this->classdaten = $mapDB->read_ClassesbyClassid($this->formvars['class_id']);
     echo'
       <table width="100%" align="left" border="0" cellspacing="0" cellpadding="3">
         <tr>
-          <td height="25" valign="top">Styles</td><td align="right"><a href="javascript:add_style();">neuer Style</a></td>
+          <td height="25" valign="top">Styles</td>
+					<td align="right">
+						'.($this->layer['editable'] ? '<a href="javascript:add_style();">neuer Style</a>' : '').'
+					</td>
         </tr>';
     if(count($this->classdaten[0]['Style']) > 0){
       $this->classdaten[0]['Style'] = array_reverse($this->classdaten[0]['Style']);
@@ -3168,9 +3172,11 @@ class GUI {
               echo '<td align="right" id="td2_style_'.$this->classdaten[0]['Style'][$i]['Style_ID'].'" ';
               if($this->formvars['style_id'] == $this->classdaten[0]['Style'][$i]['Style_ID']){echo 'style="background-color:lightsteelblue;" ';}
               echo '>';
-              if($i < count($this->classdaten[0]['Style'])-1){echo '<a href="javascript:movedown_style('.$this->classdaten[0]['Style'][$i]['Style_ID'].');" title="in der Zeichenreihenfolge nach unten verschieben"><img src="'.GRAPHICSPATH.'pfeil.gif" border="0"></a>';}
-              if($i > 0){echo '&nbsp;<a href="javascript:moveup_style('.$this->classdaten[0]['Style'][$i]['Style_ID'].');" title="in der Zeichenreihenfolge nach oben verschieben"><img src="'.GRAPHICSPATH.'pfeil2.gif" border="0"></a>';}
-              echo html_umlaute('&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:delete_style('.$this->classdaten[0]['Style'][$i]['Style_ID'].');">löschen</a>');
+							if($this->layer['editable']){
+								if($i < count($this->classdaten[0]['Style'])-1){echo '<a href="javascript:movedown_style('.$this->classdaten[0]['Style'][$i]['Style_ID'].');" title="in der Zeichenreihenfolge nach unten verschieben"><img src="'.GRAPHICSPATH.'pfeil.gif" border="0"></a>';}
+								if($i > 0){echo '&nbsp;<a href="javascript:moveup_style('.$this->classdaten[0]['Style'][$i]['Style_ID'].');" title="in der Zeichenreihenfolge nach oben verschieben"><img src="'.GRAPHICSPATH.'pfeil2.gif" border="0"></a>';}
+								echo html_umlaute('&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:delete_style('.$this->classdaten[0]['Style'][$i]['Style_ID'].');">löschen</a>');
+							}
         echo'
             </td>
           </tr>
@@ -3183,11 +3189,15 @@ class GUI {
 
   function get_labels(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$this->layer = $mapDB->get_Layer($this->formvars['layer_id']);
     $this->classdaten = $mapDB->read_ClassesbyClassid($this->formvars['class_id']);
       echo'
         <table width="100%" align="left" border="0" cellspacing="0" cellpadding="3">
           <tr>
-            <td height="25" valign="top">Labels</td><td colspan="2" align="right"><a href="javascript:add_label();">neues Label</a></td>
+            <td height="25" valign="top">Labels</td>
+						<td colspan="2" align="right">
+						'.($this->layer['editable'] ? '<a href="javascript:add_label();">neues Label</a>' : '').'
+						</td>
           </tr>';
       if(count($this->classdaten[0]['Label']) > 0){
         for($i = 0; $i < count($this->classdaten[0]['Label']); $i++){
@@ -3199,7 +3209,9 @@ class GUI {
                 echo 'Label '.$this->classdaten[0]['Label'][$i]['Label_ID'].'</td>';
                 echo '<td align="right" id="td2_label_'.$this->classdaten[0]['Label'][$i]['Label_ID'].'" ';
                 if($this->formvars['label_id'] == $this->classdaten[0]['Label'][$i]['Label_ID']){echo 'style="background-color:lightsteelblue;" ';}
-                echo html_umlaute('><a href="javascript:delete_label('.$this->classdaten[0]['Label'][$i]['Label_ID'].');">löschen</a>');
+								if($this->layer['editable']){
+									echo html_umlaute('><a href="javascript:delete_label('.$this->classdaten[0]['Label'][$i]['Label_ID'].');">löschen</a>');
+								}
           echo'
               </td>
             </tr>';
@@ -3302,6 +3314,7 @@ class GUI {
 
   function get_style(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$this->layer = $mapDB->get_Layer($this->formvars['layer_id']);
     $this->styledaten = $mapDB->get_Style($this->formvars['style_id']);
     if(is_array($this->styledaten)){
       echo'
@@ -3318,11 +3331,13 @@ class GUI {
           </tr>';
         next($this->styledaten);
       }
-      echo'
-          <tr>
-            <td height="30" colspan="2" valign="bottom" align="center"><input type="button" name="style_save" value="Speichern" onclick="save_style('.$this->styledaten['Style_ID'].')"></td>
-          </tr>
-        </table>';
+			if($this->layer['editable']){
+				echo'
+					<tr>
+						<td height="30" colspan="2" valign="bottom" align="center"><input type="button" name="style_save" value="Speichern" onclick="save_style('.$this->styledaten['Style_ID'].')"></td>
+					</tr>
+				</table>';
+			}
     }
   }
 
@@ -3336,6 +3351,7 @@ class GUI {
 
   function get_label(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$this->layer = $mapDB->get_Layer($this->formvars['layer_id']);
     $this->labeldaten = $mapDB->get_Label($this->formvars['label_id']);
     if(count($this->labeldaten) > 0){
       echo'
@@ -3350,11 +3366,13 @@ class GUI {
           </tr>';
         next($this->labeldaten);
       }
-      echo'
+			if($this->layer['editable']){
+				echo'
           <tr>
             <td height="30" colspan="2" valign="bottom" align="center"><input type="button" name="label_save" value="Speichern" onclick="save_label('.$this->labeldaten['Label_ID'].')"></td>
           </tr>
         </table>';
+			}
     }
   }
 
@@ -9981,6 +9999,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		if($this->formvars['selected_layer_id']){
 			$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 			$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL, true);
+			$this->layer = $mapdb->get_Layer($this->formvars['selected_layer_id']);
 		}
 		if($this->formvars['selected_datatype_id']){
 			$this->attributes = $mapdb->read_datatype_attributes($this->formvars['selected_datatype_id'], NULL, NULL, true);
