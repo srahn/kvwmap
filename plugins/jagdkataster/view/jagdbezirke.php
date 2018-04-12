@@ -251,7 +251,7 @@ function save(){
 ?>
 
 <?
-  if ($this->formvars['oid']!='' OR $this->formvars['value_oid']!='') {
+  if ($this->formvars['value_oid']!='') {
 ?>
   <tr>
     <td align="center"><a href="javascript:currentform.go.value = 'jagdbezirke_auswaehlen_Suchen';javascript:currentform.submit()">zur&uuml;ck zur Trefferliste</a></td>
@@ -289,7 +289,7 @@ if(!$this->jagd_hiddenfields){
 <input name="name" type="hidden" value="<? echo $this->formvars['name']; ?>">
 <input name="oid" type="hidden" value="<?php echo $this->formvars['oid']; ?>">
 <input name="search_nummer" type="hidden" value="<?php echo $this->formvars['search_nummer']; ?>">
-<input name="search_name" type="hidden" value="<?php echo $this->formvars['search_name']; ?>">
+<input name="jagd_search_name" type="hidden" value="<?php echo $this->formvars['jagd_search_name']; ?>">
 <input name="search_art" type="hidden" value="<?php echo $this->formvars['search_art']; ?>">
 <input name="search_status" type="hidden" value="<?php echo $this->formvars['search_status']; ?>">
 <input name="search_verzicht" type="hidden" value="<?php echo $this->formvars['search_verzicht']; ?>">
