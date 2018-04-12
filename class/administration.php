@@ -117,14 +117,15 @@ class administration{
 	}
 	
 	function update_databases(){
-		foreach($this->migrations_to_execute['mysql'] as $component => $component_migration){
+		foreach($this->migrations_to_execute['mysql'] as $component => $component_migration) {
 			foreach($component_migration as $file){
 				$migration['component'] = $component;
 				$migration['file'] = $file;
 				$my_migrations[] = $migration;
 			}
 		}
-		foreach($this->migrations_to_execute['postgresql'] as $component => $component_migration){			
+
+		foreach($this->migrations_to_execute['postgresql'] as $component => $component_migration) {
 			foreach($component_migration as $file){
 				$migration['component'] = $component;
 				$migration['file'] = $file;
@@ -133,27 +134,32 @@ class administration{
 		}
 		$this->execute_migrations('postgresql', $pg_migrations);
 		$this->execute_migrations('mysql', $my_migrations);
-		
+
 		foreach($this->seeds_to_execute['mysql'] as $component => $component_seed){
 			$prepath = PLUGINS.$component.'/';
 			foreach($component_seed as $file){
 				$filepath = $prepath.'db/mysql/data/'.$file;
 				$connection = 'user='.$this->pgdatabase->user.' password='.$this->pgdatabase->passwd.' dbname='.$this->pgdatabase->dbName;
 				if($this->pgdatabase->host != '')$connection .= ' host='.$this->pgdatabase->host;
-				$queryret = $this->database->exec_file($filepath, 'user=xxxx password=xxxx dbname=kvwmapsp', $connection);
+				$queryret = $this->database->exec_file($filepath, 'user=xxxx password=xxxx dbname=kvwmapsp', $connection, true); # replace known constants
 				if($queryret[0]){
 					echo $queryret[1].'<br>Fehler beim Ausführen von seed-Datei: '.$filepath.'<br>';
 				}
 				else{
-					$sql = "INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES ('".$component."', 'mysql', '".$file."');";
+					$sql = "
+						INSERT INTO `migrations`
+							(`component`, `type`, `filename`)
+						VALUES ('" . $component . "', 'mysql', '" . $file . "');
+					";
+					#echo '<p>Register MySQL migration for component ' . $component . ' with sql: <br>' . $sql;
 					$queryret=$this->database->execSQL($sql,0, 0);
-				}				
+				}
 			}
 		}
 	}
 
 	function execute_migrations($database_type, $migrations){
-		if($migrations != NULL){
+		if ($migrations != NULL) {
 			usort($migrations, 'compare_migration_filenames');		# sortieren, damit die Migrationen in der richtigen Reihenfolge ausgeführt werden
 			foreach($migrations as $migration){
 				$component = $migration['component'];
@@ -203,8 +209,8 @@ class administration{
 		if(defined('HTTP_PROXY'))putenv('https_proxy='.HTTP_PROXY);
 		exec('cd '.$folder.' && sudo -u '.GIT_USER.' git stash && sudo -u '.GIT_USER.' git pull origin', $ausgabe, $ret);
 		if($ret != 0)showAlert('Fehler bei der Ausführung von "git pull origin".');
+		return $ausgabe;
 	}
-
 }
 
 ?>

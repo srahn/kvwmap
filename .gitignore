@@ -9,5 +9,11 @@ graphics/custom/*
 plugins/*/config/config.php
 plugins/*/config/config.sh
 plugins/*/img/*
+plugins/wasserrecht/results/
+.settings
+.project
+.buildpath
 vendor/
 robots.txt
+.idea
+*.iml

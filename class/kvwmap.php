@@ -3650,7 +3650,7 @@ class GUI {
 				$this->showAdminFunctions();
       } break;
 			case "update_code" : {
-        $this->administration->update_code();
+        $result = $this->administration->update_code();
 				$this->administration->get_database_status();
 				$this->showAdminFunctions();
       } break;
@@ -3676,6 +3676,7 @@ class GUI {
         $this->showAdminFunctions();
       }
     }
+		return $result;
   }
 
 	function save_all_layer_attributes(){
@@ -15950,7 +15951,7 @@ class db_mapObj{
 		$dump_text .= "\n-- Achtung: Die Datenbank in die der Dump eingespielt wird, sollte die gleiche Migrationsversion haben,";
 		$dump_text .= "\n-- wie die Datenbank aus der exportiert wurde! Anderenfalls kann es zu Fehlern bei der Ausführung des SQL kommen.";
 		$dump_text .= "\n\nSET @group_id = 1;";
-		$dump_text .= "\nSET @connection = 'host=pgsql dbname=kvwmapsp user=kvwmap password=*****';";
+		$dump_text .= "\nSET @connection = 'user=xxxx password=xxxx dbname=kvwmapsp';";
 
 		if ($with_privileges) {
 			# Frage Stellen der Layer ab
@@ -15972,7 +15973,7 @@ class db_mapObj{
 			}
 			else {
 				while($rs = mysql_fetch_assoc($ret[1])) {
-					$stelle_id_var = '@stelle_id_' . $rs['Bezeichnung'] . '_' . $rs['ID'];
+					$stelle_id_var = '@stelle_id_' . $rs['ID'];
 					$stellen[] = array(
 						'id' => $rs['ID'],
 						'var' => $stelle_id_var
@@ -16017,8 +16018,10 @@ class db_mapObj{
 							SELECT
 								'" . $last_layer_id . "' AS Layer_ID,
 								'" . $stellen[$s]['var'] . "' AS Stelle_ID,
-								`queryable`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `offsite`, `transparency`, `postlabelcache`,
-								`Filter`, `template`, `header`, `footer`, `symbolscale`, `used_layer_id`, `logconsume`, `requires`, `privileg`, `export_privileg`,
+								`queryable`,
+								`drawingorder`,
+								`legendorder`, `minscale`, `maxscale`, `offsite`, `transparency`, `postlabelcache`, `Filter`,
+								`template`, `header`, `footer`, `symbolscale`, `requires`, `logconsume`, `privileg`, `export_privileg`,
 								`start_aktiv`,
 								`use_geom`
 							FROM
@@ -16061,30 +16064,30 @@ class db_mapObj{
 			for($j = 0; $j < count($layer_attributes['insert']); $j++){
 				# Attribut des Layers
 				$dump_text .= "\n\n-- Attribut " . $layer_attributes['extra'][$j] . " des Layers " . $layer_ids[$i] . "\n" . $layer_attributes['insert'][$j];
+			}
 
-				if ($with_privileges) {
-					for ($s = 0; $s < count($stellen); $s++) {
-						# Attributrechte in der Stelle
-						$layer_attributes2stelle = $database->create_insert_dump(
-							'layer_attributes2stelle',
-							'',
-							"
-								SELECT
-									'". $last_layer_id . "' AS layer_id,
-									'" . $stellen[$s]['var'] . "' AS stelle_id,
-									`attributename`,
-									`privileg`,
-									`tooltip`
-								FROM
-									`layer_attributes2stelle`
-								WHERE
-									`layer_id` = " . $layer_ids[$i] . " AND
-									`stelle_id` = " . $stellen[$s]['id'] . "
-							"
-						);
-						if (count($layer_attributes2stelle['insert']) > 0) {
-							$dump_text .= "\n\n-- Zuordnung der Layerattribute des Layers " . $layer_ids[$i] . " zur Stelle " . $stellen[$s]['id'] . "\n" . implode("\n", $layer_attributes2stelle['insert']);
-						}
+			if ($with_privileges) {
+				for ($s = 0; $s < count($stellen); $s++) {
+					# Attributrechte in der Stelle
+					$layer_attributes2stelle = $database->create_insert_dump(
+						'layer_attributes2stelle',
+						'',
+						"
+							SELECT
+								'". $last_layer_id . "' AS layer_id,
+								'" . $stellen[$s]['var'] . "' AS stelle_id,
+								`attributename`,
+								`privileg`,
+								`tooltip`
+							FROM
+								`layer_attributes2stelle`
+							WHERE
+								`layer_id` = " . $layer_ids[$i] . " AND
+								`stelle_id` = " . $stellen[$s]['id'] . "
+						"
+					);
+					if (count($layer_attributes2stelle['insert']) > 0) {
+						$dump_text .= "\n\n-- Zuordnung der Layerattribute des Layers " . $layer_ids[$i] . " zur Stelle " . $stellen[$s]['id'] . "\n" . implode("\n", $layer_attributes2stelle['insert']);
 					}
 				}
 			}

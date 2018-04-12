@@ -163,9 +163,9 @@ function go_switch($go){
 			$GUI->last_query_requested = true;		# get_last_query wurde direkt aufgerufen
 			$GUI->formvars['go'] = $go = $GUI->last_query['go'];
 		}
-		switch($go){
-			case 'navMap_ajax' : {   
-				$GUI->formvars['nurAufgeklappteLayer'] = true;		
+		switch($go) {
+			case 'navMap_ajax' : {
+				$GUI->formvars['nurAufgeklappteLayer'] = true;
 				$GUI->loadMap('DataBase');
 				$GUI->navMap($GUI->formvars['CMD']);
 				$GUI->saveMap('');    			
