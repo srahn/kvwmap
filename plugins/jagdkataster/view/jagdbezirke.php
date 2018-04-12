@@ -69,6 +69,7 @@ function save(){
 <?php
 	include_once (PLUGINS.'jagdkataster/model/jagdkataster.php');		# jagdkataster-Klasse einbinden
 	$jagdkataster = new jagdkataster($this->pgdatabase);
+	###### Test auf Editierrecht ###################################
 	$privileg_ = array();
 	for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
 		if($this->qlayerset[$i]['attributes']['privileg'][$this->qlayerset[$i]['attributes']['name'][$j]] == '1'){
@@ -76,6 +77,10 @@ function save(){
 			$editable = true;
 		}
 	}
+	###### Abfrage der Flst.-Rechte (für Eigentümeranzeige) ########
+	$flst_layer = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
+	$flst_privileges = $this->Stelle->get_attributes_privileges($flst_layer[0]['Layer_ID']);
+	################################################################
 	for ($j=0;$j<$anzObj;$j++) {
 		$paechterliste = $jagdkataster->get_paechter($this->qlayerset[$i]['shape'][$j]['oid']);
 ?>
@@ -217,9 +222,11 @@ function save(){
         <tr>
           <td colspan="2" bgcolor="<?php echo BG_DEFAULT ?>">
             <a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="" onclick="this.href='index.php?go=zoomtoPolygon&oid=<?php echo $this->qlayerset[$i]['shape'][$j]['oid']; ?>&layer_tablename=jagdbezirke&layer_columnname=the_geom&layer_id=<? echo $this->qlayerset[$i]['Layer_ID'];?>&selektieren='+currentform.selektieren<? echo $this->qlayerset[$i]['Layer_ID'].'_'.$j; ?>.checked;">Kartenausschnitt</a>&nbsp;&nbsp;<span style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px">Selektieren</span><input type="checkbox" name="selektieren<? echo $this->qlayerset[$i]['Layer_ID'].'_'.$j; ?>" value="1">&nbsp;|&nbsp;
+						<? if($flst_privileges['eigentuemer'] != ''){ ?>
             <a href="index.php?go=jagdkatastereditor_Flurstuecke_Listen&oid=<?php echo $this->qlayerset[$i]['shape'][$j]['oid']; ?>&name=<? echo $this->qlayerset[$i]['shape'][$j]['name'] ?>&search_nummer=<? echo $this->formvars['search_nummer']; ?>&search_name=<? echo $this->formvars['search_name']; ?>&search_art=<? echo $this->formvars['search_art']; ?>">enthaltene Flurstücke</a>&nbsp;|&nbsp;
             <a href="index.php?go=jagdkatastereditor_Eigentuemer_Listen&oid=<?php echo $this->qlayerset[$i]['shape'][$j]['oid']; ?>&name=<? echo $this->qlayerset[$i]['shape'][$j]['name'] ?>&search_nummer=<? echo $this->formvars['search_nummer']; ?>&search_name=<? echo $this->formvars['search_name']; ?>&search_art=<? echo $this->formvars['search_art']; ?>">Eigentümer auflisten</a>&nbsp;|&nbsp;
-						<? if($editable){ ?>
+						<? }
+							 if($editable){ ?>
             <a href="index.php?go=jagdkatastereditor&oid=<?php echo $this->qlayerset[$i]['shape'][$j]['oid']; ?>">bearbeiten</a>&nbsp;|&nbsp;
             <a href="javascript:Bestaetigung('index.php?go=jagdkatastereditor_Loeschen&oid=<?php echo $this->qlayerset[$i]['shape'][$j]['oid']; ?>', 'Wollen Sie diesen Jagdbezirk wirklich löschen?');">löschen</a>&nbsp;|&nbsp;
             <a href="index.php?go=jagdkatastereditor_kopieren&oid=<?php echo $this->qlayerset[$i]['shape'][$j]['oid']; ?>">kopieren</a>
