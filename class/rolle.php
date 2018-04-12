@@ -992,9 +992,9 @@ class rolle {
 					$layers_changed[$layer_oben['id']] = true;
 					$next_id = $layer_unten['id'] + 1;		// id des nächsten Layers im Layer-Array
 					if($layerset['list'][$next_id]['drawingorder'] <= $newdrawingorder){		// wenn erforderlich auch die drawingorders der Layer darüber erhöhen
-						$increase = $newdrawingorder - $layer['list'][$next_id]['drawingorder'] + 1;		// um wieviel muss erhöht werden?
-						for($j = $next_id; $j < count($layer['list']); $j++){
-							$layer['list'][$j]['drawingorder'] += $increase;
+						$increase = $newdrawingorder - $layerset['list'][$next_id]['drawingorder'] + 1;		// um wieviel muss erhöht werden?
+						for($j = $next_id; $j < count($layerset['list']); $j++){
+							$layerset['list'][$j]['drawingorder'] += $increase;
 							$layers_changed[$j] = true;
 						}
 					}
@@ -1002,8 +1002,7 @@ class rolle {
 			}
 			if($layers_changed != ''){				
 				foreach($layers_changed as $id => $value){
-					$sql = 'UPDATE u_rolle2used_layer SET drawingorder = '.$layer[$id]['drawingorder'].' WHERE layer_id='.$layer[$id]['Layer_ID'].' AND user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-					#echo $sql.'<br>';
+					$sql = 'UPDATE u_rolle2used_layer SET drawingorder = '.$layerset['list'][$id]['drawingorder'].' WHERE layer_id='.$layerset['list'][$id]['Layer_ID'].' AND user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 					$this->debug->write("<p>file:rolle.php class:rolle function:saveLegendOptions - :",4);
 					$this->database->execSQL($sql,4, $this->loglevel);
 				}
