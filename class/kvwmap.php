@@ -147,6 +147,7 @@ class GUI {
 		$this->title = 'kvwmap Passwort Änderung';
 		$this->expect = array('passwort', 'new_password', 'new_password_2');
 		if ($this->formvars['go'] == 'logout') {
+			# Nicht nochmal go = logout, sonst kommt man da nicht mehr raus.
 			$this->expect[] = 'go';
 		}
 		$this->user->rolle->gui = 'snippets/login_new_password.php';
@@ -154,10 +155,14 @@ class GUI {
 	}
 
 	function login_registration() {
+		include_once(CLASSPATH . 'Invitation.php');
 		$this->title='kvwmap Registrierung';
-		$this->user->rolle->gui = 'snippets/user_registration_form.php';
-		$login_name = $this->formvars['login_name'];
-		$passwort = $this->formvars['passwort'];
+		$this->invitation = Invitation::find_by_id($this, $this->formvars['token']);
+		if ($this->formvars['login_name'] == '') {
+			$this->formvars['login_name'] = strToLower(substr($this->invitation->inviter->get('Vorname'), 0, 1) . $this->invitation->inviter->get('Name'));
+		}
+		$this->expect = array('login_name', 'new_password', 'new_password_2');
+		$this->user->rolle->gui = 'snippets/login_registration.php';
 		$this->output();
 	}
 
@@ -7701,6 +7706,129 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->layergruppe = LayerGroup::find_by_id($this, $this->formvars['selected_group_id']);
 		$this->layergruppe->delete();
 		$this->add_message('notice', 'Layergruppe erfolgreich gelöscht.');
+	}
+
+	function invitations_list() {
+		include_once(CLASSPATH . 'Invitation.php');
+		$this->invitations = Invitation::find(
+			$this,
+			'inviter_id = ' . $this->user->id,
+			($this->formvars['order'] == '' ? 'email' : '')
+		);
+
+		$this->main = 'invitations.php';
+		$this->output();
+	}
+
+	function invitation_formular() {
+		include_once(CLASSPATH . 'Invitation.php');
+		$this->invitation = new Invitation($this);
+		if ($this->formvars['selected_invitation_id'] != '') {
+			$this->invitation = Invitation::find_by_id($this, $this->formvars['selected_invitation_id']);
+			$this->formvars = array_merge($this->formvars, array(
+				'token' => $this->invitation->get('token'),
+				'email' => $this->invitation->get('email'),
+				'name' => $this->invitation->get('name'),
+				'vorname' => $this->invitation->get('vorname'),
+				'stelle_id' => $this->invitation->get('stelle_id'),
+				'inviter_id' => $this->invitation->get('inviter_id')
+			));
+		}
+		else {
+			$this->formvars['token'] = uuid();
+			$this->formvars['inviter_id'] = $this->user->id;
+			$this->invitation->setKeysFromTable();
+		}
+		$myobj = new MyObject($this, 'stelle');
+		$stellen = $myobj->find_by_sql(
+			array(
+				'select' => 's.`ID`, s.`Bezeichnung`',
+				'from' => 'stelle s, rolle r',
+				'where' => 's.ID = r.stelle_id AND r.user_id = ' . $this->user->id . ' AND r.stelle_id != ' . $this->Stelle->id,
+				'order' => 'bezeichnung'
+			)
+		);
+
+		$this->invitation->stellen = array_map(
+			function($stelle) {
+				return array(
+					'value' => $stelle->get('ID'),
+					'output' => $stelle->get('Bezeichnung')
+				);
+			},
+			$stellen
+		);
+		$this->main = 'invitation_formular.php';
+		$this->output();
+	}
+
+	function invitation_save() {
+		include_once(CLASSPATH . 'Invitation.php');
+		$this->invitation = new Invitation($this);
+		$this->invitation->data = formvars_strip($this->formvars, $this->invitation->setKeysFromTable(), 'keep');
+
+		$results = $this->invitation->validate();
+		if (empty($results)) {
+			$results = $this->invitation->create();
+		}
+		if (empty($results)) {
+			$this->add_message('info', 'Neuer Nutzer ist vorgemerkt.<br>
+				<a href="mailto:' . $this->invitation->mailto_text() . '">Einladung per E-Mail verschicken</a>');
+			$this->invitations_list();
+		}
+		else {
+			$this->add_message('array', $results);
+			$this->invitation_formular();
+		}
+	}
+
+	function invitation_update() {
+		include_once(CLASSPATH . 'Invitation.php');
+		$this->invitation = Invitation::find_by_id($this, $this->formvars['selected_invitation_id']);
+			#//ToDo prüfen ob und warum hier die completet timestamp auf 0000-00 etc. gesetzt wird.
+		$results = $this->invitation->validate();
+		if (empty($results)) {
+			$results = $this->invitation->update(
+				array(
+					'token' => $this->formvars['token'],
+					'email' => $this->formvars['email'],
+					'name' => $this->formvars['name'],
+					'vorname' => $this->formvars['vorname'],
+					'stelle_id' => $this->formvars['stelle_id'],
+					'inviter_id' => $this->formvars['inviter_id']
+				)
+			);
+		}
+		if (empty($results)) {
+			$this->add_message(
+				'info',
+				'Daten der Einladung aktualisiert.<br><a href="mailto:' . $this->invitation->mailto_text() . '">Einladung noch mal per E-Mail verschicken</a>'
+			);
+		}
+		else {
+			if (is_array($results)) {
+				$this->add_message(
+					'array',
+					array_map(
+						function($result) {
+							return array('type' => 'info', 'msg' => $result);
+						},
+						$results
+					)
+				);
+			}
+			else {
+				$this->add_message('error', $results);
+			}
+		}
+		$this->invitation_formular();
+	}
+
+	function invitation_delete() {
+		include_once(CLASSPATH . 'Invitation.php');
+		$this->invitation = Invitation::find_by_id($this, $this->formvars['selected_invitation_id']);
+		$this->invitation->delete();
+		$this->add_message('notice', 'Einladung erfolgreich gelöscht.');
 	}
 
   function GenerischeSuche_Suchen(){

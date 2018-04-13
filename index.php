@@ -1751,6 +1751,31 @@ function go_switch($go){
 				$GUI->output();
 			} break;
 
+			case 'Einladungen_Anzeigen' : {
+				$GUI->checkCaseAllowed('Einladungen_Anzeigen');
+				$GUI->invitations_list();
+			} break;
+
+			case 'Einladung_Editor' : {
+				$GUI->checkCaseAllowed('Einladungen_Anzeigen');
+				$GUI->invitation_formular();
+			} break;
+
+			case 'Einladung_Speichern' : {
+				$GUI->checkCaseAllowed('Einladungen_Anzeigen');
+				$GUI->invitation_save();
+			} break;
+
+			case 'Einladung_Ändern' : {
+				$GUI->checkCaseAllowed('Einladungen_Anzeigen');
+				$GUI->invitation_update();
+			} break;
+
+			case 'Einladung_Löschen' : {
+				$GUI->checkCaseAllowed('Einladungen_Anzeigen');
+				$GUI->invitation_delete();
+			} break;
+
 			default : {
 				# Karteninformationen lesen
 				$GUI->loadMap('DataBase');

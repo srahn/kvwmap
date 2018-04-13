@@ -250,7 +250,7 @@
 				<li>token ist für email registriert</li>
 				<li>die für den token eingetragene Stelle 55 existiert</li>
 			</ul>
-			<? $url = 'index.php?token=ab0671b0-39ae-11e8-9ba7-bb07f51b01a2&email=peter.korduan@gdi-service.de'; ?>
+			<? $url = 'index.php?token=ab0671b0-39ae-11e8-9ba7-bb07f51b01a2&email=peter.korduan@gdi-service.de&stelle_id=64'; ?>
 			<a href="<?php echo $url; ?>" target="kvwmap_test_window"><?php echo $url; ?></a>
 			<p>
 			<b>Flow:</b>

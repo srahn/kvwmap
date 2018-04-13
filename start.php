@@ -7,7 +7,7 @@ $GUI->user->rolle->querymode = 0;
 $GUI->allowed_documents = array();
 $GUI->document_loader_name = session_id().rand(0,99999999).'.php';
 $GUI->formvars=$formvars;
-$GUI->echo = true;
+$GUI->echo = false;
 
 #################################################################################
 # Setzen der Konstante, ob in die Datenbank geschrieben werden soll oder nicht.
@@ -199,17 +199,32 @@ else {
 
 				if (is_new_password($GUI->formvars)) {
 					$GUI->debug->write('Registrierung mit neuem Passwort.', 4, $GUI->echo);
+					$new_registration_err = checkRegistration($GUI);
 
-					if (is_registration_valid($GUI->formvars)) {
+					if (is_registration_valid($new_registration_err)) {
 						$GUI->debug->write('Registrierung ist valide.', 4, $GUI->echo);
+
 						# // ToDo: Create a new user and go to login with user and password
-						$GUI->user = Nutzer::register($GUI);
-						$GUI->add_message('info', 'Nutzer erfolgreich angelegt.<br>Willkommen im WebGIS kvwmap.');
-						# login case 9
+						$result = Nutzer::register($GUI, $GUI->formvars['stelle_id']);
+						if ($result['success']) {
+							$invitation = Invitation::find_by_id($GUI, $GUI->formvars['token']);
+							$invitation->set('completed', date("Y-m-d H:i:s"));
+							$invitation->update();
+							$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->database);
+							unset($GUI->formvars['Stelle_id']);
+							$GUI->add_message('info', 'Nutzer erfolgreich angelegt.<br>Willkommen im WebGIS kvwmap.');
+							# login case 9
+						}
+						else {
+							$GUI->Fehlermeldung = 'Datenbankfehler beim Anlegen des Nutzers.<br>' . $result['msg'];
+							$show_login_form = true;
+							$go = 'login_registration';
+							# login case 11
+						}
 					}
 					else {
 						$GUI->debug->write('Registrier ist nicht valid.', 4, $GUI->echo);
-						$GUI->formvars['err_msg'] = "Die Registrierung ist nicht erfolgreich. Versuchen Sie es erneut oder lassen Sie sich erneut einladen.";
+						$GUI->Fehlermeldung = $new_registration_err . '<br>Die Registrierung ist nicht erfolgreich.<br>Versuchen Sie es erneut oder lassen Sie sich erneut einladen.';
 						$show_login_form = true;
 						$go = 'login_registration';
 						# login case 11
@@ -288,7 +303,7 @@ if ($show_login_form) {
 	$GUI->user->rolle->querymode = 0;
 }
 else {
-	$GUI->debug->write('Lade Stelle und Rolle.', 4, $echo);
+	$GUI->debug->write('Lade Stelle und Rolle.', 4, $GUI->echo);
 	# Alles was man immer machen muss bevor die go's aufgerufen werden
 	$GUI->user->setRolle($GUI->user->stelle_id);
 	#echo 'In der Rolle eingestellte Sprache: '.$GUI->user->rolle->language;
@@ -445,7 +460,7 @@ else {
 	  }
 	}
 }
-
+print_r($GUI->user->rolle);
 /**
  Functions
 **/
@@ -487,7 +502,7 @@ function is_user_member_in_stelle($user_stelle_id, $allowed_stellen_ids) {
 }
 
 function get_permission_in_stelle($GUI) {
-	echo 'get permission in stelle';
+	$GUI->debug->write('start get permission in stelle', 4, $GUI->echo);
 	$allowed = true;
 	$reason = '';
 	$errmsg = '';
@@ -550,11 +565,98 @@ function is_password_expired($user, $stelle) {
 }
 
 function is_registration($formvars) {
-	return $formvars['token'] != '' AND $formvars['email'] != '';
+	return strpos($formvars['go'], 'invitation') === false AND $formvars['token'] != '' AND $formvars['email'] != '' AND $formvars['stelle_id'] != '';
 }
 
-function is_registration_valid($formvars) {
-	return false;
+function checkRegistration($gui) {
+	include_once(CLASSPATH . 'Invitation.php');
+	$params = $gui->formvars;
+	$registration_errors = array();
+	$check = 0;
+
+	# Prüft ob ein Name übergeben wurde
+	if ($params['Name'] == '') {
+		$registration_errors[] = 'Name fehlt.';
+		$check = 1;
+	}
+
+	# Prüft ob ein login_name übergeben wurde
+	if ($check == 0 AND $params['login_name'] == '') {
+		$registration_errors[] = 'Parameter login_name fehlt.';
+		$check = 1;
+	}
+
+	# Prüft ob login_name schon existiert
+	if ($check == 0) {
+		$user = Nutzer::find_by_login_name($gui, $params['login_name']);
+		if ($user->get('login_name') == $params['login_name']) {
+			$registration_errors[] = 'login_name: ' . $params['login_name'] . ' existiert schon im System.<br>Bitte wählen sie einen anderen aus.';
+			$check = 1;
+		}
+	}
+
+	# Prüft ob new_password und new_password_2 valide sind
+	if ($check == 0) {
+		$password_errors = isPasswordValide('', $params['new_password'], $params['new_password_2']);
+		if ($password_errors != '') {
+			$registration_errors[] = $password_errors . '<br>Passwörter der Registrierung nicht valide.';
+			$check = 1;
+		}
+	}
+
+	# Prüft ob ein token übergeben wurde
+	if ($check == 0 AND $params['token'] == '') {
+		$registration_errors[] = 'Parameter token fehlt.';
+		$check = 1;
+	}
+
+	# Prüft ob eine Einladung zum token existiert
+	if ($check == 0) {
+		$invitation = Invitation::find_by_id($gui, $params['token']);
+		if ($invitation->get('token') != $params['token']) {
+			$registration_errors[] = 'Einladung zu token: ' . $params['token'] . ' nicht gefunden.<br>Prüfen Sie ob Sie den richtigen Link aufgerufen oder<br>die URL richtig kopiert haben.';
+			$check = 1;
+		}
+	}
+
+	# Prüft ob Einladung schon wahrgenommen wurde
+	if ($check == 0 AND $invitation->get('compleeted') != '') {
+		$registration_errors[] = 'Einladung zu token: ' . $params['token'] . ' wurde schon am: ' . $invitation->get('completed') . ' wahrgenommen.';
+		$check = 1;
+	}
+
+	# Prüft ob eine korrekte email übergeben wurde
+	$email_errors = emailcheck($params['email']);
+
+	if ($check == 0 AND $email_errors != '') {
+		$registration_errors[] = $email_errors;
+		$check = 1;
+	}
+
+	# Prüft ob email zum token passt
+	if ($check == 0 AND $params['email'] != $invitation->get('email')) {
+		$registration_errors[] = 'email: ' . $params['email'] . ' passt nicht zu<br>token: ' . $params['token'] . '.';
+		$check = 1;
+	}
+
+	# Prüft ob eine stellen_id übergeben wurde
+	if ($check == 0 AND $params['stelle_id'] == '') {
+		$registration_errors[] = 'Parameter stellen_id fehlt.';
+		$check = 1;
+	}
+
+	# Prüft ob stelle_id zum token passt
+	if ($check == 0 AND $params['stelle_id'] != $invitation->get('stelle_id')) {
+		$registration_errors[] = 'stelle_id: ' . $params['stelle_id'] . ' passt nicht zu<br>token: ' . $params['token'] . '.';
+		$check = 1;
+	}
+
+	return implode('<br>', $registration_errors);
+}
+
+
+function is_registration_valid($msg) {
+	return ($msg == '');
 }
 
 function is_ows_request($formvars) {

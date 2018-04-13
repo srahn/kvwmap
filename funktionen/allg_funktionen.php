@@ -363,21 +363,30 @@ function checkPasswordAge($passwordSettingTime,$allowedPassordAgeMonth) {
 */
 # Passwortprüfung
 function isPasswordValide($oldPassword, $newPassword, $newPassword2) {
-	echo 'allg_funktionen isPasswortValide old: ' . $oldPassword . ' new1: ' . $newPassword . ' new2: ' . $newPassword2;
+	#echo '<p>allg_funktionen isPasswortValide old: ' . $oldPassword . ' new1: ' . $newPassword . ' new2: ' . $newPassword2;
   $password_errors = array();
   $check = 0;
 
-  # Prüft ob überhaupt etwas eingegeben wurde
-  if (strlen($newPassword)==0 or strlen($newPassword2)==0) {
-  	$password_errors[] = "ist leer";
-  	$check = 1;
-  }
+	# Prüft ob das Password eingegeben wurde
+	if (strlen($newPassword) == 0) {
+		$password_errors[] = "ist leer";
+		$check = 1;
+	}
 
-  # Prüft ob neues Passwort nicht genau dem alten Passwort entspricht
-  if ($check == 0 and $oldPassword==$newPassword) {
-    $password_errors[] = "muss sich vom alten unterscheiden";
-    $check = 1;
-  }
+	# Prüft ob die Passwortwiederholung eingegeben wurde.
+	if ($check == 0 AND strlen($newPassword2) == 0) {
+		$password_errors[] = " hat keine Wiederholung";
+		$check = 1;
+	}
+
+	# Wenn oldPassword angegeben wurde
+	if ($check == 0 AND strlen($oldPassword) > 0) {
+		# Prüft ob neues Passwort genau dem alten Passwort entspricht
+		if ($check == 0 and $oldPassword==$newPassword) {
+			$password_errors[] = "muss sich vom alten unterscheiden";
+			$check = 1;
+		}
+	}
 
   # Prüft ob neues Passwort der Wiederholung entspricht
   if ($check == 0 and $newPassword!=$newPassword2) {
@@ -1612,7 +1621,7 @@ function hidden_formvars_fields($formvars, $except = array()) {
 		}
 	}
 	foreach($params AS $key => $value) {
-		$html = '<input type="hidden" name="' . $key . '" value="' . $value .'">';
+		$html .= '<input type="hidden" name="' . $key . '" value="' . $value .'">';
 	}
 	return $html;
 }
@@ -1639,5 +1648,15 @@ function values_from_array($array_key, $array) {
 		}
 	}
 	return $params;
+}
+
+function uuid() {
+	return sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+		mt_rand(0, 0xffff), mt_rand(0, 0xffff),
+		mt_rand(0, 0xffff),
+		mt_rand(0, 0x0fff) | 0x4000,
+		mt_rand(0, 0x3fff) | 0x8000,
+		mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+	);
 }
 ?>

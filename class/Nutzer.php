@@ -36,22 +36,39 @@ class Nutzer extends MyObject {
 		}
 	}
 
-	public static function register($gui, $email, $stelle_id) {
+	public static function register($gui, $stelle_id) {
+		$gui->debug->show('Nutzer register', Nutzer::$write_debug);
 		$user = new Nutzer($gui);
-		#// TODO: erzeuge neuen Nutzers und Ordne der Stelle zu
-		$user.create(
+		$result = $user->create(
 			array(
 				'login_name' => $gui->formvars['login_name'],
 				'Name' => $gui->formvars['Name'],
 				'Vorname' => $gui->formvars['Vorname'],
 				'Namenszusatz' => $gui->formvars['Namenszusatz'],
-				'password' => $gui->formvars['passwort'],
+				'passwort' => md5($gui->formvars['new_password']),
 				'phon' => $gui->formvars['phon'],
-				'email' => $email,
+				'email' => $gui->formvars['email'],
 				'stelle_id' => $stelle_id
 			)
 		);
-		return new user($user.get('login_name'), 0, $gui->database);
+
+		if ($result['success']) {
+			$result['success'] = false;
+			$rolle = new rolle($user->get('ID'), $stelle_id, $gui->database);
+			if ($rolle->setRollen($user->get('ID'), array($stelle_id))) {
+				if ($rolle->setMenue($user->get('ID'), array($stelle_id))) {
+					if ($rolle->setLayer($user->get('ID'), array($stelle_id), 0)) {
+						$result['success'] = true;
+						#// ToDo: Check was noch eingefügt werden muss an Hand von Nutzer pkorduan in Stelle 55 weil layer werden nicht angezeigt.
+
+					}
+				}
+			}
+			if ($result['success'] == 0) {
+				$succsess['msg'] = mysql_error($gui->database->dbConn);
+			}
+		}
+		return $result;
 	}
 }
 ?>

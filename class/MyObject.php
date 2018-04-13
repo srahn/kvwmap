@@ -190,6 +190,8 @@ class MyObject {
 
 	function create($data = array()) {
 		$this->debug->show('<p>MyObject create ' . $this->tablename, MyObject::$write_debug);
+		$success = false;
+		$errmsg = '';
 		if (!empty($data))
 			$this->data = $data;
 
@@ -219,11 +221,20 @@ class MyObject {
 			)
 		";
 		$this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
-		mysql_query($sql);
-		$new_id = mysql_insert_id();
-		$this->debug->show('<p>new id: ' . $new_id, MyObject::$write_debug);
-		$this->set($this->identifier, $new_id);
-		return NULL;
+		if (mysql_query($sql)) {
+			$new_id = mysql_insert_id();
+			$this->debug->show('<p>new id: ' . $new_id, MyObject::$write_debug);
+			$this->set($this->identifier, $new_id);
+			$success = true;
+		}
+		else {
+			$errmsg = mysql_error($this->database->dbConn);
+		}
+
+		return array(
+			'success' => $success,
+			'msg' => $errmsg
+		);
 	}
 
 	function update($data = array()) {
