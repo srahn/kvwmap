@@ -679,12 +679,15 @@
 							</td>
 						</tr>
 					</table>
-				</td>
+				</td>				
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">
+					<? if($this->layerdata['editable']){ ?>
 					<a href="javascript:Bestaetigung('index.php?go=Layereditor_Klasse_Löschen&class_id=<?php echo $this->classes[$i]['Class_ID']; ?>&selected_layer_id=<?php echo $this->formvars['selected_layer_id']; ?>#Klassen',	'<?php echo $this->strDeleteWarningMessage; ?>');"><?php echo $this->strDelete; ?></a>
+					<? } ?>
 				</td>
 			</tr><?php
 			}
+			if($this->layerdata['editable']){
 			?>
 			<tr>
 				<td style="border-bottom:1px solid #C3C7C3" colspan="10">
@@ -741,6 +744,7 @@
 					</div>
 				</td>
 			</tr>
+			<? } ?>
 			<tr>
 				<td colspan="10"><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>">Styles und Labels bearbeiten</a></td>
 			</tr>
@@ -758,10 +762,12 @@
 		<td align="center">
 			<input type="hidden" name="go_plus" id="go_plus" value="">
 			<input type="button" name="dummy2" value="<?php echo $this->strButtonBack; ?>" onclick="location.href='index.php?go=Layer_Anzeigen'">&nbsp;<?php
-		 if ($this->formvars['selected_layer_id']>0) { ?>
+		 if ($this->formvars['selected_layer_id'] > 0) { ?>
 			<input type="hidden" name="selected_layer_id" value="<?php echo $this->formvars['selected_layer_id']; ?>">
+			<? if($this->layerdata['editable']){ ?>
 			<input type="button" name="dummy" value="<?php echo $strButtonSave; ?>" onclick="submitWithValue('GUI','go_plus','Ändern')">
-			<?php
+			<?
+			}
 		 } ?>&nbsp;<input type="button" name="dummy" value="<?php echo $strButtonSaveAsNewLayer; ?>" onclick="submitWithValue('GUI','go_plus','Als neuen Layer eintragen')">		 
 		</td>
 		<td valign="top">

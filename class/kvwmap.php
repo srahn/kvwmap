@@ -1386,8 +1386,7 @@ class GUI {
 								# z.B. für Klassen mit Umlauten
 								$layerset['list'][$i]['connection'] .= " options='-c client_encoding=".MYSQL_CHARSET."'";
 							}
-							$layer->set('connection', replace_params($layerset['list'][$i]['connection'], rolle::$layer_params));
-							#echo '<br>Connection: ' . replace_params($layerset['list'][$i]['connection'], rolle::$layer_params);
+							$layer->set('connection', $layerset['list'][$i]['connection']);
 						}
 
 						if ($layerset['list'][$i]['connectiontype'] > 0) {
@@ -3213,11 +3212,15 @@ class GUI {
 
   function get_styles(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$this->layer = $mapDB->get_Layer($this->formvars['layer_id']);
     $this->classdaten = $mapDB->read_ClassesbyClassid($this->formvars['class_id']);
     echo'
       <table width="100%" align="left" border="0" cellspacing="0" cellpadding="3">
         <tr>
-          <td height="25" valign="top">Styles</td><td align="right"><a href="javascript:add_style();">neuer Style</a></td>
+          <td height="25" valign="top">Styles</td>
+					<td align="right">
+						'.($this->layer['editable'] ? '<a href="javascript:add_style();">neuer Style</a>' : '').'
+					</td>
         </tr>';
     if(count($this->classdaten[0]['Style']) > 0){
       $this->classdaten[0]['Style'] = array_reverse($this->classdaten[0]['Style']);
@@ -3231,9 +3234,11 @@ class GUI {
               echo '<td align="right" id="td2_style_'.$this->classdaten[0]['Style'][$i]['Style_ID'].'" ';
               if($this->formvars['style_id'] == $this->classdaten[0]['Style'][$i]['Style_ID']){echo 'style="background-color:lightsteelblue;" ';}
               echo '>';
-              if($i < count($this->classdaten[0]['Style'])-1){echo '<a href="javascript:movedown_style('.$this->classdaten[0]['Style'][$i]['Style_ID'].');" title="in der Zeichenreihenfolge nach unten verschieben"><img src="'.GRAPHICSPATH.'pfeil.gif" border="0"></a>';}
-              if($i > 0){echo '&nbsp;<a href="javascript:moveup_style('.$this->classdaten[0]['Style'][$i]['Style_ID'].');" title="in der Zeichenreihenfolge nach oben verschieben"><img src="'.GRAPHICSPATH.'pfeil2.gif" border="0"></a>';}
-              echo html_umlaute('&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:delete_style('.$this->classdaten[0]['Style'][$i]['Style_ID'].');">löschen</a>');
+							if($this->layer['editable']){
+								if($i < count($this->classdaten[0]['Style'])-1){echo '<a href="javascript:movedown_style('.$this->classdaten[0]['Style'][$i]['Style_ID'].');" title="in der Zeichenreihenfolge nach unten verschieben"><img src="'.GRAPHICSPATH.'pfeil.gif" border="0"></a>';}
+								if($i > 0){echo '&nbsp;<a href="javascript:moveup_style('.$this->classdaten[0]['Style'][$i]['Style_ID'].');" title="in der Zeichenreihenfolge nach oben verschieben"><img src="'.GRAPHICSPATH.'pfeil2.gif" border="0"></a>';}
+								echo html_umlaute('&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:delete_style('.$this->classdaten[0]['Style'][$i]['Style_ID'].');">löschen</a>');
+							}
         echo'
             </td>
           </tr>
@@ -3246,11 +3251,15 @@ class GUI {
 
   function get_labels(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$this->layer = $mapDB->get_Layer($this->formvars['layer_id']);
     $this->classdaten = $mapDB->read_ClassesbyClassid($this->formvars['class_id']);
       echo'
         <table width="100%" align="left" border="0" cellspacing="0" cellpadding="3">
           <tr>
-            <td height="25" valign="top">Labels</td><td colspan="2" align="right"><a href="javascript:add_label();">neues Label</a></td>
+            <td height="25" valign="top">Labels</td>
+						<td colspan="2" align="right">
+						'.($this->layer['editable'] ? '<a href="javascript:add_label();">neues Label</a>' : '').'
+						</td>
           </tr>';
       if(count($this->classdaten[0]['Label']) > 0){
         for($i = 0; $i < count($this->classdaten[0]['Label']); $i++){
@@ -3262,7 +3271,9 @@ class GUI {
                 echo 'Label '.$this->classdaten[0]['Label'][$i]['Label_ID'].'</td>';
                 echo '<td align="right" id="td2_label_'.$this->classdaten[0]['Label'][$i]['Label_ID'].'" ';
                 if($this->formvars['label_id'] == $this->classdaten[0]['Label'][$i]['Label_ID']){echo 'style="background-color:lightsteelblue;" ';}
-                echo html_umlaute('><a href="javascript:delete_label('.$this->classdaten[0]['Label'][$i]['Label_ID'].');">löschen</a>');
+								if($this->layer['editable']){
+									echo html_umlaute('><a href="javascript:delete_label('.$this->classdaten[0]['Label'][$i]['Label_ID'].');">löschen</a>');
+								}
           echo'
               </td>
             </tr>';
@@ -3365,6 +3376,7 @@ class GUI {
 
   function get_style(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$this->layer = $mapDB->get_Layer($this->formvars['layer_id']);
     $this->styledaten = $mapDB->get_Style($this->formvars['style_id']);
     if(is_array($this->styledaten)){
       echo'
@@ -3381,11 +3393,13 @@ class GUI {
           </tr>';
         next($this->styledaten);
       }
-      echo'
-          <tr>
-            <td height="30" colspan="2" valign="bottom" align="center"><input type="button" name="style_save" value="Speichern" onclick="save_style('.$this->styledaten['Style_ID'].')"></td>
-          </tr>
-        </table>';
+			if($this->layer['editable']){
+				echo'
+					<tr>
+						<td height="30" colspan="2" valign="bottom" align="center"><input type="button" name="style_save" value="Speichern" onclick="save_style('.$this->styledaten['Style_ID'].')"></td>
+					</tr>
+				</table>';
+			}
     }
   }
 
@@ -3399,6 +3413,7 @@ class GUI {
 
   function get_label(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$this->layer = $mapDB->get_Layer($this->formvars['layer_id']);
     $this->labeldaten = $mapDB->get_Label($this->formvars['label_id']);
     if(count($this->labeldaten) > 0){
       echo'
@@ -3413,11 +3428,13 @@ class GUI {
           </tr>';
         next($this->labeldaten);
       }
-      echo'
+			if($this->layer['editable']){
+				echo'
           <tr>
             <td height="30" colspan="2" valign="bottom" align="center"><input type="button" name="label_save" value="Speichern" onclick="save_label('.$this->labeldaten['Label_ID'].')"></td>
           </tr>
         </table>';
+			}
     }
   }
 
@@ -3695,7 +3712,7 @@ class GUI {
 				$this->showAdminFunctions();
       } break;
 			case "update_code" : {
-        $this->administration->update_code();
+        $result = $this->administration->update_code();
 				$this->administration->get_database_status();
 				$this->showAdminFunctions();
       } break;
@@ -3721,6 +3738,7 @@ class GUI {
         $this->showAdminFunctions();
       }
     }
+		return $result;
   }
 
 	function save_all_layer_attributes(){
@@ -8727,8 +8745,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					$insert = $this->processJSON($this->formvars[$form_fields[$i]], $doc_path, $options, $attributenames, $attributevalues, $layerdb);
 				}
 				else $insert = $this->save_uploaded_file($form_fields[$i], $doc_path, $options, $attributenames, $attributevalues, $layerdb);	// normales Dokument-Attribut
+				$this->formvars[$form_fields[$i]] = $insert;
 			}
-			$this->formvars[$form_fields[$i]] = $insert;
 		}
 
 		if ($this->formvars['geomtype'] == 'GEOMETRY') {
@@ -10167,6 +10185,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		if($this->formvars['selected_layer_id']){
 			$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 			$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL, true);
+			$this->layer = $mapdb->get_Layer($this->formvars['selected_layer_id']);
 		}
 		if($this->formvars['selected_datatype_id']){
 			$this->attributes = $mapdb->read_datatype_attributes($this->formvars['selected_datatype_id'], NULL, NULL, true);
@@ -16117,7 +16136,7 @@ class db_mapObj{
 		$dump_text .= "\n-- Achtung: Die Datenbank in die der Dump eingespielt wird, sollte die gleiche Migrationsversion haben,";
 		$dump_text .= "\n-- wie die Datenbank aus der exportiert wurde! Anderenfalls kann es zu Fehlern bei der Ausführung des SQL kommen.";
 		$dump_text .= "\n\nSET @group_id = 1;";
-		$dump_text .= "\nSET @connection = 'host=pgsql dbname=kvwmapsp user=kvwmap password=*****';";
+		$dump_text .= "\nSET @connection = 'user=xxxx password=xxxx dbname=kvwmapsp';";
 
 		if ($with_privileges) {
 			# Frage Stellen der Layer ab
@@ -16139,7 +16158,7 @@ class db_mapObj{
 			}
 			else {
 				while($rs = mysql_fetch_assoc($ret[1])) {
-					$stelle_id_var = '@stelle_id_' . $rs['Bezeichnung'] . '_' . $rs['ID'];
+					$stelle_id_var = '@stelle_id_' . $rs['ID'];
 					$stellen[] = array(
 						'id' => $rs['ID'],
 						'var' => $stelle_id_var
@@ -16184,8 +16203,10 @@ class db_mapObj{
 							SELECT
 								'" . $last_layer_id . "' AS Layer_ID,
 								'" . $stellen[$s]['var'] . "' AS Stelle_ID,
-								`queryable`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `offsite`, `transparency`, `postlabelcache`,
-								`Filter`, `template`, `header`, `footer`, `symbolscale`, `used_layer_id`, `logconsume`, `requires`, `privileg`, `export_privileg`,
+								`queryable`,
+								`drawingorder`,
+								`legendorder`, `minscale`, `maxscale`, `offsite`, `transparency`, `postlabelcache`, `Filter`,
+								`template`, `header`, `footer`, `symbolscale`, `requires`, `logconsume`, `privileg`, `export_privileg`,
 								`start_aktiv`,
 								`use_geom`
 							FROM
@@ -16228,30 +16249,30 @@ class db_mapObj{
 			for($j = 0; $j < count($layer_attributes['insert']); $j++){
 				# Attribut des Layers
 				$dump_text .= "\n\n-- Attribut " . $layer_attributes['extra'][$j] . " des Layers " . $layer_ids[$i] . "\n" . $layer_attributes['insert'][$j];
+			}
 
-				if ($with_privileges) {
-					for ($s = 0; $s < count($stellen); $s++) {
-						# Attributrechte in der Stelle
-						$layer_attributes2stelle = $database->create_insert_dump(
-							'layer_attributes2stelle',
-							'',
-							"
-								SELECT
-									'". $last_layer_id . "' AS layer_id,
-									'" . $stellen[$s]['var'] . "' AS stelle_id,
-									`attributename`,
-									`privileg`,
-									`tooltip`
-								FROM
-									`layer_attributes2stelle`
-								WHERE
-									`layer_id` = " . $layer_ids[$i] . " AND
-									`stelle_id` = " . $stellen[$s]['id'] . "
-							"
-						);
-						if (count($layer_attributes2stelle['insert']) > 0) {
-							$dump_text .= "\n\n-- Zuordnung der Layerattribute des Layers " . $layer_ids[$i] . " zur Stelle " . $stellen[$s]['id'] . "\n" . implode("\n", $layer_attributes2stelle['insert']);
-						}
+			if ($with_privileges) {
+				for ($s = 0; $s < count($stellen); $s++) {
+					# Attributrechte in der Stelle
+					$layer_attributes2stelle = $database->create_insert_dump(
+						'layer_attributes2stelle',
+						'',
+						"
+							SELECT
+								'". $last_layer_id . "' AS layer_id,
+								'" . $stellen[$s]['var'] . "' AS stelle_id,
+								`attributename`,
+								`privileg`,
+								`tooltip`
+							FROM
+								`layer_attributes2stelle`
+							WHERE
+								`layer_id` = " . $layer_ids[$i] . " AND
+								`stelle_id` = " . $stellen[$s]['id'] . "
+						"
+					);
+					if (count($layer_attributes2stelle['insert']) > 0) {
+						$dump_text .= "\n\n-- Zuordnung der Layerattribute des Layers " . $layer_ids[$i] . " zur Stelle " . $stellen[$s]['id'] . "\n" . implode("\n", $layer_attributes2stelle['insert']);
 					}
 				}
 			}
@@ -16280,7 +16301,8 @@ class db_mapObj{
 		}
 		for ($i = 0; $i < count($layer_ids); $i++) {
 			$dump_text .= "\n\n-- Replace attribute options for Layer " . $layer_ids[$i];
-			$dump_text .= "\nUPDATE layer_attributes SET options = REPLACE(options, '" . $layer_ids[$i] . "', @last_layer_id" . $layer_ids[$i] . ") WHERE layer_id IN (@last_layer_id" . implode(', @last_layer_id', $layer_ids) . ") AND form_element_type IN ('SubFormPK', 'SubFormFK', 'SubFormEmbeddedPK', 'Autovervollständigungsfeld', 'Auswahlfeld');";
+			$dump_text .= "\nUPDATE layer_attributes SET options = REPLACE(options, 'layer_id=".$layer_ids[$i]."', CONCAT('layer_id=', @last_layer_id".$layer_ids[$i].")) WHERE layer_id IN (@last_layer_id" . implode(', @last_layer_id', $layer_ids) . ") AND form_element_type IN ('Autovervollständigungsfeld', 'Auswahlfeld', 'Link','dynamicLink');";
+			$dump_text .= "\nUPDATE layer_attributes SET options = REPLACE(options, '".$layer_ids[$i].",', CONCAT(@last_layer_id".$layer_ids[$i].", ',')) WHERE layer_id IN (@last_layer_id" . implode(', @last_layer_id', $layer_ids) . ") AND form_element_type IN ('SubFormPK', 'SubFormFK', 'SubFormEmbeddedPK');";
 		}
 
 		$filename = rand(0, 1000000).'.sql';
@@ -17900,15 +17922,31 @@ class Document {
   }
 
   function save_ausschnitt($stelle_id, $user_id, $name, $center_x, $center_y, $print_scale, $angle, $frame_id){
-    $sql = 'INSERT INTO druckausschnitte SET ';
-    $sql.= 'stelle_id = '.$stelle_id.', ';
-    $sql.= 'user_id = '.$user_id.', ';
-    $sql.= 'name = "'.$name.'", ';
-    $sql.= 'center_x = '.$center_x.', ';
-    $sql.= 'center_y = '.$center_y.', ';
-    $sql.= 'print_scale = '.$print_scale.', ';
-    $sql.= 'angle = '.$angle.', ';
-    $sql.= 'frame_id = '.$frame_id;
+    $sql = "
+			INSERT INTO
+				druckausschnitte
+			SET
+				id = COALESCE(
+					(
+						SELECT
+							max(id) + 1 AS new_id
+						FROM
+							druckausschnitte
+						WHERE
+							stelle_id = " . $stelle_id . " AND
+							user_id = " . $user_id . "
+					),
+					1
+				),
+				stelle_id = " . $stelle_id . ",
+				user_id = " . $user_id . ",
+				name = '" . $name . "',
+				center_x = " . $center_x . ",
+				center_y = " . $center_y . ",
+				print_scale = " . $print_scale . ",
+				angle = " . $angle . ",
+				frame_id = " . $frame_id . "
+		";
     $this->debug->write("<p>file:kvwmap class:Document->save_ausschnitt :",4);
     $this->database->execSQL($sql,4, 1);
   }

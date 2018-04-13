@@ -54,7 +54,7 @@ function replace_tags($text, $tags) {
 	$first_right = strpos($text, '>');
 	if ($first_right !== false) {
 		$text = preg_replace("#<\s*\/?(" . $tags . ")\s*[^>]*?>#im", '', $text);
-		$first_left = strpos($text, '<');
+/*		$first_left = strpos($text, '<');
 		if ($first_left !== false and $first_right < $first_left) {
 			# >...<
 			$last_right = strrpos($text, '>');
@@ -63,7 +63,7 @@ function replace_tags($text, $tags) {
 				# entferne $first_right, $last_right und alles dazwischen
 				$text = substr_replace($text, '', $first_right, $last_right - $first_right + 1);
 			}
-		}
+		}*/
 	}
 	return $text;
 }
@@ -166,7 +166,8 @@ function go_switch($go){
 			$GUI->last_query_requested = true;		# get_last_query wurde direkt aufgerufen
 			$GUI->formvars['go'] = $go = $GUI->last_query['go'];
 		}
-		switch($go){
+
+		switch($go) {
 			case 'navMap_ajax' : {
 				$GUI->formvars['nurAufgeklappteLayer'] = true;
 				$GUI->loadMap('DataBase');

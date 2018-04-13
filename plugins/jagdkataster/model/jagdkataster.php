@@ -67,8 +67,8 @@ class jagdkataster {
   		$sql.= ' AND (id like \''.$formvars['search_nummer'].'\'';
   		$sql.= ' OR jb_zuordnung like \''.$formvars['search_nummer'].'\')';  		
   	}
-  	if($formvars['search_name']){
-  		$sql.= ' AND lower(name) like lower(\''.$formvars['search_name'].'\')';
+  	if($formvars['jagd_search_name']){
+  		$sql.= ' AND lower(name) like lower(\''.$formvars['jagd_search_name'].'\')';
   	}
   	if($formvars['search_art']){
   		$sql.= ' AND art = \''.$formvars['search_art'].'\'';

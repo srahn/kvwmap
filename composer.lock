@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "a74cb7e29609a8e70a9bdfef9d95559f",
+    "content-hash": "f5cbc9dc822274a9a8a8ba4f90ec978b",
     "packages": [
         {
             "name": "pclzip/pclzip",

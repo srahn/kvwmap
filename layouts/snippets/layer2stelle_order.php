@@ -2,13 +2,15 @@
 
 	$GUI = $this;
 
-	$this->outputGroup = function($group, $indent = -20) use ($GUI){	
+	$this->outputGroup = function($group, $indent = 0) use ($GUI){	
 		$group_layer_ids = $GUI->layers['layers_of_group'][$group['id']];
 		$anzahl_layer = count($group_layer_ids);
 		if($anzahl_layer > 0 OR $group['untergruppen'] != ''){
 			echo '
 						<tr>
-							<td colspan="5" class="px17 fett" style="height: 30px; border-bottom:1px solid #C3C7C3;"><div style="margin-left: '.$indent.'px;">&nbsp;'.$group['Gruppenname'].'</div></td>
+							<td colspan="5" class="px17 fett" style="height: 30px; border-bottom:1px solid #C3C7C3;"><div style="margin-left: '.$indent.'px;">';
+			if($indent > 0)echo '<img src="graphics/pfeil_unten-rechts.gif">';
+			echo $group['Gruppenname'].'</div></td>
 						</tr>
 					';
 			if($group['untergruppen'] != ''){
@@ -17,15 +19,15 @@
 				}
 			}
 			for($i = 0; $i < $anzahl_layer; $i++){
-				$GUI->outputLayer($group_layer_ids[$i]);
+				$GUI->outputLayer($group_layer_ids[$i], $indent + 10);
 			}
 		}
 	};
 	
-	$this->outputLayer = function($i) use ($GUI){
+	$this->outputLayer = function($i, $indent = 0) use ($GUI){
 		echo '
       	<tr>
-      		<td style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3">&nbsp;'.$GUI->layers['Bezeichnung'][$i].'</td>
+      		<td style="padding-left: '.$indent.'px;border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3">&nbsp;'.$GUI->layers['Bezeichnung'][$i].'</td>
       		<td style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3" align="center"><input size="7" type="text" name="drawingorder_layer'.$GUI->layers['ID'][$i].'" value="'.$GUI->layers['drawingorder'][$i].'"></td>
 					<td style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3" align="center"><input size="7" type="text" name="legendorder_layer'.$GUI->layers['ID'][$i].'" value="'.$GUI->layers['legendorder'][$i].'"></td>
       		<td style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3" align="center"><a href="index.php?go=Layer2Stelle_Editor&selected_layer_id='.$GUI->layers['ID'][$i].'&selected_stelle_id='.$GUI->formvars['selected_stelle_id'].'&stellen_name='.$GUI->selected_stelle->Bezeichnung.'">'.$GUI->strChange.'</a></td>
