@@ -19,7 +19,7 @@ INSERT INTO nachweisverwaltung.fp_punkte_alkis
   ( gml_id, gml_id_punktort, identifier, beginnt, endet, beginnt_punktort, endet_punktort, 
     advstandardmodell, sonstigesmodell, anlass, land, zst, pkn, pktnr, rw, hw, par, 
     soe, soe_alk_pkz, soe_alk_par, soe_alk_vma, soe_weitere, abm, rho, 
-    kds, des, nam, idn, vwl, gst, kst, hin, hat, datei, wkb_geometry
+    kds, des, nam, vwl, gst, kst, hin, hat, datei, wkb_geometry
   ) 
 SELECT 
   * 
@@ -33,7 +33,7 @@ INSERT INTO nachweisverwaltung.fp_punkte_alkis
   ( gml_id, gml_id_punktort, identifier, beginnt, endet, beginnt_punktort, endet_punktort, 
     advstandardmodell, sonstigesmodell, anlass, land, zst, pkn, pktnr, rw, hw, par, 
     soe, soe_alk_pkz, soe_alk_par, soe_alk_vma, soe_weitere, abm, rho, 
-    kds, des, nam, idn, vwl, gst, kst, hin, beziehtsichauf, gehoertzu, datei, wkb_geometry
+    kds, des, nam, vwl, gst, kst, hin, beziehtsichauf, gehoertzu, datei, wkb_geometry
   ) 
 SELECT 
   * 
@@ -47,7 +47,7 @@ INSERT INTO nachweisverwaltung.fp_punkte_alkis
   ( gml_id, gml_id_punktort, identifier, beginnt, endet, beginnt_punktort, endet_punktort, 
     advstandardmodell, sonstigesmodell, anlass, land, zst, pkn, pktnr, rw, hw, par, 
     soe, soe_alk_pkz, soe_alk_par, soe_alk_vma, soe_weitere, abm, rho, 
-    kds, des, nam, idn, vwl, gst, kst, hin, hat, datei, wkb_geometry
+    kds, des, nam, vwl, gst, kst, hin, hat, datei, wkb_geometry
   ) 
 SELECT 
   * 
@@ -61,7 +61,7 @@ INSERT INTO nachweisverwaltung.fp_punkte_alkis
   ( gml_id, gml_id_punktort, identifier, beginnt, endet, beginnt_punktort, endet_punktort, 
     advstandardmodell, sonstigesmodell, anlass, land, zst, pkn, pktnr, rw, hw, par, 
     soe, soe_alk_pkz, soe_alk_par, soe_alk_vma, soe_weitere, abm, fgp, bpn, aam, bza, zde, rho, 
-    kds, des, nam, art, idn, vwl, lzk, gst, kst, pru, hin, fdv, zeigtauf, hat, 
+    kds, des, nam, art, vwl, lzk, gst, kst, pru, hin, fdv, zeigtauf, hat, 
     beziehtsichauf, gehoertzu, datei, wkb_geometry
   ) 
 SELECT 
@@ -76,7 +76,7 @@ INSERT INTO nachweisverwaltung.fp_punkte_alkis
   ( gml_id, gml_id_punktort, identifier, beginnt, endet, beginnt_punktort, endet_punktort, 
     advstandardmodell, sonstigesmodell, anlass, land, zst, pkn, pktnr, rw, hw, par, 
     soe, soe_alk_pkz, soe_alk_par, soe_alk_vma, soe_weitere, 
-    kds, des, nam, art, idn, vwl, gst, kst, hin, wkb_geometry 
+    kds, des, nam, art, vwl, gst, kst, hin, wkb_geometry 
   ) 
 SELECT 
   * 
@@ -90,7 +90,7 @@ INSERT INTO nachweisverwaltung.fp_punkte_alkis
   ( gml_id, gml_id_punktort, identifier, beginnt, endet, beginnt_punktort, endet_punktort, 
     advstandardmodell, sonstigesmodell, anlass, land, zst, pkn, pktnr, rw, hw, par, 
     soe, soe_alk_pkz, soe_alk_par, soe_alk_vma, soe_weitere, 
-    kds, des, nam, art, idn, vwl, gst, kst, hin, wkb_geometry 
+    kds, des, nam, art, vwl, gst, kst, hin, wkb_geometry 
   ) 
 SELECT 
   * 
@@ -104,7 +104,7 @@ INSERT INTO nachweisverwaltung.fp_punkte_alkis
   ( gml_id, gml_id_punktort, identifier, beginnt, endet, beginnt_punktort, endet_punktort, 
     advstandardmodell, sonstigesmodell, anlass, land, zst, pkn, pktnr, rw, hw, par, 
     soe, soe_alk_pkz, soe_alk_par, soe_alk_vma, soe_weitere, 
-    kds, des, nam, idn, vwl, gst, kst, hin, wkb_geometry 
+    kds, des, nam, vwl, gst, kst, hin, wkb_geometry 
   ) 
 SELECT 
   * 
