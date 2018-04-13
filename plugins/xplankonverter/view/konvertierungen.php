@@ -315,18 +315,21 @@
 	loescheKonvertierung = function(e) {
 		var konvertierung_id = $(e.target).parent().parent().attr('konvertierung_id'),
 				konvertierung_oid = $(e.target).parent().parent().attr('konvertierung_oid');
-		$(this).closest('tr').remove();
-		result.text('Lösche Konvertierung für Id: ' + konvertierung_id);
-		$.ajax({
-			url: 'index.php?checkbox_names_<?php echo XPLANKONVERTER_KONVERTIERUNGEN_LAYER_ID; ?>=check;konvertierungen;konvertierungen;' + konvertierung_oid + '&check;konvertierungen;konvertierungen;' + konvertierung_oid + '=on',
-			data: {
-				go: 'xplankonverter_konvertierung_loeschen',
-				chosen_layer_id: <?php echo XPLANKONVERTER_KONVERTIERUNGEN_LAYER_ID; ?>
-			},
-			success: function(response) {
-				result.text(response.msg);
-			}
-		});
+		var r = confirm("Soll die Konvertierung mit der Id " + konvertierung_id + " wirklich gelöscht werden?")
+		if(r == true) {
+			$(this).closest('tr').remove();
+			result.text('Lösche Konvertierung für Id: ' + konvertierung_id);
+			$.ajax({
+				url: 'index.php?checkbox_names_<?php echo XPLANKONVERTER_KONVERTIERUNGEN_LAYER_ID; ?>=check;konvertierungen;konvertierungen;' + konvertierung_oid + '&check;konvertierungen;konvertierungen;' + konvertierung_oid + '=on',
+				data: {
+					go: 'xplankonverter_konvertierung_loeschen',
+					chosen_layer_id: <?php echo XPLANKONVERTER_KONVERTIERUNGEN_LAYER_ID; ?>
+				},
+				success: function(response) {
+					result.text(response.msg);
+				}
+			});
+		}
 	};
 
 </script>
@@ -393,4 +396,4 @@
 	</thead>
 </table>
 
-<button class="button" type="button" id="new_konvertierung" name="go_plus" onclick="location.href='index.php?go=neuer_Layer_Datensatz&selected_layer_id=<?php echo XPLANKONVERTER_KONVERTIERUNGEN_LAYER_ID; ?>'">neu</button>
+<button type="button" id="new_konvertierung" name="go_plus" onclick="location.href='index.php?go=neuer_Layer_Datensatz&selected_layer_id=<?php echo XPLANKONVERTER_KONVERTIERUNGEN_LAYER_ID; ?>'">neu</button>

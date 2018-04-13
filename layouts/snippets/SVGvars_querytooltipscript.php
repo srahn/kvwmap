@@ -1,7 +1,7 @@
 <?php
 #$layerset=$this->user->rolle->getLayer('');
 
-$layerset = $this->layerset;
+$layerset = $this->layerset['list'];
 
 $SVGvars_querytooltipscript = '
 
@@ -21,6 +21,8 @@ $SVGvars_querytooltipscript .= '
 		var maxwidth = 0;
 		var xpos = 5;
 		var ypos = 0;
+		
+		window.setInterval("tooltip_query()", 100);
 		
 		top.document.getElementById("svghelp").SVGshowtooltip = showtooltip;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 				
@@ -118,8 +120,6 @@ $SVGvars_querytooltipscript .= '
 				tooltipgroup.setAttribute(\'visibility\', \'visible\');
 			}
 		}				
-						
-		window.setInterval("tooltip_query()", 100);
 		
 		function cleartext(object){
 			while(object.childNodes.length > 0){

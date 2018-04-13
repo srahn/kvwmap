@@ -1,6 +1,6 @@
 <?php
 ###################################################################
-# kvwmap - Kartenserver für Kreisverwaltungen                     #
+# kvwmap - Kartenserver fÃ¼r Kreisverwaltungen                     #
 ###################################################################
 # Lizenz                                                          #
 #                                                                 # 
@@ -86,17 +86,20 @@ class Bauauskunft {
 	
 	function getbaudaten_db($searchvars){
     if($searchvars['distinct'] == 1){
-      $sql = 'SELECT DISTINCT feld1, feld2, feld3, feld8, feld11, feld20 FROM probaug.bau_akten WHERE 1 = 1';
+      $sql = 'SELECT DISTINCT feld1, feld2, feld3, feld4, feld5, feld6, feld7, feld8, feld11, feld20 FROM probaug.bau_akten WHERE 1 = 1';
     }
     else{
-      $sql = 'SELECT * FROM probaug.bau_akten WHERE 1 = 1';
+      $sql = 'SELECT *, g.oid as geom_oid, g.status as geom_status ';
+			$sql.= 'FROM probaug.bau_akten ';
+			$sql.= 'LEFT JOIN probaug.bau_geometrien g ON feld1 = g.jahr AND feld3 = g.aktenzeichen ';
+			$sql.= 'WHERE 1 = 1';
     }
     if($searchvars['jahr'] != ''){$sql .= " AND Feld1 = '".$searchvars['jahr']."'";}
     if($searchvars['obergruppe'] != ''){$sql .= " AND Feld2 = '".$searchvars['obergruppe']."'";}
     if($searchvars['nummer'] != ''){$sql .= " AND Feld3 = '".$searchvars['nummer']."'";}
     if($searchvars['vorhaben'] != ''){$sql .= " AND Feld8 LIKE '%".$searchvars['vorhaben']."%'";}
     if($searchvars['verfahrensart'] != ''){$sql .= " AND Feld9 LIKE '%".$searchvars['verfahrensart']."%'";}
-    if($searchvars['gemarkung'] != ''){$sql .= " AND '13'||Feld12 = '".$searchvars['gemarkung']."'";}
+    if($searchvars['gemarkung'] != ''){$sql .= " AND Feld39||Feld12 = '".$searchvars['gemarkung']."'";}
     if($searchvars['flur'] != ''){$sql .= " AND trim(trim(leading '0' from Feld13)) = '".$searchvars['flur']."'";}
     if($searchvars['flurstueck'] != ''){$sql .= " AND trim(trim(leading '0' from Feld14)) LIKE '".$searchvars['flurstueck']."'";}
     if($searchvars['vorname'] != ''){$sql .= " AND Feld19 LIKE '%".$searchvars['vorname']."%'";}
@@ -151,8 +154,8 @@ class Bauauskunft {
   
   function countbaudaten($searchvars){
   	$searchvars['withlimit'] = false;
-  	$ret = $this->getbaudaten($searchvars);
-  	return count($ret);
+  	$this->getbaudaten($searchvars);
+  	return count($this->baudata);
   }
   
   function formatFlurstKennz($FlurstKennz){
@@ -162,7 +165,7 @@ class Bauauskunft {
   	$flurst = trim($explosion[2]);
   	// Flur
   	$flur = str_pad ($flur, 3, '0', STR_PAD_LEFT);
-  	// Flurstück
+  	// FlurstÃ¼ck
   	$explosion = explode('/',$flurst);
   	$zaehler = $explosion[0];
   	$nenner = $explosion[1];

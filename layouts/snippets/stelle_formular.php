@@ -338,8 +338,8 @@ else {
                     <td>
                       <?php echo $strAvailable; ?><br>
                       <select name="allmenues" size="6" onchange="getsubmenues();" style="width:300px">
-                      <? for($i=0; $i < count($this->formvars['menues']["Bezeichnung"]); $i++){
-                          echo '<option id="'.$this->formvars['menues']["ORDER"][$i].'_all_'.$this->formvars['menues']["menueebene"][$i].'_'.$i.'" title="'.str_replace(' ', '&nbsp;', $this->formvars['menues']["Bezeichnung"][$i]).'" value="'.$this->formvars['menues']["ID"][$i].'">'.$this->formvars['menues']["Bezeichnung"][$i].'</option>';
+                      <? for($i=0; $i < count($this->formvars['menues']); $i++){
+                          echo '<option id="'.$this->formvars['menues'][$i]->data['order'].'_all_'.$this->formvars['menues'][$i]->data['menueebene'].'_'.$i.'" title="'.str_replace(' ', '&nbsp;', $this->formvars['menues'][$i]->data['name']).'" value="'.$this->formvars['menues'][$i]->data['id'].'">'.$this->formvars['menues'][$i]->data['name'].'</option>';
                            }
                       ?>
                       </select>
@@ -526,45 +526,111 @@ else {
           </td>
         </tr>
 
-        <tr>
-          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
-            <table border="0" cellspacing="0" cellpadding="0">
-              <tr>
-                  <th class="fetter" align="right"><?php echo $strUser;?></th>
-                </tr>
-                <tr>
-                  <td align="right">&nbsp;</td>
-                </tr>
-            </table>
-          </th>
-          <td colspan=2 valign="top" style="border-bottom:1px solid #C3C7C3">
-              <table border="0" cellspacing="0" cellpadding="0">
-                <tr valign="top">
-                    <td>
-                      <select name="selectedusers" size="6" multiple style="width:300px">
-                      <?
-                      for($i=0; $i < count($this->formvars['selusers']["Bezeichnung"]); $i++){
-                          echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['selusers']["Bezeichnung"][$i]).' value="'.$this->formvars['selusers']["ID"][$i].'">'.$this->formvars['selusers']["Bezeichnung"][$i].'</option>';
-                         }
-                      ?>
-                      </select>
-                    </td>
-                    <td align="center" valign="middle" width="1">
-                      <input type="button" name="addPlaces" value="&lt;&lt;" onClick=addOptions(document.GUI.allusers,document.GUI.selectedusers,document.GUI.selusers,'value')>
-                      <input type="button" name="substractPlaces" value="&gt;&gt;" onClick=substractOptions(document.GUI.selectedusers,document.GUI.selusers,'value')>
-                    </td>
-                    <td>
-                      <select name="allusers" size="6" multiple style="width:300px">
-                      <? for($i=0; $i < count($this->formvars['users']["Bezeichnung"]); $i++){
-                          echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['users']["Bezeichnung"][$i]).' value="'.$this->formvars['users']["ID"][$i].'">'.$this->formvars['users']["Bezeichnung"][$i].'</option>';
-                           }
-                      ?>
-                      </select>
-                    </td>
-                </tr>
-              </table>
-          </td>
-        </tr>
+				<tr>
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+						<table border="0" cellspacing="0" cellpadding="0">
+							<tr>
+								<th class="fetter" align="right"><?php echo $strUser;?></th>
+							</tr>
+							<tr>
+								<td align="right">&nbsp;</td>
+							</tr>
+						</table>
+					</th>
+					<td colspan=2 valign="top" style="border-bottom:1px solid #C3C7C3">
+						<table border="0" cellspacing="0" cellpadding="0">
+							<tr valign="top">
+								<td>
+									<select name="selectedusers" size="6" multiple style="width:300px"><?
+										for ($i = 0; $i < count($this->formvars['selusers']["Bezeichnung"]); $i++) { ?>
+											<option
+												title="<?php echo str_replace(' ', '&nbsp;', $this->formvars['selusers']["Bezeichnung"][$i]); ?>"
+												value="<?php echo $this->formvars['selusers']["ID"][$i]; ?>"
+											><?php echo $this->formvars['selusers']["Bezeichnung"][$i]; ?></option><?php
+										}?>
+									</select>
+								</td>
+								<td align="center" valign="middle" width="1">
+									<input type="button" name="addPlaces" value="&lt;&lt;" onClick=addOptions(document.GUI.allusers,document.GUI.selectedusers,document.GUI.selusers,'value')>
+									<input type="button" name="substractPlaces" value="&gt;&gt;" onClick=substractOptions(document.GUI.selectedusers,document.GUI.selusers,'value')>
+								</td>
+								<td>
+									<select name="allusers" size="6" multiple style="width:300px"><?
+										for ($i = 0; $i < count($this->formvars['users']["Bezeichnung"]); $i++) { ?>
+											<option
+												title="<?php echo str_replace(' ', '&nbsp;', $this->formvars['users']["Bezeichnung"][$i]); ?>"
+												value="<?php echo $this->formvars['users']["ID"][$i]; ?>"
+											><?php echo $this->formvars['users']["Bezeichnung"][$i]; ?></option><?php
+										}?>
+									</select>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				
+				<?php
+				if (SHOW_STELLE_HIERARCHIE) { ?>
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+							<table border="0" cellspacing="0" cellpadding="0">
+								<tr>
+									<th class="fetter" align="right">Übergeordnete Stellen</th>
+								</tr>
+								<tr>
+									<td align="right">&nbsp;</td>
+								</tr>
+							</table>
+						</th>
+						<td colspan=2 valign="top" style="border-bottom:1px solid #C3C7C3">
+							<table border="0" cellspacing="0" cellpadding="0">
+								<tr valign="top">
+									<td><?php
+										$options = array_map(
+											function($parent) {
+												return array(
+													'value' => $parent['ID'],
+													'title' => str_replace(' ', '&nbsp;', $parent["Bezeichnung"]),
+													'output' => $parent['Bezeichnung']
+												);
+											},
+											$this->formvars['selparents']
+										);
+										echo FormObject::createSelectField('selectedparents', $options, '', 6, 'width: 300px', '', '', 'multiple');?>
+									</td>
+									<td align="center" valign="middle" width="1">
+										<input
+											type="button"
+											name="addPlaces"
+											value="&lt;&lt;"
+											onClick="addOptions(document.GUI.allparents, document.GUI.selectedparents, document.GUI.selparents, 'value')"
+										>
+										<input
+											type="button"
+											name="substractPlaces"
+											value="&gt;&gt;"
+											onClick="substractOptions(document.GUI.selectedparents, document.GUI.selparents, 'value')"
+										>
+									</td>
+									<td><?php
+										$options = array_map(
+											function($parent) {
+												return array(
+													'value' => $parent->get('ID'),
+													'title' => str_replace(' ', '&nbsp;', $parent->get("Bezeichnung")),
+													'output' => $parent->get('Bezeichnung')
+												);
+											},
+											$this->formvars['parents']
+										);
+										echo FormObject::createSelectField('allparents', $options, '', 6, 'width: 300px', '', '', 'multiple');?>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr><?php
+				} ?>
+
         <tr>
           <td align="right" style="border-bottom:1px solid #C3C7C3">
             <input name="checkClientIP" type="checkbox" value="1" <?php if ($this->formvars['checkClientIP']) { ?> checked<?php } ?>>
@@ -637,15 +703,21 @@ else {
           echo ', '.$this->formvars['sellayouts'][$i]["id"];
         }
       ?>">
-<input type="hidden" name="sellayer" value="<?
-        echo $this->formvars['sellayer']["ID"][0];
-        for($i=1; $i < count($this->formvars['sellayer']["Bezeichnung"]); $i++){
-          echo ', '.$this->formvars['sellayer']["ID"][$i];
-        }
-      ?>">
-<input type="hidden" name="selusers" value="<?
-        echo $this->formvars['selusers']["ID"][0];
-        for($i=1; $i < count($this->formvars['selusers']["Bezeichnung"]); $i++){
-          echo ', '.$this->formvars['selusers']["ID"][$i];
-        }
-      ?>">
+
+<input
+	name="sellayer"
+	value="<?php echo implode(', ', $this->formvars['sellayer']['ID']); ?>"
+	type="hidden"
+>
+
+<input
+	name="selusers"
+	value="<?php echo implode(', ', $this->formvars['selusers']['ID']); ?>"
+	type="hidden"
+>
+
+<input
+	name="selparents"
+	value="<?php echo implode(', ', array_map(function($parent) { return $parent['ID']; }, $this->formvars['selparents'])); ?>"
+	type="hidden"
+>

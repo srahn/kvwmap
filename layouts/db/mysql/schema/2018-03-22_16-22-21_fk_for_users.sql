@@ -1,0 +1,68 @@
+BEGIN;
+
+ALTER TABLE user ENGINE=INNODB;
+ALTER TABLE rolle ENGINE=INNODB;
+ALTER TABLE u_consume ENGINE=INNODB;
+ALTER TABLE u_consume2comments ENGINE=INNODB;
+ALTER TABLE u_consume2layer ENGINE=INNODB;
+ALTER TABLE u_consumeALB ENGINE=INNODB;
+ALTER TABLE u_consumeALK ENGINE=INNODB;
+ALTER TABLE u_consumeCSV ENGINE=INNODB;
+ALTER TABLE u_consumeShape ENGINE=INNODB;
+ALTER TABLE rollenlayer ENGINE=INNODB;
+ALTER TABLE rolle_csv_attributes ENGINE=INNODB;
+ALTER TABLE rolle_last_query ENGINE=INNODB;
+ALTER TABLE rolle_saved_layers ENGINE=INNODB;
+ALTER TABLE search_attributes2rolle ENGINE=INNODB;
+ALTER TABLE u_groups2rolle ENGINE=INNODB;
+ALTER TABLE u_menue2rolle ENGINE=INNODB;
+ALTER TABLE u_rolle2used_class ENGINE=INNODB;
+ALTER TABLE u_rolle2used_layer ENGINE=INNODB;
+ALTER TABLE zwischenablage ENGINE=INNODB;
+
+DELETE u_consume, user FROM u_consume LEFT JOIN user ON u_consume.user_id = user.ID WHERE user.ID IS NULL;
+ALTER TABLE u_consume ADD FOREIGN KEY (user_id) REFERENCES user (ID) ON DELETE CASCADE;
+DELETE u_consume2comments, user FROM u_consume2comments LEFT JOIN user ON u_consume2comments.user_id = user.ID WHERE user.ID IS NULL;
+ALTER TABLE u_consume2comments ADD FOREIGN KEY (user_id) REFERENCES user (ID) ON DELETE CASCADE;
+DELETE u_consume2layer, user FROM u_consume2layer LEFT JOIN user ON u_consume2layer.user_id = user.ID WHERE user.ID IS NULL;
+ALTER TABLE u_consume2layer ADD FOREIGN KEY (user_id) REFERENCES user (ID) ON DELETE CASCADE;
+DELETE u_consumeALB, user FROM u_consumeALB LEFT JOIN user ON u_consumeALB.user_id = user.ID WHERE user.ID IS NULL;
+ALTER TABLE u_consumeALB ADD FOREIGN KEY (user_id) REFERENCES user (ID) ON DELETE CASCADE;
+DELETE u_consumeALK, user FROM u_consumeALK LEFT JOIN user ON u_consumeALK.user_id = user.ID WHERE user.ID IS NULL;
+ALTER TABLE u_consumeALK ADD FOREIGN KEY (user_id) REFERENCES user (ID) ON DELETE CASCADE;
+DELETE u_consumeCSV, user FROM u_consumeCSV LEFT JOIN user ON u_consumeCSV.user_id = user.ID WHERE user.ID IS NULL;
+ALTER TABLE u_consumeCSV ADD FOREIGN KEY (user_id) REFERENCES user (ID) ON DELETE CASCADE;
+DELETE u_consumeShape, user FROM u_consumeShape LEFT JOIN user ON u_consumeShape.user_id = user.ID WHERE user.ID IS NULL;
+ALTER TABLE u_consumeShape ADD FOREIGN KEY (user_id) REFERENCES user (ID) ON DELETE CASCADE;
+
+DELETE druckausschnitte, user FROM druckausschnitte LEFT JOIN user ON druckausschnitte.user_id = user.ID WHERE user.ID IS NULL;
+ALTER TABLE druckausschnitte MODIFY COLUMN id INT;
+ALTER TABLE druckausschnitte DROP PRIMARY KEY;
+ALTER TABLE druckausschnitte ADD PRIMARY KEY (stelle_id, user_id, id);
+ALTER TABLE druckausschnitte ENGINE=INNODB;
+ALTER TABLE druckausschnitte ADD FOREIGN KEY (user_id) REFERENCES user (ID) ON DELETE CASCADE;
+
+DELETE rolle, user FROM rolle LEFT JOIN user ON rolle.user_id = user.ID WHERE user.ID IS NULL;
+ALTER TABLE rolle ADD FOREIGN KEY (user_id) REFERENCES user (ID) ON DELETE CASCADE;
+DELETE rollenlayer, rolle FROM rollenlayer LEFT JOIN rolle ON rollenlayer.user_id = rolle.user_id AND rollenlayer.stelle_id = rolle.stelle_id WHERE rolle.user_id IS NULL AND rolle.stelle_id IS NULL;
+ALTER TABLE rollenlayer ADD FOREIGN KEY (user_id, stelle_id) REFERENCES rolle (user_id, stelle_id) ON DELETE CASCADE;
+DELETE rolle_csv_attributes, rolle FROM rolle_csv_attributes LEFT JOIN rolle ON rolle_csv_attributes.user_id = rolle.user_id AND rolle_csv_attributes.stelle_id = rolle.stelle_id WHERE rolle.user_id IS NULL AND rolle.stelle_id IS NULL;
+ALTER TABLE rolle_csv_attributes ADD FOREIGN KEY (user_id, stelle_id) REFERENCES rolle (user_id, stelle_id) ON DELETE CASCADE;
+DELETE rolle_last_query, rolle FROM rolle_last_query LEFT JOIN rolle ON rolle_last_query.user_id = rolle.user_id AND rolle_last_query.stelle_id = rolle.stelle_id WHERE rolle.user_id IS NULL AND rolle.stelle_id IS NULL;
+ALTER TABLE rolle_last_query ADD FOREIGN KEY (user_id, stelle_id) REFERENCES rolle (user_id, stelle_id) ON DELETE CASCADE;
+DELETE rolle_saved_layers, rolle FROM rolle_saved_layers LEFT JOIN rolle ON rolle_saved_layers.user_id = rolle.user_id AND rolle_saved_layers.stelle_id = rolle.stelle_id WHERE rolle.user_id IS NULL AND rolle.stelle_id IS NULL;
+ALTER TABLE rolle_saved_layers ADD FOREIGN KEY (user_id, stelle_id) REFERENCES rolle (user_id, stelle_id) ON DELETE CASCADE;
+DELETE search_attributes2rolle, rolle FROM search_attributes2rolle LEFT JOIN rolle ON search_attributes2rolle.user_id = rolle.user_id AND search_attributes2rolle.stelle_id = rolle.stelle_id WHERE rolle.user_id IS NULL AND rolle.stelle_id IS NULL;
+ALTER TABLE search_attributes2rolle ADD FOREIGN KEY (user_id, stelle_id) REFERENCES rolle (user_id, stelle_id) ON DELETE CASCADE;
+DELETE u_groups2rolle, rolle FROM u_groups2rolle LEFT JOIN rolle ON u_groups2rolle.user_id = rolle.user_id AND u_groups2rolle.stelle_id = rolle.stelle_id WHERE rolle.user_id IS NULL AND rolle.stelle_id IS NULL;
+ALTER TABLE u_groups2rolle ADD FOREIGN KEY (user_id, stelle_id) REFERENCES rolle (user_id, stelle_id) ON DELETE CASCADE;
+DELETE u_menue2rolle, rolle FROM u_menue2rolle LEFT JOIN rolle ON u_menue2rolle.user_id = rolle.user_id AND u_menue2rolle.stelle_id = rolle.stelle_id WHERE rolle.user_id IS NULL AND rolle.stelle_id IS NULL;
+ALTER TABLE u_menue2rolle ADD FOREIGN KEY (user_id, stelle_id) REFERENCES rolle (user_id, stelle_id) ON DELETE CASCADE;
+DELETE u_rolle2used_class, rolle FROM u_rolle2used_class LEFT JOIN rolle ON u_rolle2used_class.user_id = rolle.user_id AND u_rolle2used_class.stelle_id = rolle.stelle_id WHERE rolle.user_id IS NULL AND rolle.stelle_id IS NULL;
+ALTER TABLE u_rolle2used_class ADD FOREIGN KEY (user_id, stelle_id) REFERENCES rolle (user_id, stelle_id) ON DELETE CASCADE;
+DELETE u_rolle2used_layer, rolle FROM u_rolle2used_layer LEFT JOIN rolle ON u_rolle2used_layer.user_id = rolle.user_id AND u_rolle2used_layer.stelle_id = rolle.stelle_id WHERE rolle.user_id IS NULL AND rolle.stelle_id IS NULL;
+ALTER TABLE u_rolle2used_layer ADD FOREIGN KEY (user_id, stelle_id) REFERENCES rolle (user_id, stelle_id) ON DELETE CASCADE;
+DELETE zwischenablage, rolle FROM zwischenablage LEFT JOIN rolle ON zwischenablage.user_id = rolle.user_id AND zwischenablage.stelle_id = rolle.stelle_id WHERE rolle.user_id IS NULL AND rolle.stelle_id IS NULL;
+ALTER TABLE zwischenablage ADD FOREIGN KEY (user_id, stelle_id) REFERENCES rolle (user_id, stelle_id) ON DELETE CASCADE;
+
+COMMIT;

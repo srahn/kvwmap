@@ -17,15 +17,21 @@ send_selected_flurst = function(go, formnummer, wz, target){
       semi = true;
     }
   }
-  currentform.target = '';
-  if(target == '_blank'){
-    currentform.target = '_blank';
-  }
-  currentform.go.value=go;
-  currentform.FlurstKennz.value=flurstkennz;
-  currentform.formnummer.value=formnummer;
-  currentform.wz.value=wz;
-  currentform.submit();
+	if (go == 'kvwkol') {
+		message('Öffne folgende Flurstücke in Kolibri:<br>' + flurstkennz.replace(';', '<br>'));
+		window.location.href = 'kvwkol://FlurstKennz=' + flurstkennz.replace(';', ',');
+	}
+	else {
+		currentform.target = '';
+		if(target == '_blank'){
+			currentform.target = '_blank';
+		}
+		currentform.go.value=go;
+		currentform.FlurstKennz.value=flurstkennz;
+		currentform.formnummer.value=formnummer;
+		currentform.wz.value=wz;
+		currentform.submit();
+	}
 }
 
 backto = function(go){
@@ -139,7 +145,7 @@ hide_versions = function(flst){
   </tr>
   <tr>
     <td>
-			<div style="position:relative; top:0px; right:0px; padding:=px; border-color:<?php echo BG_DEFAULT ?>; border-width:1px; border-style:solid;">
+			<div style="position:relative; top:0px; right:0px; padding:0px; border: 1px solid <?php echo BG_DEFAULT ?>;">
 				<table width="100%" border="0" cellspacing="0" cellpadding="0">
 					<tr>
 						<td colspan="2">
@@ -732,70 +738,16 @@ hide_versions = function(flst){
 											<? }
 											}
 											$Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
-													$anzEigentuemer=count($Eigentuemerliste);
-													for ($e=0;$e<$anzEigentuemer;$e++) { ?>
-											<tr>
-											<td valign="top"><? echo $Eigentuemerliste[$e]->Nr ?>&nbsp;&nbsp;&nbsp;</td>
-											<td valign="top">
-											<?
-												$anzNamenszeilen=count($Eigentuemerliste[$e]->Name);
-												$Eigentuemerliste[$e]->Name_bearb = $Eigentuemerliste[$e]->Name;
-												if($this->Stelle->isFunctionAllowed('Adressaenderungen')) {
-															$eigentuemer = new eigentuemer(NULL, NULL, $this->pgdatabase);
-															$adressaenderungen =  $eigentuemer->getAdressaenderungen($Eigentuemerliste[$e]->gml_id);
-															$aendatum=substr($adressaenderungen['datum'],0,10);
-												}
-												if ($adressaenderungen['user_id'] != '') {
-													$user = new user(NULL, $adressaenderungen['user_id'], $this->database);
-												}
+											reset($Eigentuemerliste);
 											?>
-												<table border="0" cellspacing="0" cellpadding="2">
-													<tr>
-													<td>
-													<?
-														for ($n=0;$n<$anzNamenszeilen;$n++) {
-															if (!($Eigentuemerliste[$e]->Name_bearb[$n]=="" OR $Eigentuemerliste[$e]->Name_bearb[$n]==' ')) {
-																	echo $Eigentuemerliste[$e]->Name_bearb[$n].'<br>';
-															}
-														}
-													if ($adressaenderungen['user_id'] != '') {
-															echo '<span class="fett"><u>Aktualisierte Anschrift ('.$aendatum.' - '.$user->Name.'):</u></span><br>';
-															echo '&nbsp;&nbsp;<span class="fett">'.$adressaenderungen['strasse'].' '.$adressaenderungen['hausnummer'].'</span><br>';
-															echo '&nbsp;&nbsp;<span class="fett">'.$adressaenderungen['postleitzahlpostzustellung'].' '.$adressaenderungen['ort_post'].' '.$adressaenderungen['ortsteil'].'</span><br>';
-													}
-													?>
-													</td>
-													<td valign="bottom">
-													<?
-													if($this->Stelle->isFunctionAllowed('Adressaenderungen') AND $Eigentuemerliste[$e]->Nr != ''){
-														if ($adressaenderungen['user_id'] == '') {											
-															echo '<img src="'.GRAPHICSPATH.'pfeil_links.gif" width="12" height="12" border="0">'; ?>&nbsp;<a class="buttonlink" href="javascript:ahah('index.php', 'go=neuer_Layer_Datensatz&reload=true&selected_layer_id=<? echo LAYER_ID_ADRESSAENDERUNGEN_PERSON; ?>&attributenames[0]=gml_id&attributenames[1]=hat&values[0]=<? echo urlencode($Eigentuemerliste[$e]->gml_id); ?>&values[1]=<? echo urlencode($Eigentuemerliste[$e]->anschrift_gml_id); ?>&embedded=true&fromobject=subform_ax_person_temp<? echo $b.'_'.$e; ?>&targetlayer_id=0&targetattribute=leer', new Array(document.getElementById('subform_ax_person_temp<? echo $b.'_'.$e; ?>')), new Array('sethtml'));"><span> Anschrift aktualisieren</span></a>
-													<?}
-														else {
-															echo '<img src="'.GRAPHICSPATH.'pfeil_links.gif" width="12" height="12" border="0">'; ?>&nbsp;<a class="buttonlink" href="javascript:ahah('index.php', 'go=Layer-Suche_Suchen&reload=true&selected_layer_id=<? echo LAYER_ID_ADRESSAENDERUNGEN_PERSON; ?>&value_gml_id=<? echo urlencode($Eigentuemerliste[$e]->gml_id); ?>&operator_gml_id==&attributenames[0]=user_id&values[0]=<? echo $this->user->id ?>&embedded=true&fromobject=subform_ax_person_temp<? echo $b.'_'.$e; ?>&targetlayer_id=0&targetattribute=leer', new Array(document.getElementById('subform_ax_person_temp<? echo $b.'_'.$e; ?>')), '');">Anschrift &auml;ndern</a>
-													<?}
-													}?>
-														</td>
-													<tr>
-														<td colspan="2"><div id="subform_ax_person_temp<? echo $b.'_'.$e; ?>" style="display:inline"></div></td>
-													</tr>
-													</tr>
-												</table>
+											<tr>
+												<td colspan="3">
+													<table>				<?
+											echo $flst->outputEigentuemer(key($Eigentuemerliste), $Eigentuemerliste, 'Long', $this->Stelle->isFunctionAllowed('Adressaenderungen'), NULL, $this->database);
+											?>	</table>
 												</td>
 											</tr>
-											<? if($Eigentuemerliste[$e]->zusatz_eigentuemer != ''){ ?>
-												<tr>
-													<td colspan="2"><? echo $Eigentuemerliste[$e]->zusatz_eigentuemer; if($Eigentuemerliste[$e]->Anteil != '')echo ' zu '.$Eigentuemerliste[$e]->Anteil;?></td>
-												</tr>
-												<? }
-													 elseif($Eigentuemerliste[$e]->Anteil != ''){ ?>
-												<tr>
-													<td></td>
-													<td>zu <? echo $Eigentuemerliste[$e]->Anteil; ?></td>
-												</tr>
-												<? } ?>
-											<? }
-											 } ?>
+								<?	} ?>
 									</table>
 								</td>
 								</tr>
@@ -809,10 +761,10 @@ hide_versions = function(flst){
 					</tr>
 					<tr>
 						<td colspan="2">
-							<table width="100%" cellspacing="0" cellpading="0" border="0">
-								<tr align="center" valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
+							<table width="100%" cellspacing="0" cellpadding="0" border="0" style="border-top: 1px solid <?php echo BG_DEFAULT ?>;">
+								<tr align="center" valign="top">
 									<td colspan="2">
-										<div class="fstanzeigecontainer">
+										<div class="fstanzeigecontainer button_background">
 											<a href="index.php?go=Flurstueck_<? if($flst->endet!="" OR $flst->hist_alb == 1)echo 'hist_';?>Auswaehlen&searchInExtent=<?php echo $this->searchInExtent;
 											?>&GemID=<?php echo $flst->GemeindeID;
 											?>&GemkgID=<?php echo $flst->GemkgSchl; ?>&FlurID=<?php echo $flst->FlurID;
@@ -830,10 +782,18 @@ hide_versions = function(flst){
 													$zoomlink = 'ZoomToFlst&FlurstKennz='.$flst->FlurstKennz; 
 													if($set_timestamp != '')$zoomlink = $set_timestamp.'&go_next='.urlencode($zoomlink);else $zoom_all = true;
 											?>
-													<a href="index.php?go=<? echo $zoomlink;?>">
-														<div class="fstanzeigehover">&nbsp;&nbsp;Kartenausschnitt&nbsp;&nbsp;</div>
-													</a>
-											<? } ?>
+													&nbsp;&nbsp;
+													<a title="Zoom auf Flurstück und Flurstück hervorheben" href="index.php?go=<? echo $zoomlink;?>"><div class="button zoom_highlight"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
+													&nbsp;&nbsp;
+													<a title="Zoom auf Flurstück und andere Flurstücke ausblenden" href="javascript:zoom2object(<? echo $this->qlayerset[$i]['Layer_ID'];?>, 'Polygon', 'ax_flurstueck', 'wkb_geometry', '<?php echo $flst->oid; ?>', 'true');"><div class="button zoom_select"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
+													
+											<? }
+											if (in_array('kolibri', $kvwmap_plugins) AND $this->Stelle->isFunctionAllowed('Kolibristart')) { ?>
+												<a href="kvwkol://FlurstKennz=<?php echo $flst->FlurstKennz; ?>" onclick="message('Öffne Flurstück <?php echo $flst->FlurstKennz; ?> in Kolibri.');">
+													<div class="fstanzeigehover">&nbsp;&nbsp;Öffnen in Kolibri&nbsp;&nbsp;</div>
+												</a><?php
+											} ?>
+
 											<div class="fstanzeigehover">
 												&nbsp;&nbsp;
 												Auszug:
@@ -920,7 +880,18 @@ hide_versions = function(flst){
               CSV-Export Klassifizierung
               &nbsp;&nbsp;
             </div>
-            </a>
+            </a><?
+
+						global $kvwmap_plugins;
+						if (in_array('kolibri', $kvwmap_plugins) AND $this->Stelle->isFunctionAllowed('Kolibristart')) { ?>
+							<a href="javascript:send_selected_flurst('kvwkol', '', '', '_blank');">
+								<div class="fstanzeigehover">
+									&nbsp;&nbsp;
+									Öffnen in Kolibri
+									&nbsp;&nbsp;
+								</div>
+							</a><?
+						} ?>
 
           </div>
   		  </td>

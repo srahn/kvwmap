@@ -4,8 +4,8 @@
 #   Konfigurationsdatei zu kvwmap                                  #
 #                                                                  #
 ####################################################################
-# aktuelle Versionsnummer
-define('VERSION','2.6');
+
+#define('VERSION','2.7');						# in Version 2.8 gelöscht
 define('APPLVERSION','kvwmap/');
 # Bezeichnung der MySQL-Datenbank mit den Benutzerdaten
 $dbname='kvwmapdb';
@@ -52,10 +52,64 @@ define('GLEVIEW', 2);                  # 1 / 2              # Version 1.6.5
 # Header und Footer
 define('HEADER', 'header.php');															# Version 1.8.0
 define('FOOTER', 'footer.php');															# Version 1.8.0
+
 # Höhe von Header und Footer zusammen
-define('HEADER_FOOTER_HEIGHT', 132);																# Version 2.0
+#define('HEADER_FOOTER_HEIGHT', 166);																# Version 2.0 gelöscht in 2.7
 # Breite von Menü und Legende zusammen
-$menue_legend_widths = array('gui.php' => 485, 'gui_button.php' => 486);		# Version 2.0
+#$menue_legend_widths = array('gui.php' => 485, 'gui_button.php' => 486);		# Version 2.0 gelöscht in 2.7
+
+# Höhen und Breiten von Browser, Rand, Header, Footer, Menü und Legende																# Version 2.7
+$sizes = array(
+	'gui.php' => array(
+		'margin' => array(
+			'width'  => 0,
+			'height' => 0
+		),
+		'header' => array(
+			'height' => 50
+		),
+		'scale_bar' => array(
+			'height' => 30
+		),
+		'lagebezeichnung_bar' => array(
+			'height' => 30
+		),
+		'map_functions_bar' => array(
+			'height' => 37
+		),
+		'footer' => array(
+			'height' => 23
+		),
+		'menue' => array(
+			'width'  => 218,				# Version 2.8 (neu ist nur das Komma, der Wert müsste aber gegebenenfalls auch angepasst werden, da die Button-Menüs jetzt breiter sind)
+			'hide_width' => 22			# Version 2.8
+		),
+		'legend' => array(
+			'width' => 252,
+			'hide_width' => 27
+		)
+	)
+);
+
+# zusätzliche Legende; muss unterhalb von snippets liegen
+#define('LEGEND_GRAPHIC_FILE', '');		# Version 2.7
+
+# Höhe und Breite der generierten Legendenbilder für verschiedene Layertypen			# Version 2.8
+$legendicon_size = array(
+	'width' => array(
+		0 => 18,			# Punktlayer
+		1 => 18,			# Linienlayer
+		2 => 18,			# Flächenlayer
+		3 => 18				# Rasterlayer
+	),
+	'height' => array(
+		0 => 18,			# Punktlayer
+		1 => 12,			# Linienlayer
+		2 => 12,			# Flächenlayer
+		3 => 18				# Rasterlayer
+	)
+);
+
 # login.php
 define('LOGIN', 'login.php');																# Version 1.8.0
 # Seite zur Fehlerbehandlung, die durch fehlerhafte Layer verursacht werden; unterhalb von /snippets
@@ -78,7 +132,8 @@ define('TITLE_HILFE','Hilfe');                  						# Version 1.6.6
 define('TITLE_OPTIONEN','Optionen');										# Version 1.7.3
 define('TITLE_SCHNELLDRUCK','schnelle Druckausgabe');					# Version 1.7.5
 # Schalter für die PopUp-Funktion des Menüs
-define('POPUPMENUE','false');          # true / false
+#define('POPUPMENUE','false');          # true / false 				# Version 2.7 gelöscht
+
 # Position des Wappens (oben/unten/kein)
 define('MENU_WAPPEN','oben');          # oben / unten / kein
 # Position der Referenzkarte (oben/unten)                   # Version 1.6.4
@@ -140,7 +195,7 @@ define('PASSWORD_CHECK', '01010');															# Version 2.3
 # Dort muss dann eine Zeile in dieser Form hinzugefügt werden: 
 # www-data        ALL=(fgs) NOPASSWD: /usr/bin/git
 # Dann kann man die Aktualität des Quellcodes in der Administrationsoberfläche überprüfen und ihn aktualisieren.
-define('GIT_USER', '');																	# Version 2.1
+define('GIT_USER', 'gisadmin');																	# Version 2.1
 
 ########################## Pfadeinstellungen
 # Installationspfad
@@ -208,11 +263,12 @@ define('DRUCKRAHMEN_PATH',SHAPEPATH.'druckrahmen/');
 #define('PDFCLASSPATH', '../PDFClass/');																						# in Version 2.6 gelöscht
 
 # 3rdparty Pfade
-define('THIRDPARTY_PATH', 'http://gdi-service.de/3rdparty/');												# Version 2.6
+define('THIRDPARTY_PATH', '../3rdparty/');												# Version 2.6
 define('FONTAWESOME_PATH', THIRDPARTY_PATH . 'font-awesome-4.6.3/');								# Version 2.6
 define('JQUERY_PATH', THIRDPARTY_PATH . 'jQuery-1.12.0/');													# Version 2.6
 define('BOOTSTRAP_PATH', THIRDPARTY_PATH . 'bootstrap-3.3.6/');											# Version 2.6
 define('BOOTSTRAPTABLE_PATH', THIRDPARTY_PATH . 'bootstrap-table-1.11.0/');					# Version 2.6
+define('PROJ4JS_PATH', THIRDPARTY_PATH . 'proj4js-2.4.3/');					# Version 2.8
 
 # Bin-Pfad der Postgres-tools (shp2pgsql, pgsql2shp)
 define('POSTGRESBINPATH', '/usr/bin/');         # Version 1.6.4
@@ -221,7 +277,7 @@ define('POSTGRESBINPATH', '/usr/bin/');         # Version 1.6.4
 define('OGR_BINPATH', '/usr/bin/');					# Version 1.7.4
 
 # Pfad zum Zip-Programm (unter Linux: 'zip -j', unter Windows z.B. 'c:/programme/Zip/bin/zip.exe')
-define('ZIP_PATH', 'zip -j');													# Version 1.7.3  hier wurde das ' -j' angehängt
+define('ZIP_PATH', 'zip');													# Version 1.7.3  hier wurde das ' -j' angehängt		# Version 2.8 das ' -j' wurde wieder entfernt
 
 # EPSG-Code dem die Koordinaten der Flurstücke zugeordnet werden sollen in den Tabellen
 # alb_flurstuecke und alb_x_flurstuecke wenn man postgres verwendet
@@ -241,7 +297,7 @@ define('DHK_CALL_PROFILKENNUNG', 'mvaaa');														# Version 2.4
 
 # Parameter für die Strecken- und Flächenreduktion
 define('EARTH_RADIUS', 6384000);																										# Version 2.1
-define('M_QUASIGEOID', 38);																													# Version 2.1
+#define('M_QUASIGEOID', 38);																													# Version 2.1			in Version 2.6 über Bugfix 2.6.61 gelöscht
 
 # auswählbare Treffermengen
 $selectable_limits = array(10, 25, 50, 100, 200);			# Version 2.4
@@ -254,6 +310,9 @@ $supportedSRIDs = array(4326,2397,2398,2399,31466,31467,31468,31469,32648,25832,
 
 # Unterstützte Sprachen, nur diese stehen zur Auswahl bei der Stellenwahl ('german', 'low-german', 'english', 'polish', 'vietnamese')
 $supportedLanguages = array('german');															# Version 2.0
+
+# Unterstützte Exportformate
+$supportedExportFormats = array('Shape', 'GML', 'KML', 'GeoJSON', 'UKO', 'OVL', 'CSV');																										# Version 2.7
 
 # Hier kann festgelegt werden, ob in den Optionen das Feld "Zeitpunkt für historische Daten" erscheinen soll, oder nicht (true/false)
 #define('HIST_TIMESTAMP', true);								# Version 2.3 		# in Version 2.4 wieder gelöscht (ist jetzt stellenbezogen)
@@ -270,9 +329,9 @@ define('IMAGEPATH',INSTALLPATH.'tmp/');
 # sendEmail async: E-Mails werden erst in einem temporären Verzeichnis MAILQUEUEPATH
 # 	abgelegt und können später durch das Script tools/sendEmailAsync.sh
 # 	versendet werden. Dort muss auch MAILQUEUEPATH eingestellt werden.
-define('MAILMETHOD', 'sendmail');						# Version 2.4
+define('MAILMETHOD', 'sendEmail async');						# Version 2.4
 # SMTP-Server, Muss nur angegeben werden, wenn Methode sendEmail async verwendet wird.
-define('MAILSMTPSERVER', '');						# Version 2.4
+define('MAILSMTPSERVER', 'smtp.p4.net');						# Version 2.4
 # SMTP-Port, Muss nur angegeben werden, wenn Methode sendEmail async verwendet wird.
 define('MAILSMTPPORT', 25);													# Version 2.4
 # Verzeichnis für die JSON-Dateien mit denzu versendenen E-Mails.
@@ -482,6 +541,7 @@ define('DELETE_ROLLENLAYER', 'true');   # true / false                          
 # Definiert, ob das aktuelle Kartenbild separat angezeigt werden darf oder nicht
 define('SHOW_MAP_IMAGE', 'true');       # true / false                            # Version 1.6.7
 
+define('SHOW_STELLE_HIERARCHIE', false);						# Version 2.8.0
 
 // ############################# Klassenbibliotheken lesen														# in Version 2.0 gelöscht
 // # laden der Klassenbibliotheken																										# in Version 2.0 gelöscht
@@ -540,18 +600,24 @@ define('SHOW_MAP_IMAGE', 'true');       # true / false                          
 ############################ kvwmap-plugins #################		# Version 1.11.0
 #																																# Version 1.11.0
 $kvwmap_plugins = array();																			# Version 1.11.0
-#$kvwmap_plugins[] = 'bauleitplanung';													# Version 1.11.0
-#$kvwmap_plugins[] = 'bevoelkerung';														# Version 1.11.0
-#$kvwmap_plugins[] = 'gewaesser';																# Version 1.11.0
-#$kvwmap_plugins[] = 'bodenrichtwerte';													# Version 2.0.0
-#$kvwmap_plugins[] = 'jagdkataster';														# Version 2.0.0
-#$kvwmap_plugins[] = 'fortfuehrungslisten';											# Version 2.6.0
-#$kvwmap_plugins[] = 'nachweisverwaltung';											# Version 2.0.0
+#$kvwmap_plugins[] = 'alkis';																		# Version 2.8
 #$kvwmap_plugins[] = 'anliegerbeitraege';												# Version 2.0.0
-#$kvwmap_plugins[] = 'probaug';																	# Version 2.0.0
-#$kvwmap_plugins[] = 'geodoc';																	# Version 2.0.0
+#$kvwmap_plugins[] = 'bauleitplanung';													# Version 1.11.0
 #$kvwmap_plugins[] = 'baumfaellantrag';													# Version 2.0.0
-#																																# Version 1.11.0
+#$kvwmap_plugins[] = 'bevoelkerung';														# Version 1.11.0
+#$kvwmap_plugins[] = 'bodenrichtwerte';													# Version 2.0.0
+#$kvwmap_plugins[] = 'fortfuehrungslisten';											# Version 2.6.0
+#$kvwmap_plugins[] = 'geodoc';																	# Version 2.0.0
+#$kvwmap_plugins[] = 'gewaesser';																# Version 1.11.0
+#$kvwmap_plugins[] = 'jagdkataster';														# Version 2.0.0
+#$kvwmap_plugins[] = 'kolibri';																	# Version 2.8
+#$kvwmap_plugins[] = 'metadata';																# Version 2.8
+#$kvwmap_plugins[] = 'mobile';																	# Version 2.7
+#$kvwmap_plugins[] = 'nachweisverwaltung';											# Version 2.0.0
+#$kvwmap_plugins[] = 'probaug';																	# Version 2.0.0
+#$kvwmap_plugins[] = 'ukos';																		# Version 2.8.0
+#$kvwmap_plugins[] = 'wasserrecht';															# Version 2.8.0
+#$kvwmap_plugins[] = 'xplankonverter';													# Version 2.8.0
 #############################################################		# Version 1.11.0
 
 # Festlegung von Fehlermeldungen und Hinweisen
@@ -584,8 +650,8 @@ define('POSTGRES_HOST', 'localhost');																# Version 2.0
 define('POSTGRES_USER', '');																				# Version 2.0
 define('POSTGRES_PASSWORD', '');																		# Version 2.0
 define('POSTGRES_DBNAME', $pgdbname);																# Version 2.0
-define('POSTGRES_ROOT_PASSWORD', getenv('PGSQL_ENV_POSTGRES_PASSWORD'));
-	
+#define('POSTGRES_ROOT_PASSWORD', getenv('PGSQL_ROOT_PASSWORD'));    # in Version 2.7 gelöscht
+
 // if ($pgdbname!='') {																													# in Version 2.0 gelöscht
 	// if(in_array($_REQUEST['go'], $fast_loading_cases)){		# Version 1.7.6			# in Version 2.0 gelöscht
 		// $PostGISdb=new pgdatabase_core();										# Version 1.7.6			# in Version 2.0 gelöscht

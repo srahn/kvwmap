@@ -4,7 +4,8 @@
 
 var counter = 0;
 
-Text[0]=["Hilfe:","In Freitexten können folgende Schlüsselwörter verwendet werden, die dann durch andere Texte ersetzt werden:<ul><li>$stelle: die aktuelle Stellenbezeichung</li><li>$user: der Name des Nutzers</li><li>$pagenumber: die aktuelle Seitennummer<br>(Platzierung \"auf jeder Seite\" erforderlich)</li><li>$pagecount: die Gesamtseitenzahl<br>(Platzierung \"auf jeder Seite\" erforderlich)</li><li>$<i>&lt;attributname&gt;</i>: der Wert des Attributs</li></ul>"]
+Text[0]=["Hilfe:","In Freitexten können folgende Schlüsselwörter verwendet werden, die dann durch andere Texte ersetzt werden:<ul><li>$stelle: die aktuelle Stellenbezeichung</li><li>$user: der Name des Nutzers</li><li>$pagenumber: die aktuelle Seitennummer<br>(Platzierung \"auf jeder Seite\" erforderlich)</li><li>$pagecount: die Gesamtseitenzahl<br>(Platzierung \"auf jeder Seite\" erforderlich)</li><li>${<i>&lt;attributname&gt;</i>}: der Wert des Attributs</li></ul>"]
+Text[1]=["Hilfe:","Hier kann der Name der erzeugten PDF-Datei angegeben werden. Im Dateinamen können auch Attribute in der Form ${<i>&lt;attributname&gt;</i>} verwendet werden, wodurch der Dateiname dynamisch wird. Wird kein Dateiname angegeben, erhält die PDF-Datei einen automatisch generierten Namen."]
 
 function image_coords(event){
 	document.getElementById('coords').style.visibility='';
@@ -48,6 +49,11 @@ function update_options(){
 
 function addfreetext(){
 	document.GUI.go.value = 'sachdaten_druck_editor_Freitexthinzufuegen';
+	document.GUI.submit();
+}
+
+function addline(){
+	document.GUI.go.value = 'sachdaten_druck_editor_Liniehinzufuegen';
 	document.GUI.submit();
 }
 
@@ -166,7 +172,7 @@ function save_layout(){
           </select> 
           </td>
           <td>
-            <input class="button" type="submit" name="go_plus" value="übernehmen >>">
+            <input type="submit" name="go_plus" value="übernehmen >>">
           </td>
           <td style="border-left:1px solid #C3C7C3">
           	&nbsp;<select  name="stelle">
@@ -198,9 +204,11 @@ function save_layout(){
           <td class="fett" style="border-top:1px solid #C3C7C3;border-bottom:1px solid #C3C7C3" colspan=8 >&nbsp;Layoutdaten</td>
         </tr>
         <tr>
-          <td colspan=8 style="border-bottom:1px solid #C3C7C3">
+          <td style="border-bottom:1px solid #C3C7C3">
           	&nbsp;<span class="fett">Name:</span> 
-          	<input type="text" name="name" value="<? echo $this->ddl->selectedlayout[0]['name'] ?>" size="40">
+					</td>
+					<td colspan=7 style="border-bottom:1px solid #C3C7C3">
+          	<input type="text" name="name" value="<? echo $this->ddl->selectedlayout[0]['name'] ?>" size="35">
           	&nbsp;&nbsp;&nbsp;<span class="fett">Typ:</span> 
           	<select name="type" onchange="update_options();">
           		<option value="0" <? if($this->ddl->selectedlayout[0]['type'] == 0)echo 'selected' ?>>neue Seite für jeden Datensatz</option>
@@ -209,6 +217,18 @@ function save_layout(){
           	</select>
 					</td>
 				</tr>
+        <tr>
+          <td style="border-bottom:1px solid #C3C7C3">
+          	&nbsp;<span class="fett">Dateiname:</span>
+					</td>
+					<td colspan=7 style="border-bottom:1px solid #C3C7C3">
+          	<input type="text" name="filename" value="<? echo $this->ddl->selectedlayout[0]['filename'] ?>" size="35">
+						<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[1], Style[0], document.getElementById('Tip2'))" onmouseout="htm()">
+						<div style="position:relative">
+							<div id="Tip2" style="visibility:hidden;position:absolute;bottom:20px;z-index:1000;"></div>
+						</div>
+					</td>
+				</tr>				
 				<tr id="list_type_options" style="display:<? if($this->ddl->selectedlayout[0]['type'] == 0)echo 'none' ?>">
           <td colspan=8 style="border-bottom:1px solid #C3C7C3">
 						&nbsp;<span class="fett">Datensätze:</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="fett">Abstand:</span>
@@ -217,24 +237,6 @@ function save_layout(){
 						<input type="checkbox" name="no_record_splitting" title="Wenn angehakt, wird ein Seitenumbruch nicht innerhalb eines Datensatzes gemacht, sondern davor." value="1" <? if($this->ddl->selectedlayout[0]['no_record_splitting']) echo 'checked'; ?>>
 					</td>
         </tr>
-        <tr>
-        	<td class="fett" align="center" style="border-bottom:1px solid #C3C7C3" colspan="8">&nbsp;Hintergrundbild&nbsp;</td>
-        </tr>
-        <tr>
-        	<td width="50%" style="border-bottom:1px solid #C3C7C3" colspan=4>&nbsp;<? echo $this->ddl->selectedlayout[0]['bgsrc'] ?></td>
-        	<td>&nbsp;x:</td>
-        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="bgposx" value="<? echo $this->ddl->selectedlayout[0]['bgposx'] ?>" size="5"></td>
-					<td>&nbsp;Breite:</td>
-					<td><input type="text" name="bgwidth" value="<? echo $this->ddl->selectedlayout[0]['bgwidth'] ?>" size="5"></td>
-        </tr>
-        <tr>
-        	<td width="50%" style="border-bottom:1px solid #C3C7C3" colspan=4><input class="button" type="file" name="bgsrc" size="10"></td>
-        	<td>&nbsp;y:</td>
-        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="bgposy" value="<? echo $this->ddl->selectedlayout[0]['bgposy'] ?>" size="5"></td>
-        	<td>&nbsp;Höhe:</td>
-        	<td><input type="text" name="bgheight" value="<? echo $this->ddl->selectedlayout[0]['bgheight'] ?>" size="5"></td>
-        </tr>
-        <tr>
       </table>
       <table border="0" width="597" cellspacing="0" cellpadding="0">
       	<tr>
@@ -250,6 +252,26 @@ function save_layout(){
 					</td>
         </tr>
       </table>
+			<br>
+			<table width="597" border=0 cellpadding="3" cellspacing="0" style="border:1px solid #C3C7C3">
+				<tr>
+        	<td class="fett" align="center" style="border-bottom:2px solid #C3C7C3;border-top:2px solid #C3C7C3" colspan="8">&nbsp;Grafik&nbsp;</td>
+        </tr>
+        <tr>
+        	<td width="50%" style="border-bottom:1px solid #C3C7C3" colspan=4>&nbsp;<? echo $this->ddl->selectedlayout[0]['bgsrc'] ?></td>
+        	<td>&nbsp;x:</td>
+        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="bgposx" value="<? echo $this->ddl->selectedlayout[0]['bgposx'] ?>" size="5"></td>
+					<td>&nbsp;Breite:</td>
+					<td><input type="text" name="bgwidth" value="<? echo $this->ddl->selectedlayout[0]['bgwidth'] ?>" size="5"></td>
+        </tr>
+        <tr>
+        	<td width="50%" style="border-bottom:1px solid #C3C7C3" colspan=4><input type="file" name="bgsrc" size="10"></td>
+        	<td>&nbsp;y:</td>
+        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="bgposy" value="<? echo $this->ddl->selectedlayout[0]['bgposy'] ?>" size="5"></td>
+        	<td>&nbsp;Höhe:</td>
+        	<td><input type="text" name="bgheight" value="<? echo $this->ddl->selectedlayout[0]['bgheight'] ?>" size="5"></td>
+        </tr>
+			</table>
 			<br>
       <table width="597" border=0 cellpadding="3" cellspacing="0" style="border:1px solid #C3C7C3">
   			<tr>
@@ -379,9 +401,9 @@ function save_layout(){
     		<tr>
         	<td class="fett" align="left" style="border-top:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="8" onclick="toggle('<? echo $this->attributes['the_geom']; ?>');">
         	<? if($this->ddl->selectedlayout[0]['elements'][$this->attributes['the_geom']]['xpos'] == ''){ ?>
-        		<img id="img_<? echo $this->attributes['the_geom']; ?>" src="<? echo GRAPHICSPATH.'plus.gif'?>">&nbsp;<? echo $this->attributes['the_geom']; ?>
+        		<img id="img_<? echo $this->attributes['the_geom']; ?>" src="<? echo GRAPHICSPATH.'plus.gif'?>">&nbsp;Geometrie
         	<? }else{ ?>
-        		<img id="img_<? echo $this->attributes['the_geom']; ?>" src="<? echo GRAPHICSPATH.'minus.gif'?>">&nbsp;<? echo $this->attributes['the_geom']; ?>
+        		<img id="img_<? echo $this->attributes['the_geom']; ?>" src="<? echo GRAPHICSPATH.'minus.gif'?>">&nbsp;Geometrie
         	<? } ?>
         	</td>
         </tr>
@@ -515,7 +537,71 @@ function save_layout(){
 	      <tr>
           <td style="border-top:2px solid #C3C7C3" colspan=8 align="left">&nbsp;<a href="javascript:addfreetext();">Freitext hinzufügen</a></td>
         </tr>        
-      </table> 
+      </table>
+			<br>
+			<table width="597" border=0 cellpadding="3" cellspacing="0" style="border:1px solid #C3C7C3">
+        <tr>
+          <td class="fett" style="border-top:2px solid #C3C7C3" colspan=8 align="center">
+						Linien
+					</td>
+        </tr>
+        <? for($i = 0; $i < count($this->ddl->selectedlayout[0]['lines']); $i++){
+        	 ?>
+					<tr>
+						<td colspan="2" style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3">Start<input type="hidden" name="line_id<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id'] ?>"></td>
+						<td colspan="2" style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3">Ende</td>
+						<td colspan="2" style="border-top:2px solid #C3C7C3"></td>
+					</tr>
+	        <tr>
+	        	<td style="border-top:2px solid #C3C7C3">&nbsp;x:</td>
+	        	<td style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3"><input type="text" name="lineposx<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['posx'] ?>" size="5"></td>
+						<td style="border-top:2px solid #C3C7C3">&nbsp;x:</td>
+	        	<td style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3"><input type="text" name="lineendposx<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['endposx'] ?>" size="5"></td>
+						<td>Breite:&nbsp;<input type="text" name="breite<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['breite'] ?>" size="5"></td>
+	        </tr>
+	        <tr>
+	        	<td>&nbsp;y:</td>
+	        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="lineposy<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['posy'] ?>" size="5"></td>
+						<td>&nbsp;y:</td>
+	        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="lineendposy<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['endposy'] ?>" size="5"></td>
+	        </tr>
+	       	<tr>
+	       		<td colspan="4" valign="bottom" style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3">&nbsp;unterhalb&nbsp;von:</td>
+	       		<td colspan="2" valign="bottom">&nbsp;Platzierung:</td>
+	        </tr>
+	        <tr>
+						<td colspan="4" valign="top" style="border-right:1px solid #C3C7C3">
+							<select name="lineoffset_attribute<? echo $i ?>" style="width: 200px">
+								<option value="">- Auswahl -</option>
+								<?
+								for($j = 0; $j < count($this->attributes['name']); $j++){
+									echo '<option ';
+									if($this->ddl->selectedlayout[0]['lines'][$i]['offset_attribute'] == $this->attributes['name'][$j]){
+										echo 'selected ';
+									}
+									echo 'value="'.$this->attributes['name'][$j].'">'.$this->attributes['name'][$j].'</option>';
+								}
+								?>
+							</select>
+						</td>
+	        	<td align="left" valign="top">
+							<select style="width: 110px" name="linetype<? echo $i ?>">
+								<option value="0">normal</option>
+								<? if($this->ddl->selectedlayout[0]['type'] != 0){ ?>
+								<option value="1" <? if($this->ddl->selectedlayout[0]['lines'][$i]['type'] == 1)echo ' selected '; ?>>fixiert</option>
+								<? } ?>
+								<option value="2" <? if($this->ddl->selectedlayout[0]['lines'][$i]['type'] == 2)echo ' selected '; ?>>auf jeder Seite</option>
+							</select>
+						</td>
+						<td align="right">
+							<a href="javascript:Bestaetigung('index.php?go=sachdaten_druck_editor_Linieloeschen&line_id=<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id'] ?>&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&aktivesLayout=<? echo $this->formvars['aktivesLayout']; ?>', 'Wollen Sie die Linie wirklich löschen?');">löschen&nbsp;</a>
+						</td>
+	        </tr>
+	      <? } ?>
+	      <tr>
+          <td style="border-top:2px solid #C3C7C3" colspan=8 align="left">&nbsp;<a href="javascript:addline();">Linie hinzufügen</a></td>
+        </tr>        
+      </table>			
     </td>
     <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
   </tr>
@@ -526,9 +612,9 @@ function save_layout(){
   
   <tr align="center"> 
     <td colspan="3"> 
-    <input class="button" type="button" name="go_plus" value="Layout löschen" onclick="Bestaetigung('index.php?go=sachdaten_druck_editor_Löschen&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&selected_layout_id=<? echo $this->ddl->selectedlayout[0]['id']; ?>', 'Wollen Sie dieses Layout wirklich löschen?');">&nbsp;
-    <input class="button" type="submit" name="go_plus" value="Änderungen Speichern">&nbsp;
-    <input class="button" type="button" name="go_plus" onclick="save_layout();" value="als neues Layout speichern">
+    <input type="button" name="go_plus" value="Layout löschen" onclick="Bestaetigung('index.php?go=sachdaten_druck_editor_Löschen&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&selected_layout_id=<? echo $this->ddl->selectedlayout[0]['id']; ?>', 'Wollen Sie dieses Layout wirklich löschen?');">&nbsp;
+    <input type="submit" name="go_plus" value="Änderungen Speichern">&nbsp;
+    <input type="button" name="go_plus" onclick="save_layout();" value="als neues Layout speichern">
     </td>
   </tr>
 <? } ?>  
@@ -537,6 +623,7 @@ function save_layout(){
   </tr>
 </table>
 <input type="hidden" name="textcount" value="<? echo count($this->ddl->selectedlayout[0]['texts']); ?>">
+<input type="hidden" name="linecount" value="<? echo count($this->ddl->selectedlayout[0]['lines']); ?>">
 <input type="hidden" name="bgsrc_save" value="<? echo $this->ddl->selectedlayout[0]['bgsrc'] ?>">
 
 

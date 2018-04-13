@@ -21,21 +21,13 @@ document.onkeydown = function(ev){
 	}
 }
 
-function changeInputType(oldObject, oType) {
-	if(oldObject != undefined){
-	  var newObject = document.createElement('input');
-	  newObject.type = oType;
-	  if(oldObject.style.width) newObject.style.width = oldObject.style.width;
-	  if(oldObject.value) newObject.value = oldObject.value;
-	  if(oldObject.name) newObject.name = oldObject.name;
-	  if(oldObject.id) newObject.id = oldObject.id;
-	  if(oldObject.className) newObject.className = oldObject.className;
-	  oldObject.parentNode.replaceChild(newObject,oldObject);
-	  return newObject;
+function changeInputType(object, oType) {
+	if(object != undefined){
+		object.type = oType;
 	}
 }
 
-function operatorchange(attributname, searchmask_number){
+function operatorchange(layer_id, attributname, searchmask_number){
 	if(searchmask_number > 0){						// es ist nicht die erste Suchmaske, sondern eine weitere hinzugefügte
 		prefix = searchmask_number+'_';
 	}
@@ -48,7 +40,7 @@ function operatorchange(attributname, searchmask_number){
 	}
 	if(document.getElementById(prefix+"operator_"+attributname).value == "between"){
 		changeInputType(document.getElementById(prefix+"value2_"+attributname), "text");
-		document.getElementById(prefix+"value_"+attributname).style.width = '145px';
+		document.getElementById(prefix+"value_"+attributname).style.width = '144px';
 	}
 	else{
 		if(document.getElementById(prefix+"value2_"+attributname) != undefined){
@@ -62,7 +54,7 @@ function operatorchange(attributname, searchmask_number){
 			document.getElementById(prefix+"_avf_"+attributname).style.display = 'none';
 			document.getElementById(prefix+"_text_"+attributname).style.display = 'inline';
 			document.getElementById(prefix+"text_value_"+attributname).value = '';
-			document.getElementById(attributname+"_"+prefix).disabled = true;
+			document.getElementById(layer_id+"_"+attributname+"_"+prefix).disabled = true;
 			document.getElementById(prefix+"text_value_"+attributname).disabled = false;
 		}
 		else{
@@ -235,7 +227,7 @@ function add_searchmask(layer_id){
 	}
 
 ?><table border="0" cellpadding="5" cellspacing="2" bgcolor="<? echo $bgcolor; ?>"><?php
-	if($this->selected_search != ''){echo '<script type="text/javascript">showsearches();</script>';} ?>
+	if(!in_array($this->selected_search[0]['name'], array('', '<last_search>'))){echo '<script type="text/javascript">showsearches();</script>';} ?>
   <tr> 
     <td id="searchmasks">
 
@@ -256,7 +248,7 @@ function add_searchmask(layer_id){
 <?php if ($this->user->rolle->visually_impaired) { ?>
 					<tr>
 						<td align="center"><br>
-							<input class="button" type="button" name="suchen" onclick="suche();" value="<? echo $this->strSearch; ?>">
+							<input type="button" name="suchen" onclick="suche();" value="<? echo $this->strSearch; ?>">
 						</td>
 					</tr>
 <?php } ?>
@@ -277,7 +269,7 @@ function add_searchmask(layer_id){
 <?php if (!$this->user->rolle->visually_impaired) { ?>
 					<tr>
 						<td align="center"><br>
-							<input class="button" type="button" name="suchen" onclick="suche();" value="<? echo $this->strSearch; ?>">
+							<input type="button" name="suchen" onclick="suche();" value="<? echo $this->strSearch; ?>">
 						</td>
 					</tr>
 <?php } ?>

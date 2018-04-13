@@ -1,3 +1,6 @@
+<?
+  include(LAYOUTPATH.'languages/PolygonEditor_'.$this->user->rolle->language.'.php');
+?>
 
 <script type="text/javascript" src="funktionen/calendar.js"></script>
 <script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
@@ -84,6 +87,19 @@ function buildwktpolygonfromsvgpath(svgpath){
 	return wkt;
 }	
 
+function toggleBetweenSearch(toggle_button, secondfield){
+	if(secondfield.style.display == ''){
+		secondfield.style.display = 'none';
+		secondfield.disabled = true;
+		toggle_button.className = 'toggle_fa_off';
+	}
+	else{
+		secondfield.style.display = '';
+		secondfield.disabled = false;
+		toggle_button.className = 'toggle_fa_on';
+	}
+}
+
 function updateGemarkungsauswahl(){
 	document.GUI.gemschl.value = document.GUI.gemschl1.value+document.GUI.gemschl2.value;
 	selectbyString(document.GUI.suchgemarkung, document.GUI.gemschl.value);
@@ -158,8 +174,8 @@ else {
     </div></td>
   </tr>
   <tr> 
-    <td rowspan="17">&nbsp;</td>
-    <td rowspan="17"> 
+    <td rowspan="18">&nbsp;</td>
+    <td rowspan="18"> 
       <?php
 				include(LAYOUTPATH.'snippets/SVG_polygon_box_query_area.php')
 			?>
@@ -179,7 +195,7 @@ else {
     <td colspan="2"><input type="checkbox" name="suchgn" value="1"<?php if ($this->formvars['suchgn']) { ?> checked<?php } ?>>&nbsp;Grenzniederschrift&nbsp;(GN)</td>
   </tr>
   <tr> 
-    <td width="20%"><input type="checkbox" name="suchan" value="1"<?php if ($this->formvars['suchan']) { ?> checked<?php } ?>>
+    <td colspan="2"><input type="checkbox" name="suchan" value="1"<?php if ($this->formvars['suchan']) { ?> checked<?php } ?>>
 			&nbsp;Andere&nbsp;
 			<? $such_andere_art = explode(',', $this->formvars['such_andere_art']); ?>
 			<select name="such_andere_art[]" multiple="true" size="1" style="position: absolute;width: 185px" onmouseover="this.size=10" onmouseout="this.size=1" onchange="document.getElementsByName('suchan')[0].checked=true;">
@@ -191,7 +207,7 @@ else {
 		</td>
   </tr>
 	<tr>
-		<td>
+		<td colspan="2">
 			<table cellpadding="2" cellspacing="0">
 				<tr>
 					<td id="dokauswahl1"><a href="javascript:show_dokauswahlen();">&nbsp;gespeicherte Auswahlen...</a></td>
@@ -202,12 +218,12 @@ else {
 							<tr align="center"> 
 								<td colspan="2"  align="right">
 									Name:&nbsp;<input type="text" name="dokauswahl_name" value="<? echo $this->formvars['dokauswahl_name']; ?>">
-									<input class="button" type="button" style="width:74px" name="speichern" value="Speichern" onclick="save_dokauswahl();">
+									<input type="button" style="width:74px" name="speichern" value="Speichern" onclick="save_dokauswahl();">
 								</td>
 							</tr>
 							<tr>
 								<td align="right"  colspan="2">
-									<input class="button" type="button" style="width:74px" name="delete" value="Löschen" onclick="delete_dokauswahl();">
+									<input type="button" style="width:74px" name="delete" value="Löschen" onclick="delete_dokauswahl();">
 									<select name="dokauswahlen">
 										<option value="">  -- Auswahl --  </option>
 										<?
@@ -218,7 +234,7 @@ else {
 											}
 										?>
 									</select>
-									<input class="button" type="button" style="width:74px" name="laden" value="Laden" onclick="document.GUI.submit();">
+									<input type="button" style="width:74px" name="laden" value="Laden" onclick="document.GUI.submit();">
 								</td>
 							</tr>
 						</table>
@@ -227,7 +243,7 @@ else {
 			</table>
 		</td>
   <tr>
-		<td>&nbsp;Gültigkeit:
+		<td colspan="2">&nbsp;Gültigkeit:
 			<select name="gueltigkeit">
 				<option value="">--- Auswahl ---</option>
 				<option value="1">gültige Nachweise</option>
@@ -239,63 +255,80 @@ else {
     <td colspan="2"><hr align="center" noshade></td>
   </tr>
   <tr> 
-    <td>Auswahlverfahren:</td>
+    <td colspan="2">Auswahlverfahren:</td>
   </tr>
   <tr> 
     <td colspan="2">
       <table border="0" cellspacing="0" cellpadding="2">
         <tr>
-          <td rowspan="8" valign="top"><input type="radio" name="abfrageart" value="indiv_nr" <?php if ($this->formvars['abfrageart']=='indiv_nr') { ?> checked<?php } ?>>
+          <td rowspan="10" valign="top">
+						<input type="radio" name="abfrageart" value="indiv_nr" <?php if ($this->formvars['abfrageart']=='indiv_nr') { ?> checked<?php } ?>>
           </td>
         </tr>
-		<tr><td colspan="3"><span class="fett">Auswahl über Attribute</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:clear();" title="Suchfelder leeren"><img style="vertical-align:top;" src="<? echo GRAPHICSPATH.'edit-clear.png'; ?>"></a></td></tr>
+				<tr>
+					<td colspan="3"><span class="fett">Auswahl über Attribute</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:clear();" title="Suchfelder leeren"><img style="vertical-align:top;" src="<? echo GRAPHICSPATH.'edit-clear.png'; ?>"></a></td>
+				</tr>
         <tr>
           <td colspan="3">
-			Gemarkung:<br>
-			<input name="gemschl1" type="text" value="13" style="width:23px" onkeyup="updateGemarkungsauswahl();">
-			<input name="gemschl2" type="text" value="<? echo substr($this->formvars['suchgemarkung'], 2, 4); ?>" style="width:46px" onkeyup="updateGemarkungsauswahl();">
-			<input name="gemschl" type="hidden" value="<? echo $this->formvars['suchgemarkung']; ?>">
-			<?php 
-			  $this->GemkgFormObj->outputHTML();
-			  echo $this->GemkgFormObj->html;
-			 ?>
-          </td>
-		</tr>
-		<tr>
-			<td align="left" colspan="3">Flur:&nbsp;
-				<div style="position: relative">
-				<input type="text" name="suchflur" value="<?php echo $this->formvars['suchflur']; ?>" size="3" maxlength="3"><img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[1],Style[0], document.getElementById('TipLayer'))" onmouseout="htm()">
-				&nbsp;&nbsp;&nbsp;<input type="checkbox" name="flur_thematisch" <? if($this->formvars['flur_thematisch'] == '1')echo 'checked'; ?> value="1"> thematisch
-				<DIV id="TipLayer" style="visibility:hidden;position:absolute;z-index:1000;left: -50px"></DIV>
-				</div>
-			</td>
-		</tr>
-		<tr>
-        <? if(NACHWEIS_PRIMARY_ATTRIBUTE != 'rissnummer'){ ?>
-          <td align="left">          Antragsnummer<br>
-  					<input type="text" name="suchstammnr" value="<?php echo $this->formvars['suchstammnr']; ?>" size="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>" maxlength="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>">
- 					</td>    
-        <? } ?>
-          <td align="left">          Rissnummer<br>
-  					<input type="text" name="suchrissnr" value="<?php echo $this->formvars['suchrissnr']; ?>" size="<?php echo RISSNUMMERMAXLENGTH; ?>" maxlength="<?php echo RISSNUMMERMAXLENGTH; ?>">
- 					</td>    
+					Gemarkung:<br>
+					<input name="gemschl1" type="text" value="13" style="width:23px" onkeyup="updateGemarkungsauswahl();">
+					<input name="gemschl2" type="text" value="<? echo substr($this->formvars['suchgemarkung'], 2, 4); ?>" style="width:46px" onkeyup="updateGemarkungsauswahl();">
+					<input name="gemschl" type="hidden" value="<? echo $this->formvars['suchgemarkung']; ?>">
+					<?php 
+						$this->GemkgFormObj->outputHTML();
+						echo $this->GemkgFormObj->html;
+					 ?>
+							</td>
+				</tr>
+				<tr>
+					<td align="left" colspan="3">Flur:&nbsp;
+						<div style="position: relative">
+						<input type="text" name="suchflur" value="<?php echo $this->formvars['suchflur']; ?>" size="3" maxlength="3"><img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[1],Style[0], document.getElementById('TipLayer'))" onmouseout="htm()">
+						&nbsp;&nbsp;&nbsp;<input type="checkbox" name="flur_thematisch" <? if($this->formvars['flur_thematisch'] == '1')echo 'checked'; ?> value="1"> thematisch
+						<DIV id="TipLayer" style="visibility:hidden;position:absolute;z-index:1000;left: -50px"></DIV>
+						</div>
+					</td>
+				</tr>
         <? if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){ ?>
-          <td align="left">          Antragsnummer<br>
+				<tr>
+          <td colspan="3">          Rissnummer<br>
+  					<input type="text" name="suchrissnr" value="<?php echo $this->formvars['suchrissnr']; ?>" size="<?php echo RISSNUMMERMAXLENGTH; ?>" maxlength="<?php echo RISSNUMMERMAXLENGTH; ?>">
+						<a href="#" class="toggle_fa_off" title="von-bis-Suche" onclick="toggleBetweenSearch(this, GUI.suchrissnr2);"><i class="fa fa-step-backward"></i> <i class="fa fa-step-forward"></i></a>
+						<input type="text" style="display: none" name="suchrissnr2" value="<? echo $this->formvars['suchrissnr2']; ?>" size="<? echo RISSNUMMERMAXLENGTH; ?>" maxlength="<? echo RISSNUMMERMAXLENGTH; ?>">
+ 					</td>
+				</tr>
+				<? } ?>
+				<tr>
+					<td colspan="3">          Antragsnummer<br>
   					<input type="text" name="suchstammnr" value="<?php echo $this->formvars['suchstammnr']; ?>" size="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>" maxlength="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>">
- 					</td>    
-        <? } ?>
-          <td width="50%" align="left">          Fortführungsjahr<br>
-			<input type="text" name="suchfortf" value="<?php echo $this->formvars['suchfortf']; ?>" size="4" maxlength="4">
-		  </td>    
-        </tr>
+						<a href="#" class="toggle_fa_off" title="von-bis-Suche" onclick="toggleBetweenSearch(this, GUI.suchstammnr2);"><i class="fa fa-step-backward"></i> <i class="fa fa-step-forward"></i></a>
+						<input type="text" style="display: none" name="suchstammnr2" value="<? echo $this->formvars['suchstammnr2']; ?>" size="<? echo ANTRAGSNUMMERMAXLENGTH; ?>" maxlength="<? echo ANTRAGSNUMMERMAXLENGTH; ?>">
+ 					</td>
+				</tr>
+				<? if(NACHWEIS_PRIMARY_ATTRIBUTE == 'stammnr'){ ?>
+				<tr>
+          <td colspan="3">          Rissnummer<br>
+  					<input type="text" name="suchrissnr" value="<?php echo $this->formvars['suchrissnr']; ?>" size="<?php echo RISSNUMMERMAXLENGTH; ?>" maxlength="<?php echo RISSNUMMERMAXLENGTH; ?>">
+						<a href="#" class="toggle_fa_off" title="von-bis-Suche" onclick="toggleBetweenSearch(this, GUI.suchrissnr2);"><i class="fa fa-step-backward"></i> <i class="fa fa-step-forward"></i></a>
+						<input type="text" style="display: none" name="suchrissnr2" value="<? echo $this->formvars['suchrissnr2']; ?>" size="<? echo RISSNUMMERMAXLENGTH; ?>" maxlength="<? echo RISSNUMMERMAXLENGTH; ?>">
+ 					</td>
+				</tr>
+				<? } ?>
+				<tr>
+          <td colspan="3">          Fortführungsjahr<br>
+						<input type="text" name="suchfortf" value="<?php echo $this->formvars['suchfortf']; ?>" size="4" maxlength="4">
+						<a href="#" class="toggle_fa_off" title="von-bis-Suche" onclick="toggleBetweenSearch(this, GUI.suchfortf2);"><i class="fa fa-step-backward"></i> <i class="fa fa-step-forward"></i></a>
+						<input type="text" style="display: none" name="suchfortf2" value="<?php echo $this->formvars['suchfortf2']; ?>" size="4" maxlength="4">
+					</td>
+				</tr>
         <tr> 
 			    <td colspan="3">
-			    		Datum:<br>
+			    	Datum:<br>
 						<a href="javascript:;" title=" (TT.MM.JJJJ) " onclick="new CalendarJS().init('sdatum')"><img src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar"><input type="hidden" id="calendar_sdatum"></div>
-			    		<input id="sdatum" name="sdatum" type="text" onchange="if(document.GUI.sdatum2.value=='')document.GUI.sdatum2.value=this.value" value="<?php echo $this->formvars['sdatum']; ?>" size="10" maxlength="50">
-						&nbsp;bis&nbsp;
-						<a href="javascript:;" title=" (TT.MM.JJJJ) " onclick="new CalendarJS().init('sdatum2')"><img src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar"><input type="hidden" id="calendar_sdatum2"></div>
-			    		<input id="sdatum2" name="sdatum2" type="text" onchange="" value="<?php echo $this->formvars['sdatum2']; ?>" size="10" maxlength="50">
+			    	<input id="sdatum" name="sdatum" type="text" value="<?php echo $this->formvars['sdatum']; ?>" size="10" maxlength="50">
+						<a href="#" class="toggle_fa_off" title="von-bis-Suche" disabled="true" onclick="toggleBetweenSearch(this, GUI.sdatum2);toggleBetweenSearch(this, document.getElementById('caldatum2'), GUI.sdatum2);"><i class="fa fa-step-backward"></i> <i class="fa fa-step-forward"></i></a>
+						<a href="javascript:;" title=" (TT.MM.JJJJ) " id="caldatum2" style="display:none" onclick="new CalendarJS().init('sdatum2')"><img src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar"><input type="hidden" id="calendar_sdatum2"></div>
+			    	<input id="sdatum2" name="sdatum2" type="text" style="display:none" onchange="" value="<?php echo $this->formvars['sdatum2']; ?>" size="10" maxlength="50">
 			    </td>
 			  </tr>
 			  <tr>
@@ -315,12 +348,19 @@ else {
     </td>
   </tr>
   <tr> 
-    <td height="35px" colspan="2"><input type="radio" name="abfrageart" id="abfrageart_poly" value="poly" <?php if ($this->formvars['abfrageart']=='poly' OR $this->formvars['abfrageart']=='') { ?> checked<?php } ?>> 
-   <span class="fett">Auswahl im Kartenausschnitt über Suchpolygon</span></td>
+    <td valign="top">
+			<input type="radio" name="abfrageart" id="abfrageart_poly" value="poly" <?php if ($this->formvars['abfrageart']=='poly' OR $this->formvars['abfrageart']=='') { ?> checked<?php } ?>> 
+		</td>
+		<td>
+			<span class="fett">Auswahl im Kartenausschnitt über Suchpolygon</span>
+		</td>
   </tr>
   <tr> 
-    <td colspan="2"><input type="radio" name="abfrageart" value="antr_nr" <?php if ($this->formvars['abfrageart']=='antr_nr') { ?> checked<?php } ?>>
-		<span class="fett">Vorbereitungsnummer:</span>
+    <td valign="top">
+			<input type="radio" name="abfrageart" value="antr_nr" <?php if ($this->formvars['abfrageart']=='antr_nr') { ?> checked<?php } ?>>
+		</td>
+		<td>
+			<span class="fett">Vorbereitungsnummer:</span>
       <?php $this->FormObjAntr_nr->outputHTML();
         echo $this->FormObjAntr_nr->html;?>
     </td>
@@ -342,6 +382,11 @@ else {
   		</select> 
   	</td>
   </tr>
+	<tr>
+		<td colspan="2" style="padding-top: 5px">
+			<input type="checkbox" name="singlegeom" value="true" <? if($this->formvars['singlegeom'])echo 'checked="true"'; ?>><? echo $strSingleGeoms; ?>
+		</td>
+	</tr>	
   <tr> 
     <td colspan="2"><hr align="center" noshade></td>
   </tr>

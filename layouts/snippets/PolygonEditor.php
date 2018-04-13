@@ -12,6 +12,11 @@ function toggle_vertices(){
 	document.getElementById("vertices").SVGtoggle_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 }
 
+function split_geometries(){
+	document.GUI.go.value = 'Multi_Geometrien_splitten';
+	document.GUI.submit();
+}
+
 function send(zoom){
 	document.GUI.zoom.value = zoom;
 	if(document.GUI.newpathwkt.value == ''){
@@ -69,8 +74,8 @@ function buildwktpolygonfromsvgpath(svgpath){
     <td align="center" colspan="5"><a name="geoedit_anchor"><h2><?php echo $this->titel; ?></h2></a></td>
   </tr>
   <tr> 
-    <td rowspan="8">&nbsp;</td>
-    <td colspan="4" rowspan="8"> 
+    <td rowspan="9">&nbsp;</td>
+    <td colspan="4" rowspan="9"> 
       <?
 				include(LAYOUTPATH.'snippets/SVG_polygon_query_area.php');
 			?>
@@ -84,9 +89,9 @@ function buildwktpolygonfromsvgpath(svgpath){
 				</tr>
 				<tr align="left">
 					<td>
-					<div align="center"><input type="submit" class="button" name="neuladen" value="<?php echo $strLoadNew; ?>"></div>
+					<div align="center"><input type="button" name="neuladen_button" onclick="neuLaden();" value="<?php echo $strLoadNew; ?>"></div>
 					<br>
-					<div style="width:260px; height:<?php echo $this->map->height-196; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
+					<div style="width:260px; height:<?php echo $this->map->height-247; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
 						&nbsp;
 						<img src="graphics/tool_info_2.png" alt="<? echo $strInfoQuery; ?>" title="<? echo $strInfoQuery; ?>" width="17">&nbsp;
 						<img src="graphics/layer.png" alt="<? echo $strLayerControl; ?>" title="<? echo $strLayerControl; ?>" width="20" height="20"><br>
@@ -98,9 +103,13 @@ function buildwktpolygonfromsvgpath(svgpath){
 			</table>
 		</td>
   </tr>
-	<tr>
-		<td></td>
-	</tr>
+  <tr>
+	  <? if($this->new_entry != true){ ?>
+  	<td align="center"><input type="button" style="visibility:hidden" name="split" value="Geometrie in neue Datensätze aufteilen" onclick="split_geometries();"></td>
+		<? }else{ ?>
+		<td style="height: 24px">&nbsp;</td>
+		<? } ?>
+  </tr>
   <tr>
   	<td><? echo $strGeomFrom; ?>:<br>
   		<select name="layer_id" style="width: 260px" onchange="startwaiting(true);document.GUI.no_load.value='true';document.GUI.submit();">
@@ -115,8 +124,13 @@ function buildwktpolygonfromsvgpath(svgpath){
   		</select> 
   	</td>
   </tr>
+	<tr>
+		<td>
+			<input type="checkbox" name="singlegeom" value="true" <? if($this->formvars['singlegeom'])echo 'checked="true"'; ?>><? echo $strSingleGeoms; ?>
+		</td>
+	</tr>
   <tr> 
-    <td colspan="2" style="border-top:1px solid #999999"><img width="240px" height="1px" src="<? echo GRAPHICSPATH; ?>leer.gif"></td>
+    <td colspan="2" style="border-top:1px solid #999999"></td>
   </tr>
   <tr>  
   	<td width="160"><? echo $strArea; ?>:<br><input size="12" type="text" name="area" value="<?echo $this->formvars['area']?>">&nbsp;m<SUP>2</SUP></td>
@@ -161,7 +175,7 @@ function buildwktpolygonfromsvgpath(svgpath){
 		<? } ?>
   	<td align="right">
   		<input type="checkbox" name="always_draw" value="1" <?if($always_draw == 1 OR $always_draw == 'true')echo 'checked'; ?>>&nbsp;weiterzeichnen&nbsp;&nbsp;
-  		<input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;Punktfang
+  		<input type="checkbox" onclick="toggle_vertices()" name="punktfang" <? if($this->formvars['punktfang'] == 'on')echo 'checked="true"'; ?>>&nbsp;Punktfang
   	</td>
 		<td align="center">
 			  <? if($this->new_entry != true){ ?>
@@ -181,6 +195,7 @@ function buildwktpolygonfromsvgpath(svgpath){
 <INPUT TYPE="HIDDEN" NAME="oid" VALUE="<?php echo $this->formvars['oid']; ?>">
 <INPUT TYPE="HIDDEN" NAME="oldscale" VALUE="<?php echo round($this->map_scaledenom); ?>">    
 <input type="hidden" name="layer_options_open" value="">
+<input type="hidden" name="neuladen" value="">
 <? if($this->formvars['go'] == 'PolygonEditor'){ ?>
 	<INPUT TYPE="HIDDEN" NAME="go" VALUE="PolygonEditor" >
 	<INPUT TYPE="HIDDEN" NAME="selected_layer_id" VALUE="<?php echo $this->formvars['selected_layer_id']; ?>">

@@ -259,7 +259,7 @@ $altesneues_options = array(
 			<input size="2" onkeyup="checknumbers(this, 'int2', '', '');" type="text" name="anzahl" value="10" style="margin-right: 10px">Treffer anzeigen
 		</td>
 		<td>
-			<input class="button" type="submit" name="go_plus" value="Suchen" style="margin: 10px;">
+			<input type="submit" name="go_plus" value="Suchen" style="margin: 10px;">
 			<input type="hidden" name="selected_layer_id" value="<?php echo LAYER_ID_FF_AUFTRAG; ?>">
 			<input type="hidden" name="go" value="fortfuehrungslisten_fn_suche">
 		</td>

@@ -35,7 +35,6 @@
 	$strClass="Klasse";
 	$strExpression="Expression";
 	$strText="Text";
-	$strSignOrder="Zeichenreihenfolge";
 	$strDelete="löschen";
 	$strAddClass="Klasse hinzufügen";
   $strAddAutoClasses="Klassen automatisch hinzufügen";
@@ -46,7 +45,12 @@
 	$strButtonSaveAsNewLayer="Als neuen Layer eintragen";
 	$strCommonData="Allgemeine Angaben";
 	$strtransparency="Transparenz";
-	$strdrawingorder="Drawingorder";
+	$strDrawingOrder="Zeichenreihenfolge";
+	$strLegendOrder="Legendenreihenfolge";
+	$strLegend="Legende";
+	$strLegendGraphic="Legendengrafik";
+	$strMap="Karte";
+	$strOrder="Reihenfolge";
 	$strminscale="Minscale";
 	$strmaxscale="Maxscale";
 	$strsymbolscale="Symbolscale";
@@ -73,4 +77,9 @@
 	$strClusterMaxdistance="Cluster:Maxdistance";
 	$strTriggerFunction="Triggerfunktion";
 	$strClassification="Klassifizierung";
-?>  
+	$strWidth="Breite";
+	$strHeight="Höhe";
+	$strImagefile="Grafikdatei";
+	$strSync="Sync - Modus";
+	$strSyncHelp="Im Sync - Modus werden alle Änderungen am Layer mit einer fortlaufenden Versionsnummer in einer Tabelle mit dem Namen (Haupttabelle)_deltas gespeichert. Der Modus muss eingeschaltet sein, wenn der Layer in der App kvmobile verfügbar gemacht werden soll."
+?>

@@ -49,27 +49,42 @@ include('funktionen/input_check_functions.php');
 	buildJSONString = function(id, is_array){
 		var field = document.getElementById(id);		
 		values = new Array();
-		elements = document.getElementsByName(id);
+		elements = document.getElementsByClassName(id);
 		for(i = 0; i < elements.length; i++){
 			value = elements[i].value;
-			if(!is_array){
+			name = elements[i].name;
+			type = elements[i].type;
+			if(type == 'file'){		// Spezialfall bei Datei-Upload-Feldern:
+				if(value != ''){
+					value = 'file:'+name;		// wenn value vorhanden, wurde eine Datei ausgewählt, dann den Namen des Input-Feldes einsammeln + einem Prefix "file:"
+				}
+				else{
+					old_file_path = document.getElementsByName(name+'_alt');
+					if(old_file_path[0] != undefined)value = old_file_path[0].value;			// ansonsten den gespeicherten alten Dateipfad
+				}
+			}
+			if(!is_array){		// Datentyp
 				if(value == '')value = 'null';
 				else if(value.substring(0,1) != '{')value = '"'+value+'"';
 				values.push('"'+elements[i].title+'":'+value);
 			}			
-			else if(i > 0 && value != '')values.push(value);		// bei Arrays ist das erste Element ein Dummy
+			else if(i > 0){		// Array (hier ist das erste Element ein Dummy -> auslassen)
+				if(value != ''){
+					values.push(value);
+				}
+			}
 		}
 		if(!is_array)json = '{'+values.join()+'}';
 		else json = JSON.stringify(values);
-		field.value = json;		
+		field.value = json;
 		if(field.onchange)field.onchange();
 	}
-	
-	addArrayElement = function(fieldname){
+
+	addArrayElement = function(fieldname, form_element_type, oid){
 		outer_div = document.getElementById(fieldname+'_elements');
 		first_element = document.getElementById('div_'+fieldname+'_-1');
 		new_element = first_element.cloneNode(true);
-		last_id = outer_div.lastChild.id;
+		last_id = outer_div.lastElementChild.id;
 		parts = last_id.split('div_'+fieldname+'_');
 		new_id = parseInt(parts[1])+1;
 		new_element.id = 'div_'+fieldname+'_'+new_id;
@@ -81,10 +96,24 @@ include('funktionen/input_check_functions.php');
 	}
 	
 	removeArrayElement = function(fieldname, remove_element_id){
+		getFileAttributesInArray(remove_element_id);
 		outer_div = document.getElementById(fieldname+'_elements');
-		remove_element = document.getElementById(remove_element_id);
+		remove_element = document.getElementById('div_'+remove_element_id);
 		outer_div.removeChild(remove_element);
 		buildJSONString(fieldname, false);
+	}
+	
+	function getFileAttributesInArray(id){
+		elements = document.getElementsByClassName(id);
+		for(i = 0; i < elements.length; i++){
+			if(elements[i].type == 'file'){
+				old_file_path = document.getElementsByName(elements[i].name+'_alt');
+				if(old_file_path[0] != undefined)currentform.delete_documents.value += old_file_path[0].value+'|';
+			}
+			else{
+				getFileAttributesInArray(elements[i].id);
+			}
+		}
 	}
 	
 	nextdatasets = function(layer_id){
@@ -94,6 +123,7 @@ include('funktionen/input_check_functions.php');
 		}
 		if(sure){
 			currentform.target = '';
+			currentform.go.value = 'get_last_query';
 			if(currentform.go_backup.value != ''){
 				currentform.go.value = currentform.go_backup.value;
 			}
@@ -113,6 +143,7 @@ include('funktionen/input_check_functions.php');
 		}
 		if(sure){
 			currentform.target = '';
+			currentform.go.value = 'get_last_query';
 			if(currentform.go_backup.value != ''){
 				currentform.go.value = currentform.go_backup.value;
 			}
@@ -132,6 +163,7 @@ include('funktionen/input_check_functions.php');
 		}
 		if(sure){
 			currentform.target = '';
+			currentform.go.value = 'get_last_query';
 			if(currentform.go_backup.value != ''){
 				currentform.go.value = currentform.go_backup.value;
 			}
@@ -148,6 +180,7 @@ include('funktionen/input_check_functions.php');
 		}
 		if(sure){
 			currentform.target = '';
+			currentform.go.value = 'get_last_query';
 			if(currentform.go_backup.value != ''){
 				currentform.go.value = currentform.go_backup.value;
 			}
@@ -178,7 +211,7 @@ include('funktionen/input_check_functions.php');
 			fieldstring = form_fields[i]+'';
 			field = fieldstring.split(';');
 			if(document.getElementsByName(fieldstring)[0] != undefined && field[4] != 'Dokument' && (document.getElementsByName(fieldstring)[0].readOnly != true) && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
-				message('Das Feld '+document.getElementsByName(fieldstring)[0].title + ' erfordert eine Eingabe. und hier noch mehr Text und hier noch mehr Textund hier noch mehr Textund hier noch mehr Textund hier noch mehr Textund hier noch mehr Textund hier noch mehr Textund hier noch mehr Textund hier noch mehr Text');
+				message('Das Feld '+document.getElementsByName(fieldstring)[0].title + ' erfordert eine Eingabe.');
 				return;
 			}
 			if(document.getElementsByName(fieldstring)[0] != undefined && field[6] == 'date' && field[4] != 'Time' && document.getElementsByName(fieldstring)[0].value != '' && !checkDate(document.getElementsByName(fieldstring)[0].value)){
@@ -189,6 +222,7 @@ include('funktionen/input_check_functions.php');
 		currentform.go.value = 'Sachdaten_speichern';
 		document.getElementById('loader').style.display = '';
 		setTimeout('document.getElementById(\'loaderimg\').src=\'graphics/ajax-loader.gif\'', 50);
+		document.GUI.gle_changed.value = '';
 		overlay_submit(currentform, false);
 	}
 
@@ -213,6 +247,7 @@ include('funktionen/input_check_functions.php');
   	}
   	currentform.go.value = 'neuer_Layer_Datensatz_speichern';
 		document.getElementById('go_plus').disabled = true;
+		document.GUI.gle_changed.value = '';
   	overlay_submit(currentform, false);
 	}
 
@@ -318,17 +353,17 @@ include('funktionen/input_check_functions.php');
 		document.getElementById(subformid).innerHTML = '';
 	}
 	
-	switch_gle_view = function(layer_id){
+	switch_gle_view1 = function(layer_id){
 		currentform.chosen_layer_id.value = layer_id;
-		currentform.go.value='switch_gle_view';
+		currentform.go.value='toggle_gle_view';
 		overlay_submit(currentform, false);
 	}
 	
-	add_calendar = function(event, elementid){
+	add_calendar = function(event, elementid, type, setnow){
 		event.stopPropagation();
 		remove_calendar();
 		calendar = new CalendarJS();
-		calendar.init(elementid);
+		calendar.init(elementid, type, setnow);
 		document.getElementById('layer').calendar = calendar;
 	}
 	 
@@ -346,22 +381,22 @@ include('funktionen/input_check_functions.php');
 		}
 	}
 	
-	get_current_attribute_values = function(attributenamesarray, geom_attribute, k){
+	get_current_attribute_values = function(layer_id, attributenamesarray, geom_attribute, k){
 		var attributenames = '';
 		var attributevalues = '';
 		var geom = '';
 		for(i = 0; i < attributenamesarray.length; i++){
-			if(document.getElementById(attributenamesarray[i]+'_'+k) != undefined){
+			if(document.getElementById(layer_id+'_'+attributenamesarray[i]+'_'+k) != undefined){
 				attributenames += attributenamesarray[i] + '|';
-				attributevalues += encodeURIComponent(document.getElementById(attributenamesarray[i]+'_'+k).value) + '|';
+				attributevalues += encodeURIComponent(document.getElementById(layer_id+'_'+attributenamesarray[i]+'_'+k).value) + '|';
 			}
 			else if(attributenamesarray[i] == geom_attribute ){	// wenn es das Geometrieattribut ist, handelt es sich um eine Neuerfassung --> aktuelle Geometrie nehmen
-				if(document.GUI.loc_x != undefined && document.GUI.loc_x.value != ''){		// Punktgeometrie
-					geom = 'POINT('+document.GUI.loc_x.value+' '+document.GUI.loc_y.value+')';
+				if(currentform.loc_x != undefined && currentform.loc_x.value != ''){		// Punktgeometrie
+					geom = 'POINT('+currentform.loc_x.value+' '+currentform.loc_y.value+')';
 				}
-				else if(document.GUI.newpathwkt.value == ''){		// Polygon- oder Liniengeometrie
-					if(document.GUI.newpath.value != ''){
-						geom = buildwktpolygonfromsvgpath(document.GUI.newpath.value);
+				else if(currentform.newpathwkt.value == ''){		// Polygon- oder Liniengeometrie
+					if(currentform.newpath.value != ''){
+						geom = buildwktpolygonfromsvgpath(currentform.newpath.value);
 					}
 				}
 				attributenames += attributenamesarray[i] + '|';
@@ -373,12 +408,12 @@ include('funktionen/input_check_functions.php');
 	}
 	
 	auto_generate = function(attributenamesarray, geom_attribute, attribute, k, layer_id){
-		names_values = get_current_attribute_values(attributenamesarray, geom_attribute, k);
-		ahah("index.php", "go=auto_generate&layer_id="+layer_id+"&attribute="+attribute+"&attributenames="+names_values[0]+"&attributevalues="+names_values[1], new Array(document.getElementById(attribute+'_'+k)), new Array("setvalue"));
+		names_values = get_current_attribute_values(layer_id, attributenamesarray, geom_attribute, k);
+		ahah("index.php", "go=auto_generate&layer_id="+layer_id+"&attribute="+attribute+"&attributenames="+names_values[0]+"&attributevalues="+names_values[1], new Array(document.getElementById(layer_id+'_'+attribute+'_'+k)), new Array("setvalue"));
 	}
 	
 	openCustomSubform = function(layer_id, attribute, attributenamesarray, field_id, k){
-		names_values = get_current_attribute_values(attributenamesarray, '', k);
+		names_values = get_current_attribute_values(layer_id, attributenamesarray, '', k);
 		document.getElementById('waitingdiv').style.background = 'rgba(200,200,200,0.8)';
 		document.getElementById('waitingdiv').style.display = '';
 		subformWidth = document.GUI.browserwidth.value-70;
@@ -428,15 +463,31 @@ include('funktionen/input_check_functions.php');
 		}
 	}
 
-	zoom2object = function(params){
+	highlight_object = function(layer_id, oid){
+		ahah('index.php', 'go=tooltip_query&querylayer_id='+layer_id+'&oid='+oid, new Array(top.document.GUI.result, ''), new Array('setvalue', 'execute_function'));
+	}
+	
+	zoom2object = function(layer_id, geomtype, tablename, columnname, oid, selektieren){
+		params = 'go=zoomto'+geomtype+'&oid='+oid+'&layer_tablename='+tablename+'&layer_columnname='+columnname+'&layer_id='+layer_id+'&selektieren='+selektieren;
 		if(currentform.id == 'GUI2'){					// aus overlay heraus --> Kartenzoom per Ajax machen
 			startwaiting();
-			get_map_ajax(params);
+			get_map_ajax(params, '', 'highlight_object('+layer_id+', '+oid+');');		// Objekt highlighten
 		}
 		else{
 			window.location.href = 'index.php?'+params;		// aus normaler Sachdatenanzeige heraus --> normalen Kartenzoom machen
 		}
 	}
+	
+	zoom2wkt = function(wkt, epsg){
+		params = 'go=zoom2wkt&wkt='+wkt+'&epsg='+epsg;
+		if(currentform.id == 'GUI2'){					// aus overlay heraus --> Kartenzoom per Ajax machen
+			startwaiting();
+			get_map_ajax(params, '', '');
+		}
+		else{
+			window.location.href = 'index.php?'+params;		// aus normaler Sachdatenanzeige heraus --> normalen Kartenzoom machen
+		}
+	}	
 
 	check_for_selection = function(layer_id){
 		go = 'false';
@@ -479,13 +530,16 @@ include('funktionen/input_check_functions.php');
 
 	delete_document = function(attributename, layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data, reload){
 		if(confirm('Wollen Sie das ausgewählte Dokument wirklich löschen?')){
-			currentform.document_attributename.value = attributename;
+			field = document.getElementsByName(attributename);
+			field[0].type = 'hidden'; // bei einem Typ "file" kann man sonst den value nicht setzen
+			field[0].value = 'file:'+attributename;	// damit der JSON-String eines evtl. vorhandenen übergeordneten Attributs richtig gebildet wird
+			field[0].onchange(); // --||--
+			field[0].value = 'delete';
 			if(targetlayer_id != ''){		// SubForm-Layer
 				subsave_data(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data, reload);
-				currentform.document_attributename.value = '';
 			}
 			else{												// normaler Layer
-				currentform.go.value = 'Dokument_Loeschen';
+				currentform.go.value = 'Sachdaten_speichern';
 				currentform.submit();
 			}
 		}
@@ -552,6 +606,17 @@ include('funktionen/input_check_functions.php');
 			currentform.submit();
 		}
 	}
+	
+	dublicate_dataset = function(layer_id){
+		if(check_for_selection(layer_id)){
+			if(confirm('Der Datensatz und alle mit ihm verknüpften Objekte werden kopiert. Wollen Sie fortfahren?')){
+				currentform.chosen_layer_id.value = layer_id;
+				currentform.go_backup.value = currentform.go.value;
+				currentform.go.value = 'Datensatz_dublizieren';
+				currentform.submit();
+			}
+		}
+	}	
 
 	print_data = function(layer_id){
 		if(check_for_selection(layer_id)){
@@ -597,18 +662,18 @@ include('funktionen/input_check_functions.php');
 		// attributes ist eine Liste von zu aktualisierenden Attributen, k die Nummer des Datensatzes und attributenamesarray ein Array aller Attribute im Formular
 		var attributenames = '';
 		var attributevalues = '';
-		for(i = 0; i < attributenamesarray.length; i++){
-			if(document.getElementById(attributenamesarray[i]+'_'+k) != undefined){
+		for(var i = 0; i < attributenamesarray.length; i++){
+			if(document.getElementById(layer_id+'_'+attributenamesarray[i]+'_'+k) != undefined){
 				attributenames += attributenamesarray[i] + '|';
-				attributevalues += document.getElementById(attributenamesarray[i]+'_'+k).value + '|';
+				attributevalues += document.getElementById(layer_id+'_'+attributenamesarray[i]+'_'+k).value + '|';
 			}
 		}
 		attribute = attributes.split(',');
-		for(i = 0; i < attribute.length; i++){
-			type = document.getElementById(attribute[i]+'_'+k).type;
+		for(var i = 0; i < attribute.length; i++){
+			type = document.getElementById(layer_id+'_'+attribute[i]+'_'+k).type;
 			if(type == 'text'){action = 'setvalue'};
 			if(type == 'select-one'){action = 'sethtml'};
-			ahah("index.php", "go=get_select_list&layer_id="+layer_id+"&attribute="+attribute[i]+"&attributenames="+attributenames+"&attributevalues="+attributevalues+"&type="+type, new Array(document.getElementById(attribute[i]+'_'+k)), new Array(action));
+			ahah("index.php", "go=get_select_list&layer_id="+layer_id+"&attribute="+attribute[i]+"&attributenames="+attributenames+"&attributevalues="+attributevalues+"&type="+type, new Array(document.getElementById(layer_id+'_'+attribute[i]+'_'+k)), new Array(action));
 		}
 	}
 
@@ -640,18 +705,18 @@ include('funktionen/input_check_functions.php');
 		}
 	}
 	
-	change_all = function(layer_id, k, attribute){
-		allfield = document.getElementById(attribute+'_'+k);
+	change_all = function(layer_id, k, layerid_attribute){
+		allfield = document.getElementById(layerid_attribute+'_'+k);
 		for(var i = 0; i < k; i++){			
 			if(document.getElementById(layer_id+'_'+i).checked){
-				formfield = document.getElementById(attribute+'_'+i);
+				formfield = document.getElementById(layerid_attribute+'_'+i);
 				if(formfield.type == 'checkbox'){
 					formfield.checked = allfield.checked;
 				}
 				else{
 					formfield.value = allfield.value;
 				}
-				document.getElementById(attribute+'_'+i).onchange();
+				document.getElementById(layerid_attribute+'_'+i).onchange();
 			}
 		}		
 	}

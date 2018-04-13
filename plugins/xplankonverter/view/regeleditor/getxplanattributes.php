@@ -10,7 +10,7 @@
 </tr><?php
 
 // Insert a new row for each attribute
-while ($row = pg_fetch_row($result)){
+while ($row = pg_fetch_row($this->result)){
 	// entnimmt Metadaten u. Assoziationen
 	if ($row[0]!='gml_id' 
 		and $row[0]!='stellen_id'

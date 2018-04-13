@@ -1,5 +1,6 @@
-<? $params = $this->user->rolle->get_layer_params($this->Stelle->selectable_layer_params, $this->pgdatabase); ?>
-<script language="javascript" type="text/javascript">
+<?php
+	$params = $this->user->rolle->get_layer_params($this->Stelle->selectable_layer_params, $this->pgdatabase);
+?><script language="javascript" type="text/javascript">
 	function toggleLayerParamsBar() {
 		var openLayerParamBarIcon = $('#openLayerParamBarIcon'),
 				layerParamsBar = $('#layerParamsBar');
@@ -36,7 +37,7 @@
 				<td>
 					<div style="position: relative;">
 						<div style="position: relative;">
-							<i id="openLayerParamBarIcon" class="fa fa-bars pointer" style="font-size: 1.1em;margin: 5 5 5 5" onclick="toggleLayerParamsBar();"></i>
+							<i id="openLayerParamBarIcon" class="fa fa-bars button pointer" onclick="toggleLayerParamsBar();"></i>
 						</div>
 						<div id="layerParamsBar" class="layerOptions">
 							<div style="position: absolute; top: 2px; right: 2px;">

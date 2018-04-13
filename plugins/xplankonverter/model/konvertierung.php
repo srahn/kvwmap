@@ -19,7 +19,7 @@ class Konvertierung extends PgObject {
 		'IN_GML_ERSTELLUNG'  => 'in GML-Erstellung',
 		'GML_ERSTELLUNG_OK'  => 'GML-Erstellung abgeschlossen',
 		'GML_ERSTELLUNG_ERR' => 'GML-Erstellung abgebrochen',
-    'IN_INSPIRE_GML_ERSTELLUNG'  => 'in INSPIRE-GML-Erstellung',
+		'IN_INSPIRE_GML_ERSTELLUNG'  => 'in INSPIRE-GML-Erstellung',
 		'INSPIRE_GML_ERSTELLUNG_OK'  => 'INSPIRE-GML-Erstellung abgeschlossen',
 		'INSPIRE_GML_ERSTELLUNG_ERR' => 'INSPIRE-GML-Erstellung abgebrochen'
 	);
@@ -76,19 +76,81 @@ class Konvertierung extends PgObject {
 
 		$this->debug->show('Erzeuge Shape-Dateien für jede Klasse:', Konvertierung::$write_debug);
 		foreach ($class_names AS $class_name) {
-			$this->debug->show('Klasse: ' . $class_name, Konvertierung::$write_debug);
 			$sql = "
 				SELECT
-					*
+					DISTINCT ST_GeometryType(position)
 				FROM
-					xplan_gml. " . strtolower($class_name) . "
+					xplan_gml. " . strtolower($class_name). "
 				WHERE
 					konvertierung_id = " . $this->get('id') . "
 			";
-			$this->debug->show('Objektabfrage sql: ' . $sql, Konvertierung::$write_debug);
-			$export_class->ogr2ogr_export($sql, '"ESRI Shapefile"', $path . '/' . $class_name . '.shp', $this->database);
+			$result = pg_query($this->database->dbConn, $sql);
+			//$result = pg_fetch_assoc($query);
+			if(pg_num_rows($result) == 0) {
+				continue;
+			} else {
+				while($row = pg_fetch_array($result)){
+					if ($row[0] == 'ST_MultiPoint') {
+						$this->debug->show('Klasse: ' . $class_name, Konvertierung::$write_debug);
+						$sql_point = "
+							SELECT
+								*
+							FROM
+								xplan_gml. " . strtolower($class_name) . "
+							WHERE
+								konvertierung_id = " . $this->get('id') . "
+							AND
+								ST_GeometryType(position) = 'ST_MultiPoint'
+						";
+						$this->debug->show('Objektabfrage sql: ' . $sql, Konvertierung::$write_debug);
+						$export_class->ogr2ogr_export($sql_point, '"ESRI Shapefile"', $path . '/' . $class_name . '_point.shp', $this->database);
+					}
+					if ($row[0] == 'ST_MultiLineString') {
+						$this->debug->show('Klasse: ' . $class_name, Konvertierung::$write_debug);
+						$sql_line = "
+							SELECT
+								*
+							FROM
+								xplan_gml. " . strtolower($class_name) . "
+							WHERE
+								konvertierung_id = " . $this->get('id') . "
+							AND
+								ST_GeometryType(position) = 'ST_MultiLineString'
+						";
+						$this->debug->show('Objektabfrage sql: ' . $sql, Konvertierung::$write_debug);
+						$export_class->ogr2ogr_export($sql_line, '"ESRI Shapefile"', $path . '/' . $class_name . '_line.shp', $this->database);
+					}
+					if ($row[0] == 'ST_MultiPolygon') {
+						$this->debug->show('Klasse: ' . $class_name, Konvertierung::$write_debug);
+						$sql_poly = "
+							SELECT
+								*
+							FROM
+								xplan_gml. " . strtolower($class_name) . "
+							WHERE
+								konvertierung_id = " . $this->get('id') . "
+							AND
+								ST_GeometryType(position) = 'ST_MultiPolygon'
+						";
+						$this->debug->show('Objektabfrage sql: ' . $sql, Konvertierung::$write_debug);
+						$export_class->ogr2ogr_export($sql_poly, '"ESRI Shapefile"', $path . '/' . $class_name . '_poly.shp', $this->database);
+					}
+				}
+			}
 		}
 
+		// Fuer Plan
+		$this->debug->show('Klasse: ' . 'RP_Plan', Konvertierung::$write_debug);
+		$sql = "
+			SELECT
+				*
+			FROM
+				xplan_gml.rp_plan
+			WHERE
+				konvertierung_id = " . $this->get('id')
+		;
+		$this->debug->show('Objektabfrage sql: ' . $sql, Konvertierung::$write_debug);
+		$export_class->ogr2ogr_export($sql, '"ESRI Shapefile"', $path . '/' . RP_Plan . '.shp', $this->database);
 	}
 
 	function create_export_file($file_type) {
@@ -111,7 +173,7 @@ class Konvertierung extends PgObject {
 	function files_exists($dir) {
 		$dir = $this->get_file_path($dir);
 		$this->debug->show('Prüfe ob Dateien im Verzeichnis : ' . $dir . ' vorhanden sind: ', Konvertierung::$write_debug);
-	  $result = !(count(glob("$dir/*")) === 0);
+		$result = !(count(glob("$dir/*")) === 0);
 		$this->debug->show(($result ? 'ja' : 'nein'), Konvertierung::$write_debug);
 		return $result;
 	}
@@ -225,7 +287,7 @@ class Konvertierung extends PgObject {
 	}
 
 	function set_status($new_status = '') {
-		#echo '<br>Setze status in Konvertierung.';
+		$this->debug->show('<br>Setze status in Konvertierung.', false);
 		if ($new_status == '') {
 			$sql = "
 				SELECT DISTINCT
@@ -240,7 +302,7 @@ class Konvertierung extends PgObject {
 				WHERE
 					k.id = {$this->get('id')}
 			";
-			#echo '<br>Setze Status mit sql: ' . $sql;
+			$this->debug->show('<br>Setze Status mit sql: ' . $sql, false);
 			$query = pg_query($this->database->dbConn, $sql);
 			$result = pg_fetch_assoc($query);
 			$plan_or_regel_assigned = $result['plan_or_regel_assigned'];
@@ -323,10 +385,11 @@ class Konvertierung extends PgObject {
 				DELETE FROM
 					xplan_gml." . strtolower($class_name) . "
 				WHERE
-					konvertierung_id = " . $this->get('id') . "
+					konvertierung_id = $1
 			";
 			$this->debug->show("Delete Objekte von {$class_name} with konvertierung_id " . $this->get('id') . ' und sql: ' . $sql . ' in reset Mapping.', Konvertierung::$write_debug);
-			$query = pg_query($this->database->dbConn, $sql);
+			#echo '<br>sql: ' . $sql;
+			$query = pg_query_params($this->database->dbConn, $sql, array($this->get('id')));
 		}
 
 		# Lösche vorhandene xplan_shapes Export-Dateien
@@ -340,9 +403,8 @@ class Konvertierung extends PgObject {
 	* und den in den Regeln definierten XPlan GML Features durch.
 	* Jedes im Mapping erzeugte Feature bekommt eine eindeutige gml_id.
 	* Darüber hinaus muss die Zuordnung zum überordneten Objekt
-	* abgebildet werden. Das kann zu einem oder mehreren Bereichen
-	* in n:m Beziehung sein rp_bereich2rp_object oder zur Konvertierung
-	* (gml_id des documentes oder konvertierung_id)
+	* abgebildet werden. Das ist der Bereich oder die Konvertierung über die 
+	* gml_id des objektes oder die konvertierung_id.
 	* Derzeit umgesetzt in index.php xplankonverter_regeln_anwenden
 	* $this->converter->regeln_anwenden($this->formvars['konvertierung_id']);
 	*/
@@ -370,7 +432,7 @@ class Konvertierung extends PgObject {
 			$validierung->alle_sql_ausfuehrbar($success);
 		}
 	}
-	
+
 	function validierung_erfolgreich() {
 		$sql = "
 			SELECT DISTINCT

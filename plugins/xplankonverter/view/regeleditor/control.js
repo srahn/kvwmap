@@ -34,7 +34,7 @@ function setValue() {
 		return;
 	}
 	// Sets the sql in the kvwmap-form
-	top.document.getElementById(field_id).value = sqlString;
+	top.document.getElementById("9_sql_0").value = sqlString;
 	top.closeCustomSubform();
 }
 
@@ -944,7 +944,7 @@ function getShapeAttributes2() {
 	}
 	// Nimm den Wert shapefile und gib es an den Server Script
 	var shapefile = document.getElementById('source_selector').value;
-	var queryString = "?shapefile=" + shapefile + "&konvertierung_id=" + konvertierung_id;
+	var queryString = "shapefile=" + shapefile + "&konvertierung_id=" + konvertierung_id;
 	ajaxRequest.open("GET", "index.php?go=xplankonverter_regeleditor_getshapeattributes2&" + queryString, true);
 	ajaxRequest.send(null);
 }
@@ -975,7 +975,7 @@ function getShapeAttributes3() {
 	}
 	// Nimm den Wert shapefile und gib es an den Server Script
 	var shapefile = document.getElementById('source_selector').value;
-	var queryString = "?shapefile=" + shapefile + "&konvertierung_id=" + konvertierung_id;
+	var queryString = "shapefile=" + shapefile + "&konvertierung_id=" + konvertierung_id;
 	ajaxRequest.open("GET", "index.php?go=xplankonverter_regeleditor_getshapeattributes3&" + queryString, true);
 	ajaxRequest.send(null);
 }
@@ -1013,7 +1013,7 @@ function getShapeAttributeDistinct() {
 	// Nimm den Wert shapefile und gib es an den Server Script
 	var shapefile = document.getElementById('source_selector').value;
 	var shapefileAttribut = document.getElementById('wenn_dann_shape_attribut_attribut_selector').value;
-	var queryString = "?shapefile=" + shapefile + "&" + "shapefile_attribut=" + shapefileAttribut + "&konvertierung_id=" + konvertierung_id;
+	var queryString = "shapefile=" + shapefile + "&" + "shapefile_attribut=" + shapefileAttribut + "&konvertierung_id=" + konvertierung_id;
 	ajaxRequest.open("GET", "index.php?go=xplankonverter_regeleditor_getshapeattributesdistinctvalues&" + queryString, true);
 	ajaxRequest.send(null);
 }
@@ -1051,7 +1051,7 @@ function getShapeAttributeDistinct2() {
 	// Nimm den Wert shapefile und gib es an den Server Script
 	var shapefile = document.getElementById('source_selector').value;
 	var shapefileAttribut = document.getElementById('where_shape_attribut_attribut_selector').value;
-	var queryString = "?shapefile=" + shapefile + "&" + "shapefile_attribut=" + shapefileAttribut + "&konvertierung_id=" + konvertierung_id;
+	var queryString = "shapefile=" + shapefile + "&" + "shapefile_attribut=" + shapefileAttribut + "&konvertierung_id=" + konvertierung_id;
 	ajaxRequest.open("GET", "index.php?go=xplankonverter_regeleditor_getshapeattributesdistinctvalues2&" + queryString, true);
 	ajaxRequest.send(null);
 }
@@ -1083,7 +1083,7 @@ function getEnumerationListe() {
 	// Nimm den Wert des FeatureTypes und den Wert des Xplan-Attributs und gib es an den Server Script
 	var featuretype = document.getElementById('target_selector').value;
 	var xplanAttribut = document.getElementById("zuweisung_xplan_attribut").innerHTML;
-	var queryString = "?featuretype=" + featuretype + "&" + "xplanattribut=" + xplanAttribut + "&konvertierung_id=" + konvertierung_id;
+	var queryString = "featuretype=" + featuretype + "&" + "xplanattribut=" + xplanAttribut + "&konvertierung_id=" + konvertierung_id;
 	ajaxRequest.open("GET", "index.php?go=xplankonverter_regeleditor_getxplanenumerationattributes&" + queryString, true);
 	ajaxRequest.send(null);
 }
@@ -1115,7 +1115,7 @@ function getEnumerationListe2() {
 	// Nimm den Wert des FeatureTypes und den Wert des Xplan-Attributs und gib es an den Server Script
 	var featuretype = document.getElementById('target_selector').value;
 	var xplanAttribut = document.getElementById("zuweisung_xplan_attribut").innerHTML;
-	var queryString = "?featuretype=" + featuretype + "&" + "xplanattribut=" + xplanAttribut + "&konvertierung_id=" + konvertierung_id;
+	var queryString = "featuretype=" + featuretype + "&" + "xplanattribut=" + xplanAttribut + "&konvertierung_id=" + konvertierung_id;
 	ajaxRequest.open("GET", "index.php?go=xplankonverter_regeleditor_getxplanenumerationattributes2&" + queryString, true);
 	ajaxRequest.send(null);
 }

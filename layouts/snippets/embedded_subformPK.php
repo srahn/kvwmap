@@ -1,4 +1,5 @@
-<? 
+<?
+	include(SNIPPETS.'generic_form_parts.php');
 	# dies ist das Snippet für die SubformEmbeddedPK-Liste mit Links untereinander
 	# Variablensubstitution
 	$layer = $this->qlayerset[$i];
@@ -19,9 +20,11 @@
 		$preview_attributes = explode(' ', $this->formvars['preview_attribute']);
 		for ($k=0;$k<$anzObj;$k++){
 			$dataset = $layer['shape'][$k];								# der aktuelle Datensatz
-			for($p = 0; $p < count($preview_attributes); $p++){			
+			for($p = 0; $p < count($preview_attributes); $p++){
+				$output[$p] = $preview_attributes[$p];
 				for($j = 0; $j < count($attributes['name']); $j++){
 					if($preview_attributes[$p] == $attributes['name'][$j]){
+						$output[$p] = '';
 						switch ($attributes['form_element_type'][$j]){
 							case 'Auswahlfeld' : {
 								if(is_array($attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
@@ -53,7 +56,7 @@
 									$dateiname = $pfadteil[0];
 									$original_name = $pfadteil[1];
 									$dateinamensteil=explode('.', $dateiname);
-									$type = $dateinamensteil[1];
+									$type = strtolower($dateinamensteil[1]);
 									$thumbname = $this->get_dokument_vorschau($dateinamensteil);
 									$this->allowed_documents[] = addslashes($dateiname);
 									$this->allowed_documents[] = addslashes($thumbname);
@@ -88,17 +91,17 @@
 						if($output[$p] == '')$output[$p] = ' ';
 					}
 				}
-				if($output[$p] == '')$output[$p] = $preview_attributes[$p];
 			}
 			if($this->formvars['embedded'] == 'true'){
 				echo '<tr style="border: none">
-								<td style="height:20px"><a style="font-size: '.$this->user->rolle->fontsize_gle.'px;" href="javascript:if(document.getElementById(\'subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\').innerHTML == \'\')ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$layer['Layer_ID'].'&value_'.$layer['maintable'].'_oid='.$dataset[$layer['maintable'].'_oid'].'&embedded=true&subform_link=true&fromobject=subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'&targetobject='.$this->formvars['targetobject'].'&targetlayer_id='.$this->formvars['targetlayer_id'].'&targetattribute='.$this->formvars['targetattribute'].'&data='.$this->formvars['data'].'\', new Array(document.getElementById(\'subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\'), \'\'), new Array(\'sethtml\', \'execute_function\'));clearsubforms('.$layer['Layer_ID'].');">'.implode(' ', $output).'</a><div id="subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'"></div></td>
+								<td'. get_td_class_or_style($dataset[$attributes['style']] != '' ? $dataset[$attributes['style']] : 'height: 20px') . '"><a style="font-size: '.$this->user->rolle->fontsize_gle.'px;" href="javascript:if(document.getElementById(\'subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\').innerHTML == \'\')ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$layer['Layer_ID'].'&value_'.$layer['maintable'].'_oid='.$dataset[$layer['maintable'].'_oid'].'&embedded=true&subform_link=true&fromobject=subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'&targetobject='.$this->formvars['targetobject'].'&targetlayer_id='.$this->formvars['targetlayer_id'].'&targetattribute='.$this->formvars['targetattribute'].'&data='.$this->formvars['data'].'\', new Array(document.getElementById(\'subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\'), \'\'), new Array(\'sethtml\', \'execute_function\'));clearsubforms('.$layer['Layer_ID'].');">'.implode(' ', $output).'</a><div id="subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'"></div></td>
 							</tr>
 	';
 			}
 			else{
 				echo '<tr style="border: none">
-								<td><a style="font-size: '.$this->user->rolle->fontsize_gle.'px;"';
+								<td test="'.$attributes['style'].'"' . get_td_class_or_style($dataset[$attributes['style']]) . '>';
+				echo '<a style="font-size: '.$this->user->rolle->fontsize_gle.'px;"';
 								if($this->formvars['no_new_window'] != true){
 									echo 	' target="_blank"';
 								}

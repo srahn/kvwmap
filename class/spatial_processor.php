@@ -52,6 +52,18 @@ class spatial_processor {
       return $geoms;
     }
   }
+		
+	function split($geom_1, $geom_2){
+  	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom,0,8) as svg FROM (SELECT st_collect(geom) as geom from (select (st_dump(st_split(st_geomfromtext('".$geom_1."'), st_geomfromtext('".$geom_2."')))).geom as geom) as foo) as fooo";
+  	$ret = $this->pgdatabase->execSQL($sql,4, 0);
+    if ($ret[0]) {
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
+    }
+    else {
+    	$rs = pg_fetch_assoc($ret[1]);
+    }
+    return $rs;
+  }
   
   function union($geom_1, $geom_2){
   	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom,0,8) as svg FROM (SELECT st_union(st_geomfromtext('".$geom_1."'), st_geomfromtext('".$geom_2."')) as geom) as foo";
@@ -78,7 +90,7 @@ class spatial_processor {
   }
   
   function area($geom, $unit){
-  	$sql = "SELECT round(st_area_utm(st_geomfromtext('".$geom."'), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")::numeric, 2)";
+  	$sql = "SELECT round(st_area_utm(st_geomfromtext('".$geom."'), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.")::numeric, 2)";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
       $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
@@ -94,7 +106,7 @@ class spatial_processor {
   }
   
 	function length($geom){
-  	$sql = "SELECT round(st_length_utm(st_geomfromtext('".$geom."'), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")::numeric, 2)";
+  	$sql = "SELECT round(st_length_utm(st_geomfromtext('".$geom."'), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.")::numeric, 2)";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
       $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
@@ -262,6 +274,13 @@ class spatial_processor {
 				$result .= $rs['wkt'];
 			}break;
 		
+			case 'split':{
+				$rs = $this->split($polywkt1, $polywkt2);
+				$result = $rs['svg'];
+				$result .= '||';
+				$result .= $rs['wkt'];
+			}break;
+		
 			case 'add':{
 				$rs = $this->union($polywkt1, $polywkt2);
 				$result = $rs['svg'];
@@ -295,7 +314,7 @@ class spatial_processor {
 			}break;
 			
 			case 'add_geometry':{
-				$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['pixsize'], $formvars['layer_id'], $formvars['fromwhere'], $formvars['columnname'], $formvars['orderby']);
+				$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['pixsize'], $formvars['layer_id'], $formvars['fromwhere'], $formvars['columnname'], $formvars['singlegeom'], $formvars['orderby']);
 				if($querygeometryWKT == ''){
 					break;
 				}
@@ -309,7 +328,7 @@ class spatial_processor {
 			}break;
 			
 			case 'subtract_geometry':{
-				$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['pixsize'], $formvars['layer_id'], $formvars['fromwhere'], $formvars['columnname'], $formvars['orderby']);
+				$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['pixsize'], $formvars['layer_id'], $formvars['fromwhere'], $formvars['columnname'], $formvars['singlegeom'], $formvars['orderby']);
 				if($querygeometryWKT == ''){
 					break;
 				}
@@ -334,7 +353,7 @@ class spatial_processor {
 		echo $result;
 	}
 	
-	function queryMap($input_coord, $pixsize, $layer_id, $fromwhere, $columnname, $orderby) {
+	function queryMap($input_coord, $pixsize, $layer_id, $fromwhere, $columnname, $singlegeom, $orderby) {
 		# pixsize wird übergeben, weil sie aus dem Geometrieeditor anders sein kann, da es dort eine andere Kartengröße geben kann
     # Abfragebereich berechnen
     $corners=explode(';',$input_coord);
@@ -350,7 +369,7 @@ class spatial_processor {
     $maxy=$miny+$height;
     $rect=ms_newRectObj();
     $rect->setextent($minx,$miny,$maxx,$maxy);
-    $geom = $this->getgeometrybyquery($rect, $layer_id, $fromwhere, $columnname, $orderby);
+    $geom = $this->getgeometrybyquery($rect, $layer_id, $fromwhere, $columnname, $singlegeom, $orderby);
     return $geom;
   }
   
@@ -382,7 +401,7 @@ class spatial_processor {
   }
 		
 	function add_buffer_within_polygon($geom_1, $geom_2, $formvars){
-		$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['pixsize'], $formvars['layer_id'], $formvars['fromwhere'], $formvars['columnname'], $formvars['orderby']);
+		$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['pixsize'], $formvars['layer_id'], $formvars['fromwhere'], $formvars['columnname'], false, $formvars['orderby']);
   	if(substr_count($geom_2, ',') == 0){			# wenn Linestring nur aus einem Eckpunkt besteht -> in POINT umwandeln -> Kreis entsteht
   		$geom_2 = $this->pointfromlinestring($geom_2);
   	}
@@ -471,7 +490,7 @@ class spatial_processor {
     return $rs[0];
   }
   
-  function getgeometrybyquery($rect, $layer_id, $fromwhere, $columnname, $orderby) {
+  function getgeometrybyquery($rect, $layer_id, $fromwhere, $columnname, $singlegeom, $orderby) {
   	$dbmap = new db_mapObj($this->rolle->stelle_id, $this->rolle->user_id);
   	if($layer_id != ''){
     	if($layer_id < 0){	# Rollenlayer
@@ -549,6 +568,7 @@ class spatial_processor {
 	   
 	   			   
 	 			if($fromwhere != ''){
+					if($singlegeom == 'true')$fromwhere = str_replace($columnname, '(st_dump('.$columnname.')).geom as the_geom', $fromwhere);		# Einzelgeometrien abfragen
 					if(!$punktuell)$columnname = "st_union(".$columnname.")";			# bei punktueller Abfrage wird immer nur eine Objektgeometrie geholt, bei Rechteck-Abfrage die Vereinigung aller getroffenen Geometrien
 	 				if ($client_epsg!=$layer_epsg) {
 		        $sql = "SELECT st_astext(st_transform(".$columnname.",".$client_epsg.")) AS geomwkt ".$fromwhere." ".$sql_where;

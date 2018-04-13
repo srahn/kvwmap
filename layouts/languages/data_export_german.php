@@ -5,6 +5,7 @@
  $strAttributeSelection="Attributauswahl";
  $strNameGeometryField="Geometrie";
  $strButtonGenerateShapeData="Exportieren";
+ $strButtonCancel="zurück zur Karte";
  $strRecordFromGLE="Datensatz aus der Sachdatenanzeige";
  $strRecordsFromGLE="Datens&auml;tze aus der Sachdatenanzeige";
  $strDownloadDocuments="Dokumente herunterladen";
@@ -13,4 +14,5 @@
  $strLayer="Thema";
  $strSure='Wollen Sie wirklich alle Datensätze des ausgewählten Themas exportieren?\n\nJe nach Datenmenge kann dies u.U. sehr lange dauern.';
  $strOptions='Optionen';
+ $strSingleGeoms="Einzelgeometrien abfragen";
 ?>

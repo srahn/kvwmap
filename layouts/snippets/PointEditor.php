@@ -8,6 +8,14 @@
 <script language="JavaScript">
 <!--
 
+function toggle_vertices(){	
+	document.getElementById("vertices").SVGtoggle_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+}
+
+function rotate_point_direction(){
+	document.getElementById("svghelp").SVGrotate_point_direction();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+}
+
 function send(){
 	if(document.GUI.geom_nullable.value == '0' && document.GUI.loc_x.value == ''){
 		alert('Geben Sie einen Punkt an.');
@@ -36,8 +44,8 @@ function send(){
     <td align="center" colspan="5"><a name="geoedit_anchor"><h2><?php echo $this->titel; ?></h2></a></td>
   </tr>
   <tr> 
-    <td rowspan="3">&nbsp;</td>
-    <td colspan="3" rowspan="3"> 
+    <td rowspan="4">&nbsp;</td>
+    <td colspan="4" rowspan="4"> 
       <?php
 				include(LAYOUTPATH.'snippets/SVG_point.php')
 			?>
@@ -51,7 +59,7 @@ function send(){
 				</tr>
 				<tr align="left">
 					<td>
-					<div align="center"><input type="submit" class="button" name="neuladen" value="<?php echo $strLoadNew; ?>"></div>
+					<div align="center"><input type="button" name="neuladen_button" onclick="neuLaden();" value="<?php echo $strLoadNew; ?>"></div>
 					<br>
 					<div style="width:260px; height:<?php echo $this->map->height-196; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
 						&nbsp;
@@ -65,6 +73,13 @@ function send(){
 			</table>
 		</td>
   </tr>
+	<tr>
+		<td><? if($this->angle_attribute != ''){
+			echo $strRotationAngle; ?>: <input type="text" size="3" name="angle" onchange="angle_slider.value=parseInt(angle.value);rotate_point_direction(this.value);" value="<? echo $this->formvars['angle']; ?>">&nbsp;°<br>
+			<input type="range" id="angle_slider" min="-180" max="180" style="width: 120px" value="<? echo $this->formvars['angle']; ?>" oninput="angle.value=parseInt(angle_slider.value);angle.onchange();" onchange="angle.value=parseInt(angle_slider.value);angle.onchange();">
+			<? } ?>
+		</td>
+	</tr>
   <? if($this->new_entry != true){ ?>
   <tr> 
     <td align="center">
@@ -100,6 +115,7 @@ function send(){
 	<? }else{ ?>
 	<td colspan="2"></td>
 	<? } ?>
+	<td align="right"><input type="checkbox" onclick="toggle_vertices()" name="punktfang" <? if($this->formvars['punktfang'] == 'on')echo 'checked="true"'; ?>>&nbsp;Punktfang</td>
 	<td align="center">
 		<? if($this->new_entry != true){ ?>
 		<a href="index.php?go=Layer-Suche&go_plus=Suchen&selected_layer_id=<?php echo $this->formvars['layer_id']; ?>&value_<?php echo $this->formvars['layer_tablename']; ?>_oid=<?php echo $this->formvars['oid']; ?>">Sachdatenanzeige</a>
@@ -117,6 +133,7 @@ function send(){
 <INPUT TYPE="HIDDEN" NAME="oid" VALUE="<?php echo $this->formvars['oid']; ?>">
 <INPUT TYPE="HIDDEN" NAME="oldscale" VALUE="<?php echo round($this->map_scaledenom); ?>"> 
 <input type="hidden" name="layer_options_open" value="">
+<input type="hidden" name="neuladen" value="">
 <? if($this->formvars['go'] == 'PointEditor'){ ?>   
 	<INPUT TYPE="HIDDEN" NAME="go" VALUE="PointEditor" >
 <? } ?>

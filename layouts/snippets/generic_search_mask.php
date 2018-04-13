@@ -71,9 +71,10 @@ $num_colspan = ($this->user->rolle->visually_impaired) ? 3 : 5;
 	              else{
 	                echo $this->attributes['name'][$i];
 	              }
-	              if(strpos($this->attributes['type'][$i], 'time') !== false OR $this->attributes['type'][$i] == 'date'){
+								$date_types = array('date' => 'TT.MM.JJJJ', 'timestamp' => 'TT.MM.JJJJ hh:mm:ss', 'time' => 'hh:mm:ss');
+								if(array_key_exists($this->attributes['type'][$i], $date_types)){
 	              ?>
-	                <img src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0">
+	                <a href="javascript:;" onclick="new CalendarJS().init('<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>', '<? echo $this->attributes['type'][$i]; ?>');"><img title="<? echo $date_types[$this->attributes['type'][$i]]; ?>" src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar_<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" class="calendar"></div>
 	              <?
 	              }
 	          ?></td>
@@ -97,7 +98,7 @@ $num_colspan = ($this->user->rolle->visually_impaired) ? 3 : 5;
 							<?php
 							if (!$this->user->rolle->visually_impaired) { ?>
 	            <td width="100px">
-	              <select  style="width:75px" <? if(count($this->attributes['enum_value'][$i]) == 0) { ?>onchange="operatorchange('<? echo $this->attributes['name'][$i]; ?>', <? echo $searchmask_number; ?>);" id="<? echo $prefix; ?>operator_<? echo $this->attributes['name'][$i]; ?>" <? } ?> name="<? echo $prefix; ?>operator_<? echo $this->attributes['name'][$i]; ?>">
+	              <select  style="width:75px" <? if(count($this->attributes['enum_value'][$i]) == 0) { ?>onchange="operatorchange(<? echo $this->formvars['selected_layer_id']; ?>, '<? echo $this->attributes['name'][$i]; ?>', <? echo $searchmask_number; ?>);" id="<? echo $prefix; ?>operator_<? echo $this->attributes['name'][$i]; ?>" <? } ?> name="<? echo $prefix; ?>operator_<? echo $this->attributes['name'][$i]; ?>">
 	                <option title="<? echo $strEqualHint; ?>" value="=" <? if($operator == '='){ echo 'selected';} ?> >=</option>
 								<? if($this->attributes['type'][$i] != 'geometry'){ ?>
 	                <option title="<? echo $strNotEqualHint; ?>" value="!=" <? if($operator == '!='){ echo 'selected';} ?> >!=</option>
@@ -157,7 +158,7 @@ $num_colspan = ($this->user->rolle->visually_impaired) ? 3 : 5;
 										echo '<div id="'.$prefix.'_avf_'.$this->attributes['name'][$i].'" style="';
 										if(in_array($operator, array('LIKE', 'NOT LIKE')))echo 'display:none';
 										echo '">';
-											echo Autovervollstaendigungsfeld($this->formvars['selected_layer_id'], $this->attributes['name'][$i], $i, $this->attributes['alias'][$i], $prefix.'value_'.$this->attributes['name'][$i], $this->formvars[$prefix.'value_'.$this->attributes['name'][$i]], $this->attributes['enum_output'][$i][0], 1, $prefix, NULL, NULL, NULL, NULL, false, 15, false, 40, NULL);
+											echo Autovervollstaendigungsfeld($this->formvars['selected_layer_id'], $this->attributes['name'][$i], $i, $this->attributes['alias'][$i], $prefix.'value_'.$this->attributes['name'][$i], $this->formvars[$prefix.'value_'.$this->attributes['name'][$i]], $this->attributes['enum_output'][$i][0], 1, $prefix, NULL, NULL, NULL, NULL, false, 15, false, 40, NULL, NULL);
 										echo '</div>';
 										echo '<div id="'.$prefix.'_text_'.$this->attributes['name'][$i].'" style="';
 										if(!in_array($operator, array('LIKE', 'NOT LIKE')))echo 'display:none';

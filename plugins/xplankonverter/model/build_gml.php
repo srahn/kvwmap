@@ -37,9 +37,6 @@ class Gml_builder {
       "updated_at"
   );
 
-  static $STRUCTURE_SCHEMA = 'xplan_uml';
-  static $CONTENT_SCHEMA = 'xplan_gml';
-
   function Gml_builder($database) {
     global $debug;
     $this->debug = $debug;
@@ -70,9 +67,6 @@ class Gml_builder {
 
 		# clear tempfile
 		ftruncate($this->tmpFile, 0);
-
-		$contentScheme   = CONTENT_SCHEME;
-		$structureScheme = STRUCTURE_SCHEME;
 
 		$xplan_ns_prefix = XPLAN_NS_PREFIX ? XPLAN_NS_PREFIX.':' : '';
 
@@ -141,28 +135,37 @@ class Gml_builder {
 		// Zugehörigkeit zur Konvertierung auszuwählen?
 		$sql = "
 			SELECT
-		b.*,
-		ST_AsGML(
-			3,
-			ST_Reverse(ST_Transform(
-				b.geltungsbereich,
-				{$konvertierung->get('output_epsg')})),
-				{$konvertierung->get('geom_precision')},
-				0,
-				null,
-				'GML_' || b.gml_id::text || '_geom' ) AS gml_geltungsbereich,
+				b.*,
+				ST_AsGML(
+					3,
+					ST_Reverse(
+						ST_Transform(
+							b.geltungsbereich,
+							{$konvertierung->get('output_epsg')}
+						)
+					),
+					{$konvertierung->get('geom_precision')},
+					0,
+					null,
+					'GML_' || b.gml_id::text || '_geom'
+				) AS gml_geltungsbereich,
 				ST_AsGML(
 					3,
 					ST_Transform(
 						b.geltungsbereich,
-						{$konvertierung->get('output_epsg')}),
-						{$konvertierung->get('geom_precision')},
-						32,
-						null,
-						'GML_' || b.gml_id::text || '_envelope' ) AS envelope
-						FROM $contentScheme.rp_bereich b
-						JOIN $contentScheme.rp_plan p ON b.gehoertzuplan = p.gml_id::text
-						WHERE p.konvertierung_id = {$konvertierung->get('id')}";
+						{$konvertierung->get('output_epsg')}
+					),
+					{$konvertierung->get('geom_precision')},
+					32,
+					null,
+					'GML_' || b.gml_id::text || '_envelope'
+				) AS envelope
+			FROM
+				" . XPLANKONVERTER_CONTENT_SCHEMA . ".rp_bereich b JOIN
+				" . XPLANKONVERTER_CONTENT_SCHEMA . ".rp_plan p ON (b.gehoertzuplan = p.gml_id::text)
+			WHERE
+				p.konvertierung_id = " .$konvertierung->get('id') . " 
+		";
 		#echo $sql."\n";
 		$bereiche = pg_query($this->database->dbConn, $sql);
 
@@ -194,18 +197,15 @@ class Gml_builder {
 			// alle gml_ids von RP_Objekten finden die mit dem Bereich verknüpft sind
 			// und im RP_Bereich Element verlinken
 			$sql = "
-				SELECT gml_id
-				FROM $contentScheme.xp_objekt
-				WHERE '{$bereich['gml_id']}' = ANY (gehoertzubereich)";
-			$_sql = "
-				SELECT b2o.xp_objekt_gml_id AS gml_id
+				SELECT
+					gml_id
 				FROM
-					$contentScheme.xp_bereich AS b JOIN
-					$contentScheme.xp_bereich_zu_xp_objekt AS b2o ON b.gml_id = b2o.xp_bereich_gml_id
+					" . XPLANKONVERTER_CONTENT_SCHEMA . ".xp_objekt
 				WHERE
-					b.gml_id = '" . $bereich['gml_id'] . "'
+					gehoertzubereich = $1
 			";
-			$rp_objekte = pg_query($this->database->dbConn, $sql);
+			#echo '<br>Sql: ' . $sql;
+			$rp_objekte = pg_query_params($this->database->dbConn, $sql, array($bereich['gml_id']));
 			# complete RP_Bereich element by iteratively inserting
 			# xlink-references to each associated RP_Objekt element
 			while ($rp_objekt = pg_fetch_array($rp_objekte, NULL, PGSQL_ASSOC)) {
@@ -346,61 +346,99 @@ class Gml_builder {
                 $single_value = array_combine($value_array_keys, $single_value);
                 // generate GML output (!!! recursive !!!)
                 $gml_attrib_str .= $this->generateGmlForAttributes($single_value, $datatype_attribs,$depth-1);
-              }
+								// leere Datentypen auslassen
+                if (strlen($gml_attrib_str) == 0) break;
 
-              // leere Datentypen auslassen
-              if (strlen($gml_attrib_str) == 0) break;
-
-              $typeElementName = end($datatype_attribs)['origin'];
-              $gmlStr .= $this->wrapWithElement(
+                $typeElementName = end($datatype_attribs)['origin'];
+                $gmlStr .= $this->wrapWithElement(
                 "{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
                 // wrap all data-types with their data-type-element-tag
                 $this->wrapWithElement("{$xplan_ns_prefix}{$typeElementName}", $gml_attrib_str));
+								$gml_attrib_str = '';
+              }
+
             default:
           }
           break;
         case 'b': // built-in datatype
-          // geometrie attribute
-          if ($uml_attribute['type'] == "geometry") {
-            $gml_value = $gml_object['gml_'.$uml_attribute['col_name']];
-            // unify gml_ids by appending a sequential number to the id
-            $seq_number = 0; $unified_gml = "";
-            $haystack = $gml_value;
-            while (!empty($haystack)) {
-              $currpos = strpos($haystack, "_geom");
-              if (!$currpos) break;
-              $unified_gml .= substr($haystack, 0, $currpos);
-              $unified_gml .= "_geom_". $seq_number++;
-              $currpos = strpos($haystack, '"', $currpos);
-							if (substr($haystack, $currpos + 1, 1) == '"') {
-								$currpos++;
+          switch ($uml_attribute['type']) {
+						case 'geometry' : {
+							$gml_value = $gml_object['gml_'.$uml_attribute['col_name']];
+							// unify gml_ids by appending a sequential number to the id
+							$seq_number = 0; $unified_gml = "";
+							$haystack = $gml_value;
+							while (!empty($haystack)) {
+								$currpos = strpos($haystack, "_geom");
+								if (!$currpos) break;
+								$unified_gml .= substr($haystack, 0, $currpos);
+								$unified_gml .= "_geom_". $seq_number++;
+								$currpos = strpos($haystack, '"', $currpos);
+								if (substr($haystack, $currpos + 1, 1) == '"') {
+									$currpos++;
+								}
+								if (!$currpos) { // should never happen!!!
+									$currpos += 5;
+									$unified_gml .= '"';
+									continue;
+								}
+								$haystack = substr($haystack, $currpos);
 							}
-              if (!$currpos) { // should never happen!!!
-                $currpos += 5;
-                $unified_gml .= '"';
-                continue;
-              }
-              $haystack = substr($haystack, $currpos);
-            }
-            $unified_gml .= $haystack;
-            #echo $unified_str . "\n";
-            $gmlStr .= $this->wrapWithElement("{$xplan_ns_prefix}{$uml_attribute['uml_name']}", $unified_gml);
-            break;
-          }
-          // date attribute
-          if ($uml_attribute['type'] == "date") {
-            $gml_value = $gml_object[$uml_attribute['col_name']];
-            $timestamp = strtotime($gml_value);
-            if (!$timestamp) {
-              echo "Ungueltige Datumsangabe: " . $gml_value;
-              break;
-            }
-            $iso_date_str = date("Y-m-d", $timestamp);
-            $gmlStr .= $this->wrapWithElement("{$xplan_ns_prefix}{$uml_attribute['uml_name']}", $iso_date_str);
-            break;
-          }
+							$unified_gml .= $haystack;
+							#echo $unified_str . "\n";
+							$gmlStr .= $this->wrapWithElement("{$xplan_ns_prefix}{$uml_attribute['uml_name']}", $unified_gml);
+						} break;
+						case 'date' : {
+							$gml_value = $gml_object[$uml_attribute['col_name']];
+							// check for array values
+							if($gml_value[0] == '{' && substr ($gml_value,-1) == '}') {
+								$gml_value_array = explode(',', substr($gml_value,1,-1));
+								for ($j = 0; $j < count($gml_value_array); $j++) {
+									$timestamp = strtotime($gml_value_array[$j]);
+									if (!$timestamp) {
+										echo "Ungueltige Datumsangabe: " . $gml_value_array[$j];
+										break;
+									}
+									$iso_date_str = date("Y-m-d", $timestamp);
+									$gmlStr .= $this->wrapWithElement("{$xplan_ns_prefix}{$uml_attribute['uml_name']}", $iso_date_str);
+								}
+							} else {
+								$timestamp = strtotime($gml_value);
+								if (!$timestamp) {
+									echo "Ungueltige Datumsangabe: " . $gml_value;
+									break;
+								}
+								$iso_date_str = date("Y-m-d", $timestamp);
+								$gmlStr .= $this->wrapWithElement("{$xplan_ns_prefix}{$uml_attribute['uml_name']}", $iso_date_str);
+							}
+						} break;
+						case 'bool' : {
+							switch ($gml_object[$uml_attribute['col_name']]) {
+								case 't' : $value = 'true'; break;
+								case 'f' : $value = 'false'; break;
+								default : $value = '';
+							};
+							$gmlStr .= $this->wrapWithElement("{$xplan_ns_prefix}{$uml_attribute['uml_name']}", $value);
+						} break;
+						default: {
+							$gml_value = trim($gml_object[$uml_attribute['col_name']]);
+							 // check for array values
+							if ($gml_value[0] == '{' && substr($gml_value,-1) == '}') {
+								$gml_value_array = explode(',',substr($gml_value, 1, -1));
+								for ($j = 0; $j < count($gml_value_array); $j++){
+									$gmlStr .= $this->wrapWithElement(
+									"{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
+									htmlspecialchars($gml_value_array[$j],ENT_QUOTES|ENT_XML1,"UTF-8"));
+								}
+							} else {
+								$gmlStr .= $this->wrapWithElement(
+								"{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
+								htmlspecialchars($gml_value,ENT_QUOTES|ENT_XML1,"UTF-8"));
+							}
+						}
+					} break;
+					
         case 'e': // enum type
-        default:
+        default: {
           $gml_value = trim($gml_object[$uml_attribute['col_name']]);
           // check for array values
           if ($gml_value[0] == '{' && substr($gml_value,-1) == '}') {
@@ -414,6 +452,7 @@ class Gml_builder {
           $gmlStr .= $this->wrapWithElement(
               "{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
               htmlspecialchars($gml_value,ENT_QUOTES|ENT_XML1,"UTF-8"));
+		}
       }
     }
     return $gmlStr;
@@ -477,8 +516,14 @@ class Gml_builder {
     $curr_value = '';
     // prepare data string
     $value_str = substr($data_string, 1, -1);
+    // Kommata innerhalb Text werden derzeit über die Konverteroberflaeche nicht zugelassen,
+    //d.h. \", oder ,\" innerhalb eines CompositeDataTypes ist derzeit nicht moeglich
     $value_str = str_replace('\"(', '(', $value_str);
     $value_str = str_replace(')\"', ')', $value_str);
+    $value_str = str_replace('(\"','(', $value_str);
+    $value_str = str_replace('\")',')', $value_str);
+    $value_str = str_replace(',\"',',', $value_str);
+    $value_str = str_replace('\",',',', $value_str);
     $value_str = str_replace('\"', '&quot;', $value_str);
     $value_str = str_replace('"', '', $value_str);
     // return if no data

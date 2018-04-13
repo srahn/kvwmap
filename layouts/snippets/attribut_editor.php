@@ -78,222 +78,266 @@ function toLayerEditor(){
   <tr> 
     <td colspan="2">
 
-    	<table align="center" border="0" cellspacing="0" cellpadding="0">
-        <? if ((count($this->attributes))!=0) {
-				echo '
+			<table align="center" border="0" cellspacing="0" class="attribute-editor-table"><?
+				if ((count($this->attributes))!=0) { ?>
 					<tr>
 						<td align="center"><span class="fett">Attribut</span></td>
-						<td>&nbsp;</td>
+
 						<td align="center"><span class="fett">Formularelement</span></td>
-						<td>&nbsp;</td>
+
 						<td align="center"><span class="fett">Optionen</span></td>
-						<td>&nbsp;</td>
-						<td align="center"><span class="fett">Aliasname</span></td>
-						<td>&nbsp;</td>';
-						foreach($supportedLanguages as $language){
-							if($language != 'german'){
-								echo '<td align="center"><span class="fett">Aliasname '.$language.'</span></td>
-											<td>&nbsp;</td>';
+
+						<td align="center"><span class="fett">Aliasname</span></td><?php
+
+						foreach($supportedLanguages as $language) {
+							if($language != 'german') { ?>
+								<td align="center"><span class="fett">Aliasname <?php echo $language; ?></span></td><?php
 							}
-						}
-			echo '
-						<td align="center"><span class="fett">Erläuterungen</span></td>
-						<td>&nbsp;</td>
-						<td align="center"><span class="fett">Gruppe</span></td>
-						<td>&nbsp;</td>
-						<td align="center"><span class="fett">Anordnung</span></td>
-						<td>&nbsp;&nbsp;</td>
-						<td align="center"><span class="fett">Beschriftung</span></td>
-						<td>&nbsp;&nbsp;</td>
-						<td align="center"><span class="fett">sichtbar im Rastertemplate</span></td>
-						<td>&nbsp;</td>
-						<td align="center"><span class="fett">Bei der Suche</span></td>';
-			if(in_array($this->formvars['selected_layer_id'], $quicksearch_layer_ids)){			
-				echo '
-						<td>&nbsp;</td>
-						<td align="center"><span class="fett">Schnell-<br>suche</span></td>';
-			}
-			echo '
-					</tr>
-			';
-
-    	for($i = 0; $i < count($this->attributes['type']); $i++){ ?>
-				<tr>
-				  <td align="left" valign="top">
-				  	<input type="text"
-						  name="attribute_<?php echo $this->attributes['name'][$i]; ?>"
-							value="<?php echo $this->attributes['name'][$i]; ?>"
-							readonly
-						>
-				  </td>
-				  <td>&nbsp;</td>
-				  <td align="left" valign="top">
-				<?	$type = ltrim($this->attributes['type'][$i], '_');
-						if(is_numeric($type)){ ?>
-							<a href="index.php?go=Attributeditor&selected_datatype_id=<?php echo $type; ?>"><?php echo $this->attributes['typename'][$i]; ?></a><?php
-						}
-						else {
-							echo '
-					  	<select  style="width:130px" name="form_element_'.$this->attributes['name'][$i].'">';
-					  	if($this->attributes['type'][$i] == 'geometry'){
-					  		echo'<option value="Geometrie" selected>Geometrie</option>';
-					  	}
-					  	elseif($this->attributes['constraints'][$i] != '' AND !in_array($this->attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))){
-					  		echo '<option value="Auswahlfeld" selected>Auswahlfeld</option>';
-					  	}
-					  	else {
-					  		echo '
-					  		<option value="Text" ';
-					  		if($this->attributes['form_element_type'][$i] == 'Text'){echo 'selected';}
-					  		echo ' >Text</option>
-					  		<option value="Zahl" ';
-					  		if($this->attributes['form_element_type'][$i] == 'Zahl'){echo 'selected';}
-					  		echo ' >Zahl</option>
-					  		<option value="Textfeld" ';
-					  		if($this->attributes['form_element_type'][$i] == 'Textfeld'){echo 'selected';}
-					  		echo ' >Textfeld</option>
-					  		<option value="Auswahlfeld" ';
-					  		if($this->attributes['form_element_type'][$i] == 'Auswahlfeld'){echo 'selected';}
-					  		echo ' >Auswahlfeld</option>
-								<option value="Autovervollständigungsfeld" ';
-					  		if($this->attributes['form_element_type'][$i] == 'Autovervollständigungsfeld'){echo 'selected';}
-					  		echo ' >Autovervollständigungsfeld</option>
-					  		<option value="Checkbox" ';
-					  		if($this->attributes['form_element_type'][$i] == 'Checkbox'){echo 'selected';}
-					  		echo ' >Checkbox</option>
-					  		<option value="SubFormPK" ';
-					  		if($this->attributes['form_element_type'][$i] == 'SubFormPK'){echo 'selected';}
-					  		echo ' >SubFormPK</option>
-					  		<option value="SubFormFK" ';
-					  		if($this->attributes['form_element_type'][$i] == 'SubFormFK'){echo 'selected';}
-					  		echo ' >SubFormFK</option>
-								<option value="SubFormEmbeddedPK" ';
-					  		if($this->attributes['form_element_type'][$i] == 'SubFormEmbeddedPK'){echo 'selected';}
-					  		echo ' >SubFormEmbeddedPK</option>';
-
-								foreach($form_element_options AS $option) {
-									$selected = ($this->attributes['form_element_type'][$i] == $option['value'] ? ' selected' : '');
-									echo '<option value="' . $option['value'] . '" title="' . $option['title'] . '"' .	$selected . '>' . $option['output'] . '</option>';
-								}
-
-					  		echo '<option value="Dokument" ';
-					  		if($this->attributes['form_element_type'][$i] == 'Dokument'){echo 'selected';}
-					  		echo ' >Dokument</option>
-								<option value="Link" ';
-					  		if($this->attributes['form_element_type'][$i] == 'Link'){echo 'selected';}
-					  		echo ' >Link</option>
-								<option value="dynamicLink" ';
-					  		if($this->attributes['form_element_type'][$i] == 'dynamicLink'){echo 'selected';}
-					  		echo ' >dynamischer Link</option>
-								<option value="mailto" ';
-					  		if($this->attributes['form_element_type'][$i] == 'mailto'){echo 'selected';}
-					  		echo ' >MailTo</option>
-								<option value="Fläche" ';
-					  		if($this->attributes['form_element_type'][$i] == 'Fläche'){echo 'selected';}
-					  		echo ' >Fläche</option>
-					  		<option value="Länge" ';
-					  		if($this->attributes['form_element_type'][$i] == 'Länge'){echo 'selected';}
-					  		echo ' >Länge</option>';
-					  	}
-					  	echo'
-					  	</select>';
 						} ?>
-				  </td>
-				  <td>&nbsp;</td>
-				  <td align="left" valign="top"><?php
-				  if($this->attributes['options'][$i] == '' AND $this->attributes['constraints'][$i] != '' AND !in_array($this->attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))){
-				  	echo '
-				  	<input style="width:180px" name="options_'.$this->attributes['name'][$i].'" type="text" value="'.$this->attributes['constraints'][$i].'">';
-				  }
-				  else{
-				  	echo '
-						<textarea name="options_'.$this->attributes['name'][$i].'" style="height:22px; width:180px">'.$this->attributes['options'][$i].'</textarea>';
-				  }
-				  echo '
-				  </td>
-				  <td>&nbsp;</td>
-				  <td align="left" valign="top">
-				  	<input name="alias_'.$this->attributes['name'][$i].'" type="text" value="'.$this->attributes['alias'][$i].'">
-				  </td>
-				  <td>&nbsp;</td>';
-					foreach($supportedLanguages as $language){
-						if($language != 'german'){
-							echo '
-							<td align="left" valign="top">
-								<input name="alias_'.$language.'_'.$this->attributes['name'][$i].'" type="text" value="'.$this->attributes['alias_'.$language][$i].'">
-							</td>
-							<td>&nbsp;</td>';
+
+						<td align="center"><span class="fett">Erläuterungen</span></td>
+
+						<td align="center"><span class="fett">Gruppe</span></td>
+
+						<td align="center"><span class="fett">Anordnung</span></td>
+
+						<td align="center"><span class="fett">Beschriftung</span></td>
+						
+						<td align="center"><span class="fett">Bei der Suche</span></td>
+
+						<td align="center">
+							<span	class="fett" style="cursor: pointer">F&uuml;r neuen<br>Datensatz</span>
+						</td>
+
+						<?php
+						if (in_array($this->formvars['selected_layer_id'], $quicksearch_layer_ids)){
+							$msg = "Für die Schnellsuche verwenden."; ?>
+							<td align="center">
+								<i class="fa fa-search" style="font-size:20px" title="<?php echo $msg; ?>"style="cursor: pointer"></i>
+							</td>	<?
 						}
+
+						$msg = "In der Sachdatenanzeige sichtbar."; ?>
+						<td align="center">
+							<i class="fa fa-eye" style="font-size:23px" title="<?php echo $msg; ?>"style="cursor: pointer"></i>
+						</td>						
+						
+						<? $msg = "Im Rastertemplate als Vorschau-Attribut verwenden."; ?>
+						<td align="center">
+							<i class="fa fa-windows" style="font-size:20px" title="<?php echo $msg; ?>"style="cursor: pointer"></i>
+						</td>
+
+					</tr><?php
+
+					for ($i = 0; $i < count($this->attributes['type']); $i++){ ?>
+						<tr>
+						  <td align="left" valign="top">
+						  	<input type="text"
+								  name="attribute_<?php echo $this->attributes['name'][$i]; ?>"
+									value="<?php echo $this->attributes['name'][$i]; ?>"
+									readonly
+								>
+						  </td>
+						  <td align="left" valign="top"><?
+								$type = ltrim($this->attributes['type'][$i], '_');
+								if(is_numeric($type)){ ?>
+									<a href="index.php?go=Attributeditor&selected_datatype_id=<?php echo $type; ?>"><?php echo $this->attributes['typename'][$i]; ?></a><?php
+								}
+								else {
+									echo '
+							  	<select  style="width:130px" name="form_element_'.$this->attributes['name'][$i].'">';
+							  	if($this->attributes['type'][$i] == 'geometry'){
+							  		echo'<option value="Geometrie" selected>Geometrie</option>';
+							  	}
+							  	elseif($this->attributes['constraints'][$i] != '' AND !in_array($this->attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))){
+							  		echo '<option value="Auswahlfeld" selected>Auswahlfeld</option>';
+							  	}
+							  	else {
+							  		echo '
+							  		<option value="Text" ';
+							  		if($this->attributes['form_element_type'][$i] == 'Text'){echo 'selected';}
+							  		echo ' >Text</option>
+							  		<option value="Zahl" ';
+							  		if($this->attributes['form_element_type'][$i] == 'Zahl'){echo 'selected';}
+							  		echo ' >Zahl</option>
+							  		<option value="Textfeld" ';
+							  		if($this->attributes['form_element_type'][$i] == 'Textfeld'){echo 'selected';}
+							  		echo ' >Textfeld</option>
+							  		<option value="Auswahlfeld" ';
+							  		if($this->attributes['form_element_type'][$i] == 'Auswahlfeld'){echo 'selected';}
+							  		echo ' >Auswahlfeld</option>
+										<option value="Autovervollständigungsfeld" ';
+							  		if($this->attributes['form_element_type'][$i] == 'Autovervollständigungsfeld'){echo 'selected';}
+							  		echo ' >Autovervollständigungsfeld</option>
+										<option value="Radiobutton" ';
+							  		if($this->attributes['form_element_type'][$i] == 'Radiobutton'){echo 'selected';}
+							  		echo ' >Radiobutton</option>
+							  		<option value="Checkbox" ';
+							  		if($this->attributes['form_element_type'][$i] == 'Checkbox'){echo 'selected';}
+							  		echo ' >Checkbox</option>
+							  		<option value="SubFormPK" ';
+							  		if($this->attributes['form_element_type'][$i] == 'SubFormPK'){echo 'selected';}
+							  		echo ' >SubFormPK</option>
+							  		<option value="SubFormFK" ';
+							  		if($this->attributes['form_element_type'][$i] == 'SubFormFK'){echo 'selected';}
+							  		echo ' >SubFormFK</option>
+										<option value="SubFormEmbeddedPK" ';
+							  		if($this->attributes['form_element_type'][$i] == 'SubFormEmbeddedPK'){echo 'selected';}
+							  		echo ' >SubFormEmbeddedPK</option>';
+
+										foreach($form_element_options AS $option) {
+											$selected = ($this->attributes['form_element_type'][$i] == $option['value'] ? ' selected' : '');
+											echo '<option value="' . $option['value'] . '" title="' . $option['title'] . '"' .	$selected . '>' . $option['output'] . '</option>';
+										}
+
+							  		echo '<option value="Dokument" ';
+							  		if($this->attributes['form_element_type'][$i] == 'Dokument'){echo 'selected';}
+							  		echo ' >Dokument</option>
+										<option value="Link" ';
+							  		if($this->attributes['form_element_type'][$i] == 'Link'){echo 'selected';}
+							  		echo ' >Link</option>
+										<option value="dynamicLink" ';
+							  		if($this->attributes['form_element_type'][$i] == 'dynamicLink'){echo 'selected';}
+							  		echo ' >dynamischer Link</option>
+										<option value="mailto" ';
+							  		if($this->attributes['form_element_type'][$i] == 'mailto'){echo 'selected';}
+							  		echo ' >MailTo</option>
+										<option value="Fläche" ';
+							  		if($this->attributes['form_element_type'][$i] == 'Fläche'){echo 'selected';}
+							  		echo ' >Fläche</option>
+							  		<option value="Länge" ';
+							  		if($this->attributes['form_element_type'][$i] == 'Länge'){echo 'selected';}
+							  		echo ' >Länge</option>
+										<option value="Winkel" ';
+							  		if($this->attributes['form_element_type'][$i] == 'Winkel'){echo 'selected';}
+							  		echo ' >Winkel</option>
+										<option value="Style"' . ($this->attributes['form_element_type'][$i] == 'Style' ? ' selected' : '') . '>Style</option>';
+							  	}
+							  	echo'
+							  	</select>';
+								} ?>
+						  </td>
+
+						  <td align="left" valign="top"><?php
+						  if($this->attributes['options'][$i] == '' AND $this->attributes['constraints'][$i] != '' AND !in_array($this->attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))) { ?>
+						  	<input style="width:180px" name="options_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo $this->attributes['constraints'][$i]; ?>"><?php
+						  }
+						  else { ?>
+								<textarea name="options_<?php echo $this->attributes['name'][$i]; ?>" style="height:22px; width:180px"><?php echo $this->attributes['options'][$i]; ?></textarea><?php
+						  } ?>
+						  </td>
+
+						  <td align="left" valign="top">
+						  	<input name="alias_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo $this->attributes['alias'][$i]; ?>">
+						  </td>
+							
+							<?php
+							foreach ($supportedLanguages as $language){
+								if($language != 'german') { ?>
+									<td align="left" valign="top">
+										<input name="alias_<?php echo $language; ?>_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo $this->attributes['alias_' . $language][$i]; ?>">
+									</td><?php
+								}
+							} ?>
+
+						  <td align="left" valign="top">
+								<textarea name="tooltip_<?php echo $this->attributes['name'][$i]; ?>" style="height:22px; width:120px"><?php echo htmlspecialchars($this->attributes['tooltip'][$i]); ?></textarea>
+							</td>
+
+							<td align="left" valign="top">
+								<input name="group_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo $this->attributes['group'][$i]; ?>">
+							</td>
+							
+							<?php
+							if ($this->attributes['arrangement'][$i] == 0) { $bgcolor = 'white'; }
+							if ($this->attributes['arrangement'][$i] == 1) { $bgcolor = '#faef1e'; } ?>
+							<td align="center" valign="top"><?php
+								echo FormObject::createSelectField(
+											'arrangement_' . $this->attributes['name'][$i],
+											array(
+												array('value' => 0, 'output' => 'unter dem vorigen'),
+												array('value' => 1, 'output' => 'neben dem vorigen')
+											),
+											$this->attributes['arrangement'][$i],
+											1,
+											"outline: 1px solid lightgrey; border: none; width: 57px; height: 18px; background-color: " . $bgcolor,
+											"this.setAttribute('style', 'outline: 1px solid lightgrey; border: none; width: 59px; height: 18px;' + this.options[this.selectedIndex].getAttribute('style'));"
+										); ?>
+						  </td>
+
+							<?php
+							if($this->attributes['labeling'][$i] == 0) $bgcolor = 'white';
+							if($this->attributes['labeling'][$i] == 1) $bgcolor = '#faef1e';
+							if($this->attributes['labeling'][$i] == 2) $bgcolor = '#ff6600'; ?>
+						  <td align="center" valign="top"><?php
+								echo FormObject::createSelectField(
+											'labeling_' . $this->attributes['name'][$i],
+											array(
+												array('value' => 0, 'output' => 'links neben dem Attribut', 'style' => 'background-color: white'),
+												array('value' => 1, 'output' => 'über dem Attribut', 'style' => 'background-color: #faef1e'),
+												array('value' => 2, 'output' => 'ohne', 'style' => 'background-color: #ff6600')
+											),
+											$this->attributes['labeling'][$i],
+											1,
+											"outline: 1px solid lightgrey; border: none; width: 53px; height: 18px; background-color: " . $bgcolor,
+											"this.setAttribute('style', 'outline: 1px solid lightgrey; border: none; width: 59px; height: 18px;' + this.options[this.selectedIndex].getAttribute('style'));"
+										); ?>
+							</td>
+							
+						  <td align="center" valign="top"><?php
+								echo FormObject::createSelectField(
+											'mandatory_' . $this->attributes['name'][$i],
+											array(
+												array('value' => -1, 'output' => 'nicht sichtbar'),
+												array('value' => 0, 'output' => 'anzeigen'),
+												array('value' => 1, 'output' => 'Pflichtangabe')
+											),
+											$this->attributes['mandatory'][$i],
+											1,
+											'width: 80px'
+										); ?>
+							</td>
+
+							<td align="center" valign="top"><?php
+								echo FormObject::createSelectField(
+											'dont_use_for_new_' . $this->attributes['name'][$i],
+											array(
+												array('value' => -1, 'output' => 'nicht sichtbar'),
+												array('value' => 0, 'output' => 'anzeigen'),
+												array('value' => 1, 'output' => 'Werte nicht übernehmen')
+											),
+											$this->attributes['dont_use_for_new'][$i],
+											1,
+											'width: 80px'
+										); ?>
+							</td>
+
+							<?php
+							if (in_array($this->formvars['selected_layer_id'], $quicksearch_layer_ids)) { ?>
+								<td align="center" valign="top">
+						  		<input name="quicksearch_<?php echo $this->attributes['name'][$i]; ?>" type="checkbox" value="1"<?php echo ($this->attributes['quicksearch'][$i] ? ' checked="true"' : ''); ?>>
+						  	</td><?php
+							} ?>							
+							
+							<td align="center" valign="top">
+								<input type="checkbox" value="1" name="visible_<? echo $this->attributes['name'][$i]; ?>" <? echo ($this->attributes['visible'][$i] ? ' checked="true"' : ''); ?>>
+							</td>							
+							
+							<td align="center" valign="top">
+						  	<input name="raster_visibility_<?php echo $this->attributes['name'][$i]; ?>" type="checkbox" value="1"<?php echo ($this->attributes['raster_visibility'][$i] ? ' checked="true"' : ''); ?>>
+						  </td>
+
+						</tr><?php
 					}
-					echo '
-				  <td align="left" valign="top">
-						<textarea name="tooltip_'.$this->attributes['name'][$i].'" style="height:22px; width:120px">'.htmlspecialchars($this->attributes['tooltip'][$i]).'</textarea>
-				  </td>
-				  <td>&nbsp;</td>
-				  <td align="left" valign="top">
-				  	<input name="group_'.$this->attributes['name'][$i].'" type="text" value="'.$this->attributes['group'][$i].'">
-				  </td>
-					<td>&nbsp;</td>';
-					if($this->attributes['arrangement'][$i] == 1)$bgcolor = '#faef1e';else $bgcolor = 'white';
-					echo '
-					<td align="center" valign="top">
-				  	<select style="outline: 1px solid lightgrey; border: none; width: 59px; height: 18px; background-color: '.$bgcolor.'" onchange="this.setAttribute(\'style\', \'outline: 1px solid lightgrey; border: none; width: 59px; height: 18px;\'+this.options[this.selectedIndex].getAttribute(\'style\'));" name="arrangement_'.$this->attributes['name'][$i].'">
-							<option style="background-color: white" value="0"';if($this->attributes['arrangement'][$i] == 0) echo ' selected="true" ';echo '>unter &nbsp;dem vorigen</option>
-							<option style="background-color: #faef1e" value="1"';if($this->attributes['arrangement'][$i] == 1) echo ' selected="true" ';echo '>neben dem vorigen</option>
-						</select>
-				  </td>
-					<td>&nbsp;</td>';
-					if($this->attributes['labeling'][$i] == 0)$bgcolor = 'white';
-					if($this->attributes['labeling'][$i] == 1)$bgcolor = '#faef1e';
-					if($this->attributes['labeling'][$i] == 2)$bgcolor = '#ff6600';
-					echo '
-					<td align="center" valign="top">
-				  	<select style="outline: 1px solid lightgrey; border: none; width: 53px; height: 18px; background-color: '.$bgcolor.'" onchange="this.setAttribute(\'style\', \'outline: 1px solid lightgrey; border: none; width: 59px; height: 18px;\'+this.options[this.selectedIndex].getAttribute(\'style\'));" name="labeling_'.$this->attributes['name'][$i].'">
-							<option style="background-color: white" value="0"';if($this->attributes['labeling'][$i] == 0) echo ' selected="true" ';echo '>links neben dem Attribut</option>
-							<option style="background-color: #faef1e" value="1"';if($this->attributes['labeling'][$i] == 1) echo ' selected="true" ';echo '>über &nbsp;dem Attribut</option>
-							<option style="background-color: #ff6600" value="2"';if($this->attributes['labeling'][$i] == 2) echo ' selected="true" ';echo '>ohne</option>
-						</select>
-				  </td>
-					<td>&nbsp;</td>
-					<td align="center" valign="top">
-				  	<input name="raster_visibility_'.$this->attributes['name'][$i].'" type="checkbox" value="1" ';
-				  	if($this->attributes['raster_visibility'][$i]) echo 'checked="true"';
-						echo '>
-				  </td>
-					<td>&nbsp;</td>
-				  <td align="center" valign="top">
-						' . FormObject::createSelectField(
-									'mandatory_' . $this->attributes['name'][$i],
-									array(
-										array('value' => -1, 'output' => 'nicht sichtbar'),
-										array('value' => 0, 'output' => 'anzeigen'),
-										array('value' => 1, 'output' => 'Pflichtangabe')
-									),
-									$this->attributes['mandatory'][$i]
-								) . '
-					</td>';
-				if(in_array($this->formvars['selected_layer_id'], $quicksearch_layer_ids)){	
-					echo '
-					<td>&nbsp;</td>
-					<td align="center" valign="top">
-				  	<input name="quicksearch_'.$this->attributes['name'][$i].'" type="checkbox" value="1" ';
-				  	if($this->attributes['quicksearch'][$i]) echo 'checked="true"';
-						echo '>
-				  </td>';
-				}
-				echo '
-        </tr>';
-    	}
-			if(count($this->attributes) > 0){ ?>
-				<tr>
-					<td align="center" colspan="19"><br><br>
-						<input class="button" type="submit" name="go_plus" value="speichern">
-					</td>
-				</tr><?php
-			}
-		} 
-			?>
-      </table>
+					if(count($this->attributes) > 0 AND ($this->layer['editable'] OR $this->formvars['selected_datatype_id'])){ ?>
+						<tr>
+							<td align="center" colspan="19"><br><br>
+								<input type="submit" name="go_plus" value="speichern">
+							</td>
+						</tr><?php
+					}
+				} ?>
+			</table>
 
 		</td>
   </tr>

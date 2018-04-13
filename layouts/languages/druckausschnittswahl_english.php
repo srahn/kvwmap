@@ -8,6 +8,7 @@ $strRotationAngle="Rotation Angle";
 $strPrintDetail="Print Extent";
 $strLoad="Load";
 $strReferenceMap="Referencemap";
+$strExpandedLegend="expanded Legend";
 $strLegendExtra="Legend on separate page";
 $strNoMinMaxscaling="disable minscale/maxscale";
 $strWarning1="Please update the print extent by clicking in the scale input and then [Enter].";
@@ -22,5 +23,9 @@ $strConfirm1="Selected print layout:\\r\\n";
 $strConfirm2="€\\r\\n\\r\\nContinue?";
 $hoch="portrait";
 $quer="landscape";
+$strHelp="Help";
+$strRollenlayerLegend="If You activate this option, your searchresult-layers and imported layers will be shown in the legend as well.";
+$strLegendOptions="Legend-Options";
+$strLayers="Layers";
 
 ?>  

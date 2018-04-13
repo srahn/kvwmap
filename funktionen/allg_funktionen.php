@@ -17,34 +17,47 @@ function MapserverErrorHandler($errno, $errstr, $errfile, $errline){
 	return true;
 }
 
+function compare_layers($a, $b){
+	$a['alias'] = strtoupper($a['alias']);
+	$b['alias'] = strtoupper($b['alias']);
+	$a['alias'] = str_replace('Ä', 'A', $a['alias']);
+	$a['alias'] = str_replace('Ü', 'U', $a['alias']);
+	$a['alias'] = str_replace('Ö', 'O', $a['alias']);
+	$a['alias'] = str_replace('ß', 's', $a['alias']);
+	$b['alias'] = str_replace('Ä', 'A', $b['alias']);
+	$b['alias'] = str_replace('Ü', 'U', $b['alias']);
+	$b['alias'] = str_replace('Ö', 'O', $b['alias']);
+	$b['alias'] = str_replace('ß', 's', $b['alias']);	
+	return strcmp($a['alias'], $b['alias']);
+}
+
 function compare_names($a, $b){
 	return strcmp($a['name'], $b['name']);
 }
 
-function JSON_to_PG($json, $quote = ''){
-	if(is_array($json)){
-		for($i = 0; $i < count($json); $i++){
-			$elems[] = JSON_to_PG($json[$i], '"');
-		}
-		$pg = '{'.@implode(',', $elems).'}';
-	}
-	elseif(is_object($json)){
-		if($quote == '')$new_quote = '"';
-		else $new_quote = '\\'.$quote;
-		foreach($json as $elem){
-			$elems[] = JSON_to_PG($elem, $new_quote);
-		}
-		$pg = $quote.'('.implode(',', $elems).')'.$quote;
-	}
-	else{
-		$pg = $json;
-	}
-	return $pg;
+function compare_orders($a, $b){
+	if($a->order > $b->order)return 1;
+  else return 0;
+}
+
+function compare_groups($a, $b){
+  if($a->group > $b->group)return 1;
+  else return 0;
+}
+
+function compare_legendorder($a, $b){
+	if($a['legendorder'] > $b['legendorder'])return 1;
+	else return 0;
 }
 
 function strip_pg_escape_string($string){
 	$string = str_replace("''", "'", $string);
+	$string = str_replace('\\\\', '\\', $string);		# \\ wir durch \ ersetzt
 	return $string;
+}
+
+function replace_semicolon($text) {
+  return str_replace(';', '', $text);
 }
 
 function InchesPerUnit($unit, $center_y){
@@ -101,6 +114,23 @@ function formatFlurstkennzALKIS($FlurstKennzListe){
 		else $vorkomma = '';
 		$FlurstKennz = $gem.$flur.$zaehler.$vorkomma;
 		$Flurstuecke[$i] = str_pad($FlurstKennz, 20, '_', STR_PAD_RIGHT);
+	}
+  return implode(';', $Flurstuecke);
+}
+
+function formatFlurstkennzALKIS_0To_($FlurstKennzListe){
+	$Flurstuecke = explode(';', $FlurstKennzListe);
+	for ($i = 0; $i < count($Flurstuecke); $i++) {
+		$Flurstuecke[$i] = str_pad(
+			substr(
+				$Flurstuecke[$i],
+				0,
+				(intval(substr($Flurstuecke[$i], 14, 4)) == 0 ? 14 : 18)
+			),
+			20,
+			'_',
+			STR_PAD_RIGHT
+		);
 	}
   return implode(';', $Flurstuecke);
 }
@@ -745,6 +775,9 @@ function umlaute_umwandeln($name){
   $name = str_replace('?', '_', $name);
 	$name = str_replace('+', '_', $name);
 	$name = str_replace(',', '_', $name);
+	$name = str_replace('*', '_', $name);
+	$name = str_replace('$', '', $name);
+	$name = str_replace('&', '_', $name);
   return $name;
 }
 
@@ -783,13 +816,6 @@ function translate($polygon, $transx, $transy){
     $i++;
   }
   return $newpolygon;
-}
-
-function compare_groups($a, $b){
-  if($a->group > $b->group){
-    return 1;
-  }
-  else return 0;
 }
 
 function is_dir_empty($path){
@@ -834,12 +860,15 @@ function searchdir($path, $recursive){
 
 
 function get_select_parts($select){
-	$column = explode(',', $select);
+	$column = explode(',', $select);		# an den Kommas splitten
   for($i = 0; $i < count($column); $i++){
   	$klammerauf = substr_count($column[$i], '(');
   	$klammerzu = substr_count($column[$i], ')');
-  	if($klammerauf > $klammerzu){			# mehr Klammern auf als zu --> hier wurde eine Funktion oder eine Unterabfrage mit Kommas verwendet
-  		$column[$i] = $column[$i].', '.$column[$i+1];
+		$hochkommas = substr_count($column[$i], "'");
+		# Wenn ein Select-Teil eine ungerade Anzahl von Hochkommas oder mehr Klammern auf als zu hat,
+		# wurde hier entweder ein Komma im einem String verwendet (z.B. x||','||y) oder eine Funktion (z.B. round(x, 2)) bzw. eine Unterabfrage mit Kommas verwendet
+  	if($hochkommas % 2 != 0 OR $klammerauf > $klammerzu){
+  		$column[$i] = $column[$i].','.$column[$i+1];
   		array_splice($column, $i+1, 1);
 			$i--;							# und nochmal prüfen, falls mehrere Kommas drin sind
   	}
@@ -926,76 +955,6 @@ function showAlert($text) {
   ?>
   <script type="text/javascript">
     alert("<?php echo $text; ?>");
-  </script><?php
-}
-
-/**
-* Funktion gibt Meldungen aus
-* ToDo: Funktion wie folgt umbauen:
-* Funktion gibt Liste von Meldungen aus. Je nach Typ wird die Meldung
-* unterschiedlich dargestellt.
-* @param array[][] $messages Liste der Meldungen
-* 	Eine Meldung besteht aus einen assoziativen Array mit folgenden
-*		Bestandteilen:
-*		type: Type der Meldung. 'success' (default), 'warning', 'error'
-*		msg: Die Meldung, die als Text ausgegeben werden soll.
-*		Die Klassen zum Stylen der Meldungen lauten: 'message_' + type
-* @param boolean $fade Ob das Fenster zur Anzeige der Message von allein
-* 	verschwinden soll oder nicht.
-*/
-/*
-function showMessages($messages, $fade = true) { ?>
-	<script type="text/javascript">
-	var Msg = document.getElementById("message_box");
-			innerhtml = '';
-	if(Msg == undefined){
-		document.write('<div id="message_box" class="message_box_hidden"></div>');
-		var Msg = document.getElementById("message_box");
-	}
-	Msg.className = 'message_box_visible'; <?php
-	Msg.style.top = document.body.scrollTop + 350; <?php
-	$html = array_map($messages, function($m) {
-		return = "
-			<div class=\"message_row\">
-				<div class=\"message_type\">{$m['type']}</div>
-				<div class=\"message_{$m['type']}\">{$m['msg']}</div>
-			</div>
-		";
-	});
- 	if ($fade){ ?>
-		setTimeout(function() {Msg.className = 'message_box_hide';}, 1000);
-		setTimeout(function() {Msg.className = 'message_box_hidden';}, 3000);<?php
-	}
-	else {
-		$html .= "<br><br><input type=\"button\" onclick=\"this.parentNode.className = 'message_box_hidden';\" value=\"ok\">";
-	} ?>
-	Msg.innerHTML = <?php echo $html; ?>
-  </script><?php
-}
-*/
-function showMessage($text, $fade = true, $msg_type = 'warning') {
-  ?>
-  <script type="text/javascript">
-		var Msg = document.getElementById("message_box");
-				innerhtml = '';
-		if(Msg == undefined){
-			document.write('<div id="message_box" class="message_box_hidden"></div>');
-			var Msg = document.getElementById("message_box");
-		}
-		Msg.className = 'message_box_<?php echo $msg_type; ?>';<?php
-		if ($msg_type == 'error') { ?>
-			innerhtml += '<h2>Eingabefehler</h2>';
-			Msg.className = 'message_box_error';<?php
-		} ?>
-		Msg.style.top = document.body.scrollTop + 350;
-		innerhtml += '<?php echo $text; ?>';
-		<? if($fade == true){ ?>
-			setTimeout(function() {Msg.className = 'message_box_hide';},1000);
-			setTimeout(function() {Msg.className = 'message_box_hidden';},3000);
-		<? }else{ ?>
-			innerhtml += '<br><br><input type="button" onclick="this.parentNode.className = \'message_box_hidden\';" value="ok">';
-		<? } ?>
-		Msg.innerHTML = innerhtml;
   </script><?php
 }
 
@@ -1272,6 +1231,20 @@ function buildExpressionString($str) {
   # Beenden des Ausdrucks
   $expr.=')';
   return $expr;
+}
+
+function getNumPagesPdf($filepath){
+	exec('gs -q -dNODISPLAY -c "('.$filepath.') (r) file runpdfbegin pdfpagecount = quit"', $output);
+	return $output[0];
+}
+
+function WKT2UKO($wkt){
+	$uko = str_replace('MULTIPOLYGON(((', 'TYP UPO 2'.chr(10).'KOO ', $wkt);
+	$uko = str_replace(')),((', chr(10).'FL+'.chr(10).'KOO ', $uko);
+	$uko = str_replace('),(', chr(10).'FL-'.chr(10).'KOO ', $uko);
+	$uko = str_replace(',', chr(10).'KOO ', $uko);
+	$uko = str_replace(')))', '', $uko);
+	return $uko;
 }
 
 function rectObj2WKTPolygon($rect) {
@@ -1592,11 +1565,31 @@ function output_select($form_field_name, $data, $selected_value = null, $onchang
 	return $html;
 }
 
-function get_first_word_after($str, $word) {
-	$s = 'select * from table where nix';
-	$word_pos = stripos($str, $word);
-	$str_from_word_pos = substr($str, $word_pos);
-	$parts = explode(' ', $str_from_word_pos);
-	return $parts[1];
+/*
+* Die Funktion liefert das erste Word, welches nach $word in $str gefunden wird.
+* Über die optionalen Parameter $delim1 und $delim2 kann man die Trennzeichen vor und nach dem Wort angeben.
+* Wenn der optionale Parameter $last true ist, wird das letzte Vorkommen des Wortes verwendet.
+*/
+function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last = false){
+	if($last)$word_pos = strripos($str, $word);
+	else $word_pos = stripos($str, $word);
+	if($word_pos !== false){
+		$str_from_word_pos = substr($str, $word_pos+strlen($word));
+		$parts = explode($delim2, trim($str_from_word_pos, $delim1));
+		return $parts[0];
+	}
+}
+
+function geometrytype_to_datatype($geometrytype) {
+	if (stripos($geometrytype, 'POINT') !== false) {
+		$datatype = 0;
+	}
+	elseif (stripos($geometrytype, 'LINESTRING') !== false) {
+		$datatype = 1;
+	}
+	elseif( stripos($geometrytype, 'POLYGON') !== false) {
+		$datatype = 2;
+	}
+	return $datatype;
 }
 ?>

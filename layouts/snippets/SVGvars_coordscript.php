@@ -1,5 +1,6 @@
 <?php
- 
+  include(LAYOUTPATH . 'languages/SVGvars_coordscript_'.$this->user->rolle->language.'.php');
+
 	foreach($this->epsg_codes as $epsg_code){
 		$epsg_codes .= '<option';
 		if($this->user->rolle->epsg_code == $epsg_code['srid'])$epsg_codes .= ' selected';
@@ -10,6 +11,8 @@
   	<script type="text/javascript">
 	<!--
 	
+		form = '.$this->currentform.';		// das Formular in dem das Kartenfenster eingebettet ist
+		
 		function dec2dms(number, coordtype){
 			number = number+"";
 			part1 = number.split(".");
@@ -26,7 +29,7 @@
 				minutes = part2[0];
 				if(part2[1] != undefined)seconds = Math.round(parseFloat("."+part2[1]) * 60);
 				else seconds = "00";
-				return degrees+"°"+minutes+"\'"+seconds+\'"\';
+				return degrees+"°"+minutes+"\'"+seconds+"\'\'";
 			}			
 		}
 		
@@ -38,11 +41,10 @@
 			part2 = part1[1].split("\'");
 			minutes = parseFloat(part2[0]);
 			if(coordtype == "dms"){
-				seconds = part2[1].replace(/"/g, "");
+				seconds = part2[1].replace(/\'\'/g, "");
 				seconds = parseFloat(seconds)/60;
 			}
 			minutes = (minutes+seconds)/60;
-			console.log(Math.round((degrees + minutes)*10000)/10000);
 			return Math.round((degrees + minutes)*10000)/10000;  
 		}
 		
@@ -88,17 +90,18 @@
 		}					
 			
 		function coords_input(){
-			var mittex  = '.$this->map->width.'/2*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value);
-			var mittey  = parseFloat(top.document.GUI.maxy.value) - '.$this->map->height.'/2*parseFloat(top.document.GUI.pixelsize.value);
+			var mittex  = '.$this->map->width.'/2*parseFloat(form.pixelsize.value) + parseFloat(form.minx.value);
+			var mittey  = parseFloat(form.maxy.value) - '.$this->map->height.'/2*parseFloat(form.pixelsize.value);
 			mittex = format_number(mittex, true, true, false);
 			mittey = format_number(mittey, true, true, false);
 			var Msg = document.getElementById("message_box");
 			Msg.className = \'message_box\';
 			content = \'<div style="position: absolute;top: 0px;right: 0px"><a href="#" onclick="javascript:document.getElementById(\\\'message_box\\\').className = \\\'message_box_hidden\\\';" title="Schlie&szlig;en"><img style="border:none" src="'.GRAPHICSPATH.'exit2.png"></img></a></div>\';
-			content+= \'<div style="height: 30px">Koordinatenzoom</div>\';
-			content+= \'<table style="padding: 5px"><tr><td align="left" style="width: 300px" class="px15">Geben Sie hier die gewünschten Koordinaten ein.</td></tr>\';
-			content+= \'<tr><td><input style="width: 310px" type="text" id="input_coords" name="input_coords" value="\'+mittex+\' \'+mittey+\'"></td></tr>\';
-			content+= \'<tr><td>Koordinatensystem:&nbsp;<select name="epsg_code" id="epsg_code" style="width: 310px">'.$epsg_codes.'</select></td></tr></table>\';
+			content+= \'<div style="height: 30px">' . $strCoordZoom . '</div>\';
+			content+= \'<table style="padding: 5px"><tr><td align="left" style="width: 300px" class="px15">Koordinate (Rechtswert Hochwert):</td></tr>\';
+			content+= \'<tr><td><input style="width: 310px" type="text" id="input_coords" name="input_coords" value="\'+mittex+\' \'+mittey+\'"><i id="current_pos_button" class="fa fa-dot-circle-o" aria-hidden="true" style="margin-left: 10px; color: #4e4eef;" title="Eigene Position übernehmen" onclick="set_current_pos()"></i></td></tr>\';
+			content+= \'<tr><td>Koordinatenreferenzsystem:</td></tr>\';
+			content+= \'<tr><td><select name="epsg_code" id="epsg_code" style="width: 310px">'.$epsg_codes.'</select></td></tr></table>\';
 			content+= \'<br><input type="button" value="OK" onclick="coords_input_submit()">\';
 			Msg.innerHTML = content;
 			document.getElementById(\'input_coords\').select();
@@ -121,13 +124,32 @@
 				document.getElementById(\'message_box\').className = \'message_box_hidden\';
 				startwaiting();
 				document.GUI.INPUT_COORD.value = coords2[0]+","+coords2[1];
+				document.GUI.go.value = "zoom2coord";
 				document.GUI.CMD.value = "jump_coords";
 				document.GUI.submit();
 			}
 		}
 
+		function set_current_pos() {
+			$(\'#current_pos_button\').toggleClass(\'fa-dot-circle-o fa-spinner fa-spin\');
+			navigator.geolocation.getCurrentPosition(
+				function(position){
+					// wenn Position ermittelt werden konnte, liefert
+					//position.coords.latitude und position.coords.longitude
+					//die entsprechenden Längen- und Breitengrade
+					$(\'#input_coords\').val(position.coords.longitude + \' \' + position.coords.latitude);
+					$(\'#epsg_code\').val(4326);
+					$(\'#current_pos_button\').toggleClass(\'fa-dot-circle-o fa-spinner fa-spin\');
+				},
+				function () {
+					// der zweite Funktionsteil wird ausgeführt, wenn keine
+					//Positionsermittlung stattfinden konnte
+				}
+			)
+		}
+
 		function coords_anzeige(evt, vertex) {
-			if(top.document.GUI.activated_vertex != undefined && top.document.GUI.activated_vertex.value != 0 && vertex == null)return;
+			if(form.activated_vertex != undefined && form.activated_vertex.value != 0 && vertex == null)return;
 			minx = '.$this->Stelle->MaxGeorefExt->minx.';
 			miny = '.$this->Stelle->MaxGeorefExt->miny.';
 			maxx = '.$this->Stelle->MaxGeorefExt->maxx.';
@@ -135,27 +157,24 @@
 			
 			if(vertex != null){
 				coorxf = top.format_number(vertex.getAttribute("x"), false, false, false);
-				console.log(coorxf);
 				cooryf = top.format_number(vertex.getAttribute("y"), false, false, false);
 			}
 			else{
-				coorxf = top.format_number(evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value), true, true, false);
-				cooryf = top.format_number(top.document.GUI.maxy.value - evt.clientY*parseFloat(top.document.GUI.pixelsize.value), true, true, false);
+				coorxf = top.format_number(evt.clientX*parseFloat(form.pixelsize.value) + parseFloat(form.minx.value), true, true, false);
+				cooryf = top.format_number(form.maxy.value - evt.clientY*parseFloat(form.pixelsize.value), true, true, false);
 			}
 			
 			if(coorxf < minx || coorxf > maxx)coorxf = "undefiniert";
 			if(cooryf < miny || cooryf > maxy)cooryf = "undefiniert";
 		  
-			if(top.document.GUI.lastcoordx != undefined && top.document.GUI.lastcoordx.value != ""){
-				vectorx = top.document.GUI.lastcoordx.value - coorxf;
-				vectory = top.document.GUI.lastcoordy.value - cooryf;
+			if(form.lastcoordx != undefined && form.lastcoordx.value != ""){
+				vectorx = form.lastcoordx.value - coorxf;
+				vectory = form.lastcoordy.value - cooryf;
 				distance = format_number(Math.sqrt(Math.pow(vectorx, 2) + Math.pow(vectory, 2)), false, true, false);
-				window.status = " R:" + coorxf + " / H:" + cooryf + "  Entfernung: " + distance + " m    EPSG: "+'.$this->user->rolle->epsg_code.';
-				if(top.document.GUI.runningcoords != undefined)top.document.GUI.runningcoords.value = coorxf + " / " + cooryf + "   " + distance + " m"; 
+				if(form.runningcoords != undefined)form.runningcoords.value = coorxf + " / " + cooryf + "   " + distance + " m"; 
 			}
 			else{
-				window.status = " R:" + coorxf + " / H:" + cooryf + "   EPSG: "+'.$this->user->rolle->epsg_code.';
-				if(top.document.GUI.runningcoords != undefined)top.document.GUI.runningcoords.value = coorxf + " / " + cooryf; 
+				if(form.runningcoords != undefined)form.runningcoords.value = coorxf + " / " + cooryf; 
 			}			
 		}
 		
@@ -165,11 +184,11 @@
 				coory = top.format_number(vertex.getAttribute("y"), false, false, false);
 			}
 			else{
-				coorx = top.format_number(evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value), true, true, false);
-				coory = top.format_number(top.document.GUI.maxy.value - evt.clientY*parseFloat(top.document.GUI.pixelsize.value), true, true, false);
+				coorx = top.format_number(evt.clientX*parseFloat(form.pixelsize.value) + parseFloat(form.minx.value), true, true, false);
+				coory = top.format_number(form.maxy.value - evt.clientY*parseFloat(form.pixelsize.value), true, true, false);
 			}
-			if(top.document.GUI.secondcoords != undefined)top.ahah("index.php", "go=spatial_processing&curSRID='.$this->user->rolle->epsg_code.'&newSRID='.$this->user->rolle->epsg_code2.'&point="+coorx+" "+coory+"&operation=transformPoint&resulttype=wkt&coordtype='.$this->user->rolle->coordtype.'", new Array(top.document.GUI.secondcoords), "");
-			top.document.GUI.firstcoords.value = coorx+" "+coory; 
+			if(form.secondcoords != undefined)top.ahah("index.php", "go=spatial_processing&curSRID='.$this->user->rolle->epsg_code.'&newSRID='.$this->user->rolle->epsg_code2.'&point="+coorx+" "+coory+"&operation=transformPoint&resulttype=wkt&coordtype='.$this->user->rolle->coordtype.'", new Array(form.secondcoords), "");
+			form.firstcoords.value = coorx+" "+coory; 
 			top.document.getElementById("showcoords").style.display="";
 		}
 

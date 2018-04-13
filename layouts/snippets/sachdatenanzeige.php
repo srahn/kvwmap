@@ -20,6 +20,9 @@ if ($anzLayer==0) {
 	<?php	
 }
 for($i=0;$i<$anzLayer;$i++){
+	if($i > 0){
+		echo '<hr style="width: 100%; height: 3px; margin: 15 0; color: '.BG_GLEHEADER.'; background: '.BG_GLEHEADER.';">';
+	}
 	if ($this->qlayerset[$i]['template']=='') {
    	if(GLEVIEW == '2'){
     	include(SNIPPETS.'generic_layer_editor_2.php');			# Attribute zeilenweise
@@ -66,7 +69,7 @@ for($i=0;$i<$anzLayer;$i++){
 	   	$bis = $gesamt;
 	   }
 	   echo'
-	   <table border="0" cellpadding="2" width="100%" cellspacing="0">
+	   <table border="0" cellpadding="2" width="100%" cellspacing="0" id="sachdatenanzeige_paging">
 
 	   	<tr valign="top">
 	   		<td align="right" width="38%">';
@@ -92,7 +95,7 @@ for($i=0;$i<$anzLayer;$i++){
    }
 }
 ?>
-<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<table width="100%" border="0" cellpadding="0" cellspacing="0" id="sachdatenanzeige_footer">
 	<tr>
 		<td align="right">
     <? if ($this->user->rolle->visually_impaired) { ?>
@@ -110,7 +113,7 @@ for($i=0;$i<$anzLayer;$i++){
 </table>
 <?
 	if($this->found != 'false' AND $this->formvars['printversion'] == ''){	?>		
-		<table width="100%" border="0" cellpadding="0" cellspacing="0">
+		<table width="100%" border="0" cellpadding="0" cellspacing="0" id="sachdatenanzeige_footer">
     <tr>
     	<td width="49%" class="px13">
 				<? if($this->user->rolle->querymode == 1){ ?>
@@ -122,7 +125,7 @@ for($i=0;$i<$anzLayer;$i++){
 					</script>
 				<? }else{
 							echo '&nbsp;'.$strLimit; ?>&nbsp;
-							<select name="anzahl" id="anzahl" onchange="javascript:overlay_submit(currentform, false);">
+							<select name="anzahl" id="anzahl" onchange="javascript:currentform.go.value = 'get_last_query';overlay_submit(currentform, false);">
 								<? foreach($selectable_limits as $limit){
 								if($this->formvars['anzahl'] != '' AND $custom_limit != true AND !in_array($this->formvars['anzahl'], $selectable_limits) AND $this->formvars['anzahl'] < $limit){
 									$custom_limit = true;	?>
@@ -140,7 +143,7 @@ for($i=0;$i<$anzLayer;$i++){
 								if(document.getElementById('savebutton') != undefined)document.getElementById('savebutton').style.display = 'block';
 							</script>
 				<?  }else{ ?>
-							<input type="button" class="button" name="savebutton" value="<? echo $strSave; ?>" onclick="save();">
+							<input type="button" name="savebutton" value="<? echo $strSave; ?>" onclick="save();">
 				<? 	}
 					}?>
 			</td>
@@ -162,7 +165,7 @@ for($i=0;$i<$anzLayer;$i++){
   <br><div align="center">
 
   <?
-  	if($this->search == true){			# wenn man von der Suche kam -> Hidden Felder zum Speichern der Suchparameter
+  	if($this->search == true){			# wenn man von der Suche kam -> Hidden Felder zum Speichern der Suchparameter (die können evtl. weg, da jetzt immer get_last_query verwendet wird)
 		echo '<input name="go" type="hidden" value="Layer-Suche_Suchen">';
 		echo '		<input name="search" type="hidden" value="true">
   					<input name="selected_layer_id" type="hidden" value="'.$this->formvars['selected_layer_id'].'">
@@ -190,7 +193,7 @@ for($i=0;$i<$anzLayer;$i++){
 				}
 			}
 	  	if($this->formvars['printversion'] == '' AND $this->formvars['keinzurueck'] == '' AND $this->formvars['subform_link'] == ''){
-	  		echo '<a href="javascript:currentform.go.value=\'Layer-Suche\';currentform.submit();">'.$strbackToSearch.'</a><br><br>';
+	  		echo '<a href="javascript:currentform.go.value=\'get_last_search\';currentform.submit();" id="sachdatenanzeige_footer">'.$strbackToSearch.'</a><br><br>';
 	  	}
   	}
   	else{
@@ -220,8 +223,8 @@ for($i=0;$i<$anzLayer;$i++){
 	<input name="INPUT_COORD" type="hidden" value="<?php echo $this->formvars['INPUT_COORD']; ?>">
   <INPUT TYPE="HIDDEN" NAME="searchradius" VALUE="<?php echo $this->formvars['searchradius']; ?>">
   <input name="CMD" type="hidden" value="<?php echo $this->formvars['CMD']; ?>">
-	<? if($this->currentform != 'document.GUI2'){ ?>
-  <table width="100%" border="0" cellpadding="2" cellspacing="0">
+	<? if($this->formvars['printversion'] == '' AND $this->currentform != 'document.GUI2'){ ?>
+  <table width="100%" border="0" cellpadding="2" cellspacing="0" id="sachdatenanzeige_footer">
     <tr bgcolor="<?php echo BG_DEFAULT ?>" align="center">
       <td><a href="index.php?searchradius=<?php echo $this->formvars['searchradius']; ?>"><? echo $strbacktomap;?></a></td>
     </tr>
@@ -230,7 +233,7 @@ for($i=0;$i<$anzLayer;$i++){
 </div>
 <input type="hidden" name="titel" value="<? echo $this->formvars['titel'] ?>">
 <input type="hidden" name="width" value="">
-<input type="hidden" name="document_attributename" value="">
+<input type="hidden" name="delete_documents" value="">
 <input type="hidden" name="map_flag" value="<? echo $this->formvars['map_flag']; ?>">
 <input name="newpath" type="hidden" value="<?php echo $this->formvars['newpath']; ?>">
 <input name="pathwkt" type="hidden" value="<?php echo $this->formvars['newpathwkt']; ?>">

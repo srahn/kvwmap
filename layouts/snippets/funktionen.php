@@ -1,10 +1,3 @@
-<script type="text/javascript">
-function Bestaetigung(link,text) {
-  Check = confirm(text);
-  if (Check == true)
-  window.location.href = link;
-}
-</script>
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
     <td><h2>Funktionen</h2></td>

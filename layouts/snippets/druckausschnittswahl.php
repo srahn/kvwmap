@@ -3,11 +3,27 @@
   include(LAYOUTPATH.'languages/druckausschnittswahl_'.$this->user->rolle->language.'.php');
 	include(LAYOUTPATH.'languages/map_'.$this->user->rolle->language.'.php');
  ?>
+<script src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
 <!--
 
+Text_rollenlayer_legend=["<? echo $strHelp; ?>:","<? echo $strRollenlayerLegend ?>"];
+
 function setprintextent(wert){
 	document.GUI.printextent.value = wert;
+}
+
+function showLegendOptions(){
+	if(document.getElementById('legendOptions2').style.display == 'none'){
+		document.getElementById('legendOptions1').style.borderTop="1px solid #C3C7C3";
+		document.getElementById('legendOptions1').style.borderLeft="1px solid #C3C7C3";
+		document.getElementById('legendOptions1').style.borderRight="1px solid #C3C7C3";
+		document.getElementById('legendOptions2').style.display = '';
+	}
+	else{
+		document.getElementById('legendOptions1').style.border="none";
+		document.getElementById('legendOptions2').style.display = 'none';
+	}
 }
 
 function druck_pdf(name, format, preis){
@@ -149,8 +165,8 @@ function rotate_print_extent(angle){
   </tr>
   <tr align="center"> 
     <td colspan="5"> 
-      <input class="button" type="button" name="vorschau" value="<?php echo $strButtonPrintPreview; ?>" onclick="preview();">
-      <input class="button" type="button" name="drucken" value="<?php echo $strButtonPrint; ?>" onclick="druck_pdf('<? echo $this->Document->activeframe[0]['Name']; ?>', '<? echo $this->Document->activeframe[0]['format']; ?>', <? echo $this->Document->activeframe[0]['preis']; ?>);">
+      <input type="button" name="vorschau" value="<?php echo $strButtonPrintPreview; ?>" onclick="preview();">
+      <input type="button" name="drucken" value="<?php echo $strButtonPrint; ?>" onclick="druck_pdf('<? echo $this->Document->activeframe[0]['Name']; ?>', '<? echo $this->Document->activeframe[0]['format']; ?>', <? echo $this->Document->activeframe[0]['preis']; ?>);">
       <br>
     </td>
   </tr>
@@ -201,7 +217,7 @@ function rotate_print_extent(angle){
         </tr>
         <tr align="left">
           <td>
-          <div align="center"><input type="submit" class="button" name="neuladen" value="<?php echo $strLoadNew; ?>"></div>
+          <div align="center"><input type="button" name="neuladen_button" onclick="neuLaden();" value="<?php echo $strLoadNew; ?>"></div>
           <br>
         	<div style="width:230; height:<?php echo $this->map->height-59; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
 	          &nbsp;
@@ -216,45 +232,67 @@ function rotate_print_extent(angle){
      </td>
   </tr>
 
-  <tr align="center"> 
-    <td valign="top" align="left">
-    	<?php echo $strRotationAngle; ?><input type="text" size="3" name="angle" onchange="angle_slider.value=parseInt(angle.value);rotate_print_extent(this.value);" value="<? echo $this->formvars['angle']; ?>">&nbsp;°<br>
-			<input type="range" id="angle_slider" min="-90" max="90" style="width: 120px" value="<? echo $this->formvars['angle']; ?>" oninput="angle.value=parseInt(angle_slider.value);angle.onchange();" onchange="angle.value=parseInt(angle_slider.value);angle.onchange();">
-    </td>
-    <td align="left">
-    	<? if($this->Document->activeframe[0]['refmapfile']){ 
-    		if(!isset($this->formvars['referencemap']))$this->formvars['referencemap'] = 1;
-    	echo $strReferenceMap; ?>&nbsp;<input type="checkbox" name="referencemap" value="1" <? if($this->formvars['referencemap']) echo 'checked="true"'; ?>">
-    	<? } ?>
-    </td>
-		<td align="left">
-    	<? if($this->Document->activeframe[0]['legendsize'] > 0){ 
-    	echo $strLegendExtra; ?>&nbsp;<input type="checkbox" name="legend_extra" value="1" <? if($this->formvars['legend_extra']) echo 'checked="true"'; ?>">
-    	<? } ?>
-    </td>
-		<td align="left">
-    	<? echo $strNoMinMaxscaling; ?>&nbsp;<input type="checkbox" name="no_minmax_scaling" onclick="document.GUI.submit();" value="1" <? if($this->formvars['no_minmax_scaling']) echo 'checked="true"'; ?>">
-    </td>
-    <td align="right"> 
-      <?php echo $strPrintDetail; ?>
-    	<input type="text" name="name" value="" style="width:120px" >&nbsp;<input class="button" type="button" style="width:84px" name="speichern" value="<?php echo $this->strSave; ?>" onclick="save();">
-    </td>
-  </tr>
-  <tr>
-  	<td>&nbsp;</td>
-  	<td align="right"  colspan="4">
-  		<input class="button" type="button" style="width:84px" name="delete" value="<?php echo $this->strDelete; ?>" onclick="remove();">&nbsp;
-
-  		<select name="druckausschnitt" style="width:120px">
-  			<option value=""><?php echo $this->strPleaseSelect; ?></option>
-  			<?
-  				for($i = 0; $i < count($this->Document->ausschnitte); $i++){
-  					echo '<option value="'.$this->Document->ausschnitte[$i]['id'].'">'.$this->Document->ausschnitte[$i]['name'].'</option>';
-  				}
-  			?>
-  		</select>
-  		<input class="button" type="button" style="width:84px" name="laden" value="<?php echo $strLoad; ?>" onclick="load();">
-    </td>
+  <tr align="center">
+		<td colspan="5">
+			<div style="display: flex; width: <? echo $this->user->rolle->nImageWidth; ?>px">
+				<div style="">
+					<?php echo $strRotationAngle; ?><input type="text" size="3" name="angle" onchange="angle_slider.value=parseInt(angle.value);rotate_print_extent(this.value);" value="<? echo $this->formvars['angle']; ?>">&nbsp;°<br>
+					<input type="range" id="angle_slider" min="-90" max="90" style="width: 120px" value="<? echo $this->formvars['angle']; ?>" oninput="angle.value=parseInt(angle_slider.value);angle.onchange();" onchange="angle.value=parseInt(angle_slider.value);angle.onchange();">
+				</div>				
+			<? if($this->Document->activeframe[0]['refmapfile']){ ?>
+				<div style="margin-left: 10px"> <?
+					if(!isset($this->formvars['referencemap']))$this->formvars['referencemap'] = 1;
+						echo $strReferenceMap; ?>&nbsp;<input type="checkbox" name="referencemap" value="1" <? if($this->formvars['referencemap']) echo 'checked="true"'; ?>>
+				</div>
+			<? }				
+				if($this->Document->activeframe[0]['legendsize'] > 0){ ?>
+				<div style="flex: 1 1 300px;margin-left: 10px">	
+					<table style="width: 100%">
+						<tr>
+							<td id="legendOptions1"><a href="javascript:showLegendOptions();"><? echo $strLegendOptions; ?>...</a>&nbsp;</td>
+						</tr>
+						<tr id="legendOptions2" style="display:none">
+							<td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3">
+								<!--rollenlayer_legend-->
+								<input type="checkbox" name="legend_extra" value="1" <? if($this->formvars['legend_extra']) echo 'checked="true"'; ?>>&nbsp;<? echo $strLegendExtra; ?><br>
+								<div class="fett" style="margin-top: 5px">&nbsp;<? echo $strLayers; ?>:</div>
+								<?
+								$layerset = $this->layerset['list'];
+								$scale = $this->map_scaledenom;
+								for($i = 0; $i < count($layerset); $i++){
+									if($layerset[$i]['aktivStatus'] != 0 
+									AND !empty($layerset[$i]['Class'])){
+										if($layerset[$i]['alias'] != '')$name = $layerset[$i]['alias'];
+										else $name = $layerset[$i]['Name'];
+										if($this->formvars['legendlayer'.$layerset[$i]['Layer_ID']] == '' AND $layerset[$i]['Layer_ID'] > 0)$this->formvars['legendlayer'.$layerset[$i]['Layer_ID']] = 'on';
+										echo '<input type="checkbox" name="legendlayer'.$layerset[$i]['Layer_ID'].'" '.($this->formvars['legendlayer'.$layerset[$i]['Layer_ID']] == 'on' ? 'checked="true"' : '').' >&nbsp;'.$name.'<br>';
+									}
+								}
+								?>
+							</td>
+						</tr>
+					</table>
+				</div>
+				<? } ?>				
+				<div style="margin-left: 10px">
+					<? echo $strNoMinMaxscaling; ?>&nbsp;<input type="checkbox" name="no_minmax_scaling" onclick="document.GUI.submit();" value="1" <? if($this->formvars['no_minmax_scaling']) echo 'checked="true"'; ?>>
+				</div>
+				<div style="width: 320px;margin-left: 10px"> 
+					<?php echo $strPrintDetail; ?>
+					<input type="text" name="name" value="" style="width:120px" >&nbsp;<input type="button" style="width:84px" name="speichern" value="<?php echo $this->strSave; ?>" onclick="save();">
+					<input type="button" style="width:84px" name="delete" value="<?php echo $this->strDelete; ?>" onclick="remove();">&nbsp;
+					<select name="druckausschnitt" style="width:120px">
+						<option value=""><?php echo $this->strPleaseSelect; ?></option>
+						<?
+							for($i = 0; $i < count($this->Document->ausschnitte); $i++){
+								echo '<option value="'.$this->Document->ausschnitte[$i]['id'].'">'.$this->Document->ausschnitte[$i]['name'].'</option>';
+							}
+						?>
+					</select>
+					<input type="button" style="width:84px" name="laden" value="<?php echo $strLoad; ?>" onclick="load();">
+				</div>
+			</div>
+		</td>
   </tr>
   <?
   	# Wenn der Druckrahmen Freitexte hat, die leer sind, werden dem Nutzer Textfelder angeboten um die Freitexte selber zu belegen
@@ -288,6 +326,9 @@ function rotate_print_extent(angle){
 <input type="hidden" name="mapheight" value="<?php echo $this->Document->activeframe[0]['mapheight']; ?>">
 <input type="hidden" name="printextent" value="">
 <input type="hidden" name="map_factor" value="<? echo $this->formvars['map_factor'] ?>">
+<input type="hidden" name="neuladen" value="">
+<input type="hidden" name="free_polygons" value="<? echo $this->formvars['free_polygons'] ?>">
+<input type="hidden" name="free_texts" value="<? echo $this->formvars['free_texts'] ?>">
 
 <!-- für den externen Druck -->
 <input type="hidden" name="post_width" value="<? echo $this->formvars['post_width'] ?>">

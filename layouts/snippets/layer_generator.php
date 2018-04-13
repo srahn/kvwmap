@@ -17,7 +17,7 @@
 		<td align="left" width="50%"><input type="text" name="pg_schema" value="<?php echo $this->formvars['pg_schema']; ?>"></td>
 	</tr>
 	<tr>
-		<td align="center" colspan="2"><input type="button" class="button" value="Erzeugen" onclick="erzeuge_layer();"></td>
+		<td align="center" colspan="2"><input type="button" value="Erzeugen" onclick="erzeuge_layer();"></td>
 	</tr>
 	<tr>
 		<td align="center" colspan="2"><textarea cols="150" rows="35"><?php echo $this->sql; ?></textarea></td>

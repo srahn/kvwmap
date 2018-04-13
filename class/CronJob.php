@@ -7,7 +7,7 @@ class CronJob extends MyObject {
 	function CronJob($gui) {
 		$this->MyObject($gui, 'cron_jobs');
 		$this->identifier = 'id';
-		$this->setAttributes(
+		$this->setKeys(
 			array(
 				"id",
 				"bezeichnung",
@@ -48,7 +48,7 @@ class CronJob extends MyObject {
 
 	public static	function find($gui, $where = '1=1') {
 		$cronjob = new CronJob($gui);
-		return $cronjob->find_where($where);
+		return $cronjob->find_where($where, 'bezeichnung');
 	}
 
 	/*

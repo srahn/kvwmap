@@ -218,7 +218,7 @@ class adresse {
     }
     # sortiert nach order wenn angegeben
     if ($order!=0 AND $order!='') {
-      $sql.=' ORDER BY '.$order;
+      $sql.=' ORDER BY ' . replace_semicolon($order);
     }
     $this->debug->write("<p>kvwmap->getAdressenListeByFlst->Abfragen der Adressdaten für Flurstuecke:<br>".$sql,4);
     $query=mysql_query($sql);
@@ -941,7 +941,7 @@ class gemeinde {
       $sql.=')';
     }
     if ($order!='') {
-      $sql.=' ORDER BY '.$order;
+      $sql.=' ORDER BY ' . replace_semicolon($order);
     }
     $this->debug->write("<p>kataster.php Gemeinde->getGemeindeListeByExtent Abfragen der Geimeinden aus dem Kartenausschnitt:<br>".$sql,4);
     $query=mysql_query($sql);
@@ -1455,6 +1455,139 @@ class flurstueck {
     }
     $this->LayerName=LAYERNAME_FLURSTUECKE;
   }
+
+	function outputEigentuemerText($eigentuemer, $adressAenderungen = NULL, $indent, $database = NULL){
+		if($eigentuemer->Nr != '' OR $eigentuemer->zusatz_eigentuemer != ''){
+			$Eigentuemer .= $indent;
+			$Eigentuemer .= $eigentuemer->Nr.' ';
+			if($eigentuemer->vorname != '')$Eigentuemer .= $eigentuemer->vorname.' ';
+			$Eigentuemer .= $eigentuemer->nachnameoderfirma;
+			if($eigentuemer->namensbestandteil != '')$Eigentuemer .= ', '.$eigentuemer->namensbestandteil;
+			if($eigentuemer->akademischergrad != '')$Eigentuemer .= ', '.$eigentuemer->akademischergrad;
+			$Eigentuemer .= ' ';
+			if($eigentuemer->geburtsname != '')$Eigentuemer .= 'geb. '.$eigentuemer->geburtsname.' ';
+			$Eigentuemer .= $eigentuemer->geburtsdatum;
+			foreach($eigentuemer->anschriften as $anschrift){
+				$Eigentuemer .= ' '.$anschrift['strasse'].' '.$anschrift['hausnummer'].' ';
+				$Eigentuemer .= $anschrift['postleitzahlpostzustellung'].' '.$anschrift['ort_post'].' '.$anschrift['ortsteil'].' ';
+			}
+			$Eigentuemer .= $eigentuemer->zusatz_eigentuemer;
+			if($eigentuemer->Anteil != '')$Eigentuemer .= '  zu '.$eigentuemer->Anteil;
+			$Eigentuemer .= "\n";
+			return str_replace('"', '\'', $Eigentuemer);
+		}
+	}
+	
+	function outputEigentuemerShort($eigentuemer, $adressAenderungen = NULL, $indent = NULL, $database = NULL){
+		$Eigentuemer .= '<tr><td colspan="2"><table cellpadding="0" cellspacing="0"><tr><td valign="top" style="padding-right: 4">'.$eigentuemer->Nr.'</td><td valign="top" style="padding-right: 4">';
+		$Eigentuemer .= '<a href="index.php?go=Namen_Auswaehlen_Suchen&gml_id='.$eigentuemer->gml_id.'&withflurst=on&anzahl='.MAXQUERYROWS.'">'.$eigentuemer->vorname.' '.$eigentuemer->nachnameoderfirma;
+		if($eigentuemer->namensbestandteil != '')$Eigentuemer .= ', '.$eigentuemer->namensbestandteil;
+		if($eigentuemer->akademischergrad != '')$Eigentuemer .= ', '.$eigentuemer->akademischergrad;
+		$Eigentuemer .= '</a>';
+		if($eigentuemer->zusatz_eigentuemer != ''){
+			$Eigentuemer .= '</td></tr><tr><td colspan="2">'.$eigentuemer->zusatz_eigentuemer; if($eigentuemer->Anteil != '')$Eigentuemer .= ' zu '.$eigentuemer->Anteil; $Eigentuemer .= '</td></tr><tr><td>';
+		}
+		elseif($eigentuemer->Anteil)$Eigentuemer .= '&nbsp;&nbsp;&nbsp;zu '.$eigentuemer->Anteil.'<br>';
+		$Eigentuemer .= '</td></tr></table></td></tr>';
+		return $Eigentuemer;
+	}
+	
+	function outputEigentuemerLong($eigentuemer, $adressAenderungen, $indent = NULL, $database){
+		if($eigentuemer->Nr != ''){
+			$Eigentuemer .= '<tr>
+												<td colspan="2">
+													<table>
+														<tr>
+															<td valign="top">'.$eigentuemer->Nr.'&nbsp;&nbsp;&nbsp;</td>
+															<td valign="top">
+																<table border="0" cellspacing="0" cellpadding="0">
+																	<tr>
+																		<td>
+																			<a href="index.php?go=Namen_Auswaehlen_Suchen&gml_id='.$eigentuemer->gml_id.'&withflurst=on&anzahl='.MAXQUERYROWS.'">';
+			if($eigentuemer->vorname != '')$Eigentuemer .= $eigentuemer->vorname.' ';
+			$Eigentuemer .= $eigentuemer->nachnameoderfirma;
+			if($eigentuemer->namensbestandteil != '')$Eigentuemer .= ', '.$eigentuemer->namensbestandteil;
+			if($eigentuemer->akademischergrad != '')$Eigentuemer .= ', '.$eigentuemer->akademischergrad;
+			$Eigentuemer .= '</a><br>';
+			if($eigentuemer->geburtsname != '')$Eigentuemer .= 'geb. '.$eigentuemer->geburtsname.' ';
+			$Eigentuemer .= $eigentuemer->geburtsdatum;
+			foreach($eigentuemer->anschriften as $anschrift){
+				$Eigentuemer .= '<table style="margin-top: 2px" cellspacing="0" cellpadding="0">
+													<tr>
+														<td>';
+				$Eigentuemer .= $anschrift['strasse'].' '.$anschrift['hausnummer'].'<br>';
+				$Eigentuemer .= $anschrift['postleitzahlpostzustellung'].' '.$anschrift['ort_post'].' '.$anschrift['ortsteil'];
+				$Eigentuemer .= '</td>';
+				# Adressänderungen
+				if($adressAenderungen){
+					$Eigentuemer .= '<td style="padding-left: 30px">';
+					$adressaenderungen =  $eigentuemer->getAdressaenderungen($eigentuemer->gml_id);
+					$aendatum=substr($adressaenderungen['datum'],0,10);
+					if($adressaenderungen['user_id'] != ''){
+						$user = new user(NULL, $adressaenderungen['user_id'], $database);
+						$Eigentuemer .= '<span class="fett"><u>Aktualisierte Anschrift ('.$aendatum.' - '.$user->Name.'):</u></span><br>';
+						$Eigentuemer .= '&nbsp;&nbsp;<span class="fett">'.$adressaenderungen['strasse'].' '.$adressaenderungen['hausnummer'].'</span><br>';
+						$Eigentuemer .= '&nbsp;&nbsp;<span class="fett">'.$adressaenderungen['postleitzahlpostzustellung'].' '.$adressaenderungen['ort_post'].' '.$adressaenderungen['ortsteil'].'</span><br>';
+					}
+					if($eigentuemer->Nr != ''){
+						if($adressaenderungen['user_id'] == '')$Eigentuemer .= '<img src="'.GRAPHICSPATH.'pfeil_links.gif" width="12" height="12" border="0">&nbsp;<a class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz&reload=true&selected_layer_id='.LAYER_ID_ADRESSAENDERUNGEN_PERSON.'&attributenames[0]=gml_id&attributenames[1]=hat&values[0]='.urlencode($eigentuemer->gml_id).'&values[1]='.urlencode($eigentuemer->anschrift_gml_id).'&embedded=true&fromobject=subform_ax_person_temp'.$eigentuemer->gml_id.'&targetlayer_id=0&targetattribute=leer\', new Array(document.getElementById(\'subform_ax_person_temp'.$eigentuemer->gml_id.'\')), new Array(\'sethtml\'));"><span> Anschrift aktualisieren</span></a>';
+						else	$Eigentuemer .= '<img src="'.GRAPHICSPATH.'pfeil_links.gif" width="12" height="12" border="0">&nbsp;<a class="buttonlink" href="javascript:ahah(\'index.php\', \'go=Layer-Suche_Suchen&reload=true&selected_layer_id='.LAYER_ID_ADRESSAENDERUNGEN_PERSON.'&value_gml_id='.urlencode($eigentuemer->gml_id).'&operator_gml_id==&attributenames[0]=user_id&values[0]='.$this->user->id.'&embedded=true&fromobject=subform_ax_person_temp'.$eigentuemer->gml_id.'&targetlayer_id=0&targetattribute=leer\', new Array(document.getElementById(\'subform_ax_person_temp'.$eigentuemer->gml_id.'\')), \'\');">Anschrift &auml;ndern</a>';
+					}
+					$Eigentuemer .= '</td>';
+				}
+				$Eigentuemer .= '</tr></table>';
+			}
+			$Eigentuemer .=	   '</td>
+														<tr>
+															<td colspan="2"><div id="subform_ax_person_temp'.$eigentuemer->gml_id.'" style="display:inline"></div></td>
+														</tr>
+														</tr>
+													</table>
+													</td>
+												</tr>';
+			$Eigentuemer .= '</table></td></tr>';
+		}
+		if($eigentuemer->zusatz_eigentuemer != ''){
+			$Eigentuemer .=	 '<tr>
+													<td>&nbsp;</td><td>'.$eigentuemer->zusatz_eigentuemer; if($eigentuemer->Anteil != '')$Eigentuemer .= ' zu '.$eigentuemer->Anteil;
+			$Eigentuemer .=	   '</td>
+												</tr>';
+		}
+		elseif($eigentuemer->Anteil != ''){
+			$Eigentuemer .=	 '<tr>
+													<td></td>
+													<td>zu '.$eigentuemer->Anteil.'</td>
+												</tr>';
+		}		
+		return $Eigentuemer;
+	}	
+	
+	function outputEigentuemer($gml_id, $Eigentuemerliste, $type, $adressAenderungen = NULL, $indent = NULL, $database = NULL){
+		if($gml_id != 'wurzel')$style = 'style="border-left: 1px solid lightgrey"';
+		$eigentuemer = $Eigentuemerliste[$gml_id];
+		$Eigentuemer .= $this->{'outputEigentuemer'.$type}($eigentuemer, $adressAenderungen, $indent, $database);
+		if($eigentuemer->children != ''){
+			if($type == 'Text')$indent = $indent.'  ';
+			else $Eigentuemer .= '<tr><td '.$style.'>&nbsp;&nbsp;</td><td><table>';
+			foreach($eigentuemer->children as $child){
+				$Eigentuemer .= $this->outputEigentuemer($child, $Eigentuemerliste, $type, $adressAenderungen, $indent, $database);
+			}
+			if($type != 'Text')$Eigentuemer .= '</table></td></tr>';
+		}
+		return $Eigentuemer;
+	}
+	
+	function orderEigentuemer($gml_id, &$Eigentuemerliste, $order){
+		# Diese funktion durchläuft den Rechtsverhältnisbaum und vergibt für jeden Eigentümer eine order, die sich fortlaufend erhöht.
+		# Anschliessend kann man die Eigentümerliste an Hand dieser order sortieren und erhält damit eine lineare Liste ohne Verschachtelung.
+		$Eigentuemerliste[$gml_id]->order = $order;
+		if($Eigentuemerliste[$gml_id]->children != ''){
+			foreach($Eigentuemerliste[$gml_id]->children as $child){
+				$order = $this->orderEigentuemer($child, $Eigentuemerliste, $order+1);
+			}
+		}
+		return $order;
+	}
 		
 	function getSonstigesrecht() {
     if ($this->FlurstKennz=="") { return 0; }
@@ -1920,11 +2053,12 @@ class flurstueck {
       $errmsg.='in line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
-		if($without_temporal_filter AND $ret[1]['hist_alb'] == 0){
-			if($ret[1]['endet'] != '')rolle::$hist_timestamp = DateTime::createFromFormat('d.m.Y H:i:s', $ret[1]['beginnt'])->format('Y-m-d\TH:i:s\Z');
+		if($without_temporal_filter){
+			if($ret[1]['endet'] != '' OR $ret[1]['hist_alb'])rolle::$hist_timestamp = DateTime::createFromFormat('d.m.Y H:i:s', $ret[1]['beginnt'])->format('Y-m-d\TH:i:s\Z');			
 			else rolle::$hist_timestamp = '';
 		}
     $rs=$ret[1];
+		$this->oid=$rs['oid'];
 		$this->gml_id=$rs['gml_id'];
     $this->Zaehler=intval($rs['zaehler']);
     $this->Nenner=intval($rs['nenner']);
@@ -1973,9 +2107,6 @@ class flurstueck {
     $this->Nachfolger=$this->getNachfolger();	
     # Abfragen der Nutzungen
     $this->Nutzung=$this->getNutzung();
-    if(ALKIS){}		# ALKIS TODO
-    else $updateDate = $this->database->readLastUpdateDate('');
-    $this->updateDate = $updateDate[1]['lastupdate'];
   }
 
   function is_ALK_Flurstueck($FlurstKennz) {
@@ -2062,7 +2193,7 @@ class flurstueck {
   }
 
   function getNamen($formvars,$ganze_gemkg_ids, $eingeschr_gemkg_ids) {
-    if ($formvars['name1']=='' AND $formvars['name2']=='' AND $formvars['name3']=='' AND $formvars['name4']=='' AND $formvars['name5']=='' AND $formvars['name6']=='' AND $formvars['name7']=='' AND $formvars['name8']=='') {
+    if ($formvars['name1']=='' AND $formvars['name2']=='' AND $formvars['name3']=='' AND $formvars['name4']=='' AND $formvars['name5']=='' AND $formvars['name6']=='' AND $formvars['name7']=='' AND $formvars['name8']=='' AND $formvars['gml_id']=='') {
       $ret[0]=1;
       $ret[1]='<br>Geben Sie mindestens einen Suchbegriff ein!';
     }

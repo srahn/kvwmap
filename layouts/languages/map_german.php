@@ -6,7 +6,7 @@
   $strChoose="Ausschnitt laden";
   $strMapSettingsFrom="Karteneinstellungen vom";
   $strPreviousView="vorherige Ansicht";
-  $strNextView="naechste Ansicht";
+  $strNextView="nächste Ansicht";
   $strZoomIn="Hereinzoomen";
   $strZoomOut="Herauszoomen";
   $strZoomToFullExtent="Gesamtansicht";
@@ -20,17 +20,25 @@
   $strRuler="Wegstrecke messen";
   $strFreePolygon="Polygon zeichnen";
   $strFreeArrow="Pfeil zeichnen";
-  $strFreeText="Text Hinzufuegen";
+  $strFreeText="Text Hinzufügen";
+	$strGPS="GPS-Verfolgungsmodus";
   $strX="R";  
   $strY="H";
+	$strExtentURL="URL des Ausschnitts anzeigen";
   $strSaveExtent="Ausschnitt speichern";
 	$strSaveLayers="Themenauswahl speichern";
 	$strChooseLayers="Themenauswahl laden";
   $strMap="Kartenausschnitt";
   $strMapSize="Größe anpassen";
-	$strLayerControl="Themensteuerung";
-	$strDeactivateAllLayer="Hier klicken, um alle Themen zu deaktivieren";
-	$strClearAllQuerys="Hier klicken, um alle Abfragehaken zu entfernen";
-	$strInfoQuery="Informationsabfrage";
+	$strDeactivateAllLayer="alle Themen deaktivieren";
+	$strClearAllQuerys="alle Abfragehaken entfernen";
+	$strRotationAngle="Richtungswinkel";
+	$strNoLayer="Es wurde kein Thema zur Sachdatenabfrage ausgewählt!";
+	$strLayerSearch="Themensuche";
+	$strLegendOptions="Legenden-Optionen";
+	$strLegendType="Themendarstellung";
+	$strLegendTypeGroups="Themen in Gruppen";
+	$strLegendTypeAlphabetical="Themen alphabetisch";
+	$strDrawingOrder="Zeichenreihenfolge anpassen";
   
 ?>

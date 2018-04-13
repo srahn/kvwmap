@@ -2,9 +2,8 @@
   $strCornerPoint="an\'n Hörntüttel marachen";
   $strCutByPolygon="Polygon utsnieden";
   $strDrawPolygon="Polygon infögen";
-  $strDeletePolygon="Polygon löschen";
   $strDrawLine="Lien bidoon";
-  $strDeleteLine="allns loeschen";
+  $strDelete="allns loeschen";
   $strDelLine="Lienen löschen";
   $strUndo="Trüggnehmen";
   $strSetPosition="Positschoon setten";

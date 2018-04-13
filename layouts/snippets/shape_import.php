@@ -52,8 +52,8 @@
   <tr>
   	<td>&nbsp;</td>
 		<td align="center" style="border-bottom:1px solid #C3C7C3"><span class="fett"><?php echo $strZipArchive; ?></span>
-		<input class="button" type="file" name="zipfile" size="12">
-		<input class="button" type="submit" name="goplus" value="<?php echo $strLoadData; ?>"></td>
+		<input type="file" name="zipfile" size="12">
+		<input type="submit" name="goplus" value="<?php echo $strLoadData; ?>"></td>
 		<td>&nbsp;</td>
 	</tr>
 	<? }
@@ -99,7 +99,7 @@
   			<tr>
   				<td><input type="radio" name="table_option" value="" checked>Tabelle neu anlegen</td>
   				<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-  				<td>EPSG-Code:&nbsp;<input type="text" name="epsg" size="5" value=""></td>
+  				<td>EPSG-Code:&nbsp;<input type="text" name="epsg" size="5" value="<? echo $this->data_import_export->formvars['epsg']; ?>"></td>
   				<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
   				<!--td><input name="primary_key" type="radio" value="gid" checked>&nbsp;mit gid-Index</td-->
   			</tr>
@@ -122,7 +122,7 @@
   	<td>&nbsp;</td>
   </tr>
   <tr>
-  	<td colspan="3" align="center"><input name="save1" value="importieren" type="button" class="button" onclick="save();"></td>
+  	<td colspan="3" align="center"><input name="save1" value="importieren" type="button" onclick="save();"></td>
   </tr>
   <? } ?>
   <tr> 

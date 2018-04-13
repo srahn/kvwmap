@@ -4,6 +4,6 @@
   $strZoomToFullExtent="Gesamtansicht";
   $strPan="Verschieben / Pan";
   $strPreviousView="vorherige Ansicht";
-  $strNextView="naechste Ansicht";
+  $strNextView="n\u00e4chste Ansicht";
  
 ?>  

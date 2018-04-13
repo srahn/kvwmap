@@ -49,8 +49,9 @@ public static	function find_by_id($gui, $by, $id) {
 			$sql_ausfuehrbar = $validierung->sql_ausfuehrbar($this, $konvertierung_id);
 
 			$this->debug->show('<br>bereich_gml_id: ' . $this->get('bereich_gml_id'), Regel::$write_debug);
-			if ($sql_ausfuehrbar and !empty($this->get('bereich_gml_id'))) {
+			if ($sql_ausfuehrbar) {
 
+					$this->debug->show('<br>SQL der Regel: ' . $this->get('name') . ' ausfuehrbar', Regel::$write_debug);
 					# Prüft ob die erzeugten Geometrien valide sind.
 					$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'geometrie_isvalid');
 					$validierung->konvertierung_id = $konvertierung_id;
@@ -68,12 +69,16 @@ public static	function find_by_id($gui, $by, $id) {
 						$validierung->geom_within_bereich($this, $konvertierung);
 				}
 			}
+			else {
+				$this->debug->show('<br>Regel->validate(): SQL der Regel: ' . $this->get('name') . ' nicht ausfuehrbar', true);
+				$success = false;
+			}
 
 		}
 		else {
 			$success = false;
 		}
-		$this->debug->show('<br>Die Validierungen sind' . ($success ? '' : ' nicht') . ' erfolgreich verlaufen.', Validierung::$write_debug);
+		$this->debug->show('<br>Die Validierungen sind' . ($success ? '' : ' nicht') . ' erfolgreich verlaufen.', Regel::$write_debug);
 		return $success;
 	}
 
@@ -230,7 +235,7 @@ public static	function find_by_id($gui, $by, $id) {
 			
 			$sql = str_ireplace(
 				'select',
-				"select '" . $this->get_bereich_gml_ids() . "' AS gehoertzubereich,",
+				"select '" . $this->get_bereich_gml_id() . "' AS gehoertzubereich,",
 				$sql
 			);
 		}
@@ -251,24 +256,37 @@ public static	function find_by_id($gui, $by, $id) {
 
 	function rewrite_gml_ids($rows) {
 		$this->debug->show('<br><b>gml_ids in Shape-Tabellen zurückschreiben.</b>' . $sql, Regel::$write_debug);
-		$selects =  array();
-		foreach($rows AS $row) {
-			$selects[] = "
-				SELECT '{$row['gml_id']}' AS gml_id, {$row['gid']} AS gid
-			";
-		}
-		$converter_table = implode(' UNION ', $selects);
 
-		$converter_result = "SELECT bla UNION blu UNION bli";
+		# Erzeugt Funktion, die eine Tabelle mit allen allen gml_id's und gid's der neu eingetragenen Objekte zurückliefert.
 		$sql = "
+			CREATE OR REPLACE FUNCTION gml_id_gid_table()
+				RETURNS TABLE (gml_id character varying, gid int) AS
+			$$
+				BEGIN
+					RETURN QUERY VALUES
+						" . implode(
+							', ',
+							array_map(
+								function($row) {
+									return "('" . $row['gml_id'] . "'::character varying, " . $row['gid'] . ")";
+								},
+								$rows
+							)
+						) . ";
+				END
+			$$
+			LANGUAGE plpgsql IMMUTABLE;
+
 			UPDATE
-				xplan_shapes_" . $this->konvertierung->get('id') . '.' . $this->get_shape_table_name() . " AS shape
+				xplan_shapes_". $this->konvertierung->get('id') . '.' . $this->get_shape_table_name() . " AS shape
 			SET
 				gml_id = xplan.gml_id
 			FROM
-			  ({$converter_table}) AS xplan
+				gml_id_gid_table() AS xplan
 			WHERE
-			  shape.gid = xplan.gid
+				shape.gid = xplan.gid;
+
+			DROP FUNCTION gml_id_gid_table();
 		";
 		$this->debug->show('<br><b>Schreibe gml_ids mit folgendem sql zurück:</b>' . $sql, Regel::$write_debug);
 		pg_query(
@@ -309,13 +327,13 @@ public static	function find_by_id($gui, $by, $id) {
 	/*
 	* Diese Funktion liefert die bereich_gml_id der Regel oder falls vorhanden mehrere aus dem Attribut bereiche
 	*/
-	function get_bereich_gml_ids() {
-		if (empty($this->get('bereiche')) or $this->get('bereiche') == '{}')
-			$gml_ids = '{' . $this->get('bereich_gml_id') . '}';
+	function get_bereich_gml_id() {
+		if (empty($this->get('bereiche')) or $this->get('bereiche') == '')
+			$gml_id = $this->get('bereich_gml_id');
 		else
-			$gml_ids = $this->get('bereiche');
+			$gml_id = $this->get('bereiche');
 
-		return $gml_ids;
+		return $gml_id;
 	}
 
 	/*
