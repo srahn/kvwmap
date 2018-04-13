@@ -2,9 +2,8 @@
   $strCornerPoint="przesuń wierzchołki"; 
   $strCutByPolygon="wytnij wielokątem"; 
   $strDrawPolygon="wstaw wielokąt"; 
-  $strDeletePolygon="usuń wielokąt"; 
   $strDrawLine="wstaw linie"; 
-  $strDeleteLine="wszystko usuń"; 
+  $strDelete="wszystko usuń"; 
   $strDelLine="usuń linie"; 
   $strUndo="cofnij";
   $strSetPosition="ustaw pozycję"; 

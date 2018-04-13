@@ -74,7 +74,7 @@ class database {
   }
 
   
-  function read_colors(){
+  function read_colors(){	
   	$sql = "SELECT * FROM colors";
   	#echo $sql;
   	$ret=$this->execSQL($sql, 4, 0);
@@ -890,7 +890,7 @@ INSERT INTO u_styles2classes (
     return mysql_select_db($this->dbName,$this->dbConn);
   }
 
-  function close() {
+  function close() {	
     $this->debug->write("<br>MySQL Verbindung mit ID: ".$this->dbConn." schließen.",4);
     if (LOG_LEVEL>0){
     	$this->logfile->close();
@@ -898,32 +898,38 @@ INSERT INTO u_styles2classes (
     return mysql_close($this->dbConn);
   }
 
-	function exec_file($filename, $search, $replace){
-    if($file = file_get_contents($filename)){
-			foreach(explode(';'.chr(10), $file) as $query2){		// verschiedene Varianten des Zeilenumbruchs berücksichtigen
-				foreach(explode(';'.chr(13), $query2) as $query){
+	function exec_file($filename, $search, $replace, $replace_constants = false) {
+		if ($file = file_get_contents($filename)) {
+			foreach (explode(';' . chr(10), $file) as $query2) { // verschiedene Varianten des Zeilenumbruchs berücksichtigen
+				foreach (explode(';' . chr(13), $query2) as $query) {
 					$query_to_execute = '';
 					$query = trim($query);
-					if($search != NULL)$query = str_replace($search, $replace, $query);
-					foreach(explode(chr(10), $query) as $line){
-						if(strpos($line, "--") !== 0 && strpos($line, "#") !== 0){					// Zeilen mit Kommentarzeichen ignorieren
-							$query_to_execute .= $line;
-						}
-					}
-					#echo $query_to_execute.'<br><br>';
+					if ($search != NULL) $query = str_replace($search, $replace, $query);
+					// foreach (explode(chr(10), $query) as $line) {
+						// if ($line != '' AND strpos($line, "--") !== 0 && strpos($line, "#") !== 0) { // Zeilen mit Kommentarzeichen ignorieren
+							// $query_to_execute .= ' '.$line;
+						// }
+					// }
+					$query_to_execute = $query;
 					if (!empty($query_to_execute)) {
 						$query_to_execute = str_replace('$EPSGCODE_ALKIS', EPSGCODE_ALKIS, $query_to_execute);
 						$query_to_execute = str_replace(':alkis_epsg', EPSGCODE_ALKIS, $query_to_execute);
+						if ($replace_constants) {
+							foreach (get_defined_constants(true)['user'] AS $key => $value) {
+								$query_to_execute = str_replace('$' . $key, $value, $query_to_execute);
+							}
+						}
+						#echo '<br>exec sql: ' . $query_to_execute;
 						$ret=$this->execSQL($query_to_execute, 0, 0);
-						if($ret[0] == 1){
+						if($ret[0] == 1) {
 							return $ret;
 						}
 					}
 				}
 			}
-    }
+		}
 	}
-	
+
   function begintransaction() {
     # Starten einer Transaktion
     # initiates a transaction block, that is, all statements

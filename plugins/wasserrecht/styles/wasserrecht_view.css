@@ -1,0 +1,178 @@
+@charset "ISO-8859-1";
+
+/* TABS */
+
+ /* Style the tab */
+div.tab {
+    overflow: hidden;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+}
+
+/* Style the buttons inside the tab */
+div.tab div {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+}
+
+/* Change background color of buttons on hover */
+div.tab div:hover {
+    background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+div.tab div.active {
+    background-color: #ccc;
+}
+
+/* Style the tab content */
+.tabcontent {
+    display: none;
+    padding: 6px 12px;
+    border: 0px solid #ccc;
+    border-top: none;
+    width: 100%;
+    height: 100%;
+     -webkit-animation: fadeEffect 1s;
+    animation: fadeEffect 1s;
+/*     background-color: #D3D3D3; */
+}
+
+/* Fade in tabs */
+@-webkit-keyframes fadeEffect {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+@keyframes fadeEffect {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+/* ALLGEMEIN */
+.wasserrecht_display_table {
+  display: table;
+/*   border-collapse: separate; */
+/*   border-spacing: 10px; */
+  float: left;
+}
+
+.wasserrecht_display_table_row { 
+	display:table-row;
+}
+
+.wasserrecht_display_table_cell_caption {
+  display:table-cell;
+  padding:3px;
+  text-align: left;
+}
+
+.wasserrecht_display_table_row_spacer {
+  display:table-cell;
+  padding:10px;
+}
+
+.wasserrecht_display_table_cell_spacer {
+  width: 10px;
+}
+
+.wasserrecht_display_table_cell_spacer_bottom {
+  width: 50px;
+}
+
+.wasserrecht_display_table_cell {
+  display:table-cell;
+  padding:3px;
+  text-align: left;
+}
+
+.wasserrecht_display_table_cell_white {
+  display:table-cell;
+  padding:3px;
+  background-color: white;
+  text-align: left;
+}
+
+/* WASSERENTNAHMEBENUTZER */
+
+table#wasserentnahmebenutzer_tabelle {
+/*     width: 95%; */
+/*     border: 1px solid black; */
+    border-collapse: collapse;
+    float: left;
+    margin-top: 20px;
+    width: 1200px
+}
+
+#wasserentnahmebenutzer_tabelle th, #wasserentnahmebenutzer_tabelle td {
+/*     border: 1px solid black; */
+/*     border-collapse: collapse; */
+    padding: 3px;
+    text-align: left;
+    font-size: 12px;
+    background-color: white;
+}
+
+#wasserentnahmebenutzer_tabelle th {
+
+    background-color: inherit;
+}
+
+#wasserentnahmebenutzer_tabelle a{
+    font-size: 12px;
+}
+
+button {
+  font-size: 12px;
+  font-family: SourceSansPro1;
+}
+
+.wasserentnahmebenutzer_entgeltbescheid_inputfield_small {
+	width: 50px;
+	border: 2px solid black;
+	background-color: inherit;
+}
+
+/* WASSERENTNAHMEENTGELT */
+.wasserrecht_table {
+  float: left;
+  width: 95%;
+  border-collapse: collapse;
+/*   margin-top: 20px; */
+/*    empty-cells: hide; */
+}
+
+.wasserrecht_table th, .wasserrecht_table td {
+  text-align: left;
+  padding:5px;
+  font-size: 14px;
+}
+
+.wasserrecht_table th {
+	font-weight: normal;
+}
+
+.wasserrecht_table td {
+  background-color: white;
+  border: 1px solid black;
+}
+
+.wasserrecht_table td:empty {
+  visibility: hidden;
+  border: 0px solid black;
+}
+
+.wasserrecht_table_inputfield {
+	width: 120px;
+}
+
+.wasserrecht_button {
+  font-size: 14px;
+  font-family: SourceSansPro1;
+  width: 180px;
+}

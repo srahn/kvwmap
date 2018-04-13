@@ -90,7 +90,7 @@ if ($this->Fehlermeldung!='') {
 		<td colspan="4" style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3">
 			<table width="100%" cellpadding="0" cellspacing="0">
 				<td><input name="importliste" type="file" value="" style="width: 340px" tabindex="2"></td>
-				<td><input type="submit" class="button" value="Laden"></td>
+				<td><input type="submit" value="Laden"></td>
 			</table>
 		</td>
 	</tr>

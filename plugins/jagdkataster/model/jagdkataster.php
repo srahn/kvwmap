@@ -67,8 +67,8 @@ class jagdkataster {
   		$sql.= ' AND (id like \''.$formvars['search_nummer'].'\'';
   		$sql.= ' OR jb_zuordnung like \''.$formvars['search_nummer'].'\')';  		
   	}
-  	if($formvars['search_name']){
-  		$sql.= ' AND lower(name) like lower(\''.$formvars['search_name'].'\')';
+  	if($formvars['jagd_search_name']){
+  		$sql.= ' AND lower(name) like lower(\''.$formvars['jagd_search_name'].'\')';
   	}
   	if($formvars['search_art']){
   		$sql.= ' AND art = \''.$formvars['search_art'].'\'';
@@ -152,6 +152,7 @@ class jagdkataster {
 			if($oid != ''){
 				$sql = "UPDATE jagdkataster.jagdbezirke SET";
 				if($umring != ''){$sql.= " the_geom = st_multi(st_transform(st_geometryfromtext('".$umring."', ".$this->clientepsg."), ".$this->layerepsg.")),";}
+				$sql.= " id = '".$nummer."',";
 				$sql.= " name = '".$name."',";
 				$sql.= " flaeche = ".(float)$flaeche.",";
 				$sql.= " jb_zuordnung = '".$jb_zuordnung."',";

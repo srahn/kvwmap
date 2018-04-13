@@ -7,9 +7,13 @@
 	$randomnumber = rand(0, 1000000);
   $svgfile  = $randomnumber.'SVG.svg';
 	$bg_pic   = $this->img['hauptkarte'];
-	include(LAYOUTPATH.'snippets/SVGvars_navscript.php'); 		# zuweisen von: $SVGvars_navscript
-	include(LAYOUTPATH.'snippets/SVGvars_navbuttons.php'); 		# zuweisen von: $SVGvars_navbuttons
+
+	global $last_x;$last_x = 0;
+	global $events;$events = true;	
+	
 	include(LAYOUTPATH.'snippets/SVGvars_defs.php'); 					# zuweisen von: $SVGvars_defs
+	include(LAYOUTPATH.'snippets/SVGvars_navbuttons.php'); 		# zuweisen von: $SVGvars_navbuttons
+	include(LAYOUTPATH.'snippets/SVGvars_navscript.php'); 		# zuweisen von: $SVGvars_navscript
 	include(LAYOUTPATH.'snippets/SVGvars_coordscript.php'); 	# zuweisen von: $SVGvars_coordscript
 	include(LAYOUTPATH.'snippets/SVGvars_tooltipscript.php');	# zuweisen von: $SVGvars_tooltipscript 
 	include(LAYOUTPATH.'snippets/SVGvars_tooltipblank.php');	# zuweisen von: $SVGvars_tooltipblank  
@@ -175,7 +179,6 @@ $svg='<?xml version="1.0"?>
 	var moving  = false;
 	var moved  = false;
 	var doing = "'.$this->user->rolle->selectedButton.'";
-	var highlighted  = "yellow";
 	var cmd   = "";
 	var width = '.$printwidth.';
 	var height = '.$printheight.';
@@ -197,6 +200,7 @@ function startup() {
 	}
 	focus_FS();
 	set_printextent_on();
+	document.getElementById("extent0").classList.add("active");
 	alignbuttons(width, height);
 }
 
@@ -285,33 +289,24 @@ function zoomall(){
 
 function recentre(){
 	doing = "recentre";
-  document.getElementById("canvas").setAttribute("cursor", "move");
+  document.getElementById("canvas").setAttribute("cursor", "grab");
 }
 
 function highlightbyid(id){
-	document.getElementById("zoomin0").style.setProperty("fill","ghostwhite", "");
-  document.getElementById("zoomout0").style.setProperty("fill","ghostwhite", "");
-  document.getElementById("recentre0").style.setProperty("fill","ghostwhite", "");
-	document.getElementById(id).style.setProperty("fill",highlighted, "");
+	document.querySelector(".active").classList.remove("active");
+  document.getElementById(id).classList.add("active");
 }
 
 function focus_NAV(){
 	// --------------- NAV-canvas aktivieren! ---------------------
   document.getElementById("canvas_FS").setAttribute("visibility", "hidden");
   document.getElementById("canvas").setAttribute("visibility", "visible");
-	// --------------- FS-leiste ohne highlight ---------------------
-  document.getElementById("text0").style.setProperty("fill","ghostwhite", "");
-	document.getElementById("refpoint0").style.setProperty("fill","ghostwhite", "");
 }
 
 function focus_FS(){
 	// --------------- NAV-canvas deaktivieren! ---------------------
   document.getElementById("canvas").setAttribute("visibility", "hidden");
   document.getElementById("canvas_FS").setAttribute("visibility", "visible");
-	// --------------- NAV-leiste ohne highlight ---------------------
-  document.getElementById("zoomin0").style.setProperty("fill","ghostwhite", "");
-  document.getElementById("zoomout0").style.setProperty("fill","ghostwhite", "");
-  document.getElementById("recentre0").style.setProperty("fill","ghostwhite", "");
 }
 
 // -------------------------mausinteraktionen auf canvas------------------------------
@@ -324,6 +319,7 @@ function mousedown(evt){
     selectPoint(evt);
    break;
    case "recentre":
+		document.getElementById("canvas").setAttribute("cursor", "grabbing");
     startMove(evt);
    break;
    default:
@@ -347,16 +343,10 @@ function mouseup(evt){
 	}
 	if (moving){
 		endMove(evt);
+		document.getElementById("canvas").setAttribute("cursor", "grab");
 	}
 }
 
-// ----------------------ausgewaehlten button highlighten---------------------------
-function highlight(evt){
-  document.getElementById("zoomin0").style.setProperty("fill","ghostwhite", "");
-  document.getElementById("zoomout0").style.setProperty("fill","ghostwhite", "");
-  document.getElementById("recentre0").style.setProperty("fill","ghostwhite", "");
-  evt.target.style.setProperty("fill",highlighted, "");
-}
 
 function task(evt) {
 	if(refpoint_setting){
@@ -373,16 +363,12 @@ function get_map_scale(){
 		
 function set_printextent_on() {
   document.getElementById("canvas_FS").setAttribute("cursor", "crosshair");
-	document.getElementById("refpoint0").style.setProperty("fill","ghostwhite", "");
-  document.getElementById("text0").style.setProperty("fill",highlighted, "");
 	refpoint_setting=false;
   client_x = ""; client_y = "";
 }
 
 function set_refpoint_on(){
 	document.getElementById("canvas_FS").setAttribute("cursor", "crosshair");
-	document.getElementById("text0").style.setProperty("fill","ghostwhite", "");
-  document.getElementById("refpoint0").style.setProperty("fill",highlighted, "");
 	refpoint_setting=true;
   client_x = ""; client_y = "";
 }
@@ -568,49 +554,38 @@ function deletelast(evt) {
 			</g>
 		</g>
 	</g>
-	<g id="buttons" cursor="pointer" transform="scale(1.1)">
-  <g id="buttons_NAV" cursor="pointer" onmouseout="hide_tooltip()" onmousedown="focus_NAV();hide_tooltip()">
-'.$SVGvars_navbuttons.'
+	<g id="buttons" filter="url(#Schatten)" cursor="pointer">
+		<g id="buttons_NAV" cursor="pointer" onmouseout="hide_tooltip()" onmousedown="focus_NAV();hide_tooltip()">
+			<rect x="0" y="0" rx="3" ry="3" width="216" height="36" class="navbutton_bg"/>
+	'.$SVGvars_navbuttons.'
 		</g>
 
-    <g id="buttons_FS" cursor="pointer" onmouseout="hide_tooltip()" onmousedown="focus_FS();hide_tooltip()" transform="translate(0 26)">
+    <g id="buttons_FS" cursor="pointer" onmouseout="hide_tooltip()" onmousedown="focus_FS();hide_tooltip()" transform="translate(0 36)">
+			<rect x="0" y="0" rx="3" ry="3" width="108" height="36" class="navbutton_bg"/>
 
-			<g id="text" onmousedown="set_printextent_on();" transform="translate(0 0 )">
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-        	<set attributeName="filter" begin="text.mousedown" fill="freeze" to="none"/>
-					<set attributeName="filter" begin="text.mouseup;text.mouseout" fill="freeze" to="url(#Schatten)"/>
-				</rect>
-				<g transform="translate(-4.7 -12) scale(1.35 1.35) matrix(0.7 0 0 0.7 -3.5 0)">
-					<rect x="14" y="20" width="18" height="12" style="fill:none;stroke:rgb(0,0,0);stroke-width:1.5"/>
+			<g id="extent" onmousedown="set_printextent_on();highlightbyid(\'extent0\');" transform="translate(0 0 )">
+				<rect id="extent0" onmouseover="show_tooltip(\''.$strSetPrintExtent.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" width="36" height="36" class="navbutton_frame"/>
+				<g class="navbutton" transform="translate(5 5) scale(0.8)">
+					<path d="M3,1.0 L3,29 L27.0,29 L27,1 Z M6,4.0 L6,26 L24.0,26 L24,4 Z" style="fill-rule: evenodd;"/>
 				</g>
-				<rect id="text0" onmouseover="show_tooltip(\''.$strSetPrintExtent.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="1" ry="1" width="25" height="25" fill="none" opacity="0.2"/>
 	    </g>
 	    		
-	    <g id="mapscale" onmousedown="get_map_scale();" transform="translate(26 0 )">
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-        	<set attributeName="filter" begin="mapscale.mousedown" fill="freeze" to="none"/>
-					<set attributeName="filter" begin="mapscale.mouseup;mapscale.mouseout" fill="freeze" to="url(#Schatten)"/>
-				</rect>
-				<g transform="translate(-4.4 -12) scale(1.35 1.35) matrix(0.7 0 0 0.7 -3.5 0)">
-					<rect x="14" y="17" width="17" height="17" style="fill:none;stroke:rgb(0,0,0);stroke-width:1.5;stroke-dasharray:4,3,3,3,8,3,3,3,8,3,3,3,8,3,3,3,4"/>
+	    <g id="mapscale" onmousedown="get_map_scale();" transform="translate(36 0 )">
+        <rect id="mapscale0" onmouseover="show_tooltip(\''.$strUseMapscale.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" width="36" height="36" class="navbutton_frame"/>
+				<g class="navbutton" transform="translate(5 5) scale(0.8)">
+					<path d="M3,1.0 L3,29 L27.0,29 L27,1 Z M6,4.0 L6,26 L24.0,26 L24,4 Z" style="fill-rule: evenodd;"/>
+					<path d="M19.4,14.2 C20.6,14.2 21.5,13.2 21.5,12.06 C21.5,10.9 20.6,10 19.4,10 C18.2,10 17.3,10.9 17.3,12.1 C17.3,13.2 18.2,14.2 19.4,14.2"/>
+					<path d="M19.4,22.7 C20.6,22.7 21.5,21.8 21.5,20.6 C21.5,19.4 20.6,18.5 19.4,18.5 C18.2,18.5 17.3,19.4 17.3,20.6 C17.3,21.8 18.2,22.7 19.4,22.7"/>
+					<path d="M8.5,10.7 L8.5,14.3 L8.7,14.3 L9,14.2 L9.3,14.1 L9.8,13.8 L10.3,13.5 L11.2,13 L11.2,21.7 C11.2,22.3 11.6,22.7 12.2,22.7 L13.7,22.7 C14.3,22.7 14.7,22.3 14.7,21.7 L14.7,7 L11.9,7 L11.5,7.7 L11.0,8.5 L10.2,9.5 L9.5,10.1 Z"/>
 				</g>
-				<text transform="scale(0.6 0.6)" x="20" y="27" style="text-anchor:middle;fill:rgb(0,0,0);font-size:18;font-family:Arial;">M</text>
-				<rect id="mapscale0" onmouseover="show_tooltip(\''.$strUseMapscale.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="1" ry="1" width="25" height="25" fill="white" opacity="0.0"/>
 	    </g>
 
-			<g id="refpoint" onmousedown="set_refpoint_on();" transform="translate(52 0 )">
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-        	<set attributeName="filter" begin="mapscale.mousedown" fill="freeze" to="none"/>
-					<set attributeName="filter" begin="mapscale.mouseup;mapscale.mouseout" fill="freeze" to="url(#Schatten)"/>
-				</rect>
-				<g transform="scale(0.5) translate(2 8)">
-					<text x="23" y="15" style="text-anchor:middle;fill:black;font-size:10;font-family:Arial;font-weight:bold">Punkt</text>
-					<circle cx="23" cy="21" r="3"/>
+			<g id="refpoint" onmousedown="set_refpoint_on();highlightbyid(\'refpoint0\');" transform="translate(72 0 )">
+        <rect id="refpoint0" onmouseover="show_tooltip(\''.$strSetRefPoint.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" width="36" height="36" class="navbutton_frame"/>
+				<g class="navbutton" transform="translate(5 5) scale(0.8)">
+					<path d="M3,1.0 L3,29 L27.0,29 L27,1 Z M6,4.0 L6,26 L24.0,26 L24,4 Z" style="fill-rule: evenodd;"/>
+					<path d="M10,12.5 C10,13.9 11.1,15 12.5,15 C13.9,15 15,13.9 15,12.5 C15,11.1 13.9,10 12.5,10 C11.1,10 10,11.1 10,12.5"/>
 				</g>
-				<rect id="refpoint0" onmouseover="show_tooltip(\''.$strSetRefPoint.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="1" ry="1" width="25" height="25" fill="white" opacity="0.2"/>
 	    </g>
 	    
 		</g>

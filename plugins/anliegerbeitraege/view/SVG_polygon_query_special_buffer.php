@@ -85,7 +85,7 @@ $svg .= $special_buffer_functions;
 $svg .= $flurstqueryfunctions;	# Funktionen zum Hinzufügen und Entfernen von Polygonen
 $svg .= $coord_input_functions;	# Funktionen zum Eingeben von Koordinaten
 $svg .= $measurefunctions;
-if($_SESSION['mobile'] == 'true'){
+if($this->user->rolle->gps){
 	$svg .= $gps_functions;
 }
 $svg .= $SVGvars_coordscript;
@@ -98,13 +98,17 @@ $svg .='
   </defs>';
 $svg .= $canvaswithall;
 $svg .= $navbuttons;
-$svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate(0 26)">';
-$svg .= polygonbuttons($strUndo, $strDeletePolygon, $strDrawPolygon, $strCutByPolygon);
-$svg .= flurstquerybuttons();
-$svg .= special_bufferbuttons($strSpecialBuffer);
-$svg .= vertex_edit_buttons($strCornerPoint);
-$svg .= coord_input_buttons();
-$svg .= measure_buttons($strRuler);
+$svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate(0 36)">';
+$buttons_fs .= deletebuttons($strUndo, $strDelete);
+$buttons_fs .= polygonbuttons($strDrawPolygon, $strCutByPolygon);
+$buttons_fs .= flurstquerybuttons();
+$buttons_fs .= special_bufferbuttons($strSpecialBuffer);
+$buttons_fs .= vertex_edit_buttons($strCornerPoint);
+$buttons_fs .= coord_input_buttons();
+$buttons_fs .= measure_buttons($strRuler);
+global $last_x;
+$svg .= '<rect x="0" y="0" rx="3" ry="3" width="'.$last_x.'" height="36" class="navbutton_bg"/>';
+$svg .= $buttons_fs;
 $svg .= '</g>';
 $svg .= $SVG_end;
 

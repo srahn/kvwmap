@@ -329,10 +329,10 @@ function toLayerEditor(){
 
 						</tr><?php
 					}
-					if (count($this->attributes) > 0){ ?>
+					if(count($this->attributes) > 0 AND ($this->layer['editable'] OR $this->formvars['selected_datatype_id'])){ ?>
 						<tr>
 							<td align="center" colspan="19"><br><br>
-								<input class="button" type="submit" name="go_plus" value="speichern">
+								<input type="submit" name="go_plus" value="speichern">
 							</td>
 						</tr><?php
 					}

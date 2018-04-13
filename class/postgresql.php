@@ -758,7 +758,7 @@ FROM
 	        	$name_pair['no_real_attribute'] = true;
 	        }
 	      }
-	      elseif(strpos(strtolower($fieldstring), '||')){		# irgendwas zusammengesetztes mit ||
+	      elseif(strpos(strtolower($fieldstring), '||') OR strpos(strtolower($fieldstring), '+')){		# irgendwas zusammengesetztes mit || oder +
 	      	$explosion2 = explode('||', $fieldstring);
 	      	for($i = 0; $i < count($explosion2); $i++){
 	      		if(strpos($explosion2[$i], "'") === false){
