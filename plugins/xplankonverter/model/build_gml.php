@@ -221,7 +221,7 @@ class Gml_builder {
 			fwrite($this->tmpFile, "\n" . $this->formatXML($this->wrapWithFeatureMember($rp_bereich . "</{$xplan_ns_prefix}RP_Bereich>")));
 		}
 
-		// und nun alle RP_Objekte generieren
+// und nun alle RP_Objekte generieren
 		// dazu alle RP_Objektklassen finden die mit der Konvertierung verknüpft sind
 		$class_names = $konvertierung->get_class_names();
 		# zu jeder RP_Objektklassse die Objekte holen, die mit der Konvertierung verknüpft sind
@@ -237,10 +237,29 @@ class Gml_builder {
 				$objekt_gml = "<{$xplan_ns_prefix}{$class_name} gml:id=\"GML_{$rp_object_row['gml_id']}\">";
 
 				# Rueckverweise auf etwaige Bereiche hinzufügen
+				# sets the specific association gehoertZuBereich after XP_, which will be added at generateGmlForAttributes
+				# this keeps the sequence order of the XSD (association sequence is currently not held in the structure_schema
 				$aggregated_bereich_gml_ids = explode(',', substr($rp_object_row['bereiche_gml_ids'], 1, -1));
-				foreach ($aggregated_bereich_gml_ids as $bereich_gml_id) {
-					if (!empty($bereich_gml_id))
-						$objekt_gml .= "<{$xplan_ns_prefix}gehoertZuBereich xlink:href=\"#GML_{$bereich_gml_id}\"/>";
+				if(count($aggregated_bereich_gml_ids) > 0) {
+					#exists
+					$index_pos = 0;
+					foreach ($objekt_attribs as  $objekt_attrib) {
+						if(substr($objekt_attrib['uml_name'],0,3) !== 'XP_') {
+							break;
+						}
+						$index_pos +=1;
+					}
+					$gehoert_zu_bereich = array(
+							'uml_name'   => 'XP_Objekt',
+							'col_name'   => '',
+							'type'       => '',
+							'type_type'  => 'gehoertzubereich',
+							'is_array'   => 't',
+							'stereotype' => 'Association',
+							'sequence'   => '999',
+							'origin'     => $uml_attrib['origin']
+						);
+					array_splice($objekt_attrib, ($index_pos -1), 0, $gehoert_zu_bereich);
 				}
 
 				# alle uebrigen Attribute ausgeben
@@ -280,6 +299,14 @@ class Gml_builder {
       $lowercaseName = strtolower($uml_attribute['name']);
 	  #$gmlStr .= '<note>attributname: ' . $uml_attribute['name'] . ' type_type: ' . $uml_attribute['type_type'] . ' stereotype: ' . $uml_attribute['stereotype'] . '</note>';
       switch ($uml_attribute['type_type']) {
+				case 'gehoertzubereich': // association bereich
+					$aggregated_bereich_gml_ids = explode(',', substr($gml_object['bereiche_gml_ids'], 1, -1));
+					foreach ($aggregated_bereich_gml_ids as $bereich_gml_id) {
+						if (!empty($bereich_gml_id)) {
+							$objekt_gml .= "<{$xplan_ns_prefix}gehoertZuBereich xlink:href=\"#GML_{$bereich_gml_id}\"/>";
+						}
+					}
+					break;
         case 'c': // custom datatype
           switch ($uml_attribute['stereotype']){
             case NULL:
