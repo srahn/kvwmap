@@ -1420,6 +1420,14 @@ tbody.gle tr:hover {
 	right:210px;
 }
 
+.layerOptionsIcon{
+	font-size: 0.9em;
+	height: 14px;
+	width: 14px;
+	padding: 3px;
+	margin-left: -4;
+}
+
 #legendOptionsIcon{
 	font-size: 1.1em;
 	margin: 0 0 0 42;
