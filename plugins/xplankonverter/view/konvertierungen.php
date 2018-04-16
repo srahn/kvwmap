@@ -395,5 +395,4 @@
 		</tr>
 	</thead>
 </table>
-
-<button type="button" id="new_konvertierung" name="go_plus" onclick="location.href='index.php?go=neuer_Layer_Datensatz&selected_layer_id=<?php echo XPLANKONVERTER_KONVERTIERUNGEN_LAYER_ID; ?>'">neu</button>
+<button style="margin-bottom: 10px" type="button" id="new_konvertierung" name="go_plus" onclick="location.href='index.php?go=neuer_Layer_Datensatz&selected_layer_id=<?php echo XPLANKONVERTER_KONVERTIERUNGEN_LAYER_ID; ?>'">neu</button>

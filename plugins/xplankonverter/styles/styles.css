@@ -75,7 +75,7 @@ div.td {
 	margin-right: 40px;
 	display:inline;
 }
-
+/*
 .button {
   display: inline-block;
   border-radius: 4px;
@@ -117,7 +117,7 @@ div.td {
   opacity: 1;
   right: 0;
 }
-
+*/
 
 /*
 .xplankonverter .button {
@@ -378,7 +378,7 @@ form {
 	min-width: 1300px;
   overflow: hidden;
 }
-
+/*
 .button {
   background: #59bdff;
   background-image: -webkit-linear-gradient(top, #B2C6D4, #47839F);
@@ -402,7 +402,7 @@ form {
   background-image: linear-gradient(to bottom, #78cbff, #2980b9);
   text-decoration: none;
 }
-
+*/
 .hlink { 
   color: #47839F;
 }
@@ -752,4 +752,9 @@ nav > ul > li > ul > li:hover > ul {
 .xpk-func-btn .fa.fa-code {
 	font-weight: bold;
 	font-size: 1.5em;
+}
+
+/* fixed wrong heights for bootstrap tables in firefox */
+.fixed-table-body {
+  height: auto;
 }

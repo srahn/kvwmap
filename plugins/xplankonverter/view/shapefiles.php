@@ -85,6 +85,11 @@
     <input type="submit" value="Upload">
   </div>
 </form>
+<form action="index.php" method="post" enctype="multipart/form-data">
+  <input type="hidden" name="go" value="xplankonverter_konvertierungen_index">
+  <input type="hidden" name="konvertierung_id" value="<?php echo $this->formvars['konvertierung_id']; ?>">
+	<input style="margin-top: 5px" type="submit" name="submit" value="zurück">
+</form>
 <p>
 <?php
   if (!empty($uploaded_files)) {
