@@ -217,7 +217,7 @@ form {
 	min-width: 1300px;
   overflow: hidden;
 }
-
+/*
 .button {
   background: #59bdff;
   background-image: -webkit-linear-gradient(top, #B2C6D4, #47839F);
@@ -241,7 +241,7 @@ form {
   background-image: linear-gradient(to bottom, #78cbff, #2980b9);
   text-decoration: none;
 }
-
+*/
 .hlink { 
   color: #47839F;
 }
