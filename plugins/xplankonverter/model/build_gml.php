@@ -233,34 +233,8 @@ class Gml_builder {
 			$objekt_attribs = $this->typeInfo->getInfo($class_name);
 
 			foreach ($rp_object_rows AS $rp_object_row) {
-				# elment anlegen und gml_id als attribut eintragen
+				# element anlegen und gml_id als attribut eintragen
 				$objekt_gml = "<{$xplan_ns_prefix}{$class_name} gml:id=\"GML_{$rp_object_row['gml_id']}\">";
-
-				# Rueckverweise auf etwaige Bereiche hinzufügen
-				# sets the specific association gehoertZuBereich after XP_, which will be added at generateGmlForAttributes
-				# this keeps the sequence order of the XSD (association sequence is currently not held in the structure_schema
-				$aggregated_bereich_gml_ids = explode(',', substr($rp_object_row['bereiche_gml_ids'], 1, -1));
-				if(count($aggregated_bereich_gml_ids) > 0) {
-					#exists
-					$index_pos = 0;
-					foreach ($objekt_attribs as  $objekt_attrib) {
-						if(substr($objekt_attrib['uml_name'],0,3) !== 'XP_') {
-							break;
-						}
-						$index_pos +=1;
-					}
-					$gehoert_zu_bereich = array(
-							'uml_name'   => 'XP_Objekt',
-							'col_name'   => '',
-							'type'       => '',
-							'type_type'  => 'gehoertzubereich',
-							'is_array'   => 't',
-							'stereotype' => 'Association',
-							'sequence'   => '999',
-							'origin'     => $uml_attrib['origin']
-						);
-					array_splice($objekt_attrib, ($index_pos -1), 0, $gehoert_zu_bereich);
-				}
 
 				# alle uebrigen Attribute ausgeben
 				$objekt_gml .= $this->generateGmlForAttributes($rp_object_row, $objekt_attribs, XPLAN_MAX_NESTING_DEPTH);
@@ -292,21 +266,28 @@ class Gml_builder {
     if (($depth) < 0) return '';
     $xplan_ns_prefix = XPLAN_NS_PREFIX ? XPLAN_NS_PREFIX.':' : '';
     $gmlStr = '';
-    foreach ($uml_attribute_info as  $uml_attribute) {
-      // leere Felder auslassen
-      if ($gml_object[$uml_attribute['col_name']] == '') continue;
-
-      $lowercaseName = strtolower($uml_attribute['name']);
-	  #$gmlStr .= '<note>attributname: ' . $uml_attribute['name'] . ' type_type: ' . $uml_attribute['type_type'] . ' stereotype: ' . $uml_attribute['stereotype'] . '</note>';
-      switch ($uml_attribute['type_type']) {
-				case 'gehoertzubereich': // association bereich
+		$sequence_attr = 0;
+		foreach ($uml_attribute_info as  $uml_attribute) {
+				# Rueckverweise auf etwaige Bereiche hinzufügen
+				# index 10 is the current position (XPlanGML 5.0.1) for gehoertzubereich association to be implemented
+				# TODO Make this more generic to reflect possible changes in index and support all associations
+				# Might need a change in xplan_uml generation to contain association sequenceorder/index
+			if($sequence_attr == 10) {
 					$aggregated_bereich_gml_ids = explode(',', substr($gml_object['bereiche_gml_ids'], 1, -1));
 					foreach ($aggregated_bereich_gml_ids as $bereich_gml_id) {
 						if (!empty($bereich_gml_id)) {
-							$objekt_gml .= "<{$xplan_ns_prefix}gehoertZuBereich xlink:href=\"#GML_{$bereich_gml_id}\"/>";
+							$gmlStr .= "<{$xplan_ns_prefix}gehoertZuBereich xlink:href=\"#GML_{$bereich_gml_id}\"/>";
 						}
 					}
-					break;
+				}
+				#$gmlStr .= "<note>attribut sequenznummer: " . $sequence_attr ."</note>";
+				$sequence_attr++;
+			
+      // leere Felder auslassen
+      if ($gml_object[$uml_attribute['col_name']] == '') continue;
+
+      #$gmlStr .= '<note>attributname: ' . $uml_attribute['name'] . ' type_type: ' . $uml_attribute['type_type'] . ' stereotype: ' . $uml_attribute['stereotype'] . '</note>';
+      switch ($uml_attribute['type_type']) {
         case 'c': // custom datatype
           switch ($uml_attribute['stereotype']){
             case NULL:
@@ -331,7 +312,13 @@ class Gml_builder {
               $datatype_attribs = $this->typeInfo->getInfo($uml_attribute['type']);
               // retrieve attribute names
               $value_array_keys = array_column($datatype_attribs,'col_name');
-
+							
+							// Adds an extra Association for XP_VerbundenerPlan as they are not present with sequences in xplan_uml
+							if($uml_attribute['col_name'] == 'aendert') {
+								#$gmlStr .= '<note>XP_VerbundenerPlan</note>';
+								array_push($value_array_keys, 'verbundenerplan');
+							}
+							
               // wrap singular values into an array in order to
               // unify the processing of singular and multiple values
               if (!$uml_attribute['is_array']) {
@@ -343,6 +330,8 @@ class Gml_builder {
               // process composite data type
               foreach ($value_array as $single_value) {
                 // associate values with attribute names
+								#$gmlStr .= '<note>single_value: ' . count($single_value) . '</note>';
+								#$gmlStr .= '<note>value_array_keys: ' . count($value_array_keys) . '</note>';
                 $single_value = array_combine($value_array_keys, $single_value);
                 // generate GML output (!!! recursive !!!)
                 $gml_attrib_str .= $this->generateGmlForAttributes($single_value, $datatype_attribs,$depth-1);

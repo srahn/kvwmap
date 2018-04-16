@@ -24,9 +24,6 @@ include(PLUGINS . 'xplankonverter/model/converter.php');
 
 /**
 * Anwendungsfälle
-* show_elements
-* show_simple_types
-* show_uml
 * xplankonverter_konvertierungen_index
 * xplankonverter_shapefiles_index
 * xplankonverter_shapefiles_delete
@@ -47,33 +44,6 @@ include(PLUGINS . 'xplankonverter/model/converter.php');
 */
 
 switch($go){
-
-	case 'show_elements': {
-		$packages = array();
-		$sql	= "
-			SELECT
-				DISTINCT package
-			FROM
-				xplan.elements
-			ORDER BY
-				package
-		";
-		$result = pg_query($this->pgdatabase->dbConn, $sql);
-		$this->packages = pg_fetch_all($result);
-		array_unshift($packages, array('package' => 'Alle'));
-		$this->main = PLUGINS . 'xplankonverter/view/elements.php';
-		$this->output();
-	}	break;
-
-	case 'show_simple_types': {
-		$this->main = PLUGINS . 'xplankonverter/view/simple_types.php';
-		$this->output();
-	}	break;
-
-	case 'show_uml': {
-		$this->main = PLUGINS . 'xplankonverter/view/uml_diagramms.php';
-		$this->output();
-	}	break;
 
 	case 'xplankonverter_konvertierungen_index' : {
 		$this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
@@ -837,7 +807,6 @@ switch($go){
 	default : {
 		$this->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
 	}
-
 }
 
 function isInStelleAllowed($stelle, $requestStelleId) {
