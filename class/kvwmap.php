@@ -9986,12 +9986,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->output();
   }
 
-  function daten_export_exportieren() {
+	function daten_export_exportieren() {
 		include_(CLASSPATH . 'data_import_export.php');
-    $this->data_import_export = new data_import_export();
-    $this->formvars['filename'] = $this->data_import_export->export_exportieren($this->formvars, $this->Stelle, $this->user);
-    $this->daten_export();
-  }
+		$this->data_import_export = new data_import_export();
+		$this->formvars['filename'] = $this->data_import_export->export_exportieren($this->formvars, $this->Stelle, $this->user);
+		$this->daten_export();
+	}
 
 	function Attributeditor(){
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
@@ -11259,7 +11259,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->titel='Themenübersicht';
     $this->main='layer_uebersicht.php';
     # Abfragen aller Layer
-    $this->layer = $mapDB->getall_Layer('Gruppenname, Name');
+    $this->layers = $mapDB->getall_Layer('Gruppenname, Name', true);
+		$this->groups = $mapDB->read_Groups(true, 'Gruppenname');
     $this->output();
   }
 
@@ -16332,8 +16333,9 @@ class db_mapObj{
     $sql .= "datenherr = '".$formvars['datenherr']."',";
     $sql .= "metalink = '".$formvars['metalink']."', ";
 		$sql .= "status = '".$formvars['status']."', ";
-		$sql .= "trigger_function = '" . $formvars['trigger_function'] . "', ";
-		$sql .= "sync = '" . $formvars['sync'] . "'";
+		$sql .= "trigger_function = '".$formvars['trigger_function']."', ";
+		$sql .= "sync = '".$formvars['sync']."', ";
+		$sql .= "listed = '".$formvars['listed']."'";
     $sql .= " WHERE Layer_ID = ".$formvars['selected_layer_id'];
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->updateLayer - Aktualisieren eines Layers:<br>".$sql,4);
@@ -16357,7 +16359,7 @@ class db_mapObj{
 					$sql .= "`Name_".$language."`, ";
 				}
 			}
-			$sql.="`alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `printconnection`, `connectiontype`, `classitem`, `classification`, `filteritem`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `status`, `trigger_function`, `sync`) VALUES(";
+			$sql.="`alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `printconnection`, `connectiontype`, `classitem`, `classification`, `filteritem`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `status`, `trigger_function`, `sync`, `listed`) VALUES(";
       if($formvars['id'] != ''){
         $sql.="'".$formvars['id']."', ";
       }
@@ -16458,8 +16460,9 @@ class db_mapObj{
       $sql .= "'".$formvars['datenherr']."', ";
       $sql .= "'".$formvars['metalink']."', ";
 			$sql .= "'".$formvars['status']."', ";
-			$sql .= "'" . $formvars['trigger_function'] . "', ";
-			$sql .= "'" . $formvars['sync'] . "'";
+			$sql .= "'".$formvars['trigger_function']."', ";
+			$sql .= "'".$formvars['sync']."', ";
+			$sql .= "'".$formvars['listed']."'";
       $sql .= ")";
 
     }
@@ -16862,7 +16865,7 @@ class db_mapObj{
 		return $datatypes;
 	}
 
-	function getall_Layer($order) {
+	function getall_Layer($order, $only_listed = false) {
 		global $language;
 		$sql ='SELECT ';
 		if($language != 'german') {
@@ -16874,11 +16877,13 @@ class db_mapObj{
 		}
 		$sql.='Gruppenname FROM layer, u_groups';
 		$sql.=' WHERE layer.Gruppe = u_groups.id';
+		if($only_listed)$sql.=' AND listed=1';
 		if($order != ''){$sql .= ' ORDER BY ' . replace_semicolon($order);}
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->getall_Layer - Lesen aller Layer:<br>".$sql,4);
 		$query=mysql_query($sql);
 		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
-		while($rs=mysql_fetch_array($query)) {
+		$i = 0;
+		while($rs=mysql_fetch_array($query)){
 			$layer['ID'][]=$rs['Layer_ID'];
 			$layer['Bezeichnung'][]=$rs['Name'];
 			$layer['Gruppe'][]=$rs['Gruppenname'];
@@ -16886,6 +16891,8 @@ class db_mapObj{
 			$layer['Kurzbeschreibung'][]=$rs['kurzbeschreibung'];
 			$layer['Datenherr'][]=$rs['datenherr'];
 			$layer['alias'][]=$rs['alias'];
+			$layer['layers_of_group'][$rs['Gruppe']][] = $i;
+			$i++;
 		}
 		if($order == 'Bezeichnung'){
 			// Sortieren der Layer unter Berücksichtigung von Umlauten

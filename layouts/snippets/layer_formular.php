@@ -374,6 +374,12 @@
 						<div id="TipSync" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 					</td>
 				</tr>
+				<tr>
+					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strListed; ?></th>
+					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
+						<input name="listed" type="checkbox" value="1"<?php if ($this->layerdata['listed']) echo ' checked'; ?>>
+					</td>
+				</tr>				
 			</table>
 			<br>
 
