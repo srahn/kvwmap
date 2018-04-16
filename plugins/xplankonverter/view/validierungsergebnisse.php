@@ -6,7 +6,6 @@ if ($this->Fehlermeldung!='') {
        include(LAYOUTPATH."snippets/Fehlermeldung.php");
 }
 ?>
-</div>
 <br>
 <script language="javascript" type="text/javascript">
 // formatter functions

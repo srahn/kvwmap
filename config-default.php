@@ -4,8 +4,8 @@
 #   Konfigurationsdatei zu kvwmap                                  #
 #                                                                  #
 ####################################################################
-# aktuelle Versionsnummer
-define('VERSION','2.7');
+
+#define('VERSION','2.7');						# in Version 2.8 gelöscht
 define('APPLVERSION','kvwmap/');
 # Bezeichnung der MySQL-Datenbank mit den Benutzerdaten
 $dbname='kvwmapdb';
