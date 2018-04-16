@@ -129,26 +129,15 @@ VALUES
 	)
 ;
 
+
 -- Fix References
-ALTER TABLE
-	xplan_gml.bp_einfahrtpunkt
-ALTER COLUMN
-	typ
-TYPE
-	xplan_gml.bp_einfahrttypen;
+ALTER TABLE xplan_gml.bp_einfahrtpunkt
+ALTER COLUMN typ TYPE xplan_gml.bp_einfahrttypen USING NULL;
 	
-ALTER TABLE
-	xplan_gml.bp_einfahrtsbereichlinie
-ALTER COLUMN
-	typ 
-TYPE
-	xplan_gml.bp_einfahrttypen;
+ALTER TABLE xplan_gml.bp_einfahrtsbereichlinie
+ALTER COLUMN typ  TYPE xplan_gml.bp_einfahrttypen USING NULL;
 	
-ALTER TABLE
-	xplan_gml.bp_technischemassnahmenflaeche
-ALTER COLUMN
-	zweckbestimmung
-TYPE
-	xplan_gml.bp_zweckbestimmungentmf;
+ALTER TABLE xplan_gml.bp_technischemassnahmenflaeche
+ALTER COLUMN zweckbestimmung TYPE xplan_gml.bp_zweckbestimmungentmf USING NULL;
 
 COMMIT;
