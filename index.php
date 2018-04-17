@@ -1553,37 +1553,6 @@ function go_switch($go){
 				$GUI->FunktionAendern();
 			} break;
 			
-			case 'help' : {
-				include(WWWROOT.APPLVERSION.'help/hilfe.php');
-			} break;
-
-			case 'hilfe_nachweisverw': {
-				include(WWWROOT.APPLVERSION.'help/hilfe_nachweisverw.php');
-			} break;
-
-			case 'hilfe_dokumente': {
-				include(WWWROOT.APPLVERSION.'help/hilfe_nachweisverw.php');
-			} break;
-
-			# Flurstuecksauswahl zum festlegen pot. Geothermie-Bohrpunkte
-			case 'Geothermie_Abfrage' : {
-				$GUI->geothermie_start();
-			} break;
-
-			# pot. Geothermie-Bohrpunkte festlegen und zu DB hinzufuegen
-			case 'Geothermie_Eingabe' : {
-				$GUI->geothermie_anfrage();
-			} break;
-
-			# Polygon/Versiegelung digitalisieren
-			case 'Versiegelung' : {
-				$GUI->versiegelungsFlaechenErfassung();
-			} break;
-
-			case 'Versiegelung_Senden' : {
-				$GUI->versiegelungsFlaechenSenden();
-			} break;
-
 			case "Ändern" : {
 				$GUI->loadMap('DataBase');
 				$GUI->scaleMap($GUI->formvars['nScale']);
