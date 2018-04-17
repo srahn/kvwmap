@@ -570,7 +570,7 @@ else {
 				</tr>
 				
 				<?php
-				if (SHOW_STELLE_HIERARCHIE) { ?>
+				if (false) { # deaktiviert, da noch in Entwicklung ?>
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 							<table border="0" cellspacing="0" cellpadding="0">
