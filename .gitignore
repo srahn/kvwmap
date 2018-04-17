@@ -9,7 +9,7 @@ graphics/custom/*
 plugins/*/config/config.php
 plugins/*/config/config.sh
 plugins/*/img/*
-plugins/wasserrecht/results/
+plugins/*/results/
 .settings
 .project
 .buildpath
