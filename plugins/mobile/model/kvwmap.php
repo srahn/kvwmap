@@ -36,10 +36,11 @@
 					# Zuordnen der Privilegien und Tooltips zu den Attributen
 					for ($j = 0; $j < count($attributes['name']); $j++) {
 						$attributes['privileg'][$j] = $attributes['privileg'][$attributes['name'][$j]] = ($privileges == NULL ? 0 : $privileges[$attributes['name'][$j]]);
-						$attributes['tooltip'][$j] = $attributes['tooltip'][$attributes['name'][$j]] = ($privileges == NULL ? 0 : $privileges['tooltip_' . $attributes['name'][$j]]);
+						#$attributes['tooltip'][$j] = $attributes['tooltip'][$attributes['name'][$j]] = ($privileges == NULL ? 0 : $privileges['tooltip_' . $attributes['name'][$j]]);
 					}
-
 					$layer = $this->mobile_reformat_layer($layerset[0]);
+					$attributes = $mapDB->add_attribute_values($attributes, $layerdb, array(), true, $this->Stelle->ID);
+
 					$layer['attributes'] = $this->mobile_reformat_attributes($attributes);
 					$mobile_layers[] = $layer;
 				}
@@ -177,6 +178,7 @@
 		$layer = array(
 			"id" => $layerset['Layer_ID'],
 			"title" => $layerset['Name'],
+			"alias" => $layerset['alias'],
 			"id_attribute" => "id",
 			"name_attribute" => $layerset['labelitem'],
 			"title_attribute" => "title",
@@ -192,6 +194,16 @@
 	$this->mobile_reformat_attributes = function($attr) {
 		$attributes = array();
 		foreach($attr['name'] AS $key => $value) {
+			if ($attr['enum_value'][$key]) {
+				$attr['options'][$key] = array();
+				foreach($attr['enum_value'][$key] AS $enum_key => $enum_value) {
+					$attr['options'][$key][] = array(
+						'value' => $attr['enum_value'][$key][$enum_key],
+						'output' => $attr['enum_output'][$key][$enum_key]
+					);
+				}
+			}
+
 			$attributes[] = array(
 				"index" => $attr['indizes'][$value],
 				"name" => $value,
@@ -202,7 +214,8 @@
 				"nullable" => $attr['nullable'][$key],
 				"form_element_type" => $attr['form_element_type'][$key],
 				"options" => $attr['options'][$key],
-				"privilege" => $attr['privileg'][$key]
+				"privilege" => $attr['privileg'][$key],
+				"default" => $attr['default'][$key]
 			);
 		}
 		return $attributes;

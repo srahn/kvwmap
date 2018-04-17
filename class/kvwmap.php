@@ -12383,7 +12383,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							$sql .= " WHERE";
 
 							if ($this->plugin_loaded('mobile') AND array_key_exists('uuid', $attributes)) {
-								$sql .= " uuid = '" . $attributes['uuid'] . "'";
+								$sql .= " uuid = '" . $attributes['uuid']['value'] . "'";
 							}
 							else {
 								$sql .= " oid = " . $oid;
