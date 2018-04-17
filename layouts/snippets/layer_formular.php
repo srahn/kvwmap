@@ -12,6 +12,7 @@
 	Text[5]=["Hilfe:","Für einen Layer lassen sich verschiedene Klassifizierungen erstellen. Klassen mit dem gleichen Eintrag im Klassen-Feld \"Klassifizierung\" gehören zu einer Klassifizierung. Welche Klassifizierung in einem Layer verwendet wird, wird über das Layer-Feld \"Klassifizierung\" festgelegt."];
 	Text[6]=["Hilfe:","Wird hier der Name einer Grafikdatei aus dem Ordner <?php echo GRAPHICSPATH; ?>custom angegeben, wird diese Grafik an Stelle der vom MapServer erzeugten Grafik in der Legende angezeigt. Außerdem kann hier die Höhe und Breite der Legendengrafik angegeben werden."];
 	Text[7]=["Hilfe:","Hier kann die Zeichenreihenfolge in der Karte und optional eine abweichende Reihenfolge für die Legende festgelegt werden."];
+	Text[8]=["Hilfe:","Hier kann<br>1. ein Klassenname,<br>2. eine Variable gefolgt von einem $-Zeichen, die ein Attributnamen bezeichnet und den Klassennamen repräsentiert oder<br>3. ein SELECT Statement angegeben werden, welches den Klassennahmen für den jeweiligen Datensatz abfragt."];
 	
 	function testConnection() {
 		if (document.getElementById('connectiontype').value == 7) {
@@ -242,6 +243,14 @@
 					</td>
 				</tr>
 				<tr>
+					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDataSetStyle; ?></th>
+					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
+							<input name="dataset_style" type="text" value="<?php echo $this->layerdata['dataset_style']; ?>" size="25" maxlength="100">
+							<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[8], Style[8], document.getElementById('TipLayer9'))" onmouseout="htm()">
+							<div id="TipLayer9" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+					</td>
+				</tr>
+				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strClassification; ?></th>
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<input name="layer_classification" type="text" value="<?php echo $this->layerdata['classification']; ?>" size="25" maxlength="50">
@@ -344,6 +353,33 @@
 							<input name="trigger_function" type="text" value="<?php echo $this->layerdata['trigger_function']; ?>" size="25" maxlength="100">
 					</td>
 				</tr>
+				<tr>
+					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strSync; ?></th>
+					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
+						<input name="sync" type="checkbox" value="1"<?php if ($this->layerdata['sync']) echo ' checked'; ?>>
+						<img
+							src="<?php echo GRAPHICSPATH;?>icon_i.png"
+							onMouseOver="
+								stm(
+									[
+										'<?php echo $strHelp; ?>:',
+										'<?php echo $strSyncHelp; ?>'
+									],
+									Style[0],
+									$('#TipSync')[0]
+								);
+							"
+							onmouseout="htm()"
+						>
+						<div id="TipSync" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+					</td>
+				</tr>
+				<tr>
+					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strListed; ?></th>
+					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
+						<input name="listed" type="checkbox" value="1"<?php if ($this->layerdata['listed']) echo ' checked'; ?>>
+					</td>
+				</tr>				
 			</table>
 			<br>
 
@@ -378,6 +414,12 @@
 							<input name="drawingorder" type="text" value="<?php echo $this->layerdata['drawingorder']; ?>" size="25" maxlength="15">
 					</td>
 				</tr>
+				<tr>
+					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLegendOrder; ?></th>
+					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
+							<input name="legendorder" type="text" value="<?php echo $this->layerdata['legendorder']; ?>" size="25" maxlength="15">
+					</td>
+				</tr>				
 				<tr>
 					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strminscale; ?></th>
 					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
@@ -639,16 +681,19 @@
 								<?php echo $strLegend; ?>:&nbsp;
 							</td>
 							<td>
-								<input size="3" type="text" name="legendorder[<?php echo $this->classes[$i]['Class_ID']; ?>]" value="<?php echo $this->classes[$i]['legendorder']; ?>">
+								<input size="3" type="text" name="classlegendorder[<?php echo $this->classes[$i]['Class_ID']; ?>]" value="<?php echo $this->classes[$i]['legendorder']; ?>">
 							</td>
 						</tr>
 					</table>
-				</td>
+				</td>				
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">
+					<? if($this->layerdata['editable']){ ?>
 					<a href="javascript:Bestaetigung('index.php?go=Layereditor_Klasse_Löschen&class_id=<?php echo $this->classes[$i]['Class_ID']; ?>&selected_layer_id=<?php echo $this->formvars['selected_layer_id']; ?>#Klassen',	'<?php echo $this->strDeleteWarningMessage; ?>');"><?php echo $this->strDelete; ?></a>
+					<? } ?>
 				</td>
 			</tr><?php
 			}
+			if($this->layerdata['editable']){
 			?>
 			<tr>
 				<td style="border-bottom:1px solid #C3C7C3" colspan="10">
@@ -705,6 +750,7 @@
 					</div>
 				</td>
 			</tr>
+			<? } ?>
 			<tr>
 				<td colspan="10"><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>">Styles und Labels bearbeiten</a></td>
 			</tr>
@@ -722,10 +768,12 @@
 		<td align="center">
 			<input type="hidden" name="go_plus" id="go_plus" value="">
 			<input type="button" name="dummy2" value="<?php echo $this->strButtonBack; ?>" onclick="location.href='index.php?go=Layer_Anzeigen'">&nbsp;<?php
-		 if ($this->formvars['selected_layer_id']>0) { ?>
+		 if ($this->formvars['selected_layer_id'] > 0) { ?>
 			<input type="hidden" name="selected_layer_id" value="<?php echo $this->formvars['selected_layer_id']; ?>">
+			<? if($this->layerdata['editable']){ ?>
 			<input type="button" name="dummy" value="<?php echo $strButtonSave; ?>" onclick="submitWithValue('GUI','go_plus','Ändern')">
-			<?php
+			<?
+			}
 		 } ?>&nbsp;<input type="button" name="dummy" value="<?php echo $strButtonSaveAsNewLayer; ?>" onclick="submitWithValue('GUI','go_plus','Als neuen Layer eintragen')">		 
 		</td>
 		<td valign="top">

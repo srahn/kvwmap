@@ -1,6 +1,6 @@
-<table width="100%" border="0" cellpadding="0" cellspacing="0" class="legend-switch">
+<table width="100%" border="0" cellpadding="0" cellspacing="0" id="legend_switch">
 	<tr>
-		<td bgcolor="<?php echo BG_DEFAULT ?>" align="left"><?php
+		<td align="left"><?php
 			if ($this->user->rolle->hideLegend) {
 				if (ie_check()){$display = 'none';}
 				?><a id="linkLegend" href="javascript:switchlegend()"><img title="Legende zeigen" id="LegendMinMax" src="<?php  echo GRAPHICSPATH; ?>maximize_legend.png" border="0"></a><?php
@@ -26,13 +26,68 @@ if ($show_legend_graphic) { ?>
 </div><?php
 } ?>
 <div id="legend_layer">
+	<div class="button_background" style="box-shadow: none; border-bottom: 1px solid #bbb">
 	<?	if(defined('LAYER_ID_SCHNELLSPRUNG') AND LAYER_ID_SCHNELLSPRUNG != ''){
 				include(SNIPPETS.'schnellsprung.php');
 			} ?>
 	<div id="legendcontrol">
-		<a href="index.php?go=reset_querys"><img src="graphics/tool_info.png" border="0" alt="<? echo $strInfoQuery; ?>" title="<? echo $strInfoQuery.' | '.$strClearAllQuerys; ?>" width="17" style="vertical-align: bottom;"></a>
-		<a href="index.php?go=reset_layers"><img src="graphics/layer.png" border="0" alt="<? echo $strLayerControl; ?>" title="<? echo $strLayerControl.' | '.$strDeactivateAllLayer; ?>" width="20" height="20" style="vertical-align: bottom;"></a>
-		<input type="submit" name="neuladen_button" onclick="startwaiting(true);document.GUI.go.value='neu Laden';" value="<?php echo $strLoadNew; ?>" tabindex="1" style="vertical-align: top; margin-left: 25px">			
+		<a href="index.php?go=reset_querys">
+			<div>
+				<div class="button tool_info" style="width: 26px; height: 26px" title="<? echo $strClearAllQuerys; ?>"></div>
+			</div>
+		</a>
+		<a href="index.php?go=reset_layers">
+			<div>
+				<div class="button layer" style="width: 26px; height: 26px" title="<? echo $strDeactivateAllLayer; ?>"></div>
+			</div>
+		</a>
+		<input type="submit" name="neuladen_button" onclick="if(checkForUnsavedChanges()){startwaiting(true);document.GUI.go.value='neu Laden';}" value="<?php echo $strLoadNew; ?>" tabindex="1" style="height: 27px; vertical-align: top; margin-left: 30px">
+		<i id="legendOptionsIcon" class="fa fa-bars pointer button" title="<? echo $strLegendOptions; ?>" onclick="openLegendOptions();"></i>
+		<div id="legendOptions">
+			<div style="position: absolute;top: 0px;right: 0px"><a href="javascript:closeLegendOptions(159);" title="Schlie&szlig;en"><img style="border:none" src="graphics/exit2.png"></img></a></div>
+			<table cellspacing="0" cellpadding="0" style="padding: 0 5 8 0">
+				<tr>
+					<td id="legendOptionsHeader">
+						<span class="fett"><? echo $strLegendOptions; ?></span>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<ul>
+							<li>
+								<span><? echo $strLegendType; ?>:</span><br>
+								<label><input type="radio" name="legendtype" value="0" <? if($this->user->rolle->legendtype == 0)echo 'checked'; ?>><? echo $strLegendTypeGroups; ?></label><br>
+								<label><input type="radio" name="legendtype" value="1" <? if($this->user->rolle->legendtype == 1)echo 'checked'; ?>><? echo $strLegendTypeAlphabetical; ?></label>
+							</li>
+							<li>
+								<a href="javascript:toggleDrawingOrderForm();"><? echo $strDrawingOrder; ?></a>
+								<div id="drawingOrderForm"></div>
+							</li>
+					</td>
+				</tr>
+				<tr>
+					<td align="center">
+						<table cellspacing="0" cellpadding="0">
+							<tr>
+								<td>
+									<input type="button" onmouseup="resetLegendOptions()" value="<? echo $this->strReset; ?>">
+								</td>
+								<td>
+									<input type="button" onmouseup="saveLegendOptions()" value="<? echo $this->strSave; ?>">
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+	<? if($this->user->rolle->legendtype == 1){ # alphabetisch sortierte Legende ?>
+	<div id="layersearchdiv">
+		<? echo $strLayerSearch; ?>
+		<input type="text" autocomplete="off" id="layer_search" onkeyup="jumpToLayer(this.value);" value="">
+	</div>
+	<? } ?>
 	</div>
 	<div id="scrolldiv" onscroll="document.GUI.scrollposition.value = this.scrollTop; scrollLayerOptions();">
 		<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">

@@ -20,6 +20,9 @@ if ($anzLayer==0) {
 	<?php	
 }
 for($i=0;$i<$anzLayer;$i++){
+	if($i > 0){
+		echo '<hr style="width: 100%; height: 3px; margin: 15 0; color: '.BG_GLEHEADER.'; background: '.BG_GLEHEADER.';">';
+	}
 	if ($this->qlayerset[$i]['template']=='') {
    	if(GLEVIEW == '2'){
     	include(SNIPPETS.'generic_layer_editor_2.php');			# Attribute zeilenweise
@@ -140,7 +143,7 @@ for($i=0;$i<$anzLayer;$i++){
 								if(document.getElementById('savebutton') != undefined)document.getElementById('savebutton').style.display = 'block';
 							</script>
 				<?  }else{ ?>
-							<input type="button" class="button" name="savebutton" value="<? echo $strSave; ?>" onclick="save();">
+							<input type="button" name="savebutton" value="<? echo $strSave; ?>" onclick="save();">
 				<? 	}
 					}?>
 			</td>
@@ -220,7 +223,7 @@ for($i=0;$i<$anzLayer;$i++){
 	<input name="INPUT_COORD" type="hidden" value="<?php echo $this->formvars['INPUT_COORD']; ?>">
   <INPUT TYPE="HIDDEN" NAME="searchradius" VALUE="<?php echo $this->formvars['searchradius']; ?>">
   <input name="CMD" type="hidden" value="<?php echo $this->formvars['CMD']; ?>">
-	<? if($this->currentform != 'document.GUI2'){ ?>
+	<? if($this->formvars['printversion'] == '' AND $this->currentform != 'document.GUI2'){ ?>
   <table width="100%" border="0" cellpadding="2" cellspacing="0" id="sachdatenanzeige_footer">
     <tr bgcolor="<?php echo BG_DEFAULT ?>" align="center">
       <td><a href="index.php?searchradius=<?php echo $this->formvars['searchradius']; ?>"><? echo $strbacktomap;?></a></td>
@@ -230,7 +233,7 @@ for($i=0;$i<$anzLayer;$i++){
 </div>
 <input type="hidden" name="titel" value="<? echo $this->formvars['titel'] ?>">
 <input type="hidden" name="width" value="">
-<input type="hidden" name="document_attributename" value="">
+<input type="hidden" name="delete_documents" value="">
 <input type="hidden" name="map_flag" value="<? echo $this->formvars['map_flag']; ?>">
 <input name="newpath" type="hidden" value="<?php echo $this->formvars['newpath']; ?>">
 <input name="pathwkt" type="hidden" value="<?php echo $this->formvars['newpathwkt']; ?>">

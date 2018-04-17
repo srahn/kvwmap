@@ -105,9 +105,26 @@ class antrag {
   function DokumenteInOrdnerZusammenstellen($nachweis){
 		$antragsnr = $this->nr;
 		if($this->stelle_id != '')$antragsnr.='~'.$this->stelle_id;
-    $auftragspfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Nachweise/';
-    # Erzeuge ein Unterverzeichnis für die Nachweisdokumente
+    $auftragspfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Nachweise/';	# Erzeuge ein Unterverzeichnis für die Nachweisdokumente
     mkdir ($auftragspfad,0777);
+		$vorschaupfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Vorschaubilder/';	# Erzeuge ein Unterverzeichnis für die Vorschaubilder
+    mkdir ($vorschaupfad,0777);
+		$nachweiseUKOpfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Nachweise-UKO/';	# Erzeuge ein Unterverzeichnis für die Nachweis-UKOs
+    mkdir ($nachweiseUKOpfad,0777);
+		$uebersichtspfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/';	# Erzeuge ein Unterverzeichnis für die Protokoll- und Übersichtsdateien
+    mkdir ($uebersichtspfad,0777);
+		$gesamtpolygonpfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Gesamtpolygon/';	# Erzeuge ein Unterverzeichnis für die Gesamtpolygondateien
+    mkdir ($gesamtpolygonpfad,0777);
+		$gesamtpolygonSHPpfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Gesamtpolygon/Shape/';	# Erzeuge ein Unterverzeichnis für die Gesamtpolygondateien
+    mkdir ($gesamtpolygonSHPpfad,0777);
+		$gesamtpolygonUKOpfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Gesamtpolygon/UKO/';	# Erzeuge ein Unterverzeichnis für die Gesamtpolygondateien
+    mkdir ($gesamtpolygonUKOpfad,0777);
+		$gesamtpolygonGMLpfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Gesamtpolygon/GML/';	# Erzeuge ein Unterverzeichnis für die Gesamtpolygondateien
+    mkdir ($gesamtpolygonGMLpfad,0777);
+		$gesamtpolygonGeoJSONpfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Gesamtpolygon/GeoJSON/';	# Erzeuge ein Unterverzeichnis für die Gesamtpolygondateien
+    mkdir ($gesamtpolygonGeoJSONpfad,0777);
+		$gesamtpolygonDXFpfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Gesamtpolygon/DXF/';	# Erzeuge ein Unterverzeichnis für die Gesamtpolygondateien
+    mkdir ($gesamtpolygonDXFpfad,0777);
     # Führe in Schleif für alle zum Auftrag gehörenden Dokumente folgendes aus
     for ($i=0; $i<$nachweis->erg_dokumente;$i++){
       # Erzeuge ein Unterverzeichnis für die Flur des Dokumentes, wenn noch nicht vorhanden
@@ -135,6 +152,7 @@ class antrag {
       # Pfad zum Ziel erstellen
       $ziel=$auftragspfad.$flurid.'/'.$nr.'/'.$nachweis->Dokumente[$i]['link_datei'];
       #echo '<br>von:'.$quelle.' nach:'.$ziel;
+			$dateinamensteil = explode('.', $nachweis->Dokumente[$i]['link_datei']);
       if (!file_exists($quelle)) {
         $errmsg.='Die Datei '.$quelle.' existiert nicht.\n';
       }
@@ -146,6 +164,18 @@ class antrag {
             # Es konnte aus irgendeinem Grund nicht erfolgreich kopiert werden
             $errmsg.='Die Datei '.$ziel.' konnte nicht erstellt werden.\n';
           }
+					else{	
+						# Vorschaubild kopieren
+						$vorschaudatei = $dateinamensteil[0].'_thumb.jpg';
+						$quelle=$quellpfad.$vorschaudatei;
+						$erfolg=copy($quelle,$vorschaupfad.basename($vorschaudatei));
+						# Nachweis-UKOs erzeugen
+						$uko = WKT2UKO($nachweis->Dokumente[$i]['wkt_umring']);
+						$ukofile = $nachweiseUKOpfad.basename($dateinamensteil[0]).'.uko';
+						$fp = fopen($ukofile, 'w');
+						fwrite($fp, $uko);
+						fclose($fp);
+					}
         }
         else{
           # Die Datei, die kopiert werden soll existiert schon am ziel.
@@ -200,28 +230,37 @@ class antrag {
 			return $errmsg;     
 		}
   }  
-  	
-  function erzeugenUbergabeprotokoll_PDF() {
+  
+	function Seitenkopf(&$pdf, $row_start){
+		$pdf->ezSetMargins(0,0,0,0);
+		$pages = $pdf->objects['3']['info']['pages'];
+		$pagecount = count($pages);
+		for($i = 0; $i < $pagecount; $i++){
+			$row = $row_start;
+			$pagenumber = $i + 1;
+			$pdf->reopenObject($pages[$i]+1);		# die Page-IDs sind komischerweise alle um 1 größer
+			$pdf->addText(395,10,10, 'Seite '.$pagenumber.' von '.$pagecount);
+			$pdf->addText(748,$row+10,14, date('d.m.Y',time()));
+			$pdf->addText(100,$row-=12,20,'<b>Anlage der Vermessungsvorbereitung zur Auftragsnummer '.$this->nr.'</b>');
+			$pdf->addText(330,$row-=20,16,utf8_decode('Liste der ausgegebenen Unterlagen'));
+			$row-=3; $pdf->line(330,$row,557,$row);
+			$row-=3; $pdf->line(330,$row,557,$row);
+		}
+	}
+	
+  function erzeugenUbergabeprotokoll_PDF(){
     $pdf=new Cezpdf('A4', 'landscape');
     $tmp = array('b'=>'Times-Bold.afm','i'=>'Times-Italic.afm','bi'=>'Times-BoldItalic.afm');
-    $row=560;
+		$pageheight = 595;
+		$margin = 40;
+    $row = $pageheight - $margin;
+		$table_row = $row - 60;
+		$table_margin = $pageheight - $table_row;
     $rowGap=3;
     $colGap=3;
-    $pdf->selectFont(WWWROOT . APPLVERSION . 'fonts/PDFClass/Times-Roman.afm',$tmp);
-    $pdf->addText(100,$row-=12,20,'<b>Anlage der Vermessungsvorbereitung zur Auftragsnummer '.$this->nr.'</b>');
-    $pdf->addText(330,$row-=20,16,utf8_decode('Liste der Fortführungsrisse'));
-    $row-=3; $pdf->line(330,$row,505,$row);
-    $row-=3; $pdf->line(330,$row,505,$row);
-    
-    $rowtab=$row-=15;
-
-    $anzTab=0;
-    for ($i=0;$i<count($this->FFR);$i++) {
-      $row=$row-18;
-      $tabledata[$anzTab][]=$this->FFR[$i];
-      if ($row < 100) { $anzTab++; $row=560;}
-    }
-        
+		$pdf->ezSetMargins($table_margin,30,30,30);
+    $pdf->selectFont(WWWROOT . APPLVERSION . 'fonts/PDFClass/Times-Roman.afm',$tmp);		
+            
     $cols='';
     $title='';
     # Konfiguration der Tabelle
@@ -234,55 +273,25 @@ class antrag {
     $options['cols']['KVZ']=array('justification'=>'centre');
     $options['cols']['GN']=array('justification'=>'centre');
     $options['cols']['andere']=array('justification'=>'centre');
-    $options['cols']['Datum']=array('justification'=>'left','width'=>75);
-		$options['cols']['Datei']=array('justification'=>'left','width'=>200);
+		$options['cols']['Datei']=array('justification'=>'left','width'=>210);
     $options['cols']['gemessen durch']=array('justification'=>'left');
-    $options['cols'][utf8_decode('Gültigkeit')]=array('justification'=>'centre','width'=>60);
-    $pdf->ezSetY($rowtab);
-    $pdf->ezTable($tabledata[0],$cols,$title,$options);
-    $zahl=$anzTab+1;
-    $pdf->addText(395,10,10,"Seite 1 von $zahl");
-    for ($j=1;$j<=$anzTab;$j++){
-      $row=560; $k=$j+1;
-      $pdf->ezNewPage();
-      $pdf->ezSetY(560);
-      $pdf->addText(285,$row-=20,16,'<b>weiter zur Auftragsnummer '.$this->nr.'</b>');
-      $pdf->addText(330,$row-=20,16,utf8_decode('Liste der Fortführungsrisse'));
-      $row-=3; $pdf->line(330,$row,505,$row);
-      $row-=3; $pdf->line(330,$row,505,$row);
-      $pdf->ezSetY($row-=15);
-      $pdf->ezTable($tabledata[$j],$cols,$title,$options);
-      $pdf->addText(395,10,10,"Seite $k von $zahl");
-    }
+    $options['cols'][utf8_decode('Gültigkeit')]=array('justification'=>'centre','width'=>62);
+    $pdf->ezSetY($table_row);
+    $pdf->ezTable($this->FFR,$cols,$title,$options);
+		
+		$this->Seitenkopf($pdf, $row);
+		
     return $pdf;
   }
-  
-  function erzeugenUbergabeprotokoll_CSV(){
-  	# Überschriften
-  	foreach($this->FFR[0] as $key=>$value){
-  		$csv .= utf8_encode($key).';';
-  		next($this->FFR[0]);
-  	}
-  	$csv.= chr(10);
-  	# Daten
-  	for($i=0; $i < count($this->FFR); $i++){
-  		$dateien = explode(', ', $this->FFR[$i]['Datei']);
-  		foreach($dateien as $datei){
-  			$this->FFR[$i]['Datei'] = $datei;
-  			$csv .= utf8_encode(implode(';', $this->FFR[$i]));
-  			$csv.= chr(10);
-  		}
-    }
-    return $csv;
-  }
-    
+  	    
   function getAntraege($id,$nr,$richtung,$order,$current_stelle_id) {
 		global $admin_stellen;
     $sql ="SELECT a.*,a.vermstelle,va.art AS vermart,vs.name AS vermst";
     $sql.=" ,SUBSTRING(a.antr_nr from 1 for 2) AS antr_nr_a";
     $sql.=" ,SUBSTRING(a.antr_nr from 4 for 4) AS antr_nr_b";
-    $sql.=" FROM nachweisverwaltung.n_antraege AS a, nachweisverwaltung.n_vermstelle AS vs, nachweisverwaltung.n_vermart AS va";
-    $sql.=" WHERE a.vermstelle=vs.id AND a.vermart=va.id";
+    $sql.=" FROM nachweisverwaltung.n_antraege AS a";
+		$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle vs ON a.vermstelle=vs.id";
+    $sql.=" LEFT JOIN nachweisverwaltung.n_vermart va ON a.vermart=va.id WHERE 1=1";
     if ($id[0]!='') {
       $sql.=" AND a.antr_nr IN ('".$id[0]."'";
       for ($i=1;$i<count($id);$i++) {
@@ -326,6 +335,44 @@ class antrag {
     }
     return $ret;
   }
+	
+	function getIntersectedFlst(){	# diese Verschneidung mit den Flurstücken kann u.U. sehr lange dauern, deswegen erstmal zurückgestellt
+		$this->spatial_ref_code = EPSGCODE_ALKIS.", ".EARTH_RADIUS;
+		$sql ="SELECT flurid, stammnr, rissnummer, ";
+		if(NACHWEIS_SECONDARY_ATTRIBUTE != '')$sql.=" ".NACHWEIS_SECONDARY_ATTRIBUTE.",";
+		$sql.=" flurstueckskennzeichen,";
+		$sql.=" round(inter::numeric) as anteil_abs,";
+		$sql.=" round((inter / f_area * 100)::numeric, 1) as anteil_pro";
+		$sql.=" from (";
+		$sql.=" SELECT DISTINCT n.flurid, n.stammnr, n.rissnummer, f.flurstueckskennzeichen,";
+		if(NACHWEIS_SECONDARY_ATTRIBUTE != '')$sql.=" n.".NACHWEIS_SECONDARY_ATTRIBUTE.",";
+		$sql.=" st_area(st_intersection(st_transform(n.the_geom, 25833), f.wkb_geometry)) as inter,";
+		$sql.=" st_area(f.wkb_geometry) as f_area";
+		$sql.=" FROM alkis.ax_flurstueck f,";
+		$sql.=" (SELECT n.flurid, n.stammnr, n.art, n.blattnummer, n.rissnummer, n.the_geom";
+		if(NACHWEIS_SECONDARY_ATTRIBUTE != '')$sql.=", n.".NACHWEIS_SECONDARY_ATTRIBUTE;		
+		$sql.=" FROM nachweisverwaltung.n_nachweise2antraege AS n2a, nachweisverwaltung.n_nachweise AS n";
+		$sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id";
+		$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n2d.dokumentart_id = d.id";
+		$sql.=" WHERE  n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
+		if($this->stelle_id == '')$sql.=" AND stelle_id IS NULL";
+		else $sql.=" AND stelle_id=".$this->stelle_id;    
+		$sql.=" AND (n.art < '111' OR d.geometrie_relevant)";
+		$sql.=" )as n";
+		$sql.=" WHERE f.endet is null";
+		$sql.=" AND st_intersects(st_transform(n.the_geom, ".EPSGCODE_ALKIS."), f.wkb_geometry)";
+		$sql.=" order by n.flurid,n.stammnr,n.rissnummer,f.flurstueckskennzeichen) as foo";
+		#echo $sql;
+		$ret=$this->database->execSQL($sql,4, 0); 
+    while($rs=pg_fetch_assoc($ret[1])){
+			$rs['stammnr'] = utf8_decode($rs['stammnr']);
+			$rs['rissnummer'] = utf8_decode($rs['rissnummer']);		
+			$rs['anteil_abs'] = str_replace('.', ',', $rs['anteil_abs']);
+			$rs['anteil_pro'] = str_replace('.', ',', $rs['anteil_pro']);
+			$intersections[] = $rs;
+		}
+		return $intersections;
+	}
     
   function getFFR($formvars, $withFileLinks = false) {
     # Abfrage der Vorgänge, die zu einem Auftrag zugeordnet sind
@@ -339,13 +386,15 @@ class antrag {
     # Dieser Vorgang ist hier mit der Variable FFR belegt, weil zu einem Vorgang
     # meistens mindestens ein Fortführungsriss gehört.
     $this->debug->write('nachweis.php getFFR Abfragen der Risse zum Antrag.',4);                
-    $sql ="SELECT DISTINCT n.flurid,n.stammnr,n.rissnummer";
+    $sql ="SELECT DISTINCT max(datum) as datum, n.flurid, n.".NACHWEIS_PRIMARY_ATTRIBUTE;
 		if(NACHWEIS_SECONDARY_ATTRIBUTE != '')$sql.=",n.".NACHWEIS_SECONDARY_ATTRIBUTE." ";
     $sql.=" FROM nachweisverwaltung.n_nachweise AS n, nachweisverwaltung.n_nachweise2antraege AS n2a";
     $sql.=" WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
 		if($this->stelle_id == '')$sql.=" AND stelle_id IS NULL";
 		else $sql.=" AND stelle_id=".$this->stelle_id;
-    if($formvars['order'] != '')$sql.=" ORDER BY ".$formvars['order'];
+		$sql.=" GROUP BY n.flurid, n.".NACHWEIS_PRIMARY_ATTRIBUTE;
+		if(NACHWEIS_SECONDARY_ATTRIBUTE != '')$sql.=",n.".NACHWEIS_SECONDARY_ATTRIBUTE." ";
+    $sql.=" ORDER BY datum";
 		if(NACHWEIS_SECONDARY_ATTRIBUTE != '' AND $formvars['order'] == NACHWEIS_PRIMARY_ATTRIBUTE)$sql.=", ".NACHWEIS_SECONDARY_ATTRIBUTE;
     #echo $sql;
     $ret=$this->database->execSQL($sql,4, 0);    
@@ -354,14 +403,19 @@ class antrag {
     $i=0;
     while($rs=pg_fetch_array($query_id)) {      
       if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){
-      	if($formvars['Riss-Nummer'])$FFR[$i]['Riss-Nummer']=$rs['flurid'].'/'.$rs['rissnummer'];
-				if(NACHWEIS_SECONDARY_ATTRIBUTE != '')$FFR[$i]['Riss-Nummer'] .= ' - '.$rs[NACHWEIS_SECONDARY_ATTRIBUTE];
-      	if($formvars['Antrags-Nummer'])$FFR[$i]['Antrags-Nummer']=$rs['stammnr'];
+      	if($formvars['Riss-Nummer'])$FFR[$i]['Rissnummer']=$rs['flurid'].'/'.$rs['rissnummer'];
+				if(NACHWEIS_SECONDARY_ATTRIBUTE != '')$FFR[$i]['Rissnummer'] .= ' - '.$rs[NACHWEIS_SECONDARY_ATTRIBUTE];
       }
       else{
-      	if($formvars['Antrags-Nummer'])$FFR[$i]['Antrags-Nummer']=$rs['flurid'].'/'.str_pad($rs['stammnr'],ANTRAGSNUMMERMAXLENGTH,'0',STR_PAD_LEFT);
-      	if($formvars['Riss-Nummer'])$FFR[$i]['Riss-Nummer']=$rs['rissnummer'];
+      	if($formvars['Antrags-Nummer'])$FFR[$i]['Antragsnummer']=$rs['flurid'].'/'.str_pad($rs['stammnr'],ANTRAGSNUMMERMAXLENGTH,'0',STR_PAD_LEFT);
       }
+			
+      # Abfrage der Riss-/Stammnummern (des nicht primären Ordnungskriteriums)
+			$ret=$this->getNotPrimary($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
+			if ($ret[0]) { return $ret; }
+			if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer')$not_primary = 'Antragsnummer';
+			else $not_primary = 'Rissnummer';
+			$FFR[$i][$not_primary]=$ret[1];
 
       # Abfrage der Anzahl der FFR zum Vorgang
       if($formvars['FFR']){
@@ -390,26 +444,19 @@ class antrag {
 	      if ($ret[0]) { return $ret; }
 	      $FFR[$i]['andere']=$ret[1];
       }            
-            
-      # Abfrage der Datumsangaben im Vorgang
-      if($formvars['Datum']){
-	      $ret=$this->getDatum($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
-	      if ($ret[0]) { return $ret; }
-	      $FFR[$i]['Datum']=$ret[1];
-      }
       
     	# Abfrage der Dateinamen im Vorgang
       if($formvars['Datei']){
 	      $ret=$this->getDatei($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE], $withFileLinks);
 	      if ($ret[0]) { return $ret; }
-				$FFR[$i]['Datei'] = $ret[1];
+				$FFR[$i]['Datei - Datum'] = $ret[1];
       }
 
       # Abfrage der Vermessungsstellen im Vorgang
       if($formvars['gemessendurch']){
 	      $ret=$this->getVermessungsStellen($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
 	      if ($ret[0]) { return $ret; }
-	      $FFR[$i]['gemessen durch']=utf8_decode($ret[1]); 
+	      $FFR[$i]['gemessen durch']=utf8_decode($ret[1]);
       }
             
       # Abfrage der Gültigkeiten der Dokumente im Vorgang
@@ -425,36 +472,31 @@ class antrag {
     $this->FFR=$FFR;
     return $ret;
   }
-  
-  function getDatum($flurid,$nr,$secondary) {
-    $this->debug->write('<br>nachweis.php getDatum Abfragen der Datum zu einem Vorgang in der Nachweisführung.',4);
-    # Abfragen der Datum zu einem Vorgang in der Nachweisführung
-    $sql.="SELECT n.datum FROM nachweisverwaltung.n_nachweise AS n";		
-		if ($this->nr!='') {
-      $sql.=",nachweisverwaltung.n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
-    }
-    else {
-      $sql.=" WHERE (1=1)";
-    }
-    $sql.=" AND n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
+	
+	function getNotPrimary($flurid,$primary,$secondary){
+		if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer')$not_primary = 'stammnr';
+		else $not_primary = 'rissnummer';
+    $this->debug->write('<br>antrag.php getNotPrimary Abfragen der NotPrimary zu einem Vorgang in der Nachweisführung.',4);
+    $sql.="SELECT ".$not_primary." FROM nachweisverwaltung.n_nachweise AS n";
+		$sql.=",nachweisverwaltung.n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
+    $sql.=" AND n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$primary."'";
     if($secondary != '')$sql.=" AND n.".NACHWEIS_SECONDARY_ATTRIBUTE."='".$secondary."'";
-		$sql.= "order by datum";
+		$sql.= "order by art, blattnummer";
     $ret=$this->database->execSQL($sql,4, 0);
     if (!$ret[0]) {
-      $rs=pg_fetch_array($ret[1]);
-      $datum=$rs['datum'];  
       while($rs=pg_fetch_array($ret[1])) {
-        $datum.=', '.$rs['datum'];
+        $notPrimary[] = utf8_decode($rs[$not_primary]);
       }
-      $ret[1]=$datum;
+			if(count(array_unique($notPrimary)) == 1)$ret[1] = $notPrimary[0];
+      else $ret[1] = implode(chr(10), $notPrimary);
     }     
     return $ret;  
   }
-  
+    
 	function getDatei($flurid,$nr,$secondary, $withFileLinks) {
     $this->debug->write('<br>nachweis.php getDatei Abfragen der Dateien zu einem Vorgang in der Nachweisführung.',4);
     # Abfragen der Datum zu einem Vorgang in der Nachweisführung
-    $sql.="SELECT n.link_datei FROM nachweisverwaltung.n_nachweise AS n";
+    $sql.="SELECT n.link_datei, datum FROM nachweisverwaltung.n_nachweise AS n";
     if ($this->nr!='') {
       $sql.=",nachweisverwaltung.n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
     }
@@ -463,17 +505,14 @@ class antrag {
     }
     $sql.=" AND n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
     if($secondary != '')$sql.=" AND n.".NACHWEIS_SECONDARY_ATTRIBUTE."='".$secondary."'";
-		$sql.= "order by datum";
+		$sql.= "order by art, blattnummer";
     $ret=$this->database->execSQL($sql,4, 0);
     if (!$ret[0]) {
-      $rs=pg_fetch_array($ret[1]);
-      if($withFileLinks)$datei= '<c:alink:'.basename($rs['link_datei']).'>'.basename($rs['link_datei']).'</c:alink>';
-			else $datei= basename($rs['link_datei']);
       while($rs=pg_fetch_array($ret[1])) {
-				if($withFileLinks)$datei.=', <c:alink:'.basename($rs['link_datei']).'>'.basename($rs['link_datei']).'</c:alink>';
-        else $datei.=', '.basename($rs['link_datei']);
+				if($withFileLinks)$dateien[] = '<c:alink:../Nachweise/'.$flurid.'/'.Nachweis::buildNachweisNr($nr, $secondary).'/'.$rs['link_datei'].'>'.basename($rs['link_datei']).'</c:alink>   '.$rs['datum'];
+        else $dateien[] =basename($rs['link_datei']).' '.$rs['datum'];
       }
-      $ret[1]=$datei;
+      $ret[1] = implode(chr(10), $dateien);
     }     
     return $ret;  
   }
@@ -684,7 +723,7 @@ class antrag {
     $sql.=" VALUES('".$antr_nr."',".$VermStelle.",".$verm_art.",'".$datum."',".$stelle_id.")";
     $queryret=$this->database->execSQL($sql,4, 1);
     if ($queryret[0]) {
-      $errmsg='Es konnte keine Antragsnummer in die Datenbank eingetragen werden!\n'; 
+      $errmsg='Es konnte keine Antragsnummer in die Datenbank eingetragen werden!'; 
     }
     else {
       $errmsg.='Auftragsnummer erfolgreich übernommen! ';

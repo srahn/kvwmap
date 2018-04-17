@@ -1,3 +1,7 @@
+<?
+  include(LAYOUTPATH.'languages/PolygonEditor_'.$this->user->rolle->language.'.php');
+?>
+
 <script type="text/javascript" src="funktionen/calendar.js"></script>
 <script type="text/javascript">
 <!--
@@ -78,7 +82,10 @@ function buildwktpolygonfromsvgpath(svgpath){
 }
 
 function slide_legend_in(evt){
-	document.getElementById('legenddiv').className = 'slidinglegend_slidein';
+	if(document.getElementById('legenddiv').className == 'slidinglegend_slideout'){
+		evt.stopPropagation();
+		document.getElementById('legenddiv').className = 'slidinglegend_slidein';
+	}
 }
 
 function slide_legend_out(evt){
@@ -141,8 +148,8 @@ $legendheight = $this->map->height + 20;
 						</table></td>
 				</tr>
 				<tr> 
-					<td rowspan="20">&nbsp; </td>
-					<td rowspan="20" colspan="5"> 
+					<td rowspan="22">&nbsp; </td>
+					<td rowspan="22" colspan="5"> 
 						<?php
 							include(LAYOUTPATH.'snippets/SVG_polygon_query_area.php')
 						?>
@@ -224,6 +231,11 @@ $legendheight = $this->map->height + 20;
 					</td>
 				</tr>
 				<tr> 
+					<td colspan="2">Bearbeitungshinweise:
+						<textarea style="width:260px" name="bemerkungen_intern"><?php echo $this->formvars['bemerkungen_intern']; ?></textarea>
+					</td>
+				</tr>
+				<tr> 
 					<td colspan="2">Vermessungsstelle:<br> 
 						<?php
 										$this->FormObjVermStelle->outputHTML();
@@ -282,12 +294,17 @@ $legendheight = $this->map->height + 20;
 						</select> 
 					</td>
 				</tr>
+				<tr>
+					<td colspan="2" style="padding-top: 5px">
+						<input type="checkbox" name="singlegeom" value="true" <? if($this->formvars['singlegeom'])echo 'checked="true"'; ?>><? echo $strSingleGeoms; ?>
+					</td>
+				</tr>	
 				<tr> 
 					<td colspan="2" style="border-top:1px solid #999999"><img width="290px" height="1px" src="<? echo GRAPHICSPATH; ?>leer.gif"></td>
 				</tr>
 				<tr>
 					<td>&nbsp;</td> 
-					<td><?php if ($this->formvars[NACHWEIS_PRIMARY_ATTRIBUTE]!='') { ?><a href="index.php?go=Nachweisanzeige&order=<? echo $this->formvars['order']; ?>&richtung=<? echo $this->formvars['richtung']; ?>&flur_thematisch=<? echo $this->formvars['flur_thematisch']; ?>&such_andere_art=<? echo $this->formvars['such_andere_art']; ?>">&lt;&lt;&nbsp;zur&uuml;ck&nbsp;zum&nbsp;Rechercheergebnis</a><?php } ?></td>
+					<td><?php if ($this->formvars[NACHWEIS_PRIMARY_ATTRIBUTE]!='') { ?><a href="index.php?go=Nachweisanzeige&order=<? echo $this->formvars['order']; ?>&richtung=<? echo $this->formvars['richtung']; ?>&flur_thematisch=<? echo $this->formvars['flur_thematisch']; ?>&such_andere_art=<? echo $this->formvars['such_andere_art'].'#'.$this->formvars['id']; ?>">&lt;&lt;&nbsp;zur&uuml;ck&nbsp;zum&nbsp;Rechercheergebnis</a><?php } ?></td>
 					<td>&nbsp;<span class="fett">Maßstab&nbsp;1:&nbsp;</span><input type="text" id="scale" name="nScale" size="5" value="<?php echo round($this->map->scaledenom); ?>"></td>
 				<? if($this->user->rolle->runningcoords != '0'){ ?>
 				<td width="100px"><span class="fett">&nbsp;<?php echo $this->strCoordinates; ?>:</span>&nbsp;</td>
@@ -316,6 +333,7 @@ $legendheight = $this->map->height + 20;
 						<INPUT TYPE="HIDDEN" NAME="orderby" VALUE="<? echo $this->formvars['orderby']; ?>">						
 						<INPUT TYPE="hidden" NAME="result2" VALUE="">
 						<INPUT TYPE="hidden" NAME="check" VALUE="">
+						<INPUT TYPE="HIDDEN" NAME="oid" VALUE="<?php echo $this->formvars['oid']; ?>">
 						<input type="hidden" name="order" value="<?php echo $this->formvars['order']; ?>">
 						<INPUT TYPE="HIDDEN" NAME="richtung" VALUE="<? echo $this->formvars['richtung']; ?>">
 						<input type="hidden" name="flur_thematisch" value="<? echo $this->formvars['flur_thematisch']; ?>">
@@ -331,7 +349,7 @@ $legendheight = $this->map->height + 20;
 			<table cellpadding="0" cellspacing="0">
 				<tr>
 					<td valign="top">
-						<div id="legenddiv" onmouseenter="slide_legend_in(event);" onmouseleave="slide_legend_out(event);" class="slidinglegend_slideout">
+						<div id="legenddiv" onmouseleave="slide_legend_out(event);" class="slidinglegend_slideout">
 							<table width="100%" border="0" cellpadding="0" cellspacing="0">
 								<tr>
 									<td bgcolor="<?php echo BG_DEFAULT ?>" align="left"><?php
@@ -345,24 +363,30 @@ $legendheight = $this->map->height + 20;
 									?></td>
 								</tr>
 							</table>
-							<table class="table1" id="legendTable" style="display: <? echo $display; ?>" cellspacing=0 cellpadding=2 border=0>
-								<tr align="center">
-									<td><?php echo $strAvailableLayer; ?>:</td>
-								</tr>
+							<table class="table1" id="legendTable" onclick="slide_legend_in(event)" style="display: <? echo $display; ?>" cellspacing=0 cellpadding=2 border=0>
 								<tr align="left">
-									<td><!-- bgcolor=#e3e3e6 -->
-									<div align="center"><?php # 2007-12-30 pk
-									?><input type="button" class="button" name="neuladen_button" onclick="neuLaden();" value="<?php echo $strLoadNew; ?>" tabindex="1"></div>
-									<div id="legendcontrol">
-										<a href="index.php?go=reset_querys"><img src="graphics/tool_info.png" border="0" alt="Informationsabfrage." title="Informationsabfrage | Hier klicken, um alle Abfragehaken zu entfernen" width="17"></a>
-										<a href="javascript:document.GUI.reset_layers.value=1;document.GUI.submit();"><img src="graphics/layer.png" border="0" alt="Themensteuerung." title="Themensteuerung | Hier klicken, um alle Themen zu deaktivieren" width="20" height="20"></a><br>
-									</div>
-								<div id="scrolldiv" style="height:<?php echo $legendheight; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
-								<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
-								<div onclick="document.GUI.legendtouched.value = 1;" id="legend">
-									<? echo $this->legende; ?>
-								</div>
-								</div>
+									<td>
+										<div id="legend_layer" style="display: inline-block">
+											<div id="legendcontrol">
+												<a href="index.php?go=reset_querys">
+													<div class="button_background" style="width: 26px; height: 26px">
+														<div class="button tool_info" style="width: 26px; height: 26px" title="<? echo $strClearAllQuerys; ?>"></div>
+													</div>
+												</a>
+												<a href="index.php?go=reset_layers" style="padding: 0 0 0 6">
+													<div class="button_background" style="width: 26px; height: 26px">
+														<div class="button layer" style="width: 26px; height: 26px" title="<? echo $strDeactivateAllLayer; ?>"></div>
+													</div>
+												</a>
+												<input type="button" name="neuladen_button" onclick="neuLaden();" value="<?php echo $strLoadNew; ?>" tabindex="1" style="height: 27px; vertical-align: top; margin-left: 30px">
+											</div>
+											<div id="scrolldiv" style="height:<?php echo $legendheight; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
+												<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
+												<div onclick="document.GUI.legendtouched.value = 1;" id="legend">
+													<? echo $this->legende; ?>
+												</div>
+											</div>
+										</div>
 									</td>
 								</tr>
 							</table>

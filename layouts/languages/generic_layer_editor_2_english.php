@@ -32,4 +32,5 @@
  $strSwitchGLEViewRows="switch to row-based view";
  $strEditAll="edit multiple";
  $strCopyDataset="copy record";
+ $strNewDataset="neuen Datensatz anlegen";
 ?>

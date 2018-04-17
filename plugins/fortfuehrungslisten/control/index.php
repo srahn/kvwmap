@@ -7,7 +7,7 @@ include(PLUGINS . 'fortfuehrungslisten/model/fortfuehrungsfall.php');
 /**
 * Anwendungsfälle
 */
-switch($this->go) {
+switch($go) {
 	case 'auftragsdatei_loeschen': {
 		$ff_auftrag_id = $_REQUEST['ff_auftrag_id'];
 		if (empty($ff_auftrag_id)) {

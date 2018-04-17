@@ -1,5 +1,6 @@
 <?
 include_once(CLASSPATH.'FormObject.php');
+include(LAYOUTPATH.'languages/PolygonEditor_'.$this->user->rolle->language.'.php');
 ?>
 <script language="JavaScript">
 <!--
@@ -675,6 +676,11 @@ update_require_attribute = function(attributes, layer_id, value){
 			  		</select> 
 			  	</td>
 			  </tr>
+				<tr>
+					<td style="padding-top: 5px">
+						<input type="checkbox" name="singlegeom" value="true" <? if($this->formvars['singlegeom'])echo 'checked="true"'; ?>><? echo $strSingleGeoms; ?>
+					</td>
+				</tr>
 			  <? if($this->formvars['go'] != 'Bodenrichtwertformular_Anzeige'){ ?>
 			  <tr> 
 			    <td height="40" colspan="3" align="left">

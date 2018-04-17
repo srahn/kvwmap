@@ -4,8 +4,8 @@
 #   Konfigurationsdatei zu kvwmap                                  #
 #                                                                  #
 ####################################################################
-# aktuelle Versionsnummer
-define('VERSION','2.7');
+
+#define('VERSION','2.7');						# in Version 2.8 gelöscht
 define('APPLVERSION','kvwmap/');
 # Bezeichnung der MySQL-Datenbank mit den Benutzerdaten
 $dbname='kvwmapdb';
@@ -75,13 +75,14 @@ $sizes = array(
 			'height' => 30
 		),
 		'map_functions_bar' => array(
-			'height' => 43
+			'height' => 37
 		),
 		'footer' => array(
-			'height' => 22
+			'height' => 23
 		),
 		'menue' => array(
-			'width'  => 211
+			'width'  => 218,				# Version 2.8 (neu ist nur das Komma, der Wert müsste aber gegebenenfalls auch angepasst werden, da die Button-Menüs jetzt breiter sind)
+			'hide_width' => 22			# Version 2.8
 		),
 		'legend' => array(
 			'width' => 252,
@@ -92,6 +93,22 @@ $sizes = array(
 
 # zusätzliche Legende; muss unterhalb von snippets liegen
 #define('LEGEND_GRAPHIC_FILE', '');		# Version 2.7
+
+# Höhe und Breite der generierten Legendenbilder für verschiedene Layertypen			# Version 2.8
+$legendicon_size = array(
+	'width' => array(
+		0 => 18,			# Punktlayer
+		1 => 18,			# Linienlayer
+		2 => 18,			# Flächenlayer
+		3 => 18				# Rasterlayer
+	),
+	'height' => array(
+		0 => 18,			# Punktlayer
+		1 => 12,			# Linienlayer
+		2 => 12,			# Flächenlayer
+		3 => 18				# Rasterlayer
+	)
+);
 
 # login.php
 define('LOGIN', 'login.php');																# Version 1.8.0
@@ -178,7 +195,7 @@ define('PASSWORD_CHECK', '01010');															# Version 2.3
 # Dort muss dann eine Zeile in dieser Form hinzugefügt werden: 
 # www-data        ALL=(fgs) NOPASSWD: /usr/bin/git
 # Dann kann man die Aktualität des Quellcodes in der Administrationsoberfläche überprüfen und ihn aktualisieren.
-define('GIT_USER', '');																	# Version 2.1
+define('GIT_USER', 'gisadmin');																	# Version 2.1
 
 ########################## Pfadeinstellungen
 # Installationspfad
@@ -246,11 +263,12 @@ define('DRUCKRAHMEN_PATH',SHAPEPATH.'druckrahmen/');
 #define('PDFCLASSPATH', '../PDFClass/');																						# in Version 2.6 gelöscht
 
 # 3rdparty Pfade
-define('THIRDPARTY_PATH', 'http://gdi-service.de/3rdparty/');												# Version 2.6
+define('THIRDPARTY_PATH', '../3rdparty/');												# Version 2.6
 define('FONTAWESOME_PATH', THIRDPARTY_PATH . 'font-awesome-4.6.3/');								# Version 2.6
 define('JQUERY_PATH', THIRDPARTY_PATH . 'jQuery-1.12.0/');													# Version 2.6
 define('BOOTSTRAP_PATH', THIRDPARTY_PATH . 'bootstrap-3.3.6/');											# Version 2.6
 define('BOOTSTRAPTABLE_PATH', THIRDPARTY_PATH . 'bootstrap-table-1.11.0/');					# Version 2.6
+define('PROJ4JS_PATH', THIRDPARTY_PATH . 'proj4js-2.4.3/');					# Version 2.8
 
 # Bin-Pfad der Postgres-tools (shp2pgsql, pgsql2shp)
 define('POSTGRESBINPATH', '/usr/bin/');         # Version 1.6.4
@@ -259,7 +277,7 @@ define('POSTGRESBINPATH', '/usr/bin/');         # Version 1.6.4
 define('OGR_BINPATH', '/usr/bin/');					# Version 1.7.4
 
 # Pfad zum Zip-Programm (unter Linux: 'zip -j', unter Windows z.B. 'c:/programme/Zip/bin/zip.exe')
-define('ZIP_PATH', 'zip -j');													# Version 1.7.3  hier wurde das ' -j' angehängt
+define('ZIP_PATH', 'zip');													# Version 1.7.3  hier wurde das ' -j' angehängt		# Version 2.8 das ' -j' wurde wieder entfernt
 
 # EPSG-Code dem die Koordinaten der Flurstücke zugeordnet werden sollen in den Tabellen
 # alb_flurstuecke und alb_x_flurstuecke wenn man postgres verwendet
@@ -523,59 +541,6 @@ define('DELETE_ROLLENLAYER', 'true');   # true / false                          
 # Definiert, ob das aktuelle Kartenbild separat angezeigt werden darf oder nicht
 define('SHOW_MAP_IMAGE', 'true');       # true / false                            # Version 1.6.7
 
-// ############################# Klassenbibliotheken lesen														# in Version 2.0 gelöscht
-// # laden der Klassenbibliotheken																										# in Version 2.0 gelöscht
-// include_(CLASSPATH.'kvwmap_core.php');								# Version 1.7.6								# in Version 2.0 gelöscht
-// include_(CLASSPATH.'kataster_core.php');							# Version 1.7.6								# in Version 2.0 gelöscht
-// include_(CLASSPATH.'mysql.php');											# Version 1.7.6								# in Version 2.0 gelöscht
-// include_(CLASSPATH.'postgresql_core.php');						# Version 1.7.6								# in Version 2.0 gelöscht
-// include_(CLASSPATH.'users_core.php');									# Version 1.7.6							# in Version 2.0 gelöscht
-// if(!in_array($_REQUEST['go'], $fast_loading_cases)){		# Version 1.7.6							# in Version 2.0 gelöscht
-	// include_(CLASSPATH.'kvwmap.php');																								# in Version 2.0 gelöscht
-	// include_(CLASSPATH.'kataster.php');																							# in Version 2.0 gelöscht
-	// include_(CLASSPATH.'postgresql.php');																						# in Version 2.0 gelöscht
-	// if(ALKIS){																					#	Version 1.13								# in Version 2.0 gelöscht
-		// include_(CLASSPATH.'kataster_alkis.php');					# Version 1.13							# in Version 2.0 gelöscht
-		// include_(CLASSPATH.'postgresql_alkis.php');				# Version 1.13							# in Version 2.0 gelöscht
-	// }																										# Version 1.13							# in Version 2.0 gelöscht
-	// else{																								# Version 1.13							# in Version 2.0 gelöscht
-		// include_(CLASSPATH.'kataster_alk.php');						# Version 1.13							# in Version 2.0 gelöscht
-		// include_(CLASSPATH.'postgresql_alk.php');					# Version 1.13							# in Version 2.0 gelöscht
-	// }																										# Version 1.13							# in Version 2.0 gelöscht
-	// include_(CLASSPATH.'users.php');																									# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'alb.php');																									# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'alk.php');																									# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'antrag.php');																								# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'bau.php');																									# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'nachweis.php');																							# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'geothermie.php');																						# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'bodenrichtwerte.php');																			# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'verundentsorgung.php');																			# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'metadaten.php');																						# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'spatial_processor.php');																		# in Version 2.0 gelöscht
-	// include_(CLASSPATH.'bauleitplanung.php');           # Version 1.6.1							# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'jagdkataster.php');            # Version 1.6.1							# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'polygoneditor.php');           # Version 1.6.3							# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'pointeditor.php');             # Version 1.6.3							# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'dbf.php');                     # Version 1.6.5							# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'anliegerbeitraege.php');       # Version 1.6.6   						# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'gebaeude_editor.php');         # Version 1.6.6   						# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'documents.php');               # Version 1.6.6							# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'esaf.php');                    # Version 1.6.6							# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'shape.php');                   # Version 1.6.6							# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'gps.php');                     # Version 1.6.7   						# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'wms.php');                     # Version 1.6.7   						# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'funktion.php');                # Version 1.6.9							# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'lineeditor.php');              # Version 1.7.0							# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'wfs.php');                     # Version 1.7.0							# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'synchronisation.php');         # Version 1.7.0							# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'tif.php');          						# Version 1.7.2							# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'gpx.php');          						# Version 1.7.4							# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'datendrucklayout.php');        # Version 1.7.5							# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'metadaten_csw.php');						# Version 1.7.5							# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'uko.php');          						# Version 1.8.0							# in Version 2.0 gelöscht
-// }																											# Version 1.7.6							# in Version 2.0 gelöscht
-// include (WWWROOT.APPLVERSION.'funktionen/allg_funktionen.php');										# in Version 2.0 gelöscht
 
 ############################ kvwmap-plugins #################		# Version 1.11.0
 #																																# Version 1.11.0
@@ -587,15 +552,18 @@ $kvwmap_plugins = array();																			# Version 1.11.0
 #$kvwmap_plugins[] = 'bevoelkerung';														# Version 1.11.0
 #$kvwmap_plugins[] = 'bodenrichtwerte';													# Version 2.0.0
 #$kvwmap_plugins[] = 'fortfuehrungslisten';											# Version 2.6.0
-#$kvwmap_plugins[] = 'gewaesser';																# Version 1.11.0
 #$kvwmap_plugins[] = 'geodoc';																	# Version 2.0.0
+#$kvwmap_plugins[] = 'gewaesser';																# Version 1.11.0
 #$kvwmap_plugins[] = 'jagdkataster';														# Version 2.0.0
 #$kvwmap_plugins[] = 'kolibri';																	# Version 2.8
 #$kvwmap_plugins[] = 'metadata';																# Version 2.8
+#$kvwmap_plugins[] = 'mobile';																	# Version 2.7
 #$kvwmap_plugins[] = 'nachweisverwaltung';											# Version 2.0.0
 #$kvwmap_plugins[] = 'probaug';																	# Version 2.0.0
+#$kvwmap_plugins[] = 'ukos';																		# Version 2.8.0
 #$kvwmap_plugins[] = 'wasserrecht';															# Version 2.8.0
-############################################################
+#$kvwmap_plugins[] = 'xplankonverter';													# Version 2.8.0
+#############################################################		# Version 1.11.0
 
 # Festlegung von Fehlermeldungen und Hinweisen
 define ('INFO1','Prüfen Sie ob Ihr Datenbankmodell aktuell ist.');

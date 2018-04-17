@@ -79,7 +79,8 @@ INSERT INTO `u_funktionen` (`id`, `bezeichnung`, `link`) VALUES
 (18, 'Adressaenderungen', NULL),
 (19, 'sendeFestpunktskizze', NULL),
 (20, 'Nachweise_bearbeiten', NULL),
-(21, 'ALB-Auszug 30', NULL);
+(21, 'ALB-Auszug 30', NULL),
+(22, 'Kolibristart', NULL);
 
 
 ####################################################################################
@@ -108,6 +109,7 @@ INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (18,@stelle_i
 INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (19,@stelle_id);
 INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (20,@stelle_id);
 INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (21,@stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (22,@stelle_id);
 
 ###########################
 # Einträge der Menüpunkte #
@@ -175,12 +177,6 @@ INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@
 INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Namen', 'index.php?go=Namen_Auswaehlen', @last_level1menue_id, 2, NULL);
 SET @last_menue_id=LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,14);
-INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
-
-# Metadaten
-INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Metadaten', 'index.php?go=Metadaten_Auswaehlen', @last_level1menue_id, 2, NULL);
-SET @last_menue_id=LAST_INSERT_ID();
-INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,15);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
 
 # Grundbuchblattsuche
@@ -280,6 +276,12 @@ SET @last_level1menue_id=LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_level1menue_id,75);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_level1menue_id,0);
 
+# Layergruppen anzeigen
+INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Gruppen anzeigen', 'index.php?go=Layergruppen_Anzeigen', @last_level1menue_id, 2, NULL);
+SET @last_menue_id=LAST_INSERT_ID();
+INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,75);
+INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
+
 # Layer anzeigen
 INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Layer anzeigen', 'index.php?go=Layer_Anzeigen', @last_level1menue_id, 2, NULL);
 SET @last_menue_id=LAST_INSERT_ID();
@@ -310,40 +312,52 @@ SET @last_menue_id=LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,80);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
 
+# Layergruppen
+INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Layergruppen', 'index.php?go=Layergruppen_Anzeigen', @last_level1menue_id, 2, NULL);
+SET @last_menue_id=LAST_INSERT_ID();
+INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id, 82);
+INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id, 0);
+
+# Layerübersicht
+INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Themenübersicht', 'index.php?go=Layer_Uebersicht', @last_level1menue_id, 2, NULL);
+SET @last_menue_id=LAST_INSERT_ID();
+INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id, 84);
+INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id, 0);
+
 #### Import/Export
 INSERT INTO u_menues (name, links, obermenue, menueebene, target, `order`) VALUES ('Import/Export', 'index.php?go=changemenue', 0, 1, NULL, 40);
 SET @last_level1menue_id=LAST_INSERT_ID();
-INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_level1menue_id,81);
+INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_level1menue_id, 86);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_level1menue_id,0);
 
 # WMS-Export
 INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('WMS-Export', 'index.php?go=WMS_Export', @last_level1menue_id, 2, NULL);
 SET @last_menue_id=LAST_INSERT_ID();
-INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,82);
+INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,88);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
 
 # WMS-Import
 INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('WMS-Import', 'index.php?go=WMS_Import', @last_level1menue_id, 2, NULL);
 SET @last_menue_id=LAST_INSERT_ID();
-INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,83);
+INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id, 90);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
 
 # Daten-Export
 INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Daten-Export', 'index.php?go=Daten_Export', @last_level1menue_id, 2, NULL);
 SET @last_menue_id=LAST_INSERT_ID();
-INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,84);
+INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id, 92);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
 
 # Shape Anzeigen
 INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Shape-Anzeigen', 'index.php?go=SHP_Anzeigen', @last_level1menue_id, 2, NULL);
 SET @last_menue_id=LAST_INSERT_ID();
-INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,85);
+INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id, 94);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
 
 # Druckausgabe
 INSERT INTO u_menues (`name`, `links`, `obermenue`, `menueebene`, `target`, `title`, `button_class`) VALUES ('Druckausgabe', 'index.php?go=Schnelle_Druckausgabe', @last_level1menue_id, 2, '_blank', 'Karte sofort ausdrucken', 'schnelldruck');
 SET @last_menue_id=LAST_INSERT_ID();
-INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,86);
+INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id, 96);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
 
 #### Druckmanager
@@ -369,7 +383,6 @@ INSERT INTO `u_menue2stelle` ( `stelle_id` , `menue_id` , `menue_order` )
 VALUES (@stelle_id, @last_menue_id, '90');
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
 
-
 #### Drucken
 INSERT INTO u_menues ( `name` , `links` , `obermenue` , `menueebene` , `target`, `title`, `button_class`)
 VALUES ( 'Drucken', 'index.php?go=Druckausschnittswahl', @last_level1menue_id, '2', NULL, 'Zur Druckausschnittswahl', 'drucken');
@@ -377,6 +390,24 @@ SET @last_menue_id=LAST_INSERT_ID();
 INSERT INTO `u_menue2stelle` ( `stelle_id` , `menue_id` , `menue_order` )
 VALUES (@stelle_id, @last_menue_id, '91');
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
+
+
+## Metadaten
+INSERT INTO u_menues (name, links, obermenue, menueebene, target, `order`) VALUES ('Metadaten', 'index.php?go=changemenue', 0, 1, NULL, 100);
+SET @last_level1menue_id=LAST_INSERT_ID();
+INSERT INTO u_menue2stelle (stelle_id, menue_id, menue_order) VALUES (@stelle_id, @last_level1menue_id, 100);
+INSERT INTO u_menue2rolle (user_id, stelle_id, menue_id, status) VALUES (@user_id, @stelle_id, @last_level1menue_id, 0);
+# Recherche
+INSERT INTO u_menues (name, links, obermenue, menueebene, target, `order`) VALUES ('Recherche', 'index.php?go=Metadaten_Auswaehlen', @last_level1menue_id, 2, NULL, 110);
+SET @last_menue_id=LAST_INSERT_ID();
+INSERT INTO u_menue2stelle (stelle_id, menue_id, menue_order) VALUES (@stelle_id, @last_menue_id, 110);
+INSERT INTO u_menue2rolle (user_id, stelle_id, menue_id, status) VALUES (@user_id, @stelle_id, @last_menue_id, 0);
+# Eingabe
+INSERT INTO u_menues (name, links, obermenue, menueebene, target, `order`) VALUES ('Neuer Metadatensatz', 'index.php?go=Metadateneingabe', @last_level1menue_id, 2, NULL, 120);
+SET @last_menue_id=LAST_INSERT_ID();
+INSERT INTO u_menue2stelle (stelle_id, menue_id, menue_order) VALUES (@stelle_id, @last_menue_id, 120);
+INSERT INTO u_menue2rolle (user_id, stelle_id, menue_id, status) VALUES (@user_id, @stelle_id, @last_menue_id, 0);
+
 
 # Layer-Gruppen anlegen
 INSERT INTO `u_groups` (`id`, `Gruppenname`, `order`) VALUES (1, 'Hintergrundkarten', 1000);

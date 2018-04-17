@@ -2,7 +2,7 @@
 
 	$this->goNotExecutedInPlugins = false;
 	
-	switch($this->go){  
+	switch($go){  
 		case 'delete_bplan' : {
 			include(PLUGINS.'bauleitplanung/model/rok.php');
 			$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);

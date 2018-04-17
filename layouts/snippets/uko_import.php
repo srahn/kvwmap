@@ -27,7 +27,7 @@ function save(){
   <tr>
   	<td>&nbsp;</td>
 		<td align="center" style="border-bottom:1px solid #C3C7C3"><span class="fett">UKO- oder Zip-Datei:</span>
-		<input class="button" type="file" name="ukofile" size="12">
+		<input type="file" name="ukofile" size="12">
 		<td>&nbsp;</td>
 	</tr>
 	<tr align="center">
@@ -53,7 +53,7 @@ function save(){
 		</td>
 	</tr>
 	<tr>
-		<td colspan="3" align="center"><input class="button" type="button" name="import" onclick="save();" value="Importieren"></td></td>
+		<td colspan="3" align="center"><input type="button" name="import" onclick="save();" value="Importieren"></td></td>
 	</tr>
 	<? }else{ ?>
 	<tr>

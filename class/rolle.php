@@ -85,7 +85,7 @@ class rolle {
 				$name_column . ",
 				l.Layer_ID,
 				alias, Datentyp, Gruppe, pfad, maintable, maintable_is_view, Data, `schema`, document_path, labelitem, connection, printconnection,
-				connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
+				classitem, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, trigger_function, ul.`queryable`, ul.`drawingorder`,
 				ul.`minscale`, ul.`maxscale`,
 				ul.`offsite`,
@@ -262,7 +262,10 @@ class rolle {
 		$query=mysql_query($sql,$this->database->dbConn);
 		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		$this->debug->write('Neue Werte für Rolle eingestellt: '.$formvars['nZoomFactor'].', '.$formvars['mapsize'],4);
-		if($go_next != '')echo "<script>window.location.href='index.php?go=".$go_next."';</script>";
+		if($go_next != ''){
+			go_switch($go_next);
+			exit();
+		}
 	}
 	
   function readSettings() {
@@ -323,6 +326,7 @@ class rolle {
 			$this->menu_auto_close=$rs['menu_auto_close'];
 			rolle::$layer_params = (array)json_decode('{' . $rs['layer_params'] . '}');
 			$this->visually_impaired = $rs['visually_impaired'];
+			$this->legendtype = $rs['legendtype'];
 			if($rs['hist_timestamp'] != ''){
 				$this->hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');			# der wird zur Anzeige des Timestamps benutzt
 				rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');	# der hat die Form, wie der timestamp in der PG-DB steht und wird für die Abfragen benutzt
@@ -347,6 +351,7 @@ class rolle {
 			$this->freepolygon = in_array('freepolygon', $buttons);
 			$this->freetext = in_array('freetext', $buttons);
 			$this->freearrow = in_array('freearrow', $buttons);
+			$this->gps = in_array('gps', $buttons);
 			return 1;
 		}else return 0;
   }
@@ -968,6 +973,50 @@ class rolle {
 		}
 	}
 	
+	function saveLegendOptions($layerset, $formvars){
+		$sql ="	UPDATE rolle SET 
+						legendtype=".$formvars['legendtype']." 
+						WHERE user_id=".$this->user_id." AND stelle_id=".$this->stelle_id;
+		#echo $sql;
+		$this->debug->write("<p>file:rolle.php class:rolle function:saveLegendOptions - :",4);
+		$this->database->execSQL($sql,4, $this->loglevel);
+		if($formvars['active_layers'] != ''){
+			$active_layers = $formvars['active_layers'];		// $active_layers ist ein Array mit den Layer-IDs der aktiven Layern in der neuen Reihenfolge
+			$active_layer_count = count($active_layers);
+			for($i = $active_layer_count-2; $i >= 0; $i--){		# von hinten beginnen
+				$layer_oben = &$layerset['layer_ids'][$active_layers[$i]];
+				$layer_unten = $layerset['layer_ids'][$active_layers[$i+1]];
+				if($layer_oben['drawingorder'] < $layer_unten['drawingorder']){		// drawingorder muss erhöht werden
+					$newdrawingorder = $layer_unten['drawingorder'] + 1;
+					$layer_oben['drawingorder'] = $newdrawingorder;
+					$layers_changed[$layer_oben['id']] = true;
+					$next_id = $layer_unten['id'] + 1;		// id des nächsten Layers im Layer-Array
+					if($layerset['list'][$next_id]['drawingorder'] <= $newdrawingorder){		// wenn erforderlich auch die drawingorders der Layer darüber erhöhen
+						$increase = $newdrawingorder - $layerset['list'][$next_id]['drawingorder'] + 1;		// um wieviel muss erhöht werden?
+						for($j = $next_id; $j < count($layerset['list']); $j++){
+							$layerset['list'][$j]['drawingorder'] += $increase;
+							$layers_changed[$j] = true;
+						}
+					}
+				}
+			}
+			if($layers_changed != ''){				
+				foreach($layers_changed as $id => $value){
+					$sql = 'UPDATE u_rolle2used_layer SET drawingorder = '.$layerset['list'][$id]['drawingorder'].' WHERE layer_id='.$layerset['list'][$id]['Layer_ID'].' AND user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+					$this->debug->write("<p>file:rolle.php class:rolle function:saveLegendOptions - :",4);
+					$this->database->execSQL($sql,4, $this->loglevel);
+				}
+			}
+		}
+	}
+	
+	function removeDrawingOrders(){
+		$sql ='UPDATE u_rolle2used_layer set drawingorder = NULL';
+		$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+		$this->debug->write("<p>file:rolle.php class:rolle->removeDrawingOrders:",4);
+		$this->database->execSQL($sql,4, $this->loglevel);
+	}
+	
 	function setTransparency($formvars) {
 		if($formvars['layer_options_open'] > 0){		# normaler Layer
 			$sql ='UPDATE u_rolle2used_layer set transparency = '.$formvars['layer_options_transparency'];
@@ -1285,7 +1334,7 @@ class rolle {
 		$this->database->execSQL($sql,4, $this->loglevel);
 		return 1;
 	}
-
+	
 	function changeLegendDisplay($hide) {
 		# speichern des Zustandes der Legende
 		# hide=0 Legende ist zu sehen
@@ -1296,10 +1345,9 @@ class rolle {
 		$this->debug->write("<p>file:rolle.php class:rolle function:hideMenue - :",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 		return 1;
-	}
+	}	
 	
 	function saveOverlayPosition($x, $y){
-		if($x < 0)$x = 10;
 		$sql ="UPDATE rolle SET overlayx = ".$x.", overlayy=".abs($y);
 		$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 		#echo $sql;
@@ -1395,10 +1443,10 @@ class rolle {
 		$sql.=' user_id='.$this->user_id;
 		$sql.=', stelle_id='.$this->stelle_id;
 		$sql.=', name="'.$comment.'"';
-		for($i=0; $i < count($layerset); $i++){
-			if($layerset[$i]['Layer_ID'] > 0 AND $layerset[$i]['aktivStatus'] == 1){
-				$layers[] = $layerset[$i]['Layer_ID'];
-				if($layerset[$i]['queryStatus'] == 1)$query[] = $layerset[$i]['Layer_ID'];
+		for($i=0; $i < count($layerset['list']); $i++){
+			if($layerset['list'][$i]['Layer_ID'] > 0 AND $layerset['list'][$i]['aktivStatus'] == 1){
+				$layers[] = $layerset['list'][$i]['Layer_ID'];
+				if($layerset['list'][$i]['queryStatus'] == 1)$query[] = $layerset['list'][$i]['Layer_ID'];
 			}
 		}
 		$sql.=', layers="'.implode(',', $layers).'"';

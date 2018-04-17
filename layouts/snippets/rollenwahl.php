@@ -1,8 +1,18 @@
 <?
   # 2007-12-30 pk
   include(LAYOUTPATH.'languages/rollenwahl_'.$this->user->rolle->language.'.php');
+	include(LAYOUTPATH.'languages/map_'.$this->user->rolle->language.'.php');
+	include(LAYOUTPATH.'snippets/SVGvars_defs.php');
 	global $supportedLanguages;
+	global $last_x;
 ?>
+
+<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15">
+	<defs>
+		<? echo $SVGvars_defs; ?>
+	</defs>
+</svg>
+
 <script type="text/javascript" src="funktionen/calendar.js"></script>
 <script src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
@@ -65,10 +75,9 @@ Text_menue_buttons=["<? echo $strHelp; ?>:","<? echo $strHintMenueButtons; ?>"];
 									<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_task, Style[0], document.getElementById('Tip1'))" onmouseout="htm()">
 									<div id="Tip1" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 								</div>
-								<div style="align-self: center;">
+								<div style="width: 80px; text-align: center;">
 									<i id="sign_in_stelle" title="<? echo $this->strEnter; ?>" class="fa fa-sign-out fa-2x" onclick="document.GUI.submit();" style="cursor: pointer;display: none;"></i>
 								</div>
-								<div style="clear: both;">
 							</div>
 						</td>
 					</tr>
@@ -136,25 +145,29 @@ Text_menue_buttons=["<? echo $strHelp; ?>:","<? echo $strHintMenueButtons; ?>"];
 							<? echo $strMapTools; ?>:
 						</td>
 						<td class="rollenwahl-option-data">
-							<img src="<? echo GRAPHICSPATH.'back.png'; ?>"><input type="checkbox" name="back" value="1" <? if($this->user->rolle->back){echo 'checked="true"';} ?>>&nbsp;
-							<img src="<? echo GRAPHICSPATH.'frwd.png'; ?>"><input type="checkbox" name="forward" value="1" <? if($this->user->rolle->forward){echo 'checked="true"';} ?>>&nbsp;
-							<img src="<? echo GRAPHICSPATH.'zoomin.png'; ?>"><input type="checkbox" name="zoomin" value="1" <? if($this->user->rolle->zoomin){echo 'checked="true"';} ?>>&nbsp;
-							<img src="<? echo GRAPHICSPATH.'zoomout.png'; ?>"><input type="checkbox" name="zoomout" value="1" <? if($this->user->rolle->zoomout){echo 'checked="true"';} ?>>&nbsp;
-							<img src="<? echo GRAPHICSPATH.'zoomall.png'; ?>"><input type="checkbox" name="zoomall" value="1" <? if($this->user->rolle->zoomall){echo 'checked="true"';} ?>>&nbsp;
-							<img src="<? echo GRAPHICSPATH.'pan.png'; ?>"><input type="checkbox" name="recentre" value="1" <? if($this->user->rolle->recentre){echo 'checked="true"';} ?>>
-							<img src="<? echo GRAPHICSPATH.'freetext.png'; ?>"><input type="checkbox" name="freetext" value="1" <? if($this->user->rolle->freetext){echo 'checked="true"';} ?>>
-							<img src="<? echo GRAPHICSPATH.'arrow.png'; ?>"><input type="checkbox" name="freearrow" value="1" <? if($this->user->rolle->freearrow){echo 'checked="true"';} ?>>  		
-							<br>
-							<img src="<? echo GRAPHICSPATH.'jumpto.png'; ?>"><input type="checkbox" name="jumpto" value="1" <? if($this->user->rolle->jumpto){echo 'checked="true"';} ?>>&nbsp;
-							<img src="<? echo GRAPHICSPATH.'coord_query.png'; ?>"><input type="checkbox" name="coord_query" value="1" <? if($this->user->rolle->coord_query){echo 'checked="true"';} ?>>&nbsp;
-							<img src="<? echo GRAPHICSPATH.'query.png'; ?>"><input type="checkbox" name="query" value="1" <? if($this->user->rolle->query){echo 'checked="true"';} ?>>&nbsp;
-							<img src="<? echo GRAPHICSPATH.'touchquery.png'; ?>"><input type="checkbox" name="touchquery" value="1" <? if($this->user->rolle->touchquery){echo 'checked="true"';} ?>>&nbsp;
-							<img src="<? echo GRAPHICSPATH.'query-radius.png'; ?>"><input type="checkbox" name="queryradius" value="1" <? if($this->user->rolle->queryradius){echo 'checked="true"';} ?>>&nbsp;
-							<img src="<? echo GRAPHICSPATH.'polyquery.png'; ?>"><input type="checkbox" name="polyquery" value="1" <? if($this->user->rolle->polyquery){echo 'checked="true"';} ?>>&nbsp;
-							<img src="<? echo GRAPHICSPATH.'measure.png'; ?>"><input type="checkbox" name="measure" value="1" <? if($this->user->rolle->measure){echo 'checked="true"';} ?>>
-							<img src="<? echo GRAPHICSPATH.'freepolygon.png'; ?>"><input type="checkbox" name="freepolygon" value="1" <? if($this->user->rolle->freepolygon){echo 'checked="true"';} ?>>
-							<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_buttons, Style[0], document.getElementById('Tip4'))" onmouseout="htm()">
-							<div id="Tip4" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+							<div class="button_selection">
+								<div title="<? echo $strPreviousView; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? echo previous('', $strPreviousView, ''); ?></svg></div><input type="checkbox" name="back" value="1" <? if($this->user->rolle->back){echo 'checked="true"';} ?>>&nbsp;
+								<div title="<? echo $strNextView; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo forward('', $strNextView, ''); ?></svg></div><input type="checkbox" name="forward" value="1" <? if($this->user->rolle->forward){echo 'checked="true"';} ?>>&nbsp;
+								<div title="<? echo $strZoomIn; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo zoomin($strZoomIn); ?></svg></div><input type="checkbox" name="zoomin" value="1" <? if($this->user->rolle->zoomin){echo 'checked="true"';} ?>>&nbsp;
+								<div title="<? echo $strZoomOut; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo zoomout($strZoomOut); ?></svg></div><input type="checkbox" name="zoomout" value="1" <? if($this->user->rolle->zoomout){echo 'checked="true"';} ?>>&nbsp;
+								<div title="<? echo $strZoomToFullExtent; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo zoomall($strZoomToFullExtent); ?></svg></div><input type="checkbox" name="zoomall" value="1" <? if($this->user->rolle->zoomall){echo 'checked="true"';} ?>>&nbsp;
+								<div title="<? echo $strPan; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo recentre($strPan); ?></svg></div><input type="checkbox" name="recentre" value="1" <? if($this->user->rolle->recentre){echo 'checked="true"';} ?>>
+								<br>
+								<div title="<? echo $strCoordinatesZoom; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo coords1($strCoordinatesZoom); ?></svg></div><input type="checkbox" name="jumpto" value="1" <? if($this->user->rolle->jumpto){echo 'checked="true"';} ?>>&nbsp;
+								<div title="<? echo $strCoordinatesQuery; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo coords2($strCoordinatesQuery); ?></svg></div><input type="checkbox" name="coord_query" value="1" <? if($this->user->rolle->coord_query){echo 'checked="true"';} ?>>&nbsp;
+								<div title="<? echo $strInfo; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo ppquery($strInfo); ?></svg></div><input type="checkbox" name="query" value="1" <? if($this->user->rolle->query){echo 'checked="true"';} ?>>&nbsp;
+								<div title="<? echo $strTouchInfo; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo touchquery($strTouchInfo); ?></svg></div><input type="checkbox" name="touchquery" value="1" <? if($this->user->rolle->touchquery){echo 'checked="true"';} ?>>&nbsp;
+								<div title="<? echo $strInfoWithRadius; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo pquery($strInfoWithRadius); ?></svg></div><input type="checkbox" name="queryradius" value="1" <? if($this->user->rolle->queryradius){echo 'checked="true"';} ?>>&nbsp;
+								<div title="<? echo $strInfoInPolygon; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo polygonquery($strInfoInPolygon); ?></svg></div><input type="checkbox" name="polyquery" value="1" <? if($this->user->rolle->polyquery){echo 'checked="true"';} ?>>&nbsp;
+								<br>
+								<div title="<? echo $strRuler; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo dist($strRuler); ?></svg></div><input type="checkbox" name="measure" value="1" <? if($this->user->rolle->measure){echo 'checked="true"';} ?>>&nbsp;
+								<div title="<? echo $strFreePolygon; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo freepolygon($strFreePolygon); ?></svg></div><input type="checkbox" name="freepolygon" value="1" <? if($this->user->rolle->freepolygon){echo 'checked="true"';} ?>>&nbsp;
+								<div title="<? echo $strFreeText; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo freetext($strFreeText); ?></svg></div><input type="checkbox" name="freetext" value="1" <? if($this->user->rolle->freetext){echo 'checked="true"';} ?>>&nbsp;
+								<div title="<? echo $strFreeArrow; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo freearrow($strFreeArrow); ?></svg></div><input type="checkbox" name="freearrow" value="1" <? if($this->user->rolle->freearrow){echo 'checked="true"';} ?>>&nbsp;
+								<div title="<? echo $strGPS; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo gps_follow($strGPS, 'on'); ?></svg></div><input type="checkbox" name="gps" value="1" <? if($this->user->rolle->gps){echo 'checked="true"';} ?>>&nbsp;
+								<div style="width: 30px;position: relative"><img style="position: absolute; right: 0px; bottom: 0px" src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_buttons, Style[0], document.getElementById('Tip4'))" onmouseout="htm()"></div>
+								<div id="Tip4" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+							</div>
 						</td>
 					</tr>
 					<tr>
@@ -431,11 +444,11 @@ Text_menue_buttons=["<? echo $strHelp; ?>:","<? echo $strHintMenueButtons; ?>"];
 					</tr>		
 					<tr <? if(!$this->Stelle->hist_timestamp)echo 'style="display:none"'; ?> >		
 						<td class="rollenwahl-option-header">
-							<? echo $strhist_timestamp; ?>:&nbsp;<a href="javascript:;" onclick="new CalendarJS().init('hist_timestamp');"><img title="TT.MM.JJJJ hh:mm:ss" src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar" style="bottom:100px"><input type="hidden" id="calendar_hist_timestamp"></div></td>
+							<? echo $strhist_timestamp; ?>:&nbsp;<a href="javascript:;" onclick="new CalendarJS().init('hist_timestamp', 'timestamp');"><img title="TT.MM.JJJJ hh:mm:ss" src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar_hist_timestamp" class="calendar" style="bottom:40px"></div></td>
 						<td class="rollenwahl-option-data">
 							<input onchange="if(this.value.length == 10)this.value = this.value + ' 06:00:00'" id="hist_timestamp" name="hist_timestamp" type="text" value="<? echo $this->user->rolle->hist_timestamp; ?>" size="16">
 							<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_histtimestamp, Style[0], document.getElementById('Tip20'))" onmouseout="htm()">
-							<div id="Tip20" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+							<div id="Tip20" style="visibility:hidden;position:absolute;bottom:40px;z-index:1000;"></div>
 						</td>			
 					</tr>
 				</table>

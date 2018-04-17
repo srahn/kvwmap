@@ -145,7 +145,7 @@ hide_versions = function(flst){
   </tr>
   <tr>
     <td>
-			<div style="position:relative; top:0px; right:0px; padding:=px; border-color:<?php echo BG_DEFAULT ?>; border-width:1px; border-style:solid;">
+			<div style="position:relative; top:0px; right:0px; padding:0px; border: 1px solid <?php echo BG_DEFAULT ?>;">
 				<table width="100%" border="0" cellspacing="0" cellpadding="0">
 					<tr>
 						<td colspan="2">
@@ -761,10 +761,10 @@ hide_versions = function(flst){
 					</tr>
 					<tr>
 						<td colspan="2">
-							<table width="100%" cellspacing="0" cellpading="0" border="0">
-								<tr align="center" valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
+							<table width="100%" cellspacing="0" cellpadding="0" border="0" style="border-top: 1px solid <?php echo BG_DEFAULT ?>;">
+								<tr align="center" valign="top">
 									<td colspan="2">
-										<div class="fstanzeigecontainer">
+										<div class="fstanzeigecontainer button_background">
 											<a href="index.php?go=Flurstueck_<? if($flst->endet!="" OR $flst->hist_alb == 1)echo 'hist_';?>Auswaehlen&searchInExtent=<?php echo $this->searchInExtent;
 											?>&GemID=<?php echo $flst->GemeindeID;
 											?>&GemkgID=<?php echo $flst->GemkgSchl; ?>&FlurID=<?php echo $flst->FlurID;
@@ -782,9 +782,11 @@ hide_versions = function(flst){
 													$zoomlink = 'ZoomToFlst&FlurstKennz='.$flst->FlurstKennz; 
 													if($set_timestamp != '')$zoomlink = $set_timestamp.'&go_next='.urlencode($zoomlink);else $zoom_all = true;
 											?>
-													<a href="index.php?go=<? echo $zoomlink;?>">
-														<div class="fstanzeigehover">&nbsp;&nbsp;Kartenausschnitt&nbsp;&nbsp;</div>
-													</a>
+													&nbsp;&nbsp;
+													<a title="Zoom auf Flurstück und Flurstück hervorheben" href="index.php?go=<? echo $zoomlink;?>"><div class="button zoom_highlight"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
+													&nbsp;&nbsp;
+													<a title="Zoom auf Flurstück und andere Flurstücke ausblenden" href="javascript:zoom2object(<? echo $this->qlayerset[$i]['Layer_ID'];?>, 'Polygon', 'ax_flurstueck', 'wkb_geometry', '<?php echo $flst->oid; ?>', 'true');"><div class="button zoom_select"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
+													
 											<? }
 											if (in_array('kolibri', $kvwmap_plugins) AND $this->Stelle->isFunctionAllowed('Kolibristart')) { ?>
 												<a href="kvwkol://FlurstKennz=<?php echo $flst->FlurstKennz; ?>" onclick="message('Öffne Flurstück <?php echo $flst->FlurstKennz; ?> in Kolibri.');">

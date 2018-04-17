@@ -42,6 +42,7 @@ class MyObject {
 	* @ return all objects
 	*/
 	function find_where($where, $order = '') {
+		$where = ($where == '' ? '' : 'WHERE ' . $where);
 		$orders = array_map(
 			function ($order) {
 				return trim($order);
@@ -53,8 +54,7 @@ class MyObject {
 				*
 			FROM
 				`" . $this->tableName . "`
-			WHERE
-				" . $where . 
+			" . $where .
 			($order != '' ? " ORDER BY `" . implode('`, `', $orders) . "`" : "");
 		$this->debug->show('mysql find_where sql: ' . $sql, MyObject::$write_debug);
 		$query = mysql_query($sql, $this->database->dbConn);
@@ -66,8 +66,7 @@ class MyObject {
 	}
 
 	/*
-	* Search for an record in the database
-	* by the given sql clause
+	* Search for a records in the database by the given sql clause
 	* @ return all found objects
 	*/
 	function find_by_sql($params, $hierarchy_key = NULL) {
@@ -123,18 +122,35 @@ class MyObject {
 	}
 
 	function setKeysFromTable() {
+		$columns = $this->getColumnsFromTable();
+		foreach($columns AS $column) {
+			$this->set($column['Field'], NULL);
+		}
+		return $this->getKeys();
+	}
+
+	function getColumnsFromTable() {
+		$columns = array();
 		$sql = "
 			SHOW COLUMNS
 			FROM
 				`" . $this->tableName . "`
 		";
 		$this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
-		$query = mysql_query($sql, $this->database->dbConn);
-		
-		while($row = mysql_fetch_assoc($query)) {
-			$this->set($row['Field'], NULL);
+		$result = mysql_query($sql, $this->database->dbConn);
+		while ($column = mysql_fetch_assoc($result)) {
+			$columns[] = $column;
+		};
+		return $columns;
+	}
+
+	function getTypesFromColumns() {
+		$types = array();
+		$columns = $this->getColumnsFromTable();
+		foreach ($columns AS $column) {
+			$types[$column['Field']] = $column['Type'];
 		}
-		return $this->getKeys();
+		return $types;
 	}
 
 	function setData($formvars) {
@@ -150,10 +166,11 @@ class MyObject {
 	}
 
 	function getKVP() {
+		$types = $this->getTypesFromColumns();
 		$kvp = array();
 		if (is_array($this->data)) {
 			foreach($this->data AS $key => $value) {
-				$kvp[] = "`" . $key . "` = '" . $value . "'";
+				$kvp[] = "`" . $key . "` = " . ((stripos($types[$key], 'int') !== false AND $value == '') ? 'NULL' : "'" . $value . "'");
 			}
 		}
 		return $kvp;
@@ -231,6 +248,21 @@ class MyObject {
 		$this->debug->show('MyObject delete sql: ' . $sql, MyObject::$write_debug);
 		$result = mysql_query($sql);
 		return $result;
+	}
+
+	public function validate() {
+		$results = array();
+		foreach($this->validations AS $validation) {
+			$results[] = $this->validates($validation['attribute'], $validation['condition'], $validation['description'], $validation['options']);
+		}
+
+		$messages = array();
+		foreach($results AS $result) {
+			if (!empty($result)) {
+				$messages[] = $result;
+			}
+		}
+		return $messages;
 	}
 
 	public function validates($key, $condition, $msg = '', $option = '') {

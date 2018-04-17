@@ -17,6 +17,20 @@ function MapserverErrorHandler($errno, $errstr, $errfile, $errline){
 	return true;
 }
 
+function compare_layers($a, $b){
+	$a['alias'] = strtoupper($a['alias']);
+	$b['alias'] = strtoupper($b['alias']);
+	$a['alias'] = str_replace('Ä', 'A', $a['alias']);
+	$a['alias'] = str_replace('Ü', 'U', $a['alias']);
+	$a['alias'] = str_replace('Ö', 'O', $a['alias']);
+	$a['alias'] = str_replace('ß', 's', $a['alias']);
+	$b['alias'] = str_replace('Ä', 'A', $b['alias']);
+	$b['alias'] = str_replace('Ü', 'U', $b['alias']);
+	$b['alias'] = str_replace('Ö', 'O', $b['alias']);
+	$b['alias'] = str_replace('ß', 's', $b['alias']);	
+	return strcmp($a['alias'], $b['alias']);
+}
+
 function compare_names($a, $b){
 	return strcmp($a['name'], $b['name']);
 }
@@ -36,29 +50,9 @@ function compare_legendorder($a, $b){
 	else return 0;
 }
 
-function JSON_to_PG($json, $quote = ''){
-	if(is_array($json)){
-		for($i = 0; $i < count($json); $i++){
-			$elems[] = JSON_to_PG($json[$i], '"');
-		}
-		$pg = '{'.@implode(',', $elems).'}';
-	}
-	elseif(is_object($json)){
-		if($quote == '')$new_quote = '"';
-		else $new_quote = '\\'.$quote;
-		foreach($json as $elem){
-			$elems[] = JSON_to_PG($elem, $new_quote);
-		}
-		$pg = $quote.'('.implode(',', $elems).')'.$quote;
-	}
-	else{
-		$pg = $json;
-	}
-	return $pg;
-}
-
 function strip_pg_escape_string($string){
 	$string = str_replace("''", "'", $string);
+	$string = str_replace('\\\\', '\\', $string);		# \\ wir durch \ ersetzt
 	return $string;
 }
 
@@ -782,6 +776,7 @@ function umlaute_umwandeln($name){
 	$name = str_replace('+', '_', $name);
 	$name = str_replace(',', '_', $name);
 	$name = str_replace('*', '_', $name);
+	$name = str_replace('$', '', $name);
 	$name = str_replace('&', '_', $name);
   return $name;
 }
@@ -960,76 +955,6 @@ function showAlert($text) {
   ?>
   <script type="text/javascript">
     alert("<?php echo $text; ?>");
-  </script><?php
-}
-
-/**
-* Funktion gibt Meldungen aus
-* ToDo: Funktion wie folgt umbauen:
-* Funktion gibt Liste von Meldungen aus. Je nach Typ wird die Meldung
-* unterschiedlich dargestellt.
-* @param array[][] $messages Liste der Meldungen
-* 	Eine Meldung besteht aus einen assoziativen Array mit folgenden
-*		Bestandteilen:
-*		type: Type der Meldung. 'success' (default), 'warning', 'error'
-*		msg: Die Meldung, die als Text ausgegeben werden soll.
-*		Die Klassen zum Stylen der Meldungen lauten: 'message_' + type
-* @param boolean $fade Ob das Fenster zur Anzeige der Message von allein
-* 	verschwinden soll oder nicht.
-*/
-/*
-function showMessages($messages, $fade = true) { ?>
-	<script type="text/javascript">
-	var Msg = document.getElementById("message_box");
-			innerhtml = '';
-	if(Msg == undefined){
-		document.write('<div id="message_box" class="message_box_hidden"></div>');
-		var Msg = document.getElementById("message_box");
-	}
-	Msg.className = 'message_box_visible'; <?php
-	Msg.style.top = document.body.scrollTop + 350; <?php
-	$html = array_map($messages, function($m) {
-		return = "
-			<div class=\"message_row\">
-				<div class=\"message_type\">{$m['type']}</div>
-				<div class=\"message_{$m['type']}\">{$m['msg']}</div>
-			</div>
-		";
-	});
- 	if ($fade){ ?>
-		setTimeout(function() {Msg.className = 'message_box_hide';}, 1000);
-		setTimeout(function() {Msg.className = 'message_box_hidden';}, 3000);<?php
-	}
-	else {
-		$html .= "<br><br><input type=\"button\" onclick=\"this.parentNode.className = 'message_box_hidden';\" value=\"ok\">";
-	} ?>
-	Msg.innerHTML = <?php echo $html; ?>
-  </script><?php
-}
-*/
-function showMessage($text, $fade = true, $msg_type = 'warning') {
-  ?>
-  <script type="text/javascript">
-		var Msg = document.getElementById("message_box");
-				innerhtml = '';
-		if(Msg == undefined){
-			document.write('<div id="message_box" class="message_box_hidden"></div>');
-			var Msg = document.getElementById("message_box");
-		}
-		Msg.className = 'message_box_<?php echo $msg_type; ?>';<?php
-		if ($msg_type == 'error') { ?>
-			innerhtml += '<h2>Eingabefehler</h2>';
-			Msg.className = 'message_box_error';<?php
-		} ?>
-		Msg.style.top = document.body.scrollTop + 350;
-		innerhtml += '<?php echo $text; ?>';
-		<? if($fade == true){ ?>
-			setTimeout(function() {Msg.className = 'message_box_hide';},1000);
-			setTimeout(function() {Msg.className = 'message_box_hidden';},3000);
-		<? }else{ ?>
-			innerhtml += '<br><br><input type="button" onclick="this.parentNode.className = \'message_box_hidden\';" value="ok">';
-		<? } ?>
-		Msg.innerHTML = innerhtml;
   </script><?php
 }
 
@@ -1306,6 +1231,20 @@ function buildExpressionString($str) {
   # Beenden des Ausdrucks
   $expr.=')';
   return $expr;
+}
+
+function getNumPagesPdf($filepath){
+	exec('gs -q -dNODISPLAY -c "('.$filepath.') (r) file runpdfbegin pdfpagecount = quit"', $output);
+	return $output[0];
+}
+
+function WKT2UKO($wkt){
+	$uko = str_replace('MULTIPOLYGON(((', 'TYP UPO 2'.chr(10).'KOO ', $wkt);
+	$uko = str_replace(')),((', chr(10).'FL+'.chr(10).'KOO ', $uko);
+	$uko = str_replace('),(', chr(10).'FL-'.chr(10).'KOO ', $uko);
+	$uko = str_replace(',', chr(10).'KOO ', $uko);
+	$uko = str_replace(')))', '', $uko);
+	return $uko;
 }
 
 function rectObj2WKTPolygon($rect) {
@@ -1639,5 +1578,64 @@ function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last =
 		$parts = explode($delim2, trim($str_from_word_pos, $delim1));
 		return $parts[0];
 	}
+}
+
+function geometrytype_to_datatype($geometrytype) {
+	if (stripos($geometrytype, 'POINT') !== false) {
+		$datatype = 0;
+	}
+	elseif (stripos($geometrytype, 'LINESTRING') !== false) {
+		$datatype = 1;
+	}
+	elseif( stripos($geometrytype, 'POLYGON') !== false) {
+		$datatype = 2;
+	}
+	return $datatype;
+}
+
+/**
+*  Get the file size of any remote resource (using get_headers()), 
+*  either in bytes or - default - as human-readable formatted string.
+*
+*  @author  Stephan Schmitz <eyecatchup@gmail.com>
+*  @license MIT <http://eyecatchup.mit-license.org/>
+*  @url     <https://gist.github.com/eyecatchup/f26300ffd7e50a92bc4d>
+*
+*  @param   string   $url          Takes the remote object's URL.
+*  @param   boolean  $formatSize   Whether to return size in bytes or formatted.
+*  @param   boolean  $useHead      Whether to use HEAD requests. If false, uses GET.
+*  @return  string                 Returns human-readable formatted size
+*                                  or size in bytes (default: formatted).
+*/
+function get_remote_filesize($url, $formatSize = true, $useHead = true) {
+	if (false !== $useHead) {
+		stream_context_set_default(array('http' => array('method' => 'HEAD')));
+	}
+	$head = array_change_key_case(get_headers($url, 1));
+	// content-length of download (in bytes), read from Content-Length: field
+	$clen = isset($head['content-length']) ? $head['content-length'] : 0;
+
+	// cannot retrieve file size, return "-1"
+	if (!$clen) {
+		return -1;
+	}
+
+	if (!$formatSize) {
+		return $clen; // return size in bytes
+	}
+
+	$size = $clen;
+	switch ($clen) {
+		case $clen < 1024:
+		$size = $clen .' B'; break;
+		case $clen < 1048576:
+		$size = round($clen / 1024, 2) .' KiB'; break;
+		case $clen < 1073741824:
+		$size = round($clen / 1048576, 2) . ' MiB'; break;
+		case $clen < 1099511627776:
+		$size = round($clen / 1073741824, 2) . ' GiB'; break;
+	}
+
+	return $size; // return formatted size
 }
 ?>

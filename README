@@ -1,57 +1,30 @@
-Zusammenfassung
+ï»¿kvwmap ist ein Open Source WebGIS-Framework zur Erfassung, Verarbeitung, Analyse und PrÃ¤sentation 
+von raumbezogenen Informationen. Die Anwendung ist in PHP implementiert und verwendet verschiedene 
+Open-Source-GIS-Komponenten, wie den UMN-MapServer, PostGIS und OGR. kvwmap besitzt ein leistungsfÃ¤higes 
+Nutzer- und Rollensystem, sodass Geo- und Sachdaten rechtebasiert bearbeitet und prÃ¤sentiert werden kÃ¶nnen. 
+Ãœber eine Plugin-Schnittstelle ist es auÃŸerdem mÃ¶glich, eigene Fachschalen zu entwickeln.
 
-kvwmap ist ein System zur Erstellung einer Internet-GIS Anwendung. Es basiert auf
-PHP und der Nutzung des MapServers, einer MySQL und einer Postgres-Datenbank
-mit PostGIS Erweiterung. Die Benutzeroberfläche wird entsprechend der Einstellungen
-für die Benutzer und die Karteninhalte dynamisch über phpMapScript an die Clients
-ausgeliefert. Als Datengrundlage kann alles dienen, was vom UMN-MapServer gelesen
-wird.
+FÃ¼r mehr Informationen besuchen Sie:
 
-Zusätzlich zu den Kartenfunktionen des UMN-MapServers wie Navigation und
-Abfrage sind einige Fachanwendungen speziell für öffentliche Verwaltungen wie
-Kataster- und Vermessungsämter und Kreisverwaltungen eingebaut. Zusammen mit
-entsprechend bereitgestellten und zu bearbeitenden Fachdaten bilden die Funktionen
-Fachschalen. Eine Darstellung der aktuell verfügbaren Fachschalen finden Sie in der
-Dokumentation.
+http://www.kvwmap.de
 
-Hinweise zur Installation der Client-Server Anwendung finden sie für Unix unter
-README.UNIX und für Windows unter README.WIN32.
+Eine komplette Dokumentation finden Sie unter http://www.kvwmap.de/index.php/Admin-Dokumentation
 
-Die Liste der Änderungen als html-Version ist unter help/changelog.htm zu finden.
+Die Liste der Ã„nderungen finden Sie unter http://www.kvwmap.de/index.php/Changelog
 
-Für mehr Informationen und eine komplette Dokumentation besuchen Sie:
+Bugmeldungen sind unter http://www.kvwmap.de/index.php/Bug_kvwmap zu finden.
 
-https://www.kvwmap.de
-
-oder die Dokumentation unter help
-
-Für Hilfe, Hinweise und Bugmeldungen benutzen Sie bitte die Mailingliste:
+FÃ¼r Hilfe und Hinweise benutzen Sie bitte die Mailingliste:
 
 kvwmap-users@lists.sourceforge.net
 
-Durchsuchen können Sie die Liste unter:
+Durchsuchen kÃ¶nnen Sie die Liste unter:
 
-http://sourceforge.net/mailarchive/forum.php?forum=kvwmap-users
+https://sourceforge.net/p/kvwmap/mailman/kvwmap-users/
 
 kvwmap steht unter der GNU Public Licence.
 
-Der Download ist bei sourceforge unter:
-http://sourceforge.net/projects/kvwmap/files/kvwmap/
+Dienstleistungen zur Einrichtung und Weiterentwicklung werden von der Firma http://gdi-service.de angeboten.
 
-möglich oder seit neuestem bei github unter:
-https://github.com/srahn/kvwmap
-
-Bei der Entwicklung der Software waren unter anderem beteiligt: 
-
-Peter Korduan
-Stefan Rahn
-Sven Hüner
-Michael Müller
-Conrad Gühler
-Hauke Christoph
-
-Haupsächlich gefördert wurde das Projekt durch das Katasteramt Bad Doberan und
-verschiedene andere Landkreise im Land Mecklenburg/Vorpommern.
-
-Dienstleistungen zur Einrichtung und Weiterentwicklung werden von der Firma GDI-Service angeboten.
 peter.korduan@gdi-service.de
+stefan.rahn@gdi-service.de

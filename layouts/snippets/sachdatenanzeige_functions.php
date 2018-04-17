@@ -49,27 +49,42 @@ include('funktionen/input_check_functions.php');
 	buildJSONString = function(id, is_array){
 		var field = document.getElementById(id);		
 		values = new Array();
-		elements = document.getElementsByName(id);
+		elements = document.getElementsByClassName(id);
 		for(i = 0; i < elements.length; i++){
 			value = elements[i].value;
-			if(!is_array){
+			name = elements[i].name;
+			type = elements[i].type;
+			if(type == 'file'){		// Spezialfall bei Datei-Upload-Feldern:
+				if(value != ''){
+					value = 'file:'+name;		// wenn value vorhanden, wurde eine Datei ausgewählt, dann den Namen des Input-Feldes einsammeln + einem Prefix "file:"
+				}
+				else{
+					old_file_path = document.getElementsByName(name+'_alt');
+					if(old_file_path[0] != undefined)value = old_file_path[0].value;			// ansonsten den gespeicherten alten Dateipfad
+				}
+			}
+			if(!is_array){		// Datentyp
 				if(value == '')value = 'null';
 				else if(value.substring(0,1) != '{')value = '"'+value+'"';
 				values.push('"'+elements[i].title+'":'+value);
 			}			
-			else if(i > 0 && value != '')values.push(value);		// bei Arrays ist das erste Element ein Dummy
+			else if(i > 0){		// Array (hier ist das erste Element ein Dummy -> auslassen)
+				if(value != ''){
+					values.push(value);
+				}
+			}
 		}
 		if(!is_array)json = '{'+values.join()+'}';
 		else json = JSON.stringify(values);
-		field.value = json;		
+		field.value = json;
 		if(field.onchange)field.onchange();
 	}
-	
-	addArrayElement = function(fieldname){
+
+	addArrayElement = function(fieldname, form_element_type, oid){
 		outer_div = document.getElementById(fieldname+'_elements');
 		first_element = document.getElementById('div_'+fieldname+'_-1');
 		new_element = first_element.cloneNode(true);
-		last_id = outer_div.lastChild.id;
+		last_id = outer_div.lastElementChild.id;
 		parts = last_id.split('div_'+fieldname+'_');
 		new_id = parseInt(parts[1])+1;
 		new_element.id = 'div_'+fieldname+'_'+new_id;
@@ -81,10 +96,24 @@ include('funktionen/input_check_functions.php');
 	}
 	
 	removeArrayElement = function(fieldname, remove_element_id){
+		getFileAttributesInArray(remove_element_id);
 		outer_div = document.getElementById(fieldname+'_elements');
-		remove_element = document.getElementById(remove_element_id);
+		remove_element = document.getElementById('div_'+remove_element_id);
 		outer_div.removeChild(remove_element);
 		buildJSONString(fieldname, false);
+	}
+	
+	function getFileAttributesInArray(id){
+		elements = document.getElementsByClassName(id);
+		for(i = 0; i < elements.length; i++){
+			if(elements[i].type == 'file'){
+				old_file_path = document.getElementsByName(elements[i].name+'_alt');
+				if(old_file_path[0] != undefined)currentform.delete_documents.value += old_file_path[0].value+'|';
+			}
+			else{
+				getFileAttributesInArray(elements[i].id);
+			}
+		}
 	}
 	
 	nextdatasets = function(layer_id){
@@ -193,6 +222,7 @@ include('funktionen/input_check_functions.php');
 		currentform.go.value = 'Sachdaten_speichern';
 		document.getElementById('loader').style.display = '';
 		setTimeout('document.getElementById(\'loaderimg\').src=\'graphics/ajax-loader.gif\'', 50);
+		document.GUI.gle_changed.value = '';
 		overlay_submit(currentform, false);
 	}
 
@@ -217,6 +247,7 @@ include('funktionen/input_check_functions.php');
   	}
   	currentform.go.value = 'neuer_Layer_Datensatz_speichern';
 		document.getElementById('go_plus').disabled = true;
+		document.GUI.gle_changed.value = '';
   	overlay_submit(currentform, false);
 	}
 
@@ -322,17 +353,17 @@ include('funktionen/input_check_functions.php');
 		document.getElementById(subformid).innerHTML = '';
 	}
 	
-	switch_gle_view = function(layer_id){
+	switch_gle_view1 = function(layer_id){
 		currentform.chosen_layer_id.value = layer_id;
-		currentform.go.value='switch_gle_view';
+		currentform.go.value='toggle_gle_view';
 		overlay_submit(currentform, false);
 	}
 	
-	add_calendar = function(event, elementid){
+	add_calendar = function(event, elementid, type, setnow){
 		event.stopPropagation();
 		remove_calendar();
 		calendar = new CalendarJS();
-		calendar.init(elementid);
+		calendar.init(elementid, type, setnow);
 		document.getElementById('layer').calendar = calendar;
 	}
 	 
@@ -446,6 +477,17 @@ include('funktionen/input_check_functions.php');
 			window.location.href = 'index.php?'+params;		// aus normaler Sachdatenanzeige heraus --> normalen Kartenzoom machen
 		}
 	}
+	
+	zoom2wkt = function(wkt, epsg){
+		params = 'go=zoom2wkt&wkt='+wkt+'&epsg='+epsg;
+		if(currentform.id == 'GUI2'){					// aus overlay heraus --> Kartenzoom per Ajax machen
+			startwaiting();
+			get_map_ajax(params, '', '');
+		}
+		else{
+			window.location.href = 'index.php?'+params;		// aus normaler Sachdatenanzeige heraus --> normalen Kartenzoom machen
+		}
+	}	
 
 	check_for_selection = function(layer_id){
 		go = 'false';
@@ -488,13 +530,16 @@ include('funktionen/input_check_functions.php');
 
 	delete_document = function(attributename, layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data, reload){
 		if(confirm('Wollen Sie das ausgewählte Dokument wirklich löschen?')){
-			currentform.document_attributename.value = attributename;
+			field = document.getElementsByName(attributename);
+			field[0].type = 'hidden'; // bei einem Typ "file" kann man sonst den value nicht setzen
+			field[0].value = 'file:'+attributename;	// damit der JSON-String eines evtl. vorhandenen übergeordneten Attributs richtig gebildet wird
+			field[0].onchange(); // --||--
+			field[0].value = 'delete';
 			if(targetlayer_id != ''){		// SubForm-Layer
 				subsave_data(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data, reload);
-				currentform.document_attributename.value = '';
 			}
 			else{												// normaler Layer
-				currentform.go.value = 'Dokument_Loeschen';
+				currentform.go.value = 'Sachdaten_speichern';
 				currentform.submit();
 			}
 		}
@@ -617,14 +662,14 @@ include('funktionen/input_check_functions.php');
 		// attributes ist eine Liste von zu aktualisierenden Attributen, k die Nummer des Datensatzes und attributenamesarray ein Array aller Attribute im Formular
 		var attributenames = '';
 		var attributevalues = '';
-		for(i = 0; i < attributenamesarray.length; i++){
+		for(var i = 0; i < attributenamesarray.length; i++){
 			if(document.getElementById(layer_id+'_'+attributenamesarray[i]+'_'+k) != undefined){
 				attributenames += attributenamesarray[i] + '|';
 				attributevalues += document.getElementById(layer_id+'_'+attributenamesarray[i]+'_'+k).value + '|';
 			}
 		}
 		attribute = attributes.split(',');
-		for(i = 0; i < attribute.length; i++){
+		for(var i = 0; i < attribute.length; i++){
 			type = document.getElementById(layer_id+'_'+attribute[i]+'_'+k).type;
 			if(type == 'text'){action = 'setvalue'};
 			if(type == 'select-one'){action = 'sethtml'};

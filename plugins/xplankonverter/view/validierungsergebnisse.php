@@ -6,7 +6,6 @@ if ($this->Fehlermeldung!='') {
        include(LAYOUTPATH."snippets/Fehlermeldung.php");
 }
 ?>
-</div>
 <br>
 <script language="javascript" type="text/javascript">
 // formatter functions
@@ -28,8 +27,16 @@ function validierung_msg_correcture_formatter(value, row) {
 	}
 	if (row.regel_id)
 		output += '<br>zur Regel <a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=9&operator_id==&value_id=' + row.regel_id + '"><i class="fa fa-lg fa-pencil"></i></a>';
-	if (row.shape_gid)
-		output += ' zum Objekt <a href="index.php?go=Layer-Suche&selected_group_id=' + row.shape_layer_group_id + '"><i class="fa fa-lg fa-pencil"></i></a>';
+	if (row.shape_gid) {
+		if (row.regel_shp_layer_id) {
+			// Direkt zur Anzeige des Datensatzes
+			output += ' zum Objekt <a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=' + row.regel_shp_layer_id + '&operator_gid==&value_gid=' + row.shape_gid + '"><i class="fa fa-lg fa-pencil"></i></a>';
+		}
+		else {
+			// Zur Suche in der Layergruppe der Shape-Dateien der Konvertierung
+			output += ' zum Objekt <a href="index.php?go=Layer-Suche&selected_group_id=' + row.shape_layer_group_id + '"><i class="fa fa-lg fa-pencil"></i></a>';
+		}
+	}
 	return output;
 }
 
@@ -79,6 +86,13 @@ function validierungsergebnisseRowAttribs(row, index){
         data-sortable="true"
         class="text-right"
       >ID</th>
+      <th
+        data-field="regel_name"
+        data-visible="true"
+        data-switchable="true"
+        data-sortable="true"
+        class="text-left"
+      >Regel</th>
       <th
         data-field="validierung_name"
         data-visible="true"

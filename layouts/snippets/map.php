@@ -67,51 +67,39 @@ function showMapImage(){
 	document.GUI.target = '';
 }
 
-function slide_legend_in(evt) {
-	document.getElementById('legenddiv').className = 'slidinglegend_slidein';
-}
-
-function slide_legend_out(evt) {
-	if(window.outerWidth - evt.pageX > 100) {
-		document.getElementById('legenddiv').className = 'slidinglegend_slideout';
+function addRedlining(){
+	svgdoc = document.SVG.getSVGDocument();
+	var redlining = svgdoc.getElementById("redlining");
+	for(var i = 0; i < redlining.childNodes.length; i++){
+		child = redlining.childNodes[i];
+		switch(child.id){
+			case 'free_polygon':
+			case 'free_arrow':
+				if(child.transform.baseVal.numberOfItems > 0)child.transform.baseVal.consolidate();
+				for(var j = 0; j < child.points.numberOfItems; j++){		// Punkte in Weltkoordinaten umrechnen
+					point = child.points.getItem(j);
+					if(child.transform.baseVal.numberOfItems > 0)point = point.matrixTransform(child.transform.baseVal.getItem(0).matrix);
+					x = point.x*parseFloat(document.GUI.pixelsize.value) + parseFloat(document.GUI.minx.value);
+					y = document.GUI.maxy.value - (<? echo $this->map->height; ?> - point.y)*parseFloat(document.GUI.pixelsize.value);
+					if(j > 0)document.GUI.free_polygons.value += ','
+					document.GUI.free_polygons.value += x+' '+y;
+				}
+				document.GUI.free_polygons.value += '|'+child.getAttribute('style')+'||';
+				break;
+			case 'free_text':
+				x = child.getAttribute('x')*parseFloat(document.GUI.pixelsize.value) + parseFloat(document.GUI.minx.value);
+				y = document.GUI.maxy.value - (<? echo $this->map->height; ?> - (-1 * child.getAttribute('y')))*parseFloat(document.GUI.pixelsize.value);
+				document.GUI.free_texts.value += x+' '+y+'|';
+				for(var j = 0; j < child.childNodes.length; j++){
+					tspan = child.childNodes[j];
+					if(j > 0)document.GUI.free_texts.value += String.fromCharCode(13);
+					document.GUI.free_texts.value += tspan.textContent;
+				}
+				document.GUI.free_texts.value += '||';
+			break;
+		}
 	}
 }
-
-<? if (!ie_check()){ ?>					// Firefox, Chrome
-
-function switchlegend(){
-	if (document.getElementById('legenddiv').className == 'normallegend') {
-		document.getElementById('legenddiv').className = 'slidinglegend_slideout';
-		ahah('index.php', 'go=changeLegendDisplay&hide=1', new Array('', ''), new Array("", "execute_function"));
-		document.getElementById('LegendMinMax').src='<?php echo GRAPHICSPATH; ?>maximize_legend.png';
-		document.getElementById('LegendMinMax').title="Legende zeigen";
-	}
-	else {
-		document.getElementById('legenddiv').className = 'normallegend';
-		ahah('index.php', 'go=changeLegendDisplay&hide=0', new Array('', ''), new Array("", "execute_function"));
-		document.getElementById('LegendMinMax').src='<?php echo GRAPHICSPATH; ?>minimize_legend.png';
-		document.getElementById('LegendMinMax').title="Legende verstecken";
-	}
-}
-
-<? }else{ ?>						// IE
-
-function switchlegend(){
-	if(document.getElementById('legendTable').style.display == 'none'){
-		document.getElementById('legendTable').style.display='';
-		ahah('index.php', 'go=changeLegendDisplay&hide=0', new Array('', ''), new Array("", "execute_function"));
-		document.getElementById('LegendMinMax').src='<?php echo GRAPHICSPATH; ?>maximize.png';
-		document.getElementById('LegendMinMax').title="Legende verstecken";
-	}
-	else{
-		document.getElementById('legendTable').style.display='none';
-		ahah('index.php', 'go=changeLegendDisplay&hide=1', new Array('', ''), new Array("", "execute_function"));
-		document.getElementById('LegendMinMax').src='<?php echo GRAPHICSPATH; ?>minimize.png';
-		document.getElementById('LegendMinMax').title="Legende zeigen";
-	}
-}
-
-<? } ?>
 
 </script>
 <?
@@ -124,10 +112,11 @@ if($this->formvars['gps_follow'] == ''){
 	$this->formvars['gps_follow'] = 'off';
 }
 ?>
+
 <div id="map_frame" style="text-align: left;position: relative; width: <?php echo ($map_width + $legend_width); ?>px;">
 	<table cellpadding="0" cellspacing="0" border="0">
 		<tr>
-			<td>
+			<td valign="top">
 				<div id="map" style="float: left; width: <?php echo $map_width; ?>px; height: 100%">
 					<?php include(SNIPPETS . 'mapdiv.php'); ?>
 				</div>

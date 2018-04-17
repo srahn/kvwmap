@@ -89,7 +89,10 @@ class Bauauskunft {
       $sql = 'SELECT DISTINCT feld1, feld2, feld3, feld4, feld5, feld6, feld7, feld8, feld11, feld20 FROM probaug.bau_akten WHERE 1 = 1';
     }
     else{
-      $sql = 'SELECT * FROM probaug.bau_akten WHERE 1 = 1';
+      $sql = 'SELECT *, g.oid as geom_oid, g.status as geom_status ';
+			$sql.= 'FROM probaug.bau_akten ';
+			$sql.= 'LEFT JOIN probaug.bau_geometrien g ON feld1 = g.jahr AND feld3 = g.aktenzeichen ';
+			$sql.= 'WHERE 1 = 1';
     }
     if($searchvars['jahr'] != ''){$sql .= " AND Feld1 = '".$searchvars['jahr']."'";}
     if($searchvars['obergruppe'] != ''){$sql .= " AND Feld2 = '".$searchvars['obergruppe']."'";}
@@ -151,8 +154,8 @@ class Bauauskunft {
   
   function countbaudaten($searchvars){
   	$searchvars['withlimit'] = false;
-  	$ret = $this->getbaudaten($searchvars);
-  	return count($ret);
+  	$this->getbaudaten($searchvars);
+  	return count($this->baudata);
   }
   
   function formatFlurstKennz($FlurstKennz){

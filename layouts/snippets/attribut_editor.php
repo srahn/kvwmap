@@ -102,34 +102,29 @@ function toLayerEditor(){
 						<td align="center"><span class="fett">Anordnung</span></td>
 
 						<td align="center"><span class="fett">Beschriftung</span></td>
+						
+						<td align="center"><span class="fett">Bei der Suche</span></td>
 
-						<td align="center"><span class="fett">Bei der Suche</span></td><?php
+						<td align="center">
+							<span	class="fett" style="cursor: pointer">F&uuml;r neuen<br>Datensatz</span>
+						</td>
 
-						if (in_array($this->formvars['selected_layer_id'], $quicksearch_layer_ids)) { ?>
-							<td align="center"><span class="fett">Schnell-<br>suche</span></td><?php
+						<?php
+						if (in_array($this->formvars['selected_layer_id'], $quicksearch_layer_ids)){
+							$msg = "Für die Schnellsuche verwenden."; ?>
+							<td align="center">
+								<i class="fa fa-search" style="font-size:20px" title="<?php echo $msg; ?>"style="cursor: pointer"></i>
+							</td>	<?
 						}
 
-						$msg = "Zeigt Attribut im Rastertemplate an."; ?>
+						$msg = "In der Sachdatenanzeige sichtbar."; ?>
 						<td align="center">
-							<i
-								class="fa fa-windows"
-								title="<?php echo $msg; ?>"
-								onmouseover="message([{ 'type': 'notice', 'msg': '<?php echo $msg; ?>' }], 3000, 6000);"
-								style="cursor: pointer"
-							></i>
-						</td><?php
-
-						$msg = "Verwende Wert des Attributes nicht für neuen Datensatz"; ?>
+							<i class="fa fa-eye" style="font-size:23px" title="<?php echo $msg; ?>"style="cursor: pointer"></i>
+						</td>						
+						
+						<? $msg = "Im Rastertemplate als Vorschau-Attribut verwenden."; ?>
 						<td align="center">
-							<span
-								class="fa-stack fa-lg"
-								title="<?php echo $msg; ?>"
-								onmouseover="message([{ 'type': 'notice', 'msg' : '<?php echo $msg; ?>' }], 3000, 6000);"
-								style="cursor: pointer"
-							>
-								<i class="fa fa-plus-square fa-stack-1x"></i>
-							  <i class="fa fa-times fa-stack-1x text-danger" style="color: red; margin-left: 7px; margin-top: -9px"></i>
-							</span>
+							<i class="fa fa-windows" style="font-size:20px" title="<?php echo $msg; ?>"style="cursor: pointer"></i>
 						</td>
 
 					</tr><?php
@@ -215,7 +210,8 @@ function toLayerEditor(){
 							  		echo ' >Länge</option>
 										<option value="Winkel" ';
 							  		if($this->attributes['form_element_type'][$i] == 'Winkel'){echo 'selected';}
-							  		echo ' >Winkel</option>';
+							  		echo ' >Winkel</option>
+										<option value="Style"' . ($this->attributes['form_element_type'][$i] == 'Style' ? ' selected' : '') . '>Style</option>';
 							  	}
 							  	echo'
 							  	</select>';
@@ -287,7 +283,7 @@ function toLayerEditor(){
 											"this.setAttribute('style', 'outline: 1px solid lightgrey; border: none; width: 59px; height: 18px;' + this.options[this.selectedIndex].getAttribute('style'));"
 										); ?>
 							</td>
-
+							
 						  <td align="center" valign="top"><?php
 								echo FormObject::createSelectField(
 											'mandatory_' . $this->attributes['name'][$i],
@@ -296,7 +292,23 @@ function toLayerEditor(){
 												array('value' => 0, 'output' => 'anzeigen'),
 												array('value' => 1, 'output' => 'Pflichtangabe')
 											),
-											$this->attributes['mandatory'][$i]
+											$this->attributes['mandatory'][$i],
+											1,
+											'width: 80px'
+										); ?>
+							</td>
+
+							<td align="center" valign="top"><?php
+								echo FormObject::createSelectField(
+											'dont_use_for_new_' . $this->attributes['name'][$i],
+											array(
+												array('value' => -1, 'output' => 'nicht sichtbar'),
+												array('value' => 0, 'output' => 'anzeigen'),
+												array('value' => 1, 'output' => 'Werte nicht übernehmen')
+											),
+											$this->attributes['dont_use_for_new'][$i],
+											1,
+											'width: 80px'
 										); ?>
 							</td>
 
@@ -305,22 +317,22 @@ function toLayerEditor(){
 								<td align="center" valign="top">
 						  		<input name="quicksearch_<?php echo $this->attributes['name'][$i]; ?>" type="checkbox" value="1"<?php echo ($this->attributes['quicksearch'][$i] ? ' checked="true"' : ''); ?>>
 						  	</td><?php
-							} ?>
-
+							} ?>							
+							
+							<td align="center" valign="top">
+								<input type="checkbox" value="1" name="visible_<? echo $this->attributes['name'][$i]; ?>" <? echo ($this->attributes['visible'][$i] ? ' checked="true"' : ''); ?>>
+							</td>							
+							
 							<td align="center" valign="top">
 						  	<input name="raster_visibility_<?php echo $this->attributes['name'][$i]; ?>" type="checkbox" value="1"<?php echo ($this->attributes['raster_visibility'][$i] ? ' checked="true"' : ''); ?>>
 						  </td>
 
-							<td align="center" valign="top">
-							  <input name="dont_use_for_new_<?php echo $this->attributes['name'][$i]; ?>" type="checkbox" value="1"<?php echo ($this->attributes['dont_use_for_new'][$i] ? ' checked="true"' : ''); ?>>
-							</td>
-
-		        </tr><?php
-		    	}
-					if (count($this->attributes) > 0){ ?>
+						</tr><?php
+					}
+					if(count($this->attributes) > 0 AND ($this->layer['editable'] OR $this->formvars['selected_datatype_id'])){ ?>
 						<tr>
 							<td align="center" colspan="19"><br><br>
-								<input class="button" type="submit" name="go_plus" value="speichern">
+								<input type="submit" name="go_plus" value="speichern">
 							</td>
 						</tr><?php
 					}

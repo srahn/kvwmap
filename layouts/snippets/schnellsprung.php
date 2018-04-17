@@ -2,7 +2,7 @@
 	$layerset = $this->user->rolle->getLayer(LAYER_ID_SCHNELLSPRUNG);
 	if($layerset != NULL){ ?>
 
-<div style="margin: 2px;">
+<div style="margin: 4 4 2 4;">
 	<table style="border:1px solid lightgrey" width="100%">
 	<?
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);

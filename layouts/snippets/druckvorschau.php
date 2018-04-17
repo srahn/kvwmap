@@ -171,7 +171,7 @@ function preventflickering(evt){
   </tr>
 	<tr align="center"> 
     <td colspan="2"> 
-      <input class="button" type="button" value="Freitext hinzufügen" onclick="addfreetext();">
+      <input type="button" value="Freitext hinzufügen" onclick="addfreetext();">
     </td>
   </tr>
 <? } ?>
@@ -180,8 +180,8 @@ function preventflickering(evt){
   </tr>
   <tr align="center"> 
     <td colspan="2"> 
-      <input class="button" type="button" name="zurueck" value="zurück zum Druckausschnitt" onclick="goback();">
-      <input class="button" type="button" name="drucken" value="Drucken" onclick="print('<? echo $this->Docu->activeframe[0]['Name']; ?>', '<? echo $this->Docu->activeframe[0]['format']; ?>', <? echo $this->Docu->activeframe[0]['preis']; ?>);">
+      <input type="button" name="zurueck" value="zurück zum Druckausschnitt" onclick="goback();">
+      <input type="button" name="drucken" value="Drucken" onclick="print('<? echo $this->Docu->activeframe[0]['Name']; ?>', '<? echo $this->Docu->activeframe[0]['format']; ?>', <? echo $this->Docu->activeframe[0]['preis']; ?>);">
     </td>
   </tr>
   <tr>
@@ -215,6 +215,8 @@ function preventflickering(evt){
 <input type="hidden" name="mapwidth" value="<?php echo $this->map->width; ?>">
 <input type="hidden" name="mapheight" value="<?php echo $this->map->height; ?>">
 <input type="hidden" name="aktiverRahmen" value="<?php echo $this->formvars['aktiverRahmen']; ?>">
+<input type="hidden" name="free_polygons" value="<? echo $this->formvars['free_polygons'] ?>">
+<input type="hidden" name="free_texts" value="<? echo $this->formvars['free_texts'] ?>">
 
 <input type="hidden" name="mapwidth" value="<?php echo $this->Document->activeframe[0]['mapwidth']; ?>">
 <input type="hidden" name="mapheight" value="<?php echo $this->Document->activeframe[0]['mapheight']; ?>">
@@ -251,7 +253,7 @@ function preventflickering(evt){
 <?	$i++;
 	}
 	
-	$layerset = $this->layerset;
+	$layerset = $this->layerset['list'];
 	$scale = $this->map_scaledenom;
 	for($i = 0; $i < count($layerset); $i++){
 		if($layerset[$i]['aktivStatus'] != 0 

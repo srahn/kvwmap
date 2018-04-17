@@ -61,7 +61,7 @@ class Validierung extends PgObject {
 				'konvertierung_id' => $this->konvertierung_id,
 				'validierung_id' => $this->get('id'),
 				'status' => ($regeln_existieren ? 'Erfolg' : 'Warnung'),
-				'msg' => 'Es sind' . ($regeln_existieren ? '' : ' keine') . ' Regeln zur Konvertierung vorhanden.'
+				'msg' => 'Es sind' . ($regeln_existieren ? ' ' . count($regeln) : ' keine') . ' Regeln zur Konvertierung vorhanden.'
 			)
 		);
 		return $regeln_existieren;
@@ -81,7 +81,6 @@ class Validierung extends PgObject {
 
 		if (!$result) {
 			$validierungsergebnis = new Validierungsergebnis($this->gui);
-					echo '<p>==' .$sql . '<br>==<p>';
 			$validierungsergebnis->create(
 				array(
 					'konvertierung_id' => $this->konvertierung_id,
@@ -222,14 +221,14 @@ class Validierung extends PgObject {
 		$sql = str_ireplace(
 			'where',
 			"where
-				NOT st_isvalid(the_geom) AND
+				NOT st_isvalid(the_geom) AND (
 			",
 			$sql
 		);
 		$this->debug->show('<br>sql mit where st_isvalid: ' . $sql, Validierung::$write_debug);
 
 #		$sql = "SET search_path=xplan_shapes_" . $konvertierung->get('id') . ", public; " . substr($sql, 0, stripos($sql, 'returning'));
-		$sql = substr($sql, 0, stripos($sql, 'returning'));
+		$sql = substr($sql, 0, stripos($sql, 'returning')) . ')';
 
 		$this->debug->show('Sql für Prüfung geom_isvalid:<br>' . $sql, Validierung::$write_debug);
 
@@ -277,7 +276,8 @@ class Validierung extends PgObject {
 					'konvertierung_id' => $konvertierung->get('id'),
 					'validierung_id' => $this->get('id'),
 					'status' => 'Erfolg',
-					'msg' => 'Alle Geometrien der Regel sind valide.'
+					'msg' => 'Alle Geometrien der Regel sind valide.',
+					'regel_id' => $regel->get('id')
 				)
 			);
 		}
@@ -311,8 +311,8 @@ class Validierung extends PgObject {
 			'select',
 			"select
 				gid,
-				NOT st_within(st_transform(the_geom, " . $konvertierung->get('output_epsg') . "), st_transform(rp_plan.raeumlichergeltungsbereich, " . $konvertierung->get('output_epsg') . ")) AS ausserhalb,
-				st_distance(st_transform(the_geom, " . $konvertierung->get('output_epsg') . "), st_transform(rp_plan.raeumlichergeltungsbereich, " . $konvertierung->get('output_epsg') . "))/1000 AS distance,
+				NOT st_within(the_geom, rp_plan.raeumlichergeltungsbereich) AS ausserhalb,
+				st_distance(ST_Transform(the_geom, 25832), rp_plan.raeumlichergeltungsbereich)/1000 AS distance,
 			",
 			$sql
 		);
@@ -332,14 +332,15 @@ class Validierung extends PgObject {
 		$sql = str_ireplace(
 			'where',
 			"where
-				rp_plan.konvertierung_id = " . $konvertierung->get('id') . " AND
+				rp_plan.konvertierung_id = " . $konvertierung->get('id') . " AND 
+				NOT st_within(the_geom, raeumlichergeltungsbereich) AND (
 			",
 			$sql
 		);
 		$this->debug->show('<br>sql mit where Klausel für rp_plan: ' . $sql, Validierung::$write_debug);
 
 		#$sql = "SET search_path=xplan_shapes_" . $konvertierung->get('id') . ", public; " . 
-		$sql = substr($sql, 0, stripos($sql, 'returning'));
+		$sql = substr($sql, 0, stripos($sql, 'returning')) . ')';
 		$this->debug->show('<br>sql ohne returning: ' . $sql, Validierung::$write_debug);
 
 		$this->debug->show('Sql für Prüfung geom_within_plan:<br>' . $sql, false);
@@ -390,7 +391,8 @@ class Validierung extends PgObject {
 					'konvertierung_id' => $konvertierung->get('id'),
 					'validierung_id' => $this->get('id'),
 					'status' => 'Erfolg',
-					'msg' => 'Alle Objekte der Regel liegen im Planbereich.'
+					'msg' => 'Alle Objekte der Regel liegen im Planbereich.',
+					'regel_id' => $regel->get('id')
 				)
 			);
 		}

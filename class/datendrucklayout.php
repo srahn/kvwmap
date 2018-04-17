@@ -63,15 +63,16 @@ class ddl {
 	function add_freetexts($i, $offsetx, $type, $pagenumber = NULL, $pagecount = NULL){
 		if(count($this->remaining_freetexts) == 0)return;
     for($j = 0; $j < count($this->layout['texts']); $j++){
-			if($type != 'everypage' AND $this->page_overflow){
-				$this->pdf->reopenObject($this->page_id_before_sublayout);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
-				#if($this->layout['type'] == 0)$this->page_overflow = false;			# if ???							wegen dem Geometrie-Attribut auskommentiert
-			}
 			# der Freitext wurde noch nicht geschrieben und ist entweder ein fester Freitext oder ein fortlaufender oder einer, der auf jeder Seite erscheinen soll
     	if(in_array($this->layout['texts'][$j]['id'], $this->remaining_freetexts) AND $this->layout['texts'][$j]['posy'] != ''){	# nur Freitexte mit einem y-Wert werden geschrieben
 				if(($type == 'fixed' AND $this->layout['texts'][$j]['type'] != 2 AND ($this->layout['type'] == 0 OR $this->layout['texts'][$j]['type'] == 1)) 
 				OR ($type == 'running' AND $this->layout['type'] != 0 AND $this->layout['texts'][$j]['type'] == 0)
-				OR ($type == 'everypage' AND $this->layout['texts'][$j]['type'] == 2)){									
+				OR ($type == 'everypage' AND $this->layout['texts'][$j]['type'] == 2)){
+					if($type != 'everypage' AND $this->page_overflow){
+						$this->pdf->reopenObject($this->page_id_before_sublayout);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
+						$this->i_on_page = 0;		# evtl. nicht 0 setzen, sondern ein eigenes i_on_page für jede Seite machen
+						#$this->page_overflow = false;		# muss auskommentiert bleiben, da sonst Fehler in EN-Liste1
+					}
 					$this->pdf->selectFont(WWWROOT . APPLVERSION . 'fonts/PDFClass/' . $this->layout['texts'][$j]['font']);								
 					$x = $this->layout['texts'][$j]['posx'];
 					$y = $this->layout['texts'][$j]['posy'];
@@ -108,13 +109,13 @@ class ddl {
 					}
 					$text = $this->substituteFreitext($this->layout['texts'][$j]['text'], $i, $pagenumber, $pagecount);					
 					$y = $this->putText($text, $this->layout['texts'][$j]['size'], NULL, $x, $y, $offsetx);
-					if(!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $y)$this->miny[$this->pdf->currentContents] = $y;		# miny ist die unterste y-Position das aktuellen Datensatzes 
+					if(!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $y)$this->miny[$this->pdf->currentContents] = $y;		# miny ist die unterste y-Position das aktuellen Datensatzes 					
+					if($type != 'everypage' AND $this->pdf->currentContents != end($this->pdf->objects['3']['info']['pages'])+1)$this->pdf->closeObject();			# falls in eine alte Seite geschrieben wurde, zurückkehren
 				}
 				else{
 					$remaining_freetexts[] = $this->layout['texts'][$j]['id'];
 				}
-			}
-			if($type != 'everypage' AND $this->pdf->currentContents != end($this->pdf->objects['3']['info']['pages'])+1)$this->pdf->closeObject();			# falls in eine alte Seite geschrieben wurde, zurückkehren
+			}			
 	  }
 		return $remaining_freetexts;
 	}
@@ -403,6 +404,7 @@ class ddl {
 					# Rechteck um die Karte
 					$this->pdf->rectangle($x, $y, $this->layout['elements'][$attributes['name'][$j]]['width'], $this->layout['elements'][$attributes['name'][$j]]['width']);
 					if(!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $y)$this->miny[$this->pdf->currentContents] = $y;
+					if($this->pdf->currentContents != end($this->pdf->objects['3']['info']['pages'])+1)$this->pdf->closeObject();									# falls in eine alte Seite geschrieben wurde, zurückkehren
 				}
 				unset($this->remaining_attributes[$attributes['name'][$j]]);		# das Attribut aus den remaining_attributes entfernen
 			}
@@ -479,13 +481,21 @@ class ddl {
 		$text = str_replace('$pagenumber', $pagenumber, $text);
 		$text = str_replace('$pagecount', $pagecount, $text);		
 		$text = str_replace(';', chr(10), $text);
-		for($j = 0; $j < count($this->attributes['name']); $j++){
-			$text = str_replace('$'.$this->attributes['name'][$j], $this->get_result_value_output($i, $j, true), $text);
+		if(strpos($text, '${') !== false){
+			for($j = 0; $j < count($this->attributes['name']); $j++){
+				$text = str_replace('${'.$this->attributes['name'][$j].'}', $this->get_result_value_output($i, $j, true), $text);
+			}
+		}
+		if(strpos($text, '$') !== false){
+			for($j = 0; $j < count($this->attributes['name']); $j++){
+				$text = str_replace('$'.$this->attributes['name'][$j], $this->get_result_value_output($i, $j, true), $text);
+			}
 		}
   	return $text;
   }
   
-  function get_result_value_output($i, $j, $preview){		# $i ist der result-counter, $j ist der attribute-counter
+  function get_result_value_output($i, $j, $preview){
+				# $i ist der result-counter, $j ist der attribute-counter
 		if($this->result[$i][$this->attributes['name'][$j]] == '')$this->result[$i][$this->attributes['name'][$j]] = ' ';		# wenns der result-value leer ist, ein Leerzeichen setzen, wegen der relativen Positionierung
 		switch ($this->attributes['form_element_type'][$j]){
 			case 'Auswahlfeld' : {
@@ -579,7 +589,7 @@ class ddl {
 				$this->add_static_elements($offsetx);
     	}
 			$this->yoffset_onpage = $this->maxy - $this->miny[$lastpage];			# der Offset mit dem die Elemente beim Untereinander-Typ nach unten versetzt werden
-			if($this->layout['type'] != 0 AND $this->miny[$lastpage] != '' AND $this->miny[$lastpage] < 60){		# neue Seite beim Untereinander-Typ oder eingebettet-Typ und Seitenüberlauf
+			if($this->layout['type'] != 0 AND $this->miny[$lastpage] != '' AND ($this->miny[$lastpage] - $this->layout['gap']) < 60){		# neue Seite beim Untereinander-Typ oder eingebettet-Typ und Seitenüberlauf
 				$this->i_on_page = 0;
 				#$this->maxy = 0;
 				if(!$this->initial_yoffset)$this->initial_yoffset = 780-$this->maxy;			# der Offset von oben gesehen, mit dem das erste fortlaufende Element auf der ersten Seite beginnt; wird benutzt, um die fortlaufenden Elemente ab der 2. Seite oben beginnen zu lassen
@@ -600,6 +610,13 @@ class ddl {
 					$this->remaining_lines[] = $this->layout['lines'][$j]['id'];		# zu Beginn jedes Datensatzes sind alle Linien noch zu schreiben, bei fortlaufenden Layouts aber nur die fortlaufenden Linien
 				}
 			}
+
+			################# fortlaufende Freitexte schreiben ###############
+			# (die festen Freitexte werden vor jedem Attribut geschrieben, da ein Attribut zu einem Seitenüberlauf führen können)
+			$this->remaining_freetexts = $this->add_freetexts($i, $offsetx, 'running');
+			$this->remaining_lines = $this->add_lines($offsetx, 'running');
+			################# fortlaufende Freitexte schreiben ###############			
+			
 			################# Daten schreiben ###############
 			for($j = 0; $j < count($this->attributes['name']); $j++){
 				if($this->layout['elements'][$attributes['name'][$j]]['ypos'] > 0){
@@ -666,9 +683,20 @@ class ddl {
 			# Freitexte hinzufügen, die auf jeder Seite erscheinen sollen (Seitennummerierung etc.)
 			$this->add_everypage_elements();
 			$dateipfad=IMAGEPATH;
-			$currenttime = date('Y-m-d_H_i_s',time());
-			$name = umlaute_umwandeln($this->user->Name);    
-			$dateiname = $name.'-'.$currenttime.'.pdf';
+			if($this->layout['filename'] != ''){
+				$dateiname = $this->layout['filename'];
+				for($j = 0; $j < count($this->attributes['name']); $j++){
+					$dateiname = str_replace('${'.$this->attributes['name'][$j].'}', $this->get_result_value_output(0, $j, true), $dateiname);
+				}
+				for($j = 0; $j < count($this->attributes['name']); $j++){
+					$dateiname = str_replace('$'.$this->attributes['name'][$j], $this->get_result_value_output(0, $j, true), $dateiname);
+				}
+			}
+			if($dateiname == ''){
+				$currenttime = date('Y-m-d_H_i_s',time());
+				$dateiname = umlaute_umwandeln($this->user->Name.'-'.$currenttime);
+			}
+			$dateiname = $dateiname.'.pdf';
 			$this->outputfile = $dateiname;
 			$fp=fopen($dateipfad.$dateiname,'wb');
 			fwrite($fp,$this->pdf->ezOutput());
@@ -724,6 +752,8 @@ class ddl {
       if($formvars['type'] != '')$sql .= ", `type` = ".(int)$formvars['type'];
       else $sql .= ", `type` = NULL";
 			$sql .= ", `no_record_splitting` = ".(int)$formvars['no_record_splitting'];
+			if($formvars['filename'])$sql .= ", `filename` = '".$formvars['filename']."'";
+      else $sql .= ", `filename` = NULL";			
       if($_files['bgsrc']['name']){
         $nachDatei = DRUCKRAHMEN_PATH.$_files['bgsrc']['name'];
         if (move_uploaded_file($_files['bgsrc']['tmp_name'],$nachDatei)) {
@@ -854,6 +884,8 @@ class ddl {
       if($formvars['type'])$sql .= ", `type` = ".(int)$formvars['type'];
       else $sql .= ", `type` = NULL";
 			$sql .= ", `no_record_splitting` = ".(int)$formvars['no_record_splitting'];
+			if($formvars['filename'])$sql .= ", `filename` = '".$formvars['filename']."'";
+      else $sql .= ", `filename` = NULL";			
       if($_files['bgsrc']['name']){
         $nachDatei = DRUCKRAHMEN_PATH.$_files['bgsrc']['name'];
         if (move_uploaded_file($_files['bgsrc']['tmp_name'],$nachDatei)) {
@@ -940,9 +972,16 @@ class ddl {
     }
   }
  	
- 	function load_layouts($stelle_id, $ddl_id, $layer_id, $types){
-    $sql = 'SELECT DISTINCT datendrucklayouts.* FROM datendrucklayouts';
-    if($ddl_id AND !$stelle_id){$sql .= ' WHERE datendrucklayouts.id ='.$ddl_id;}
+	function load_layouts($stelle_id, $ddl_id, $layer_id, $types, $return = '') {
+		$sql = "
+			SELECT DISTINCT
+				datendrucklayouts.*
+			FROM
+				datendrucklayouts
+		";
+    if($ddl_id AND !$stelle_id){
+			$sql .= ' WHERE datendrucklayouts.id ='.$ddl_id;
+		}
     if($stelle_id AND !$layer_id AND !$ddl_id){
     	$sql.= ', ddl2stelle WHERE ddl2stelle.ddl_id = datendrucklayouts.id';
     	$sql .= ' AND ddl2stelle.stelle_id = '.$stelle_id;
@@ -970,12 +1009,17 @@ class ddl {
     if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     $i = 0;
     while($rs=mysql_fetch_array($query)){
-      $layouts[] = $rs;
-      #$layouts[0]['bilder'] = $this->load_bilder($rs['id']);
-      $layouts[0]['elements'] = $this->load_elements($rs['id']);
-      $layouts[0]['texts'] = $this->load_texts($rs['id']);
-			$layouts[0]['lines'] = $this->load_lines($rs['id']);
-      $i++;
+			if ($return == 'only_ids') {
+				$layouts[] = $rs['id'];
+			}
+			else {
+				$layouts[] = $rs;
+				#$layouts[0]['bilder'] = $this->load_bilder($rs['id']);
+				$layouts[0]['elements'] = $this->load_elements($rs['id']);
+				$layouts[0]['texts'] = $this->load_texts($rs['id']);
+				$layouts[0]['lines'] = $this->load_lines($rs['id']);
+				$i++;
+			}
     }
     return $layouts;
   }

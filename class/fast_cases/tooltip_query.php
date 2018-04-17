@@ -145,7 +145,7 @@ class GUI {
 		$this->scaleUnitSwitchScale = 239210;
 		$this->trigger_functions = array();
   }
-
+	
 	function loadMultiLingualText($language) {
     #echo 'In der Rolle eingestellte Sprache: '.$GUI->user->rolle->language;
     $this->Stelle->language=$language;

@@ -18,6 +18,38 @@ function ImageLoadFailed(id) {
 var currentform;
 var doit;
 
+function preventSubmit(){
+	document.GUI.onsubmit = function(){return false;};
+}
+
+function allowSubmit(){
+	document.GUI.onsubmit = function(){};
+}
+
+function printMap(){
+	if(typeof addRedlining != 'undefined'){
+		addRedlining();
+	}
+	document.GUI.go.value = 'Druckausschnittswahl';
+	document.GUI.submit();
+}
+
+function checkForUnsavedChanges(event){
+	var sure = true;
+	if(document.GUI.gle_changed.value == 1){
+		sure = confirm('Es gibt noch ungespeicherte Datensätze. Wollen Sie dennoch fortfahren?');
+	}
+	if(!sure){
+		if(event != undefined)event.preventDefault();
+		preventSubmit();
+	}
+	else{
+		document.GUI.gle_changed.value = 0;
+		allowSubmit();
+	}
+	return sure;
+}
+
 function startwaiting(lock) {
 	var lock = lock || false;
 	document.GUI.stopnavigation.value = 1;
@@ -66,7 +98,7 @@ function resizemap2window(){
 * or as a single string
 */
 function message(messages, t_hide, t_hidden) {
-	if (typeof(t_hide) === 'undefined') t_hide = 1000;
+	if (typeof(t_hide) === 'undefined') t_hide = 3000;
 	if (typeof(t_hidden) === 'undefined') t_hidden = 3000;
 	var msgDiv = $("#message_box");
 	types = {
@@ -117,8 +149,7 @@ function message(messages, t_hide, t_hidden) {
 	msgDiv.attr('class', 'message_box');
 
 	if (!confirmMsgDiv) {
-		setTimeout(function() {msgDiv.addClass('message_box_hide');}, t_hide);
-//		setTimeout(function() {msgDiv.addClass('message_box_hidden');}, t_hidden);
+		msgDiv.fadeOut(t_hide);
 	}
 	else {
 		msgDiv.append('<input type="button" onclick="$(\'#message_box\').addClass(\'message_box_hidden\');" value="ok" style="margin-top: 10px;">');
@@ -189,6 +220,8 @@ function dragstop(){
 	if(dragobjekt){
 		document.GUI.overlayx.value = parseInt(dragobjekt.style.left);
 		document.GUI.overlayy.value = parseInt(dragobjekt.style.top);
+		if(document.GUI.overlayx.value < 0)document.GUI.overlayx.value = 10;
+		if(window.innerHeight - 20 - document.GUI.overlayy.value < 0)document.GUI.overlayy.value = window.innerHeight - 20;
 		ahah('index.php', 'go=saveOverlayPosition&overlayx='+document.GUI.overlayx.value+'&overlayy='+document.GUI.overlayy.value, new Array(''), new Array(""));
 	}
   dragobjekt = null;
@@ -260,8 +293,10 @@ function activate_overlay(){
 }
 
 function deactivate_overlay(){
-	document.getElementById('contentdiv').scrollTop = 0;
-	document.getElementById('overlaydiv').style.display='none';
+	if(checkForUnsavedChanges()){
+		document.getElementById('contentdiv').scrollTop = 0;
+		document.getElementById('overlaydiv').style.display='none';
+	}
 }
 
 function urlstring2formdata(formdata, string){
@@ -569,6 +604,146 @@ function resetLayerOptions(layer_id){
 	document.GUI.submit();
 }
 
+function openLegendOptions(){
+	document.getElementById('legendOptions').style.display = 'inline-block';
+}
+
+function closeLegendOptions(){
+	document.getElementById('legendOptions').style.display = 'none';
+}
+
+function saveLegendOptions(){
+	document.GUI.go.value = 'saveLegendOptions';
+	document.GUI.submit();
+}
+
+function resetLegendOptions(){
+	document.GUI.go.value = 'resetLegendOptions';
+	document.GUI.submit();
+}
+
+function toggleDrawingOrderForm(){
+	drawingOrderForm = document.getElementById('drawingOrderForm');
+	if(drawingOrderForm.innerHTML == ''){
+		ahah('index.php', 'go=loadDrawingOrderForm', new Array(drawingOrderForm), new Array('sethtml'));
+	}
+	else{
+		drawingOrderForm.innerHTML = '';
+	}
+}
+
+
+// --- html5 Drag and Drop der Layer im drawingOrderForm --- //
+ 
+var dragSrcEl = null;
+
+function handleDragStart(e){
+	var dropzones = document.querySelectorAll('#drawingOrderForm .drawingOrderFormDropZone');
+	[].forEach.call(dropzones, function (dropzone){		// DropZones groesser machen
+    dropzone.classList.add('ready');
+  });
+	dragSrcEl = e.target;
+  if(browser == 'firefox')e.dataTransfer.setData('text/html', null);	
+	dragSrcEl.classList.add('dragging');
+	setTimeout(function(){dragSrcEl.classList.add('picked');}, 1);
+}
+
+function handleDragOver(e){
+  if(e.preventDefault)e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  return false;
+}
+
+function handleDragEnter(e){
+  e.target.classList.add('over');
+}
+
+function handleDragLeave(e){
+  e.target.classList.remove('over');
+}
+
+function handleDrop(e){
+  if (e.stopPropagation)e.stopPropagation();
+	dstDropZone = e.target;
+	srcDropZone = dragSrcEl.nextElementSibling;
+	dstDropZone.classList.remove('over');
+	dragSrcEl.classList.remove('dragging');
+	dragSrcEl.classList.remove('picked');
+	if(srcDropZone != dstDropZone){
+		dragSrcEl.parentNode.insertBefore(dragSrcEl, dstDropZone);		// layer verschieben
+		dragSrcEl.parentNode.insertBefore(srcDropZone, dragSrcEl);		// dropzone verschieben
+	}
+  return false;
+}
+
+function handleDragEnd(e){
+	dragSrcEl.classList.remove('dragging');
+	dragSrcEl.classList.remove('picked');
+	var dropzones = document.querySelectorAll('#drawingOrderForm .drawingOrderFormDropZone');
+	[].forEach.call(dropzones, function (dropzone){		// DropZones kleiner machen
+    dropzone.classList.remove('ready');
+  });
+}
+
+// --- html5 Drag and Drop der Layer im drawingOrderForm --- //
+ 
+
+<?
+	if($this->user->rolle->legendtype == 1){ # alphabetisch sortierte Legende
+		echo 'layernames = new Array();';
+		$layercount = count($this->sorted_layerset);
+		for($j = 0; $j < $layercount; $j++){
+			echo 'layernames['.$j.'] = \''.$this->sorted_layerset[$j]['alias'].'\';';
+		}
+?>
+		function jumpToLayer(searchtext){
+			if(searchtext.length > 1){
+				found = false;
+				legend_top = document.getElementById('scrolldiv').getBoundingClientRect().top;
+				for(var i = 0; i < layernames.length; i++){
+					if(layernames[i].toLowerCase().search(searchtext.toLowerCase()) != -1){
+						layer = document.getElementById(layernames[i].replace('-', '_'));
+						layer.classList.remove('legend_layer_highlight');
+						void layer.offsetWidth;
+						layer.classList.add('legend_layer_highlight');
+						if(!found){
+							document.getElementById('scrolldiv').style.scrollBehavior = 'smooth';		// erst hier und nicht im css, damit das Scrollen beim Laden nicht animiert wird
+							document.getElementById('scrolldiv').scrollTop = document.getElementById('scrolldiv').scrollTop + (layer.getBoundingClientRect().top - legend_top);
+						}
+						found = true;
+					}
+				}
+			}
+		}
+<?
+	}
+?>
+
+function slide_legend_in(evt) {
+	document.getElementById('legenddiv').className = 'slidinglegend_slidein';
+}
+
+function slide_legend_out(evt) {
+	if(window.outerWidth - evt.pageX > 100) {
+		document.getElementById('legenddiv').className = 'slidinglegend_slideout';
+	}
+}
+
+function switchlegend(){
+	if (document.getElementById('legenddiv').className == 'normallegend') {
+		document.getElementById('legenddiv').className = 'slidinglegend_slideout';
+		ahah('index.php', 'go=changeLegendDisplay&hide=1', new Array('', ''), new Array("", "execute_function"));
+		document.getElementById('LegendMinMax').src='<?php echo GRAPHICSPATH; ?>maximize_legend.png';
+		document.getElementById('LegendMinMax').title="Legende zeigen";
+	}
+	else {
+		document.getElementById('legenddiv').className = 'normallegend';
+		ahah('index.php', 'go=changeLegendDisplay&hide=0', new Array('', ''), new Array("", "execute_function"));
+		document.getElementById('LegendMinMax').src='<?php echo GRAPHICSPATH; ?>minimize_legend.png';
+		document.getElementById('LegendMinMax').title="Legende verstecken";
+	}
+}
+
 function home() {
 	document.GUI.go.value = '';
 	document.GUI.submit();
@@ -580,7 +755,7 @@ function scrollLayerOptions(){
 		legend_top = document.getElementById('legenddiv').getBoundingClientRect().top;
 		legend_bottom = document.getElementById('legenddiv').getBoundingClientRect().bottom;
 		posy = document.getElementById('options_'+layer_id).getBoundingClientRect().top;
-		if(posy < legend_bottom - 150 && posy > legend_top + 10)document.getElementById('options_content_'+layer_id).style.top = posy - (13+legend_top);		
+		if(posy < legend_bottom - 180 && posy > legend_top + 10)document.getElementById('options_content_'+layer_id).style.top = posy - (13+legend_top);		
 	}
 }
 

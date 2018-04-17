@@ -10,7 +10,7 @@
 			</div>
 		</div>
 		<a name="oben"></a>
-		<table width="900" align="center" border="0" cellspacing="0" cellpadding="0">
+		<table id="gui-table" border="0" cellspacing="0" cellpadding="0">
 			<tr>
 				<td align="center" valign="top">
 					<form name="GUI" enctype="multipart/form-data" method="post" action="index.php" id="GUI">
@@ -23,11 +23,11 @@
 								</td>
 							</tr>
 							<tr>
-								<td id="menuebar" valign="top" align="center" background="<?php echo GRAPHICSPATH."bg.gif"; ?>" style="border: 1px solid; border-color: #FFFFFF #CCCCCC #CCCCCC; border-bottom: 0px"><?php
+								<td id="menuebar" valign="top" align="center"><?php
 									include(SNIPPETS . "menue.php"); ?>
 								</td>
-								<td align="center" width="100%" valign="top" background="<?php echo GRAPHICSPATH; ?>bg.gif" style="border-right: 1px solid; border-color: #FFFFFF #CCCCCC #CCCCCC;">
-									<div style=" position: relative; overflow: hidden; ">
+								<td align="center" width="100%" height="100%" valign="top" background="<?php echo GRAPHICSPATH; ?>bg.gif" style="border-right: 1px solid; border-color: #FFFFFF #CCCCCC #CCCCCC;">
+									<div style="height:100%; position: relative; overflow: hidden; ">		<!-- overflow wird für rausfliegende Legende benötigt und height:100% für den Box-Shadow unter der MapFunctionsBar und Legende -->
 										<script type="text/javascript">
 											currentform = document.GUI;
 											<? $this->currentform = 'document.GUI'; ?>
@@ -54,6 +54,7 @@
 						<input type="hidden" name="browserwidth">
 						<input type="hidden" name="browserheight">
 						<input type="hidden" name="stopnavigation" value="0">
+						<input type="hidden" name="gle_changed" value="">
 					</form><?
 					if ($this->user->rolle->querymode == 1) {
 						include(LAYOUTPATH.'snippets/overlayframe.php');
@@ -64,7 +65,7 @@
 				<tr>
 					<td>
 						<div id="log">
-							<?php echo readfile('/var/www/logs/2.6_' . $this->user->login_name . '_debug.htm');  ?>
+							<?php echo readfile('/var/www/logs/' . VERSION . '_' . $this->user->login_name . '_debug.htm');  ?>
 						</div>
 					</td>
 				</tr><?php

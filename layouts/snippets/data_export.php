@@ -8,6 +8,11 @@
 			"geom_attribute" => "the_geom",
 			"geom_type" => ""
 		),
+		"DXF" => array(
+			"export_privileg" => 1,
+			"geom_attribute" => "the_geom",
+			"geom_type" => ""
+		),		
 		"GML" => array(
 			"export_privileg" => 1,
 			"geom_attribute" => "the_geom",
@@ -218,8 +223,8 @@ $j=0;
 						</table>
 					</div><?
 				}
-				if ($this->data_import_export->layerdaten['export_privileg'][$selectindex] == 1 AND $this->data_import_export->attributes['the_geom'] != ''){ ?>
-					<div id="coord_div" style="padding-top:1px; padding-bottom:5px; margin-left: 15px;<? if($this->formvars['export_format'] == 'CSV')echo 'display:none'; ?>">
+				if ($this->data_import_export->attributes['the_geom'] != ''){ ?>
+					<div id="coord_div" style="padding-top:1px; padding-bottom:5px; margin-left: 15px;<? if($this->formvars['export_format'] == 'CSV' OR $this->data_import_export->layerdaten['export_privileg'][$selectindex] != 1)echo 'display:none'; ?>">
 						<table>
 							<tr>
 								<td><? echo $strTransformInto; ?>:</td>
@@ -255,9 +260,12 @@ $j=0;
 						<div style="float: left; padding: 4px; min-width:20%;"><?
 							for($i = 0; $i < $floor+$r; $i++) {
 								if($this->data_import_export->attributes['group'][$j] != '') $groupnames = true;
-								if($this->data_import_export->attributes['form_element_type'][$j] == 'Dokument'){$document_attributes = true; $document_ids[] = $j;}
-								if($this->data_import_export->attributes['name'][$j] == $this->data_import_export->attributes['the_geom'] AND $this->data_import_export->layerdaten['export_privileg'][$selectindex] != 1) continue; ?>
-								<div style="padding: 4px;<? if($this->data_import_export->attributes['name'][$j] == $this->data_import_export->attributes['the_geom']){if($this->formvars['export_format'] == 'CSV'){echo 'display:none"';} echo '" id="geom_div';} ?>">
+								if($this->data_import_export->attributes['form_element_type'][$j] == 'Dokument'){$document_attributes = true; $document_ids[] = $j;} ?>
+								<div style="padding: 4px;
+							<? 	if($this->data_import_export->attributes['name'][$j] == $this->data_import_export->attributes['the_geom']){
+										if($this->formvars['export_format'] == 'CSV' OR $this->data_import_export->layerdaten['export_privileg'][$selectindex] != 1){echo 'display:none"';} echo '" id="geom_div';
+									} ?>
+								">
 									<input id="check_attribute_<? echo $j; ?>" type="checkbox" <? if($this->formvars['load'] OR $this->formvars['check_'.$this->data_import_export->attributes['name'][$j]] == 1)echo 'checked'; ?> value="1" name="check_<? echo $this->data_import_export->attributes['name'][$j]; ?>"><?php
 									if($this->data_import_export->attributes['alias'][$j] != ''){
 										echo $this->data_import_export->attributes['alias'][$j];
@@ -306,8 +314,8 @@ $j=0;
 			} ?>
 
 			<div style="margin-top:30px; margin-bottom:10px; text-align: center;">
-				<input class="button" name="cancel" type="button" onclick="home();" value="<? echo $strButtonCancel; ?>">
-				<input class="button" name="create" type="button" onclick="data_export();" value="<? echo $strButtonGenerateShapeData; ?>">
+				<input name="cancel" type="button" onclick="home();" value="<? echo $strButtonCancel; ?>">
+				<input name="create" type="button" onclick="data_export();" value="<? echo $strButtonGenerateShapeData; ?>">
 			</div>
 
 		</td>
@@ -317,8 +325,10 @@ $j=0;
   		<input id="go_plus" type="hidden" name="go_plus" value="">
   	</td>
   </tr>
-  <tr<?php if ($simple) echo ' style="display: none;"'; ?>>
+  <tr<?php if ($simple OR $this->data_import_export->attributes['the_geom'] == '') echo ' style="display: none;"'; ?>>
     <td align="right">
+			<input type="checkbox" name="singlegeom" value="true" <? if($this->formvars['singlegeom'])echo 'checked="true"'; ?>>
+			<? echo $strSingleGeoms; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 			<? echo $this->strUseGeometryOf; ?>:
   		<select name="layer_id" onchange="document.GUI.submit();">
   			<option value=""><?php echo $this->strPleaseSelect; ?></option>

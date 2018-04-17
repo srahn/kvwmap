@@ -1,6 +1,5 @@
 <?
 	include(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->language.'.php');
-	
 	$checkbox_names = '';
 	$columnname = '';
 	$geom_tablename = '';
@@ -17,29 +16,6 @@
 	if($layer['alias'] != '' AND $this->Stelle->useLayerAliases){
 		$layer['Name'] = $layer['alias'];
 	}
-?>
-<div id="layer" onclick="remove_calendar();">
-<input type="hidden" value="" id="changed_<? echo $layer['Layer_ID']; ?>" name="changed_<? echo $layer['Layer_ID']; ?>">
-<? if($this->new_entry != true AND $layer['requires'] == ''){ ?>
-<table border="0" cellpadding="0" cellspacing="0" width="100%">
-	<tr>
-		<td width="99%" align="center"><h2 id="layername"><? echo $layer['Name']; ?></h2></td>
-    <? if (!$this->user->rolle->visually_impaired) { ?>
-			<td valign="top" style="padding: 0 10 0 0" class="layer_header">
-				<? if($layer['template'] == '' OR $layer['template'] == 'generic_layer_editor_2.php'){ ?>
-				<img onclick="switch_gle_view(<? echo $layer['Layer_ID']; ?>);"" title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border pointer" src="<? echo GRAPHICSPATH.'columns.png'; ?>">
-				<? }else{ ?>
-				<img onclick="switch_gle_view(<? echo $layer['Layer_ID']; ?>);"" title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border pointer" src="<? echo GRAPHICSPATH.'rows.png'; ?>">
-				<? } ?>
-			</td>
-			<td align="right" class="layer_header">			
-				<a href="javascript:scrollbottom();"><img class="hover-border" title="nach unten" src="<? echo GRAPHICSPATH; ?>pfeil.gif" width="11" height="11" border="0"></a>&nbsp;
-			</td>
-		<? } ?>
-	</tr>
-</table>
-<? }
-
 	$doit = false;
   $anzObj = count($layer['shape']);
   if ($anzObj > 0) {
@@ -50,6 +26,29 @@
   	$anzObj = 1;
   	$doit = true;
   }
+?>
+<div id="layer" onclick="remove_calendar();">
+<input type="hidden" value="" id="changed_<? echo $layer['Layer_ID']; ?>" name="changed_<? echo $layer['Layer_ID']; ?>">
+<? if($this->new_entry != true AND $layer['requires'] == ''){ ?>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+	<tr>
+		<td width="99%" align="center"><h2 id="layername"><? echo $layer['Name']; ?></h2></td>
+    <? if (!$this->user->rolle->visually_impaired AND $anzObj > 0) { ?>
+			<td valign="top" style="padding: 0 10 0 0" class="layer_header">
+				<? if($layer['template'] == '' OR $layer['template'] == 'generic_layer_editor_2.php'){ ?>
+				<img onclick="checkForUnsavedChanges(event);switch_gle_view1(<? echo $layer['Layer_ID']; ?>);" title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border pointer" src="<? echo GRAPHICSPATH.'columns.png'; ?>">
+				<? }else{ ?>
+				<img onclick="checkForUnsavedChanges(event);switch_gle_view1(<? echo $layer['Layer_ID']; ?>);" title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border pointer" src="<? echo GRAPHICSPATH.'rows.png'; ?>">
+				<? } ?>
+			</td>
+			<td align="right" class="layer_header">			
+				<a href="javascript:scrollbottom();"><img class="hover-border" title="nach unten" src="<? echo GRAPHICSPATH; ?>pfeil.gif" width="11" height="11" border="0"></a>&nbsp;
+			</td>
+		<? } ?>
+	</tr>
+</table>
+<? }
+
   if($doit == true){
 ?>
 <table border="0" cellspacing="0" cellpadding="2">
@@ -66,7 +65,7 @@
 			onmouseenter="if(typeof FormData !== 'undefined')highlight_object(<? echo $layer['Layer_ID']; ?>, '<? echo $layer['shape'][$k][$attributes['table_name'][$attributes['the_geom']].'_oid']; ?>');"
 			<? } ?>
 			>
-	    <input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
+	    <input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value;document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
 	    <table id="dstable" class="tgle" <? if($attributes['group'][0] != ''){echo 'border="0" style="width:100%" cellpadding="6" cellspacing="0"';}else{echo 'border="1"';} ?>>
 				<? if (!$this->user->rolle->visually_impaired) include(LAYOUTPATH . 'snippets/generic_layer_editor_2_layer_head.php'); ?>
         <tbody <? if($attributes['group'][0] == '')echo 'class="gle"'; ?>>
@@ -76,7 +75,8 @@
 				$lock[$k] = true;
 			}
 						
-			for($j = 0; $j < count($attributes['name']); $j++){
+			for($j = 0; $j < count($attributes['name']); $j++) {
+				$attribute_class = (($this->new_entry == true AND $attributes['dont_use_for_new'][$j] == -1) ? 'hidden' : 'visible');
 				if($layer['shape'][$k][$attributes['name'][$j]] == ''){
 					#$layer['shape'][$k][$attributes['name'][$j]] = $this->formvars[$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j]];
 				}
@@ -101,24 +101,24 @@
 											</tr>';
 				}
 				
-				if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
+				if($attributes['visible'][$j]){
 					if($attributes['type'][$j] != 'geometry'){
 						if($attributes['privileg'][$j] != '0' AND !$lock[$k])$this->editable = $layer['Layer_ID'];
 						if($attributes['alias'][$j] == '')$attributes['alias'][$j] = $attributes['name'][$j];
-						
+					
 						if($attributes['arrangement'][$j] != 1){	# wenn Attribut nicht daneben -> neue Zeile beginnen
 							$attributes_in_row_so_far = 1;					# Attributanzahl in dieser Zeile bis zu diesem Attribut
-							$datapart .= '<tr>';							
+							$datapart .= '<tr class="' . $attribute_class . '">';
 						}
 						else $attributes_in_row_so_far++;
 						if($attributes['labeling'][$j] != 2){
 							$td = '	<td class="gle_attribute_name" '; if($attributes['labeling'][$j] == 1 AND $attributes['arrangement'][$j] == 1 AND $attributes['arrangement'][$j+1] != 1)$td .= 'colspan="20" ';if($attributes['group'][0] != '' AND $attributes['arrangement'][$j] != 1)$td .= 'width="10%">';else $td.='width="1%">';
-							$td.= 			attribute_name($layer['Layer_ID'], $attributes, $j, $k, $this->user->rolle->fontsize_gle);
+							$td.= 			attribute_name($layer['Layer_ID'], $attributes, $j, $k, $this->user->rolle->fontsize_gle, ($this->formvars['printversion'] == '')? true : false);
 							$td.= '	</td>';
 							if($nl AND $attributes['labeling'][$j] != 1)$next_line .= $td; else $datapart .= $td;
 						}
 						if($attributes['labeling'][$j] == 1)$nl = true;										# Attributname soll oben stehen -> alle weiteren tds für die nächste Zeile aufsammeln
-						
+					
 						# Ermittlung einer geeigneten Größe für das Attribut
 						if($attributes['arrangement'][$j+1] == 1 OR $attributes['arrangement'][$j] == 1){
 							$b = $j+1;
@@ -133,9 +133,13 @@
 							$size2 = $size;
 							$select_width2 = $select_width;
 						}
-						
-						$td = '	<td id="row'.$j.'" class="gle_attribute_value"'; if($attributes['arrangement'][$j+1] != 1){$colspan = 20 - $attributes_in_row_so_far; $td .= 'colspan="'.$colspan.'"';} $td .= '>';
-						$td.= 			attribute_value($this, $layer['Layer_ID'], $attributes, $j, $k, $layer['shape'][$k], $size2, $select_width2, $this->user->rolle->fontsize_gle);
+
+						$td = '	<td
+							id="row' . $j . '"
+							colspan="' . ($attributes['arrangement'][$j+1] != 1 ? 20 - $attributes_in_row_so_far : '') . '"' .
+							get_td_class_or_style($layer['shape'][$k][$attributes['style']] != '' ? $layer['shape'][$k][$attributes['style']] : 'gle_attribute_value') . '
+						>';
+						$td.=	attribute_value($this, $layer['Layer_ID'], $attributes, $j, $k, $layer['shape'][$k], $size2, $select_width2, $this->user->rolle->fontsize_gle);
 						$td.= '<div onmousedown="resizestart(document.getElementById(\'row'.$j.'\'), \'col_resize\');" style="position: absolute; transform: translate(4px); top: 0px; right: 0px; height: 20px; width: 6px; cursor: e-resize;"></div>';
 						$td.= '	</td>';
 						if($nl)$next_line .= $td; else $datapart .= $td;
@@ -145,7 +149,7 @@
 							$next_line = '';
 							$nl = false;
 						}
-						
+					
 						if($attributes['privileg'][$j] >= '0'){
 							$this->form_field_names .= $layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'|';
 						}
@@ -165,6 +169,9 @@
 						$nullable = $attributes['nullable'][$j];
 						$this->form_field_names .= $layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';Geometrie;'.$attributes['nullable'][$j].'|';
 					}
+				}
+				else{
+					$invisible_attributes[$layer['Layer_ID']][] = '<input type="hidden" id="'.$layer['Layer_ID'].'_'.$attributes['name'][$j].'_'.$k.'" value="'.htmlspecialchars($layer['shape'][$k][$attributes['name'][$j]]).'">';
 				}
 				if($attributes['group'][$j] != $attributes['group'][$j+1]){		# wenn die nächste Gruppe anders ist, Tabelle schliessen
 					$datapart .= '</table></td></tr>';
@@ -187,7 +194,7 @@
 						<? } else { ?>
 			    	    <td <? if($attributes['group'][0] != '')echo 'width="200px"'; ?> bgcolor="<? echo BG_GLEATTRIBUTE; ?>" style="padding-top:5px; padding-bottom:5px;">&nbsp;</td>
 			    	    <? } ?>
-			    	    <td style="padding-top:5px; padding-bottom:5px;" valign="middle" colspan="19">
+			    	    <td class="button_background" style="box-shadow: none; padding: 5px;" valign="middle" colspan="19">
 <?						
 							if(!$layer['shape'][$k]['wfs_geom']){		// kein WFS 
 								echo '<input type="hidden" id="'.$layer['Layer_ID'].'_'.$columnname.'_'.$k.'" value="'.$layer['shape'][$k][$columnname].'">';						
@@ -195,13 +202,13 @@
 								<table cellspacing="0" cellpadding="0">
 									<tr>
 <?								if($privileg == 1 AND !$lock[$k]) { ?>
-										<td style="padding: 0 0 0 10;"><a title="<? echo $strEditGeom; ?>" href="index.php?go=<? echo $geomtype; ?>Editor&oid=<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>&layer_tablename=<? echo $geom_tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>&selected_layer_id=<? echo $layer['Layer_ID'];?>&dimension=<? echo $dimension; ?>"><div class="emboss edit_geom"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+										<td><a onclick="checkForUnsavedChanges(event);" title="<? echo $strEditGeom; ?>" href="index.php?go=<? echo $geomtype; ?>Editor&oid=<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>&layer_tablename=<? echo $geom_tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>&selected_layer_id=<? echo $layer['Layer_ID'];?>&dimension=<? echo $dimension; ?>"><div class="button edit_geom"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
 <?								} 
 								if($layer['shape'][$k][$attributes['the_geom']]){ ?>
-										<td style="padding: 0 0 0 10;"><a title="<? echo $strMapZoom; ?>" href="javascript:zoom2object(<? echo $layer['Layer_ID'];?>, '<? echo $geomtype; ?>', '<? echo $geom_tablename; ?>', '<? echo $columnname; ?>', '<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>', 'zoomonly');"><div class="emboss zoom_normal"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+										<td><a title="<? echo $strMapZoom; ?>" href="javascript:zoom2object(<? echo $layer['Layer_ID'];?>, '<? echo $geomtype; ?>', '<? echo $geom_tablename; ?>', '<? echo $columnname; ?>', '<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>', 'zoomonly');"><div class="button zoom_normal"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
 								<? if($layer['Layer_ID'] > 0){ ?>
-										<td style="padding: 0 0 0 10;"><a title="<? echo $strMapZoom.$strAndHighlight; ?>" href="javascript:zoom2object(<? echo $layer['Layer_ID'];?>, '<? echo $geomtype; ?>', '<? echo $geom_tablename; ?>', '<? echo $columnname; ?>', '<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>', 'false');"><div class="emboss zoom_highlight"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
-										<td style="padding: 0 0 0 10;"><a title="<? echo $strMapZoom.$strAndHide; ?>" href="javascript:zoom2object(<? echo $layer['Layer_ID'];?>, '<? echo $geomtype; ?>', '<? echo $geom_tablename; ?>', '<? echo $columnname; ?>', '<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>', 'true');"><div class="emboss zoom_select"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+										<td><a title="<? echo $strMapZoom.$strAndHighlight; ?>" href="javascript:zoom2object(<? echo $layer['Layer_ID'];?>, '<? echo $geomtype; ?>', '<? echo $geom_tablename; ?>', '<? echo $columnname; ?>', '<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>', 'false');"><div class="button zoom_highlight"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+										<td><a title="<? echo $strMapZoom.$strAndHide; ?>" href="javascript:zoom2object(<? echo $layer['Layer_ID'];?>, '<? echo $geomtype; ?>', '<? echo $geom_tablename; ?>', '<? echo $columnname; ?>', '<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>', 'true');"><div class="button zoom_select"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
 								<? }} ?>
 									</tr>
 								</table>
@@ -210,7 +217,7 @@
 						else{		# bei WFS-Layern
 ?>						<table cellspacing="0" cellpadding="0">
 								<tr>
-									<td style="padding: 0 0 0 5;"><a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:zoom2object('go=zoom2wkt&wkt=<? echo $layer['shape'][$k]['wfs_geom']; ?>&epsg=<? echo $layer['epsg_code']; ?>');"><div class="emboss zoom_normal"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+									<td style="padding: 0 0 0 5;"><a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:zoom2wkt('<? echo $layer['shape'][$k]['wfs_geom']; ?>', '<? echo $layer['epsg_code']; ?>');"><div class="button zoom_normal"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
 								</tr>
 							</table>
 <?															
@@ -285,23 +292,23 @@
 				</tr>
 				<tr>
 					<td>
-						<table cellspacing="0" cellpadding="0">
+						<table cellspacing="0" cellpadding="0" class="button_background" style="box-shadow: none; border: 1px solid #bbb">
 							<tr>
 						<? if($this->formvars['go'] == 'Zwischenablage' OR $this->formvars['go'] == 'gemerkte_Datensaetze_anzeigen'){ ?>
-								<td style="padding: 5 10 0 0;"><a title="<? echo $strDontRememberDataset; ?>" href="javascript:remove_from_clipboard(<? echo $layer['Layer_ID']; ?>);"><div class="button_background"><div class="emboss nicht_mehr_merken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div></a></td>
+								<td><a title="<? echo $strDontRememberDataset; ?>" href="javascript:remove_from_clipboard(<? echo $layer['Layer_ID']; ?>);"><div class="button nicht_mehr_merken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
 							<? }else{ ?>
-								<td id="merk_link_<? echo $layer['Layer_ID']; ?>" style="padding: 5 10 0 0;"><a title="<? echo $strRemember; ?>" href="javascript:add_to_clipboard(<? echo $layer['Layer_ID']; ?>);"><div class="button_background"><div class="emboss merken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div></a></td>
+								<td id="merk_link_<? echo $layer['Layer_ID']; ?>"><a title="<? echo $strRemember; ?>" href="javascript:add_to_clipboard(<? echo $layer['Layer_ID']; ?>);"><div class="button merken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
 							<? } ?>
 					<? if($layer['privileg'] == '2'){ ?>
-								<td id="delete_link_<? echo $layer['Layer_ID']; ?>" style="padding: 5 10 0 0;"><a title="<? echo $strdelete; ?>" href="javascript:delete_datasets(<?php echo $layer['Layer_ID']; ?>);"><div class="button_background"><div class="emboss datensatz_loeschen"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div></td>
+								<td id="delete_link_<? echo $layer['Layer_ID']; ?>"><a title="<? echo $strdelete; ?>" href="javascript:delete_datasets(<?php echo $layer['Layer_ID']; ?>);"><div class="button datensatz_loeschen"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></td>
 					<?} if($layer['export_privileg'] != 0){ ?>
-								<td style="padding: 5 10 0 0;"><a title="<? echo $strExport; ?>" href="javascript:daten_export(<?php echo $layer['Layer_ID']; ?>, <? echo $layer['count']; ?>);"><div class="button_background"><div class="emboss datensatz_exportieren"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div></a></td>
+								<td><a title="<? echo $strExport; ?>" href="javascript:daten_export(<?php echo $layer['Layer_ID']; ?>, <? echo $layer['count']; ?>);"><div class="button datensatz_exportieren"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
 					<? } if($layer['layouts']){ ?>
-								<td id="print_link_<? echo $layer['Layer_ID']; ?>" style="padding: 5 10 0 0;"><a title="<? echo $strPrint; ?>" href="javascript:print_data(<?php echo $layer['Layer_ID']; ?>);"><div class="button_background"><div class="emboss drucken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div></a></td>
+								<td id="print_link_<? echo $layer['Layer_ID']; ?>"><a title="<? echo $strPrint; ?>" href="javascript:print_data(<?php echo $layer['Layer_ID']; ?>);"><div class="button drucken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
 					<? } ?>
 					<? if($privileg != ''){ ?>
-								<td id="zoom_link_<? echo $layer['Layer_ID']; ?>" style="padding: 5 10 0 0;"><a title="<? echo $strzoomtodatasets; ?>" href="javascript:zoomto_datasets(<?php echo $layer['Layer_ID']; ?>, '<? echo $geom_tablename; ?>', '<? echo $columnname; ?>');"><div class="emboss zoom_highlight"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
-								<td id="classify_link_<? echo $layer['Layer_ID']; ?>" style="padding: 5 0 0 0;">
+								<td id="zoom_link_<? echo $layer['Layer_ID']; ?>" style="padding: 0 0 0 15px"><a title="<? echo $strzoomtodatasets; ?>" href="javascript:zoomto_datasets(<?php echo $layer['Layer_ID']; ?>, '<? echo $geom_tablename; ?>', '<? echo $columnname; ?>');"><div class="button zoom_highlight"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+								<td id="classify_link_<? echo $layer['Layer_ID']; ?>" style="padding: 0 5px 0 0">
 									<select style="width: 130px" name="klass_<?php echo $layer['Layer_ID']; ?>">
 										<option value=""><? echo $strClassify; ?>:</option>
 										<?
@@ -396,6 +403,13 @@
 	<? } ?>
 </table>
 
+<?
+	
+	for($l = 0; $l < count($invisible_attributes[$layer['Layer_ID']]); $l++){
+		echo $invisible_attributes[$layer['Layer_ID']][$l]."\n";
+	}
+	
+?>
 
 <input type="hidden" name="checkbox_names_<? echo $layer['Layer_ID']; ?>" value="<? echo $checkbox_names; ?>">
 <input type="hidden" name="orderby<? echo $layer['Layer_ID']; ?>" id="orderby<? echo $layer['Layer_ID']; ?>" value="<? echo $this->formvars['orderby'.$layer['Layer_ID']]; ?>">
@@ -406,10 +420,15 @@
 ?>
 <table border="0" cellspacing="10" cellpadding="2">
   <tr>
-	<td>
-      <span style="font-size:12px; color:#FF0000;"><? echo $strNoMatch; ?></span>
-	</td>
+		<td>
+				<span style="color:#FF0000;"><? echo $strNoMatch; ?></span>
+		</td>
   </tr>
+	<? if($layer['privileg'] > 0){ ?>
+	<tr align="center">
+		<td><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id=<? echo $layer['Layer_ID']; ?>"><? echo $strNewDataset; ?></a></td>
+	</tr>
+	<? } ?>
 </table>
 
 <?

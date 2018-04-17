@@ -89,6 +89,8 @@ function showmap(){
   </tr>
   <tr id="map2" style="<? if($this->formvars['map_flag'] == '')echo 'display:none'; ?>"> 
     <td align="right" colspan="5" align="center">
+			<input type="checkbox" name="singlegeom" value="true" <? if($this->formvars['singlegeom'])echo 'checked="true"'; ?>>
+			<? echo $strSingleGeoms; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     	Geometrie übernehmen von: 
   		<select name="layer_id" onchange="document.GUI.submit();">
   			<option value="">--- Auswahl ---</option>
@@ -136,7 +138,7 @@ function showmap(){
 		</td>
   </tr>
   <tr>
-		<td align="right" colspan="5"><input class="button" type="button" name="load" value="<?php echo $strButtonLoad; ?>" onclick="document.GUI.newpath.value = '';document.GUI.newpathwkt.value = '';document.GUI.pathwkt.value = '';document.GUI.result.value = '';;getlayers();">
+		<td align="right" colspan="5"><input type="button" name="load" value="<?php echo $strButtonLoad; ?>" onclick="document.GUI.newpath.value = '';document.GUI.newpathwkt.value = '';document.GUI.pathwkt.value = '';document.GUI.result.value = '';;getlayers();">
 		</td>
 	</tr>
   <tr> 
@@ -244,7 +246,7 @@ function showmap(){
 				if($this->attributes[$the_geom_index[0]]['name'] != '')$geom_check = 'document.GUI.check_'.$this->attributes[$the_geom_index[0]]['name'].'.checked';
 				else $geom_check = 0;
 				echo '<tr>
-			 					<td align="center" colspan="5"><br><br><input class="button" type="button" name="speichern" value="speichern" onclick="save('.$geom_check.');">
+			 					<td align="center" colspan="5"><br><br><input type="button" name="speichern" value="speichern" onclick="save('.$geom_check.');">
 			 					</td>
 			 				</tr>';
 			}

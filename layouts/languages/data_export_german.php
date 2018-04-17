@@ -14,4 +14,5 @@
  $strLayer="Thema";
  $strSure='Wollen Sie wirklich alle Datensätze des ausgewählten Themas exportieren?\n\nJe nach Datenmenge kann dies u.U. sehr lange dauern.';
  $strOptions='Optionen';
+ $strSingleGeoms="Einzelgeometrien abfragen";
 ?>

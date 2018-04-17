@@ -2,6 +2,36 @@
 
 	$GUI = $this;	
 	
+	$this->zoom2bauakte = function() use ($GUI){
+		if($GUI->formvars['nummer'] != '' AND $GUI->formvars['jahr'] != ''){
+			$GUI->bau = new Bauauskunft($GUI->baudatabase);
+			$GUI->bau->getbaudaten($GUI->formvars);
+			for($i = 0; $i < count($GUI->bau->baudata); $i++){
+				$flst = explode(', ', $GUI->bau->baudata[$i]['feld14']);
+				for($j = 0; $j < count($flst); $j++){
+					$GUI->bau->grundstueck[] = $GUI->bau->formatFlurstKennz($GUI->bau->baudata[$i]['feld39'].$GUI->bau->baudata[$i]['feld12'].'-'.$GUI->bau->baudata[$i]['feld13'].'-'.$flst[$j]);
+				}
+			}		
+			$GUI->zoomToALKFlurst($GUI->bau->grundstueck, 10);
+			if($GUI->bau->baudata[0]['geom_status'] == 't'){
+				$GUI->formvars['oid'] = $GUI->bau->baudata[0]['geom_oid'];
+				$GUI->formvars['layer_tablename'] = 'bau_geometrien';
+				$GUI->formvars['layer_columnname'] = 'the_geom';
+				$GUI->formvars['layer_id'] = LAYER_ID_BAUAKTEN_GEOMETRIEN;
+				$GUI->formvars['selektieren'] = 'zoomonly';
+			}
+			$GUI->zoom_toPoint();
+		}
+		else{
+			$GUI->loadMap('DataBase');
+	    $GUI->saveMap('');
+			$currenttime=date('Y-m-d H:i:s',time());
+			$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
+			$GUI->drawMap();
+			$GUI->output();
+		}
+	};
+	
 	$this->bauauskunftSuche = function() use ($GUI){
     $GUI->bau = new Bauauskunft($GUI->baudatabase);
     $GUI->bau->readvorhaben();

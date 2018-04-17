@@ -115,7 +115,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 		<td colspan="4" style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3">
 			<table>
 				<td><input name="importliste" type="file" value="" style="width: 340px" tabindex="2"></td>
-				<td><input type="submit" class="button" value="Laden"></td>
+				<td><input type="submit" value="Laden"></td>
 			</table>
 		</td>
 	</tr>
@@ -127,7 +127,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 
 <input type="hidden" name="selBlatt" value="<? echo $this->formvars['selBlatt']; ?>">
 <input type="hidden" name="go" value="Grundbuchblatt_Auswaehlen">
-<input type="submit" class="button" name="go_plus" value="Suchen" tabindex="6">
+<input type="submit" name="go_plus" value="Suchen" tabindex="6">
 
    </td>
 

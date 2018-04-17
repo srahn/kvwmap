@@ -117,6 +117,19 @@
 		document.getElementById("svghelp").SVGmoveback();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 	}
 	
+	function checkQueryFields(){
+		var selected = false;
+		query_fields = document.getElementsByClassName('info-select-field');
+		for(var i = 0; i < query_fields.length; i++){
+			if(query_fields[i].checked){
+				selected = true;
+				break;
+			}
+		}
+		if(selected == false)message([{ 'type': 'warning', 'msg': '<? echo $strNoLayer; ?>' }]);
+		return selected;
+	}
+	
   function sendpath(cmd,pathx,pathy)   {
     path  = "";
     switch(cmd) 
@@ -157,6 +170,7 @@
       get_map_ajax('go=navMap_ajax', '', '');
      break;
      case "pquery_point":
+			if(!checkQueryFields() || !checkForUnsavedChanges())break;
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "pquery";
@@ -164,6 +178,7 @@
       overlay_submit(document.GUI, true);
      break;
      case "pquery_box":
+			if(!checkQueryFields() || !checkForUnsavedChanges())break;
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "pquery";
@@ -171,6 +186,7 @@
       overlay_submit(document.GUI, true);
      break;
      case "touchquery_point":
+			if(!checkQueryFields() || !checkForUnsavedChanges())break;
      	top.document.GUI.searchradius.value = "";
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
@@ -179,6 +195,7 @@
       overlay_submit(document.GUI, true);
      break;
      case "touchquery_box":
+			if(!checkQueryFields() || !checkForUnsavedChanges())break;
      	top.document.GUI.searchradius.value = "";
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
@@ -187,7 +204,8 @@
       overlay_submit(document.GUI, true);
      break;
      case "ppquery_point":
-      top.document.GUI.searchradius.value = "";
+			if(!checkQueryFields() || !checkForUnsavedChanges())break;
+      document.GUI.searchradius.value = "";
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "ppquery";
@@ -195,6 +213,7 @@
 			overlay_submit(document.GUI, true);
      break;
      case "ppquery_box":
+			if(!checkQueryFields() || !checkForUnsavedChanges())break;
       top.document.GUI.searchradius.value = "";
       path = pathx[0]+","+pathy[0]+";"+pathx[2]+","+pathy[2];
       document.GUI.INPUT_COORD.value  = path;
@@ -203,6 +222,7 @@
       overlay_submit(document.GUI, true);
      break;
      case "pquery_polygon":
+			if(!checkQueryFields() || !checkForUnsavedChanges())break;
       path = pathx[0]+","+pathy[0]+";"+pathx[2]+","+pathy[2];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "pquery";
@@ -210,6 +230,7 @@
       overlay_submit(document.GUI, true);
      break;
      case "polygonquery":
+			if(!checkQueryFields() || !checkForUnsavedChanges())break;
      	for(i = 0; i < pathx.length-1; i++){
      		path = path+pathx[i]+","+pathy[i]+";";
      	}
@@ -236,8 +257,12 @@
 #
   $randomnumber = rand(0, 1000000);
   $svgfile  = $randomnumber.'SVG_map.svg';
-  include(LAYOUTPATH.'snippets/SVGvars_mainnavbuttons.php');  # zuweisen von: $SVGvars_mainnavbuttons
+	
+	global $last_x;$last_x = 0;
+	global $events;$events = true;
+	
   include(LAYOUTPATH.'snippets/SVGvars_defs.php');            # zuweisen von: $SVGvars_defs 
+	include(LAYOUTPATH.'snippets/SVGvars_mainnavbuttons.php');  # zuweisen von: $SVGvars_mainnavbuttons
   include(LAYOUTPATH.'snippets/SVGvars_coordscript.php');     # zuweisen von: $SVGvars_coordscript
   include(LAYOUTPATH.'snippets/SVGvars_querytooltipscript.php');   # zuweisen von: $SVGvars_tooltipscript
   include(LAYOUTPATH.'snippets/SVGvars_tooltipscript.php');   # zuweisen von: $SVGvars_tooltipscript 
@@ -250,13 +275,9 @@
   $dx       = $this->map->extent->maxx-$this->map->extent->minx;
   $dy       = $this->map->extent->maxy-$this->map->extent->miny;
   $scale    = ($dx/$res_x+$dy/$res_y)/2;
-  $radius = $this->formvars['searchradius'] / $scale;
+  $radius = $this->formvars['searchradius'] / $scale;	
 
-#
-# Zusammenstellen der SVG  
-#
-# 2006-02-16 pk
-# in function highlight(evt) Zeilen für previous und next eingefügt
+
 $fpsvg = fopen(IMAGEPATH.$svgfile,'w') or die('fail: fopen('.$svgfile.')');
 chmod(IMAGEPATH.$svgfile, 0666);
 $svg='<?xml version="1.0"?>
@@ -299,8 +320,8 @@ $svg='<?xml version="1.0"?>
   moving  = false;
   moved  = false;
   var doing = "'.$this->user->rolle->selectedButton.'";
+	var doing_save;
 	mouse_down = false;
-  var highlighted  = "yellow";
   var cmd   = ""; 
   var data="";
   var x_pos="";
@@ -333,9 +354,18 @@ $svg='<?xml version="1.0"?>
 			touchPanZoomThreshold = 17 // differences of drag vectors, to distinguish between pan and zoom on touch gestures;
 	';
 
-if($_SESSION['mobile'] == 'true'){
+if($this->user->rolle->gps){
 	$svg.= '  
   function update_gps_position(){
+		navigator.geolocation.getCurrentPosition(
+			function(position){		//success
+				var Projection = "'.$this->epsg_codes[$this->user->rolle->epsg_code]['proj4text'].'";
+				pos = top.proj4(Projection,[position.coords.longitude,position.coords.latitude]);
+				top.document.GUI.gps_posx.value = pos[0];
+				top.document.GUI.gps_posy.value = pos[1];
+			},
+			function(){}		// error
+		)
 		posx = top.document.GUI.gps_posx.value+"";
 		posy = top.document.GUI.gps_posy.value+"";
 		if(posx != "" && posy != ""){
@@ -357,15 +387,13 @@ if($_SESSION['mobile'] == 'true'){
 				}
 			}
 		}
-  	top.ahah("index.php", "go=get_gps_position&srs='.$this->user->rolle->epsg_code.'", new Array(top.document.GUI.gps_posx, top.document.GUI.gps_posy), "");
  	}
- 	
- 	window.setInterval("update_gps_position()", 2000);';
+ 	window.setInterval("update_gps_position()", 1000);';
 }
 $svg .='
 
 function startup(){';
-	if($_SESSION['mobile'] == 'true'){
+	if($this->user->rolle->gps){
 		$svg .='update_gps_position();';
 	}
 	$svg .='
@@ -377,7 +405,8 @@ function startup(){';
 	if(doing == "polygonquery"){polygonarea()};
 	set_suchkreis();
 	eval(doing+"()");	
-  document.getElementById(doing+"0").style.setProperty("fill",highlighted,"");
+  //document.getElementById(doing+"0").classList.add("active");				// das kann der IE nicht
+	document.getElementById(doing+"0").className.baseVal += " active";	// deswegen dieser workaround
 	pinching = false;
 }
 
@@ -597,7 +626,7 @@ top.document.getElementById("svghelp").SVGmoveback = moveback;
 function moveback_ff(evt){
 	// beim Firefox wird diese Funktion beim onload des Kartenbildes ausgefuehrt
 	document.getElementById("mapimg2").setAttribute("style", "display:block");	
-	window.setTimeout(\'document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");document.getElementById("mapimg").setAttribute("xlink:href", document.getElementById("mapimg2").getAttribute("xlink:href"));\', 200);
+	window.setTimeout(\'document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");document.getElementById("mapimg").setAttribute("xlink:href", document.getElementById("mapimg2").getAttribute("xlink:href"));startup();\', 200);
 	// Redlining-Sachen loeschen
 	while(child = document.getElementById("redlining").firstChild){
   	document.getElementById("redlining").removeChild(child);
@@ -608,8 +637,7 @@ function moveback_ff(evt){
 	// Navigation wieder erlauben
 	top.stopwaiting();
 	window.setTimeout(\'document.getElementById("mapimg2").setAttribute("xlink:href", "")\', 400);
-	window.setTimeout(\'document.getElementById("mapimg2").setAttribute("style", "display:none")\', 400);
-	startup();
+	window.setTimeout(\'document.getElementById("mapimg2").setAttribute("style", "display:none")\', 400);	
 }
 
 
@@ -627,7 +655,7 @@ function sleep(milliseconds) {
 
 function moveback(evt){
 	// bei allen anderen Browsern gibt es kein onload für das Kartenbild, deswegen wird diese Funktion als erstes ausgefuehrt
-	document.getElementById("mapimg").setAttribute("xlink:href", "'.dirname($_SERVER['SCRIPT_NAME']).'/'.GRAPHICSPATH.'leer.gif")
+	document.getElementById("mapimg").setAttribute("xlink:href", "'.dirname($_SERVER['SCRIPT_NAME']).'/'.GRAPHICSPATH.'leer.gif");
 	document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");
 	// Redlining-Sachen loeschen
 	while(child = document.getElementById("redlining").firstChild){
@@ -669,7 +697,8 @@ function recentre(){
 	}
   doing = "recentre";
 	top.document.GUI.last_button.value = doing = "recentre";
-  document.getElementById("canvas").setAttribute("cursor", "move"); //setAttribute("cursor", "url(#MyMove)");
+	document.getElementById("canvas").setAttribute("cursor", "move");
+  document.getElementById("canvas").setAttribute("cursor", "grab");
 }
 
 function zoomin(){
@@ -848,7 +877,7 @@ function save_polygon_path(){
 
 function get_polygon_path(){
 	if(top.document.GUI.str_polypathx.value != ""){
-		document.getElementById(doing+"0").style.setProperty("fill", "ghostwhite","");
+		highlightbyid("polygonquery0");
 		doing = "polygonquery";
 		var str_polypathx = top.document.GUI.str_polypathx.value;
 		var str_polypathy = top.document.GUI.str_polypathy.value;
@@ -910,6 +939,18 @@ function mousedown(evt){
 	tooltipstate = "tooltip_paused";
 	cleartooltip();
 	if(top.document.GUI.stopnavigation.value == 0){
+		if(evt.button == 1){			// mittlere Maustaste -> Pan
+			if(evt.preventDefault)evt.preventDefault();
+			else evt.returnValue = false; // IE fix
+			if(doing == "polygonquery"){
+				save_polygon_path();
+			}
+			if(doing == "measure"){
+				save_measure_path();
+			}
+			doing_save = doing;
+			doing = "recentre";
+		}
 	  switch(doing){
 	   case "previous":
 	   break;
@@ -923,7 +964,7 @@ function mousedown(evt){
 			remove_vertices();
 	    selectPoint(evt);
 	   break;
-	   case "recentre":
+	   case "recentre":			
 			remove_vertices();
 	    startMove(evt);
 	   break;
@@ -1027,17 +1068,19 @@ function mousemove(evt){
 
 function mouseup(evt){
 	mouse_down = false;
-  switch(doing) 
-  {
-   case "measure":
-   break;
-	 case "drawarrow":
-	   finisharrowdraw();
-	 break;
-   default:
-    hide_tooltip();
-    endPoint(evt);
-    endMove(evt);
+  switch(doing){
+		case "measure":
+		break;
+		case "drawarrow":
+		 finisharrowdraw();
+		break;
+		default:
+		hide_tooltip();
+		endPoint(evt);
+		endMove(evt);
+		if(evt.button == 1){
+			doing = doing_save;
+		}
    break;
   }
 }
@@ -1053,10 +1096,11 @@ function addnewtext(evt){
 
 function create_new_freetext(x, y){
 	var newtext = document.createElementNS("http://www.w3.org/2000/svg","text");
-  newtext.setAttributeNS(null, "style", "fill:rgb(255,0,0);font-size:15px;font-family:Arial;font-weight:bold;");
+  newtext.setAttributeNS(null, "style", "fill:rgb(255,0,0);font-size:16px;font-family:Arial;font-weight:bold;");
 	newtext.setAttributeNS(null, "transform", "scale(1,-1)");
 	newtext.setAttributeNS(null, "x", x);
 	newtext.setAttributeNS(null, "y", -y);
+	newtext.setAttributeNS(null, "id", "free_text");
 	document.documentElement.addEventListener("keypress", texttype, true);
 	document.documentElement.addEventListener("keydown", trigger_keypress, true);
 	tspan1 = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
@@ -1153,8 +1197,8 @@ function create_new_freearrow(x, y){
 
 function create_new_freepolygon(){
 	var newpoly = document.createElementNS("http://www.w3.org/2000/svg","polygon");
-	newpoly.setAttributeNS(null, "style", "fill:red;stroke:black;stroke-width:2");
-  newpoly.setAttributeNS(null, "opacity", "0.35");	
+	newpoly.setAttributeNS(null, "style", "opacity:0.35;fill:rgb(255,0,0);stroke:rgb(0,0,0);stroke-width:2");
+	newpoly.setAttributeNS(null, "id", "free_polygon");	
   document.getElementById("redlining").appendChild(newpoly);
 	return newpoly;
 }
@@ -1215,6 +1259,7 @@ function redrawPolygon(){
   	document.getElementById("polygon").setAttribute("points", polypath);
 	}
 	if(doing == "drawpolygon"){
+		if(current_freepolygon == undefined)current_freepolygon = create_new_freepolygon();
 		current_freepolygon.setAttribute("points", polypath);
 	}
 }		
@@ -1441,7 +1486,7 @@ function add_vertex(evt){
 			vertex.setAttribute("opacity", "0.8");
 		}
 	}
-	if(doing == "polygonquery"){
+	if(doing == "polygonquery" || doing == "drawpolygon"){
 		if(!polydrawing){
 			restart();
 			polydrawing = true;
@@ -1449,7 +1494,7 @@ function add_vertex(evt){
   	polypathx.push(parseFloat(worldx));
   	polypathy.push(parseFloat(worldy));
 		redrawPolygon();
-		polygonarea();
+		if(doing == "polygonquery")polygonarea();
 		vertex.setAttribute("opacity", "0.8");
 	}
 	if(doing == "pquery" || doing == "ppquery"){
@@ -1671,6 +1716,8 @@ function endPoint(evt) {
 
 // ----------------------------vektor aufziehen---------------------------------
 function startMove(evt) {
+	document.getElementById("canvas").setAttribute("cursor", "move");
+	document.getElementById("canvas").setAttribute("cursor", "grabbing");
   moving  = true;
   var alle = pathx.length;
   for(var i = 0; i < alle; ++i)
@@ -1705,6 +1752,8 @@ function moveMap(){
 
 function endMove(evt) {
   if (!moving) return;
+	document.getElementById("canvas").setAttribute("cursor", "move");
+	document.getElementById("canvas").setAttribute("cursor", "grab");
   cmd = doing;
   if (moved){ 
     pathx[0]=resx_m-move_x;
@@ -1737,23 +1786,11 @@ function redraw()
 }
 
 // ----------------------ausgewaehlten button highlighten---------------------------
-function highlight(evt){
-  if(document.getElementById("ppquery0") != undefined){document.getElementById("ppquery0").style.setProperty("fill","ghostwhite","");}
-  if(document.getElementById("previous0") != undefined){document.getElementById("previous0").style.setProperty("fill","ghostwhite","");}
-  if(document.getElementById("next0") != undefined){document.getElementById("next0").style.setProperty("fill","ghostwhite","");}
-  if(document.getElementById("measure0") != undefined){document.getElementById("measure0").style.setProperty("fill","ghostwhite","");}
-  if(document.getElementById("zoomin0") != undefined){document.getElementById("zoomin0").style.setProperty("fill","ghostwhite","");}
-  if(document.getElementById("zoomout0") != undefined){document.getElementById("zoomout0").style.setProperty("fill","ghostwhite","");}
-  if(document.getElementById("recentre0") != undefined){document.getElementById("recentre0").style.setProperty("fill","ghostwhite","");}
-  if(document.getElementById("pquery0") != undefined){document.getElementById("pquery0").style.setProperty("fill","ghostwhite","");}
-	if(document.getElementById("polygonquery0") != undefined){document.getElementById("polygonquery0").style.setProperty("fill","ghostwhite","");}
-	if(document.getElementById("touchquery0") != undefined){document.getElementById("touchquery0").style.setProperty("fill","ghostwhite","");}
-	if(document.getElementById("freepolygon0") != undefined){document.getElementById("freepolygon0").style.setProperty("fill","ghostwhite","");}
-	if(document.getElementById("freetext0") != undefined){document.getElementById("freetext0").style.setProperty("fill","ghostwhite","");}
-	if(document.getElementById("freearrow0") != undefined){document.getElementById("freearrow0").style.setProperty("fill","ghostwhite","");}
-	if(document.getElementById("coords0") != undefined){document.getElementById("coords0").style.setProperty("fill","ghostwhite","");}
-	if(document.getElementById("coords02") != undefined){document.getElementById("coords02").style.setProperty("fill","ghostwhite","");}
-  evt.target.style.setProperty("fill",highlighted,"");
+function highlightbyid(id){
+	//document.querySelector(".active").classList.remove("active");		// kann der IE nicht
+	document.querySelector(".active").className.baseVal = "navbutton_frame";	// deswegen dieser workaround
+  //document.getElementById(id).classList.add("active");						// kann der IE nicht
+	document.getElementById(id).className.baseVal += " active";				// deswegen dieser workaround
   document.getElementById("suchkreis").setAttribute("cx", -10000);
 	if(top.document.GUI.orthofang != undefined){
 		options1 = top.document.getElementById("options").innerHTML="";
@@ -1787,8 +1824,8 @@ function highlight(evt){
       <circle id="suchkreis" cx="-100" cy="-100" r="'.$radius.'" style="fill-opacity:0.25;fill:yellow;stroke:grey;stroke-width:2"/>
 			<g id="redlining">
 			</g>';
-if($_SESSION['mobile'] == 'true'){
-	 $svg.=' <use id="gps_position" xlink:href="#crosshair_red" x="-100" y="-100"/>';
+if($this->user->rolle->gps){
+	 $svg.=' <use id="gps_position" xlink:href="#crosshair_red" x="-100000" y="-100000"/>';
 }
 $svg.='
     </g>
@@ -1802,11 +1839,12 @@ $svg.='
 			<circle id="kreis" cx="-500" cy="-500" r="7" opacity="0.1" onmouseover="activate_vertex(evt)" onmouseout="deactivate_vertex(evt)" onmousedown="add_vertex(evt)" />
 			<line stroke="#111" stroke-width="14" id="linie" x1="-5000" y1="-5000" x2="-5001" y2="-5001" opacity="0.8" onmouseover="activate_line(evt)" onmousemove="activate_line(evt)" />
 		</g>
-    <g id="buttons" onmouseout="hide_tooltip()" onmousemove="get_bbox();" onmousedown="hide_tooltip()" cursor="pointer" transform="scale(1.1)">
+    <g id="buttons" onmouseout="hide_tooltip()" onmousemove="get_bbox();" onmousedown="hide_tooltip()" cursor="pointer">
+			<rect x="0" y="0" rx="3" ry="3" width="'.$last_x.'" height="36" class="navbutton_bg"/>
 '.$SVGvars_mainnavbuttons.'
     </g>
 		<g id="tooltipgroup" onmouseover="prevent=1;" onmouseout="prevent=0;">
-    	<rect id="frame" width="0" height="20" rx="5" ry="5" style="fill-opacity:0.8;fill:rgb(255,255,215);stroke:rgb(0,0,0);stroke-width:1.5"/>
+    	<rect id="frame" width="0" height="20" rx="5" ry="5" style="fill-opacity:0.8;fill:rgb(255, 250, 240);stroke:rgb(140, 140, 140);stroke-width:1.5"/>
     	<text id="querytooltip" x="100" y="100" style="text-anchor:start;fill:rgb(0,0,0);stroke:none;font-size:10px;font-family:Arial;font-weight:bold"></text>
     	<text id="link0" cursor="pointer" onmousedown="top.document.body.style.cursor=\'pointer\';" onmousemove="top.document.body.style.cursor=\'pointer\';" style="text-anchor:start;fill:rgb(0,0,200);stroke:none;font-size:10px;font-family:Arial;font-weight:bold"></text>
 			<g id="tooltipcontent">

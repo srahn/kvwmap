@@ -38,6 +38,11 @@ body {
 	font-size: 15px;
 }
 
+#gui-table {
+  width: 900px;
+	margin: auto;	
+}
+
 form {
 	margin: 0;
 	padding: 0;
@@ -184,7 +189,7 @@ input[type="text"].transparent_input{
   float: left;
   text-align: right;
 	font-size: 17px;
-  width: 150px;
+  width: 210px;
   height: 15px;
   margin-right: 10px;
 }
@@ -233,6 +238,10 @@ select {
 textarea {
 	font-size: 14px;
 	font-family: SourceSansPro1;
+}
+
+tr.tr_hover:hover{
+	background-color: #DAE4EC;
 }
 
 td {	
@@ -353,6 +362,14 @@ a.invisiblelayerlink:hover{
 	background: linear-gradient(#DAE4EC, #84accf);
 }
 
+#openLayerParamBarIcon{
+	width: 16px; 
+	height: 16px; 
+	padding: 5px; 
+	font-size: 1.1em;
+	margin: 0 5px 0 40px;
+}
+
 #layerParamsBar {
 	display: none;
 	position: absolute;
@@ -363,8 +380,21 @@ a.invisiblelayerlink:hover{
 	z-index: 9999;
 }
 
+#menuebar{
+	width: <? echo ($size['menue']['width'] - 2); ?>px;
+	background: url('../graphics/bg.gif');
+	border: 1px solid;
+	border-color: #CCC; 
+	border-top: none;
+	border-bottom: none;
+}
+
+#menue_switch{
+	min-width: <? echo $size['menue']['hide_width']; ?>px;
+	background: linear-gradient(90deg, #DAE4EC, #c1d6f2);
+}
+
 #menueTable{
-	padding-top: 6px;
 	margin-bottom: 2px;
 	width: <? echo ($size['menue']['width'] - 2); ?>px;
 	text-align: center;
@@ -482,7 +512,7 @@ a.menuered:hover {
 
 .button-menue{
 	flex: 0 0 auto;
-	padding: 0 0 6 4;
+	margin: 0 0 2 0;
 }
 
 .text-menue{
@@ -593,66 +623,74 @@ a.menuered:hover {
 	background-image: url(../graphics/load_layers.png);
 }
 
+.tool_info{
+	background-image: url(../graphics/tool_info.png);
+}
+
+.layer{
+	background-image: url(../graphics/layer.png);
+}
+
 .button_background{
-	background: linear-gradient(#eff3f6, #DAE4EC);
-	width: 30px;
-	height: 29px;
+	background: linear-gradient(#fdfdfd, #DAE4EC);
+	box-shadow: 0px 1px 0px #bbb;
 }
 
-.emboss{
-	width:30px;
-	height:30px;
-	box-shadow:
-	2px 3px 3px rgba(0, 0, 0, 0.2), 
-	0px 3px 1px rgba(255, 255, 255, 0.6) inset, 
-	-1px -1px 3px rgba(0, 0, 0, 0.7) inset,	 
-	0px 1px 1px rgba(0, 0, 0, 0.8) inset;
+.button{
+	position: relative;
+	background-repeat: no-repeat;
+	background-position: center; 
+	width:36px;
+	height:36px;
 }
 
-.emboss:hover{
-	box-shadow:
-	2px 0 7px rgba( 255, 255, 255 ,0.1), 
-	0 2px 7px rgba( 255, 255, 255 ,0.1), 
-	-2px 0 7px rgba( 255, 255, 255 ,0.1),
-	0 -2px 7px rgba( 255, 255, 255 ,0.1),
-	2px 3px 3px rgba(0, 0, 0, 0.2), 
-	0px 3px 1px rgba(255, 255, 255, 0.6) inset, 
-	-1px -1px 3px rgba(0, 0, 0, 0.7) inset,	 
-	0px 1px 1px rgba(0, 0, 0, 0.8) inset;
+.button::after {
+	border-radius: 3px;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
+  content: '';
+	opacity: 0;
+  position: absolute;
+  height: calc(100% - 2px);
+	width: calc(100% - 2px);
+  left: 1;
+  top: 1;
 }
 
-.emboss:active{
-	box-shadow:
-	2px 0 7px rgba( 255, 255, 255 ,0.2), 
-	0 2px 7px rgba( 255, 255, 255 ,0.2), 
-	-2px 0 7px rgba( 255, 255, 255 ,0.2),
-	0 -2px 7px rgba( 255, 255, 255 ,0.2),
-	-1px -1px 3px rgba(0, 0, 0, 0.7) inset,	 
-	0px 0px 1px rgba(0, 0, 0, 0.8) inset;
+.button:active{
+	background-color: #e3e8ed;
+}
+
+.button:hover::after{
+  opacity: 1;
 }
 
 #header{
-	height: <? echo ($size['header']['height'] - 2); ?>;
+	height: <? echo ($size['header']['height'] - 2); ?>px;
 	border: 1px solid; 
 	border-color: #ffffff #cccccc #bbbbbb;
 }
 
 #footer{
-	height: <? echo ($size['footer']['height'] - 2); ?>;
+	height: <? echo ($size['footer']['height'] - 2); ?>px;
 	border: 1px solid; 
-	border-color: #cccccc #cccccc #cccccc;
+	border-color: #aaa #cccccc #cccccc;
+}
+
+#map{
+	transform: translate(0, 0);		/* ansonsten wird das SVG unscharf */
 }
 
 #scale_bar {
 	background: <? echo BG_MENUETOP; ?>;
 	border-top: 1px solid #aaaaaa;
-	height: <? echo ($size['scale_bar']['height'] - 1); ?>;
+	height: <? echo ($size['scale_bar']['height'] - 1); ?>px;
 }
 
 #lagebezeichnung_bar{
 	background: <? echo BG_MENUETOP; ?>;
 	border-top: 1px solid #aaaaaa;
-	height: <? echo ($size['lagebezeichnung_bar']['height'] - 1); ?>;
+	height: <? echo ($size['lagebezeichnung_bar']['height'] - 1); ?>px;
+	text-align: center;
 }
 
 #lagebezeichnung{
@@ -662,16 +700,22 @@ a.menuered:hover {
 }
 
 #map_functions_bar{
-	border-top: 1px solid #aaaaaa;
-	padding-top: 6px;
-	padding-bottom: 6px;
-	height: <? echo ($size['map_functions_bar']['height'] - 13); ?>;
+	background: linear-gradient(#fdfdfd, #DAE4EC);
+	border-top: 1px solid #ccc;
+	box-shadow: 0px 1px 0px #bbb;
+	height: <? echo ($size['map_functions_bar']['height'] - 1); ?>px;
+}
+
+#legend_switch{
+	background: linear-gradient(90deg, #c1d6f2, #DAE4EC);
 }
 
 #legenddiv {
 	border-left: 1px solid #ccc;
+	box-shadow: 0px 1px 0px #bbb;
 	display: flex; 
 	flex-direction: column;
+	background-image: url(../graphics/bg.gif);
 }
 
 #legend_layer{
@@ -680,13 +724,89 @@ a.menuered:hover {
 	flex-direction: column;
 }
 
+.legend_layer_highlight{
+	background-color: none;
+	animation: highlight 3s ease-in-out;
+}
+
+@keyframes highlight{
+  0%,100% { background-color: none }
+  10%,60% { background-color: lightsteelblue }
+}
+
 #legendcontrol{
 	margin-top: 5px;
 	margin-bottom: 8px;
 	display: flex; 
 	flex-direction: row;
 	justify-content: flex-start;
-	padding-left: 20px;
+	padding-left: 7px;
+}
+
+#drawingOrderForm{
+	margin: 5 0 10 0;
+	position: relative;
+}
+
+.drawingOrderFormDropZone{
+	position: relative;
+	z-index: 1000;
+	margin: 0;
+	height: 0px;
+	width: 177px;
+}
+
+.drawingOrderFormDropZone.ready{
+	margin: -12 0 -12 15;
+	height: 24px;
+	transition: height 0.1s ease, margin 0.1s ease;
+}
+
+.drawingOrderFormDropZone.over{
+	height: 51px;
+	margin: -13 0 -13 15;
+	transition: height 0.1s ease, margin 0.1s ease;
+}
+
+.drawingOrderFormLayer{
+	background-color: #f6f6f6;
+	box-shadow: 1px 1px 4px #aaa;
+	z-index: 100;
+	margin: 3 0 0 15;
+	padding: 2 2 2 3;
+	height: 16px;
+	width: 177px;
+	border: 1px solid grey;
+	cursor: pointer;
+}
+
+.drawingOrderFormLayer:hover{
+	background-color: #fcfcfc;
+}
+
+.drawingOrderFormLayer.dragging{
+	box-shadow: 3px 3px 6px #aaa;
+}
+
+.drawingOrderFormLayer.picked{
+	visibility: hidden;
+	height: 0px;
+	margin: 0 0 0 0;
+	padding: 0 0 0 0;
+	border: none;
+	transition: height 0.15s ease, margin 0.15s ease, padding 0.15s ease;
+}
+
+.drawingOrderFormLayer.over{
+	border: 1px dashed #000;
+}
+
+#layersearchdiv{
+	margin: 7px;
+}
+
+#layer_search{
+	width: 145px;
 }
 
 #scrolldiv{
@@ -698,24 +818,19 @@ a.menuered:hover {
 }
 
 #legend{
-	margin-left:5px;
+	margin: 4px 0 4px 7px;
 }
 
 .normallegend {
 	float: right;
 	width: <?php echo ($size['legend']['width'] - 1); ?>px;
 	vertical-align: top;
-	background-image: url(../graphics/bg.gif);
-	border-top: 1px solid #eeeeee;
 }
 
 .slidinglegend_slideout {
+	cursor: pointer;
 	right: -<?php echo $size['legend']['width']; ?>px;
 	position:absolute;
-	border-top: 1px solid #eeeeee;
-	border-left:1px solid #CCCCCC;
-	border-bottom: 1px solid #aaaaaa;
-	background-image: url(../graphics/bg.gif);
 	transform: translate3d(-<? echo ($size['legend']['hide_width'] + 2); ?>px,0px,0px);
 	transition: all 0.3s ease;
 }
@@ -729,10 +844,6 @@ a.menuered:hover {
 .slidinglegend_slidein {
 	right: -<?php echo $size['legend']['width']; ?>px;
 	position: absolute;
-	border-top: 1px solid #eeeeee;
-	border-left:1px solid #CCCCCC;
-	border-bottom: 1px solid #aaaaaa;
-	background-image: url(../graphics/bg.gif);
 	transform: translate3d(-<?php echo $size['legend']['width']; ?>px,0px,0px);
 	transition: all 0.3s ease;
 }
@@ -855,10 +966,12 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 .raster_record .tr_hide input{width:0.0001px;font-size: 0.0001px;height:0.0001px;transition: all 0.25s ease;}
 .raster_record .tr_hide input[type=checkbox]{display:none;width:12px;font-size: 15px;height:12px;transition: all 0.25s ease;}
 .raster_record .tr_hide textarea{font-size: 0.0001px !important;transition: all 0.25s ease;}
-.raster_record .tr_hide div{min-width: 0.0001px !important;}
+.raster_record .tr_hide div{min-width: 0.0001px !important; transition: all 0.25s ease;}
+.raster_record .tr_hide .readonly_text{font-size: 0.0001px !important;word-wrap: break-word;min-width: 0.0001px !important;max-width: 0.0001px !important; transition: all 0.25s ease;}
 /* Attribute, die eingeblendet werden sollen: */
 .raster_record .tr_show{visibility:visible;}
-.raster_record .tr_show #formelement{width: 125px;overflow: hidden}
+.raster_record .tr_show #formelement{width: 125px;}
+.raster_record .tr_show .readonly_text{font-size: 15px;word-wrap: break-word;min-width: 122px !important;max-width: 122px !important;transition: all 0.25s ease;}
 .raster_record .tr_show td{border:none;padding: 0.0001px;transition: all 0.25s ease;}
 .raster_record .tr_show select{width: 112%;height:22px;transition: all 0.25s ease;}									/* Selectfelder werden auf 130px Breite verkleinert*/
 .raster_record .tr_show input{width:130px;font-size: 15px;height:22px;transition: all 0.25s ease;}		/* normale Inputfelder werden auf 130px Breite verkleinert*/
@@ -879,9 +992,10 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 .raster_record_open input[type=checkbox]{width:12px;font-size: 15px;height:12px;transition: all 0.25s ease;}
 .raster_record_open textarea{font-size: 15px;transition: all 0.25s ease;}
 .raster_record_open .tr_show #formelement{width: 100%;overflow: visible}
+.raster_record_open .readonly_text{font-size: 15px;word-wrap: break-word;min-width: 400px !important;max-width: 400px !important;transition: all 0.25s ease;}
 .raster_record_open .tr_show input[type=file]{width:290px;font-size: 15px;height:22px;transition: all 0.25s ease;}
 .raster_record_open select{font-size: 15px;display:inline;width:290px;transition: all 0.25s ease;}
-.raster_record_open select:focus{font-size: 15px;display:inline;width:290px;}
+.raster_record_open select:focus{font-size: 15px;display:inline;width:290px;transition: all 0.25s ease;}
 .raster_record_open span{line-height:16px;font-size: 15px;transition: all 0.25s ease;}
 .raster_record_open img{width: auto; transition: all 0.25s ease;}
 .raster_record_open .tr_hide{visibility:visible;}
@@ -891,13 +1005,19 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 
 #layer	h2{
 	font-weight: bold;
-	padding-left: 50px;
+	padding-left: 35px;
 }
 
 #datensatz {
 	border:0px solid gray;
 	border-collapse:collapse;
 	padding:0px 0px 0px 0px;
+}
+
+.datensatz_header{
+	background: linear-gradient(#DAE4EC 0%, lightsteelblue 100%);
+	#background-color:<? echo BG_GLEHEADER; ?>;
+	border-bottom: 1px solid #bbb;
 }
 
 .message_box {
@@ -929,7 +1049,7 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 	transition: opacity 2s ease-out;
 }
 
-.message_box_hidden {
+.message_box_hidden, .hidden {
 	display: none;
 }
 
@@ -965,7 +1085,7 @@ table.tgle {
 }
 
 thead.gle th { 
- padding:4px 4px 4px 4px;
+ padding: 0;
  text-align:left;
 }
 
@@ -1011,17 +1131,61 @@ tbody.gle tr:hover {
 }
 
 
-#calendar { /* Fuer IE <= 6 */
+.calendar { /* Fuer IE <= 6 */
 	text-align: center;
 	position: absolute;
 	z-index: 1000000;
 }
 
-#calendar tr { 
+.timepicker{
+	min-width: 180px;
+	font-size: 18px;
+	line-height: 24px;
+	border: solid #112A5D 2px;
+	padding: 3 0 3 0;
+	margin-top: 7px;
+	margin-left:auto;
+	margin-right:auto;
+	background-color: #F6F6F6;
+	display: flex;
+	justify-content: center;
+}
+
+.timepicker .time{
+	flex: 0 0 auto;
+	cursor: n-resize;
+	width: 33px;
+	padding: 0 5 0 5;
+	font-size: 18px;
+	border: 1px solid white;
+}
+
+.timepicker .time:focus{
+	border: 1px solid grey;
+}
+
+.timepicker .time:hover{ 
+	background-color: #CCD2D8;
+}
+
+.timepicker .submit{
+	cursor: pointer;
+	position: absolute;
+	right: 8px;
+	margin: 3 0 3 0;
+	font-size: 1.2em;
+	color: silver;
+}
+
+.timepicker .submit:hover{
+	color: gray;
+}
+
+.calendar tr { 
  border:none;
 }
 
-#calendar table thead th{ 
+.calendar table thead th{ 
 	font-weight: bold; 
 	font-size: 15px;
 	line-height: 1.2em;				
@@ -1030,7 +1194,7 @@ tbody.gle tr:hover {
 	background-color: #112A5D;
 }
 
-#calendar table thead th.weekday{ 
+.calendar table thead th.weekday{ 
 	font-weight: bold; 
 	font-size: 14px;
 	line-height: 1.2em;
@@ -1040,7 +1204,7 @@ tbody.gle tr:hover {
 	border: solid #112A5D 1px;
 }
 
-#calendar table tbody td, #calendar table tfoot td{ 
+.calendar table tbody td, .calendar table tfoot td{ 
 	font-weight: normal; 
 	font-size: 14px;
 	line-height: 1.2em;
@@ -1052,39 +1216,39 @@ tbody.gle tr:hover {
 	border: 1px solid #CCD2D8;
 }
 
-#calendar table tfoot td {
+.calendar table tfoot td {
 	font-size: 7px;
 	border: none;
 }
 
-#calendar table tfoot td.calendar_week {
+.calendar table tfoot td.calendar_week {
 	text-align: left;
 }
 
-#calendar table tbody td:hover{ 
+.calendar table tbody td:hover{ 
 	background-color: #CCD2D8;
 	font-weight: bold;
 }
 
-#calendar table tbody td.saturday{ 
+.calendar table tbody td.saturday{ 
 	color: #9A2525;
 	font-weight: normal;
 }
 
-#calendar table tbody td.sunday{ 
+.calendar table tbody td.sunday{ 
 	color: #9A2525;
 	font-weight: bold;
 }
 
-#calendar table tbody td.weekend{ 
+.calendar table tbody td.weekend{ 
 	color: #9A2525;
 }
 
-#calendar table tbody td.today{
+.calendar table tbody td.today{
 	background-color: #A7B5C7;
 }
 
-#calendar table thead th.prev_year, #calendar table thead th.next_year {
+.calendar table thead th.prev_year, .calendar table thead th.next_year {
 	border:none;
 	margin: 0.1em;
 	padding: 0.1em;
@@ -1092,11 +1256,11 @@ tbody.gle tr:hover {
 	font-size: 11px;
 }
 
-#calendar table tbody td.last_month, #calendar table tbody td.next_month {
+.calendar table tbody td.last_month, .calendar table tbody td.next_month {
 	color:	 #a3afc4;
 }
 
-#calendar table{
+.calendar table{
 	border-collapse: collapse;
 	border: solid #112A5D 2px;
 	padding: 0;
@@ -1131,7 +1295,7 @@ tbody.gle tr:hover {
 }
 
 .fstanzeigehover:hover{
-								background-color:rgba(255,255,255,0.2);
+								background-color:rgba(255,255,255,0.4);
 }
 
 .flexcontainer1{
@@ -1156,6 +1320,8 @@ tbody.gle tr:hover {
 .rollenwahl-gruppe {
 	margin: 10px;
 	border: 1px solid #cccccc;
+	background: url('../graphics/bg.gif'); 
+	z-index: 2;
 }
 
 .rollenwahl-table {
@@ -1178,8 +1344,18 @@ tbody.gle tr:hover {
 }
 
 .rollenwahl-option-data {
-	width: 440px;
+	width: 460px;
 	padding : 4px;
+}
+
+.button_selection{
+	width: 390px;
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.button_selection div{
+	padding: 0 0 3px 4px;
 }
 
 .hover-border{
@@ -1227,13 +1403,11 @@ tbody.gle tr:hover {
 	cursor: pointer;
 }
 
-.layerOptions{
+.layerOptions, #legendOptions{
+	width: 220px;
 	border: 1px solid #cccccc;
 	background: #EDEFEF;
 	padding:0px;
-	right:210px;
-	top:300px;
-	width: 200px;
 	position:absolute;
 	z-index: 1000;
 	-moz-box-shadow: 6px 5px 7px #777;
@@ -1241,12 +1415,41 @@ tbody.gle tr:hover {
 	box-shadow: 6px 5px 7px #777;
 }
 
-.layerOptionsHeader{
+.layerOptions{
+	top:300px;
+	right:210px;
+}
+
+.layerOptionsIcon{
+	font-size: 0.9em;
+	height: 14px;
+	width: 14px;
+	padding: 3px;
+	margin-left: -4;
+}
+
+#legendOptionsIcon{
+	font-size: 1.1em;
+	margin: 0 0 0 42;
+	height: 16px;
+	width: 16px;
+	padding: 5px;
+}
+
+#legendOptions{
+	border: 1px solid #cccccc;
+	background: #EDEFEF;
+	position: absolute;
+	right: 100px;
+	display: none;
+}
+
+.layerOptionsHeader, #legendOptionsHeader{
 	background-color: #c7d9e6;
 	padding: 2px 2px 2px 8px;
 }
 
-.layerOptions ul{
+.layerOptions ul, #legendOptions ul{
 	color: lightsteelblue;
 	margin: 5px;
 	padding: 0px;
@@ -1254,8 +1457,16 @@ tbody.gle tr:hover {
 	list-style: square inside none;
 }
 
-.layerOptions span{
+.layerOptions li, #legendOptions li{
+	margin-bottom: 5px;
+}
+
+.layerOptions span, #legendOptions span, label{
 	color: #252525;
+}
+
+#legendOptions label{
+	margin-left: 12px;
 }
 
 .groupOptions{
@@ -1422,4 +1633,30 @@ tbody.gle tr:hover {
 	position: relative;
 	text-align: right;
 	margin-right: 8px;
+}
+
+.scrolltable thead, .scrolltable tbody {
+	display: block;
+}
+
+.scrolltable tbody {
+  height: 590px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.scrolltable td {
+	padding: 5 0 5 0;
+}
+
+.toggle_fa_off i{
+	color: #888888;
+}
+
+.toggle_fa_off:hover i{
+	color: #444444;
+}
+
+.toggle_fa_on i{
+	color: #444444;
 }

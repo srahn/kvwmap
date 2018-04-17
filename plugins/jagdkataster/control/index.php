@@ -2,7 +2,7 @@
 		
 	$this->goNotExecutedInPlugins = false;
 		
-	switch($this->go){
+	switch($go){
 	  # Jagdbezirke Sachdaten anzeigen
 	  case 'jagdbezirk_show_data' : {
 			include(PLUGINS.'jagdkataster/model/kvwmap.php');						# GUI-Objekt erweitern
@@ -40,7 +40,7 @@
 
 	  # Jagdkatastereditor
 	  case 'jagdkatastereditor' : {
-			$this->checkCaseAllowed($this->go);
+			$this->checkCaseAllowed($go);
 			include(PLUGINS.'jagdkataster/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'jagdkataster/model/jagdkataster.php');		# jagdkataster-Klasse einbinden
 			$this->jagdkatastereditor();

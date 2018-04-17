@@ -37,11 +37,15 @@
 		$this->formvars['last_doing'] = 'draw_polygon';
 	}
 	?>
+	<input name="gps_posx" type="hidden" value="<? echo $this->formvars['gps_posx']; ?>">
+	<input name="gps_posy" type="hidden" value="<? echo $this->formvars['gps_posy']; ?>">
+	<input name="gps_follow" type="hidden" value="<? echo $this->formvars['gps_follow'] ?>">
 	<input name="last_button" type="hidden" value="<? echo $this->formvars['last_button']; ?>">
 	<input name="last_doing" type="hidden" value="<? echo $this->formvars['last_doing']; ?>">
 	<input name="last_doing2" type="hidden" value="<? echo $this->formvars['last_doing2']; ?>">
 	<input name="lastcoordx" type="hidden" value="">
 	<input name="lastcoordy" type="hidden" value="">
+	<input name="angle" type="hidden" value="">
   
 <?php
 #
@@ -57,6 +61,9 @@ $svg .= $SVGvars_navscript;
 $svg .= $basicfunctions;
 $svg .= $pointfunctions;
 $svg .= $polygonfunctions;
+if($this->user->rolle->gps){
+	$svg .= $gps_functions;
+}
 $svg .= $SVGvars_coordscript;
 $svg .= $SVGvars_tooltipscript;
 $svg .= ']]></script>';
@@ -67,13 +74,15 @@ $svg .='
 '.$pointelement.'
   </defs>';
 $svg .= $canvaswithall;
-$svg .= '<g id="buttons" cursor="pointer" transform="scale(1.1)">';
 $svg .= $navbuttons;
-$svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate(0 26)">';
-$svg .= polygonbuttons($strUndo, $strDeletePolygon, $strDrawPolygon, $strCutByPolygon);
-$svg .= vertex_edit_buttons($strCornerPoint);
-$svg .= pointbuttons($strSetPosition);
-$svg .= '</g>';
+$svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate(0 36)">';
+$buttons_fs .= deletebuttons($strUndo, $strDelete);
+$buttons_fs .= polygonbuttons($strDrawPolygon, $strCutByPolygon);
+$buttons_fs .= vertex_edit_buttons($strCornerPoint);
+$buttons_fs .= pointbuttons($strSetPosition);
+global $last_x;
+$svg .= '<rect x="0" y="0" rx="3" ry="3" width="'.$last_x.'" height="36" class="navbutton_bg"/>';
+$svg .= $buttons_fs;
 $svg .= '</g>';
 $svg .= $SVG_end;
 

@@ -35,8 +35,9 @@ function get_style(style_id){
 	}
 	if(document.getElementById('td1_style_'+style_id))document.getElementById('td1_style_'+style_id).style.backgroundColor='lightsteelblue';
 	if(document.getElementById('td2_style_'+style_id))document.getElementById('td2_style_'+style_id).style.backgroundColor='lightsteelblue';
+	layer_id = document.GUI.layer.options[document.GUI.layer.selectedIndex].value;
 	document.GUI.selected_style_id.value = style_id;
-	ahah('index.php', 'go=get_style&style_id='+style_id, new Array(document.getElementById('selected_style_div')), "");
+	ahah('index.php', 'go=get_style&style_id='+style_id+'&layer_id='+layer_id, new Array(document.getElementById('selected_style_div')), "");
 }
 
 function get_label(label_id){
@@ -46,8 +47,9 @@ function get_label(label_id){
 	}
 	document.getElementById('td1_label_'+label_id).style.backgroundColor='lightsteelblue';
 	document.getElementById('td2_label_'+label_id).style.backgroundColor='lightsteelblue';
+	layer_id = document.GUI.layer.options[document.GUI.layer.selectedIndex].value;
 	document.GUI.selected_label_id.value = label_id;
-	ahah('index.php', 'go=get_label&label_id='+label_id, new Array(document.getElementById('selected_label_div')), "");
+	ahah('index.php', 'go=get_label&label_id='+label_id+'&layer_id='+layer_id, new Array(document.getElementById('selected_label_div')), "");
 }
 
 function add_label(){
@@ -333,7 +335,7 @@ function toLayerEditor(){
 							}
 							echo'
 									<tr>
-										<td height="30" colspan="2" valign="bottom" align="center"><input class="button" type="button" name="style_save" value="Speichern" onclick="save_style('.$this->styledaten['Style_ID'].')"></td>
+										<td height="30" colspan="2" valign="bottom" align="center"><input type="button" name="style_save" value="Speichern" onclick="save_style('.$this->styledaten['Style_ID'].')"></td>
 									</tr>
 								</table>';
 				  	}
@@ -358,7 +360,7 @@ function toLayerEditor(){
 							}
 							echo'
 									<tr>
-										<td height="30" colspan="2" valign="bottom" align="center"><input class="button" type="button" name="label_save" value="Speichern" onclick="save_label('.$this->labeldaten['Label_ID'].')"></td>
+										<td height="30" colspan="2" valign="bottom" align="center"><input type="button" name="label_save" value="Speichern" onclick="save_label('.$this->labeldaten['Label_ID'].')"></td>
 									</tr>
 								</table>';
 				  	}
@@ -434,7 +436,7 @@ function toLayerEditor(){
 			        </tr>
 			        <tr align="left">
 			          <td>
-			          <div align="center"><input type="button" class="button" name="neuladen_button" onclick="neuLaden();" value="neu Laden"></div>
+			          <div align="center"><input type="button" name="neuladen_button" onclick="neuLaden();" value="neu Laden"></div>
 			          <br>
 			        	<div style="width:230; height:<?php echo $this->map->height-59; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
 				          &nbsp;

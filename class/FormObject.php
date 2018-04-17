@@ -46,8 +46,9 @@ class FormObject {
 					$this->AnzValues=count($value);
 				}
 				$this->select['name']=$name;
-				if ($size=='Anzahl Werte') {
-					$this->select['size']=$this->AnzValues;
+				if(substr($size, 0, 3) == 'max'){
+					$maxsize = substr($size, 3);
+					$this->select['size'] = ($this->AnzValues < $maxsize) ? $this->AnzValues : $maxsize;
 				}
 				else {
 					$this->select['size']=$size;
@@ -78,8 +79,12 @@ class FormObject {
 		$this->outputHTML();
 	} # ende constructor
 
-static	function createSelectField($name, $options, $value = '', $size = 1, $style = '', $onchange = '', $id = '') {
-	$id = (empty($id) ? $name : $id);
+static	function createSelectField($name, $options, $value = '', $size = 1, $style = '', $onchange = '', $id = '', $multiple = '') {
+	$id = ($id == '' ? $name : $id);
+	if ($multiple != '') $multiple = ' multiple';
+	if ($style != '') $style = 'style="' . $style . '"';
+	if ($onchange != '') $onchange = 'onchange="' . $onchange . '"';
+
 	$options_html = array();
 	foreach($options AS $option) {
 		$selected = ($option['value'] == $value ? ' selected' : '');
@@ -93,7 +98,7 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 	}
 
 	$html  = "
-<select id=\"{$id}\" name=\"{$name}\" size=\"{$size}\" style=\"{$style}\" onchange=\"{$onchange}\">
+<select id=\"{$id}\" name=\"{$name}\" size=\"{$size}\" {$style} {$onchange} {$multiple}>
 	" . implode('<br>', $options_html) . "
 </select>
 ";
@@ -151,10 +156,10 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 		switch ($this->type) {
 			case "select" : {
 				$this->html ="<select name='".$this->select["name"]."' size='".$this->select["size"]."' ";
-				if($this->width > 0) {
-					$this->html.="style='width:".$this->width."px'";
+				if ($this->width > 0) {
+					$this->style .= (substr(trim($this->style), -1) != ';' ? ';' : '') . ' width: ' . $this->width . 'px;';
 				}
-				if($this->disabled) {
+				if ($this->disabled) {
 					$this->html.=' disabled="true" ';
 				}
 				if ($this->select["multiple"]) {
