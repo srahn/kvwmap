@@ -641,18 +641,26 @@ FROM
 			if($fields[$i]['nullable'] == '')$fields[$i]['nullable'] = 'NULL';
 			if($fields[$i]['length'] == '')$fields[$i]['length'] = 'NULL';
 			if($fields[$i]['decimal_length'] == '')$fields[$i]['decimal_length'] = 'NULL';
-			$sql = "REPLACE INTO datatype_attributes SET ";
-			$sql.= "datatype_id = ".$datatype_id.", ";
-			$sql.= "name = '".$fields[$i]['name']."', ";
-			$sql.= "real_name = '".$fields[$i]['real_name']."', ";
-			$sql.= "type = '".$fields[$i]['type']."', ";
-			//$sql.= "geometrytype = '".$fields[$i]['geomtype']."', ";	# todo
-			$sql.= "constraints = '".addslashes($fields[$i]['constraints'])."', ";
-			$sql.= "nullable = ".$fields[$i]['nullable'].", ";
-			$sql.= "length = ".$fields[$i]['length'].", ";			
-			$sql.= "decimal_length = ".$fields[$i]['decimal_length'].", ";
-			$sql.= "`default` = '".addslashes($fields[$i]['default'])."', ";
-			$sql.= "`order` = ".$i;
+			$sql = "INSERT INTO datatype_attributes SET
+								datatype_id = ".$datatype_id.", 
+								name = '".$fields[$i]['name']."', 
+								real_name = '".$fields[$i]['real_name']."', 
+								type = '".$fields[$i]['type']."', 
+								constraints = '".addslashes($fields[$i]['constraints'])."', 
+								nullable = ".$fields[$i]['nullable'].", 
+								length = ".$fields[$i]['length'].", 
+								decimal_length = ".$fields[$i]['decimal_length'].", 
+								`default` = '".addslashes($fields[$i]['default'])."', 
+								`order` = ".$i." 
+							ON DUPLICATE KEY UPDATE
+								real_name = '".$fields[$i]['real_name']."', 
+								type = '".$fields[$i]['type']."', 
+								constraints = '".addslashes($fields[$i]['constraints'])."', 
+								nullable = ".$fields[$i]['nullable'].", 
+								length = ".$fields[$i]['length'].", 
+								decimal_length = ".$fields[$i]['decimal_length'].", 
+								`default` = '".addslashes($fields[$i]['default'])."', 
+								`order` = ".$i;
 			$query=mysql_query($sql);
 			if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
 		}
