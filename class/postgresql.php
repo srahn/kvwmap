@@ -1805,7 +1805,7 @@ FROM
 		split_part(split_part(e2.beschreibung, '(', 2), ')', 1), 
 		split_part(split_part(s.beschreibung, '(', 2), ')', 1), 
 		n.bodenzahlodergruenlandgrundzahl || '/' || n.wert], ' ') as label ";
-		$sql.=" FROM (SELECT amtlicheflaeche, st_area_utm(st_intersection(n.wkb_geometry, st_intersection(be.wkb_geometry,f.wkb_geometry)), ".$this->spatial_ref_code.") as fl_geom, st_area_utm(f.wkb_geometry, ".$this->spatial_ref_code.") as flstflaeche, n.bodenzahlodergruenlandgrundzahl, n.ackerzahlodergruenlandzahl as wert, n.kulturart as objart, n.kulturart, n.bodenart, n.entstehungsartoderklimastufewasserverhaeltnisse, n.zustandsstufeoderbodenstufe, n.sonstigeangaben";
+		$sql.=" FROM (SELECT amtlicheflaeche, st_area_utm(st_intersection(n.wkb_geometry, st_intersection(be.wkb_geometry,f.wkb_geometry)), ".$this->spatial_ref_code.") as fl_geom, st_area_utm(f.wkb_geometry, ".$this->spatial_ref_code.") as flstflaeche, ltrim(n.bodenzahlodergruenlandgrundzahl, '0') as bodenzahlodergruenlandgrundzahl, ltrim(n.ackerzahlodergruenlandzahl, '0') as wert, n.kulturart as objart, n.kulturart, n.bodenart, n.entstehungsartoderklimastufewasserverhaeltnisse, n.zustandsstufeoderbodenstufe, n.sonstigeangaben";
     $sql.=" FROM alkis.ax_flurstueck f, alkis.ax_bewertung be, alkis.ax_bodenschaetzung n ";		
     $sql.=" WHERE st_intersects(n.wkb_geometry,f.wkb_geometry) = true AND st_intersects(be.wkb_geometry,f.wkb_geometry) = true AND st_area_utm(st_intersection(n.wkb_geometry, st_intersection(be.wkb_geometry,f.wkb_geometry)), " . $this->spatial_ref_code . ") > 0.001 AND f.flurstueckskennzeichen='" . $FlurstKennz . "'";
 		$sql.= $this->build_temporal_filter(array('f', 'be', 'n'));
