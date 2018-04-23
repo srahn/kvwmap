@@ -494,7 +494,7 @@ define("DEFAULTMAPFILE",SHAPEPATH.'mapfiles/defaultmapfile.map');
 define("SAVEMAPFILE",LOGPATH.'save_mapfile.map');                                # Version 1.11.0 
 define("REFMAPFILE",SHAPEPATH.'mapfiles/refmapfile.map');
 # Ort der Datei, in der die Meldungen beim Debugen geschrieben werden
-define('DEBUGFILE',LOGPATH.VERSION.'_'.$_SESSION['login_name'].'_debug.htm');
+define('DEBUGFILE',LOGPATH.$_SESSION['login_name'].'_debug.htm');			# in Version 2.8 gibt es die Konstante VERSION nicht mehr
 # Level der Fehlermeldungen beim debuggen
 # 3 nur Ausgaben die für Admin bestimmt sind
 # 2 nur Datenbankanfragen
