@@ -7,7 +7,7 @@ $GUI->user->rolle->querymode = 0;
 $GUI->allowed_documents = array();
 $GUI->document_loader_name = session_id().rand(0,99999999).'.php';
 $GUI->formvars=$formvars;
-$GUI->echo = true;
+$GUI->echo = false;
 
 #################################################################################
 # Setzen der Konstante, ob in die Datenbank geschrieben werden soll oder nicht.

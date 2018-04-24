@@ -7788,16 +7788,22 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$results = $this->invitation->validate();
 		if (empty($results)) {
 			$results = $this->invitation->create();
-		}
-		if (empty($results)) {
-			$this->add_message('info', 'Neuer Nutzer ist vorgemerkt.<br>
-				<a href="mailto:' . $this->invitation->mailto_text() . '">Einladung per E-Mail verschicken</a>');
-			$this->invitations_list();
+			if ($results['success']) {
+				$this->invitation = Invitation::find_by_id($this, $this->invitation->get('token'));
+				$this->add_message('info', 'Neuer Nutzer ist vorgemerkt.<br>
+					<a href="mailto:' . $this->invitation->mailto_text() . '">Einladung per E-Mail verschicken</a>');
+				$this->invitations_list();
+			}
+			else {
+				$this->add_message('error', $results['msg']);
+				$this->invitation_formular();
+			}
 		}
 		else {
 			$this->add_message('array', $results);
 			$this->invitation_formular();
 		}
+
 	}
 
 	function invitation_update() {

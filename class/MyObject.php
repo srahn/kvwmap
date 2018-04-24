@@ -223,6 +223,7 @@ class MyObject {
 		$this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
 		if (mysql_query($sql)) {
 			$new_id = mysql_insert_id();
+			$new_id = ($new_id == 0 ? $this->get($this->identifier) : $new_id);
 			$this->debug->show('<p>new id: ' . $new_id, MyObject::$write_debug);
 			$this->set($this->identifier, $new_id);
 			$success = true;
