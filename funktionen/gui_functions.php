@@ -97,10 +97,9 @@ function resizemap2window(){
 * @param array or string messages contain the messages as array
 * or as a single string
 */
-function message(messages, t_hide, t_hidden) {
-	if (typeof(t_hide) === 'undefined') t_hide = 3000;
-	if (typeof(t_hidden) === 'undefined') t_hidden = 3000;
+function message(messages, t_hide = 3000, t_hidden = 3000, top = '20%') {
 	var msgDiv = $("#message_box");
+	msgDiv.css('top', top);
 	types = {
 		'notice': {
 			'description': 'Erfolg',

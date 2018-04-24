@@ -145,7 +145,7 @@ class Konvertierung extends PgObject {
 			SELECT
 				*
 			FROM
-				xplan_gml.rp_plan
+				xplan_gml." . strtolower($this->get('planart')) . "
 			WHERE
 				konvertierung_id = " . $this->get('id')
 		;

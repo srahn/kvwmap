@@ -1,5 +1,5 @@
 BEGIN;
 
-ALTER TABLE xplankonverter.konvertierungen ADD COLUMN planart character varying;
+ALTER TABLE xplankonverter.konvertierungen ADD COLUMN planart character varying NOT NULL;
 
 COMMIT;
