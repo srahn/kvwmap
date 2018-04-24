@@ -7,7 +7,7 @@ $GUI->user->rolle->querymode = 0;
 $GUI->allowed_documents = array();
 $GUI->document_loader_name = session_id().rand(0,99999999).'.php';
 $GUI->formvars=$formvars;
-$GUI->echo = false;
+$GUI->echo = true;
 
 #################################################################################
 # Setzen der Konstante, ob in die Datenbank geschrieben werden soll oder nicht.
@@ -121,17 +121,17 @@ if (is_logout($GUI->formvars)) {
 # login
 $show_login_form = false;
 if (is_logged_in()) {
-	$GUI->debug->write('Ist angemeldet.', 4, $echo);
+	$GUI->debug->write('Ist angemeldet.', 4, $GUI->echo);
 	$GUI->formvars['login_name'] = $_SESSION['login_name'];
 	$GUI->user = new user($_SESSION['login_name'], 0, $GUI->database);
 	# login case 1
 }
 else {
-	$GUI->debug->write('Nicht angemeldet.', 4);
+	$GUI->debug->write('Nicht angemeldet.', 4, $GUI->echo);
 	if (is_gast_login($GUI->formvars, $gast_stellen)) {
-		$GUI->debug->write('Es ist eine Gastanmeldung.', 4, $echo);
+		$GUI->debug->write('Es ist eine Gastanmeldung.', 4, $GUI->echo);
 		if (has_width_and_height($GUI->formvars)) {
-			$GUI->debug->write('Hat width und height. (' . $GUI->formvars['browserwidth'] . 'x' . $GUI->formvars['browserheight'] . ')', 4, $echo);
+			$GUI->debug->write('Hat width und height. (' . $GUI->formvars['browserwidth'] . 'x' . $GUI->formvars['browserheight'] . ')', 4, $GUI->echo);
 			$gast = $userDb->create_new_gast($_REQUEST['gast']);
 			$GUI->formvars['login_name'] = $gast['username'];
 			$GUI->formvars['passwort'] = $gast['passwort'];
@@ -140,7 +140,7 @@ else {
 			# login case 2
 		}
 		else {
-			$GUI->debug->write('Hat kein width und height. Frage sie ab.', 4, $echo);
+			$GUI->debug->write('Hat kein width und height. Frage sie ab.', 4, $GUI->echo);
 			# // ToDo: frage browser width und height ab.
 			$show_login_form = true;
 			$go = 'login_browser_size';
@@ -148,29 +148,29 @@ else {
 		}
 	}
 	else { # ist keine gastanmeldung
-		$GUI->debug->write('Es ist keine Gastanmeldung.', 4);
+		$GUI->debug->write('Es ist keine Gastanmeldung.', 4, $GUI->echo);
 
 		if (is_login($GUI->formvars)) {
-			$GUI->debug->write('Es ist eine reguläre Anmeldung.', 4);
+			$GUI->debug->write('Es ist eine reguläre Anmeldung.', 4, $GUI->echo);
 
 			# Frage den Nutzer mit dem login_namen ab
 			$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->database, $GUI->formvars['passwort']);
 
 			if (is_login_granted($GUI->user, $GUI->formvars['login_name'])) {
-				$GUI->debug->write('Anmeldung war erfolgreich. Frage alle Stellen des Nutzers ab.', 4);
+				$GUI->debug->write('Anmeldung war erfolgreich. Frage alle Stellen des Nutzers ab.', 4, $GUI->echo);
 				Nutzer::reset_num_login_failed($GUI, $GUI->formvars['login_name']);
 
 				if (is_new_password($GUI->formvars)) {
-					$GUI->debug->write('Es wurde ein neues Passwort angegeben.', 4);
+					$GUI->debug->write('Es wurde ein neues Passwort angegeben.', 4, $GUI->echo);
 					$new_password_err = isPasswordValide($GUI->formvars['passwort'], $GUI->formvars['new_password'], $GUI->formvars['new_password_2']);
 
 					if (is_new_password_valid($new_password_err)) {
-						$GUI->debug->write('Neues Password ist valid.', 4);
+						$GUI->debug->write('Neues Password ist valid.', 4, $GUI->echo);
 						update_password($GUI);
 						# login case 5
 					}
 					else { # new password is not ok
-						$GUI->debug->write('Neues Password ist nicht valid. Zurück zur Anmeldung mit Fehlermeldung.', 4);
+						$GUI->debug->write('Neues Password ist nicht valid. Zurück zur Anmeldung mit Fehlermeldung.', 4, $GUI->echo);
 						$GUI->Fehlermeldung = $new_password_err . '!<br>Vorschlag für ein neues Password: <b>' . createRandomPassword(8) . '</b><br>';
 						$show_login_form = true;
 						$go = 'login_new_password';
@@ -178,12 +178,12 @@ else {
 					}
 				}
 				else {
-					$GUI->debug->write('Es wurde kein neues Passwort angegeben.', 4);
+					$GUI->debug->write('Es wurde kein neues Passwort angegeben.', 4, $GUI->echo);
 					# login case 4
 				}
 			}
 			else { # Anmeldung ist fehlgeschlagen
-				$GUI->debug->write('Anmeldung ist fehlgeschlagen.', 4);
+				$GUI->debug->write('Anmeldung ist fehlgeschlagen.', 4, $GUI->echo);
 				$GUI->formvars['num_failed'] = Nutzer::increase_num_login_failed($GUI, $GUI->formvars['login_name']);
 				sleep($GUI->formvars['num_failed'] * $GUI->formvars['num_failed']);
 				$show_login_form = true;
@@ -238,7 +238,7 @@ else {
 				}
 			}
 			else { # keine Registrierung
-				$GUI->debug->write('Es ist keine Registrierung. Zeige Login-Formular.', 4, $GUI->echo);
+				$GUI->debug->write('Es ist keine Registrierung.', 4, $GUI->echo);
 				$show_login_form = true;
 				$go = 'login';
 				# login case 8
@@ -299,6 +299,7 @@ if (!$show_login_form) {
 
 # $show_login_form = true nach login cases 3, 6, 7, 8, 9, 10, 11
 if ($show_login_form) {
+	$GUI->debug->write('Zeige Login-Form', 4, $GUI->echo);
 	$GUI->user->rolle = new stdClass();
 	$GUI->user->rolle->querymode = 0;
 }
@@ -310,7 +311,7 @@ else {
 	# Rollenbezogene Stellendaten zuweisen
 	$GUI->loadMultiLingualText($GUI->user->rolle->language);
 
-	$GUI->debug->write('Set Session', 4, $echo);
+	$GUI->debug->write('Set Session', 4, $GUI->echo);
 	set_session_vars($GUI->formvars);
 
 	# Ausgabe der Zugriffsinformationen in debug-Datei
@@ -460,7 +461,7 @@ else {
 	  }
 	}
 }
-print_r($GUI->user->rolle);
+#print_r($GUI->user->rolle);
 /**
  Functions
 **/
