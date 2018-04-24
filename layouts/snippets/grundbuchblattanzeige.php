@@ -21,11 +21,11 @@ function flurstanzeige(flurstkennz){
 </script>
 
 <?php
-
+$alle_flst = array();
 $this->Stelle->getFunktionen();
 for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 	$this->buchungen = $this->gbblaetter[$gb];
-	$alle_flst = array();	
+	$alle_flst_pro_buchung = array();	
 	$currenttime=date('Y-m-d H:i:s',time());
 	$this->user->rolle->setConsumeALB($currenttime, 'Grundbuchblattanzeige', array($this->buchungen[0]['bezirk'].'-'.$this->buchungen[0]['blatt']), 0, 'NULL');		# das Grundbuchblattkennzeichen wird geloggt
   $anzObj=count($this->buchungen);
@@ -55,7 +55,8 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 	  	$Nutzunglangtext = '';
 	  	$Adressbezeichnung = '';
 	  	$flst=new flurstueck($this->buchungen[$i]['flurstkennz'],$this->pgdatabase);
-	  	$alle_flst[] = $this->buchungen[$i]['flurstkennz'];
+	  	$alle_flst_pro_buchung[] = $this->buchungen[$i]['flurstkennz'];
+			$alle_flst[] = $this->buchungen[$i]['flurstkennz'];
 	  	$ret=$flst->readALB_Data($this->buchungen[$i]['flurstkennz']);
 	  	for($s=0;$s<count($flst->Adresse);$s++) {
 	      $Adressbezeichnung.=$flst->Adresse[$s]["strassenname"];
@@ -117,7 +118,7 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 					<table border="0" cellspacing="0" cellpadding="3">
 						<tr align="center">
 							<td>	<? 
-								if(count($alle_flst) > 1){ ?><a href="javascript:flurstanzeige('<?php echo implode(';', $alle_flst); ?>');" title="Flurstücksdaten anzeigen">alle Flurstücke anzeigen</a>&nbsp;|<? } 
+								if(count($alle_flst_pro_buchung) > 1){ ?><a href="javascript:flurstanzeige('<?php echo implode(';', $alle_flst_pro_buchung); ?>');" title="Flurstücksdaten anzeigen">alle Flurstücke anzeigen</a>&nbsp;|<? } 
 								if($this->Stelle->funktionen['MV0700']['erlaubt']){ ?>&nbsp;<a href="index.php?go=ALKIS_Auszug&formnummer=MV0700&Grundbuchbezirk=<? echo $this->buchungen[0]['bezirk'] ?>&Grundbuchblatt=<? echo $this->buchungen[0]['blatt'] ?>" target="_blank">Bestandsnachweis</a>&nbsp;<? }							
 								if($this->Stelle->funktionen['ALB-Auszug 20']['erlaubt']){ ?>|&nbsp;<a href="index.php?go=ALB_Anzeige_Bestand&formnummer=20&Grundbuchbezirk=<? echo $this->buchungen[0]['bezirk'] ?>&Grundbuchblatt=<? echo $this->buchungen[0]['blatt'] ?>&wz=1" target="_blank">Bestandsdaten</a>&nbsp;<? }
 								if($this->Stelle->funktionen['ALB-Auszug 25']['erlaubt']){ ?>|&nbsp;<a href="index.php?go=ALB_Anzeige_Bestand&formnummer=25&Grundbuchbezirk=<? echo $this->buchungen[0]['bezirk'] ?>&Grundbuchblatt=<? echo $this->buchungen[0]['blatt'] ?>&wz=1" target="_blank">&Uuml;bersicht&nbsp;Bestandsdaten</a>&nbsp;<? } ?>
@@ -131,7 +132,11 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
   else {?>
    <br><span class="fett" style="color:"#FF0000">Es wurden keine Daten gefunden.</span><br>
  <? }
-} ?>
+} 
+
+if(count($alle_flst) > 1){ ?><a href="javascript:flurstanzeige('<?php echo implode(';', $alle_flst); ?>');" title="Flurstücksdaten anzeigen">alle Flurstücke anzeigen</a><br><br><? } 
+
+?>
 <a href="javascript:backto_gbbsearch();">zurück zur Grundbuchblattsuche</a>
 <br>
 <br>

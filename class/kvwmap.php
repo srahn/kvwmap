@@ -8129,7 +8129,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 								default : { ?>
                   <input size="24" onkeydown="keydown(event)" id="attribute_<? echo $i; ?>" name="value_<? echo $this->attributes['name'][$i]; ?>" type="text" value="">
-									<? if($this->layerset[0]['connectiontype'] == MS_WFS) { ?>
+									<? if($this->layerset[0]['connectiontype'] == MS_WFS OR
+												!in_array($this->attributes['type'][$i],	array('varchar', 'text'))){ ?>
 										<input type="hidden" id="operator_attribute_<? echo $i; ?>" name="operator_<? echo $this->attributes['name'][$i]; ?>" value="=">
 									<? }else{ ?>
 										<input type="hidden" id="operator_attribute_<? echo $i; ?>" name="operator_<? echo $this->attributes['name'][$i]; ?>" value="LIKE">
