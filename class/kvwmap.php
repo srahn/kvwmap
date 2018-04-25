@@ -2451,6 +2451,10 @@ class GUI {
 	}
 
 	function add_message($type, $msg) {
+		if (is_array($msg) AND array_key_exists('success', $msg) AND is_array($msg)) {
+			$type = 'notice';
+			$msg = $msg['msg'];
+		}
 		if ($type == 'array' or is_array($msg)) {
 			foreach($msg AS $m) {
 				$this->add_message($m['type'], $m['msg']);
@@ -7692,7 +7696,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		if (empty($results)) {
 			$results = $this->layergruppe->create();
 		}
-		if (empty($results)) {
+		if ($results[0]['success']) {
 			$this->add_message('notice', 'Layergruppe erfolgreich angelegt.');
 			$this->Layergruppen_Anzeigen();
 		}
@@ -7710,7 +7714,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		if (empty($results)) {
 			$results = $this->layergruppe->update();
 		}
-		if (empty($results)) {
+		if ($results[0]['success']) {
 			$this->add_message('notice', 'Layergruppe erfolgreich aktualisiert.');
 		}
 		else {
@@ -7739,6 +7743,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	}
 
 	function invitation_formular() {
+		include_once(CLASSPATH . 'FormObject.php');
 		include_once(CLASSPATH . 'Invitation.php');
 		$this->invitation = new Invitation($this);
 		if ($this->formvars['selected_invitation_id'] != '') {
@@ -7785,25 +7790,21 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->invitation = new Invitation($this);
 		$this->invitation->data = formvars_strip($this->formvars, $this->invitation->setKeysFromTable(), 'keep');
 
+
 		$results = $this->invitation->validate();
 		if (empty($results)) {
 			$results = $this->invitation->create();
-			if ($results['success']) {
-				$this->invitation = Invitation::find_by_id($this, $this->invitation->get('token'));
-				$this->add_message('info', 'Neuer Nutzer ist vorgemerkt.<br>
-					<a href="mailto:' . $this->invitation->mailto_text() . '">Einladung per E-Mail verschicken</a>');
-				$this->invitations_list();
-			}
-			else {
-				$this->add_message('error', $results['msg']);
-				$this->invitation_formular();
-			}
+		}
+		if ($results[0]['success']) {
+			$this->invitation = Invitation::find_by_id($this, $this->invitation->get('token'));
+			$this->add_message('info', 'Neuer Nutzer ist vorgemerkt.<br>
+				<a href="mailto:' . $this->invitation->mailto_text() . '">Einladung per E-Mail verschicken</a>');
+			$this->invitations_list();
 		}
 		else {
 			$this->add_message('array', $results);
 			$this->invitation_formular();
 		}
-
 	}
 
 	function invitation_update() {
@@ -7823,27 +7824,14 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				)
 			);
 		}
-		if (empty($results)) {
+		if ($results[0]['success']) {
 			$this->add_message(
 				'info',
 				'Daten der Einladung aktualisiert.<br><a href="mailto:' . $this->invitation->mailto_text() . '">Einladung noch mal per E-Mail verschicken</a>'
 			);
 		}
 		else {
-			if (is_array($results)) {
-				$this->add_message(
-					'array',
-					array_map(
-						function($result) {
-							return array('type' => 'info', 'msg' => $result);
-						},
-						$results
-					)
-				);
-			}
-			else {
-				$this->add_message('error', $results);
-			}
+			$this->add_message('array', $results);
 		}
 		$this->invitation_formular();
 	}
@@ -10857,13 +10845,14 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		if (empty($results)) {
 			$results = $this->menue->create();
 		}
-		if (empty($results)) {
+		if ($results[0]['success']) {
 			$this->add_message('notice', 'Menü erfolgreich angelegt.');
 			$this->menuedaten = Menue::find($this, '', $this->formvars['order']);
 			$this->titel='Menüdaten';
 			$this->main='menuedaten.php';
 		}
 		else {
+			echo '<p>results: ' . print_r($results, true);
 			$this->add_message('array', $results);
 			$this->main = 'menue_formular.php';
 		}
@@ -10878,7 +10867,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		if (empty($results)) {
 			$results = $this->menue->update();
 		}
-		if (empty($results)) {
+		if ($results[0]['success']) {
 			$this->add_message('notice', 'Menü erfolgreich aktualisiert.');
 		}
 		else {
@@ -11373,7 +11362,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		if (empty($results)) {
 			$results = $this->cronjob->create();
 		}
-		if (empty($results)) {
+		if ($results[0]['success']) {
 			$this->add_message('notice', 'Job erfolgreich angelegt.');
 			$this->cronjobs = CronJob::find($this);
 			$this->main = 'cronjobs.php';
@@ -11389,8 +11378,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		include_once(CLASSPATH . 'CronJob.php');
 		$this->cronjob = CronJob::find_by_id($this, $this->formvars['id']);
 		$this->cronjob->data = formvars_strip($this->formvars, $this->cronjob->getKeys(), 'keep');
-		$result = $this->cronjob->update();
-		if (!empty($result)) {
+		$results = $this->cronjob->update();
+		if ($results[0]['success']) {
 			$this->add_message('error', 'Fehler beim Eintragen in die Datenbank!<br>' . $result);
 			$this->main = 'cronjob_formular.php';
 		}

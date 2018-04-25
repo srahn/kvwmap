@@ -206,6 +206,8 @@ else {
 
 						# // ToDo: Create a new user and go to login with user and password
 						$result = Nutzer::register($GUI, $GUI->formvars['stelle_id']);
+						
+						
 						if ($result['success']) {
 							$invitation = Invitation::find_by_id($GUI, $GUI->formvars['token']);
 							$invitation->set('completed', date("Y-m-d H:i:s"));
@@ -268,6 +270,7 @@ if (!$show_login_form) {
 		if ($permission['allowed']) {
 			$GUI->debug->write('Nutzer ist in Stelle ' . $GUI->Stelle->id . ' erlaubt.', 4, $GUI->echo);
 			$GUI->user->stelle_id = $GUI->Stelle->id; # set selected stelle to user
+			$GUI->user->updateStelleID($GUI->Stelle->id);
 		}
 		else {
 			$GUI->debug->write('Zugang zur Stelle ' . $GUI->Stelle->id . ' für Nutzer nicht erlaubt weil: ' . $permission['reason'], 4, $GUI->echo);
@@ -307,12 +310,17 @@ else {
 	$GUI->debug->write('Lade Stelle und Rolle.', 4, $GUI->echo);
 	# Alles was man immer machen muss bevor die go's aufgerufen werden
 	$GUI->user->setRolle($GUI->user->stelle_id);
+
+	#$GUI->debug->write('Eingestellte Rolle: ' . print_r($GUI->user->rolle, true), 4, $GUI->echo);
+
 	#echo 'In der Rolle eingestellte Sprache: '.$GUI->user->rolle->language;
 	# Rollenbezogene Stellendaten zuweisen
 	$GUI->loadMultiLingualText($GUI->user->rolle->language);
 
 	$GUI->debug->write('Set Session', 4, $GUI->echo);
 	set_session_vars($GUI->formvars);
+
+	#$GUI->debug->write('<p>Session: ' . print_r($_SESSION, true), 4, $GUI->echo);
 
 	# Ausgabe der Zugriffsinformationen in debug-Datei
 	$GUI->debug->write('User: ' . $GUI->user->login_name, 4);
@@ -421,7 +429,7 @@ else {
 		# Zurücksetzen des histtimestamps
 		if($GUI->user->rolle->hist_timestamp != '')$GUI->setHistTimestamp();
 		# Zurücksetzen der veränderten Klassen
-		$GUI->user->rolle->resetClasses();
+		#$GUI->user->rolle->resetClasses();
 		$_SESSION['login_routines'] = false;
 	} else {
 			define('AFTER_LOGIN', false);

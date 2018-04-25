@@ -39,7 +39,7 @@ class Nutzer extends MyObject {
 	public static function register($gui, $stelle_id) {
 		$gui->debug->show('Nutzer register', Nutzer::$write_debug);
 		$user = new Nutzer($gui);
-		$result = $user->create(
+		$results = $user->create(
 			array(
 				'login_name' => $gui->formvars['login_name'],
 				'Name' => $gui->formvars['Name'],
@@ -52,7 +52,7 @@ class Nutzer extends MyObject {
 			)
 		);
 
-		if ($result['success']) {
+		if ($results[0]['success']) {
 			$result['success'] = false;
 			$rolle = new rolle($user->get('ID'), $stelle_id, $gui->database);
 			if ($rolle->setRollen($user->get('ID'), array($stelle_id))) {

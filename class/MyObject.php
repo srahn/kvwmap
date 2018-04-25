@@ -190,8 +190,7 @@ class MyObject {
 
 	function create($data = array()) {
 		$this->debug->show('<p>MyObject create ' . $this->tablename, MyObject::$write_debug);
-		$success = false;
-		$errmsg = '';
+		$results = array();
 		if (!empty($data))
 			$this->data = $data;
 
@@ -226,19 +225,23 @@ class MyObject {
 			$new_id = ($new_id == 0 ? $this->get($this->identifier) : $new_id);
 			$this->debug->show('<p>new id: ' . $new_id, MyObject::$write_debug);
 			$this->set($this->identifier, $new_id);
-			$success = true;
+			$results[] = array(
+				'success' => true,
+				'msg' => 'Datensatz erfolgreich angelegt.'
+			);
 		}
 		else {
-			$errmsg = mysql_error($this->database->dbConn);
+			$results[] = array(
+				'success' => false,
+				'msg' => mysql_error($this->database->dbConn)
+			);
 		}
 
-		return array(
-			'success' => $success,
-			'msg' => $errmsg
-		);
+		return $results;
 	}
 
 	function update($data = array()) {
+		$results = array();
 		$quote = ($this->identifier_type == 'text') ? "'" : "";
 		if (!empty($data))
 			$this->data = $data;
@@ -253,7 +256,12 @@ class MyObject {
 		";
 		$this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
 		$query = mysql_query($sql);
-		return mysql_error($this->database->dbConn);
+		$err_msg = mysql_error($this->database->dbConn);
+		$results[] = array(
+			'success' => ($errmsg == ''),
+			'err_msg' => $err_msg
+		);
+		return $results;
 	}
 
 	function delete() {
