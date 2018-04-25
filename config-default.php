@@ -4,8 +4,8 @@
 #   Konfigurationsdatei zu kvwmap                                  #
 #                                                                  #
 ####################################################################
-# aktuelle Versionsnummer
-define('VERSION','2.7');
+
+#define('VERSION','2.7');						# in Version 2.8 gelöscht
 define('APPLVERSION','kvwmap/');
 # Bezeichnung der MySQL-Datenbank mit den Benutzerdaten
 $dbname='kvwmapdb';
@@ -494,7 +494,7 @@ define("DEFAULTMAPFILE",SHAPEPATH.'mapfiles/defaultmapfile.map');
 define("SAVEMAPFILE",LOGPATH.'save_mapfile.map');                                # Version 1.11.0 
 define("REFMAPFILE",SHAPEPATH.'mapfiles/refmapfile.map');
 # Ort der Datei, in der die Meldungen beim Debugen geschrieben werden
-define('DEBUGFILE',LOGPATH.VERSION.'_'.$_SESSION['login_name'].'_debug.htm');
+define('DEBUGFILE',LOGPATH.$_SESSION['login_name'].'_debug.htm');			# in Version 2.8 gibt es die Konstante VERSION nicht mehr
 # Level der Fehlermeldungen beim debuggen
 # 3 nur Ausgaben die für Admin bestimmt sind
 # 2 nur Datenbankanfragen
@@ -543,61 +543,6 @@ define('DELETE_ROLLENLAYER', 'true');   # true / false                          
 # Definiert, ob das aktuelle Kartenbild separat angezeigt werden darf oder nicht
 define('SHOW_MAP_IMAGE', 'true');       # true / false                            # Version 1.6.7
 
-define('SHOW_STELLE_HIERARCHIE', false);						# Version 2.8.0
-
-// ############################# Klassenbibliotheken lesen														# in Version 2.0 gelöscht
-// # laden der Klassenbibliotheken																										# in Version 2.0 gelöscht
-// include_(CLASSPATH.'kvwmap_core.php');								# Version 1.7.6								# in Version 2.0 gelöscht
-// include_(CLASSPATH.'kataster_core.php');							# Version 1.7.6								# in Version 2.0 gelöscht
-// include_(CLASSPATH.'mysql.php');											# Version 1.7.6								# in Version 2.0 gelöscht
-// include_(CLASSPATH.'postgresql_core.php');						# Version 1.7.6								# in Version 2.0 gelöscht
-// include_(CLASSPATH.'users_core.php');									# Version 1.7.6							# in Version 2.0 gelöscht
-// if(!in_array($_REQUEST['go'], $fast_loading_cases)){		# Version 1.7.6							# in Version 2.0 gelöscht
-	// include_(CLASSPATH.'kvwmap.php');																								# in Version 2.0 gelöscht
-	// include_(CLASSPATH.'kataster.php');																							# in Version 2.0 gelöscht
-	// include_(CLASSPATH.'postgresql.php');																						# in Version 2.0 gelöscht
-	// if(ALKIS){																					#	Version 1.13								# in Version 2.0 gelöscht
-		// include_(CLASSPATH.'kataster_alkis.php');					# Version 1.13							# in Version 2.0 gelöscht
-		// include_(CLASSPATH.'postgresql_alkis.php');				# Version 1.13							# in Version 2.0 gelöscht
-	// }																										# Version 1.13							# in Version 2.0 gelöscht
-	// else{																								# Version 1.13							# in Version 2.0 gelöscht
-		// include_(CLASSPATH.'kataster_alk.php');						# Version 1.13							# in Version 2.0 gelöscht
-		// include_(CLASSPATH.'postgresql_alk.php');					# Version 1.13							# in Version 2.0 gelöscht
-	// }																										# Version 1.13							# in Version 2.0 gelöscht
-	// include_(CLASSPATH.'users.php');																									# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'alb.php');																									# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'alk.php');																									# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'antrag.php');																								# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'bau.php');																									# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'nachweis.php');																							# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'geothermie.php');																						# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'bodenrichtwerte.php');																			# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'verundentsorgung.php');																			# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'metadaten.php');																						# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'spatial_processor.php');																		# in Version 2.0 gelöscht
-	// include_(CLASSPATH.'bauleitplanung.php');           # Version 1.6.1							# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'jagdkataster.php');            # Version 1.6.1							# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'polygoneditor.php');           # Version 1.6.3							# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'pointeditor.php');             # Version 1.6.3							# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'dbf.php');                     # Version 1.6.5							# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'anliegerbeitraege.php');       # Version 1.6.6   						# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'gebaeude_editor.php');         # Version 1.6.6   						# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'documents.php');               # Version 1.6.6							# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'esaf.php');                    # Version 1.6.6							# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'shape.php');                   # Version 1.6.6							# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'gps.php');                     # Version 1.6.7   						# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'wms.php');                     # Version 1.6.7   						# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'funktion.php');                # Version 1.6.9							# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'lineeditor.php');              # Version 1.7.0							# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'wfs.php');                     # Version 1.7.0							# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'synchronisation.php');         # Version 1.7.0							# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'tif.php');          						# Version 1.7.2							# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'gpx.php');          						# Version 1.7.4							# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'datendrucklayout.php');        # Version 1.7.5							# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'metadaten_csw.php');						# Version 1.7.5							# in Version 2.0 gelöscht
-	// #include_(CLASSPATH.'uko.php');          						# Version 1.8.0							# in Version 2.0 gelöscht
-// }																											# Version 1.7.6							# in Version 2.0 gelöscht
-// include (WWWROOT.APPLVERSION.'funktionen/allg_funktionen.php');										# in Version 2.0 gelöscht
 
 ############################ kvwmap-plugins #################		# Version 1.11.0
 #																																# Version 1.11.0

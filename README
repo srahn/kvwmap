@@ -1,24 +1,24 @@
-kvwmap ist ein Open Source WebGIS-Framework zur Erfassung, Verarbeitung, Analyse und Präsentation 
+ï»¿kvwmap ist ein Open Source WebGIS-Framework zur Erfassung, Verarbeitung, Analyse und PrÃ¤sentation 
 von raumbezogenen Informationen. Die Anwendung ist in PHP implementiert und verwendet verschiedene 
-Open-Source-GIS-Komponenten, wie den UMN-MapServer, PostGIS und OGR. kvwmap besitzt ein leistungsfähiges 
-Nutzer- und Rollensystem, sodass Geo- und Sachdaten rechtebasiert bearbeitet und präsentiert werden können. 
-Über eine Plugin-Schnittstelle ist es außerdem möglich, eigene Fachschalen zu entwickeln.
+Open-Source-GIS-Komponenten, wie den UMN-MapServer, PostGIS und OGR. kvwmap besitzt ein leistungsfÃ¤higes 
+Nutzer- und Rollensystem, sodass Geo- und Sachdaten rechtebasiert bearbeitet und prÃ¤sentiert werden kÃ¶nnen. 
+Ãœber eine Plugin-Schnittstelle ist es auÃŸerdem mÃ¶glich, eigene Fachschalen zu entwickeln.
 
-Für mehr Informationen besuchen Sie:
+FÃ¼r mehr Informationen besuchen Sie:
 
 http://www.kvwmap.de
 
 Eine komplette Dokumentation finden Sie unter http://www.kvwmap.de/index.php/Admin-Dokumentation
 
-Die Liste der Änderungen finden Sie unter http://www.kvwmap.de/index.php/Changelog
+Die Liste der Ã„nderungen finden Sie unter http://www.kvwmap.de/index.php/Changelog
 
 Bugmeldungen sind unter http://www.kvwmap.de/index.php/Bug_kvwmap zu finden.
 
-Für Hilfe und Hinweise benutzen Sie bitte die Mailingliste:
+FÃ¼r Hilfe und Hinweise benutzen Sie bitte die Mailingliste:
 
 kvwmap-users@lists.sourceforge.net
 
-Durchsuchen können Sie die Liste unter:
+Durchsuchen kÃ¶nnen Sie die Liste unter:
 
 https://sourceforge.net/p/kvwmap/mailman/kvwmap-users/
 

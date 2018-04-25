@@ -1259,6 +1259,7 @@ function redrawPolygon(){
   	document.getElementById("polygon").setAttribute("points", polypath);
 	}
 	if(doing == "drawpolygon"){
+		if(current_freepolygon == undefined)current_freepolygon = create_new_freepolygon();
 		current_freepolygon.setAttribute("points", polypath);
 	}
 }		

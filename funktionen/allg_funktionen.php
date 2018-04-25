@@ -1659,4 +1659,50 @@ function uuid() {
 		mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
 	);
 }
+
+/**
+*  Get the file size of any remote resource (using get_headers()), 
+*  either in bytes or - default - as human-readable formatted string.
+*
+*  @author  Stephan Schmitz <eyecatchup@gmail.com>
+*  @license MIT <http://eyecatchup.mit-license.org/>
+*  @url     <https://gist.github.com/eyecatchup/f26300ffd7e50a92bc4d>
+*
+*  @param   string   $url          Takes the remote object's URL.
+*  @param   boolean  $formatSize   Whether to return size in bytes or formatted.
+*  @param   boolean  $useHead      Whether to use HEAD requests. If false, uses GET.
+*  @return  string                 Returns human-readable formatted size
+*                                  or size in bytes (default: formatted).
+*/
+function get_remote_filesize($url, $formatSize = true, $useHead = true) {
+	if (false !== $useHead) {
+		stream_context_set_default(array('http' => array('method' => 'HEAD')));
+	}
+	$head = array_change_key_case(get_headers($url, 1));
+	// content-length of download (in bytes), read from Content-Length: field
+	$clen = isset($head['content-length']) ? $head['content-length'] : 0;
+
+	// cannot retrieve file size, return "-1"
+	if (!$clen) {
+		return -1;
+	}
+
+	if (!$formatSize) {
+		return $clen; // return size in bytes
+	}
+
+	$size = $clen;
+	switch ($clen) {
+		case $clen < 1024:
+		$size = $clen .' B'; break;
+		case $clen < 1048576:
+		$size = round($clen / 1024, 2) .' KiB'; break;
+		case $clen < 1073741824:
+		$size = round($clen / 1048576, 2) . ' MiB'; break;
+		case $clen < 1099511627776:
+		$size = round($clen / 1073741824, 2) . ' GiB'; break;
+	}
+
+	return $size; // return formatted size
+}
 ?>

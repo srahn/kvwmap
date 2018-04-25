@@ -145,12 +145,12 @@ else{
 	include_(CLASSPATH . 'bauleitplanung.php');
 }
 
-include(WWWROOT . APPLVERSION.'start.php');
+include(WWWROOT . APPLVERSION . 'start.php');
 
 # Übergeben des Anwendungsfalles
-$debug->write("<br><b>Anwendungsfall go: ".$go."</b>",4);
+$debug->write("<br><b>Anwendungsfall go: " . $go . "</b>", 4);
 
-$GUI->go=$go;
+$GUI->go = $go;
 $GUI->requeststring = $QUERY_STRING;
 
 function go_switch($go){
@@ -1576,37 +1576,6 @@ function go_switch($go){
 			case 'Funktionen_Ändern' : {
 				$GUI->checkCaseAllowed('Funktionen_Formular');
 				$GUI->FunktionAendern();
-			} break;
-
-			case 'help' : {
-				include(WWWROOT.APPLVERSION.'help/hilfe.php');
-			} break;
-
-			case 'hilfe_nachweisverw': {
-				include(WWWROOT.APPLVERSION.'help/hilfe_nachweisverw.php');
-			} break;
-
-			case 'hilfe_dokumente': {
-				include(WWWROOT.APPLVERSION.'help/hilfe_nachweisverw.php');
-			} break;
-
-			# Flurstuecksauswahl zum festlegen pot. Geothermie-Bohrpunkte
-			case 'Geothermie_Abfrage' : {
-				$GUI->geothermie_start();
-			} break;
-
-			# pot. Geothermie-Bohrpunkte festlegen und zu DB hinzufuegen
-			case 'Geothermie_Eingabe' : {
-				$GUI->geothermie_anfrage();
-			} break;
-
-			# Polygon/Versiegelung digitalisieren
-			case 'Versiegelung' : {
-				$GUI->versiegelungsFlaechenErfassung();
-			} break;
-
-			case 'Versiegelung_Senden' : {
-				$GUI->versiegelungsFlaechenSenden();
 			} break;
 
 			case "Ändern" : {
