@@ -110,11 +110,11 @@ class MyObject {
 	}
 
 	function getKeys() {
-		return array_keys($this->data);
+		return (is_array($this->data) ? array_keys($this->data) : array());
 	}
 
 	function has_key($key) {
-		return in_array($key, $this->getKeys());
+		return ($key ? in_array($key, $this->getKeys()) : false);
 	}
 
 	function setKeys($keys) {
