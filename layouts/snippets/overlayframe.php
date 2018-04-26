@@ -27,7 +27,7 @@
 						<div id="overlayfooter" style="<? if($this->found == 'false' OR $this->formvars['printversion'] != '')echo 'display:none;'; ?>background: url(<? echo GRAPHICSPATH; ?>bg.gif);border: 1px solid #cccccc;max-width:<? echo $width; ?>px;position:relative;">
 							<table style="width:100%">
 								<tr>
-									<td style="width:49%" class="px13">&nbsp;<? echo $this->strLimit; ?>&nbsp;										
+									<td style="width:40%" class="px13">&nbsp;<? echo $this->strLimit; ?>&nbsp;										
 										<select name="anzahl" id="anzahl" onchange="javascript:overlay_submit(currentform, false);">
 											<? foreach($selectable_limits as $limit){
 											if($this->formvars['anzahl'] != '' AND $custom_limit != true AND !in_array($this->formvars['anzahl'], $selectable_limits) AND $this->formvars['anzahl'] < $limit){
@@ -39,7 +39,7 @@
 										</select>
 									</td>
 									<td align="center"><div id="savebutton" <? if($this->editable == '')echo 'style="display:none"'; ?>><input type="button" name="savebutton" value="<? echo $this->strSave; ?>" onclick="save();"></div></td>
-									<td style="width:49%" align="right"><a href="javascript:druck();" class="px13"><? echo $this->printversion; ?></a>&nbsp;</td>
+									<td style="width:40%" align="right"><a href="javascript:druck();" class="px13"><? echo $this->printversion; ?></a>&nbsp;</td>
 								</tr>
 							</table>
 						</div>

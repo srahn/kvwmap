@@ -1649,7 +1649,7 @@ tbody.gle tr:hover {
   overflow-x: hidden;
 }
 
-.scrolltable td {
+.scrolltable_td td {
 	padding: 5 0 5 0;
 }
 

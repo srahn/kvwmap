@@ -163,7 +163,7 @@ function CalendarJS() {
 						delta = evt.wheelDelta / 120; // Chrome/Safari
 					else if(evt.detail)
 						delta = evt.detail / -3; // Mozilla
-					value = parseInt(evt.target.value) + delta;
+					value = parseInt(parseInt(evt.target.value) + delta);
 					if(evt.target.id == 'tp_hours')max = 24;
 					else max = 60;
 					evt.target.value = this.Instanz.formatTime(max, value);
