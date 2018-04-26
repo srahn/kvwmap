@@ -1265,7 +1265,7 @@ FROM
 		$sql.="FROM alkis.ax_kreisregion AS k, alkis.ax_gemeinde as g, alkis.ax_gemarkung AS gem, alkis.ax_flurstueck AS f ";
 		$sql.="LEFT JOIN alkis.ax_dienststelle as d ON d.stellenart = 1200 AND d.stelle = ANY(f.zustaendigestelle_stelle) ";
 		$sql.="WHERE f.gemarkungsnummer=gem.gemarkungsnummer AND f.land = gem.land AND f.gemeindezugehoerigkeit_kreis = g.kreis AND f.gemeindezugehoerigkeit_gemeinde = g.gemeinde AND f.gemeindezugehoerigkeit_kreis = k.kreis AND f.flurstueckskennzeichen='" . $FlurstKennz . "'";
-		if(!$without_temporal_filter)$sql.= $this->build_temporal_filter(array('k', 'g', 'gem', 'f'));
+		if(!$without_temporal_filter)$sql.= $this->build_temporal_filter(array('k', 'g', 'gem', 'f', 'd'));
 		else{
 			$sql.= " UNION ";
 			$sql.= "SELECT distinct f.oid, f.gml_id, 1 as hist_alb, lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, '' as abweichenderrechtszustand, zaehler, nenner, '0' AS kreisid, '' as kreisname, gem.schluesselgesamt as gemkgschl, gem.bezeichnung as gemkgname, g.schluesselgesamt as gemeinde, g.bezeichnung as gemeindename, '' as finanzamt, '' AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp ";
@@ -1623,7 +1623,7 @@ FROM
 				) > 0.001 AND
 				f.flurstueckskennzeichen = '" . $FlurstKennz . "'
 		";
-		$sql .= $this->build_temporal_filter(array('f', 'fo'));
+		$sql .= $this->build_temporal_filter(array('f', 'fo', 's'));
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
@@ -1719,7 +1719,7 @@ FROM
 				st_intersects(fo.wkb_geometry,f.wkb_geometry) = true AND st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), " . $this->spatial_ref_code . ") > 0.001 AND
 				f.flurstueckskennzeichen='" . $FlurstKennz . "'
 		";
-		$sql.= $this->build_temporal_filter(array('f', 'fo'));
+		$sql.= $this->build_temporal_filter(array('f', 'fo', 's'));
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
@@ -2160,7 +2160,7 @@ FROM
   function getForstamt($FlurstKennz) {
     $sql ="SELECT distinct d.stelle as schluessel, d.bezeichnung as name FROM alkis.ax_dienststelle as d, alkis.ax_flurstueck as f";
     $sql.=" WHERE d.stellenart = 1400 AND d.stelle = ANY(f.zustaendigestelle_stelle) AND f.flurstueckskennzeichen = '" . $FlurstKennz . "'";
-		$sql.= $this->build_temporal_filter(array('d', 'f'));
+		$sql.= $this->build_temporal_filter(array('d', 'f', 'd'));
 		#echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret[0]) {
