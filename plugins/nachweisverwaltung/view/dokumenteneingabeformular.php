@@ -353,12 +353,11 @@ $legendheight = $this->map->height + 20;
 							<table width="100%" border="0" cellpadding="0" cellspacing="0">
 								<tr>
 									<td bgcolor="<?php echo BG_DEFAULT ?>" align="left"><?php
-										if ($this->user->rolle->hideLegend) {
-											if (ie_check()){$display = 'none';}
-											?><a id="linkLegend" href="javascript:switchlegend()"><img title="Legende zeigen" id="LegendMinMax" src="<?php  echo GRAPHICSPATH; ?>maximize_legend.png" border="0"></a><?php
+										if ($this->user->rolle->hideLegend) {	?>
+											<a id="linkLegend" href="javascript:switchlegend()"><img title="Legende zeigen" id="LegendMinMax" src="<?php  echo GRAPHICSPATH; ?>maximize_legend.png" border="0"></a><?php
 										}
-										else {
-											?><a id="linkLegend" href="javascript:switchlegend()"><img title="Legende verstecken" id="LegendMinMax" src="<?php  echo GRAPHICSPATH; ?>minimize_legend.png" border="0"></a><?php
+										else { ?>
+											<a id="linkLegend" href="javascript:switchlegend()"><img title="Legende verstecken" id="LegendMinMax" src="<?php  echo GRAPHICSPATH; ?>minimize_legend.png" border="0"></a><?php
 										}
 									?></td>
 								</tr>

@@ -123,7 +123,7 @@ if($this->formvars['gps_follow'] == ''){
 			</td>
 			<td valign="top">
 				<div id="legenddiv" style="height: <? echo $legend_height; ?>px;"<?
-					if (!ie_check() AND $this->user->rolle->hideLegend) { ?>
+					if ($this->user->rolle->hideLegend) { ?>
 						onmouseenter="slide_legend_in(event);"
 						onmouseleave="slide_legend_out(event);"
 						class="slidinglegend_slideout"<?
