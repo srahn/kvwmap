@@ -155,7 +155,7 @@
 						}
 					}
 					else {
-						$columnname = $attributes['name'][$j];
+						$columnname = $attributes['real_name'][$attributes['name'][$j]];
 						$geom_tablename = $attributes['table_name'][$attributes['name'][$j]];
 						$geomtype = $attributes['geomtype'][$attributes['name'][$j]];
 						# Frage den Geometrietyp aus der Layerdefinition, wenn in geometry_columns nur als Geometry definiert.

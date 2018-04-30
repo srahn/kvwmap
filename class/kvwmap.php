@@ -14433,6 +14433,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	    $layer_id = $layerset['Layer_ID'];
 	    $tablename = $layerset['attributes']['table_name'][$layerset['attributes']['the_geom']];
 	    $oid = $layerset['shape'][$k][$tablename.'_oid'];
+			$real_geom_name = $layerset['attributes']['real_name'][$layerset['attributes']['the_geom']];
 	    $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 			if(MAPSERVERVERSION < 600){
 				$map = ms_newMapObj(NULL);
@@ -14444,7 +14445,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	    $layerdb = $mapDB->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
 	    # Auf den Datensatz zoomen
 	    $sql ="SELECT st_xmin(bbox) AS minx,st_ymin(bbox) AS miny,st_xmax(bbox) AS maxx,st_ymax(bbox) AS maxy";
-	    $sql.=" FROM (SELECT box2D(st_transform(".$layerset['attributes']['the_geom'].", ".$this->user->rolle->epsg_code.")) as bbox";
+	    $sql.=" FROM (SELECT box2D(st_transform(".$real_geom_name.", ".$this->user->rolle->epsg_code.")) as bbox";
 	    $sql.=" FROM ".$tablename." WHERE oid = '".$oid."') AS foo";
 	    $ret = $layerdb->execSQL($sql, 4, 0);
 	    $rs = pg_fetch_array($ret[1]);
@@ -14502,7 +14503,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		    elseif($layerset['schema'] != ''){
 		    	$tablename = $layerset['schema'].'.'.$tablename;
 		    }
-		    $datastring = $layerset['attributes']['the_geom']." from (select oid as id, ".$layerset['attributes']['the_geom']." from ".$tablename;
+		    $datastring = $real_geom_name." from (select oid as id, ".$real_geom_name." from ".$tablename;
 		    $datastring.=" WHERE oid = '".$oid."'";
 		    $datastring.=") as foo using unique id using srid=".$layerset['epsg_code'];
 		    $layer->set('data',$datastring);
