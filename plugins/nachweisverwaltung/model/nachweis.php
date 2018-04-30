@@ -986,7 +986,7 @@ class Nachweis {
 						}
 						else{
 							if(is_numeric($rissnr)){
-								$sql.=" AND n.rissnummer::integer=".$rissnr;
+								$sql.=" AND REGEXP_REPLACE(COALESCE(n.rissnummer, ''), '[a-zA-Z]+' ,'')::integer=".$rissnr;
 							}
 							else{
 								$sql.=" AND lower(n.rissnummer)='".strtolower($rissnr)."'";
