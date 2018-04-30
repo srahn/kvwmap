@@ -209,6 +209,7 @@
 				"name" => $value,
 				"real_name" => $attr['real_name'][$value],
 				"alias" => $attr['alias'][$value],
+				"group" => $attr['group'][$key],
 				"tooltip" => $attr['tooltip'][$key],
 				"type" => $attr['type'][$key],
 				"nullable" => $attr['nullable'][$key],
