@@ -160,7 +160,7 @@
 					}
 				}
 				else {
-					$columnname = $attributes['name'][$j];
+					$columnname = $attributes['real_name'][$attributes['name'][$j]];
 					$geom_tablename = $attributes['table_name'][$attributes['name'][$j]];
 					$geomtype = $attributes['geomtype'][$attributes['name'][$j]];
 					$dimension = $attributes['dimension'][$j];
@@ -186,7 +186,7 @@
 			    	    <? //} ?>
 			    	    <td style="padding-top:5px; padding-bottom:5px;">
 <?						
-							if(!$layer['shape'][$k]['geom']){		// kein WFS
+							if(!$layer['shape'][$k]['wfs_geom']){		// kein WFS
 								echo '<input type="hidden" id="'.$columnname.'_'.$k.'" value="'.$layer['shape'][$k][$columnname].'">';
 								if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON' OR $geomtype == 'GEOMETRY')$geomtype = 'Polygon';
 								elseif($geomtype == 'POINT')$geomtype = 'Point';
