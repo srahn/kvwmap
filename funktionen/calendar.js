@@ -157,9 +157,10 @@ function CalendarJS() {
 				},
 				
 				this.tp_keydown = function(evt){
-					if(evt.keyCode == '38')delta = 1;
-					if(evt.keyCode == '40')delta = -1;
-					value = parseInt(parseInt(evt.target.value) + delta);
+					var d = 0;
+					if(evt.keyCode == '38')d = 1;
+					if(evt.keyCode == '40')d = -1;
+					value = parseInt(parseInt(evt.target.value) + d);
 					this.Instanz.setTime(evt, value);
 				},
 				
