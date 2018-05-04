@@ -2,6 +2,48 @@
 	$GUI = $this;
 
 	/**
+	* This function return all stellen the authenticated user is assigned to
+	* where sync enabled layer are in
+	*/
+	$this->mobile_get_stellen = function() {
+		$sql = "
+			SELECT DISTINCT
+				s.ID,
+				s.Bezeichnung
+			FROM
+				rolle r JOIN
+				stelle s ON r.stelle_id = s.ID JOIN
+				used_layer ul ON s.ID = ul.Stelle_ID JOIN
+				layer l ON ul.Layer_ID = l.Layer_ID
+			WHERE
+				r.user_id = 2 AND
+				l.sync = '1'
+			ORDER BY
+				s.Bezeichnung
+		";
+		$ret = $this->database->execSQL($sql, 4, 0);
+
+		if ($ret[0]) {
+			$result = array(
+				"success" => false,
+				"err_msg" => "Es konnten keine Stellen mit mobilen Layern abgefragt werden! SQL: " . $sql
+			);
+		}
+		else {
+			$stellen = array();
+			while ($rs = mysql_fetch_assoc($ret[1])) {
+				$stellen[] = $rs;
+			}
+
+			$result = array(
+				"success" => true,
+				"stellen" => $stellen
+			);
+		}
+		return $result;
+	};
+
+	/**
 	* Frage den Layer mit selected_layer_id und die dazugehörigen Attributdaten ab
 	*/
 	$this->mobile_get_layers = function() {
