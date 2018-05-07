@@ -2374,7 +2374,7 @@ FROM
   function getStrassenListe($GemID,$GemkgID,$PolygonWKTString) {		
 	# Hier bitte nicht auf die Idee kommen, die Strassen ohne die Flurstücke abfragen zu können. 
 	# Die Flurstücke müssen miteinbezogen werden, weil wir ja auch über die Gemarkung auswählen wollen.	
-  	$sql ="set enable_seqscan = off;SELECT '-1' AS gemeinde,'-1' AS strasse,'--Auswahl--' AS strassenname, '' as gemkgname";
+  	$sql ="set enable_seqscan = off;SELECT '00-1' AS gemeinde,'-1' AS strasse,'--Auswahl--' AS strassenname, '' as gemkgname";
     $sql.=" UNION";
     $sql.=" SELECT DISTINCT g.gemeinde, s.lage as strasse, s.bezeichnung as strassenname, array_to_string(array_agg(distinct gem.bezeichnung), ', ') as gemkgname";
     $sql.=" FROM alkis.ax_gemeinde as g, alkis.ax_gemarkung as gem, alkis.ax_flurstueck as f";
