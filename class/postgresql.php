@@ -2251,13 +2251,13 @@ FROM
 		$sql.="FROM alkis.ax_flurstueck f ";
 		$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR f.istgebucht = ANY(s.an) OR f.gml_id = ANY(s.verweistauf) ";		
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
-		$sql.="WHERE g.land||g.bezirk = ".$bezirk." AND (blattart = 1000 OR blattart = 2000 OR blattart = 3000) AND (FALSE ";		
+		$sql.="WHERE g.land||g.bezirk = '".$bezirk."' AND (blattart = 1000 OR blattart = 2000 OR blattart = 3000) AND (FALSE ";		
 		if($ganze_gemkg_ids[0] != ''){
-			$sql.="OR f.land||f.gemarkungsnummer IN (".implode(',', $ganze_gemkg_ids).")";
+			$sql.="OR f.land||f.gemarkungsnummer IN ('".implode("','", $ganze_gemkg_ids)."')";
 		}
 		if(count($eingeschr_gemkg_ids) > 0){
 			foreach($eingeschr_gemkg_ids as $eingeschr_gemkg_id => $fluren){
-				$sql.=" OR (f.land||f.gemarkungsnummer = ".$eingeschr_gemkg_id." AND flurnummer IN (".implode(',', $fluren)."))";
+				$sql.=" OR (f.land||f.gemarkungsnummer = '".$eingeschr_gemkg_id."' AND flurnummer IN (".implode(',', $fluren)."))";
 			}
 		}
 		$sql.= ")";
@@ -2296,11 +2296,11 @@ FROM
 		$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
 		$sql.="WHERE (g.blattart = 1000 OR g.blattart = 2000 OR g.blattart = 3000) AND (FALSE ";
 		if($ganze_gemkg_ids[0] != ''){
-			$sql.="OR f.land||f.gemarkungsnummer IN (".implode(',', $ganze_gemkg_ids).")";
+			$sql.="OR f.land||f.gemarkungsnummer IN ('".implode("','", $ganze_gemkg_ids)."')";
 		}
 		if(count($eingeschr_gemkg_ids) > 0){
 			foreach($eingeschr_gemkg_ids as $eingeschr_gemkg_id => $fluren){
-				$sql.=" OR (f.land||f.gemarkungsnummer = ".$eingeschr_gemkg_id." AND flurnummer IN (".implode(',', $fluren)."))";
+				$sql.=" OR (f.land||f.gemarkungsnummer = '".$eingeschr_gemkg_id."' AND flurnummer IN (".implode(',', $fluren)."))";
 			}
 		}
 		$sql.= ")";
