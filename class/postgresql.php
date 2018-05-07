@@ -641,18 +641,26 @@ FROM
 			if($fields[$i]['nullable'] == '')$fields[$i]['nullable'] = 'NULL';
 			if($fields[$i]['length'] == '')$fields[$i]['length'] = 'NULL';
 			if($fields[$i]['decimal_length'] == '')$fields[$i]['decimal_length'] = 'NULL';
-			$sql = "REPLACE INTO datatype_attributes SET ";
-			$sql.= "datatype_id = ".$datatype_id.", ";
-			$sql.= "name = '".$fields[$i]['name']."', ";
-			$sql.= "real_name = '".$fields[$i]['real_name']."', ";
-			$sql.= "type = '".$fields[$i]['type']."', ";
-			//$sql.= "geometrytype = '".$fields[$i]['geomtype']."', ";	# todo
-			$sql.= "constraints = '".addslashes($fields[$i]['constraints'])."', ";
-			$sql.= "nullable = ".$fields[$i]['nullable'].", ";
-			$sql.= "length = ".$fields[$i]['length'].", ";			
-			$sql.= "decimal_length = ".$fields[$i]['decimal_length'].", ";
-			$sql.= "`default` = '".addslashes($fields[$i]['default'])."', ";
-			$sql.= "`order` = ".$i;
+			$sql = "INSERT INTO datatype_attributes SET
+								datatype_id = ".$datatype_id.", 
+								name = '".$fields[$i]['name']."', 
+								real_name = '".$fields[$i]['real_name']."', 
+								type = '".$fields[$i]['type']."', 
+								constraints = '".addslashes($fields[$i]['constraints'])."', 
+								nullable = ".$fields[$i]['nullable'].", 
+								length = ".$fields[$i]['length'].", 
+								decimal_length = ".$fields[$i]['decimal_length'].", 
+								`default` = '".addslashes($fields[$i]['default'])."', 
+								`order` = ".$i." 
+							ON DUPLICATE KEY UPDATE
+								real_name = '".$fields[$i]['real_name']."', 
+								type = '".$fields[$i]['type']."', 
+								constraints = '".addslashes($fields[$i]['constraints'])."', 
+								nullable = ".$fields[$i]['nullable'].", 
+								length = ".$fields[$i]['length'].", 
+								decimal_length = ".$fields[$i]['decimal_length'].", 
+								`default` = '".addslashes($fields[$i]['default'])."', 
+								`order` = ".$i;
 			$query=mysql_query($sql);
 			if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
 		}
@@ -2243,13 +2251,13 @@ FROM
 		$sql.="FROM alkis.ax_flurstueck f ";
 		$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR f.istgebucht = ANY(s.an) OR f.gml_id = ANY(s.verweistauf) ";		
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
-		$sql.="WHERE g.land||g.bezirk = ".$bezirk." AND (blattart = 1000 OR blattart = 2000 OR blattart = 3000) AND (FALSE ";		
+		$sql.="WHERE g.land||g.bezirk = '".$bezirk."' AND (blattart = 1000 OR blattart = 2000 OR blattart = 3000) AND (FALSE ";		
 		if($ganze_gemkg_ids[0] != ''){
-			$sql.="OR f.land||f.gemarkungsnummer IN (".implode(',', $ganze_gemkg_ids).")";
+			$sql.="OR f.land||f.gemarkungsnummer IN ('".implode("','", $ganze_gemkg_ids)."')";
 		}
 		if(count($eingeschr_gemkg_ids) > 0){
 			foreach($eingeschr_gemkg_ids as $eingeschr_gemkg_id => $fluren){
-				$sql.=" OR (f.land||f.gemarkungsnummer = ".$eingeschr_gemkg_id." AND flurnummer IN (".implode(',', $fluren)."))";
+				$sql.=" OR (f.land||f.gemarkungsnummer = '".$eingeschr_gemkg_id."' AND flurnummer IN (".implode(',', $fluren)."))";
 			}
 		}
 		$sql.= ")";
@@ -2288,11 +2296,11 @@ FROM
 		$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
 		$sql.="WHERE (g.blattart = 1000 OR g.blattart = 2000 OR g.blattart = 3000) AND (FALSE ";
 		if($ganze_gemkg_ids[0] != ''){
-			$sql.="OR f.land||f.gemarkungsnummer IN (".implode(',', $ganze_gemkg_ids).")";
+			$sql.="OR f.land||f.gemarkungsnummer IN ('".implode("','", $ganze_gemkg_ids)."')";
 		}
 		if(count($eingeschr_gemkg_ids) > 0){
 			foreach($eingeschr_gemkg_ids as $eingeschr_gemkg_id => $fluren){
-				$sql.=" OR (f.land||f.gemarkungsnummer = ".$eingeschr_gemkg_id." AND flurnummer IN (".implode(',', $fluren)."))";
+				$sql.=" OR (f.land||f.gemarkungsnummer = '".$eingeschr_gemkg_id."' AND flurnummer IN (".implode(',', $fluren)."))";
 			}
 		}
 		$sql.= ")";
