@@ -7931,7 +7931,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         $attributes = $mapDB->add_attribute_values($attributes, $layerdb, $layerset[0]['shape'], true, $this->Stelle->id);
 
 				# last_search speichern
-				if($this->last_query == '' AND $this->formvars['embedded'] == ''){
+				if($this->last_query == '' AND $this->formvars['embedded_subformPK'] == '' AND $this->formvars['embedded'] == ''){
 					$this->formvars['search_name'] = '<last_search>';
 					$this->user->rolle->delete_search($this->formvars['search_name']);		# das muss hier stehen bleiben, denn in save_search wird mit der Layer-ID gelöscht
 					$this->user->rolle->save_search($attributes, $this->formvars);
