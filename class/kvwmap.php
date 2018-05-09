@@ -383,6 +383,9 @@ class GUI {
 				$legend .= $this->create_layer_legend($layer);
 			}
 			$legend .= '</table>';
+			foreach($this->groupset as $group){
+				$legend .= '<input type="hidden" name="radiolayers_'.$group['id'].'" value="'.$this->radiolayers[$group['id']].'">';
+			}
 		}
 		else{		# Layer in Zeichenreihenfolge in Gruppen
 			foreach($this->groupset as $group){
