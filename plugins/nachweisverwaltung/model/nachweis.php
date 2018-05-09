@@ -654,8 +654,8 @@ class Nachweis {
 		if($zieldateiname != NULL)$sql.="link_datei='".$zieldateiname."', ";
     if($fortf != NULL)$sql.="fortfuehrung=".(int)$fortf.", ";
 		if($rissnr != NULL)$sql.="rissnummer='".$rissnr."', ";
-		if($bemerkungen != NULL)$sql.="bemerkungen='".$bemerkungen."', ";
-		if($bemerkungen_intern != NULL)$sql.="bemerkungen_intern='".$bemerkungen_intern."', ";
+		$sql.="bemerkungen='".$bemerkungen."', ";
+		$sql.="bemerkungen_intern='".$bemerkungen_intern."', ";
 		$sql.=" bearbeiter='".$user->Vorname." ".$user->Name."', zeit='".date('Y-m-d G:i:s')."'";
     $sql.=" WHERE id = ".$id;
     #echo $sql;
