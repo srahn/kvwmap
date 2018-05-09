@@ -7931,7 +7931,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         $attributes = $mapDB->add_attribute_values($attributes, $layerdb, $layerset[0]['shape'], true, $this->Stelle->id);
 
 				# last_search speichern
-				if($this->last_query == '' AND $this->formvars['embedded'] == ''){
+				if($this->last_query == '' AND $this->formvars['embedded_subformPK'] == '' AND $this->formvars['embedded'] == ''){
 					$this->formvars['search_name'] = '<last_search>';
 					$this->user->rolle->delete_search($this->formvars['search_name']);		# das muss hier stehen bleiben, denn in save_search wird mit der Layer-ID gelöscht
 					$this->user->rolle->save_search($attributes, $this->formvars);
@@ -13900,7 +13900,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $GemkgObj=new Gemarkung($Gemkgschl,$this->pgdatabase);
     $layer=ms_newLayerObj($this->map);
     $datastring ="the_geom from (SELECT 1 as id, st_multi(st_buffer(st_union(wkb_geometry), 0.1)) as the_geom FROM alkis.ax_flurstueck ";
-    $datastring.="WHERE land*10000 + gemarkungsnummer = ".$Gemkgschl;
+    $datastring.="WHERE land||gemarkungsnummer = '".$Gemkgschl."'";
 		$datastring.=" AND CASE WHEN '\$hist_timestamp' = '' THEN endet IS NULL ELSE beginnt::text <= '\$hist_timestamp' and ('\$hist_timestamp' <= endet::text or endet IS NULL) END";
     $datastring.=") as foo using unique id using srid=".EPSGCODE_ALKIS;
     $legendentext ="Gemarkung: ".$GemkgObj->getGemkgName($Gemkgschl);
@@ -13969,7 +13969,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $GemkgObj=new Gemarkung($GemkgID,$this->pgdatabase);
     $layer=ms_newLayerObj($this->map);
     $datastring ="the_geom from (SELECT 1 as id, st_multi(st_buffer(st_union(wkb_geometry), 0.1)) as the_geom FROM alkis.ax_flurstueck ";
-    $datastring.="WHERE land*10000 + gemarkungsnummer = ".$GemkgID;
+    $datastring.="WHERE land||gemarkungsnummer = '".$GemkgID."'";
     $datastring.=" AND flurnummer = ".(int)$FlurID;
 		$datastring.=" AND CASE WHEN '\$hist_timestamp' = '' THEN endet IS NULL ELSE beginnt::text <= '\$hist_timestamp' and ('\$hist_timestamp' <= endet::text or endet IS NULL) END";
     $datastring.=") as foo using unique id using srid=".EPSGCODE_ALKIS;
@@ -14163,7 +14163,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				$datastring.=" AND gem.schluesselgesamt||'-'||l.lage||'-'||TRIM(LOWER(l.hausnummer)) IN ('".$Hausnr."')";
 			}
 			else{
-				$datastring.=" AND gem.schluesselgesamt=".(int)$Gemeinde;
+				$datastring.=" AND gem.schluesselgesamt = '".$Gemeinde."'";
 				if ($Strasse!='') {
 					$datastring.=" AND l.lage='".$Strasse."'";
 				}

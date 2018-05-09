@@ -1234,7 +1234,7 @@ FROM
     	}
     }
     else{
-    	$sql.=" AND g.schluesselgesamt=".(int)$GemeindeSchl;
+    	$sql.=" AND g.schluesselgesamt='".$GemeindeSchl."'";
     	$sql.=" AND l.lage='".$StrassenSchl."'";
     }
 		$sql.= $this->build_temporal_filter(array('g', 'f', 'l', 's'));
@@ -2526,7 +2526,7 @@ FROM
     $sql ="SELECT MIN(st_xmin(st_envelope(st_transform(the_geom, ".$epsgcode.")))) AS minx,MAX(st_xmax(st_envelope(st_transform(the_geom, ".$epsgcode.")))) AS maxx";
     $sql.=",MIN(st_ymin(st_envelope(st_transform(the_geom, ".$epsgcode.")))) AS miny,MAX(st_ymax(st_envelope(st_transform(the_geom, ".$epsgcode.")))) AS maxy";
     $sql.=" FROM alkis.pp_flur";
-    $sql.=" WHERE land||gemarkung = ".$Gemarkung;
+    $sql.=" WHERE land||gemarkung = '".$Gemarkung."'";
     $sql.=" AND flurnummer = ".(int)$Flur;
     #echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
@@ -2594,7 +2594,7 @@ FROM
       $sql.=" AND gem.schluesselgesamt||'-'||l.lage||'-'||TRIM(LOWER(l.hausnummer)) IN ('".$Hausnr."')";
     }
     else{
-	    $sql.=" AND gem.schluesselgesamt=".(int)$Gemeinde;
+	    $sql.=" AND gem.schluesselgesamt = '".$Gemeinde."'";
 	    if ($Strasse!='') {
 	      $sql.=" AND l.lage='".$Strasse."'";
 	    }
