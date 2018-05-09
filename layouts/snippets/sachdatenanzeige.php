@@ -226,7 +226,7 @@ for($i=0;$i<$anzLayer;$i++){
 	<? if($this->formvars['printversion'] == '' AND $this->currentform != 'document.GUI2'){ ?>
   <table width="100%" border="0" cellpadding="2" cellspacing="0" id="sachdatenanzeige_footer">
     <tr bgcolor="<?php echo BG_DEFAULT ?>" align="center">
-      <td><a href="index.php?searchradius=<?php echo $this->formvars['searchradius']; ?>"><? echo $strbacktomap;?></a></td>
+      <td><a href="index.php?searchradius=<?php echo $this->formvars['searchradius']; ?>" onclick="checkForUnsavedChanges(event);"><? echo $strbacktomap;?></a></td>
     </tr>
   </table>
 	<? } ?>
