@@ -10478,11 +10478,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       if($this->formvars['selected_layers'] != ''){
         $this->selected_layers = explode(', ', $this->formvars['selected_layers']);
         $layerdb = $this->mapDB->getlayerdatabase($this->selected_layers[0], $this->Stelle->pgdbhost);
-        $this->attributes = $this->mapDB->getDataAttributes($layerdb, $this->selected_layers[0]);
+        $this->attributes = $this->mapDB->getDataAttributes($layerdb, $this->selected_layers[0], true);
         $poly_id = $this->mapDB->getPolygonID($this->formvars['stelle'],$this->selected_layers[0]);
         for($i = 1; $i < count($this->selected_layers); $i++){
           $layerdb = $this->mapDB->getlayerdatabase($this->selected_layers[$i], $this->Stelle->pgdbhost);
-          $attributes = $this->mapDB->getDataAttributes($layerdb, $this->selected_layers[$i]);
+          $attributes = $this->mapDB->getDataAttributes($layerdb, $this->selected_layers[$i], true);
           $this->attributes = array_values(array_uintersect($this->attributes, $attributes, "compare_names"));
           $next_poly_id = $this->mapDB->getPolygonID($this->formvars['stelle'],$this->selected_layers[$i]);
           if($poly_id != $next_poly_id){
@@ -10560,10 +10560,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     if($formvars['selected_layers'] != ''){
       $this->selected_layers = explode(', ', $formvars['selected_layers']);
       $layerdb = $mapDB->getlayerdatabase($this->selected_layers[0], $this->Stelle->pgdbhost);
-      $this->attributes = $mapDB->getDataAttributes($layerdb, $this->selected_layers[0]);
+      $this->attributes = $mapDB->getDataAttributes($layerdb, $this->selected_layers[0], true);
 			for($i = 1; $i < count($this->selected_layers); $i++){
 				$layerdb = $mapDB->getlayerdatabase($this->selected_layers[$i], $this->Stelle->pgdbhost);
-				$attributes = $mapDB->getDataAttributes($layerdb, $this->selected_layers[$i]);
+				$attributes = $mapDB->getDataAttributes($layerdb, $this->selected_layers[$i], true);
 				$this->attributes = array_values(array_uintersect($this->attributes, $attributes, "compare_names"));
 			}
 			for($i = 0; $i < count($this->attributes); $i++){
@@ -15585,7 +15585,7 @@ class db_mapObj{
     return $select;
   }
 
-  function getDataAttributes($database, $layer_id){
+  function getDataAttributes($database, $layer_id, $ifEmptyUseQuery = false){
     $data = $this->getData($layer_id);
     if($data != ''){
       $select = $this->getSelectFromData($data);
@@ -15595,7 +15595,11 @@ class db_mapObj{
       $attribute = $database->getFieldsfromSelect($select);
       return $attribute;
     }
-    else{
+    elseif($ifEmptyUseQuery){
+			$path = $this->getPath($layer_id);
+			return $this->getPathAttributes($database, $path);
+		}
+		else{
       echo 'Das Data-Feld des Layers mit der Layer-ID '.$layer_id.' ist leer.';
       return NULL;
     }
