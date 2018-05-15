@@ -2502,7 +2502,7 @@ FROM
     $sql ="SELECT MIN(st_xmin(st_envelope(st_transform(the_geom, ".$epsgcode.")))) AS minx,MAX(st_xmax(st_envelope(st_transform(the_geom, ".$epsgcode.")))) AS maxx";
     $sql.=",MIN(st_ymin(st_envelope(st_transform(the_geom, ".$epsgcode.")))) AS miny,MAX(st_ymax(st_envelope(st_transform(the_geom, ".$epsgcode.")))) AS maxy";
     $sql.=" FROM alkis.pp_gemarkung";
-    $sql.=" WHERE schluesselgesamt = ".$Gemarkung;
+    $sql.=" WHERE schluesselgesamt = '".$Gemarkung."'";
     #echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) {
