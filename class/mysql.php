@@ -55,7 +55,7 @@ class database {
     $this->blocktransaction=0;
   }
 
-  function login_user($username, $passwort, $agreement){
+  function login_user($username, $passwort, $agreement = ''){
   	$sql = "SELECT ID, login_name, agreement_accepted FROM user WHERE login_name = '".addslashes($username)."' AND passwort = '".md5($passwort)."'";
   	$sql.=' AND (("'.date('Y-m-d h:i:s').'" >= start AND "'.date('Y-m-d h:i:s').'" <= stop)';
     $sql.=' OR ';
