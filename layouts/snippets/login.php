@@ -66,6 +66,7 @@
 		// kein Gastuser, username und passwort übernehmen falls vorhanden
 		$username = $formvars['username'];
 		$passwort = $formvars['passwort'];
+		$agreement = $formvars['agreement_accepted'];
 	}
 	$oldPassword = $formvars['passwort'];
 	$newPassword = $formvars['newPassword'];
@@ -75,7 +76,7 @@
   $remote_addr = getenv('REMOTE_ADDR');
 
 	// Benutzername und Passwort werden überprüft
-	if (($newPassword == '' OR ($newPassword != '' AND $newPassword2 != '')) AND $userDb->login_user($username, $passwort)) {
+	if (($newPassword == '' OR ($newPassword != '' AND $newPassword2 != '')) AND $userDb->login_user($username, $passwort, $agreement)) {
 	#if ($userDb->login_user($username, $passwort)) {
 		$_SESSION['angemeldet'] = true;
 		$_SESSION['login_name'] = $username;
@@ -112,7 +113,7 @@
 				document.login.browserheight.value = height;
 				document.login.submit();
 			}
-			
+						
 			document.onkeydown = function(ev){
 				var key;
 				ev = ev || event;
@@ -125,9 +126,20 @@
 			</script>
 		</head>
 		<body style="font-family: Arial, Verdana, Helvetica, sans-serif" onload="document.login.username.focus();">
-		  <form name="login" action="index.php" method="post"><?php
+		  <form name="login" action="index.php" method="post">
+				<? if(defined('AGREEMENT_MESSAGE') AND AGREEMENT_MESSAGE != '' AND $userDb->agreement_not_accepted){ ?>
+					<div id="agreement_message">
+						<div id="agreement_message_body">
+							<? include(SNIPPETS.AGREEMENT_MESSAGE); ?>
+						</div>
+						<div id="agreement_message_button">
+							<input type="hidden" name="agreement_accepted" value="">
+							<input type="button" value="Akzeptieren" onclick="document.login.agreement_accepted.value='true';logon();">
+						</div>
+					</div>
+				<? } 
 				foreach($formvars AS $key => $value) {
-					if (!in_array($key, array('username', 'passwort'))) {
+					if (!in_array($key, array('username', 'passwort', 'agreement_accepted'))) {
 						echo '<input type="hidden" name="'. $key . '" value="' . $value . '">';
 					}
 				} ?>

@@ -114,6 +114,8 @@ $legendicon_size = array(
 define('LOGIN', 'login.php');																# Version 1.8.0
 # Seite zur Fehlerbehandlung, die durch fehlerhafte Layer verursacht werden; unterhalb von /snippets
 define('LAYER_ERROR_PAGE', 'layer_error_page.php');					# Version 2.0
+# Seite mit der Datenschutzerklärung, die einmalig beim Login angezeigt wird
+define('AGREEMENT_MESSAGE', '');					# Version 2.8
 # Geschwindigkeit der Warteanimation (normal: 6, 0 = keine Animation)
 #define('WAITING_ANIMATION_SPEED', 6);											# Version 2.0			# in Version 2.6 über den Bugfix 2.6.23 gelöscht
 # Vorschaubildgröße
