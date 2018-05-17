@@ -676,6 +676,31 @@ a.menuered:hover {
 	border-color: #aaa #cccccc #cccccc;
 }
 
+#agreement_message{
+	box-shadow: 12px 10px 14px #777;
+	background-color: #ffffff;
+	border: 2px solid #000000;
+	position: absolute;
+	top: 15px;
+	left: 50%;
+	transform: translate(-50%, 0);
+	height: 90%;
+}
+
+#agreement_message_body{	
+	position: relative;
+	border-bottom: 2px solid #000000;
+	height: 93%;
+	overflow-y:	auto;
+}
+
+#agreement_message_button{
+	height: 50px;
+	position: relative;
+	text-align: center;
+	padding: 15px;
+}
+
 #map{
 	transform: translate(0, 0);		/* ansonsten wird das SVG unscharf */
 }
