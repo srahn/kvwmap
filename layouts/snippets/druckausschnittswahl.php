@@ -175,7 +175,7 @@ function rotate_print_extent(angle){
 			<div style="width:350px;" onmouseover="document.getElementById('scales').style.display='inline-block';" onmouseout="document.getElementById('scales').style.display='none';">
 				<?php echo $strButtonPrintScale; ?><input type="text" size="7" name="printscale" onkeydown="setprintextent('false');" autocomplete="off" value="<?php echo $this->formvars['printscale']; ?>">
 				<div valign="top" style="height:0px; position:relative;">
-					<div id="scales" style="display:none; position:absolute; left:95px; top:-1px; width: 78px; vertical-align:top; overflow:hidden; border:solid grey 1px;">
+					<div id="scales" style="z-index: 1;display:none; position:absolute; left:95px; top:-1px; width: 78px; vertical-align:top; overflow:hidden; border:solid grey 1px;">
 						<select size="<? echo count($this->selectable_scales); ?>" style="padding:4px; margin:-2px -17px -4px -4px;" onclick="document.GUI.printscale.value=this.value; document.getElementById('scales').style.display='none';setprintextent('false');">
 							<? 
 								foreach($this->selectable_scales as $scale){
@@ -234,7 +234,7 @@ function rotate_print_extent(angle){
 
   <tr align="center">
 		<td colspan="5">
-			<div style="display: flex; width: <? echo $this->user->rolle->nImageWidth; ?>px">
+			<div style="display: flex; width: <? echo $this->map->width; ?>px">
 				<div style="">
 					<?php echo $strRotationAngle; ?><input type="text" size="3" name="angle" onchange="angle_slider.value=parseInt(angle.value);rotate_print_extent(this.value);" value="<? echo $this->formvars['angle']; ?>">&nbsp;°<br>
 					<input type="range" id="angle_slider" min="-90" max="90" style="width: 120px" value="<? echo $this->formvars['angle']; ?>" oninput="angle.value=parseInt(angle_slider.value);angle.onchange();" onchange="angle.value=parseInt(angle_slider.value);angle.onchange();">

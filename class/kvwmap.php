@@ -383,6 +383,9 @@ class GUI {
 				$legend .= $this->create_layer_legend($layer);
 			}
 			$legend .= '</table>';
+			foreach($this->groupset as $group){
+				$legend .= '<input type="hidden" name="radiolayers_'.$group['id'].'" value="'.$this->radiolayers[$group['id']].'">';
+			}
 		}
 		else{		# Layer in Zeichenreihenfolge in Gruppen
 			foreach($this->groupset as $group){
@@ -7928,7 +7931,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         $attributes = $mapDB->add_attribute_values($attributes, $layerdb, $layerset[0]['shape'], true, $this->Stelle->id);
 
 				# last_search speichern
-				if($this->last_query == '' AND $this->formvars['embedded'] == ''){
+				if($this->last_query == '' AND $this->formvars['embedded_subformPK'] == '' AND $this->formvars['embedded'] == ''){
 					$this->formvars['search_name'] = '<last_search>';
 					$this->user->rolle->delete_search($this->formvars['search_name']);		# das muss hier stehen bleiben, denn in save_search wird mit der Layer-ID gelöscht
 					$this->user->rolle->save_search($attributes, $this->formvars);
@@ -10475,11 +10478,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       if($this->formvars['selected_layers'] != ''){
         $this->selected_layers = explode(', ', $this->formvars['selected_layers']);
         $layerdb = $this->mapDB->getlayerdatabase($this->selected_layers[0], $this->Stelle->pgdbhost);
-        $this->attributes = $this->mapDB->getDataAttributes($layerdb, $this->selected_layers[0]);
+        $this->attributes = $this->mapDB->getDataAttributes($layerdb, $this->selected_layers[0], true);
         $poly_id = $this->mapDB->getPolygonID($this->formvars['stelle'],$this->selected_layers[0]);
         for($i = 1; $i < count($this->selected_layers); $i++){
           $layerdb = $this->mapDB->getlayerdatabase($this->selected_layers[$i], $this->Stelle->pgdbhost);
-          $attributes = $this->mapDB->getDataAttributes($layerdb, $this->selected_layers[$i]);
+          $attributes = $this->mapDB->getDataAttributes($layerdb, $this->selected_layers[$i], true);
           $this->attributes = array_values(array_uintersect($this->attributes, $attributes, "compare_names"));
           $next_poly_id = $this->mapDB->getPolygonID($this->formvars['stelle'],$this->selected_layers[$i]);
           if($poly_id != $next_poly_id){
@@ -10557,10 +10560,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     if($formvars['selected_layers'] != ''){
       $this->selected_layers = explode(', ', $formvars['selected_layers']);
       $layerdb = $mapDB->getlayerdatabase($this->selected_layers[0], $this->Stelle->pgdbhost);
-      $this->attributes = $mapDB->getDataAttributes($layerdb, $this->selected_layers[0]);
+      $this->attributes = $mapDB->getDataAttributes($layerdb, $this->selected_layers[0], true);
 			for($i = 1; $i < count($this->selected_layers); $i++){
 				$layerdb = $mapDB->getlayerdatabase($this->selected_layers[$i], $this->Stelle->pgdbhost);
-				$attributes = $mapDB->getDataAttributes($layerdb, $this->selected_layers[$i]);
+				$attributes = $mapDB->getDataAttributes($layerdb, $this->selected_layers[$i], true);
 				$this->attributes = array_values(array_uintersect($this->attributes, $attributes, "compare_names"));
 			}
 			for($i = 0; $i < count($this->attributes); $i++){
@@ -13897,7 +13900,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $GemkgObj=new Gemarkung($Gemkgschl,$this->pgdatabase);
     $layer=ms_newLayerObj($this->map);
     $datastring ="the_geom from (SELECT 1 as id, st_multi(st_buffer(st_union(wkb_geometry), 0.1)) as the_geom FROM alkis.ax_flurstueck ";
-    $datastring.="WHERE land*10000 + gemarkungsnummer = ".$Gemkgschl;
+    $datastring.="WHERE land||gemarkungsnummer = '".$Gemkgschl."'";
 		$datastring.=" AND CASE WHEN '\$hist_timestamp' = '' THEN endet IS NULL ELSE beginnt::text <= '\$hist_timestamp' and ('\$hist_timestamp' <= endet::text or endet IS NULL) END";
     $datastring.=") as foo using unique id using srid=".EPSGCODE_ALKIS;
     $legendentext ="Gemarkung: ".$GemkgObj->getGemkgName($Gemkgschl);
@@ -13966,7 +13969,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $GemkgObj=new Gemarkung($GemkgID,$this->pgdatabase);
     $layer=ms_newLayerObj($this->map);
     $datastring ="the_geom from (SELECT 1 as id, st_multi(st_buffer(st_union(wkb_geometry), 0.1)) as the_geom FROM alkis.ax_flurstueck ";
-    $datastring.="WHERE land*10000 + gemarkungsnummer = ".$GemkgID;
+    $datastring.="WHERE land||gemarkungsnummer = '".$GemkgID."'";
     $datastring.=" AND flurnummer = ".(int)$FlurID;
 		$datastring.=" AND CASE WHEN '\$hist_timestamp' = '' THEN endet IS NULL ELSE beginnt::text <= '\$hist_timestamp' and ('\$hist_timestamp' <= endet::text or endet IS NULL) END";
     $datastring.=") as foo using unique id using srid=".EPSGCODE_ALKIS;
@@ -14160,7 +14163,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				$datastring.=" AND gem.schluesselgesamt||'-'||l.lage||'-'||TRIM(LOWER(l.hausnummer)) IN ('".$Hausnr."')";
 			}
 			else{
-				$datastring.=" AND gem.schluesselgesamt=".(int)$Gemeinde;
+				$datastring.=" AND gem.schluesselgesamt = '".$Gemeinde."'";
 				if ($Strasse!='') {
 					$datastring.=" AND l.lage='".$Strasse."'";
 				}
@@ -15582,7 +15585,7 @@ class db_mapObj{
     return $select;
   }
 
-  function getDataAttributes($database, $layer_id){
+  function getDataAttributes($database, $layer_id, $ifEmptyUseQuery = false){
     $data = $this->getData($layer_id);
     if($data != ''){
       $select = $this->getSelectFromData($data);
@@ -15592,7 +15595,11 @@ class db_mapObj{
       $attribute = $database->getFieldsfromSelect($select);
       return $attribute;
     }
-    else{
+    elseif($ifEmptyUseQuery){
+			$path = $this->getPath($layer_id);
+			return $this->getPathAttributes($database, $path);
+		}
+		else{
       echo 'Das Data-Feld des Layers mit der Layer-ID '.$layer_id.' ist leer.';
       return NULL;
     }
