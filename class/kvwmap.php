@@ -471,7 +471,8 @@ class GUI {
     return $legend;
   }
 
-	function create_layer_legend($layer){
+	function create_layer_legend($layer, $requires = false){
+		if(!$requires AND $layer['requires'] != '' OR $requires AND $layer['requires'] == '')return;
 		global $legendicon_size;
 		$visible = $this->check_layer_visibility($layer);
 		# sichtbare Layer
@@ -750,6 +751,13 @@ class GUI {
 			$legend .=  '</td>
 					</tr>';
 		}
+		
+		# requires-Layer
+		if($layer['required'] != ''){
+			foreach($layer['required'] as $require_layer_id){
+				$legend .= $this->create_layer_legend($this->layerset['layer_ids'][$require_layer_id], true);
+			}
+		}		
 		return $legend;
 	}
 
@@ -15090,6 +15098,8 @@ class db_mapObj{
 			if($rs['maxscale'] > 0)$rs['maxscale'] = $rs['maxscale']+0.3;
 			if($rs['minscale'] > 0)$rs['minscale'] = $rs['minscale']-0.3;
 			$layer['list'][$i]=$rs;
+			$layer['list'][$i]['required'] =& $requires_layer[$rs['Layer_ID']];		# Pointer auf requires-Array
+			if($rs['requires'] != '')$requires_layer[$rs['requires']][] = $rs['Layer_ID'];		# requires-Array füllen
 			$layer['layer_ids'][$rs['Layer_ID']] =& $layer['list'][$i];		# damit man mit einer Layer-ID als Schlüssel auf dieses Array zugreifen kann
 			$i++;
     }
