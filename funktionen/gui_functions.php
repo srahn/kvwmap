@@ -97,7 +97,7 @@ function resizemap2window(){
 * @param array or string messages contain the messages as array
 * or as a single string
 */
-function message(messages, t_hide = 3000, t_hidden = 3000, top = '20%') {
+function message(messages, t_hide = 1000, t_hidden = 3000, top = '20%') {
 	var msgDiv = $("#message_box");
 	msgDiv.css('top', top);
 	types = {
@@ -148,7 +148,6 @@ function message(messages, t_hide = 3000, t_hidden = 3000, top = '20%') {
 	msgDiv.attr('class', 'message_box');
 
 	if (!confirmMsgDiv) {
-		msgDiv.fadeOut(t_hide);
 		setTimeout(function() {msgDiv.addClass('message_box_hide');}, t_hide);
 		setTimeout(function() {msgDiv.addClass('message_box_hidden');}, t_hidden);		// hier bitte kein FadeOut machen, sondern mit den Klassen arbeiten
 	}
