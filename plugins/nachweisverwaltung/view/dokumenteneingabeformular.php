@@ -220,7 +220,7 @@ $legendheight = $this->map->height + 20;
 					</td>
 				</tr>
 				<tr> 
-					<td>Datum:&nbsp;&nbsp;<a href="javascript:;" title=" (TT.MM.JJJJ) " onclick="new CalendarJS().init('datum')"><img src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar" style="right: 70px"><input type="hidden" id="calendar_datum"></div></td>
+					<td>Datum:&nbsp;&nbsp;<a href="javascript:;" title=" (TT.MM.JJJJ) " onclick="new CalendarJS().init('datum', 'date', false)"><img src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar" style="right: 70px"><div id="calendar_datum" class="calendar"></div></td>
 					<td>
 						<input name="datum" id="datum" type="text" onchange="" value="<?php echo $this->formvars['datum']; ?>" size="10" maxlength="50">
 					</td>
