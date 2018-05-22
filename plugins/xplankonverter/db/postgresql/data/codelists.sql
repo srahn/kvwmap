@@ -112,22 +112,22 @@ TRUNCATE
 INSERT INTO 
 	xplan_gml.xp_mimetypes (codespace, id, value)
 VALUES
-	('https://bauleitplaene-mv.de/codelist/XP_MimeType/XP_MimeType.xml', 'application/pdf, application/pdf'),
+	('https://bauleitplaene-mv.de/codelist/XP_MimeType/XP_MimeType.xml', 'application/pdf', 'application/pdf'),
 	('https://bauleitplaene-mv.de/codelist/XP_MimeType/XP_MimeType.xml', 'application/zip', 'application/zip'),
-	('https://bauleitplaene-mv.de/codelist/XP_MimeType/XP_MimeType.xml', 'application/xml, application/xml'),
-	('https://bauleitplaene-mv.de/codelist/XP_MimeType/XP_MimeType.xml', 'application/msword, application/msword'),
-	('https://bauleitplaene-mv.de/codelist/XP_MimeType/XP_MimeType.xml', 'application/msexcel, application/msexcel'),
-	('https://bauleitplaene-mv.de/codelist/XP_MimeType/XP_MimeType.xml', 'application/vnd.ogc.sld+xml, application/vnd.ogc.sld+xml'),
-	('https://bauleitplaene-mv.de/codelist/XP_MimeType/XP_MimeType.xml', 'application/vnd.ogc.wms_xml, application/vnd.ogc.wms_xml'),
-	('https://bauleitplaene-mv.de/codelist/XP_MimeType/XP_MimeType.xml', 'application/vnd.ogc.gml, application/vnd.ogc.gml'),
-	('https://bauleitplaene-mv.de/codelist/XP_MimeType/XP_MimeType.xml', 'application/odt, application/odt'),
-	('https://bauleitplaene-mv.de/codelist/XP_MimeType/XP_MimeType.xml', 'image/jpg, image/jpg'),
-	('https://bauleitplaene-mv.de/codelist/XP_MimeType/XP_MimeType.xml', 'image/png, image/png'),
-	('https://bauleitplaene-mv.de/codelist/XP_MimeType/XP_MimeType.xml', 'image/tiff, image/tiff'),
-	('https://bauleitplaene-mv.de/codelist/XP_MimeType/XP_MimeType.xml', 'image/ecw, image/ecw'),
-	('https://bauleitplaene-mv.de/codelist/XP_MimeType/XP_MimeType.xml', 'image/svg+xml, image/svg+xml'),
-	('https://bauleitplaene-mv.de/codelist/XP_MimeType/XP_MimeType.xml', 'text/html, text/html'),
-	('https://bauleitplaene-mv.de/codelist/XP_MimeType/XP_MimeType.xml', 'text/plain, text/plain')
+	('https://bauleitplaene-mv.de/codelist/XP_MimeType/XP_MimeType.xml', 'application/xml', 'application/xml'),
+	('https://bauleitplaene-mv.de/codelist/XP_MimeType/XP_MimeType.xml', 'application/msword', 'application/msword'),
+	('https://bauleitplaene-mv.de/codelist/XP_MimeType/XP_MimeType.xml', 'application/msexcel', 'application/msexcel'),
+	('https://bauleitplaene-mv.de/codelist/XP_MimeType/XP_MimeType.xml', 'application/vnd.ogc.sld+xml', 'application/vnd.ogc.sld+xml'),
+	('https://bauleitplaene-mv.de/codelist/XP_MimeType/XP_MimeType.xml', 'application/vnd.ogc.wms_xml', 'application/vnd.ogc.wms_xml'),
+	('https://bauleitplaene-mv.de/codelist/XP_MimeType/XP_MimeType.xml', 'application/vnd.ogc.gml', 'application/vnd.ogc.gml'),
+	('https://bauleitplaene-mv.de/codelist/XP_MimeType/XP_MimeType.xml', 'application/odt', 'application/odt'),
+	('https://bauleitplaene-mv.de/codelist/XP_MimeType/XP_MimeType.xml', 'image/jpg', 'image/jpg'),
+	('https://bauleitplaene-mv.de/codelist/XP_MimeType/XP_MimeType.xml', 'image/png', 'image/png'),
+	('https://bauleitplaene-mv.de/codelist/XP_MimeType/XP_MimeType.xml', 'image/tiff', 'image/tiff'),
+	('https://bauleitplaene-mv.de/codelist/XP_MimeType/XP_MimeType.xml', 'image/ecw', 'image/ecw'),
+	('https://bauleitplaene-mv.de/codelist/XP_MimeType/XP_MimeType.xml', 'image/svg+xml', 'image/svg+xml'),
+	('https://bauleitplaene-mv.de/codelist/XP_MimeType/XP_MimeType.xml', 'text/html', 'text/html'),
+	('https://bauleitplaene-mv.de/codelist/XP_MimeType/XP_MimeType.xml', 'text/plain', 'text/plain')
 ;
-COMMIT:
+COMMIT;
 --XP_StylesheetListe
