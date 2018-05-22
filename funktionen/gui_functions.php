@@ -149,6 +149,8 @@ function message(messages, t_hide = 3000, t_hidden = 3000, top = '20%') {
 
 	if (!confirmMsgDiv) {
 		msgDiv.fadeOut(t_hide);
+		setTimeout(function() {msgDiv.addClass('message_box_hide');}, t_hide);
+		setTimeout(function() {msgDiv.addClass('message_box_hidden');}, t_hidden);		// hier bitte kein FadeOut machen, sondern mit den Klassen arbeiten
 	}
 	else {
 		msgDiv.append('<input type="button" onclick="$(\'#message_box\').addClass(\'message_box_hidden\');" value="ok" style="margin-top: 10px;">');

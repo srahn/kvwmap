@@ -654,8 +654,8 @@ class Nachweis {
 		if($zieldateiname != NULL)$sql.="link_datei='".$zieldateiname."', ";
     if($fortf != NULL)$sql.="fortfuehrung=".(int)$fortf.", ";
 		if($rissnr != NULL)$sql.="rissnummer='".$rissnr."', ";
-		if($bemerkungen != NULL)$sql.="bemerkungen='".$bemerkungen."', ";
-		if($bemerkungen_intern != NULL)$sql.="bemerkungen_intern='".$bemerkungen_intern."', ";
+		$sql.="bemerkungen='".$bemerkungen."', ";
+		$sql.="bemerkungen_intern='".$bemerkungen_intern."', ";
 		$sql.=" bearbeiter='".$user->Vorname." ".$user->Name."', zeit='".date('Y-m-d G:i:s')."'";
     $sql.=" WHERE id = ".$id;
     #echo $sql;
@@ -973,7 +973,7 @@ class Nachweis {
 						}
 						else{
 							if(is_numeric($stammnr)){
-								$sql.=" AND n.stammnr::integer=".$stammnr;
+								$sql.=" AND REGEXP_REPLACE(COALESCE(n.stammnr, ''), '[a-zA-Z]+' ,'') = '".$stammnr."'";
 							}
 							else{
 								$sql.=" AND lower(n.stammnr)='".strtolower($stammnr)."'";
@@ -986,7 +986,7 @@ class Nachweis {
 						}
 						else{
 							if(is_numeric($rissnr)){
-								$sql.=" AND n.rissnummer::integer=".$rissnr;
+								$sql.=" AND REGEXP_REPLACE(COALESCE(n.rissnummer, ''), '[a-zA-Z]+' ,'') = '".$rissnr."'";
 							}
 							else{
 								$sql.=" AND lower(n.rissnummer)='".strtolower($rissnr)."'";

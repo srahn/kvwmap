@@ -55,8 +55,8 @@ class database {
     $this->blocktransaction=0;
   }
 
-  function login_user($username, $passwort){
-  	$sql = "SELECT login_name FROM user WHERE login_name = '".addslashes($username)."' AND passwort = '".md5($passwort)."'";
+  function login_user($username, $passwort, $agreement = ''){
+  	$sql = "SELECT ID, login_name, agreement_accepted FROM user WHERE login_name = '".addslashes($username)."' AND passwort = '".md5($passwort)."'";
   	$sql.=' AND (("'.date('Y-m-d h:i:s').'" >= start AND "'.date('Y-m-d h:i:s').'" <= stop)';
     $sql.=' OR ';
     $sql.='(start="0000-00-00 00:00:00" AND stop="0000-00-00 00:00:00"))';		# Zeiteinschränkung wird nicht berücksichtigt.
@@ -66,7 +66,19 @@ class database {
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     $ret = mysql_fetch_array($ret[1]);
     if($ret[0] != ''){
-    	return true;
+			# wenn Nutzer bisher noch nicht akzeptiert hatte
+			if(defined('AGREEMENT_MESSAGE') AND AGREEMENT_MESSAGE != '' AND $ret['agreement_accepted'] == 0){
+				if($agreement != ''){		# es wurde jetzt akzeptiert
+					$sql = "UPDATE user SET agreement_accepted = TRUE WHERE ID = ".$ret['ID'];
+					$ret2=$this->execSQL($sql, 4, 0);
+					return true;
+				}
+				else{		# jetzt wurde auch nicht akzeptiert
+					$this->agreement_not_accepted = true;
+					return false;
+				}
+			}			
+    	else return true;
     }
     else{
     	return false;
