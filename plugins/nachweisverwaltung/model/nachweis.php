@@ -973,7 +973,7 @@ class Nachweis {
 						}
 						else{
 							if(is_numeric($stammnr)){
-								$sql.=" AND n.stammnr::integer=".$stammnr;
+								$sql.=" AND REGEXP_REPLACE(COALESCE(n.stammnr, ''), '[a-zA-Z]+' ,'') = '".$stammnr."'";
 							}
 							else{
 								$sql.=" AND lower(n.stammnr)='".strtolower($stammnr)."'";
@@ -986,7 +986,7 @@ class Nachweis {
 						}
 						else{
 							if(is_numeric($rissnr)){
-								$sql.=" AND REGEXP_REPLACE(COALESCE(n.rissnummer, ''), '[a-zA-Z]+' ,'')::integer=".$rissnr;
+								$sql.=" AND REGEXP_REPLACE(COALESCE(n.rissnummer, ''), '[a-zA-Z]+' ,'') = '".$rissnr."'";
 							}
 							else{
 								$sql.=" AND lower(n.rissnummer)='".strtolower($rissnr)."'";
