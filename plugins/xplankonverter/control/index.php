@@ -804,6 +804,47 @@ switch($go){
 		echo fread(fopen($filename, "r"), filesize($filename));
 	} break;
 
+	case 'xplankonverter_go_to_plan' : {
+		# query planart by gml_id
+		$sql = "
+			SELECT
+				k.planart
+			FROM
+				xplan_gml.xp_plan AS p JOIN
+				xplankonverter.konvertierungen k ON p.konvertierung_id = k.id
+			WHERE
+				p.gml_id = '" . $this->formvars['plan_gml_id'] . "'
+		";
+
+    $ret = $this->pgdatabase->execSQL($sql,4, 0);
+
+		if ($ret['success']) {
+			$rs = pg_fetch_assoc($ret[1]);
+
+			# go to layer search with layer of planart
+			switch ($rs['planart']) {
+				case 'BP-Plan' : $layer_id = XPLANKONVERTER_BP_PLAENE_LAYER_ID; break;
+				case 'FP-Plan' : $layer_id = XPLANKONVERTER_BP_PLAENE_LAYER_ID; break;
+				case 'SO-Plan' : $layer_id = XPLANKONVERTER_SO_PLAENE_LAYER_ID; break;
+				case 'RP-Plan' : $layer_id = XPLANKONVERTER_RP_PLAENE_LAYER_ID; break;
+			}
+
+			$this->go = 'Layer-Suche_Suchen';
+			$this->formvars = array(
+				'go' => $this->go,
+				'selected_layer_id' => $layer_id,
+				'operator_plan_gml_id' => '=',
+				'value_plan_gml_id' => $this->formvars['plan_gml_id'],
+			);
+		}
+		else {
+			$this->add_message('error', 'Plan konnte nicht gefunden werden. Prüfen Sie bitte die Referenz.');
+			$this->go = 'get_last_query';			
+		}
+
+		$this->goNotExecutedInPlugins = true;
+	} break;
+
 	default : {
 		$this->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
 	}
