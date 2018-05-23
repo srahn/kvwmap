@@ -2,17 +2,20 @@
 	include('header.php');
 ?>
 <script language="javascript" type="text/javascript">
+	$('#gui-table').css('width', '100%');
 	$(function () {
 		result = $('#eventsResult');
 		result.success = function(text){
-			result.text(text);
+			message([{ type: 'notice', msg: text}], 3000, 3000, '13%');
+/*			result.text(text);
 			result.removeClass('alert-danger');
-			result.addClass('alert-success');
+			result.addClass('alert-success');*/
 		};
 		result.error = function(text){
-			result.text(text);
+			message([{ type: 'error', msg: text}]);
+/*			result.text(text);
 			result.removeClass('alert-success');
-			result.addClass('alert-danger');
+			result.addClass('alert-danger');*/
 		};
 
 		// event handler
@@ -213,7 +216,7 @@
                  || row.status == "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_ERR']; ?>"
                  || row.status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']; ?>"
                  || row.status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
-		output += '<a title="Konvertierung bearbeiten" class="btn btn-link btn-xs xpk-func-btn' + (funcIsAllowed ? '' : disableFrag) + '" href="index.php?go=Layer-Suche_Suchen&selected_layer_id=8&operator_konvertierung_id==&value_konvertierung_id=' + value + '"><i class="btn-link fa fa-lg fa-pencil"></i></a>';
+		output += '<a title="Konvertierung bearbeiten" class="btn btn-link btn-xs xpk-func-btn' + (funcIsAllowed ? '' : disableFrag) + '" href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<?php echo XPLANKONVERTER_KONVERTIERUNGEN_LAYER_ID; ?>&operator_konvertierung_id==&value_konvertierung_id=' + value + '"><i class="btn-link fa fa-lg fa-pencil"></i></a>';
 
 		// Shapefile upload
     funcIsAllowed = true; // function is always allowed
@@ -334,18 +337,20 @@
 
 </script>
 <h2>Konvertierungen</h2>
-<div class="alert alert-success" style="white-space: pre-wrap" id="eventsResult">
+<!--div class="alert alert-success" style="white-space: pre-wrap" id="eventsResult">
 		Here is the result of event.
-</div>
+</div//-->
 <table
 	id="konvertierungen_table"
 	data-toggle="table"
-	data-url="index.php?go=Layer-Suche_Suchen&selected_layer_id=<?php echo XPLANKONVERTER_KONVERTIERUNGEN_LAYER_ID; ?>&anzahl=1000&mime_type=formatter&format=json"
+	data-url="index.php?go=Layer-Suche_Suchen&selected_layer_id=<?php echo XPLANKONVERTER_KONVERTIERUNGEN_LAYER_ID; ?>&anzahl=10000&mime_type=formatter&format=json<?php echo ($this->formvars['planart'] != '' ? '&value_planart=' . $this->formvars['planart'] . '&operator_planart==' : '') ?>"
 	data-height="100%"
 	data-click-to-select="false"
+	data-filter-control="true" 
 	data-sort-name="bezeichnung"
 	data-sort-order="asc"
-	data-search="false"
+	data-search="true"
+	data-show-export="true"
 	data-show-refresh="false"
 	data-show-toggle="false"
 	data-show-columns="true"
@@ -354,6 +359,8 @@
 	data-page-size="25"
 	data-show-export="false"
 	data-export_types=['json', 'xml', 'csv', 'txt', 'sql', 'excel']
+	data-toggle="table"
+	data-toolbar="#toolbar"
 >
 	<thead>
 		<tr>
@@ -363,6 +370,13 @@
 				data-visible="false"
 				data-switchable="true"
 			>Konvertierung Id</th>
+			<th
+				data-field="planart"
+				data-sortable="true"
+				data-visible="true"
+				data-switchable="true"
+				data-filter-control="select"
+			>Planart</th>
 			<th
 				data-field="bezeichnung"
 				data-sortable="true"
@@ -395,4 +409,4 @@
 		</tr>
 	</thead>
 </table>
-<button style="margin-bottom: 10px" type="button" id="new_konvertierung" name="go_plus" onclick="location.href='index.php?go=neuer_Layer_Datensatz&selected_layer_id=<?php echo XPLANKONVERTER_KONVERTIERUNGEN_LAYER_ID; ?>'">neu</button>
+<button style="margin-bottom: 10px" type="button" id="new_konvertierung" name="go_plus" onclick="location.href='index.php?go=neuer_Layer_Datensatz&selected_layer_id=<?php echo XPLANKONVERTER_KONVERTIERUNGEN_LAYER_ID; ?>&attributenames[0]=planart&values[0]=<?php echo $this->formvars['planart']; ?>'">neu</button>

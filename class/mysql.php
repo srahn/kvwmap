@@ -1011,7 +1011,7 @@ INSERT INTO u_styles2classes (
   	}
   }
 
-  function execSQL($sql,$debuglevel, $loglevel) {
+  function execSQL($sql, $debuglevel, $loglevel) {
   	switch ($this->loglevel) {
   		case 0 : {
   			$logsql=0;
