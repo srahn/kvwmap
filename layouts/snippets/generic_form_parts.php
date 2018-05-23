@@ -630,8 +630,8 @@
 						}
 						else{								// zeilenweise
 							$maxwidth = $size * 11;
-							$minwidth = $size * 7.1;
-							$datapart .= '<div class="readonly_text" style="padding: 0 0 0 3; min-width: '.$minwidth.'px; max-width:'.$maxwidth.'px; font-size: '.$fontsize.'px;">'.$value.'</div>';
+							#$minwidth = $size * 7.1;
+							$datapart .= '<div class="readonly_text" style="padding: 0 0 0 3; max-width:'.$maxwidth.'px; font-size: '.$fontsize.'px;">'.$value.'</div>';
 						}
 					}
 					if($attribute_privileg > '0' AND $attributes['options'][$j] != ''){
