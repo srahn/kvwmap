@@ -35,8 +35,6 @@
 				$stellen[] = $rs;
 			}
 
-			echo $this->user->id;
-
 			$result = array(
 				"success" => true,
 				"user_id" => $this->user->id,
