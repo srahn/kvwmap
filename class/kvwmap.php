@@ -12051,10 +12051,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     else {
       $FlurID=$this->formvars['FlurID'];
     }
-    #$FlstID=$this->formvars['FlstID'];
     $FlstID=$this->formvars['selFlstID'];
     $FlstNr=$this->formvars['FlstNr'];
-    #$this->searchInExtent=$this->formvars['searchInExtent'];
     $Gemarkung=new gemarkung('',$this->pgdatabase);
     # abfragen, ob es sich um eine gültige GemarkungsID handelt
     $GemkgListe=$Gemarkung->getGemarkungListe(array($GemID),array($GemkgID));
@@ -12145,8 +12143,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       } # ende Suche nach Flur
     }
     else {
-      $this->Fehlermeldung='Wählen Sie eine Gemarkung!';
-      $this->flurstwahl();
+			if($FlstNr != '')$this->flurstAnzeige(array($FlstNr));			# ein Flurstückskennzeichen wurde in das EIngabefeld eingetragen
+			else{
+				$this->Fehlermeldung='Wählen Sie eine Gemarkung!';
+				$this->flurstwahl();
+			}
     }
   } # ende function flurstSuchen
 
@@ -14750,8 +14751,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       }
     }
     else {
-      $FlurFormObj=new FormObject("FlurID","text","","","","25","25","multiple",NULL);
-      $FlstNrFormObj=new FormObject("FlstNr","text","","","","5","5","multiple",NULL);
+      $FlurFormObj=new FormObject("FlurID","text","","","","5","5","multiple",NULL);
+      $FlstNrFormObj=new FormObject("FlstNr","text","","","","20","20","multiple",NULL);
     }
     $this->FormObject["Gemeinden"]=$GemFormObj;
     $this->FormObject["Gemarkungen"]=$GemkgFormObj;
