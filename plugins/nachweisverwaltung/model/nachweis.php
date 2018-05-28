@@ -969,7 +969,7 @@ class Nachweis {
 					}
           if($stammnr!=''){
 						if($stammnr2!=''){
-							$sql.=" AND n.stammnr::integer between ".(int)$stammnr." AND ".(int)$stammnr2;
+							$sql.=" AND COALESCE(NULLIF(REGEXP_REPLACE(n.stammnr, '[a-zA-Z]+' ,''), ''), '0')::integer between ".(int)$stammnr." AND ".(int)$stammnr2;
 						}
 						else{
 							if(is_numeric($stammnr)){
@@ -982,7 +982,7 @@ class Nachweis {
           }
 	        if($rissnr!=''){
 						if($rissnr2!=''){
-							$sql.=" AND n.rissnummer::integer between ".(int)$rissnr." AND ".(int)$rissnr2;
+							$sql.=" AND COALESCE(NULLIF(REGEXP_REPLACE(n.rissnummer, '[a-zA-Z]+' ,''), ''), '0')::integer between ".(int)$rissnr." AND ".(int)$rissnr2;
 						}
 						else{
 							if(is_numeric($rissnr)){

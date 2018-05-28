@@ -370,7 +370,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 	  <span class="fett">Es konnten keine Dokumente zu der Auswahl gefunden werden.<br>
 Wählen Sie neue Suchparameter.</span><br>
 	  <? } ?>
-         <a href="index.php?go=Nachweisrechercheformular&datum=<? echo $this->formvars['datum']; ?>&datum2=<? echo $this->formvars['datum2']; ?>&VermStelle=<? echo $this->formvars['VermStelle']; ?>&flur_thematisch=<? echo $this->formvars['flur_thematisch']; ?>&such_andere_art=<? echo $this->formvars['such_andere_art']; ?>">&lt;&lt; zur&uuml;ck
+         <a href="index.php?go=Nachweisrechercheformular&VermStelle=<? echo $this->formvars['VermStelle']; ?>&flur_thematisch=<? echo $this->formvars['flur_thematisch']; ?>&such_andere_art=<? echo $this->formvars['such_andere_art']; ?>">&lt;&lt; zur&uuml;ck
          zur Suche</a></td>
   </tr>
   <tr> 
