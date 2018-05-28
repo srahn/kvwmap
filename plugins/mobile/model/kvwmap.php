@@ -37,6 +37,7 @@
 
 			$result = array(
 				"success" => true,
+				"user_id" => $this->user->id,
 				"stellen" => $stellen
 			);
 		}
@@ -227,7 +228,8 @@
 			"geometry_type" => $geometry_types[$layerset['Datentyp']],
 			"table_name" => $layerset['maintable'],
 			"schema_name" => $layerset['schema'],
-			"document_path" => $layerset['document_path']
+			"document_path" => $layerset['document_path'],
+			"privileg" => $layerset['privileg']
 		);
 		# ToDo use $mapDB->getDocument_Path(...) to get the calculated document_path
 		return $layer;

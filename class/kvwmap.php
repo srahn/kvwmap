@@ -5828,7 +5828,7 @@ class GUI {
   } # END of function notizKategorieLoeschen
 
   function metadatenblattanzeige() {
-		include_(CLASSPATH.'metadaten.php');
+		include_(CLASSPATH.'metadaten_csw.php');
     # Zuweisen von Titel und Layoutdatei
     $this->titel='Metadatenblattanzeige';
     $this->main='Metadatenblatt.php';
