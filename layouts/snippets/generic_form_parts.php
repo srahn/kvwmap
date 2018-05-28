@@ -442,12 +442,12 @@
 						$thumbname = $gui->get_dokument_vorschau($dateinamensteil);
 						$gui->allowed_documents[] = addslashes($dateiname);
 						$gui->allowed_documents[] = addslashes($thumbname);
-						if($attributes['options'][$j] != '' AND strtolower(substr($attributes['options'][$j], 0, 6)) != 'select'){		# bei Layern die auf andere Server zugreifen, wird die URL des anderen Servers verwendet
-							$url = $attributes['options'][$j].$gui->document_loader_name.'?dokument=';
+						if(substr($dokumentpfad, 0, 4) == 'http'){
+							$url = '';										# URL zu der Datei
 						}
 						else{
-							$url = IMAGEURL.$gui->document_loader_name.'?dokument=';
-						}											
+							$url = IMAGEURL.$gui->document_loader_name.'?dokument=';			# absoluter Dateipfad
+						}
 						$datapart .= '<table border="0"><tr><td>';
 						if($hover_preview){
 							$onmouseover='onmouseenter="document.getElementById(\'vorschau\').style.border=\'1px solid grey\';document.getElementById(\'preview_img\').src=this.src" onmouseleave="document.getElementById(\'vorschau\').style.border=\'none\';document.getElementById(\'preview_img\').src=\''.GRAPHICSPATH.'leer.gif\'"';
