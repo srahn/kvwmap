@@ -74,6 +74,7 @@ function InchesPerUnit($unit, $center_y){
 }
 
 function ie_check(){
+	$browser = $_SERVER['HTTP_USER_AGENT'];
 	if(preg_match("/MSIE/i", $browser) OR preg_match("/rv:11.0/i", $browser) OR preg_match("/Edge/i", $browser)){
 			return TRUE;
 	}
