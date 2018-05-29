@@ -8006,7 +8006,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         for($j = 0; $j < count($features); $j++){
           for($k = 0; $k < count($attributes['name']); $k++){
             $layerset[0]['shape'][$j][$attributes['name'][$k]] = $features[$j]['value'][$attributes['name'][$k]];
-            $attributes['privileg'][$k] = 0;
+						$attributes['privileg'][$k] = 0;
+						$attributes['visible'][$k] = true;
           }
           $layerset[0]['shape'][$j]['wfs_geom'] = $features[$j]['geom'];
         }
@@ -13103,6 +13104,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
               for($k = 0; $k < count($layerset[$i]['attributes']['name']); $k++){
 								$layerset[$i]['shape'][$j][$layerset[$i]['attributes']['name'][$k]] = $features[$j]['value'][$layerset[$i]['attributes']['name'][$k]];
                 $layerset[$i]['attributes']['privileg'][$k] = 0;
+								$layerset[$i]['attributes']['visible'][$k] = true;
               }
               $layerset[$i]['shape'][$j]['wfs_geom'] = $features[$j]['geom'];
             }
