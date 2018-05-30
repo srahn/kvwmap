@@ -53,23 +53,26 @@
 								if ($dataset[$attributes['name'][$j]]!='') {
 									$dokumentpfad = $dataset[$attributes['name'][$j]];
 									$pfadteil = explode('&original_name=', $dokumentpfad);
-									$dateiname = $pfadteil[0];
-									$original_name = $pfadteil[1];
-									$dateinamensteil=explode('.', $dateiname);
+									$dateiname = $pfadteil[0];														
+									if($layer['document_url'] != '')$dateiname = url2filepath($dateiname, $layer['document_path'], $layer['document_url']);
+									$dateinamensteil = explode('.', $dateiname);
 									$type = strtolower($dateinamensteil[1]);
 									$thumbname = $this->get_dokument_vorschau($dateinamensteil);
-									$this->allowed_documents[] = addslashes($dateiname);
-									$this->allowed_documents[] = addslashes($thumbname);
-									// if($attributes['options'][$j] != '' AND strtolower(substr($attributes['options'][$j], 0, 6)) != 'select'){		# bei Layern die auf andere Server zugreifen, wird die URL des anderen Servers verwendet
-										// $url = $attributes['options'][$j].$this->document_loader_name.'?dokument=';
-									// }
-									// else{
-										$url = IMAGEURL.$this->document_loader_name.'?dokument=';
-									//}											
-									if($type == 'jpg' OR $type == 'png' OR $type == 'gif' OR $type == 'pdf' ){
-										echo '<tr><td><a class="preview_link" href="'.$url.$dokumentpfad.'"><img class="preview_image" src="'.$url.$thumbname.'"></a></td></tr>';									
+									if($layer['document_url'] != ''){
+										$url = '';										# URL zu der Datei (komplette URL steht schon in $dokumentpfad)
+										$target = 'target="_blank"';
+										$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
+									}
+									else{
+										$original_name = $pfadteil[1];																	
+										$this->allowed_documents[] = addslashes($dateiname);
+										$this->allowed_documents[] = addslashes($thumbname);
+										$url = IMAGEURL.$this->document_loader_name.'?dokument=';			# absoluter Dateipfad
+									}
+									if(in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf')) ){
+										echo '<tr><td><a class="preview_link" '.$target.' href="'.$url.$dokumentpfad.'"><img class="preview_image" src="'.$url.$thumbname.'"></a></td></tr>';									
 									}else{
-										echo '<tr><td><a class="preview_link" href="'.$url.$dokumentpfad.'"><img class="preview_doc" src="'.$url.$thumbname.'"></a></td></tr>';
+										echo '<tr><td><a class="preview_link" '.$target.' href="'.$url.$dokumentpfad.'"><img class="preview_doc" src="'.$url.$thumbname.'"></a></td></tr>';
 									}
 									$output[$p] = '<table><tr><td>'.$original_name.'</td>';
 								}

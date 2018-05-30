@@ -17,6 +17,12 @@ function MapserverErrorHandler($errno, $errstr, $errfile, $errline){
 	return true;
 }
 
+function url2filepath($url, $doc_path, $doc_url){
+	if($doc_path == '')$doc_path = CUSTOM_IMAGE_PATH;
+	$url_parts = explode($doc_url, $url);
+	return $doc_path.$url_parts[1];
+}
+
 function compare_layers($a, $b){
 	$a['alias'] = strtoupper($a['alias']);
 	$b['alias'] = strtoupper($b['alias']);

@@ -45,14 +45,16 @@
 		return $datapart;
 	}
 
-	function attribute_value(&$gui, $layer_id, $attributes, $j, $k, $dataset, $size, $select_width, $fontsize, $change_all = false, $onchange = NULL, $field_name = NULL, $field_id = NULL, $field_class = NULL){
+	function attribute_value(&$gui, $layer, $attributes, $j, $k, $dataset, $size, $select_width, $fontsize, $change_all = false, $onchange = NULL, $field_name = NULL, $field_id = NULL, $field_class = NULL){
 		global $strShowPK;
 		global $strNewPK;
 		global $strShowFK;
 		global $strShowAll;
 		global $strNewEmbeddedPK;
 		global $hover_preview;
-		# $dataset 																											# der aktuelle Datensatz
+		$layer_id = $layer['Layer_ID'];
+		if($dataset == NULL)$dataset = $layer['shape'][$k]; 						# der aktuelle Datensatz (wird nur beim Array- oder Nutzer-Datentyp übergeben)
+		if($attributes == NULL)$attributes = $layer['attributes'];			# das Attribut-Array (wird nur beim Array- oder Nutzer-Datentyp übergeben)
 		$name = $attributes['name'][$j];																# der Name des Attributs
 		$alias = $attributes['alias'][$j];															# der Aliasname des Attributs
 		$value = $dataset[$name];																				# der Wert des Attributs
@@ -86,7 +88,7 @@
 				if(is_array($elements[$e]) OR is_object($elements[$e]))$elements[$e] = json_encode($elements[$e]);		# ist ein Array oder Objekt (also entweder ein Array-Typ oder ein Datentyp) und wird zur Übertragung wieder encodiert
 				$dataset2[$attributes2['name'][$j]] = $elements[$e];
 				$datapart .= '<div id="div_'.$id.'_'.$e.'" style="display: '.($e==-1 ? 'none' : 'block').'"><table cellpadding="0" cellspacing="0"><tr><td>';
-				$datapart .= attribute_value($gui, $layer_id, $attributes2, $j, $k, $dataset2, $size, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id);
+				$datapart .= attribute_value($gui, $layer, $attributes2, $j, $k, $dataset2, $size, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id);
 				$datapart .= '</td>';
 				if($attributes['privileg'][$j] == '1' AND !$lock[$k]){
 					$datapart .= '<td valign="top"><a href="#" onclick="removeArrayElement(\''.$id.'\', \''.$id.'_'.$e.'\');'.$onchange2.'return false;"><img style="width: 18px" src="'.GRAPHICSPATH.'datensatz_loeschen.png"></a></td>';
@@ -121,7 +123,7 @@
 				$type_attributes['privileg'][$e] = $attributes['privileg'][$j];
 				if($type_attributes['alias'][$e] == '')$type_attributes['alias'][$e] = $type_attributes['name'][$e];
 				$datapart .= '<tr><td valign="top" class="gle_attribute_name"><table><tr><td>'.$type_attributes['alias'][$e].'</td></tr></table></td>';
-				$datapart .= '<td class="gle_attribute_value">'.attribute_value($gui, $layer_id, $type_attributes, $e, NULL, $dataset2, $tsize, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id).'</td></tr>';
+				$datapart .= '<td class="gle_attribute_value">'.attribute_value($gui, $layer, $type_attributes, $e, NULL, $dataset2, $tsize, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id).'</td></tr>';
 			}
 			$datapart .= '</tr></table>';
 			return $datapart;
@@ -436,16 +438,19 @@
 						$dokumentpfad = $value;
 						$pfadteil = explode('&original_name=', $dokumentpfad);
 						$dateiname = $pfadteil[0];
-						$original_name = $pfadteil[1];
-						$dateinamensteil=explode('.', $dateiname);
+						if($layer['document_url'] != '')$dateiname = url2filepath($dateiname, $layer['document_path'], $layer['document_url']);
+						$dateinamensteil = explode('.', $dateiname);
 						$type = strtolower($dateinamensteil[1]);
 						$thumbname = $gui->get_dokument_vorschau($dateinamensteil);
-						$gui->allowed_documents[] = addslashes($dateiname);
-						$gui->allowed_documents[] = addslashes($thumbname);
-						if(substr($dokumentpfad, 0, 4) == 'http'){
-							$url = '';										# URL zu der Datei
+						if($layer['document_url'] != ''){
+							$url = '';										# URL zu der Datei (komplette URL steht schon in $dokumentpfad)
+							$target = 'target="_blank"';
+							$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
 						}
 						else{
+							$original_name = $pfadteil[1];							
+							$gui->allowed_documents[] = addslashes($dateiname);
+							$gui->allowed_documents[] = addslashes($thumbname);
 							$url = IMAGEURL.$gui->document_loader_name.'?dokument=';			# absoluter Dateipfad
 						}
 						$datapart .= '<table border="0"><tr><td>';
@@ -453,10 +458,10 @@
 							$onmouseover='onmouseenter="document.getElementById(\'vorschau\').style.border=\'1px solid grey\';document.getElementById(\'preview_img\').src=this.src" onmouseleave="document.getElementById(\'vorschau\').style.border=\'none\';document.getElementById(\'preview_img\').src=\''.GRAPHICSPATH.'leer.gif\'"';
 						}
 						if(in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf')) ){
-							$datapart .= '<a href="'.$url.$dokumentpfad.'"><img class="preview_image" src="'.$url.$thumbname.'" '.$onmouseover.'></a>';									
+							$datapart .= '<a href="'.$url.$dokumentpfad.'" '.$target.'><img class="preview_image" src="'.$url.$thumbname.'" '.$onmouseover.'></a>';									
 						}
 						else{
-							$datapart .= '<a href="'.$url.$dokumentpfad.'"><img class="preview_doc" src="'.$url.$thumbname.'"></a>';									
+							$datapart .= '<a href="'.$url.$dokumentpfad.'" '.$target.'><img class="preview_doc" src="'.$url.$thumbname.'"></a>';									
 						}
 						$datapart .= '</td><td>';
 						if($attribute_privileg != '0' AND !$lock[$k]){
@@ -466,7 +471,7 @@
 						$datapart .= '</td></tr>';
 						$datapart .= '<tr><td colspan="2"><span id="image_original_name">'.$original_name.'</span></td></tr>';
 						$datapart .= '</table>';
-						$datapart .= '<input type="hidden" name="'.$fieldname.'_alt" value="'.$value.'">';
+						$datapart .= '<input type="hidden" name="'.str_replace(';Dokument;', ';Dokument_alt;', $fieldname).'" value="'.$value.'">';
 					}
 					if($attribute_privileg != '0' AND !$lock[$k]){
 						$datapart .= '<input tabindex="1" onchange="'.$onchange.'" style="font-size: '.$fontsize.'px" size="43" type="file" onchange="this.title=this.value;" id="'.$layer_id.'_'.$name.'_'.$k.'" title="'.$alias.'" class="'.$field_class.'" name="'.$fieldname.'">';

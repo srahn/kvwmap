@@ -6092,8 +6092,9 @@ class GUI {
     } # ende Abfrage war erfolgreich
   }
 
-	function deleteDokument($path){
-		$path = array_shift(explode('&original_name', $path));
+	function deleteDokument($path, $doc_path, $doc_url){
+		if($doc_url != '')$path = url2filepath($path, $doc_path, $doc_url);			# Dokument mit URL
+		else $path = array_shift(explode('&original_name', $path));
 		$dateinamensteil = explode('.', $path);
 		if(file_exists($path))unlink($path);
 		if(file_exists($dateinamensteil[0].'_thumb.jpg'))unlink($dateinamensteil[0].'_thumb.jpg');
@@ -8487,7 +8488,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			if($form_fields[$i] != ''){
 				$element = explode(';', $form_fields[$i]);
 				if($element[4] == 'Dokument' AND in_array($element[3], $oids)){
-					$this->deleteDokument($this->formvars[str_replace(';Dokument;', ';Dokument_alt;', $form_fields[$i])]);
+					$this->deleteDokument($this->formvars[str_replace(';Dokument;', ';Dokument_alt;', $form_fields[$i])], $layer['document_path'], $layer['document_url']);
 				}
 			}
 		}
@@ -12380,7 +12381,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		if($this->formvars['delete_documents'] != ''){		// in diesem input-Feld stehen die Pfade von Dokumenten, die zu entfernten Array-Elementen gehörten und gelöscht werden müssen
 			$documents = explode('|', $this->formvars['delete_documents']);
 			foreach($documents as $path){
-				$this->deleteDokument($path);
+				$this->deleteDokument($path, $layerset[$layer_id][0]['document_path'], $layerset[$layer_id][0]['document_url']);		# geht erstmal nur für einen einzelnen Layer
 			}
 		}
 		if($updates != NULL){
@@ -12558,7 +12559,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				# Wenn eine alte Datei existiert, die nicht so heißt wie die neue --> löschen
 				$old = $this->formvars[$input_name.'_alt'];
 				if ($old != '' AND $old != $db_input) {
-					$this->deleteDokument($old);
+					$this->deleteDokument($old, $doc_path, $doc_url);
 				}
 			}
 			else {
@@ -13646,13 +13647,21 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 									$dokumentpfad = $layer['shape'][$k][$attributes['name'][$j]];
 									$pfadteil = explode('&original_name=', $dokumentpfad);
 									$dateiname = $pfadteil[0];
+									if($layer['document_url'] != '')$dateiname = url2filepath($dateiname, $layer['document_path'], $layer['document_url']);
+									$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
 									$original_name = $pfadteil[1];
 									$dateinamensteil=explode('.', $dateiname);
 									$type = $dateinamensteil[1];
 									$thumbname = $this->get_dokument_vorschau($dateinamensteil);
-									$this->allowed_documents[] = addslashes($dateiname);
-									$this->allowed_documents[] = addslashes($thumbname);
-									$url = IMAGEURL.$this->document_loader_name.'?dokument=';
+									if($layer['document_url'] != ''){
+										$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
+										$url = '';
+									}
+									else{
+										$this->allowed_documents[] = addslashes($dateiname);
+										$this->allowed_documents[] = addslashes($thumbname);
+										$url = IMAGEURL.$this->document_loader_name.'?dokument=';
+									}
 									$pictures .= '| '.$url.$thumbname;
 				        }break;
 				        case 'Link': {
