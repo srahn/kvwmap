@@ -71,12 +71,12 @@
     elseif($oldscale!=$GUI->formvars['nScale'] AND $GUI->formvars['nScale'] != '') {
       $GUI->scaleMap($GUI->formvars['nScale']);
     }
-    $GUI->saveMap('');
   	if($GUI->formvars['CMD'] != 'previous' AND $GUI->formvars['CMD'] != 'next'){
     	$currenttime=date('Y-m-d H:i:s',time());
     	$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
     }
     $GUI->drawMap();
+		$GUI->saveMap('');
     $GUI->output();
   };
 	
