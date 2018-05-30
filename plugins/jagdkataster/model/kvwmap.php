@@ -140,10 +140,10 @@
       $GUI->navMap($GUI->formvars['CMD']);
       $GUI->user->rolle->saveDrawmode($GUI->formvars['always_draw']);
     }
-    $GUI->saveMap('');
     $currenttime=date('Y-m-d H:i:s',time());
     $GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
     $GUI->drawMap();
+		$GUI->saveMap('');
     $GUI->output();
   };
 	
