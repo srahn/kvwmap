@@ -152,7 +152,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 				<? }else{echo '<th align="center" style="width: 90"><span class="fett">Antragsnr.</span></th>';}
 				if(strpos($this->formvars['order'], 'blattnummer') === false){ ?>
 				<th align="center" style="width: 70"><a href="javascript:add_to_order('blattnummer');" title="nach Blattnummer sortieren"><span class="fett">Blattnr.</span></a></th>
-			<? }else{echo '<th align="center" style="width: 137"><span class="fett">Blattnr.</span></th>';}
+			<? }else{echo '<th align="center" style="width: 70"><span class="fett">Blattnr.</span></th>';}
 				} ?>
 			<? if(strpos($this->formvars['order'], 'rissnummer') === false){ ?>
 				<th align="center" style="width: 70"><a href="javascript:add_to_order('rissnummer');" title="nach Rissnr. sortieren"><span class="fett">Rissnr.</span></a></th>
@@ -160,7 +160,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
           <? if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){
 						if(strpos($this->formvars['order'], 'blattnummer') === false){ ?>
 				<th align="center" style="width: 70"><a href="javascript:add_to_order('blattnummer');" title="nach Blattnummer sortieren"><span class="fett">Blattnr.</span></a></th>
-			<? }else{echo '<th align="center" style="width: 137"><span class="fett">Blattnr.</span></th>';} 
+			<? }else{echo '<th align="center" style="width: 70"><span class="fett">Blattnr.</span></th>';} 
 				if(strpos($this->formvars['order'], 'stammnr') === false){ ?>
 					<th align="center" style="width: 90"><a href="javascript:add_to_order('stammnr');" title="nach Antragsnr. sortieren"><span class="fett">Antragsnr.</span></a></th>
 				<? }else{echo '<th align="center" style="width: 90"><span class="fett">Antragsnr.</span></th>';}
@@ -370,7 +370,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 	  <span class="fett">Es konnten keine Dokumente zu der Auswahl gefunden werden.<br>
 Wählen Sie neue Suchparameter.</span><br>
 	  <? } ?>
-         <a href="index.php?go=Nachweisrechercheformular&datum=<? echo $this->formvars['datum']; ?>&datum2=<? echo $this->formvars['datum2']; ?>&VermStelle=<? echo $this->formvars['VermStelle']; ?>&flur_thematisch=<? echo $this->formvars['flur_thematisch']; ?>&such_andere_art=<? echo $this->formvars['such_andere_art']; ?>">&lt;&lt; zur&uuml;ck
+         <a href="index.php?go=Nachweisrechercheformular&VermStelle=<? echo $this->formvars['VermStelle']; ?>&flur_thematisch=<? echo $this->formvars['flur_thematisch']; ?>&such_andere_art=<? echo $this->formvars['such_andere_art']; ?>">&lt;&lt; zur&uuml;ck
          zur Suche</a></td>
   </tr>
   <tr> 
