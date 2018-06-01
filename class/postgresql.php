@@ -486,7 +486,7 @@ FROM
 				
         # Geometrietyp
         if($fieldtype == 'geometry'){
-          $fields[$i]['geomtype'] = $this->get_geom_type($fields[$i]['real_name'], $tablename);
+          $fields[$i]['geomtype'] = $this->get_geom_type($this->schema, $fields[$i]['real_name'], $tablename);
           $fields['the_geom'] = $fieldname;
 					$fields['the_geom_id'] = $i;
         }				
@@ -673,16 +673,20 @@ FROM
 	* @param string $tablename Name der Tabelle
 	* @return string Geometrytyp
 	*/
-	function get_geom_type($geomcolumn, $tablename){
+	function get_geom_type($schema, $geomcolumn, $tablename){
+		if($schema == '')$schema = 'public';
 		if($geomcolumn != '' AND $tablename != ''){
 			$sql = "
-				SELECT
-					type
-				FROM
-					geometry_columns
-				WHERE
-					f_table_name = '" . $tablename . "' AND
-					f_geometry_column = '" . $geomcolumn ."'
+				SELECT coalesce(
+					geometrytype(".$geomcolumn.")
+					,  
+					(select type from geometry_columns WHERE 
+					 f_table_schema = '".$schema."' and 
+					 f_table_name = '".$tablename."' AND 
+					 f_geometry_column = '".$geomcolumn."')
+				) as type
+				FROM ".$schema.".".$tablename."
+				limit 1
 			";
 			$ret1 = $this->execSQL($sql, 4, 0);
 			if($ret1[0] == 0) {
