@@ -29,20 +29,21 @@
 			else $title_link = 'href="javascript:void(0);"';
 			$datapart .= '<td align="right"><a '.$title_link.' title="'.$attributes['tooltip'][$j].'"><img src="'.GRAPHICSPATH.'emblem-important.png" border="0"></a></td>';
 		}
-		$date_types = array('date' => 'TT.MM.JJJJ', 'timestamp' => 'TT.MM.JJJJ hh:mm:ss', 'time' => 'hh:mm:ss');
-		if(array_key_exists($attributes['type'][$j], $date_types)){
-			$datapart .= '
-				<td width="16px" align="right">
-						<a id="caldbl" href="javascript:;" title="('.$date_types[$attributes['type'][$j]].')"'.
-						(($attributes['privileg'][$j] == '1') ? 'onclick="add_calendar(event, \''.$layer_id.'_'.$attributes['name'][$j].'_'.$k.'\', \''.$attributes['type'][$j].'\');" 
-																										 ondblclick="add_calendar(event, \''.$layer_id.'_'.$attributes['name'][$j].'_'.$k.'\', \''.$attributes['type'][$j].'\', true);"' : '').'
-					><img src="' . GRAPHICSPATH . 'calendarsheet.png" border="0"></a>
-					<div id="calendar_'.$layer_id.'_'.$attributes['name'][$j].'_'.$k.'" class="calendar"></div>
-				</td>
-			';
+		if(in_array($attributes['type'][$j], array('date', 'time', 'timestamp'))){
+			$datapart .= '<td width="16px" align="right">'.calendar($attributes['type'][$j], $layer_id.'_'.$attributes['name'][$j].'_'.$k, $attributes['privileg'][$j]).'</td>';
 		}
 		$datapart .= '</td></tr></table>';
 		return $datapart;
+	}
+	
+	function calendar($type, $field_id, $privileg){
+		$date_types = array('date' => 'TT.MM.JJJJ', 'timestamp' => 'TT.MM.JJJJ hh:mm:ss', 'time' => 'hh:mm:ss');
+		$cal = '<a id="caldbl" href="javascript:;" title="('.$date_types[$type].')"'.
+						(($privileg == '1') ? 'onclick="add_calendar(event, \''.$field_id.'\', \''.$type.'\');" 
+																										 ondblclick="add_calendar(event, \''.$field_id.'\', \''.$type.'\', true);"' : '').'
+						><img src="' . GRAPHICSPATH . 'calendarsheet.png" border="0"></a>
+						<div id="calendar_'.$field_id.'" class="calendar"></div>';
+		return $cal;
 	}
 
 	function attribute_value(&$gui, $layer, $attributes, $j, $k, $dataset, $size, $select_width, $fontsize, $change_all = false, $onchange = NULL, $field_name = NULL, $field_id = NULL, $field_class = NULL){
