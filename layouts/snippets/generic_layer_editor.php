@@ -152,7 +152,10 @@
 			if($attributes['visible'][$j]){
 				if($attributes['type'][$j] != 'geometry') {
 					echo '<td' . get_td_class_or_style($layer['shape'][$k][$attributes['style']] != '' ? $layer['shape'][$k][$attributes['style']] : 'position: relative; text-align: right') . '>';
-					echo attribute_value($this, $layer['Layer_ID'], $attributes, $j, $k, $layer['shape'][$k], $size, $select_width, $this->user->rolle->fontsize_gle);
+					if(in_array($attributes['type'][$j], array('date', 'time', 'timestamp'))){
+						echo calendar($attributes['type'][$j], $layer['Layer_ID'].'_'.$attributes['name'][$j].'_'.$k, $attributes['privileg'][$j]);
+					}
+					echo attribute_value($this, $layer['Layer_ID'], $attributes, $j, $k, $layer['shape'][$k], $size, $select_width, $this->user->rolle->fontsize_gle);					
 					echo '<div onmousedown="resizestart(document.getElementById(\'column'.$j.'\'), \'col_resize\');" style="position: absolute; transform: translate(4px); top: 0px; right: 0px; height: 100%; width: 8px; cursor: e-resize;"></div>';
 					echo '</td>';
 					if($attributes['privileg'][$j] >= '0'){
@@ -317,6 +320,9 @@
 								if($attributes['type'][$j] != 'geometry'){
 									echo '<td>';
 									if(!in_array($attributes['form_element_type'][$j], array('Dokument', 'SubFormPK', 'SubFormEmbeddedPK'))){
+										if(in_array($attributes['type'][$j], array('date', 'time', 'timestamp'))){
+											echo calendar($attributes['type'][$j], $layer['Layer_ID'].'_'.$attributes['name'][$j].'_'.$k, $attributes['privileg'][$j]);
+										}
 										echo attribute_value($this, $layer['Layer_ID'], $attributes, $j, $k, $layer['shape'][$k], $size, $select_width, $this->user->rolle->fontsize_gle, true);
 									}
 									echo '</td>';
