@@ -105,6 +105,12 @@
 			content+= \'<br><input type="button" value="OK" onclick="coords_input_submit()">\';
 			Msg.innerHTML = content;
 			document.getElementById(\'input_coords\').select();
+			document.onkeydown = function(ev){
+				var key;
+				ev = ev || event;
+				key = ev.keyCode;
+				if(key == 13)coords_input_submit();
+			}
 		}
 		
 		function coords_input_submit(){
