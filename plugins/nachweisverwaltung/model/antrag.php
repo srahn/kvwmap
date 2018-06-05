@@ -93,7 +93,7 @@ class antrag {
       if(delete_files($auftragspfad, $exceptions, 0)) {
         # Ordner wieder neu anlegen
         mkdir ($auftragspfad, 0777);
-        $msg = "Alle alten Dateien des Auftrages vor dem Hinzufügen der neuen Dateien gelöscht.<br>";
+        $msg = "Alle alten Dateien des Auftrages vor dem Hinzufügen der neuen Dateien gelöscht.\n";
       }
       else {
         $msg = "Löschen vorhandener Dateien fehlgeschlagen.<br>";

@@ -448,13 +448,21 @@ class GUI {
 									$dokumentpfad = $layer['shape'][$k][$attributes['name'][$j]];
 									$pfadteil = explode('&original_name=', $dokumentpfad);
 									$dateiname = $pfadteil[0];
+									if($layer['document_url'] != '')$dateiname = url2filepath($dateiname, $layer['document_path'], $layer['document_url']);
+									$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
 									$original_name = $pfadteil[1];
 									$dateinamensteil=explode('.', $dateiname);
 									$type = $dateinamensteil[1];
 									$thumbname = $this->get_dokument_vorschau($dateinamensteil);
-									$this->allowed_documents[] = addslashes($dateiname);
-									$this->allowed_documents[] = addslashes($thumbname);
-									$url = IMAGEURL.$this->document_loader_name.'?dokument=';
+									if($layer['document_url'] != ''){
+										$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
+										$url = '';
+									}
+									else{
+										$this->allowed_documents[] = addslashes($dateiname);
+										$this->allowed_documents[] = addslashes($thumbname);
+										$url = IMAGEURL.$this->document_loader_name.'?dokument=';
+									}
 									$pictures .= '| '.$url.$thumbname;
 				        }break;
 				        case 'Link': {
