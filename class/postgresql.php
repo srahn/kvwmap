@@ -678,15 +678,13 @@ FROM
 		if($geomcolumn != '' AND $tablename != ''){
 			$sql = "
 				SELECT coalesce(
-					geometrytype(".$geomcolumn.")
+					(select geometrytype(".$geomcolumn.") FROM ".$schema.".".$tablename." limit 1)
 					,  
 					(select type from geometry_columns WHERE 
 					 f_table_schema = '".$schema."' and 
 					 f_table_name = '".$tablename."' AND 
 					 f_geometry_column = '".$geomcolumn."')
 				) as type
-				FROM ".$schema.".".$tablename."
-				limit 1
 			";
 			$ret1 = $this->execSQL($sql, 4, 0);
 			if($ret1[0] == 0) {
