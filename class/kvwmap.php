@@ -12424,10 +12424,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 									SELECT
 										oid, *
 									FROM
-										{$element[2]}
+										".$tablename."
 									WHERE
-										oid = {$element[3]}
-								";
+										oid = ".$oid;
 								#echo '<br>sql before update: ' . $sql_old; #pk
 								$ret = $layerdb[$layer_id]->execSQL($sql_old, 4, 1);
 								$old_dataset = ($ret[0] == 0 ? pg_fetch_assoc($ret[1]) : array());
