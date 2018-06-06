@@ -24,24 +24,26 @@ include(PLUGINS . 'xplankonverter/model/converter.php');
 
 /**
 * Anwendungsfälle
-* xplankonverter_konvertierungen_index
-* xplankonverter_shapefiles_index
-* xplankonverter_shapefiles_delete
-* xplankonverter_konvertierung
-* xplankonverter_konvertierung_status
-* xplankonverter_validierungsergebnisse
-* xplankonverter_gml_generieren
-* xplankonverter_konvertierung_loeschen
-* xplankonverter_inspire_gml_generieren
-* xplankonverter_regeleditor
-* xplankonverter_regeleditor_getxplanattributes
-* xplankonverter_regeleditor_getshapeattributes
-* xplankonverter_download_uploaded_shapes
 * xplankonverter_download_edited_shapes
-* xplankonverter_download_xplan_shapes
-* xplankonverter_download_xplan_gml
 * xplankonverter_download_inspire_gml
+* xplankonverter_download_uploaded_shapes
+* xplankonverter_download_xplan_gml
+* xplankonverter_download_xplan_shapes
+* xplankonverter_gml_generieren
+* xplankonverter_go_to_plan
+* xplankonverter_inspire_gml_generieren
+* xplankonverter_konvertierung
+* xplankonverter_konvertierungen_index
+* xplankonverter_konvertierung_loeschen
+* xplankonverter_konvertierung_status
+* xplankonverter_regeleditor
+* xplankonverter_regeleditor_getshapeattributes
+* xplankonverter_regeleditor_getxplanattributes
+* xplankonverter_shapefiles_delete
+* xplankonverter_shapefiles_index
+* xplankonverter_validierungsergebnisse
 */
+
 
 switch($go){
 
@@ -824,7 +826,7 @@ switch($go){
 			# go to layer search with layer of planart
 			switch ($rs['planart']) {
 				case 'BP-Plan' : $layer_id = XPLANKONVERTER_BP_PLAENE_LAYER_ID; break;
-				case 'FP-Plan' : $layer_id = XPLANKONVERTER_BP_PLAENE_LAYER_ID; break;
+				case 'FP-Plan' : $layer_id = XPLANKONVERTER_FP_PLAENE_LAYER_ID; break;
 				case 'SO-Plan' : $layer_id = XPLANKONVERTER_SO_PLAENE_LAYER_ID; break;
 				case 'RP-Plan' : $layer_id = XPLANKONVERTER_RP_PLAENE_LAYER_ID; break;
 			}

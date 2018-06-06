@@ -15427,16 +15427,25 @@ class db_mapObj{
     if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
   }
 
-  function readAttributeFilter($Stelle_ID, $Layer_ID){
-    $sql ='SELECT * FROM u_attributfilter2used_layer WHERE Stelle_ID = '.$Stelle_ID.' AND Layer_ID = '.$Layer_ID;
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->readAttributeFilter - Lesen der Attribute-Filter-Parameter:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    while($rs = mysql_fetch_array($query)){
-      $filter[] = $rs;
-    }
-    return $filter;
-  }
+	function readAttributeFilter($Stelle_ID, $Layer_ID) {
+		$sql = "
+			SELECT
+				*
+			FROM
+				u_attributfilter2used_layer
+			WHERE
+				Stelle_ID = " . $Stelle_ID . " AND
+				Layer_ID = " . $Layer_ID . "
+		";
+		# echo '<br>Sql: ' . $sql;
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->readAttributeFilter - Lesen der Attribute-Filter-Parameter:<br>" . $sql, 4);
+		$query = mysql_query($sql);
+		if ($query == 0) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__,4); return 0; }
+		while($rs = mysql_fetch_array($query)) {
+			$filter[] = $rs;
+		}
+		return $filter;
+	}
 
 	function getFilter($layer_id, $stelle_id){
     $sql ='SELECT Filter FROM used_layer WHERE Layer_ID = '.$layer_id.' AND Stelle_ID = '.$stelle_id;
