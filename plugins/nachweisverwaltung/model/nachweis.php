@@ -642,8 +642,10 @@ class Nachweis {
     $this->debug->write('Aktualisieren der Metadaten zu einem bestehenden Nachweisdokument',4);
     $sql="UPDATE nachweisverwaltung.n_nachweise SET ";
 		if($flurid != NULL)$sql.="flurid='".$flurid."', ";
-		if($stammnr == '')$sql.="stammnr=NULL, ";
-		else $sql.="stammnr='".trim($stammnr)."', ";
+		if($stammnr !== NULL){
+			if($stammnr === '')$sql.="stammnr=NULL, ";
+			else $sql.="stammnr='".trim($stammnr)."', ";
+		}
 		if($art != NULL)$sql.="art='".$art."'";
     if($Blattnr != NULL)$sql.=",blattnummer='".trim($Blattnr)."', ";
 		if($art != NULL)$sql.="datum='".$datum."', ";
@@ -652,10 +654,14 @@ class Nachweis {
 		if($Blattformat != NULL)$sql.="format='".$Blattformat."', ";
 		if($umring != NULL)$sql.="the_geom=st_transform(st_geometryfromtext('".$umring."', ".$this->client_epsg."), (select srid from geometry_columns where f_table_name = 'n_nachweise')), ";
 		if($zieldateiname != NULL)$sql.="link_datei='".$zieldateiname."', ";
-    if($fortf == '')$sql.="fortfuehrung=NULL, ";
-		else $sql.="fortfuehrung=".(int)$fortf.", ";
-		if($rissnr == '')$sql.="rissnummer=NULL, ";
-		else $sql.="rissnummer='".$rissnr."', ";
+		if($fortf !== NULL){
+			if($fortf === '')$sql.="fortfuehrung=NULL, ";
+			else $sql.="fortfuehrung=".(int)$fortf.", ";
+		}
+		if($rissnr !== NULL){
+			if($rissnr === '')$sql.="rissnummer=NULL, ";
+			else $sql.="rissnummer='".$rissnr."', ";
+		}
 		$sql.="bemerkungen='".$bemerkungen."', ";
 		$sql.="bemerkungen_intern='".$bemerkungen_intern."', ";
 		$sql.=" bearbeiter='".$user->Vorname." ".$user->Name."', zeit='".date('Y-m-d G:i:s')."'";

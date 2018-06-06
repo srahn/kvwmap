@@ -29,7 +29,7 @@
     $GUI->output();
   };
 	
-	$this->DokumenteOrdnerPacken = function() use ($GUI){
+	$this->DokumenteOrdnerPacken = function($mit_uebersichten) use ($GUI){
     if ($GUI->formvars['antr_selected']!=''){			
 			$explosion = explode('~', $GUI->formvars['antr_selected']);
 			$antr_selected = $explosion[0];
@@ -54,17 +54,23 @@
 				$timestamp = date('Y-m-d_H-i-s',time());
 				if($GUI->nachweis->Dokumente != NULL){		# wenn es Nachweise zu diesem Auftrag gibt
 					$GUI->erzeugenUebergabeprotokollNachweise(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Uebergabeprotokoll.pdf');
-					$GUI->erzeugenUebersicht_HTML(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Uebersicht.htm');
-					$GUI->erzeugenUebersicht_CSV(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Uebersicht.csv');
-					#$GUI->erzeugenZuordnungFlst_CSV(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/');
-					$GUI->create_Recherche_UKO(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/');
-					$GUI->nachweis->create_Gesamtpolygon(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Gesamtpolygon/');
-					$GUI->nachweis->writeIgnoredDokumentarten(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/');
+					if($mit_uebersichten){
+						$GUI->erzeugenUebersicht_HTML(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Uebersicht.htm');
+						$GUI->erzeugenUebersicht_CSV(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Uebersicht.csv');
+						#$GUI->erzeugenZuordnungFlst_CSV(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/');
+						$GUI->create_Recherche_UKO(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/');
+						$GUI->nachweis->create_Gesamtpolygon(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Gesamtpolygon/');
+						$GUI->nachweis->writeIgnoredDokumentarten(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/');
+					}
 					# Loggen der übergebenen Dokumente
 					$uebergabe_logpath = $GUI->antrag->create_uebergabe_logpath($GUI->Stelle->Bezeichnung).'/'.$antr_selected.'_'.$timestamp.'.pdf';
 					$GUI->erzeugenUebergabeprotokollNachweise($uebergabe_logpath, true);
 				}
-        $result = exec(ZIP_PATH.' -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr);
+        if($mit_uebersichten)$result = exec(ZIP_PATH.' -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr);		# gesamten Rechercheordner packen
+				else
+					$result = exec(ZIP_PATH.' -j -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr.'/Nachweise');		# Ordnerstruktur verwerfen und nur Nachweise
+					$result = exec(ZIP_PATH.' -j -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr.'/Protokolle');		# und das Übergabeprotokoll packen
+				}
       }
     }
     $filename = RECHERCHEERGEBNIS_PATH.$antragsnr.'.zip';
