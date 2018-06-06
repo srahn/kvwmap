@@ -54,9 +54,17 @@
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$ret=$this->DokumenteZumAntragInOrdnerZusammenstellen();
 			if($ret != '')showAlert($ret);
-			$filename = $this->DokumenteOrdnerPacken();
+			$filename = $this->DokumenteOrdnerPacken(false);
 			$this->Datei_Download($filename);
 	  } break;
+		
+	  case 'Antraganzeige_Zusammenstellen_Zippen_mit_Uebersichten' : {
+			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
+			$ret=$this->DokumenteZumAntragInOrdnerZusammenstellen();
+			if($ret != '')showAlert($ret);
+			$filename = $this->DokumenteOrdnerPacken(true);
+			$this->Datei_Download($filename);
+	  } break;		
 
 	  case 'Nachweisloeschen':{
 			$this->checkCaseAllowed($go);
