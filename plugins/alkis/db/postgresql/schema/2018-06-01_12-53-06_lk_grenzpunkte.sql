@@ -1,6 +1,8 @@
 BEGIN;
 
-CREATE OR REPLACE VIEW alkis.lk_grenzpunkte AS
+DROP VIEW alkis.lk_grenzpunkte;
+
+CREATE VIEW alkis.lk_grenzpunkte AS
  SELECT o.oid,
     o.gml_id,
     o.beginnt AS o_beginnt,
