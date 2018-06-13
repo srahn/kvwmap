@@ -66,7 +66,8 @@
 				<option value="Festpunkte_in_Liste_Anzeigen">Zugeordnete Festpunkte in Liste Anzeigen</option>
 		 		<option value="Festpunkte_in_KVZ_schreiben">Zugeordnete Festpunkte in KVZ Schreiben</option>
         <option value="Uebergabeprotokoll_Zusammenstellen"<?php if ($this->formvars['antr_verarbeitung']=='erzeugen') { ?> selected<?php } ?>>Übergabeprotokoll erzeugen</option>
-        <option value="Zusammenstellen_Zippen">Zusammenstellen & Packen</option>
+        <option value="Zusammenstellen_Zippen">Dokumente zusammenstellen & packen</option>
+				<option value="Zusammenstellen_Zippen_mit_Uebersichten">Dokumente mit Übersichten zusammenstellen & packen</option>
       </select>
       <input type="hidden" name="go" value="Antraganzeige">
       <input type="hidden" name="file" value="1">

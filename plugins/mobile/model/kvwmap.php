@@ -1,4 +1,20 @@
 <?php
+	/*
+	* Cases:
+	* mobile_create_layer_sync
+	* mobile_delete_images
+	* mobile_drop_layer_sync
+	* mobile_get_layers 
+	* mobile_get_stellen
+	* mobile_prepare_layer_sync
+	* mobile_reformat_attributes
+	* mobile_reformat_layer
+	* mobile_sync
+	* mobile_sync_parameter_valide
+	* mobile_upload_image
+	* 
+	*/
+
 	$GUI = $this;
 
 	/**
@@ -37,6 +53,7 @@
 
 			$result = array(
 				"success" => true,
+				"user_id" => $this->user->id,
 				"stellen" => $stellen
 			);
 		}
@@ -227,7 +244,8 @@
 			"geometry_type" => $geometry_types[$layerset['Datentyp']],
 			"table_name" => $layerset['maintable'],
 			"schema_name" => $layerset['schema'],
-			"document_path" => $layerset['document_path']
+			"document_path" => $layerset['document_path'],
+			"privileg" => $layerset['privileg']
 		);
 		# ToDo use $mapDB->getDocument_Path(...) to get the calculated document_path
 		return $layer;

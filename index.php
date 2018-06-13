@@ -157,10 +157,10 @@ function go_switch($go){
 	global $passwort;
 	global $username;
 	if(!FAST_CASE) {
+		$old_go = $GUI->go;
 		$GUI->loadPlugins($go);
-		# go neu setzen, weil es in plugin geändert worden sein kann
-		$go = $GUI->go;
-		#echo '<p>formvars<br>' . print_r($GUI->formvars, true);
+		# go nur neu setzen, wenn es in einem Plugin auch geändert worden ist
+		if($old_go != $GUI->go)$go = $GUI->go;
 	}
 	if (FAST_CASE OR $GUI->goNotExecutedInPlugins) {
 		if ($go == 'get_last_query') {

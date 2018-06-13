@@ -471,7 +471,8 @@ class GUI {
     return $legend;
   }
 
-	function create_layer_legend($layer){
+	function create_layer_legend($layer, $requires = false){
+		if(!$requires AND $layer['requires'] != '' OR $requires AND $layer['requires'] == '')return;
 		global $legendicon_size;
 		$visible = $this->check_layer_visibility($layer);
 		# sichtbare Layer
@@ -750,6 +751,13 @@ class GUI {
 			$legend .=  '</td>
 					</tr>';
 		}
+		
+		# requires-Layer
+		if($layer['required'] != ''){
+			foreach($layer['required'] as $require_layer_id){
+				$legend .= $this->create_layer_legend($this->layerset['layer_ids'][$require_layer_id], true);
+			}
+		}		
 		return $legend;
 	}
 
@@ -5820,7 +5828,7 @@ class GUI {
   } # END of function notizKategorieLoeschen
 
   function metadatenblattanzeige() {
-		include_(CLASSPATH.'metadaten.php');
+		include_(CLASSPATH.'metadaten_csw.php');
     # Zuweisen von Titel und Layoutdatei
     $this->titel='Metadatenblattanzeige';
     $this->main='Metadatenblatt.php';
@@ -6084,8 +6092,9 @@ class GUI {
     } # ende Abfrage war erfolgreich
   }
 
-	function deleteDokument($path){
-		$path = array_shift(explode('&original_name', $path));
+	function deleteDokument($path, $doc_path, $doc_url){
+		if($doc_url != '')$path = url2filepath($path, $doc_path, $doc_url);			# Dokument mit URL
+		else $path = array_shift(explode('&original_name', $path));
 		$dateinamensteil = explode('.', $path);
 		if(file_exists($path))unlink($path);
 		if(file_exists($dateinamensteil[0].'_thumb.jpg'))unlink($dateinamensteil[0].'_thumb.jpg');
@@ -7998,7 +8007,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         for($j = 0; $j < count($features); $j++){
           for($k = 0; $k < count($attributes['name']); $k++){
             $layerset[0]['shape'][$j][$attributes['name'][$k]] = $features[$j]['value'][$attributes['name'][$k]];
-            $attributes['privileg'][$k] = 0;
+						$attributes['privileg'][$k] = 0;
+						$attributes['visible'][$k] = true;
           }
           $layerset[0]['shape'][$j]['wfs_geom'] = $features[$j]['geom'];
         }
@@ -8034,7 +8044,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							for($k = 0; $k < count($this->qlayerset[$i]['shape']); $k++){
 								$oids[] = $this->qlayerset[$i]['shape'][$k][$geometrie_tabelle.'_oid'];
 							}
-							$rect = $mapDB->zoomToDatasets($oids, $geometrie_tabelle, $attributes['the_geom'], 10, $layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+							$rect = $mapDB->zoomToDatasets($oids, $geometrie_tabelle, $attributes['real_name'][$attributes['the_geom']], 10, $layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
 							$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
 							if (MAPSERVERVERSION > 600) {
 								$this->map_scaledenom = $this->map->scaledenom;
@@ -8478,7 +8488,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			if($form_fields[$i] != ''){
 				$element = explode(';', $form_fields[$i]);
 				if($element[4] == 'Dokument' AND in_array($element[3], $oids)){
-					$this->deleteDokument($this->formvars[str_replace(';Dokument;', ';Dokument_alt;', $form_fields[$i])]);
+					$this->deleteDokument($this->formvars[str_replace(';Dokument;', ';Dokument_alt;', $form_fields[$i])], $layer['document_path'], $layer['document_url']);
 				}
 			}
 		}
@@ -8559,13 +8569,14 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		if(count($document_attributes)> 0){
 			foreach($document_attributes as $i => $document_attribute){
 				$doc_path = $layerset[0]['document_path'];
+				$doc_url = $layerset[0]['document_url'];
 				$options = $attributes['options'][$attribute_name];
 				if(substr($attr_oid['datatype'], 0, 1) == '_'){
 					// ein Array aus Dokumenten, hier enthält der JSON-String eine Mischung aus bereits vorhandenen,
 					// nicht geänderten Datei-Pfaden und File-input-Feldnamen, die noch verarbeitet werden müssen
-					$insert = $this->processJSON($this->formvars[$form_fields[$i]], $doc_path, $options, $attributenames, $attributevalues, $layerdb);
+					$insert = $this->processJSON($this->formvars[$form_fields[$i]], $doc_path, $doc_url, $options, $attributenames, $attributevalues, $layerdb);
 				}
-				else $insert = $this->save_uploaded_file($form_fields[$i], $doc_path, $options, $attributenames, $attributevalues, $layerdb);	// normales Dokument-Attribut
+				else $insert = $this->save_uploaded_file($form_fields[$i], $doc_path, $doc_url, $options, $attributenames, $attributevalues, $layerdb);	// normales Dokument-Attribut
 				$this->formvars[$form_fields[$i]] = $insert;
 			}
 		}
@@ -12043,10 +12054,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     else {
       $FlurID=$this->formvars['FlurID'];
     }
-    #$FlstID=$this->formvars['FlstID'];
     $FlstID=$this->formvars['selFlstID'];
     $FlstNr=$this->formvars['FlstNr'];
-    #$this->searchInExtent=$this->formvars['searchInExtent'];
     $Gemarkung=new gemarkung('',$this->pgdatabase);
     # abfragen, ob es sich um eine gültige GemarkungsID handelt
     $GemkgListe=$Gemarkung->getGemarkungListe(array($GemID),array($GemkgID));
@@ -12137,8 +12146,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       } # ende Suche nach Flur
     }
     else {
-      $this->Fehlermeldung='Wählen Sie eine Gemarkung!';
-      $this->flurstwahl();
+			if($FlstNr != '')$this->flurstAnzeige(array($FlstNr));			# ein Flurstückskennzeichen wurde in das EIngabefeld eingetragen
+			else{
+				$this->Fehlermeldung='Wählen Sie eine Gemarkung!';
+				$this->flurstwahl();
+			}
     }
   } # ende function flurstSuchen
 
@@ -12352,6 +12364,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		if(count($document_attributes)> 0){
 			foreach($document_attributes as $i => $attr_oid){
 				$doc_path = $layerset[$attr_oid['layer_id']][0]['document_path'];
+				$doc_url = $layerset[$attr_oid['layer_id']][0]['document_url'];
 				$options = $attributes['options'][$attr_oid['attributename']];
 				$attribute_names = $attributenames[$attr_oid['oid']];
 				$attribute_values = $attributevalues[$attr_oid['oid']];
@@ -12359,16 +12372,16 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				if(substr($attr_oid['datatype'], 0, 1) == '_'){
 					// ein Array aus Dokumenten, hier enthält der JSON-String eine Mischung aus bereits vorhandenen,
 					// nicht geänderten Datei-Pfaden und File-input-Feldnamen, die noch verarbeitet werden müssen
-					$update = $this->processJSON($this->formvars[$form_fields[$i]], $doc_path, $options, $attribute_names, $attribute_values, $layer_db);
+					$update = $this->processJSON($this->formvars[$form_fields[$i]], $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db);
 				}
-				else $update = $this->save_uploaded_file($form_fields[$i], $doc_path, $options, $attribute_names, $attribute_values, $layer_db);	// normales Dokument-Attribut
+				else $update = $this->save_uploaded_file($form_fields[$i], $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db);	// normales Dokument-Attribut
 				$updates[$attr_oid['layer_id']][$attr_oid['tablename']][$attr_oid['oid']][$attr_oid['attributename']]['value'] = $update;
 			}
 		}
 		if($this->formvars['delete_documents'] != ''){		// in diesem input-Feld stehen die Pfade von Dokumenten, die zu entfernten Array-Elementen gehörten und gelöscht werden müssen
 			$documents = explode('|', $this->formvars['delete_documents']);
 			foreach($documents as $path){
-				$this->deleteDokument($path);
+				$this->deleteDokument($path, $layerset[$layer_id][0]['document_path'], $layerset[$layer_id][0]['document_url']);		# geht erstmal nur für einen einzelnen Layer
 			}
 		}
 		if($updates != NULL){
@@ -12415,10 +12428,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 									SELECT
 										oid, *
 									FROM
-										{$element[2]}
+										".$tablename."
 									WHERE
-										oid = {$element[3]}
-								";
+										oid = ".$oid;
 								#echo '<br>sql before update: ' . $sql_old; #pk
 								$ret = $layerdb[$layer_id]->execSQL($sql_old, 4, 1);
 								$old_dataset = ($ret[0] == 0 ? pg_fetch_assoc($ret[1]) : array());
@@ -12496,7 +12508,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     }
   }
 
-	function processJSON($json, $doc_path = NULL, $options = NULL, $attribute_names = NULL, $attribute_values = NULL, $layer_db = NULL, $quote = ''){
+	function processJSON($json, $doc_path = NULL, $doc_url = NULL, $options = NULL, $attribute_names = NULL, $attribute_values = NULL, $layer_db = NULL, $quote = ''){
 		# Diese Funktion wandelt den übergebenen JSON-String in ein PostgeSQL-Struct um.
 		# Wenn der JSON-String mit "file:" gekennzeichnete File-Input-Feld-Namen von Datei-Uploads enthält,
 		# werden diese Uploads gespeichert und der entstandene Dateipfad an die enstdprechende Stelle im String eingefügt
@@ -12506,7 +12518,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		}
 		if(is_array($json)){		// Array-Datentyp
 			for($i = 0; $i < count($json); $i++){
-				$elems[] = $this->processJSON($json[$i], $doc_path, $options, $attribute_names, $attribute_values, $layer_db, '"');
+				$elems[] = $this->processJSON($json[$i], $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db, '"');
 			}
 			$result = '{'.@implode(',', $elems).'}';
 		}
@@ -12514,41 +12526,45 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			if($quote == '')$new_quote = '"';
 			else $new_quote = '\\'.$quote;
 			foreach($json as $elem){
-				$elems[] = $this->processJSON($elem, $doc_path, $options, $attribute_names, $attribute_values, $layer_db, $new_quote);
+				$elems[] = $this->processJSON($elem, $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db, $new_quote);
 			}
 			$result = $quote.'('.implode(',', $elems).')'.$quote;
 		}
 		else{		// normaler Datentyp
-			if(substr($json, 0, 5) == 'file:')$json = $this->save_uploaded_file(substr($json, 5), $doc_path, $options, $attribute_names, $attribute_values, $layer_db);		// Datei-Uploads verarbeiten
+			if(substr($json, 0, 5) == 'file:')$json = $this->save_uploaded_file(substr($json, 5), $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db);		// Datei-Uploads verarbeiten
 			$result = $json;
 		}
 		return $result;
 	}
 
-	function save_uploaded_file($input_name, $doc_path, $options, $attribute_names, $attribute_values, $layer_db){
+	function save_uploaded_file($input_name, $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db){
 		$_files = $_FILES;
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
 		if($_files[$input_name]['name'] != '' OR $this->formvars[$input_name] == 'delete'){
-			# Dateiname erzeugen
 			$name_array=explode('.',basename($_files[$input_name]['name']));
 			$datei_name=$name_array[0];
 			$datei_erweiterung=array_pop($name_array);
-			$doc_path = $mapdb->getDocument_Path($doc_path, $options, $attribute_names, $attribute_values, $layer_db);
-			$nachDatei = $doc_path.'.'.$datei_erweiterung;
-			$file_path = $nachDatei."&original_name=".$_files[$input_name]['name'];
-			if($this->formvars[$input_name] == 'delete')$file_path = '';
+			$doc_paths = $mapdb->getDocument_Path($doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db);
+			$nachDatei = $doc_paths['doc_path'].'.'.$datei_erweiterung;
+			if($doc_paths['doc_url'] != ''){
+				$db_input = $doc_paths['doc_url'].'.'.$datei_erweiterung;			# die URL zu der Datei wird gespeichert (Permalink)
+			}
+			else{
+				$db_input = $nachDatei."&original_name=".$_files[$input_name]['name'];			# absoluter Dateipfad wird gespeichert
+			}
+			if($this->formvars[$input_name] == 'delete')$db_input = '';
 			# Bild in das Datenverzeichnis kopieren
 			if(move_uploaded_file($_files[$input_name]['tmp_name'],$nachDatei) OR $this->formvars[$input_name] == 'delete'){
 				# Wenn eine alte Datei existiert, die nicht so heißt wie die neue --> löschen
 				$old = $this->formvars[$input_name.'_alt'];
-				if ($old != '' AND $old != $file_path) {
-					$this->deleteDokument($old);
+				if ($old != '' AND $old != $db_input) {
+					$this->deleteDokument($old, $doc_path, $doc_url);
 				}
 			}
 			else {
 				echo '<br>Datei: '.$_files[$input_name]['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
 			}
-			return $file_path;
+			return $db_input;
 		}
 	}
 
@@ -13088,6 +13104,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
               for($k = 0; $k < count($layerset[$i]['attributes']['name']); $k++){
 								$layerset[$i]['shape'][$j][$layerset[$i]['attributes']['name'][$k]] = $features[$j]['value'][$layerset[$i]['attributes']['name'][$k]];
                 $layerset[$i]['attributes']['privileg'][$k] = 0;
+								$layerset[$i]['attributes']['visible'][$k] = true;
               }
               $layerset[$i]['shape'][$j]['wfs_geom'] = $features[$j]['geom'];
             }
@@ -13112,7 +13129,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						for($k = 0; $k < count($this->qlayerset[0]['shape']); $k++){
 							$oids[] = $this->qlayerset[0]['shape'][$k][$geometrie_tabelle.'_oid'];
 						}
-						$rect = $this->mapDB->zoomToDatasets($oids, $geometrie_tabelle, $attributes['the_geom'], 10, $layerdb, $this->qlayerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+						$rect = $this->mapDB->zoomToDatasets($oids, $geometrie_tabelle, $attributes['real_name'][$attributes['the_geom']], 10, $layerdb, $this->qlayerset[0]['epsg_code'], $this->user->rolle->epsg_code);
 						$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
 						if (MAPSERVERVERSION > 600) {
 							$this->map_scaledenom = $this->map->scaledenom;
@@ -13629,13 +13646,21 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 									$dokumentpfad = $layer['shape'][$k][$attributes['name'][$j]];
 									$pfadteil = explode('&original_name=', $dokumentpfad);
 									$dateiname = $pfadteil[0];
+									if($layer['document_url'] != '')$dateiname = url2filepath($dateiname, $layer['document_path'], $layer['document_url']);
+									$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
 									$original_name = $pfadteil[1];
 									$dateinamensteil=explode('.', $dateiname);
 									$type = $dateinamensteil[1];
 									$thumbname = $this->get_dokument_vorschau($dateinamensteil);
-									$this->allowed_documents[] = addslashes($dateiname);
-									$this->allowed_documents[] = addslashes($thumbname);
-									$url = IMAGEURL.$this->document_loader_name.'?dokument=';
+									if($layer['document_url'] != ''){
+										$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
+										$url = '';
+									}
+									else{
+										$this->allowed_documents[] = addslashes($dateiname);
+										$this->allowed_documents[] = addslashes($thumbname);
+										$url = IMAGEURL.$this->document_loader_name.'?dokument=';
+									}
 									$pictures .= '| '.$url.$thumbname;
 				        }break;
 				        case 'Link': {
@@ -14742,8 +14767,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       }
     }
     else {
-      $FlurFormObj=new FormObject("FlurID","text","","","","25","25","multiple",NULL);
-      $FlstNrFormObj=new FormObject("FlstNr","text","","","","5","5","multiple",NULL);
+      $FlurFormObj=new FormObject("FlurID","text","","","","5","5","multiple",NULL);
+      $FlstNrFormObj=new FormObject("FlstNr","text","","","","20","20","multiple",NULL);
     }
     $this->FormObject["Gemeinden"]=$GemFormObj;
     $this->FormObject["Gemarkungen"]=$GemkgFormObj;
@@ -15090,6 +15115,8 @@ class db_mapObj{
 			if($rs['maxscale'] > 0)$rs['maxscale'] = $rs['maxscale']+0.3;
 			if($rs['minscale'] > 0)$rs['minscale'] = $rs['minscale']-0.3;
 			$layer['list'][$i]=$rs;
+			$layer['list'][$i]['required'] =& $requires_layer[$rs['Layer_ID']];		# Pointer auf requires-Array
+			if($rs['requires'] != '')$requires_layer[$rs['requires']][] = $rs['Layer_ID'];		# requires-Array füllen
 			$layer['layer_ids'][$rs['Layer_ID']] =& $layer['list'][$i];		# damit man mit einer Layer-ID als Schlüssel auf dieses Array zugreifen kann
 			$i++;
     }
@@ -15497,27 +15524,30 @@ class db_mapObj{
     return $pfad;
   }
 
-  function getDocument_Path($doc_path, $option, $attributenames, $attributevalues, $layerdb){
+  function getDocument_Path($doc_path, $doc_url, $dynamic_path_sql, $attributenames, $attributevalues, $layerdb){
 		// diese Funktion liefert den Pfad des Dokuments, welches hochgeladen werden soll (absoluter Pfad mit Dateiname ohne Dateiendung)
+		// sowie die URL des Dokuments, falls eine verwendet werden soll
     if($doc_path == '')$doc_path = CUSTOM_IMAGE_PATH;
-		if(strtolower(substr($option, 0, 6)) == 'select'){		// ist im Optionenfeld eine SQL-Abfrage definiert, diese ausführen und mit dem Ergebnis den Dokumentenpfad erweitern
-			$sql = $option;
+		if(strtolower(substr($dynamic_path_sql, 0, 6)) == 'select'){		// ist im Optionenfeld eine SQL-Abfrage definiert, diese ausführen und mit dem Ergebnis den Dokumentenpfad erweitern
+			$sql = $dynamic_path_sql;
 			for($a = 0; $a < count($attributenames); $a++){
 				if($attributenames[$a] != '')$sql = str_replace('$'.$attributenames[$a], $attributevalues[$a], $sql);
 			}
 			$ret = $layerdb->execSQL($sql,4, 1);
 			$dynamic_path = pg_fetch_row($ret[1]);
 			$doc_path .= $dynamic_path[0];		// der ganze Pfad mit Dateiname ohne Endung
+			if($doc_url)$doc_url = $doc_url.$dynamic_path[0];
 			$path_parts = explode('/', $doc_path);
 			array_pop($path_parts);
 			$new_path = implode('/', $path_parts);		// der evtl. neu anzulegende Pfad ohne Datei
 			@mkdir($new_path, 0777, true);
 		}
 		else{
-			$currenttime = date('Y-m-d_H_i_s',time());			// andernfalls werden keine weiteren Unterordner generiert und der Dateiname aus Zeitstempel und Zufallszahl zusammengesetzt
-      $doc_path .= $currenttime.'-'.rand(100000, 999999);
+			$filename = date('Y-m-d_H_i_s',time()).'-'.rand(100000, 999999);			// andernfalls werden keine weiteren Unterordner generiert und der Dateiname aus Zeitstempel und Zufallszahl zusammengesetzt
+      $doc_path .= $filename;
+			if($doc_url)$doc_url = $doc_url .= $filename;
 		}
-    return $doc_path;
+    return array('doc_path' => $doc_path, 'doc_url' => $doc_url);
   }
 
 	function getlayerdatabase($layer_id, $host){
@@ -16308,6 +16338,7 @@ class db_mapObj{
     $sql .= "Data = '".$formvars['Data']."', ";
     $sql .= "`schema` = '".$formvars['schema']."', ";
     $sql .= "document_path = '".$formvars['document_path']."', ";
+		$sql .= "document_url = '".$formvars['document_url']."', ";
     $sql .= "tileindex = '".$formvars['tileindex']."', ";
     $sql .= "tileitem = '".$formvars['tileitem']."', ";
     $sql .= "labelangleitem = '".$formvars['labelangleitem']."', ";
@@ -16389,7 +16420,7 @@ class db_mapObj{
 					$sql .= "`Name_".$language."`, ";
 				}
 			}
-			$sql.="`alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `printconnection`, `connectiontype`, `classitem`, `classification`, `filteritem`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `status`, `trigger_function`, `sync`, `listed`) VALUES(";
+			$sql.="`alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `document_url`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `printconnection`, `connectiontype`, `classitem`, `classification`, `filteritem`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `status`, `trigger_function`, `sync`, `listed`) VALUES(";
       if($formvars['id'] != ''){
         $sql.="'".$formvars['id']."', ";
       }
@@ -16426,12 +16457,10 @@ class db_mapObj{
       else{
         $sql .= "'".$formvars['schema']."', ";
       }
-      if($formvars['document_path'] == ''){
-        $sql .= "NULL, ";
-      }
-      else{
-        $sql .= "'".$formvars['document_path']."', ";
-      }
+      if($formvars['document_path'] == '')$sql .= "NULL, ";
+      else $sql .= "'".$formvars['document_path']."', ";
+			if($formvars['document_url'] == '')$sql .= "NULL, ";
+      else $sql .= "'".$formvars['document_url']."', ";
       $sql .= "'".$formvars['tileindex']."', ";
       $sql .= "'".$formvars['tileitem']."', ";
       $sql .= "'".$formvars['labelangleitem']."', ";

@@ -97,7 +97,7 @@ function resizemap2window(){
 * @param array or string messages contain the messages as array
 * or as a single string
 */
-function message(messages, t_hide = 3000, t_hidden = 3000, top = '20%') {
+function message(messages, t_hide = 1000, t_hidden = 3000, top = '20%') {
 	var msgDiv = $("#message_box");
 
 	if (msgDiv.is(':visible')) {
@@ -149,7 +149,6 @@ function message(messages, t_hide = 3000, t_hidden = 3000, top = '20%') {
 		if (types[msg.type].confirm) {
 			// if no confirm box allready than set it now
 			if (!msgDiv.hasClass('confirm-box')) {
-				console.log('set class confirm-box');
 				msgDiv.append('<input type="button" onclick="$(\'#message_box\').html(\'\').hide(); " value="ok" style="margin-top: 10px; margin-bottom: 10px">');
 				msgDiv.addClass('confirm-box');
 			}
@@ -162,8 +161,6 @@ function message(messages, t_hide = 3000, t_hidden = 3000, top = '20%') {
 
 	if (!msgDiv.hasClass('confirm-box')) {
 		msgDiv.fadeOut(t_hide);
-//		setTimeout(function() {msgDiv.attr('class', 'message_box_hide');}, t_hide);
-//		setTimeout(function() {msgDiv.html('').attr('class', 'message_box_hidden');}, t_hidden);		// hier bitte kein FadeOut machen, sondern mit den Klassen arbeiten
 	}
 }
 

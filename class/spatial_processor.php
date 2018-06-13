@@ -568,7 +568,7 @@ class spatial_processor {
 	   
 	   			   
 	 			if($fromwhere != ''){
-					if($singlegeom == 'true')$fromwhere = str_replace($columnname, '(st_dump('.$columnname.')).geom as the_geom', $fromwhere);		# Einzelgeometrien abfragen
+					if($singlegeom == 'true')$fromwhere = preg_replace('/ ([a-z_]*\.)?'.$columnname.'/', ' (st_dump($0)).geom as the_geom', $fromwhere);		# Einzelgeometrien abfragen
 					if(!$punktuell)$columnname = "st_union(".$columnname.")";			# bei punktueller Abfrage wird immer nur eine Objektgeometrie geholt, bei Rechteck-Abfrage die Vereinigung aller getroffenen Geometrien
 	 				if ($client_epsg!=$layer_epsg) {
 		        $sql = "SELECT st_astext(st_transform(".$columnname.",".$client_epsg.")) AS geomwkt ".$fromwhere." ".$sql_where;

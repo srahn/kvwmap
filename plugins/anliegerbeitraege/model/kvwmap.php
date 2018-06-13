@@ -41,12 +41,11 @@
     else{
       $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
       $GUI->formvars['layer_id'] = $layerset[0]['Layer_ID'];
-    }
-
-    $GUI->saveMap('');
+    }    
     $currenttime=date('Y-m-d H:i:s',time());
     $GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
     $GUI->drawMap();
+		$GUI->saveMap('');
     $GUI->output();
   };
 
