@@ -64,6 +64,10 @@ $BODY$
 
 DROP TRIGGER IF EXISTS update_konvertierung_state ON xplankonverter.regeln;
 DROP TRIGGER IF EXISTS update_konvertierung_state ON xplan_gml.xp_plan;
+DROP TRIGGER IF EXISTS update_konvertierung_state ON xplan_gml.bp_plan;
+DROP TRIGGER IF EXISTS update_konvertierung_state ON xplan_gml.fp_plan;
+DROP TRIGGER IF EXISTS update_konvertierung_state ON xplan_gml.so_plan;
+DROP TRIGGER IF EXISTS update_konvertierung_state ON xplan_gml.rp_plan;
 
 CREATE TRIGGER update_konvertierung_state AFTER INSERT OR UPDATE OR DELETE ON xplan_gml.bp_plan FOR EACH ROW EXECUTE PROCEDURE xplankonverter.update_konvertierung_state();
 CREATE TRIGGER update_konvertierung_state AFTER INSERT OR UPDATE OR DELETE ON xplan_gml.fp_plan FOR EACH ROW EXECUTE PROCEDURE xplankonverter.update_konvertierung_state();
