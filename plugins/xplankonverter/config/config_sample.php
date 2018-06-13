@@ -17,6 +17,8 @@
 
 	define('XPLANKONVERTER_CONTENT_SCHEMA', 'xplan_gml');
 
+	define('XPLANKONVERTER_INSPIRE_KONVERTER', false);
+
 	// Konstanten fuer GML-Builder
 	// XML-namespace
 	define('XPLAN_NS_PREFIX', 'xplan');

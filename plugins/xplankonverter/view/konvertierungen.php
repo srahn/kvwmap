@@ -5,7 +5,7 @@
 	$('#gui-table').css('width', '100%');
 	$(function () {
 		result = $('#eventsResult');
-		result.success = function(text){
+		result.success = function(text) {
 			message([{ type: 'notice', msg: text}], 3000, 3000, '13%');
 /*			result.text(text);
 			result.removeClass('alert-danger');
@@ -251,11 +251,13 @@
 		funcIsInProgress = row.status == "<?php echo Konvertierung::$STATUS['IN_GML_ERSTELLUNG']; ?>";
 		output += '<a title="XPlan-GML-Datei erzeugen" class="btn btn-link btn-xs xpk-func-btn xpk-func-generate-gml' + (funcIsAllowed ? '' : disableFrag) + '" href="#"><i class="' + (funcIsInProgress ? 'btn-link fa fa-spinner fa-pulse fa-fw' : 'btn-link fa fa-lg fa-code') + '"></i></a>';
 
-		// INSPIRE-Erstellung
-		funcIsAllowed = row.status == "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_OK']; ?>"
-									|| row.status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK']; ?>";
-		funcIsInProgress = row.status == "<?php echo Konvertierung::$STATUS['IN_INSPIRE_GML_ERSTELLUNG']; ?>";
-		output += '<a title="INSPIRE-GML-Datei erzeugen" class="btn btn-link btn-xs xpk-func-btn xpk-func-generate-inspire-gml' + (funcIsAllowed ? '' : disableFrag) + '" href="#"><i class="' + (funcIsInProgress ? 'btn-link fa fa-spinner fa-pulse fa-fw' : 'btn-link fa fa-lg fa-globe') + '"></i></a>';
+		if (<?php echo ((defined('XPLANKONVERTER_INSPIRE_KONVERTER') AND !XPLANKONVERTER_INSPIRE_KONVERTER) ? 'false' : 'true'); ?>) {
+			// INSPIRE-Erstellung
+			funcIsAllowed = row.status == "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_OK']; ?>"
+										|| row.status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK']; ?>";
+			funcIsInProgress = row.status == "<?php echo Konvertierung::$STATUS['IN_INSPIRE_GML_ERSTELLUNG']; ?>";
+			output += '<a title="INSPIRE-GML-Datei erzeugen" class="btn btn-link btn-xs xpk-func-btn xpk-func-generate-inspire-gml' + (funcIsAllowed ? '' : disableFrag) + '" href="#"><i class="' + (funcIsInProgress ? 'btn-link fa fa-spinner fa-pulse fa-fw' : 'btn-link fa fa-lg fa-globe') + '"></i></a>';
+		}
 
 		// Konvertierung Löschen
     funcIsAllowed = row.status == "<?php echo Konvertierung::$STATUS['IN_ERSTELLUNG'     ]; ?>"
@@ -298,7 +300,7 @@
 		funcIsAllowed =  row.status == "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_OK'         ]; ?>"
 	                || row.status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']; ?>"
 	                || row.status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
-		output += '<a title="XPlanung-GML" class="btn btn-link btn-xs xpk-func-btn xpk-func-download-gml' + (funcIsAllowed ? '' : disableFrag) + '" href="index.php?go=xplankonverter_download_xplan_gml&konvertierung_id=' + value + '" download="xplan_gml.gml"><i class="btn-link fa fa-lg fa-file-excel-o" style="color: red;"></i></a>';
+		output += '<a title="XPlanung-GML" class="btn btn-link btn-xs xpk-func-btn xpk-func-download-gml' + (funcIsAllowed ? '' : disableFrag) + '" href="index.php?go=xplankonverter_download_xplan_gml&konvertierung_id=' + value + '"><i class="btn-link fa fa-lg fa-file-excel-o" style="color: red;"></i></a>';
 
 		// GML-Erzeugen
 		funcIsAllowed =  row.status == "<?php echo Konvertierung::$STATUS['KONVERTIERUNG_OK'          ]; ?>"
@@ -307,9 +309,11 @@
 		              || row.status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
 	output += '<a title="XPlanung-Shapes" class="btn btn-link btn-xs xpk-func-btn xpk-func-download-gml' + (funcIsAllowed ? '' : disableFrag) + '" href="index.php?go=xplankonverter_download_xplan_shapes&konvertierung_id=' + value + '"><i class="btn-link fa fa-lg fa-file-picture-o" style="color: red;"></i></a>';
 
-		 // INSPIRE-GML
-		funcIsAllowed = row.status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK']; ?>";
-		output += '<a title="INSPIRE-GML" class="btn btn-link btn-xs xpk-func-btn xpk-func-download-inspire-gml' + (funcIsAllowed ? '' : disableFrag) + '" href="index.php?go=xplankonverter_download_inspire_gml&konvertierung_id=' + value + '" download="inspire_gml.gml"><i class="btn-link fa fa-lg fa-file-code-o" style="color: blue;"></i></a>';
+		if (<?php echo ((defined('XPLANKONVERTER_INSPIRE_KONVERTER') AND !XPLANKONVERTER_INSPIRE_KONVERTER) ? 'false' : 'true'); ?>) {
+			// INSPIRE-GML
+			funcIsAllowed = row.status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK']; ?>";
+			output += '<a title="INSPIRE-GML" class="btn btn-link btn-xs xpk-func-btn xpk-func-download-inspire-gml' + (funcIsAllowed ? '' : disableFrag) + '" href="index.php?go=xplankonverter_download_inspire_gml&konvertierung_id=' + value + '" download="inspire_gml.gml"><i class="btn-link fa fa-lg fa-file-code-o" style="color: blue;"></i></a>';
+		}
 
 		output += '</span>';
 		return output;
@@ -350,7 +354,7 @@
 	data-sort-name="bezeichnung"
 	data-sort-order="asc"
 	data-search="true"
-	data-show-export="true"
+	data-show-export="false"
 	data-show-refresh="false"
 	data-show-toggle="false"
 	data-show-columns="true"
@@ -370,6 +374,12 @@
 				data-visible="false"
 				data-switchable="true"
 			>Konvertierung Id</th>
+			<th
+				data-field="stelle_id"
+				data-sortable="true"
+				data-visible="false"
+				data-switchable="true"
+			>Stelle Id</th>
 			<th
 				data-field="planart"
 				data-sortable="true"
@@ -397,14 +407,14 @@
 				data-visible="true"
 				data-formatter="konvertierungFunctionsFormatter"
 				data-switchable="false"
-				class="col-md-4"
+				class="col-md-2"
 			>Funktionen</th>
 			<th
 				data-field="konvertierung_id"
 				data-visible="true"
 				data-formatter="konvertierungDownloadsFormatter"
 				data-switchable="false"
-				class="col-md-3"
+				class="col-md-2"
 			>Downloads</th>
 		</tr>
 	</thead>

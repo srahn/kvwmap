@@ -407,6 +407,32 @@ class Validierung extends PgObject {
 		$this->debug->show('<br>Validiere ob Geometrien in Bereich. (ToDo: Noch zu implementieren)', Validierung::$write_debug);
 	}
 
+	function detaillierte_requires_bedeutung($bereich) {
+		$success = true;
+		if ($bereich->get('detailliertebeschreibung') == '') {
+			$msg = 'Im Bereich ' . $bereich->get('nummer') . ' wurde keine detaillierte Bedeutung angegeben, deswegen muss auch keine Bedeutung angegeben werden.';
+		}
+		else {
+			if ($bereich->get('bedeutung') == '') {
+				$success = false;
+				$msg = 'Da im Bereich ' . $bereich->get('nummer') . ' eine detaillierte Bedeutung angegeben wurde, muss auch eine Bedeutung angegeben werden.';
+			}
+			else {
+				$msg = 'Zur angegebenen detaillierten Bedeutung im Bereich ' . $bereich->get('nummer') . ' wurde auch eine Bedeutung angegeben.';
+			}
+		}
+		$validierungsergebnis = new Validierungsergebnis($this->gui);
+		$validierungsergebnis->create(
+			array(
+				'konvertierung_id' => $this->konvertierung_id,
+				'validierung_id' => $this->get('id'),
+				'status' => ($success ? 'Erfolg' : 'Fehler'),
+				'msg' => $msg
+			)
+		);
+		return $success;
+	}
+
   function doValidate($konvertierung) {
     // validate here
     if (true)

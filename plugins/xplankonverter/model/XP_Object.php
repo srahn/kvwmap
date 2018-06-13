@@ -1,14 +1,14 @@
 <?php
 #############################
-# Klasse RP_Object #
+# Klasse XP_Object #
 #############################
 
-class RP_Object extends PgObject {
+class XP_Object extends PgObject {
 
 	static $schema = 'xplan_gml';
 
-	function RP_Object($konvertierung, $class_name) {
-		$this->PgObject($konvertierung->gui, RP_Object::$schema, strtolower($class_name));
+	function XP_Object($konvertierung, $class_name) {
+		$this->PgObject($konvertierung->gui, XP_Object::$schema, strtolower($class_name));
 		$this->class_name = $class_name;
 		$this->konvertierung = $konvertierung;
 		$this->identifier = 'gml_id';

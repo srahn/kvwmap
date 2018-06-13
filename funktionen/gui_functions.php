@@ -99,6 +99,14 @@ function resizemap2window(){
 */
 function message(messages, t_hide = 3000, t_hidden = 3000, top = '20%') {
 	var msgDiv = $("#message_box");
+
+	if (msgDiv.is(':visible')) {
+		msgDiv.stop().css('opacity', '1').show();
+	}
+	else {
+		msgDiv.html('')
+	}
+
 	msgDiv.css('top', top);
 	types = {
 		'notice': {
@@ -125,8 +133,8 @@ function message(messages, t_hide = 3000, t_hidden = 3000, top = '20%') {
 			'color': 'red',
 			'confirm': true
 		}
-	},
-	confirmMsgDiv = false;
+	};
+	//	,confirmMsgDiv = false;
 
 	if (!$.isArray(messages)) {
 		messages = [{
@@ -135,25 +143,27 @@ function message(messages, t_hide = 3000, t_hidden = 3000, top = '20%') {
 		}];
 	}
 
-	msgDiv.html('');
-
 	$.each(messages, function (index, msg) {
 		msg.type = (['notice', 'info', 'error'].indexOf(msg.type) > -1 ? msg.type : 'warning');
 		msgDiv.append('<div class="message-box-' + msg.type + '">' + (types[msg.type].icon ? '<div class="message-box-type"><i class="fa ' + types[msg.type].icon + '" style="color: ' + types[msg.type].color + '; cursor: default;"></i></div>' : '') + '<div class="message-box-msg">' + msg.msg + '</div><div style="clear: both"></div></div>');
 		if (types[msg.type].confirm) {
-			confirmMsgDiv = true;
+			// if no confirm box allready than set it now
+			if (!msgDiv.hasClass('confirm-box')) {
+				console.log('set class confirm-box');
+				msgDiv.append('<input type="button" onclick="$(\'#message_box\').html(\'\').hide(); " value="ok" style="margin-top: 10px; margin-bottom: 10px">');
+				msgDiv.addClass('confirm-box');
+			}
 		}
 	});
 
-	msgDiv.attr('class', 'message_box');
-
-	if (!confirmMsgDiv) {
-		msgDiv.fadeOut(t_hide);
-		setTimeout(function() {msgDiv.addClass('message_box_hide');}, t_hide);
-		setTimeout(function() {msgDiv.addClass('message_box_hidden');}, t_hidden);		// hier bitte kein FadeOut machen, sondern mit den Klassen arbeiten
+	if (msgDiv.html() != '') {
+		msgDiv.attr('class', 'message_box').show();
 	}
-	else {
-		msgDiv.append('<input type="button" onclick="$(\'#message_box\').addClass(\'message_box_hidden\');" value="ok" style="margin-top: 10px;">');
+
+	if (!msgDiv.hasClass('confirm-box')) {
+		msgDiv.fadeOut(t_hide);
+//		setTimeout(function() {msgDiv.attr('class', 'message_box_hide');}, t_hide);
+//		setTimeout(function() {msgDiv.html('').attr('class', 'message_box_hidden');}, t_hidden);		// hier bitte kein FadeOut machen, sondern mit den Klassen arbeiten
 	}
 }
 
