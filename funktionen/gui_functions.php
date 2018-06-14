@@ -97,7 +97,7 @@ function resizemap2window(){
 * @param array or string messages contain the messages as array
 * or as a single string
 */
-function message(messages, t_hide = 1000, t_hidden = 3000, top = '20%') {
+function message(messages, t_hide = 3000, t_hidden = 3000, top = '20%') {
 	var msgDiv = $("#message_box");
 
 	if (msgDiv.is(':visible')) {
@@ -147,8 +147,10 @@ function message(messages, t_hide = 1000, t_hidden = 3000, top = '20%') {
 		msg.type = (['notice', 'info', 'error'].indexOf(msg.type) > -1 ? msg.type : 'warning');
 		msgDiv.append('<div class="message-box-' + msg.type + '">' + (types[msg.type].icon ? '<div class="message-box-type"><i class="fa ' + types[msg.type].icon + '" style="color: ' + types[msg.type].color + '; cursor: default;"></i></div>' : '') + '<div class="message-box-msg">' + msg.msg + '</div><div style="clear: both"></div></div>');
 		if (types[msg.type].confirm) {
+			console.log('message has to be confirmed');
 			// if no confirm box allready than set it now
 			if (!msgDiv.hasClass('confirm-box')) {
+				console.log('set class confirm-box');
 				msgDiv.append('<input type="button" onclick="$(\'#message_box\').html(\'\').hide(); " value="ok" style="margin-top: 10px; margin-bottom: 10px">');
 				msgDiv.addClass('confirm-box');
 			}
@@ -156,7 +158,10 @@ function message(messages, t_hide = 1000, t_hidden = 3000, top = '20%') {
 	});
 
 	if (msgDiv.html() != '') {
-		msgDiv.attr('class', 'message_box').show();
+		if (!msgDiv.hasClass('message_box')) {
+			msgDiv.addClass('message_box')
+		}
+		msgDiv.show();
 	}
 
 	if (!msgDiv.hasClass('confirm-box')) {
