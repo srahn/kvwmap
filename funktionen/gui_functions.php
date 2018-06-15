@@ -97,20 +97,21 @@ function resizemap2window(){
 * @param array or string messages contain the messages as array
 * or as a single string
 */
-function message(messages, t_hide, t_hidden, top) {
+function message(messages, t_hide, t_hidden, css_top) {
 	var msgDiv = $('#message_box');
 
-	if (!t_hide) = 3000;
-	if (!t_hidden) = 3000;
-	if (!top) = '20%';
+	t_hide   = (typeof t_hide   !== 'undefined') ? t_hide   : 3000;
+	t_hidden = (typeof t_hidden !== 'undefined') ? t_hidden : 3000;
+	css_top  = (typeof css_top  !== 'undefined') ? css_top  : '20%';
+
 	if (msgDiv.is(':visible')) {
 		msgDiv.stop().css('opacity', '1').show();
 	}
 	else {
-		msgDiv.html('')
+		msgDiv.html('');
 	}
 
-	msgDiv.css('top', top);
+	msgDiv.css('top', css_top);
 	types = {
 		'notice': {
 			'description': 'Erfolg',
