@@ -97,9 +97,12 @@ function resizemap2window(){
 * @param array or string messages contain the messages as array
 * or as a single string
 */
-function message(messages, t_hide = 3000, t_hidden = 3000, top = '20%') {
-	var msgDiv = $("#message_box");
+function message(messages, t_hide, t_hidden, top) {
+	var msgDiv = $('#message_box');
 
+	if (!t_hide) = 3000;
+	if (!t_hidden) = 3000;
+	if (!top) = '20%';
 	if (msgDiv.is(':visible')) {
 		msgDiv.stop().css('opacity', '1').show();
 	}
