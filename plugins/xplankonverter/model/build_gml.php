@@ -282,10 +282,8 @@ class Gml_builder {
 				}
 				#$gmlStr .= "<note>attribut sequenznummer: " . $sequence_attr ."</note>";
 				$sequence_attr++;
-			
       // leere Felder auslassen
-      if ($gml_object[$uml_attribute['col_name']] == '') continue;
-
+      if ($gml_object[$uml_attribute['col_name']] == '' OR $gml_object[$uml_attribute['col_name']] == '{}') continue;
       #$gmlStr .= '<note>attributname: ' . $uml_attribute['name'] . ' type_type: ' . $uml_attribute['type_type'] . ' stereotype: ' . $uml_attribute['stereotype'] . '</note>';
       switch ($uml_attribute['type_type']) {
         case 'c': // custom datatype
@@ -384,7 +382,7 @@ class Gml_builder {
 								for ($j = 0; $j < count($gml_value_array); $j++) {
 									$timestamp = strtotime($gml_value_array[$j]);
 									if (!$timestamp) {
-										echo "Ungueltige Datumsangabe: " . $gml_value_array[$j];
+										echo "Ungueltige Datumsangabe im Attribut " . $uml_attribute['col_name'] . ": " . $gml_value_array[$j];
 										break;
 									}
 									$iso_date_str = date("Y-m-d", $timestamp);
@@ -393,7 +391,7 @@ class Gml_builder {
 							} else {
 								$timestamp = strtotime($gml_value);
 								if (!$timestamp) {
-									echo "Ungueltige Datumsangabe: " . $gml_value;
+									echo "Ungueltige Datumsangabe im Attribut " . $uml_attribute['col_name'] . ": " . $gml_value;
 									break;
 								}
 								$iso_date_str = date("Y-m-d", $timestamp);

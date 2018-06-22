@@ -5,7 +5,7 @@
 	* Trigger für Konvertierungen
 	*/
 	$this->trigger_functions['handle_konvertierung'] = function($fired, $event, $layer = '', $oid = 0, $old_dataset = array()) use ($GUI) {
-		#echo '<br>Handle Konvertierungen trigger ';
+		#echo '<br>Handle Konvertierungen trigger mit fired: ' . $fired . ' event: ' . $event . ' layer: ' . print_r($layer, true) . ' oid: ' . $oid;
 		$executed = true;
 		$success = true;
 

@@ -465,7 +465,7 @@ class Konvertierung extends PgObject {
 	* löscht sich am Ende selbst.
 	*/
 	function destroy() {
-		# Lösche gml-Datei
+		$this->debug->show('Lösche gml-Datei', Konvertierung::$write_debug);
 		$gml_file = new gml_file($this->get_file_name('xplan_gml'));
 		if ($gml_file->exists()) {
 			$msg = "\nLösche gml file: ". $gml_file->filename;
@@ -487,7 +487,7 @@ class Konvertierung extends PgObject {
 		# Lösche Plan der Konvertierung
 		if ($this->plan) {
 			$msg .= "\n " . $this->plan->umlName . ' ' . $this->plan->get('name') . ' gelöscht.';
-			$plan->destroy();
+			$this->plan->destroy();
 		}
 
 		# Lösche GML-Layer Gruppe
