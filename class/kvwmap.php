@@ -7935,6 +7935,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						}
 					}
         }
+
         # Hier nach der Abfrage der Sachdaten die weiteren Attributinformationen hinzufügen
         # Steht an dieser Stelle, weil die Auswahlmöglichkeiten von Auswahlfeldern abhängig sein können
         $attributes = $mapDB->add_attribute_values($attributes, $layerdb, $layerset[0]['shape'], true, $this->Stelle->id);
@@ -16582,40 +16583,62 @@ class db_mapObj{
     return mysql_insert_id();
   }
 
-  function save_datatype_attributes($attributes, $database, $formvars){
+	function save_datatype_attributes($attributes, $database, $formvars){
 		global $supportedLanguages;
-    for($i = 0; $i < count($attributes['name']); $i++){
-      $sql = 'INSERT INTO datatype_attributes SET ';
-      $sql.= 'datatype_id = '.$formvars['selected_datatype_id'].', ';
-      $sql.= 'name = "'.$attributes['name'][$i].'", ';
-      $sql.= 'form_element_type = "'.$formvars['form_element_'.$attributes['name'][$i]].'", ';
-      $sql.= "options = '".$formvars['options_'.$attributes['name'][$i]]."', ";
-      $sql.= 'tooltip = "'.$formvars['tooltip_'.$attributes['name'][$i]].'", ';
-      $sql.= '`group` = "'.$formvars['group_'.$attributes['name'][$i]].'", ';
-			if($formvars['raster_visibility_'.$attributes['name'][$i]] == '')$formvars['raster_visibility_'.$attributes['name'][$i]] = 'NULL';
-      $sql.= 'raster_visibility = '.$formvars['raster_visibility_'.$attributes['name'][$i]].', ';
-      if($formvars['mandatory_'.$attributes['name'][$i]] == '')$formvars['mandatory_'.$attributes['name'][$i]] = 'NULL';
-      $sql.= 'mandatory = '.$formvars['mandatory_'.$attributes['name'][$i]].', ';
-      $sql.= 'alias = "'.$formvars['alias_'.$attributes['name'][$i]].'", ';
-			foreach($supportedLanguages as $language){
-				if($language != 'german'){
-					$sql.= '`alias_'.$language.'` = "'.$formvars['alias_'.$language.'_'.$attributes['name'][$i]].'", ';
-				}
+		$language_columns = array();
+
+		foreach ($supportedLanguages as $language){
+			if ($language != 'german') {
+				$language_columns[] = "`alias_" . $language . "` = '" . $formvars['alias_' . $language . '_' . $attributes['name'][$i]] . "'";
 			}
-			if($formvars['quicksearch_'.$attributes['name'][$i]] == '')$formvars['quicksearch_'.$attributes['name'][$i]] = 'NULL';
-			$sql.= 'quicksearch = '.$formvars['quicksearch_'.$attributes['name'][$i]];
-      $sql.= " ON DUPLICATE KEY UPDATE name = '".$attributes['name'][$i]."', form_element_type = '".$formvars['form_element_'.$attributes['name'][$i]]."', options = '".$formvars['options_'.$attributes['name'][$i]]."', tooltip = '".$formvars['tooltip_'.$attributes['name'][$i]]."', `group` = '".$formvars['group_'.$attributes['name'][$i]]."', alias = '".$formvars['alias_'.$attributes['name'][$i]]."', ";
-			foreach($supportedLanguages as $language){
-				if($language != 'german'){
-					$sql.= '`alias_'.$language.'` = "'.$formvars['alias_'.$language.'_'.$attributes['name'][$i]].'", ';
-				}
+		}
+		$language_columns = (count($language_columns) > 0 ? implode(',
+					', $language_columns) . ',' : '');
+
+		for ($i = 0; $i < count($attributes['name']); $i++) {
+			$sql = "
+				INSERT INTO
+					datatype_attributes
+				SET
+					`datatype_id` = " . $formvars['selected_datatype_id'] . ",
+					" . $language_columns . "
+					`name` = '" . $attributes['name'][$i] . "',
+					`form_element_type` = '" . $formvars['form_element_' . $attributes['name'][$i]] . "',
+					`options` = '" . $formvars['options_' . $attributes['name'][$i]] . "',
+					`tooltip` = '" . $formvars['tooltip_' . $attributes['name'][$i]] . "',
+					`alias` = '" . $formvars['alias_'.$attributes['name'][$i]] . "',
+					`group` = '" . $formvars['group_' . $attributes['name'][$i]] . "',
+					`raster_visibility` = " . ($formvars['raster_visibility_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['raster_visibility_' . $attributes['name'][$i]]) . ",
+					`mandatory` = " . ($formvars['mandatory_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['mandatory_' . $attributes['name'][$i]]) . ",
+					`quicksearch` = " . ($formvars['quicksearch_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['quicksearch_' . $attributes['name'][$i]]) . ",
+					`visible` = " . ($formvars['visible_' . $attributes['name'][$i]] == '' ? "0" : $formvars['visible_' . $attributes['name'][$i]]) . ",
+					`arrangement` = " . ($formvars['arrangement_' . $attributes['name'][$i]] == '' ? "0" : $formvars['arrangement_' . $attributes['name'][$i]]) . ",
+					`labeling` = " . ($formvars['labeling_' . $attributes['name'][$i]] == '' ? "0" : $formvars['labeling_' . $attributes['name'][$i]]) . "
+				ON DUPLICATE KEY UPDATE
+					" . $language_columns . "
+					`name` = '" . $attributes['name'][$i] . "',
+					`form_element_type` = '" . $formvars['form_element_' . $attributes['name'][$i]] . "',
+					`options` = '" . $formvars['options_' . $attributes['name'][$i]] . "',
+					`tooltip` = '" . $formvars['tooltip_' . $attributes['name'][$i]] . "',
+					`alias` = '" . $formvars['alias_'.$attributes['name'][$i]] . "',
+					`group` = '" . $formvars['group_' . $attributes['name'][$i]] . "',
+					`raster_visibility` = " . ($formvars['raster_visibility_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['raster_visibility_' . $attributes['name'][$i]]) . ",
+					`mandatory` = " . ($formvars['mandatory_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['mandatory_' . $attributes['name'][$i]]) . ",
+					`quicksearch` = " . ($formvars['quicksearch_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['quicksearch_' . $attributes['name'][$i]]) . ",
+					`visible` = " . ($formvars['visible_' . $attributes['name'][$i]] == '' ? "0" : $formvars['visible_' . $attributes['name'][$i]]) . ",
+					`arrangement` = " . ($formvars['arrangement_' . $attributes['name'][$i]] == '' ? "0" : $formvars['arrangement_' . $attributes['name'][$i]]) . ",
+					`labeling` = " . ($formvars['labeling_' . $attributes['name'][$i]] == '' ? "0" : $formvars['labeling_' . $attributes['name'][$i]]) . "
+			";
+			#echo '<br>Save datatype Sql: ' . $sql;
+			$this->debug->write("<p>file:kvwmap class:Document->save_datatype_attributes :", 4);
+			$ret = $database->execSQL($sql, 4, 1);
+			if ($ret[0]) {
+				$msg = 'Fehler beim Speichern der Datentypeinstellungen:<br>' . $ret[1];
+				$this->debug->write('<p>file:kvwmap class:Document->save_datatype_attributes: ' . $msg, 4);
+				$this->GUI->add_message('error', $msg);
 			}
-			$sql.= ' raster_visibility = '.$formvars['raster_visibility_'.$attributes['name'][$i]].', mandatory = '.$formvars['mandatory_'.$attributes['name'][$i]].' , quicksearch = '.$formvars['quicksearch_'.$attributes['name'][$i]];
-			#echo '<br>' . $sql;
-      $this->debug->write("<p>file:kvwmap class:Document->save_datatype_attributes :",4);
-      $database->execSQL($sql,4, 1);
-    }
-  }
+		}
+	}
 
 	function save_layer_attributes($attributes, $database, $formvars){
 		global $supportedLanguages;
@@ -16680,25 +16703,72 @@ class db_mapObj{
 
   function read_datatype_attributes($datatype_id, $datatypedb, $attributenames, $all_languages = false, $recursive = false){
 		global $language;
-		if($attributenames != NULL){
-			$einschr = ' AND a.name IN (\'';
-			$einschr.= implode('\', \'', $attributenames);
-			$einschr.= '\')';
+
+		$alias_column = (
+			(!$all_languages AND $language != 'german') ?
+			"
+				CASE
+					WHEN `alias_" . $language. "` != '' THEN `alias_" . $language . "`
+					ELSE `alias`
+				END AS alias
+			" :
+			"
+				`alias`
+			"
+		);
+
+		if ($attributenames != NULL) {
+			$einschr = " AND a.name IN ('" . implode("', '", $attributenames) . "')";
 		}
-		$sql = 'SELECT ';
-		if(!$all_languages AND $language != 'german') {
-			$sql.='CASE WHEN `alias_'.$language.'` != "" THEN `alias_'.$language.'` ELSE `alias` END AS ';
-		}
-		$sql.='alias, `alias_low-german`, alias_english, alias_polish, alias_vietnamese, datatype_id, a.name, real_name, tablename, table_alias_name, type, d.name as typename, geometrytype, constraints, nullable, length, decimal_length, `default`, form_element_type, options, tooltip, `group`, raster_visibility, mandatory, quicksearch, `order`, privileg, query_tooltip ';
-		$sql.='FROM datatype_attributes as a ';
-		$sql.='LEFT JOIN datatypes as d ON d.id = REPLACE(type, \'_\', \'\') ';
-		$sql.='WHERE datatype_id = '.$datatype_id.$einschr.' ORDER BY `order`';
+
+		$sql = "
+			SELECT " .
+				$alias_column . ", `alias_low-german`, `alias_english`, `alias_polish`, `alias_vietnamese`,
+				`datatype_id`,
+				a.`name`,
+				`real_name`,
+				`tablename`,
+				`table_alias_name`,
+				`type`,
+				d.`name` as typename,
+				`geometrytype`,
+				`constraints`,
+				`nullable`,
+				`length`,
+				`decimal_length`,
+				`default`,
+				`form_element_type`,
+				`options`,
+				`tooltip`,
+				`group`,
+				`raster_visibility`,
+				`mandatory`,
+				`quicksearch`,
+				`order`,
+				`privileg`,
+				`query_tooltip`,
+				`visible`,
+				`arrangement`,
+				`labeling`
+			FROM
+				`datatype_attributes` as a LEFT JOIN
+				`datatypes` as d ON d.`id` = REPLACE(`type`, '_', '')
+			WHERE
+				`datatype_id` = " . $datatype_id .
+				$einschr . "
+			ORDER BY
+				`order`
+		";
+		/* Attributes die fehlen im Vergleich zu layer_attributes
+		`dont_use_for_new`
+		*/
+		#echo '<br>Sql read_datatype_attributes: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_datatype_attributes:<br>".$sql,4);
 		$query=mysql_query($sql);
 		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
 		$i = 0;
-		while($rs=mysql_fetch_array($query)){
-			$attributes['name'][$i]= $rs['name'];
+		while($rs = mysql_fetch_array($query)){
+			$attributes['name'][$i] = $rs['name'];
 			$attributes['indizes'][$rs['name']] = $i;
 			$attributes['real_name'][$rs['name']]= $rs['real_name'];
 			if($rs['tablename']){
@@ -16761,6 +16831,9 @@ class db_mapObj{
 			$attributes['quicksearch'][$i]= $rs['quicksearch'];
 			$attributes['privileg'][$i]= $rs['privileg'];
 			$attributes['query_tooltip'][$i]= $rs['query_tooltip'];
+			$attributes['visible'][$i]= $rs['visible'];
+			$attributes['arrangement'][$i]= $rs['arrangement'];
+			$attributes['labeling'][$i]= $rs['labeling'];
 			$i++;
 		}
 		return $attributes;
