@@ -44,7 +44,7 @@ BEGIN
   RAISE NOTICE 'Mindestens ein Plan oder Regel ist zugeordnet: %', plan_or_regel_assigned;
   RAISE NOTICE 'Alter Konvertierungsstatus: %', old_state;
   new_state := old_state;
-  IF (plan_or_regel_assigned) THEN
+  IF (plan_assigned) THEN
     IF (old_state = 'in Erstellung') THEN
       new_state := 'erstellt';
     END IF;
@@ -71,6 +71,6 @@ CREATE TRIGGER update_konvertierung_state
   FOR EACH ROW
   EXECUTE PROCEDURE xplankonverter.update_konvertierung_state();
 	
-DROP TRIGGER update_konvertierung_state ON xplankonverter.regeln;
+DROP TRIGGER IF EXISTS update_konvertierung_state ON xplankonverter.regeln;
 
 COMMIT;

@@ -1,28 +1,31 @@
 <?php
 #############################
-# Klasse RP_Bereich #
+# Klasse XP_Bereich #
 #############################
 
-class RP_Bereich extends PgObject {
+class XP_Bereich extends PgObject {
 
   static $schema = 'xplan_gml';
-  static $tableName = 'rp_bereich';
 
-  function RP_Bereich($gui) {
-    $this->PgObject($gui, RP_Bereich::$schema, RP_Bereich::$tableName);
-    $this->rp_objekte = array();
+  function XP_Bereich($gui, $planart) {
+		$this->planart = $planart;
+		$this->planartAbk = strtolower(substr($planart, 0, 2));
+		$this->tableName = $this->planartAbk . '_bereich';
+		$this->umlName = strtoupper($this->planartAbk) . '_Bereich';
+		$this->PgObject($gui, XP_Bereich::$schema, $this->tableName);
+		$this->xp_objekte = array();
 		$this->identifier = 'gml_id';
 		$this->identifier_type = 'text';
-  }
+	}
 
 	public static	function find_by_id($gui, $by, $id) {
-		$rp_bereich = new RP_Bereich($gui);
-		$rp_bereich->find_by($by, $id);
-		return $rp_bereich;
+		$xp_bereich = new XP_Bereich($gui, $this->planart);
+		$xp_bereich->find_by($by, $id);
+		return $xp_bereich;
 	}
 
   function holeObjekte($konvertierung_id) {
-    $this->rp_objekte;
+    $this->xp_objekte;
   }
 
 	function get_regeln() {
@@ -34,7 +37,7 @@ class RP_Bereich extends PgObject {
 	}
 
 	function get_plan() {
-		$plan = new RP_Plan($this->gui);
+		$plan = new XP_Plan($this->gui, $this->planart);
 		return $plan->find_by('gml_id', $this->get('gehoertzuplan'));
 	}
 

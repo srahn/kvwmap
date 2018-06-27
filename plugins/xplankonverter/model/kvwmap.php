@@ -5,7 +5,7 @@
 	* Trigger für Konvertierungen
 	*/
 	$this->trigger_functions['handle_konvertierung'] = function($fired, $event, $layer = '', $oid = 0, $old_dataset = array()) use ($GUI) {
-		#echo '<br>Handle Konvertierungen trigger ';
+		#echo '<br>Handle Konvertierungen trigger mit fired: ' . $fired . ' event: ' . $event . ' layer: ' . print_r($layer, true) . ' oid: ' . $oid;
 		$executed = true;
 		$success = true;
 
@@ -54,7 +54,7 @@
 	};
 
 	/**
-	* Trigger für RP_Plan Objekte
+	* Trigger für XP_Plan Objekte
 	*/
 	$this->trigger_functions['handle_rp_plan'] = function($fired, $event, $layer = '', $oid = 0, $old_dataset = array()) use ($GUI) {
 		$executed = true;
@@ -64,8 +64,8 @@
 
 			case ($fired == 'AFTER' AND $event == 'INSERT') : {
 				#echo '<br>Führe ' . $fired . ' ' . $event . ' in handle_rp_plan Funktion aus.';
-				$rp_plan = RP_Plan::find_by_id($this, 'oid', $oid);
-				$konvertierung_id = $rp_plan->get('konvertierung_id');
+				$xp_plan = XP_Plan::find_by_id($this, 'oid', $oid);
+				$konvertierung_id = $xp_plan->get('konvertierung_id');
 				$konvertierung = Konvertierung::find_by_id($this, 'id', $konvertierung_id);
 				$konvertierung->set_status();
 			} break;
@@ -123,7 +123,7 @@
 				if (empty($old_dataset['konvertierung_id'])) {
 					# hole konvertierung_id ueber plan und bereich_gml_id
 					$bereich = RP_Bereich::find_by_id($this, 'gml_id', $old_dataset['bereich_gml_id']);
-					$plan = RP_Plan::find_by_id($this, 'gml_id', $bereich->get('gehoertzuplan'));
+					$plan = XP_Plan::find_by_id($this, 'gml_id', $bereich->get('gehoertzuplan'));
 					$konvertierung_id = $plan->get('konvertierung_id');
 				}
 				else {

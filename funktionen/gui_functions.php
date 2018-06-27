@@ -97,9 +97,21 @@ function resizemap2window(){
 * @param array or string messages contain the messages as array
 * or as a single string
 */
-function message(messages, t_hide = 1000, t_hidden = 3000, top = '20%') {
-	var msgDiv = $("#message_box");
-	msgDiv.css('top', top);
+function message(messages, t_hide, t_hidden, css_top) {
+	var msgDiv = $('#message_box');
+
+	t_hide   = (typeof t_hide   !== 'undefined') ? t_hide   : 3000;
+	t_hidden = (typeof t_hidden !== 'undefined') ? t_hidden : 3000;
+	css_top  = (typeof css_top  !== 'undefined') ? css_top  : '20%';
+
+	if (msgDiv.is(':visible')) {
+		msgDiv.stop().css('opacity', '1').show();
+	}
+	else {
+		msgDiv.html('');
+	}
+
+	msgDiv.css('top', css_top);
 	types = {
 		'notice': {
 			'description': 'Erfolg',
@@ -125,8 +137,8 @@ function message(messages, t_hide = 1000, t_hidden = 3000, top = '20%') {
 			'color': 'red',
 			'confirm': true
 		}
-	},
-	confirmMsgDiv = false;
+	};
+	//	,confirmMsgDiv = false;
 
 	if (!$.isArray(messages)) {
 		messages = [{
@@ -135,24 +147,29 @@ function message(messages, t_hide = 1000, t_hidden = 3000, top = '20%') {
 		}];
 	}
 
-	msgDiv.html('');
-
 	$.each(messages, function (index, msg) {
 		msg.type = (['notice', 'info', 'error'].indexOf(msg.type) > -1 ? msg.type : 'warning');
 		msgDiv.append('<div class="message-box-' + msg.type + '">' + (types[msg.type].icon ? '<div class="message-box-type"><i class="fa ' + types[msg.type].icon + '" style="color: ' + types[msg.type].color + '; cursor: default;"></i></div>' : '') + '<div class="message-box-msg">' + msg.msg + '</div><div style="clear: both"></div></div>');
 		if (types[msg.type].confirm) {
-			confirmMsgDiv = true;
+			console.log('message has to be confirmed');
+			// if no confirm box allready than set it now
+			if (!msgDiv.hasClass('confirm-box')) {
+				console.log('set class confirm-box');
+				msgDiv.append('<input type="button" onclick="$(\'#message_box\').html(\'\').hide(); " value="ok" style="margin-top: 10px; margin-bottom: 10px">');
+				msgDiv.addClass('confirm-box');
+			}
 		}
 	});
 
-	msgDiv.attr('class', 'message_box');
-
-	if (!confirmMsgDiv) {
-		setTimeout(function() {msgDiv.addClass('message_box_hide');}, t_hide);
-		setTimeout(function() {msgDiv.addClass('message_box_hidden');}, t_hidden);		// hier bitte kein FadeOut machen, sondern mit den Klassen arbeiten
+	if (msgDiv.html() != '') {
+		if (!msgDiv.hasClass('message_box')) {
+			msgDiv.addClass('message_box')
+		}
+		msgDiv.show();
 	}
-	else {
-		msgDiv.append('<input type="button" onclick="$(\'#message_box\').addClass(\'message_box_hidden\');" value="ok" style="margin-top: 10px;">');
+
+	if (!msgDiv.hasClass('confirm-box')) {
+		msgDiv.fadeOut(t_hide);
 	}
 }
 

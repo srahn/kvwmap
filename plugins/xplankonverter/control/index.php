@@ -11,9 +11,9 @@ include_once(CLASSPATH . 'Label2Class.php');
 #include_once(CLASSPATH . 'LayerGroup.php');
 include_once(CLASSPATH . 'data_import_export.php');
 include(PLUGINS . 'xplankonverter/model/gml_file.php');
-include(PLUGINS . 'xplankonverter/model/RP_Plan.php');
-include(PLUGINS . 'xplankonverter/model/RP_Bereich.php');
-include(PLUGINS . 'xplankonverter/model/RP_Object.php');
+include(PLUGINS . 'xplankonverter/model/XP_Plan.php');
+include(PLUGINS . 'xplankonverter/model/XP_Bereich.php');
+include(PLUGINS . 'xplankonverter/model/XP_Object.php');
 include(PLUGINS . 'xplankonverter/model/konvertierung.php');
 include(PLUGINS . 'xplankonverter/model/regel.php');
 include(PLUGINS . 'xplankonverter/model/shapefiles.php');
@@ -24,24 +24,26 @@ include(PLUGINS . 'xplankonverter/model/converter.php');
 
 /**
 * Anwendungsfälle
-* xplankonverter_konvertierungen_index
-* xplankonverter_shapefiles_index
-* xplankonverter_shapefiles_delete
-* xplankonverter_konvertierung
-* xplankonverter_konvertierung_status
-* xplankonverter_validierungsergebnisse
-* xplankonverter_gml_generieren
-* xplankonverter_konvertierung_loeschen
-* xplankonverter_inspire_gml_generieren
-* xplankonverter_regeleditor
-* xplankonverter_regeleditor_getxplanattributes
-* xplankonverter_regeleditor_getshapeattributes
-* xplankonverter_download_uploaded_shapes
 * xplankonverter_download_edited_shapes
-* xplankonverter_download_xplan_shapes
-* xplankonverter_download_xplan_gml
 * xplankonverter_download_inspire_gml
+* xplankonverter_download_uploaded_shapes
+* xplankonverter_download_xplan_gml
+* xplankonverter_download_xplan_shapes
+* xplankonverter_gml_generieren
+* xplankonverter_go_to_plan
+* xplankonverter_inspire_gml_generieren
+* xplankonverter_konvertierung
+* xplankonverter_konvertierungen_index
+* xplankonverter_konvertierung_loeschen
+* xplankonverter_konvertierung_status
+* xplankonverter_regeleditor
+* xplankonverter_regeleditor_getshapeattributes
+* xplankonverter_regeleditor_getxplanattributes
+* xplankonverter_shapefiles_delete
+* xplankonverter_shapefiles_index
+* xplankonverter_validierungsergebnisse
 */
+
 
 switch($go){
 
@@ -364,6 +366,16 @@ switch($go){
     echo json_encode($response);
   } break;
 
+
+	case 'xplankonverter_create_konvertierung_directories' : {
+		$konvertierung = new Konvertierung($this);
+		$konvertierungen = $konvertierung->find_where('1=1');
+		Konvertierung::$write_debug = true;
+		foreach($konvertierungen AS $k) {
+			$k->create_directories();
+		}
+	} break;
+
   case 'xplankonverter_konvertierung': {
 		if ($this->formvars['konvertierung_id'] == '') {
 			$this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
@@ -427,15 +439,13 @@ switch($go){
 				if ($this->konvertierung->get('status') == Konvertierung::$STATUS['KONVERTIERUNG_OK']
 				 || $this->konvertierung->get('status') == Konvertierung::$STATUS['IN_GML_ERSTELLUNG']
 				 || $this->konvertierung->get('status') == Konvertierung::$STATUS['GML_ERSTELLUNG_OK']) {
-
 					// Status setzen
 					$this->konvertierung->set('status', Konvertierung::$STATUS['IN_GML_ERSTELLUNG']);
 					$this->konvertierung->update();
 
 					// XPlan-GML ausgeben
 					$this->gml_builder = new Gml_builder($this->pgdatabase);
-					$plan = RP_Plan::find_by_id($this,'konvertierung_id', $this->konvertierung->get('id'));
-
+					$plan = XP_Plan::find_by_id($this,'konvertierung_id', $this->konvertierung->get('id'), $this->konvertierung->get('planart'));
 					if (!$this->gml_builder->build_gml($this->konvertierung, $plan)) {
   					// Status setzen
   					$this->konvertierung->set('status', Konvertierung::$STATUS['GML_ERSTELLUNG_ERR']);
@@ -789,9 +799,18 @@ switch($go){
 	} break;
 
 	case 'xplankonverter_download_xplan_gml' : {
-		if ($this->xplankonverter_is_case_forbidden()) return;
-
+		if ($this->xplankonverter_is_case_forbidden()) {
+			echo 'Anwendungsfall nicht erlaubt!';
+			return;
+		}
 		$filename = XPLANKONVERTER_FILE_PATH . $this->formvars['konvertierung_id'] . '/xplan_gml/xplan_' . $this->formvars['konvertierung_id'] . '.gml';
+
+		if (!file_exists($filename)) {
+			$this->add_message('warning', 'Diese Datei ist nicht vorhanden. Prüfen Sie ob die Konvertierung schon korrekt ausgeführt wurde. Wenn ja, wenden Sie sich an den Support.');
+			$this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
+			$this->output();
+			return;
+		}
 		header('Content-Type: text/xml; subtype="gml/3.3"');
 		echo fread(fopen($filename, "r"), filesize($filename));
 	} break;
@@ -824,7 +843,7 @@ switch($go){
 			# go to layer search with layer of planart
 			switch ($rs['planart']) {
 				case 'BP-Plan' : $layer_id = XPLANKONVERTER_BP_PLAENE_LAYER_ID; break;
-				case 'FP-Plan' : $layer_id = XPLANKONVERTER_BP_PLAENE_LAYER_ID; break;
+				case 'FP-Plan' : $layer_id = XPLANKONVERTER_FP_PLAENE_LAYER_ID; break;
 				case 'SO-Plan' : $layer_id = XPLANKONVERTER_SO_PLAENE_LAYER_ID; break;
 				case 'RP-Plan' : $layer_id = XPLANKONVERTER_RP_PLAENE_LAYER_ID; break;
 			}

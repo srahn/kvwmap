@@ -624,7 +624,8 @@ update_require_attribute = function(attributes, layer_id, value){
 										'Sanierungsgebiet',
 										'sonstige Flächen',
 										'Entwicklungsbereich',
-										'Soziale Stadt'
+										'Soziale Stadt',
+										'Sonderbauflächen'
 									);
 									$FormatBez = array(
 										'-- Bitte wählen --',
@@ -637,7 +638,8 @@ update_require_attribute = function(attributes, layer_id, value){
 										'Sanierungsgebiet',
 										'sonstige Flächen',
 										'Entwicklungsbereich',
-										'Soziale Stadt'
+										'Soziale Stadt',
+										'Sonderbauflächen'
 									);
 									$zonentyp = new FormObject('zonentyp', 'select', $FormatWerte, array($this->formvars['zonentyp']), $FormatBez, 1, $maxlenght, $multiple, 158);
 									$zonentyp->OutputHTML();

@@ -47,6 +47,7 @@
 	}
 
 	function attribute_value(&$gui, $layer, $attributes, $j, $k, $dataset, $size, $select_width, $fontsize, $change_all = false, $onchange = NULL, $field_name = NULL, $field_id = NULL, $field_class = NULL){
+
 		global $strShowPK;
 		global $strNewPK;
 		global $strShowFK;
@@ -55,7 +56,9 @@
 		global $hover_preview;
 		$layer_id = $layer['Layer_ID'];
 		if($dataset == NULL)$dataset = $layer['shape'][$k]; 						# der aktuelle Datensatz (wird nur beim Array- oder Nutzer-Datentyp übergeben)
-		if($attributes == NULL)$attributes = $layer['attributes'];			# das Attribut-Array (wird nur beim Array- oder Nutzer-Datentyp übergeben)
+		if($attributes == NULL) {
+			$attributes = $layer['attributes'];			# das Attribut-Array (wird nur beim Array- oder Nutzer-Datentyp übergeben)
+		}
 		$name = $attributes['name'][$j];																# der Name des Attributs
 		$alias = $attributes['alias'][$j];															# der Aliasname des Attributs
 		$value = $dataset[$name];																				# der Wert des Attributs
@@ -71,10 +74,10 @@
 		else{
 			$onchange .= 'change_all('.$layer_id.', '.$k.', \''.$layer_id.'_'.$name.'\');';
 		}
-		
+
 		###### Array-Typ #####
-		if(POSTGRESVERSION >= 930 AND substr($attributes['type'][$j], 0, 1) == '_'){
-			if($field_id != NULL)$id = $field_id;		# wenn field_id übergeben wurde (nicht die oberste Ebene)
+		if (POSTGRESVERSION >= 930 AND substr($attributes['type'][$j], 0, 1) == '_'){
+			if ($field_id != NULL) $id = $field_id;		# wenn field_id übergeben wurde (nicht die oberste Ebene)
 			else $id = $k.'_'.$name;	# oberste Ebene
 			$datapart .= '<input type="hidden" class="'.$field_class.'" title="'.$alias.'" name="'.$fieldname.'" id="'.$id.'" onchange="'.$onchange.'" value="'.htmlspecialchars($value).'">';
 			$datapart .= '<div id="'.$id.'_elements" style="">';
@@ -103,7 +106,7 @@
 			}
 			return $datapart;
 		}
-		
+
 		###### Nutzer-Datentyp #####
 		if(is_numeric($attributes['type'][$j])){
 			if($field_id != NULL)$id = $field_id;		# wenn field_id übergeben wurde (nicht die oberste Ebene)
@@ -113,23 +116,71 @@
 			$elements = json_decode($value);	# diese Funktion decodiert immer den kommpletten String
 			$tsize = 20;
 			$datapart .= '<table border="2" class="gle_datatype_table">';
-			$onchange2 = 'buildJSONString(\''.$id.'\', false);';
-			for($e = 0; $e < count($type_attributes['name']); $e++){
-				if($elements != NULL){
+			$onchange2 = "buildJSONString('" . $id . "', false);";
+			for ($e = 0; $e < count($type_attributes['name']); $e++) {
+				if ($elements != NULL) {
 					$elem_value = current($elements);
 					next($elements);
 				}
-				if(is_array($elem_value) OR is_object($elem_value))$elem_value = json_encode($elem_value);		# ist ein Array oder Objekt (also entweder ein Array-Typ oder ein Datentyp) und wird zur Übertragung wieder encodiert
-				$dataset2[$type_attributes['name'][$e]] = $elem_value;
-				$type_attributes['privileg'][$e] = $attributes['privileg'][$j];
-				if($type_attributes['alias'][$e] == '')$type_attributes['alias'][$e] = $type_attributes['name'][$e];
-				$datapart .= '<tr><td valign="top" class="gle_attribute_name"><table><tr><td>'.$type_attributes['alias'][$e].'</td></tr></table></td>';
-				$datapart .= '<td class="gle_attribute_value">'.attribute_value($gui, $layer, $type_attributes, $e, NULL, $dataset2, $tsize, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id).'</td></tr>';
+				if (is_array($elem_value) OR is_object($elem_value)) {
+					# ist ein Array oder Objekt (also entweder ein Array-Typ oder ein Datentyp) und wird zur Übertragung wieder encodiert
+					$elem_value = json_encode($elem_value);
+				}
+				if ($type_attributes['visible'][$e] == 1) {
+					$dataset2[$type_attributes['name'][$e]] = $elem_value;
+					$type_attributes['privileg'][$e] = $attributes['privileg'][$j];
+					if ($type_attributes['alias'][$e] == '') $type_attributes['alias'][$e] = $type_attributes['name'][$e];
+					switch ($type_attributes['labeling'][$e]) {
+						case 1 : {
+							$datapart .= '
+								<tr>
+									<td colspan="2" valign="top" class="gle_attribute_name">
+										<table>
+											<tr>
+												<td>' . $type_attributes['alias'][$e] . '</td>
+											</tr>
+										</table>
+									</td>
+								</tr>
+								<tr>
+									<td colspan="2" class="gle_attribute_value">
+										' . attribute_value($gui, $layer, $type_attributes, $e, NULL, $dataset2, $tsize, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id) . '
+									</td>
+								</tr>
+							';
+						} break;
+						case 2 : {
+							$datapart .= '
+								<tr>
+									<td colspan="2" class="gle_attribute_value">
+										' . attribute_value($gui, $layer, $type_attributes, $e, NULL, $dataset2, $tsize, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id) . '
+									</td>
+								</tr>
+							';
+						} break;
+						default : {
+							$datapart .= '
+								<tr>
+									<td valign="top" class="gle_attribute_name">
+										<table>
+											<tr>
+												<td>' . $type_attributes['alias'][$e] . '</td>
+											</tr>
+										</table>
+									</td>
+									<td class="gle_attribute_value">
+										' . attribute_value($gui, $layer, $type_attributes, $e, NULL, $dataset2, $tsize, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id) . '
+									</td>
+								</tr>
+							';
+						}
+					}
+				}
 			}
-			$datapart .= '</tr></table>';
+			$datapart .= '</table>';
 			return $datapart;
 		}
-		
+
 		###### normal #####
 		if($attributes['constraints'][$j] != '' AND !in_array($attributes['constraints'][$j], array('PRIMARY KEY', 'UNIQUE'))){
 			if($attributes['privileg'][$j] == '0' OR $lock[$k]){

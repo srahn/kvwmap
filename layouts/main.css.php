@@ -1099,7 +1099,7 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 	float: left;
 	margin-left: 20px;
 	padding: 0px;
-	max-width: 490px
+	max-width: 480px
 }
 
 table.tgle {

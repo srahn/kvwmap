@@ -158,6 +158,7 @@ class PgObject {
 				"'" . implode("', '", $values) . "'
 			)
 		";
+		#echo $sql.'<br>';
 		$this->debug->show('create sql: ' . $sql, false);
 		$query = pg_query($this->database->dbConn, $sql);
 		$oid = pg_last_oid($query);

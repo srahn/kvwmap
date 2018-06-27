@@ -100,7 +100,7 @@
 												<td bgcolor="'.BG_GLEATTRIBUTE.'" colspan="40">&nbsp;<a href="javascript:void(0);" onclick="javascript:document.getElementById(\'group'.$layer['Layer_ID'].'_'.$j.'_'.$k.'\').style.display=\'none\';document.getElementById(\'colgroup'.$layer['Layer_ID'].'_'.$j.'_'.$k.'\').style.display=\'\';"><img border="0" src="'.GRAPHICSPATH.'/minus.gif"></a>&nbsp;&nbsp;<span class="fett">'.$groupname.'</span></td>
 											</tr>';
 				}
-				
+
 				if($attributes['visible'][$j]){
 					if($attributes['type'][$j] != 'geometry'){
 						if($attributes['privileg'][$j] != '0' AND !$lock[$k])$this->editable = $layer['Layer_ID'];
@@ -133,6 +133,7 @@
 							$size2 = $size;
 							$select_width2 = $select_width;
 						}
+						if ($select_width2 == '') $select_width2 = 'max-width: 600px;';
 
 						$td = '	<td
 							id="row' . $j . '"
