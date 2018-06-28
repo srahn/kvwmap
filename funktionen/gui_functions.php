@@ -97,21 +97,23 @@ function resizemap2window(){
 * @param array or string messages contain the messages as array
 * or as a single string
 */
-function message(messages, t_hide, t_hidden, css_top) {
-	var msgDiv = $('#message_box');
-
-	t_hide   = (typeof t_hide   !== 'undefined') ? t_hide   : 3000;
-	t_hidden = (typeof t_hidden !== 'undefined') ? t_hidden : 3000;
-	css_top  = (typeof css_top  !== 'undefined') ? css_top  : '20%';
-
-	if (msgDiv.is(':visible')) {
-		msgDiv.stop().css('opacity', '1').show();
+function message(messages, t_visible, t_fade, css_top) {
+	var msgBoxDiv = $('#message_box');
+	if (msgBoxDiv.is(':visible')) {
+		msgBoxDiv.stop().css('opacity', '1').show();
 	}
 	else {
-		msgDiv.html('');
+		msgBoxDiv.html('');
 	}
+	if(document.getElementById('messages') == null)msgBoxDiv.append('<div id="messages"></div>');
+	var msgDiv = $('#messages');
+	var confirm = false;
 
-	msgDiv.css('top', css_top);
+	t_visible   = (typeof t_visible   !== 'undefined') ? t_visible   : 1000;		// Zeit, die die Message-Box komplett zu sehen ist
+	t_fade   = (typeof t_fade   !== 'undefined') ? t_fade   : 2000;							// Dauer des Fadings
+	css_top  = (typeof css_top  !== 'undefined') ? css_top  : '20%';
+
+	msgBoxDiv.css('top', css_top);
 	types = {
 		'notice': {
 			'description': 'Erfolg',
@@ -150,26 +152,17 @@ function message(messages, t_hide, t_hidden, css_top) {
 	$.each(messages, function (index, msg) {
 		msg.type = (['notice', 'info', 'error'].indexOf(msg.type) > -1 ? msg.type : 'warning');
 		msgDiv.append('<div class="message-box-' + msg.type + '">' + (types[msg.type].icon ? '<div class="message-box-type"><i class="fa ' + types[msg.type].icon + '" style="color: ' + types[msg.type].color + '; cursor: default;"></i></div>' : '') + '<div class="message-box-msg">' + msg.msg + '</div><div style="clear: both"></div></div>');
-		if (types[msg.type].confirm) {
-			console.log('message has to be confirmed');
-			// if no confirm box allready than set it now
-			if (!msgDiv.hasClass('confirm-box')) {
-				console.log('set class confirm-box');
-				msgDiv.append('<input type="button" onclick="$(\'#message_box\').html(\'\').hide(); " value="ok" style="margin-top: 10px; margin-bottom: 10px">');
-				msgDiv.addClass('confirm-box');
-			}
+		if (types[msg.type].confirm && document.getElementById('message_ok_button') == null) {
+			msgBoxDiv.append('<input id="message_ok_button" type="button" onclick="$(\'#message_box\').hide();" value="ok" style="margin: 10px 0 10px 0;">');
 		}
 	});
-
+	
 	if (msgDiv.html() != '') {
-		if (!msgDiv.hasClass('message_box')) {
-			msgDiv.addClass('message_box')
-		}
-		msgDiv.show();
+		msgBoxDiv.show();
 	}
 
-	if (!msgDiv.hasClass('confirm-box')) {
-		msgDiv.fadeOut(t_hide);
+	if (document.getElementById('message_ok_button') == null) {		// wenn kein OK-Button da ist, ausblenden
+		setTimeout(function() {msgBoxDiv.fadeOut(t_fade);}, t_visible);
 	}
 }
 

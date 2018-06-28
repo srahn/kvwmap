@@ -1008,15 +1008,15 @@ function mouseup(evt){
 		}
 		mittex = Math.round(minx+(maxx-minx)/2);
 		mittey = Math.round(miny+(maxy-miny)/2);
-		var Msg = top.document.getElementById("message_box");
-		Msg.className = \'message_box\';
-		content = \'<div style="position: absolute;top: 0px;right: 0px"><a href="#" onclick="javascript:document.getElementById(\\\'message_box\\\').className = \\\'message_box_hidden\\\';" title="Schlie&szlig;en"><img style="border:none" src="'.GRAPHICSPATH.'exit2.png"></img></a></div>\';
+		var Msg = top.$("#message_box");
+		Msg.show();
+		content = \'<div style="position: absolute;top: 0px;right: 0px"><a href="javascript:void(0)" onclick="top.$(\\\'#message_box\\\').hide();" title="Schlie&szlig;en"><img style="border:none" src="'.GRAPHICSPATH.'exit2.png"></img></a></div>\';
 		content+= \'<div style="height: 30px">Koordinateneingabe</div>\';
 		content+= \'<table style="padding: 5px"><tr><td align="left" style="width: 300px" class="px15">Koordinate</td></tr>\';
 		content+= \'<tr><td><input style="width: 310px" type="text" id="input_coords" name="input_coords" value="\'+mittex+\' \'+mittey+\'"></td></tr>\';
 		content+= \'<tr><td>Koordinatensystem:&nbsp;<select name="epsg_code" id="epsg_code" style="width: 310px">'.$epsg_codes.'</select></td></tr></table>\';
 		content+= \'<br><input type="button" value="OK" onclick="coord_input_submit()">\';
-		Msg.innerHTML = content;
+		Msg.html(content);
 	}
 		
 	function coord_input_submit(){
@@ -1034,7 +1034,7 @@ function mouseup(evt){
 				alert("Falsches Format");
 				return;
 			}
-			top.document.getElementById(\'message_box\').className = \'message_box_hidden\';
+			top.$(\'#message_box\').hide();
 			if(viewer_epsg == epsgcode){
 				set_coord(coords2[0], coords2[1]);
 			}

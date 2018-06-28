@@ -1045,10 +1045,10 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 	border-bottom: 1px solid #bbb;
 }
 
-.message_box {
+#message_box {
 	opacity: 1;
 	position: fixed;
-	display: block;
+	display: none;
 	top:20%;
 	left:45%;
 	min-width:250px;
@@ -1067,15 +1067,6 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 	background-color: #DAE4EC;
 	box-shadow: 10px 10px 14px #777;
 	z-index: 1000000;
-}
-
-.message_box_hide {
-	opacity: 0;
-	transition: opacity 2s ease-out;
-}
-
-.message_box_hidden, .hidden {
-	display: none;
 }
 
 .message-box-notice {
