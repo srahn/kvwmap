@@ -1,5 +1,10 @@
 <?
 
+function compare_legendorder($a, $b){
+	if($a['legendorder'] > $b['legendorder'])return 1;
+	else return 0;
+}
+
 function in_subnet($ip,$net) {
 	$ipparts=explode('.',$ip);
 	$netparts=explode('.',$net);
