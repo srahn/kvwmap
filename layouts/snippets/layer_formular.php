@@ -474,6 +474,13 @@
 							</select>
 					</td>
 				</tr>
+				<? if(count($this->formvars['selstellen']["Bezeichnung"]) > 0){ ?>
+				<tr>
+					<td align="center" colspan=3 style="height: 30px;border-bottom:1px solid #C3C7C3">
+						<a href="javascript:document.GUI.assign_default_values.value=1;submitWithValue('GUI','go_plus','Ändern')"><? echo $strAssignDefaultValues; ?></a>
+					</td>
+				</tr>
+				<? } ?>
 			</table>
 			<br>
 			<a name="stellenzuweisung"></a>
@@ -792,6 +799,7 @@
 </table>
 
 <input type="hidden" name="go" value="Layereditor">
+<input type="hidden" name="assign_default_values" value="0">
 <input type="hidden" name="selstellen" value="<? 
 	echo $this->formvars['selstellen']["ID"][0];
 	for($i=1; $i < count($this->formvars['selstellen']["Bezeichnung"]); $i++){

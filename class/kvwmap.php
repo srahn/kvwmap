@@ -7478,8 +7478,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     # Stellenzuweisung
 		$stellen = $this->Stellenzuweisung(
       array($this->formvars['selected_layer_id']),
-      explode(', ', $this->formvars['selstellen'])
+      explode(', ', $this->formvars['selstellen']),
+			NULL,
+			$this->formvars['assign_default_values']
     );
+		if($this->formvars['assign_default_values'])$this->add_message('notice', 'Die Defaultwerte wurden an die zugeordneten Stellen übertragen.');
 
     # Löschen der in der Selectbox entfernten Stellen
     $layerstellen = $mapDB->get_stellen_from_layer($this->formvars['selected_layer_id']);
@@ -7550,12 +7553,13 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
   * @param array Array von layer_ids, die den Stellen zugewiesen werden sollen.
   * @param array Array von Stellen, denen die Layer zugewiesen werden sollen.
 	* @param string (optional) Text der in used_layer im Attribut Filter verwendet werden soll.
+	* @param boolean (optional) Flag, ob die Defaultwerte auch an die bereits zugeordneten Stellen übertragen werden sollen
   * @return void
   */
-  function Stellenzuweisung($layer_ids, $stellen_ids, $filter = '') {
-    for($i = 0; $i < count($stellen_ids); $i++) {
+  function Stellenzuweisung($layer_ids, $stellen_ids, $filter = '', $assign_default_values = false) {
+    for($i = 0; $i < count($stellen_ids); $i++){
       $stelle = new stelle($stellen_ids[$i], $this->database);
-      $stelle->addLayer($layer_ids,	0, $filter);
+      $stelle->addLayer($layer_ids,	0, $filter, $assign_default_values);
       $users = $stelle->getUser();
       for($j = 0; $j < count($users['ID']); $j++){
         $this->user->rolle->setGroups($users['ID'][$j], array($stellen_ids[$i]), $layer_ids, 0); # Hinzufügen der Layergruppen der selektierten Layer zur Rolle

@@ -85,4 +85,5 @@
 	$strSyncHelp="In Sync - Mode all changes on the layer will be stored in a table named 'Main Table'_deltas with a serialised version number. The mode must be switched on, to enable the layer in the mobile App kvmobile.";
 	$strListed="show in Layer-List";
 	$strDocument_url="Document URL";
+	$strAssignDefaultValues="Apply Default-Values to User-Groups";
 ?>  
