@@ -77,6 +77,7 @@ define(CASE_COMPRESS, false);																																						  #
 # 	tooltip_query:	  - ein Datensatz mit Bild muss agefragt werden																			  #
 #										  - getRollenLayer() reinkopieren																										  #
 #   getLayerOptions:  - getRollenLayer() reinkopieren																											#
+#		get_group_legend:	- compare_legendorder() reinkopieren																								#
 #																																																				  #
 #																																																				  #
 ###########################################################################################################
