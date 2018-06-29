@@ -848,12 +848,20 @@
 	}
 
 	/*
-	* Diese Funktion erzeugt ein class oder ein style Attribut eines html elementes
-	* geführt von einem Leerzeichen je nach dem ob der übergebene Text ein : enthält (style) oder nicht.
-	* @param string $class_or_style Der Text, der den Klassennamen oder den Styletext enthält
-	* @return string Text in der Form ' class="class_name"' oder ' style="css-text"'
+	* Diese Funktion erzeugt ein class und/oder ein style Attribut eines html-Elementes
+	* geführt von einem Leerzeichen je nach dem ob die in einem Array übergebenen Strings ein ":" enthalten (style) oder nicht (class).
+	* @param array $class_or_style Ein Array welches beliebig viele Klassennamen oder Styledefinitionen enthalten kann
+	* @return string Text in der Form ' class="class_name" style="css-text"'
 	*/
-	function get_td_class_or_style($class_or_style) {
-		return ' ' . (strpos($class_or_style, ':') === false ? 'class' : 'style') . '="' . $class_or_style . '"';
+	function get_td_class_or_style($class_or_style){
+		foreach($class_or_style as $elem){
+			if($elem != ''){
+				if(strpos($elem, ':') === false)$class[] = $elem;
+				else $style[] = $elem;
+			}
+		}
+		if(!empty($class))$output = ' class="'.implode($class, ' ').'"';
+		if(!empty($style))$output.= ' style="'.implode($style, ';').'"';
+		return $output;
 	}
 ?>

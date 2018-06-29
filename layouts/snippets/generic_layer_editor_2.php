@@ -138,7 +138,7 @@
 						$td = '	<td
 							id="row' . $j . '"
 							colspan="' . ($attributes['arrangement'][$j+1] != 1 ? 20 - $attributes_in_row_so_far : '') . '"' .
-							get_td_class_or_style($layer['shape'][$k][$attributes['style']] != '' ? $layer['shape'][$k][$attributes['style']] : 'gle_attribute_value') . '
+							get_td_class_or_style(array($layer['shape'][$k][$attributes['style']], 'gle_attribute_value')) . '
 						>';
 						$td.=	attribute_value($this, $layer, NULL, $j, $k, NULL, $size2, $select_width2, $this->user->rolle->fontsize_gle);
 						$td.= '<div onmousedown="resizestart(document.getElementById(\'row'.$j.'\'), \'col_resize\');" style="position: absolute; transform: translate(4px); top: 0px; right: 0px; height: 20px; width: 6px; cursor: e-resize;"></div>';

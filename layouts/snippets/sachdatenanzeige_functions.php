@@ -33,6 +33,33 @@ include('funktionen/input_check_functions.php');
 		}
 	}
 	
+	toggleGroup = function(groupname){
+		var group_elements = document.querySelectorAll('.group_'+groupname);
+		var gap_elements = document.querySelectorAll('.gap_'+groupname);
+		var group = document.getElementById(groupname);
+		var img = document.getElementById('img_'+groupname);
+		if(group.colSpan == group.dataset.colspan){		// wenn aktueller colspan = initialer colspan -> Gruppe ist aufgeklappt
+			[].forEach.call(group_elements, function (group_element){
+				group_element.style.display='none';		// Attribute der Gruppe ausblenden
+			});
+			[].forEach.call(gap_elements, function (gap_element){
+				gap_element.colSpan=2;		// Leerspalte zwischen den Gruppen verbreitern
+			});
+			group.colSpan=1;
+			img.src='graphics/plus.gif';
+		}
+		else{ // Gruppe ist zusammengeklappt
+			[].forEach.call(group_elements, function (group_element){
+				group_element.style.display='';		// Attribute der Gruppe einblenden
+			});
+			[].forEach.call(gap_elements, function (gap_element){
+				gap_element.colSpan=1;		// Leerspalte zwischen den Gruppen verkleinern
+			});
+			group.colSpan=group.dataset.colspan;
+			img.src='graphics/minus.gif';
+		}
+	}
+	
 	toggle_statistic_row = function(layer_id) {
 		var x = document.getElementsByClassName('statistic_row_'+layer_id),
 				i;
