@@ -422,7 +422,7 @@ define('MAPFACTOR', 3);                                                # Version
 define('DEFAULT_DRUCKRAHMEN_ID', 42);													# Version 1.7.4
 
 # Zeigt an, ob Image Magick und Ghostscript installiert sind oder nicht (wird für neue Druckvorschau benötigt)
-define('IMAGEMAGICK', 'true');                        # Version 1.6.3
+#define('IMAGEMAGICK', 'true');                        # Version 1.6.3			# in Version 2.9 gelöscht
 
 # Pfad zum Imagemagick convert
 define('IMAGEMAGICKPATH', '/usr/bin/');                        # Version 1.7.3

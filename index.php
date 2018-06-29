@@ -856,14 +856,8 @@ function go_switch($go){
 			} break;
 
 			case 'Druckausschnittswahl_Vorschau' : {
-				if(IMAGEMAGICK == 'true'){
-					$GUI->druckvorschau();
-					$GUI->output();
-				}
-				else{
-					$GUI->druckvorschau_html();
-					$GUI->output();
-				}
+				$GUI->druckvorschau();
+				$GUI->output();
 			} break;
 
 			case 'Druckausschnittswahl_Drucken' : {
