@@ -351,14 +351,9 @@ $legendheight = $this->map->height + 20;
 						<div id="legenddiv" onmouseleave="slide_legend_out(event);" class="slidinglegend_slideout">
 							<table width="100%" border="0" cellpadding="0" cellspacing="0">
 								<tr>
-									<td bgcolor="<?php echo BG_DEFAULT ?>" align="left"><?php
-										if ($this->user->rolle->hideLegend) {	?>
-											<a id="linkLegend" href="javascript:switchlegend()"><img title="Legende zeigen" id="LegendMinMax" src="<?php  echo GRAPHICSPATH; ?>maximize_legend.png" border="0"></a><?php
-										}
-										else { ?>
-											<a id="linkLegend" href="javascript:switchlegend()"><img title="Legende verstecken" id="LegendMinMax" src="<?php  echo GRAPHICSPATH; ?>minimize_legend.png" border="0"></a><?php
-										}
-									?></td>
+									<td bgcolor="<?php echo BG_DEFAULT ?>" align="left">
+										<img id="LegendMinMax" src="<?php  echo GRAPHICSPATH; ?>maximize_legend.png" border="0">
+									</td>
 								</tr>
 							</table>
 							<table class="table1" id="legendTable" onclick="slide_legend_in(event)" style="display: <? echo $display; ?>" cellspacing=0 cellpadding=2 border=0>

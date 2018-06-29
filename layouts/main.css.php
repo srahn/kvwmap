@@ -344,6 +344,14 @@ a.invisiblelayerlink:hover{
 	color: gray;
 }
 
+.print_options_box{
+	width: 200px;
+	margin-right: <? echo $size['legend']['hide_width']; ?>px;
+	margin-bottom: 5px;
+	border: 1px solid #aaa;
+	padding: 5px;
+}
+
 .buttonlink{
 	height: 13px;
 	display: inline-block;
