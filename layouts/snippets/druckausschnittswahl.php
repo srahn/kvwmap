@@ -15,13 +15,9 @@ function setprintextent(wert){
 
 function showLegendOptions(){
 	if(document.getElementById('legendOptions2').style.display == 'none'){
-		document.getElementById('legendOptions1').style.borderTop="1px solid #C3C7C3";
-		document.getElementById('legendOptions1').style.borderLeft="1px solid #C3C7C3";
-		document.getElementById('legendOptions1').style.borderRight="1px solid #C3C7C3";
 		document.getElementById('legendOptions2').style.display = '';
 	}
 	else{
-		document.getElementById('legendOptions1').style.border="none";
 		document.getElementById('legendOptions2').style.display = 'none';
 	}
 }
@@ -117,6 +113,7 @@ function load(){
 		alert("<? echo $strWarning3; ?>");
 	}
 	else{
+		document.GUI.go.value = "Druckausschnitt_laden";
 		document.GUI.submit();
 	}
 }
@@ -176,7 +173,7 @@ function rotate_print_extent(angle){
 		
 		<td>
 			<div class="print_options_box">
-				<? echo $strPrintFrame; ?>
+				<span class="fett"><? echo $strPrintFrame; ?></span>
 				<select name="aktiverRahmen" style="width: 200px" onchange="document.GUI.go.value='Druckausschnittswahl';document.GUI.target = '';document.GUI.submit()">
 					<?  
 					for($i = 0; $i < count($this->Document->frames); $i++){            	
@@ -191,9 +188,9 @@ function rotate_print_extent(angle){
 				<br>(<? echo $asize.' '.$$orientation.')'; ?>
 				<br>
 				<div style="width:190px;" onmouseover="document.getElementById('scales').style.display='inline-block';" onmouseout="document.getElementById('scales').style.display='none';">
-					<?php echo $strButtonPrintScale; ?><input type="text" size="7" name="printscale" onkeydown="setprintextent('false');" autocomplete="off" value="<?php echo $this->formvars['printscale']; ?>">
+					<span class="fett"><? echo $strButtonPrintScale; ?></span><input type="text" size="7" name="printscale" onkeydown="setprintextent('false');" autocomplete="off" value="<?php echo $this->formvars['printscale']; ?>">
 					<div valign="top" style="height:0px; position:relative;">
-						<div id="scales" style="z-index: 1;display:none; position:absolute; left:95px; top:-1px; width: 78px; vertical-align:top; overflow:hidden; border:solid grey 1px;">
+						<div id="scales" style="z-index: 1;display:none; position:absolute; left:98px; top:-1px; width: 78px; vertical-align:top; overflow:hidden; border:solid grey 1px;">
 							<select size="<? echo count($this->selectable_scales); ?>" style="padding:4px; margin:-2px -17px -4px -4px;" onclick="document.GUI.printscale.value=this.value; document.getElementById('scales').style.display='none';setprintextent('false');">
 								<? 
 									foreach($this->selectable_scales as $scale){
@@ -206,19 +203,19 @@ function rotate_print_extent(angle){
 				</div>
 				<br>
 				<div style="">
-					<?php echo $strRotationAngle; ?>:&nbsp;<input type="text" size="3" name="angle" onchange="angle_slider.value=parseInt(angle.value);rotate_print_extent(this.value);" value="<? echo $this->formvars['angle']; ?>">&nbsp;°<br>
-					<input type="range" id="angle_slider" min="-90" max="90" style="width: 120px" value="<? echo $this->formvars['angle']; ?>" oninput="angle.value=parseInt(angle_slider.value);angle.onchange();" onchange="angle.value=parseInt(angle_slider.value);angle.onchange();">
+					<span class="fett"><? echo $strRotationAngle; ?>:</span>&nbsp;<input type="text" size="3" name="angle" onchange="angle_slider.value=parseInt(angle.value);rotate_print_extent(this.value);" value="<? echo $this->formvars['angle']; ?>">&nbsp;°<br>
+					<input type="range" id="angle_slider" min="-90" max="90" style="margin: 0; width: 154px" value="<? echo $this->formvars['angle']; ?>" oninput="angle.value=parseInt(angle_slider.value);angle.onchange();" onchange="angle.value=parseInt(angle_slider.value);angle.onchange();">
 				</div>
 			</div>
 			
-			<div class="print_options_box">
+			<div class="print_options_box fett">
 				<? echo $strNoMinMaxscaling; ?>&nbsp;<input type="checkbox" name="no_minmax_scaling" onclick="document.GUI.submit();" value="1" <? if($this->formvars['no_minmax_scaling']) echo 'checked="true"'; ?>>
 			</div>
 			
 			<? if($this->Document->activeframe[0]['refmapfile'] OR $this->Document->activeframe[0]['legendsize'] > 0){ ?>
 			<div class="print_options_box" style="overflow: auto; max-height: 300px">
 				<? if($this->Document->activeframe[0]['refmapfile']){ ?>
-					<div> <?
+					<div class="fett"> <?
 						if(!isset($this->formvars['referencemap']))$this->formvars['referencemap'] = 1;
 							echo $strReferenceMap; ?>&nbsp;<input type="checkbox" name="referencemap" value="1" <? if($this->formvars['referencemap']) echo 'checked="true"'; ?>>
 					</div>
@@ -226,14 +223,14 @@ function rotate_print_extent(angle){
 			
 				if($this->Document->activeframe[0]['legendsize'] > 0){ ?>
 				<div style="flex: 1 1 200px;">	
-					<table style="width: 100%">
+					<table style="width: 100%;margin-top: 5px" cellspacing="0" cellpadding="0">
 						<tr>
 							<td id="legendOptions1"><a href="javascript:showLegendOptions();"><? echo $strLegendOptions; ?>...</a>&nbsp;</td>
 						</tr>
 						<tr id="legendOptions2" style="display:none">
-							<td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3">
+							<td>
 								<!--rollenlayer_legend-->
-								<input type="checkbox" name="legend_extra" value="1" <? if($this->formvars['legend_extra']) echo 'checked="true"'; ?>>&nbsp;<? echo $strLegendExtra; ?><br>
+								<span class="fett">&nbsp;<? echo $strLegendExtra; ?></span>&nbsp;<input type="checkbox" name="legend_extra" value="1" <? if($this->formvars['legend_extra']) echo 'checked="true"'; ?>>
 								<div class="fett" style="margin-top: 5px">&nbsp;<? echo $strLayers; ?>:</div>
 								<?
 								$layerset = $this->layerset['list'];
@@ -258,13 +255,13 @@ function rotate_print_extent(angle){
 			
 			<div class="print_options_box">
 				<div> 
-					<?php echo $strPrintDetail; ?>:<br>
+					<span class="fett"><? echo $strPrintDetail; ?>:<br></span>
 					<input type="text" name="name" value="" style="width:112px" >&nbsp;<input type="button" style="width:84px" name="speichern" value="<?php echo $this->strSave; ?>" onclick="save();">
 					<select name="druckausschnitt" style="width:200px">
 						<option value=""><?php echo $this->strPleaseSelect; ?></option>
 						<?
 							for($i = 0; $i < count($this->Document->ausschnitte); $i++){
-								echo '<option value="'.$this->Document->ausschnitte[$i]['id'].'">'.$this->Document->ausschnitte[$i]['name'].'</option>';
+								echo '<option value="'.$this->Document->ausschnitte[$i]['id'].'" '.($this->formvars['druckausschnitt'] == $this->Document->ausschnitte[$i]['id'] ? 'selected="true"' : '').'>'.$this->Document->ausschnitte[$i]['name'].'</option>';
 							}
 						?>
 					</select><br>

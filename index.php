@@ -841,7 +841,12 @@ function go_switch($go){
 				$GUI->druckrahmen_load();
 				$GUI->output();
 			} break;
-
+			
+			case 'Druckausschnitt_laden' : {
+				$GUI->formvars['loadmapsource'] = 'DataBase';
+				$GUI->druckausschnittswahl($GUI->formvars['loadmapsource']);
+			} break;
+			
 			case 'Druckausschnitt_loeschen' : {
 				$GUI->druckausschnitt_löschen($GUI->formvars['loadmapsource']);
 			} break;
