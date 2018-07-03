@@ -412,29 +412,25 @@ FROM
         }
         else{
           $fields[$i]['real_name'] = $fieldname;
-        }
-
+        }				
+				
         # Tabellenname des Attributs
-        if(PHPVERSION >= 580){
-        	$tablename = pg_field_table($ret[1], $i);
-        	$table['alias'] = '';
-        }
-        else{
-	        $table = $this->pg_field_table2($fieldname, $fieldstring[$i], $select);
-	        $tablename = $table['name'];
-					if($tablename == NULL AND $name_pair != ''){
-	          $table = $this->pg_field_table2($name_pair['real_name'], $fieldstring[$i], $select);
-	          $tablename = $table['name'];
-	        }
-        }
+        // if(PHPVERSION >= 580){
+        $tablename = pg_field_table($ret[1], $i);
+        // }																									# kann ganz weg, wenn Bugfix 2.8.55 sich bewährt
+        // else{
+	        // $table = $this->pg_field_table2($fieldname, $fieldstring[$i], $select);
+	        // $tablename = $table['name'];
+					// if($tablename == NULL AND $name_pair != ''){
+	          // $table = $this->pg_field_table2($name_pair['real_name'], $fieldstring[$i], $select);
+	          // $tablename = $table['name'];
+	        // }
+        // }
         if($tablename != NULL){
           $all_table_names[] = $tablename;
         }
         $fields[$i]['table_name'] = $tablename;
-        #$fields['table_name'][$fieldname] = $tablename;		todo
-        if($table['alias'] == ''){
-        	$table['alias'] = $this->get_table_alias($tablename, $fromposition, $withoutwhere);
-        }
+        $table['alias'] = $this->get_table_alias($tablename, $fromposition, $withoutwhere);
         if($table['alias']){
         	$fields[$i]['table_alias_name'] = $table['alias'];
         }
@@ -675,13 +671,14 @@ FROM
 	*/
 	function get_geom_type($schema, $geomcolumn, $tablename){
 		if($schema == '')$schema = 'public';
+		$schema = str_replace(',', "','", $schema);
 		if($geomcolumn != '' AND $tablename != ''){
 			$sql = "
 				SELECT coalesce(
-					(select geometrytype(".$geomcolumn.") FROM ".$schema.".".$tablename." limit 1)
+					(select geometrytype(".$geomcolumn.") FROM ".$tablename." limit 1)		-- search_path ist gesetzt, kein Schema erforderlich
 					,  
 					(select type from geometry_columns WHERE 
-					 f_table_schema = '".$schema."' and 
+					 f_table_schema IN ('".$schema."') and 
 					 f_table_name = '".$tablename."' AND 
 					 f_geometry_column = '".$geomcolumn."')
 				) as type
@@ -855,67 +852,68 @@ FROM
   	return $from;
   }
 
-  function pg_field_table2($columname, $fieldstring, $query){    # gibts in php 4 noch nicht, deswegen hier so handisch
-   	$from = $this->getfrom($query);
-    $tables = explode(',', trim($from));
-    $sql = "SELECT table_name FROM information_schema.columns WHERE column_name = '".$columname."'";
-    $sql.= " AND table_name IN (";
-    for($i = 0; $i < count($tables); $i++){
-    	$tableparts = explode(' ', $tables[$i]);
-    	for($j = 0; $j < count($tableparts); $j++){
-				$sql.= "'".pg_escape_string($tableparts[$j])."', ";
-    	}
-    }
-    $schema = str_replace(',', "','", $this->schema);
-    $sql.= "'bla') AND table_schema IN ('".$schema."')";
-    #echo $sql.'<br><br>';
-    $ret = $this->execSQL($sql,4, 0);
-    if(pg_num_rows($ret[1]) == 1){
-      $rs = pg_fetch_row($ret[1]);
-      $tablename = $rs[0];
-    }
-    else{     # Tabellenname lï¿½ï¿½t sich nicht eindeutig identifizieren (entweder durch Umbenennung oder weil es mehrere Tabellen mit diesem Attribut gibt)
-      $klammerstartpos = strrpos($fieldstring, '(');
-      if($klammerstartpos !== false){
-        return NULL;
-      }
-      else{
-      	if(strpos($fieldstring, '.') !== false AND strpos($fieldstring, "'") === false){
-        	$explosion = explode('.', trim($fieldstring));
-        	$tablealias = $explosion[0];
-					$tables = explode(',', $from);
-					$i = 0;
-					$found = false;
-					while($found == false AND $i < count($tables)){
-						$tables2 = explode('join', strtolower($tables[$i]));
-						$j = 0;
-						while($found == false AND $j < count($tables2)){
-							$index = 1;
-							$tableexplosion = explode(' ', trim($tables2[$j]));
-							if(count($tableexplosion) > 1){
-								if($tableexplosion[1] == 'as')$index = 2;
-								if($tableexplosion[$index] == $tablealias){
-									$tablename = $tableexplosion[0];
-									$found = true;
-								}
-							}
-							else{
-								if($tableexplosion[0] == $tablealias){
-									$tablename = $tableexplosion[0];
-									$found = true;
-								}
-							}
-							$j++;
-						}
-						$i++;
-					}
-      	}
-      }
-    }
-    $table['alias'] = $tablealias;
-    $table['name'] = $tablename;
-    return $table;
-  }
+	# kann ganz weg, wenn Bugfix 2.8.55 sich bewährt
+  // function pg_field_table2($columname, $fieldstring, $query){    # gibts in php 4 noch nicht, deswegen hier so handisch
+   	// $from = $this->getfrom($query);
+    // $tables = explode(',', trim($from));
+    // $sql = "SELECT table_name FROM information_schema.columns WHERE column_name = '".$columname."'";
+    // $sql.= " AND table_name IN (";
+    // for($i = 0; $i < count($tables); $i++){
+    	// $tableparts = explode(' ', $tables[$i]);
+    	// for($j = 0; $j < count($tableparts); $j++){
+				// $sql.= "'".pg_escape_string($tableparts[$j])."', ";
+    	// }
+    // }
+    // $schema = str_replace(',', "','", $this->schema);
+    // $sql.= "'bla') AND table_schema IN ('".$schema."')";
+    // #echo $sql.'<br><br>';
+    // $ret = $this->execSQL($sql,4, 0);
+    // if(pg_num_rows($ret[1]) == 1){
+      // $rs = pg_fetch_row($ret[1]);
+      // $tablename = $rs[0];
+    // }
+    // else{     # Tabellenname lï¿½ï¿½t sich nicht eindeutig identifizieren (entweder durch Umbenennung oder weil es mehrere Tabellen mit diesem Attribut gibt)
+      // $klammerstartpos = strrpos($fieldstring, '(');
+      // if($klammerstartpos !== false){
+        // return NULL;
+      // }
+      // else{
+      	// if(strpos($fieldstring, '.') !== false AND strpos($fieldstring, "'") === false){
+        	// $explosion = explode('.', trim($fieldstring));
+        	// $tablealias = $explosion[0];
+					// $tables = explode(',', $from);
+					// $i = 0;
+					// $found = false;
+					// while($found == false AND $i < count($tables)){
+						// $tables2 = explode('join', strtolower($tables[$i]));
+						// $j = 0;
+						// while($found == false AND $j < count($tables2)){
+							// $index = 1;
+							// $tableexplosion = explode(' ', trim($tables2[$j]));
+							// if(count($tableexplosion) > 1){
+								// if($tableexplosion[1] == 'as')$index = 2;
+								// if($tableexplosion[$index] == $tablealias){
+									// $tablename = $tableexplosion[0];
+									// $found = true;
+								// }
+							// }
+							// else{
+								// if($tableexplosion[0] == $tablealias){
+									// $tablename = $tableexplosion[0];
+									// $found = true;
+								// }
+							// }
+							// $j++;
+						// }
+						// $i++;
+					// }
+      	// }
+      // }
+    // }
+    // $table['alias'] = $tablealias;
+    // $table['name'] = $tablename;
+    // return $table;
+  // }
 
   function pg_table_constraints($table){
   	if($table != ''){
