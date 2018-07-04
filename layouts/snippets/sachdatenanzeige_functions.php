@@ -33,7 +33,19 @@ include('funktionen/input_check_functions.php');
 		}
 	}
 	
-	toggleGroup = function(groupname){
+	check_visibility = function(layer_id, object, dependents, k){
+		dependents.forEach(function(dependent){
+			var operator = object.closest('div').querySelector('#vcheck_operator_'+dependent).value;
+			var value = object.closest('div').querySelector('#vcheck_value_'+dependent).value;
+			if(operator == '=')operator = '==';
+			if(eval("'"+object.value+"' "+operator+" '"+value+"'"))
+				object.closest('div').querySelector('#tr_'+layer_id+'_'+dependent+'_'+k).style.display = '';
+			else
+				object.closest('div').querySelector('#tr_'+layer_id+'_'+dependent+'_'+k).style.display = 'none';
+		})
+	}
+	
+	toggleGroup = function(groupname){			// fuer die spaltenweise Ansicht
 		var group_elements = document.querySelectorAll('.group_'+groupname);
 		var gap_elements = document.querySelectorAll('.gap_'+groupname);
 		var group = document.getElementById(groupname);

@@ -74,6 +74,10 @@
 		else{
 			$onchange .= 'change_all('.$layer_id.', '.$k.', \''.$layer_id.'_'.$name.'\');';
 		}
+		
+		if($attributes['dependents'][$j] != NULL){
+			$onchange .= 'check_visibility('.$layer_id.', this, [\''.implode('\',\'', $attributes['dependents'][$j]).'\'], '.$k.');';
+		}
 
 		###### Array-Typ #####
 		if (POSTGRESVERSION >= 930 AND substr($attributes['type'][$j], 0, 1) == '_'){
@@ -126,7 +130,7 @@
 					# ist ein Array oder Objekt (also entweder ein Array-Typ oder ein Datentyp) und wird zur Übertragung wieder encodiert
 					$elem_value = json_encode($elem_value);
 				}
-				if ($type_attributes['visible'][$e] == 1) {
+				if ($type_attributes['visible'][$e] != 0) {
 					$dataset2[$type_attributes['name'][$e]] = $elem_value;
 					$type_attributes['privileg'][$e] = $attributes['privileg'][$j];
 					if ($type_attributes['alias'][$e] == '') $type_attributes['alias'][$e] = $type_attributes['name'][$e];
@@ -144,7 +148,7 @@
 								</tr>
 								<tr>
 									<td colspan="2" class="gle_attribute_value">
-										' . attribute_value($gui, $layer, $type_attributes, $e, NULL, $dataset2, $tsize, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id) . '
+										' . attribute_value($gui, $layer, $type_attributes, $e, $k, $dataset2, $tsize, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id) . '
 									</td>
 								</tr>
 							';
@@ -153,14 +157,14 @@
 							$datapart .= '
 								<tr>
 									<td colspan="2" class="gle_attribute_value">
-										' . attribute_value($gui, $layer, $type_attributes, $e, NULL, $dataset2, $tsize, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id) . '
+										' . attribute_value($gui, $layer, $type_attributes, $e, $k, $dataset2, $tsize, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id) . '
 									</td>
 								</tr>
 							';
 						} break;
 						default : {
 							$datapart .= '
-								<tr>
+								<tr id="tr_'.$layer_id.'_'.$type_attributes['name'][$e].'_'.$k.'" class="' . $attribute_class . '">
 									<td valign="top" class="gle_attribute_name">
 										<table>
 											<tr>
@@ -169,10 +173,9 @@
 										</table>
 									</td>
 									<td class="gle_attribute_value">
-										' . attribute_value($gui, $layer, $type_attributes, $e, NULL, $dataset2, $tsize, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id) . '
+										' . attribute_value($gui, $layer, $type_attributes, $e, $k, $dataset2, $tsize, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id) . '
 									</td>
-								</tr>
-							';
+								</tr>';
 						}
 					}
 				}
@@ -182,6 +185,17 @@
 		}
 
 		###### normal #####
+		if($attributes['vcheck_attribute'][$j] != ''){
+			$datapart .= '<input type="hidden" id="vcheck_attribute_'.$attributes['name'][$j].'" value="'.$attributes['vcheck_attribute'][$j].'">';
+			$datapart .= '<input type="hidden" id="vcheck_operator_'.$attributes['name'][$j].'" value="'.$attributes['vcheck_operator'][$j].'">';
+			$datapart .= '<input type="hidden" id="vcheck_value_'.$attributes['name'][$j].'" value="'.$attributes['vcheck_value'][$j].'">';	
+			$number = rand();
+			$datapart .= "
+			<span id=\"".$number."\"></span>
+			<script type=\"text/javascript\">
+				check_visibility(".$layer_id.", document.getElementById('".$number."').closest('div').querySelector(\"[id='".$layer_id."_".$attributes['vcheck_attribute'][$j]."_".$k."']\"), ['".$name."'], ".$k.");
+			</script>";			
+		}
 		if($attributes['constraints'][$j] != '' AND !in_array($attributes['constraints'][$j], array('PRIMARY KEY', 'UNIQUE'))){
 			if($attributes['privileg'][$j] == '0' OR $lock[$k]){
 				$size1 = 1.3*strlen($dataset[$attributes['name'][$j]]);
