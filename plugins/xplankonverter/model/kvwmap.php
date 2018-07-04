@@ -53,10 +53,11 @@
 		return array('executed' => $executed, 'success' => $success);
 	};
 
+
 	/**
 	* Trigger für XP_Plan Objekte
 	*/
-	$this->trigger_functions['handle_rp_plan'] = function($fired, $event, $layer = '', $oid = 0, $old_dataset = array()) use ($GUI) {
+	$this->trigger_functions['handle_xp_plan'] = function($fired, $event, $layer = '', $oid = 0, $old_dataset = array()) use ($GUI) {
 		$executed = true;
 		$success = true;
 

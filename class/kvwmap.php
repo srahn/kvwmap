@@ -7725,7 +7725,15 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					$this->user->rolle->save_last_query('Layer-Suche_Suchen', $this->formvars['selected_layer_id'], $sql, $sql_order, $this->formvars['anzahl'], $this->formvars['offset_'.$layerset[0]['Layer_ID']]);
 
 					# Querymaps erzeugen
-					if($layerset[0]['querymap'] == 1 AND $attributes['privileg'][$attributes['the_geom']] >= '0' AND ($layerset[0]['Datentyp'] == 1 OR $layerset[0]['Datentyp'] == 2)){
+					if (
+						$this->formvars['format'] != 'json' AND
+						$layerset[0]['querymap'] == 1 AND
+						$attributes['privileg'][$attributes['the_geom']] >= '0'
+						AND (
+							$layerset[0]['Datentyp'] == 1 OR
+							$layerset[0]['Datentyp'] == 2
+						)
+					) {
 						$layerset[0]['attributes'] = $attributes;
 						for($k = 0; $k < count($layerset[0]['shape']); $k++){
 							$layerset[0]['querymaps'][$k] = $this->createQueryMap($layerset[0], $k);
