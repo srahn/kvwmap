@@ -15,6 +15,12 @@
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
 <!--
+
+function update_visibility_form(visibility, attributename){
+	if(visibility == 2)document.getElementById('visibility_form_'+attributename).style.display = '';
+	else document.getElementById('visibility_form_'+attributename).style.display = 'none';
+}
+
 function submitLayerSelector() {
 	var element = document.getElementById('selected_datatype_id');
 	    element.value = '<?php echo $strPleaseSelect; ?>';
@@ -323,7 +329,7 @@ function toLayerEditor(){
 											$this->attributes['visible'][$i],
 											1,
 											'width: 75px',
-											'update_visibility_form(\''.$this->attributes['name'][$i].'\')'
+											'update_visibility_form(this.value, \''.$this->attributes['name'][$i].'\')'
 										); ?>
 										</td>
 										<td id="visibility_form_<? echo $this->attributes['name'][$i]; ?>" style="<? echo ($this->attributes['visible'][$i] == 2 ? '' : 'display:none') ?>">
