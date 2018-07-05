@@ -17784,13 +17784,18 @@ class Document {
 			SET
 				id = COALESCE(
 					(
-						SELECT
-							max(id) + 1 AS new_id
+						SELECT 
+							new_id
 						FROM
-							druckausschnitte
-						WHERE
-							stelle_id = " . $stelle_id . " AND
-							user_id = " . $user_id . "
+						(
+							SELECT
+								max(id) + 1 AS new_id
+							FROM
+								druckausschnitte
+							WHERE
+								stelle_id = " . $stelle_id . " AND
+								user_id = " . $user_id . "
+						) as foo
 					),
 					1
 				),
