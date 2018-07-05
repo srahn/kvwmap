@@ -351,34 +351,30 @@
 
 				case 'SubFormEmbeddedPK' : {
 					$datapart .= '<div id="'.$layer_id.'_'.$name.'_'.$k.'"><img src="'.GRAPHICSPATH.'leer.gif" ';
-					if($gui->new_entry != true AND $no_query != true){
-						$datapart .= 'onload="ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
-										$data = '';
-										for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
-											$data .= '&value_'.$attributes['subform_pkeys'][$j][$p].'='.$dataset[$attributes['subform_pkeys'][$j][$p]];
-											$data .= '&operator_'.$attributes['subform_pkeys'][$j][$p].'==';
-										}
-										$data .= '&preview_attribute='.$attributes['preview_attribute'][$j];
-										$data .= '&count='.$k;
-										$data .= '&no_new_window='.$attributes['no_new_window'][$j];
-										$datapart .= $data;
-										$datapart .= '&data='.str_replace('&', '<und>', $data);
-										$datapart .= '&embedded_subformPK=true';
-										if($attributes['embedded'][$j] == true){
-											$datapart .= '&embedded=true';
-										}
-										$datapart .= '&targetobject='.$layer_id.'_'.$name.'_'.$k.'&targetlayer_id='.$layer_id.'&targetattribute='.$name;
-										$datapart .= '\', new Array(document.getElementById(\''.$layer_id.'_'.$name.'_'.$k.'\')), new Array(\'sethtml\'));
-									"';
-					}
-					$datapart .= '></div><table width="98%" cellspacing="0" cellpadding="2"><tr style="border: none"><td width="100%" align="right">';
-					$no_query = false;
-					for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
-						if($dataset[$attributes['subform_pkeys'][$j][$p]] == ''){
-							$no_query = true;
+					if($gui->new_entry != true){
+						$subform_request = true;
+						$onload = 'onload="ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
+						$data = '';
+						for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
+							if($dataset[$attributes['subform_pkeys'][$j][$p]] == '')$subform_request = false;		// eines der Verknüpfungsattribute ist leer -> keinen Subform-Request machen
+							$data .= '&value_'.$attributes['subform_pkeys'][$j][$p].'='.$dataset[$attributes['subform_pkeys'][$j][$p]];
+							$data .= '&operator_'.$attributes['subform_pkeys'][$j][$p].'==';
 						}
+						$data .= '&preview_attribute='.$attributes['preview_attribute'][$j];
+						$data .= '&count='.$k;
+						$data .= '&no_new_window='.$attributes['no_new_window'][$j];
+						$onload .= $data;
+						$onload .= '&data='.str_replace('&', '<und>', $data);
+						$onload .= '&embedded_subformPK=true';
+						if($attributes['embedded'][$j] == true){
+							$onload .= '&embedded=true';
+						}
+						$onload .= '&targetobject='.$layer_id.'_'.$name.'_'.$k.'&targetlayer_id='.$layer_id.'&targetattribute='.$name;
+						$onload .= '\', new Array(document.getElementById(\''.$layer_id.'_'.$name.'_'.$k.'\')), new Array(\'sethtml\'));
+					"';
 					}
-					if($gui->new_entry != true AND $no_query != true){
+					$datapart .= ($subform_request? $onload : '').'></div><table width="98%" cellspacing="0" cellpadding="2"><tr style="border: none"><td width="100%" align="right">';
+					if($gui->new_entry != true AND $subform_request){
 						$datapart .= '<a id="show_all_'.$layer_id.'_'.$name.'_'.$k.'" style="font-size: '.$linksize.'px;display:none" class="buttonlink" href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
 						for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
 							$datapart .= '&value_'.$attributes['subform_pkeys'][$j][$p].'='.$dataset[$attributes['subform_pkeys'][$j][$p]];
