@@ -23,16 +23,16 @@ class Konvertierung extends PgObject {
 		'INSPIRE_GML_ERSTELLUNG_OK'  => 'INSPIRE-GML-Erstellung abgeschlossen',
 		'INSPIRE_GML_ERSTELLUNG_ERR' => 'INSPIRE-GML-Erstellung abgebrochen'
 	);
-	static $write_debug = false;
+	static $write_debug = true;
 
 	function Konvertierung($gui) {
 		$this->PgObject($gui, Konvertierung::$schema, Konvertierung::$tableName);
 	}
 
 	public static	function find_by_id($gui, $by, $id) {
-		#echo '<br>find konvertierung by ' . $by . ' = ' . $id;
 		$konvertierung = new Konvertierung($gui);
 		$konvertierung->find_by($by, $id);
+		$konvertierung->debug->show('Found Konvertierung with planart: ' . $konvertierung->get('planart'), Konvertierung::$write_debug);
 		if ($konvertierung->get('planart') != '') {
 			$konvertierung->get_plan();
 		}
@@ -234,12 +234,17 @@ class Konvertierung extends PgObject {
 
 	function get_plan() {
 		if (!$this->plan) {
+			$this->debug->show('get_plan with planart: ' . $this->get('planart'), Konvertierung::$write_debug);
 			$plan = new XP_Plan($this->gui, $this->get('planart'));
 			$plan = $plan->find_where('konvertierung_id = ' . $this->get('id'));
-			if ($plan > 0)
+			$this->debug->show('found ' . count($plan) . ' Pläne', Konvertierung::$write_debug);
+			if (count($plan) > 0) {
 				$this->plan = $plan[0];
-			else
+				$this->debug->show('get_plan assign first plan with planart: ' . $this->plan->planart . ' gml_id: ' . $this->plan->get('gml_id') . ' to Konvertierung.', Konvertierung::$write_debug);
+			}
+			else {
 				$this->plan = false;
+			}
 		}
 		return $this->plan;
 	}
@@ -288,7 +293,7 @@ class Konvertierung extends PgObject {
 	}
 
 	function set_status($new_status = '') {
-		$this->debug->show('<br>Setze status in Konvertierung.', false);
+		$this->debug->show('<br>Setze status in Konvertierung.', Konvertierung::$write_debug);
 		if ($new_status == '') {
 			$sql = "
 				SELECT DISTINCT
@@ -303,7 +308,7 @@ class Konvertierung extends PgObject {
 				WHERE
 					k.id = {$this->get('id')}
 			";
-			$this->debug->show('<br>Setze Status mit sql: ' . $sql, false);
+			$this->debug->show('<br>Setze Status mit sql: ' . $sql, Konvertierung::$write_debug);
 			$query = pg_query($this->database->dbConn, $sql);
 			$result = pg_fetch_assoc($query);
 			$plan_or_regel_assigned = $result['plan_or_regel_assigned'];
@@ -337,7 +342,7 @@ class Konvertierung extends PgObject {
 	*
 	*/
 	function create_layer_group($layer_type) {
-		$this->debug->show('Konvertierung create_layer_group layer_type: ' . $layer_type, false);
+		$this->debug->show('Konvertierung create_layer_group layer_type: ' . $layer_type, Konvertierung::$write_debug);
 		$layer_group_id = $this->get(strtolower($layer_type) . '_layer_group_id');
 		if (empty($layer_group_id)) {
 			$layerGroup = new MyObject($this->gui, 'u_groups');
@@ -356,7 +361,7 @@ class Konvertierung extends PgObject {
 	*
 	*/
 	function delete_layer_group($layer_type) {
-		$this->debug->show('delete_layer_group typ: ' . $layer_type, false);
+		$this->debug->show('delete_layer_group typ: ' . $layer_type, Konvertierung::$write_debug);
 		$layer_group_id = $this->get(strtolower($layer_type) . '_layer_group_id');
 		if (!empty($layer_group_id)) {
 			$layer_group = new MyObject($this->gui, 'u_groups');

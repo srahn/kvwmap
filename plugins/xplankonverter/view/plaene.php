@@ -6,7 +6,7 @@
 	$(function () {
 		result = $('#eventsResult');
 		result.success = function(text) {
-			message([{ type: 'notice', msg: text}], 3000, 3000, '13%');
+//			message([{ type: 'notice', msg: text}], 1000, 500, '13%');
 /*			result.text(text);
 			result.removeClass('alert-danger');
 			result.addClass('alert-success');*/
@@ -202,6 +202,27 @@
 	};
 
 	// formatter functions
+	function konvertierungGemeindeFormatter(value, row) {
+		var gemeinden = JSON.parse(value);
+		return $.map(
+			gemeinden,
+			function(gemeinde) {
+				return gemeinde.gemeindename;
+			}
+		).join(', ')
+	}
+
+	function konvertierungEditFunctionsFormatter(value, row) {
+		var funcIsAllowed,
+				funcIsInProgress,
+				disableFrag = ' disabled" onclick="return false',
+				output = '<span class="btn-group" role="group" konvertierung_oid="' + row.konvertierungen_oid + '" konvertierung_id="' + value + '">';
+		output += '<a title="Plan bearbeiten" class="btn btn-link btn-xs xpk-func-btn" href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<?php echo $this->plan_layer_id ?>&operator_plan_gml_id==&value_plan_gml_id=' + row.plan_gml_id + '"><i class="btn-link fa fa-lg fa-pencil"></i></a>';
+		output += '<a title="Konvertierung l&ouml;schen" class="btn btn-link btn-xs xpk-func-btn xpk-func-del-konvertierung" href="#"><i class="btn-link fa fa-lg fa-trash"></i></a>';
+		output += '</span>';
+		return output;
+	}
+
 	function konvertierungFunctionsFormatter(value, row) {
 		var funcIsAllowed,
 				funcIsInProgress,
@@ -209,18 +230,6 @@
 				output = '<span class="btn-group" role="group" konvertierung_oid="' + row.konvertierungen_oid + '" konvertierung_id="' + value + '">';
 
 		// enabled by status of konvertierung
-		// Bearbeiten
-		funcIsAllowed = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['IN_ERSTELLUNG'     ]; ?>"
-                 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['ERSTELLT'          ]; ?>"
-                 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['KONVERTIERUNG_OK'  ]; ?>"
-                 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['KONVERTIERUNG_ERR' ]; ?>"
-                 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_OK' ]; ?>"
-                 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_ERR']; ?>"
-                 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']; ?>"
-                 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
-
-		output += '<a title="Plan bearbeiten" class="btn btn-link btn-xs xpk-func-btn' + (funcIsAllowed ? '' : disableFrag) + '" href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<?php echo $this->plan_layer_id ?>&operator_plan_gml_id==&value_plan_gml_id=' + row.plan_gml_id + '"><i class="btn-link fa fa-lg fa-pencil"></i></a>';
-
 		// Shapefile upload
     funcIsAllowed = true; // function is always allowed
 		output += '<a title="Shapefiles bearbeiten" class="btn btn-link btn-xs	xpk-func-btn' + (funcIsAllowed ? '' : disableFrag) + '" href="index.php?go=xplankonverter_shapefiles_index&konvertierung_id=' + value + '"><i class="btn-link fa fa-lg fa-upload"></i></a>';
@@ -261,17 +270,6 @@
 			funcIsInProgress = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['IN_INSPIRE_GML_ERSTELLUNG']; ?>";
 			output += '<a title="INSPIRE-GML-Datei erzeugen" class="btn btn-link btn-xs xpk-func-btn xpk-func-generate-inspire-gml' + (funcIsAllowed ? '' : disableFrag) + '" href="#"><i class="' + (funcIsInProgress ? 'btn-link fa fa-spinner fa-pulse fa-fw' : 'btn-link fa fa-lg fa-globe') + '"></i></a>';
 		}
-
-		// Konvertierung Löschen
-    funcIsAllowed = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['IN_ERSTELLUNG'     ]; ?>"
-                 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['ERSTELLT'          ]; ?>"
-                 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['KONVERTIERUNG_OK'  ]; ?>"
-                 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['KONVERTIERUNG_ERR' ]; ?>"
-                 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_OK' ]; ?>"
-                 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_ERR']; ?>"
-                 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']; ?>"
-                 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
-		output += '<a title="Konvertierung l&ouml;schen" class="btn btn-link btn-xs xpk-func-btn xpk-func-del-konvertierung' + (funcIsAllowed ? '' : disableFrag) + '" href="#"><i class="btn-link fa fa-lg fa-trash"></i></a>';
 
 		output += '</span>';
 		return output;
@@ -343,7 +341,8 @@
 	};
 
 </script>
-<h2><?php echo $this->list_title; ?></h2>
+<h2><?php echo $this->title; ?></h2>
+<button type="button" id="new_konvertierung" name="go_plus" onclick="location.href='index.php?go=neuer_Layer_Datensatz&selected_layer_id=<?php echo $this->plan_layer_id ?>'">neu</button>
 <!--div class="alert alert-success" style="white-space: pre-wrap" id="eventsResult">
 		Here is the result of event.
 </div//-->
@@ -354,7 +353,7 @@
 	data-height="100%"
 	data-click-to-select="false"
 	data-filter-control="true" 
-	data-sort-name="bezeichnung"
+	data-sort-name="gemeinde"
 	data-sort-order="asc"
 	data-search="true"
 	data-show-export="false"
@@ -395,6 +394,13 @@
 				data-visible="true"
 			>Name</th>
 			<th
+				data-field="gemeinde"
+				data-visible="true"
+				data-sortable="true"
+				data-formatter="konvertierungGemeindeFormatter"
+				class="col-md-2"
+			>Gemeinden</th>
+			<th
 				data-field="konvertierung_status"
 				data-visible="true"
 				data-sortable="true"
@@ -405,16 +411,20 @@
 				data-visible="true"
 				data-formatter="konvertierungFunctionsFormatter"
 				data-switchable="false"
-				class="col-md-2"
-			>Funktionen</th>
+			>Funktionen&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
 			<th
 				data-field="konvertierung_id"
 				data-visible="true"
 				data-formatter="konvertierungDownloadsFormatter"
 				data-switchable="false"
-				class="col-md-2"
-			>Downloads</th>
+			>Downloads&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+			<th
+				data-field="konvertierung_id"
+				data-visible="true"
+				data-formatter="konvertierungEditFunctionsFormatter"
+				data-switchable="false"
+			>Edit&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
 		</tr>
 	</thead>
 </table>
-<button style="margin-bottom: 10px" type="button" id="new_konvertierung" name="go_plus" onclick="location.href='index.php?go=neuer_Layer_Datensatz&selected_layer_id=<?php echo $this->plan_layer_id ?>&attributenames[0]=planart&values[0]=<?php echo $this->formvars['planart']; ?>'">neu</button>
+<button style="margin-bottom: 10px" type="button" id="new_konvertierung" name="go_plus" onclick="location.href='index.php?go=neuer_Layer_Datensatz&selected_layer_id=<?php echo $this->plan_layer_id ?>'">neu</button>

@@ -78,6 +78,22 @@
 		else{
 			$onchange .= 'change_all('.$layer_id.', '.$k.', \''.$layer_id.'_'.$name.'\');';
 		}
+		
+		if($attributes['dependents'][$j] != NULL){
+			$onchange .= 'check_visibility('.$layer_id.', this, [\''.implode('\',\'', $attributes['dependents'][$j]).'\'], '.$k.');';
+		}
+		
+		if($attributes['vcheck_attribute'][$j] != ''){
+			$after_attribute .= '<input type="hidden" id="vcheck_attribute_'.$attributes['name'][$j].'" value="'.$attributes['vcheck_attribute'][$j].'">';
+			$after_attribute .= '<input type="hidden" id="vcheck_operator_'.$attributes['name'][$j].'" value="'.$attributes['vcheck_operator'][$j].'">';
+			$after_attribute .= '<input type="hidden" id="vcheck_value_'.$attributes['name'][$j].'" value="'.$attributes['vcheck_value'][$j].'">';	
+			$number = rand();
+			$after_attribute .= "
+			<span id=\"".$number."\"></span>
+			<script type=\"text/javascript\">
+				check_visibility(".$layer_id.", document.getElementById('".$number."').closest('table').querySelector(\"[id='".$layer_id."_".$attributes['vcheck_attribute'][$j]."_".$k."']\"), ['".$name."'], ".$k.");
+			</script>";			
+		}
 
 		###### Array-Typ #####
 		if (POSTGRESVERSION >= 930 AND substr($attributes['type'][$j], 0, 1) == '_'){
@@ -108,7 +124,7 @@
 			if($attributes['privileg'][$j] == '1' AND !$lock[$k]){
 				$datapart .= '<div style="padding: 3px 10px 3px 3px;float: right"><a href="javascript:addArrayElement(\''.$id.'\', \''.$attributes['form_element_type'][$j].'\', \''.$oid.'\')" class="buttonlink"><span>'.$strNewEmbeddedPK.'</span></a></div>';
 			}
-			return $datapart;
+			return $datapart.$after_attribute;
 		}
 
 		###### Nutzer-Datentyp #####
@@ -130,7 +146,7 @@
 					# ist ein Array oder Objekt (also entweder ein Array-Typ oder ein Datentyp) und wird zur Übertragung wieder encodiert
 					$elem_value = json_encode($elem_value);
 				}
-				if ($type_attributes['visible'][$e] == 1) {
+				if ($type_attributes['visible'][$e] != 0) {
 					$dataset2[$type_attributes['name'][$e]] = $elem_value;
 					$type_attributes['privileg'][$e] = $attributes['privileg'][$j];
 					if ($type_attributes['alias'][$e] == '') $type_attributes['alias'][$e] = $type_attributes['name'][$e];
@@ -148,7 +164,7 @@
 								</tr>
 								<tr>
 									<td colspan="2" class="gle_attribute_value">
-										' . attribute_value($gui, $layer, $type_attributes, $e, NULL, $dataset2, $tsize, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id) . '
+										' . attribute_value($gui, $layer, $type_attributes, $e, $k, $dataset2, $tsize, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id) . '
 									</td>
 								</tr>
 							';
@@ -157,15 +173,15 @@
 							$datapart .= '
 								<tr>
 									<td colspan="2" class="gle_attribute_value">
-										' . attribute_value($gui, $layer, $type_attributes, $e, NULL, $dataset2, $tsize, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id) . '
+										' . attribute_value($gui, $layer, $type_attributes, $e, $k, $dataset2, $tsize, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id) . '
 									</td>
 								</tr>
 							';
 						} break;
 						default : {
 							$datapart .= '
-								<tr>
-									<td valign="top" class="gle-attribute-name">
+								<tr id="tr_'.$layer_id.'_'.$type_attributes['name'][$e].'_'.$k.'" class="' . $attribute_class . '">
+									<td valign="top" class="gle_attribute_name">
 										<table>
 											<tr>
 												<td>' . $type_attributes['alias'][$e] . '</td>
@@ -173,16 +189,15 @@
 										</table>
 									</td>
 									<td class="gle_attribute_value">
-										' . attribute_value($gui, $layer, $type_attributes, $e, NULL, $dataset2, $tsize, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id) . '
+										' . attribute_value($gui, $layer, $type_attributes, $e, $k, $dataset2, $tsize, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id) . '
 									</td>
-								</tr>
-							';
+								</tr>';
 						}
 					}
 				}
 			}
 			$datapart .= '</table>';
-			return $datapart;
+			return $datapart.$after_attribute;
 		}
 
 		###### normal #####
@@ -706,7 +721,7 @@
 				}
 			}
 		}
-		return $datapart;
+		return $datapart.$after_attribute;
 	}
 
 	function Autovervollstaendigungsfeld($layer_id, $name, $j, $alias, $fieldname, $value, $output, $privileg, $k, $oid, $subform_layer_id, $subform_layer_privileg, $embedded, $lock, $fontsize, $change_all, $size, $onchange, $field_class){

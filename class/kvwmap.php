@@ -8530,8 +8530,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							}
 
 							$last_oid = pg_last_oid($ret['query']);
-							if($this->formvars['embedded'] == '')$this->formvars['value_' . $table['tablename'] . '_oid'] = $last_oid;
-
+							if($this->formvars['embedded'] == '') $this->formvars['value_' . $table['tablename'] . '_oid'] = $last_oid;
+							echo '<br>tablename: ' . $table['tablename'];
+							echo '<br>last_oid: ' . $last_oid;
+							echo '<br>formvar name:' . 'value_' . $table['tablename'] . '_oid';
+							echo '<br>form: ' . $this->formvars['value_' . $table['tablename'] . '_oid'];
 							# After Insert trigger
 							if (!empty($layerset[0]['trigger_function'])) {
 								$this->exec_trigger_function('AFTER', 'INSERT', $layerset[0], $last_oid);
@@ -8616,7 +8619,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         	$this->formvars['last_doing'] = '';
         	$this->neuer_Layer_Datensatz();
         }
-        else{
+        else {
+					echo '<br>tablename: ' . $table['tablename'];
+					echo '<br>last_oid: ' . $last_oid;
+					echo '<br>form: ' . $this->formvars['value_' . $table['tablename'] . '_oid'];
+					echo '<br>';
+					var_dump($this->formvars);
         	$this->GenerischeSuche_Suchen();
         }
       }
@@ -16374,8 +16382,13 @@ class db_mapObj{
 		}
 		$language_columns = (count($language_columns) > 0 ? implode(',
 					', $language_columns) . ',' : '');
-
+					
 		for ($i = 0; $i < count($attributes['name']); $i++) {
+			if($formvars['visible_' . $attributes['name'][$i]] != 2 OR $formvars['vcheck_value_'.$attributes['name'][$i]] == ''){
+				$formvars['vcheck_attribute_'.$attributes['name'][$i]] = '';
+				$formvars['vcheck_operator_'.$attributes['name'][$i]] = '';
+				$formvars['vcheck_value_'.$attributes['name'][$i]] = '';
+			}
 			$sql = "
 				INSERT INTO
 					datatype_attributes
@@ -16392,6 +16405,9 @@ class db_mapObj{
 					`mandatory` = " . ($formvars['mandatory_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['mandatory_' . $attributes['name'][$i]]) . ",
 					`quicksearch` = " . ($formvars['quicksearch_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['quicksearch_' . $attributes['name'][$i]]) . ",
 					`visible` = " . ($formvars['visible_' . $attributes['name'][$i]] == '' ? "0" : $formvars['visible_' . $attributes['name'][$i]]) . ",
+					`vcheck_attribute`= '".$formvars['vcheck_attribute_'.$attributes['name'][$i]]."',
+					`vcheck_operator`= '".$formvars['vcheck_operator_'.$attributes['name'][$i]]."',
+					`vcheck_value`= '".$formvars['vcheck_value_'.$attributes['name'][$i]]."',
 					`arrangement` = " . ($formvars['arrangement_' . $attributes['name'][$i]] == '' ? "0" : $formvars['arrangement_' . $attributes['name'][$i]]) . ",
 					`labeling` = " . ($formvars['labeling_' . $attributes['name'][$i]] == '' ? "0" : $formvars['labeling_' . $attributes['name'][$i]]) . "
 				ON DUPLICATE KEY UPDATE
@@ -16406,6 +16422,9 @@ class db_mapObj{
 					`mandatory` = " . ($formvars['mandatory_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['mandatory_' . $attributes['name'][$i]]) . ",
 					`quicksearch` = " . ($formvars['quicksearch_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['quicksearch_' . $attributes['name'][$i]]) . ",
 					`visible` = " . ($formvars['visible_' . $attributes['name'][$i]] == '' ? "0" : $formvars['visible_' . $attributes['name'][$i]]) . ",
+					`vcheck_attribute`= '".$formvars['vcheck_attribute_'.$attributes['name'][$i]]."',
+					`vcheck_operator`= '".$formvars['vcheck_operator_'.$attributes['name'][$i]]."',
+					`vcheck_value`= '".$formvars['vcheck_value_'.$attributes['name'][$i]]."',					
 					`arrangement` = " . ($formvars['arrangement_' . $attributes['name'][$i]] == '' ? "0" : $formvars['arrangement_' . $attributes['name'][$i]]) . ",
 					`labeling` = " . ($formvars['labeling_' . $attributes['name'][$i]] == '' ? "0" : $formvars['labeling_' . $attributes['name'][$i]]) . "
 			";
@@ -16430,6 +16449,11 @@ class db_mapObj{
 					$alias_rows .= "`alias_" . $language . "` = '" . $formvars['alias_' . $language . '_' . $attributes['name'][$i]] . "',";
 				}
 			}
+			if($formvars['visible_' . $attributes['name'][$i]] != 2 OR $formvars['vcheck_value_'.$attributes['name'][$i]] == ''){
+				$formvars['vcheck_attribute_'.$attributes['name'][$i]] = '';
+				$formvars['vcheck_operator_'.$attributes['name'][$i]] = '';
+				$formvars['vcheck_value_'.$attributes['name'][$i]] = '';
+			}
 			$rows = "
 				`name` = '" . $attributes['name'][$i] . "', " .
 				$alias_rows . "
@@ -16443,7 +16467,10 @@ class db_mapObj{
 				`dont_use_for_new`= " . ($formvars['dont_use_for_new_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['dont_use_for_new_' . $attributes['name'][$i]]) . ",
 				`mandatory` = " . ($formvars['mandatory_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['mandatory_' . $attributes['name'][$i]]) . ",
 				`quicksearch`= " . ($formvars['quicksearch_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['quicksearch_' . $attributes['name'][$i]]) . ",
-				`visible`= ".($formvars['visible_'.$attributes['name'][$i]] == '' ? "0" : $formvars['visible_'.$attributes['name'][$i]])."
+				`visible`= ".($formvars['visible_'.$attributes['name'][$i]] == '' ? "0" : $formvars['visible_'.$attributes['name'][$i]]).",
+				`vcheck_attribute`= '".$formvars['vcheck_attribute_'.$attributes['name'][$i]]."',
+				`vcheck_operator`= '".$formvars['vcheck_operator_'.$attributes['name'][$i]]."',
+				`vcheck_value`= '".$formvars['vcheck_value_'.$attributes['name'][$i]]."'
 			";
 			$sql = "
 				INSERT INTO
@@ -16528,6 +16555,9 @@ class db_mapObj{
 				`privileg`,
 				`query_tooltip`,
 				`visible`,
+				`vcheck_attribute`,
+				`vcheck_operator`,
+				`vcheck_value`,				
 				`arrangement`,
 				`labeling`
 			FROM
@@ -16612,6 +16642,11 @@ class db_mapObj{
 			$attributes['privileg'][$i]= $rs['privileg'];
 			$attributes['query_tooltip'][$i]= $rs['query_tooltip'];
 			$attributes['visible'][$i]= $rs['visible'];
+			$attributes['vcheck_attribute'][$i] = $rs['vcheck_attribute'];
+			$attributes['vcheck_operator'][$i] = $rs['vcheck_operator'];
+			$attributes['vcheck_value'][$i] = $rs['vcheck_value'];
+			$attributes['dependents'][$i] = &$dependents[$rs['name']];
+			$dependents[$rs['vcheck_attribute']][] = $rs['name'];
 			$attributes['arrangement'][$i]= $rs['arrangement'];
 			$attributes['labeling'][$i]= $rs['labeling'];
 			$i++;
@@ -16666,6 +16701,9 @@ class db_mapObj{
 				`mandatory`,
 				`quicksearch`,
 				`visible`,
+				`vcheck_attribute`,
+				`vcheck_operator`,
+				`vcheck_value`,
 				`order`,
 				`privileg`,
 				`query_tooltip`
@@ -16746,6 +16784,10 @@ class db_mapObj{
 			$attributes['mandatory'][$i] = $rs['mandatory'];
 			$attributes['quicksearch'][$i] = $rs['quicksearch'];
 			$attributes['visible'][$i] = $rs['visible'];
+			$attributes['vcheck_attribute'][$i] = $rs['vcheck_attribute'];
+			$attributes['vcheck_operator'][$i] = $rs['vcheck_operator'];
+			$attributes['vcheck_value'][$i] = $rs['vcheck_value'];
+			$attributes['dependents'][$attributes['indizes'][$rs['vcheck_attribute']]][] = $rs['name'];
 			$attributes['privileg'][$i] = $rs['privileg'];
 			$attributes['query_tooltip'][$i] = $rs['query_tooltip'];
 			if($rs['form_element_type'] == 'Style'){

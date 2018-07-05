@@ -108,7 +108,7 @@
 					
 						if($attributes['arrangement'][$j] != 1){	# wenn Attribut nicht daneben -> neue Zeile beginnen
 							$attributes_in_row_so_far = 1;					# Attributanzahl in dieser Zeile bis zu diesem Attribut
-							$datapart .= '<tr class="' . $attribute_class . '">';
+							$datapart .= '<tr id="tr_'.$layer['Layer_ID'].'_'.$attributes['name'][$j].'_'.$k.'" class="' . $attribute_class . '">';
 						}
 						else $attributes_in_row_so_far++;
 						if($attributes['labeling'][$j] != 2){

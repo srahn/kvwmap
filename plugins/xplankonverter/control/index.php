@@ -79,7 +79,7 @@ switch ($go) {
 	} break;
 
 	case 'xplankonverter_plaene_index' : {
-		$this->title = str_replace('an', 'aene', $this->title);
+		$this->title = str_replace('an', 'äne', $this->title);
 		$this->main = '../../plugins/xplankonverter/view/plaene.php';
 		$this->output();
 	} break;
