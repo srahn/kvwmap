@@ -80,19 +80,14 @@
 		}
 		
 		if($attributes['dependents'][$j] != NULL){
-			$onchange .= 'check_visibility('.$layer_id.', this, [\''.implode('\',\'', $attributes['dependents'][$j]).'\'], '.$k.');';
+			$field_class .= ' visibility_changer';
+			$onchange .= 'this.oninput();" oninput="check_visibility('.$layer_id.', this, [\''.implode('\',\'', $attributes['dependents'][$j]).'\'], '.$k.');';
 		}
 		
 		if($attributes['vcheck_attribute'][$j] != ''){
 			$after_attribute .= '<input type="hidden" id="vcheck_attribute_'.$attributes['name'][$j].'" value="'.$attributes['vcheck_attribute'][$j].'">';
 			$after_attribute .= '<input type="hidden" id="vcheck_operator_'.$attributes['name'][$j].'" value="'.$attributes['vcheck_operator'][$j].'">';
-			$after_attribute .= '<input type="hidden" id="vcheck_value_'.$attributes['name'][$j].'" value="'.$attributes['vcheck_value'][$j].'">';	
-			$number = rand();
-			$after_attribute .= "
-			<span id=\"".$number."\"></span>
-			<script type=\"text/javascript\">
-				check_visibility(".$layer_id.", document.getElementById('".$number."').closest('table').querySelector(\"[id='".$layer_id."_".$attributes['vcheck_attribute'][$j]."_".$k."']\"), ['".$name."'], ".$k.");
-			</script>";			
+			$after_attribute .= '<input type="hidden" id="vcheck_value_'.$attributes['name'][$j].'" value="'.htmlentities($attributes['vcheck_value'][$j]).'">';
 		}
 
 		###### Array-Typ #####
@@ -104,6 +99,7 @@
 			$elements = json_decode($value);		# diese Funktion decodiert immer den kommpletten String
 			$attributes2 = $attributes;
 			$attributes2['name'][$j] = '';
+			$attributes2['dependents'][$j] = '';		// die Array-Elemente sollen keine Visibility-Changer sein, nur das gemeinsame Hidden-Feld oben
 			$attributes2['table_name'][$attributes2['name'][$j]] = $tablename;
 			$attributes2['type'][$j] = substr($attributes['type'][$j], 1);			
 			$dataset2[$tablename.'_oid'] = $oid;
@@ -180,7 +176,7 @@
 						} break;
 						default : {
 							$datapart .= '
-								<tr id="tr_'.$layer_id.'_'.$type_attributes['name'][$e].'_'.$k.'" class="' . $attribute_class . '">
+								<tr id="tr_'.$layer_id.'_'.$type_attributes['name'][$e].'_'.$k.'" style="'.($type_attributes['vcheck_attribute'][$e] != ''? 'display: none' : '').'" class="' . $attribute_class . '">
 									<td valign="top" class="gle_attribute_name">
 										<table>
 											<tr>

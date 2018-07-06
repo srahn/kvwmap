@@ -36,8 +36,6 @@ include('funktionen/input_check_functions.php');
 	check_visibility = function(layer_id, object, dependents, k){
 		if(object == null)return;
 		dependents.forEach(function(dependent){
-			console.log(object.closest('table'));
-			console.log('#vcheck_operator_'+dependent);
 			var operator = object.closest('table').querySelector('#vcheck_operator_'+dependent).value;
 			var value = object.closest('table').querySelector('#vcheck_value_'+dependent).value;
 			if(operator == '=')operator = '==';

@@ -19,7 +19,7 @@ class XP_Plan extends PgObject {
 		$this->select = $select;
 		$this->identifier = 'gml_id';
 		$this->identifier_type = 'text';
-		$this->debug->show('Objekt XP_Plan created with planart: ' . $this->planart . ' tableName: ' . $this->tableName, true);
+		$this->debug->show('Objekt XP_Plan created with planart: ' . $this->planart . ' tableName: ' . $this->tableName, false);
 	}
 
 	public static	function find_by_id($gui, $by, $id, $planart) {

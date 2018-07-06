@@ -58,7 +58,7 @@
 	* Trigger für XP_Plan Objekte
 	*/
 	$this->trigger_functions['handle_xp_plan'] = function($fired, $event, $layer = '', $oid = 0, $old_dataset = array()) use ($GUI) {
-		echo '<br>Trigger Funktion handle_xp_plan ' . $fired . ' ' . $event . ' aufgerufen.';
+		#echo '<br>Trigger Funktion handle_xp_plan ' . $fired . ' ' . $event . ' aufgerufen.';
 		$executed = true;
 		$success = true;
 
@@ -85,17 +85,20 @@
 
 				# Create Konvertierung and get konvertierung_id
 				$konvertierung = new Konvertierung($this);
-				$konvertierung_id = $konvertierung->create(array(
-					'bezeichnung' => $xp_plan->get_anzeige_name(),
-					'epsg' => 25833,
-					'planart' => $planart
-				));
+				$konvertierung_id = $konvertierung->create(
+					$xp_plan->get_anzeige_name(),
+					$this->Stelle->epsg_code,
+					$this->user->rolle->epsg_code,
+					$planart,
+					$this->Stelle->id,
+					$this->user->id
+				);
 
 				$xp_plan->set('konvertierung_id', $konvertierung_id);
 				$xp_plan->update();
 
 				$konvertierung = $konvertierung->find_by_id($this, 'id', $konvertierung_id);
-				$this->debug->show('Trigger ' . $fired . ' ' . $event . ' konvertierung planart: ' . $konvertierung->get('planart') . ' plan planart: ' . $konvertierung->plan->get('planart'), true);
+				$this->debug->show('Trigger ' . $fired . ' ' . $event . ' konvertierung planart: ' . $konvertierung->get('planart') . ' plan planart: ' . $konvertierung->plan->get('planart'), false);
 				$konvertierung->set_status();
 			} break;
 
@@ -107,11 +110,11 @@
 			} break;
 
 			default : {
-				echo '<br>Default Case in ' . $fired . ' ' . $event . ' Triggerfunktion, tuhe nichts!';
+				#echo '<br>Default Case in ' . $fired . ' ' . $event . ' Triggerfunktion, tuhe nichts!';
 				$executed = false;
 			}
 		}
-		echo '<br>Trigger Funktion ' . $fired . ' ' . $event . ' ausgeführt: ' . ($executed ? 'Ja' : 'Nein');
+		#echo '<br>Trigger Funktion ' . $fired . ' ' . $event . ' ausgeführt: ' . ($executed ? 'Ja' : 'Nein');
 		return array('executed' => $executed, 'success' => $success);
 	};
 

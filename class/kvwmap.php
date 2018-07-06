@@ -8315,6 +8315,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 		$layerdb->setClientEncoding();
 		$attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
+		$doc_path = $layerset[0]['document_path'];
+		$doc_url = $layerset[0]['document_url'];
 		$layer_epsg = $layerset[0]['epsg_code'];
 		$client_epsg = $this->user->rolle->epsg_code;
 		$form_fields = explode('|', $this->formvars['form_field_names']);
@@ -8349,8 +8351,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		# Dokumente speichern
 		if(count($document_attributes)> 0){
 			foreach($document_attributes as $i => $document_attribute){
-				$doc_path = $layerset[0]['document_path'];
-				$doc_url = $layerset[0]['document_url'];
 				$options = $attributes['options'][$attribute_name];
 				if(substr($attr_oid['datatype'], 0, 1) == '_'){
 					// ein Array aus Dokumenten, hier enthält der JSON-String eine Mischung aus bereits vorhandenen,
@@ -8482,7 +8482,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						}
 						if($table['type'][$i] != 'Dokument' AND (substr($table['datatype'][$i], 0, 1) == '_' OR is_numeric($table['datatype'][$i]))){		// bei Dokumenten wurde das JSON schon weiter oben verarbeitet
 							# bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln
-							$this->formvars[$table['formfield'][$i]] = $this->processJSON($this->formvars[$table['formfield'][$i]]);
+							$this->formvars[$table['formfield'][$i]] = $this->processJSON($this->formvars[$table['formfield'][$i]], $doc_path, $doc_url);
 						}
 						$sql .= "'" . $this->formvars[$table['formfield'][$i]] . "', "; # Typ "normal"
 					}
@@ -8531,10 +8531,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 							$last_oid = pg_last_oid($ret['query']);
 							if($this->formvars['embedded'] == '') $this->formvars['value_' . $table['tablename'] . '_oid'] = $last_oid;
-							echo '<br>tablename: ' . $table['tablename'];
-							echo '<br>last_oid: ' . $last_oid;
-							echo '<br>formvar name:' . 'value_' . $table['tablename'] . '_oid';
-							echo '<br>form: ' . $this->formvars['value_' . $table['tablename'] . '_oid'];
+
 							# After Insert trigger
 							if (!empty($layerset[0]['trigger_function'])) {
 								$this->exec_trigger_function('AFTER', 'INSERT', $layerset[0], $last_oid);
@@ -8620,11 +8617,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         	$this->neuer_Layer_Datensatz();
         }
         else {
-					echo '<br>tablename: ' . $table['tablename'];
-					echo '<br>last_oid: ' . $last_oid;
-					echo '<br>form: ' . $this->formvars['value_' . $table['tablename'] . '_oid'];
-					echo '<br>';
-					var_dump($this->formvars);
         	$this->GenerischeSuche_Suchen();
         }
       }
@@ -12149,7 +12141,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
             default : {
               if($tablename AND $formtype != 'dynamicLink' AND $formtype != 'Text_not_saveable' AND $formtype != 'Auswahlfeld_not_saveable' AND $formtype != 'SubFormPK' AND $formtype != 'SubFormFK' AND $formtype != 'SubFormEmbeddedPK' AND $attributname != 'the_geom'){
 								if(POSTGRESVERSION >= 930 AND (substr($datatype, 0, 1) == '_' OR is_numeric($datatype))){
-              		$this->formvars[$form_fields[$i]] = $this->processJSON($this->formvars[$form_fields[$i]]);		# bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln
+              		$this->formvars[$form_fields[$i]] = $this->processJSON($this->formvars[$form_fields[$i]], $layerset[$layer_id][0]['document_path'], $layerset[$layer_id][0]['document_url']);		# bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln
               	}
                 if($this->formvars[$form_fields[$i]] == ''){
 									$eintrag = 'NULL';
@@ -12349,7 +12341,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$name_array=explode('.',basename($_files[$input_name]['name']));
 			$datei_name=$name_array[0];
 			$datei_erweiterung=array_pop($name_array);
-			$doc_paths = $mapdb->getDocument_Path($doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db);
+			$doc_paths = $mapdb->getDocument_Path($doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db, $datei_name);
 			$nachDatei = $doc_paths['doc_path'].'.'.$datei_erweiterung;
 			if($doc_paths['doc_url'] != ''){
 				$db_input = $doc_paths['doc_url'].'.'.$datei_erweiterung;			# die URL zu der Datei wird gespeichert (Permalink)
@@ -15329,7 +15321,7 @@ class db_mapObj{
     return $pfad;
   }
 
-  function getDocument_Path($doc_path, $doc_url, $dynamic_path_sql, $attributenames, $attributevalues, $layerdb){
+  function getDocument_Path($doc_path, $doc_url, $dynamic_path_sql, $attributenames, $attributevalues, $layerdb, $originalname){
 		// diese Funktion liefert den Pfad des Dokuments, welches hochgeladen werden soll (absoluter Pfad mit Dateiname ohne Dateiendung)
 		// sowie die URL des Dokuments, falls eine verwendet werden soll
     if($doc_path == '')$doc_path = CUSTOM_IMAGE_PATH;
@@ -15347,10 +15339,15 @@ class db_mapObj{
 			$new_path = implode('/', $path_parts);		// der evtl. neu anzulegende Pfad ohne Datei
 			@mkdir($new_path, 0777, true);
 		}
-		else{
-			$filename = date('Y-m-d_H_i_s',time()).'-'.rand(100000, 999999);			// andernfalls werden keine weiteren Unterordner generiert und der Dateiname aus Zeitstempel und Zufallszahl zusammengesetzt
-      $doc_path .= $filename;
-			if($doc_url)$doc_url = $doc_url .= $filename;
+		else{			// andernfalls werden keine weiteren Unterordner generiert und der Dateiname aus Zeitstempel und Zufallszahl zusammengesetzt
+			if(!$doc_url){
+				$filename = date('Y-m-d_H_i_s',time()).'-'.rand(100000, 999999);
+			}
+			else{
+				$filename = $originalname.'-'.rand(100000, 999999);
+				$doc_url .= $filename;
+			}
+			$doc_path .= $filename;
 		}
     return array('doc_path' => $doc_path, 'doc_url' => $doc_url);
   }

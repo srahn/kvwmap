@@ -61,7 +61,7 @@ class PgObject {
 			WHERE
 				\"{$attribute}\" = '{$value}'
 		";
-		$this->debug->show('find_by sql: ' . $sql, true);
+		$this->debug->show('find_by sql: ' . $sql, false);
 		$query = pg_query($this->database->dbConn, $sql);
 		$this->data = pg_fetch_assoc($query);
 		return $this;
@@ -82,7 +82,7 @@ class PgObject {
 				" . $where . "
 			" . $order . "
 		";
-		$this->debug->show('find_where sql: ' . $sql, true);
+		$this->debug->show('find_where sql: ' . $sql, false);
 		$query = pg_query($this->database->dbConn, $sql);
 		$result = array();
 		while($this->data = pg_fetch_assoc($query)) {
@@ -158,7 +158,7 @@ class PgObject {
 				"'" . implode("', '", $values) . "'
 			)
 		";
-		$this->debug->show('Create new dataset with sql: ' . $sql, true);
+		$this->debug->show('Create new dataset with sql: ' . $sql, false);
 		$query = pg_query($this->database->dbConn, $sql);
 		$oid = pg_last_oid($query);
 		if (empty($oid)) {
@@ -173,12 +173,12 @@ class PgObject {
 				WHERE
 					oid = " . $oid . "
 			";
-			$this->debug->show('Query created oid with sql: ' . $sql, true);
+			$this->debug->show('Query created oid with sql: ' . $sql, false);
 			$query = pg_query($this->database->dbConn, $sql);
 			$row = pg_fetch_assoc($query);
 			$this->set($this->identifier, $row[$this->identifier]);
 		}
-		$this->debug->show('Dataset created with ' . $this->identifier . ': '. $this->get($this->identifier), true);
+		$this->debug->show('Dataset created with ' . $this->identifier . ': '. $this->get($this->identifier), false);
 		return $this->get($this->identifier);
 	}
 	/* Für Postgres Version in der RETURNING zusammen mit RULE und Bedingung funktioniert. 
@@ -219,7 +219,7 @@ class PgObject {
 			WHERE
 				" . $this->identifier . " = {$quote}" . $this->get($this->identifier) . "{$quote}
 		";
-		$this->debug->show('update sql: ' . $sql, true);
+		$this->debug->show('update sql: ' . $sql, false);
 		$query = pg_query($this->database->dbConn, $sql);
 	}
 
