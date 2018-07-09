@@ -343,7 +343,7 @@ class spatial_processor {
 			}break;
 			
 		}
-		if(!in_array($formvars['operation'], array('area', 'length', 'transformPoint', 'transform'))){
+		if($result != '' AND !in_array($formvars['operation'], array('area', 'length', 'transformPoint', 'transform'))){
 			if($formvars['resulttype'] != 'wkt'){
 				$result = $this->transformCoordsSVG($result);
 			}
