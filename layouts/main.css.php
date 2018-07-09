@@ -1113,11 +1113,14 @@ thead.gle th {
  text-align:left;
 }
 
-.gle_attribute_name { 
+.gle-attribute-name { 
  padding-left: 2px;
  padding-right: 2px;
  vertical-align: top;
  background-color: <? echo BG_GLEATTRIBUTE; ?>;
+}
+
+.gle-attribute-mandatory {
 }
 
 .gle_attribute_value {

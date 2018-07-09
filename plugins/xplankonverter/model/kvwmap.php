@@ -53,20 +53,52 @@
 		return array('executed' => $executed, 'success' => $success);
 	};
 
+
 	/**
 	* Trigger für XP_Plan Objekte
 	*/
-	$this->trigger_functions['handle_rp_plan'] = function($fired, $event, $layer = '', $oid = 0, $old_dataset = array()) use ($GUI) {
+	$this->trigger_functions['handle_xp_plan'] = function($fired, $event, $layer = '', $oid = 0, $old_dataset = array()) use ($GUI) {
+		#echo '<br>Trigger Funktion handle_xp_plan ' . $fired . ' ' . $event . ' aufgerufen.';
 		$executed = true;
 		$success = true;
+
+		switch ($layer['Layer_ID']) {
+			case XPLANKONVERTER_BP_PLAENE_LAYER_ID : {
+				$planart = 'BP-Plan';
+			} break;
+			case XPLANKONVERTER_FP_PLAENE_LAYER_ID : {
+				$planart = 'FP-Plan';
+			} break;
+			case XPLANKONVERTER_SO_PLAENE_LAYER_ID : {
+				$planart = 'SO-Plan';
+			} break;
+			case XPLANKONVERTER_RP_PLAENE_LAYER_ID : {
+				$planart = 'RP-Plan';
+			} break;
+		}
 
 		switch(true) {
 
 			case ($fired == 'AFTER' AND $event == 'INSERT') : {
 				#echo '<br>Führe ' . $fired . ' ' . $event . ' in handle_rp_plan Funktion aus.';
-				$xp_plan = XP_Plan::find_by_id($this, 'oid', $oid);
-				$konvertierung_id = $xp_plan->get('konvertierung_id');
-				$konvertierung = Konvertierung::find_by_id($this, 'id', $konvertierung_id);
+				$xp_plan = XP_Plan::find_by_id($this, 'oid', $oid, $planart);
+
+				# Create Konvertierung and get konvertierung_id
+				$konvertierung = new Konvertierung($this);
+				$konvertierung_id = $konvertierung->create(
+					$xp_plan->get_anzeige_name(),
+					$this->Stelle->epsg_code,
+					$this->user->rolle->epsg_code,
+					$planart,
+					$this->Stelle->id,
+					$this->user->id
+				);
+
+				$xp_plan->set('konvertierung_id', $konvertierung_id);
+				$xp_plan->update();
+
+				$konvertierung = $konvertierung->find_by_id($this, 'id', $konvertierung_id);
+				$this->debug->show('Trigger ' . $fired . ' ' . $event . ' konvertierung planart: ' . $konvertierung->get('planart') . ' plan planart: ' . $konvertierung->plan->get('planart'), false);
 				$konvertierung->set_status();
 			} break;
 
@@ -78,11 +110,11 @@
 			} break;
 
 			default : {
-				#echo '<br>Default Case in ' . $fired . ' ' . $event . ' Triggerfunktion.';
+				#echo '<br>Default Case in ' . $fired . ' ' . $event . ' Triggerfunktion, tuhe nichts!';
 				$executed = false;
 			}
 		}
-		#echo '<br>Trigger Funktion ' . $fired . ' ' . $event . ' ausgeführt? ' . $executed;
+		#echo '<br>Trigger Funktion ' . $fired . ' ' . $event . ' ausgeführt: ' . ($executed ? 'Ja' : 'Nein');
 		return array('executed' => $executed, 'success' => $success);
 	};
 

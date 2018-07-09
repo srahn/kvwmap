@@ -7,21 +7,25 @@
 	global $strNewEmbeddedPK;
 	global $hover_preview;
 
-	function attribute_name($layer_id, $attributes, $j, $k, $fontsize, $sort_links = true){
+	function attribute_name($layer_id, $attributes, $j, $k, $fontsize, $sort_links = true) {
 		$datapart .= '<table ';
 		if($attributes['group'][0] != '' AND $attributes['arrangement'][$j+1] != 1 AND $attributes['arrangement'][$j-1] != 1 AND $attributes['arrangement'][$j] != 1)$datapart .= 'width="200px"';
 		else $datapart .= 'width="100%"';
-		$datapart .= '><tr style="border: none"><td>';
-		if($sort_links AND 
-			 !(in_array($attributes['form_element_type'][$j], array('SubFormPK', 'SubFormEmbeddedPK', 'SubFormFK', 'dynamicLink')) OR
-				 is_numeric($attributes['type'][$j]) OR
-				 substr($attributes['type'][$j], 0, 1) == '_')){
+		$datapart .= '><tr style="border: none"><td' . (($attributes['nullable'][$j] == '0' AND $attributes['privileg'][$j] != '0') ? ' class="gle-attribute-mandatory"' : '') . '>';
+		if (
+			$sort_links AND
+			!(
+				in_array($attributes['form_element_type'][$j], array('SubFormPK', 'SubFormEmbeddedPK', 'SubFormFK', 'dynamicLink')) OR
+				is_numeric($attributes['type'][$j]) OR
+				substr($attributes['type'][$j], 0, 1) == '_'
+			)
+		) {
 			$datapart .= '<a style="font-size: '.$fontsize.'px" title="Sortieren nach '.$attributes['alias'][$j].'" href="javascript:change_orderby(\''.$attributes['name'][$j].'\', '.$layer_id.');">'.$attributes['alias'][$j].'</a>';
 		}
-		else{
-			$datapart .= '<span style="font-size: '.$fontsize.'px; color:#222222;">'.$attributes['alias'][$j].'</span>';
+		else {
+			$datapart .= '<span style="font-size: '.$fontsize.'px;">'.$attributes['alias'][$j].'</span>';
 		}
-		if($attributes['nullable'][$j] == '0' AND $attributes['privileg'][$j] != '0'){
+		if ($attributes['nullable'][$j] == '0' AND $attributes['privileg'][$j] != '0'){
 			$datapart .= '<span title="Eingabe erforderlich">*</span>';
 		}
 		if($attributes['tooltip'][$j]!='' AND $attributes['form_element_type'][$j] != 'Time'){
@@ -76,7 +80,14 @@
 		}
 		
 		if($attributes['dependents'][$j] != NULL){
-			$onchange .= 'check_visibility('.$layer_id.', this, [\''.implode('\',\'', $attributes['dependents'][$j]).'\'], '.$k.');';
+			$field_class .= ' visibility_changer';
+			$onchange .= 'this.oninput();" oninput="check_visibility('.$layer_id.', this, [\''.implode('\',\'', $attributes['dependents'][$j]).'\'], '.$k.');';
+		}
+		
+		if($attributes['vcheck_attribute'][$j] != ''){
+			$after_attribute .= '<input type="hidden" id="vcheck_attribute_'.$attributes['name'][$j].'" value="'.$attributes['vcheck_attribute'][$j].'">';
+			$after_attribute .= '<input type="hidden" id="vcheck_operator_'.$attributes['name'][$j].'" value="'.$attributes['vcheck_operator'][$j].'">';
+			$after_attribute .= '<input type="hidden" id="vcheck_value_'.$attributes['name'][$j].'" value="'.htmlentities($attributes['vcheck_value'][$j]).'">';
 		}
 
 		###### Array-Typ #####
@@ -88,6 +99,7 @@
 			$elements = json_decode($value);		# diese Funktion decodiert immer den kommpletten String
 			$attributes2 = $attributes;
 			$attributes2['name'][$j] = '';
+			$attributes2['dependents'][$j] = '';		// die Array-Elemente sollen keine Visibility-Changer sein, nur das gemeinsame Hidden-Feld oben
 			$attributes2['table_name'][$attributes2['name'][$j]] = $tablename;
 			$attributes2['type'][$j] = substr($attributes['type'][$j], 1);			
 			$dataset2[$tablename.'_oid'] = $oid;
@@ -108,7 +120,7 @@
 			if($attributes['privileg'][$j] == '1' AND !$lock[$k]){
 				$datapart .= '<div style="padding: 3px 10px 3px 3px;float: right"><a href="javascript:addArrayElement(\''.$id.'\', \''.$attributes['form_element_type'][$j].'\', \''.$oid.'\')" class="buttonlink"><span>'.$strNewEmbeddedPK.'</span></a></div>';
 			}
-			return $datapart;
+			return $datapart.$after_attribute;
 		}
 
 		###### Nutzer-Datentyp #####
@@ -138,7 +150,7 @@
 						case 1 : {
 							$datapart .= '
 								<tr>
-									<td colspan="2" valign="top" class="gle_attribute_name">
+									<td colspan="2" valign="top" class="gle-attribute-name">
 										<table>
 											<tr>
 												<td>' . $type_attributes['alias'][$e] . '</td>
@@ -164,7 +176,7 @@
 						} break;
 						default : {
 							$datapart .= '
-								<tr id="tr_'.$layer_id.'_'.$type_attributes['name'][$e].'_'.$k.'" class="' . $attribute_class . '">
+								<tr id="tr_'.$layer_id.'_'.$type_attributes['name'][$e].'_'.$k.'" style="'.($type_attributes['vcheck_attribute'][$e] != ''? 'display: none' : '').'" class="' . $attribute_class . '">
 									<td valign="top" class="gle_attribute_name">
 										<table>
 											<tr>
@@ -181,21 +193,10 @@
 				}
 			}
 			$datapart .= '</table>';
-			return $datapart;
+			return $datapart.$after_attribute;
 		}
 
 		###### normal #####
-		if($attributes['vcheck_attribute'][$j] != ''){
-			$datapart .= '<input type="hidden" id="vcheck_attribute_'.$attributes['name'][$j].'" value="'.$attributes['vcheck_attribute'][$j].'">';
-			$datapart .= '<input type="hidden" id="vcheck_operator_'.$attributes['name'][$j].'" value="'.$attributes['vcheck_operator'][$j].'">';
-			$datapart .= '<input type="hidden" id="vcheck_value_'.$attributes['name'][$j].'" value="'.$attributes['vcheck_value'][$j].'">';	
-			$number = rand();
-			$datapart .= "
-			<span id=\"".$number."\"></span>
-			<script type=\"text/javascript\">
-				check_visibility(".$layer_id.", document.getElementById('".$number."').closest('div').querySelector(\"[id='".$layer_id."_".$attributes['vcheck_attribute'][$j]."_".$k."']\"), ['".$name."'], ".$k.");
-			</script>";			
-		}
 		if($attributes['constraints'][$j] != '' AND !in_array($attributes['constraints'][$j], array('PRIMARY KEY', 'UNIQUE'))){
 			if($attributes['privileg'][$j] == '0' OR $lock[$k]){
 				$size1 = 1.3*strlen($dataset[$attributes['name'][$j]]);
@@ -706,13 +707,13 @@
 							$datapart .= '&nbsp;<a title="automatisch generieren" href="javascript:auto_generate(new Array(\''.implode($attributes['name'], "','").'\'), \''.$attributes['the_geom'].'\', \''.$name.'\', '.$k.', '.$layer_id.');set_changed_flag(currentform.changed_'.$layer_id.'_'.$oid.')"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
 						}
 						else{
-							$datapart .= '&nbsp;<a title="Eingabewerkzeug verwenden" href="javascript:openCustomSubform('.$layer_id.', \''.$name.'\', new Array(\''.implode($attributes['name'], "','").'\'), \''.$name.'_'.$k.'\', '.$k.');"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
+							$datapart .= '&nbsp;<a title="Eingabewerkzeug verwenden" href="javascript:openCustomSubform('.$layer_id.', \''.$name.'\', new Array(\''.implode($attributes['name'], "','").'\'), \''.$layer_id.'_'.$name.'_'.$k.'\', '.$k.');"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
 						}
 					}
 				}
 			}
 		}
-		return $datapart;
+		return $datapart.$after_attribute;
 	}
 
 	function Autovervollstaendigungsfeld($layer_id, $name, $j, $alias, $fieldname, $value, $output, $privileg, $k, $oid, $subform_layer_id, $subform_layer_privileg, $embedded, $lock, $fontsize, $change_all, $size, $onchange, $field_class){

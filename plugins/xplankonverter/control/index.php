@@ -36,19 +36,86 @@ include(PLUGINS . 'xplankonverter/model/converter.php');
 * xplankonverter_konvertierungen_index
 * xplankonverter_konvertierung_loeschen
 * xplankonverter_konvertierung_status
+* xplankonverter_plaene_index
 * xplankonverter_regeleditor
 * xplankonverter_regeleditor_getshapeattributes
 * xplankonverter_regeleditor_getxplanattributes
 * xplankonverter_shapefiles_delete
 * xplankonverter_shapefiles_index
+* xplankonverter_show_geltungsbereich_upload
+* xplankonverter_upload_geltungsbereich
 * xplankonverter_validierungsergebnisse
 */
 
+switch ($this->formvars['planart']) {
+	case 'BP-Plan' : {
+		$this->title = 'Bebauungsplan';
+		$this->plan_layer_id = XPLANKONVERTER_BP_PLAENE_LAYER_ID;
+	} break;
+	case 'FP-Plan' : {
+		$this->title = 'Flächennutzungsplan';
+		$this->plan_layer_id = XPLANKONVERTER_FP_PLAENE_LAYER_ID;
+	} break;
+	case 'SO-Plan' : {
+		$this->title = 'Sonstige Plan';
+		$this->plan_layer_id = XPLANKONVERTER_SO_PLAENE_LAYER_ID;
+	} break;
+	case 'RP-Plan' : {
+		$this->title = 'Raumordnungsplan';
+		$this->plan_layer_id = XPLANKONVERTER_RP_PLAENE_LAYER_ID;
+	} break;
+	default : {
+		$this->formvars['planart'] = 'Plan';
+		$this->title = 'Plan';
+		$this->plan_layer_id = XPLANKONVERTER_XP_PLAENE_LAYER_ID;
+	} break;	
+}
 
-switch($go){
+switch ($go) {
 
 	case 'xplankonverter_konvertierungen_index' : {
 		$this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
+		$this->output();
+	} break;
+
+	case 'xplankonverter_plaene_index' : {
+		$this->title = str_replace('an', 'äne', $this->title);
+		$this->main = '../../plugins/xplankonverter/view/plaene.php';
+		$this->output();
+	} break;
+
+	case 'xplankonverter_plan_edit' : {
+		$error = true;
+		if ($this->formvars['konvertierung_id'] != '') {
+			$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
+			if ($this->konvertierung->get('id') != '') {
+				if (isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) {
+					$this->plan = XP_Plan::find_by_id($this,'konvertierung_id', $this->konvertierung->get('id'), $this->konvertierung->get('planart'));
+					if ($this->plan->get('gml_id') != '') {
+						$error = false;
+						$this->title .= ' bearbeiten';
+						$this->main = '../../plugins/xplankonverter/view/plan/' . $this->formvars['planart'] . '_edit.php';
+					}
+					else {
+						$err_msg = 'Der Plan zur Konvertierung mit dem Namen "' . $this->konvertierung->get('bezeichnung') . '" und der ID "' . $this->konvertierung->get('id') . '" wurde nicht gefunden!';
+					}
+				}
+			}
+			else {
+				$err_msg = 'Die Konvertierung mit der ID: ' . $this->formvars['konvertierung_id'] . ' wurde nicht gefunden!';
+			}
+		}
+		else {
+			$error = false;
+			$this->title = 'Neuer ' . $this->title;
+			$this->main = '../../plugins/xplankonverter/view/plan/' . $this->formvars['planart'] . '_edit.php';
+		}
+		if ($error) {
+			if ($err_msg != '') {
+				$this->add_message('error', $err_msg);
+			}
+			$this->main = '../../plugins/xplankonverter/view/plaene.php';
+		}
 		$this->output();
 	} break;
 
@@ -864,16 +931,59 @@ switch($go){
 		$this->goNotExecutedInPlugins = true;
 	} break;
 
+	case 'xplankonverter_show_geltungsbereich_upload' : {
+		include('plugins/xplankonverter/view/upload_geltungsbereich.php');
+	} break;
+
+	case 'xplankonverter_upload_geltungsbereich' : {
+		$upload_file = $_FILES['shape_file'];
+		$zip_file = IMAGEPATH . $upload_file['name'];
+		$response = array(
+			'success' => false
+		);
+		$importer = new data_import_export();
+
+		if (move_uploaded_file($upload_file['tmp_name'], $zip_file)) {
+			# extract zip
+			$shape_files = unzip($zip_file, false, false, true);
+			# get shape file name
+			$first_file = explode('.', $shape_files[0]);
+			$shape_file_name = $first_file[0];
+
+			# get EPSG-Code aus prj-Datei
+			$epsg = $importer->get_shp_epsg(IMAGEPATH . $shape_file_name, $this->pgdatabase);
+			if ($epsg == '') {
+				$epsg = '25833';
+				# ToDo EPSG-Code konnte nicht aus prj-Datei ermittelt werden, Dateiname merken und EPSG-Code nachfragen
+			}
+			$response['success'] = true;
+		}
+
+		# get encoding of dbf file
+		$encoding = $importer->getEncoding(IMAGEPATH . $shape_file_name . '.dbf');
+
+		# load shapes to custom schema
+		$import_result = $importer->load_shp_into_pgsql($this->pgdatabase, IMAGEPATH, $shape_file_name, $epsg, CUSTOM_SHAPE_SCHEMA, 'b' . strtolower(umlaute_umwandeln(substr($shape_file_name, 0, 15))) . rand(1, 1000000), $encoding);
+
+		# return name of import table
+		$response['result'] = $import_result[0]['tablename'];
+
+		header('Content-Type: application/json');
+		echo json_encode($response);
+		return;
+	} break;
+
 	default : {
 		$this->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
 	}
 }
 
 function isInStelleAllowed($stelle, $requestStelleId) {
+	global $GUI;
 	if ($stelle->id == $requestStelleId)
 		return true;
 	else {
-		echo '<br>(Diese Aktion kann nur von der Stelle ' . $stelle->Bezeichnung . ' aus aufgerufen werden.)';
+		$GUI->add_message('error', 'Das angefragte Objekt darf nicht in dieser Stelle bearbeitet werden.' . ($requestStelleId != '' ? ' Es gehört zur Stelle mit der ID: ' . $requestStelleId : ''));
 		return false;
 	}
 }

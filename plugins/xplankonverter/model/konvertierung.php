@@ -30,13 +30,49 @@ class Konvertierung extends PgObject {
 	}
 
 	public static	function find_by_id($gui, $by, $id) {
-		#echo '<br>find konvertierung by ' . $by . ' = ' . $id;
 		$konvertierung = new Konvertierung($gui);
 		$konvertierung->find_by($by, $id);
+		$konvertierung->debug->show('Found Konvertierung with planart: ' . $konvertierung->get('planart'), Konvertierung::$write_debug);
 		if ($konvertierung->get('planart') != '') {
 			$konvertierung->get_plan();
 		}
 		return $konvertierung;
+	}
+
+	function create($anzeige_name, $epsg_code, $input_epsg_code, $planart, $stelle_id, $user_id) {
+		$sql = "
+			INSERT INTO " . $this->schema . "." . $this->tableName . " (
+				bezeichnung, epsg, input_epsg, planart, stelle_id, user_id
+			) VALUES ( 
+				'" . $anzeige_name . "',
+				'" . $epsg_code . "'::xplankonverter.epsg_codes,
+				'" . $input_epsg_code . "'::xplankonverter.epsg_codes,
+				'" . $planart . "',
+				" . $stelle_id . ",
+				" . $user_id . "
+		)";
+		$this->debug->show('Create new konvertierung with sql: ' . $sql, Konvertierung::$write_debug);
+		$query = pg_query($this->database->dbConn, $sql);
+		$oid = pg_last_oid($query);
+		if (empty($oid)) {
+			$this->lastquery = $query;
+		}
+		else {
+			$sql = "
+				SELECT
+					*
+				FROM
+					" . $this->schema . "." . $this->tableName . "
+				WHERE
+					oid = " . $oid . "
+			";
+			$this->debug->show('Query created oid with sql: ' . $sql, Konvertierung::$write_debug);
+			$query = pg_query($this->database->dbConn, $sql);
+			$row = pg_fetch_assoc($query);
+			$this->set($this->identifier, $row[$this->identifier]);
+		}
+		$this->debug->show('Konvertierung created with ' . $this->identifier . ': '. $this->get($this->identifier), Konvertierung::$write_debug);
+		return $this->get($this->identifier);
 	}
 
 	function create_directories() {
@@ -234,12 +270,17 @@ class Konvertierung extends PgObject {
 
 	function get_plan() {
 		if (!$this->plan) {
+			$this->debug->show('get_plan with planart: ' . $this->get('planart'), Konvertierung::$write_debug);
 			$plan = new XP_Plan($this->gui, $this->get('planart'));
 			$plan = $plan->find_where('konvertierung_id = ' . $this->get('id'));
-			if ($plan > 0)
+			$this->debug->show('found ' . count($plan) . ' Pläne', Konvertierung::$write_debug);
+			if (count($plan) > 0) {
 				$this->plan = $plan[0];
-			else
+				$this->debug->show('get_plan assign first plan with planart: ' . $this->plan->planart . ' gml_id: ' . $this->plan->get('gml_id') . ' to Konvertierung.', Konvertierung::$write_debug);
+			}
+			else {
 				$this->plan = false;
+			}
 		}
 		return $this->plan;
 	}
@@ -288,7 +329,7 @@ class Konvertierung extends PgObject {
 	}
 
 	function set_status($new_status = '') {
-		$this->debug->show('<br>Setze status in Konvertierung.', false);
+		$this->debug->show('<br>Setze status in Konvertierung.', Konvertierung::$write_debug);
 		if ($new_status == '') {
 			$sql = "
 				SELECT DISTINCT
@@ -298,12 +339,12 @@ class Konvertierung extends PgObject {
 					END AS plan_or_regel_assigned
 				FROM
 					xplankonverter.konvertierungen k LEFT JOIN
-					xplan_gml." . $this->plan->planartAbk . "_plan p ON k.id = p.konvertierung_id LEFT JOIN
+					xplan_gml." . strtolower(substr($this->get('planart'), 0, 2)) . "_plan p ON k.id = p.konvertierung_id LEFT JOIN
 					xplankonverter.regeln r ON k.id = r.konvertierung_id
 				WHERE
 					k.id = {$this->get('id')}
 			";
-			$this->debug->show('<br>Setze Status mit sql: ' . $sql, false);
+			$this->debug->show('<br>Setze Status mit sql: ' . $sql, Konvertierung::$write_debug);
 			$query = pg_query($this->database->dbConn, $sql);
 			$result = pg_fetch_assoc($query);
 			$plan_or_regel_assigned = $result['plan_or_regel_assigned'];
@@ -337,7 +378,7 @@ class Konvertierung extends PgObject {
 	*
 	*/
 	function create_layer_group($layer_type) {
-		$this->debug->show('Konvertierung create_layer_group layer_type: ' . $layer_type, false);
+		$this->debug->show('Konvertierung create_layer_group layer_type: ' . $layer_type, Konvertierung::$write_debug);
 		$layer_group_id = $this->get(strtolower($layer_type) . '_layer_group_id');
 		if (empty($layer_group_id)) {
 			$layerGroup = new MyObject($this->gui, 'u_groups');
@@ -356,7 +397,7 @@ class Konvertierung extends PgObject {
 	*
 	*/
 	function delete_layer_group($layer_type) {
-		$this->debug->show('delete_layer_group typ: ' . $layer_type, false);
+		$this->debug->show('delete_layer_group typ: ' . $layer_type, Konvertierung::$write_debug);
 		$layer_group_id = $this->get(strtolower($layer_type) . '_layer_group_id');
 		if (!empty($layer_group_id)) {
 			$layer_group = new MyObject($this->gui, 'u_groups');

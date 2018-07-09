@@ -39,10 +39,8 @@
 #
 ############################################################################################
 # Klassen in dieser Datei
-# class_account
-# class_user
-# class_rolle
-# class_stelle
+# account
+# user
 
 ##############################
 # class_account

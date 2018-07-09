@@ -265,12 +265,13 @@ define('DRUCKRAHMEN_PATH',SHAPEPATH.'druckrahmen/');
 #define('PDFCLASSPATH', '../PDFClass/');																						# in Version 2.6 gelöscht
 
 # 3rdparty Pfade
-define('THIRDPARTY_PATH', '../3rdparty/');												# Version 2.6
-define('FONTAWESOME_PATH', THIRDPARTY_PATH . 'font-awesome-4.6.3/');								# Version 2.6
-define('JQUERY_PATH', THIRDPARTY_PATH . 'jQuery-1.12.0/');													# Version 2.6
-define('BOOTSTRAP_PATH', THIRDPARTY_PATH . 'bootstrap-3.3.6/');											# Version 2.6
-define('BOOTSTRAPTABLE_PATH', THIRDPARTY_PATH . 'bootstrap-table-1.11.0/');					# Version 2.6
-define('PROJ4JS_PATH', THIRDPARTY_PATH . 'proj4js-2.4.3/');					# Version 2.8
+define('THIRDPARTY_PATH', '../3rdparty/');																	# Version 2.6
+define('FONTAWESOME_PATH', THIRDPARTY_PATH . 'font-awesome-4.6.3/');				# Version 2.6
+define('JQUERY_PATH', THIRDPARTY_PATH . 'jQuery-1.12.0/');									# Version 2.6
+define('BOOTSTRAP_PATH', THIRDPARTY_PATH . 'bootstrap-3.3.6/');							# Version 2.6
+define('BOOTSTRAPTABLE_PATH', THIRDPARTY_PATH . 'bootstrap-table-1.11.0/');	# Version 2.6
+define('PROJ4JS_PATH', THIRDPARTY_PATH . 'proj4js-2.4.3/');									# Version 2.8
+define('DROPZONE_PATH', THIRDPARTY_PATH . 'dropzone-4.3.0/');								# Version 2.9
 
 # Bin-Pfad der Postgres-tools (shp2pgsql, pgsql2shp)
 define('POSTGRESBINPATH', '/usr/bin/');         # Version 1.6.4

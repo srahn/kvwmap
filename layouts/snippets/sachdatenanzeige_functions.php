@@ -34,14 +34,15 @@ include('funktionen/input_check_functions.php');
 	}
 	
 	check_visibility = function(layer_id, object, dependents, k){
+		if(object == null)return;
 		dependents.forEach(function(dependent){
-			var operator = object.closest('div').querySelector('#vcheck_operator_'+dependent).value;
-			var value = object.closest('div').querySelector('#vcheck_value_'+dependent).value;
+			var operator = object.closest('table').querySelector('#vcheck_operator_'+dependent).value;
+			var value = object.closest('table').querySelector('#vcheck_value_'+dependent).value;
 			if(operator == '=')operator = '==';
 			if(eval("'"+object.value+"' "+operator+" '"+value+"'"))
-				object.closest('div').querySelector('#tr_'+layer_id+'_'+dependent+'_'+k).style.display = '';
+				object.closest('table').querySelector('#tr_'+layer_id+'_'+dependent+'_'+k).style.display = '';
 			else
-				object.closest('div').querySelector('#tr_'+layer_id+'_'+dependent+'_'+k).style.display = 'none';
+				object.closest('table').querySelector('#tr_'+layer_id+'_'+dependent+'_'+k).style.display = 'none';
 		})
 	}
 	

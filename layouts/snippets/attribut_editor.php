@@ -353,7 +353,7 @@ function toLayerEditor(){
 																); ?>
 													</td>
 													<td>
-														<input type="text" style="width: 60px" name="vcheck_value_<? echo $this->attributes['name'][$i]; ?>" value="<? echo $this->attributes['vcheck_value'][$i]; ?>">
+														<input type="text" style="width: 60px" name="vcheck_value_<? echo $this->attributes['name'][$i]; ?>" value="<? echo htmlentities($this->attributes['vcheck_value'][$i]); ?>">
 													</td>
 												</tr>
 											</table>

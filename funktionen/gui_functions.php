@@ -177,6 +177,8 @@ function onload_functions(){
 	<? if($this->user->rolle->auto_map_resize){ ?>
 	window.onresize = function(){clearTimeout(doit);doit = setTimeout(resizemap2window, 200);};
 	<? } ?>
+	var vchangers = document.getElementsByClassName('visibility_changer');
+	[].forEach.call(vchangers, function(vchanger){vchanger.oninput();});
 	document.fullyLoaded = true;
 }
 
