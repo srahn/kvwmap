@@ -7713,13 +7713,13 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         $attributes = $mapDB->add_attribute_values($attributes, $layerdb, $layerset[0]['shape'], true, $this->Stelle->id);
 
 				# last_search speichern
-				if($this->last_query == '' AND $this->formvars['embedded_subformPK'] == '' AND $this->formvars['embedded'] == ''){
+				if($this->last_query == '' AND $this->formvars['embedded_subformPK'] == '' AND $this->formvars['embedded'] == '' AND $this->formvars['subform_link'] == ''){
 					$this->formvars['search_name'] = '<last_search>';
 					$this->user->rolle->delete_search($this->formvars['search_name']);		# das muss hier stehen bleiben, denn in save_search wird mit der Layer-ID gelöscht
 					$this->user->rolle->save_search($attributes, $this->formvars);
 				}
 
-				if($layerset[0]['count'] != 0 AND $this->formvars['embedded_subformPK'] == '' AND $this->formvars['embedded'] == '' AND $this->formvars['embedded_dataPDF'] == ''){
+				if($layerset[0]['count'] != 0 AND $this->formvars['embedded_subformPK'] == '' AND $this->formvars['embedded'] == '' AND $this->formvars['embedded_dataPDF'] == '' AND $this->formvars['subform_link'] == ''){
 					# last_query speichern
 					$this->user->rolle->delete_last_query();
 					$this->user->rolle->save_last_query('Layer-Suche_Suchen', $this->formvars['selected_layer_id'], $sql, $sql_order, $this->formvars['anzahl'], $this->formvars['offset_'.$layerset[0]['Layer_ID']]);
