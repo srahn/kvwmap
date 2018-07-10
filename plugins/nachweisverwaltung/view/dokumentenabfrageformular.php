@@ -174,8 +174,8 @@ else {
     </div></td>
   </tr>
   <tr> 
-    <td rowspan="18">&nbsp;</td>
-    <td rowspan="18"> 
+    <td rowspan="19">&nbsp;</td>
+    <td rowspan="19"> 
       <?php
 				include(LAYOUTPATH.'snippets/SVG_polygon_box_query_area.php')
 			?>
@@ -243,11 +243,22 @@ else {
 			</table>
 		</td>
   <tr>
-		<td colspan="2">&nbsp;Gültigkeit:
-			<select name="gueltigkeit">
+		<td>&nbsp;Gültigkeit:</td>
+		<td>
+			<select style="width: 156px" name="gueltigkeit">
 				<option value="">--- Auswahl ---</option>
 				<option value="1">gültige Nachweise</option>
 				<option value="0">ungültige Nachweise</option>
+			</select>
+		</td>
+  </tr>
+	<tr>
+		<td>&nbsp;geprüft:</td>
+		<td>
+			<select style="width: 156px" name="geprueft">
+				<option value="">--- Auswahl ---</option>
+				<option value="1">geprüfte Nachweise</option>
+				<option value="0">ungeprüfte Nachweise</option>
 			</select>
 		</td>
   </tr>
@@ -348,18 +359,14 @@ else {
     </td>
   </tr>
   <tr> 
-    <td valign="top">
+    <td valign="top" colspan="3">
 			<input type="radio" name="abfrageart" id="abfrageart_poly" value="poly" <?php if ($this->formvars['abfrageart']=='poly' OR $this->formvars['abfrageart']=='') { ?> checked<?php } ?>> 
-		</td>
-		<td>
 			<span class="fett">Auswahl im Kartenausschnitt über Suchpolygon</span>
 		</td>
   </tr>
   <tr> 
-    <td valign="top">
+    <td valign="top" colspan="3">
 			<input type="radio" name="abfrageart" value="antr_nr" <?php if ($this->formvars['abfrageart']=='antr_nr') { ?> checked<?php } ?>>
-		</td>
-		<td>
 			<span class="fett">Vorbereitungsnummer:</span>
       <?php $this->FormObjAntr_nr->outputHTML();
         echo $this->FormObjAntr_nr->html;?>
