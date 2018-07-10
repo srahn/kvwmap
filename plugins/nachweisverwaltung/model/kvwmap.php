@@ -630,7 +630,6 @@
 	};
   
 	$this->erzeugenUebersicht_HTML = function($path) use ($GUI){
-		$nachweise_json = json_encode($GUI->nachweis->Dokumente);
 		$html = "
 <html>
 	<head>
@@ -746,8 +745,13 @@
 			}
 		</style>
 		<SCRIPT TYPE=\"text/javascript\">
-			var nachweise = JSON.parse('".$nachweise_json."');
+			var nachweise = new Array();";
 			
+		for($i = 0; $i < count($GUI->nachweis->Dokumente); $i++){
+			$html.= "nachweise.push(JSON.parse('".json_encode($GUI->nachweis->Dokumente[$i])."'));";
+		}	
+		
+		$html.= "
 			var columns = new Array();
 			columns['id'] = 'ID';
 			columns['flurid'] = 'Flur';
