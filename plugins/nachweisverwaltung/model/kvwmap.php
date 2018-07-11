@@ -441,18 +441,20 @@
 	
 	$this->create_Recherche_UKO = function($pfad) use ($GUI){
 		$searches = $GUI->antrag->searches;
-		foreach($searches as $params){
-			if($params['abfrageart'] == 'poly')$polys[] = "st_geometryfromtext('".$params['suchpolygon']."', 25833)";
-		}
-		if($polys != NULL){
-			$sql = "select st_astext(st_multi(st_union(ARRAY[".implode(',', $polys)."])))";
-			$ret = $GUI->pgdatabase->execSQL($sql, 4, 1);
-			$rs=pg_fetch_row($ret[1]);
-			$uko = WKT2UKO($rs[0]);
-			$ukofile = 'Recherche.uko';
-			$fp = fopen($pfad.$ukofile, 'w');
-			fwrite($fp, $uko);
-			fclose($fp);
+		if($searches != NULL){
+			foreach($searches as $params){
+				if($params['abfrageart'] == 'poly')$polys[] = "st_geometryfromtext('".$params['suchpolygon']."', 25833)";
+			}
+			if($polys != NULL){
+				$sql = "select st_astext(st_multi(st_union(ARRAY[".implode(',', $polys)."])))";
+				$ret = $GUI->pgdatabase->execSQL($sql, 4, 1);
+				$rs=pg_fetch_row($ret[1]);
+				$uko = WKT2UKO($rs[0]);
+				$ukofile = 'Recherche.uko';
+				$fp = fopen($pfad.$ukofile, 'w');
+				fwrite($fp, $uko);
+				fclose($fp);
+			}
 		}
 	};
 		
