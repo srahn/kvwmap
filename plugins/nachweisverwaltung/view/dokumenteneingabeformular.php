@@ -126,14 +126,6 @@ $legendheight = $this->map->height + 20;
 								<td>
 									<input name="Bilddatei" type="file" onchange="this.title=this.value;" value="<?php echo $this->formvars['Bilddatei']; ?>" size="22" accept="image/*.jpg"> 
 								</td>
-								<td>
-								<? if ($this->formvars['id']!='') { ?>
-									Dokument auch ändern:<input type="checkbox" name="changeDocument" value="1" <? if ($this->formvars['changeDocument']){ ?> checked<? } ?>>
-								<? }
-									else { ?>
-									<input type="hidden" name="changeDocument" value="1">
-								<? } ?>
-								</td>	
 								<td colspan="3">Gemarkung/Gemeinde: 
 									<?
 									$this->GemkgFormObj->outputHTML();

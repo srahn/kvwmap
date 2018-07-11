@@ -129,14 +129,11 @@ class Nachweis {
   }
   
   function changeDokument($formvars, $user) {
-    #2005-11-25_pk
-    #echo 'Änderung des Dokumentes mit der id: '.$formvars['id'];
-
     # 1. Starten der Transaktion
     $this->database->begintransaction();        
 
     # 2. Prüfen der Eingabewerte
-    $ret=$this->pruefeEingabedaten($formvars['id'], $formvars['datum'],$formvars['VermStelle'],$formvars['art'],$formvars['gueltigkeit'],$formvars['stammnr'],$formvars['rissnummer'],$formvars['fortfuehrung'],$formvars['Blattformat'],$formvars['Blattnr'],$formvars['changeDocument'],$formvars['Bilddatei_name'],$formvars['pathlength'],$formvars['umring'], $formvars['flurid'], $formvars['Blattnr']);
+    $ret=$this->pruefeEingabedaten($formvars['id'], $formvars['datum'],$formvars['VermStelle'],$formvars['art'],$formvars['gueltigkeit'],$formvars['stammnr'],$formvars['rissnummer'],$formvars['fortfuehrung'],$formvars['Blattformat'],$formvars['Blattnr'],false,$formvars['Bilddatei_name'],$formvars['pathlength'],$formvars['umring'], $formvars['flurid'], $formvars['Blattnr']);
     if ($ret[0]) {
       # Fehler bei den Eingabewerten entdeckt.  
       #echo '<br>Ergebnis der Prüfung: '.$ret;
@@ -154,7 +151,7 @@ class Nachweis {
         # Name der alten Dokumentendatei gefunden
         $doclocation=$ret[1];
         #echo '<br>Speicherort der alten Dokumentendatei: '.$doclocation.' abgefragt.';
-        if ($formvars['changeDocument']==0) {
+        if($formvars['Bilddatei'] != ''){
           # Verwenden der vorhandenen Datei für die Bildung des neuen Dateinamens
           # unter dem die Datei nach der Sachdatenänderung gespeichert werden soll
           $formvars['Bilddatei_name']=$doclocation;
@@ -173,7 +170,7 @@ class Nachweis {
           # 5. Änderung erfolgreich, überschreiben der alten durch die neue Datei
           #echo '<br>Eintragung in Datenbank geändert.';
           # Unterscheidung ob auch die Datei geändert werden soll
-          if ($formvars['changeDocument']) {
+          if($formvars['Bilddatei'] != ''){
             # Datei soll auch geändert werden.
             # 5.1 Löschen der bestehenden Bilddatei auf dem Server
             $ret=$this->dokumentenDateiLoeschen($doclocation);
@@ -211,7 +208,7 @@ class Nachweis {
 								# Erfolgreiches abschließen der Transaktion
 								$this->database->committransaction();
 								$ret[0]=0;
-								$ret[1]='Änderung des Datenbankeintrages und der Datei erfolgreich.';
+								$ret[1]='Änderung des Datenbankeintrages und des Speicherortes der Datei erfolgreich.';
 							}
             }
             else {
