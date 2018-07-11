@@ -444,14 +444,16 @@
 		foreach($searches as $params){
 			if($params['abfrageart'] == 'poly')$polys[] = "st_geometryfromtext('".$params['suchpolygon']."', 25833)";
 		}
-		$sql = "select st_astext(st_multi(st_union(ARRAY[".implode(',', $polys)."])))";
-		$ret = $GUI->pgdatabase->execSQL($sql, 4, 1);
-    $rs=pg_fetch_row($ret[1]);
-		$uko = WKT2UKO($rs[0]);
-		$ukofile = 'Recherche.uko';
-		$fp = fopen($pfad.$ukofile, 'w');
-		fwrite($fp, $uko);
-		fclose($fp);
+		if($polys != NULL){
+			$sql = "select st_astext(st_multi(st_union(ARRAY[".implode(',', $polys)."])))";
+			$ret = $GUI->pgdatabase->execSQL($sql, 4, 1);
+			$rs=pg_fetch_row($ret[1]);
+			$uko = WKT2UKO($rs[0]);
+			$ukofile = 'Recherche.uko';
+			$fp = fopen($pfad.$ukofile, 'w');
+			fwrite($fp, $uko);
+			fclose($fp);
+		}
 	};
 		
 	$this->Suchparameter_loggen = function($formvars, $stelle_id, $user_id) use ($GUI){
@@ -744,10 +746,10 @@
 			}
 		</style>
 		<SCRIPT TYPE=\"text/javascript\">
-			var nachweise = new Array();";
+			var nachweise = new Array();\n";
 			
 		for($i = 0; $i < count($GUI->nachweis->Dokumente); $i++){
-			$html.= "nachweise.push(JSON.parse('".json_encode($GUI->nachweis->Dokumente[$i])."'));";
+			$html.= "			nachweise.push(JSON.parse('".json_encode($GUI->nachweis->Dokumente[$i])."'));\n";
 		}	
 		
 		$html.= "
