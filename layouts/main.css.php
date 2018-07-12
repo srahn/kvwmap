@@ -344,6 +344,29 @@ a.invisiblelayerlink:hover{
 	color: gray;
 }
 
+#data_import_upload_zone{
+	position: relative;
+	width: 400px;
+	height: 350px;
+	box-shadow: inset 0px 0px 40px 40px rgba(251,251,251,1);
+	background-color:	#4c86a8;
+	opacity: 0.6;
+	transition: all 0.2s ease;
+}
+
+#data_import_upload_zone:hover{
+	opacity: 0.7;
+	transition: all 0.2s ease;
+}
+
+#data_import_upload_zone #text{
+	position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+	color: white;
+}
+
 .print_options_box{
 	width: 200px;
 	margin-right: <? echo $size['legend']['hide_width']; ?>px;
