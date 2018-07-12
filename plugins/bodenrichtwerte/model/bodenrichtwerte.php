@@ -139,116 +139,134 @@ class bodenrichtwertzone {
   }
 
   function eintragenNeueZone($formvars) {
-  	$formvars['bodenrichtwert'] = str_replace(',', '.', $formvars['bodenrichtwert']);
-  	$formvars['geschossflaechenzahl'] = str_replace(',', '.', $formvars['geschossflaechenzahl']);
-  	$formvars['grundflaechenzahl'] = str_replace(',', '.', $formvars['grundflaechenzahl']);
-  	$formvars['baumassenzahl'] = str_replace(',', '.', $formvars['baumassenzahl']);
-  	$formvars['oertliche_bezeichnung'] = str_replace(chr(10), '', $formvars['oertliche_bezeichnung']);
-  	$formvars['oertliche_bezeichnung'] = str_replace(chr(13), '', $formvars['oertliche_bezeichnung']);
-    $this->debug->write('<br>file:bodenrichtwerte.php class:bodenrichtwertzone function eintragenNeueZone<br>Einfügen der Daten zu einer Richtwertzone in<br>PostGIS',4);
-  	$sql ="INSERT INTO bodenrichtwerte.bw_zonen (";
-  	if($formvars['stichtag']){$sql.= "stichtag";} 
-		if($formvars['gemeinde']){$sql.= ",gemeinde";} 
-		if($formvars['gemarkung']){$sql.= ",gemarkung";} 
-		if($formvars['ortsteilname']){$sql.= ",ortsteilname";} 
-		if($formvars['postleitzahl']){$sql.= ",postleitzahl";}
-		if($formvars['zonentyp']){$sql.= ",zonentyp";} 
-		if($formvars['gutachterausschuss']){$sql.= ",gutachterausschuss";} 
-		if($formvars['bodenrichtwertnummer']){$sql.= ",bodenrichtwertnummer";} 
-		if($formvars['oertliche_bezeichnung']){$sql.= ",oertliche_bezeichnung";} 
-		if($formvars['bodenrichtwert']){$sql.= ",bodenrichtwert";}
-		if($formvars['brwu']){$sql.= ",brwu";}
-		if($formvars['brws']){$sql.= ",brws";}
-		if($formvars['brwb']){$sql.= ",brwb";}		
-  	if($formvars['bedarfswert']){$sql.= ",bedarfswert";} 
-		if($formvars['basiskarte']){$sql.=",basiskarte";} 
-		if($formvars['entwicklungszustand']){$sql.= ",entwicklungszustand";} 
-		if($formvars['beitragszustand']){$sql.= ",beitragszustand";} 
-		if($formvars['nutzungsart']){$sql.= ",nutzungsart";} 
-		if($formvars['ergaenzende_nutzung']){$sql.= ",ergaenzende_nutzung";} 
-		if($formvars['bauweise']){$sql.= ",bauweise";} 
-		if($formvars['geschosszahl']){$sql.= ",geschosszahl";} 
-		if($formvars['grundflaechenzahl']){$sql.= ",grundflaechenzahl";} 
-		if($formvars['geschossflaechenzahl']){$sql.= ",geschossflaechenzahl";} 
-		if($formvars['baumassenzahl']){$sql.= ",baumassenzahl";} 
-		if($formvars['flaeche']){$sql.= ",flaeche";} 
-		if($formvars['tiefe']){$sql.= ",tiefe";} 
-		if($formvars['breite']){$sql.= ",breite";} 
-		if($formvars['wegeerschliessung']){$sql.= ",wegeerschliessung";} 
-  	if($formvars['erschliessung']){$sql.= ",erschliessung";}
-		if($formvars['ackerzahl']){$sql.= ",ackerzahl";} 
-		if($formvars['gruenlandzahl']){$sql.= ",gruenlandzahl";} 
-		if($formvars['aufwuchs']){$sql.= ",aufwuchs";}
-  	if($formvars['bodenart']){$sql.= ",bodenart";} 
-		if($formvars['verfahrensgrund']){$sql.= ",verfahrensgrund";} 
-		if($formvars['verfahrensgrund_zusatz']){$sql.= ",verfahrensgrund_zusatz";} 
-		if($formvars['bemerkungen']){$sql.= ",bemerkungen";} 
-  	$sql.=", the_geom, textposition) VALUES (";
-  	if($formvars['stichtag']){$sql.= "'31.12.".$formvars['stichtag']."' ";}
-    if($formvars['gemeinde']){$sql.= ",".$formvars['gemeinde'];}
-    if($formvars['gemarkung']){$sql.= ",".$formvars['gemarkung'];}
-    if($formvars['ortsteilname']){$sql.= ",'".$formvars['ortsteilname']."' ";}
-    if($formvars['postleitzahl']){$sql.= ",".$formvars['postleitzahl'];}
-    if($formvars['zonentyp']){$sql.= ",'".$formvars['zonentyp']."' ";}
-    if($formvars['gutachterausschuss']){$sql.= ",'".$formvars['gutachterausschuss']."'";}
-    if($formvars['bodenrichtwertnummer']){$sql.= ",".$formvars['bodenrichtwertnummer'];}
-    if($formvars['oertliche_bezeichnung']){$sql.= ",'".$formvars['oertliche_bezeichnung']."' ";}
-    if($formvars['bodenrichtwert']){$sql.= ",".$formvars['bodenrichtwert'];}
-		if($formvars['brwu']){$sql.= ",".$formvars['brwu'];}
-		if($formvars['brws']){$sql.= ",".$formvars['brws'];}
-		if($formvars['brwb']){$sql.= ",".$formvars['brwb'];}
-  	if($formvars['bedarfswert']){$sql.= ",".$formvars['bedarfswert'];}
-    if($formvars['basiskarte']){$sql.= ",'".$formvars['basiskarte']."' ";}
-    if($formvars['entwicklungszustand']){$sql.= ",'".$formvars['entwicklungszustand']."' ";}
-    if($formvars['beitragszustand']){$sql.= ",'".$formvars['beitragszustand']."' ";}
-    if($formvars['nutzungsart']){$sql.= ",'".$formvars['nutzungsart']."' ";}
-    if($formvars['ergaenzende_nutzung']){$sql.= ",'".$formvars['ergaenzende_nutzung']."' ";}
-    if($formvars['bauweise']){$sql.= ",'".$formvars['bauweise']."' ";}
-    if($formvars['geschosszahl']){$sql.= ",'".$formvars['geschosszahl']."' ";}
-    if($formvars['grundflaechenzahl']){$sql.= ",".$formvars['grundflaechenzahl'];}
-    if($formvars['geschossflaechenzahl']){$sql.= ",".$formvars['geschossflaechenzahl'];}
-    if($formvars['baumassenzahl']){$sql.= ",".$formvars['baumassenzahl'];}
-    if($formvars['flaeche']){$sql.= ",'".$formvars['flaeche']."' ";}
-    if($formvars['tiefe']){$sql.= ",'".$formvars['tiefe']."' ";}
-    if($formvars['breite']){$sql.= ",'".$formvars['breite']."' ";}
-    if($formvars['wegeerschliessung']){$sql.= ",'".$formvars['wegeerschliessung']."' ";}
-  	if($formvars['erschliessung']){$sql.= ",'".$formvars['erschliessung']."' ";}
-    if($formvars['ackerzahl']){$sql.= ",'".$formvars['ackerzahl']."' ";}
-    if($formvars['gruenlandzahl']){$sql.= ",'".$formvars['gruenlandzahl']."' ";}
-    if($formvars['aufwuchs']){$sql.= ",'".$formvars['aufwuchs']."' ";}
-  	if($formvars['bodenart']){$sql.= ",'".$formvars['bodenart']."' ";}
-    if($formvars['verfahrensgrund']){$sql.= ",'".$formvars['verfahrensgrund']."' ";}
-    if($formvars['verfahrensgrund_zusatz']){$sql.= ",'".$formvars['verfahrensgrund_zusatz']."' ";}
-    if($formvars['bemerkungen']){$sql.= ",'".$formvars['bemerkungen']."' ";}	
-  	$sql.=",st_transform(st_geometryfromtext('".$formvars['umring']."',".$this->client_epsg."), ".$this->layer_epsg.")";
-    $sql.=",st_transform(st_geometryfromtext('".$formvars['textposition']."',".$this->client_epsg."), ".$this->layer_epsg."))";
-    # echo $sql;
-    $ret=$this->database->execSQL($sql,4, 1);
-    if ($ret[0]) {
-      # Fehler beim Eintragen in Datenbank
-      $ret[1]='\nAuf Grund eines Datenbankfehlers konnte die Zone nicht eingetragen werden!\n'.$ret[1];
+		if($formvars['umring'] != ''){
+	  	$sql = "SELECT st_IsValidReason(st_geometryfromtext('".$formvars['umring']."', ".$this->client_epsg."))";
+	  	$ret = $this->database->execSQL($sql, 4, 0);
+	  	$valid = pg_fetch_array($ret[1]);
+  	}
+  	if($valid[0] == 'Valid Geometry'){
+			$formvars['bodenrichtwert'] = str_replace(',', '.', $formvars['bodenrichtwert']);
+			$formvars['geschossflaechenzahl'] = str_replace(',', '.', $formvars['geschossflaechenzahl']);
+			$formvars['grundflaechenzahl'] = str_replace(',', '.', $formvars['grundflaechenzahl']);
+			$formvars['baumassenzahl'] = str_replace(',', '.', $formvars['baumassenzahl']);
+			$formvars['oertliche_bezeichnung'] = str_replace(chr(10), '', $formvars['oertliche_bezeichnung']);
+			$formvars['oertliche_bezeichnung'] = str_replace(chr(13), '', $formvars['oertliche_bezeichnung']);
+			$this->debug->write('<br>file:bodenrichtwerte.php class:bodenrichtwertzone function eintragenNeueZone<br>Einfügen der Daten zu einer Richtwertzone in<br>PostGIS',4);
+			$sql ="INSERT INTO bodenrichtwerte.bw_zonen (";
+			if($formvars['stichtag']){$sql.= "stichtag";} 
+			if($formvars['gemeinde']){$sql.= ",gemeinde";} 
+			if($formvars['gemarkung']){$sql.= ",gemarkung";} 
+			if($formvars['ortsteilname']){$sql.= ",ortsteilname";} 
+			if($formvars['postleitzahl']){$sql.= ",postleitzahl";}
+			if($formvars['zonentyp']){$sql.= ",zonentyp";} 
+			if($formvars['gutachterausschuss']){$sql.= ",gutachterausschuss";} 
+			if($formvars['bodenrichtwertnummer']){$sql.= ",bodenrichtwertnummer";} 
+			if($formvars['oertliche_bezeichnung']){$sql.= ",oertliche_bezeichnung";} 
+			if($formvars['bodenrichtwert']){$sql.= ",bodenrichtwert";}
+			if($formvars['brwu']){$sql.= ",brwu";}
+			if($formvars['brws']){$sql.= ",brws";}
+			if($formvars['brwb']){$sql.= ",brwb";}		
+			if($formvars['bedarfswert']){$sql.= ",bedarfswert";} 
+			if($formvars['basiskarte']){$sql.=",basiskarte";} 
+			if($formvars['entwicklungszustand']){$sql.= ",entwicklungszustand";} 
+			if($formvars['beitragszustand']){$sql.= ",beitragszustand";} 
+			if($formvars['nutzungsart']){$sql.= ",nutzungsart";} 
+			if($formvars['ergaenzende_nutzung']){$sql.= ",ergaenzende_nutzung";} 
+			if($formvars['bauweise']){$sql.= ",bauweise";} 
+			if($formvars['geschosszahl']){$sql.= ",geschosszahl";} 
+			if($formvars['grundflaechenzahl']){$sql.= ",grundflaechenzahl";} 
+			if($formvars['geschossflaechenzahl']){$sql.= ",geschossflaechenzahl";} 
+			if($formvars['baumassenzahl']){$sql.= ",baumassenzahl";} 
+			if($formvars['flaeche']){$sql.= ",flaeche";} 
+			if($formvars['tiefe']){$sql.= ",tiefe";} 
+			if($formvars['breite']){$sql.= ",breite";} 
+			if($formvars['wegeerschliessung']){$sql.= ",wegeerschliessung";} 
+			if($formvars['erschliessung']){$sql.= ",erschliessung";}
+			if($formvars['ackerzahl']){$sql.= ",ackerzahl";} 
+			if($formvars['gruenlandzahl']){$sql.= ",gruenlandzahl";} 
+			if($formvars['aufwuchs']){$sql.= ",aufwuchs";}
+			if($formvars['bodenart']){$sql.= ",bodenart";} 
+			if($formvars['verfahrensgrund']){$sql.= ",verfahrensgrund";} 
+			if($formvars['verfahrensgrund_zusatz']){$sql.= ",verfahrensgrund_zusatz";} 
+			if($formvars['bemerkungen']){$sql.= ",bemerkungen";} 
+			$sql.=", the_geom, textposition) VALUES (";
+			if($formvars['stichtag']){$sql.= "'31.12.".$formvars['stichtag']."' ";}
+			if($formvars['gemeinde']){$sql.= ",".$formvars['gemeinde'];}
+			if($formvars['gemarkung']){$sql.= ",".$formvars['gemarkung'];}
+			if($formvars['ortsteilname']){$sql.= ",'".$formvars['ortsteilname']."' ";}
+			if($formvars['postleitzahl']){$sql.= ",".$formvars['postleitzahl'];}
+			if($formvars['zonentyp']){$sql.= ",'".$formvars['zonentyp']."' ";}
+			if($formvars['gutachterausschuss']){$sql.= ",'".$formvars['gutachterausschuss']."'";}
+			if($formvars['bodenrichtwertnummer']){$sql.= ",".$formvars['bodenrichtwertnummer'];}
+			if($formvars['oertliche_bezeichnung']){$sql.= ",'".$formvars['oertliche_bezeichnung']."' ";}
+			if($formvars['bodenrichtwert']){$sql.= ",".$formvars['bodenrichtwert'];}
+			if($formvars['brwu']){$sql.= ",".$formvars['brwu'];}
+			if($formvars['brws']){$sql.= ",".$formvars['brws'];}
+			if($formvars['brwb']){$sql.= ",".$formvars['brwb'];}
+			if($formvars['bedarfswert']){$sql.= ",".$formvars['bedarfswert'];}
+			if($formvars['basiskarte']){$sql.= ",'".$formvars['basiskarte']."' ";}
+			if($formvars['entwicklungszustand']){$sql.= ",'".$formvars['entwicklungszustand']."' ";}
+			if($formvars['beitragszustand']){$sql.= ",'".$formvars['beitragszustand']."' ";}
+			if($formvars['nutzungsart']){$sql.= ",'".$formvars['nutzungsart']."' ";}
+			if($formvars['ergaenzende_nutzung']){$sql.= ",'".$formvars['ergaenzende_nutzung']."' ";}
+			if($formvars['bauweise']){$sql.= ",'".$formvars['bauweise']."' ";}
+			if($formvars['geschosszahl']){$sql.= ",'".$formvars['geschosszahl']."' ";}
+			if($formvars['grundflaechenzahl']){$sql.= ",".$formvars['grundflaechenzahl'];}
+			if($formvars['geschossflaechenzahl']){$sql.= ",".$formvars['geschossflaechenzahl'];}
+			if($formvars['baumassenzahl']){$sql.= ",".$formvars['baumassenzahl'];}
+			if($formvars['flaeche']){$sql.= ",'".$formvars['flaeche']."' ";}
+			if($formvars['tiefe']){$sql.= ",'".$formvars['tiefe']."' ";}
+			if($formvars['breite']){$sql.= ",'".$formvars['breite']."' ";}
+			if($formvars['wegeerschliessung']){$sql.= ",'".$formvars['wegeerschliessung']."' ";}
+			if($formvars['erschliessung']){$sql.= ",'".$formvars['erschliessung']."' ";}
+			if($formvars['ackerzahl']){$sql.= ",'".$formvars['ackerzahl']."' ";}
+			if($formvars['gruenlandzahl']){$sql.= ",'".$formvars['gruenlandzahl']."' ";}
+			if($formvars['aufwuchs']){$sql.= ",'".$formvars['aufwuchs']."' ";}
+			if($formvars['bodenart']){$sql.= ",'".$formvars['bodenart']."' ";}
+			if($formvars['verfahrensgrund']){$sql.= ",'".$formvars['verfahrensgrund']."' ";}
+			if($formvars['verfahrensgrund_zusatz']){$sql.= ",'".$formvars['verfahrensgrund_zusatz']."' ";}
+			if($formvars['bemerkungen']){$sql.= ",'".$formvars['bemerkungen']."' ";}	
+			$sql.=",st_transform(st_geometryfromtext('".$formvars['umring']."',".$this->client_epsg."), ".$this->layer_epsg.")";
+			$sql.=",st_transform(st_geometryfromtext('".$formvars['textposition']."',".$this->client_epsg."), ".$this->layer_epsg."))";
+			# echo $sql;
+			$ret=$this->database->execSQL($sql,4, 1);
+			if ($ret[0]) {
+				# Fehler beim Eintragen in Datenbank
+				$ret[1]='\nAuf Grund eines Datenbankfehlers konnte die Zone nicht eingetragen werden!\n'.$ret[1];
+			}
+		}
+		else{
+    	# Fehlerhafte Geometrie
+    	$ret[0] = 1;
+	    $ret[1]='\nDie Flaeche konnte nicht eingetragen werden, da sie fehlerhaft ist!\n\n'.$valid[0];
     }
     return $ret; 
   }
 
-    function aktualisierenZone($oid,$formvars) {
-    	$formvars['bodenrichtwert'] = str_replace(',', '.', $formvars['bodenrichtwert']);
-    	$formvars['geschossflaechenzahl'] = str_replace(',', '.', $formvars['geschossflaechenzahl']);
-    	$formvars['grundflaechenzahl'] = str_replace(',', '.', $formvars['grundflaechenzahl']);
-    	$formvars['baumassenzahl'] = str_replace(',', '.', $formvars['baumassenzahl']);
-    	$formvars['oertliche_bezeichnung'] = str_replace(chr(10), '', $formvars['oertliche_bezeichnung']);
-    	$formvars['oertliche_bezeichnung'] = str_replace(chr(13), '', $formvars['oertliche_bezeichnung']);
-      $this->debug->write('<br>file:bodenrichtwerte.php class:bodenrichtwertzone function aktualisierenZone<br>Einfügen der Daten zu einer Richtwertzone in<br>PostGIS',4);
-      $sql = "UPDATE bodenrichtwerte.bw_zonen SET ";
-      if($formvars['gemeinde']){$sql.= "gemeinde = ".(int)$formvars['gemeinde'].", ";}
-      if($formvars['gemarkung']){$sql.= "gemarkung = ".(int)$formvars['gemarkung'].", ";}
-      if($formvars['ortsteilname']){$sql.= "ortsteilname = '".$formvars['ortsteilname']."', ";}
-      if($formvars['postleitzahl']){$sql.= "postleitzahl = ".(int)$formvars['postleitzahl'].", ";}
-      if($formvars['zonentyp']){$sql.= "zonentyp = '".$formvars['zonentyp']."', ";}
-      if($formvars['gutachterausschuss']){$sql.= "gutachterausschuss = '".$formvars['gutachterausschuss']."', ";}
-      if($formvars['bodenrichtwertnummer']){$sql.= "bodenrichtwertnummer = ".(int)$formvars['bodenrichtwertnummer'].", ";}
-      if($formvars['oertliche_bezeichnung']){$sql.= "oertliche_bezeichnung = '".$formvars['oertliche_bezeichnung']."', ";}
-      if($formvars['bodenrichtwert'] == '')$sql.= "bodenrichtwert = NULL, ";
+  function aktualisierenZone($oid,$formvars) {
+		if($formvars['umring'] != ''){
+			$sql = "SELECT st_IsValidReason(st_geometryfromtext('".$formvars['umring']."', ".$this->client_epsg."))";
+			$ret = $this->database->execSQL($sql, 4, 0);
+			$valid = pg_fetch_array($ret[1]);
+		}
+		if($valid[0] == 'Valid Geometry'){
+			$formvars['bodenrichtwert'] = str_replace(',', '.', $formvars['bodenrichtwert']);
+			$formvars['geschossflaechenzahl'] = str_replace(',', '.', $formvars['geschossflaechenzahl']);
+			$formvars['grundflaechenzahl'] = str_replace(',', '.', $formvars['grundflaechenzahl']);
+			$formvars['baumassenzahl'] = str_replace(',', '.', $formvars['baumassenzahl']);
+			$formvars['oertliche_bezeichnung'] = str_replace(chr(10), '', $formvars['oertliche_bezeichnung']);
+			$formvars['oertliche_bezeichnung'] = str_replace(chr(13), '', $formvars['oertliche_bezeichnung']);
+			$this->debug->write('<br>file:bodenrichtwerte.php class:bodenrichtwertzone function aktualisierenZone<br>Einfügen der Daten zu einer Richtwertzone in<br>PostGIS',4);
+			$sql = "UPDATE bodenrichtwerte.bw_zonen SET ";
+			if($formvars['gemeinde']){$sql.= "gemeinde = ".(int)$formvars['gemeinde'].", ";}
+			if($formvars['gemarkung']){$sql.= "gemarkung = ".(int)$formvars['gemarkung'].", ";}
+			if($formvars['ortsteilname']){$sql.= "ortsteilname = '".$formvars['ortsteilname']."', ";}
+			if($formvars['postleitzahl']){$sql.= "postleitzahl = ".(int)$formvars['postleitzahl'].", ";}
+			if($formvars['zonentyp']){$sql.= "zonentyp = '".$formvars['zonentyp']."', ";}
+			if($formvars['gutachterausschuss']){$sql.= "gutachterausschuss = '".$formvars['gutachterausschuss']."', ";}
+			if($formvars['bodenrichtwertnummer']){$sql.= "bodenrichtwertnummer = ".(int)$formvars['bodenrichtwertnummer'].", ";}
+			if($formvars['oertliche_bezeichnung']){$sql.= "oertliche_bezeichnung = '".$formvars['oertliche_bezeichnung']."', ";}
+			if($formvars['bodenrichtwert'] == '')$sql.= "bodenrichtwert = NULL, ";
 			else $sql.= "bodenrichtwert = ".(float)$formvars['bodenrichtwert'].", ";
 			if($formvars['brwu'] == '')$sql.= "brwu = NULL, ";
 			else $sql.= "brwu = ".(float)$formvars['brwu'].", ";
@@ -256,49 +274,55 @@ class bodenrichtwertzone {
 			else $sql.= "brws = ".(float)$formvars['brws'].", ";
 			if($formvars['brwb'] == '')$sql.= "brwb = NULL, ";
 			else $sql.= "brwb = ".(float)$formvars['brwb'].", ";
-    	if($formvars['bedarfswert']){$sql.= "bedarfswert = ".(float)$formvars['bedarfswert'].", ";}
-      if($formvars['stichtag']){$sql.= "stichtag = '31.12.".$formvars['stichtag']."', ";}
-      if($formvars['basiskarte']){$sql.="basiskarte = '".$formvars['basiskarte']."', ";}
-      if($formvars['entwicklungszustand']){$sql.= "entwicklungszustand = '".$formvars['entwicklungszustand']."', ";}
-      if($formvars['beitragszustand']){$sql.= "beitragszustand = '".$formvars['beitragszustand']."', ";}
-      if($formvars['nutzungsart']){$sql.= "nutzungsart = '".$formvars['nutzungsart']."', ";}
-      if($formvars['ergaenzende_nutzung'] == '')$sql.= "ergaenzende_nutzung = NULL, ";
+			if($formvars['bedarfswert']){$sql.= "bedarfswert = ".(float)$formvars['bedarfswert'].", ";}
+			if($formvars['stichtag']){$sql.= "stichtag = '31.12.".$formvars['stichtag']."', ";}
+			if($formvars['basiskarte']){$sql.="basiskarte = '".$formvars['basiskarte']."', ";}
+			if($formvars['entwicklungszustand']){$sql.= "entwicklungszustand = '".$formvars['entwicklungszustand']."', ";}
+			if($formvars['beitragszustand']){$sql.= "beitragszustand = '".$formvars['beitragszustand']."', ";}
+			if($formvars['nutzungsart']){$sql.= "nutzungsart = '".$formvars['nutzungsart']."', ";}
+			if($formvars['ergaenzende_nutzung'] == '')$sql.= "ergaenzende_nutzung = NULL, ";
 			else $sql.= "ergaenzende_nutzung = '".$formvars['ergaenzende_nutzung']."', ";
-      if($formvars['bauweise']){$sql.= "bauweise = '".$formvars['bauweise']."', ";}
-      if($formvars['geschosszahl']){$sql.= "geschosszahl = '".$formvars['geschosszahl']."', ";}
-      if($formvars['grundflaechenzahl'] == '')$sql.= "grundflaechenzahl = NULL, ";
-      else $sql.= "grundflaechenzahl = '".$formvars['grundflaechenzahl']."', ";
-      if($formvars['geschossflaechenzahl'] == '')$sql.= "geschossflaechenzahl = NULL, ";
-      else $sql.= "geschossflaechenzahl = '".$formvars['geschossflaechenzahl']."', ";
-      if($formvars['baumassenzahl'] == '')$sql.= "baumassenzahl = NULL, ";
-      else $sql.= "baumassenzahl = '".$formvars['baumassenzahl']."', ";
-      if($formvars['flaeche'] == '')$sql.= "flaeche = NULL, ";
-      else $sql.= "flaeche = '".$formvars['flaeche']."', ";
-      if($formvars['tiefe'] == '')$sql.= "tiefe = NULL, ";
-      else $sql.= "tiefe = '".$formvars['tiefe']."', ";
-      if($formvars['breite'] == '')$sql.= "breite = NULL, ";
-      else $sql.= "breite = '".$formvars['breite']."', ";
-      if($formvars['wegeerschliessung']){$sql.= "wegeerschliessung = '".$formvars['wegeerschliessung']."', ";}
-    	if($formvars['erschliessung']){$sql.= "erschliessung = '".$formvars['erschliessung']."', ";}
-    	if($formvars['ackerzahl'] == '')$sql.= "ackerzahl = NULL, ";
-    	else $sql.= "ackerzahl = '".$formvars['ackerzahl']."', ";
-    	if($formvars['gruenlandzahl'] == '')$sql.= "gruenlandzahl = NULL, ";
-    	else $sql.= "gruenlandzahl = '".$formvars['gruenlandzahl']."', ";
-      if($formvars['aufwuchs']){$sql.= "aufwuchs = '".$formvars['aufwuchs']."', ";}
-    	if($formvars['bodenart']){$sql.= "bodenart = '".$formvars['bodenart']."', ";}
-      $sql.= "verfahrensgrund = '".$formvars['verfahrensgrund']."', ";
-      #$sql.= "verfahrensgrund_zusatz = '".$formvars['verfahrensgrund_zusatz']."', ";
-      $sql.= "bemerkungen = '".$formvars['bemerkungen']."', ";
-      $sql.= "the_geom = st_transform(st_GeometryFromText('".$formvars['umring']."',".$this->client_epsg."), ".$this->layer_epsg.")";
-      $sql.= ", textposition = st_transform(st_GeometryFromText('".$formvars['textposition']."',".$this->client_epsg."), ".$this->layer_epsg.")";
-      $sql.=" WHERE oid=".sprintf("%.0f", $oid);
-      #echo $sql;
-      $ret=$this->database->execSQL($sql,4, 1);
-      if ($ret[0]) {
-        # Fehler beim Eintragen in Datenbank
-        $ret[1]='\nAuf Grund eines Datenbankfehlers konnte die Zone nicht aktualisiert werden!\n'.$ret[1];
-      }
-      return $ret;
+			if($formvars['bauweise']){$sql.= "bauweise = '".$formvars['bauweise']."', ";}
+			if($formvars['geschosszahl']){$sql.= "geschosszahl = '".$formvars['geschosszahl']."', ";}
+			if($formvars['grundflaechenzahl'] == '')$sql.= "grundflaechenzahl = NULL, ";
+			else $sql.= "grundflaechenzahl = '".$formvars['grundflaechenzahl']."', ";
+			if($formvars['geschossflaechenzahl'] == '')$sql.= "geschossflaechenzahl = NULL, ";
+			else $sql.= "geschossflaechenzahl = '".$formvars['geschossflaechenzahl']."', ";
+			if($formvars['baumassenzahl'] == '')$sql.= "baumassenzahl = NULL, ";
+			else $sql.= "baumassenzahl = '".$formvars['baumassenzahl']."', ";
+			if($formvars['flaeche'] == '')$sql.= "flaeche = NULL, ";
+			else $sql.= "flaeche = '".$formvars['flaeche']."', ";
+			if($formvars['tiefe'] == '')$sql.= "tiefe = NULL, ";
+			else $sql.= "tiefe = '".$formvars['tiefe']."', ";
+			if($formvars['breite'] == '')$sql.= "breite = NULL, ";
+			else $sql.= "breite = '".$formvars['breite']."', ";
+			if($formvars['wegeerschliessung']){$sql.= "wegeerschliessung = '".$formvars['wegeerschliessung']."', ";}
+			if($formvars['erschliessung']){$sql.= "erschliessung = '".$formvars['erschliessung']."', ";}
+			if($formvars['ackerzahl'] == '')$sql.= "ackerzahl = NULL, ";
+			else $sql.= "ackerzahl = '".$formvars['ackerzahl']."', ";
+			if($formvars['gruenlandzahl'] == '')$sql.= "gruenlandzahl = NULL, ";
+			else $sql.= "gruenlandzahl = '".$formvars['gruenlandzahl']."', ";
+			if($formvars['aufwuchs']){$sql.= "aufwuchs = '".$formvars['aufwuchs']."', ";}
+			if($formvars['bodenart']){$sql.= "bodenart = '".$formvars['bodenart']."', ";}
+			$sql.= "verfahrensgrund = '".$formvars['verfahrensgrund']."', ";
+			#$sql.= "verfahrensgrund_zusatz = '".$formvars['verfahrensgrund_zusatz']."', ";
+			$sql.= "bemerkungen = '".$formvars['bemerkungen']."', ";
+			$sql.= "the_geom = st_transform(st_GeometryFromText('".$formvars['umring']."',".$this->client_epsg."), ".$this->layer_epsg.")";
+			$sql.= ", textposition = st_transform(st_GeometryFromText('".$formvars['textposition']."',".$this->client_epsg."), ".$this->layer_epsg.")";
+			$sql.=" WHERE oid=".sprintf("%.0f", $oid);
+			#echo $sql;
+			$ret=$this->database->execSQL($sql,4, 1);
+			if ($ret[0]) {
+				# Fehler beim Eintragen in Datenbank
+				$ret[1]='\nAuf Grund eines Datenbankfehlers konnte die Zone nicht aktualisiert werden!\n'.$ret[1];
+			}
+		}
+		else{
+			# Fehlerhafte Geometrie
+			$ret[0] = 1;
+			$ret[1]='\nDie Flaeche konnte nicht eingetragen werden, da sie fehlerhaft ist!\n\n'.$valid[0];
+		}
+    return $ret;
   }
   
   function copyZonenToNewStichtag($oldStichtag,$newStichtag) {

@@ -84,7 +84,7 @@ class rolle {
 			SELECT " .
 				$name_column . ",
 				l.Layer_ID,
-				alias, Datentyp, Gruppe, pfad, maintable, maintable_is_view, Data, `schema`, document_path, labelitem, connection, printconnection,
+				alias, Datentyp, Gruppe, pfad, maintable, maintable_is_view, Data, `schema`, document_path, document_url, labelitem, connection, printconnection,
 				classitem, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, trigger_function, ul.`queryable`, ul.`drawingorder`,
 				ul.`minscale`, ul.`maxscale`,
@@ -990,12 +990,15 @@ class rolle {
 					$newdrawingorder = $layer_unten['drawingorder'] + 1;
 					$layer_oben['drawingorder'] = $newdrawingorder;
 					$layers_changed[$layer_oben['id']] = true;
+					$layers_changed[$layer_unten['id']] = true;		// muss gesetzt werden, obwohl die drawingorder des unteren Layers nicht verändert wird, damit er in der folgenden for-Schleife nicht erhöht wird
 					$next_id = $layer_unten['id'] + 1;		// id des nächsten Layers im Layer-Array
 					if($layerset['list'][$next_id]['drawingorder'] <= $newdrawingorder){		// wenn erforderlich auch die drawingorders der Layer darüber erhöhen
 						$increase = $newdrawingorder - $layerset['list'][$next_id]['drawingorder'] + 1;		// um wieviel muss erhöht werden?
 						for($j = $next_id; $j < count($layerset['list']); $j++){
-							$layerset['list'][$j]['drawingorder'] += $increase;
-							$layers_changed[$j] = true;
+							if($layers_changed[$layerset['list'][$j]['id']] !== true){		// nur, wenn dieser Layer nicht schon angepasst wurde
+								$layerset['list'][$j]['drawingorder'] += $increase;
+								$layers_changed[$j] = true;
+							}
 						}
 					}
 				}

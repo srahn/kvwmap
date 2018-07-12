@@ -100,7 +100,7 @@
 												<td bgcolor="'.BG_GLEATTRIBUTE.'" colspan="40">&nbsp;<a href="javascript:void(0);" onclick="javascript:document.getElementById(\'group'.$layer['Layer_ID'].'_'.$j.'_'.$k.'\').style.display=\'none\';document.getElementById(\'colgroup'.$layer['Layer_ID'].'_'.$j.'_'.$k.'\').style.display=\'\';"><img border="0" src="'.GRAPHICSPATH.'/minus.gif"></a>&nbsp;&nbsp;<span class="fett">'.$groupname.'</span></td>
 											</tr>';
 				}
-				
+
 				if($attributes['visible'][$j]){
 					if($attributes['type'][$j] != 'geometry'){
 						if($attributes['privileg'][$j] != '0' AND !$lock[$k])$this->editable = $layer['Layer_ID'];
@@ -108,12 +108,12 @@
 					
 						if($attributes['arrangement'][$j] != 1){	# wenn Attribut nicht daneben -> neue Zeile beginnen
 							$attributes_in_row_so_far = 1;					# Attributanzahl in dieser Zeile bis zu diesem Attribut
-							$datapart .= '<tr class="' . $attribute_class . '">';
+							$datapart .= '<tr id="tr_'.$layer['Layer_ID'].'_'.$attributes['name'][$j].'_'.$k.'" class="' . $attribute_class . '">';
 						}
 						else $attributes_in_row_so_far++;
 						if($attributes['labeling'][$j] != 2){
-							$td = '	<td class="gle_attribute_name" '; if($attributes['labeling'][$j] == 1 AND $attributes['arrangement'][$j] == 1 AND $attributes['arrangement'][$j+1] != 1)$td .= 'colspan="20" ';if($attributes['group'][0] != '' AND $attributes['arrangement'][$j] != 1)$td .= 'width="10%">';else $td.='width="1%">';
-							$td.= 			attribute_name($layer['Layer_ID'], $attributes, $j, $k, $this->user->rolle->fontsize_gle, ($this->formvars['printversion'] == '')? true : false);
+							$td = '	<td class="gle-attribute-name" '; if($attributes['labeling'][$j] == 1 AND $attributes['arrangement'][$j] == 1 AND $attributes['arrangement'][$j+1] != 1)$td .= 'colspan="20" ';if($attributes['group'][0] != '' AND $attributes['arrangement'][$j] != 1)$td .= 'width="10%">';else $td.='width="1%">';
+							$td.= attribute_name($layer['Layer_ID'], $attributes, $j, $k, $this->user->rolle->fontsize_gle, ($this->formvars['printversion'] == '' AND $anzObj > 1) ? true : false);
 							$td.= '	</td>';
 							if($nl AND $attributes['labeling'][$j] != 1)$next_line .= $td; else $datapart .= $td;
 						}
@@ -133,13 +133,14 @@
 							$size2 = $size;
 							$select_width2 = $select_width;
 						}
+						if ($select_width2 == '') $select_width2 = 'max-width: 600px;';
 
 						$td = '	<td
 							id="row' . $j . '"
 							colspan="' . ($attributes['arrangement'][$j+1] != 1 ? 20 - $attributes_in_row_so_far : '') . '"' .
-							get_td_class_or_style($layer['shape'][$k][$attributes['style']] != '' ? $layer['shape'][$k][$attributes['style']] : 'gle_attribute_value') . '
+							get_td_class_or_style(array($layer['shape'][$k][$attributes['style']], 'gle_attribute_value')) . '
 						>';
-						$td.=	attribute_value($this, $layer['Layer_ID'], $attributes, $j, $k, $layer['shape'][$k], $size2, $select_width2, $this->user->rolle->fontsize_gle);
+						$td.=	attribute_value($this, $layer, NULL, $j, $k, NULL, $size2, $select_width2, $this->user->rolle->fontsize_gle);
 						$td.= '<div onmousedown="resizestart(document.getElementById(\'row'.$j.'\'), \'col_resize\');" style="position: absolute; transform: translate(4px); top: 0px; right: 0px; height: 20px; width: 6px; cursor: e-resize;"></div>';
 						$td.= '	</td>';
 						if($nl)$next_line .= $td; else $datapart .= $td;
@@ -155,7 +156,7 @@
 						}
 					}
 					else {
-						$columnname = $attributes['name'][$j];
+						$columnname = $attributes['real_name'][$attributes['name'][$j]];
 						$geom_tablename = $attributes['table_name'][$attributes['name'][$j]];
 						$geomtype = $attributes['geomtype'][$attributes['name'][$j]];
 						# Frage den Geometrietyp aus der Layerdefinition, wenn in geometry_columns nur als Geometry definiert.

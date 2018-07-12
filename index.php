@@ -88,6 +88,7 @@ define(CASE_COMPRESS, false);																																						  #
 # 	tooltip_query:	  - ein Datensatz mit Bild muss agefragt werden																			  #
 #										  - getRollenLayer() reinkopieren																										  #
 #   getLayerOptions:  - getRollenLayer() reinkopieren																											#
+#		get_group_legend:	- compare_legendorder() reinkopieren																								#
 #																																																				  #
 #																																																				  #
 ###########################################################################################################
@@ -159,9 +160,14 @@ function go_switch($go){
 	global $newPassword;
 	global $passwort;
 	global $username;
-	if(!FAST_CASE)$GUI->loadPlugins($go);
-	if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
-		if($go == 'get_last_query'){
+	if(!FAST_CASE) {
+		$old_go = $GUI->go;
+		$GUI->loadPlugins($go);
+		# go nur neu setzen, wenn es in einem Plugin auch geändert worden ist
+		if($old_go != $GUI->go)$go = $GUI->go;
+	}
+	if (FAST_CASE OR $GUI->goNotExecutedInPlugins) {
+		if ($go == 'get_last_query') {
 			$GUI->last_query = $GUI->user->rolle->get_last_query();
 			$GUI->last_query_requested = true;		# get_last_query wurde direkt aufgerufen
 			$GUI->formvars['go'] = $go = $GUI->last_query['go'];
@@ -860,7 +866,12 @@ function go_switch($go){
 				$GUI->druckrahmen_load();
 				$GUI->output();
 			} break;
-
+			
+			case 'Druckausschnitt_laden' : {
+				$GUI->formvars['loadmapsource'] = 'DataBase';
+				$GUI->druckausschnittswahl($GUI->formvars['loadmapsource']);
+			} break;
+			
 			case 'Druckausschnitt_loeschen' : {
 				$GUI->druckausschnitt_löschen($GUI->formvars['loadmapsource']);
 			} break;
@@ -875,14 +886,8 @@ function go_switch($go){
 			} break;
 
 			case 'Druckausschnittswahl_Vorschau' : {
-				if(IMAGEMAGICK == 'true'){
-					$GUI->druckvorschau();
-					$GUI->output();
-				}
-				else{
-					$GUI->druckvorschau_html();
-					$GUI->output();
-				}
+				$GUI->druckvorschau();
+				$GUI->output();
 			} break;
 
 			case 'Druckausschnittswahl_Drucken' : {

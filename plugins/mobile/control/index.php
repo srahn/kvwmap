@@ -15,6 +15,7 @@ include_once(CLASSPATH . 'data_import_export.php');
 
 /**
 * Anwendungsfälle
+* mobile_get_stellen
 * mobile_get_layers
 * mobile_sync
 * mobile_delete_images
@@ -24,6 +25,10 @@ include_once(CLASSPATH . 'data_import_export.php');
 #echo '<br>go: ' . $this->go;
 
 switch($this->go) {
+	case 'mobile_get_stellen' : {
+		$result = $this->mobile_get_stellen();
+		echo json_encode($result);
+	} break;
 
 	case 'mobile_get_layers' : {
 		$result = $this->mobile_get_layers();

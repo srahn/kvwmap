@@ -75,7 +75,7 @@ class antrag {
       # Verzeichnis für recherchierte Aufträge existierte noch nicht. 
       # Anlegen eines neuen Verzeichnisses zur Speicherung der Dokumentendateien entsprechend RECHERCHEERGEBNIS_PATH
       mkdir (RECHERCHEERGEBNIS_PATH, 0777);
-      $msg = "Verzeichnis für Rechercheergebnisse erstmalig angelegt: ".RECHERCHEERGEBNIS_PATH."\\r\\n";
+      $msg = "Verzeichnis für Rechercheergebnisse erstmalig angelegt: ".RECHERCHEERGEBNIS_PATH."<br>";
     }    
     # Festlegen des Pfades für den Auftrag
     $auftragspfad=RECHERCHEERGEBNIS_PATH.$this->nr;
@@ -93,10 +93,10 @@ class antrag {
       if(delete_files($auftragspfad, $exceptions, 0)) {
         # Ordner wieder neu anlegen
         mkdir ($auftragspfad, 0777);
-        $msg = "Alle alten Dateien des Auftrages vor dem Hinzufügen der neuen Dateien gelöscht.\\r\\n";
+        $msg = "Alle alten Dateien des Auftrages vor dem Hinzufügen der neuen Dateien gelöscht.\n";
       }
       else {
-        $msg = "Löschen vorhandener Dateien fehlgeschlagen.\\r\\n";
+        $msg = "Löschen vorhandener Dateien fehlgeschlagen.<br>";
       }
     }
 		return $msg;
@@ -154,7 +154,7 @@ class antrag {
       #echo '<br>von:'.$quelle.' nach:'.$ziel;
 			$dateinamensteil = explode('.', $nachweis->Dokumente[$i]['link_datei']);
       if (!file_exists($quelle)) {
-        $errmsg.='Die Datei '.$quelle.' existiert nicht.\n';
+        $errmsg.='Die Datei '.$quelle.' existiert nicht.<br>';
       }
       else {
         if (!file_exists($ziel)){
@@ -162,7 +162,7 @@ class antrag {
           $erfolg=@copy($quelle,$ziel);
           if ($erfolg==0){
             # Es konnte aus irgendeinem Grund nicht erfolgreich kopiert werden
-            $errmsg.='Die Datei '.$ziel.' konnte nicht erstellt werden.\n';
+            $errmsg.='Die Datei '.$ziel.' konnte nicht erstellt werden.<br>';
           }
 					else{	
 						# Vorschaubild kopieren
@@ -209,7 +209,7 @@ class antrag {
 				$ziel=$skizzenpfad.$festpunkt['datei'];;
 				#echo '<br>von:'.$quelle.' nach:'.$ziel;
 				if (!file_exists($quelle)) {
-					$errmsg.='Die Datei '.$quelle.' existiert nicht.\n';
+					$errmsg.='Die Datei '.$quelle.' existiert nicht.<br>';
 				}
 				else {
 					if (!file_exists($ziel)){
@@ -217,12 +217,12 @@ class antrag {
 						$erfolg=@copy($quelle,$ziel);
 						if ($erfolg==0){
 							# Es konnte aus irgendeinem Grund nicht erfolgreich kopiert werden
-							$errmsg.='Die Datei '.$ziel.' konnte nicht erstellt werden.\n';
+							$errmsg.='Die Datei '.$ziel.' konnte nicht erstellt werden.<br>';
 						}
 					}
 					else{
 						# Die Datei, die kopiert werden soll existiert schon am ziel.
-						$errmsg.='Die Datei '.$ziel.' existiert bereits!\n';
+						$errmsg.='Die Datei '.$ziel.' existiert bereits!<br>';
 					}
 				}
 			}
@@ -687,13 +687,13 @@ class antrag {
     #prüfen, ob die Antragsnummer korrekt eingegeben wurde!
     $strenthalten=0;
     if($antr_nr==''){
-      $errmsg.='Bitte geben Sie die Antragsnummer ein! \n';
+      $errmsg.='Bitte geben Sie die Antragsnummer ein!<br>';
     }
     $this->debug->write("<br>antrag.php pruefe_antrag_eintragen() prüfen der Eingabe der Anträge, ob Antragsnummer schon vorhanden.<br>".$sql,4);        
     $sql ="SELECT * FROM nachweisverwaltung.n_antraege WHERE antr_nr = '".$antr_nr."' AND stelle_id=".$stelle_id;
     $queryret=$this->database->execSQL($sql,4, 0);
     if ($queryret[0]) {
-      $errmsg.='Fehler bei der Abfrage der Anträge! '.$queryret[1].'\n';
+      $errmsg.='Fehler bei der Abfrage der Anträge! '.$queryret[1].'<br>';
     }
     else {
       if (pg_num_rows($queryret[1])>0) {
@@ -703,17 +703,17 @@ class antrag {
 
     #prüfen, ob ein Datum eingegeben wurde
     if ($datum==''){
-      $errmsg.='Bitte geben Sie ein Datum an! \n';
+      $errmsg.='Bitte geben Sie ein Datum an!<br>';
     }
     else {
       # Pfüfen, ob es sich um das richtige Format handelt.
       $datumteile=explode('.',$datum);
       if (!checkdate($datumteile[1],$datumteile[0],$datumteile[2])) {
-        $errmsg.='Das ist kein gültiges Datum. Geben sie es in der Form TT-MM-JJJJ ein.\n';
+        $errmsg.='Das ist kein gültiges Datum. Geben sie es in der Form TT-MM-JJJJ ein.<br>';
       }
     }
     if($verm_art==''){
-      $errmsg.='Bitte geben Sie die Vermessungsart an! \n';
+      $errmsg.='Bitte geben Sie die Vermessungsart an!<br>';
     }
     return $errmsg;
   }

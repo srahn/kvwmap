@@ -344,6 +344,14 @@ a.invisiblelayerlink:hover{
 	color: gray;
 }
 
+.print_options_box{
+	width: 200px;
+	margin-right: <? echo $size['legend']['hide_width']; ?>px;
+	margin-bottom: 5px;
+	border: 1px solid #aaa;
+	padding: 5px;
+}
+
 .buttonlink{
 	height: 13px;
 	display: inline-block;
@@ -674,6 +682,31 @@ a.menuered:hover {
 	height: <? echo ($size['footer']['height'] - 2); ?>px;
 	border: 1px solid; 
 	border-color: #aaa #cccccc #cccccc;
+}
+
+#agreement_message{
+	box-shadow: 12px 10px 14px #777;
+	background-color: #ffffff;
+	border: 2px solid #000000;
+	position: absolute;
+	top: 15px;
+	left: 50%;
+	transform: translate(-50%, 0);
+	height: 90%;
+}
+
+#agreement_message_body{	
+	position: relative;
+	border-bottom: 2px solid #000000;
+	height: 93%;
+	overflow-y:	auto;
+}
+
+#agreement_message_button{
+	height: 50px;
+	position: relative;
+	text-align: center;
+	padding: 15px;
 }
 
 #map{
@@ -1020,10 +1053,10 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 	border-bottom: 1px solid #bbb;
 }
 
-.message_box {
+#message_box {
 	opacity: 1;
 	position: fixed;
-	display: block;
+	display: none;
 	top:20%;
 	left:45%;
 	min-width:250px;
@@ -1042,15 +1075,6 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 	background-color: #DAE4EC;
 	box-shadow: 10px 10px 14px #777;
 	z-index: 1000000;
-}
-
-.message_box_hide {
-	opacity: 0;
-	transition: opacity 2s ease-out;
-}
-
-.message_box_hidden, .hidden {
-	display: none;
 }
 
 .message-box-notice {
@@ -1074,7 +1098,7 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 	float: left;
 	margin-left: 20px;
 	padding: 0px;
-	max-width: 490px
+	max-width: 480px
 }
 
 table.tgle {
@@ -1089,11 +1113,14 @@ thead.gle th {
  text-align:left;
 }
 
-.gle_attribute_name { 
+.gle-attribute-name { 
  padding-left: 2px;
  padding-right: 2px;
  vertical-align: top;
  background-color: <? echo BG_GLEATTRIBUTE; ?>;
+}
+
+.gle-attribute-mandatory {
 }
 
 .gle_attribute_value {

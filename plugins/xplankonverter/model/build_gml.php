@@ -115,22 +115,22 @@ class Gml_builder {
 			$this->formatXML($this->wrapWithElement('gml:boundedBy', $plan->get('envelope')))
 		);
 
-		// das RP_Plan Element anlegen
+		// das Plan Element anlegen
 		$gmlElemInner = "";
-		$gmlElemOpenTag = "<{$xplan_ns_prefix}RP_Plan";
+		$gmlElemOpenTag = "<{$xplan_ns_prefix}{$plan->umlName}";
 		$gmlElemOpenTag .= " gml:id=\"GML_{$plan->data['gml_id']}\"";
 
 		// fetch information about attributes and their properties
 		//$typeInfo = new TypeInfo($this->database);
-		$plan_attribs = $this->typeInfo->getInfo('rp_plan');
+		$plan_attribs = $this->typeInfo->getInfo($plan->tableName);
 
-		// alle Attribute von RP_Plan ausgeben
+		// alle Attribute vom Planobjekt ausgeben
 		$gmlElemInner .= $this->generateGmlForAttributes($plan->data, $plan_attribs, XPLAN_MAX_NESTING_DEPTH);
 
-		$rp_plan = $gmlElemOpenTag . ">" . $gmlElemInner;
+		$xplan_gml = $gmlElemOpenTag . ">" . $gmlElemInner;
 
 		// alle Bereiche suchen, die zur Konvertierung gehören
-		// TODO: Ist es sinnvoller die Bereiche abzufragen, die dem RP_Plan
+		// TODO: Ist es sinnvoller die Bereiche abzufragen, die dem Plan
 		// zugeordnet sind, oder ist es sauberer die Bereiche nach Ihrer
 		// Zugehörigkeit zur Konvertierung auszuwählen?
 		$sql = "
@@ -161,8 +161,8 @@ class Gml_builder {
 					'GML_' || b.gml_id::text || '_envelope'
 				) AS envelope
 			FROM
-				" . XPLANKONVERTER_CONTENT_SCHEMA . ".rp_bereich b JOIN
-				" . XPLANKONVERTER_CONTENT_SCHEMA . ".rp_plan p ON (b.gehoertzuplan = p.gml_id::text)
+				" . XPLANKONVERTER_CONTENT_SCHEMA . "." . $plan->bereichTableName . " b JOIN
+				" . XPLANKONVERTER_CONTENT_SCHEMA . "." . $plan->tableName . " p ON (b.gehoertzuplan = p.gml_id::text)
 			WHERE
 				p.konvertierung_id = " .$konvertierung->get('id') . " 
 		";
@@ -170,32 +170,32 @@ class Gml_builder {
 		$bereiche = pg_query($this->database->dbConn, $sql);
 
 		# iterating bereiche in two passes:
-		# first pass: complete RP_Plan element by iteratively inserting
-		# xlink-references to each RP_Bereich element
+		# first pass: complete Plan element by iteratively inserting
+		# xlink-references to each Bereich element
 		while ($bereich = pg_fetch_array($bereiche, NULL, PGSQL_ASSOC)) {
-			$rp_plan .= "<{$xplan_ns_prefix}bereich xlink:href=\"#GML_" . $bereich['gml_id'] . "\"/>";
+			$xplan_gml .= "<{$xplan_ns_prefix}bereich xlink:href=\"#GML_" . $bereich['gml_id'] . "\"/>";
 		}
-		# close and write RP_Plan element
-		fwrite($this->tmpFile, $this->formatXML($this->wrapWithFeatureMember($rp_plan . "</{$xplan_ns_prefix}RP_Plan>")));
+		# close and write Plan element
+		fwrite($this->tmpFile, $this->formatXML($this->wrapWithFeatureMember($xplan_gml . "</{$xplan_ns_prefix}{$plan->umlName}>")));
 
 		#
-		# second pass: iteratively building and writing gml for each RP_Bereich element
+		# second pass: iteratively building and writing gml for each Bereich element
 		#
 		// fetch information about attributes and their properties
-		$rp_bereich_attribs = $this->typeInfo->getInfo('rp_bereich', false);
+		$bereich_attribs = $this->typeInfo->getInfo($plan->planartAbk . '_bereich', false);
 		$xp_bereich_attribs = $this->typeInfo->getInfo('xp_bereich', false);
 
 		pg_result_seek($bereiche, 0);
 		while ($bereich = pg_fetch_array($bereiche, NULL, PGSQL_ASSOC)) {
-			$gmlElemOpenTag = "<{$xplan_ns_prefix}RP_Bereich";
+			$gmlElemOpenTag = "<{$xplan_ns_prefix}{$plan->bereichUmlName}";
 			$gmlElemOpenTag .= " gml:id=\"GML_{$bereich['gml_id']}\"";
-			$rp_bereich = $gmlElemOpenTag . ">";
+			$bereich_gml = $gmlElemOpenTag . ">";
 
 			// alle von XP_Bereich geerbten Attribute ausgeben
-			$rp_bereich .= $this->generateGmlForAttributes($bereich, $xp_bereich_attribs, XPLAN_MAX_NESTING_DEPTH);
+			$bereich_gml .= $this->generateGmlForAttributes($bereich, $xp_bereich_attribs, XPLAN_MAX_NESTING_DEPTH);
 
-			// alle gml_ids von RP_Objekten finden die mit dem Bereich verknüpft sind
-			// und im RP_Bereich Element verlinken
+			// alle gml_ids von Fachobjekten finden die mit dem Bereich verknüpft sind
+			// und im Bereich Element verlinken
 			$sql = "
 				SELECT
 					gml_id
@@ -205,39 +205,39 @@ class Gml_builder {
 					gehoertzubereich = $1
 			";
 			#echo '<br>Sql: ' . $sql;
-			$rp_objekte = pg_query_params($this->database->dbConn, $sql, array($bereich['gml_id']));
-			# complete RP_Bereich element by iteratively inserting
-			# xlink-references to each associated RP_Objekt element
-			while ($rp_objekt = pg_fetch_array($rp_objekte, NULL, PGSQL_ASSOC)) {
-				$rp_bereich .= "<{$xplan_ns_prefix}planinhalt xlink:href=\"#GML_" . $rp_objekt['gml_id'] . "\"/>";
+			$xp_objekte = pg_query_params($this->database->dbConn, $sql, array($bereich['gml_id']));
+			# complete Bereich element by iteratively inserting
+			# xlink-references to each associated Objekt element
+			while ($xp_objekt = pg_fetch_array($xp_objekte, NULL, PGSQL_ASSOC)) {
+				$bereich_gml .= "<{$xplan_ns_prefix}planinhalt xlink:href=\"#GML_" . $xp_objekt['gml_id'] . "\"/>";
 			}
-			// die übrigen in RP_Bereich definierten Attribute ausgeben
-			$rp_bereich .= $this->generateGmlForAttributes($bereich, $rp_bereich_attribs, XPLAN_MAX_NESTING_DEPTH);
+			// die übrigen in Bereich definierten Attribute ausgeben
+			$bereich_gml .= $this->generateGmlForAttributes($bereich, $bereich_attribs, XPLAN_MAX_NESTING_DEPTH);
 
-			// Rueckbezug zu RP_Plan
-			$rp_bereich .= "<{$xplan_ns_prefix}gehoertZuPlan xlink:href=\"#GML_{$bereich['gehoertzuplan']}\"/>";
+			// Rueckbezug zu Plan
+			$bereich_gml .= "<{$xplan_ns_prefix}gehoertZuPlan xlink:href=\"#GML_{$bereich['gehoertzuplan']}\"/>";
 
-			# close and write RP_Bereich element
-			fwrite($this->tmpFile, "\n" . $this->formatXML($this->wrapWithFeatureMember($rp_bereich . "</{$xplan_ns_prefix}RP_Bereich>")));
+			# close and write Bereich element
+			fwrite($this->tmpFile, "\n" . $this->formatXML($this->wrapWithFeatureMember($bereich_gml . "</{$xplan_ns_prefix}{$plan->bereichUmlName}>")));
 		}
 
-// und nun alle RP_Objekte generieren
-		// dazu alle RP_Objektklassen finden die mit der Konvertierung verknüpft sind
+// und nun alle Fachobjekte generieren
+		// dazu alle Fachobjektklassen finden die mit der Konvertierung verknüpft sind
 		$class_names = $konvertierung->get_class_names();
-		# zu jeder RP_Objektklassse die Objekte holen, die mit der Konvertierung verknüpft sind
+		# zu jeder Objektklassse die Objekte holen, die mit der Konvertierung verknüpft sind
 		foreach ($class_names AS $class_name) {
-			$rp_object = new RP_Object($konvertierung, $class_name);
-			$rp_object_rows = $rp_object->get_object_rows();
+			$object = new XP_Object($konvertierung, $class_name);
+			$object_rows = $object->get_object_rows();
 
 			// fetch information about attributes and their properties
 			$objekt_attribs = $this->typeInfo->getInfo($class_name);
 
-			foreach ($rp_object_rows AS $rp_object_row) {
+			foreach ($object_rows AS $object_row) {
 				# element anlegen und gml_id als attribut eintragen
-				$objekt_gml = "<{$xplan_ns_prefix}{$class_name} gml:id=\"GML_{$rp_object_row['gml_id']}\">";
+				$objekt_gml = "<{$xplan_ns_prefix}{$class_name} gml:id=\"GML_{$object_row['gml_id']}\">";
 
 				# alle uebrigen Attribute ausgeben
-				$objekt_gml .= $this->generateGmlForAttributes($rp_object_row, $objekt_attribs, XPLAN_MAX_NESTING_DEPTH);
+				$objekt_gml .= $this->generateGmlForAttributes($object_row, $objekt_attribs, XPLAN_MAX_NESTING_DEPTH);
 				# close and write FeatureMember
 				$objekt_gml .= "</{$xplan_ns_prefix}{$class_name}>";
 
@@ -267,7 +267,7 @@ class Gml_builder {
     $xplan_ns_prefix = XPLAN_NS_PREFIX ? XPLAN_NS_PREFIX.':' : '';
     $gmlStr = '';
 		$sequence_attr = 0;
-		foreach ($uml_attribute_info as  $uml_attribute) {
+		foreach ($uml_attribute_info as $uml_attribute) {
 				# Rueckverweise auf etwaige Bereiche hinzufügen
 				# index 10 is the current position (XPlanGML 5.0.1) for gehoertzubereich association to be implemented
 				# TODO Make this more generic to reflect possible changes in index and support all associations
@@ -282,10 +282,8 @@ class Gml_builder {
 				}
 				#$gmlStr .= "<note>attribut sequenznummer: " . $sequence_attr ."</note>";
 				$sequence_attr++;
-			
       // leere Felder auslassen
-      if ($gml_object[$uml_attribute['col_name']] == '') continue;
-
+      if ($gml_object[$uml_attribute['col_name']] == '' OR $gml_object[$uml_attribute['col_name']] == '{}') continue;
       #$gmlStr .= '<note>attributname: ' . $uml_attribute['name'] . ' type_type: ' . $uml_attribute['type_type'] . ' stereotype: ' . $uml_attribute['stereotype'] . '</note>';
       switch ($uml_attribute['type_type']) {
         case 'c': // custom datatype
@@ -384,7 +382,7 @@ class Gml_builder {
 								for ($j = 0; $j < count($gml_value_array); $j++) {
 									$timestamp = strtotime($gml_value_array[$j]);
 									if (!$timestamp) {
-										echo "Ungueltige Datumsangabe: " . $gml_value_array[$j];
+										echo "Ungueltige Datumsangabe im Attribut " . $uml_attribute['col_name'] . ": " . $gml_value_array[$j];
 										break;
 									}
 									$iso_date_str = date("Y-m-d", $timestamp);
@@ -393,7 +391,7 @@ class Gml_builder {
 							} else {
 								$timestamp = strtotime($gml_value);
 								if (!$timestamp) {
-									echo "Ungueltige Datumsangabe: " . $gml_value;
+									echo "Ungueltige Datumsangabe im Attribut " . $uml_attribute['col_name'] . ": " . $gml_value;
 									break;
 								}
 								$iso_date_str = date("Y-m-d", $timestamp);

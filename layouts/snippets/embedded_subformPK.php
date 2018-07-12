@@ -53,23 +53,26 @@
 								if ($dataset[$attributes['name'][$j]]!='') {
 									$dokumentpfad = $dataset[$attributes['name'][$j]];
 									$pfadteil = explode('&original_name=', $dokumentpfad);
-									$dateiname = $pfadteil[0];
-									$original_name = $pfadteil[1];
-									$dateinamensteil=explode('.', $dateiname);
+									$dateiname = $pfadteil[0];														
+									if($layer['document_url'] != '')$dateiname = url2filepath($dateiname, $layer['document_path'], $layer['document_url']);
+									$dateinamensteil = explode('.', $dateiname);
 									$type = strtolower($dateinamensteil[1]);
 									$thumbname = $this->get_dokument_vorschau($dateinamensteil);
-									$this->allowed_documents[] = addslashes($dateiname);
-									$this->allowed_documents[] = addslashes($thumbname);
-									if($attributes['options'][$j] != '' AND strtolower(substr($attributes['options'][$j], 0, 6)) != 'select'){		# bei Layern die auf andere Server zugreifen, wird die URL des anderen Servers verwendet
-										$url = $attributes['options'][$j].$this->document_loader_name.'?dokument=';
+									if($layer['document_url'] != ''){
+										$url = '';										# URL zu der Datei (komplette URL steht schon in $dokumentpfad)
+										$target = 'target="_blank"';
+										$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
 									}
 									else{
-										$url = IMAGEURL.$this->document_loader_name.'?dokument=';
-									}											
-									if($type == 'jpg' OR $type == 'png' OR $type == 'gif' OR $type == 'pdf' ){
-										echo '<tr><td><a class="preview_link" href="'.$url.$dokumentpfad.'"><img class="preview_image" src="'.$url.$thumbname.'"></a></td></tr>';									
+										$original_name = $pfadteil[1];																	
+										$this->allowed_documents[] = addslashes($dateiname);
+										$this->allowed_documents[] = addslashes($thumbname);
+										$url = IMAGEURL.$this->document_loader_name.'?dokument=';			# absoluter Dateipfad
+									}
+									if(in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf')) ){
+										echo '<tr><td><a class="preview_link" '.$target.' href="'.$url.$dokumentpfad.'"><img class="preview_image" src="'.$url.$thumbname.'"></a></td></tr>';									
 									}else{
-										echo '<tr><td><a class="preview_link" href="'.$url.$dokumentpfad.'"><img class="preview_doc" src="'.$url.$thumbname.'"></a></td></tr>';
+										echo '<tr><td><a class="preview_link" '.$target.' href="'.$url.$dokumentpfad.'"><img class="preview_doc" src="'.$url.$thumbname.'"></a></td></tr>';
 									}
 									$output[$p] = '<table><tr><td>'.$original_name.'</td>';
 								}
@@ -94,13 +97,13 @@
 			}
 			if($this->formvars['embedded'] == 'true'){
 				echo '<tr style="border: none">
-								<td'. get_td_class_or_style($dataset[$attributes['style']] != '' ? $dataset[$attributes['style']] : 'height: 20px') . '"><a style="font-size: '.$this->user->rolle->fontsize_gle.'px;" href="javascript:if(document.getElementById(\'subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\').innerHTML == \'\')ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$layer['Layer_ID'].'&value_'.$layer['maintable'].'_oid='.$dataset[$layer['maintable'].'_oid'].'&embedded=true&subform_link=true&fromobject=subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'&targetobject='.$this->formvars['targetobject'].'&targetlayer_id='.$this->formvars['targetlayer_id'].'&targetattribute='.$this->formvars['targetattribute'].'&data='.$this->formvars['data'].'\', new Array(document.getElementById(\'subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\'), \'\'), new Array(\'sethtml\', \'execute_function\'));clearsubforms('.$layer['Layer_ID'].');">'.implode(' ', $output).'</a><div id="subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'"></div></td>
+								<td'. get_td_class_or_style(array($dataset[$attributes['style']], 'height: 20px')) . '"><a style="font-size: '.$this->user->rolle->fontsize_gle.'px;" href="javascript:if(document.getElementById(\'subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\').innerHTML == \'\')ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$layer['Layer_ID'].'&value_'.$layer['maintable'].'_oid='.$dataset[$layer['maintable'].'_oid'].'&embedded=true&subform_link=true&fromobject=subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'&targetobject='.$this->formvars['targetobject'].'&targetlayer_id='.$this->formvars['targetlayer_id'].'&targetattribute='.$this->formvars['targetattribute'].'&data='.$this->formvars['data'].'\', new Array(document.getElementById(\'subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\'), \'\'), new Array(\'sethtml\', \'execute_function\'));clearsubforms('.$layer['Layer_ID'].');">'.implode(' ', $output).'</a><div id="subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'"></div></td>
 							</tr>
 	';
 			}
 			else{
 				echo '<tr style="border: none">
-								<td test="'.$attributes['style'].'"' . get_td_class_or_style($dataset[$attributes['style']]) . '>';
+								<td test="'.$attributes['style'].'"' . get_td_class_or_style(array($dataset[$attributes['style']])) . '>';
 				echo '<a style="font-size: '.$this->user->rolle->fontsize_gle.'px;"';
 								if($this->formvars['no_new_window'] != true){
 									echo 	' target="_blank"';

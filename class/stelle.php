@@ -857,12 +857,12 @@ class stelle {
 		return 1;
 	}
 
-	function addLayer($layer_ids, $drawingorder, $filter = '') {
+	function addLayer($layer_ids, $drawingorder, $filter = '', $assign_default_values = false) {
 		#echo '<br>stelle.php addLayer ids: ' . implode(', ', $layer_ids);
 		# Hinzufügen von Layern zur Stelle
-		for ($i=0;$i<count($layer_ids);$i++) {
-			$sql = "
-				INSERT IGNORE INTO used_layer (
+		for ($i=0;$i<count($layer_ids);$i++){
+			$sql = ($assign_default_values ? "REPLACE" : "INSERT IGNORE").
+			" INTO used_layer (
 					`Stelle_ID`,
 					`Layer_ID`,
 					`queryable`,
@@ -909,8 +909,8 @@ class stelle {
 			$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 			$query=mysql_query($sql,$this->database->dbConn);
 			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-			
-			if(mysql_affected_rows() > 0){
+
+			if(!$assign_default_values AND mysql_affected_rows() > 0){
 				$sql = "INSERT IGNORE INTO layer_attributes2stelle (layer_id, attributename, stelle_id, privileg, tooltip) ";
 				$sql.= "SELECT ".$layer_ids[$i].", name, ".$this->id.", privileg, query_tooltip FROM layer_attributes WHERE layer_id = ".$layer_ids[$i]." AND privileg IS NOT NULL";
 				#echo $sql.'<br>';

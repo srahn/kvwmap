@@ -15,7 +15,7 @@ function validierung_msg_formatter(value, row) {
 	else if (row.ergebnis_status == 'Warnung')
 		return row.validierung_msg_warning + '<br>' + value;
 	else
-		return row.validierung_msg_success;
+		return (value !='' ? value : row.validierung_msg_success);
 }
 
 function validierung_msg_correcture_formatter(value, row) {

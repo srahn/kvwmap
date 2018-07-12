@@ -55,35 +55,72 @@ class database {
     $this->blocktransaction=0;
   }
 
-	function login_user($username, $passwort){
+	function login_user($username, $passwort, $agreement = ''){
 		$sql = "
 			SELECT
-				login_name
+				* 
+			FROM
+				information_schema.COLUMNS 
+			WHERE
+				TABLE_SCHEMA = '" . $this->dbName . "' AND
+				TABLE_NAME = 'user' AND
+				COLUMN_NAME = 'agreement_accepted'
+		";
+		$ret = $this->execSQL($sql, 4, 0);
+		if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
+
+		$colunn_aggreement_accepted = (mysql_num_rows($ret[1]) == 1 ? ', agreement_accepted' : ', 1');
+
+		$sql = "
+			SELECT
+				ID,
+				login_name" .
+				$colunn_aggreement_accepted . "
 			FROM
 				user
 			WHERE
 				login_name = '" . addslashes($username) . "' AND
 				passwort = '" . md5($passwort) . "' AND
 				(
-					(
-						'" . date('Y-m-d h:i:s') . "' >= start AND
-						'" . date('Y-m-d h:i:s') . "' <= stop
-					) OR
-					(
-						start = '0000-00-00 00:00:00' AND
-						stop = '0000-00-00 00:00:00'
-					)
+					('" . date('Y-m-d h:i:s') . "' >= start AND '" . date('Y-m-d h:i:s') . "' <= stop) OR
+					(start='0000-00-00 00:00:00' AND stop='0000-00-00 00:00:00')
 				)
-		";	# Zeiteinschränkung wird nicht berücksichtigt.
+		"; # Zeiteinschränkung wird nicht berücksichtigt.
 		#echo $sql;
 		$this->execSQL("SET NAMES '" . MYSQL_CHARSET . "'", 0, 0);
-		$ret=$this->execSQL($sql, 3, 0);
+		$ret=$this->execSQL($sql, 4, 0);
 		if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
 		$ret = mysql_fetch_array($ret[1]);
-		return ($ret[0] != '' ? true : false);
+		if ($ret[0] != '') {
+			# wenn Nutzer bisher noch nicht akzeptiert hatte
+			if (defined('AGREEMENT_MESSAGE') AND AGREEMENT_MESSAGE != '' AND $ret['agreement_accepted'] == 0) {
+				if ($agreement != '') { # es wurde jetzt akzeptiert
+					$sql = "
+						UPDATE
+							user
+						SET
+							agreement_accepted = TRUE
+						WHERE
+							ID = " . $ret['ID'] . "
+					";
+					$ret2 = $this->execSQL($sql, 4, 0);
+					return true;
+				}
+				else { # jetzt wurde auch nicht akzeptiert
+					$this->agreement_not_accepted = true;
+					return false;
+				}
+			}
+			else {
+				return true;
+			}
+		}
+		else{
+			return false;
+		}
 	}
 
-  function read_colors(){
+  function read_colors(){	
   	$sql = "SELECT * FROM colors";
   	#echo $sql;
   	$ret=$this->execSQL($sql, 4, 0);
@@ -1008,7 +1045,7 @@ INSERT INTO u_styles2classes (
   	}
   }
 
-  function execSQL($sql,$debuglevel, $loglevel) {
+  function execSQL($sql, $debuglevel, $loglevel) {
   	switch ($this->loglevel) {
   		case 0 : {
   			$logsql=0;

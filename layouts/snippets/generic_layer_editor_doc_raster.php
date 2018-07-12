@@ -234,14 +234,14 @@
 		  				}
 		  			}
 		  			else{
-							echo attribute_value($this, $layer['Layer_ID'], $attributes, $j, $k, $layer['shape'][$k], $size, $select_width, $this->user->rolle->fontsize_gle);
+							echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width, $this->user->rolle->fontsize_gle);
 		  			}
 						if($attributes['privileg'][$j] >= '0' AND !($attributes['privileg'][$j] == '0' AND $attributes['form_element_type'][$j] == 'Auswahlfeld')){
 							$this->form_field_names .= $layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'|';
 						}
 		  		}
 		  		else {
-		  			$columnname = $attributes['name'][$j];
+						$columnname = $attributes['real_name'][$attributes['name'][$j]];
 		  			$geom_tablename = $attributes['table_name'][$attributes['name'][$j]];
 		  			$geomtype = $attributes['geomtype'][$attributes['name'][$j]];
 		  			$dimension = $attributes['dimension'][$j];

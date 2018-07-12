@@ -86,7 +86,7 @@ public static	function find_by_id($gui, $by, $id) {
 	* Führt die in der Regel definierten SQL-Statements aus um
 	* Daten aus Shapefiles in die Tabellen der XPlan GML Datentabellen
 	* zu schreiben. Dabei wird die im sql angegebene Id der Konvertierung
-	* für jedes RP_Objekt gesetzt.
+	* für jedes XP_Objekt gesetzt.
 	* Bei Objekten, die eine gml_id haben wird diese mit übernommen,
 	* bei den anderen wird die gid mit übernommen und die erzeugte gml_id
 	* zusammen mit der gid im Result mit zurückgeliefert und
