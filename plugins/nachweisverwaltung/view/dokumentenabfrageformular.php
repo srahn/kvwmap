@@ -246,8 +246,8 @@ else {
 		<td colspan="2">&nbsp;Gültigkeit:
 			<select name="gueltigkeit">
 				<option value="">--- Auswahl ---</option>
-				<option value="1">gültige Nachweise</option>
-				<option value="0">ungültige Nachweise</option>
+				<option value="1" <? if($this->formvars['gueltigkeit'] == 1)echo 'selected'; ?>>gültige Nachweise</option>
+				<option value="0" <? if($this->formvars['gueltigkeit'] === '0')echo 'selected'; ?>>ungültige Nachweise</option>
 			</select>
 		</td>
   </tr>
