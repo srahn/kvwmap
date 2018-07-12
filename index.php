@@ -1090,6 +1090,10 @@ function go_switch($go){
 			case 'Daten_Import' : {
 				$GUI->daten_import();
 			} break;
+			
+			case 'Daten_Import_Upload' : {
+				$GUI->daten_import_upload();
+			} break;			
 
 			case 'Daten_Export' : {
 				$GUI->checkCaseAllowed('Daten_Export');

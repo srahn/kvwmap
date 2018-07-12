@@ -347,15 +347,22 @@ a.invisiblelayerlink:hover{
 #data_import_upload_zone{
 	position: relative;
 	width: 400px;
-	height: 350px;
-	box-shadow: inset 0px 0px 40px 40px rgba(251,251,251,1);
-	background-color:	#4c86a8;
-	opacity: 0.6;
-	transition: all 0.2s ease;
+	height: 300px;
+	outline: 2px dashed steelblue;
+	outline-offset: -6px;
+	background:	linear-gradient(#adc7da 0%, #DAE4EC 50%, #adc7da 100%);
+	opacity: 0.7;
+	transition: all 0.2s ease;	
 }
 
 #data_import_upload_zone:hover{
-	opacity: 0.7;
+	opacity: 0.9;
+	transition: all 0.2s ease;
+}
+
+#data_import_upload_zone.dragover{
+	opacity: 0.5;
+	outline-offset: -2px;
 	transition: all 0.2s ease;
 }
 
@@ -364,7 +371,19 @@ a.invisiblelayerlink:hover{
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-	color: white;
+	color: #333;
+}
+
+#data_import_upload_progress .file_status{
+	display: flex;
+	border: 1px solid #bbb;
+	padding: 3px;
+}
+
+#data_import_upload_progress .file_status .uploadPercentage{
+	width: 100%;
+	text-align: right;
+	margin-right: 20px;
 }
 
 .print_options_box{

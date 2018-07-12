@@ -9721,6 +9721,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->main='data_import.php';
 		$this->output();
 	}
+	
+	function daten_import_upload(){
+		echo 'Upload erfolgreich~startNextUpload();';
+	}
 
   function daten_export() {
 		include_once (CLASSPATH.'data_import_export.php');

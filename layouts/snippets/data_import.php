@@ -5,11 +5,12 @@
 <!--
 
 	var filelist = [];  // Ein Array, das alle hochzuladenden Files enthält
-	var filesizes = [];  
-	var uploadCount = 0;
+	var filesizes = [];
+	var filenames = [];
+	var totalCount = 0;
 	var totalSize = 0; // Enthält die Gesamtgröße aller hochzuladenden Dateien
-	var totalProgress = 0; // Enthält den aktuellen Gesamtfortschritt
 	var currentUpload = null; // Enthält die Datei, die aktuell hochgeladen wird
+	var currentUploadId = 0;
 
 	function preventDefaults(e){
 		e.preventDefault()
@@ -21,54 +22,43 @@
 		for(var i = 0; i < event.dataTransfer.files.length; i++){
 			filelist.push(event.dataTransfer.files[i]);
 			filesizes.push(event.dataTransfer.files[i].size);
+			filenames.push(event.dataTransfer.files[i].name);			
+			createProgressDiv(totalCount);
+			totalCount++;
     }
-		startNextUpload();
+		startNextUpload(currentUploadId);
 	}
-	
-	function handleDragOver(event){
-		if(event.stopPropagation)event.stopPropagation();
-	}
-	
+		
 	function startNextUpload(){
 		if(filelist.length > 0){
 			currentUpload = filelist.shift();
-			uploadFile(currentUpload);
+			uploadFile(currentUpload, currentUploadId);
+			currentUploadId++;
     }
 	}
 	
-	function createProgressDiv(){
+	function createProgressDiv(uploadId){
 		fileProgress = document.createElement("div");
-		fileProgress.id = 'progress'+uploadCount;
-		document.getElementById('progress').appendChild(fileProgress);
+		fileProgress.id = 'progress'+uploadId;
+		fileProgress.className = 'file_status';
+		fileProgress.innerHTML = filenames[uploadId];
+		fileProgress.innerHTML = '<div>'+filenames[uploadId]+':</div><div class="uploadPercentage"></div><div class="serverResponse"></div>';
+		document.getElementById('data_import_upload_progress').appendChild(fileProgress);
 	}
 	
-	function uploadFile(file){
-		createProgressDiv();
-		var xhr = new XMLHttpRequest();
-		xhr.upload.addEventListener("progress", function(e){handleProgress(e, uploadCount)});
-		xhr.addEventListener("load", handleComplete);
-		xhr.addEventListener("error", handleError);
-		xhr.open('POST', 'index.php?go=Daten_Import_Upload');
+	function uploadFile(file, uploadId){		
 		var formdata = new FormData();
 		formdata.append('uploadfile', file);
-		xhr.send(formdata);
-		uploadCount++;
+		ahah('index.php?go=Daten_Import_Upload&upload_id='+uploadId, 
+					formdata, 
+					[document.getElementById('progress'+uploadId).querySelector('.serverResponse'), ''], 
+					['sethtml', 'execute_function'], 
+					function(e){handleProgress(e, uploadId)}
+				);
 	}
-	
-	function handleComplete(event){
-    totalProgress += currentUpload.size;
-    startNextUpload();
-	}
- 
-	function handleError(event){
-		alert("Upload failed");
-		totalProgress += currentUpload.size;
-		startNextUpload();
-	}
- 
-	function handleProgress(event, id){
-		console.log(id);
-		document.getElementById('progress'+id).innerHTML = 'Aktueller Fortschritt: ' + Math.round(filesizes[id] / event.loaded * 100) + '%';
+	  
+	function handleProgress(event, uploadId){
+		document.getElementById('progress'+uploadId).querySelector('.uploadPercentage').innerHTML = Math.round(event.loaded / filesizes[uploadId] * 100) + '%';
 	}
 	
   
@@ -81,14 +71,14 @@
   </tr>
 	<tr>
 		<td>
-			<div id="data_import_upload_zone" ondrop="handleFileDrop(event)" ondragenter="preventDefaults(event);" ondragover="preventDefaults(event);" ondragleave="preventDefaults(event);">
+			<div id="data_import_upload_zone" ondrop="handleFileDrop(event)" ondragover="this.className='dragover';preventDefaults(event);" ondragleave="this.className='';preventDefaults(event);" onmouseout="this.className='';">
 				<div id="text" class="px20 fett"><? echo $strDropFilesHere; ?></div>				
 			</div>
 		</td>
 	</tr>
 	<tr>
 		<td>
-			<div id="progress" class="px17 fett"></div>
+			<div id="data_import_upload_progress"></div>
 		</td>
 	</tr>
   <tr> 
