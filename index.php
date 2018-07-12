@@ -206,6 +206,10 @@ function go_switch($go){
 				$GUI->login_registration();
 			} break;
 
+			case 'login_agreement' : {
+				$GUI->login_agreement();
+			} break;
+
 			case 'loadDrawingOrderForm' : {
 				$GUI->loadDrawingOrderForm();
 			} break;

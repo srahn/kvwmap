@@ -157,29 +157,50 @@ else {
 			$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->database, $GUI->formvars['passwort']);
 
 			if (is_login_granted($GUI->user, $GUI->formvars['login_name'])) {
-				$GUI->debug->write('Anmeldung war erfolgreich. Frage alle Stellen des Nutzers ab.', 4, $GUI->echo);
+				$GUI->debug->write('Anmeldung war erfolgreich, Benutzer wurde mit angegebenem Passwort gefunden.', 4, $GUI->echo);
 				Nutzer::reset_num_login_failed($GUI, $GUI->formvars['login_name']);
 
-				if (is_new_password($GUI->formvars)) {
-					$GUI->debug->write('Es wurde ein neues Passwort angegeben.', 4, $GUI->echo);
-					$new_password_err = isPasswordValide($GUI->formvars['passwort'], $GUI->formvars['new_password'], $GUI->formvars['new_password_2']);
+				if (
+					!defined('AGREEMENT_MESSAGE') OR
+					AGREEMENT_MESSAGE == '' OR
+					is_agreement_accepted($GUI->user)
+				) {
+					$GUI->debug->write('Agreement ist akzeptiert.', 4, $GUI->echo);
 
-					if (is_new_password_valid($new_password_err)) {
-						$GUI->debug->write('Neues Password ist valid.', 4, $GUI->echo);
-						update_password($GUI);
-						# login case 5
+					if (is_new_password($GUI->formvars)) {
+						$GUI->debug->write('Es wurde ein neues Passwort angegeben.', 4, $GUI->echo);
+						$new_password_err = isPasswordValide($GUI->formvars['passwort'], $GUI->formvars['new_password'], $GUI->formvars['new_password_2']);
+
+						if (is_new_password_valid($new_password_err)) {
+							$GUI->debug->write('Neues Password ist valid.', 4, $GUI->echo);
+							update_password($GUI);
+							# login case 5
+						}
+						else { # new password is not ok
+							$GUI->debug->write('Neues Password ist nicht valid. Zurück zur Anmeldung mit Fehlermeldung.', 4, $GUI->echo);
+							$GUI->Fehlermeldung = $new_password_err . '!<br>Vorschlag für ein neues Password: <b>' . createRandomPassword(8) . '</b><br>';
+							$show_login_form = true;
+							$go = 'login_new_password';
+							# login case 6
+						}
 					}
-					else { # new password is not ok
-						$GUI->debug->write('Neues Password ist nicht valid. Zurück zur Anmeldung mit Fehlermeldung.', 4, $GUI->echo);
-						$GUI->Fehlermeldung = $new_password_err . '!<br>Vorschlag für ein neues Password: <b>' . createRandomPassword(8) . '</b><br>';
-						$show_login_form = true;
-						$go = 'login_new_password';
-						# login case 6
+					else {
+						$GUI->debug->write('Es wurde kein neues Passwort angegeben.', 4, $GUI->echo);
+						# login case 4
 					}
 				}
 				else {
-					$GUI->debug->write('Es wurde kein neues Passwort angegeben.', 4, $GUI->echo);
-					# login case 4
+					if ($GUI->formvars['agreement_accepted'] == '1') {
+						$GUI->debug->write('Nutzer bestätigt Agreement. Trage das ein.', 4, $GUI->echo);
+						$GUI->user->update_agreement_accepted($GUI->formvars['agreement_accepted']);
+					}
+					else {
+						$GUI->debug->write('Agreement ist nicht akzeptiert.', 4, $GUI->echo);
+						$GUI->Fehlermeldung = 'Vor Nutzung der Anwendung müssen Sie der Vereinbarung zustimmen!';
+						$show_login_form = true;
+						$go = 'login_agreement';
+						# login case 16
+					}
 				}
 			}
 			else { # Anmeldung ist fehlgeschlagen
@@ -500,6 +521,10 @@ function is_login($formvars) {
 
 function is_login_granted($user, $login_name) {
 	return $user->login_name == $login_name;
+}
+
+function is_agreement_accepted($user) {
+	return $user->agreement_accepted == 1;
 }
 
 function is_new_stelle($new_stelle_id, $user) {

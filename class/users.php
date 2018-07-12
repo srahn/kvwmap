@@ -731,6 +731,7 @@ class user {
 		}
 		$this->funktion = $rs['Funktion'];
 		$this->password_setting_time = $rs['password_setting_time'];
+		$this->agreement_accepted = $rs['agreement_accepted'];
 	}
 
 	/*
@@ -910,6 +911,23 @@ class user {
 		$query=mysql_query($sql,$this->database->dbConn);
 		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		$this->debug->write('Stelle gewechselt, neue Stellen_ID: '.$neueStelle,4);
+	}
+
+	function update_agreement_accepted($accepted) {
+		$sql = "
+			UPDATE
+				user
+			SET
+				agreement_accepted = " . $accepted . "
+			WHERE
+				ID = " . $this->id . "
+		";
+		$this->debug->write("<p>file:users.php class:user->agreement_accepted - Setzen ob Agreement akzeptiert.<br>" . $sql, 4);
+		$query = mysql_query($sql, $this->database->dbConn);
+		if ($query == 0) {
+			$this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4);
+			return 0;
+		}
 	}
 
 	function setStelle($stelle_id,$formvars) {

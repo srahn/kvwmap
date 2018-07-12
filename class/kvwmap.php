@@ -166,6 +166,13 @@ class GUI {
 		$this->output();
 	}
 
+	function login_agreement() {
+		$this->title='kvwmap Vereinbarung';
+		$this->expect = array('agreement_accepted');
+		$this->user->rolle->gui = ((defined('AGREEMENT_MESSAGE') AND AGREEMENT_MESSAGE != '') ? AGREEMENT_MESSAGE : 'snippets/login_agreement.php');
+		$this->output();
+	}
+
 	/**
 	*
 	* @params $layer Array mit Angben des Layers aus der MySQL-Datenbank
