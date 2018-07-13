@@ -120,6 +120,7 @@ function CalendarJS() {
 					hours.Instanz = this;
 					hours.addEventListener('mousewheel', this.mousewheelchange, false); // Chrome/Safari//IE9
 					hours.addEventListener('DOMMouseScroll', this.mousewheelchange, false);		//Firefox
+					hours.addEventListener('keydown', this.tp_keydown, false);
 					hours.addEventListener('change', function(e){this.Instanz.changeTime(e)}, false);
 					body.appendChild(hours);
 					body.appendChild(this.getCell("div", ':', ""));
@@ -127,6 +128,7 @@ function CalendarJS() {
 					minutes.Instanz = this;
 					minutes.addEventListener('mousewheel', this.mousewheelchange, false); // Chrome/Safari//IE9
 					minutes.addEventListener('DOMMouseScroll', this.mousewheelchange, false);		//Firefox
+					minutes.addEventListener('keydown', this.tp_keydown, false);
 					minutes.addEventListener('change', function(e){this.Instanz.changeTime(e)}, false);
 					body.appendChild(minutes);
 					body.appendChild(this.getCell("div", ':', ""));
@@ -134,6 +136,7 @@ function CalendarJS() {
 					seconds.Instanz = this;
 					seconds.addEventListener('mousewheel', this.mousewheelchange, false); // Chrome/Safari//IE9
 					seconds.addEventListener('DOMMouseScroll', this.mousewheelchange, false);		//Firefox
+					seconds.addEventListener('keydown', this.tp_keydown, false);
 					seconds.addEventListener('change', function(e){this.Instanz.changeTime(e)}, false);
 					body.appendChild(seconds);
 					submit = this.getCell("i", '', "fa submit fa-check-square");
@@ -153,6 +156,14 @@ function CalendarJS() {
 						this.now.setSeconds(parseInt(evt.target.value));
 				},
 				
+				this.tp_keydown = function(evt){
+					var d = 0;
+					if(evt.keyCode == '38')d = 1;
+					if(evt.keyCode == '40')d = -1;
+					value = parseInt(parseInt(evt.target.value) + d);
+					this.Instanz.setTime(evt, value);
+				},
+				
 				this.mousewheelchange = function(evt){
 					if(evt.preventDefault){
 						evt.preventDefault();
@@ -163,12 +174,16 @@ function CalendarJS() {
 						delta = evt.wheelDelta / 120; // Chrome/Safari
 					else if(evt.detail)
 						delta = evt.detail / -3; // Mozilla
-					value = parseInt(evt.target.value) + delta;
+					value = parseInt(parseInt(evt.target.value) + delta);
+					this.Instanz.setTime(evt, value);
+				},
+				
+				this.setTime = function(evt, value){
 					if(evt.target.id == 'tp_hours')max = 24;
 					else max = 60;
-					evt.target.value = this.Instanz.formatTime(max, value);
-					this.Instanz.changeTime(evt);
-				},
+					evt.target.value = this.formatTime(max, value);
+					this.changeTime(evt);
+				}
 				
 				this.formatTime = function(max, value){
 					if(value > max - 1)value = 0;

@@ -10,17 +10,25 @@ include_once(CLASSPATH . 'Style2Class.php');
 include_once(CLASSPATH . 'Label2Class.php');
 #include_once(CLASSPATH . 'LayerGroup.php');
 include_once(CLASSPATH . 'data_import_export.php');
+
 */
 
 /**
 * Anwendungsfälle
-* mobile_get_layer
+* mobile_get_stellen
+* mobile_get_layers
 * mobile_sync
+* mobile_delete_images
+* mobile_upload_images
 */
 
 #echo '<br>go: ' . $this->go;
 
 switch($this->go) {
+	case 'mobile_get_stellen' : {
+		$result = $this->mobile_get_stellen();
+		echo json_encode($result);
+	} break;
 
 	case 'mobile_get_layers' : {
 		$result = $this->mobile_get_layers();
@@ -43,6 +51,14 @@ switch($this->go) {
 		$this->checkCaseAllowed($this->go);
 		$result = $this->mobile_upload_image($this->formvars['selected_layer_id'], $_FILES);
 		echo json_encode($result);
+	} break;
+
+	case 'mobile_download_image' : {
+		$this->checkCaseAllowed($this->go);
+		$file = $this->formvars['image'];
+		header('Content-Type: image/jpeg');
+		header('Content-Length: ' . filesize($file));
+		readfile($file);
 	} break;
 
 	default : {

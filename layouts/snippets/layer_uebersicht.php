@@ -1,4 +1,42 @@
 <?php
+
+	$GUI = $this;
+		
+	$this->outputGroup = function($group, $indent = 0) use ($GUI){
+		$group_layer_ids = $GUI->layers['layers_of_group'][$group['id']];
+		$anzahl_layer = count($group_layer_ids);
+		if($anzahl_layer > 0 OR $group['untergruppen'] != ''){
+			echo '
+						<tr>
+							<td colspan="3" bgcolor="'.BG_GLEATTRIBUTE.'" class="px17 fett" style="height: 30px; border:1px solid #C3C7C3;"><div style="margin-left: '.$indent.'px;">';
+			if($indent > 0)echo '<img src="graphics/pfeil_unten-rechts.gif">';
+			echo $group['Gruppenname'].'</div></td>
+						</tr>
+					';
+			if($group['untergruppen'] != ''){
+				foreach($group['untergruppen'] as $untergruppe){
+					$GUI->outputGroup($GUI->groups[$untergruppe], $indent + 10);
+				}
+			}
+			for($i = 0; $i < $anzahl_layer; $i++){
+				$GUI->outputLayer($group_layer_ids[$i], $indent + 10);
+			}
+		}
+	};
+	
+	$this->outputLayer = function($i, $indent = 0) use ($GUI){
+		echo '
+      	<tr>
+		        <td style="padding-left: '.$indent.'px;border-right:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3" valign="top">';
+							if($GUI->layers['alias'][$i] != '')echo $GUI->layers['alias'][$i];
+							else echo $GUI->layers['Bezeichnung'][$i];
+		echo '	</td>
+		        <td style="border-right:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3" valign="top"><div style="width: 400px">'.htmlentities($GUI->layers['Kurzbeschreibung'][$i]).'</div></td>
+		        <td style="border-bottom:1px solid #C3C7C3"><div style="width: 200px" valign="top">'.$GUI->layers['Datenherr'][$i].'</div></td>
+		      </tr>
+      	';
+	};
+
  # 2008-01-12 pkvvm
   include(LAYOUTPATH.'languages/userdaten_'.$this->user->rolle->language.'.php');
  ?>
@@ -21,20 +59,13 @@ function Bestaetigung(link,text) {
 	        <th style="border-right:1px solid #C3C7C3">Kurzbeschreibung</th>
 	        <th>Datenherr</th>
 	      </tr>
-	      <?php 
-	      for($i = 0; $i < count($this->layer['ID']); $i++){
-	      	if($lastgroup != $this->layer['Gruppe'][$i]){  	
-	      		$lastgroup = $this->layer['Gruppe'][$i]; ?>
-	      	<tr>
-	      		<td colspan="3" bgcolor="<?php echo BG_GLEATTRIBUTE ?>" style="border:1px solid <?php echo BG_DEFAULT ?>"><span class="fett"><? echo $this->layer['Gruppe'][$i]; ?></span></td>
-	      	</tr>
-		   <? } ?>
-		      <tr>
-		        <td style="border-right:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3" valign="top"><? echo $this->layer['Bezeichnung'][$i]; ?></td>
-		        <td style="border-right:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3" valign="top"><div style="width: 400px"><? echo htmlentities($this->layer['Kurzbeschreibung'][$i]); ?></div></td>
-		        <td style="border-bottom:1px solid #C3C7C3"><div style="width: 200px" valign="top"><? echo $this->layer['Datenherr'][$i]; ?></div></td>
-		      </tr>
-		   <? } ?>
+	      <?
+				foreach($this->groups as $group){
+					if($group['obergruppe'] == ''){
+						$this->outputGroup($group);
+					}
+				}
+				?>
 	    </table>
     </td>
   </tr>

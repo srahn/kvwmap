@@ -37,11 +37,7 @@ class Converter {
     $konvertierung->find_by($by, $id);
     return $konvertierung;
   }
-  
-  function build_inspire($konvertierung) {
-    # Hier XSLT-Prozessor
-  }
-  
+
    function save($path){
     rewind($this->tmpFile);
     $file = fopen($path,'w');
@@ -49,17 +45,11 @@ class Converter {
     stream_copy_to_stream($this->tmpFile,$file);
 
     fclose($file);
-    
   }
   
   function Converter($structDb, $contentDb) {
     $this->structDb = $structDb;
     $this->contentDb = (empty($contentDb)) ? $structDb : $contentDb;
-  }
-  
-  function say_hello($msg){
-    $hallo = 'Hallo XPlan: <br>' . $msg;
-    return $hallo;
   }
 
   function findRPPlanByKonvertierung($konvertierung) {

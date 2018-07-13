@@ -76,7 +76,7 @@ else {
 				</tr>
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLogInName;?></th>
-					<td style="border-bottom:1px solid #C3C7C3"><input name="loginname" type="text" value="<?php echo $this->formvars['loginname']; ?>" size="15" maxlength="100"></td>
+					<td style="border-bottom:1px solid #C3C7C3"><input name="loginname" readonly onfocus="this.removeAttribute('readonly');" type="text" value="<?php echo $this->formvars['loginname']; ?>" size="15" maxlength="100"></td>
 				</tr><?php if ($this->formvars['selected_user_id']>0) {?>
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strChangePassword;?></th>
@@ -90,11 +90,11 @@ else {
 				</tr><?php } ?>
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPassword;?></th>
-					<td style="border-bottom:1px solid #C3C7C3"><input name="password1" <?php if ($this->formvars['selected_user_id']>0)echo'disabled="true"';?> type="password" size="10" maxlength="30"></td>
+					<td style="border-bottom:1px solid #C3C7C3"><input name="password1" readonly onfocus="this.removeAttribute('readonly');" <?php if ($this->formvars['selected_user_id']>0)echo'disabled="true"';?> type="password" size="10" maxlength="30"></td>
 				</tr>
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strReEnterPassword;?></th>
-					<td style="border-bottom:1px solid #C3C7C3"><input name="password2" <?php if ($this->formvars['selected_user_id']>0)echo'disabled="true"';?> type="password" size="10" maxlength="30"></td>
+					<td style="border-bottom:1px solid #C3C7C3"><input name="password2" readonly onfocus="this.removeAttribute('readonly');" <?php if ($this->formvars['selected_user_id']>0)echo'disabled="true"';?> type="password" size="10" maxlength="30"></td>
 				</tr>
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strStart;?></th>

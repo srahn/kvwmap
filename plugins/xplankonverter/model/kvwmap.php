@@ -5,21 +5,21 @@
 	* Trigger für Konvertierungen
 	*/
 	$this->trigger_functions['handle_konvertierung'] = function($fired, $event, $layer = '', $oid = 0, $old_dataset = array()) use ($GUI) {
-		echo '<br>Handle Konvertierungen trigger ';
+		#echo '<br>Handle Konvertierungen trigger mit fired: ' . $fired . ' event: ' . $event . ' layer: ' . print_r($layer, true) . ' oid: ' . $oid;
 		$executed = true;
 		$success = true;
 
 		switch(true) {
 			# Erzeuge Layergruppe und Verzeichnisse nach dem Erzeugen einer Konvertierung
 			case ($fired == 'AFTER' AND $event == 'INSERT') : {
-				echo 'AFTER INSERT';
+				#echo 'AFTER INSERT';
 				$konvertierung = Konvertierung::find_by_id($this, 'oid', $oid);
 				$konvertierung->create_layer_group('GML');
 				$konvertierung->create_directories();
 			} break;
 
 			case ($fired == 'INSTEAD' AND $event == 'DELETE') : {
-				echo 'INSTEAD DELETE';
+				#echo 'INSTEAD DELETE';
 				$konvertierung = Konvertierung::find_by_id($this, 'oid', $oid);
 				$konvertierung->destroy();
 			} break;
@@ -53,20 +53,52 @@
 		return array('executed' => $executed, 'success' => $success);
 	};
 
+
 	/**
-	* Trigger für RP_Plan Objekte
+	* Trigger für XP_Plan Objekte
 	*/
-	$this->trigger_functions['handle_rp_plan'] = function($fired, $event, $layer = '', $oid = 0, $old_dataset = array()) use ($GUI) {
+	$this->trigger_functions['handle_xp_plan'] = function($fired, $event, $layer = '', $oid = 0, $old_dataset = array()) use ($GUI) {
+		#echo '<br>Trigger Funktion handle_xp_plan ' . $fired . ' ' . $event . ' aufgerufen.';
 		$executed = true;
 		$success = true;
+
+		switch ($layer['Layer_ID']) {
+			case XPLANKONVERTER_BP_PLAENE_LAYER_ID : {
+				$planart = 'BP-Plan';
+			} break;
+			case XPLANKONVERTER_FP_PLAENE_LAYER_ID : {
+				$planart = 'FP-Plan';
+			} break;
+			case XPLANKONVERTER_SO_PLAENE_LAYER_ID : {
+				$planart = 'SO-Plan';
+			} break;
+			case XPLANKONVERTER_RP_PLAENE_LAYER_ID : {
+				$planart = 'RP-Plan';
+			} break;
+		}
 
 		switch(true) {
 
 			case ($fired == 'AFTER' AND $event == 'INSERT') : {
 				#echo '<br>Führe ' . $fired . ' ' . $event . ' in handle_rp_plan Funktion aus.';
-				$rp_plan = RP_Plan::find_by_id($this, 'oid', $oid);
-				$konvertierung_id = $rp_plan->get('konvertierung_id');
-				$konvertierung = Konvertierung::find_by_id($this, 'id', $konvertierung_id);
+				$xp_plan = XP_Plan::find_by_id($this, 'oid', $oid, $planart);
+
+				# Create Konvertierung and get konvertierung_id
+				$konvertierung = new Konvertierung($this);
+				$konvertierung_id = $konvertierung->create(
+					$xp_plan->get_anzeige_name(),
+					$this->Stelle->epsg_code,
+					$this->user->rolle->epsg_code,
+					$planart,
+					$this->Stelle->id,
+					$this->user->id
+				);
+
+				$xp_plan->set('konvertierung_id', $konvertierung_id);
+				$xp_plan->update();
+
+				$konvertierung = $konvertierung->find_by_id($this, 'id', $konvertierung_id);
+				$this->debug->show('Trigger ' . $fired . ' ' . $event . ' konvertierung planart: ' . $konvertierung->get('planart') . ' plan planart: ' . $konvertierung->plan->get('planart'), false);
 				$konvertierung->set_status();
 			} break;
 
@@ -78,11 +110,11 @@
 			} break;
 
 			default : {
-				#echo '<br>Default Case in ' . $fired . ' ' . $event . ' Triggerfunktion.';
+				#echo '<br>Default Case in ' . $fired . ' ' . $event . ' Triggerfunktion, tuhe nichts!';
 				$executed = false;
 			}
 		}
-		#echo '<br>Trigger Funktion ' . $fired . ' ' . $event . ' ausgeführt? ' . $executed;
+		#echo '<br>Trigger Funktion ' . $fired . ' ' . $event . ' ausgeführt: ' . ($executed ? 'Ja' : 'Nein');
 		return array('executed' => $executed, 'success' => $success);
 	};
 
@@ -123,7 +155,7 @@
 				if (empty($old_dataset['konvertierung_id'])) {
 					# hole konvertierung_id ueber plan und bereich_gml_id
 					$bereich = RP_Bereich::find_by_id($this, 'gml_id', $old_dataset['bereich_gml_id']);
-					$plan = RP_Plan::find_by_id($this, 'gml_id', $bereich->get('gehoertzuplan'));
+					$plan = XP_Plan::find_by_id($this, 'gml_id', $bereich->get('gehoertzuplan'));
 					$konvertierung_id = $plan->get('konvertierung_id');
 				}
 				else {
@@ -145,7 +177,7 @@
 	$this->xplankonverter_is_case_forbidden = function() {
 		$forbidden = false;
 		if ($this->formvars['konvertierung_id'] == '') {
-			echo 'Diese Link kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
+			#echo 'Diese Link kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
 			$forbidden = true;
 		}
 		else {

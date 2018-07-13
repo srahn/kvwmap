@@ -30,10 +30,49 @@ class Konvertierung extends PgObject {
 	}
 
 	public static	function find_by_id($gui, $by, $id) {
-		#echo '<br>find konvertierung by ' . $by . ' = ' . $id;
 		$konvertierung = new Konvertierung($gui);
 		$konvertierung->find_by($by, $id);
+		$konvertierung->debug->show('Found Konvertierung with planart: ' . $konvertierung->get('planart'), Konvertierung::$write_debug);
+		if ($konvertierung->get('planart') != '') {
+			$konvertierung->get_plan();
+		}
 		return $konvertierung;
+	}
+
+	function create($anzeige_name, $epsg_code, $input_epsg_code, $planart, $stelle_id, $user_id) {
+		$sql = "
+			INSERT INTO " . $this->schema . "." . $this->tableName . " (
+				bezeichnung, epsg, input_epsg, planart, stelle_id, user_id
+			) VALUES ( 
+				'" . $anzeige_name . "',
+				'" . $epsg_code . "'::xplankonverter.epsg_codes,
+				'" . $input_epsg_code . "'::xplankonverter.epsg_codes,
+				'" . $planart . "',
+				" . $stelle_id . ",
+				" . $user_id . "
+		)";
+		$this->debug->show('Create new konvertierung with sql: ' . $sql, Konvertierung::$write_debug);
+		$query = pg_query($this->database->dbConn, $sql);
+		$oid = pg_last_oid($query);
+		if (empty($oid)) {
+			$this->lastquery = $query;
+		}
+		else {
+			$sql = "
+				SELECT
+					*
+				FROM
+					" . $this->schema . "." . $this->tableName . "
+				WHERE
+					oid = " . $oid . "
+			";
+			$this->debug->show('Query created oid with sql: ' . $sql, Konvertierung::$write_debug);
+			$query = pg_query($this->database->dbConn, $sql);
+			$row = pg_fetch_assoc($query);
+			$this->set($this->identifier, $row[$this->identifier]);
+		}
+		$this->debug->show('Konvertierung created with ' . $this->identifier . ': '. $this->get($this->identifier), Konvertierung::$write_debug);
+		return $this->get($this->identifier);
 	}
 
 	function create_directories() {
@@ -140,17 +179,17 @@ class Konvertierung extends PgObject {
 		}
 
 		// Fuer Plan
-		$this->debug->show('Klasse: ' . 'RP_Plan', Konvertierung::$write_debug);
+		$this->debug->show('Klasse: ' . $this->plan->umlName, Konvertierung::$write_debug);
 		$sql = "
 			SELECT
 				*
 			FROM
-				xplan_gml.rp_plan
+				xplan_gml." . $this->plan->tableName . "
 			WHERE
 				konvertierung_id = " . $this->get('id')
 		;
 		$this->debug->show('Objektabfrage sql: ' . $sql, Konvertierung::$write_debug);
-		$export_class->ogr2ogr_export($sql, '"ESRI Shapefile"', $path . '/' . RP_Plan . '.shp', $this->database);
+		$export_class->ogr2ogr_export($sql, '"ESRI Shapefile"', $path . '/' . $this->plan->umlName . '.shp', $this->database);
 	}
 
 	function create_export_file($file_type) {
@@ -192,7 +231,7 @@ class Konvertierung extends PgObject {
 		return $input_codes;
 	}
 
-	function get_regeln() {
+	function get_regeln($plan) {
 		$this->debug->show('get_regeln', Konvertierung::$write_debug);
 
 		$regeln = array();
@@ -202,8 +241,6 @@ class Konvertierung extends PgObject {
 			bereich_gml_id IS NULL
 		");
 		$this->debug->show(count($regeln_ohne_bereich) . ' Regeln ohne Bereich gefunden.', Konvertierung::$write_debug);
-
-		$plan = $this->get_plan();
 
 		foreach($this->get_bereiche($plan->get('gml_id')) AS $bereich) {
 			$regeln_mit_bereich = $regel->find_where("bereich_gml_id = '{$bereich->get('gml_id')}'");
@@ -233,19 +270,24 @@ class Konvertierung extends PgObject {
 
 	function get_plan() {
 		if (!$this->plan) {
-			$plan = new RP_Plan($this->gui);
+			$this->debug->show('get_plan with planart: ' . $this->get('planart'), Konvertierung::$write_debug);
+			$plan = new XP_Plan($this->gui, $this->get('planart'));
 			$plan = $plan->find_where('konvertierung_id = ' . $this->get('id'));
-			if ($plan > 0)
+			$this->debug->show('found ' . count($plan) . ' Pläne', Konvertierung::$write_debug);
+			if (count($plan) > 0) {
 				$this->plan = $plan[0];
-			else
+				$this->debug->show('get_plan assign first plan with planart: ' . $this->plan->planart . ' gml_id: ' . $this->plan->get('gml_id') . ' to Konvertierung.', Konvertierung::$write_debug);
+			}
+			else {
 				$this->plan = false;
+			}
 		}
 		return $this->plan;
 	}
 
 	function get_bereiche($plan_id) {
 		#echo 'get_bereiche';
-		$bereich = new RP_Bereich($this->gui);
+		$bereich = new XP_Bereich($this->gui, $this->get('planart'));
 		return $bereich->find_where("gehoertzuplan = '{$plan_id}'");
 	}
 
@@ -259,9 +301,9 @@ class Konvertierung extends PgObject {
 				r.class_name
 			FROM
 				xplankonverter.regeln r LEFT JOIN
-				xplan_gml.rp_bereich b ON r.bereich_gml_id = b.gml_id left JOIN
-				xplan_gml.rp_plan bp ON b.gehoertzuplan = bp.gml_id::text LEFT JOIN
-				xplan_gml.rp_plan rp ON r.konvertierung_id = rp.konvertierung_id
+				xplan_gml." . $this->plan->planartAbk . "_bereich b ON r.bereich_gml_id = b.gml_id left JOIN
+				xplan_gml." . $this->plan->planartAbk . "_plan bp ON b.gehoertzuplan = bp.gml_id::text LEFT JOIN
+				xplan_gml." . $this->plan->planartAbk . "_plan rp ON r.konvertierung_id = rp.konvertierung_id
 			WHERE
 				bp.konvertierung_id = " . $this->get('id') . " OR
 				rp.konvertierung_id = " . $this->get('id') . "
@@ -287,7 +329,7 @@ class Konvertierung extends PgObject {
 	}
 
 	function set_status($new_status = '') {
-		$this->debug->show('<br>Setze status in Konvertierung.', false);
+		$this->debug->show('<br>Setze status in Konvertierung.', Konvertierung::$write_debug);
 		if ($new_status == '') {
 			$sql = "
 				SELECT DISTINCT
@@ -297,12 +339,12 @@ class Konvertierung extends PgObject {
 					END AS plan_or_regel_assigned
 				FROM
 					xplankonverter.konvertierungen k LEFT JOIN
-					xplan_gml.rp_plan p ON k.id = p.konvertierung_id LEFT JOIN
+					xplan_gml." . strtolower(substr($this->get('planart'), 0, 2)) . "_plan p ON k.id = p.konvertierung_id LEFT JOIN
 					xplankonverter.regeln r ON k.id = r.konvertierung_id
 				WHERE
 					k.id = {$this->get('id')}
 			";
-			$this->debug->show('<br>Setze Status mit sql: ' . $sql, false);
+			$this->debug->show('<br>Setze Status mit sql: ' . $sql, Konvertierung::$write_debug);
 			$query = pg_query($this->database->dbConn, $sql);
 			$result = pg_fetch_assoc($query);
 			$plan_or_regel_assigned = $result['plan_or_regel_assigned'];
@@ -336,7 +378,7 @@ class Konvertierung extends PgObject {
 	*
 	*/
 	function create_layer_group($layer_type) {
-		$this->debug->show('Konvertierung create_layer_group layer_type: ' . $layer_type, false);
+		$this->debug->show('Konvertierung create_layer_group layer_type: ' . $layer_type, Konvertierung::$write_debug);
 		$layer_group_id = $this->get(strtolower($layer_type) . '_layer_group_id');
 		if (empty($layer_group_id)) {
 			$layerGroup = new MyObject($this->gui, 'u_groups');
@@ -355,7 +397,7 @@ class Konvertierung extends PgObject {
 	*
 	*/
 	function delete_layer_group($layer_type) {
-		$this->debug->show('delete_layer_group typ: ' . $layer_type, false);
+		$this->debug->show('delete_layer_group typ: ' . $layer_type, Konvertierung::$write_debug);
 		$layer_group_id = $this->get(strtolower($layer_type) . '_layer_group_id');
 		if (!empty($layer_group_id)) {
 			$layer_group = new MyObject($this->gui, 'u_groups');
@@ -399,7 +441,8 @@ class Konvertierung extends PgObject {
 	}
 
 	/*
-	* Diese Funktion führt das Mapping zwischen den Shape Dateien
+	* Diese Funktion prüft die Konformitätsbedingungen für Plan und Bereichsobjekte und
+	* führt das Mapping zwischen den Shape Dateien
 	* und den in den Regeln definierten XPlan GML Features durch.
 	* Jedes im Mapping erzeugte Feature bekommt eine eindeutige gml_id.
 	* Darüber hinaus muss die Zuordnung zum überordneten Objekt
@@ -409,27 +452,39 @@ class Konvertierung extends PgObject {
 	* $this->converter->regeln_anwenden($this->formvars['konvertierung_id']);
 	*/
 	function mapping() {
-		$regeln = $this->get_regeln();
-		$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'regel_existiert');
+		$regeln = $this->get_regeln($this->plan);
+
+		// validate Plan
+
+		// validate Bereiche
+		$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'detaillierte_requires_bedeutung');
 		$validierung->konvertierung_id = $this->get('id');
-		if ($validierung->regel_existiert($regeln)) {
-			$success = true;
-			$this->get_plan();
-			foreach($regeln AS $regel) {
-				$result = $regel->validate($this);
-				if (!$result) {
-					$success = false;
-				}
-				else {
-					$result = $regel->convert($this);
-					if (!empty($result)) {
-						$regel->rewrite_gml_ids($result);
+		$bereiche = $this->plan->get_bereiche();
+		foreach($bereiche AS $bereich) {
+			$validierung->detaillierte_requires_bedeutung($bereich);
+		}
+
+		if(!empty($regeln)){
+			$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'regel_existiert');
+			$validierung->konvertierung_id = $this->get('id');
+			if ($validierung->regel_existiert($regeln)) {
+				$success = true;
+				foreach($regeln AS $regel) {
+					$result = $regel->validate($this);
+					if (!$result) {
+						$success = false;
+					}
+					else {
+						$result = $regel->convert($this);
+						if (!empty($result)) {
+							$regel->rewrite_gml_ids($result);
+						}
 					}
 				}
+				$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'alle_sql_ausfuehrbar');
+				$validierung->konvertierung_id = $this->get('id');
+				$validierung->alle_sql_ausfuehrbar($success);
 			}
-			$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'alle_sql_ausfuehrbar');
-			$validierung->konvertierung_id = $this->get('id');
-			$validierung->alle_sql_ausfuehrbar($success);
 		}
 	}
 
@@ -451,7 +506,7 @@ class Konvertierung extends PgObject {
 	* löscht sich am Ende selbst.
 	*/
 	function destroy() {
-		# Lösche gml-Datei
+		$this->debug->show('Lösche gml-Datei', Konvertierung::$write_debug);
 		$gml_file = new gml_file($this->get_file_name('xplan_gml'));
 		if ($gml_file->exists()) {
 			$msg = "\nLösche gml file: ". $gml_file->filename;
@@ -471,10 +526,9 @@ class Konvertierung extends PgObject {
 		}
 
 		# Lösche Plan der Konvertierung
-		$plan = $this->get_plan();
-		if ($plan) {
-			$msg .= "\nRP Plan " . $plan->get('name') . ' gelöscht.';
-			$plan->destroy();
+		if ($this->plan) {
+			$msg .= "\n " . $this->plan->umlName . ' ' . $this->plan->get('name') . ' gelöscht.';
+			$this->plan->destroy();
 		}
 
 		# Lösche GML-Layer Gruppe

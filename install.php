@@ -34,13 +34,16 @@ $debug; $log_mysql; $log_postgres;
 define('KVWMAP_INIT_PASSWORD', (getenv('KVWMAP_INIT_PASSWORD') == '') ? 'KvwMapPW1' : getenv('KVWMAP_INIT_PASSWORD'));
 
 output_header();
-if ($_REQUEST['go'] == 'Installation starten') {
-  install();
+
+if (!file_exists('config.php')) {
+	if ($_REQUEST['go'] == 'Installation starten') {
+	  install();
+	}
+	else {
+	  settings();
+	}
+	output_footer();
 }
-else {
-  settings();
-}
-output_footer();
 
 function output_header() { ?>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de" lang="de">

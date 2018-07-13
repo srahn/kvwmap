@@ -1,5 +1,64 @@
 <?php
+	/*
+	* Cases:
+	* mobile_create_layer_sync
+	* mobile_delete_images
+	* mobile_drop_layer_sync
+	* mobile_get_layers 
+	* mobile_get_stellen
+	* mobile_prepare_layer_sync
+	* mobile_reformat_attributes
+	* mobile_reformat_layer
+	* mobile_sync
+	* mobile_sync_parameter_valide
+	* mobile_upload_image
+	* 
+	*/
+
 	$GUI = $this;
+
+	/**
+	* This function return all stellen the authenticated user is assigned to
+	* where sync enabled layer are in
+	*/
+	$this->mobile_get_stellen = function() {
+		$sql = "
+			SELECT DISTINCT
+				s.ID,
+				s.Bezeichnung
+			FROM
+				rolle r JOIN
+				stelle s ON r.stelle_id = s.ID JOIN
+				used_layer ul ON s.ID = ul.Stelle_ID JOIN
+				layer l ON ul.Layer_ID = l.Layer_ID
+			WHERE
+				r.user_id = 2 AND
+				l.sync = '1'
+			ORDER BY
+				s.Bezeichnung
+		";
+		$ret = $this->database->execSQL($sql, 4, 0);
+
+		if ($ret[0]) {
+			$result = array(
+				"success" => false,
+				"err_msg" => "Es konnten keine Stellen mit mobilen Layern abgefragt werden! SQL: " . $sql
+			);
+		}
+		else {
+			$stellen = array();
+			while ($rs = mysql_fetch_assoc($ret[1])) {
+				$stellen[] = $rs;
+			}
+
+			$result = array(
+				"success" => true,
+				"user_id" => $this->user->id,
+				"stellen" => $stellen
+			);
+		}
+		return $result;
+	};
 
 	/**
 	* Frage den Layer mit selected_layer_id und die dazugehörigen Attributdaten ab
@@ -36,10 +95,11 @@
 					# Zuordnen der Privilegien und Tooltips zu den Attributen
 					for ($j = 0; $j < count($attributes['name']); $j++) {
 						$attributes['privileg'][$j] = $attributes['privileg'][$attributes['name'][$j]] = ($privileges == NULL ? 0 : $privileges[$attributes['name'][$j]]);
-						$attributes['tooltip'][$j] = $attributes['tooltip'][$attributes['name'][$j]] = ($privileges == NULL ? 0 : $privileges['tooltip_' . $attributes['name'][$j]]);
+						#$attributes['tooltip'][$j] = $attributes['tooltip'][$attributes['name'][$j]] = ($privileges == NULL ? 0 : $privileges['tooltip_' . $attributes['name'][$j]]);
 					}
-
 					$layer = $this->mobile_reformat_layer($layerset[0]);
+					$attributes = $mapDB->add_attribute_values($attributes, $layerdb, array(), true, $this->Stelle->ID);
+
 					$layer['attributes'] = $this->mobile_reformat_attributes($attributes);
 					$mobile_layers[] = $layer;
 				}
@@ -74,7 +134,7 @@
 		#		if ($this->formvars['selected_layer_id'] != '')
 
 		$this->formvars['client_deltas'] = json_decode(file_get_contents($_FILES['client_deltas']['tmp_name']));
-		move_uploaded_file($_FILES['file']['tmp_name'], '/var/www/logs/upload_file.json');
+		//move_uploaded_file($_FILES['client_deltas']['tmp_name'], '/var/www/logs/upload_file.json');
 
 		$result = $this->mobile_sync_parameter_valide($this->formvars);
 		if ($result['success']) {
@@ -177,12 +237,15 @@
 		$layer = array(
 			"id" => $layerset['Layer_ID'],
 			"title" => $layerset['Name'],
+			"alias" => $layerset['alias'],
 			"id_attribute" => "id",
+			"name_attribute" => $layerset['labelitem'],
 			"title_attribute" => "title",
 			"geometry_type" => $geometry_types[$layerset['Datentyp']],
 			"table_name" => $layerset['maintable'],
 			"schema_name" => $layerset['schema'],
-			"document_path" => $layerset['document_path']
+			"document_path" => $layerset['document_path'],
+			"privileg" => $layerset['privileg']
 		);
 		# ToDo use $mapDB->getDocument_Path(...) to get the calculated document_path
 		return $layer;
@@ -191,17 +254,29 @@
 	$this->mobile_reformat_attributes = function($attr) {
 		$attributes = array();
 		foreach($attr['name'] AS $key => $value) {
+			if ($attr['enum_value'][$key]) {
+				$attr['options'][$key] = array();
+				foreach($attr['enum_value'][$key] AS $enum_key => $enum_value) {
+					$attr['options'][$key][] = array(
+						'value' => $attr['enum_value'][$key][$enum_key],
+						'output' => $attr['enum_output'][$key][$enum_key]
+					);
+				}
+			}
+
 			$attributes[] = array(
 				"index" => $attr['indizes'][$value],
 				"name" => $value,
 				"real_name" => $attr['real_name'][$value],
 				"alias" => $attr['alias'][$value],
+				"group" => $attr['group'][$key],
 				"tooltip" => $attr['tooltip'][$key],
 				"type" => $attr['type'][$key],
 				"nullable" => $attr['nullable'][$key],
 				"form_element_type" => $attr['form_element_type'][$key],
 				"options" => $attr['options'][$key],
-				"privilege" => $attr['privileg'][$key]
+				"privilege" => $attr['privileg'][$key],
+				"default" => $attr['default'][$key]
 			);
 		}
 		return $attributes;
@@ -280,6 +355,7 @@
 					_query TEXT;
 					_sql TEXT;
 					part TEXT;
+					search_path_schema TEXT;
 				BEGIN
 					SET datestyle to 'German';
 					_query := current_query();
@@ -287,7 +363,17 @@
 					--raise notice '_query: %', _query;
 					foreach part in array string_to_array(_query, ';')
 					loop
-						IF strpos(lower(ltrim(part)), 'insert') = 1 THEN _sql := trim(part); END IF;
+					-- replace horizontal tabs, new lines and carriage returns
+					part = trim(regexp_replace(part, E'[\\t\\n\\r]+', ' ', 'g'));
+
+					IF strpos(lower(part), 'set search_path') = 1 THEN
+					search_path_schema = trim(lower(split_part(split_part(part, '=', 2), ',', 1)));
+					--RAISE notice 'schema in search_path %', search_path_schema;
+					END IF;
+
+					IF strpos(lower(part), 'insert into ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME) = 1 OR (strpos(lower(part), 'insert into ' || TG_TABLE_NAME) = 1 AND TG_TABLE_SCHEMA = search_path_schema) THEN
+					_sql := part;
+					END IF;
 					end loop;
 					--raise notice 'sql nach split by ; und select by update: %', _sql;
 
@@ -328,6 +414,7 @@
 					_query TEXT;
 					_sql TEXT;
 					part TEXT;
+					search_path_schema TEXT;
 				BEGIN
 					SET datestyle to 'German';
 					_query := current_query();
@@ -335,7 +422,20 @@
 					--raise notice '_query: %', _query;
 					foreach part in array string_to_array(_query, ';')
 					loop
-						IF strpos(lower(ltrim(part)), 'update') = 1 THEN _sql := trim(part); END IF;
+					--raise notice 'part in loop vor trim und replace: %', part;
+					-- replace horizontal tabs, new lines and carriage returns
+					part = trim(regexp_replace(part, E'[\\t\\n\\r]+', ' ', 'g'));
+					--raise notice 'part in loop nach trim und replace: %', part;
+					--raise notice 'suche nach %', 'update ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME;
+
+					IF strpos(lower(part), 'set search_path') = 1 THEN
+					search_path_schema = trim(lower(split_part(split_part(part, '=', 2), ',', 1)));
+					--RAISE notice 'schema in search_path %', search_path_schema;
+					END IF;
+
+					IF strpos(lower(part), 'update ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME) = 1 OR (strpos(lower(part), 'update ' || TG_TABLE_NAME) = 1 AND TG_TABLE_SCHEMA = search_path_schema) THEN
+					_sql := part;
+					END IF;
 					end loop;
 					--raise notice 'sql nach split by ; und select by update: %', _sql;
 
@@ -370,6 +470,7 @@
 					_query TEXT;
 					_sql TEXT;
 					part TEXT;
+					search_path_schema TEXT;
 				BEGIN
 					SET datestyle to 'German';
 					_query := current_query();
@@ -377,9 +478,30 @@
 					--raise notice '_query: %', _query;
 					foreach part in array string_to_array(_query, ';')
 					loop
-						IF strpos(lower(ltrim(part)), 'delete') = 1 THEN _sql := trim(part); END IF;
+					-- replace horizontal tabs, new lines and carriage returns
+					part := trim(regexp_replace(part, E'[\\t\\n\\r]+', ' ', 'g'));
+
+					IF strpos(lower(part), 'set search_path') = 1 THEN
+					search_path_schema := trim(lower(split_part(split_part(part, '=', 2), ',', 1)));
+					--RAISE notice 'schema in search_path %', search_path_schema;
+					END IF;
+
+					IF strpos(lower(part), 'delete from ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME) = 1 OR (strpos(lower(part), 'delete from ' || TG_TABLE_NAME) = 1 AND TG_TABLE_SCHEMA = search_path_schema) THEN
+					_sql := part;
+					END IF;
 					end loop;
 					--raise notice 'sql nach split by ; und select by update: %', _sql;
+
+					_sql := replace(_sql, ' ' || TG_TABLE_NAME || ' ', ' ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME || ' ');
+					--RAISE notice 'sql nach remove %', TG_TABLE_SCHEMA || '.';
+
+					RAISE notice 'old uuid: %', OLD.uuid;
+
+					_sql := split_part(_sql, ' WHERE ', 1) || ' WHERE uuid = ''' || OLD.uuid || '''';
+					--RAISE notice 'sql nach replace where oid by where uuid 
+
+					_sql := replace(_sql, ' ' || TG_TABLE_NAME || ' ', ' ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME || ' ');
+					--RAISE notice 'sql nach remove %', TG_TABLE_SCHEMA || '.';
 
 					INSERT INTO " . $layer->get('schema') . "." . $layer->get('maintable') . "_deltas (version, sql) VALUES (new_version, _sql);
 
@@ -391,7 +513,7 @@
 			CREATE TRIGGER create_" . $layer->get('maintable') . "_delete_delta_trigger
 			BEFORE DELETE
 			ON " . $layer->get('schema') . "." . $layer->get('maintable') . "
-			FOR EACH STATEMENT
+			FOR EACH ROW
 			EXECUTE PROCEDURE " . $layer->get('schema') . ".create_" . $layer->get('maintable') . "_delete_delta();
 		";
 		#echo '<p>Plugin: Mobile, function: mobile_create_layer_sync, Create table and trigger for deltas SQL:<br>' . $sql;

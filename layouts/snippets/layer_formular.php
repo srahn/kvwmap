@@ -61,13 +61,13 @@
 				<tr>
 					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLayerID; ?></th>
 					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
-						<input name="id" type="text" value="<?php echo $this->formvars['selected_layer_id']; ?>" size="25" maxlength="11">
+						<input name="id" type="text" value="<?php echo $this->formvars['selected_layer_id']; ?>" size="36" maxlength="11">
 					</td>
 				</tr><?php } ?>
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strName; ?>*</th>
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-						<input name="Name" type="text" value="<?php echo $this->layerdata['Name']; ?>" size="25" maxlength="100">
+						<input name="Name" type="text" value="<?php echo $this->layerdata['Name']; ?>" size="36" maxlength="100">
 					</td>
 				</tr><?
 				foreach($supportedLanguages as $language){
@@ -75,7 +75,7 @@
 						<tr>
 							<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strName.' '.$language; ?></th>
 							<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-									<input name="Name_<? echo $language; ?>" type="text" value="<?php echo $this->layerdata['Name_'.$language]; ?>" size="25" maxlength="100">
+									<input name="Name_<? echo $language; ?>" type="text" value="<?php echo $this->layerdata['Name_'.$language]; ?>" size="36" maxlength="100">
 							</td>
 						</tr><?
 					}
@@ -83,7 +83,7 @@
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strAlias; ?></th>
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="alias" type="text" value="<?php echo $this->layerdata['alias']; ?>" size="25" maxlength="100">
+							<input name="alias" type="text" value="<?php echo $this->layerdata['alias']; ?>" size="36" maxlength="100">
 					</td>
 				</tr>
 				<tr>
@@ -139,62 +139,68 @@
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strMaintable; ?></th>
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-						<input name="maintable" type="text" value="<?php echo $this->layerdata['maintable']; ?>" size="25" maxlength="100">&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[1], Style[0], document.getElementById('TipLayer1'))" onmouseout="htm()">
+						<input name="maintable" type="text" value="<?php echo $this->layerdata['maintable']; ?>" size="36" maxlength="100">&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[1], Style[0], document.getElementById('TipLayer1'))" onmouseout="htm()">
 						<div id="TipLayer1" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 					</td>
 				</tr>
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strSchema; ?></th>
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="schema" type="text" value="<?php echo $this->layerdata['schema']; ?>" size="25" maxlength="100">
+							<input name="schema" type="text" value="<?php echo $this->layerdata['schema']; ?>" size="36" maxlength="100">
 					</td>
 				</tr>
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDocument_path; ?></th>
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="document_path" type="text" value="<?php echo $this->layerdata['document_path']; ?>" size="25" maxlength="100">
+							<input name="document_path" type="text" value="<?php echo $this->layerdata['document_path']; ?>" size="36" maxlength="100">
 					</td>
 				</tr>
 				<tr>
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDocument_url; ?></th>
+					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+							<input name="document_url" type="text" value="<?php echo $this->layerdata['document_url']; ?>" size="36" maxlength="100">
+					</td>
+				</tr>				
+				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTileIndex; ?></th>
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="tileindex" type="text" value="<?php echo $this->layerdata['tileindex']; ?>" size="25" maxlength="100">
+							<input name="tileindex" type="text" value="<?php echo $this->layerdata['tileindex']; ?>" size="36" maxlength="100">
 					</td>
 				</tr>
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTileItem; ?></th>
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="tileitem" type="text" value="<?php echo $this->layerdata['tileitem']; ?>" size="25" maxlength="100">
+							<input name="tileitem" type="text" value="<?php echo $this->layerdata['tileitem']; ?>" size="36" maxlength="100">
 					</td>
 				</tr>
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLabelAngleItem; ?></th>
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="labelangleitem" type="text" value="<?php echo $this->layerdata['labelangleitem']; ?>" size="25" maxlength="100">
+							<input name="labelangleitem" type="text" value="<?php echo $this->layerdata['labelangleitem']; ?>" size="36" maxlength="100">
 					</td>
 				</tr>
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLabelItem; ?></th>
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="labelitem" type="text" value="<?php echo $this->layerdata['labelitem']; ?>" size="25" maxlength="100">
+							<input name="labelitem" type="text" value="<?php echo $this->layerdata['labelitem']; ?>" size="36" maxlength="100">
 					</td>
 				</tr>
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLabelMaxScale; ?></th>
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="labelmaxscale" type="text" value="<?php echo $this->layerdata['labelmaxscale']; ?>" size="25" maxlength="100">
+							<input name="labelmaxscale" type="text" value="<?php echo $this->layerdata['labelmaxscale']; ?>" size="36" maxlength="100">
 					</td>
 				</tr>
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLabelMinScale; ?></th>
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="labelminscale" type="text" value="<?php echo $this->layerdata['labelminscale']; ?>" size="25" maxlength="100">
+							<input name="labelminscale" type="text" value="<?php echo $this->layerdata['labelminscale']; ?>" size="36" maxlength="100">
 					</td>
 				</tr>
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLabelRequires; ?></th>
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="labelrequires" type="text" value="<?php echo $this->layerdata['labelrequires']; ?>" size="25" maxlength="100">
+							<input name="labelrequires" type="text" value="<?php echo $this->layerdata['labelrequires']; ?>" size="36" maxlength="100">
 					</td>
 				</tr>
 				<tr>
@@ -239,13 +245,13 @@
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strClassItem; ?></th>
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="classitem" type="text" value="<?php echo $this->layerdata['classitem']; ?>" size="25" maxlength="100">
+							<input name="classitem" type="text" value="<?php echo $this->layerdata['classitem']; ?>" size="36" maxlength="100">
 					</td>
 				</tr>
 				<tr>
 					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDataSetStyle; ?></th>
 					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="dataset_style" type="text" value="<?php echo $this->layerdata['dataset_style']; ?>" size="25" maxlength="100">
+							<input name="dataset_style" type="text" value="<?php echo $this->layerdata['dataset_style']; ?>" size="36" maxlength="100">
 							<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[8], Style[8], document.getElementById('TipLayer9'))" onmouseout="htm()">
 							<div id="TipLayer9" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 					</td>
@@ -253,26 +259,26 @@
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strClassification; ?></th>
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="layer_classification" type="text" value="<?php echo $this->layerdata['classification']; ?>" size="25" maxlength="50">
+							<input name="layer_classification" type="text" value="<?php echo $this->layerdata['classification']; ?>" size="36" maxlength="50">
 					</td>
 				</tr>
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strFilterItem; ?></th>
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="filteritem" type="text" value="<?php echo $this->layerdata['filteritem']; ?>" size="25" maxlength="100">
+							<input name="filteritem" type="text" value="<?php echo $this->layerdata['filteritem']; ?>" size="36" maxlength="100">
 					</td>
 				</tr>
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strClusterMaxdistance; ?></th>
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="cluster_maxdistance" type="text" value="<?php echo $this->layerdata['cluster_maxdistance']; ?>" size="25" maxlength="11">&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[4], Style[0], document.getElementById('TipLayer5'))" onmouseout="htm()">
+							<input name="cluster_maxdistance" type="text" value="<?php echo $this->layerdata['cluster_maxdistance']; ?>" size="36" maxlength="11">&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[4], Style[0], document.getElementById('TipLayer5'))" onmouseout="htm()">
 						<div id="TipLayer5" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 					</td>
 				</tr>
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTolerance; ?></th>
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="tolerance" type="text" value="<?php echo $this->layerdata['tolerance']; ?>" size="25" maxlength="100">
+							<input name="tolerance" type="text" value="<?php echo $this->layerdata['tolerance']; ?>" size="36" maxlength="100">
 					</td>
 				</tr>
 				<tr>
@@ -303,7 +309,7 @@
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strSelectionType; ?></th>
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="selectiontype" type="text" value="<?php echo $this->layerdata['selectiontype']; ?>" size="25" maxlength="20">
+							<input name="selectiontype" type="text" value="<?php echo $this->layerdata['selectiontype']; ?>" size="36" maxlength="20">
 					</td>
 				</tr>
 				<tr>
@@ -318,7 +324,7 @@
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strProcessing; ?></th>
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-						<input name="processing" type="text" value="<?php echo $this->layerdata['processing']; ?>" size="25" maxlength="255">
+						<input name="processing" type="text" value="<?php echo $this->layerdata['processing']; ?>" size="36" maxlength="255">
 						<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[0], Style[0], document.getElementById('TipLayer2'))" onmouseout="htm()">
 						<div id="TipLayer2" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 					</td>
@@ -332,25 +338,25 @@
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDataOwner; ?></th>
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="datenherr" type="text" value="<?php echo $this->layerdata['datenherr']; ?>" size="25" maxlength="100">
+							<input name="datenherr" type="text" value="<?php echo $this->layerdata['datenherr']; ?>" size="36" maxlength="100">
 					</td>
 				</tr>
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strMetaLink; ?></th>
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="metalink" type="text" value="<?php echo $this->layerdata['metalink']; ?>" size="25" maxlength="255">
+							<input name="metalink" type="text" value="<?php echo $this->layerdata['metalink']; ?>" size="36" maxlength="255">
 					</td>
 				</tr>
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strStatus; ?></th>
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="status" type="text" value="<?php echo $this->layerdata['status']; ?>" size="25" maxlength="255">
+							<input name="status" type="text" value="<?php echo $this->layerdata['status']; ?>" size="36" maxlength="255">
 					</td>
 				</tr>
 				<tr>
 					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTriggerFunction; ?></th>
 					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="trigger_function" type="text" value="<?php echo $this->layerdata['trigger_function']; ?>" size="25" maxlength="100">
+							<input name="trigger_function" type="text" value="<?php echo $this->layerdata['trigger_function']; ?>" size="36" maxlength="100">
 					</td>
 				</tr>
 				<tr>
@@ -374,6 +380,12 @@
 						<div id="TipSync" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 					</td>
 				</tr>
+				<tr>
+					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strListed; ?></th>
+					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
+						<input name="listed" type="checkbox" value="1"<?php if ($this->layerdata['listed']) echo ' checked'; ?>>
+					</td>
+				</tr>				
 			</table>
 			<br>
 
@@ -384,7 +396,7 @@
 				<tr>
 					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTemplate; ?></th>
 					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="template" type="text" value="<?php echo $this->layerdata['template']; ?>" size="25" maxlength="100">
+							<input name="template" type="text" value="<?php echo $this->layerdata['template']; ?>" size="36" maxlength="100">
 					</td>
 				</tr>
 				<tr>
@@ -399,43 +411,43 @@
 				<tr>
 					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strtransparency; ?></th>
 					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="transparency" type="text" value="<?php echo $this->layerdata['transparency']; ?>" size="25" maxlength="3">
+							<input name="transparency" type="text" value="<?php echo $this->layerdata['transparency']; ?>" size="36" maxlength="3">
 					</td>
 				</tr>
 				<tr>
 					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDrawingOrder; ?></th>
 					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="drawingorder" type="text" value="<?php echo $this->layerdata['drawingorder']; ?>" size="25" maxlength="15">
+							<input name="drawingorder" type="text" value="<?php echo $this->layerdata['drawingorder']; ?>" size="36" maxlength="15">
 					</td>
 				</tr>
 				<tr>
 					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLegendOrder; ?></th>
 					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="legendorder" type="text" value="<?php echo $this->layerdata['legendorder']; ?>" size="25" maxlength="15">
+							<input name="legendorder" type="text" value="<?php echo $this->layerdata['legendorder']; ?>" size="36" maxlength="15">
 					</td>
 				</tr>				
 				<tr>
 					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strminscale; ?></th>
 					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="minscale" type="text" value="<?php echo $this->layerdata['minscale']; ?>" size="25" maxlength="15">
+							<input name="minscale" type="text" value="<?php echo $this->layerdata['minscale']; ?>" size="36" maxlength="15">
 					</td>
 				</tr>
 				<tr>
 					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strmaxscale; ?></th>
 					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="maxscale" type="text" value="<?php echo $this->layerdata['maxscale']; ?>" size="25" maxlength="15">
+							<input name="maxscale" type="text" value="<?php echo $this->layerdata['maxscale']; ?>" size="36" maxlength="15">
 					</td>
 				</tr>
 				<tr>
 					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strsymbolscale; ?></th>
 					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="symbolscale" type="text" value="<?php echo $this->layerdata['symbolscale']; ?>" size="25" maxlength="15">
+							<input name="symbolscale" type="text" value="<?php echo $this->layerdata['symbolscale']; ?>" size="36" maxlength="15">
 					</td>
 				</tr>
 				<tr>
 					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $stroffsite; ?></th>
 					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="offsite" type="text" value="<?php echo $this->layerdata['offsite']; ?>" size="25" maxlength="11">
+							<input name="offsite" type="text" value="<?php echo $this->layerdata['offsite']; ?>" size="36" maxlength="11">
 					</td>
 				</tr>
 				<tr>
@@ -462,6 +474,13 @@
 							</select>
 					</td>
 				</tr>
+				<? if(count($this->formvars['selstellen']["Bezeichnung"]) > 0){ ?>
+				<tr>
+					<td align="center" colspan=3 style="height: 30px;border-bottom:1px solid #C3C7C3">
+						<a href="javascript:document.GUI.assign_default_values.value=1;submitWithValue('GUI','go_plus','Ändern')"><? echo $strAssignDefaultValues; ?></a>
+					</td>
+				</tr>
+				<? } ?>
 			</table>
 			<br>
 			<a name="stellenzuweisung"></a>
@@ -511,13 +530,13 @@
 				<tr>
 					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsSrs; ?></th>
 					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="ows_srs" type="text" value="<?php echo $this->layerdata['ows_srs']; ?>" size="25" maxlength="255">
+							<input name="ows_srs" type="text" value="<?php echo $this->layerdata['ows_srs']; ?>" size="36" maxlength="255">
 					</td>
 				</tr>
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWMSName; ?></th>
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="wms_name" type="text" value="<?php echo $this->layerdata['wms_name']; ?>" size="25" maxlength="100">
+							<input name="wms_name" type="text" value="<?php echo $this->layerdata['wms_name']; ?>" size="36" maxlength="100">
 					</td>
 				</tr>
 				<tr>
@@ -545,25 +564,25 @@
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWMSConnectionTimeout; ?></th>
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="wms_connectiontimeout" type="text" value="<?php echo $this->layerdata['wms_connectiontimeout']; ?>" size="25" maxlength="100">
+							<input name="wms_connectiontimeout" type="text" value="<?php echo $this->layerdata['wms_connectiontimeout']; ?>" size="36" maxlength="100">
 					</td>
 				</tr>
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWMSAuthUsername; ?></th>
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="wms_auth_username" type="text" value="<?php echo $this->layerdata['wms_auth_username']; ?>" size="25" maxlength="100">
+							<input name="wms_auth_username" type="text" value="<?php echo $this->layerdata['wms_auth_username']; ?>" size="36" maxlength="100">
 					</td>
 				</tr>
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWMSAuthPassword; ?></th>
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="wms_auth_password" type="text" value="<?php echo $this->layerdata['wms_auth_password']; ?>" size="25" maxlength="100">
+							<input name="wms_auth_password" type="text" value="<?php echo $this->layerdata['wms_auth_password']; ?>" size="36" maxlength="100">
 					</td>
 				</tr>
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWFS_geom; ?></th>
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="wfs_geom" type="text" value="<?php echo $this->layerdata['wfs_geom']; ?>" size="25" maxlength="100">
+							<input name="wfs_geom" type="text" value="<?php echo $this->layerdata['wfs_geom']; ?>" size="36" maxlength="100">
 					</td>
 				</tr>
 		</table>
@@ -780,6 +799,7 @@
 </table>
 
 <input type="hidden" name="go" value="Layereditor">
+<input type="hidden" name="assign_default_values" value="0">
 <input type="hidden" name="selstellen" value="<? 
 	echo $this->formvars['selstellen']["ID"][0];
 	for($i=1; $i < count($this->formvars['selstellen']["Bezeichnung"]); $i++){

@@ -554,7 +554,7 @@ function deletelast(evt) {
 			</g>
 		</g>
 	</g>
-	<g id="buttons" filter="url(#Schatten)" cursor="pointer">
+	<g id="buttons" cursor="pointer">
 		<g id="buttons_NAV" cursor="pointer" onmouseout="hide_tooltip()" onmousedown="focus_NAV();hide_tooltip()">
 			<rect x="0" y="0" rx="3" ry="3" width="216" height="36" class="navbutton_bg"/>
 	'.$SVGvars_navbuttons.'

@@ -126,14 +126,6 @@ $legendheight = $this->map->height + 20;
 								<td>
 									<input name="Bilddatei" type="file" onchange="this.title=this.value;" value="<?php echo $this->formvars['Bilddatei']; ?>" size="22" accept="image/*.jpg"> 
 								</td>
-								<td>
-								<? if ($this->formvars['id']!='') { ?>
-									Dokument auch ändern:<input type="checkbox" name="changeDocument" value="1" <? if ($this->formvars['changeDocument']){ ?> checked<? } ?>>
-								<? }
-									else { ?>
-									<input type="hidden" name="changeDocument" value="1">
-								<? } ?>
-								</td>	
 								<td colspan="3">Gemarkung/Gemeinde: 
 									<?
 									$this->GemkgFormObj->outputHTML();
@@ -148,8 +140,8 @@ $legendheight = $this->map->height + 20;
 						</table></td>
 				</tr>
 				<tr> 
-					<td rowspan="22">&nbsp; </td>
-					<td rowspan="22" colspan="5"> 
+					<td rowspan="23">&nbsp; </td>
+					<td rowspan="23" colspan="5"> 
 						<?php
 							include(LAYOUTPATH.'snippets/SVG_polygon_query_area.php')
 						?>
@@ -220,7 +212,7 @@ $legendheight = $this->map->height + 20;
 					</td>
 				</tr>
 				<tr> 
-					<td>Datum:&nbsp;&nbsp;<a href="javascript:;" title=" (TT.MM.JJJJ) " onclick="new CalendarJS().init('datum')"><img src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar" style="right: 70px"><input type="hidden" id="calendar_datum"></div></td>
+					<td>Datum:&nbsp;&nbsp;<a href="javascript:;" title=" (TT.MM.JJJJ) " onclick="new CalendarJS().init('datum', 'date', false)"><img src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar" style="right: 70px"><div id="calendar_datum" class="calendar"></div></td>
 					<td>
 						<input name="datum" id="datum" type="text" onchange="" value="<?php echo $this->formvars['datum']; ?>" size="10" maxlength="50">
 					</td>
@@ -265,18 +257,25 @@ $legendheight = $this->map->height + 20;
 					<td colspan="2">&nbsp;</td>
 				</tr>
 				<tr> 
-					<td colspan="2"><table border="0" cellspacing="0" cellpadding="5">
-							<tr> 
-								<td>g&uuml;ltig 
-									<input type="radio" name="gueltigkeit" value="1" <?php if ($this->formvars['gueltigkeit']=='1' OR $this->formvars['gueltigkeit']=='') { ?> checked<?php } ?>> 
-								</td>
-								<td> ung&uuml;ltig 
-									<input type="radio" name="gueltigkeit" value="0" <?php if ($this->formvars['gueltigkeit']=='0') { ?> checked<?php } ?>> 
-								</td>
-							</tr>
-						</table></td>
+					<td> 
+						<input type="radio" name="gueltigkeit" value="1" <?php if ($this->formvars['gueltigkeit']=='1' OR $this->formvars['gueltigkeit']=='') { ?> checked<?php } ?>> 
+						g&uuml;ltig
+					</td>
+					<td>
+						<input type="radio" name="gueltigkeit" value="0" <?php if ($this->formvars['gueltigkeit']=='0') { ?> checked<?php } ?>> 
+						ung&uuml;ltig
+					</td>
 				</tr>
-				
+				<tr> 
+					<td>
+						<input type="radio" name="geprueft" value="1" <?php if ($this->formvars['geprueft']=='1' OR $this->formvars['geprueft']=='') { ?> checked<?php } ?>> 
+						geprüft
+					</td>
+					<td>
+						<input type="radio" name="geprueft" value="0" <?php if ($this->formvars['geprueft']=='0') { ?> checked<?php } ?>> 
+						ungeprüft
+					</td>
+				</tr>				
 				<tr>
 					<td>&nbsp;</td>
 				</tr>
@@ -333,7 +332,6 @@ $legendheight = $this->map->height + 20;
 						<INPUT TYPE="HIDDEN" NAME="orderby" VALUE="<? echo $this->formvars['orderby']; ?>">						
 						<INPUT TYPE="hidden" NAME="result2" VALUE="">
 						<INPUT TYPE="hidden" NAME="check" VALUE="">
-						<INPUT TYPE="HIDDEN" NAME="oid" VALUE="<?php echo $this->formvars['oid']; ?>">
 						<input type="hidden" name="order" value="<?php echo $this->formvars['order']; ?>">
 						<INPUT TYPE="HIDDEN" NAME="richtung" VALUE="<? echo $this->formvars['richtung']; ?>">
 						<input type="hidden" name="flur_thematisch" value="<? echo $this->formvars['flur_thematisch']; ?>">
@@ -352,15 +350,9 @@ $legendheight = $this->map->height + 20;
 						<div id="legenddiv" onmouseleave="slide_legend_out(event);" class="slidinglegend_slideout">
 							<table width="100%" border="0" cellpadding="0" cellspacing="0">
 								<tr>
-									<td bgcolor="<?php echo BG_DEFAULT ?>" align="left"><?php
-										if ($this->user->rolle->hideLegend) {
-											if (ie_check()){$display = 'none';}
-											?><a id="linkLegend" href="javascript:switchlegend()"><img title="Legende zeigen" id="LegendMinMax" src="<?php  echo GRAPHICSPATH; ?>maximize_legend.png" border="0"></a><?php
-										}
-										else {
-											?><a id="linkLegend" href="javascript:switchlegend()"><img title="Legende verstecken" id="LegendMinMax" src="<?php  echo GRAPHICSPATH; ?>minimize_legend.png" border="0"></a><?php
-										}
-									?></td>
+									<td bgcolor="<?php echo BG_DEFAULT ?>" align="left">
+										<img id="LegendMinMax" src="<?php  echo GRAPHICSPATH; ?>maximize_legend.png" border="0">
+									</td>
 								</tr>
 							</table>
 							<table class="table1" id="legendTable" onclick="slide_legend_in(event)" style="display: <? echo $display; ?>" cellspacing=0 cellpadding=2 border=0>

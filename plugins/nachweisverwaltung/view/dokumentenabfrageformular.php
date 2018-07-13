@@ -174,8 +174,8 @@ else {
     </div></td>
   </tr>
   <tr> 
-    <td rowspan="18">&nbsp;</td>
-    <td rowspan="18"> 
+    <td rowspan="19">&nbsp;</td>
+    <td rowspan="19"> 
       <?php
 				include(LAYOUTPATH.'snippets/SVG_polygon_box_query_area.php')
 			?>
@@ -243,11 +243,22 @@ else {
 			</table>
 		</td>
   <tr>
-		<td colspan="2">&nbsp;Gültigkeit:
-			<select name="gueltigkeit">
+		<td>&nbsp;Gültigkeit:</td>
+		<td>
+			<select style="width: 156px" name="gueltigkeit">
 				<option value="">--- Auswahl ---</option>
 				<option value="1">gültige Nachweise</option>
 				<option value="0">ungültige Nachweise</option>
+			</select>
+		</td>
+  </tr>
+	<tr>
+		<td>&nbsp;geprüft:</td>
+		<td>
+			<select style="width: 156px" name="geprueft">
+				<option value="">--- Auswahl ---</option>
+				<option value="1">geprüfte Nachweise</option>
+				<option value="0">ungeprüfte Nachweise</option>
 			</select>
 		</td>
   </tr>
@@ -294,7 +305,7 @@ else {
           <td colspan="3">          Rissnummer<br>
   					<input type="text" name="suchrissnr" value="<?php echo $this->formvars['suchrissnr']; ?>" size="<?php echo RISSNUMMERMAXLENGTH; ?>" maxlength="<?php echo RISSNUMMERMAXLENGTH; ?>">
 						<a href="#" class="toggle_fa_off" title="von-bis-Suche" onclick="toggleBetweenSearch(this, GUI.suchrissnr2);"><i class="fa fa-step-backward"></i> <i class="fa fa-step-forward"></i></a>
-						<input type="text" style="display: none" name="suchrissnr2" value="<? echo $this->formvars['suchrissnr2']; ?>" size="<? echo RISSNUMMERMAXLENGTH; ?>" maxlength="<? echo RISSNUMMERMAXLENGTH; ?>">
+						<input type="text" <? if($this->formvars['suchrissnr2'] == '')echo 'style="display: none"'; ?> name="suchrissnr2" value="<? echo $this->formvars['suchrissnr2']; ?>" size="<? echo RISSNUMMERMAXLENGTH; ?>" maxlength="<? echo RISSNUMMERMAXLENGTH; ?>">
  					</td>
 				</tr>
 				<? } ?>
@@ -302,7 +313,7 @@ else {
 					<td colspan="3">          Antragsnummer<br>
   					<input type="text" name="suchstammnr" value="<?php echo $this->formvars['suchstammnr']; ?>" size="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>" maxlength="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>">
 						<a href="#" class="toggle_fa_off" title="von-bis-Suche" onclick="toggleBetweenSearch(this, GUI.suchstammnr2);"><i class="fa fa-step-backward"></i> <i class="fa fa-step-forward"></i></a>
-						<input type="text" style="display: none" name="suchstammnr2" value="<? echo $this->formvars['suchstammnr2']; ?>" size="<? echo ANTRAGSNUMMERMAXLENGTH; ?>" maxlength="<? echo ANTRAGSNUMMERMAXLENGTH; ?>">
+						<input type="text" <? if($this->formvars['suchstammnr2'] == '')echo 'style="display: none"'; ?> name="suchstammnr2" value="<? echo $this->formvars['suchstammnr2']; ?>" size="<? echo ANTRAGSNUMMERMAXLENGTH; ?>" maxlength="<? echo ANTRAGSNUMMERMAXLENGTH; ?>">
  					</td>
 				</tr>
 				<? if(NACHWEIS_PRIMARY_ATTRIBUTE == 'stammnr'){ ?>
@@ -310,7 +321,7 @@ else {
           <td colspan="3">          Rissnummer<br>
   					<input type="text" name="suchrissnr" value="<?php echo $this->formvars['suchrissnr']; ?>" size="<?php echo RISSNUMMERMAXLENGTH; ?>" maxlength="<?php echo RISSNUMMERMAXLENGTH; ?>">
 						<a href="#" class="toggle_fa_off" title="von-bis-Suche" onclick="toggleBetweenSearch(this, GUI.suchrissnr2);"><i class="fa fa-step-backward"></i> <i class="fa fa-step-forward"></i></a>
-						<input type="text" style="display: none" name="suchrissnr2" value="<? echo $this->formvars['suchrissnr2']; ?>" size="<? echo RISSNUMMERMAXLENGTH; ?>" maxlength="<? echo RISSNUMMERMAXLENGTH; ?>">
+						<input type="text" <? if($this->formvars['suchrissnr2'] == '')echo 'style="display: none"'; ?> name="suchrissnr2" value="<? echo $this->formvars['suchrissnr2']; ?>" size="<? echo RISSNUMMERMAXLENGTH; ?>" maxlength="<? echo RISSNUMMERMAXLENGTH; ?>">
  					</td>
 				</tr>
 				<? } ?>
@@ -318,17 +329,17 @@ else {
           <td colspan="3">          Fortführungsjahr<br>
 						<input type="text" name="suchfortf" value="<?php echo $this->formvars['suchfortf']; ?>" size="4" maxlength="4">
 						<a href="#" class="toggle_fa_off" title="von-bis-Suche" onclick="toggleBetweenSearch(this, GUI.suchfortf2);"><i class="fa fa-step-backward"></i> <i class="fa fa-step-forward"></i></a>
-						<input type="text" style="display: none" name="suchfortf2" value="<?php echo $this->formvars['suchfortf2']; ?>" size="4" maxlength="4">
+						<input type="text" <? if($this->formvars['suchfortf2'] == '')echo 'style="display: none"'; ?> name="suchfortf2" value="<?php echo $this->formvars['suchfortf2']; ?>" size="4" maxlength="4">
 					</td>
 				</tr>
         <tr> 
 			    <td colspan="3">
 			    	Datum:<br>
-						<a href="javascript:;" title=" (TT.MM.JJJJ) " onclick="new CalendarJS().init('sdatum')"><img src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar"><input type="hidden" id="calendar_sdatum"></div>
+						<a href="javascript:;" title=" (TT.MM.JJJJ) " onclick="new CalendarJS().init('sdatum', 'date', false)"><img src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar_sdatum" class="calendar"></div>
 			    	<input id="sdatum" name="sdatum" type="text" value="<?php echo $this->formvars['sdatum']; ?>" size="10" maxlength="50">
 						<a href="#" class="toggle_fa_off" title="von-bis-Suche" disabled="true" onclick="toggleBetweenSearch(this, GUI.sdatum2);toggleBetweenSearch(this, document.getElementById('caldatum2'), GUI.sdatum2);"><i class="fa fa-step-backward"></i> <i class="fa fa-step-forward"></i></a>
-						<a href="javascript:;" title=" (TT.MM.JJJJ) " id="caldatum2" style="display:none" onclick="new CalendarJS().init('sdatum2')"><img src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar"><input type="hidden" id="calendar_sdatum2"></div>
-			    	<input id="sdatum2" name="sdatum2" type="text" style="display:none" onchange="" value="<?php echo $this->formvars['sdatum2']; ?>" size="10" maxlength="50">
+						<a href="javascript:;" title=" (TT.MM.JJJJ) " id="caldatum2" <? if($this->formvars['sdatum2'] == '')echo 'style="display: none"'; ?> onclick="new CalendarJS().init('sdatum2', 'date', false)"><img src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar_sdatum2" class="calendar"></div>
+			    	<input id="sdatum2" name="sdatum2" type="text" <? if($this->formvars['sdatum2'] == '')echo 'style="display: none"'; ?> onchange="" value="<?php echo $this->formvars['sdatum2']; ?>" size="10" maxlength="50">
 			    </td>
 			  </tr>
 			  <tr>
@@ -348,18 +359,14 @@ else {
     </td>
   </tr>
   <tr> 
-    <td valign="top">
+    <td valign="top" colspan="3">
 			<input type="radio" name="abfrageart" id="abfrageart_poly" value="poly" <?php if ($this->formvars['abfrageart']=='poly' OR $this->formvars['abfrageart']=='') { ?> checked<?php } ?>> 
-		</td>
-		<td>
 			<span class="fett">Auswahl im Kartenausschnitt über Suchpolygon</span>
 		</td>
   </tr>
   <tr> 
-    <td valign="top">
+    <td valign="top" colspan="3">
 			<input type="radio" name="abfrageart" value="antr_nr" <?php if ($this->formvars['abfrageart']=='antr_nr') { ?> checked<?php } ?>>
-		</td>
-		<td>
 			<span class="fett">Vorbereitungsnummer:</span>
       <?php $this->FormObjAntr_nr->outputHTML();
         echo $this->FormObjAntr_nr->html;?>

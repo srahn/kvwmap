@@ -94,17 +94,23 @@
 			var mittey  = parseFloat(form.maxy.value) - '.$this->map->height.'/2*parseFloat(form.pixelsize.value);
 			mittex = format_number(mittex, true, true, false);
 			mittey = format_number(mittey, true, true, false);
-			var Msg = document.getElementById("message_box");
-			Msg.className = \'message_box\';
-			content = \'<div style="position: absolute;top: 0px;right: 0px"><a href="#" onclick="javascript:document.getElementById(\\\'message_box\\\').className = \\\'message_box_hidden\\\';" title="Schlie&szlig;en"><img style="border:none" src="'.GRAPHICSPATH.'exit2.png"></img></a></div>\';
+			var Msg = $("#message_box");
+			Msg.show();
+			content = \'<div style="position: absolute;top: 0px;right: 0px"><a href="#" onclick="$(\\\'#message_box\\\').hide();" title="Schlie&szlig;en"><img style="border:none" src="'.GRAPHICSPATH.'exit2.png"></img></a></div>\';
 			content+= \'<div style="height: 30px">' . $strCoordZoom . '</div>\';
 			content+= \'<table style="padding: 5px"><tr><td align="left" style="width: 300px" class="px15">Koordinate (Rechtswert Hochwert):</td></tr>\';
-			content+= \'<tr><td><input style="width: 310px" type="text" id="input_coords" name="input_coords" value="\'+mittex+\' \'+mittey+\'"><i id="current_pos_button" class="fa fa-dot-circle-o" aria-hidden="true" style="margin-left: 10px; color: #4e4eef;" title="Eigene Position übernehmen" onclick="set_current_pos()"></i></td></tr>\';
+			content+= \'<tr><td><input style="width: 310px" type="text" id="input_coords" name="input_coords" value="\'+mittex+\' \'+mittey+\'"></td></tr>\';
 			content+= \'<tr><td>Koordinatenreferenzsystem:</td></tr>\';
 			content+= \'<tr><td><select name="epsg_code" id="epsg_code" style="width: 310px">'.$epsg_codes.'</select></td></tr></table>\';
 			content+= \'<br><input type="button" value="OK" onclick="coords_input_submit()">\';
-			Msg.innerHTML = content;
+			Msg.html(content);
 			document.getElementById(\'input_coords\').select();
+			document.onkeydown = function(ev){
+				var key;
+				ev = ev || event;
+				key = ev.keyCode;
+				if(key == 13)coords_input_submit();
+			}
 		}
 		
 		function coords_input_submit(){
@@ -128,24 +134,6 @@
 				document.GUI.CMD.value = "jump_coords";
 				document.GUI.submit();
 			}
-		}
-
-		function set_current_pos() {
-			$(\'#current_pos_button\').toggleClass(\'fa-dot-circle-o fa-spinner fa-spin\');
-			navigator.geolocation.getCurrentPosition(
-				function(position){
-					// wenn Position ermittelt werden konnte, liefert
-					//position.coords.latitude und position.coords.longitude
-					//die entsprechenden Längen- und Breitengrade
-					$(\'#input_coords\').val(position.coords.longitude + \' \' + position.coords.latitude);
-					$(\'#epsg_code\').val(4326);
-					$(\'#current_pos_button\').toggleClass(\'fa-dot-circle-o fa-spinner fa-spin\');
-				},
-				function () {
-					// der zweite Funktionsteil wird ausgeführt, wenn keine
-					//Positionsermittlung stattfinden konnte
-				}
-			)
 		}
 
 		function coords_anzeige(evt, vertex) {

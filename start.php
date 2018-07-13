@@ -157,33 +157,54 @@ else {
 			$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->database, $GUI->formvars['passwort']);
 
 			if (is_login_granted($GUI->user, $GUI->formvars['login_name'])) {
-				$GUI->debug->write('Anmeldung war erfolgreich. Frage alle Stellen des Nutzers ab.', 4, $GUI->echo);
+				$GUI->debug->write('Anmeldung war erfolgreich, Benutzer wurde mit angegebenem Passwort gefunden.', 4, $GUI->echo);
 				Nutzer::reset_num_login_failed($GUI, $GUI->formvars['login_name']);
 
-				if (is_new_password($GUI->formvars)) {
-					$GUI->debug->write('Es wurde ein neues Passwort angegeben.', 4);
-					$new_password_err = isPasswordValide($GUI->formvars['passwort'], $GUI->formvars['new_password'], $GUI->formvars['new_password_2']);
+				if (
+					!defined('AGREEMENT_MESSAGE') OR
+					AGREEMENT_MESSAGE == '' OR
+					is_agreement_accepted($GUI->user)
+				) {
+					$GUI->debug->write('Agreement ist akzeptiert.', 4, $GUI->echo);
 
-					if (is_new_password_valid($new_password_err)) {
-						$GUI->debug->write('Neues Password ist valid.', 4);
-						update_password($GUI);
-						# login case 5
+					if (is_new_password($GUI->formvars)) {
+						$GUI->debug->write('Es wurde ein neues Passwort angegeben.', 4, $GUI->echo);
+						$new_password_err = isPasswordValide($GUI->formvars['passwort'], $GUI->formvars['new_password'], $GUI->formvars['new_password_2']);
+
+						if (is_new_password_valid($new_password_err)) {
+							$GUI->debug->write('Neues Password ist valid.', 4, $GUI->echo);
+							update_password($GUI);
+							# login case 5
+						}
+						else { # new password is not ok
+							$GUI->debug->write('Neues Password ist nicht valid. Zurück zur Anmeldung mit Fehlermeldung.', 4, $GUI->echo);
+							$GUI->Fehlermeldung = $new_password_err . '!<br>Vorschlag für ein neues Password: <b>' . createRandomPassword(8) . '</b><br>';
+							$show_login_form = true;
+							$go = 'login_new_password';
+							# login case 6
+						}
 					}
-					else { # new password is not ok
-						$GUI->debug->write('Neues Password ist nicht valid. Zurück zur Anmeldung mit Fehlermeldung.', 4);
-						$GUI->Fehlermeldung = $new_password_err . '!<br>Vorschlag für ein neues Password: <b>' . createRandomPassword(8) . '</b><br>';
-						$show_login_form = true;
-						$go = 'login_new_password';
-						# login case 6
+					else {
+						$GUI->debug->write('Es wurde kein neues Passwort angegeben.', 4, $GUI->echo);
+						# login case 4
 					}
 				}
 				else {
-					$GUI->debug->write('Es wurde kein neues Passwort angegeben.', 4);
-					# login case 4
+					if ($GUI->formvars['agreement_accepted'] == '1') {
+						$GUI->debug->write('Nutzer bestätigt Agreement. Trage das ein.', 4, $GUI->echo);
+						$GUI->user->update_agreement_accepted($GUI->formvars['agreement_accepted']);
+					}
+					else {
+						$GUI->debug->write('Agreement ist nicht akzeptiert.', 4, $GUI->echo);
+						$GUI->Fehlermeldung = 'Vor Nutzung der Anwendung müssen Sie der Vereinbarung zustimmen!';
+						$show_login_form = true;
+						$go = 'login_agreement';
+						# login case 16
+					}
 				}
 			}
-			else { # Anmeldung ist fehlgeschlagen				
-				$GUI->debug->write('Anmeldung ist fehlgeschlagen.', 4,$GUI->echo);
+			else { # Anmeldung ist fehlgeschlagen
+				$GUI->debug->write('Anmeldung ist fehlgeschlagen.', 4, $GUI->echo);
 				$GUI->formvars['num_failed'] = Nutzer::increase_num_login_failed($GUI, $GUI->formvars['login_name']);
 				sleep($GUI->formvars['num_failed'] * $GUI->formvars['num_failed']);
 				$show_login_form = true;
@@ -206,6 +227,8 @@ else {
 
 						# // ToDo: Create a new user and go to login with user and password
 						$result = Nutzer::register($GUI, $GUI->formvars['stelle_id']);
+						
+						
 						if ($result['success']) {
 							$invitation = Invitation::find_by_id($GUI, $GUI->formvars['token']);
 							$invitation->set('completed', date("Y-m-d H:i:s"));
@@ -238,7 +261,7 @@ else {
 				}
 			}
 			else { # keine Registrierung
-				$GUI->debug->write('Es ist keine Registrierung. Zeige Login-Formular.', 4, $GUI->echo);
+				$GUI->debug->write('Es ist keine Registrierung.', 4, $GUI->echo);
 				$show_login_form = true;
 				$go = 'login';
 				# login case 8
@@ -268,6 +291,7 @@ if (!$show_login_form) {
 		if ($permission['allowed']) {
 			$GUI->debug->write('Nutzer ist in Stelle ' . $GUI->Stelle->id . ' erlaubt.', 4, $GUI->echo);
 			$GUI->user->stelle_id = $GUI->Stelle->id; # set selected stelle to user
+			$GUI->user->updateStelleID($GUI->Stelle->id);
 		}
 		else {
 			$GUI->debug->write('Zugang zur Stelle ' . $GUI->Stelle->id . ' für Nutzer nicht erlaubt weil: ' . $permission['reason'], 4, $GUI->echo);
@@ -299,6 +323,7 @@ if (!$show_login_form) {
 
 # $show_login_form = true nach login cases 3, 6, 7, 8, 9, 10, 11
 if ($show_login_form) {
+	$GUI->debug->write('Zeige Login-Form', 4, $GUI->echo);
 	$GUI->user->rolle = new stdClass();
 	$GUI->user->rolle->querymode = 0;
 }
@@ -306,12 +331,17 @@ else {
 	$GUI->debug->write('Lade Stelle und Rolle.', 4, $GUI->echo);
 	# Alles was man immer machen muss bevor die go's aufgerufen werden
 	$GUI->user->setRolle($GUI->user->stelle_id);
+
+	#$GUI->debug->write('Eingestellte Rolle: ' . print_r($GUI->user->rolle, true), 4, $GUI->echo);
+
 	#echo 'In der Rolle eingestellte Sprache: '.$GUI->user->rolle->language;
 	# Rollenbezogene Stellendaten zuweisen
 	$GUI->loadMultiLingualText($GUI->user->rolle->language);
 
 	$GUI->debug->write('Set Session', 4, $GUI->echo);
 	set_session_vars($GUI->formvars);
+
+	#$GUI->debug->write('<p>Session: ' . print_r($_SESSION, true), 4, $GUI->echo);
 
 	# Ausgabe der Zugriffsinformationen in debug-Datei
 	$GUI->debug->write('User: ' . $GUI->user->login_name, 4);
@@ -420,7 +450,7 @@ else {
 		# Zurücksetzen des histtimestamps
 		if($GUI->user->rolle->hist_timestamp != '')$GUI->setHistTimestamp();
 		# Zurücksetzen der veränderten Klassen
-		$GUI->user->rolle->resetClasses();
+		#$GUI->user->rolle->resetClasses();
 		$_SESSION['login_routines'] = false;
 	} else {
 			define('AFTER_LOGIN', false);
@@ -491,6 +521,10 @@ function is_login($formvars) {
 
 function is_login_granted($user, $login_name) {
 	return $user->login_name == $login_name;
+}
+
+function is_agreement_accepted($user) {
+	return $user->agreement_accepted == 1;
 }
 
 function is_new_stelle($new_stelle_id, $user) {

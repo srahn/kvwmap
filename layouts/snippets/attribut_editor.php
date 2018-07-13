@@ -15,6 +15,12 @@
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
 <!--
+
+function update_visibility_form(visibility, attributename){
+	if(visibility == 2)document.getElementById('visibility_form_'+attributename).style.display = '';
+	else document.getElementById('visibility_form_'+attributename).style.display = 'none';
+}
+
 function submitLayerSelector() {
 	var element = document.getElementById('selected_datatype_id');
 	    element.value = '<?php echo $strPleaseSelect; ?>';
@@ -109,22 +115,19 @@ function toLayerEditor(){
 							<span	class="fett" style="cursor: pointer">F&uuml;r neuen<br>Datensatz</span>
 						</td>
 
-						<?php
+						<td align="center"><span class="fett">sichtbar</span></td>
+						
+						<?
 						if (in_array($this->formvars['selected_layer_id'], $quicksearch_layer_ids)){
 							$msg = "Für die Schnellsuche verwenden."; ?>
 							<td align="center">
-								<i class="fa fa-search" style="font-size:20px" title="<?php echo $msg; ?>"style="cursor: pointer"></i>
+								<i class="fa fa-search" style="font-size:20px" title="<?php echo $msg; ?>"></i>
 							</td>	<?
 						}
-
-						$msg = "In der Sachdatenanzeige sichtbar."; ?>
-						<td align="center">
-							<i class="fa fa-eye" style="font-size:23px" title="<?php echo $msg; ?>"style="cursor: pointer"></i>
-						</td>						
 						
-						<? $msg = "Im Rastertemplate als Vorschau-Attribut verwenden."; ?>
+						$msg = "Im Rastertemplate als Vorschau-Attribut verwenden."; ?>
 						<td align="center">
-							<i class="fa fa-windows" style="font-size:20px" title="<?php echo $msg; ?>"style="cursor: pointer"></i>
+							<i class="fa fa-windows" style="font-size:20px" title="<?php echo $msg; ?>"></i>
 						</td>
 
 					</tr><?php
@@ -256,7 +259,7 @@ function toLayerEditor(){
 											'arrangement_' . $this->attributes['name'][$i],
 											array(
 												array('value' => 0, 'output' => 'unter dem vorigen'),
-												array('value' => 1, 'output' => 'neben dem vorigen')
+												array('value' => 1, 'output' => 'neben dem vorigen', 'style' => 'background-color: #faef1e')
 											),
 											$this->attributes['arrangement'][$i],
 											1,
@@ -294,7 +297,7 @@ function toLayerEditor(){
 											),
 											$this->attributes['mandatory'][$i],
 											1,
-											'width: 80px'
+											'width: 75px'
 										); ?>
 							</td>
 
@@ -308,9 +311,56 @@ function toLayerEditor(){
 											),
 											$this->attributes['dont_use_for_new'][$i],
 											1,
-											'width: 80px'
+											'width: 75'
 										); ?>
 							</td>
+							
+							<td align="center" valign="top">
+								<table style="width: 100%" cellspacing="0" cellpadding="0">
+									<tr>
+										<td align="left"><?
+								echo FormObject::createSelectField(
+											'visible_' . $this->attributes['name'][$i],
+											array(
+												array('value' => 0, 'output' => 'nein'),
+												array('value' => 1, 'output' => 'ja'),
+												array('value' => 2, 'output' => 'ja, wenn')
+											),
+											$this->attributes['visible'][$i],
+											1,
+											'width: 75px',
+											'update_visibility_form(this.value, \''.$this->attributes['name'][$i].'\')'
+										); ?>
+										</td>
+										<td id="visibility_form_<? echo $this->attributes['name'][$i]; ?>" style="<? echo ($this->attributes['visible'][$i] == 2 ? '' : 'display:none') ?>">
+											<table style="width: 100%" cellspacing="0" cellpadding="0">
+												<tr>
+													<td><?
+														echo FormObject::createSelectField(
+																'vcheck_attribute_' . $this->attributes['name'][$i],
+																$this->attributes['name'],
+																$this->attributes['vcheck_attribute'][$i],
+																1
+															); ?>
+													</td>
+													<td><?
+														echo FormObject::createSelectField(
+																	'vcheck_operator_' . $this->attributes['name'][$i],
+																	array('=', '!=', '<', '>'),
+																	$this->attributes['vcheck_operator'][$i],
+																	1,
+																	'width: 35px'
+																); ?>
+													</td>
+													<td>
+														<input type="text" style="width: 60px" name="vcheck_value_<? echo $this->attributes['name'][$i]; ?>" value="<? echo htmlentities($this->attributes['vcheck_value'][$i]); ?>">
+													</td>
+												</tr>
+											</table>
+										</td>
+									</tr>
+								</table>
+							</td>	
 
 							<?php
 							if (in_array($this->formvars['selected_layer_id'], $quicksearch_layer_ids)) { ?>
@@ -318,10 +368,6 @@ function toLayerEditor(){
 						  		<input name="quicksearch_<?php echo $this->attributes['name'][$i]; ?>" type="checkbox" value="1"<?php echo ($this->attributes['quicksearch'][$i] ? ' checked="true"' : ''); ?>>
 						  	</td><?php
 							} ?>							
-							
-							<td align="center" valign="top">
-								<input type="checkbox" value="1" name="visible_<? echo $this->attributes['name'][$i]; ?>" <? echo ($this->attributes['visible'][$i] ? ' checked="true"' : ''); ?>>
-							</td>							
 							
 							<td align="center" valign="top">
 						  	<input name="raster_visibility_<?php echo $this->attributes['name'][$i]; ?>" type="checkbox" value="1"<?php echo ($this->attributes['raster_visibility'][$i] ? ' checked="true"' : ''); ?>>

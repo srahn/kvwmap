@@ -17,6 +17,12 @@ function MapserverErrorHandler($errno, $errstr, $errfile, $errline){
 	return true;
 }
 
+function url2filepath($url, $doc_path, $doc_url){
+	if($doc_path == '')$doc_path = CUSTOM_IMAGE_PATH;
+	$url_parts = explode($doc_url, $url);
+	return $doc_path.$url_parts[1];
+}
+
 function compare_layers($a, $b){
 	$a['alias'] = strtoupper($a['alias']);
 	$b['alias'] = strtoupper($b['alias']);
@@ -75,7 +81,7 @@ function InchesPerUnit($unit, $center_y){
 
 function ie_check(){
 	$browser = $_SERVER['HTTP_USER_AGENT'];
-	if (preg_match("/MSIE/i", $browser)){
+	if(preg_match("/MSIE/i", $browser) OR preg_match("/rv:11.0/i", $browser) OR preg_match("/Edge/i", $browser)){
 			return TRUE;
 	}
 	else{
@@ -1658,5 +1664,51 @@ function uuid() {
 		mt_rand(0, 0x3fff) | 0x8000,
 		mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
 	);
+}
+
+/**
+*  Get the file size of any remote resource (using get_headers()), 
+*  either in bytes or - default - as human-readable formatted string.
+*
+*  @author  Stephan Schmitz <eyecatchup@gmail.com>
+*  @license MIT <http://eyecatchup.mit-license.org/>
+*  @url     <https://gist.github.com/eyecatchup/f26300ffd7e50a92bc4d>
+*
+*  @param   string   $url          Takes the remote object's URL.
+*  @param   boolean  $formatSize   Whether to return size in bytes or formatted.
+*  @param   boolean  $useHead      Whether to use HEAD requests. If false, uses GET.
+*  @return  string                 Returns human-readable formatted size
+*                                  or size in bytes (default: formatted).
+*/
+function get_remote_filesize($url, $formatSize = true, $useHead = true) {
+	if (false !== $useHead) {
+		stream_context_set_default(array('http' => array('method' => 'HEAD')));
+	}
+	$head = array_change_key_case(get_headers($url, 1));
+	// content-length of download (in bytes), read from Content-Length: field
+	$clen = isset($head['content-length']) ? $head['content-length'] : 0;
+
+	// cannot retrieve file size, return "-1"
+	if (!$clen) {
+		return -1;
+	}
+
+	if (!$formatSize) {
+		return $clen; // return size in bytes
+	}
+
+	$size = $clen;
+	switch ($clen) {
+		case $clen < 1024:
+		$size = $clen .' B'; break;
+		case $clen < 1048576:
+		$size = round($clen / 1024, 2) .' KiB'; break;
+		case $clen < 1073741824:
+		$size = round($clen / 1048576, 2) . ' MiB'; break;
+		case $clen < 1099511627776:
+		$size = round($clen / 1073741824, 2) . ' GiB'; break;
+	}
+
+	return $size; // return formatted size
 }
 ?>

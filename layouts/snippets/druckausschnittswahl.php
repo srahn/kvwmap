@@ -15,13 +15,9 @@ function setprintextent(wert){
 
 function showLegendOptions(){
 	if(document.getElementById('legendOptions2').style.display == 'none'){
-		document.getElementById('legendOptions1').style.borderTop="1px solid #C3C7C3";
-		document.getElementById('legendOptions1').style.borderLeft="1px solid #C3C7C3";
-		document.getElementById('legendOptions1').style.borderRight="1px solid #C3C7C3";
 		document.getElementById('legendOptions2').style.display = '';
 	}
 	else{
-		document.getElementById('legendOptions1').style.border="none";
 		document.getElementById('legendOptions2').style.display = 'none';
 	}
 }
@@ -117,6 +113,7 @@ function load(){
 		alert("<? echo $strWarning3; ?>");
 	}
 	else{
+		document.GUI.go.value = "Druckausschnitt_laden";
 		document.GUI.submit();
 	}
 }
@@ -156,105 +153,84 @@ function rotate_print_extent(angle){
 	  $bgcolor=BG_FORMFAIL;
 		showAlert('Fehler bei der Eingabe:\n'.$this->Meldung);
 }
- ?> 
- <br>
+
+	global $sizes;
+	$legendheight = $this->map->height+8;
+
+ ?>
 <table border="0" cellspacing="2" cellpadding="2">
   <tr align="center"> 
-    <td colspan="5"><h2><? echo $strTitle; ?></h2><br>
+    <td colspan="5" style="height: 40px"><h2><? echo $strTitle; ?></h2>
     </td>
   </tr>
-  <tr align="center"> 
-    <td colspan="5"> 
-      <input type="button" name="vorschau" value="<?php echo $strButtonPrintPreview; ?>" onclick="preview();">
-      <input type="button" name="drucken" value="<?php echo $strButtonPrint; ?>" onclick="druck_pdf('<? echo $this->Document->activeframe[0]['Name']; ?>', '<? echo $this->Document->activeframe[0]['format']; ?>', <? echo $this->Document->activeframe[0]['preis']; ?>);">
-      <br>
-    </td>
-  </tr>
-	<tr align="center"> 
-    <td valign="top" align="left">			
-			<div style="width:350px;" onmouseover="document.getElementById('scales').style.display='inline-block';" onmouseout="document.getElementById('scales').style.display='none';">
-				<?php echo $strButtonPrintScale; ?><input type="text" size="7" name="printscale" onkeydown="setprintextent('false');" autocomplete="off" value="<?php echo $this->formvars['printscale']; ?>">
-				<div valign="top" style="height:0px; position:relative;">
-					<div id="scales" style="display:none; position:absolute; left:95px; top:-1px; width: 78px; vertical-align:top; overflow:hidden; border:solid grey 1px;">
-						<select size="<? echo count($this->selectable_scales); ?>" style="padding:4px; margin:-2px -17px -4px -4px;" onclick="document.GUI.printscale.value=this.value; document.getElementById('scales').style.display='none';setprintextent('false');">
-							<? 
-								foreach($this->selectable_scales as $scale){
-									echo '<option onmouseover="this.selected = true;" value="'.$scale.'">1:&nbsp;&nbsp;'.$scale.'</option>';
-								}
-							?>
-						</select>
-					</div>
-				</div>
-			</div>
-			
-    </td>
-    <td valign="top" align="right" colspan="4">
-    	<?php echo $strPrintFrame; ?>
-    	<select name="aktiverRahmen" onchange="document.GUI.go.value='Druckausschnittswahl';document.GUI.target = '';document.GUI.submit()">
-            <?  
-            for($i = 0; $i < count($this->Document->frames); $i++){            	
-              echo ($this->Document->activeframe[0]['id']<>$this->Document->frames[$i]['id']) ? '<option value="'.$this->Document->frames[$i]['id'].'">'.$this->Document->frames[$i]['Name'].'</option>' : '<option value="'.$this->Document->frames[$i]['id'].'" selected>'.$this->Document->frames[$i]['Name'].'</option>';
-            }
-            ?>
-      </select>
-			<? 
-				$orientation = substr($this->Document->activeframe[0]['format'], 2); 
-				$asize = substr($this->Document->activeframe[0]['format'], 0, 2);				
-			?>
-    	&nbsp;(<? echo $asize.' '.$$orientation.')'; ?>
-    </td>
-  </tr>
+
   <tr valign="top"> 
     <td align="center" colspan="5" style="border:1px solid #C3C7C3"> 
       <?php
       include(LAYOUTPATH.'snippets/SVG_druckausschnittswahl.php');
     ?>
     </td>
-    <td valign="top">
-      <table cellspacing=0 cellpadding=2 border=0 style="border:1px solid #C3C7C3;">
-        <tr align="center">
-          <td><?php echo $strAvailableLayer; ?>:</td>
-        </tr>
-        <tr align="left">
-          <td>
-          <div align="center"><input type="button" name="neuladen_button" onclick="neuLaden();" value="<?php echo $strLoadNew; ?>"></div>
-          <br>
-        	<div style="width:230; height:<?php echo $this->map->height-59; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
-	          &nbsp;
-	          <img src="graphics/tool_info_2.png" alt="Informationsabfrage" title="Informationsabfrage" width="17">&nbsp;
-	          <img src="graphics/layer.png" alt="Themensteuerung" title="Themensteuerung" width="20" height="20"><br>
-						<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
-	          <div id="legend_div"><? echo $this->legende; ?></div>
-	        </div>
-          </td>
-        </tr>
-      </table>
-     </td>
-  </tr>
-
-  <tr align="center">
-		<td colspan="5">
-			<div style="display: flex; width: <? echo $this->user->rolle->nImageWidth; ?>px">
-				<div style="">
-					<?php echo $strRotationAngle; ?><input type="text" size="3" name="angle" onchange="angle_slider.value=parseInt(angle.value);rotate_print_extent(this.value);" value="<? echo $this->formvars['angle']; ?>">&nbsp;°<br>
-					<input type="range" id="angle_slider" min="-90" max="90" style="width: 120px" value="<? echo $this->formvars['angle']; ?>" oninput="angle.value=parseInt(angle_slider.value);angle.onchange();" onchange="angle.value=parseInt(angle_slider.value);angle.onchange();">
-				</div>				
-			<? if($this->Document->activeframe[0]['refmapfile']){ ?>
-				<div style="margin-left: 10px"> <?
-					if(!isset($this->formvars['referencemap']))$this->formvars['referencemap'] = 1;
-						echo $strReferenceMap; ?>&nbsp;<input type="checkbox" name="referencemap" value="1" <? if($this->formvars['referencemap']) echo 'checked="true"'; ?>>
+		
+		<td>
+			<div class="print_options_box">
+				<span class="fett"><? echo $strPrintFrame; ?></span>
+				<select name="aktiverRahmen" style="width: 200px" onchange="document.GUI.go.value='Druckausschnittswahl';document.GUI.target = '';document.GUI.submit()">
+					<?  
+					for($i = 0; $i < count($this->Document->frames); $i++){            	
+						echo ($this->Document->activeframe[0]['id']<>$this->Document->frames[$i]['id']) ? '<option value="'.$this->Document->frames[$i]['id'].'">'.$this->Document->frames[$i]['Name'].'</option>' : '<option value="'.$this->Document->frames[$i]['id'].'" selected>'.$this->Document->frames[$i]['Name'].'</option>';
+					}
+					?>
+				</select>
+				<? 
+					$orientation = substr($this->Document->activeframe[0]['format'], 2); 
+					$asize = substr($this->Document->activeframe[0]['format'], 0, 2);				
+				?>
+				<br>(<? echo $asize.' '.$$orientation.')'; ?>
+				<br>
+				<div style="width:190px;" onmouseover="document.getElementById('scales').style.display='inline-block';" onmouseout="document.getElementById('scales').style.display='none';">
+					<span class="fett"><? echo $strButtonPrintScale; ?></span><input type="text" size="7" name="printscale" onkeydown="setprintextent('false');" autocomplete="off" value="<?php echo $this->formvars['printscale']; ?>">
+					<div valign="top" style="height:0px; position:relative;">
+						<div id="scales" style="z-index: 1;display:none; position:absolute; left:98px; top:-1px; width: 78px; vertical-align:top; overflow:hidden; border:solid grey 1px;">
+							<select size="<? echo count($this->selectable_scales); ?>" style="padding:4px; margin:-2px -17px -4px -4px;" onclick="document.GUI.printscale.value=this.value; document.getElementById('scales').style.display='none';setprintextent('false');">
+								<? 
+									foreach($this->selectable_scales as $scale){
+										echo '<option onmouseover="this.selected = true;" value="'.$scale.'">1:&nbsp;&nbsp;'.$scale.'</option>';
+									}
+								?>
+							</select>
+						</div>
+					</div>
 				</div>
-			<? }				
+				<br>
+				<div style="">
+					<span class="fett"><? echo $strRotationAngle; ?>:</span>&nbsp;<input type="text" size="3" name="angle" onchange="angle_slider.value=parseInt(angle.value);rotate_print_extent(this.value);" value="<? echo $this->formvars['angle']; ?>">&nbsp;°<br>
+					<input type="range" id="angle_slider" min="-90" max="90" style="margin: 0; width: 154px" value="<? echo $this->formvars['angle']; ?>" oninput="angle.value=parseInt(angle_slider.value);angle.onchange();" onchange="angle.value=parseInt(angle_slider.value);angle.onchange();">
+				</div>
+			</div>
+			
+			<div class="print_options_box fett">
+				<? echo $strNoMinMaxscaling; ?>&nbsp;<input type="checkbox" name="no_minmax_scaling" onclick="document.GUI.submit();" value="1" <? if($this->formvars['no_minmax_scaling']) echo 'checked="true"'; ?>>
+			</div>
+			
+			<? if($this->Document->activeframe[0]['refmapfile'] OR $this->Document->activeframe[0]['legendsize'] > 0){ ?>
+			<div class="print_options_box" style="overflow: auto; max-height: 300px">
+				<? if($this->Document->activeframe[0]['refmapfile']){ ?>
+					<div class="fett"> <?
+						if(!isset($this->formvars['referencemap']))$this->formvars['referencemap'] = 1;
+							echo $strReferenceMap; ?>&nbsp;<input type="checkbox" name="referencemap" value="1" <? if($this->formvars['referencemap']) echo 'checked="true"'; ?>>
+					</div>
+				<? }
+			
 				if($this->Document->activeframe[0]['legendsize'] > 0){ ?>
-				<div style="flex: 1 1 300px;margin-left: 10px">	
-					<table style="width: 100%">
+				<div style="flex: 1 1 200px;">	
+					<table style="width: 100%;margin-top: 5px" cellspacing="0" cellpadding="0">
 						<tr>
 							<td id="legendOptions1"><a href="javascript:showLegendOptions();"><? echo $strLegendOptions; ?>...</a>&nbsp;</td>
 						</tr>
 						<tr id="legendOptions2" style="display:none">
-							<td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3">
+							<td>
 								<!--rollenlayer_legend-->
-								<input type="checkbox" name="legend_extra" value="1" <? if($this->formvars['legend_extra']) echo 'checked="true"'; ?>>&nbsp;<? echo $strLegendExtra; ?><br>
+								<span class="fett">&nbsp;<? echo $strLegendExtra; ?></span>&nbsp;<input type="checkbox" name="legend_extra" value="1" <? if($this->formvars['legend_extra']) echo 'checked="true"'; ?>>
 								<div class="fett" style="margin-top: 5px">&nbsp;<? echo $strLayers; ?>:</div>
 								<?
 								$layerset = $this->layerset['list'];
@@ -273,46 +249,88 @@ function rotate_print_extent(angle){
 						</tr>
 					</table>
 				</div>
-				<? } ?>				
-				<div style="margin-left: 10px">
-					<? echo $strNoMinMaxscaling; ?>&nbsp;<input type="checkbox" name="no_minmax_scaling" onclick="document.GUI.submit();" value="1" <? if($this->formvars['no_minmax_scaling']) echo 'checked="true"'; ?>>
-				</div>
-				<div style="width: 320px;margin-left: 10px"> 
-					<?php echo $strPrintDetail; ?>
-					<input type="text" name="name" value="" style="width:120px" >&nbsp;<input type="button" style="width:84px" name="speichern" value="<?php echo $this->strSave; ?>" onclick="save();">
-					<input type="button" style="width:84px" name="delete" value="<?php echo $this->strDelete; ?>" onclick="remove();">&nbsp;
-					<select name="druckausschnitt" style="width:120px">
+				<? } ?>
+			</div>
+<? 		} 	?>
+			
+			<div class="print_options_box">
+				<div> 
+					<span class="fett"><? echo $strPrintDetail; ?>:<br></span>
+					<input type="text" name="name" value="" style="width:112px" >&nbsp;<input type="button" style="width:84px" name="speichern" value="<?php echo $this->strSave; ?>" onclick="save();">
+					<select name="druckausschnitt" style="width:200px">
 						<option value=""><?php echo $this->strPleaseSelect; ?></option>
 						<?
 							for($i = 0; $i < count($this->Document->ausschnitte); $i++){
-								echo '<option value="'.$this->Document->ausschnitte[$i]['id'].'">'.$this->Document->ausschnitte[$i]['name'].'</option>';
+								echo '<option value="'.$this->Document->ausschnitte[$i]['id'].'" '.($this->formvars['druckausschnitt'] == $this->Document->ausschnitte[$i]['id'] ? 'selected="true"' : '').'>'.$this->Document->ausschnitte[$i]['name'].'</option>';
 							}
 						?>
-					</select>
+					</select><br>
 					<input type="button" style="width:84px" name="laden" value="<?php echo $strLoad; ?>" onclick="load();">
+					<input type="button" style="width:84px" name="delete" value="<?php echo $this->strDelete; ?>" onclick="remove();">
 				</div>
+			</div>
+
+<?		if(count($this->Document->activeframe[0]['texts']) > 0){ 	# Wenn der Druckrahmen Freitexte hat, die leer sind, werden dem Nutzer Textfelder angeboten um die Freitexte selber zu belegen  ?>
+			<div class="print_options_box" style="overflow: auto; max-height: 200px">
+<?			for($j = 0; $j < count($this->Document->activeframe[0]['texts']); $j++){
+					if($this->Document->activeframe[0]['texts'][$j]['text'] == ''){
+						# falls man von der Vorschau zurück gekommen ist
+						$this->formvars['freetext_'.$this->Document->activeframe[0]['texts'][$j]['id']] = str_replace(';', chr(10), $this->formvars['freetext_'.$this->Document->activeframe[0]['texts'][$j]['id']]);
+			?>
+							Freitext <? echo $j+1; ?>:
+							<br>
+							<textarea name="freetext_<? echo $this->Document->activeframe[0]['texts'][$j]['id']; ?>" cols="25" rows="2"><? echo $this->formvars['freetext_'.$this->Document->activeframe[0]['texts'][$j]['id']]; ?></textarea>
+<?				}
+				}			?>
+			</div>
+<?		}		?>
+
+			<div class="print_options_box" style="text-align: center; padding: 10px 5px 10px 5px">
+	      <input type="button" name="vorschau" value="<?php echo $strButtonPrintPreview; ?>" onclick="preview();"><br><br>
+	      <input type="button" name="drucken" value="<?php echo $strButtonPrint; ?>" onclick="druck_pdf('<? echo $this->Document->activeframe[0]['Name']; ?>', '<? echo $this->Document->activeframe[0]['format']; ?>', <? echo $this->Document->activeframe[0]['preis']; ?>);">
+	    </div>
+			
+		</td>
+		
+    <td valign="top">
+			<div id="legenddiv" onmouseleave="slide_legend_out(event);" class="slidinglegend_slideout">
+				<table width="100%" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<td bgcolor="<?php echo BG_DEFAULT ?>" align="left">
+							<img id="LegendMinMax" src="<?php  echo GRAPHICSPATH; ?>maximize_legend.png" border="0">
+						</td>
+					</tr>
+				</table>
+				<table class="table1" id="legendTable" onclick="slide_legend_in(event)" style="display: <? echo $display; ?>" cellspacing=0 cellpadding=2 border=0>
+					<tr align="left">
+						<td>
+							<div id="legend_layer" style="display: inline-block">
+								<div id="legendcontrol">
+									<a href="index.php?go=reset_querys">
+										<div class="button_background" style="width: 26px; height: 26px">
+											<div class="button tool_info" style="width: 26px; height: 26px" title="<? echo $strClearAllQuerys; ?>"></div>
+										</div>
+									</a>
+									<a href="index.php?go=reset_layers" style="padding: 0 0 0 6">
+										<div class="button_background" style="width: 26px; height: 26px">
+											<div class="button layer" style="width: 26px; height: 26px" title="<? echo $strDeactivateAllLayer; ?>"></div>
+										</div>
+									</a>
+									<input type="button" name="neuladen_button" onclick="neuLaden();" value="<?php echo $strLoadNew; ?>" tabindex="1" style="height: 27px; vertical-align: top; margin-left: 30px">
+								</div>
+								<div id="scrolldiv" style="height:<?php echo $legendheight; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
+									<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
+									<div onclick="document.GUI.legendtouched.value = 1;" id="legend">
+										<? echo $this->legende; ?>
+									</div>
+								</div>
+							</div>
+						</td>
+					</tr>
+				</table>
 			</div>
 		</td>
   </tr>
-  <?
-  	# Wenn der Druckrahmen Freitexte hat, die leer sind, werden dem Nutzer Textfelder angeboten um die Freitexte selber zu belegen
-		for($j = 0; $j < count($this->Document->activeframe[0]['texts']); $j++){
-      if($this->Document->activeframe[0]['texts'][$j]['text'] == ''){
-      	# falls man von der Vorschau zurück gekommen ist
-      	$this->formvars['freetext_'.$this->Document->activeframe[0]['texts'][$j]['id']] = str_replace(';', chr(10), $this->formvars['freetext_'.$this->Document->activeframe[0]['texts'][$j]['id']]);
-	?>
-					<tr>
-				  	<td colspan="2">Freitext <? echo $j+1; ?>:</td>
-				  </tr>
-				  <tr>
-				  	<td colspan="2">
-				  		<textarea name="freetext_<? echo $this->Document->activeframe[0]['texts'][$j]['id']; ?>" cols="40" rows="2"><? echo $this->formvars['freetext_'.$this->Document->activeframe[0]['texts'][$j]['id']]; ?></textarea>
-				  	</td>
-				  </tr>
-	<?
-      }
-    }
-    ?>
 </table>
 <br>
 <input type="hidden" name="loadmapsource" value="<? echo $this->formvars['loadmapsource']; ?>">

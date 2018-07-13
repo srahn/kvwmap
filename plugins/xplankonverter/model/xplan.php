@@ -36,11 +36,6 @@ class xplan {
     $this->debug=$debug;
     $this->database = $database;
   }
-
-  function say_hallo($msg){
-    $hallo = 'Hallo XPlan: <br>' . $msg;
-    return $hallo;
-  }
 }
   
 ?>

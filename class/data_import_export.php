@@ -380,7 +380,7 @@ class data_import_export {
 	}
 
 	function load_shp_into_pgsql($pgdatabase, $uploadpath, $file, $epsg, $schemaname, $tablename, $encoding = 'LATIN1') {
-		if(file_exists($uploadpath . $file . '.dbf') OR file_exists($uploadpath . $file . '.DBF')){
+		if (file_exists($uploadpath . $file . '.dbf') OR file_exists($uploadpath . $file . '.DBF')) {
 	    $command = POSTGRESBINPATH .
 				'shp2pgsql' .
 				' -g the_geom' .
@@ -647,9 +647,9 @@ class data_import_export {
       else {
 				$result = array(
 					'success' => false,
-					'err_msg' => $ret
+					'err_msg' => $ret[1]
 				);
-				#showAlert('Import fehlgeschlagen.');
+				showAlert('Import fehlgeschlagen.');
 			}
 		}
 		else {
@@ -751,7 +751,7 @@ class data_import_export {
 	}
 
 	function ogr2ogr_export($sql, $exportformat, $exportfile, $layerdb){
-		$command = 'export PGCLIENTENCODING=UTF-8;'.OGR_BINPATH.'ogr2ogr -f '.$exportformat.' -lco ENCODING=UTF-8 -sql "'.$sql.'" '.$exportfile.' PG:"dbname='.$layerdb->dbName.' user='.$layerdb->user;
+		$command = 'export PGDATESTYLE="ISO, MDY";export PGCLIENTENCODING=UTF-8;'.OGR_BINPATH.'ogr2ogr -f '.$exportformat.' -lco ENCODING=UTF-8 -sql "'.$sql.'" '.$exportfile.' PG:"dbname='.$layerdb->dbName.' user='.$layerdb->user;
 		if($layerdb->passwd != '')$command.= ' password='.$layerdb->passwd;
 		if($layerdb->port != '')$command.=' port='.$layerdb->port;
 		if($layerdb->host != '') $command .= ' host=' . $layerdb->host;
@@ -929,28 +929,30 @@ class data_import_export {
 	function export_exportieren($formvars, $stelle, $user){
 		global $language;
 		global $GUI;
+    global $kvwmap_plugins;
+
 		$currenttime=date('Y-m-d H:i:s',time());
-  	$this->formvars = $formvars;
-  	$layerset = $user->rolle->getLayer($this->formvars['selected_layer_id']);
-    $mapdb = new db_mapObj($stelle->id,$user->id);
-    $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $stelle->pgdbhost);
+		$this->formvars = $formvars;
+		$layerset = $user->rolle->getLayer($this->formvars['selected_layer_id']);
+		$mapdb = new db_mapObj($stelle->id,$user->id);
+		$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $stelle->pgdbhost);
 		$sql = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[0]['pfad']);
 		$sql = str_replace('$language', $language, $sql);
 		$sql = replace_params($sql, rolle::$layer_params);
-    $privileges = $stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
-    $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
+		$privileges = $stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
+		$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
 		$filter = $mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id);
 
 		# Where-Klausel aus Sachdatenabfrage-SQL
 		$where = substr(strip_pg_escape_string($this->formvars['sql_'.$this->formvars['selected_layer_id']]), strrpos(strtolower(strip_pg_escape_string($this->formvars['sql_'.$this->formvars['selected_layer_id']])), 'where'));
 
 		# order by rausnehmen
-  	$orderbyposition = strrpos(strtolower($sql), 'order by');
+		$orderbyposition = strrpos(strtolower($sql), 'order by');
 		$lastfromposition = strrpos(strtolower($sql), 'from');
-  	if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
-	  	$orderby = ' '.substr($sql, $orderbyposition);
-	  	$sql = substr($sql, 0, $orderbyposition);
-  	}
+		if ($orderbyposition !== false AND $orderbyposition > $lastfromposition){
+			$orderby = ' '.substr($sql, $orderbyposition);
+			$sql = substr($sql, 0, $orderbyposition);
+		}
 		# group by rausnehmen
 		$groupbyposition = strpos(strtolower($sql), 'group by');
 		if($groupbyposition !== false){
@@ -959,16 +961,16 @@ class data_import_export {
   	}
 
 		# Zusammensammeln der Attribute, die abgefragt werden müssen
-    for ($i = 0; $i < count($this->attributes['name']); $i++) {
-    	if ($this->formvars['check_'.$this->attributes['name'][$i]]) {		# Entweder das Attribut wurde angehakt
-    		$selection[$this->attributes['name'][$i]] = 1;
+		for ($i = 0; $i < count($this->attributes['name']); $i++) {
+			if ($this->formvars['check_'.$this->attributes['name'][$i]]  or $this->formvars['all'] == 1) {		# Entweder das Attribut wurde angehakt
+				$selection[$this->attributes['name'][$i]] = 1;
 				$selected_attributes[] = $this->attributes['name'][$i];						# Zusammensammeln der angehakten Attribute, denn nur die sollen weiter unten auch exportiert werden
 				$selected_attr_types[] = $this->attributes['type'][$i];
-    	}
+			}
 			if (strpos($where, 'query.'.$this->attributes['name'][$i])) {			# oder es kommt in der Where-Bedingung des Sachdatenabfrage-SQLs vor
 				$selection[$this->attributes['name'][$i]] = 1;
 			}
-			if (strpos($orderby, $this->attributes['name'][$i])) {						# oder es kommt im ORDER BY des Layer-Query vor
+			if (strpos($orderby, 'query.' . $this->attributes['name'][$i])) {						# oder es kommt im ORDER BY des Layer-Query vor
 				$selection[$this->attributes['name'][$i]] = 1;
 			}
 			if (strpos($filter, $this->attributes['name'][$i])) {						# oder es kommt im Filter des Layers vor
@@ -1004,12 +1006,12 @@ class data_import_export {
 		$sql = "SELECT " . $pfad;
 
 		# Bedingungen
-  	if($where != ''){		# Where-Klausel aus Sachdatenabfrage-SQL (abgefragter Extent, Suchparameter oder oids)
-  		$orderbyposition = strpos(strtolower($where), 'order by');
-  		if($orderbyposition)$where = substr($where, 0, $orderbyposition);
-	    $sql = "SELECT * FROM (".$sql.$groupby.") as query ".$where;
-  	}
-    elseif($filter != ''){		# Filter muss nur dazu, wenn kein $where vorhanden, also keine Abfrage gemacht wurde, sondern der gesamte Layer exportiert werden soll (Filter ist ja schon im $where enthalten)
+		if($where != ''){		# Where-Klausel aus Sachdatenabfrage-SQL (abgefragter Extent, Suchparameter oder oids)
+			$orderbyposition = strpos(strtolower($where), 'order by');
+			if($orderbyposition)$where = substr($where, 0, $orderbyposition);
+			$sql = "SELECT * FROM (".$sql.$groupby.") as query ".$where;
+		}
+		elseif($filter != ''){		# Filter muss nur dazu, wenn kein $where vorhanden, also keine Abfrage gemacht wurde, sondern der gesamte Layer exportiert werden soll (Filter ist ja schon im $where enthalten)
 			$filter = str_replace('$userid', $user->id, $filter);
     	$sql = "SELECT * FROM (".$sql.$groupby.") as query WHERE ".$filter;
     }
@@ -1026,26 +1028,30 @@ class data_import_export {
 
 		for($s = 0; $s < count($selected_attributes); $s++){
 			# Transformieren der Geometrie
-			if($this->attributes['the_geom'] == $selected_attributes[$s])$selected_attributes[$s] = 'st_transform('.$selected_attributes[$s].', '.$this->formvars['epsg'].') as '.$selected_attributes[$s];
+			if ($this->attributes['the_geom'] == $selected_attributes[$s])$selected_attributes[$s] = 'st_transform('.$selected_attributes[$s].', '.$this->formvars['epsg'].') as '.$selected_attributes[$s];
 			# das Abschneiden bei nicht in der Länge begrenzten Textspalten verhindern
-			if($this->formvars['export_format'] == 'Shape'){
-				if(in_array($selected_attr_types[$s], array('text', 'varchar')))$selected_attributes[$s] = $selected_attributes[$s].'::varchar(254)';
+			if ($this->formvars['export_format'] == 'Shape') {
+				if (in_array($selected_attr_types[$s], array('text', 'varchar'))) $selected_attributes[$s] = $selected_attributes[$s].'::varchar(254)';
 			}
 		}
-    $sql = 'SELECT '.implode(', ', $selected_attributes).' FROM public.'.$temp_table;		# auf die ausgewählten Attribute einschränken
-    $ret = $layerdb->execSQL($sql,4, 0);
-    if(!$ret[0]){
-      $count = pg_num_rows($ret[1]);
-      #showAlert('Abfrage erfolgreich. Es wurden '.$count.' Zeilen geliefert.');
+		$sql = "
+			SELECT " . implode(', ', $selected_attributes) . " FROM public." . $temp_table . "
+		"; # auf die ausgewählten Attribute einschränken
+		$ret = $layerdb->execSQL($sql,4, 0);
+		if (!$ret[0]) {
+			$count = pg_num_rows($ret[1]);
+			if ($this->formvars['layer_name'] == '') $this->formvars['layer_name'] = $layerset[0]['Name'];
+
+			#showAlert('Abfrage erfolgreich. Es wurden '.$count.' Zeilen geliefert.');
 			$this->formvars['layer_name'] = replace_params($this->formvars['layer_name'], rolle::$layer_params);
-      $this->formvars['layer_name'] = umlaute_umwandeln($this->formvars['layer_name']);
-      $this->formvars['layer_name'] = str_replace('.', '_', $this->formvars['layer_name']);
-      $this->formvars['layer_name'] = str_replace('(', '_', $this->formvars['layer_name']);
-      $this->formvars['layer_name'] = str_replace(')', '_', $this->formvars['layer_name']);
-      $this->formvars['layer_name'] = str_replace('/', '_', $this->formvars['layer_name']);
-      $this->formvars['layer_name'] = str_replace('[', '_', $this->formvars['layer_name']);
-      $this->formvars['layer_name'] = str_replace(']', '_', $this->formvars['layer_name']);
-      $folder = 'Export_'.$this->formvars['layer_name'].rand(0,10000);
+			$this->formvars['layer_name'] = umlaute_umwandeln($this->formvars['layer_name']);
+			$this->formvars['layer_name'] = str_replace('.', '_', $this->formvars['layer_name']);
+			$this->formvars['layer_name'] = str_replace('(', '_', $this->formvars['layer_name']);
+			$this->formvars['layer_name'] = str_replace(')', '_', $this->formvars['layer_name']);
+			$this->formvars['layer_name'] = str_replace('/', '_', $this->formvars['layer_name']);
+			$this->formvars['layer_name'] = str_replace('[', '_', $this->formvars['layer_name']);
+			$this->formvars['layer_name'] = str_replace(']', '_', $this->formvars['layer_name']);
+			$folder = 'Export_'.$this->formvars['layer_name'].rand(0,10000);
 			$old = umask(0);
       mkdir(IMAGEPATH.$folder, 0777);                       # Ordner erzeugen
 			umask($old);
@@ -1082,6 +1088,14 @@ class data_import_export {
 					$exportfile = $exportfile.'.json';
 					$this->ogr2ogr_export($sql, 'GeoJSON', $exportfile, $layerdb);
 				}break;
+
+				case 'GeoJSONPlus': {
+					$exportfile = $exportfile.'.json';
+					if (in_array('mobile', $kvwmap_plugins)) {
+						$sql = str_replace('version FROM ', '(SELECT coalesce(max(version), 1) FROM ' . $layerset[0]['schema'] . '.' . $layerset[0]['maintable'] . '_deltas) AS version FROM ', $sql);
+					}
+					$this->ogr2ogr_export($sql, 'GeoJSON', $exportfile, $layerdb);
+				} break;
 
 				case 'CSV' : {
 					while($rs=pg_fetch_assoc($ret[1])){

@@ -88,6 +88,7 @@ define(CASE_COMPRESS, false);																																						  #
 # 	tooltip_query:	  - ein Datensatz mit Bild muss agefragt werden																			  #
 #										  - getRollenLayer() reinkopieren																										  #
 #   getLayerOptions:  - getRollenLayer() reinkopieren																											#
+#		get_group_legend:	- compare_legendorder() reinkopieren																								#
 #																																																				  #
 #																																																				  #
 ###########################################################################################################
@@ -145,12 +146,12 @@ else{
 	include_(CLASSPATH . 'bauleitplanung.php');
 }
 
-include(WWWROOT . APPLVERSION.'start.php');
+include(WWWROOT . APPLVERSION . 'start.php');
 
 # Übergeben des Anwendungsfalles
-$debug->write("<br><b>Anwendungsfall go: ".$go."</b>",4);
+$debug->write("<br><b>Anwendungsfall go: " . $go . "</b>", 4);
 
-$GUI->go=$go;
+$GUI->go = $go;
 $GUI->requeststring = $QUERY_STRING;
 
 function go_switch($go){
@@ -159,9 +160,14 @@ function go_switch($go){
 	global $newPassword;
 	global $passwort;
 	global $username;
-	if(!FAST_CASE)$GUI->loadPlugins($go);
-	if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
-		if($go == 'get_last_query'){
+	if(!FAST_CASE) {
+		$old_go = $GUI->go;
+		$GUI->loadPlugins($go);
+		# go nur neu setzen, wenn es in einem Plugin auch geändert worden ist
+		if($old_go != $GUI->go)$go = $GUI->go;
+	}
+	if (FAST_CASE OR $GUI->goNotExecutedInPlugins) {
+		if ($go == 'get_last_query') {
 			$GUI->last_query = $GUI->user->rolle->get_last_query();
 			$GUI->last_query_requested = true;		# get_last_query wurde direkt aufgerufen
 			$GUI->formvars['go'] = $go = $GUI->last_query['go'];
@@ -198,6 +204,10 @@ function go_switch($go){
 
 			case 'login_registration' : {
 				$GUI->login_registration();
+			} break;
+
+			case 'login_agreement' : {
+				$GUI->login_agreement();
 			} break;
 
 			case 'loadDrawingOrderForm' : {
@@ -860,7 +870,12 @@ function go_switch($go){
 				$GUI->druckrahmen_load();
 				$GUI->output();
 			} break;
-
+			
+			case 'Druckausschnitt_laden' : {
+				$GUI->formvars['loadmapsource'] = 'DataBase';
+				$GUI->druckausschnittswahl($GUI->formvars['loadmapsource']);
+			} break;
+			
 			case 'Druckausschnitt_loeschen' : {
 				$GUI->druckausschnitt_löschen($GUI->formvars['loadmapsource']);
 			} break;
@@ -875,14 +890,8 @@ function go_switch($go){
 			} break;
 
 			case 'Druckausschnittswahl_Vorschau' : {
-				if(IMAGEMAGICK == 'true'){
-					$GUI->druckvorschau();
-					$GUI->output();
-				}
-				else{
-					$GUI->druckvorschau_html();
-					$GUI->output();
-				}
+				$GUI->druckvorschau();
+				$GUI->output();
 			} break;
 
 			case 'Druckausschnittswahl_Drucken' : {
@@ -1576,37 +1585,6 @@ function go_switch($go){
 			case 'Funktionen_Ändern' : {
 				$GUI->checkCaseAllowed('Funktionen_Formular');
 				$GUI->FunktionAendern();
-			} break;
-
-			case 'help' : {
-				include(WWWROOT.APPLVERSION.'help/hilfe.php');
-			} break;
-
-			case 'hilfe_nachweisverw': {
-				include(WWWROOT.APPLVERSION.'help/hilfe_nachweisverw.php');
-			} break;
-
-			case 'hilfe_dokumente': {
-				include(WWWROOT.APPLVERSION.'help/hilfe_nachweisverw.php');
-			} break;
-
-			# Flurstuecksauswahl zum festlegen pot. Geothermie-Bohrpunkte
-			case 'Geothermie_Abfrage' : {
-				$GUI->geothermie_start();
-			} break;
-
-			# pot. Geothermie-Bohrpunkte festlegen und zu DB hinzufuegen
-			case 'Geothermie_Eingabe' : {
-				$GUI->geothermie_anfrage();
-			} break;
-
-			# Polygon/Versiegelung digitalisieren
-			case 'Versiegelung' : {
-				$GUI->versiegelungsFlaechenErfassung();
-			} break;
-
-			case 'Versiegelung_Senden' : {
-				$GUI->versiegelungsFlaechenSenden();
 			} break;
 
 			case "Ändern" : {

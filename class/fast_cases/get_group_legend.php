@@ -1,5 +1,10 @@
 <?
 
+function compare_legendorder($a, $b){
+	if($a['legendorder'] > $b['legendorder'])return 1;
+	else return 0;
+}
+
 function in_subnet($ip,$net) {
 	$ipparts=explode('.',$ip);
 	$netparts=explode('.',$net);
@@ -63,11 +68,6 @@ function html_umlaute($string){
 	$string = str_replace('ø', '&oslash;', $string);
 	$string = str_replace('æ', '&aelig;', $string);
 	return $string;
-}
-
-function compare_legendorder($a, $b){
-	if($a['legendorder'] > $b['legendorder'])return 1;
-	else return 0;
 }
 
 
@@ -258,16 +258,17 @@ class GUI {
           else{
             $layer->setProjection('+init='.strtolower($this->formvars['post_epsg']));
           }
-          #$layer->set('connection',"http://www.kartenserver.niedersachsen.de/wmsconnector/com.esri.wms.Esrimap/Biotope?LAYERS=7&REQUEST=GetMap&TRANSPARENT=true&FORMAT=image/png&SERVICE=WMS&VERSION=1.1.1&STYLES=&EXCEPTIONS=application/vnd.ogc.se_xml&SRS=EPSG:31467");
-          #echo '<br>Name: '.$layerset[$i][name];
-          #echo '<br>Connection: '.$layerset[$i][connection];
-          $layer->set('connection', $layerset[$i][connection]);
-          if (MAPSERVERVERSION < 540) {
-			      $layer->set('connectiontype', 7);
-			    }
-			    else {
-			      $layer->setConnectionType(7);
-			    }
+
+					#$layer->set('connection',"http://www.kartenserver.niedersachsen.de/wmsconnector/com.esri.wms.Esrimap/Biotope?LAYERS=7&REQUEST=GetMap&TRANSPARENT=true&FORMAT=image/png&SERVICE=WMS&VERSION=1.1.1&STYLES=&EXCEPTIONS=application/vnd.ogc.se_xml&SRS=EPSG:31467");
+					#echo '<br>Name: '.$layerset[$i][name];
+					$layer->set('connection', replace_params($layerset[$i][connection], rolle::$layer_params));
+					#echo '<br>Connection: ' . replace_params($layerset[$i][connection], rolle::$layer_params);
+					if (MAPSERVERVERSION < 540) {
+						$layer->set('connectiontype', 7);
+					}
+					else {
+						$layer->setConnectionType(7);
+					}
           if($layerset[$i]['transparency'] != ''){
             if(MAPSERVERVERSION > 500){
               $layer->set('opacity',$layerset[$i]['transparency']);
@@ -502,26 +503,32 @@ class GUI {
 						$layer->set('debug',MS_ON);
 
 						# fremde Layer werden auf Verbindung getestet
-						if($layerset['list'][$i]['aktivStatus'] != 0 AND $layerset['list'][$i]['connectiontype'] == 6 AND strpos($layerset['list'][$i]['connection'], 'host') !== false AND strpos($layerset['list'][$i]['connection'], 'host=localhost') === false AND strpos($layerset['list'][$i]['connection'], 'host=pgsql') === false){
-						$connection = explode(' ', trim($layerset['list'][$i]['connection']));
-								for($j = 0; $j < count($connection); $j++){
-								if($connection[$j] != ''){
+						if (
+							$layerset['list'][$i]['aktivStatus'] != 0 AND
+							$layerset['list'][$i]['connectiontype'] == 6 AND
+							strpos($layerset['list'][$i]['connection'], 'host') !== false AND
+							strpos($layerset['list'][$i]['connection'], 'host=localhost') === false AND
+							strpos($layerset['list'][$i]['connection'], 'host=pgsql') === false
+						) {
+							$connection = explode(' ', trim($layerset['list'][$i]['connection']));
+							for ($j = 0; $j < count($connection); $j++) {
+								if ($connection[$j] != '') {
 									$value = explode('=', $connection[$j]);
-									if(strtolower($value[0]) == 'host'){
-									$host = $value[1];
+									if (strtolower($value[0]) == 'host') {
+										$host = $value[1];
 									}
-									if(strtolower($value[0]) == 'port'){
-									$port = $value[1];
+									if(strtolower($value[0]) == 'port') {
+										$port = $value[1];
 									}
 								}
-								}
-								if($port == '')$port = '5432';
-						$fp = @fsockopen($host, $port, $errno, $errstr, 5);
-						if(!$fp){			# keine Verbindung --> Layer ausschalten
-							$layer->set('status', 0);
-							$layer->setMetaData('queryStatus', 0);
-									$this->Fehlermeldung = $errstr.' für Layer: '.$layerset['list'][$i]['Name'].'<br>';
-						}
+							}
+							if ($port == '') $port = '5432';
+							$fp = @fsockopen($host, $port, $errno, $errstr, 5);
+							if(!$fp) {			# keine Verbindung --> Layer ausschalten
+								$layer->set('status', 0);
+								$layer->setMetaData('queryStatus', 0);
+								$this->Fehlermeldung = $errstr.' für Layer: '.$layerset['list'][$i]['Name'].'<br>';
+							}
 						}
 
 						if($layerset['list'][$i]['aktivStatus'] != 0){
@@ -576,35 +583,43 @@ class GUI {
 								}
 							}
 						}
-            $layer->setProjection('+init=epsg:'.$layerset['list'][$i]['epsg_code']); # recommended
-            if ($layerset['list'][$i]['connection']!='') {
-              if($this->map_factor != '' AND $layerset['list'][$i]['connectiontype'] == 7){		# WMS-Layer
-              	if($layerset['list'][$i]['printconnection']!=''){
-              		$layerset['list'][$i]['connection'] = $layerset['list'][$i]['printconnection']; 		# wenn es eine Druck-Connection gibt, wird diese verwendet
-              	}
-              	else{
-                	//$layerset['list'][$i]['connection'] .= '&mapfactor='.$this->map_factor;			# bei WMS-Layern wird der map_factor durchgeschleift (für die eigenen WMS) erstmal rausgenommen, weil einige WMS-Server der zusätzliche Parameter mapfactor stört
-              	}
-              }
-              if($layerset['list'][$i]['connectiontype'] == 6)$layerset['list'][$i]['connection'] .= " options='-c client_encoding=".MYSQL_CHARSET."'";		# z.B. für Klassen mit Umlauten
-              $layer->set('connection', $layerset['list'][$i]['connection']);
-            }
-            if ($layerset['list'][$i]['connectiontype']>0) {
-              if (MAPSERVERVERSION >= 540) {
-                $layer->setConnectionType($layerset['list'][$i]['connectiontype']);
-              }
-              else {
-                $layer->set('connectiontype',$layerset['list'][$i]['connectiontype']);
-              }
-            }
+						$layer->setProjection('+init=epsg:'.$layerset['list'][$i]['epsg_code']); # recommended
+						if ($layerset['list'][$i]['connection']!='') {
+							if ($this->map_factor != '' AND $layerset['list'][$i]['connectiontype'] == 7) {		# WMS-Layer
+								if ($layerset['list'][$i]['printconnection']!=''){
+									$layerset['list'][$i]['connection'] = $layerset['list'][$i]['printconnection']; 		# wenn es eine Druck-Connection gibt, wird diese verwendet
+								}
+								else{
+									//$layerset['list'][$i]['connection'] .= '&mapfactor='.$this->map_factor;			# bei WMS-Layern wird der map_factor durchgeschleift (für die eigenen WMS) erstmal rausgenommen, weil einige WMS-Server der zusätzliche Parameter mapfactor stört
+								}
+							}
+							if ($layerset['list'][$i]['connectiontype'] == 6) {
+								# z.B. für Klassen mit Umlauten
+								$layerset['list'][$i]['connection'] .= " options='-c client_encoding=".MYSQL_CHARSET."'";
+							}
+							$layer->set('connection', $layerset['list'][$i]['connection']);
+						}
 
-						if($layerset['list'][$i]['connectiontype'] == 6)$layerset['list'][$i]['processing'] = 'CLOSE_CONNECTION=DEFER;'.$layerset['list'][$i]['processing'];		# DB-Connection erst am Ende schliessen und nicht für jeden Layer neu aufmachen
-            if ($layerset['list'][$i]['processing'] != "") {
-              $processings = explode(";",$layerset['list'][$i]['processing']);
-              foreach ($processings as $processing) {
-                $layer->setProcessing($processing);
-              }
-            }
+						if ($layerset['list'][$i]['connectiontype'] > 0) {
+							if (MAPSERVERVERSION >= 540) {
+								$layer->setConnectionType($layerset['list'][$i]['connectiontype']);
+							}
+							else {
+								$layer->set('connectiontype',$layerset['list'][$i]['connectiontype']);
+							}
+						}
+
+						if ($layerset['list'][$i]['connectiontype'] == 6) {
+							$layerset['list'][$i]['processing'] = 'CLOSE_CONNECTION=DEFER;' . $layerset['list'][$i]['processing'];		# DB-Connection erst am Ende schliessen und nicht für jeden Layer neu aufmachen
+						}
+
+						if ($layerset['list'][$i]['processing'] != "") {
+							$processings = explode(";",$layerset['list'][$i]['processing']);
+							foreach ($processings as $processing) {
+								$layer->setProcessing($processing);
+							}
+						}
+
 						if ($layerset['list'][$i]['postlabelcache'] != 0) {
 							$layer->set('postlabelcache',$layerset['list'][$i]['postlabelcache']);
 						}
@@ -812,7 +827,7 @@ class GUI {
 				  $style = new styleObj($klasse);
 				}
 				if($dbStyle['geomtransform'] != ''){
-					$style->updateFromString("STYLE GEOMTRANSFORM '".$dbStyle['geomtransform']."' END"); 
+					$style->updateFromString("STYLE GEOMTRANSFORM '".$dbStyle['geomtransform']."' END");
 				}
 				if($dbStyle['minscale'] != ''){
 					$style->set('minscaledenom', $dbStyle['minscale']);
@@ -850,7 +865,7 @@ class GUI {
 	          $style->set('linejoinmaxsize', $dbStyle['linejoinmaxsize']);
 	        }
 					if($dbStyle['polaroffset'] != '') {
-	          $style->updateFromString("STYLE POLAROFFSET ".$dbStyle['polaroffset']." END"); 
+	          $style->updateFromString("STYLE POLAROFFSET ".$dbStyle['polaroffset']." END");
 	        }
         }
 
@@ -1219,7 +1234,7 @@ class GUI {
 						</a>
 						<span class="legend_group' . ($this->group_has_active_layers[$group_id] != '' ? '_active_layers' : '') . '">
 							<!--a
-								href="javascript:getGroupOptions(' . $group_id . ')" 
+								href="javascript:getGroupOptions(' . $group_id . ')"
 								onmouseover="$(\'#test_' . $group_id . '\').show()"
 								onmouseout="$(\'#test_' . $group_id . '\').hide()"
 							>' . html_umlaute($groupname) . '
@@ -1275,7 +1290,8 @@ class GUI {
     return $legend;
   }
 
-	function create_layer_legend($layer){
+	function create_layer_legend($layer, $requires = false){
+		if(!$requires AND $layer['requires'] != '' OR $requires AND $layer['requires'] == '')return;
 		global $legendicon_size;
 		$visible = $this->check_layer_visibility($layer);
 		# sichtbare Layer
@@ -1311,7 +1327,7 @@ class GUI {
 						"this.checked = this.checked2;" :
 						""
 					);
-					
+
 					$input_attr['onMouseDown'] = ($input_attr['type'] == 'radio' ?
 						"updateThema(
 							event,
@@ -1374,12 +1390,14 @@ class GUI {
 				$legend .= '<span id="'.str_replace('-', '_', $layer['alias']).'"';
 				if($layer['minscale'] != -1 AND $layer['maxscale'] > 0){
 					$legend .= ' title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
-				}			  
+				}
 				$legend .=' >'.html_umlaute($layer['alias']).'</span>';
 				$legend .= '</a>';
 
 				# Bei eingeschalteten Layern und eingeschalteter Rollenoption ist ein Optionen-Button sichtbar
-				if($layer['aktivStatus'] == 1 and $this->user->rolle->showlayeroptions) $legend.='&nbsp;<a href="javascript:getLayerOptions('.$layer['Layer_ID'].')"><img src="graphics/rows.png" border="0" title="'.$this->layerOptions.'"></a>';
+				if($layer['aktivStatus'] == 1 and $this->user->rolle->showlayeroptions) $legend.='&nbsp;<a href="javascript:getLayerOptions('.$layer['Layer_ID'].')">
+				<i class="fa fa-bars pointer button layerOptionsIcon" title="'.$this->layerOptions.'"></i>
+				</a>';
 				$legend.='<div style="position:static" id="options_'.$layer['Layer_ID'].'"> </div>';
 			}
 			if($layer['aktivStatus'] == 1 AND $layer['Class'][0]['Name'] != ''){
@@ -1412,9 +1430,11 @@ class GUI {
 										$style->set('size', 2*$style->width);					# size und maxsize beim Typ Hatch auf die doppelte Linienbreite setzen, damit man was in der Legende erkennt
 										$style->set('maxsize', 2*$style->width);
 									}
-									else{
-										$style->set('size', 2);					# size und maxsize bei Linien und Polygonlayern immer auf 2 setzen, damit man was in der Legende erkennt
+									elseif($style->symbolname == ''){
+										$style->set('size', 2);					# size und width bei Linien und Polygonlayern immer auf 2 setzen, damit man was in der Legende erkennt
 										$style->set('maxsize', 2);
+										$style->set('width', 2);
+										$style->set('maxwidth', 2);
 									}
 								}
 								else{		# Punktlayer
@@ -1550,6 +1570,13 @@ class GUI {
 			$legend .=  '</td>
 					</tr>';
 		}
+		
+		# requires-Layer
+		if($layer['required'] != ''){
+			foreach($layer['required'] as $require_layer_id){
+				$legend .= $this->create_layer_legend($this->layerset['layer_ids'][$require_layer_id], true);
+			}
+		}		
 		return $legend;
 	}
 
@@ -1652,7 +1679,7 @@ class database {
     return $ret;
   }
 
-  function close() {
+  function close() {	
     $this->debug->write("<br>MySQL Verbindung mit ID: ".$this->dbConn." schließen.",4);
     if (LOG_LEVEL>0){
     	$this->logfile->close();
@@ -1997,6 +2024,7 @@ class rolle {
 			$this->freepolygon = in_array('freepolygon', $buttons);
 			$this->freetext = in_array('freetext', $buttons);
 			$this->freearrow = in_array('freearrow', $buttons);
+			$this->gps = in_array('gps', $buttons);
 			return 1;
 		}else return 0;
   }
@@ -2199,7 +2227,7 @@ class pgdatabase {
 
 	function read_epsg_codes($order = true){
     global $supportedSRIDs;
-    $sql ="SELECT spatial_ref_sys.srid, coalesce(alias, substr(srtext, 9, 35)) as srtext, minx, miny, maxx, maxy FROM spatial_ref_sys ";
+    $sql ="SELECT spatial_ref_sys.srid, coalesce(alias, substr(srtext, 9, 35)) as srtext, proj4text, minx, miny, maxx, maxy FROM spatial_ref_sys ";
     $sql.="LEFT JOIN spatial_ref_sys_alias ON spatial_ref_sys_alias.srid = spatial_ref_sys.srid";
     # Wenn zu unterstützende SRIDs angegeben sind, ist die Abfrage diesbezüglich eingeschränkt
     $anzSupportedSRIDs = count($supportedSRIDs);
@@ -2238,7 +2266,9 @@ class db_mapObj {
 
   function db_mapObj($Stelle_ID, $User_ID, $database = NULL) {
     global $debug;
+		global $GUI;
     $this->debug=$debug;
+		$this->GUI = $GUI;
     $this->Stelle_ID=$Stelle_ID;
     $this->User_ID=$User_ID;
 		$this->rolle = new rolle($User_ID, $Stelle_ID, $database);
@@ -2298,7 +2328,7 @@ class db_mapObj {
 
 		$sql = "
 			SELECT DISTINCT
-				coalesce(rl.transparency, ul.transparency, 100) as transparency, rl.`aktivStatus`, rl.`queryStatus`, rl.`gle_view`, rl.`showclasses`, rl.`logconsume`, 
+				coalesce(rl.transparency, ul.transparency, 100) as transparency, rl.`aktivStatus`, rl.`queryStatus`, rl.`gle_view`, rl.`showclasses`, rl.`logconsume`,
 				ul.`queryable`, COALESCE(rl.drawingorder, ul.drawingorder) as drawingorder, ul.legendorder, ul.`minscale`, ul.`maxscale`, ul.`offsite`, ul.`postlabelcache`, ul.`Filter`, ul.`template`, ul.`header`, ul.`footer`, ul.`symbolscale`, ul.`logconsume`, ul.`requires`, ul.`privileg`, ul.`export_privileg`,
 				l.Layer_ID," .
 				$name_column . ",
@@ -2306,7 +2336,7 @@ class db_mapObj {
 				l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem,
 				l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.classification, l.filteritem,
 				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version,
-				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status,
+				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, l.trigger_function, l.sync,
 				g.*
 			FROM
 				u_rolle2used_layer AS rl,
@@ -2363,8 +2393,10 @@ class db_mapObj {
 			}
 			if($rs['maxscale'] > 0)$rs['maxscale'] = $rs['maxscale']+0.3;
 			if($rs['minscale'] > 0)$rs['minscale'] = $rs['minscale']-0.3;
-			$layer['list'][$i]=$rs;			
-			$layer['layer_ids'][$rs['Layer_ID']] =& $layer[$i];		# damit man mit einer Layer-ID als Schlüssel auf dieses Array zugreifen kann
+			$layer['list'][$i]=$rs;
+			$layer['list'][$i]['required'] =& $requires_layer[$rs['Layer_ID']];		# Pointer auf requires-Array
+			if($rs['requires'] != '')$requires_layer[$rs['requires']][] = $rs['Layer_ID'];		# requires-Array füllen
+			$layer['layer_ids'][$rs['Layer_ID']] =& $layer['list'][$i];		# damit man mit einer Layer-ID als Schlüssel auf dieses Array zugreifen kann
 			$i++;
     }
     return $layer;

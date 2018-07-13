@@ -14,7 +14,7 @@
 			<tr>
 				<td align="center" valign="top">
 					<form name="GUI" enctype="multipart/form-data" method="post" action="index.php" id="GUI">
-						<div id="message_box" class="message_box_hidden"></div>		<!-- muss innerhalb des form stehen -->
+						<div id="message_box"></div>		<!-- muss innerhalb des form stehen -->
 						<table cellpadding=0 cellspacing=0>
 							<tr> 
 								<td colspan="2" id="header"><?php
@@ -27,7 +27,7 @@
 									include(SNIPPETS . "menue.php"); ?>
 								</td>
 								<td align="center" width="100%" height="100%" valign="top" background="<?php echo GRAPHICSPATH; ?>bg.gif" style="border-right: 1px solid; border-color: #FFFFFF #CCCCCC #CCCCCC;">
-									<div style="height:100%; position: relative; overflow: hidden; ">
+									<div style="height:100%; position: relative; overflow: hidden; ">		<!-- overflow wird für rausfliegende Legende benötigt und height:100% für den Box-Shadow unter der MapFunctionsBar und Legende -->
 										<script type="text/javascript">
 											currentform = document.GUI;
 											<? $this->currentform = 'document.GUI'; ?>

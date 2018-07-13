@@ -178,14 +178,14 @@ else {
         <tr>
           <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPostGISDataBankName; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
-              <input name="pgdbname" type="text" value="<?php echo $this->formvars['pgdbname']; ?>" size="25" maxlength="100">
+              <input name="pgdbname" readonly onfocus="this.removeAttribute('readonly');" type="text" value="<?php echo $this->formvars['pgdbname']; ?>" size="25" maxlength="100">
           </td>
         </tr>
 
         <tr>
           <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPostGISUserName; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
-              <input name="pgdbuser" type="text" value="<?php echo $this->formvars['pgdbuser']; ?>" size="25" maxlength="100">
+              <input name="pgdbuser" readonly onfocus="this.removeAttribute('readonly');" type="text" value="<?php echo $this->formvars['pgdbuser']; ?>" size="25" maxlength="100">
           </td>
         </tr>
 
@@ -570,7 +570,7 @@ else {
 				</tr>
 				
 				<?php
-				if (SHOW_STELLE_HIERARCHIE) { ?>
+				if (false) { # deaktiviert, da noch in Entwicklung ?>
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 							<table border="0" cellspacing="0" cellpadding="0">
