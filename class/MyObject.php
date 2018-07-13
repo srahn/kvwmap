@@ -32,7 +32,8 @@ class MyObject {
 		";
 		$this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
 		$query = mysql_query($sql, $this->database->dbConn);
-		$this->data = mysql_fetch_assoc($query);
+		$result = mysql_fetch_assoc($query);
+		if($result !== false)$this->data = $result;
 		return $this;
 	}
 

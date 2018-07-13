@@ -121,17 +121,17 @@ if (is_logout($GUI->formvars)) {
 # login
 $show_login_form = false;
 if (is_logged_in()) {
-	$GUI->debug->write('Ist angemeldet.', 4, $echo);
+	$GUI->debug->write('Ist angemeldet.', 4, $GUI->echo);
 	$GUI->formvars['login_name'] = $_SESSION['login_name'];
 	$GUI->user = new user($_SESSION['login_name'], 0, $GUI->database);
 	# login case 1
 }
 else {
-	$GUI->debug->write('Nicht angemeldet.', 4);
+	$GUI->debug->write('Nicht angemeldet.', 4, $GUI->echo);
 	if (is_gast_login($GUI->formvars, $gast_stellen)) {
-		$GUI->debug->write('Es ist eine Gastanmeldung.', 4, $echo);
+		$GUI->debug->write('Es ist eine Gastanmeldung.', 4, $GUI->echo);
 		if (has_width_and_height($GUI->formvars)) {
-			$GUI->debug->write('Hat width und height. (' . $GUI->formvars['browserwidth'] . 'x' . $GUI->formvars['browserheight'] . ')', 4, $echo);
+			$GUI->debug->write('Hat width und height. (' . $GUI->formvars['browserwidth'] . 'x' . $GUI->formvars['browserheight'] . ')', 4, $GUI->echo);
 			$gast = $userDb->create_new_gast($_REQUEST['gast']);
 			$GUI->formvars['login_name'] = $gast['username'];
 			$GUI->formvars['passwort'] = $gast['passwort'];
@@ -140,7 +140,7 @@ else {
 			# login case 2
 		}
 		else {
-			$GUI->debug->write('Hat kein width und height. Frage sie ab.', 4, $echo);
+			$GUI->debug->write('Hat kein width und height. Frage sie ab.', 4, $GUI->echo);
 			# // ToDo: frage browser width und height ab.
 			$show_login_form = true;
 			$go = 'login_browser_size';
@@ -148,10 +148,10 @@ else {
 		}
 	}
 	else { # ist keine gastanmeldung
-		$GUI->debug->write('Es ist keine Gastanmeldung.', 4);
+		$GUI->debug->write('Es ist keine Gastanmeldung.', 4, $GUI->echo);
 
 		if (is_login($GUI->formvars)) {
-			$GUI->debug->write('Es ist eine reguläre Anmeldung.', 4);
+			$GUI->debug->write('Es ist eine reguläre Anmeldung.', 4, $GUI->echo);
 
 			# Frage den Nutzer mit dem login_namen ab
 			$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->database, $GUI->formvars['passwort']);
@@ -182,8 +182,8 @@ else {
 					# login case 4
 				}
 			}
-			else { # Anmeldung ist fehlgeschlagen
-				$GUI->debug->write('Anmeldung ist fehlgeschlagen.', 4);
+			else { # Anmeldung ist fehlgeschlagen				
+				$GUI->debug->write('Anmeldung ist fehlgeschlagen.', 4,$GUI->echo);
 				$GUI->formvars['num_failed'] = Nutzer::increase_num_login_failed($GUI, $GUI->formvars['login_name']);
 				sleep($GUI->formvars['num_failed'] * $GUI->formvars['num_failed']);
 				$show_login_form = true;
@@ -310,7 +310,7 @@ else {
 	# Rollenbezogene Stellendaten zuweisen
 	$GUI->loadMultiLingualText($GUI->user->rolle->language);
 
-	$GUI->debug->write('Set Session', 4, $echo);
+	$GUI->debug->write('Set Session', 4, $GUI->echo);
 	set_session_vars($GUI->formvars);
 
 	# Ausgabe der Zugriffsinformationen in debug-Datei
@@ -460,7 +460,7 @@ else {
 	  }
 	}
 }
-print_r($GUI->user->rolle);
+
 /**
  Functions
 **/

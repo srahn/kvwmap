@@ -50,6 +50,7 @@ if (!empty($params)) { ?>
 								<tr>
 									<td class="layerOptionHeader"><?php echo $param['alias']; ?></td>
 									<td><?php
+										include_once(CLASSPATH.'FormObject.php');
 										echo FormObject::createSelectField(
 											'layer_parameter_' . $param['key'],		# name
 											$param['options'],										# options
