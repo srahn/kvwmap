@@ -7,7 +7,7 @@ $GUI->user->rolle->querymode = 0;
 $GUI->allowed_documents = array();
 $GUI->document_loader_name = session_id().rand(0,99999999).'.php';
 $GUI->formvars=$formvars;
-$GUI->echo = false;
+$GUI->echo = true;
 
 #################################################################################
 # Setzen der Konstante, ob in die Datenbank geschrieben werden soll oder nicht.
@@ -157,7 +157,7 @@ else {
 			$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->database, $GUI->formvars['passwort']);
 
 			if (is_login_granted($GUI->user, $GUI->formvars['login_name'])) {
-				$GUI->debug->write('Anmeldung war erfolgreich. Frage alle Stellen des Nutzers ab.', 4);
+				$GUI->debug->write('Anmeldung war erfolgreich. Frage alle Stellen des Nutzers ab.', 4, $GUI->echo);
 				Nutzer::reset_num_login_failed($GUI, $GUI->formvars['login_name']);
 
 				if (is_new_password($GUI->formvars)) {
