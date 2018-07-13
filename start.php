@@ -196,7 +196,6 @@ else {
 					}
 					else {
 						$GUI->debug->write('Agreement ist nicht akzeptiert.', 4, $GUI->echo);
-						$GUI->Fehlermeldung = 'Vor Nutzung der Anwendung müssen Sie der Vereinbarung zustimmen!';
 						$show_login_form = true;
 						$go = 'login_agreement';
 						# login case 16

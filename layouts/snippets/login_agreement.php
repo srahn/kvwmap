@@ -40,30 +40,23 @@
 			<input type="hidden" name="browserwidth">
 			<input type="hidden" name="browserheight"><?
 			echo hidden_formvars_fields($this->formvars, $this->expect); ?>
-			<table align="center" cellspacing="4" cellpadding="12" bgcolor="<? echo BG_DEFAULT; ?>" border="0" style="background-color: <? echo BG_DEFAULT; ?>; box-shadow: 12px 10px 14px #777; border: 1px solid #bbbbbb; background: linear-gradient(<? echo BG_GLEATTRIBUTE; ?> 0%, <? echo BG_DEFAULT ?> 100%);">
+			<table align="center" cellspacing="4" cellpadding="12" border="0" style="box-shadow: 12px 10px 14px #777; border: 1px solid #bbbbbb;">
 				<tr>
 					<td align="center">
 						<table cellspacing="0" cellpadding="2" border="0">
 							<tr>
 								<td align="center" colspan="2"><h1 style="margin-bottom: 20px;"><?php echo $this->title; ?></h1></td>
 							</tr>
-							<tr><?php
-							if ($this->Fehlermeldung) { ?>
-								<tr>
-									<td colspan="2" style="color: red;">
-										<? echo $this->Fehlermeldung; ?>
-									</td>
-								</tr><?
-							} ?>
+							<tr>
 							<tr>
 								<td colspan="2" align="center">
 									<div>
-										Sie sind mit den Vereinbarungen zur Nutzung dieser Web-Seite einverstanden.<br><br>
+										<? include(SNIPPETS.AGREEMENT_MESSAGE); ?>
 									</div>
 								</td>
 							</tr>
 							<tr>
-								<td colspan="2" align="center"><input id="agreement_accepted" type="checkbox" name="agreement_accepted" value="1"/> Ich habe die Vereinbarung verstanden und bin einverstanden</td>
+								<td colspan="2" align="center"><input id="agreement_accepted" type="checkbox" name="agreement_accepted" value="1"/> Ich habe die Vereinbarung verstanden und stimme zu</td>
 							</tr>
 							<tr>
 								<td colspan="2" align="center"><input id="absenden" type="button" name="absenden" onclick="logon();" value="Absenden"/></td>
