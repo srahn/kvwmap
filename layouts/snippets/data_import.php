@@ -61,6 +61,14 @@
 		document.getElementById('progress'+uploadId).querySelector('.uploadPercentage').innerHTML = Math.round(event.loaded / filesizes[uploadId] * 100) + '%';
 	}
 	
+	function restartProcessing(uploadId){
+		ahah('index.php?go=Daten_Import_Process', 
+					'&upload_id='+uploadId+'&filename='+document.getElementById('filename'+uploadId).value+'&epsg='+document.getElementById('epsg'+uploadId).value, 
+					[document.getElementById('progress'+uploadId).querySelector('.serverResponse')], 
+					['sethtml']
+				);
+	}
+	
   
 //-->
 </script>

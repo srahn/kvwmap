@@ -376,14 +376,20 @@ a.invisiblelayerlink:hover{
 
 #data_import_upload_progress .file_status{
 	display: flex;
+	flex-wrap: wrap;
 	border: 1px solid #bbb;
 	padding: 3px;
 }
 
 #data_import_upload_progress .file_status .uploadPercentage{
-	width: 100%;
+	width: 200px;
 	text-align: right;
-	margin-right: 20px;
+	margin: 0 20px 0 20px;
+}
+
+#data_import_upload_progress .file_status .serverResponse{
+	text-align: right;
+	margin: 0 20px 0 20px;
 }
 
 .print_options_box{

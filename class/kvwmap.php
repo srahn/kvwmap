@@ -9722,8 +9722,40 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->output();
 	}
 	
-	function daten_import_upload(){
-		echo 'Upload erfolgreich~startNextUpload();';
+	function daten_import_upload(){		
+		$_files = $_FILES;
+		if($this->formvars['upload_id'] !== ''){
+			if($_files['uploadfile']['name']){
+				$user_upload_folder = UPLOADPATH.$this->user->id.'/';
+				@mkdir($user_upload_folder);
+				$nachDatei = $user_upload_folder.$_files['uploadfile']['name'];
+				if(move_uploaded_file($_files['uploadfile']['tmp_name'],$nachDatei)){
+					echo '<i class="fa fa-check" style="color: green;"></i>';
+					$dateityp = strtolower(array_pop(explode('.', $nachDatei)));
+					if($dateityp == 'zip'){
+						$files = unzip($nachDatei, false, false, true);
+						foreach($files as $file){
+							$dateityp = strtolower(array_pop(explode('.', $file)));
+							if(!in_array($dateityp, array('dbf', 'shx'))){		// damit gezippte Shapes nur einmal bearbeitet werden
+								$this->daten_import_process($this->formvars['upload_id'], $file, NULL);
+							}
+						}
+					}
+					else $this->daten_import_process($this->formvars['upload_id'], $_files['uploadfile']['name'], NULL);
+					echo '~startNextUpload();';
+				}
+			}
+		}
+	}
+	
+	function daten_import_process($upload_id, $filename, $epsg){
+		include_once (CLASSPATH.'data_import_export.php');
+		$this->data_import_export = new data_import_export();
+		$user_upload_folder = UPLOADPATH.$this->user->id.'/';
+		$layer_id = $this->data_import_export->process_import_file($upload_id, $user_upload_folder.$filename, $this->Stelle, $this->user, $this->pgdatabase, $epsg);
+		if($layer_id != NULL){
+			echo 'Import erfolgreich <a href="index.php?go=zoomToMaxLayerExtent&layer_id='.$layer_id.'">Zoom auf Layer</a>';
+		}
 	}
 
   function daten_export() {

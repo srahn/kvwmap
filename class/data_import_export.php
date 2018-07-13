@@ -38,6 +38,77 @@ class data_import_export {
 
 ################# Import #################
 
+	
+	function process_import_file($upload_id, $filename, $stelle, $user, $pgdatabase, $epsg){
+		$this->epsg_codes = read_epsg_codes($pgdatabase);
+		$file_name_parts = explode('.', $filename);
+		$filetype = strtolower($file_name_parts[1]);
+		switch($filetype){
+			case 'shp' : case 'dbf' : case 'shx' : {
+				$custom_tables = $this->import_custom_shape($file_name_parts, $user, $pgdatabase, $epsg);
+				$formvars['epsg'] = $custom_tables[0]['epsg'];
+			}break;
+			case 'point' : {
+				$file = basename($formvars['file1']);
+				$custom_tables = $this->import_custom_pointlist($formvars, $pgdatabase);
+			}break;
+			case 'GPX' : {
+				$formvars['epsg'] = 4326;
+				$custom_tables = $this->import_custom_gpx($formvars, $pgdatabase);
+			}break;
+			case 'OVL' : {
+				$formvars['epsg'] = 4326;
+				$custom_tables = $this->import_custom_ovl($formvars, $pgdatabase);
+			}break;
+			case 'DXF' : {
+				$custom_tables = $this->import_custom_dxf($formvars, $pgdatabase);
+			}break;
+			case 'GeoJSON' : {
+				$custom_tables = $this->import_custom_geojson($pgdatabase);
+				$formvars['epsg'] = $custom_tables[0]['epsg'];
+			}break;
+		}
+		if($custom_tables != NULL){
+			foreach($custom_tables as $custom_table){				# ------ Rollenlayer erzeugen ------- #
+				$layer_id = $this->create_rollenlayer(
+					$pgdatabase,
+					$stelle,
+					$user,
+					$file." (".date('d.m. H:i',time()).")".str_repeat(' ', $custom_table['datatype']),
+					$custom_table,
+					$formvars['epsg']
+				);
+			}
+			return -$layer_id;
+		}
+		else{
+			if($this->ask_epsg)$this->create_epsg_form($upload_id, basename($filename));
+		}
+	}
+	
+	function create_epsg_form($upload_id, $filename){
+		echo "
+			<input id=\"filename".$upload_id."\" type=\"hidden\" value=\"".$filename."\">
+			<table>
+				<tr>
+					<td>
+						<span class=\"fett\">Bitte EPSG-Code angeben:</span><br>
+						<select id=\"epsg".$upload_id."\" onchange=\"restartProcessing(".$upload_id.")\">
+							<option value=\"\">--Auswahl--</option>
+							";
+							foreach($this->epsg_codes as $epsg_code){
+								echo '<option value="'.$epsg_code['srid'].'">';
+								echo $epsg_code['srid'].': '.$epsg_code['srtext'];
+								echo "</option>\n";
+							}
+				echo "
+						</select>
+					</td>
+				</tr>
+			</table>
+		";
+	}
+
   function create_import_rollenlayer($formvars, $type, $stelle, $user, $database, $pgdatabase){
 		$_files = $_FILES;
 		$file = $_files['file1']['name'];
@@ -70,12 +141,10 @@ class data_import_export {
 		if($custom_tables != NULL){
 			foreach($custom_tables as $custom_table){				# ------ Rollenlayer erzeugen ------- #
 				$layer_id = $this->create_rollenlayer(
-					$database,
 					$pgdatabase,
 					$stelle,
 					$user,
 					$file." (".date('d.m. H:i',time()).")".str_repeat(' ', $custom_table['datatype']),
-					CUSTOM_SHAPE_SCHEMA,
 					$custom_table,
 					$formvars['epsg']
 				);
@@ -84,7 +153,7 @@ class data_import_export {
 		}
 	}
 
-	function create_rollenlayer($database, $pgdatabase, $stelle, $user, $layername, $schema, $custom_table, $epsg) {
+	function create_rollenlayer($pgdatabase, $stelle, $user, $layername, $custom_table, $epsg) {
 		$dbmap = new db_mapObj($stelle->id, $user->id);
 		$group = $dbmap->getGroupbyName('Eigene Importe');
 		if($group != ''){
@@ -355,28 +424,26 @@ class data_import_export {
 		else return false;
 	}
 
-	function import_custom_shape($formvars, $pgdatabase){
-		if($formvars['shapefile'] == ''){
-			$_files = $_FILES;
-			if($_files['file1']['name']){     # eine Zipdatei wurde ausgewählt
-				$nachDatei = UPLOADPATH.$_files['file1']['name'];
-				if(move_uploaded_file($_files['file1']['tmp_name'],$nachDatei)){
-					$files = unzip($nachDatei, false, false, true);
-					$firstfile = explode('.', $files[0]);
-					$formvars['shapefile'] = $firstfile[0];
-					# EPSG-Code aus prj-Datei ermitteln
-					if($formvars['epsg'] == '')$formvars['epsg'] = $this->get_shp_epsg(UPLOADPATH.$firstfile[0], $pgdatabase);
-					if($formvars['epsg'] == ''){
-						$this->shapefile = $formvars['shapefile'];		# EPSG-Code konnte nicht aus prj-Datei ermittelt werden, Dateiname merken und EPSG-Code nachfragen
-						return;
-					}
+	function import_custom_shape($filenameparts, $user, $pgdatabase, $epsg){
+		if($filenameparts[0] != ''){
+			if((file_exists($filenameparts[0].'.shp') AND file_exists($filenameparts[0].'.dbf') AND file_exists($filenameparts[0].'.shx')) OR
+				(file_exists($filenameparts[0].'.SHP') AND file_exists($filenameparts[0].'.DBF') AND file_exists($filenameparts[0].'.SHX'))){
+				$formvars['shapefile'] = $filenameparts[0];				
+				if($epsg == NULL)$epsg = $this->get_shp_epsg($filenameparts[0], $pgdatabase);		# EPSG-Code aus prj-Datei ermitteln
+				if($epsg == NULL){
+					$this->ask_epsg = true;		# EPSG-Code konnte nicht aus prj-Datei ermittelt werden => nachfragen
+					return;
 				}
 			}
+			else return;
+			$encoding = $this->getEncoding($filenameparts[0].'.dbf');
+			$custom_table = $this->load_shp_into_pgsql($pgdatabase, '', $formvars['shapefile'], $epsg, CUSTOM_SHAPE_SCHEMA, 'a'.strtolower(umlaute_umwandeln(substr(basename($formvars['shapefile']), 0, 15))).rand(1,1000000), $encoding);
+			if($custom_table != NULL){
+				exec('rm '.UPLOADPATH.'/'.$user->id.'/'.basename($formvars['shapefile']).'.*');	# aus Sicherheitsgründen rm mit Uploadpfad davor
+			}
+			$custom_table[0]['epsg'] = $epsg;
+			return $custom_table;
 		}
-		$encoding = $this->getEncoding(UPLOADPATH.$formvars['shapefile'].'.dbf');
-		$custom_table = $this->load_shp_into_pgsql($pgdatabase, UPLOADPATH, $formvars['shapefile'], $formvars['epsg'], CUSTOM_SHAPE_SCHEMA, 'a'.strtolower(umlaute_umwandeln(substr($formvars['shapefile'], 0, 15))).rand(1,1000000), $encoding);
-		$custom_table[0]['epsg'] = $formvars['epsg'];
-		return $custom_table;
 	}
 
 	function load_shp_into_pgsql($pgdatabase, $uploadpath, $file, $epsg, $schemaname, $tablename, $encoding = 'LATIN1') {
