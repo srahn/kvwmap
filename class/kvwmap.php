@@ -167,7 +167,6 @@ class GUI {
 	}
 
 	function login_agreement() {
-		$this->title='kvwmap Vereinbarung';
 		$this->expect = array('agreement_accepted');
 		$this->user->rolle->gui = 'snippets/login_agreement.php';
 		$this->output();

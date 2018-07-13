@@ -45,10 +45,6 @@
 					<td align="center">
 						<table cellspacing="0" cellpadding="2" border="0">
 							<tr>
-								<td align="center" colspan="2"><h1 style="margin-bottom: 20px;"><?php echo $this->title; ?></h1></td>
-							</tr>
-							<tr>
-							<tr>
 								<td colspan="2" align="center">
 									<div>
 										<? include(SNIPPETS.AGREEMENT_MESSAGE); ?>
