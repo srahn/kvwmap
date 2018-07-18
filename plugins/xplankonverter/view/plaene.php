@@ -212,6 +212,11 @@
 		).join(', ')
 	}
 
+	function konvertierungBundeslandFormatter(value, row) {
+		var bundeslaender = JSON.parse(value);
+		return bundeslaender;
+	}
+
 	function konvertierungEditFunctionsFormatter(value, row) {
 		var funcIsAllowed,
 				funcIsInProgress,
@@ -392,31 +397,47 @@
 				data-field="anzeigename"
 				data-sortable="true"
 				data-visible="true"
-			>Name</th>
-			<th
-				data-field="gemeinde"
-				data-visible="true"
-				data-sortable="true"
-				data-formatter="konvertierungGemeindeFormatter"
-				class="col-md-2"
-			>Gemeinden</th>
-			<th
-				data-field="konvertierung_status"
-				data-visible="true"
-				data-sortable="true"
-				class="col-md-2"
-			>Status</th>
+				class="col-md-7"
+			>Name</th><?php
+				if ($this->plan_layer_id = XPLANKONVERTER_RP_PLAENE_LAYER_ID) { ?>
+					<th
+						data-field="bundesland"
+						data-visible="false"
+						data-sortable="true"
+						data-formatter="konvertierungBundeslandFormatter"
+						class="col-md-2"
+					>Bundesland</th><?php
+				}
+				else { ?>
+					<th
+						data-field="gemeinde"
+						data-visible="true"
+						data-sortable="true"
+						data-formatter="konvertierungGemeindeFormatter"
+						class="col-md-2"
+					>Gemeinden</th><?php
+				}
+				if ($this->plan_layer_id != XPLANKONVERTER_RP_PLAENE_LAYER_ID) { ?>
+					<th
+						data-field="konvertierung_status"
+						data-visible="true"
+						data-sortable="true"
+						class="col-md-2"
+					>Status</th><?php
+				} ?>
 			<th
 				data-field="konvertierung_id"
 				data-visible="true"
 				data-formatter="konvertierungFunctionsFormatter"
 				data-switchable="false"
+				class="col-md-2"
 			>Funktionen&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
 			<th
 				data-field="konvertierung_id"
 				data-visible="true"
 				data-formatter="konvertierungDownloadsFormatter"
 				data-switchable="false"
+				class="col-md-2"
 			>Downloads&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
 			<th
 				data-field="konvertierung_id"
