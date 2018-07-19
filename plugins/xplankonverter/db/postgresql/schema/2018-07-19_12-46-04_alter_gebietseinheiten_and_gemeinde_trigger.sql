@@ -10,10 +10,29 @@ BEGIN;
 		ags integer,
 		gmd_name character varying(254),
 		id_ot character varying,
-		ortsteilname character varying,
+		ot_name character varying,
 		stelle_id integer
 	)
 	WITH (OIDS=TRUE);
+
+	/*
+	CREATE TABLE xplankonverter.gebietseinheiten AS
+	SELECT
+	  a.id_amt,
+	  a.amt_name,
+	  g.id_gmd,
+	  o.rs,
+	  g.id_gmd AS ags,
+	  g.gmd_name,
+	  o.nr AS id_ot,
+	  o.ortsteil_wohnplatz AS ot_name,
+	  a.id_amt AS stelle_id
+	FROM
+	  import.aemter_laiv a LEFT JOIN
+	  import.gemeinden_laiv g ON a.id_amt = g.id_amt LEFT JOIN
+	  import.ortsverzeichnis_laiv o ON g.id_gmd = o.gem_nr
+	ORDER BY a.amt_name, g.gmd_name, o.ortsteil_wohnplatz
+	*/
 
 	CREATE INDEX stelle_id_idx ON xplankonverter.gebietseinheiten USING btree (stelle_id);
 
