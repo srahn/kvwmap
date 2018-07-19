@@ -114,7 +114,7 @@ class data_import_export {
 		$file = $_files['file1']['name'];
 		switch ($type){
 			case 'Shape' : {
-				$custom_tables = $this->import_custom_shape($formvars, $pgdatabase);
+				$custom_tables = $this->import_custom_shape_zip($formvars, $pgdatabase);
 				$formvars['epsg'] = $custom_tables[0]['epsg'];
 				if($file == '')$file = $formvars['shapefile'];
 			}break;
@@ -444,6 +444,30 @@ class data_import_export {
 			$custom_table[0]['epsg'] = $epsg;
 			return $custom_table;
 		}
+	}
+
+	function import_custom_shape_zip($formvars, $pgdatabase){
+		if($formvars['shapefile'] == ''){
+			$_files = $_FILES;
+			if($_files['file1']['name']){     # eine Zipdatei wurde ausgewählt
+				$nachDatei = UPLOADPATH.$_files['file1']['name'];
+				if(move_uploaded_file($_files['file1']['tmp_name'],$nachDatei)){
+					$files = unzip($nachDatei, false, false, true);
+					$firstfile = explode('.', $files[0]);
+					$formvars['shapefile'] = $firstfile[0];
+					# EPSG-Code aus prj-Datei ermitteln
+					if($formvars['epsg'] == '')$formvars['epsg'] = $this->get_shp_epsg(UPLOADPATH.$firstfile[0], $pgdatabase);
+					if($formvars['epsg'] == ''){
+						$this->shapefile = $formvars['shapefile'];		# EPSG-Code konnte nicht aus prj-Datei ermittelt werden, Dateiname merken und EPSG-Code nachfragen
+						return;
+					}
+				}
+			}
+		}
+		$encoding = $this->getEncoding(UPLOADPATH.$formvars['shapefile'].'.dbf');
+		$custom_table = $this->load_shp_into_pgsql($pgdatabase, UPLOADPATH, $formvars['shapefile'], $formvars['epsg'], CUSTOM_SHAPE_SCHEMA, 'a'.strtolower(umlaute_umwandeln(substr($formvars['shapefile'], 0, 15))).rand(1,1000000), $encoding);
+		$custom_table[0]['epsg'] = $formvars['epsg'];
+		return $custom_table;
 	}
 
 	function load_shp_into_pgsql($pgdatabase, $uploadpath, $file, $epsg, $schemaname, $tablename, $encoding = 'LATIN1') {
