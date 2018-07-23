@@ -6692,7 +6692,8 @@ class GUI {
 			$result = $mapDB->create_layer_dumpfile(
 				$this->database,
 				$export_layer_ids,
-				($this->formvars['with_privileges'] != '')
+				($this->formvars['with_privileges'] != ''),
+				($this->formvars['with_datatypes'] != '')
 			);
 			if ($result['success']) {
 				$this->add_message('notice', 'Export erfolgreich.<br>Sie können die Datei jetzt herunterladen.');
@@ -15854,7 +15855,7 @@ class db_mapObj{
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
   }
 
-	function create_layer_dumpfile($database, $layer_ids, $with_privileges = false) {
+	function create_layer_dumpfile($database, $layer_ids, $with_privileges = false, $with_datatypes = false) {
 		$success = true;
 		$dump_text .= "-- Layerdump aus kvwmap vom " . date("d.m.Y H:i:s");
 		$dump_text .= "\n-- Achtung: Die Datenbank in die der Dump eingespielt wird, sollte die gleiche Migrationsversion haben,";
@@ -16027,6 +16028,48 @@ class db_mapObj{
 			$dump_text .= "\n\n-- Replace attribute options for Layer " . $layer_ids[$i];
 			$dump_text .= "\nUPDATE layer_attributes SET options = REPLACE(options, 'layer_id=".$layer_ids[$i]."', CONCAT('layer_id=', @last_layer_id".$layer_ids[$i].")) WHERE layer_id IN (@last_layer_id" . implode(', @last_layer_id', $layer_ids) . ") AND form_element_type IN ('Autovervollständigungsfeld', 'Auswahlfeld', 'Link','dynamicLink');";
 			$dump_text .= "\nUPDATE layer_attributes SET options = REPLACE(options, '".$layer_ids[$i].",', CONCAT(@last_layer_id".$layer_ids[$i].", ',')) WHERE layer_id IN (@last_layer_id" . implode(', @last_layer_id', $layer_ids) . ") AND form_element_type IN ('SubFormPK', 'SubFormFK', 'SubFormEmbeddedPK');";
+		}
+
+		if ($with_datatypes) {
+			# Frage Datatypes der Layer ab
+			$datatypes = $this->get_datatypes($layer_ids);
+
+			foreach ($datatypes AS $datatype) {
+				$datatype_dump = $database->create_insert_dump(
+					'datatypes',
+					'id',
+					"
+						SELECT
+							*
+						FROM
+							datatypes
+						WHERE
+							id = " . $datatype['id'] . "
+					"
+				);
+
+				$dump_text .= "\n\n-- Datatype " . $datatype['id'] . "\n" . $datatype_dump['insert'][0];
+				$last_datatype_id = '@last_datatype_id' . $datatype['id'];
+				$dump_text .= "\nSET " . $last_datatype_id . "=LAST_INSERT_ID();";
+
+				$datatype_attributes_dump = $database->create_insert_dump(
+					'datatype_attributes',
+					'',
+					"
+						SELECT
+							'" . $last_datatype_id . "' AS datatype_id,
+							`name`, `real_name`, `tablename`, `table_alias_name`, `type`, `geometrytype`, `constraints`, `nullable`, `length`, `decimal_length`, `default`, `form_element_type`,
+							`options`, `alias`, `alias_low-german`, `alias_english`, `alias_polish`, `alias_vietnamese`, `tooltip`, `group`, `raster_visibility`, `mandatory`, `quicksearch`,
+							`order`, `privileg`, `query_tooltip`, `visible`, `vcheck_attribute`, `vcheck_operator`, `vcheck_value`, `arrangement`, `labeling`
+						FROM
+							datatype_attributes
+						WHERE
+							datatype_id = " . $datatype['id'] . "
+					"
+				);
+
+				$dump_text .= "\n\n-- Datatype_attributes " . $datatype['id'] . "\n" . $datatype_attributes_dump['insert'][0];
+			}
 		}
 
 		$filename = rand(0, 1000000).'.sql';
@@ -16849,6 +16892,33 @@ class db_mapObj{
 		}
 		return $attributes;
   }
+
+	/*
+	* Returns a list of datatypes used by layer, given in layer_ids array
+	*/
+	function get_datatypes($layer_ids) {
+		$datatypes = array();
+		$sql = "
+			SELECT DISTINCT
+				dt.*
+			FROM
+				`layer_attributes` la JOIN
+				`datatypes` dt ON replace(la.type,'_', '') = dt.id
+			WHERE
+				la.layer_id IN (" . implode(', ', $layer_ids) . ")
+		";
+
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->get_datatypes - Lesen der Datentypen der Layer mit id (" . implode(', ', $layer_ids) . "):<br>" . $sql , 4);
+		$query = mysql_query($sql);
+		if ($query == 0) {
+			$this->GUI->add_message('error', "<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>" . INFO1);
+			return 0;
+		}
+		while ($rs = mysql_fetch_assoc($query)) {
+			$datatypes[] = $rs;
+		}
+		return $datatypes;
+	}
 
 	function getall_Datatypes($order) {
 		$datatypes = array();
