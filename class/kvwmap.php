@@ -7713,13 +7713,13 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         $attributes = $mapDB->add_attribute_values($attributes, $layerdb, $layerset[0]['shape'], true, $this->Stelle->id);
 
 				# last_search speichern
-				if($this->last_query == '' AND $this->formvars['embedded_subformPK'] == '' AND $this->formvars['embedded'] == ''){
+				if($this->last_query == '' AND $this->formvars['embedded_subformPK'] == '' AND $this->formvars['embedded'] == '' AND $this->formvars['subform_link'] == ''){
 					$this->formvars['search_name'] = '<last_search>';
 					$this->user->rolle->delete_search($this->formvars['search_name']);		# das muss hier stehen bleiben, denn in save_search wird mit der Layer-ID gelöscht
 					$this->user->rolle->save_search($attributes, $this->formvars);
 				}
 
-				if($layerset[0]['count'] != 0 AND $this->formvars['embedded_subformPK'] == '' AND $this->formvars['embedded'] == '' AND $this->formvars['embedded_dataPDF'] == ''){
+				if($layerset[0]['count'] != 0 AND $this->formvars['embedded_subformPK'] == '' AND $this->formvars['embedded'] == '' AND $this->formvars['embedded_dataPDF'] == '' AND $this->formvars['subform_link'] == ''){
 					# last_query speichern
 					$this->user->rolle->delete_last_query();
 					$this->user->rolle->save_last_query('Layer-Suche_Suchen', $this->formvars['selected_layer_id'], $sql, $sql_order, $this->formvars['anzahl'], $this->formvars['offset_'.$layerset[0]['Layer_ID']]);
@@ -9720,6 +9720,42 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	function daten_import(){
 		$this->main='data_import.php';
 		$this->output();
+	}
+	
+	function daten_import_upload(){		
+		$_files = $_FILES;
+		if($this->formvars['upload_id'] !== ''){
+			if($_files['uploadfile']['name']){
+				$user_upload_folder = UPLOADPATH.$this->user->id.'/';
+				@mkdir($user_upload_folder);
+				$nachDatei = $user_upload_folder.$_files['uploadfile']['name'];
+				if(move_uploaded_file($_files['uploadfile']['tmp_name'],$nachDatei)){
+					echo '<i class="fa fa-check" style="color: green;"></i>';
+					$dateityp = strtolower(array_pop(explode('.', $nachDatei)));
+					if($dateityp == 'zip'){
+						$files = unzip($nachDatei, false, false, true);
+						foreach($files as $file){
+							$dateityp = strtolower(array_pop(explode('.', $file)));
+							if(!in_array($dateityp, array('dbf', 'shx'))){		// damit gezippte Shapes nur einmal bearbeitet werden
+								$this->daten_import_process($this->formvars['upload_id'], $file, NULL);
+							}
+						}
+					}
+					else $this->daten_import_process($this->formvars['upload_id'], $_files['uploadfile']['name'], NULL);
+					echo '~startNextUpload();';
+				}
+			}
+		}
+	}
+	
+	function daten_import_process($upload_id, $filename, $epsg){
+		include_once (CLASSPATH.'data_import_export.php');
+		$this->data_import_export = new data_import_export();
+		$user_upload_folder = UPLOADPATH.$this->user->id.'/';
+		$layer_id = $this->data_import_export->process_import_file($upload_id, $user_upload_folder.$filename, $this->Stelle, $this->user, $this->pgdatabase, $epsg);
+		if($layer_id != NULL){
+			echo 'Import erfolgreich <a href="index.php?go=zoomToMaxLayerExtent&layer_id='.$layer_id.'">Zoom auf Layer</a>';
+		}
 	}
 
   function daten_export() {

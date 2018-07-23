@@ -129,14 +129,11 @@ class Nachweis {
   }
   
   function changeDokument($formvars, $user) {
-    #2005-11-25_pk
-    #echo 'Änderung des Dokumentes mit der id: '.$formvars['id'];
-
     # 1. Starten der Transaktion
     $this->database->begintransaction();        
 
     # 2. Prüfen der Eingabewerte
-    $ret=$this->pruefeEingabedaten($formvars['id'], $formvars['datum'],$formvars['VermStelle'],$formvars['art'],$formvars['gueltigkeit'],$formvars['stammnr'],$formvars['rissnummer'],$formvars['fortfuehrung'],$formvars['Blattformat'],$formvars['Blattnr'],$formvars['changeDocument'],$formvars['Bilddatei_name'],$formvars['pathlength'],$formvars['umring'], $formvars['flurid'], $formvars['Blattnr']);
+    $ret=$this->pruefeEingabedaten($formvars['id'], $formvars['datum'],$formvars['VermStelle'],$formvars['art'],$formvars['gueltigkeit'],$formvars['stammnr'],$formvars['rissnummer'],$formvars['fortfuehrung'],$formvars['Blattformat'],$formvars['Blattnr'],false,$formvars['Bilddatei_name'],$formvars['pathlength'],$formvars['umring'], $formvars['flurid'], $formvars['Blattnr']);
     if ($ret[0]) {
       # Fehler bei den Eingabewerten entdeckt.  
       #echo '<br>Ergebnis der Prüfung: '.$ret;
@@ -154,7 +151,7 @@ class Nachweis {
         # Name der alten Dokumentendatei gefunden
         $doclocation=$ret[1];
         #echo '<br>Speicherort der alten Dokumentendatei: '.$doclocation.' abgefragt.';
-        if ($formvars['changeDocument']==0) {
+        if($formvars['Bilddatei'] != ''){
           # Verwenden der vorhandenen Datei für die Bildung des neuen Dateinamens
           # unter dem die Datei nach der Sachdatenänderung gespeichert werden soll
           $formvars['Bilddatei_name']=$doclocation;
@@ -164,7 +161,7 @@ class Nachweis {
 				$zieldatei=NACHWEISDOCPATH.$formvars['flurid'].'/'.$this->buildNachweisNr($formvars[NACHWEIS_PRIMARY_ATTRIBUTE], $formvars[NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$formvars['artname'].'/'.$formvars['zieldateiname'];
 
         # 4. Ändern der Eintragung in der Datenbank
-        $ret=$this->aktualisierenDokument($formvars['id'],$formvars['datum'],$formvars['flurid'],$formvars['VermStelle'],$formvars['art'],$formvars['andere_art'],$formvars['gueltigkeit'],$formvars['stammnr'],$formvars['Blattformat'],$formvars['Blattnr'],$formvars['rissnummer'],$formvars['fortfuehrung'],$formvars['bemerkungen'],$formvars['bemerkungen_intern'],$formvars['umring'],$formvars['artname'].'/'.$formvars['zieldateiname'], $user);
+        $ret=$this->aktualisierenDokument($formvars['id'],$formvars['datum'],$formvars['flurid'],$formvars['VermStelle'],$formvars['art'],$formvars['andere_art'],$formvars['gueltigkeit'],$formvars['geprueft'],$formvars['stammnr'],$formvars['Blattformat'],$formvars['Blattnr'],$formvars['rissnummer'],$formvars['fortfuehrung'],$formvars['bemerkungen'],$formvars['bemerkungen_intern'],$formvars['umring'],$formvars['artname'].'/'.$formvars['zieldateiname'], $user);
         if ($ret[0]) {
           # Aktualisierungsvorgang in der Datenbank nicht erfolgreich
           $errmsg=$ret[1];
@@ -173,7 +170,7 @@ class Nachweis {
           # 5. Änderung erfolgreich, überschreiben der alten durch die neue Datei
           #echo '<br>Eintragung in Datenbank geändert.';
           # Unterscheidung ob auch die Datei geändert werden soll
-          if ($formvars['changeDocument']) {
+          if($formvars['Bilddatei'] != ''){
             # Datei soll auch geändert werden.
             # 5.1 Löschen der bestehenden Bilddatei auf dem Server
             $ret=$this->dokumentenDateiLoeschen($doclocation);
@@ -211,7 +208,7 @@ class Nachweis {
 								# Erfolgreiches abschließen der Transaktion
 								$this->database->committransaction();
 								$ret[0]=0;
-								$ret[1]='Änderung des Datenbankeintrages und der Datei erfolgreich.';
+								$ret[1]='Änderung des Datenbankeintrages und des Speicherortes der Datei erfolgreich.';
 							}
             }
             else {
@@ -615,13 +612,13 @@ class Nachweis {
     return $ret;
   }
   
-  function eintragenNeuesDokument($datum,$flurid,$VermStelle,$art,$andere_art,$gueltigkeit,$stammnr,$blattformat,$blattnr,$rissnummer,$fortf,$bemerkungen,$bemerkungen_intern,$zieldatei,$umring,$user) {
+  function eintragenNeuesDokument($datum,$flurid,$VermStelle,$art,$andere_art,$gueltigkeit,$geprueft,$stammnr,$blattformat,$blattnr,$rissnummer,$fortf,$bemerkungen,$bemerkungen_intern,$zieldatei,$umring,$user) {
     #2005-11-24_pk
     if($fortf == '')$fortf = 'NULL';
     $this->debug->write('Einfügen der Metadaten zum neuen Nachweisdokument in die Sachdatenbank',4);
-    $sql ="INSERT INTO nachweisverwaltung.n_nachweise (flurid,stammnr,art,blattnummer,datum,vermstelle,gueltigkeit,format,link_datei,the_geom,fortfuehrung,rissnummer,bemerkungen,bemerkungen_intern,bearbeiter,zeit,erstellungszeit)";
+    $sql ="INSERT INTO nachweisverwaltung.n_nachweise (flurid,stammnr,art,blattnummer,datum,vermstelle,gueltigkeit,geprueft,format,link_datei,the_geom,fortfuehrung,rissnummer,bemerkungen,bemerkungen_intern,bearbeiter,zeit,erstellungszeit)";
     $sql.=" VALUES (".$flurid.",'".trim($stammnr)."','".$art."','".trim($blattnr)."','".$datum."'";
-    $sql.=",'".$VermStelle."','".$gueltigkeit."','".$blattformat."','".$zieldatei."',st_transform(st_geometryfromtext('".$umring."', ".$this->client_epsg."), (select srid from geometry_columns where f_table_name = 'n_nachweise'))";
+    $sql.=",'".$VermStelle."','".$gueltigkeit."','".$geprueft."','".$blattformat."','".$zieldatei."',st_transform(st_geometryfromtext('".$umring."', ".$this->client_epsg."), (select srid from geometry_columns where f_table_name = 'n_nachweise'))";
     $sql.=",".$fortf.",'".$rissnummer."','".$bemerkungen."','".$bemerkungen_intern."','".$user->Vorname." ".$user->Name."', '".date('Y-m-d G:i:s')."', '".date('Y-m-d G:i:s')."')";
 		#echo '<br>Polygon-SQL: '.$sql;
     $ret=$this->database->execSQL($sql,4, 1);
@@ -638,7 +635,7 @@ class Nachweis {
     return $ret;
   }
   
-  function aktualisierenDokument($id,$datum,$flurid,$VermStelle,$art,$andere_art,$gueltigkeit,$stammnr,$Blattformat,$Blattnr,$rissnr,$fortf,$bemerkungen,$bemerkungen_intern,$umring,$zieldateiname,$user){
+  function aktualisierenDokument($id,$datum,$flurid,$VermStelle,$art,$andere_art,$gueltigkeit,$geprueft,$stammnr,$Blattformat,$Blattnr,$rissnr,$fortf,$bemerkungen,$bemerkungen_intern,$umring,$zieldateiname,$user){
     $this->debug->write('Aktualisieren der Metadaten zu einem bestehenden Nachweisdokument',4);
     $sql="UPDATE nachweisverwaltung.n_nachweise SET ";
 		if($flurid != NULL)$sql.="flurid='".$flurid."', ";
@@ -651,6 +648,7 @@ class Nachweis {
 		if($art != NULL)$sql.="datum='".$datum."', ";
 		if($VermStelle != NULL)$sql.="vermstelle='".$VermStelle."', ";
     if($gueltigkeit != NULL)$sql.="gueltigkeit='".$gueltigkeit."', ";
+		if($geprueft != NULL)$sql.="geprueft='".$geprueft."', ";
 		if($Blattformat != NULL)$sql.="format='".$Blattformat."', ";
 		if($umring != NULL)$sql.="the_geom=st_transform(st_geometryfromtext('".$umring."', ".$this->client_epsg."), (select srid from geometry_columns where f_table_name = 'n_nachweise')), ";
 		if($zieldateiname != NULL)$sql.="link_datei='".$zieldateiname."', ";
@@ -780,7 +778,7 @@ class Nachweis {
     return $errmsg;
   }
   
-  function getNachweise($id,$polygon,$gemarkung,$stammnr,$rissnr,$fortf,$art_einblenden,$richtung,$abfrage_art,$order,$antr_nr, $datum = NULL, $VermStelle = NULL, $gueltigkeit = NULL, $datum2 = NULL, $flur = NULL, $flur_thematisch = NULL, $andere_art = NULL, $suchbemerkung = NULL, $blattnr = NULL, $stammnr2 = NULL, $rissnr2 = NULL, $fortf2 = NULL) {
+  function getNachweise($id,$polygon,$gemarkung,$stammnr,$rissnr,$fortf,$art_einblenden,$richtung,$abfrage_art,$order,$antr_nr, $datum = NULL, $VermStelle = NULL, $gueltigkeit = NULL, $datum2 = NULL, $flur = NULL, $flur_thematisch = NULL, $andere_art = NULL, $suchbemerkung = NULL, $blattnr = NULL, $stammnr2 = NULL, $rissnr2 = NULL, $fortf2 = NULL, $geprueft = NULL) {
 		$explosion = explode('~', $antr_nr);
 		$antr_nr = $explosion[0];
 		$stelle_id = $explosion[1];
@@ -807,7 +805,8 @@ class Nachweis {
 					$sql.= " LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
           $sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id";
           $sql.=" WHERE n.id=".(int)$id;
-		  if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
+					if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
+					if($geprueft != NULL)$sql.=" AND geprueft = ".$geprueft;
           #echo $sql;
           $this->debug->write("<br>nachweis.php getNachweise Abfragen der Nachweisdokumente.<br>",4);
           $ret=$this->database->execSQL($sql,4, 1);
@@ -831,7 +830,8 @@ class Nachweis {
 				$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
         $sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id";
         $sql.=" WHERE n.id=".(int)$idselected[0];
-		if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
+				if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
+				if($geprueft != NULL)$sql.=" AND geprueft = ".$geprueft;
         #echo $sql;
         $this->debug->write("<br>nachweis.php getNachweise Abfragen der Nachweisdokumente.<br>",4);
         $ret=$this->database->execSQL($sql,4, 0);
@@ -842,7 +842,8 @@ class Nachweis {
         	$sql ="SELECT distinct st_astext(st_union(st_transform(n.the_geom, ".$this->client_epsg."))) AS wkt_umring, st_assvg(st_union(st_transform(n.the_geom, ".$this->client_epsg."))) AS svg_umring, st_union(st_transform(n.the_geom, ".$this->client_epsg.")) as geom";
 					$sql.=" FROM nachweisverwaltung.n_nachweise AS n";
 	        $sql.=" WHERE 1=1";
-			if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
+					if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
+					if($geprueft != NULL)$sql.=" AND geprueft = ".$geprueft;
 	        if ($idselected[0]!=0) {
 	          $sql.=" AND n.id IN ('".$idselected[0]."'";
 	          for ($i=1;$i<count($idselected);$i++) {
@@ -876,6 +877,7 @@ class Nachweis {
 				$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n2d.dokumentart_id = d.id";
         $sql.=" WHERE ";
 				if($gueltigkeit != NULL)$sql.=" gueltigkeit = ".$gueltigkeit." AND ";
+				if($geprueft != NULL)$sql.=" AND geprueft = ".$geprueft;
         if ($idselected[0]!=0) {
           $sql.=" n.id IN ('".$idselected[0]."'";
           for ($i=1;$i<count($idselected);$i++) {
@@ -956,6 +958,7 @@ class Nachweis {
 					$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n2d.dokumentart_id = d.id";
           $sql.=" WHERE 1=1 ";
 					if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
+					if($geprueft != NULL)$sql.=" AND geprueft = ".$geprueft;
           if ($idselected[0]!=0) {
             $sql.=" AND n.id IN ('".$idselected[0]."'";
             for ($i=1;$i<count($idselected);$i++) {
@@ -1083,7 +1086,8 @@ class Nachweis {
 					$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n2d.dokumentart_id = d.id";					
  					$sql.=" WHERE 1=1";
           $sql.=" AND st_intersects(st_transform(st_geometryfromtext('".$polygon."',".$this->client_epsg."), (select srid from geometry_columns where f_table_name = 'n_nachweise')),the_geom)";
-		  if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
+					if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
+					if($geprueft != NULL)$sql.=" AND geprueft = ".$geprueft;
           
 					if($art_einblenden!=''){
 						if($art_einblenden == '2222'){
@@ -1136,6 +1140,7 @@ class Nachweis {
 				if($stelle_id == '')$sql.=" AND stelle_id IS NULL";
 				else $sql.=" AND stelle_id=".$stelle_id;
 				if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
+				if($geprueft != NULL)$sql.=" AND geprueft = ".$geprueft;
 				if($art_einblenden!=''){
 					if($art_einblenden == '2222'){
 						$sql.=" AND n.id IN (".implode(',', $idselected).")";

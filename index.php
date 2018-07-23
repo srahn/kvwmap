@@ -1090,6 +1090,14 @@ function go_switch($go){
 			case 'Daten_Import' : {
 				$GUI->daten_import();
 			} break;
+			
+			case 'Daten_Import_Upload' : {
+				$GUI->daten_import_upload();
+			} break;
+			
+			case 'Daten_Import_Process' : {
+				$GUI->daten_import_process($GUI->formvars['upload_id'], $GUI->formvars['filename'], $GUI->formvars['epsg']);
+			} break;			
 
 			case 'Daten_Export' : {
 				$GUI->checkCaseAllowed('Daten_Export');
@@ -1579,6 +1587,16 @@ function go_switch($go){
 				$currenttime=date('Y-m-d H:i:s',time());
 				$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
 				$GUI->drawMap();
+				$GUI->output();
+			} break;
+			
+			case "zoomToMaxLayerExtent" : {
+				$GUI->loadMap('DataBase');
+				$GUI->zoomToMaxLayerExtent($GUI->formvars['layer_id']);
+				$currenttime=date('Y-m-d H:i:s',time());
+				$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+				$GUI->drawMap();
+				$GUI->saveMap('');
 				$GUI->output();
 			} break;
 

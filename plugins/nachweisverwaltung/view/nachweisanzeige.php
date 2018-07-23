@@ -53,7 +53,7 @@ function getvorschau(url){
 <? 
 	function build_order_links($orderstring, $richtung){
 		if($orderstring != ''){
-			$orderaliases = array('flurid' => 'Flur', 'stammnr' => 'Antragsnr.', 'rissnummer' => 'Rissnr.', 'art' => 'Dokumentart', 'blattnummer' => 'Blattnr.', 'datum' => 'Datum', 'fortfuehrung' => 'Fortfuehrung', 'vermst' => 'Vermstelle', 'gueltigkeit' => 'Gueltigkeit', 'format' => 'Format');
+			$orderaliases = array('flurid' => 'Flur', 'stammnr' => 'Antragsnr.', 'rissnummer' => 'Rissnr.', 'art' => 'Dokumentart', 'blattnummer' => 'Blattnr.', 'datum' => 'Datum', 'fortfuehrung' => 'Fortfuehrung', 'vermst' => 'Vermstelle', 'gueltigkeit' => 'Gueltigkeit', 'geprueft' => 'geprueft', 'format' => 'Format');
 			$orders = explode(',', $orderstring);
 			foreach($orders as $order){
 				$orderlinks[] = '<a href="javascript:remove_from_order(\''.$order.'\');" title="'.$orderaliases[$order].' aus Sortierung entfernen">'.$orderaliases[$order].'</a>';
@@ -102,7 +102,10 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
             <?
 						if($this->formvars['gueltigkeit'] == 1){ echo ' nur gültige '; }
 						if($this->formvars['gueltigkeit'] == '0'){ echo ' nur ungültige '; }
-						if($this->formvars['gueltigkeit'] == ''){ echo ' alle '; }
+						if($this->formvars['gueltigkeit'] == ''){ echo ' gültige und ungültige '; }
+						if($this->formvars['geprueft'] == 1){ echo ' nur geprüfte '; }
+						if($this->formvars['geprueft'] == '0'){ echo ' nur ungeprüfte '; }
+						if($this->formvars['geprueft'] == ''){ echo ' geprüfte und ungeprüfte '; }
 						if ($this->formvars['suchffr']){ echo ' FFR, '; }
 						if ($this->formvars['suchkvz']){ echo ' KVZ, '; }
 						if ($this->formvars['suchgn']){ echo ' GN, '; }
@@ -179,11 +182,14 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 				<th align="center" style="width: 120"><a href="javascript:add_to_order('vermst');" title="nach Vermessungsstelle sortieren"><span class="fett">VermStelle</span></a></th>
 			<? }else{echo '<th align="center" style="width: 120"><span class="fett">VermStelle</span></th>';} ?>
 			<? if(strpos($this->formvars['order'], 'gueltigkeit') === false){ ?>
-				<th align="center" style="width: 120"><a href="javascript:add_to_order('gueltigkeit');" title="nach Gültigkeit sortieren"><span class="fett">Gültigkeit</span></a></th>
-			<? }else{echo '<th align="center" style="width: 120"><span class="fett">Gültigkeit</span></th>';} ?>
+				<th align="center" style="width: 80"><a href="javascript:add_to_order('gueltigkeit');" title="nach Gültigkeit sortieren"><span class="fett">Gültigkeit</span></a></th>
+			<? }else{echo '<th align="center" style="width: 80"><span class="fett">Gültigkeit</span></th>';} ?>
+			<? if(strpos($this->formvars['order'], 'geprueft') === false){ ?>
+				<th align="center" style="width: 80"><a href="javascript:add_to_order('geprueft');" title="nach geprüft sortieren"><span class="fett">geprüft</span></a></th>
+			<? }else{echo '<th align="center" style="width: 80"><span class="fett">geprüft</span></th>';} ?>
 			<? if(strpos($this->formvars['order'], 'format') === false){ ?>
-				<th align="center" style="width: 120"><a href="javascript:add_to_order('format');" title="nach Blattformat sortieren"><span class="fett">Format</span></a></th>
-			<? }else{echo '<th align="center" style="width: 120"><span class="fett">Format</span></th>';} ?>	
+				<th align="center" style="width: 80"><a href="javascript:add_to_order('format');" title="nach Blattformat sortieren"><span class="fett">Format</span></a></th>
+			<? }else{echo '<th align="center" style="width: 80"><span class="fett">Format</span></th>';} ?>	
           <th colspan="3" style="width: 100"><div align="center"><?    echo $this->nachweis->erg_dokumente.' Treffer';   ?></div></th>
         </tr>
 			</thead>
@@ -240,7 +246,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
           <td style="width: 70"><div align="center"><? echo $this->formvars['rissnummer']=$this->nachweis->Dokumente[$i]['rissnummer']; ?></div></td>
           <? if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){ ?>
 					<td style="width: 70"><div align="center"><? echo $this->formvars['blattnummer']=str_pad($this->nachweis->Dokumente[$i]['blattnummer'],BLATTNUMMERMAXLENGTH,'0',STR_PAD_LEFT); ?></div></td>
-          <td style="width: 64"><div align="center"><? echo $this->formvars['stammnr']=$this->nachweis->Dokumente[$i]['stammnr']; ?></div></td>
+          <td style="width: 90"><div align="center"><? echo $this->formvars['stammnr']=$this->nachweis->Dokumente[$i]['stammnr']; ?></div></td>
           <? } ?>
           <td style="width: 137"><div align="center"> 
               <? if ($this->formvars['art']=$this->nachweis->Dokumente[$i]['art']=='100'){?>
@@ -263,8 +269,9 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
           <td style="width: 80"><div align="center"><? echo $this->nachweis->Dokumente[$i]['datum']; ?></div></td>
           <td style="width: 120"><div align="center"><? echo $this->formvars['fortf']=$this->nachweis->Dokumente[$i]['fortfuehrung']; ?></div></td>
           <td style="width: 120"><div align="center"><? echo $this->formvars['vermstelle']=$this->nachweis->Dokumente[$i]['vermst']; ?></div></td>
-          <td style="width: 120"><div align="center"><? echo $this->formvars['gueltigkeit']=$this->nachweis->Dokumente[$i]['gueltigkeit']; ?></div></td>
-          <td style="width: 120"><div align="center"><? echo $this->formvars['format']=$this->nachweis->Dokumente[$i]['format']; ?> 
+          <td style="width: 80"><div align="center"><? echo $this->formvars['gueltigkeit']=$this->nachweis->Dokumente[$i]['gueltigkeit']; ?></div></td>
+					<td style="width: 80"><div align="center"><? echo $this->formvars['geprueft']=$this->nachweis->Dokumente[$i]['geprueft']; ?></div></td>
+          <td style="width: 80"><div align="center"><? echo $this->formvars['format']=$this->nachweis->Dokumente[$i]['format']; ?> 
             </div></td>
           <td style="width: 40">
 					<? 

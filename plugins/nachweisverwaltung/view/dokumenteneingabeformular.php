@@ -126,14 +126,6 @@ $legendheight = $this->map->height + 20;
 								<td>
 									<input name="Bilddatei" type="file" onchange="this.title=this.value;" value="<?php echo $this->formvars['Bilddatei']; ?>" size="22" accept="image/*.jpg"> 
 								</td>
-								<td>
-								<? if ($this->formvars['id']!='') { ?>
-									Dokument auch ändern:<input type="checkbox" name="changeDocument" value="1" <? if ($this->formvars['changeDocument']){ ?> checked<? } ?>>
-								<? }
-									else { ?>
-									<input type="hidden" name="changeDocument" value="1">
-								<? } ?>
-								</td>	
 								<td colspan="3">Gemarkung/Gemeinde: 
 									<?
 									$this->GemkgFormObj->outputHTML();
@@ -148,8 +140,8 @@ $legendheight = $this->map->height + 20;
 						</table></td>
 				</tr>
 				<tr> 
-					<td rowspan="22">&nbsp; </td>
-					<td rowspan="22" colspan="5"> 
+					<td rowspan="23">&nbsp; </td>
+					<td rowspan="23" colspan="5"> 
 						<?php
 							include(LAYOUTPATH.'snippets/SVG_polygon_query_area.php')
 						?>
@@ -265,18 +257,25 @@ $legendheight = $this->map->height + 20;
 					<td colspan="2">&nbsp;</td>
 				</tr>
 				<tr> 
-					<td colspan="2"><table border="0" cellspacing="0" cellpadding="5">
-							<tr> 
-								<td>g&uuml;ltig 
-									<input type="radio" name="gueltigkeit" value="1" <?php if ($this->formvars['gueltigkeit']=='1' OR $this->formvars['gueltigkeit']=='') { ?> checked<?php } ?>> 
-								</td>
-								<td> ung&uuml;ltig 
-									<input type="radio" name="gueltigkeit" value="0" <?php if ($this->formvars['gueltigkeit']=='0') { ?> checked<?php } ?>> 
-								</td>
-							</tr>
-						</table></td>
+					<td> 
+						<input type="radio" name="gueltigkeit" value="1" <?php if ($this->formvars['gueltigkeit']=='1' OR $this->formvars['gueltigkeit']=='') { ?> checked<?php } ?>> 
+						g&uuml;ltig
+					</td>
+					<td>
+						<input type="radio" name="gueltigkeit" value="0" <?php if ($this->formvars['gueltigkeit']=='0') { ?> checked<?php } ?>> 
+						ung&uuml;ltig
+					</td>
 				</tr>
-				
+				<tr> 
+					<td>
+						<input type="radio" name="geprueft" value="1" <?php if ($this->formvars['geprueft']=='1' OR $this->formvars['geprueft']=='') { ?> checked<?php } ?>> 
+						geprüft
+					</td>
+					<td>
+						<input type="radio" name="geprueft" value="0" <?php if ($this->formvars['geprueft']=='0') { ?> checked<?php } ?>> 
+						ungeprüft
+					</td>
+				</tr>				
 				<tr>
 					<td>&nbsp;</td>
 				</tr>

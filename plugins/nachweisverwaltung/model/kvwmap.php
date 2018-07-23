@@ -212,6 +212,7 @@
       $GUI->formvars['VermStelle']=$nachweis->document['vermstelle'];
       $GUI->formvars['Blattformat']=$nachweis->document['format'];
       $GUI->formvars['gueltigkeit']=$nachweis->document['gueltigkeit'];
+			$GUI->formvars['geprueft']=$nachweis->document['geprueft'];
       $GUI->formvars['Gemeinde']=$nachweis->document['Gemeinde'];
       $GUI->formvars['Gemarkung']=substr($GUI->formvars['flurid'],0,6);
       $GUI->formvars['Flur']=intval(substr($GUI->formvars['flurid'],6,9));
@@ -441,17 +442,21 @@
 	
 	$this->create_Recherche_UKO = function($pfad) use ($GUI){
 		$searches = $GUI->antrag->searches;
-		foreach($searches as $params){
-			if($params['abfrageart'] == 'poly')$polys[] = "st_geometryfromtext('".$params['suchpolygon']."', 25833)";
+		if($searches != NULL){
+			foreach($searches as $params){
+				if($params['abfrageart'] == 'poly')$polys[] = "st_geometryfromtext('".$params['suchpolygon']."', 25833)";
+			}
+			if($polys != NULL){
+				$sql = "select st_astext(st_multi(st_union(ARRAY[".implode(',', $polys)."])))";
+				$ret = $GUI->pgdatabase->execSQL($sql, 4, 1);
+				$rs=pg_fetch_row($ret[1]);
+				$uko = WKT2UKO($rs[0]);
+				$ukofile = 'Recherche.uko';
+				$fp = fopen($pfad.$ukofile, 'w');
+				fwrite($fp, $uko);
+				fclose($fp);
+			}
 		}
-		$sql = "select st_astext(st_multi(st_union(ARRAY[".implode(',', $polys)."])))";
-		$ret = $GUI->pgdatabase->execSQL($sql, 4, 1);
-    $rs=pg_fetch_row($ret[1]);
-		$uko = WKT2UKO($rs[0]);
-		$ukofile = 'Recherche.uko';
-		$fp = fopen($pfad.$ukofile, 'w');
-		fwrite($fp, $uko);
-		fclose($fp);
 	};
 		
 	$this->Suchparameter_loggen = function($formvars, $stelle_id, $user_id) use ($GUI){
@@ -535,7 +540,7 @@
     # Suchparameter in Ordnung
     # Recherchieren nach den Nachweisen
 		if($GUI->formvars['such_andere_art'] != NULL)$GUI->formvars['such_andere_art'] = implode(',', $GUI->formvars['such_andere_art']);
-		$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['such_andere_art'], $GUI->formvars['suchbemerkung'], NULL, $GUI->formvars['suchstammnr2'], $GUI->formvars['suchrissnr2'], $GUI->formvars['suchfortf2']);
+		$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['such_andere_art'], $GUI->formvars['suchbemerkung'], NULL, $GUI->formvars['suchstammnr2'], $GUI->formvars['suchrissnr2'], $GUI->formvars['suchfortf2'], $GUI->formvars['geprueft']);
     #$GUI->nachweis->getAnzahlNachweise($GUI->formvars['suchpolygon']);
     if($ret!=''){
       # Fehler bei der Recherche im Datenbestand
@@ -629,7 +634,6 @@
 	};
   
 	$this->erzeugenUebersicht_HTML = function($path) use ($GUI){
-		$nachweise_json = json_encode($GUI->nachweis->Dokumente);
 		$html = "
 <html>
 	<head>
@@ -745,8 +749,13 @@
 			}
 		</style>
 		<SCRIPT TYPE=\"text/javascript\">
-			var nachweise = JSON.parse('".$nachweise_json."');
+			var nachweise = new Array();\n";
 			
+		for($i = 0; $i < count($GUI->nachweis->Dokumente); $i++){
+			$html.= "			nachweise.push(JSON.parse('".json_encode($GUI->nachweis->Dokumente[$i])."'));\n";
+		}	
+		
+		$html.= "
 			var columns = new Array();
 			columns['id'] = 'ID';
 			columns['flurid'] = 'Flur';
@@ -1017,7 +1026,7 @@
     if ($GUI->formvars['id']=='') {
       # Prüfen der Eingabewerte
       #echo '<br>Prüfen der Eingabewerte.';
-      $ret=$GUI->nachweis->pruefeEingabedaten($GUI->formvars['id'], $GUI->formvars['datum'],$GUI->formvars['VermStelle'],$GUI->formvars['art'],$GUI->formvars['gueltigkeit'],$GUI->formvars['stammnr'],$GUI->formvars['rissnummer'], $GUI->formvars['fortfuehrung'], $GUI->formvars['Blattformat'],$GUI->formvars['Blattnr'],$GUI->formvars['changeDocument'],$GUI->formvars['Bilddatei_name'],$GUI->formvars['pathlength'],$GUI->formvars['umring'], $GUI->formvars['flurid'], $GUI->formvars['Blattnr']);
+      $ret=$GUI->nachweis->pruefeEingabedaten($GUI->formvars['id'], $GUI->formvars['datum'],$GUI->formvars['VermStelle'],$GUI->formvars['art'],$GUI->formvars['gueltigkeit'],$GUI->formvars['stammnr'],$GUI->formvars['rissnummer'], $GUI->formvars['fortfuehrung'], $GUI->formvars['Blattformat'],$GUI->formvars['Blattnr'],true,$GUI->formvars['Bilddatei_name'],$GUI->formvars['pathlength'],$GUI->formvars['umring'], $GUI->formvars['flurid'], $GUI->formvars['Blattnr']);
       if ($ret[0]) {
         #echo '<br>Ergebnis der Prüfung: '.$ret;
         $errmsg=$ret[1];
@@ -1034,7 +1043,7 @@
         else {
           # Speicherung der Bilddatei erfolgreich, Eintragen in Datenbank
           $GUI->nachweis->database->begintransaction();
-          $ret=$GUI->nachweis->eintragenNeuesDokument($GUI->formvars['datum'],$GUI->formvars['flurid'],$GUI->formvars['VermStelle'], $GUI->formvars['art'], $GUI->formvars['andere_art'], $GUI->formvars['gueltigkeit'],$GUI->formvars['stammnr'],$GUI->formvars['Blattformat'],$GUI->formvars['Blattnr'],$GUI->formvars['rissnummer'],$GUI->formvars['fortfuehrung'],$GUI->formvars['bemerkungen'],$GUI->formvars['bemerkungen_intern'],$GUI->formvars['artname']."/".$GUI->formvars['zieldateiname'],$GUI->formvars['umring'], $GUI->user);
+          $ret=$GUI->nachweis->eintragenNeuesDokument($GUI->formvars['datum'],$GUI->formvars['flurid'],$GUI->formvars['VermStelle'], $GUI->formvars['art'], $GUI->formvars['andere_art'], $GUI->formvars['gueltigkeit'], $GUI->formvars['geprueft'], $GUI->formvars['stammnr'],$GUI->formvars['Blattformat'],$GUI->formvars['Blattnr'],$GUI->formvars['rissnummer'],$GUI->formvars['fortfuehrung'],$GUI->formvars['bemerkungen'],$GUI->formvars['bemerkungen_intern'],$GUI->formvars['artname']."/".$GUI->formvars['zieldateiname'],$GUI->formvars['umring'], $GUI->user);
           if ($ret[0]) {
             $GUI->nachweis->database->rollbacktransaction();
             $errmsg=$ret[1];
@@ -1094,6 +1103,7 @@
     $GUI->formvars['VermStelle']=$nachweis->document['vermstelle'];
     $GUI->formvars['Blattformat']=$nachweis->document['format'];
     $GUI->formvars['gueltigkeit']=$nachweis->document['gueltigkeit'];
+		$GUI->formvars['geprueft']=$nachweis->document['geprueft'];
     $GUI->formvars['Gemeinde']=$nachweis->document['Gemeinde'];
     $GUI->formvars['Gemarkung']=substr($GUI->formvars['flurid'],0,6);
     $GUI->formvars['Flur']=intval(substr($GUI->formvars['flurid'],6,9));
@@ -1234,7 +1244,7 @@
     # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
     $GUI->formvars=$GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id);
     $GUI->nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
-		$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['such_andere_art'], $GUI->formvars['suchbemerkung'], NULL, $GUI->formvars['suchstammnr2'], $GUI->formvars['suchrissnr2'], $GUI->formvars['suchfortf2']);
+		$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['such_andere_art'], $GUI->formvars['suchbemerkung'], NULL, $GUI->formvars['suchstammnr2'], $GUI->formvars['suchrissnr2'], $GUI->formvars['suchfortf2'], $GUI->formvars['geprueft']);
     if ($ret!='') {
       $errmsg.=$ret;
     }    
@@ -1285,7 +1295,7 @@
       # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
       $GUI->formvars=$GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id);
       $GUI->nachweis = new nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
-			$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['such_andere_art'], $GUI->formvars['suchbemerkung'], NULL, $GUI->formvars['suchstammnr2'], $GUI->formvars['suchrissnr2'], $GUI->formvars['suchfortf2']);
+			$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['such_andere_art'], $GUI->formvars['suchbemerkung'], NULL, $GUI->formvars['suchstammnr2'], $GUI->formvars['suchrissnr2'], $GUI->formvars['suchfortf2'], $GUI->formvars['geprueft']);
       # Anzeige der Rechercheergebnisse			
 			if($errmsg)$GUI->add_message('error', $errmsg);
 			if($okmsg)$GUI->add_message('notice', $okmsg);
@@ -1346,7 +1356,7 @@
       # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
 			$GUI->formvars = array_merge($GUI->formvars, $GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id));
       # Abfragen der Nachweise entsprechend der eingestellten Suchparameter
-			$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['such_andere_art'], $GUI->formvars['suchbemerkung'], NULL, $GUI->formvars['suchstammnr2'], $GUI->formvars['suchrissnr2'], $GUI->formvars['suchfortf2']);
+			$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['such_andere_art'], $GUI->formvars['suchbemerkung'], NULL, $GUI->formvars['suchstammnr2'], $GUI->formvars['suchrissnr2'], $GUI->formvars['suchfortf2'], $GUI->formvars['geprueft']);
       if ($ret!='') {
         $GUI->Fehlermeldung.=$ret;
       }
