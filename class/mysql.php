@@ -585,7 +585,7 @@ SET @last_layer_id_{$table['oid']} = LAST_INSERT_ID();
 		return $sql;
 	}
 
-	function generate_layer_attribute($attribute, $options) {
+	function generate_layer_attribute($attribute, $table, $options) {
 		#echo '<br>Create Layerattribute: ' . $attribute['name'];
 		if($attribute['nullable'] == '')$attribute['nullable'] = 'NULL';
 		if($attribute['length'] == '')$attribute['length'] = 'NULL';
@@ -631,7 +631,7 @@ VALUES (
 	'{$options['option']}', -- options
 	'', -- group
 	NULL, -- raster_visibility
-	NULL -- mandatory
+	NULL, -- mandatory
 	'{$attributes['ordinal_position']}', -- order
 	'1',
 	'0'
@@ -644,60 +644,26 @@ VALUES (
 		#echo '<br>Create Datatype: ' . $datatype['type'] . ' for attribute ' . $datatype['name'];
 		$sql = "
 -- Create datatype {$datatype['type_name']}
-INSERT INTO datatype (
-	`Name`,
-	`Datentyp`,
-	`Gruppe`,
-	`pfad`,
-	`maintable`,
-	`Data`,
+INSERT INTO datatypes (
+	`name`,
 	`schema`,
-	`connection`,
-	`connectiontype`,
-	`tolerance`,
-	`toleranceunits`,
-	`epsg_code`,
-	`queryable`,
-	`transparency`,
-	`ows_srs`,
-	`wms_name`,
-	`wms_server_version`,
-	`wms_format`,
-	`wms_connectiontimeout`,
-	`querymap`,
-	`kurzbeschreibung`,
-	`privileg`
+	`dbname`,
+	`host`,
+	`port`,
 )
 VALUES (
 	'{$datatype['type']}',
-	'5',
-	@group_id,
-	'SELECT * FROM {$datatype['type']} WHERE 1=1',
-	'{$datatype['type']}', -- maintable
-	'geom from (select oid, position AS geom FROM {$schema}.{$datatype['type']}) as foo using unique oid using srid={$epsg}', -- Data
 	'{$schema}', -- schema
-	@connection, -- connection
-	'6', -- connectiontype
-	'3',
-	'pixels',
-	'{$epsg}',
-	'1',
-	'60',
-	'EPSG:{$epsg}',
-	'{$table['name']}', -- wms_name
-	'1.1.0',
-	'image/png',
-	'60',
-	'1',
-	'Diese Tabelle enthält alle Objekte aus der Tabelle {$datatype['type']}.',
-	'2'
+	'xplan_gml'
+	'localhost',
+	'5432'
 );
-SET @last_database_id_{$datatype['attribute_type_oid']} = LAST_INSERT_ID();
+SET @last_datatype_id_{$datatype['attribute_type_oid']} = LAST_INSERT_ID();
 ";
 		return $sql;
 	}
 
-	function generate_datatype_attribute($attribute, $options) {
+	function generate_datatype_attribute($attribute, $table, $options) {
 		#echo '<br>Create Datatypeattribute: ' . $attribute['name'] . ' für Datentyp: ' . $attribute['table_name'];
 		$sql = "
 --Create datatype_attribute {$attribute['name']} for datatype {$attribute['table_name']}
@@ -724,7 +690,7 @@ INSERT INTO datatype_attributes (
 	`query_tooltip`
 )
 VALUES (
-	@last_layer_id_{$attribute['datatype_oid']},
+	@last_datatype_id_{$table['attribute_type_oid']},
 	'{$attribute['name']}',
 	'{$attribute['name']}', -- real_name
 	'{$attribute['table_name']}',
@@ -826,13 +792,15 @@ INSERT INTO u_styles2classes (
 		return $sql;
 	}
 
+	/*
+	* Funktion liefert das Ergebnis einer SQL-Abfrage als INSERT-Dump für die Tabelle "$table" 
+	* über $extra kann ein Feld angegeben werden, welches nicht mit in das INSERT aufgenommen wird
+	* dieses Feld wird jedoch auch mit abgefragt und separat zurückgeliefert
+	*/
 	function create_insert_dump($table, $extra, $sql){
 		#echo '<br>Create_insert_dump for table: ' . $table;
 		#echo '<br>sql: ' . $sql;
 		#echo '<br>extra: ' . $extra;
-		# Funktion liefert das Ergebnis einer SQL-Abfrage als INSERT-Dump für die Tabelle "$table" 
-		# über $extra kann ein Feld angegeben werden, welches nicht mit in das INSERT aufgenommen wird
-		# dieses Feld wird jedoch auch mit abgefragt und separat zurückgeliefert
 		$this->debug->write("<p>file:kvwmap class:database->create_insert_dump :<br>".$sql,4);
     $query = mysql_query($sql);
     if ($query==0) {
