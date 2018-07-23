@@ -277,6 +277,8 @@ define('POSTGRESBINPATH', '/usr/bin/');         # Version 1.6.4
 
 # Bin-Pfad der OGR-tools (ogr2ogr, ogrinfo)
 define('OGR_BINPATH', '/usr/bin/');					# Version 1.7.4
+# Bin-Pfad der OGR-tools (ogr2ogr, ogrinfo) im GDAL-Container
+define('OGR_BINPATH_GDAL', '/usr/local/gdal/bin/');			# Version 2.9
 
 # Pfad zum Zip-Programm (unter Linux: 'zip -j', unter Windows z.B. 'c:/programme/Zip/bin/zip.exe')
 define('ZIP_PATH', 'zip');													# Version 1.7.3  hier wurde das ' -j' angehängt		# Version 2.8 das ' -j' wurde wieder entfernt

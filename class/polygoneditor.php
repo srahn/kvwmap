@@ -41,11 +41,11 @@ class polygoneditor {
     #echo '<br>EPSG-Code vom Layer:'.$this->layerepsg;
   }
 
-  function zoomTopolygon($oid, $tablename, $columnname,  $border) {
+  function zoomTopolygon($oid, $tablename, $columnname,  $border, $schemaname = '') {
   	# Eine Variante mit der nur einmal transformiert wird
   	$sql ="SELECT st_xmin(bbox) AS minx,st_ymin(bbox) AS miny,st_xmax(bbox) AS maxx,st_ymax(bbox) AS maxy";
   	$sql.=" FROM (SELECT box2D(st_transform(".$columnname.", ".$this->clientepsg.")) as bbox";
-  	$sql.=" FROM ".$tablename." WHERE oid = '".$oid."') AS foo";
+  	$sql.=" FROM " . ($schemaname != '' ? $schemaname . '.' : '') .$tablename." WHERE oid = '".$oid."') AS foo";
     $ret = $this->database->execSQL($sql, 4, 0);
 		$rs = pg_fetch_array($ret[1]);
 		$rect = ms_newRectObj();
@@ -87,7 +87,7 @@ class polygoneditor {
     return $ret;
   }
 
-  function eintragenFlaeche($umring, $oid, $tablename, $columnname){
+  function eintragenFlaeche($umring, $oid, $tablename, $columnname) {
 		if($umring == '')$sql = "UPDATE ".$tablename." SET ".$columnname." = NULL WHERE oid = ".$oid;
 		else $sql = "UPDATE ".$tablename." SET ".$columnname." = st_transform(st_multi(st_geometryfromtext('".$umring."',".$this->clientepsg.")),".$this->layerepsg.") WHERE oid = ".$oid;
 		$ret = $this->database->execSQL($sql, 4, 1);
@@ -104,9 +104,10 @@ class polygoneditor {
     return $ret;
   }
 
-	function getpolygon($oid, $tablename, $columnname, $extent){
-		$sql = "SELECT st_assvg(st_transform(st_union(".$columnname."),".$this->clientepsg."), 0, 8) AS svggeom, st_astext(st_transform(st_union(".$columnname."),".$this->clientepsg.")) AS wktgeom FROM ".$tablename;
+	function getpolygon($oid, $tablename, $columnname, $extent, $schemaname = ''){
+		$sql = "SELECT st_assvg(st_transform(st_union(".$columnname."),".$this->clientepsg."), 0, 8) AS svggeom, st_astext(st_transform(st_union(".$columnname."),".$this->clientepsg.")) AS wktgeom FROM " . ($schemaname != '' ? $schemaname . '.' : '') . $tablename;
 		if($oid != NULL)$sql .= " WHERE oid = ".$oid;
+		#echo '<br>sql: ' . $sql;
 		$ret = $this->database->execSQL($sql, 4, 0);
 		$polygon = pg_fetch_array($ret[1]);
 		$polygon['svggeom'] = transformCoordsSVG($polygon['svggeom']);
