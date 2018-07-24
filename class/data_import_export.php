@@ -740,7 +740,7 @@ class data_import_export {
 					'success' => false,
 					'err_msg' => $ret[1]
 				);
-				showAlert('Import fehlgeschlagen.');
+				showAlert('Import fehlgeschlagen bei Datei: ' . $importfile);
 			}
 		}
 		else {
