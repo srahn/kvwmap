@@ -7219,6 +7219,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		global $supportedLanguages;
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$this->user->rolle->readSettings();
+
+		# trim attributes to prevent big surprise if layer not work as expected
+		# due to spaces in string concatenations with these attributes
+		$this->formvars['maintable'] = trim($this->formvars['maintable']);
+		$this->formvars['schema'] = trim($this->formvars['schema']);
+
     $mapDB->updateLayer($this->formvars);
     $old_layer_id = $this->formvars['selected_layer_id'];
     if($this->formvars['id'] != ''){
@@ -12144,7 +12150,19 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
           #$filter = $mapdb->getFilter($layer_id, $this->Stelle->id);		# siehe unten
           $old_layer_id = $layer_id;
         }
-				if(($this->formvars['go'] == 'Dokument_Loeschen' OR $this->formvars['changed_'.$layer_id.'_'.$oid] == 1 OR $this->formvars['embedded']) AND $attributname != 'oid' AND $tablename != '' AND $datatype != 'not_saveable' AND $tablename == $layerset[$layer_id][0]['maintable']){		# nur Attribute aus der Haupttabelle werden gespeichert
+
+				if (
+					(
+						$this->formvars['go'] == 'Dokument_Loeschen' OR
+						$this->formvars['changed_' . $layer_id . '_' . $oid] == 1 OR
+						$this->formvars['embedded']
+					) AND
+					$attributname != 'oid' AND
+					$tablename != '' AND
+					$datatype != 'not_saveable' AND
+					$tablename == $layerset[$layer_id][0]['maintable']
+				) { # nur Attribute aus der Haupttabelle werden gespeichert
+
           switch($formtype) {
             case 'Dokument' : {
 							# die Dokument-Attribute werden hier zusammen gesammelt, weil der Datei-Upload gemacht werden muss, nachdem alle Attribute durchlaufen worden sind (wegen dem DocumentPath)
