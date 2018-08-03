@@ -21,7 +21,7 @@ function save(){
   <tr align="center"> 
     <td colspan="3"><h2><?php echo $this->titel; ?></h2></td>
   </tr>
-	<? if($this->data_import_export->shapefile == ''){ ?>
+	<? #if($this->data_import_export->shapefile == ''){ ?>
   <tr>
   	<td>&nbsp;</td>
   	<td colspan="2"><?php echo $strLoadZipArchieve; ?></td>
@@ -33,7 +33,7 @@ function save(){
 		<td><input type="file" name="file1"></td>
 		<td>&nbsp;</td>
 	</tr>
-	<? }else{ ?>
+	<? #}else{ ?>
   <tr>
   	<td>&nbsp;</td>
   	<td colspan="2"><?php echo $strEnterEpsgCode; ?></td>
@@ -56,7 +56,7 @@ function save(){
     </td>
     <td>&nbsp;</td>
   </tr>
-	<? } ?>
+	<? #} ?>
 	<tr>
 		<td colspan="3" align="center">
       <input type="button" name="cancel" value="Abbrechen" onclick="home();">
