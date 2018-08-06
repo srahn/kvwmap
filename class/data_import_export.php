@@ -36,56 +36,54 @@ class data_import_export {
 		$this->delimiters = array("\t", ';', ' ', ',');		# erlaubte Trennzeichen
   }
 
-################# Import #################
-
-	
-	function process_import_file($upload_id, $filename, $stelle, $user, $pgdatabase, $epsg){
+	################# Import #################
+	function process_import_file($upload_id, $filename, $stelle, $user, $pgdatabase, $epsg) {
 		$this->epsg_codes = read_epsg_codes($pgdatabase);
 		$file_name_parts = explode('.', $filename);
 		$filetype = strtolower($file_name_parts[1]);
-		switch($filetype){
+		switch($filetype) {
 			case 'shp' : case 'dbf' : case 'shx' : {
 				$custom_tables = $this->import_custom_shape($file_name_parts, $user, $pgdatabase, $epsg);
 				$formvars['epsg'] = $custom_tables[0]['epsg'];
-			}break;
+			} break;
 			case 'point' : {
 				$file = basename($formvars['file1']);
 				$custom_tables = $this->import_custom_pointlist($formvars, $pgdatabase);
-			}break;
+			} break;
 			case 'GPX' : {
 				$formvars['epsg'] = 4326;
 				$custom_tables = $this->import_custom_gpx($formvars, $pgdatabase);
-			}break;
+			} break;
 			case 'OVL' : {
 				$formvars['epsg'] = 4326;
 				$custom_tables = $this->import_custom_ovl($formvars, $pgdatabase);
-			}break;
+			} break;
 			case 'DXF' : {
 				$custom_tables = $this->import_custom_dxf($formvars, $pgdatabase);
-			}break;
+			} break;
 			case 'GeoJSON' : {
 				$custom_tables = $this->import_custom_geojson($pgdatabase);
 				$formvars['epsg'] = $custom_tables[0]['epsg'];
-			}break;
+			} break;
 		}
-		if($custom_tables != NULL){
+		if ($custom_tables != NULL) {
 			foreach($custom_tables as $custom_table){				# ------ Rollenlayer erzeugen ------- #
 				$layer_id = $this->create_rollenlayer(
 					$pgdatabase,
 					$stelle,
 					$user,
-					$file." (".date('d.m. H:i',time()).")".str_repeat(' ', $custom_table['datatype']),
+					$file . " (".date('d.m. H:i',time()).")".str_repeat(' ', $custom_table['datatype']),
 					$custom_table,
 					$formvars['epsg']
 				);
 			}
 			return -$layer_id;
 		}
-		else{
+		else {
 			if($this->ask_epsg)$this->create_epsg_form($upload_id, basename($filename));
 		}
 	}
-	
+
 	function create_epsg_form($upload_id, $filename){
 		echo "
 			<input id=\"filename".$upload_id."\" type=\"hidden\" value=\"".$filename."\">
@@ -109,42 +107,43 @@ class data_import_export {
 		";
 	}
 
-  function create_import_rollenlayer($formvars, $type, $stelle, $user, $database, $pgdatabase){
+  function create_import_rollenlayer($formvars, $type, $stelle, $user, $database, $pgdatabase) {
 		$_files = $_FILES;
 		$file = $_files['file1']['name'];
-		switch ($type){
+		switch ($type) {
 			case 'Shape' : {
-				$custom_tables = $this->import_custom_shape($formvars, $pgdatabase);
+				$custom_tables = $this->import_custom_shape_zip($formvars, $pgdatabase);
 				$formvars['epsg'] = $custom_tables[0]['epsg'];
-				if($file == '')$file = $formvars['shapefile'];
-			}break;
+				if ($file == '') $file = $formvars['shapefile'];
+			} break;
 			case 'point' : {
 				$file = basename($formvars['file1']);
 				$custom_tables = $this->import_custom_pointlist($formvars, $pgdatabase);
-			}break;
+			} break;
 			case 'GPX' : {
 				$formvars['epsg'] = 4326;
 				$custom_tables = $this->import_custom_gpx($formvars, $pgdatabase);
-			}break;
+			} break;
 			case 'OVL' : {
 				$formvars['epsg'] = 4326;
 				$custom_tables = $this->import_custom_ovl($formvars, $pgdatabase);
-			}break;
+			} break;
 			case 'DXF' : {
 				$custom_tables = $this->import_custom_dxf($formvars, $pgdatabase);
-			}break;
+			} break;
 			case 'GeoJSON' : {
 				$custom_tables = $this->import_custom_geojson($pgdatabase);
 				$formvars['epsg'] = $custom_tables[0]['epsg'];
-			}break;
+			} break;
 		}
-		if($custom_tables != NULL){
-			foreach($custom_tables as $custom_table){				# ------ Rollenlayer erzeugen ------- #
+		if ($custom_tables != NULL) {
+			foreach ($custom_tables as $custom_table) {
+				# ------ Rollenlayer erzeugen ------- #
 				$layer_id = $this->create_rollenlayer(
 					$pgdatabase,
 					$stelle,
 					$user,
-					$file." (".date('d.m. H:i',time()).")".str_repeat(' ', $custom_table['datatype']),
+					$file ." (" . date('d.m. H:i',time()) . ")" . str_repeat(' ', $custom_table['datatype']),
 					$custom_table,
 					$formvars['epsg']
 				);
@@ -156,13 +155,13 @@ class data_import_export {
 	function create_rollenlayer($pgdatabase, $stelle, $user, $layername, $custom_table, $epsg) {
 		$dbmap = new db_mapObj($stelle->id, $user->id);
 		$group = $dbmap->getGroupbyName('Eigene Importe');
-		if($group != ''){
+		if ($group != '') {
 			$groupid = $group['id'];
 		}
-		else{
+		else {
 			$groupid = $dbmap->newGroup('Eigene Importe', 1);
 		}
-		$user->rolle->set_one_Group($user->id, $stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
+		$user->rolle->set_one_Group($user->id, $stelle->id, $groupid, 1); # der Rolle die Gruppe zuordnen
 		$this->formvars['user_id'] = $user->id;
 		$this->formvars['stelle_id'] = $stelle->id;
 		$this->formvars['aktivStatus'] = 1;
@@ -171,18 +170,18 @@ class data_import_export {
 		$this->formvars['Typ'] = 'import';
 		$this->formvars['Datentyp'] = $custom_table['datatype'];
 		$select = 'oid, the_geom';
-		if($custom_table['labelitem'] != '')$select .= ', '.$custom_table['labelitem'];
-		$this->formvars['Data'] = 'the_geom from (SELECT '.$select.' FROM '.CUSTOM_SHAPE_SCHEMA.'.'.$custom_table['tablename'].' WHERE 1=1 '.$custom_table['where'].')as foo using unique oid using srid='.$epsg;
-		$this->formvars['query'] = 'SELECT * FROM '.$custom_table['tablename'].' WHERE 1=1'.$custom_table['where'];
-		$connectionstring ='user='.$pgdatabase->user;
-		if($pgdatabase->passwd != '')$connectionstring.=' password='.$pgdatabase->passwd;
-		$connectionstring.=' dbname='.$pgdatabase->dbName;
-    if($pgdatabase->host != 'localhost') $connectionstring .= ' host=' . $pgdatabase->host;
-		$this->formvars['connection'] = $connectionstring;
+		if ($custom_table['labelitem'] != '') $select .= ', ' . $custom_table['labelitem'];
+		$this->formvars['Data'] = 'the_geom from (SELECT ' . $select . ' FROM ' . CUSTOM_SHAPE_SCHEMA . '.' . $custom_table['tablename'] . ' WHERE 1=1 ' . $custom_table['where'] . ')as foo using unique oid using srid=' . $epsg;
+		$this->formvars['query'] = 'SELECT * FROM ' . $custom_table['tablename'] . ' WHERE 1=1' . $custom_table['where'];
+		$this->formvars['connection'] =
+			'dbname=' . $pgdatabase->dbName .
+			' user=' . $pgdatabase->user .
+			($pgdatabase->host != 'localhost' ? ' host=' . $pgdatabase->host : '') .
+			($pgdatabase->passwd != ''        ? ' password=' . $pgdatabase->passwd : '');
 		$this->formvars['connectiontype'] = 6;
 		$this->formvars['epsg_code'] = $epsg;
 		$this->formvars['transparency'] = 65;
-		if($custom_table['labelitem'] != '')$this->formvars['labelitem'] = $custom_table['labelitem'];
+		if ($custom_table['labelitem'] != '') $this->formvars['labelitem'] = $custom_table['labelitem'];
 		$layer_id = $dbmap->newRollenLayer($this->formvars);
 		$layerdb = $dbmap->getlayerdatabase(-$layer_id, $this->Stelle->pgdbhost);
 		$layerdb->setClientEncoding();
@@ -203,17 +202,17 @@ class data_import_export {
 		$style['outlinecolorgreen'] = 0;
 		$style['outlinecolorblue'] = 0;
 		switch ($custom_table['datatype']) {
-			case 0 :{
+			case 0 : {
 				$style['size'] = 8;
 				$style['maxsize'] = 8;
 				$style['symbolname'] = 'circle';
-			}break;
-			case 1 :{
+			} break;
+			case 1 : {
 				$style['width'] = 2;
 				$style['minwidth'] = 1;
 				$style['maxwidth'] = 3;
 				$style['symbolname'] = NULL;
-			}break;
+			} break;
 			case 2 :{
 				$style['size'] = 1;
 				$style['maxsize'] = 2;
@@ -224,8 +223,8 @@ class data_import_export {
 		$style['minsize'] = NULL;
 		$style['angle'] = 360;
 		$style_id = $dbmap->new_Style($style);
-		$dbmap->addStyle2Class($class_id, $style_id, 0);          # den Style der Klasse zuordnen
-		if($custom_table['labelitem'] != ''){
+		$dbmap->addStyle2Class($class_id, $style_id, 0); # den Style der Klasse zuordnen
+		if($custom_table['labelitem'] != '') {
 			$label['font'] = 'arial';
 			$label['color'] = '0 0 0';
 			$label['outlinecolor'] = '255 255 255';
@@ -444,6 +443,30 @@ class data_import_export {
 			$custom_table[0]['epsg'] = $epsg;
 			return $custom_table;
 		}
+	}
+
+	function import_custom_shape_zip($formvars, $pgdatabase){
+		if($formvars['shapefile'] == ''){
+			$_files = $_FILES;
+			if($_files['file1']['name']){     # eine Zipdatei wurde ausgewählt
+				$nachDatei = UPLOADPATH.$_files['file1']['name'];
+				if(move_uploaded_file($_files['file1']['tmp_name'],$nachDatei)){
+					$files = unzip($nachDatei, false, false, true);
+					$firstfile = explode('.', $files[0]);
+					$formvars['shapefile'] = $firstfile[0];
+					# EPSG-Code aus prj-Datei ermitteln
+					if($formvars['epsg'] == '')$formvars['epsg'] = $this->get_shp_epsg(UPLOADPATH.$firstfile[0], $pgdatabase);
+					if($formvars['epsg'] == ''){
+						$this->shapefile = $formvars['shapefile'];		# EPSG-Code konnte nicht aus prj-Datei ermittelt werden, Dateiname merken und EPSG-Code nachfragen
+						return;
+					}
+				}
+			}
+		}
+		$encoding = $this->getEncoding(UPLOADPATH.$formvars['shapefile'].'.dbf');
+		$custom_table = $this->load_shp_into_pgsql($pgdatabase, UPLOADPATH, $formvars['shapefile'], $formvars['epsg'], CUSTOM_SHAPE_SCHEMA, 'a'.strtolower(umlaute_umwandeln(substr($formvars['shapefile'], 0, 15))).rand(1,1000000), $encoding);
+		$custom_table[0]['epsg'] = $formvars['epsg'];
+		return $custom_table;
 	}
 
 	function load_shp_into_pgsql($pgdatabase, $uploadpath, $file, $epsg, $schemaname, $tablename, $encoding = 'LATIN1') {
@@ -716,7 +739,7 @@ class data_import_export {
 					'success' => false,
 					'err_msg' => $ret[1]
 				);
-				showAlert('Import fehlgeschlagen.');
+				showAlert('Import fehlgeschlagen bei Datei: ' . $importfile);
 			}
 		}
 		else {
