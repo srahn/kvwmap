@@ -7727,6 +7727,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         # Steht an dieser Stelle, weil die Auswahlmöglichkeiten von Auswahlfeldern abhängig sein können
         $attributes = $mapDB->add_attribute_values($attributes, $layerdb, $layerset[0]['shape'], true, $this->Stelle->id);
 
+				# Datendrucklayouts abfragen
+				include_(CLASSPATH.'datendrucklayout.php');
+				$ddl = new ddl($this->database);
+				$layerset[0]['layouts'] = $ddl->load_layouts($this->Stelle->id, NULL, $layerset[0]['Layer_ID'], array(0,1));
+				
 				# last_search speichern
 				if($this->last_query == '' AND $this->formvars['embedded_subformPK'] == '' AND $this->formvars['embedded'] == '' AND $this->formvars['subform_link'] == ''){
 					$this->formvars['search_name'] = '<last_search>';
@@ -7754,11 +7759,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							$layerset[0]['querymaps'][$k] = $this->createQueryMap($layerset[0], $k);
 						}
 					}
-
-					# Datendrucklayouts abfragen
-					include_(CLASSPATH.'datendrucklayout.php');
-					$ddl = new ddl($this->database);
-					$layerset[0]['layouts'] = $ddl->load_layouts($this->Stelle->id, NULL, $layerset[0]['Layer_ID'], array(0,1));
 
 					# wenn Attributname/Wert-Paare übergeben wurden, diese im Formular einsetzen
 					if(is_array($this->formvars['attributenames'])){
