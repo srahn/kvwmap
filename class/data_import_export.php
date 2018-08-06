@@ -375,6 +375,9 @@ class data_import_export {
 		}
 		$encoding = $this->getEncoding(UPLOADPATH.$formvars['shapefile'].'.dbf');
 		$custom_table = $this->load_shp_into_pgsql($pgdatabase, UPLOADPATH, $formvars['shapefile'], $formvars['epsg'], CUSTOM_SHAPE_SCHEMA, 'a'.strtolower(umlaute_umwandeln(substr($formvars['shapefile'], 0, 15))).rand(1,1000000), $encoding);
+		if($custom_table != NULL){
+			exec('rm '.UPLOADPATH.'/'.basename($formvars['shapefile']).'.*');	# aus Sicherheitsgründen rm mit Uploadpfad davor
+		}
 		$custom_table[0]['epsg'] = $formvars['epsg'];
 		return $custom_table;
 	}
