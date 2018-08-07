@@ -67,8 +67,6 @@ CREATE TABLE lk_aemtergemeinden (
 );
 
 
-ALTER TABLE alkis.lk_aemtergemeinden OWNER TO kvwmap;
-
 --
 -- TOC entry 12371 (class 0 OID 0)
 -- Dependencies: 2464
@@ -91,8 +89,6 @@ CREATE SEQUENCE lk_aemtergemeinden_id_seq
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE alkis.lk_aemtergemeinden_id_seq OWNER TO kvwmap;
 
 --
 -- TOC entry 12372 (class 0 OID 0)
