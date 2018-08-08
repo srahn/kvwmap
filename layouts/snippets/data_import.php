@@ -8,6 +8,8 @@
 	var filesizes = [];
 	var filenames = [];
 	var totalCount = 0;
+	var totalSize = 0;
+	var maxTotalSize = <? echo MAXUPLOADSIZE; ?>;
 	var currentUpload = null; // Enthält die Datei, die aktuell hochgeladen wird
 	var currentUploadId = 0;
 
@@ -19,10 +21,15 @@
 	function handleFileDrop(event){
 		preventDefaults(event);
 		for(var i = 0; i < event.dataTransfer.files.length; i++){
+			if(totalSize + event.dataTransfer.files[i].size > maxTotalSize * 1024 * 1024){		// Byte -> MegaByte
+				message('<? echo $strMaxFileSizeExceeded; ?>');
+				return;
+			}
 			filelist.push(event.dataTransfer.files[i]);
 			filesizes.push(event.dataTransfer.files[i].size);
 			filenames.push(event.dataTransfer.files[i].name);			
 			createProgressDiv(totalCount);
+			totalSize += event.dataTransfer.files[i].size;
 			totalCount++;
     }
 		startNextUpload(currentUploadId);
@@ -41,7 +48,7 @@
 		fileProgress.id = 'progress'+uploadId;
 		fileProgress.className = 'file_status';
 		fileProgress.innerHTML = filenames[uploadId];
-		fileProgress.innerHTML = '<div>'+filenames[uploadId]+':</div><div class="uploadPercentage"></div><div class="serverResponse"></div>';
+		fileProgress.innerHTML = '<div>&nbsp;'+filenames[uploadId]+':&nbsp;</div><div class="uploadPercentage"></div><div class="serverResponse"></div>';
 		document.getElementById('data_import_upload_progress').appendChild(fileProgress);
 	}
 	
@@ -63,10 +70,10 @@
 		document.getElementById('progress'+uploadId).querySelector('.uploadPercentage').innerHTML = progress + '%';
 	}
 	
-	function restartProcessing(uploadId){
+	function restartProcessing(uploadId, filenumber, filename){
 		ahah('index.php?go=Daten_Import_Process', 
-					'&upload_id='+uploadId+'&filename='+document.getElementById('filename'+uploadId).value+'&epsg='+document.getElementById('epsg'+uploadId).value, 
-					[document.getElementById('progress'+uploadId).querySelector('.serverResponse')], 
+					'&upload_id='+uploadId+'&filenumber='+filenumber+'&filename='+filename+'&epsg='+document.getElementById('epsg'+filename).value, 
+					[document.getElementById('progress'+uploadId).querySelector('.serverResponse #serverResponse'+filenumber)], 
 					['sethtml']
 				);
 	}

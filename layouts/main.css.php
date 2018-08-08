@@ -346,7 +346,7 @@ a.invisiblelayerlink:hover{
 
 #data_import_upload_zone{
 	position: relative;
-	width: 500px;
+	width: 600px;
 	height: 300px;
 	outline: 2px dashed steelblue;
 	outline-offset: -6px;
@@ -376,7 +376,9 @@ a.invisiblelayerlink:hover{
 
 #data_import_upload_progress{
 	display: table;
-	width: 500px;
+	width: 600px;
+	border-collapse: separate;
+  border-spacing: 5px;
 }
 
 #data_import_upload_progress .file_status{
@@ -387,12 +389,16 @@ a.invisiblelayerlink:hover{
 
 #data_import_upload_progress .file_status div{
 	display: table-cell;
-	margin: 0 20px 0 20px;
-	vertical-align: middle;
+	vertical-align: top;
 }
 
 #data_import_upload_progress .file_status .serverResponse{
 	text-align: right;
+}
+
+#data_import_upload_progress .file_status .serverResponse div{
+	margin: 0;
+	display: inline-block;
 }
 
 

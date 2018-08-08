@@ -37,7 +37,7 @@ class data_import_export {
   }
 
 	################# Import #################
-	function process_import_file($upload_id, $filename, $stelle, $user, $pgdatabase, $epsg, $filetype = NULL, $formvars = NULL) {
+	function process_import_file($upload_id, $file_number, $filename, $stelle, $user, $pgdatabase, $epsg, $filetype = NULL, $formvars = NULL) {
 		$this->epsg_codes = read_epsg_codes($pgdatabase);
 		$file_name_parts = explode('.', $filename);
 		if($filetype == NULL)$filetype = strtolower($file_name_parts[1]);
@@ -79,30 +79,31 @@ class data_import_export {
 			return -$layer_id;
 		}
 		else{
-			if($this->ask_epsg)$this->create_epsg_form($upload_id, basename($filename));
+			if($this->ask_epsg)$this->create_epsg_form($upload_id, $file_number, basename($filename));
 		}
 	}
 
-	function create_epsg_form($upload_id, $filename){
+	function create_epsg_form($upload_id, $file_number, $filename){
 		echo "
-			<input id=\"filename".$upload_id."\" type=\"hidden\" value=\"".$filename."\">
-			<table>
-				<tr>
-					<td>
-						<span class=\"fett\">Bitte EPSG-Code angeben:</span><br>
-						<select id=\"epsg".$upload_id."\" onchange=\"restartProcessing(".$upload_id.")\">
-							<option value=\"\">--Auswahl--</option>
-							";
-							foreach($this->epsg_codes as $epsg_code){
-								echo '<option value="'.$epsg_code['srid'].'">';
-								echo $epsg_code['srid'].': '.$epsg_code['srtext'];
-								echo "</option>\n";
-							}
-				echo "
-						</select>
-					</td>
-				</tr>
-			</table>
+			<div id=\"serverResponse".$file_number."\">
+				<table>
+					<tr>
+						<td>
+							<span class=\"fett\">".$filename.": Bitte EPSG-Code angeben:</span><br>
+							<select id=\"epsg".$filename."\" onchange=\"restartProcessing(".$upload_id.", ".$file_number.", '".$filename."')\">
+								<option value=\"\">--Auswahl--</option>
+								";
+								foreach($this->epsg_codes as $epsg_code){
+									echo '<option value="'.$epsg_code['srid'].'">';
+									echo $epsg_code['srid'].': '.$epsg_code['srtext'];
+									echo "</option>\n";
+								}
+					echo "
+							</select>
+						</td>
+					</tr>
+				</table>
+			</div>
 		";
 	}
 

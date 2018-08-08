@@ -1056,7 +1056,7 @@ function go_switch($go){
 			} break;
 			
 			case 'Daten_Import_Process' : {
-				$GUI->daten_import_process($GUI->formvars['upload_id'], $GUI->formvars['filename'], $GUI->formvars['epsg']);
+				$GUI->daten_import_process($GUI->formvars['upload_id'], $GUI->formvars['filenumber'], $GUI->formvars['filename'], $GUI->formvars['epsg']);
 			} break;			
 
 			case 'Daten_Export' : {
