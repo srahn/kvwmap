@@ -3,5 +3,6 @@
  $strType="Format";
  $strPointlist="Punktliste";
  $strDropFilesHere="Dateien hier reinziehen";
+ $strSupportedFileTypes="Unterstützte Formate: ";
  
 ?>  

@@ -79,6 +79,9 @@
   <tr> 
     <td align="center" valign="top" style="height: 40px"><h2><?php echo $strTitle; ?></h2></td>
   </tr>
+	<tr> 
+    <td align="center" valign="top"><? echo $strSupportedFileTypes; ?>Shape, GeoJSON, DXF, GPX, OVL</td>
+  </tr>
 	<tr>
 		<td>
 			<div id="data_import_upload_zone" ondrop="handleFileDrop(event)" ondragover="this.className='dragover';preventDefaults(event);" ondragleave="this.className='';preventDefaults(event);" onmouseout="this.className='';">
