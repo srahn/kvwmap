@@ -9556,59 +9556,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->output();
   }
 
-	function gpx_import(){
-    $this->titel='GPX-Import';
-    $this->main='gpx_import.php';
-    $this->output();
-  }
-
-  function gpx_import_importieren(){
-		include_(CLASSPATH.'data_import_export.php');
-		$this->data_import_export = new data_import_export();
-		$layer_id = $this->data_import_export->create_import_rollenlayer($this->formvars, 'GPX', $this->Stelle, $this->user, $this->database, $this->pgdatabase);
-		$this->loadMap('DataBase');
-		$this->zoomToMaxLayerExtent($layer_id);
-		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
-    $this->drawMap();
-    $this->saveMap('');
-    $this->output();
-  }
-
-	function dxf_import(){
-    $this->titel='DXF-Import';
-    $this->main='dxf_import.php';
-    $this->output();
-  }
-
-  function dxf_import_importieren(){
-		include_(CLASSPATH.'data_import_export.php');
-		$this->data_import_export = new data_import_export();
-		$layer_id = $this->data_import_export->create_import_rollenlayer($this->formvars, 'DXF', $this->Stelle, $this->user, $this->database, $this->pgdatabase);
-		$this->loadMap('DataBase');
-		$this->zoomToMaxLayerExtent($layer_id);
-		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
-    $this->drawMap();
-    $this->saveMap('');
-    $this->output();
-  }
-
-	function ovl_import(){
-    $this->titel='OVL-Import';
-    $this->main='ovl_import.php';
-    $this->output();
-  }
-
-  function ovl_import_importieren(){
-		include_(CLASSPATH.'data_import_export.php');
-		$this->data_import_export = new data_import_export();
-		$layer_id = $this->data_import_export->create_import_rollenlayer($this->formvars, 'OVL', $this->Stelle, $this->user, $this->database, $this->pgdatabase);
-		$this->loadMap('DataBase');
-		$this->zoomToMaxLayerExtent($layer_id);
-		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
-    $this->drawMap();
-    $this->saveMap('');
-    $this->output();
-  }
 
   function TIFExport(){
     $this->loadMap('DataBase');
@@ -9632,47 +9579,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->output();
   }
 
-	function create_geojson_rollenlayer(){
-    $this->main='create_geojson_rollenlayer.php';
-    $this->output();
-	}
-
-	function create_geojson_rollenlayer_load(){
-		include_(CLASSPATH.'data_import_export.php');
-		$this->data_import_export = new data_import_export();
-		$layer_id = $this->data_import_export->create_import_rollenlayer($this->formvars, 'GeoJSON', $this->Stelle, $this->user, $this->database, $this->pgdatabase);
-		$this->loadMap('DataBase');
-		$this->zoomToMaxLayerExtent($layer_id);
-		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
-    $this->drawMap();
-    $this->saveMap('');
-    $this->output();
-	}
-
-	function create_shp_rollenlayer(){
-		$this->titel='Shape-Datei Anzeigen';
-    $this->main='create_shape_rollenlayer.php';
-    $this->epsg_codes = read_epsg_codes($this->pgdatabase);
-    $this->output();
-	}
-
-	function create_shp_rollenlayer_load(){
-		include_(CLASSPATH.'data_import_export.php');
-		$this->data_import_export = new data_import_export();
-		$layer_id = $this->data_import_export->create_import_rollenlayer($this->formvars, 'Shape', $this->Stelle, $this->user, $this->database, $this->pgdatabase);
-		if($layer_id != NULL){
-			$this->loadMap('DataBase');
-			$this->zoomToMaxLayerExtent($layer_id);
-			$this->user->rolle->newtime = $this->user->rolle->last_time_id;
-			$this->drawMap();
-			$this->saveMap('');
-			$this->output();
-		}
-		else{
-			$this->create_shp_rollenlayer();
-		}
-	}
-
 	function create_point_rollenlayer(){
     $this->main='create_point_rollenlayer.php';
     $this->epsg_codes = read_epsg_codes($this->pgdatabase);
@@ -9683,14 +9589,14 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->main='create_point_rollenlayer.php';
 		include_(CLASSPATH.'data_import_export.php');
 		$this->data_import_export = new data_import_export();
-		$this->data_import_export->pointlist = $this->data_import_export->load_custom_pointlist($this->formvars);
+		$this->data_import_export->pointlist = $this->data_import_export->load_custom_pointlist($this->user);
     $this->output();
 	}
 
 	function create_point_rollenlayer_import(){
 		include_(CLASSPATH.'data_import_export.php');
 		$this->data_import_export = new data_import_export();
-		$layer_id = $this->data_import_export->create_import_rollenlayer($this->formvars, 'point', $this->Stelle, $this->user, $this->database, $this->pgdatabase);
+		$layer_id = $this->data_import_export->process_import_file(NULL, NULL, $this->Stelle, $this->user, $this->pgdatabase, $this->formvars['epsg'], 'point', $this->formvars);
 		$this->loadMap('DataBase');
 		$this->zoomToMaxLayerExtent($layer_id);
 		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
@@ -9745,7 +9651,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				@mkdir($user_upload_folder);
 				$nachDatei = $user_upload_folder . $_files['uploadfile']['name'];
 				if (move_uploaded_file($_files['uploadfile']['tmp_name'], $nachDatei)) {
-					echo '<i class="fa fa-check" style="color: green;"></i>';
 					$dateityp = strtolower(array_pop(explode('.', $nachDatei)));
 					if ($dateityp == 'zip') {
 						$files = unzip($nachDatei, false, false, true);
@@ -9771,7 +9676,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$user_upload_folder = UPLOADPATH . $this->user->id.'/';
 		$layer_id = $this->data_import_export->process_import_file($upload_id, $user_upload_folder.$filename, $this->Stelle, $this->user, $this->pgdatabase, $epsg);
 		if ($layer_id != NULL) {
-			echo 'Import erfolgreich <a href="index.php?go=zoomToMaxLayerExtent&layer_id='.$layer_id.'">Zoom auf Layer</a>';
+			echo 'Import erfolgreich&nbsp;=>&nbsp;<a href="index.php?go=zoomToMaxLayerExtent&layer_id='.$layer_id.'">Zoom auf Layer</a>';
 		}
 	}
 

@@ -8,7 +8,6 @@
 	var filesizes = [];
 	var filenames = [];
 	var totalCount = 0;
-	var totalSize = 0; // Enthält die Gesamtgröße aller hochzuladenden Dateien
 	var currentUpload = null; // Enthält die Datei, die aktuell hochgeladen wird
 	var currentUploadId = 0;
 
@@ -58,7 +57,10 @@
 	}
 	  
 	function handleProgress(event, uploadId){
-		document.getElementById('progress'+uploadId).querySelector('.uploadPercentage').innerHTML = Math.round(event.loaded / filesizes[uploadId] * 100) + '%';
+		var progress;
+		if(event.loaded > filesizes[uploadId])progress = 100;
+		else progress = Math.round(event.loaded / filesizes[uploadId] * 100);
+		document.getElementById('progress'+uploadId).querySelector('.uploadPercentage').innerHTML = progress + '%';
 	}
 	
 	function restartProcessing(uploadId){
@@ -89,19 +91,6 @@
 			<div id="data_import_upload_progress"></div>
 		</td>
 	</tr>
-  <tr> 
-    <td align="center"><? echo $strType; ?>:&nbsp;
-			<select name="go" onchange="document.GUI.submit();">
-				<option value="">---<? echo $this->strChoose; ?>---</option>
-				<option value="SHP_Anzeigen">Shape</option>
-				<option value="GeoJSON_Anzeigen">GeoJSON</option>
-				<option value="DXF_Import">DXF</option>
-				<option value="OVL_Import">OVL</option>
-				<option value="GPX_Import">GPX</option>
-				<option value="Punktliste_Anzeigen"><? echo $strPointlist; ?></option>
-			</select>
-		</td>
-  </tr>
 </table>
 
 

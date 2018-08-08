@@ -346,7 +346,7 @@ a.invisiblelayerlink:hover{
 
 #data_import_upload_zone{
 	position: relative;
-	width: 400px;
+	width: 500px;
 	height: 300px;
 	outline: 2px dashed steelblue;
 	outline-offset: -6px;
@@ -374,23 +374,27 @@ a.invisiblelayerlink:hover{
 	color: #333;
 }
 
+#data_import_upload_progress{
+	display: table;
+	width: 500px;
+}
+
 #data_import_upload_progress .file_status{
-	display: flex;
-	flex-wrap: wrap;
+	display: table-row;
 	border: 1px solid #bbb;
 	padding: 3px;
 }
 
-#data_import_upload_progress .file_status .uploadPercentage{
-	width: 200px;
-	text-align: right;
+#data_import_upload_progress .file_status div{
+	display: table-cell;
 	margin: 0 20px 0 20px;
+	vertical-align: middle;
 }
 
 #data_import_upload_progress .file_status .serverResponse{
 	text-align: right;
-	margin: 0 20px 0 20px;
 }
+
 
 .print_options_box{
 	width: 200px;
