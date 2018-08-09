@@ -7739,7 +7739,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					$this->user->rolle->save_search($attributes, $this->formvars);
 				}
 
-				if($layerset[0]['count'] != 0 AND $this->formvars['embedded_subformPK'] == '' AND $this->formvars['embedded'] == '' AND $this->formvars['embedded_dataPDF'] == '' AND $this->formvars['subform_link'] == ''){
+				if($layerset[0]['count'] != 0 AND $this->formvars['embedded_subformPK'] == '' AND $this->formvars['embedded'] == '' AND $this->formvars['embedded_dataPDF'] == ''){
 					# last_query speichern
 					$this->user->rolle->delete_last_query();
 					$this->user->rolle->save_last_query('Layer-Suche_Suchen', $this->formvars['selected_layer_id'], $sql, $sql_order, $this->formvars['anzahl'], $this->formvars['offset_'.$layerset[0]['Layer_ID']]);
