@@ -2090,7 +2090,7 @@ FROM
 		if($gml_id != '')$sql.=" AND p.gml_id = '".$gml_id."'";
 
     if($bezirk!='') {
-      $sql.=" AND b.schluesselgesamt=".(int)$bezirk;
+      $sql.=" AND b.schluesselgesamt = '".$bezirk."'";
     }
     if($blatt != ''){
       $sql.=" AND g.buchungsblattnummermitbuchstabenerweiterung= '".$blatt."'";
