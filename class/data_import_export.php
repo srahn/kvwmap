@@ -46,6 +46,10 @@ class data_import_export {
 				$custom_tables = $this->import_custom_shape($file_name_parts, $user, $pgdatabase, $epsg);
 				$epsg = $custom_tables[0]['epsg'];
 			} break;
+			case 'kml' : {
+				$epsg = 4326;
+				$custom_tables = $this->import_custom_kml($filename, $pgdatabase, $epsg);
+			} break;
 			case 'gpx' : {
 				$epsg = 4326;
 				$custom_tables = $this->import_custom_gpx($filename, $pgdatabase, $epsg);
@@ -297,6 +301,32 @@ class data_import_export {
 			return $custom_table;
 		}
 	}
+	
+	function import_custom_kml($filename, $pgdatabase, $epsg){
+		if(file_exists($filename)){
+			# tracks
+			$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))).rand(1,1000000);
+			$this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $epsg, $filename, $pgdatabase, NULL);
+			$sql = '
+				ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' SET WITH OIDS;
+				'.$this->rename_reserved_attribute_names(CUSTOM_SHAPE_SCHEMA, $tablename).'
+				SELECT geometrytype(the_geom), count(*) FROM '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' GROUP BY geometrytype(the_geom);
+			';
+			$ret = $pgdatabase->execSQL($sql,4, 0);
+			if(!$ret[0]){
+				$geom_types = array('POINT' => 0, 'LINESTRING' => 1, 'MULTILINESTRING' => 1, 'POLYGON' => 2, 'MULTIPOLYGON' => 2);
+				while($result = pg_fetch_assoc($ret[1])){
+					if($result['count'] > 0 AND $geom_types[$result['geometrytype']] !== NULL){
+						$custom_table['datatype'] = $geom_types[$result['geometrytype']];
+						$custom_table['tablename'] = $tablename;
+						$custom_table['where'] = " AND geometrytype(the_geom) = '".$result['geometrytype']."'";
+						$custom_tables[] = $custom_table;
+					}
+				}
+				return $custom_tables;
+			}
+		}
+	}	
 
 	function import_custom_gpx($filename, $pgdatabase, $epsg){
 		if(file_exists($filename)){
