@@ -1376,9 +1376,11 @@
 		}
 		# die Namen aller gespeicherten Dokumentauswahlen dieser Rolle laden
 		$GUI->dokauswahlset=$GUI->get_Dokumentauswahl($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, NULL);
-		# Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
-    $nachweisSuchParameter=$GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id);
-		$GUI->formvars=array_merge($GUI->formvars,$nachweisSuchParameter);
+		if($GUI->formvars['CMD'] == ''){		# wenn nicht navigiert wurde
+			# Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
+			$nachweisSuchParameter=$GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id);
+			$GUI->formvars=array_merge($GUI->formvars,$nachweisSuchParameter);
+		}
 		# die Parameter einer gespeicherten Dokumentauswahl laden
 		if($GUI->formvars['dokauswahlen'] != ''){
 			$GUI->selected_dokauswahlset = $GUI->get_Dokumentauswahl($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars['dokauswahlen']);
