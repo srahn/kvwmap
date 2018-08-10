@@ -1340,6 +1340,39 @@ FROM
     }
     return $ret;
   }
+	
+	function getOrte(){
+		$sql = "SELECT distinct ortsteil as name, 'ortsteil' as typ
+						FROM alkis.ax_lagebezeichnungmithausnummer as l
+						WHERE ortsteil IS NOT NULL
+						".$this->build_temporal_filter(array('l'))."
+						UNION
+						SELECT gd.bezeichnung as name, 'gemeinde' as typ
+						FROM alkis.ax_gemeinde as gd
+						WHERE true
+						".$this->build_temporal_filter(array('gd'))."
+						UNION
+						SELECT gm.bezeichnung as name, 'gemarkung' as typ
+						FROM alkis.ax_gemarkung as gm
+						WHERE true
+						".$this->build_temporal_filter(array('gm'))."
+						ORDER BY name";
+		#echo $sql;
+    $queryret=$this->execSQL($sql, 4, 0);
+    if ($queryret[0]) {
+      $ret[0]=1;
+      $ret[1]=$queryret[1];
+    }
+    else {
+      $ret[0]=0;
+      while($rs=pg_fetch_assoc($queryret[1])) {
+        $orte['bezeichnung'][]=$rs['name'].' ('.$rs['typ'].')';
+				$orte['typ'][]=$rs['typ'];
+      }
+      $ret[1]=$orte;
+    }
+    return $ret;
+	}
   
   function getStrassen($FlurstKennz) {
     $sql ="set enable_seqscan = off;SELECT DISTINCT g.schluesselgesamt as gemeinde, g.bezeichnung as gemeindename, l.lage as strasse, s.bezeichnung as strassenname ";

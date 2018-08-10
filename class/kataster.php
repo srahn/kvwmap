@@ -150,22 +150,6 @@ class adresse {
   var $debug;
   var $database;
 
-  ###################### Liste der Funktionen ####################################
-  #
-  # function adresse($GemeindeSchl,$StrassenSchl,$HausNr) - Construktor
-  # function setDBConn($dbConn)
-  # function getGebaeude()
-  # function getQuelle()
-  # function getFlurstKennzListe()
-  # function updateAdressTable()
-  # function getStrassenListe($GemID,$AdressenListeByExtent,$order)
-  # function getAdressenListeByFlst($FlstListe,$order)
-  # function getAdressenListeByExtent($extent)
-  # function getHausNrListe($GemID,$StrID,$HausNr,$order)
-  # function getStrIDfromName($GemID,$StrName)
-  #
-  ################################################################################
-
   function adresse($GemeindeSchl,$StrassenSchl,$HausNr,$database) {
     global $debug;
     $this->debug=$debug;
@@ -179,6 +163,17 @@ class adresse {
     $this->dbConn=$dbConn;
   }
 
+	function getOrte(){
+		$ret = $this->database->getOrte();
+		if ($ret[0]) {
+      $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4);
+      return 0;
+    }
+    else {
+      return $ret[1];
+    }
+	}
+	
   function getGebaeude() {
     $Gebaeude=new gebaeude($this);
     return $Gebaeude->getGebaeude();

@@ -51,6 +51,10 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
   </td>
 </tr>
 //-->
+	<tr>
+    <td align="right"><span class="fett">Ort:&nbsp;</span></td>
+    <td colspan="3"><?php echo $this->FormObject["Orte"]->html; ?></td>
+  </tr>
   <tr <? if($this->FormObject["Gemarkungen"]->selected){ echo 'style="display:none"'; }?>>
     <td align="right"><span class="fett"><?php echo $strGem; ?>:&nbsp;</span></td>
     <td colspan="3"><?php echo $this->FormObject["Gemeinden"]->html; ?><!-- Name GemID //-->

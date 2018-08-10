@@ -14581,11 +14581,18 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		if($GemeindenStelle == NULL){
 			$GemListe=$Gemeinde->getGemeindeListe(NULL);
 			$GemkgListe=$Gemarkung->getGemarkungListe(NULL,'');
+			$Orte = $Adresse->getOrte();
 		}
 		else{
 			$GemListe=$Gemeinde->getGemeindeListe(array_merge(array_keys($GemeindenStelle['ganze_gemeinde']), array_keys($GemeindenStelle['eingeschr_gemeinde'])));
 			$GemkgListe=$Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
 		}
+		
+		# Erzeugen des Formobjektes für die Ortsauswahl
+    $OrtsFormObj=new selectFormObject("Orte","select",$Orte['bezeichnung'],NULL,$Orte['bezeichnung'],"1","","",NULL);
+    $OrtsFormObj->insertOption(-1,0,'--Auswahl--',0);
+    $OrtsFormObj->outputHTML();
+		
 		# Wenn nur eine Gemeinde zur Auswahl steht, wird diese gewählt; Verhalten so, als würde die Gemeinde vorher gewählt worden sein.
 		if(count($GemListe['ID'])==1)$GemID=$GemListe['ID'][0];
     // Sortieren der Gemarkungen unter Berücksichtigung von Umlauten
@@ -14653,6 +14660,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $StrFormObj=new selectFormObject("StrName","text","","","","25","25","",NULL);
       $HausNrFormObj=new selectFormObject("HausNr","text","","","","5","5","",NULL);
     }
+		$this->FormObject["Orte"]=$OrtsFormObj;
     $this->FormObject["Gemeinden"]=$GemFormObj;
     $this->FormObject["Gemarkungen"]=$GemkgFormObj;
     $this->FormObject["Strassen"]=$StrFormObj;
