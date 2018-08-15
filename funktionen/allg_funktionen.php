@@ -966,24 +966,6 @@ function showAlert($text) {
   </script><?php
 }
 
-function ArtCode2Abk($code) {
-  switch ($code) {
-    case '100' : {
-      $abk='ffr';
-    } break;
-    case '010' : {
-      $abk='kvz';
-    } break;
-    case '001' : {
-      $abk='gn';
-    } break;
-    case '111' : {
-      $abk='andere';
-    } break;
-  }
-  return $abk;
-}
-
 ########### Funktion wandelt UNIX Zeichen in DOS Zeichen um für Konvertierung WLDGE-Dateien
 function unix2dos($text) {
    $search  = array ("{", "|", "}", "~","'","[","\\","]","@"); 

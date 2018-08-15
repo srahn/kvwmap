@@ -12,7 +12,7 @@ function toggle_vertices(){
 
 function save(){	
 	document.GUI.result2.value = '';
-	if(document.getElementsByName('art')[3].checked==true && document.GUI.andere_art.value == ''){
+	if(document.getElementsByName('unterart_'+document.GUI.hauptart.value)[0] != undefined && document.getElementsByName('unterart_'+document.GUI.hauptart.value)[0].value == ''){
 		alert('Keine Dokumentart ausgewählt.');
 		return;
 	}
@@ -93,6 +93,18 @@ function slide_legend_out(evt){
 		document.getElementById('legenddiv').className = 'slidinglegend_slideout';
 	}
 }
+
+function showUnterArten(id){
+	var unterarten = document.getElementsByName('unterart_'+id);
+	var hauptart = document.getElementById('hauptart_'+id);
+	var alle_unterarten = document.getElementsByClassName('nachweise_unterart');
+	[].forEach.call(alle_unterarten, function (unterarten){
+    unterarten.style.display = 'none';
+  });
+	if(unterarten[0] != undefined){
+		if(hauptart.checked)unterarten[0].style.display = '';
+	}
+}
   
 //-->
 </script>
@@ -140,40 +152,39 @@ $legendheight = $this->map->height + 20;
 						</table></td>
 				</tr>
 				<tr> 
-					<td rowspan="23">&nbsp; </td>
-					<td rowspan="23" colspan="5"> 
+					<td rowspan="20">&nbsp; </td>
+					<td rowspan="20" colspan="5"> 
 						<?php
 							include(LAYOUTPATH.'snippets/SVG_polygon_query_area.php')
 						?>
 					</td>
 					<td colspan="2" style="border-top:1px solid #999999"><img width="290px" height="1px" src="<? echo GRAPHICSPATH; ?>leer.gif"></td>
-				</tr>					
-				<tr> 
-					<td colspan="2"><input type="radio" name="art" onchange="andere_art.value=''" value="100"<?php if ($this->formvars['art']=='100') { ?> checked<?php } ?>>
-						Fortführungsriss&nbsp;(FFR)
-					</td>
-				</tr>
-				<tr> 
-					<td colspan="2"><input type="radio" name="art" onchange="andere_art.value=''" value="010"<?php if ($this->formvars['art']=='010') { ?> checked<?php } ?>>
-						Koordinatenverzeichnis&nbsp;(KVZ)
-					</td>
-				</tr>
-				<tr> 
-					<td colspan="2"><input type="radio" name="art" onchange="andere_art.value=''" value="001"<?php if ($this->formvars['art']=='001') { ?> checked<?php } ?>>
-						Grenzniederschrift&nbsp;(GN)
-					</td>
 				</tr>
 				<tr>
-					<td colspan="2"><input type="radio" name="art" value="111"<?php if ($this->formvars['art']=='111') { ?> checked<?php } ?>>
-						andere:
-						<select name="andere_art" style="width: 185px" onchange="document.getElementsByName('art')[3].checked=true;">
-							<option value="">-- Auswahl --</option>
-							<? for($i = 0; $i < count($this->dokumentarten['id']); $i++){?>
-							<option <? if($this->formvars['andere_art'] == $this->dokumentarten['id'][$i]){echo 'selected';} ?> value="<? echo $this->dokumentarten['id'][$i]; ?>"><? echo $this->dokumentarten['art'][$i]; ?></option>	
-							<? } ?>
-						</select>
+					<td colspan="2">
+						<table cellspacing="0" cellpadding="0" style="margin: 0 0 0 -5px">
+						
+			<?		foreach($this->hauptdokumentarten as $hauptdokumentart){	?>
+							<tr>
+								<td style="vertical-align: top;padding: 0 5px 10px 0;">
+									<input type="radio" name="hauptart" id="hauptart_<? echo $hauptdokumentart['id']; ?>" onchange="showUnterArten(<? echo $hauptdokumentart['id']; ?>);" value="<? echo $hauptdokumentart['id']; ?>" <? if($this->formvars['hauptart'] == $hauptdokumentart['id']) { ?> checked<?php } ?>>
+								</td>
+								<td style="vertical-align: top;padding: 2px 0 10px 0;">
+									<? echo $hauptdokumentart['art'].'&nbsp;('.$hauptdokumentart['abkuerzung'].')';
+								if($this->dokumentarten[$hauptdokumentart['id']] != ''){	?>
+									:<select name="unterart_<? echo $hauptdokumentart['id']; ?>" class="nachweise_unterart" style="width: 185px;<? if($this->formvars['hauptart'] != $hauptdokumentart['id'])echo 'display:none'; ?>">
+										<option value="">-- Auswahl --</option>
+										<? for($i = 0; $i < count($this->dokumentarten[$hauptdokumentart['id']]); $i++){?>
+										<option <? if($this->formvars['unterart'] == $this->dokumentarten[$hauptdokumentart['id']][$i]['id']){echo 'selected';} ?> value="<? echo $this->dokumentarten['id'][$i]; ?>"><? echo $this->dokumentarten[$hauptdokumentart['id']][$i]['art']; ?></option>	
+										<? } ?>
+									</select>
+			<?				} ?>						
+								</td>
+							</tr>
+			<?		}	?>
+			
+						</table>
 					</td>
-				</tr>
 				<tr> 
 					<td colspan="2" style="border-top:1px solid #999999"><img width="290px" height="1px" src="<? echo GRAPHICSPATH; ?>leer.gif"></td>
 				</tr>
