@@ -133,7 +133,7 @@ class Nachweis {
     $this->database->begintransaction();        
 
     # 2. Prüfen der Eingabewerte
-    $ret=$this->pruefeEingabedaten($formvars['id'], $formvars['datum'],$formvars['VermStelle'],$formvars['art'],$formvars['gueltigkeit'],$formvars['stammnr'],$formvars['rissnummer'],$formvars['fortfuehrung'],$formvars['Blattformat'],$formvars['Blattnr'],false,$formvars['Bilddatei_name'],$formvars['pathlength'],$formvars['umring'], $formvars['flurid'], $formvars['Blattnr']);
+    $ret=$this->pruefeEingabedaten($formvars['id'], $formvars['datum'],$formvars['VermStelle'],$formvars['hauptart'],$formvars['gueltigkeit'],$formvars['stammnr'],$formvars['rissnummer'],$formvars['fortfuehrung'],$formvars['Blattformat'],$formvars['Blattnr'],false,$formvars['Bilddatei_name'],$formvars['pathlength'],$formvars['umring'], $formvars['flurid'], $formvars['Blattnr']);
     if ($ret[0]) {
       # Fehler bei den Eingabewerten entdeckt.  
       #echo '<br>Ergebnis der Prüfung: '.$ret;
@@ -161,7 +161,7 @@ class Nachweis {
 				$zieldatei=NACHWEISDOCPATH.$formvars['flurid'].'/'.$this->buildNachweisNr($formvars[NACHWEIS_PRIMARY_ATTRIBUTE], $formvars[NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$formvars['artname'].'/'.$formvars['zieldateiname'];
 
         # 4. Ändern der Eintragung in der Datenbank
-        $ret=$this->aktualisierenDokument($formvars['id'],$formvars['datum'],$formvars['flurid'],$formvars['VermStelle'],$formvars['art'],$formvars['andere_art'],$formvars['gueltigkeit'],$formvars['geprueft'],$formvars['stammnr'],$formvars['Blattformat'],$formvars['Blattnr'],$formvars['rissnummer'],$formvars['fortfuehrung'],$formvars['bemerkungen'],$formvars['bemerkungen_intern'],$formvars['umring'],$formvars['artname'].'/'.$formvars['zieldateiname'], $user);
+        $ret=$this->aktualisierenDokument($formvars['id'],$formvars['datum'],$formvars['flurid'],$formvars['VermStelle'],$formvars['hauptart'],$formvars['unterart_'.$formvars['hauptart']],$formvars['gueltigkeit'],$formvars['geprueft'],$formvars['stammnr'],$formvars['Blattformat'],$formvars['Blattnr'],$formvars['rissnummer'],$formvars['fortfuehrung'],$formvars['bemerkungen'],$formvars['bemerkungen_intern'],$formvars['umring'],$formvars['artname'].'/'.$formvars['zieldateiname'], $user);
         if ($ret[0]) {
           # Aktualisierungsvorgang in der Datenbank nicht erfolgreich
           $errmsg=$ret[1];
@@ -230,14 +230,24 @@ class Nachweis {
     }
     return $ret;
   }
+
+  function getHauptDokumentarten(){
+  	$sql="SELECT * FROM nachweisverwaltung.n_hauptdokumentarten order by id"; 
+    $ret=$this->database->execSQL($sql,4, 0);    
+    if (!$ret[0]) {
+      while($rs=pg_fetch_array($ret[1])){
+				$art[$rs['id']] = $rs;
+      }
+    }
+    return $art;
+  }	
   
   function getDokumentarten(){
   	$sql="SELECT * FROM nachweisverwaltung.n_dokumentarten order by art"; 
     $ret=$this->database->execSQL($sql,4, 0);    
     if (!$ret[0]) {
       while($rs=pg_fetch_array($ret[1])){
-				$art['id'][] = $rs['id'];
-				$art['art'][] = $rs['art'];
+				$art[$rs['hauptart']][] = $rs;
       }
     }
     return $art;
@@ -303,14 +313,13 @@ class Nachweis {
   	return $result;
   }
   
-  function pruefeEingabedaten($id, $datum, $VermStelle, $art, $gueltigkeit, $stammnr, $rissnummer, $fortfuehrung, $Blattformat, $Blattnr, $changeDocument,$Bilddatei_name, $pathlength, $umring, $flur, $blattnr){
+  function pruefeEingabedaten($id, $datum, $VermStelle, $hauptart, $gueltigkeit, $stammnr, $rissnummer, $fortfuehrung, $Blattformat, $Blattnr, $changeDocument,$Bilddatei_name, $pathlength, $umring, $flur, $blattnr){
 		global $nachweis_unique_attributes;
 		# Test ob schon ein Nachweis mit dieser Kombination existiert
 		if($nachweis_unique_attributes != NULL){
 			if(NACHWEIS_SECONDARY_ATTRIBUTE == 'fortfuehrung')$test_fortfuehrung = $fortfuehrung;
 			if(in_array('art', $nachweis_unique_attributes)){
-				if($art == '111')$test_art = '0001';
-				else $test_art = $art;
+				$test_art = $hauptart;
 			}
 			if(in_array('blattnr', $nachweis_unique_attributes))$test_blattnr = $Blattnr;			
 			if(NACHWEIS_PRIMARY_ATTRIBUTE == 'stammnr'){
@@ -369,14 +378,8 @@ class Nachweis {
       }
     }
     # Test der Dokumentenart  
-    if ($art==''){
+    if ($hauptart==''){
         $errmsg.='Bitte wählen Sie die Art des einzugebenden Dokuments aus! <br>';
-    }
-    else{
-      $nums = array ("100","010","001","111");
-      if (!in_array($art,$nums)) {
-        $errmsg.='Die Auswahl der Dokumentenart ist nicht korrekt! <br>';
-      }
     }
     if ($gueltigkeit==''){
       $errmsg.='Bitte wählen Sie die Gültigkeit des einzugebenden Dokuments aus! <br>';
@@ -612,19 +615,19 @@ class Nachweis {
     return $ret;
   }
   
-  function eintragenNeuesDokument($datum,$flurid,$VermStelle,$art,$andere_art,$gueltigkeit,$geprueft,$stammnr,$blattformat,$blattnr,$rissnummer,$fortf,$bemerkungen,$bemerkungen_intern,$zieldatei,$umring,$user) {
+  function eintragenNeuesDokument($datum,$flurid,$VermStelle,$hauptart,$unterart,$gueltigkeit,$geprueft,$stammnr,$blattformat,$blattnr,$rissnummer,$fortf,$bemerkungen,$bemerkungen_intern,$zieldatei,$umring,$user) {
     #2005-11-24_pk
     if($fortf == '')$fortf = 'NULL';
     $this->debug->write('Einfügen der Metadaten zum neuen Nachweisdokument in die Sachdatenbank',4);
     $sql ="INSERT INTO nachweisverwaltung.n_nachweise (flurid,stammnr,art,blattnummer,datum,vermstelle,gueltigkeit,geprueft,format,link_datei,the_geom,fortfuehrung,rissnummer,bemerkungen,bemerkungen_intern,bearbeiter,zeit,erstellungszeit)";
-    $sql.=" VALUES (".$flurid.",'".trim($stammnr)."','".$art."','".trim($blattnr)."','".$datum."'";
+    $sql.=" VALUES (".$flurid.",'".trim($stammnr)."',".$hauptart.",'".trim($blattnr)."','".$datum."'";
     $sql.=",'".$VermStelle."','".$gueltigkeit."','".$geprueft."','".$blattformat."','".$zieldatei."',st_transform(st_geometryfromtext('".$umring."', ".$this->client_epsg."), (select srid from geometry_columns where f_table_name = 'n_nachweise'))";
     $sql.=",".$fortf.",'".$rissnummer."','".$bemerkungen."','".$bemerkungen_intern."','".$user->Vorname." ".$user->Name."', '".date('Y-m-d G:i:s')."', '".date('Y-m-d G:i:s')."')";
 		#echo '<br>Polygon-SQL: '.$sql;
     $ret=$this->database->execSQL($sql,4, 1);
-    if($andere_art != ''){
+    if($unterart != ''){
     	$sql = "INSERT INTO nachweisverwaltung.n_nachweise2dokumentarten";
-    	$sql .= " SELECT id, ".$andere_art." FROM nachweisverwaltung.n_nachweise WHERE oid = ".pg_last_oid($ret[1]);
+    	$sql .= " SELECT id, ".$unterart." FROM nachweisverwaltung.n_nachweise WHERE oid = ".pg_last_oid($ret[1]);
     	#echo $sql;
     	$ret=$this->database->execSQL($sql,4, 1);	
     }
@@ -635,7 +638,7 @@ class Nachweis {
     return $ret;
   }
   
-  function aktualisierenDokument($id,$datum,$flurid,$VermStelle,$art,$andere_art,$gueltigkeit,$geprueft,$stammnr,$Blattformat,$Blattnr,$rissnr,$fortf,$bemerkungen,$bemerkungen_intern,$umring,$zieldateiname,$user){
+  function aktualisierenDokument($id,$datum,$flurid,$VermStelle,$hauptart,$unterart,$gueltigkeit,$geprueft,$stammnr,$Blattformat,$Blattnr,$rissnr,$fortf,$bemerkungen,$bemerkungen_intern,$umring,$zieldateiname,$user){
     $this->debug->write('Aktualisieren der Metadaten zu einem bestehenden Nachweisdokument',4);
     $sql="UPDATE nachweisverwaltung.n_nachweise SET ";
 		if($flurid != NULL)$sql.="flurid='".$flurid."', ";
@@ -643,9 +646,9 @@ class Nachweis {
 			if($stammnr === '')$sql.="stammnr=NULL, ";
 			else $sql.="stammnr='".trim($stammnr)."', ";
 		}
-		if($art != NULL)$sql.="art='".$art."'";
+		if($hauptart != NULL)$sql.="art=".$hauptart;
     if($Blattnr != NULL)$sql.=",blattnummer='".trim($Blattnr)."', ";
-		if($art != NULL)$sql.="datum='".$datum."', ";
+		if($datum != NULL)$sql.="datum='".$datum."', ";
 		if($VermStelle != NULL)$sql.="vermstelle='".$VermStelle."', ";
     if($gueltigkeit != NULL)$sql.="gueltigkeit='".$gueltigkeit."', ";
 		if($geprueft != NULL)$sql.="geprueft='".$geprueft."', ";
@@ -673,18 +676,18 @@ class Nachweis {
 				$ret=$this->database->execSQL($sql,4, 1);	
 			}
 			else{
-				if($andere_art != ''){
+				if($unterart != ''){
 					$sql = "SELECT dokumentart_id FROM nachweisverwaltung.n_nachweise2dokumentarten WHERE nachweis_id = ".$id.";";
 					$query=@pg_query($this->database->dbConn,$sql);
 					$rs=pg_fetch_array($query);
 					if ($rs[0]!=''){
-						$sql = "UPDATE nachweisverwaltung.n_nachweise2dokumentarten SET dokumentart_id = ".$andere_art." WHERE nachweis_id = ".$id.";";
+						$sql = "UPDATE nachweisverwaltung.n_nachweise2dokumentarten SET dokumentart_id = ".$unterart." WHERE nachweis_id = ".$id.";";
 						#echo $sql;
 						$ret=$this->database->execSQL($sql,4, 1);
 					}
 					else{
 						$sql = "INSERT INTO nachweisverwaltung.n_nachweise2dokumentarten";
-						$sql .= " SELECT id, ".$andere_art." FROM nachweisverwaltung.n_nachweise WHERE id = ".$id;
+						$sql .= " SELECT id, ".$unterart." FROM nachweisverwaltung.n_nachweise WHERE id = ".$id;
 						#echo $sql;
 						$ret=$this->database->execSQL($sql,4, 1);	
 					}	
