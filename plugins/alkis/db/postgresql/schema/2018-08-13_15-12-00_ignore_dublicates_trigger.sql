@@ -31,7 +31,7 @@ BEGIN
 			EXECUTE s;
 			GET DIAGNOSTICS n = ROW_COUNT;
 			IF n<>1 THEN
-				RAISE EXCEPTION 'Löschen des Eintrags in der delete-Tabelle schlug fehl: %', s;
+				RAISE EXCEPTION 'LÃ¶schen des Eintrags in der delete-Tabelle schlug fehl: %', s;
 			END IF;
 		END IF;
 	END LOOP;
