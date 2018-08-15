@@ -435,6 +435,9 @@ define('IMAGEMAGICKPATH', '/usr/bin/');                        # Version 1.7.3
 # Pfad zum Ordner für Datei-Uploads
 define('UPLOADPATH',SHAPEPATH.'upload/');       # Version 1.6.7
 
+# maximale Datenmenge in MB, die beim Datenimport hochgeladen werden darf
+define('MAXUPLOADSIZE', 200);										# Version 2.9
+
 # Definiert, ob die Festpunkte in 2 Streifen liegen oder nicht
 #define('FESTPUNKTE_2_STREIFEN', 'true');  #true/false   # Version 1.6.7			# in Version 2.6 gelöscht
 

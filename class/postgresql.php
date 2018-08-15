@@ -1340,7 +1340,7 @@ FROM
     }
     return $ret;
   }
-  
+	  
   function getStrassen($FlurstKennz) {
     $sql ="set enable_seqscan = off;SELECT DISTINCT g.schluesselgesamt as gemeinde, g.bezeichnung as gemeindename, l.lage as strasse, s.bezeichnung as strassenname ";
     $sql.="FROM alkis.ax_gemeinde as g, alkis.ax_flurstueck as f ";
@@ -2090,7 +2090,7 @@ FROM
 		if($gml_id != '')$sql.=" AND p.gml_id = '".$gml_id."'";
 
     if($bezirk!='') {
-      $sql.=" AND b.schluesselgesamt=".(int)$bezirk;
+      $sql.=" AND b.schluesselgesamt = '".$bezirk."'";
     }
     if($blatt != ''){
       $sql.=" AND g.buchungsblattnummermitbuchstabenerweiterung= '".$blatt."'";

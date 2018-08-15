@@ -7727,6 +7727,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         # Steht an dieser Stelle, weil die Auswahlmöglichkeiten von Auswahlfeldern abhängig sein können
         $attributes = $mapDB->add_attribute_values($attributes, $layerdb, $layerset[0]['shape'], true, $this->Stelle->id);
 
+				# Datendrucklayouts abfragen
+				include_(CLASSPATH.'datendrucklayout.php');
+				$ddl = new ddl($this->database);
+				$layerset[0]['layouts'] = $ddl->load_layouts($this->Stelle->id, NULL, $layerset[0]['Layer_ID'], array(0,1));
+				
 				# last_search speichern
 				if($this->last_query == '' AND $this->formvars['embedded_subformPK'] == '' AND $this->formvars['embedded'] == '' AND $this->formvars['subform_link'] == ''){
 					$this->formvars['search_name'] = '<last_search>';
@@ -7734,7 +7739,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					$this->user->rolle->save_search($attributes, $this->formvars);
 				}
 
-				if($layerset[0]['count'] != 0 AND $this->formvars['embedded_subformPK'] == '' AND $this->formvars['embedded'] == '' AND $this->formvars['embedded_dataPDF'] == '' AND $this->formvars['subform_link'] == ''){
+				if($layerset[0]['count'] != 0 AND $this->formvars['embedded_subformPK'] == '' AND $this->formvars['embedded'] == '' AND $this->formvars['embedded_dataPDF'] == ''){
 					# last_query speichern
 					$this->user->rolle->delete_last_query();
 					$this->user->rolle->save_last_query('Layer-Suche_Suchen', $this->formvars['selected_layer_id'], $sql, $sql_order, $this->formvars['anzahl'], $this->formvars['offset_'.$layerset[0]['Layer_ID']]);
@@ -7754,11 +7759,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							$layerset[0]['querymaps'][$k] = $this->createQueryMap($layerset[0], $k);
 						}
 					}
-
-					# Datendrucklayouts abfragen
-					include_(CLASSPATH.'datendrucklayout.php');
-					$ddl = new ddl($this->database);
-					$layerset[0]['layouts'] = $ddl->load_layouts($this->Stelle->id, NULL, $layerset[0]['Layer_ID'], array(0,1));
 
 					# wenn Attributname/Wert-Paare übergeben wurden, diese im Formular einsetzen
 					if(is_array($this->formvars['attributenames'])){
@@ -9556,59 +9556,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->output();
   }
 
-	function gpx_import(){
-    $this->titel='GPX-Import';
-    $this->main='gpx_import.php';
-    $this->output();
-  }
-
-  function gpx_import_importieren(){
-		include_(CLASSPATH.'data_import_export.php');
-		$this->data_import_export = new data_import_export();
-		$layer_id = $this->data_import_export->create_import_rollenlayer($this->formvars, 'GPX', $this->Stelle, $this->user, $this->database, $this->pgdatabase);
-		$this->loadMap('DataBase');
-		$this->zoomToMaxLayerExtent($layer_id);
-		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
-    $this->drawMap();
-    $this->saveMap('');
-    $this->output();
-  }
-
-	function dxf_import(){
-    $this->titel='DXF-Import';
-    $this->main='dxf_import.php';
-    $this->output();
-  }
-
-  function dxf_import_importieren(){
-		include_(CLASSPATH.'data_import_export.php');
-		$this->data_import_export = new data_import_export();
-		$layer_id = $this->data_import_export->create_import_rollenlayer($this->formvars, 'DXF', $this->Stelle, $this->user, $this->database, $this->pgdatabase);
-		$this->loadMap('DataBase');
-		$this->zoomToMaxLayerExtent($layer_id);
-		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
-    $this->drawMap();
-    $this->saveMap('');
-    $this->output();
-  }
-
-	function ovl_import(){
-    $this->titel='OVL-Import';
-    $this->main='ovl_import.php';
-    $this->output();
-  }
-
-  function ovl_import_importieren(){
-		include_(CLASSPATH.'data_import_export.php');
-		$this->data_import_export = new data_import_export();
-		$layer_id = $this->data_import_export->create_import_rollenlayer($this->formvars, 'OVL', $this->Stelle, $this->user, $this->database, $this->pgdatabase);
-		$this->loadMap('DataBase');
-		$this->zoomToMaxLayerExtent($layer_id);
-		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
-    $this->drawMap();
-    $this->saveMap('');
-    $this->output();
-  }
 
   function TIFExport(){
     $this->loadMap('DataBase');
@@ -9632,47 +9579,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->output();
   }
 
-	function create_geojson_rollenlayer(){
-    $this->main='create_geojson_rollenlayer.php';
-    $this->output();
-	}
-
-	function create_geojson_rollenlayer_load(){
-		include_(CLASSPATH.'data_import_export.php');
-		$this->data_import_export = new data_import_export();
-		$layer_id = $this->data_import_export->create_import_rollenlayer($this->formvars, 'GeoJSON', $this->Stelle, $this->user, $this->database, $this->pgdatabase);
-		$this->loadMap('DataBase');
-		$this->zoomToMaxLayerExtent($layer_id);
-		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
-    $this->drawMap();
-    $this->saveMap('');
-    $this->output();
-	}
-
-	function create_shp_rollenlayer(){
-		$this->titel='Shape-Datei Anzeigen';
-    $this->main='create_shape_rollenlayer.php';
-    $this->epsg_codes = read_epsg_codes($this->pgdatabase);
-    $this->output();
-	}
-
-	function create_shp_rollenlayer_load(){
-		include_(CLASSPATH.'data_import_export.php');
-		$this->data_import_export = new data_import_export();
-		$layer_id = $this->data_import_export->create_import_rollenlayer($this->formvars, 'Shape', $this->Stelle, $this->user, $this->database, $this->pgdatabase);
-		if($layer_id != NULL){
-			$this->loadMap('DataBase');
-			$this->zoomToMaxLayerExtent($layer_id);
-			$this->user->rolle->newtime = $this->user->rolle->last_time_id;
-			$this->drawMap();
-			$this->saveMap('');
-			$this->output();
-		}
-		else{
-			$this->create_shp_rollenlayer();
-		}
-	}
-
 	function create_point_rollenlayer(){
     $this->main='create_point_rollenlayer.php';
     $this->epsg_codes = read_epsg_codes($this->pgdatabase);
@@ -9683,14 +9589,14 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->main='create_point_rollenlayer.php';
 		include_(CLASSPATH.'data_import_export.php');
 		$this->data_import_export = new data_import_export();
-		$this->data_import_export->pointlist = $this->data_import_export->load_custom_pointlist($this->formvars);
+		$this->data_import_export->pointlist = $this->data_import_export->load_custom_pointlist($this->user);
     $this->output();
 	}
 
 	function create_point_rollenlayer_import(){
 		include_(CLASSPATH.'data_import_export.php');
 		$this->data_import_export = new data_import_export();
-		$layer_id = $this->data_import_export->create_import_rollenlayer($this->formvars, 'point', $this->Stelle, $this->user, $this->database, $this->pgdatabase);
+		$layer_id = $this->data_import_export->process_import_file(NULL, NULL, 1, $this->Stelle, $this->user, $this->pgdatabase, $this->formvars['epsg'], 'point', $this->formvars);
 		$this->loadMap('DataBase');
 		$this->zoomToMaxLayerExtent($layer_id);
 		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
@@ -9745,19 +9651,20 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				@mkdir($user_upload_folder);
 				$nachDatei = $user_upload_folder . $_files['uploadfile']['name'];
 				if (move_uploaded_file($_files['uploadfile']['tmp_name'], $nachDatei)) {
-					echo '<i class="fa fa-check" style="color: green;"></i>';
+					$file_number = 1;
 					$dateityp = strtolower(array_pop(explode('.', $nachDatei)));
 					if ($dateityp == 'zip') {
 						$files = unzip($nachDatei, false, false, true);
 						foreach ($files as $file) {
 							$dateityp = strtolower(array_pop(explode('.', $file)));
 							if (!in_array($dateityp, array('dbf', 'shx'))) { // damit gezippte Shapes nur einmal bearbeitet werden
-								$this->daten_import_process($this->formvars['upload_id'], $file, NULL);
+								$this->daten_import_process($this->formvars['upload_id'], $file_number, $file, NULL);
+								$file_number++;
 							}
 						}
 					}
 					else {
-						$this->daten_import_process($this->formvars['upload_id'], $_files['uploadfile']['name'], NULL);
+						$this->daten_import_process($this->formvars['upload_id'], $file_number, $_files['uploadfile']['name'], NULL);
 					}
 					echo '~startNextUpload();';
 				}
@@ -9765,13 +9672,13 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		}
 	}
 
-	function daten_import_process($upload_id, $filename, $epsg) {
+	function daten_import_process($upload_id, $file_number, $filename, $epsg) {
 		include_once (CLASSPATH.'data_import_export.php');
 		$this->data_import_export = new data_import_export();
 		$user_upload_folder = UPLOADPATH . $this->user->id.'/';
-		$layer_id = $this->data_import_export->process_import_file($upload_id, $user_upload_folder.$filename, $this->Stelle, $this->user, $this->pgdatabase, $epsg);
+		$layer_id = $this->data_import_export->process_import_file($upload_id, $file_number, $user_upload_folder.$filename, $this->Stelle, $this->user, $this->pgdatabase, $epsg);
 		if ($layer_id != NULL) {
-			echo 'Import erfolgreich <a href="index.php?go=zoomToMaxLayerExtent&layer_id='.$layer_id.'">Zoom auf Layer</a>';
+			echo $filename.' importiert&nbsp;=>&nbsp;<a href="index.php?go=zoomToMaxLayerExtent&layer_id='.$layer_id.'">Zoom auf Layer</a>';
 		}
 	}
 
@@ -14678,7 +14585,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		else{
 			$GemListe=$Gemeinde->getGemeindeListe(array_merge(array_keys($GemeindenStelle['ganze_gemeinde']), array_keys($GemeindenStelle['eingeschr_gemeinde'])));
 			$GemkgListe=$Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
-		}
+		}		
 		# Wenn nur eine Gemeinde zur Auswahl steht, wird diese gewählt; Verhalten so, als würde die Gemeinde vorher gewählt worden sein.
 		if(count($GemListe['ID'])==1)$GemID=$GemListe['ID'][0];
     // Sortieren der Gemarkungen unter Berücksichtigung von Umlauten
@@ -14746,6 +14653,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $StrFormObj=new selectFormObject("StrName","text","","","","25","25","",NULL);
       $HausNrFormObj=new selectFormObject("HausNr","text","","","","5","5","",NULL);
     }
+		$this->FormObject["Orte"]=$OrtsFormObj;
     $this->FormObject["Gemeinden"]=$GemFormObj;
     $this->FormObject["Gemarkungen"]=$GemkgFormObj;
     $this->FormObject["Strassen"]=$StrFormObj;
