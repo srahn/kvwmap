@@ -31,7 +31,9 @@ class stelle {
 
 	function stelle($id, $database) {
 		global $debug;
+		global $log_mysql;
 		$this->debug = $debug;
+		$this->log = $log_mysql;
 		$this->id = $id;
 		$this->database = $database;
 		$this->Bezeichnung = $this->getName();
@@ -105,8 +107,8 @@ class stelle {
     return $rs['Bezeichnung'];
   }
 
-  function readDefaultValues() {
-    $sql = "
+	function readDefaultValues() {
+		$sql = "
 			SELECT
 				*
 			FROM
@@ -114,38 +116,38 @@ class stelle {
 			WHERE
 				ID = " . $this->id . "
 		";
-    $this->debug->write("<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs=mysql_fetch_array($query);    
-    $this->MaxGeorefExt=ms_newRectObj();
-    $this->MaxGeorefExt->setextent($rs['minxmax'],$rs['minymax'],$rs['maxxmax'],$rs['maxymax']);
-    $this->epsg_code=$rs["epsg_code"];
-    $this->alb_raumbezug=$rs["alb_raumbezug"];
-    $this->alb_raumbezug_wert=$rs["alb_raumbezug_wert"];
-    $this->pgdbhost = ($rs["pgdbhost"] == 'PGSQL_PORT_5432_TCP_ADDR') ? getenv('PGSQL_PORT_5432_TCP_ADDR') : $rs["pgdbhost"];
-    $this->pgdbname=$rs["pgdbname"];
-    $this->pgdbuser=$rs["pgdbuser"];
-    $this->pgdbpasswd=$rs["pgdbpasswd"];
-    $this->protected=$rs["protected"];
-    //---------- OWS Metadaten ----------//
-    $this->ows_title=$rs["ows_title"];
-    $this->ows_abstract=$rs["ows_abstract"];
-    $this->wms_accessconstraints=$rs["wms_accessconstraints"];
-    $this->ows_contactperson=$rs["ows_contactperson"];
-    $this->ows_contactorganization=$rs["ows_contactorganization"];
-    $this->ows_contactelectronicmailaddress=$rs["ows_contactemailaddress"];
-    $this->ows_contactposition=$rs["ows_contactposition"];
-    $this->ows_fees=$rs["ows_fees"];
-    $this->ows_srs=$rs["ows_srs"];
-    $this->check_client_ip=$rs["check_client_ip"];
-    $this->checkPasswordAge=$rs["check_password_age"];
-    $this->allowedPasswordAge=$rs["allowed_password_age"];
-    $this->useLayerAliases=$rs["use_layer_aliases"];
+		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>' . $sql, 4);
+		$query = mysql_query($sql,$this->database->dbConn);
+		if ($query == 0) { $this->debug->write('<br>Abbruch Zeile: ' . __LINE__, 4); return 0; }
+		$rs = mysql_fetch_array($query);    
+		$this->MaxGeorefExt = ms_newRectObj();
+		$this->MaxGeorefExt->setextent($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
+		$this->epsg_code = $rs['epsg_code'];
+		$this->alb_raumbezug = $rs['alb_raumbezug'];
+		$this->alb_raumbezug_wert = $rs['alb_raumbezug_wert'];
+		$this->pgdbhost = ($rs['pgdbhost'] == 'PGSQL_PORT_5432_TCP_ADDR' ? getenv('PGSQL_PORT_5432_TCP_ADDR') : $rs['pgdbhost']);
+		$this->pgdbname = $rs['pgdbname'];
+		$this->pgdbuser = $rs['pgdbuser'];
+		$this->pgdbpasswd = $rs['pgdbpasswd'];
+		$this->protected = $rs['protected'];
+		//---------- OWS Metadaten ----------//
+		$this->ows_title = $rs['ows_title'];
+		$this->ows_abstract = $rs['ows_abstract'];
+		$this->wms_accessconstraints = $rs['wms_accessconstraints'];
+		$this->ows_contactperson = $rs['ows_contactperson'];
+		$this->ows_contactorganization = $rs['ows_contactorganization'];
+		$this->ows_contactelectronicmailaddress = $rs['ows_contactemailaddress'];
+		$this->ows_contactposition = $rs['ows_contactposition'];
+		$this->ows_fees = $rs['ows_fees'];
+		$this->ows_srs = $rs['ows_srs'];
+		$this->check_client_ip = $rs['check_client_ip'];
+		$this->checkPasswordAge = $rs['check_password_age'];
+		$this->allowedPasswordAge = $rs['allowed_password_age'];
+		$this->useLayerAliases = $rs['use_layer_aliases'];
 		$this->selectable_layer_params = $rs['selectable_layer_params'];
-		$this->hist_timestamp=$rs["hist_timestamp"];
+		$this->hist_timestamp = $rs['hist_timestamp'];
 		$this->default_user_id = $rs['default_user_id'];
-  }
+	}
 
   function checkClientIpIsOn() {
     $sql ='SELECT check_client_ip FROM stelle WHERE ID = '.$this->id;
