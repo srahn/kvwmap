@@ -1198,6 +1198,11 @@ class data_import_export {
 			}
 			# bei Bedarf zippen
 			if($zip){
+				# Beim Zippen gehen die Umlaute in den Dateinamen kaputt, deswegen vorher umwandeln
+				array_walk(searchdir(IMAGEPATH.$folder, true), function($item, $key){
+					$pathinfo = pathinfo($item);
+					rename($item, $pathinfo['dirname'].'/'.umlaute_umwandeln($pathinfo['filename']).'.'.$pathinfo['extension']);
+				});
 				exec(ZIP_PATH.' -j '.IMAGEPATH.$folder.' '.IMAGEPATH.$folder.'/*'); # Ordner zippen
 				#echo ZIP_PATH.' -j '.IMAGEPATH.$folder.' '.IMAGEPATH.$folder.'/*';
 				$exportfile = IMAGEPATH.$folder.'.zip';
