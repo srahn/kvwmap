@@ -188,13 +188,12 @@ else {
 <?	foreach($this->hauptdokumentarten as $hauptdokumentart){	?>
 			<tr> 
 				<td colspan="2">
-					<input type="checkbox" name="suchhauptart_<? echo $hauptdokumentart['id']; ?>" value="1"<?php if ($this->formvars['suchhauptart_'.$hauptdokumentart['id']]) { ?> checked<?php } ?>>&nbsp;<? echo $hauptdokumentart['art'].'&nbsp;('.$hauptdokumentart['abkuerzung'].')'; ?>
-					<? $such_andere_art = explode(',', $this->formvars['such_andere_art']); 
-					if($this->dokumentarten[$hauptdokumentart['id']] != ''){	?>
-					:&nbsp;<select name="suchunterart_<? echo $hauptdokumentart['id']; ?>[]" multiple="true" size="1" style="position: absolute;width: 185px" onmouseover="this.size=10" onmouseout="this.size=1">
+					<input type="checkbox" name="suchhauptart[]" value="<? echo $hauptdokumentart['id']; ?>"<?php if(in_array($hauptdokumentart['id'], $this->formvars['suchhauptart'])) { ?> checked<?php } ?>>&nbsp;<? echo $hauptdokumentart['art'].'&nbsp;('.$hauptdokumentart['abkuerzung'].')'; ?>
+<?				if($this->dokumentarten[$hauptdokumentart['id']] != ''){	?>
+					:&nbsp;<select name="suchunterart[]" multiple="true" size="1" style="position: absolute;width: 185px" onmouseover="this.size=10" onmouseout="this.size=1">
 						<option value="">alle</option>
 						<? for($i = 0; $i < count($this->dokumentarten[$hauptdokumentart['id']]); $i++){?>
-							<option <? if(in_array($this->dokumentarten[$hauptdokumentart['id']][$i]['id'], $such_andere_art)){echo 'selected';} ?> value="<? echo $this->dokumentarten[$hauptdokumentart['id']][$i]['id']; ?>"><? echo $this->dokumentarten[$hauptdokumentart['id']][$i]['art']; ?></option>	
+							<option <? if(in_array($this->dokumentarten[$hauptdokumentart['id']][$i]['id'], $this->formvars['suchunterart'])){echo 'selected';} ?> value="<? echo $this->dokumentarten[$hauptdokumentart['id']][$i]['id']; ?>"><? echo $this->dokumentarten[$hauptdokumentart['id']][$i]['art']; ?></option>	
 						<? } ?>
 					</select>
 					<? } ?>

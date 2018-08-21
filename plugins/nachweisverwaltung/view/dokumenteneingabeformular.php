@@ -167,12 +167,12 @@ $legendheight = $this->map->height + 20;
 			<?		foreach($this->hauptdokumentarten as $hauptdokumentart){	?>
 							<tr>
 								<td style="vertical-align: top;padding: 0 5px 10px 0;">
-									<input type="radio" name="hauptart" id="hauptart_<? echo $hauptdokumentart['id']; ?>" onchange="showUnterArten(<? echo $hauptdokumentart['id']; ?>);" value="<? echo $hauptdokumentart['id']; ?>" <? if($this->formvars['hauptart'] == $hauptdokumentart['id']) { ?> checked<?php } ?>>
+									<input type="radio" name="hauptart" id="hauptart_<? echo $hauptdokumentart['id']; ?>" onchange="showUnterArten(<? echo $hauptdokumentart['id']; ?>);" value="<? echo $hauptdokumentart['id']; ?>" <? if($this->formvars['art'] == $hauptdokumentart['id']) { ?> checked<?php } ?>>
 								</td>
 								<td style="vertical-align: top;padding: 2px 0 10px 0;">
 									<? echo $hauptdokumentart['art'].'&nbsp;('.$hauptdokumentart['abkuerzung'].')';
 								if($this->dokumentarten[$hauptdokumentart['id']] != ''){	?>
-									:<select name="unterart_<? echo $hauptdokumentart['id']; ?>" class="nachweise_unterart" style="width: 185px;<? if($this->formvars['hauptart'] != $hauptdokumentart['id'])echo 'display:none'; ?>">
+									:<select name="unterart_<? echo $hauptdokumentart['id']; ?>" class="nachweise_unterart" style="width: 185px;<? if($this->formvars['art'] != $hauptdokumentart['id'])echo 'display:none'; ?>">
 										<option value="">-- Auswahl --</option>
 										<? for($i = 0; $i < count($this->dokumentarten[$hauptdokumentart['id']]); $i++){?>
 										<option <? if($this->formvars['unterart'] == $this->dokumentarten[$hauptdokumentart['id']][$i]['id']){echo 'selected';} ?> value="<? echo $this->dokumentarten['id'][$i]; ?>"><? echo $this->dokumentarten[$hauptdokumentart['id']][$i]['art']; ?></option>	
@@ -314,7 +314,7 @@ $legendheight = $this->map->height + 20;
 				</tr>
 				<tr>
 					<td>&nbsp;</td> 
-					<td><?php if ($this->formvars[NACHWEIS_PRIMARY_ATTRIBUTE]!='') { ?><a href="index.php?go=Nachweisanzeige&order=<? echo $this->formvars['order']; ?>&richtung=<? echo $this->formvars['richtung']; ?>&flur_thematisch=<? echo $this->formvars['flur_thematisch']; ?>&such_andere_art=<? echo $this->formvars['such_andere_art'].'#'.$this->formvars['id']; ?>">&lt;&lt;&nbsp;zur&uuml;ck&nbsp;zum&nbsp;Rechercheergebnis</a><?php } ?></td>
+					<td><?php if ($this->formvars[NACHWEIS_PRIMARY_ATTRIBUTE]!='') { ?><a href="index.php?go=Nachweisanzeige&order=<? echo $this->formvars['order']; ?>&richtung=<? echo $this->formvars['richtung']; ?>&flur_thematisch=<? echo $this->formvars['flur_thematisch']; ?>&suchunterart=<? echo $this->formvars['suchunterart'].'#'.$this->formvars['id']; ?>">&lt;&lt;&nbsp;zur&uuml;ck&nbsp;zum&nbsp;Rechercheergebnis</a><?php } ?></td>
 					<td>&nbsp;<span class="fett">Maßstab&nbsp;1:&nbsp;</span><input type="text" id="scale" name="nScale" size="5" value="<?php echo round($this->map->scaledenom); ?>"></td>
 				<? if($this->user->rolle->runningcoords != '0'){ ?>
 				<td width="100px"><span class="fett">&nbsp;<?php echo $this->strCoordinates; ?>:</span>&nbsp;</td>
