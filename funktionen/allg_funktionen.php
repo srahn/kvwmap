@@ -786,6 +786,8 @@ function umlaute_umwandeln($name){
   $name = str_replace('ß', 'ss', $name);
   $name = str_replace('.', '', $name);
   $name = str_replace(':', '', $name);
+	$name = str_replace('(', '', $name);
+	$name = str_replace(')', '', $name);
   $name = str_replace('/', '-', $name);
   $name = str_replace(' ', '', $name);
   $name = str_replace('-', '_', $name);
@@ -973,24 +975,6 @@ function showAlert($text) {
   <script type="text/javascript">
     alert("<?php echo $text; ?>");
   </script><?php
-}
-
-function ArtCode2Abk($code) {
-  switch ($code) {
-    case '100' : {
-      $abk='ffr';
-    } break;
-    case '010' : {
-      $abk='kvz';
-    } break;
-    case '001' : {
-      $abk='gn';
-    } break;
-    case '111' : {
-      $abk='andere';
-    } break;
-  }
-  return $abk;
 }
 
 ########### Funktion wandelt UNIX Zeichen in DOS Zeichen um für Konvertierung WLDGE-Dateien

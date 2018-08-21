@@ -1044,46 +1044,6 @@ function go_switch($go){
 				$GUI->uko_import_importieren();
 			} break;
 
-			case 'GPX_Import' : {
-				$GUI->gpx_import();
-			} break;
-
-			case 'GPX_Import_Laden' : {
-				$GUI->gpx_import_importieren();
-			} break;
-
-			case 'OVL_Import' : {
-				$GUI->ovl_import();
-			} break;
-
-			case 'OVL_Import_Laden' : {
-				$GUI->ovl_import_importieren();
-			} break;
-
-			case 'DXF_Import' : {
-				$GUI->dxf_import();
-			} break;
-
-			case 'DXF_Import_Laden' : {
-				$GUI->dxf_import_importieren();
-			} break;
-
-			case 'GeoJSON_Anzeigen' : {
-				$GUI->create_geojson_rollenlayer();
-			} break;
-
-			case 'GeoJSON_Anzeigen_Datei laden' : {
-				$GUI->create_geojson_rollenlayer_load();
-			} break;
-
-			case 'SHP_Anzeigen' : {
-				$GUI->create_shp_rollenlayer();
-			} break;
-
-			case 'SHP_Anzeigen_Datei laden' : {
-				$GUI->create_shp_rollenlayer_load();
-			} break;
-
 			case 'Punktliste_Anzeigen' : {
 				$GUI->create_point_rollenlayer();
 			} break;
@@ -1118,6 +1078,14 @@ function go_switch($go){
 
 			case 'Daten_Import' : {
 				$GUI->daten_import();
+			} break;
+
+			case 'Daten_Import_Upload' : {
+				$GUI->daten_import_upload();
+			} break;
+
+			case 'Daten_Import_Process' : {
+				$GUI->daten_import_process($GUI->formvars['upload_id'], $GUI->formvars['filenumber'], $GUI->formvars['filename'], $GUI->formvars['epsg']);
 			} break;
 
 			case 'Daten_Export' : {
@@ -1608,6 +1576,16 @@ function go_switch($go){
 				$currenttime=date('Y-m-d H:i:s',time());
 				$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
 				$GUI->drawMap();
+				$GUI->output();
+			} break;
+			
+			case "zoomToMaxLayerExtent" : {
+				$GUI->loadMap('DataBase');
+				$GUI->zoomToMaxLayerExtent($GUI->formvars['layer_id']);
+				$currenttime=date('Y-m-d H:i:s',time());
+				$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+				$GUI->drawMap();
+				$GUI->saveMap('');
 				$GUI->output();
 			} break;
 

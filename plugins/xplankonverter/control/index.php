@@ -29,6 +29,7 @@ include(PLUGINS . 'xplankonverter/model/converter.php');
 * xplankonverter_download_uploaded_shapes
 * xplankonverter_download_xplan_gml
 * xplankonverter_download_xplan_shapes
+* xplankonverter_extract_gml_to_form
 * xplankonverter_gml_generieren
 * xplankonverter_go_to_plan
 * xplankonverter_inspire_gml_generieren
@@ -44,6 +45,7 @@ include(PLUGINS . 'xplankonverter/model/converter.php');
 * xplankonverter_shapefiles_index
 * xplankonverter_show_geltungsbereich_upload
 * xplankonverter_upload_geltungsbereich
+* xplankonverter_upload_xplan_gml
 * xplankonverter_validierungsergebnisse
 */
 
@@ -971,6 +973,257 @@ switch ($go) {
 		header('Content-Type: application/json');
 		echo json_encode($response);
 		return;
+	} break;
+
+	case 'xplankonverter_upload_xplan_gml' : {
+		$upload_file = $_FILES['gml_file'];
+		if ($upload_file != '') {
+			Konvertierung::$write_debug = true;
+			# TODO check $_FILES['userfile']['type'] == gml or xml else abort (possibly also zip
+			# TODO check $_FILES['userfile']['size'] == eg less than 100 MB else abort and message that the file has to be converted piecemail or by an administrator
+			$gml_file = IMAGEPATH . $upload_file['name']; # the original filename from the computer of the file-owner
+			$response = array(
+				'success' => false
+			);
+			$importer = new data_import_export();
+
+			if (move_uploaded_file($upload_file['tmp_name'], $gml_file . '_' . $this->user->id . '.gml')) {
+				$response['success'] = true;
+			}
+
+			#$zip_file = IMAGEPATH . $upload_file['name'];
+		}
+		$this->main = '../../plugins/xplankonverter/view/upload_xplan_gml.php';
+		$this->output();
+	} break;
+
+	case 'xplankonverter_extract_gml_to_form' : {
+		$this->checkCaseAllowed($go);
+		# TODO get $conn from somewhere else
+#		$conn = pg_connect('host=' . $this->pgdatabase->host . ' dbname=' . $this->pgdatabase->dbName . ' user=' .  $this->pgdatabase->user . ' password=' . $this->pgdatabase->passwd);
+		$xsd_location = '/var/www/html/modell/xsd/5.0.1/XPlanung-Operationen.xsd';
+
+		$docker_gdal_cmd = 'docker exec gdal';
+		$target_gmlas_schema = 'xplan_gmlas';
+
+		if (!isset($_POST['gml_file']) or empty($_POST['gml_file'])) {
+			$this->add_message('error', 'GML-Datei nicht gefunden. Bitte hochladen.');
+			$this->main = '../../plugins/xplankonverter/view/upload_xplan_gml.php';
+			$this->output();
+			exit;
+		}
+		# echo 'File:' . $_POST['gml_file'] . '<br>';
+
+		$gml_location = IMAGEPATH . $_POST['gml_file'] . '_' . $this->user->id . '.gml';
+
+		# Parse the GML-ID of the file (to avoid duplicates, to identify the file)
+		$lines = file($gml_location);
+		foreach ($lines as $lineNumber => $line) {
+			if(strpos($line, 'BP_Plan') === false) {
+				continue;
+			}
+			# echo '<pre>' . htmlentities($line) . '</pre>';
+			# needs to check for both single and double quotes as both are permitted by XML spec
+			if (preg_match('/id="([^"]+)"/', $line, $matched_gml_id)) {
+				break; #found it
+			}
+			# echo 'could not find BP_Plan gml-id within double quotes. checking single quotes:<br>';
+			if (preg_match('/id=\'([^"]+)\'/', $line, $matched_gml_id)) {
+				break; #found it
+			}
+			$msg  = 'could not find compulsory BP_Plan gml-id within double quotes or single quotes<br>';
+			$msg .= 'Please make sure that BP_Plan contains the compulsory gml:id attribute, e.g. in the following style: ';
+			$msg .= '<pre>' . htmlentities('<xplan:BP_plan gml:id="GML_3789d575-433f-11e8-86d4-3f03fdce6d8b"') . '</pre>...<br>';
+			$this->add_message('error', $msg);
+			$this->main = '../../plugins/xplankonverter/view/upload_xplan_gml.php';
+			$this->output();
+			exit;
+		}
+		# print $matched_gml_id[1];
+		$gml_id = $matched_gml_id[1];
+
+		# Delete the found instance for all connected elements (e.g. BP_Plan, BP_Bereich, BP_Objekt etc.
+		$sql = "
+			TRUNCATE
+				xplan_gmlas.aendert,
+				xplan_gmlas.bp_bereich,
+				xplan_gmlas.bp_plan,
+				xplan_gmlas.bp_plan_aendert_aendert,
+				xplan_gmlas.bp_plan_bereich,
+				xplan_gmlas.bp_plan_externereferenz,
+				xplan_gmlas.bp_plan_gemeinde,
+				xplan_gmlas.bp_plan_verfahrensmerkmale_verfahrensmerkmale,
+				xplan_gmlas.bp_plan_wurdegeaendertvon_wurdegeaendertvon,
+				xplan_gmlas.verfahrensmerkmale,
+				xplan_gmlas.wurdegeaendertvon,
+				xplan_gmlas.xp_gemeinde,
+				xplan_gmlas.xp_plangeber,
+				xplan_gmlas.xp_spezexternereferenz,
+				xplan_gmlas.xp_verbundenerplan,
+				xplan_gmlas.xplanauszug,
+				xplan_gmlas.xplanauszug_featuremember
+		";
+		$ret = $this->pgdatabase->execSQL($sql, 4,0);
+
+		/*#OGRINFO
+		$cmd = $docker_gdal_cmd . ' ' . OGR_BINPATH_GDAL . 'ogrinfo GMLAS:' . $gml_location . ' -oo REMOVE_UNUSED_LAYERS=YES -oo XSD=' . $xsd_location;
+		exec($cmd, $output); echo $cmd . <br><br><pre>'; print_r($output); echo '</pre>;*/
+
+		#OGR2OGR Fill GMLAS-Schema
+		# For Logging add: . ' >> /var/www/logs/ogr_' . $gml_id . '.log 2>> /var/www/logs/ogr_' . $gml_id . '.err'
+		$cmd = $docker_gdal_cmd . ' ' . OGR_BINPATH_GDAL . 'ogr2ogr -f "PostgreSQL" PG:"host=' . $this->pgdatabase->host . ' dbname=' . $this->pgdatabase->dbName . ' user=' . $this->pgdatabase->user . ' password=' . $this->pgdatabase->passwd . ' SCHEMAS=' . $target_gmlas_schema .'" GMLAS:' . $gml_location . ' -oo REMOVE_UNUSED_LAYERS=YES -oo XSD=' . $xsd_location;
+
+		#echo $cmd;
+		exec($cmd, $output);
+		#echo '<pre>'; print_r($output); echo '</pre>';
+
+		# Send to form
+		$sql = "
+			SELECT
+				gmlas.oid,
+				trim(leading 'GML_' FROM gmlas.id)::text::uuid AS plan_gml_id, -- TODO: ONLY TRIM GML_ IF EXISTS
+				gmlas.xplan_name AS name,
+				gmlas.nummer AS nummer,
+				gmlas.internalid AS internalid,
+				gmlas.beschreibung AS beschreibung,
+				gmlas.kommentar AS kommentar,
+				to_char(gmlas.technherstelldatum, 'DD.MM.YYYY') AS technherstelldatum,
+				to_char(gmlas.genehmigungsdatum, 'DD.MM.YYYY') AS genehmigungsdatum,
+				to_char(gmlas.untergangsdatum, 'DD.MM.YYYY') AS untergangsdatum,
+				CASE WHEN vpa.planname IS NOT NULL OR vpa.rechtscharakter IS NOT NULL OR vpa.nummer IS NOT NULL OR vpa.verbundenerplan_href IS NOT NULL THEN
+					array_to_json(ARRAY[(vpa.planname, vpa.rechtscharakter::xplan_gml.xp_rechtscharakterplanaenderung, vpa.nummer, vpa.verbundenerplan_href)]::xplan_gml.xp_verbundenerplan[])
+					ELSE NULL
+				END AS aendert,
+				CASE WHEN vpwgv.planname IS NOT NULL OR vpwgv.rechtscharakter IS NOT NULL OR vpwgv.nummer IS NOT NULL OR vpwgv.verbundenerplan_href IS NOT NULL THEN
+					array_to_json(ARRAY[(vpwgv.planname, vpwgv.rechtscharakter::xplan_gml.xp_rechtscharakterplanaenderung, vpwgv.nummer, vpwgv.verbundenerplan_href)]::xplan_gml.xp_verbundenerplan[])
+					ELSE NULL
+				END AS wurdegeaendertvon,
+				gmlas.erstellungsmassstab AS erstellungsmassstab,
+				gmlas.bezugshoehe AS bezugshoehe,
+				st_assvg(st_transform(gmlas.raeumlichergeltungsbereich,25833), 0, 8) AS newpath,
+				st_astext(st_transform(gmlas.raeumlichergeltungsbereich,25833)) AS newpathwkt,
+				CASE WHEN vm.xp_verfahrensmerkmal_vermerk IS NOT NULL OR vm.xp_verfahrensmerkmal_datum IS NOT NULL OR vm.xp_verfahrensmerkmal_signatur IS NOT NULL OR  vm.xp_verfahrensmerkmal_signiert IS NOT NULL THEN
+					array_to_json(ARRAY[(vm.xp_verfahrensmerkmal_vermerk, vm.xp_verfahrensmerkmal_datum, vm.xp_verfahrensmerkmal_signatur, vm.xp_verfahrensmerkmal_signiert)]::xplan_gml.xp_verfahrensmerkmal[])
+					ELSE NULL
+				END AS  verfahrensmerkmale,
+				--'' AS hatgenerattribut,
+				--'' AS user_id, -- SET BY APPLICATION
+				--'' AS konvertierung_id, -- SET BY APPLICATION
+				--'' AS texte,
+				--'' AS begruendungstexte,
+				CASE WHEN e.georefurl IS NOT NULL OR e.georefmimetype_codespace IS NOT NULL OR e.georefmimetype IS NOT NULL OR e.art IS NOT NULL OR e.informationssystemurl IS NOT NULL OR e.referenzname IS NOT NULL OR e.referenzmimetype_codespace IS NOT NULL OR e.referenzmimetype IS NOT NULL OR e.beschreibung IS NOT NULL OR e.datum IS NOT NULL OR e.typ IS NOT NULL THEN 
+					array_to_json(ARRAY[(e.georefurl, 
+						(e.georefmimetype_codespace, e.georefmimetype, NULL)::xplan_gml.xp_mimetypes,
+						e.art::xplan_gml.xp_externereferenzart,
+						e.informationssystemurl,
+						e.referenzname, e.referenzurl,
+						(e.referenzmimetype_codespace, e.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
+						e.beschreibung,
+						to_char(e.datum, 'DD.MM.YYYY'),
+						e.typ::xplan_gml.xp_externereferenztyp
+					)]::xplan_gml.xp_spezexternereferenz[])
+					ELSE NULL
+				END AS  externereferenz,
+				--'' AS inverszu_verbundenerplan_xp_verbundenerplan,
+				to_char(gmlas.veraenderungssperredatum, 'DD.MM.YYYY') AS veraenderungssperredatum,
+				array_to_json(ARRAY[(g.ags,g.rs,g.gemeindename,g.ortsteilname)]::xplan_gml.xp_gemeinde[]) AS gemeinde,
+				gmlas.verfahren::xplan_gml.bp_verfahren AS verfahren,
+				to_char(gmlas.inkrafttretensdatum, 'DD.MM.YYYY') AS inkrafttretensdatum,
+				gmlas.durchfuehrungsvertrag AS durchfuehrungsvertrag,
+				gmlas.staedtebaulichervertrag AS staedtebaulichervertrag,
+				gmlas.rechtsverordnungsdatum AS rechtsverordnungsdatum,
+				gmlas.rechtsstand::xplan_gml.bp_rechtsstand AS rechtsstand,
+				gmlas.hoehenbezug AS hoehenbezug,
+				to_char(gmlas.aufstellungsbeschlussdatum, 'DD.MM.YYYY') AS aufstellungsbeschlussdatum,
+				to_char(gmlas.ausfertigungsdatum, 'DD.MM.YYYY') AS ausfertigungsdatum,
+				to_char(gmlas.satzungsbeschlussdatum, 'DD.MM.YYYY') AS satzungsbeschlussdatum,
+				gmlas.veraenderungssperre AS veraenderungssperre,
+				-- to_char(gmlas.auslegungsenddatum, 'DD.MM.YYYY') AS auslegungsenddatum, -- NOT YET IN 5.0.1
+				to_json((gmlas.sonstplanart_codespace, gmlas.sonstplanart, NULL)::xplan_gml.bp_sonstplanart) AS sonstplanart,
+				gmlas.gruenordnungsplan AS gruenordnungsplan,
+				to_json((pg.name, pg.kennziffer)::xplan_gml.xp_plangeber) AS plangeber,
+				-- to_char(gmlas.auslegungsstartdatum AS auslegungsstartdatum, 'DD.MM.YYYY'), -- NOT YET IN 5.0.1
+				-- to_char(gmlas.traegerbeteiligungsstartdatum, 'DD.MM.YYYY') AS traegerbeteiligungsstartdatum,  -- NOT YET IN 5.0.1
+				to_char(gmlas.aenderungenbisdatum, 'DD.MM.YYYY') AS aenderungenbisdatum,
+				to_json((gmlas.status_codespace, gmlas.status, NULL)::xplan_gml.bp_status) AS status,--'' AS status,
+				-- to_char(gmlas.traegerbeteiligungsenddatum, 'DD.MM.YYYY') AS traegerbeteiligungsenddatum,  -- NOT YET IN 5.0.1
+				array_to_json(gmlas.planart) AS planart,
+				gmlas.erschliessungsvertrag AS erschliessungsvertrag--,
+				--'' AS bereich
+			FROM
+				xplan_gmlas.bp_plan gmlas LEFT JOIN
+				xplan_gmlas.bp_plan_gemeinde gemeindelink ON gmlas.id = gemeindelink.parent_id LEFT JOIN
+				xplan_gmlas.xp_gemeinde g ON gemeindelink.xp_gemeinde_pkid = g.ogr_pkid LEFT JOIN
+				xplan_gmlas.bp_plan_externereferenz externereferenzlink ON gmlas.id = externereferenzlink.parent_id LEFT JOIN
+				xplan_gmlas.xp_spezexternereferenz e ON externereferenzlink.xp_spezexternereferenz_pkid = e.ogr_pkid LEFT JOIN
+				xplan_gmlas.bp_plan_aendert_aendert aendertlink ON gmlas.id = aendertlink.parent_pkid LEFT JOIN
+				xplan_gmlas.aendert aendertlinktwo ON aendertlink.child_pkid = aendertlinktwo.ogr_pkid LEFT JOIN
+				xplan_gmlas.xp_verbundenerplan vpa ON aendertlinktwo.xp_verbundenerplan_pkid = vpa.ogr_pkid
+			-- JOIN Datatype wurdeGeaendertVon XP_VerbundenerPlan
+			LEFT JOIN
+				xplan_gmlas.bp_plan_wurdegeaendertvon_wurdegeaendertvon wurdegeaendertvonlink
+			ON
+				gmlas.id = wurdegeaendertvonlink.parent_pkid
+			LEFT JOIN
+				xplan_gmlas.wurdegeaendertvon wurdegeaendertvonlinktwo
+			ON
+				wurdegeaendertvonlink.child_pkid = wurdegeaendertvonlinktwo.ogr_pkid
+			LEFT JOIN
+				xplan_gmlas.xp_verbundenerplan vpwgv
+			ON
+				wurdegeaendertvonlinktwo.xp_verbundenerplan_pkid = vpwgv.ogr_pkid
+			-- JOIN Datatype XP_VerfahrensMerkmal
+			LEFT JOIN
+				xplan_gmlas.bp_plan_verfahrensmerkmale_verfahrensmerkmale verfahrensmerkmalelink
+			ON
+				gmlas.id = verfahrensmerkmalelink.parent_pkid
+			LEFT JOIN
+				xplan_gmlas.verfahrensmerkmale vm
+			ON
+				verfahrensmerkmalelink.child_pkid = vm.ogr_pkid
+			-- JOIN Datatype XP_Plangeber
+			LEFT JOIN
+				xplan_gmlas.xp_plangeber pg
+			ON
+				gmlas.plangeber_xp_plangeber_pkid  = pg.ogr_pkid
+			WHERE
+				gmlas.id ='" . $gml_id . "'
+		;";
+
+		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
+		$result = pg_fetch_assoc($ret[1]);
+
+		# Set formvars
+		$this->formvars['chosen_layer_id'] = XPLANKONVERTER_BP_PLAENE_LAYER_ID;
+
+		$rect = ms_newRectObj();
+		# iterate over all attributes as formvars
+		foreach($result as $r_key => $r_value) {
+			#echo 'key:' . $r_key . ' value:' . $r_value . '<br>';
+			$this->formvars['attributenames'][] = $r_key;
+			$this->formvars['values'][] = $r_value;
+			# for filling the data
+			if($r_key == 'newpathwkt') {
+				$this->formvars['newpathwkt'] = $r_value;
+				$this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
+			}
+			# for drawing the data onto the polygoneditor
+			if($r_key == 'newpath') {
+				$this->formvars['newpath'] = $r_value;
+			}
+			if($r_key == 'oid') {
+				$oid = $r_value;
+			}
+		}
+
+		$this->formvars['selected_layer_id'] = $this->formvars['chosen_layer_id'];
+		$this->formvars['checkbox_names_' . $this->formvars['chosen_layer_id']] = 'check;B-Pläne;bp_plan;' . $oid . '|';
+		$this->formvars['check;B-Pläne;bp_plan;' . $oid] = 'on';
+		$this->formvars['layer_schemaname'] = 'xplan_gmlas';
+
+	#	print_r($this->formvars);
+
+		$this->neuer_Layer_Datensatz();
 	} break;
 
 	default : {

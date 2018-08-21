@@ -344,6 +344,64 @@ a.invisiblelayerlink:hover{
 	color: gray;
 }
 
+#data_import_upload_zone{
+	position: relative;
+	width: 600px;
+	height: 300px;
+	outline: 2px dashed steelblue;
+	outline-offset: -6px;
+	background:	linear-gradient(#adc7da 0%, #DAE4EC 50%, #adc7da 100%);
+	opacity: 0.7;
+	transition: all 0.2s ease;	
+}
+
+#data_import_upload_zone:hover{
+	opacity: 0.9;
+	transition: all 0.2s ease;
+}
+
+#data_import_upload_zone.dragover{
+	opacity: 0.5;
+	outline-offset: -2px;
+	transition: all 0.2s ease;
+}
+
+#data_import_upload_zone #text{
+	position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+	color: #333;
+}
+
+#data_import_upload_progress{
+	display: table;
+	width: 600px;
+	border-collapse: separate;
+  border-spacing: 5px;
+}
+
+#data_import_upload_progress .file_status{
+	display: table-row;
+	border: 1px solid #bbb;
+	padding: 3px;
+}
+
+#data_import_upload_progress .file_status div{
+	display: table-cell;
+	vertical-align: top;
+}
+
+#data_import_upload_progress .file_status .serverResponse{
+	text-align: right;
+}
+
+#data_import_upload_progress .file_status .serverResponse div{
+	margin: 0;
+	display: inline-block;
+}
+
+
 .print_options_box{
 	width: 200px;
 	margin-right: <? echo $size['legend']['hide_width']; ?>px;

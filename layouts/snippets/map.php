@@ -61,9 +61,11 @@ function showMapImage(){
 	catch(e){
 		document.GUI.svg_string.value = printNode(svg);
 	}
+	save_go = document.GUI.go.value;
   document.GUI.go.value = 'showMapImage';
 	document.GUI.target = '_blank';
 	document.GUI.submit();
+	document.GUI.go.value = save_go;
 	document.GUI.target = '';
 }
 

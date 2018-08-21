@@ -212,6 +212,11 @@
 		).join(', ')
 	}
 
+	function konvertierungBundeslandFormatter(value, row) {
+		var bundeslaender = JSON.parse(value);
+		return bundeslaender;
+	}
+
 	function konvertierungEditFunctionsFormatter(value, row) {
 		var funcIsAllowed,
 				funcIsInProgress,
@@ -343,6 +348,7 @@
 </script>
 <h2><?php echo $this->title; ?></h2>
 <button type="button" id="new_konvertierung" name="go_plus" onclick="location.href='index.php?go=neuer_Layer_Datensatz&selected_layer_id=<?php echo $this->plan_layer_id ?>'">neu</button>
+<button type="button" id="new_konvertierung_from_gml" name="go_plus" onclick="location.href='index.php?go=xplankonverter_upload_xplan_gml'">Neuer Plan aus XPlanGML</button>
 <!--div class="alert alert-success" style="white-space: pre-wrap" id="eventsResult">
 		Here is the result of event.
 </div//-->
@@ -392,31 +398,47 @@
 				data-field="anzeigename"
 				data-sortable="true"
 				data-visible="true"
-			>Name</th>
-			<th
-				data-field="gemeinde"
-				data-visible="true"
-				data-sortable="true"
-				data-formatter="konvertierungGemeindeFormatter"
-				class="col-md-2"
-			>Gemeinden</th>
-			<th
-				data-field="konvertierung_status"
-				data-visible="true"
-				data-sortable="true"
-				class="col-md-2"
-			>Status</th>
+				class="col-md-7"
+			>Name</th><?php
+				if ($this->plan_layer_id = XPLANKONVERTER_RP_PLAENE_LAYER_ID) { ?>
+					<th
+						data-field="bundesland"
+						data-visible="false"
+						data-sortable="true"
+						data-formatter="konvertierungBundeslandFormatter"
+						class="col-md-2"
+					>Bundesland</th><?php
+				}
+				else { ?>
+					<th
+						data-field="gemeinde"
+						data-visible="true"
+						data-sortable="true"
+						data-formatter="konvertierungGemeindeFormatter"
+						class="col-md-2"
+					>Gemeinden</th><?php
+				}
+				if ($this->plan_layer_id != XPLANKONVERTER_RP_PLAENE_LAYER_ID) { ?>
+					<th
+						data-field="konvertierung_status"
+						data-visible="true"
+						data-sortable="true"
+						class="col-md-2"
+					>Status</th><?php
+				} ?>
 			<th
 				data-field="konvertierung_id"
 				data-visible="true"
 				data-formatter="konvertierungFunctionsFormatter"
 				data-switchable="false"
+				class="col-md-2"
 			>Funktionen&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
 			<th
 				data-field="konvertierung_id"
 				data-visible="true"
 				data-formatter="konvertierungDownloadsFormatter"
 				data-switchable="false"
+				class="col-md-2"
 			>Downloads&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
 			<th
 				data-field="konvertierung_id"
@@ -428,3 +450,4 @@
 	</thead>
 </table>
 <button style="margin-bottom: 10px" type="button" id="new_konvertierung" name="go_plus" onclick="location.href='index.php?go=neuer_Layer_Datensatz&selected_layer_id=<?php echo $this->plan_layer_id ?>'">neu</button>
+<button type="button" id="new_konvertierung_from_gml" name="go_plus" onclick="location.href='index.php?go=xplankonverter_upload_xplan_gml&planart=<?php echo $this->formvars['planart'] ?>'">Neuer Plan aus XPlanGML</button>

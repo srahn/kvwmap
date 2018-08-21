@@ -185,27 +185,22 @@ else {
   <tr> 
     <td colspan="2">Recherche nach folgenden Dokumenten:</td>
   </tr>
-  <tr> 
-    <td colspan="2"><input type="checkbox" name="suchffr" value="1"<?php if ($this->formvars['suchffr']) { ?> checked<?php } ?>>&nbsp;Fortführungsriss&nbsp;(FFR) </td>
-  </tr>
-  <tr> 
-    <td colspan="2"><input type="checkbox" name="suchkvz" value="1"<?php if ($this->formvars['suchkvz']) { ?> checked<?php } ?>>&nbsp;Koordinatenverzeichnis&nbsp;(KVZ)</td>
-  </tr>
-  <tr> 
-    <td colspan="2"><input type="checkbox" name="suchgn" value="1"<?php if ($this->formvars['suchgn']) { ?> checked<?php } ?>>&nbsp;Grenzniederschrift&nbsp;(GN)</td>
-  </tr>
-  <tr> 
-    <td colspan="2"><input type="checkbox" name="suchan" value="1"<?php if ($this->formvars['suchan']) { ?> checked<?php } ?>>
-			&nbsp;Andere&nbsp;
-			<? $such_andere_art = explode(',', $this->formvars['such_andere_art']); ?>
-			<select name="such_andere_art[]" multiple="true" size="1" style="position: absolute;width: 185px" onmouseover="this.size=10" onmouseout="this.size=1" onchange="document.getElementsByName('suchan')[0].checked=true;">
-				<option value="">alle</option>
-				<? for($i = 0; $i < count($this->dokumentarten['id']); $i++){?>
-				<option <? if(in_array($this->dokumentarten['id'][$i], $such_andere_art)){echo 'selected';} ?> value="<? echo $this->dokumentarten['id'][$i]; ?>"><? echo $this->dokumentarten['art'][$i]; ?></option>	
-				<? } ?>
-			</select>
-		</td>
-  </tr>
+<?	foreach($this->hauptdokumentarten as $hauptdokumentart){	?>
+			<tr> 
+				<td colspan="2">
+					<input type="checkbox" name="suchhauptart_<? echo $hauptdokumentart['id']; ?>" value="1"<?php if ($this->formvars['suchhauptart_'.$hauptdokumentart['id']]) { ?> checked<?php } ?>>&nbsp;<? echo $hauptdokumentart['art'].'&nbsp;('.$hauptdokumentart['abkuerzung'].')'; ?>
+					<? $such_andere_art = explode(',', $this->formvars['such_andere_art']); 
+					if($this->dokumentarten[$hauptdokumentart['id']] != ''){	?>
+					:&nbsp;<select name="suchunterart_<? echo $hauptdokumentart['id']; ?>[]" multiple="true" size="1" style="position: absolute;width: 185px" onmouseover="this.size=10" onmouseout="this.size=1">
+						<option value="">alle</option>
+						<? for($i = 0; $i < count($this->dokumentarten[$hauptdokumentart['id']]); $i++){?>
+							<option <? if(in_array($this->dokumentarten[$hauptdokumentart['id']][$i]['id'], $such_andere_art)){echo 'selected';} ?> value="<? echo $this->dokumentarten[$hauptdokumentart['id']][$i]['id']; ?>"><? echo $this->dokumentarten[$hauptdokumentart['id']][$i]['art']; ?></option>	
+						<? } ?>
+					</select>
+					<? } ?>
+				</td>
+			</tr>
+<? } ?>
 	<tr>
 		<td colspan="2">
 			<table cellpadding="2" cellspacing="0">
@@ -247,8 +242,8 @@ else {
 		<td>
 			<select style="width: 156px" name="gueltigkeit">
 				<option value="">--- Auswahl ---</option>
-				<option value="1">gültige Nachweise</option>
-				<option value="0">ungültige Nachweise</option>
+				<option value="1" <? if($this->formvars['gueltigkeit'] == 1)echo 'selected'; ?>>gültige Nachweise</option>
+				<option value="0" <? if($this->formvars['gueltigkeit'] === '0')echo 'selected'; ?>>ungültige Nachweise</option>
 			</select>
 		</td>
   </tr>
