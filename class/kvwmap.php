@@ -88,6 +88,10 @@ class GUI {
     # Logdatei für PostgreSQL setzten
     global $log_postgres;
     $this->log_postgres=$log_postgres;
+
+		global $log_loginfail;
+		$this->log_loginfail = $log_loginfail;
+
     # layout Templatedatei zur Anzeige der Daten
     if ($main!="") $this->main=$main;
     # Stylesheetdatei
@@ -102,6 +106,70 @@ class GUI {
 		if(isset($this->{$method}) && is_callable($this->{$method})){
 			return call_user_func_array($this->{$method}, $arguments);
     }
+	}
+
+	function login() {
+		$this->title = 'kvwmap Anmeldung';
+		$this->expect = array('login_name', 'passwort', 'mobile');
+		if ($this->formvars['go'] == 'logout') {
+			$this->expect[] = 'go';
+		}
+		$this->user->rolle->gui = 'snippets/' . (file_exists(LAYOUTPATH . 'snippets/' . LOGIN) ? LOGIN : 'login.php');
+		$this->output();
+	}
+
+	function login_failed() {
+		$this->login_failed = $failed;
+		$this->title = 'kvwmap Anmeldung';
+		$this->expect = array('login_name', 'passwort', 'mobile');
+		if ($this->formvars['go'] == 'logout') {
+			$this->expect[] = 'go';
+		}
+		$this->add_message('error', 'Benutzername oder Passwort ' . ($this->formvars['num_failed'] > 0 ? $this->formvars['num_failed'] . ' mal' : '') . ' falsch eingegeben!<br>Versuchen Sie es noch einmal.');
+		$this->log_loginfail->write(
+			date("Y:m:d H:i:s", time()) .
+			' IP: ' . $_SERVER['REMOTE_ADDR'] .
+			' Port: ' . $_SERVER['REMOTE_PORT'] .
+			' User: ' . $login_name .
+			' User agent: ' .
+			getenv('HTTP_USER_AGENT')
+		);
+		$this->user->rolle->gui = 'snippets/' . (file_exists(LAYOUTPATH . 'snippets/' . LOGIN) ? LOGIN : 'login.php');
+		$this->output();
+	}
+
+	function login_browser_size() {
+		$this->user->rolle->gui = 'snippets/login_browser_size.php';
+		$this->output();
+	}
+
+	function login_new_password() {
+		$this->title = 'kvwmap Passwort Änderung';
+		$this->expect = array('passwort', 'new_password', 'new_password_2');
+		if ($this->formvars['go'] == 'logout') {
+			# Nicht nochmal go = logout, sonst kommt man da nicht mehr raus.
+			$this->expect[] = 'go';
+		}
+		$this->user->rolle->gui = 'snippets/login_new_password.php';
+		$this->output();
+	}
+
+	function login_registration() {
+		include_once(CLASSPATH . 'Invitation.php');
+		$this->title='kvwmap Registrierung';
+		$this->invitation = Invitation::find_by_id($this, $this->formvars['token']);
+		if ($this->formvars['login_name'] == '') {
+			$this->formvars['login_name'] = strToLower(substr($this->invitation->inviter->get('Vorname'), 0, 1) . $this->invitation->inviter->get('Name'));
+		}
+		$this->expect = array('login_name', 'new_password', 'new_password_2');
+		$this->user->rolle->gui = 'snippets/login_registration.php';
+		$this->output();
+	}
+
+	function login_agreement() {
+		$this->expect = array('agreement_accepted');
+		$this->user->rolle->gui = 'snippets/login_agreement.php';
+		$this->output();
 	}
 
 	/**
@@ -2402,6 +2470,10 @@ class GUI {
 	}
 
 	function add_message($type, $msg) {
+		if (is_array($msg) AND array_key_exists('success', $msg) AND is_array($msg)) {
+			$type = 'notice';
+			$msg = $msg['msg'];
+		}
 		if ($type == 'array' or is_array($msg)) {
 			foreach($msg AS $m) {
 				$this->add_message($m['type'], $m['msg']);
@@ -7431,7 +7503,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		if (empty($results)) {
 			$results = $this->layergruppe->create();
 		}
-		if (empty($results)) {
+		if ($results[0]['success']) {
 			$this->add_message('notice', 'Layergruppe erfolgreich angelegt.');
 			$this->Layergruppen_Anzeigen();
 		}
@@ -7449,7 +7521,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		if (empty($results)) {
 			$results = $this->layergruppe->update();
 		}
-		if (empty($results)) {
+		if ($results[0]['success']) {
 			$this->add_message('notice', 'Layergruppe erfolgreich aktualisiert.');
 		}
 		else {
@@ -7463,6 +7535,119 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->layergruppe = LayerGroup::find_by_id($this, $this->formvars['selected_group_id']);
 		$this->layergruppe->delete();
 		$this->add_message('notice', 'Layergruppe erfolgreich gelöscht.');
+	}
+
+	function invitations_list() {
+		include_once(CLASSPATH . 'Invitation.php');
+		$this->invitations = Invitation::find(
+			$this,
+			'inviter_id = ' . $this->user->id,
+			($this->formvars['order'] == '' ? 'email' : '')
+		);
+
+		$this->main = 'invitations.php';
+		$this->output();
+	}
+
+	function invitation_formular() {
+		include_once(CLASSPATH . 'FormObject.php');
+		include_once(CLASSPATH . 'Invitation.php');
+		$this->invitation = new Invitation($this);
+		if ($this->formvars['selected_invitation_id'] != '') {
+			$this->invitation = Invitation::find_by_id($this, $this->formvars['selected_invitation_id']);
+			$this->formvars = array_merge($this->formvars, array(
+				'token' => $this->invitation->get('token'),
+				'email' => $this->invitation->get('email'),
+				'name' => $this->invitation->get('name'),
+				'vorname' => $this->invitation->get('vorname'),
+				'stelle_id' => $this->invitation->get('stelle_id'),
+				'inviter_id' => $this->invitation->get('inviter_id')
+			));
+		}
+		else {
+			$this->formvars['token'] = uuid();
+			$this->formvars['inviter_id'] = $this->user->id;
+			$this->invitation->setKeysFromTable();
+		}
+		$myobj = new MyObject($this, 'stelle');
+		$stellen = $myobj->find_by_sql(
+			array(
+				'select' => 's.`ID`, s.`Bezeichnung`',
+				'from' => 'stelle s, rolle r',
+				'where' => 's.ID = r.stelle_id AND r.user_id = ' . $this->user->id . ' AND r.stelle_id != ' . $this->Stelle->id,
+				'order' => 'bezeichnung'
+			)
+		);
+
+		$this->invitation->stellen = array_map(
+			function($stelle) {
+				return array(
+					'value' => $stelle->get('ID'),
+					'output' => $stelle->get('Bezeichnung')
+				);
+			},
+			$stellen
+		);
+		$this->main = 'invitation_formular.php';
+		$this->output();
+	}
+
+	function invitation_save() {
+		include_once(CLASSPATH . 'Invitation.php');
+		$this->invitation = new Invitation($this);
+		$this->invitation->data = formvars_strip($this->formvars, $this->invitation->setKeysFromTable(), 'keep');
+
+
+		$results = $this->invitation->validate();
+		if (empty($results)) {
+			$results = $this->invitation->create();
+		}
+		if ($results[0]['success']) {
+			$this->invitation = Invitation::find_by_id($this, $this->invitation->get('token'));
+			$this->add_message('info', 'Neuer Nutzer ist vorgemerkt.<br>
+				<a href="mailto:' . $this->invitation->mailto_text() . '">Einladung per E-Mail verschicken</a>');
+			$this->invitations_list();
+		}
+		else {
+			$this->add_message('array', $results);
+			$this->invitation_formular();
+		}
+	}
+
+	function invitation_update() {
+		include_once(CLASSPATH . 'Invitation.php');
+		$this->invitation = Invitation::find_by_id($this, $this->formvars['selected_invitation_id']);
+			#//ToDo prüfen ob und warum hier die completet timestamp auf 0000-00 etc. gesetzt wird.
+		$results = $this->invitation->validate();
+		if (empty($results)) {
+			$results = $this->invitation->update(
+				array(
+					'token' => $this->formvars['token'],
+					'email' => $this->formvars['email'],
+					'name' => $this->formvars['name'],
+					'vorname' => $this->formvars['vorname'],
+					'stelle_id' => $this->formvars['stelle_id'],
+					'inviter_id' => $this->formvars['inviter_id']
+				)
+			);
+		}
+		if ($results[0]['success']) {
+			$this->add_message(
+				'info',
+				'Daten der Einladung aktualisiert.<br><a href="mailto:' . $this->invitation->mailto_text() . '">Einladung noch mal per E-Mail verschicken</a>'
+			);
+		}
+		else {
+			$this->add_message('array', $results);
+		}
+		$this->invitation_formular();
+	}
+
+	function invitation_delete() {
+		include_once(CLASSPATH . 'Invitation.php');
+		$this->invitation = Invitation::find_by_id($this, $this->formvars['selected_invitation_id']);
+		$this->invitation->delete();
+		$this->add_message('notice', 'Einladung erfolgreich gelöscht.');
 	}
 
   function GenerischeSuche_Suchen(){
@@ -10452,13 +10637,14 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		if (empty($results)) {
 			$results = $this->menue->create();
 		}
-		if (empty($results)) {
+		if ($results[0]['success']) {
 			$this->add_message('notice', 'Menü erfolgreich angelegt.');
 			$this->menuedaten = Menue::find($this, '', $this->formvars['order']);
 			$this->titel='Menüdaten';
 			$this->main='menuedaten.php';
 		}
 		else {
+			echo '<p>results: ' . print_r($results, true);
 			$this->add_message('array', $results);
 			$this->main = 'menue_formular.php';
 		}
@@ -10473,7 +10659,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		if (empty($results)) {
 			$results = $this->menue->update();
 		}
-		if (empty($results)) {
+		if ($results[0]['success']) {
 			$this->add_message('notice', 'Menü erfolgreich aktualisiert.');
 		}
 		else {
@@ -10968,7 +11154,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		if (empty($results)) {
 			$results = $this->cronjob->create();
 		}
-		if (empty($results)) {
+		if ($results[0]['success']) {
 			$this->add_message('notice', 'Job erfolgreich angelegt.');
 			$this->cronjobs = CronJob::find($this);
 			$this->main = 'cronjobs.php';
@@ -10984,8 +11170,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		include_once(CLASSPATH . 'CronJob.php');
 		$this->cronjob = CronJob::find_by_id($this, $this->formvars['id']);
 		$this->cronjob->data = formvars_strip($this->formvars, $this->cronjob->getKeys(), 'keep');
-		$result = $this->cronjob->update();
-		if (!empty($result)) {
+		$results = $this->cronjob->update();
+		if ($results[0]['success']) {
 			$this->add_message('error', 'Fehler beim Eintragen in die Datenbank!<br>' . $result);
 			$this->main = 'cronjob_formular.php';
 		}

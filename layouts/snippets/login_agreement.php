@@ -37,41 +37,25 @@
 	</head>
 	<body style="font-family: Arial, Verdana, Helvetica, sans-serif" onload="load()">
 		<form name="login" action="index.php" method="post">
-			<div id="message_box" class="message_box_hidden"></div>		<!-- muss innerhalb des form stehen -->
 			<input type="hidden" name="browserwidth">
 			<input type="hidden" name="browserheight"><?
 			echo hidden_formvars_fields($this->formvars, $this->expect); ?>
-			<table align="center" cellspacing="4" cellpadding="12" bgcolor="<? echo BG_DEFAULT; ?>" border="0" style="margin-top: 20px; background-color: <? echo BG_DEFAULT; ?>; box-shadow: 12px 10px 14px #777; border: 1px solid #bbbbbb; background: linear-gradient(<? echo BG_GLEATTRIBUTE; ?> 0%, <? echo BG_DEFAULT ?> 100%);">
+			<table align="center" cellspacing="4" cellpadding="12" border="0" style="box-shadow: 12px 10px 14px #777; border: 1px solid #bbbbbb;">
 				<tr>
 					<td align="center">
 						<table cellspacing="0" cellpadding="2" border="0">
 							<tr>
-								<td align="center" colspan="2" style="padding-bottom: 15px"><h1><?php echo $this->title; ?></h1></td>
-							</tr><?
-							if ($this->login_failed) { ?>
-								<tr>
-									<td align="center" colspan="2" style="padding: 10 0 5 0;"><span class="fett red">Anmeldung nicht erfolgreich.</span></td>
-								</tr><?
-							} ?>
-							<tr>
-								<td><span class="px16">Nutzername: </span></td>
-								<td><input id="login_name" style="width: 130px" type="text" value="<? echo $this->formvars['login_name']; ?>" name="login_name"/></td>
+								<td colspan="2" align="center">
+									<div>
+										<? include(SNIPPETS.AGREEMENT_MESSAGE); ?>
+									</div>
+								</td>
 							</tr>
 							<tr>
-								<td><span class="px16">Passwort: </span></td>
-								<td><input style="width: 130px;" type="password" value="<? echo $this->formvars['passwort']; ?>" name="passwort" /></td>
-							</tr><?
-							if (MOBILE == 'true') { ?>
-								<tr>
-								 <td>mobil:</td>
-								 <td><input type="checkbox" value="on" name="mobile"/></td>
-								</tr><?php
-							} ?>
-							<tr>
-								<td colspan="2">Ihre IP-Adresse: <?php echo   $remote_addr = getenv('REMOTE_ADDR'); ?></td>
+								<td colspan="2" align="center"><input id="agreement_accepted" type="checkbox" name="agreement_accepted" value="1"/> Ich habe die Vereinbarung verstanden und stimme zu</td>
 							</tr>
 							<tr>
-								<td colspan="2" align="center"><input id="anmelden" type="button" name="anmelden" onclick="logon();" value="Anmelden"/></td>
+								<td colspan="2" align="center"><input id="absenden" type="button" name="absenden" onclick="logon();" value="Absenden"/></td>
 							</tr>
 						</table>
 					</td>
