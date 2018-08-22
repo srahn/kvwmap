@@ -179,6 +179,9 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 						if($this->formvars['geprueft'] == 1){ echo ' nur geprüfte '; }
 						if($this->formvars['geprueft'] == '0'){ echo ' nur ungeprüfte '; }
 						if($this->formvars['geprueft'] == ''){ echo ' geprüfte und ungeprüfte '; }
+						foreach($this->formvars['suchhauptart'] as $suchart){
+							echo $this->hauptdokumentarten[$suchart]['abkuerzung'].', ';
+						}
 						if ($this->formvars['suchffr']){ echo ' FFR, '; }
 						if ($this->formvars['suchkvz']){ echo ' KVZ, '; }
 						if ($this->formvars['suchgn']){ echo ' GN, '; }

@@ -74,10 +74,6 @@
       <input type="hidden" name="Lfd" value="1">
  			<input type="hidden" name="Riss-Nummer" value="1"> 
  			<input type="hidden" name="Antrags-Nummer" value="1"> 
-			<input type="hidden" name="FFR" value="1">
-			<input type="hidden" name="KVZ" value="1">
-			<input type="hidden" name="GN" value="1">
-			<input type="hidden" name="andere" value="1"> 
 			<input type="hidden" name="Datum" value="1">
 			<input type="hidden" name="Datei" value="1">
  			<input type="hidden" name="gemessendurch" value="1">

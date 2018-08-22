@@ -43,10 +43,6 @@
         chdir(RECHERCHEERGEBNIS_PATH);
 				$GUI->formvars['Riss-Nummer'] = 1;
 				$GUI->formvars['Antrags-Nummer'] = 1;
-				$GUI->formvars['FFR'] = 1;
-				$GUI->formvars['KVZ'] = 1;
-				$GUI->formvars['GN'] = 1;
-				$GUI->formvars['andere'] = 1;
 				$GUI->formvars['Datum'] = 1;
 				$GUI->formvars['Datei'] = 1;
 				$GUI->formvars['gemessendurch'] = 1;
@@ -122,9 +118,6 @@
 
 	$this->nachweisAenderungsformular = function() use ($GUI){
 		include_once(CLASSPATH.'FormObject.php');
-    #2005-11-25_pk
-    # Anzeige des Formulars zum Eintragen neuer/Ändern vorhandener Metadaten zu einem Nachweisdokument
-    # (FFR, KVZ oder GN)
     $GUI->menue='menue.php';
     $GUI->main= PLUGINS.'nachweisverwaltung/view/dokumenteneingabeformular.php';
     $GUI->titel='Dokument überarbeiten';    
