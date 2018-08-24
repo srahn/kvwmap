@@ -107,6 +107,7 @@ $buttons_fs .= bufferbuttons($strBuffer, $strBufferedLine, $strParallelPolygon);
 $buttons_fs .= transform_buttons($strMoveGeometry);
 $buttons_fs .= vertex_edit_buttons($strCornerPoint);
 $buttons_fs .= coord_input_buttons();
+$buttons_fs .= ortho_point_buttons();
 if($this->user->rolle->gps){
 	$buttons_fs .= gpsbuttons($strSetGPSPosition, $strGPSFollow, $this->formvars['gps_follow']);
 }

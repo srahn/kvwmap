@@ -3544,6 +3544,26 @@ $measurefunctions = '
     return $vertex_edit_buttons;
 	}
 	
+	function ortho_point_buttons(){
+		global $last_x;
+		$ortho_point_buttons ='
+			<g id="ortho_point" transform="translate('.$last_x.' 0)">
+				<rect id="ortho_point1" onmouseover="show_tooltip(\'Orthogonalpunktberechnung\',evt.clientX,evt.clientY)" onmousedown="highlightbyid(\'ortho_point1\');ortho_point();hide_tooltip();" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+				<g class="navbutton" transform="translate(4 4) scale(1)">
+					<g transform="translate(-10.8 -6.5)">
+						<circle cx="13" cy="18" r="2.4"/>
+						<circle cx="35" cy="20" r="2.4"/>
+						<polyline class="navbutton_stroke navbutton_nofill" style="stroke-width:1.7;stroke-dasharray:2,2;" points="12 32 37 8" />
+						<polyline class="navbutton_stroke navbutton_nofill" style="stroke-width:1;" points="13 18 19 25" />
+						<polyline class="navbutton_stroke navbutton_nofill" style="stroke-width:1;" points="35 20 30.5 14.5" />
+					</g>
+				</g>
+      </g>
+    ';
+		$last_x += 36;
+    return $ortho_point_buttons;
+	}	
+	
 	function measure_buttons($strRuler){
 		global $last_x;
 		$measure_buttons .= dist($strRuler);
