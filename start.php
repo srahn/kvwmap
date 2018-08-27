@@ -157,6 +157,8 @@ else {
 			$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->database, $GUI->formvars['passwort']);
 
 			if (is_login_granted($GUI->user, $GUI->formvars['login_name'])) {
+				$GUI->debug->write('Set Session', 4, $GUI->echo);
+				set_session_vars($GUI->formvars);
 				$GUI->debug->write('Anmeldung war erfolgreich, Benutzer wurde mit angegebenem Passwort gefunden.', 4, $GUI->echo);
 				Nutzer::reset_num_login_failed($GUI, $GUI->formvars['login_name']);
 
@@ -341,11 +343,6 @@ else {
 	#echo 'In der Rolle eingestellte Sprache: '.$GUI->user->rolle->language;
 	# Rollenbezogene Stellendaten zuweisen
 	$GUI->loadMultiLingualText($GUI->user->rolle->language);
-
-	$GUI->debug->write('Set Session', 4, $GUI->echo);
-	set_session_vars($GUI->formvars);
-
-	#$GUI->debug->write('<p>Session: ' . print_r($_SESSION, true), 4, $GUI->echo);
 
 	# Ausgabe der Zugriffsinformationen in debug-Datei
 	$GUI->debug->write('User: ' . $GUI->user->login_name, 4);

@@ -205,7 +205,7 @@
 						$date_types = array('date' => 'TT.MM.JJJJ', 'timestamp' => 'TT.MM.JJJJ hh:mm:ss', 'time' => 'hh:mm:ss');
 						if(array_key_exists($layer['attributes']['type'][$j], $date_types)){
 							echo '
-								<td width="16px" align="right">
+								<td align="right">
 										<a id="caldbl" href="javascript:;" title="('.$date_types[$layer['attributes']['type'][$j]].')"'.
 										(($layer['attributes']['privileg'][$j] == '1') ? 'onclick="add_calendar(event, \''.$layer_id.'_'.$layer['attributes']['name'][$j].'_'.$k.'\', \''.$layer['attributes']['type'][$j].'\');" 
 																														 ondblclick="add_calendar(event, \''.$layer_id.'_'.$layer['attributes']['name'][$j].'_'.$k.'\', \''.$layer['attributes']['type'][$j].'\', true);"' : '').'

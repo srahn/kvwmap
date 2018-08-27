@@ -1,4 +1,8 @@
 <?php
+header('Content-Type: text/html; charset=utf-8');
+session_set_cookie_params(0, $_SERVER['CONTEXT_PREFIX']);
+session_start();
+
 include('config.php');
 include(CLASSPATH . 'log.php');
 
@@ -10,9 +14,6 @@ if (LOG_LEVEL > 0) {
  $log_loginfail = new LogFile(LOGFILE_LOGIN, 'text', 'Log-Datei Login Failure', '');
 }
 
-header('Content-Type: text/html; charset=utf-8');
-session_set_cookie_params(0, $_SERVER['CONTEXT_PREFIX']);
-session_start();
 ###################################################################
 # kvwmap - Kartenserver für die Verwaltung raumbezogener Daten.   #
 # Lizenz                                                          #

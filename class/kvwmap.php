@@ -4591,6 +4591,7 @@ class GUI {
 		$this->formvars['Data'] = $datastring;
 		$this->formvars['connectiontype'] = 6;
 		$this->formvars['labelitem'] = $layerset[0]['labelitem'];
+		$this->formvars['classitem'] = $layerset[0]['classitem'];
 		$connectionstring ='user='.$layerdb->user;
 		if($layerdb->passwd != ''){
 			$connectionstring.=' password='.$layerdb->passwd;
@@ -4671,7 +4672,7 @@ class GUI {
 			$dbmap->addStyle2Class($class_id, $style_id, 0);          # den Style der Klasse zuordnen
 		}
 		else{         # selektieren (eigenen Style verwenden)
-			$class_id =  $dbmap->getClassFromObject($select, $this->formvars['layer_id']);
+			$class_id = $dbmap->getClassFromObject($select, $this->formvars['layer_id'], $layerset[0]['classitem']);
 			$this->formvars['class'] = $dbmap->copyClass($class_id, -$layer_id);
 			$this->user->rolle->setOneLayer($this->formvars['layer_id'], 0);
 		}
@@ -16253,7 +16254,7 @@ class db_mapObj{
     $formvars['Data'] = str_replace ( "'", "''", $formvars['Data']);
 		$formvars['query'] = str_replace ( "'", "''", $formvars['query']);
 
-    $sql = "INSERT INTO rollenlayer (`user_id`, `stelle_id`, `aktivStatus`, `Name`, `Datentyp`, `Gruppe`, `Typ`, `Data`, `query`, `connection`, `connectiontype`, `transparency`, `epsg_code`, `labelitem`) VALUES(";
+    $sql = "INSERT INTO rollenlayer (`user_id`, `stelle_id`, `aktivStatus`, `Name`, `Datentyp`, `Gruppe`, `Typ`, `Data`, `query`, `connection`, `connectiontype`, `transparency`, `epsg_code`, `labelitem`, `classitem`) VALUES(";
     $sql .= "'".$formvars['user_id']."', ";
     $sql .= "'".$formvars['stelle_id']."', ";
     $sql .= "'".$formvars['aktivStatus']."', ";
@@ -16267,7 +16268,8 @@ class db_mapObj{
     $sql .= "'".$formvars['connectiontype']."', ";
     $sql .= "'".$formvars['transparency']."', ";
     $sql .= "'".$formvars['epsg_code']."', ";
-    $sql .= "'".$formvars['labelitem']."'";
+    $sql .= "'".$formvars['labelitem']."', ";
+		$sql .= "'".$formvars['classitem']."'";
     $sql .= ")";
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->newRollenLayer - Erzeugen eines RollenLayers:<br>".$sql,4);
@@ -17335,7 +17337,7 @@ class db_mapObj{
     return $rs;
   }
 
-  function getClassFromObject($select, $layer_id){
+  function getClassFromObject($select, $layer_id, $classitem){
     # diese Funktion bestimmt für ein über die oid gegebenes Objekt welche Klasse dieses Objekt hat
     $classes = $this->read_Classes($layer_id);
     $anzahl = count($classes);
@@ -17360,7 +17362,10 @@ class db_mapObj{
 	      	}
 	      }
 	      $exp = implode(' ', $exp_parts);
-				$sql = $select." AND (".$exp.")";
+				if(count($exp_parts) == 1 AND $classitem != ''){		# Classitem davor setzen
+					$exp = $classitem."::text = '".$exp."'";
+				}				
+				$sql = 'SELECT * FROM ('.$select.") as foo WHERE (".$exp.")";
         $this->debug->write("<p>file:kvwmap class:db_mapObj->getClassFromObject - Lesen einer Klasse eines Objektes:<br>".$sql,4);
         $query=pg_query($sql);
         if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
@@ -17373,7 +17378,7 @@ class db_mapObj{
   }
 
 	function copyStyle($style_id){
-		$sql = "INSERT INTO styles (symbol,symbolname,size,color,backgroundcolor,outlinecolor,minsize,maxsize,angle,angleitem,antialias,width,minwidth,maxwidth,sizeitem) SELECT symbol,symbolname,size,color,backgroundcolor,outlinecolor,minsize,maxsize,angle,angleitem,antialias,width,minwidth,maxwidth,sizeitem FROM styles WHERE Style_ID = ".$style_id;
+		$sql = "INSERT INTO styles (symbol,symbolname,size,color,backgroundcolor,outlinecolor,minsize,maxsize,angle,angleitem,antialias,width,minwidth,maxwidth,sizeitem,geomtransform) SELECT symbol,symbolname,size,color,backgroundcolor,outlinecolor,minsize,maxsize,angle,angleitem,antialias,width,minwidth,maxwidth,sizeitem,geomtransform FROM styles WHERE Style_ID = ".$style_id;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->copyStyle - Kopieren eines Styles:<br>".$sql,4);
 		$query=mysql_query($sql);
 		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }

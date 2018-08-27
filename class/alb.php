@@ -197,7 +197,7 @@ class ALB {
   	if($formvars['pruefzeichen_f']){ $csv .= utf8_encode('P Flurstück;');}
     if($formvars['bvnr']){ $csv .= 'BVNR;';}
     if($formvars['buchungsart']){ $csv .= 'Buchungsart;';}
-    if($formvars['eigentuemer']){ $csv .= utf8_encode('Eigentümer;');}
+    if($formvars['eigentuemer']){ $csv .= utf8_encode('Namensnummer;Eigentümer;');}
 		if($formvars['abweichenderrechtszustand']){ $csv .= utf8_encode('abweichender Rechtszustand;');}
 		if($formvars['baubodenrecht']){ $csv .= utf8_encode('Bauraum/Bodenordnungsrecht;');}
     
@@ -391,9 +391,15 @@ class ALB {
 		      }
 	      
 	      if($formvars['eigentuemer']){
+					$csv .= '"';
+	          for($b = 0; $b < count($flst->Buchungen); $b++){
+	            $Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
+							reset($Eigentuemerliste);
+							$csv .= $flst->outputEigentuemer(key($Eigentuemerliste), $Eigentuemerliste, 'Namensnummer');
+	          }
+	        $csv .= '";';
 	      	$csv .= '"';
 	          for($b = 0; $b < count($flst->Buchungen); $b++){
-	          	if($b > 0)$csv .= "\n";
 	            $Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
 							reset($Eigentuemerliste);
 							$csv .= $flst->outputEigentuemer(key($Eigentuemerliste), $Eigentuemerliste, 'Text');
@@ -721,7 +727,7 @@ class ALB {
     if($formvars['buchungsart']){ $csv .= 'Buchungsart;';}
 		if($formvars['abweichenderrechtszustand']){ $csv .= utf8_encode('abweichender Rechtszustand;');}
 		if($formvars['baubodenrecht']){ $csv .= utf8_encode('Bauraum/Bodenordnungsrecht;');}
-    if($formvars['eigentuemer']){ $csv .= utf8_encode('Eigentümer;');}
+    if($formvars['eigentuemer']){ $csv .= utf8_encode('Namensnummer;Eigentümer;');}
     $csv .= utf8_encode('Nutzung - Fläche;');
     $csv .= 'Nutzung - Kennzeichen;';
     $csv .= 'Nutzung - Bezeichnung;';
@@ -904,13 +910,20 @@ class ALB {
 	      
   		if($formvars['eigentuemer']){
 				$csv .= '"';
-				for($b = 0; $b < count($flst->Buchungen); $b++){
-					$Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
-					reset($Eigentuemerliste);
-					$csv .= $flst->outputEigentuemer(key($Eigentuemerliste), $Eigentuemerliste, 'Text');
-				}
-        $csv .= '";';
-      }
+					for($b = 0; $b < count($flst->Buchungen); $b++){
+						$Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
+						reset($Eigentuemerliste);
+						$csv .= $flst->outputEigentuemer(key($Eigentuemerliste), $Eigentuemerliste, 'Namensnummer');
+					}
+				$csv .= '";';
+				$csv .= '"';
+					for($b = 0; $b < count($flst->Buchungen); $b++){
+						$Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
+						reset($Eigentuemerliste);
+						$csv .= $flst->outputEigentuemer(key($Eigentuemerliste), $Eigentuemerliste, 'Text');
+					}
+				$csv .= '";';
+			}
 
         
         $csv .= $flst->Nutzung[$n][flaeche].';';
@@ -976,7 +989,7 @@ class ALB {
     if($formvars['buchungsart']){ $csv .= 'Buchungsart;';}
 		if($formvars['abweichenderrechtszustand']){ $csv .= utf8_encode('abweichender Rechtszustand;');}
 		if($formvars['baubodenrecht']){ $csv .= utf8_encode('Bauraum/Bodenordnungsrecht;');}
-    if($formvars['eigentuemer']){ $csv .= utf8_encode('Eigentümer;');}
+    if($formvars['eigentuemer']){ $csv .= utf8_encode('Namensnummer;Eigentümer;');}
     
     $csv .= chr(10);
     for($i = 0; $i < count($flurstuecke); $i++) {
@@ -1166,14 +1179,21 @@ class ALB {
 			}
       
       if($formvars['eigentuemer']){
-      	$csv .= '"';
-				for($b = 0; $b < count($flst->Buchungen); $b++){
-					$Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
-					reset($Eigentuemerliste);
-					$csv .= $flst->outputEigentuemer(key($Eigentuemerliste), $Eigentuemerliste, 'Text');
-				}
-        $csv .= '";';
-      }
+				$csv .= '"';
+					for($b = 0; $b < count($flst->Buchungen); $b++){
+						$Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
+						reset($Eigentuemerliste);
+						$csv .= $flst->outputEigentuemer(key($Eigentuemerliste), $Eigentuemerliste, 'Namensnummer');
+					}
+				$csv .= '";';
+				$csv .= '"';
+					for($b = 0; $b < count($flst->Buchungen); $b++){
+						$Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
+						reset($Eigentuemerliste);
+						$csv .= $flst->outputEigentuemer(key($Eigentuemerliste), $Eigentuemerliste, 'Text');
+					}
+				$csv .= '";';
+			}
       $csv .= chr(10);
     }
 
