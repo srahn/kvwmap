@@ -274,7 +274,7 @@ class GUI {
 						}
 					}
 					if(!$show){
-						return NULL;
+						continue;
 					}
 				}
 

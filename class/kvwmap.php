@@ -13465,7 +13465,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						}
 					}
 					if(!$show){
-						return NULL;
+						continue;
 					}
 				}
 
