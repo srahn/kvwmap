@@ -15,6 +15,10 @@
 	
 	function coord_input_submit(){
 		document.getElementById("svghelp").SVGcoord_input_submit();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+	}
+	
+	function ortho_point_submit(){
+		document.getElementById("svghelp").SVGortho_point_submit();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 	}	
 
 	var nbh = new Array();
@@ -74,6 +78,7 @@
 	$scriptdefinitions ='
 	var transformfunctions = false;
 	var coord_input_functions = false;
+	var ortho_point_functions = false;
 	var bufferfunctions = false;
 	var special_bufferfunctions = false;
 	var polygonfunctions = false;
@@ -104,6 +109,8 @@
 		str = top.currentform.pathy_second.value;
 		pathy_second = str.split(";");
 	}
+	var ortho_point_vertices = new Array();
+	if(top.currentform.ortho_point_vertices.value != "")ortho_point_vertices = top.currentform.ortho_point_vertices.value.split("|");
 	var textx = '.$text_x.';
 	var texty = '.$text_y.';
 	var newpath_undo = new Array();
@@ -747,6 +754,10 @@
 			case "move_geometry":
 				startMoveGeom(client_x, client_y);
 			break;
+			
+			case "ortho_point":
+				add_ortho_point(world_x, world_y);
+			break;
 
 			case "measure":
 		    if (measuring){
@@ -1060,6 +1071,100 @@ function mouseup(evt){
 	}
 
 	';
+	
+	$ortho_point_functions = '
+
+	ortho_point_functions = true;
+	
+	top.document.getElementById("svghelp").SVGortho_point_submit = ortho_point_submit;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+
+	function ortho_point(){
+		top.currentform.last_doing.value = "ortho_point";
+		mittex = Math.round(minx+(maxx-minx)/2);
+		mittey = Math.round(miny+(maxy-miny)/2);
+		var Msg = top.$("#message_box");
+		Msg[0].style.left = "70%";
+		Msg.show();
+		content = \'<div style="position: absolute;top: 0px;right: 0px"><a href="javascript:void(0)" onclick="top.$(\\\'#message_box\\\').hide();" title="Schlie&szlig;en"><img style="border:none" src="'.GRAPHICSPATH.'exit2.png"></img></a></div>\';
+		content+= \'<div style="height: 30px">Orthogonalpunktberechnung</div>\';
+		content+= \'<span class="px15">1. Setzen Sie in der Karte durch 2 Klicks die beiden Punkte für die Bezugslinie.</span>\';
+		content+= \'<div id="ortho_points"></div>\';
+		content+= \'<br><input type="button" value="OK" onclick="ortho_point_submit()">\';
+		Msg.html(content);
+	}
+	
+	function add_ortho_point(worldx, worldy){
+	  var vertex;
+		var point_number = ortho_point_vertices.length;
+		var id = "ortho_point_vertex_"+point_number;
+		top.currentform.lastcoordx.value = world_x;
+		top.currentform.lastcoordy.value = world_y;
+		ortho_point_vertices.push(world_x+" "+world_y);
+		top.currentform.ortho_point_vertices.value = ortho_point_vertices.join("|");
+		vertex = create_catch_vertex(document.getElementById("kreis3"), id, world_x, world_y);
+		vertex.setAttribute("pointer-events", "none");		// Events bei diesem Vertex deaktivieren, sonst wird durch den Mouseup gleich noch einer angelegt
+		deactivated_foreign_vertex = id;
+		document.getElementById("ortho_point_vertices").appendChild(vertex);
+		point_div = top.document.createElement("div");
+		point_div.className = "ortho_point_div";
+		local_coord = get_local_ortho_point_coord(point_number);
+		point_x = top.document.createElement("input");
+		point_x.type = "text";
+		point_x.value = local_coord[0];
+		point_x.name="ortho_point_x[]";
+		point_div.appendChild(point_x);
+		point_y = top.document.createElement("input");
+		point_y.type = "text";
+		point_y.value = local_coord[1];
+		point_y.name="ortho_point_y[]";
+		point_div.appendChild(point_y);
+		top.document.getElementById("ortho_points").appendChild(point_div);
+		if(point_number < 2){
+			top.document.getElementById("ortho_point_x"+point_number).value = point_x.value;
+			top.document.getElementById("ortho_point_y"+point_number).value = point_y.value;
+		}
+		if(point_number == 1){
+			top.document.getElementById("ortho_points").appendChild(top.document.createTextNode("2. Sie können nun weitere Punkte hinzufügen."));
+		}
+	}
+	
+	function get_local_ortho_point_coord(point_number){
+		var coord = new Array();
+		var a = ortho_point_vertices[0].split(" ");			// Bezugspunkt a
+		if(point_number > 0){
+			var b = ortho_point_vertices[1].split(" ");		// Bezugspunkt b
+			var m = new Array();
+			m[0] = b[0] - a[0];
+			m[1] = b[1] - a[1];
+			var dist_ab = Math.sqrt((m[0]*m[0])+(m[1]*m[1]));
+		}
+		var x0 = top.document.getElementById("ortho_point_x0").value;
+		var y0 = top.document.getElementById("ortho_point_y0").value;
+		var x1 = top.document.getElementById("ortho_point_x1").value;
+		var y1 = top.document.getElementById("ortho_point_y1").value;
+		if(point_number == 0){
+			if(x0 == ""){coord[0] = 0} else {coord[0] = x0};
+			if(y0 == ""){coord[1] = 0} else {coord[1] = y0};
+		}
+		else if(point_number == 1){
+			if(x1 == ""){coord[0] = dist_ab} else {coord[0] = x1};
+			if(y1 == ""){coord[1] = 0} else {coord[1] = y1};
+		}
+		else{
+			p = ortho_point_vertices[point_number].split(" ");
+			r = ((m[0]*p[0]) + (m[1]*p[1]) - ((m[0]*a[0]) + (m[1]*a[1]))) / ((m[0]*m[0])+(m[1]*m[1]))
+			coord[0] = dist_ab * r;
+			coord[1] = Math.sqrt(Math.pow(p[0] - (parseInt(a[0]) + (r*m[0])), 2) + Math.pow(p[1] - (parseInt(a[1]) + (r*m[1])), 2));
+			if(p[0] - (parseInt(a[0]) + (r*m[0])) < 0)coord[1] = coord[1] * -1;			// negativ wenn auf der anderen Seite
+		}
+		return coord;
+	}
+	
+	function ortho_point_submit(){
+		
+	}
+
+	';	
 
 	$pointfunctions = '
 
@@ -2876,19 +2981,24 @@ $vertex_catch_functions = '
 			top.currentform.vertices.value = "";
 			vertices = vertex_string.split("|");
 			for(i = 0; i < vertices.length-1; i++){
-				circle[i] = kreis1.cloneNode(true);
-				coords = vertices[i].split(" ");
-				circle[i].setAttribute("x", coords[0]);
-				circle[i].setAttribute("y", coords[1]);
-				coords[0] = Math.round((coords[0] - parseFloat(top.currentform.minx.value))/parseFloat(top.currentform.pixelsize.value));
-				coords[1] = Math.round((coords[1] - top.currentform.miny.value)/parseFloat(top.currentform.pixelsize.value));
-				circle[i].setAttribute("cx", coords[0]);
-				circle[i].setAttribute("cy", coords[1]);
-				circle[i].setAttribute("style","fill: #00DD00");
-				circle[i].setAttribute("id", "foreign_vertex_"+i);
+				coords = vertices[i].split(" ");				
+				circle[i] = create_catch_vertex(kreis1, "foreign_vertex_"+i, coords[0], coords[1]);
 				parent.appendChild(circle[i]);
 			}
 		}
+	}
+	
+	function create_catch_vertex(template, id, world_x, world_y){
+		var circle = template.cloneNode(true);
+		circle.setAttribute("x", world_x);
+		circle.setAttribute("y", world_y);
+		x = Math.round((world_x - parseFloat(top.currentform.minx.value))/parseFloat(top.currentform.pixelsize.value));
+		y = Math.round((world_y - top.currentform.miny.value)/parseFloat(top.currentform.pixelsize.value));
+		circle.setAttribute("cx", x);
+		circle.setAttribute("cy", y);
+		circle.setAttribute("style","fill: #00DD00");
+		circle.setAttribute("id", id);
+		return circle;
 	}
 
 	//------------------------------------------------------------
@@ -3132,12 +3242,10 @@ $measurefunctions = '
 				<circle id="startvertex" cx="-500" cy="-500" r="2" style="fill:blue;stroke:blue;stroke-width:2"/>
 			</g>
 			<rect id="canvas" cursor="crosshair" onmousedown="mousedown(evt);" onmousemove="mousemove(evt);" onmouseup="mouseup(evt);" width="100%" height="100%" opacity="0" visibility="visible"/>
-			<g id="in_between_vertices" transform="translate(0,'.$res_y.') scale(1,-1)">			
-			</g>
-			<g id="vertices" transform="translate(0,'.$res_y.') scale(1,-1)">			
-			</g>
-			<g id="foreignvertices" transform="translate(0,'.$res_y.') scale(1,-1)">
-			</g>
+			<g id="in_between_vertices" transform="translate(0,'.$res_y.') scale(1,-1)"></g>
+			<g id="vertices" transform="translate(0,'.$res_y.') scale(1,-1)"></g>
+			<g id="ortho_point_vertices" transform="translate(0,'.$res_y.') scale(1,-1)"></g>
+			<g id="foreignvertices" transform="translate(0,'.$res_y.') scale(1,-1)"></g>
 	  </g>
 	  <g id="templates">
 	  	<circle style="-moz-user-select: none;" id="kreis" cx="-5000" cy="-5000" r="7" opacity="0.3" onmouseover="activate_vertex(evt)" onmouseout="deactivate_vertex(evt)" onmousedown="select_vertex(evt)" onmousemove="move_vertex(evt)" onmouseup="end_vertex_move(evt)" />

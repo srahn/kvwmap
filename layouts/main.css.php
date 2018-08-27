@@ -344,6 +344,20 @@ a.invisiblelayerlink:hover{
 	color: gray;
 }
 
+#ortho_points{
+	font-size: 15px;
+	text-align: left;
+}
+
+.ortho_point_div{
+	padding: 0 0 5px 30px;
+}
+
+.ortho_point_div input{
+	width: 50px;
+	margin-left: 5px;
+}
+
 #data_import_upload_zone{
 	position: relative;
 	width: 600px;
