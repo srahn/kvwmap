@@ -290,6 +290,7 @@ if (!$show_login_form) {
 		if ($permission['allowed']) {
 			$GUI->debug->write('Nutzer ist in Stelle ' . $GUI->Stelle->id . ' erlaubt.', 4, $GUI->echo);
 			$GUI->user->stelle_id = $GUI->Stelle->id; # set selected stelle to user
+			$GUI->debug->write('Setze neue Stellen-ID: ' . $GUI->Stelle->id . ' für Nutzer: ' . $GUI->user->id, 4, $GUI->echo);
 			$GUI->user->updateStelleID($GUI->Stelle->id);
 		}
 		else {
@@ -327,9 +328,13 @@ if ($show_login_form) {
 	$GUI->user->rolle->querymode = 0;
 }
 else {
-	$GUI->debug->write('Lade Stelle und Rolle.', 4, $GUI->echo);
+	$GUI->debug->write('Lade Stelle und ordne Rolle dem User zu.', 4, $GUI->echo);
 	# Alles was man immer machen muss bevor die go's aufgerufen werden
 	$GUI->user->setRolle($GUI->user->stelle_id);
+	if (new_options_sent($GUI->formvars)) {
+		$GUI->debug->write('Speicher neue Stellenoptionen.', 4, $GUI->echo);
+		$GUI->user->setOptions($GUI->user->stelle_id, $GUI->formvars);
+	}
 
 	#$GUI->debug->write('Eingestellte Rolle: ' . print_r($GUI->user->rolle, true), 4, $GUI->echo);
 
@@ -694,6 +699,10 @@ function is_registration_valid($msg) {
 
 function is_ows_request($formvars) {
 	return ($formvars['go'] == 'OWS');
+}
+
+function new_options_sent($formvars) {
+	return $formvars['gui'] != '';
 }
 
 function logout() {
