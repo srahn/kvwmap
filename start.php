@@ -121,10 +121,10 @@ if (is_logout($GUI->formvars)) {
 # login
 $show_login_form = false;
 if (is_logged_in()) {
-	$GUI->debug->write('Ist angemeldet an ' . $_SESSION['SCRIPT_URI'], 4, $GUI->echo);
+	$GUI->debug->write('Ist angemeldet an: ' . $_SESSION['HTTP_HOST'] . $_SESSION['CONTEXT_PREFIX'], 4, $GUI->echo);
 	$GUI->formvars['login_name'] = $_SESSION['login_name'];
 	$GUI->user = new user($_SESSION['login_name'], 0, $GUI->database);
-	$GUI->debug->write('Angemeldet als ' . print_r($GUI->user->login_name, true), 4, $GUI->echo);
+	$GUI->debug->write('Ist angemeldet als: ' . $GUI->user->login_name, 4, $GUI->echo);
 	# login case 1
 }
 else {
@@ -506,7 +506,8 @@ function is_logged_in() {
 		array_key_exists('angemeldet', $_SESSION) AND
 		$_SESSION['angemeldet'] === true AND
 		$_SESSION['login_name'] != '' AND
-		$_SESSION['SCRIPT_URI'] == $_SERVER['SCRIPT_URI']
+		$_SESSION['HTTP_HOST'] == $_SERVER['HTTP_HOST'] AND
+		$_SESSION['CONTEXT_PREFIX'] == $_SERVER['CONTEXT_PREFIX']
 	);
 }
 
@@ -695,7 +696,6 @@ function checkRegistration($gui) {
 	return implode('<br>', $registration_errors);
 }
 
-
 function is_registration_valid($msg) {
 	return ($msg == '');
 }
@@ -729,6 +729,6 @@ function set_session_vars($formvars) {
 	$_SESSION['login_name'] = $formvars['login_name'];
 	$_SESSION['login_routines'] = true;
 	$_SESSION['CONTEXT_PREFIX'] = $_SERVER['CONTEXT_PREFIX'];
-	$_SESSION['SCRIPT_URI'] = $_SERVER['SCRIPT_URI'];
+	$_SESSION['HTTP_HOST'] = $_SERVER['HTTP_HOST'];
 }
 ?>
