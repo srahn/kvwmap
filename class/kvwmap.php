@@ -14382,7 +14382,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
     # Abfragen der Layerausdehnung
     $ret=$layerdb->execSQL($sql,4,0);
-		if ($query==0) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+		if ($ret[0]) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
     $rs = pg_fetch_array($ret[1]);
     if($rs['minx'] != ''){
 			if($this->user->rolle->epsg_code == 4326)$rand = 10/10000;
@@ -15702,9 +15702,9 @@ class db_mapObj{
                 if(is_array($attributes['dependent_options'][$i])){   # mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
                   for($k = 0; $k < count($query_result); $k++){
                     $sql = $attributes['dependent_options'][$i][$k];
-                    if($sql != ''){
-                      $ret=$database->execSQL($sql,4,0);
-											if ($query==0) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+                    if($sql != '') {
+                      $ret = $database->execSQL($sql, 4, 0);
+											if ($ret[0]) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
                       while($rs = pg_fetch_array($ret[1])){
                         $attributes['enum_value'][$i][$k][] = $rs['value'];
                         $attributes['enum_output'][$i][$k][] = $rs['output'];
@@ -15715,7 +15715,7 @@ class db_mapObj{
                 }
                 elseif($attributes['options'][$i] != ''){
                   $sql = str_replace('$stelleid', $stelle_id, $attributes['options'][$i]);
-                  $ret=$database->execSQL($sql,4,0);
+                  $ret = $database->execSQL($sql, 4, 0);
 									if ($ret[0]) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
                   while($rs = pg_fetch_array($ret[1])){
                     $attributes['enum_value'][$i][] = $rs['value'];
@@ -15738,8 +15738,8 @@ class db_mapObj{
 										$value = $query_result[$k][$attributes['name'][$i]];
 										if($value != '' AND !in_array($attributes['operator'][$i], array('LIKE', 'NOT LIKE', 'IN'))){			# falls eine LIKE-Suche oder eine IN-Suche durchgeführt wurde
 											$sql = 'SELECT * FROM ('.$sql.') as foo WHERE value = \''.pg_escape_string($value).'\'';
-											$ret=$database->execSQL($sql,4,0);
-											if ($query==0) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+											$ret = $database->execSQL($sql, 4, 0);
+											if ($ret[0]) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
 											$rs = pg_fetch_array($ret[1]);
 											$attributes['enum_output'][$i][$k] = $rs['output'];
 										}
@@ -15777,8 +15777,8 @@ class db_mapObj{
                 $attributes['options'][$i] = $optionen[0];
 								if($attributes['options'][$i] != ''){
                   $sql = str_replace('$stelleid', $stelle_id, $attributes['options'][$i]);
-                  $ret=$database->execSQL($sql,4,0);
-									if ($query==0) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+                  $ret = $database->execSQL($sql, 4, 0);
+									if ($ret[0]) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
                   while($rs = pg_fetch_array($ret[1])){
                     $attributes['enum_value'][$i][] = $rs['value'];
                     $attributes['enum_output'][$i][] = $rs['output'];
@@ -15991,7 +15991,7 @@ class db_mapObj{
 			";
 			#echo '<br>Sql: ' . $sql;
 			$ret = $database->execSQL($sql, 4, 0);
-			if ($ret[0] == 1) {
+			if ($ret[0]) {
 				$success = false;
 				$err_msg = $ret[1];
 			}
@@ -16701,7 +16701,7 @@ class db_mapObj{
 			";
 			#echo '<br>Sql: ' . $sql;
 			$this->debug->write("<p>file:kvwmap class:Document->save_layer_attributes :",4);
-			$database->execSQL($sql,4, 1);
+			$database->execSQL($sql, 4, 1);
 		}
 	}
 
