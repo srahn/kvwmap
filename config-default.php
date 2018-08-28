@@ -516,9 +516,11 @@ define('LOGFILE_POSTGRES',LOGPATH.VERSION.'_log_postgres.sql');   # Version 1.6.
 # Log-Datei zur Speicherung der Login Vorgänge
 define('LOGFILE_LOGIN', LOGPATH . 'login_fail.log'); 							# Version 2.9.0
 
-# Erlaubt die Verwendung ein und der selben Session für verschiedene kvwmap's auf dem gleichen Server
-# Funktioniert nur wenn es den login_name in den anderen kvwmap's in denen man sich ohne Passwort anmelden will auch gibt.
-define('ONE_SESSION_PER_CONTEXT_PREFIX', false);										# Version 2.9.0
+# Nutze eine eventuell schon vorhandene Session dieses Hosts (true).
+# Das funktioniert nur, wenn es den Nutzer, der in der Session gespeichert ist, in diesem kvwmap auch gibt.
+# Kann verwendet werden, wenn es mehrere kvwmap's auf dem Server gibt, die mit dem gleichen Login erreicht,
+# genutzt werden sollen. z.B. verschiedene Jahresscheiben.
+define('USE_EXISTING_SESSION', false);										# Version 2.9.0
 
 # Log-Level zur Speicherung der SQL-Statements                    # Version 1.6.0
 define('LOG_LEVEL',2);                                            # Version 1.6.0
