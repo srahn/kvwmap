@@ -1,12 +1,11 @@
 <?php
+include('config.php');
+include(CLASSPATH . 'log.php');
 header('Content-Type: text/html; charset=utf-8');
 if (!USE_EXISTING_SESSION) {
 	session_set_cookie_params(0, $_SERVER['CONTEXT_PREFIX']);
 }
 session_start();
-
-include('config.php');
-include(CLASSPATH . 'log.php');
 
 if (DEBUG_LEVEL > 0) $debug = new Debugger(DEBUGFILE);	# öffnen der Debug-log-datei
 # Öffnen der Log-Dateien. Derzeit werden in den Log-Dateien nur die SQL-Statements gespeichert, die über execSQL in den Klassen mysql und postgres ausgeführt werden.
