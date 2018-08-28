@@ -121,7 +121,7 @@ if (is_logout($GUI->formvars)) {
 # login
 $show_login_form = false;
 if (is_logged_in()) {
-	$GUI->debug->write('Ist angemeldet an: ' . $_SESSION['HTTP_HOST'] . $_SESSION['CONTEXT_PREFIX'], 4, $GUI->echo);
+	$GUI->debug->write('Ist angemeldet an: ' . $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_URL'], 4, $GUI->echo);
 	$GUI->formvars['login_name'] = $_SESSION['login_name'];
 	$GUI->user = new user($_SESSION['login_name'], 0, $GUI->database);
 	$GUI->debug->write('Ist angemeldet als: ' . $GUI->user->login_name, 4, $GUI->echo);
@@ -505,9 +505,7 @@ function is_logged_in() {
 	return (
 		array_key_exists('angemeldet', $_SESSION) AND
 		$_SESSION['angemeldet'] === true AND
-		$_SESSION['login_name'] != '' AND
-		$_SESSION['HTTP_HOST'] == $_SERVER['HTTP_HOST'] AND
-		$_SESSION['CONTEXT_PREFIX'] == $_SERVER['CONTEXT_PREFIX']
+		$_SESSION['login_name'] != ''
 	);
 }
 
@@ -728,7 +726,5 @@ function set_session_vars($formvars) {
 	$_SESSION['angemeldet'] = true;
 	$_SESSION['login_name'] = $formvars['login_name'];
 	$_SESSION['login_routines'] = true;
-	$_SESSION['CONTEXT_PREFIX'] = $_SERVER['CONTEXT_PREFIX'];
-	$_SESSION['HTTP_HOST'] = $_SERVER['HTTP_HOST'];
 }
 ?>
