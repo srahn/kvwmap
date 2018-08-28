@@ -216,7 +216,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
   <tr>
     <td bgcolor="<? echo BG_FORM ?>"><?
 	 if ($this->nachweis->erg_dokumente > 0) { ie_check();?>
-		<table class="<? if (!ie_check()){ ?>scrolltable <? } ?>scrolltable_td" style="width: 1247px" border="0" cellspacing="0" cellpadding="0">
+		<table id="nachweisanzeige_ergebnis" class="<? if (!ie_check()){ ?>scrolltable <? } ?>scrolltable_td" style="width: 1247px" border="0" cellspacing="0" cellpadding="0">
 			<thead>
         <tr style="outline: 1px solid grey;" bgcolor="#FFFFFF"> 
           <th height="40" style="width: 80"><div align="center"><span class="fett">Auswahl</span></div></th>
