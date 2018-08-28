@@ -346,7 +346,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
     ?>
 				</tbody>
       </table>
-      <table width="0%" border="1" cellspacing="0" cellpadding="0" style="border-collapse: collapse; border: 1px solid grey; margin-top: 7px;">
+      <table width="0%" border="1" cellspacing="0" cellpadding="0" id="nachweisanzeige_optionen">
 			  <tr>
 					<td valign="top" style="padding: 5px;">
 						<table cellspacing="4">

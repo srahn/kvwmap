@@ -344,6 +344,12 @@ a.invisiblelayerlink:hover{
 	color: gray;
 }
 
+#nachweisanzeige_optionen{
+	border-collapse: collapse; 
+	border: 1px solid grey; 
+	margin-top: 7px;
+}
+
 #ortho_points{
 	font-size: 15px;
 	text-align: left;
