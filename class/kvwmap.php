@@ -10603,7 +10603,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
   function MenuesAnzeigen() {
     # Abfragen aller Menues
-    if ($this->formvars['view_sort'] == ''){
+    if ($this->formvars['view_sort'] == '') {
       $this->formvars['view_sort'] = 'name';
     }
     $this->menuedaten = Menue::find($this, 'true', $this->formvars['view_sort']);
@@ -10640,12 +10640,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		}
 		if ($results[0]['success']) {
 			$this->add_message('notice', 'Menü erfolgreich angelegt.');
-			$this->menuedaten = Menue::find($this, '', $this->formvars['order']);
+			$this->menuedaten = Menue::find($this, '', 'name');
 			$this->titel='Menüdaten';
 			$this->main='menuedaten.php';
 		}
 		else {
-			echo '<p>results: ' . print_r($results, true);
 			$this->add_message('array', $results);
 			$this->main = 'menue_formular.php';
 		}

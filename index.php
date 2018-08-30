@@ -1435,6 +1435,11 @@ function go_switch($go){
 				$GUI->MenueAendern();
 			} break;
 
+			case 'Menue_Als neuen Menüpunkt Eintragen' : {
+				$GUI->checkCaseAllowed('Menues_Anzeigen');
+				$GUI->MenueSpeichern();
+			} break;
+
 			case 'Menue_Löschen' : {
 				$GUI->checkCaseAllowed('Menues_Anzeigen');
 				$GUI->MenueLoeschen();
