@@ -476,7 +476,7 @@ class Nachweis {
   
 	function CreateNachweisDokumentVorschau($dateiname){		
 		$dateinamensteil=explode('.',$dateiname);
-		if(strtolower($dateinamensteil[1]) == 'pdf'){
+		if(mb_strtolower($dateinamensteil[1]) == 'pdf'){
 			$pagecount = getNumPagesPdf($dateiname);
 			if($pagecount > 1)$label = "-fill black -undercolor white -gravity North -pointsize 18 -annotate +0+15 ' ".$pagecount." Seiten '";
 		}
@@ -985,7 +985,7 @@ class Nachweis {
 								$sql.=" AND REGEXP_REPLACE(COALESCE(n.stammnr, ''), '[^0-9]+' ,'') = '".$stammnr."'";
 							}
 							else{
-								$sql.=" AND lower(n.stammnr)='".strtolower($stammnr)."'";
+								$sql.=" AND lower(n.stammnr)='".mb_strtolower($stammnr)."'";
 							}
 						}
           }
@@ -998,7 +998,7 @@ class Nachweis {
 								$sql.=" AND REGEXP_REPLACE(COALESCE(n.rissnummer, ''), '[^0-9]+' ,'') = '".$rissnr."'";
 							}
 							else{
-								$sql.=" AND lower(n.rissnummer)='".strtolower($rissnr)."'";
+								$sql.=" AND lower(n.rissnummer)='".mb_strtolower($rissnr)."'";
 							}
 						}
 	        }
@@ -1034,7 +1034,7 @@ class Nachweis {
 					}
 					if(!empty($unterart))$sql.=" AND d.id IN (".implode(',', $unterart).")";
 					if($suchbemerkung != ''){
-						$sql.=" AND lower(n.bemerkungen) LIKE '%".strtolower($suchbemerkung)."%'";
+						$sql.=" AND lower(n.bemerkungen) LIKE '%".mb_strtolower($suchbemerkung)."%'";
 					}
           if ($order=='') {
             $order="flurid, stammnr, datum";
