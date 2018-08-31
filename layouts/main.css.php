@@ -1239,6 +1239,15 @@ tbody.gle tr:hover {
 	margin: 2px 2px 2px 0;
 }
 
+.subFormListItem{
+	height: 20px;
+	padding: 0;
+}
+
+.subFormListItem a:before{
+	content:url('../graphics/submenue.png');
+	vertical-align: top;
+}
 
 .calendar { /* Fuer IE <= 6 */
 	text-align: center;
