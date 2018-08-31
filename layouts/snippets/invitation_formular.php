@@ -27,7 +27,9 @@
 		<div class="clear"></div><?
 		if ($this->formvars['selected_invitation_id'] != '') { ?>
 			<label class="fetter" for="email">Kennung:</label>
-			<div style="float: left"><? echo $this->formvars['token']; ?></div><?
+			<div style="float: left"><? echo $this->formvars['token']; ?></div>
+			<div class="clear"></div>
+			<div style="float: left"><a href="mailto:<?php echo $this->invitation->mailto_text(); ?>">Einladung noch mal per E-Mail versenden</a></div><?
 		} ?>
 		<div class="clear"></div>
 		<div style="text-align: -webkit-center">

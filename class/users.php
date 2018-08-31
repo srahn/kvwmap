@@ -907,7 +907,7 @@ class user {
 	function updateStelleID($stelle_id) {
 		# sezten der aktuell für den Nutzer eingestellten Stelle
 		$sql ='UPDATE user SET stelle_id='.$stelle_id.' WHERE ID='.$this->id;
-		$this->debug->write("<p>file:users.php class:user->setStelle - Setzen der aktuellen Stelle<br>".$sql,4);
+		$this->debug->write("<p>file:users.php class:user->updateStelleID - Setzen der aktuellen Stellen-ID für den User<br>".$sql,4);
 		$query=mysql_query($sql,$this->database->dbConn);
 		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		$this->debug->write('Stelle gewechselt, neue Stellen_ID: '.$neueStelle,4);
@@ -930,11 +930,9 @@ class user {
 		}
 	}
 
-	function setStelle($stelle_id,$formvars) {
-		# Speicherung dass der User diese Stelle als letztes genutzt hat
-		# setzen der Werte, die aktuell für die Nutzung der Stelle durch den Nutzer gelten sollen.
-		$this->updateStelleID($stelle_id);
-		# zerlegen der Variable für die Kartengröße
+	function setOptions($stelle_id, $formvars) {
+		# Setzen der Werte, die aktuell für die Nutzung der Stelle durch den Nutzer gelten sollen.
+		# Zerlegen der Variable für die Kartengröße
 		$teil=explode('x',$formvars['mapsize']);
 		$nImageWidth=$teil[0];
 		$nImageHeight=$teil[1];
@@ -1009,7 +1007,7 @@ class user {
 
 			$sql.=' WHERE stelle_id='.$stelle_id.' AND user_id='.$this->id;
 			#echo $sql;
-			$this->debug->write("<p>file:users.php class:user->setStelle - Setzen der Einstellungen für die Rolle<br>".$sql,4);
+			$this->debug->write("<p>file:users.php class:user->setOptions - Setzen der Einstellungen für die Rolle des Users<br>".$sql,4);
 			$query=mysql_query($sql,$this->database->dbConn);
 			if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 			$this->debug->write('Neue Werte für Rolle eingestellt: '.$formvars['nZoomFactor'].', '.$formvars['mapsize'],4);

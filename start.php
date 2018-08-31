@@ -121,9 +121,10 @@ if (is_logout($GUI->formvars)) {
 # login
 $show_login_form = false;
 if (is_logged_in()) {
-	$GUI->debug->write('Ist angemeldet.', 4, $GUI->echo);
+	$GUI->debug->write('Ist angemeldet an: ' . $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_URL'], 4, $GUI->echo);
 	$GUI->formvars['login_name'] = $_SESSION['login_name'];
 	$GUI->user = new user($_SESSION['login_name'], 0, $GUI->database);
+	$GUI->debug->write('Ist angemeldet als: ' . $GUI->user->login_name, 4, $GUI->echo);
 	# login case 1
 }
 else {
@@ -292,6 +293,7 @@ if (!$show_login_form) {
 		if ($permission['allowed']) {
 			$GUI->debug->write('Nutzer ist in Stelle ' . $GUI->Stelle->id . ' erlaubt.', 4, $GUI->echo);
 			$GUI->user->stelle_id = $GUI->Stelle->id; # set selected stelle to user
+			$GUI->debug->write('Setze neue Stellen-ID: ' . $GUI->Stelle->id . ' für Nutzer: ' . $GUI->user->id, 4, $GUI->echo);
 			$GUI->user->updateStelleID($GUI->Stelle->id);
 		}
 		else {
@@ -329,9 +331,13 @@ if ($show_login_form) {
 	$GUI->user->rolle->querymode = 0;
 }
 else {
-	$GUI->debug->write('Lade Stelle und Rolle.', 4, $GUI->echo);
+	$GUI->debug->write('Lade Stelle und ordne Rolle dem User zu.', 4, $GUI->echo);
 	# Alles was man immer machen muss bevor die go's aufgerufen werden
 	$GUI->user->setRolle($GUI->user->stelle_id);
+	if (new_options_sent($GUI->formvars)) {
+		$GUI->debug->write('Speicher neue Stellenoptionen.', 4, $GUI->echo);
+		$GUI->user->setOptions($GUI->user->stelle_id, $GUI->formvars);
+	}
 
 	#$GUI->debug->write('Eingestellte Rolle: ' . print_r($GUI->user->rolle, true), 4, $GUI->echo);
 
@@ -496,7 +502,11 @@ function is_logout($formvars) {
 }
 
 function is_logged_in() {
-	return (array_key_exists('angemeldet', $_SESSION) AND $_SESSION['angemeldet'] === true AND $_SESSION['login_name'] != '');
+	return (
+		array_key_exists('angemeldet', $_SESSION) AND
+		$_SESSION['angemeldet'] === true AND
+		$_SESSION['login_name'] != ''
+	);
 }
 
 function is_logged_out() {
@@ -684,13 +694,16 @@ function checkRegistration($gui) {
 	return implode('<br>', $registration_errors);
 }
 
-
 function is_registration_valid($msg) {
 	return ($msg == '');
 }
 
 function is_ows_request($formvars) {
 	return ($formvars['go'] == 'OWS');
+}
+
+function new_options_sent($formvars) {
+	return $formvars['gui'] != '';
 }
 
 function logout() {
@@ -713,6 +726,5 @@ function set_session_vars($formvars) {
 	$_SESSION['angemeldet'] = true;
 	$_SESSION['login_name'] = $formvars['login_name'];
 	$_SESSION['login_routines'] = true;
-	$_SESSION['CONTEXT_PREFIX'] = $_SERVER['CONTEXT_PREFIX'];
 }
 ?>

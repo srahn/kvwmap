@@ -1695,4 +1695,11 @@ function get_remote_filesize($url, $formatSize = true, $useHead = true) {
 
 	return $size; // return formatted size
 }
+
+/*
+* Function returns a readable message of sql errors optionally with word $find replaced by asterists *****
+*/
+function sql_err_msg($file, $line, $sql, $find = '') {
+	return "<br>Abbruch in " . $file . " Zeile: " . $line . "<br>wegen: " . ($find != '' ? str_replace($find, '*****', $sql) : $sql). "<p>" . INFO1;
+}
 ?>

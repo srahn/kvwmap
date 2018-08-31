@@ -4,13 +4,13 @@
 <script type="text/javascript">
 <!--
 
-	var filelist = [];  // Ein Array, das alle hochzuladenden Files enth‰lt
+	var filelist = [];  // Ein Array, das alle hochzuladenden Files enth√§lt
 	var filesizes = [];
 	var filenames = [];
 	var totalCount = 0;
 	var totalSize = 0;
 	var maxTotalSize = <? echo MAXUPLOADSIZE; ?>;
-	var currentUpload = null; // Enth‰lt die Datei, die aktuell hochgeladen wird
+	var currentUpload = null; // Enth√§lt die Datei, die aktuell hochgeladen wird
 	var currentUploadId = 0;
 
 	function preventDefaults(e){
@@ -22,7 +22,7 @@
 		preventDefaults(event);
 		for(var i = 0; i < event.dataTransfer.files.length; i++){
 			if(totalSize + event.dataTransfer.files[i].size > maxTotalSize * 1024 * 1024){		// Byte -> MegaByte
-				message('<? echo $strMaxFileSizeExceeded; ?>');
+				message('<? echo $strMaxFileSize; ?> von ' + maxTotalSize + ' MB <? echo $this->strExceeded; ?>');
 				return;
 			}
 			filelist.push(event.dataTransfer.files[i]);

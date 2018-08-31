@@ -1,10 +1,11 @@
 <?php
-header('Content-Type: text/html; charset=utf-8');
-session_set_cookie_params(0, $_SERVER['CONTEXT_PREFIX']);
-session_start();
-
 include('config.php');
 include(CLASSPATH . 'log.php');
+header('Content-Type: text/html; charset=utf-8');
+if (!USE_EXISTING_SESSION) {
+	session_set_cookie_params(0, $_SERVER['CONTEXT_PREFIX']);
+}
+session_start();
 
 if (DEBUG_LEVEL > 0) $debug = new Debugger(DEBUGFILE);	# öffnen der Debug-log-datei
 # Öffnen der Log-Dateien. Derzeit werden in den Log-Dateien nur die SQL-Statements gespeichert, die über execSQL in den Klassen mysql und postgres ausgeführt werden.
@@ -1432,6 +1433,11 @@ function go_switch($go){
 			case 'Menue_Ändern' : {
 				$GUI->checkCaseAllowed('Menues_Anzeigen');
 				$GUI->MenueAendern();
+			} break;
+
+			case 'Menue_Als neuen Menüpunkt Eintragen' : {
+				$GUI->checkCaseAllowed('Menues_Anzeigen');
+				$GUI->MenueSpeichern();
 			} break;
 
 			case 'Menue_Löschen' : {
