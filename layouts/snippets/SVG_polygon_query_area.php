@@ -59,11 +59,7 @@
 	<input type="hidden" name="str_pathx" value="<? echo $this->formvars['str_pathx']; ?>">
   <input type="hidden" name="str_pathy" value="<? echo $this->formvars['str_pathy']; ?>">
   <input type="hidden" name="vertices" id="vertices" value="">
-	<input type="text" name="ortho_point_vertices" id="ortho_point_vertices" value="<? echo $this->formvars['ortho_point_vertices']; ?>">
-	<input type="text" name="ortho_point_x0" id="ortho_point_x0" value="<? echo $this->formvars['ortho_point_x1']; ?>">
-	<input type="text" name="ortho_point_y0" id="ortho_point_y0" value="<? echo $this->formvars['ortho_point_y1']; ?>">
-	<input type="text" name="ortho_point_x1" id="ortho_point_x1" value="<? echo $this->formvars['ortho_point_x2']; ?>">
-	<input type="text" name="ortho_point_y1" id="ortho_point_y1" value="<? echo $this->formvars['ortho_point_y2']; ?>">
+	<input type="hidden" name="ortho_point_vertices" id="ortho_point_vertices" value="<? echo $this->formvars['ortho_point_vertices']; ?>">
 
 <?php
 #

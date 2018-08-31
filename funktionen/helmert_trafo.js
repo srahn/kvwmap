@@ -182,8 +182,6 @@ HelmertTransformation4Js.prototype.transformToLocal = function(y, x, round) {
     x = -x0Rev + aT * xIn + oT * yIn;
 
     if (round) {
-				console.log(y);
-				console.log(x);
         y = parseFloat(roundNumber(y, round));
         x =  parseFloat(roundNumber(x, round));
     }

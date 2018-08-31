@@ -19,8 +19,8 @@
 		document.getElementById("svghelp").SVGcoord_input_submit();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 	}
 	
-	function add_ortho_point(){
-		document.getElementById("svghelp").SVGadd_ortho_point();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+	function add_ortho_point(world_x, world_y, local_x, local_y, deactivate){
+		document.getElementById("svghelp").SVGadd_ortho_point(world_x, world_y, local_x, local_y, deactivate);			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 	}	
 
 	var nbh = new Array();
@@ -113,7 +113,6 @@
 	}
 	if(top.currentform.ortho_point_vertices != undefined){
 		var ortho_point_vertices = new Array();
-		if(top.currentform.ortho_point_vertices.value != "")ortho_point_vertices = top.currentform.ortho_point_vertices.value.split("|");
 	}
 	var helmert;
 	var textx = '.$text_x.';
@@ -524,7 +523,7 @@
 		return p;
 	}
  	
-	function startup(){		
+	function startup(){
 		if(window.addEventListener){
 			window.addEventListener(\'mousewheel\', mousewheelchange, false); // Chrome/Safari//IE9
   		window.addEventListener(\'DOMMouseScroll\', mousewheelchange, false);		//Firefox
@@ -594,6 +593,23 @@
 				if(top.currentform.firstline.value == "true" && top.currentform.last_doing.value == "draw_line"){
 					top.currentform.last_doing.value = "draw_second_line";
 				}
+			}
+		}
+		if(ortho_point_functions == true){
+			if(top.currentform.ortho_point_vertices.value != ""){
+				o_p_vertices = top.currentform.ortho_point_vertices.value.split("|");
+				top.currentform.last_button.value = "ortho_point1";
+				top.currentform.always_draw.checked = false;
+				ortho_point();';
+				for($o = 0; $o < count($this->formvars['ortho_point_x']); $o++){
+					if($o < 2){
+						$basicfunctions.= '
+						var a = o_p_vertices['.$o.'].split(" ");
+						add_ortho_point(a[0], a[1], '.$this->formvars['ortho_point_x'][$o].', '.$this->formvars['ortho_point_y'][$o].', false);';
+					}
+					else $basicfunctions.= 'add_ortho_point(null, null, '.$this->formvars['ortho_point_x'][$o].', '.$this->formvars['ortho_point_y'][$o].', false);';
+				}
+$basicfunctions.= '			
 			}
 		}
 		fachschale();
@@ -761,7 +777,7 @@
 			break;
 			
 			case "ortho_point":
-				add_ortho_point(world_x, world_y);
+				add_ortho_point(world_x, world_y, null, null, true);
 			break;
 
 			case "measure":
@@ -1084,59 +1100,62 @@ function mouseup(evt){
 	top.document.getElementById("svghelp").SVGadd_ortho_point = add_ortho_point;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
 	function ortho_point(){
-		helmert = new top.HelmertTransformation4Js(0, 0, 0, 0);
 		top.currentform.last_doing.value = "ortho_point";
-		mittex = Math.round(minx+(maxx-minx)/2);
-		mittey = Math.round(miny+(maxy-miny)/2);
-		var Msg = top.$("#message_box");
-		Msg[0].style.left = "70%";
-		Msg.show();
-		content = \'<div style="position: absolute;top: 0px;right: 0px"><a href="javascript:void(0)" onclick="top.$(\\\'#message_box\\\').hide();" title="Schlie&szlig;en"><img style="border:none" src="'.GRAPHICSPATH.'exit2.png"></img></a></div>\';
-		content+= \'<div style="height: 30px">Orthogonalpunktberechnung</div>\';
-		content+= \'<span class="px15">1. Setzen Sie in der Karte durch 2 Klicks die beiden Punkte für die Bezugslinie.</span>\';
-		content+= \'<div id="ortho_points"></div>\';
-		content+= \'<br><input id="ortho_point_button" type="button" style="display:none;margin-right: 10px" value="neuer Punkt" onclick="add_ortho_point(null, null)"><input type="button" value="OK" onclick="ortho_point_submit()">\';
-		Msg.html(content);
+		if(ortho_point_vertices.length == 0){
+			helmert = new top.HelmertTransformation4Js(0, 0, 0, 0);
+			mittex = Math.round(minx+(maxx-minx)/2);
+			mittey = Math.round(miny+(maxy-miny)/2);
+			var Msg = top.$("#message_box");
+			Msg[0].style.left = "70%";
+			Msg.show();
+			content = \'<div style="height: 30px">Orthogonalpunktberechnung</div>\';
+			content+= \'<span class="px15">1. Setzen Sie in der Karte durch 2 Klicks die beiden Punkte für die Bezugslinie.</span>\';
+			content+= \'<div id="ortho_points"></div>\';
+			content+= \'<br><input id="ortho_point_button" type="button" style="display:none;margin-right: 10px" value="neuer Punkt" onclick="add_ortho_point(null, null, 0, 0, false)"><input type="button" value="Beenden" onclick="currentform.ortho_point_vertices.value = \\\'\\\';$(\\\'#message_box\\\').hide();">\';
+			Msg.html(content);
+		}
 	}
 	
-	function add_ortho_point(world_x, world_y){
+	function add_ortho_point(world_x, world_y, local_x, local_y, deactivate){
 	  var vertex;
 		var point_number = ortho_point_vertices.length;
 		var id = "ortho_point_vertex_"+point_number;
-		if(world_x == null){	
-			var a = ortho_point_vertices[0].split(" ")
-			world_x = a[0];
-			world_y = a[1];			
+		if(world_x == null && local_x != null){
+			world = get_world_ortho_point_coord(local_x, local_y);
+			world_x = world[0];
+			world_y = world[1];
 		}
+		if(local_x == null){
+			local_coord = get_local_ortho_point_coord(world_x, world_y, point_number);
+			local_x = local_coord[0];
+			local_y = local_coord[1];
+		}		
 		top.currentform.lastcoordx.value = world_x;
 		top.currentform.lastcoordy.value = world_y;
 		ortho_point_vertices.push(world_x+" "+world_y);
 		top.currentform.ortho_point_vertices.value = ortho_point_vertices.join("|");
 		vertex = create_catch_vertex(document.getElementById("kreis3"), id, world_x, world_y);
-		vertex.setAttribute("pointer-events", "none");		// Events bei diesem Vertex deaktivieren, sonst wird durch den Mouseup gleich noch einer angelegt
-		deactivated_foreign_vertex = id;
+		if(deactivate){
+			vertex.setAttribute("pointer-events", "none");		// Events bei diesem Vertex deaktivieren, sonst wird durch den Mouseup gleich noch einer angelegt
+			deactivated_foreign_vertex = id;
+		}
 		document.getElementById("ortho_point_vertices").appendChild(vertex);
 		point_div = top.document.createElement("div");
 		point_div.className = "ortho_point_div";
-		local_coord = get_local_ortho_point_coord(point_number);
 		point_x = top.document.createElement("input");
-		point_x.type = "text";
-		point_x.value = local_coord[0];
-		point_x.id="ortho_point_x"+point_number;
-		point_x.oninput = function(){change_ortho_point(point_number)};
-		point_div.appendChild(point_x);
 		point_y = top.document.createElement("input");
-		point_y.type = "text";
-		point_y.value = local_coord[1];
-		point_y.id="ortho_point_y"+point_number;
-		point_y.oninput = function(){change_ortho_point(point_number)};
+		point_x.value = local_x;
+		point_y.value = local_y;
+		point_x.name="ortho_point_x[]";
+		point_y.name="ortho_point_y[]";
+		point_x.type = point_y.type = "text";
+		point_x.oninput = point_y.oninput = function(){change_ortho_point(point_number)};
+		point_x.autocomplete = point_y.autocomplete = "off";
+		point_div.appendChild(point_x);
 		point_div.appendChild(point_y);
 		top.document.getElementById("ortho_points").appendChild(point_div);
-		if(point_number < 2){
-			top.document.getElementById("ortho_point_x"+point_number).value = point_x.value;
-			top.document.getElementById("ortho_point_y"+point_number).value = point_y.value;
-		}
 		if(point_number == 1){
+			calculate_transformation_parameters();
 			top.document.getElementById("ortho_points").appendChild(top.document.createTextNode("2. Sie können nun weitere Punkte hinzufügen."));
 			top.document.getElementById("ortho_point_button").style.display = "";
 		}
@@ -1145,64 +1164,59 @@ function mouseup(evt){
 	function change_ortho_point(point_number){
 		var id = "ortho_point_vertex_"+point_number;
 		var vertex = document.getElementById(id);
-		var local_x = top.document.getElementById("ortho_point_x"+point_number).value;
-		var local_y = top.document.getElementById("ortho_point_y"+point_number).value;
-		world = get_world_ortho_point_coord(point_number, local_x, local_y);
-		vertex.setAttribute("x", world[0]);
-		vertex.setAttribute("y", world[1]);
-		x = Math.round((world[0] - parseFloat(top.currentform.minx.value))/parseFloat(top.currentform.pixelsize.value));
-		y = Math.round((world[1] - top.currentform.miny.value)/parseFloat(top.currentform.pixelsize.value));
-		vertex.setAttribute("cx", x);
-		vertex.setAttribute("cy", y);
-		ortho_point_vertices[point_number] = world[0]+" "+world[1];
+		var local_x = top.document.getElementsByName("ortho_point_x[]")[point_number].value;
+		var local_y = top.document.getElementsByName("ortho_point_y[]")[point_number].value;
+		if(point_number > 1){																																			// ein Kleinpunkt wird veraendert
+			world = get_world_ortho_point_coord(local_x, local_y);
+			vertex.setAttribute("x", world[0]);
+			vertex.setAttribute("y", world[1]);
+			x = Math.round((world[0] - parseFloat(top.currentform.minx.value))/parseFloat(top.currentform.pixelsize.value));
+			y = Math.round((world[1] - top.currentform.miny.value)/parseFloat(top.currentform.pixelsize.value));
+			vertex.setAttribute("cx", x);
+			vertex.setAttribute("cy", y);
+			ortho_point_vertices[point_number] = world[0]+" "+world[1];
+		}
+		else{																																											// ein Bezugspunkt wird veraendert
+			calculate_transformation_parameters();
+			ops = top.document.getElementsByName("ortho_point_x[]");																// alle Kleinpunkte neu berechnen
+			for(var o = 0; o < ops.length; o++){
+				if(o > 1)change_ortho_point(o);
+			};
+		}
 		top.currentform.ortho_point_vertices.value = ortho_point_vertices.join("|");
 	}
 	
-	function get_world_ortho_point_coord(point_number, local_x, local_y){
-		var coord = new Array();
-		if(point_number > 1){
-			calculate_transformation_parameters();
-			coord = helmert.transformToWorld(local_y, local_x, 3);
-		}
-		console.log(coord);
-		return coord;
+	function get_world_ortho_point_coord(local_x, local_y){
+		return helmert.transformToWorld(local_y, local_x, 3);
 	}
 	
-	function get_local_ortho_point_coord(point_number){
-		var coord = new Array();		
-		var x0 = top.document.getElementById("ortho_point_x0").value;
-		var y0 = top.document.getElementById("ortho_point_y0").value;
-		var x1 = top.document.getElementById("ortho_point_x1").value;
-		var y1 = top.document.getElementById("ortho_point_y1").value;
+	function get_local_ortho_point_coord(world_x, world_y, point_number){
+		var coord = new Array();
 		if(point_number == 0){																// lokale Koordinaten von Punkt a
-			if(x0 == ""){coord[0] = 0} else {coord[0] = x0};
-			if(y0 == ""){coord[1] = 0} else {coord[1] = y0};
+			coord[0] = 0;
+			coord[1] = 0;
 		}
 		else if(point_number == 1){														// lokale Koordinaten von Punkt b
-			var a = ortho_point_vertices[0].split(" ");							// Welt-Koordinaten von Punkt a
-			var b = ortho_point_vertices[1].split(" ");							// Welt-Koordinaten von Punkt b
+			var a = ortho_point_vertices[0].split(" ");					// Welt-Koordinaten von Punkt a
 			var m = new Array();
-			m[0] = b[0] - a[0];
-			m[1] = b[1] - a[1];
-			var dist_ab = Math.sqrt((m[0]*m[0])+(m[1]*m[1]));
-			if(x1 == ""){coord[0] = dist_ab} else {coord[0] = x1};
-			if(y1 == ""){coord[1] = 0} else {coord[1] = y1};
+			m[0] = world_x - a[0];
+			m[1] = world_y - a[1];
+			coord[0] = Math.sqrt((m[0]*m[0])+(m[1]*m[1]));
+			coord[1] = 0;
 		}
 		else{																									// lokale Koordinaten der Kleinpunkte
-			calculate_transformation_parameters();
-			p = ortho_point_vertices[point_number].split(" ");
-			coord = helmert.transformToLocal(parseFloat(p[0]), parseFloat(p[1]), 3);
+			coord = helmert.transformToLocal(world_x, world_y, 3);
 		}
 		return coord;
 	}
 	
 	function calculate_transformation_parameters(){
 		var a = ortho_point_vertices[0].split(" ");			// Welt-Koordinaten von Punkt a
-		var b = ortho_point_vertices[1].split(" ");		// Welt-Koordinaten von Punkt b
-		var x0 = top.document.getElementById("ortho_point_x0").value;
-		var y0 = top.document.getElementById("ortho_point_y0").value;
-		var x1 = top.document.getElementById("ortho_point_x1").value;
-		var y1 = top.document.getElementById("ortho_point_y1").value;
+		var b = ortho_point_vertices[1].split(" ");			// Welt-Koordinaten von Punkt b
+		var x0 = top.document.getElementsByName("ortho_point_x[]")[0].value;
+		var y0 = top.document.getElementsByName("ortho_point_y[]")[0].value;
+		var x1 = top.document.getElementsByName("ortho_point_x[]")[1].value;
+		var y1 = top.document.getElementsByName("ortho_point_y[]")[1].value;
 		helmert.calcTransformationParameter([{
       "local" : {
       	"y": y0,
@@ -1223,10 +1237,6 @@ function mouseup(evt){
       }}]);
 	}
 	
-	function ortho_point_submit(){
-		
-	}
-
 	';	
 
 	$pointfunctions = '
