@@ -1089,6 +1089,7 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 .raster_record .tr_show input[type=file]{width:0.0001px;font-size: 0.0001px;height:0.0001px;transition: all 0.25s ease;}		/* Das FileUpload-Inputfeld soll auch versteckt werden*/
 .raster_record .tr_show .preview_image{width: 125px;transition: all 0.25s ease;}	/* Vorschaubilder für Bilder (und PDFs) werden zunächst mit 125px Breite angezeigt und bei Hover auf 250px vergrößert */
 .raster_record .tr_show .preview_doc{width: auto;}																/* Vorschaubilder für andere Dokumente nicht */
+.raster_record .tr_show .buttonlink{display: none}
 /* Alle Attribute: */
 .raster_record span{line-height:0.0001px;font-size: 0px;transition: all 0.25s ease;}
 .raster_record img{width: 0px;transition: all 0.25s ease;}
