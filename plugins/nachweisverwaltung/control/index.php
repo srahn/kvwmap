@@ -87,6 +87,11 @@
 			$this->nachweiseZuAuftragEntfernen();
 	  } break;
 
+		case 'Nachweisanzeige_Geometrieuebernahme':{
+			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
+			$this->nachweiseGeometrieuebernahme();
+		} break;
+		
 	  # Rechercheanfrage an die Datenbank senden / mit prüfen der Eingabedaten
 	  case 'Nachweisanzeige' : {
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
@@ -103,7 +108,7 @@
 			if($this->formvars['showhauptart'][0] == '')$this->formvars['showhauptart'] = $this->formvars['suchhauptart'];		# ist bei "alle einblenden" der Fall
 			$this->nachweis = new Nachweis($this->pgdatabase, $this->user->rolle->epsg_code);
 			$this->hauptdokumentarten = $this->nachweis->getHauptDokumentarten();
-			$ret=$this->nachweis->getNachweise($ids,$this->formvars['suchpolygon'],$this->formvars['suchgemarkung'],$this->formvars['suchstammnr'],$this->formvars['suchrissnr'],$this->formvars['suchfortf'],$this->formvars['showhauptart'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'], $this->formvars['suchantrnr'], $this->formvars['sdatum'], $this->formvars['sVermStelle'], $this->formvars['gueltigkeit'], $this->formvars['sdatum2'], $this->formvars['suchflur'], $this->formvars['flur_thematisch'], $this->formvars['suchunterart'], $this->formvars['suchbemerkung'], NULL, $this->formvars['suchstammnr2'], $this->formvars['suchrissnr2'], $this->formvars['suchfortf2']);
+			$ret=$this->nachweis->getNachweise($ids,$this->formvars['suchpolygon'],$this->formvars['suchgemarkung'],$this->formvars['suchstammnr'],$this->formvars['suchrissnummer'],$this->formvars['suchfortfuehrung'],$this->formvars['showhauptart'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'], $this->formvars['suchantrnr'], $this->formvars['sdatum'], $this->formvars['sVermStelle'], $this->formvars['gueltigkeit'], $this->formvars['sdatum2'], $this->formvars['suchflur'], $this->formvars['flur_thematisch'], $this->formvars['suchunterart'], $this->formvars['suchbemerkung'], NULL, $this->formvars['suchstammnr2'], $this->formvars['suchrissnummer2'], $this->formvars['suchfortfuehrung2']);
 			if($ret!=''){
 				$this->nachweisAnzeige();
 				showAlert($ret);

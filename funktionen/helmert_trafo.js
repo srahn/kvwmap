@@ -77,12 +77,16 @@ function HelmertTransformation4Js(y0, x0, o, a) {
       }
     }
   ]);
-  pWorld = t.transformToWorld(0, 65.9, true);
-	pLocal = t.transformToLocal(500050, 6000025, true);
+  pWorld = t.transformToWorld(0, 65.9, 3);
+	pLocal = t.transformToLocal(500050, 6000025, 3);
 */
 HelmertTransformation4Js.prototype.calcTransformationParameter = function(identPoints) {
-  // local Punkte des Ausgangssystems
-  // world Punkte des Zielsystems
+  identPoints = identPoints.map(function(iP) {
+    return {
+      "local": { "y": parseFloat(iP.local.y), "x": parseFloat(iP.local.x) },
+      "world": { "y": parseFloat(iP.world.y), "x": parseFloat(iP.world.x) }
+    }
+  });
   var roh = 180 / Math.PI,
       // Anzahl der identischen Punkte
       n = identPoints.length,
@@ -107,6 +111,7 @@ HelmertTransformation4Js.prototype.calcTransformationParameter = function(identP
       sumCenterPoints = centerPoints.reduce(function(a, b) { return a.local.y + b.local.y + a.local.x + b.local.x + a.world.y + b.world.y + a.world.x + b.world.x}),
       c = centerPoints.reduce(function(a, b) { return a.local.x * a.local.x + a.local.y * a.local.y + b.local.x * b.local.x + b.local.y * b.local.y; });
 
+  this.identPoints = identPoints;
   this.o = centerPoints.reduce(function(a, b) { return a.local.x * a.world.y - a.local.y * a.world.x + b.local.x * b.world.y - b.local.y * b.world.x; }) / c;
   this.a = centerPoints.reduce(function(a, b) { return a.local.x * a.world.x + a.local.y * a.world.y + b.local.x * b.world.x + b.local.y * b.world.y; }) / c;
   this.y0 = center.world.y - this.o * center.local.x - this.a * center.local.y;
@@ -117,8 +122,15 @@ HelmertTransformation4Js.prototype.calcTransformationParameter = function(identP
     transPoints = identPoints.map(function(iP) {
       return this_.transformToWorld(iP.local.x, iP.local.y, true);
     });
-		
-  return {};
+
+  var result = {
+    'o': this.o,
+    'a': this.a,
+    'y0': this.y0,
+    'x0': this.x0,
+    'transPoints': transPoints
+  };
+  return result
 }
 
 /**
@@ -134,20 +146,19 @@ HelmertTransformation4Js.prototype.calcTransformationParameter = function(identP
  * @returns {Object} Plain JS-object representing the transformed point
  */
 HelmertTransformation4Js.prototype.transformToWorld = function(y, x, round) {
-
-    var xIn = x;
     var yIn = y;
+    var xIn = x;
 
-    if (typeof round === "undefined" || round === null) {
-        round = 14;
+    if (round !== parseInt(round, 10)) {
+      round = 14;
     }
 
     y = this.y0 + this.o * xIn + this.a * yIn;
     x = this.x0 + this.a * xIn - this.o * yIn;
 
     if (round) {
-        y = parseFloat(roundNumber(y, round));
-        x =  parseFloat(roundNumber(x, round));
+      y = parseFloat(roundNumber(y, round));
+      x =  parseFloat(roundNumber(x, round));
     }
 
     return [y,x];

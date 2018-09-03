@@ -1101,7 +1101,8 @@ function mouseup(evt){
 
 	function ortho_point(){
 		top.currentform.last_doing.value = "ortho_point";
-		if(ortho_point_vertices.length == 0){
+		if(top.currentform.ortho_point_vertices.value == "" || ortho_point_vertices.length == 0){
+			if(top.currentform.ortho_point_vertices.value == "")ortho_point_vertices = new Array();
 			helmert = new top.HelmertTransformation4Js(0, 0, 0, 0);
 			mittex = Math.round(minx+(maxx-minx)/2);
 			mittey = Math.round(miny+(maxy-miny)/2);

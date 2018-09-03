@@ -14,11 +14,11 @@ Text[1]=["Achtung:","Bei Auswahl von Gemarkung und Flur erfolgt eine räumliche 
 function save(){
 	art = document.getElementsByName('abfrageart');
 	if(art[0].checked == true){
-		if(document.GUI.suchgemarkung.value == '' && (document.GUI.suchflur.value != '' || document.GUI.suchrissnr.value != '' || document.GUI.suchfortf.value != '')){
+		if(document.GUI.suchgemarkung.value == '' && (document.GUI.suchflur.value != '' || document.GUI.suchrissnummer.value != '' || document.GUI.suchfortfuehrung.value != '')){
 			alert('Bitte geben Sie die Gemarkung an.');
 			return;
 		}
-		if(document.GUI.sVermStelle.value != '' && document.GUI.suchgemarkung.value == '' && document.GUI.suchstammnr.value == '' && document.GUI.suchrissnr.value == '' && document.GUI.sdatum.value == '' && document.GUI.suchfortf.value == ''){
+		if(document.GUI.sVermStelle.value != '' && document.GUI.suchgemarkung.value == '' && document.GUI.suchstammnr.value == '' && document.GUI.suchrissnummer.value == '' && document.GUI.sdatum.value == '' && document.GUI.suchfortfuehrung.value == ''){
 			alert('Bitte geben Sie eine Gemarkung, eine Antragsnummer, eine Rissnummer, ein Datum oder eine Fortführung an.');
 			return;
 		}
@@ -115,8 +115,8 @@ function clear(){
 	document.GUI.suchgemarkung.value = '';
 	document.GUI.suchflur.value = '';
 	document.GUI.suchstammnr.value = '';
-	document.GUI.suchrissnr.value = '';
-	document.GUI.suchfortf.value = '';
+	document.GUI.suchrissnummer.value = '';
+	document.GUI.suchfortfuehrung.value = '';
 	document.GUI.sdatum.value = '';
 	document.GUI.sdatum2.value = '';
 	document.GUI.sVermStelle.value = '';
@@ -297,9 +297,9 @@ else {
         <? if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){ ?>
 				<tr>
           <td colspan="3">          Rissnummer<br>
-  					<input type="text" name="suchrissnr" value="<?php echo $this->formvars['suchrissnr']; ?>" size="<?php echo RISSNUMMERMAXLENGTH; ?>" maxlength="<?php echo RISSNUMMERMAXLENGTH; ?>">
-						<a href="#" class="toggle_fa_off" title="von-bis-Suche" onclick="toggleBetweenSearch(this, GUI.suchrissnr2);"><i class="fa fa-step-backward"></i> <i class="fa fa-step-forward"></i></a>
-						<input type="text" <? if($this->formvars['suchrissnr2'] == '')echo 'style="display: none"'; ?> name="suchrissnr2" value="<? echo $this->formvars['suchrissnr2']; ?>" size="<? echo RISSNUMMERMAXLENGTH; ?>" maxlength="<? echo RISSNUMMERMAXLENGTH; ?>">
+  					<input type="text" name="suchrissnummer" value="<?php echo $this->formvars['suchrissnummer']; ?>" size="<?php echo RISSNUMMERMAXLENGTH; ?>" maxlength="<?php echo RISSNUMMERMAXLENGTH; ?>">
+						<a href="#" class="toggle_fa_off" title="von-bis-Suche" onclick="toggleBetweenSearch(this, GUI.suchrissnummer2);"><i class="fa fa-step-backward"></i> <i class="fa fa-step-forward"></i></a>
+						<input type="text" <? if($this->formvars['suchrissnummer2'] == '')echo 'style="display: none"'; ?> name="suchrissnummer2" value="<? echo $this->formvars['suchrissnummer2']; ?>" size="<? echo RISSNUMMERMAXLENGTH; ?>" maxlength="<? echo RISSNUMMERMAXLENGTH; ?>">
  					</td>
 				</tr>
 				<? } ?>
@@ -313,17 +313,17 @@ else {
 				<? if(NACHWEIS_PRIMARY_ATTRIBUTE == 'stammnr'){ ?>
 				<tr>
           <td colspan="3">          Rissnummer<br>
-  					<input type="text" name="suchrissnr" value="<?php echo $this->formvars['suchrissnr']; ?>" size="<?php echo RISSNUMMERMAXLENGTH; ?>" maxlength="<?php echo RISSNUMMERMAXLENGTH; ?>">
-						<a href="#" class="toggle_fa_off" title="von-bis-Suche" onclick="toggleBetweenSearch(this, GUI.suchrissnr2);"><i class="fa fa-step-backward"></i> <i class="fa fa-step-forward"></i></a>
-						<input type="text" <? if($this->formvars['suchrissnr2'] == '')echo 'style="display: none"'; ?> name="suchrissnr2" value="<? echo $this->formvars['suchrissnr2']; ?>" size="<? echo RISSNUMMERMAXLENGTH; ?>" maxlength="<? echo RISSNUMMERMAXLENGTH; ?>">
+  					<input type="text" name="suchrissnummer" value="<?php echo $this->formvars['suchrissnummer']; ?>" size="<?php echo RISSNUMMERMAXLENGTH; ?>" maxlength="<?php echo RISSNUMMERMAXLENGTH; ?>">
+						<a href="#" class="toggle_fa_off" title="von-bis-Suche" onclick="toggleBetweenSearch(this, GUI.suchrissnummer2);"><i class="fa fa-step-backward"></i> <i class="fa fa-step-forward"></i></a>
+						<input type="text" <? if($this->formvars['suchrissnummer2'] == '')echo 'style="display: none"'; ?> name="suchrissnummer2" value="<? echo $this->formvars['suchrissnummer2']; ?>" size="<? echo RISSNUMMERMAXLENGTH; ?>" maxlength="<? echo RISSNUMMERMAXLENGTH; ?>">
  					</td>
 				</tr>
 				<? } ?>
 				<tr>
           <td colspan="3">          Fortführungsjahr<br>
-						<input type="text" name="suchfortf" value="<?php echo $this->formvars['suchfortf']; ?>" size="4" maxlength="4">
-						<a href="#" class="toggle_fa_off" title="von-bis-Suche" onclick="toggleBetweenSearch(this, GUI.suchfortf2);"><i class="fa fa-step-backward"></i> <i class="fa fa-step-forward"></i></a>
-						<input type="text" <? if($this->formvars['suchfortf2'] == '')echo 'style="display: none"'; ?> name="suchfortf2" value="<?php echo $this->formvars['suchfortf2']; ?>" size="4" maxlength="4">
+						<input type="text" name="suchfortfuehrung" value="<?php echo $this->formvars['suchfortfuehrung']; ?>" size="4" maxlength="4">
+						<a href="#" class="toggle_fa_off" title="von-bis-Suche" onclick="toggleBetweenSearch(this, GUI.suchfortfuehrung2);"><i class="fa fa-step-backward"></i> <i class="fa fa-step-forward"></i></a>
+						<input type="text" <? if($this->formvars['suchfortfuehrung2'] == '')echo 'style="display: none"'; ?> name="suchfortfuehrung2" value="<?php echo $this->formvars['suchfortfuehrung2']; ?>" size="4" maxlength="4">
 					</td>
 				</tr>
         <tr> 

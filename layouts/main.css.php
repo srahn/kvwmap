@@ -1245,7 +1245,7 @@ tbody.gle tr:hover {
 	padding: 0;
 }
 
-.subFormListItem a:before{
+.subFormListItem > a:before{
 	content:url('../graphics/submenue.png');
 	vertical-align: top;
 }

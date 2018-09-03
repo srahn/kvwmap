@@ -319,7 +319,7 @@ class Nachweis {
 		if($nachweis_unique_attributes != NULL){
 			if(NACHWEIS_SECONDARY_ATTRIBUTE == 'fortfuehrung')$test_fortfuehrung = $fortfuehrung;
 			if(in_array('art', $nachweis_unique_attributes)){
-				$test_art = $hauptart;
+				$test_art = array($hauptart);
 			}
 			if(in_array('blattnr', $nachweis_unique_attributes))$test_blattnr = $Blattnr;			
 			if(NACHWEIS_PRIMARY_ATTRIBUTE == 'stammnr'){
@@ -945,7 +945,7 @@ class Nachweis {
           # Suchparameter sind gültig
           # Suche nach individueller Nummer
           #echo '<br>Suche nach individueller Nummer.';
-          $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS unterart, d.art AS unterart_name";
+          $sql ="SELECT n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS unterart, d.art AS unterart_name";
           $sql.=" FROM ";
 					if($gemarkung != '' AND $flur_thematisch == ''){
 						$sql.=" alkis.pp_flur as flur, ";
@@ -1282,6 +1282,18 @@ class Nachweis {
     }
     return $result;
   }
+	
+	function Geometrieuebernahme($ref_geom, $id){
+		$sql = "UPDATE nachweisverwaltung.n_nachweise n 
+						SET the_geom = n2.the_geom 
+						FROM nachweisverwaltung.n_nachweise n2
+						WHERE n2.id = ".$ref_geom."
+						AND n.id IN (".implode(',', $id).")";
+		$ret=$this->database->execSQL($sql,4, 1);
+    if ($ret[0])$result[0]='Fehler bei der Geometrieübernahme!';
+    else $result[1]='Geometrien erfolgreich übernommen!';
+    return $result;
+	}
   
   function getDocLocation($id){
     #2005-11-24_pk

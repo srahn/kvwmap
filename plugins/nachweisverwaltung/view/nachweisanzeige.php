@@ -79,6 +79,30 @@ function vorlage(){
 	document.GUI.submit();
 }
 
+function set_ref_geom(){
+	if(document.GUI.ref_geom.value == ''){
+		document.getElementById('updateGeomLink').style.display = '';
+		update_selection(document.getElementsByName('markhauptart[]')[2]);
+	}
+}
+
+function updategeoms(){
+	var ids = document.getElementsByName('id[]');
+	var count = 0;
+	for(i = 0; i < ids.length; i++){
+		if(ids[i].checked){
+			count++;
+		}
+	}
+	if(count == 0)message([{ 'type': 'warning', 'msg': 'Bitte wählen Sie die Nachweise aus, deren Geometrie überschrieben werden soll.' }]);
+	else{
+		if(window.confirm("Wollen Sie wirklich "+count+" Nachweisgeometrien überschreiben?")){
+			document.GUI.go.value='Nachweisanzeige_Geometrieuebernahme';
+			document.GUI.submit();
+		}
+	}
+}
+
 function bearbeiten(){
 	selected_ids = new Array();
 	ids = document.getElementsByName('id[]');
@@ -146,7 +170,6 @@ function getvorschau(url){
 <input type="hidden" name="go_plus" value="">
 <input type="hidden" name="order" value="<? echo $this->formvars['order']; ?>">
 <input type="hidden" name="richtung" value="<? echo $this->formvars['richtung']; ?>">
-<input type="hidden" name="flur_thematisch" value="<? echo $this->formvars['flur_thematisch']; ?>">
 <input type="hidden" name="selected_layer_id" value="<? echo LAYER_ID_NACHWEISE; ?>">
 <input type="hidden" name="value_id" value="">
 <input type="hidden" name="operator_id" value="IN">
@@ -191,8 +214,8 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 								if($this->formvars['suchgemarkung'] != '') echo ' in Gemarkung: '.$this->formvars['suchgemarkung'];
 								if($this->formvars['suchflur'] != '') echo ' in Flur: '.str_pad($this->formvars['suchflur'],3,'0',STR_PAD_LEFT);
                 if($this->formvars['suchstammnr'] != '')echo ' mit Antragsnummer: '.$this->formvars['suchstammnr'];
-                if($this->formvars['suchrissnr'] != '')echo ' mit Rissnummer: '.$this->formvars['suchrissnr'];
-                if($this->formvars['suchfortf'] != '')echo ' mit Fortführung: '.$this->formvars['suchfortf'];
+                if($this->formvars['suchrissnummer'] != '')echo ' mit Rissnummer: '.$this->formvars['suchrissnummer'];
+                if($this->formvars['suchfortfuehrung'] != '')echo ' mit Fortführung: '.$this->formvars['suchfortfuehrung'];
 								if($this->formvars['datum'] != '')echo ' von '.$this->formvars['datum'];
 								if($this->formvars['datum2'] != '')echo ' bis '.$this->formvars['datum2'];
 								if($this->formvars['VermStelle'] != '')echo ' von Vermessungsstelle '.$this->formvars['VermStelle'];
@@ -266,7 +289,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 			<? if(strpos($this->formvars['order'], 'format') === false){ ?>
 				<th align="center" style="width: 80"><a href="javascript:add_to_order('format');" title="nach Blattformat sortieren"><span class="fett">Format</span></a></th>
 			<? }else{echo '<th align="center" style="width: 80"><span class="fett">Format</span></th>';} ?>	
-          <th colspan="3" style="width: 100"><div align="center"><?    echo $this->nachweis->erg_dokumente.' Treffer';   ?></div></th>
+          <th colspan="3" style="width: 110"><div align="center"><?    echo $this->nachweis->erg_dokumente.' Treffer';   ?></div></th>
         </tr>
 			</thead>
 			<tbody>
@@ -330,14 +353,17 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 						$this->allowed_documents[] = addslashes($thumbname);
 						$url = IMAGEURL.$this->document_loader_name.'?dokument='.$thumbname;
 					?>
-					<a target="_blank" onmouseover="getvorschau('<? echo $url; ?>');" href="index.php?go=document_anzeigen&ohnesession=1&id=<? echo $this->nachweis->Dokumente[$i]['id']; ?>&file=1" title="Ansicht"><img src="graphics/button_ansicht.png" border="0"></a></td>
-          <td style="width: 30">
+						<a target="_blank" onmouseover="getvorschau('<? echo $url; ?>');" href="index.php?go=document_anzeigen&ohnesession=1&id=<? echo $this->nachweis->Dokumente[$i]['id']; ?>&file=1" title="Ansicht"><img src="graphics/button_ansicht.png" border="0"></a>
+					</td>
+          <td style="width: 40">
           	<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten')){ ?>
-          	<a href="index.php?go=Nachweisformular&id=<? echo $this->nachweis->Dokumente[$i]['id'];?>&order=<? echo $this->formvars['order'] ?>&richtung=<? echo $this->formvars['richtung'] ?>&flur_thematisch=<? echo $this->formvars['flur_thematisch']; ?>" title="bearbeiten"><img src="graphics/button_edit.png" border="0"></a></td>
+          	<a href="index.php?go=Nachweisformular&id=<? echo $this->nachweis->Dokumente[$i]['id'];?>&order=<? echo $this->formvars['order'] ?>&richtung=<? echo $this->formvars['richtung'] ?>" title="bearbeiten"><img src="graphics/button_edit.png" border="0"></a>
+						<input type="radio" title="Geometrie für Geometrieübernahme verwenden" onmousedown="set_ref_geom();" value="<? echo $this->nachweis->Dokumente[$i]['id'];?>" name="ref_geom" <? if($this->formvars['ref_geom'] == $this->nachweis->Dokumente[$i]['id'])echo 'checked'; ?>>
           	<? } ?>
+					</td>
           <td style="width: 30">
           	<? if($this->Stelle->isFunctionAllowed('Nachweisloeschen')){ ?>
-          	<a href="index.php?go=Nachweisloeschen&id=<? echo $this->nachweis->Dokumente[$i]['id']; ?>&order=<? echo $this->formvars['order'] ?>&richtung=<? echo $this->formvars['richtung'] ?>&flur_thematisch=<? echo $this->formvars['flur_thematisch']; ?>"  title="löschen"><img src="graphics/button_drop.png" border="0"></a>
+          	<a href="index.php?go=Nachweisloeschen&id=<? echo $this->nachweis->Dokumente[$i]['id']; ?>&order=<? echo $this->formvars['order'] ?>&richtung=<? echo $this->formvars['richtung'] ?>"  title="löschen"><img src="graphics/button_drop.png" border="0"></a>
           	<? } ?>
           </td>
         </tr>
@@ -386,7 +412,11 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 								<td valign="bottom">
 									<br>
 									<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten')){ ?>
-										<a href="javascript:vorlage();"><span class="fett">als Vorlage übernehmen</span></a>
+										<a href="javascript:updategeoms();" id="updateGeomLink" <? if($this->formvars['ref_geom'] == '')echo 'style="display: none"'; ?>><span class="fett">Geometrie übernehmen</span></a>
+									<? } ?>
+									<br><br>
+									<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten')){ ?>
+										<a href="javascript:vorlage();"><span class="fett">als Vorlage verwenden</span></a>
 									<? } ?>
 									<br><br>
 									<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten')){ ?>          		
@@ -430,7 +460,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 Wählen Sie neue Suchparameter.</span><br>
 	  <? } ?>
 			<br>
-			<a href="index.php?go=Nachweisrechercheformular&VermStelle=<? echo $this->formvars['VermStelle']; ?>&flur_thematisch=<? echo $this->formvars['flur_thematisch']; ?>">&lt;&lt; zur&uuml;ck zur Suche</a>
+			<a href="index.php?go=Nachweisrechercheformular&VermStelle=<? echo $this->formvars['VermStelle']; ?>">&lt;&lt; zur&uuml;ck zur Suche</a>
 		</td>
   </tr>
   <tr> 
