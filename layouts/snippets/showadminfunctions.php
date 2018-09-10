@@ -1,3 +1,5 @@
+<script src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></script>
+
 <br><h2><?php echo $this->titel; ?></h2><br>
 <? global $kvwmap_plugins; ?>
 
@@ -5,7 +7,7 @@
 	<? if(defined('GIT_USER') AND GIT_USER != ''){ ?>
 	<tr>
 		<td valign="top" align="center" style="border:1px solid #C3C7C3">			
-			<table width="400px" cellpadding="4" cellspacing="2" border="0" style="border:1px solid #C3C7C3;border-collapse:collapse">
+			<table width="100%" cellpadding="4" cellspacing="2" border="0" style="border:1px solid #C3C7C3;border-collapse:collapse">
 				<tr style="border:1px solid #C3C7C3">
 					<td colspan="3" style="background-color:<? echo BG_GLEATTRIBUTE; ?>;"><span class="fetter px17">Aktualisierung des Quellcodes</span></td>
 				</tr>
@@ -21,7 +23,7 @@
 	<? } ?>
 	<tr>
 		<td valign="top" align="center" style="border:1px solid #C3C7C3">			
-			<table width="400px" cellpadding="4" cellspacing="2" border="0" style="border:1px solid #C3C7C3;border-collapse:collapse">
+			<table width="100%" cellpadding="4" cellspacing="2" border="0" style="border:1px solid #C3C7C3;border-collapse:collapse">
 				<tr style="border:1px solid #C3C7C3">
 					<td colspan="3" style="background-color:<? echo BG_GLEATTRIBUTE; ?>;"><span class="fetter px17">Aktualisierung der Datenbanken</span></td>
 				</tr>
@@ -70,6 +72,51 @@
 				}?>
 				<tr >
 					<td colspan="2" align="center"><input type="button" onclick="location.href='index.php?go=Administratorfunktionen&func=update_databases'" <? if(!$update_necessary)echo 'disabled'; ?> value="Aktualisieren"></td>
+				</tr>
+			</table> 
+		</td>
+	</tr>
+	<tr>
+		<td valign="top" align="center" style="border:1px solid #C3C7C3">			
+			<table cellpadding="4" cellspacing="2" class="table_border_collapse">
+				<tr>
+					<td colspan="4" style="background-color:<? echo BG_GLEATTRIBUTE; ?>;"><span class="fetter px17">Konfigurationsparameter</span></td>
+				</tr>
+				<? 
+					global $kvwmap_plugins;
+					foreach($this->administration->config_params as $group => $params_in_group){
+						$group_level = explode('/', $group);
+						if($group_level[0] != 'Plugins' OR in_array(strtolower($group_level[1]), $kvwmap_plugins)){	?>
+							<tr>
+								<td colspan="4" class="fett" style="background-color:<? echo BG_GLEATTRIBUTE; ?>;"><? echo $group; ?></td>
+							</tr>
+							<tr>
+								<td class="fett">Name</td>
+								<td class="fett">Prefix</td>
+								<td class="fett">Wert</td>
+								<td class="fett">Info</td>
+							</tr>
+				<?		foreach($params_in_group as $param){
+				?>
+				<tr>
+					<td><? echo $param['name']; ?></td>
+					<td><? echo $param['prefix']; ?></td>
+					<td>
+						<? 
+							if($param['type'] == 'constant'){echo '<input type="text" style="width: 300px" name="'.$param['name'].'" value="'.$param['value'].'">';}
+							else echo '<textarea style="width: 300px" rows="'.substr_count($param['value'], "\n").'" name="'.$param['name'].'">'.$param['value'].'</textarea>';
+						?>
+					</td>
+					<td align="center">
+						<? if($param['description'] != ''){ ?>
+						<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(['Beschreibung:', '<? echo str_replace(array("\r\n", "\r", "\n"), '', htmlentities($param['description'], ENT_QUOTES)); ?>'], Style[0], document.getElementById('Tip_<? echo $param['name']; ?>'))" onmouseout="htm()">
+						<div id="Tip_<? echo $param['name']; ?>" style="right: 10px;visibility:hidden;position:absolute;z-index:1000;"></div>
+						<? } ?>
+					</td>
+				</tr>
+				<? }}} ?>
+				<tr >
+					<td colspan="4" align="center"><input type="button" onclick="location.href='index.php?go=Administratorfunktionen&func=save_config'" value="Speichern"></td>
 				</tr>
 			</table> 
 		</td>

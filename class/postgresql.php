@@ -2889,16 +2889,6 @@ FROM
     return $anzRows;
   }
 
-  function setFortfuehrung($ist_Fortfuehrung) {
-    $this->ist_Fortfuehrung=$ist_Fortfuehrung;
-    if ($this->ist_Fortfuehrung) {
-      $this->tableprefix=TEMPTABLEPREFIX;
-    }
-    else {
-      $this->tableprefix="";
-    }
-  }
-
   function setLogLevel($loglevel,$logfile) {
   	if ($loglevel==-1) {
   		# setzen der Defaulteinstellungen

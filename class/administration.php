@@ -36,6 +36,7 @@ function compare_migration_filenames($a, $b){
 class administration{
 
 	var $database;
+	var $config_params;
 	var $migration_logs;
 	var $migration_files;
 	var $migrations_to_execute;
@@ -210,6 +211,68 @@ class administration{
 		exec('cd '.$folder.' && sudo -u '.GIT_USER.' git stash && sudo -u '.GIT_USER.' git pull origin', $ausgabe, $ret);
 		if($ret != 0)showAlert('Fehler bei der Ausführung von "git pull origin".');
 		return $ausgabe;
+	}
+	
+	function get_config_params(){
+		$sql = "SELECT * FROM config ORDER BY `group`";
+		$queryret=$this->database->execSQL($sql,0, 0);
+    if($queryret[0]) {
+      #echo '<br>Fehler bei der Abfrage der Tabelle config.<br>';
+    }
+    else {
+      while($rs=mysql_fetch_array($queryret[1])){
+				$this->config_params[$rs['group']][] = $rs;
+			}
+		}
+	}
+	
+	function get_constants_from_config(){
+		$def_constants = get_defined_constants(true)['user'];
+		$config_lines = file('config.php');
+		foreach($config_lines as $config_line){
+			if(substr($config_line, 0, 6) == 'define'){																												# Konstanten
+				$delim = substr($config_line, strpos($config_line, '(')+1, 1);
+				$name = get_first_word_after($config_line, '(', $delim, $delim);				
+				if($def_constants[$name] != ''){
+					$value = ltrim(substr($config_line, strpos($config_line, ',')+1));
+					$value = rtrim(substr($value, 0, strpos($value, ');')));
+					if($value == '')$value = $def_constants[$name];					
+					$prefix = explode('"', $value)[0];
+					$prefix = explode("'", $prefix)[0];
+					$value = trim($value, "'\"");
+					if(strpos($prefix, '.') != ''){
+						$prefix = rtrim($prefix, '. ');
+						$value = array_pop(explode("'", $value));
+					}
+					else $prefix = '';
+					$constant['name'] = $name;
+					$constant['value'] = $value;
+					$constant['prefix'] = $prefix;
+					$constant['type'] = 'constant';
+					$constant['description'] = $description;
+					$constant['group'] = $group;
+					$description = '';
+					$constants[] = $constant;
+				}
+			}
+			elseif(strpos($config_line, 'array(') !== false AND substr(trim($config_line), 0, 1) == '$'){			# Arrays
+				$array_name = trim(substr($config_line, 0, strpos($config_line, '=')), ' $');
+				global ${$array_name};
+				$constant['name'] = $array_name;
+				$constant['value'] = json_encode(${$array_name}, JSON_PRETTY_PRINT);
+				$constant['type'] = 'array';
+				$constant['description'] = $description;
+				$constant['group'] = $group;
+				$description = '';
+				$constants[] = $constant;
+			}
+			elseif(substr($config_line, 0, 26) == '##########################'){
+				$group = trim(substr($config_line, 26));
+			}
+			elseif(trim($config_line) == '')$description = '';
+			else $description.= trim($config_line, ' #');
+		}
+		return $constants;
 	}
 }
 

@@ -130,6 +130,14 @@ input[type="text"].transparent_input{
 	display: inline-block;
 }
 
+.table_border_collapse{
+	border-collapse:	collapse;
+}
+
+.table_border_collapse>tbody>tr>td{
+	border:	1px solid #C3C7C3;
+}
+
 .search-form h2 {
 	color: black;
 	margin-bottom: 10px

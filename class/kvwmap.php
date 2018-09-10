@@ -1472,9 +1472,6 @@ class GUI {
               if ($layerset['list'][$i]['template']!='') {
                 $layer->set('template',$layerset['list'][$i]['template']);
               }
-              else {
-                $layer->set('template',DEFAULTTEMPLATE);
-              }
               # Header (Kopfdatei)
               if ($layerset['list'][$i]['header']!='') {
                 $layer->set('header',$layerset['list'][$i]['header']);
@@ -3728,6 +3725,7 @@ class GUI {
 		include_once(CLASSPATH.'administration.php');
 		$this->administration = new administration($this->database, $this->pgdatabase);
 		$this->administration->get_database_status();
+		$this->administration->get_config_params();
     switch ($this->formvars['func']) {
 			case "update_databases" : {
         $this->administration->update_databases();
@@ -3815,8 +3813,11 @@ class GUI {
   }
 
   function showConstants() {
-    $this->main='showconstants.php';
-    $this->titel='Konstanten';
+		$this->main='showadminfunctions.php';
+		$constants = $this->administration->get_constants_from_config();
+		foreach($constants as $constant){
+			echo "INSERT INTO config (name, prefix, value, description, type, `group`) VALUES ('".$constant['name']."', '".$constant['prefix']."', '".addslashes($constant['value'])."', '".addslashes($constant['description'])."', '".$constant['type']."', '".$constant['group']."');\n";
+		}
   }
 
   function grundbuchblattWahl() {
@@ -12595,9 +12596,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
               if ($layerset[$i]['template']!='') {
                 $layer->set('template',$layerset[$i]['template']);
               }
-              else {
-                $layer->set('template',DEFAULTTEMPLATE);
-              }
               $projFROM = ms_newprojectionobj("init=epsg:".$this->user->rolle->epsg_code);
     					$projTO = ms_newprojectionobj("init=epsg:".$layerset[$i]['epsg_code']);
 							$rect2=ms_newRectObj();
@@ -12644,9 +12642,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						$layer->set('status',MS_ON);
 						if ($layerset[$i]['template']!='') {
 							$layer->set('template',$layerset[$i]['template']);
-						}
-						else {
-							$layer->set('template',DEFAULTTEMPLATE);
 						}
 						@$layer->queryByRect($rect);
 						$layer->open();

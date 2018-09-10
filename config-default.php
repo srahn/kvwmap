@@ -127,12 +127,12 @@ define('PREVIEW_IMAGE_WIDTH', 250);													# Version 2.1
 # Hier werden die Werte aus der Spalte name der Tabelle u_menues
 # Konstanten zugewiesen um sie später beim Layout verwenden zu können
 define('TITLE','Web-GIS kvwmap');             		# Version 1.7.6
-define('TITLE_DRUCKEN','Druckausschnittswahl');             # Version 1.6.6
-define('TITLE_KARTE','Karte anzeigen');                     # Version 1.6.6
-define('TITLE_NOTIZEN','neue Notiz');                       # Version 1.6.6
-define('TITLE_HILFE','Hilfe');                  						# Version 1.6.6
-define('TITLE_OPTIONEN','Optionen');										# Version 1.7.3
-define('TITLE_SCHNELLDRUCK','schnelle Druckausgabe');					# Version 1.7.5
+define('TITLE_DRUCKEN','Druckausschnittswahl');             # Version 1.6.6		# in Version 2.9 gelöscht
+define('TITLE_KARTE','Karte anzeigen');                     # Version 1.6.6		# in Version 2.9 gelöscht
+define('TITLE_NOTIZEN','neue Notiz');                       # Version 1.6.6		# in Version 2.9 gelöscht
+define('TITLE_HILFE','Hilfe');                  						# Version 1.6.6		# in Version 2.9 gelöscht
+define('TITLE_OPTIONEN','Optionen');										# Version 1.7.3				# in Version 2.9 gelöscht
+define('TITLE_SCHNELLDRUCK','schnelle Druckausgabe');					# Version 1.7.5	# in Version 2.9 gelöscht
 # Schalter für die PopUp-Funktion des Menüs
 #define('POPUPMENUE','false');          # true / false 				# Version 2.7 gelöscht
 
@@ -369,11 +369,11 @@ define ('LAYOUTPATH',WWWROOT.APPLVERSION.'layouts/');
 define ('SNIPPETS',LAYOUTPATH.'snippets/');
 define('CLASSPATH', WWWROOT.APPLVERSION.'class/');
 define('PLUGINS',WWWROOT.APPLVERSION.'plugins/');		# Version 1.11.0
-define('TEMPTABLEPREFIX','x_');
+define('TEMPTABLEPREFIX','x_');		# in Version 2.9 gelöscht
 # Default Templates für Sachdatenanzeige
-define('DEFAULTTEMPLATE',' ');
-define('DEFAULTHEADER',' ');
-define('DEFAULTFOOTER',' ');
+define('DEFAULTTEMPLATE',' ');	# in Version 2.9 gelöscht
+define('DEFAULTHEADER',' ');	# in Version 2.9 gelöscht
+define('DEFAULTFOOTER',' ');	# in Version 2.9 gelöscht
 # Erlaubte maximale Länge der Stammnummer in der Fachschale Nachweisverwaltung
 #define('STAMMNUMMERMAXLENGTH',8);																											# in Version 1.11.0 gelöscht
 # Erlaubte maximale Länge der Rissnummer in der Fachschale Nachweisverwaltung
@@ -407,10 +407,10 @@ define('MAPSERVERVERSION', '620');              # Version 1.6.8     (5.0.2 == 50
 define('PHPVERSION', '450');										# Version 1.7.1  (5.2.0 == 520)
 
 # Schalter für die mobile Variante
-define('MOBILE', 'false');                                  # Version 1.6.7 (noch in Entwicklung)
+define('MOBILE', 'false');                                  # Version 1.6.7 (noch in Entwicklung)		# in Version 2.9 gelöscht
 
-# Pfad zur GPS-Logdatei                         # Version 1.7.0
-define('GPSPATH', SHAPEPATH.'gpsulog.txt');
+# Pfad zur GPS-Logdatei                         # Version 1.7.0			# in Version 2.9 gelöscht
+define('GPSPATH', SHAPEPATH.'gpsulog.txt');	
 #define('GPSPATH', 'http://localhost:8081/');
 #define('GPSPATH', 'http://www.gdi-service.de/gps_position_nmea_gga.txt');
 
@@ -539,7 +539,7 @@ define('DEFAULTDBWRITE',1);                                       # Version 1.6.
 
 # Die ID der Stelle aus der Datenbank, auf die alle Nutzer Zugriff haben
 # und die als Einstiegsseite für neue Benutzer eingestellt ist
-define('DEFAULTSTELLE','4');
+define('DEFAULTSTELLE','4');			# in Version 2.9 gelöscht
 
 # Adminstellen
 $admin_stellen = array(3);						# Version 2.2
