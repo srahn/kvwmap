@@ -1862,11 +1862,11 @@ FROM
     }
     else {
 			if(pg_num_rows($queryret[1]) == 0){		# kein Fortführungsfall unter ALKIS -> Suche in ALB-Historie
-				$sql = "SELECT nachfolger, bool_and(CASE WHEN b.flurstueckskennzeichen IS NULL THEN NULL ELSE TRUE END) as hist_alb, min(c.endet) as endet FROM (";
+				$sql = "SELECT nachfolger, bool_and(CASE WHEN b.flurstueckskennzeichen IS NULL THEN NULL ELSE TRUE END) as hist_alb, CASE WHEN min(coalesce(c.endet::text, '')) = '' THEN '' ELSE max(coalesce(c.endet::text, '')) END as endet FROM (";		# der CASE ist dazu da, damit immer nur die jüngste Version eines Flurstücks gefunden wird
 				$sql.= "SELECT unnest(a.nachfolgerflurstueckskennzeichen) as nachfolger FROM alkis.ax_historischesflurstueckohneraumbezug as a WHERE a.flurstueckskennzeichen = '" . $FlurstKennz . "') as foo ";
 				$sql.= "LEFT JOIN alkis.ax_historischesflurstueckohneraumbezug b ON b.flurstueckskennzeichen = nachfolger ";
 				$sql.= "LEFT JOIN alkis.ax_flurstueck c ON c.flurstueckskennzeichen = nachfolger ";			# falls ein Nachfolger in ALKIS historisch ist (endet IS NOT NULL)
-				$sql.= "GROUP BY nachfolger ORDER BY nachfolger";																														# damit aber immer nur die jüngste Version eines Flurstücks gefunden wird
+				$sql.= "GROUP BY nachfolger ORDER BY nachfolger";
 				$queryret=$this->execSQL($sql, 4, 0);	
 				while($rs=pg_fetch_assoc($queryret[1])){
 					$Nachfolger[]=$rs;
@@ -1911,14 +1911,16 @@ FROM
 	
 	function getVersionen($table, $gml_ids, $start){
 		$versionen = array();
-		$sql = "SELECT beginnt::timestamp, endet::timestamp, value as anlass, '".$table."' as table ";
-		$sql.= "FROM alkis.".$table." LEFT JOIN alkis.aa_anlassart ON id = anlass[1] ";
-		$sql.= "WHERE gml_id IN ('".implode("','", $gml_ids)."') ";
-		if($start)$sql.= "AND beginnt::timestamp > '".$start."' ";
-		$sql.= "ORDER BY beginnt";
-		$queryret=$this->execSQL($sql, 4, 0);
-		while($rs=pg_fetch_assoc($queryret[1])) {
-			$versionen[]=$rs;
+		if($gml_ids != NULL){
+			$sql = "SELECT beginnt::timestamp, endet::timestamp, value as anlass, '".$table."' as table ";
+			$sql.= "FROM alkis.".$table." LEFT JOIN alkis.aa_anlassart ON id = anlass[1] ";
+			$sql.= "WHERE gml_id IN ('".implode("','", $gml_ids)."') ";
+			if($start)$sql.= "AND beginnt::timestamp > '".$start."' ";
+			$sql.= "ORDER BY beginnt";
+			$queryret=$this->execSQL($sql, 4, 0);
+			while($rs=pg_fetch_assoc($queryret[1])) {
+				$versionen[]=$rs;
+			}
 		}
 		return $versionen;
 	}
