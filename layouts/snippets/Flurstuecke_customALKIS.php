@@ -176,7 +176,7 @@ hide_versions = function(flst){
 															</td>
 															<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
 															<td>
-																<? if($this->Stelle->hist_timestamp){ ?>
+																<? if($this->Stelle->hist_timestamp AND !$flst->hist_alb){ ?>
 																<div id="no_versions_<? echo $flst->FlurstKennz; ?>">
 																	<table cellspacing="0" cellpadding="2">
 																		<tr>
