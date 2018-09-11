@@ -258,7 +258,7 @@ class rolle {
 		}
 		$sql.=' WHERE stelle_id='.$this->stelle_id.' AND user_id='.$this->user_id;		
 		#echo $sql;
-		$this->debug->write("<p>file:users.php class:user->setHistTimestamp - Setzen der Einstellungen für die Rolle<br>".$sql,4);
+		$this->debug->write("<p>file:rolle.php class:rolle->setHistTimestamp - Setzen der Einstellungen für die Rolle<br>".$sql,4);
 		$query=mysql_query($sql,$this->database->dbConn);
 		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		$this->debug->write('Neue Werte für Rolle eingestellt: '.$formvars['nZoomFactor'].', '.$formvars['mapsize'],4);
@@ -368,13 +368,13 @@ class rolle {
 					id IN (" . $selectable_layer_params . ")
 			";
 			#echo '<br>Sql: ' . $sql;
-			$params_result = $this->database->execSQL($sql, 4, 1);
+			$params_result = $this->database->execSQL($sql, 4, 0);
 			if ($params_result[0]) {
 				echo '<br>Fehler bei der Abfrage der Layerparameter mit SQL: ' . $sql;
 			}
 			else {
 				while ($param = mysql_fetch_assoc($params_result[1])) {
-					$options_result = $pgdatabase->execSQL($param['options_sql'], 4, 1);
+					$options_result = $pgdatabase->execSQL($param['options_sql'], 4, 0);
 					$param['options'] = array();
 					while ($option = pg_fetch_assoc($options_result[1])) {
 						$param['options'][] = $option;
@@ -1052,7 +1052,7 @@ class rolle {
 		$nImageHeight=$teil[1];
 		$sql ='UPDATE rolle SET nImageWidth='.$nImageWidth;
 		$sql.=',nImageHeight='.$nImageHeight.' WHERE stelle_id='.$this->stelle_id.' AND user_id='.$this->user_id;
-		$this->debug->write("<p>file:users.php class:user->setStelle - Setzen der Einstellungen für die Rolle",4);
+		$this->debug->write("<p>file:rolle.php class:rolle->setSize - Setzen der Einstellungen für die Bildgröße", 4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 		$this->debug->write('Neue Werte für Rolle eingestellt: '.$formvars['nZoomFactor'].', '.$formvars['mapsize'],4);
 		return 1;
@@ -1124,7 +1124,7 @@ class rolle {
 						`stelle_id` = " . $stellen[$i] . "
 				";
 				#echo '<br>'.$sql;
-				$this->debug->write("<p>file:users.php class:stelle function:deleteMenue - Löschen der Menuepunkte der Stelle:<br>".$sql,4);
+				$this->debug->write("<p>file:rolle.php class:stelle function:deleteMenue - Löschen der Menuepunkte der Stelle:<br>".$sql,4);
 				$query=mysql_query($sql,$this->database->dbConn);
 				if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 			}

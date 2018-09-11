@@ -241,7 +241,7 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 } # end of Classe FormObject
 
 ##########################################################################################
-# Classe zum dynamischen Erzeugen von Formularobjekten mit automatischem Abschicken nach #
+# Klasse zum dynamischen Erzeugen von Formularobjekten mit automatischem Abschicken      #
 # des Formulars nach Änderung der Auswahl über                                           #
 # Java Script Funktionen (onchange='...' Erweiterung von Classe FormObject               #
 ##########################################################################################

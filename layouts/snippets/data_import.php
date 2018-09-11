@@ -4,12 +4,13 @@
 <script type="text/javascript">
 <!--
 
-	var filelist = [];  // Ein Array, das alle hochzuladenden Files enth‰lt
+	var filelist = [];  // Ein Array, das alle hochzuladenden Files enth√§lt
 	var filesizes = [];
 	var filenames = [];
 	var totalCount = 0;
-	var totalSize = 0; // Enth‰lt die Gesamtgrˆﬂe aller hochzuladenden Dateien
-	var currentUpload = null; // Enth‰lt die Datei, die aktuell hochgeladen wird
+	var totalSize = 0;
+	var maxTotalSize = <? echo MAXUPLOADSIZE; ?>;
+	var currentUpload = null; // Enth√§lt die Datei, die aktuell hochgeladen wird
 	var currentUploadId = 0;
 
 	function preventDefaults(e){
@@ -20,10 +21,15 @@
 	function handleFileDrop(event){
 		preventDefaults(event);
 		for(var i = 0; i < event.dataTransfer.files.length; i++){
+			if(totalSize + event.dataTransfer.files[i].size > maxTotalSize * 1024 * 1024){		// Byte -> MegaByte
+				message('<? echo $strMaxFileSize; ?> von ' + maxTotalSize + ' MB <? echo $this->strExceeded; ?>');
+				return;
+			}
 			filelist.push(event.dataTransfer.files[i]);
 			filesizes.push(event.dataTransfer.files[i].size);
 			filenames.push(event.dataTransfer.files[i].name);			
 			createProgressDiv(totalCount);
+			totalSize += event.dataTransfer.files[i].size;
 			totalCount++;
     }
 		startNextUpload(currentUploadId);
@@ -42,7 +48,7 @@
 		fileProgress.id = 'progress'+uploadId;
 		fileProgress.className = 'file_status';
 		fileProgress.innerHTML = filenames[uploadId];
-		fileProgress.innerHTML = '<div>'+filenames[uploadId]+':</div><div class="uploadPercentage"></div><div class="serverResponse"></div>';
+		fileProgress.innerHTML = '<div>&nbsp;'+filenames[uploadId]+':&nbsp;</div><div class="uploadPercentage"></div><div class="serverResponse"></div>';
 		document.getElementById('data_import_upload_progress').appendChild(fileProgress);
 	}
 	
@@ -58,13 +64,16 @@
 	}
 	  
 	function handleProgress(event, uploadId){
-		document.getElementById('progress'+uploadId).querySelector('.uploadPercentage').innerHTML = Math.round(event.loaded / filesizes[uploadId] * 100) + '%';
+		var progress;
+		if(event.loaded > filesizes[uploadId])progress = 100;
+		else progress = Math.round(event.loaded / filesizes[uploadId] * 100);
+		document.getElementById('progress'+uploadId).querySelector('.uploadPercentage').innerHTML = progress + '%';
 	}
 	
-	function restartProcessing(uploadId){
+	function restartProcessing(uploadId, filenumber, filename){
 		ahah('index.php?go=Daten_Import_Process', 
-					'&upload_id='+uploadId+'&filename='+document.getElementById('filename'+uploadId).value+'&epsg='+document.getElementById('epsg'+uploadId).value, 
-					[document.getElementById('progress'+uploadId).querySelector('.serverResponse')], 
+					'&upload_id='+uploadId+'&filenumber='+filenumber+'&filename='+filename+'&epsg='+document.getElementById('epsg'+filename).value, 
+					[document.getElementById('progress'+uploadId).querySelector('.serverResponse #serverResponse'+filenumber)], 
 					['sethtml']
 				);
 	}
@@ -76,6 +85,9 @@
 <table border="0" cellpadding="5" cellspacing="3" style="width:400px" bgcolor="<?php echo $bgcolor; ?>">
   <tr> 
     <td align="center" valign="top" style="height: 40px"><h2><?php echo $strTitle; ?></h2></td>
+  </tr>
+	<tr> 
+    <td align="center" valign="top"><? echo $strSupportedFileTypes; ?>Shape, GeoJSON, KML, DXF, GPX, OVL</td>
   </tr>
 	<tr>
 		<td>
@@ -89,19 +101,6 @@
 			<div id="data_import_upload_progress"></div>
 		</td>
 	</tr>
-  <tr> 
-    <td align="center"><? echo $strType; ?>:&nbsp;
-			<select name="go" onchange="document.GUI.submit();">
-				<option value="">---<? echo $this->strChoose; ?>---</option>
-				<option value="SHP_Anzeigen">Shape</option>
-				<option value="GeoJSON_Anzeigen">GeoJSON</option>
-				<option value="DXF_Import">DXF</option>
-				<option value="OVL_Import">OVL</option>
-				<option value="GPX_Import">GPX</option>
-				<option value="Punktliste_Anzeigen"><? echo $strPointlist; ?></option>
-			</select>
-		</td>
-  </tr>
 </table>
 
 

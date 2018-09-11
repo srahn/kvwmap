@@ -132,7 +132,7 @@ class database {
     }
     return $colors;
   }
-  
+
   function read_color($id){
   	$sql = "SELECT * FROM colors WHERE id = ".$id;
   	#echo $sql;
@@ -172,7 +172,7 @@ class database {
 				'd4061b1486fe2da19dd578e8d970f7eb',
 				'',
 				'gast',
-				'" . $gast_stelle . 
+				'" . $gast_stelle .
 				"'
 			);
 		";
@@ -190,12 +190,12 @@ class database {
 		# ID des Defaultnutzers abfragen
 		$sql = "
 			SELECT
-				`default_user_id`
+				s.default_user_id
 			FROM
-				`stelle` s JOIN
-				`rolle` r ON (s.ID = r.stelle_id AND s.default_user_id = r.user_id)
+				stelle s JOIN
+				rolle r ON (s.ID = r.stelle_id AND s.default_user_id = r.user_id)
 			WHERE
-				`ID` = " . $gast_stelle . "
+				s.ID = " . $gast_stelle . "
 		";
 		#echo '<br>sql: ' . $sql;
 		$query = mysql_query($sql);
@@ -339,8 +339,8 @@ class database {
 		#echo '<br>sql: ' . $sql;
 		$query = mysql_query($sql);
 
-		include(CLASSPATH . 'stelle.php');
-		include(CLASSPATH . 'rolle.php');
+		include_once(CLASSPATH . 'stelle.php');
+		include_once(CLASSPATH . 'rolle.php');
 		$stelle = new stelle($gast_stelle, $this);
 		$rolle = new rolle(NULL, $gast_stelle, $this);
 		$layers = $stelle->getLayers(NULL);
@@ -434,7 +434,7 @@ class database {
 				`queryStatus`,
 				`showclasses`,
 				`logconsume`
-			) " . 
+			) " .
 			$rolle2used_layer_select_sql . "
 		";
 		#echo '<br>sql: ' . $sql;
@@ -585,7 +585,7 @@ SET @last_layer_id_{$table['oid']} = LAST_INSERT_ID();
 		return $sql;
 	}
 
-	function generate_layer_attribute($attribute, $options) {
+	function generate_layer_attribute($attribute, $table, $options) {
 		#echo '<br>Create Layerattribute: ' . $attribute['name'];
 		if($attribute['nullable'] == '')$attribute['nullable'] = 'NULL';
 		if($attribute['length'] == '')$attribute['length'] = 'NULL';
@@ -631,7 +631,7 @@ VALUES (
 	'{$options['option']}', -- options
 	'', -- group
 	NULL, -- raster_visibility
-	NULL -- mandatory
+	NULL, -- mandatory
 	'{$attributes['ordinal_position']}', -- order
 	'1',
 	'0'
@@ -644,60 +644,26 @@ VALUES (
 		#echo '<br>Create Datatype: ' . $datatype['type'] . ' for attribute ' . $datatype['name'];
 		$sql = "
 -- Create datatype {$datatype['type_name']}
-INSERT INTO datatype (
-	`Name`,
-	`Datentyp`,
-	`Gruppe`,
-	`pfad`,
-	`maintable`,
-	`Data`,
+INSERT INTO datatypes (
+	`name`,
 	`schema`,
-	`connection`,
-	`connectiontype`,
-	`tolerance`,
-	`toleranceunits`,
-	`epsg_code`,
-	`queryable`,
-	`transparency`,
-	`ows_srs`,
-	`wms_name`,
-	`wms_server_version`,
-	`wms_format`,
-	`wms_connectiontimeout`,
-	`querymap`,
-	`kurzbeschreibung`,
-	`privileg`
+	`dbname`,
+	`host`,
+	`port`,
 )
 VALUES (
 	'{$datatype['type']}',
-	'5',
-	@group_id,
-	'SELECT * FROM {$datatype['type']} WHERE 1=1',
-	'{$datatype['type']}', -- maintable
-	'geom from (select oid, position AS geom FROM {$schema}.{$datatype['type']}) as foo using unique oid using srid={$epsg}', -- Data
 	'{$schema}', -- schema
-	@connection, -- connection
-	'6', -- connectiontype
-	'3',
-	'pixels',
-	'{$epsg}',
-	'1',
-	'60',
-	'EPSG:{$epsg}',
-	'{$table['name']}', -- wms_name
-	'1.1.0',
-	'image/png',
-	'60',
-	'1',
-	'Diese Tabelle enthält alle Objekte aus der Tabelle {$datatype['type']}.',
-	'2'
+	'xplan_gml'
+	'localhost',
+	'5432'
 );
-SET @last_database_id_{$datatype['attribute_type_oid']} = LAST_INSERT_ID();
+SET @last_datatype_id_{$datatype['attribute_type_oid']} = LAST_INSERT_ID();
 ";
 		return $sql;
 	}
 
-	function generate_datatype_attribute($attribute, $options) {
+	function generate_datatype_attribute($attribute, $table, $options) {
 		#echo '<br>Create Datatypeattribute: ' . $attribute['name'] . ' für Datentyp: ' . $attribute['table_name'];
 		$sql = "
 --Create datatype_attribute {$attribute['name']} for datatype {$attribute['table_name']}
@@ -724,7 +690,7 @@ INSERT INTO datatype_attributes (
 	`query_tooltip`
 )
 VALUES (
-	@last_layer_id_{$attribute['datatype_oid']},
+	@last_datatype_id_{$table['attribute_type_oid']},
 	'{$attribute['name']}',
 	'{$attribute['name']}', -- real_name
 	'{$attribute['table_name']}',
@@ -825,78 +791,80 @@ INSERT INTO u_styles2classes (
 ";
 		return $sql;
 	}
-
+	
+	/*
+	* Funktion liefert das Ergebnis einer SQL-Abfrage als INSERT-Dump für die Tabelle "$table" 
+	* über $extra kann ein Feld angegeben werden, welches nicht mit in das INSERT aufgenommen wird
+	* dieses Feld wird jedoch auch mit abgefragt und separat zurückgeliefert
+	*/
 	function create_insert_dump($table, $extra, $sql){
 		#echo '<br>Create_insert_dump for table: ' . $table;
 		#echo '<br>sql: ' . $sql;
 		#echo '<br>extra: ' . $extra;
-		# Funktion liefert das Ergebnis einer SQL-Abfrage als INSERT-Dump für die Tabelle "$table" 
-		# über $extra kann ein Feld angegeben werden, welches nicht mit in das INSERT aufgenommen wird
-		# dieses Feld wird jedoch auch mit abgefragt und separat zurückgeliefert
 		$this->debug->write("<p>file:kvwmap class:database->create_insert_dump :<br>".$sql,4);
-    $query = mysql_query($sql);
-    if ($query==0) {
+		$query = mysql_query($sql);
+		if ($query==0) {
 			$this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0;
 		}
 
-    $feld_anzahl = mysql_num_fields($query);
+		$feld_anzahl = mysql_num_fields($query);
 		#echo '<br>Anzahl Felder: ' . $feld_anzahl;
-    for ($i = 0; $i < $feld_anzahl; $i++) {
-    	$meta = mysql_fetch_field($query, $i);
+		for ($i = 0; $i < $feld_anzahl; $i++) {
+			$meta = mysql_fetch_field($query, $i);
 			#echo '<br>Meta name: ' . $meta->name;
-    	# array mit feldnamen
-    	$felder[$i] = $meta->name;
-    	if ($meta->name == 'connectiontype'){
-    		$connectiontype = $i;
-    	}
-    	if($meta->name == 'connection'){
-    		$connection = $i;
-    	}
-    }
+			# array mit feldnamen
+			$felder[$i] = $meta->name;
+			if ($meta->name == 'connectiontype'){
+				$connectiontype = $i;
+			}
+			if($meta->name == 'connection'){
+				$connection = $i;
+			}
+		}
 
-    while ($rs = mysql_fetch_array($query)) {
-    	$insert = '';
-    	if ($rs[$connectiontype] == 6) {
-    		$rs[$connection] = '@connection';
-    	}
-    	$insert .= 'INSERT INTO '.$table.' (';
-    	for ($i = 0; $i < $feld_anzahl; $i++) {
-    		if($felder[$i] != $extra) {
-    			$insert .= "`".$felder[$i]."`";
-    			if ($feld_anzahl-1 > $i){$insert .= ', ';}
-    		}
-    	}
-    	$insert .= ') VALUES (';
-    	for ($i = 0; $i < $feld_anzahl; $i++) {
-    		if ($felder[$i] != $extra) {
-    			if (strpos($rs[$i], '@') === 0) {
-	    			$insert .= addslashes($rs[$i]);
-	    		}
-	    		else {
-	    			if (mysql_field_type($query, $i) != 'string' AND mysql_field_type($query, $i) != 'blob' AND $rs[$i] == '') {
-	    				$insert .= "NULL";
-	    			} else{
-    					$insert .= "'".addslashes($rs[$i])."'";
-	    			}
-	    		}
-	    		if ($feld_anzahl - 1 > $i) { $insert .= ', '; }
-    		}
-    		else {
-    			$dump['extra'][] = $rs[$i];
-    		}
-    	}
-    	$insert .= ');';
-    	$dump['insert'][] = $insert;
-    }
+		while ($rs = mysql_fetch_array($query)) {
+			$insert = '';
+			if ($rs[$connectiontype] == 6) {
+				$rs[$connection] = '@connection';
+			}
+			$insert .= 'INSERT INTO '.$table.' (';
+			for ($i = 0; $i < $feld_anzahl; $i++) {
+				if($felder[$i] != $extra) {
+					$insert .= "`".$felder[$i]."`";
+					if ($feld_anzahl-1 > $i){$insert .= ', ';}
+				}
+			}
+			$insert .= ') VALUES (';
+			for ($i = 0; $i < $feld_anzahl; $i++) {
+				if ($felder[$i] != $extra) {
+					if (strpos($rs[$i], '@') === 0) {
+						$insert .= addslashes($rs[$i]);
+					}
+					else {
+						if (mysql_field_type($query, $i) != 'string' AND mysql_field_type($query, $i) != 'blob' AND $rs[$i] == '') {
+							$insert .= "NULL";
+						} else{
+							$insert .= "'".addslashes($rs[$i])."'";
+						}
+					}
+					if ($feld_anzahl - 1 > $i) { $insert .= ', '; }
+				}
+				else {
+					$dump['extra'][] = $rs[$i];
+				}
+			}
+			$insert .= ');';
+			$dump['insert'][] = $insert;
+		}
 		#echo '<br>insert: ' . $insert;
 		return $dump;
 	}
 
-  function create_update_dump($table){
+	function create_update_dump($table){
 		# Funktion erstellt zu einer Tabelle einen Update-Dump und liefert ihn als String zurück
 		$sql = 'SELECT * FROM '.$table;
 		$this->debug->write("<p>file:kvwmap class:database->create_update_dump :<br>".$sql,4);
-    $query=mysql_query($sql);
+	  $query=mysql_query($sql);
     if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 
     $feld_anzahl = mysql_num_fields($query);
@@ -925,7 +893,7 @@ INSERT INTO u_styles2classes (
    return $dump;
 	}
 
- 
+
 ####################################################
 # database Funktionen
 ###########################################################
@@ -936,7 +904,7 @@ INSERT INTO u_styles2classes (
     return mysql_select_db($this->dbName,$this->dbConn);
   }
 
-  function close() {	
+  function close() {
     $this->debug->write("<br>MySQL Verbindung mit ID: ".$this->dbConn." schließen.",4);
     if (LOG_LEVEL>0){
     	$this->logfile->close();
@@ -1066,7 +1034,7 @@ INSERT INTO u_styles2classes (
       if ($query==0) {
         $ret[0]=1;
         $ret[1]="<b>Fehler bei SQL Anweisung:</b><br>".$sql."<br>".mysql_error($this->dbConn);
-        $this->debug->write($ret[1],$debuglevel);
+        $this->debug->write($ret[1], $debuglevel);
         if ($logsql) {
           $this->logfile->write("#".$ret[1]);
         }

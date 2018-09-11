@@ -14,11 +14,11 @@ Text[1]=["Achtung:","Bei Auswahl von Gemarkung und Flur erfolgt eine räumliche 
 function save(){
 	art = document.getElementsByName('abfrageart');
 	if(art[0].checked == true){
-		if(document.GUI.suchgemarkung.value == '' && (document.GUI.suchflur.value != '' || document.GUI.suchrissnr.value != '' || document.GUI.suchfortf.value != '')){
+		if(document.GUI.suchgemarkung.value == '' && (document.GUI.suchflur.value != '' || document.GUI.suchrissnummer.value != '' || document.GUI.suchfortfuehrung.value != '')){
 			alert('Bitte geben Sie die Gemarkung an.');
 			return;
 		}
-		if(document.GUI.sVermStelle.value != '' && document.GUI.suchgemarkung.value == '' && document.GUI.suchstammnr.value == '' && document.GUI.suchrissnr.value == '' && document.GUI.sdatum.value == '' && document.GUI.suchfortf.value == ''){
+		if(document.GUI.sVermStelle.value != '' && document.GUI.suchgemarkung.value == '' && document.GUI.suchstammnr.value == '' && document.GUI.suchrissnummer.value == '' && document.GUI.sdatum.value == '' && document.GUI.suchfortfuehrung.value == ''){
 			alert('Bitte geben Sie eine Gemarkung, eine Antragsnummer, eine Rissnummer, ein Datum oder eine Fortführung an.');
 			return;
 		}
@@ -115,8 +115,8 @@ function clear(){
 	document.GUI.suchgemarkung.value = '';
 	document.GUI.suchflur.value = '';
 	document.GUI.suchstammnr.value = '';
-	document.GUI.suchrissnr.value = '';
-	document.GUI.suchfortf.value = '';
+	document.GUI.suchrissnummer.value = '';
+	document.GUI.suchfortfuehrung.value = '';
 	document.GUI.sdatum.value = '';
 	document.GUI.sdatum2.value = '';
 	document.GUI.sVermStelle.value = '';
@@ -185,27 +185,21 @@ else {
   <tr> 
     <td colspan="2">Recherche nach folgenden Dokumenten:</td>
   </tr>
-  <tr> 
-    <td colspan="2"><input type="checkbox" name="suchffr" value="1"<?php if ($this->formvars['suchffr']) { ?> checked<?php } ?>>&nbsp;Fortführungsriss&nbsp;(FFR) </td>
-  </tr>
-  <tr> 
-    <td colspan="2"><input type="checkbox" name="suchkvz" value="1"<?php if ($this->formvars['suchkvz']) { ?> checked<?php } ?>>&nbsp;Koordinatenverzeichnis&nbsp;(KVZ)</td>
-  </tr>
-  <tr> 
-    <td colspan="2"><input type="checkbox" name="suchgn" value="1"<?php if ($this->formvars['suchgn']) { ?> checked<?php } ?>>&nbsp;Grenzniederschrift&nbsp;(GN)</td>
-  </tr>
-  <tr> 
-    <td colspan="2"><input type="checkbox" name="suchan" value="1"<?php if ($this->formvars['suchan']) { ?> checked<?php } ?>>
-			&nbsp;Andere&nbsp;
-			<? $such_andere_art = explode(',', $this->formvars['such_andere_art']); ?>
-			<select name="such_andere_art[]" multiple="true" size="1" style="position: absolute;width: 185px" onmouseover="this.size=10" onmouseout="this.size=1" onchange="document.getElementsByName('suchan')[0].checked=true;">
-				<option value="">alle</option>
-				<? for($i = 0; $i < count($this->dokumentarten['id']); $i++){?>
-				<option <? if(in_array($this->dokumentarten['id'][$i], $such_andere_art)){echo 'selected';} ?> value="<? echo $this->dokumentarten['id'][$i]; ?>"><? echo $this->dokumentarten['art'][$i]; ?></option>	
-				<? } ?>
-			</select>
-		</td>
-  </tr>
+<?	foreach($this->hauptdokumentarten as $hauptdokumentart){	?>
+			<tr> 
+				<td colspan="2">
+					<input type="checkbox" name="suchhauptart[]" value="<? echo $hauptdokumentart['id']; ?>"<?php if(in_array($hauptdokumentart['id'], $this->formvars['suchhauptart'])) { ?> checked<?php } ?>>&nbsp;<? echo $hauptdokumentart['art'].'&nbsp;('.$hauptdokumentart['abkuerzung'].')'; ?>
+<?				if($this->dokumentarten[$hauptdokumentart['id']] != ''){	?>
+					:&nbsp;<select name="suchunterart[]" multiple="true" size="1" style="position: absolute;width: 185px" onmouseover="this.size=10" onmouseout="this.size=1">
+						<option value="">alle</option>
+						<? for($i = 0; $i < count($this->dokumentarten[$hauptdokumentart['id']]); $i++){?>
+							<option <? if(in_array($this->dokumentarten[$hauptdokumentart['id']][$i]['id'], $this->formvars['suchunterart'])){echo 'selected';} ?> value="<? echo $this->dokumentarten[$hauptdokumentart['id']][$i]['id']; ?>"><? echo $this->dokumentarten[$hauptdokumentart['id']][$i]['art']; ?></option>	
+						<? } ?>
+					</select>
+					<? } ?>
+				</td>
+			</tr>
+<? } ?>
 	<tr>
 		<td colspan="2">
 			<table cellpadding="2" cellspacing="0">
@@ -303,9 +297,9 @@ else {
         <? if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){ ?>
 				<tr>
           <td colspan="3">          Rissnummer<br>
-  					<input type="text" name="suchrissnr" value="<?php echo $this->formvars['suchrissnr']; ?>" size="<?php echo RISSNUMMERMAXLENGTH; ?>" maxlength="<?php echo RISSNUMMERMAXLENGTH; ?>">
-						<a href="#" class="toggle_fa_off" title="von-bis-Suche" onclick="toggleBetweenSearch(this, GUI.suchrissnr2);"><i class="fa fa-step-backward"></i> <i class="fa fa-step-forward"></i></a>
-						<input type="text" <? if($this->formvars['suchrissnr2'] == '')echo 'style="display: none"'; ?> name="suchrissnr2" value="<? echo $this->formvars['suchrissnr2']; ?>" size="<? echo RISSNUMMERMAXLENGTH; ?>" maxlength="<? echo RISSNUMMERMAXLENGTH; ?>">
+  					<input type="text" name="suchrissnummer" value="<?php echo $this->formvars['suchrissnummer']; ?>" size="<?php echo RISSNUMMERMAXLENGTH; ?>" maxlength="<?php echo RISSNUMMERMAXLENGTH; ?>">
+						<a href="#" class="toggle_fa_off" title="von-bis-Suche" onclick="toggleBetweenSearch(this, GUI.suchrissnummer2);"><i class="fa fa-step-backward"></i> <i class="fa fa-step-forward"></i></a>
+						<input type="text" <? if($this->formvars['suchrissnummer2'] == '')echo 'style="display: none"'; ?> name="suchrissnummer2" value="<? echo $this->formvars['suchrissnummer2']; ?>" size="<? echo RISSNUMMERMAXLENGTH; ?>" maxlength="<? echo RISSNUMMERMAXLENGTH; ?>">
  					</td>
 				</tr>
 				<? } ?>
@@ -319,17 +313,17 @@ else {
 				<? if(NACHWEIS_PRIMARY_ATTRIBUTE == 'stammnr'){ ?>
 				<tr>
           <td colspan="3">          Rissnummer<br>
-  					<input type="text" name="suchrissnr" value="<?php echo $this->formvars['suchrissnr']; ?>" size="<?php echo RISSNUMMERMAXLENGTH; ?>" maxlength="<?php echo RISSNUMMERMAXLENGTH; ?>">
-						<a href="#" class="toggle_fa_off" title="von-bis-Suche" onclick="toggleBetweenSearch(this, GUI.suchrissnr2);"><i class="fa fa-step-backward"></i> <i class="fa fa-step-forward"></i></a>
-						<input type="text" <? if($this->formvars['suchrissnr2'] == '')echo 'style="display: none"'; ?> name="suchrissnr2" value="<? echo $this->formvars['suchrissnr2']; ?>" size="<? echo RISSNUMMERMAXLENGTH; ?>" maxlength="<? echo RISSNUMMERMAXLENGTH; ?>">
+  					<input type="text" name="suchrissnummer" value="<?php echo $this->formvars['suchrissnummer']; ?>" size="<?php echo RISSNUMMERMAXLENGTH; ?>" maxlength="<?php echo RISSNUMMERMAXLENGTH; ?>">
+						<a href="#" class="toggle_fa_off" title="von-bis-Suche" onclick="toggleBetweenSearch(this, GUI.suchrissnummer2);"><i class="fa fa-step-backward"></i> <i class="fa fa-step-forward"></i></a>
+						<input type="text" <? if($this->formvars['suchrissnummer2'] == '')echo 'style="display: none"'; ?> name="suchrissnummer2" value="<? echo $this->formvars['suchrissnummer2']; ?>" size="<? echo RISSNUMMERMAXLENGTH; ?>" maxlength="<? echo RISSNUMMERMAXLENGTH; ?>">
  					</td>
 				</tr>
 				<? } ?>
 				<tr>
           <td colspan="3">          Fortführungsjahr<br>
-						<input type="text" name="suchfortf" value="<?php echo $this->formvars['suchfortf']; ?>" size="4" maxlength="4">
-						<a href="#" class="toggle_fa_off" title="von-bis-Suche" onclick="toggleBetweenSearch(this, GUI.suchfortf2);"><i class="fa fa-step-backward"></i> <i class="fa fa-step-forward"></i></a>
-						<input type="text" <? if($this->formvars['suchfortf2'] == '')echo 'style="display: none"'; ?> name="suchfortf2" value="<?php echo $this->formvars['suchfortf2']; ?>" size="4" maxlength="4">
+						<input type="text" name="suchfortfuehrung" value="<?php echo $this->formvars['suchfortfuehrung']; ?>" size="4" maxlength="4">
+						<a href="#" class="toggle_fa_off" title="von-bis-Suche" onclick="toggleBetweenSearch(this, GUI.suchfortfuehrung2);"><i class="fa fa-step-backward"></i> <i class="fa fa-step-forward"></i></a>
+						<input type="text" <? if($this->formvars['suchfortfuehrung2'] == '')echo 'style="display: none"'; ?> name="suchfortfuehrung2" value="<?php echo $this->formvars['suchfortfuehrung2']; ?>" size="4" maxlength="4">
 					</td>
 				</tr>
         <tr> 

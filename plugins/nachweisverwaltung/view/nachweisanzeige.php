@@ -1,9 +1,106 @@
 <script type="text/javascript">
 <!--
 
+var nachweise = new Array();
+
+<?
+	for($i = 0; $i < count($this->nachweis->Dokumente); $i++){
+		echo "nachweise.push(JSON.parse('".json_encode($this->nachweis->Dokumente[$i])."'));";
+	}
+?>
+
+function update_selection(selection){
+	var condition;
+	var checked = true;
+	var selections = document.getElementsByName('markhauptart[]');
+	switch(selection.value){
+		case '111': {			// alle
+			condition = 'true';
+			[].forEach.call(selections, function (s){s.checked = true;});
+			selections[0].checked = false;
+			selections[1].checked = false;
+			selections[2].checked = false;
+		}break;
+		case '000': {			// keine
+			condition = 'true';
+			checked = false;
+			clear_selections('markhauptart[]', 000);
+		}break;
+		case '222': {			// alle der Messung
+			condition = create_condition();
+			clear_selections('markhauptart[]', 222);
+		}break;
+		default: {				// nach Dokumentart
+			checked = selection.checked;
+			condition = 'selection.value == nachweis.art';
+			selections[0].checked = false;
+			selections[1].checked = false;
+			selections[2].checked = false;
+		}
+	}
+	[].forEach.call(nachweise, function (nachweis){
+		if(eval(condition))document.getElementById('id_'+nachweis.id).checked = checked;
+  });
+}
+
+function clear_selections(name, except){
+	var selections = document.getElementsByName(name);
+	[].forEach.call(selections, function (s){if(s.value != except)s.checked = false;});
+}
+
+function create_condition(){		// fuer alle der Messung
+	var condition;
+	var conditions = new Array();
+	[].forEach.call(nachweise, function (nachweis){
+		if(document.getElementById('id_'+nachweis.id).checked){
+			condition = "(nachweis.flurid == '"+nachweis.flurid+"' && nachweis.<? echo NACHWEIS_PRIMARY_ATTRIBUTE; ?> == '"+nachweis.<? echo NACHWEIS_PRIMARY_ATTRIBUTE; ?>+"'";
+			<? if(NACHWEIS_SECONDARY_ATTRIBUTE != ''){ ?>
+			condition += " && nachweis.<? echo NACHWEIS_SECONDARY_ATTRIBUTE; ?> == '"+nachweis.<? echo NACHWEIS_SECONDARY_ATTRIBUTE; ?>+"'";
+			<? } ?>
+			condition += ')';
+			conditions.push(condition);
+		}
+  });
+	return conditions.join(' || ');
+}
+
+function zum_Auftrag_hinzufuegen(){
+	document.GUI.go_plus.value='zum_Auftrag_hinzufuegen';
+	document.GUI.submit();
+}
+
+function aus_Auftrag_entfernen(){
+	document.GUI.go_plus.value='aus_Auftrag_entfernen';
+	document.GUI.submit();
+}
+
 function vorlage(){
 	document.GUI.go.value='Nachweisformular_Vorlage';
 	document.GUI.submit();
+}
+
+function set_ref_geom(){
+	if(document.GUI.ref_geom.value == ''){
+		document.getElementById('updateGeomLink').style.display = '';
+		update_selection(document.getElementsByName('markhauptart[]')[2]);
+	}
+}
+
+function updategeoms(){
+	var ids = document.getElementsByName('id[]');
+	var count = 0;
+	for(i = 0; i < ids.length; i++){
+		if(ids[i].checked){
+			count++;
+		}
+	}
+	if(count == 0)message([{ 'type': 'warning', 'msg': 'Bitte wählen Sie die Nachweise aus, deren Geometrie überschrieben werden soll.' }]);
+	else{
+		if(window.confirm("Wollen Sie wirklich "+count+" Nachweisgeometrien überschreiben?")){
+			document.GUI.go.value='Nachweisanzeige_Geometrieuebernahme';
+			document.GUI.submit();
+		}
+	}
 }
 
 function bearbeiten(){
@@ -70,10 +167,9 @@ function getvorschau(url){
 ?>
 
 <input type="hidden" name="go" value="Nachweisanzeige">
+<input type="hidden" name="go_plus" value="">
 <input type="hidden" name="order" value="<? echo $this->formvars['order']; ?>">
 <input type="hidden" name="richtung" value="<? echo $this->formvars['richtung']; ?>">
-<input type="hidden" name="flur_thematisch" value="<? echo $this->formvars['flur_thematisch']; ?>">
-<input type="hidden" name="such_andere_art" value="<? echo $this->formvars['such_andere_art']; ?>">
 <input type="hidden" name="selected_layer_id" value="<? echo LAYER_ID_NACHWEISE; ?>">
 <input type="hidden" name="value_id" value="">
 <input type="hidden" name="operator_id" value="IN">
@@ -106,6 +202,9 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 						if($this->formvars['geprueft'] == 1){ echo ' nur geprüfte '; }
 						if($this->formvars['geprueft'] == '0'){ echo ' nur ungeprüfte '; }
 						if($this->formvars['geprueft'] == ''){ echo ' geprüfte und ungeprüfte '; }
+						foreach($this->formvars['suchhauptart'] as $suchart){
+							echo $this->hauptdokumentarten[$suchart]['abkuerzung'].', ';
+						}
 						if ($this->formvars['suchffr']){ echo ' FFR, '; }
 						if ($this->formvars['suchkvz']){ echo ' KVZ, '; }
 						if ($this->formvars['suchgn']){ echo ' GN, '; }
@@ -115,8 +214,8 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 								if($this->formvars['suchgemarkung'] != '') echo ' in Gemarkung: '.$this->formvars['suchgemarkung'];
 								if($this->formvars['suchflur'] != '') echo ' in Flur: '.str_pad($this->formvars['suchflur'],3,'0',STR_PAD_LEFT);
                 if($this->formvars['suchstammnr'] != '')echo ' mit Antragsnummer: '.$this->formvars['suchstammnr'];
-                if($this->formvars['suchrissnr'] != '')echo ' mit Rissnummer: '.$this->formvars['suchrissnr'];
-                if($this->formvars['suchfortf'] != '')echo ' mit Fortführung: '.$this->formvars['suchfortf'];
+                if($this->formvars['suchrissnummer'] != '')echo ' mit Rissnummer: '.$this->formvars['suchrissnummer'];
+                if($this->formvars['suchfortfuehrung'] != '')echo ' mit Fortführung: '.$this->formvars['suchfortfuehrung'];
 								if($this->formvars['datum'] != '')echo ' von '.$this->formvars['datum'];
 								if($this->formvars['datum2'] != '')echo ' bis '.$this->formvars['datum2'];
 								if($this->formvars['VermStelle'] != '')echo ' von Vermessungsstelle '.$this->formvars['VermStelle'];
@@ -140,7 +239,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
   <tr>
     <td bgcolor="<? echo BG_FORM ?>"><?
 	 if ($this->nachweis->erg_dokumente > 0) { ie_check();?>
-		<table class="<? if (!ie_check()){ ?>scrolltable <? } ?>scrolltable_td" style="width: 1247px" border="0" cellspacing="0" cellpadding="0">
+		<table id="nachweisanzeige_ergebnis" class="<? if (!ie_check()){ ?>scrolltable <? } ?>scrolltable_td" style="width: 1247px" border="0" cellspacing="0" cellpadding="0">
 			<thead>
         <tr style="outline: 1px solid grey;" bgcolor="#FFFFFF"> 
           <th height="40" style="width: 80"><div align="center"><span class="fett">Auswahl</span></div></th>
@@ -190,7 +289,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 			<? if(strpos($this->formvars['order'], 'format') === false){ ?>
 				<th align="center" style="width: 80"><a href="javascript:add_to_order('format');" title="nach Blattformat sortieren"><span class="fett">Format</span></a></th>
 			<? }else{echo '<th align="center" style="width: 80"><span class="fett">Format</span></th>';} ?>	
-          <th colspan="3" style="width: 100"><div align="center"><?    echo $this->nachweis->erg_dokumente.' Treffer';   ?></div></th>
+          <th colspan="3" style="width: 110"><div align="center"><?    echo $this->nachweis->erg_dokumente.' Treffer';   ?></div></th>
         </tr>
 			</thead>
 			<tbody>
@@ -214,20 +313,10 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 			"> 
 				<td align="left" style="width: 80">
 					<a name="<? echo $this->nachweis->Dokumente[$i]['id']; ?>">
-					<input type="checkbox" name="id[]" onchange="document.GUI.art_markieren.value='individuell';" value="<? echo $this->nachweis->Dokumente[$i]['id']; ?>"<? 
+					<input type="checkbox" name="id[]" id="id_<? echo $this->nachweis->Dokumente[$i]['id']; ?>" onchange="clear_selections('markhauptart[]', '');" value="<? echo $this->nachweis->Dokumente[$i]['id']; ?>"<? 
         # Püfen ob das Dokument markiert werden soll
-                
-				switch ($this->formvars['art_markieren']) {
-					case 'individuell' : {			# Nutzer hat selber selektiert
-						if (in_array($this->nachweis->Dokumente[$i]['id'], $this->formvars['id']))echo ' checked';
-					}break;
-					case '222' : {			# alle der Messung
-						if($this->nachweis->Dokumente[$i]['selected'] == 1)echo ' checked';
-					}break;
-					default : {		# Selektion nach Art
-						if($this->nachweis->Dokumente[$i]['art'] == ($this->nachweis->Dokumente[$i]['art'] & $this->formvars['art_markieren']))echo ' checked';
-					}
-				}
+                				
+				if($this->formvars['markhauptart'][0] != '000' AND ($this->formvars['id'] == NULL OR in_array($this->nachweis->Dokumente[$i]['id'], $this->formvars['id'])))echo ' checked';
 				
         ?>>	
 				<? if($this->nachweis->Dokumente[$i]['bemerkungen'] != ''){ ?>
@@ -248,24 +337,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 					<td style="width: 70"><div align="center"><? echo $this->formvars['blattnummer']=str_pad($this->nachweis->Dokumente[$i]['blattnummer'],BLATTNUMMERMAXLENGTH,'0',STR_PAD_LEFT); ?></div></td>
           <td style="width: 90"><div align="center"><? echo $this->formvars['stammnr']=$this->nachweis->Dokumente[$i]['stammnr']; ?></div></td>
           <? } ?>
-          <td style="width: 137"><div align="center"> 
-              <? if ($this->formvars['art']=$this->nachweis->Dokumente[$i]['art']=='100'){?>
-              FFR 
-              <?               
-                    }
-                    elseif($this->formvars['art']=$this->nachweis->Dokumente[$i]['art']=='010'){?>
-              KVZ 
-              <?               
-                    }
-                    elseif($this->formvars['art']=$this->nachweis->Dokumente[$i]['art']=='001'){?>
-              GN 
-              <?
-                    }
-                    elseif($this->formvars['art']=$this->nachweis->Dokumente[$i]['art']=='111'){
-                    	echo $this->nachweis->Dokumente[$i]['andere_art_name'];
-                    }
-                ?>
-            </div></td>          
+          <td style="width: 137"><div align="center"><? echo ($this->nachweis->Dokumente[$i]['unterart_name']? $this->nachweis->Dokumente[$i]['unterart_name'] : $this->hauptdokumentarten[$this->nachweis->Dokumente[$i]['art']]['abkuerzung']); ?></div></td>          
           <td style="width: 80"><div align="center"><? echo $this->nachweis->Dokumente[$i]['datum']; ?></div></td>
           <td style="width: 120"><div align="center"><? echo $this->formvars['fortf']=$this->nachweis->Dokumente[$i]['fortfuehrung']; ?></div></td>
           <td style="width: 120"><div align="center"><? echo $this->formvars['vermstelle']=$this->nachweis->Dokumente[$i]['vermst']; ?></div></td>
@@ -281,14 +353,17 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 						$this->allowed_documents[] = addslashes($thumbname);
 						$url = IMAGEURL.$this->document_loader_name.'?dokument='.$thumbname;
 					?>
-					<a target="_blank" onmouseover="getvorschau('<? echo $url; ?>');" href="index.php?go=document_anzeigen&ohnesession=1&id=<? echo $this->nachweis->Dokumente[$i]['id']; ?>&file=1" title="Ansicht"><img src="graphics/button_ansicht.png" border="0"></a></td>
-          <td style="width: 30">
+						<a target="_blank" onmouseover="getvorschau('<? echo $url; ?>');" href="index.php?go=document_anzeigen&ohnesession=1&id=<? echo $this->nachweis->Dokumente[$i]['id']; ?>&file=1" title="Ansicht"><img src="graphics/button_ansicht.png" border="0"></a>
+					</td>
+          <td style="width: 40">
           	<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten')){ ?>
-          	<a href="index.php?go=Nachweisformular&id=<? echo $this->nachweis->Dokumente[$i]['id'];?>&order=<? echo $this->formvars['order'] ?>&richtung=<? echo $this->formvars['richtung'] ?>&flur_thematisch=<? echo $this->formvars['flur_thematisch']; ?>&such_andere_art=<? echo $this->formvars['such_andere_art']; ?>" title="bearbeiten"><img src="graphics/button_edit.png" border="0"></a></td>
+          	<a href="index.php?go=Nachweisformular&id=<? echo $this->nachweis->Dokumente[$i]['id'];?>&order=<? echo $this->formvars['order'] ?>&richtung=<? echo $this->formvars['richtung'] ?>" title="bearbeiten"><img src="graphics/button_edit.png" border="0"></a>
+						<input type="radio" title="Geometrie für Geometrieübernahme verwenden" onmousedown="set_ref_geom();" value="<? echo $this->nachweis->Dokumente[$i]['id'];?>" name="ref_geom" <? if($this->formvars['ref_geom'] == $this->nachweis->Dokumente[$i]['id'])echo 'checked'; ?>>
           	<? } ?>
+					</td>
           <td style="width: 30">
           	<? if($this->Stelle->isFunctionAllowed('Nachweisloeschen')){ ?>
-          	<a href="index.php?go=Nachweisloeschen&id=<? echo $this->nachweis->Dokumente[$i]['id']; ?>&order=<? echo $this->formvars['order'] ?>&richtung=<? echo $this->formvars['richtung'] ?>&flur_thematisch=<? echo $this->formvars['flur_thematisch']; ?>"  title="löschen"><img src="graphics/button_drop.png" border="0"></a>
+          	<a href="index.php?go=Nachweisloeschen&id=<? echo $this->nachweis->Dokumente[$i]['id']; ?>&order=<? echo $this->formvars['order'] ?>&richtung=<? echo $this->formvars['richtung'] ?>"  title="löschen"><img src="graphics/button_drop.png" border="0"></a>
           	<? } ?>
           </td>
         </tr>
@@ -297,79 +372,86 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
     ?>
 				</tbody>
       </table>
-      <table width="0%" border="0" cellspacing="0" cellpadding="5">
-        <tr> 
-          <td>markieren</td>
-          <td colspan="3">
-          	<select name="art_markieren" onChange="document.GUI.submit()">
-	            <option value="individuell">---</option>
-	            <option value="111"<? if ($this->formvars['art_markieren']=='111')echo ' selected '; ?>>alle</option>
-							<option value="222"<? if ($this->formvars['art_markieren']=='222')echo ' selected '; ?>>alle der Messung</option>
-	            <option value="000"<? if ($this->formvars['art_markieren']=='000')echo ' selected '; ?>>keine</option>
-	            <option value="100"<? if ($this->formvars['art_markieren']=='100')echo ' selected '; ?>>nur FFR</option>
-	            <option value="010"<? if ($this->formvars['art_markieren']=='010')echo ' selected '; ?>>nur KVZ</option>
-	            <option value="001"<? if ($this->formvars['art_markieren']=='001')echo ' selected '; ?>>nur GN</option>
-	            <option value="110"<? if ($this->formvars['art_markieren']=='110')echo ' selected '; ?>>FFR + KVZ</option>
-	            <option value="101"<? if ($this->formvars['art_markieren']=='101')echo ' selected '; ?>>FFR + GN</option>
-	            <option value="011"<? if ($this->formvars['art_markieren']=='011')echo ' selected '; ?>>KVZ + GN</option>
-          	</select>
-          </td>
-          <td>
-          	<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten')){ ?>
-          		<a href="javascript:vorlage();"><span class="fett">--> markierte als Vorlage übernehmen</span></a>
-          	<? } ?>
+      <table width="0%" border="1" cellspacing="0" cellpadding="0" id="nachweisanzeige_optionen">
+			  <tr>
+					<td valign="top" style="padding: 5px;">
+						<table cellspacing="4">
+							<tr>
+								<td colspan="2" align="center"><span class="fett">Einblenden</span></td>
+							</tr>
+							<tr>
+								<td>
+									<input type="checkbox" name="showhauptart[]" value=""> alle<br>
+									<input type="checkbox" name="showhauptart[]" onchange="clear_selections('showhauptart[]', 2222);" value="2222"<? if(in_array(2222, $this->formvars['showhauptart']))echo ' checked="true" '; ?>> alle ausgewählten<br>
+					<? 			foreach($this->hauptdokumentarten as $hauptart){  ?>
+										<input type="checkbox" name="showhauptart[]" value="<? echo $hauptart['id']; ?>"<? if(in_array($hauptart['id'], $this->formvars['showhauptart']))echo ' checked="true" '; ?>> <? echo $hauptart['abkuerzung']; ?><br>
+					<?			}		?>
+								</td>
+							</tr>
+							<tr>
+								<td align="center">
+									<input type="submit" value="Aktualisieren">
+								</td>
+							</tr>
+						</table>
 					</td>
-        </tr>
-        <tr> 
-          <td>einblenden</td>
-          <td colspan="3"><select name="art_einblenden" onChange="document.GUI.submit()">
-              <option value="">---</option>
-              <option value="1111"<? if ($this->formvars['art_einblenden']==='1111')echo ' selected '; ?>>alle</option>
-							<option value="2222"<? if ($this->formvars['art_einblenden']==='2222')echo ' selected '; ?>>alle ausgewählten</option>
-              <option value="0001"<? if ($this->formvars['art_einblenden']==='0001')echo ' selected '; ?>>nur Andere</option>
-              <option value="1000"<? if ($this->formvars['art_einblenden']==='1000')echo ' selected '; ?>>nur FFR</option>
-              <option value="0100"<? if ($this->formvars['art_einblenden']==='0100')echo ' selected '; ?>>nur KVZ</option>
-              <option value="0010"<? if ($this->formvars['art_einblenden']==='0010')echo ' selected '; ?>>nur GN</option>
-              <option value="1100"<? if ($this->formvars['art_einblenden']==='1100')echo ' selected '; ?>>FFR + KVZ</option>
-              <option value="1010"<? if ($this->formvars['art_einblenden']==='1010')echo ' selected '; ?>>FFR + GN</option>
-              <option value="0110"<? if ($this->formvars['art_einblenden']==='0110')echo ' selected '; ?>>KVZ + GN</option>
-							<option value="1001"<? if ($this->formvars['art_einblenden']==='1001')echo ' selected '; ?>>FFR + Andere</option>
-              <option value="0101"<? if ($this->formvars['art_einblenden']==='0101')echo ' selected '; ?>>KVZ + Andere</option>
-              <option value="0011"<? if ($this->formvars['art_einblenden']==='0011')echo ' selected '; ?>>GN + Andere</option>
-              <option value="1101"<? if ($this->formvars['art_einblenden']==='1101')echo ' selected '; ?>>FFR + KVZ + Andere</option>
-              <option value="1011"<? if ($this->formvars['art_einblenden']==='1011')echo ' selected '; ?>>FFR + GN + Andere</option>
-              <option value="0111"<? if ($this->formvars['art_einblenden']==='0111')echo ' selected '; ?>>KVZ + GN + Andere</option>
-            </select>
+					<td valign="top" style="padding: 5px;">
+						<table cellspacing="4">
+							<tr> 
+								<td colspan="2" align="center"><span class="fett">Markieren</span></td>
+							</tr>
+							<tr>
+								<td>
+									<input type="checkbox" name="markhauptart[]" onchange="update_selection(this);" value="111"<? if(in_array(111, $this->formvars['markhauptart']))echo ' checked="true" '; ?>> alle<br>
+									<input type="checkbox" name="markhauptart[]" onchange="update_selection(this);" value="222"<? if(in_array(222, $this->formvars['markhauptart']))echo ' checked="true" '; ?>> alle der Messung<br>
+									<input type="checkbox" name="markhauptart[]" onchange="update_selection(this);" value="000"<? if(in_array(000, $this->formvars['markhauptart']))echo ' checked="true" '; ?>> keine<br>
+					<? 			foreach($this->hauptdokumentarten as $hauptart){  ?>
+										<input type="checkbox" name="markhauptart[]" onchange="update_selection(this);" value="<? echo $hauptart['id']; ?>"<? if(in_array($hauptart['id'], $this->formvars['markhauptart']))echo ' checked="true" '; ?>> <? echo $hauptart['abkuerzung']; ?><br>
+					<?			}		?>
+								</td>							
+								<td valign="bottom">
+									<br>
+									<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten')){ ?>
+										<a href="javascript:updategeoms();" id="updateGeomLink" <? if($this->formvars['ref_geom'] == '')echo 'style="display: none"'; ?>><span class="fett">Geometrie übernehmen</span></a>
+									<? } ?>
+									<br><br>
+									<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten')){ ?>
+										<a href="javascript:vorlage();"><span class="fett">als Vorlage verwenden</span></a>
+									<? } ?>
+									<br><br>
+									<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten')){ ?>          		
+										<a href="javascript:bearbeiten();"><span class="fett">bearbeiten</span></a>
+									<? } ?>
+									<br><br>
+									<? if($this->Stelle->isFunctionAllowed('Nachweisloeschen')){ ?>
+										<a href="javascript:loeschen();"><span class="fett">löschen</span></a>
+									<? } ?>
+								</td>		
+							</tr>
+						</table>
 					</td>
-					<td>
-          	<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten')){ ?>          		
-							<a href="javascript:bearbeiten();"><span class="fett">--> markierte bearbeiten</span></a>
-          	<? } ?>
+					<td valign="top" style="padding: 5px;">
+						<table cellspacing="4">
+							<tr> 
+								<td colspan="2" align="center"><span class="fett">Vorbereitungsnummer</span></td>
+							</tr>
+							<tr>
+								<td>
+									<span class="fett">
+									<? $this->FormObjAntr_nr->outputHTML();
+										echo $this->FormObjAntr_nr->html;?>
+									</span>
+								</td>
+								<td valign="top">
+									<br>
+									<a href="javascript:zum_Auftrag_hinzufuegen();"><span class="fett">zu Auftrag hinzufügen</span></a>
+									<br><br>
+									<a href="javascript:aus_Auftrag_entfernen();"><span class="fett">aus Auftrag entfernen</span></a>
+								</td>
+							</tr>							
+						</table>
 					</td>
-        </tr>
-        <tr> 
-          <td>Vorbereitungsnummer:</td>
-          <td colspan="3">
-						<span class="fett">
-            <? $this->FormObjAntr_nr->outputHTML();
-    					echo $this->FormObjAntr_nr->html;?>
-						</span>
-						&nbsp;
-						<select name="go_plus" onChange="document.GUI.submit()">
-              <option value="">---</option>
-              <option value="zum_Auftrag_hinzufuegen"<? if ($this->formvars['nachweisaction']=='markierte_zum_Auftrag_hinzufuegen')echo ' selected '; ?>>zu 
-              Auftrag hinzufügen</option>
-              <option value="aus_Auftrag_entfernen"<? if ($this->formvars['nachweisaction']=='markierte_aus_Auftrag_entfernen')echo ' selected '; ?>>aus 
-              Auftrag entfernen</option>
-            </select>
-						<span class="fett">&nbsp;</span>
-					</td>
-					<td>
-						<? if($this->Stelle->isFunctionAllowed('Nachweisloeschen')){ ?>
-          		<a href="javascript:loeschen();"><span class="fett">--> markierte löschen</span></a>
-          	<? } ?>
-					</td>
-        </tr>
+				</tr>
       </table>
 	  <? 
 	  } else {
@@ -377,8 +459,9 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 	  <span class="fett">Es konnten keine Dokumente zu der Auswahl gefunden werden.<br>
 Wählen Sie neue Suchparameter.</span><br>
 	  <? } ?>
-         <a href="index.php?go=Nachweisrechercheformular&VermStelle=<? echo $this->formvars['VermStelle']; ?>&flur_thematisch=<? echo $this->formvars['flur_thematisch']; ?>&such_andere_art=<? echo $this->formvars['such_andere_art']; ?>">&lt;&lt; zur&uuml;ck
-         zur Suche</a></td>
+			<br>
+			<a href="index.php?go=Nachweisrechercheformular&VermStelle=<? echo $this->formvars['VermStelle']; ?>">&lt;&lt; zur&uuml;ck zur Suche</a>
+		</td>
   </tr>
   <tr> 
     <td bgcolor="<? echo BG_FORM ?>"> 

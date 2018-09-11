@@ -7,7 +7,6 @@ BEGIN;
 -- Dumped by pg_dump version 9.4.8
 -- Started on 2016-12-05 10:41:49 UTC
 SET statement_timeout = 0;
-SET lock_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SET check_function_bodies = false;

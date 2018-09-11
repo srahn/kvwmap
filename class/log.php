@@ -29,7 +29,10 @@ class Debugger {
 		}
 	}
 
-	function write($msg, $level = 4) {
+	function write($msg, $level = 4, $echo = false) {
+		if ($echo) {
+			echo '<br>' . $msg;
+		}
 		if ($level>=DEBUG_LEVEL) {
 			if ($mime_type == 'text/html') {
 				fwrite($this->fp, "\n<br>");

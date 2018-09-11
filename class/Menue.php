@@ -10,6 +10,11 @@ class Menue extends MyObject {
 		$this->identifier = 'id';
 		$this->validations = array(
 			array(
+				'attribute' => 'id',
+				'condition' => 'unique',
+				'description' => 'Die id darf nur ein Mal vorkommen.',
+			),
+			array(
 				'attribute' => 'name',
 				'condition' => 'not_null',
 				'description' => 'Es muss ein Menüname angegeben werden.',

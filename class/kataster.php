@@ -150,22 +150,6 @@ class adresse {
   var $debug;
   var $database;
 
-  ###################### Liste der Funktionen ####################################
-  #
-  # function adresse($GemeindeSchl,$StrassenSchl,$HausNr) - Construktor
-  # function setDBConn($dbConn)
-  # function getGebaeude()
-  # function getQuelle()
-  # function getFlurstKennzListe()
-  # function updateAdressTable()
-  # function getStrassenListe($GemID,$AdressenListeByExtent,$order)
-  # function getAdressenListeByFlst($FlstListe,$order)
-  # function getAdressenListeByExtent($extent)
-  # function getHausNrListe($GemID,$StrID,$HausNr,$order)
-  # function getStrIDfromName($GemID,$StrName)
-  #
-  ################################################################################
-
   function adresse($GemeindeSchl,$StrassenSchl,$HausNr,$database) {
     global $debug;
     $this->debug=$debug;
@@ -178,7 +162,7 @@ class adresse {
   function setDBConn($dbConn) {
     $this->dbConn=$dbConn;
   }
-
+	
   function getGebaeude() {
     $Gebaeude=new gebaeude($this);
     return $Gebaeude->getGebaeude();
@@ -1459,7 +1443,6 @@ class flurstueck {
 	function outputEigentuemerText($eigentuemer, $adressAenderungen = NULL, $indent, $database = NULL){
 		if($eigentuemer->Nr != '' OR $eigentuemer->zusatz_eigentuemer != ''){
 			$Eigentuemer .= $indent;
-			$Eigentuemer .= $eigentuemer->Nr.' ';
 			if($eigentuemer->vorname != '')$Eigentuemer .= $eigentuemer->vorname.' ';
 			$Eigentuemer .= $eigentuemer->nachnameoderfirma;
 			if($eigentuemer->namensbestandteil != '')$Eigentuemer .= ', '.$eigentuemer->namensbestandteil;
@@ -1477,6 +1460,14 @@ class flurstueck {
 			return str_replace('"', '\'', $Eigentuemer);
 		}
 	}
+	
+	function outputEigentuemerNamensnummer($eigentuemer, $adressAenderungen = NULL, $indent, $database = NULL){
+		if($eigentuemer->Nr != '' OR $eigentuemer->zusatz_eigentuemer != ''){
+			$Eigentuemer .= $eigentuemer->Nr.' ';
+			$Eigentuemer .= "\n";
+			return $Eigentuemer;
+		}
+	}	
 	
 	function outputEigentuemerShort($eigentuemer, $adressAenderungen = NULL, $indent = NULL, $database = NULL){
 		$Eigentuemer .= '<tr><td colspan="2"><table cellpadding="0" cellspacing="0"><tr><td valign="top" style="padding-right: 4">'.$eigentuemer->Nr.'</td><td valign="top" style="padding-right: 4">';
@@ -1567,12 +1558,12 @@ class flurstueck {
 		$eigentuemer = $Eigentuemerliste[$gml_id];
 		$Eigentuemer .= $this->{'outputEigentuemer'.$type}($eigentuemer, $adressAenderungen, $indent, $database);
 		if($eigentuemer->children != ''){
-			if($type == 'Text')$indent = $indent.'  ';
+			if(in_array($type, array('Text','Namensnummer')))$indent = $indent.'  ';
 			else $Eigentuemer .= '<tr><td '.$style.'>&nbsp;&nbsp;</td><td><table>';
 			foreach($eigentuemer->children as $child){
 				$Eigentuemer .= $this->outputEigentuemer($child, $Eigentuemerliste, $type, $adressAenderungen, $indent, $database);
 			}
-			if($type != 'Text')$Eigentuemer .= '</table></td></tr>';
+			if(!in_array($type, array('Text','Namensnummer')))$Eigentuemer .= '</table></td></tr>';
 		}
 		return $Eigentuemer;
 	}

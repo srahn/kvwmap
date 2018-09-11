@@ -140,7 +140,7 @@ class antrag {
         mkdir ($zielpfad, 0777);
       }
       # Erzeuge ein Unterverzeichnis für die Dokumentenart, wenn noch nicht vorhanden
-      $artname=ArtCode2Abk($nachweis->Dokumente[$i]['art']);    
+      $artname = strtolower($nachweis->hauptdokumentarten[$nachweis->Dokumente[$i]['art']]['abkuerzung']);
       $zielpfad.=$artname.'/';
       if (!is_dir($zielpfad)) {
         mkdir ($zielpfad, 0777);
@@ -267,12 +267,9 @@ class antrag {
     # Allgemeine Einstellungen für die ganze Tabelle
     $options=array('xPos'=>'left','xOrientation'=>'right','rowGap'=>$rowGap,'colGap'=>$colGap,'showLines'=>2 ,'width'=>780,'showHeadings'=>1,'fontSize'=>12, 'shaded'=>0);
     # Individuelle Einstellungen für die Spalten.
-    $options['cols']['Riss-Nummer']=array('justification'=>'centre');
-    $options['cols']['Antrags-Nummer']=array('justification'=>'centre');
-    $options['cols']['FFR']=array('justification'=>'centre');
-    $options['cols']['KVZ']=array('justification'=>'centre');
-    $options['cols']['GN']=array('justification'=>'centre');
-    $options['cols']['andere']=array('justification'=>'centre');
+		foreach($this->FFR[0] as $property => $value){
+			$options['cols'][$property]=array('justification'=>'centre');
+		}		
 		$options['cols']['Datei']=array('justification'=>'left','width'=>210);
     $options['cols']['gemessen durch']=array('justification'=>'left');
     $options['cols'][utf8_decode('Gültigkeit')]=array('justification'=>'centre','width'=>62);
@@ -417,33 +414,11 @@ class antrag {
 			else $not_primary = 'Rissnummer';
 			$FFR[$i][$not_primary]=$ret[1];
 
-      # Abfrage der Anzahl der FFR zum Vorgang
-      if($formvars['FFR']){
-      	$ret=$this->getAnzFFR($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
-      	if ($ret[0]) { return $ret; }
-      	$FFR[$i]['FFR']=$ret[1];
-      }      
-      
-      # Abfrage der Anzahl der KVZ zum Vorgang
-      if($formvars['KVZ']){
-	      $ret=$this->getAnzKVZ($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
-	      if ($ret[0]) { return $ret; }
-	      $FFR[$i]['KVZ']=$ret[1];
-      }
-      
-      # Abfrage der Anzahl der GN zum Vorgang
-      if($formvars['GN']){
-	      $ret=$this->getAnzGN($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
-	      if ($ret[0]) { return $ret; }
-	      $FFR[$i]['GN']=$ret[1];
-      }
-      
-      # Abfrage der Anzahl der anderen Dokumente zum Vorgang
-      if($formvars['andere']){
-	      $ret=$this->getAnzAndere($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
-	      if ($ret[0]) { return $ret; }
-	      $FFR[$i]['andere']=$ret[1];
-      }            
+      # Abfrage der Anzahl der verschiedenen Dokumentarten zum Vorgang      
+			$anz_arten = $this->getAnzArten($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
+			foreach($anz_arten as $anz_art){
+				$FFR[$i][$anz_art['abkuerzung']] = $anz_art['anz'];
+			}
       
     	# Abfrage der Dateinamen im Vorgang
       if($formvars['Datei']){
@@ -570,118 +545,27 @@ class antrag {
     return $ret;    
   }
     
-  function getAnzFFR($flurid,$nr,$secondary) {
+  function getAnzArten($flurid,$nr,$secondary) {
     $this->debug->write('<br>nachweis.php getAnzFFR Abfragen der Anzahl der Blätter eines FFR.',4);
     # Abfrag der Anzahl der zum Riss gehörenden Fortführungsrisse
-    $sql.="SELECT COUNT(n.id) AS anzffr FROM nachweisverwaltung.n_nachweise AS n";
-    if ($this->nr!='') {
-			$sql.=",nachweisverwaltung.n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
-    }
-    else {
-      $sql.=" WHERE (1=1)";
-    }
-    $sql.=" AND n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
+    $sql.="SELECT h.abkuerzung, CASE WHEN COUNT(n.id) = 0 THEN '-' ELSE COUNT(n.id)::text END AS anz FROM nachweisverwaltung.n_hauptdokumentarten h " ;
+		$sql.="LEFT JOIN nachweisverwaltung.n_nachweise AS n ON n.art = h.id AND n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
     if($secondary != '')$sql.=" AND n.".NACHWEIS_SECONDARY_ATTRIBUTE."='".$secondary."'";
-    $sql.=" AND n.art = '100'";
+    if ($this->nr!='') {
+			$sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2antraege AS n2a ON n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
+    }
+    $sql.=" GROUP BY h.id, h.abkuerzung";
+		$sql.=" ORDER BY h.id";
     $queryret=$this->database->execSQL($sql,4, 0);
     if ($queryret[0]) { $ret=$queryret; }
     else {
       $ret[0]=0;
-      $rs=pg_fetch_array($queryret[1]);
-      if ($rs["anzffr"]>0) {
-        $ret[1]=$rs["anzffr"];
-      }
-      else {
-        $ret[1]='-';
-      }
+      while($rs=pg_fetch_array($queryret[1])){
+				$anz_art[]=$rs;
+			}
     }
-    return $ret;
+    return $anz_art;
   }
-   
-  function getAnzKVZ($flurid,$nr,$secondary) {
-    $this->debug->write('<br>nachweis.php getAnzKVZ Abfragen der Anzahl der KVZ zum Riss.',4);
-    # Abfrag der Anzahl der zum Riss gehörenden Koordinatenverzeichnisse
-    $sql.="SELECT COUNT(n.id) AS anzkvz FROM nachweisverwaltung.n_nachweise AS n";
-    if ($this->nr!='') {
-      $sql.=",nachweisverwaltung.n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
-    }
-    else {
-      $sql.=" WHERE (1=1)";
-    }
-    $sql.=" AND n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
-    if($secondary != '')$sql.=" AND n.".NACHWEIS_SECONDARY_ATTRIBUTE."='".$secondary."'";
-    $sql.=" AND n.art = '010'";
-    $queryret=$this->database->execSQL($sql,4, 0);
-    if ($queryret[0]) { $ret=$queryret; }
-    else {
-      $ret[0]=0;
-      $rs=pg_fetch_array($queryret[1]);
-      if ($rs['anzkvz']>0) {
-        $ret[1]=$rs["anzkvz"];
-      }
-      else {
-        $ret[1]='-';
-      }
-    }
-    return $ret;
-  }
-  
-  function getAnzGN($flurid,$nr,$secondary) {
-    $this->debug->write('<br>nachweis.php getAnzGN Abfragen der Anzahl der Grenzniederschriften zum Riss.',4);
-    # Abfrage der Anzahl der zum Riss gehörenden Grenzniederschriften
-    $sql.="SELECT COUNT(n.id) AS anzgn FROM nachweisverwaltung.n_nachweise AS n";
-    if ($this->nr!='') {
-      $sql.=",nachweisverwaltung.n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
-    }
-    else {
-      $sql.=" WHERE (1=1)";
-    }
-    $sql.=" AND n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
-    if($secondary != '')$sql.=" AND n.".NACHWEIS_SECONDARY_ATTRIBUTE."='".$secondary."'";
-    $sql.=" AND n.art = '001'";
-    $queryret=$this->database->execSQL($sql,4, 0);
-    if ($queryret[0]) { $ret=$queryret; }
-    else {
-      $ret[0]=0;
-      $rs=pg_fetch_array($queryret[1]);
-      if ($rs['anzgn']>0) {
-        $ret[1]=$rs["anzgn"];
-      }
-      else {
-        $ret[1]='-';
-      }
-    }
-    return $ret;    
-  }
-  
-  function getAnzAndere($flurid,$nr,$secondary) {
-    $this->debug->write('<br>nachweis.php getAnzAn Abfragen der Anzahl der anderen Dokumente zum Riss.',4);
-    # Abfrage der Anzahl der zum Riss gehörenden Grenzniederschriften
-    $sql.="SELECT COUNT(n.id) AS anzan FROM nachweisverwaltung.n_nachweise AS n";
-    if ($this->nr!='') {
-      $sql.=",nachweisverwaltung.n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
-    }
-    else {
-      $sql.=" WHERE (1=1)";
-    }
-    $sql.=" AND n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
-    if($secondary != '')$sql.=" AND n.".NACHWEIS_SECONDARY_ATTRIBUTE."='".$secondary."'";
-    $sql.=" AND n.art = '111'";
-    $queryret=$this->database->execSQL($sql,4, 0);
-    if ($queryret[0]) { $ret=$queryret; }
-    else {
-      $ret[0]=0;
-      $rs=pg_fetch_array($queryret[1]);
-      if ($rs['anzan']>0) {
-        $ret[1]=$rs["anzan"];
-      }
-      else {
-        $ret[1]='-';
-      }
-    }
-    return $ret;    
-  }
-  
   
   function pruefe_antrag_eintragen($antr_nr,$VermStelle,$verm_art,$datum,$stelle_id) {
     #prüfen, ob die Antragsnummer korrekt eingegeben wurde!
