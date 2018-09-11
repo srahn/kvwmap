@@ -1,4 +1,4 @@
-﻿BEGIN;
+BEGIN;
 
 DROP TABLE IF EXISTS xplankonverter.mappingtable_gmlas_to_gml;
 CREATE TABLE xplankonverter.mappingtable_gmlas_to_gml AS

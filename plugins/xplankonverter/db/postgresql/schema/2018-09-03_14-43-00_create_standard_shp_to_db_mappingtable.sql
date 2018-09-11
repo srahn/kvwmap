@@ -1,4 +1,4 @@
-﻿BEGIN;
+BEGIN;
 
 DROP TABLE IF EXISTS xplankonverter.mappingtable_standard_shp_to_db;
 CREATE TABLE xplankonverter.mappingtable_standard_shp_to_db AS (
@@ -315,8 +315,7 @@ UPDATE
 SET
 	regel = shp_attribute || '::xplan_gml.' || data_type || ' AS ' || db_attribute
 WHERE
-	regel IS NULL
-
+	regel IS NULL;
 
 /*
 SELECT DISTINCT data_type FROM xplankonverter.mappingtable_standard_shp_to_db ORDER BY data_type

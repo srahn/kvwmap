@@ -55,10 +55,6 @@ class XP_Bereich extends PgObject {
 		pg_query($this->database->dbConn, $sql);
 	}
 
-	function destroy_associated_objekt_layers() {
-		
-	}
-
 	/*
 	* Löscht den Bereich und alles was dazugehört
 	* Löscht dazugehörige Regeln

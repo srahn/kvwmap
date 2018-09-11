@@ -20,7 +20,6 @@ include(PLUGINS . 'xplankonverter/model/shapefiles.php');
 include(PLUGINS . 'xplankonverter/model/validierung.php');
 include(PLUGINS . 'xplankonverter/model/validierungsergebnis.php');
 include(PLUGINS . 'xplankonverter/model/xplan.php');
-include(PLUGINS . 'xplankonverter/model/converter.php');
 include(PLUGINS . 'xplankonverter/model/extract_gml.php');
 include(PLUGINS . 'xplankonverter/model/extract_standard_shp.php');
 

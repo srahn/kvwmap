@@ -43,11 +43,12 @@ class Konvertierung extends PgObject {
 	function create($anzeige_name, $epsg_code, $input_epsg_code, $planart, $stelle_id, $user_id) {
 		$sql = "
 			INSERT INTO " . $this->schema . "." . $this->tableName . " (
-				bezeichnung, epsg, input_epsg, planart, stelle_id, user_id
+				bezeichnung, epsg, input_epsg, output_epsg, planart, stelle_id, user_id
 			) VALUES ( 
 				'" . $anzeige_name . "',
 				'" . $epsg_code . "'::xplankonverter.epsg_codes,
 				'" . $input_epsg_code . "'::xplankonverter.epsg_codes,
+				'" . $epsg_code . "'::xplankonverter.epsg_codes,
 				'" . $planart . "',
 				" . $stelle_id . ",
 				" . $user_id . "
@@ -537,15 +538,6 @@ class Konvertierung extends PgObject {
 		foreach($regeln AS $regel) {
 			$regel->konvertierung = $regel->get_konvertierung();
 			$regel->destroy();
-		}
-
-		# Lösche zugehörige Objekte (von XP_Objekt abgeleitet)
-		$bereiche = $this->plan->get_bereiche();
-		foreach($bereiche as $bereich) {
-			$bereich->destroy_associated_objekte();
-			# TODO Layer is not yet implemented, maybe dont find them through bereich
-			$bereich->destroy_associated_objekt_layers();
-			# TODO Should also delete all textabschnitte, texte, raster etc. ocne those are implemented
 		}
 
 		# Lösche zugehörige Postgres gmlas und shape schemas
