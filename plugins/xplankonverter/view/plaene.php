@@ -6,7 +6,7 @@
 	$(function () {
 		result = $('#eventsResult');
 		result.success = function(text) {
-//			message([{ type: 'notice', msg: text}], 1000, 500, '13%');
+			message([{ type: 'notice', msg: text}], 1000, 500, '13%');
 /*			result.text(text);
 			result.removeClass('alert-danger');
 			result.addClass('alert-success');*/
@@ -21,9 +21,9 @@
 		// event handler
 		$('#konvertierungen_table')
 		.one('load-success.bs.table', function (e, data) {
-			result.success('Tabelle erfolgreich geladen.');
+			result.success('Tabelle erfolgreich geladen');
 		})
-		.on('load-success.bs.table', function (e, data) {
+		.on('post-body.bs.table', function (e, data) {
 			$('.xpk-func-convert').click(
 				starteKonvertierung
 			);
@@ -38,6 +38,7 @@
 			);
 		})
 		.on('load-error.bs.table', function (e, status) {
+			console.log('loaderror');
 			result.error('Event: load-error.bs.table');
 		});
 		// more examples for register events on data tables: http://jsfiddle.net/wenyi/e3nk137y/36/
@@ -45,6 +46,7 @@
 
 	// functions
 	starteKonvertierung = function(e) {
+		e.preventDefault();
 		var konvertierung_id = $(e.target).parent().parent().attr('konvertierung_id');
 		document.getElementById('sperrspinner').style.display = 'block';
 		result.success('Starte Konvertierung und Validierung für Konvertierung-Id: ' + konvertierung_id);
@@ -102,6 +104,7 @@
 	};
 
 	starteXplanGmlGenerierung = function(e) {
+		e.preventDefault();
 		var konvertierung_id = $(e.target).parent().parent().attr('konvertierung_id');
 
 		// onclick="document.getElementById(\'sperrspinner\').style.display = \'block\';"
@@ -152,6 +155,7 @@
 	};
 
 	starteInspireGmlGenerierung = function(e) {
+		e.preventDefault();
 		var konvertierung_id = $(e.target).parent().parent().attr('konvertierung_id');
 
 		//onclick="document.getElementById(\'sperrspinner\').style.display = \'block\';"
@@ -201,6 +205,29 @@
 		});
 	};
 
+	loescheKonvertierung = function(e) {
+		e.preventDefault();
+		var plan_name = $(e.target).parent().parent().attr('plan_name'),
+				plan_oid = $(e.target).parent().parent().attr('plan_oid'),
+				r = confirm("Soll der Plan " + plan_oid + " wirklich gelöscht werden?");
+
+		if (r == true) {
+			$(this).closest('tr').remove();
+			result.text('Lösche Plan: ' + plan_name);
+			$.ajax({
+				url: 'index.php',
+				data: {
+					go: 'xplankonverter_konvertierung_loeschen',
+					planart: '<?php echo $this->formvars['planart']; ?>',
+					plan_oid: plan_oid
+				},
+				success: function(response) {
+					message([response]);
+				}
+			});
+		}
+	};
+
 	// formatter functions
 	function konvertierungGemeindeFormatter(value, row) {
 		var gemeinden = JSON.parse(value);
@@ -221,9 +248,9 @@
 		var funcIsAllowed,
 				funcIsInProgress,
 				disableFrag = ' disabled" onclick="return false',
-				output = '<span class="btn-group" role="group" konvertierung_oid="' + row.konvertierungen_oid + '" konvertierung_id="' + value + '">';
+				output = '<span class="btn-group" role="group" plan_oid="' + row.<?php echo $this->plan_oid_name; ?> + '" plan_name="' + row.anzeigename + '">';
 		output += '<a title="Plan bearbeiten" class="btn btn-link btn-xs xpk-func-btn" href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<?php echo $this->plan_layer_id ?>&operator_plan_gml_id==&value_plan_gml_id=' + row.plan_gml_id + '"><i class="btn-link fa fa-lg fa-pencil"></i></a>';
-		output += '<a title="Konvertierung l&ouml;schen" class="btn btn-link btn-xs xpk-func-btn xpk-func-del-konvertierung" href="#"><i class="btn-link fa fa-lg fa-trash"></i></a>';
+		output += '<a id="delButton' + value + '" title="Konvertierung l&ouml;schen" class="btn btn-link btn-xs xpk-func-btn xpk-func-del-konvertierung" href="#"><i class="btn-link fa fa-lg fa-trash"></i></a>';
 		output += '</span>';
 		return output;
 	}
@@ -232,7 +259,7 @@
 		var funcIsAllowed,
 				funcIsInProgress,
 				disableFrag = ' disabled" onclick="return false',
-				output = '<span class="btn-group" role="group" konvertierung_oid="' + row.konvertierungen_oid + '" konvertierung_id="' + value + '">';
+				output = '<span class="btn-group" role="group" plan_oid="' + row.<?php echo $this->plan_oid_name; ?> + '" konvertierung_id="' + value + '">';
 
 		// enabled by status of konvertierung
 		// Shapefile upload
@@ -283,7 +310,7 @@
 	function konvertierungDownloadsFormatter(value, row) {
 		var funcIsAllowed, funcIsInProgress,
 			disableFrag = ' disabled" onclick="return false';
-		output = '<span class="btn-group" role="group" konvertierung_oid="' + row.konvertierungen_oid + '" konvertierung_id="' + value + '">';
+		output = '<span class="btn-group" role="group" plan_oid="' + row.<?php echo $this->plan_oid_name; ?> + '" konvertierung_id="' + value + '">';
 
 		// hochgeladene Shapes
 		funcIsAllowed = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['IN_ERSTELLUNG'     ]; ?>"
@@ -325,30 +352,10 @@
 		return output;
 	}
 
-	loescheKonvertierung = function(e) {
-		var konvertierung_id = $(e.target).parent().parent().attr('konvertierung_id'),
-				konvertierung_oid = $(e.target).parent().parent().attr('konvertierung_oid');
-		var r = confirm("Soll die Konvertierung mit der Id " + konvertierung_id + " wirklich gelöscht werden?")
-		if(r == true) {
-			$(this).closest('tr').remove();
-			result.text('Lösche Konvertierung für Id: ' + konvertierung_id);
-			$.ajax({
-				url: 'index.php?checkbox_names_<?php echo $this->plan_layer_id ?>=check;konvertierungen;konvertierungen;' + konvertierung_oid + '&check;konvertierungen;konvertierungen;' + konvertierung_oid + '=on',
-				data: {
-					go: 'xplankonverter_konvertierung_loeschen',
-					chosen_layer_id: <?php echo $this->plan_layer_id ?>
-				},
-				success: function(response) {
-					result.text(response.msg);
-				}
-			});
-		}
-	};
-
 </script>
 <h2><?php echo $this->title; ?></h2>
 <button type="button" id="new_konvertierung" name="go_plus" onclick="location.href='index.php?go=neuer_Layer_Datensatz&selected_layer_id=<?php echo $this->plan_layer_id ?>'">neu</button>
-<button type="button" id="new_konvertierung_from_gml" name="go_plus" onclick="location.href='index.php?go=xplankonverter_upload_xplan_gml'">Neuer Plan aus XPlanGML</button>
+<button type="button" id="new_konvertierung_from_gml" name="go_plus" onclick="location.href='index.php?go=xplankonverter_upload_xplan_gml&planart=<?php echo $this->formvars['planart'] ?>'">Neuer Plan aus XPlanGML</button>
 <!--div class="alert alert-success" style="white-space: pre-wrap" id="eventsResult">
 		Here is the result of event.
 </div//-->
@@ -368,7 +375,7 @@
 	data-show-columns="true"
 	data-query-params="go=Layer-Suche_Suchen&selected_layer_id=<?php echo $this->plan_layer_id ?>&anzahl=10000&mime_type=formatter&format=json"
 	data-pagination="true"
-	data-page-size="25"
+	data-page-size="100"
 	data-show-export="false"
 	data-export_types=['json', 'xml', 'csv', 'txt', 'sql', 'excel']
 	data-toggle="table"
@@ -441,7 +448,7 @@
 				class="col-md-2"
 			>Downloads&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
 			<th
-				data-field="konvertierung_id"
+				data-field="plan_gml_id"
 				data-visible="true"
 				data-formatter="konvertierungEditFunctionsFormatter"
 				data-switchable="false"

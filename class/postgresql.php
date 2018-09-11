@@ -253,13 +253,7 @@ FROM
 			if ($this->schema != ''){
 				$sql = "SET search_path = " . $this->schema . ", public;" . $sql;
 			}
-			if ($suppress_error_msg) {
-				$query = @pg_query($this->dbConn, $sql);
-			}
-			else {
-				$query = @pg_query($this->dbConn, $sql);
-			}
-
+			$query = @pg_query($this->dbConn, $sql);
 			//$query=0;
 			if ($query == 0) {
 				$ret[0] = 1;

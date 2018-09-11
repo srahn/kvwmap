@@ -138,34 +138,41 @@ class Validierung extends PgObject {
 	* Wenn die Geometrie dann auch änderbar sein soll, müssten die Layerrechte für den shape Layer
 	* noch gesetzt werden. Aber dann immer automatisch beim Anlegen des Layers.
 	*/
-	function geometrie_vorhanden($sql, $regel_id) {
+	function geometrie_vorhanden($sql, $regel_id, $sourcetype = 'shape') {
 		$this->debug->show('<br>validate ob geometrie_vorhanden mit Ausgangs-sql: ' . $sql, Validierung::$write_debug);
 		$geometrie_vorhanden = true;
 		$sql = stristr($sql, 'select');
 		$this->debug->show('<br>sql von select an: ' . $sql, Validierung::$write_debug);
 
+		# Default Shape
+		# ogc_fid is pkey serial (an alternative oid would have to be added to each table after loading it)
+		# (position as the default geometry of all objects inheriting from xp_objekt in gmlas
+		$gid_or_oid = ($sourcetype == 'gmlas') ? 'ogc_fid' : 'gid';
+		$geometry_col = ($sourcetype == 'gmlas') ? 'position' : 'the_geom';
+		$search_path  = ($sourcetype == 'gmlas') ? "xplan_gmlas_{$this->gui->user->id}" : "xplan_shapes_{$this_konvertierung_id}";
+
 		# Frage gid mit ab
 		$sql = str_ireplace(
 			'select',
-			"select gid,",
+			"select " . $gid_or_oid . ",",
 			$sql
 		);
-		$this->debug->show('<br>sql mit gid: ' . $sql, Validierung::$write_debug);
+		$this->debug->show('<br>sql mit ' . $gid_or_oid . ': ' . $sql, Validierung::$write_debug);
 
 		# Hänge Where Klauses is null an
 		if (strpos(strtolower($sql), 'where') === false) {
-			$sql .= ' where the_geom IS NULL';
+			$sql .= ' where ' . $geometry_col .' IS NULL';
 		}
 		else {
 			$sql = str_ireplace(
 				'where',
-				"WHERE the_geom IS NULL AND ",
+				"WHERE " . $geometry_col . " IS NULL AND ",
 				$sql
 			);
 		}
 		$this->debug->show('<br>sql mit where Klausel: ' . $sql, Validierung::$write_debug);
 
-		$sql = "SET search_path=xplan_shapes_{$this->konvertierung_id}, public; " . $sql;
+		$sql = "SET search_path=" . $search_path . ", public; " . $sql;
 
 		$this->debug->show('<br>Validiere ob geometrie_vorhanden mit sql:<br>' . $sql, Validierung::$write_debug);
 
@@ -199,6 +206,9 @@ class Validierung extends PgObject {
 	function geometrie_isvalid($regel, $konvertierung) {
 		$this->debug->show('<br>Validate geom_isvalid:', Validierung::$write_debug);
 		$all_geom_isvalid = true;
+		$sourcetype = $regel->is_source_shape_or_gmlas($regel);
+		# shape or gmlas?
+		$geometry_col = ($sourcetype == 'gmlas') ? 'position' : 'the_geom';
 
 		$sql = $regel->get_convert_sql($konvertierung->get('id'));
 
@@ -206,25 +216,39 @@ class Validierung extends PgObject {
 		$sql = stristr($sql, 'select');
 		$this->debug->show('<br>sql von select an: ' . $sql, Validierung::$write_debug);
 
-		# Selektiere gid zur eindeutigen Identifizierung des Datensatzes und st_isvalidreason
-		$sql = str_ireplace(
-			'select',
-			"select
-				gid,
-				st_isvalidreason(the_geom) validreason,
-			",
-			$sql
-		);
-		$this->debug->show('<br>sql mit gid und is_validreason: ' . $sql, Validierung::$write_debug);
+		if($sourcetype != 'gmlas') {
+			# Selektiere gid zur eindeutigen Identifizierung des Datensatzes und st_isvalidreason
+			$sql = str_ireplace(
+				'select',
+				"select
+					gid,
+					st_isvalidreason(" . $geometry_col . ") validreason,
+				",
+				$sql
+			);
+			$this->debug->show('<br>sql mit gid und is_validreason: ' . $sql, Validierung::$write_debug);
 
-		# where klausel für rp_plan hinzufügen
-		$sql = str_ireplace(
-			'where',
-			"where
-				NOT st_isvalid(the_geom) AND (
-			",
-			$sql
+		} else {
+			# Selektiere gid zur eindeutigen Identifizierung des Datensatzes und st_isvalidreason
+			$sql = str_ireplace(
+				'select',
+				"select
+					st_isvalidreason(" . $geometry_col .") validreason,
+				",
+				$sql
+			);
+			$this->debug->show('<br>sql mit is_validreason: ' . $sql, Validierung::$write_debug);
+		}
+
+	# where klausel für plan hinzufügen
+	$sql = str_ireplace(
+		'where',
+		"where
+			NOT st_isvalid(" . $geometry_col . ") AND (
+		",
+		$sql
 		);
+
 		$this->debug->show('<br>sql mit where st_isvalid: ' . $sql, Validierung::$write_debug);
 
 #		$sql = "SET search_path=xplan_shapes_" . $konvertierung->get('id') . ", public; " . substr($sql, 0, stripos($sql, 'returning'));
@@ -301,43 +325,63 @@ class Validierung extends PgObject {
 		$all_within_plan = true;
 
 		$sql = $regel->get_convert_sql($konvertierung->get('id'));
+		$sourcetype = $regel->is_source_shape_or_gmlas($regel);
+		# Default Shape (the_geom), gmlas (position)
+		$geometry_col = ($sourcetype == 'gmlas') ? 'position' : 'the_geom';
+
+		$plantype = $konvertierung->get_plan()->tableName;
 
 		# Extrahiere alles ab select
 		$sql = stristr($sql, 'select');
 		$this->debug->show('<br>sql von select an: ' . $sql, Validierung::$write_debug);
+		
 
 		# Selektiere gid zur eindeutigen Identifizierung des Datensatzes und within und distance
-		$sql = str_ireplace(
-			'select',
-			"select
-				gid,
-				NOT st_within(the_geom, rp_plan.raeumlichergeltungsbereich) AS ausserhalb,
-				st_distance(ST_Transform(the_geom, 25832), rp_plan.raeumlichergeltungsbereich)/1000 AS distance,
-			",
-			$sql
-		);
-		$this->debug->show('<br>sql mit gid, within und distance: ' . $sql, Validierung::$write_debug);
+		#if for gid (shape) or no gid (gmlas)
+		# changed to 25833 as otherwise thered be mixed geometry errors
+		if($sourcetype != 'gmlas') {
+			$sql = str_ireplace(
+				'select',
+				"select
+					gid,
+					NOT st_within(" . $geometry_col . ", " . $plantype . ".raeumlichergeltungsbereich) AS ausserhalb,
+					st_distance(ST_Transform(" . $geometry_col . ", 25833), " . $plantype . ".raeumlichergeltungsbereich)/1000 AS distance,
+				",
+				$sql
+			);
+			$this->debug->show('<br>sql mit gid, within und distance: ' . $sql, Validierung::$write_debug);
+		} else {
+			$sql = str_ireplace(
+				'select',
+				"select
+					NOT st_within(" . $geometry_col . ", " . $plantype . ".raeumlichergeltungsbereich) AS ausserhalb,
+					st_distance(ST_Transform(" . $geometry_col . ", 25833), " . $plantype . ".raeumlichergeltungsbereich)/1000 AS distance,
+				",
+				$sql
+			);
+			$this->debug->show('<br>sql mit gid, within und distance: ' . $sql, Validierung::$write_debug);
+		}
 
-		# tabelle rp_plan hinzufügen
+		# tabelle " . $plantype . " hinzufügen
 		$sql = str_ireplace(
 			'from',
 			"from
-				xplan_gml.rp_plan rp_plan,
+				xplan_gml." . $plantype . " " . $plantype . ",
 			",
 			$sql
 		);
-		$this->debug->show('<br>sql mit rp_plan Tabelle: ' . $sql, Validierung::$write_debug);
+		$this->debug->show('<br>sql mit " . $plantype . " Tabelle: ' . $sql, Validierung::$write_debug);
 
-		# where klausel für rp_plan hinzufügen
+		# where klausel für plan hinzufügen
 		$sql = str_ireplace(
 			'where',
 			"where
-				rp_plan.konvertierung_id = " . $konvertierung->get('id') . " AND 
-				NOT st_within(the_geom, raeumlichergeltungsbereich) AND (
+				" . $plantype . ".konvertierung_id = " . $konvertierung->get('id') . " AND 
+				NOT st_within(" . $geometry_col . ", raeumlichergeltungsbereich) AND (
 			",
 			$sql
 		);
-		$this->debug->show('<br>sql mit where Klausel für rp_plan: ' . $sql, Validierung::$write_debug);
+		$this->debug->show('<br>sql mit where Klausel für ' . $plantype . ': ' . $sql, Validierung::$write_debug);
 
 		#$sql = "SET search_path=xplan_shapes_" . $konvertierung->get('id') . ", public; " . 
 		$sql = substr($sql, 0, stripos($sql, 'returning')) . ')';
@@ -369,16 +413,30 @@ class Validierung extends PgObject {
 				if ($row['ausserhalb'] == 't') {
 					$this->debug->show('geometrie mit gid: ' . $row['gid'] . ' ist außerhalb vom Planbereich', Validierung::$write_debug);
 					$validierungsergebnis = new Validierungsergebnis($this->gui);
-					$validierungsergebnis->create(
-						array(
-							'konvertierung_id' => $konvertierung->get('id'),
-							'validierung_id' => $this->get('id'),
-							'status' => ($row['distance'] > 100 ? 'Fehler' : 'Warnung'),
-							'regel_id' => $regel->get('id'),
-							'shape_gid' => $row['gid'],
-							'msg' => 'Objekt mit gid=' . $row['gid'] . ' ist außerhalb des räumlichen Geltungsbereiches des Planes.' . ($row['distance'] > 100 ? ' Das Objekt ist mehr als 100 km entfernt.' : '')
-						)
-					);
+					if($sourcetype != 'gmlas') {
+						# default, e.g. Shape
+						$validierungsergebnis->create(
+							array(
+								'konvertierung_id' => $konvertierung->get('id'),
+								'validierung_id' => $this->get('id'),
+								'status' => ($row['distance'] > 100 ? 'Fehler' : 'Warnung'),
+								'regel_id' => $regel->get('id'),
+								'shape_gid' => $row['gid'],
+								'msg' => 'Objekt mit gid=' . $row['gid'] . ' ist außerhalb des räumlichen Geltungsbereiches des Planes.' . ($row['distance'] > 100 ? ' Das Objekt ist mehr als 100 km entfernt.' : '')
+							)
+						);
+					} else {
+						#GMLAS
+						$validierungsergebnis->create(
+							array(
+								'konvertierung_id' => $konvertierung->get('id'),
+								'validierung_id' => $this->get('id'),
+								'status' => ($row['distance'] > 100 ? 'Fehler' : 'Warnung'),
+								'regel_id' => $regel->get('id'),
+								'msg' => 'Objekt ist außerhalb des räumlichen Geltungsbereiches des Planes.' . ($row['distance'] > 100 ? ' Das Objekt ist mehr als 100 km entfernt.' : '')
+							)
+						);
+					}
 					$all_within_plan = false;
 				}
 			}

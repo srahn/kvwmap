@@ -14,8 +14,12 @@
 			case ($fired == 'AFTER' AND $event == 'INSERT') : {
 				#echo 'AFTER INSERT';
 				$konvertierung = Konvertierung::find_by_id($this, 'oid', $oid);
-				$konvertierung->create_layer_group('GML');
-				$konvertierung->create_directories();
+				# layer_group wird erstellt, wenn diese noch nicht existiert (wird derzeit nicht mehr gelöscht)
+				$layer_group_id = $this->get(strtolower($layer_type) . '_layer_group_id');
+				if (empty($layer_group_id)) {
+					$konvertierung->create_layer_group('GML');
+					$konvertierung->create_directories();
+				}
 			} break;
 
 			case ($fired == 'INSTEAD' AND $event == 'DELETE') : {
@@ -65,15 +69,19 @@
 		switch ($layer['Layer_ID']) {
 			case XPLANKONVERTER_BP_PLAENE_LAYER_ID : {
 				$planart = 'BP-Plan';
+				$bereichtable = 'bp_bereich';
 			} break;
 			case XPLANKONVERTER_FP_PLAENE_LAYER_ID : {
 				$planart = 'FP-Plan';
+				$bereichtable = 'fp_bereich';
 			} break;
 			case XPLANKONVERTER_SO_PLAENE_LAYER_ID : {
 				$planart = 'SO-Plan';
+				$bereichtable = 'so_bereich';
 			} break;
 			case XPLANKONVERTER_RP_PLAENE_LAYER_ID : {
 				$planart = 'RP-Plan';
+				$bereichtable = 'rp_bereich';
 			} break;
 		}
 
@@ -100,13 +108,21 @@
 				$konvertierung = $konvertierung->find_by_id($this, 'id', $konvertierung_id);
 				$this->debug->show('Trigger ' . $fired . ' ' . $event . ' konvertierung planart: ' . $konvertierung->get('planart') . ' plan planart: ' . $konvertierung->plan->get('planart'), false);
 				$konvertierung->set_status();
+
+				# Creates Bereiche for each Plan loaded with GMLAS
+				$gml_extractor = new Gml_extractor($this->pgdatabase, 'placeholder', 'xplan_gmlas_' . $this->user->id);
+				$gml_extractor->insert_into_bereich($bereichtable, $konvertierung_id, $this->user->id);
+				# Inserts regeln for each possible class loaded with GMLAS
+				$gml_extractor->insert_all_regeln_into_db($konvertierung_id, $this->Stelle->id);
 			} break;
 
-			case ($fired == 'AFTER' AND $event == 'DELETE') : {
-				#echo '<br>Führe ' . $fired . ' ' . $event . ' in handle_rp_plan Funktion aus.';
+			case ($fired == 'INSTEAD' AND $event == 'DELETE') : {
+				#echo '<br>Führe ' . $fired . ' ' . $event . ' in handle_xp_plan Funktion aus.';
+				# Delete Konvertierung and all pending objects instead of deleting only plan
 				$konvertierung_id = $old_dataset['konvertierung_id'];
+				#echo '<p>Lösche Konvertierung mit Id: ' . $konvertierung_id;
 				$konvertierung = Konvertierung::find_by_id($this, 'id', $konvertierung_id);
-				$konvertierung->set_status();
+				$konvertierung->destroy();
 			} break;
 
 			default : {

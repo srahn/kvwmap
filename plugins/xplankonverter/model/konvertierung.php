@@ -29,8 +29,9 @@ class Konvertierung extends PgObject {
 		$this->PgObject($gui, Konvertierung::$schema, Konvertierung::$tableName);
 	}
 
-	public static	function find_by_id($gui, $by, $id) {
+	public static	function find_by_id($gui, $by, $id, $select = '*') {
 		$konvertierung = new Konvertierung($gui);
+		$konvertierung->select = $select;
 		$konvertierung->find_by($by, $id);
 		$konvertierung->debug->show('Found Konvertierung with planart: ' . $konvertierung->get('planart'), Konvertierung::$write_debug);
 		if ($konvertierung->get('planart') != '') {
@@ -270,7 +271,7 @@ class Konvertierung extends PgObject {
 
 	function get_plan() {
 		if (!$this->plan) {
-			$this->debug->show('get_plan with planart: ' . $this->get('planart'), Konvertierung::$write_debug);
+			$this->debug->show('get_plan with planart: ' . $this->get('planart') . ' for konvertierung: ' . $this->get('id'), Konvertierung::$write_debug);
 			$plan = new XP_Plan($this->gui, $this->get('planart'));
 			$plan = $plan->find_where('konvertierung_id = ' . $this->get('id'));
 			$this->debug->show('found ' . count($plan) . ' Pläne', Konvertierung::$write_debug);
@@ -382,9 +383,20 @@ class Konvertierung extends PgObject {
 		$layer_group_id = $this->get(strtolower($layer_type) . '_layer_group_id');
 		if (empty($layer_group_id)) {
 			$layerGroup = new MyObject($this->gui, 'u_groups');
-			$layerGroup->create(array(
-				'Gruppenname' => $this->get('bezeichnung') . ' ' . $layer_type
-			));
+			if ($layer_type == 'GML') {
+				$layerGroup = $layerGroup->find_by('Gruppenname', 'XPlanung');
+				/*
+					ToDo create also a new group if no exists allready
+				$layerGroup->create(array(
+					'Gruppenname' => 'XPlanung'
+				));
+				*/
+			}
+			else {
+				$layerGroup->create(array(
+					'Gruppenname' => $this->get('bezeichnung') . ' ' . $layer_type
+				));
+			}
 			$this->set(strtolower($layer_type) . '_layer_group_id', $layerGroup->get('id'));
 			$this->update();
 		}
@@ -477,7 +489,9 @@ class Konvertierung extends PgObject {
 					else {
 						$result = $regel->convert($this);
 						if (!empty($result)) {
-							$regel->rewrite_gml_ids($result);
+							if($regel->is_source_shape_or_gmlas($regel) != 'gmlas') {
+								$regel->rewrite_gml_ids($result);
+							}
 						}
 					}
 				}
@@ -525,26 +539,39 @@ class Konvertierung extends PgObject {
 			$regel->destroy();
 		}
 
+		# Lösche zugehörige Objekte (von XP_Objekt abgeleitet)
+		$bereiche = $this->plan->get_bereiche();
+		foreach($bereiche as $bereich) {
+			$bereich->destroy_associated_objekte();
+			# TODO Layer is not yet implemented, maybe dont find them through bereich
+			$bereich->destroy_associated_objekt_layers();
+			# TODO Should also delete all textabschnitte, texte, raster etc. ocne those are implemented
+		}
+
+		# Lösche zugehörige Postgres gmlas und shape schemas
+		$this->destroy_gmlas_and_shape_schemas();
+		# TODO Lösche Shape Layer + Gruppe
+
 		# Lösche Plan der Konvertierung
 		if ($this->plan) {
 			$msg .= "\n " . $this->plan->umlName . ' ' . $this->plan->get('name') . ' gelöscht.';
 			$this->plan->destroy();
 		}
 
-		# Lösche GML-Layer Gruppe
-		$this->delete_layer_group('GML');
-
-		# Lösche Shapes
-		#$shapeFile->deleteDataTable();
-		#$shapeFile->delete();
-
-		# Lösche Shape Layer Gruppe
-
 		# Lösche Konvertierung
 		$this->delete();
+		$this->debug->show($msg, Konvertierung::$write_debug);
 	}
 
+	function destroy_gmlas_and_shape_schemas() {
+		# Destroy the xplan_shapes_ + $konvertierung_id if it exists
+		# Destroy the xplan_gmlas: + $user_id schema if it exists
+		$sql = "
+			DROP SCHEMA IF EXISTS xplan_shapes_" .  $this->get('id') . " CASCADE;
+			DROP SCHEMA IF EXISTS xplan_gmlas_" .  $this->gui->user->id . " CASCADE;
+		";
+		pg_query($this->database->dbConn, $sql);
+	}
 
 }
-
 ?>

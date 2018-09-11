@@ -42,6 +42,24 @@ class XP_Bereich extends PgObject {
 	}
 
 	/*
+	* Löscht alle dem Bereich zugehörigen Objekte
+	*/
+	function destroy_associated_objekte() {
+		$sql = "
+			DELETE FROM
+				xplan_gml.xp_objekt
+			WHERE
+				gehoertzubereich = '" . $this->get('gml_id') .
+			"';";
+			echo $sql;
+		pg_query($this->database->dbConn, $sql);
+	}
+
+	function destroy_associated_objekt_layers() {
+		
+	}
+
+	/*
 	* Löscht den Bereich und alles was dazugehört
 	* Löscht dazugehörige Regeln
 	*/
@@ -51,6 +69,7 @@ class XP_Bereich extends PgObject {
 			$regel->konvertierung = $regel->get_konvertierung();
 			$regel->destroy();
 		}
+		$this->destroy_associated_objekte();
 		$this->delete();
 	}
 

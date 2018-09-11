@@ -53,7 +53,7 @@ class Converter {
   }
 
   function findRPPlanByKonvertierung($konvertierung) {
-    $sql = "SELECT gml_id FROM gml_classes.rp_plan WHERE konvertierung_id == " . $konvertierung->get('id');
+    $sql = "SELECT gml_id FROM gml_classes.xp_plan WHERE konvertierung_id == " . $konvertierung->get('id');
     $result = pg_query($this->contentDb->dbConn, $sql);
     return pg_fetch_assoc($result)['gml_id'];
   }
@@ -83,20 +83,20 @@ class Converter {
     # Regeln der Konvertierung abfragen
     #Wählt alle Regeln aus, die entweder eine Konvertierungsid besitzen oder 
     #ansonsten Konvertierung nach Plan abfragen
-    # $Konvertierung_id entspricht Spalte konvertierung_id in gml_classes.rp_plan
-    # gml_id in gml_classes.rp_plan entspricht gehoertzuplan in gml_classes.rp_bereich
-    # gml_id in rp_bereich entspricht bereich_gml_id in xplankonverter.regeln
+    # $Konvertierung_id entspricht Spalte konvertierung_id in gml_classes.xp_plan
+    # gml_id in gml_classes.xp_plan entspricht gehoertzuplan in gml_classes.xp_bereich
+    # gml_id in xp_bereich entspricht bereich_gml_id in xplankonverter.regeln
     $sql = "
       SELECT
         r.sql
       FROM
         xplankonverter.regeln r
       INNER JOIN
-        gml_classes.rp_bereich b
+        gml_classes.xp_bereich b
       ON 
         r.bereich_gml_id = b.gml_id
       INNER JOIN
-        gml_classes.rp_plan p 
+        gml_classes.xp_plan p 
       ON
         b.gehoertzuplan = p.gml_id
       WHERE
@@ -123,15 +123,15 @@ class Converter {
     # Selektiert die gml_ids aller Objekte mit der KonvertierungsId
     $sql ="
     SELECT
-      rp_objekt_gml_id
+      xp_objekt_gml_id
     FROM
-      gml_classes.rp_bereich2rp_objekt a
+      gml_classes.xp_bereich2xp_objekt a
     INNER JOIN
-      gml_classes.rp_bereich b
+      gml_classes.xp_bereich b
     ON 
-      a.rp_bereich_gml_id = b.gml_id
+      a.xp_bereich_gml_id = b.gml_id
     INNER JOIN
-      gml_classes.rp_plan p 
+      gml_classes.xp_plan p 
     ON
       b.gehoertzuplan = p.gml_id
     WHERE

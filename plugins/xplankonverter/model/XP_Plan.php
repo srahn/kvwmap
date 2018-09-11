@@ -103,10 +103,12 @@ class XP_Plan extends PgObject {
 	* Löscht die Bereiche
 	*/
 	function destroy() {
+		$this->debug->show('Objekt XP_Plan gml_id: ' . $this->get('gml_id') . ' destroy', false);
 		$bereiche = $this->get_bereiche();
 		foreach($bereiche AS $bereich) {
 			$bereich->destroy();
 		}
+		$this->delete();
 	}
 }
 ?>
