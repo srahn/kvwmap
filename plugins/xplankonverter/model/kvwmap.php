@@ -109,11 +109,13 @@
 				$this->debug->show('Trigger ' . $fired . ' ' . $event . ' konvertierung planart: ' . $konvertierung->get('planart') . ' plan planart: ' . $konvertierung->plan->get('planart'), false);
 				$konvertierung->set_status();
 
-				# Creates Bereiche for each Plan loaded with GMLAS
-				$gml_extractor = new Gml_extractor($this->pgdatabase, 'placeholder', 'xplan_gmlas_' . $this->user->id);
-				$gml_extractor->insert_into_bereich($bereichtable, $konvertierung_id, $this->user->id);
-				# Inserts regeln for each possible class loaded with GMLAS
-				$gml_extractor->insert_all_regeln_into_db($konvertierung_id, $this->Stelle->id);
+				if(!empty($this->formvars['layer_schemaname'])) {
+					# Creates Bereiche for each Plan loaded with GMLAS
+					$gml_extractor = new Gml_extractor($this->pgdatabase, 'placeholder', 'xplan_gmlas_' . $this->user->id);
+					$gml_extractor->insert_into_bereich($bereichtable, $konvertierung_id, $this->user->id);
+					# Inserts regeln for each possible class loaded with GMLAS
+					$gml_extractor->insert_all_regeln_into_db($konvertierung_id, $this->Stelle->id);
+				}
 			} break;
 
 			case ($fired == 'INSTEAD' AND $event == 'DELETE') : {

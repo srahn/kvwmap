@@ -296,10 +296,10 @@ class MyObject {
 		return $result;
 	}
 
-	public function validate() {
+	public function validate($on = '') {
 		$results = array();
 		foreach($this->validations AS $validation) {
-			$results[] = $this->validates($validation['attribute'], $validation['condition'], $validation['description'], $validation['options']);
+			$results[] = $this->validates($validation['attribute'], $validation['condition'], $validation['description'], $validation['option'], $on);
 		}
 
 		$messages = array();
@@ -311,7 +311,7 @@ class MyObject {
 		return $messages;
 	}
 
-	public function validates($key, $condition, $msg = '', $option = '') {
+	public function validates($key, $condition, $msg = '', $option = '', $on = '') {
 		$this->debug->show('MyObject validates key: ' . $key . ' condition: ' . $condition . ' msg: ' . $msg . ' option: ' . $option, MyObject::$write_debug);
 		switch ($condition) {
 
@@ -336,7 +336,7 @@ class MyObject {
 				break;
 
 			case 'unique' :
-				$result = ($this->get($key) == '' ? '' : $this->validate_unique($key));
+				$result = ($this->get($key) == '' ? '' : $this->validate_unique($key, $msg, $option, $on));
 				break;
 		}
 		$this->debug->show('MyObject validates result: ' . print_r($result, true), MyObject::$write_debug);
@@ -378,11 +378,14 @@ class MyObject {
 	* Prüft ob der Wert im Attribut key innerhalb der vorhandenen Datensätze schon vorkommt
 	* Wenn ja, ist die Validierung nicht bestanden
 	*/
-	function validate_unique($key, $msg = '') {
-		if ($msg == '') {
-			$msg = 'Der Wert ' . $this->get($key) . ' im Attribut ' . $key . ' existiert schon, und darf nur ein Mal vorkommen.';
+	function validate_unique($key, $msg = '', $option = '', $on = '') {
+		$msg = $msg . ' Der Wert ' . $this->get($key) . ' im Attribut ' . $key . ' existiert schon.';
+		if ($option == $on) {
+			return ($this->exists($key) ? $msg : '');
 		}
-		return ($this->exists($key) ? $msg : '');
+		else {
+			return ''; # nicht validieren
+		}
 	}
 
 	function validate_format($key, $msg, $format) {
