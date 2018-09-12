@@ -250,7 +250,6 @@ CREATE TABLE xplankonverter.mappingtable_standard_shp_to_db AS (
 		xplan_uml.uml_classes u ON (i.table_name = LOWER(u.name))
 	WHERE
 		i.column_name = g.t_column AND
-		table_catalog = 'kvwmapsp_dev' AND
 		column_name NOT IN ('geltungsbereich', 'raeumlichergeltungsbereich', 'position') AND
 		table_schema = 'xplan_gml' AND
 		(
@@ -316,55 +315,5 @@ SET
 	regel = shp_attribute || '::xplan_gml.' || data_type || ' AS ' || db_attribute
 WHERE
 	regel IS NULL;
-
-/*
-SELECT DISTINCT data_type FROM xplankonverter.mappingtable_standard_shp_to_db ORDER BY data_type
-SELECT * FROM xplankonverter.mappingtable_standard_shp_to_db WHERE data_type = 'thema'
-SELECT * FROM xplankonverter.mappingtable_gmlas_to_gml WHERE t_column = 'nummer'
-SELECT * FROM information_schema.columns WHERE column_name = 'nummer'
-
-SELECT DISTINCT s.db_attribute, s.shp_attribute, s.ambiguous_fields, g.t_data_type AS data_type
-FROM xplankonverter.mappingtable_standard_shp_to_db s
-LEFT JOIN xplankonverter.mappingtable_gmlas_to_gml g
-ON g.t_column = s.db_attribute
-ORDER BY db_attribute
-*/
-/*
-SELECT
-	i.table_name
-FROM
-	information_schema.tables i INNER JOIN xplan_uml.uml_classes u ON (i.table_name = LOWER(u.name))
-WHERE
-	i.table_schema = 'xplan_gml' AND
-	i.table_name NOT LIKE 'xp\_%' AND
-	i.table_name NOT LIKE 'lp\_%' AND
-	i.table_name NOT LIKE 'rp\_%' AND
-	i.table_name NOT LIKE '%\_plan' AND
-	i.table_name NOT LIKE '%\_bereich' AND
-	i.table_name NOT LIKE '%\_textabschnitt'
-ORDER BY i.table_name
-
-*/
-
-	
-/*
-
-
-SELECT *
-FROM
-	information_schema.columns
-WHERE
-	table_catalog = 'kvwmapsp_dev'
-AND
-	column_name NOT IN ('geltungsbereich', 'raeumlichergeltungsbereich', 'position')
-AND
-	table_schema = 'xplan_gml'
-LIMIT 1000
-
-
-SELECT DISTINCT db_attribute FROM xplankonverter.mappingtable_standard_shp_to_db
-
-SELECT DISTINCT t_column FROM xplankonverter.mappingtable_gmlas_to_gml g
-*/
 
 COMMIT;
