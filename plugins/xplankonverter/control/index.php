@@ -43,7 +43,7 @@ include(PLUGINS . 'xplankonverter/model/extract_standard_shp.php');
 * xplankonverter_regeleditor
 * xplankonverter_regeleditor_getshapeattributes
 * xplankonverter_regeleditor_getxplanattributes
-* xplankonverter_shapefiles_delete
+* xplankonverter_shapefile_loeschen
 * xplankonverter_shapefiles_index
 * xplankonverter_show_geltungsbereich_upload
 * xplankonverter_upload_geltungsbereich
@@ -314,28 +314,28 @@ switch ($go) {
 		$this->output();
 	} break;
 
-	case 'xplankonverter_shapefiles_delete' : {
-		if ($this->formvars['shapefile_id'] == '') {
-			$this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher ein Shape Datei ausgewählt wurde.';
-			$this->main = 'Hinweis.php';
+	case 'xplankonverter_shapefile_loeschen' : {
+		if ($this->formvars['shapefile_oid'] == '') {
+			$response = array(
+				'success' => false,
+				'type' => 'notice',
+				'msg' => 'Diese Seite kann nur aufgerufen werden wenn vorher ein Shape Datei ausgewählt wurde.'
+			);
 		}
 		else {
-			$shapefile = new Shapefile($this, 'xplankonverter', 'shapefiles');
-			$shapefile->find_by('id', $this->formvars['shapefile_id']);
-			if (isInStelleAllowed($this->Stelle, $shapefile->get('stelle_id'))) {
-				# Delete the layerdefinition in mysql (rolleneinstellungen, layer, classes, styles, etc.)
-				$shapefile->deleteLayer();
-				# Delete the postgis data table that hold the data of the shape file
-				$shapefile->deleteDataTable();
-				# Delete the uploaded shape files itself
-				$shapefile->deleteUploadFiles();
-				# Delete the record in postgres shapefile table (unregister for konverter)
-				$shapefile->delete();
-				$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
-				$this->main = '../../plugins/xplankonverter/view/shapefiles.php';
-			}
+			$key = 'check;shapefiles;shapefiles;' . $this->formvars['shapefile_oid'];
+			$this->formvars['checkbox_names_' . XPLANKONVERTER_SHAPEFILES_LAYER_ID] = $key;
+			$this->formvars[$key] = 'on';
+			$this->formvars['chosen_layer_id'] = XPLANKONVERTER_SHAPEFILES_LAYER_ID;
+			$success = $this->layer_Datensaetze_loeschen(false);
+			$response = array(
+				'success' => $success,
+				'type' => ($success ? 'notice' : 'error'),
+				'msg' => ($success ? 'Shape-Datei erfolgreich gelöscht. ' : $this->messages[0]['msg'])
+			);
 		}
-		$this->output();
+		header('Content-Type: application/json');
+		echo json_encode($response);
 	} break;
 
   case 'xplankonverter_konvertierung_status': {

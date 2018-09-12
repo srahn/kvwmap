@@ -50,6 +50,17 @@
 					$shapefile->update_geometry_srid();
 			} break;
 
+			case ($fired == 'BEFORE' AND $event == 'DELETE') : {
+				$this->debug->show('Führe ' . $fired . ' ' . $event . ' in handle_shapes Funktion aus.', false);
+				$shapefile = ShapeFile::find_by_id($this, 'oid', $oid);
+				# Delete the layerdefinition in mysql (rolleneinstellungen, layer, classes, styles, etc.)
+				$shapefile->deleteLayer();
+				# Delete the postgis data table that hold the data of the shape file
+				$shapefile->deleteDataTable();
+				# Delete the uploaded shape files
+				$shapefile->deleteUploadFiles();
+			} break;
+
 			default : {
 				$executed = false;
 			}
