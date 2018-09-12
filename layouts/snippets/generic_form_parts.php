@@ -130,20 +130,20 @@
 			$datapart .= '<input type="hidden" class="'.$field_class.'" title="'.$alias.'" name="'.$fieldname.'" id="'.$id.'" onchange="'.$onchange.'" value="'.htmlspecialchars($value).'">';
 			$type_attributes = $attributes['type_attributes'][$j];
 			$elements = json_decode($value);	# diese Funktion decodiert immer den kommpletten String
+			if($elements != NULL){
+				foreach($elements as $element => $elem_value){
+					if (is_array($elem_value) OR is_object($elem_value)) {
+						# ist ein Array oder Objekt (also entweder ein Array-Typ oder ein Datentyp) und wird zur Übertragung wieder encodiert
+						$elem_value = json_encode($elem_value);
+					}
+					$dataset2[$element] = $elem_value;
+				}
+			}
 			$tsize = 20;
 			$datapart .= '<table border="2" class="gle_datatype_table">';
 			$onchange2 = "buildJSONString('" . $id . "', false);";
 			for ($e = 0; $e < count($type_attributes['name']); $e++) {
-				if ($elements != NULL) {
-					$elem_value = current($elements);
-					next($elements);
-				}
-				if (is_array($elem_value) OR is_object($elem_value)) {
-					# ist ein Array oder Objekt (also entweder ein Array-Typ oder ein Datentyp) und wird zur Übertragung wieder encodiert
-					$elem_value = json_encode($elem_value);
-				}
 				if ($type_attributes['visible'][$e] != 0) {
-					$dataset2[$type_attributes['name'][$e]] = $elem_value;
 					$type_attributes['privileg'][$e] = $attributes['privileg'][$j];
 					if ($type_attributes['alias'][$e] == '') $type_attributes['alias'][$e] = $type_attributes['name'][$e];
 					switch ($type_attributes['labeling'][$e]) {
@@ -589,7 +589,7 @@
 					if ($explosion[3] == 'all_not_null' and $one_param_is_null) {
 						$show_link = false;
 					}
-
+					$datapart .= '<input class="'.$field_class.'" type="hidden" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 					if ($show_link) {
 						if($explosion[2] == 'embedded'){
 							$datapart .= '<a class="dynamicLink" href="javascript:if(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\').innerHTML != \'\'){clearsubform(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\');} else {ahah(\''.$href.'\', \'\', new Array(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'))}">';
