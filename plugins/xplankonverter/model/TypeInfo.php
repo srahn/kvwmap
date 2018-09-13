@@ -35,7 +35,8 @@ class TypeInfo {
             'is_array'   => $attribInfo[$lowercaseName]['is_array'] == 't',
             'stereotype' => $this->getStereotype($attribInfo[$lowercaseName]['type']),
             'sequence'   => $sequence,
-            'origin'     => $uml_attrib['origin']
+            'origin'     => $uml_attrib['origin'],
+						'uml_dtype'  => $uml_attrib['dtype']
         );
         $sequence++;
       }

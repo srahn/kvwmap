@@ -2,6 +2,8 @@
  # 2008-01-24 pkvvm
   include(LAYOUTPATH.'languages/SVG_Utilities_'.$this->user->rolle->language.'.php');
  ?>
+
+<script type="text/javascript" src="funktionen/helmert_trafo.js"></script>
  
 <script language="JavaScript">
 
@@ -15,6 +17,10 @@
 	
 	function coord_input_submit(){
 		document.getElementById("svghelp").SVGcoord_input_submit();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+	}
+	
+	function add_ortho_point(world_x, world_y, local_x, local_y, deactivate){
+		document.getElementById("svghelp").SVGadd_ortho_point(world_x, world_y, local_x, local_y, deactivate);			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 	}	
 
 	var nbh = new Array();
@@ -74,6 +80,7 @@
 	$scriptdefinitions ='
 	var transformfunctions = false;
 	var coord_input_functions = false;
+	var ortho_point_functions = false;
 	var bufferfunctions = false;
 	var special_bufferfunctions = false;
 	var polygonfunctions = false;
@@ -104,6 +111,10 @@
 		str = top.currentform.pathy_second.value;
 		pathy_second = str.split(";");
 	}
+	if(top.currentform.ortho_point_vertices != undefined){
+		var ortho_point_vertices = new Array();
+	}
+	var helmert;
 	var textx = '.$text_x.';
 	var texty = '.$text_y.';
 	var newpath_undo = new Array();
@@ -512,7 +523,7 @@
 		return p;
 	}
  	
-	function startup(){		
+	function startup(){
 		if(window.addEventListener){
 			window.addEventListener(\'mousewheel\', mousewheelchange, false); // Chrome/Safari//IE9
   		window.addEventListener(\'DOMMouseScroll\', mousewheelchange, false);		//Firefox
@@ -582,6 +593,23 @@
 				if(top.currentform.firstline.value == "true" && top.currentform.last_doing.value == "draw_line"){
 					top.currentform.last_doing.value = "draw_second_line";
 				}
+			}
+		}
+		if(ortho_point_functions == true){
+			if(top.currentform.ortho_point_vertices.value != ""){
+				o_p_vertices = top.currentform.ortho_point_vertices.value.split("|");
+				top.currentform.last_button.value = "ortho_point1";
+				top.currentform.always_draw.checked = false;
+				ortho_point();';
+				for($o = 0; $o < count($this->formvars['ortho_point_x']); $o++){
+					if($o < 2){
+						$basicfunctions.= '
+						var a = o_p_vertices['.$o.'].split(" ");
+						add_ortho_point(a[0], a[1], '.$this->formvars['ortho_point_x'][$o].', '.$this->formvars['ortho_point_y'][$o].', false);';
+					}
+					else $basicfunctions.= 'add_ortho_point(null, null, '.$this->formvars['ortho_point_x'][$o].', '.$this->formvars['ortho_point_y'][$o].', false);';
+				}
+$basicfunctions.= '			
 			}
 		}
 		fachschale();
@@ -746,6 +774,10 @@
 			break;
 			case "move_geometry":
 				startMoveGeom(client_x, client_y);
+			break;
+			
+			case "ortho_point":
+				add_ortho_point(world_x, world_y, null, null, true);
 			break;
 
 			case "measure":
@@ -1060,6 +1092,153 @@ function mouseup(evt){
 	}
 
 	';
+	
+	$ortho_point_functions = '
+
+	ortho_point_functions = true;
+	
+	top.document.getElementById("svghelp").SVGadd_ortho_point = add_ortho_point;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+
+	function ortho_point(){
+		top.currentform.last_doing.value = "ortho_point";
+		if(top.currentform.ortho_point_vertices.value == "" || ortho_point_vertices.length == 0){
+			if(top.currentform.ortho_point_vertices.value == "")ortho_point_vertices = new Array();
+			helmert = new top.HelmertTransformation4Js(0, 0, 0, 0);
+			mittex = Math.round(minx+(maxx-minx)/2);
+			mittey = Math.round(miny+(maxy-miny)/2);
+			var Msg = top.$("#message_box");
+			Msg[0].style.left = "70%";
+			Msg.show();
+			content = \'<div style="height: 30px">Orthogonalpunktberechnung</div>\';
+			content+= \'<span class="px15">1. Setzen Sie in der Karte durch 2 Klicks die beiden Punkte für die Bezugslinie.</span>\';
+			content+= \'<div id="ortho_points"></div>\';
+			content+= \'<br><input id="ortho_point_button" type="button" style="display:none;margin-right: 10px" value="neuer Punkt" onclick="add_ortho_point(null, null, 0, 0, false)"><input type="button" value="Beenden" onclick="currentform.ortho_point_vertices.value = \\\'\\\';$(\\\'#message_box\\\').hide();">\';
+			Msg.html(content);
+		}
+	}
+	
+	function add_ortho_point(world_x, world_y, local_x, local_y, deactivate){
+	  var vertex;
+		var point_number = ortho_point_vertices.length;
+		var id = "ortho_point_vertex_"+point_number;
+		if(world_x == null && local_x != null){
+			world = get_world_ortho_point_coord(local_x, local_y);
+			world_x = world[0];
+			world_y = world[1];
+		}
+		if(local_x == null){
+			local_coord = get_local_ortho_point_coord(world_x, world_y, point_number);
+			local_x = local_coord[0];
+			local_y = local_coord[1];
+		}		
+		top.currentform.lastcoordx.value = world_x;
+		top.currentform.lastcoordy.value = world_y;
+		ortho_point_vertices.push(world_x+" "+world_y);
+		top.currentform.ortho_point_vertices.value = ortho_point_vertices.join("|");
+		vertex = create_catch_vertex(document.getElementById("kreis3"), id, world_x, world_y);
+		if(deactivate){
+			vertex.setAttribute("pointer-events", "none");		// Events bei diesem Vertex deaktivieren, sonst wird durch den Mouseup gleich noch einer angelegt
+			deactivated_foreign_vertex = id;
+		}
+		document.getElementById("ortho_point_vertices").appendChild(vertex);
+		point_div = top.document.createElement("div");
+		point_div.className = "ortho_point_div";
+		point_x = top.document.createElement("input");
+		point_y = top.document.createElement("input");
+		point_x.value = local_x;
+		point_y.value = local_y;
+		point_x.name="ortho_point_x[]";
+		point_y.name="ortho_point_y[]";
+		point_x.type = point_y.type = "text";
+		point_x.oninput = point_y.oninput = function(){change_ortho_point(point_number)};
+		point_x.autocomplete = point_y.autocomplete = "off";
+		point_div.appendChild(point_x);
+		point_div.appendChild(point_y);
+		top.document.getElementById("ortho_points").appendChild(point_div);
+		if(point_number == 1){
+			calculate_transformation_parameters();
+			top.document.getElementById("ortho_points").appendChild(top.document.createTextNode("2. Sie können nun weitere Punkte hinzufügen."));
+			top.document.getElementById("ortho_point_button").style.display = "";
+		}
+	}
+	
+	function change_ortho_point(point_number){
+		var id = "ortho_point_vertex_"+point_number;
+		var vertex = document.getElementById(id);
+		var local_x = top.document.getElementsByName("ortho_point_x[]")[point_number].value;
+		var local_y = top.document.getElementsByName("ortho_point_y[]")[point_number].value;
+		if(point_number > 1){																																			// ein Kleinpunkt wird veraendert
+			world = get_world_ortho_point_coord(local_x, local_y);
+			vertex.setAttribute("x", world[0]);
+			vertex.setAttribute("y", world[1]);
+			x = Math.round((world[0] - parseFloat(top.currentform.minx.value))/parseFloat(top.currentform.pixelsize.value));
+			y = Math.round((world[1] - top.currentform.miny.value)/parseFloat(top.currentform.pixelsize.value));
+			vertex.setAttribute("cx", x);
+			vertex.setAttribute("cy", y);
+			ortho_point_vertices[point_number] = world[0]+" "+world[1];
+		}
+		else{																																											// ein Bezugspunkt wird veraendert
+			calculate_transformation_parameters();
+			ops = top.document.getElementsByName("ortho_point_x[]");																// alle Kleinpunkte neu berechnen
+			for(var o = 0; o < ops.length; o++){
+				if(o > 1)change_ortho_point(o);
+			};
+		}
+		top.currentform.ortho_point_vertices.value = ortho_point_vertices.join("|");
+	}
+	
+	function get_world_ortho_point_coord(local_x, local_y){
+		return helmert.transformToWorld(local_y, local_x, 3);
+	}
+	
+	function get_local_ortho_point_coord(world_x, world_y, point_number){
+		var coord = new Array();
+		if(point_number == 0){																// lokale Koordinaten von Punkt a
+			coord[0] = 0;
+			coord[1] = 0;
+		}
+		else if(point_number == 1){														// lokale Koordinaten von Punkt b
+			var a = ortho_point_vertices[0].split(" ");					// Welt-Koordinaten von Punkt a
+			var m = new Array();
+			m[0] = world_x - a[0];
+			m[1] = world_y - a[1];
+			coord[0] = Math.sqrt((m[0]*m[0])+(m[1]*m[1]));
+			coord[1] = 0;
+		}
+		else{																									// lokale Koordinaten der Kleinpunkte
+			coord = helmert.transformToLocal(world_x, world_y, 3);
+		}
+		return coord;
+	}
+	
+	function calculate_transformation_parameters(){
+		var a = ortho_point_vertices[0].split(" ");			// Welt-Koordinaten von Punkt a
+		var b = ortho_point_vertices[1].split(" ");			// Welt-Koordinaten von Punkt b
+		var x0 = top.document.getElementsByName("ortho_point_x[]")[0].value;
+		var y0 = top.document.getElementsByName("ortho_point_y[]")[0].value;
+		var x1 = top.document.getElementsByName("ortho_point_x[]")[1].value;
+		var y1 = top.document.getElementsByName("ortho_point_y[]")[1].value;
+		helmert.calcTransformationParameter([{
+      "local" : {
+      	"y": y0,
+       	"x": x0
+      },
+      "world" : {
+       	"y": parseFloat(a[0]),
+       	"x": parseFloat(a[1])
+      }
+    }, {
+      "local" : {
+       	"y": y1,
+       	"x": x1
+      },
+      "world" : {
+     		"y": parseFloat(b[0]),
+       	"x": parseFloat(b[1])
+      }}]);
+	}
+	
+	';	
 
 	$pointfunctions = '
 
@@ -2876,19 +3055,24 @@ $vertex_catch_functions = '
 			top.currentform.vertices.value = "";
 			vertices = vertex_string.split("|");
 			for(i = 0; i < vertices.length-1; i++){
-				circle[i] = kreis1.cloneNode(true);
-				coords = vertices[i].split(" ");
-				circle[i].setAttribute("x", coords[0]);
-				circle[i].setAttribute("y", coords[1]);
-				coords[0] = Math.round((coords[0] - parseFloat(top.currentform.minx.value))/parseFloat(top.currentform.pixelsize.value));
-				coords[1] = Math.round((coords[1] - top.currentform.miny.value)/parseFloat(top.currentform.pixelsize.value));
-				circle[i].setAttribute("cx", coords[0]);
-				circle[i].setAttribute("cy", coords[1]);
-				circle[i].setAttribute("style","fill: #00DD00");
-				circle[i].setAttribute("id", "foreign_vertex_"+i);
+				coords = vertices[i].split(" ");				
+				circle[i] = create_catch_vertex(kreis1, "foreign_vertex_"+i, coords[0], coords[1]);
 				parent.appendChild(circle[i]);
 			}
 		}
+	}
+	
+	function create_catch_vertex(template, id, world_x, world_y){
+		var circle = template.cloneNode(true);
+		circle.setAttribute("x", world_x);
+		circle.setAttribute("y", world_y);
+		x = Math.round((world_x - parseFloat(top.currentform.minx.value))/parseFloat(top.currentform.pixelsize.value));
+		y = Math.round((world_y - top.currentform.miny.value)/parseFloat(top.currentform.pixelsize.value));
+		circle.setAttribute("cx", x);
+		circle.setAttribute("cy", y);
+		circle.setAttribute("style","fill: #00DD00");
+		circle.setAttribute("id", id);
+		return circle;
 	}
 
 	//------------------------------------------------------------
@@ -3132,12 +3316,10 @@ $measurefunctions = '
 				<circle id="startvertex" cx="-500" cy="-500" r="2" style="fill:blue;stroke:blue;stroke-width:2"/>
 			</g>
 			<rect id="canvas" cursor="crosshair" onmousedown="mousedown(evt);" onmousemove="mousemove(evt);" onmouseup="mouseup(evt);" width="100%" height="100%" opacity="0" visibility="visible"/>
-			<g id="in_between_vertices" transform="translate(0,'.$res_y.') scale(1,-1)">			
-			</g>
-			<g id="vertices" transform="translate(0,'.$res_y.') scale(1,-1)">			
-			</g>
-			<g id="foreignvertices" transform="translate(0,'.$res_y.') scale(1,-1)">
-			</g>
+			<g id="in_between_vertices" transform="translate(0,'.$res_y.') scale(1,-1)"></g>
+			<g id="vertices" transform="translate(0,'.$res_y.') scale(1,-1)"></g>
+			<g id="ortho_point_vertices" transform="translate(0,'.$res_y.') scale(1,-1)"></g>
+			<g id="foreignvertices" transform="translate(0,'.$res_y.') scale(1,-1)"></g>
 	  </g>
 	  <g id="templates">
 	  	<circle style="-moz-user-select: none;" id="kreis" cx="-5000" cy="-5000" r="7" opacity="0.3" onmouseover="activate_vertex(evt)" onmouseout="deactivate_vertex(evt)" onmousedown="select_vertex(evt)" onmousemove="move_vertex(evt)" onmouseup="end_vertex_move(evt)" />

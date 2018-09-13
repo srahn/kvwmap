@@ -8405,13 +8405,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$layer = $layers[0];
 		$mapdb = new db_mapObj($this->Stelle->id, $this->user->id);
 		$layerdb = $mapdb->getlayerdatabase($this->formvars['chosen_layer_id'], $this->Stelle->pgdbhost);
-
+		$results = array();
 		$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
-		for($i = 0; $i < count($checkbox_names); $i++){
+		for($i = 0; $i < count($checkbox_names); $i++) {
 			if($this->formvars[$checkbox_names[$i]] == 'on') {
 				$element = explode(';', $checkbox_names[$i]);     #  check;table_alias;table;oid
 
-				# Before Delete trigger
 				if (!empty($layer['trigger_function'])) {
 					$sql_old = "
 						SELECT
@@ -8421,38 +8420,52 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						WHERE
 							oid = {$element[3]}
 					";
-					#echo '<br>sql before delete: ' . $sql_old; #pk
-					$ret = $layerdb->execSQL($sql_old, 4, 1);
-					$old_dataset = ($ret[0] == 0 ? pg_fetch_assoc($ret[1]) : array());
-					$this->exec_trigger_function('BEFORE', 'DELETE', $layer, $element[3], $old_dataset);
-				}
+					#echo '<br>Sql before delete: ' . $sql_old; #pk
+					$ret = $layerdb->execSQL($sql_old, 4, 1, true);
+					if ($ret['success']) {
+						$old_dataset = pg_fetch_assoc($ret['query']);
 
-				if (!empty($layer['trigger_function'])) {
-					# Rufe Instead Delete trigger auf
-					#echo '<br>Rufe Instead Delete trigger auf.';
-					$trigger_result = $this->exec_trigger_function('INSTEAD', 'DELETE', $layer, $element[3]);
+						# Rufe Before Delete trigger
+						$this->exec_trigger_function('BEFORE', 'DELETE', $layer, $element[3], $old_dataset);
+
+						# Rufe Instead Delete trigger auf
+						$trigger_result = $this->exec_trigger_function('INSTEAD', 'DELETE', $layer, $element[3], $old_dataset);
+					}
+					else {
+						$old_dataset = array();
+						$results[] = $ret['msg'];
+						$this->success = false;
+					}
 				}
 
 				if ($trigger_result['executed']) {
 					#echo '<br>Delete Trigger Funktion wurde ausgeführt.';
 					# Instead Triggerfunktion wurde ausgeführt, übergebe Erfolgsmeldung
-					$result = array($trigger_result['message']);
+					$results[] = $trigger_result['message'];
 					$this->success = $trigger_result['success'];
 				}
 				else {
 					#echo '<br>Delete Trigger Funktion wurde nicht ausgeführt.';
 					# Instead Triggerfuktion wurde nicht ausgeführt
 					# Delete the object regularly in database
-					$sql = "DELETE FROM ".$element[2]." WHERE oid = ".$element[3];
+					$sql = "
+						DELETE FROM
+							" . $element[2] . "
+						WHERE
+							oid = " . $element[3] . "
+					";
 					$oids[] = $element[3];
-					#echo $sql.'<br>';
-					$ret = $layerdb->execSQL($sql,4, 1);
-					if(!$ret[0]){
-						$result = pg_fetch_row($ret[1]);
-						if (pg_affected_rows($ret[1]) == 0){
-							$ret[0] = 1;
+					$ret = $layerdb->execSQL($sql, 4, 1, true);
+					if ($ret['success']) {
+						$results[] = pg_fetch_row($ret['query']);
+						if (pg_affected_rows($ret['query']) == 0) {
+							$results[] = '<br>Datensatz wurde nicht gelöscht, weil er nicht existiert!<br>';
 							$this->success = false;
 						}
+					}
+					else {
+						$results[] = $ret['msg'];
+						$this->success = false;
 					}
 				}
 
@@ -8461,6 +8474,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					if (!empty($layer['trigger_function'])) {
 						$this->exec_trigger_function('AFTER', 'DELETE', $layer, '', $old_dataset);
 					}
+				}
+				else {
+					$this->add_message('error', 'Löschen fehlgeschlagen.<br>' . implode('<br>', $results));
 				}
 			}
 		}
@@ -8476,9 +8492,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		}
 
 		if ($output) {
-			if($this->formvars['embedded'] == '') {
+			if ($this->formvars['embedded'] == '') {
 				if($this->success == false) {
-					$this->add_message('error', 'Löschen fehlgeschlagen.<br>' . $result[0]);
+					$this->add_message('error', 'Löschen fehlgeschlagen.<br>' . implode('<br>', $results));
 				}
 				else {
 					$this->add_message('notice', 'Löschen erfolgreich');
@@ -10603,7 +10619,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
   function MenuesAnzeigen() {
     # Abfragen aller Menues
-    if ($this->formvars['view_sort'] == ''){
+    if ($this->formvars['view_sort'] == '') {
       $this->formvars['view_sort'] = 'name';
     }
     $this->menuedaten = Menue::find($this, 'true', $this->formvars['view_sort']);
@@ -10640,12 +10656,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		}
 		if ($results[0]['success']) {
 			$this->add_message('notice', 'Menü erfolgreich angelegt.');
-			$this->menuedaten = Menue::find($this, '', $this->formvars['order']);
+			$this->menuedaten = Menue::find($this, '', 'name');
 			$this->titel='Menüdaten';
 			$this->main='menuedaten.php';
 		}
 		else {
-			echo '<p>results: ' . print_r($results, true);
 			$this->add_message('array', $results);
 			$this->main = 'menue_formular.php';
 		}
@@ -13428,7 +13443,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						}
 					}
 					if(!$show){
-						return NULL;
+						continue;
 					}
 				}
 

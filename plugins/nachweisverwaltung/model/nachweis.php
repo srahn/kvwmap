@@ -319,7 +319,7 @@ class Nachweis {
 		if($nachweis_unique_attributes != NULL){
 			if(NACHWEIS_SECONDARY_ATTRIBUTE == 'fortfuehrung')$test_fortfuehrung = $fortfuehrung;
 			if(in_array('art', $nachweis_unique_attributes)){
-				$test_art = $hauptart;
+				$test_art = array($hauptart);
 			}
 			if(in_array('blattnr', $nachweis_unique_attributes))$test_blattnr = $Blattnr;			
 			if(NACHWEIS_PRIMARY_ATTRIBUTE == 'stammnr'){
@@ -476,7 +476,7 @@ class Nachweis {
   
 	function CreateNachweisDokumentVorschau($dateiname){		
 		$dateinamensteil=explode('.',$dateiname);
-		if(strtolower($dateinamensteil[1]) == 'pdf'){
+		if(mb_strtolower($dateinamensteil[1]) == 'pdf'){
 			$pagecount = getNumPagesPdf($dateiname);
 			if($pagecount > 1)$label = "-fill black -undercolor white -gravity North -pointsize 18 -annotate +0+15 ' ".$pagecount." Seiten '";
 		}
@@ -785,6 +785,7 @@ class Nachweis {
 		$explosion = explode('~', $antr_nr);
 		$antr_nr = $explosion[0];
 		$stelle_id = $explosion[1];
+		$order = str_replace('blattnummer', "NULLIF(regexp_replace(blattnummer, '\D', '', 'g'), '')::int", $order);		// nach Blattnummer nummerisch sortieren
     # Die Funktion liefert die Nachweise nach verschiedenen Suchverfahren.
     # Vor dem Suchen nach Nachweisen werden jeweils die Suchparameter überprüft    
     if (is_array($id)) { $idListe=$id; } else { $idListe=array($id); }
@@ -944,7 +945,7 @@ class Nachweis {
           # Suchparameter sind gültig
           # Suche nach individueller Nummer
           #echo '<br>Suche nach individueller Nummer.';
-          $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS unterart, d.art AS unterart_name";
+          $sql ="SELECT n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS unterart, d.art AS unterart_name";
           $sql.=" FROM ";
 					if($gemarkung != '' AND $flur_thematisch == ''){
 						$sql.=" alkis.pp_flur as flur, ";
@@ -984,7 +985,7 @@ class Nachweis {
 								$sql.=" AND REGEXP_REPLACE(COALESCE(n.stammnr, ''), '[^0-9]+' ,'') = '".$stammnr."'";
 							}
 							else{
-								$sql.=" AND lower(n.stammnr)='".strtolower($stammnr)."'";
+								$sql.=" AND lower(n.stammnr)='".mb_strtolower($stammnr)."'";
 							}
 						}
           }
@@ -997,7 +998,7 @@ class Nachweis {
 								$sql.=" AND REGEXP_REPLACE(COALESCE(n.rissnummer, ''), '[^0-9]+' ,'') = '".$rissnr."'";
 							}
 							else{
-								$sql.=" AND lower(n.rissnummer)='".strtolower($rissnr)."'";
+								$sql.=" AND lower(n.rissnummer)='".mb_strtolower($rissnr)."'";
 							}
 						}
 	        }
@@ -1033,7 +1034,7 @@ class Nachweis {
 					}
 					if(!empty($unterart))$sql.=" AND d.id IN (".implode(',', $unterart).")";
 					if($suchbemerkung != ''){
-						$sql.=" AND lower(n.bemerkungen) LIKE '%".strtolower($suchbemerkung)."%'";
+						$sql.=" AND lower(n.bemerkungen) LIKE '%".mb_strtolower($suchbemerkung)."%'";
 					}
           if ($order=='') {
             $order="flurid, stammnr, datum";
@@ -1071,7 +1072,7 @@ class Nachweis {
           # Suche mit Suchpolygon
           #echo '<br>Suche mit Suchpolygon.';
           $this->debug->write('Abfragen der Nachweise die das Polygon schneiden',4);
-          $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS unterart, d.art AS unterart_name";
+          $sql ="SELECT n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS unterart, d.art AS unterart_name";
           $sql.=" FROM nachweisverwaltung.n_nachweise AS n";
 					$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
           $sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id"; 
@@ -1091,7 +1092,7 @@ class Nachweis {
 					if(!empty($unterart))$sql.=" AND d.id IN (".implode(',', $unterart).")";
           if ($order=='') {
             $order="flurid, stammnr, datum";
-          }
+          }					
           if ($richtung=='' OR $richtung=='ASC'){
             $richtung=="ASC";
             $this->richtung="DESC";
@@ -1281,6 +1282,18 @@ class Nachweis {
     }
     return $result;
   }
+	
+	function Geometrieuebernahme($ref_geom, $id){
+		$sql = "UPDATE nachweisverwaltung.n_nachweise n 
+						SET the_geom = n2.the_geom 
+						FROM nachweisverwaltung.n_nachweise n2
+						WHERE n2.id = ".$ref_geom."
+						AND n.id IN (".implode(',', $id).")";
+		$ret=$this->database->execSQL($sql,4, 1);
+    if ($ret[0])$result[0]='Fehler bei der Geometrieübernahme!';
+    else $result[1]='Geometrien erfolgreich übernommen!';
+    return $result;
+	}
   
   function getDocLocation($id){
     #2005-11-24_pk

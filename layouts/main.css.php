@@ -344,6 +344,26 @@ a.invisiblelayerlink:hover{
 	color: gray;
 }
 
+#nachweisanzeige_optionen{
+	border-collapse: collapse; 
+	border: 1px solid grey; 
+	margin-top: 7px;
+}
+
+#ortho_points{
+	font-size: 15px;
+	text-align: left;
+}
+
+.ortho_point_div{
+	padding: 0 0 5px 30px;
+}
+
+.ortho_point_div input{
+	width: 50px;
+	margin-left: 5px;
+}
+
 #data_import_upload_zone{
 	position: relative;
 	width: 600px;
@@ -1069,6 +1089,7 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 .raster_record .tr_show input[type=file]{width:0.0001px;font-size: 0.0001px;height:0.0001px;transition: all 0.25s ease;}		/* Das FileUpload-Inputfeld soll auch versteckt werden*/
 .raster_record .tr_show .preview_image{width: 125px;transition: all 0.25s ease;}	/* Vorschaubilder für Bilder (und PDFs) werden zunächst mit 125px Breite angezeigt und bei Hover auf 250px vergrößert */
 .raster_record .tr_show .preview_doc{width: auto;}																/* Vorschaubilder für andere Dokumente nicht */
+.raster_record .tr_show .buttonlink{display: none}
 /* Alle Attribute: */
 .raster_record span{line-height:0.0001px;font-size: 0px;transition: all 0.25s ease;}
 .raster_record img{width: 0px;transition: all 0.25s ease;}
@@ -1219,6 +1240,15 @@ tbody.gle tr:hover {
 	margin: 2px 2px 2px 0;
 }
 
+.subFormListItem{
+	height: 20px;
+	padding: 0;
+}
+
+.subFormListItem > a:before{
+	content:url('../graphics/submenue.png');
+	vertical-align: top;
+}
 
 .calendar { /* Fuer IE <= 6 */
 	text-align: center;

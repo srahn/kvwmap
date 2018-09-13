@@ -258,6 +258,11 @@ class Gml_builder {
     return "<$tag>$inner</$tag>";
   }
 
+	function wrapWithElementAndAttribute($tag, $inner, $attributename, $attributevalue) {
+		$str = "<" . $tag . " " . $attributename . '="' . $attributevalue . '">' . $inner . "</" . $tag . ">";
+		return $str;
+	}
+
   function wrapWithFeatureMember($inner) {
     return $this->wrapWithElement("gml:featureMember",$inner);
   }
@@ -274,6 +279,8 @@ class Gml_builder {
 				# Might need a change in xplan_uml generation to contain association sequenceorder/index
 			if($sequence_attr == 10) {
 					$aggregated_bereich_gml_ids = explode(',', substr($gml_object['bereiche_gml_ids'], 1, -1));
+					// entnimmt mögliche doppelte Werte
+					$aggregated_bereich_gml_ids = array_unique($aggregated_bereich_gml_ids);
 					foreach ($aggregated_bereich_gml_ids as $bereich_gml_id) {
 						if (!empty($bereich_gml_id)) {
 							$gmlStr .= "<{$xplan_ns_prefix}gehoertZuBereich xlink:href=\"#GML_{$bereich_gml_id}\"/>";
@@ -284,7 +291,7 @@ class Gml_builder {
 				$sequence_attr++;
       // leere Felder auslassen
       if ($gml_object[$uml_attribute['col_name']] == '' OR $gml_object[$uml_attribute['col_name']] == '{}') continue;
-      #$gmlStr .= '<note>attributname: ' . $uml_attribute['name'] . ' type_type: ' . $uml_attribute['type_type'] . ' stereotype: ' . $uml_attribute['stereotype'] . '</note>';
+      #$gmlStr .= '<note>attributname: ' . $uml_attribute['name'] . ' type_type: ' . $uml_attribute['type_type'] . ' stereotype: ' . $uml_attribute['stereotype'] . ' uml-attribute-type: '. $uml_attribute['type'] . ' uml-attribute-datatype: '. $uml_attribute['uml_dtype'] . '</note>';
       switch ($uml_attribute['type_type']) {
         case 'c': // custom datatype
           switch ($uml_attribute['stereotype']){
@@ -343,7 +350,7 @@ class Gml_builder {
                 $this->wrapWithElement("{$xplan_ns_prefix}{$typeElementName}", $gml_attrib_str));
 								$gml_attrib_str = '';
               }
-
+							break;
             default:
           }
           break;
@@ -406,6 +413,39 @@ class Gml_builder {
 							};
 							$gmlStr .= $this->wrapWithElement("{$xplan_ns_prefix}{$uml_attribute['uml_name']}", $value);
 						} break;
+						case 'float8': {
+							// Handles float values for angles, volumne, area,length, decimal. These elements need an XML uom-attribute
+							// values are defined by Konformitaetsbedingung 2.1.2 (%, grad, m3, m2, m, (decimal is not specified: here, also m))
+							$xml_attributename = "uom";
+								switch ($uml_attribute['uml_dtype']) {
+									case 'Angle':		{$xml_attributevalue = "grad";}  break;
+									case 'Volume':	{$xml_attributevalue = "m3";} break;
+									case 'Area': 		{$xml_attributevalue = "m2";} break;
+									case 'Length': 	{$xml_attributevalue = "m";}  break;
+									case 'Decimal': {$xml_attributevalue = "m";}  break;
+									default: 				{$xml_attributevalue = "m";}  break;
+								}
+							$gml_value = trim($gml_object[$uml_attribute['col_name']]);
+							 // check for array values
+							if ($gml_value[0] == '{' && substr($gml_value,-1) == '}') {
+								$gml_value_array = explode(',',substr($gml_value, 1, -1));
+								for ($j = 0; $j < count($gml_value_array); $j++){
+										$gmlStr .= $this->wrapWithElementAndAttribute(
+										"{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
+										htmlspecialchars($gml_value_array[$j],ENT_QUOTES|ENT_XML1,"UTF-8"),
+										$xml_attributename,
+										$xml_attributevalue
+									);
+								}
+							} else {
+								$gmlStr .= $this->wrapWithElementAndAttribute(
+									"{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
+									htmlspecialchars($gml_value,ENT_QUOTES|ENT_XML1,"UTF-8"),
+									$xml_attributename,
+									$xml_attributevalue
+								);
+							}
+						} break;
 						default: {
 							$gml_value = trim($gml_object[$uml_attribute['col_name']]);
 							 // check for array values
@@ -439,7 +479,7 @@ class Gml_builder {
           $gmlStr .= $this->wrapWithElement(
               "{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
               htmlspecialchars($gml_value,ENT_QUOTES|ENT_XML1,"UTF-8"));
-		}
+       }
       }
     }
     return $gmlStr;

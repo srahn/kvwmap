@@ -33,7 +33,7 @@ class MyObject {
 		$this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
 		$query = mysql_query($sql, $this->database->dbConn);
 		$result = mysql_fetch_assoc($query);
-		if($result !== false)$this->data = $result;
+		if ($result !== false) $this->data = $result;
 		return $this;
 	}
 
@@ -60,7 +60,7 @@ class MyObject {
 		$this->debug->show('mysql find_where sql: ' . $sql, MyObject::$write_debug);
 		$query = mysql_query($sql, $this->database->dbConn);
 		$result = array();
-		while($this->data = mysql_fetch_assoc($query)) {
+		while ($this->data = mysql_fetch_assoc($query)) {
 			$result[] = clone $this;
 		}
 		return $result;
@@ -94,6 +94,23 @@ class MyObject {
 			}
 		}
 		return $results;
+	}
+
+	function exists($key) {
+		$types = $this->getTypesFromColumns();
+
+		$quote = ($types[$key] == 'text') ? "'" : "";
+		$sql = "
+			SELECT
+				`" . $key . "`
+			FROM
+				`" . $this->tableName . "`
+			WHERE
+				`" . $key . "` = {$quote}" . $this->get($key) . "{$quote}
+		";
+		$this->debug->show('mysql exists sql: ' . $sql, MyObject::$write_debug);
+		$query = mysql_query($sql, $this->database->dbConn);
+		return mysql_num_rows($query) > 0;
 	}
 
 	function getAttributes() {
@@ -174,7 +191,7 @@ class MyObject {
 		$types = $this->getTypesFromColumns();
 		$kvp = array();
 		if (is_array($this->data)) {
-			foreach($this->data AS $key => $value) {
+			foreach ($this->data AS $key => $value) {
 				$kvp[] = "`" . $key . "` = " . ((stripos($types[$key], 'int') !== false AND $value == '') ? 'NULL' : "'" . $value . "'");
 			}
 		}
@@ -279,10 +296,10 @@ class MyObject {
 		return $result;
 	}
 
-	public function validate() {
+	public function validate($on = '') {
 		$results = array();
 		foreach($this->validations AS $validation) {
-			$results[] = $this->validates($validation['attribute'], $validation['condition'], $validation['description'], $validation['options']);
+			$results[] = $this->validates($validation['attribute'], $validation['condition'], $validation['description'], $validation['option'], $on);
 		}
 
 		$messages = array();
@@ -294,7 +311,8 @@ class MyObject {
 		return $messages;
 	}
 
-	public function validates($key, $condition, $msg = '', $option = '') {
+	public function validates($key, $condition, $msg = '', $option = '', $on = '') {
+		$this->debug->show('MyObject validates key: ' . $key . ' condition: ' . $condition . ' msg: ' . $msg . ' option: ' . $option, MyObject::$write_debug);
 		switch ($condition) {
 
 			case 'presence' :
@@ -316,11 +334,14 @@ class MyObject {
 			case 'format' :
 				$result = $this->validate_format($key, $msg, $option);
 				break;
-		}
 
+			case 'unique' :
+				$result = ($this->get($key) == '' ? '' : $this->validate_unique($key, $msg, $option, $on));
+				break;
+		}
+		$this->debug->show('MyObject validates result: ' . print_r($result, true), MyObject::$write_debug);
 		return (empty($result) ? '' : array('type' => 'error', 'msg' => $result));
 	}
-
 
 	function validate_presence($key, $msg = '') {
 		if (empty($msg)) {
@@ -351,6 +372,20 @@ class MyObject {
 	function validate_value_is_one_off($key, $allowed_values, $msg = '') {
 		if ($msg == '') $msg = 'Der angegebene Wert ' . $this->get($key) . ' muss einer von diesen sein: <i>(' . implode(', ', $allowed_values) . '</i>)';
 		return (in_array($this->get($key), $allowed_values) ? '' : $msg);
+	}
+
+	/*
+	* Prüft ob der Wert im Attribut key innerhalb der vorhandenen Datensätze schon vorkommt
+	* Wenn ja, ist die Validierung nicht bestanden
+	*/
+	function validate_unique($key, $msg = '', $option = '', $on = '') {
+		$msg = $msg . ' Der Wert ' . $this->get($key) . ' im Attribut ' . $key . ' existiert schon.';
+		if ($option == $on) {
+			return ($this->exists($key) ? $msg : '');
+		}
+		else {
+			return ''; # nicht validieren
+		}
 	}
 
 	function validate_format($key, $msg, $format) {

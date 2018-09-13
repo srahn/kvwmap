@@ -134,7 +134,12 @@ $legendheight = $this->map->height + 20;
 				<tr> 
 					<td colspan="8">
 						<table border="0" align="right" cellpadding="5" cellspacing="0">
-							<tr> 
+							<tr>
+								<td align="left" width="100%">
+									<? if ($this->formvars[NACHWEIS_PRIMARY_ATTRIBUTE]!=''){ ?>
+									<a href="index.php?go=Nachweisrechercheformular_Senden&suchhauptart=&suchgemarkung=<? echo $this->formvars['Gemarkung']; ?>&suchflur=<? echo $this->formvars['Flur']; ?>&flur_thematisch=1&such<? echo NACHWEIS_PRIMARY_ATTRIBUTE.'='.$this->formvars[NACHWEIS_PRIMARY_ATTRIBUTE]; if(NACHWEIS_SECONDARY_ATTRIBUTE != '')echo '&such'.NACHWEIS_SECONDARY_ATTRIBUTE.'='.$this->formvars[NACHWEIS_SECONDARY_ATTRIBUTE];; ?>">alle der Messung anzeigen</a>
+									<? } ?>
+								</td>
 								<td>
 									<input name="Bilddatei" type="file" onchange="this.title=this.value;" value="<?php echo $this->formvars['Bilddatei']; ?>" size="22" accept="image/*.jpg"> 
 								</td>
@@ -314,7 +319,7 @@ $legendheight = $this->map->height + 20;
 				</tr>
 				<tr>
 					<td>&nbsp;</td> 
-					<td><?php if ($this->formvars[NACHWEIS_PRIMARY_ATTRIBUTE]!='') { ?><a href="index.php?go=Nachweisanzeige&order=<? echo $this->formvars['order']; ?>&richtung=<? echo $this->formvars['richtung']; ?>&flur_thematisch=<? echo $this->formvars['flur_thematisch']; ?>&suchunterart=<? echo $this->formvars['suchunterart'].'#'.$this->formvars['id']; ?>">&lt;&lt;&nbsp;zur&uuml;ck&nbsp;zum&nbsp;Rechercheergebnis</a><?php } ?></td>
+					<td><?php if ($this->formvars[NACHWEIS_PRIMARY_ATTRIBUTE]!='') { ?><a href="index.php?go=Nachweisanzeige&order=<? echo $this->formvars['order']; ?>&richtung=<? echo $this->formvars['richtung']; ?>&suchunterart=<? echo $this->formvars['suchunterart'].'#'.$this->formvars['id']; ?>">&lt;&lt;&nbsp;zur&uuml;ck&nbsp;zum&nbsp;Rechercheergebnis</a><?php } ?></td>
 					<td>&nbsp;<span class="fett">Maßstab&nbsp;1:&nbsp;</span><input type="text" id="scale" name="nScale" size="5" value="<?php echo round($this->map->scaledenom); ?>"></td>
 				<? if($this->user->rolle->runningcoords != '0'){ ?>
 				<td width="100px"><span class="fett">&nbsp;<?php echo $this->strCoordinates; ?>:</span>&nbsp;</td>
@@ -345,7 +350,6 @@ $legendheight = $this->map->height + 20;
 						<INPUT TYPE="hidden" NAME="check" VALUE="">
 						<input type="hidden" name="order" value="<?php echo $this->formvars['order']; ?>">
 						<INPUT TYPE="HIDDEN" NAME="richtung" VALUE="<? echo $this->formvars['richtung']; ?>">
-						<input type="hidden" name="flur_thematisch" value="<? echo $this->formvars['flur_thematisch']; ?>">
 						<input type="hidden" name="such_andere_art" value="<? echo $this->formvars['such_andere_art']; ?>">						
 						<INPUT TYPE="hidden" NAME="reset_layers" VALUE="">
 						<input type="hidden" name="layer_options_open" value="">

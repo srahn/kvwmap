@@ -1,11 +1,11 @@
-<h2 style="margin-top: 20px;">XPlan-GML hochladen</h2>
+<h2 style="margin-top: 20px;"><?php echo$this->formvars['planart']; ?> GML hochladen</h2>
 <form id="file_form" action="" method="post" enctype="multipart/form-data">
 	<input type="file" id="file_select" name="gml_file" style="margin-top: 50px;"/><br>
 	<button id="upload_button" style="margin-top: 50px;">Hochladen</button><br>
 	<div id="upload_message" style="margin-top: 50px; margin-bottom: 20px;"></div>
 </form>
 
-<form action="index.php?go=xplankonverter_extract_gml_to_form" method="post">
+<form action="index.php?go=xplankonverter_extract_gml_to_form&planart=<?php echo $this->formvars['planart']?>" method="post">
 	<button id="extract_to_form" style="display:none" name="gml_file" value="">Daten in Formular laden</button>
 </form>
 <script>

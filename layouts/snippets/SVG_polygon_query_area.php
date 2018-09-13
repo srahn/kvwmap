@@ -59,6 +59,7 @@
 	<input type="hidden" name="str_pathx" value="<? echo $this->formvars['str_pathx']; ?>">
   <input type="hidden" name="str_pathy" value="<? echo $this->formvars['str_pathy']; ?>">
   <input type="hidden" name="vertices" id="vertices" value="">
+	<input type="hidden" name="ortho_point_vertices" id="ortho_point_vertices" value="<? echo $this->formvars['ortho_point_vertices']; ?>">
 
 <?php
 #
@@ -82,6 +83,7 @@ $svg .= $polygonfunctions;			# Funktionen zum Zeichnen eines Polygons
 $svg .= $vertex_catch_functions;# Punktfangfunktionen
 $svg .= $flurstqueryfunctions;	# Funktionen zum Hinzufügen und Entfernen von Polygonen
 $svg .= $coord_input_functions;	# Funktionen zum Eingeben von Koordinaten
+$svg .= $ortho_point_functions;	# Funktionen zum Erstellen von orthogonalen Fangpunkten
 $svg .= $bufferfunctions;				# Funktionen zum Erzeugen eines Puffers
 $svg .= $transformfunctions;		# Funktionen zum Transformieren (Verschieben, ...) der Geometrie
 $svg .= $measurefunctions;
