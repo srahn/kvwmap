@@ -1184,29 +1184,27 @@ class user {
 	}
 
 	function Aendern($userdaten) {
-		$sql ='UPDATE user SET';
-		if($userdaten['id'] != ''){
-			$sql.=' ID='.$userdaten['id'].', ';
-		}
-		$sql.=' Name="'.$userdaten['nachname'].'"';
-		$sql.=',Vorname="'.$userdaten['vorname'].'"';
-		$sql.=',login_name="'.$userdaten['loginname'].'"';
-		$sql.=',Namenszusatz="'.$userdaten['Namenszusatz'].'"';
-		if($userdaten['changepasswd']){
-			$sql.=',passwort=MD5("'.$userdaten['password2'].'")';
-			$sql.=',password_setting_time=CURRENT_TIMESTAMP()';
-		}
-		if ($userdaten['phon']!='') {
-			$sql.=',phon="'.$userdaten['phon'].'"';
-		}
-		if ($userdaten['email']!='') {
-			$sql.=',email="'.$userdaten['email'].'"';
-		}
-		$sql.=',start="'.$userdaten['start'].'"';
-		$sql.=',stop="'.$userdaten['stop'].'"';
-		$sql.=',ips="'.$userdaten['ips'].'"';
-		$sql.=' WHERE ID='.$userdaten['selected_user_id'];
-		$ret=$this->database->execSQL($sql,4, 0);
+		$sql = "
+			UPDATE
+				`user`
+			SET
+				`Name` = '" . $userdaten['nachname'] . "',
+				`Vorname` = '" . $userdaten['vorname'] . "',
+				`login_name` = '" . $userdaten['loginname'] . "',
+				`Namenszusatz` = '" . $userdaten['Namenszusatz'] . "',
+				`start` = '" . $userdaten['start'] . "',
+				`stop`= '" . $userdaten['stop'] . "',
+				`password_setting_time` = " . ($userdaten['password_setting_time'] != '' ? "'" . $userdaten['password_setting_time'] . "'" : "CURRENT_TIMESTAMP()") . "," .
+				($userdaten['changepasswd'] ? "`passwort` = MD5('" . $userdaten['password2'] . "'),"	: "") .
+				($userdaten['id'] 		!= '' ? "`ID` 			= " . $userdaten['id'] . "," 								: "") .
+				($userdaten['phon'] 	!= '' ? "`phon` 		= '" . $userdaten['phon'] . "'," 						: "") .
+				($userdaten['email']	!= '' ? "`email` 		= '" . $userdaten['email'] . "',"						: "") . "
+				`ips` = '" . $userdaten['ips'] . "'
+			WHERE
+				`ID`= " . $userdaten['selected_user_id'] . "
+		";
+		#echo 'SQL: ' . $sql;
+		$ret = $this->database->execSQL($sql, 4, 0);
 		if ($ret[0]) {
 			$ret[1].='<br>Die Benutzerdaten konnten nicht aktualisiert werden.<br>'.$ret[1];
 		}
@@ -1227,14 +1225,23 @@ class user {
 	 * @see    NeuAnlegen(), Aendern(), Loeschen(), $user, $rolle, $stelle
 	 */
 	function setNewPassword($password) {
-		$sql ='UPDATE user SET';
-		$sql.=' passwort=MD5("'.$password.'")';
-		$sql.=',password_setting_time=CURRENT_TIMESTAMP()';
-		$sql.=' WHERE ID='.$this->id;
-		#echo $sql;
-		$ret=$this->database->execSQL($sql,4, 0);
+		$password_setting_time = date('Y-m-d H:i:s', time());
+		$sql = "
+			UPDATE
+				user
+			SET
+				`passwort` = MD5('" . $password . "'),
+				`password_setting_time` = '" . $password_setting_time . "'
+			WHERE
+				`ID` = " . $this->id . "
+		";
+		echo $sql;
+		$ret = $this->database->execSQL($sql,4, 0);
 		if ($ret[0]) {
-			$ret[1].='<br>Die Benutzerdaten konnten nicht aktualisiert werden.<br>'.$ret[1];
+			$ret[1] .= '<br>Die Benutzerdaten konnten nicht aktualisiert werden.<br>'.$ret[1];
+		}
+		else {
+			$this->password_setting_time = $password_setting_time;
 		}
 		return $ret;
 	}

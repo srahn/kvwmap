@@ -49,28 +49,54 @@ include(PLUGINS . 'xplankonverter/model/converter.php');
 * xplankonverter_validierungsergebnisse
 */
 
-switch ($this->formvars['planart']) {
-	case 'BP-Plan' : {
-		$this->title = 'Bebauungsplan';
-		$this->plan_layer_id = XPLANKONVERTER_BP_PLAENE_LAYER_ID;
-	} break;
-	case 'FP-Plan' : {
-		$this->title = 'Flächennutzungsplan';
-		$this->plan_layer_id = XPLANKONVERTER_FP_PLAENE_LAYER_ID;
-	} break;
-	case 'SO-Plan' : {
-		$this->title = 'Sonstige Plan';
-		$this->plan_layer_id = XPLANKONVERTER_SO_PLAENE_LAYER_ID;
-	} break;
-	case 'RP-Plan' : {
-		$this->title = 'Raumordnungsplan';
-		$this->plan_layer_id = XPLANKONVERTER_RP_PLAENE_LAYER_ID;
-	} break;
-	default : {
-		$this->formvars['planart'] = 'Plan';
-		$this->title = 'Plan';
-		$this->plan_layer_id = XPLANKONVERTER_XP_PLAENE_LAYER_ID;
-	} break;	
+if (in_array($go, array(
+	'xplankonverter_download_edited_shapes',
+	'xplankonverter_download_inspire_gml',
+	'xplankonverter_download_uploaded_shapes',
+	'xplankonverter_download_xplan_gml',
+	'xplankonverter_download_xplan_shapes',
+	'xplankonverter_extract_gml_to_form',
+	'xplankonverter_gml_generieren',
+	'xplankonverter_go_to_plan',
+	'xplankonverter_inspire_gml_generieren',
+	'xplankonverter_konvertierung',
+	'xplankonverter_konvertierungen_index',
+	'xplankonverter_konvertierung_loeschen',
+	'xplankonverter_konvertierung_status',
+	'xplankonverter_plaene_index',
+	'xplankonverter_regeleditor',
+	'xplankonverter_regeleditor_getshapeattributes',
+	'xplankonverter_regeleditor_getxplanattributes',
+	'xplankonverter_shapefiles_delete',
+	'xplankonverter_shapefiles_index',
+	'xplankonverter_show_geltungsbereich_upload',
+	'xplankonverter_upload_geltungsbereich',
+	'xplankonverter_upload_xplan_gml',
+	'xplankonverter_validierungsergebnisse'
+))) {
+	switch ($this->formvars['planart']) {
+		case 'BP-Plan' : {
+			$this->title = 'Bebauungsplan';
+			$this->plan_layer_id = XPLANKONVERTER_BP_PLAENE_LAYER_ID;
+		} break;
+		case 'FP-Plan' : {
+			$this->title = 'Flächennutzungsplan';
+			$this->plan_layer_id = XPLANKONVERTER_FP_PLAENE_LAYER_ID;
+		} break;
+		case 'SO-Plan' : {
+			$this->title = 'Sonstige Plan';
+			$this->plan_layer_id = XPLANKONVERTER_SO_PLAENE_LAYER_ID;
+		} break;
+		case 'RP-Plan' : {
+			$this->title = 'Raumordnungsplan';
+			$this->plan_layer_id = XPLANKONVERTER_RP_PLAENE_LAYER_ID;
+		} break;
+		default : {
+			$this->formvars['planart'] = 'Plan';
+			$this->title = 'Plan';
+			$this->plan_layer_id = XPLANKONVERTER_XP_PLAENE_LAYER_ID;
+		} break;	
+	}
 }
 
 switch ($go) {
