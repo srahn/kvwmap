@@ -3814,10 +3814,7 @@ class GUI {
 
   function showConstants() {
 		$this->main='showadminfunctions.php';
-		$constants = $this->administration->get_constants_from_config();
-		foreach($constants as $constant){
-			echo "INSERT INTO config (name, prefix, value, description, type, `group`) VALUES ('".$constant['name']."', '".$constant['prefix']."', '".addslashes($constant['value'])."', '".addslashes($constant['description'])."', '".$constant['type']."', '".$constant['group']."');\n";
-		}
+		$this->administration->get_constants_from_all_configs();
   }
 
   function grundbuchblattWahl() {

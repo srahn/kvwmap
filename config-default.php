@@ -535,7 +535,8 @@ define('LOG_LEVEL',2);                                            # Version 1.6.
 # des Schreiben in die Datenbank auch mit Formularwerten eingestellt werden kann.
 # das übernimmt in dem Falle die Formularvariable disableDbWrite.
 # Hier kann jedoch noch der Defaultwert gesetzt werden
-define('DEFAULTDBWRITE',1);                                       # Version 1.6.6
+#define('DBWRITE',1);                                       				# Version 1.6.6 		# in Version 2.9 gelöscht
+define('DEFAULTDBWRITE',1);                                       # Version 2.9
 
 # Die ID der Stelle aus der Datenbank, auf die alle Nutzer Zugriff haben
 # und die als Einstiegsseite für neue Benutzer eingestellt ist
@@ -594,7 +595,7 @@ define('MYSQL_HOST', 'localhost');																	# Version 2.0
 define('MYSQL_USER', '');																						# Version 2.0
 define('MYSQL_PASSWORD', '');																				# Version 2.0
 define('MYSQL_DBNAME', $dbname);																		# Version 2.0
-define('MYSQL_ROOT_PASSWORD', getenv('MYSQL_ENV_MYSQL_ROOT_PASSWORD'));
+define('MYSQL_ROOT_PASSWORD', getenv('MYSQL_ENV_MYSQL_ROOT_PASSWORD'));		# gelöscht in Version 2.9
 define('MYSQL_HOSTS_ALLOWED', '172.17.%');
 
 // $userDb=new database();																				# in Version 2.0 gelöscht

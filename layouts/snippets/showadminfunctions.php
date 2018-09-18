@@ -1,5 +1,23 @@
 <script src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></script>
 
+<script type="text/javascript">
+
+function toggleGroup(group, show){
+	var img = document.getElementById(group);
+	var constants = document.getElementsByClassName('constants_'+group);
+	if(show || img.src.split(/[\\/]/).pop() == 'plus.gif'){
+		img.src = '<? echo GRAPHICSPATH.'minus.gif'; ?>';		
+		display = '';
+	}
+	else{
+		img.src = '<? echo GRAPHICSPATH.'plus.gif'; ?>';		
+		display = 'none';
+	}
+	[].forEach.call(constants, function(constant){constant.style.display = display;});
+}
+
+</script>
+
 <br><h2><?php echo $this->titel; ?></h2><br>
 <? global $kvwmap_plugins; ?>
 
@@ -78,33 +96,40 @@
 	</tr>
 	<tr>
 		<td valign="top" align="center" style="border:1px solid #C3C7C3">			
-			<table cellpadding="4" cellspacing="2" class="table_border_collapse">
+			<table width="100%" cellpadding="4" cellspacing="2" class="table_border_collapse">
 				<tr>
 					<td colspan="4" style="background-color:<? echo BG_GLEATTRIBUTE; ?>;"><span class="fetter px17">Konfigurationsparameter</span></td>
 				</tr>
 				<? 
 					global $kvwmap_plugins;
-					foreach($this->administration->config_params as $group => $params_in_group){
-						$group_level = explode('/', $group);
-						if($group_level[0] != 'Plugins' OR in_array(strtolower($group_level[1]), $kvwmap_plugins)){	?>
+					$last_group = '';
+					foreach($this->administration->config_params as $param){
+						if($param['plugin'] == '' OR in_array($param['plugin'], $kvwmap_plugins)){
+							if($last_group != $param['group']){
+								$last_group = $param['group'];			?>
 							<tr>
-								<td colspan="4" class="fett" style="background-color:<? echo BG_GLEATTRIBUTE; ?>;"><? echo $group; ?></td>
+								<td colspan="4" class="fett" style="background-color:<? echo BG_GLEATTRIBUTE; ?>;"><a href="javascript:toggleGroup('<? echo $param['group']; ?>', false);"><img id="<? echo $param['group']; ?>" src="<? echo GRAPHICSPATH.'plus.gif'; ?>"></a>&nbsp;<? echo $param['group']; ?></td>
 							</tr>
-							<tr>
+							<tr class="constants_<? echo $param['group']; ?>" style="display: none">
 								<td class="fett">Name</td>
 								<td class="fett">Prefix</td>
 								<td class="fett">Wert</td>
 								<td class="fett">Info</td>
 							</tr>
-				<?		foreach($params_in_group as $param){
-				?>
-				<tr>
+				<?		}		?>
+				<tr class="constants_<? echo $param['group']; ?> config_param_saved_<? echo $param['saved']; ?>" style="display: none">
 					<td><? echo $param['name']; ?></td>
 					<td><? echo $param['prefix']; ?></td>
 					<td>
 						<? 
-							if($param['type'] == 'constant'){echo '<input type="text" style="width: 300px" name="'.$param['name'].'" value="'.$param['value'].'">';}
-							else echo '<textarea style="width: 300px" rows="'.substr_count($param['value'], "\n").'" name="'.$param['name'].'">'.$param['value'].'</textarea>';
+							if($param['type'] == 'array'){
+								echo '<textarea style="width: 300px" rows="'.substr_count($param['value'], "\n").'" name="'.$param['name'].'">'.$param['value'].'</textarea>';
+							}
+							else{
+								if($param['type'] == 'password')$type = 'password';
+								else $type = 'text';
+								echo '<input type="'.$type.'" style="width: 300px" name="'.$param['name'].'" value="'.$param['value'].'">';
+							}
 						?>
 					</td>
 					<td align="center">
@@ -114,7 +139,10 @@
 						<? } ?>
 					</td>
 				</tr>
-				<? }}} ?>
+<?			if($param['saved'] == 0){ ?>
+					<script type="text/javascript">toggleGroup('<? echo $param['group']; ?>', true);</script>
+		<?	}
+			}} ?>
 				<tr >
 					<td colspan="4" align="center"><input type="button" onclick="location.href='index.php?go=Administratorfunktionen&func=save_config'" value="Speichern"></td>
 				</tr>
@@ -126,7 +154,7 @@
 	</tr>
 	<tr>
 		<td valign="top" align="center" style="border:1px solid #C3C7C3">
-			<table width="400px" cellpadding="4" cellspacing="2" border="0" style="border:1px solid #C3C7C3;border-collapse:collapse">
+			<table width="100%" cellpadding="4" cellspacing="2" border="0" style="border:1px solid #C3C7C3;border-collapse:collapse">
 				<tr style="border:1px solid #C3C7C3;">
 					<td style="background-color:<? echo BG_GLEATTRIBUTE; ?>;"><span class="fetter px17">weitere Funktionen</span></td>
 				</tr>

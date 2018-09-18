@@ -352,6 +352,11 @@ a.invisiblelayerlink:hover{
 	color: gray;
 }
 
+.config_param_saved_0{
+	border-collapse: separate;
+	outline: 2px solid red;
+}
+
 #nachweisanzeige_optionen{
 	border-collapse: collapse; 
 	border: 1px solid grey; 

@@ -37,7 +37,7 @@ include(PLUGINS . 'wasserrecht/model/db/teilgewaesserbenutzungen.php');
 include(PLUGINS . 'wasserrecht/model/db/teilgewaesserbenutzungen_art.php');
 include(PLUGINS . 'wasserrecht/model/db/wasserrechtliche_zulassungen.php');
 
-require_once (CLASSPATH . '/../vendor/autoload.php');
+#require_once (CLASSPATH . '/../vendor/autoload.php');
 // include(PLUGINS . 'wasserrecht/view/KvwmapJodDocumentConverter.class.php');
 include(PLUGINS . 'wasserrecht/bescheide/create_bescheide.php');
 

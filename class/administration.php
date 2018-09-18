@@ -49,12 +49,12 @@ class administration{
 	function get_migration_logs(){
 		$migrations = array();
 		$sql = "SELECT * FROM migrations";
-		$queryret=$this->database->execSQL($sql,0, 0);
-    if($queryret[0]) {
+		$result=$this->database->execSQL($sql,0, 0);
+    if($result[0]) {
       #echo '<br>Fehler bei der Abfrage der Tabelle migrations.<br>'; 	// bei Neuinstallation gibt es diese Tabelle noch nicht
     }
     else {
-      while($rs=mysql_fetch_array($queryret[1])){
+      while($rs=mysql_fetch_array($result[1])){
 				$migrations[$rs['component']][$rs['type']][$rs['filename']] = 1;
 			}
 		}
@@ -142,9 +142,9 @@ class administration{
 				$filepath = $prepath.'db/mysql/data/'.$file;
 				$connection = 'user='.$this->pgdatabase->user.' password='.$this->pgdatabase->passwd.' dbname='.$this->pgdatabase->dbName;
 				if($this->pgdatabase->host != '')$connection .= ' host='.$this->pgdatabase->host;
-				$queryret = $this->database->exec_file($filepath, 'user=xxxx password=xxxx dbname=kvwmapsp', $connection, true); # replace known constants
-				if($queryret[0]){
-					echo $queryret[1].'<br>Fehler beim Ausführen von seed-Datei: '.$filepath.'<br>';
+				$result = $this->database->exec_commands(file_get_contents($filepath), 'user=xxxx password=xxxx dbname=kvwmapsp', $connection, true); # replace known constants
+				if($result[0]){
+					echo $result[1].'<br>Fehler beim Ausführen von seed-Datei: '.$filepath.'<br>';
 				}
 				else{
 					$sql = "
@@ -153,7 +153,7 @@ class administration{
 						VALUES ('" . $component . "', 'mysql', '" . $file . "');
 					";
 					#echo '<p>Register MySQL migration for component ' . $component . ' with sql: <br>' . $sql;
-					$queryret=$this->database->execSQL($sql,0, 0);
+					$result=$this->database->execSQL($sql,0, 0);
 				}
 			}
 		}
@@ -167,39 +167,46 @@ class administration{
 				$file = $migration['file'];
 				if($component == 'kvwmap')$prepath = LAYOUTPATH; else $prepath = PLUGINS.$component.'/';
 				$filepath = $prepath.'db/'.$database_type.'/schema/'.$file;			
-				$sql = file_get_contents($filepath);
-				if ($sql != '') {
-					$sql = str_replace('$EPSGCODE_ALKIS', EPSGCODE_ALKIS, $sql);
-					$sql = str_replace(':alkis_epsg', EPSGCODE_ALKIS, $sql);
-					if ($database_type == 'mysql') {
-						#echo 'Exec MySQL-Datei: ' . $filepath;
-						$queryret = $this->database->exec_file($filepath, NULL, NULL);	# mysql
-					}
-					else {
-						#echo 'Exec PostgreSQL-Datei: ' . $filepath;
-						if (stripos($sql, '-- exec statements separated') !== false) {
-							$sql = str_ireplace('-- exec statements separated', '', $sql);
-							$sql = str_ireplace('BEGIN;', '', $sql);
-							$sql = str_ireplace('COMMIT;', '', $sql);
-							$sql_parts = explode(';', $sql);
-						}
-						else {
-							$sql_parts = array($sql);
-						}
-						foreach ($sql_parts AS $sql) {
-							$sql = trim($sql);
-							if ($sql != '') {
-								$queryret = $this->pgdatabase->execSQL($sql, 0, 0, true);	# postgresql
+				$filetype = pathinfo($filepath)['extension'];
+				switch($filetype){
+					case 'sql' : {
+						$sql = file_get_contents($filepath);
+						if ($sql != '') {
+							$sql = str_replace('$EPSGCODE_ALKIS', EPSGCODE_ALKIS, $sql);
+							$sql = str_replace(':alkis_epsg', EPSGCODE_ALKIS, $sql);
+							if($database_type == 'mysql'){
+								$result = $this->database->exec_commands($sql, NULL, NULL);	# mysql
+							}
+							else {
+								if (stripos($sql, '-- exec statements separated') !== false) {
+									$sql = str_ireplace('-- exec statements separated', '', $sql);
+									$sql = str_ireplace('BEGIN;', '', $sql);
+									$sql = str_ireplace('COMMIT;', '', $sql);
+									$sql_parts = explode(';', $sql);
+								}
+								else {
+									$sql_parts = array($sql);
+								}
+								foreach ($sql_parts AS $sql) {
+									$sql = trim($sql);
+									if ($sql != '') {
+										$result = $this->pgdatabase->execSQL($sql, 0, 0, true);	# postgresql
+									}
+								}
 							}
 						}
-					}
-					if($queryret[0]){
-						echo $queryret[1].'<br>Fehler beim Ausführen von migration-Datei: '.$filepath.'<br>';
-					}
-					else{
-						$sql = "INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES ('".$component."', '".$database_type."', '".$file."');";
-						$queryret=$this->database->execSQL($sql,0, 0);
-					}
+					}break;
+					
+					case 'php' : {
+						include $filepath;
+					}break;
+				}
+				if($result[0]){
+					echo $result[1].'<br>Fehler beim Ausführen von migration-Datei: '.$filepath.'<br>';
+				}
+				else{
+					$sql = "INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES ('".$component."', '".$database_type."', '".$file."');";
+					$result=$this->database->execSQL($sql,0, 0);
 				}
 			}
 		}
@@ -215,65 +222,138 @@ class administration{
 	
 	function get_config_params(){
 		$sql = "SELECT * FROM config ORDER BY `group`";
-		$queryret=$this->database->execSQL($sql,0, 0);
-    if($queryret[0]) {
-      #echo '<br>Fehler bei der Abfrage der Tabelle config.<br>';
+		$result=$this->database->execSQL($sql,0, 0);
+    if($result[0]) {
+      echo '<br>Fehler bei der Abfrage der Tabelle config.<br>';
     }
     else {
-      while($rs=mysql_fetch_array($queryret[1])){
-				$this->config_params[$rs['group']][] = $rs;
+      while($rs=mysql_fetch_assoc($result[1])){
+				$this->config_params[$rs['name']] = $rs;
+			}
+			foreach($this->config_params as &$param){
+				$param['real_value'] = $this->get_real_value($param['name']);
 			}
 		}
 	}
 	
-	function get_constants_from_config(){
-		$def_constants = get_defined_constants(true)['user'];
-		$config_lines = file('config.php');
-		foreach($config_lines as $config_line){
-			if(substr($config_line, 0, 6) == 'define'){																												# Konstanten
-				$delim = substr($config_line, strpos($config_line, '(')+1, 1);
-				$name = get_first_word_after($config_line, '(', $delim, $delim);				
-				if($def_constants[$name] != ''){
-					$value = ltrim(substr($config_line, strpos($config_line, ',')+1));
-					$value = rtrim(substr($value, 0, strpos($value, ');')));
-					if($value == '')$value = $def_constants[$name];					
-					$prefix = explode('"', $value)[0];
-					$prefix = explode("'", $prefix)[0];
-					$value = trim($value, "'\"");
-					if(strpos($prefix, '.') != ''){
-						$prefix = rtrim($prefix, '. ');
-						$value = array_pop(explode("'", $value));
+	function get_real_value($name){
+		if($this->config_params[$name]['prefix'] != ''){
+			foreach(explode('.', $this->config_params[$name]['prefix']) as $prefix_constant){
+				$prefix_value .= $this->get_real_value($prefix_constant);
+			}
+			return $prefix_value.$this->config_params[$name]['value'];
+		}
+		else{
+			return $this->config_params[$name]['value'];
+		}
+	}	
+	
+	function write_config_file($plugin){
+		$this->get_config_params();
+		foreach($this->config_params as $param){
+			if($param['plugin'] == $plugin){
+				if($param['description'] != ''){
+					$lines = explode("\n", $param['description']);
+					for($l = 0; $l < count($lines)-1; $l++){
+						$config.= "# ".$lines[$l]."\n";
 					}
-					else $prefix = '';
-					$constant['name'] = $name;
-					$constant['value'] = $value;
-					$constant['prefix'] = $prefix;
-					$constant['type'] = 'constant';
-					$constant['description'] = $description;
-					$constant['group'] = $group;
-					$description = '';
-					$constants[] = $constant;
+				}
+				if($param['type'] == 'array'){
+					$config.= "$".$param['name']." = ".preg_replace('/stdClass::__set_state/', '(object)', var_export(json_decode($param['value']), true)).";\n\n";
+				}
+				else{
+					$config.= "define(".$param['name'].", '".$param['real_value']."');\n\n";
 				}
 			}
+		}
+		if($plugin != '')$prepath = PLUGINS.$plugin.'/config/';
+		if(file_put_contents($prepath.'config_live.php', "<?\n\n".$config."\n?>") === false){
+			$result[0]=1;
+			$result[1]='Fehler beim Schreiben der config-Datei '.$prepath.'config.php';
+		}
+		else $result[0]=0;
+		return $result;
+	}
+		
+	function get_constants_from_all_configs(){
+		$constants = $this->get_constants_from_config(file('config.php'), '');
+		var_export($constants);
+		global $kvwmap_plugins;
+  	if(count($kvwmap_plugins) > 0){
+			for($i = 0; $i < count($kvwmap_plugins); $i++){
+				if(file_exists(PLUGINS.$kvwmap_plugins[$i].'/config/config.php')){
+					$constants = $this->get_constants_from_config(file(PLUGINS.$kvwmap_plugins[$i].'/config/config.php'), $kvwmap_plugins[$i]);
+					echo "\n".$kvwmap_plugins[$i].":\n";
+					var_export($constants);
+				}
+			}
+		}
+	}
+	
+	function get_constants_from_config($config_lines, $plugin){
+		$def_constants = get_defined_constants(true)['user'];
+		foreach($config_lines as $config_line){
+			if(substr(ltrim($config_line), 0, 6) == 'define'){																												# Konstanten
+				$name = get_first_word_after(str_replace(' ', '', $config_line), 'define', '(', ',');				
+				$name = trim($name, '"\'');
+				$value = ltrim(substr($config_line, strpos($config_line, ',')+1));
+				$value = rtrim(substr($value, 0, strpos($value, ');')));
+				if($value == '')$value = $def_constants[$name];					
+				$prefix = explode('"', $value)[0];
+				$prefix = explode("'", $prefix)[0];
+				if(strpos($value, '"') === false AND strpos($value, "'") === false AND is_numeric(trim($value, "'\"")))$type = 'numeric';
+				else{
+					if($value == 'true' OR $value == 'false')$type = 'boolean';
+					else $type = 'string';
+				}
+				$value = trim($value, "'\"");
+				if($type == 'string' AND strpos($prefix, '.') != ''){
+					$prefix = rtrim($prefix, '. ');
+					$value = array_pop(explode("'", $value));
+				}
+				else $prefix = '';
+				if(substr($value, 0, 1) == '$'){
+					global ${substr($value, 1)};
+					$value = ${substr($value, 1)};
+				}
+				$constant['name'] = $name;
+				$constant['value'] = $value;
+				$constant['prefix'] = $prefix;
+				$constant['type'] = $type;
+				$constant['description'] = $description;
+				if($plugin != '')$constant['group'] = 'Plugins/'.$plugin;
+				else $constant['group'] = $group;
+				$constant['plugin'] = $plugin;
+				$constant['saved'] = 0;
+				$description = '';
+				$constants[$name] = $constant;
+			}
 			elseif(strpos($config_line, 'array(') !== false AND substr(trim($config_line), 0, 1) == '$'){			# Arrays
-				$array_name = trim(substr($config_line, 0, strpos($config_line, '=')), ' $');
-				global ${$array_name};
-				$constant['name'] = $array_name;
-				$constant['value'] = json_encode(${$array_name}, JSON_PRETTY_PRINT);
+				$name = trim(substr($config_line, 0, strpos($config_line, '=')), ' $');
+				global ${$name};
+				echo '<br>'.$name.':'.print_r(${$name}, true).'<br>';
+				print_r($katasterfuehrendestelle);
+				$constant['name'] = $name;
+				$constant['value'] = json_encode(${$name}, JSON_PRETTY_PRINT);
 				$constant['type'] = 'array';
 				$constant['description'] = $description;
-				$constant['group'] = $group;
+				if($plugin != '')$constant['group'] = 'Plugins/'.$plugin;
+				else $constant['group'] = $group;
+				$constant['plugin'] = $plugin;
+				$constant['saved'] = 0;
 				$description = '';
-				$constants[] = $constant;
+				$constants[$name] = $constant;
 			}
 			elseif(substr($config_line, 0, 26) == '##########################'){
 				$group = trim(substr($config_line, 26));
 			}
 			elseif(trim($config_line) == '')$description = '';
-			else $description.= trim($config_line, ' #');
+			else $description.= trim($config_line, " \t#/");
 		}
 		return $constants;
 	}
+	
+	
 }
 
 ?>
