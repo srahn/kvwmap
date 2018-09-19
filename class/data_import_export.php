@@ -1156,7 +1156,8 @@ class data_import_export {
 				}break;
 
 				case 'UKO' : {
-					$this->create_uko($layerdb, $temp_table, $this->attributes['the_geom'], $this->formvars['epsg'], $exportfile.'.uko');
+					$exportfile = $exportfile.'.uko';
+					$this->create_uko($layerdb, $temp_table, $this->attributes['the_geom'], $this->formvars['epsg'], $exportfile);
 					$contenttype = 'text/uko';
 				}break;
 
