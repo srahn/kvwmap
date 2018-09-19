@@ -928,8 +928,8 @@ class data_import_export {
 		return utf8_decode($csv);
 	}
 
-	function create_uko($layerdb, $table, $column, $epsg, $exportfile){
-		$sql.= "SELECT st_astext(st_multi(st_union(st_transform(".$column.", ".$epsg.")))) as geom FROM ".$table;
+	function create_uko($layerdb, $sql, $column, $epsg, $exportfile){
+		$sql = "SELECT st_astext(st_multi(st_union(st_transform(".$column.", ".$epsg.")))) as geom FROM (".$sql.") as foo";
 		#echo $sql;
 		$ret = $layerdb->execSQL($sql,4, 1);
 		if(!$ret[0]){
@@ -941,12 +941,12 @@ class data_import_export {
 		}
   }
 
-	function create_ovl($datentyp, $layerdb, $table, $column, $epsg){
+	function create_ovl($datentyp, $layerdb, $query_sql, $column, $epsg){
 		$ovl_type = array(MS_LAYER_POINT => 6, MS_LAYER_LINE => 3, MS_LAYER_POLYGON => 4);
-		$sql.= "SELECT st_astext(";
+		$sql = "SELECT st_astext(";
 		if($datentyp == MS_LAYER_POLYGON)$sql.= "ST_MakePolygon(st_exteriorring(geom))) as geom ";
 		else $sql.= "geom) as geom ";
-		$sql.= "FROM (select (st_dump(st_union(st_transform(".$column.", ".$epsg.")))).geom as geom FROM ".$table.") as foo";
+		$sql.= "FROM (select (st_dump(st_union(st_transform(".$column.", ".$epsg.")))).geom as geom FROM (".$query_sql.") as foo) as foo";
 		#echo $sql;
 		$ret = $layerdb->execSQL($sql,4, 1);
 		if(!$ret[0]){
@@ -1157,12 +1157,12 @@ class data_import_export {
 
 				case 'UKO' : {
 					$exportfile = $exportfile.'.uko';
-					$this->create_uko($layerdb, $temp_table, $this->attributes['the_geom'], $this->formvars['epsg'], $exportfile);
+					$this->create_uko($layerdb, $sql, $this->attributes['the_geom'], $this->formvars['epsg'], $exportfile);
 					$contenttype = 'text/uko';
 				}break;
 
 				case 'OVL' : {
-					$ovl = $this->create_ovl($layerset[0]['Datentyp'], $layerdb, $temp_table, $this->attributes['the_geom'], $this->formvars['epsg']);
+					$ovl = $this->create_ovl($layerset[0]['Datentyp'], $layerdb, $sql, $this->attributes['the_geom'], $this->formvars['epsg']);
 					for($i = 0; $i < count($ovl); $i++){
 						$exportfile2 = $exportfile.'_'.$i.'.ovl';
 						$fp = fopen($exportfile2, 'w');
