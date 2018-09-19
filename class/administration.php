@@ -331,8 +331,6 @@ class administration{
 			elseif(strpos($config_line, 'array(') !== false AND substr(trim($config_line), 0, 1) == '$'){			# Arrays
 				$name = trim(substr($config_line, 0, strpos($config_line, '=')), ' $');
 				global ${$name};
-				echo '<br>'.$name.':'.print_r(${$name}, true).'<br>';
-				print_r($katasterfuehrendestelle);
 				$constant['name'] = $name;
 				$constant['value'] = json_encode(${$name}, JSON_PRETTY_PRINT);
 				$constant['type'] = 'array';
