@@ -1998,7 +1998,7 @@ else{
 		foreach($constants as $constant){
 			if(!in_array($constant['name'], array('MYSQL_HOST','MYSQL_USER','MYSQL_PASSWORD','MYSQL_DBNAME','MYSQL_HOSTS_ALLOWED')))
 				$sql.="INSERT INTO config (name, prefix, value, description, type, `group`, `plugin`, `saved`) VALUES ('".$constant['name']."', '".$constant['prefix']."', '".addslashes($constant['value'])."', '".addslashes($constant['description'])."', '".$constant['type']."', '".$constant['group']."', '".$constant['plugin']."', ".$constant['saved'].");\n";
-			else
+			elseif(defined($constant['name']))
 				$credentials.= 'define('.$constant['name'].', '.var_export(constant($constant['name']), true).");\n";
 		}
 		# config Tabelle befüllen
