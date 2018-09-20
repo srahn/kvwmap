@@ -1,4 +1,4 @@
-.gitignore
+credentials.php
 config.php
 fonts/custom/*
 layouts/custom/*

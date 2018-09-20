@@ -5,6 +5,7 @@ if (!USE_EXISTING_SESSION) {
 }
 session_start();
 
+include('credentials.php');
 include('config.php');
 for($i = 0; $i < count($kvwmap_plugins); $i++) {
 	if(file_exists(PLUGINS.$kvwmap_plugins[$i].'/config/config.php'))include(PLUGINS.$kvwmap_plugins[$i].'/config/config.php');
@@ -711,10 +712,6 @@ function go_switch($go){
 			case 'StatistikAuswahl' : {
 				$GUI->checkCaseAllowed($go);
 				$GUI->StatistikAuswahl();
-			}break;
-
-			case 'loadDenkmale_laden' : {
-				$GUI->loadDenkmale_laden();
 			}break;
 
 			case 'StatistikAuswahl_Stelle' : {

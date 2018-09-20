@@ -17,7 +17,7 @@ class Debugger {
 	################################################################################
 
 	function Debugger($filename, $mime_type = 'text/html') {
-		$this->filename = LOGPATH.$_SESSION['login_name'].$filename;
+		$this->filename = LOGPATH.$_SESSION['login_name'].basename($filename);
 		$this->fp=fopen($this->filename,'w');
 
 		if ($mime_type == 'text/html') {

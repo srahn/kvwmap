@@ -3196,21 +3196,6 @@ class GUI {
 			";
   }
 
-  # Funktion zu Testzwecken der postgresql-Datenbankanfragens
-  function loadDenkmale_laden(){
-		include_(CLASSPATH.'xml.php');
-    # Erzeugen eines HIDA XML-Export-Dokument-Objektes
-    $hidaDoc=new hidaDocument(DEFAULT_DENKMAL_IMPORT_FILE);
-    # Einlesen der Felder in die Datenbank
-    $hidaDoc->loadDocInDatabase();
-    # Übergabe der Felder zur Ausgabe in HTML
-    $this->fields=$hidaDoc->fields;
-    # Löschen des Objektes
-    unset($hidaDoc);
-    # Setzen des Ausgabetemplates
-    $this->main='denkmale_geladen.php';
-  }
-
   function get_classes(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->classdaten = $mapDB->read_Classes($this->formvars['layer_id']);
@@ -3734,8 +3719,9 @@ class GUI {
 				$this->administration->get_database_status();
 				$this->showAdminFunctions();
       } break;
-      case "showConstants" : {
-        $this->showConstants();
+			case "save_config" : {
+        $result = $this->administration->save_config($this->formvars);
+				$this->showAdminFunctions();
       } break;
       case "createRandomPassword" : {
         $this->createRandomPassword();

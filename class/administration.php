@@ -36,7 +36,7 @@ function compare_migration_filenames($a, $b){
 class administration{
 
 	var $database;
-	var $config_params;
+	var $config_params = array();
 	var $migration_logs;
 	var $migration_files;
 	var $migrations_to_execute;
@@ -224,7 +224,7 @@ class administration{
 		$sql = "SELECT * FROM config ORDER BY `group`";
 		$result=$this->database->execSQL($sql,0, 0);
     if($result[0]) {
-      echo '<br>Fehler bei der Abfrage der Tabelle config.<br>';
+      #echo '<br>Fehler bei der Abfrage der Tabelle config.<br>';
     }
     else {
       while($rs=mysql_fetch_assoc($result[1])){
@@ -246,10 +246,28 @@ class administration{
 		else{
 			return $this->config_params[$name]['value'];
 		}
-	}	
+	}
+	
+	function save_config($formvars){
+		global $kvwmap_plugins;
+		foreach($this->config_params as $param){
+			$sql = "UPDATE config SET value = '".$formvars[$param['name']]."', saved = 1 WHERE name = '".$param['name']."'";
+			#echo $sql.'<br>';
+			$result=$this->database->execSQL($sql,0, 0);
+			if($result[0]) {
+				echo '<br>Fehler beim Update der Tabelle config.<br>';
+			}
+		}
+		$this->get_config_params();
+		$this->write_config_file('');
+		for($i = 0; $i < count($kvwmap_plugins); $i++){
+			$this->write_config_file($kvwmap_plugins[$i]);
+		}
+	}
 	
 	function write_config_file($plugin){
 		$this->get_config_params();
+		$config = '';
 		foreach($this->config_params as $param){
 			if($param['plugin'] == $plugin){
 				if($param['description'] != ''){
@@ -259,38 +277,31 @@ class administration{
 					}
 				}
 				if($param['type'] == 'array'){
-					$config.= "$".$param['name']." = ".preg_replace('/stdClass::__set_state/', '(object)', var_export(json_decode($param['value']), true)).";\n\n";
+					$config.= "$".$param['name']." = ".preg_replace('/stdClass::__set_state/', '', var_export(json_decode($param['value']), true)).";\n\n";
 				}
 				else{
-					$config.= "define(".$param['name'].", '".$param['real_value']."');\n\n";
+					if($param['type'] == 'string' OR $param['type'] == 'password')$quote = "'";
+					else $quote = '';
+					$config.= "define(".$param['name'].", ".$quote.$param['real_value'].$quote.");\n\n";
 				}
 			}
 		}
-		if($plugin != '')$prepath = PLUGINS.$plugin.'/config/';
-		if(file_put_contents($prepath.'config_live.php', "<?\n\n".$config."\n?>") === false){
-			$result[0]=1;
-			$result[1]='Fehler beim Schreiben der config-Datei '.$prepath.'config.php';
+		if($config != ''){
+			if($plugin != ''){
+				$prepath = PLUGINS.$plugin.'/config/';
+				if(!file_exists($prepath))mkdir($prepath);
+			}
+			if(file_put_contents($prepath.'config.php', "<?\n\n".$config."?>") === false){
+				$result[0]=1;
+				$result[1]='Fehler beim Schreiben der config-Datei '.$prepath.'config.php';
+			}
+			else $result[0]=0;
 		}
-		else $result[0]=0;
 		return $result;
 	}
-		
-	function get_constants_from_all_configs(){
-		$constants = $this->get_constants_from_config(file('config.php'), '');
-		var_export($constants);
-		global $kvwmap_plugins;
-  	if(count($kvwmap_plugins) > 0){
-			for($i = 0; $i < count($kvwmap_plugins); $i++){
-				if(file_exists(PLUGINS.$kvwmap_plugins[$i].'/config/config.php')){
-					$constants = $this->get_constants_from_config(file(PLUGINS.$kvwmap_plugins[$i].'/config/config.php'), $kvwmap_plugins[$i]);
-					echo "\n".$kvwmap_plugins[$i].":\n";
-					var_export($constants);
-				}
-			}
-		}
-	}
 	
-	function get_constants_from_config($config_lines, $plugin){
+	
+	function get_constants_from_config($config_lines, $plugin){			# diese Funktion wird nur in den Migrationen gebraucht, die von config.php auf config-Tabelle umstellen
 		$def_constants = get_defined_constants(true)['user'];
 		foreach($config_lines as $config_line){
 			if(substr(ltrim($config_line), 0, 6) == 'define'){																												# Konstanten
@@ -298,7 +309,7 @@ class administration{
 				$name = trim($name, '"\'');
 				$value = ltrim(substr($config_line, strpos($config_line, ',')+1));
 				$value = rtrim(substr($value, 0, strpos($value, ');')));
-				if($value == '')$value = $def_constants[$name];					
+				if(substr($value, 0, 1) == '$')$value = $def_constants[$name];					
 				$prefix = explode('"', $value)[0];
 				$prefix = explode("'", $prefix)[0];
 				if(strpos($value, '"') === false AND strpos($value, "'") === false AND is_numeric(trim($value, "'\"")))$type = 'numeric';
@@ -350,7 +361,6 @@ class administration{
 		}
 		return $constants;
 	}
-	
 	
 }
 

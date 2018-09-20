@@ -96,7 +96,7 @@ function toggleGroup(group, show){
 	</tr>
 	<tr>
 		<td valign="top" align="center" style="border:1px solid #C3C7C3">			
-			<table width="100%" cellpadding="4" cellspacing="2" class="table_border_collapse">
+			<table width="100%" cellpadding="4" cellspacing="2" style="width: 584px" class="table_border_collapse">
 				<tr>
 					<td colspan="4" style="background-color:<? echo BG_GLEATTRIBUTE; ?>;"><span class="fetter px17">Konfigurationsparameter</span></td>
 				</tr>
@@ -134,7 +134,7 @@ function toggleGroup(group, show){
 					</td>
 					<td align="center">
 						<? if($param['description'] != ''){ ?>
-						<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(['Beschreibung:', '<? echo str_replace(array("\r\n", "\r", "\n"), '', htmlentities($param['description'], ENT_QUOTES)); ?>'], Style[0], document.getElementById('Tip_<? echo $param['name']; ?>'))" onmouseout="htm()">
+						<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(['Beschreibung:', '<? echo str_replace(array("\r\n", "\r", "\n"), '<br>', htmlentities($param['description'], ENT_QUOTES)); ?>'], Style[0], document.getElementById('Tip_<? echo $param['name']; ?>'))" onmouseout="htm()">
 						<div id="Tip_<? echo $param['name']; ?>" style="right: 10px;visibility:hidden;position:absolute;z-index:1000;"></div>
 						<? } ?>
 					</td>
@@ -144,7 +144,7 @@ function toggleGroup(group, show){
 		<?	}
 			}} ?>
 				<tr >
-					<td colspan="4" align="center"><input type="button" onclick="location.href='index.php?go=Administratorfunktionen&func=save_config'" value="Speichern"></td>
+					<td colspan="4" align="center"><input type="button" onclick="document.GUI.func.value='save_config';document.GUI.submit();" value="Speichern"></td>
 				</tr>
 			</table> 
 		</td>
@@ -159,25 +159,8 @@ function toggleGroup(group, show){
 					<td style="background-color:<? echo BG_GLEATTRIBUTE; ?>;"><span class="fetter px17">weitere Funktionen</span></td>
 				</tr>
 				<tr style="border:1px solid #C3C7C3;">
-					<td align="center"><span class="fett"><a href="index.php?go=Administratorfunktionen&func=showConstants">Anzeige der Konstanten</a></span></td>
-				</tr>
-				<!--tr>
-					<td bordercolor="#000000" bgcolor="<?php echo BG_GLEATTRIBUTE ?>">
-						<span class="fett"><font color="#000000"><a href="index.php?go=Administratorfunktionen&func=closelogfiles">Logfiles abschliessen</a></font></span>
-					</td>
-				</tr-->
-				<tr style="border:1px solid #C3C7C3;">
 					<td align="center"><span class="fett"><a href="index.php?go=Administratorfunktionen&func=createRandomPassword">Erzeuge zufälliges Passwort</a></span></td>
 				</tr>
-				<!--tr>
-					<td bordercolor="#000000" bgcolor="<?php echo BG_GLEATTRIBUTE ?>">
-						<span class="fett">
-							<a href="index.php?go=loadDenkmale_laden">
-								Laden von Denkmaldaten aus HIDA XML Exportdatei
-							</a>
-						</span>
-					</td>
-				</tr-->
 				<tr style="border:1px solid #C3C7C3;">
 					<td align="center"><span class="fett"><a href="index.php?go=Administratorfunktionen&func=save_all_layer_attributes">Alle Layerattribute speichern</a></span></td>
 				</tr>  
@@ -185,3 +168,6 @@ function toggleGroup(group, show){
 		</td>
 	</tr>
 </table>
+
+<input type="hidden" name="go" value="Administratorfunktionen">
+<input type="hidden" name="func" value="">
