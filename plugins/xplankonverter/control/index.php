@@ -20,7 +20,8 @@ include(PLUGINS . 'xplankonverter/model/shapefiles.php');
 include(PLUGINS . 'xplankonverter/model/validierung.php');
 include(PLUGINS . 'xplankonverter/model/validierungsergebnis.php');
 include(PLUGINS . 'xplankonverter/model/xplan.php');
-include(PLUGINS . 'xplankonverter/model/converter.php');
+include(PLUGINS . 'xplankonverter/model/extract_gml.php');
+include(PLUGINS . 'xplankonverter/model/extract_standard_shp.php');
 
 /**
 * Anwendungsfälle
@@ -30,6 +31,7 @@ include(PLUGINS . 'xplankonverter/model/converter.php');
 * xplankonverter_download_xplan_gml
 * xplankonverter_download_xplan_shapes
 * xplankonverter_extract_gml_to_form
+* xplankonverter_extract_standardshapes_to_regeln
 * xplankonverter_gml_generieren
 * xplankonverter_go_to_plan
 * xplankonverter_inspire_gml_generieren
@@ -41,7 +43,7 @@ include(PLUGINS . 'xplankonverter/model/converter.php');
 * xplankonverter_regeleditor
 * xplankonverter_regeleditor_getshapeattributes
 * xplankonverter_regeleditor_getxplanattributes
-* xplankonverter_shapefiles_delete
+* xplankonverter_shapefile_loeschen
 * xplankonverter_shapefiles_index
 * xplankonverter_show_geltungsbereich_upload
 * xplankonverter_upload_geltungsbereich
@@ -49,1320 +51,1148 @@ include(PLUGINS . 'xplankonverter/model/converter.php');
 * xplankonverter_validierungsergebnisse
 */
 
-switch ($this->formvars['planart']) {
-	case 'BP-Plan' : {
-		$this->title = 'Bebauungsplan';
-		$this->plan_layer_id = XPLANKONVERTER_BP_PLAENE_LAYER_ID;
-	} break;
-	case 'FP-Plan' : {
-		$this->title = 'Flächennutzungsplan';
-		$this->plan_layer_id = XPLANKONVERTER_FP_PLAENE_LAYER_ID;
-	} break;
-	case 'SO-Plan' : {
-		$this->title = 'Sonstige Plan';
-		$this->plan_layer_id = XPLANKONVERTER_SO_PLAENE_LAYER_ID;
-	} break;
-	case 'RP-Plan' : {
-		$this->title = 'Raumordnungsplan';
-		$this->plan_layer_id = XPLANKONVERTER_RP_PLAENE_LAYER_ID;
-	} break;
-	default : {
-		$this->formvars['planart'] = 'Plan';
-		$this->title = 'Plan';
-		$this->plan_layer_id = XPLANKONVERTER_XP_PLAENE_LAYER_ID;
-	} break;	
-}
+if (stripos($this->go, 'xplankonverter_') === 0) {
+	function isInStelleAllowed($stelle, $requestStelleId) {
+		global $GUI;
+		if ($stelle->id == $requestStelleId)
+			return true;
+		else {
+			$GUI->add_message('error', 'Das angefragte Objekt darf nicht in dieser Stelle bearbeitet werden.' . ($requestStelleId != '' ? ' Es gehört zur Stelle mit der ID: ' . $requestStelleId : ''));
+			return false;
+		}
+	}
 
-switch ($go) {
+	/*
+	* extract zip files if necessary, check completeness and copy files to upload folder
+	*/
+	function xplankonverter_unzip_and_check_and_copy($shape_files, $dest_dir) {
+		# extract zip files if necessary and extract info
+		$temp_files = xplankonverter_unzip($shape_files, $dest_dir);
 
-	case 'xplankonverter_konvertierungen_index' : {
-		$this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
-		$this->output();
-	} break;
+		# group uploaded files to triples according to their basename
+		$check = array('shp' => false, 'shx' => false, 'dbf' => false);
+		$check_list = array();
+		array_walk($temp_files, function($file_item) use ($check, &$check_list){
+			if (!$check_list[$file_item['filename']]) $check_list[$file_item['filename']] = $check;
+			$check_list[$file_item['filename']][$file_item['extension']] = $file_item;
+		});
 
-	case 'xplankonverter_plaene_index' : {
-		$this->title = str_replace('an', 'äne', $this->title);
-		$this->main = '../../plugins/xplankonverter/view/plaene.php';
-		$this->output();
-	} break;
+		$incomplete = array();
+		$complete_files = array();
+		array_walk($check_list, function($check_list_item) use (&$incomplete, &$complete_files){
+			if ($check_list_item['dbf'] && $check_list_item['shx'] && $check_list_item['shp']) {
+				$complete_files[] = $check_list_item['dbf'];
+				$complete_files[] = $check_list_item['shp'];
+				$complete_files[] = $check_list_item['shx'];
+			} else $incomplete = $check_list_item;
+		});
 
-	case 'xplankonverter_plan_edit' : {
-		$error = true;
-		if ($this->formvars['konvertierung_id'] != '') {
-			$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
-			if ($this->konvertierung->get('id') != '') {
-				if (isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) {
-					$this->plan = XP_Plan::find_by_id($this,'konvertierung_id', $this->konvertierung->get('id'), $this->konvertierung->get('planart'));
-					if ($this->plan->get('gml_id') != '') {
-						$error = false;
-						$this->title .= ' bearbeiten';
-						$this->main = '../../plugins/xplankonverter/view/plan/' . $this->formvars['planart'] . '_edit.php';
-					}
-					else {
-						$err_msg = 'Der Plan zur Konvertierung mit dem Namen "' . $this->konvertierung->get('bezeichnung') . '" und der ID "' . $this->konvertierung->get('id') . '" wurde nicht gefunden!';
-					}
-				}
+		# copy temp shape files to destination
+		$uploaded_files = array();
+		foreach($complete_files AS $file) {
+			$uploaded_files[] = xplankonverter_copy_uploaded_shp_file($file, $dest_dir);
+		}
+		return $uploaded_files;
+	}
+	/*
+	* extract zip files if necessary and copy files to upload folder
+	*/
+	function xplankonverter_unzip($shape_files, $dest_dir) {
+		$temp_files = array();
+		# extract zip files if necessary and copy files to upload folder
+		foreach($shape_files['name'] AS $i => $shape_file_name) {
+			$path_parts = pathinfo($shape_file_name);
+
+			if (strtolower($path_parts['extension']) == 'zip') {
+				# extract files if the extension is zip
+				$temp_files = extract_uploaded_zip_file($shape_files['tmp_name'][$i]);
 			}
 			else {
-				$err_msg = 'Die Konvertierung mit der ID: ' . $this->formvars['konvertierung_id'] . ' wurde nicht gefunden!';
-			}
-		}
-		else {
-			$error = false;
-			$this->title = 'Neuer ' . $this->title;
-			$this->main = '../../plugins/xplankonverter/view/plan/' . $this->formvars['planart'] . '_edit.php';
-		}
-		if ($error) {
-			if ($err_msg != '') {
-				$this->add_message('error', $err_msg);
-			}
-			$this->main = '../../plugins/xplankonverter/view/plaene.php';
-		}
-		$this->output();
-	} break;
-
-	/*
-	* Anwendungsfall, der aus jeder gml_class einen Layer erzeugt.
-	*/
-	/*
-	case 'xplankonverter_xplan_classes' : {
-		# get layerGroupId or create a group if not exists
-		$layer_group_id = 12;
-
-		$gml_classes = getGMLClasses();
-
-		foreach($gml_classes AS $gml_class) {
-			foreach(array(0 => 'point', 1 => 'line', 2 => 'polygon') AS $geom_type_key => $geom_type_value) {
-				# create layer
-				$this->formvars['Name'] = $gml_class['name'];
-				$this->formvars['Datentyp'] = $shapeFile->get('datatype');
-				$this->formvars['Gruppe'] = $layer_group_id;
-				$this->formvars['pfad'] = 'Select * from ' . $shapeFile->dataTableName() . ' where 1=1';
-				$this->formvars['Data'] = 'the_geom from (select oid, * from ' .
-					$shapeFile->dataSchemaName() . '.' . $shapeFile->dataTableName() .
-					' where 1=1) as foo using unique oid using srid=' . $shapeFile->get('epsg_code');
-				$this->formvars['maintable'] = $shapeFile->dataTableName();
-				$this->formvars['schema'] = $shapeFile->dataSchemaName();
-				$this->formvars['connection'] = $this->pgdatabase->connect_string;
-				$this->formvars['connectiontype'] = '6';
-				$this->formvars['filteritem'] = 'oid';
-				$this->formvars['tolerance'] = '5';
-				$this->formvars['toleranceunits'] = 'pixels';
-				$this->formvars['epsg_code'] = $shapeFile->get('epsg_code');
-				$this->formvars['querymap'] = '1';
-				$this->formvars['queryable'] = '1';
-				$this->formvars['transparency'] = '75';
-				$this->formvars['postlabelcache'] = '0';
-				$this->formvars['allstellen'] = '2300';
-				$this->formvars['ows_srs'] = 'EPSG:' . $shapeFile->get('epsg_code') . ' EPSG:25833 EPSG:4326 EPSG:2398';
-				$this->formvars['wms_server_version'] = '1.1.0';
-				$this->formvars['wms_format'] = 'image/png';
-				$this->formvars['wms_connectiontimeout'] = '60';
-				$this->formvars['selstellen'] = '1, ' . $this->konvertierung->get('stelle_id') . ', 1, ' . $this->konvertierung->get('stelle_id');
-				$this->LayerAnlegen();
-
-
-				# Ordne layer zur Stelle
-				$this->Stellenzuweisung(
-					array($shapeFile->get('layer_id')),
-					array($this->konvertierung->get('stelle_id'))
+				# set data from single file
+				$path_parts = pathinfo($shape_file_name);
+				$temp_files[] = array(
+					'basename' => $path_parts['basename'],
+					'filename' => $path_parts['filename'],
+					'extension' => strtolower($path_parts['extension']),
+					'tmp_name' => $shape_files['tmp_name'][$i],
+					'unziped' => false
 				);
-
-				# Füge eine Klasse zum neuen Layer hinzu.
-				$this->formvars['class_name'] = 'alle';
-				$this->formvars['class_id'] = $this->Layereditor_KlasseHinzufuegen();
-
-				# Füge einen Style zur Klasse hinzu
-				$this->add_style();
-
 			}
 		}
-	#}	end of upload files
-	$this->main = '../../plugins/xplankonverter/view/shapefiles.php';
+		return $temp_files;
+	}
 
+	/*
+	* Packt die angegebenen Zip-Dateien im sys_temp_dir Verzeichnis aus
+	* und gibt die ausgepackten Dateien in der Struktur von
+	* hochgeladenen Dateien aus
+	*/
+	function extract_uploaded_zip_file($zip_file) {
+		$sys_temp_dir = sys_get_temp_dir();
+		$extracted_files = array_map(
+			function($extracted_file) {
+				$path_parts = pathinfo($extracted_file);
+				$file = array(
+					'basename' => $path_parts['basename'],
+					'filename' => $path_parts['filename'],
+					'extension' => $path_parts['extension'],
+					'tmp_name' => sys_get_temp_dir() . '/' . $extracted_file,
+					'unziped' => true
+				);
+				return $file;
+			},
+			unzip($zip_file, false, false, true)
+		);
+		return $extracted_files;
+	}
 
-		$this->output();
-	} break;
-*/
-	case 'xplankonverter_shapefiles_index': {
-		if ($this->formvars['konvertierung_id'] == '') {
-			$this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
-			$this->main = 'Hinweis.php';
+	/*
+	* Copy files from sys_temp_dir to upload directory and mark if
+	* files are new, override older or are ignored
+	*/
+	function xplankonverter_copy_uploaded_shp_file($file, $dest_dir) {
+		$messages = array();
+		if (
+			in_array($file['extension'], array('dbf', 'shx', 'shp')) and # nur Shape files
+			substr($file['basename'], 0, 2) != '._' # keine versteckten files
+		) {
+
+			$umlaute_mit_diakritic = array('ä','Ä','ü', 'Ü', 'ö', 'Ö');
+			$umlaute_ohne_diakritic = array('ä', 'Ä', 'ü', 'Ü', 'ö', 'Ö');
+			$file['basename'] = str_replace($umlaute_mit_diakritic, $umlaute_ohne_diakritic, $file['basename']);
+			$file['filename'] = str_replace($umlaute_mit_diakritic, $umlaute_ohne_diakritic, $file['filename']);
+
+			if (file_exists($dest_dir . $file['basename'])) {
+				$file['state'] = 'geändert';
+			}
+			else {
+				$file['state'] = 'neu';
+			}
+			if ($file['unziped']) {
+				rename($file['tmp_name'], $dest_dir . $file['basename']);
+			}
+			else {
+				move_uploaded_file($file['tmp_name'], $dest_dir . $file['basename']);
+			}
 		}
 		else {
-			$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
-			if (isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) {
-				if (isset($_FILES['shape_files']) and $_FILES['shape_files']['name'][0] != '') {
+			if ($file['unziped']) {
+				if (is_dir($file['tmp_name']))
+					delete_files($file['tmp_name']);
+				else
+					unlink($file['tmp_name']);
+			}
+			$file['state'] = 'ignoriert';
+		}
+		return $file;
+	}
 
-					$this->konvertierung->create_directories();
-					$upload_path = $this->konvertierung->get_file_path('uploaded_shapes/');
+	switch ($this->formvars['planart']) {
+		case 'BP-Plan' : {
+			$this->title = 'Bebauungsplan';
+			$this->plan_class = 'BP_Plan';
+			$this->plan_layer_id = XPLANKONVERTER_BP_PLAENE_LAYER_ID;
+		} break;
+		case 'FP-Plan' : {
+			$this->title = 'Flächennutzungsplan';
+			$this->plan_class = 'FP_Plan';
+			$this->plan_layer_id = XPLANKONVERTER_FP_PLAENE_LAYER_ID;
+		} break;
+		case 'SO-Plan' : {
+			$this->title = 'Sonstige Plan';
+			$this->plan_class = 'SO_Plan';
+			$this->plan_layer_id = XPLANKONVERTER_SO_PLAENE_LAYER_ID;
+		} break;
+		case 'RP-Plan' : {
+			$this->title = 'Raumordnungsplan';
+			$this->plan_class = 'RP_Plan';
+			$this->plan_layer_id = XPLANKONVERTER_RP_PLAENE_LAYER_ID;
+		} break;
+		default : {
+			$this->formvars['planart'] = 'Plan';
+			$this->plan_class = 'XP_Plan';
+			$this->title = 'Plan';
+			$this->plan_layer_id = XPLANKONVERTER_XP_PLAENE_LAYER_ID;
+		} break;
+	}
 
-					# unzip and copy files to upload folder
-					$uploaded_files = xplankonverter_unzip_and_check_and_copy($_FILES['shape_files'], $upload_path);
-					# get layerGroupId or create a group if not exists
-					$layer_group_id = $this->konvertierung->get('layer_group_id');
-					if (empty($layer_group_id))
-						$layer_group_id = $this->konvertierung->create_layer_group('Shape');
-					foreach($uploaded_files AS $uploaded_file) {
-						if ($uploaded_file['extension'] == 'dbf' and $uploaded_file['state'] != 'ignoriert') {
+	$this->plan_table_name = strtolower($this->plan_class);
+	$this->plan_oid_name = $this->plan_table_name . '_oid';
 
-							# delete existing shape file
-							$shapeFile = new ShapeFile($this);
-							$shapeFiles = $shapeFile->find_where("
-								filename = '" . $uploaded_file['filename'] . "' AND
-								konvertierung_id = '" . $this->konvertierung->get('id') . "' AND
-								stelle_id = " . $this->konvertierung->get('stelle_id')
-							);
+	switch ($go) {
+		case 'xplankonverter_konvertierungen_index' : {
+			$this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
+			$this->output();
+		} break;
 
-							if (!empty($shapeFiles)) $shapeFile = $shapeFiles[0]; # es kann nur eins geben
-							if (!empty($shapeFile->data)) {
-								$this->debug->show('<p>Lösche gefundenes shape file.', false);
-								$shapeFile->deleteLayer();
-								$shapeFile->deleteDataTable();
-								$shapeFile->delete();
-							}
+		case 'xplankonverter_plaene_index' : {
+			$this->title = str_replace('an', 'äne', $this->title);
+			$this->main = '../../plugins/xplankonverter/view/plaene.php';
+			$this->output();
+		} break;
 
-							# create new record in shapefile table
-							$shapeFile->create(
-								array(
-									'filename' => $uploaded_file['filename'],
-									'konvertierung_id' => $this->konvertierung->get('id'),
-									'stelle_id' => $this->konvertierung->get('stelle_id'),
-									'epsg_code' => $this->formvars['epsg_code']
-								)
-							);
-
-							# Create schema for data table if not exists
-							$shapeFile->createDataTableSchema();
-
-							# load into database table
-							$result = $shapeFile->loadIntoDataTable();
-
-							if ($result['success']) {
-								# add gml_id column if not exists
-								if (!$shapeFile->gmlIdColumnExists())
-									$shapeFile->addGmlIdColumn();
-
-								# Set datatype for shapefile
-								$shapeFile->set('datatype', $result['datatype']);
-								$shapeFile->update();
-
-								# create layer
-								$this->formvars['Name'] = $shapeFile->get('filename');
-								$this->formvars['Datentyp'] = $shapeFile->get('datatype');
-								$this->formvars['Gruppe'] = $layer_group_id;
-								$this->formvars['pfad'] = 'Select * from ' . $shapeFile->dataTableName() . ' where 1=1';
-								$this->formvars['Data'] = 'the_geom from (select oid, * from ' .
-									$shapeFile->dataSchemaName() . '.' . $shapeFile->dataTableName() .
-									' where 1=1) as foo using unique oid using srid=' . $shapeFile->get('epsg_code');
-								$this->formvars['maintable'] = $shapeFile->dataTableName();
-								$this->formvars['schema'] = $shapeFile->dataSchemaName();
-								$this->formvars['connection'] = $this->pgdatabase->connect_string;
-								$this->formvars['connectiontype'] = '6';
-								$this->formvars['filteritem'] = 'oid';
-								$this->formvars['tolerance'] = '5';
-								$this->formvars['toleranceunits'] = 'pixels';
-								$this->formvars['epsg_code'] = $shapeFile->get('epsg_code');
-								$this->formvars['querymap'] = '1';
-								$this->formvars['queryable'] = '1';
-								$this->formvars['transparency'] = '75';
-								$this->formvars['postlabelcache'] = '0';
-								$this->formvars['allstellen'] = '2300';
-								$this->formvars['ows_srs'] = 'EPSG:' . $shapeFile->get('epsg_code') . ' EPSG:25833 EPSG:4326 EPSG:2398';
-								$this->formvars['wms_server_version'] = '1.1.0';
-								$this->formvars['wms_format'] = 'image/png';
-								$this->formvars['wms_connectiontimeout'] = '60';
-								$this->formvars['selstellen'] = '1, ' . $this->konvertierung->get('stelle_id') . ', 1, ' . $this->konvertierung->get('stelle_id');
-								$this->LayerAnlegen();
-
-								# Assign layer_id to shape file record
-								$shapeFile->set('layer_id', $this->formvars['selected_layer_id']);
-								$shapeFile->update();
-
-								# Ordne layer zur Stelle
-								$this->Stellenzuweisung(
-									array($shapeFile->get('layer_id')),
-									array($this->konvertierung->get('stelle_id'))
-								);
-
-								# Füge eine Klasse zum neuen Layer hinzu.
-								$this->formvars['class_name'] = 'alle';
-								$this->formvars['class_id'] = $this->Layereditor_KlasseHinzufuegen();
-
-								# Füge einen Style zur Klasse hinzu
-								$this->add_style();
-							}
-							else {
-								$this->add_message('error', $result['err_msg']);
-							}
+		case 'xplankonverter_plan_edit' : {
+			$error = true;
+			if ($this->formvars['konvertierung_id'] != '') {
+				$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
+				if ($this->konvertierung->get('id') != '') {
+					if (isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) {
+						$this->plan = XP_Plan::find_by_id($this,'konvertierung_id', $this->konvertierung->get('id'), $this->konvertierung->get('planart'));
+						if ($this->plan->get('gml_id') != '') {
+							$error = false;
+							$this->title .= ' bearbeiten';
+							$this->main = '../../plugins/xplankonverter/view/plan/' . $this->formvars['planart'] . '_edit.php';
+						}
+						else {
+							$err_msg = 'Der Plan zur Konvertierung mit dem Namen "' . $this->konvertierung->get('bezeichnung') . '" und der ID "' . $this->konvertierung->get('id') . '" wurde nicht gefunden!';
 						}
 					}
-				} # end of upload files
-				$this->main = '../../plugins/xplankonverter/view/shapefiles.php';
-			}
-		}
-		$this->output();
-	} break;
-
-	case 'xplankonverter_shapefiles_delete' : {
-		if ($this->formvars['shapefile_id'] == '') {
-			$this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher ein Shape Datei ausgewählt wurde.';
-			$this->main = 'Hinweis.php';
-		}
-		else {
-			$shapefile = new Shapefile($this, 'xplankonverter', 'shapefiles');
-			$shapefile->find_by('id', $this->formvars['shapefile_id']);
-			if (isInStelleAllowed($this->Stelle, $shapefile->get('stelle_id'))) {
-				# Delete the layerdefinition in mysql (rolleneinstellungen, layer, classes, styles, etc.)
-				$shapefile->deleteLayer();
-				# Delete the postgis data table that hold the data of the shape file
-				$shapefile->deleteDataTable();
-				# Delete the uploaded shape files itself
-				$shapefile->deleteUploadFiles();
-				# Delete the record in postgres shapefile table (unregister for konverter)
-				$shapefile->delete();
-				$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
-				$this->main = '../../plugins/xplankonverter/view/shapefiles.php';
-			}
-		}
-		$this->output();
-	} break;
-
-  case 'xplankonverter_konvertierung_status': {
-    header('Content-Type: application/json');
-    $response = array();
-    if ($this->formvars['konvertierung_id'] == '') {
-      $response['success'] = false;
-      $response['msg'] = 'Konvertierung wurde nicht angegeben';
-      return;
-    }
-    if ($this->formvars['status'] == '') {
-      $this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn ein Status angegeben ist.';
-      $response['success'] = false;
-      $response['msg'] = 'Status wurde nicht angegeben';
-      echo json_encode($response);
-      return;
-    }
-    // now get konvertierung
-    $this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
-
-    // check stelle
-    if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) return;
-
-    // check applicability of status for external invokation
-    $statusToSet = $this->formvars['status'];
-    $isApplicable = false;
-    $applicableStates = array(
-        Konvertierung::$STATUS['IN_ERSTELLUNG'],
-        Konvertierung::$STATUS['IN_KONVERTIERUNG'],
-        Konvertierung::$STATUS['IN_GML_ERSTELLUNG'],
-        Konvertierung::$STATUS['IN_INSPIRE_GML_ERSTELLUNG']
-    );
-    array_walk(
-      $applicableStates,
-      function($pattern) use ($statusToSet,&$isApplicable) {
-        $isApplicable |= $statusToSet == $pattern;
-      }
-    );
-    if (!$isApplicable) {
-      $this->Hinweis = "Der Status '$statusToSet' kann nicht explizit gesetzt werden.";
-      $response['success'] = false;
-      $response['msg'] = "Status '$statusToSet' kann nicht explizit gesetzt werden";
-      echo json_encode($response);
-      return;
-    }
-    // check validity of status
-    $isValid = false;
-    $validPredecessorStates = array();
-    switch($statusToSet){
-      case Konvertierung::$STATUS['IN_ERSTELLUNG']:
-        $validPredecessorStates = array(
-          Konvertierung::$STATUS['ERSTELLT'],
-          Konvertierung::$STATUS['KONVERTIERUNG_OK'],
-          Konvertierung::$STATUS['KONVERTIERUNG_ERR'],
-          Konvertierung::$STATUS['GML_ERSTELLUNG_OK'],
-          Konvertierung::$STATUS['GML_ERSTELLUNG_ERR'],
-          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK'],
-          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']
-        );
-      break;
-      case Konvertierung::$STATUS['IN_KONVERTIERUNG']:
-        $validPredecessorStates = array(
-          Konvertierung::$STATUS['ERSTELLT'],
-          Konvertierung::$STATUS['KONVERTIERUNG_OK'],
-          Konvertierung::$STATUS['KONVERTIERUNG_ERR'],
-          Konvertierung::$STATUS['GML_ERSTELLUNG_OK'],
-          Konvertierung::$STATUS['GML_ERSTELLUNG_ERR'],
-          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK'],
-          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']
-        );
-      break;
-      case Konvertierung::$STATUS['IN_GML_ERSTELLUNG']:
-        $validPredecessorStates = array(
-          Konvertierung::$STATUS['KONVERTIERUNG_OK'],
-          Konvertierung::$STATUS['GML_ERSTELLUNG_OK'],
-          Konvertierung::$STATUS['GML_ERSTELLUNG_ERR'],
-          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK'],
-          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']
-        );
-      break;
-      case Konvertierung::$STATUS['IN_INSPIRE_GML_ERSTELLUNG']:
-        $validPredecessorStates = array(
-          Konvertierung::$STATUS['GML_ERSTELLUNG_OK'],
-          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK'],
-          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']
-        );
-      break;
-    }
-    $currStatus = $this->konvertierung->get('status');
-    $isValid = array_reduce(
-        $validPredecessorStates,
-        function($isValid,$predStatus) use ($currStatus) {
-          return isValid || ($predStatus == $currStatus);
-    }, $isValid);
-    if (!$isValid) {
-      $response['success'] = false;
-      $response['msg'] = "Status '$statusToSet' ist kein gueltiger Folgestatus von '$currStatus'";
-      echo json_encode($response);
-      return;
-    }
-
-    // status is valid to be set
-    $this->konvertierung->set('status', $statusToSet);
-    $this->konvertierung->update();
-    $response['success'] = true;
-    $response['msg'] = 'Status wurde gesetzt';
-    echo json_encode($response);
-  } break;
-
-
-	case 'xplankonverter_create_konvertierung_directories' : {
-		$konvertierung = new Konvertierung($this);
-		$konvertierungen = $konvertierung->find_where('1=1');
-		Konvertierung::$write_debug = true;
-		foreach($konvertierungen AS $k) {
-			$k->create_directories();
-		}
-	} break;
-
-  case 'xplankonverter_konvertierung': {
-		if ($this->formvars['konvertierung_id'] == '') {
-			$this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
-			$this->main = 'Hinweis.php';
-		}
-		else {
-			$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
-			if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) {
-				$this->Fehlermeldung = "Der Zugriff auf den Anwendungsfall ist nicht erlaubt.<br>
-					Die Konvertierung mit der ID={$this->konvertierung->get('id')} gehört zur Stelle ID= {$this->konvertierung->get('stelle_id')}<br>
-					Sie befinden sich aber in Stelle ID= {$this->Stelle->id}<br>
-					Melden Sie sich mit einem anderen Benutzer an.";
-			}
-			else {
-				$this->konvertierung->reset_mapping();
-				$this->konvertierung->mapping();
-#				$this->konvertierung->set_historie();
-				$this->konvertierung->set_status(
-					($this->konvertierung->validierung_erfolgreich() ? 'Konvertierung abgeschlossen' : 'Konvertierung abgebrochen')
-				);
-
-				# Validierungsergebnisse anzeigen.
-				$this->main = '../../plugins/xplankonverter/view/validierungsergebnisse.php';
-			}
-		}
-		$this->output();
-	} break;
-
-	case 'xplankonverter_validierungsergebnisse' : {
-		if ($this->formvars['konvertierung_id'] == '') {
-			$this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
-			$this->main = 'Hinweis.php';
-		}
-		else {
-			$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
-			if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) {
-				$this->Fehlermeldung = "Der Zugriff auf den Anwendungsfall ist nicht erlaubt.<br>
-					Die Konvertierung mit der ID={$this->konvertierung->get('id')} gehört zur Stelle ID= {$this->konvertierung->get('stelle_id')}<br>
-					Sie befinden sich aber in Stelle ID= {$this->Stelle->id}<br>
-					Melden Sie sich mit einem anderen Benutzer an.";
-			}
-			else {
-				# Validierungsergebnisse anzeigen.
-				$this->main = '../../plugins/xplankonverter/view/validierungsergebnisse.php';
-			}
-		}
-		$this->output();
-	} break;
-
-	case 'xplankonverter_gml_generieren' : {
-		include(PLUGINS . 'xplankonverter/model/build_gml.php');
-		include(PLUGINS . 'xplankonverter/model/TypeInfo.php');
-		$response = array();
-		if ($this->formvars['konvertierung_id'] == '') {
-			$response['success'] = false;
-			$response['msg'] = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
-		}
-		else {
-			$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
-			if (isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) {
-				if ($this->konvertierung->get('status') == Konvertierung::$STATUS['KONVERTIERUNG_OK']
-				 || $this->konvertierung->get('status') == Konvertierung::$STATUS['IN_GML_ERSTELLUNG']
-				 || $this->konvertierung->get('status') == Konvertierung::$STATUS['GML_ERSTELLUNG_OK']) {
-					// Status setzen
-					$this->konvertierung->set('status', Konvertierung::$STATUS['IN_GML_ERSTELLUNG']);
-					$this->konvertierung->update();
-
-					// XPlan-GML ausgeben
-					$this->gml_builder = new Gml_builder($this->pgdatabase);
-					$plan = XP_Plan::find_by_id($this,'konvertierung_id', $this->konvertierung->get('id'), $this->konvertierung->get('planart'));
-					if (!$this->gml_builder->build_gml($this->konvertierung, $plan)) {
-  					// Status setzen
-  					$this->konvertierung->set('status', Konvertierung::$STATUS['GML_ERSTELLUNG_ERR']);
-  					$this->konvertierung->update();
-  					// Antwort absenden und case beenden
-  					$response['success'] = false;
-  					$response['msg'] = 'Bei der XPlan-GML-Generierung ist ein Fehler aufgetreten.';
-        		header('Content-Type: application/json');
-        		echo json_encode($response);
-        		break;
-					}
-					$this->gml_builder->save($this->konvertierung->get_file_name('xplan_gml'));
-
-					// Status setzen
-					$this->konvertierung->set('status', Konvertierung::$STATUS['GML_ERSTELLUNG_OK']);
-					$this->konvertierung->update();
-
-					// Erzeuge Layergruppe, falls noch nicht vorhanden
-					$layer_group_id = $this->konvertierung->create_layer_group('GML');
-					// vorhandene Layer dieser Konvertierung löschen
-					// Neue Layer von Vorlagen GML kopieren
-					/*
-					$this->formvars['group_id'] = $layer_group_id;
-					$this->formvars['pg_schema'] = XPLANKONVERTER_CONTENT_SCHEMA;
-					$this->layer_generator_erzeugen(); # Funktion aus kvwmap.php
-					*/
-					$response['success'] = true;
-					$response['msg'] = 'XPlan-GML-Datei erfolgreich erstellt.';
-				} else {
-					$response['success'] = false;
-					$response['msg'] = 'Die ausgewählte Konvertierung muss zuerst ausgeführt werden.';
+				}
+				else {
+					$err_msg = 'Die Konvertierung mit der ID: ' . $this->formvars['konvertierung_id'] . ' wurde nicht gefunden!';
 				}
 			}
-		}
-		header('Content-Type: application/json');
-		echo json_encode($response);
-	} break;
+			else {
+				$error = false;
+				$this->title = 'Neuer ' . $this->title;
+				$this->main = '../../plugins/xplankonverter/view/plan/' . $this->formvars['planart'] . '_edit.php';
+			}
+			if ($error) {
+				if ($err_msg != '') {
+					$this->add_message('error', $err_msg);
+				}
+				$this->main = '../../plugins/xplankonverter/view/plaene.php';
+			}
+			$this->output();
+		} break;
 
-	case 'xplankonverter_konvertierung_loeschen' : {
-		$response = array(
-			'success' => $this->layer_Datensaetze_loeschen(false),
-			'msg' => 'Konvertierung erfolgreich gelöscht. ' . $msg
-		);
-		header('Content-Type: application/json');
-		echo json_encode($response);
-	} break;
+		/*
+		* Anwendungsfall, der aus jeder gml_class einen Layer erzeugt.
+		*/
+		/*
+		case 'xplankonverter_xplan_classes' : {
+			# get layerGroupId or create a group if not exists
+			$layer_group_id = 12;
 
-	case 'xplankonverter_inspire_gml_generieren' : {
-		$success = true;
-		$konvertierung_id = $this->formvars['konvertierung_id'];
-		if ($konvertierung_id == '') {
-			$this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
-			$this->main = 'Hinweis.php';
-		}
+			$gml_classes = getGMLClasses();
 
-		$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
-		if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) return;
+			foreach($gml_classes AS $gml_class) {
+				foreach(array(0 => 'point', 1 => 'line', 2 => 'polygon') AS $geom_type_key => $geom_type_value) {
+					# create layer
+					$this->formvars['Name'] = $gml_class['name'];
+					$this->formvars['Datentyp'] = $shapeFile->get('datatype');
+					$this->formvars['Gruppe'] = $layer_group_id;
+					$this->formvars['pfad'] = 'Select * from ' . $shapeFile->dataTableName() . ' where 1=1';
+					$this->formvars['Data'] = 'the_geom from (select oid, * from ' .
+						$shapeFile->dataSchemaName() . '.' . $shapeFile->dataTableName() .
+						' where 1=1) as foo using unique oid using srid=' . $shapeFile->get('epsg_code');
+					$this->formvars['maintable'] = $shapeFile->dataTableName();
+					$this->formvars['schema'] = $shapeFile->dataSchemaName();
+					$this->formvars['connection'] = $this->pgdatabase->connect_string;
+					$this->formvars['connectiontype'] = '6';
+					$this->formvars['filteritem'] = 'oid';
+					$this->formvars['tolerance'] = '5';
+					$this->formvars['toleranceunits'] = 'pixels';
+					$this->formvars['epsg_code'] = $shapeFile->get('epsg_code');
+					$this->formvars['querymap'] = '1';
+					$this->formvars['queryable'] = '1';
+					$this->formvars['transparency'] = '75';
+					$this->formvars['postlabelcache'] = '0';
+					$this->formvars['allstellen'] = '2300';
+					$this->formvars['ows_srs'] = 'EPSG:' . $shapeFile->get('epsg_code') . ' EPSG:25833 EPSG:4326 EPSG:2398';
+					$this->formvars['wms_server_version'] = '1.1.0';
+					$this->formvars['wms_format'] = 'image/png';
+					$this->formvars['wms_connectiontimeout'] = '60';
+					$this->formvars['selstellen'] = '1, ' . $this->konvertierung->get('stelle_id') . ', 1, ' . $this->konvertierung->get('stelle_id');
+					$this->LayerAnlegen();
 
-		# set the paths
-		$xsl = PLUGINS . 'xplankonverter/model/xplan2inspire.xsl';
-		$fileinput = $this->konvertierung->get_file_name('xplan_gml');
-		$fileoutput = $this->konvertierung->get_file_name('inspire_gml');
-		#echo 'test' . $fileinput;
 
-		if (!file_exists($fileinput)) {
-			$success = false;
-			$msg = 'Die XPlanGML-Datei fehlt. Sie wurde noch nicht erzeugt oder ein Pfad ist falsch.';
-			$status =  Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR'];
-		}
+					# Ordne layer zur Stelle
+					$this->Stellenzuweisung(
+						array($shapeFile->get('layer_id')),
+						array($this->konvertierung->get('stelle_id'))
+					);
 
-		if (file_exists($fileoutput)) {
-			unlink($fileoutput);
-		}
+					# Füge eine Klasse zum neuen Layer hinzu.
+					$this->formvars['class_name'] = 'alle';
+					$this->formvars['class_id'] = $this->Layereditor_KlasseHinzufuegen();
 
-		if ($success) {
-	    $this->konvertierung->set('status', Konvertierung::$STATUS['IN_INSPIRE_GML_ERSTELLUNG']);
+					# Füge einen Style zur Klasse hinzu
+					$this->add_style();
+
+				}
+			}
+		#}	end of upload files
+		$this->main = '../../plugins/xplankonverter/view/shapefiles.php';
+
+
+			$this->output();
+		} break;
+	*/
+		case 'xplankonverter_shapefiles_index': {
+			if ($this->formvars['konvertierung_id'] == '') {
+				$this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
+				$this->main = 'Hinweis.php';
+			}
+			else {
+				$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
+				if (isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) {
+					if (isset($_FILES['shape_files']) and $_FILES['shape_files']['name'][0] != '') {
+
+						$this->konvertierung->create_directories();
+						$upload_path = $this->konvertierung->get_file_path('uploaded_shapes/');
+
+						# unzip and copy files to upload folder
+						$uploaded_files = xplankonverter_unzip_and_check_and_copy($_FILES['shape_files'], $upload_path);
+						# get layerGroupId or create a group if not exists
+						$layer_group_id = $this->konvertierung->get('layer_group_id');
+						if (empty($layer_group_id))
+							$layer_group_id = $this->konvertierung->create_layer_group('Shape');
+						foreach($uploaded_files AS $uploaded_file) {
+							if ($uploaded_file['extension'] == 'dbf' and $uploaded_file['state'] != 'ignoriert') {
+
+								# delete existing shape file
+								$shapeFile = new ShapeFile($this);
+								$shapeFiles = $shapeFile->find_where("
+									filename = '" . $uploaded_file['filename'] . "' AND
+									konvertierung_id = '" . $this->konvertierung->get('id') . "' AND
+									stelle_id = " . $this->konvertierung->get('stelle_id')
+								);
+
+								if (!empty($shapeFiles)) $shapeFile = $shapeFiles[0]; # es kann nur eins geben
+								if (!empty($shapeFile->data)) {
+									$this->debug->show('<p>Lösche gefundenes shape file.', false);
+									$shapeFile->deleteLayer();
+									$shapeFile->deleteDataTable();
+									$shapeFile->delete();
+								}
+
+								# create new record in shapefile table
+								$shapeFile->create(
+									array(
+										'filename' => $uploaded_file['filename'],
+										'konvertierung_id' => $this->konvertierung->get('id'),
+										'stelle_id' => $this->konvertierung->get('stelle_id'),
+										'epsg_code' => $this->formvars['epsg_code']
+									)
+								);
+
+								# Create schema for data table if not exists
+								$shapeFile->createDataTableSchema();
+
+								# load into database table
+								$result = $shapeFile->loadIntoDataTable();
+
+								if ($result['success']) {
+									# add gml_id column if not exists
+									if (!$shapeFile->gmlIdColumnExists())
+										$shapeFile->addGmlIdColumn();
+
+									# Set datatype for shapefile
+									$shapeFile->set('datatype', $result['datatype']);
+									$shapeFile->update();
+
+									# create layer
+									$this->formvars['Name'] = $shapeFile->get('filename');
+									$this->formvars['Datentyp'] = $shapeFile->get('datatype');
+									$this->formvars['Gruppe'] = $layer_group_id;
+									$this->formvars['pfad'] = 'Select * from ' . $shapeFile->dataTableName() . ' where 1=1';
+									$this->formvars['Data'] = 'the_geom from (select oid, * from ' .
+										$shapeFile->dataSchemaName() . '.' . $shapeFile->dataTableName() .
+										' where 1=1) as foo using unique oid using srid=' . $shapeFile->get('epsg_code');
+									$this->formvars['maintable'] = $shapeFile->dataTableName();
+									$this->formvars['schema'] = $shapeFile->dataSchemaName();
+									$this->formvars['connection'] = $this->pgdatabase->connect_string;
+									$this->formvars['connectiontype'] = '6';
+									$this->formvars['filteritem'] = 'oid';
+									$this->formvars['tolerance'] = '5';
+									$this->formvars['toleranceunits'] = 'pixels';
+									$this->formvars['epsg_code'] = $shapeFile->get('epsg_code');
+									$this->formvars['querymap'] = '1';
+									$this->formvars['queryable'] = '1';
+									$this->formvars['transparency'] = '75';
+									$this->formvars['postlabelcache'] = '0';
+									$this->formvars['allstellen'] = '2300';
+									$this->formvars['ows_srs'] = 'EPSG:' . $shapeFile->get('epsg_code') . ' EPSG:25833 EPSG:4326 EPSG:2398';
+									$this->formvars['wms_server_version'] = '1.1.0';
+									$this->formvars['wms_format'] = 'image/png';
+									$this->formvars['wms_connectiontimeout'] = '60';
+									$this->formvars['selstellen'] = '1, ' . $this->konvertierung->get('stelle_id') . ', 1, ' . $this->konvertierung->get('stelle_id');
+									$this->LayerAnlegen();
+
+									# Assign layer_id to shape file record
+									$shapeFile->set('layer_id', $this->formvars['selected_layer_id']);
+									$shapeFile->update();
+
+									# Ordne layer zur Stelle
+									$this->Stellenzuweisung(
+										array($shapeFile->get('layer_id')),
+										array($this->konvertierung->get('stelle_id'))
+									);
+
+									# Füge eine Klasse zum neuen Layer hinzu.
+									$this->formvars['class_name'] = 'alle';
+									$this->formvars['class_id'] = $this->Layereditor_KlasseHinzufuegen();
+
+									# Füge einen Style zur Klasse hinzu
+									$this->add_style();
+								}
+								else {
+									$this->add_message('error', $result['err_msg']);
+								}
+							}
+						}
+					} # end of upload files
+					$this->main = '../../plugins/xplankonverter/view/shapefiles.php';
+				}
+			}
+			$this->output();
+		} break;
+
+		case 'xplankonverter_shapefile_loeschen' : {
+			if ($this->formvars['shapefile_oid'] == '') {
+				$response = array(
+					'success' => false,
+					'type' => 'notice',
+					'msg' => 'Diese Seite kann nur aufgerufen werden wenn vorher ein Shape Datei ausgewählt wurde.'
+				);
+			}
+			else {
+				$key = 'check;shapefiles;shapefiles;' . $this->formvars['shapefile_oid'];
+				$this->formvars['checkbox_names_' . XPLANKONVERTER_SHAPEFILES_LAYER_ID] = $key;
+				$this->formvars[$key] = 'on';
+				$this->formvars['chosen_layer_id'] = XPLANKONVERTER_SHAPEFILES_LAYER_ID;
+				$success = $this->layer_Datensaetze_loeschen(false);
+				$response = array(
+					'success' => $success,
+					'type' => ($success ? 'notice' : 'error'),
+					'msg' => ($success ? 'Shape-Datei erfolgreich gelöscht. ' : $this->messages[0]['msg'])
+				);
+			}
+			header('Content-Type: application/json');
+			echo json_encode($response);
+		} break;
+
+	  case 'xplankonverter_konvertierung_status': {
+	    header('Content-Type: application/json');
+	    $response = array();
+	    if ($this->formvars['konvertierung_id'] == '') {
+	      $response['success'] = false;
+	      $response['msg'] = 'Konvertierung wurde nicht angegeben';
+	      return;
+	    }
+	    if ($this->formvars['status'] == '') {
+	      $this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn ein Status angegeben ist.';
+	      $response['success'] = false;
+	      $response['msg'] = 'Status wurde nicht angegeben';
+	      echo json_encode($response);
+	      return;
+	    }
+	    // now get konvertierung
+	    $this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
+
+	    // check stelle
+	    if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) return;
+
+	    // check applicability of status for external invokation
+	    $statusToSet = $this->formvars['status'];
+	    $isApplicable = false;
+	    $applicableStates = array(
+	        Konvertierung::$STATUS['IN_ERSTELLUNG'],
+	        Konvertierung::$STATUS['IN_KONVERTIERUNG'],
+	        Konvertierung::$STATUS['IN_GML_ERSTELLUNG'],
+	        Konvertierung::$STATUS['IN_INSPIRE_GML_ERSTELLUNG']
+	    );
+	    array_walk(
+	      $applicableStates,
+	      function($pattern) use ($statusToSet,&$isApplicable) {
+	        $isApplicable |= $statusToSet == $pattern;
+	      }
+	    );
+	    if (!$isApplicable) {
+	      $this->Hinweis = "Der Status '$statusToSet' kann nicht explizit gesetzt werden.";
+	      $response['success'] = false;
+	      $response['msg'] = "Status '$statusToSet' kann nicht explizit gesetzt werden";
+	      echo json_encode($response);
+	      return;
+	    }
+	    // check validity of status
+	    $isValid = false;
+	    $validPredecessorStates = array();
+	    switch($statusToSet){
+	      case Konvertierung::$STATUS['IN_ERSTELLUNG']:
+	        $validPredecessorStates = array(
+	          Konvertierung::$STATUS['ERSTELLT'],
+	          Konvertierung::$STATUS['KONVERTIERUNG_OK'],
+	          Konvertierung::$STATUS['KONVERTIERUNG_ERR'],
+	          Konvertierung::$STATUS['GML_ERSTELLUNG_OK'],
+	          Konvertierung::$STATUS['GML_ERSTELLUNG_ERR'],
+	          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK'],
+	          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']
+	        );
+	      break;
+	      case Konvertierung::$STATUS['IN_KONVERTIERUNG']:
+	        $validPredecessorStates = array(
+	          Konvertierung::$STATUS['ERSTELLT'],
+	          Konvertierung::$STATUS['KONVERTIERUNG_OK'],
+	          Konvertierung::$STATUS['KONVERTIERUNG_ERR'],
+	          Konvertierung::$STATUS['GML_ERSTELLUNG_OK'],
+	          Konvertierung::$STATUS['GML_ERSTELLUNG_ERR'],
+	          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK'],
+	          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']
+	        );
+	      break;
+	      case Konvertierung::$STATUS['IN_GML_ERSTELLUNG']:
+	        $validPredecessorStates = array(
+	          Konvertierung::$STATUS['KONVERTIERUNG_OK'],
+	          Konvertierung::$STATUS['GML_ERSTELLUNG_OK'],
+	          Konvertierung::$STATUS['GML_ERSTELLUNG_ERR'],
+	          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK'],
+	          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']
+	        );
+	      break;
+	      case Konvertierung::$STATUS['IN_INSPIRE_GML_ERSTELLUNG']:
+	        $validPredecessorStates = array(
+	          Konvertierung::$STATUS['GML_ERSTELLUNG_OK'],
+	          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK'],
+	          Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']
+	        );
+	      break;
+	    }
+	    $currStatus = $this->konvertierung->get('status');
+	    $isValid = array_reduce(
+	        $validPredecessorStates,
+	        function($isValid,$predStatus) use ($currStatus) {
+	          return isValid || ($predStatus == $currStatus);
+	    }, $isValid);
+	    if (!$isValid) {
+	      $response['success'] = false;
+	      $response['msg'] = "Status '$statusToSet' ist kein gueltiger Folgestatus von '$currStatus'";
+	      echo json_encode($response);
+	      return;
+	    }
+
+	    // status is valid to be set
+	    $this->konvertierung->set('status', $statusToSet);
 	    $this->konvertierung->update();
+	    $response['success'] = true;
+	    $response['msg'] = 'Status wurde gesetzt';
+	    echo json_encode($response);
+	  } break;
 
-			# set and run the XSLT-Processor
-			$proc = new XsltProcessor;
-			$proc->importStylesheet(DOMDocument::load($xsl)); // load script
-			$output = $proc->transformToXML(DomDocument::load($fileinput)); // load your file
-			file_put_contents($fileoutput, $output, FILE_APPEND | LOCK_EX);
-	    $status = Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK'];
-			$msg = 'Die Konvertierung nach INSPIRE-GML wurde erfolgreich ausgeführt. Sie können die Datei jetzt herunterladen.';
-		}
-
-    $this->konvertierung->set('status', $status);
-    $this->konvertierung->update();
-		$response['success'] = $success;
-		$response['msg'] = $msg;
-
-		header('Content-Type: application/json');
-		echo json_encode($response);
-	} break;
-
-	case 'xplankonverter_regeleditor' : {
-		$konvertierung_id = $_REQUEST['konvertierung_id'];
-		$bereich_gml_id = $_REQUEST['bereich_gml_id'];
-		$class_name = $_REQUEST['class_name'];
-
-		if (empty($konvertierung_id)) {
-			if (!empty($bereich_gml_id)) {
-				# Hole konvertierung_id über den Bereich
-				$bereich = RP_Bereich::find_by_id($this, 'gml_id', $bereich_gml_id);
-				$plan = $bereich->get_plan();
-				$konvertierung_id = $plan->get('konvertierung_id');
-			}
-		}
-
-		include(PLUGINS . 'xplankonverter/view/regeleditor/index.php');
-
-	} break;
-
-	case 'xplankonverter_regeleditor_getxplanattributes' : {
-		$sql = "
-		SELECT
-			column_name, udt_name, data_type, is_nullable
-		FROM
-			information_schema.columns
-		WHERE
-			table_name='" . $this->formvars['featuretype'] . "' AND
-			table_schema='xplan_gml'
-		ORDER BY
-			column_name
-		";
-
-		$this->result = pg_query($this->pgdatabase->dbConn, $sql);
-		include(PLUGINS . 'xplankonverter/view/regeleditor/getxplanattributes.php');
-	} break;
-
-	case 'xplankonverter_regeleditor_getshapeattributes' : {
-		// Sets für alle Option in Regeleditor
-		$sql = "
-			SELECT
-				column_name
-			FROM
-				information_schema.columns
-			WHERE
-				table_name = '" . $this->formvars['shapefile'] . "' AND
-				table_schema = 'xplan_shapes_" . $this->formvars['konvertierung_id'] . "'
-			ORDER BY
-				column_name
-		";
-		$this->result = pg_query($this->pgdatabase->dbConn, $sql);
-		include(PLUGINS . 'xplankonverter/view/regeleditor/getshapeattributes.php');
-	} break;
-
-	case 'xplankonverter_regeleditor_getshapeattributes2' : {
-		// Sets Wenn dann Option in Regeleditor
-		$sql = "
-			SELECT
-				column_name
-			FROM
-				information_schema.columns
-			WHERE
-				table_name = '" . $this->formvars['shapefile'] . "' AND
-				table_schema = 'xplan_shapes_" . $this->formvars['konvertierung_id'] . "'
-			ORDER BY
-				column_name
-		";
-
-		#echo '<br>Sql: ' . $sql;
-		$this->result = pg_query($this->pgdatabase->dbConn, $sql);
-
-		include(PLUGINS . 'xplankonverter/view/regeleditor/getshapeattributes2.php');
-	} break;
-
-	case 'xplankonverter_regeleditor_getshapeattributes3' : {
-		// Sets WHERE Filter for Shapes in Regeleditor
-		$sql = "
-			SELECT
-				column_name
-			FROM
-				information_schema.columns
-			WHERE
-				table_name = '" . $this->formvars['shapefile'] . "' AND
-				table_schema = 'xplan_shapes_" . $this->formvars['konvertierung_id'] . "'
-			ORDER BY
-				column_name
-		";
-
-		$this->result = pg_query($this->pgdatabase->dbConn, $sql);
-
-		include(PLUGINS . 'xplankonverter/view/regeleditor/getshapeattributes3.php');
-	} break;
-
-	case 'xplankonverter_regeleditor_getshapeattributesdistinctvalues' : {
-		// Sets DISTINCT value für alle aus Shape
-		$sql = "
-			SELECT
-				DISTINCT " . $this->formvars['shapefile_attribut'] . "
-			FROM
-				xplan_shapes_" . $this->formvars['konvertierung_id'] . "." . $this->formvars['shapefile'] . "
-			ORDER BY
-				" . $this->formvars['shapefile_attribut'] . "
-		";
-		#echo '<br>Sql: ' . $sql;
-		$this->result = pg_query($this->pgdatabase->dbConn, $sql);
-
-		include(PLUGINS . 'xplankonverter/view/regeleditor/getshapeattributesdistinctvalues.php');
-	} break;
-
-	case 'xplankonverter_regeleditor_getshapeattributesdistinctvalues2' : {
-		// Sets DISTINCT value für WHERE Selector
-		$sql = "
-			SELECT
-				DISTINCT " . $this->formvars['shapefile_attribut'] . "
-			FROM
-				xplan_shapes_" . $this->formvars['konvertierung_id'] . "." . $this->formvars['shapefile'] . "
-			ORDER BY
-				" . $this->formvars['shapefile_attribut'] . "
-		";
-
-		$this->result = pg_query($this->pgdatabase->dbConn, $sql);
-
-		include(PLUGINS . 'xplankonverter/view/regeleditor/getshapeattributesdistinctvalues2.php');
-	} break;
-
-	case 'xplankonverter_regeleditor_getxplanenumerationattributes' : {
-		//Enumerationsliste Auswahl von Shape
-		$sql = "
-			SELECT
-				udt_name
-			FROM
-				information_schema.columns
-			WHERE
-				table_name='" . $this->formvars['featuretype'] . "' AND
-				column_name = '" . $this->formvars['xplanattribut'] . "' AND
-				table_schema='xplan_classes'
-			ORDER BY
-				column_name
-		";
-
-		$result = pg_query($this->pgdatabase->dbConn, $sql);
-
-		while($row = pg_fetch_row($result)) {
-			$enumerationsliste = $row[0];
-		}
-		# wenn es mit _startet ist es ein array, dann das _ entfernen
-		$arrayEnum = bool;
-		if(substr($enumerationsliste, 0, 1) === '_') {
-			$arrayEnum = true;
-		} else {
-			$arrayEnum = false;
-		}
-		$enumerationsliste = ltrim($enumerationsliste, '_');
-
-		$sql = "
-			SELECT
-				wert,
-				beschreibung
-			FROM
-				xplan_classes. " . $enumerationsliste . "
-		";
-
-		$this->result = pg_query($this->pgdatabase->dbConn, $sql);
-
-		include(PLUGINS . 'xplankonverter/view/regeleditor/getxplanenumerationattributes.php');
-	} break;
-
-	case 'xplankonverter_regeleditor_getxplanenumerationattributes2' : {
-		//Enumerationsliste Wenn-Dann Auswahl von Shape
-		$sql = "
-			SELECT
-				udt_name
-			FROM
-				information_schema.columns
-			WHERE
-				table_name='" . $this->formvars['featuretype'] . "' AND
-				column_name = '" . $this->formvars['xplanattribut'] . "' AND
-				table_schema='xplan_classes'
-			ORDER BY
-				column_name
-		";
-		#echo '<br>Sql: ' . $sql;
-
-		$result = pg_query($this->pgdatabase->dbConn, $sql);
-
-		while($row = pg_fetch_row($result)) {
-			$enumerationsliste = $row[0];
-		}
-		# wenn es mit _startet ist es ein array, dann das _ entfernen
-		$arrayEnum = bool;
-		if(substr($enumerationsliste, 0, 1) === '_') {
-			$arrayEnum = true;
-		} else {
-			$arrayEnum = false;
-		}
-		$enumerationsliste = ltrim($enumerationsliste, '_');
-
-		$sql = "
-			SELECT
-				wert,
-				beschreibung
-			FROM
-				xplan_classes." . $enumerationsliste . "
-			";
-		#echo '<br>Sql: ' . $sql;
-		$this->result = pg_query($this->pgdatabase->dbConn, $sql);
-
-		include(PLUGINS . 'xplankonverter/view/regeleditor/getxplanenumerationattributes2.php');
-	} break;
-
-	#-------------------------------------------------------------------------------------------------------------------------
-	# Download cases
-	#-------------------------------------------------------------------------------------------------------------------------
-	case 'xplankonverter_download_uploaded_shapes' : {
-		if ($this->xplankonverter_is_case_forbidden()) return;
-		if (!$this->konvertierung->files_exists('uploaded_shapes')) {
-			$this->add_message('warning', 'Es sind keine Dateien für den Export vorhanden.');
-			$this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
-			$this->output();
-			return;
-		}
-
-		$exportfile = $this->konvertierung->create_export_file('uploaded_shapes');
-		$this->konvertierung->send_export_file($exportfile, 'application/octet-stream');
-
-	} break;
-
-	case 'xplankonverter_download_edited_shapes' : {
-		if ($this->xplankonverter_is_case_forbidden()) return;
-
-		if (!$this->konvertierung->files_exists('edited_shapes')) {
-			$this->add_message('warning', 'Es sind keine Dateien für den Export vorhanden.');
-			$this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
-			$this->output();
-			return;
-		}
-
-		$exportfile = $this->konvertierung->create_export_file('edited_shapes');
-		$this->konvertierung->send_export_file($exportfile, 'application/octet-stream');
-	} break;
-
-	case 'xplankonverter_download_xplan_shapes' : {
-		if ($this->xplankonverter_is_case_forbidden()) return;
-
-		$this->konvertierung->create_xplan_shapes();
-
-		if (!$this->konvertierung->files_exists('xplan_shapes')) {
-			$this->add_message('warning', 'Es sind keine Dateien für den Export vorhanden.');
-			$this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
-			$this->output();
-			return;
-		}
-
-		$exportfile = $this->konvertierung->create_export_file('xplan_shapes');
-		$this->konvertierung->send_export_file($exportfile, 'application/octet-stream');
-
-	} break;
-
-	case 'xplankonverter_download_xplan_gml' : {
-		if ($this->xplankonverter_is_case_forbidden()) {
-			echo 'Anwendungsfall nicht erlaubt!';
-			return;
-		}
-		$filename = XPLANKONVERTER_FILE_PATH . $this->formvars['konvertierung_id'] . '/xplan_gml/xplan_' . $this->formvars['konvertierung_id'] . '.gml';
-
-		if (!file_exists($filename)) {
-			$this->add_message('warning', 'Diese Datei ist nicht vorhanden. Prüfen Sie ob die Konvertierung schon korrekt ausgeführt wurde. Wenn ja, wenden Sie sich an den Support.');
-			$this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
-			$this->output();
-			return;
-		}
-		header('Content-Type: text/xml; subtype="gml/3.3"');
-		echo fread(fopen($filename, "r"), filesize($filename));
-	} break;
-
-	case 'xplankonverter_download_inspire_gml' : {
-		if ($this->xplankonverter_is_case_forbidden()) return;
-
-		$filename = XPLANKONVERTER_FILE_PATH . $this->formvars['konvertierung_id'] . '/inspire_gml/inspire_' . $this->formvars['konvertierung_id'] . '.gml';
-		header('Content-Type: text/xml; subtype="gml/3.3"');
-		echo fread(fopen($filename, "r"), filesize($filename));
-	} break;
-
-	case 'xplankonverter_go_to_plan' : {
-		# query planart by gml_id
-		$sql = "
-			SELECT
-				k.planart
-			FROM
-				xplan_gml.xp_plan AS p JOIN
-				xplankonverter.konvertierungen k ON p.konvertierung_id = k.id
-			WHERE
-				p.gml_id = '" . $this->formvars['plan_gml_id'] . "'
-		";
-
-    $ret = $this->pgdatabase->execSQL($sql,4, 0);
-
-		if ($ret['success']) {
-			$rs = pg_fetch_assoc($ret[1]);
-
-			# go to layer search with layer of planart
-			switch ($rs['planart']) {
-				case 'BP-Plan' : $layer_id = XPLANKONVERTER_BP_PLAENE_LAYER_ID; break;
-				case 'FP-Plan' : $layer_id = XPLANKONVERTER_FP_PLAENE_LAYER_ID; break;
-				case 'SO-Plan' : $layer_id = XPLANKONVERTER_SO_PLAENE_LAYER_ID; break;
-				case 'RP-Plan' : $layer_id = XPLANKONVERTER_RP_PLAENE_LAYER_ID; break;
-			}
-
-			$this->go = 'Layer-Suche_Suchen';
-			$this->formvars = array(
-				'go' => $this->go,
-				'selected_layer_id' => $layer_id,
-				'operator_plan_gml_id' => '=',
-				'value_plan_gml_id' => $this->formvars['plan_gml_id'],
-			);
-		}
-		else {
-			$this->add_message('error', 'Plan konnte nicht gefunden werden. Prüfen Sie bitte die Referenz.');
-			$this->go = 'get_last_query';			
-		}
-
-		$this->goNotExecutedInPlugins = true;
-	} break;
-
-	case 'xplankonverter_show_geltungsbereich_upload' : {
-		include('plugins/xplankonverter/view/upload_geltungsbereich.php');
-	} break;
-
-	case 'xplankonverter_upload_geltungsbereich' : {
-		$upload_file = $_FILES['shape_file'];
-		$zip_file = IMAGEPATH . $upload_file['name'];
-		$response = array(
-			'success' => false
-		);
-		$importer = new data_import_export();
-
-		if (move_uploaded_file($upload_file['tmp_name'], $zip_file)) {
-			# extract zip
-			$shape_files = unzip($zip_file, false, false, true);
-			# get shape file name
-			$first_file = explode('.', $shape_files[0]);
-			$shape_file_name = $first_file[0];
-
-			# get EPSG-Code aus prj-Datei
-			$epsg = $importer->get_shp_epsg(IMAGEPATH . $shape_file_name, $this->pgdatabase);
-			if ($epsg == '') {
-				$epsg = '25833';
-				# ToDo EPSG-Code konnte nicht aus prj-Datei ermittelt werden, Dateiname merken und EPSG-Code nachfragen
-			}
-			$response['success'] = true;
-		}
-
-		# get encoding of dbf file
-		$encoding = $importer->getEncoding(IMAGEPATH . $shape_file_name . '.dbf');
-
-		# load shapes to custom schema
-		$import_result = $importer->load_shp_into_pgsql($this->pgdatabase, IMAGEPATH, $shape_file_name, $epsg, CUSTOM_SHAPE_SCHEMA, 'b' . strtolower(umlaute_umwandeln(substr($shape_file_name, 0, 15))) . rand(1, 1000000), $encoding);
-
-		# return name of import table
-		$response['result'] = $import_result[0]['tablename'];
-
-		header('Content-Type: application/json');
-		echo json_encode($response);
-		return;
-	} break;
-
-	case 'xplankonverter_upload_xplan_gml' : {
-		$upload_file = $_FILES['gml_file'];
-		if ($upload_file != '') {
+		case 'xplankonverter_create_konvertierung_directories' : {
+			$konvertierung = new Konvertierung($this);
+			$konvertierungen = $konvertierung->find_where('1=1');
 			Konvertierung::$write_debug = true;
-			# TODO check $_FILES['userfile']['type'] == gml or xml else abort (possibly also zip
-			# TODO check $_FILES['userfile']['size'] == eg less than 100 MB else abort and message that the file has to be converted piecemail or by an administrator
-			$gml_file = IMAGEPATH . $upload_file['name']; # the original filename from the computer of the file-owner
+			foreach($konvertierungen AS $k) {
+				$k->create_directories();
+			}
+		} break;
+
+	  case 'xplankonverter_konvertierung': {
+			if ($this->formvars['konvertierung_id'] == '') {
+				$this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
+				$this->main = 'Hinweis.php';
+			}
+			else {
+				$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
+				if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) {
+					$this->Fehlermeldung = "Der Zugriff auf den Anwendungsfall ist nicht erlaubt.<br>
+						Die Konvertierung mit der ID={$this->konvertierung->get('id')} gehört zur Stelle ID= {$this->konvertierung->get('stelle_id')}<br>
+						Sie befinden sich aber in Stelle ID= {$this->Stelle->id}<br>
+						Melden Sie sich mit einem anderen Benutzer an.";
+				}
+				else {
+					$this->konvertierung->reset_mapping();
+					$this->konvertierung->mapping();
+	#				$this->konvertierung->set_historie();
+					$this->konvertierung->set_status(
+						($this->konvertierung->validierung_erfolgreich() ? 'Konvertierung abgeschlossen' : 'Konvertierung abgebrochen')
+					);
+
+					# Validierungsergebnisse anzeigen.
+					$this->main = '../../plugins/xplankonverter/view/validierungsergebnisse.php';
+				}
+			}
+			$this->output();
+		} break;
+
+		case 'xplankonverter_validierungsergebnisse' : {
+			if ($this->formvars['konvertierung_id'] == '') {
+				$this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
+				$this->main = 'Hinweis.php';
+			}
+			else {
+				$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
+				if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) {
+					$this->Fehlermeldung = "Der Zugriff auf den Anwendungsfall ist nicht erlaubt.<br>
+						Die Konvertierung mit der ID={$this->konvertierung->get('id')} gehört zur Stelle ID= {$this->konvertierung->get('stelle_id')}<br>
+						Sie befinden sich aber in Stelle ID= {$this->Stelle->id}<br>
+						Melden Sie sich mit einem anderen Benutzer an.";
+				}
+				else {
+					# Validierungsergebnisse anzeigen.
+					$this->main = '../../plugins/xplankonverter/view/validierungsergebnisse.php';
+				}
+			}
+			$this->output();
+		} break;
+
+		case 'xplankonverter_gml_generieren' : {
+			include(PLUGINS . 'xplankonverter/model/build_gml.php');
+			include(PLUGINS . 'xplankonverter/model/TypeInfo.php');
+			$response = array();
+			if ($this->formvars['konvertierung_id'] == '') {
+				$response['success'] = false;
+				$response['msg'] = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
+			}
+			else {
+				$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
+				if (isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) {
+					if ($this->konvertierung->get('status') == Konvertierung::$STATUS['KONVERTIERUNG_OK']
+					 || $this->konvertierung->get('status') == Konvertierung::$STATUS['IN_GML_ERSTELLUNG']
+					 || $this->konvertierung->get('status') == Konvertierung::$STATUS['GML_ERSTELLUNG_OK']) {
+						// Status setzen
+						$this->konvertierung->set('status', Konvertierung::$STATUS['IN_GML_ERSTELLUNG']);
+						$this->konvertierung->update();
+
+						// XPlan-GML ausgeben
+						$this->gml_builder = new Gml_builder($this->pgdatabase);
+						$plan = XP_Plan::find_by_id($this,'konvertierung_id', $this->konvertierung->get('id'), $this->konvertierung->get('planart'));
+						if (!$this->gml_builder->build_gml($this->konvertierung, $plan)) {
+	  					// Status setzen
+	  					$this->konvertierung->set('status', Konvertierung::$STATUS['GML_ERSTELLUNG_ERR']);
+	  					$this->konvertierung->update();
+	  					// Antwort absenden und case beenden
+	  					$response['success'] = false;
+	  					$response['msg'] = 'Bei der XPlan-GML-Generierung ist ein Fehler aufgetreten.';
+	        		header('Content-Type: application/json');
+	        		echo json_encode($response);
+	        		break;
+						}
+						# Creates path if it doesnt exist (e.g. because of gmlas-creation
+						if(!file_exists($this->konvertierung->get_file_path('xplan_gml'))) {
+							echo 'test';
+							mkdir($this->konvertierung->get_file_path('xplan_gml'), 0777, true);
+						}
+						$this->gml_builder->save($this->konvertierung->get_file_name('xplan_gml'));
+
+						// Status setzen
+						$this->konvertierung->set('status', Konvertierung::$STATUS['GML_ERSTELLUNG_OK']);
+						$this->konvertierung->update();
+
+						// Erzeuge Layergruppe, falls noch nicht vorhanden
+						$layer_group_id = $this->konvertierung->create_layer_group('GML');
+						// vorhandene Layer dieser Konvertierung löschen
+						// Neue Layer von Vorlagen GML kopieren
+						/*
+						$this->formvars['group_id'] = $layer_group_id;
+						$this->formvars['pg_schema'] = XPLANKONVERTER_CONTENT_SCHEMA;
+						$this->layer_generator_erzeugen(); # Funktion aus kvwmap.php
+						*/
+						$response['success'] = true;
+						$response['msg'] = 'XPlan-GML-Datei erfolgreich erstellt.';
+					} else {
+						$response['success'] = false;
+						$response['msg'] = 'Die ausgewählte Konvertierung muss zuerst ausgeführt werden.';
+					}
+				}
+			}
+			header('Content-Type: application/json');
+			echo json_encode($response);
+		} break;
+
+		case 'xplankonverter_konvertierung_loeschen' : {
+			$this->formvars['checkbox_names_' . $this->plan_layer_id] = 'check;;' . $this->plan_table_name . ';' . $this->formvars['plan_oid'];
+			$this->formvars['check;;' . $this->plan_table_name . ';' . $this->formvars['plan_oid']] = 'on';
+			$this->formvars['chosen_layer_id'] = $this->plan_layer_id;
+			$success = $this->layer_Datensaetze_loeschen(false);
+			$response = array(
+				'success' => $success,
+				'type' => ($success ? 'notice' : 'error'),
+				'msg' => ($success ? 'Plan und Konvertierung erfolgreich gelöscht. ' : $this->messages[0]['msg'])
+			);
+			header('Content-Type: application/json');
+			echo json_encode($response);
+		} break;
+
+		case 'xplankonverter_inspire_gml_generieren' : {
+			$success = true;
+			$konvertierung_id = $this->formvars['konvertierung_id'];
+			if ($konvertierung_id == '') {
+				$this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
+				$this->main = 'Hinweis.php';
+			}
+
+			$this->konvertierung = Konvertierung::find_by_id($this, 'id', $this->formvars['konvertierung_id']);
+			if (!isInStelleAllowed($this->Stelle, $this->konvertierung->get('stelle_id'))) return;
+
+			# set the paths
+			$xsl = PLUGINS . 'xplankonverter/model/xplan2inspire.xsl';
+			$fileinput = $this->konvertierung->get_file_name('xplan_gml');
+			$fileoutput = $this->konvertierung->get_file_name('inspire_gml');
+			#echo 'test' . $fileinput;
+
+			if (!file_exists($fileinput)) {
+				$success = false;
+				$msg = 'Die XPlanGML-Datei fehlt. Sie wurde noch nicht erzeugt oder ein Pfad ist falsch.';
+				$status =  Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR'];
+			}
+
+			if (file_exists($fileoutput)) {
+				unlink($fileoutput);
+			}
+
+			if ($success) {
+		    $this->konvertierung->set('status', Konvertierung::$STATUS['IN_INSPIRE_GML_ERSTELLUNG']);
+		    $this->konvertierung->update();
+
+				# set and run the XSLT-Processor
+				$proc = new XsltProcessor;
+				$proc->importStylesheet(DOMDocument::load($xsl)); // load script
+				$output = $proc->transformToXML(DomDocument::load($fileinput)); // load your file
+				file_put_contents($fileoutput, $output, FILE_APPEND | LOCK_EX);
+		    $status = Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK'];
+				$msg = 'Die Konvertierung nach INSPIRE-GML wurde erfolgreich ausgeführt. Sie können die Datei jetzt herunterladen.';
+			}
+
+	    $this->konvertierung->set('status', $status);
+	    $this->konvertierung->update();
+			$response['success'] = $success;
+			$response['msg'] = $msg;
+
+			header('Content-Type: application/json');
+			echo json_encode($response);
+		} break;
+
+		case 'xplankonverter_regeleditor' : {
+			$konvertierung_id = $_REQUEST['konvertierung_id'];
+			$bereich_gml_id = $_REQUEST['bereich_gml_id'];
+			$class_name = $_REQUEST['class_name'];
+
+			if (empty($konvertierung_id)) {
+				if (!empty($bereich_gml_id)) {
+					# Hole konvertierung_id über den Bereich
+					$bereich = RP_Bereich::find_by_id($this, 'gml_id', $bereich_gml_id);
+					$plan = $bereich->get_plan();
+					$konvertierung_id = $plan->get('konvertierung_id');
+				}
+			}
+
+			include(PLUGINS . 'xplankonverter/view/regeleditor/index.php');
+
+		} break;
+
+		case 'xplankonverter_regeleditor_getxplanattributes' : {
+			$sql = "
+			SELECT
+				column_name, udt_name, data_type, is_nullable
+			FROM
+				information_schema.columns
+			WHERE
+				table_name='" . $this->formvars['featuretype'] . "' AND
+				table_schema='xplan_gml'
+			ORDER BY
+				column_name
+			";
+
+			$this->result = pg_query($this->pgdatabase->dbConn, $sql);
+			include(PLUGINS . 'xplankonverter/view/regeleditor/getxplanattributes.php');
+		} break;
+
+		case 'xplankonverter_regeleditor_getshapeattributes' : {
+			// Sets für alle Option in Regeleditor
+			$sql = "
+				SELECT
+					column_name
+				FROM
+					information_schema.columns
+				WHERE
+					table_name = '" . $this->formvars['shapefile'] . "' AND
+					table_schema = 'xplan_shapes_" . $this->formvars['konvertierung_id'] . "'
+				ORDER BY
+					column_name
+			";
+			$this->result = pg_query($this->pgdatabase->dbConn, $sql);
+			include(PLUGINS . 'xplankonverter/view/regeleditor/getshapeattributes.php');
+		} break;
+
+		case 'xplankonverter_regeleditor_getshapeattributes2' : {
+			// Sets Wenn dann Option in Regeleditor
+			$sql = "
+				SELECT
+					column_name
+				FROM
+					information_schema.columns
+				WHERE
+					table_name = '" . $this->formvars['shapefile'] . "' AND
+					table_schema = 'xplan_shapes_" . $this->formvars['konvertierung_id'] . "'
+				ORDER BY
+					column_name
+			";
+
+			#echo '<br>Sql: ' . $sql;
+			$this->result = pg_query($this->pgdatabase->dbConn, $sql);
+
+			include(PLUGINS . 'xplankonverter/view/regeleditor/getshapeattributes2.php');
+		} break;
+
+		case 'xplankonverter_regeleditor_getshapeattributes3' : {
+			// Sets WHERE Filter for Shapes in Regeleditor
+			$sql = "
+				SELECT
+					column_name
+				FROM
+					information_schema.columns
+				WHERE
+					table_name = '" . $this->formvars['shapefile'] . "' AND
+					table_schema = 'xplan_shapes_" . $this->formvars['konvertierung_id'] . "'
+				ORDER BY
+					column_name
+			";
+
+			$this->result = pg_query($this->pgdatabase->dbConn, $sql);
+
+			include(PLUGINS . 'xplankonverter/view/regeleditor/getshapeattributes3.php');
+		} break;
+
+		case 'xplankonverter_regeleditor_getshapeattributesdistinctvalues' : {
+			// Sets DISTINCT value für alle aus Shape
+			$sql = "
+				SELECT
+					DISTINCT " . $this->formvars['shapefile_attribut'] . "
+				FROM
+					xplan_shapes_" . $this->formvars['konvertierung_id'] . "." . $this->formvars['shapefile'] . "
+				ORDER BY
+					" . $this->formvars['shapefile_attribut'] . "
+			";
+			#echo '<br>Sql: ' . $sql;
+			$this->result = pg_query($this->pgdatabase->dbConn, $sql);
+
+			include(PLUGINS . 'xplankonverter/view/regeleditor/getshapeattributesdistinctvalues.php');
+		} break;
+
+		case 'xplankonverter_regeleditor_getshapeattributesdistinctvalues2' : {
+			// Sets DISTINCT value für WHERE Selector
+			$sql = "
+				SELECT
+					DISTINCT " . $this->formvars['shapefile_attribut'] . "
+				FROM
+					xplan_shapes_" . $this->formvars['konvertierung_id'] . "." . $this->formvars['shapefile'] . "
+				ORDER BY
+					" . $this->formvars['shapefile_attribut'] . "
+			";
+
+			$this->result = pg_query($this->pgdatabase->dbConn, $sql);
+
+			include(PLUGINS . 'xplankonverter/view/regeleditor/getshapeattributesdistinctvalues2.php');
+		} break;
+
+		case 'xplankonverter_regeleditor_getxplanenumerationattributes' : {
+			//Enumerationsliste Auswahl von Shape
+			$sql = "
+				SELECT
+					udt_name
+				FROM
+					information_schema.columns
+				WHERE
+					table_name='" . $this->formvars['featuretype'] . "' AND
+					column_name = '" . $this->formvars['xplanattribut'] . "' AND
+					table_schema='xplan_classes'
+				ORDER BY
+					column_name
+			";
+
+			$result = pg_query($this->pgdatabase->dbConn, $sql);
+
+			while($row = pg_fetch_row($result)) {
+				$enumerationsliste = $row[0];
+			}
+			# wenn es mit _startet ist es ein array, dann das _ entfernen
+			$arrayEnum = bool;
+			if(substr($enumerationsliste, 0, 1) === '_') {
+				$arrayEnum = true;
+			} else {
+				$arrayEnum = false;
+			}
+			$enumerationsliste = ltrim($enumerationsliste, '_');
+
+			$sql = "
+				SELECT
+					wert,
+					beschreibung
+				FROM
+					xplan_classes. " . $enumerationsliste . "
+			";
+
+			$this->result = pg_query($this->pgdatabase->dbConn, $sql);
+
+			include(PLUGINS . 'xplankonverter/view/regeleditor/getxplanenumerationattributes.php');
+		} break;
+
+		case 'xplankonverter_regeleditor_getxplanenumerationattributes2' : {
+			//Enumerationsliste Wenn-Dann Auswahl von Shape
+			$sql = "
+				SELECT
+					udt_name
+				FROM
+					information_schema.columns
+				WHERE
+					table_name='" . $this->formvars['featuretype'] . "' AND
+					column_name = '" . $this->formvars['xplanattribut'] . "' AND
+					table_schema='xplan_classes'
+				ORDER BY
+					column_name
+			";
+			#echo '<br>Sql: ' . $sql;
+
+			$result = pg_query($this->pgdatabase->dbConn, $sql);
+
+			while($row = pg_fetch_row($result)) {
+				$enumerationsliste = $row[0];
+			}
+			# wenn es mit _startet ist es ein array, dann das _ entfernen
+			$arrayEnum = bool;
+			if(substr($enumerationsliste, 0, 1) === '_') {
+				$arrayEnum = true;
+			} else {
+				$arrayEnum = false;
+			}
+			$enumerationsliste = ltrim($enumerationsliste, '_');
+
+			$sql = "
+				SELECT
+					wert,
+					beschreibung
+				FROM
+					xplan_classes." . $enumerationsliste . "
+				";
+			#echo '<br>Sql: ' . $sql;
+			$this->result = pg_query($this->pgdatabase->dbConn, $sql);
+
+			include(PLUGINS . 'xplankonverter/view/regeleditor/getxplanenumerationattributes2.php');
+		} break;
+
+		#-------------------------------------------------------------------------------------------------------------------------
+		# Download cases
+		#-------------------------------------------------------------------------------------------------------------------------
+		case 'xplankonverter_download_uploaded_shapes' : {
+			if ($this->xplankonverter_is_case_forbidden()) return;
+			if (!$this->konvertierung->files_exists('uploaded_shapes')) {
+				$this->add_message('warning', 'Es sind keine Dateien für den Export vorhanden.');
+				$this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
+				$this->output();
+				return;
+			}
+
+			$exportfile = $this->konvertierung->create_export_file('uploaded_shapes');
+			$this->konvertierung->send_export_file($exportfile, 'application/octet-stream');
+
+		} break;
+
+		case 'xplankonverter_download_edited_shapes' : {
+			if ($this->xplankonverter_is_case_forbidden()) return;
+
+			if (!$this->konvertierung->files_exists('edited_shapes')) {
+				$this->add_message('warning', 'Es sind keine Dateien für den Export vorhanden.');
+				$this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
+				$this->output();
+				return;
+			}
+
+			$exportfile = $this->konvertierung->create_export_file('edited_shapes');
+			$this->konvertierung->send_export_file($exportfile, 'application/octet-stream');
+		} break;
+
+		case 'xplankonverter_download_xplan_shapes' : {
+			if ($this->xplankonverter_is_case_forbidden()) return;
+
+			$this->konvertierung->create_xplan_shapes();
+
+			if (!$this->konvertierung->files_exists('xplan_shapes')) {
+				$this->add_message('warning', 'Es sind keine Dateien für den Export vorhanden.');
+				$this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
+				$this->output();
+				return;
+			}
+
+			$exportfile = $this->konvertierung->create_export_file('xplan_shapes');
+			$this->konvertierung->send_export_file($exportfile, 'application/octet-stream');
+
+		} break;
+
+		case 'xplankonverter_download_xplan_gml' : {
+			if ($this->xplankonverter_is_case_forbidden()) {
+				echo 'Anwendungsfall nicht erlaubt!';
+				return;
+			}
+			$filename = XPLANKONVERTER_FILE_PATH . $this->formvars['konvertierung_id'] . '/xplan_gml/xplan_' . $this->formvars['konvertierung_id'] . '.gml';
+
+			if (!file_exists($filename)) {
+				$this->add_message('warning', 'Diese Datei ist nicht vorhanden. Prüfen Sie ob die Konvertierung schon korrekt ausgeführt wurde. Wenn ja, wenden Sie sich an den Support.');
+				$this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
+				$this->output();
+				return;
+			}
+			header('Content-Type: text/xml; subtype="gml/3.3"');
+			echo fread(fopen($filename, "r"), filesize($filename));
+		} break;
+
+		case 'xplankonverter_download_inspire_gml' : {
+			if ($this->xplankonverter_is_case_forbidden()) return;
+
+			$filename = XPLANKONVERTER_FILE_PATH . $this->formvars['konvertierung_id'] . '/inspire_gml/inspire_' . $this->formvars['konvertierung_id'] . '.gml';
+			header('Content-Type: text/xml; subtype="gml/3.3"');
+			echo fread(fopen($filename, "r"), filesize($filename));
+		} break;
+
+		case 'xplankonverter_go_to_plan' : {
+			# query planart by gml_id
+			$sql = "
+				SELECT
+					k.planart
+				FROM
+					xplan_gml.xp_plan AS p JOIN
+					xplankonverter.konvertierungen k ON p.konvertierung_id = k.id
+				WHERE
+					p.gml_id = '" . $this->formvars['plan_gml_id'] . "'
+			";
+
+	    $ret = $this->pgdatabase->execSQL($sql,4, 0);
+
+			if ($ret['success']) {
+				$rs = pg_fetch_assoc($ret[1]);
+
+				# go to layer search with layer of planart
+				switch ($rs['planart']) {
+					case 'BP-Plan' : $layer_id = XPLANKONVERTER_BP_PLAENE_LAYER_ID; break;
+					case 'FP-Plan' : $layer_id = XPLANKONVERTER_FP_PLAENE_LAYER_ID; break;
+					case 'SO-Plan' : $layer_id = XPLANKONVERTER_SO_PLAENE_LAYER_ID; break;
+					case 'RP-Plan' : $layer_id = XPLANKONVERTER_RP_PLAENE_LAYER_ID; break;
+				}
+
+				$this->go = 'Layer-Suche_Suchen';
+				$this->formvars = array(
+					'go' => $this->go,
+					'selected_layer_id' => $layer_id,
+					'operator_plan_gml_id' => '=',
+					'value_plan_gml_id' => $this->formvars['plan_gml_id'],
+				);
+			}
+			else {
+				$this->add_message('error', 'Plan konnte nicht gefunden werden. Prüfen Sie bitte die Referenz.');
+				$this->go = 'get_last_query';
+			}
+
+			$this->goNotExecutedInPlugins = true;
+		} break;
+
+		case 'xplankonverter_show_geltungsbereich_upload' : {
+			include('plugins/xplankonverter/view/upload_geltungsbereich.php');
+		} break;
+
+		case 'xplankonverter_upload_geltungsbereich' : {
+			$upload_file = $_FILES['shape_file'];
+			$zip_file = IMAGEPATH . $upload_file['name'];
 			$response = array(
 				'success' => false
 			);
 			$importer = new data_import_export();
 
-			if (move_uploaded_file($upload_file['tmp_name'], $gml_file . '_' . $this->user->id . '.gml')) {
+			if (move_uploaded_file($upload_file['tmp_name'], $zip_file)) {
+				# extract zip
+				$shape_files = unzip($zip_file, false, false, true);
+				# get shape file name
+				$first_file = explode('.', $shape_files[0]);
+				$shape_file_name = $first_file[0];
+
+				# get EPSG-Code aus prj-Datei
+				$epsg = $importer->get_shp_epsg(IMAGEPATH . $shape_file_name, $this->pgdatabase);
+				if ($epsg == '') {
+					$epsg = '25833';
+					# ToDo EPSG-Code konnte nicht aus prj-Datei ermittelt werden, Dateiname merken und EPSG-Code nachfragen
+				}
 				$response['success'] = true;
 			}
 
-			#$zip_file = IMAGEPATH . $upload_file['name'];
-		}
-		$this->main = '../../plugins/xplankonverter/view/upload_xplan_gml.php';
-		$this->output();
-	} break;
+			# get encoding of dbf file
+			$encoding = $importer->getEncoding(IMAGEPATH . $shape_file_name . '.dbf');
 
-	case 'xplankonverter_extract_gml_to_form' : {
-		$this->checkCaseAllowed($go);
-		# TODO get $conn from somewhere else
-#		$conn = pg_connect('host=' . $this->pgdatabase->host . ' dbname=' . $this->pgdatabase->dbName . ' user=' .  $this->pgdatabase->user . ' password=' . $this->pgdatabase->passwd);
-		$xsd_location = '/var/www/html/modell/xsd/5.0.1/XPlanung-Operationen.xsd';
+			# load shapes to custom schema
+			$import_result = $importer->load_shp_into_pgsql($this->pgdatabase, IMAGEPATH, $shape_file_name, $epsg, CUSTOM_SHAPE_SCHEMA, 'b' . strtolower(umlaute_umwandeln(substr($shape_file_name, 0, 15))) . rand(1, 1000000), $encoding);
 
-		$docker_gdal_cmd = 'docker exec gdal';
-		$target_gmlas_schema = 'xplan_gmlas';
+			# return name of import table
+			$response['result'] = $import_result[0]['tablename'];
 
-		if (!isset($_POST['gml_file']) or empty($_POST['gml_file'])) {
-			$this->add_message('error', 'GML-Datei nicht gefunden. Bitte hochladen.');
+			header('Content-Type: application/json');
+			echo json_encode($response);
+			return;
+		} break;
+
+		case 'xplankonverter_upload_xplan_gml' : {
+			$upload_file = $_FILES['gml_file'];
+			if ($upload_file != '') {
+				Konvertierung::$write_debug = true;
+				# TODO check $_FILES['userfile']['type'] == gml or xml else abort (possibly also zip
+				# TODO check $_FILES['userfile']['size'] == eg less than 100 MB else abort and message that the file has to be converted piecemail or by an administrator
+				$gml_file = IMAGEPATH . $upload_file['name']; # the original filename from the computer of the file-owner
+				$response = array(
+					'success' => false
+				);
+				$importer = new data_import_export();
+
+				if (move_uploaded_file($upload_file['tmp_name'], $gml_file . '_' . $this->user->id . '.gml')) {
+					$response['success'] = true;
+				}
+				echo $gml_file . '_' . $this->user->id . '.gml';
+
+				#$zip_file = IMAGEPATH . $upload_file['name'];
+			}
 			$this->main = '../../plugins/xplankonverter/view/upload_xplan_gml.php';
 			$this->output();
-			exit;
-		}
-		# echo 'File:' . $_POST['gml_file'] . '<br>';
+		} break;
 
-		$gml_location = IMAGEPATH . $_POST['gml_file'] . '_' . $this->user->id . '.gml';
+		case 'xplankonverter_extract_gml_to_form' : {
+			$this->checkCaseAllowed($go);
 
-		# Parse the GML-ID of the file (to avoid duplicates, to identify the file)
-		$lines = file($gml_location);
-		foreach ($lines as $lineNumber => $line) {
-			if(strpos($line, 'BP_Plan') === false) {
-				continue;
+			if (!isset($_POST['gml_file']) or empty($_POST['gml_file'])) {
+				$this->add_message('error', 'GML-Datei nicht gefunden. Bitte hochladen.');
+				$this->main = '../../plugins/xplankonverter/view/upload_xplan_gml.php';
+				$this->output();
+				exit;
 			}
-			# echo '<pre>' . htmlentities($line) . '</pre>';
-			# needs to check for both single and double quotes as both are permitted by XML spec
-			if (preg_match('/id="([^"]+)"/', $line, $matched_gml_id)) {
-				break; #found it
-			}
-			# echo 'could not find BP_Plan gml-id within double quotes. checking single quotes:<br>';
-			if (preg_match('/id=\'([^"]+)\'/', $line, $matched_gml_id)) {
-				break; #found it
-			}
-			$msg  = 'could not find compulsory BP_Plan gml-id within double quotes or single quotes<br>';
-			$msg .= 'Please make sure that BP_Plan contains the compulsory gml:id attribute, e.g. in the following style: ';
-			$msg .= '<pre>' . htmlentities('<xplan:BP_plan gml:id="GML_3789d575-433f-11e8-86d4-3f03fdce6d8b"') . '</pre>...<br>';
-			$this->add_message('error', $msg);
-			$this->main = '../../plugins/xplankonverter/view/upload_xplan_gml.php';
-			$this->output();
-			exit;
-		}
-		# print $matched_gml_id[1];
-		$gml_id = $matched_gml_id[1];
+			# echo 'File:' . $_POST['gml_file'] . '<br>';
+			$gml_location = IMAGEPATH . $_POST['gml_file'] . '_' . $GUI->user->id . '.gml';
 
-		# Delete the found instance for all connected elements (e.g. BP_Plan, BP_Bereich, BP_Objekt etc.
-		$sql = "
-			TRUNCATE
-				xplan_gmlas.aendert,
-				xplan_gmlas.bp_bereich,
-				xplan_gmlas.bp_plan,
-				xplan_gmlas.bp_plan_aendert_aendert,
-				xplan_gmlas.bp_plan_bereich,
-				xplan_gmlas.bp_plan_externereferenz,
-				xplan_gmlas.bp_plan_gemeinde,
-				xplan_gmlas.bp_plan_verfahrensmerkmale_verfahrensmerkmale,
-				xplan_gmlas.bp_plan_wurdegeaendertvon_wurdegeaendertvon,
-				xplan_gmlas.verfahrensmerkmale,
-				xplan_gmlas.wurdegeaendertvon,
-				xplan_gmlas.xp_gemeinde,
-				xplan_gmlas.xp_plangeber,
-				xplan_gmlas.xp_spezexternereferenz,
-				xplan_gmlas.xp_verbundenerplan,
-				xplan_gmlas.xplanauszug,
-				xplan_gmlas.xplanauszug_featuremember
-		";
-		$ret = $this->pgdatabase->execSQL($sql, 4,0);
+			$gml_extractor = new Gml_extractor($this->pgdatabase, $gml_location, 'xplan_gmlas_' . $GUI->user->id);
+			$gml_extractor->extract_gml_class($this->plan_class);
 
-		/*#OGRINFO
-		$cmd = $docker_gdal_cmd . ' ' . OGR_BINPATH_GDAL . 'ogrinfo GMLAS:' . $gml_location . ' -oo REMOVE_UNUSED_LAYERS=YES -oo XSD=' . $xsd_location;
-		exec($cmd, $output); echo $cmd . <br><br><pre>'; print_r($output); echo '</pre>;*/
+			$this->neuer_Layer_Datensatz();
+		} break;
 
-		#OGR2OGR Fill GMLAS-Schema
-		# For Logging add: . ' >> /var/www/logs/ogr_' . $gml_id . '.log 2>> /var/www/logs/ogr_' . $gml_id . '.err'
-		$cmd = $docker_gdal_cmd . ' ' . OGR_BINPATH_GDAL . 'ogr2ogr -f "PostgreSQL" PG:"host=' . $this->pgdatabase->host . ' dbname=' . $this->pgdatabase->dbName . ' user=' . $this->pgdatabase->user . ' password=' . $this->pgdatabase->passwd . ' SCHEMAS=' . $target_gmlas_schema .'" GMLAS:' . $gml_location . ' -oo REMOVE_UNUSED_LAYERS=YES -oo XSD=' . $xsd_location;
+		case 'xplankonverter_extract_standardshapes_to_regeln' : {
+			//$this->checkCaseAllowed($go);
+			$bereich_gml_id = $_REQUEST['bereich_gml_id'];
+			$konvertierung_id = $_REQUEST['konvertierung_id'];
+			$stelle_id = $_REQUEST['stelle_id'];
 
-		#echo $cmd;
-		exec($cmd, $output);
-		#echo '<pre>'; print_r($output); echo '</pre>';
-
-		# Send to form
-		$sql = "
-			SELECT
-				gmlas.oid,
-				trim(leading 'GML_' FROM gmlas.id)::text::uuid AS plan_gml_id, -- TODO: ONLY TRIM GML_ IF EXISTS
-				gmlas.xplan_name AS name,
-				gmlas.nummer AS nummer,
-				gmlas.internalid AS internalid,
-				gmlas.beschreibung AS beschreibung,
-				gmlas.kommentar AS kommentar,
-				to_char(gmlas.technherstelldatum, 'DD.MM.YYYY') AS technherstelldatum,
-				to_char(gmlas.genehmigungsdatum, 'DD.MM.YYYY') AS genehmigungsdatum,
-				to_char(gmlas.untergangsdatum, 'DD.MM.YYYY') AS untergangsdatum,
-				CASE WHEN vpa.planname IS NOT NULL OR vpa.rechtscharakter IS NOT NULL OR vpa.nummer IS NOT NULL OR vpa.verbundenerplan_href IS NOT NULL THEN
-					array_to_json(ARRAY[(vpa.planname, vpa.rechtscharakter::xplan_gml.xp_rechtscharakterplanaenderung, vpa.nummer, vpa.verbundenerplan_href)]::xplan_gml.xp_verbundenerplan[])
-					ELSE NULL
-				END AS aendert,
-				CASE WHEN vpwgv.planname IS NOT NULL OR vpwgv.rechtscharakter IS NOT NULL OR vpwgv.nummer IS NOT NULL OR vpwgv.verbundenerplan_href IS NOT NULL THEN
-					array_to_json(ARRAY[(vpwgv.planname, vpwgv.rechtscharakter::xplan_gml.xp_rechtscharakterplanaenderung, vpwgv.nummer, vpwgv.verbundenerplan_href)]::xplan_gml.xp_verbundenerplan[])
-					ELSE NULL
-				END AS wurdegeaendertvon,
-				gmlas.erstellungsmassstab AS erstellungsmassstab,
-				gmlas.bezugshoehe AS bezugshoehe,
-				st_assvg(st_transform(gmlas.raeumlichergeltungsbereich,25833), 0, 8) AS newpath,
-				st_astext(st_transform(gmlas.raeumlichergeltungsbereich,25833)) AS newpathwkt,
-				CASE WHEN vm.xp_verfahrensmerkmal_vermerk IS NOT NULL OR vm.xp_verfahrensmerkmal_datum IS NOT NULL OR vm.xp_verfahrensmerkmal_signatur IS NOT NULL OR  vm.xp_verfahrensmerkmal_signiert IS NOT NULL THEN
-					array_to_json(ARRAY[(vm.xp_verfahrensmerkmal_vermerk, vm.xp_verfahrensmerkmal_datum, vm.xp_verfahrensmerkmal_signatur, vm.xp_verfahrensmerkmal_signiert)]::xplan_gml.xp_verfahrensmerkmal[])
-					ELSE NULL
-				END AS  verfahrensmerkmale,
-				--'' AS hatgenerattribut,
-				--'' AS user_id, -- SET BY APPLICATION
-				--'' AS konvertierung_id, -- SET BY APPLICATION
-				--'' AS texte,
-				--'' AS begruendungstexte,
-				CASE WHEN e.georefurl IS NOT NULL OR e.georefmimetype_codespace IS NOT NULL OR e.georefmimetype IS NOT NULL OR e.art IS NOT NULL OR e.informationssystemurl IS NOT NULL OR e.referenzname IS NOT NULL OR e.referenzmimetype_codespace IS NOT NULL OR e.referenzmimetype IS NOT NULL OR e.beschreibung IS NOT NULL OR e.datum IS NOT NULL OR e.typ IS NOT NULL THEN 
-					array_to_json(ARRAY[(e.georefurl, 
-						(e.georefmimetype_codespace, e.georefmimetype, NULL)::xplan_gml.xp_mimetypes,
-						e.art::xplan_gml.xp_externereferenzart,
-						e.informationssystemurl,
-						e.referenzname, e.referenzurl,
-						(e.referenzmimetype_codespace, e.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
-						e.beschreibung,
-						to_char(e.datum, 'DD.MM.YYYY'),
-						e.typ::xplan_gml.xp_externereferenztyp
-					)]::xplan_gml.xp_spezexternereferenz[])
-					ELSE NULL
-				END AS  externereferenz,
-				--'' AS inverszu_verbundenerplan_xp_verbundenerplan,
-				to_char(gmlas.veraenderungssperredatum, 'DD.MM.YYYY') AS veraenderungssperredatum,
-				array_to_json(ARRAY[(g.ags,g.rs,g.gemeindename,g.ortsteilname)]::xplan_gml.xp_gemeinde[]) AS gemeinde,
-				gmlas.verfahren::xplan_gml.bp_verfahren AS verfahren,
-				to_char(gmlas.inkrafttretensdatum, 'DD.MM.YYYY') AS inkrafttretensdatum,
-				gmlas.durchfuehrungsvertrag AS durchfuehrungsvertrag,
-				gmlas.staedtebaulichervertrag AS staedtebaulichervertrag,
-				gmlas.rechtsverordnungsdatum AS rechtsverordnungsdatum,
-				gmlas.rechtsstand::xplan_gml.bp_rechtsstand AS rechtsstand,
-				gmlas.hoehenbezug AS hoehenbezug,
-				to_char(gmlas.aufstellungsbeschlussdatum, 'DD.MM.YYYY') AS aufstellungsbeschlussdatum,
-				to_char(gmlas.ausfertigungsdatum, 'DD.MM.YYYY') AS ausfertigungsdatum,
-				to_char(gmlas.satzungsbeschlussdatum, 'DD.MM.YYYY') AS satzungsbeschlussdatum,
-				gmlas.veraenderungssperre AS veraenderungssperre,
-				-- to_char(gmlas.auslegungsenddatum, 'DD.MM.YYYY') AS auslegungsenddatum, -- NOT YET IN 5.0.1
-				to_json((gmlas.sonstplanart_codespace, gmlas.sonstplanart, NULL)::xplan_gml.bp_sonstplanart) AS sonstplanart,
-				gmlas.gruenordnungsplan AS gruenordnungsplan,
-				to_json((pg.name, pg.kennziffer)::xplan_gml.xp_plangeber) AS plangeber,
-				-- to_char(gmlas.auslegungsstartdatum AS auslegungsstartdatum, 'DD.MM.YYYY'), -- NOT YET IN 5.0.1
-				-- to_char(gmlas.traegerbeteiligungsstartdatum, 'DD.MM.YYYY') AS traegerbeteiligungsstartdatum,  -- NOT YET IN 5.0.1
-				to_char(gmlas.aenderungenbisdatum, 'DD.MM.YYYY') AS aenderungenbisdatum,
-				to_json((gmlas.status_codespace, gmlas.status, NULL)::xplan_gml.bp_status) AS status,--'' AS status,
-				-- to_char(gmlas.traegerbeteiligungsenddatum, 'DD.MM.YYYY') AS traegerbeteiligungsenddatum,  -- NOT YET IN 5.0.1
-				array_to_json(gmlas.planart) AS planart,
-				gmlas.erschliessungsvertrag AS erschliessungsvertrag--,
-				--'' AS bereich
-			FROM
-				xplan_gmlas.bp_plan gmlas LEFT JOIN
-				xplan_gmlas.bp_plan_gemeinde gemeindelink ON gmlas.id = gemeindelink.parent_id LEFT JOIN
-				xplan_gmlas.xp_gemeinde g ON gemeindelink.xp_gemeinde_pkid = g.ogr_pkid LEFT JOIN
-				xplan_gmlas.bp_plan_externereferenz externereferenzlink ON gmlas.id = externereferenzlink.parent_id LEFT JOIN
-				xplan_gmlas.xp_spezexternereferenz e ON externereferenzlink.xp_spezexternereferenz_pkid = e.ogr_pkid LEFT JOIN
-				xplan_gmlas.bp_plan_aendert_aendert aendertlink ON gmlas.id = aendertlink.parent_pkid LEFT JOIN
-				xplan_gmlas.aendert aendertlinktwo ON aendertlink.child_pkid = aendertlinktwo.ogr_pkid LEFT JOIN
-				xplan_gmlas.xp_verbundenerplan vpa ON aendertlinktwo.xp_verbundenerplan_pkid = vpa.ogr_pkid
-			-- JOIN Datatype wurdeGeaendertVon XP_VerbundenerPlan
-			LEFT JOIN
-				xplan_gmlas.bp_plan_wurdegeaendertvon_wurdegeaendertvon wurdegeaendertvonlink
-			ON
-				gmlas.id = wurdegeaendertvonlink.parent_pkid
-			LEFT JOIN
-				xplan_gmlas.wurdegeaendertvon wurdegeaendertvonlinktwo
-			ON
-				wurdegeaendertvonlink.child_pkid = wurdegeaendertvonlinktwo.ogr_pkid
-			LEFT JOIN
-				xplan_gmlas.xp_verbundenerplan vpwgv
-			ON
-				wurdegeaendertvonlinktwo.xp_verbundenerplan_pkid = vpwgv.ogr_pkid
-			-- JOIN Datatype XP_VerfahrensMerkmal
-			LEFT JOIN
-				xplan_gmlas.bp_plan_verfahrensmerkmale_verfahrensmerkmale verfahrensmerkmalelink
-			ON
-				gmlas.id = verfahrensmerkmalelink.parent_pkid
-			LEFT JOIN
-				xplan_gmlas.verfahrensmerkmale vm
-			ON
-				verfahrensmerkmalelink.child_pkid = vm.ogr_pkid
-			-- JOIN Datatype XP_Plangeber
-			LEFT JOIN
-				xplan_gmlas.xp_plangeber pg
-			ON
-				gmlas.plangeber_xp_plangeber_pkid  = pg.ogr_pkid
-			WHERE
-				gmlas.id ='" . $gml_id . "'
-		;";
-
-		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
-		$result = pg_fetch_assoc($ret[1]);
-
-		# Set formvars
-		$this->formvars['chosen_layer_id'] = XPLANKONVERTER_BP_PLAENE_LAYER_ID;
-
-		$rect = ms_newRectObj();
-		# iterate over all attributes as formvars
-		foreach($result as $r_key => $r_value) {
-			#echo 'key:' . $r_key . ' value:' . $r_value . '<br>';
-			$this->formvars['attributenames'][] = $r_key;
-			$this->formvars['values'][] = $r_value;
-			# for filling the data
-			if($r_key == 'newpathwkt') {
-				$this->formvars['newpathwkt'] = $r_value;
-				$this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
-			}
-			# for drawing the data onto the polygoneditor
-			if($r_key == 'newpath') {
-				$this->formvars['newpath'] = $r_value;
-			}
-			if($r_key == 'oid') {
-				$oid = $r_value;
-			}
+			$shp_extractor = new Standard_shp_extractor($this->pgdatabase,
+																									$konvertierung_id,
+																									$bereich_gml_id,
+																									$stelle_id);
+			# Writes all regeln for all standard shapes for the specific konvertierung_id
+			# into the xplankonverter.regeln list and associates it with bereich_gml_id
+			# Nonstandard shapes should be skipped (if their names differ) or their attributes should be skipped
+			# if they differ
+			$shp_extractor->create_regeln_for_standard_shps();
 		}
 
-		$this->formvars['selected_layer_id'] = $this->formvars['chosen_layer_id'];
-		$this->formvars['checkbox_names_' . $this->formvars['chosen_layer_id']] = 'check;B-Pläne;bp_plan;' . $oid . '|';
-		$this->formvars['check;B-Pläne;bp_plan;' . $oid] = 'on';
-		$this->formvars['layer_schemaname'] = 'xplan_gmlas';
-
-	#	print_r($this->formvars);
-
-		$this->neuer_Layer_Datensatz();
-	} break;
-
-	default : {
-		$this->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
+		default : {
+			$this->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
+		}
 	}
 }
-
-function isInStelleAllowed($stelle, $requestStelleId) {
-	global $GUI;
-	if ($stelle->id == $requestStelleId)
-		return true;
-	else {
-		$GUI->add_message('error', 'Das angefragte Objekt darf nicht in dieser Stelle bearbeitet werden.' . ($requestStelleId != '' ? ' Es gehört zur Stelle mit der ID: ' . $requestStelleId : ''));
-		return false;
-	}
-}
-
-/*
-* extract zip files if necessary, check completeness and copy files to upload folder
-*/
-function xplankonverter_unzip_and_check_and_copy($shape_files, $dest_dir) {
-	# extract zip files if necessary and extract info
-	$temp_files = xplankonverter_unzip($shape_files, $dest_dir);
-
-	# group uploaded files to triples according to their basename
-	$check = array('shp' => false, 'shx' => false, 'dbf' => false);
-	$check_list = array();
-	array_walk($temp_files, function($file_item) use ($check, &$check_list){
-		if (!$check_list[$file_item['filename']]) $check_list[$file_item['filename']] = $check;
-		$check_list[$file_item['filename']][$file_item['extension']] = $file_item;
-	});
-
-	$incomplete = array();
-	$complete_files = array();
-	array_walk($check_list, function($check_list_item) use (&$incomplete, &$complete_files){
-		if ($check_list_item['dbf'] && $check_list_item['shx'] && $check_list_item['shp']) {
-			$complete_files[] = $check_list_item['dbf'];
-			$complete_files[] = $check_list_item['shp'];
-			$complete_files[] = $check_list_item['shx'];
-		} else $incomplete = $check_list_item;
-	});
-
-	# copy temp shape files to destination
-	$uploaded_files = array();
-	foreach($complete_files AS $file) {
-		$uploaded_files[] = xplankonverter_copy_uploaded_shp_file($file, $dest_dir);
-	}
-	return $uploaded_files;
-}
-/*
-* extract zip files if necessary and copy files to upload folder
-*/
-function xplankonverter_unzip($shape_files, $dest_dir) {
-	$temp_files = array();
-	# extract zip files if necessary and copy files to upload folder
-	foreach($shape_files['name'] AS $i => $shape_file_name) {
-		$path_parts = pathinfo($shape_file_name);
-
-		if (strtolower($path_parts['extension']) == 'zip') {
-			# extract files if the extension is zip
-			$temp_files = extract_uploaded_zip_file($shape_files['tmp_name'][$i]);
-		}
-		else {
-			# set data from single file
-			$path_parts = pathinfo($shape_file_name);
-			$temp_files[] = array(
-				'basename' => $path_parts['basename'],
-				'filename' => $path_parts['filename'],
-				'extension' => strtolower($path_parts['extension']),
-				'tmp_name' => $shape_files['tmp_name'][$i],
-				'unziped' => false
-			);
-		}
-	}
-	return $temp_files;
-}
-
-/*
-* Packt die angegebenen Zip-Dateien im sys_temp_dir Verzeichnis aus
-* und gibt die ausgepackten Dateien in der Struktur von
-* hochgeladenen Dateien aus
-*/
-function extract_uploaded_zip_file($zip_file) {
-	$sys_temp_dir = sys_get_temp_dir();
-	$extracted_files = array_map(
-		function($extracted_file) {
-			$path_parts = pathinfo($extracted_file);
-			$file = array(
-				'basename' => $path_parts['basename'],
-				'filename' => $path_parts['filename'],
-				'extension' => $path_parts['extension'],
-				'tmp_name' => sys_get_temp_dir() . '/' . $extracted_file,
-				'unziped' => true
-			);
-			return $file;
-		},
-		unzip($zip_file, false, false, true)
-	);
-	return $extracted_files;
-}
-
-/*
-* Copy files from sys_temp_dir to upload directory and mark if
-* files are new, override older or are ignored
-*/
-function xplankonverter_copy_uploaded_shp_file($file, $dest_dir) {
-	$messages = array();
-	if (
-		in_array($file['extension'], array('dbf', 'shx', 'shp')) and # nur Shape files
-		substr($file['basename'], 0, 2) != '._' # keine versteckten files
-	) {
-
-		$umlaute_mit_diakritic = array('ä','Ä','ü', 'Ü', 'ö', 'Ö');
-		$umlaute_ohne_diakritic = array('ä', 'Ä', 'ü', 'Ü', 'ö', 'Ö');
-		$file['basename'] = str_replace($umlaute_mit_diakritic, $umlaute_ohne_diakritic, $file['basename']);
-		$file['filename'] = str_replace($umlaute_mit_diakritic, $umlaute_ohne_diakritic, $file['filename']);
-
-		if (file_exists($dest_dir . $file['basename'])) {
-			$file['state'] = 'geändert';
-		}
-		else {
-			$file['state'] = 'neu';
-		}
-		if ($file['unziped']) {
-			rename($file['tmp_name'], $dest_dir . $file['basename']);
-		}
-		else {
-			move_uploaded_file($file['tmp_name'], $dest_dir . $file['basename']);
-		}
-	}
-	else {
-		if ($file['unziped']) {
-			if (is_dir($file['tmp_name']))
-				delete_files($file['tmp_name']);
-			else
-				unlink($file['tmp_name']);
-		}
-		$file['state'] = 'ignoriert';
-	}
-	return $file;
+else {
+	$this->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
 }
 ?>

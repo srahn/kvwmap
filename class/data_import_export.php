@@ -82,8 +82,8 @@ class data_import_export {
 			}
 			return -$layer_id;
 		}
-		else{
-			if($this->ask_epsg)$this->create_epsg_form($upload_id, $file_number, basename($filename));
+		else {
+			if ($this->ask_epsg) $this->create_epsg_form($upload_id, $file_number, basename($filename));
 		}
 	}
 

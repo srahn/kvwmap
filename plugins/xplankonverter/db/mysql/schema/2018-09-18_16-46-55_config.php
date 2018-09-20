@@ -12,17 +12,6 @@ $constants = array (
     'plugin' => 'xplankonverter',
     'saved' => 0,
   ),
-  'XPLANKONVERTER_SHAPE_PATH' => 
-  array (
-    'name' => 'XPLANKONVERTER_SHAPE_PATH',
-    'value' => 'xplanshapes/',
-    'prefix' => 'UPLOADPATH',
-    'type' => 'string',
-    'description' => '',
-    'group' => 'Plugins/xplankonverter',
-    'plugin' => 'xplankonverter',
-    'saved' => 0,
-  ),
   'XPLANKONVERTER_KONVERTIERUNGEN_LAYER_ID' => 
   array (
     'name' => 'XPLANKONVERTER_KONVERTIERUNGEN_LAYER_ID',

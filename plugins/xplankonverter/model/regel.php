@@ -27,11 +27,61 @@ public static	function find_by_id($gui, $by, $id) {
 	}
 
 	/*
+	* Checks which geom column is used in the regel to determine whether the source is shape(the_geom) or gmlas(position)
+	*/
+	function is_source_shape_or_gmlas($regel) {
+		$user_id = $this->gui->user->id;
+		$full_table_name = $this->get_shape_table_name();
+		$full_table_name_arr = explode('.', $full_table_name);
+		$table_name = $full_table_name_arr[1];
+		
+		$sql = 
+		"SELECT
+			EXISTS(
+				SELECT
+					column_name
+				FROM
+					information_schema.columns
+				WHERE
+					table_schema = 'xplan_shapes_" . $user_id . "'
+				AND
+					table_name = '" . $table_name . "'
+				AND
+					column_name = 'the_geom'
+			) AS the_geom,
+			EXISTS(
+				SELECT
+					column_name
+				FROM
+					information_schema.columns
+				WHERE
+					table_schema = 'xplan_gmlas_" . $user_id . "'
+				AND
+					table_name = '" . $table_name . "'
+				AND
+					column_name = 'position'
+			) AS position";
+		$ret = pg_query($this->database->dbConn, $sql);
+		$result = pg_fetch_assoc($ret);
+		if($result['the_geom'] == 't') {
+			$sourcetype = 'shape';
+		} elseif ($result['position'] == 't') {
+			$sourcetype = 'gmlas';
+		} else {
+			$sourcetype = ''; #should not happen
+		}
+		return $sourcetype;
+	}
+
+	/*
 	* Validiert die in der Regel definierten SQL-Statements
 	*/
 	function validate($konvertierung) {
 		$success = true;
 		$konvertierung_id = $konvertierung->get('id');
+		# Check geometry column source
+		$sourcetype = $this->is_source_shape_or_gmlas($this);
+		
 		$this->debug->show('Regel validate mit konvertierung_id: ' . $konvertierung_id, Regel::$write_debug);
 		$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'sql_vorhanden');
 		$validierung->konvertierung_id = $konvertierung_id;
@@ -41,7 +91,7 @@ public static	function find_by_id($gui, $by, $id) {
 			# Prüft ob alle Objekte eine Geometrie haben
 			$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'geometrie_vorhanden');
 			$validierung->konvertierung_id = $konvertierung_id;
-			$validierung->geometrie_vorhanden($this->get('sql'), $this->get('id'));
+			$validierung->geometrie_vorhanden($this->get('sql'), $this->get('id'), $sourcetype);
 
 			# Prüft ob das sql ausführbar ist und legt die Objekte an wenn ja.
 			$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'sql_ausfuehrbar');
@@ -98,22 +148,33 @@ public static	function find_by_id($gui, $by, $id) {
 		$this->debug->show('convert', Regel::$write_debug);
 		$sql = 	$this->get_convert_sql($konvertierung->get('id'));
 
-		# Konvertiere Objekte, die eine gml_id haben
-		# Die gid muss nicht mit übertragen werden
-		pg_query(
-			$this->database->dbConn,
-			$this->get_convert_sql_with_gml_id($sql)
-		);
+		# Stringpos needed as gml_id will be transfered with gmlas
+		# And there will be no gid but a ogr_fid
+		if(strpos($sql, 'gml_id') == false) {
 
-		# Konvertiere Objekte, die keine gml_id haben
-		# Die gid muss mit übertragen werden und zusammen mit der
-		# erzeugten gml_id zurückkommen.
-		$result = pg_query(
-			$this->database->dbConn,
-			$this->get_convert_sql_with_gid($sql)
-		);
+			# Konvertiere Objekte, die eine gml_id haben
+			# Die gid muss nicht mit übertragen werden
+			pg_query(
+				$this->database->dbConn,
+				$this->get_convert_sql_with_gml_id($sql)
+			);
 
-		return (pg_num_rows($result) == 0 ? array() : pg_fetch_all($result));
+			# Konvertiere Objekte, die keine gml_id haben
+			# Die gid muss mit übertragen werden und zusammen mit der
+			# erzeugten gml_id zurückkommen.
+			$result = pg_query(
+				$this->database->dbConn,
+				$this->get_convert_sql_with_gid($sql)
+			);
+
+			return (pg_num_rows($result) == 0 ? array() : pg_fetch_all($result));
+		} else {
+			$result = pg_query(
+				$this->database->dbConn,
+				$sql
+			);
+			return (pg_num_rows($result) == 0 ? array() : pg_fetch_all($result));
+		}
 	}
 
 	function get_shape_table_name() {
@@ -188,6 +249,10 @@ public static	function find_by_id($gui, $by, $id) {
 		$sql = $this->get('sql');
 		$konvertierung = $this->get_konvertierung();
 		$epsg = $konvertierung->get('output_epsg');
+		# Sourcetype for geom_column
+		$sourcetype = $this->is_source_shape_or_gmlas($regel);
+		# Default Shape, position for gmlas
+		$geometry_col = ($sourcetype == 'gmlas') ? 'position' : 'the_geom';
 
 		# konvertierung_id hinzufügen
 		$sql = substr_replace(
@@ -204,21 +269,33 @@ public static	function find_by_id($gui, $by, $id) {
 		$this->debug->show('sql nach konvertierung_id hinzufügen:<br>' . $sql, Regel::$write_debug);
 
 		# transformation hinzufügen
-		$sql = str_ireplace(
-			'the_geom',
-			"st_multi(st_transform(the_geom, {$epsg}))",
-			$sql
-		);
+		if($geometry_col == 'the_geom') {
+			$sql = str_ireplace(
+				$geometry_col,
+				"st_multi(st_transform(" . $geometry_col . ", {$epsg}))",
+				$sql
+			);
+		} elseif($geometry_col == 'position') {
+			# Needs to use gmlas.position, because if position is in source,
+			# it is also used in INSERT and possibly WHERE clause, where it should not be replaced
+			# TODO What if the schema shortcut is not gmlas?
+			$geometry_col_with_schema = 'gmlas.position';
+			$sql = str_ireplace(
+				$geometry_col_with_schema,
+				"st_multi(st_transform(" . $geometry_col_with_schema . ", {$epsg}))",
+				$sql
+			);
+		}
 		$this->debug->show('sql nach transformation:<br>' . $sql, Regel::$write_debug);
 
 		# nur nicht leere Geometrien übernehmen
 		if (strpos(strtolower($sql), 'where') === false) {
-			$sql .= ' WHERE the_geom IS NOT NULL';
+			$sql .= ' WHERE ' . $geometry_col . ' IS NOT NULL';
 		}
 		else {
 			$sql = str_ireplace(
 				'where',
-				"WHERE the_geom IS NOT NULL AND",
+				"WHERE " . $geometry_col . " IS NOT NULL AND",
 				$sql
 			);
 		}
@@ -320,7 +397,7 @@ public static	function find_by_id($gui, $by, $id) {
 	}
 
 	function get_bereich() {
-		$bereich = new RP_Bereich($this->gui);
+		$bereich = new XP_Bereich($this->gui);
 		return $bereich->find_by('gml_id', $this->get('bereich_gml_id'));
 	}
 
@@ -352,9 +429,9 @@ public static	function find_by_id($gui, $by, $id) {
 					coalesce(bp.konvertierung_id, rp.konvertierung_id) AS konvertierung_id
 				FROM
 					xplankonverter.regeln r LEFT JOIN
-					xplan_gml.rp_bereich b ON r.bereich_gml_id = b.gml_id LEFT JOIN
-					xplan_gml.rp_plan bp ON bp.gml_id::text = b.gehoertzuplan LEFT JOIN
-					xplan_gml.rp_plan rp ON rp.konvertierung_id = r.konvertierung_id
+					xplan_gml.xp_bereich b ON r.bereich_gml_id = b.gml_id LEFT JOIN
+					xplan_gml.xp_plan bp ON bp.gml_id::text = b.gehoertzuplan LEFT JOIN
+					xplan_gml.xp_plan rp ON rp.konvertierung_id = r.konvertierung_id
 				WHERE
 					r.id = " . $this->get('id') . "
 			";
@@ -389,7 +466,7 @@ public static	function find_by_id($gui, $by, $id) {
 				# ToDo: Kein Template Layer vorhanden, erzeuge einen Dummy
 			}
 			else {
-				$this->debug->show('<p>Copiere Templatelayer in gml layer gruppe id: ' . $this->konvertierung->get('gml_layer_group_id'), Regel::$write_debug);
+				$this->debug->show('<p>Kopiere Templatelayer in gml layer gruppe id: ' . $this->konvertierung->get('gml_layer_group_id'), Regel::$write_debug);
 				$gml_layer = $template_layer->copy(
 					array(
 						'Gruppe' => $this->konvertierung->get('gml_layer_group_id'),
@@ -435,8 +512,8 @@ public static	function find_by_id($gui, $by, $id) {
 					SELECT
 						rb.*
 					FROM
-						xplan_gml.rp_plan p JOIN
-						xplan_gml.rp_bereich b ON p.gml_id::text = b.gehoertzuplan JOIN
+						xplan_gml.xp_plan p JOIN
+						xplan_gml.xp_bereich b ON p.gml_id::text = b.gehoertzuplan JOIN
 						xplankonverter.regeln rb ON b.gml_id = rb.bereich_gml_id
 					WHERE
 						p.konvertierung_id = {$this->konvertierung->get('id')}

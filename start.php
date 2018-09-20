@@ -93,25 +93,13 @@ $GUI->database->execSQL("SET NAMES '".MYSQL_CHARSET."'",0,0);
 /**
 	Hier findet sich die gesamte Loging für Login und Reggistrierung, sowie Stellenwechsel
 **/
-
-# Test cases
-if ($GUI->formvars['go'] == 'test') {
-	if (in_array($GUI->formvars['case'], array('start'))) {
-		$GUI->user->rolle->gui = '../tests/' . $GUI->formvars['case'] . '.php';
-		$GUI->output();
-	}
-	else {
-		echo 'Test nicht gefunden!';
-	}
-	exit;
-}
-
+#$GUI->debug->write('Formularvariablen: ' . print_r($GUI->formvars, true), 4, $GUI->echo);
 # logout
 if (is_logout($GUI->formvars)) {
 	$GUI->debug->write('Logout angefragt.', 4, $GUI->echo);
 	if (is_logged_in()) {
 		$GUI->debug->write('Logout.', 4, $GUI->echo);
-		logout($GUI);
+		logout();
 	}
 	else {
 		$GUI->debug->write('Ist schon logged out.', 4, $GUI->echo);
@@ -169,33 +157,13 @@ else {
 					is_agreement_accepted($GUI->user)
 				) {
 					$GUI->debug->write('Agreement ist akzeptiert.', 4, $GUI->echo);
-
-					if (is_new_password($GUI->formvars)) {
-						$GUI->debug->write('Es wurde ein neues Passwort angegeben.', 4, $GUI->echo);
-						$new_password_err = isPasswordValide($GUI->formvars['passwort'], $GUI->formvars['new_password'], $GUI->formvars['new_password_2']);
-
-						if (is_new_password_valid($new_password_err)) {
-							$GUI->debug->write('Neues Password ist valid.', 4, $GUI->echo);
-							update_password($GUI);
-							# login case 5
-						}
-						else { # new password is not ok
-							$GUI->debug->write('Neues Password ist nicht valid. Zurück zur Anmeldung mit Fehlermeldung.', 4, $GUI->echo);
-							$GUI->Fehlermeldung = $new_password_err . '!<br>Vorschlag für ein neues Password: <b>' . createRandomPassword(8) . '</b><br>';
-							$show_login_form = true;
-							$go = 'login_new_password';
-							# login case 6
-						}
-					}
-					else {
-						$GUI->debug->write('Es wurde kein neues Passwort angegeben.', 4, $GUI->echo);
-						# login case 4
-					}
+					# login case 4
 				}
 				else {
 					if ($GUI->formvars['agreement_accepted'] == '1') {
 						$GUI->debug->write('Nutzer bestätigt Agreement. Trage das ein.', 4, $GUI->echo);
 						$GUI->user->update_agreement_accepted($GUI->formvars['agreement_accepted']);
+						# login case 18
 					}
 					else {
 						$GUI->debug->write('Agreement ist nicht akzeptiert.', 4, $GUI->echo);
@@ -227,10 +195,9 @@ else {
 					if (is_registration_valid($new_registration_err)) {
 						$GUI->debug->write('Registrierung ist valide.', 4, $GUI->echo);
 
-						# // ToDo: Create a new user and go to login with user and password
+						# Create a new user and go to login with user and password
 						$result = Nutzer::register($GUI, $GUI->formvars['stelle_id']);
-						
-						
+
 						if ($result['success']) {
 							$invitation = Invitation::find_by_id($GUI, $GUI->formvars['token']);
 							$invitation->set('completed', date("Y-m-d H:i:s"));
@@ -241,15 +208,15 @@ else {
 							# login case 9
 						}
 						else {
-							$GUI->Fehlermeldung = 'Datenbankfehler beim Anlegen des Nutzers.<br>' . $result['msg'];
+							$GUI->add_message('error', 'Datenbankfehler beim Anlegen des Nutzers.<br>' . $result['msg']);
 							$show_login_form = true;
 							$go = 'login_registration';
-							# login case 11
+							# login case 10
 						}
 					}
 					else {
 						$GUI->debug->write('Registrier ist nicht valid.', 4, $GUI->echo);
-						$GUI->Fehlermeldung = $new_registration_err . '<br>Die Registrierung ist nicht erfolgreich.<br>Versuchen Sie es erneut oder lassen Sie sich erneut einladen.';
+						$GUI->add_message('error', $new_registration_err . '<br>Die Registrierung ist nicht erfolgreich.<br>Versuchen Sie es erneut oder lassen Sie sich erneut einladen.');
 						$show_login_form = true;
 						$go = 'login_registration';
 						# login case 11
@@ -284,7 +251,7 @@ if (!$show_login_form) {
 	}
 
 	# check stelle wenn noch nicht angemeldet gewesen oder auch wenn stelle gewechselt wird.
-	if (!is_logged_in() OR is_new_stelle($GUI->formvars['Stelle_ID'], $GUI->user)) {
+	if (is_login($GUI->formvars) OR is_new_stelle($GUI->formvars['Stelle_ID'], $GUI->user)) {
 		$GUI->debug->write('Zugang zu Stelle ' . $GUI->Stelle->id . ' wird angefragt.', 4, $GUI->echo);
 
 		$GUI->user->Stellen = $GUI->user->getStellen(0);
@@ -295,29 +262,53 @@ if (!$show_login_form) {
 			$GUI->user->stelle_id = $GUI->Stelle->id; # set selected stelle to user
 			$GUI->debug->write('Setze neue Stellen-ID: ' . $GUI->Stelle->id . ' für Nutzer: ' . $GUI->user->id, 4, $GUI->echo);
 			$GUI->user->updateStelleID($GUI->Stelle->id);
+			# login case 15
 		}
 		else {
 			$GUI->debug->write('Zugang zur Stelle ' . $GUI->Stelle->id . ' für Nutzer nicht erlaubt weil: ' . $permission['reason'], 4, $GUI->echo);
-			$GUI->Fehlermeldung = $permission['errmsg'];
 
 			if (is_ows_request($GUI->formvars)) {
 				$GUI->debug->write('OWS Request führt zu Exception.', 4);
-				$GUI->Fehlermeldung .= ' Melden Sie sich unter ' . URL . ' mit Ihrem alten Password an. Daraufhin werden Sie aufgefordert ein neues Passwort einzugeben. Ist dies erfolgt, können Sie diesen Dienst weiter nutzen.';
+				$GUI->Fehlermeldung .= ' Der Zugang zur URL: ' . URL . ' ist mit dem Login oder in der Stelle nicht möglich. Melden Sie sich über einen Browser an dieser Adresse an und aktualisieren Sie ggf. Ihr Passwort oder passen Sie die URL an.';
 				$go = 'OWS_Exception';
+				# login case 13
 			}
 			else {
 				$GUI->debug->write('Kein OWS Request.', 4);
 
 				if ($permission['reason'] == 'password expired') {
-					$GUI->debug->write('Passwort ist abgelaufen. Frage neues ab.', 4, $GUI->echo);
-					$GUI->passwort_abgelaufen = true;
-					$show_login_form = true;
-					$go = 'login_new_password';
-					# login case 11
+					logout();
+					if (is_new_password($GUI->formvars)) {
+						$GUI->debug->write('Passwort ist abgelaufen. Es wurde ein neues Passwort angegeben.', 4, $GUI->echo);
+						$new_password_err = isPasswordValide($GUI->formvars['passwort'], $GUI->formvars['new_password'], $GUI->formvars['new_password_2']);
+
+						if (is_new_password_valid($new_password_err)) {
+							$GUI->debug->write('Neues Password ist valid.', 4, $GUI->echo);
+							update_password($GUI);
+							# login case 17
+						}
+						else { # new password is not ok
+							$GUI->debug->write('Neues Password ist nicht valid. Zurück zur Anmeldung mit Fehlermeldung.', 4, $GUI->echo);
+							$GUI->Fehlermeldung = $new_password_err . '!<br>Vorschlag für ein neues Password: <b>' . createRandomPassword(8) . '</b><br>';
+							$show_login_form = true;
+							$go = 'login_new_password';
+							# login case 6
+						}
+					}
+					else {
+						$GUI->debug->write('Passwort ist abgelaufen. Frage neues ab.', 4, $GUI->echo);
+						$GUI->passwort_abgelaufen = true;
+						$show_login_form = true;
+						$go = 'login_new_password';
+						# login case 19
+					}
 				}
 				else {
 					$GUI->debug->write('Passwort ist nicht abgelaufen.', 4);
+					$GUI->add_message('error', $permission['errmsg'] . '<br>' . $permission['reason']);
+					$GUI->Stelle = new stelle($GUI->user->stelle_id, $GUI->database);
 					$go = 'Stelle_waehlen';
+					# login case 14
 				}
 			}
 		}
@@ -552,6 +543,9 @@ function get_permission_in_stelle($GUI) {
 
 		if (is_password_expired($GUI->user, $GUI->Stelle)) {
 			$GUI->debug->write('Passwort ist abgelaufen.', 4, $GUI->echo);
+			if (new_password)
+
+
 			$allowed = false;
 			$reason = 'password expired';
 			$errmsg = 'Das Passwort des Nutzers ' . $GUI->user->login_name . ' ist in der Stelle ' . $GUI->stelle->Bezeichnung . ' abgelaufen. Passwörter haben in dieser Stelle nur eine Gütligkeit von ' . $GUI->Stelle->allowedPasswordAge . ' Monaten. Geben Sie ein neues Passwort ein und notieren Sie es sich.';
@@ -577,6 +571,8 @@ function get_permission_in_stelle($GUI) {
 	}
 	else {
 		$GUI->debug->write('Nutzer gehört nicht zur Stelle ' . $GUI->Stelle->id, 4, $GUI->echo);
+		$reason = 'Der Nutzer ist nicht der Stelle mit der ID: ' . $GUI->Stelle->id . ' zugeordnet oder es gibt diese Stelle in der Anwendung nicht.';
+		$errmsg = 'Anmeldung in der Stelle fehlgeschlagen.';
 		$allowed = false;
 	}
 	return array(
@@ -598,7 +594,7 @@ function is_password_expired($user, $stelle) {
 	$abgelaufen = false;
 	if ($stelle->checkPasswordAge) {
 		$remainingDays = checkPasswordAge($user->password_setting_time, $stelle->allowedPasswordAge);
-		#echo '<br>Verbleibende Tage '.$remainingDays;
+		#echo '<br>Passwort setting time: ' . $user->password_setting_time . ' erlaubt iin Monat: ' . $stelle->allowedPasswordAge . ' Verbleibende Tage: ' . $remainingDays;
 		return ($remainingDays <= 0);
 	}
 	return $abgelaufen;
@@ -718,7 +714,6 @@ function logout() {
 
 function update_password($GUI) {
 	$GUI->user->setNewPassword($GUI->formvars['new_password']);
-	$GUI->user->password_setting_time=date('Y-m-d H:i:s',time());
 	$GUI->add_message('notice', 'Password ist erfolgreich geändert worden.');
 }
 

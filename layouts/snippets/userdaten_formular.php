@@ -22,7 +22,22 @@
 		layer = document.getElementById('layer_'+layer_id);
 		layer.parentNode.removeChild(layer);
 	}
-	
+
+	function resetPassword() {
+		var newPassword = 'geheim',
+		loginName = $('form[name="GUI"] input[name="loginname"]').val();
+		$('#resetPassword').attr(
+			'href',
+			'mailto:' + $('form[name="GUI"] input[name="email"]').val() + '?subject=Neues Passwort für kvwmap&body=Einladung%20f%C3%BCr%20kvwmap-Nutzer%20' + loginName + '%0A%0ASie werden aufgefordert ein neues Passwort für kvwmap einzugeben.%0A%0AKlicken Sie dazu bitte auf folgenden Link:%0A %0A%0Ahttps%3A%2F%2Fgdi-service.de%2Fkvwmap_pet_dev%2Findex.php%3Flogin_name=' + loginName + '%0A%0AMit freundlichen Grüßen%0AIhr GIS-Administrator%0A'
+		);
+		$('#resetPassword').parent().html('Neues Passwort vergeben!');
+		message('Neues Passwort vergeben.<br>Es hat sich ein E-Mail-Fenster mit einer vorgefertigten Meldung geöffnet. Verschicken die Einladung mit dem automatisch generierten Passwort an den Nutzer und speichern Sie den Datensatz des Benutzers mit den neuen Angaben!');
+		$('<input>').attr({
+			type: 'hidden',
+			name: 'password_setting_time',
+			value: '<? echo date('Y-m-d', time() - (60 * 60 * 24 * 31 * ($this->Stelle->allowedPasswordAge > 0 ? $this->Stelle->allowedPasswordAge : 1))); ?>'
+		}).appendTo('#GUI');
+	}
 -->
 </script>
 
@@ -34,7 +49,6 @@
 		echo $this->formvars['selstellen']["ID"][$i];
 	}
 ?>">
-
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
     <td><h2><?php echo $strTitle; ?></h2></td>
@@ -53,13 +67,15 @@ else {
 			<table border="0" cellspacing="0" cellpadding="5" style="border:1px solid #C3C7C3">
 				<tr align="center">
 					<td colspan="2" style="border-bottom:1px solid #C3C7C3"><em><span class="px13"><?php echo $strAsteriskRequired;?></span></em></td>
-					</tr><?php if ($this->formvars['selected_user_id']>0) {?>
-				<tr>
-					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDataBankID;?></th>
-					<td style="border-bottom:1px solid #C3C7C3">
-						<input name="id" type="text" value="<?php echo $this->formvars['selected_user_id']; ?>" size="25" maxlength="11">
-					</td>
-				</tr><?php } ?>
+				</tr><?php
+				if ($this->formvars['selected_user_id'] > 0) { ?>
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDataBankID;?></th>
+						<td style="border-bottom:1px solid #C3C7C3">
+							<input name="id" type="text" value="<?php echo $this->formvars['selected_user_id']; ?>" size="25" maxlength="11">
+						</td>
+					</tr><?php
+				} ?>
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strName;?></th>
 					<td style="border-bottom:1px solid #C3C7C3">
@@ -80,17 +96,39 @@ else {
 				</tr><?php if ($this->formvars['selected_user_id']>0) {?>
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strChangePassword;?></th>
-					<td style="border-bottom:1px solid #C3C7C3"><input type="checkbox" onchange="toggle_password();" name="changepasswd" value="1">&nbsp;Letzte Änderung am: <?php
-					$passwordSettingUnixTime=strtotime($this->formvars['password_setting_time']);
-					echo date('d.m.Y',$passwordSettingUnixTime); ?><?php
-					if ($this->Stelle->check_password_age) {
-						$allowedPasswordAgeRemainDays=checkPasswordAge($this->formvars['password_setting_time'],$this->Stelle->allowed_password_age);
-						?>&nbsp;Es gilt noch <?php echo $allowedPasswordAgeRemainDays; ?> Tage.<?php
-					 } ?></td>
+					<td style="border-bottom:1px solid #C3C7C3"><input type="checkbox" onchange="toggle_password();" name="changepasswd" value="1"><?
+						$passwordSettingUnixTime = strtotime($this->formvars['password_setting_time']); ?>
+						Letzte Änderung am: <? echo date('d.m.Y', $passwordSettingUnixTime); ?>. <?
+						if ($this->Stelle->checkPasswordAge) {
+							$allowedPasswordAgeRemainDays = checkPasswordAge($this->formvars['password_setting_time'], $this->Stelle->allowedPasswordAge);?>
+							Das Passwort <?
+							if ($allowedPasswordAgeRemainDays < 0) { ?>
+								ist seit <? echo $allowedPasswordAgeRemainDays * -1; ?> Tagen abgelaufen<?
+							}
+							else { ?>
+								gilt noch <? echo $allowedPasswordAgeRemainDays; ?> Tage<?
+							} ?>.<?
+					 	} ?>
+					</td>
 				</tr><?php } ?>
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPassword;?></th>
-					<td style="border-bottom:1px solid #C3C7C3"><input name="password1" readonly onfocus="this.removeAttribute('readonly');" <?php if ($this->formvars['selected_user_id']>0)echo'disabled="true"';?> type="password" size="10" maxlength="30"></td>
+					<td style="border-bottom:1px solid #C3C7C3">
+						<input
+							name="password1"
+							readonly
+							onfocus="this.removeAttribute('readonly');" <?php
+							if ($this->formvars['selected_user_id'] > 0) { ?>
+								disabled="true"<?php
+							} ?>
+							type="password"
+							size="10"
+							maxlength="30"
+						><?php
+						if ($this->formvars['selected_user_id'] > 0) { ?>
+							<span><a id="resetPassword" href="#" onclick="resetPassword();"); "><? echo $this->strReset; ?></a></span><?php
+						} ?>
+					</td>
 				</tr>
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strReEnterPassword;?></th>
@@ -159,39 +197,41 @@ else {
 				</tr>
 			</table>
 		</td>
-	</tr>
-	<tr>
-		<td>
-			<table border="0" cellspacing="0" cellpadding="5" style="width: 100%;border:1px solid #C3C7C3">
-				<tr>
-					<th class="fetter" align="right" valign="top" style="width: 175px;border-bottom:1px solid #C3C7C3"><?php echo $strActiveStelle;?></th>
-					<td style="border-bottom:1px solid #C3C7C3">
-						<a href="index.php?go=Stelleneditor&selected_stelle_id=<? echo $this->userdaten[0]['stelle_id']; ?>"><? echo $this->formvars['selstellen']['Bezeichnung'][$active_stelle]; ?></a>
-					</td>
-				</tr>
-				<tr>
-					<th class="fetter" align="right" valign="top" style="width: 173px;border-bottom:1px solid #C3C7C3"><?php echo $strActiveLayers;?></th>
-					<td style="border-bottom:1px solid #C3C7C3">
-						<table cellpadding="0" cellspacing="0">
-					<?	for($i = 0; $i < count($this->active_layers)-1; $i++){ ?>
-							<tr id="layer_<? echo $this->active_layers[$i]['Layer_ID']; ?>" class="tr_hover">
-								<td style="padding: 0 10 0 2">
-									<? echo $this->active_layers[$i]['alias'].'</td><td><a title="deaktivieren" href="javascript:deactivate_layer('.$this->formvars['selected_user_id'].', '.$this->userdaten[0]['stelle_id'].', '.$this->active_layers[$i]['Layer_ID'].');"><i style="font-size: 19px; color: firebrick" class="fa fa-times" aria-hidden="true"></i></a>'; ?>
-								<td>
-							</tr>
-					<?	}	 ?>
-						</table>
-					</td>
-				</tr>
-				<tr>
-					<th class="fetter" align="right" valign="top" style="width: 173px;border-bottom:1px solid #C3C7C3"><? echo $strChangeUser;?></th>
-					<td style="border-bottom:1px solid #C3C7C3">
-						<a href="index.php?go=als_nutzer_anmelden&loginname=<? echo $this->formvars['loginname']; ?>"><? echo $strLoginAsUser; ?></a>
-					</td>
-				</tr>				
-			</table>
-		</td>
-	</tr>
+	</tr><?
+	if ($this->formvars['selected_user_id'] > 0) { ?>
+		<tr>
+			<td>
+				<table border="0" cellspacing="0" cellpadding="5" style="width: 100%;border:1px solid #C3C7C3">
+					<tr>
+						<th class="fetter" align="right" valign="top" style="width: 175px;border-bottom:1px solid #C3C7C3"><?php echo $strActiveStelle;?></th>
+						<td style="border-bottom:1px solid #C3C7C3">
+							<a href="index.php?go=Stelleneditor&selected_stelle_id=<? echo $this->userdaten[0]['stelle_id']; ?>"><? echo $this->formvars['selstellen']['Bezeichnung'][$active_stelle]; ?></a>
+						</td>
+					</tr>
+					<tr>
+						<th class="fetter" align="right" valign="top" style="width: 173px;border-bottom:1px solid #C3C7C3"><?php echo $strActiveLayers;?></th>
+						<td style="border-bottom:1px solid #C3C7C3">
+							<table cellpadding="0" cellspacing="0">
+						<?	for($i = 0; $i < count($this->active_layers)-1; $i++){ ?>
+								<tr id="layer_<? echo $this->active_layers[$i]['Layer_ID']; ?>" class="tr_hover">
+									<td style="padding: 0 10 0 2">
+										<? echo $this->active_layers[$i]['alias'].'</td><td><a title="deaktivieren" href="javascript:deactivate_layer('.$this->formvars['selected_user_id'].', '.$this->userdaten[0]['stelle_id'].', '.$this->active_layers[$i]['Layer_ID'].');"><i style="font-size: 19px; color: firebrick" class="fa fa-times" aria-hidden="true"></i></a>'; ?>
+									<td>
+								</tr>
+						<?	}	 ?>
+							</table>
+						</td>
+					</tr>
+					<tr>
+						<th class="fetter" align="right" valign="top" style="width: 173px;border-bottom:1px solid #C3C7C3"><? echo $strChangeUser;?></th>
+						<td style="border-bottom:1px solid #C3C7C3">
+							<a href="index.php?go=als_nutzer_anmelden&loginname=<? echo $this->formvars['loginname']; ?>"><? echo $strLoginAsUser; ?></a>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr><?
+	} ?>
 	<tr>
 		<td align="center">
 		<input type="hidden" name="go_plus" id="go_plus" value=""><?php
