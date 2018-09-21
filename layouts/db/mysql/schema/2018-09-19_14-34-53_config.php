@@ -1996,10 +1996,13 @@ else{
 	if(mysql_num_rows($result[1]) == 0){
 		$sql = '';
 		foreach($constants as $constant){
-			if(!in_array($constant['name'], array('MYSQL_HOST','MYSQL_USER','MYSQL_PASSWORD','MYSQL_DBNAME','MYSQL_HOSTS_ALLOWED')))
+			if(!in_array($constant['name'], array('MYSQL_HOST','MYSQL_USER','MYSQL_PASSWORD','MYSQL_DBNAME','MYSQL_HOSTS_ALLOWED'))){
 				$sql.="INSERT INTO config (name, prefix, value, description, type, `group`, `plugin`, `saved`) VALUES ('".$constant['name']."', '".$constant['prefix']."', '".addslashes($constant['value'])."', '".addslashes($constant['description'])."', '".$constant['type']."', '".$constant['group']."', '".$constant['plugin']."', ".$constant['saved'].");\n";
-			elseif(defined($constant['name']))
-				$credentials.= 'define('.$constant['name'].', '.var_export(constant($constant['name']), true).");\n";
+			}
+			else{
+				if(defined($constant['name']))$constant['value'] = var_export(constant($constant['name']), true);
+				$credentials.= 'define('.$constant['name'].', '.$constant['value'].");\n";
+			}
 		}
 		# config Tabelle befüllen
 		$result = $this->database->exec_commands($sql, NULL, NULL);
