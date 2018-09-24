@@ -7575,7 +7575,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			array(
 				'select' => 's.`ID`, s.`Bezeichnung`',
 				'from' => 'stelle s, rolle r',
-				'where' => 's.ID = r.stelle_id AND r.user_id = ' . $this->user->id . ' AND r.stelle_id != ' . $this->Stelle->id,
+				'where' => 's.ID = r.stelle_id AND r.user_id = ' . $this->user->id,
 				'order' => 'bezeichnung'
 			)
 		);

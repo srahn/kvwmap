@@ -195,7 +195,6 @@ else {
 					if (is_registration_valid($new_registration_err)) {
 						$GUI->debug->write('Registrierung ist valide.', 4, $GUI->echo);
 
-						# Create a new user and go to login with user and password
 						$result = Nutzer::register($GUI, $GUI->formvars['stelle_id']);
 
 						if ($result['success']) {
@@ -205,6 +204,8 @@ else {
 							$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->database);
 							unset($GUI->formvars['Stelle_id']);
 							$GUI->add_message('info', 'Nutzer erfolgreich angelegt.<br>Willkommen im WebGIS kvwmap.');
+							$GUI->debug->write('Set Session', 4, $GUI->echo);
+							set_session_vars($GUI->formvars);
 							# login case 9
 						}
 						else {
