@@ -195,7 +195,6 @@ else {
 					if (is_registration_valid($new_registration_err)) {
 						$GUI->debug->write('Registrierung ist valide.', 4, $GUI->echo);
 
-						# Create a new user and go to login with user and password
 						$result = Nutzer::register($GUI, $GUI->formvars['stelle_id']);
 
 						if ($result['success']) {
@@ -205,6 +204,8 @@ else {
 							$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->database);
 							unset($GUI->formvars['Stelle_id']);
 							$GUI->add_message('info', 'Nutzer erfolgreich angelegt.<br>Willkommen im WebGIS kvwmap.');
+							$GUI->debug->write('Set Session', 4, $GUI->echo);
+							set_session_vars($GUI->formvars);
 							# login case 9
 						}
 						else {
@@ -324,11 +325,11 @@ if ($show_login_form) {
 else {
 	$GUI->debug->write('Lade Stelle und ordne Rolle dem User zu.', 4, $GUI->echo);
 	# Alles was man immer machen muss bevor die go's aufgerufen werden
-	$GUI->user->setRolle($GUI->user->stelle_id);
 	if (new_options_sent($GUI->formvars)) {
 		$GUI->debug->write('Speicher neue Stellenoptionen.', 4, $GUI->echo);
 		$GUI->user->setOptions($GUI->user->stelle_id, $GUI->formvars);
 	}
+	$GUI->user->setRolle($GUI->user->stelle_id);
 
 	#$GUI->debug->write('Eingestellte Rolle: ' . print_r($GUI->user->rolle, true), 4, $GUI->echo);
 
@@ -656,7 +657,7 @@ function checkRegistration($gui) {
 	}
 
 	# Prüft ob Einladung schon wahrgenommen wurde
-	if ($check == 0 AND $invitation->get('compleeted') != '') {
+	if ($check == 0 AND $invitation->get('completed') != '') {
 		$registration_errors[] = 'Einladung zu token: ' . $params['token'] . ' wurde schon am: ' . $invitation->get('completed') . ' wahrgenommen.';
 		$check = 1;
 	}

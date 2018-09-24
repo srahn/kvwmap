@@ -1472,9 +1472,6 @@ class GUI {
               if ($layerset['list'][$i]['template']!='') {
                 $layer->set('template',$layerset['list'][$i]['template']);
               }
-              else {
-                $layer->set('template',DEFAULTTEMPLATE);
-              }
               # Header (Kopfdatei)
               if ($layerset['list'][$i]['header']!='') {
                 $layer->set('header',$layerset['list'][$i]['header']);
@@ -2606,26 +2603,22 @@ class GUI {
 			~document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'block\';';
 		}
 	}
-
-	function loadPlugins($go){
+	
+	function go_switch_plugins($go){
   	global $kvwmap_plugins;
-		$this->loaded_plugins = array();
 	  $this->goNotExecutedInPlugins = true;		// wenn es keine Plugins gibt, ist diese Var. immer true
-  	if(count($kvwmap_plugins) > 0){
-			$plugins = scandir(PLUGINS, 1);
-			for($i = 0; $i < count($plugins)-2; $i++) {
-				if($this->goNotExecutedInPlugins == true AND in_array($plugins[$i], $kvwmap_plugins)){
-					if (file_exists(PLUGINS.$plugins[$i].'/config/config.php'))
-						include(PLUGINS.$plugins[$i].'/config/config.php');
-					include(PLUGINS.$plugins[$i].'/control/index.php');
-					$this->loaded_plugins[] = $plugins[$i];
-				}
+		for($i = 0; $i < count($kvwmap_plugins); $i++){
+			if($this->goNotExecutedInPlugins == true){
+				$this->goNotExecutedInPlugins = false;
+				$go_switch_plugin = 'go_switch_'.$kvwmap_plugins[$i];
+				$go_switch_plugin($go);
 			}
 		}
-  }
+  }	
 
-	function plugin_loaded($plugin) {
-		return in_array($plugin, $this->loaded_plugins);
+	function plugin_loaded($plugin){
+		global $kvwmap_plugins;
+		return in_array($plugin, $kvwmap_plugins);
 	}
 
   function checkCaseAllowed($case){
@@ -3202,21 +3195,6 @@ class GUI {
 			";
   }
 
-  # Funktion zu Testzwecken der postgresql-Datenbankanfragens
-  function loadDenkmale_laden(){
-		include_(CLASSPATH.'xml.php');
-    # Erzeugen eines HIDA XML-Export-Dokument-Objektes
-    $hidaDoc=new hidaDocument(DEFAULT_DENKMAL_IMPORT_FILE);
-    # Einlesen der Felder in die Datenbank
-    $hidaDoc->loadDocInDatabase();
-    # Übergabe der Felder zur Ausgabe in HTML
-    $this->fields=$hidaDoc->fields;
-    # Löschen des Objektes
-    unset($hidaDoc);
-    # Setzen des Ausgabetemplates
-    $this->main='denkmale_geladen.php';
-  }
-
   function get_classes(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->classdaten = $mapDB->read_Classes($this->formvars['layer_id']);
@@ -3728,6 +3706,7 @@ class GUI {
 		include_once(CLASSPATH.'administration.php');
 		$this->administration = new administration($this->database, $this->pgdatabase);
 		$this->administration->get_database_status();
+		$this->administration->get_config_params();
     switch ($this->formvars['func']) {
 			case "update_databases" : {
         $this->administration->update_databases();
@@ -3739,8 +3718,9 @@ class GUI {
 				$this->administration->get_database_status();
 				$this->showAdminFunctions();
       } break;
-      case "showConstants" : {
-        $this->showConstants();
+			case "save_config" : {
+        $result = $this->administration->save_config($this->formvars);
+				$this->showAdminFunctions();
       } break;
       case "createRandomPassword" : {
         $this->createRandomPassword();
@@ -3815,8 +3795,8 @@ class GUI {
   }
 
   function showConstants() {
-    $this->main='showconstants.php';
-    $this->titel='Konstanten';
+		$this->main='showadminfunctions.php';
+		$this->administration->get_constants_from_all_configs();
   }
 
   function grundbuchblattWahl() {
@@ -7575,7 +7555,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			array(
 				'select' => 's.`ID`, s.`Bezeichnung`',
 				'from' => 'stelle s, rolle r',
-				'where' => 's.ID = r.stelle_id AND r.user_id = ' . $this->user->id . ' AND r.stelle_id != ' . $this->Stelle->id,
+				'where' => 's.ID = r.stelle_id AND r.user_id = ' . $this->user->id,
 				'order' => 'bezeichnung'
 			)
 		);
@@ -12614,9 +12594,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
               if ($layerset[$i]['template']!='') {
                 $layer->set('template',$layerset[$i]['template']);
               }
-              else {
-                $layer->set('template',DEFAULTTEMPLATE);
-              }
               $projFROM = ms_newprojectionobj("init=epsg:".$this->user->rolle->epsg_code);
     					$projTO = ms_newprojectionobj("init=epsg:".$layerset[$i]['epsg_code']);
 							$rect2=ms_newRectObj();
@@ -12663,9 +12640,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						$layer->set('status',MS_ON);
 						if ($layerset[$i]['template']!='') {
 							$layer->set('template',$layerset[$i]['template']);
-						}
-						else {
-							$layer->set('template',DEFAULTTEMPLATE);
 						}
 						@$layer->queryByRect($rect);
 						$layer->open();

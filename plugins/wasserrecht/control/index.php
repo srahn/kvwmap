@@ -1,5 +1,5 @@
 <?php
-$this->goNotExecutedInPlugins = false;
+
 include_once(CLASSPATH . 'PgObject.php');
 include_once(CLASSPATH . 'Layer.php');
 // include('funktionen/input_check_functions.php');
@@ -114,22 +114,22 @@ function getDocumentUrlFromPath(&$gui, $documentPath)
     return $absoluteURL;
 }
 
-$this->actual_link = parse_url((isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]", PHP_URL_PATH);
+$GUI->actual_link = parse_url((isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]", PHP_URL_PATH);
 
 /**
  * LOG
  */
-$this->log = new Log($this->debug);
+$GUI->log = new Log($GUI->debug);
 
 /**
  * Date
  */
-$this->date = new DateHelper($this);
+$GUI->date = new DateHelper($GUI);
 
 /**
  * Layer Names
  */
-// $this->layer_names = new LayerNames($this, Layer::find($this, "true"));
+// $GUI->layer_names = new LayerNames($GUI, Layer::find($GUI, "true"));
 
 // print_r($_POST);
 // print_r($_REQUEST);
@@ -139,7 +139,7 @@ $this->date = new DateHelper($this);
 //     $parts = parse_url($url);
 //     print_r($_GET);
     
-//     $this->go=htmlspecialchars($_POST["post_action"]);
+//     $GUI->go=htmlspecialchars($_POST["post_action"]);
 // }
 
 if($_SERVER ["REQUEST_METHOD"] == "POST")
@@ -157,195 +157,194 @@ if($_SERVER ["REQUEST_METHOD"] == "POST")
         
         if(startsWith($keyEscaped, ERKLAERUNG_URL))
         {
-            $this->go = WASSERENTNAHMEENTGELT_ERKLAERUNG_DER_ENTNAHME_URL;
+            $GUI->go = WASSERENTNAHMEENTGELT_ERKLAERUNG_DER_ENTNAHME_URL;
             break;
         }
         elseif($keyEscaped === VERWALTUNGSAUFWAND_BEANTRAGEN_URL)
         {
-            $this->go = ERSTATTUNG_DES_VERWALTUNGSAUFWANDS_URL;
+            $GUI->go = ERSTATTUNG_DES_VERWALTUNGSAUFWANDS_URL;
         }
     }
 }
 
-/**
- * Anwendungsfälle
- * wasserentnahmebenutzer
- * wasserrecht_deploy
- * wasserrecht_deploy_Starten
- */
-switch($this->go){
 
-    case WASSERENTNAHMEBENUTZER: {
-        $this->log->log_debug(WASSERENTNAHMEBENUTZER . ' called!');
-	    
-	    $this->main = PLUGINS . 'wasserrecht/view/'. WASSERENTNAHMEBENUTZER_AUFFORDERUNG_ZUR_ERKLAERUNG_URL . '.php';
-	    $this->output();
-	}	break;
-	
-	case WASSERENTNAHMEBENUTZER_AUFFORDERUNG_ZUR_ERKLAERUNG_URL: {
-	    $this->log->log_debug(WASSERENTNAHMEBENUTZER_AUFFORDERUNG_ZUR_ERKLAERUNG_URL . ' called!');
-	    
-	    $this->main = PLUGINS . 'wasserrecht/view/'. WASSERENTNAHMEBENUTZER_AUFFORDERUNG_ZUR_ERKLAERUNG_URL . '.php';
-	    $this->output();
-	}	break;
-	
-	case WASSERENTNAHMEBENUTZER_ENTGELTBESCHEID_URL: {
-	    $this->log->log_debug(WASSERENTNAHMEBENUTZER_ENTGELTBESCHEID_URL . ' called!');
-	    
-	    $this->main = PLUGINS . 'wasserrecht/view/' . WASSERENTNAHMEBENUTZER_ENTGELTBESCHEID_URL .'.php';
-	    $this->output();
-	}	break;
-	
-	case WASSERENTNAHMEENTGELT_URL: {
-	    $this->log->log_debug(WASSERENTNAHMEENTGELT_URL . ' called!');
-	    
-	    $this->main = PLUGINS . 'wasserrecht/view/' . WASSERENTNAHMEENTGELT_ERKLAERUNG_DER_ENTNAHME_URL . '.php';
-	    $this->output();
-	}	break;
-	
-	case WASSERENTNAHMEENTGELT_ERKLAERUNG_DER_ENTNAHME_URL: {
-	    $this->log->log_debug(WASSERENTNAHMEENTGELT_ERKLAERUNG_DER_ENTNAHME_URL . ' called!');
-	    
-	    $this->main = PLUGINS . 'wasserrecht/view/' . WASSERENTNAHMEENTGELT_ERKLAERUNG_DER_ENTNAHME_URL .'.php';
-	    $this->output();
-	}	break;
-	
-	case WASSERENTNAHMEENTGELT_FESTSETZUNG_URL: {
-	    $this->log->log_debug(WASSERENTNAHMEENTGELT_FESTSETZUNG_URL . 'called!');
-	    
-	    $this->main = PLUGINS . 'wasserrecht/view/' . WASSERENTNAHMEENTGELT_FESTSETZUNG_URL . '.php';
-	    $this->output();
-	}	break;
-	
-	case ZENTRALE_STELLE_URL: {
-	    $this->log->log_debug(ZENTRALE_STELLE_URL . ' called!');
-	    
-// 	    if ($this->user->funktion === 'admin') 
-// 	    {
-	        $this->log->log_debug(ZENTRALE_STELLE_URL . ' Zugriff erlaubt');
-	        
-	        $this->main = PLUGINS . 'wasserrecht/view/' . ZENTRALE_STELLE_URL . '.php';
-	        $this->output();
-// 	    }
-// 	    else 
-// 	    {
-// 	        $this->log->log_debug(ZENTRALE_STELLE_URL . ' Zugriff verweigert');
-	        
-// 	        echo 'Zugriff verweigert';
-// 	    }
-	    
-	}	break;
-	
-	case ERSTATTUNG_DES_VERWALTUNGSAUFWANDS_URL: {
-	    $this->log->log_debug(ERSTATTUNG_DES_VERWALTUNGSAUFWANDS_URL . ' called!');
-	    
-	    $this->main = PLUGINS . 'wasserrecht/view/'. ERSTATTUNG_DES_VERWALTUNGSAUFWANDS_URL . '.php';
-	    $this->output();
-	}  break;
+function go_switch_wasserrecht($go){
+	global $GUI;
+	switch($GUI->go){
 
-	case 'wasserrecht_deploy': {
-		$this->checkCaseAllowed($this->go);
-		if ($this->user->funktion == 'admin') {
-			$this->main = PLUGINS . 'wasserrecht/view/deploy_form.php';
-			$this->output();
-		}
-		else {
-			echo 'Zugriff verweigert';
-		};
-	} break;
+			case WASSERENTNAHMEBENUTZER: {
+					$GUI->log->log_debug(WASSERENTNAHMEBENUTZER . ' called!');
+				
+				$GUI->main = PLUGINS . 'wasserrecht/view/'. WASSERENTNAHMEBENUTZER_AUFFORDERUNG_ZUR_ERKLAERUNG_URL . '.php';
+				$GUI->output();
+		}	break;
+		
+		case WASSERENTNAHMEBENUTZER_AUFFORDERUNG_ZUR_ERKLAERUNG_URL: {
+				$GUI->log->log_debug(WASSERENTNAHMEBENUTZER_AUFFORDERUNG_ZUR_ERKLAERUNG_URL . ' called!');
+				
+				$GUI->main = PLUGINS . 'wasserrecht/view/'. WASSERENTNAHMEBENUTZER_AUFFORDERUNG_ZUR_ERKLAERUNG_URL . '.php';
+				$GUI->output();
+		}	break;
+		
+		case WASSERENTNAHMEBENUTZER_ENTGELTBESCHEID_URL: {
+				$GUI->log->log_debug(WASSERENTNAHMEBENUTZER_ENTGELTBESCHEID_URL . ' called!');
+				
+				$GUI->main = PLUGINS . 'wasserrecht/view/' . WASSERENTNAHMEBENUTZER_ENTGELTBESCHEID_URL .'.php';
+				$GUI->output();
+		}	break;
+		
+		case WASSERENTNAHMEENTGELT_URL: {
+				$GUI->log->log_debug(WASSERENTNAHMEENTGELT_URL . ' called!');
+				
+				$GUI->main = PLUGINS . 'wasserrecht/view/' . WASSERENTNAHMEENTGELT_ERKLAERUNG_DER_ENTNAHME_URL . '.php';
+				$GUI->output();
+		}	break;
+		
+		case WASSERENTNAHMEENTGELT_ERKLAERUNG_DER_ENTNAHME_URL: {
+				$GUI->log->log_debug(WASSERENTNAHMEENTGELT_ERKLAERUNG_DER_ENTNAHME_URL . ' called!');
+				
+				$GUI->main = PLUGINS . 'wasserrecht/view/' . WASSERENTNAHMEENTGELT_ERKLAERUNG_DER_ENTNAHME_URL .'.php';
+				$GUI->output();
+		}	break;
+		
+		case WASSERENTNAHMEENTGELT_FESTSETZUNG_URL: {
+				$GUI->log->log_debug(WASSERENTNAHMEENTGELT_FESTSETZUNG_URL . 'called!');
+				
+				$GUI->main = PLUGINS . 'wasserrecht/view/' . WASSERENTNAHMEENTGELT_FESTSETZUNG_URL . '.php';
+				$GUI->output();
+		}	break;
+		
+		case ZENTRALE_STELLE_URL: {
+				$GUI->log->log_debug(ZENTRALE_STELLE_URL . ' called!');
+				
+	// 	    if ($GUI->user->funktion === 'admin') 
+	// 	    {
+						$GUI->log->log_debug(ZENTRALE_STELLE_URL . ' Zugriff erlaubt');
+						
+						$GUI->main = PLUGINS . 'wasserrecht/view/' . ZENTRALE_STELLE_URL . '.php';
+						$GUI->output();
+	// 	    }
+	// 	    else 
+	// 	    {
+	// 	        $GUI->log->log_debug(ZENTRALE_STELLE_URL . ' Zugriff verweigert');
+						
+	// 	        echo 'Zugriff verweigert';
+	// 	    }
+				
+		}	break;
+		
+		case ERSTATTUNG_DES_VERWALTUNGSAUFWANDS_URL: {
+				$GUI->log->log_debug(ERSTATTUNG_DES_VERWALTUNGSAUFWANDS_URL . ' called!');
+				
+				$GUI->main = PLUGINS . 'wasserrecht/view/'. ERSTATTUNG_DES_VERWALTUNGSAUFWANDS_URL . '.php';
+				$GUI->output();
+		}  break;
 
-	case 'wasserrecht_deploy_Starten': {
-		$this->checkCaseAllowed('wasserrecht_deploy');
-		if ($this->user->funktion == 'admin') {
-			$result = array(
-				'update_mysql' => 'Fehler',
-				'pull_git' => 'Fehlgeschlagen',
-				'reset_pgsql_schema' => 'Fehler',
-				'reset_pgsql_data' => 'Fehler'
-			);
+		case 'wasserrecht_deploy': {
+			$GUI->checkCaseAllowed($GUI->go);
+			if ($GUI->user->funktion == 'admin') {
+				$GUI->main = PLUGINS . 'wasserrecht/view/deploy_form.php';
+				$GUI->output();
+			}
+			else {
+				echo 'Zugriff verweigert';
+			};
+		} break;
 
-			# update MySQL-Database
-			{
-				$mysqli = new mysqli("mysql", "kvwmap", "Laridae_Moewe1", "kvwmapdb_wr");
-				if (mysqli_connect_errno()) {
-					$this->result['update_mysql'] = 'Datenbankverbindung fehlgeschlagen<br>' . mysqli_connect_error();
-					$this->main = PLUGINS . 'wasserrecht/view/deploy_results.php';
-					$this->output();
-					exit();
-				}
-				$sql_dump .= file_get_contents($_FILES['file']['tmp_name']);
-				$msg = array();
-				if (strpos($sql_dump, 'phpMyAdmin SQL Dump') === false) {
-					$msg[] = 'Datei ' . $_FILES['file']['name'] . ' ist MySQL-Dump.';
-				}
-				else {
-					$sql .= "DROP DATABASE kvwmapdb_wr;";
-					$msg[] = 'Lösche Datenbank kvwmapdb_wr.';
-					$sql .= "CREATE DATABASE kvwmapdb_wr;";
-					$msg[] = 'Erzeuge neue Datenbank kvwmapdb_wr.';
-					$sql .= "USE kvwmapdb_wr;";
-					$sql .= $sql_dump;
-					$msg[] = 'Befülle Datenbank kvwmapdb_wr.';
-					if ($mysqli->multi_query($sql)) {
-						do {
-							/* store first result set */
-							if ($result = $mysqli->store_result()) {
-								while ($row = $result->fetch_row()) {
-									$msg[] = $row[0];
-								}
-								$result->free();
-							}
-						} while ($mysqli->next_result());
+		case 'wasserrecht_deploy_Starten': {
+			$GUI->checkCaseAllowed('wasserrecht_deploy');
+			if ($GUI->user->funktion == 'admin') {
+				$result = array(
+					'update_mysql' => 'Fehler',
+					'pull_git' => 'Fehlgeschlagen',
+					'reset_pgsql_schema' => 'Fehler',
+					'reset_pgsql_data' => 'Fehler'
+				);
+
+				# update MySQL-Database
+				{
+					$mysqli = new mysqli("mysql", "kvwmap", "Laridae_Moewe1", "kvwmapdb_wr");
+					if (mysqli_connect_errno()) {
+						$GUI->result['update_mysql'] = 'Datenbankverbindung fehlgeschlagen<br>' . mysqli_connect_error();
+						$GUI->main = PLUGINS . 'wasserrecht/view/deploy_results.php';
+						$GUI->output();
+						exit();
 					}
+					$sql_dump .= file_get_contents($_FILES['file']['tmp_name']);
+					$msg = array();
+					if (strpos($sql_dump, 'phpMyAdmin SQL Dump') === false) {
+						$msg[] = 'Datei ' . $_FILES['file']['name'] . ' ist MySQL-Dump.';
+					}
+					else {
+						$sql .= "DROP DATABASE kvwmapdb_wr;";
+						$msg[] = 'Lösche Datenbank kvwmapdb_wr.';
+						$sql .= "CREATE DATABASE kvwmapdb_wr;";
+						$msg[] = 'Erzeuge neue Datenbank kvwmapdb_wr.';
+						$sql .= "USE kvwmapdb_wr;";
+						$sql .= $sql_dump;
+						$msg[] = 'Befülle Datenbank kvwmapdb_wr.';
+						if ($mysqli->multi_query($sql)) {
+							do {
+								/* store first result set */
+								if ($result = $mysqli->store_result()) {
+									while ($row = $result->fetch_row()) {
+										$msg[] = $row[0];
+									}
+									$result->free();
+								}
+							} while ($mysqli->next_result());
+						}
+					}
+					$mysqli->close();
+					$msg[] = 'MySQL-Datenbank kvwmapdb_wr erfolgreich ausgetauscht.';
+					$result['update_mysql'] = implode('<p>', $msg);
 				}
-				$mysqli->close();
-				$msg[] = 'MySQL-Datenbank kvwmapdb_wr erfolgreich ausgetauscht.';
-				$result['update_mysql'] = implode('<p>', $msg);
-			}
 
-			# pull git repository
-			{
-				$this->formvars['func'] = 'update_code';
-				$ausgabe = $this->adminFunctions();
-				$result['pull_git'] = $ausgabe[0];
-				$result['pull_git'] .= "<br>Git Repository aktualisiert";
-			}
-
-			# reset pgsql schema
-			{
-				$msg = array();
-				foreach (glob(PLUGINS . "wasserrecht/db/postgresql/schema/*.sql") as $filename) {
-					$sql = file_get_contents($filename);
-					$this->pgdatabase->execSQL($sql, 4, 1);
-					$msg[] = basename($filename) . ' eingelesen.';
+				# pull git repository
+				{
+					$GUI->formvars['func'] = 'update_code';
+					$ausgabe = $GUI->adminFunctions();
+					$result['pull_git'] = $ausgabe[0];
+					$result['pull_git'] .= "<br>Git Repository aktualisiert";
 				}
-				
-				$result['reset_pgsql_schema'] = implode('<br>', $msg);
-			}
 
-			# reset_pgsql_data
-			{
-				$msg = array();
-				foreach (glob(PLUGINS . "wasserrecht/db/postgresql/data/*.sql") as $filename) {
-					$sql = file_get_contents($filename);
-					$this->pgdatabase->execSQL($sql, 4, 1);
-					$msg[] = basename($filename) . ' eingelesen.';
+				# reset pgsql schema
+				{
+					$msg = array();
+					foreach (glob(PLUGINS . "wasserrecht/db/postgresql/schema/*.sql") as $filename) {
+						$sql = file_get_contents($filename);
+						$GUI->pgdatabase->execSQL($sql, 4, 1);
+						$msg[] = basename($filename) . ' eingelesen.';
+					}
+					
+					$result['reset_pgsql_schema'] = implode('<br>', $msg);
 				}
-				
-				$result['reset_pgsql_data'] = implode('<br>', $msg);
-			}
 
-			$this->result = $result;
-			$this->main = PLUGINS . 'wasserrecht/view/deploy_results.php';
-			$this->output();
+				# reset_pgsql_data
+				{
+					$msg = array();
+					foreach (glob(PLUGINS . "wasserrecht/db/postgresql/data/*.sql") as $filename) {
+						$sql = file_get_contents($filename);
+						$GUI->pgdatabase->execSQL($sql, 4, 1);
+						$msg[] = basename($filename) . ' eingelesen.';
+					}
+					
+					$result['reset_pgsql_data'] = implode('<br>', $msg);
+				}
+
+				$GUI->result = $result;
+				$GUI->main = PLUGINS . 'wasserrecht/view/deploy_results.php';
+				$GUI->output();
+			}
+			else {
+				echo 'Zugriff verweigert';
+			};
+		} break;
+
+		default : {
+			$GUI->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
 		}
-		else {
-			echo 'Zugriff verweigert';
-		};
-	} break;
-
-	default : {
-		$this->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
 	}
 }
+
 ?>

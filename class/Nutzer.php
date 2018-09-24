@@ -58,9 +58,11 @@ class Nutzer extends MyObject {
 			if ($rolle->setRollen($user->get('ID'), array($stelle_id))) {
 				if ($rolle->setMenue($user->get('ID'), array($stelle_id))) {
 					if ($rolle->setLayer($user->get('ID'), array($stelle_id), 0)) {
-						$result['success'] = true;
-						#// ToDo: Check was noch eingefügt werden muss an Hand von Nutzer pkorduan in Stelle 55 weil layer werden nicht angezeigt.
-
+						$stelle = new stelle($stelle_id, $gui->database);
+						$layers = $stelle->getLayers(NULL);
+						if ($rolle->setGroups($user->get('ID'), array($stelle_id), $layers['ID'], 0)) {
+							$result['success'] = true;
+						}
 					}
 				}
 			}

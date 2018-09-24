@@ -664,9 +664,6 @@ class GUI {
               if ($layerset['list'][$i]['template']!='') {
                 $layer->set('template',$layerset['list'][$i]['template']);
               }
-              else {
-                $layer->set('template',DEFAULTTEMPLATE);
-              }
               # Header (Kopfdatei)
               if ($layerset['list'][$i]['header']!='') {
                 $layer->set('header',$layerset['list'][$i]['header']);

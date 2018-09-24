@@ -1,4 +1,5 @@
 <?php
+	$this->strAnd = "und";
 	$this->strID = "ID";
 	$this->strChoose = "Auswahl";
 	$this->strChange = "Ändern";
