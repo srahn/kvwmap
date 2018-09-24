@@ -58,7 +58,7 @@ class Nutzer extends MyObject {
 			if ($rolle->setRollen($user->get('ID'), array($stelle_id))) {
 				if ($rolle->setMenue($user->get('ID'), array($stelle_id))) {
 					if ($rolle->setLayer($user->get('ID'), array($stelle_id), 0)) {
-						$stelle = new stelle($stelle_id, $this->database);
+						$stelle = new stelle($stelle_id, $gui->database);
 						$layers = $stelle->getLayers(NULL);
 						if ($rolle->setGroups($user->get('ID'), array($stelle_id), $layers['ID'], 0)) {
 							$result['success'] = true;

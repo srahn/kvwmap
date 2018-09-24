@@ -657,7 +657,7 @@ function checkRegistration($gui) {
 	}
 
 	# Prüft ob Einladung schon wahrgenommen wurde
-	if ($check == 0 AND $invitation->get('compleeted') != '') {
+	if ($check == 0 AND $invitation->get('completed') != '') {
 		$registration_errors[] = 'Einladung zu token: ' . $params['token'] . ' wurde schon am: ' . $invitation->get('completed') . ' wahrgenommen.';
 		$check = 1;
 	}
