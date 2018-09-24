@@ -1472,9 +1472,6 @@ class GUI {
               if ($layerset['list'][$i]['template']!='') {
                 $layer->set('template',$layerset['list'][$i]['template']);
               }
-              else {
-                $layer->set('template',DEFAULTTEMPLATE);
-              }
               # Header (Kopfdatei)
               if ($layerset['list'][$i]['header']!='') {
                 $layer->set('header',$layerset['list'][$i]['header']);
@@ -2606,26 +2603,22 @@ class GUI {
 			~document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'block\';';
 		}
 	}
-
-	function loadPlugins($go){
+	
+	function go_switch_plugins($go){
   	global $kvwmap_plugins;
-		$this->loaded_plugins = array();
 	  $this->goNotExecutedInPlugins = true;		// wenn es keine Plugins gibt, ist diese Var. immer true
-  	if(count($kvwmap_plugins) > 0){
-			$plugins = scandir(PLUGINS, 1);
-			for($i = 0; $i < count($plugins)-2; $i++) {
-				if($this->goNotExecutedInPlugins == true AND in_array($plugins[$i], $kvwmap_plugins)){
-					if (file_exists(PLUGINS.$plugins[$i].'/config/config.php'))
-						include(PLUGINS.$plugins[$i].'/config/config.php');
-					include(PLUGINS.$plugins[$i].'/control/index.php');
-					$this->loaded_plugins[] = $plugins[$i];
-				}
+		for($i = 0; $i < count($kvwmap_plugins); $i++){
+			if($this->goNotExecutedInPlugins == true){
+				$this->goNotExecutedInPlugins = false;
+				$go_switch_plugin = 'go_switch_'.$kvwmap_plugins[$i];
+				$go_switch_plugin($go);
 			}
 		}
-  }
+  }	
 
-	function plugin_loaded($plugin) {
-		return in_array($plugin, $this->loaded_plugins);
+	function plugin_loaded($plugin){
+		global $kvwmap_plugins;
+		return in_array($plugin, $kvwmap_plugins);
 	}
 
   function checkCaseAllowed($case){
@@ -3202,21 +3195,6 @@ class GUI {
 			";
   }
 
-  # Funktion zu Testzwecken der postgresql-Datenbankanfragens
-  function loadDenkmale_laden(){
-		include_(CLASSPATH.'xml.php');
-    # Erzeugen eines HIDA XML-Export-Dokument-Objektes
-    $hidaDoc=new hidaDocument(DEFAULT_DENKMAL_IMPORT_FILE);
-    # Einlesen der Felder in die Datenbank
-    $hidaDoc->loadDocInDatabase();
-    # Übergabe der Felder zur Ausgabe in HTML
-    $this->fields=$hidaDoc->fields;
-    # Löschen des Objektes
-    unset($hidaDoc);
-    # Setzen des Ausgabetemplates
-    $this->main='denkmale_geladen.php';
-  }
-
   function get_classes(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->classdaten = $mapDB->read_Classes($this->formvars['layer_id']);
@@ -3728,6 +3706,7 @@ class GUI {
 		include_once(CLASSPATH.'administration.php');
 		$this->administration = new administration($this->database, $this->pgdatabase);
 		$this->administration->get_database_status();
+		$this->administration->get_config_params();
     switch ($this->formvars['func']) {
 			case "update_databases" : {
         $this->administration->update_databases();
@@ -3739,8 +3718,9 @@ class GUI {
 				$this->administration->get_database_status();
 				$this->showAdminFunctions();
       } break;
-      case "showConstants" : {
-        $this->showConstants();
+			case "save_config" : {
+        $result = $this->administration->save_config($this->formvars);
+				$this->showAdminFunctions();
       } break;
       case "createRandomPassword" : {
         $this->createRandomPassword();
@@ -3815,8 +3795,8 @@ class GUI {
   }
 
   function showConstants() {
-    $this->main='showconstants.php';
-    $this->titel='Konstanten';
+		$this->main='showadminfunctions.php';
+		$this->administration->get_constants_from_all_configs();
   }
 
   function grundbuchblattWahl() {
@@ -8683,23 +8663,25 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						$sql.= "'".$this->formvars[$table['formfield'][$i]]."', ";
 						$this->formvars[$table['formfield'][$i]] = ''; # leeren, falls weiter_erfassen angehakt
 					}
-					elseif (
+					elseif(
 						$table['type'][$i] != 'Text_not_saveable' AND
 						$table['type'][$i] != 'Auswahlfeld_not_saveable' AND
 						$table['type'][$i] != 'SubFormPK' AND
 						$table['type'][$i] != 'SubFormFK' AND
 						($this->formvars[$table['formfield'][$i]] != '' OR $table['type'][$i] == 'Checkbox')
-					) {
-						if ($table['type'][$i] == 'Zahl') {
-							# bei Zahlen den Punkt (Tausendertrenner) entfernen
-							$this->formvars[$table['formfield'][$i]] = removeTausenderTrenner($this->formvars[$table['formfield'][$i]]); # bei Zahlen den Punkt (Tausendertrenner) entfernen
-						}
-						if ($table['type'][$i] == 'Checkbox' AND $this->formvars[$table['formfield'][$i]] == '') {
-							$this->formvars[$table['formfield'][$i]] = 'f';
-						}
+					){
 						if($table['type'][$i] != 'Dokument' AND (substr($table['datatype'][$i], 0, 1) == '_' OR is_numeric($table['datatype'][$i]))){		// bei Dokumenten wurde das JSON schon weiter oben verarbeitet
 							# bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln
-							$this->formvars[$table['formfield'][$i]] = $this->processJSON($this->formvars[$table['formfield'][$i]], $doc_path, $doc_url);
+							$sql.= "'".$this->processJSON($this->formvars[$table['formfield'][$i]], $doc_path, $doc_url)."', ";
+						}
+						else{
+							if($table['type'][$i] == 'Zahl'){
+								# bei Zahlen den Punkt (Tausendertrenner) entfernen
+								$this->formvars[$table['formfield'][$i]] = removeTausenderTrenner($this->formvars[$table['formfield'][$i]]); # bei Zahlen den Punkt (Tausendertrenner) entfernen
+							}
+							if ($table['type'][$i] == 'Checkbox' AND $this->formvars[$table['formfield'][$i]] == '') {
+								$this->formvars[$table['formfield'][$i]] = 'f';
+							}
 						}
 						$sql .= "'" . $this->formvars[$table['formfield'][$i]] . "', "; # Typ "normal"
 					}
@@ -8756,6 +8738,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						}
 						else {
 							# dataset was not created
+							$this->success = false;
 							$this->add_message('error', 'Eintrag fehlgeschlagen.<br>' . $result[0]);
 						}
 					}
@@ -8819,7 +8802,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
     }
     else {
-      if ($ret['success'] == false) {
+      if ($this->success == false) {
         $this->neuer_Layer_Datensatz();
       }
       else {
@@ -12314,14 +12297,14 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						} break;
             default : {
               if($tablename AND $formtype != 'dynamicLink' AND $formtype != 'Text_not_saveable' AND $formtype != 'Auswahlfeld_not_saveable' AND $formtype != 'SubFormPK' AND $formtype != 'SubFormFK' AND $formtype != 'SubFormEmbeddedPK' AND $attributname != 'the_geom'){
-								if(POSTGRESVERSION >= 930 AND (substr($datatype, 0, 1) == '_' OR is_numeric($datatype))){
-              		$this->formvars[$form_fields[$i]] = $this->processJSON($this->formvars[$form_fields[$i]], $layerset[$layer_id][0]['document_path'], $layerset[$layer_id][0]['document_url']);		# bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln
-              	}
                 if($this->formvars[$form_fields[$i]] == ''){
 									$eintrag = 'NULL';
                 }
                 else{
-									$eintrag = $this->formvars[$form_fields[$i]];
+									if(POSTGRESVERSION >= 930 AND (substr($datatype, 0, 1) == '_' OR is_numeric($datatype))){
+										$eintrag = $this->processJSON($this->formvars[$form_fields[$i]], $layerset[$layer_id][0]['document_path'], $layerset[$layer_id][0]['document_url']);		# bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln
+									}
+									else $eintrag = $this->formvars[$form_fields[$i]];
                 }
               }
             } # end of default case
@@ -12611,9 +12594,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
               if ($layerset[$i]['template']!='') {
                 $layer->set('template',$layerset[$i]['template']);
               }
-              else {
-                $layer->set('template',DEFAULTTEMPLATE);
-              }
               $projFROM = ms_newprojectionobj("init=epsg:".$this->user->rolle->epsg_code);
     					$projTO = ms_newprojectionobj("init=epsg:".$layerset[$i]['epsg_code']);
 							$rect2=ms_newRectObj();
@@ -12660,9 +12640,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						$layer->set('status',MS_ON);
 						if ($layerset[$i]['template']!='') {
 							$layer->set('template',$layerset[$i]['template']);
-						}
-						else {
-							$layer->set('template',DEFAULTTEMPLATE);
 						}
 						@$layer->queryByRect($rect);
 						$layer->open();

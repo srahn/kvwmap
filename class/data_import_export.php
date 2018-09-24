@@ -798,7 +798,8 @@ class data_import_export {
 		$command = 'export PGDATESTYLE="ISO, MDY";export PGCLIENTENCODING=UTF-8;'.OGR_BINPATH.'ogr2ogr -f '.$exportformat.' -lco ENCODING=UTF-8 -sql "'.$sql.'" '.$exportfile.' PG:"dbname='.$layerdb->dbName.' user='.$layerdb->user;
 		if($layerdb->passwd != '')$command.= ' password='.$layerdb->passwd;
 		if($layerdb->port != '')$command.=' port='.$layerdb->port;
-		if($layerdb->host != '') $command .= ' host=' . $layerdb->host;
+		if($layerdb->host != '')$command .= ' host=' . $layerdb->host;
+		if($layerdb->schema != '')$command .= ' active_schema='.$layerdb->schema;
 		exec($command.'"');
 	}
 
@@ -927,8 +928,8 @@ class data_import_export {
 		return utf8_decode($csv);
 	}
 
-	function create_uko($layerdb, $table, $column, $epsg, $exportfile){
-		$sql.= "SELECT st_astext(st_multi(st_union(st_transform(".$column.", ".$epsg.")))) as geom FROM ".$table;
+	function create_uko($layerdb, $sql, $column, $epsg, $exportfile){
+		$sql = "SELECT st_astext(st_multi(st_union(st_transform(".$column.", ".$epsg.")))) as geom FROM (".$sql.") as foo";
 		#echo $sql;
 		$ret = $layerdb->execSQL($sql,4, 1);
 		if(!$ret[0]){
@@ -940,12 +941,12 @@ class data_import_export {
 		}
   }
 
-	function create_ovl($datentyp, $layerdb, $table, $column, $epsg){
+	function create_ovl($datentyp, $layerdb, $query_sql, $column, $epsg){
 		$ovl_type = array(MS_LAYER_POINT => 6, MS_LAYER_LINE => 3, MS_LAYER_POLYGON => 4);
-		$sql.= "SELECT st_astext(";
+		$sql = "SELECT st_astext(";
 		if($datentyp == MS_LAYER_POLYGON)$sql.= "ST_MakePolygon(st_exteriorring(geom))) as geom ";
 		else $sql.= "geom) as geom ";
-		$sql.= "FROM (select (st_dump(st_union(st_transform(".$column.", ".$epsg.")))).geom as geom FROM ".$table.") as foo";
+		$sql.= "FROM (select (st_dump(st_union(st_transform(".$column.", ".$epsg.")))).geom as geom FROM (".$query_sql.") as foo) as foo";
 		#echo $sql;
 		$ret = $layerdb->execSQL($sql,4, 1);
 		if(!$ret[0]){
@@ -1066,9 +1067,9 @@ class data_import_export {
 		$data_sql = $sql;
 		#echo $sql;
 
-    $temp_table = 'shp_export_'.rand(1, 10000);
-    $sql = 'CREATE TABLE public.'.$temp_table.' AS '.$sql;		# temporäre Tabelle erzeugen, damit das/die Schema/ta berücksichtigt werden
-    $ret = $layerdb->execSQL($sql,4, 0);
+    #$temp_table = 'shp_export_'.rand(1, 10000);
+    #$sql = 'CREATE TABLE public.'.$temp_table.' AS '.$sql;		# temporäre Tabelle erzeugen, damit das/die Schema/ta berücksichtigt werden
+    #$ret = $layerdb->execSQL($sql,4, 0);
 
 		for($s = 0; $s < count($selected_attributes); $s++){
 			# Transformieren der Geometrie
@@ -1078,9 +1079,8 @@ class data_import_export {
 				if (in_array($selected_attr_types[$s], array('text', 'varchar'))) $selected_attributes[$s] = $selected_attributes[$s].'::varchar(254)';
 			}
 		}
-		$sql = "
-			SELECT " . implode(', ', $selected_attributes) . " FROM public." . $temp_table . "
-		"; # auf die ausgewählten Attribute einschränken
+		#$sql = "SELECT " . implode(', ', $selected_attributes) . " FROM public." . $temp_table; # auf die ausgewählten Attribute einschränken
+		$sql = "SELECT " . implode(', ', $selected_attributes) . " FROM (".$sql.") as foo"; # auf die ausgewählten Attribute einschränken
 		$ret = $layerdb->execSQL($sql,4, 0);
 		if (!$ret[0]) {
 			$count = pg_num_rows($ret[1]);
@@ -1156,12 +1156,13 @@ class data_import_export {
 				}break;
 
 				case 'UKO' : {
-					$this->create_uko($layerdb, $temp_table, $this->attributes['the_geom'], $this->formvars['epsg'], $exportfile.'.uko');
+					$exportfile = $exportfile.'.uko';
+					$this->create_uko($layerdb, $sql, $this->attributes['the_geom'], $this->formvars['epsg'], $exportfile);
 					$contenttype = 'text/uko';
 				}break;
 
 				case 'OVL' : {
-					$ovl = $this->create_ovl($layerset[0]['Datentyp'], $layerdb, $temp_table, $this->attributes['the_geom'], $this->formvars['epsg']);
+					$ovl = $this->create_ovl($layerset[0]['Datentyp'], $layerdb, $sql, $this->attributes['the_geom'], $this->formvars['epsg']);
 					for($i = 0; $i < count($ovl); $i++){
 						$exportfile2 = $exportfile.'_'.$i.'.ovl';
 						$fp = fopen($exportfile2, 'w');
@@ -1209,9 +1210,9 @@ class data_import_export {
 				$contenttype = 'application/octet-stream';
 			}
 			# temp. Tabelle wieder löschen
-			$sql = 'DROP TABLE '.$temp_table;
-			$ret = $layerdb->execSQL($sql,4, 0);
-			if($this->formvars['export_format'] != 'CSV')$user->rolle->setConsumeShape($currenttime,$this->formvars['selected_layer_id'],$count);
+			// $sql = 'DROP TABLE '.$temp_table;
+			// $ret = $layerdb->execSQL($sql,4, 0);
+			// if($this->formvars['export_format'] != 'CSV')$user->rolle->setConsumeShape($currenttime,$this->formvars['selected_layer_id'],$count);
 
 			ob_end_clean();
 			header('Content-type: '.$contenttype);

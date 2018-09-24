@@ -84,7 +84,7 @@ function install() {
   $mysqlRootDb = new database;
   $mysqlRootDb->host = MYSQL_HOST;
   $mysqlRootDb->user = 'root';
-  $mysqlRootDb->passwd = MYSQL_ROOT_PASSWORD;
+  $mysqlRootDb->passwd = getenv('MYSQL_ENV_MYSQL_ROOT_PASSWORD');
   $mysqlRootDb->dbName = 'mysql'; ?>
   Verbindungsdaten für Zugang zu MySQL root Nutzer wie folgt gesetzt:<br>
   Host: <?php echo $mysqlRootDb->host; ?><br>
@@ -101,7 +101,7 @@ function install() {
     <ul>
       <li><b>MySQL ist noch nicht installiert:</b> => Installieren sie MySQL</li>
       <li><b>Der MySQL server host ist nicht korrekt angegeben:</b> => Setzen Sie den richtigen hostnamen in der Datei config.php in der Konstante <b>MYSQL_HOST</b>. In Docker Containern muss der Name mysql oder mysql-server heißen, sonst in der Regel localhost oder 172.0.0.1. Nur wenn sich die Datenbank auf einem anderem Rechner befindet geben Sie hier die entsprechende IP oder den Rechnername an.</li>
-      <li><b>Das Passwort des Datenbanknutzers root ist nicht richtig gesetzt:</b> => Das Passwort kann in der Konstante <b>MYSQL_ROOT_PASSWORD</b> in der Datei config.php eingestellt werden. Nach der erfolgreichen Installation können sie diese Konstante löschen oder das Passwort auf ein Leerzeichen setzen.</li>
+      <li><b>Das Passwort des Datenbanknutzers root ist nicht richtig gesetzt:</b> => standardmäßig wird es aus der Umgebungsvariablen MYSQL_ENV_MYSQL_ROOT_PASSWORD genommen.</li>
     </ul>
     <input type="button" value="Script neu starten" onclick="window.location.reload()">
     <?php
@@ -561,7 +561,7 @@ function admin_stelle_exists($mysqlKvwmapDb) {
 */
 function install_admin_stelle($mysqlKvwmapDb) {
   $filepath = LAYOUTPATH . 'db/mysql/data/mysql_install_admin.sql';
-  $queryret = $mysqlKvwmapDb->exec_file($filepath, NULL, NULL);
+  $queryret = $mysqlKvwmapDb->exec_commands(file_get_contents($filepath), NULL, NULL);
   if ($queryret[0]) { 
     echo $queryret[1]; ?>
     Fehler beim Ausführen der Datei: <?php echo $filepath; ?><br><?php

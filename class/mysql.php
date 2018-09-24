@@ -912,9 +912,9 @@ INSERT INTO u_styles2classes (
     return mysql_close($this->dbConn);
   }
 
-	function exec_file($filename, $search, $replace, $replace_constants = false) {
-		if ($file = file_get_contents($filename)) {
-			foreach (explode(';' . chr(10), $file) as $query2) { // verschiedene Varianten des Zeilenumbruchs berücksichtigen
+	function exec_commands($commands_string, $search, $replace, $replace_constants = false) {
+		if($commands_string != ''){
+			foreach (explode(';' . chr(10), $commands_string) as $query2) { // verschiedene Varianten des Zeilenumbruchs berücksichtigen
 				foreach (explode(';' . chr(13), $query2) as $query) {
 					$query_to_execute = '';
 					$query = trim($query);
@@ -942,6 +942,7 @@ INSERT INTO u_styles2classes (
 				}
 			}
 		}
+		return array(0);
 	}
 
   function begintransaction() {
@@ -989,16 +990,6 @@ INSERT INTO u_styles2classes (
 
   function getAffectedRows($query) {
     return mysql_affected_rows();
-  }
-
-  function setFortfuehrung($ist_Fortfuehrung) {
-    $this->ist_Fortfuehrung=$ist_Fortfuehrung;
-    if ($this->ist_Fortfuehrung) {
-      $this->tableprefix=TEMPTABLEPREFIX;
-    }
-    else {
-      $this->tableprefix="";
-    }
   }
 
   function setLogLevel($loglevel,$logfile) {

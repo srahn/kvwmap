@@ -325,11 +325,11 @@ if ($show_login_form) {
 else {
 	$GUI->debug->write('Lade Stelle und ordne Rolle dem User zu.', 4, $GUI->echo);
 	# Alles was man immer machen muss bevor die go's aufgerufen werden
-	$GUI->user->setRolle($GUI->user->stelle_id);
 	if (new_options_sent($GUI->formvars)) {
 		$GUI->debug->write('Speicher neue Stellenoptionen.', 4, $GUI->echo);
 		$GUI->user->setOptions($GUI->user->stelle_id, $GUI->formvars);
 	}
+	$GUI->user->setRolle($GUI->user->stelle_id);
 
 	#$GUI->debug->write('Eingestellte Rolle: ' . print_r($GUI->user->rolle, true), 4, $GUI->echo);
 

@@ -1,13 +1,12 @@
 <?
 
-	$this->goNotExecutedInPlugins = false;
-	
+function go_switch_kolibri($go){
+	global $GUI;
 	switch($go) {
-
-
 		default : {
-			$this->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
+			$GUI->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
 		}
 	}
+}
 	
 ?>
