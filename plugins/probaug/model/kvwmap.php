@@ -1,8 +1,6 @@
 <?
 
-	$GUI = $this;	
-	
-	$this->zoom2bauakte = function() use ($GUI){
+	$GUI->zoom2bauakte = function() use ($GUI){
 		if($GUI->formvars['nummer'] != '' AND $GUI->formvars['jahr'] != ''){
 			$GUI->bau = new Bauauskunft($GUI->baudatabase);
 			$GUI->bau->getbaudaten($GUI->formvars);
@@ -26,13 +24,13 @@
 			$GUI->loadMap('DataBase');
 	    $GUI->saveMap('');
 			$currenttime=date('Y-m-d H:i:s',time());
-			$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
+			$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
 			$GUI->drawMap();
 			$GUI->output();
 		}
 	};
 	
-	$this->bauauskunftSuche = function() use ($GUI){
+	$GUI->bauauskunftSuche = function() use ($GUI){
     $GUI->bau = new Bauauskunft($GUI->baudatabase);
     $GUI->bau->readvorhaben();
     $GUI->bau->readverfahrensart();
@@ -52,7 +50,7 @@
     $GUI->titel='Bauauskunftsuche';
   };
 
-	$this->bauauskunftSucheSenden = function($flurstkennz) use ($GUI){
+	$GUI->bauauskunftSucheSenden = function($flurstkennz) use ($GUI){
     $GUI->bau = new Bauauskunft($GUI->baudatabase);
     if($GUI->formvars['flurstkennz'] != ''){
       $GUI->formvars['flurstkennz'] = $flurstkennz;
@@ -83,7 +81,7 @@
     }
   };
 
-	$this->bauauskunftanzeige = function() use ($GUI){
+	$GUI->bauauskunftanzeige = function() use ($GUI){
     $GUI->bau = new Bauauskunft($GUI->baudatabase);
     $GUI->bau->getbaudaten($GUI->formvars);
     for($i = 0; $i < count($GUI->bau->baudata); $i++){

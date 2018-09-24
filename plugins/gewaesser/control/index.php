@@ -1,12 +1,12 @@
 <?
 
-	$this->goNotExecutedInPlugins = false;
-	
+function go_switch_gewaesser($go){
+	global $GUI;
 	switch($go){
 		case 'migrationGewaesser' : {
-			if($this->Stelle->isFunctionAllowed($go)){
+			if($GUI->Stelle->isFunctionAllowed($go)){
 				include(PLUGINS.'gewaesser/model/wasserverband.php');
-				$gewaesser = new gewaesser($this->pgdatabase);
+				$gewaesser = new gewaesser($GUI->pgdatabase);
 				
 				$gewaesser->truncateSpatial();
 				
@@ -16,21 +16,22 @@
 				
 				$gewaesser->loadThematic();
 				
-				$this->gewaesser=$gewaesser;
-				$this->main= PLUGINS.'gewaesser/view/migrationGewaesser.php';
-				$this->output();
+				$GUI->gewaesser=$gewaesser;
+				$GUI->main= PLUGINS.'gewaesser/view/migrationGewaesser.php';
+				$GUI->output();
 			}
 			else {
 				# Benutzer ist nicht berechtigt zum Ausführen des Anwendungsfalles
-				$this->Fehlermeldung=$this->TaskChangeWarning;
-				$this->rollenwahl($Stelle_ID);
-				$this->output();
+				$GUI->Fehlermeldung=$GUI->TaskChangeWarning;
+				$GUI->rollenwahl($Stelle_ID);
+				$GUI->output();
 			}		
 		}break;
 	
 		default : {
-			$this->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
+			$GUI->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
 		}
 	}
+}
 	
 ?>

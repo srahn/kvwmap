@@ -7,9 +7,7 @@ session_start();
 
 include('credentials.php');
 include('config.php');
-for($i = 0; $i < count($kvwmap_plugins); $i++) {
-	if(file_exists(PLUGINS.$kvwmap_plugins[$i].'/config/config.php'))include(PLUGINS.$kvwmap_plugins[$i].'/config/config.php');
-}
+
 include(CLASSPATH . 'log.php');
 
 if (DEBUG_LEVEL > 0) $debug = new Debugger(DEBUGFILE);	# öffnen der Debug-log-datei
@@ -155,6 +153,12 @@ else{
 
 include(WWWROOT . APPLVERSION . 'start.php');
 
+# Laden der Plugins
+for($i = 0; $i < count($kvwmap_plugins); $i++){
+	if(file_exists(PLUGINS.$kvwmap_plugins[$i].'/config/config.php'))include(PLUGINS.$kvwmap_plugins[$i].'/config/config.php');
+	include(PLUGINS.$kvwmap_plugins[$i].'/control/index.php');
+}
+
 # Übergeben des Anwendungsfalles
 $debug->write("<br><b>Anwendungsfall go: " . $go . "</b>", 4);
 
@@ -169,7 +173,7 @@ function go_switch($go){
 	global $username;
 	if(!FAST_CASE) {
 		$old_go = $GUI->go;
-		$GUI->loadPlugins($go);
+		$GUI->go_switch_plugins($go);
 		# go nur neu setzen, wenn es in einem Plugin auch geändert worden ist
 		if($old_go != $GUI->go)$go = $GUI->go;
 	}

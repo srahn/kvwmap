@@ -1,127 +1,128 @@
 <?
 
-	$this->goNotExecutedInPlugins = false;
-	
+function go_switch_bauleitplanung($go){
+	global $GUI;
 	switch($go){  
 		case 'delete_bplan' : {
 			include(PLUGINS.'bauleitplanung/model/rok.php');
-			$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
-			$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+			$mapdb = new db_mapObj($GUI->Stelle->id,$GUI->user->id);
+			$layerdb = $mapdb->getlayerdatabase($GUI->formvars['selected_layer_id'], $GUI->Stelle->pgdbhost);
 			$rok = new rok($layerdb);
-			$rok->delete_bplan($this->formvars['plan_id']);
-			if($this->formvars['value_b_plan_stammdaten_oid'] == ''){
-				$this->GenerischeSuche_Suchen();		# Trefferliste wieder anzeigen
+			$rok->delete_bplan($GUI->formvars['plan_id']);
+			if($GUI->formvars['value_b_plan_stammdaten_oid'] == ''){
+				$GUI->GenerischeSuche_Suchen();		# Trefferliste wieder anzeigen
 			}
 			else{
-				$this->loadMap('DataBase');					# Karte anzeigen
+				$GUI->loadMap('DataBase');					# Karte anzeigen
 				$currenttime=date('Y-m-d H:i:s',time());
-				$this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-				$this->drawMap();
-				$this->saveMap('');
-				$this->output();
+				$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+				$GUI->drawMap();
+				$GUI->saveMap('');
+				$GUI->output();
 			}
 		} break;
 		
 		case 'delete_fplan' : {
 			include(PLUGINS.'bauleitplanung/model/rok.php');
-			$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
-			$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+			$mapdb = new db_mapObj($GUI->Stelle->id,$GUI->user->id);
+			$layerdb = $mapdb->getlayerdatabase($GUI->formvars['selected_layer_id'], $GUI->Stelle->pgdbhost);
 			$rok = new rok($layerdb);
-			$rok->delete_fplan($this->formvars['plan_id']);
-			if($this->formvars['value_f_plan_stammdaten_oid'] == ''){
-				$this->GenerischeSuche_Suchen();		# Trefferliste wieder anzeigen
+			$rok->delete_fplan($GUI->formvars['plan_id']);
+			if($GUI->formvars['value_f_plan_stammdaten_oid'] == ''){
+				$GUI->GenerischeSuche_Suchen();		# Trefferliste wieder anzeigen
 			}
 			else{
-				$this->loadMap('DataBase');					# Karte anzeigen
+				$GUI->loadMap('DataBase');					# Karte anzeigen
 				$currenttime=date('Y-m-d H:i:s',time());
-				$this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-				$this->drawMap();
-				$this->saveMap('');
-				$this->output();
+				$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+				$GUI->drawMap();
+				$GUI->saveMap('');
+				$GUI->output();
 			}
 		} break;
 		
 		case 'copy_bplan' : {
 			include(PLUGINS.'bauleitplanung/model/rok.php');
-			$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
-			$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+			$mapdb = new db_mapObj($GUI->Stelle->id,$GUI->user->id);
+			$layerdb = $mapdb->getlayerdatabase($GUI->formvars['selected_layer_id'], $GUI->Stelle->pgdbhost);
 			$rok = new rok($layerdb);
-			$this->formvars['value_b_plan_stammdaten_oid'] = $rok->copy_bplan($this->formvars['plan_id']);
-			$this->GenerischeSuche_Suchen();
+			$GUI->formvars['value_b_plan_stammdaten_oid'] = $rok->copy_bplan($GUI->formvars['plan_id']);
+			$GUI->GenerischeSuche_Suchen();
 		} break;
 		
 		case 'copy_fplan' : {
 			include(PLUGINS.'bauleitplanung/model/rok.php');
-			$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
-			$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+			$mapdb = new db_mapObj($GUI->Stelle->id,$GUI->user->id);
+			$layerdb = $mapdb->getlayerdatabase($GUI->formvars['selected_layer_id'], $GUI->Stelle->pgdbhost);
 			$rok = new rok($layerdb);
-			$this->formvars['value_b_plan_stammdaten_oid'] = $rok->copy_fplan($this->formvars['plan_id']);
-			$this->GenerischeSuche_Suchen();
+			$GUI->formvars['value_b_plan_stammdaten_oid'] = $rok->copy_fplan($GUI->formvars['plan_id']);
+			$GUI->GenerischeSuche_Suchen();
 		} break;
 		
 		case 'update_bplan_from_rok' : {
 			include(PLUGINS.'bauleitplanung/model/rok.php');
-			$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
-			$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+			$mapdb = new db_mapObj($GUI->Stelle->id,$GUI->user->id);
+			$layerdb = $mapdb->getlayerdatabase($GUI->formvars['selected_layer_id'], $GUI->Stelle->pgdbhost);
 			$rok = new rok($layerdb);
-			$rok->update_bplan_from_rok($this->formvars['plan_id']);
-			$this->GenerischeSuche_Suchen();
+			$rok->update_bplan_from_rok($GUI->formvars['plan_id']);
+			$GUI->GenerischeSuche_Suchen();
 		} break;
 		
 		case 'update_fplan_from_rok' : {
 			include(PLUGINS.'bauleitplanung/model/rok.php');
-			$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
-			$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+			$mapdb = new db_mapObj($GUI->Stelle->id,$GUI->user->id);
+			$layerdb = $mapdb->getlayerdatabase($GUI->formvars['selected_layer_id'], $GUI->Stelle->pgdbhost);
 			$rok = new rok($layerdb);
-			$rok->update_fplan_from_rok($this->formvars['plan_id']);
-			$this->GenerischeSuche_Suchen();
+			$rok->update_fplan_from_rok($GUI->formvars['plan_id']);
+			$GUI->GenerischeSuche_Suchen();
 		} break;
 		
 		case 'zoomtobplan' : {
 			include(PLUGINS.'bauleitplanung/model/rok.php');
-			$rok = new rok($this->pgdatabase);
-			$rect = $rok->getExtentFromRokNrBplan($this->formvars['roknr'], $this->formvars['art'], 10, $this->user->rolle->epsg_code);
-			$this->loadMap('DataBase');
+			$rok = new rok($GUI->pgdatabase);
+			$rect = $rok->getExtentFromRokNrBplan($GUI->formvars['roknr'], $GUI->formvars['art'], 10, $GUI->user->rolle->epsg_code);
+			$GUI->loadMap('DataBase');
 			if ($rect->minx!=0 and $rect->miny!=0 and $rect->maxx!=0 and $rect->maxy!=0) {
-				$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
+				$GUI->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
 				if (MAPSERVERVERSION > 600) {
-					$this->map_scaledenom = $this->map->scaledenom;
+					$GUI->map_scaledenom = $GUI->map->scaledenom;
 				}
 				else {
-					$this->map_scaledenom = $this->map->scale;
+					$GUI->map_scaledenom = $GUI->map->scale;
 				}
 			}
 			else {
-				$this->Fehlermeldung='Es konnte kein Geltungsbereich mit ROK-Nr. = '.$this->formvars['roknr'].' gefunden werden.';
+				$GUI->Fehlermeldung='Es konnte kein Geltungsbereich mit ROK-Nr. = '.$GUI->formvars['roknr'].' gefunden werden.';
 			}
 			$currenttime=date('Y-m-d H:i:s',time());
-			$this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-			$this->drawMap();
-			$this->saveMap('');
-			$this->output();
+			$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+			$GUI->drawMap();
+			$GUI->saveMap('');
+			$GUI->output();
 		} break;
 		
 		case 'zoomtofplan' : {
 			include(PLUGINS.'bauleitplanung/model/rok.php');
-			$rok = new rok($this->pgdatabase);
-			$rect = $rok->getExtentFromRokNrFplan($this->formvars['gkz'], 10, $this->user->rolle->epsg_code);
-			$this->loadMap('DataBase');
+			$rok = new rok($GUI->pgdatabase);
+			$rect = $rok->getExtentFromRokNrFplan($GUI->formvars['gkz'], 10, $GUI->user->rolle->epsg_code);
+			$GUI->loadMap('DataBase');
 			if ($rect->minx!=0 and $rect->miny!=0 and $rect->maxx!=0 and $rect->maxy!=0) {
-				$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);	  
+				$GUI->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);	  
 			}
 			else {
-				$this->Fehlermeldung='Es konnte keine Gemeinde mit GKZ = '.$this->formvars['gkz'].' gefunden werden.';
+				$GUI->Fehlermeldung='Es konnte keine Gemeinde mit GKZ = '.$GUI->formvars['gkz'].' gefunden werden.';
 			}
 			$currenttime=date('Y-m-d H:i:s',time());
-			$this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-			$this->drawMap();
-			$this->saveMap('');
-			$this->output();
+			$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+			$GUI->drawMap();
+			$GUI->saveMap('');
+			$GUI->output();
 		} break;
 		
 		default : {
-			$this->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
+			$GUI->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
 		}
 	}
-	
+}
+
 ?>

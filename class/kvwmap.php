@@ -2603,19 +2603,18 @@ class GUI {
 			~document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'block\';';
 		}
 	}
-
-	function loadPlugins($go){
+	
+	function go_switch_plugins($go){
   	global $kvwmap_plugins;
 	  $this->goNotExecutedInPlugins = true;		// wenn es keine Plugins gibt, ist diese Var. immer true
-  	if(count($kvwmap_plugins) > 0){
-			$plugins = scandir(PLUGINS, 1);
-			for($i = 0; $i < count($plugins)-2; $i++) {
-				if($this->goNotExecutedInPlugins == true AND in_array($plugins[$i], $kvwmap_plugins)){
-					include(PLUGINS.$plugins[$i].'/control/index.php');
-				}
+		for($i = 0; $i < count($kvwmap_plugins); $i++){
+			if($this->goNotExecutedInPlugins == true){
+				$this->goNotExecutedInPlugins = false;
+				$go_switch_plugin = 'go_switch_'.$kvwmap_plugins[$i];
+				$go_switch_plugin($go);
 			}
 		}
-  }
+  }	
 
 	function plugin_loaded($plugin){
 		global $kvwmap_plugins;
