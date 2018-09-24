@@ -8682,7 +8682,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					elseif($table['type'][$i] == 'Dokument' AND $this->formvars[$table['formfield'][$i]] != '') {
 						$sql.= "'".$this->formvars[$table['formfield'][$i]]."', ";
 						$this->formvars[$table['formfield'][$i]] = ''; # leeren, falls weiter_erfassen angehakt
-					}
+					}					
 					elseif (
 						$table['type'][$i] != 'Text_not_saveable' AND
 						$table['type'][$i] != 'Auswahlfeld_not_saveable' AND
@@ -8690,18 +8690,20 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						$table['type'][$i] != 'SubFormFK' AND
 						($this->formvars[$table['formfield'][$i]] != '' OR $table['type'][$i] == 'Checkbox')
 					) {
-						if ($table['type'][$i] == 'Zahl') {
-							# bei Zahlen den Punkt (Tausendertrenner) entfernen
-							$this->formvars[$table['formfield'][$i]] = removeTausenderTrenner($this->formvars[$table['formfield'][$i]]); # bei Zahlen den Punkt (Tausendertrenner) entfernen
-						}
-						if ($table['type'][$i] == 'Checkbox' AND $this->formvars[$table['formfield'][$i]] == '') {
-							$this->formvars[$table['formfield'][$i]] = 'f';
-						}
 						if($table['type'][$i] != 'Dokument' AND (substr($table['datatype'][$i], 0, 1) == '_' OR is_numeric($table['datatype'][$i]))){		// bei Dokumenten wurde das JSON schon weiter oben verarbeitet
 							# bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln
-							$this->formvars[$table['formfield'][$i]] = $this->processJSON($this->formvars[$table['formfield'][$i]], $doc_path, $doc_url);
+							$sql.= "'".$this->processJSON($this->formvars[$table['formfield'][$i]], $doc_path, $doc_url)."', ";
 						}
-						$sql .= "'" . $this->formvars[$table['formfield'][$i]] . "', "; # Typ "normal"
+						else{
+							if ($table['type'][$i] == 'Zahl') {
+								# bei Zahlen den Punkt (Tausendertrenner) entfernen
+								$this->formvars[$table['formfield'][$i]] = removeTausenderTrenner($this->formvars[$table['formfield'][$i]]); # bei Zahlen den Punkt (Tausendertrenner) entfernen
+							}
+							if ($table['type'][$i] == 'Checkbox' AND $this->formvars[$table['formfield'][$i]] == '') {
+								$this->formvars[$table['formfield'][$i]] = 'f';
+							}
+							$sql .= "'" . $this->formvars[$table['formfield'][$i]] . "', "; # Typ "normal"
+						}
 					}
 					elseif($table['type'][$i] == 'Geometrie') {
 						if($this->formvars['geomtype'] == 'POINT') {
@@ -8756,6 +8758,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						}
 						else {
 							# dataset was not created
+							$this->success = false;
 							$this->add_message('error', 'Eintrag fehlgeschlagen.<br>' . $result[0]);
 						}
 					}
@@ -8819,7 +8822,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
     }
     else {
-      if ($ret['success'] == false) {
+      if ($this->success == false) {
         $this->neuer_Layer_Datensatz();
       }
       else {
@@ -12314,14 +12317,14 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						} break;
             default : {
               if($tablename AND $formtype != 'dynamicLink' AND $formtype != 'Text_not_saveable' AND $formtype != 'Auswahlfeld_not_saveable' AND $formtype != 'SubFormPK' AND $formtype != 'SubFormFK' AND $formtype != 'SubFormEmbeddedPK' AND $attributname != 'the_geom'){
-								if(POSTGRESVERSION >= 930 AND (substr($datatype, 0, 1) == '_' OR is_numeric($datatype))){
-              		$this->formvars[$form_fields[$i]] = $this->processJSON($this->formvars[$form_fields[$i]], $layerset[$layer_id][0]['document_path'], $layerset[$layer_id][0]['document_url']);		# bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln
-              	}
                 if($this->formvars[$form_fields[$i]] == ''){
 									$eintrag = 'NULL';
                 }
                 else{
-									$eintrag = $this->formvars[$form_fields[$i]];
+									if(POSTGRESVERSION >= 930 AND (substr($datatype, 0, 1) == '_' OR is_numeric($datatype))){
+										$eintrag = $this->processJSON($this->formvars[$form_fields[$i]], $layerset[$layer_id][0]['document_path'], $layerset[$layer_id][0]['document_url']);		# bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln
+									}
+									else $eintrag = $this->formvars[$form_fields[$i]];
                 }
               }
             } # end of default case

@@ -106,7 +106,8 @@ include('funktionen/input_check_functions.php');
 			if(!is_array){		// Datentyp
 				if(value == '')value = 'null';
 				else if(value.substring(0,1) != '{')value = '"'+value+'"';
-				values.push('"'+elements[i].title+'":'+value);
+				id_parts = elements[i].id.split('_');
+				values.push('"'+id_parts[1]+'":'+value);
 			}			
 			else if(i > 0){		// Array (hier ist das erste Element ein Dummy -> auslassen)
 				if(value != ''){
