@@ -251,11 +251,13 @@ class administration{
 	function save_config($formvars){
 		global $kvwmap_plugins;
 		foreach($this->config_params as $param){
-			$sql = "UPDATE config SET value = '".$formvars[$param['name']]."', saved = 1 WHERE name = '".$param['name']."'";
-			#echo $sql.'<br>';
-			$result=$this->database->execSQL($sql,0, 0);
-			if($result[0]) {
-				echo '<br>Fehler beim Update der Tabelle config.<br>';
+			if(isset($formvars[$param['name']])){
+				$sql = "UPDATE config SET value = '".$formvars[$param['name']]."', saved = 1 WHERE name = '".$param['name']."'";
+				#echo $sql.'<br>';
+				$result=$this->database->execSQL($sql,0, 0);
+				if($result[0]) {
+					echo '<br>Fehler beim Update der Tabelle config.<br>';
+				}
 			}
 		}
 		$this->get_config_params();
