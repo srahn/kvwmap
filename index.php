@@ -7,6 +7,10 @@ session_start();
 
 include('credentials.php');
 include('config.php');
+# Laden der Plugins config.phps
+for($i = 0; $i < count($kvwmap_plugins); $i++){
+	if(file_exists(PLUGINS.$kvwmap_plugins[$i].'/config/config.php'))include(PLUGINS.$kvwmap_plugins[$i].'/config/config.php');
+}
 
 include(CLASSPATH . 'log.php');
 
@@ -153,9 +157,8 @@ else{
 
 include(WWWROOT . APPLVERSION . 'start.php');
 
-# Laden der Plugins
+# Laden der Plugins index.phps
 for($i = 0; $i < count($kvwmap_plugins); $i++){
-	if(file_exists(PLUGINS.$kvwmap_plugins[$i].'/config/config.php'))include(PLUGINS.$kvwmap_plugins[$i].'/config/config.php');
 	include(PLUGINS.$kvwmap_plugins[$i].'/control/index.php');
 }
 
