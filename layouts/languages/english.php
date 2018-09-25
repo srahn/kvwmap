@@ -1,4 +1,5 @@
 <?php
+	$this->strAnd = "and";
 	$this->strID="ID";
 	$this->strName="Name";
 	$this->strGroup="Group";

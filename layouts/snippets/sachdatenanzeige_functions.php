@@ -86,39 +86,55 @@ include('funktionen/input_check_functions.php');
 		}
 	}
 	
-	buildJSONString = function(id, is_array){
-		var field = document.getElementById(id);		
+	buildJSONString = function(id, is_array) {
+		var field = document.getElementById(id);
 		values = new Array();
 		elements = document.getElementsByClassName(id);
-		for(i = 0; i < elements.length; i++){
+		for (i = 0; i < elements.length; i++) {
 			value = elements[i].value;
 			name = elements[i].name;
 			type = elements[i].type;
-			if(type == 'file'){		// Spezialfall bei Datei-Upload-Feldern:
-				if(value != ''){
-					value = 'file:'+name;		// wenn value vorhanden, wurde eine Datei ausgewählt, dann den Namen des Input-Feldes einsammeln + einem Prefix "file:"
+			if (type == 'file') { // Spezialfall bei Datei-Upload-Feldern:
+				if (value != '') {
+					value = 'file:' + name; // wenn value vorhanden, wurde eine Datei ausgewählt, dann den Namen des Input-Feldes einsammeln + einem Prefix "file:"
 				}
-				else{
+				else {
 					old_file_path = document.getElementsByName(name+'_alt');
-					if(old_file_path[0] != undefined)value = old_file_path[0].value;			// ansonsten den gespeicherten alten Dateipfad
+					if (old_file_path[0] != undefined) {
+						value = old_file_path[0].value; // ansonsten den gespeicherten alten Dateipfad
+					}
 				}
 			}
-			if(!is_array){		// Datentyp
-				if(value == '')value = 'null';
-				else if(value.substring(0,1) != '{')value = '"'+value+'"';
+			if (!is_array) { // Datentyp
+				if (value == '') {
+					value = 'null';
+				}
+				else {
+					if (value.substring(0,1) != '{') {
+						value = '"' + value + '"';
+					}
+				}
 				id_parts = elements[i].id.split('_');
-				values.push('"'+id_parts[1]+'":'+value);
-			}			
-			else if(i > 0){		// Array (hier ist das erste Element ein Dummy -> auslassen)
-				if(value != ''){
-					values.push(value);
+				values.push('"' + id_parts[1] + '":' + value);
+			}
+			else {
+				if (i > 0) { // Array (hier ist das erste Element ein Dummy -> auslassen)
+					if (value != '') {
+						values.push(value);
+					}
 				}
 			}
 		}
-		if(!is_array)json = '{'+values.join()+'}';
-		else json = JSON.stringify(values);
+		if (!is_array) {
+			json = '{'+values.join()+'}';
+		}
+		else {
+			json = JSON.stringify(values);
+		}
 		field.value = json;
-		if(field.onchange)field.onchange();
+		if (field.onchange) {
+			field.onchange();
+		}
 	}
 
 	addArrayElement = function(fieldname, form_element_type, oid){
