@@ -15,13 +15,11 @@
 	* 
 	*/
 
-	$GUI = $this;
-
 	/**
 	* This function return all stellen the authenticated user is assigned to
 	* where sync enabled layer are in
 	*/
-	$this->mobile_get_stellen = function() {
+	$GUI->mobile_get_stellen = function() {
 		$sql = "
 			SELECT DISTINCT
 				s.ID,
@@ -37,7 +35,7 @@
 			ORDER BY
 				s.Bezeichnung
 		";
-		$ret = $this->database->execSQL($sql, 4, 0);
+		$ret = $GUI->database->execSQL($sql, 4, 0);
 
 		if ($ret[0]) {
 			$result = array(
@@ -53,7 +51,7 @@
 
 			$result = array(
 				"success" => true,
-				"user_id" => $this->user->id,
+				"user_id" => $GUI->user->id,
 				"stellen" => $stellen
 			);
 		}
@@ -63,25 +61,25 @@
 	/**
 	* Frage den Layer mit selected_layer_id und die dazugehörigen Attributdaten ab
 	*/
-	$this->mobile_get_layers = function() {
+	$GUI->mobile_get_layers = function() {
 		# ToDo get more than only the layer with selected_layer_id
-		$layers = $this->Stelle->getLayers('');
+		$layers = $GUI->Stelle->getLayers('');
 		$mobile_layers = array();
 
 		foreach($layers['ID'] AS $layer_id) {
 
 			if ($layer_id != '') {
 				# Abfragen der Layerdefinition
-				$layerset = $this->user->rolle->getLayer($layer_id);
+				$layerset = $GUI->user->rolle->getLayer($layer_id);
 				if ($layerset and $layerset[0]['connectiontype'] == '6') {
 					# Abfragen der Privilegien der Attribute
-					$privileges = $this->Stelle->get_attributes_privileges($layer_id);
+					$privileges = $GUI->Stelle->get_attributes_privileges($layer_id);
 
 					# Abfragen der Attribute des Layers mit selected_layer_id
-					$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+					$mapDB = new db_mapObj($GUI->Stelle->id, $GUI->user->id);
 					$layerdb = $mapDB->getlayerdatabase(
 						$layer_id,
-						$this->Stelle->pgdbhost
+						$GUI->Stelle->pgdbhost
 					);
 					$layerdb->setClientEncoding();
 					$attributes = $mapDB->read_layer_attributes(
@@ -97,10 +95,10 @@
 						$attributes['privileg'][$j] = $attributes['privileg'][$attributes['name'][$j]] = ($privileges == NULL ? 0 : $privileges[$attributes['name'][$j]]);
 						#$attributes['tooltip'][$j] = $attributes['tooltip'][$attributes['name'][$j]] = ($privileges == NULL ? 0 : $privileges['tooltip_' . $attributes['name'][$j]]);
 					}
-					$layer = $this->mobile_reformat_layer($layerset[0]);
-					$attributes = $mapDB->add_attribute_values($attributes, $layerdb, array(), true, $this->Stelle->ID);
+					$layer = $GUI->mobile_reformat_layer($layerset[0]);
+					$attributes = $mapDB->add_attribute_values($attributes, $layerdb, array(), true, $GUI->Stelle->ID);
 
-					$layer['attributes'] = $this->mobile_reformat_attributes($attributes);
+					$layer['attributes'] = $GUI->mobile_reformat_attributes($attributes);
 					$mobile_layers[] = $layer;
 				}
 			}
@@ -121,7 +119,7 @@
 		return $result;
 	};
 
-	$this->mobile_sync = function() {
+	$GUI->mobile_sync = function() {
 		include_once(CLASSPATH . 'synchronisation.php');
 		# Prüfe ob folgende Parameter mit gültigen Werten übergeben wurden.
 		# $selected_layer_id (existiert und ist in mysql-Datenbank?)
@@ -131,20 +129,20 @@
 		# $last_client_version sollte 1 oder größer sein. ist das leer oder 0, dann wechseln zu DatenExport_Exportieren oder Exeption
 		# $client_deltas Da müssen keine Daten vorhanden sein, aber es könnte geprüft werden ob die die da sind vollständig sind, jeweils mindestens
 		# sql muss vorhanden sein.
-		#		if ($this->formvars['selected_layer_id'] != '')
+		#		if ($GUI->formvars['selected_layer_id'] != '')
 
-		$this->formvars['client_deltas'] = json_decode(file_get_contents($_FILES['client_deltas']['tmp_name']));
+		$GUI->formvars['client_deltas'] = json_decode(file_get_contents($_FILES['client_deltas']['tmp_name']));
 		//move_uploaded_file($_FILES['client_deltas']['tmp_name'], '/var/www/logs/upload_file.json');
 
-		$result = $this->mobile_sync_parameter_valide($this->formvars);
+		$result = $GUI->mobile_sync_parameter_valide($GUI->formvars);
 		if ($result['success']) {
 
 			# Layer DB abfragen $layerdb = new ...
-			$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
-			$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-			$result['msg'] = 'Layerdb abgefragt mit layer_id: ' . $this->formvars['selected_layer_id'];
-			$sync = new synchro($this->Stelle, $this->user, $layerdb);
-			$result = $sync->sync($this->formvars['device_id'], $this->formvars['username'], $layerdb->schema, $this->formvars['table_name'], $this->formvars['client_time'], $this->formvars['last_client_version'], $this->formvars['client_deltas']);
+			$mapDB = new db_mapObj($GUI->Stelle->id, $GUI->user->id);
+			$layerdb = $mapDB->getlayerdatabase($GUI->formvars['selected_layer_id'], $GUI->Stelle->pgdbhost);
+			$result['msg'] = 'Layerdb abgefragt mit layer_id: ' . $GUI->formvars['selected_layer_id'];
+			$sync = new synchro($GUI->Stelle, $GUI->user, $layerdb);
+			$result = $sync->sync($GUI->formvars['device_id'], $GUI->formvars['username'], $layerdb->schema, $GUI->formvars['table_name'], $GUI->formvars['client_time'], $GUI->formvars['last_client_version'], $GUI->formvars['client_deltas']);
 		}
 		else {
 			$result['err_msg'] = ' Syncronisation auf dem Server abgebrochen wegen folgenden Fehlern: ' . $result['err_msg'];
@@ -152,7 +150,7 @@
 		return $result;
 	};
 
-	$this->mobile_sync_parameter_valide = function($params) {
+	$GUI->mobile_sync_parameter_valide = function($params) {
 		$result = array(
 			"success" => true,
 			"msg" => 'Validierung durchgeführt für Parameter: ',
@@ -230,7 +228,7 @@
 		return $result;
 	};
 
-	$this->mobile_reformat_layer = function($layerset) {
+	$GUI->mobile_reformat_layer = function($layerset) {
 		$geometry_types = array(
 			"Point", "Line", "Polygon"
 		);
@@ -251,7 +249,7 @@
 		return $layer;
 	};
 
-	$this->mobile_reformat_attributes = function($attr) {
+	$GUI->mobile_reformat_attributes = function($attr) {
 		$attributes = array();
 		foreach($attr['name'] AS $key => $value) {
 			if ($attr['enum_value'][$key]) {
@@ -282,9 +280,9 @@
 		return $attributes;
 	};
 
-	$this->mobile_prepare_layer_sync = function($layerdb, $id, $sync) {
+	$GUI->mobile_prepare_layer_sync = function($layerdb, $id, $sync) {
 		include_once(CLASSPATH . 'Layer.php');
-		$layer = Layer::find($this, 'Layer_ID = ' . $id)[0];
+		$layer = Layer::find($GUI, 'Layer_ID = ' . $id)[0];
 
 		$sql = "
 			SELECT EXISTS (
@@ -303,15 +301,15 @@
 
 		$rs = pg_fetch_assoc($ret[1]);
 		if ($rs['table_exists'] == 't' and $sync == 0) {
-			$this->mobile_drop_layer_sync($layerdb, $layer);
+			$GUI->mobile_drop_layer_sync($layerdb, $layer);
 		}
 
 		if ($rs['table_exists'] == 'f' and $sync == 1) {
-			$this->mobile_create_layer_sync($layerdb, $layer);
+			$GUI->mobile_create_layer_sync($layerdb, $layer);
 		}
 	};
 
-	$this->mobile_drop_layer_sync = function($layerdb, $layer) {
+	$GUI->mobile_drop_layer_sync = function($layerdb, $layer) {
 		$sql = "
 			DROP TRIGGER IF EXISTS create_" . $layer->get('maintable') . "_insert_delta_trigger ON " . $layer->get('schema') . "." . $layer->get('maintable') . ";
 			DROP FUNCTION IF EXISTS " . $layer->get('schema') . ".create_" . $layer->get('maintable') . "_insert_delta();
@@ -327,13 +325,13 @@
 		#echo '<p>Plugin: Mobile, function: mobile_remove_layer_sync, Drop table and trigger for deltas SQL:<br>' . $sql;
 		$ret = $layerdb->execSQL($sql, 4, 0, true);
 		if ($ret[0]) {
-			$this->add_message('error', 'Fehler beim Löschen der Sync-Tabelle!<p>Abbruch in Plugin mobile kvwmap.php  Zeile: ' . __LINE__ . '<br>wegen '  . $ret['msg']);
+			$GUI->add_message('error', 'Fehler beim Löschen der Sync-Tabelle!<p>Abbruch in Plugin mobile kvwmap.php  Zeile: ' . __LINE__ . '<br>wegen '  . $ret['msg']);
 			return 0;
 		}
-		$this->add_message('notice', 'Sync-Tabelle und Trigger gelöscht.');
+		$GUI->add_message('notice', 'Sync-Tabelle und Trigger gelöscht.');
 	};
 
-	$this->mobile_create_layer_sync = function($layerdb, $layer) {
+	$GUI->mobile_create_layer_sync = function($layerdb, $layer) {
 		# create table for deltas
 		$sql = "
 			CREATE TABLE " . $layer->get('schema') . "." . $layer->get('maintable') . "_deltas (
@@ -519,13 +517,13 @@
 		#echo '<p>Plugin: Mobile, function: mobile_create_layer_sync, Create table and trigger for deltas SQL:<br>' . $sql;
 		$ret = $layerdb->execSQL($sql, 4, 0, true);
 		if ($ret[0]) {
-			$this->add_message('error', 'Fehler beim Anlegen der Sync-Tabelle!<p>Abbruch in Plugin mobile kvwmap.php  Zeile: ' . __LINE__ . '<br>wegen ' . $ret['msg']);
+			$GUI->add_message('error', 'Fehler beim Anlegen der Sync-Tabelle!<p>Abbruch in Plugin mobile kvwmap.php  Zeile: ' . __LINE__ . '<br>wegen ' . $ret['msg']);
 			return 0;
 		}
-		$this->add_message('info', 'Sync-Tabelle ' . $layer->get('schema') . '.' . $layer->get('maintable') . '_delta<br>und Trigger für INSERT, UPDATE und DELETE angelegt.');
+		$GUI->add_message('info', 'Sync-Tabelle ' . $layer->get('schema') . '.' . $layer->get('maintable') . '_delta<br>und Trigger für INSERT, UPDATE und DELETE angelegt.');
 	};
 
-	$this->mobile_upload_image = function($layer_id, $files) {
+	$GUI->mobile_upload_image = function($layer_id, $files) {
 		# Bestimme den Uploadpfad des Layers
 		if (intval($layer_id) == 0) {
 			return array(
@@ -533,11 +531,11 @@
 				"msg" => "Sie müssen eine korrekte Layer_id angeben!"
 			);
 		}
-		$layer = $this->Stelle->getLayer($layer_id);
+		$layer = $GUI->Stelle->getLayer($layer_id);
 		if (count($layer) == 0) {
 			return array(
 				"success" => false,
-				"msg" => "Der Layer mit der ID " . $layer_id . " wurde in der Stelle mit ID: " . $this->Stelle->id . " nicht gefunden!"
+				"msg" => "Der Layer mit der ID " . $layer_id . " wurde in der Stelle mit ID: " . $GUI->Stelle->id . " nicht gefunden!"
 			);
 		}
 		$doc_path = $layer[0]['document_path'];
@@ -562,7 +560,7 @@
 			$msg = 'Konnte hochgeladene Datei: ' . $files['image']['tmp_name'] . ' nicht nach ' . $doc_path . $files['image']['name'] . ' kopieren!';
 		}
 		else {
-			$vorschaubild = $this->get_dokument_vorschau(explode('.', $doc_path . $files['image']['name']));
+			$vorschaubild = $GUI->get_dokument_vorschau(explode('.', $doc_path . $files['image']['name']));
 			$success = true;
 			$msg = 'Datei erfolgreich auf dem Server gespeichert unter: ' . $doc_path . $files['image']['name'];
 		}
@@ -573,7 +571,7 @@
 		);
 	};
 
-	$this->mobile_delete_images = function($layer_id, $images) {
+	$GUI->mobile_delete_images = function($layer_id, $images) {
 		# Bestimme den Uploadpfad des Layers
 		if (intval($layer_id) == 0) {
 			return array(
@@ -581,18 +579,18 @@
 				"msg" => "Sie müssen eine korrekte Layer_id angeben!"
 			);
 		}
-		$layer = $this->Stelle->getLayer($layer_id);
+		$layer = $GUI->Stelle->getLayer($layer_id);
 		if (count($layer) == 0) {
 			return array(
 				"success" => false,
-				"msg" => "Der Layer mit der ID " . $layer_id . " wurde in der Stelle mit ID: " . $this->Stelle->id . " nicht gefunden!"
+				"msg" => "Der Layer mit der ID " . $layer_id . " wurde in der Stelle mit ID: " . $GUI->Stelle->id . " nicht gefunden!"
 			);
 		}
 		$doc_path = $layer[0]['document_path'];
 
 		/*
 		Prüfe ob die zu löschende Datei in im document_path liegt, wenn ja lösche, wenn nicht lösche nicht.
-		$this->deleteDokument(image);
+		$GUI->deleteDokument(image);
 		*/
 		if ($images == '') {
 			return array(

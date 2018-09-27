@@ -148,8 +148,9 @@ function validierungsergebnisseRowAttribs(row, index){
 </table>
 <div style="clear:both"></div>
 <form action="index.php" method="post" enctype="multipart/form-data">
-  <input type="hidden" name="go" value="xplankonverter_konvertierungen_index">
-  <input type="hidden" name="konvertierung_id" value="<?php echo $this->formvars['konvertierung_id']; ?>">
+	<input type="hidden" name="go" value="xplankonverter_plaene_index">
+	<input type="hidden" name="planart" value="<?php echo $this->konvertierung->get('planart'); ?>">
+	<input type="hidden" name="konvertierung_id" value="<?php echo $this->formvars['konvertierung_id']; ?>">
 	<input type="submit" name="submit" value="zurück">
 </form>
 <p>

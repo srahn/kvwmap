@@ -1,8 +1,6 @@
 <?
 
-	$GUI = $this;
-
-	$this->Anliegerbeiträge_editor = function() use ($GUI){
+	$GUI->Anliegerbeiträge_editor = function() use ($GUI){
     $GUI->main = PLUGINS.'anliegerbeitraege/view/anliegerbeitraege_editor.php';
     $GUI->titel='Anliegerbeiträge';
     # aktuellen Kartenausschnitt laden + zeichnen!
@@ -49,7 +47,7 @@
     $GUI->output();
   };
 
-	$this->Anliegerbeiträge_strasse_speichern = function() use ($GUI){
+	$GUI->Anliegerbeiträge_strasse_speichern = function() use ($GUI){
     $anliegerbeitraege = new anliegerbeitraege($GUI->pgdatabase);
     $layerset = $GUI->user->rolle->getLayer('AB_Strassen');
     $anliegerbeitraege->layerepsg = $layerset[0]['epsg_code'];
@@ -75,7 +73,7 @@
     }
   };
 
-	$this->Anliegerbeiträge_buffer_speichern = function() use ($GUI){
+	$GUI->Anliegerbeiträge_buffer_speichern = function() use ($GUI){
     $anliegerbeitraege = new anliegerbeitraege($GUI->pgdatabase);
     $layerset = $GUI->user->rolle->getLayer('AB_Bereiche');
     $anliegerbeitraege->layerepsg = $layerset[0]['epsg_code'];

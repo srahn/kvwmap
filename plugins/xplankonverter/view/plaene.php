@@ -366,7 +366,7 @@
 	data-height="100%"
 	data-click-to-select="false"
 	data-filter-control="true" 
-	data-sort-name="gemeinde"
+	data-sort-name="Name"
 	data-sort-order="asc"
 	data-search="true"
 	data-show-export="false"
@@ -407,7 +407,7 @@
 				data-visible="true"
 				class="col-md-7"
 			>Name</th><?php
-				if ($this->plan_layer_id = XPLANKONVERTER_RP_PLAENE_LAYER_ID) { ?>
+				if ($this->plan_layer_id == XPLANKONVERTER_RP_PLAENE_LAYER_ID) { ?>
 					<th
 						data-field="bundesland"
 						data-visible="false"

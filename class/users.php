@@ -1193,9 +1193,8 @@ class user {
 				`login_name` = '" . $userdaten['loginname'] . "',
 				`Namenszusatz` = '" . $userdaten['Namenszusatz'] . "',
 				`start` = '" . $userdaten['start'] . "',
-				`stop`= '" . $userdaten['stop'] . "',
-				`password_setting_time` = " . ($userdaten['password_setting_time'] != '' ? "'" . $userdaten['password_setting_time'] . "'" : "CURRENT_TIMESTAMP()") . "," .
-				($userdaten['changepasswd'] ? "`passwort` = MD5('" . $userdaten['password2'] . "'),"	: "") .
+				`stop`= '" . $userdaten['stop'] . "',".
+				($userdaten['changepasswd'] ? "`passwort` = MD5('" . $userdaten['password2'] . "'), password_setting_time=CURRENT_TIMESTAMP(),"	: "") .
 				($userdaten['id'] 		!= '' ? "`ID` 			= " . $userdaten['id'] . "," 								: "") .
 				($userdaten['phon'] 	!= '' ? "`phon` 		= '" . $userdaten['phon'] . "'," 						: "") .
 				($userdaten['email']	!= '' ? "`email` 		= '" . $userdaten['email'] . "',"						: "") . "

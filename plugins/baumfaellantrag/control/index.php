@@ -1,5 +1,7 @@
 <?
-	$this->goNotExecutedInPlugins = false;
+	
+function go_switch_baumfaellantrag($go){
+	global $GUI;	
 	switch($go) {
 		case 'baumfaellantrag_get_flurstueck' : {
 			# example for request
@@ -8,29 +10,29 @@
 			# {"landId":"13","kreisId":"99","gemeindId":"99","gemarkungId":"123","gemarkungName":"Testgemarkung","flurId":"1","flurstueckId":"130999-001-00099\/009.00","flurstueckNummer":"99\/9"}
 	
 			# Layer Id für den Flurstueckslayer
-			$this->formvars['selected_layer_id'] = BAUMFAELLANTRAG_LAYER_ID_FLURSTUECKE;
+			$GUI->formvars['selected_layer_id'] = BAUMFAELLANTRAG_LAYER_ID_FLURSTUECKE;
 
 			# EPSG-Code der Abfragekoordinaten
-			if ($this->formvars['epsg_code'] == '')
-				$this->formvars['epsg_code'] = 4326; # epsg_code of search point coordinates
+			if ($GUI->formvars['epsg_code'] == '')
+				$GUI->formvars['epsg_code'] = 4326; # epsg_code of search point coordinates
 
 			# Default Koordinate
-			if ($this->formvars['longitude'] == '')
-				$this->formvars['longitude'] = BAUMFAELLANTRAG_DEFAULT_LONGITUDE;
-			if ($this->formvars['latitude'] == '')
-				$this->formvars['latitude'] = BAUMFAELLANTRAG_DEFAULT_LATITUDE;
-			$this->formvars['newpathwkt'] = "POINT(" . $this->formvars['longitude'] . " " . $this->formvars['latitude'] . ")";
+			if ($GUI->formvars['longitude'] == '')
+				$GUI->formvars['longitude'] = BAUMFAELLANTRAG_DEFAULT_LONGITUDE;
+			if ($GUI->formvars['latitude'] == '')
+				$GUI->formvars['latitude'] = BAUMFAELLANTRAG_DEFAULT_LATITUDE;
+			$GUI->formvars['newpathwkt'] = "POINT(" . $GUI->formvars['longitude'] . " " . $GUI->formvars['latitude'] . ")";
 
 			# Ausgewählte Spalten
-			$this->formvars['selectors'] = 'landId, kreisId, gemeindeId, gemeindeName, gemarkungId, gemarkungName, flurId, flurstueckId, flurstueckNummer';
+			$GUI->formvars['selectors'] = 'landId, kreisId, gemeindeId, gemeindeName, gemarkungId, gemarkungName, flurId, flurstueckId, flurstueckNummer';
 
 			# Format
-			$this->formvars['mime_type'] = 'formatter';
-			if ($this->formvars['format'] == '')
-				$this->formvars['format'] = "json";
+			$GUI->formvars['mime_type'] = 'formatter';
+			if ($GUI->formvars['format'] == '')
+				$GUI->formvars['format'] = "json";
 
-			$this->formvars['content_type'] = 'text/plain';
-			$this->GenerischeSuche_Suchen();
+			$GUI->formvars['content_type'] = 'text/plain';
+			$GUI->GenerischeSuche_Suchen();
 		} break;
 
 		case 'baumfaellantrag_get_zustaendige_stelle' : {
@@ -40,29 +42,29 @@
 			# {"gemnr":"13060999","name":"Musterstelle","lk_nr":"99","email":"pkorduan@beispiel.de","ansprechpartner":"Marc Mustermann","bearbeitungszeit":"ca. 10 Tage","npa_allowed":"t","www":"http:\/\/www.zustaendigestelle.de\/mustin\/"}
 	
 			# Layer Id für den zuständige Stelle
-			$this->formvars['selected_layer_id'] = BAUMFAELLANTRAG_LAYER_ID_ZUSTAENDIGESTELLEN;
+			$GUI->formvars['selected_layer_id'] = BAUMFAELLANTRAG_LAYER_ID_ZUSTAENDIGESTELLEN;
 
 			# EPSG-Code der Abfragekoordinaten
-			if ($this->formvars['epsg_code'] == '')
-				$this->formvars['epsg_code'] = 4326; # epsg_code of search point coordinates
+			if ($GUI->formvars['epsg_code'] == '')
+				$GUI->formvars['epsg_code'] = 4326; # epsg_code of search point coordinates
 
 			# Default Koordinate
-			if ($this->formvars['longitude'] == '')
-				$this->formvars['longitude'] = BAUMFAELLANTRAG_DEFAULT_LONGITUDE;
-			if ($this->formvars['latitude'] == '')
-				$this->formvars['latitude'] = BAUMFAELLANTRAG_DEFAULT_LATITUDE;
-			$this->formvars['newpathwkt'] = "POINT(" . $this->formvars['longitude'] . " " . $this->formvars['latitude'] . ")";
+			if ($GUI->formvars['longitude'] == '')
+				$GUI->formvars['longitude'] = BAUMFAELLANTRAG_DEFAULT_LONGITUDE;
+			if ($GUI->formvars['latitude'] == '')
+				$GUI->formvars['latitude'] = BAUMFAELLANTRAG_DEFAULT_LATITUDE;
+			$GUI->formvars['newpathwkt'] = "POINT(" . $GUI->formvars['longitude'] . " " . $GUI->formvars['latitude'] . ")";
 
 			# Ausgewählte Spalten
-			$this->formvars['selectors'] = 'gemnr, name, lk_nr, email, ansprechpartner, bearbeitungszeit, npa_allowed, www';
+			$GUI->formvars['selectors'] = 'gemnr, name, lk_nr, email, ansprechpartner, bearbeitungszeit, npa_allowed, www';
 
 			# Format
-			$this->formvars['mime_type'] = 'formatter';
-			if ($this->formvars['format'] == '')
-				$this->formvars['format'] = "json";
+			$GUI->formvars['mime_type'] = 'formatter';
+			if ($GUI->formvars['format'] == '')
+				$GUI->formvars['format'] = "json";
 
-			$this->formvars['content_type'] = 'text/plain';
-			$this->GenerischeSuche_Suchen();
+			$GUI->formvars['content_type'] = 'text/plain';
+			$GUI->GenerischeSuche_Suchen();
 		} break;
 
 		case 'baumfaellantrag_get_satzungsgebiet' : {
@@ -72,68 +74,69 @@
 			# {"id":"1","name":"Satzung 1 Testgebiet","type":"Baumf\u00e4llsatzung","erlaubter_durchmesser":"80"}
 	
 			# Layer Id für den zuständige Stelle
-			$this->formvars['selected_layer_id'] = BAUMFAELLANTRAG_LAYER_ID_SATZUNGSGEBIETE;
+			$GUI->formvars['selected_layer_id'] = BAUMFAELLANTRAG_LAYER_ID_SATZUNGSGEBIETE;
 
 			# EPSG-Code der Abfragekoordinaten
-			if ($this->formvars['epsg_code'] == '')
-				$this->formvars['epsg_code'] = 4326; # epsg_code of search point coordinates
+			if ($GUI->formvars['epsg_code'] == '')
+				$GUI->formvars['epsg_code'] = 4326; # epsg_code of search point coordinates
 
 			# Default Koordinate
-			if ($this->formvars['longitude'] == '')
-				$this->formvars['longitude'] = BAUMFAELLANTRAG_DEFAULT_LONGITUDE;
-			if ($this->formvars['latitude'] == '')
-				$this->formvars['latitude'] = BAUMFAELLANTRAG_DEFAULT_LATITUDE;
-			$this->formvars['newpathwkt'] = "POINT(" . $this->formvars['longitude'] . " " . $this->formvars['latitude'] . ")";
+			if ($GUI->formvars['longitude'] == '')
+				$GUI->formvars['longitude'] = BAUMFAELLANTRAG_DEFAULT_LONGITUDE;
+			if ($GUI->formvars['latitude'] == '')
+				$GUI->formvars['latitude'] = BAUMFAELLANTRAG_DEFAULT_LATITUDE;
+			$GUI->formvars['newpathwkt'] = "POINT(" . $GUI->formvars['longitude'] . " " . $GUI->formvars['latitude'] . ")";
 
 			# Ausgewählte Spalten
-			$this->formvars['selectors'] = 'id, name, type, erlaubter_durchmesser';
+			$GUI->formvars['selectors'] = 'id, name, type, erlaubter_durchmesser';
 
 			# Format
-			$this->formvars['mime_type'] = 'formatter';
-			if ($this->formvars['format'] == '')
-				$this->formvars['format'] = "json";
+			$GUI->formvars['mime_type'] = 'formatter';
+			if ($GUI->formvars['format'] == '')
+				$GUI->formvars['format'] = "json";
 
-			$this->formvars['content_type'] = 'text/plain';
-			$this->GenerischeSuche_Suchen();
+			$GUI->formvars['content_type'] = 'text/plain';
+			$GUI->GenerischeSuche_Suchen();
 		} break;
 
 		case 'upload_temp_file' : {
-			$this->checkCaseAllowed($go);
+			$GUI->checkCaseAllowed($go);
 			include(PLUGINS.'baumfaellantrag/model/kvwmap.php');
 			header('Content-Type: text/plain; charset=utf-8');
-			echo utf8_decode(json_encode($this->uploadTempFile()));
+			echo utf8_decode(json_encode($GUI->uploadTempFile()));
 		} break;
 
 		case 'pack_and_mail' : {
-			$this->checkCaseAllowed($go);
+			$GUI->checkCaseAllowed($go);
 			include(PLUGINS.'baumfaellantrag/model/kvwmap.php');
 			$strip_list = "go, go_plus, username, passwort, Stelle_ID, format, version, callback, _dc, file";
-			$application_data = formvars_strip($this->formvars, $strip_list);
+			$application_data = formvars_strip($GUI->formvars, $strip_list);
 
 			# erzeuge eine eindeutige Nummer für diesen Antrag
 			$antrag_id = date("YmdHis") . str_pad(rand(1, 99), 2, "00", STR_PAD_LEFT);
 
 			# erzeuge die benötigten Dateien
-			$application_data = $this->createFiles($antrag_id, $application_data);
+			$application_data = $GUI->createFiles($antrag_id, $application_data);
 			#echo 'mandateRef after createFiles: ' . $application_data['mandateReference'];
 			# speicher die Antragsdaten in der Datenbank
-			if ($this->saveApplicationData($antrag_id, $application_data)) {
+			if ($GUI->saveApplicationData($antrag_id, $application_data)) {
 				# Wenn das geklappt hat, packe die Dateien in zip und versende die E-Mails.
-				$this->qlayerset[0]['shape'][0] = $this->packAndMail($antrag_id, $application_data);
+				$GUI->qlayerset[0]['shape'][0] = $GUI->packAndMail($antrag_id, $application_data);
 			}
 			else {
-				$this->qlayerset[0]['shape'][0] = array("success" => 0, "data" => $application_data);
+				$GUI->qlayerset[0]['shape'][0] = array("success" => 0, "data" => $application_data);
 			}
-			$this->mime_type = "formatter";
-			if ($this->formvars['format'] == '')
-				$this->formvars['format'] = "json";
+			$GUI->mime_type = "formatter";
+			if ($GUI->formvars['format'] == '')
+				$GUI->formvars['format'] = "json";
 
-			$this->formvars['content_type'] = 'text/plain';
-			$this->output();
+			$GUI->formvars['content_type'] = 'text/plain';
+			$GUI->output();
 		} break;
 
 		default : {
-			$this->goNotExecutedInPlugins = true;	// in diesem Plugin wurde go nicht ausgeführt
+			$GUI->goNotExecutedInPlugins = true;	// in diesem Plugin wurde go nicht ausgeführt
 		}
 	}
+}
 ?>

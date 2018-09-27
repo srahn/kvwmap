@@ -60,13 +60,7 @@
 							<tr>
 								<td><span class="px16">Passwort: </span></td>
 								<td><input style="width: 130px;" type="password" value="<? echo $this->formvars['passwort']; ?>" name="passwort" /></td>
-							</tr><?
-							if (MOBILE == 'true') { ?>
-								<tr>
-								 <td>mobil:</td>
-								 <td><input type="checkbox" value="on" name="mobile"/></td>
-								</tr><?php
-							} ?>
+							</tr>
 							<tr>
 								<td colspan="2">Ihre IP-Adresse: <?php echo   $remote_addr = getenv('REMOTE_ADDR'); ?></td>
 							</tr>

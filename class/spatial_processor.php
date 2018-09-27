@@ -31,6 +31,8 @@
 
 #-----------------------------------------------------------------------------------------------------------------
 
+if(!defined('EPSGCODE_ALKIS'))define('EPSGCODE_ALKIS', 0);	// EPSGCODE_ALKIS ist nur bei Verwendung des Plugin alkis definiert
+
 class spatial_processor {
   
   function spatial_processor($rolle, $database, $pgdatabase) {

@@ -1,7 +1,7 @@
 <?	
-	$GUI = $this;
+
 	
-	$this->bodenRichtWertErfassung = function() use ($GUI){
+	$GUI->bodenRichtWertErfassung = function() use ($GUI){
 		include_once(CLASSPATH.'FormObject.php');
     if ($GUI->formvars['oid']=='') {
       $GUI->titel='Bodenrichtwerterfassung';
@@ -80,7 +80,7 @@
     $GUI->output();
   };
 	
-	$this->aendernBodenRichtWert = function() use ($GUI){
+	$GUI->aendernBodenRichtWert = function() use ($GUI){
     # Bodenrichtwertzone aus der Datenbank abfragen
     $layer = $GUI->user->rolle->getLayer(LAYERNAME_BODENRICHTWERTE);
     $bodenrichtwertzone=new bodenrichtwertzone($GUI->pgdatabase, $layer[0]['epsg_code'], $GUI->user->rolle->epsg_code);
@@ -116,7 +116,7 @@
     $GUI->bodenRichtWertErfassung();
   };
 	
-	$this->bodenRichtWertFormSenden = function() use ($GUI){
+	$GUI->bodenRichtWertFormSenden = function() use ($GUI){
     # Zusammensetzen der übergebenen Parameter für das Polygon und die Textposition
     #echo 'formvars[loc_x, loc_y]: '.$GUI->formvars['loc_x'].', '.$GUI->formvars['loc_x'];
     if ($GUI->formvars['loc_x']!='' OR $GUI->formvars['loc_y']!='') {
@@ -163,7 +163,7 @@
     $GUI->bodenRichtWertErfassung();
   };
 	
-	$this->zoomToBodenrichtwertzone = function($oid,$border) use ($GUI){
+	$GUI->zoomToBodenrichtwertzone = function($oid,$border) use ($GUI){
     $layer = $GUI->user->rolle->getLayer(LAYERNAME_BODENRICHTWERTE);
     $zone=new bodenrichtwertzone($GUI->pgdatabase, $layer[0]['epsg_code'], $GUI->user->rolle->epsg_code);
     $ret=$zone->getBBoxAsRectObj($oid);
@@ -187,7 +187,7 @@
     }
   };
 	
-	$this->bodenRichtWertZoneLoeschen = function() use ($GUI){
+	$GUI->bodenRichtWertZoneLoeschen = function() use ($GUI){
     $layer = $GUI->user->rolle->getLayer(LAYERNAME_BODENRICHTWERTE);
     $zone=new bodenrichtwertzone($GUI->pgdatabase, $layer[0]['epsg_code'], $GUI->user->rolle->epsg_code);
     $ret=$zone->deleteBodenrichtwertzonen(array($GUI->formvars['oid']));
@@ -206,7 +206,7 @@
     $GUI->output();
   };
 	
-	$this->waehleBodenwertStichtagToCopy = function() use ($GUI){
+	$GUI->waehleBodenwertStichtagToCopy = function() use ($GUI){
 		include_once(CLASSPATH.'FormObject.php');
     $GUI->main = PLUGINS.'bodenrichtwerte/view/waehlebodenwertstichtagtocopy.php';
     $GUI->titel='Kopieren von Bodenrichtwertzonen auf einen neuen Stichtag';
@@ -225,7 +225,7 @@
     $GUI->output();
   };
 	
-	$this->copyBodenrichtwertzonen = function() use ($GUI){
+	$GUI->copyBodenrichtwertzonen = function() use ($GUI){
     # Bodenrichtwertzonenobjekt erzeugen
     $layer = $GUI->user->rolle->getLayer(LAYERNAME_BODENRICHTWERTE);
     $bodenrichtwertzone=new bodenrichtwertzone($GUI->pgdatabase, $layer[0]['epsg_code'], $GUI->user->rolle->epsg_code);
@@ -263,7 +263,7 @@
     } # ende kopiervorgang wurde bestätigt
   };
 	
-	$this->commitBodenrichtwertCopy = function() use ($GUI){
+	$GUI->commitBodenrichtwertCopy = function() use ($GUI){
     # Frage eine Bestätigung für die Aktion ab
     $GUI->main = PLUGINS.'bodenrichtwerte/view/bestaetigebodenwertstichtagtocopy.php';
     $GUI->titel='Bodenrichtwertzonen kopieren';
