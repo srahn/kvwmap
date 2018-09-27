@@ -56,7 +56,9 @@
 							</tr>
 							<tr>
 								<td><span class="px16">Passwort: </span></td>
-								<td><input style="width: 130px" type="password" value="" name="passwort" /></td>
+								<td>
+									<input style="width: 130px" type="password" value="<? echo $this->formvars['passwort']; ?>" name="passwort" />
+								</td>
 							</tr><?
 							if ($this->Fehlermeldung) { ?>
 								<tr>

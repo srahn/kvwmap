@@ -1184,6 +1184,15 @@ class user {
 	}
 
 	function Aendern($userdaten) {
+		if ($userdaten['changepasswd']) {
+			$passwort_column = ", `passwort` = MD5('" . $userdaten['password2'] . "')";
+			$passwort_setting_time_column = ", `password_setting_time` = CURRENT_TIMESTAMP()";
+		}
+		# Wurde ein password_setting_time explizit mitgeschickt, wird dieses eingetragen statt current_timestamp
+		if ($userdaten['password_setting_time']) {
+			$passwort_setting_time_column = ", `password_setting_time` = '" . $userdaten['password_setting_time'] . "'";
+		}
+
 		$sql = "
 			UPDATE
 				`user`
@@ -1193,12 +1202,13 @@ class user {
 				`login_name` = '" . $userdaten['loginname'] . "',
 				`Namenszusatz` = '" . $userdaten['Namenszusatz'] . "',
 				`start` = '" . $userdaten['start'] . "',
-				`stop`= '" . $userdaten['stop'] . "',".
-				($userdaten['changepasswd'] ? "`passwort` = MD5('" . $userdaten['password2'] . "'), password_setting_time=CURRENT_TIMESTAMP(),"	: "") .
-				($userdaten['id'] 		!= '' ? "`ID` 			= " . $userdaten['id'] . "," 								: "") .
+				`stop`= '" . $userdaten['stop'] . "', " .
+				($userdaten['id'] 		!= '' ? "`ID` 			=  " . $userdaten['id'] . "," 								: "") .
 				($userdaten['phon'] 	!= '' ? "`phon` 		= '" . $userdaten['phon'] . "'," 						: "") .
 				($userdaten['email']	!= '' ? "`email` 		= '" . $userdaten['email'] . "',"						: "") . "
-				`ips` = '" . $userdaten['ips'] . "'
+				`ips` = '" . $userdaten['ips'] . "'" .
+				$passwort_column .
+				$passwort_setting_time_column . "
 			WHERE
 				`ID`= " . $userdaten['selected_user_id'] . "
 		";
@@ -1234,7 +1244,7 @@ class user {
 			WHERE
 				`ID` = " . $this->id . "
 		";
-		echo $sql;
+		#echo $sql;
 		$ret = $this->database->execSQL($sql,4, 0);
 		if ($ret[0]) {
 			$ret[1] .= '<br>Die Benutzerdaten konnten nicht aktualisiert werden.<br>'.$ret[1];
