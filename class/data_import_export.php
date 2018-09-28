@@ -528,7 +528,7 @@ class data_import_export {
 		}
 	}
 
-	function shp_import_speichern($formvars, $database, $upload_path = UPLOADPATH, $encoding = 'LATIN1') {
+	function shp_import_speichern($formvars, $database, $upload_path = UPLOADPATH, $encoding = '') {
 		$this->formvars = $formvars;
 		if (file_exists($upload_path . $this->formvars['dbffile'])) {
 			$importfile = basename($this->formvars['dbffile'], '.dbf');
