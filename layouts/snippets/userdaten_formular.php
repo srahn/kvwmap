@@ -24,11 +24,11 @@
 	}
 
 	function resetPassword() {
-		var newPassword = 'geheim',
+		var newPassword = Math.random().toString(36).slice(6),
 		loginName = $('form[name="GUI"] input[name="loginname"]').val();
 		$('#resetPassword').attr(
 			'href',
-			'mailto:' + $('form[name="GUI"] input[name="email"]').val() + '?subject=Neues Passwort für kvwmap&body=Einladung%20f%C3%BCr%20kvwmap-Nutzer%20' + loginName + '%0A%0ASie werden aufgefordert ein neues Passwort für kvwmap einzugeben.%0A%0AKlicken Sie dazu bitte auf folgenden Link:%0A %0A%0Ahttps%3A%2F%2Fgdi-service.de%2Fkvwmap_pet_dev%2Findex.php%3Flogin_name=' + loginName + '%0A%0AMit freundlichen Grüßen%0AIhr GIS-Administrator%0A'
+			'mailto:' + $('form[name="GUI"] input[name="email"]').val() + '?subject=Neues Passwort für kvwmap&body=Einladung%20f%C3%BCr%20kvwmap-Nutzer%20' + loginName + '%0A%0ASie werden aufgefordert ein neues Passwort für kvwmap einzugeben.%0A%0AKlicken Sie dazu bitte auf folgenden Link: <? echo urlencode(URL.APPLVERSION); ?>index.php%3Fgo=logout%26login_name=' + loginName + '%26passwort=' + newPassword + ', melden Sie sich mit dem Passwort: ' + newPassword + ' an und vergeben ein neues.%0A%0AMit freundlichen Grüßen%0AIhr GIS-Administrator%0A'
 		);
 		$('#resetPassword').parent().html('Neues Passwort vergeben!');
 		message('Neues Passwort vergeben.<br>Es hat sich ein E-Mail-Fenster mit einer vorgefertigten Meldung geöffnet. Verschicken die Einladung mit dem automatisch generierten Passwort an den Nutzer und speichern Sie den Datensatz des Benutzers mit den neuen Angaben!');
@@ -37,6 +37,9 @@
 			name: 'password_setting_time',
 			value: '<? echo date('Y-m-d', time() - (60 * 60 * 24 * 31 * ($this->Stelle->allowedPasswordAge > 0 ? $this->Stelle->allowedPasswordAge : 1))); ?>'
 		}).appendTo('#GUI');
+		$('#GUI input[name=password1]').prop('disabled', false).val(newPassword);
+		$('#GUI input[name=password2]').prop('disabled', false).val(newPassword);
+		$('#GUI input[name=changepasswd]').attr('checked', true);
 	}
 -->
 </script>
@@ -108,7 +111,10 @@ else {
 							else { ?>
 								gilt noch <? echo $allowedPasswordAgeRemainDays; ?> Tage<?
 							} ?>.<?
-					 	} ?>
+					 	}
+						if ($this->formvars['selected_user_id'] > 0) { ?>
+							<br><span><a id="resetPassword" href="#" onclick="resetPassword();"); "><? echo $strPassword . ' ' . $this->strReset; ?></a></span><?php
+						} ?>
 					</td>
 				</tr><?php } ?>
 				<tr>
@@ -117,22 +123,31 @@ else {
 						<input
 							name="password1"
 							readonly
-							onfocus="this.removeAttribute('readonly');" <?php
+							onfocus="this.removeAttribute('readonly');" <?
 							if ($this->formvars['selected_user_id'] > 0) { ?>
-								disabled="true"<?php
+								disabled="true"<?
 							} ?>
 							type="password"
 							size="10"
 							maxlength="30"
-						><?php
-						if ($this->formvars['selected_user_id'] > 0) { ?>
-							<span><a id="resetPassword" href="#" onclick="resetPassword();"); "><? echo $this->strReset; ?></a></span><?php
-						} ?>
+						>
 					</td>
 				</tr>
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strReEnterPassword;?></th>
-					<td style="border-bottom:1px solid #C3C7C3"><input name="password2" readonly onfocus="this.removeAttribute('readonly');" <?php if ($this->formvars['selected_user_id']>0)echo'disabled="true"';?> type="password" size="10" maxlength="30"></td>
+					<td style="border-bottom:1px solid #C3C7C3">
+						<input
+							name="password2"
+							readonly
+							onfocus="this.removeAttribute('readonly');" <?php
+							if ($this->formvars['selected_user_id']>0) { ?>
+								disabled="true"<?
+							} ?>
+							type="password"
+							size="10"
+							maxlength="30"
+						>
+					</td>
 				</tr>
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strStart;?></th>
