@@ -257,7 +257,7 @@ $j=0;
 				&nbsp;&nbsp;<?php echo $strAttributeSelection; ?>:
 				<div class="flexcontainer2"><?
 					for($s = 0; $s < 4; $s++){ ?>
-						<div style="float: left; padding: 4px; min-width:20%;"><?
+						<div style="float: left; padding: 4px;"><?
 							for($i = 0; $i < $floor+$r; $i++) {
 								if($this->data_import_export->attributes['group'][$j] != '') $groupnames = true;
 								if($this->data_import_export->attributes['form_element_type'][$j] == 'Dokument'){$document_attributes = true; $document_ids[] = $j;} ?>

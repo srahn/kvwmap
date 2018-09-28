@@ -1438,7 +1438,6 @@ tbody.gle tr:hover {
 }
 
 .flexcontainer2{
-		max-width: 800px;
 		display: flex;
 		justify-content:flex-start;
 		flex-direction: row;
