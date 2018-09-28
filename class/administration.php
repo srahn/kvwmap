@@ -284,7 +284,7 @@ class administration{
 				else{
 					if($param['type'] == 'string' OR $param['type'] == 'password')$quote = "'";
 					else $quote = '';
-					$config.= "define(".$param['name'].", ".$quote.$param['real_value'].$quote.");\n\n";
+					$config.= "define('".$param['name']."', ".$quote.$param['real_value'].$quote.");\n\n";
 				}
 			}
 		}
