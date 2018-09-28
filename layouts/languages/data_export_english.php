@@ -15,4 +15,5 @@
  $strSure='Are you sure you want to export the whole layer?\n\nThis might take a while.';
  $strOptions='Options';
  $strSingleGeoms="use singlegeometries";
+ $strWithin="only within";
 ?>
