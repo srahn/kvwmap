@@ -369,10 +369,10 @@ die Geometriespalte muß auch mit dieser EPSG Nummer angelegt sein.
 $config_file = 'config.php';
 if(file_exists($config_file)){
 	$own_constants = $this->get_constants_from_config(file($config_file), 'alkis');
-	foreach($constants as &$constant){
-		if(array_key_exists($constant['name'], $own_constants)){
-			$constant['value'] = $own_constants[$constant['name']]['value'];
-			$constant['saved'] = 1;
+	foreach($constants as &$const){
+		if(array_key_exists($const['name'], $own_constants)){
+			$const['value'] = $own_constants[$const['name']]['value'];
+			$const['saved'] = 1;
 		}
 	}
 }
