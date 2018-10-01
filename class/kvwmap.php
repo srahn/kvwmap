@@ -150,7 +150,7 @@ class GUI {
 			# Nicht nochmal go = logout, sonst kommt man da nicht mehr raus.
 			$this->expect[] = 'go';
 		}
-		$this->user->rolle->gui = 'snippets/login_new_password.php';
+		$this->user->rolle->gui = 'snippets/'.LOGIN_NEW_PASSWORD;
 		$this->output();
 	}
 
@@ -162,13 +162,13 @@ class GUI {
 			$this->formvars['login_name'] = strToLower(substr($this->invitation->inviter->get('Vorname'), 0, 1) . $this->invitation->inviter->get('Name'));
 		}
 		$this->expect = array('login_name', 'new_password', 'new_password_2');
-		$this->user->rolle->gui = 'snippets/login_registration.php';
+		$this->user->rolle->gui = 'snippets/'.LOGIN_REGISTRATION;
 		$this->output();
 	}
 
 	function login_agreement() {
 		$this->expect = array('agreement_accepted');
-		$this->user->rolle->gui = 'snippets/login_agreement.php';
+		$this->user->rolle->gui = 'snippets/'.LOGIN_AGREEMENT;
 		$this->output();
 	}
 
