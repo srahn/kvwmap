@@ -115,7 +115,9 @@ include('funktionen/input_check_functions.php');
 					}
 				}
 				id_parts = elements[i].id.split('_');
-				values.push('"' + id_parts[1] + '":' + value);
+				if(id_parts.length == 3)attribute_name = id_parts[1];		// normales Attribut
+				else attribute_name = id_parts.pop();										// Nutzerdatentyp-Attribut
+				values.push('"' + attribute_name + '":' + value);
 			}
 			else {
 				if (i > 0) { // Array (hier ist das erste Element ein Dummy -> auslassen)
