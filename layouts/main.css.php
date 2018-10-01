@@ -352,6 +352,14 @@ a.invisiblelayerlink:hover{
 	color: gray;
 }
 
+#login_table{
+	margin-top: 20px; 
+	background-color: <? echo BG_DEFAULT; ?>;
+	box-shadow: 12px 10px 14px #777; 
+	border: 1px solid #bbbbbb; 
+	background: linear-gradient(<? echo BG_GLEATTRIBUTE; ?> 0%, <? echo BG_DEFAULT ?> 100%);
+}
+
 .config_param_saved_0{
 	border-collapse: separate;
 	outline: 2px solid red;
