@@ -876,17 +876,11 @@ class Nachweis {
 				$sql.=" FROM nachweisverwaltung.n_nachweise AS n";
 				$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
 				$sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id"; 
-<<<<<<< HEAD
 				$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n2d.dokumentart_id = d.id";
 				$sql.=" LEFT JOIN nachweisverwaltung.n_hauptdokumentarten h ON h.id = n.art";
-        $sql.=" WHERE ";
-				if($gueltigkeit != NULL)$sql.=" gueltigkeit = ".$gueltigkeit." AND ";
-				if($geprueft != NULL)$sql.=" AND geprueft = ".$geprueft;
-=======
-				$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n2d.dokumentart_id = d.id";
         $sql.=" WHERE true ";
 				if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit." AND ";
->>>>>>> bugfix
+				if($geprueft != NULL)$sql.=" AND geprueft = ".$geprueft;
         if ($idselected[0]!=0) {
           $sql.=" n.id IN ('".$idselected[0]."'";
           for ($i=1;$i<count($idselected);$i++) {
