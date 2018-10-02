@@ -78,6 +78,7 @@
 	</svg>';
 
 	$scriptdefinitions ='
+	var enclosingForm = top.currentform;
 	var transformfunctions = false;
 	var coord_input_functions = false;
 	var ortho_point_functions = false;
@@ -216,6 +217,16 @@
 			save_measure_path();
 		}
 	}
+	
+	function ppquery(){
+		top.currentform.last_doing2.value = top.currentform.last_doing.value;
+		top.currentform.last_doing.value = "ppquery";
+		document.getElementById("canvas").setAttribute("cursor", "help");
+	}
+	
+	function noMeasuring(){
+		measuring = false;
+	}	
 
 	function measure(){
 	  top.currentform.last_doing.value = "measure";
@@ -351,6 +362,10 @@
 	';
 
 	$basicfunctions = '
+	
+	function mouseenter(evt){
+		top.currentform = enclosingForm;
+	}
 
 	function redrawpoint(){
 		if(document.getElementById("pointposition")){
@@ -382,6 +397,20 @@
       top.currentform.CMD.value  = "Full_Extent";
       submit();
   }
+
+	function checkQueryFields(){
+		var selected = false;
+		query_fields = top.document.getElementsByClassName(\'info-select-field\');
+		for(var i = 0; i < query_fields.length; i++){
+			if(query_fields[i].checked){
+				selected = true;
+				break;
+			}
+		}
+		if(selected == false)top.message([{ \'type\': \'warning\', \'msg\': \''.$strNoLayer.'\' }]);
+		return selected;
+	}	
+	
   function sendpath(cmd,navX,navY){
     // navX[0] enthaelt den Rechtswert des ersten gesetzte Punktes im Bild in Pixeln
     // von links nach rechts gerechnet
@@ -409,6 +438,22 @@
       top.currentform.INPUT_COORD.value  = navX[0]+","+navY[0];
       top.currentform.CMD.value = cmd;
       submit();
+     break;
+     case "ppquery_point":
+			if(!checkQueryFields())break;
+      path = navX[0]+","+navY[0]+";"+navX[0]+","+navY[0];
+      top.currentform.INPUT_COORD.value  = path;
+      top.currentform.CMD.value          = "ppquery";
+			top.currentform.go.value = "Sachdaten";
+			top.overlay_submit(top.currentform, true);
+     break;
+     case "ppquery_box":
+			if(!checkQueryFields())break;
+      path = navX[0]+","+navY[0]+";"+navX[2]+","+navY[2];
+      top.currentform.INPUT_COORD.value  = path;
+      top.currentform.CMD.value          = "ppquery";
+			top.currentform.go.value = "Sachdaten";
+      top.overlay_submit(top.currentform, true);
      break;
      case "add_geom_box":
       top.currentform.INPUT_COORD.value  = navX[0]+","+navY[0]+";"+navX[2]+","+navY[2];
@@ -683,7 +728,7 @@ $basicfunctions.= '
 			case "recentre":				
 				startMove(client_x, client_y);
 			break;
-			case "pquery":
+			case "ppquery":
 				startPoint(client_x, client_y);
 			break;
 
@@ -799,8 +844,7 @@ $basicfunctions.= '
 		}
 	}
   }
-
-
+	
 function mousemove(evt){
 	if(deactivated_foreign_vertex != 0){		// wenn es einen deaktivierten foreign vertex gibt, wird dieser jetzt wieder aktiviert
 		document.getElementById(deactivated_foreign_vertex).setAttribute("pointer-events", "auto");
@@ -3315,7 +3359,7 @@ $measurefunctions = '
 				<use id="pointposition" xlink:href="#crosshair_blue" x="-500" y="-500"/>
 				<circle id="startvertex" cx="-500" cy="-500" r="2" style="fill:blue;stroke:blue;stroke-width:2"/>
 			</g>
-			<rect id="canvas" cursor="crosshair" onmousedown="mousedown(evt);" onmousemove="mousemove(evt);" onmouseup="mouseup(evt);" width="100%" height="100%" opacity="0" visibility="visible"/>
+			<rect id="canvas" cursor="crosshair" onmouseenter="mouseenter(evt);" onmousedown="mousedown(evt);" onmousemove="mousemove(evt);" onmouseup="mouseup(evt);" width="100%" height="100%" opacity="0" visibility="visible"/>
 			<g id="in_between_vertices" transform="translate(0,'.$res_y.') scale(1,-1)"></g>
 			<g id="vertices" transform="translate(0,'.$res_y.') scale(1,-1)"></g>
 			<g id="ortho_point_vertices" transform="translate(0,'.$res_y.') scale(1,-1)"></g>
@@ -3575,7 +3619,7 @@ $measurefunctions = '
   	global $last_x;
     $flurstquerybuttons = '
       <g id="query_add" transform="translate('.$last_x.' 0)">
-        <rect id="ppquery0" onmouseover="show_tooltip(\'vorhandene Geometrie hinzuf\u00fcgen\',evt.clientX,evt.clientY)" onmousedown="add_geometry();hide_tooltip();highlightbyid(\'ppquery0\');" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+        <rect id="ppquery1" onmouseover="show_tooltip(\'vorhandene Geometrie hinzuf\u00fcgen\',evt.clientX,evt.clientY)" onmousedown="add_geometry();hide_tooltip();highlightbyid(\'ppquery1\');" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
 				<g class="navbutton" transform="translate(5 5) scale(0.8)">
 					<g transform="translate(9 -8)">
 						<path d="M23,12 L16,12 C15.4,12 15,11.6 15,11 L15,10 C15,9.4 15.4,9 16,9 L23,9 C23.6,9 24,9.4 24,10 L24,11 C24,11.6 23.6,12 23,12"/>
@@ -3593,7 +3637,7 @@ $measurefunctions = '
     $last_x += 36;
     $flurstquerybuttons .= '
 		  <g id="query_subtract" transform="translate('.$last_x.' 0)">
-        <rect id="ppquery1" onmouseover="show_tooltip(\'mit vorhandener Geometrie ausschneiden\',evt.clientX,evt.clientY)" onmousedown="subtract_geometry();hide_tooltip();highlightbyid(\'ppquery1\');" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+        <rect id="ppquery2" onmouseover="show_tooltip(\'mit vorhandener Geometrie ausschneiden\',evt.clientX,evt.clientY)" onmousedown="subtract_geometry();hide_tooltip();highlightbyid(\'ppquery2\');" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
         <g class="navbutton" transform="translate(5 5) scale(0.8)">
 					<g transform="translate(9 -8)">
 						<path d="M23,12 L16,12 C15.4,12 15,11.6 15,11 L15,10 C15,9.4 15.4,9 16,9 L23,9 C23.6,9 24,9.4 24,10 L24,11 C24,11.6 23.6,12 23,12"/>
