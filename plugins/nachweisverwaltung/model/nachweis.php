@@ -896,6 +896,9 @@ class Nachweis {
       	if($fortf!=''){
           $sql.=" AND n.fortfuehrung=".(int)$fortf;
         }
+				if($blattnr!=''){
+					$sql.=" AND n.blattnummer='".$blattnr."'";
+				}
 				if($art_einblenden!=''){
 					if($art_einblenden == '2222'){
 						$sql.=" AND n.id IN (".implode(',', $idselected).")";
