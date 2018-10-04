@@ -901,6 +901,9 @@ class Nachweis {
       	if($fortf!=''){
           $sql.=" AND n.fortfuehrung=".(int)$fortf;
         }
+				if($blattnr!=''){
+					$sql.=" AND n.blattnummer='".$blattnr."'";
+				}				
 				if(!empty($hauptart)){
 					if($hauptart[0] == '2222' AND $idselected[0] != ''){
 						$sql.=" AND n.id IN (".implode(',', $idselected).")";
