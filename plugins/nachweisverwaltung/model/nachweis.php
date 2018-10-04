@@ -888,6 +888,10 @@ class Nachweis {
           }
           $sql.=")";
         }
+				if($flur_thematisch != ''){
+					if($flur == '')	$sql.=" AND substr(n.flurid::text, 1, 6) = '".$gemarkung."'";
+					else $sql.=" AND n.flurid='".$gemarkung.str_pad($flur,3,'0',STR_PAD_LEFT)."'";
+				}				
         if($stammnr!=''){
           $sql.=" AND n.stammnr='".$stammnr."'";
         }
