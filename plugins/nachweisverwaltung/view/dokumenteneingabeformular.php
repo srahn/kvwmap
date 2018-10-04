@@ -10,7 +10,7 @@ function toggle_vertices(){
 	document.getElementById("vertices").SVGtoggle_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 }
 
-function save(){	
+function send(){	
 	document.GUI.result2.value = '';
 	if(document.getElementsByName('unterart_'+document.GUI.hauptart.value)[0] != undefined && document.getElementsByName('unterart_'+document.GUI.hauptart.value)[0].value == ''){
 		alert('Keine Dokumentart ausgewählt.');
@@ -335,7 +335,7 @@ $legendheight = $this->map->height + 20;
 						<table border="0">
 							<tr> 
 								<td><input type="reset" name="go_plus2" value="Zurücksetzen"></td>
-								<td><input type="button" name="senden" value="Senden" onclick="save();"></td>
+								<td><input type="button" name="senden" value="Senden" onclick="send();"></td>
 							</tr>
 						</table>
 						<input type="hidden" name="id" value="<?php echo $this->formvars['id']; ?>">
@@ -389,7 +389,7 @@ $legendheight = $this->map->height + 20;
 											</div>
 											<div id="scrolldiv" style="height:<?php echo $legendheight; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
 												<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
-												<div onclick="document.GUI.legendtouched.value = 1;" id="legend">
+												<div id="legend">
 													<? echo $this->legende; ?>
 												</div>
 											</div>

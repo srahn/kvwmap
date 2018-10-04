@@ -50,7 +50,7 @@ class Nachweis {
 	function check_documentpath($old_dataset){		
 		$ret=$this->getNachweise($old_dataset['id'],'','','','','','','','bySingleID','','');
 		if ($ret=='') {
-			$this->Dokumente[0]['artname'] = ArtCode2Abk($this->Dokumente[0]['art']);
+			$this->Dokumente[0]['artname'] = strtolower($this->hauptarten[$this->Dokumente[0]['art']]['abkuerzung']);
 			$this->Dokumente[0]['Bilddatei_name'] = $this->Dokumente[0]['link_datei'];
 			$this->Dokumente[0]['Blattnr'] = $this->Dokumente[0]['blattnummer'];
 			$formvars['zieldateiname']=$this->getZielDateiName($this->Dokumente[0]);

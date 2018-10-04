@@ -8,7 +8,8 @@ include('funktionen/input_check_functions.php');
 <script type="text/javascript">
 
 	var geom_not_null = false;
-	
+	var enclosingForm = <? echo $this->currentform; ?>;
+		
 	update_geometry = function(){
 		document.getElementById("svghelp").SVGupdate_geometry();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 	}
@@ -18,7 +19,7 @@ include('funktionen/input_check_functions.php');
 	}
 
 	scrolltop = function(){
-		if(currentform.name == 'GUI2'){
+		if(enclosingForm.name == 'GUI2'){
 			document.getElementById('contentdiv').scrollTop = 0;
 		}else{
 			window.scrollTo(0,0);
@@ -26,7 +27,7 @@ include('funktionen/input_check_functions.php');
 	}
 	
 	scrollbottom = function(){
-		if(currentform.name == 'GUI2'){
+		if(enclosingForm.name == 'GUI2'){
 			document.getElementById('contentdiv').scrollTop = document.getElementById('contentdiv').scrollHeight;
 		}else{
 			window.scrollTo(0, document.body.scrollHeight);
@@ -167,7 +168,7 @@ include('funktionen/input_check_functions.php');
 		for(i = 0; i < elements.length; i++){
 			if(elements[i].type == 'file'){
 				old_file_path = document.getElementsByName(elements[i].name+'_alt');
-				if(old_file_path[0] != undefined)currentform.delete_documents.value += old_file_path[0].value+'|';
+				if(old_file_path[0] != undefined)enclosingForm.delete_documents.value += old_file_path[0].value+'|';
 			}
 			else{
 				getFileAttributesInArray(elements[i].id);
@@ -181,17 +182,17 @@ include('funktionen/input_check_functions.php');
 			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch weiterblättern?');
 		}
 		if(sure){
-			currentform.target = '';
-			currentform.go.value = 'get_last_query';
-			if(currentform.go_backup.value != ''){
-				currentform.go.value = currentform.go_backup.value;
+			enclosingForm.target = '';
+			enclosingForm.go.value = 'get_last_query';
+			if(enclosingForm.go_backup.value != ''){
+				enclosingForm.go.value = enclosingForm.go_backup.value;
 			}
 			obj = document.getElementById('offset_'+layer_id);
 			if(obj.value == '' || obj.value == undefined){
 				obj.value = 0;
 			}
 			obj.value = parseInt(obj.value) + <? echo $this->formvars['anzahl']; ?>;
-			overlay_submit(currentform, false);
+			overlay_submit(enclosingForm, false);
 		}
 	}
 	
@@ -201,17 +202,17 @@ include('funktionen/input_check_functions.php');
 			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch weiterblättern?');
 		}
 		if(sure){
-			currentform.target = '';
-			currentform.go.value = 'get_last_query';
-			if(currentform.go_backup.value != ''){
-				currentform.go.value = currentform.go_backup.value;
+			enclosingForm.target = '';
+			enclosingForm.go.value = 'get_last_query';
+			if(enclosingForm.go_backup.value != ''){
+				enclosingForm.go.value = enclosingForm.go_backup.value;
 			}
 			obj = document.getElementById('offset_'+layer_id);
 			if(obj.value == '' || obj.value == undefined){
 				obj.value = 0;
 			}
 			obj.value = count - (count % <? echo $this->formvars['anzahl']; ?>);
-			overlay_submit(currentform, false);
+			overlay_submit(enclosingForm, false);
 		}
 	}
 	
@@ -221,14 +222,14 @@ include('funktionen/input_check_functions.php');
 			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch zurückblättern?');
 		}
 		if(sure){
-			currentform.target = '';
-			currentform.go.value = 'get_last_query';
-			if(currentform.go_backup.value != ''){
-				currentform.go.value = currentform.go_backup.value;
+			enclosingForm.target = '';
+			enclosingForm.go.value = 'get_last_query';
+			if(enclosingForm.go_backup.value != ''){
+				enclosingForm.go.value = enclosingForm.go_backup.value;
 			}
 			obj = document.getElementById('offset_'+layer_id);
 			obj.value = 0;
-			overlay_submit(currentform, false);
+			overlay_submit(enclosingForm, false);
 		}
 	}
 
@@ -238,33 +239,33 @@ include('funktionen/input_check_functions.php');
 			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch zurückblättern?');
 		}
 		if(sure){
-			currentform.target = '';
-			currentform.go.value = 'get_last_query';
-			if(currentform.go_backup.value != ''){
-				currentform.go.value = currentform.go_backup.value;
+			enclosingForm.target = '';
+			enclosingForm.go.value = 'get_last_query';
+			if(enclosingForm.go_backup.value != ''){
+				enclosingForm.go.value = enclosingForm.go_backup.value;
 			}
 			obj = document.getElementById('offset_'+layer_id);
 			if(obj.value == '' || obj.value == undefined){
 				obj.value = 0;
 			}
 			obj.value = parseInt(obj.value) - <? echo $this->formvars['anzahl']; ?>;
-			overlay_submit(currentform, false);
+			overlay_submit(enclosingForm, false);
 		}
 	}
 
 	back = function(){
-		currentform.go.value = 'Layer-Suche';
-		currentform.submit();
+		enclosingForm.go.value = 'Layer-Suche';
+		enclosingForm.submit();
 	}
 
 	druck = function(){
-		currentform.target = '_blank';
-		currentform.printversion.value = 'true';
-		currentform.submit();
+		enclosingForm.target = '_blank';
+		enclosingForm.printversion.value = 'true';
+		enclosingForm.submit();
 	}
 
 	save = function(){
-		form_fieldstring = currentform.form_field_names.value+'';
+		form_fieldstring = enclosingForm.form_field_names.value+'';
 		form_fields = form_fieldstring.split('|');
 		for(i = 0; i < form_fields.length-1; i++){
 			fieldstring = form_fields[i]+'';
@@ -278,19 +279,19 @@ include('funktionen/input_check_functions.php');
 				return;
 			}
 		}
-		currentform.go.value = 'Sachdaten_speichern';
+		enclosingForm.go.value = 'Sachdaten_speichern';
 		document.getElementById('loader').style.display = '';
 		setTimeout('document.getElementById(\'loaderimg\').src=\'graphics/ajax-loader.gif\'', 50);
 		document.GUI.gle_changed.value = '';
-		overlay_submit(currentform, false);
+		overlay_submit(enclosingForm, false);
 	}
 
 	save_new_dataset = function(){
-		if((geom_not_null && currentform.newpath.value == '' && currentform.loc_x == undefined) || (geom_not_null && currentform.loc_x != undefined && currentform.loc_x.value == '')){ 
+		if((geom_not_null && enclosingForm.newpath.value == '' && enclosingForm.loc_x == undefined) || (geom_not_null && enclosingForm.loc_x != undefined && enclosingForm.loc_x.value == '')){ 
 			message('Sie haben keine Geometrie angegeben.');
 			return;
 		}
-  	form_fieldstring = currentform.form_field_names.value+'';
+  	form_fieldstring = enclosingForm.form_field_names.value+'';
   	form_fields = form_fieldstring.split('|');
   	for(i = 0; i < form_fields.length; i++){
   		fieldstring = form_fields[i]+'';
@@ -304,10 +305,10 @@ include('funktionen/input_check_functions.php');
   			return;
   		}
   	}
-  	currentform.go.value = 'neuer_Layer_Datensatz_speichern';
+  	enclosingForm.go.value = 'neuer_Layer_Datensatz_speichern';
 		document.getElementById('go_plus').disabled = true;
 		document.GUI.gle_changed.value = '';
-  	overlay_submit(currentform, false);
+  	overlay_submit(enclosingForm, false);
 	}
 
 	subdelete_data = function(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data){
@@ -324,7 +325,7 @@ include('funktionen/input_check_functions.php');
 			data += '&checkbox_names_'+layer_id+'='+document.getElementsByName('checkbox_names_'+layer_id)[0].value;
 			data += '&'+document.getElementsByName('checkbox_names_'+layer_id)[0].value+'=on';			
 			if(typeof (window.FormData) != 'undefined'){		// in alten IEs gibts FormData nicht
-				formdata = new FormData(currentform);
+				formdata = new FormData(enclosingForm);
 				data = urlstring2formdata(formdata, data);
 			}			
 			ahah('index.php', data, new Array(document.getElementById(fromobject), document.getElementById(targetobject)), new Array('sethtml', 'sethtml'));
@@ -358,7 +359,7 @@ include('funktionen/input_check_functions.php');
   	}
   	data = 'go=Sachdaten_speichern&reload='+reload+'&selected_layer_id='+layer_id+'&fromobject='+fromobject+'&targetobject='+targetobject+'&targetlayer_id='+targetlayer_id+'&targetattribute='+targetattribute+'&data='+data+'&form_field_names='+form_fieldstring+'&embedded=true' + data_r;
 		if(typeof (window.FormData) != 'undefined'){		// in alten IEs gibts FormData nicht
-			formdata = new FormData(currentform);
+			formdata = new FormData(enclosingForm);
 			data = urlstring2formdata(formdata, data);
 		}
 		ahah('index.php', data, new Array(document.getElementById(fromobject), document.getElementById(targetobject), ''), new Array('sethtml', 'sethtml', 'execute_function'));
@@ -391,7 +392,7 @@ include('funktionen/input_check_functions.php');
   	}
   	data = 'go=neuer_Layer_Datensatz_speichern&reload='+reload+'&selected_layer_id='+layer_id+'&fromobject='+fromobject+'&targetobject='+targetobject+'&targetlayer_id='+targetlayer_id+'&targetattribute='+targetattribute+'&data='+data+'&form_field_names='+form_fieldstring+'&embedded=true' + data_r;
 		if(typeof (window.FormData) != 'undefined'){		// in alten IEs gibts FormData nicht
-			formdata = new FormData(currentform);
+			formdata = new FormData(enclosingForm);
 			data = urlstring2formdata(formdata, data);
 		}
 		ahah('index.php', data, new Array(document.getElementById(fromobject), document.getElementById(targetobject), ''), new Array('sethtml', 'sethtml', 'execute_function'));
@@ -413,9 +414,9 @@ include('funktionen/input_check_functions.php');
 	}
 	
 	switch_gle_view1 = function(layer_id){
-		currentform.chosen_layer_id.value = layer_id;
-		currentform.go.value='toggle_gle_view';
-		overlay_submit(currentform, false);
+		enclosingForm.chosen_layer_id.value = layer_id;
+		enclosingForm.go.value='toggle_gle_view';
+		overlay_submit(enclosingForm, false);
 	}
 	
 	add_calendar = function(event, elementid, type, setnow){
@@ -450,12 +451,12 @@ include('funktionen/input_check_functions.php');
 				attributevalues += encodeURIComponent(document.getElementById(layer_id+'_'+attributenamesarray[i]+'_'+k).value) + '|';
 			}
 			else if(attributenamesarray[i] == geom_attribute ){	// wenn es das Geometrieattribut ist, handelt es sich um eine Neuerfassung --> aktuelle Geometrie nehmen
-				if(currentform.loc_x != undefined && currentform.loc_x.value != ''){		// Punktgeometrie
-					geom = 'POINT('+currentform.loc_x.value+' '+currentform.loc_y.value+')';
+				if(enclosingForm.loc_x != undefined && enclosingForm.loc_x.value != ''){		// Punktgeometrie
+					geom = 'POINT('+enclosingForm.loc_x.value+' '+enclosingForm.loc_y.value+')';
 				}
-				else if(currentform.newpathwkt.value == ''){		// Polygon- oder Liniengeometrie
-					if(currentform.newpath.value != ''){
-						geom = buildwktpolygonfromsvgpath(currentform.newpath.value);
+				else if(enclosingForm.newpathwkt.value == ''){		// Polygon- oder Liniengeometrie
+					if(enclosingForm.newpath.value != ''){
+						geom = buildwktpolygonfromsvgpath(enclosingForm.newpath.value);
 					}
 				}
 				attributenames += attributenamesarray[i] + '|';
@@ -528,7 +529,7 @@ include('funktionen/input_check_functions.php');
 	
 	zoom2object = function(layer_id, geomtype, tablename, columnname, oid, selektieren){
 		params = 'go=zoomto'+geomtype+'&oid='+oid+'&layer_tablename='+tablename+'&layer_columnname='+columnname+'&layer_id='+layer_id+'&selektieren='+selektieren;
-		if(currentform.id == 'GUI2'){					// aus overlay heraus --> Kartenzoom per Ajax machen
+		if(enclosingForm.id == 'GUI2'){					// aus overlay heraus --> Kartenzoom per Ajax machen
 			startwaiting();
 			get_map_ajax(params, '', 'highlight_object('+layer_id+', '+oid+');');		// Objekt highlighten
 		}
@@ -539,7 +540,7 @@ include('funktionen/input_check_functions.php');
 	
 	zoom2wkt = function(wkt, epsg){
 		params = 'go=zoom2wkt&wkt='+wkt+'&epsg='+epsg;
-		if(currentform.id == 'GUI2'){					// aus overlay heraus --> Kartenzoom per Ajax machen
+		if(enclosingForm.id == 'GUI2'){					// aus overlay heraus --> Kartenzoom per Ajax machen
 			startwaiting();
 			get_map_ajax(params, '', '');
 		}
@@ -569,20 +570,20 @@ include('funktionen/input_check_functions.php');
 
 	zoomto_datasets = function(layer_id, tablename, columnname){
 		if(check_for_selection(layer_id)){
-			currentform.chosen_layer_id.value = layer_id;
-			currentform.layer_tablename.value = tablename;
-			currentform.layer_columnname.value = columnname;
-			currentform.go.value = 'zoomto_selected_datasets';
-			currentform.submit();
+			enclosingForm.chosen_layer_id.value = layer_id;
+			enclosingForm.layer_tablename.value = tablename;
+			enclosingForm.layer_columnname.value = columnname;
+			enclosingForm.go.value = 'zoomto_selected_datasets';
+			enclosingForm.submit();
 		}
 	}
 
 	delete_datasets = function(layer_id){
 		if(check_for_selection(layer_id)){
 			if(confirm('Wollen Sie die ausgewählten Datensätze wirklich löschen?')){
-				currentform.chosen_layer_id.value = layer_id;
-				currentform.go.value = 'Layer_Datensaetze_Loeschen';
-				currentform.submit();
+				enclosingForm.chosen_layer_id.value = layer_id;
+				enclosingForm.go.value = 'Layer_Datensaetze_Loeschen';
+				enclosingForm.submit();
 			}
 		}
 	}
@@ -598,24 +599,24 @@ include('funktionen/input_check_functions.php');
 				subsave_data(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data, reload);
 			}
 			else{												// normaler Layer
-				currentform.go.value = 'Sachdaten_speichern';
-				currentform.submit();
+				enclosingForm.go.value = 'Sachdaten_speichern';
+				enclosingForm.submit();
 			}
 		}
 	}
 
 	daten_export = function(layer_id, anzahl, format){
-		currentform.all.value = document.getElementById('all_'+layer_id).value;
-		if(currentform.all.value || check_for_selection(layer_id)){				// entweder alle gefundenen oder die ausgewaehlten
+		enclosingForm.all.value = document.getElementById('all_'+layer_id).value;
+		if(enclosingForm.all.value || check_for_selection(layer_id)){				// entweder alle gefundenen oder die ausgewaehlten
 			var option = document.createElement("option");
 			option.text = anzahl;
 			option.value = anzahl;
-			currentform.anzahl.add(option);
-			currentform.anzahl.selectedIndex = currentform.anzahl.options.length-1;
-			currentform.chosen_layer_id.value = layer_id;
-			currentform.go_backup.value = currentform.go.value;
-			currentform.go.value = 'Daten_Export';
-			currentform.submit();
+			enclosingForm.anzahl.add(option);
+			enclosingForm.anzahl.selectedIndex = enclosingForm.anzahl.options.length-1;
+			enclosingForm.chosen_layer_id.value = layer_id;
+			enclosingForm.go_backup.value = enclosingForm.go.value;
+			enclosingForm.go.value = 'Daten_Export';
+			enclosingForm.submit();
 		}
 	}
 
@@ -632,57 +633,57 @@ include('funktionen/input_check_functions.php');
 
 	add_to_clipboard = function(layer_id){
 		if(check_for_selection(layer_id)){
-			saved_go = currentform.go.value;
-			currentform.chosen_layer_id.value = layer_id;
-			currentform.go.value = 'Datensaetze_Merken';
-			formdata = new FormData(currentform);
+			saved_go = enclosingForm.go.value;
+			enclosingForm.chosen_layer_id.value = layer_id;
+			enclosingForm.go.value = 'Datensaetze_Merken';
+			formdata = new FormData(enclosingForm);
 			ahah("index.php", formdata, new Array(), new Array());
-			currentform.go.value = saved_go;
+			enclosingForm.go.value = saved_go;
 			message([{'type': 'notice', 'msg': 'Datensätze gemerkt'}]);
 		}
 	}
 
 	remove_from_clipboard = function(layer_id){
 		if(check_for_selection(layer_id)){
-			saved_go = currentform.go.value;
-			currentform.chosen_layer_id.value = layer_id;
-			currentform.go.value = 'Datensaetze_nicht_mehr_merken';
-			formdata = new FormData(currentform);
+			saved_go = enclosingForm.go.value;
+			enclosingForm.chosen_layer_id.value = layer_id;
+			enclosingForm.go.value = 'Datensaetze_nicht_mehr_merken';
+			formdata = new FormData(enclosingForm);
 			ahah("index.php", formdata, new Array(), new Array());
-			currentform.go.value = saved_go;
+			enclosingForm.go.value = saved_go;
 			message([{'type': 'notice', 'msg': 'Datensätze entfernt'}]);
 		}
 	}
 
 	use_for_new_dataset = function(layer_id){
 		if(check_for_selection(layer_id)){
-			currentform.chosen_layer_id.value = layer_id;
-			currentform.pathwkt.value = '';
-			currentform.newpathwkt.value = '';
-			currentform.newpath.value = '';
-			currentform.go_backup.value = currentform.go.value;
-			currentform.go.value = 'neuer_Layer_Datensatz';
-			currentform.submit();
+			enclosingForm.chosen_layer_id.value = layer_id;
+			enclosingForm.pathwkt.value = '';
+			enclosingForm.newpathwkt.value = '';
+			enclosingForm.newpath.value = '';
+			enclosingForm.go_backup.value = enclosingForm.go.value;
+			enclosingForm.go.value = 'neuer_Layer_Datensatz';
+			enclosingForm.submit();
 		}
 	}
 	
 	dublicate_dataset = function(layer_id){
 		if(check_for_selection(layer_id)){
 			if(confirm('Der Datensatz und alle mit ihm verknüpften Objekte werden kopiert. Wollen Sie fortfahren?')){
-				currentform.chosen_layer_id.value = layer_id;
-				currentform.go_backup.value = currentform.go.value;
-				currentform.go.value = 'Datensatz_dublizieren';
-				currentform.submit();
+				enclosingForm.chosen_layer_id.value = layer_id;
+				enclosingForm.go_backup.value = enclosingForm.go.value;
+				enclosingForm.go.value = 'Datensatz_dublizieren';
+				enclosingForm.submit();
 			}
 		}
 	}	
 
 	print_data = function(layer_id){
 		if(check_for_selection(layer_id)){
-			currentform.chosen_layer_id.value = layer_id;
-			currentform.go_backup.value = currentform.go.value;
-			currentform.go.value = 'generischer_sachdaten_druck';
-			currentform.submit();
+			enclosingForm.chosen_layer_id.value = layer_id;
+			enclosingForm.go_backup.value = enclosingForm.go.value;
+			enclosingForm.go.value = 'generischer_sachdaten_druck';
+			enclosingForm.submit();
 		}
 	}
 
@@ -706,13 +707,13 @@ include('funktionen/input_check_functions.php');
 
 	create_chart = function(layer_id){
 		if(check_for_selection(layer_id)){
-			currentform.target = "_blank";
-			currentform.chosen_layer_id.value = layer_id;
-			currentform.width.value = 700;
-			currentform.go_backup.value = currentform.go.value;
-			currentform.go.value = 'generisches_sachdaten_diagramm';
-			currentform.submit();
-			currentform.target = "";
+			enclosingForm.target = "_blank";
+			enclosingForm.chosen_layer_id.value = layer_id;
+			enclosingForm.width.value = 700;
+			enclosingForm.go_backup.value = enclosingForm.go.value;
+			enclosingForm.go.value = 'generisches_sachdaten_diagramm';
+			enclosingForm.submit();
+			enclosingForm.target = "";
 		}
 	}
 
@@ -737,8 +738,8 @@ include('funktionen/input_check_functions.php');
 	}
 
 	change_orderby = function(attribute, layer_id){
-		if(currentform.go_backup.value != ''){
-			currentform.go.value = currentform.go_backup.value;
+		if(enclosingForm.go_backup.value != ''){
+			enclosingForm.go.value = enclosingForm.go_backup.value;
 		}
 		if(document.getElementById('orderby'+layer_id).value == attribute){
 			document.getElementById('orderby'+layer_id).value = attribute+' DESC';
@@ -746,7 +747,7 @@ include('funktionen/input_check_functions.php');
 		else{
 			document.getElementById('orderby'+layer_id).value = attribute;
 		}
-		overlay_submit(currentform);
+		overlay_submit(enclosingForm);
 	}
 	
 	switch_edit_all = function(layer_id){
