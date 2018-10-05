@@ -12634,7 +12634,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
                 $layer->set('template',$layerset[$i]['template']);
               }
               else {
-                $layer->set('template',DEFAULTTEMPLATE);
+                $layer->set('template', ' ');		# ohne Template kann der Layer über den Mapserver nicht abgefragt werden
               }
               $projFROM = ms_newprojectionobj("init=epsg:".$this->user->rolle->epsg_code);
     					$projTO = ms_newprojectionobj("init=epsg:".$layerset[$i]['epsg_code']);
@@ -12660,6 +12660,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 										$layerset[$i]['shape'][$j][$key] = utf8_encode($value);
 										$layerset[$i]['attributes']['name'][$count] = $key;
 										$layerset[$i]['attributes']['privileg'][$count] = 0;
+										$layerset[$i]['attributes']['visible'][$count] = true;
 									}
 									$count++;
 								}
