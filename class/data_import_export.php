@@ -572,7 +572,7 @@ class data_import_export {
 	}	
 
 
-	function shp_import_speichern($formvars, $database, $upload_path = UPLOADPATH, $encoding = 'LATIN1') {
+	function shp_import_speichern($formvars, $database, $upload_path = UPLOADPATH, $encoding = '') {
 		$this->formvars = $formvars;
 		if (file_exists($upload_path . $this->formvars['dbffile'])) {
 			$importfile = basename($this->formvars['dbffile'], '.dbf');
@@ -1061,15 +1061,12 @@ class data_import_export {
     	$sql = "SELECT * FROM (".$sql.$groupby.") as query WHERE ".$filter;
     }
     if($this->formvars['newpathwkt']){	# über Polygon einschränken
-    	$sql.= " AND ST_INTERSECTS(".$this->attributes['the_geom'].", st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code']."))";
+			if($this->formvars['within'] == 1)$sp_op = 'st_within'; else $sp_op = 'st_intersects';
+    	$sql.= " AND ".$sp_op."(".$this->attributes['the_geom'].", st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code']."))";
     }
     $sql.= $orderby;
 		$data_sql = $sql;
 		#echo $sql;
-
-    #$temp_table = 'shp_export_'.rand(1, 10000);
-    #$sql = 'CREATE TABLE public.'.$temp_table.' AS '.$sql;		# temporäre Tabelle erzeugen, damit das/die Schema/ta berücksichtigt werden
-    #$ret = $layerdb->execSQL($sql,4, 0);
 
 		for($s = 0; $s < count($selected_attributes); $s++){
 			# Transformieren der Geometrie
@@ -1079,7 +1076,6 @@ class data_import_export {
 				if (in_array($selected_attr_types[$s], array('text', 'varchar'))) $selected_attributes[$s] = $selected_attributes[$s].'::varchar(254)';
 			}
 		}
-		#$sql = "SELECT " . implode(', ', $selected_attributes) . " FROM public." . $temp_table; # auf die ausgewählten Attribute einschränken
 		$sql = "SELECT " . implode(', ', $selected_attributes) . " FROM (".$sql.") as foo"; # auf die ausgewählten Attribute einschränken
 		$ret = $layerdb->execSQL($sql,4, 0);
 		if (!$ret[0]) {

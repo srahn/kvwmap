@@ -17,10 +17,10 @@ $constants = array (
 $config_file = PLUGINS.'fortfuehrungslisten/config/config.php';
 if(file_exists($config_file)){
 	$own_constants = $this->get_constants_from_config(file($config_file), 'fortfuehrungslisten');
-	foreach($constants as &$constant){
-		if(array_key_exists($constant['name'], $own_constants)){
-			$constant['value'] = $own_constants[$constant['name']]['value'];
-			$constant['saved'] = 1;
+	foreach($constants as &$const){
+		if(array_key_exists($const['name'], $own_constants)){
+			$const['value'] = $own_constants[$const['name']]['value'];
+			$const['saved'] = 1;
 		}
 	}
 }

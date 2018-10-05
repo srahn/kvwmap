@@ -143,9 +143,9 @@ function message(messages, t_visible, t_fade, css_top) {
 
 	t_visible   = (typeof t_visible   !== 'undefined') ? t_visible   : 1000;		// Zeit, die die Message-Box komplett zu sehen ist
 	t_fade   = (typeof t_fade   !== 'undefined') ? t_fade   : 2000;							// Dauer des Fadings
-	css_top  = (typeof css_top  !== 'undefined') ? css_top  : '20%';
-
-	msgBoxDiv.css('top', css_top);
+	
+	if(typeof css_top  !== 'undefined')msgBoxDiv.css('top', css_top);
+	
 	types = {
 		'notice': {
 			'description': 'Erfolg',

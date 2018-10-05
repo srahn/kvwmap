@@ -221,7 +221,7 @@ class administration{
 	}
 	
 	function get_config_params(){
-		$sql = "SELECT * FROM config ORDER BY `group`";
+		$sql = "SELECT * FROM config ORDER BY `group`, name";
 		$result=$this->database->execSQL($sql,0, 0);
     if($result[0]) {
       #echo '<br>Fehler bei der Abfrage der Tabelle config.<br>';
@@ -273,8 +273,9 @@ class administration{
 		foreach($this->config_params as $param){
 			if($param['plugin'] == $plugin AND $param['real_value'] != ''){
 				if($param['description'] != ''){
+					$param['description'] = rtrim($param['description']);
 					$lines = explode("\n", $param['description']);
-					for($l = 0; $l < count($lines)-1; $l++){
+					for($l = 0; $l < count($lines); $l++){
 						$config.= "# ".$lines[$l]."\n";
 					}
 				}
@@ -284,7 +285,7 @@ class administration{
 				else{
 					if($param['type'] == 'string' OR $param['type'] == 'password')$quote = "'";
 					else $quote = '';
-					$config.= "define(".$param['name'].", ".$quote.$param['real_value'].$quote.");\n\n";
+					$config.= "define('".$param['name']."', ".$quote.$param['real_value'].$quote.");\n\n";
 				}
 			}
 		}

@@ -323,13 +323,13 @@ class Nachweis {
 			}
 			if(in_array('blattnr', $nachweis_unique_attributes))$test_blattnr = $Blattnr;			
 			if(NACHWEIS_PRIMARY_ATTRIBUTE == 'stammnr'){
-				$nachweise = $this->getNachweise(NULL,NULL,$gemarkung,$stammnr,NULL,$test_fortfuehrung,$test_art,NULL,'indiv_nr',NULL,NULL,NULL,NULL,NULL,NULL, $flur, true,NULL,NULL, $test_blattnr);
+				$nachweise = $this->getNachweise(NULL,NULL,$gemarkung,$stammnr,NULL,$test_fortfuehrung,$test_art,NULL,'multibleIDs',NULL,NULL,NULL,NULL,NULL,NULL, $flur, true,NULL,NULL, $test_blattnr);
 			}
 			else{
-				$nachweise = $this->getNachweise(NULL,NULL,$gemarkung,NULL,$rissnummer,$test_fortfuehrung,$test_art,NULL,'indiv_nr',NULL,NULL,NULL,NULL,NULL,NULL, $flur, true,NULL,NULL, $test_blattnr);
+				$nachweise = $this->getNachweise(NULL,NULL,$gemarkung,NULL,$rissnummer,$test_fortfuehrung,$test_art,NULL,'multibleIDs',NULL,NULL,NULL,NULL,NULL,NULL, $flur, true,NULL,NULL, $test_blattnr);
 			}
 			if(($this->Dokumente[0]['id'] != '' AND $id != $this->Dokumente[0]['id']) OR ($this->Dokumente[1]['id'] != '' AND $id != $this->Dokumente[1]['id'])){
-				$errmsg.='Es existiert bereits ein Nachweis mit diesen Parametern.\n';
+				$errmsg.='Es existiert bereits ein Nachweis mit diesen Parametern. ';
 			}
 		}
 		
@@ -878,8 +878,8 @@ class Nachweis {
 				$sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id"; 
 				$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n2d.dokumentart_id = d.id";
 				$sql.=" LEFT JOIN nachweisverwaltung.n_hauptdokumentarten h ON h.id = n.art";
-        $sql.=" WHERE ";
-				if($gueltigkeit != NULL)$sql.=" gueltigkeit = ".$gueltigkeit." AND ";
+        $sql.=" WHERE true ";
+				if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit." AND ";
 				if($geprueft != NULL)$sql.=" AND geprueft = ".$geprueft;
         if ($idselected[0]!=0) {
           $sql.=" n.id IN ('".$idselected[0]."'";

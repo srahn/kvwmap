@@ -80,7 +80,7 @@ function vorlage(){
 }
 
 function set_ref_geom(){
-	if(document.GUI.ref_geom.value == ''){
+	if(document.getElementById('updateGeomLink').style.display != ''){
 		document.getElementById('updateGeomLink').style.display = '';
 		update_selection(document.getElementsByName('markhauptart[]')[2]);
 	}

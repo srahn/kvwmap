@@ -257,7 +257,7 @@ $j=0;
 				&nbsp;&nbsp;<?php echo $strAttributeSelection; ?>:
 				<div class="flexcontainer2"><?
 					for($s = 0; $s < 4; $s++){ ?>
-						<div style="float: left; padding: 4px; min-width:20%;"><?
+						<div style="float: left; padding: 4px;"><?
 							for($i = 0; $i < $floor+$r; $i++) {
 								if($this->data_import_export->attributes['group'][$j] != '') $groupnames = true;
 								if($this->data_import_export->attributes['form_element_type'][$j] == 'Dokument'){$document_attributes = true; $document_ids[] = $j;} ?>
@@ -327,6 +327,8 @@ $j=0;
   </tr>
   <tr<?php if ($simple OR $this->data_import_export->attributes['the_geom'] == '') echo ' style="display: none;"'; ?>>
     <td align="right">
+			<input type="checkbox" name="within" value="1" <? if($this->formvars['within'] == 1)echo 'checked'; ?>>
+			<? echo $strWithin; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 			<input type="checkbox" name="singlegeom" value="true" <? if($this->formvars['singlegeom'])echo 'checked="true"'; ?>>
 			<? echo $strSingleGeoms; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 			<? echo $this->strUseGeometryOf; ?>:
