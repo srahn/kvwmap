@@ -50,7 +50,7 @@ class Nachweis {
 	function check_documentpath($old_dataset){		
 		$ret=$this->getNachweise($old_dataset['id'],'','','','','','','','bySingleID','','');
 		if ($ret=='') {
-			$this->Dokumente[0]['artname'] = ArtCode2Abk($this->Dokumente[0]['art']);
+			$this->Dokumente[0]['artname'] = strtolower($this->hauptarten[$this->Dokumente[0]['art']]['abkuerzung']);
 			$this->Dokumente[0]['Bilddatei_name'] = $this->Dokumente[0]['link_datei'];
 			$this->Dokumente[0]['Blattnr'] = $this->Dokumente[0]['blattnummer'];
 			$formvars['zieldateiname']=$this->getZielDateiName($this->Dokumente[0]);
@@ -888,6 +888,10 @@ class Nachweis {
           }
           $sql.=")";
         }
+				if($flur_thematisch != ''){
+					if($flur == '')	$sql.=" AND substr(n.flurid::text, 1, 6) = '".$gemarkung."'";
+					else $sql.=" AND n.flurid='".$gemarkung.str_pad($flur,3,'0',STR_PAD_LEFT)."'";
+				}				
         if($stammnr!=''){
           $sql.=" AND n.stammnr='".$stammnr."'";
         }
@@ -897,6 +901,9 @@ class Nachweis {
       	if($fortf!=''){
           $sql.=" AND n.fortfuehrung=".(int)$fortf;
         }
+				if($blattnr!=''){
+					$sql.=" AND n.blattnummer='".$blattnr."'";
+				}				
 				if(!empty($hauptart)){
 					if($hauptart[0] == '2222' AND $idselected[0] != ''){
 						$sql.=" AND n.id IN (".implode(',', $idselected).")";

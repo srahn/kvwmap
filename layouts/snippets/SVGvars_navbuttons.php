@@ -7,5 +7,6 @@ $SVGvars_navbuttons .= zoomall($strZoomToFullExtent);
 $SVGvars_navbuttons .= recentre($strPan);
 $SVGvars_navbuttons .= zoomin($strZoomIn);
 $SVGvars_navbuttons .= zoomout($strZoomOut);
+$SVGvars_navbuttons .= ppquery($strInfo);
 
 ?>

@@ -12534,20 +12534,23 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$center_y = ($this->user->rolle->oGeorefExt->maxy + $this->user->rolle->oGeorefExt->miny) / 2;
 		if($this->user->rolle->epsg_code == 4326){$unit = MS_DD;} else {$unit = MS_METERS;}
 		$md = ($this->user->rolle->nImageWidth-1)/(96 * InchesPerUnit($unit, $center_y));
-		$gd = $this->user->rolle->oGeorefExt->maxx - $this->user->rolle->oGeorefExt->minx;
-		$this->map_scaledenom = round($gd/$md);
+		$width = $this->user->rolle->nImageWidth;
+		$height = $this->user->rolle->nImageHeight;
+		$extentwidth = $this->user->rolle->oGeorefExt->maxx - $this->user->rolle->oGeorefExt->minx;
+		$extentheight = $this->user->rolle->oGeorefExt->maxy - $this->user->rolle->oGeorefExt->miny;
+		$this->map_scaledenom = round($extentwidth/$md);
+		$ratio_image = round($width/$height, 5);
+		$ratio_extent = round($extentwidth/$extentheight, 5);
+		$pixwidth=$extentwidth/$width * $ratio_image/$ratio_extent;
+		$pixheight=$extentheight/$height;
+		$this->user->rolle->pixsize=($pixwidth+$pixheight)/2;		# pixsize neu berechnen, da die Kartenabfrage aus einer Fachschale mit reduzierter Kartenbreite gemacht worden sein kann
+		
     # Abfragebereich berechnen
 		if($this->formvars['querypolygon'] != ''){
 			$rect = $this->formvars['querypolygon'];
 		}
 		else{
-			if($this->formvars['rectminx'] != ''){			// ?????????
-				$rect = ms_newRectObj();										// ?????????
-				$rect->setextent($this->formvars['rectminx'],$this->formvars['rectminy'],$this->formvars['rectmaxx'],$this->formvars['rectmaxy']);		// ?????????
-			}
-			else{
-				$rect = $this->create_query_rect($this->formvars['INPUT_COORD']);
-			}
+			$rect = $this->create_query_rect($this->formvars['INPUT_COORD']);
 		}
     if($this->show_query_tooltip == true){
       $this->tooltip_query($rect);
@@ -12601,6 +12604,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
               if ($layerset[$i]['template']!='') {
                 $layer->set('template',$layerset[$i]['template']);
               }
+              else {
+                $layer->set('template', ' ');		# ohne Template kann der Layer über den Mapserver nicht abgefragt werden
+              }
               $projFROM = ms_newprojectionobj("init=epsg:".$this->user->rolle->epsg_code);
     					$projTO = ms_newprojectionobj("init=epsg:".$layerset[$i]['epsg_code']);
 							$rect2=ms_newRectObj();
@@ -12625,6 +12631,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 										$layerset[$i]['shape'][$j][$key] = utf8_encode($value);
 										$layerset[$i]['attributes']['name'][$count] = $key;
 										$layerset[$i]['attributes']['privileg'][$count] = 0;
+										$layerset[$i]['attributes']['visible'][$count] = true;
 									}
 									$count++;
 								}

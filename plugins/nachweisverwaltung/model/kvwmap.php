@@ -10,6 +10,7 @@
 		switch(true) {
 			case ($fired == 'AFTER' AND $event == 'UPDATE') : {
 				$nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
+				$nachweis->hauptarten = $nachweis->getHauptDokumentarten();
 				$nachweis->check_documentpath($old_dataset);
 			} break;
 
