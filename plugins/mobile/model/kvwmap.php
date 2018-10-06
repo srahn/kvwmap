@@ -20,6 +20,7 @@
 	* where sync enabled layer are in
 	*/
 	$GUI->mobile_get_stellen = function() {
+		global $GUI;
 		$sql = "
 			SELECT DISTINCT
 				s.ID,
@@ -62,6 +63,7 @@
 	* Frage den Layer mit selected_layer_id und die dazugehörigen Attributdaten ab
 	*/
 	$GUI->mobile_get_layers = function() {
+		global $GUI;
 		# ToDo get more than only the layer with selected_layer_id
 		$layers = $GUI->Stelle->getLayers('');
 		$mobile_layers = array();
@@ -120,6 +122,7 @@
 	};
 
 	$GUI->mobile_sync = function() {
+		global $GUI;
 		include_once(CLASSPATH . 'synchronisation.php');
 		# Prüfe ob folgende Parameter mit gültigen Werten übergeben wurden.
 		# $selected_layer_id (existiert und ist in mysql-Datenbank?)
@@ -281,6 +284,7 @@
 	};
 
 	$GUI->mobile_prepare_layer_sync = function($layerdb, $id, $sync) {
+		global $GUI;
 		include_once(CLASSPATH . 'Layer.php');
 		$layer = Layer::find($GUI, 'Layer_ID = ' . $id)[0];
 
@@ -310,6 +314,7 @@
 	};
 
 	$GUI->mobile_drop_layer_sync = function($layerdb, $layer) {
+		global $GUI;
 		$sql = "
 			DROP TRIGGER IF EXISTS create_" . $layer->get('maintable') . "_insert_delta_trigger ON " . $layer->get('schema') . "." . $layer->get('maintable') . ";
 			DROP FUNCTION IF EXISTS " . $layer->get('schema') . ".create_" . $layer->get('maintable') . "_insert_delta();
@@ -332,6 +337,7 @@
 	};
 
 	$GUI->mobile_create_layer_sync = function($layerdb, $layer) {
+		global $GUI;
 		# create table for deltas
 		$sql = "
 			CREATE TABLE " . $layer->get('schema') . "." . $layer->get('maintable') . "_deltas (
@@ -524,6 +530,7 @@
 	};
 
 	$GUI->mobile_upload_image = function($layer_id, $files) {
+		global $GUI;
 		# Bestimme den Uploadpfad des Layers
 		if (intval($layer_id) == 0) {
 			return array(
@@ -572,6 +579,7 @@
 	};
 
 	$GUI->mobile_delete_images = function($layer_id, $images) {
+		global $GUI;
 		# Bestimme den Uploadpfad des Layers
 		if (intval($layer_id) == 0) {
 			return array(
