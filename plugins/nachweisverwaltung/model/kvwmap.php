@@ -182,10 +182,12 @@
 				$GUI->scaleMap($GUI->formvars['nScale']);
 			}
       elseif($nachweis->document['wkt_umring'] != ''){
-        # Zoom zum Polygon des Dokumentes
-        $GUI->zoomToNachweis($nachweis,10);
-        $GUI->user->rolle->saveSettings($GUI->map->extent);
-        $GUI->user->rolle->readSettings();
+				if($GUI->formvars['neuladen'] == ''){
+					# Zoom zum Polygon des Dokumentes
+					$GUI->zoomToNachweis($nachweis,10);
+					$GUI->user->rolle->saveSettings($GUI->map->extent);
+					$GUI->user->rolle->readSettings();
+				}
         # Übernahme des Nachweisumrings aus der PostGIS-Datenbank
         $GUI->formvars['newpath'] = transformCoordsSVG($nachweis->document['svg_umring']);
         $GUI->formvars['newpathwkt'] = $nachweis->document['wkt_umring'];
