@@ -63,7 +63,7 @@
 				}
         if($mit_uebersichten)$result = exec(ZIP_PATH.' -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr);		# gesamten Rechercheordner packen
 				else{
-					$result = exec(ZIP_PATH.' -j -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr.'/Nachweise');		# Ordnerstruktur verwerfen und nur Nachweise
+					$result = exec(ZIP_PATH.' -j -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.'.zip/Nachweise '.'./'.$antragsnr.'/Nachweise');		# Ordnerstruktur verwerfen und nur Nachweise
 					$result = exec(ZIP_PATH.' -j -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr.'/Protokolle');		# und das Übergabeprotokoll packen
 				}
       }
@@ -201,7 +201,7 @@
       # Zuweisen der Werte des Dokumentes zum Formular
       $GUI->formvars['flurid']=$nachweis->document['flurid'];
       $GUI->formvars['stammnr']=$nachweis->document['stammnr'];
-      $GUI->formvars['art']=$nachweis->document['art'];
+      $GUI->formvars['hauptart']=$nachweis->document['art'];
       $GUI->formvars['Blattnr']=$nachweis->document['blattnummer'];
       $GUI->formvars['datum']=$nachweis->document['datum'];
       $GUI->formvars['VermStelle']=$nachweis->document['vermstelle'];
@@ -352,9 +352,10 @@
 		$sql.='sdatum="'.$sdatum.'",';
 		$sql.='sdatum2="'.$sdatum2.'",';
 		if ($svermstelle!='') { $sql.='sVermStelle='.$svermstelle.','; }else{$sql.='sVermStelle= NULL,' ;}
-		$sql.='flur_thematisch='.$flur_thematisch.',';
+		$sql.='flur_thematisch="'.$flur_thematisch.'",';
 		$sql .= 'user_id = '.$user_id;
 		$sql.=' WHERE user_id='.$user_id.' AND stelle_id='.$stelle_id;
+		#echo $sql;
 		$GUI->debug->write("<p>file:users.php class:rolle->setNachweisSuchparameter - Setzen der aktuellen Parameter für die Nachweissuche",4);
 		$GUI->database->execSQL($sql,4, 1);
 		return 1;
@@ -1033,6 +1034,7 @@
           # Speicherung der Bilddatei erfolgreich, Eintragen in Datenbank
           $GUI->nachweis->database->begintransaction();
           $ret=$GUI->nachweis->eintragenNeuesDokument($GUI->formvars['datum'],$GUI->formvars['flurid'],$GUI->formvars['VermStelle'], $GUI->formvars['hauptart'], $GUI->formvars['unterart_'.$GUI->formvars['hauptart']], $GUI->formvars['gueltigkeit'], $GUI->formvars['geprueft'], $GUI->formvars['stammnr'],$GUI->formvars['Blattformat'],$GUI->formvars['Blattnr'],$GUI->formvars['rissnummer'],$GUI->formvars['fortfuehrung'],$GUI->formvars['bemerkungen'],$GUI->formvars['bemerkungen_intern'],$GUI->formvars['artname']."/".$GUI->formvars['zieldateiname'],$GUI->formvars['umring'], $GUI->user);
+					$GUI->formvars['unterart'] = $GUI->formvars['unterart_'.$GUI->formvars['hauptart']];
           if ($ret[0]) {
             $GUI->nachweis->database->rollbacktransaction();
             $errmsg=$ret[1];
@@ -1086,7 +1088,7 @@
     $GUI->formvars['flurid']=$nachweis->document['flurid'];
     $GUI->formvars['stammnr']=$nachweis->document['stammnr'];
     $GUI->formvars['rissnummer']=$nachweis->document['rissnummer'];
-    $GUI->formvars['art']=$nachweis->document['art'];
+    $GUI->formvars['hauptart']=$nachweis->document['art'];
     $GUI->formvars['Blattnr']=$nachweis->document['blattnummer'];
     $GUI->formvars['datum']=$nachweis->document['datum'];
     $GUI->formvars['VermStelle']=$nachweis->document['vermstelle'];
@@ -1097,7 +1099,7 @@
     $GUI->formvars['Gemarkung']=substr($GUI->formvars['flurid'],0,6);
     $GUI->formvars['Flur']=intval(substr($GUI->formvars['flurid'],6,9));
     $GUI->formvars['Bilddatei']=NACHWEISDOCPATH.$nachweis->document['link_datei'];
-    $GUI->formvars['andere_art']=$nachweis->document['andere_art'];
+    $GUI->formvars['unterart']=$nachweis->document['unterart'];
 		$GUI->formvars['fortfuehrung']=$nachweis->document['fortfuehrung'];
 		$GUI->formvars['bemerkungen']=$nachweis->document['bemerkungen'];
 		$GUI->formvars['bemerkungen_intern']=$nachweis->document['bemerkungen_intern'];

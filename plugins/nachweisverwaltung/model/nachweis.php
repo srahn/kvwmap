@@ -93,7 +93,7 @@ class Nachweis {
 		$io->ogr2ogr_export($sql, 'GeoJSON', $pfad.'GeoJSON/gesamtpolygon.json', $this->database);
 		$io->ogr2ogr_export($sql, 'GML', $pfad.'GML/gesamtpolygon.xml', $this->database);
 		$io->ogr2ogr_export($sql, 'DXF', $pfad.'DXF/gesamtpolygon.dxf', $this->database);
-		$io->create_uko($this->database, $temp_table, 'the_geom', EPSGCODE, $pfad.'UKO/gesamtpolygon.uko');
+		$io->create_uko($this->database, $sql, 'the_geom', EPSGCODE, $pfad.'UKO/gesamtpolygon.uko');
 		# temp. Tabelle wieder löschen
 		$sql = 'DROP TABLE '.$temp_table;
 		$ret = $this->database->execSQL($sql,4, 0);
@@ -669,34 +669,17 @@ class Nachweis {
     $sql.=" WHERE id = ".$id;
     #echo $sql;
     $ret=$this->database->execSQL($sql,4, 1);
-		if($art != NULL){
-			if($art != '111'){
-				$sql = "DELETE FROM nachweisverwaltung.n_nachweise2dokumentarten WHERE nachweis_id = ".$id;
-				#echo $sql;
-				$ret=$this->database->execSQL($sql,4, 1);	
-			}
-			else{
-				if($unterart != ''){
-					$sql = "SELECT dokumentart_id FROM nachweisverwaltung.n_nachweise2dokumentarten WHERE nachweis_id = ".$id.";";
-					$query=@pg_query($this->database->dbConn,$sql);
-					$rs=pg_fetch_array($query);
-					if ($rs[0]!=''){
-						$sql = "UPDATE nachweisverwaltung.n_nachweise2dokumentarten SET dokumentart_id = ".$unterart." WHERE nachweis_id = ".$id.";";
-						#echo $sql;
-						$ret=$this->database->execSQL($sql,4, 1);
-					}
-					else{
-						$sql = "INSERT INTO nachweisverwaltung.n_nachweise2dokumentarten";
-						$sql .= " SELECT id, ".$unterart." FROM nachweisverwaltung.n_nachweise WHERE id = ".$id;
-						#echo $sql;
-						$ret=$this->database->execSQL($sql,4, 1);	
-					}	
-				}
-			}
-			if ($ret[0]) {
-				# Fehler beim Eintragen in Datenbank
-				$ret[1]='Auf Grund eines Datenbankfehlers konnte das Dokument nicht aktualisiert werden!'.$ret[1];
-			}
+		$sql = "DELETE FROM nachweisverwaltung.n_nachweise2dokumentarten WHERE nachweis_id = ".$id;
+		#echo $sql;
+		$ret=$this->database->execSQL($sql,4, 1);	
+		if($unterart != ''){
+			$sql = "INSERT INTO nachweisverwaltung.n_nachweise2dokumentarten VALUES (".$id.", ".$unterart.")";
+			#echo $sql;
+			$ret=$this->database->execSQL($sql,4, 1);	
+		}
+		if ($ret[0]){
+			# Fehler beim Eintragen in Datenbank
+			$ret[1]='Auf Grund eines Datenbankfehlers konnte das Dokument nicht aktualisiert werden!'.$ret[1];
 		}
     return $ret; 
   }
@@ -882,7 +865,7 @@ class Nachweis {
 				if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit." AND ";
 				if($geprueft != NULL)$sql.=" AND geprueft = ".$geprueft;
         if ($idselected[0]!=0) {
-          $sql.=" n.id IN ('".$idselected[0]."'";
+          $sql.="AND n.id IN ('".$idselected[0]."'";
           for ($i=1;$i<count($idselected);$i++) {
             $sql.=",'".$idselected[$i]."'";
           }

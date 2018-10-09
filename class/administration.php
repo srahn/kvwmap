@@ -271,7 +271,7 @@ class administration{
 		$this->get_config_params();
 		$config = '';
 		foreach($this->config_params as $param){
-			if($param['plugin'] == $plugin AND $param['real_value'] != ''){
+			if($param['plugin'] == $plugin){
 				if($param['description'] != ''){
 					$param['description'] = rtrim($param['description']);
 					$lines = explode("\n", $param['description']);
