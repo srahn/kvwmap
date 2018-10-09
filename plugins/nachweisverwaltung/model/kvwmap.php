@@ -28,7 +28,7 @@
     $GUI->output();
   };
 	
-	$GUI->DokumenteOrdnerPacken = function($mit_uebersichten) use ($GUI){
+	$GUI->DokumenteOrdnerPacken = function($light) use ($GUI){
     if ($GUI->formvars['antr_selected']!=''){			
 			$explosion = explode('~', $GUI->formvars['antr_selected']);
 			$antr_selected = $explosion[0];
@@ -49,8 +49,8 @@
 				$timestamp = date('Y-m-d_H-i-s',time());
 				if($GUI->nachweis->Dokumente != NULL){		# wenn es Nachweise zu diesem Auftrag gibt
 					$GUI->erzeugenUebergabeprotokollNachweise(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Uebergabeprotokoll.pdf');
-					if($mit_uebersichten){
-						$GUI->erzeugenUebersicht_HTML(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Uebersicht.htm');
+					$GUI->erzeugenUebersicht_HTML(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Uebersicht.htm', $light);
+					if(!$light){
 						$GUI->erzeugenUebersicht_CSV(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Uebersicht.csv');
 						#$GUI->erzeugenZuordnungFlst_CSV(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/');
 						$GUI->create_Recherche_UKO(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/');
@@ -61,10 +61,13 @@
 					$uebergabe_logpath = $GUI->antrag->create_uebergabe_logpath($GUI->Stelle->Bezeichnung).'/'.$antr_selected.'_'.$timestamp.'.pdf';
 					$GUI->erzeugenUebergabeprotokollNachweise($uebergabe_logpath, true);
 				}
-        if($mit_uebersichten)$result = exec(ZIP_PATH.' -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr);		# gesamten Rechercheordner packen
+        if(!$light)$result = exec(ZIP_PATH.' -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr);		# gesamten Rechercheordner packen
 				else{
-					$result = exec(ZIP_PATH.' -j -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.'.zip/Nachweise '.'./'.$antragsnr.'/Nachweise');		# Ordnerstruktur verwerfen und nur Nachweise
-					$result = exec(ZIP_PATH.' -j -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr.'/Protokolle');		# und das Übergabeprotokoll packen
+					$result = exec(ZIP_PATH.' -j -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr.'/Nachweise');		# Nachweise-Ordnerstruktur verwerfen und nur Nachweise
+					$result = exec(ZIP_PATH.' '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr.'/Protokolle/Uebergabeprotokoll.pdf');		# und das Übergabeprotokoll 
+					$result = exec(ZIP_PATH.' '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr.'/Protokolle/Uebersicht.htm');		# und Uebersicht.htm
+					$result = exec(ZIP_PATH.' -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr.'/Vorschaubilder');		# und Vorschaubilder 
+					$result = exec(ZIP_PATH.' -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr.'/Einmessungsskizzen');		# und, wenn vorhanden, die Einmessungsskizzen packen
 				}
       }
     }
@@ -624,7 +627,7 @@
 		fclose($fp);
 	};
   
-	$GUI->erzeugenUebersicht_HTML = function($path) use ($GUI){
+	$GUI->erzeugenUebersicht_HTML = function($path, $light) use ($GUI){
 		$html = "
 <html>
 	<head>
@@ -790,8 +793,10 @@
 							if(key == 'dokument_path' && value != null){
 								path_parts = value.split('/');
 								filename = path_parts[path_parts.length-1];
-								a = document.createElement('a');
-								a.href = value;
+								a = document.createElement('a');";
+								if($light)$html.="a.href = '../../'+filename;";
+								else $html.= "a.href = value;";
+								$html.="
 								a.target = '_blank';
 								a.setAttribute('onmouseover', \"showPreview('\"+filename+\"')\");
 								a.onmouseout = function(){hidePreview()};
