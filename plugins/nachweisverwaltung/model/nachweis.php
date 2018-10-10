@@ -877,7 +877,7 @@ class Nachweis {
         $sql.=" WHERE true ";
 				if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit." AND ";
         if ($idselected[0]!=0) {
-          $sql.=" n.id IN ('".$idselected[0]."'";
+          $sql.=" AND n.id IN ('".$idselected[0]."'";
           for ($i=1;$i<count($idselected);$i++) {
             $sql.=",'".$idselected[$i]."'";
           }
