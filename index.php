@@ -11,7 +11,7 @@ include('config.php');
 for($i = 0; $i < count($kvwmap_plugins); $i++){
 	if(file_exists(PLUGINS.$kvwmap_plugins[$i].'/config/config.php'))include(PLUGINS.$kvwmap_plugins[$i].'/config/config.php');
 }
-
+if(!defined('EPSGCODE_ALKIS'))define('EPSGCODE_ALKIS', 0);	// EPSGCODE_ALKIS ist nur bei Verwendung des Plugin alkis definiert
 include(CLASSPATH . 'log.php');
 
 if (DEBUG_LEVEL > 0) $debug = new Debugger(DEBUGFILE);	# öffnen der Debug-log-datei
