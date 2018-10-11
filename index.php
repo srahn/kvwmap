@@ -1,20 +1,32 @@
 <?php
 header('Content-Type: text/html; charset=utf-8');
+
 if (!USE_EXISTING_SESSION) {
 	session_set_cookie_params(0, $_SERVER['CONTEXT_PREFIX']);
 }
+
 session_start();
 
 include('credentials.php');
 include('config.php');
+
 # Laden der Plugins config.phps
-for($i = 0; $i < count($kvwmap_plugins); $i++){
-	if(file_exists(PLUGINS.$kvwmap_plugins[$i].'/config/config.php'))include(PLUGINS.$kvwmap_plugins[$i].'/config/config.php');
+for ($i = 0; $i < count($kvwmap_plugins); $i++) {
+	if (file_exists(PLUGINS.$kvwmap_plugins[$i] . '/config/config.php')) {
+		include(PLUGINS.$kvwmap_plugins[$i].'/config/config.php');
+	}
 }
-if(!defined('EPSGCODE_ALKIS'))define('EPSGCODE_ALKIS', 0);	// EPSGCODE_ALKIS ist nur bei Verwendung des Plugin alkis definiert
+
+if (!defined('EPSGCODE_ALKIS')) {
+	define('EPSGCODE_ALKIS', 0);	// EPSGCODE_ALKIS ist nur bei Verwendung des Plugin alkis definiert
+}
+
 include(CLASSPATH . 'log.php');
 
-if (DEBUG_LEVEL > 0) $debug = new Debugger(DEBUGFILE);	# öffnen der Debug-log-datei
+if (DEBUG_LEVEL > 0) {
+	$debug = new Debugger(DEBUGFILE);	# öffnen der Debug-log-datei
+}
+
 # Öffnen der Log-Dateien. Derzeit werden in den Log-Dateien nur die SQL-Statements gespeichert, die über execSQL in den Klassen mysql und postgres ausgeführt werden.
 if (LOG_LEVEL > 0) {
  $log_mysql = new LogFile(LOGFILE_MYSQL,'text','Log-Datei MySQL', '#------v: ' . date("Y:m:d H:i:s", time()));

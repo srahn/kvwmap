@@ -44,68 +44,75 @@
 ##############
 class GUI {
 
-  var $layout;
-  var $style;
-  var $mime_type;
-  var $menue;
-  var $pdf;
-  var $addressliste;
-  var $debug;
-  var $dbConn;
-  var $flst;
-  var $formvars;
-  var $legende;
-  var $map;
-  var $mapDB;
-  var $img;
-  var $FormObject;
-  var $StellenForm;
-  var $Fehlermeldung;
+	var $layout;
+	var $style;
+	var $mime_type;
+	var $menue;
+	var $pdf;
+	var $addressliste;
+	var $debug;
+	var $dbConn;
+	var $flst;
+	var $formvars;
+	var $legende;
+	var $map;
+	var $mapDB;
+	var $img;
+	var $FormObject;
+	var $StellenForm;
+	var $Fehlermeldung;
 	var $messages = array();
-  var $Hinweis;
-  var $Stelle;
-  var $ALB;
-  var $activeLayer;
-  var $nImageWidth;
-  var $nImageHeight;
-  var $user;
-  var $qlayerset;
+	var $Hinweis;
+	var $Stelle;
+	var $ALB;
+	var $activeLayer;
+	var $nImageWidth;
+	var $nImageHeight;
+	var $user;
+	var $qlayerset;
 	var $scaleUnitSwitchScale;
-  var $map_scaledenom;
-  var $map_factor='';
+	var $map_scaledenom;
+	var $map_factor='';
 	var $formatter;
 	var $success = true;
 
+	# Konstruktor
+	function GUI($main, $style, $mime_type) {
+		# Debugdatei setzen
+		global $debug;
+		$this->debug = $debug;
 
-  # Konstruktor
-  function GUI($main, $style, $mime_type) {
-    # Debugdatei setzen
-    global $debug;
-    $this->debug=$debug;
-    # Logdatei für Mysql setzen
-    global $log_mysql;
-    $this->log_mysql=$log_mysql;
-    # Logdatei für PostgreSQL setzten
-    global $log_postgres;
-    $this->log_postgres=$log_postgres;
+		# Logdatei für Mysql setzen
+		global $log_mysql;
+		$this->log_mysql = $log_mysql;
+
+		# Logdatei für PostgreSQL setzten
+		global $log_postgres;
+		$this->log_postgres = $log_postgres;
 
 		global $log_loginfail;
 		$this->log_loginfail = $log_loginfail;
 
-    # layout Templatedatei zur Anzeige der Daten
-    if ($main!="") $this->main=$main;
-    # Stylesheetdatei
-    if (isset($style)) $this->style=$style;
-    # mime_type html, pdf
-    if (isset ($mime_type)) $this->mime_type=$mime_type;
+		# layout Templatedatei zur Anzeige der Daten
+		if ($main != "") {
+			$this->main = $main;
+		}
+
+		# Stylesheetdatei
+		if (isset($style)) {
+			$this->style = $style;
+		}
+
+		# mime_type html, pdf
+		if (isset ($mime_type)) $this->mime_type=$mime_type;
 		$this->scaleUnitSwitchScale = 239210;
 		$this->trigger_functions = array();
-  }
+	}
 
 	public function __call($method, $arguments){
-		if(isset($this->{$method}) && is_callable($this->{$method})){
+		if (isset($this->{$method}) && is_callable($this->{$method})) {
 			return call_user_func_array($this->{$method}, $arguments);
-    }
+		}
 	}
 
 	function login() {
@@ -7269,9 +7276,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		}
   }
 
-  function LayerAendern(){
+	function LayerAendern(){
 		global $supportedLanguages;
-    $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$this->user->rolle->readSettings();
 
 		# trim attributes to prevent big surprise if layer not work as expected
@@ -7279,23 +7286,23 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->formvars['maintable'] = trim($this->formvars['maintable']);
 		$this->formvars['schema'] = trim($this->formvars['schema']);
 
-    $mapDB->updateLayer($this->formvars);
-    $old_layer_id = $this->formvars['selected_layer_id'];
-    if($this->formvars['id'] != ''){
-      $this->formvars['selected_layer_id'] = $this->formvars['id'];
-    }
+		$mapDB->updateLayer($this->formvars);
+		$old_layer_id = $this->formvars['selected_layer_id'];
+		if ($this->formvars['id'] != '') {
+			$this->formvars['selected_layer_id'] = $this->formvars['id'];
+		}
 
-		if($this->formvars['connectiontype'] == 6){
+		if ($this->formvars['connectiontype'] == 6){
 			if($this->formvars['connection'] != ''){
 				if($this->formvars['pfad'] != ''){
 					#---------- Speichern der Layerattribute -------------------
-			    $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-			    $layerdb->setClientEncoding();
-			    $path = strip_pg_escape_string($this->formvars['pfad']);
+					$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+					$layerdb->setClientEncoding();
+					$path = strip_pg_escape_string($this->formvars['pfad']);
 					$all_layer_params = $mapDB->get_all_layer_params_default_values();
-			    $attributes = $mapDB->load_attributes($layerdb,	replace_params($path,	$all_layer_params));
-			    $mapDB->save_postgis_attributes($this->formvars['selected_layer_id'], $attributes, $this->formvars['maintable'], $this->formvars['schema']);
-			    #---------- Speichern der Layerattribute -------------------
+					$attributes = $mapDB->load_attributes($layerdb,	replace_params($path,	$all_layer_params));
+					$mapDB->save_postgis_attributes($this->formvars['selected_layer_id'], $attributes, $this->formvars['maintable'], $this->formvars['schema']);
+					#---------- Speichern der Layerattribute -------------------
 					if ($this->plugin_loaded('mobile')) {
 						$this->mobile_prepare_layer_sync(
 							$layerdb,
