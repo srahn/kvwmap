@@ -17,6 +17,10 @@ for ($i = 0; $i < count($kvwmap_plugins); $i++) {
 	}
 }
 
+if (!defined('EPSGCODE_ALKIS')) {
+	define('EPSGCODE_ALKIS', 0);	// EPSGCODE_ALKIS ist nur bei Verwendung des Plugin alkis definiert
+}
+
 include(CLASSPATH . 'log.php');
 
 if (DEBUG_LEVEL > 0) {
@@ -117,24 +121,7 @@ $fast_loading_cases = array_merge($spatial_cases, $non_spatial_cases);
 if(in_array($go, $fast_loading_cases))define(FAST_CASE, true);else define(FAST_CASE, false);
 
 if(CASE_COMPRESS)	include(CLASSPATH.'case_compressor.php');
-/*
-if(!$_SESSION['angemeldet'] or !empty($formvars['username'])){
-	$msg .= '<br>Nicht angemeldet';
-	include(CLASSPATH . 'mysql.php');
-	$userDb = new database();
-	$userDb->host = MYSQL_HOST;
-	$userDb->user = MYSQL_USER;
-	$userDb->passwd = MYSQL_PASSWORD;
-	$userDb->dbName = MYSQL_DBNAME;
-	header('logout: true');		// damit ajax-Requests das auch mitkriegen
-	if (file_exists(LAYOUTPATH . 'snippets/' . LOGIN)) {
-		include(LAYOUTPATH . 'snippets/' . LOGIN);
-	}
-	else {
-		include(LAYOUTPATH . 'snippets/login.php');
-	}
-}
-*/
+
 function include_($filename){
 	if(CASE_COMPRESS AND FAST_CASE){		// ein fast-case und er soll komprimiert werden
 		$filename = case_compressor::inject($filename);
@@ -539,25 +526,6 @@ function go_switch($go){
 				$GUI->output();
 			} break;
 
-/*
-			case 'logout' : {
-				session_start();
-				$_SESSION = array();
-				if (ini_get("session.use_cookies")){
-					$params = session_get_cookie_params();
-					setcookie(session_name(), '', time() - 42000, $params["path"], $params["domain"], $params["secure"], $params["httponly"]);
-				}
-				session_destroy();
-				$locationStr = 'index.php' . ($_REQUEST['gast'] != '' ? '?gast=' . $_REQUEST['gast'] : '');
-				if (isset($newPassword)) {
-					$locationStr.='?newPassword='.$newPassword;
-					$locationStr.='&msg='.$GUI->Fehlermeldung;
-					$locationStr.='&passwort='.$passwort;
-					$locationStr.='&username='.$username;
-				}
-				header('Location: ' . $locationStr);
-			} break;
-*/
 			case 'Flurstuecks-CSV-Export' : {
 				$GUI->export_flurst_csv();
 			} break;

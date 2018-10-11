@@ -271,7 +271,7 @@ class administration{
 		$this->get_config_params();
 		$config = '';
 		foreach($this->config_params as $param){
-			if($param['plugin'] == $plugin AND $param['real_value'] != ''){
+			if($param['plugin'] == $plugin){
 				if($param['description'] != ''){
 					$param['description'] = rtrim($param['description']);
 					$lines = explode("\n", $param['description']);
@@ -284,7 +284,10 @@ class administration{
 				}
 				else{
 					if($param['type'] == 'string' OR $param['type'] == 'password')$quote = "'";
-					else $quote = '';
+					else{
+						$quote = '';
+						if($param['real_value'] == '')$param['real_value'] = 'NULL';
+					}
 					$config.= "define('".$param['name']."', ".$quote.$param['real_value'].$quote.");\n\n";
 				}
 			}

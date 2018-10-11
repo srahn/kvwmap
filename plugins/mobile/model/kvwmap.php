@@ -19,8 +19,7 @@
 	* This function return all stellen the authenticated user is assigned to
 	* where sync enabled layer are in
 	*/
-	$GUI->mobile_get_stellen = function() {
-		global $GUI;
+	$GUI->mobile_get_stellen = function() use ($GUI) {
 		$sql = "
 			SELECT DISTINCT
 				s.ID,
@@ -62,8 +61,7 @@
 	/**
 	* Frage den Layer mit selected_layer_id und die dazugehörigen Attributdaten ab
 	*/
-	$GUI->mobile_get_layers = function() {
-		global $GUI;
+	$GUI->mobile_get_layers = function() use ($GUI) {
 		# ToDo get more than only the layer with selected_layer_id
 		$layers = $GUI->Stelle->getLayers('');
 		$mobile_layers = array();
@@ -121,8 +119,7 @@
 		return $result;
 	};
 
-	$GUI->mobile_sync = function() {
-		global $GUI;
+	$GUI->mobile_sync = function() use ($GUI) {
 		include_once(CLASSPATH . 'synchronisation.php');
 		# Prüfe ob folgende Parameter mit gültigen Werten übergeben wurden.
 		# $selected_layer_id (existiert und ist in mysql-Datenbank?)
@@ -153,7 +150,7 @@
 		return $result;
 	};
 
-	$GUI->mobile_sync_parameter_valide = function($params) {
+	$GUI->mobile_sync_parameter_valide = function($params) use ($GUI) {
 		$result = array(
 			"success" => true,
 			"msg" => 'Validierung durchgeführt für Parameter: ',
@@ -231,7 +228,7 @@
 		return $result;
 	};
 
-	$GUI->mobile_reformat_layer = function($layerset) {
+	$GUI->mobile_reformat_layer = function($layerset) use ($GUI) {
 		$geometry_types = array(
 			"Point", "Line", "Polygon"
 		);
@@ -252,7 +249,7 @@
 		return $layer;
 	};
 
-	$GUI->mobile_reformat_attributes = function($attr) {
+	$GUI->mobile_reformat_attributes = function($attr) use ($GUI) {
 		$attributes = array();
 		foreach($attr['name'] AS $key => $value) {
 			if ($attr['enum_value'][$key]) {
@@ -283,8 +280,7 @@
 		return $attributes;
 	};
 
-	$GUI->mobile_prepare_layer_sync = function($layerdb, $id, $sync) {
-		global $GUI;
+	$GUI->mobile_prepare_layer_sync = function($layerdb, $id, $sync) use ($GUI) {
 		include_once(CLASSPATH . 'Layer.php');
 		$layer = Layer::find($GUI, 'Layer_ID = ' . $id)[0];
 
@@ -313,8 +309,7 @@
 		}
 	};
 
-	$GUI->mobile_drop_layer_sync = function($layerdb, $layer) {
-		global $GUI;
+	$GUI->mobile_drop_layer_sync = function($layerdb, $layer) use ($GUI) {
 		$sql = "
 			DROP TRIGGER IF EXISTS create_" . $layer->get('maintable') . "_insert_delta_trigger ON " . $layer->get('schema') . "." . $layer->get('maintable') . ";
 			DROP FUNCTION IF EXISTS " . $layer->get('schema') . ".create_" . $layer->get('maintable') . "_insert_delta();
@@ -336,8 +331,7 @@
 		$GUI->add_message('notice', 'Sync-Tabelle und Trigger gelöscht.');
 	};
 
-	$GUI->mobile_create_layer_sync = function($layerdb, $layer) {
-		global $GUI;
+	$GUI->mobile_create_layer_sync = function($layerdb, $layer) use ($GUI) {
 		# create table for deltas
 		$sql = "
 			CREATE TABLE " . $layer->get('schema') . "." . $layer->get('maintable') . "_deltas (
@@ -529,8 +523,7 @@
 		$GUI->add_message('info', 'Sync-Tabelle ' . $layer->get('schema') . '.' . $layer->get('maintable') . '_delta<br>und Trigger für INSERT, UPDATE und DELETE angelegt.');
 	};
 
-	$GUI->mobile_upload_image = function($layer_id, $files) {
-		global $GUI;
+	$GUI->mobile_upload_image = function($layer_id, $files) use ($GUI) {
 		# Bestimme den Uploadpfad des Layers
 		if (intval($layer_id) == 0) {
 			return array(
@@ -578,8 +571,7 @@
 		);
 	};
 
-	$GUI->mobile_delete_images = function($layer_id, $images) {
-		global $GUI;
+	$GUI->mobile_delete_images = function($layer_id, $images) use ($GUI) {
 		# Bestimme den Uploadpfad des Layers
 		if (intval($layer_id) == 0) {
 			return array(

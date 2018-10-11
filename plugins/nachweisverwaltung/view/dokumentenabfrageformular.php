@@ -155,6 +155,14 @@ function delete_dokauswahl(){
 		alert('Es wurde keine Dokumentauswahl ausgewählt.');
 	}
 }
+
+function scrollToSelected(select){
+  for(var i = 0; i < select.options.length; i++){
+		if(select.options[i].selected){
+			select.scrollTop = i * select.options[i].offsetHeight;
+		}
+	}
+}
   
 //-->
 </script>
@@ -190,7 +198,7 @@ else {
 				<td colspan="2">
 					<input type="checkbox" name="suchhauptart[]" value="<? echo $hauptdokumentart['id']; ?>"<?php if(in_array($hauptdokumentart['id'], $this->formvars['suchhauptart'])) { ?> checked<?php } ?>>&nbsp;<? echo $hauptdokumentart['art'].'&nbsp;('.$hauptdokumentart['abkuerzung'].')'; ?>
 <?				if($this->dokumentarten[$hauptdokumentart['id']] != ''){	?>
-					:&nbsp;<select name="suchunterart[]" multiple="true" size="1" style="position: absolute;width: 185px" onmouseover="this.size=10" onmouseout="this.size=1">
+					:&nbsp;<select name="suchunterart[]" multiple="true" size="1" style="position: absolute;width: 185px" onmouseenter="this.size=10" onmouseleave="this.size=1;scrollToSelected(this);">
 						<option value="">alle</option>
 						<? for($i = 0; $i < count($this->dokumentarten[$hauptdokumentart['id']]); $i++){?>
 							<option <? if(in_array($this->dokumentarten[$hauptdokumentart['id']][$i]['id'], $this->formvars['suchunterart'])){echo 'selected';} ?> value="<? echo $this->dokumentarten[$hauptdokumentart['id']][$i]['id']; ?>"><? echo $this->dokumentarten[$hauptdokumentart['id']][$i]['art']; ?></option>	

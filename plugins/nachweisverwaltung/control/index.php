@@ -54,7 +54,7 @@ function go_switch_nachweisverwaltung($go){
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$ret=$GUI->DokumenteZumAntragInOrdnerZusammenstellen();
 			if($ret != '')showAlert($ret);
-			$filename = $GUI->DokumenteOrdnerPacken(false);
+			$filename = $GUI->DokumenteOrdnerPacken(true);
 			$GUI->Datei_Download($filename);
 	  } break;
 		
@@ -62,7 +62,7 @@ function go_switch_nachweisverwaltung($go){
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$ret=$GUI->DokumenteZumAntragInOrdnerZusammenstellen();
 			if($ret != '')showAlert($ret);
-			$filename = $GUI->DokumenteOrdnerPacken(true);
+			$filename = $GUI->DokumenteOrdnerPacken(false);
 			$GUI->Datei_Download($filename);
 	  } break;		
 

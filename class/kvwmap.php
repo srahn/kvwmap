@@ -3718,6 +3718,7 @@ class GUI {
 			case "update_databases" : {
         $this->administration->update_databases();
 				$this->administration->get_database_status();
+				$this->administration->get_config_params();
 				$this->showAdminFunctions();
       } break;
 			case "update_code" : {

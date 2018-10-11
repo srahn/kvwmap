@@ -172,15 +172,15 @@ $legendheight = $this->map->height + 20;
 			<?		foreach($this->hauptdokumentarten as $hauptdokumentart){	?>
 							<tr>
 								<td style="vertical-align: top;padding: 0 5px 10px 0;">
-									<input type="radio" name="hauptart" id="hauptart_<? echo $hauptdokumentart['id']; ?>" onchange="showUnterArten(<? echo $hauptdokumentart['id']; ?>);" value="<? echo $hauptdokumentart['id']; ?>" <? if($this->formvars['art'] == $hauptdokumentart['id']) { ?> checked<?php } ?>>
+									<input type="radio" name="hauptart" id="hauptart_<? echo $hauptdokumentart['id']; ?>" onchange="showUnterArten(<? echo $hauptdokumentart['id']; ?>);" value="<? echo $hauptdokumentart['id']; ?>" <? if($this->formvars['hauptart'] == $hauptdokumentart['id']) { ?> checked<?php } ?>>
 								</td>
 								<td style="vertical-align: top;padding: 2px 0 10px 0;">
 									<? echo $hauptdokumentart['art'].'&nbsp;('.$hauptdokumentart['abkuerzung'].')';
 								if($this->dokumentarten[$hauptdokumentart['id']] != ''){	?>
-									:<select name="unterart_<? echo $hauptdokumentart['id']; ?>" class="nachweise_unterart" style="width: 185px;<? if($this->formvars['art'] != $hauptdokumentart['id'])echo 'display:none'; ?>">
+									:<select name="unterart_<? echo $hauptdokumentart['id']; ?>" class="nachweise_unterart" style="width: 185px;<? if($this->formvars['hauptart'] != $hauptdokumentart['id'])echo 'display:none'; ?>">
 										<option value="">-- Auswahl --</option>
 										<? for($i = 0; $i < count($this->dokumentarten[$hauptdokumentart['id']]); $i++){?>
-										<option <? if($this->formvars['unterart'] == $this->dokumentarten[$hauptdokumentart['id']][$i]['id']){echo 'selected';} ?> value="<? echo $this->dokumentarten['id'][$i]; ?>"><? echo $this->dokumentarten[$hauptdokumentart['id']][$i]['art']; ?></option>	
+										<option <? if($this->formvars['unterart'] == $this->dokumentarten[$hauptdokumentart['id']][$i]['id']){echo 'selected';} ?> value="<? echo $this->dokumentarten[$hauptdokumentart['id']][$i]['id']; ?>"><? echo $this->dokumentarten[$hauptdokumentart['id']][$i]['art']; ?></option>	
 										<? } ?>
 									</select>
 			<?				} ?>						

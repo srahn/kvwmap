@@ -116,6 +116,7 @@ if (is_logged_in()) {
 	# login case 1
 }
 else {
+	header('logout: true');		// damit ajax-Requests das auch mitkriegen
 	$GUI->debug->write('Nicht angemeldet.', 4, $GUI->echo);
 	if (is_gast_login($GUI->formvars, $gast_stellen)) {
 		$GUI->debug->write('Es ist eine Gastanmeldung.', 4, $GUI->echo);

@@ -28,7 +28,7 @@
     $GUI->output();
   };
 	
-	$GUI->DokumenteOrdnerPacken = function($mit_uebersichten) use ($GUI){
+	$GUI->DokumenteOrdnerPacken = function($light) use ($GUI){
     if ($GUI->formvars['antr_selected']!=''){			
 			$explosion = explode('~', $GUI->formvars['antr_selected']);
 			$antr_selected = $explosion[0];
@@ -49,8 +49,8 @@
 				$timestamp = date('Y-m-d_H-i-s',time());
 				if($GUI->nachweis->Dokumente != NULL){		# wenn es Nachweise zu diesem Auftrag gibt
 					$GUI->erzeugenUebergabeprotokollNachweise(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Uebergabeprotokoll.pdf');
-					if($mit_uebersichten){
-						$GUI->erzeugenUebersicht_HTML(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Uebersicht.htm');
+					$GUI->erzeugenUebersicht_HTML(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Uebersicht.htm', $light);
+					if(!$light){
 						$GUI->erzeugenUebersicht_CSV(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Uebersicht.csv');
 						#$GUI->erzeugenZuordnungFlst_CSV(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/');
 						$GUI->create_Recherche_UKO(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/');
@@ -61,10 +61,13 @@
 					$uebergabe_logpath = $GUI->antrag->create_uebergabe_logpath($GUI->Stelle->Bezeichnung).'/'.$antr_selected.'_'.$timestamp.'.pdf';
 					$GUI->erzeugenUebergabeprotokollNachweise($uebergabe_logpath, true);
 				}
-        if($mit_uebersichten)$result = exec(ZIP_PATH.' -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr);		# gesamten Rechercheordner packen
+        if(!$light)$result = exec(ZIP_PATH.' -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr);		# gesamten Rechercheordner packen
 				else{
-					$result = exec(ZIP_PATH.' -j -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr.'/Nachweise');		# Ordnerstruktur verwerfen und nur Nachweise
-					$result = exec(ZIP_PATH.' -j -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr.'/Protokolle');		# und das Übergabeprotokoll packen
+					$result = exec(ZIP_PATH.' -j -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr.'/Nachweise');		# Nachweise-Ordnerstruktur verwerfen und nur Nachweise
+					$result = exec(ZIP_PATH.' '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr.'/Protokolle/Uebergabeprotokoll.pdf');		# und das Übergabeprotokoll 
+					$result = exec(ZIP_PATH.' '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr.'/Protokolle/Uebersicht.htm');		# und Uebersicht.htm
+					$result = exec(ZIP_PATH.' -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr.'/Vorschaubilder');		# und Vorschaubilder 
+					$result = exec(ZIP_PATH.' -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr.'/Einmessungsskizzen');		# und, wenn vorhanden, die Einmessungsskizzen packen
 				}
       }
     }
@@ -182,10 +185,12 @@
 				$GUI->scaleMap($GUI->formvars['nScale']);
 			}
       elseif($nachweis->document['wkt_umring'] != ''){
-        # Zoom zum Polygon des Dokumentes
-        $GUI->zoomToNachweis($nachweis,10);
-        $GUI->user->rolle->saveSettings($GUI->map->extent);
-        $GUI->user->rolle->readSettings();
+				if($GUI->formvars['neuladen'] == ''){
+					# Zoom zum Polygon des Dokumentes
+					$GUI->zoomToNachweis($nachweis,10);
+					$GUI->user->rolle->saveSettings($GUI->map->extent);
+					$GUI->user->rolle->readSettings();
+				}
         # Übernahme des Nachweisumrings aus der PostGIS-Datenbank
         $GUI->formvars['newpath'] = transformCoordsSVG($nachweis->document['svg_umring']);
         $GUI->formvars['newpathwkt'] = $nachweis->document['wkt_umring'];
@@ -199,7 +204,7 @@
       # Zuweisen der Werte des Dokumentes zum Formular
       $GUI->formvars['flurid']=$nachweis->document['flurid'];
       $GUI->formvars['stammnr']=$nachweis->document['stammnr'];
-      $GUI->formvars['art']=$nachweis->document['art'];
+      $GUI->formvars['hauptart']=$nachweis->document['art'];
       $GUI->formvars['Blattnr']=$nachweis->document['blattnummer'];
       $GUI->formvars['datum']=$nachweis->document['datum'];
       $GUI->formvars['VermStelle']=$nachweis->document['vermstelle'];
@@ -350,9 +355,10 @@
 		$sql.='sdatum="'.$sdatum.'",';
 		$sql.='sdatum2="'.$sdatum2.'",';
 		if ($svermstelle!='') { $sql.='sVermStelle='.$svermstelle.','; }else{$sql.='sVermStelle= NULL,' ;}
-		$sql.='flur_thematisch='.$flur_thematisch.',';
+		$sql.='flur_thematisch="'.$flur_thematisch.'",';
 		$sql .= 'user_id = '.$user_id;
 		$sql.=' WHERE user_id='.$user_id.' AND stelle_id='.$stelle_id;
+		#echo $sql;
 		$GUI->debug->write("<p>file:users.php class:rolle->setNachweisSuchparameter - Setzen der aktuellen Parameter für die Nachweissuche",4);
 		$GUI->database->execSQL($sql,4, 1);
 		return 1;
@@ -621,7 +627,7 @@
 		fclose($fp);
 	};
   
-	$GUI->erzeugenUebersicht_HTML = function($path) use ($GUI){
+	$GUI->erzeugenUebersicht_HTML = function($path, $light) use ($GUI){
 		$html = "
 <html>
 	<head>
@@ -787,8 +793,10 @@
 							if(key == 'dokument_path' && value != null){
 								path_parts = value.split('/');
 								filename = path_parts[path_parts.length-1];
-								a = document.createElement('a');
-								a.href = value;
+								a = document.createElement('a');";
+								if($light)$html.="a.href = '../../'+filename;";
+								else $html.= "a.href = value;";
+								$html.="
 								a.target = '_blank';
 								a.setAttribute('onmouseover', \"showPreview('\"+filename+\"')\");
 								a.onmouseout = function(){hidePreview()};
@@ -1031,6 +1039,7 @@
           # Speicherung der Bilddatei erfolgreich, Eintragen in Datenbank
           $GUI->nachweis->database->begintransaction();
           $ret=$GUI->nachweis->eintragenNeuesDokument($GUI->formvars['datum'],$GUI->formvars['flurid'],$GUI->formvars['VermStelle'], $GUI->formvars['hauptart'], $GUI->formvars['unterart_'.$GUI->formvars['hauptart']], $GUI->formvars['gueltigkeit'], $GUI->formvars['geprueft'], $GUI->formvars['stammnr'],$GUI->formvars['Blattformat'],$GUI->formvars['Blattnr'],$GUI->formvars['rissnummer'],$GUI->formvars['fortfuehrung'],$GUI->formvars['bemerkungen'],$GUI->formvars['bemerkungen_intern'],$GUI->formvars['artname']."/".$GUI->formvars['zieldateiname'],$GUI->formvars['umring'], $GUI->user);
+					$GUI->formvars['unterart'] = $GUI->formvars['unterart_'.$GUI->formvars['hauptart']];
           if ($ret[0]) {
             $GUI->nachweis->database->rollbacktransaction();
             $errmsg=$ret[1];
@@ -1084,7 +1093,7 @@
     $GUI->formvars['flurid']=$nachweis->document['flurid'];
     $GUI->formvars['stammnr']=$nachweis->document['stammnr'];
     $GUI->formvars['rissnummer']=$nachweis->document['rissnummer'];
-    $GUI->formvars['art']=$nachweis->document['art'];
+    $GUI->formvars['hauptart']=$nachweis->document['art'];
     $GUI->formvars['Blattnr']=$nachweis->document['blattnummer'];
     $GUI->formvars['datum']=$nachweis->document['datum'];
     $GUI->formvars['VermStelle']=$nachweis->document['vermstelle'];
@@ -1095,7 +1104,7 @@
     $GUI->formvars['Gemarkung']=substr($GUI->formvars['flurid'],0,6);
     $GUI->formvars['Flur']=intval(substr($GUI->formvars['flurid'],6,9));
     $GUI->formvars['Bilddatei']=NACHWEISDOCPATH.$nachweis->document['link_datei'];
-    $GUI->formvars['andere_art']=$nachweis->document['andere_art'];
+    $GUI->formvars['unterart']=$nachweis->document['unterart'];
 		$GUI->formvars['fortfuehrung']=$nachweis->document['fortfuehrung'];
 		$GUI->formvars['bemerkungen']=$nachweis->document['bemerkungen'];
 		$GUI->formvars['bemerkungen_intern']=$nachweis->document['bemerkungen_intern'];
@@ -1341,6 +1350,7 @@
     }
     else {
       $GUI->nachweis = new nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
+			$GUI->hauptdokumentarten = $GUI->nachweis->getHauptDokumentarten();
       # Abfrage ob gelöscht werden soll oder nicht
       if ($GUI->formvars['bestaetigung']=='JA') {
         # Der Löschvorgang wurde bestätigt und wird jetzt ausgeführt
@@ -1356,7 +1366,7 @@
       # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
 			$GUI->formvars = array_merge($GUI->formvars, $GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id));
       # Abfragen der Nachweise entsprechend der eingestellten Suchparameter
-			$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['such_andere_art'], $GUI->formvars['suchbemerkung'], NULL, $GUI->formvars['suchstammnr2'], $GUI->formvars['suchrissnummer2'], $GUI->formvars['suchfortfuehrung2'], $GUI->formvars['geprueft']);
+			$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['suchhauptart'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['suchunterart'], $GUI->formvars['suchbemerkung'], NULL, $GUI->formvars['suchstammnr2'], $GUI->formvars['suchrissnummer2'], $GUI->formvars['suchfortfuehrung2'], $GUI->formvars['geprueft']);
       if ($ret!='') {
         $GUI->Fehlermeldung.=$ret;
       }
