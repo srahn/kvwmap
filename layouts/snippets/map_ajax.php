@@ -34,8 +34,7 @@ $response.= '~
 '.$this->map->extent->miny.'~
 '.$this->map->extent->maxx.'~
 '.$this->map->extent->maxy.'~
-'.$pixelsize.'~
-~update_legend(\''.$this->layerhiddenstring.'\');'.$this->formvars['code2execute_after'];
+'.$pixelsize.'~~update_legend(\''.$this->layerhiddenstring.'\');'.$this->formvars['code2execute_after'];		# die zwei ~~ müssen hier sein, da sonst der Zeilenumbruch in das Attribut points vom polygon geschrieben wird
 
 ob_end_clean();
 header('Content-Type: text/html; charset=utf-8');
