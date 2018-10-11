@@ -98,6 +98,7 @@ $GUI->database->execSQL("SET NAMES '".MYSQL_CHARSET."'",0,0);
 if (is_logout($GUI->formvars)) {
 	$GUI->debug->write('Logout angefragt.', 4, $GUI->echo);
 	if (is_logged_in()) {
+		if(LOGOUT_ROUTINE != '')include(LOGOUT_ROUTINE);
 		$GUI->debug->write('Logout.', 4, $GUI->echo);
 		logout();
 	}
