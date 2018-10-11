@@ -447,6 +447,7 @@ else {
 		if($GUI->user->rolle->hist_timestamp != '')$GUI->setHistTimestamp();
 		# Zurücksetzen der veränderten Klassen
 		#$GUI->user->rolle->resetClasses();
+		if(LOGIN_ROUTINE != '')include(LOGIN_ROUTINE);
 		$_SESSION['login_routines'] = false;
 	} else {
 			define('AFTER_LOGIN', false);
