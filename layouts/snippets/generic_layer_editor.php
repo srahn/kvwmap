@@ -251,7 +251,7 @@
 							<td valign="top" class="group_<? echo $layer['attributes']['group'][$j]; ?>">
 								<div class="statistic_row_<? echo $layer['Layer_ID']; ?>" style="display:none"><?php
 								$column_name = $this->qlayerset[$i]['attributes']['name'][$j];
-								if(in_array($this->qlayerset[$i]['attributes']['type'][$j], array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))) {
+								if(in_array($this->qlayerset[$i]['attributes']['type'][$j], array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8', 'not_saveable'))) {
 									$values = array_map(
 										function ($row) use ($column_name) {
 											return $row[$column_name];
