@@ -94,18 +94,6 @@ $GUI->database->execSQL("SET NAMES '".MYSQL_CHARSET."'",0,0);
 	Hier findet sich die gesamte Loging für Login und Reggistrierung, sowie Stellenwechsel
 **/
 #$GUI->debug->write('Formularvariablen: ' . print_r($GUI->formvars, true), 4, $GUI->echo);
-# logout
-if (is_logout($GUI->formvars)) {
-	$GUI->debug->write('Logout angefragt.', 4, $GUI->echo);
-	if (is_logged_in()) {
-		if(LOGOUT_ROUTINE != '')include(LOGOUT_ROUTINE);
-		$GUI->debug->write('Logout.', 4, $GUI->echo);
-		logout();
-	}
-	else {
-		$GUI->debug->write('Ist schon logged out.', 4, $GUI->echo);
-	}
-}
 
 # login
 $show_login_form = false;
@@ -114,6 +102,13 @@ if (is_logged_in()) {
 	$GUI->formvars['login_name'] = $_SESSION['login_name'];
 	$GUI->user = new user($_SESSION['login_name'], 0, $GUI->database);
 	$GUI->debug->write('Ist angemeldet als: ' . $GUI->user->login_name, 4, $GUI->echo);
+	# logout
+	if (is_logout($GUI->formvars)) {
+		$GUI->debug->write('Logout angefragt.', 4, $GUI->echo);
+		if(LOGOUT_ROUTINE != '')include(LOGOUT_ROUTINE);
+		$GUI->debug->write('Logout.', 4, $GUI->echo);
+		logout();
+	}
 	# login case 1
 }
 else {
