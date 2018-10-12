@@ -238,6 +238,7 @@ class administration{
 	
 	function get_real_value($name){
 		if($this->config_params[$name]['prefix'] != ''){
+			if($this->config_params[$name]['value'] == '')return NULL;
 			foreach(explode('.', $this->config_params[$name]['prefix']) as $prefix_constant){
 				$prefix_value .= $this->get_real_value($prefix_constant);
 			}
