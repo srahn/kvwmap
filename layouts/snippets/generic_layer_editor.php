@@ -247,7 +247,7 @@
 						if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
 							echo '<td class="gap_'.$layer['attributes']['group'][$j].'" style="border:none;background: url(graphics/bg.gif);"></td>';
 						}
-						if($layer['attributes']['visible'][$j] AND $layer['attributes']['name'][$j] != 'lock'){ ?>
+						if($layer['attributes']['type'][$j] != 'geometry' AND $layer['attributes']['visible'][$j]){ ?>
 							<td valign="top" class="group_<? echo $layer['attributes']['group'][$j]; ?>">
 								<div class="statistic_row_<? echo $layer['Layer_ID']; ?>" style="display:none"><?php
 								$column_name = $this->qlayerset[$i]['attributes']['name'][$j];
