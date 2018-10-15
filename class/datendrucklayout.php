@@ -78,18 +78,9 @@ class ddl {
 					$y = $this->layout['texts'][$j]['posy'];
 					$offset_attribute = $this->layout['texts'][$j]['offset_attribute'];
 					if($offset_attribute != ''){			# ist ein offset_attribute gesetzt
-						$offset_attributes = explode(',', $offset_attribute);		# es können mehrere Offset-Attribute durch Komma getrennt angegeben sein (ist aber noch nicht in der Oberfläche umgesetzt)
-						$smallest_offset_value = 10000;
-						foreach($offset_attributes as $offset_attribute){
-							$offset_value = $this->layout['offset_attributes'][$offset_attribute];
-							if($offset_value == ''){		# wenn eines der Offset-Attribute noch keinen Wert hat, also noch nicht geschrieben wurde, abbrechen
-								$smallest_offset_value = '';
-								break;
-							}
-							if($offset_value < $smallest_offset_value)$smallest_offset_value = $offset_value;
-						}
-						if($smallest_offset_value != ''){																							# dieses Attribut wurde auch schon geschrieben, d.h. dessen y-Position ist bekannt -> Freitext relativ dazu setzen
-							$y = $this->handlePageOverflow($offset_attribute, $smallest_offset_value, $y);		# Seitenüberläufe berücksichtigen
+						$offset_value = $this->layout['offset_attributes'][$offset_attribute];
+						if($offset_value != ''){		# dieses Attribut wurde auch schon geschrieben, d.h. dessen y-Position ist bekannt -> Freitext relativ dazu setzen 
+							$y = $this->handlePageOverflow($offset_attribute, $offset_value, $y);		# Seitenüberläufe berücksichtigen
 						}
 						else{
 							$remaining_freetexts[] = $this->layout['texts'][$j]['id'];
@@ -136,34 +127,37 @@ class ddl {
 					$y_orig = $y = $this->layout['lines'][$j]['posy'];
 					$endx = $this->layout['lines'][$j]['endposx'] + $offsetx;
 					$endy = $this->layout['lines'][$j]['endposy'];
-					$offset_attribute = $this->layout['lines'][$j]['offset_attribute'];
-					if($offset_attribute != ''){			# ist ein offset_attribute gesetzt
-						$offset_attributes = explode(',', $offset_attribute);		# es können mehrere Offset-Attribute durch Komma getrennt angegeben sein (ist aber noch nicht in der Oberfläche umgesetzt)
-						$smallest_offset_value = 10000;
-						foreach($offset_attributes as $offset_attribute){
-							$offset_value = $this->layout['offset_attributes'][$offset_attribute];
-							if($offset_value == ''){		# wenn eines der Offset-Attribute noch keinen Wert hat, also noch nicht geschrieben wurde, abbrechen
-								$smallest_offset_value = '';
-								break;
-							}
-							if($offset_value < $smallest_offset_value)$smallest_offset_value = $offset_value;
-						}
-						if($smallest_offset_value != ''){																							# dieses Attribut wurde auch schon geschrieben, d.h. dessen y-Position ist bekannt -> Linie relativ dazu setzen
-							$y = $this->handlePageOverflow($offset_attribute, $smallest_offset_value, $y);		# Seitenüberläufe berücksichtigen
-							$endy = $this->handlePageOverflow($offset_attribute, $smallest_offset_value, $endy);		# Seitenüberläufe berücksichtigen
+					$offset_attribute_start = $this->layout['lines'][$j]['offset_attribute_start'];
+					$offset_attribute_end = $this->layout['lines'][$j]['offset_attribute_end'];
+					if($offset_attribute_start != ''){			# ist ein offset_attribute gesetzt
+						$offset_value = $this->layout['offset_attributes'][$offset_attribute_start];
+						if($offset_value != ''){		# dieses Attribut wurde auch schon geschrieben, d.h. dessen y-Position ist bekannt -> Linie relativ dazu setzen
+							$y = $this->handlePageOverflow($offset_attribute_start, $offset_value, $y);		# Seitenüberläufe berücksichtigen
 						}
 						else{
 							$remaining_lines[] = $this->layout['lines'][$j]['id'];
 							continue;			# die Linie ist abhängig aber das Attribut noch nicht geschrieben, Linie merken und überspringen
 						}
 					}
-					if($offset_attribute == ''){
+					if($offset_attribute_end != ''){			# ist ein offset_attribute gesetzt
+						$offset_value = $this->layout['offset_attributes'][$offset_attribute_end];
+						if($offset_value != ''){		# dieses Attribut wurde auch schon geschrieben, d.h. dessen y-Position ist bekannt -> Linie relativ dazu setzen
+							$endy = $this->handlePageOverflow($offset_attribute_end, $offset_value, $endy);		# Seitenüberläufe berücksichtigen
+						}
+						else{
+							$remaining_lines[] = $this->layout['lines'][$j]['id'];
+							continue;			# die Linie ist abhängig aber das Attribut noch nicht geschrieben, Linie merken und überspringen
+						}
+					}
+					if($offset_attribute_start == ''){
 						$y = $y - $this->offsety;
-						$endy = $endy - ($y_orig - $y);		# y-Endposition auch anpassen
+						if($offset_attribute_end == ''){
+							$endy = $endy - ($y_orig - $y);		# y-Endposition auch anpassen
+						}
 					}
 					if($type == 'running'){	# fortlaufende Linien
 						$pagecount = count($this->pdf->objects['3']['info']['pages']);								
-						if($this->layout['type'] == 1 AND $offset_attribute == '' AND $pagecount > 1){
+						if($this->layout['type'] == 1 AND $offset_attribute_start == '' AND $pagecount > 1){
 							$y = $y + $this->initial_yoffset;		# ab der 2. Seite sollen die forlaufenden absolut positionierten Elemente oben auf der Seite beginnen
 							$endy = $endy + $this->initial_yoffset;		# ab der 2. Seite sollen die forlaufenden absolut positionierten Elemente oben auf der Seite beginnen
 						}
@@ -171,13 +165,14 @@ class ddl {
 							#if($this->maxy < $y)$this->maxy = $y;		# beim ersten Datensatz das maxy ermitteln
 							#if($this->maxy < $endy)$this->maxy = $endy;		# beim ersten Datensatz das maxy ermitteln							
 						}						
-						if($offset_attribute == '' AND $this->i_on_page > 0){		# bei allen darauffolgenden den y-Wert um Offset verschieben (aber nur bei absolut positionierten)
+						if($offset_attribute_start == '' AND $this->i_on_page > 0){		# bei allen darauffolgenden den y-Wert um Offset verschieben (aber nur bei absolut positionierten)
 							$y = $y - $this->yoffset_onpage-$this->layout['gap'];
 							$endy = $endy - $this->yoffset_onpage-$this->layout['gap'];
 						}
 					}
-					$this->pdf->setLineStyle($this->layout['lines'][$j]['breite']);
+					$this->pdf->setLineStyle($this->layout['lines'][$j]['breite'], 'square');
 					$this->pdf->line($x,$y,$endx,$endy);
+					#echo 'zeichne Linie: '.$x.' '.$y.' '.$endx.' '.$endy.'<br>';
 					if($this->layout['lines'][$j]['type'] === 0){
 						#if(!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $y)$this->miny[$this->pdf->currentContents] = $y;		# miny ist die unterste y-Position das aktuellen Datensatzes 
 						#if(!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $endy)$this->miny[$this->pdf->currentContents] = $endy;		# miny ist die unterste y-Position das aktuellen Datensatzes 
@@ -834,8 +829,10 @@ class ddl {
         else $sql .= ", `endposx` = NULL";
         if($formvars['lineendposy'.$i])$sql .= ", `endposy` = ".(int)$formvars['lineendposy'.$i];
         else $sql .= ", `endposy` = NULL";
-				if($formvars['lineoffset_attribute'.$i])$sql .= ", `offset_attribute` = '".$formvars['lineoffset_attribute'.$i]."'";
-        else $sql .= ", `offset_attribute` = NULL";
+				if($formvars['lineoffset_attribute_start'.$i])$sql .= ", `offset_attribute_start` = '".$formvars['lineoffset_attribute_start'.$i]."'";
+        else $sql .= ", `offset_attribute_start` = NULL";
+				if($formvars['lineoffset_attribute_end'.$i])$sql .= ", `offset_attribute_end` = '".$formvars['lineoffset_attribute_end'.$i]."'";
+        else $sql .= ", `offset_attribute_end` = NULL";
         if($formvars['linetype'.$i] == '')$formvars['linetype'.$i] = 0;
         $sql .= ", `type` = '".$formvars['linetype'.$i]."'";
         #echo $sql;
@@ -959,8 +956,10 @@ class ddl {
         else $sql .= ", `endposx` = NULL";
         if($formvars['lineendposy'.$i])$sql .= ", `endposy` = ".(int)$formvars['lineendposy'.$i];
         else $sql .= ", `endposy` = NULL";
-				if($formvars['lineoffset_attribute'.$i])$sql .= ", `offset_attribute` = '".$formvars['lineoffset_attribute'.$i]."'";
-        else $sql .= ", `offset_attribute` = NULL";
+				if($formvars['lineoffset_attribute_start'.$i])$sql .= ", `offset_attribute_start` = '".$formvars['lineoffset_attribute_start'.$i]."'";
+        else $sql .= ", `offset_attribute_start` = NULL";
+				if($formvars['lineoffset_attribute_end'.$i])$sql .= ", `offset_attribute_end` = '".$formvars['lineoffset_attribute_end'.$i]."'";
+        else $sql .= ", `offset_attribute_end` = NULL";
         if($formvars['linetype'.$i] == '')$formvars['linetype'.$i] = 0;
         $sql .= ", `type` = '".$formvars['linetype'.$i]."'";
         $sql .= " WHERE id = ".(int)$formvars['line_id'.$i];
