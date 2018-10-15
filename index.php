@@ -1,9 +1,9 @@
 <?php
 header('Content-Type: text/html; charset=utf-8');
 
-if (!USE_EXISTING_SESSION) {
+#if (!USE_EXISTING_SESSION) {
 	session_set_cookie_params(0, $_SERVER['CONTEXT_PREFIX']);
-}
+#}
 
 session_start();
 

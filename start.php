@@ -290,6 +290,9 @@ if (!$show_login_form) {
 						if (is_new_password_valid($new_password_err)) {
 							$GUI->debug->write('Neues Password ist valid.', 4, $GUI->echo);
 							update_password($GUI);
+							$GUI->debug->write('Set Session', 4, $GUI->echo);
+							session_start();
+							set_session_vars($GUI->formvars);
 							# login case 17
 						}
 						else { # new password is not ok
