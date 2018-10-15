@@ -221,6 +221,7 @@ class administration{
 	}
 	
 	function get_config_params(){
+		$this->config_params = array();
 		$sql = "SELECT * FROM config ORDER BY `group`, name";
 		$result=$this->database->execSQL($sql,0, 0);
     if($result[0]) {

@@ -3802,11 +3802,6 @@ class GUI {
     $this->titel='Administrationsfunktionen';
   }
 
-  function showConstants() {
-		$this->main='showadminfunctions.php';
-		$this->administration->get_constants_from_all_configs();
-  }
-
   function grundbuchblattWahl() {
     $this->titel='Suche nach Grundbuchblättern';
     $this->main='grundbuchblattsuchform.php';
