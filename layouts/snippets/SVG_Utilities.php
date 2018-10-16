@@ -1131,11 +1131,11 @@ function mouseup(evt){
 		evt1.clientY = coordy;
 		mousedown(evt1);
 		mouse_coords_type = "image";
-		if(coordx < minx || coordx > maxx || coordy < miny || coordy > maxy){		// wenn Punkt ausserhalb des Kartenausschnittes -> hinzoomen
-			pathx[0] = (coordx-minx)/scale;
-			pathy[0] = resy-((coordy-miny)/scale);
-			sendpath("recentre", pathx, pathy);
-		}
+		// if(coordx < minx || coordx > maxx || coordy < miny || coordy > maxy){		// wenn Punkt ausserhalb des Kartenausschnittes -> hinzoomen (erstmal rausgenommen, da es bei "gepufferte Linie" nicht funktioniert)
+			// pathx[0] = (coordx-minx)/scale;
+			// pathy[0] = resy-((coordy-miny)/scale);
+			// sendpath("recentre", pathx, pathy);
+		// }
 	}
 
 	';
