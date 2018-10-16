@@ -41,7 +41,7 @@ class ddl {
   function add_static_elements($offsetx){
 		$offsety = $this->offsety;
 		# Hintergrundbild    
-		if($this->layout['bgsrc']){
+		if($this->layout['bgsrc'] AND $this->layout['bgposx'] AND $this->layout['bgposy']){
     	$this->pdf->addJpegFromFile(DRUCKRAHMEN_PATH.basename($this->layout['bgsrc']),$this->layout['bgposx']+$offsetx,$this->layout['bgposy']-$offsety,$this->layout['bgwidth']);
 		}
     # Datum
