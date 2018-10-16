@@ -15,7 +15,7 @@ function validierung_msg_formatter(value, row) {
 	else if (row.ergebnis_status == 'Warnung')
 		return row.validierung_msg_warning + '<br>' + value;
 	else
-		return row.validierung_msg_success;
+		return (value !='' ? value : row.validierung_msg_success);
 }
 
 function validierung_msg_correcture_formatter(value, row) {
@@ -26,7 +26,7 @@ function validierung_msg_correcture_formatter(value, row) {
 		output = '';
 	}
 	if (row.regel_id)
-		output += '<br>zur Regel <a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=9&operator_id==&value_id=' + row.regel_id + '"><i class="fa fa-lg fa-pencil"></i></a>';
+		output += '<br>zur Regel <a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<?php echo XPLANKONVERTER_REGELN_LAYER_ID; ?>&operator_id==&value_id=' + row.regel_id + '"><i class="fa fa-lg fa-pencil"></i></a>';
 	if (row.shape_gid) {
 		if (row.regel_shp_layer_id) {
 			// Direkt zur Anzeige des Datensatzes
@@ -148,8 +148,9 @@ function validierungsergebnisseRowAttribs(row, index){
 </table>
 <div style="clear:both"></div>
 <form action="index.php" method="post" enctype="multipart/form-data">
-  <input type="hidden" name="go" value="xplankonverter_konvertierungen_index">
-  <input type="hidden" name="konvertierung_id" value="<?php echo $this->formvars['konvertierung_id']; ?>">
+	<input type="hidden" name="go" value="xplankonverter_plaene_index">
+	<input type="hidden" name="planart" value="<?php echo $this->konvertierung->get('planart'); ?>">
+	<input type="hidden" name="konvertierung_id" value="<?php echo $this->formvars['konvertierung_id']; ?>">
 	<input type="submit" name="submit" value="zurück">
 </form>
 <p>

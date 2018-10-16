@@ -7,19 +7,25 @@
 	global $strNewEmbeddedPK;
 	global $hover_preview;
 
-	function attribute_name($layer_id, $attributes, $j, $k, $fontsize, $sort_links = true){
+	function attribute_name($layer_id, $attributes, $j, $k, $fontsize, $sort_links = true) {
 		$datapart .= '<table ';
 		if($attributes['group'][0] != '' AND $attributes['arrangement'][$j+1] != 1 AND $attributes['arrangement'][$j-1] != 1 AND $attributes['arrangement'][$j] != 1)$datapart .= 'width="200px"';
 		else $datapart .= 'width="100%"';
-		$datapart .= '><tr style="border: none"><td>';
-		if($sort_links AND !in_array($attributes['form_element_type'][$j], array('SubFormPK', 'SubFormEmbeddedPK', 'SubFormFK', 'dynamicLink'))){
-			$datapart .= '<a style="font-size: '.$fontsize.'px" title="Sortieren nach '.$attributes['alias'][$j].'" href="javascript:change_orderby(\''.$attributes['name'][$j].'\', '.$layer_id.');">
-							'.$attributes['alias'][$j].'</a>';
+		$datapart .= '><tr style="border: none"><td' . (($attributes['nullable'][$j] == '0' AND $attributes['privileg'][$j] != '0') ? ' class="gle-attribute-mandatory"' : '') . '>';
+		if (
+			$sort_links AND
+			!(
+				in_array($attributes['form_element_type'][$j], array('SubFormPK', 'SubFormEmbeddedPK', 'SubFormFK', 'dynamicLink')) OR
+				is_numeric($attributes['type'][$j]) OR
+				substr($attributes['type'][$j], 0, 1) == '_'
+			)
+		) {
+			$datapart .= '<a style="font-size: '.$fontsize.'px" title="Sortieren nach '.$attributes['alias'][$j].'" href="javascript:change_orderby(\''.$attributes['name'][$j].'\', '.$layer_id.');">'.$attributes['alias'][$j].'</a>';
 		}
-		else{
-			$datapart .= '<span style="font-size: '.$fontsize.'px; color:#222222;">'.$attributes['alias'][$j].'</span>';
+		else {
+			$datapart .= '<span style="font-size: '.$fontsize.'px;">'.$attributes['alias'][$j].'</span>';
 		}
-		if($attributes['nullable'][$j] == '0' AND $attributes['privileg'][$j] != '0'){
+		if ($attributes['nullable'][$j] == '0' AND $attributes['privileg'][$j] != '0'){
 			$datapart .= '<span title="Eingabe erforderlich">*</span>';
 		}
 		if($attributes['tooltip'][$j]!='' AND $attributes['form_element_type'][$j] != 'Time'){
@@ -28,7 +34,7 @@
 			$datapart .= '<td align="right"><a '.$title_link.' title="'.$attributes['tooltip'][$j].'"><img src="'.GRAPHICSPATH.'emblem-important.png" border="0"></a></td>';
 		}
 		if(in_array($attributes['type'][$j], array('date', 'time', 'timestamp'))){
-			$datapart .= '<td width="16px" align="right">'.calendar($attributes['type'][$j], $layer_id.'_'.$attributes['name'][$j].'_'.$k, $attributes['privileg'][$j]).'</td>';
+			$datapart .= '<td align="right">'.calendar($attributes['type'][$j], $layer_id.'_'.$attributes['name'][$j].'_'.$k, $attributes['privileg'][$j]).'</td>';
 		}
 		$datapart .= '</td></tr></table>';
 		return $datapart;
@@ -44,14 +50,18 @@
 		return $cal;
 	}
 
-	function attribute_value(&$gui, $layer_id, $attributes, $j, $k, $dataset, $size, $select_width, $fontsize, $change_all = false, $onchange = NULL, $field_name = NULL, $field_id = NULL, $field_class = NULL){
+	function attribute_value(&$gui, $layer, $attributes, $j, $k, $dataset, $size, $select_width, $fontsize, $change_all = false, $onchange = NULL, $field_name = NULL, $field_id = NULL, $field_class = NULL){
 		global $strShowPK;
 		global $strNewPK;
 		global $strShowFK;
 		global $strShowAll;
 		global $strNewEmbeddedPK;
 		global $hover_preview;
-		# $dataset 																											# der aktuelle Datensatz
+		$layer_id = $layer['Layer_ID'];
+		if($dataset == NULL)$dataset = $layer['shape'][$k]; 						# der aktuelle Datensatz (wird nur beim Array- oder Nutzer-Datentyp übergeben)
+		if($attributes == NULL) {
+			$attributes = $layer['attributes'];			# das Attribut-Array (wird nur beim Array- oder Nutzer-Datentyp übergeben)
+		}
 		$name = $attributes['name'][$j];																# der Name des Attributs
 		$alias = $attributes['alias'][$j];															# der Aliasname des Attributs
 		$value = $dataset[$name];																				# der Wert des Attributs
@@ -68,15 +78,27 @@
 			$onchange .= 'change_all('.$layer_id.', '.$k.', \''.$layer_id.'_'.$name.'\');';
 		}
 		
+		if($attributes['dependents'][$j] != NULL){
+			$field_class .= ' visibility_changer';
+			$onchange .= 'this.oninput();" oninput="check_visibility('.$layer_id.', this, [\''.implode('\',\'', $attributes['dependents'][$j]).'\'], '.$k.');';
+		}
+		
+		if($attributes['vcheck_attribute'][$j] != ''){
+			$after_attribute .= '<input type="hidden" id="vcheck_attribute_'.$attributes['name'][$j].'" value="'.$attributes['vcheck_attribute'][$j].'">';
+			$after_attribute .= '<input type="hidden" id="vcheck_operator_'.$attributes['name'][$j].'" value="'.$attributes['vcheck_operator'][$j].'">';
+			$after_attribute .= '<input type="hidden" id="vcheck_value_'.$attributes['name'][$j].'" value="'.htmlentities($attributes['vcheck_value'][$j]).'">';
+		}
+
 		###### Array-Typ #####
-		if(POSTGRESVERSION >= 930 AND substr($attributes['type'][$j], 0, 1) == '_'){
-			if($field_id != NULL)$id = $field_id;		# wenn field_id übergeben wurde (nicht die oberste Ebene)
-			else $id = $k.'_'.$name;	# oberste Ebene
+		if (POSTGRESVERSION >= 930 AND substr($attributes['type'][$j], 0, 1) == '_'){
+			if ($field_id != NULL) $id = $field_id;		# wenn field_id übergeben wurde (nicht die oberste Ebene)
+			else $id = $layer_id.'_'.$name.'_'.$k;	# oberste Ebene
 			$datapart .= '<input type="hidden" class="'.$field_class.'" title="'.$alias.'" name="'.$fieldname.'" id="'.$id.'" onchange="'.$onchange.'" value="'.htmlspecialchars($value).'">';
 			$datapart .= '<div id="'.$id.'_elements" style="">';
 			$elements = json_decode($value);		# diese Funktion decodiert immer den kommpletten String
 			$attributes2 = $attributes;
 			$attributes2['name'][$j] = '';
+			$attributes2['dependents'][$j] = '';		// die Array-Elemente sollen keine Visibility-Changer sein, nur das gemeinsame Hidden-Feld oben
 			$attributes2['table_name'][$attributes2['name'][$j]] = $tablename;
 			$attributes2['type'][$j] = substr($attributes['type'][$j], 1);			
 			$dataset2[$tablename.'_oid'] = $oid;
@@ -85,7 +107,7 @@
 				if(is_array($elements[$e]) OR is_object($elements[$e]))$elements[$e] = json_encode($elements[$e]);		# ist ein Array oder Objekt (also entweder ein Array-Typ oder ein Datentyp) und wird zur Übertragung wieder encodiert
 				$dataset2[$attributes2['name'][$j]] = $elements[$e];
 				$datapart .= '<div id="div_'.$id.'_'.$e.'" style="display: '.($e==-1 ? 'none' : 'block').'"><table cellpadding="0" cellspacing="0"><tr><td>';
-				$datapart .= attribute_value($gui, $layer_id, $attributes2, $j, $k, $dataset2, $size, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id);
+				$datapart .= attribute_value($gui, $layer, $attributes2, $j, $k, $dataset2, $size, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id);
 				$datapart .= '</td>';
 				if($attributes['privileg'][$j] == '1' AND !$lock[$k]){
 					$datapart .= '<td valign="top"><a href="#" onclick="removeArrayElement(\''.$id.'\', \''.$id.'_'.$e.'\');'.$onchange2.'return false;"><img style="width: 18px" src="'.GRAPHICSPATH.'datensatz_loeschen.png"></a></td>';
@@ -97,9 +119,9 @@
 			if($attributes['privileg'][$j] == '1' AND !$lock[$k]){
 				$datapart .= '<div style="padding: 3px 10px 3px 3px;float: right"><a href="javascript:addArrayElement(\''.$id.'\', \''.$attributes['form_element_type'][$j].'\', \''.$oid.'\')" class="buttonlink"><span>'.$strNewEmbeddedPK.'</span></a></div>';
 			}
-			return $datapart;
+			return $datapart.$after_attribute;
 		}
-		
+
 		###### Nutzer-Datentyp #####
 		if(is_numeric($attributes['type'][$j])){
 			if($field_id != NULL)$id = $field_id;		# wenn field_id übergeben wurde (nicht die oberste Ebene)
@@ -107,25 +129,72 @@
 			$datapart .= '<input type="hidden" class="'.$field_class.'" title="'.$alias.'" name="'.$fieldname.'" id="'.$id.'" onchange="'.$onchange.'" value="'.htmlspecialchars($value).'">';
 			$type_attributes = $attributes['type_attributes'][$j];
 			$elements = json_decode($value);	# diese Funktion decodiert immer den kommpletten String
+			if($elements != NULL){
+				foreach($elements as $element => $elem_value){
+					if (is_array($elem_value) OR is_object($elem_value)) {
+						# ist ein Array oder Objekt (also entweder ein Array-Typ oder ein Datentyp) und wird zur Übertragung wieder encodiert
+						$elem_value = json_encode($elem_value);
+					}
+					$dataset2[$element] = $elem_value;
+				}
+			}
 			$tsize = 20;
 			$datapart .= '<table border="2" class="gle_datatype_table">';
-			$onchange2 = 'buildJSONString(\''.$id.'\', false);';
-			for($e = 0; $e < count($type_attributes['name']); $e++){
-				if($elements != NULL){
-					$elem_value = current($elements);
-					next($elements);
+			$onchange2 = "buildJSONString('" . $id . "', false);";
+			for ($e = 0; $e < count($type_attributes['name']); $e++) {
+				if ($type_attributes['visible'][$e] != 0) {
+					$type_attributes['privileg'][$e] = $attributes['privileg'][$j];
+					if ($type_attributes['alias'][$e] == '') $type_attributes['alias'][$e] = $type_attributes['name'][$e];
+					switch ($type_attributes['labeling'][$e]) {
+						case 1 : {
+							$datapart .= '
+								<tr>
+									<td colspan="2" valign="top" class="gle-attribute-name">
+										<table>
+											<tr>
+												<td>' . $type_attributes['alias'][$e] . '</td>
+											</tr>
+										</table>
+									</td>
+								</tr>
+								<tr>
+									<td colspan="2" class="gle_attribute_value">
+										' . attribute_value($gui, $layer, $type_attributes, $e, $k, $dataset2, $tsize, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id) . '
+									</td>
+								</tr>
+							';
+						} break;
+						case 2 : {
+							$datapart .= '
+								<tr>
+									<td colspan="2" class="gle_attribute_value">
+										' . attribute_value($gui, $layer, $type_attributes, $e, $k, $dataset2, $tsize, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id) . '
+									</td>
+								</tr>
+							';
+						} break;
+						default : {
+							$datapart .= '
+								<tr id="tr_'.$layer_id.'_'.$type_attributes['name'][$e].'_'.$k.'" style="'.($type_attributes['vcheck_attribute'][$e] != ''? 'display: none' : '').'" class="' . $attribute_class . '">
+									<td valign="top" class="gle_attribute_name">
+										<table>
+											<tr>
+												<td>' . $type_attributes['alias'][$e] . '</td>
+											</tr>
+										</table>
+									</td>
+									<td class="gle_attribute_value">
+										' . attribute_value($gui, $layer, $type_attributes, $e, $k, $dataset2, $tsize, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id) . '
+									</td>
+								</tr>';
+						}
+					}
 				}
-				if(is_array($elem_value) OR is_object($elem_value))$elem_value = json_encode($elem_value);		# ist ein Array oder Objekt (also entweder ein Array-Typ oder ein Datentyp) und wird zur Übertragung wieder encodiert
-				$dataset2[$type_attributes['name'][$e]] = $elem_value;
-				$type_attributes['privileg'][$e] = $attributes['privileg'][$j];
-				if($type_attributes['alias'][$e] == '')$type_attributes['alias'][$e] = $type_attributes['name'][$e];
-				$datapart .= '<tr><td valign="top" class="gle_attribute_name"><table><tr><td>'.$type_attributes['alias'][$e].'</td></tr></table></td>';
-				$datapart .= '<td class="gle_attribute_value">'.attribute_value($gui, $layer_id, $type_attributes, $e, NULL, $dataset2, $tsize, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id).'</td></tr>';
 			}
-			$datapart .= '</tr></table>';
-			return $datapart;
+			$datapart .= '</table>';
+			return $datapart.$after_attribute;
 		}
-		
+
 		###### normal #####
 		if($attributes['constraints'][$j] != '' AND !in_array($attributes['constraints'][$j], array('PRIMARY KEY', 'UNIQUE'))){
 			if($attributes['privileg'][$j] == '0' OR $lock[$k]){
@@ -431,27 +500,30 @@
 						$dokumentpfad = $value;
 						$pfadteil = explode('&original_name=', $dokumentpfad);
 						$dateiname = $pfadteil[0];
-						$original_name = $pfadteil[1];
-						$dateinamensteil=explode('.', $dateiname);
+						if($layer['document_url'] != '')$dateiname = url2filepath($dateiname, $layer['document_path'], $layer['document_url']);
+						$dateinamensteil = explode('.', $dateiname);
 						$type = strtolower($dateinamensteil[1]);
 						$thumbname = $gui->get_dokument_vorschau($dateinamensteil);
-						$gui->allowed_documents[] = addslashes($dateiname);
-						$gui->allowed_documents[] = addslashes($thumbname);
-						if($attributes['options'][$j] != '' AND strtolower(substr($attributes['options'][$j], 0, 6)) != 'select'){		# bei Layern die auf andere Server zugreifen, wird die URL des anderen Servers verwendet
-							$url = $attributes['options'][$j].$gui->document_loader_name.'?dokument=';
+						if($layer['document_url'] != ''){
+							$url = '';										# URL zu der Datei (komplette URL steht schon in $dokumentpfad)
+							$target = 'target="_blank"';
+							$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
 						}
 						else{
-							$url = IMAGEURL.$gui->document_loader_name.'?dokument=';
-						}											
+							$original_name = $pfadteil[1];							
+							$gui->allowed_documents[] = addslashes($dateiname);
+							$gui->allowed_documents[] = addslashes($thumbname);
+							$url = IMAGEURL.$gui->document_loader_name.'?dokument=';			# absoluter Dateipfad
+						}
 						$datapart .= '<table border="0"><tr><td>';
 						if($hover_preview){
 							$onmouseover='onmouseenter="document.getElementById(\'vorschau\').style.border=\'1px solid grey\';document.getElementById(\'preview_img\').src=this.src" onmouseleave="document.getElementById(\'vorschau\').style.border=\'none\';document.getElementById(\'preview_img\').src=\''.GRAPHICSPATH.'leer.gif\'"';
 						}
 						if(in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf')) ){
-							$datapart .= '<a href="'.$url.$dokumentpfad.'"><img class="preview_image" src="'.$url.$thumbname.'" '.$onmouseover.'></a>';									
+							$datapart .= '<a href="'.$url.$dokumentpfad.'" '.$target.'><img class="preview_image" src="'.$url.$thumbname.'" '.$onmouseover.'></a>';									
 						}
 						else{
-							$datapart .= '<a href="'.$url.$dokumentpfad.'"><img class="preview_doc" src="'.$url.$thumbname.'"></a>';									
+							$datapart .= '<a href="'.$url.$dokumentpfad.'" '.$target.'><img class="preview_doc" src="'.$url.$thumbname.'"></a>';									
 						}
 						$datapart .= '</td><td>';
 						if($attribute_privileg != '0' AND !$lock[$k]){
@@ -461,7 +533,7 @@
 						$datapart .= '</td></tr>';
 						$datapart .= '<tr><td colspan="2"><span id="image_original_name">'.$original_name.'</span></td></tr>';
 						$datapart .= '</table>';
-						$datapart .= '<input type="hidden" name="'.$fieldname.'_alt" value="'.$value.'">';
+						$datapart .= '<input type="hidden" name="'.str_replace(';Dokument;', ';Dokument_alt;', $fieldname).'" value="'.$value.'">';
 					}
 					if($attribute_privileg != '0' AND !$lock[$k]){
 						$datapart .= '<input tabindex="1" onchange="'.$onchange.'" style="font-size: '.$fontsize.'px" size="43" type="file" onchange="this.title=this.value;" id="'.$layer_id.'_'.$name.'_'.$k.'" title="'.$alias.'" class="'.$field_class.'" name="'.$fieldname.'">';
@@ -516,7 +588,7 @@
 					if ($explosion[3] == 'all_not_null' and $one_param_is_null) {
 						$show_link = false;
 					}
-
+					$datapart .= '<input class="'.$field_class.'" type="hidden" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 					if ($show_link) {
 						if($explosion[2] == 'embedded'){
 							$datapart .= '<a class="dynamicLink" href="javascript:if(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\').innerHTML != \'\'){clearsubform(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\');} else {ahah(\''.$href.'\', \'\', new Array(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'))}">';
@@ -625,8 +697,8 @@
 						}
 						else{								// zeilenweise
 							$maxwidth = $size * 11;
-							$minwidth = $size * 7.1;
-							$datapart .= '<div class="readonly_text" style="padding: 0 0 0 3; min-width: '.$minwidth.'px; max-width:'.$maxwidth.'px; font-size: '.$fontsize.'px;">'.$value.'</div>';
+							#$minwidth = $size * 7.1;
+							$datapart .= '<div class="readonly_text" style="padding: 0 0 0 3; max-width:'.$maxwidth.'px; font-size: '.$fontsize.'px;">'.$value.'</div>';
 						}
 					}
 					if($attribute_privileg > '0' AND $attributes['options'][$j] != ''){
@@ -634,13 +706,13 @@
 							$datapart .= '&nbsp;<a title="automatisch generieren" href="javascript:auto_generate(new Array(\''.implode($attributes['name'], "','").'\'), \''.$attributes['the_geom'].'\', \''.$name.'\', '.$k.', '.$layer_id.');set_changed_flag(currentform.changed_'.$layer_id.'_'.$oid.')"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
 						}
 						else{
-							$datapart .= '&nbsp;<a title="Eingabewerkzeug verwenden" href="javascript:openCustomSubform('.$layer_id.', \''.$name.'\', new Array(\''.implode($attributes['name'], "','").'\'), \''.$name.'_'.$k.'\', '.$k.');"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
+							$datapart .= '&nbsp;<a title="Eingabewerkzeug verwenden" href="javascript:openCustomSubform('.$layer_id.', \''.$name.'\', new Array(\''.implode($attributes['name'], "','").'\'), \''.$layer_id.'_'.$name.'_'.$k.'\', '.$k.');"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
 						}
 					}
 				}
 			}
 		}
-		return $datapart;
+		return $datapart.$after_attribute;
 	}
 
 	function Autovervollstaendigungsfeld($layer_id, $name, $j, $alias, $fieldname, $value, $output, $privileg, $k, $oid, $subform_layer_id, $subform_layer_privileg, $embedded, $lock, $fontsize, $change_all, $size, $onchange, $field_class){
@@ -786,12 +858,20 @@
 	}
 
 	/*
-	* Diese Funktion erzeugt ein class oder ein style Attribut eines html elementes
-	* geführt von einem Leerzeichen je nach dem ob der übergebene Text ein : enthält (style) oder nicht.
-	* @param string $class_or_style Der Text, der den Klassennamen oder den Styletext enthält
-	* @return string Text in der Form ' class="class_name"' oder ' style="css-text"'
+	* Diese Funktion erzeugt ein class und/oder ein style Attribut eines html-Elementes
+	* geführt von einem Leerzeichen je nach dem ob die in einem Array übergebenen Strings ein ":" enthalten (style) oder nicht (class).
+	* @param array $class_or_style Ein Array welches beliebig viele Klassennamen oder Styledefinitionen enthalten kann
+	* @return string Text in der Form ' class="class_name" style="css-text"'
 	*/
-	function get_td_class_or_style($class_or_style) {
-		return ' ' . (strpos($class_or_style, ':') === false ? 'class' : 'style') . '="' . $class_or_style . '"';
+	function get_td_class_or_style($class_or_style){
+		foreach($class_or_style as $elem){
+			if($elem != ''){
+				if(strpos($elem, ':') === false)$class[] = $elem;
+				else $style[] = $elem;
+			}
+		}
+		if(!empty($class))$output = ' class="'.implode($class, ' ').'"';
+		if(!empty($style))$output.= ' style="'.implode($style, ';').'"';
+		return $output;
 	}
 ?>

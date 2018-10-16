@@ -39,10 +39,8 @@
 #
 ############################################################################################
 # Klassen in dieser Datei
-# class_account
-# class_user
-# class_rolle
-# class_stelle
+# account
+# user
 
 ##############################
 # class_account
@@ -62,13 +60,13 @@ class account {
 			# die Statistik zur Anfrage
 			$BezeichnungStelle = new stelle($stelle,$this->database);
 			$UserName = new user('','',$this->database);
-	
+
 			$this->epoch=$this->epoch();
 			#$this->getLayer=$this->getLayer('');
 			#$this->getLoggedLayer=$this->getLayer(1);
 			#$this->allLayerAccess=$this->getAllAccess('2layer');
 			#$this->allAccess=$this->getAllAccess('');
-	
+
 			$day_d=str_pad($day_d, 2, "0", STR_PAD_LEFT);
 			$month_d=str_pad($month_d, 2, "0", STR_PAD_LEFT);
 			$month_e1=str_pad($month_e1, 2, "0", STR_PAD_LEFT);
@@ -77,7 +75,7 @@ class account {
 			$day_e2=str_pad($day_e2, 2, "0", STR_PAD_LEFT);
 			$date1=$year_e1.'-'.$month_e1.'-'.$day_e1;
 			$date2=$year_e2.'-'.$month_e2.'-'.$day_e2 ;
-	
+
 			if ($zeitraum=='month') {
 				if ($nutzung=='stelle'){
 					$this->Bezeichnung=$BezeichnungStelle->getName();
@@ -654,9 +652,7 @@ class account {
 #########################
 # class_user #
 class user {
-	# todo
-	# Beim Anlegen eines neuen Benutzers müssen die Einstellungen für die Karte
-	# aus der Stellenbeschreibung als Anfangswerte übernommen werden
+	# // TODO: Beim Anlegen eines neuen Benutzers müssen die Einstellungen für die Karte aus der Stellenbeschreibung als Anfangswerte übernommen werden
 
 	var $id;
 	var $Name;
@@ -671,22 +667,21 @@ class user {
 	var $database;
 	var $remote_addr;
 
-	
-	function user($login_name,$id,$database) {
+	function user($login_name, $id, $database, $passwort = '') {
 		global $debug;
-		$this->debug=$debug;
-		$this->database=$database;
-		if($login_name){
-			$this->login_name=$login_name;
-			$this->readUserDaten(0,$login_name);
-			$this->remote_addr=getenv('REMOTE_ADDR');
+		$this->debug = $debug;
+		$this->database = $database;
+		if ($login_name) {
+			$this->login_name = $login_name;
+			$this->readUserDaten(0, $login_name, $passwort);
+			$this->remote_addr = getenv('REMOTE_ADDR');
 		}
-		else{
+		else {
 			$this->id = $id;
-			$this->readUserDaten($id,0);
+			$this->readUserDaten($id, 0);
 		}
 	}
-	
+
 	function clientIpIsValide($remote_addr) {
     # Prüfen ob die übergebene IP Adresse zu den für den Nutzer eingetragenen Adressen passt
     $ips=explode(';',$this->ips);
@@ -704,21 +699,22 @@ class user {
     return 0;
   }
 
-	function readUserDaten($id, $login_name) {
+	function readUserDaten($id, $login_name, $passwort = '') {
 		$where = array();
 		if ($id > 0) array_push($where, "ID = " . $id);
 		if ($login_name != '') array_push($where, "login_name LIKE '" . $login_name . "'");
+		if ($passwort != '') array_push($where, "passwort = md5('" . $passwort . "')");
 		$sql = "
 			SELECT
 				*
 			FROM
 				user
-			WHERE " .
-				implode(" AND ", $where) . "
+			WHERE
+				" . implode(" AND ", $where) . "
 		";
 		#echo '<br>Sql: ' . $sql;
 
-		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>" . $sql, 4);
+		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>" . $sql, 3);
 		$query = mysql_query($sql,$this->database->dbConn);
 		if ($query == 0) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
 		$rs = mysql_fetch_array($query);
@@ -735,25 +731,41 @@ class user {
 		}
 		$this->funktion = $rs['Funktion'];
 		$this->password_setting_time = $rs['password_setting_time'];
-  }
-  
-  function getLastStelle() {
-    $sql = 'SELECT stelle_id FROM user WHERE ID='.$this->id;
-    $this->debug->write("<p>file:users.php class:user->getLastStelle - Abfragen der zuletzt genutzten Stelle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs=mysql_fetch_array($query);
-    return $rs['stelle_id'];
-  }
-  
+		$this->agreement_accepted = $rs['agreement_accepted'];
+	}
+
+	/*
+	* Liefert die ID der vom Nutzer zuletzt verwendeten Stelle
+	* wird keine gefunden wird eine 0 zurückgegeben
+	* @return integer
+	*/
+	function getLastStelle() {
+		$sql = "
+			SELECT
+				stelle_id
+			FROM
+				user
+			WHERE
+				ID= " . $this->id ."
+		";
+		$this->debug->write("<p>file:users.php class:user->getLastStelle - Abfragen der zuletzt genutzten Stelle:<br>" . $sql, 4);
+		$query = mysql_query($sql, $this->database->dbConn);
+		if ($query == 0) {
+			$this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4);
+			return 0;
+		}
+		$rs = mysql_fetch_array($query);
+		return $rs['stelle_id'];
+	}
+
 	function setSize($mapsize) {
 		$this->rolle->setSize($mapsize);
 		return 1;
 	}
 
 	function setRolle($stelle_id) {
-		# Abfragen und zuweisen der Einstellungen für die Rolle		
-		$rolle = new rolle($this->id, $stelle_id, $this->database);		
+		# Abfragen und zuweisen der Einstellungen für die Rolle
+		$rolle = new rolle($this->id, $stelle_id, $this->database);
 		if ($rolle->readSettings()) {
 			$this->rolle=$rolle;
 			return 1;
@@ -825,7 +837,7 @@ class user {
 		}
 		return $user;
 	}
-	
+
 	function getUserDaten($id,$login_name,$order) {
 		$sql ='SELECT * FROM user WHERE 1=1';
 		if ($id>0) {
@@ -895,17 +907,32 @@ class user {
 	function updateStelleID($stelle_id) {
 		# sezten der aktuell für den Nutzer eingestellten Stelle
 		$sql ='UPDATE user SET stelle_id='.$stelle_id.' WHERE ID='.$this->id;
-		$this->debug->write("<p>file:users.php class:user->setStelle - Setzen der aktuellen Stelle<br>".$sql,4);
+		$this->debug->write("<p>file:users.php class:user->updateStelleID - Setzen der aktuellen Stellen-ID für den User<br>".$sql,4);
 		$query=mysql_query($sql,$this->database->dbConn);
 		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		$this->debug->write('Stelle gewechselt, neue Stellen_ID: '.$neueStelle,4);
 	}
 
-	function setStelle($stelle_id,$formvars) {
-		# Speicherung dass der User diese Stelle als letztes genutzt hat
-		# setzen der Werte, die aktuell für die Nutzung der Stelle durch den Nutzer gelten sollen.
-		$this->updateStelleID($stelle_id);
-		# zerlegen der Variable für die Kartengröße
+	function update_agreement_accepted($accepted) {
+		$sql = "
+			UPDATE
+				user
+			SET
+				agreement_accepted = " . $accepted . "
+			WHERE
+				ID = " . $this->id . "
+		";
+		$this->debug->write("<p>file:users.php class:user->agreement_accepted - Setzen ob Agreement akzeptiert.<br>" . $sql, 4);
+		$query = mysql_query($sql, $this->database->dbConn);
+		if ($query == 0) {
+			$this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4);
+			return 0;
+		}
+	}
+
+	function setOptions($stelle_id, $formvars) {
+		# Setzen der Werte, die aktuell für die Nutzung der Stelle durch den Nutzer gelten sollen.
+		# Zerlegen der Variable für die Kartengröße
 		$teil=explode('x',$formvars['mapsize']);
 		$nImageWidth=$teil[0];
 		$nImageHeight=$teil[1];
@@ -980,14 +1007,14 @@ class user {
 
 			$sql.=' WHERE stelle_id='.$stelle_id.' AND user_id='.$this->id;
 			#echo $sql;
-			$this->debug->write("<p>file:users.php class:user->setStelle - Setzen der Einstellungen für die Rolle<br>".$sql,4);
+			$this->debug->write("<p>file:users.php class:user->setOptions - Setzen der Einstellungen für die Rolle des Users<br>".$sql,4);
 			$query=mysql_query($sql,$this->database->dbConn);
 			if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 			$this->debug->write('Neue Werte für Rolle eingestellt: '.$formvars['nZoomFactor'].', '.$formvars['mapsize'],4);
 		}
 		return 1;
 	}
-	
+
 	function checkstelle(){
 		# Funktion wird nach Änderungen im Nutzer- und Stelleneditor aufgerufen und überprüft
 		# ob die letzte Stellen_ID leer ist und ob die letzte Stellen_ID nicht mehr zu den dem Nutzer
@@ -1043,7 +1070,7 @@ class user {
 
 	function loginname_exists($login) {
 		$Meldung='';
-		# testen ob es einen user unter dieser id in der Datenbanktabelle gibt
+		# testen ob es einen user mit diesem login_namen in der Datenbanktabelle gibt
 		$sql ="SELECT * FROM user WHERE login_name='".$login."'";
 		$ret=$this->database->execSQL($sql,4, 0);
 		if ($ret[0]) {
@@ -1157,29 +1184,36 @@ class user {
 	}
 
 	function Aendern($userdaten) {
-		$sql ='UPDATE user SET';
-		if($userdaten['id'] != ''){
-			$sql.=' ID='.$userdaten['id'].', ';
+		if ($userdaten['changepasswd']) {
+			$passwort_column = ", `passwort` = MD5('" . $userdaten['password2'] . "')";
+			$passwort_setting_time_column = ", `password_setting_time` = CURRENT_TIMESTAMP()";
 		}
-		$sql.=' Name="'.$userdaten['nachname'].'"';
-		$sql.=',Vorname="'.$userdaten['vorname'].'"';
-		$sql.=',login_name="'.$userdaten['loginname'].'"';
-		$sql.=',Namenszusatz="'.$userdaten['Namenszusatz'].'"';
-		if($userdaten['changepasswd']){
-			$sql.=',passwort=MD5("'.$userdaten['password2'].'")';
-			$sql.=',password_setting_time=CURRENT_TIMESTAMP()';
+		# Wurde ein password_setting_time explizit mitgeschickt, wird dieses eingetragen statt current_timestamp
+		if ($userdaten['password_setting_time']) {
+			$passwort_setting_time_column = ", `password_setting_time` = '" . $userdaten['password_setting_time'] . "'";
 		}
-		if ($userdaten['phon']!='') {
-			$sql.=',phon="'.$userdaten['phon'].'"';
-		}
-		if ($userdaten['email']!='') {
-			$sql.=',email="'.$userdaten['email'].'"';
-		}
-		$sql.=',start="'.$userdaten['start'].'"';
-		$sql.=',stop="'.$userdaten['stop'].'"';
-		$sql.=',ips="'.$userdaten['ips'].'"';
-		$sql.=' WHERE ID='.$userdaten['selected_user_id'];
-		$ret=$this->database->execSQL($sql,4, 0);
+
+		$sql = "
+			UPDATE
+				`user`
+			SET
+				`Name` = '" . $userdaten['nachname'] . "',
+				`Vorname` = '" . $userdaten['vorname'] . "',
+				`login_name` = '" . $userdaten['loginname'] . "',
+				`Namenszusatz` = '" . $userdaten['Namenszusatz'] . "',
+				`start` = '" . $userdaten['start'] . "',
+				`stop`= '" . $userdaten['stop'] . "', " .
+				($userdaten['id'] 		!= '' ? "`ID` 			=  " . $userdaten['id'] . "," 								: "") .
+				($userdaten['phon'] 	!= '' ? "`phon` 		= '" . $userdaten['phon'] . "'," 						: "") .
+				($userdaten['email']	!= '' ? "`email` 		= '" . $userdaten['email'] . "',"						: "") . "
+				`ips` = '" . $userdaten['ips'] . "'" .
+				$passwort_column .
+				$passwort_setting_time_column . "
+			WHERE
+				`ID`= " . $userdaten['selected_user_id'] . "
+		";
+		#echo 'SQL: ' . $sql;
+		$ret = $this->database->execSQL($sql, 4, 0);
 		if ($ret[0]) {
 			$ret[1].='<br>Die Benutzerdaten konnten nicht aktualisiert werden.<br>'.$ret[1];
 		}
@@ -1200,14 +1234,23 @@ class user {
 	 * @see    NeuAnlegen(), Aendern(), Loeschen(), $user, $rolle, $stelle
 	 */
 	function setNewPassword($password) {
-		$sql ='UPDATE user SET';
-		$sql.=' passwort=MD5("'.$password.'")';
-		$sql.=',password_setting_time=CURRENT_TIMESTAMP()';
-		$sql.=' WHERE ID='.$this->id;
+		$password_setting_time = date('Y-m-d H:i:s', time());
+		$sql = "
+			UPDATE
+				user
+			SET
+				`passwort` = MD5('" . $password . "'),
+				`password_setting_time` = '" . $password_setting_time . "'
+			WHERE
+				`ID` = " . $this->id . "
+		";
 		#echo $sql;
-		$ret=$this->database->execSQL($sql,4, 0);
+		$ret = $this->database->execSQL($sql,4, 0);
 		if ($ret[0]) {
-			$ret[1].='<br>Die Benutzerdaten konnten nicht aktualisiert werden.<br>'.$ret[1];
+			$ret[1] .= '<br>Die Benutzerdaten konnten nicht aktualisiert werden.<br>'.$ret[1];
+		}
+		else {
+			$this->password_setting_time = $password_setting_time;
 		}
 		return $ret;
 	}

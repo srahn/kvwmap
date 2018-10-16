@@ -1,110 +1,111 @@
 <?
 		
-	$this->goNotExecutedInPlugins = false;
-		
+function go_switch_jagdkataster($go){
+	global $GUI;
 	switch($go){
 	  # Jagdbezirke Sachdaten anzeigen
 	  case 'jagdbezirk_show_data' : {
 			include(PLUGINS.'jagdkataster/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'jagdkataster/model/jagdkataster.php');		# jagdkataster-Klasse einbinden
-			$this->jagdbezirk_show_data();
+			$GUI->jagdbezirk_show_data();
 	  }break;
 
 	  # zoomtoJagdbezirke
 	  case 'zoomtojagdbezirk' : {
 			include(PLUGINS.'jagdkataster/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'jagdkataster/model/jagdkataster.php');		# jagdkataster-Klasse einbinden
-			$this->zoomtojagdbezirk();
+			$GUI->zoomtojagdbezirk();
 	  }break;
 	  
 	  # Jagdbezirke Suchenflurst
 	  case 'jagdbezirke_auswaehlen_Suchen' : {
 			include(PLUGINS.'jagdkataster/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'jagdkataster/model/jagdkataster.php');		# jagdkataster-Klasse einbinden
-			$this->jagdbezirke_auswaehlen_suchen();
+			$GUI->jagdbezirke_auswaehlen_suchen();
 	  }break;
 	  
 	  # Jagdbezirke Suchenflurst
 	  case 'jagdbezirke_auswaehlen_Suchen_csv' : {
 			include(PLUGINS.'jagdkataster/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'jagdkataster/model/jagdkataster.php');		# jagdkataster-Klasse einbinden
-			$this->jagdbezirke_auswaehlen_suchen_csv();
+			$GUI->jagdbezirke_auswaehlen_suchen_csv();
 	  }break;
 	  
 	  # Jagdbezirke Suchen
 	  case 'jagdbezirke_auswaehlen' : {
 			include(PLUGINS.'jagdkataster/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'jagdkataster/model/jagdkataster.php');		# jagdkataster-Klasse einbinden
-			$this->jagdbezirke_auswaehlen();
+			$GUI->jagdbezirke_auswaehlen();
 	  }break;
 
 	  # Jagdkatastereditor
 	  case 'jagdkatastereditor' : {
-			$this->checkCaseAllowed($go);
+			$GUI->checkCaseAllowed($go);
 			include(PLUGINS.'jagdkataster/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'jagdkataster/model/jagdkataster.php');		# jagdkataster-Klasse einbinden
-			$this->jagdkatastereditor();
+			$GUI->jagdkatastereditor();
 	  }break;
 
 	  # Jagdkatastereditor
 	  case 'jagdkatastereditor_Senden' : {
 			include(PLUGINS.'jagdkataster/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'jagdkataster/model/jagdkataster.php');		# jagdkataster-Klasse einbinden
-			$this->jagdkatastereditor_senden();
+			$GUI->jagdkatastereditor_senden();
 	  }break;
 
 	  # Jagdkatastereditor
 	  case 'jagdkatastereditor_Loeschen' : {
 			include(PLUGINS.'jagdkataster/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'jagdkataster/model/jagdkataster.php');		# jagdkataster-Klasse einbinden
-			$this->jagdkatastereditor_loeschen();
+			$GUI->jagdkatastereditor_loeschen();
 	  }break;
 
 	  # Jagdkatastereditor
 	  case 'jagdkatastereditor_kopieren' : {
 			include(PLUGINS.'jagdkataster/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'jagdkataster/model/jagdkataster.php');		# jagdkataster-Klasse einbinden
-			$this->jagdkatastereditor_kopieren();
+			$GUI->jagdkatastereditor_kopieren();
 	  }break;
 
 	  # Jagdkatastereditor
 	  case 'jagdkatastereditor_Eigentuemer_Listen' : {	
 			include(PLUGINS.'jagdkataster/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'jagdkataster/model/jagdkataster.php');		# jagdkataster-Klasse einbinden
-			$this->jagdkatastereditor_listeigentuemer();
+			$GUI->jagdkatastereditor_listeigentuemer();
 	  }break;
 	  
 	  # Jagdkatastereditor
 	  case 'jagdkatastereditor_Flurstuecke_Listen' : {
 			include(PLUGINS.'jagdkataster/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'jagdkataster/model/jagdkataster.php');		# jagdkataster-Klasse einbinden
-			$this->jagdkatastereditor_listflurst();
+			$GUI->jagdkatastereditor_listflurst();
 	  }break;
 	  
 	  # Jagdkatastereditor
 	  case 'jagdkatastereditor_Flurstuecke_Listen_csv' : {
 			include(PLUGINS.'jagdkataster/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'jagdkataster/model/jagdkataster.php');		# jagdkataster-Klasse einbinden
-			$this->jagdkatastereditor_listflurst_csv();
+			$GUI->jagdkatastereditor_listflurst_csv();
 	  }break;
 		
 		# Jagdkatastereditor
 	  case 'jagdkatastereditor_Eigentuemer_Listen_csv' : {
 			include(PLUGINS.'jagdkataster/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'jagdkataster/model/jagdkataster.php');		# jagdkataster-Klasse einbinden
-			$this->jagdkatastereditor_listeigentuemer_csv();
+			$GUI->jagdkatastereditor_listeigentuemer_csv();
 	  }break;
 
 	  # Jagdkatastereditor
 	  case 'jagdkatastereditor_Paechter_Listen' : {
 			include(PLUGINS.'jagdkataster/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'jagdkataster/model/jagdkataster.php');		# jagdkataster-Klasse einbinden
-			$this->jagdkatastereditor_listpaechter();
+			$GUI->jagdkatastereditor_listpaechter();
 	  }break;
 		
 		default : {
-			$this->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
+			$GUI->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
 		}
 	}
+}
 	
 ?>

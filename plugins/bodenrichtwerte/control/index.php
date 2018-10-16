@@ -1,60 +1,61 @@
 <?
 		
-	$this->goNotExecutedInPlugins = false;	
-		
+function go_switch_bodenrichtwerte($go){
+	global $GUI;
 	switch($go){		
 		case 'Bodenrichtwertzone_Loeschen' : {
 			include(PLUGINS.'bodenrichtwerte/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'bodenrichtwerte/model/bodenrichtwerte.php');	# bodenrichtwert-Klasse einbinden
-			$this->bodenRichtWertZoneLoeschen();
+			$GUI->bodenRichtWertZoneLoeschen();
 	  } break;
 
 	  case 'Bodenrichtwertformular' : {
-			$this->checkCaseAllowed('Bodenrichtwertformular');
+			$GUI->checkCaseAllowed('Bodenrichtwertformular');
 			include (PLUGINS.'bodenrichtwerte/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'bodenrichtwerte/model/bodenrichtwerte.php');	# bodenrichtwert-Klasse einbinden
-			$this->titel='Bodenrichtwerterfassung';
-			$this->bodenRichtWertErfassung();
+			$GUI->titel='Bodenrichtwerterfassung';
+			$GUI->bodenRichtWertErfassung();
 	  } break;
 	  
 	  case 'Bodenrichtwertformular_Anzeige' : {
 			include(PLUGINS.'bodenrichtwerte/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'bodenrichtwerte/model/bodenrichtwerte.php');	# bodenrichtwert-Klasse einbinden
-			$this->titel='Bodenrichtwertanzeige';
-			$this->aendernBodenRichtWert();
+			$GUI->titel='Bodenrichtwertanzeige';
+			$GUI->aendernBodenRichtWert();
 	  } break;
 
 	  case 'Bodenrichtwertformular_Aendern' : {
-			$this->checkCaseAllowed('Bodenrichtwertformular');
+			$GUI->checkCaseAllowed('Bodenrichtwertformular');
 			include(PLUGINS.'bodenrichtwerte/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'bodenrichtwerte/model/bodenrichtwerte.php');	# bodenrichtwert-Klasse einbinden
-			$this->aendernBodenRichtWert();
+			$GUI->aendernBodenRichtWert();
 	  } break;
 
 	  case 'Bodenrichtwertformular_Senden' : {
-			$this->checkCaseAllowed('Bodenrichtwertformular');
+			$GUI->checkCaseAllowed('Bodenrichtwertformular');
 			include(PLUGINS.'bodenrichtwerte/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'bodenrichtwerte/model/bodenrichtwerte.php');	# bodenrichtwert-Klasse einbinden
-			$this->bodenRichtWertFormSenden();
+			$GUI->bodenRichtWertFormSenden();
 	  } break;
 
 	  case 'BodenrichtwertzonenKopieren' : {
-			$this->checkCaseAllowed('BodenrichtwertzonenKopieren');
+			$GUI->checkCaseAllowed('BodenrichtwertzonenKopieren');
 			include(PLUGINS.'bodenrichtwerte/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'bodenrichtwerte/model/bodenrichtwerte.php');	# bodenrichtwert-Klasse einbinden
-			$this->waehleBodenwertStichtagToCopy();
+			$GUI->waehleBodenwertStichtagToCopy();
 	  } break;
 
 	  case 'BodenrichtwertzonenKopieren_Senden' : {
-			$this->checkCaseAllowed('BodenrichtwertzonenKopieren');
+			$GUI->checkCaseAllowed('BodenrichtwertzonenKopieren');
 			include(PLUGINS.'bodenrichtwerte/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'bodenrichtwerte/model/bodenrichtwerte.php');	# bodenrichtwert-Klasse einbinden
-			$this->copyBodenrichtwertzonen();
+			$GUI->copyBodenrichtwertzonen();
 	  } break;
 		
 		default : {
-			$this->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
+			$GUI->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
 		}
 	}
+}
 	
 ?>

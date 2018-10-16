@@ -1,5 +1,4 @@
 <?
-	$GUI = $this;
 	
 	# set upload_path from layers document_path
 	$layer = $GUI->user->rolle->getLayer(BAUMFAELLANTRAG_LAYER_ID_ANTRAEGE);
@@ -8,7 +7,7 @@
 		($layer[0]['document_path'] != '') ? $layer[0]['document_path'] : UPLOADPATH
 	);
 
-	$this->uploadTempFile = function() use ($GUI) {
+	$GUI->uploadTempFile = function() use ($GUI) {
 		# pruefe Version
 		if ($GUI->formvars['version'] != "1.0.0")
 			return array("success" => 0, "error_message" => "Geben Sie eine gültige Versionsnummer an. Derzeit wird nur die Version 1.0.0 unterstützt.");
@@ -47,7 +46,7 @@
 		return array("success" => 1, "temp_file" => $upload_file, "preview_file" => $preview_file );
 	};
 
-	$this->createFiles = function($antrag_id, $data) use ($GUI) {
+	$GUI->createFiles = function($antrag_id, $data) use ($GUI) {
 		$plugin_name = 'baumfaellantrag';
 
 		# kopiere hochgelandene temporäre Dateien in Dateien mit sprechenden Namen
@@ -92,7 +91,7 @@
 		return $data;
 	};
 
-	$this->packAndMail = function($antrag_id, $data) use ($GUI) {
+	$GUI->packAndMail = function($antrag_id, $data) use ($GUI) {
 		$plugin_name = 'baumfaellantrag';
 
 		# pruefe Version
@@ -159,7 +158,7 @@
 		);
 	};
 	
-	$this->saveApplicationData = function($antrag_id, $data) use ($GUI) {
+	$GUI->saveApplicationData = function($antrag_id, $data) use ($GUI) {
 		#echo "mandanteRef in saveApp: " . $data['mandateReference'];
 		# get layer database
 		$mapDB = new db_mapObj(null, null);

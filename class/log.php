@@ -17,8 +17,8 @@ class Debugger {
 	################################################################################
 
 	function Debugger($filename, $mime_type = 'text/html') {
-		$this->filename=$filename;
-		$this->fp=fopen($filename,'w');
+		$this->filename = LOGPATH.$_SESSION['login_name'].basename($filename);
+		$this->fp=fopen($this->filename,'w');
 
 		if ($mime_type == 'text/html') {
 			fwrite($this->fp,"<html>\n<head>\n  <title>kvwmap Debug-Datei</title>\n<META http-equiv=Content-Type content='text/html; charset=UTF-8'>\n</head>\n<body>");
@@ -29,7 +29,10 @@ class Debugger {
 		}
 	}
 
-	function write($msg, $level = 4) {
+	function write($msg, $level = 4, $echo = false) {
+		if ($echo) {
+			echo '<br>' . $msg;
+		}
 		if ($level>=DEBUG_LEVEL) {
 			if ($mime_type == 'text/html') {
 				fwrite($this->fp, "\n<br>");

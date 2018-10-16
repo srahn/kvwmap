@@ -1,24 +1,18 @@
 <?
 $ahah = '
 <script language="javascript" type="text/javascript">
-	function ahah(url, data, target, action) {
-		for (k = 0; k < target.length; ++k) {
-			if (target[k] != null && target[k].tagName == "DIV" && target[k].innerHTML == "") {
+	function ahah(url, data, target, action, progress){
+		for(k = 0; k < target.length; ++k){
+			if(target[k] != null && target[k].tagName == "DIV" && target[k].innerHTML == ""){
 				target[k].innerHTML = \'<img src="graphics/ajax-loader.gif">\';
 			}
 		}
-		if (top.window.XMLHttpRequest) {
-			var req = new XMLHttpRequest();
-		} 
-		else if (top.window.ActiveXObject) {
-			var req = new ActiveXObject("Microsoft.XMLHTTP");
-		}
-		if (req != undefined) {
-			req.onreadystatechange = function() {
-				ahahDone(url, target, req, action);
-			};
+		var req = new XMLHttpRequest();
+		if(req != undefined){
+			req.onreadystatechange = function(){ahahDone(url, target, req, action);};
+			if(typeof progress !== \'undefined\')req.upload.addEventListener("progress", progress);
 			req.open("POST", url, true);
-			if (typeof data == "string") {
+			if(typeof data == "string") {
 				req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=iso-8859-15"); // data kann entweder ein String oder ein FormData-Objekt sein
 			}
 			req.send(data);
@@ -34,12 +28,9 @@ $ahah = '
 				}
 				var found = false;
 				response = "" + req.responseText;
-				//response = response.replace(/\s/,""); // bei neueren Postgis-Versionen wird hier das Leerzeichen nach dem M bei asSVG-Abfragen entfernt 
 				response = response.replace(/\n/,"");
 				response = response.replace(/\n/,"");
 				response = response.replace(/\r/,"");
-				//Behandlung des Zielformelements als ein Array
-				//Zerlegung des Resultes für den Fall, dass es mehrere Responsvalues sind
 				responsevalues = response.split("~");
 				if (actions == undefined || actions == "") {
 					actions = new Array();
@@ -59,7 +50,6 @@ $ahah = '
 							break;
 
 							case "xlink:href":
-								//targets[i].setAttribute("xlink:href", responsevalues[i]);	
 								targets[i].setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", responsevalues[i]);
 							break;
 

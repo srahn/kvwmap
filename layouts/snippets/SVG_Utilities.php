@@ -2,6 +2,8 @@
  # 2008-01-24 pkvvm
   include(LAYOUTPATH.'languages/SVG_Utilities_'.$this->user->rolle->language.'.php');
  ?>
+
+<script type="text/javascript" src="funktionen/helmert_trafo.js"></script>
  
 <script language="JavaScript">
 
@@ -15,9 +17,16 @@
 	
 	function coord_input_submit(){
 		document.getElementById("svghelp").SVGcoord_input_submit();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+	}
+	
+	function add_ortho_point(world_x, world_y, local_x, local_y, deactivate){
+		document.getElementById("svghelp").SVGadd_ortho_point(world_x, world_y, local_x, local_y, deactivate);			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 	}	
 
 	var nbh = new Array();
+	
+	function showtooltip(){
+	}
 	
 </script>
  
@@ -29,6 +38,7 @@
 	include(LAYOUTPATH.'snippets/SVGvars_defs.php'); 					# zuweisen von: $SVGvars_defs
 	include(LAYOUTPATH.'snippets/SVGvars_navbuttons.php'); 		# zuweisen von: $SVGvars_navbuttons	
 	include(LAYOUTPATH.'snippets/SVGvars_coordscript.php'); 	# zuweisen von: $SVGvars_coordscript
+	include(LAYOUTPATH.'snippets/SVGvars_querytooltipscript.php');   # zuweisen von: $SVGvars_tooltipscript
 	include(LAYOUTPATH.'snippets/SVGvars_tooltipscript.php');	# zuweisen von: $SVGvars_tooltipscript
 	include(LAYOUTPATH.'snippets/SVGvars_tooltipblank.php');	# zuweisen von: $SVGvars_tooltipblank
 	$bg_pic   = $this->img['hauptkarte'];
@@ -72,8 +82,10 @@
 	</svg>';
 
 	$scriptdefinitions ='
+	var enclosingForm = top.currentform;
 	var transformfunctions = false;
 	var coord_input_functions = false;
+	var ortho_point_functions = false;
 	var bufferfunctions = false;
 	var special_bufferfunctions = false;
 	var polygonfunctions = false;
@@ -94,16 +106,20 @@
 	var pathy = new Array();
 	var m_pathx = new Array();
 	var m_pathy = new Array();
-	if(top.currentform.newpath.value){
-		pathx = getxcoordsfromsvgpath(top.currentform.newpath.value);
-		pathy = getycoordsfromsvgpath(top.currentform.newpath.value);
+	if(enclosingForm.newpath.value){
+		pathx = getxcoordsfromsvgpath(enclosingForm.newpath.value);
+		pathy = getycoordsfromsvgpath(enclosingForm.newpath.value);
 	}
-	if(top.currentform.pathy_second.value != ""){
-		str = top.currentform.pathx_second.value;
+	if(enclosingForm.pathy_second.value != ""){
+		str = enclosingForm.pathx_second.value;
 		pathx_second = str.split(";");
-		str = top.currentform.pathy_second.value;
+		str = enclosingForm.pathy_second.value;
 		pathy_second = str.split(";");
 	}
+	if(enclosingForm.ortho_point_vertices != undefined){
+		var ortho_point_vertices = new Array();
+	}
+	var helmert;
 	var textx = '.$text_x.';
 	var texty = '.$text_y.';
 	var newpath_undo = new Array();
@@ -164,30 +180,30 @@
 
 	function submit(){
 		top.startwaiting();
-		top.overlay_submit(top.currentform, false);
+		top.overlay_submit(enclosingForm, false);
 	}
 		
 	function go_previous(){
 	  document.getElementById("canvas").setAttribute("cursor", "wait");
-	  top.currentform.CMD.value  = "previous";
+	  enclosingForm.CMD.value  = "previous";
 	  submit();
 	}
 	
 	function go_next(){
 	  document.getElementById("canvas").setAttribute("cursor", "wait");
-	  top.currentform.CMD.value  = "next";
+	  enclosingForm.CMD.value  = "next";
 	  submit();
 	}	
 
 	function zoomin(){
-		top.currentform.last_doing2.value = top.currentform.last_doing.value;
-		top.currentform.last_doing.value = "zoomin"; 
+		enclosingForm.last_doing2.value = enclosingForm.last_doing.value;
+		enclosingForm.last_doing.value = "zoomin"; 
 	  document.getElementById("canvas").setAttribute("cursor", "crosshair");
 	}
 
 	function zoomout(){
-		top.currentform.last_doing2.value = top.currentform.last_doing.value;
-		top.currentform.last_doing.value = "zoomout";
+		enclosingForm.last_doing2.value = enclosingForm.last_doing.value;
+		enclosingForm.last_doing.value = "zoomout";
 	  document.getElementById("canvas").setAttribute("cursor", "crosshair");
 	}
 
@@ -197,23 +213,33 @@
 	}
 
 	function recentre(){
-		top.currentform.last_doing2.value = top.currentform.last_doing.value;
-		top.currentform.last_doing.value = "recentre";
+		enclosingForm.last_doing2.value = enclosingForm.last_doing.value;
+		enclosingForm.last_doing.value = "recentre";
 		document.getElementById("canvas").setAttribute("cursor", "move");
 	  document.getElementById("canvas").setAttribute("cursor", "grab");
 		if(measurefunctions == true){
 			save_measure_path();
 		}
 	}
+	
+	function ppquery(){
+		enclosingForm.last_doing2.value = enclosingForm.last_doing.value;
+		enclosingForm.last_doing.value = "ppquery";
+		document.getElementById("canvas").setAttribute("cursor", "pointer");
+	}
+	
+	function noMeasuring(){
+		measuring = false;
+	}	
 
 	function measure(){
-	  top.currentform.last_doing.value = "measure";
+	  enclosingForm.last_doing.value = "measure";
 		// Wenn im UTM-System gemessen wird, NBH-Datei laden
 		if('.$this->user->rolle->epsg_code.' == '.EPSGCODE_ALKIS.')top.ahah("index.php", "go=getNBH", new Array(""), new Array("execute_function"));
-		if(top.currentform.str_pathx.value != ""){
+		if(enclosingForm.str_pathx.value != ""){
 			measuring = true;	
-			top.currentform.str_pathx.value = "";
-			top.currentform.str_pathy.value = "";
+			enclosingForm.str_pathx.value = "";
+			enclosingForm.str_pathy.value = "";
 		}
 		else{
 	  	measuring = false;
@@ -224,7 +250,7 @@
 
 	// ----------------------------punkt setzen---------------------------------
 	function selectPoint(clientx, clienty) {
-	  cmd = top.currentform.last_doing.value;
+	  cmd = enclosingForm.last_doing.value;
 	  // neuen punkt abgreifen
 	  boxx[0] = clientx;
 	  boxy[0] = resy - clienty;
@@ -267,7 +293,7 @@
 	}
 
 	function endPoint(evt) {
-	  cmd = top.currentform.last_doing.value;
+	  cmd = enclosingForm.last_doing.value;
 	  if (!dragdone){
 	  		cmd  = cmd+"_point";}
 	  	else {
@@ -357,63 +383,93 @@
 	}
 
 	function sendBWlocation(loc_x,loc_y) {
-      top.currentform.loc_x.value    = loc_x;
-      top.currentform.loc_y.value    = loc_y;
+      enclosingForm.loc_x.value    = loc_x;
+      enclosingForm.loc_y.value    = loc_y;
   }
 
   function sendBWpath(pathx,pathy) {
-      top.currentform.pathlength.value   = pathx.length;
-      top.currentform.pathx.value    = pathx;
-      top.currentform.pathy.value    = pathy;
+      enclosingForm.pathlength.value   = pathx.length;
+      enclosingForm.pathx.value    = pathx;
+      enclosingForm.pathy.value    = pathy;
   }
 
   function Full_Extent()   {
-      top.currentform.CMD.value  = "Full_Extent";
+      enclosingForm.CMD.value  = "Full_Extent";
       submit();
   }
+
+	function checkQueryFields(){
+		var selected = false;
+		query_fields = top.document.getElementsByClassName(\'info-select-field\');
+		for(var i = 0; i < query_fields.length; i++){
+			if(query_fields[i].checked){
+				selected = true;
+				break;
+			}
+		}
+		if(selected == false)top.message([{ \'type\': \'warning\', \'msg\': \''.$strNoLayer.'\' }]);
+		return selected;
+	}	
+	
   function sendpath(cmd,navX,navY){
     // navX[0] enthaelt den Rechtswert des ersten gesetzte Punktes im Bild in Pixeln
     // von links nach rechts gerechnet
     // navY[0] enthaelt den Hochwert des ersten Punktes im Bild in Pixeln
     // allerdings von oben nach untern gerechnet
     // [2] jeweils den anderen Punkt wenn ein Rechteck uebergeben wurde
-		top.currentform.action = "index.php#geoedit_anchor";
+		enclosingForm.action = "index.php#geoedit_anchor";
     switch(cmd) {
      case "zoomin_point":
-      top.currentform.INPUT_COORD.value  = navX[0]+","+navY[0];
-      top.currentform.CMD.value          = "zoomin";
+      enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0];
+      enclosingForm.CMD.value          = "zoomin";
       submit();
      break;
      case "zoomout":
-      top.currentform.INPUT_COORD.value  = navX[0]+","+navY[0];
-      top.currentform.CMD.value          = cmd;
+      enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0];
+      enclosingForm.CMD.value          = cmd;
       submit();
      break;
      case "zoomin_box":
-      top.currentform.INPUT_COORD.value  = navX[0]+","+navY[0]+";"+navX[2]+","+navY[2];
-      top.currentform.CMD.value          = "zoomin";
+      enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0]+";"+navX[2]+","+navY[2];
+      enclosingForm.CMD.value          = "zoomin";
       submit();
      break;
      case "recentre":
-      top.currentform.INPUT_COORD.value  = navX[0]+","+navY[0];
-      top.currentform.CMD.value = cmd;
+      enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0];
+      enclosingForm.CMD.value = cmd;
       submit();
      break;
+     case "ppquery_point":
+			if(!checkQueryFields())break;
+      path = navX[0]+","+navY[0]+";"+navX[0]+","+navY[0];
+      enclosingForm.INPUT_COORD.value  = path;
+      enclosingForm.CMD.value          = "ppquery";
+			enclosingForm.go.value = "Sachdaten";
+			top.overlay_submit(enclosingForm, true);
+     break;
+     case "ppquery_box":
+			if(!checkQueryFields())break;
+      path = navX[0]+","+navY[0]+";"+navX[2]+","+navY[2];
+      enclosingForm.INPUT_COORD.value  = path;
+      enclosingForm.CMD.value          = "ppquery";
+			enclosingForm.go.value = "Sachdaten";
+      top.overlay_submit(enclosingForm, true);
+     break;
      case "add_geom_box":
-      top.currentform.INPUT_COORD.value  = navX[0]+","+navY[0]+";"+navX[2]+","+navY[2];
-      top.currentform.CMD.value = cmd;
+      enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0]+";"+navX[2]+","+navY[2];
+      enclosingForm.CMD.value = cmd;
      break;
 		 case "subtract_geom_box":
-      top.currentform.INPUT_COORD.value  = navX[0]+","+navY[0]+";"+navX[2]+","+navY[2];
-      top.currentform.CMD.value = cmd;
+      enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0]+";"+navX[2]+","+navY[2];
+      enclosingForm.CMD.value = cmd;
      break;
      case "add_geom_point":
-      top.currentform.INPUT_COORD.value  = navX[0]+","+navY[0]+";"+navX[0]+","+navY[0];
-      top.currentform.CMD.value = cmd;
+      enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0]+";"+navX[0]+","+navY[0];
+      enclosingForm.CMD.value = cmd;
      break;
 		 case "subtract_geom_point":
-      top.currentform.INPUT_COORD.value  = navX[0]+","+navY[0]+";"+navX[0]+","+navY[0];
-      top.currentform.CMD.value = cmd;
+      enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0]+";"+navX[0]+","+navY[0];
+      enclosingForm.CMD.value = cmd;
      break;
      default:
       alert("Keine Bearbeitung moeglich! \nUebergebene Daten: "+cmd+", "+navX[0]+","+navY[0]);
@@ -422,26 +478,26 @@
   }
 
   function updatepaths(){
-  	if(top.currentform.result.value != "" && top.currentform.result.value != " "){
-	  	result = ""+top.currentform.result.value;
+  	if(enclosingForm.result.value != "" && enclosingForm.result.value != " "){
+	  	result = ""+enclosingForm.result.value;
 	  	paths = result.split("||");
 	  	if(paths[1] == "GEOMETRYCOLLECTION EMPTY" || paths[1] == ""){
   			paths[0] = "";
   			paths[1] = "";
 				if(polygonfunctions == true){
-  				top.currentform.firstpoly.value = false;
-  				top.currentform.secondpoly.value = false;
+  				enclosingForm.firstpoly.value = false;
+  				enclosingForm.secondpoly.value = false;
   				restart();
 				}
 				if(linefunctions == true){
-  				top.currentform.firstline.value = false;
-  				top.currentform.secondline.value = false;
+  				enclosingForm.firstline.value = false;
+  				enclosingForm.secondline.value = false;
   				restart();
 				}
 	  	}
-	  	top.currentform.newpath.value = paths[0];
-	  	top.currentform.newpathwkt.value = paths[1];
-	  	top.currentform.result.value = "";
+	  	enclosingForm.newpath.value = paths[0];
+	  	enclosingForm.newpathwkt.value = paths[1];
+	  	enclosingForm.result.value = "";
 			must_redraw = true;
 	  	if(polygonfunctions == true){
 	  		polygonarea();				
@@ -449,22 +505,22 @@
 			if(linefunctions == true){
 				linelength();
 	  	}
-			if(top.currentform.last_doing.value == "split_geometry"){
+			if(enclosingForm.last_doing.value == "split_geometry"){
 				split_geometry();
 			}
-			if(top.currentform.split != undefined){
+			if(enclosingForm.split != undefined){
 				if(paths[1].search(/MULTI.+/) != -1){
-					top.currentform.split.style.visibility = "visible";
+					enclosingForm.split.style.visibility = "visible";
 				}
 				else{
-					top.currentform.split.style.visibility = "hidden";
+					enclosingForm.split.style.visibility = "hidden";
 				}
 			}
   	}
  	}
 
  	function mousewheelzoom(){
-		top.currentform.last_doing2.value = top.currentform.last_doing.value;
+		enclosingForm.last_doing2.value = enclosingForm.last_doing.value;
 		var g = document.getElementById("moveGroup");
 		zx = g.getCTM().inverse();
 		pathx[0] = Math.round(zx.e);
@@ -512,7 +568,7 @@
 		return p;
 	}
  	
-	function startup(){		
+	function startup(){
 		if(window.addEventListener){
 			window.addEventListener(\'mousewheel\', mousewheelchange, false); // Chrome/Safari//IE9
   		window.addEventListener(\'DOMMouseScroll\', mousewheelchange, false);		//Firefox
@@ -528,20 +584,20 @@
 			update_gps_position();
 		}
 		if(polygonfunctions == true){
-			if(top.currentform.always_draw.checked && !geomload){		// "weiterzeichnen"
-				top.currentform.last_button.value = "pgon0";
-				if(top.currentform.secondpoly.value == "started" || top.currentform.secondpoly.value == "true"){	// am zweiten Polygon oder an einer gepufferten Linie wird weitergezeichnet
-					if(top.currentform.last_doing2.value == "add_buffered_line")top.currentform.last_button.value = "buffer1";
-					if(top.currentform.last_doing2.value == "add_parallel_polygon")top.currentform.last_button.value = "buffer2";
-					if(top.currentform.last_doing2.value == "subtract_polygon")top.currentform.last_button.value = "pgon_subtr0";
-					top.currentform.last_doing.value = top.currentform.last_doing2.value;
+			if(enclosingForm.always_draw.checked && !geomload){		// "weiterzeichnen"
+				enclosingForm.last_button.value = "pgon0";
+				if(enclosingForm.secondpoly.value == "started" || enclosingForm.secondpoly.value == "true"){	// am zweiten Polygon oder an einer gepufferten Linie wird weitergezeichnet
+					if(enclosingForm.last_doing2.value == "add_buffered_line")enclosingForm.last_button.value = "buffer1";
+					if(enclosingForm.last_doing2.value == "add_parallel_polygon")enclosingForm.last_button.value = "buffer2";
+					if(enclosingForm.last_doing2.value == "subtract_polygon")enclosingForm.last_button.value = "pgon_subtr0";
+					enclosingForm.last_doing.value = enclosingForm.last_doing2.value;
 					if(pathx_second.length == 1){				// ersten Punkt darstellen
 						document.getElementById("startvertex").setAttribute("cx", (pathx_second[0]-minx)/scale);
 						document.getElementById("startvertex").setAttribute("cy", (pathy_second[0]-miny)/scale);
 					}
 				}
 				else{																												// am ersten Polygon wird weitergezeichnet
-					top.currentform.last_doing.value = "draw_polygon";
+					enclosingForm.last_doing.value = "draw_polygon";
 					if(pathx.length == 1){							// ersten Punkt darstellen
 						document.getElementById("startvertex").setAttribute("cx", (pathx[0]-minx)/scale);
 						document.getElementById("startvertex").setAttribute("cy", (pathy[0]-miny)/scale);
@@ -554,21 +610,21 @@
 					pathx_second.pop();
 					pathy_second.pop();
 				}
-				top.currentform.pathx_second.value = "";
-				top.currentform.pathy_second.value = "";
-				if(top.currentform.firstpoly.value == "true" && top.currentform.last_doing.value == "draw_polygon"){
-					top.currentform.last_doing.value = "draw_second_polygon";
+				enclosingForm.pathx_second.value = "";
+				enclosingForm.pathy_second.value = "";
+				if(enclosingForm.firstpoly.value == "true" && enclosingForm.last_doing.value == "draw_polygon"){
+					enclosingForm.last_doing.value = "draw_second_polygon";
 				}
 			}
 		}
 		if(linefunctions == true){
-			if(top.currentform.always_draw.checked && !geomload){
-				top.currentform.last_button.value = "line0";
-				if(top.currentform.secondline.value == "true"){
-					top.currentform.last_doing.value = "draw_second_line";
+			if(enclosingForm.always_draw.checked && !geomload){
+				enclosingForm.last_button.value = "line0";
+				if(enclosingForm.secondline.value == "true"){
+					enclosingForm.last_doing.value = "draw_second_line";
 				}
 				else{
-					top.currentform.last_doing.value = "draw_line";
+					enclosingForm.last_doing.value = "draw_line";
 				}
 			}
 			else{
@@ -577,22 +633,39 @@
 					pathx_second.pop();
 					pathy_second.pop();
 				}
-				top.currentform.pathx_second.value = "";
-				top.currentform.pathy_second.value = "";
-				if(top.currentform.firstline.value == "true" && top.currentform.last_doing.value == "draw_line"){
-					top.currentform.last_doing.value = "draw_second_line";
+				enclosingForm.pathx_second.value = "";
+				enclosingForm.pathy_second.value = "";
+				if(enclosingForm.firstline.value == "true" && enclosingForm.last_doing.value == "draw_line"){
+					enclosingForm.last_doing.value = "draw_second_line";
 				}
+			}
+		}
+		if(ortho_point_functions == true){
+			if(enclosingForm.ortho_point_vertices.value != ""){
+				o_p_vertices = enclosingForm.ortho_point_vertices.value.split("|");
+				enclosingForm.last_button.value = "ortho_point1";
+				enclosingForm.always_draw.checked = false;
+				ortho_point();';
+				for($o = 0; $o < count($this->formvars['ortho_point_x']); $o++){
+					if($o < 2){
+						$basicfunctions.= '
+						var a = o_p_vertices['.$o.'].split(" ");
+						add_ortho_point(a[0], a[1], '.$this->formvars['ortho_point_x'][$o].', '.$this->formvars['ortho_point_y'][$o].', false);';
+					}
+					else $basicfunctions.= 'add_ortho_point(null, null, '.$this->formvars['ortho_point_x'][$o].', '.$this->formvars['ortho_point_y'][$o].', false);';
+				}
+$basicfunctions.= '			
 			}
 		}
 		fachschale();
 		if(polygonfunctions == true){
-			path = top.currentform.newpath.value;
-			if(top.currentform.pathwkt.value != ""){
-				top.currentform.firstpoly.value = true;
+			path = enclosingForm.newpath.value;
+			if(enclosingForm.pathwkt.value != ""){
+				enclosingForm.firstpoly.value = true;
 			}
-			//top.currentform.secondpoly.value = false;
+			//enclosingForm.secondpoly.value = false;
 			redrawfirstpolygon();
-			if(top.currentform.firstpoly.value == "true")polygonarea();
+			if(enclosingForm.firstpoly.value == "true")polygonarea();
 		}
 		if(linefunctions == true){
 			redrawfirstline();
@@ -637,15 +710,15 @@
 		if(evt.button == 1){			// mittlere Maustaste -> Pan
 			if(evt.preventDefault)evt.preventDefault();
 			else evt.returnValue = false; // IE fix
-			if(top.currentform.last_doing.value == "measure"){
+			if(enclosingForm.last_doing.value == "measure"){
 				save_measure_path();
 			}
-			top.currentform.always_draw.checked = true;
-			top.currentform.last_doing2.value = top.currentform.last_doing.value;
-			top.currentform.last_doing.value = "recentre";
+			enclosingForm.always_draw.checked = true;
+			enclosingForm.last_doing2.value = enclosingForm.last_doing.value;
+			enclosingForm.last_doing.value = "recentre";
 		}
 
-	  switch(top.currentform.last_doing.value){
+	  switch(enclosingForm.last_doing.value){
 			case "zoomin":
 	  		startPoint(client_x, client_y);
 			break;
@@ -655,7 +728,7 @@
 			case "recentre":				
 				startMove(client_x, client_y);
 			break;
-			case "pquery":
+			case "ppquery":
 				startPoint(client_x, client_y);
 			break;
 
@@ -672,23 +745,23 @@
 			break;
 			case "draw_second_line":
 				addlinepoint_second(world_x, world_y);
-				if(top.currentform.secondline.value == "true"){
-					top.ahah("index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&operation=add&geotype=line&resulttype=svgwkt&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
+				if(enclosingForm.secondline.value == "true"){
+					top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=add&geotype=line&resulttype=svgwkt&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 				}
 				redrawsecondline();
 			break;
 			case "delete_lines":
 				addpoint_second(world_x, world_y);
-				if(top.currentform.secondpoly.value == "true"){
-					top.ahah("index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&operation=subtract&resulttype=svgwkt&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
+				if(enclosingForm.secondpoly.value == "true"){
+					top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=subtract&resulttype=svgwkt&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 				}
 				redrawsecondline();
 			break;
 			
 			case "split_geometry":
 				addlinepoint_second(world_x, world_y);
-				if(top.currentform.secondline.value == "true"){
-					top.ahah("index.php", "go=spatial_processing&geotype=line&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&operation=split&resulttype=svgwkt&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
+				if(enclosingForm.secondline.value == "true"){
+					top.ahah("index.php", "go=spatial_processing&geotype=line&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=split&resulttype=svgwkt&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 				}
 				//redrawsecondline();
 			break;
@@ -699,14 +772,14 @@
 			break;
 			case "draw_second_polygon":
 				addpoint_second(world_x, world_y);
-				if(top.currentform.secondpoly.value == "true"){
-					top.ahah("index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&operation=add&resulttype=svgwkt&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
+				if(enclosingForm.secondpoly.value == "true"){
+					top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=add&resulttype=svgwkt&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 				}
 			break;
 			case "subtract_polygon":
 				addpoint_second(world_x, world_y);
-				if(top.currentform.secondpoly.value == "true"){
-					top.ahah("index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&operation=subtract&resulttype=svgwkt&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
+				if(enclosingForm.secondpoly.value == "true"){
+					top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=subtract&resulttype=svgwkt&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 				}
 			break;
 			case "add_geom":
@@ -719,16 +792,16 @@
 			break;
 			case "add_buffered_line":
 				addlinepoint_second(world_x, world_y);
-				top.currentform.firstpoly.value = "true";
-				top.currentform.secondpoly.value = "true";
-				top.ahah("index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&operation=add_buffered_line&width="+top.currentform.bufferwidth.value+"&geotype=line&resulttype=svgwkt&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
+				enclosingForm.firstpoly.value = "true";
+				enclosingForm.secondpoly.value = "true";
+				top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=add_buffered_line&width="+enclosingForm.bufferwidth.value+"&geotype=line&resulttype=svgwkt&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 			break;
 			case "add_parallel_polygon":
 				addlinepoint_second(world_x, world_y);
 				if(pathx_second.length > 1){
-					top.currentform.firstpoly.value = "true";
-					top.currentform.secondpoly.value = true;
-					top.ahah("index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&operation=add_parallel_polygon&width="+top.currentform.bufferwidth.value+"&geotype=line&resulttype=svgwkt&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
+					enclosingForm.firstpoly.value = "true";
+					enclosingForm.secondpoly.value = true;
+					top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=add_parallel_polygon&width="+enclosingForm.bufferwidth.value+"&geotype=line&resulttype=svgwkt&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 				}				
 			break;
 			case "add_buffer_within_polygon":
@@ -738,14 +811,18 @@
 				pathx_second.pop();
 				pathy_second.pop();
 				client_y = resy - client_y;
-				top.currentform.INPUT_COORD.value  = client_x+","+client_y+";"+client_x+","+client_y;
-				top.currentform.firstpoly.value = "true";
-				top.currentform.secondpoly.value = "true";
-				buffer_geom = top.currentform.buffer_geom.value;		// die gesicherte Geometrie, um die gepuffert werden soll
-				top.ahah("index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&path3="+buffer_geom+"&operation=add_buffer_within_polygon&input_coord="+top.currentform.INPUT_COORD.value+"&pixsize='.$pixelsize.'&resulttype=svgwkt&fromwhere="+top.currentform.fromwhere.value+"&orderby="+top.currentform.orderby.value+"&columnname="+top.currentform.columnname.value+"&layer_id="+top.currentform.layer_id.value+"&geotype=line&resulttype=svgwkt", new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));				
+				enclosingForm.INPUT_COORD.value  = client_x+","+client_y+";"+client_x+","+client_y;
+				enclosingForm.firstpoly.value = "true";
+				enclosingForm.secondpoly.value = "true";
+				buffer_geom = enclosingForm.buffer_geom.value;		// die gesicherte Geometrie, um die gepuffert werden soll
+				top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&path3="+buffer_geom+"&operation=add_buffer_within_polygon&input_coord="+enclosingForm.INPUT_COORD.value+"&pixsize='.$pixelsize.'&resulttype=svgwkt&fromwhere="+enclosingForm.fromwhere.value+"&orderby="+enclosingForm.orderby.value+"&columnname="+enclosingForm.columnname.value+"&layer_id="+enclosingForm.layer_id.value+"&geotype=line&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));				
 			break;
 			case "move_geometry":
 				startMoveGeom(client_x, client_y);
+			break;
+			
+			case "ortho_point":
+				add_ortho_point(world_x, world_y, null, null, true);
 			break;
 
 			case "measure":
@@ -759,7 +836,7 @@
 			break;
 
 			default:
-				alert("Fehlerhafte Eingabe! \nUebergebene Daten: "+top.currentform.last_doing.value);
+				alert("Fehlerhafte Eingabe! \nUebergebene Daten: "+enclosingForm.last_doing.value);
 			break;
 		}
 		if(polygonfunctions){
@@ -767,17 +844,16 @@
 		}
 	}
   }
-
-
+	
 function mousemove(evt){
 	if(deactivated_foreign_vertex != 0){		// wenn es einen deaktivierten foreign vertex gibt, wird dieser jetzt wieder aktiviert
 		document.getElementById(deactivated_foreign_vertex).setAttribute("pointer-events", "auto");
 		deactivated_foreign_vertex = 0;
 	}
-	if(top.currentform.last_doing.value == "vertex_edit" && selected_vertex != undefined && selected_vertex != ""){
+	if(enclosingForm.last_doing.value == "vertex_edit" && selected_vertex != undefined && selected_vertex != ""){
 		move_vertex(evt, selected_vertex, "image");
 	}
-	if(top.currentform.last_doing.value == "split_geometry" && pathx_second.length < 2){
+	if(enclosingForm.last_doing.value == "split_geometry" && pathx_second.length < 2){
 		client_x = evt.clientX;
   	client_y = resy - evt.clientY;
   	world_x = (client_x * scale) + minx;
@@ -804,7 +880,7 @@ function mousemove(evt){
 					moveVector(evt);
 				}
 				else{
-					if(top.currentform.last_doing.value == "measure"){
+					if(enclosingForm.last_doing.value == "measure"){
 			      if (measuring){
 							client_x = evt.clientX;
 	  					client_y = resy - evt.clientY;
@@ -828,24 +904,24 @@ function mousemove(evt){
 function mouseup(evt){
 	if(dragging){
 		endPoint(evt);
-		top.currentform.secondpoly.value = "true";
-		if(top.currentform.last_doing.value == "add_geom"){
-			top.ahah("index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&input_coord="+top.currentform.INPUT_COORD.value+"&pixsize='.$pixelsize.'&operation=add_geometry&resulttype=svgwkt&fromwhere="+top.currentform.fromwhere.value+"&singlegeom="+top.currentform.singlegeom.checked+"&orderby="+top.currentform.orderby.value+"&columnname="+top.currentform.columnname.value+"&layer_id="+top.currentform.layer_id.value,new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
+		enclosingForm.secondpoly.value = "true";
+		if(enclosingForm.last_doing.value == "add_geom"){
+			top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&input_coord="+enclosingForm.INPUT_COORD.value+"&pixsize='.$pixelsize.'&operation=add_geometry&resulttype=svgwkt&fromwhere="+enclosingForm.fromwhere.value+"&singlegeom="+enclosingForm.singlegeom.checked+"&orderby="+enclosingForm.orderby.value+"&columnname="+enclosingForm.columnname.value+"&layer_id="+enclosingForm.layer_id.value,new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 			if(polygonfunctions == true){
-				top.currentform.firstpoly.value = "true";
+				enclosingForm.firstpoly.value = "true";
 			}
 			else{
-				top.currentform.firstline.value = "true";
+				enclosingForm.firstline.value = "true";
 			}
 		}
 		else{
-			if(top.currentform.last_doing.value == "subtract_geom"){
-				top.ahah("index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&input_coord="+top.currentform.INPUT_COORD.value+"&pixsize='.$pixelsize.'&operation=subtract_geometry&resulttype=svgwkt&fromwhere="+top.currentform.fromwhere.value+"&singlegeom="+top.currentform.singlegeom.checked+"&orderby="+top.currentform.orderby.value+"&columnname="+top.currentform.columnname.value+"&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
+			if(enclosingForm.last_doing.value == "subtract_geom"){
+				top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&input_coord="+enclosingForm.INPUT_COORD.value+"&pixsize='.$pixelsize.'&operation=subtract_geometry&resulttype=svgwkt&fromwhere="+enclosingForm.fromwhere.value+"&singlegeom="+enclosingForm.singlegeom.checked+"&orderby="+enclosingForm.orderby.value+"&columnname="+enclosingForm.columnname.value+"&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 			}
 		}
 	}
 	if(moving){
-		endMove(top.currentform.last_doing.value);
+		endMove(enclosingForm.last_doing.value);
 	}
 	if(draggingFS){
     endpointFS(evt);
@@ -871,10 +947,13 @@ function mouseup(evt){
 				remove_vertices();
 				remove_in_between_vertices();
 			}
-			top.currentform.last_button.value = id;
+			enclosingForm.last_button.value = id;
 			if(id == "recentre0"){
 				document.getElementById("canvas").setAttribute("cursor", "move");
 				document.getElementById("canvas").setAttribute("cursor", "grab");
+			}
+			else if(id == "ppquery0"){
+				document.getElementById("canvas").setAttribute("cursor", "help");
 			}
 			else{
 				document.getElementById("canvas").setAttribute("cursor", "crosshair");
@@ -887,9 +966,9 @@ function mouseup(evt){
 		dragdone  = false;
 		moving  = false;
 		moved  = false;
-		//document.getElementById(top.currentform.last_button.value).classList.add("active");						// kann der IE nicht
-		document.getElementById(top.currentform.last_button.value).className.baseVal += " active";				// deswegen dieser workaround		
-		if(top.currentform.last_doing.value == "recentre"){
+		//document.getElementById(enclosingForm.last_button.value).classList.add("active");						// kann der IE nicht
+		document.getElementById(enclosingForm.last_button.value).className.baseVal += " active";				// deswegen dieser workaround		
+		if(enclosingForm.last_doing.value == "recentre"){
 			document.getElementById("canvas").setAttribute("cursor", "move");
 	  	document.getElementById("canvas").setAttribute("cursor", "grab");
 		}
@@ -917,17 +996,17 @@ function mouseup(evt){
 	
 	function addlinepoint_second(worldx, worldy){
 		// neuen punkt setzen
-		top.currentform.lastcoordx.value = world_x;
-		top.currentform.lastcoordy.value = world_y;
+		enclosingForm.lastcoordx.value = world_x;
+		enclosingForm.lastcoordy.value = world_y;
 	  pathx_second.push(world_x);
 	  pathy_second.push(world_y);
-		if(top.currentform.pathx_second.value != ""){
-			top.currentform.pathx_second.value = top.currentform.pathx_second.value+";"+world_x;
-			top.currentform.pathy_second.value = top.currentform.pathy_second.value+";"+world_y;
+		if(enclosingForm.pathx_second.value != ""){
+			enclosingForm.pathx_second.value = enclosingForm.pathx_second.value+";"+world_x;
+			enclosingForm.pathy_second.value = enclosingForm.pathy_second.value+";"+world_y;
 		}
 		else{
-			top.currentform.pathx_second.value = world_x;
-			top.currentform.pathy_second.value = world_y;
+			enclosingForm.pathx_second.value = world_x;
+			enclosingForm.pathy_second.value = world_y;
 		}
 		if(pathx_second.length == 1){
 			document.getElementById("startvertex").setAttribute("cx", (world_x-minx)/scale);
@@ -939,14 +1018,14 @@ function mouseup(evt){
 		}
 	  path_second = buildsvglinepath(pathx_second, pathy_second);
 	  if(pathy_second.length > 1){
-	  	top.currentform.secondline.value = true;
+	  	enclosingForm.secondline.value = true;
 	  }
 	}
 	
 	function redrawsecondline(){
 	 	// Line um punktepfad erweitern
 	  var obj = document.getElementById("line_first");
-	  pixel_path = world2pixelsvg(top.currentform.newpath.value);
+	  pixel_path = world2pixelsvg(enclosingForm.newpath.value);
 	  obj.setAttribute("d", pixel_path);
 	  pixel_path_second = world2pixelsvg(path_second);
 	  var obj = document.getElementById("line_second");
@@ -959,7 +1038,7 @@ function mouseup(evt){
 	}
 	
 	function remove_second_line(){
-		if(top.currentform.secondline.value == "true"){
+		if(enclosingForm.secondline.value == "true"){
 			var length = pathx_second.length;
 			for(i = 0; i < length; i++ ){
 				pathx_second.pop();
@@ -972,10 +1051,10 @@ function mouseup(evt){
 			}
 			path_second = buildsvglinepath(pathx_second, pathy_second);
 			redrawsecondline();
-			top.currentform.secondline.value = false;
-			top.currentform.secondpoly.value = false;
-			top.currentform.pathx_second.value = "";
-			top.currentform.pathy_second.value = "";
+			enclosingForm.secondline.value = false;
+			enclosingForm.secondpoly.value = false;
+			enclosingForm.pathx_second.value = "";
+			enclosingForm.pathy_second.value = "";
 		}
 	}
 	
@@ -989,7 +1068,7 @@ function mouseup(evt){
 	top.document.getElementById("svghelp").SVGcoord_input_submit = coord_input_submit;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
 	function coord_input(){
-		doing = top.currentform.last_doing.value;
+		doing = enclosingForm.last_doing.value;
 		if(doing == "recentre" || doing == "zoomout" || doing == "zoomin"){
 			if(polygonfunctions){
 				add_polygon();
@@ -1008,15 +1087,15 @@ function mouseup(evt){
 		}
 		mittex = Math.round(minx+(maxx-minx)/2);
 		mittey = Math.round(miny+(maxy-miny)/2);
-		var Msg = top.document.getElementById("message_box");
-		Msg.className = \'message_box\';
-		content = \'<div style="position: absolute;top: 0px;right: 0px"><a href="#" onclick="javascript:document.getElementById(\\\'message_box\\\').className = \\\'message_box_hidden\\\';" title="Schlie&szlig;en"><img style="border:none" src="'.GRAPHICSPATH.'exit2.png"></img></a></div>\';
+		var Msg = top.$("#message_box");
+		Msg.show();
+		content = \'<div style="position: absolute;top: 0px;right: 0px"><a href="javascript:void(0)" onclick="top.$(\\\'#message_box\\\').hide();" title="Schlie&szlig;en"><img style="border:none" src="'.GRAPHICSPATH.'exit2.png"></img></a></div>\';
 		content+= \'<div style="height: 30px">Koordinateneingabe</div>\';
 		content+= \'<table style="padding: 5px"><tr><td align="left" style="width: 300px" class="px15">Koordinate</td></tr>\';
 		content+= \'<tr><td><input style="width: 310px" type="text" id="input_coords" name="input_coords" value="\'+mittex+\' \'+mittey+\'"></td></tr>\';
 		content+= \'<tr><td>Koordinatensystem:&nbsp;<select name="epsg_code" id="epsg_code" style="width: 310px">'.$epsg_codes.'</select></td></tr></table>\';
 		content+= \'<br><input type="button" value="OK" onclick="coord_input_submit()">\';
-		Msg.innerHTML = content;
+		Msg.html(content);
 	}
 		
 	function coord_input_submit(){
@@ -1034,7 +1113,7 @@ function mouseup(evt){
 				alert("Falsches Format");
 				return;
 			}
-			top.document.getElementById(\'message_box\').className = \'message_box_hidden\';
+			top.$(\'#message_box\').hide();
 			if(viewer_epsg == epsgcode){
 				set_coord(coords2[0], coords2[1]);
 			}
@@ -1052,14 +1131,161 @@ function mouseup(evt){
 		evt1.clientY = coordy;
 		mousedown(evt1);
 		mouse_coords_type = "image";
-		if(coordx < minx || coordx > maxx || coordy < miny || coordy > maxy){		// wenn Punkt ausserhalb des Kartenausschnittes -> hinzoomen
-			pathx[0] = (coordx-minx)/scale;
-			pathy[0] = resy-((coordy-miny)/scale);
-			sendpath("recentre", pathx, pathy);
-		}
+		// if(coordx < minx || coordx > maxx || coordy < miny || coordy > maxy){		// wenn Punkt ausserhalb des Kartenausschnittes -> hinzoomen (erstmal rausgenommen, da es bei "gepufferte Linie" nicht funktioniert)
+			// pathx[0] = (coordx-minx)/scale;
+			// pathy[0] = resy-((coordy-miny)/scale);
+			// sendpath("recentre", pathx, pathy);
+		// }
 	}
 
 	';
+	
+	$ortho_point_functions = '
+
+	ortho_point_functions = true;
+	
+	top.document.getElementById("svghelp").SVGadd_ortho_point = add_ortho_point;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+
+	function ortho_point(){
+		enclosingForm.last_doing.value = "ortho_point";
+		if(enclosingForm.ortho_point_vertices.value == "" || ortho_point_vertices.length == 0){
+			if(enclosingForm.ortho_point_vertices.value == "")ortho_point_vertices = new Array();
+			helmert = new top.HelmertTransformation4Js(0, 0, 0, 0);
+			mittex = Math.round(minx+(maxx-minx)/2);
+			mittey = Math.round(miny+(maxy-miny)/2);
+			var Msg = top.$("#message_box");
+			Msg[0].style.left = "70%";
+			Msg.show();
+			content = \'<div style="height: 30px">Orthogonalpunktberechnung</div>\';
+			content+= \'<span class="px15">1. Setzen Sie in der Karte durch 2 Klicks die beiden Punkte für die Bezugslinie.</span>\';
+			content+= \'<div id="ortho_points"></div>\';
+			content+= \'<br><input id="ortho_point_button" type="button" style="display:none;margin-right: 10px" value="neuer Punkt" onclick="add_ortho_point(null, null, 0, 0, false)"><input type="button" value="Beenden" onclick="currentform.ortho_point_vertices.value = \\\'\\\';$(\\\'#message_box\\\').hide();">\';
+			Msg.html(content);
+		}
+	}
+	
+	function add_ortho_point(world_x, world_y, local_x, local_y, deactivate){
+	  var vertex;
+		var point_number = ortho_point_vertices.length;
+		var id = "ortho_point_vertex_"+point_number;
+		if(world_x == null && local_x != null){
+			world = get_world_ortho_point_coord(local_x, local_y);
+			world_x = world[0];
+			world_y = world[1];
+		}
+		if(local_x == null){
+			local_coord = get_local_ortho_point_coord(world_x, world_y, point_number);
+			local_x = local_coord[0];
+			local_y = local_coord[1];
+		}		
+		enclosingForm.lastcoordx.value = world_x;
+		enclosingForm.lastcoordy.value = world_y;
+		ortho_point_vertices.push(world_x+" "+world_y);
+		enclosingForm.ortho_point_vertices.value = ortho_point_vertices.join("|");
+		vertex = create_catch_vertex(document.getElementById("kreis3"), id, world_x, world_y);
+		if(deactivate){
+			vertex.setAttribute("pointer-events", "none");		// Events bei diesem Vertex deaktivieren, sonst wird durch den Mouseup gleich noch einer angelegt
+			deactivated_foreign_vertex = id;
+		}
+		document.getElementById("ortho_point_vertices").appendChild(vertex);
+		point_div = top.document.createElement("div");
+		point_div.className = "ortho_point_div";
+		point_x = top.document.createElement("input");
+		point_y = top.document.createElement("input");
+		point_x.value = local_x;
+		point_y.value = local_y;
+		point_x.name="ortho_point_x[]";
+		point_y.name="ortho_point_y[]";
+		point_x.type = point_y.type = "text";
+		point_x.oninput = point_y.oninput = function(){change_ortho_point(point_number)};
+		point_x.autocomplete = point_y.autocomplete = "off";
+		point_div.appendChild(point_x);
+		point_div.appendChild(point_y);
+		top.document.getElementById("ortho_points").appendChild(point_div);
+		if(point_number == 1){
+			calculate_transformation_parameters();
+			top.document.getElementById("ortho_points").appendChild(top.document.createTextNode("2. Sie können nun weitere Punkte hinzufügen."));
+			top.document.getElementById("ortho_point_button").style.display = "";
+		}
+	}
+	
+	function change_ortho_point(point_number){
+		var id = "ortho_point_vertex_"+point_number;
+		var vertex = document.getElementById(id);
+		var local_x = top.document.getElementsByName("ortho_point_x[]")[point_number].value;
+		var local_y = top.document.getElementsByName("ortho_point_y[]")[point_number].value;
+		if(point_number > 1){																																			// ein Kleinpunkt wird veraendert
+			world = get_world_ortho_point_coord(local_x, local_y);
+			vertex.setAttribute("x", world[0]);
+			vertex.setAttribute("y", world[1]);
+			x = Math.round((world[0] - parseFloat(enclosingForm.minx.value))/parseFloat(enclosingForm.pixelsize.value));
+			y = Math.round((world[1] - enclosingForm.miny.value)/parseFloat(enclosingForm.pixelsize.value));
+			vertex.setAttribute("cx", x);
+			vertex.setAttribute("cy", y);
+			ortho_point_vertices[point_number] = world[0]+" "+world[1];
+		}
+		else{																																											// ein Bezugspunkt wird veraendert
+			calculate_transformation_parameters();
+			ops = top.document.getElementsByName("ortho_point_x[]");																// alle Kleinpunkte neu berechnen
+			for(var o = 0; o < ops.length; o++){
+				if(o > 1)change_ortho_point(o);
+			};
+		}
+		enclosingForm.ortho_point_vertices.value = ortho_point_vertices.join("|");
+	}
+	
+	function get_world_ortho_point_coord(local_x, local_y){
+		return helmert.transformToWorld(local_y, local_x, 3);
+	}
+	
+	function get_local_ortho_point_coord(world_x, world_y, point_number){
+		var coord = new Array();
+		if(point_number == 0){																// lokale Koordinaten von Punkt a
+			coord[0] = 0;
+			coord[1] = 0;
+		}
+		else if(point_number == 1){														// lokale Koordinaten von Punkt b
+			var a = ortho_point_vertices[0].split(" ");					// Welt-Koordinaten von Punkt a
+			var m = new Array();
+			m[0] = world_x - a[0];
+			m[1] = world_y - a[1];
+			coord[0] = Math.sqrt((m[0]*m[0])+(m[1]*m[1]));
+			coord[1] = 0;
+		}
+		else{																									// lokale Koordinaten der Kleinpunkte
+			coord = helmert.transformToLocal(world_x, world_y, 3);
+		}
+		return coord;
+	}
+	
+	function calculate_transformation_parameters(){
+		var a = ortho_point_vertices[0].split(" ");			// Welt-Koordinaten von Punkt a
+		var b = ortho_point_vertices[1].split(" ");			// Welt-Koordinaten von Punkt b
+		var x0 = top.document.getElementsByName("ortho_point_x[]")[0].value;
+		var y0 = top.document.getElementsByName("ortho_point_y[]")[0].value;
+		var x1 = top.document.getElementsByName("ortho_point_x[]")[1].value;
+		var y1 = top.document.getElementsByName("ortho_point_y[]")[1].value;
+		helmert.calcTransformationParameter([{
+      "local" : {
+      	"y": y0,
+       	"x": x0
+      },
+      "world" : {
+       	"y": parseFloat(a[0]),
+       	"x": parseFloat(a[1])
+      }
+    }, {
+      "local" : {
+       	"y": y1,
+       	"x": x1
+      },
+      "world" : {
+     		"y": parseFloat(b[0]),
+       	"x": parseFloat(b[1])
+      }}]);
+	}
+	
+	';	
 
 	$pointfunctions = '
 
@@ -1068,7 +1294,7 @@ function mouseup(evt){
 	top.document.getElementById("svghelp").SVGrotate_point_direction = rotate_point_direction;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
 	function rotate_point_direction(){
-		angle = top.currentform.angle.value;
+		angle = enclosingForm.angle.value;
 		custom_angle = top.document.getElementById("custom_angle");
 		if(custom_angle != undefined)custom_angle.value = angle;
 		dir_arrow = document.getElementById("point_direction");
@@ -1078,14 +1304,14 @@ function mouseup(evt){
 	function draw_point() {
 	  //document.getElementById("canvas_FS").setAttribute("cursor", "text");
 	  if(polygonfunctions == true){
-		 	if(top.currentform.secondpoly.value == "true"){
+		 	if(enclosingForm.secondpoly.value == "true"){
 				applypolygons();
 			}
 	  }
 	 	if(polygonXORpoint){
 	 		restart();
 	 	}
-		top.currentform.last_doing.value = "draw_point";
+		enclosingForm.last_doing.value = "draw_point";
 	}
 
 	// ------------------------texteinfuegepunkt setzen-----------------------------
@@ -1104,18 +1330,18 @@ function mouseup(evt){
 	top.document.getElementById("svghelp").SVGupdate_geometry = update_geometry;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
 	function update_geometry(){
-		if(top.currentform.secondline.value == "true" || top.currentform.secondpoly.value == "true"){
+		if(enclosingForm.secondline.value == "true" || enclosingForm.secondpoly.value == "true"){
 			document.getElementById("cartesian").setAttribute("transform", "translate(0,'.$res_y.') scale(1,-1)");
 			updatepaths();
-			if(top.currentform.last_doing.value == "add_geom" || top.currentform.last_doing.value == "subtract_geom" || top.currentform.last_doing.value == "move_geometry"){
-				top.currentform.pathwkt.value = top.currentform.newpathwkt.value;
-				if(top.currentform.secondline.value == "true" && must_redraw){
+			if(enclosingForm.last_doing.value == "add_geom" || enclosingForm.last_doing.value == "subtract_geom" || enclosingForm.last_doing.value == "move_geometry"){
+				enclosingForm.pathwkt.value = enclosingForm.newpathwkt.value;
+				if(enclosingForm.secondline.value == "true" && must_redraw){
 					applylines();
 					must_redraw = false;
 				}
-				top.currentform.secondline.value = "true";
+				enclosingForm.secondline.value = "true";
 			}
-			wktstring = top.currentform.newpathwkt.value + "";
+			wktstring = enclosingForm.newpathwkt.value + "";
 			if(must_redraw){
 				redrawsecondline();
 				must_redraw = false;
@@ -1125,8 +1351,8 @@ function mouseup(evt){
 
 	function addlinepoint_first(worldx, worldy){
 		// neuen punkt setzen
-		top.currentform.lastcoordx.value = world_x;
-		top.currentform.lastcoordy.value = world_y; 
+		enclosingForm.lastcoordx.value = world_x;
+		enclosingForm.lastcoordy.value = world_y; 
 	  pathx.push(world_x);
 	  pathy.push(world_y);
 		if(pathx.length == 1){
@@ -1138,29 +1364,29 @@ function mouseup(evt){
 			document.getElementById("startvertex").setAttribute("cy", -500);
 		}
 	  path = buildsvglinepath(pathx,pathy);
-	  top.currentform.newpath.value = path;
+	  enclosingForm.newpath.value = path;
 	  if(pathy.length > 1){
-	  	top.currentform.firstline.value = true;
+	  	enclosingForm.firstline.value = true;
 	  	linelength();
 	  }
 	}
 
 	function addpoint_second(worldx, worldy) {
 	  // neuen punkt setzen
-		top.currentform.lastcoordx.value = world_x;
-		top.currentform.lastcoordy.value = world_y;
+		enclosingForm.lastcoordx.value = world_x;
+		enclosingForm.lastcoordy.value = world_y;
 	  poly_pathx_second.push(world_x);
 	  poly_pathy_second.push(world_y);
 	  path_second = buildsvgpath(poly_pathx_second, poly_pathy_second);
 	  if(poly_pathy_second.length > 2){
-	  	top.currentform.secondpoly.value = true;
+	  	enclosingForm.secondpoly.value = true;
 	  }
 	}
 
 	function redrawfirstline(){
 		// Line um punktepfad erweitern
 	  var obj = document.getElementById("line_first");
-		pixel_path = world2pixelsvg(top.currentform.newpath.value);
+		pixel_path = world2pixelsvg(enclosingForm.newpath.value);
 	  obj.setAttribute("d", pixel_path);
 	}
 	
@@ -1170,14 +1396,14 @@ function mouseup(evt){
 			pathx_second.pop();
 			pathy_second.pop();
 		}
-		top.currentform.pathx_second.value = "";
-		top.currentform.pathy_second.value = "";
+		enclosingForm.pathx_second.value = "";
+		enclosingForm.pathy_second.value = "";
 		applylines();
-		if(top.currentform.firstline.value == "true"){
-			top.currentform.last_doing.value = "draw_second_line";
+		if(enclosingForm.firstline.value == "true"){
+			enclosingForm.last_doing.value = "draw_second_line";
 		}
 		else{
-			top.currentform.last_doing.value = "draw_line";
+			enclosingForm.last_doing.value = "draw_line";
 		}
 	}
 	
@@ -1188,42 +1414,42 @@ function mouseup(evt){
 			poly_pathy_second.pop();
 		}
 		applylines();
-		top.currentform.last_doing.value = "delete_lines";
+		enclosingForm.last_doing.value = "delete_lines";
 	}
 
 	function split_geometry(){
 		applylines();
-		top.currentform.last_doing.value = "split_geometry";
+		enclosingForm.last_doing.value = "split_geometry";
 	}
 	
 	function reverse_geom(){
 		applylines();
-		top.currentform.secondline.value = true;
+		enclosingForm.secondline.value = true;
 		must_redraw = true;
-		top.ahah("index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&operation=reverse&resulttype=svgwkt", new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
+		top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&operation=reverse&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 	}
 	
 	function applylines(){
-		if(top.currentform.pathwkt.value == "" && top.currentform.newpath.value != ""){
-			top.currentform.pathwkt.value = buildwktlinefromsvgpath(top.currentform.newpath.value);
+		if(enclosingForm.pathwkt.value == "" && enclosingForm.newpath.value != ""){
+			enclosingForm.pathwkt.value = buildwktlinefromsvgpath(enclosingForm.newpath.value);
 		}
 		else{
-			top.currentform.pathwkt.value = top.currentform.newpathwkt.value;
+			enclosingForm.pathwkt.value = enclosingForm.newpathwkt.value;
 		}
 		remove_second_line();
 	}
 	
 	function restart(){
 		highlightbyid(\'line0\');
-		top.currentform.last_doing.value = "draw_line";
-		top.currentform.newpath.value = "";
-		top.currentform.pathwkt.value = "";
-		top.currentform.newpathwkt.value = "";
-		top.currentform.result.value = "";
-		top.currentform.linelength.value = "";
+		enclosingForm.last_doing.value = "draw_line";
+		enclosingForm.newpath.value = "";
+		enclosingForm.pathwkt.value = "";
+		enclosingForm.newpathwkt.value = "";
+		enclosingForm.result.value = "";
+		enclosingForm.linelength.value = "";
 		path = "";
-		top.currentform.firstline.value = false;
-		top.currentform.secondline.value = false;
+		enclosingForm.firstline.value = false;
+		enclosingForm.secondline.value = false;
 		var alle = pathx.length;
 		for(var i = 0; i < alle; ++i){
 		  pathx.pop();
@@ -1234,8 +1460,8 @@ function mouseup(evt){
 			pathx_second.pop();
 			pathy_second.pop();
 		}
-		top.currentform.pathx_second.value = "";
-		top.currentform.pathy_second.value = "";
+		enclosingForm.pathx_second.value = "";
+		enclosingForm.pathy_second.value = "";
 		var length = poly_pathx_second.length;
 		for(i = 0; i < length; i++ ){
 			poly_pathx_second.pop();
@@ -1244,17 +1470,17 @@ function mouseup(evt){
 		path_second = "";
 		redrawsecondline();
 		redraw();
-		if(top.currentform.split != undefined)top.currentform.split.style.visibility = "hidden";
+		if(enclosingForm.split != undefined)enclosingForm.split.style.visibility = "hidden";
 	}
 
 	function deletelastline(evt){
-		switch(top.currentform.last_doing.value){
+		switch(enclosingForm.last_doing.value){
 			case "draw_line":
 				if(pathx.length > 2){
 					pathx.pop();
 					pathy.pop();
 					path = buildsvglinepath(pathx,pathy);
-					top.currentform.newpath.value = path;
+					enclosingForm.newpath.value = path;
 					redrawfirstline();
 				}
 			break;
@@ -1262,13 +1488,13 @@ function mouseup(evt){
 				if(pathx_second.length > 2){
 					pathx_second.pop();
 					pathy_second.pop();
-					str = top.currentform.pathx_second.value;
-					top.currentform.pathx_second.value = str.substring(0, str.lastIndexOf(";"));
-					str = top.currentform.pathy_second.value;
-					top.currentform.pathy_second.value = str.substring(0, str.lastIndexOf(";"));
+					str = enclosingForm.pathx_second.value;
+					enclosingForm.pathx_second.value = str.substring(0, str.lastIndexOf(";"));
+					str = enclosingForm.pathy_second.value;
+					enclosingForm.pathy_second.value = str.substring(0, str.lastIndexOf(";"));
 					path_second = buildsvglinepath(pathx_second,pathy_second);
-					if(top.currentform.secondline.value == "true"){
-						top.ahah("index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&operation=add&geotype=line&resulttype=svgwkt&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
+					if(enclosingForm.secondline.value == "true"){
+						top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=add&geotype=line&resulttype=svgwkt&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 					}
 					redrawsecondline();
 				}
@@ -1342,7 +1568,7 @@ function mouseup(evt){
 	}
 
 	function activate_vertex(evt){
-		if(top.currentform.last_doing.value == "vertex_edit"){
+		if(enclosingForm.last_doing.value == "vertex_edit"){
 			vertex_id_string = evt.target.getAttribute("id");
 			vertex_id = vertex_id_string.split("_");
 			if(vertex_id[1] == "new"){
@@ -1355,7 +1581,7 @@ function mouseup(evt){
 	}
 	
 	function activate_line(evt){
-		if(top.currentform.last_doing.value == "vertex_edit"){
+		if(enclosingForm.last_doing.value == "vertex_edit"){
 			line = evt.target;
 			vertex_id_string = line.getAttribute("id");
 			vertex_id = vertex_id_string.split("_");
@@ -1381,7 +1607,7 @@ function mouseup(evt){
 	}
 
 	function deactivate_vertex(evt){
-		if(top.currentform.last_doing.value == "vertex_edit"){
+		if(enclosingForm.last_doing.value == "vertex_edit"){
 			vertex_id_string = evt.target.getAttribute("id");
 			vertex_id = vertex_id_string.split("_");
 			if(vertex_id[1] == "new"){
@@ -1433,7 +1659,7 @@ function mouseup(evt){
 				}
 				vertex.setAttribute("cx", x);
 				vertex.setAttribute("cy", resy-y);
-				svg_path = top.currentform.newpath.value+"";
+				svg_path = enclosingForm.newpath.value+"";
 				components = svg_path.split(" ");
 				components[parseInt(vertex_id[1])] = vertex_new_world_x;
 		  	components[parseInt(vertex_id[1])+1] = vertex_new_world_y;
@@ -1441,7 +1667,7 @@ function mouseup(evt){
 				for(i = 1; i < components.length; i++){
 					new_svg_path = new_svg_path + " " + components[i];
 				}
-				top.currentform.newpath.value = new_svg_path;
+				enclosingForm.newpath.value = new_svg_path;
 				redrawsecondline();
 				vertex_moved = true;
 			}
@@ -1457,7 +1683,7 @@ function mouseup(evt){
 			y = vertex.getAttribute("cy");
 			x_world = (x * scale) + minx;
 			y_world = (y * scale) + miny;
-			svg_path = top.currentform.newpath.value+"";
+			svg_path = enclosingForm.newpath.value+"";
 			components = svg_path.split(" ");
 			new_svg_path = "M";
 			for(i = 1; i < components.length+1; i++){
@@ -1466,10 +1692,10 @@ function mouseup(evt){
 				}
 				if(components[i] != undefined)new_svg_path = new_svg_path + " " + components[i];
 			}
-			top.currentform.newpath.value = new_svg_path;
+			enclosingForm.newpath.value = new_svg_path;
 
-			if(top.currentform.newpathwkt.value != ""){			// wenn ein WKT-String da ist, hier auch den Vertex einfuegen
-				wktarray = get_array_from_wktstring(top.currentform.newpathwkt.value);
+			if(enclosingForm.newpathwkt.value != ""){			// wenn ein WKT-String da ist, hier auch den Vertex einfuegen
+				wktarray = get_array_from_wktstring(enclosingForm.newpathwkt.value);
 				wktstring = "";
 				komma = 1;
 				kommaset = 0;
@@ -1504,7 +1730,7 @@ function mouseup(evt){
 						}
 					}
 				}
-				top.currentform.newpathwkt.value = wktstring;
+				enclosingForm.newpathwkt.value = wktstring;
 			}
 			remove_vertices();													// alle entfernen
 			remove_in_between_vertices();
@@ -1519,7 +1745,7 @@ function mouseup(evt){
 		if(selected_vertex == vertex){
 			vertex_id_string = vertex.getAttribute("id");
 			vertex_id = vertex_id_string.split("_");
-			svg_path = top.currentform.newpath.value+"";
+			svg_path = enclosingForm.newpath.value+"";
 			components = svg_path.split(" ");
 			if(components.length > 6){			// nur loeschen, wenn mindestens 3 Eckpunkte uebrig
 				components.splice(parseInt(vertex_id[1]), 2);
@@ -1530,10 +1756,10 @@ function mouseup(evt){
 					components.splice(parseInt(vertex_id[1]-3), 3);			// in diesem Fall hat der Teil-Linestring nur 2 Eckpunkte und wird komplett entfernt
 				}
 				new_svg_path = components.join(" ");
-				top.currentform.newpath.value = new_svg_path;
+				enclosingForm.newpath.value = new_svg_path;
 	
-				if(top.currentform.newpathwkt.value != ""){			// wenn ein WKT-String da ist, diesen neu aus dem SVG erstellen
-					top.currentform.newpathwkt.value = buildwktlinefromsvgpath(new_svg_path);
+				if(enclosingForm.newpathwkt.value != ""){			// wenn ein WKT-String da ist, diesen neu aus dem SVG erstellen
+					enclosingForm.newpathwkt.value = buildwktlinefromsvgpath(new_svg_path);
 				}
 				remove_vertices();													// alle entfernen
 				remove_in_between_vertices();
@@ -1593,10 +1819,10 @@ function mouseup(evt){
 	function end_vertex_move(evt){
 		if(selected_vertex == evt.target){
 			if(vertex_moved == true){
-				if(top.currentform.newpathwkt.value != ""){
+				if(enclosingForm.newpathwkt.value != ""){
 					vertex_id_string = selected_vertex.getAttribute("id");
 					vertex_id = vertex_id_string.split("_");
-					wktarray = get_array_from_wktstring(top.currentform.newpathwkt.value);
+					wktarray = get_array_from_wktstring(enclosingForm.newpathwkt.value);
 					wktarray[parseInt(vertex_id[1])] = vertex_new_world_x;
 					wktarray[parseInt(vertex_id[1])+1] = vertex_new_world_y;
 					wktstring = "";
@@ -1621,11 +1847,11 @@ function mouseup(evt){
 							}
 						}
 					}
-					top.currentform.newpathwkt.value = wktstring;
+					enclosingForm.newpathwkt.value = wktstring;
 				}
 				remove_vertices();													// alle entfernen
 				remove_in_between_vertices();
-				pixel_path = world2pixelsvg(top.currentform.newpath.value);
+				pixel_path = world2pixelsvg(enclosingForm.newpath.value);
 				add_vertices(pixel_path);										// und wieder hinzufuegen
 				linelength();
 			}
@@ -1737,22 +1963,22 @@ function mouseup(evt){
 	function edit_vertices(){
 		remove_second_line();
 		save_geometry_for_undo();
-		top.currentform.last_doing.value = "vertex_edit";
-		pixel_path = world2pixelsvg(top.currentform.newpath.value);
+		enclosingForm.last_doing.value = "vertex_edit";
+		pixel_path = world2pixelsvg(enclosingForm.newpath.value);
 		add_vertices(pixel_path);
 	}
 
 	function save_geometry_for_undo(){
-		newpath_undo = top.currentform.newpath.value;
-		newpathwkt_undo = top.currentform.newpathwkt.value;
+		newpath_undo = enclosingForm.newpath.value;
+		newpathwkt_undo = enclosingForm.newpathwkt.value;
 	}
 
 	function undo_geometry_editing(){
-		top.currentform.newpath.value = newpath_undo;
-		top.currentform.newpathwkt.value = newpathwkt_undo;
+		enclosingForm.newpath.value = newpath_undo;
+		enclosingForm.newpathwkt.value = newpathwkt_undo;
 		remove_vertices();													// alle entfernen
 		remove_in_between_vertices();
-		pixel_path = world2pixelsvg(top.currentform.newpath.value);
+		pixel_path = world2pixelsvg(enclosingForm.newpath.value);
 		add_vertices(pixel_path);										// und wieder hinzufuegen
 		redrawfirstline();
 	}
@@ -1760,17 +1986,17 @@ function mouseup(evt){
 	function linelength(){
 		length1 = top.document.getElementById("custom_length");
 		if(length1 == undefined){						// wenn es ein Laenge-Attribut gibt, wird das verwendet, ansonsten die normale Laengenanzeige
-			length1 = top.currentform.linelength;
+			length1 = enclosingForm.linelength;
 		}
-	  if(top.currentform.newpathwkt.value != ""){
-	  	top.ahah("index.php", "go=spatial_processing&geotype=line&path1="+top.currentform.newpathwkt.value+"&operation=length&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.linelength, length1), "");
+	  if(enclosingForm.newpathwkt.value != ""){
+	  	top.ahah("index.php", "go=spatial_processing&geotype=line&path1="+enclosingForm.newpathwkt.value+"&operation=length&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.linelength, length1), "");
 	  }
 	  else{
-	  	if(top.currentform.newpath.value != ""){
-	  		top.ahah("index.php", "go=spatial_processing&geotype=line&path2="+top.currentform.newpath.value+"&operation=length&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.linelength, length1), "");
+	  	if(enclosingForm.newpath.value != ""){
+	  		top.ahah("index.php", "go=spatial_processing&geotype=line&path2="+enclosingForm.newpath.value+"&operation=length&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.linelength, length1), "");
 	  	}
 	  	else{
-	  		top.currentform.linelength.value = "0.0";
+	  		enclosingForm.linelength.value = "0.0";
 	  	}
 	  }
 	}
@@ -1784,7 +2010,7 @@ function mouseup(evt){
 	function draw_box_on() {
 	  //document.getElementById("canvas_FS").setAttribute("cursor", "text");
 	 	restart();
-		top.currentform.last_doing.value = "draw_box";
+		enclosingForm.last_doing.value = "draw_box";
 	}
 
 	// ----------------------------box aufziehen---------------------------------
@@ -1795,7 +2021,7 @@ function mouseup(evt){
 	  pathx.push(worldx);
 	  pathy.push(worldy);
 	  path = buildsvgpath(pathx,pathy);
-	  top.currentform.newpath.value = path;
+	  enclosingForm.newpath.value = path;
 	}
 
 	function movepointFS(evt) {
@@ -1812,8 +2038,8 @@ function mouseup(evt){
 	  pathx[3]  = world_x;
 	  pathy[3]  = pathy[0];
 	  path = buildsvgpath(pathx,pathy);
-	  top.currentform.newpath.value = path;
-	  top.currentform.firstpoly.value = true;
+	  enclosingForm.newpath.value = path;
+	  enclosingForm.firstpoly.value = true;
 	  redrawfirstpolygon();
 	}
 
@@ -1826,50 +2052,50 @@ function mouseup(evt){
 		bufferfunctions = true;
 
 		function add_buffer(){
-			buffer = prompt("Breite des Puffers in Metern:", top.currentform.bufferwidth.value);
+			buffer = prompt("Breite des Puffers in Metern:", enclosingForm.bufferwidth.value);
 			if(buffer){
-				top.currentform.secondpoly.value = true;
-				top.currentform.firstpoly.value = true;
-				if(top.currentform.newpathwkt.value != ""){
-					top.ahah("index.php", "go=spatial_processing&path1="+top.currentform.newpathwkt.value+"&width="+buffer+"&operation=buffer&resulttype=svgwkt", new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
+				enclosingForm.secondpoly.value = true;
+				enclosingForm.firstpoly.value = true;
+				if(enclosingForm.newpathwkt.value != ""){
+					top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.newpathwkt.value+"&width="+buffer+"&operation=buffer&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 				}
 				else{
-					if(top.currentform.newpath.value != ""){
-						newpath = buildwktpolygonfromsvgpath(top.currentform.newpath.value);
-						top.ahah("index.php", "go=spatial_processing&path1="+newpath+"&width="+buffer+"&operation=buffer&resulttype=svgwkt", new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
+					if(enclosingForm.newpath.value != ""){
+						newpath = buildwktpolygonfromsvgpath(enclosingForm.newpath.value);
+						top.ahah("index.php", "go=spatial_processing&path1="+newpath+"&width="+buffer+"&operation=buffer&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 					}
 				}
 			}
 		}
 		
 		function add_buffered_line(){
-			top.currentform.last_doing.value = "add_buffered_line";
-			top.currentform.bufferwidth.value = prompt("Breite des Puffers in Metern:", top.currentform.bufferwidth.value);
-			if(top.currentform.pathwkt.value == "" && top.currentform.newpath.value != ""){
-				top.currentform.pathwkt.value = buildwktpolygonfromsvgpath(top.currentform.newpath.value);
+			enclosingForm.last_doing.value = "add_buffered_line";
+			enclosingForm.bufferwidth.value = prompt("Breite des Puffers in Metern:", enclosingForm.bufferwidth.value);
+			if(enclosingForm.pathwkt.value == "" && enclosingForm.newpath.value != ""){
+				enclosingForm.pathwkt.value = buildwktpolygonfromsvgpath(enclosingForm.newpath.value);
 			}
 			else{
-				if(top.currentform.newpathwkt.value != ""){
-					top.currentform.pathwkt.value = top.currentform.newpathwkt.value;
+				if(enclosingForm.newpathwkt.value != ""){
+					enclosingForm.pathwkt.value = enclosingForm.newpathwkt.value;
 				}
 			}
-		  if(top.currentform.secondpoly.value == "true"){
+		  if(enclosingForm.secondpoly.value == "true"){
 				applypolygons();
 			}
 		}
 		
 		function add_parallel_polygon(){
-			top.currentform.last_doing.value = "add_parallel_polygon";
-			top.currentform.bufferwidth.value = prompt("Breite des Polygons in Metern:", top.currentform.bufferwidth.value);
-			if(top.currentform.pathwkt.value == "" && top.currentform.newpath.value != ""){
-				top.currentform.pathwkt.value = buildwktpolygonfromsvgpath(top.currentform.newpath.value);
+			enclosingForm.last_doing.value = "add_parallel_polygon";
+			enclosingForm.bufferwidth.value = prompt("Breite des Polygons in Metern:", enclosingForm.bufferwidth.value);
+			if(enclosingForm.pathwkt.value == "" && enclosingForm.newpath.value != ""){
+				enclosingForm.pathwkt.value = buildwktpolygonfromsvgpath(enclosingForm.newpath.value);
 			}
 			else{
-				if(top.currentform.newpathwkt.value != ""){
-					top.currentform.pathwkt.value = top.currentform.newpathwkt.value;
+				if(enclosingForm.newpathwkt.value != ""){
+					enclosingForm.pathwkt.value = enclosingForm.newpathwkt.value;
 				}
 			}
-		  if(top.currentform.secondpoly.value == "true"){
+		  if(enclosingForm.secondpoly.value == "true"){
 				applypolygons();
 			}
 		}
@@ -1881,16 +2107,16 @@ function mouseup(evt){
 		special_bufferfunctions = true;
 		
 		function add_buffer_within_polygon(){
-			top.currentform.last_doing.value = "add_buffer_within_polygon";
-			if(top.currentform.pathwkt.value == "" && top.currentform.newpath.value != ""){
-				top.currentform.pathwkt.value = buildwktpolygonfromsvgpath(top.currentform.newpath.value);
+			enclosingForm.last_doing.value = "add_buffer_within_polygon";
+			if(enclosingForm.pathwkt.value == "" && enclosingForm.newpath.value != ""){
+				enclosingForm.pathwkt.value = buildwktpolygonfromsvgpath(enclosingForm.newpath.value);
 			}
 			else{
-				if(top.currentform.newpathwkt.value != ""){
-					top.currentform.pathwkt.value = top.currentform.newpathwkt.value;
+				if(enclosingForm.newpathwkt.value != ""){
+					enclosingForm.pathwkt.value = enclosingForm.newpathwkt.value;
 				}
 			}
-		  if(top.currentform.secondpoly.value == "true"){
+		  if(enclosingForm.secondpoly.value == "true"){
 				applypolygons();
 			}
 		}
@@ -1903,34 +2129,34 @@ function mouseup(evt){
 
 		function add_geometry(){
 			if(polygonfunctions){
-				if(top.currentform.pathwkt.value == "" && top.currentform.newpath.value != ""){
-					top.currentform.pathwkt.value = buildwktpolygonfromsvgpath(top.currentform.newpath.value);
+				if(enclosingForm.pathwkt.value == "" && enclosingForm.newpath.value != ""){
+					enclosingForm.pathwkt.value = buildwktpolygonfromsvgpath(enclosingForm.newpath.value);
 				}
 				else{
-					top.currentform.pathwkt.value = top.currentform.newpathwkt.value;
+					enclosingForm.pathwkt.value = enclosingForm.newpathwkt.value;
 				}
-				if(top.currentform.secondpoly.value == "true"){
+				if(enclosingForm.secondpoly.value == "true"){
 					applypolygons();
 				}
 			}
 			else applylines();
-			top.currentform.last_doing.value = "add_geom";
+			enclosingForm.last_doing.value = "add_geom";
 		};
 
 		function subtract_geometry(){
 			if(polygonfunctions){
-				if(top.currentform.pathwkt.value == "" && top.currentform.newpath.value != ""){
-					top.currentform.pathwkt.value = buildwktpolygonfromsvgpath(top.currentform.newpath.value);
+				if(enclosingForm.pathwkt.value == "" && enclosingForm.newpath.value != ""){
+					enclosingForm.pathwkt.value = buildwktpolygonfromsvgpath(enclosingForm.newpath.value);
 				}
 				else{
-					top.currentform.pathwkt.value = top.currentform.newpathwkt.value;
+					enclosingForm.pathwkt.value = enclosingForm.newpathwkt.value;
 				}
-				if(top.currentform.secondpoly.value == "true"){
+				if(enclosingForm.secondpoly.value == "true"){
 					applypolygons();
 				}
 			}
 			else applylines();
-			top.currentform.last_doing.value = "subtract_geom";
+			enclosingForm.last_doing.value = "subtract_geom";
 		};
 	';
 
@@ -1941,16 +2167,16 @@ function mouseup(evt){
 	top.document.getElementById("svghelp").SVGupdate_geometry = update_geometry;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
 	function update_geometry(){
-		if(top.currentform.secondline != undefined && top.currentform.secondline.value == "true" || top.currentform.secondpoly.value == "true"){
+		if(enclosingForm.secondline != undefined && enclosingForm.secondline.value == "true" || enclosingForm.secondpoly.value == "true"){
 			document.getElementById("cartesian").setAttribute("transform", "translate(0,'.$res_y.') scale(1,-1)");
 			updatepaths();
-			if(top.currentform.last_doing.value == "add_geom" || top.currentform.last_doing.value == "subtract_geom" || top.currentform.last_doing.value == "move_geometry"){
-				top.currentform.pathwkt.value = top.currentform.newpathwkt.value;
-				if(top.currentform.secondpoly.value == "true" && must_redraw){
+			if(enclosingForm.last_doing.value == "add_geom" || enclosingForm.last_doing.value == "subtract_geom" || enclosingForm.last_doing.value == "move_geometry"){
+				enclosingForm.pathwkt.value = enclosingForm.newpathwkt.value;
+				if(enclosingForm.secondpoly.value == "true" && must_redraw){
 					applypolygons();
 					must_redraw = false;
 				}
-				top.currentform.secondpoly.value = "true";
+				enclosingForm.secondpoly.value = "true";
 			}
 			if(must_redraw){
 				redrawsecondpolygon();
@@ -1963,7 +2189,7 @@ function mouseup(evt){
 		applypolygons();
 		remove_second_line();
 		clear_first_line();
-		top.currentform.last_doing.value = "split_geometry";
+		enclosingForm.last_doing.value = "split_geometry";
 	}	
 	
 	function draw_pgon_on() {
@@ -1982,8 +2208,8 @@ function mouseup(evt){
 	// ----------------------------pgon zeichnen---------------------------------
 	function addpoint_first(worldx, worldy) {
 	  // neuen punkt setzen
-		top.currentform.lastcoordx.value = world_x;
-		top.currentform.lastcoordy.value = world_y; 
+		enclosingForm.lastcoordx.value = world_x;
+		enclosingForm.lastcoordy.value = world_y; 
 	  pathx.push(world_x);
 	  pathy.push(world_y);
 		if(pathx.length == 1){
@@ -1995,18 +2221,18 @@ function mouseup(evt){
 			document.getElementById("startvertex").setAttribute("cy", -500);
 		}
 	  path = buildsvgpath(pathx,pathy);
-	  top.currentform.newpath.value = path;
+	  enclosingForm.newpath.value = path;
 	  if(pathy.length > 2){
-	  	top.currentform.firstpoly.value = true;
-			if(top.currentform.firstpoly.onchange)top.currentform.firstpoly.onchange();
+	  	enclosingForm.firstpoly.value = true;
+			if(enclosingForm.firstpoly.onchange)enclosingForm.firstpoly.onchange();
 	  	polygonarea();
 	  }
 	}
 
 	function addpoint_second(worldx, worldy) {
 	  // neuen punkt setzen
-		top.currentform.lastcoordx.value = world_x;
-		top.currentform.lastcoordy.value = world_y;
+		enclosingForm.lastcoordx.value = world_x;
+		enclosingForm.lastcoordy.value = world_y;
 	  pathx_second.push(world_x);
 	  pathy_second.push(world_y);
 		if(pathx_second.length == 1){
@@ -2017,32 +2243,32 @@ function mouseup(evt){
 			document.getElementById("startvertex").setAttribute("cx", -500);
 			document.getElementById("startvertex").setAttribute("cy", -500);
 		}
-		if(top.currentform.pathx_second.value != ""){
-			top.currentform.pathx_second.value = top.currentform.pathx_second.value+";"+world_x;
-			top.currentform.pathy_second.value = top.currentform.pathy_second.value+";"+world_y;
+		if(enclosingForm.pathx_second.value != ""){
+			enclosingForm.pathx_second.value = enclosingForm.pathx_second.value+";"+world_x;
+			enclosingForm.pathy_second.value = enclosingForm.pathy_second.value+";"+world_y;
 		}
 		else{
-			top.currentform.pathx_second.value = world_x;
-			top.currentform.pathy_second.value = world_y;
+			enclosingForm.pathx_second.value = world_x;
+			enclosingForm.pathy_second.value = world_y;
 		} 
 	  path_second = buildsvgpath(pathx_second, pathy_second);
 	  if(pathy_second.length > 2){
-	  	top.currentform.secondpoly.value = true;
+	  	enclosingForm.secondpoly.value = true;
 	  }
 	  else{
-	  	top.currentform.secondpoly.value = "started";
+	  	enclosingForm.secondpoly.value = "started";
 	  }
 	}
 
 	function redrawfirstpolygon(){
 	  // polygone um punktepfad erweitern
 	  var obj = document.getElementById("polygon_first");
-		pixel_path = world2pixelsvg(top.currentform.newpath.value);
+		pixel_path = world2pixelsvg(enclosingForm.newpath.value);
 	  obj.setAttribute("d", pixel_path);
 	}
 
 	function activate_vertex(evt){
-		if(top.currentform.last_doing.value == "vertex_edit"){
+		if(enclosingForm.last_doing.value == "vertex_edit"){
 			vertex_id_string = evt.target.getAttribute("id");
 			vertex_id = vertex_id_string.split("_");
 			if(vertex_id[1] == "new"){
@@ -2055,7 +2281,7 @@ function mouseup(evt){
 	}
 	
 	function activate_line(evt){
-		if(top.currentform.last_doing.value == "vertex_edit"){
+		if(enclosingForm.last_doing.value == "vertex_edit"){
 			line = evt.target;
 			vertex_id_string = line.getAttribute("id");
 			vertex_id = vertex_id_string.split("_");
@@ -2081,7 +2307,7 @@ function mouseup(evt){
 	}
 
 	function deactivate_vertex(evt){
-		if(top.currentform.last_doing.value == "vertex_edit"){
+		if(enclosingForm.last_doing.value == "vertex_edit"){
 			vertex_id_string = evt.target.getAttribute("id");
 			vertex_id = vertex_id_string.split("_");
 			if(vertex_id[1] == "new"){
@@ -2133,7 +2359,7 @@ function mouseup(evt){
 				}
 				vertex.setAttribute("cx", x);
 				vertex.setAttribute("cy", resy-y);
-				svg_path = top.currentform.newpath.value+"";
+				svg_path = enclosingForm.newpath.value+"";
 				components = svg_path.split(" ");
 				components[parseInt(vertex_id[1])] = vertex_new_world_x;
 		  	components[parseInt(vertex_id[1])+1] = vertex_new_world_y;
@@ -2145,7 +2371,7 @@ function mouseup(evt){
 				for(i = 1; i < components.length; i++){
 					new_svg_path = new_svg_path + " " + components[i];
 				}
-				top.currentform.newpath.value = new_svg_path;
+				enclosingForm.newpath.value = new_svg_path;
 				redrawsecondpolygon();
 				vertex_moved = true;
 			}
@@ -2161,7 +2387,7 @@ function mouseup(evt){
 			y = vertex.getAttribute("cy");
 			x_world = (x * scale) + minx;
 			y_world = (y * scale) + miny;
-			svg_path = top.currentform.newpath.value+"";
+			svg_path = enclosingForm.newpath.value+"";
 			components = svg_path.split(" ");
 			new_svg_path = "M";
 			for(i = 1; i < components.length; i++){
@@ -2170,10 +2396,10 @@ function mouseup(evt){
 					new_svg_path = new_svg_path + " " + x_world + " " + y_world;
 				}
 			}
-			top.currentform.newpath.value = new_svg_path;
+			enclosingForm.newpath.value = new_svg_path;
 
-			if(top.currentform.newpathwkt.value != ""){			// wenn ein WKT-String da ist, hier auch den Vertex einfuegen
-				wktarray = get_array_from_wktstring(top.currentform.newpathwkt.value);
+			if(enclosingForm.newpathwkt.value != ""){			// wenn ein WKT-String da ist, hier auch den Vertex einfuegen
+				wktarray = get_array_from_wktstring(enclosingForm.newpathwkt.value);
 				wktstring = "";
 				komma = 1;
 				for(i = 0; i < wktarray.length; i++){
@@ -2199,7 +2425,7 @@ function mouseup(evt){
 						wktstring = wktstring + x_world + " " + y_world + ",";
 					}
 				}
-				top.currentform.newpathwkt.value = wktstring;
+				enclosingForm.newpathwkt.value = wktstring;
 			}
 			remove_vertices();													// alle entfernen
 			remove_in_between_vertices();
@@ -2214,7 +2440,7 @@ function mouseup(evt){
 		if(selected_vertex == vertex){
 			vertex_id_string = vertex.getAttribute("id");
 			vertex_id = vertex_id_string.split("_");
-			svg_path = top.currentform.newpath.value+"";
+			svg_path = enclosingForm.newpath.value+"";
 			components = svg_path.split(" ");
 			if(components.length > 10){			// nur loeschen, wenn mindestens 4 Eckpunkte uebrig
 				components.splice(parseInt(vertex_id[1]), 2);
@@ -2228,10 +2454,10 @@ function mouseup(evt){
 						new_svg_path = new_svg_path + " " + components[i];
 					}
 				}
-				top.currentform.newpath.value = new_svg_path;
+				enclosingForm.newpath.value = new_svg_path;
 	
-				if(top.currentform.newpathwkt.value != ""){			// wenn ein WKT-String da ist, hier auch den Vertex loeschen
-					wktarray = get_array_from_wktstring(top.currentform.newpathwkt.value);
+				if(enclosingForm.newpathwkt.value != ""){			// wenn ein WKT-String da ist, hier auch den Vertex loeschen
+					wktarray = get_array_from_wktstring(enclosingForm.newpathwkt.value);
 					wktarray.splice(parseInt(vertex_id[1]), 2);
 					if(vertex_id[2] != ""){			// Anfangs und Endpunkt
 						wktarray[parseInt(vertex_id[2])-2] = wktarray[parseInt(vertex_id[1])];
@@ -2259,7 +2485,7 @@ function mouseup(evt){
 							}
 						}
 					}
-					top.currentform.newpathwkt.value = wktstring;
+					enclosingForm.newpathwkt.value = wktstring;
 				}
 	
 				remove_vertices();													// alle entfernen
@@ -2345,10 +2571,10 @@ function mouseup(evt){
 	function end_vertex_move(evt){
 		if(selected_vertex == evt.target){			
 			if(vertex_moved == true){
-				if(top.currentform.newpathwkt.value != ""){
+				if(enclosingForm.newpathwkt.value != ""){
 					vertex_id_string = selected_vertex.getAttribute("id");
 					vertex_id = vertex_id_string.split("_");
-					wktarray = get_array_from_wktstring(top.currentform.newpathwkt.value);
+					wktarray = get_array_from_wktstring(enclosingForm.newpathwkt.value);
 					wktarray[parseInt(vertex_id[1])] = vertex_new_world_x;
 					wktarray[parseInt(vertex_id[1])+1] = vertex_new_world_y;
 					if(vertex_id[2] != ""){			// Anfangs und Endpunkt
@@ -2377,11 +2603,11 @@ function mouseup(evt){
 							}
 						}
 					}
-					top.currentform.newpathwkt.value = wktstring;
+					enclosingForm.newpathwkt.value = wktstring;
 				}
 				remove_vertices();													// alle entfernen
 				remove_in_between_vertices();
-				pixel_path = world2pixelsvg(top.currentform.newpath.value);
+				pixel_path = world2pixelsvg(enclosingForm.newpath.value);
 				add_vertices(pixel_path);										// und wieder hinzufuegen
 				polygonarea();
 			}
@@ -2462,23 +2688,23 @@ function mouseup(evt){
 	function edit_vertices(){
 		remove_second_poly()
 		save_geometry_for_undo();
-		top.currentform.last_doing.value = "vertex_edit";
-		pixel_path = world2pixelsvg(top.currentform.newpath.value);
+		enclosingForm.last_doing.value = "vertex_edit";
+		pixel_path = world2pixelsvg(enclosingForm.newpath.value);
 		add_vertices(pixel_path);
 	}
 
 
 	function save_geometry_for_undo(){
-		newpath_undo = top.currentform.newpath.value;
-		newpathwkt_undo = top.currentform.newpathwkt.value;
+		newpath_undo = enclosingForm.newpath.value;
+		newpathwkt_undo = enclosingForm.newpathwkt.value;
 	}
 
 	function undo_geometry_editing(){
-		top.currentform.newpath.value = newpath_undo;
-		top.currentform.newpathwkt.value = newpathwkt_undo;
+		enclosingForm.newpath.value = newpath_undo;
+		enclosingForm.newpathwkt.value = newpathwkt_undo;
 		remove_vertices();													// alle entfernen
 		remove_in_between_vertices();
-		pixel_path = world2pixelsvg(top.currentform.newpath.value);
+		pixel_path = world2pixelsvg(enclosingForm.newpath.value);
 		add_vertices(pixel_path);										// und wieder hinzufuegen
 		redrawfirstpolygon();
 	}
@@ -2486,7 +2712,7 @@ function mouseup(evt){
 	function redrawsecondpolygon(){
 	  // polygone um punktepfad erweitern
 	  var obj = document.getElementById("polygon_first");
-	  pixel_path = world2pixelsvg(top.currentform.newpath.value);
+	  pixel_path = world2pixelsvg(enclosingForm.newpath.value);
 	  obj.setAttribute("d", pixel_path);
 	  pixel_path_second = world2pixelsvg(path_second);
 	  var obj = document.getElementById("polygon_second");
@@ -2561,13 +2787,13 @@ function mouseup(evt){
 	}
 
 	function deletelast(evt){
-		switch(top.currentform.last_doing.value){
+		switch(enclosingForm.last_doing.value){
 			case "draw_polygon":
 	  		if(pathx.length > 3){
 					pathx.pop();
 					pathy.pop();
 					path = buildsvgpath(pathx,pathy);
-					top.currentform.newpath.value = path;
+					enclosingForm.newpath.value = path;
 					redrawfirstpolygon();
 				}
 			break;
@@ -2575,17 +2801,17 @@ function mouseup(evt){
 				if(pathx_second.length > 3){
 					pathx_second.pop();
 					pathy_second.pop();
-					str = top.currentform.pathx_second.value;
-					top.currentform.pathx_second.value = str.substring(0, str.lastIndexOf(";"));
-					str = top.currentform.pathy_second.value;
-					top.currentform.pathy_second.value = str.substring(0, str.lastIndexOf(";"));
+					str = enclosingForm.pathx_second.value;
+					enclosingForm.pathx_second.value = str.substring(0, str.lastIndexOf(";"));
+					str = enclosingForm.pathy_second.value;
+					enclosingForm.pathy_second.value = str.substring(0, str.lastIndexOf(";"));
 					path_second = buildsvgpath(pathx_second,pathy_second);
-					if(top.currentform.last_doing.value == "draw_second_polygon"){
-						top.ahah("index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&operation=add&resulttype=svgwkt&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
+					if(enclosingForm.last_doing.value == "draw_second_polygon"){
+						top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=add&resulttype=svgwkt&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 					}
 					else{
-						if(top.currentform.last_doing.value == "subtract_polygon"){				
-							top.ahah("index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&operation=subtract&resulttype=svgwkt&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
+						if(enclosingForm.last_doing.value == "subtract_polygon"){				
+							top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=subtract&resulttype=svgwkt&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 						}
 					}
 					redrawsecondpolygon();
@@ -2595,12 +2821,12 @@ function mouseup(evt){
 				if(pathx_second.length > 1){
 					pathx_second.pop();
 					pathy_second.pop();
-					str = top.currentform.pathx_second.value;
-					top.currentform.pathx_second.value = str.substring(0, str.lastIndexOf(";"));
-					str = top.currentform.pathy_second.value;
-					top.currentform.pathy_second.value = str.substring(0, str.lastIndexOf(";"));
+					str = enclosingForm.pathx_second.value;
+					enclosingForm.pathx_second.value = str.substring(0, str.lastIndexOf(";"));
+					str = enclosingForm.pathy_second.value;
+					enclosingForm.pathy_second.value = str.substring(0, str.lastIndexOf(";"));
 					path_second = buildsvglinepath(pathx_second, pathy_second);
-					top.ahah("index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&operation=add_buffered_line&width="+top.currentform.bufferwidth.value+"&geotype=line&resulttype=svgwkt&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
+					top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=add_buffered_line&width="+enclosingForm.bufferwidth.value+"&geotype=line&resulttype=svgwkt&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 					redrawsecondpolygon();
 				}
 			break;
@@ -2608,12 +2834,12 @@ function mouseup(evt){
 				if(pathx_second.length > 2){
 					pathx_second.pop();
 					pathy_second.pop();
-					str = top.currentform.pathx_second.value;
-					top.currentform.pathx_second.value = str.substring(0, str.lastIndexOf(";"));
-					str = top.currentform.pathy_second.value;
-					top.currentform.pathy_second.value = str.substring(0, str.lastIndexOf(";"));
+					str = enclosingForm.pathx_second.value;
+					enclosingForm.pathx_second.value = str.substring(0, str.lastIndexOf(";"));
+					str = enclosingForm.pathy_second.value;
+					enclosingForm.pathy_second.value = str.substring(0, str.lastIndexOf(";"));
 					path_second = buildsvglinepath(pathx_second, pathy_second);
-					top.ahah("index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&operation=add_parallel_polygon&width="+top.currentform.bufferwidth.value+"&geotype=line&resulttype=svgwkt&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
+					top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=add_parallel_polygon&width="+enclosingForm.bufferwidth.value+"&geotype=line&resulttype=svgwkt&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 					redrawsecondpolygon();
 				}
 			break;
@@ -2625,20 +2851,20 @@ function mouseup(evt){
 
 	function restart(){
 		highlightbyid(\'pgon0\');
-		top.currentform.last_doing.value = "draw_polygon";
-		top.currentform.last_doing2.value = "draw_polygon";
+		enclosingForm.last_doing.value = "draw_polygon";
+		enclosingForm.last_doing2.value = "draw_polygon";
 		textx = -1000000;
 		texty = -1000000;
 		redrawpoint();
-		top.currentform.newpath.value = "";
-		top.currentform.pathwkt.value = "";
-		top.currentform.newpathwkt.value = "";
-		top.currentform.result.value = "";
-		top.currentform.INPUT_COORD.value = "";
-		top.currentform.area.value = "";
+		enclosingForm.newpath.value = "";
+		enclosingForm.pathwkt.value = "";
+		enclosingForm.newpathwkt.value = "";
+		enclosingForm.result.value = "";
+		enclosingForm.INPUT_COORD.value = "";
+		enclosingForm.area.value = "";
 		path = "";
-		top.currentform.firstpoly.value = false;
-		top.currentform.secondpoly.value = false;
+		enclosingForm.firstpoly.value = false;
+		enclosingForm.secondpoly.value = false;
 		var alle = pathx.length;
 		for(var i = 0; i < alle; ++i){
 		  pathx.pop();
@@ -2649,8 +2875,8 @@ function mouseup(evt){
 			pathx_second.pop();
 			pathy_second.pop();
 		}
-		top.currentform.pathx_second.value = "";
-		top.currentform.pathy_second.value = "";
+		enclosingForm.pathx_second.value = "";
+		enclosingForm.pathy_second.value = "";
 		path_second = "";
 		var alle = boxx.length;
 		for(var i = 0; i < alle; ++i){
@@ -2664,20 +2890,20 @@ function mouseup(evt){
 	}
 
 	function applypolygons(){
-		if(top.currentform.pathwkt.value == "" && top.currentform.newpath.value != ""){
-			top.currentform.pathwkt.value = buildwktpolygonfromsvgpath(top.currentform.newpath.value);
+		if(enclosingForm.pathwkt.value == "" && enclosingForm.newpath.value != ""){
+			enclosingForm.pathwkt.value = buildwktpolygonfromsvgpath(enclosingForm.newpath.value);
 		}
 		else{
-			if(top.currentform.newpathwkt.value != ""){
-				top.currentform.pathwkt.value = top.currentform.newpathwkt.value;
+			if(enclosingForm.newpathwkt.value != ""){
+				enclosingForm.pathwkt.value = enclosingForm.newpathwkt.value;
 			}
 		}
 		remove_second_poly();
 	}
 	
 	function remove_second_poly(){
-		if(top.currentform.secondpoly.value == "true"){
-			path = top.currentform.newpath.value;
+		if(enclosingForm.secondpoly.value == "true"){
+			path = enclosingForm.newpath.value;
 			var length = pathx_second.length;
 			for(i = 0; i < length; i++ ){
 				pathx_second.pop();
@@ -2685,15 +2911,15 @@ function mouseup(evt){
 			}
 			path_second = buildsvgpath(pathx_second, pathy_second);
 			redrawsecondpolygon();
-			top.currentform.secondpoly.value = false;
-			top.currentform.pathx_second.value = "";
-			top.currentform.pathy_second.value = "";
+			enclosingForm.secondpoly.value = false;
+			enclosingForm.pathx_second.value = "";
+			enclosingForm.pathy_second.value = "";
 		}
 	}
 	
 	function subtr_polygon(){
 		applypolygons();
-		top.currentform.last_doing.value = "subtract_polygon";
+		enclosingForm.last_doing.value = "subtract_polygon";
 	}
 
 	function add_polygon(){
@@ -2702,41 +2928,41 @@ function mouseup(evt){
 			pathx_second.pop();
 			pathy_second.pop();
 		}
-		top.currentform.pathx_second.value = "";
-		top.currentform.pathy_second.value = "";
+		enclosingForm.pathx_second.value = "";
+		enclosingForm.pathy_second.value = "";
 		applypolygons();
-		if(top.currentform.firstpoly.value == "true"){
-			top.currentform.last_doing.value = "draw_second_polygon";
+		if(enclosingForm.firstpoly.value == "true"){
+			enclosingForm.last_doing.value = "draw_second_polygon";
 		}
 		else{
-			top.currentform.last_doing.value = "draw_polygon";
+			enclosingForm.last_doing.value = "draw_polygon";
 		}
 	}
 
 	function polygonarea(){
 		area = top.document.getElementById("custom_area");
 		if(area == undefined){						// wenn es ein Flaeche-Attribut gibt, wird das verwendet, ansonsten die normale Flaechenanzeige
-			area = top.currentform.area;
+			area = enclosingForm.area;
 		}
-	  if(top.currentform.newpathwkt.value != ""){
-	  	if(top.currentform.areaunit == undefined){
-	  		top.ahah("index.php", "go=spatial_processing&path1="+top.currentform.newpathwkt.value+"&operation=area&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.area, area), "");
+	  if(enclosingForm.newpathwkt.value != ""){
+	  	if(enclosingForm.areaunit == undefined){
+	  		top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.newpathwkt.value+"&operation=area&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.area, area), "");
 	  	}
 	  	else{
-	  		top.ahah("index.php", "go=spatial_processing&path1="+top.currentform.newpathwkt.value+"&operation=area&unit="+top.currentform.areaunit.value+"&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.area, area), "");
+	  		top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.newpathwkt.value+"&operation=area&unit="+enclosingForm.areaunit.value+"&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.area, area), "");
 	  	}
 	  }
 	  else{
-	  	if(top.currentform.newpath.value != ""){
-	  		if(top.currentform.areaunit == undefined){
-	  			top.ahah("index.php", "go=spatial_processing&path2="+top.currentform.newpath.value+"&operation=area&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.area, area), "");
+	  	if(enclosingForm.newpath.value != ""){
+	  		if(enclosingForm.areaunit == undefined){
+	  			top.ahah("index.php", "go=spatial_processing&path2="+enclosingForm.newpath.value+"&operation=area&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.area, area), "");
 	  		}
 	  		else{
-	  			top.ahah("index.php", "go=spatial_processing&path2="+top.currentform.newpath.value+"&operation=area&unit="+top.currentform.areaunit.value+"&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.area, area), "");
+	  			top.ahah("index.php", "go=spatial_processing&path2="+enclosingForm.newpath.value+"&operation=area&unit="+enclosingForm.areaunit.value+"&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.area, area), "");
 	  		}
 	  	}
 	  	else{
-	  		top.currentform.area.value = "0.0";
+	  		enclosingForm.area.value = "0.0";
 	  	}
 	  }
 	}
@@ -2754,7 +2980,7 @@ $transformfunctions = '
 
 	function move_geometry(){
 		document.getElementById("canvas").setAttribute("cursor", "move");
-		top.currentform.last_doing.value = "move_geometry";
+		enclosingForm.last_doing.value = "move_geometry";
 		if(polygonfunctions){
 			applypolygons();
 		}
@@ -2784,10 +3010,10 @@ $transformfunctions = '
 	  if(moved){
 			translate_x = (move_dx * scale);
 	  	translate_y = (move_dy * scale * -1);
-			top.currentform.secondpoly.value = true;
-			top.currentform.secondline.value = true;
+			enclosingForm.secondpoly.value = true;
+			enclosingForm.secondline.value = true;
 			must_redraw = true;
-			top.ahah("index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&translate_x="+translate_x+"&translate_y="+translate_y+"&operation=translate&resulttype=svgwkt", new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
+			top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&translate_x="+translate_x+"&translate_y="+translate_y+"&operation=translate&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 		}
 	  movinggeom  = false;
 	  moved  = false;
@@ -2805,7 +3031,7 @@ $vertex_catch_functions = '
 	top.document.getElementById("vertices").SVGtoggle_vertices = toggle_vertices;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
 	function toggle_vertices(){
-		if(top.currentform.punktfang.checked){
+		if(enclosingForm.punktfang.checked){
 			request_foreign_vertices();
 		}
 		else{
@@ -2813,10 +3039,10 @@ $vertex_catch_functions = '
 		}
 	}
 	
-	if(top.currentform.punktfang.checked)toggle_vertices();		// am Anfang einmal aufrufen, damit die Vertices nach Navigation geladen werden, falls der Punktfang an war
+	if(enclosingForm.punktfang.checked)toggle_vertices();		// am Anfang einmal aufrufen, damit die Vertices nach Navigation geladen werden, falls der Punktfang an war
 
 	function request_foreign_vertices(){
-		top.ahah("index.php", "go=getSVG_foreign_vertices&layer_id="+top.currentform.layer_id.value+"&oid="+top.currentform.oid.value, new Array(top.currentform.vertices, ""), new Array("setvalue", "execute_function"));
+		top.ahah("index.php", "go=getSVG_foreign_vertices&layer_id="+enclosingForm.layer_id.value+"&oid="+enclosingForm.oid.value, new Array(enclosingForm.vertices, ""), new Array("setvalue", "execute_function"));
 	}
 
 	function remove_foreign_vertices(){
@@ -2828,7 +3054,7 @@ $vertex_catch_functions = '
 	}
 
 	function activate_foreign_vertex(evt){
-		if(top.currentform.last_doing.value == "vertex_edit" && (selected_vertex == undefined || selected_vertex == "")){
+		if(enclosingForm.last_doing.value == "vertex_edit" && (selected_vertex == undefined || selected_vertex == "")){
 			// wenn man im Vertex-Edit Modus ist, die Events von diesem foreign-vertex ausschalten, damit die Geometrie-Vertices Vorrang haben 
 			evt.target.setAttribute("pointer-events", "none");
 			deactivated_foreign_vertex = evt.target.getAttribute("id");  
@@ -2850,7 +3076,7 @@ $vertex_catch_functions = '
     }
 		// Aufrufen der Funktion mousedown() fuer die jeweilige Aktion
     position= new point(evt.target.getAttribute("x"), evt.target.getAttribute("y"));
-		if(top.currentform.last_doing.value == "vertex_edit"){
+		if(enclosingForm.last_doing.value == "vertex_edit"){
 			if(last_selected_vertex != ""){
 				selected_vertex = last_selected_vertex;
 				position.target = selected_vertex;  
@@ -2868,27 +3094,32 @@ $vertex_catch_functions = '
 	top.document.getElementById("svghelp").SVGshow_foreign_vertices = show_foreign_vertices;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
 	function show_foreign_vertices(){
-		if(top.currentform.vertices.value != ""){
+		if(enclosingForm.vertices.value != ""){
 			var parent = document.getElementById("foreignvertices");
 			circle = new Array();
 			var kreis1 = document.getElementById("kreis3");
-			vertex_string = top.currentform.vertices.value+"";
-			top.currentform.vertices.value = "";
+			vertex_string = enclosingForm.vertices.value+"";
+			enclosingForm.vertices.value = "";
 			vertices = vertex_string.split("|");
 			for(i = 0; i < vertices.length-1; i++){
-				circle[i] = kreis1.cloneNode(true);
-				coords = vertices[i].split(" ");
-				circle[i].setAttribute("x", coords[0]);
-				circle[i].setAttribute("y", coords[1]);
-				coords[0] = Math.round((coords[0] - parseFloat(top.currentform.minx.value))/parseFloat(top.currentform.pixelsize.value));
-				coords[1] = Math.round((coords[1] - top.currentform.miny.value)/parseFloat(top.currentform.pixelsize.value));
-				circle[i].setAttribute("cx", coords[0]);
-				circle[i].setAttribute("cy", coords[1]);
-				circle[i].setAttribute("style","fill: #00DD00");
-				circle[i].setAttribute("id", "foreign_vertex_"+i);
+				coords = vertices[i].split(" ");				
+				circle[i] = create_catch_vertex(kreis1, "foreign_vertex_"+i, coords[0], coords[1]);
 				parent.appendChild(circle[i]);
 			}
 		}
+	}
+	
+	function create_catch_vertex(template, id, world_x, world_y){
+		var circle = template.cloneNode(true);
+		circle.setAttribute("x", world_x);
+		circle.setAttribute("y", world_y);
+		x = Math.round((world_x - parseFloat(enclosingForm.minx.value))/parseFloat(enclosingForm.pixelsize.value));
+		y = Math.round((world_y - enclosingForm.miny.value)/parseFloat(enclosingForm.pixelsize.value));
+		circle.setAttribute("cx", x);
+		circle.setAttribute("cy", y);
+		circle.setAttribute("style","fill: #00DD00");
+		circle.setAttribute("id", id);
+		return circle;
 	}
 
 	//------------------------------------------------------------
@@ -2936,10 +3167,10 @@ $gps_functions = '
       this.clientY = y;
     }
     // Abfragen der aktuellen GPS Position
-		if(top.currentform.gps_posx.value != "" && top.currentform.gps_posy.value != ""){
+		if(enclosingForm.gps_posx.value != "" && enclosingForm.gps_posy.value != ""){
 			// Aufrufen der Funktion mousedown() fuer die jeweilige Aktion
-	    position= new point(top.currentform.gps_posx.value, top.currentform.gps_posy.value);
-			if(top.currentform.last_doing.value == "vertex_edit"){
+	    position= new point(enclosingForm.gps_posx.value, enclosingForm.gps_posy.value);
+			if(enclosingForm.last_doing.value == "vertex_edit"){
 				if(last_selected_vertex != ""){
 					selected_vertex = last_selected_vertex;
 					position.target = selected_vertex; 
@@ -2956,12 +3187,12 @@ $gps_functions = '
   }
 
 	function switch_gps_follow(){
-		if(top.currentform.gps_follow.value == "on"){
-			top.currentform.gps_follow.value = "off";
+		if(enclosingForm.gps_follow.value == "on"){
+			enclosingForm.gps_follow.value = "off";
 			document.getElementById("gps_text").firstChild.data = "off";
 		}
 		else{
-			top.currentform.gps_follow.value = "on";
+			enclosingForm.gps_follow.value = "on";
 			document.getElementById("gps_text").firstChild.data = "on";
 		}
 	}
@@ -2982,18 +3213,18 @@ $measurefunctions = '
 		    str_pathx = str_pathx + ";" + ((m_pathx[i] * scale) + minx);
 				str_pathy = str_pathy + ";" + ((m_pathy[i] * scale) + miny);
 			}
-			top.currentform.str_pathx.value = str_pathx;
-			top.currentform.str_pathy.value = str_pathy;
+			enclosingForm.str_pathx.value = str_pathx;
+			enclosingForm.str_pathy.value = str_pathy;
 			top.document.GUI.measured_distance.value = measured_distance;
 		}
 	}
 	
 	function get_measure_path(){
-		if(top.currentform.str_pathx.value != ""){
+		if(enclosingForm.str_pathx.value != ""){
 			doing = "measure";
 			measuring = true;
-			var str_pathx = top.currentform.str_pathx.value;
-			var str_pathy = top.currentform.str_pathy.value;
+			var str_pathx = enclosingForm.str_pathx.value;
+			var str_pathy = enclosingForm.str_pathy.value;
 			world_pathx = str_pathx.split(";");
 			world_pathy = str_pathy.split(";");  
 			m_pathx[0] = (world_pathx[0] - minx)/scale;
@@ -3132,12 +3363,10 @@ $measurefunctions = '
 				<circle id="startvertex" cx="-500" cy="-500" r="2" style="fill:blue;stroke:blue;stroke-width:2"/>
 			</g>
 			<rect id="canvas" cursor="crosshair" onmousedown="mousedown(evt);" onmousemove="mousemove(evt);" onmouseup="mouseup(evt);" width="100%" height="100%" opacity="0" visibility="visible"/>
-			<g id="in_between_vertices" transform="translate(0,'.$res_y.') scale(1,-1)">			
-			</g>
-			<g id="vertices" transform="translate(0,'.$res_y.') scale(1,-1)">			
-			</g>
-			<g id="foreignvertices" transform="translate(0,'.$res_y.') scale(1,-1)">
-			</g>
+			<g id="in_between_vertices" transform="translate(0,'.$res_y.') scale(1,-1)"></g>
+			<g id="vertices" transform="translate(0,'.$res_y.') scale(1,-1)"></g>
+			<g id="ortho_point_vertices" transform="translate(0,'.$res_y.') scale(1,-1)"></g>
+			<g id="foreignvertices" transform="translate(0,'.$res_y.') scale(1,-1)"></g>
 	  </g>
 	  <g id="templates">
 	  	<circle style="-moz-user-select: none;" id="kreis" cx="-5000" cy="-5000" r="7" opacity="0.3" onmouseover="activate_vertex(evt)" onmouseout="deactivate_vertex(evt)" onmousedown="select_vertex(evt)" onmousemove="move_vertex(evt)" onmouseup="end_vertex_move(evt)" />
@@ -3393,7 +3622,7 @@ $measurefunctions = '
   	global $last_x;
     $flurstquerybuttons = '
       <g id="query_add" transform="translate('.$last_x.' 0)">
-        <rect id="ppquery0" onmouseover="show_tooltip(\'vorhandene Geometrie hinzuf\u00fcgen\',evt.clientX,evt.clientY)" onmousedown="add_geometry();hide_tooltip();highlightbyid(\'ppquery0\');" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+        <rect id="ppquery1" onmouseover="show_tooltip(\'vorhandene Geometrie hinzuf\u00fcgen\',evt.clientX,evt.clientY)" onmousedown="add_geometry();hide_tooltip();highlightbyid(\'ppquery1\');" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
 				<g class="navbutton" transform="translate(5 5) scale(0.8)">
 					<g transform="translate(9 -8)">
 						<path d="M23,12 L16,12 C15.4,12 15,11.6 15,11 L15,10 C15,9.4 15.4,9 16,9 L23,9 C23.6,9 24,9.4 24,10 L24,11 C24,11.6 23.6,12 23,12"/>
@@ -3411,7 +3640,7 @@ $measurefunctions = '
     $last_x += 36;
     $flurstquerybuttons .= '
 		  <g id="query_subtract" transform="translate('.$last_x.' 0)">
-        <rect id="ppquery1" onmouseover="show_tooltip(\'mit vorhandener Geometrie ausschneiden\',evt.clientX,evt.clientY)" onmousedown="subtract_geometry();hide_tooltip();highlightbyid(\'ppquery1\');" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+        <rect id="ppquery2" onmouseover="show_tooltip(\'mit vorhandener Geometrie ausschneiden\',evt.clientX,evt.clientY)" onmousedown="subtract_geometry();hide_tooltip();highlightbyid(\'ppquery2\');" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
         <g class="navbutton" transform="translate(5 5) scale(0.8)">
 					<g transform="translate(9 -8)">
 						<path d="M23,12 L16,12 C15.4,12 15,11.6 15,11 L15,10 C15,9.4 15.4,9 16,9 L23,9 C23.6,9 24,9.4 24,10 L24,11 C24,11.6 23.6,12 23,12"/>
@@ -3543,6 +3772,26 @@ $measurefunctions = '
 		$last_x += 36;
     return $vertex_edit_buttons;
 	}
+	
+	function ortho_point_buttons(){
+		global $last_x;
+		$ortho_point_buttons ='
+			<g id="ortho_point" transform="translate('.$last_x.' 0)">
+				<rect id="ortho_point1" onmouseover="show_tooltip(\'Orthogonalpunktberechnung\',evt.clientX,evt.clientY)" onmousedown="highlightbyid(\'ortho_point1\');ortho_point();hide_tooltip();" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+				<g class="navbutton" transform="translate(4 4) scale(1)">
+					<g transform="translate(-10.8 -6.5)">
+						<circle cx="13" cy="18" r="2.4"/>
+						<circle cx="35" cy="20" r="2.4"/>
+						<polyline class="navbutton_stroke navbutton_nofill" style="stroke-width:1.7;stroke-dasharray:2,2;" points="12 32 37 8" />
+						<polyline class="navbutton_stroke navbutton_nofill" style="stroke-width:1;" points="13 18 19 25" />
+						<polyline class="navbutton_stroke navbutton_nofill" style="stroke-width:1;" points="35 20 30.5 14.5" />
+					</g>
+				</g>
+      </g>
+    ';
+		$last_x += 36;
+    return $ortho_point_buttons;
+	}	
 	
 	function measure_buttons($strRuler){
 		global $last_x;

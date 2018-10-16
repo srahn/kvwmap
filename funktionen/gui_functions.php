@@ -11,6 +11,38 @@ function Bestaetigung(link,text) {
 	}
 }
 
+// closest() for IE
+if (!Element.prototype.matches)
+    Element.prototype.matches = Element.prototype.msMatchesSelector || 
+                                Element.prototype.webkitMatchesSelector;
+
+if (!Element.prototype.closest)
+    Element.prototype.closest = function(s) {
+        var el = this;
+        if (!document.documentElement.contains(el)) return null;
+        do {
+            if (el.matches(s)) return el;
+            el = el.parentElement || el.parentNode;
+        } while (el !== null && el.nodeType === 1); 
+        return null;
+    };
+
+function roundNumber(num, scale){
+  if(!("" + num).indexOf("e") != -1) {
+    return +(Math.round(num + "e+" + scale)  + "e-" + scale);  
+  } else {
+    var arr = ("" + num).split("e");
+    var sig = ""
+    if(+arr[1] + scale > 0) {
+      sig = "+";
+    }
+    var i = +arr[0] + "e" + sig + (+arr[1] + scale);
+    var j = Math.round(i);
+    var k = +(j + "e-" + scale);
+    return k;  
+  }
+}
+
 function ImageLoadFailed(id) {
   document.getElementById(id).innerHTML = '';
 }
@@ -97,10 +129,23 @@ function resizemap2window(){
 * @param array or string messages contain the messages as array
 * or as a single string
 */
-function message(messages, t_hide, t_hidden) {
-	if (typeof(t_hide) === 'undefined') t_hide = 1000;
-	if (typeof(t_hidden) === 'undefined') t_hidden = 3000;
-	var msgDiv = $("#message_box");
+function message(messages, t_visible, t_fade, css_top) {
+	var msgBoxDiv = $('#message_box');
+	if (msgBoxDiv.is(':visible')) {
+		msgBoxDiv.stop().css('opacity', '1').show();
+	}
+	else {
+		msgBoxDiv.html('');
+	}
+	if(document.getElementById('messages') == null)msgBoxDiv.append('<div id="messages"></div>');
+	var msgDiv = $('#messages');
+	var confirm = false;
+
+	t_visible   = (typeof t_visible   !== 'undefined') ? t_visible   : 1000;		// Zeit, die die Message-Box komplett zu sehen ist
+	t_fade   = (typeof t_fade   !== 'undefined') ? t_fade   : 2000;							// Dauer des Fadings
+	
+	if(typeof css_top  !== 'undefined')msgBoxDiv.css('top', css_top);
+	
 	types = {
 		'notice': {
 			'description': 'Erfolg',
@@ -126,8 +171,8 @@ function message(messages, t_hide, t_hidden) {
 			'color': 'red',
 			'confirm': true
 		}
-	},
-	confirmMsgDiv = false;
+	};
+	//	,confirmMsgDiv = false;
 
 	if (!$.isArray(messages)) {
 		messages = [{
@@ -136,24 +181,20 @@ function message(messages, t_hide, t_hidden) {
 		}];
 	}
 
-	msgDiv.html('');
-
 	$.each(messages, function (index, msg) {
 		msg.type = (['notice', 'info', 'error'].indexOf(msg.type) > -1 ? msg.type : 'warning');
 		msgDiv.append('<div class="message-box-' + msg.type + '">' + (types[msg.type].icon ? '<div class="message-box-type"><i class="fa ' + types[msg.type].icon + '" style="color: ' + types[msg.type].color + '; cursor: default;"></i></div>' : '') + '<div class="message-box-msg">' + msg.msg + '</div><div style="clear: both"></div></div>');
-		if (types[msg.type].confirm) {
-			confirmMsgDiv = true;
+		if (types[msg.type].confirm && document.getElementById('message_ok_button') == null) {
+			msgBoxDiv.append('<input id="message_ok_button" type="button" onclick="$(\'#message_box\').hide();" value="ok" style="margin: 10px 0 10px 0;">');
 		}
 	});
-
-	msgDiv.attr('class', 'message_box');
-
-	if (!confirmMsgDiv) {
-		setTimeout(function() {msgDiv.addClass('message_box_hide');}, t_hide);
-		setTimeout(function() {msgDiv.addClass('message_box_hidden');}, t_hidden);		// hier bitte kein FadeOut machen, sondern mit den Klassen arbeiten
+	
+	if (msgDiv.html() != '') {
+		msgBoxDiv.show();
 	}
-	else {
-		msgDiv.append('<input type="button" onclick="$(\'#message_box\').addClass(\'message_box_hidden\');" value="ok" style="margin-top: 10px;">');
+
+	if (document.getElementById('message_ok_button') == null) {		// wenn kein OK-Button da ist, ausblenden
+		setTimeout(function() {msgBoxDiv.fadeOut(t_fade);}, t_visible);
 	}
 }
 
@@ -168,6 +209,8 @@ function onload_functions(){
 	<? if($this->user->rolle->auto_map_resize){ ?>
 	window.onresize = function(){clearTimeout(doit);doit = setTimeout(resizemap2window, 200);};
 	<? } ?>
+	var vchangers = document.getElementsByClassName('visibility_changer');
+	[].forEach.call(vchangers, function(vchanger){vchanger.oninput();});
 	document.fullyLoaded = true;
 }
 

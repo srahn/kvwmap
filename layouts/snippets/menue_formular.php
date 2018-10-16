@@ -15,11 +15,12 @@
 						if ($this->menue->get('id') != '') { ?>
 							<input value="Ändern" title="Änderungen Speichern" type="button" name="dummy" onclick="submitWithValue('GUI','go_plus','Ändern')">&nbsp;
 							<input value="Zurücksetzen" title="Setzt alle Werte zurück auf die vorhigen." type="reset" name="reset1">&nbsp;
+							<input value="Als neuen Menüpunkt Eintragen" title="Als neuen Menüpunkt eintragen" type="button" onclick="submitWithValue('GUI','go_plus','Als neuen Menüpunkt Eintragen')">
 							<input type="hidden" name="selected_menue_id" value="<?php echo  $this->menue->get('id'); ?>"><?php
 						}
 						else { ?>
 							<input value="Speichern" title="Speichern" type="button" name="dummy" onclick="submitWithValue('GUI','go_plus','Speichern')">&nbsp;
-							<input value="Zurücksetzen" title="Setzt die Werte zurück auf den letzten Stand." type="button" onclick="document.location.href='index.php?go=Menueeditor&selected_menue_id=<?php echo  $this->menue->get('id'); ?>'">&nbsp;<?
+							<input value="Zurücksetzen" title="Setzt die Werte zurück auf den letzten Stand." type="button" onclick="document.location.href='index.php?go=Menueeditor&selected_menue_id=<?php echo $this->menue->get('id'); ?>'"><?
 						} ?>
 						<!--input type="button" name="dummy" value="Als neues Menü eintragen" onclick="submitWithValue('GUI','go_plus','Als neues Menü eintragen')"-->
 				  </td>

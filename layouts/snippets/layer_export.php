@@ -30,6 +30,10 @@
 					Mit Stellenzugehörigkeit
 				</input>
 				<p>
+				<input type="checkbox" name="with_datatypes" value="true"<? echo ($this->formvars['with_datatypes'] != '' ? ' checked' : ''); ?>>
+					Mit Datentypen
+				</input>
+				<p>
 				<i>Derzeit wird davon ausgegangen, dass alle auf ein mal exportierten Layer zu jeweils einer Gruppe gehören. Die Gruppen-ID kann im Dumpfile manuell gesetzt werden. Erfolgt der Export mit Stellenzuordnung, kann die Erstellung der Stelle im Dumpfile nachträglich manuell unterbunden werden und statt dessen die Stellen_ID des Zielsystems eingetragen werden.</i>
 				<p>
 				<input type="submit" value="Exportieren" name="go_plus"/>

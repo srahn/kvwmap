@@ -31,7 +31,9 @@ class stelle {
 
 	function stelle($id, $database) {
 		global $debug;
+		global $log_mysql;
 		$this->debug = $debug;
+		$this->log = $log_mysql;
 		$this->id = $id;
 		$this->database = $database;
 		$this->Bezeichnung = $this->getName();
@@ -105,8 +107,8 @@ class stelle {
     return $rs['Bezeichnung'];
   }
 
-  function readDefaultValues() {
-    $sql = "
+	function readDefaultValues() {
+		$sql = "
 			SELECT
 				*
 			FROM
@@ -114,38 +116,38 @@ class stelle {
 			WHERE
 				ID = " . $this->id . "
 		";
-    $this->debug->write("<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs=mysql_fetch_array($query);    
-    $this->MaxGeorefExt=ms_newRectObj();
-    $this->MaxGeorefExt->setextent($rs['minxmax'],$rs['minymax'],$rs['maxxmax'],$rs['maxymax']);
-    $this->epsg_code=$rs["epsg_code"];
-    $this->alb_raumbezug=$rs["alb_raumbezug"];
-    $this->alb_raumbezug_wert=$rs["alb_raumbezug_wert"];
-    $this->pgdbhost = ($rs["pgdbhost"] == 'PGSQL_PORT_5432_TCP_ADDR') ? getenv('PGSQL_PORT_5432_TCP_ADDR') : $rs["pgdbhost"];
-    $this->pgdbname=$rs["pgdbname"];
-    $this->pgdbuser=$rs["pgdbuser"];
-    $this->pgdbpasswd=$rs["pgdbpasswd"];
-    $this->protected=$rs["protected"];
-    //---------- OWS Metadaten ----------//
-    $this->ows_title=$rs["ows_title"];
-    $this->ows_abstract=$rs["ows_abstract"];
-    $this->wms_accessconstraints=$rs["wms_accessconstraints"];
-    $this->ows_contactperson=$rs["ows_contactperson"];
-    $this->ows_contactorganization=$rs["ows_contactorganization"];
-    $this->ows_contactelectronicmailaddress=$rs["ows_contactemailaddress"];
-    $this->ows_contactposition=$rs["ows_contactposition"];
-    $this->ows_fees=$rs["ows_fees"];
-    $this->ows_srs=$rs["ows_srs"];
-    $this->check_client_ip=$rs["check_client_ip"];
-    $this->checkPasswordAge=$rs["check_password_age"];
-    $this->allowedPasswordAge=$rs["allowed_password_age"];
-    $this->useLayerAliases=$rs["use_layer_aliases"];
+		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>' . $sql, 4);
+		$query = mysql_query($sql,$this->database->dbConn);
+		if ($query == 0) { $this->debug->write('<br>Abbruch Zeile: ' . __LINE__, 4); return 0; }
+		$rs = mysql_fetch_array($query);    
+		$this->MaxGeorefExt = ms_newRectObj();
+		$this->MaxGeorefExt->setextent($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
+		$this->epsg_code = $rs['epsg_code'];
+		$this->alb_raumbezug = $rs['alb_raumbezug'];
+		$this->alb_raumbezug_wert = $rs['alb_raumbezug_wert'];
+		$this->pgdbhost = ($rs['pgdbhost'] == 'PGSQL_PORT_5432_TCP_ADDR' ? getenv('PGSQL_PORT_5432_TCP_ADDR') : $rs['pgdbhost']);
+		$this->pgdbname = $rs['pgdbname'];
+		$this->pgdbuser = $rs['pgdbuser'];
+		$this->pgdbpasswd = $rs['pgdbpasswd'];
+		$this->protected = $rs['protected'];
+		//---------- OWS Metadaten ----------//
+		$this->ows_title = $rs['ows_title'];
+		$this->ows_abstract = $rs['ows_abstract'];
+		$this->wms_accessconstraints = $rs['wms_accessconstraints'];
+		$this->ows_contactperson = $rs['ows_contactperson'];
+		$this->ows_contactorganization = $rs['ows_contactorganization'];
+		$this->ows_contactelectronicmailaddress = $rs['ows_contactemailaddress'];
+		$this->ows_contactposition = $rs['ows_contactposition'];
+		$this->ows_fees = $rs['ows_fees'];
+		$this->ows_srs = $rs['ows_srs'];
+		$this->check_client_ip = $rs['check_client_ip'];
+		$this->checkPasswordAge = $rs['check_password_age'];
+		$this->allowedPasswordAge = $rs['allowed_password_age'];
+		$this->useLayerAliases = $rs['use_layer_aliases'];
 		$this->selectable_layer_params = $rs['selectable_layer_params'];
-		$this->hist_timestamp=$rs["hist_timestamp"];
+		$this->hist_timestamp = $rs['hist_timestamp'];
 		$this->default_user_id = $rs['default_user_id'];
-  }
+	}
 
   function checkClientIpIsOn() {
     $sql ='SELECT check_client_ip FROM stelle WHERE ID = '.$this->id;
@@ -855,12 +857,12 @@ class stelle {
 		return 1;
 	}
 
-	function addLayer($layer_ids, $drawingorder, $filter = '') {
+	function addLayer($layer_ids, $drawingorder, $filter = '', $assign_default_values = false) {
 		#echo '<br>stelle.php addLayer ids: ' . implode(', ', $layer_ids);
 		# Hinzufügen von Layern zur Stelle
-		for ($i=0;$i<count($layer_ids);$i++) {
-			$sql = "
-				INSERT IGNORE INTO used_layer (
+		for ($i=0;$i<count($layer_ids);$i++){
+			$sql = ($assign_default_values ? "REPLACE" : "INSERT IGNORE").
+			" INTO used_layer (
 					`Stelle_ID`,
 					`Layer_ID`,
 					`queryable`,
@@ -907,8 +909,8 @@ class stelle {
 			$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 			$query=mysql_query($sql,$this->database->dbConn);
 			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-			
-			if(mysql_affected_rows() > 0){
+
+			if(!$assign_default_values AND mysql_affected_rows() > 0){
 				$sql = "INSERT IGNORE INTO layer_attributes2stelle (layer_id, attributename, stelle_id, privileg, tooltip) ";
 				$sql.= "SELECT ".$layer_ids[$i].", name, ".$this->id.", privileg, query_tooltip FROM layer_attributes WHERE layer_id = ".$layer_ids[$i]." AND privileg IS NOT NULL";
 				#echo $sql.'<br>';

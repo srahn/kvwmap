@@ -14,7 +14,7 @@
 			<tr>
 				<td align="center" valign="top">
 					<form name="GUI" enctype="multipart/form-data" method="post" action="index.php" id="GUI">
-						<div id="message_box" class="message_box_hidden"></div>		<!-- muss innerhalb des form stehen -->
+						<div id="message_box"></div>		<!-- muss innerhalb des form stehen -->
 						<table cellpadding=0 cellspacing=0>
 							<tr> 
 								<td colspan="2" id="header"><?php

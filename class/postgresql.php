@@ -253,13 +253,7 @@ FROM
 			if ($this->schema != ''){
 				$sql = "SET search_path = " . $this->schema . ", public;" . $sql;
 			}
-			if ($suppress_error_msg) {
-				$query = @pg_query($this->dbConn, $sql);
-			}
-			else {
-				$query = @pg_query($this->dbConn, $sql);
-			}
-
+			$query = @pg_query($this->dbConn, $sql);
 			//$query=0;
 			if ($query == 0) {
 				$ret[0] = 1;
@@ -1340,7 +1334,7 @@ FROM
     }
     return $ret;
   }
-  
+	  
   function getStrassen($FlurstKennz) {
     $sql ="set enable_seqscan = off;SELECT DISTINCT g.schluesselgesamt as gemeinde, g.bezeichnung as gemeindename, l.lage as strasse, s.bezeichnung as strassenname ";
     $sql.="FROM alkis.ax_gemeinde as g, alkis.ax_flurstueck as f ";
@@ -2889,16 +2883,6 @@ FROM
     $anzRows=pg_affected_rows($query);
 #    echo ' anzRows:'.$anzRows;
     return $anzRows;
-  }
-
-  function setFortfuehrung($ist_Fortfuehrung) {
-    $this->ist_Fortfuehrung=$ist_Fortfuehrung;
-    if ($this->ist_Fortfuehrung) {
-      $this->tableprefix=TEMPTABLEPREFIX;
-    }
-    else {
-      $this->tableprefix="";
-    }
   }
 
   function setLogLevel($loglevel,$logfile) {

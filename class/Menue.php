@@ -10,28 +10,34 @@ class Menue extends MyObject {
 		$this->identifier = 'id';
 		$this->validations = array(
 			array(
+				'attribute' => 'id',
+				'condition' => 'unique',
+				'description' => 'Die id darf nur ein Mal vorkommen.',
+				'option' => 'on Insert'
+			),
+			array(
 				'attribute' => 'name',
 				'condition' => 'not_null',
 				'description' => 'Es muss ein Menüname angegeben werden.',
-				'options' => null
+				'option' => null
 			),
 			array(
 				'attribute' => 'links',
 				'condition' => 'not_null',
 				'description' => 'Ein Link muss angegeben werden. Für Obermenüpunkte in der Regel index.php?go=changemenue',
-				'options' => null
+				'option' => null
 			),
 			array(
 				'attribute' => 'menueebene',
 				'condition' => 'not_null',
 				'description' => 'Es muss eine Menüebene angegeben werden.',
-				'options' => array(1, 2)
+				'option' => array(1, 2)
 			),
 			array(
 				'attribute' => 'menueebene',
 				'condition' => 'validate_value_is_one_off',
 				'description' => 'Es muss Menüebene 1=Obermenü oder 2=Untermenü angegeben werden.',
-				'options' => array(1, 2)
+				'option' => array(1, 2)
 			)
 		);
 	}
@@ -140,7 +146,7 @@ class Menue extends MyObject {
 	public function validate() {
 		$results = array();
 		foreach($this->validations AS $validation) {
-			$results[] = $this->validates($validation['attribute'], $validation['condition'], $validation['description'], $validation['options']);
+			$results[] = $this->validates($validation['attribute'], $validation['condition'], $validation['description'], $validation['option']);
 		}
 
 		$messages = array();

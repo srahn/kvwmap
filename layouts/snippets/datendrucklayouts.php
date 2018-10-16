@@ -566,17 +566,32 @@ function save_layout(){
 	        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="lineendposy<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['endposy'] ?>" size="5"></td>
 	        </tr>
 	       	<tr>
-	       		<td colspan="4" valign="bottom" style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3">&nbsp;unterhalb&nbsp;von:</td>
+	       		<td colspan="2" valign="bottom" style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3">&nbsp;unterhalb&nbsp;von:</td>
+						<td colspan="2" valign="bottom" style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3">&nbsp;unterhalb&nbsp;von:</td>
 	       		<td colspan="2" valign="bottom">&nbsp;Platzierung:</td>
 	        </tr>
 	        <tr>
-						<td colspan="4" valign="top" style="border-right:1px solid #C3C7C3">
-							<select name="lineoffset_attribute<? echo $i ?>" style="width: 200px">
+						<td colspan="2" valign="top" style="border-right:1px solid #C3C7C3">
+							<select name="lineoffset_attribute_start<? echo $i ?>" style="width: 200px">
 								<option value="">- Auswahl -</option>
 								<?
 								for($j = 0; $j < count($this->attributes['name']); $j++){
 									echo '<option ';
-									if($this->ddl->selectedlayout[0]['lines'][$i]['offset_attribute'] == $this->attributes['name'][$j]){
+									if($this->ddl->selectedlayout[0]['lines'][$i]['offset_attribute_start'] == $this->attributes['name'][$j]){
+										echo 'selected ';
+									}
+									echo 'value="'.$this->attributes['name'][$j].'">'.$this->attributes['name'][$j].'</option>';
+								}
+								?>
+							</select>
+						</td>
+						<td colspan="2" valign="top" style="border-right:1px solid #C3C7C3">
+							<select name="lineoffset_attribute_end<? echo $i ?>" style="width: 200px">
+								<option value="">- Auswahl -</option>
+								<?
+								for($j = 0; $j < count($this->attributes['name']); $j++){
+									echo '<option ';
+									if($this->ddl->selectedlayout[0]['lines'][$i]['offset_attribute_end'] == $this->attributes['name'][$j]){
 										echo 'selected ';
 									}
 									echo 'value="'.$this->attributes['name'][$j].'">'.$this->attributes['name'][$j].'</option>';
