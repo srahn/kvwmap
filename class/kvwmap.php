@@ -3802,6 +3802,11 @@ class GUI {
     $this->titel='Administrationsfunktionen';
   }
 
+  function showConstants() {
+		$this->main='showadminfunctions.php';
+		$this->administration->get_constants_from_all_configs();
+  }
+
   function grundbuchblattWahl() {
     $this->titel='Suche nach Grundbuchblättern';
     $this->main='grundbuchblattsuchform.php';
@@ -11174,13 +11179,13 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->cronjob->data = formvars_strip($this->formvars, $this->cronjob->getKeys(), 'keep');
 		$results = $this->cronjob->update();
 		if ($results[0]['success']) {
-			$this->add_message('error', 'Fehler beim Eintragen in die Datenbank!<br>' . $result);
-			$this->main = 'cronjob_formular.php';
-		}
-		else {
-	#		$this->cronjob->set('query', strip_pg_escape_string($this->cronjob->get('query')));
+			#		$this->cronjob->set('query', strip_pg_escape_string($this->cronjob->get('query')));
 			$this->cronjobs = CronJob::find($this);
 			$this->main = 'cronjobs.php';
+		}
+		else {
+			$this->add_message('error', 'Fehler beim Eintragen in die Datenbank!<br>' . $result);
+			$this->main = 'cronjob_formular.php';
 		}
 		$this->output();
 	}
