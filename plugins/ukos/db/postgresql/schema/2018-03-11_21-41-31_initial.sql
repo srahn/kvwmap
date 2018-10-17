@@ -2540,7 +2540,7 @@ CREATE TABLE ukos_okstra.baum(
 		REFERENCES ukos_okstra.wlo_detaillierungsgrad_asb (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (okstra.bewuchs);
+INHERITS (ukos_okstra.bewuchs);
 
 CREATE TABLE ukos_okstra.teilbauwerk (
 	hat_objekt_id character varying,
@@ -2666,7 +2666,7 @@ CREATE TABLE ukos_okstra.bruecke(
 	hat_baustoff_bauwerk character varying, -- Association
 	hat_brueckenfeld_stuetzung character varying -- Association
 )
-INHERITS (okstra.teilbauwerk);
+INHERITS (ukos_okstra.teilbauwerk);
 
 CREATE TABLE ukos_okstra.tunnel_trogbauwerk(
 	gradiente character varying,
@@ -2703,7 +2703,7 @@ CREATE TABLE ukos_okstra.tunnel_trogbauwerk(
 	hat_tunnelsicherheit character varying -- Association
 	
 )
-INHERITS (okstra.teilbauwerk);
+INHERITS (ukos_okstra.teilbauwerk);
 
 CREATE TABLE ukos_okstra.stuetzbauwerk(
 	gesamtlaenge_stuetzbauwerk numeric,
@@ -2722,7 +2722,7 @@ CREATE TABLE ukos_okstra.stuetzbauwerk(
 	bemerkungen_zum_stuetzbauwerk character varying,
 	hat_segment_stuetzbauwerk character varying -- Association
 )
-INHERITS (okstra.teilbauwerk);
+INHERITS (ukos_okstra.teilbauwerk);
 
 CREATE TABLE ukos_okstra.laermschutzbauwerk(
 	gesamtlaenge integer,
@@ -2740,7 +2740,7 @@ CREATE TABLE ukos_okstra.laermschutzbauwerk(
 	durchschnittliche_segmenthoehe numeric,
 	hat_segment_laermschutzbw character varying -- Association
 )
-INHERITS (okstra.teilbauwerk);
+INHERITS (ukos_okstra.teilbauwerk);
 
 CREATE TABLE ukos_okstra.verkehrszeichenbruecke(
 	querschnitt_stiel character varying,
@@ -2752,7 +2752,7 @@ CREATE TABLE ukos_okstra.verkehrszeichenbruecke(
 	hat_baustoff_bauwerk character varying, -- Association
 	hat_brueckenfeld_stuetzung character varying -- Association
 )
-INHERITS (okstra.teilbauwerk);
+INHERITS (ukos_okstra.teilbauwerk);
 
 CREATE TABLE ukos_okstra.strassenausstattung_strecke (
 	kreuzungszuordnung character varying,
@@ -3860,7 +3860,7 @@ CREATE TABLE ukos_okstra.durchschnittsgeschwindigkeit(
 		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (okstra.strassenbeschreibung_verkehrl);
+INHERITS (ukos_okstra.strassenbeschreibung_verkehrl);
 
 -- inherits from strassenbeschreibung_verkehrl
 CREATE TABLE ukos_okstra.fkt_d_verb_im_knotenpktber(
@@ -3884,7 +3884,7 @@ CREATE TABLE ukos_okstra.fkt_d_verb_im_knotenpktber(
 		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (okstra.strassenbeschreibung_verkehrl);
+INHERITS (ukos_okstra.strassenbeschreibung_verkehrl);
 
 -- inherits from strassenbeschreibung_verkehrl
 CREATE TABLE ukos_okstra.spur_fuer_rettungsfahrzeuge(
@@ -3908,7 +3908,7 @@ CREATE TABLE ukos_okstra.spur_fuer_rettungsfahrzeuge(
 		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (okstra.strassenbeschreibung_verkehrl);
+INHERITS (ukos_okstra.strassenbeschreibung_verkehrl);
 
 -- inherits from strassenbeschreibung_verkehrl
 CREATE TABLE ukos_okstra.strassenfunktion(
@@ -3932,7 +3932,7 @@ CREATE TABLE ukos_okstra.strassenfunktion(
 		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (okstra.strassenbeschreibung_verkehrl);
+INHERITS (ukos_okstra.strassenbeschreibung_verkehrl);
 
 -- inherits from strassenbeschreibung_verkehrl
 CREATE TABLE ukos_okstra.gebuehrenpflichtig(
@@ -3956,7 +3956,7 @@ CREATE TABLE ukos_okstra.gebuehrenpflichtig(
 		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (okstra.strassenbeschreibung_verkehrl);
+INHERITS (ukos_okstra.strassenbeschreibung_verkehrl);
 
 -- hausnummer in OKSTRA technically inherits only directly from okstra_objekt. To unify the model, additional values (e.g. historical dates) can still be represented.
 CREATE TABLE ukos_okstra.hausnummer(
@@ -4506,7 +4506,7 @@ CREATE TABLE ukos_doppik.lampe
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_lampe_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.lampe
 CREATE TRIGGER tr_idents_add_ident
@@ -4545,7 +4545,7 @@ CREATE TABLE ukos_doppik.baum
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_baum_id PRIMARY KEY (id)
 )
-INHERITS(okstra.baum);
+INHERITS(ukos_okstra.baum);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.baum
 CREATE TRIGGER tr_idents_add_ident
@@ -4573,7 +4573,7 @@ CREATE TABLE ukos_doppik.bewuchs
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_bewuchs_id PRIMARY KEY (id)
 )
-INHERITS(okstra.bewuchs);
+INHERITS(ukos_okstra.bewuchs);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.bewuchs
 CREATE TRIGGER tr_idents_add_ident
@@ -4595,7 +4595,7 @@ CREATE TABLE ukos_doppik.blumenkuebel
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_blumenkuebel_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.blumenkuebel
 CREATE TRIGGER tr_idents_add_ident
@@ -4617,7 +4617,7 @@ CREATE TABLE ukos_doppik.stationaere_geschwindigkeitsueberwachung
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_stationaere_geschwindigkeitsueberwachung_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.stationaere_geschwindigkeitsueberwachung
 CREATE TRIGGER tr_idents_add_ident
@@ -4639,7 +4639,7 @@ CREATE TABLE ukos_doppik.verkehrsspiegel
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_verkehrsspiegel_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.verkehrsspiegel
 CREATE TRIGGER tr_idents_add_ident
@@ -4661,7 +4661,7 @@ CREATE TABLE ukos_doppik.leitpfosten
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_leitpfosten_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.leitpfosten
 CREATE TRIGGER tr_idents_add_ident
@@ -4683,7 +4683,7 @@ CREATE TABLE ukos_doppik.kilometerstein
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_kilometerstein_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.kilometerstein
 CREATE TRIGGER tr_idents_add_ident
@@ -4705,7 +4705,7 @@ CREATE TABLE ukos_doppik.anleger
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_anleger_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.anleger
 CREATE TRIGGER tr_idents_add_ident
@@ -4727,7 +4727,7 @@ CREATE TABLE ukos_doppik.anschlagsaeule
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_anschlagsaeule_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.anschlagsaeule
 CREATE TRIGGER tr_idents_add_ident
@@ -4749,7 +4749,7 @@ CREATE TABLE ukos_doppik.bank
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_bank_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.bank
 CREATE TRIGGER tr_idents_add_ident
@@ -4774,7 +4774,7 @@ CREATE TABLE ukos_doppik.bruecke
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_bruecke_id PRIMARY KEY (id)
 )
-INHERITS(okstra.bruecke);
+INHERITS(ukos_okstra.bruecke);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.bruecke
 CREATE TRIGGER tr_idents_add_ident
@@ -4796,7 +4796,7 @@ CREATE TABLE ukos_doppik.dalben
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_dalben_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.dalben
 CREATE TRIGGER tr_idents_add_ident
@@ -4818,7 +4818,7 @@ CREATE TABLE ukos_doppik.denkmal
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_denkmale_id PRIMARY KEY (id)
 )
-INHERITS(okstra.teilbauwerk);
+INHERITS(ukos_okstra.teilbauwerk);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.denkmal
 CREATE TRIGGER tr_idents_add_ident
@@ -4840,7 +4840,7 @@ CREATE TABLE ukos_doppik.fahne
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_fahne_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.fahne
 CREATE TRIGGER tr_idents_add_ident
@@ -4862,7 +4862,7 @@ CREATE TABLE ukos_doppik.infoterminal
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_infoterminal_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.infoterminal
 CREATE TRIGGER tr_idents_add_ident
@@ -4884,7 +4884,7 @@ CREATE TABLE ukos_doppik.kunstwerk
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_kunstwerk_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.kunstwerk
 CREATE TRIGGER tr_idents_add_ident
@@ -4907,7 +4907,7 @@ CREATE TABLE ukos_doppik.schaukasten
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_schaukasten_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.schaukasten
 CREATE TRIGGER tr_idents_add_ident
@@ -4930,7 +4930,7 @@ CREATE TABLE ukos_doppik.spielgeraet
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_spielgeraet_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.spielgeraet
 CREATE TRIGGER tr_idents_add_ident
@@ -4952,7 +4952,7 @@ CREATE TABLE ukos_doppik.tunnel
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_tunnel_id PRIMARY KEY (id)
 )
-INHERITS(okstra.tunnel_trogbauwerk);
+INHERITS(ukos_okstra.tunnel_trogbauwerk);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.tunnel
 CREATE TRIGGER tr_idents_add_ident
@@ -4974,7 +4974,7 @@ CREATE TABLE ukos_doppik.uhr
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_uhr_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.uhr
 CREATE TRIGGER tr_idents_add_ident
@@ -4996,7 +4996,7 @@ CREATE TABLE ukos_doppik.ampel
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_ampel_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.ampel
 CREATE TRIGGER tr_idents_add_ident
@@ -5023,7 +5023,7 @@ CREATE TABLE ukos_doppik.fahrradstaender
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_fahrradstaender_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.fahrradstaender
 CREATE TRIGGER tr_idents_add_ident
@@ -5046,7 +5046,7 @@ CREATE TABLE ukos_doppik.hinweistafel
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_hinweistafel_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.hinweistafel
 CREATE TRIGGER tr_idents_add_ident
@@ -5069,7 +5069,7 @@ CREATE TABLE ukos_doppik.parkscheinautomat
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_parkscheinautomat_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.parkscheinautomat
 CREATE TRIGGER tr_idents_add_ident
@@ -5095,7 +5095,7 @@ CREATE TABLE ukos_doppik.poller
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_poller_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.poller
 CREATE TRIGGER tr_idents_add_ident
@@ -5119,7 +5119,7 @@ CREATE TABLE ukos_doppik.schranke
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_schranke_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.schranke
 CREATE TRIGGER tr_idents_add_ident
@@ -5151,7 +5151,7 @@ CREATE TABLE ukos_doppik.aufstellvorrichtung_schild
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_aufstellvorrichtung_schild_id PRIMARY KEY (id)
 )
-INHERITS(okstra.aufstellvorrichtung_schild);
+INHERITS(ukos_okstra.aufstellvorrichtung_schild);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.aufstellvorrichtung_schild
 CREATE TRIGGER tr_idents_add_ident
@@ -5174,7 +5174,7 @@ CREATE TABLE ukos_doppik.schild
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_schild_id PRIMARY KEY (id)
 )
-INHERITS(okstra.schild);
+INHERITS(ukos_okstra.schild);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.schild
 CREATE TRIGGER tr_idents_add_ident
@@ -5198,7 +5198,7 @@ CREATE TABLE ukos_doppik.wartestelle
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_wartestelle_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.wartestelle
 CREATE TRIGGER tr_idents_add_ident
@@ -5220,7 +5220,7 @@ CREATE TABLE ukos_doppik.brunnen
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_brunnen_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.brunnen
 CREATE TRIGGER tr_idents_add_ident
@@ -5244,7 +5244,7 @@ CREATE TABLE ukos_doppik.strassenablauf
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_strassenablauf_id PRIMARY KEY (id)
 )
-INHERITS(okstra.strassenablauf);
+INHERITS(ukos_okstra.strassenablauf);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.strassenablauf
 CREATE TRIGGER tr_idents_add_ident
@@ -5268,7 +5268,7 @@ CREATE TABLE ukos_doppik.kabelkasten
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_kabelkasten_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.kabelkasten
 CREATE TRIGGER tr_idents_add_ident
@@ -5290,7 +5290,7 @@ CREATE TABLE ukos_doppik.kabelschacht
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_kabelschacht_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.kabelschacht
 CREATE TRIGGER tr_idents_add_ident
@@ -5311,7 +5311,7 @@ CREATE TABLE ukos_doppik.abfallbehaelter
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_abfallbehaelter_id PRIMARY KEY (id)
 )
-INHERITS(okstra.abfallentsorgung);
+INHERITS(ukos_okstra.abfallentsorgung);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.abfallbehaelter
 CREATE TRIGGER tr_idents_add_ident
@@ -5337,7 +5337,7 @@ CREATE TABLE ukos_doppik.schacht
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_schacht_id PRIMARY KEY (id)
 )
-INHERITS(okstra.schacht);
+INHERITS(ukos_okstra.schacht);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.schacht
 CREATE TRIGGER tr_idents_add_ident
@@ -5360,7 +5360,7 @@ CREATE TABLE ukos_doppik.sonstiges_punktobjekt
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_sonstiges_punktobjekt_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.sonstiges_punktobjekt
 CREATE TRIGGER tr_idents_add_ident
@@ -5383,7 +5383,7 @@ CREATE TABLE ukos_doppik.durchlass
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_durchlass_id PRIMARY KEY (id)
 )
-INHERITS(okstra.durchlass);
+INHERITS(ukos_okstra.durchlass);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.durchlass
 CREATE TRIGGER tr_idents_add_ident
@@ -5405,7 +5405,7 @@ CREATE TABLE ukos_doppik.bord_strecke
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_bord_strecke_id PRIMARY KEY (id)
 )
-INHERITS(okstra.strassenausstattung_strecke);
+INHERITS(ukos_okstra.strassenausstattung_strecke);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.bord_strecke
 CREATE TRIGGER tr_idents_add_ident
@@ -5430,7 +5430,7 @@ CREATE TABLE ukos_doppik.gelaender
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_gelaender_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_strecke);
+INHERITS (ukos_okstra.strassenausstattung_strecke);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.gelaender
 CREATE TRIGGER tr_idents_add_ident
@@ -5455,7 +5455,7 @@ CREATE TABLE ukos_doppik.schutzplanke
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_schutzplanke_id PRIMARY KEY (id)
 )
-INHERITS(okstra.schutzeinrichtung_aus_stahl);
+INHERITS(ukos_okstra.schutzeinrichtung_aus_stahl);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.schutzplanke
 CREATE TRIGGER tr_idents_add_ident
@@ -5477,7 +5477,7 @@ CREATE TABLE ukos_doppik.leitung
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_leitung_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_strecke);
+INHERITS (ukos_okstra.strassenausstattung_strecke);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.leitung
 CREATE TRIGGER tr_idents_add_ident
@@ -5502,7 +5502,7 @@ CREATE TABLE ukos_doppik.mauer
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_mauer_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_strecke);
+INHERITS (ukos_okstra.strassenausstattung_strecke);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.mauer
 CREATE TRIGGER tr_idents_add_ident
@@ -5526,7 +5526,7 @@ CREATE TABLE ukos_doppik.rinne
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_rinne_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_strecke);
+INHERITS (ukos_okstra.strassenausstattung_strecke);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.rinne
 CREATE TRIGGER tr_idents_add_ident
@@ -5551,7 +5551,7 @@ CREATE TABLE ukos_doppik.zaun
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_zaun_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_strecke);
+INHERITS (ukos_okstra.strassenausstattung_strecke);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.zaun
 CREATE TRIGGER tr_idents_add_ident
@@ -5575,7 +5575,7 @@ CREATE TABLE ukos_doppik.sonstige_linie
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_sonstige_linie_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_strecke);
+INHERITS (ukos_okstra.strassenausstattung_strecke);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.sonstige_linie
 CREATE TRIGGER tr_idents_add_ident
@@ -5599,7 +5599,7 @@ CREATE TABLE ukos_doppik.bankett
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_bankett_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
+INHERITS (ukos_okstra.querschnittstreifen);
 ALTER TABLE ukos_doppik.bankett ALTER COLUMN streifenart SET NOT NULL;
 ALTER TABLE ukos_doppik.bankett ALTER COLUMN streifenart SET DEFAULT '301';
 
@@ -5625,7 +5625,7 @@ CREATE TABLE ukos_doppik.baumscheibe
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_baumscheibe_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
+INHERITS (ukos_okstra.querschnittstreifen);
 ALTER TABLE ukos_doppik.baumscheibe ALTER COLUMN streifenart SET NOT NULL;
 ALTER TABLE ukos_doppik.baumscheibe ALTER COLUMN streifenart SET DEFAULT '751';
 
@@ -5652,7 +5652,7 @@ CREATE TABLE ukos_doppik.gehweg
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_gehweg_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
+INHERITS (ukos_okstra.querschnittstreifen);
 ALTER TABLE ukos_doppik.gehweg ALTER COLUMN streifenart SET NOT NULL;
 ALTER TABLE ukos_doppik.gehweg ALTER COLUMN streifenart SET DEFAULT '210';
 
@@ -5679,7 +5679,7 @@ CREATE TABLE ukos_doppik.gruenflaeche
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_gruenflaeche_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
+INHERITS (ukos_okstra.querschnittstreifen);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.gruenflaeche
 CREATE TRIGGER tr_idents_add_ident
@@ -5704,7 +5704,7 @@ CREATE TABLE ukos_doppik.hecke
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_hecke_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
+INHERITS (ukos_okstra.querschnittstreifen);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.hecke
 CREATE TRIGGER tr_idents_add_ident
@@ -5729,7 +5729,7 @@ CREATE TABLE ukos_doppik.platz
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_platz_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
+INHERITS (ukos_okstra.querschnittstreifen);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.platz
 CREATE TRIGGER tr_idents_add_ident
@@ -5754,7 +5754,7 @@ CREATE TABLE ukos_doppik.parkplatz
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_parkplatz_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
+INHERITS (ukos_okstra.querschnittstreifen);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.parkplatz
 CREATE TRIGGER tr_idents_add_ident
@@ -5779,7 +5779,7 @@ CREATE TABLE ukos_doppik.parkstreifen
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_parkstreifen_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
+INHERITS (ukos_okstra.querschnittstreifen);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.parkstreifen
 CREATE TRIGGER tr_idents_add_ident
@@ -5805,7 +5805,7 @@ CREATE TABLE ukos_doppik.rad_und_gehweg
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_rad_und_gehweg_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
+INHERITS (ukos_okstra.querschnittstreifen);
 ALTER TABLE ukos_doppik.rad_und_gehweg ALTER COLUMN streifenart SET NOT NULL;
 ALTER TABLE ukos_doppik.rad_und_gehweg ALTER COLUMN streifenart SET DEFAULT '210';
 
@@ -5833,7 +5833,7 @@ CREATE TABLE ukos_doppik.radweg
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_radweg_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
+INHERITS (ukos_okstra.querschnittstreifen);
 ALTER TABLE ukos_doppik.radweg ALTER COLUMN streifenart SET NOT NULL;
 ALTER TABLE ukos_doppik.radweg ALTER COLUMN streifenart SET DEFAULT '240';
 
@@ -5865,7 +5865,7 @@ CREATE TABLE ukos_doppik.fahrbahn
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_fahrbahn_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
+INHERITS (ukos_okstra.querschnittstreifen);
 ALTER TABLE ukos_doppik.fahrbahn ALTER COLUMN streifenart SET NOT NULL;
 ALTER TABLE ukos_doppik.fahrbahn ALTER COLUMN streifenart SET DEFAULT '100';
 
@@ -5893,7 +5893,7 @@ CREATE TABLE ukos_doppik.strassengraben
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_strassengraben_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
+INHERITS (ukos_okstra.querschnittstreifen);
 ALTER TABLE ukos_doppik.strassengraben ALTER COLUMN streifenart SET NOT NULL;
 ALTER TABLE ukos_doppik.strassengraben ALTER COLUMN streifenart SET DEFAULT '520';
 
@@ -5920,7 +5920,7 @@ CREATE TABLE ukos_doppik.ueberfahrt
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_ueberfahrt_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
+INHERITS (ukos_okstra.querschnittstreifen);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.ueberfahrt
 CREATE TRIGGER tr_idents_add_ident
@@ -5946,7 +5946,7 @@ CREATE TABLE ukos_doppik.bord_flaeche
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_bord_flaeche_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
+INHERITS (ukos_okstra.querschnittstreifen);
 ALTER TABLE ukos_doppik.bord_flaeche ALTER COLUMN streifenart SET NOT NULL;
 ALTER TABLE ukos_doppik.bord_flaeche ALTER COLUMN streifenart SET DEFAULT '640';
 
@@ -5977,7 +5977,7 @@ CREATE TABLE ukos_doppik.dammschuettung
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_dammschuettung_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
+INHERITS (ukos_okstra.querschnittstreifen);
 ALTER TABLE ukos_doppik.dammschuettung ALTER COLUMN streifenart SET NOT NULL;
 ALTER TABLE ukos_doppik.dammschuettung ALTER COLUMN streifenart SET DEFAULT '700';
 
@@ -6004,7 +6004,7 @@ CREATE TABLE ukos_doppik.spielplatz
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_spielplatz_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
+INHERITS (ukos_okstra.querschnittstreifen);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.spielplatz
 CREATE TRIGGER tr_idents_add_ident
@@ -6029,7 +6029,7 @@ CREATE TABLE ukos_doppik.sportplatz
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_sportplatz_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
+INHERITS (ukos_okstra.querschnittstreifen);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.sportplatz
 CREATE TRIGGER tr_idents_add_ident
@@ -6056,7 +6056,7 @@ CREATE TABLE ukos_doppik.strasse
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_strasse_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
+INHERITS (ukos_okstra.querschnittstreifen);
 ALTER TABLE ukos_doppik.strasse ALTER COLUMN streifenart SET NOT NULL;
 ALTER TABLE ukos_doppik.strasse ALTER COLUMN streifenart SET DEFAULT '100';
 
@@ -6083,7 +6083,7 @@ CREATE TABLE ukos_doppik.sonstige_flaeche
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_sonstige_flaeche_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
+INHERITS (ukos_okstra.querschnittstreifen);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.sonstige_flaeche
 CREATE TRIGGER tr_idents_add_ident
@@ -6106,7 +6106,7 @@ CREATE TABLE ukos_doppik.ueberwachungsanlage
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_ueberwachungsanlage_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.ueberwachungsanlage
 CREATE TRIGGER tr_idents_add_ident
@@ -6131,7 +6131,7 @@ CREATE TABLE ukos_doppik.ueberweg
 		ident character(6) NOT NULL,
 	CONSTRAINT pk_ueberweg_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
+INHERITS (ukos_okstra.querschnittstreifen);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.ueberweg
 CREATE TRIGGER tr_idents_add_ident
@@ -6157,7 +6157,7 @@ CREATE TABLE ukos_doppik.verkehrszeichenbruecke
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_verkehrszeichenbruecke_id PRIMARY KEY (id)
 )
-INHERITS (okstra.verkehrszeichenbruecke);
+INHERITS (ukos_okstra.verkehrszeichenbruecke);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.verkehrszeichenbruecke
 CREATE TRIGGER tr_idents_add_ident
@@ -6183,7 +6183,7 @@ CREATE TABLE ukos_doppik.vorwegweiser
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_vorwegweiser_id PRIMARY KEY (id)
 )
-INHERITS (okstra.verkehrszeichenbruecke);
+INHERITS (ukos_okstra.verkehrszeichenbruecke);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.vorwegweiser
 CREATE TRIGGER tr_idents_add_ident
@@ -6208,7 +6208,7 @@ CREATE TABLE ukos_doppik.ueberdachung_fahrradstaender
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_ueberdachung_fahrradstaender_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.ueberdachung_fahrradstaender
 CREATE TRIGGER tr_idents_add_ident
@@ -6235,7 +6235,7 @@ CREATE TABLE ukos_doppik.stuetzbauwerk
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_stuetzbauwerk_id PRIMARY KEY (id)
 )
-INHERITS(okstra.stuetzbauwerk);
+INHERITS(ukos_okstra.stuetzbauwerk);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.stuetzbauwerk
 CREATE TRIGGER tr_idents_add_ident
@@ -6262,7 +6262,7 @@ CREATE TABLE ukos_doppik.laermschutzbauwerk
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_laermschutzbauwerk_id PRIMARY KEY (id)
 )
-INHERITS(okstra.laermschutzbauwerk);
+INHERITS(ukos_okstra.laermschutzbauwerk);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.laermschutzbauwerk
 CREATE TRIGGER tr_idents_add_ident
@@ -6284,7 +6284,7 @@ CREATE TABLE ukos_doppik.hydrant
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_hydrant_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.hydrant
 CREATE TRIGGER tr_idents_add_ident
@@ -6308,7 +6308,7 @@ CREATE TABLE ukos_doppik.loeschwasserentnahmestelle_saugstutzen
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_loeschwasserentnahmestelle_saugstutzen_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.loeschwasserentnahmestelle_saugstutzen
 CREATE TRIGGER tr_idents_add_ident
@@ -6330,7 +6330,7 @@ CREATE TABLE ukos_doppik.auslauf
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_auslauf_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.auslauf
 CREATE TRIGGER tr_idents_add_ident
@@ -6352,7 +6352,7 @@ CREATE TABLE ukos_doppik.dueker
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_dueker_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_strecke);
+INHERITS (ukos_okstra.strassenausstattung_strecke);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.dueker
 CREATE TRIGGER tr_idents_add_ident
@@ -6374,7 +6374,7 @@ CREATE TABLE ukos_doppik.einlauf
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_einlauf_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.einlauf
 CREATE TRIGGER tr_idents_add_ident
@@ -6396,7 +6396,7 @@ CREATE TABLE ukos_doppik.klaeranlage
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_klaeranlage_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.klaeranlage
 CREATE TRIGGER tr_idents_add_ident
@@ -6421,7 +6421,7 @@ CREATE TABLE ukos_doppik.leitplanke
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_leitplanke_id PRIMARY KEY (id)
 )
-INHERITS(okstra.schutzeinrichtung_aus_stahl);
+INHERITS(ukos_okstra.schutzeinrichtung_aus_stahl);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.leitplanke
 CREATE TRIGGER tr_idents_add_ident
@@ -6443,7 +6443,7 @@ CREATE TABLE ukos_doppik.markierung
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_markierung_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.markierung
 CREATE TRIGGER tr_idents_add_ident
@@ -6465,7 +6465,7 @@ CREATE TABLE ukos_doppik.mast
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_mast_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.mast
 CREATE TRIGGER tr_idents_add_ident
@@ -6487,7 +6487,7 @@ CREATE TABLE ukos_doppik.medien
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_medien_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.medien
 CREATE TRIGGER tr_idents_add_ident
@@ -6509,7 +6509,7 @@ CREATE TABLE ukos_doppik.papierkorb
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_papierkorb_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.papierkorb
 CREATE TRIGGER tr_idents_add_ident
@@ -6531,7 +6531,7 @@ CREATE TABLE ukos_doppik.spundwand
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_spundwand_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.spundwand
 CREATE TRIGGER tr_idents_add_ident
@@ -6553,7 +6553,7 @@ CREATE TABLE ukos_doppik.telefon
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_telefon_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.telefon
 CREATE TRIGGER tr_idents_add_ident
@@ -6575,7 +6575,7 @@ CREATE TABLE ukos_doppik.tor
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_tor_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.tor
 CREATE TRIGGER tr_idents_add_ident
@@ -6597,7 +6597,7 @@ CREATE TABLE ukos_doppik.turm
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_turm_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.turm
 CREATE TRIGGER tr_idents_add_ident
@@ -6619,7 +6619,7 @@ CREATE TABLE ukos_doppik.haltestelle
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_haltestelle_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.haltestelle
 CREATE TRIGGER tr_idents_add_ident
@@ -6641,7 +6641,7 @@ CREATE TABLE ukos_doppik.wehr
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_wehr_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
 -- Trigger: tr_idents_add_ident on ukos_doppik.wehr
 CREATE TRIGGER tr_idents_add_ident
