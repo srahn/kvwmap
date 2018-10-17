@@ -67,7 +67,8 @@
 					$result = exec(ZIP_PATH.' '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr.'/Protokolle/Uebergabeprotokoll.pdf');		# und das Übergabeprotokoll 
 					$result = exec(ZIP_PATH.' '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr.'/Protokolle/Uebersicht.htm');		# und Uebersicht.htm
 					$result = exec(ZIP_PATH.' -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr.'/Vorschaubilder');		# und Vorschaubilder 
-					$result = exec(ZIP_PATH.' -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr.'/Einmessungsskizzen');		# und, wenn vorhanden, die Einmessungsskizzen packen
+					$result = exec(ZIP_PATH.' -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr.'/Einmessungsskizzen');		# und, wenn vorhanden, die Einmessungsskizzen
+					$result = exec(ZIP_PATH.' -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr.'/KVZ');		# und, wenn vorhanden, die KVZ packen
 				}
       }
     }

@@ -59,7 +59,9 @@ function toggleGroup(group, show){
 						<td align="right">
 						<?	if($mysql_counter == 0 AND $postgresql_counter == 0)echo ' Schemata aktuell'; 
 								else {
-									echo '<span class="fett red blink">';
+									$title = @implode('&#10;', $this->administration->migrations_to_execute['mysql'][$component]).'&#10;';
+									$title.= @implode('&#10;', $this->administration->migrations_to_execute['postgresql'][$component]);
+									echo '<span class="fett red" title="'.$title.'">';
 									$update_necessary = true;
 									if($mysql_counter > 0)echo 'MySQL-Schema ';
 									if($postgresql_counter > 0)echo 'PostgreSQL-Schema ';

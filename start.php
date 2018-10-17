@@ -98,6 +98,8 @@ $GUI->database->execSQL("SET NAMES '".MYSQL_CHARSET."'",0,0);
 if (is_logout($GUI->formvars)) {
 	$GUI->debug->write('Logout angefragt.', 4, $GUI->echo);
 	if (is_logged_in()) {
+		$GUI->user = new user($_SESSION['login_name'], 0, $GUI->database);
+		if(LOGOUT_ROUTINE != '')include(LOGOUT_ROUTINE);
 		$GUI->debug->write('Logout.', 4, $GUI->echo);
 		logout();
 	}
@@ -288,6 +290,9 @@ if (!$show_login_form) {
 						if (is_new_password_valid($new_password_err)) {
 							$GUI->debug->write('Neues Password ist valid.', 4, $GUI->echo);
 							update_password($GUI);
+							$GUI->debug->write('Set Session', 4, $GUI->echo);
+							session_start();
+							set_session_vars($GUI->formvars);
 							# login case 17
 						}
 						else { # new password is not ok
@@ -447,6 +452,7 @@ else {
 		if($GUI->user->rolle->hist_timestamp != '')$GUI->setHistTimestamp();
 		# Zurücksetzen der veränderten Klassen
 		#$GUI->user->rolle->resetClasses();
+		if(LOGIN_ROUTINE != '')include(LOGIN_ROUTINE);
 		$_SESSION['login_routines'] = false;
 	} else {
 			define('AFTER_LOGIN', false);

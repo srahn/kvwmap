@@ -221,6 +221,7 @@ class administration{
 	}
 	
 	function get_config_params(){
+		$this->config_params = array();
 		$sql = "SELECT * FROM config ORDER BY `group`, name";
 		$result=$this->database->execSQL($sql,0, 0);
     if($result[0]) {
@@ -238,6 +239,7 @@ class administration{
 	
 	function get_real_value($name){
 		if($this->config_params[$name]['prefix'] != ''){
+			if($this->config_params[$name]['value'] == '')return NULL;
 			foreach(explode('.', $this->config_params[$name]['prefix']) as $prefix_constant){
 				$prefix_value .= $this->get_real_value($prefix_constant);
 			}
