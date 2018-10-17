@@ -30,7 +30,7 @@
 				used_layer ul ON s.ID = ul.Stelle_ID JOIN
 				layer l ON ul.Layer_ID = l.Layer_ID
 			WHERE
-				r.user_id = 2 AND
+				r.user_id = " . $GUI->user->id . " AND
 				l.sync = '1'
 			ORDER BY
 				s.Bezeichnung
