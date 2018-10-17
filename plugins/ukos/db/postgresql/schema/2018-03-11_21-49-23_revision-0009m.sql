@@ -1,1 +1,1 @@
-ALTER TABLE strassennetz.strasse ADD COLUMN kennung character varying;
+ALTER TABLE ukos_strassennetz.strasse ADD COLUMN kennung character varying;
