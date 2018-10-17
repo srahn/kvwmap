@@ -127,7 +127,7 @@ CREATE OR REPLACE FUNCTION ukos_base.idents_remove_ident()
 ---------------------------------------------------------------
 CREATE TABLE ukos_okstra.wlo_kreuzungszuordnung (
 	CONSTRAINT pk_wlo_kreuzungszuordnung PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_kreuzungszuordnung
 VALUES
 ('1', 'liegt in nicht aufzunehmender Straße'),
@@ -135,7 +135,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_erfassung_verfahren (
 	CONSTRAINT pk_wlo_erfassung_verfahren PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_erfassung_verfahren
 VALUES
 ('1', 'photogrammetrisch'),
@@ -148,7 +148,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_schutzstatus_bewuchs (
 	CONSTRAINT pk_wlo_schutzstatus_bewuchs PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_schutzstatus_bewuchs
 VALUES
 ('1', 'Landschaftsschutzgebiet (LSG)'),
@@ -159,12 +159,12 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_tab_biotoptyp (
 	CONSTRAINT pk_wlo_tab_biotoptyp PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 -- Open Codelist
 
 CREATE TABLE ukos_okstra.wlo_bestandsstatus (
 	CONSTRAINT pk_wlo_bestandsstatus PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_bestandsstatus
 VALUES
 ('1', 'Bestand_erfasst'),
@@ -176,7 +176,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_lage (
 	CONSTRAINT pk_wlo_lage PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_lage
 VALUES
 ('00', 'gesamte Fahrbahn(en) (ein- und zweibahnig)'),
@@ -642,7 +642,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_schiefstand_baum (
 	CONSTRAINT pk_wlo_schiefstand_baum PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_schiefstand_baum
 VALUES
 ('0', 'kein'),
@@ -653,7 +653,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_zustandsbeurteilung_baum (
 	CONSTRAINT pk_wlo_zustandsbeurteilung_baum PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_zustandsbeurteilung_baum
 VALUES
 ('1', 'gesund'),
@@ -664,7 +664,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_lagebeschreibung_baum (
 	CONSTRAINT pk_wlo_lagebeschreibung_baum PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_lagebeschreibung_baum
 VALUES
 ('1', 'Baum auf Trennstreifen zwischen Radweg und Straße'),
@@ -676,7 +676,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_detaillierungsgrad_asb (
 	CONSTRAINT pk_wlo_detaillierungsgad_asb PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_detaillierungsgrad_asb
 VALUES
 ('01', 'hoch'),
@@ -685,7 +685,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_art_der_erfassung (
 	CONSTRAINT pk_wlo_art_der_erfassung PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_art_der_erfassung
 VALUES
 ('00', 'unbekannt'),
@@ -704,12 +704,12 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_art_der_erfassung_sonst (
 	CONSTRAINT pk_wlo_art_der_erfassung_sonst PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 -- Open Codelist
 
 CREATE TABLE ukos_okstra.wlo_quelle_der_information (
 	CONSTRAINT pk_wlo_quelle_der_information PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_quelle_der_information
 VALUES
 ('00', 'unbekannt'),
@@ -721,12 +721,12 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_quelle_der_information_sonst (
 	CONSTRAINT pk_wlo_quelle_der_information_sonst PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 -- Open Codelist
 
 CREATE TABLE ukos_okstra.wlo_strassenklasse (
 	CONSTRAINT pk_wlo_strassenklasse PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_strassenklasse
 VALUES
 ('A', 'Bundesautobahn'),
@@ -739,7 +739,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_art_strassenausst_punkt (
 	CONSTRAINT pk_wlo_art_strassenausst_punkt PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_art_strassenausst_punkt
 VALUES
 ('01', 'Glättemeldeanlage'),
@@ -767,12 +767,12 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_art_strausst_punkt_sonst (
 	CONSTRAINT pk_wlo_art_strausst_punkt_sonst PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 -- Open Codelist
 
 CREATE TABLE ukos_okstra.wlo_dreiwertige_logik (
 	CONSTRAINT pk_wlo_dreiwertige_logik PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_dreiwertige_logik
 VALUES
 ('0', 'unbekannt'),
@@ -781,7 +781,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_art_strassenausst_strecke (
 	CONSTRAINT pk_wlo_art_straussenausst_strecke PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_art_strassenausst_strecke
 VALUES
 ('01', 'Strecke mit Glättemeldeanlage'),
@@ -796,12 +796,12 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_art_strausst_strecke_sonst (
 	CONSTRAINT pk_wlo_art_strausst_strecke_sonst PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 -- Open Codelist
 
 CREATE TABLE ukos_okstra.wlo_art_der_aufstellvorrichtung (
 	CONSTRAINT pk_wlo_art_der_aufstellvorrichtung PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_art_der_aufstellvorrichtung
 VALUES
 ('00', 'unbekannt'),
@@ -816,7 +816,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_material_aufstellvorrichtung (
 	CONSTRAINT pk_wlo_material_aufstellvorrichtung PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_material_aufstellvorrichtung
 VALUES
 ('00', 'unbekannt'),
@@ -826,7 +826,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_art_schild_ok (
 	CONSTRAINT pk_wlo_art_schild_ok PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_art_schild_ok
 VALUES
 ('00', 'unbekannt'),
@@ -837,7 +837,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_art_schild_asb (
 	CONSTRAINT pk_wlo_art_schild_asb PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_art_schild_asb
 VALUES
 ('01', 'amtlicher Wegweiser'),
@@ -846,7 +846,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_art_schild_nichtamtlich_asb (
 	CONSTRAINT pk_wlo_art_schild_nichtamtlich_asb PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_art_schild_nichtamtlich_asb
 VALUES
 ('00', 'unbekannt'),
@@ -856,7 +856,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_lage_schild (
 	CONSTRAINT pk_wlo_lage_schild PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_lage_schild
 VALUES
 ('01', 'wie Aufstellvorrichtung'),
@@ -866,7 +866,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_strassenbezug_asb (
 	CONSTRAINT pk_wlo_strassenbezug_asb PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_strassenbezug_asb
 VALUES
 ('0', 'unbekannt'),
@@ -875,7 +875,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_befestigung_schild (
 	CONSTRAINT pk_wlo_befestigung_schild PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_befestigung_schild
 VALUES
 ('00', 'unbekannt'),
@@ -887,7 +887,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_beleuchtung_schild (
 	CONSTRAINT pk_wlo_beleuchtung_schild PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_beleuchtung_schild
 VALUES
 ('00', 'unbekannt'),
@@ -897,7 +897,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_groessenklasse_vz (
 	CONSTRAINT pk_wlo_groessenklasse_vz PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_groessenklasse_vz
 VALUES
 ('00', 'unbekannt'),
@@ -907,7 +907,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_einzel_mehrfach_schild (
 	CONSTRAINT pk_wlo_einzel_mehrfach_schild PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_einzel_mehrfach_schild
 VALUES
 ('00', 'unbekannt'),
@@ -916,7 +916,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_unterhaltungspflicht_schild (
 	CONSTRAINT pk_wlo_unterhaltungspflicht_schild PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_unterhaltungspflicht_schild
 VALUES
 ('01', 'Land'),
@@ -929,12 +929,12 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_sonstige_unterhaltspflichtige (
 	CONSTRAINT pk_wlo_sonstige_unterhaltspflichtige PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 -- Open Codelist
 
 CREATE TABLE ukos_okstra.wlo_art_aufsatz (
 	CONSTRAINT pk_wlo_art_aufsatz PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_art_aufsatz
 VALUES
 ('00', 'unbekannt'),
@@ -946,7 +946,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_art_unterteil (
 	CONSTRAINT pk_wlo_art_unterteil PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_art_unterteil
 VALUES
 ('00', 'unbekannt'),
@@ -956,12 +956,12 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_art_unterteil_sonst (
 	CONSTRAINT pk_wlo_art_unterteil_sonst PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 -- Open Codelist
 
 CREATE TABLE ukos_okstra.wlo_unterhaltungspflicht (
 	CONSTRAINT pk_wlo_unterhaltungspflicht PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_unterhaltungspflicht
 VALUES
 ('00', 'unbekannt'),
@@ -975,7 +975,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_typ_abfallentsorgung (
 	CONSTRAINT pk_wlo_typ_abfallentsorgung PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_typ_abfallentsorgung
 VALUES
 ('01', 'Abfallbehälter auf der Anlage des ruhenden Verkehrs, ohne Spezifizierung'),
@@ -985,7 +985,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_art_abfall (
 	CONSTRAINT pk_wlo_art_abfall PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_art_abfall
 VALUES
 ('00', 'unbekannt'),
@@ -997,7 +997,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_lagetyp_abfallentsorgung (
 	CONSTRAINT pk_wlo_lagetyp_abfallentsorgung PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_lagetyp_abfallentsorgung
 VALUES
 ('00', 'unbekannt'),
@@ -1007,7 +1007,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_material_abfallentsorgung (
 	CONSTRAINT pk_wlo_material_abfallentsorgung PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_material_abfallentsorgung
 VALUES
 ('00', 'unbekannt'),
@@ -1024,7 +1024,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_art_schacht (
 	CONSTRAINT pk_wlo_art_schacht PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_art_schacht
 VALUES
 ('00', 'unbekannt'),
@@ -1037,7 +1037,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_lage_schacht_strassenablauf (
 	CONSTRAINT pk_wlo_lage_schacht_strassenablauf PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_lage_schacht_strassenablauf
 VALUES
 ('00', 'unbekannt'),
@@ -1087,7 +1087,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_angaben_zum_konus (
 	CONSTRAINT pk_wlo_angaben_zum_konus PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_angaben_zum_konus
 VALUES
 ('00', 'unbekannt'),
@@ -1096,7 +1096,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_lage_durchlass (
 	CONSTRAINT pk_wlo_lage_durchlass PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_lage_durchlass
 VALUES
 ('00', 'unbekannt'),
@@ -1112,7 +1112,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_profil_durchlass (
 	CONSTRAINT pk_wlo_profil_durchlass PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_profil_durchlass
 VALUES
 ('00', 'unbekannt'),
@@ -1128,7 +1128,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_material_durchlass (
 	CONSTRAINT pk_wlo_material_durchlass PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_material_durchlass
 VALUES
 ('00', 'unbekannt'),
@@ -1144,7 +1144,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_funktion_durchlass (
 	CONSTRAINT pk_wlo_funktion_durchlass PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_funktion_durchlass
 VALUES
 ('00', 'unbekannt'),
@@ -1156,7 +1156,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_zustand_durchlass (
 	CONSTRAINT pk_wlo_zustand_durchlass PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_zustand_durchlass
 VALUES
 ('01', 'gut'),
@@ -1165,7 +1165,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_schutzeinrichtung_durchlass (
 	CONSTRAINT pk_wlo_schutzeinrichtung_durchlass PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_schutzeinrichtung_durchlass
 VALUES
 ('00', 'unbekannt'),
@@ -1175,7 +1175,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_stadium_durchlass (
 	CONSTRAINT pk_wlo_stadium_durchlass PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_stadium_durchlass
 VALUES
 ('00', 'unbekannt'),
@@ -1184,7 +1184,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_lage_leitung (
 	CONSTRAINT pk_wlo_lage_leitung PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_lage_leitung
 VALUES
 ('00', 'unbekannt'),
@@ -1200,7 +1200,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_art_leitung (
 	CONSTRAINT pk_wlo_art_leitung PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_art_leitung
 VALUES
 ('00', 'unbekannt'),
@@ -1215,7 +1215,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_art_leitung_detail (
 	CONSTRAINT pk_wlo_art_leitung_detail PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_art_leitung_detail
 VALUES
 ('0101', 'Elektrizität Niedrigspannung'),
@@ -1236,7 +1236,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_material_leitung (
 	CONSTRAINT pk_wlo_material_leitung PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_material_leitung
 VALUES
 ('00', 'unbekannt'),
@@ -1254,7 +1254,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_material_schutzrohr (
 	CONSTRAINT pk_wlo_material_schutzrohr PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_material_schutzrohr
 VALUES
 ('00', 'unbekannt'),
@@ -1266,12 +1266,12 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_betreiber_leitung (
 	CONSTRAINT pk_wlo_betreiber_leitung PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 -- Open Codelist
 
 CREATE TABLE ukos_okstra.wlo_streifenart (
 	CONSTRAINT pk_wlo_streifenart PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_streifenart
 VALUES
 ('100', 'Fahrbahn'),
@@ -1350,12 +1350,12 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_streifenart_sonst (
 	CONSTRAINT pk_wlo_streifenart_sonst PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 -- Open Codelist
 
 CREATE TABLE ukos_okstra.wlo_anzahl_gleise_laengs (
 	CONSTRAINT pk_wlo_anzahl_gleise_laengs PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_anzahl_gleise_laengs
 VALUES
 ('0', 'unbekannt'),
@@ -1365,7 +1365,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_art_der_oberflaeche (
 	CONSTRAINT pk_wlo_art_der_oberflaeche PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_art_der_oberflaeche
 VALUES
 ('00', 'unbekannt'),
@@ -1380,7 +1380,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_art_part_baulasttraeger (
 	CONSTRAINT pk_wlo_art_part_baulasttraeger PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_art_part_baulasttraeger
 VALUES
 ('00', 'unbekannt'),
@@ -1392,12 +1392,12 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_sonstiger_ui_partner_land (
 	CONSTRAINT pk_wlo_sonstiger_ui_partner_land PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 -- Open Codelist
 
 CREATE TABLE ukos_okstra.wlo_standort_rueckhaltesystem (
 	CONSTRAINT pk_wlo_standort_rueckhaltesystem PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_standort_rueckhaltesystem
 VALUES
 ('00', 'unbekannt'),
@@ -1421,7 +1421,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_modulbezeichnung_schutzeinr_stahl (
 	CONSTRAINT pk_wlo_modulbezeichnung_schutzeinr_stahl PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_modulbezeichnung_schutzeinr_stahl
 VALUES
 ('M01', 'einfache Schutzplanke (ESP)'),
@@ -1439,12 +1439,12 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_systemname_schutzeinr_stahl (
 	CONSTRAINT pk_wlo_systemname_schutzeinr_stahl PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 -- Open Codelist
 
 CREATE TABLE ukos_okstra.wlo_holmform_schutzeinr_stahl (
 	CONSTRAINT pk_wlo_holmform_schutzeinr_stahl PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_holmform_schutzeinr_stahl
 VALUES
 ('00', 'unbekannt'),
@@ -1454,7 +1454,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_pfostenform_schutzeinr_stahl (
 	CONSTRAINT pk_wlo_pfostenform_schutzeinr_stahl PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_pfostenform_schutzeinr_stahl
 VALUES
 ('00', 'unbekannt'),
@@ -1464,7 +1464,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_art_pfostenbefestigung_schutzeinr_stahl (
 	CONSTRAINT pk_wlo_art_pfostenbefestigung_schutzeinr_stahl PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_art_pfostenbefestigung_schutzeinr_stahl
 VALUES
 ('00', 'unbekannt'),
@@ -1474,13 +1474,13 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_art_aek_schutzeinr_stahl (
 	CONSTRAINT pk_wlo_art_aek_schutzeinr_stahl PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 -- Open Codelist
 
 -- Codelists that were not originally in the infrastructure tables, but can be found in the datenmodell.sql
 CREATE TABLE ukos_okstra.wlo_art_aufbauschicht (
 	CONSTRAINT pk_wlo_art_aufbauschicht PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_art_aufbauschicht
 VALUES
 ('0', 'unbekannt'),
@@ -1496,12 +1496,12 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_material_aufbauschicht (
 	CONSTRAINT pk_wlo_material_aufbauschicht PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 -- Open Codelist
 
 CREATE TABLE ukos_okstra.wlo_herkunft_angaben_aufbau (
 	CONSTRAINT pk_wlo_herkunft_angaben_aufbau PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_herkunft_angaben_aufbau
 VALUES
 ('00', 'unbekannt'),
@@ -1552,12 +1552,12 @@ CREATE TABLE ukos_okstra.wlo_detail_d_aufbauschicht (
 
 CREATE TABLE ukos_okstra.wlo_bindemittel_aufbauschicht (
 	CONSTRAINT pk_wlo_bindemittel_aufbauschicht PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 -- Open Codelist
 
 CREATE TABLE ukos_okstra.wlo_kennzeichen_bahnigkeit (
 	CONSTRAINT pk_wlo_kennzeichen_bahnigkeit PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_kennzeichen_bahnigkeit
 VALUES
 ('0', 'unbekannt'),
@@ -1566,7 +1566,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_art_belastungsklasse (
 	CONSTRAINT pk_wlo_art_belastungsklasse PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_art_belastungsklasse
 VALUES
 ('01', 'Soll-Belastungsklasse'),
@@ -1574,7 +1574,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_belastungsklasse_rsto (
 	CONSTRAINT pk_wlo_belastungsklasse_rsto PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_belastungsklasse_rsto
 VALUES
 ('00', 'unbekannt'),
@@ -1590,12 +1590,12 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_belastungsklasse_sonst (
 	CONSTRAINT pk_wlo_belastungsklasse_sonst PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 -- Open Codelist
 
 CREATE TABLE ukos_okstra.wlo_verkehrsrichtung (
 	CONSTRAINT pk_wlo_verkehrsrichtung PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_verkehrsrichtung
 VALUES
 ('B', 'Verkehr in beiden Richtungen'),
@@ -1604,7 +1604,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_fahrzeugart (
 	CONSTRAINT pk_wlo_fahrzeugart PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_fahrzeugart
 VALUES
 ('nk Kfz', 'nicht klassifizierbare Fahrzeuge (Sonstige)'),
@@ -1624,7 +1624,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_tab_funktion (
 	CONSTRAINT pk_wlo_tab_funktion PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_tab_funktion
 VALUES
 ('01', 'Ausfahrt'),
@@ -1636,7 +1636,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_art_komplexer_knoten (
 	CONSTRAINT pk_wlo_art_komplexer_knoten PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_art_komplexer_knoten
 VALUES
 ('1', 'plangleicher Knoten'),
@@ -1646,7 +1646,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_organisationsart (
 	CONSTRAINT pk_wlo_organisationsart PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_organisationsart
 VALUES
 ('1', 'Bundesministerium'),
@@ -1665,7 +1665,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_kommunikationstyp (
 	CONSTRAINT pk_wlo_kommunikationstyp PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_kommunikationstyp
 VALUES
 ('1', 'Telefonnummer'),
@@ -1676,7 +1676,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_dienstlich_privat (
 	CONSTRAINT pk_wlo_dienstlich_privat PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_dienstlich_privat
 VALUES
 ('1', 'dienstlich'),
@@ -1684,7 +1684,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_anschriftstyp (
 	CONSTRAINT pk_wlo_anschriftstyp PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_anschriftstyp
 VALUES
 ('1', 'Postadresse'),
@@ -1692,7 +1692,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_personenklasse (
 	CONSTRAINT pk_wlo_personenklasse PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_personenklasse
 VALUES
 ('?', 'unbekannt'),
@@ -1705,7 +1705,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_tab_stadium (
 	CONSTRAINT pk_wlo_tab_stadium PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_tab_stadium
 VALUES
 ('000', 'unbekannt'),
@@ -1728,7 +1728,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_verkehrsrichtung_se (
 	CONSTRAINT pk_wlo_verkehrsrichtung_se PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_verkehrsrichtung_se
 VALUES
 ('R', 'Verkehrsrichtung von Von-VP nach Nach-VP'),
@@ -1738,7 +1738,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_stufe_strassenelement (
 	CONSTRAINT pk_wlo_stufe_strassenelement PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_stufe_strassenelement
 VALUES
 ('1', 'Hauptverbindung'),
@@ -1746,7 +1746,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_verkehrsteilnehmergruppe (
 	CONSTRAINT pk_wlo_verkehrsteilnehmergruppe PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_verkehrsteilnehmergruppe
 VALUES
 ('01', 'alle Kraftfahrzeuge'),
@@ -1764,7 +1764,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_querschnitt_streifenart_ves (
 	CONSTRAINT pk_wlo_querschnitt_streifenart_ves PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_querschnitt_streifenart_ves
 VALUES
 ('110', 'Hauptfahrstreifen (HFS)'),
@@ -1776,7 +1776,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_art_ves (
 	CONSTRAINT pk_wlo_art_ves PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_art_ves
 VALUES
 ('00', 'unbekannt'),
@@ -1793,7 +1793,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_bezugsrichtung (
 	CONSTRAINT pk_wlo_bezugsrichtung PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_bezugsrichtung
 VALUES
 ('0', 'unbekannt'),
@@ -1803,7 +1803,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_gueltigkeit_ves (
 	CONSTRAINT pk_wlo_gueltigkeit_ves PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_gueltigkeit_ves
 VALUES
 ('01', 'permanent'),
@@ -1818,7 +1818,7 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_orientierungsrichtung (
 	CONSTRAINT pk_wlo_orientierungsrichtung PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_orientierungsrichtung
 VALUES
 ('R', 'in Definitionsrichtung'),
@@ -1827,12 +1827,12 @@ VALUES
 
 CREATE TABLE ukos_okstra.wlo_art_zustaendigkeit (
 	CONSTRAINT pk_wlo_art_zustaendigkeit PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 -- open codelist
 
 CREATE TABLE ukos_okstra.wlo_wochentag_ves (
 	CONSTRAINT pk_wlo_wochentag_ves PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos.base.werteliste);
 INSERT INTO ukos_okstra.wlo_wochentag_ves
 VALUES
 ('00', 'permanent'),
@@ -1848,13 +1848,13 @@ VALUES
 CREATE TABLE ukos_base.wld_klassifizierung (
 	CONSTRAINT pk_wld_klassifizierung PRIMARY KEY (id)
 )
-INHERITS (base.basiscodeliste);
+INHERITS (ukos.base.basiscodeliste);
 INSERT INTO ukos_base.wld_klassifizierung (id, langtext) VALUES ('00000000-0000-0000-0000-000000000000', 'unbekannt');
 
 CREATE TABLE ukos_base.wld_nutzung (
 	CONSTRAINT pk_wld_nutzung PRIMARY KEY (id)
 )
-INHERITS (base.basiscodeliste);
+INHERITS (ukos.base.basiscodeliste);
 INSERT INTO ukos_base.wld_nutzung (ident_hist, kurztext, langtext)
  VALUES ('1', '', 'Autobahn');
 INSERT INTO ukos_base.wld_nutzung (ident_hist, kurztext, langtext)
@@ -1866,68 +1866,68 @@ CREATE TABLE ukos_base.wld_strassennetzlage
 (
 	CONSTRAINT pk_wld_strassennetzlage PRIMARY KEY (id)
 )
-INHERITS (base.basiscodeliste);
+INHERITS (ukos.base.basiscodeliste);
 INSERT INTO ukos_base.wld_strassennetzlage (id, langtext) VALUES ('00000000-0000-0000-0000-000000000000', 'unbekannt');
 
 CREATE TABLE ukos_base.wld_bauklasse (
 	CONSTRAINT pk_wld_bauklasse PRIMARY KEY (id)
 )
-INHERITS (base.basiscodeliste);
+INHERITS (ukos.base.basiscodeliste);
 
 CREATE TABLE ukos_base.wld_baulasttraeger (
 	CONSTRAINT pk_wld_baulasttraeger PRIMARY KEY (id)
 )
-INHERITS (base.basiscodeliste);
+INHERITS (ukos.base.basiscodeliste);
 
 CREATE TABLE ukos_base.wld_baumart (
 	CONSTRAINT pk_wld_baumart PRIMARY KEY (id)
 )
-INHERITS (base.basiscodeliste);
+INHERITS (ukos.base.basiscodeliste);
 
 CREATE TABLE ukos_base.wld_deckschicht (
 	CONSTRAINT pk_wld_deckschicht PRIMARY KEY (id)
 )
-INHERITS (base.basiscodeliste);
+INHERITS (ukos.base.basiscodeliste);
 
 CREATE TABLE ukos_base.wld_eigentuemer (
 	CONSTRAINT pk_wld_eigentuemer PRIMARY KEY (id)
 )
-INHERITS (base.basiscodeliste);
+INHERITS (ukos.base.basiscodeliste);
 
 CREATE TABLE ukos_base.wld_fertigstellung (
 	CONSTRAINT pk_wld_fertigstellung PRIMARY KEY (id)
 )
-INHERITS (base.basiscodeliste);
+INHERITS (ukos.base.basiscodeliste);
 
 CREATE TABLE ukos_base.wld_material (
 	CONSTRAINT pk_wld_material PRIMARY KEY (id)
 )
-INHERITS (base.basiscodeliste);
+INHERITS (ukos.base.basiscodeliste);
 
 CREATE TABLE ukos_base.wld_objektbezeichnung (
 	CONSTRAINT pk_wld_objektbezeichnung PRIMARY KEY (id)
 )
-INHERITS (base.basiscodeliste);
+INHERITS (ukos.base.basiscodeliste);
 
 CREATE TABLE ukos_base.wld_preisermittlung (
 	CONSTRAINT pk_wld_preisermittlung PRIMARY KEY (id)
 )
-INHERITS (base.basiscodeliste);
+INHERITS (ukos.base.basiscodeliste);
 
 CREATE TABLE ukos_base.wld_zustand (
 	CONSTRAINT pk_wld_zustand PRIMARY KEY (id)
 )
-INHERITS (base.basiscodeliste);
+INHERITS (ukos.base.basiscodeliste);
 
 CREATE TABLE ukos_base.wld_zustandsbewertung (
 	CONSTRAINT pk_wld_zustandsbewertung PRIMARY KEY (id)
 )
-INHERITS (base.basiscodeliste);
+INHERITS (ukos.base.basiscodeliste);
 
 CREATE TABLE ukos_base.wld_stvonr (
 	CONSTRAINT pk_wld_stvonr PRIMARY KEY (id)
 )
-INHERITS (base.basiscodeliste);
+INHERITS (ukos.base.basiscodeliste);
 
 ---------------------------------------------------------------
 -- KATASTER
@@ -2436,15 +2436,15 @@ CREATE TABLE ukos_base.punktobjekt (
 	bei_strassenelementpunkt_abstand_zur_fahrbahnoberkante numeric, -- bei_strassenpunkt holds the the complex data type strassenelementpunkt. if any value of strassenelementpunkt is filled, station must be filled
 	bei_strassenelementpunkt_auf_strassenelement character varying, -- Association. If any value of strassenpunkt is filed, auf_strassenelement must also be filled
 	geometrie_punktobjekt geometry(MultiPoint, 25833)
-) INHERITS(base.basisobjekt);
+) INHERITS(ukos.base.basisobjekt);
 
 CREATE TABLE ukos_base.streckenobjekt (
 	geometrie_streckenobjekt geometry(MultiLineString, 25833)
-) INHERITS(base.basisobjekt);
+) INHERITS(ukos.base.basisobjekt);
 
 CREATE TABLE ukos_base.punktundstreckenobjekt (
 	geometrie_streckenobjekt geometry(MultiLineString, 25833)
-) INHERITS(base.punktobjekt);
+) INHERITS(ukos.base.punktobjekt);
 
 ---------------------------------------------------------------
 ---------------------------------------------------------------
@@ -2494,7 +2494,7 @@ CREATE TABLE ukos_okstra.bewuchs (
 		REFERENCES ukos_okstra.wlo_tab_biotoptyp (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.punktobjekt);
+INHERITS (ukos.base.punktobjekt);
 
 CREATE TABLE ukos_okstra.baum(
 	lage character varying DEFAULT '99'::character varying,
@@ -2632,7 +2632,7 @@ CREATE TABLE ukos_okstra.teilbauwerk (
 		REFERENCES ukos_okstra.wlo_strassenklasse (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.punktundstreckenobjekt);
+INHERITS (ukos.base.punktundstreckenobjekt);
 
 CREATE TABLE ukos_okstra.bruecke(
 	gesamtlaenge_bruecke numeric,
@@ -2808,7 +2808,7 @@ CREATE TABLE ukos_okstra.strassenausstattung_strecke (
 		REFERENCES ukos_okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.streckenobjekt);
+INHERITS (ukos.base.streckenobjekt);
 
 CREATE TABLE ukos_okstra.strassenausstattung_punkt (
 	kreuzungszuordnung character varying,
@@ -2858,7 +2858,7 @@ CREATE TABLE ukos_okstra.strassenausstattung_punkt (
 		REFERENCES ukos_okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.punktobjekt);
+INHERITS (ukos.base.punktobjekt);
 
 CREATE TABLE ukos_okstra.aufstellvorrichtung_schild (
 	kreuzungszuordnung character varying,
@@ -2924,7 +2924,7 @@ CREATE TABLE ukos_okstra.aufstellvorrichtung_schild (
 		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.punktobjekt);
+INHERITS (ukos.base.punktobjekt);
 
 CREATE TABLE ukos_okstra.schild(
 	erfassungsdatum date,
@@ -3014,7 +3014,7 @@ CREATE TABLE ukos_okstra.schild(
 		REFERENCES ukos_okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.basisobjekt);
+INHERITS (ukos.base.basisobjekt);
 
 CREATE TABLE ukos_okstra.strassenablauf (
 	kreuzungszuordnung character varying,
@@ -3079,7 +3079,7 @@ CREATE TABLE ukos_okstra.strassenablauf (
 		REFERENCES ukos_okstra.wlo_sonstige_unterhaltspflichtige (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.punktobjekt);
+INHERITS (ukos.base.punktobjekt);
 
 CREATE TABLE ukos_okstra.abfallentsorgung(
 	erfassungsdatum date,
@@ -3135,7 +3135,7 @@ CREATE TABLE ukos_okstra.abfallentsorgung(
 		REFERENCES ukos_okstra.wlo_unterhaltungspflicht (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.basisobjekt);
+INHERITS (ukos.base.basisobjekt);
 
 CREATE TABLE ukos_okstra.schacht (
 	kreuzungszuordnung character varying,
@@ -3198,7 +3198,7 @@ CREATE TABLE ukos_okstra.schacht (
 		REFERENCES ukos_okstra.wlo_sonstige_unterhaltspflichtige (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.punktobjekt);
+INHERITS (ukos.base.punktobjekt);
 
 CREATE TABLE ukos_okstra.querschnittstreifen(
  flaechengeometrie geometry(MultiPolygon, 25833),
@@ -3285,7 +3285,7 @@ CREATE TABLE ukos_okstra.querschnittstreifen(
 		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.streckenobjekt);
+INHERITS (ukos.base.streckenobjekt);
 
 CREATE TABLE ukos_okstra.durchlass (
 	geometrie_streckenobjekt geometry(MultiLineString,25833),
@@ -3380,7 +3380,7 @@ CREATE TABLE ukos_okstra.durchlass (
 		REFERENCES ukos_okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 	)
-INHERITS (base.punktobjekt);
+INHERITS (ukos.base.punktobjekt);
 
 CREATE TABLE ukos_okstra.leitung(
 	erfassungsdatum date,
@@ -3466,7 +3466,7 @@ CREATE TABLE ukos_okstra.leitung(
 		REFERENCES ukos_okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.streckenobjekt);
+INHERITS (ukos.base.streckenobjekt);
 
 CREATE TABLE ukos_okstra.schutzeinrichtung_aus_stahl(
 	kreuzungszuordnung character varying,
@@ -3581,7 +3581,7 @@ CREATE TABLE ukos_okstra.schutzeinrichtung_aus_stahl(
 		REFERENCES ukos_okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.streckenobjekt);
+INHERITS (ukos.base.streckenobjekt);
 
 -- The following tables are not found in the original db infrastruktur, but are found in the accompanying sql
 CREATE TABLE ukos_okstra.anzahl_fahrstreifen(
@@ -3613,7 +3613,7 @@ CREATE TABLE ukos_okstra.anzahl_fahrstreifen(
 		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.streckenobjekt);
+INHERITS (ukos.base.streckenobjekt);
 
 CREATE TABLE ukos_okstra.aufbauschicht(
 	flaechengeometrie geometry(MultiPolygon, 25833),
@@ -3697,7 +3697,7 @@ CREATE TABLE ukos_okstra.aufbauschicht(
 		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.streckenobjekt);
+INHERITS (ukos.base.streckenobjekt);
 
 CREATE TABLE ukos_okstra.bahnigkeit(
 	kennzeichen_bahnigkeit character varying NOT NULL DEFAULT '0',
@@ -3729,7 +3729,7 @@ CREATE TABLE ukos_okstra.bahnigkeit(
 		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.streckenobjekt);
+INHERITS (ukos.base.streckenobjekt);
 
 CREATE TABLE ukos_okstra.belastungsklasse(
 	art character varying NOT NULL DEFAULT '01',
@@ -3777,7 +3777,7 @@ CREATE TABLE ukos_okstra.belastungsklasse(
 		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.streckenobjekt);
+INHERITS (ukos.base.streckenobjekt);
 
 CREATE TABLE ukos_okstra.fahrstreifen_nummer(
 	flaechengeometrie geometry(MultiPolygon, 25833),
@@ -3797,7 +3797,7 @@ CREATE TABLE ukos_okstra.fahrstreifen_nummer(
 		REFERENCES ukos_okstra.wlo_verkehrsrichtung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.basisobjekt);
+INHERITS (ukos.base.basisobjekt);
 
 -- strassenbeschreibung_verkehrl is generalization of other classes, such as durchschnittsgeschwindigkeit, fkt_d_verb_im_knotenpktber, spur_fuer_rettungsfahrzeuge, strassenfunktion, gebuehrenpflichtig
 CREATE TABLE ukos_okstra.strassenbeschreibung_verkehrl (
@@ -3836,7 +3836,7 @@ CREATE TABLE ukos_okstra.strassenbeschreibung_verkehrl (
 		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.streckenobjekt);
+INHERITS (ukos.base.streckenobjekt);
 
 -- inherits from strassenbeschreibung_verkehrl
 CREATE TABLE ukos_okstra.durchschnittsgeschwindigkeit(
@@ -3972,7 +3972,7 @@ CREATE TABLE ukos_okstra.hausnummer(
 	zu_kommunale_strasse character varying, -- Association
 	zu_segment_kommunale_strasse character varying -- Association
 )
-INHERITS (base.basisobjekt);
+INHERITS (ukos.base.basisobjekt);
 
 -- kommunikationsobjekt in OKSTRA technically inherits only directly from okstra_objekt. To unify the model, additional values (e.g. historical dates) can still be represented.
 CREATE TABLE ukos_okstra.kommunikationsobjekt(
@@ -3985,7 +3985,7 @@ CREATE TABLE ukos_okstra.kommunikationsobjekt(
 	status character varying,
 	zu_okstra_objekt character varying -- Association
 )
-INHERITS (base.basisobjekt);
+INHERITS (ukos.base.basisobjekt);
 
 -- komplexer_knoten in OKSTRA technically inherits only directly from okstra_objekt. To unify the model, additional values (e.g. historical dates) can still be represented.
 CREATE TABLE ukos_okstra.komplexer_knoten(
@@ -3997,7 +3997,7 @@ CREATE TABLE ukos_okstra.komplexer_knoten(
 		REFERENCES ukos_okstra.wlo_art_komplexer_knoten (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.basisobjekt);
+INHERITS (ukos.base.basisobjekt);
 
 -- Organisation in OKSTRA technically inherits only from okstra_objekt (indirectly over ansprechpartner). To unifty the model, additional values (e.g. historical dates) can still be represented.
 CREATE TABLE ukos_okstra.organisation(
@@ -4038,7 +4038,7 @@ CREATE TABLE ukos_okstra.organisation(
 		REFERENCES ukos_okstra.wlo_anschriftstyp (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.basisobjekt);
+INHERITS (ukos.base.basisobjekt);
 
 -- Organisationseinheit in OKSTRA technically inherits only from okstra_objekt (indirectly over ansprechpartner). To unifty the model, additional values (e.g. historical dates) can still be represented.
 CREATE TABLE ukos_okstra.organisationseinheit(
@@ -4072,7 +4072,7 @@ CREATE TABLE ukos_okstra.organisationseinheit(
 		REFERENCES ukos_okstra.wlo_anschriftstyp (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.basisobjekt);
+INHERITS (ukos.base.basisobjekt);
 
 -- Organisationseinheit in OKSTRA technically inherits only from okstra_objekt (indirectly over ansprechpartner). To unifty the model, additional values (e.g. historical dates) can still be represented.
 CREATE TABLE ukos_okstra.person(
@@ -4128,7 +4128,7 @@ CREATE TABLE ukos_okstra.person(
 		REFERENCES ukos_okstra.wlo_anschriftstyp (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.basisobjekt);
+INHERITS (ukos.base.basisobjekt);
 
 -- segment_kommunale_strasse in OKSTRA inherits only from okstra_objekt. To unifty the model, additional values (e.g. historical dates) can still be represented.
 CREATE TABLE ukos_okstra.segment_kommunale_strasse (
@@ -4136,7 +4136,7 @@ CREATE TABLE ukos_okstra.segment_kommunale_strasse (
 	zu_kommunale_strasse character varying NOT NULL, -- Association
 	hat_strassenbezugsobjekt character varying -- ASSOCIATION
 )
-INHERITS (base.basisobjekt);
+INHERITS (ukos.base.basisobjekt);
 
 CREATE TABLE ukos_okstra.stadium (
 	unter_verkehr character varying NOT NULL DEFAULT '0',
@@ -4165,7 +4165,7 @@ CREATE TABLE ukos_okstra.stadium (
 		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.streckenobjekt);
+INHERITS (ukos.base.streckenobjekt);
 
 CREATE TABLE ukos_okstra.strassenelement (
 	liniengeometrie geometry(linestring,25833),
@@ -4198,7 +4198,7 @@ CREATE TABLE ukos_okstra.strassenelement (
 		REFERENCES ukos_okstra.wlo_stufe_strassenelement (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.streckenobjekt);
+INHERITS (ukos.base.streckenobjekt);
 
 -- Strassenelementpunkt is a datatype in ukos_okstra. Due to its importance for the geometry of streets for possible expansion, it is modelled as its own table
 CREATE TABLE ukos_okstra.strassenelementpunkt (
@@ -4209,7 +4209,7 @@ CREATE TABLE ukos_okstra.strassenelementpunkt (
 	auf_strassenelement character varying NOT NULL,--Association
 	CONSTRAINT pk_strassenelementpunkt_id PRIMARY KEY (id)
 )
-INHERITS (base.basisobjekt);
+INHERITS (ukos.base.basisobjekt);
 
 CREATE TABLE ukos_okstra.teilelement (
 	beginnt_bei_strassenelempkt character varying NOT NULL, --- beginnt_bei_strassenelempkt is a complex data type. Due to its importance in visualization and its possible expansion, it is held in its own table
@@ -4258,7 +4258,7 @@ CREATE TABLE ukos_okstra.teilelement (
 		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.basisobjekt);
+INHERITS (ukos.base.basisobjekt);
 
 CREATE TABLE ukos_okstra.verbindungspunkt (
 	punktgeometrie geometry(point, 25833),
@@ -4301,7 +4301,7 @@ CREATE TABLE ukos_okstra.verbindungspunkt (
 		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.basisobjekt);
+INHERITS (ukos.base.basisobjekt);
 
 CREATE TABLE ukos_okstra.verbotene_fahrbeziehung (
 	fuer_art_verkehrsnutzung character varying,
@@ -4338,7 +4338,7 @@ CREATE TABLE ukos_okstra.verbotene_fahrbeziehung (
 		REFERENCES ukos_okstra.wlo_verkehrsteilnehmergruppe (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.basisobjekt);
+INHERITS (ukos.base.basisobjekt);
 
 CREATE TABLE ukos_okstra.verkehrseinschraenkung (
 	lage character varying DEFAULT '99'::character varying,
@@ -4405,7 +4405,7 @@ CREATE TABLE ukos_okstra.verkehrseinschraenkung (
 		REFERENCES ukos_okstra.wlo_wochentag_ves (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.streckenobjekt);
+INHERITS (ukos.base.streckenobjekt);
 
 CREATE TABLE ukos_okstra.verkehrsflaeche (
 	flaeche geometry(MultiPolygon,25833),
@@ -4416,7 +4416,7 @@ CREATE TABLE ukos_okstra.verkehrsflaeche (
 	zu_segment_kommunale_strasse character varying, -- Association
 	zu_strasse character varying -- Association
 )
-INHERITS (base.basisobjekt);
+INHERITS (ukos.base.basisobjekt);
 
 CREATE TABLE ukos_okstra.verkehrsnutzungsbereich (
 	gilt_fuer_verkehrsrichtung character varying,
@@ -4432,7 +4432,7 @@ CREATE TABLE ukos_okstra.verkehrsnutzungsbereich (
 		REFERENCES ukos_okstra.wlo_verkehrsteilnehmergruppe (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.streckenobjekt);
+INHERITS (ukos.base.streckenobjekt);
 
 CREATE TABLE ukos_okstra.zustaendigkeit (
 	art_zustaendigkeit character varying NOT NULL,
@@ -4474,7 +4474,7 @@ CREATE TABLE ukos_okstra.zustaendigkeit (
 		REFERENCES ukos_okstra.wlo_art_zustaendigkeit (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.basisobjekt);
+INHERITS (ukos.base.basisobjekt);
 
 -- OKSTRA Zuordnungstables
 -- Is equivalent to associations zu_streckenobjekt / hat_strecke between querschnittstreifen and teilelement (inherited from streckenobjekt and verallgemeinerte_strecke)
