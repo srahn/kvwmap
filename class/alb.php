@@ -475,7 +475,7 @@ class ALB {
 		if($formvars['abweichenderrechtszustand']){ $csv .= utf8_encode('abweichender Rechtszustand;');}
 		if($formvars['baubodenrecht']){ $csv .= utf8_encode('Bauraum/Bodenordnungsrecht;');}
     $csv .= 'Namensnummer;'; 
-    $csv .= utf8_encode('Eigentümer;Zusatz;Adresse;Ort;');
+    $csv .= utf8_encode('Vorname;Name;Zusatz;Adresse;Ort;');
     
     $csv .= chr(10);
     for($i = 0; $i < count($flurstuecke); $i++) {
@@ -663,7 +663,7 @@ class ALB {
 					$csv .= $eigentuemer->zusatz_eigentuemer;
 					if($eigentuemer->Anteil !=''){$csv .= '  zu '.$eigentuemer->Anteil;}
 					$csv .= ';';
-					if($eigentuemer->vorname != '')$csv .= $eigentuemer->vorname.' ';
+					$csv .= $eigentuemer->vorname.';';
 					$csv .= $eigentuemer->nachnameoderfirma;
 					if($Eigentuemer->namensbestandteil != '')$csv .= ', '.$Eigentuemer->namensbestandteil;
 					if($Eigentuemer->akademischergrad != '')$csv .= ', '.$Eigentuemer->akademischergrad;
