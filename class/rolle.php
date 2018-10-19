@@ -207,6 +207,15 @@ class rolle {
     return $groups;
   }
 	
+	function set_print_legend_separate($separate){
+		$sql ='UPDATE rolle SET print_legend_separate="'.$separate.'"';
+    $sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+    # echo $sql;
+    $this->debug->write("<p>file:rolle.php class:rolle function:set_print_legend_separate - Speichern der Einstellungen zur Rolle:",4);
+    $this->database->execSQL($sql,4, $this->loglevel);
+    return 1;
+	}
+	
 	function switch_gle_view($layer_id) {
     $sql ='UPDATE u_rolle2used_layer SET gle_view = CASE WHEN gle_view IS NULL THEN 0 ELSE NOT gle_view END';
     $sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' AND layer_id='.$layer_id;
@@ -327,6 +336,7 @@ class rolle {
 			rolle::$layer_params = (array)json_decode('{' . $rs['layer_params'] . '}');
 			$this->visually_impaired = $rs['visually_impaired'];
 			$this->legendtype = $rs['legendtype'];
+			$this->print_legend_separate = $rs['print_legend_separate'];
 			if($rs['hist_timestamp'] != ''){
 				$this->hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');			# der wird zur Anzeige des Timestamps benutzt
 				rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');	# der hat die Form, wie der timestamp in der PG-DB steht und wird für die Abfragen benutzt

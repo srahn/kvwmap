@@ -6202,6 +6202,8 @@ class GUI {
 				$this->user->rolle->setConsumeActivity($currenttime,'print',$this->user->rolle->last_time_id);
 				$this->user->rolle->setConsumeALK($currenttime, $this->Docu->activeframe[0]['id']);
 			}
+			
+			$this->user->rolle->set_print_legend_separate($this->formvars['legend_extra']);
 
 			# Redlining Polygone
 			$this->addRedlining();
