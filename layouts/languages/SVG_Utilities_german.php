@@ -15,7 +15,7 @@
   $strBuffer="Puffer hinzuf\u00fcgen";
 	$strSpecialBuffer="Puffer erweitern";
 	$strBufferedLine="gepufferte Linie hinzuf\u00fcgen";
-	$strParallelPolygon="linksseitig gepufferte Linie hinzuf\u00fcgen";
+	$strParallelPolygon="einseitig gepufferte Linie erzeugen";
   $strMoveGeometry="Geometrie verschieben";
 	$strReverse="Linienrichtung drehen";
 ?>  
