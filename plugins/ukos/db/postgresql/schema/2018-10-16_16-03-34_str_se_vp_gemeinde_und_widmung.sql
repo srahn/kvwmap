@@ -137,7 +137,6 @@ BEGIN;
 
 	INSERT INTO ukos_base.config (key, value, default_value, type, description) VALUES
 		('Toplogietolerance', 0.1, 0.1, 'numeric', 'Legt die Toleranz bei der Erzeugung der Topologie fest. Gilt auch als Fangradius für Punkte und Punkte auf Linien. Einheit in Meter');
-
 	INSERT INTO ukos_base.config (key, value, default_value, type, description) VALUES
 		('Koordinatengenauigkeit', 0.0001, 0.0001, 'numeric', 'Legt die Genauigkeit der im System verwendeten Koordinaten fest. Die Geometrien aller erzeugten Objekte werden vor dem Speichern mit ST_SnapToGrid auf diese Genauigkeit gerundet. Dadurch wird ein exakter vergleich von Koordinaten in binärer und Textschreibweise möglich. ST_Equals(ST_MakePoint(500000, 6000000), ST_MakePoint(500000.00000000001, 6000000) ist true, ST_Equals(ST_MakePoint(500000, 6000000), ST_MakePoint(500000.0000000001, 6000000) ist false, Ist der Wert NULL, wird ST_SnapToGrid nicht angewendet, Einheit in Meter');
 
