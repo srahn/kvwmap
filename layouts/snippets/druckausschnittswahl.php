@@ -230,7 +230,7 @@ function rotate_print_extent(angle){
 						<tr id="legendOptions2" style="display:none">
 							<td>
 								<!--rollenlayer_legend-->
-								<span class="fett">&nbsp;<? echo $strLegendExtra; ?></span>&nbsp;<input type="checkbox" name="legend_extra" value="1" <? if($this->formvars['legend_extra']) echo 'checked="true"'; ?>>
+								<span class="fett">&nbsp;<? echo $strLegendExtra; ?></span>&nbsp;<input type="checkbox" name="legend_extra" value="1" <? if($this->user->rolle->print_legend_separate) echo 'checked="true"'; ?>>
 								<div class="fett" style="margin-top: 5px">&nbsp;<? echo $strLayers; ?>:</div>
 								<?
 								$layerset = $this->layerset['list'];
