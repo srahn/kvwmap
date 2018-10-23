@@ -48,7 +48,7 @@ if (LOG_LEVEL > 0) {
 # This program is distributed in the hope that it will be useful, #
 # but WITHOUT ANY WARRANTY; without even the implied warranty of  #
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the    #
-# GNU General Public License for more details.                    #
+# GNU General Public License for more details.                    
 #                                                                 #
 # You should have received a copy of the GNU General Public       #
 # License along with this program; if not, write to the Free      #
@@ -1347,12 +1347,12 @@ function go_switch($go){
 			} break;
 
 			case 'Layer2Stelle_Editor' : {
-				$GUI->checkCaseAllowed('Stellen_Anzeigen');
+				$GUI->checkCaseAllowed('Layereditor');
 				$GUI->Layer2Stelle_Editor();
 			} break;
 
 			case 'Layer2Stelle_Editor_Speichern' : {
-				$GUI->checkCaseAllowed('Stellen_Anzeigen');
+				$GUI->checkCaseAllowed('Layereditor');
 				$GUI->Layer2Stelle_EditorSpeichern();
 			} break;
 
@@ -1377,13 +1377,13 @@ function go_switch($go){
 			} break;
 
 			case 'Stelleneditor' : {
-				$GUI->checkCaseAllowed('Stellen_Anzeigen');
+				$GUI->checkCaseAllowed('Stellen_Anzeigen', 'Stelleneditor');
 				$GUI->Stelleneditor();
 			} break;
 
 			case 'Stelle_Löschen' : {
-				$GUI->checkCaseAllowed('Stellen_Anzeigen');
-				$GUI->StelleLoeschen();
+				$GUI->checkCaseAllowed('Stellen_Anzeigen', 'Stelle_Löschen');
+#				$GUI->StelleLoeschen();
 			} break;
 
 			case 'Stelleneditor_Als neue Stelle eintragen' : {
@@ -1463,12 +1463,12 @@ function go_switch($go){
 			} break;
 
 			case 'Benutzerdaten_Formular' : {
-				$GUI->checkCaseAllowed('Benutzerdaten_Formular');
+				$GUI->checkCaseAllowed('Benutzerdaten_Formular', 'Benutzerdaten_Formular');
 				$GUI->BenutzerdatenFormular();
 			} break;
 
 			case 'Benutzer_Löschen' : {
-				$GUI->checkCaseAllowed('Benutzerdaten_Anzeigen');
+				$GUI->checkCaseAllowed('Benutzerdaten_Anzeigen', 'Benutzer_Löschen');
 				$GUI->BenutzerLöschen();
 			} break;
 
@@ -1488,7 +1488,7 @@ function go_switch($go){
 			} break;
 
 			case 'als_nutzer_anmelden' : {
-				$GUI->checkCaseAllowed('Benutzerdaten_Formular');
+				$GUI->checkCaseAllowed('Benutzerdaten_Formular', 'als_nutzer_anmelden');
 				$_SESSION['login_name'] = $GUI->formvars['loginname'];
 				header('location: index.php');
 			} break;

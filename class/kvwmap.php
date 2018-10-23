@@ -2610,37 +2610,145 @@ class GUI {
 			~document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'block\';';
 		}
 	}
-	
-	function go_switch_plugins($go){
-  	global $kvwmap_plugins;
-	  $this->goNotExecutedInPlugins = true;		// wenn es keine Plugins gibt, ist diese Var. immer true
-		for($i = 0; $i < count($kvwmap_plugins); $i++){
-			if($this->goNotExecutedInPlugins == true){
+
+	function go_switch_plugins($go) {
+		global $kvwmap_plugins;
+		// wenn es keine Plugins gibt, ist diese Var. immer true
+		$this->goNotExecutedInPlugins = true;
+		for ($i = 0; $i < count($kvwmap_plugins); $i++) {
+			if ($this->goNotExecutedInPlugins == true) {
 				$this->goNotExecutedInPlugins = false;
-				$go_switch_plugin = 'go_switch_'.$kvwmap_plugins[$i];
+				$go_switch_plugin = 'go_switch_' . $kvwmap_plugins[$i];
 				$go_switch_plugin($go);
 			}
 		}
-  }	
+	}
 
-	function plugin_loaded($plugin){
+	function plugin_loaded($plugin) {
 		global $kvwmap_plugins;
 		return in_array($plugin, $kvwmap_plugins);
 	}
 
-  function checkCaseAllowed($case){
+	function checkCaseAllowed($case, $go = '') {
 		global $log_loginfail;
-  	if(!$this->Stelle->isMenueAllowed($case) AND !$this->Stelle->isFunctionAllowed($case)) {
-      $this->add_message('error', $this->TaskChangeWarning . '<br>(' . $case . ')');
+		$allowed = false;
+
+		if ($this->Stelle->isMenueAllowed($case) OR $this->Stelle->isFunctionAllowed($case)) {
+			if ($this->echo) {
+				echo '<br>Menü oder Funktion erlaubt.';
+				echo '<br>isMenueAlloed: ' . $this->Stelle->isMenueAllowed($case);
+				echo '<br>isFunctionAllowed: ' . $this->Stelle->isFunctionAllowed($case);
+			}
+			switch ($go) {
+
+				case 'als_nutzer_anmelden' : {
+					if ($this->echo) {
+						echo '<br>Case als_nutzer_anmelden.';
+					}
+					$allowed = !$this->is_admin_user($this->formvars['loginname']);
+					if ($this->echo) {
+						echo '<br>Nutzer mit loginname: ' . $this->formvars['loginname'] . ' ist Admin-Nutzer? ' . ($allowed ? 'Nein' : 'Ja');
+					}
+				} break;
+
+				case 'Stelleneditor' : {
+					#echo '<br>Prüfe ob der Nutzer ' . $this->user->id . ' ' . $this->user->login_name . ' die Stelle ' . $this->formvars['selected_stelle_id'] . ' ändern darf.';
+					$user_stellen = $this->Stelle->getStellen('ID', $this->user->id);
+					if (in_array($this->formvars['selected_stelle_id'], $user_stellen['ID'])) {
+						$allowed = true;
+					}
+					else {
+						$this->Fehlermeldung = '<br>Sie sind nicht berechtigt die Stelle ' . $this->formvars['selected_stelle_id'] . ' zu bearbeiten!';
+					}
+				} break;
+
+				case 'Stelle_Löschen' : {
+					#echo '<br>Prüfe ob der Nutzer ' . $this->user->id . ' ' . $this->user->login_name . ' die Stelle ' . $this->formvars['selected_stelle_id'] . ' löschen darf.';
+					$user_stellen = $this->Stelle->getStellen('ID', $this->user->id);
+					if (in_array($this->formvars['selected_stelle_id'], $user_stellen['ID'])) {
+						$allowed = true;
+					}
+					else {
+						$this->Fehlermeldung = '<br>Sie sind nicht berechtigt die Stelle ' . $this->formvars['selected_stelle_id'] . ' zu löschen!';
+					}
+				} break;
+
+				case 'Benutzerdaten_Formular' : {
+					#echo '<br>Prüfe ob der Nutzer ' . $this->user->id . ' ' . $this->user->login_name . ' die Nutzerdaten ' . $this->formvars['selected_user_id'] . ' ändern darf.';
+					$users = $this->user->getall_Users('Name', $this->formvars['selected_user_id'], $this->user->id);
+					if (in_array($this->formvars['selected_user_id'], $users['ID'])) {
+						$allowed = true;
+					}
+					else {
+						$this->Fehlermeldung = '<br>Sie sind nicht berechtigt den Nutzer ' . $this->formvars['selected_user_id'] . ' zu bearbeiten!';
+					}
+				} break;
+
+				case 'Benutzer_Löschen' : {
+					#echo '<br>Prüfe ob der Nutzer ' . $this->user->id . ' ' . $this->user->login_name . ' den Nutzer ' . $this->formvars['selected_user_id'] . ' löschen darf.';
+					$users = $this->user->getall_Users('Name', $this->formvars['selected_user_id'], $this->user->id);
+					if (in_array($this->formvars['selected_user_id'], $users['ID'])) {
+						$allowed = true;
+					}
+					else {
+						$this->Fehlermeldung = '<br>Sie sind nicht berechtigt den Nutzer ' . $this->formvars['selected_user_id'] . ' zu löschen!';
+					}
+				} break;
+
+				default : $allowed = true;
+			}
+		}
+		else {
+			if ($this->echo) {
+				echo '<br>Weder Menü noch Funktion erlaubt.';
+			}
+		}
+
+		if (!$allowed) {
+			$this->add_message('error', $this->TaskChangeWarning . '<br>(' . $case . ')' . '<br>' . $this->Fehlermeldung);
+			$this->Fehlermeldung = '';
 			$log_loginfail->write(date("Y:m:d H:i:s",time()) . ' case: ' . $case . ' not allowed in Stelle: ' . $this->Stelle->id . ' for User: ' . $this->user->Name);
 			$this->loadMap('DataBase');
-      $this->user->rolle->newtime = $this->user->rolle->last_time_id;
-     	$this->saveMap('');
-      $this->drawMap();
-      $this->output();
-      exit;
-    }
-  }
+			$this->user->rolle->newtime = $this->user->rolle->last_time_id;
+			$this->saveMap('');
+			$this->drawMap();
+			$this->output();
+			exit;
+		}
+	}
+
+	function is_admin_user($login_name) {
+		global $admin_stellen;
+		global $GUI;
+		$ret = false;
+
+		$sql = "
+			SELECT DISTINCT
+				r.user_id
+			FROM
+				rolle r JOIN
+				user u ON r.user_id = u.ID
+			WHERE
+				r.stelle_id IN (" . implode(', ', $admin_stellen) . ") AND
+				u.login_name = '" . $login_name . "'
+		";
+		echo '<br>sql: ' . $sql;
+
+		$result = $this->database->execSQL($sql, 0, 0);
+		if ($result['success']) {
+			if (mysql_num_rows($result['query']) == 1) {
+				$this->Fehlermeldung = '<br>Nutzer mit dem Login-Namen: ' . $login_name . ' hat eine Rolle in mindestens einer Admin-Stelle!';
+				$ret = true;
+			}
+			else {
+				$this->Fehlermeldung = '<br>Nutzer mit dem Login-Namen: ' . $login_name . ' hat keine Rolle in einer Admin-Stelle!';
+			}
+		}
+		else {
+			$this->Fehlermeldung = '<br>Fehler beim Abfragen ob der Nutzer ein Administrator ist.';
+		}
+		return $ret;
+	}
 
 	function getSVG_vertices(){
 		# Diese Funktion liefert die Eckpunkte der Geometrien von allen aktiven Postgis-Layern, die im aktuellen Kartenausschnitt liegen
@@ -10293,16 +10401,14 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		include_(CLASSPATH.'datendrucklayout.php');
 		include_(CLASSPATH.'funktion.php');
 		include_(CLASSPATH.'FormObject.php');
-    $this->titel='Stellen Editor';
-    $this->main='stelle_formular.php';
-    $document = new Document($this->database);
+		$document = new Document($this->database);
 		$ddl = new ddl($this->database, $this);
 		$where = '';
 		$this->formvars['selparents'] = array();
 
-    # Abfragen der Stellendaten wenn eine stelle_id zur Änderung selektiert ist
-    if ($this->formvars['selected_stelle_id'] > 0) {
-      $Stelle = new stelle($this->formvars['selected_stelle_id'], $this->user->database);
+		# Abfragen der Stellendaten wenn eine stelle_id zur Änderung selektiert ist
+		if ($this->formvars['selected_stelle_id'] > 0) {
+			$Stelle = new stelle($this->formvars['selected_stelle_id'], $this->user->database);
       $Stelle->language = $this->Stelle->language;
       $this->stellendaten = $Stelle->getstellendaten();
       $this->formvars['bezeichnung'] = $this->stellendaten['Bezeichnung'];
@@ -10379,6 +10485,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
     # Abfragen aller möglichen EPSG-Codes
     $this->epsg_codes = read_epsg_codes($this->pgdatabase);
+		$this->titel='Stellen Editor';
+		$this->main='stelle_formular.php';
     $this->output();
   }
 

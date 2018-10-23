@@ -1020,6 +1020,7 @@ INSERT INTO u_styles2classes (
     # wenn keine INSERT, UPDATE und DELETE Anweisungen in $sql stehen.
     # (lesend immer, aber schreibend nur mit DBWRITE=1)
     if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
+			#echo '<br>sql in execSQL: ' . $sql;
       $query=mysql_query($sql,$this->dbConn);
       #echo $sql;
       if ($query==0) {
@@ -1031,14 +1032,15 @@ INSERT INTO u_styles2classes (
         }
       }
       else {
-        $ret[0]=0;
-        $ret[1]=$query;
+        $ret[0] = 0;
+				$ret['success'] = true;
+        $ret[1] = $ret['query'] = $query;
         if ($logsql) {
           $this->logfile->write($sql.';');
         }
         $this->debug->write(date('H:i:s')."<br>".$sql,$debuglevel);
       }
-      $ret[2]=$sql;
+      $ret[2] = $sql;
     }
     else {
     	if ($logsql) {

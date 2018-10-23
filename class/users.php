@@ -777,12 +777,13 @@ class user {
 		global $admin_stellen;
 		$more_from = '';
 
+		#echo '<br>getall_Users für Stelle: ' . $stelle_id . ' und User: ' . $admin_id;
 		if ($admin_id > 0 AND !in_array($stelle_id, $admin_stellen)) {
 			$more_from = "
 					JOIN rolle rall ON u.ID = rall.user_id
 					JOIN rolle radm ON rall.stelle_id = radm.stelle_id
 			";
-			$hwere = " WHERE radm.user_id = " . $admin_id;
+			$where = " WHERE radm.user_id = " . $admin_id;
 		}
 
 		if ($order != '') {
@@ -798,7 +799,7 @@ class user {
 			$where .
 			$order . "
 		";
-		#echo '<br>sql: ' . $sql;
+		#echo '<br>getall_Users sql: ' . $sql;
 
 		$this->debug->write("<p>file:kvwmap class:user->getall_Users - Lesen aller User:<br>" . $sql, 4);
 		$query = mysql_query($sql);
