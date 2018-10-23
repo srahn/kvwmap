@@ -7450,11 +7450,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 	function LayerAnzeigen() {
 		# Abfragen aller Layer
-		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		if($this->formvars['order'] == ''){
 			$this->formvars['order'] = 'Name';
 		}
-		$this->layerdaten = $mapDB->getall_Layer($this->formvars['order']);
+		$this->layerdaten = $mapDB->getall_Layer($this->formvars['order'], $this->Stelle->id, $this->user->id);
 		$this->titel='Layerdaten';
 		$this->main='layerdaten.php';
 		$this->output();
@@ -10277,16 +10277,16 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->Stelleneditor();
   }
 
-  function StellenAnzeigen() {
-    # Abfragen aller Stellen
-    if($this->formvars['order'] == ''){
-      $this->formvars['order'] = 'Bezeichnung';
-    }
-    $this->stellendaten=$this->Stelle->getStellen($this->formvars['order']);
-    $this->titel='Stellendaten';
-    $this->main='stellendaten.php';
-    $this->output();
-  }
+	function StellenAnzeigen() {
+		# Abfragen aller Stellen
+		if($this->formvars['order'] == ''){
+			$this->formvars['order'] = 'Bezeichnung';
+		}
+		$this->stellendaten=$this->Stelle->getStellen($this->formvars['order'], $this->user->id);
+		$this->titel='Stellendaten';
+		$this->main='stellendaten.php';
+		$this->output();
+	}
 
   function Stelleneditor() {
 		#echo '<p><b>Stelleneditor</b>';
@@ -10350,17 +10350,19 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->formvars['menues'] = Menue::get_all_ober_menues($this);
     # Abfragen aller möglichen Funktionen
     $funktion = new funktion($this->database);
-    $this->formvars['functions'] = $funktion->getFunktionen(NULL, 'bezeichnung');
+    $this->formvars['functions'] = $funktion->getFunktionen(NULL, 'bezeichnung', $this->Stelle->id, $this->user->id);
     # Abfragen aller möglichen Kartendruck-Layouts
     $this->formvars['frames'] = $document->load_frames(NULL, NULL);
 		# Abfragen aller möglichen Datendruck-Layouts
     $this->formvars['layouts'] = $ddl->load_layouts(NULL, NULL, NULL, NULL);
-    # Abfragen aller möglichen Layer
-    $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-    $this->formvars['layer']=$mapDB->getall_Layer('Name');
+
+		# Abfragen aller verfügbaren Layer der Stelle ab
+    $mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+		$this->formvars['layer'] = $mapDB->getall_Layer('Name');
 		$this->layergruppen = $mapDB->get_Groups();
-    # Abfragen aller möglichen User
-    $this->formvars['users']=$this->user->getall_Users('Name');
+
+    # Abfragen aller verfügbaren User der Stelle ab
+		$this->formvars['users'] = $this->user->getall_Users('Name', $this->Stelle->id, $this->user->id);
 
 		# Abfragen aller möglichen Oberstellen Kindstellen der ausgewählten Stelle werden ausgenommen;
 		$stelle = new MyObject($this, 'stelle');
@@ -10697,7 +10699,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     if($this->formvars['go'] == 'StatistikAuswahl_Stelle'){
     	$this->stellendaten=$this->user->getStellen('Bezeichnung');
     }
-    $this->UserDaten=$this->user2->getUserDaten('','','Name');
+    $this->UserDaten=$this->user2->getUserDaten('','','Name', $this->Stelle->id, $this->user->id);
     $this->titel='Auswahl zur Statistik';
     $this->main='StatistikWaehlen.php';
     $this->output();
@@ -10969,7 +10971,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->main='userdaten_formular.php';
     # Abfragen der Benutzerdaten wenn eine user_id zur Änderung selektiert ist
     if($this->formvars['selected_user_id']>0){
-      $this->userdaten=$this->user->getUserDaten($this->formvars['selected_user_id'],'','');
+      $this->userdaten=$this->user->getUserDaten($this->formvars['selected_user_id'],'','', $this->Stelle->id, $this->user->id);
       $this->formvars['nachname']=$this->userdaten[0]['Name'];
       $this->formvars['vorname']=$this->userdaten[0]['Vorname'];
       $this->formvars['loginname']=$this->userdaten[0]['login_name'];
@@ -10992,7 +10994,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			}
     }
     # Abfragen aller möglichen Stellen
-    $this->formvars['stellen']=$this->Stelle->getStellen('Bezeichnung');
+    $this->formvars['stellen']=$this->Stelle->getStellen('Bezeichnung', $this->user->id);
     $this->output();
   }
 
@@ -11007,20 +11009,20 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->titel='Benutzerdaten';
     $this->main='userdaten.php';
     # Abfragen aller Benutzer
-    $this->userdaten=$this->user->getUserDaten(0,'',$this->formvars['order']);
+    $this->userdaten=$this->user->getUserDaten(0,'',$this->formvars['order'], $this->Stelle->id, $this->user->id);
     $this->output();
   }
 
-  function BenutzerdatenAnzeigen() {
-  	if($this->formvars['order'] == ''){
-      $this->formvars['order'] = 'Name';
-    }
-    $this->titel='Benutzerdaten';
-    $this->main='userdaten.php';
-    # Abfragen aller Benutzer
-    $this->userdaten=$this->user->getUserDaten(0,'',$this->formvars['order']);
-    $this->output();
-  }
+	function BenutzerdatenAnzeigen() {
+		if($this->formvars['order'] == ''){
+			$this->formvars['order'] = 'Name';
+		}
+		$this->titel='Benutzerdaten';
+		$this->main='userdaten.php';
+		# Abfragen aller Benutzer
+		$this->userdaten=$this->user->getUserDaten(0, '', $this->formvars['order'], $this->Stelle->id, $this->user->id);
+		$this->output();
+	}
 
   function BenutzerdatenAnlegen() {
     $ret=$this->user->checkUserDaten($this->formvars);
@@ -11125,7 +11127,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     }
     $this->unassigned_users = $this->user->get_Unassigned_Users();
 		$this->expired_users = $this->user->get_Expired_Users();
-    $all_users = $this->user->getall_Users(NULL);
+    $all_users = $this->user->getall_Users(NULL, $this->Stelle->id, $this->user->id);
     $this->user_count = count($all_users['ID']);
     $this->output();
   }
@@ -14958,16 +14960,16 @@ class db_mapObj{
   var $User_ID;
 	var $database;
 
-  function db_mapObj($Stelle_ID, $User_ID, $database = NULL) {
-    global $debug;
+	function db_mapObj($Stelle_ID, $User_ID, $database = NULL) {
+		global $debug;
 		global $GUI;
-    $this->debug=$debug;
+		$this->debug = $debug;
 		$this->GUI = $GUI;
-    $this->Stelle_ID=$Stelle_ID;
-    $this->User_ID=$User_ID;
+		$this->Stelle_ID = $Stelle_ID;
+		$this->User_ID = $User_ID;
 		$this->rolle = new rolle($User_ID, $Stelle_ID, $database);
-		$this->database=$database;
-  }
+		$this->database = $database;
+	}
 
 	function read_ReferenceMap() {
     $sql ='SELECT r.* FROM referenzkarten AS r, stelle AS s WHERE r.ID=s.Referenzkarte_ID';
@@ -15091,6 +15093,52 @@ class db_mapObj{
 
   function read_Groups($all = false, $order = '') {
 		global $language;
+		global $admin_stellen;
+		$more_from = '';
+		$where = array();
+
+		if ($language != 'german') {
+			$gruppenname_column = "
+			CASE
+				WHEN g.`Gruppenname_" . $language . "` != \"\" THEN g.`Gruppenname_" . $language . "`
+				ELSE g.`Gruppenname`
+			END AS `Gruppenname`";
+		}
+		else {
+			$gruppenname_column = "g.`Gruppenname`";
+		}
+
+		if ($all == false) {
+			$where[] = "g2r.stelle_ID = " . $this->Stelle_ID;
+			$where[] = "g2r.user_id = " . $this->User_ID;
+		}
+
+		if ($this->User_ID > 0 AND !in_array($this->Stelle_ID, $admin_stellen)) {
+			$more_from = "
+				JOIN rolle rall ON g2r.stelle_id = rall.stelle_id
+				JOIN rolle radm ON rall.stelle_id = radm.stelle_id
+			";
+			$where[] = "radm.user_id = " . $this->User_ID;
+		}
+
+		$sql = "
+			SELECT DISTINCT " .
+				$gruppenname_column . ", " .
+				($all == false ? "g2r.status, " : "") . "
+				g.obergruppe,
+				g.id
+			FROM
+				u_groups g JOIN
+				u_groups2rolle g2r ON g.id = g2r.id" .
+				$more_from .
+			(count($where) > 0 ? " WHERE " . implode(' AND ', $where) : "") . "
+			ORDER BY " .
+				($order != '' ? replace_semicolon($order) : "g.order") . "
+		";
+		#echo '<br>sql: ' . $sql;
+
+/*
+		global $language;
 		$sql = 'SELECT ';
 		if($all == false) $sql .= 'g2r.status, ';
 		if($language != 'german') {
@@ -15105,6 +15153,7 @@ class db_mapObj{
 		if($order != '')$sql.=' ORDER BY '. replace_semicolon($order);
 		else $sql.=' ORDER BY `order`';
 		#echo $sql;
+*/
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Groups - Lesen der Gruppen der Rolle:<br>".$sql,4);
     $query=mysql_query($sql);
 		if ($query==0) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
@@ -17089,6 +17138,68 @@ class db_mapObj{
 
 	function getall_Layer($order, $only_listed = false) {
 		global $language;
+		global $admin_stellen;
+		$more_from = '';
+		$where = array();
+
+		if ($language != 'german') {
+			$name_column = "
+			CASE
+				WHEN l.`name_" . $language . "` != \"\" THEN l.`name_" . $language . "`
+				ELSE l.`name`
+			END AS `name`";
+		}
+		else {
+			$name_column = "l.`name`";
+		}
+
+		if ($language != 'german') {
+			$gruppenname_column = "
+			CASE
+				WHEN g.`Gruppenname_" . $language . "` != \"\" THEN g.`Gruppenname_" . $language . "`
+				ELSE g.`Gruppenname`
+			END AS `Gruppenname`";
+		}
+		else {
+			$gruppenname_column = "g.`Gruppenname`";
+		}
+
+		if ($only_listed) {
+			$where[] = "listed = 1";
+		}
+
+		if ($this->Userd_ID > 0 AND !in_array($this->Stelle_ID, $admin_stellen)) {
+			$more_from = "
+				JOIN used_layer ul ON l.Layer_ID = ul.Layer_id
+				JOIN rolle rall ON ul.Stelle_ID = rall.stelle_id
+				JOIN rolle radm ON rall.stelle_id = radm.stelle_id
+			";
+			$hwere[] = "radm.user_id = " . $this->User_ID;
+		}
+
+		if ($order != '') {
+			$order = " ORDER BY " . replace_semicolon($order);
+		}
+
+		$sql = "
+			SELECT DISTINCT " .
+				$name_column . "," .
+				$gruppenname_column . ",
+				l.Layer_ID,
+				l.Gruppe,
+				l.kurzbeschreibung,
+				l.datenherr,
+				l.alias
+			FROM
+				layer l JOIN
+				u_groups g ON l.Gruppe = g.id" .
+				$more_from .
+			(count($where) > 0 ? " WHERE " . implode(' AND ', $where) : "") .
+			$order . "
+		";
+		#echo '<br>sql: ' . $sql;
+
+		/*
 		$sql ='SELECT ';
 		if($language != 'german') {
 			$sql.='CASE WHEN `Name_'.$language.'` != "" THEN `Name_'.$language.'` ELSE `Name` END AS ';
@@ -17101,6 +17212,8 @@ class db_mapObj{
 		$sql.=' WHERE layer.Gruppe = u_groups.id';
 		if($only_listed)$sql.=' AND listed=1';
 		if($order != ''){$sql .= ' ORDER BY ' . replace_semicolon($order);}
+*/
+
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->getall_Layer - Lesen aller Layer:<br>".$sql,4);
 		$query=mysql_query($sql);
     if ($query==0) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }

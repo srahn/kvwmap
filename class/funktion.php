@@ -48,7 +48,38 @@ class funktion {
     $this->database=$database;
   }
   
-  function getFunktionen($id, $order) {
+  function getFunktionen($id, $order, $stelle_id = 0, $admin_id = 0) {
+		global $admin_stellen;
+		$where = array();
+
+		if ($admin_id > 0 AND !in_array($stelle_id, $admin_stellen)) {
+			$more_from = "
+				JOIN u_funktion2stelle f2s ON f.id = f2s.funktion_id
+				JOIN rolle r ON r.stelle_id = f2s.stelle_id
+			";
+			$where[] = "r.user_id = " . $admin_id;
+		}
+
+		if ($id > 0) {
+			$where[] = 'f.id = ' . $id;
+		}
+
+		if ($order != '') {
+			$order = ' ORDER BY ' . replace_semicolon($order);
+		}
+
+		$sql = "
+			SELECT DISTINCT
+				f.*
+			FROM
+				u_funktionen f" .
+				$more_from .
+			(count($where) > 0 ? " WHERE " . implode(' AND ', $where) : "") .
+			$order . "
+		";
+		#echo '<br>sql: ' . $sql;
+
+		/*
     $sql ='SELECT * FROM u_funktionen WHERE 1=1';
     if ($id>0) {
       $sql.=' AND id='.$id;
@@ -56,6 +87,7 @@ class funktion {
     if ($order!='') {
       $sql.=' ORDER BY ' . replace_semicolon($order);
     }
+		*/
     $this->debug->write("<p>file:users.php class:funktion->getFunktionen - Abfragen einer oder aller Funktionen:<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);
     if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }

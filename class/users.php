@@ -773,15 +773,39 @@ class user {
 		return 0;
 	}
 
-	function getall_Users($order){
-		$sql ='SELECT * FROM user';
-		if($order != ''){$sql .= ' ORDER BY ' . replace_semicolon($order);}
-		$this->debug->write("<p>file:kvwmap class:user->getall_Users - Lesen aller User:<br>".$sql,4);
-		$query=mysql_query($sql);
-		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
-		while($rs=mysql_fetch_array($query)) {
-			$user['ID'][]=$rs['ID'];
-			$user['Bezeichnung'][]=$rs['Name'].', '.$rs['Vorname'];
+	function getall_Users($order, $stelle_id = 0, $admin_id = 0) {
+		global $admin_stellen;
+		$more_from = '';
+
+		if ($admin_id > 0 AND !in_array($stelle_id, $admin_stellen)) {
+			$more_from = "
+					JOIN rolle rall ON u.ID = rall.user_id
+					JOIN rolle radm ON rall.stelle_id = radm.stelle_id
+			";
+			$hwere = " WHERE radm.user_id = " . $admin_id;
+		}
+
+		if ($order != '') {
+			$order = ' ORDER BY ' . replace_semicolon($order);
+		}
+
+		$sql = "
+			SELECT DISTINCT
+				u.*
+			FROM
+				user u " .
+				$more_from .
+			$where .
+			$order . "
+		";
+		#echo '<br>sql: ' . $sql;
+
+		$this->debug->write("<p>file:kvwmap class:user->getall_Users - Lesen aller User:<br>" . $sql, 4);
+		$query = mysql_query($sql);
+		if ($query==0) { echo "<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>" . INFO1; return 0; }
+		while ($rs = mysql_fetch_array($query)) {
+			$user['ID'][] = $rs['ID'];
+			$user['Bezeichnung'][] = $rs['Name'] . ', ' . $rs['Vorname'];
 		}
 		// Sortieren der User unter Berücksichtigung von Umlauten
 		$sorted_arrays = umlaute_sortieren($user['Bezeichnung'], $user['ID']);
@@ -838,17 +862,41 @@ class user {
 		return $user;
 	}
 
-	function getUserDaten($id,$login_name,$order) {
-		$sql ='SELECT * FROM user WHERE 1=1';
-		if ($id>0) {
-			$sql.=' AND ID='.$id;
+	function getUserDaten($id, $login_name, $order, $stelle_id = 0, $admin_id = 0) {
+		global $admin_stellen;
+		$where = array();
+
+		if ($admin_id > 0 AND !in_array($stelle_id, $admin_stellen)) {
+			$more_from = "
+				JOIN rolle rall ON u.ID = rall.user_id
+				JOIN rolle radm ON radm.stelle_id = rall.stelle_id
+			";
+			$where[] = "radm.user_id = " . $admin_id;
 		}
-		if ($login_name!='') {
-			$sql.=' AND login_name LIKE "'.$login_name.'"';
+
+		if ($id > 0) {
+			$where[] = 'u.ID = ' . $id;
 		}
-		if ($order!='') {
-			$sql.=' ORDER BY ' . replace_semicolon($order);
+
+		if ($login_name != '') {
+			$where[] = 'login_name LIKE "' . $login_name . '"';
 		}
+
+		if ($order != '') {
+			$order = ' ORDER BY ' . replace_semicolon($order);
+		}
+
+		$sql = "
+			SELECT DISTINCT
+				u.*
+			FROM
+				user u" .
+				$more_from .
+			(count($where) > 0 ? " WHERE " . implode(' AND ', $where) : "") .
+			$order . "
+		";
+		#echo '<br>sql: ' . $sql;
+
 		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>".$sql,4);
 		$query=mysql_query($sql,$this->database->dbConn);
 		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
