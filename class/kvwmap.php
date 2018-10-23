@@ -12600,6 +12600,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
             else{
               $layer=ms_newLayerObj($map);
               $layer->set('data', $layerset[$i]['Data']);
+							if($layerset[$i]['tileindex'] != '')$layer->set('tileindex', SHAPEPATH.$layerset[$i]['tileindex']);
               $layer->set('status',MS_ON);
 							$layer->set('type',$layerset[$i]['Datentyp']);
               if ($layerset[$i]['template']!='') {
