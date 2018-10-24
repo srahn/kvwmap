@@ -637,10 +637,15 @@ class GUI {
 				if ($this->user->rolle->showlayeroptions) {
 					$legend .= ' oncontextmenu="getLayerOptions(' . $layer['Layer_ID'] . '); return false;"';
 				}
-				if($layer['metalink'] != '' AND substr($layer['metalink'], 0, 10) != 'javascript')
-					$legend .= ' target="_blank"';
-				if($layer['metalink'] != '')
+				if($layer['metalink'] != ''){
+					if(substr($layer['metalink'], 0, 10) != 'javascript'){
+						$legend .= ' target="_blank"';
+						if(strpos($layer['metalink'], '?') === false)$layer['metalink'] .= '?';
+						else $layer['metalink'] .= '&';
+						$layer['metalink'] .= 'time='.time();
+					}
 					$legend .= ' class="metalink boldhover" href="'.$layer['metalink'].'">';
+				}
 				else
 					$legend .= ' class="visiblelayerlink boldhover" href="javascript:void(0)">';
 				$legend .= '<span id="'.str_replace('-', '_', $layer['alias']).'"';
