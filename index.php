@@ -48,7 +48,7 @@ if (LOG_LEVEL > 0) {
 # This program is distributed in the hope that it will be useful, #
 # but WITHOUT ANY WARRANTY; without even the implied warranty of  #
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the    #
-# GNU General Public License for more details.                    #
+# GNU General Public License for more details.                    
 #                                                                 #
 # You should have received a copy of the GNU General Public       #
 # License along with this program; if not, write to the Free      #
@@ -163,7 +163,7 @@ $debug->write("<br><b>Anwendungsfall go: " . $go . "</b>", 4);
 $GUI->go = $go;
 $GUI->requeststring = $QUERY_STRING;
 
-function go_switch($go){
+function go_switch($go, $exit = false) {
 	global $GUI;
 	global $Stelle_ID;
 	global $newPassword;
@@ -1347,12 +1347,12 @@ function go_switch($go){
 			} break;
 
 			case 'Layer2Stelle_Editor' : {
-				$GUI->checkCaseAllowed('Stellen_Anzeigen');
+				$GUI->checkCaseAllowed('Layereditor');
 				$GUI->Layer2Stelle_Editor();
 			} break;
 
 			case 'Layer2Stelle_Editor_Speichern' : {
-				$GUI->checkCaseAllowed('Stellen_Anzeigen');
+				$GUI->checkCaseAllowed('Layereditor');
 				$GUI->Layer2Stelle_EditorSpeichern();
 			} break;
 
@@ -1378,11 +1378,13 @@ function go_switch($go){
 
 			case 'Stelleneditor' : {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
+				$GUI->stelle_bearbeiten_allowed();
 				$GUI->Stelleneditor();
 			} break;
 
 			case 'Stelle_Löschen' : {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
+				$GUI->stelle_bearbeiten_allowed();
 				$GUI->StelleLoeschen();
 			} break;
 
@@ -1464,11 +1466,13 @@ function go_switch($go){
 
 			case 'Benutzerdaten_Formular' : {
 				$GUI->checkCaseAllowed('Benutzerdaten_Formular');
+				$GUI->user_bearbeiten_allowed();
 				$GUI->BenutzerdatenFormular();
 			} break;
 
 			case 'Benutzer_Löschen' : {
 				$GUI->checkCaseAllowed('Benutzerdaten_Anzeigen');
+				$GUI->user_bearbeiten_allowed();
 				$GUI->BenutzerLöschen();
 			} break;
 
@@ -1489,6 +1493,7 @@ function go_switch($go){
 
 			case 'als_nutzer_anmelden' : {
 				$GUI->checkCaseAllowed('Benutzerdaten_Formular');
+				$GUI->als_nutzer_anmelden_allowed();
 				$_SESSION['login_name'] = $GUI->formvars['loginname'];
 				header('location: index.php');
 			} break;
@@ -1733,8 +1738,13 @@ function go_switch($go){
 				$GUI->saveMap('');
 				$GUI->drawMap();
 				$GUI->output();
-			}break;
+			}
 		}
+	}
+
+	if ($exit) {
+		include('end.php');
+		exit;
 	}
 };
 
@@ -1742,7 +1752,7 @@ go_switch($go);
 
 include('end.php');
 
-if(CASE_COMPRESS AND FAST_CASE)case_compressor::write_fast_case_file($go);
+if (CASE_COMPRESS AND FAST_CASE) case_compressor::write_fast_case_file($go);
 
 // $executiontimes['time'][] = microtime_float1();
 // $executiontimes['action'][] = 'Ende';

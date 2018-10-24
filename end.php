@@ -11,9 +11,9 @@ if (isset($user)) {
 }  
 if ($GUI->database->dbConn>0) { $GUI->database->close(); }
 if ($GUI->pgdatabase->dbConn>0) { $GUI->pgdatabase->close(); } 
-if (DEBUG_LEVEL>0) { $debug->close(); }
+if (DEBUG_LEVEL > 0) { $GUI->debug->close(); }
 # Schließen des Postgres Logfiles
-if (LOG_LEVEL>0){
-  $log_postgres->close();
+if (LOG_LEVEL> 0) {
+  $GUI->log_postgres->close();
 }
 ?>
