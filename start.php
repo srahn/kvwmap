@@ -112,6 +112,11 @@ if (is_logout($GUI->formvars)) {
 $show_login_form = false;
 if (is_logged_in()) {
 	$GUI->debug->write('Ist angemeldet an: ' . $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_URL'], 4, $GUI->echo);
+	if ($_SESSION['login_name'] == '') {
+		logout();
+		$show_login_form = true;
+		$go = 'login';
+	}
 	$GUI->formvars['login_name'] = $_SESSION['login_name'];
 	$GUI->user = new user($_SESSION['login_name'], 0, $GUI->database);
 	$GUI->debug->write('Ist angemeldet als: ' . $GUI->user->login_name, 4, $GUI->echo);
@@ -336,10 +341,10 @@ else {
 		$GUI->debug->write('Speicher neue Stellenoptionen.', 4, $GUI->echo);
 		$GUI->user->setOptions($GUI->user->stelle_id, $GUI->formvars);
 	}
+	$GUI->debug->write('Ordne Nutzer: ' . $GUI->user->id . ' Stelle: ' . $GUI->Stelle->ID . ' zu.', 4, $GUI->echo);
 	$GUI->user->setRolle($GUI->user->stelle_id);
 
-	#$GUI->debug->write('Eingestellte Rolle: ' . print_r($GUI->user->rolle, true), 4, $GUI->echo);
-
+	$GUI->debug->write('Eingestellte Rolle: ' . print_r($GUI->user->rolle, true), 4, $GUI->echo);
 	#echo 'In der Rolle eingestellte Sprache: '.$GUI->user->rolle->language;
 	# Rollenbezogene Stellendaten zuweisen
 	$GUI->loadMultiLingualText($GUI->user->rolle->language);
@@ -351,7 +356,7 @@ else {
 	$GUI->debug->write('Stellenbezeichnung: ' . $GUI->Stelle->Bezeichnung, 4);
 	$GUI->debug->write('Host_ID: ' . getenv("REMOTE_ADDR"), 4);
 
-	if(BEARBEITER == 'true'){
+	if(BEARBEITER == 'true') {
 		define('BEARBEITER_NAME', 'Bearbeiter: ' . $GUI->user->Name);
 	}
 
@@ -376,7 +381,6 @@ else {
 			$PostGISdb->passwd = $GUI->Stelle->pgdbpasswd;
 			$PostGISdb->port = $GUI->Stelle->port;
 		}
-
 		if ($PostGISdb->dbName != '') {
 			# Übergeben der GIS-Datenbank für GIS-Daten an die GUI
 			$GUI->pgdatabase = $PostGISdb;
