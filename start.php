@@ -144,7 +144,6 @@ else {
 			$GUI->formvars['passwort'] = $gast['passwort'];
 			$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->database, $GUI->formvars['passwort']);
 			$GUI->user->stelle_id = $GUI->formvars['gast']; # set new stelle
-			set_session_vars($GUI->formvars);
 			# login case 2
 		}
 		else {
