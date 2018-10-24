@@ -2629,91 +2629,37 @@ class GUI {
 		return in_array($plugin, $kvwmap_plugins);
 	}
 
-	function checkCaseAllowed($case, $go = '') {
-		global $log_loginfail;
-		$allowed = false;
-
-		if ($this->Stelle->isMenueAllowed($case) OR $this->Stelle->isFunctionAllowed($case)) {
-			if ($this->echo) {
-				echo '<br>Menü oder Funktion erlaubt.';
-				echo '<br>isMenueAlloed: ' . $this->Stelle->isMenueAllowed($case);
-				echo '<br>isFunctionAllowed: ' . $this->Stelle->isFunctionAllowed($case);
-			}
-			switch ($go) {
-
-				case 'als_nutzer_anmelden' : {
-					if ($this->echo) {
-						echo '<br>Case als_nutzer_anmelden.';
-					}
-					$allowed = !$this->is_admin_user($this->formvars['loginname']);
-					if ($this->echo) {
-						echo '<br>Nutzer mit loginname: ' . $this->formvars['loginname'] . ' ist Admin-Nutzer? ' . ($allowed ? 'Nein' : 'Ja');
-					}
-				} break;
-
-				case 'Stelleneditor' : {
-					#echo '<br>Prüfe ob der Nutzer ' . $this->user->id . ' ' . $this->user->login_name . ' die Stelle ' . $this->formvars['selected_stelle_id'] . ' ändern darf.';
-					$user_stellen = $this->Stelle->getStellen('ID', $this->user->id);
-					if (in_array($this->formvars['selected_stelle_id'], $user_stellen['ID'])) {
-						$allowed = true;
-					}
-					else {
-						$this->Fehlermeldung = '<br>Sie sind nicht berechtigt die Stelle ' . $this->formvars['selected_stelle_id'] . ' zu bearbeiten!';
-					}
-				} break;
-
-				case 'Stelle_Löschen' : {
-					#echo '<br>Prüfe ob der Nutzer ' . $this->user->id . ' ' . $this->user->login_name . ' die Stelle ' . $this->formvars['selected_stelle_id'] . ' löschen darf.';
-					$user_stellen = $this->Stelle->getStellen('ID', $this->user->id);
-					if (in_array($this->formvars['selected_stelle_id'], $user_stellen['ID'])) {
-						$allowed = true;
-					}
-					else {
-						$this->Fehlermeldung = '<br>Sie sind nicht berechtigt die Stelle ' . $this->formvars['selected_stelle_id'] . ' zu löschen!';
-					}
-				} break;
-
-				case 'Benutzerdaten_Formular' : {
-					#echo '<br>Prüfe ob der Nutzer ' . $this->user->id . ' ' . $this->user->login_name . ' die Nutzerdaten ' . $this->formvars['selected_user_id'] . ' ändern darf.';
-					$users = $this->user->getall_Users('Name', $this->formvars['selected_user_id'], $this->user->id);
-					if (in_array($this->formvars['selected_user_id'], $users['ID'])) {
-						$allowed = true;
-					}
-					else {
-						$this->Fehlermeldung = '<br>Sie sind nicht berechtigt den Nutzer ' . $this->formvars['selected_user_id'] . ' zu bearbeiten!';
-					}
-				} break;
-
-				case 'Benutzer_Löschen' : {
-					#echo '<br>Prüfe ob der Nutzer ' . $this->user->id . ' ' . $this->user->login_name . ' den Nutzer ' . $this->formvars['selected_user_id'] . ' löschen darf.';
-					$users = $this->user->getall_Users('Name', $this->formvars['selected_user_id'], $this->user->id);
-					if (in_array($this->formvars['selected_user_id'], $users['ID'])) {
-						$allowed = true;
-					}
-					else {
-						$this->Fehlermeldung = '<br>Sie sind nicht berechtigt den Nutzer ' . $this->formvars['selected_user_id'] . ' zu löschen!';
-					}
-				} break;
-
-				default : $allowed = true;
-			}
-		}
-		else {
-			if ($this->echo) {
-				echo '<br>Weder Menü noch Funktion erlaubt.';
-			}
-		}
-
-		if (!$allowed) {
-			$this->add_message('error', $this->TaskChangeWarning . '<br>(' . $case . ')' . '<br>' . $this->Fehlermeldung);
-			$this->Fehlermeldung = '';
+	function checkCaseAllowed($case) {
+		if (!($this->Stelle->isMenueAllowed($case) OR $this->Stelle->isFunctionAllowed($case))) {
+			$this->add_message('error', $this->TaskChangeWarning . '<br>(' . $case . ')' . '<br>Weder Menü noch Funktion erlaubt.');
+			global $log_loginfail;
 			$log_loginfail->write(date("Y:m:d H:i:s",time()) . ' case: ' . $case . ' not allowed in Stelle: ' . $this->Stelle->id . ' for User: ' . $this->user->Name);
-			$this->loadMap('DataBase');
-			$this->user->rolle->newtime = $this->user->rolle->last_time_id;
-			$this->saveMap('');
-			$this->drawMap();
-			$this->output();
-			exit;
+			go_switch('', true);
+		}
+	}
+
+	function als_nutzer_anmelden_allowed() {
+		if ($this->is_admin_user($this->formvars['loginname'])) {
+			if ($this->echo) {
+				$this->add_message('error', '<br>Sie durfen sich nicht als Nutzer ' . $this->formvars['loginname'] . ' anmelden, weil er Admin-Rechte hat.');
+			}
+			go_switch('', true);
+		}
+	}
+
+	function stelle_bearbeiten_allowed() {
+		$user_stellen = $this->Stelle->getStellen('ID', $this->user->id);
+		if (!in_array($this->formvars['selected_stelle_id'], $user_stellen['ID'])) {
+			$this->add_message('error', '<br>Sie sind nicht berechtigt die Stelle ' . $this->formvars['selected_stelle_id'] . ' zu bearbeiten!');
+			go_switch('', true);
+		}
+	}
+
+	function user_bearbeiten_allowed() {
+		$users = $this->user->getall_Users('Name', $this->formvars['selected_user_id'], $this->user->id);
+		if (!in_array($this->formvars['selected_user_id'], $users['ID'])) {
+			$this->add_message('error', '<br>Sie sind nicht berechtigt den Nutzer ' . $this->formvars['selected_user_id'] . ' zu bearbeiten!');
+			go_switch('', true);
 		}
 	}
 
@@ -2732,7 +2678,7 @@ class GUI {
 				r.stelle_id IN (" . implode(', ', $admin_stellen) . ") AND
 				u.login_name = '" . $login_name . "'
 		";
-		echo '<br>sql: ' . $sql;
+		#echo '<br>sql: ' . $sql;
 
 		$result = $this->database->execSQL($sql, 0, 0);
 		if ($result['success']) {

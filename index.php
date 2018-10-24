@@ -163,7 +163,7 @@ $debug->write("<br><b>Anwendungsfall go: " . $go . "</b>", 4);
 $GUI->go = $go;
 $GUI->requeststring = $QUERY_STRING;
 
-function go_switch($go){
+function go_switch($go, $exit = false) {
 	global $GUI;
 	global $Stelle_ID;
 	global $newPassword;
@@ -1377,13 +1377,15 @@ function go_switch($go){
 			} break;
 
 			case 'Stelleneditor' : {
-				$GUI->checkCaseAllowed('Stellen_Anzeigen', 'Stelleneditor');
+				$GUI->checkCaseAllowed('Stellen_Anzeigen');
+				$GUI->stelle_bearbeiten_allowed();
 				$GUI->Stelleneditor();
 			} break;
 
 			case 'Stelle_Löschen' : {
-				$GUI->checkCaseAllowed('Stellen_Anzeigen', 'Stelle_Löschen');
-#				$GUI->StelleLoeschen();
+				$GUI->checkCaseAllowed('Stellen_Anzeigen');
+				$GUI->stelle_bearbeiten_allowed();
+				$GUI->StelleLoeschen();
 			} break;
 
 			case 'Stelleneditor_Als neue Stelle eintragen' : {
@@ -1463,12 +1465,14 @@ function go_switch($go){
 			} break;
 
 			case 'Benutzerdaten_Formular' : {
-				$GUI->checkCaseAllowed('Benutzerdaten_Formular', 'Benutzerdaten_Formular');
+				$GUI->checkCaseAllowed('Benutzerdaten_Formular');
+				$GUI->user_bearbeiten_allowed();
 				$GUI->BenutzerdatenFormular();
 			} break;
 
 			case 'Benutzer_Löschen' : {
-				$GUI->checkCaseAllowed('Benutzerdaten_Anzeigen', 'Benutzer_Löschen');
+				$GUI->checkCaseAllowed('Benutzerdaten_Anzeigen');
+				$GUI->user_bearbeiten_allowed();
 				$GUI->BenutzerLöschen();
 			} break;
 
@@ -1488,7 +1492,8 @@ function go_switch($go){
 			} break;
 
 			case 'als_nutzer_anmelden' : {
-				$GUI->checkCaseAllowed('Benutzerdaten_Formular', 'als_nutzer_anmelden');
+				$GUI->checkCaseAllowed('Benutzerdaten_Formular');
+				$GUI->als_nutzer_anmelden_allowed();
 				$_SESSION['login_name'] = $GUI->formvars['loginname'];
 				header('location: index.php');
 			} break;
@@ -1733,8 +1738,13 @@ function go_switch($go){
 				$GUI->saveMap('');
 				$GUI->drawMap();
 				$GUI->output();
-			}break;
+			}
 		}
+	}
+
+	if ($exit) {
+		include('end.php');
+		exit;
 	}
 };
 
@@ -1742,7 +1752,7 @@ go_switch($go);
 
 include('end.php');
 
-if(CASE_COMPRESS AND FAST_CASE)case_compressor::write_fast_case_file($go);
+if (CASE_COMPRESS AND FAST_CASE) case_compressor::write_fast_case_file($go);
 
 // $executiontimes['time'][] = microtime_float1();
 // $executiontimes['action'][] = 'Ende';

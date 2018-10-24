@@ -113,13 +113,23 @@ $show_login_form = false;
 if (is_logged_in()) {
 	$GUI->debug->write('Ist angemeldet an: ' . $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_URL'], 4, $GUI->echo);
 	if ($_SESSION['login_name'] == '') {
+		$GUI->debug->write('login_name in Session ist leer', 4, $GUI->echo);
 		logout();
 		$show_login_form = true;
 		$go = 'login';
 	}
 	$GUI->formvars['login_name'] = $_SESSION['login_name'];
+	$GUI->debug->write('Ist angemeldet als: ' . $_SESSION['login_name'], 4, $GUI->echo);
 	$GUI->user = new user($_SESSION['login_name'], 0, $GUI->database);
-	$GUI->debug->write('Ist angemeldet als: ' . $GUI->user->login_name, 4, $GUI->echo);
+	if ($GUI->user->login_name == '') {
+		$GUI->debug->write('Nutzer mit login_name: ' . $_SESSION['login_name'] . ' nicht in Datenbank vorhanden.', 4, $GUI->echo);
+		logout();
+		$show_login_form = true;
+		$go = 'login';
+	}
+	else {
+		$GUI->debug->write('Nutzerdaten gelesen von: ' . $GUI->user->login_name, 4, $GUI->echo);
+	}
 	# login case 1
 }
 else {
@@ -344,7 +354,6 @@ else {
 	$GUI->debug->write('Ordne Nutzer: ' . $GUI->user->id . ' Stelle: ' . $GUI->Stelle->ID . ' zu.', 4, $GUI->echo);
 	$GUI->user->setRolle($GUI->user->stelle_id);
 
-	$GUI->debug->write('Eingestellte Rolle: ' . print_r($GUI->user->rolle, true), 4, $GUI->echo);
 	#echo 'In der Rolle eingestellte Sprache: '.$GUI->user->rolle->language;
 	# Rollenbezogene Stellendaten zuweisen
 	$GUI->loadMultiLingualText($GUI->user->rolle->language);
