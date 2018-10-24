@@ -1,14 +1,14 @@
 <?php
 header('Content-Type: text/html; charset=utf-8');
 
+include('credentials.php');
+include('config.php');
+
 if (!USE_EXISTING_SESSION) {
 	session_set_cookie_params(0, $_SERVER['CONTEXT_PREFIX']);
 }
 
 session_start();
-
-include('credentials.php');
-include('config.php');
 
 # Laden der Plugins config.phps
 for ($i = 0; $i < count($kvwmap_plugins); $i++) {
