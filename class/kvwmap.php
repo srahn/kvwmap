@@ -17299,7 +17299,7 @@ class db_mapObj{
 			CASE
 				WHEN l.`name_" . $language . "` != \"\" THEN l.`name_" . $language . "`
 				ELSE l.`name`
-			END AS `name`";
+			END";
 		}
 		else {
 			$name_column = "l.`name`";
@@ -17310,7 +17310,7 @@ class db_mapObj{
 			CASE
 				WHEN g.`Gruppenname_" . $language . "` != \"\" THEN g.`Gruppenname_" . $language . "`
 				ELSE g.`Gruppenname`
-			END AS `Gruppenname`";
+			END";
 		}
 		else {
 			$gruppenname_column = "g.`Gruppenname`";
@@ -17335,8 +17335,8 @@ class db_mapObj{
 
 		$sql = "
 			SELECT DISTINCT " .
-				$name_column . "," .
-				$gruppenname_column . ",
+				$name_column . " AS Name," .
+				$gruppenname_column . " AS Gruppenname,
 				l.Layer_ID,
 				l.Gruppe,
 				l.kurzbeschreibung,
