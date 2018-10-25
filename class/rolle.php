@@ -84,12 +84,14 @@ class rolle {
 			SELECT " .
 				$name_column . ",
 				l.Layer_ID,
-				alias, Datentyp, Gruppe, pfad, maintable, maintable_is_view, Data, tileindex, `schema`, document_path, document_url, labelitem, connection, printconnection,
+				alias, Datentyp, Gruppe, pfad, maintable, maintable_is_view, Data, tileindex, `schema`, document_path, document_url, connection, printconnection,
 				classitem, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, trigger_function, ul.`queryable`, ul.`drawingorder`,
 				ul.`minscale`, ul.`maxscale`,
 				ul.`offsite`,
 				coalesce(r2ul.transparency, ul.transparency, 100) as transparency,
+				coalesce(r2ul.labelitem, l.labelitem) as labelitem,
+				l.labelitem as original_labelitem,
 				ul.`postlabelcache`,
 				`Filter`,
 				CASE r2ul.gle_view
@@ -1030,6 +1032,33 @@ class rolle {
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
 	
+	function setLabelitem($formvars){
+		if(isset($formvars['layer_options_labelitem'])){
+			if($formvars['layer_options_open'] > 0){		# normaler Layer
+				$sql ='UPDATE u_rolle2used_layer set labelitem = \''.$formvars['layer_options_labelitem'].'\'';
+				$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+				$sql.=' AND layer_id='.$formvars['layer_options_open'];
+				$this->debug->write("<p>file:rolle.php class:rolle->setLabelitem:",4);
+				$this->database->execSQL($sql,4, $this->loglevel);
+			}
+			elseif($formvars['layer_options_open'] < 0){		# Rollenlayer
+				$sql ='UPDATE rollenlayer set labelitem = \''.$formvars['layer_options_labelitem'].'\'';
+				$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+				$sql.=' AND id= -1*'.$formvars['layer_options_open'];
+				$this->debug->write("<p>file:rolle.php class:rolle->setLabelitem:",4);
+				$this->database->execSQL($sql,4, $this->loglevel);
+			}
+		}
+	}
+	
+	function removeLabelitem($formvars) {
+		$sql ='UPDATE u_rolle2used_layer set labelitem = NULL';
+		$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+		$sql.=' AND layer_id='.$formvars['layer_options_open'];
+		$this->debug->write("<p>file:rolle.php class:rolle->removeLabelitem:",4);
+		$this->database->execSQL($sql,4, $this->loglevel);
+	}	
+	
 	function setTransparency($formvars) {
 		if($formvars['layer_options_open'] > 0){		# normaler Layer
 			$sql ='UPDATE u_rolle2used_layer set transparency = '.$formvars['layer_options_transparency'];
@@ -1051,7 +1080,7 @@ class rolle {
 		$sql ='UPDATE u_rolle2used_layer set transparency = NULL';
 		$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 		$sql.=' AND layer_id='.$formvars['layer_options_open'];
-		$this->debug->write("<p>file:rolle.php class:rolle->setTransparency:",4);
+		$this->debug->write("<p>file:rolle.php class:rolle->removeTransparency:",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
 

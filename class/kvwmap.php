@@ -238,6 +238,10 @@ class GUI {
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		if($this->formvars['layer_id'] > 0)$layer = $this->user->rolle->getLayer($this->formvars['layer_id']);
 		else $layer = $this->user->rolle->getRollenLayer(-$this->formvars['layer_id']);
+		if($layer[0]['connectiontype']==6){
+			$layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+			$attributes = $mapDB->getDataAttributes($layerdb, $this->formvars['layer_id'], false);
+		}
 		$disabled_classes = $mapDB->read_disabled_classes();
 		$layer[0]['Class'] = $mapDB->read_Classes($this->formvars['layer_id'], $disabled_classes);
 		echo '
@@ -271,7 +275,17 @@ class GUI {
 							if($layer[0]['Class'][0]['Status'] == '1' || $layer[0]['Class'][1]['Status'] == '1')echo '<li><a href="javascript:deactivateAllClasses(\''.implode(',', $class_ids).'\')">'.$this->deactivateAllClasses.'</a></li>';
 							if($layer[0]['Class'][0]['Status'] == '0' || $layer[0]['Class'][1]['Status'] == '0')echo '<li><a href="javascript:activateAllClasses(\''.implode(',', $class_ids).'\')">'.$this->activateAllClasses.'</a></li>';
 						}
-						echo '<li><span>Transparenz:</span> <input name="layer_options_transparency" onchange="transparency_slider.value=parseInt(layer_options_transparency.value); style="width: 30px" value="'.$layer[0]['transparency'].'"><input type="range" id="transparency_slider" name="transparency_slider" style="width: 120px" value="'.$layer[0]['transparency'].'" onchange="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()" oninput="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()"></li>
+						if($layer[0]['connectiontype']==6 AND ($this->formvars['layer_id'] < 0 OR $layer[0]['original_labelitem'] != '')){		# für Rollenlayer oder normale Layer mit labelitem
+							echo '<li><span>'.$this->label.':</span>
+											<select name="layer_options_labelitem">
+												<option value=""> - </option>';
+												for($i = 0; $i < count($attributes)-2; $i++){
+													if($attributes['the_geom'] != $attributes[$i]['name'])echo '<option value="'.$attributes[$i]['name'].'" '.($layer[0]['labelitem'] == $attributes[$i]['name'] ? 'selected' : '').'>'.$attributes[$i]['name'].'</option>';
+												}
+							echo 	 '</select>
+										</li>';
+						}
+						echo '<li><span>'.$this->transparency.':</span> <input name="layer_options_transparency" onchange="transparency_slider.value=parseInt(layer_options_transparency.value);" style="width: 30px" value="'.$layer[0]['transparency'].'"><input type="range" id="transparency_slider" name="transparency_slider" style="width: 120px" value="'.$layer[0]['transparency'].'" onchange="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()" oninput="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()"></li>
 					</td>
 				</tr>
 				<tr>
@@ -366,6 +380,20 @@ class GUI {
 
 	function saveLayerOptions(){
 		$this->user->rolle->setTransparency($this->formvars);
+		$this->user->rolle->setLabelitem($this->formvars);
+		if($this->formvars['layer_options_open'] < 0){		# für Rollenlayer Label anlegen
+			$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+			$classes = $mapDB->read_Classes($this->formvars['layer_options_open']);
+			if($classes[0]['Label'] == NULL){
+				$empty_label = new stdClass();
+				$empty_label->font = 'arial';
+				$empty_label->size = '8';
+				$empty_label->minsize = '6';
+				$empty_label->maxsize = '10';
+				$new_label_id = $mapDB->new_Label($empty_label);
+				$mapDB->addLabel2Class($classes[0]['Class_ID'], $new_label_id, 0);
+			}
+		}
 		$this->neuLaden();
 		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
 		$this->drawMap();
@@ -375,6 +403,7 @@ class GUI {
 
 	function resetLayerOptions(){
 		$this->user->rolle->removeTransparency($this->formvars);
+		$this->user->rolle->removeLabelitem($this->formvars);
 		$this->neuLaden();
 		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
 		$this->drawMap();
@@ -15145,7 +15174,7 @@ class db_mapObj{
 				l.Layer_ID," .
 				$name_column . ",
 				l.alias,
-				l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem,
+				l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, coalesce(rl.labelitem, l.labelitem) as labelitem,
 				l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.classification, l.filteritem,
 				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version,
 				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, l.trigger_function, l.sync,
