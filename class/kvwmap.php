@@ -2643,34 +2643,68 @@ class GUI {
 		}
 	}
 
-	function als_nutzer_anmelden_allowed() {
-		if ($this->is_admin_user($this->formvars['loginname'])) {
-			if ($this->echo) {
-				$this->add_message('error', '<br>Sie durfen sich nicht als Nutzer ' . $this->formvars['loginname'] . ' anmelden, weil er Admin-Rechte hat.');
+	/*
+	* Erzeugt eine Fehlermeldung in $this->messages und wechselt zum default use case,
+	* wenn der Bearbeiter $editor_user nicht zu einer Admin-Stelle gehört aber
+	* der $selected_user zu einer Admin-Stelle gehört
+	*/
+	function als_nutzer_anmelden_allowed($selected_user, $editor_user) {
+		if (
+			!$this->is_admin_user($editor_user) AND
+			$this->is_admin_user($selected_user)
+		) {
+			$this->add_message('error', 'Sie durfen sich nicht als Nutzer mit der ID: ' . $selected_user . ' anmelden, weil er Admin-Rechte hat.');
+			go_switch('', true);
+		}
+	}
+
+	/*
+	* Erzeugt eine Fehlermeldung in $this->messages und wechselt zum default use case,
+	* wenn der Bearbeiter $editor_user nicht zu einer Admin-Stelle gehört und
+	* wenn die $selected_stelle nicht zu den Stellen zählt, die der $editor_user sehen kann.
+	*/
+	function stelle_bearbeiten_allowed($selected_stelle, $editor_user) {
+		if (!$this->is_admin_user($editor_user)) {
+			$editor_stellen = $this->Stelle->getStellen('ID', $editor_user);
+			if (!in_array($selected_stelle, $editor_stellen['ID'])) {
+				$this->add_message('error', 'Sie sind nicht berechtigt die Stelle ' . $selected_stelle . ' zu bearbeiten!');
+				go_switch('', true);
 			}
-			go_switch('', true);
 		}
 	}
 
-	function stelle_bearbeiten_allowed() {
-		$user_stellen = $this->Stelle->getStellen('ID', $this->user->id);
-		if (!in_array($this->formvars['selected_stelle_id'], $user_stellen['ID'])) {
-			$this->add_message('error', '<br>Sie sind nicht berechtigt die Stelle ' . $this->formvars['selected_stelle_id'] . ' zu bearbeiten!');
-			go_switch('', true);
+	/*
+	* Erzeugt eine Fehlermeldung in $this->messages und wechselt zum default use case,
+	* wenn der Bearbeiter $editor_user nicht zu einer Admin-Stelle gehört und
+	* wenn der $selected_user erstens nicht zu den Nutzern zählt, die der $editor_user sehen kann ($editor_users) oder
+	* zweitens wenn der $selected_user noch zu anderen Stellen gehört, die der $bearbeiter_user nicht sehen kann.
+	* Der $edit_user darf also nur Nutzer bearbeiten wenn er entweder admin ist oder es sich um Nutzer
+	* handelt, die ausschließlich in seinen sichtbaren Stellen sind.
+	*/
+	function user_bearbeiten_allowed($selected_user, $editor_user) {
+		if (!$this->is_admin_user($editor_user)) {
+			# Fragt user ab, die Bearbeiter sehen kann
+			$editor_users = $this->user->getall_Users('Name', $selected_user, $editor_user);
+			# Fragt stellen ab, die Bearbeiter sehen kann
+			$editor_stellen = $this->Stelle->getStellen('ID', $editor_user);
+			if (
+				!in_array($selected_user, $editor_users['ID']) OR
+				$this->user_is_in_fremden_stellen($selected_user, $editor_stellen['ID'])
+			) {
+				$this->add_message('error', 'Sie sind nicht berechtigt den Nutzer ' . $selected_user . ' zu bearbeiten!');
+				go_switch('', true);
+			}
 		}
 	}
 
-	function user_bearbeiten_allowed() {
-		$users = $this->user->getall_Users('Name', $this->formvars['selected_user_id'], $this->user->id);
-		if (!in_array($this->formvars['selected_user_id'], $users['ID'])) {
-			$this->add_message('error', '<br>Sie sind nicht berechtigt den Nutzer ' . $this->formvars['selected_user_id'] . ' zu bearbeiten!');
-			go_switch('', true);
-		}
-	}
-
-	function is_admin_user($login_name) {
+	/*
+	* Liefert true wenn der Nutzer mit $user_id zu einer Stelle gehört, die in $admin_stellen
+	* registriert ist, also wenn der Nutzer Administrator ist.
+	* Liefert ansonsten false und setzt wenn es einen Fehler bei der Abfrage gab,
+	* zusätzlich eine Fehlermeldung in $this->messages
+	*/
+	function is_admin_user($user_id) {
 		global $admin_stellen;
-		global $GUI;
 		$ret = false;
 
 		$sql = "
@@ -2681,22 +2715,46 @@ class GUI {
 				user u ON r.user_id = u.ID
 			WHERE
 				r.stelle_id IN (" . implode(', ', $admin_stellen) . ") AND
-				u.login_name = '" . $login_name . "'
+				u.id = '" . $user_id . "'
 		";
 		#echo '<br>sql: ' . $sql;
 
 		$result = $this->database->execSQL($sql, 0, 0);
 		if ($result['success']) {
 			if (mysql_num_rows($result['query']) == 1) {
-				$this->Fehlermeldung = '<br>Nutzer mit dem Login-Namen: ' . $login_name . ' hat eine Rolle in mindestens einer Admin-Stelle!';
 				$ret = true;
-			}
-			else {
-				$this->Fehlermeldung = '<br>Nutzer mit dem Login-Namen: ' . $login_name . ' hat keine Rolle in einer Admin-Stelle!';
 			}
 		}
 		else {
-			$this->Fehlermeldung = '<br>Fehler beim Abfragen ob der Nutzer ein Administrator ist.';
+			$this->add_message('error', 'Fehler beim Abfragen ob der Nutzer mit der ID: ' . $user_id . ' ein Administrator ist.');
+		}
+		return $ret;
+	}
+
+	function user_is_in_fremden_stellen($user_id, $stellen) {
+		$ret = false;
+
+		$sql = "
+			SELECT
+				stelle_id
+			FROM
+				rolle
+			WHERE
+				user_id = " . $user_id . " AND
+				stelle_id NOT IN (" . implode(', ', $stellen) . ")
+		";
+		#echo '<br>sql: ' . $sql;
+
+		$result = $this->database->execSQL($sql, 0, 0);
+		if ($result['success']) {
+			if (mysql_num_rows($result['query']) > 0) {
+				$ret = true;
+				$this->add_message('error', 'Nutzer mit der ID: ' . $user_id . ' gehört noch zu anderen Stellen und kann daher nur in Adminstellen bearbeitet werden!');
+			}
+		}
+		else {
+			$ret = true; # wegen Fehler
+			$this->add_message('error', 'Fehler beim Abfragen der Stellenzugehörigkeit des Nutzers mit der id: ' . $user_id);
 		}
 		return $ret;
 	}
