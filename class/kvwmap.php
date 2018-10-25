@@ -8758,114 +8758,90 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		}
 		$this->success = true;
 		foreach($tablename as $table){
-			$execute = false;
+			$insert = array();
 			if($table['tablename'] != '' AND $table['tablename'] == $layerset[0]['maintable']){		# nur Attribute aus der Haupttabelle werden gespeichert
-				if(!$layerset[0]['maintable_is_view'])$sql = "LOCK TABLE ".$table['tablename']." IN SHARE ROW EXCLUSIVE MODE;";
-				$sql.= "INSERT INTO ".$table['tablename']." (";
-				for($i = 0; $i < count($table['attributname']); $i++){
-					if(($table['type'][$i] != 'Text_not_saveable' AND $table['type'][$i] != 'Auswahlfeld_not_saveable' AND $table['type'][$i] != 'SubFormPK' AND $table['type'][$i] != 'SubFormFK' AND $this->formvars[$table['formfield'][$i]] != '')
-					OR $table['type'][$i] == 'Checkbox' OR $table['type'][$i] == 'Time' OR $table['type'][$i] == 'User' OR $table['type'][$i] == 'UserID' OR $table['type'][$i] == 'Stelle' OR $table['type'][$i] == 'StelleID' OR $table['type'][$i] == 'Geometrie'){
-						if($table['type'][$i] == 'Geometrie'){
-							if($this->formvars['geomtype'] == 'POINT' AND $this->formvars['loc_x'] != ''){
-								$sql .= $table['attributname'][$i].", ";
-								$execute = true;
-							}
-							elseif($this->formvars['newpathwkt'] != ''){
-								$sql .= $table['attributname'][$i].", ";
-								$execute = true;
-							}
-						}
-						else{
-							$sql .= $table['attributname'][$i].", ";
-							$execute = true;
-						}
-					}
-				}
-				$sql = substr($sql, 0, strlen($sql)-2);
-				$sql.= ") VALUES (";
 				for($i = 0; $i < count($table['attributname']); $i++){
 					if($table['type'][$i] == 'Time'){                       # Typ "Time"
 						if(in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
-							$sql .= "'" . date("Y-m-d H:i:s") ."', ";
-							#$sql .= "(now())::timestamp(0), ";
+							$insert[$table['attributname'][$i]] = "'".date("Y-m-d H:i:s")."'";
 						}
-						else $sql.= "NULL, ";
 					}
 					elseif($table['type'][$i] == 'User'){                       # Typ "User"
 						if(in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
-							$sql.= "'".$this->user->Vorname." ".$this->user->Name."', ";
+							$insert[$table['attributname'][$i]] = "'".$this->user->Vorname." ".$this->user->Name."'";
 						}
-						else $sql.= "NULL, ";
 					}
 					elseif($table['type'][$i] == 'UserID'){                       # Typ "UserID"
 						if(in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
-							$sql.= "'".$this->user->id."', ";
+							$insert[$table['attributname'][$i]] = "'".$this->user->id."'";
 						}
-						else $sql.= "NULL, ";
 					}
 					elseif($table['type'][$i] == 'Stelle'){                       # Typ "Stelle"
 						if(in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
-							$sql.= "'".$this->Stelle->Bezeichnung."', ";
+							$insert[$table['attributname'][$i]] = "'".$this->Stelle->Bezeichnung."'";
 						}
-						else $sql.= "NULL, ";
 					}
 					elseif($table['type'][$i] == 'StelleID'){                       # Typ "StelleID"
 						if(in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
-							$sql.= "'".$this->Stelle->id."', ";
+							$insert[$table['attributname'][$i]] = "'".$this->Stelle->id."'";
 						}
-						else $sql.= "NULL, ";
 					}
 					elseif($table['type'][$i] == 'Dokument' AND $this->formvars[$table['formfield'][$i]] != '') {
-						$sql.= "'".$this->formvars[$table['formfield'][$i]]."', ";
+						$insert[$table['attributname'][$i]] = "'".$this->formvars[$table['formfield'][$i]]."'";
 						$this->formvars[$table['formfield'][$i]] = ''; # leeren, falls weiter_erfassen angehakt
 					}					
-					elseif (
+					elseif(
 						$table['type'][$i] != 'Text_not_saveable' AND
 						$table['type'][$i] != 'Auswahlfeld_not_saveable' AND
 						$table['type'][$i] != 'SubFormPK' AND
 						$table['type'][$i] != 'SubFormFK' AND
 						($this->formvars[$table['formfield'][$i]] != '' OR $table['type'][$i] == 'Checkbox')
-					) {
+					){
 						if($table['type'][$i] != 'Dokument' AND (substr($table['datatype'][$i], 0, 1) == '_' OR is_numeric($table['datatype'][$i]))){		// bei Dokumenten wurde das JSON schon weiter oben verarbeitet
 							# bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln
-							$sql.= "'".$this->processJSON($this->formvars[$table['formfield'][$i]], $doc_path, $doc_url)."', ";
+							$insert[$table['attributname'][$i]] = "'".$this->processJSON($this->formvars[$table['formfield'][$i]], $doc_path, $doc_url)."'";
 						}
 						else{
-							if ($table['type'][$i] == 'Zahl') {
+							if($table['type'][$i] == 'Zahl'){
 								# bei Zahlen den Punkt (Tausendertrenner) entfernen
 								$this->formvars[$table['formfield'][$i]] = removeTausenderTrenner($this->formvars[$table['formfield'][$i]]); # bei Zahlen den Punkt (Tausendertrenner) entfernen
 							}
 							if ($table['type'][$i] == 'Checkbox' AND $this->formvars[$table['formfield'][$i]] == '') {
 								$this->formvars[$table['formfield'][$i]] = 'f';
 							}
-							$sql .= "'" . $this->formvars[$table['formfield'][$i]] . "', "; # Typ "normal"
+							$insert[$table['attributname'][$i]] = "'".$this->formvars[$table['formfield'][$i]]."'"; # Typ "normal"
 						}
 					}
 					elseif($table['type'][$i] == 'Geometrie') {
-						if($this->formvars['geomtype'] == 'POINT') {
+						if($this->formvars['geomtype'] == 'POINT'){
 							if($this->formvars['loc_x'] != '') {
 								if($this->formvars['dimension'] == 3) {
-									$sql .= "st_transform(st_geomfromtext('POINT(".$this->formvars['loc_x']." ".$this->formvars['loc_y']." 0)', ".$client_epsg."), ".$layer_epsg."), ";
+									$insert[$table['attributname'][$i]] = "st_transform(st_geomfromtext('POINT(".$this->formvars['loc_x']." ".$this->formvars['loc_y']." 0)', ".$client_epsg."), ".$layer_epsg.")";
 								}
 								else{
-									$sql .= "st_transform(st_geomfromtext('POINT(".$this->formvars['loc_x']." ".$this->formvars['loc_y'].")', ".$client_epsg."), ".$layer_epsg."), ";
+									$insert[$table['attributname'][$i]] = "st_transform(st_geomfromtext('POINT(".$this->formvars['loc_x']." ".$this->formvars['loc_y'].")', ".$client_epsg."), ".$layer_epsg.")";
 								}
 							}
 						}
 						elseif($this->formvars['newpathwkt'] != ''){
 							if(substr($this->formvars['geomtype'], 0, 5) == 'MULTI'){
-								$sql .= "st_transform(ST_Multi(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$client_epsg.")), ".$layer_epsg."), ";
+								$insert[$table['attributname'][$i]] = "st_transform(ST_Multi(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$client_epsg.")), ".$layer_epsg.")";
 							}
 							else{
-								$sql .= "st_transform(ST_GeometryN(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$client_epsg."), 1), ".$layer_epsg."), ";
+								$insert[$table['attributname'][$i]] = "st_transform(ST_GeometryN(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$client_epsg."), 1), ".$layer_epsg.")";
 							}
 						}
 					}
 				}
-				$sql = substr($sql, 0, strlen($sql)-2);
-				$sql.= ")";
+				
+				if(!empty($insert)){
+					if(!$layerset[0]['maintable_is_view'])$sql = "LOCK TABLE ".$table['tablename']." IN SHARE ROW EXCLUSIVE MODE;";
+					$sql.= "INSERT INTO ".$table['tablename']." (";
+					$sql.= implode(', ', array_keys($insert));
+					$sql.= ") VALUES (";
+					$sql.= implode(', ', $insert);
+					$sql.= ")";
 
-				if ($execute == true) {
 					# Before Insert trigger
 					if (!empty($layerset[0]['trigger_function'])) {
 						$this->exec_trigger_function('BEFORE', 'INSERT', $layerset[0]);
