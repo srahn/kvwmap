@@ -223,12 +223,16 @@ delete from ukos_base.idents
 
 	CREATE OR REPLACE FUNCTION ukos_okstra.split_strassenelemente()
 		RETURNS trigger AS
-	$BODY$
+		$BODY$
 			DECLARE
-				rec							RECORD;
 				tolerance				NUMERIC;
+				se							RECORD;
 				teil_anfang_id	CHARACTER VARYING;
 				teil_ende_id		CHARACTER VARYING;
+				new_se_id				CHARACTER VARYING;
+				sep							RECORD;
+				new_sep_id			CHARACTER VARYING;
+				new_sep_station	NUMERIC;
 				sql							TEXT;
 				aenderungszeit	TIMESTAMP WITH time zone = timezone('utc-1'::text, now());
 			BEGIN
@@ -238,7 +242,7 @@ delete from ukos_base.idents
 
 				RAISE NOTICE 'Trenne Strassenelemente am Verbindungspunkt % auf mit Punktgeometrie: % und Topologietolerance: %, wenn Verbindungspunkt auf solche fällt ', NEW.id, ST_AsText(NEW.punktgeometrie), tolerance;
 				--------------------------------------------------------------------------------------------------------
-				FOR rec IN EXECUTE '
+				FOR se IN EXECUTE '
 					SELECT
 						id,
 						st_distance($1, liniengeometrie),
@@ -257,11 +261,11 @@ delete from ukos_base.idents
 				'
 				USING NEW.punktgeometrie, tolerance, aenderungszeit
 				LOOP
-					RAISE NOTICE 'Teile Strassenelement % auf in die Teile % und %.', rec.id, rec.teil_anfang, rec.teil_ende;
+					RAISE NOTICE 'Teile Strassenelement % auf in die Teile % und %.', se.id, se.teil_anfang, se.teil_ende;
 
 					-- Setze das alte Strassenelement auf historisch
-					EXECUTE 'UPDATE ukos_okstra.strassenelement SET gueltig_bis = now() WHERE id = $1'
-					USING rec.id;
+					EXECUTE 'UPDATE ukos_okstra.strassenelement SET gueltig_bis = $2 WHERE id = $1'
+					USING se.id, aenderungszeit;
 
 					-- Füge das neue Strassenelement vom Anfangsteil des alten Strassenelementes ein
 					EXECUTE '
@@ -323,7 +327,7 @@ delete from ukos_base.idents
 						WHERE id = $6
 						RETURNING id
 					'
-					USING aenderungszeit, NEW.angelegt_von, rec.teil_anfang, ST_Length(rec.teil_anfang), NEW.id, rec.id
+					USING aenderungszeit, NEW.angelegt_von, se.teil_anfang, ST_Length(se.teil_anfang), NEW.id, se.id
 					INTO teil_anfang_id;
 					RAISE NOTICE 'Strassenelement id: % am Anfang angelegt', teil_anfang_id;
 
@@ -387,21 +391,101 @@ delete from ukos_base.idents
 						WHERE id = $6
 						RETURNING id
 					'
-					USING aenderungszeit, NEW.angelegt_von, rec.teil_ende, ST_Length(rec.teil_ende), NEW.id, rec.id
+					USING aenderungszeit, NEW.angelegt_von, se.teil_ende, ST_Length(se.teil_ende), NEW.id, se.id
 					INTO teil_ende_id;
 					RAISE NOTICE 'Strassenelement id: % am Ende angelegt', teil_ende_id;
 
-					-- ToDo:
-					-- Wenn sich ein Strassenelement ändert müssen auch die abhängigen Objekte geändert werden. Das ist Bestandteil eines anderen Triggers
-					-- Wenn ein neues Strassenelement erzeugt wird als Teil eines anderen, müssen auch die an dem alten hängenden Objekte für das neue Teil übernommen werden. Das kann hier gemacht werden oder in einem separaten Trigger dem die id des alten Strassenelementes übergeben wird.
+					-- Abfrage der Strassenelementpunkte des alten Strassenelementes
+					FOR sep IN EXECUTE '
+						SELECT
+							id,
+							station,
+							abstand_zur_bestandsachse
+						FROM
+							ukos_okstra.strassenelementpunkt
+						WHERE
+							gueltig_bis > $2 AND
+							auf_strassenelement = $1
+						ORDER BY
+							station, abstand_zur_bestandsachse
+					'
+					USING se.id, aenderungszeit
+					LOOP
+						IF sep.station < ST_Length(se.teil_anfang) THEN
+							RAISE NOTICE 'Erzeuge und ordne Strassenelementpunkt % dem Anfangsteil % zu,', sep.id, teil_anfang_id;
+							new_se_id = teil_anfang_id;
+							new_sep_station = sep.station;
+						ELSE
+							RAISE NOTICE 'Erzeuge und ordne Strassenelementpunkt % dem Endteil % zu.', se.id, teil_ende_id;
+							new_sep_station = sep.station - ST_Length(se.teil_anfang);
+							new_se_id = teil_ende_id;
+						END IF;
+
+						-- Setze den alten Strassenelementpunkt auf historisch
+						EXECUTE 'UPDATE ukos_okstra.strassenelementpunkt SET gueltig_bis = $2 WHERE id = $1'
+						USING sep.id, aenderungszeit;
+
+						-- Füge den neuen Strassenelementpunkt ein
+						EXECUTE '
+							INSERT INTO ukos_okstra.strassenelementpunkt(
+								gueltig_von, gueltig_bis,
+								id_strassenelement,
+								id_preisermittlung, 
+								id_zustand, id_zustandsbewertung_01, id_zustandsbewertung_02, 
+								id_zustandsbewertung_03, id_zustandsbewertung_04, id_zustandsbewertung_05, 
+								id_eigentuemer, id_baulasttraeger, ahk, baujahr,
+								angelegt_am, angelegt_von,
+								geaendert_am, geaendert_von,
+								ident_hist, bemerkung, 
+								objektname, zusatzbezeichnung, objektart, objektart_kurz, 
+								objektnummer, zustandsnote, datum_der_benotung, pauschalpreis, 
+								baulasttraeger, baulasttraeger_dritter, abschreibung, art_der_preisermittlung, 
+								eroeffnungsbilanzwert, zeitwert, fremdobjekt, fremddatenbestand, 
+								kommunikationsobjekt, erzeugt_von_ereignis, geloescht_von_ereignis, 
+								hat_vorgaenger_hist_objekt, hat_nachfolger_hist_objekt, punktgeometrie,
+								station,
+								abstand_zur_bestandsachse,
+								abstand_zur_fahrbahnoberkante,
+								auf_strassenelement,
+								id_strasse
+							)
+							SELECT
+								$1, ''2100-01-01 02:00:00+01'',
+								$2,
+								id_preisermittlung, 
+								id_zustand, id_zustandsbewertung_01, id_zustandsbewertung_02, 
+								id_zustandsbewertung_03, id_zustandsbewertung_04, id_zustandsbewertung_05, 
+								id_eigentuemer, id_baulasttraeger, ahk, baujahr,
+								$1, $3,
+								geaendert_am, geaendert_von, ident_hist, bemerkung,
+								objektname, zusatzbezeichnung, objektart, objektart_kurz,
+								objektnummer, zustandsnote, datum_der_benotung, pauschalpreis,
+								baulasttraeger, baulasttraeger_dritter, abschreibung, art_der_preisermittlung,
+								eroeffnungsbilanzwert, zeitwert, fremdobjekt, fremddatenbestand,
+								kommunikationsobjekt, erzeugt_von_ereignis, geloescht_von_ereignis,
+								hat_vorgaenger_hist_objekt, hat_nachfolger_hist_objekt, punktgeometrie,
+								$5,
+								abstand_zur_bestandsachse, abstand_zur_fahrbahnoberkante,
+								$2,
+								id_strasse
+							FROM ukos_okstra.strassenelementpunkt
+							WHERE id = $4
+							RETURNING id
+						'
+						USING aenderungszeit, new_se_id, NEW.angelegt_von, sep.id, new_sep_station
+						INTO new_sep_id;
+
+						RAISE NOTICE 'Neuen Strassenelementpunkt % mit Station % und Abstand: % angelegt.', new_sep_id, new_sep_station, sep.abstand_zur_bestandsachse;
+
+					END LOOP;
 
 				END LOOP;
 
 			RETURN NEW;
 		END;
-		$BODY$
-		LANGUAGE plpgsql VOLATILE
-		COST 100;
+	$BODY$
+	LANGUAGE plpgsql VOLATILE
+	COST 100;
 
 	CREATE TRIGGER split_strassenelemente
 	AFTER INSERT

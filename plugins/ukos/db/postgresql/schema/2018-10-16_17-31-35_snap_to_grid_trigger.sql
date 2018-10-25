@@ -51,7 +51,6 @@ BEGIN;
 	LANGUAGE plpgsql VOLATILE
 	COST 100;
 
-
 	CREATE TRIGGER __first_snap_to_grid
 	BEFORE INSERT OR UPDATE OF geometrie_streckenobjekt
 	ON ukos_base.punktundstreckenobjekt
@@ -232,6 +231,5 @@ BEGIN;
 	ON ukos_okstra.zustaendigkeit
 	FOR EACH ROW
 	EXECUTE PROCEDURE ukos_base.first_snap_to_grid();
-
 
 COMMIT;
