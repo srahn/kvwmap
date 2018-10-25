@@ -4155,6 +4155,7 @@ class GUI {
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
     $layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
+		$this->attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
     $lineeditor = new lineeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
     # eingeabewerte pruefen:
     $ret = $lineeditor->pruefeEingabedaten($this->formvars['newpathwkt']);
@@ -4165,13 +4166,12 @@ class GUI {
     }
     else {
       $umring = $this->formvars['newpathwkt'];
-      $ret = $lineeditor->eintragenLinie($umring, $this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname']);
+      $ret = $lineeditor->eintragenLinie($umring, $this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], $this->attributes['geomtype'][$this->attributes['the_geom']]);
       if ($ret[0]) { # fehler beim eintrag
           $this->Meldung=$ret[1];
       }
       else { # eintrag erfolgreich
 	      # wenn Time-Attribute vorhanden, aktuelle Zeit speichern
-				$this->attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
 				for($i = 0; $i < count($this->attributes['type']); $i++){
 					if($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'Time' AND in_array($this->attributes['options'][$i], array('', 'update'))){
 						$sql = "UPDATE ".$this->formvars['layer_tablename']." SET ".$this->attributes['name'][$i]." = '".date('Y-m-d G:i:s')."' WHERE oid = '".$this->formvars['oid']."'";
@@ -4302,6 +4302,7 @@ class GUI {
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
     $layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
+		$this->attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
     $polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
     # eingeabewerte pruefen:
     $ret = $polygoneditor->pruefeEingabedaten($this->formvars['newpathwkt']);
@@ -4312,13 +4313,12 @@ class GUI {
     }
     else{
       $umring = $this->formvars['newpathwkt'];
-      $ret = $polygoneditor->eintragenFlaeche($umring, $this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname']);
+      $ret = $polygoneditor->eintragenFlaeche($umring, $this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], $this->attributes['geomtype'][$this->attributes['the_geom']]);
       if ($ret[0]) { # fehler beim eintrag
           $this->Meldung=$ret[1];
       }
       else { # eintrag erfolgreich
 	      # wenn auto-Attribute vorhanden, auto-Werte eintragen
-				$this->attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
 				for($i = 0; $i < count($this->attributes['type']); $i++){
 					if($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'Time' AND in_array($this->attributes['options'][$i], array('', 'update'))){
 						$sql = "UPDATE ".$this->formvars['layer_tablename']." SET ".$this->attributes['name'][$i]." = '".date('Y-m-d G:i:s')."' WHERE oid = '".$this->formvars['oid']."'";
@@ -8766,7 +8766,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							}
 						}
 						elseif($this->formvars['newpathwkt'] != ''){
-							$sql .= "st_transform(st_multi(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$client_epsg.")), ".$layer_epsg."), ";
+							if(substr($this->formvars['geomtype'], 0, 5) == 'MULTI'){
+								$sql .= "st_transform(ST_Multi(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$client_epsg.")), ".$layer_epsg."), ";
+							}
+							else{
+								$sql .= "st_transform(ST_GeometryN(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$client_epsg."), 1), ".$layer_epsg."), ";
+							}
 						}
 					}
 				}
