@@ -87,9 +87,16 @@ class polygoneditor {
     return $ret;
   }
 
-  function eintragenFlaeche($umring, $oid, $tablename, $columnname) {
+  function eintragenFlaeche($umring, $oid, $tablename, $columnname, $geomtype) {
 		if($umring == '')$sql = "UPDATE ".$tablename." SET ".$columnname." = NULL WHERE oid = ".$oid;
-		else $sql = "UPDATE ".$tablename." SET ".$columnname." = st_transform(st_multi(st_geometryfromtext('".$umring."',".$this->clientepsg.")),".$this->layerepsg.") WHERE oid = ".$oid;
+		else{
+			if(substr($geomtype, 0, 5) == 'MULTI'){
+				$sql = "UPDATE ".$tablename." SET ".$columnname." = st_transform(ST_MULTI(st_geometryfromtext('".$umring."',".$this->clientepsg.")),".$this->layerepsg.") WHERE oid = ".$oid;
+			}
+			else{
+				$sql = "UPDATE ".$tablename." SET ".$columnname." = st_transform(ST_GeometryN(st_geometryfromtext('".$umring."',".$this->clientepsg."), 1),".$this->layerepsg.") WHERE oid = ".$oid;
+			}
+		}
 		$ret = $this->database->execSQL($sql, 4, 1);
 		if(!$ret[0]){
 			if(pg_affected_rows($ret[1]) == 0){

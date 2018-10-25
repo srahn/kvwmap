@@ -1,14 +1,14 @@
 <?php
 header('Content-Type: text/html; charset=utf-8');
 
+include('credentials.php');
+include('config.php');
+
 if (!USE_EXISTING_SESSION) {
 	session_set_cookie_params(0, $_SERVER['CONTEXT_PREFIX']);
 }
 
 session_start();
-
-include('credentials.php');
-include('config.php');
 
 # Laden der Plugins config.phps
 for ($i = 0; $i < count($kvwmap_plugins); $i++) {
@@ -1378,13 +1378,13 @@ function go_switch($go, $exit = false) {
 
 			case 'Stelleneditor' : {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
-				$GUI->stelle_bearbeiten_allowed();
+				$GUI->stelle_bearbeiten_allowed($GUI->formvars['selected_stelle_id'], $GUI->user->id);
 				$GUI->Stelleneditor();
 			} break;
 
 			case 'Stelle_Löschen' : {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
-				$GUI->stelle_bearbeiten_allowed();
+				$GUI->stelle_bearbeiten_allowed($GUI->formvars['selected_stelle_id'], $GUI->user->id);
 				$GUI->StelleLoeschen();
 			} break;
 
@@ -1466,13 +1466,13 @@ function go_switch($go, $exit = false) {
 
 			case 'Benutzerdaten_Formular' : {
 				$GUI->checkCaseAllowed('Benutzerdaten_Formular');
-				$GUI->user_bearbeiten_allowed();
+				$GUI->user_bearbeiten_allowed($GUI->formvars['selected_user_id'], $GUI->user->id);
 				$GUI->BenutzerdatenFormular();
 			} break;
 
 			case 'Benutzer_Löschen' : {
 				$GUI->checkCaseAllowed('Benutzerdaten_Anzeigen');
-				$GUI->user_bearbeiten_allowed();
+				$GUI->user_bearbeiten_allowed($GUI->formvars['selected_user_id'], $GUI->user->id);
 				$GUI->BenutzerLöschen();
 			} break;
 
@@ -1493,7 +1493,7 @@ function go_switch($go, $exit = false) {
 
 			case 'als_nutzer_anmelden' : {
 				$GUI->checkCaseAllowed('Benutzerdaten_Formular');
-				$GUI->als_nutzer_anmelden_allowed();
+				$GUI->als_nutzer_anmelden_allowed($GUI->formvars['selected_user_id'], $GUI->user->id);
 				$_SESSION['login_name'] = $GUI->formvars['loginname'];
 				header('location: index.php');
 			} break;
