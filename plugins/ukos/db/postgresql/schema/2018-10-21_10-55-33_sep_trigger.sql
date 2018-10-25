@@ -22,6 +22,10 @@ BEGIN;
 				RAISE EXCEPTION 'Der Strassenelementpunkt muss einem Strassenelement zugeordnet sein.';
 			END IF;
 
+			-- ToDo:
+			-- Prüfe ob das angegebene Strassenelement existiert
+			
+
 			-- Prüfe ob Punktgeometrie und/oder Station existieren
 			-- Berechne jeweils fehlendes Element und fange Linie wenn Punkt in tolerance zu Linie liegt
 			IF NEW.punktgeometrie IS NULL THEN
@@ -46,34 +50,40 @@ BEGIN;
 					RAISE NOTICE 'Setze Punktgeometrie auf: %', ST_AsText(NEW.punktgeometrie);
 				END IF;
 			ELSE
-				RAISE NOTICE 'Berechne Station und Abstand zur Bestandsachse aus Punktgeometrie: %', ST_AsText(NEW.punktgeometrie);
-				EXECUTE '
-					SELECT
-						foot_point, ordinate, abscissa
-					FROM
-						(
-							SELECT
-								gdi_LineLocatePointWithOffset(liniengeometrie, $1)
-							FROM
-								ukos_okstra.strassenelement
-							WHERE
-								id = $2
-						) AS (foot_point GEOMETRY, ordinate NUMERIC, absicca NUMERIC)
-				'
-				USING NEW.punktgeometrie, NEW.auf_strassenelement
-				INTO rec;
+				RAISE NOTICE 'Punktgeometrie vorhanden.';
+				IF NEW.station IS NULL OR NEW.abstand_zur_bestandsachse IS NULL THEN
+					RAISE NOTICE 'Berechne Station und Abstand zur Bestandsachse aus Punktgeometrie: %', ST_AsText(NEW.punktgeometrie);
+					EXECUTE '
+						SELECT
+							foot_point, ordinate, abscissa
+						FROM
+							(
+								SELECT
+									gdi_LineLocatePointWithOffset(liniengeometrie, $1)
+								FROM
+									ukos_okstra.strassenelement
+								WHERE
+									id = $2
+							) AS (foot_point GEOMETRY, ordinate NUMERIC, absicca NUMERIC)
+					'
+					USING NEW.punktgeometrie, NEW.auf_strassenelement
+					INTO rec;
 
-				NEW.station = rec.ordinate;
-				RAISE NOTICE 'Station auf: % gesetzt.', NEW.station;
-				IF abs(rec.abscissa) <= tolerance THEN
-					NEW.abstand_zur_bestandsachse = 0;
-					NEW.punktgeometrie = rec.foot_point;
-					RAISE NOTICE 'Abstand zur Bestandsachse auf 0 gesetzt und Punktgeometrie auf: %', NEW.punktgeometrie;
-				ELSE
-					NEW.abstand_zur_bestandsachse = rec.abscissa;
-					RAISE NOTICE 'Abstand zur Bestandsachse auf: % gesetzt.', NEW.abstand_zur_bestandsachse;
+					NEW.station = rec.ordinate;
+					RAISE NOTICE 'Station auf: % gesetzt.', NEW.station;
+					IF abs(rec.abscissa) <= tolerance THEN
+						NEW.abstand_zur_bestandsachse = 0;
+						NEW.punktgeometrie = rec.foot_point;
+						RAISE NOTICE 'Abstand zur Bestandsachse auf 0 gesetzt und Punktgeometrie auf: %', NEW.punktgeometrie;
+					ELSE
+						NEW.abstand_zur_bestandsachse = rec.abscissa;
+						RAISE NOTICE 'Abstand zur Bestandsachse auf: % gesetzt.', NEW.abstand_zur_bestandsachse;
+					END IF;
 				END IF;
 			END IF;
+
+			-- ToDo:
+			-- Was machen mit Strassenelementpunkten, die negative Station oder Station länger als Strassenelement haben? Zulassen?
 
 			NEW.punktgeometrie = ST_SnapToGrid(NEW.punktgeometrie, accuracy);
 
@@ -83,11 +93,27 @@ BEGIN;
 	LANGUAGE plpgsql VOLATILE
 	COST 100;
 
-
 	CREATE TRIGGER validate_strassenelementpunkt
 	BEFORE INSERT
 	ON ukos_okstra.strassenelementpunkt
 	FOR EACH ROW
 	EXECUTE PROCEDURE ukos_okstra.validate_strassenelementpunkt();
+
+	/*
+		INSERT INTO ukos_okstra.strassenelementpunkt (auf_strassenelement, station, abstand_zur_bestandsachse) VALUES
+('8106924c-5e05-49f9-a07c-fd84f463074f', 70.71, 10)
+		INSERT INTO ukos_okstra.strassenelementpunkt (auf_strassenelement, station, abstand_zur_bestandsachse) VALUES
+('8106924c-5e05-49f9-a07c-fd84f463074f', 80, 2)	
+		INSERT INTO ukos_okstra.strassenelementpunkt (auf_strassenelement, station, abstand_zur_bestandsachse) VALUES
+('8106924c-5e05-49f9-a07c-fd84f463074f', 80, -4)
+		INSERT INTO ukos_okstra.strassenelementpunkt (auf_strassenelement, station, abstand_zur_bestandsachse) VALUES
+('8106924c-5e05-49f9-a07c-fd84f463074f', 20, 3)
+
+	SELECT id, st_astext(liniengeometrie) FROM ukos_okstra.strassenelement WHERE id = '8106924c-5e05-49f9-a07c-fd84f463074f'
+	SELECT id, st_AsText(punktgeometrie, station, abstand_von_bestandsachse) FROM ukos_okstra.strassenelementpunkt WHERE auf_strassenelement = '8106924c-5e05-49f9-a07c-fd84f463074f'
+	INSERT INTO ukos_okstra.verbindungspunkt (punktgeometrie) VALUES (ST_GeomFromText('POINT(500049.9995 6000049.9995)', 25833))
+
+
+	*/
 
 COMMIT;

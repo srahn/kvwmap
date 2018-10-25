@@ -126,6 +126,28 @@ BEGIN;
 		FOR EACH ROW
 		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
+	-- Tabelle strassenelementpunkt in Schema okstra erweitern
+	ALTER TABLE ukos_okstra.strassenelementpunkt
+		ADD COLUMN id_strasse character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
+		ADD COLUMN ident character(6) NOT NULL,
+		ADD CONSTRAINT fk_strassenelementpunkt_strasse FOREIGN KEY (id_strasse)
+			REFERENCES ukos_okstra.strasse (id) MATCH SIMPLE
+			ON UPDATE NO ACTION ON DELETE NO ACTION,
+
+	-- Trigger: tr_idents_add_ident on ukos_okstra.strassenelementpunkt
+	CREATE TRIGGER tr_idents_add_ident
+		BEFORE INSERT
+		ON ukos_okstra.strassenelementpunkt
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
+
+	-- Trigger: tr_idents_remove_ident on okstra.strassenelementpunkt
+	CREATE TRIGGER tr_idents_remove_ident
+		AFTER DELETE
+		ON ukos_okstra.strassenelementpunkt
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
+
 	CREATE TABLE ukos_base.config (
 		key character varying,
 		value text,
