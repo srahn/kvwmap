@@ -1,13 +1,16 @@
 BEGIN;
 
+	ALTER TABLE ukos_okstra.strassenelementpunkt ALTER station DROP NOT NULL;
+
 	-- DROP FUNCTION ukos_okstra.validate_strassenelementpunkt();
 	CREATE OR REPLACE FUNCTION ukos_okstra.validate_strassenelementpunkt()
 	RETURNS trigger AS
 	$BODY$
 		DECLARE
-			rec				RECORD;
-			tolerance	NUMERIC;
-			accuracy	NUMERIC;
+			rec RECORD;
+			tolerance NUMERIC;
+			accuracy NUMERIC;
+			anzahl_strassenelemente INTEGER;
 		BEGIN
 			--------------------------------------------------------------------------------------------------------
 			-- Initialisierung
@@ -19,18 +22,28 @@ BEGIN;
 
 			-- Prüfe ob eine Zuordnung zum Strassenelement existiert
 			IF NEW.auf_strassenelement IS NULL THEN
-				RAISE EXCEPTION 'Der Strassenelementpunkt muss einem Strassenelement zugeordnet sein.';
+				RAISE EXCEPTION 'Der Strassenelementpunkt muss einem Strassenelement zugeordnet sein!';
 			END IF;
 
-			-- ToDo:
 			-- Prüfe ob das angegebene Strassenelement existiert
-			
+			EXECUTE '
+				SELECT count(id)
+				FROM ukos_okstra.strassenelement
+				WHERE
+					id = $1
+			'
+			USING NEW.auf_strassenelement
+			INTO anzahl_strassenelemente;
 
-			-- Prüfe ob Punktgeometrie und/oder Station existieren
-			-- Berechne jeweils fehlendes Element und fange Linie wenn Punkt in tolerance zu Linie liegt
+			IF anzahl_strassenelemente = 0 THEN
+				RAISE EXCEPTION 'Das Strassenelement existiert nicht!';
+			END IF;
+
+			-- Prüfe ob Punktgeometrie und/oder Station im Strassenelementpunkt angegeben sind
+			-- und berechne jeweils fehlendes Element und fange Linie wenn Punkt in tolerance zu Linie liegt
 			IF NEW.punktgeometrie IS NULL THEN
 				IF NEW.station IS NULL THEN
-					RAISE EXCEPTION 'Punktgeometrie und Station sind leer. Ein Strassenelementpunkt muss entweder eine Punktgeometrie oder eine Stationierungsangabe haben.';
+					RAISE EXCEPTION 'Punktgeometrie und Station sind leer. Ein Strassenelementpunkt muss entweder eine Punktgeometrie oder eine Stationierungsangabe haben!';
 				ELSE
 					RAISE NOTICE 'Berechne Punktgeometrie entlang des Strassenelementes: % aus Station: % und Abstand zur Bestandsachse: %', NEW.auf_strassenelement, NEW.station, NEW.abstand_zur_bestandsachse;
 					IF abs(NEW.abstand_zur_bestandsachse) <= tolerance THEN
@@ -47,24 +60,31 @@ BEGIN;
 					'
 					USING NEW.station, NEW.abstand_zur_bestandsachse, NEW.auf_strassenelement
 					INTO NEW.punktgeometrie;
-					RAISE NOTICE 'Setze Punktgeometrie auf: %', ST_AsText(NEW.punktgeometrie);
+					RAISE NOTICE 'Korrigiere Punktgeometrie auf: %', ST_AsText(NEW.punktgeometrie);
 				END IF;
 			ELSE
-				RAISE NOTICE 'Punktgeometrie vorhanden.';
+				RAISE NOTICE 'Punktgeometrie in Strassenelementpunkt vorhanden.';
 				IF NEW.station IS NULL OR NEW.abstand_zur_bestandsachse IS NULL THEN
 					RAISE NOTICE 'Berechne Station und Abstand zur Bestandsachse aus Punktgeometrie: %', ST_AsText(NEW.punktgeometrie);
 					EXECUTE '
-						SELECT
-							foot_point, ordinate, abscissa
-						FROM
+					SELECT
+						foot_point, ordinate, abscissa
+					FROM
+						gdi_LineLocatePointWithOffset(
 							(
 								SELECT
-									gdi_LineLocatePointWithOffset(liniengeometrie, $1)
+									liniengeometrie
 								FROM
 									ukos_okstra.strassenelement
 								WHERE
 									id = $2
-							) AS (foot_point GEOMETRY, ordinate NUMERIC, absicca NUMERIC)
+							),
+							$1
+						) AS (
+							foot_point GEOMETRY,
+							ordinate NUMERIC,
+							abscissa NUMERIC
+						)
 					'
 					USING NEW.punktgeometrie, NEW.auf_strassenelement
 					INTO rec;
@@ -93,12 +113,6 @@ BEGIN;
 	LANGUAGE plpgsql VOLATILE
 	COST 100;
 
-	CREATE TRIGGER validate_strassenelementpunkt
-	BEFORE INSERT
-	ON ukos_okstra.strassenelementpunkt
-	FOR EACH ROW
-	EXECUTE PROCEDURE ukos_okstra.validate_strassenelementpunkt();
-
 	/*
 		INSERT INTO ukos_okstra.strassenelementpunkt (auf_strassenelement, station, abstand_zur_bestandsachse) VALUES
 ('8106924c-5e05-49f9-a07c-fd84f463074f', 70.71, 10)
@@ -112,8 +126,24 @@ BEGIN;
 	SELECT id, st_astext(liniengeometrie) FROM ukos_okstra.strassenelement WHERE id = '8106924c-5e05-49f9-a07c-fd84f463074f'
 	SELECT id, st_AsText(punktgeometrie, station, abstand_von_bestandsachse) FROM ukos_okstra.strassenelementpunkt WHERE auf_strassenelement = '8106924c-5e05-49f9-a07c-fd84f463074f'
 	INSERT INTO ukos_okstra.verbindungspunkt (punktgeometrie) VALUES (ST_GeomFromText('POINT(500049.9995 6000049.9995)', 25833))
-
-
 	*/
+
+	CREATE TRIGGER validate_strassenelementpunkt
+	BEFORE INSERT
+	ON ukos_okstra.strassenelementpunkt
+	FOR EACH ROW
+	EXECUTE PROCEDURE ukos_okstra.validate_strassenelementpunkt();
+
+	CREATE TRIGGER _20_untergang
+	BEFORE DELETE
+	ON ukos_okstra.strassenelementpunkt
+	FOR EACH ROW
+	EXECUTE PROCEDURE ukos_okstra.untergang();
+
+	CREATE TRIGGER _99_untergang
+	BEFORE DELETE
+	ON ukos_okstra.strassenelementpunkt
+	FOR EACH ROW
+	EXECUTE PROCEDURE ukos_okstra.stop();
 
 COMMIT;

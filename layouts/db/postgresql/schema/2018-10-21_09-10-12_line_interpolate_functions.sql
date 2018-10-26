@@ -64,7 +64,7 @@ BEGIN;
 				SELECT
 					ST_LineInterpolatePoint($1, ST_LineLocatePoint($1, $2)) AS foot_point,
 					(ST_LineLocatePoint($1, $2) * ST_Length($1))::NUMERIC AS ordinate,
-					(CASE WHEN ST_Distance(ST_OffsetCurve($1, ST_Distance($1, $2)), $2) > ST_Distance($1, $2)
+					(CASE WHEN ST_Distance(ST_OffsetCurve($1, ST_Distance($1, $2)), $2) > ST_Distance($1, $2) AS abszissa
 					THEN -1
 					ELSE 1
 					END * ST_Distance($1, $2))::NUMERIC AS abscissa

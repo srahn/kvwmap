@@ -47,12 +47,6 @@ BEGIN;
 	LANGUAGE plpgsql VOLATILE
 	COST 100;
 
-	CREATE TRIGGER validate_strassenelement
-	BEFORE INSERT
-	ON ukos_okstra.strassenelement
-	FOR EACH ROW
-	EXECUTE PROCEDURE ukos_okstra.validate_strassenelement();
-
 	-- DROP FUNCTION ukos_okstra.add_strassenelement();
 	CREATE OR REPLACE FUNCTION ukos_okstra.add_verbindungspunkte()
 	RETURNS trigger AS
@@ -156,12 +150,6 @@ BEGIN;
 	$BODY$
 	LANGUAGE plpgsql VOLATILE
 	COST 100;
-
-	CREATE TRIGGER add_verbindungspunkte
-	AFTER INSERT
-	ON ukos_okstra.strassenelement
-	FOR EACH ROW
-	EXECUTE PROCEDURE ukos_okstra.add_verbindungspunkte();
 
 	CREATE INDEX strassenelement_gist
 	ON ukos_okstra.strassenelement
@@ -492,20 +480,91 @@ delete from ukos_base.idents
 	LANGUAGE plpgsql VOLATILE
 	COST 100;
 
-	CREATE TRIGGER split_strassenelemente
-	AFTER INSERT
-	ON ukos_okstra.verbindungspunkt
-	FOR EACH ROW
-	EXECUTE PROCEDURE ukos_okstra.split_strassenelemente();
+	CREATE OR REPLACE FUNCTION ukos_okstra.liniengeometrie_aendern()
+		RETURNS trigger AS
+		$BODY$
+			DECLARE
+				tolerance				NUMERIC;
+				se							RECORD;
+				teil_anfang_id	CHARACTER VARYING;
+				teil_ende_id		CHARACTER VARYING;
+				new_se_id				CHARACTER VARYING;
+				sep							RECORD;
+				new_sep_id			CHARACTER VARYING;
+				new_sep_station	NUMERIC;
+				sql							TEXT;
+				aenderungszeit	TIMESTAMP WITH time zone = timezone('utc-1'::text, now());
+			BEGIN
+				--------------------------------------------------------------------------------------------------------
+				-- Initialisierung
+				EXECUTE 'SELECT value::NUMERIC FROM ukos_base.config WHERE key = $1' USING 'Toplogietolerance' INTO tolerance;
 
-	-- DROP FUNCTION ukos_okstra.delete_verbindungspunkte();
-	CREATE OR REPLACE FUNCTION ukos_okstra.delete_verbindungspunkte()
+				--------------------------------------------------------------------------------------------------------
+				NEW.laenge = ST_Length(NEW.liniengeometrie);
+				RAISE NOTICE 'Länge des Strassenelementes: % aktualisiert.', NEW.id;
+
+				--------------------------------------------------------------------------------------------------------
+				EXECUTE '
+					UPDATE
+						ukos_okstra.strassenelementpunkt
+					SET
+						auf_strassenelement = ''00000000-0000-0000-0000-000000000000''
+					WHERE
+						auf_strassenelement = (SELECT id FROM ukos_okstra.strassenelement WHERE id = $1)
+				'
+				USING NEW.id;
+				RAISE NOTICE 'Anhängenden Punktobjekte zurückgesetzt.';
+
+			RETURN NEW;
+		END;
+	$BODY$
+	LANGUAGE plpgsql VOLATILE
+	COST 100;
+
+	-- DROP FUNCTION ukos_okstra.untergang();
+	CREATE OR REPLACE FUNCTION ukos_okstra.untergang()
+	RETURNS trigger AS
+	$BODY$
+		DECLARE
+			aenderungszeit TIMESTAMP WITH time zone = timezone('utc-1'::text, now());
+		BEGIN
+			EXECUTE '
+				UPDATE
+					' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME || '
+				SET
+					gueltig_bis = $2
+				WHERE
+					id = $1
+			'
+			USING OLD.id, aenderungszeit;
+			RAISE NOTICE '%.% id: % nicht mehr gültig seit: %', TG_TABLE_SCHEMA, TG_TABLE_NAME, OLD.id, OLD.gueltig_bis;
+			RETURN OLD;
+		END;
+	$BODY$
+	LANGUAGE plpgsql VOLATILE COST 100;
+	COMMENT ON FUNCTION ukos_okstra.untergang() IS 'Setzt die Gültigkeit des Datensatzes OLD.id in der Tabelle in der das Event auftritt auf das aktuelle Datum und läßt ihn damit untergehen. Der Rückgabewert ist OLD, damit danach auch noch Trigger ausgeführt werden können.';
+
+
+	-- DROP FUNCTION ukos_okstra.stop();
+	CREATE OR REPLACE FUNCTION ukos_okstra.stop()
+	RETURNS trigger AS
+	$BODY$
+		BEGIN
+			RETURN NULL;
+		END;
+	$BODY$
+	LANGUAGE plpgsql VOLATILE COST 100;
+	COMMENT ON FUNCTION ukos_okstra.stop() IS 'Verhindert die Ausführung des Statements.';
+
+	-- DROP FUNCTION ukos_okstra.delete_punkte();
+	CREATE OR REPLACE FUNCTION ukos_okstra.delete_punkte()
 	RETURNS trigger AS
 	$BODY$
 		DECLARE
 			anzahl_strassenelemente	INTEGER;
 		BEGIN
 			--------------------------------------------------------------------------------------------------------
+			-- Verbinsungspunkt am Anfang löschen
 			IF OLD.beginnt_bei_vp != '00000000-0000-0000-0000-000000000000' THEN
 				RAISE NOTICE 'Versuche Verbindungspunkt am Anfang: % zu löschen.', OLD.beginnt_bei_vp;
 				EXECUTE '
@@ -514,7 +573,8 @@ delete from ukos_base.idents
 				'
 				USING OLD.beginnt_bei_vp;
 			END IF;
-
+			--------------------------------------------------------------------------------------------------------
+			-- Verbindungspunkt am Ende löschen
 			IF OLD.endet_bei_vp != '00000000-0000-0000-0000-000000000000' THEN
 				RAISE NOTICE 'Versuche Verbindungspunkt am Ende: % zu löschen.', OLD.endet_bei_vp;
 				EXECUTE '
@@ -523,29 +583,37 @@ delete from ukos_base.idents
 				'
 				USING OLD.endet_bei_vp;
 			END IF;
-		RETURN NEW;
+			--------------------------------------------------------------------------------------------------------
+			-- Strassenelementpunkte zurücksetzen
+			EXECUTE '
+				UPDATE
+					ukos_okstra.strassenelementpunkt
+				SET
+					auf_strassenelement = ''00000000-0000-0000-0000-000000000000''
+				WHERE
+					auf_strassenelement = $1
+			'
+			USING OLD.id;
+			RAISE NOTICE 'Strassenelement: % in Strassenelementpunkten zurückgesetzt.', OLD.id;
+
+		RETURN OLD;
 	END;
 	$BODY$
 	LANGUAGE plpgsql VOLATILE
 	COST 100;
 
-	CREATE TRIGGER delete_verbindungspunkte
-	AFTER DELETE
-	ON ukos_okstra.strassenelement
-	FOR EACH ROW
-	EXECUTE PROCEDURE ukos_okstra.delete_verbindungspunkte();
-
-	-- DROP FUNCTION ukos_okstra.nicht_an_strassenelementen();
-	CREATE OR REPLACE FUNCTION ukos_okstra.nicht_an_strassenelementen()
+	-- DROP FUNCTION ukos_okstra.pruefe_abhaengigkeiten();
+	CREATE OR REPLACE FUNCTION ukos_okstra.pruefe_abhaengigkeiten()
 	RETURNS trigger AS
 	$BODY$
 		DECLARE
-			aenderungszeit					TIMESTAMP WITH time zone = timezone('utc-1'::text, now());
+			aenderungszeit TIMESTAMP WITH time zone = timezone('utc-1'::text, now());
 			anzahl_strassenelemente	INTEGER;
 		BEGIN
 			--------------------------------------------------------------------------------------------------------
 			IF OLD.id = '00000000-0000-0000-0000-000000000000' THEN
-				RAISE NOTICE 'Default Verbindungspunkt id: % darf nicht gelöscht werden', OLD.id;
+				RAISE EXCEPTION 'Default Verbindungspunkt id: % darf nicht gelöscht werden', OLD.id;
+				RETURN NULL;
 			ELSE
 				-- Frage ab ob noch gültige Strassenelemente an dem Verbindungspunkt hängen
 				EXECUTE '
@@ -558,34 +626,75 @@ delete from ukos_base.idents
 				USING OLD.id, aenderungszeit
 				INTO anzahl_strassenelemente;
 
-				IF anzahl_strassenelemente = 0 THEN
-				 	-- es hängt kein Strassenelement mehr am Verbindungspunkt
-					OLD.gueltig_bis = aenderungszeit;
-					EXECUTE '
-						UPDATE
-							ukos_okstra.verbindungspunkt
-						SET
-							gueltig_bis = $2
-						WHERE
-							id = $1
-					'
-					USING OLD.id, aenderungszeit;
-					RAISE NOTICE 'Verbindungspunkt: % nicht mehr gültig seit: %', OLD.id, OLD.gueltig_bis;
-				ELSE
-					-- es hängen noch Strassenelemente am Verbindungspunkt nicht auf ungültig setzen.
+				IF anzahl_strassenelemente > 0 THEN
+					-- es hängen noch Strassenelemente am Verbindungspunkt. Löschen abbrechen.
 					RAISE NOTICE 'Verbindungspunkt: % nicht gelöscht, weil noch % strassenelement(e) anhängen.', OLD.id, anzahl_strassenelemente;
+					RETURN NULL;
+				ELSE
+					RETURN OLD;
 				END IF;
 			END IF;
-			RETURN NULL;
 		END;
 	$BODY$
 	LANGUAGE plpgsql VOLATILE
 	COST 100;
+	COMMENT ON FUNCTION ukos_okstra.pruefe_abhaengigkeiten() IS 'Bricht den Trigger ab, wenn die id default ist oder noch gültige Strassenelemente an dem Punkt hängen.';
 
-	CREATE TRIGGER nicht_an_strassenelementen
-	BEFORE DELETE
+	--
+
+	CREATE TRIGGER split_strassenelemente
+	AFTER INSERT
 	ON ukos_okstra.verbindungspunkt
 	FOR EACH ROW
-	EXECUTE PROCEDURE ukos_okstra.nicht_an_strassenelementen();
+	EXECUTE PROCEDURE ukos_okstra.split_strassenelemente();
+
+	--
+
+	CREATE TRIGGER validate_strassenelement BEFORE INSERT
+	ON ukos_okstra.strassenelement
+	FOR EACH ROW
+	EXECUTE PROCEDURE ukos_okstra.validate_strassenelement();
+
+	CREATE TRIGGER add_verbindungspunkte AFTER INSERT
+	ON ukos_okstra.strassenelement
+	FOR EACH ROW
+	EXECUTE PROCEDURE ukos_okstra.add_verbindungspunkte();
+
+	CREATE TRIGGER liniengeometrie_aendern BEFORE UPDATE
+	ON ukos_okstra.strassenelement
+	FOR EACH ROW
+	EXECUTE PROCEDURE ukos_okstra.liniengeometrie_aendern();
+
+	CREATE TRIGGER _10_untergang BEFORE DELETE
+	ON ukos_okstra.strassenelement
+	FOR EACH ROW
+	EXECUTE PROCEDURE ukos_okstra.untergang();
+
+	CREATE TRIGGER _20_delete_punkte BEFORE DELETE
+	ON ukos_okstra.strassenelement
+	FOR EACH ROW
+	EXECUTE PROCEDURE ukos_okstra.delete_punkte();
+
+	CREATE TRIGGER _99_stop BEFORE DELETE
+	ON ukos_okstra.strassenelement
+	FOR EACH ROW
+	EXECUTE PROCEDURE ukos_okstra.stop();
+
+	--
+
+	CREATE TRIGGER _01_pruefe_abhaengigkeiten BEFORE DELETE
+	ON ukos_okstra.verbindungspunkt
+	FOR EACH ROW
+	EXECUTE PROCEDURE ukos_okstra.pruefe_abhaengigkeiten();
+
+	CREATE TRIGGER _20_untergang BEFORE DELETE
+	ON ukos_okstra.verbindungspunkt
+	FOR EACH ROW
+	EXECUTE PROCEDURE ukos_okstra.untergang();
+
+	CREATE TRIGGER _99_stop BEFORE DELETE
+	ON ukos_okstra.verbindungspunkt
+	FOR EACH ROW
+	EXECUTE PROCEDURE ukos_okstra.stop();
 
 COMMIT;
