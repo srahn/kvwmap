@@ -70,10 +70,11 @@ BEGIN;
 			-- Initialisierung
 			EXECUTE 'SELECT value::NUMERIC FROM ukos_base.config WHERE key = $1' USING 'Toplogietolerance' INTO tolerance;
 
-			RAISE NOTICE 'Füge Verindungspunkte des Strassenelementes mit Liniengeometrie: % und Topologietolerance: % hinzu, falls noch nicht übergeben oder nicht vorhanden und setze ggf. neue Geometrie und Verindungspunkte in Strassenelement ein.', ST_AsText(NEW.liniengeometrie), tolerance;
+			RAISE NOTICE 'Füge Verindungspunkte des Strassenelementes mit Liniengeometrie: % und Topologietolerance: % hinzu,
+			falls noch nicht übergeben oder nicht vorhanden und setze ggf. neue Geometrie und Verindungspunkte in Strassenelement ein.', ST_AsText(NEW.liniengeometrie), tolerance;
 
 			--------------------------------------------------------------------------------------------------------
-			IF NEW.beginnt_bei_vp IS NULL THEN
+			IF NEW.beginnt_bei_vp = '00000000-0000-0000-0000-000000000000' THEN
 				EXECUTE '
 					SELECT id, punktgeometrie, ST_Equals($1, punktgeometrie) punkt_gleich
 					FROM ukos_okstra.verbindungspunkt
@@ -100,10 +101,12 @@ BEGIN;
 						liniengeometrie_changed = true;
 					END IF;
 				END IF;
+			ELSE
+				RAISE NOTICE 'Verbindungspunkt am Anfang ist mit übergeben worden: %', NEW.beginnt_bei_vp;
 			END IF;
 
 			--------------------------------------------------------------------------------------------------------
-			IF NEW.endet_bei_vp IS NULL THEN
+			IF NEW.endet_bei_vp = '00000000-0000-0000-0000-000000000000' THEN
 				EXECUTE '
 					SELECT id, punktgeometrie, ST_Equals($1, punktgeometrie) punkt_gleich
 					FROM ukos_okstra.verbindungspunkt WHERE ST_Distance(punktgeometrie, $1) <= $2
@@ -129,6 +132,8 @@ BEGIN;
 						liniengeometrie_changed = true;
 					END IF;
 				END IF;
+			ELSE
+				RAISE NOTICE 'Verbindungspunkt am Ende ist mit übergeben worden: %', NEW.endet_bei_vp;
 			END IF;
 
 			--------------------------------------------------------------------------------------------------------
