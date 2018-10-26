@@ -498,4 +498,77 @@ delete from ukos_base.idents
 	FOR EACH ROW
 	EXECUTE PROCEDURE ukos_okstra.split_strassenelemente();
 
+	-- DROP FUNCTION ukos_okstra.delete_verbindungspunkte();
+	CREATE OR REPLACE FUNCTION ukos_okstra.delete_verbindungspunkte()
+	RETURNS trigger AS
+	$BODY$
+		DECLARE
+			anzahl_strassenelemente	INTEGER;
+		BEGIN
+			--------------------------------------------------------------------------------------------------------
+			IF OLD.beginnt_bei_vp != '00000000-0000-0000-0000-000000000000' THEN
+				EXECUTE '
+					SELECT count(id)
+					FROM ukos_okstra.strassenelement
+					WHERE
+						gueltig_bis > now() AND
+						(beginnt_bei_vp = $2 OR endet_bei_vp = $2) AND
+						id != $1
+				'
+				USING OLD.id, OLD.beginnt_bei_vp
+				INTO anzahl_strassenelemente;
+
+				IF anzahl_strassenelemente = 0 THEN --wenn kein Strassenelement mehr an beginnt_bei_vp hängt
+					EXECUTE '
+						DELETE FROM ukos_okstra.verbindungspunkt
+						WHERE id = $1
+					'
+					USING OLD.beginnt_bei_vp;
+					RAISE NOTICE 'Verbindungspunkt am Anfang: % gelöscht.', OLD.beginnt_bei_vp;
+				ELSE
+					RAISE NOTICE 'Verbindungspunkt amd Anfang: % nicht gelöscht, weil noch % strassenelement(e) anhängen.', OLD.beginnt_bei_vp, anzahl_strassenelemente;
+				END IF;
+			ELSE
+				RAISE NOTICE 'Verbindungspunkt am Anfang war: ', OLD.beginnt_bei_vp;
+			END IF;
+
+			--------------------------------------------------------------------------------------------------------
+			IF OLD.endet_bei_vp != '00000000-0000-0000-0000-000000000000' THEN
+				EXECUTE '
+					SELECT count(id)
+					FROM ukos_okstra.strassenelement
+					WHERE
+						gueltig_bis > now() AND
+						(endet_bei_vp = $2 OR endet_bei_vp = $2) AND
+						id != $1
+				'
+				USING OLD.id, OLD.endet_bei_vp
+				INTO anzahl_strassenelemente;
+
+				IF anzahl_strassenelemente = 0 THEN --wenn kein Strassenelement mehr an endet_bei_vp hängt
+					EXECUTE '
+						DELETE FROM ukos_okstra.verbindungspunkt
+						WHERE id = $1
+					'
+					USING OLD.endet_bei_vp;
+					RAISE NOTICE 'Verbindungspunkt am Ende: % gelöscht.', OLD.endet_bei_vp;
+				ELSE
+					RAISE NOTICE 'Verbindungspunkt am Ende: % nicht gelöscht, weil noch % strassenelement(e) anhängen.', OLD.endet_bei_vp, anzahl_strassenelemente;
+				END IF;
+			ELSE
+				RAISE NOTICE 'Verbindungspunkt am Ende war: ', OLD.endet_bei_vp;
+			END IF;
+
+		RETURN NEW;
+	END;
+	$BODY$
+	LANGUAGE plpgsql VOLATILE
+	COST 100;
+
+	CREATE TRIGGER delete_verbindungspunkte
+	AFTER DELETE
+	ON ukos_okstra.strassenelement
+	FOR EACH ROW
+	EXECUTE PROCEDURE ukos_okstra.delete_verbindungspunkte();
+
 COMMIT;
