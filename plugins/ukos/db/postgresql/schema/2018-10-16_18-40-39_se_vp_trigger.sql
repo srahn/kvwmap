@@ -484,23 +484,11 @@ delete from ukos_base.idents
 		RETURNS trigger AS
 		$BODY$
 			DECLARE
-				tolerance				NUMERIC;
-				se							RECORD;
-				teil_anfang_id	CHARACTER VARYING;
-				teil_ende_id		CHARACTER VARYING;
-				new_se_id				CHARACTER VARYING;
-				sep							RECORD;
-				new_sep_id			CHARACTER VARYING;
-				new_sep_station	NUMERIC;
-				sql							TEXT;
 				aenderungszeit	TIMESTAMP WITH time zone = timezone('utc-1'::text, now());
 			BEGIN
 				--------------------------------------------------------------------------------------------------------
-				-- Initialisierung
-				EXECUTE 'SELECT value::NUMERIC FROM ukos_base.config WHERE key = $1' USING 'Toplogietolerance' INTO tolerance;
-
-				--------------------------------------------------------------------------------------------------------
 				NEW.laenge = ST_Length(NEW.liniengeometrie);
+				NEW.geaendert_am = aenderungszeit;
 				RAISE NOTICE 'Länge des Strassenelementes: % aktualisiert.', NEW.id;
 
 				--------------------------------------------------------------------------------------------------------
@@ -508,12 +496,13 @@ delete from ukos_base.idents
 					UPDATE
 						ukos_okstra.strassenelementpunkt
 					SET
-						auf_strassenelement = ''00000000-0000-0000-0000-000000000000''
+						auf_strassenelement = ''00000000-0000-0000-0000-000000000000'',
+						geaendert_am = $2
 					WHERE
 						auf_strassenelement = (SELECT id FROM ukos_okstra.strassenelement WHERE id = $1)
 				'
-				USING NEW.id;
-				RAISE NOTICE 'Anhängenden Punktobjekte zurückgesetzt.';
+				USING NEW.id, aenderungszeit;
+				RAISE NOTICE 'Anhängende Punktobjekte zurückgesetzt.';
 
 			RETURN NEW;
 		END;
