@@ -15220,7 +15220,7 @@ class db_mapObj{
   }
 
   function read_Groups($all = false, $order = '') {
-		global $language;
+/*		global $language;
 		global $admin_stellen;
 		$more_from = '';
 		$where = array();
@@ -15264,8 +15264,7 @@ class db_mapObj{
 				($order != '' ? replace_semicolon($order) : "g.order") . "
 		";
 		#echo '<br>sql: ' . $sql;
-
-/*
+*/
 		global $language;
 		$sql = 'SELECT ';
 		if($all == false) $sql .= 'g2r.status, ';
@@ -15281,7 +15280,6 @@ class db_mapObj{
 		if($order != '')$sql.=' ORDER BY '. replace_semicolon($order);
 		else $sql.=' ORDER BY `order`';
 		#echo $sql;
-*/
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Groups - Lesen der Gruppen der Rolle:<br>".$sql,4);
     $query=mysql_query($sql);
 		if ($query==0) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
