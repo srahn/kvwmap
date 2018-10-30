@@ -15219,51 +15219,6 @@ class db_mapObj{
   }
 
   function read_Groups($all = false, $order = '') {
-/*		global $language;
-		global $admin_stellen;
-		$more_from = '';
-		$where = array();
-
-		if ($language != 'german') {
-			$gruppenname_column = "
-			CASE
-				WHEN g.`Gruppenname_" . $language . "` != \"\" THEN g.`Gruppenname_" . $language . "`
-				ELSE g.`Gruppenname`
-			END AS `Gruppenname`";
-		}
-		else {
-			$gruppenname_column = "g.`Gruppenname`";
-		}
-
-		if ($all == false) {
-			$where[] = "g2r.stelle_ID = " . $this->Stelle_ID;
-			$where[] = "g2r.user_id = " . $this->User_ID;
-		}
-
-		if ($this->User_ID > 0 AND !in_array($this->Stelle_ID, $admin_stellen)) {
-			$more_from = "
-				JOIN rolle rall ON g2r.stelle_id = rall.stelle_id
-				JOIN rolle radm ON rall.stelle_id = radm.stelle_id
-			";
-			$where[] = "radm.user_id = " . $this->User_ID;
-		}
-
-		$sql = "
-			SELECT DISTINCT " .
-				$gruppenname_column . ", " .
-				($all == false ? "g2r.status, " : "") . "
-				g.obergruppe,
-				g.id
-			FROM
-				u_groups g JOIN
-				u_groups2rolle g2r ON g.id = g2r.id" .
-				$more_from .
-			(count($where) > 0 ? " WHERE " . implode(' AND ', $where) : "") . "
-			ORDER BY " .
-				($order != '' ? replace_semicolon($order) : "g.order") . "
-		";
-		#echo '<br>sql: ' . $sql;
-*/
 		global $language;
 		$sql = 'SELECT ';
 		if($all == false) $sql .= 'g2r.status, ';
@@ -15279,6 +15234,7 @@ class db_mapObj{
 		if($order != '')$sql.=' ORDER BY '. replace_semicolon($order);
 		else $sql.=' ORDER BY `order`';
 		#echo $sql;
+
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Groups - Lesen der Gruppen der Rolle:<br>".$sql,4);
     $query=mysql_query($sql);
 		if ($query==0) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
@@ -17293,13 +17249,13 @@ class db_mapObj{
 			$where[] = "listed = 1";
 		}
 
-		if ($this->Userd_ID > 0 AND !in_array($this->Stelle_ID, $admin_stellen)) {
+		if ($this->User_ID > 0 AND !in_array($this->Stelle_ID, $admin_stellen)) {
 			$more_from = "
 				JOIN used_layer ul ON l.Layer_ID = ul.Layer_id
 				JOIN rolle rall ON ul.Stelle_ID = rall.stelle_id
 				JOIN rolle radm ON rall.stelle_id = radm.stelle_id
 			";
-			$hwere[] = "radm.user_id = " . $this->User_ID;
+			$where[] = "radm.user_id = " . $this->User_ID;
 		}
 
 		if ($order != '') {
