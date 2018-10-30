@@ -3400,7 +3400,7 @@ $measurefunctions = '
 	  ';
 		
 	$SVGvars_navbuttons .= ppquery($strInfo);
-	
+
 	$navbuttons ='
 	    <g id="buttons_NAV" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()">
 				<rect x="0" y="0" rx="3" ry="3" width="'.$last_x.'" height="36" class="navbutton_bg"/>

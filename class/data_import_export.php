@@ -39,7 +39,8 @@ class data_import_export {
 	################# Import #################
 	function process_import_file($upload_id, $file_number, $filename, $stelle, $user, $pgdatabase, $epsg, $filetype = NULL, $formvars = NULL) {
 		$this->epsg_codes = read_epsg_codes($pgdatabase);
-		$file_name_parts = explode('.', $filename);
+		$file_name_parts[0] = substr($filename, 0, strrpos($filename, '.'));
+		$file_name_parts[1] = substr($filename, strrpos($filename, '.')+1);
 		if($filetype == NULL)$filetype = strtolower($file_name_parts[1]);
 		switch($filetype) {
 			case 'shp' : case 'dbf' : case 'shx' : {
@@ -61,7 +62,7 @@ class data_import_export {
 			case 'dxf' : {
 				$custom_tables = $this->import_custom_dxf($filename, $pgdatabase, $epsg);
 			} break;
-			case 'json' : {		# (GeoJSON)
+			case 'json' : case 'geojson' : {		# (GeoJSON)
 				$custom_tables = $this->import_custom_geojson($filename, $pgdatabase, $epsg);
 				$epsg = $custom_tables[0]['epsg'];
 			} break;
