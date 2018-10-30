@@ -112,6 +112,8 @@ BEGIN;
 			REFERENCES ukos_okstra.verbindungspunkt (id) MATCH SIMPLE
 			ON UPDATE NO ACTION ON DELETE NO ACTION;
 
+INSERT INTO ukos_okstra.strassenelement (id) VALUES ('00000000-0000-0000-0000-000000000000');
+
 	-- Trigger: tr_idents_add_ident on ukos_okstra.strassenelement
 	CREATE TRIGGER tr_idents_add_ident
 		BEFORE INSERT
@@ -158,9 +160,11 @@ BEGIN;
 	);
 
 	INSERT INTO ukos_base.config (key, value, default_value, type, description) VALUES
-		('Toplogietolerance', 0.1, 0.1, 'numeric', 'Legt die Toleranz bei der Erzeugung der Topologie fest. Gilt auch als Fangradius für Punkte und Punkte auf Linien. Einheit in Meter');
+		('Topologietolerance', 0.1, 0.1, 'numeric', 'Legt die Toleranz bei der Erzeugung der Topologie fest. Gilt auch als Fangradius für Punkte und Punkte auf Linien. Einheit in Meter');
 	INSERT INTO ukos_base.config (key, value, default_value, type, description) VALUES
 		('Koordinatengenauigkeit', 0.0001, 0.0001, 'numeric', 'Legt die Genauigkeit der im System verwendeten Koordinaten fest. Die Geometrien aller erzeugten Objekte werden vor dem Speichern mit ST_SnapToGrid auf diese Genauigkeit gerundet. Dadurch wird ein exakter vergleich von Koordinaten in binärer und Textschreibweise möglich. ST_Equals(ST_MakePoint(500000, 6000000), ST_MakePoint(500000.00000000001, 6000000) ist true, ST_Equals(ST_MakePoint(500000, 6000000), ST_MakePoint(500000.0000000001, 6000000) ist false, Ist der Wert NULL, wird ST_SnapToGrid nicht angewendet, Einheit in Meter');
+	INSERT INTO ukos_base.config (key, value, default_value, type, description) VALUES
+		('Löeschsperre', 'true', 'true', 'boolean', 'true Verhindert das Löschen bei der Benutzung der Triggerfunktion stop(). Der Wert false löscht Werte in Tabellen auch wenn Sie die Triggerfunktion stop() benutzen. Auf true setzen wenn die Datenbank mit alten Datensätzen aufgeräumt werden soll.');
 
 	-- DROP schema strassennetz
 	DROP SCHEMA ukos_strassennetz CASCADE;
