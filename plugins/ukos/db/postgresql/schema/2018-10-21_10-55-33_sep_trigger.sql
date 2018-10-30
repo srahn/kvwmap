@@ -2,6 +2,8 @@ BEGIN;
 
 	ALTER TABLE ukos_okstra.strassenelementpunkt ALTER station DROP NOT NULL;
 
+	INSERT INTO ukos_okstra.strassenelementpunkt (id, auf_strassenelement, station, abstand_zur_bestandsachse) VALUES ('00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000000', 0, 0);
+
 	-- DROP FUNCTION ukos_okstra.validate_strassenelementpunkt();
 	CREATE OR REPLACE FUNCTION ukos_okstra.validate_strassenelementpunkt()
 	RETURNS trigger AS
@@ -16,7 +18,6 @@ BEGIN;
 			-- Initialisierung
 			EXECUTE 'SELECT value::NUMERIC FROM ukos_base.config WHERE key = $1' USING 'Topologietolerance' INTO tolerance;
 			EXECUTE 'SELECT value::NUMERIC FROM ukos_base.config WHERE key = $1' USING 'Koordinatengenauigkeit' INTO accuracy;
-
 			--------------------------------------------------------------------------------------------------------
 			-- Exceptions
 
@@ -94,10 +95,10 @@ BEGIN;
 					IF abs(rec.abscissa) <= tolerance THEN
 						NEW.abstand_zur_bestandsachse = 0;
 						NEW.punktgeometrie = rec.foot_point;
-						RAISE NOTICE 'Abstand zur Bestandsachse auf 0 gesetzt und Punktgeometrie auf: %', NEW.punktgeometrie;
+						RAISE NOTICE 'Abstand zur Bestandsachse auf 0 gesetzt und Punktgeometrie auf: %', ST_AsText(NEW.punktgeometrie);
 					ELSE
 						NEW.abstand_zur_bestandsachse = rec.abscissa;
-						RAISE NOTICE 'Abstand zur Bestandsachse auf: % gesetzt.', NEW.abstand_zur_bestandsachse;
+						RAISE NOTICE 'Abstand zur Bestandsachse mit Toleranz: % auf: % gesetzt.', tolerance, NEW.abstand_zur_bestandsachse;
 					END IF;
 				END IF;
 			END IF;
@@ -128,11 +129,69 @@ BEGIN;
 	INSERT INTO ukos_okstra.verbindungspunkt (punktgeometrie) VALUES (ST_GeomFromText('POINT(500049.9995 6000049.9995)', 25833))
 	*/
 
+	-- DROP FUNCTION ukos_okstra.check_abhaengigkeiten_strassenelement();
+	CREATE OR REPLACE FUNCTION ukos_okstra.check_abhaengigkeiten_strassenelement()
+	RETURNS trigger AS
+	$BODY$
+		DECLARE
+			anzahl_te INTEGER;
+			anzahl_sap INTEGER;
+			aenderungszeit TIMESTAMP WITH time zone = timezone('utc-1'::text, now());
+		BEGIN
+			--------------------------------------------------------------------------------------------------------
+			-- Frage Abhängigkeiten von noch lebenden Teilelementen ab
+			EXECUTE '
+				SELECT
+					count(*)
+				FROM
+				  ukos_okstra.teilelement te
+				WHERE
+					gueltig_bis > $1 AND
+					(
+						beginnt_bei_strassenelempkt = $2 OR
+						endet_bei_strassenelempkt = $2
+					)
+			'
+			USING aenderungszeit, OLD.id
+			INTO anzahl_te;
+			IF anzahl_te > 0 THEN
+				RETURN NULL; -- Abbruch des Löschvorgangs der Strassenelemente
+			END IF;
+			--------------------------------------------------------------------------------------------------------
+			-- Frage Abhängigkeiten von noch lebenden Strassenausstattungspunkten ab
+			EXECUTE '
+				SELECT
+					count(*)
+				FROM
+					ukos_okstra.strassenausstattung_punkt
+				WHERE
+					gueltig_bis > $1 AND
+					bei_strassenelementpunkt_id = $1
+			'
+			USING aenderungszeit, OLD.id
+			INTO anzahl_sap;
+			IF anzahl_sap > 0 THEN
+				RETURN NULL; -- Abbruch des Löschvorgangs des Strassenelementes
+			END IF;
+
+		RETURN OLD; -- Weiter mit Löschvorgang des Strassenelementes
+	END;
+	$BODY$
+	LANGUAGE plpgsql VOLATILE
+	COST 100;
+	COMMENT ON FUNCTION ukos_okstra.check_abhaengigkeiten_strassenelement() IS 'Objekte, die diese Funktion über Trigger auslösen müssen vor dem Start dieser Funktion schon untergegangen sein (guelig_bis <= aenderungszeit).'
+
 	CREATE TRIGGER validate_strassenelementpunkt
 	BEFORE INSERT
 	ON ukos_okstra.strassenelementpunkt
 	FOR EACH ROW
 	EXECUTE PROCEDURE ukos_okstra.validate_strassenelementpunkt();
+
+	CREATE TRIGGER _10_check_abhaengigkeiten
+	BEFORE DELETE
+	ON ukos_okstra.strassenelementpunkt
+	FOR EACH ROW
+	EXECUTE PROCEDURE ukos_okstra.check_abhaengigkeiten_strassenelement();
 
 	CREATE TRIGGER _20_untergang
 	BEFORE DELETE

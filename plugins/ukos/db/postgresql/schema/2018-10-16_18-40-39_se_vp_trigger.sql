@@ -62,7 +62,7 @@ BEGIN;
 		BEGIN
 			--------------------------------------------------------------------------------------------------------
 			-- Initialisierung
-			EXECUTE 'SELECT value::NUMERIC FROM ukos_base.config WHERE key = $1' USING 'Toplogietolerance' INTO tolerance;
+			EXECUTE 'SELECT value::NUMERIC FROM ukos_base.config WHERE key = $1' USING 'Topologietolerance' INTO tolerance;
 
 			RAISE NOTICE 'Füge Verindungspunkte des Strassenelementes mit Liniengeometrie: % und Topologietolerance: % hinzu,
 			falls noch nicht übergeben oder nicht vorhanden und setze ggf. neue Geometrie und Verindungspunkte in Strassenelement ein.', ST_AsText(NEW.liniengeometrie), tolerance;
@@ -231,7 +231,7 @@ delete from ukos_base.idents
 			BEGIN
 				--------------------------------------------------------------------------------------------------------
 				-- Initialisierung
-				EXECUTE 'SELECT value::NUMERIC FROM ukos_base.config WHERE key = $1' USING 'Toplogietolerance' INTO tolerance;
+				EXECUTE 'SELECT value::NUMERIC FROM ukos_base.config WHERE key = $1' USING 'Topologietolerance' INTO tolerance;
 
 				RAISE NOTICE 'Trenne Strassenelemente am Verbindungspunkt % auf mit Punktgeometrie: % und Topologietolerance: %, wenn Verbindungspunkt auf solche fällt ', NEW.id, ST_AsText(NEW.punktgeometrie), tolerance;
 				--------------------------------------------------------------------------------------------------------
@@ -516,34 +516,47 @@ delete from ukos_base.idents
 	$BODY$
 		DECLARE
 			aenderungszeit TIMESTAMP WITH time zone = timezone('utc-1'::text, now());
+			loeschsperre BOOLEAN;
 		BEGIN
-			EXECUTE '
-				UPDATE
-					' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME || '
-				SET
-					gueltig_bis = $2
-				WHERE
-					id = $1
-			'
-			USING OLD.id, aenderungszeit;
-			RAISE NOTICE '%.% id: % nicht mehr gültig seit: %', TG_TABLE_SCHEMA, TG_TABLE_NAME, OLD.id, OLD.gueltig_bis;
+			--------------------------------------------------------------------------------------------------------
+			EXECUTE 'SELECT value::BOOLEAN FROM ukos_base.config WHERE key = $1' USING 'Löschsperre' INTO loeschsperre;
+			IF loeschsperre THEN
+				EXECUTE '
+					UPDATE
+						' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME || '
+					SET
+						gueltig_bis = $2
+					WHERE
+						id = $1
+				'
+				USING OLD.id, aenderungszeit;
+				RAISE NOTICE '%.% id: % nicht mehr gültig seit: %', TG_TABLE_SCHEMA, TG_TABLE_NAME, OLD.id, OLD.gueltig_bis;
+			END IF;
 			RETURN OLD;
 		END;
 	$BODY$
 	LANGUAGE plpgsql VOLATILE COST 100;
-	COMMENT ON FUNCTION ukos_okstra.untergang() IS 'Setzt die Gültigkeit des Datensatzes OLD.id in der Tabelle in der das Event auftritt auf das aktuelle Datum und läßt ihn damit untergehen. Der Rückgabewert ist OLD, damit danach auch noch Trigger ausgeführt werden können.';
+	COMMENT ON FUNCTION ukos_okstra.untergang() IS 'Setzt die Gültigkeit des Datensatzes OLD.id in der Tabelle in der das Event auftritt auf das aktuelle Datum und läßt ihn damit untergehen, wenn der Parameter Löschsperre auf true gesetzt ist. Der Rückgabewert ist OLD, damit danach auch noch Trigger ausgeführt werden können.';
 
 
 	-- DROP FUNCTION ukos_okstra.stop();
 	CREATE OR REPLACE FUNCTION ukos_okstra.stop()
 	RETURNS trigger AS
 	$BODY$
+		DECLARE
+			loeschsperre BOOLEAN;
 		BEGIN
-			RETURN NULL;
+			--------------------------------------------------------------------------------------------------------
+			EXECUTE 'SELECT value::BOOLEAN FROM ukos_base.config WHERE key = $1' USING 'Löschsperre' INTO loeschsperre;
+			IF loeschsperre THEN
+				RETURN NULL;
+			ELSE
+				RETURN OLD;
+			END IF;
 		END;
 	$BODY$
 	LANGUAGE plpgsql VOLATILE COST 100;
-	COMMENT ON FUNCTION ukos_okstra.stop() IS 'Verhindert die Ausführung des Statements.';
+	COMMENT ON FUNCTION ukos_okstra.stop() IS 'Verhindert die Ausführung des Statements, wenn der Parameter Löschsperre auf true gesetzt ist.';
 
 	-- DROP FUNCTION ukos_okstra.delete_punkte();
 	CREATE OR REPLACE FUNCTION ukos_okstra.delete_punkte()
