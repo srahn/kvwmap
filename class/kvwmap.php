@@ -5118,7 +5118,6 @@ class GUI {
 		global $selectable_scales;
 		$this->selectable_scales = array_reverse($selectable_scales);
 		$saved_scale = $this->reduce_mapwidth(10);
-    $this->titel='Druckausschnitt wählen';
     $this->main="druckausschnittswahl.php";
 		$this->Document=new Document($this->database);
     # aktuellen Kartenausschnitt laden + zeichnen!

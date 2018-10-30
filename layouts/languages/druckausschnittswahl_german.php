@@ -1,5 +1,5 @@
 <?php
-$strTitle="Kartendruck";
+$strTitle="Druckausschnitt wählen";
 $strButtonPrintPreview="Vorschau";
 $strButtonPrint="Drucken";
 $strButtonPrintScale="Druckmaßstab: 1:";
