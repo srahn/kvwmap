@@ -207,7 +207,7 @@ else {
 									<div><input type="checkbox" name="suchhauptart[]" value="<? echo $hauptdokumentart['id']; ?>"<?php if(in_array($hauptdokumentart['id'], $this->formvars['suchhauptart'])) { ?> checked<?php } ?>>&nbsp;</div>
 									<div><? echo $hauptdokumentart['art'].'&nbsp;('.$hauptdokumentart['abkuerzung'].')'; ?></div>
 								</div>
-								<div style="width: 100px">
+								<div style="width: 190px">
 				<?				if($this->dokumentarten[$hauptdokumentart['id']] != ''){	?>
 									:&nbsp;<select name="suchunterart[]" multiple="true" size="1" style="z-index:<? echo $z_index-=1; ?>;position: absolute;width: 185px" onmouseenter="this.size=this.length" onmouseleave="this.size=1;scrollToSelected(this);">
 										<option value="">alle</option>
