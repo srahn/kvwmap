@@ -270,8 +270,8 @@ if (!$show_login_form) {
 		$GUI->Stelle = new stelle($GUI->user->stelle_id, $GUI->database);
 	}
 
-	# check stelle wenn noch nicht angemeldet gewesen oder auch wenn stelle gewechselt wird.
-	if (is_login($GUI->formvars) OR is_new_stelle($GUI->formvars['Stelle_ID'], $GUI->user)) {
+	# check stelle wenn noch nicht angemeldet gewesen, wenn noch nicht in Stelle angemeldet auch wenn stelle gewechselt wird.
+	if (is_login($GUI->formvars) OR !is_logged_in_stelle() OR is_new_stelle($GUI->formvars['Stelle_ID'], $GUI->user)) {
 		$GUI->debug->write('Zugang zu Stelle ' . $GUI->Stelle->id . ' wird angefragt.', 4, $GUI->echo);
 
 		$GUI->user->Stellen = $GUI->user->getStellen(0);
@@ -282,6 +282,7 @@ if (!$show_login_form) {
 			$GUI->user->stelle_id = $GUI->Stelle->id; # set selected stelle to user
 			$GUI->debug->write('Setze neue Stellen-ID: ' . $GUI->Stelle->id . ' für Nutzer: ' . $GUI->user->id, 4, $GUI->echo);
 			$GUI->user->updateStelleID($GUI->Stelle->id);
+			$_SESSION['stelle_angemeldet'] = true;
 			# login case 15
 		}
 		else {
@@ -519,6 +520,13 @@ function is_logged_in() {
 		array_key_exists('angemeldet', $_SESSION) AND
 		$_SESSION['angemeldet'] === true AND
 		$_SESSION['login_name'] != ''
+	);
+}
+
+function is_logged_in_stelle() {
+	return (
+		array_key_exists('stelle_angemeldet', $_SESSION) AND
+		$_SESSION['stelle_angemeldet'] === true
 	);
 }
 
