@@ -5761,8 +5761,8 @@ class GUI {
 
   function notizKatVerwaltung() {
 		include_once (CLASSPATH.'notiz.php');
-    $this->stelle=new stelle('',$this->database);
-    $this->stellen=$this->stelle->getStellen('Bezeichnung');
+    $this->Stelle=new stelle('',$this->database);
+    $this->Stellen=$this->Stelle->getStellen('Bezeichnung');
     $this->notiz=new notiz($this->pgdatabase, $this->user->rolle->epsg_code);
     $this->AllKat=$this->notiz->selectKategorie('','','');
     if($this->formvars['kategorie_id'] != ''){
@@ -10738,16 +10738,22 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->Filterverwaltung();
   }
 
-  function MenuesAnzeigen() {
-    # Abfragen aller Menues
-    if ($this->formvars['view_sort'] == '') {
-      $this->formvars['view_sort'] = 'name';
-    }
-    $this->menuedaten = Menue::find($this, 'true', $this->formvars['view_sort']);
-    $this->titel='Menüdaten';
-    $this->main='menuedaten.php';
-    $this->output();
-  }
+	function MenuesAnzeigen() {
+		# Abfragen aller Menues
+		if ($this->formvars['view_sort'] == '') {
+			$this->formvars['view_sort'] = 'name';
+		}
+		$this->menuedaten = Menue::find($this, 'true', $this->formvars['view_sort'], $this->formvars['sort_direction']);
+		if ($this->formvars['sort_direction'] == 'DESC') {
+			$this->formvars['sort_direction'] = 'ASC';
+		}
+		else {
+			$this->formvars['sort_direction'] = 'DESC';
+		}
+		$this->titel='Menüdaten';
+		$this->main='menuedaten.php';
+		$this->output();
+	}
 
 	/*
 	* this function get the menue by formvar selected_menue_id,
