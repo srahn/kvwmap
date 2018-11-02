@@ -8594,8 +8594,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					if ($ret['success']) {
 						$results[] = pg_fetch_row($ret['query']);
 						if (pg_affected_rows($ret['query']) == 0) {
-							$results[] = '<br>Datensatz wurde nicht gelöscht, weil er nicht existiert!<br>';
-							$this->success = false;
+							$last_notice = pg_last_notice($layerdb->dbConn);
+							if ($last_notice != 'HINWEIS:  success') {
+								$results[] = '<br>Datensatz wurde nicht gelöscht, weil er nicht existiert!<br>';
+								$this->success = false;
+							}
 						}
 					}
 					else {
@@ -8609,9 +8612,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					if (!empty($layer['trigger_function'])) {
 						$this->exec_trigger_function('AFTER', 'DELETE', $layer, '', $old_dataset);
 					}
-				}
-				else {
-					$this->add_message('error', 'Löschen fehlgeschlagen.<br>' . implode('<br>', $results));
 				}
 			}
 		}
