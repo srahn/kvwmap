@@ -197,19 +197,19 @@ else {
   </tr>
 	<tr>
 		<td colspan="2">
-			<table border="0" cellpadding="4" cellspacing="0">
+			<table border="0" cellpadding="4" cellspacing="0" style="margin-left: -8px;">
 		<?	$z_index = count($this->hauptdokumentarten);
 				foreach($this->hauptdokumentarten as $hauptdokumentart){	?>
 					<tr> 
 						<td>
 							<div style="display: flex;">
-								<div style="width: 215px;display: flex;justify-content: flex-start">
+								<div style="width: 208px;display: flex;justify-content: flex-start">
 									<div><input type="checkbox" name="suchhauptart[]" value="<? echo $hauptdokumentart['id']; ?>"<?php if(in_array($hauptdokumentart['id'], $this->formvars['suchhauptart'])) { ?> checked<?php } ?>>&nbsp;</div>
 									<div><? echo $hauptdokumentart['art'].'&nbsp;('.$hauptdokumentart['abkuerzung'].')'; ?></div>
 								</div>
-								<div style="width: 190px">
+								<div style="width: 215px;">
 				<?				if($this->dokumentarten[$hauptdokumentart['id']] != ''){	?>
-									:&nbsp;<select name="suchunterart[]" multiple="true" size="1" style="z-index:<? echo $z_index-=1; ?>;position: absolute;width: 185px" onmouseenter="this.size=this.length" onmouseleave="this.size=1;scrollToSelected(this);">
+									&nbsp;<select name="suchunterart[]" multiple="true" size="1" style="z-index:<? echo $z_index-=1; ?>;position: absolute;width: 219px" onmouseenter="this.size=this.length" onmouseleave="this.size=1;scrollToSelected(this);">
 										<option value="">alle</option>
 										<? for($i = 0; $i < count($this->dokumentarten[$hauptdokumentart['id']]); $i++){?>
 											<option <? if(in_array($this->dokumentarten[$hauptdokumentart['id']][$i]['id'], $this->formvars['suchunterart'])){echo 'selected';} ?> value="<? echo $this->dokumentarten[$hauptdokumentart['id']][$i]['id']; ?>"><? echo $this->dokumentarten[$hauptdokumentart['id']][$i]['art']; ?></option>	

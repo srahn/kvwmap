@@ -152,23 +152,22 @@ $legendheight = $this->map->height + 20;
 								<td>Flur:&nbsp; 
 									<input name="Flur" type="text" value="<?php echo $this->formvars['Flur']; ?>" size="3" maxlength="3">
 								</td>
-								<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+								<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
 							</tr>
 						</table></td>
 				</tr>
 				<tr> 
 					<td rowspan="20">&nbsp; </td>
-					<td rowspan="20" colspan="5"> 
+					<td rowspan="20" colspan="5" valign="top" style="border-right: 1px solid #bbb"> 
 						<?php
 							include(LAYOUTPATH.'snippets/SVG_polygon_query_area.php')
 						?>
 					</td>
-					<td colspan="2" style="border-top:1px solid #999999"><img width="290px" height="1px" src="<? echo GRAPHICSPATH; ?>leer.gif"></td>
+					<td colspan="2" style="border-top:1px solid #999999"><img width="300px" height="1px" src="<? echo GRAPHICSPATH; ?>leer.gif"></td>
 				</tr>
 				<tr>
 					<td colspan="2">
 						<table cellspacing="0" cellpadding="0" style="margin: 0 0 0 -5px">
-						
 			<?		foreach($this->hauptdokumentarten as $hauptdokumentart){	?>
 							<tr>
 								<td style="vertical-align: top;padding: 0 5px 10px 0;">
@@ -187,7 +186,6 @@ $legendheight = $this->map->height + 20;
 								</td>
 							</tr>
 			<?		}	?>
-			
 						</table>
 					</td>
 				<tr> 
@@ -270,7 +268,7 @@ $legendheight = $this->map->height + 20;
 					</td>
 				</tr>
 				<tr> 
-					<td colspan="2">&nbsp;</td>
+					<td colspan="2"></td>
 				</tr>
 				<tr> 
 					<td> 
@@ -293,7 +291,7 @@ $legendheight = $this->map->height + 20;
 					</td>
 				</tr>				
 				<tr>
-					<td>&nbsp;</td>
+					<td></td>
 				</tr>
 				<tr>
 					<td colspan="2">Geometrie übernehmen von:<br>
