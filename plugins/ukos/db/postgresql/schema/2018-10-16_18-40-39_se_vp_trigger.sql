@@ -520,7 +520,7 @@ delete from ukos_base.idents
 		BEGIN
 			--------------------------------------------------------------------------------------------------------
 			EXECUTE 'SELECT value::BOOLEAN FROM ukos_base.config WHERE key = $1' USING 'Löschsperre' INTO loeschsperre;
-			IF loeschsperre THEN
+			IF loeschsperre AND OLD.gueltig_bis > aenderungszeit THEN
 				EXECUTE '
 					UPDATE
 						' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME || '
@@ -549,6 +549,7 @@ delete from ukos_base.idents
 			--------------------------------------------------------------------------------------------------------
 			EXECUTE 'SELECT value::BOOLEAN FROM ukos_base.config WHERE key = $1' USING 'Löschsperre' INTO loeschsperre;
 			IF loeschsperre THEN
+				RAISE NOTICE 'success';
 				RETURN NULL;
 			ELSE
 				RETURN OLD;
