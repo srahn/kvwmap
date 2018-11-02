@@ -20,16 +20,22 @@
 	
 	function handleFileDrop(event){
 		preventDefaults(event);
-		for(var i = 0; i < event.dataTransfer.files.length; i++){
-			if(totalSize + event.dataTransfer.files[i].size > maxTotalSize * 1024 * 1024){		// Byte -> MegaByte
+		var files = [].slice.call(event.dataTransfer.files);	// ein richtiges Array aus dem FileList-Objekt machen
+		files.sort(function(a, b){
+			if(a.name < b.name){return -1;}
+			if(a.name > b.name){return 1;}
+			return 0;
+		});
+		for(var i = 0; i < files.length; i++){
+			if(totalSize + files[i].size > maxTotalSize * 1024 * 1024){		// Byte -> MegaByte
 				message('<? echo $strMaxFileSize; ?> von ' + maxTotalSize + ' MB <? echo $this->strExceeded; ?>');
 				return;
 			}
-			filelist.push(event.dataTransfer.files[i]);
-			filesizes.push(event.dataTransfer.files[i].size);
-			filenames.push(event.dataTransfer.files[i].name);			
+			filelist.push(files[i]);
+			filesizes.push(files[i].size);
+			filenames.push(files[i].name);			
 			createProgressDiv(totalCount);
-			totalSize += event.dataTransfer.files[i].size;
+			totalSize += files[i].size;
 			totalCount++;
     }
 		startNextUpload(currentUploadId);
