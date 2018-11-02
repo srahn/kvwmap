@@ -80,59 +80,62 @@ Text_menue_buttons=["<? echo $strHelp; ?>:","<? echo $strHintMenueButtons; ?>"];
 								</div>
 							</div>
 						</td>
-					</tr>
-					<tr>
-						<td class="rollenwahl-option-header">
-							<? echo $strLanguage; ?>:
-						</td>
-						<td class="rollenwahl-option-data">
-							<select name="language">
-								<? if(in_array('german', $supportedLanguages)){ ?><option value="german"<? if($this->user->rolle->language == 'german') { echo ' selected'; }	?>><? echo $strGerman; ?></option><? } ?>
-								<? if(in_array('low-german', $supportedLanguages)){ ?><option value="low-german"<? if($this->user->rolle->language == 'low-german') { echo ' selected'; }	?>><? echo $strPlatt; ?></option><? } ?>
-								<? if(in_array('english', $supportedLanguages)){ ?><option value="english"<? if($this->user->rolle->language == 'english') { echo ' selected'; }	?>><? echo $strEnglish; ?></option><? } ?>
-								<? if(in_array('polish', $supportedLanguages)){ ?><option value="polish"<? if($this->user->rolle->language == 'polish') { echo ' selected'; }	?>><? echo $strPolish; ?></option><? } ?>
-								<? if(in_array('vietnamese', $supportedLanguages)){ ?><option value="vietnamese"<? if($this->user->rolle->language == 'vietnamese') { echo ' selected'; }	?>><? echo $strVietnamese; ?></option><? } ?>
-							</select>
-							<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_language, Style[0], document.getElementById('Tip2'))" onmouseout="htm()">
-							<div id="Tip2" style="visibility:hidden;position:absolute;z-index:1000;"></div>
-						</td>
-					</tr>
-					<tr>
-						<td class="rollenwahl-option-header">
-							<? echo $strGUI; ?>:
-						</td>
-						<td class="rollenwahl-option-data">
-							<select name="gui"><?
-								# Anzeige der GUI´s, die kvwmap bereitstellt
-								for($i = 0; $i < count($this->guifiles); $i++){ ?>
-									<option value="<? echo basename($this->guifiles[$i]); ?>" <? if ($this->user->rolle->gui == basename($this->guifiles[$i])) { echo "selected"; } ?>><? echo basename($this->guifiles[$i]); ?></option><?
-								}
-								# Anzeige der GUI´s, die Admins in ihren custom Verzeichnissen haben
-								for($i = 0; $i < count($this->customguifiles); $i++){ ?>
-									<option value="<? echo 'custom/'.basename($this->customguifiles[$i]); ?>" <? if ($this->user->rolle->gui == 'custom/'.basename($this->customguifiles[$i])) { echo "selected"; } ?>><? echo 'custom/'.basename($this->customguifiles[$i]); ?></option><?
-								} ?>
-							</select>
-							<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_gui, Style[0], document.getElementById('Tip3'))" onmouseout="htm()">
-							<div id="Tip3" style="visibility:hidden;position:absolute;z-index:1000;"></div>
-						</td>
-					</tr>
-					<tr>
-						<td class="rollenwahl-option-header">
-							<? echo $strVisuallyImpaired; ?>:
-						</td>
-						<td class="rollenwahl-option-data">
-							<input name="visually_impaired" type="checkbox" value="1" <? if($this->user->rolle->visually_impaired == '1') { echo 'checked="true"';} ?> >
-							<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_visuallyimpaired, Style[0], document.getElementById('Tip24'))" onmouseout="htm()">
-							<div id="Tip24" style="visibility:hidden;position:absolute;z-index:1000;"></div>
-						</td>
-					</tr>
+					</tr><?
+					if (array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angemeldet'] === true) { ?>
+						<tr>
+							<td class="rollenwahl-option-header">
+								<? echo $strLanguage; ?>:
+							</td>
+							<td class="rollenwahl-option-data">
+								<select name="language">
+									<? if(in_array('german', $supportedLanguages)){ ?><option value="german"<? if($this->user->rolle->language == 'german') { echo ' selected'; }	?>><? echo $strGerman; ?></option><? } ?>
+									<? if(in_array('low-german', $supportedLanguages)){ ?><option value="low-german"<? if($this->user->rolle->language == 'low-german') { echo ' selected'; }	?>><? echo $strPlatt; ?></option><? } ?>
+									<? if(in_array('english', $supportedLanguages)){ ?><option value="english"<? if($this->user->rolle->language == 'english') { echo ' selected'; }	?>><? echo $strEnglish; ?></option><? } ?>
+									<? if(in_array('polish', $supportedLanguages)){ ?><option value="polish"<? if($this->user->rolle->language == 'polish') { echo ' selected'; }	?>><? echo $strPolish; ?></option><? } ?>
+									<? if(in_array('vietnamese', $supportedLanguages)){ ?><option value="vietnamese"<? if($this->user->rolle->language == 'vietnamese') { echo ' selected'; }	?>><? echo $strVietnamese; ?></option><? } ?>
+								</select>
+								<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_language, Style[0], document.getElementById('Tip2'))" onmouseout="htm()">
+								<div id="Tip2" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+							</td>
+						</tr>
+						<tr>
+							<td class="rollenwahl-option-header">
+								<? echo $strGUI; ?>:
+							</td>
+							<td class="rollenwahl-option-data">
+								<select name="gui"><?
+									# Anzeige der GUI´s, die kvwmap bereitstellt
+									for($i = 0; $i < count($this->guifiles); $i++){ ?>
+										<option value="<? echo basename($this->guifiles[$i]); ?>" <? if ($this->user->rolle->gui == basename($this->guifiles[$i])) { echo "selected"; } ?>><? echo basename($this->guifiles[$i]); ?></option><?
+									}
+									# Anzeige der GUI´s, die Admins in ihren custom Verzeichnissen haben
+									for($i = 0; $i < count($this->customguifiles); $i++){ ?>
+										<option value="<? echo 'custom/'.basename($this->customguifiles[$i]); ?>" <? if ($this->user->rolle->gui == 'custom/'.basename($this->customguifiles[$i])) { echo "selected"; } ?>><? echo 'custom/'.basename($this->customguifiles[$i]); ?></option><?
+									} ?>
+								</select>
+								<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_gui, Style[0], document.getElementById('Tip3'))" onmouseout="htm()">
+								<div id="Tip3" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+							</td>
+						</tr>
+						<tr>
+							<td class="rollenwahl-option-header">
+								<? echo $strVisuallyImpaired; ?>:
+							</td>
+							<td class="rollenwahl-option-data">
+								<input name="visually_impaired" type="checkbox" value="1" <? if($this->user->rolle->visually_impaired == '1') { echo 'checked="true"';} ?> >
+								<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_visuallyimpaired, Style[0], document.getElementById('Tip24'))" onmouseout="htm()">
+								<div id="Tip24" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+							</td>
+						</tr><?
+					} ?>
 				</table>
 			</td>
 		</tr>
 	</table>
-</div>
+</div><?
 
-<div class="rollenwahl-gruppe">
+if (array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angemeldet'] === true) { ?>
+	<div class="rollenwahl-gruppe">
 	<table class="rollenwahl-table" border="0" cellpadding="0" cellspacing="0">
 		<tr>
 			<td colspan="2" class="rollenwahl-gruppen-header"><span class="fett"><? echo $strButtons; ?></span></td>
@@ -216,7 +219,7 @@ Text_menue_buttons=["<? echo $strHelp; ?>:","<? echo $strHintMenueButtons; ?>"];
 	</table>
 </div>
 
-<div class="rollenwahl-gruppe">
+	<div class="rollenwahl-gruppe">
 	<table class="rollenwahl-table" border="0" cellpadding="0" cellspacing="0">
 			<tr>
 			<td colspan="2" class="rollenwahl-gruppen-header"><span class="fett"><? echo $strMapOptions; ?></span></td>
@@ -381,7 +384,7 @@ Text_menue_buttons=["<? echo $strHelp; ?>:","<? echo $strHintMenueButtons; ?>"];
 	</table>
 </div>
 
-<div class="rollenwahl-gruppe">
+	<div class="rollenwahl-gruppe">
 	<table class="rollenwahl-table" border="0" cellpadding="0" cellspacing="0">
 		<tr>
 			<td colspan="2" class="rollenwahl-gruppen-header"><span class="fett"><? echo $strDataPresentation; ?></span></td>
@@ -455,11 +458,13 @@ Text_menue_buttons=["<? echo $strHelp; ?>:","<? echo $strHintMenueButtons; ?>"];
 			</td>
 		</tr>
 	</table>
-</div>
+</div><?
+} ?>
+
 <table>
   <tr>
     <td></td>
     <td><input type="button" name="starten" onclick="start1();" value="<? echo $this->strEnter; ?>" style="margin-bottom: 10px"></td>
   </tr>
 </table>
-  <input type="hidden" name="go" value="">
+<input type="hidden" name="go" value="">
