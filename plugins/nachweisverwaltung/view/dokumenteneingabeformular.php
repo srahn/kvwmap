@@ -12,7 +12,7 @@ function toggle_vertices(){
 
 function send(){	
 	document.GUI.result2.value = '';
-	if(document.getElementsByName('unterart_'+document.GUI.hauptart.value)[0] != undefined && document.getElementsByName('unterart_'+document.GUI.hauptart.value)[0].value == ''){
+	if(document.GUI.hauptart.value == '' || (document.getElementsByName('unterart_'+document.GUI.hauptart.value)[0] != undefined && document.getElementsByName('unterart_'+document.GUI.hauptart.value)[0].value == '')){
 		alert('Keine Dokumentart ausgewählt.');
 		return;
 	}
@@ -97,12 +97,18 @@ function slide_legend_out(evt){
 function showUnterArten(id){
 	var unterarten = document.getElementsByName('unterart_'+id);
 	var hauptart = document.getElementById('hauptart_'+id);
+	var hauptart_name = document.getElementById('hauptart_name_'+id).innerHTML;
 	var alle_unterarten = document.getElementsByClassName('nachweise_unterart');
 	[].forEach.call(alle_unterarten, function (unterarten){
     unterarten.style.display = 'none';
   });
 	if(unterarten[0] != undefined){
 		if(hauptart.checked)unterarten[0].style.display = '';
+		if(unterarten[0].value == ''){
+			for(i = 0; i < unterarten[0].options.length; i++){
+				if(unterarten[0].options[i].text == hauptart_name)unterarten[0].options[i].selected = true;
+			}
+		}
 	}
 }
   
@@ -173,10 +179,10 @@ $legendheight = $this->map->height + 20;
 								<td style="vertical-align: top;padding: 0 5px 10px 0;">
 									<input type="radio" name="hauptart" id="hauptart_<? echo $hauptdokumentart['id']; ?>" onchange="showUnterArten(<? echo $hauptdokumentart['id']; ?>);" value="<? echo $hauptdokumentart['id']; ?>" <? if($this->formvars['hauptart'] == $hauptdokumentart['id']) { ?> checked<?php } ?>>
 								</td>
-								<td style="vertical-align: top;padding: 2px 0 10px 0;">
-									<? echo $hauptdokumentart['art'].'&nbsp;('.$hauptdokumentart['abkuerzung'].')';
+								<td style="vertical-align: top;padding: 2px 0 10px 0;" onclick="document.getElementById('hauptart_<? echo $hauptdokumentart['id']; ?>').checked=true;showUnterArten(<? echo $hauptdokumentart['id']; ?>);">
+									<span id="hauptart_name_<? echo $hauptdokumentart['id']; ?>"><? echo $hauptdokumentart['art']; ?></span><? echo '&nbsp;('.$hauptdokumentart['abkuerzung'].')';
 								if($this->dokumentarten[$hauptdokumentart['id']] != ''){	?>
-									:<select name="unterart_<? echo $hauptdokumentart['id']; ?>" class="nachweise_unterart" style="width: 185px;<? if($this->formvars['hauptart'] != $hauptdokumentart['id'])echo 'display:none'; ?>">
+									<select name="unterart_<? echo $hauptdokumentart['id']; ?>" class="nachweise_unterart" style="width: 185px;<? if($this->formvars['hauptart'] != $hauptdokumentart['id'])echo 'display:none'; ?>">
 										<option value="">-- Auswahl --</option>
 										<? for($i = 0; $i < count($this->dokumentarten[$hauptdokumentart['id']]); $i++){?>
 										<option <? if($this->formvars['unterart'] == $this->dokumentarten[$hauptdokumentart['id']][$i]['id']){echo 'selected';} ?> value="<? echo $this->dokumentarten[$hauptdokumentart['id']][$i]['id']; ?>"><? echo $this->dokumentarten[$hauptdokumentart['id']][$i]['art']; ?></option>	
