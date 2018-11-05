@@ -42,13 +42,13 @@ class Menue extends MyObject {
 		);
 	}
 
-	public static	function find($gui, $where, $order = '') {
+	public static	function find($gui, $where, $order = '', $sort_direction = '') {
 		$menue = new Menue($gui);
-		return $menue->find_where($where, $order);
+		return $menue->find_where($where, $order, $sort_direction);
 	}
 
 	public static function loadMenue($gui, $type) {
-		switch ($type){
+		switch ($type) {
 			case 'button' : {		# es sollen nur die Button-Menüpunkte abgefragt werden
 				$button_where = " AND m.button_class != ''";
 			}break;
@@ -100,7 +100,7 @@ class Menue extends MyObject {
 		$more_from = '';
 		$more_where = '';
 
-		if ($gui->user->id > 0 AND !in_array($gui->stelle->id, $admin_stellen)) {
+		if ($gui->user->id > 0 AND !in_array($gui->Stelle->id, $admin_stellen)) {
 			# Frage nur die Nutzer ab, die der aktuellen Stelle zugeordnet sind
 			$more_from = "
 				JOIN u_menue2stelle ms ON m.id = ms.menue_id
@@ -140,7 +140,7 @@ class Menue extends MyObject {
 		$more_from = '';
 		$more_where = '';
 
-		if ($gui->user->id > 0 AND !in_array($gui->stelle->id, $admin_stellen)) {
+		if ($gui->user->id > 0 AND !in_array($gui->Stelle->id, $admin_stellen)) {
 			# Frage nur die Nutzer ab, die der aktuellen Stelle zugeordnet sind
 			$more_from = "
 				JOIN u_menue2stelle ms ON m.id = ms.menue_id

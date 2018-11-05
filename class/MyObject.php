@@ -42,7 +42,7 @@ class MyObject {
 	* by the given where clause
 	* @ return all objects
 	*/
-	function find_where($where, $order = '') {
+	function find_where($where, $order = '', $sort_direction = '') {
 		$where = ($where == '' ? '' : 'WHERE ' . $where);
 		$orders = array_map(
 			function ($order) {
@@ -56,7 +56,8 @@ class MyObject {
 			FROM
 				`" . $this->tableName . "`
 			" . $where .
-			($order != '' ? " ORDER BY `" . implode('`, `', $orders) . "`" : "");
+			($order != '' ? " ORDER BY `" . implode('`, `', $orders) . "`" : "") .
+			($sort_direction == 'ASC' ? ' ASC' : ' DESC');
 		$this->debug->show('mysql find_where sql: ' . $sql, MyObject::$write_debug);
 		$query = mysql_query($sql, $this->database->dbConn);
 		$result = array();
