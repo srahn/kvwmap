@@ -4067,6 +4067,17 @@ class GUI {
 				}
 			}
     }
+		# Zoom auf Geometrie-Fehler-Position
+		if ($this->error_position != '') {
+			$rect = ms_newRectObj();
+			$this->map->setextent($this->error_position[0]-50,$this->error_position[1]-50,$this->error_position[0]+50,$this->error_position[1]+50);
+			if (MAPSERVERVERSION > 600) {
+				$this->map_scaledenom = $this->map->scaledenom;
+			}
+			else {
+				$this->map_scaledenom = $this->map->scale;
+			}
+		}		
 		# zoomToMaxLayerExtent
 		if($this->formvars['zoom_layer_id'] != '')$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
     # Spaltenname und from-where abfragen
@@ -4105,6 +4116,8 @@ class GUI {
     # eingeabewerte pruefen:
     $ret = $lineeditor->pruefeEingabedaten($this->formvars['newpathwkt']);
     if ($ret[0]) { # fehlerhafte eingabedaten
+			$this->error_position = explode(' ', trim(substr($ret[1], strpos($ret[1], '[')), '[]'));
+			$this->formvars['no_load'] = 'true';
       $this->Meldung=$ret[1];
       $this->LineEditor();
       return;
@@ -4193,6 +4206,17 @@ class GUI {
 				}
 			}
 		}
+		# Zoom auf Geometrie-Fehler-Position
+		if ($this->error_position != '') {
+			$rect = ms_newRectObj();
+			$this->map->setextent($this->error_position[0]-50,$this->error_position[1]-50,$this->error_position[0]+50,$this->error_position[1]+50);
+			if (MAPSERVERVERSION > 600) {
+				$this->map_scaledenom = $this->map->scaledenom;
+			}
+			else {
+				$this->map_scaledenom = $this->map->scale;
+			}
+		}		
 		# zoomToMaxLayerExtent
 		if($this->formvars['zoom_layer_id'] != '')$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
     # Geometrie-Übernahme-Layer:
@@ -4252,6 +4276,8 @@ class GUI {
     # eingeabewerte pruefen:
     $ret = $polygoneditor->pruefeEingabedaten($this->formvars['newpathwkt']);
     if ($ret[0]) { # fehlerhafte eingabedaten
+			$this->error_position = explode(' ', trim(substr($ret[1], strpos($ret[1], '[')), '[]'));
+			$this->formvars['no_load'] = 'true';
       $this->Meldung=$ret[1];
       $this->PolygonEditor();
       return;
