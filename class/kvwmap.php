@@ -7155,7 +7155,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
           FROM (".$data_sql.") AS data ORDER BY " . replace_semicolon($class_item) . " LIMIT 50";
 
         $ret=$layerdb->execSQL($sql, 4, 0);
-				if ($query==0) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+				if ($ret['success']==0) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
 				$order = 1;
         while($rs = pg_fetch_assoc($ret[1])){
           $class['name'] = $rs[$class_item];
@@ -7179,7 +7179,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         #echo '<br>' . $sql;
 
         $ret=$layerdb->execSQL($sql, 4, 0);
-    		if ($query==0) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+    		if ($ret['success']==0) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
         while($rs = pg_fetch_assoc($ret[1])){
           $min = $rs['min'];
           $max = $rs['max'];
@@ -7211,7 +7211,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         ";
 
         $ret=$layerdb->execSQL($sql, 4, 0);
-    		if ($query==0) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+    		if ($ret['success']==0) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
         $rows = pg_fetch_all($ret[1]);
         $range_floor = 0;
         $range_ceil = count($rows);
@@ -7242,7 +7242,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
             " . replace_semicolon($class_item) . "
         ";
         $ret=$layerdb->execSQL($sql, 4, 0);
-				if ($query==0) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+				if ($ret['success']==0) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
         $data = pg_fetch_all($ret[1]);
 
         // flatten data
@@ -7277,7 +7277,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
             prozent
         ";
         $ret=$layerdb->execSQL($sql, 4, 0);
-				if ($query==0) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+				if ($ret['success']==0) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
         $histogram = pg_fetch_all($ret[1]);
         // flatten histogram
         $flatHistogram = array_fill(0,101,0);
@@ -7322,7 +7322,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         ";
         #echo '<p>' . $sql;
         $ret=$layerdb->execSQL($sql, 4, 0);
-				if ($query==0) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+				if ($ret['success']==0) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
         $data = pg_fetch_all($ret[1]);
 
         if (count($data) > 0) {
