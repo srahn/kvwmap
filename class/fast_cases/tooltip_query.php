@@ -1028,12 +1028,13 @@ class rolle {
 			SELECT " .
 				$name_column . ",
 				l.Layer_ID,
-				alias, Datentyp, Gruppe, pfad, maintable, maintable_is_view, Data, `schema`, document_path, labelitem, connection, printconnection,
+				alias, Datentyp, Gruppe, pfad, maintable, maintable_is_view, Data, `schema`, document_path, connection, printconnection,
 				connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, trigger_function, ul.`queryable`, ul.`drawingorder`,
 				ul.`minscale`, ul.`maxscale`,
 				ul.`offsite`,
 				coalesce(r2ul.transparency, ul.transparency, 100) as transparency,
+				coalesce(r2ul.labelitem, l.labelitem) as labelitem,							
 				ul.`postlabelcache`,
 				`Filter`,
 				CASE r2ul.gle_view

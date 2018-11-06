@@ -12,12 +12,14 @@ BEGIN;
 			rec RECORD;
 			tolerance NUMERIC;
 			accuracy NUMERIC;
+			decimals INTEGER;
 			anzahl_strassenelemente INTEGER;
 		BEGIN
 			--------------------------------------------------------------------------------------------------------
 			-- Initialisierung
 			EXECUTE 'SELECT value::NUMERIC FROM ukos_base.config WHERE key = $1' USING 'Topologietolerance' INTO tolerance;
 			EXECUTE 'SELECT value::NUMERIC FROM ukos_base.config WHERE key = $1' USING 'Koordinatengenauigkeit' INTO accuracy;
+			decimals = CASE WHEN log(1 / accuracy) < 0 THEN 0 ELSE round(log(1 / accuracy))::INTEGER END;
 			--------------------------------------------------------------------------------------------------------
 			-- Exceptions
 
@@ -107,6 +109,8 @@ BEGIN;
 			-- Was machen mit Strassenelementpunkten, die negative Station oder Station länger als Strassenelement haben? Zulassen?
 
 			NEW.punktgeometrie = ST_SnapToGrid(NEW.punktgeometrie, accuracy);
+			NEW.station = round(NEW.station, decimals);
+			NEW.abstand_zur_bestandsachse = round(NEW.abstand_zur_bestandsachse, decimals);
 
 		RETURN NEW;
 	END;
@@ -129,8 +133,8 @@ BEGIN;
 	INSERT INTO ukos_okstra.verbindungspunkt (punktgeometrie) VALUES (ST_GeomFromText('POINT(500049.9995 6000049.9995)', 25833))
 	*/
 
-	-- DROP FUNCTION ukos_okstra.check_abhaengigkeiten_strassenelement();
-	CREATE OR REPLACE FUNCTION ukos_okstra.check_abhaengigkeiten_strassenelement()
+	-- DROP FUNCTION ukos_okstra.check_abhaengigkeiten_strassenelement_punkt();
+	CREATE OR REPLACE FUNCTION ukos_okstra.check_abhaengigkeiten_strassenelementpunkt()
 	RETURNS trigger AS
 	$BODY$
 		DECLARE
@@ -166,7 +170,7 @@ BEGIN;
 					ukos_okstra.strassenausstattung_punkt
 				WHERE
 					gueltig_bis > $1 AND
-					bei_strassenelementpunkt_id = $1
+					bei_strassenelementpunkt_id = $2
 			'
 			USING aenderungszeit, OLD.id
 			INTO anzahl_sap;
@@ -179,29 +183,76 @@ BEGIN;
 	$BODY$
 	LANGUAGE plpgsql VOLATILE
 	COST 100;
-	COMMENT ON FUNCTION ukos_okstra.check_abhaengigkeiten_strassenelement() IS 'Objekte, die diese Funktion über Trigger auslösen müssen vor dem Start dieser Funktion schon untergegangen sein (guelig_bis <= aenderungszeit).'
+	COMMENT ON FUNCTION ukos_okstra.check_abhaengigkeiten_strassenelementpunkt() IS 'Objekte, die diese Funktion über Trigger auslösen müssen vor dem Start dieser Funktion schon untergegangen sein (guelig_bis <= aenderungszeit).'
 
-	CREATE TRIGGER validate_strassenelementpunkt
+	-- strassenelementpunkt Trigger
+	-- INSERT Trigger on strassenelementpunkt
+	CREATE TRIGGER tr_before_insert_validate_strassenelementpunkt
 	BEFORE INSERT
 	ON ukos_okstra.strassenelementpunkt
 	FOR EACH ROW
 	EXECUTE PROCEDURE ukos_okstra.validate_strassenelementpunkt();
 
-	CREATE TRIGGER _10_check_abhaengigkeiten
+	-- UPDATE Trigger on strassenelementpunkt
+	CREATE TRIGGER tr_before_update_validate_strassenelementpunkt
+	BEFORE UPDATE
+	ON ukos_okstra.strassenelementpunkt
+	FOR EACH ROW
+	EXECUTE PROCEDURE ukos_okstra.validate_strassenelementpunkt();
+
+	-- DELETE Trigger on strassenelementpunkt
+	CREATE TRIGGER tr_before_delete_10_check_abhaengigkeiten
 	BEFORE DELETE
 	ON ukos_okstra.strassenelementpunkt
 	FOR EACH ROW
-	EXECUTE PROCEDURE ukos_okstra.check_abhaengigkeiten_strassenelement();
+	EXECUTE PROCEDURE ukos_okstra.check_abhaengigkeiten_strassenelementpunkt();
 
-	CREATE TRIGGER _20_untergang
+	CREATE TRIGGER tr_before_delete_20_untergang
 	BEFORE DELETE
 	ON ukos_okstra.strassenelementpunkt
 	FOR EACH ROW
 	EXECUTE PROCEDURE ukos_okstra.untergang();
 
-	CREATE TRIGGER _99_untergang
+	CREATE TRIGGER tr_before_delete_99_stop
 	BEFORE DELETE
 	ON ukos_okstra.strassenelementpunkt
+	FOR EACH ROW
+	EXECUTE PROCEDURE ukos_okstra.stop();
+
+	--
+	CREATE TRIGGER tr_before_delete_20_untergang
+	BEFORE DELETE
+	ON ukos_doppik.ampel
+	FOR EACH ROW
+	EXECUTE PROCEDURE ukos_okstra.untergang();
+
+	CREATE TRIGGER tr_before_delete_99_stop
+	BEFORE DELETE
+	ON ukos_doppik.ampel
+	FOR EACH ROW
+	EXECUTE PROCEDURE ukos_okstra.stop();
+
+	CREATE TRIGGER tr_before_delete_20_untergang
+	BEFORE DELETE
+	ON ukos_doppik.hydrant
+	FOR EACH ROW
+	EXECUTE PROCEDURE ukos_okstra.untergang();
+
+	CREATE TRIGGER tr_before_delete_99_stop
+	BEFORE DELETE
+	ON ukos_doppik.hydrant
+	FOR EACH ROW
+	EXECUTE PROCEDURE ukos_okstra.stop();
+
+	CREATE TRIGGER tr_before_delete_20_untergang
+	BEFORE DELETE
+	ON ukos_doppik.haltestelle
+	FOR EACH ROW
+	EXECUTE PROCEDURE ukos_okstra.untergang();
+
+	CREATE TRIGGER tr_before_delete_99_stop
+	BEFORE DELETE
+	ON ukos_doppik.haltestelle
 	FOR EACH ROW
 	EXECUTE PROCEDURE ukos_okstra.stop();
 

@@ -363,67 +363,67 @@ BEGIN;
 	LANGUAGE plpgsql VOLATILE
 	COST 100;
 
-	--
-
-	CREATE TRIGGER calc_flaecheninhalt
+	-- Trigger on fahrbahn
+	-- INSERT Trigger
+	CREATE TRIGGER tr_before_insert_calc_flaecheninhalt
 	BEFORE INSERT
 	ON ukos_doppik.fahrbahn
 	FOR EACH ROW
 	EXECUTE PROCEDURE ukos_doppik.calc_flaecheninhalt();
 
-	CREATE TRIGGER add_querschnittstreifen
+	CREATE TRIGGER tr_after_insert_add_querschnittstreifen
 	AFTER INSERT
 	ON ukos_doppik.fahrbahn
 	FOR EACH ROW
 	EXECUTE PROCEDURE ukos_okstra.add_querschnittstreifen();
 
-	--
-
-	CREATE TRIGGER validate_querschnittstreifen
-	BEFORE INSERT
-	ON ukos_okstra.querschnittstreifen
-	FOR EACH ROW
-	EXECUTE PROCEDURE ukos_okstra.validate_querschnittstreifen();
-
-	CREATE TRIGGER add_teilelement_von_flaeche
-	AFTER INSERT
-	ON ukos_okstra.querschnittstreifen
-	FOR EACH ROW
-	EXECUTE PROCEDURE ukos_okstra.add_teilelement_von_flaeche();
-
-	--
-	CREATE TRIGGER _10_untergang
+	-- DELETE Trigger
+	CREATE TRIGGER tr_before_delete_10_untergang
 	BEFORE DELETE
 	ON ukos_doppik.fahrbahn
 	FOR EACH ROW
   EXECUTE PROCEDURE ukos_okstra.untergang();
 
-	CREATE TRIGGER _20_delete_querschnittstreifen
+	CREATE TRIGGER tr_before_delete_20_delete_querschnittstreifen
 	BEFORE DELETE
 	ON ukos_doppik.fahrbahn
 	FOR EACH ROW
 	EXECUTE PROCEDURE ukos_okstra.delete_querschnittstreifen();
 
-	CREATE TRIGGER _99_stop
+	CREATE TRIGGER tr_before_delete_99_stop
 	BEFORE DELETE
 	ON ukos_doppik.fahrbahn
 	FOR EACH ROW
 	EXECUTE PROCEDURE ukos_okstra.stop();
 
-	--
-	CREATE TRIGGER _10_untergang
+	-- Trigger on querschnittstreifen
+	-- INSERT Trigger
+	CREATE TRIGGER tr_before_insert_validate_querschnittstreifen
+	BEFORE INSERT
+	ON ukos_okstra.querschnittstreifen
+	FOR EACH ROW
+	EXECUTE PROCEDURE ukos_okstra.validate_querschnittstreifen();
+
+	CREATE TRIGGER tr_after_insert_add_teilelement_von_flaeche
+	AFTER INSERT
+	ON ukos_okstra.querschnittstreifen
+	FOR EACH ROW
+	EXECUTE PROCEDURE ukos_okstra.add_teilelement_von_flaeche();
+
+	-- DELETE Trigger
+	CREATE TRIGGER tr_before_delete_10_untergang
 	BEFORE DELETE
 	ON ukos_okstra.querschnittstreifen
 	FOR EACH ROW
 	EXECUTE PROCEDURE ukos_okstra.untergang();
 
-	CREATE TRIGGER _20_delete_teilelemente
+	CREATE TRIGGER tr_before_delete_20_delete_teilelemente
 	BEFORE DELETE
 	ON ukos_okstra.querschnittstreifen
 	FOR EACH ROW
 	EXECUTE PROCEDURE ukos_okstra.delete_teilelemente();
 
-	CREATE TRIGGER _99_stop
+	CREATE TRIGGER tr_before_delete_99_stop
 	BEFORE DELETE
 	ON ukos_okstra.querschnittstreifen
 	FOR EACH ROW

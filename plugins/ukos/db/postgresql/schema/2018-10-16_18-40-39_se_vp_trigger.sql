@@ -208,12 +208,6 @@ delete from ukos_base.idents
 	LANGUAGE plpgsql VOLATILE
 	COST 100;
 
-	CREATE TRIGGER validate_verbindungspunkt
-	BEFORE INSERT
-	ON ukos_okstra.verbindungspunkt
-	FOR EACH ROW
-	EXECUTE PROCEDURE ukos_okstra.validate_verbindungspunkt();
-
 	CREATE OR REPLACE FUNCTION ukos_okstra.split_strassenelemente()
 		RETURNS trigger AS
 		$BODY$
@@ -549,6 +543,7 @@ delete from ukos_base.idents
 			--------------------------------------------------------------------------------------------------------
 			EXECUTE 'SELECT value::BOOLEAN FROM ukos_base.config WHERE key = $1' USING 'Löschsperre' INTO loeschsperre;
 			IF loeschsperre THEN
+				RAISE NOTICE 'Echtes Löschen von Objekt id: % gestoppt', OLD.id;
 				RAISE NOTICE 'success';
 				RETURN NULL;
 			ELSE
@@ -643,61 +638,216 @@ delete from ukos_base.idents
 	COST 100;
 	COMMENT ON FUNCTION ukos_okstra.pruefe_abhaengigkeiten() IS 'Bricht den Trigger ab, wenn die id default ist oder noch gültige Strassenelemente an dem Punkt hängen.';
 
-	--
+	-- DROP FUNCTION ukos_okstra.create_topogeom();
+	CREATE OR REPLACE FUNCTION ukos_okstra.create_topogeom()
+	RETURNS trigger AS
+	$BODY$
+		DECLARE
+			tolerance									NUMERIC;
+		BEGIN
+			--------------------------------------------------------------------------------------------------------
+			-- Initialisierung
+			EXECUTE 'SELECT value::NUMERIC FROM ukos_base.config WHERE key = $1' USING 'Topologietolerance' INTO tolerance;
 
-	CREATE TRIGGER split_strassenelemente
+			EXECUTE '
+				UPDATE
+					ukos_okstra.strassenelement
+				SET
+					liniengeometrie_topo = topology.toTopoGeom(liniengeometrie, ' || quote_literal('ukos_topo') || ', 1, $1)
+				WHERE
+					id = $2
+			'
+			USING tolerance, NEW.id;
+
+			RETURN NEW;
+		END;
+	$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+	COMMENT ON FUNCTION ukos_okstra.create_topogeom() IS 'Fügt das Strassenelement in die Topologie ein. Muss nach dem Trigger add_verbindungpunkte ausgeführt werden.';
+
+	CREATE OR REPLACE FUNCTION ukos_okstra.update_topogeom()
+	RETURNS trigger AS
+	$BODY$
+		BEGIN
+			--------------------------------------------------------------------------------------------------------
+			EXECUTE '
+				SELECT
+					topology.ST_ChangeEdgeGeom(
+						' || quote_literal('ukos_topo') || ',
+						(
+							SELECT
+								e[1]
+							FROM
+								(
+									SELECT
+										topology.GetTopoGeomElements(liniengeometrie_topo) e
+									FROM
+										ukos_okstra.strassenelement
+									WHERE
+										id = $1
+									LIMIT 1
+								) e_tab
+						),
+						$2
+					)
+			'
+			USING NEW.id, NEW.liniengeometrie;
+
+			RETURN NEW;
+		END;
+	$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+	COMMENT ON FUNCTION ukos_okstra.update_topogeom() IS 'Aktualisiert die Liniengeometrie der Edge des Strassenelements in die Topologie.';
+
+	CREATE OR REPLACE FUNCTION ukos_okstra.delete_topogeom()
+	RETURNS trigger AS
+	$BODY$
+		DECLARE
+			edge_id INTEGER;
+		BEGIN
+			--------------------------------------------------------------------------------------------------------
+			EXECUTE '
+				SELECT
+					e[1]
+				FROM
+					(
+						SELECT
+							topology.GetTopoGeomElements(liniengeometrie_topo) e
+						FROM
+							ukos_okstra.strassenelement
+						WHERE
+							id = $1
+						LIMIT 1
+					) e_tab
+			'
+			USING OLD.id
+			INTO edge_id;
+
+			EXECUTE '
+				UPDATE
+					ukos_okstra.strassenelement
+				SET
+					liniengeometrie_topo = topology.clearTopoGeom(liniengeometrie_topo)
+				WHERE
+					id = $1
+			'
+			USING OLD.id;
+
+			IF edge_id IS NOT NULL THEN
+				EXECUTE '
+					SELECT topology.ST_RemEdgeModFace(' || quote_literal('ukos_topo') || ', $1)
+				'
+				USING edge_id;
+			END IF;
+
+			EXECUTE '
+				SELECT
+					topology.ST_RemoveIsoNode(' || quote_literal('ukos_topo') || ', node_id)
+				FROM
+					ukos_topo.node
+				WHERE
+					containing_face = 0
+			';
+
+			RETURN OLD;
+		END;
+	$BODY$
+	LANGUAGE plpgsql VOLATILE
+	COST 100;
+	COMMENT ON FUNCTION ukos_okstra.update_topogeom() IS 'Aktualisiert die Liniengeometrie der Edge des Strassenelements in die Topologie.';
+
+	-- trigger on verbindungspunkt
+	-- insert trigger on verbindungspunkt
+	CREATE TRIGGER tr_before_insert_validate_verbindungspunkt
+	BEFORE INSERT
+	ON ukos_okstra.verbindungspunkt
+	FOR EACH ROW
+	EXECUTE PROCEDURE ukos_okstra.validate_verbindungspunkt();
+
+	CREATE TRIGGER tr_after_insert_split_strassenelemente
 	AFTER INSERT
 	ON ukos_okstra.verbindungspunkt
 	FOR EACH ROW
 	EXECUTE PROCEDURE ukos_okstra.split_strassenelemente();
 
-	--
-
-	CREATE TRIGGER validate_strassenelement BEFORE INSERT
-	ON ukos_okstra.strassenelement
-	FOR EACH ROW
-	EXECUTE PROCEDURE ukos_okstra.validate_strassenelement();
-
-	CREATE TRIGGER add_verbindungspunkte AFTER INSERT
-	ON ukos_okstra.strassenelement
-	FOR EACH ROW
-	EXECUTE PROCEDURE ukos_okstra.add_verbindungspunkte();
-
-	CREATE TRIGGER liniengeometrie_aendern BEFORE UPDATE
-	ON ukos_okstra.strassenelement
-	FOR EACH ROW
-	EXECUTE PROCEDURE ukos_okstra.liniengeometrie_aendern();
-
-	CREATE TRIGGER _10_untergang BEFORE DELETE
-	ON ukos_okstra.strassenelement
-	FOR EACH ROW
-	EXECUTE PROCEDURE ukos_okstra.untergang();
-
-	CREATE TRIGGER _20_delete_punkte BEFORE DELETE
-	ON ukos_okstra.strassenelement
-	FOR EACH ROW
-	EXECUTE PROCEDURE ukos_okstra.delete_punkte();
-
-	CREATE TRIGGER _99_stop BEFORE DELETE
-	ON ukos_okstra.strassenelement
-	FOR EACH ROW
-	EXECUTE PROCEDURE ukos_okstra.stop();
-
-	--
-
-	CREATE TRIGGER _01_pruefe_abhaengigkeiten BEFORE DELETE
+	-- delete trigger on verbindungspunkt
+	CREATE TRIGGER tr_before_delete_01_pruefe_abhaengigkeiten
+	BEFORE DELETE
 	ON ukos_okstra.verbindungspunkt
 	FOR EACH ROW
 	EXECUTE PROCEDURE ukos_okstra.pruefe_abhaengigkeiten();
 
-	CREATE TRIGGER _20_untergang BEFORE DELETE
+	CREATE TRIGGER tr_before_delete_20_untergang
+	BEFORE DELETE
 	ON ukos_okstra.verbindungspunkt
 	FOR EACH ROW
 	EXECUTE PROCEDURE ukos_okstra.untergang();
 
-	CREATE TRIGGER _99_stop BEFORE DELETE
+	CREATE TRIGGER tr_before_delete_99_stop
+	BEFORE DELETE
 	ON ukos_okstra.verbindungspunkt
 	FOR EACH ROW
 	EXECUTE PROCEDURE ukos_okstra.stop();
+
+	-- trigger on strassenelement
+	-- insert trigger on strassenelement
+	CREATE TRIGGER tr_before_insert_validate_strassenelement
+	BEFORE INSERT
+	ON ukos_okstra.strassenelement
+	FOR EACH ROW
+	EXECUTE PROCEDURE ukos_okstra.validate_strassenelement();
+
+	CREATE TRIGGER tr_after_insert_10_create_topogeom
+	AFTER INSERT
+	ON ukos_okstra.strassenelement
+	FOR EACH ROW
+	EXECUTE PROCEDURE ukos_okstra.create_topogeom();
+
+	CREATE TRIGGER tr_after_insert_20_add_verbindungspunkte
+	AFTER INSERT
+	ON ukos_okstra.strassenelement
+	FOR EACH ROW
+	EXECUTE PROCEDURE ukos_okstra.add_verbindungspunkte();
+
+	-- update trigger on strassenelement
+	CREATE TRIGGER tr_before_update_liniengeometrie_aendern
+	BEFORE UPDATE OF liniengeometrie
+	ON ukos_okstra.strassenelement
+	FOR EACH ROW
+	EXECUTE PROCEDURE ukos_okstra.liniengeometrie_aendern();
+
+	CREATE TRIGGER tr_after_update_update_topogeom
+	AFTER UPDATE OF liniengeometrie
+	ON ukos_okstra.strassenelement
+	FOR EACH ROW
+	EXECUTE PROCEDURE ukos_okstra.update_topogeom();
+
+	-- delete trigger on strassenelement
+	CREATE TRIGGER tr_before_delete_10_untergang
+	BEFORE DELETE
+	ON ukos_okstra.strassenelement
+	FOR EACH ROW
+	EXECUTE PROCEDURE ukos_okstra.untergang();
+
+	CREATE TRIGGER tr_before_delete_20_delete_punkte
+	BEFORE DELETE
+	ON ukos_okstra.strassenelement
+	FOR EACH ROW
+	EXECUTE PROCEDURE ukos_okstra.delete_punkte();
+
+	CREATE TRIGGER tr_before_delete_30_delete_topogeom
+	BEFORE DELETE
+	ON ukos_okstra.strassenelement
+	FOR EACH ROW
+	EXECUTE PROCEDURE ukos_okstra.delete_topogeom();
+
+	CREATE TRIGGER tr_before_delete_99_stop
+	BEFORE DELETE
+	ON ukos_okstra.strassenelement
+	FOR EACH ROW
+	EXECUTE PROCEDURE ukos_okstra.stop();
+
 
 COMMIT;

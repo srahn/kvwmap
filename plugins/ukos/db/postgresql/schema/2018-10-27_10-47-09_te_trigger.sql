@@ -346,53 +346,73 @@ BEGIN;
 	COST 100;
 
 
-	--
-
-	CREATE TRIGGER validate_strecke
+	-- Trigger on verkehrseinschraenkung
+	-- INSERT Trigger
+	CREATE TRIGGER tr_before_insert_validate_strecke
 	BEFORE INSERT
 	ON ukos_okstra.verkehrseinschraenkung
 	FOR EACH ROW
 	EXECUTE PROCEDURE ukos_okstra.validate_strecke();
 
-	CREATE TRIGGER add_teilelemente
+	CREATE TRIGGER tr_after_insert_add_teilelemente
 	AFTER INSERT
 	ON ukos_okstra.verkehrseinschraenkung
 	FOR EACH ROW
 	EXECUTE PROCEDURE ukos_okstra.add_teilelemente();
 
-	CREATE TRIGGER _10_untergang
-	BEFORE DELETE
+	-- UPDATE Trigger
+	CREATE TRIGGER tr_before_update_10_validate_strecke
+	BEFORE UPDATE OF geometrie_streckenobjekt
 	ON ukos_okstra.verkehrseinschraenkung
 	FOR EACH ROW
-  EXECUTE PROCEDURE ukos_okstra.untergang();
+	EXECUTE PROCEDURE ukos_okstra.validate_strecke();
 
-	CREATE TRIGGER _20_delete_teilelemente
-	BEFORE DELETE
+	CREATE TRIGGER tr_before_update_20_delete_teilelemente
+	BEFORE UPDATE OF geometrie_streckenobjekt
 	ON ukos_okstra.verkehrseinschraenkung
 	FOR EACH ROW
 	EXECUTE PROCEDURE ukos_okstra.delete_teilelemente();
 
-	CREATE TRIGGER _99_stop
-	BEFORE DELETE
+	CREATE TRIGGER tr_after_update_add_teilelemente
+	AFTER UPDATE OF geometrie_streckenobjekt
 	ON ukos_okstra.verkehrseinschraenkung
+	FOR EACH ROW
+	EXECUTE PROCEDURE ukos_okstra.add_teilelemente();
+
+	-- DELETE Trigger
+	CREATE TRIGGER tr_before_delete_10_untergang
+  BEFORE DELETE
+  ON ukos_okstra.verkehrseinschraenkung
+	FOR EACH ROW
+  EXECUTE PROCEDURE ukos_okstra.untergang();
+
+	CREATE TRIGGER tr_before_delete_20_delete_teilelemente
+  BEFORE DELETE
+  ON ukos_okstra.verkehrseinschraenkung
+	FOR EACH ROW
+	EXECUTE PROCEDURE ukos_okstra.delete_teilelemente();
+
+	CREATE TRIGGER tr_before_delete_99_stop
+  BEFORE DELETE
+  ON ukos_okstra.verkehrseinschraenkung
 	FOR EACH ROW
 	EXECUTE PROCEDURE ukos_okstra.stop();
 
-	--
-
-	CREATE TRIGGER _10_untergang
+	-- Trigger on teilelement
+	-- DELETE Trigger
+	CREATE TRIGGER tr_before_delete_10_untergang
 	BEFORE DELETE
 	ON ukos_okstra.teilelement
 	FOR EACH ROW
   EXECUTE PROCEDURE ukos_okstra.untergang();
 
-	CREATE TRIGGER _20_delete_strassenelementpunkte
+	CREATE TRIGGER tr_before_delete_20_delete_strassenelementpunkte
 	BEFORE DELETE
 	ON ukos_okstra.teilelement
 	FOR EACH ROW
 	EXECUTE PROCEDURE ukos_okstra.delete_strassenelementpunkte();
 
-	CREATE TRIGGER _99_stop
+	CREATE TRIGGER tr_before_delete_99_stop
 	BEFORE DELETE
 	ON ukos_okstra.teilelement
 	FOR EACH ROW
