@@ -1034,7 +1034,7 @@ class rolle {
 				ul.`minscale`, ul.`maxscale`,
 				ul.`offsite`,
 				coalesce(r2ul.transparency, ul.transparency, 100) as transparency,
-				coalesce(r2ul.labelitem, l.labelitem) as labelitem,				
+				coalesce(r2ul.labelitem, l.labelitem) as labelitem,
 				ul.`postlabelcache`,
 				`Filter`,
 				CASE r2ul.gle_view

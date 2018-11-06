@@ -109,6 +109,7 @@ BEGIN;
 				';
 			FOR vp IN EXECUTE sql
 			LOOP
+				RAISE NOTICE 'Erzeuge Strassenelementpunkt auf VP: % an Punkt: %', vp.id, ST_AsText(vp.punktgeometrie);
 				EXECUTE '
 					INSERT INTO ukos_okstra.strassenelementpunkt (punktgeometrie, auf_strassenelement, angelegt_von) VALUES
 					($1, $2, $3)
@@ -126,15 +127,17 @@ BEGIN;
 				FROM
 					ukos_okstra.strassenelementpunkt
 				WHERE
+					gueltig_bis > $3 AND
 					ST_Distance(punktgeometrie, $1) < $2
 				ORDER BY
 					ST_Distance(punktgeometrie, $1)
 				LIMIT 1
 			'
-			USING punkt_anfang, tolerance
+			USING punkt_anfang, tolerance, aenderungszeit
 			INTO sep;
 			IF sep.id IS NULL THEN
 				--kein SEP an der Stelle gefunden, anlegen
+				RAISE NOTICE 'Erzeuge Strassenelementpunkt am Anfang an Punkt: %', ST_AsText(punkt_anfang);
 				EXECUTE '
 					INSERT INTO ukos_okstra.strassenelementpunkt (
 						punktgeometrie,
@@ -149,6 +152,8 @@ BEGIN;
 				'
 				USING punkt_anfang, NEW.angelegt_von, aenderungszeit, tolerance
 				INTO sep;
+			ELSE
+				RAISE NOTICE 'Strassenelementpunkt am Anfang: % an Punkt: % schon vorhanden.', sep.id, ST_AsText(sep.punktgeometrie);
 			END IF;
 			RAISE NOTICE 'Übernehme die Koordinaten des gefundenen Strassenelementpunktes % als neuen Anfang der Strecke', sep.id;
 			liniengeometrie_streckenobjekt = ST_SetPoint(liniengeometrie_streckenobjekt, 0, sep.punktgeometrie);
@@ -163,33 +168,36 @@ BEGIN;
 				FROM
 					ukos_okstra.strassenelementpunkt
 				WHERE
+					gueltig_bis > $3 AND
 					ST_Distance(punktgeometrie, $1) < $2
 				ORDER BY
 					ST_Distance(punktgeometrie, $1)
 				LIMIT 1
 			'
-			USING punkt_ende, tolerance
+			USING punkt_ende, tolerance, aenderungszeit
 			INTO sep;
 			IF sep.id IS NULL THEN
 				--kein SEP an der Stelle gefunden, anlegen
-
+				RAISE NOTICE 'Erzeuge Strassenelementpunkt am Ende an Punkt: %', ST_AsText(punkt_ende);
 				EXECUTE '
-				INSERT INTO ukos_okstra.strassenelementpunkt (
-					punktgeometrie,
-					auf_strassenelement,
-					angelegt_von
-				) VALUES (
-					$1,
-					(SELECT id FROM ukos_okstra.strassenelement WHERE id != ''00000000-0000-0000-0000-000000000000'' AND gueltig_bis > $3 AND ST_Distance(liniengeometrie, $1) < $4),
-					$2
-				)
-				RETURNING id, punktgeometrie
-			'
-			USING punkt_ende, NEW.angelegt_von, aenderungszeit, tolerance
-			INTO sep;
-		END IF;
-		RAISE NOTICE 'Übernehme die Koordinaten des gefundenen Strassenelementpunktes % als neues Ende der Strecke', sep.id;
-		liniengeometrie_streckenobjekt = ST_SetPoint(liniengeometrie_streckenobjekt, ST_NumPoints(liniengeometrie_streckenobjekt) - 1, sep.punktgeometrie);
+					INSERT INTO ukos_okstra.strassenelementpunkt (
+						punktgeometrie,
+						auf_strassenelement,
+						angelegt_von
+					) VALUES (
+						$1,
+						(SELECT id FROM ukos_okstra.strassenelement WHERE id != ''00000000-0000-0000-0000-000000000000'' AND gueltig_bis > $3 AND ST_Distance(liniengeometrie, $1) < $4),
+						$2
+					)
+					RETURNING id, punktgeometrie
+				'
+				USING punkt_ende, NEW.angelegt_von, aenderungszeit, tolerance
+				INTO sep;
+			ELSE
+				RAISE NOTICE 'Strassenelementpunkt am Ende: % an Punkt: % schon vorhanden.', sep.id, ST_AsText(sep.punktgeometrie);
+			END IF;
+			RAISE NOTICE 'Übernehme die Koordinaten des gefundenen Strassenelementpunktes % als neues Ende der Strecke', sep.id;
+			liniengeometrie_streckenobjekt = ST_SetPoint(liniengeometrie_streckenobjekt, ST_NumPoints(liniengeometrie_streckenobjekt) - 1, sep.punktgeometrie);
 
 			-- Fehlende Teilelemente entlang der Strecke bilden
 			-- Alle SEP finden, station berechnen sortieren und leg und die te finden, die fehlen
@@ -293,7 +301,7 @@ BEGIN;
 				EXECUTE '
 					DELETE FROM ukos_okstra.teilelement WHERE id = $1
 				'
-				USING te.id;
+				USING te.teilelement_id;
 			END LOOP;
 
 		RETURN OLD;
@@ -338,53 +346,73 @@ BEGIN;
 	COST 100;
 
 
-	--
-
-	CREATE TRIGGER validate_strecke
+	-- Trigger on verkehrseinschraenkung
+	-- INSERT Trigger
+	CREATE TRIGGER tr_before_insert_validate_strecke
 	BEFORE INSERT
 	ON ukos_okstra.verkehrseinschraenkung
 	FOR EACH ROW
 	EXECUTE PROCEDURE ukos_okstra.validate_strecke();
 
-	CREATE TRIGGER add_teilelemente
+	CREATE TRIGGER tr_after_insert_add_teilelemente
 	AFTER INSERT
 	ON ukos_okstra.verkehrseinschraenkung
 	FOR EACH ROW
 	EXECUTE PROCEDURE ukos_okstra.add_teilelemente();
 
-	CREATE TRIGGER _10_untergang
-	BEFORE DELETE
+	-- UPDATE Trigger
+	CREATE TRIGGER tr_before_update_10_validate_strecke
+	BEFORE UPDATE OF geometrie_streckenobjekt
 	ON ukos_okstra.verkehrseinschraenkung
 	FOR EACH ROW
-  EXECUTE PROCEDURE ukos_okstra.untergang();
+	EXECUTE PROCEDURE ukos_okstra.validate_strecke();
 
-	CREATE TRIGGER _20_delete_teilelemente
-	BEFORE DELETE
+	CREATE TRIGGER tr_before_update_20_delete_teilelemente
+	BEFORE UPDATE OF geometrie_streckenobjekt
 	ON ukos_okstra.verkehrseinschraenkung
 	FOR EACH ROW
 	EXECUTE PROCEDURE ukos_okstra.delete_teilelemente();
 
-	CREATE TRIGGER _99_stop
-	BEFORE DELETE
+	CREATE TRIGGER tr_after_update_add_teilelemente
+	AFTER UPDATE OF geometrie_streckenobjekt
 	ON ukos_okstra.verkehrseinschraenkung
+	FOR EACH ROW
+	EXECUTE PROCEDURE ukos_okstra.add_teilelemente();
+
+	-- DELETE Trigger
+	CREATE TRIGGER tr_before_delete_10_untergang
+  BEFORE DELETE
+  ON ukos_okstra.verkehrseinschraenkung
+	FOR EACH ROW
+  EXECUTE PROCEDURE ukos_okstra.untergang();
+
+	CREATE TRIGGER tr_before_delete_20_delete_teilelemente
+  BEFORE DELETE
+  ON ukos_okstra.verkehrseinschraenkung
+	FOR EACH ROW
+	EXECUTE PROCEDURE ukos_okstra.delete_teilelemente();
+
+	CREATE TRIGGER tr_before_delete_99_stop
+  BEFORE DELETE
+  ON ukos_okstra.verkehrseinschraenkung
 	FOR EACH ROW
 	EXECUTE PROCEDURE ukos_okstra.stop();
 
-	--
-
-	CREATE TRIGGER _10_untergang
+	-- Trigger on teilelement
+	-- DELETE Trigger
+	CREATE TRIGGER tr_before_delete_10_untergang
 	BEFORE DELETE
 	ON ukos_okstra.teilelement
 	FOR EACH ROW
   EXECUTE PROCEDURE ukos_okstra.untergang();
 
-	CREATE TRIGGER _20_delete_strassenelementpunkte
+	CREATE TRIGGER tr_before_delete_20_delete_strassenelementpunkte
 	BEFORE DELETE
 	ON ukos_okstra.teilelement
 	FOR EACH ROW
 	EXECUTE PROCEDURE ukos_okstra.delete_strassenelementpunkte();
 
-	CREATE TRIGGER _99_stop
+	CREATE TRIGGER tr_before_delete_99_stop
 	BEFORE DELETE
 	ON ukos_okstra.teilelement
 	FOR EACH ROW

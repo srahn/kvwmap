@@ -112,7 +112,14 @@ BEGIN;
 			REFERENCES ukos_okstra.verbindungspunkt (id) MATCH SIMPLE
 			ON UPDATE NO ACTION ON DELETE NO ACTION;
 
-INSERT INTO ukos_okstra.strassenelement (id) VALUES ('00000000-0000-0000-0000-000000000000');
+	INSERT INTO ukos_okstra.strassenelement (id) VALUES ('00000000-0000-0000-0000-000000000000');
+
+	CREATE EXTENSION IF NOT EXISTS topology;
+
+	SELECT topology.AddTopoGeometryColumn('ukos_topo', 'ukos_okstra', 'strassenelement', 'liniengeometrie_topo', 'LINE');
+
+	ALTER TABLE ukos_topo.edge_data SET WITH OIDS;
+	ALTER TABLE ukos_topo.node SET WITH OIDS;
 
 	-- Trigger: tr_idents_add_ident on ukos_okstra.strassenelement
 	CREATE TRIGGER tr_idents_add_ident
