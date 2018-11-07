@@ -1183,14 +1183,14 @@ class GUI {
           $map->setMetaData("ows_title",OWS_TITLE);
         }
         if($this->Stelle->ows_abstract != ''){
-          $map->setMetaData("ows_abstract",$this->Stelle->ows_abstract);}
+          $map->setMetaData("ows_abstract", $this->Stelle->ows_abstract);}
         else{
-          $map->setMetaData("ows_title",OWS_ABSTRACT);
+          $map->setMetaData("ows_abstract", OWS_ABSTRACT);
         }
         if($this->Stelle->wms_accessconstraints != ''){
-          $map->setMetaData("wms_accessconstraints",$this->Stelle->wms_accessconstraints);}
+          $map->setMetaData("ows_accessconstraints",$this->Stelle->wms_accessconstraints);}
         else{
-          $map->setMetaData("wms_accessconstraints",OWS_ACCESSCONSTRAINTS);
+          $map->setMetaData("ows_accessconstraints",OWS_ACCESSCONSTRAINTS);
         }
         if($this->Stelle->ows_contactperson != ''){
           $map->setMetaData("ows_contactperson",$this->Stelle->ows_contactperson);}
@@ -1212,6 +1212,20 @@ class GUI {
         else{
           $map->setMetaData("ows_contactposition",OWS_CONTACTPOSITION);
         }
+
+				$map->setMetaData("ows_encoding", 'UTF-8');
+				$map->setMetaData("ows_keywordlist", OWS_KEYWORDLIST);
+				$map->setMetaData("ows_contactvoicetelephone", OWS_CONTACTVOICETELEPHONE);
+				$map->setMetaData("ows_contactfacsimiletelephone", OWS_CONTACTFACSIMILETELEPHONE);
+				$map->setMetaData("ows_address", OWS_ADDRESS);
+				$map->setMetaData("ows_city", OWS_CITY);
+				$map->setMetaData("ows_stateorprovince", OWS_STATEORPROVINCE);
+				$map->setMetaData("ows_postcode", OWS_POSTCODE);
+				$map->setMetaData("ows_country", OWS_COUNTRY);
+				$map->setMetaData("ows_contactinstructions", OWS_CONTACTINSTRUCTIONS);
+				$map->setMetaData("ows_hoursofservice", OWS_HOURSOFSERVICE);
+				$map->setMetaData("ows_role", OWS_ROLE);
+
         if($this->Stelle->ows_fees != ''){
           $map->setMetaData("ows_fees",$this->Stelle->ows_fees);}
         else{
@@ -1222,12 +1236,15 @@ class GUI {
         else{
           $map->setMetaData("ows_srs",OWS_SRS);
         }
-        $ows_onlineresource = OWS_SERVICE_ONLINERESOURCE.'&Stelle_ID='.$this->Stelle->id;
-        $map->setMetaData("ows_onlineresource",$ows_onlineresource);
+        $ows_onlineresource = OWS_SERVICE_ONLINERESOURCE . '&Stelle_ID=' . $this->Stelle->id .'&login_name=' . $_REQUEST['login_name'] . '&passwort=' .  $_REQUEST['passwort'];
+        $map->setMetaData("ows_onlineresource", $ows_onlineresource);
+				$map->setMetaData("ows_service_onlineresource", $ows_onlineresource);
+
         $bb=$this->Stelle->MaxGeorefExt;
         $map->setMetaData("wms_extent",$bb->minx.' '.$bb->miny.' '.$bb->maxx.' '.$bb->maxy);
 				// enable service types
         $map->setMetaData("ows_enable_request", '*');
+
         ///------------------------------////
 
         $map->setSymbolSet(SYMBOLSET);
@@ -1322,13 +1339,16 @@ class GUI {
 						$layer->setMetaData('wms_format',$layerset['list'][$i]['wms_format']);
 						$layer->setMetaData('ows_server_version',$layerset['list'][$i]['wms_server_version']);
 						$layer->setMetaData('ows_version',$layerset['list'][$i]['wms_server_version']);
-						if($layerset['list'][$i]['ows_srs'] == '')$layerset['list'][$i]['ows_srs'] = 'EPSG:'.$layerset['list'][$i]['epsg_code'];
-						$layer->setMetaData('ows_srs',$layerset['list'][$i]['ows_srs']);
+						if($layerset['list'][$i]['ows_srs'] == '') $layerset['list'][$i]['ows_srs'] = 'EPSG:' . $layerset['list'][$i]['epsg_code'];
+						$layer->setMetaData('ows_srs', $layerset['list'][$i]['ows_srs']);
 						$layer->setMetaData('wms_connectiontimeout',$layerset['list'][$i]['wms_connectiontimeout']);
 						$layer->setMetaData('ows_auth_username', $layerset['list'][$i]['wms_auth_username']);
 						$layer->setMetaData('ows_auth_password', $layerset['list'][$i]['wms_auth_password']);
 						$layer->setMetaData('ows_auth_type', 'basic');
 						$layer->setMetaData('wms_exceptions_format', 'application/vnd.ogc.se_xml');
+						$layer->setMetaData("ows_extent", $bb->minx . ' '. $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
+						$layer->setMetaData("gml_featureid", "ogc_fid");
+						$layer->setMetaData("gml_include_items", "all");
 
 						$layer->set('dump', 0);
 						$layer->set('type',$layerset['list'][$i]['Datentyp']);
@@ -3827,33 +3847,53 @@ class GUI {
     ms_ioresethandlers();
   }
 
-  function createOWSResponse(){
-    $this->map_factor = $this->formvars['mapfactor'];   # der durchgeschleifte MapFactor
-    $this->class_load_level = 2;    # die Klassen von allen Layern laden
-    $this->loadMap('DataBase');
-    $requestobject = ms_newOwsRequestObj();
-    $params = array_keys($this->formvars);
-    for($i = 0; $i < count($this->formvars); $i++){
-      $requestobject->setParameter($params[$i],$this->formvars[$params[$i]]);
-    }
-    //$requestobject->loadparams();   # geht nur wenn php als cgi läuft
-    ms_ioinstallstdouttobuffer();
-    $this->map->owsdispatch($requestobject);
-    $contenttype = ms_iostripstdoutbuffercontenttype();
-    ob_end_clean();   //Ausgabepuffer leeren (sonst funktioniert header() nicht)
-    ob_start();
-    if ($contenttype == 'image/png'){
-      header('Content-type: image/png');
-    }
-    ms_iogetStdoutBufferBytes();
-    if ($this->writeTmpFile) {
-      $wms_response = new wms_response_obj($this->tmpfile);
-      $wms_response->save(ob_get_contents());
-    }
-    ob_end_flush();
-    ms_ioresethandlers();
-  }
-
+	function createOWSResponse(){
+		$this->map_factor = $this->formvars['mapfactor'];   # der durchgeschleifte MapFactor
+		$this->class_load_level = 2;    # die Klassen von allen Layern laden
+		$this->loadMap('DataBase');
+		$requestobject = ms_newOwsRequestObj();
+		$params = array_keys($this->formvars);
+		for($i = 0; $i < count($this->formvars); $i++){
+			$requestobject->setParameter($params[$i],$this->formvars[$params[$i]]);
+		}
+		//$requestobject->loadparams();   # geht nur wenn php als cgi läuft
+		ms_ioinstallstdouttobuffer();
+		$this->map->owsdispatch($requestobject);
+		$contenttype = ms_iostripstdoutbuffercontenttype();
+		ob_end_clean();   //Ausgabepuffer leeren (sonst funktioniert header() nicht)
+		ob_start();
+		switch (strtolower($_REQUEST['REQUEST'])) {
+			case 'getmap' : {
+				if ( $contenttype != 'image/png') {
+					$contenttype = 'image/jpeg';
+				}
+			} break;
+			case 'getfeature': {
+				switch ($_REQUEST['OUTPUTFORMAT']) {
+					case 'text/plain' : {
+						$contenttype = 'text/plain';
+					} break;
+					case 'application/x-gzip;subtype=text/xml' : {
+						$contenttype = 'application/x-gzip';
+					} break;
+					default : {
+						$contenttype = 'text/xml';
+					}
+				}
+			} break;
+			default : {
+				$contenttype = 'application/xml';
+			}
+		}
+		header('Content-type: ' . $contenttype);
+		ms_iogetStdoutBufferBytes();
+		if ($this->writeTmpFile) {
+			$wms_response = new wms_response_obj($this->tmpfile);
+			$wms_response->save(ob_get_contents());
+		}
+		ob_end_flush();
+		ms_ioresethandlers();
+	}
 
   function adminFunctions() {
 		include_once(CLASSPATH.'administration.php');
