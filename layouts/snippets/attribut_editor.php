@@ -16,6 +16,8 @@
 <script type="text/javascript">
 <!--
 
+var attributes = new Array('<? echo implode("', '", $this->attributes['name']); ?>');
+
 function update_visibility_form(visibility, attributename){
 	if(visibility == 2)document.getElementById('visibility_form_'+attributename).style.display = '';
 	else document.getElementById('visibility_form_'+attributename).style.display = 'none';
@@ -36,6 +38,29 @@ function submitDatatypeSelector() {
 function toLayerEditor(){	
 	location.href='index.php?go=Layereditor&selected_layer_id='+document.GUI.selected_layer_id.value;
 }
+
+function create_aliasnames(){
+	for(i = 0; i < attributes.length; i++){
+		attribute_field = document.getElementsByName('attribute_'+attributes[i])[0];
+		alias_field = document.getElementsByName('alias_'+attributes[i])[0];
+		if(alias_field.value == '')alias_field.value = alias_replace(attribute_field.value);
+	}
+}
+
+function alias_replace(name){
+	lowercase_words = new Array('der', 'die', 'das', 'von', 'bis', 'zu', 'hat', 'gueltig');
+	name = name.replace(/_/g, ' ');
+	var words = name.split(' ');
+	for(var i = 0; i < words.length; i++){
+		if(lowercase_words.indexOf(words[i]) == -1){
+			words[i] = words[i].charAt(0).toUpperCase() + words[i].slice(1);
+		}
+		if(words[i] == 'Id')words[i] = 'ID';
+  }
+	name = words.join(' ');
+	return name;
+}
+
 //-->
 </script>
 <table cellpadding="5" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
@@ -93,7 +118,7 @@ function toLayerEditor(){
 
 						<td align="center"><span class="fett">Optionen</span></td>
 
-						<td align="center"><span class="fett">Aliasname</span></td><?php
+						<td align="center"><span class="fett">Aliasname</span>&nbsp;<a title="aus Attributname erzeugen" href="javascript:create_aliasnames();"><img src="<? echo GRAPHICSPATH; ?>autogen.png"></a></td><?php
 
 						foreach($supportedLanguages as $language) {
 							if($language != 'german') { ?>
