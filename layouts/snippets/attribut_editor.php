@@ -16,7 +16,9 @@
 <script type="text/javascript">
 <!--
 
+<? if ((count($this->attributes))!=0) { ?>
 var attributes = new Array('<? echo implode("', '", $this->attributes['name']); ?>');
+<? } ?>
 
 function update_visibility_form(visibility, attributename){
 	if(visibility == 2)document.getElementById('visibility_form_'+attributename).style.display = '';
