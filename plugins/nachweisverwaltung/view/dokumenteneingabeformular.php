@@ -161,6 +161,7 @@ $legendheight = $this->map->height + 20;
 		text-align: center;
 	}
 	#dokein-allemessung {
+		margin-left: 10px;
 		flex-grow: 10;	
 	}
 	#dokein-image, #dokein-gemkg {
@@ -258,7 +259,7 @@ $legendheight = $this->map->height + 20;
 				</div>
 				<div id="dokein-allemessung">
 					<? if ($this->formvars[NACHWEIS_PRIMARY_ATTRIBUTE]!=''){ ?>
-					<a href="index.php?go=Nachweisrechercheformular_Senden&suchhauptart=&suchgemarkung=<? echo $this->formvars['Gemarkung']; ?>&suchflur=<? echo $this->formvars['Flur']; ?>&flur_thematisch=1&such<? echo NACHWEIS_PRIMARY_ATTRIBUTE.'='.$this->formvars[NACHWEIS_PRIMARY_ATTRIBUTE]; if(NACHWEIS_SECONDARY_ATTRIBUTE != '')echo '&such'.NACHWEIS_SECONDARY_ATTRIBUTE.'='.$this->formvars[NACHWEIS_SECONDARY_ATTRIBUTE];; ?>">alle der Messung anzeigen</a>
+					<a href="index.php?go=Nachweisrechercheformular_Senden&abfrageart=indiv_nr&suchhauptart=&suchgemarkung=<? echo $this->formvars['Gemarkung']; ?>&suchflur=<? echo $this->formvars['Flur']; ?>&flur_thematisch=1&such<? echo NACHWEIS_PRIMARY_ATTRIBUTE.'='.$this->formvars[NACHWEIS_PRIMARY_ATTRIBUTE]; if(NACHWEIS_SECONDARY_ATTRIBUTE != '')echo '&such'.NACHWEIS_SECONDARY_ATTRIBUTE.'='.$this->formvars[NACHWEIS_SECONDARY_ATTRIBUTE];; ?>">alle der Messung anzeigen</a>
 					<? } ?>
 				</div>
 				<div id="dokein-image">
