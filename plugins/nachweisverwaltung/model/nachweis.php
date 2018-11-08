@@ -764,10 +764,11 @@ class Nachweis {
     return $errmsg;
   }
   
-  function getNachweise($id,$polygon,$gemarkung,$stammnr,$rissnr,$fortf,$hauptart,$richtung,$abfrage_art,$order,$antr_nr, $datum = NULL, $VermStelle = NULL, $gueltigkeit = NULL, $datum2 = NULL, $flur = NULL, $flur_thematisch = NULL, $unterart = NULL, $suchbemerkung = NULL, $blattnr = NULL, $stammnr2 = NULL, $rissnr2 = NULL, $fortf2 = NULL, $geprueft = NULL) {
+  function getNachweise($id,$polygon,$gemarkung,$stammnr,$rissnr,$fortf,$hauptart,$richtung,$abfrage_art,$order,$antr_nr, $datum = NULL, $VermStelle = NULL, $gueltigkeit = NULL, $datum2 = NULL, $flur = NULL, $flur_thematisch = NULL, $unterart = NULL, $suchbemerkung = NULL, $blattnr = NULL, $stammnr2 = NULL, $rissnr2 = NULL, $fortf2 = NULL, $geprueft = NULL, $alle_der_messung = NULL) {
 		$explosion = explode('~', $antr_nr);
 		$antr_nr = $explosion[0];
 		$stelle_id = $explosion[1];
+		$n = 'n';
 		$order = str_replace('blattnummer', "NULLIF(regexp_replace(blattnummer, '\D', '', 'g'), '')::int", $order);		// nach Blattnummer nummerisch sortieren
     # Die Funktion liefert die Nachweise nach verschiedenen Suchverfahren.
     # Vor dem Suchen nach Nachweisen werden jeweils die Suchparameter überprüft    
@@ -1066,17 +1067,21 @@ class Nachweis {
           $sql.=" FROM nachweisverwaltung.n_nachweise AS n";
 					$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
           $sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id"; 
-					$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n2d.dokumentart_id = d.id";					
+					$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n2d.dokumentart_id = d.id";
+					if($alle_der_messung){
+						$sql.=" LEFT JOIN nachweisverwaltung.n_nachweise AS n2 ON n.oid = n2.oid OR (n.flurid = n2.flurid AND n.".NACHWEIS_PRIMARY_ATTRIBUTE." = n2.".NACHWEIS_PRIMARY_ATTRIBUTE." ".((NACHWEIS_SECONDARY_ATTRIBUTE) ? "and n.".NACHWEIS_SECONDARY_ATTRIBUTE." = n2.".NACHWEIS_SECONDARY_ATTRIBUTE : "").")";
+						$n = 'n2';
+					}
  					$sql.=" WHERE 1=1";
-          $sql.=" AND st_intersects(st_transform(st_geometryfromtext('".$polygon."',".$this->client_epsg."), (select srid from geometry_columns where f_table_name = 'n_nachweise')),the_geom)";
-					if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
-					if($geprueft != NULL)$sql.=" AND geprueft = ".$geprueft;
+          $sql.=" AND st_intersects(st_transform(st_geometryfromtext('".$polygon."',".$this->client_epsg."), (select srid from geometry_columns where f_table_name = 'n_nachweise')), ".$n.".the_geom)";
+					if($gueltigkeit != NULL)$sql.=" AND ".$n.".gueltigkeit = ".$gueltigkeit;
+					if($geprueft != NULL)$sql.=" AND ".$n.".geprueft = ".$geprueft;
 					if(!empty($hauptart)){
 						if($hauptart[0] == '2222' AND $idselected[0] != ''){
-							$sql.=" AND n.id IN (".implode(',', $idselected).")";
+							$sql.=" AND ".$n.".id IN (".implode(',', $idselected).")";
 						}
 						else{
-							$sql.=" AND n.art IN (".implode(',', $hauptart).")";
+							$sql.=" AND ".$n.".art IN (".implode(',', $hauptart).")";
 						}
 					}
 					if(!empty($unterart))$sql.=" AND d.id IN (".implode(',', $unterart).")";
