@@ -1821,10 +1821,7 @@ class GUI {
             $style->set('maxwidth',$dbStyle['maxwidth']);
           }
         }
-
-        if (MAPSERVERVERSION < 500 AND $dbStyle['sizeitem']!='') {
-          $style->set('sizeitem', $dbStyle['sizeitem']);
-        }
+				
         if ($dbStyle['color']!='') {
           $RGB=explode(" ",$dbStyle['color']);
           if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
@@ -5634,9 +5631,6 @@ class GUI {
     }
     if($dbStyle['angle']!='') {
       $style->set('angle', $dbStyle['angle']);
-    }
-    if (MAPSERVERVERSION < 500 AND $dbStyle['sizeitem']!='') {
-      $style->sizeitem = $dbStyle['sizeitem'];
     }
   	if(MAPSERVERVERSION >= 620) {
     	if($dbStyle['geomtransform'] != '') {
@@ -16342,7 +16336,7 @@ class db_mapObj{
 				$dump_text .= "\n\n-- Class " . $classes['extra'][$j] . " des Layers " . $layer_ids[$i] . "\n" . $classes['insert'][$j];
 				$dump_text .= "\nSET @last_class_id=LAST_INSERT_ID();";
 
-				$styles = $database->create_insert_dump('styles', 'Style_ID', 'SELECT styles.Style_ID, `symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`,`sizeitem` FROM styles, u_styles2classes WHERE u_styles2classes.style_id = styles.Style_ID AND Class_ID='.$classes['extra'][$j].' ORDER BY drawingorder');
+				$styles = $database->create_insert_dump('styles', 'Style_ID', 'SELECT styles.Style_ID, `symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth` FROM styles, u_styles2classes WHERE u_styles2classes.style_id = styles.Style_ID AND Class_ID='.$classes['extra'][$j].' ORDER BY drawingorder');
 				for ($k = 0; $k < count($styles['insert']); $k++) {
 					$dump_text .= "\n\n-- Style " . $styles['extra'][$k] . " der Class " . $classes['extra'][$j];
 					$dump_text .= "\n" . $styles['insert'][$k] . "\nSET @last_style_id=LAST_INSERT_ID();";
@@ -17679,7 +17673,7 @@ class db_mapObj{
   }
 
 	function copyStyle($style_id){
-		$sql = "INSERT INTO styles (symbol,symbolname,size,color,backgroundcolor,outlinecolor,minsize,maxsize,angle,angleitem,antialias,width,minwidth,maxwidth,sizeitem,geomtransform) SELECT symbol,symbolname,size,color,backgroundcolor,outlinecolor,minsize,maxsize,angle,angleitem,antialias,width,minwidth,maxwidth,sizeitem,geomtransform FROM styles WHERE Style_ID = ".$style_id;
+		$sql = "INSERT INTO styles (symbol,symbolname,size,color,backgroundcolor,outlinecolor,minsize,maxsize,angle,angleitem,antialias,width,minwidth,maxwidth,geomtransform) SELECT symbol,symbolname,size,color,backgroundcolor,outlinecolor,minsize,maxsize,angle,angleitem,antialias,width,minwidth,maxwidth,geomtransform FROM styles WHERE Style_ID = ".$style_id;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->copyStyle - Kopieren eines Styles:<br>".$sql,4);
 		$query=mysql_query($sql);
     if ($query==0) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
@@ -17855,7 +17849,6 @@ class db_mapObj{
       if($style['width']){$sql.= ", width = '".$style['width']."'";}
       if($style['minwidth']){$sql.= ", minwidth = '".$style['minwidth']."'";}
       if($style['maxwidth']){$sql.= ", maxwidth = '".$style['maxwidth']."'";}
-			if($style['sizeitem']){$sql.= ", sizeitem = '".$style['sizeitem']."'";}
 			if($style['offsetx']){$sql.= ", offsetx = ".$style['offsetx'];}
 			if($style['offsety']){$sql.= ", offsety = ".$style['offsety'];}
 			if($style['polaroffset']){$sql.= ", polaroffset = '".$style['polaroffset']."'";}
@@ -18010,7 +18003,6 @@ class db_mapObj{
     if($formvars["width"] != ''){$sql.="width = '".$formvars["width"]."',";}else{$sql.="width = NULL,";}
     if($formvars["minwidth"] != ''){$sql.="minwidth = '".$formvars["minwidth"]."',";}else{$sql.="minwidth = NULL,";}
     if($formvars["maxwidth"] != ''){$sql.="maxwidth = '".$formvars["maxwidth"]."',";}else{$sql.="maxwidth = NULL,";}
-    $sql.="sizeitem = '".$formvars["sizeitem"]."',";
     if($formvars["offsetx"] != ''){$sql.="offsetx = '".$formvars["offsetx"]."',";}else{$sql.="offsetx = NULL,";}
     if($formvars["offsety"] != ''){$sql.="offsety = '".$formvars["offsety"]."',";}else{$sql.="offsety = NULL,";}
 		if($formvars["polaroffset"] != ''){$sql.="polaroffset = '".$formvars["polaroffset"]."',";}else{$sql.="polaroffset = NULL,";}
