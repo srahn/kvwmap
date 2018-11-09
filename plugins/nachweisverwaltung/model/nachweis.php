@@ -123,6 +123,7 @@ class Nachweis {
   function getZielDateiName($formvars) {
     #2005-11-24_pk
     $pathparts=pathinfo($formvars['Bilddatei_name']);
+		print_r($pathparts);
     $zieldateiname=$formvars['flurid'].'-'.$this->buildNachweisNr($formvars[NACHWEIS_PRIMARY_ATTRIBUTE], $formvars[NACHWEIS_SECONDARY_ATTRIBUTE]).'-'.$formvars['artname'].'-'.str_pad(trim($formvars['Blattnr']),3,'0',STR_PAD_LEFT).'.'.$pathparts['extension'];
     #echo $zieldateiname;
     return $zieldateiname;
@@ -151,11 +152,12 @@ class Nachweis {
         # Name der alten Dokumentendatei gefunden
         $doclocation=$ret[1];
         #echo '<br>Speicherort der alten Dokumentendatei: '.$doclocation.' abgefragt.';
-        if($formvars['Bilddatei'] != ''){
+        if($formvars['Bilddatei'] == ''){
           # Verwenden der vorhandenen Datei für die Bildung des neuen Dateinamens
           # unter dem die Datei nach der Sachdatenänderung gespeichert werden soll
           $formvars['Bilddatei_name']=$doclocation;
         }
+				echo $formvars['Bilddatei_name'];
         # Zusammensetzen des Dateinamen unter dem das Dokument gespeichert werden soll
         $formvars['zieldateiname']=$this->getZielDateiName($formvars);
 				$zieldatei=NACHWEISDOCPATH.$formvars['flurid'].'/'.$this->buildNachweisNr($formvars[NACHWEIS_PRIMARY_ATTRIBUTE], $formvars[NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$formvars['artname'].'/'.$formvars['zieldateiname'];
