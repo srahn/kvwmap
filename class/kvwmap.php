@@ -1746,18 +1746,20 @@ class GUI {
             }
           }
         }
-				if ($layerset['Datentyp'] == 8) {
-					# Skalierung der Stylegröße when Type Chart
-					$style->setbinding(MS_STYLE_BINDING_SIZE, $dbStyle['size']);
-				}
-				else {
-					if($this->map_factor != '') {
-						if(is_numeric($dbStyle['size']))$style->set('size', $dbStyle['size']*$this->map_factor/1.414);
-						else $style->updateFromString("STYLE SIZE [".$dbStyle['size']."] END");
+				if($dbStyle['size'] != ''){
+					if ($layerset['Datentyp'] == 8) {
+						# Skalierung der Stylegröße when Type Chart
+						$style->setbinding(MS_STYLE_BINDING_SIZE, $dbStyle['size']);
 					}
-					else{
-						if(is_numeric($dbStyle['size']))$style->set('size', $dbStyle['size']);
-						else $style->updateFromString("STYLE SIZE [".$dbStyle['size']."] END");
+					else {
+						if($this->map_factor != '') {
+							if(is_numeric($dbStyle['size']))$style->set('size', $dbStyle['size']*$this->map_factor/1.414);
+							else $style->updateFromString("STYLE SIZE [".$dbStyle['size']."] END");
+						}
+						else{
+							if(is_numeric($dbStyle['size']))$style->set('size', $dbStyle['size']);
+							else $style->updateFromString("STYLE SIZE [".$dbStyle['size']."] END");
+						}
 					}
 				}
 
@@ -5623,8 +5625,10 @@ class GUI {
     if($dbStyle['symbol']>0) {
       $style->set('symbol',$dbStyle['symbol']);
     }
-		if(is_numeric($dbStyle['size']))$style->set('size', $dbStyle['size']);
-		else $style->updateFromString("STYLE SIZE [".$dbStyle['size']."] END");
+		if($dbStyle['size'] != ''){
+			if(is_numeric($dbStyle['size']))$style->set('size', $dbStyle['size']);
+			else $style->updateFromString("STYLE SIZE [".$dbStyle['size']."] END");
+		}
     if($dbStyle['width']!='') {
       $style->set('width', $dbStyle['width']);
     }
