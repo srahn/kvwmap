@@ -1703,10 +1703,12 @@ class GUI {
 				}
 				else {
 					if($this->map_factor != '') {
-						$style->set('size', $dbStyle['size']*$this->map_factor/1.414);
+						if(is_numeric($dbStyle['size']))$style->set('size', $dbStyle['size']*$this->map_factor/1.414);
+						else $style->updateFromString("STYLE SIZE [".$dbStyle['size']."] END");
 					}
 					else{
-						$style->set('size', $dbStyle['size']);
+						if(is_numeric($dbStyle['size']))$style->set('size', $dbStyle['size']);
+						else $style->updateFromString("STYLE SIZE [".$dbStyle['size']."] END");
 					}
 				}
 
@@ -5435,7 +5437,8 @@ class GUI {
     if($dbStyle['symbol']>0) {
       $style->set('symbol',$dbStyle['symbol']);
     }
-    $style->set('size', $dbStyle['size']);
+		if(is_numeric($dbStyle['size']))$style->set('size', $dbStyle['size']);
+		else $style->updateFromString("STYLE SIZE [".$dbStyle['size']."] END");
     if($dbStyle['width']!='') {
       $style->set('width', $dbStyle['width']);
     }

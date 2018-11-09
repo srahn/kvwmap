@@ -889,7 +889,8 @@ class GUI {
 						$style->set('size', $dbStyle['size']*$this->map_factor/1.414);
 					}
 					else{
-						$style->set('size', $dbStyle['size']);
+						if(is_numeric($dbStyle['size']))$style->set('size', $dbStyle['size']);
+						else $style->updateFromString("STYLE SIZE [".$dbStyle['size']."] END");
 					}
 				}
 
