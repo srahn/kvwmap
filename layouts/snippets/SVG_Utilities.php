@@ -448,16 +448,20 @@
       path = navX[0]+","+navY[0]+";"+navX[0]+","+navY[0];
       enclosingForm.INPUT_COORD.value  = path;
       enclosingForm.CMD.value          = "ppquery";
+			go_backup = enclosingForm.go.value;
 			enclosingForm.go.value = "Sachdaten";
 			top.overlay_submit(enclosingForm, true);
+			enclosingForm.go.value = go_backup;
      break;
      case "ppquery_box":
 			if(!checkQueryFields())break;
       path = navX[0]+","+navY[0]+";"+navX[2]+","+navY[2];
       enclosingForm.INPUT_COORD.value  = path;
       enclosingForm.CMD.value          = "ppquery";
+			go_backup = enclosingForm.go.value;
 			enclosingForm.go.value = "Sachdaten";
       top.overlay_submit(enclosingForm, true);
+			enclosingForm.go.value = go_backup;
      break;
      case "add_geom_box":
       enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0]+";"+navX[2]+","+navY[2];
