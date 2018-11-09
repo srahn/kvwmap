@@ -969,11 +969,13 @@ class Nachweis {
 					}
           if($stammnr!=''){
 						if($stammnr2!=''){
-							$sql.=" AND COALESCE(NULLIF(REGEXP_REPLACE(n.stammnr, '[^0-9]+' ,''), ''), '0')::integer between ".(int)$stammnr." AND ".(int)$stammnr2;
+							$sql.=" AND COALESCE(NULLIF(REGEXP_REPLACE(n.stammnr, '[^0-9]+' ,'', 'g'), ''), '0')::integer between 
+											COALESCE(NULLIF(REGEXP_REPLACE('".$stammnr."', '[^0-9]+' ,'', 'g'), ''), '0')::integer AND 
+											COALESCE(NULLIF(REGEXP_REPLACE('".$stammnr2."', '[^0-9]+' ,'', 'g'), ''), '0')::integer";
 						}
 						else{
 							if(is_numeric($stammnr)){
-								$sql.=" AND REGEXP_REPLACE(COALESCE(n.stammnr, ''), '[^0-9]+' ,'') = '".$stammnr."'";
+								$sql.=" AND REGEXP_REPLACE(COALESCE(n.stammnr, ''), '[^0-9]+' ,'', 'g') = '".$stammnr."'";
 							}
 							else{
 								$sql.=" AND lower(n.stammnr)='".mb_strtolower($stammnr)."'";
@@ -982,11 +984,13 @@ class Nachweis {
           }
 	        if($rissnr!=''){
 						if($rissnr2!=''){
-							$sql.=" AND COALESCE(NULLIF(REGEXP_REPLACE(n.rissnummer, '[^0-9]+' ,''), ''), '0')::integer between ".(int)$rissnr." AND ".(int)$rissnr2;
+							$sql.=" AND COALESCE(NULLIF(REGEXP_REPLACE(n.rissnummer, '[^0-9]+' ,'', 'g'), ''), '0')::integer between 
+											COALESCE(NULLIF(REGEXP_REPLACE('".$rissnr."', '[^0-9]+' ,'', 'g'), ''), '0')::integer AND 
+											COALESCE(NULLIF(REGEXP_REPLACE('".$rissnr2."', '[^0-9]+' ,'', 'g'), ''), '0')::integer";
 						}
 						else{
 							if(is_numeric($rissnr)){
-								$sql.=" AND REGEXP_REPLACE(COALESCE(n.rissnummer, ''), '[^0-9]+' ,'') = '".$rissnr."'";
+								$sql.=" AND REGEXP_REPLACE(COALESCE(n.rissnummer, ''), '[^0-9]+' ,'', 'g') = '".$rissnr."'";
 							}
 							else{
 								$sql.=" AND lower(n.rissnummer)='".mb_strtolower($rissnr)."'";
