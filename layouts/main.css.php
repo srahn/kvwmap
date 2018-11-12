@@ -1224,6 +1224,7 @@ thead.gle th {
 }
 
 .gle_attribute_value {
+ background-clip: padding-box;
  position: relative;
  padding-left: 4px;
  padding-right: 5px;
