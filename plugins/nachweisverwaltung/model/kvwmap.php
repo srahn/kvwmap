@@ -179,48 +179,51 @@
       # Ausführen von Aktionen vor der Anzeige der Karte und der Zeichnung
 			$oldscale=round($GUI->map_scaledenom);  
 			if ($GUI->formvars['CMD']!='') {
+				$GUI->formvars['unterart'] = $GUI->formvars['unterart_'.$GUI->formvars['hauptart']];
 				$GUI->navMap($GUI->formvars['CMD']);
 				$GUI->user->rolle->saveDrawmode($GUI->formvars['always_draw']);
 			}
 			elseif($oldscale!=$GUI->formvars['nScale'] AND $GUI->formvars['nScale'] != '') {
 				$GUI->scaleMap($GUI->formvars['nScale']);
 			}
-      elseif($nachweis->document['wkt_umring'] != ''){
-				if($GUI->formvars['neuladen'] == ''){
-					# Zoom zum Polygon des Dokumentes
-					$GUI->zoomToNachweis($nachweis,10);
-					$GUI->user->rolle->saveSettings($GUI->map->extent);
-					$GUI->user->rolle->readSettings();
-				}
-        # Übernahme des Nachweisumrings aus der PostGIS-Datenbank
-        $GUI->formvars['newpath'] = transformCoordsSVG($nachweis->document['svg_umring']);
-        $GUI->formvars['newpathwkt'] = $nachweis->document['wkt_umring'];
-        $GUI->formvars['pathwkt'] = $GUI->formvars['newpathwkt'];
-				$GUI->formvars['firstpoly'] = 'true';
-				$GUI->geomload = true;			# Geometrie wird das erste Mal geladen, deshalb nicht in den Weiterzeichnenmodus gehen
-      }
       else{
-				$GUI->add_message('error', 'Achtung! Nachweis hat noch keine Geometrie!');
-      }
-      # Zuweisen der Werte des Dokumentes zum Formular
-      $GUI->formvars['flurid']=$nachweis->document['flurid'];
-      $GUI->formvars['stammnr']=$nachweis->document['stammnr'];
-      $GUI->formvars['hauptart']=$nachweis->document['art'];
-      $GUI->formvars['Blattnr']=$nachweis->document['blattnummer'];
-      $GUI->formvars['datum']=$nachweis->document['datum'];
-      $GUI->formvars['VermStelle']=$nachweis->document['vermstelle'];
-      $GUI->formvars['Blattformat']=$nachweis->document['format'];
-      $GUI->formvars['gueltigkeit']=$nachweis->document['gueltigkeit'];
-			$GUI->formvars['geprueft']=$nachweis->document['geprueft'];
-      $GUI->formvars['Gemeinde']=$nachweis->document['Gemeinde'];
-      $GUI->formvars['Gemarkung']=substr($GUI->formvars['flurid'],0,6);
-      $GUI->formvars['Flur']=intval(substr($GUI->formvars['flurid'],6,9));
-      $GUI->formvars['Bilddatei']=NACHWEISDOCPATH.$nachweis->document['link_datei'];
-      $GUI->formvars['unterart']=$nachweis->document['unterart'];
-      $GUI->formvars['rissnummer']=$nachweis->document['rissnummer'];
-      $GUI->formvars['fortfuehrung']=$nachweis->document['fortfuehrung'];
-      $GUI->formvars['bemerkungen']=$nachweis->document['bemerkungen'];
-			$GUI->formvars['bemerkungen_intern']=$nachweis->document['bemerkungen_intern'];
+	      # Zuweisen der Werte des Dokumentes zum Formular
+				$GUI->formvars['flurid']=$nachweis->document['flurid'];
+				$GUI->formvars['stammnr']=$nachweis->document['stammnr'];
+				$GUI->formvars['hauptart']=$nachweis->document['art'];
+				$GUI->formvars['Blattnr']=$nachweis->document['blattnummer'];
+				$GUI->formvars['datum']=$nachweis->document['datum'];
+				$GUI->formvars['VermStelle']=$nachweis->document['vermstelle'];
+				$GUI->formvars['Blattformat']=$nachweis->document['format'];
+				$GUI->formvars['gueltigkeit']=$nachweis->document['gueltigkeit'];
+				$GUI->formvars['geprueft']=$nachweis->document['geprueft'];
+				$GUI->formvars['Gemeinde']=$nachweis->document['Gemeinde'];
+				$GUI->formvars['Gemarkung']=substr($GUI->formvars['flurid'],0,6);
+				$GUI->formvars['Flur']=intval(substr($GUI->formvars['flurid'],6,9));
+				$GUI->formvars['Bilddatei']=NACHWEISDOCPATH.$nachweis->document['link_datei'];
+				$GUI->formvars['unterart']=$nachweis->document['unterart'];
+				$GUI->formvars['rissnummer']=$nachweis->document['rissnummer'];
+				$GUI->formvars['fortfuehrung']=$nachweis->document['fortfuehrung'];
+				$GUI->formvars['bemerkungen']=$nachweis->document['bemerkungen'];
+				$GUI->formvars['bemerkungen_intern']=$nachweis->document['bemerkungen_intern'];
+				if($nachweis->document['wkt_umring'] != ''){
+					if($GUI->formvars['neuladen'] == ''){
+						# Zoom zum Polygon des Dokumentes
+						$GUI->zoomToNachweis($nachweis,10);
+						$GUI->user->rolle->saveSettings($GUI->map->extent);
+						$GUI->user->rolle->readSettings();
+					}
+					# Übernahme des Nachweisumrings aus der PostGIS-Datenbank
+					$GUI->formvars['newpath'] = transformCoordsSVG($nachweis->document['svg_umring']);
+					$GUI->formvars['newpathwkt'] = $nachweis->document['wkt_umring'];
+					$GUI->formvars['pathwkt'] = $GUI->formvars['newpathwkt'];
+					$GUI->formvars['firstpoly'] = 'true';
+					$GUI->geomload = true;			# Geometrie wird das erste Mal geladen, deshalb nicht in den Weiterzeichnenmodus gehen
+				}
+				else{
+					$GUI->add_message('error', 'Achtung! Nachweis hat noch keine Geometrie!');
+				}
+			}
 
       # Abfragen der Gemarkungen
       # 2006-01-26 pk
@@ -1159,7 +1162,8 @@
 	    }
 	  }
     $oldscale=round($GUI->map_scaledenom);  
-    if ($GUI->formvars['CMD']!='') {
+    if ($GUI->formvars['CMD']!=''){
+			$GUI->formvars['unterart'] = $GUI->formvars['unterart_'.$GUI->formvars['hauptart']];
       $GUI->navMap($GUI->formvars['CMD']);
       $GUI->user->rolle->saveDrawmode($GUI->formvars['always_draw']);
     }

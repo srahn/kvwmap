@@ -156,7 +156,6 @@ class Nachweis {
           # unter dem die Datei nach der Sachdatenänderung gespeichert werden soll
           $formvars['Bilddatei_name']=$doclocation;
         }
-				echo $formvars['Bilddatei_name'];
         # Zusammensetzen des Dateinamen unter dem das Dokument gespeichert werden soll
         $formvars['zieldateiname']=$this->getZielDateiName($formvars);
 				$zieldatei=NACHWEISDOCPATH.$formvars['flurid'].'/'.$this->buildNachweisNr($formvars[NACHWEIS_PRIMARY_ATTRIBUTE], $formvars[NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$formvars['artname'].'/'.$formvars['zieldateiname'];
