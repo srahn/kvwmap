@@ -19,10 +19,6 @@
 		document.getElementById("svghelp").SVGcoord_input_submit();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 	}
 	
-	function add_parallel_polygon_submit(){
-		document.getElementById("svghelp").SVGadd_parallel_polygon_submit();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-	}	
-	
 	function add_ortho_point(world_x, world_y, local_x, local_y, deactivate){
 		document.getElementById("svghelp").SVGadd_ortho_point(world_x, world_y, local_x, local_y, deactivate);			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 	}	
@@ -443,7 +439,7 @@
       enclosingForm.CMD.value = cmd;
       submit();
      break;
-     case "ppquery_point":
+		 case "ppquery_point":
 			if(!checkQueryFields())break;
       path = navX[0]+","+navY[0]+";"+navX[0]+","+navY[0];
       enclosingForm.INPUT_COORD.value  = path;
@@ -809,7 +805,7 @@ $basicfunctions.= '
 				if(pathx_second.length > 1){
 					enclosingForm.firstpoly.value = "true";
 					enclosingForm.secondpoly.value = true;
-					top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=add_parallel_polygon&width="+enclosingForm.bufferwidth.value+"&side="+enclosingForm.bufferside.value+"&subtract="+enclosingForm.buffersubtract.value+"&geotype=line&resulttype=svgwkt&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+					top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=add_parallel_polygon&width="+enclosingForm.bufferwidth.value+"&geotype=line&resulttype=svgwkt&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 				}				
 			break;
 			case "add_buffer_within_polygon":
@@ -2058,8 +2054,6 @@ function mouseup(evt){
 	$bufferfunctions ='
 
 		bufferfunctions = true;
-		
-		top.document.getElementById("svghelp").SVGadd_parallel_polygon_submit = add_parallel_polygon_submit;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
 		function add_buffer(){
 			buffer = prompt("Breite des Puffers in Metern:", enclosingForm.bufferwidth.value);
@@ -2095,16 +2089,8 @@ function mouseup(evt){
 		}
 		
 		function add_parallel_polygon(){
-			enclosingForm.last_doing.value = "add_parallel_polygon";			
-			var Msg = top.$("#message_box");
-			Msg.show();
-			content = \'<div style="position: absolute;top: 0px;right: 0px"><a href="javascript:void(0)" onclick="top.$(\\\'#message_box\\\').hide();" title="Schlie&szlig;en"><img style="border:none" src="'.GRAPHICSPATH.'exit2.png"></img></a></div>\';
-			content+= \'<div style="width:320px;height: 30px">einseitig gepufferte Linie erzeugen</div>\';
-			content+= \'<table style="padding: 5px;width: 100%"><tr><td align="right" class="px15">Breite:</td><td><input style="width: 110px" type="text" id="buffer_width" name="buffer_width" value="\'+enclosingForm.bufferwidth.value+\'">&nbsp;m</td></tr>\';
-			content+= \'<tr><td align="right">Seite:&nbsp;</td><td><select name="buffer_side" id="buffer_side" style="width: 110px"><option value="left">links</option><option value="right">rechts</option></select></td></tr>\';
-			content+= \'<tr><td align="right">Aktion:&nbsp;</td><td><select name="buffer_subtract" id="buffer_subtract" style="width: 110px"><option value="0">hinzufügen</option><option value="1">abziehen</option></select></td></tr></table>\';
-			content+= \'<br><input type="button" value="OK" onclick="add_parallel_polygon_submit()">\';
-			Msg.html(content);
+			enclosingForm.last_doing.value = "add_parallel_polygon";
+			enclosingForm.bufferwidth.value = prompt("Breite des Polygons in Metern:", enclosingForm.bufferwidth.value);
 			if(enclosingForm.pathwkt.value == "" && enclosingForm.newpath.value != ""){
 				enclosingForm.pathwkt.value = buildwktpolygonfromsvgpath(enclosingForm.newpath.value);
 			}
@@ -2116,13 +2102,6 @@ function mouseup(evt){
 		  if(enclosingForm.secondpoly.value == "true"){
 				applypolygons();
 			}
-		}
-		
-		function add_parallel_polygon_submit(){
-			enclosingForm.bufferwidth.value = enclosingForm.buffer_width.value;
-			enclosingForm.bufferside.value = enclosingForm.buffer_side.value;
-			enclosingForm.buffersubtract.value = enclosingForm.buffer_subtract.value;
-			top.$(\'#message_box\').hide();
 		}
 
 	';
@@ -2864,7 +2843,7 @@ function mouseup(evt){
 					str = enclosingForm.pathy_second.value;
 					enclosingForm.pathy_second.value = str.substring(0, str.lastIndexOf(";"));
 					path_second = buildsvglinepath(pathx_second, pathy_second);
-					top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=add_parallel_polygon&width="+enclosingForm.bufferwidth.value+"&side="+enclosingForm.bufferside.value+"&subtract="+enclosingForm.buffersubtract.value+"&geotype=line&resulttype=svgwkt&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+					top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=add_parallel_polygon&width="+enclosingForm.bufferwidth.value+"&geotype=line&resulttype=svgwkt&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 					redrawsecondpolygon();
 				}
 			break;
@@ -3404,7 +3383,7 @@ $measurefunctions = '
 	  ';
 		
 	$SVGvars_navbuttons .= ppquery($strInfo);
-
+		
 	$navbuttons ='
 	    <g id="buttons_NAV" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()">
 				<rect x="0" y="0" rx="3" ry="3" width="'.$last_x.'" height="36" class="navbutton_bg"/>
@@ -3715,7 +3694,7 @@ $measurefunctions = '
       <g id="parallel_polygon" transform="translate('.$last_x.' 0)">
         <rect id="buffer2" onmouseover="show_tooltip(\''.$strParallelPolygon.'\',evt.clientX,evt.clientY)" onmousedown="add_parallel_polygon();hide_tooltip();highlightbyid(\'buffer2\');" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
 				<g class="navbutton navbutton_semifill navbutton_stroke" transform="translate(5 3) scale(1.1)">
-					<polyline class="navbutton_nofill" points="461 270 692 532" transform="translate(0 -41) scale(0.070) rotate(94 197 419)" style="stroke-dasharray:2,2;stroke-width:20"/>
+					<polyline class="navbutton_nofill" points="476 285 677 517" transform="translate(0 -41) scale(0.070) rotate(94 197 419)" style="stroke-width:20"/>
 					<polygon points="574 546 647 483 506 320 433 383 574 546"
 						transform="translate(0 -41) scale(0.070) rotate(94 197 419)"
 						 style="stroke-width:20"/>
