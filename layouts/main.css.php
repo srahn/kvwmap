@@ -1788,7 +1788,11 @@ tbody.gle tr:hover {
 	overflow-x: hidden;
 }
 
-.scrolltable td {
+.nw_treffer_table tr:hover {
+	background-color: lightgrey;
+}
+
+.nw_treffer_table td {
 	padding: 5 0 5 0;
 }
 
