@@ -115,8 +115,11 @@ function clear(){
 	document.GUI.suchgemarkung.value = '';
 	document.GUI.suchflur.value = '';
 	document.GUI.suchstammnr.value = '';
+	document.GUI.suchstammnr2.value = '';
 	document.GUI.suchrissnummer.value = '';
+	document.GUI.suchrissnummer2.value = '';
 	document.GUI.suchfortfuehrung.value = '';
+	document.GUI.suchfortfuehrung2.value = '';
 	document.GUI.sdatum.value = '';
 	document.GUI.sdatum2.value = '';
 	document.GUI.sVermStelle.value = '';
