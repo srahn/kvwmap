@@ -769,6 +769,9 @@ class Nachweis {
 		$antr_nr = $explosion[0];
 		$stelle_id = $explosion[1];
 		$n = 'n';
+		if($order==''){
+			$order="flurid, stammnr, datum";
+		}
 		$order = str_replace('blattnummer', "NULLIF(regexp_replace(blattnummer, '\D', '', 'g'), '')::int", $order);		// nach Blattnummer nummerisch sortieren
     # Die Funktion liefert die Nachweise nach verschiedenen Suchverfahren.
     # Vor dem Suchen nach Nachweisen werden jeweils die Suchparameter überprüft    
@@ -900,9 +903,6 @@ class Nachweis {
 				if($suchbemerkung != ''){
           $sql.=" AND n.bemerkungen LIKE '%".$suchbemerkung."%'";
         }				
-        if ($order=='') {
-          $order="flurid, stammnr, datum";
-        }
         if ($richtung=='' OR $richtung=='ASC'){
           $richtung=="ASC";
           $this->richtung="DESC";
@@ -1031,9 +1031,6 @@ class Nachweis {
 					if($suchbemerkung != ''){
 						$sql.=" AND lower(n.bemerkungen) LIKE '%".mb_strtolower($suchbemerkung)."%'";
 					}
-          if ($order=='') {
-            $order="flurid, stammnr, datum";
-          }
           if ($richtung=='' OR $richtung=='ASC'){
             $richtung=="ASC";
             $this->richtung="DESC";
@@ -1067,7 +1064,7 @@ class Nachweis {
           # Suche mit Suchpolygon
           #echo '<br>Suche mit Suchpolygon.';
           $this->debug->write('Abfragen der Nachweise die das Polygon schneiden',4);
-          $sql ="SELECT distinct n.*, ".$order.", st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS unterart, d.art AS unterart_name";
+          $sql ="SELECT distinct n.*, NULLIF(regexp_replace(blattnummer, '\D', '', 'g'), '')::int, st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS unterart, d.art AS unterart_name";
           $sql.=" FROM nachweisverwaltung.n_nachweise AS n";
 					$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
           $sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id"; 
@@ -1088,10 +1085,7 @@ class Nachweis {
 							$sql.=" AND ".$n.".art IN (".implode(',', $hauptart).")";
 						}
 					}
-					if(!empty($unterart))$sql.=" AND d.id IN (".implode(',', $unterart).")";
-          if ($order=='') {
-            $order="flurid, stammnr, datum";
-          }					
+					if(!empty($unterart))$sql.=" AND d.id IN (".implode(',', $unterart).")";					
           if ($richtung=='' OR $richtung=='ASC'){
             $richtung=="ASC";
             $this->richtung="DESC";
