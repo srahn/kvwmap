@@ -750,7 +750,8 @@
 			var nachweise = new Array();\n";
 			
 		for($i = 0; $i < count($GUI->nachweis->Dokumente); $i++){
-			$html.= "			nachweise.push(JSON.parse('".json_encode($GUI->nachweis->Dokumente[$i])."'));\n";
+			$json = str_replace('\\r', '\\\r', str_replace('\\n', '\\\n', json_encode($GUI->nachweis->Dokumente[$i])));
+			$html.= "			nachweise.push(JSON.parse('".$json."'));\n";
 		}	
 		
 		$html.= "
