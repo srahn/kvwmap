@@ -389,7 +389,7 @@ BEGIN;
 				SET
 					flaeche = (
 						SELECT
-							ST_Union(flaechengeometrie)
+							ST_Multi(ST_Union(flaechengeometrie))
 						FROM
 							ukos_okstra.querschnittstreifen
 						WHERE
