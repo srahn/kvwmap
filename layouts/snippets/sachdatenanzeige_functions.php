@@ -44,12 +44,26 @@ include('funktionen/input_check_functions.php');
 			var operator = scope.querySelector('#vcheck_operator_'+dependent).value;
 			var value = scope.querySelector('#vcheck_value_'+dependent).value;
 			if(operator == '=')operator = '==';
-			if(eval("'"+object.value+"' "+operator+" '"+value+"'"))
+			if(field_has_value(object, operator, value))
 				scope.querySelector('#tr_'+layer_id+'_'+dependent+'_'+k).style.display = '';
 			else
 				scope.querySelector('#tr_'+layer_id+'_'+dependent+'_'+k).style.display = 'none';
 		})
 	}
+	
+	field_has_value = function(field, operator, value){
+		if(field.type == 'checkbox'){
+			if((operator == '==' && value == 't' && field.checked) || 
+				 (operator == '==' && value == 'f' && !field.checked) ||
+				 (operator == '!=' && value == 't' && !field.checked) ||
+				 (operator == '!=' && value == 'f' && field.checked)
+				 )return true;
+			else return false;
+		}
+		else{
+			return eval("'"+field.value+"' "+operator+" '"+value+"'")
+		}
+	}	
 	
 	toggleGroup = function(groupname){			// fuer die spaltenweise Ansicht
 		var group_elements = document.querySelectorAll('.group_'+groupname);
