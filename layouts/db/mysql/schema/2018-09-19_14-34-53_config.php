@@ -1,4 +1,38 @@
 <?
+function getMySQLVersion() {
+  return getVersionFromText(
+    shell_exec('mysql -V')
+  );
+}
+
+function getPostgreSQLVersion() { 
+  return getVersionFromText(
+    shell_exec('psql -h $PGSQL_PORT_5432_TCP_ADDR -V')
+  );
+}
+
+function getMapServerVersion() {
+  return getVersionFromText(
+    shell_exec('/usr/lib/cgi-bin/mapserv -v')
+  );
+}
+
+function getPHPVersion() {
+  return getVersionFromText(
+    shell_exec('php -v')
+  );
+}
+
+function getVersionFromText($text) {
+  preg_match('@[0-9]+\.[0-9]+\.[0-9]+@', $text, $version);
+  return $version[0];
+}
+
+$cwd = getcwd();
+$applversion = basename($cwd);
+$rest = dirname($cwd);
+$wwwpath = basename($rest) . '/';
+$installpath = dirname($rest) . '/';
 
 $constants = array (
   'HEADER' => 
@@ -348,7 +382,7 @@ z.B. custom/ds_gvo.htm',
   'POSTGRESVERSION' => 
   array (
     'name' => 'POSTGRESVERSION',
-    'value' => '940',
+    'value' => (getenv('PGSQL_ENV_PG_MAJOR') == '' ? '940' : versionFormatter(getenv('PGSQL_ENV_PG_MAJOR'))),
     'prefix' => '',
     'type' => 'string',
     'description' => 'PostgreSQL Server Version                         # Version 1.6.4
@@ -360,7 +394,7 @@ z.B. custom/ds_gvo.htm',
   'MYSQLVERSION' => 
   array (
     'name' => 'MYSQLVERSION',
-    'value' => '550',
+    'value' => (getenv('MYSQL_ENV_MYSQL_MAJOR') == '' ? '550' : versionFormatter(getenv('MYSQL_ENV_MYSQL_MAJOR'))),
     'prefix' => '',
     'type' => 'string',
     'description' => 'MySQLSQL Server Version                         # Version 1.6.4
@@ -372,7 +406,7 @@ z.B. custom/ds_gvo.htm',
   'MAPSERVERVERSION' => 
   array (
     'name' => 'MAPSERVERVERSION',
-    'value' => '641',
+    'value' => (getMapServerVersion() == '' ? '641' : versionFormatter(getMapServerVersion())),
     'prefix' => '',
     'type' => 'string',
     'description' => 'Mapserver Version                             # Version 1.6.8
@@ -384,7 +418,7 @@ z.B. custom/ds_gvo.htm',
   'PHPVERSION' => 
   array (
     'name' => 'PHPVERSION',
-    'value' => '562',
+    'value' => (getPHPVersion() == '' ? '562' : versionFormatter(getPHPVersion())),
     'prefix' => '',
     'type' => 'string',
     'description' => 'PHP-Version
@@ -829,7 +863,7 @@ der Seite immer in den Modus "Polygon zeichnen" wechselt
   'APPLVERSION' => 
   array (
     'name' => 'APPLVERSION',
-    'value' => 'kvwmap_dev/',
+    'value' => $applversion . '/',
     'prefix' => '',
     'type' => 'string',
     'description' => '',
@@ -840,7 +874,7 @@ der Seite immer in den Modus "Polygon zeichnen" wechselt
   'INSTALLPATH' => 
   array (
     'name' => 'INSTALLPATH',
-    'value' => '/var/www/',
+    'value' => $installpath,
     'prefix' => '',
     'type' => 'string',
     'description' => 'Installationspfad
@@ -852,7 +886,7 @@ der Seite immer in den Modus "Polygon zeichnen" wechselt
   'WWWROOT' => 
   array (
     'name' => 'WWWROOT',
-    'value' => 'apps/',
+    'value' => $wwwpath,
     'prefix' => 'INSTALLPATH',
     'type' => 'string',
     'description' => '',
@@ -875,7 +909,7 @@ der Seite immer in den Modus "Polygon zeichnen" wechselt
   'URL' => 
   array (
     'name' => 'URL',
-    'value' => 'https://gdi-service.de/',
+    'value' => 'http://' . $_SERVER['HTTP_HOST'] . '/',
     'prefix' => '',
     'type' => 'string',
     'description' => '',
@@ -1526,7 +1560,7 @@ Hier kann jedoch noch der Defaultwert gesetzt werden
   'MYSQL_PASSWORD' => 
   array (
     'name' => 'MYSQL_PASSWORD',
-    'value' => getenv('MYSQL_ENV_MYSQL_ROOT_PASSWORD'),
+    'value' => (getenv('KVWMAP_INIT_PASSWORD') == '' ? 'KvwMapPW1' : getenv('KVWMAP_INIT_PASSWORD')),
     'prefix' => '',
     'type' => 'password',
     'description' => '',
@@ -1581,7 +1615,7 @@ Hier kann jedoch noch der Defaultwert gesetzt werden
   'POSTGRES_PASSWORD' => 
   array (
     'name' => 'POSTGRES_PASSWORD',
-    'value' => getenv('PGSQL_ROOT_PASSWORD'),
+    'value' => (getenv('KVWMAP_INIT_PASSWORD') == '' ? 'KvwMapPW1' : getenv('KVWMAP_INIT_PASSWORD')),
     'prefix' => '',
     'type' => 'password',
     'description' => '',
