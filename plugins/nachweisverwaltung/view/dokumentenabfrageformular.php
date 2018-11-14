@@ -115,8 +115,11 @@ function clear(){
 	document.GUI.suchgemarkung.value = '';
 	document.GUI.suchflur.value = '';
 	document.GUI.suchstammnr.value = '';
+	document.GUI.suchstammnr2.value = '';
 	document.GUI.suchrissnummer.value = '';
+	document.GUI.suchrissnummer2.value = '';
 	document.GUI.suchfortfuehrung.value = '';
+	document.GUI.suchfortfuehrung2.value = '';
 	document.GUI.sdatum.value = '';
 	document.GUI.sdatum2.value = '';
 	document.GUI.sVermStelle.value = '';
@@ -155,6 +158,14 @@ function delete_dokauswahl(){
 		alert('Es wurde keine Dokumentauswahl ausgewählt.');
 	}
 }
+
+function scrollToSelected(select){
+  for(var i = 0; i < select.options.length; i++){
+		if(select.options[i].selected){
+			select.scrollTop = i * select.options[i].offsetHeight;
+		}
+	}
+}
   
 //-->
 </script>
@@ -170,36 +181,52 @@ else {
 
 <table style="border: 1px solid; border-color: #eeeeee; border-left: none; border-right: none" border="0" cellpadding="4" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr> 
-    <td colspan="3"> <div align="center"></div>      <div align="center"><h2><?php echo $this->titel; ?></h2> 
-    </div></td>
+    <td colspan="3" style="height: 30px">
+			<div align="center"><h2><?php echo $this->titel; ?></h2></div>
+		</td>
   </tr>
   <tr> 
-    <td rowspan="19">&nbsp;</td>
-    <td rowspan="19"> 
+    <td rowspan="17">&nbsp;</td>
+    <td rowspan="17" valign="top" align="right" style="border-right: 1px solid #bbb"> 
       <?php
 				include(LAYOUTPATH.'snippets/SVG_polygon_box_query_area.php')
 			?>
+			<br>
+			<input type="checkbox" name="always_draw" value="1" <?if($always_draw == 1 OR $always_draw == 'true')echo 'checked'; ?>>&nbsp;weiterzeichnen&nbsp;&nbsp;
     </td>
-    <td></td>
   </tr>
   <tr> 
     <td colspan="2">Recherche nach folgenden Dokumenten:</td>
   </tr>
-<?	foreach($this->hauptdokumentarten as $hauptdokumentart){	?>
-			<tr> 
-				<td colspan="2">
-					<input type="checkbox" name="suchhauptart[]" value="<? echo $hauptdokumentart['id']; ?>"<?php if(in_array($hauptdokumentart['id'], $this->formvars['suchhauptart'])) { ?> checked<?php } ?>>&nbsp;<? echo $hauptdokumentart['art'].'&nbsp;('.$hauptdokumentart['abkuerzung'].')'; ?>
-<?				if($this->dokumentarten[$hauptdokumentart['id']] != ''){	?>
-					:&nbsp;<select name="suchunterart[]" multiple="true" size="1" style="position: absolute;width: 185px" onmouseover="this.size=10" onmouseout="this.size=1">
-						<option value="">alle</option>
-						<? for($i = 0; $i < count($this->dokumentarten[$hauptdokumentart['id']]); $i++){?>
-							<option <? if(in_array($this->dokumentarten[$hauptdokumentart['id']][$i]['id'], $this->formvars['suchunterart'])){echo 'selected';} ?> value="<? echo $this->dokumentarten[$hauptdokumentart['id']][$i]['id']; ?>"><? echo $this->dokumentarten[$hauptdokumentart['id']][$i]['art']; ?></option>	
-						<? } ?>
-					</select>
-					<? } ?>
-				</td>
-			</tr>
-<? } ?>
+	<tr>
+		<td colspan="2">
+			<table border="0" cellpadding="4" cellspacing="0" style="margin-left: -8px;">
+		<?	$z_index = count($this->hauptdokumentarten);
+				foreach($this->hauptdokumentarten as $hauptdokumentart){	?>
+					<tr> 
+						<td>
+							<div style="display: flex;">
+								<div style="width: 208px;display: flex;justify-content: flex-start">
+									<div><input type="checkbox" name="suchhauptart[]" value="<? echo $hauptdokumentart['id']; ?>"<?php if(in_array($hauptdokumentart['id'], $this->formvars['suchhauptart'])) { ?> checked<?php } ?>>&nbsp;</div>
+									<div><? echo $hauptdokumentart['art'].'&nbsp;('.$hauptdokumentart['abkuerzung'].')'; ?></div>
+								</div>
+								<div style="width: 215px;">
+				<?				if($this->dokumentarten[$hauptdokumentart['id']] != ''){	?>
+									&nbsp;<select name="suchunterart[]" multiple="true" size="1" style="z-index:<? echo $z_index-=1; ?>;position: absolute;width: 219px" onmouseenter="this.size=this.length" onmouseleave="this.size=1;scrollToSelected(this);">
+										<option value="">alle</option>
+										<? for($i = 0; $i < count($this->dokumentarten[$hauptdokumentart['id']]); $i++){?>
+											<option <? if(in_array($this->dokumentarten[$hauptdokumentart['id']][$i]['id'], $this->formvars['suchunterart'])){echo 'selected';} ?> value="<? echo $this->dokumentarten[$hauptdokumentart['id']][$i]['id']; ?>"><? echo $this->dokumentarten[$hauptdokumentart['id']][$i]['art']; ?></option>	
+										<? } ?>
+									</select>
+									<? } ?>
+								</div>
+							</div>
+						</td>
+					</tr>
+		<? } ?>
+			</table>
+		</td>
+	</tr>
 	<tr>
 		<td colspan="2">
 			<table cellpadding="2" cellspacing="0">
@@ -212,12 +239,12 @@ else {
 							<tr align="center"> 
 								<td colspan="2"  align="right">
 									Name:&nbsp;<input type="text" name="dokauswahl_name" value="<? echo $this->formvars['dokauswahl_name']; ?>">
-									<input type="button" style="width:74px" name="speichern" value="Speichern" onclick="save_dokauswahl();">
+									<input type="button" style="width:80px" name="speichern" value="Speichern" onclick="save_dokauswahl();">
 								</td>
 							</tr>
 							<tr>
 								<td align="right"  colspan="2">
-									<input type="button" style="width:74px" name="delete" value="Löschen" onclick="delete_dokauswahl();">
+									<input type="button" style="width:80px" name="delete" value="Löschen" onclick="delete_dokauswahl();">
 									<select name="dokauswahlen">
 										<option value="">  -- Auswahl --  </option>
 										<?
@@ -228,7 +255,7 @@ else {
 											}
 										?>
 									</select>
-									<input type="button" style="width:74px" name="laden" value="Laden" onclick="document.GUI.submit();">
+									<input type="button" style="width:80px" name="laden" value="Laden" onclick="document.GUI.submit();">
 								</td>
 							</tr>
 						</table>
@@ -358,6 +385,9 @@ else {
 			<span class="fett">Auswahl im Kartenausschnitt über Suchpolygon</span>
 		</td>
   </tr>
+	<tr>
+		<td colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" name="alle_der_messung" value="1" <? if($this->formvars['alle_der_messung'] == 1)echo 'checked'; ?>>&nbsp;alle der Messung</td>
+	</tr>	
   <tr> 
     <td valign="top" colspan="3">
 			<input type="radio" name="abfrageart" value="antr_nr" <?php if ($this->formvars['abfrageart']=='antr_nr') { ?> checked<?php } ?>>
@@ -393,10 +423,6 @@ else {
   </tr>
   <tr> 
     <td align="center" colspan="2"><input type="button" name="senden" value="Suchen" onclick="save();"> </td>
-  </tr>
-  <tr>
-  	<td></td>
-  	<td align="right"><input type="checkbox" name="always_draw" value="1" <?if($always_draw == 1 OR $always_draw == 'true')echo 'checked'; ?>>&nbsp;weiterzeichnen&nbsp;&nbsp;</td>
   </tr>
 </table>
 		

@@ -39,6 +39,10 @@
 	$this->deactivatelayer="Deactivate layer";
 	$this->activatelayer="Activate layer";
 	$this->printversion="Printversion";
+	$this->strLimit = "Record Count:";
+	$this->layerOptions = "Options";
 	$this->strExceeded = "exceeded";
+	$this->transparency = "Transparency";
+	$this->label = "Label";
 ?>
 	

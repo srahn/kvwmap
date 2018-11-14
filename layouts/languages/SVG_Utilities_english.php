@@ -11,7 +11,7 @@
   $strRuler="ruler";
   $strBuffer="create buffer";
 	$strBufferedLine="add buffered line";
-	$strParallelPolygon="add parallel polygon";
+	$strParallelPolygon="create one-side buffered line";
 	$strMoveGeometry="move geometry";
 	$strReverse="change line orientation";
 ?>  

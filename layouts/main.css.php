@@ -1224,6 +1224,7 @@ thead.gle th {
 }
 
 .gle_attribute_value {
+ background-clip: padding-box;
  position: relative;
  padding-left: 4px;
  padding-right: 5px;
@@ -1788,7 +1789,11 @@ tbody.gle tr:hover {
 	overflow-x: hidden;
 }
 
-.scrolltable td {
+.nw_treffer_table tr:hover {
+	background-color: lightgrey;
+}
+
+.nw_treffer_table td {
 	padding: 5 0 5 0;
 }
 

@@ -422,15 +422,28 @@ class stelle {
 		return $ret[1];
 	}
 
-	function getStellen($order) {
-		if ($order != '') $order = " ORDER BY `" . $order . "`";
+	function getStellen($order, $user_id = 0) {
+		global $admin_stellen;
+
+		if ($order != '') {
+			$order = " ORDER BY `" . $order . "`";
+		}
+
+		if ($user_id > 0 AND !in_array($this->id, $admin_stellen)) {
+			$where = "
+				JOIN `rolle` AS r ON s.ID = r.stelle_id
+				WHERE r.user_id = " . $user_id . "
+			";
+		}
+
 		$sql = "
 			SELECT
 				s.ID,
 				s.Bezeichnung
 			FROM
 				`stelle` AS s" .
-			$order . "
+				$where .
+				$order . "
 		";
 		#echo '<br>sql: ' . $sql;
 

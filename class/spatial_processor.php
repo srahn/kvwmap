@@ -31,8 +31,6 @@
 
 #-----------------------------------------------------------------------------------------------------------------
 
-if(!defined('EPSGCODE_ALKIS'))define('EPSGCODE_ALKIS', 0);	// EPSGCODE_ALKIS ist nur bei Verwendung des Plugin alkis definiert
-
 class spatial_processor {
   
   function spatial_processor($rolle, $database, $pgdatabase) {
@@ -270,7 +268,7 @@ class spatial_processor {
 			
 			case 'add_parallel_polygon':{
 				if($formvars['width'] == ''){$formvars['width'] = 50;}
-				$rs = $this->add_parallel_polygon($polywkt1, $polywkt2, $formvars['width']);
+				$rs = $this->add_parallel_polygon($polywkt1, $polywkt2, $formvars['width'], $formvars['side'], $formvars['subtract']);
 				$result = $rs['svg'];
 				$result .= '||';
 				$result .= $rs['wkt'];
@@ -445,12 +443,11 @@ class spatial_processor {
     return $rs;
   }
 	
-	function add_parallel_polygon($geom_1, $geom_2, $width){
+	function add_parallel_polygon($geom_1, $geom_2, $width, $side, $subtract){
 		if($geom_1 == ''){
 			$geom_1 = 'GEOMETRYCOLLECTION EMPTY';
 		}
-		if($width < 0){		# eine negative Breite bewirkt das Abziehen der Puffergeometrie von der aktuellen Geometrie
-			$width = $width * -1;
+		if($subtract == 1){
 			$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom,0,8) as svg FROM (SELECT st_astext(st_difference(st_geomfromtext('".$geom_1."'), geom)) as geom FROM st_dump((SELECT ST_Polygonize(st_union(ST_Boundary(ST_Buffer(the_geom, ".$width.", 'endcap=flat join=round')), the_geom)) AS buffer_sides FROM (SELECT ST_GeomFromText('".$geom_2."') AS the_geom) AS table1))) as foo";
 		}
 		else{
@@ -461,7 +458,8 @@ class spatial_processor {
       $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
     }
     else {
-    	$rs = pg_fetch_array($ret[1]);
+    	$rs = pg_fetch_array($ret[1]);												# linke Seite
+			if($side == 'right')$rs = pg_fetch_array($ret[1]);		# rechte Seite
     }
     return $rs;
   }

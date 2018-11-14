@@ -148,20 +148,24 @@ function CalendarJS() {
 				},
 				
 				this.changeTime = function(evt){
-					if(evt.target.id == 'tp_hours')
-						this.now.setHours(parseInt(evt.target.value));
-					else if(evt.target.id == 'tp_minutes')
-						this.now.setMinutes(parseInt(evt.target.value));
-					else
-						this.now.setSeconds(parseInt(evt.target.value));
+					if(evt.target.value != ''){
+						if(evt.target.id == 'tp_hours')
+							this.now.setHours(parseInt(evt.target.value));
+						else if(evt.target.id == 'tp_minutes')
+							this.now.setMinutes(parseInt(evt.target.value));
+						else
+							this.now.setSeconds(parseInt(evt.target.value));
+					}
 				},
 				
 				this.tp_keydown = function(evt){
-					var d = 0;
-					if(evt.keyCode == '38')d = 1;
-					if(evt.keyCode == '40')d = -1;
-					value = parseInt(parseInt(evt.target.value) + d);
-					this.Instanz.setTime(evt, value);
+					if(evt.target.value != ''){
+						var d = 0;
+						if(evt.keyCode == '38')d = 1;
+						if(evt.keyCode == '40')d = -1;
+						value = parseInt(parseInt(evt.target.value) + d);
+						this.Instanz.setTime(evt, value);
+					}
 				},
 				
 				this.mousewheelchange = function(evt){

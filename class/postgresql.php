@@ -27,37 +27,37 @@
 # Klasse Datenbank für ALB Modell und PostgreSQL #
 ##################################################
 class pgdatabase {
-  var $ist_Fortfuehrung;
-  var $debug;
-  var $loglevel;
-  var $defaultloglevel;
-  var $logfile;
-  var $defaultlogfile;
-  var $commentsign;
-  var $blocktransaction;
+	var $ist_Fortfuehrung;
+	var $debug;
+	var $loglevel;
+	var $defaultloglevel;
+	var $logfile;
+	var $defaultlogfile;
+	var $commentsign;
+	var $blocktransaction;
 
 	function pgdatabase() {
-	  global $debug;
-    $this->debug=$debug;
-    $this->loglevel=LOG_LEVEL;
- 		$this->defaultloglevel=LOG_LEVEL;
- 		global $log_postgres;
-    $this->logfile=$log_postgres;
- 		$this->defaultlogfile=$log_postgres;
-    $this->ist_Fortfuehrung=1;
-    $this->type='postgresql';
-    $this->commentsign='--';
-    # Wenn dieser Parameter auf 1 gesetzt ist werden alle Anweisungen
-    # START TRANSACTION, ROLLBACK und COMMIT unterdrï¿½ckt, so daï¿½ alle anderen SQL
-    # Anweisungen nicht in Transactionsblï¿½cken ablaufen.
-    # Kann zur Steigerung der Geschwindigkeit von groï¿½en Datenbestï¿½nden verwendet werden
-    # Vorsicht: Wenn Fehler beim Einlesen passieren, ist der Datenbestand inkonsistent
-    # und der Einlesevorgang muss wiederholt werden bis er fehlerfrei durchgelaufen ist.
-    # Dazu Fehlerausschriften bearchten.
-    $this->blocktransaction=0;
+		global $debug;
+		$this->debug=$debug;
+		$this->loglevel=LOG_LEVEL;
+		$this->defaultloglevel=LOG_LEVEL;
+		global $log_postgres;
+		$this->logfile=$log_postgres;
+		$this->defaultlogfile=$log_postgres;
+		$this->ist_Fortfuehrung=1;
+		$this->type='postgresql';
+		$this->commentsign='--';
+		# Wenn dieser Parameter auf 1 gesetzt ist werden alle Anweisungen
+		# START TRANSACTION, ROLLBACK und COMMIT unterdrückt, so daß alle anderen SQL
+		# Anweisungen nicht in Transactionsblöcken ablaufen.
+		# Kann zur Steigerung der Geschwindigkeit von großen Datenbeständen verwendet werden
+		# Vorsicht: Wenn Fehler beim Einlesen passieren, ist der Datenbestand inkonsistent
+		# und der Einlesevorgang muss wiederholt werden bis er fehlerfrei durchgelaufen ist.
+		# Dazu Fehlerausschriften bearchten.
+		$this->blocktransaction=0;
 		$this->spatial_ref_code = EPSGCODE_ALKIS . ", " . EARTH_RADIUS;
-  }
-	
+	}
+
   function open() {
   	if($this->port == '') $this->port = 5432;
     #$this->debug->write("<br>Datenbankverbindung öffnen: Datenbank: ".$this->dbName." User: ".$this->user,4);
@@ -246,7 +246,7 @@ FROM
 		# wenn keine INSERT, UPDATE und DELETE Anweisungen in $sql stehen.
 		# (lesend immer, aber schreibend nur mit DBWRITE=1)
 		if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
-			#echo "<br>".$sql;
+			#echo "<br>SQL in execSQL: " . $sql;
 			if (stristr($sql, 'SELECT')) {
 				$sql = "SET datestyle TO 'German';" . $sql;
 			};
@@ -1263,14 +1263,14 @@ FROM
   }
   
   function getALBData($FlurstKennz, $without_temporal_filter = false){		
-		$sql ="SELECT distinct f.oid, f.gml_id, 0 as hist_alb, lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, CASE WHEN f.abweichenderrechtszustand = 'true' THEN 'ja' ELSE 'nein' END AS abweichenderrechtszustand, zaehler, nenner, k.schluesselgesamt AS kreisid, k.bezeichnung as kreisname, gem.schluesselgesamt as gemkgschl, gem.bezeichnung as gemkgname, g.schluesselgesamt as gemeinde, g.bezeichnung as gemeindename,d.stelle as finanzamt, d.bezeichnung AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp ";
+		$sql ="SELECT distinct f.oid, f.gml_id, 0 as hist_alb, lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, CASE WHEN f.abweichenderrechtszustand = 'true' THEN 'ja' ELSE 'nein' END AS abweichenderrechtszustand, CASE WHEN f.zweifelhafterflurstuecksnachweis = 'true' THEN 'ja' ELSE 'nein' END as zweifelhafterflurstuecksnachweis, zaehler, nenner, k.schluesselgesamt AS kreisid, k.bezeichnung as kreisname, gem.schluesselgesamt as gemkgschl, gem.bezeichnung as gemkgname, g.schluesselgesamt as gemeinde, g.bezeichnung as gemeindename,d.stelle as finanzamt, d.bezeichnung AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp ";
 		$sql.="FROM alkis.ax_kreisregion AS k, alkis.ax_gemeinde as g, alkis.ax_gemarkung AS gem, alkis.ax_flurstueck AS f ";
 		$sql.="LEFT JOIN alkis.ax_dienststelle as d ON d.stellenart = 1200 AND d.stelle = ANY(f.zustaendigestelle_stelle) ";
 		$sql.="WHERE f.gemarkungsnummer=gem.gemarkungsnummer AND f.land = gem.land AND f.gemeindezugehoerigkeit_kreis = g.kreis AND f.gemeindezugehoerigkeit_gemeinde = g.gemeinde AND f.gemeindezugehoerigkeit_kreis = k.kreis AND f.flurstueckskennzeichen='" . $FlurstKennz . "'";
 		if(!$without_temporal_filter)$sql.= $this->build_temporal_filter(array('k', 'g', 'gem', 'f', 'd'));
 		else{
 			$sql.= " UNION ";
-			$sql.= "SELECT distinct f.oid, f.gml_id, 1 as hist_alb, lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, '' as abweichenderrechtszustand, zaehler, nenner, '0' AS kreisid, '' as kreisname, gem.schluesselgesamt as gemkgschl, gem.bezeichnung as gemkgname, g.schluesselgesamt as gemeinde, g.bezeichnung as gemeindename, '' as finanzamt, '' AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp ";
+			$sql.= "SELECT distinct f.oid, f.gml_id, 1 as hist_alb, lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, CASE WHEN f.abweichenderrechtszustand = 'true' THEN 'ja' ELSE 'nein' END AS abweichenderrechtszustand, CASE WHEN f.zweifelhafterflurstuecksnachweis = 'true' THEN 'ja' ELSE 'nein' END as zweifelhafterflurstuecksnachweis, zaehler, nenner, '0' AS kreisid, '' as kreisname, gem.schluesselgesamt as gemkgschl, gem.bezeichnung as gemkgname, g.schluesselgesamt as gemeinde, g.bezeichnung as gemeindename, '' as finanzamt, '' AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp ";
 			$sql.= "FROM alkis.ax_historischesflurstueckohneraumbezug as f ";
 			$sql.= "LEFT JOIN alkis.ax_gemarkung AS gem ON f.gemarkungsnummer=gem.gemarkungsnummer AND f.land = gem.land ";
 			$sql.= "LEFT JOIN alkis.pp_gemarkung ppg ON gem.land = ppg.land AND gem.gemarkungsnummer = ppg.gemarkung ";

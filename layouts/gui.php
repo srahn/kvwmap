@@ -44,7 +44,7 @@
 							</tr>
 							<tr> 
 								<td colspan="2" id="footer"><?php
-									$this->debug->write("<br>Include <b>".LAYOUTPATH."snippets/".FOOTER."</b> in gui.php",4);    
+									$this->debug->write("<br>Include <b>".LAYOUTPATH."snippets/".FOOTER."</b> in gui.php",4);
 									include(LAYOUTPATH."snippets/".FOOTER); ?>
 								</td>
 							</tr>
@@ -65,11 +65,11 @@
 				<tr>
 					<td>
 						<div id="log">
-							<?php echo readfile('/var/www/logs/' . VERSION . '_' . $this->user->login_name . '_debug.htm');  ?>
+							<?php echo readfile(LOGPATH.$_SESSION['login_name'].basename(DEBUGFILE)); ?>
 						</div>
 					</td>
 				</tr><?php
 			} ?>
-		</table>
+			</table>
 	</body>
 </html>

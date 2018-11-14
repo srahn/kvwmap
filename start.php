@@ -98,6 +98,8 @@ $GUI->database->execSQL("SET NAMES '".MYSQL_CHARSET."'",0,0);
 if (is_logout($GUI->formvars)) {
 	$GUI->debug->write('Logout angefragt.', 4, $GUI->echo);
 	if (is_logged_in()) {
+		$GUI->user = new user($_SESSION['login_name'], 0, $GUI->database);
+		if(LOGOUT_ROUTINE != '')include(LOGOUT_ROUTINE);
 		$GUI->debug->write('Logout.', 4, $GUI->echo);
 		logout();
 	}
@@ -110,12 +112,28 @@ if (is_logout($GUI->formvars)) {
 $show_login_form = false;
 if (is_logged_in()) {
 	$GUI->debug->write('Ist angemeldet an: ' . $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_URL'], 4, $GUI->echo);
+	if ($_SESSION['login_name'] == '') {
+		$GUI->debug->write('login_name in Session ist leer', 4, $GUI->echo);
+		logout();
+		$show_login_form = true;
+		$go = 'login';
+	}
 	$GUI->formvars['login_name'] = $_SESSION['login_name'];
+	$GUI->debug->write('Ist angemeldet als: ' . $_SESSION['login_name'], 4, $GUI->echo);
 	$GUI->user = new user($_SESSION['login_name'], 0, $GUI->database);
-	$GUI->debug->write('Ist angemeldet als: ' . $GUI->user->login_name, 4, $GUI->echo);
+	if ($GUI->user->login_name == '') {
+		$GUI->debug->write('Nutzer mit login_name: ' . $_SESSION['login_name'] . ' nicht in Datenbank vorhanden.', 4, $GUI->echo);
+		logout();
+		$show_login_form = true;
+		$go = 'login';
+	}
+	else {
+		$GUI->debug->write('Nutzerdaten gelesen von: ' . $GUI->user->login_name, 4, $GUI->echo);
+	}
 	# login case 1
 }
 else {
+	header('logout: true');		// damit ajax-Requests das auch mitkriegen
 	$GUI->debug->write('Nicht angemeldet.', 4, $GUI->echo);
 	if (is_gast_login($GUI->formvars, $gast_stellen)) {
 		$GUI->debug->write('Es ist eine Gastanmeldung.', 4, $GUI->echo);
@@ -126,6 +144,7 @@ else {
 			$GUI->formvars['passwort'] = $gast['passwort'];
 			$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->database, $GUI->formvars['passwort']);
 			$GUI->user->stelle_id = $GUI->formvars['gast']; # set new stelle
+			set_session_vars($GUI->formvars);
 			# login case 2
 		}
 		else {
@@ -252,8 +271,8 @@ if (!$show_login_form) {
 		$GUI->Stelle = new stelle($GUI->user->stelle_id, $GUI->database);
 	}
 
-	# check stelle wenn noch nicht angemeldet gewesen oder auch wenn stelle gewechselt wird.
-	if (is_login($GUI->formvars) OR is_new_stelle($GUI->formvars['Stelle_ID'], $GUI->user)) {
+	# check stelle wenn noch nicht angemeldet gewesen, wenn noch nicht in Stelle angemeldet auch wenn stelle gewechselt wird.
+	if (is_login($GUI->formvars) OR !is_logged_in_stelle() OR is_new_stelle($GUI->formvars['Stelle_ID'], $GUI->user)) {
 		$GUI->debug->write('Zugang zu Stelle ' . $GUI->Stelle->id . ' wird angefragt.', 4, $GUI->echo);
 
 		$GUI->user->Stellen = $GUI->user->getStellen(0);
@@ -264,6 +283,7 @@ if (!$show_login_form) {
 			$GUI->user->stelle_id = $GUI->Stelle->id; # set selected stelle to user
 			$GUI->debug->write('Setze neue Stellen-ID: ' . $GUI->Stelle->id . ' für Nutzer: ' . $GUI->user->id, 4, $GUI->echo);
 			$GUI->user->updateStelleID($GUI->Stelle->id);
+			$_SESSION['stelle_angemeldet'] = true;
 			# login case 15
 		}
 		else {
@@ -287,6 +307,9 @@ if (!$show_login_form) {
 						if (is_new_password_valid($new_password_err)) {
 							$GUI->debug->write('Neues Password ist valid.', 4, $GUI->echo);
 							update_password($GUI);
+							$GUI->debug->write('Set Session', 4, $GUI->echo);
+							session_start();
+							set_session_vars($GUI->formvars);
 							# login case 17
 						}
 						else { # new password is not ok
@@ -330,9 +353,8 @@ else {
 		$GUI->debug->write('Speicher neue Stellenoptionen.', 4, $GUI->echo);
 		$GUI->user->setOptions($GUI->user->stelle_id, $GUI->formvars);
 	}
+	$GUI->debug->write('Ordne Nutzer: ' . $GUI->user->id . ' Stelle: ' . $GUI->Stelle->ID . ' zu.', 4, $GUI->echo);
 	$GUI->user->setRolle($GUI->user->stelle_id);
-
-	#$GUI->debug->write('Eingestellte Rolle: ' . print_r($GUI->user->rolle, true), 4, $GUI->echo);
 
 	#echo 'In der Rolle eingestellte Sprache: '.$GUI->user->rolle->language;
 	# Rollenbezogene Stellendaten zuweisen
@@ -345,7 +367,7 @@ else {
 	$GUI->debug->write('Stellenbezeichnung: ' . $GUI->Stelle->Bezeichnung, 4);
 	$GUI->debug->write('Host_ID: ' . getenv("REMOTE_ADDR"), 4);
 
-	if(BEARBEITER == 'true'){
+	if(BEARBEITER == 'true') {
 		define('BEARBEITER_NAME', 'Bearbeiter: ' . $GUI->user->Name);
 	}
 
@@ -370,7 +392,6 @@ else {
 			$PostGISdb->passwd = $GUI->Stelle->pgdbpasswd;
 			$PostGISdb->port = $GUI->Stelle->port;
 		}
-
 		if ($PostGISdb->dbName != '') {
 			# Übergeben der GIS-Datenbank für GIS-Daten an die GUI
 			$GUI->pgdatabase = $PostGISdb;
@@ -446,6 +467,7 @@ else {
 		if($GUI->user->rolle->hist_timestamp != '')$GUI->setHistTimestamp();
 		# Zurücksetzen der veränderten Klassen
 		#$GUI->user->rolle->resetClasses();
+		if(LOGIN_ROUTINE != '')include(LOGIN_ROUTINE);
 		$_SESSION['login_routines'] = false;
 	} else {
 			define('AFTER_LOGIN', false);
@@ -499,6 +521,13 @@ function is_logged_in() {
 		array_key_exists('angemeldet', $_SESSION) AND
 		$_SESSION['angemeldet'] === true AND
 		$_SESSION['login_name'] != ''
+	);
+}
+
+function is_logged_in_stelle() {
+	return (
+		array_key_exists('stelle_angemeldet', $_SESSION) AND
+		$_SESSION['stelle_angemeldet'] === true
 	);
 }
 

@@ -43,4 +43,6 @@
 	$this->strLimit = "Anzahl Treffer:";
 	$this->layerOptions = "Optionen";
 	$this->strExceeded = "überschritten";
+	$this->transparency = "Tranzparenz";
+	$this->label = "Beschriftung";
 ?>

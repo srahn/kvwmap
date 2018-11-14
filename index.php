@@ -1,20 +1,32 @@
 <?php
 header('Content-Type: text/html; charset=utf-8');
-if (!USE_EXISTING_SESSION) {
-	session_set_cookie_params(0, $_SERVER['CONTEXT_PREFIX']);
-}
-session_start();
 
 include('credentials.php');
 include('config.php');
+
+if (!USE_EXISTING_SESSION) {
+	session_set_cookie_params(0, $_SERVER['CONTEXT_PREFIX']);
+}
+
+session_start();
+
 # Laden der Plugins config.phps
-for($i = 0; $i < count($kvwmap_plugins); $i++){
-	if(file_exists(PLUGINS.$kvwmap_plugins[$i].'/config/config.php'))include(PLUGINS.$kvwmap_plugins[$i].'/config/config.php');
+for ($i = 0; $i < count($kvwmap_plugins); $i++) {
+	if (file_exists(PLUGINS.$kvwmap_plugins[$i] . '/config/config.php')) {
+		include(PLUGINS.$kvwmap_plugins[$i].'/config/config.php');
+	}
+}
+
+if (!defined('EPSGCODE_ALKIS')) {
+	define('EPSGCODE_ALKIS', 0);	// EPSGCODE_ALKIS ist nur bei Verwendung des Plugin alkis definiert
 }
 
 include(CLASSPATH . 'log.php');
 
-if (DEBUG_LEVEL > 0) $debug = new Debugger(DEBUGFILE);	# öffnen der Debug-log-datei
+if (DEBUG_LEVEL > 0) {
+	$debug = new Debugger(DEBUGFILE);	# öffnen der Debug-log-datei
+}
+
 # Öffnen der Log-Dateien. Derzeit werden in den Log-Dateien nur die SQL-Statements gespeichert, die über execSQL in den Klassen mysql und postgres ausgeführt werden.
 if (LOG_LEVEL > 0) {
  $log_mysql = new LogFile(LOGFILE_MYSQL,'text','Log-Datei MySQL', '#------v: ' . date("Y:m:d H:i:s", time()));
@@ -36,7 +48,7 @@ if (LOG_LEVEL > 0) {
 # This program is distributed in the hope that it will be useful, #
 # but WITHOUT ANY WARRANTY; without even the implied warranty of  #
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the    #
-# GNU General Public License for more details.                    #
+# GNU General Public License for more details.                    
 #                                                                 #
 # You should have received a copy of the GNU General Public       #
 # License along with this program; if not, write to the Free      #
@@ -109,24 +121,7 @@ $fast_loading_cases = array_merge($spatial_cases, $non_spatial_cases);
 if(in_array($go, $fast_loading_cases))define(FAST_CASE, true);else define(FAST_CASE, false);
 
 if(CASE_COMPRESS)	include(CLASSPATH.'case_compressor.php');
-/*
-if(!$_SESSION['angemeldet'] or !empty($formvars['username'])){
-	$msg .= '<br>Nicht angemeldet';
-	include(CLASSPATH . 'mysql.php');
-	$userDb = new database();
-	$userDb->host = MYSQL_HOST;
-	$userDb->user = MYSQL_USER;
-	$userDb->passwd = MYSQL_PASSWORD;
-	$userDb->dbName = MYSQL_DBNAME;
-	header('logout: true');		// damit ajax-Requests das auch mitkriegen
-	if (file_exists(LAYOUTPATH . 'snippets/' . LOGIN)) {
-		include(LAYOUTPATH . 'snippets/' . LOGIN);
-	}
-	else {
-		include(LAYOUTPATH . 'snippets/login.php');
-	}
-}
-*/
+
 function include_($filename){
 	if(CASE_COMPRESS AND FAST_CASE){		// ein fast-case und er soll komprimiert werden
 		$filename = case_compressor::inject($filename);
@@ -157,6 +152,9 @@ else{
 
 include(WWWROOT . APPLVERSION . 'start.php');
 
+$GUI->go = $go;
+$GUI->requeststring = $QUERY_STRING;
+
 # Laden der Plugins index.phps
 for($i = 0; $i < count($kvwmap_plugins); $i++){
 	include(PLUGINS.$kvwmap_plugins[$i].'/control/index.php');
@@ -165,10 +163,7 @@ for($i = 0; $i < count($kvwmap_plugins); $i++){
 # Übergeben des Anwendungsfalles
 $debug->write("<br><b>Anwendungsfall go: " . $go . "</b>", 4);
 
-$GUI->go = $go;
-$GUI->requeststring = $QUERY_STRING;
-
-function go_switch($go){
+function go_switch($go, $exit = false) {
 	global $GUI;
 	global $Stelle_ID;
 	global $newPassword;
@@ -531,25 +526,6 @@ function go_switch($go){
 				$GUI->output();
 			} break;
 
-/*
-			case 'logout' : {
-				session_start();
-				$_SESSION = array();
-				if (ini_get("session.use_cookies")){
-					$params = session_get_cookie_params();
-					setcookie(session_name(), '', time() - 42000, $params["path"], $params["domain"], $params["secure"], $params["httponly"]);
-				}
-				session_destroy();
-				$locationStr = 'index.php' . ($_REQUEST['gast'] != '' ? '?gast=' . $_REQUEST['gast'] : '');
-				if (isset($newPassword)) {
-					$locationStr.='?newPassword='.$newPassword;
-					$locationStr.='&msg='.$GUI->Fehlermeldung;
-					$locationStr.='&passwort='.$passwort;
-					$locationStr.='&username='.$username;
-				}
-				header('Location: ' . $locationStr);
-			} break;
-*/
 			case 'Flurstuecks-CSV-Export' : {
 				$GUI->export_flurst_csv();
 			} break;
@@ -1371,12 +1347,12 @@ function go_switch($go){
 			} break;
 
 			case 'Layer2Stelle_Editor' : {
-				$GUI->checkCaseAllowed('Stellen_Anzeigen');
+				$GUI->checkCaseAllowed('Layereditor');
 				$GUI->Layer2Stelle_Editor();
 			} break;
 
 			case 'Layer2Stelle_Editor_Speichern' : {
-				$GUI->checkCaseAllowed('Stellen_Anzeigen');
+				$GUI->checkCaseAllowed('Layereditor');
 				$GUI->Layer2Stelle_EditorSpeichern();
 			} break;
 
@@ -1402,11 +1378,13 @@ function go_switch($go){
 
 			case 'Stelleneditor' : {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
+				$GUI->stelle_bearbeiten_allowed($GUI->formvars['selected_stelle_id'], $GUI->user->id);
 				$GUI->Stelleneditor();
 			} break;
 
 			case 'Stelle_Löschen' : {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
+				$GUI->stelle_bearbeiten_allowed($GUI->formvars['selected_stelle_id'], $GUI->user->id);
 				$GUI->StelleLoeschen();
 			} break;
 
@@ -1488,11 +1466,13 @@ function go_switch($go){
 
 			case 'Benutzerdaten_Formular' : {
 				$GUI->checkCaseAllowed('Benutzerdaten_Formular');
+				$GUI->user_bearbeiten_allowed($GUI->formvars['selected_user_id'], $GUI->user->id);
 				$GUI->BenutzerdatenFormular();
 			} break;
 
 			case 'Benutzer_Löschen' : {
 				$GUI->checkCaseAllowed('Benutzerdaten_Anzeigen');
+				$GUI->user_bearbeiten_allowed($GUI->formvars['selected_user_id'], $GUI->user->id);
 				$GUI->BenutzerLöschen();
 			} break;
 
@@ -1513,6 +1493,7 @@ function go_switch($go){
 
 			case 'als_nutzer_anmelden' : {
 				$GUI->checkCaseAllowed('Benutzerdaten_Formular');
+				$GUI->als_nutzer_anmelden_allowed($GUI->formvars['selected_user_id'], $GUI->user->id);
 				$_SESSION['login_name'] = $GUI->formvars['loginname'];
 				header('location: index.php');
 			} break;
@@ -1757,8 +1738,13 @@ function go_switch($go){
 				$GUI->saveMap('');
 				$GUI->drawMap();
 				$GUI->output();
-			}break;
+			}
 		}
+	}
+
+	if ($exit) {
+		include('end.php');
+		exit;
 	}
 };
 
@@ -1766,7 +1752,7 @@ go_switch($go);
 
 include('end.php');
 
-if(CASE_COMPRESS AND FAST_CASE)case_compressor::write_fast_case_file($go);
+if (CASE_COMPRESS AND FAST_CASE) case_compressor::write_fast_case_file($go);
 
 // $executiontimes['time'][] = microtime_float1();
 // $executiontimes['action'][] = 'Ende';

@@ -475,7 +475,7 @@ class ALB {
 		if($formvars['abweichenderrechtszustand']){ $csv .= utf8_encode('abweichender Rechtszustand;');}
 		if($formvars['baubodenrecht']){ $csv .= utf8_encode('Bauraum/Bodenordnungsrecht;');}
     $csv .= 'Namensnummer;'; 
-    $csv .= utf8_encode('Eigentümer;Zusatz;Adresse;Ort;');
+    $csv .= utf8_encode('Vorname;Name;Zusatz;Adresse;Ort;');
     
     $csv .= chr(10);
     for($i = 0; $i < count($flurstuecke); $i++) {
@@ -663,7 +663,7 @@ class ALB {
 					$csv .= $eigentuemer->zusatz_eigentuemer;
 					if($eigentuemer->Anteil !=''){$csv .= '  zu '.$eigentuemer->Anteil;}
 					$csv .= ';';
-					if($eigentuemer->vorname != '')$csv .= $eigentuemer->vorname.' ';
+					$csv .= $eigentuemer->vorname.';';
 					$csv .= $eigentuemer->nachnameoderfirma;
 					if($Eigentuemer->namensbestandteil != '')$csv .= ', '.$Eigentuemer->namensbestandteil;
 					if($Eigentuemer->akademischergrad != '')$csv .= ', '.$Eigentuemer->akademischergrad;
@@ -1439,15 +1439,12 @@ class ALB {
           $pdf->addText($col2,$row,$fontSize,$flst->ALB_Flaeche.' m²');
 
           # Hinweise zum Flurstücke
-          if ($flst->Hinweis[0]['hinwzflst']!='') {
-            $pdf->addText($col0,$row-=24,$fontSize,'Hinweise zum Flurstück');
-            $row-=6;
-            for($h = 0; $h < count($flst->Hinweis); $h++){
-              $pdf->addText($col1,$row,$fontSize,utf8_decode($flst->Hinweis[$h]['hinwzflst']));
-              $pdf->addText($col3,$row,$fontSize,utf8_decode($flst->Hinweis[$h]['bezeichnung']));
-              $row = $row - 12;
-            }
-          }
+          if($flst->abweichenderrechtszustand == 'ja'){
+						$pdf->addText($col0,$row-=24,$fontSize,'In einem durch Gesetz geregelten Verfahren der Bodenordnung ist für das Flurstück ein neuer');
+						$pdf->addText($col0,$row-=12,$fontSize,'Rechtszustand eingetreten. Die Festlegungen des Verfahrens sind noch nicht in das Liegen-');
+						$pdf->addText($col0,$row-=12,$fontSize,'schaftskataster übernommen. Dieser Nachweis entspricht deshalb nicht dem aktuellen Stand.');
+					}
+					if($flst->zweifelhafterflurstuecksnachweis == 'ja')$pdf->addText($col0,$row-=24,$fontSize,'Zweifelhafter Flurstücksnachweis');
 
           # Baulastenblattnummer
           if (count($flst->Baulasten)>0) {

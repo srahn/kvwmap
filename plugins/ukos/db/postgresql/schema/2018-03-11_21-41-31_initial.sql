@@ -1,38 +1,44 @@
 BEGIN;
 
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 ---------------------------------------------------------------
 ---------------------------------------------------------------
 -- CREATE SCHEMATA
 ---------------------------------------------------------------
 ---------------------------------------------------------------
 -- Drop Schemata
-DROP SCHEMA IF EXISTS base CASCADE;
-DROP SCHEMA IF EXISTS doppik CASCADE;
-DROP SCHEMA IF EXISTS okstra CASCADE;
-DROP SCHEMA IF EXISTS strassennetz CASCADE;
-DROP SCHEMA IF EXISTS kataster CASCADE;
-  
--- schema doppik
-CREATE SCHEMA doppik;
-COMMENT ON SCHEMA doppik
+DROP SCHEMA IF EXISTS ukos_base CASCADE;
+DROP SCHEMA IF EXISTS ukos_doppik CASCADE;
+DROP SCHEMA IF EXISTS ukos_okstra CASCADE;
+DROP SCHEMA IF EXISTS ukos_strassennetz CASCADE;
+DROP SCHEMA IF EXISTS ukos_kataster CASCADE;
+	
+-- schema ukos_doppik
+CREATE SCHEMA ukos_doppik;
+COMMENT ON SCHEMA ukos_doppik
 	IS 'This schema contains relevant OKSTRA and doppik features. Every non-abstract table ultimately inherits from an abstract table called basisobjekt';
 
--- schema okstra
-CREATE SCHEMA IF NOT EXISTS okstra;
-COMMENT ON SCHEMA okstra
-	IS 'This schema contains relevant OKSTRA	features and codelists. All tables can be considered abstract and realized through inheritance in Doppik. They likewise contain all relevant information to create okstra-gml.';
+-- schema ukos_okstra
+CREATE SCHEMA IF NOT EXISTS ukos_okstra;
+COMMENT ON SCHEMA ukos_okstra
+	IS 'This schema contains relevant OKSTRA	features and codelists. All tables can be considered abstract and realized through inheritance in ukos_doppik. They likewise contain all relevant information to create okstra-gml.';
 
-CREATE SCHEMA IF NOT EXISTS base;
-COMMENT ON SCHEMA base
+-- schema ukos_base
+CREATE SCHEMA IF NOT EXISTS ukos_base;
+COMMENT ON SCHEMA ukos_base
 	IS 'This schema contains basefeatures and codelists that are referenced through objects from other schemata. Every non-abstract table inherits from an abstract table called werteliste or basisobjekt';
 
-CREATE SCHEMA IF NOT EXISTS strassennetz;
-COMMENT ON SCHEMA strassennetz
+-- schema ukos_strassennetz
+CREATE SCHEMA IF NOT EXISTS ukos_strassennetz;
+COMMENT ON SCHEMA ukos_strassennetz
 	IS 'This schema contains a street network';
 
-CREATE SCHEMA IF NOT EXISTS kataster;
-COMMENT ON SCHEMA kataster
+-- schema ukos_kataster
+CREATE SCHEMA IF NOT EXISTS ukos_kataster;
+COMMENT ON SCHEMA ukos_kataster
 	IS 'This schema contains cadastral parcel data';
+
 ---------------------------------------------------------------
 ---------------------------------------------------------------
 -- CREATE BASISCODELISTE
@@ -40,7 +46,7 @@ COMMENT ON SCHEMA kataster
 ---------------------------------------------------------------
 -- Basisobjekt contains data (is a generalization)from doppik and OKSTRA, which are relevant for all other tables
 -- Basisobjekt is considered abstract and should not be realized on its own
-CREATE TABLE base.basiscodeliste (
+CREATE TABLE ukos_base.basiscodeliste (
 	id character varying NOT NULL DEFAULT uuid_generate_v4(),
 	ident_hist character varying NOT NULL DEFAULT 'unbekannt'::character varying,
 	kurztext character varying NOT NULL DEFAULT 'unbekannt'::character varying,
@@ -58,79 +64,79 @@ CREATE TABLE base.basiscodeliste (
 WITH (
 	OIDS=FALSE
 );
-COMMENT ON TABLE base.basiscodeliste
+COMMENT ON TABLE ukos_base.basiscodeliste
 	IS 'This abstract table containts base information shared by all doppik codelists';
 
-CREATE TABLE base.werteliste (
+CREATE TABLE ukos_base.werteliste (
 	kennung character varying NOT NULL,
 	langtext character varying,
 	CONSTRAINT pk_werteliste PRIMARY KEY (kennung)
 );
-COMMENT ON TABLE base.werteliste
+COMMENT ON TABLE ukos_base.werteliste
 	IS 'This abstract table is the base for most codelists. A few codelists related to okstra bewuchs and baum do not follow the kennung/langtext columns of werteliste and therefore do not inherit from it';
 
-CREATE TABLE base.idents (
+CREATE TABLE ukos_base.idents (
 	ident character(6) NOT NULL,
 	name_schema character varying NOT NULL,
 	name_tabelle character varying NOT NULL,
 	CONSTRAINT pk_idents PRIMARY KEY (ident)
 );
-COMMENT ON TABLE base.idents
+COMMENT ON TABLE ukos_base.idents
 	IS 'In this table all idents and their origin (schema and table) are stored.';
 
-CREATE OR REPLACE FUNCTION base.idents_add_ident()
-  RETURNS trigger AS
-  $BODY$
-    DECLARE
-      chars char[];
-    BEGIN
-        IF (NEW.ident IS NULL OR NEW.ident = '') THEN
-            chars := ARRAY['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
-            LOOP
-                NEW.ident = (SELECT array_to_string(ARRAY(SELECT chars[(1 + round(random() * 62))::integer] FROM generate_series(1, 6)), ''));
-                EXIT WHEN NEW.ident NOT IN (SELECT ident FROM base.idents);
-            END LOOP;
-            INSERT INTO base.idents (ident, name_schema, name_tabelle) VALUES (NEW.ident, TG_TABLE_SCHEMA, TG_TABLE_NAME);
-            RETURN NEW;
-        ELSIF (NEW.ident NOT IN (SELECT ident FROM base.idents)) THEN
-            INSERT INTO base.idents (ident, name_schema, name_tabelle) VALUES (NEW.ident, TG_TABLE_SCHEMA, TG_TABLE_NAME);
-            RETURN NEW;
-        ELSIF (NEW.gueltig_bis != '2100-01-01 02:00:00+01'::timestamp with time zone) THEN
-            RAISE EXCEPTION 'Es wird versucht ein lebendes Objekt mit bereits vorhandenem Attribut ident zu erzeugen.';
-        END IF;
-    END
-  $BODY$
-  LANGUAGE plpgsql VOLATILE
-  COST 100;
+CREATE OR REPLACE FUNCTION ukos_base.idents_add_ident()
+	RETURNS trigger AS
+	$BODY$
+		DECLARE
+			chars char[];
+		BEGIN
+				IF (NEW.ident IS NULL OR NEW.ident = '') THEN
+						chars := ARRAY['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
+						LOOP
+								NEW.ident = (SELECT array_to_string(ARRAY(SELECT chars[(1 + round(random() * 62))::integer] FROM generate_series(1, 6)), ''));
+								EXIT WHEN NEW.ident NOT IN (SELECT ident FROM ukos_base.idents);
+						END LOOP;
+						INSERT INTO ukos_base.idents (ident, name_schema, name_tabelle) VALUES (NEW.ident, TG_TABLE_SCHEMA, TG_TABLE_NAME);
+						RETURN NEW;
+				ELSIF (NEW.ident NOT IN (SELECT ident FROM ukos_base.idents)) THEN
+						INSERT INTO ukos_base.idents (ident, name_schema, name_tabelle) VALUES (NEW.ident, TG_TABLE_SCHEMA, TG_TABLE_NAME);
+						RETURN NEW;
+				ELSIF (NEW.gueltig_bis != '2100-01-01 02:00:00+01'::timestamp with time zone) THEN
+						RAISE EXCEPTION 'Es wird versucht ein lebendes Objekt mit bereits vorhandenem Attribut ident zu erzeugen.';
+				END IF;
+		END
+	$BODY$
+	LANGUAGE plpgsql VOLATILE
+	COST 100;
 
-CREATE OR REPLACE FUNCTION base.idents_remove_ident()
-  RETURNS trigger AS
-  $BODY$
-    BEGIN
-        IF (OLD.ident IN (SELECT ident FROM base.idents)) THEN
-            DELETE FROM base.idents WHERE ident = OLD.ident;
-        END IF;
-        RETURN NEW;
-    END
-  $BODY$
-  LANGUAGE plpgsql VOLATILE
-  COST 100;
+CREATE OR REPLACE FUNCTION ukos_base.idents_remove_ident()
+	RETURNS trigger AS
+	$BODY$
+		BEGIN
+				IF (OLD.ident IN (SELECT ident FROM ukos_base.idents)) THEN
+						DELETE FROM ukos_base.idents WHERE ident = OLD.ident;
+				END IF;
+				RETURN NEW;
+		END
+	$BODY$
+	LANGUAGE plpgsql VOLATILE
+	COST 100;
 
 ---------------------------------------------------------------
 -- CODELISTEN OKSTRA
 ---------------------------------------------------------------
-CREATE TABLE okstra.wlo_kreuzungszuordnung (
+CREATE TABLE ukos_okstra.wlo_kreuzungszuordnung (
 	CONSTRAINT pk_wlo_kreuzungszuordnung PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_kreuzungszuordnung
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_kreuzungszuordnung
 VALUES
 ('1', 'liegt in nicht aufzunehmender Straße'),
 ('2', 'liegt in aufzunehmender Straße, abweichende Unterhaltungszuordnung vorhanden');
 
-CREATE TABLE okstra.wlo_erfassung_verfahren (
+CREATE TABLE ukos_okstra.wlo_erfassung_verfahren (
 	CONSTRAINT pk_wlo_erfassung_verfahren PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_erfassung_verfahren
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_erfassung_verfahren
 VALUES
 ('1', 'photogrammetrisch'),
 ('2', 'photogrammetrisch mit Feldvergleich'),
@@ -140,10 +146,10 @@ VALUES
 ('6', 'Übernahme aus Liegenschaftskarte'),
 ('99', 'sonstige');
 
-CREATE TABLE okstra.wlo_schutzstatus_bewuchs (
+CREATE TABLE ukos_okstra.wlo_schutzstatus_bewuchs (
 	CONSTRAINT pk_wlo_schutzstatus_bewuchs PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_schutzstatus_bewuchs
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_schutzstatus_bewuchs
 VALUES
 ('1', 'Landschaftsschutzgebiet (LSG)'),
 ('2', 'Naturschutzgebiet (NSG)'),
@@ -151,15 +157,15 @@ VALUES
 ('4', 'Fauna/Flora/Habitat (FFH)'),
 ('5', 'geschützter Landschaftsbestandteil');
 
-CREATE TABLE okstra.wlo_tab_biotoptyp (
+CREATE TABLE ukos_okstra.wlo_tab_biotoptyp (
 	CONSTRAINT pk_wlo_tab_biotoptyp PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos_base.werteliste);
 -- Open Codelist
 
-CREATE TABLE okstra.wlo_bestandsstatus (
+CREATE TABLE ukos_okstra.wlo_bestandsstatus (
 	CONSTRAINT pk_wlo_bestandsstatus PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_bestandsstatus
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_bestandsstatus
 VALUES
 ('1', 'Bestand_erfasst'),
 ('2', 'Bestand_amtlich'),
@@ -168,10 +174,10 @@ VALUES
 ('5', 'zerstört'),
 ('6', 'unbekannt');
 
-CREATE TABLE okstra.wlo_lage (
+CREATE TABLE ukos_okstra.wlo_lage (
 	CONSTRAINT pk_wlo_lage PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_lage
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_lage
 VALUES
 ('00', 'gesamte Fahrbahn(en) (ein- und zweibahnig)'),
 ('01', 'linker Fahrbahnrand (einbahnig)'),
@@ -226,13 +232,13 @@ VALUES
 
 -- The structure of baumgattung diverts from other codelists, insofar that it has 3 columns (Kennung, deutscher_Name, botanischer_Name)
 -- Therefore, it does not inherit from the base codelist but defines its own columns
-CREATE TABLE okstra.wlo_baumgattung (
+CREATE TABLE ukos_okstra.wlo_baumgattung (
 	kennung character varying NOT NULL,
 	deutscher_name character varying,
 	botanischer_name character varying, 
 	CONSTRAINT pk_wlo_baumgattung PRIMARY KEY (kennung)
 );
-INSERT INTO okstra.wlo_baumgattung
+INSERT INTO ukos_okstra.wlo_baumgattung
 VALUES
 ('000', 'Baum (allgemein)', ''),
 ('030', 'Laubbaum', ''),
@@ -296,14 +302,14 @@ VALUES
 
 -- The structure of baumgattung diverts from other codelists, insofar that it has 4 columns (Kennung, deutscher_Name, Gattungskennung, botanischer_Name)
 -- Therefore, it does not inherit from the base codelist but defines its own columns
-CREATE TABLE okstra.wlo_baumart (
+CREATE TABLE ukos_okstra.wlo_baumart (
 	kennung character varying NOT NULL,
 	deutscher_name character varying,
 	gattungskennung character varying,
 	botanischer_name character varying,
 	CONSTRAINT pk_wlo_baumart PRIMARY KEY (kennung)
 );
-INSERT INTO okstra.wlo_baumart
+INSERT INTO ukos_okstra.wlo_baumart
 VALUES
 ('1337', '100', 'Feldahorn', 'Acer campestre'),
 ('1338', '100', 'Roter Schlangenhautahorn', 'Acer capillipes'),
@@ -634,10 +640,10 @@ VALUES
 ('5549', '530', 'Säulenförmige Krimlinde', 'Tilia euchlora ''Pallida Fastigiata'''),
 ('9999', '000', 'Baumart nicht bestimmt', 'nicht bestimmt');
 
-CREATE TABLE okstra.wlo_schiefstand_baum (
+CREATE TABLE ukos_okstra.wlo_schiefstand_baum (
 	CONSTRAINT pk_wlo_schiefstand_baum PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_schiefstand_baum
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_schiefstand_baum
 VALUES
 ('0', 'kein'),
 ('1', 'ja, ohne Angabe'),
@@ -645,10 +651,10 @@ VALUES
 ('3', 'von der Fahrbahn'),
 ('4', 'parallel zur Fahrbahn');
 
-CREATE TABLE okstra.wlo_zustandsbeurteilung_baum (
+CREATE TABLE ukos_okstra.wlo_zustandsbeurteilung_baum (
 	CONSTRAINT pk_wlo_zustandsbeurteilung_baum PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_zustandsbeurteilung_baum
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_zustandsbeurteilung_baum
 VALUES
 ('1', 'gesund'),
 ('2', 'sehr schwach geschädigt'),
@@ -656,10 +662,10 @@ VALUES
 ('4', 'stark geschädigt'),
 ('5', 'absterbend bis tot');
 
-CREATE TABLE okstra.wlo_lagebeschreibung_baum (
+CREATE TABLE ukos_okstra.wlo_lagebeschreibung_baum (
 	CONSTRAINT pk_wlo_lagebeschreibung_baum PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_lagebeschreibung_baum
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_lagebeschreibung_baum
 VALUES
 ('1', 'Baum auf Trennstreifen zwischen Radweg und Straße'),
 ('2', 'Baum zwischen Radweg und Graben'),
@@ -668,19 +674,19 @@ VALUES
 ('5', 'Baum in Pflasterfläche'),
 ('6', 'Baum hinter Gehweg');
 
-CREATE TABLE okstra.wlo_detaillierungsgrad_asb (
+CREATE TABLE ukos_okstra.wlo_detaillierungsgrad_asb (
 	CONSTRAINT pk_wlo_detaillierungsgad_asb PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_detaillierungsgrad_asb
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_detaillierungsgrad_asb
 VALUES
 ('01', 'hoch'),
 ('02', 'mittel'),
 ('03', 'niedrig');
 
-CREATE TABLE okstra.wlo_art_der_erfassung (
+CREATE TABLE ukos_okstra.wlo_art_der_erfassung (
 	CONSTRAINT pk_wlo_art_der_erfassung PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_art_der_erfassung
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_art_der_erfassung
 VALUES
 ('00', 'unbekannt'),
 ('10', 'vor Ort gemessen'),
@@ -696,15 +702,15 @@ VALUES
 ('20', 'Sonstiges Fachinformationssystem'),
 ('99', 'sonstige Art der Erfassung');
 
-CREATE TABLE okstra.wlo_art_der_erfassung_sonst (
+CREATE TABLE ukos_okstra.wlo_art_der_erfassung_sonst (
 	CONSTRAINT pk_wlo_art_der_erfassung_sonst PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos_base.werteliste);
 -- Open Codelist
 
-CREATE TABLE okstra.wlo_quelle_der_information (
+CREATE TABLE ukos_okstra.wlo_quelle_der_information (
 	CONSTRAINT pk_wlo_quelle_der_information PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_quelle_der_information
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_quelle_der_information
 VALUES
 ('00', 'unbekannt'),
 ('01', 'Ingenieurbüro'),
@@ -713,15 +719,15 @@ VALUES
 ('04', 'Kreise'),
 ('99', 'sonstige Quelle der Information');
 
-CREATE TABLE okstra.wlo_quelle_der_information_sonst (
+CREATE TABLE ukos_okstra.wlo_quelle_der_information_sonst (
 	CONSTRAINT pk_wlo_quelle_der_information_sonst PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos_base.werteliste);
 -- Open Codelist
 
-CREATE TABLE okstra.wlo_strassenklasse (
+CREATE TABLE ukos_okstra.wlo_strassenklasse (
 	CONSTRAINT pk_wlo_strassenklasse PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_strassenklasse
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_strassenklasse
 VALUES
 ('A', 'Bundesautobahn'),
 ('B', 'Bundesstraße'),
@@ -731,10 +737,10 @@ VALUES
 ('G', 'Gemeindestraße'),
 ('N', 'Nicht öffentliche Straße');
 
-CREATE TABLE okstra.wlo_art_strassenausst_punkt (
+CREATE TABLE ukos_okstra.wlo_art_strassenausst_punkt (
 	CONSTRAINT pk_wlo_art_strassenausst_punkt PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_art_strassenausst_punkt
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_art_strassenausst_punkt
 VALUES
 ('01', 'Glättemeldeanlage'),
 ('02', 'Streugutbehälter'),
@@ -759,24 +765,24 @@ VALUES
 ('22', 'Ortsdurchfahrtszeichen'),
 ('99', 'Sonstiges');
 
-CREATE TABLE okstra.wlo_art_strausst_punkt_sonst (
+CREATE TABLE ukos_okstra.wlo_art_strausst_punkt_sonst (
 	CONSTRAINT pk_wlo_art_strausst_punkt_sonst PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos_base.werteliste);
 -- Open Codelist
 
-CREATE TABLE okstra.wlo_dreiwertige_logik (
+CREATE TABLE ukos_okstra.wlo_dreiwertige_logik (
 	CONSTRAINT pk_wlo_dreiwertige_logik PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_dreiwertige_logik
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_dreiwertige_logik
 VALUES
 ('0', 'unbekannt'),
 ('1', 'ja'),
 ('2', 'nein');
 
-CREATE TABLE okstra.wlo_art_strassenausst_strecke (
+CREATE TABLE ukos_okstra.wlo_art_strassenausst_strecke (
 	CONSTRAINT pk_wlo_art_straussenausst_strecke PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_art_strassenausst_strecke
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_art_strassenausst_strecke
 VALUES
 ('01', 'Strecke mit Glättemeldeanlage'),
 ('02', 'Strecke mit Taumittelsprühanlage'),
@@ -788,15 +794,15 @@ VALUES
 ('08', 'Geröllfangzaun'),
 ('99', 'Sonstiges');
 
-CREATE TABLE okstra.wlo_art_strausst_strecke_sonst (
+CREATE TABLE ukos_okstra.wlo_art_strausst_strecke_sonst (
 	CONSTRAINT pk_wlo_art_strausst_strecke_sonst PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos_base.werteliste);
 -- Open Codelist
 
-CREATE TABLE okstra.wlo_art_der_aufstellvorrichtung (
+CREATE TABLE ukos_okstra.wlo_art_der_aufstellvorrichtung (
 	CONSTRAINT pk_wlo_art_der_aufstellvorrichtung PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_art_der_aufstellvorrichtung
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_art_der_aufstellvorrichtung
 VALUES
 ('00', 'unbekannt'),
 ('01', 'Rohrpfosten'),
@@ -808,20 +814,20 @@ VALUES
 ('08', 'Mast/Straßenlaterne'),
 ('99', 'sonstiges');
 
-CREATE TABLE okstra.wlo_material_aufstellvorrichtung (
+CREATE TABLE ukos_okstra.wlo_material_aufstellvorrichtung (
 	CONSTRAINT pk_wlo_material_aufstellvorrichtung PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_material_aufstellvorrichtung
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_material_aufstellvorrichtung
 VALUES
 ('00', 'unbekannt'),
 ('01', 'Metall'),
 ('02', 'Holz'),
 ('99', 'Sonstiges');
 
-CREATE TABLE okstra.wlo_art_schild_ok (
+CREATE TABLE ukos_okstra.wlo_art_schild_ok (
 	CONSTRAINT pk_wlo_art_schild_ok PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_art_schild_ok
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_art_schild_ok
 VALUES
 ('00', 'unbekannt'),
 ('01', 'amtliches Schild'),
@@ -829,48 +835,48 @@ VALUES
 ('03', 'militärisches Tragfähigkeitsschild'),
 ('99', 'sonstiges');
 
-CREATE TABLE okstra.wlo_art_schild_asb (
+CREATE TABLE ukos_okstra.wlo_art_schild_asb (
 	CONSTRAINT pk_wlo_art_schild_asb PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_art_schild_asb
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_art_schild_asb
 VALUES
 ('01', 'amtlicher Wegweiser'),
 ('02', 'amtliches Verkehrszeichen'),
 ('03', 'nichtamtliches Schild');
 
-CREATE TABLE okstra.wlo_art_schild_nichtamtlich_asb (
+CREATE TABLE ukos_okstra.wlo_art_schild_nichtamtlich_asb (
 	CONSTRAINT pk_wlo_art_schild_nichtamtlich_asb PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_art_schild_nichtamtlich_asb
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_art_schild_nichtamtlich_asb
 VALUES
 ('00', 'unbekannt'),
 ('01', 'militärische Tragfähigkeitsschilder'),
 ('02', 'private Wegweiser'),
 ('99', 'sonstige');
 
-CREATE TABLE okstra.wlo_lage_schild (
+CREATE TABLE ukos_okstra.wlo_lage_schild (
 	CONSTRAINT pk_wlo_lage_schild PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_lage_schild
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_lage_schild
 VALUES
 ('01', 'wie Aufstellvorrichtung'),
 ('02', 'über gesamter Fahrbahn(en)(ein- und zweibahnig)'),
 ('03', 'über linker Fahrbahn (zweibahnig)'),
 ('04', 'über rechter Fahrbahn (zweibahnig)');
 
-CREATE TABLE okstra.wlo_strassenbezug_asb (
+CREATE TABLE ukos_okstra.wlo_strassenbezug_asb (
 	CONSTRAINT pk_wlo_strassenbezug_asb PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_strassenbezug_asb
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_strassenbezug_asb
 VALUES
 ('0', 'unbekannt'),
 ('1', 'aktuelle Straße'),
 ('2', 'nachgeordnetes Netz');
 
-CREATE TABLE okstra.wlo_befestigung_schild (
+CREATE TABLE ukos_okstra.wlo_befestigung_schild (
 	CONSTRAINT pk_wlo_befestigung_schild PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_befestigung_schild
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_befestigung_schild
 VALUES
 ('00', 'unbekannt'),
 ('01', 'Schelle'),
@@ -879,39 +885,39 @@ VALUES
 ('04', 'Stahlnägel'),
 ('99', 'Sonstiges');
 
-CREATE TABLE okstra.wlo_beleuchtung_schild (
+CREATE TABLE ukos_okstra.wlo_beleuchtung_schild (
 	CONSTRAINT pk_wlo_beleuchtung_schild PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_beleuchtung_schild
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_beleuchtung_schild
 VALUES
 ('00', 'unbekannt'),
 ('01', 'ohne Beleuchtung'),
 ('02', 'außenbeleuchtet'),
 ('03', 'innenbeleuchtet');
 
-CREATE TABLE okstra.wlo_groessenklasse_vz (
+CREATE TABLE ukos_okstra.wlo_groessenklasse_vz (
 	CONSTRAINT pk_wlo_groessenklasse_vz PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_groessenklasse_vz
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_groessenklasse_vz
 VALUES
 ('00', 'unbekannt'),
 ('01', 'Klasse 1 (70%)'),
 ('02', 'Klasse 2 (100%)'),
 ('03', 'Klasse 3 (140%)');
 
-CREATE TABLE okstra.wlo_einzel_mehrfach_schild (
+CREATE TABLE ukos_okstra.wlo_einzel_mehrfach_schild (
 	CONSTRAINT pk_wlo_einzel_mehrfach_schild PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_einzel_mehrfach_schild
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_einzel_mehrfach_schild
 VALUES
 ('00', 'unbekannt'),
 ('01', 'Einzelschild'),
 ('02', 'Bestandteil eines Mehrfachschildes');
 
-CREATE TABLE okstra.wlo_unterhaltungspflicht_schild (
+CREATE TABLE ukos_okstra.wlo_unterhaltungspflicht_schild (
 	CONSTRAINT pk_wlo_unterhaltungspflicht_schild PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_unterhaltungspflicht_schild
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_unterhaltungspflicht_schild
 VALUES
 ('01', 'Land'),
 ('02', 'Kreis / kreisfreie Stadt'),
@@ -921,15 +927,15 @@ VALUES
 ('09', 'Sonstige Partner'),
 ('99', 'noch unbekannt');
 
-CREATE TABLE okstra.wlo_sonstige_unterhaltspflichtige (
+CREATE TABLE ukos_okstra.wlo_sonstige_unterhaltspflichtige (
 	CONSTRAINT pk_wlo_sonstige_unterhaltspflichtige PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos_base.werteliste);
 -- Open Codelist
 
-CREATE TABLE okstra.wlo_art_aufsatz (
+CREATE TABLE ukos_okstra.wlo_art_aufsatz (
 	CONSTRAINT pk_wlo_art_aufsatz PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_art_aufsatz
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_art_aufsatz
 VALUES
 ('00', 'unbekannt'),
 ('01', 'Pultaufsatz'),
@@ -938,25 +944,25 @@ VALUES
 ('04', 'Seitenablauf'),
 ('05', 'Bergeinlauf');
 
-CREATE TABLE okstra.wlo_art_unterteil (
+CREATE TABLE ukos_okstra.wlo_art_unterteil (
 	CONSTRAINT pk_wlo_art_unterteil PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_art_unterteil
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_art_unterteil
 VALUES
 ('00', 'unbekannt'),
 ('01', 'Unterteil für Trockenschlamm'),
 ('02', 'Unterteil für Nassschlamm'),
 ('99', 'Sonstiges');
 
-CREATE TABLE okstra.wlo_art_unterteil_sonst (
+CREATE TABLE ukos_okstra.wlo_art_unterteil_sonst (
 	CONSTRAINT pk_wlo_art_unterteil_sonst PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos_base.werteliste);
 -- Open Codelist
 
-CREATE TABLE okstra.wlo_unterhaltungspflicht (
+CREATE TABLE ukos_okstra.wlo_unterhaltungspflicht (
 	CONSTRAINT pk_wlo_unterhaltungspflicht PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_unterhaltungspflicht
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_unterhaltungspflicht
 VALUES
 ('00', 'unbekannt'),
 ('01', 'Land'),
@@ -967,20 +973,20 @@ VALUES
 ('09', 'Sonstige Partner'),
 ('10', 'keine Unterhaltungspflicht');
 
-CREATE TABLE okstra.wlo_typ_abfallentsorgung (
+CREATE TABLE ukos_okstra.wlo_typ_abfallentsorgung (
 	CONSTRAINT pk_wlo_typ_abfallentsorgung PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_typ_abfallentsorgung
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_typ_abfallentsorgung
 VALUES
 ('01', 'Abfallbehälter auf der Anlage des ruhenden Verkehrs, ohne Spezifizierung'),
 ('02', 'Behälter'),
 ('03', 'Behälter mit Aschenbecher'),
 ('06', 'Abfallcontainer');
 
-CREATE TABLE okstra.wlo_art_abfall (
+CREATE TABLE ukos_okstra.wlo_art_abfall (
 	CONSTRAINT pk_wlo_art_abfall PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_art_abfall
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_art_abfall
 VALUES
 ('00', 'unbekannt'),
 ('01', 'Restmüll/Reiseabfall'),
@@ -989,20 +995,20 @@ VALUES
 ('04', 'Glas'),
 ('99', 'Sonstiges');
 
-CREATE TABLE okstra.wlo_lagetyp_abfallentsorgung (
+CREATE TABLE ukos_okstra.wlo_lagetyp_abfallentsorgung (
 	CONSTRAINT pk_wlo_lagetyp_abfallentsorgung PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_lagetyp_abfallentsorgung
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_lagetyp_abfallentsorgung
 VALUES
 ('00', 'unbekannt'),
 ('01', 'unterirdisch'),
 ('02', 'oberirdisch'),
 ('03', 'Sonstige');
 
-CREATE TABLE okstra.wlo_material_abfallentsorgung (
+CREATE TABLE ukos_okstra.wlo_material_abfallentsorgung (
 	CONSTRAINT pk_wlo_material_abfallentsorgung PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_material_abfallentsorgung
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_material_abfallentsorgung
 VALUES
 ('00', 'unbekannt'),
 ('01', 'Kunststoff'),
@@ -1016,10 +1022,10 @@ VALUES
 ('09', 'Metallgitter'),
 ('99', 'Sonstiges');
 
-CREATE TABLE okstra.wlo_art_schacht (
+CREATE TABLE ukos_okstra.wlo_art_schacht (
 	CONSTRAINT pk_wlo_art_schacht PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_art_schacht
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_art_schacht
 VALUES
 ('00', 'unbekannt'),
 ('01', 'Prüfschacht'),
@@ -1029,10 +1035,10 @@ VALUES
 ('05', 'Sickerschacht'),
 ('99', 'sonstiges');
 
-CREATE TABLE okstra.wlo_lage_schacht_strassenablauf (
+CREATE TABLE ukos_okstra.wlo_lage_schacht_strassenablauf (
 	CONSTRAINT pk_wlo_lage_schacht_strassenablauf PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_lage_schacht_strassenablauf
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_lage_schacht_strassenablauf
 VALUES
 ('00', 'unbekannt'),
 ('01', 'linker Fahrbahnrand (einbahnig)'),
@@ -1079,19 +1085,19 @@ VALUES
 ('95', 'links außerhalb'),
 ('96', 'rechts außerhalb');
 
-CREATE TABLE okstra.wlo_angaben_zum_konus (
+CREATE TABLE ukos_okstra.wlo_angaben_zum_konus (
 	CONSTRAINT pk_wlo_angaben_zum_konus PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_angaben_zum_konus
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_angaben_zum_konus
 VALUES
 ('00', 'unbekannt'),
 ('01', 'flach'),
 ('02', 'hoch');
 
-CREATE TABLE okstra.wlo_lage_durchlass (
+CREATE TABLE ukos_okstra.wlo_lage_durchlass (
 	CONSTRAINT pk_wlo_lage_durchlass PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_lage_durchlass
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_lage_durchlass
 VALUES
 ('00', 'unbekannt'),
 ('01', 'links, längs'),
@@ -1104,10 +1110,10 @@ VALUES
 ('08', 'Mitte längs'),
 ('09', 'unter einbahniger Fahrbahn');
 
-CREATE TABLE okstra.wlo_profil_durchlass (
+CREATE TABLE ukos_okstra.wlo_profil_durchlass (
 	CONSTRAINT pk_wlo_profil_durchlass PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_profil_durchlass
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_profil_durchlass
 VALUES
 ('00', 'unbekannt'),
 ('01', 'Rechteck'),
@@ -1120,10 +1126,10 @@ VALUES
 ('08', 'Mehrfachkreis'),
 ('99', 'Sonstiges');
 
-CREATE TABLE okstra.wlo_material_durchlass (
+CREATE TABLE ukos_okstra.wlo_material_durchlass (
 	CONSTRAINT pk_wlo_material_durchlass PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_material_durchlass
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_material_durchlass
 VALUES
 ('00', 'unbekannt'),
 ('01', 'Holz'),
@@ -1136,10 +1142,10 @@ VALUES
 ('08', 'Ton'),
 ('99', 'Sonstiges');
 
-CREATE TABLE okstra.wlo_funktion_durchlass (
+CREATE TABLE ukos_okstra.wlo_funktion_durchlass (
 	CONSTRAINT pk_wlo_funktion_durchlass PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_funktion_durchlass
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_funktion_durchlass
 VALUES
 ('00', 'unbekannt'),
 ('01', 'Gewässer 2. Ordnung'),
@@ -1148,38 +1154,38 @@ VALUES
 ('97', 'verschüttet'),
 ('98', 'verpresst');
 
-CREATE TABLE okstra.wlo_zustand_durchlass (
+CREATE TABLE ukos_okstra.wlo_zustand_durchlass (
 	CONSTRAINT pk_wlo_zustand_durchlass PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_zustand_durchlass
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_zustand_durchlass
 VALUES
 ('01', 'gut'),
 ('02', 'mittel'),
 ('03', 'schlecht');
 
-CREATE TABLE okstra.wlo_schutzeinrichtung_durchlass (
+CREATE TABLE ukos_okstra.wlo_schutzeinrichtung_durchlass (
 	CONSTRAINT pk_wlo_schutzeinrichtung_durchlass PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_schutzeinrichtung_durchlass
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_schutzeinrichtung_durchlass
 VALUES
 ('00', 'unbekannt'),
 ('01', 'Schutzplanke'),
 ('02', 'Geländer'),
 ('03', 'Mauer/Brüstung');
 
-CREATE TABLE okstra.wlo_stadium_durchlass (
+CREATE TABLE ukos_okstra.wlo_stadium_durchlass (
 	CONSTRAINT pk_wlo_stadium_durchlass PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_stadium_durchlass
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_stadium_durchlass
 VALUES
 ('00', 'unbekannt'),
 ('01', 'in Betrieb'),
 ('02', 'nicht in Betrieb');
 
-CREATE TABLE okstra.wlo_lage_leitung (
+CREATE TABLE ukos_okstra.wlo_lage_leitung (
 	CONSTRAINT pk_wlo_lage_leitung PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_lage_leitung
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_lage_leitung
 VALUES
 ('00', 'unbekannt'),
 ('01', 'links, längs'),
@@ -1192,10 +1198,10 @@ VALUES
 ('91', 'befestigter Seitenstreifen links'),
 ('92', 'befestigter Seitenstreifen rechts');
 
-CREATE TABLE okstra.wlo_art_leitung (
+CREATE TABLE ukos_okstra.wlo_art_leitung (
 	CONSTRAINT pk_wlo_art_leitung PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_art_leitung
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_art_leitung
 VALUES
 ('00', 'unbekannt'),
 ('01', 'Elektrizität'),
@@ -1207,10 +1213,10 @@ VALUES
 ('07', 'Öl'),
 ('99', 'Sonstiges');
 
-CREATE TABLE okstra.wlo_art_leitung_detail (
+CREATE TABLE ukos_okstra.wlo_art_leitung_detail (
 	CONSTRAINT pk_wlo_art_leitung_detail PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_art_leitung_detail
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_art_leitung_detail
 VALUES
 ('0101', 'Elektrizität Niedrigspannung'),
 ('0102', 'Elektrizität Mittelspannung'),
@@ -1228,10 +1234,10 @@ VALUES
 ('0503', 'Fernmeldekabel'),
 ('0701', 'Mineralöl');
 
-CREATE TABLE okstra.wlo_material_leitung (
+CREATE TABLE ukos_okstra.wlo_material_leitung (
 	CONSTRAINT pk_wlo_material_leitung PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_material_leitung
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_material_leitung
 VALUES
 ('00', 'unbekannt'),
 ('01', 'PVC (Polyvinylchlorid)'),
@@ -1246,10 +1252,10 @@ VALUES
 ('10', 'LWL (Lichtwellenleiter)'),
 ('11', 'KG (Kanalgrundrohr-PVC)');
 
-CREATE TABLE okstra.wlo_material_schutzrohr (
+CREATE TABLE ukos_okstra.wlo_material_schutzrohr (
 	CONSTRAINT pk_wlo_material_schutzrohr PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_material_schutzrohr
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_material_schutzrohr
 VALUES
 ('00', 'unbekannt'),
 ('01', 'PVC Polyvinylchlorid (schwer entflammbar)'),
@@ -1258,15 +1264,15 @@ VALUES
 ('04', 'Steinzeug'),
 ('05', 'HDPE Polyethylen (sehr dicht)');
 
-CREATE TABLE okstra.wlo_betreiber_leitung (
+CREATE TABLE ukos_okstra.wlo_betreiber_leitung (
 	CONSTRAINT pk_wlo_betreiber_leitung PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos_base.werteliste);
 -- Open Codelist
 
-CREATE TABLE okstra.wlo_streifenart (
+CREATE TABLE ukos_okstra.wlo_streifenart (
 	CONSTRAINT pk_wlo_streifenart PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_streifenart
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_streifenart
 VALUES
 ('100', 'Fahrbahn'),
 ('110', 'Hauptfahrstreifen (HFS)'),
@@ -1342,25 +1348,25 @@ VALUES
 ('751', 'Baumscheibe'),
 ('999', 'sonstige Streifenart');
 
-CREATE TABLE okstra.wlo_streifenart_sonst (
+CREATE TABLE ukos_okstra.wlo_streifenart_sonst (
 	CONSTRAINT pk_wlo_streifenart_sonst PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos_base.werteliste);
 -- Open Codelist
 
-CREATE TABLE okstra.wlo_anzahl_gleise_laengs (
+CREATE TABLE ukos_okstra.wlo_anzahl_gleise_laengs (
 	CONSTRAINT pk_wlo_anzahl_gleise_laengs PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_anzahl_gleise_laengs
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_anzahl_gleise_laengs
 VALUES
 ('0', 'unbekannt'),
 ('1', 'ein Gleis'),
 ('2', 'zwei Gleise'),
 ('3', 'drei oder mehr Gleise');
 
-CREATE TABLE okstra.wlo_art_der_oberflaeche (
+CREATE TABLE ukos_okstra.wlo_art_der_oberflaeche (
 	CONSTRAINT pk_wlo_art_der_oberflaeche PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_art_der_oberflaeche
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_art_der_oberflaeche
 VALUES
 ('00', 'unbekannt'),
 ('01', 'Grasfläche mit Intensivpflege'),
@@ -1372,10 +1378,10 @@ VALUES
 ('11', 'versiegelt'),
 ('12', 'befestigt, unversiegelt');
 
-CREATE TABLE okstra.wlo_art_part_baulasttraeger (
+CREATE TABLE ukos_okstra.wlo_art_part_baulasttraeger (
 	CONSTRAINT pk_wlo_art_part_baulasttraeger PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_art_part_baulasttraeger
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_art_part_baulasttraeger
 VALUES
 ('00', 'unbekannt'),
 ('01', 'Land'),
@@ -1384,15 +1390,15 @@ VALUES
 ('09', 'Dritter'),
 ('10', 'keine Unterhaltungspflicht');
 
-CREATE TABLE okstra.wlo_sonstiger_ui_partner_land (
+CREATE TABLE ukos_okstra.wlo_sonstiger_ui_partner_land (
 	CONSTRAINT pk_wlo_sonstiger_ui_partner_land PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos_base.werteliste);
 -- Open Codelist
 
-CREATE TABLE okstra.wlo_standort_rueckhaltesystem (
+CREATE TABLE ukos_okstra.wlo_standort_rueckhaltesystem (
 	CONSTRAINT pk_wlo_standort_rueckhaltesystem PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_standort_rueckhaltesystem
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_standort_rueckhaltesystem
 VALUES
 ('00', 'unbekannt'),
 ('01', 'neben Fahrbahn'),
@@ -1413,10 +1419,10 @@ VALUES
 ('16', 'neben untergeordnetem Verkehrsweg'),
 ('17', 'vor Einzelbaum / Einzelbäumen');
 
-CREATE TABLE okstra.wlo_modulbezeichnung_schutzeinr_stahl (
+CREATE TABLE ukos_okstra.wlo_modulbezeichnung_schutzeinr_stahl (
 	CONSTRAINT pk_wlo_modulbezeichnung_schutzeinr_stahl PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_modulbezeichnung_schutzeinr_stahl
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_modulbezeichnung_schutzeinr_stahl
 VALUES
 ('M01', 'einfache Schutzplanke (ESP)'),
 ('M02', 'einfache Distanzschutzplanke (EDSP)'),
@@ -1431,51 +1437,51 @@ VALUES
 ('A04', 'kurze Schutzplanke'),
 ('99', 'sonstige');
 
-CREATE TABLE okstra.wlo_systemname_schutzeinr_stahl (
+CREATE TABLE ukos_okstra.wlo_systemname_schutzeinr_stahl (
 	CONSTRAINT pk_wlo_systemname_schutzeinr_stahl PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos_base.werteliste);
 -- Open Codelist
 
-CREATE TABLE okstra.wlo_holmform_schutzeinr_stahl (
+CREATE TABLE ukos_okstra.wlo_holmform_schutzeinr_stahl (
 	CONSTRAINT pk_wlo_holmform_schutzeinr_stahl PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_holmform_schutzeinr_stahl
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_holmform_schutzeinr_stahl
 VALUES
 ('00', 'unbekannt'),
 ('01', 'Profil A'),
 ('02', 'Profil B'),
 ('03', 'sonstige Konstruktion');
 
-CREATE TABLE okstra.wlo_pfostenform_schutzeinr_stahl (
+CREATE TABLE ukos_okstra.wlo_pfostenform_schutzeinr_stahl (
 	CONSTRAINT pk_wlo_pfostenform_schutzeinr_stahl PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_pfostenform_schutzeinr_stahl
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_pfostenform_schutzeinr_stahl
 VALUES
 ('00', 'unbekannt'),
 ('01', 'Sigma 100 - Pfosten'),
 ('02', 'IPE 100 - Pfosten'),
 ('03', 'sonstige Konstruktion');
 
-CREATE TABLE okstra.wlo_art_pfostenbefestigung_schutzeinr_stahl (
+CREATE TABLE ukos_okstra.wlo_art_pfostenbefestigung_schutzeinr_stahl (
 	CONSTRAINT pk_wlo_art_pfostenbefestigung_schutzeinr_stahl PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_art_pfostenbefestigung_schutzeinr_stahl
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_art_pfostenbefestigung_schutzeinr_stahl
 VALUES
 ('00', 'unbekannt'),
 ('01', 'gerammt'),
 ('02', 'geschraubt'),
 ('03', 'gesteckt');
 
-CREATE TABLE okstra.wlo_art_aek_schutzeinr_stahl (
+CREATE TABLE ukos_okstra.wlo_art_aek_schutzeinr_stahl (
 	CONSTRAINT pk_wlo_art_aek_schutzeinr_stahl PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos_base.werteliste);
 -- Open Codelist
 
 -- Codelists that were not originally in the infrastructure tables, but can be found in the datenmodell.sql
-CREATE TABLE okstra.wlo_art_aufbauschicht (
+CREATE TABLE ukos_okstra.wlo_art_aufbauschicht (
 	CONSTRAINT pk_wlo_art_aufbauschicht PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_art_aufbauschicht
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_art_aufbauschicht
 VALUES
 ('0', 'unbekannt'),
 ('1', 'Untergrund / Unterbau'),
@@ -1488,15 +1494,15 @@ VALUES
 ('8', 'Platten'),
 ('9', 'Sonstige Schichten');
 
-CREATE TABLE okstra.wlo_material_aufbauschicht (
+CREATE TABLE ukos_okstra.wlo_material_aufbauschicht (
 	CONSTRAINT pk_wlo_material_aufbauschicht PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos_base.werteliste);
 -- Open Codelist
 
-CREATE TABLE okstra.wlo_herkunft_angaben_aufbau (
+CREATE TABLE ukos_okstra.wlo_herkunft_angaben_aufbau (
 	CONSTRAINT pk_wlo_herkunft_angaben_aufbau PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_herkunft_angaben_aufbau
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_herkunft_angaben_aufbau
 VALUES
 ('00', 'unbekannt'),
 ('01', 'aus Bauunterlagen'),
@@ -1509,7 +1515,7 @@ VALUES
 ('08', 'von Bauüberwacher');
 
 -- Doesn't inherit from Werteliste due to different column-structure
-CREATE TABLE okstra.wlo_detail_a_aufbauschicht (
+CREATE TABLE ukos_okstra.wlo_detail_a_aufbauschicht (
 	kennung character varying NOT NULL,
 	bedeutung character varying,
 	langtext character varying,
@@ -1518,7 +1524,7 @@ CREATE TABLE okstra.wlo_detail_a_aufbauschicht (
 -- Open Codelist
 
 -- Doesn't inherit from Werteliste due to different column-structure
-CREATE TABLE okstra.wlo_detail_b_aufbauschicht (
+CREATE TABLE ukos_okstra.wlo_detail_b_aufbauschicht (
 	kennung character varying NOT NULL,
 	bedeutung character varying,
 	langtext character varying,
@@ -1527,7 +1533,7 @@ CREATE TABLE okstra.wlo_detail_b_aufbauschicht (
 -- Open Codelist
 
 -- Doesn't inherit from Werteliste due to different column-structure
-CREATE TABLE okstra.wlo_detail_c_aufbauschicht (
+CREATE TABLE ukos_okstra.wlo_detail_c_aufbauschicht (
 	kennung character varying NOT NULL,
 	bedeutung character varying,
 	langtext character varying,
@@ -1536,7 +1542,7 @@ CREATE TABLE okstra.wlo_detail_c_aufbauschicht (
 -- Open Codelist
 
 -- Doesn't inherit from Werteliste due to different column-structure
-CREATE TABLE okstra.wlo_detail_d_aufbauschicht (
+CREATE TABLE ukos_okstra.wlo_detail_d_aufbauschicht (
 	kennung character varying NOT NULL,
 	bedeutung character varying,
 	langtext character varying,
@@ -1544,32 +1550,32 @@ CREATE TABLE okstra.wlo_detail_d_aufbauschicht (
 );
 -- Open Codelist
 
-CREATE TABLE okstra.wlo_bindemittel_aufbauschicht (
+CREATE TABLE ukos_okstra.wlo_bindemittel_aufbauschicht (
 	CONSTRAINT pk_wlo_bindemittel_aufbauschicht PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos_base.werteliste);
 -- Open Codelist
 
-CREATE TABLE okstra.wlo_kennzeichen_bahnigkeit (
+CREATE TABLE ukos_okstra.wlo_kennzeichen_bahnigkeit (
 	CONSTRAINT pk_wlo_kennzeichen_bahnigkeit PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_kennzeichen_bahnigkeit
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_kennzeichen_bahnigkeit
 VALUES
 ('0', 'unbekannt'),
 ('1', 'einbahnig, Straße mit/ohne Gegenverkehr'),
 ('2', 'zweibahnig, Straße mit baulich getrennten Richtungsfahrbahnen');
 
-CREATE TABLE okstra.wlo_art_belastungsklasse (
+CREATE TABLE ukos_okstra.wlo_art_belastungsklasse (
 	CONSTRAINT pk_wlo_art_belastungsklasse PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_art_belastungsklasse
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_art_belastungsklasse
 VALUES
 ('01', 'Soll-Belastungsklasse'),
 ('02', 'Ist-Belastungsklasse');
 
-CREATE TABLE okstra.wlo_belastungsklasse_rsto (
+CREATE TABLE ukos_okstra.wlo_belastungsklasse_rsto (
 	CONSTRAINT pk_wlo_belastungsklasse_rsto PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_belastungsklasse_rsto
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_belastungsklasse_rsto
 VALUES
 ('00', 'unbekannt'),
 ('01', 'Bk 32'),
@@ -1582,24 +1588,24 @@ VALUES
 ('98', 'sonstige Belastungsklasse'),
 ('99', 'keine Zuordnung möglich');
 
-CREATE TABLE okstra.wlo_belastungsklasse_sonst (
+CREATE TABLE ukos_okstra.wlo_belastungsklasse_sonst (
 	CONSTRAINT pk_wlo_belastungsklasse_sonst PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos_base.werteliste);
 -- Open Codelist
 
-CREATE TABLE okstra.wlo_verkehrsrichtung (
+CREATE TABLE ukos_okstra.wlo_verkehrsrichtung (
 	CONSTRAINT pk_wlo_verkehrsrichtung PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_verkehrsrichtung
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_verkehrsrichtung
 VALUES
 ('B', 'Verkehr in beiden Richtungen'),
 ('R', 'Einbahnverkehr in Stationierungsrichtung'),
 ('G', 'Einbahnverkehr gegen Stationierungsrichtung');
 
-CREATE TABLE okstra.wlo_fahrzeugart (
+CREATE TABLE ukos_okstra.wlo_fahrzeugart (
 	CONSTRAINT pk_wlo_fahrzeugart PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_fahrzeugart
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_fahrzeugart
 VALUES
 ('nk Kfz', 'nicht klassifizierbare Fahrzeuge (Sonstige)'),
 ('Krad', 'Motorräder'),
@@ -1616,10 +1622,10 @@ VALUES
 ('LkwÄ', 'PkwA + Lkw + LkwA + Bus'),
 ('Kfz', 'PkwÄ + LkwÄ');
 
-CREATE TABLE okstra.wlo_tab_funktion (
+CREATE TABLE ukos_okstra.wlo_tab_funktion (
 	CONSTRAINT pk_wlo_tab_funktion PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_tab_funktion
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_tab_funktion
 VALUES
 ('01', 'Ausfahrt'),
 ('02', 'Einfahrt'),
@@ -1628,20 +1634,20 @@ VALUES
 ('05', 'Verzögerungsspur'),
 ('06', 'Beschleunigungsspur');
 
-CREATE TABLE okstra.wlo_art_komplexer_knoten (
+CREATE TABLE ukos_okstra.wlo_art_komplexer_knoten (
 	CONSTRAINT pk_wlo_art_komplexer_knoten PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_art_komplexer_knoten
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_art_komplexer_knoten
 VALUES
 ('1', 'plangleicher Knoten'),
 ('2', 'planfreier Knoten'),
 ('3', 'teilplanfreier Knoten'),
 ('4', 'Kreisverkehr');
 
-CREATE TABLE okstra.wlo_organisationsart (
+CREATE TABLE ukos_okstra.wlo_organisationsart (
 	CONSTRAINT pk_wlo_organisationsart PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_organisationsart
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_organisationsart
 VALUES
 ('1', 'Bundesministerium'),
 ('2', 'Landesministerium'),
@@ -1657,10 +1663,10 @@ VALUES
 ('52', 'GmbH & Co. KG'),
 ('99', 'Sonstiges');
 
-CREATE TABLE okstra.wlo_kommunikationstyp (
+CREATE TABLE ukos_okstra.wlo_kommunikationstyp (
 	CONSTRAINT pk_wlo_kommunikationstyp PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_kommunikationstyp
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_kommunikationstyp
 VALUES
 ('1', 'Telefonnummer'),
 ('2', 'Faxnummer'),
@@ -1668,26 +1674,26 @@ VALUES
 ('4', 'Emailadresse'),
 ('9', 'Sonstiges');
 
-CREATE TABLE okstra.wlo_dienstlich_privat (
+CREATE TABLE ukos_okstra.wlo_dienstlich_privat (
 	CONSTRAINT pk_wlo_dienstlich_privat PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_dienstlich_privat
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_dienstlich_privat
 VALUES
 ('1', 'dienstlich'),
 ('2', 'privat');
 
-CREATE TABLE okstra.wlo_anschriftstyp (
+CREATE TABLE ukos_okstra.wlo_anschriftstyp (
 	CONSTRAINT pk_wlo_anschriftstyp PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_anschriftstyp
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_anschriftstyp
 VALUES
 ('1', 'Postadresse'),
 ('2', 'Büroadresse');
 
-CREATE TABLE okstra.wlo_personenklasse (
+CREATE TABLE ukos_okstra.wlo_personenklasse (
 	CONSTRAINT pk_wlo_personenklasse PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_personenklasse
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_personenklasse
 VALUES
 ('?', 'unbekannt'),
 ('G', 'Gemeindeverwaltung'),
@@ -1697,10 +1703,10 @@ VALUES
 ('Ö', 'öffentlicher Bedarfsträger'),
 ('V', 'verstorben');
 
-CREATE TABLE okstra.wlo_tab_stadium (
+CREATE TABLE ukos_okstra.wlo_tab_stadium (
 	CONSTRAINT pk_wlo_tab_stadium PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_tab_stadium
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_tab_stadium
 VALUES
 ('000', 'unbekannt'),
 ('VP', 'Vorplanung hat begonnen'),
@@ -1720,28 +1726,28 @@ VALUES
 ('IPL', 'Instandsetzung in Planung'),
 ('IAU', 'Instandsetzung in Ausführung');
 
-CREATE TABLE okstra.wlo_verkehrsrichtung_se (
+CREATE TABLE ukos_okstra.wlo_verkehrsrichtung_se (
 	CONSTRAINT pk_wlo_verkehrsrichtung_se PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_verkehrsrichtung_se
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_verkehrsrichtung_se
 VALUES
 ('R', 'Verkehrsrichtung von Von-VP nach Nach-VP'),
 ('G', 'Verkehrsrichtung von Nach-VP nach Von-VP'),
 ('B', 'In beiden Richtungen'),
 ('K', 'In keiner Richtung');
 
-CREATE TABLE okstra.wlo_stufe_strassenelement (
+CREATE TABLE ukos_okstra.wlo_stufe_strassenelement (
 	CONSTRAINT pk_wlo_stufe_strassenelement PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_stufe_strassenelement
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_stufe_strassenelement
 VALUES
 ('1', 'Hauptverbindung'),
 ('2', 'Nebenverbindung');
 
-CREATE TABLE okstra.wlo_verkehrsteilnehmergruppe (
+CREATE TABLE ukos_okstra.wlo_verkehrsteilnehmergruppe (
 	CONSTRAINT pk_wlo_verkehrsteilnehmergruppe PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_verkehrsteilnehmergruppe
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_verkehrsteilnehmergruppe
 VALUES
 ('01', 'alle Kraftfahrzeuge'),
 ('02', 'alle Fahrzeuge'),
@@ -1756,10 +1762,10 @@ VALUES
 ('11', 'Taxi'),
 ('99', 'Sonstige');
 
-CREATE TABLE okstra.wlo_querschnitt_streifenart_ves (
+CREATE TABLE ukos_okstra.wlo_querschnitt_streifenart_ves (
 	CONSTRAINT pk_wlo_querschnitt_streifenart_ves PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_querschnitt_streifenart_ves
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_querschnitt_streifenart_ves
 VALUES
 ('110', 'Hauptfahrstreifen (HFS)'),
 ('111', '1. Überholstreifen (UE1)'),
@@ -1768,10 +1774,10 @@ VALUES
 ('114', 'Zusatzfahrstreifen (ZFS)'),
 ('115', 'Sonderfahrstreifen (z. B. Busse)');
 
-CREATE TABLE okstra.wlo_art_ves (
+CREATE TABLE ukos_okstra.wlo_art_ves (
 	CONSTRAINT pk_wlo_art_ves PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_art_ves
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_art_ves
 VALUES
 ('00', 'unbekannt'),
 ('01', 'Geschwindigkeitsbeschränkung'),
@@ -1785,20 +1791,20 @@ VALUES
 ('09', 'Mindestgeschwindigkeit'),
 ('99', 'Sonstige Verbote (z.B. Halteverbot)');
 
-CREATE TABLE okstra.wlo_bezugsrichtung (
+CREATE TABLE ukos_okstra.wlo_bezugsrichtung (
 	CONSTRAINT pk_wlo_bezugsrichtung PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_bezugsrichtung
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_bezugsrichtung
 VALUES
 ('0', 'unbekannt'),
 ('B', 'beide Richtungen'),
 ('R', 'in Stationierungsrichtung'),
 ('G', 'gegen Stationierungsrichtung');
 
-CREATE TABLE okstra.wlo_gueltigkeit_ves (
+CREATE TABLE ukos_okstra.wlo_gueltigkeit_ves (
 	CONSTRAINT pk_wlo_gueltigkeit_ves PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_gueltigkeit_ves
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_gueltigkeit_ves
 VALUES
 ('01', 'permanent'),
 ('02', 'bei Nässe'),
@@ -1810,24 +1816,24 @@ VALUES
 ('08', 'bei Bedarf (verdeckbar)'),
 ('99', 'sonstiges');
 
-CREATE TABLE okstra.wlo_orientierungsrichtung (
+CREATE TABLE ukos_okstra.wlo_orientierungsrichtung (
 	CONSTRAINT pk_wlo_orientierungsrichtung PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_orientierungsrichtung
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_orientierungsrichtung
 VALUES
 ('R', 'in Definitionsrichtung'),
 ('G', 'gegen Definitionsrichtung'),
 ('B', 'beide Richtungen');
 
-CREATE TABLE okstra.wlo_art_zustaendigkeit (
+CREATE TABLE ukos_okstra.wlo_art_zustaendigkeit (
 	CONSTRAINT pk_wlo_art_zustaendigkeit PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
+) INHERITS (ukos_base.werteliste);
 -- open codelist
 
-CREATE TABLE okstra.wlo_wochentag_ves (
+CREATE TABLE ukos_okstra.wlo_wochentag_ves (
 	CONSTRAINT pk_wlo_wochentag_ves PRIMARY KEY (kennung)
-) INHERITS (base.werteliste);
-INSERT INTO okstra.wlo_wochentag_ves
+) INHERITS (ukos_base.werteliste);
+INSERT INTO ukos_okstra.wlo_wochentag_ves
 VALUES
 ('00', 'permanent'),
 ('01', 'Werktags'),
@@ -1839,97 +1845,97 @@ VALUES
 ---------------------------------------------------------------
 -- CODELISTEN DOPPIK
 ---------------------------------------------------------------
-CREATE TABLE base.wld_klassifizierung (
+CREATE TABLE ukos_base.wld_klassifizierung (
 	CONSTRAINT pk_wld_klassifizierung PRIMARY KEY (id)
 )
-INHERITS (base.basiscodeliste);
-INSERT INTO base.wld_klassifizierung (id, langtext) VALUES ('00000000-0000-0000-0000-000000000000', 'unbekannt');
+INHERITS (ukos_base.basiscodeliste);
+INSERT INTO ukos_base.wld_klassifizierung (id, langtext) VALUES ('00000000-0000-0000-0000-000000000000', 'unbekannt');
 
-CREATE TABLE base.wld_nutzung (
+CREATE TABLE ukos_base.wld_nutzung (
 	CONSTRAINT pk_wld_nutzung PRIMARY KEY (id)
 )
-INHERITS (base.basiscodeliste);
-INSERT INTO base.wld_nutzung (ident_hist, kurztext, langtext)
+INHERITS (ukos_base.basiscodeliste);
+INSERT INTO ukos_base.wld_nutzung (ident_hist, kurztext, langtext)
  VALUES ('1', '', 'Autobahn');
-INSERT INTO base.wld_nutzung (ident_hist, kurztext, langtext)
+INSERT INTO ukos_base.wld_nutzung (ident_hist, kurztext, langtext)
  VALUES ('2', '54401', 'Bundesstraße');
-INSERT INTO base.wld_nutzung (ident_hist, kurztext, langtext)
+INSERT INTO ukos_base.wld_nutzung (ident_hist, kurztext, langtext)
  VALUES ('5', '54301', 'Landesstraße');
 
-CREATE TABLE base.wld_strassennetzlage
+CREATE TABLE ukos_base.wld_strassennetzlage
 (
 	CONSTRAINT pk_wld_strassennetzlage PRIMARY KEY (id)
 )
-INHERITS (base.basiscodeliste);
-INSERT INTO base.wld_strassennetzlage (id, langtext) VALUES ('00000000-0000-0000-0000-000000000000', 'unbekannt');
+INHERITS (ukos_base.basiscodeliste);
+INSERT INTO ukos_base.wld_strassennetzlage (id, langtext) VALUES ('00000000-0000-0000-0000-000000000000', 'unbekannt');
 
-CREATE TABLE base.wld_bauklasse (
+CREATE TABLE ukos_base.wld_bauklasse (
 	CONSTRAINT pk_wld_bauklasse PRIMARY KEY (id)
 )
-INHERITS (base.basiscodeliste);
+INHERITS (ukos_base.basiscodeliste);
 
-CREATE TABLE base.wld_baulasttraeger (
+CREATE TABLE ukos_base.wld_baulasttraeger (
 	CONSTRAINT pk_wld_baulasttraeger PRIMARY KEY (id)
 )
-INHERITS (base.basiscodeliste);
+INHERITS (ukos_base.basiscodeliste);
 
-CREATE TABLE base.wld_baumart (
+CREATE TABLE ukos_base.wld_baumart (
 	CONSTRAINT pk_wld_baumart PRIMARY KEY (id)
 )
-INHERITS (base.basiscodeliste);
+INHERITS (ukos_base.basiscodeliste);
 
-CREATE TABLE base.wld_deckschicht (
+CREATE TABLE ukos_base.wld_deckschicht (
 	CONSTRAINT pk_wld_deckschicht PRIMARY KEY (id)
 )
-INHERITS (base.basiscodeliste);
+INHERITS (ukos_base.basiscodeliste);
 
-CREATE TABLE base.wld_eigentuemer (
+CREATE TABLE ukos_base.wld_eigentuemer (
 	CONSTRAINT pk_wld_eigentuemer PRIMARY KEY (id)
 )
-INHERITS (base.basiscodeliste);
+INHERITS (ukos_base.basiscodeliste);
 
-CREATE TABLE base.wld_fertigstellung (
+CREATE TABLE ukos_base.wld_fertigstellung (
 	CONSTRAINT pk_wld_fertigstellung PRIMARY KEY (id)
 )
-INHERITS (base.basiscodeliste);
+INHERITS (ukos_base.basiscodeliste);
 
-CREATE TABLE base.wld_material (
+CREATE TABLE ukos_base.wld_material (
 	CONSTRAINT pk_wld_material PRIMARY KEY (id)
 )
-INHERITS (base.basiscodeliste);
+INHERITS (ukos_base.basiscodeliste);
 
-CREATE TABLE base.wld_objektbezeichnung (
+CREATE TABLE ukos_base.wld_objektbezeichnung (
 	CONSTRAINT pk_wld_objektbezeichnung PRIMARY KEY (id)
 )
-INHERITS (base.basiscodeliste);
+INHERITS (ukos_base.basiscodeliste);
 
-CREATE TABLE base.wld_preisermittlung (
+CREATE TABLE ukos_base.wld_preisermittlung (
 	CONSTRAINT pk_wld_preisermittlung PRIMARY KEY (id)
 )
-INHERITS (base.basiscodeliste);
+INHERITS (ukos_base.basiscodeliste);
 
-CREATE TABLE base.wld_zustand (
+CREATE TABLE ukos_base.wld_zustand (
 	CONSTRAINT pk_wld_zustand PRIMARY KEY (id)
 )
-INHERITS (base.basiscodeliste);
+INHERITS (ukos_base.basiscodeliste);
 
-CREATE TABLE base.wld_zustandsbewertung (
+CREATE TABLE ukos_base.wld_zustandsbewertung (
 	CONSTRAINT pk_wld_zustandsbewertung PRIMARY KEY (id)
 )
-INHERITS (base.basiscodeliste);
+INHERITS (ukos_base.basiscodeliste);
 
-CREATE TABLE base.wld_stvonr (
+CREATE TABLE ukos_base.wld_stvonr (
 	CONSTRAINT pk_wld_stvonr PRIMARY KEY (id)
 )
-INHERITS (base.basiscodeliste);
+INHERITS (ukos_base.basiscodeliste);
 
 ---------------------------------------------------------------
 -- KATASTER
 ---------------------------------------------------------------
-CREATE TABLE kataster.kreis (
+CREATE TABLE ukos_kataster.kreis (
 	id character varying NOT NULL DEFAULT uuid_generate_v4(),
 	bezeichnung character varying NOT NULL DEFAULT 'nicht zugewiesen'::character varying,
-    schluessel character(5) NOT NULL DEFAULT '00000'::character varying,
+		schluessel character(5) NOT NULL DEFAULT '00000'::character varying,
 	bemerkung character varying NOT NULL DEFAULT 'noch keine Bemerkung'::character varying,
 	gueltig_von timestamp with time zone NOT NULL DEFAULT timezone('utc-1'::text, now()),
 	gueltig_bis timestamp with time zone NOT NULL DEFAULT '2100-01-01 02:00:00+01'::timestamp with time zone,
@@ -1943,13 +1949,13 @@ CREATE TABLE kataster.kreis (
 WITH (
 	OIDS=TRUE
 );
-INSERT INTO kataster.kreis (id) VALUES ('00000000-0000-0000-0000-000000000000');
+INSERT INTO ukos_kataster.kreis (id) VALUES ('00000000-0000-0000-0000-000000000000');
 
-CREATE TABLE kataster.gemeindeverband (
+CREATE TABLE ukos_kataster.gemeindeverband (
 	id character varying NOT NULL DEFAULT uuid_generate_v4(),
 	id_kreis character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
 	bezeichnung character varying NOT NULL DEFAULT 'nicht zugewiesen'::character varying,
-    schluessel character(4) NOT NULL DEFAULT '0000'::character varying,
+		schluessel character(4) NOT NULL DEFAULT '0000'::character varying,
 	bemerkung character varying NOT NULL DEFAULT 'noch keine Bemerkung'::character varying,
 	gueltig_von timestamp with time zone NOT NULL DEFAULT timezone('utc-1'::text, now()),
 	gueltig_bis timestamp with time zone NOT NULL DEFAULT '2100-01-01 02:00:00+01'::timestamp with time zone,
@@ -1959,20 +1965,20 @@ CREATE TABLE kataster.gemeindeverband (
 	geaendert_von character varying NOT NULL DEFAULT 'unbekannt'::character varying,
 	CONSTRAINT pk_gemeindeverband PRIMARY KEY (id),
 	CONSTRAINT fk_gemeindeverband_kreis FOREIGN KEY (id_kreis)
-		REFERENCES kataster.kreis (id) MATCH SIMPLE
+		REFERENCES ukos_kataster.kreis (id) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT uk1_gemeindeverband UNIQUE (id_kreis, schluessel)
 )
 WITH (
 	OIDS=TRUE
 );
-INSERT INTO kataster.gemeindeverband (id) VALUES ('00000000-0000-0000-0000-000000000000');
+INSERT INTO ukos_kataster.gemeindeverband (id) VALUES ('00000000-0000-0000-0000-000000000000');
 
-CREATE TABLE kataster.gemeinde (
+CREATE TABLE ukos_kataster.gemeinde (
 	id character varying NOT NULL DEFAULT uuid_generate_v4(),
 	id_gemeindeverband character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
 	bezeichnung character varying NOT NULL DEFAULT 'nicht zugewiesen'::character varying,
-    schluessel character(3) NOT NULL DEFAULT '000'::character varying,
+		schluessel character(3) NOT NULL DEFAULT '000'::character varying,
 	bemerkung character varying NOT NULL DEFAULT 'noch keine Bemerkung'::character varying,
 	gueltig_von timestamp with time zone NOT NULL DEFAULT timezone('utc-1'::text, now()),
 	gueltig_bis timestamp with time zone NOT NULL DEFAULT '2100-01-01 02:00:00+01'::timestamp with time zone,
@@ -1982,20 +1988,20 @@ CREATE TABLE kataster.gemeinde (
 	geaendert_von character varying NOT NULL DEFAULT 'unbekannt'::character varying,
 	CONSTRAINT pk_gemeinde PRIMARY KEY (id),
 	CONSTRAINT fk_gemeinde_gemeindeverband FOREIGN KEY (id_gemeindeverband)
-		REFERENCES kataster.gemeindeverband (id) MATCH SIMPLE
+		REFERENCES ukos_kataster.gemeindeverband (id) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT uk1_gemeinde UNIQUE (id_gemeindeverband, schluessel)
 )
 WITH (
 	OIDS=TRUE
 );
-INSERT INTO kataster.gemeinde (id) VALUES ('00000000-0000-0000-0000-000000000000');
+INSERT INTO ukos_kataster.gemeinde (id) VALUES ('00000000-0000-0000-0000-000000000000');
 
-CREATE TABLE kataster.gemeindeteil (
+CREATE TABLE ukos_kataster.gemeindeteil (
 	id character varying NOT NULL DEFAULT uuid_generate_v4(),
 	id_gemeinde character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
 	bezeichnung character varying NOT NULL DEFAULT 'nicht zugewiesen'::character varying,
-    schluessel character(4) NOT NULL DEFAULT '0000'::character varying,
+		schluessel character(4) NOT NULL DEFAULT '0000'::character varying,
 	bemerkung character varying NOT NULL DEFAULT 'noch keine Bemerkung'::character varying,
 	gueltig_von timestamp with time zone NOT NULL DEFAULT timezone('utc-1'::text, now()),
 	gueltig_bis timestamp with time zone NOT NULL DEFAULT '2100-01-01 02:00:00+01'::timestamp with time zone,
@@ -2005,19 +2011,19 @@ CREATE TABLE kataster.gemeindeteil (
 	geaendert_von character varying NOT NULL DEFAULT 'unbekannt'::character varying,
 	CONSTRAINT pk_gemeindeteil PRIMARY KEY (id),
 	CONSTRAINT fk_gemeindeteil_gemeinde FOREIGN KEY (id_gemeinde)
-		REFERENCES kataster.gemeinde (id) MATCH SIMPLE
+		REFERENCES ukos_kataster.gemeinde (id) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT uk1_gemeindeteil UNIQUE (id_gemeinde, schluessel)
 )
 WITH (
 	OIDS=TRUE
 );
-INSERT INTO kataster.gemeindeteil (id) VALUES ('00000000-0000-0000-0000-000000000000');
+INSERT INTO ukos_kataster.gemeindeteil (id) VALUES ('00000000-0000-0000-0000-000000000000');
 
 ---------------------------------------------------------------
--- Strassennetz (Part 1)
+-- ukos_strassennetz (Part 1)
 ---------------------------------------------------------------
-CREATE TABLE strassennetz.widmung (
+CREATE TABLE ukos_strassennetz.widmung (
 	id character varying NOT NULL DEFAULT uuid_generate_v4(),
 	ident_hist character varying NOT NULL DEFAULT 'unbekannt'::character varying,
 	widmung character varying NOT NULL DEFAULT 'nicht zugewiesen'::character varying,
@@ -2035,14 +2041,14 @@ CREATE TABLE strassennetz.widmung (
 WITH (
 	OIDS=TRUE
 );
-INSERT INTO strassennetz.widmung (id) VALUES ('00000000-0000-0000-0000-000000000000');
+INSERT INTO ukos_strassennetz.widmung (id) VALUES ('00000000-0000-0000-0000-000000000000');
 
 CREATE INDEX widmung_s
-	ON strassennetz.widmung
+	ON ukos_strassennetz.widmung
 	USING gist
 	(wkb_geometry);
 
-CREATE TABLE strassennetz.gvm_netz (
+CREATE TABLE ukos_strassennetz.gvm_netz (
 	id serial NOT NULL,
 	geom geometry(LineString,25833),
 	"AMT" character varying(64),
@@ -2090,11 +2096,11 @@ WITH (
 );
 	
 CREATE INDEX sidx_gvm_netz_geom
-	ON strassennetz.gvm_netz
+	ON ukos_strassennetz.gvm_netz
 	USING gist
 	(geom);
 
-CREATE TABLE strassennetz.gvm_netzknoten (
+CREATE TABLE ukos_strassennetz.gvm_netzknoten (
 	id serial NOT NULL,
 	geom geometry(Point,25833),
 	"FID" double precision,
@@ -2131,16 +2137,16 @@ WITH (
 );
 	
 CREATE INDEX sidx_gvm_netzknoten_geom
-	ON strassennetz.gvm_netzknoten
+	ON ukos_strassennetz.gvm_netzknoten
 	USING gist
 	(geom);
 
-CREATE TABLE strassennetz.strasse (
+CREATE TABLE ukos_strassennetz.strasse (
 	id character varying NOT NULL DEFAULT uuid_generate_v4(),
 	id_gemeinde character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
 	id_widmung character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
 	ident_hist character varying NOT NULL DEFAULT 'unbekannt'::character varying,
-    bezeichnung character varying NOT NULL DEFAULT 'nicht zugewiesen'::character varying,
+		bezeichnung character varying NOT NULL DEFAULT 'nicht zugewiesen'::character varying,
 	schluessel character(5) NOT NULL DEFAULT '00000'::character varying,
 	bemerkung character varying NOT NULL DEFAULT 'noch keine Bemerkung'::character varying,
 	gueltig_von timestamp with time zone NOT NULL DEFAULT timezone('utc-1'::text, now()),
@@ -2151,19 +2157,19 @@ CREATE TABLE strassennetz.strasse (
 	geaendert_von character varying NOT NULL DEFAULT 'unbekannt'::character varying,
 	CONSTRAINT pk_strasse PRIMARY KEY (id),
 	CONSTRAINT fk_strasse_gemeinde FOREIGN KEY (id_gemeinde)
-		REFERENCES kataster.gemeinde (id) MATCH SIMPLE
+		REFERENCES ukos_kataster.gemeinde (id) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strasse_widmung FOREIGN KEY (id_widmung)
-		REFERENCES strassennetz.widmung (id) MATCH SIMPLE
+		REFERENCES ukos_strassennetz.widmung (id) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT uk1_strasse UNIQUE (id_gemeinde, schluessel)
 )
 WITH (
 	OIDS=TRUE
 );
-INSERT INTO strassennetz.strasse (id) VALUES ('00000000-0000-0000-0000-000000000000');
+INSERT INTO ukos_strassennetz.strasse (id) VALUES ('00000000-0000-0000-0000-000000000000');
 
-CREATE TABLE strassennetz.verbindungspunkt (
+CREATE TABLE ukos_strassennetz.verbindungspunkt (
 	id character varying NOT NULL DEFAULT uuid_generate_v4(),
 	id_strasse character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
 	ident character(6) NOT NULL,
@@ -2178,32 +2184,32 @@ CREATE TABLE strassennetz.verbindungspunkt (
 	wkb_geometry geometry(Point,25833),
 	CONSTRAINT pk_verbindungspunkt PRIMARY KEY (id),
 	CONSTRAINT fk_verbindungspunkt_strasse FOREIGN KEY (id_strasse)
-		REFERENCES strassennetz.strasse (id) MATCH SIMPLE
+		REFERENCES ukos_strassennetz.strasse (id) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
 WITH (
 	OIDS=TRUE
 );
 
--- Trigger: tr_idents_add_ident on strassennetz.verbindungspunkt
+-- Trigger: tr_idents_add_ident on ukos_strassennetz.verbindungspunkt
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON strassennetz.verbindungspunkt
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_strassennetz.verbindungspunkt
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on strassennetz.verbindungspunkt
+-- Trigger: tr_idents_remove_ident on ukos_strassennetz.verbindungspunkt
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON strassennetz.verbindungspunkt
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_strassennetz.verbindungspunkt
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-INSERT INTO strassennetz.verbindungspunkt (bemerkung) VALUES ('default Netzknoten oben');
-INSERT INTO strassennetz.verbindungspunkt (bemerkung) VALUES ('default Netzknoten unten');
+INSERT INTO ukos_strassennetz.verbindungspunkt (bemerkung) VALUES ('default Netzknoten oben');
+INSERT INTO ukos_strassennetz.verbindungspunkt (bemerkung) VALUES ('default Netzknoten unten');
 
 CREATE INDEX verbindungspunkt_s
-	ON strassennetz.verbindungspunkt
+	ON ukos_strassennetz.verbindungspunkt
 	USING gist
 	(wkb_geometry);
 ---------------------------------------------------------------
@@ -2212,9 +2218,9 @@ CREATE INDEX verbindungspunkt_s
 ---------------------------------------------------------------
 -- tf_ai_strassenelement()
 ---------------------------------------------------------------
--- Function: strassennetz.tf_ai_strassenelement()
--- DROP FUNCTION strassennetz.tf_ai_strassenelement();
-CREATE OR REPLACE FUNCTION strassennetz.tf_ai_strassenelement()
+-- Function: ukos_strassennetz.tf_ai_strassenelement()
+-- DROP FUNCTION ukos_strassennetz.tf_ai_strassenelement();
+CREATE OR REPLACE FUNCTION ukos_strassennetz.tf_ai_strassenelement()
 	RETURNS trigger AS
 $BODY$
 DECLARE
@@ -2234,31 +2240,31 @@ BEGIN
 		vwkb_geometry_unten					:= ST_EndPoint(NEW.wkb_geometry);
 
 		--------------------------------------------------------------------------------------------------------
-		FOR c in (select count(*) A from strassennetz.verbindungspunkt where wkb_geometry = vwkb_geometry_oben) loop
+		FOR c in (select count(*) A from ukos_strassennetz.verbindungspunkt where wkb_geometry = vwkb_geometry_oben) loop
 			vz := c.A; 
 		END LOOP;
 		
 		IF vz = 0 THEN --wenn kein Knoten an der Stelle gefunden wird 
 			vuuid_verbindungspunkt_oben := uuid_generate_v4(); --dann uuid neu generieren
-			EXECUTE 'INSERT INTO strassennetz.verbindungspunkt (id, id_strasse, wkb_geometry) VALUES ( $1, $2, $3 )' USING vuuid_verbindungspunkt_oben, NEW.id_strasse, vwkb_geometry_oben; --und Datensatz anlegen
+			EXECUTE 'INSERT INTO ukos_strassennetz.verbindungspunkt (id, id_strasse, wkb_geometry) VALUES ( $1, $2, $3 )' USING vuuid_verbindungspunkt_oben, NEW.id_strasse, vwkb_geometry_oben; --und Datensatz anlegen
 			NEW.id_verbindungspunkt_oben := vuuid_verbindungspunkt_oben; --und die id im neuen strassenelement eintragen
 		ELSE
-		FOR c in (select id from strassennetz.verbindungspunkt where wkb_geometry = vwkb_geometry_oben) loop
+		FOR c in (select id from ukos_strassennetz.verbindungspunkt where wkb_geometry = vwkb_geometry_oben) loop
 			vuuid_verbindungspunkt_oben := c.id; -- id ermitteln
 		END LOOP;
 		 NEW.id_verbindungspunkt_oben := vuuid_verbindungspunkt_oben; --sonst nur die ermittelte id im neuen strassenelement eintragen
 		END IF;
 		--------------------------------------------------------------------------------------------------------
-		FOR c in (select count(*) A from strassennetz.verbindungspunkt where wkb_geometry = vwkb_geometry_unten) loop
+		FOR c in (select count(*) A from ukos_strassennetz.verbindungspunkt where wkb_geometry = vwkb_geometry_unten) loop
 			vz := c.A; 
 		END LOOP;
 
 		IF vz = 0 then --wenn kein Knoten an der Stelle gefunden wird 
 			vuuid_verbindungspunkt_unten := uuid_generate_v4(); --dann uuid neu generieren
-			EXECUTE 'INSERT INTO strassennetz.verbindungspunkt (id, id_strasse, wkb_geometry) VALUES ( $1, $2, $3 )' USING vuuid_verbindungspunkt_unten, NEW.id_strasse, vwkb_geometry_unten; --und Datensatz anlegen
+			EXECUTE 'INSERT INTO ukos_strassennetz.verbindungspunkt (id, id_strasse, wkb_geometry) VALUES ( $1, $2, $3 )' USING vuuid_verbindungspunkt_unten, NEW.id_strasse, vwkb_geometry_unten; --und Datensatz anlegen
 			NEW.id_verbindungspunkt_unten := vuuid_verbindungspunkt_unten; --und die id im neuen strassenelement eintragen
 		ELSE
-		FOR c in (select id from strassennetz.verbindungspunkt where wkb_geometry = vwkb_geometry_unten) loop
+		FOR c in (select id from ukos_strassennetz.verbindungspunkt where wkb_geometry = vwkb_geometry_unten) loop
 			vuuid_verbindungspunkt_unten := c.id; -- id ermitteln
 		END LOOP;
 			NEW.id_verbindungspunkt_unten := vuuid_verbindungspunkt_unten; --sonst nur die ermittelte id im neuen strassenelement eintragen
@@ -2272,9 +2278,9 @@ LANGUAGE plpgsql VOLATILE
 COST 100;
 
 ---------------------------------------------------------------
--- Strassennetz (Part 2)
+-- ukos_strassennetz (Part 2)
 ---------------------------------------------------------------
-CREATE TABLE strassennetz.strassenelement (
+CREATE TABLE ukos_strassennetz.strassenelement (
 	id character varying NOT NULL DEFAULT uuid_generate_v4(),
 	id_strasse character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
 	id_verbindungspunkt_oben character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
@@ -2294,22 +2300,22 @@ CREATE TABLE strassennetz.strassenelement (
 	wkb_geometry geometry(LineString,25833),
 	CONSTRAINT pk_strassenelement PRIMARY KEY (id),
 	CONSTRAINT fk_strassenelement_strasse FOREIGN KEY (id_strasse)
-		REFERENCES strassennetz.strasse (id) MATCH SIMPLE
+		REFERENCES ukos_strassennetz.strasse (id) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenelement_verbindungspunkt_oben FOREIGN KEY (id_verbindungspunkt_oben)
-		REFERENCES strassennetz.verbindungspunkt (id) MATCH SIMPLE
+		REFERENCES ukos_strassennetz.verbindungspunkt (id) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenelement_verbindungspunkt_unten FOREIGN KEY (id_verbindungspunkt_unten)
-		REFERENCES strassennetz.verbindungspunkt (id) MATCH SIMPLE
+		REFERENCES ukos_strassennetz.verbindungspunkt (id) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenelement_klassifizierung FOREIGN KEY (id_klassifizierung)
-		REFERENCES base.wld_klassifizierung (id) MATCH SIMPLE
+		REFERENCES ukos_base.wld_klassifizierung (id) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenelement_nutzung FOREIGN KEY (id_nutzung)
-		REFERENCES base.wld_nutzung (id) MATCH SIMPLE
+		REFERENCES ukos_base.wld_nutzung (id) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenelement_strassennetzlage FOREIGN KEY (id_strassennetzlage)
-		REFERENCES base.wld_strassennetzlage (id) MATCH SIMPLE
+		REFERENCES ukos_base.wld_strassennetzlage (id) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
 WITH (
@@ -2317,30 +2323,30 @@ WITH (
 );
 
 CREATE INDEX strassenelement_s
-	ON strassennetz.strassenelement
+	ON ukos_strassennetz.strassenelement
 	USING gist
 	(wkb_geometry);
 
--- Trigger: tr_ai_strassenelement on strassennetz.strassenelement
+-- Trigger: tr_ai_strassenelement on ukos_strassennetz.strassenelement
 CREATE TRIGGER tr_ai_strassenelement
 	AFTER INSERT
-	ON strassennetz.strassenelement
+	ON ukos_strassennetz.strassenelement
 	FOR EACH ROW
-	EXECUTE PROCEDURE strassennetz.tf_ai_strassenelement();
+	EXECUTE PROCEDURE ukos_strassennetz.tf_ai_strassenelement();
 
--- Trigger: tr_idents_add_ident on strassennetz.strassenelement
+-- Trigger: tr_idents_add_ident on ukos_strassennetz.strassenelement
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON strassennetz.strassenelement
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_strassennetz.strassenelement
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on strassennetz.strassenelement
+-- Trigger: tr_idents_remove_ident on ukos_strassennetz.strassenelement
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON strassennetz.strassenelement
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_strassennetz.strassenelement
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
 
 ---------------------------------------------------------------
@@ -2350,7 +2356,7 @@ CREATE TRIGGER tr_idents_remove_ident
 ---------------------------------------------------------------
 -- Basisobjekt contains data (is a generalization)from doppik and OKSTRA, which are relevant for all other tables
 -- Basisobjekt is considered abstract and should not be realized on its own
-CREATE TABLE base.basisobjekt (
+CREATE TABLE ukos_base.basisobjekt (
 	id character varying NOT NULL DEFAULT uuid_generate_v4(), --origin doppik, equals OKSTRA_id (datatype GUID), can be NULL in OKSTRA
 	gueltig_von timestamp with time zone NOT NULL DEFAULT timezone('utc-1'::text, now()), --origin doppik, equals OKSTRA gueltig_von (datatype Date), can be NULL in OKSTRA
 	gueltig_bis timestamp with time zone NOT NULL DEFAULT '2100-01-01 02:00:00+01'::timestamp with time zone, --origin doppik, equals OKSTRA gueltig_bis (datatype Date), can be NULL in OKSTRA
@@ -2396,31 +2402,31 @@ CREATE TABLE base.basisobjekt (
 	hat_nachfolger_hist_objekt character varying, -- origin OKSTRA association
 	CONSTRAINT pk_basisobjekt_id PRIMARY KEY (id),
 	CONSTRAINT fk_basisobjekt_id_strassenelement FOREIGN KEY (id_strassenelement)
-		REFERENCES strassennetz.strassenelement (id) MATCH SIMPLE
+		REFERENCES ukos_strassennetz.strassenelement (id) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_basisobjekt_id_baulasttraeger FOREIGN KEY (id_baulasttraeger)
-		REFERENCES base.wld_baulasttraeger (id) MATCH SIMPLE
+		REFERENCES ukos_base.wld_baulasttraeger (id) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_basisobjekt_id_eigentuemer FOREIGN KEY (id_eigentuemer)
-		REFERENCES base.wld_eigentuemer (id) MATCH SIMPLE
+		REFERENCES ukos_base.wld_eigentuemer (id) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_basisobjekt_preisermittlung FOREIGN KEY (id_preisermittlung)
-		REFERENCES base.wld_preisermittlung (id) MATCH SIMPLE
+		REFERENCES ukos_base.wld_preisermittlung (id) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_basisobjekt_id_zustand FOREIGN KEY (id_zustand)
-		REFERENCES base.wld_zustand (id) MATCH SIMPLE
+		REFERENCES ukos_base.wld_zustand (id) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
 WITH (
 	OIDS = TRUE
 );
-COMMENT ON COLUMN base.basisobjekt.id IS 'is equivalent to OKSTRA_ID from the superobject OKSTRA_Objekt (that is inherited by all realized OKSTRA classes)';
-COMMENT ON COLUMN base.basisobjekt.gueltig_von IS 'is equivalent to gueltig_von from the superobject historisches_Objekt (that is inherited by all realized OKSTRA classes)';
-COMMENT ON COLUMN base.basisobjekt.gueltig_bis IS 'is equivalent to gueltig_bis from the superobject historisches_Objekt (that is inherited by all realized OKSTRA classes)';
-COMMENT ON COLUMN base.basisobjekt.hat_vorgaenger_hist_objekt IS 'is equivalent to association hat_vorgaenger_hist_objekt from the suberobject historisches Objekt in OKSTRA (that is inherited by all realized OKSTRA classes)';
-COMMENT ON COLUMN base.basisobjekt.hat_nachfolger_hist_objekt IS 'is equivalent to association hat_nachfolger_hist_objekt from the suberobject historisches Objekt in OKSTRA (that is inherited by all realized OKSTRA classes)';
+COMMENT ON COLUMN ukos_base.basisobjekt.id IS 'is equivalent to OKSTRA_ID from the superobject OKSTRA_Objekt (that is inherited by all realized OKSTRA classes)';
+COMMENT ON COLUMN ukos_base.basisobjekt.gueltig_von IS 'is equivalent to gueltig_von from the superobject historisches_Objekt (that is inherited by all realized OKSTRA classes)';
+COMMENT ON COLUMN ukos_base.basisobjekt.gueltig_bis IS 'is equivalent to gueltig_bis from the superobject historisches_Objekt (that is inherited by all realized OKSTRA classes)';
+COMMENT ON COLUMN ukos_base.basisobjekt.hat_vorgaenger_hist_objekt IS 'is equivalent to association hat_vorgaenger_hist_objekt from the suberobject historisches Objekt in OKSTRA (that is inherited by all realized OKSTRA classes)';
+COMMENT ON COLUMN ukos_base.basisobjekt.hat_nachfolger_hist_objekt IS 'is equivalent to association hat_nachfolger_hist_objekt from the suberobject historisches Objekt in OKSTRA (that is inherited by all realized OKSTRA classes)';
 
-CREATE TABLE base.punktobjekt (
+CREATE TABLE ukos_base.punktobjekt (
 	bei_strassenpunkt_station numeric,-- bei_strassenpunkt holds the the complex data type strassenpunkt. if any value of strassenpunkt is filled, station must be filled
 	bei_strassenpunkt_abstand_zur_bestandsachse numeric, -- bei_strassenpunkt holds the the complex data type strassenpunkt. if any value of strassenpunkt is filled, station must be filled
 	bei_strassenpunkt_abstand_zur_fahrbahnoberkante numeric, -- bei_strassenpunkt holds the the complex data type strassenpunkt. if any value of strassenpunkt is filled, station must be filled
@@ -2430,15 +2436,15 @@ CREATE TABLE base.punktobjekt (
 	bei_strassenelementpunkt_abstand_zur_fahrbahnoberkante numeric, -- bei_strassenpunkt holds the the complex data type strassenelementpunkt. if any value of strassenelementpunkt is filled, station must be filled
 	bei_strassenelementpunkt_auf_strassenelement character varying, -- Association. If any value of strassenpunkt is filed, auf_strassenelement must also be filled
 	geometrie_punktobjekt geometry(MultiPoint, 25833)
-) INHERITS(base.basisobjekt);
+) INHERITS(ukos_base.basisobjekt);
 
-CREATE TABLE base.streckenobjekt (
+CREATE TABLE ukos_base.streckenobjekt (
 	geometrie_streckenobjekt geometry(MultiLineString, 25833)
-) INHERITS(base.basisobjekt);
+) INHERITS(ukos_base.basisobjekt);
 
-CREATE TABLE base.punktundstreckenobjekt (
+CREATE TABLE ukos_base.punktundstreckenobjekt (
 	geometrie_streckenobjekt geometry(MultiLineString, 25833)
-) INHERITS(base.punktobjekt);
+) INHERITS(ukos_base.punktobjekt);
 
 ---------------------------------------------------------------
 ---------------------------------------------------------------
@@ -2446,7 +2452,7 @@ CREATE TABLE base.punktundstreckenobjekt (
 ---------------------------------------------------------------
 ---------------------------------------------------------------
 -- Tables are abstract and contain different okstra possiblities
-CREATE TABLE okstra.bewuchs (
+CREATE TABLE ukos_okstra.bewuchs (
 	kreuzungszuordnung character varying,
 	unterhaltsbezug_sp character varying,
 	hat_objekt_id character varying,
@@ -2473,24 +2479,24 @@ CREATE TABLE okstra.bewuchs (
 	hat_pflegemassnahme character varying,--Association
 	hat_dokument character varying,--Association
 	CONSTRAINT fk_bewuchs_kreuzungszuordnung FOREIGN KEY (kreuzungszuordnung)
-		REFERENCES okstra.wlo_kreuzungszuordnung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_kreuzungszuordnung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_bewuchs_bestandsstatus FOREIGN KEY (bestandsstatus)
-		REFERENCES okstra.wlo_bestandsstatus (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_bestandsstatus (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_bewuchs_schutzstatus FOREIGN KEY (schutzstatus)
-		REFERENCES okstra.wlo_schutzstatus_bewuchs (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_schutzstatus_bewuchs (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_bewuchs_erfassungsqualitaet_erfassung_verfahren FOREIGN KEY (erfassungsqualitaet_erfassung_verfahren)
-		REFERENCES okstra.wlo_erfassung_verfahren (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_erfassung_verfahren (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_bewuchs_biotoptyp_biotoptypangabe FOREIGN KEY (biotoptyp_biotoptypangabe)
-		REFERENCES okstra.wlo_tab_biotoptyp (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_tab_biotoptyp (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.punktobjekt);
+INHERITS (ukos_base.punktobjekt);
 
-CREATE TABLE okstra.baum(
+CREATE TABLE ukos_okstra.baum(
 	lage character varying DEFAULT '99'::character varying,
 	baumgattung character varying NOT NULL default '000',
 	baumart character varying,
@@ -2513,30 +2519,30 @@ CREATE TABLE okstra.baum(
 	hat_baumschaeden character varying,--Association
 	zu_baumreihenabschnitt character varying, --Association
 	CONSTRAINT fk_baum_baumgattung FOREIGN KEY (baumgattung)
-		REFERENCES okstra.wlo_baumgattung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_baumgattung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_baum_baumart FOREIGN KEY (baumart)
-		REFERENCES okstra.wlo_baumart (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_baumart (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_baum_schiefstand FOREIGN KEY (schiefstand)
-		REFERENCES okstra.wlo_schiefstand_baum (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_schiefstand_baum (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_baum_zustandsbeurteilung FOREIGN KEY (zustandsbeurteilung)
-		REFERENCES okstra.wlo_zustandsbeurteilung_baum (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_zustandsbeurteilung_baum (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_baum_lagebeschreibung FOREIGN KEY (lagebeschreibung)
-		REFERENCES okstra.wlo_lagebeschreibung_baum (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_lagebeschreibung_baum (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_baum_lage FOREIGN KEY (lage)
-		REFERENCES okstra.wlo_lage(kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_lage(kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_baum_detaillierungsgrad FOREIGN KEY (detaillierungsgrad)
-		REFERENCES okstra.wlo_detaillierungsgrad_asb (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_detaillierungsgrad_asb (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (okstra.bewuchs);
+INHERITS (ukos_okstra.bewuchs);
 
-CREATE TABLE okstra.teilbauwerk (
+CREATE TABLE ukos_okstra.teilbauwerk (
 	hat_objekt_id character varying,
 	punktgeometrie_gauss_krueger geometry(point, 25833),
 	punktgeometrie_utm geometry(point, 25833),
@@ -2623,12 +2629,12 @@ CREATE TABLE okstra.teilbauwerk (
 	bauwerk character varying, -- Association
 	baudienststelle character varying, -- Association
 	CONSTRAINT fk_teilbauwerk_strassenbezeichnung_strassenklasse FOREIGN KEY (strassenbezeichnung_strassenklasse)
-		REFERENCES okstra.wlo_strassenklasse (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_strassenklasse (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.punktundstreckenobjekt);
+INHERITS (ukos_base.punktundstreckenobjekt);
 
-CREATE TABLE okstra.bruecke(
+CREATE TABLE ukos_okstra.bruecke(
 	gesamtlaenge_bruecke numeric,
 	breite_bruecke numeric,
 	gesamtbreite_bruecke numeric,
@@ -2660,9 +2666,9 @@ CREATE TABLE okstra.bruecke(
 	hat_baustoff_bauwerk character varying, -- Association
 	hat_brueckenfeld_stuetzung character varying -- Association
 )
-INHERITS (okstra.teilbauwerk);
+INHERITS (ukos_okstra.teilbauwerk);
 
-CREATE TABLE okstra.tunnel_trogbauwerk(
+CREATE TABLE ukos_okstra.tunnel_trogbauwerk(
 	gradiente character varying,
 	rundungshalbmesser numeric,
 	minimale_laengsneigung numeric,
@@ -2697,9 +2703,9 @@ CREATE TABLE okstra.tunnel_trogbauwerk(
 	hat_tunnelsicherheit character varying -- Association
 	
 )
-INHERITS (okstra.teilbauwerk);
+INHERITS (ukos_okstra.teilbauwerk);
 
-CREATE TABLE okstra.stuetzbauwerk(
+CREATE TABLE ukos_okstra.stuetzbauwerk(
 	gesamtlaenge_stuetzbauwerk numeric,
 	flaeche_stuetzbauwerk numeric,
 	anzahl_segmente integer,
@@ -2716,9 +2722,9 @@ CREATE TABLE okstra.stuetzbauwerk(
 	bemerkungen_zum_stuetzbauwerk character varying,
 	hat_segment_stuetzbauwerk character varying -- Association
 )
-INHERITS (okstra.teilbauwerk);
+INHERITS (ukos_okstra.teilbauwerk);
 
-CREATE TABLE okstra.laermschutzbauwerk(
+CREATE TABLE ukos_okstra.laermschutzbauwerk(
 	gesamtlaenge integer,
 	flaeche character varying,
 	anzahl_segmente integer,
@@ -2734,9 +2740,9 @@ CREATE TABLE okstra.laermschutzbauwerk(
 	durchschnittliche_segmenthoehe numeric,
 	hat_segment_laermschutzbw character varying -- Association
 )
-INHERITS (okstra.teilbauwerk);
+INHERITS (ukos_okstra.teilbauwerk);
 
-CREATE TABLE okstra.verkehrszeichenbruecke(
+CREATE TABLE ukos_okstra.verkehrszeichenbruecke(
 	querschnitt_stiel character varying,
 	querschnitt_riegel character varying,
 	gesamtlaenge_des_riegels numeric,
@@ -2746,9 +2752,9 @@ CREATE TABLE okstra.verkehrszeichenbruecke(
 	hat_baustoff_bauwerk character varying, -- Association
 	hat_brueckenfeld_stuetzung character varying -- Association
 )
-INHERITS (okstra.teilbauwerk);
+INHERITS (ukos_okstra.teilbauwerk);
 
-CREATE TABLE okstra.strassenausstattung_strecke (
+CREATE TABLE ukos_okstra.strassenausstattung_strecke (
 	kreuzungszuordnung character varying,
 	unterhaltsbezug_sp character varying,
 	erfassungsdatum date,
@@ -2775,36 +2781,36 @@ CREATE TABLE okstra.strassenausstattung_strecke (
 	hat_strecke character varying, -- Association
 	hat_strassenausstattung_punkt character varying, -- Association
 	CONSTRAINT fk_strassenausstattung_strecke_kreuzungszuordnung FOREIGN KEY (kreuzungszuordnung)
-		REFERENCES okstra.wlo_kreuzungszuordnung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_kreuzungszuordnung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenausstattung_strecke_art FOREIGN KEY (art)
-		REFERENCES okstra.wlo_art_strassenausst_strecke (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_strassenausst_strecke (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenausstattung_strecke_art_sonst FOREIGN KEY (art_sonst)
-		REFERENCES okstra.wlo_art_strausst_strecke_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_strausst_strecke_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenausstattung_strecke_lage FOREIGN KEY (lage)
-		REFERENCES okstra.wlo_lage (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_lage (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenausstattung_strecke_art_der_erfassung FOREIGN KEY (art_der_erfassung)
-		REFERENCES okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenausstattung_strecke_art_der_erfassung_sonst FOREIGN KEY (art_der_erfassung_sonst)
-		REFERENCES okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenausstattung_strecke_quelle_der_information FOREIGN KEY (quelle_der_information)
-		REFERENCES okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenausstattung_strecke_quelle_der_information_sonst FOREIGN KEY (quelle_der_information_sonst)
-		REFERENCES okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenausstattung_strecke_dauereinrichtung FOREIGN KEY (dauereinrichtung)
-		REFERENCES okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.streckenobjekt);
+INHERITS (ukos_base.streckenobjekt);
 
-CREATE TABLE okstra.strassenausstattung_punkt (
+CREATE TABLE ukos_okstra.strassenausstattung_punkt (
 	kreuzungszuordnung character varying,
 	unterhaltsbezug_sp character varying,
 	erfassungsdatum date,
@@ -2834,27 +2840,27 @@ CREATE TABLE okstra.strassenausstattung_punkt (
 	zu_hausnummernblock character varying, -- association
 	zu_hausnummernbereich character varying, -- association
 	CONSTRAINT fk_strassenausstattung_punkt_kreuzungszuordnung FOREIGN KEY (kreuzungszuordnung)
-		REFERENCES okstra.wlo_kreuzungszuordnung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_kreuzungszuordnung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenausstattung_punkt_art FOREIGN KEY (art)
-		REFERENCES okstra.wlo_art_strassenausst_punkt (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_strassenausst_punkt (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenausstattung_punkt_art_sonst FOREIGN KEY (art_sonst)
-		REFERENCES okstra.wlo_art_strausst_punkt_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_strausst_punkt_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenausstattung_punkt_lage FOREIGN KEY (lage)
-		REFERENCES okstra.wlo_lage (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_lage (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenausstattung_punkt_detaillierungsgrad FOREIGN KEY (detaillierungsgrad)
-		REFERENCES okstra.wlo_detaillierungsgrad_asb (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_detaillierungsgrad_asb (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenausstattung_punkt_dauereinrichtung FOREIGN KEY (dauereinrichtung)
-		REFERENCES okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.punktobjekt);
+INHERITS (ukos_base.punktobjekt);
 
-CREATE TABLE okstra.aufstellvorrichtung_schild (
+CREATE TABLE ukos_okstra.aufstellvorrichtung_schild (
 	kreuzungszuordnung character varying,
 	unterhaltsbezug_sp character varying,
 	erfassungsdatum date,
@@ -2891,36 +2897,36 @@ CREATE TABLE okstra.aufstellvorrichtung_schild (
 	stellt_teilhindernis_dar character varying, -- Association
 	ist_teilbauwerk character varying, -- Association
 	CONSTRAINT fk_aufstellvorrichtung_schild_kreuzungszuordnung FOREIGN KEY (kreuzungszuordnung)
-		REFERENCES okstra.wlo_kreuzungszuordnung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_kreuzungszuordnung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_aufstellvorrichtung_schild_lage FOREIGN KEY (lage)
-		REFERENCES okstra.wlo_lage (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_lage (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_aufstellvorrichtung_schild_detaillierungsgrad FOREIGN KEY (detaillierungsgrad)
-		REFERENCES okstra.wlo_detaillierungsgrad_asb (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_detaillierungsgrad_asb (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_aufstellvorrichtung_schild_art FOREIGN KEY (art)
-		REFERENCES okstra.wlo_art_der_aufstellvorrichtung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_aufstellvorrichtung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_aufstellvorrichtung_schild_material FOREIGN KEY (material)
-		REFERENCES okstra.wlo_material_aufstellvorrichtung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_material_aufstellvorrichtung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_aufstellvorrichtung_schild_art_der_erfassung FOREIGN KEY (art_der_erfassung)
-		REFERENCES okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_aufstellvorrichtung_schild_art_der_erfassung_sonst FOREIGN KEY (art_der_erfassung_sonst)
-		REFERENCES okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_aufstellvorrichtung_schild_quelle_der_information FOREIGN KEY (quelle_der_information)
-		REFERENCES okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_aufstellvorrichtung_schild_quelle_der_information_sonst FOREIGN KEY (quelle_der_information_sonst)
-		REFERENCES okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.punktobjekt);
+INHERITS (ukos_base.punktobjekt);
 
-CREATE TABLE okstra.schild(
+CREATE TABLE ukos_okstra.schild(
 	erfassungsdatum date,
 	systemdatum date,
 	textfeld character varying,
@@ -2960,57 +2966,57 @@ CREATE TABLE okstra.schild(
 	zu_verkehrseinschraenkung character varying, -- Association
 	hat_aufstellvorrichtung character varying, -- Association
 	CONSTRAINT fk_schild_art_schild_ok FOREIGN KEY (art_schild_ok)
-		REFERENCES okstra.wlo_art_schild_ok (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_schild_ok (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schild_art_schild_asb FOREIGN KEY (art_schild_asb)
-		REFERENCES okstra.wlo_art_schild_asb (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_schild_asb (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schild_art_schild_nichtamtlich_asb FOREIGN KEY (art_schild_nichtamtlich_asb)
-		REFERENCES okstra.wlo_art_schild_nichtamtlich_asb (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_schild_nichtamtlich_asb (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schild_lage_schild FOREIGN KEY (lage_schild)
-		REFERENCES okstra.wlo_lage_schild (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_lage_schild (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schild_strassenbezug_asb FOREIGN KEY (strassenbezug_asb)
-		REFERENCES okstra.wlo_strassenbezug_asb (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_strassenbezug_asb (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schild_befestigung FOREIGN KEY (befestigung)
-		REFERENCES okstra.wlo_befestigung_schild (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_befestigung_schild (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schild_beleuchtung FOREIGN KEY (beleuchtung)
-		REFERENCES okstra.wlo_beleuchtung_schild (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_beleuchtung_schild (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schild_groessenklasse FOREIGN KEY (groessenklasse)
-		REFERENCES okstra.wlo_groessenklasse_vz (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_groessenklasse_vz (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schild_einzel_mehrfach_schild FOREIGN KEY (einzel_mehrfach_schild)
-		REFERENCES okstra.wlo_einzel_mehrfach_schild (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_einzel_mehrfach_schild (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schild_unterhaltungspflicht FOREIGN KEY (unterhaltungspflicht)
-		REFERENCES okstra.wlo_unterhaltungspflicht_schild (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_unterhaltungspflicht_schild (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schild_sonstige_unterhaltspflicht FOREIGN KEY (sonstige_unterhaltspflicht)
-		REFERENCES okstra.wlo_sonstige_unterhaltspflichtige (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_sonstige_unterhaltspflichtige (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schild_art_der_erfassung FOREIGN KEY (art_der_erfassung)
-		REFERENCES okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schild_art_der_erfassung_sonst FOREIGN KEY (art_der_erfassung_sonst)
-		REFERENCES okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schild_quelle_der_information FOREIGN KEY (quelle_der_information)
-		REFERENCES okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schild_quelle_der_information_sonst FOREIGN KEY (quelle_der_information_sonst)
-		REFERENCES okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schild_verdeckbar FOREIGN KEY (verdeckbar)
-		REFERENCES okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.basisobjekt);
+INHERITS (ukos_base.basisobjekt);
 
-CREATE TABLE okstra.strassenablauf (
+CREATE TABLE ukos_okstra.strassenablauf (
 	kreuzungszuordnung character varying,
 	unterhaltsbezug_sp character varying,
 	erfassungsdatum date,
@@ -3037,45 +3043,45 @@ CREATE TABLE okstra.strassenablauf (
 	zu_hausnummernblock character varying, -- Association
 	zu_hausnummernbereich character varying, -- Association
 	CONSTRAINT fk_strassenablauf_kreuzungszuordnung FOREIGN KEY (kreuzungszuordnung)
-		REFERENCES okstra.wlo_kreuzungszuordnung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_kreuzungszuordnung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenablauf_lage FOREIGN KEY (lage)
-		REFERENCES okstra.wlo_lage (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_lage (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenablauf_detaillierungsgrad FOREIGN KEY (detaillierungsgrad)
-		REFERENCES okstra.wlo_detaillierungsgrad_asb (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_detaillierungsgrad_asb (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenablauf_art_der_erfassung FOREIGN KEY (art_der_erfassung)
-		REFERENCES okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenablauf_art_der_erfassung_sonst FOREIGN KEY (art_der_erfassung_sonst)
-		REFERENCES okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenablauf_quelle_der_information FOREIGN KEY (quelle_der_information)
-		REFERENCES okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenablauf_quelle_der_information_sonst FOREIGN KEY (quelle_der_information_sonst)
-		REFERENCES okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenablauf_aufsatz FOREIGN KEY (aufsatz)
-		REFERENCES okstra.wlo_art_aufsatz (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_aufsatz (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenablauf_unterteil FOREIGN KEY (unterteil)
-		REFERENCES okstra.wlo_art_unterteil (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_unterteil (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenablauf_art_unterteil_sonst FOREIGN KEY (art_unterteil_sonst)
-		REFERENCES okstra.wlo_art_unterteil_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_unterteil_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenablauf_unterhaltungspflicht FOREIGN KEY (unterhaltungspflicht)
-		REFERENCES okstra.wlo_unterhaltungspflicht (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_unterhaltungspflicht (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenablauf_sonstige_unterhaltspflichtige FOREIGN KEY (sonstige_unterhaltspflichtige)
-		REFERENCES okstra.wlo_sonstige_unterhaltspflichtige (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_sonstige_unterhaltspflichtige (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.punktobjekt);
+INHERITS (ukos_base.punktobjekt);
 
-CREATE TABLE okstra.abfallentsorgung(
+CREATE TABLE ukos_okstra.abfallentsorgung(
 	erfassungsdatum date,
 	systemdatum date,
 	textfeld character varying,
@@ -3099,39 +3105,39 @@ CREATE TABLE okstra.abfallentsorgung(
 	dokument character varying, -- Association
 	anlage_des_ruhenden_verkehrs character varying NOT NULL, --Association
 	CONSTRAINT fk_abfallentsorgung_ausstattungstyp FOREIGN KEY (ausstattungstyp)
-		REFERENCES okstra.wlo_typ_abfallentsorgung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_typ_abfallentsorgung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_abfallentsorgung_abfall FOREIGN KEY (abfall)
-		REFERENCES okstra.wlo_art_abfall (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_abfall (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_abfallentsorgung_lagetyp FOREIGN KEY (lagetyp)
-		REFERENCES okstra.wlo_lagetyp_abfallentsorgung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_lagetyp_abfallentsorgung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_abfallentsorgung_material FOREIGN KEY (material)
-		REFERENCES okstra.wlo_material_abfallentsorgung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_material_abfallentsorgung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_abfallentsorgung_art_der_erfassung FOREIGN KEY (art_der_erfassung)
-		REFERENCES okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_abfallentsorgung_art_der_erfassung_sonst FOREIGN KEY (art_der_erfassung_sonst)
-		REFERENCES okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_abfallentsorgung_quelle_der_information FOREIGN KEY (quelle_der_information)
-		REFERENCES okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_abfallentsorgung_quelle_der_information_sonst FOREIGN KEY (quelle_der_information_sonst)
-		REFERENCES okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_abfallentsorgung_unterhaltungspflicht FOREIGN KEY (unterhaltungspflicht)
-		REFERENCES okstra.wlo_unterhaltungspflicht (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_unterhaltungspflicht (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_abfallentsorgung_sonstige_unterhaltungspflicht FOREIGN KEY (sonstige_unterhaltungspflicht)
-		REFERENCES okstra.wlo_unterhaltungspflicht (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_unterhaltungspflicht (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.basisobjekt);
+INHERITS (ukos_base.basisobjekt);
 
-CREATE TABLE okstra.schacht (
+CREATE TABLE ukos_okstra.schacht (
 	kreuzungszuordnung character varying,
 	unterhaltsbezug_sp character varying,
 	erfassungsdatum date,
@@ -3159,42 +3165,42 @@ CREATE TABLE okstra.schacht (
 	zu_hausnummernbereich character varying, -- Association
 	stellt_teilhindernis_dar character varying, -- Association
 	CONSTRAINT fk_schacht_kreuzungszuordnung FOREIGN KEY (kreuzungszuordnung)
-		REFERENCES okstra.wlo_kreuzungszuordnung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_kreuzungszuordnung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schacht_art FOREIGN KEY (art)
-		REFERENCES okstra.wlo_art_schacht(kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_schacht(kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schacht_lage FOREIGN KEY (lage)
-		REFERENCES okstra.wlo_lage_schacht_strassenablauf (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_lage_schacht_strassenablauf (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schacht_angaben_zum_konus FOREIGN KEY (angaben_zum_konus)
-		REFERENCES okstra.wlo_angaben_zum_konus MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_angaben_zum_konus MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schacht_detaillierungsgrad FOREIGN KEY (detaillierungsgrad)
-		REFERENCES okstra.wlo_detaillierungsgrad_asb (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_detaillierungsgrad_asb (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schacht_art_der_erfassung FOREIGN KEY (art_der_erfassung)
-		REFERENCES okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schacht_art_der_erfassung_sonst FOREIGN KEY (art_der_erfassung_sonst)
-		REFERENCES okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schacht_quelle_der_information FOREIGN KEY (quelle_der_information)
-		REFERENCES okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schacht_quelle_der_information_sonst FOREIGN KEY (quelle_der_information_sonst)
-		REFERENCES okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schacht_unterhaltungspflicht FOREIGN KEY (unterhaltungspflicht)
-		REFERENCES okstra.wlo_unterhaltungspflicht (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_unterhaltungspflicht (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schacht_sonstige_unterhaltspflicht FOREIGN KEY (sonstige_unterhaltspflicht)
-		REFERENCES okstra.wlo_sonstige_unterhaltspflichtige (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_sonstige_unterhaltspflichtige (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.punktobjekt);
+INHERITS (ukos_base.punktobjekt);
 
-CREATE TABLE okstra.querschnittstreifen(
+CREATE TABLE ukos_okstra.querschnittstreifen(
  flaechengeometrie geometry(MultiPolygon, 25833),
  kreuzungszuordnung character varying,
  unterhaltsbezug_sp character varying,
@@ -3237,51 +3243,51 @@ CREATE TABLE okstra.querschnittstreifen(
  hat_flaechenbezugsobjekt character varying, -- Associaton
  hat_fahrstreifen character varying, -- Associaton
  CONSTRAINT fk_querschnittstreifen_kreuzungszuordnung FOREIGN KEY (kreuzungszuordnung)
-		REFERENCES okstra.wlo_kreuzungszuordnung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_kreuzungszuordnung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_querschnittstreifen_streifenart FOREIGN KEY (streifenart)
-		REFERENCES okstra.wlo_streifenart (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_streifenart (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_querschnittstreifen_streifenart_sonst FOREIGN KEY (streifenart_sonst)
-		REFERENCES okstra.wlo_streifenart_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_streifenart_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_querschnittstreifen_lage FOREIGN KEY (lage)
-		REFERENCES okstra.wlo_lage (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_lage (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_querschnittstreifen_detaillierungsgrad FOREIGN KEY (detaillierungsgrad)
-		REFERENCES okstra.wlo_detaillierungsgrad_asb (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_detaillierungsgrad_asb (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_querschnittstreifen_laengs_verlaufende_gleise FOREIGN KEY (laengs_verlaufende_gleise)
-		REFERENCES okstra.wlo_anzahl_gleise_laengs (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_anzahl_gleise_laengs (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_querschnittstreifen_art_der_oberflaeche FOREIGN KEY (art_der_oberflaeche)
-		REFERENCES okstra.wlo_art_der_oberflaeche (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_oberflaeche (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_querschnittstreifen_partielle_baulast FOREIGN KEY (partielle_baulast)
-		REFERENCES okstra.wlo_art_part_baulasttraeger (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_part_baulasttraeger (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_querschnittstreifen_partielle_ui_partner FOREIGN KEY (partielle_ui_partner)
-		REFERENCES okstra.wlo_unterhaltungspflicht (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_unterhaltungspflicht (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_querschnittstreifen_partielle_ui_sonstiger_partner FOREIGN KEY (partielle_ui_sonstiger_partner)
-		REFERENCES okstra.wlo_sonstiger_ui_partner_land (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_sonstiger_ui_partner_land (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_querschnittstreifen_art_der_erfassung FOREIGN KEY (art_der_erfassung)
-		REFERENCES okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_querschnittstreifen_art_der_erfassung_sonst FOREIGN KEY (art_der_erfassung_sonst)
-		REFERENCES okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_querschnittstreifen_quelle_der_information FOREIGN KEY (quelle_der_information)
-		REFERENCES okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_querschnittstreifen_quelle_der_information_sonst FOREIGN KEY (quelle_der_information_sonst)
-		REFERENCES okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.streckenobjekt);
+INHERITS (ukos_base.streckenobjekt);
 
-CREATE TABLE okstra.durchlass (
+CREATE TABLE ukos_okstra.durchlass (
 	geometrie_streckenobjekt geometry(MultiLineString,25833),
 	kreuzungszuordnung character varying,
 	unterhaltsbezug_sp character varying,
@@ -3326,57 +3332,57 @@ CREATE TABLE okstra.durchlass (
 	zu_hausnummernbereich character varying, -- Associaton
 	hat_strecke character varying, -- Associaton
 	CONSTRAINT fk_durchlass_kreuzungszuordnung FOREIGN KEY (kreuzungszuordnung)
-		REFERENCES okstra.wlo_kreuzungszuordnung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_kreuzungszuordnung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_durchlass_lage FOREIGN KEY (lage)
-		REFERENCES okstra.wlo_lage_durchlass (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_lage_durchlass (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_durchlass_profil FOREIGN KEY (profil)
-		REFERENCES okstra.wlo_profil_durchlass (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_profil_durchlass (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_durchlass_hauptsaechliches_material FOREIGN KEY (hauptsaechliches_material)
-		REFERENCES okstra.wlo_material_durchlass (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_material_durchlass (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_durchlass_unterhaltungspflicht FOREIGN KEY (unterhaltungspflicht)
-		REFERENCES okstra.wlo_unterhaltungspflicht (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_unterhaltungspflicht (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_durchlass_sonstige_unterhaltspflichtige FOREIGN KEY (sonstige_unterhaltspflichtige)
-		REFERENCES okstra.wlo_sonstige_unterhaltspflichtige (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_sonstige_unterhaltspflichtige (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_durchlass_funktion FOREIGN KEY (funktion)
-		REFERENCES okstra.wlo_funktion_durchlass (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_funktion_durchlass (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_durchlass_zustandsnote FOREIGN KEY (zustandsnote)
-		REFERENCES okstra.wlo_zustand_durchlass (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_zustand_durchlass (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_durchlass_schutzeinrichtung FOREIGN KEY (schutzeinrichtung)
-		REFERENCES okstra.wlo_schutzeinrichtung_durchlass (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_schutzeinrichtung_durchlass (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_durchlass_stadium FOREIGN KEY (stadium)
-		REFERENCES  okstra.wlo_stadium_durchlass (kennung) MATCH SIMPLE
+		REFERENCES	ukos_okstra.wlo_stadium_durchlass (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_durchlass_detaillierungsgrad FOREIGN KEY (detaillierungsgrad)
-		REFERENCES okstra.wlo_detaillierungsgrad_asb (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_detaillierungsgrad_asb (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_durchlass_art_der_erfassung FOREIGN KEY (art_der_erfassung)
-		REFERENCES okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_durchlass_art_der_erfassung_sonst FOREIGN KEY (art_der_erfassung_sonst)
-		REFERENCES okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_durchlass_quelle_der_information FOREIGN KEY (quelle_der_information)
-		REFERENCES okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_durchlass_quelle_der_information_sonst FOREIGN KEY (quelle_der_information_sonst)
-		REFERENCES okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_durchlass_permanente_nutzungseinschr FOREIGN KEY (permanente_nutzungseinschr)
-		REFERENCES okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 	)
-INHERITS (base.punktobjekt);
+INHERITS (ukos_base.punktobjekt);
 
-CREATE TABLE okstra.leitung(
+CREATE TABLE ukos_okstra.leitung(
 	erfassungsdatum date,
 	systemdatum date,
 	textfeld character varying,
@@ -3415,54 +3421,54 @@ CREATE TABLE okstra.leitung(
 	zu_hausnummerbereich character varying, -- Association
 	hat_strecke character varying ,-- Association
 	CONSTRAINT fk_leitung_lage_leitung FOREIGN KEY (lage_leitung)
-		REFERENCES okstra.wlo_lage_leitung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_lage_leitung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_leitung_art FOREIGN KEY (art)
-		REFERENCES okstra.wlo_art_leitung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_leitung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_leitung_art_detail FOREIGN KEY (art_detail)
-		REFERENCES okstra.wlo_art_leitung_detail (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_leitung_detail (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_leitung_material FOREIGN KEY (material)
-		REFERENCES okstra.wlo_material_leitung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_material_leitung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_leitung_material_schutzrohr FOREIGN KEY (material_schutzrohr)
-		REFERENCES okstra.wlo_material_schutzrohr (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_material_schutzrohr (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_leitung_betreiber FOREIGN KEY (betreiber)
-		REFERENCES okstra.wlo_betreiber_leitung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_betreiber_leitung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_leitung_detaillierungsgrad FOREIGN KEY (detaillierungsgrad)
-		REFERENCES okstra.wlo_detaillierungsgrad_asb (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_detaillierungsgrad_asb (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_leitung_art_der_erfassung FOREIGN KEY (art_der_erfassung)
-		REFERENCES okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_leitung_art_der_erfassung_sonst FOREIGN KEY (art_der_erfassung_sonst)
-		REFERENCES okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_leitung_quelle_der_information FOREIGN KEY (quelle_der_information)
-		REFERENCES okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_leitung_quelle_der_information_sonst FOREIGN KEY (quelle_der_information_sonst)
-		REFERENCES okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_leitung_schutzrohr FOREIGN KEY (schutzrohr)
-		REFERENCES okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_leitung_beschilderung FOREIGN KEY (beschilderung)
-		REFERENCES okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_leitung_in_betrieb FOREIGN KEY (in_betrieb)
-		REFERENCES okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_leitung_bestandsplan_vorhanden FOREIGN KEY (bestandsplan_vorhanden)
-		REFERENCES okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.streckenobjekt);
+INHERITS (ukos_base.streckenobjekt);
 
-CREATE TABLE okstra.schutzeinrichtung_aus_stahl(
+CREATE TABLE ukos_okstra.schutzeinrichtung_aus_stahl(
 	kreuzungszuordnung character varying,
 	unterhaltsbezug_sp character varying,
 	erfassungsdatum date,
@@ -3509,76 +3515,76 @@ CREATE TABLE okstra.schutzeinrichtung_aus_stahl(
 	liegt_vor_uebergang character varying, -- Association
 	liegt_hinter_uebergang character varying, -- Association
 	CONSTRAINT fk_schutzeinrichtung_aus_stahl_kreuzungszuordnung FOREIGN KEY (kreuzungszuordnung)
-		REFERENCES okstra.wlo_kreuzungszuordnung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_kreuzungszuordnung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schutzeinrichtung_aus_stahl_lage FOREIGN KEY (lage)
-		REFERENCES okstra.wlo_lage (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_lage (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schutzeinrichtung_aus_stahl_detaillierungsgrad FOREIGN KEY (detaillierungsgrad)
-		REFERENCES okstra.wlo_detaillierungsgrad_asb (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_detaillierungsgrad_asb (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schutzeinrichtung_aus_stahl_standort FOREIGN KEY (standort)
-		REFERENCES okstra.wlo_standort_rueckhaltesystem (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_standort_rueckhaltesystem (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schutzeinrichtung_aus_stahl_modulbezeichnung FOREIGN KEY (modulbezeichnung)
-		REFERENCES okstra.wlo_modulbezeichnung_schutzeinr_stahl (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_modulbezeichnung_schutzeinr_stahl (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schutzeinrichtung_aus_stahl_systemname FOREIGN KEY (systemname)
-		REFERENCES okstra.wlo_systemname_schutzeinr_stahl (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_systemname_schutzeinr_stahl (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schutzeinrichtung_aus_stahl_holmform FOREIGN KEY (holmform)
-		REFERENCES okstra.wlo_holmform_schutzeinr_stahl (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_holmform_schutzeinr_stahl (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schutzeinrichtung_aus_stahl_pfostenform FOREIGN KEY (pfostenform)
-		REFERENCES okstra.wlo_pfostenform_schutzeinr_stahl (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_pfostenform_schutzeinr_stahl (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schutzeinrichtung_aus_stahl_art_pfostenbefestigung FOREIGN KEY (art_pfostenbefestigung)
-		REFERENCES okstra.wlo_art_pfostenbefestigung_schutzeinr_stahl (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_pfostenbefestigung_schutzeinr_stahl (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schutzeinrichtung_aus_stahl_art_anfangs_endkonstruktion FOREIGN KEY (art_anfangs_endkonstruktion)
-		REFERENCES okstra.wlo_art_aek_schutzeinr_stahl (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_aek_schutzeinr_stahl (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schutzeinrichtung_aus_stahl_art_der_erfassung FOREIGN KEY (art_der_erfassung)
-		REFERENCES okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schutzeinrichtung_aus_stahl_art_der_erfassung_sonst FOREIGN KEY (art_der_erfassung_sonst)
-		REFERENCES okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schutzeinrichtung_aus_stahl_quelle_der_information FOREIGN KEY (quelle_der_information)
-		REFERENCES okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schutzeinrichtung_aus_stahl_quelle_der_information_sonst FOREIGN KEY (quelle_der_information_sonst)
-		REFERENCES okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schutzeinrichtung_aus_stahl_gelaender FOREIGN KEY (gelaender)
-		REFERENCES okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schutzeinrichtung_aus_stahl_mitwirkung_gelaender FOREIGN KEY (mitwirkung_gelaender)
-		REFERENCES okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schutzeinrichtung_aus_stahl_unterfahrschutz FOREIGN KEY (unterfahrschutz)
-		REFERENCES okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schutzeinrichtung_aus_stahl_schutzplankenpfostenummantelung FOREIGN KEY (schutzplankenpfostenummantelung)
-		REFERENCES okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schutzeinrichtung_aus_stahl_blendschutzzaun FOREIGN KEY (blendschutzzaun)
-		REFERENCES okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schutzeinrichtung_aus_stahl_grasstopplatten FOREIGN KEY (grasstopplatten)
-		REFERENCES okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schutzeinrichtung_aus_stahl_leitmale FOREIGN KEY (leitmale)
-		REFERENCES okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_schutzeinrichtung_aus_stahl_herausnehmbar FOREIGN KEY (herausnehmbar)
-		REFERENCES okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.streckenobjekt);
+INHERITS (ukos_base.streckenobjekt);
 
 -- The following tables are not found in the original db infrastruktur, but are found in the accompanying sql
-CREATE TABLE okstra.anzahl_fahrstreifen(
+CREATE TABLE ukos_okstra.anzahl_fahrstreifen(
 	fahrstreifen_richtung integer NOT NULL DEFAULT 0,
 	fahrstreifen_gegenrichtung integer NOT NULL DEFAULT 0,
 	fahrstreifen_beide_richtungen integer NOT NULL DEFAULT 0,
@@ -3595,21 +3601,21 @@ CREATE TABLE okstra.anzahl_fahrstreifen(
 	unscharf boolean,
 	hat_dokument character varying, --Association
 	CONSTRAINT fk_anzahl_fahrstreifen_art_der_erfassung FOREIGN KEY (art_der_erfassung)
-		REFERENCES okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_anzahl_fahrstreifen_art_der_erfassung_sonst FOREIGN KEY (art_der_erfassung_sonst)
-		REFERENCES okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_anzahl_fahrstreifen_quelle_der_information FOREIGN KEY (quelle_der_information)
-		REFERENCES okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_anzahl_fahrstreifen_quelle_der_information_sonst FOREIGN KEY (quelle_der_information_sonst)
-		REFERENCES okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.streckenobjekt);
+INHERITS (ukos_base.streckenobjekt);
 
-CREATE TABLE okstra.aufbauschicht(
+CREATE TABLE ukos_okstra.aufbauschicht(
 	flaechengeometrie geometry(MultiPolygon, 25833),
 	x_wert_von_station_links numeric,
 	x_wert_bis_station_links numeric,
@@ -3649,51 +3655,51 @@ CREATE TABLE okstra.aufbauschicht(
 	zu_querschnittstreifen character varying, -- Association
 	zu_verkehrsflaeche character varying, -- Association
 	CONSTRAINT fk_aufbauschicht_art FOREIGN KEY (art)
-		REFERENCES okstra.wlo_art_aufbauschicht (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_aufbauschicht (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_aufbauschicht_material FOREIGN KEY (material)
-		REFERENCES okstra.wlo_material_aufbauschicht (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_material_aufbauschicht (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_aufbauschicht_bindemittel_aufbauschicht FOREIGN KEY (bindemittel_aufbauschicht)
-		REFERENCES okstra.wlo_bindemittel_aufbauschicht (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_bindemittel_aufbauschicht (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_aufbauschicht_detail_a FOREIGN KEY (detail_a)
-		REFERENCES okstra.wlo_detail_a_aufbauschicht (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_detail_a_aufbauschicht (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_aufbauschicht_detail_b FOREIGN KEY (detail_b)
-		REFERENCES okstra.wlo_detail_b_aufbauschicht (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_detail_b_aufbauschicht (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_aufbauschicht_detail_c FOREIGN KEY (detail_c)
-		REFERENCES okstra.wlo_detail_c_aufbauschicht (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_detail_c_aufbauschicht (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_aufbauschicht_detail_d FOREIGN KEY (detail_d)
-		REFERENCES okstra.wlo_detail_d_aufbauschicht (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_detail_d_aufbauschicht (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_aufbauschicht_oberste_deckschicht FOREIGN KEY (oberste_deckschicht)
-		REFERENCES okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_aufbauschicht_abgefraeste_deckschicht FOREIGN KEY (abgefraeste_deckschicht)
-		REFERENCES okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_dreiwertige_logik (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_aufbauschicht_herkunft_der_angaben FOREIGN KEY (herkunft_der_angaben)
-		REFERENCES okstra.wlo_herkunft_angaben_aufbau (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_herkunft_angaben_aufbau (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_anzahl_fahrstreifen_art_der_erfassung FOREIGN KEY (art_der_erfassung)
-		REFERENCES okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_anzahl_fahrstreifen_art_der_erfassung_sonst FOREIGN KEY (art_der_erfassung_sonst)
-		REFERENCES okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_anzahl_fahrstreifen_quelle_der_information FOREIGN KEY (quelle_der_information)
-		REFERENCES okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_anzahl_fahrstreifen_quelle_der_information_sonst FOREIGN KEY (quelle_der_information_sonst)
-		REFERENCES okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.streckenobjekt);
+INHERITS (ukos_base.streckenobjekt);
 
-CREATE TABLE okstra.bahnigkeit(
+CREATE TABLE ukos_okstra.bahnigkeit(
 	kennzeichen_bahnigkeit character varying NOT NULL DEFAULT '0',
 	hat_objekt_id character varying,
 	erfassungsdatum date,
@@ -3708,24 +3714,24 @@ CREATE TABLE okstra.bahnigkeit(
 	unscharf boolean,
 	hat_dokument character varying, --Association
 	CONSTRAINT fk_bahnigkeit_kennzeichen_bahnigkeit FOREIGN KEY (kennzeichen_bahnigkeit)
-		REFERENCES okstra.wlo_kennzeichen_bahnigkeit (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_kennzeichen_bahnigkeit (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_bahnigkeit_art_der_erfassung FOREIGN KEY (art_der_erfassung)
-		REFERENCES okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_bahnigkeit_art_der_erfassung_sonst FOREIGN KEY (art_der_erfassung_sonst)
-		REFERENCES okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_bahnigkeit_quelle_der_information FOREIGN KEY (quelle_der_information)
-		REFERENCES okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_bahnigkeit_quelle_der_information_sonst FOREIGN KEY (quelle_der_information_sonst)
-		REFERENCES okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.streckenobjekt);
+INHERITS (ukos_base.streckenobjekt);
 
-CREATE TABLE okstra.belastungsklasse(
+CREATE TABLE ukos_okstra.belastungsklasse(
 	art character varying NOT NULL DEFAULT '01',
 	belastungsklasse_gemaess_rsto character varying NOT NULL DEFAULT '00',
 	belastungsklasse_sonst character varying,
@@ -3747,33 +3753,33 @@ CREATE TABLE okstra.belastungsklasse(
 	unscharf boolean,
 	hat_dokument character varying, --Association
 	CONSTRAINT fk_belastungsklasse_art FOREIGN KEY (art)
-		REFERENCES okstra.wlo_art_belastungsklasse (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_belastungsklasse (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_belastungsklasse_belastungsklasse_gemaess_rsto FOREIGN KEY (belastungsklasse_gemaess_rsto)
-		REFERENCES okstra.wlo_belastungsklasse_rsto (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_belastungsklasse_rsto (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_belastungsklasse_belastungsklasse_sonst FOREIGN KEY (belastungsklasse_sonst)
-		REFERENCES okstra.wlo_belastungsklasse_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_belastungsklasse_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_belastungsklasse_lage FOREIGN KEY (lage)
-		REFERENCES okstra.wlo_lage (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_lage (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_belastungsklasse_art_der_erfassung FOREIGN KEY (art_der_erfassung)
-		REFERENCES okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_belastungsklasse_art_der_erfassung_sonst FOREIGN KEY (art_der_erfassung_sonst)
-		REFERENCES okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_belastungsklasse_quelle_der_information FOREIGN KEY (quelle_der_information)
-		REFERENCES okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_belastungsklasse_quelle_der_information_sonst FOREIGN KEY (quelle_der_information_sonst)
-		REFERENCES okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.streckenobjekt);
+INHERITS (ukos_base.streckenobjekt);
 
-CREATE TABLE okstra.fahrstreifen_nummer(
+CREATE TABLE ukos_okstra.fahrstreifen_nummer(
 	flaechengeometrie geometry(MultiPolygon, 25833),
 	fahrstreifennummer integer,
 	verkehrsrichtung character varying,
@@ -3788,13 +3794,13 @@ CREATE TABLE okstra.fahrstreifen_nummer(
 	zu_ganglinie character varying, -- Association
 	zu_dtv character varying, -- Association
 	CONSTRAINT fk_fahrstreifen_nummer_verkehrsrichtung FOREIGN KEY (verkehrsrichtung)
-		REFERENCES okstra.wlo_verkehrsrichtung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_verkehrsrichtung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.basisobjekt);
+INHERITS (ukos_base.basisobjekt);
 
 -- strassenbeschreibung_verkehrl is generalization of other classes, such as durchschnittsgeschwindigkeit, fkt_d_verb_im_knotenpktber, spur_fuer_rettungsfahrzeuge, strassenfunktion, gebuehrenpflichtig
-CREATE TABLE okstra.strassenbeschreibung_verkehrl (
+CREATE TABLE ukos_okstra.strassenbeschreibung_verkehrl (
 	im_zeitraum character varying,
 	gilt_fuer_verkehrsrichtung character varying,
 	gilt_fuer_fahrzeugart character varying,
@@ -3812,148 +3818,148 @@ CREATE TABLE okstra.strassenbeschreibung_verkehrl (
 	unscharf boolean,
 	hat_dokument character varying, --Association
 	CONSTRAINT fk_strassenbeschreibung_verkehrl_gilt_fuer_verkehrsrichtung FOREIGN KEY (gilt_fuer_verkehrsrichtung)
-		REFERENCES okstra.wlo_verkehrsrichtung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_verkehrsrichtung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenbeschreibung_verkehrl_gilt_fuer_fahrzeugart FOREIGN KEY (gilt_fuer_fahrzeugart)
-		REFERENCES okstra.wlo_fahrzeugart (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_fahrzeugart (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenbeschreibung_verkehrl_art_der_erfassung FOREIGN KEY (art_der_erfassung)
-		REFERENCES okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenbeschreibung_verkehrl_art_der_erfassung_sonst FOREIGN KEY (art_der_erfassung_sonst)
-		REFERENCES okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenbeschreibung_verkehrl_quelle_der_information FOREIGN KEY (quelle_der_information)
-		REFERENCES okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenbeschreibung_verkehrl_quelle_der_information_sonst FOREIGN KEY (quelle_der_information_sonst)
-		REFERENCES okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.streckenobjekt);
+INHERITS (ukos_base.streckenobjekt);
 
 -- inherits from strassenbeschreibung_verkehrl
-CREATE TABLE okstra.durchschnittsgeschwindigkeit(
+CREATE TABLE ukos_okstra.durchschnittsgeschwindigkeit(
 	km_h numeric NOT NULL,
 	CONSTRAINT fk_durchschnittsgeschwindigkeit_gilt_fuer_verkehrsrichtung FOREIGN KEY (gilt_fuer_verkehrsrichtung)
-		REFERENCES okstra.wlo_verkehrsrichtung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_verkehrsrichtung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_durchschnittsgeschwindigkeit_gilt_fuer_fahrzeugart FOREIGN KEY (gilt_fuer_fahrzeugart)
-		REFERENCES okstra.wlo_fahrzeugart (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_fahrzeugart (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_durchschnittsgeschwindigkeit_art_der_erfassung FOREIGN KEY (art_der_erfassung)
-		REFERENCES okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_durchschnittsgeschwindigkeit_art_der_erfassung_sonst FOREIGN KEY (art_der_erfassung_sonst)
-		REFERENCES okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_durchschnittsgeschwindigkeit_quelle_der_information FOREIGN KEY (quelle_der_information)
-		REFERENCES okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_durchschnittsgeschwindigkeit_quelle_der_information_sonst FOREIGN KEY (quelle_der_information_sonst)
-		REFERENCES okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (okstra.strassenbeschreibung_verkehrl);
+INHERITS (ukos_okstra.strassenbeschreibung_verkehrl);
 
 -- inherits from strassenbeschreibung_verkehrl
-CREATE TABLE okstra.fkt_d_verb_im_knotenpktber(
+CREATE TABLE ukos_okstra.fkt_d_verb_im_knotenpktber(
 	funktion character varying NOT NULL,
 	CONSTRAINT fk_fkt_d_verb_im_knotenpktber_gilt_fuer_verkehrsrichtung FOREIGN KEY (gilt_fuer_verkehrsrichtung)
-		REFERENCES okstra.wlo_verkehrsrichtung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_verkehrsrichtung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_fkt_d_verb_im_knotenpktber_gilt_fuer_fahrzeugart FOREIGN KEY (gilt_fuer_fahrzeugart)
-		REFERENCES okstra.wlo_fahrzeugart (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_fahrzeugart (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_fkt_d_verb_im_knotenpktber_art_der_erfassung FOREIGN KEY (art_der_erfassung)
-		REFERENCES okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_fkt_d_verb_im_knotenpktber_art_der_erfassung_sonst FOREIGN KEY (art_der_erfassung_sonst)
-		REFERENCES okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_fkt_d_verb_im_knotenpktber_quelle_der_information FOREIGN KEY (quelle_der_information)
-		REFERENCES okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_fkt_d_verb_im_knotenpktber_quelle_der_information_sonst FOREIGN KEY (quelle_der_information_sonst)
-		REFERENCES okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (okstra.strassenbeschreibung_verkehrl);
+INHERITS (ukos_okstra.strassenbeschreibung_verkehrl);
 
 -- inherits from strassenbeschreibung_verkehrl
-CREATE TABLE okstra.spur_fuer_rettungsfahrzeuge(
+CREATE TABLE ukos_okstra.spur_fuer_rettungsfahrzeuge(
 	spur_fuer_rettungsfahrzeuge boolean NOT NULL,
 	CONSTRAINT fk_spur_fuer_rettungsfahrzeuge_gilt_fuer_verkehrsrichtung FOREIGN KEY (gilt_fuer_verkehrsrichtung)
-		REFERENCES okstra.wlo_verkehrsrichtung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_verkehrsrichtung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_spur_fuer_rettungsfahrzeuge_gilt_fuer_fahrzeugart FOREIGN KEY (gilt_fuer_fahrzeugart)
-		REFERENCES okstra.wlo_fahrzeugart (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_fahrzeugart (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_spur_fuer_rettungsfahrzeuge_art_der_erfassung FOREIGN KEY (art_der_erfassung)
-		REFERENCES okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_spur_fuer_rettungsfahrzeuge_art_der_erfassung_sonst FOREIGN KEY (art_der_erfassung_sonst)
-		REFERENCES okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_spur_fuer_rettungsfahrzeuge_quelle_der_information FOREIGN KEY (quelle_der_information)
-		REFERENCES okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_spur_fuer_rettungsfahrzeuge_quelle_der_information_sonst FOREIGN KEY (quelle_der_information_sonst)
-		REFERENCES okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (okstra.strassenbeschreibung_verkehrl);
+INHERITS (ukos_okstra.strassenbeschreibung_verkehrl);
 
 -- inherits from strassenbeschreibung_verkehrl
-CREATE TABLE okstra.strassenfunktion(
+CREATE TABLE ukos_okstra.strassenfunktion(
 	strassenfunktion character varying NOT NULL DEFAULT '',
 	CONSTRAINT fk_strassenfunktion_gilt_fuer_verkehrsrichtung FOREIGN KEY (gilt_fuer_verkehrsrichtung)
-		REFERENCES okstra.wlo_verkehrsrichtung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_verkehrsrichtung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenfunktion_gilt_fuer_fahrzeugart FOREIGN KEY (gilt_fuer_fahrzeugart)
-		REFERENCES okstra.wlo_fahrzeugart (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_fahrzeugart (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenfunktion_art_der_erfassung FOREIGN KEY (art_der_erfassung)
-		REFERENCES okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenfunktion_art_der_erfassung_sonst FOREIGN KEY (art_der_erfassung_sonst)
-		REFERENCES okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenfunktion_quelle_der_information FOREIGN KEY (quelle_der_information)
-		REFERENCES okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenfunktion_quelle_der_information_sonst FOREIGN KEY (quelle_der_information_sonst)
-		REFERENCES okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (okstra.strassenbeschreibung_verkehrl);
+INHERITS (ukos_okstra.strassenbeschreibung_verkehrl);
 
 -- inherits from strassenbeschreibung_verkehrl
-CREATE TABLE okstra.gebuehrenpflichtig(
+CREATE TABLE ukos_okstra.gebuehrenpflichtig(
 	gebuehrenpflicht boolean NOT NULL,
 	CONSTRAINT fk_gebuehrenpflichtig_gilt_fuer_verkehrsrichtung FOREIGN KEY (gilt_fuer_verkehrsrichtung)
-		REFERENCES okstra.wlo_verkehrsrichtung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_verkehrsrichtung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_gebuehrenpflichtig_gilt_fuer_fahrzeugart FOREIGN KEY (gilt_fuer_fahrzeugart)
-		REFERENCES okstra.wlo_fahrzeugart (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_fahrzeugart (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_gebuehrenpflichtig_art_der_erfassung FOREIGN KEY (art_der_erfassung)
-		REFERENCES okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_gebuehrenpflichtig_art_der_erfassung_sonst FOREIGN KEY (art_der_erfassung_sonst)
-		REFERENCES okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_gebuehrenpflichtig_quelle_der_information FOREIGN KEY (quelle_der_information)
-		REFERENCES okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_gebuehrenpflichtig_quelle_der_information_sonst FOREIGN KEY (quelle_der_information_sonst)
-		REFERENCES okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (okstra.strassenbeschreibung_verkehrl);
+INHERITS (ukos_okstra.strassenbeschreibung_verkehrl);
 
 -- hausnummer in OKSTRA technically inherits only directly from okstra_objekt. To unify the model, additional values (e.g. historical dates) can still be represented.
-CREATE TABLE okstra.hausnummer(
+CREATE TABLE ukos_okstra.hausnummer(
 	nummer integer NOT NULL,
 	zusatzbuchstabe character varying,
 	hat_hsnrbezugsobjekt character varying, -- Association
@@ -3966,10 +3972,10 @@ CREATE TABLE okstra.hausnummer(
 	zu_kommunale_strasse character varying, -- Association
 	zu_segment_kommunale_strasse character varying -- Association
 )
-INHERITS (base.basisobjekt);
+INHERITS (ukos_base.basisobjekt);
 
 -- kommunikationsobjekt in OKSTRA technically inherits only directly from okstra_objekt. To unify the model, additional values (e.g. historical dates) can still be represented.
-CREATE TABLE okstra.kommunikationsobjekt(
+CREATE TABLE ukos_okstra.kommunikationsobjekt(
 	multigeometrie geometry(geometry,25833),
 	beschreibung character varying NOT NULL DEFAULT ''::character varying,
 	art_des_betroffenen_objekts character varying,
@@ -3979,22 +3985,22 @@ CREATE TABLE okstra.kommunikationsobjekt(
 	status character varying,
 	zu_okstra_objekt character varying -- Association
 )
-INHERITS (base.basisobjekt);
+INHERITS (ukos_base.basisobjekt);
 
 -- komplexer_knoten in OKSTRA technically inherits only directly from okstra_objekt. To unify the model, additional values (e.g. historical dates) can still be represented.
-CREATE TABLE okstra.komplexer_knoten(
+CREATE TABLE ukos_okstra.komplexer_knoten(
 	art_komplexer_knoten character varying NOT NULL,
 	hat_verbindungspunkt character varying NOT NULL, -- Association
 	hat_strassenelement character varying NOT NULL, -- Association
 	zu_netzbezugsobjekt_kompknoten character varying, -- Association
 	CONSTRAINT fk_komplexer_knoten_art_komplexer_knoten FOREIGN KEY (art_komplexer_knoten)
-		REFERENCES okstra.wlo_art_komplexer_knoten (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_komplexer_knoten (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.basisobjekt);
+INHERITS (ukos_base.basisobjekt);
 
 -- Organisation in OKSTRA technically inherits only from okstra_objekt (indirectly over ansprechpartner). To unifty the model, additional values (e.g. historical dates) can still be represented.
-CREATE TABLE okstra.organisation(
+CREATE TABLE ukos_okstra.organisation(
 	name character varying NOT NULL DEFAULT ''::character varying,
 	behoerdenkennung character varying,
 	registernummer character varying,
@@ -4020,22 +4026,22 @@ CREATE TABLE okstra.organisation(
 	ist_behoerde_in character varying, -- Association
 	hat_zustaendigkeit character varying, -- Association
 	CONSTRAINT fk_organisation_organisationsart FOREIGN KEY (organisationsart)
-		REFERENCES okstra.wlo_organisationsart (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_organisationsart (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_organisation_anschrift_kommunikationsdaten_kommunikationstyp FOREIGN KEY (anschrift_kommunikationsdaten_kommunikationstyp)
-		REFERENCES okstra.wlo_kommunikationstyp (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_kommunikationstyp (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_organisation_anschrift_kommunikationsdaten_dienstlich_privat FOREIGN KEY (anschrift_kommunikationsdaten_dienstlich_privat)
-		REFERENCES okstra.wlo_dienstlich_privat (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_dienstlich_privat (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_organisation_anschrift_typ_der_anschrift FOREIGN KEY (anschrift_typ_der_anschrift)
-		REFERENCES okstra.wlo_anschriftstyp (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_anschriftstyp (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.basisobjekt);
+INHERITS (ukos_base.basisobjekt);
 
 -- Organisationseinheit in OKSTRA technically inherits only from okstra_objekt (indirectly over ansprechpartner). To unifty the model, additional values (e.g. historical dates) can still be represented.
-CREATE TABLE okstra.organisationseinheit(
+CREATE TABLE ukos_okstra.organisationseinheit(
 	bezeichnung character varying NOT NULL DEFAULT ''::character varying,
 	anschrift_adresszeile_2 character varying, -- the attribute anschrift holds the complex data type adressdaten
 	anschrift_adresszeile_3 character varying,-- the attribute anschrift holds the complex data type adressdaten
@@ -4057,19 +4063,19 @@ CREATE TABLE okstra.organisationseinheit(
 	hat_person character varying, -- Association
 	hat_zustaendigkeit character varying, -- Association
 	CONSTRAINT fk_organisationseinheit_anschrift_kommunikationsdaten_kommunikationstyp FOREIGN KEY (anschrift_kommunikationsdaten_kommunikationstyp)
-		REFERENCES okstra.wlo_kommunikationstyp (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_kommunikationstyp (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_organisationseinheit__anschrift_kommunikationsdaten_dienstlich_privat FOREIGN KEY (anschrift_kommunikationsdaten_dienstlich_privat)
-		REFERENCES okstra.wlo_dienstlich_privat (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_dienstlich_privat (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_organisationseinheit__anschrift_typ_der_anschrift FOREIGN KEY (anschrift_typ_der_anschrift)
-		REFERENCES okstra.wlo_anschriftstyp (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_anschriftstyp (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.basisobjekt);
+INHERITS (ukos_base.basisobjekt);
 
 -- Organisationseinheit in OKSTRA technically inherits only from okstra_objekt (indirectly over ansprechpartner). To unifty the model, additional values (e.g. historical dates) can still be represented.
-CREATE TABLE okstra.person(
+CREATE TABLE ukos_okstra.person(
 	personenklasse character varying,
 	titel character varying,
 	name character varying NOT NULL DEFAULT ''::character varying,
@@ -4110,29 +4116,29 @@ CREATE TABLE okstra.person(
 	zu_rolle_arbeitsstelle character varying, -- Association
 	zu_flurstueck character varying, -- Association
 	CONSTRAINT fk_person_personenklasse FOREIGN KEY (personenklasse)
-		REFERENCES okstra.wlo_personenklasse (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_personenklasse (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_organisationseinheit_anschrift_kommunikationsdaten_kommunikationstyp FOREIGN KEY (anschrift_kommunikationsdaten_kommunikationstyp)
-		REFERENCES okstra.wlo_kommunikationstyp (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_kommunikationstyp (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_organisationseinheit__anschrift_kommunikationsdaten_dienstlich_privat FOREIGN KEY (anschrift_kommunikationsdaten_dienstlich_privat)
-		REFERENCES okstra.wlo_dienstlich_privat (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_dienstlich_privat (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_organisationseinheit__anschrift_typ_der_anschrift FOREIGN KEY (anschrift_typ_der_anschrift)
-		REFERENCES okstra.wlo_anschriftstyp (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_anschriftstyp (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.basisobjekt);
+INHERITS (ukos_base.basisobjekt);
 
 -- segment_kommunale_strasse in OKSTRA inherits only from okstra_objekt. To unifty the model, additional values (e.g. historical dates) can still be represented.
-CREATE TABLE okstra.segment_kommunale_strasse (
+CREATE TABLE ukos_okstra.segment_kommunale_strasse (
 	segmentschluessel character varying NOT NULL DEFAULT ''::character varying,
 	zu_kommunale_strasse character varying NOT NULL, -- Association
 	hat_strassenbezugsobjekt character varying -- ASSOCIATION
 )
-INHERITS (base.basisobjekt);
+INHERITS (ukos_base.basisobjekt);
 
-CREATE TABLE okstra.stadium (
+CREATE TABLE ukos_okstra.stadium (
 	unter_verkehr character varying NOT NULL DEFAULT '0',
 	stadium character varying,
 	erfassungsdatum date,
@@ -4147,21 +4153,21 @@ CREATE TABLE okstra.stadium (
 	unscharf boolean,
 	hat_dokument character varying, --Association
 	CONSTRAINT fk_stadium_art_der_erfassung FOREIGN KEY (art_der_erfassung)
-		REFERENCES okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_stadium_art_der_erfassung_sonst FOREIGN KEY (art_der_erfassung_sonst)
-		REFERENCES okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_stadium_quelle_der_information FOREIGN KEY (quelle_der_information)
-		REFERENCES okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_stadium_quelle_der_information_sonst FOREIGN KEY (quelle_der_information_sonst)
-		REFERENCES okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.streckenobjekt);
+INHERITS (ukos_base.streckenobjekt);
 
-CREATE TABLE okstra.strassenelement (
+CREATE TABLE ukos_okstra.strassenelement (
 	liniengeometrie geometry(linestring,25833),
 	gdf_id character varying,
 	verkehrsrichtung character varying,
@@ -4186,16 +4192,16 @@ CREATE TABLE okstra.strassenelement (
 	in_nullpunkt character varying, --Association
 	in_komplexem_knoten character varying, --Association
 	CONSTRAINT fk_strassenelement_verkehrsrichtung FOREIGN KEY (verkehrsrichtung)
-		REFERENCES okstra.wlo_verkehrsrichtung_se (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_verkehrsrichtung_se (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_strassenelement_stufe FOREIGN KEY (stufe)
-		REFERENCES okstra.wlo_stufe_strassenelement (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_stufe_strassenelement (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.streckenobjekt);
+INHERITS (ukos_base.streckenobjekt);
 
--- Strassenelementpunkt is a datatype in OKSTRA. Due to its importance for the geometry of streets for possible expansion, it is modelled as its own table
-CREATE TABLE okstra.strassenelementpunkt (
+-- Strassenelementpunkt is a datatype in ukos_okstra. Due to its importance for the geometry of streets for possible expansion, it is modelled as its own table
+CREATE TABLE ukos_okstra.strassenelementpunkt (
 	punktgeometrie geometry(point, 25833), -- Not in the original model, but added here
 	station numeric NOT NULL,
 	abstand_zur_bestandsachse numeric,
@@ -4203,19 +4209,19 @@ CREATE TABLE okstra.strassenelementpunkt (
 	auf_strassenelement character varying NOT NULL,--Association
 	CONSTRAINT pk_strassenelementpunkt_id PRIMARY KEY (id)
 )
-INHERITS (base.basisobjekt);
+INHERITS (ukos_base.basisobjekt);
 
-CREATE TABLE okstra.teilelement (
+CREATE TABLE ukos_okstra.teilelement (
 	beginnt_bei_strassenelempkt character varying NOT NULL, --- beginnt_bei_strassenelempkt is a complex data type. Due to its importance in visualization and its possible expansion, it is held in its own table
 	endet_bei_strassenelempkt character varying NOT NULL, -- endet_bei_strassenelempkt is a complex data type. Due to its importance in visualization and its possible expansion, it is held in its own table
 	--beginnt_bei_strassenelempkt_station numeric NOT NULL, -- beginnt_bei_strassenelempkt holds the the complex data type strassenelementpunkt. Since beginnt_bei_strassenelempkt must always be filled, station must also always be filled
 	--beginnt_bei_strassenelempkt_abstand_zur_bestandsachse numeric, -- beginnt_bei_strassenelempkt holds the complex data type strassenelementpunkt.
 	--beginnt_bei_strassenelempkt_abstand_zur_fahrbahnoberkante numeric, -- beginnt_bei_strassenelempkt holds the complex data type strassenelementpunkt.
-	--beginnt_bei_strassenelempkt_auf_strassenelement character varying NOT NULL,  -- Association
+	--beginnt_bei_strassenelempkt_auf_strassenelement character varying NOT NULL,	-- Association
 	--endet_bei_strassenelempkt_station numeric NOT NULL, -- beginnt_bei_strassenelempkt holds the the complex data type strassenelementpunkt. Since beginnt_bei_strassenelempkt must always be filled, station must also always be filled
 	--endet_bei_strassenelempkt_abstand_zur_bestandsachse numeric, -- beginnt_bei_strassenelempkt holds the complex data type strassenelementpunkt.
 	--endet_bei_strassenelempkt_abstand_zur_fahrbahnoberkante numeric, -- beginnt_bei_strassenelempkt holds the complex data type strassenelementpunkt.
-	--endet_bei_strassenelempkt_auf_strassenelement character varying NOT NULL,  -- Association
+	--endet_bei_strassenelempkt_auf_strassenelement character varying NOT NULL,	-- Association
 	auf_strasselement character varying NOT NULL, -- Association
 	altes_netzteil character varying, -- Association
 	neues_netzteil character varying, -- Association
@@ -4234,27 +4240,27 @@ CREATE TABLE okstra.teilelement (
 	unscharf boolean,
 	hat_dokument character varying, --Association
 	CONSTRAINT fk_teilelement_beginnt_bei_strassenelempkt FOREIGN KEY (beginnt_bei_strassenelempkt)
-		REFERENCES okstra.strassenelementpunkt (id) MATCH SIMPLE
+		REFERENCES ukos_okstra.strassenelementpunkt (id) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_teilelement_endet_bei_strassenelempkt FOREIGN KEY (endet_bei_strassenelempkt)
-		REFERENCES okstra.strassenelementpunkt (id) MATCH SIMPLE
+		REFERENCES ukos_okstra.strassenelementpunkt (id) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_teilelement_art_der_erfassung FOREIGN KEY (art_der_erfassung)
-		REFERENCES okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_teilelement_art_der_erfassung_sonst FOREIGN KEY (art_der_erfassung_sonst)
-		REFERENCES okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_teilelement_quelle_der_information FOREIGN KEY (quelle_der_information)
-		REFERENCES okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_teilelement_quelle_der_information_sonst FOREIGN KEY (quelle_der_information_sonst)
-		REFERENCES okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.basisobjekt);
+INHERITS (ukos_base.basisobjekt);
 
-CREATE TABLE okstra.verbindungspunkt (
+CREATE TABLE ukos_okstra.verbindungspunkt (
 	punktgeometrie geometry(point, 25833),
 	nummerierungsbezirk character varying,
 	kennung_gemeinde character varying,
@@ -4283,21 +4289,21 @@ CREATE TABLE okstra.verbindungspunkt (
 	unscharf boolean,
 	hat_dokument character varying, --Association
 	CONSTRAINT fk_verbindungspunkt_art_der_erfassung FOREIGN KEY (art_der_erfassung)
-		REFERENCES okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_verbindungspunkt_art_der_erfassung_sonst FOREIGN KEY (art_der_erfassung_sonst)
-		REFERENCES okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_verbindungspunkt_quelle_der_information FOREIGN KEY (quelle_der_information)
-		REFERENCES okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_verbindungspunkt_quelle_der_information_sonst FOREIGN KEY (quelle_der_information_sonst)
-		REFERENCES okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.basisobjekt);
+INHERITS (ukos_base.basisobjekt);
 
-CREATE TABLE okstra.verbotene_fahrbeziehung (
+CREATE TABLE ukos_okstra.verbotene_fahrbeziehung (
 	fuer_art_verkehrsnutzung character varying,
 	ueber_strassenknoten character varying NOT NULL, --Association
 	von_strassenknoten character varying NOT NULL, --Association
@@ -4317,24 +4323,24 @@ CREATE TABLE okstra.verbotene_fahrbeziehung (
 	unscharf boolean,
 	hat_dokument character varying, --Association
 	CONSTRAINT fk_verbotene_fahrbeziehung_art_der_erfassung FOREIGN KEY (art_der_erfassung)
-		REFERENCES okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_verbotene_fahrbeziehung_art_der_erfassung_sonst FOREIGN KEY (art_der_erfassung_sonst)
-		REFERENCES okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_verbotene_fahrbeziehung_quelle_der_information FOREIGN KEY (quelle_der_information)
-		REFERENCES okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_verbotene_fahrbeziehung_quelle_der_information_sonst FOREIGN KEY (quelle_der_information_sonst)
-		REFERENCES okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_verbotene_fahrbeziehung_fuer_art_verkehrsnutzung FOREIGN KEY (fuer_art_verkehrsnutzung)
-		REFERENCES okstra.wlo_verkehrsteilnehmergruppe (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_verkehrsteilnehmergruppe (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.basisobjekt);
+INHERITS (ukos_base.basisobjekt);
 
-CREATE TABLE okstra.verkehrseinschraenkung (
+CREATE TABLE ukos_okstra.verkehrseinschraenkung (
 	lage character varying DEFAULT '99'::character varying,
 	querschnitt_streifenart character varying,
 	art character varying not null,
@@ -4366,42 +4372,42 @@ CREATE TABLE okstra.verkehrseinschraenkung (
 	unscharf boolean,
 	hat_dokument character varying, --Association
 	CONSTRAINT fk_verkehrseinschraenkung_art_der_erfassung FOREIGN KEY (art_der_erfassung)
-		REFERENCES okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_verkehrseinschraenkung_art_der_erfassung_sonst FOREIGN KEY (art_der_erfassung_sonst)
-		REFERENCES okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_verkehrseinschraenkung_quelle_der_information FOREIGN KEY (quelle_der_information)
-		REFERENCES okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_verkehrseinschraenkung_quelle_der_information_sonst FOREIGN KEY (quelle_der_information_sonst)
-		REFERENCES okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_verkehrseinschraenkung_lage FOREIGN KEY (lage)
-		REFERENCES okstra.wlo_lage (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_lage (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_verkehrseinschraenkung_querschnitt_streifenart FOREIGN KEY (querschnitt_streifenart)
-		REFERENCES okstra.wlo_querschnitt_streifenart_ves (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_querschnitt_streifenart_ves (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_verkehrseinschraenkung_art FOREIGN KEY (art)
-		REFERENCES okstra.wlo_art_ves (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_ves (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_verkehrseinschraenkung_verkehrsrichtung FOREIGN KEY (verkehrsrichtung)
-		REFERENCES okstra.wlo_bezugsrichtung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_bezugsrichtung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_verkehrseinschraenkung_verkehrsteilnehmergruppe FOREIGN KEY (verkehrsteilnehmergruppe)
-		REFERENCES okstra.wlo_verkehrsteilnehmergruppe (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_verkehrsteilnehmergruppe (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_verkehrseinschraenkung_gueltigkeit FOREIGN KEY (gueltigkeit)
-		REFERENCES okstra.wlo_gueltigkeit_ves (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_gueltigkeit_ves (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_verkehrseinschraenkung_wochentag FOREIGN KEY (wochentag)
-		REFERENCES okstra.wlo_wochentag_ves (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_wochentag_ves (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.streckenobjekt);
+INHERITS (ukos_base.streckenobjekt);
 
-CREATE TABLE okstra.verkehrsflaeche (
+CREATE TABLE ukos_okstra.verkehrsflaeche (
 	flaeche geometry(MultiPolygon,25833),
 	hat_flaechenbezugsobjekt character varying, -- Association
 	besteht_aus_querschnittstreifen character varying, -- Association
@@ -4410,9 +4416,9 @@ CREATE TABLE okstra.verkehrsflaeche (
 	zu_segment_kommunale_strasse character varying, -- Association
 	zu_strasse character varying -- Association
 )
-INHERITS (base.basisobjekt);
+INHERITS (ukos_base.basisobjekt);
 
-CREATE TABLE okstra.verkehrsnutzungsbereich (
+CREATE TABLE ukos_okstra.verkehrsnutzungsbereich (
 	gilt_fuer_verkehrsrichtung character varying,
 	entspricht_nutzungsflaeche character varying, -- Association
 	art_der_verkehrsnutzung character varying NOT NULL DEFAULT '99',
@@ -4420,15 +4426,15 @@ CREATE TABLE okstra.verkehrsnutzungsbereich (
 	zu_hausnummernbereich character varying, -- Association
 	zu_hausnummernblock character varying, -- Associaton
 	CONSTRAINT fk_verkehrsnutzungsbereich_gilt_fuer_verkehrsrichtung FOREIGN KEY (gilt_fuer_verkehrsrichtung)
-		REFERENCES okstra.wlo_orientierungsrichtung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_orientierungsrichtung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_verkehrsnutzungsbereich_art_der_verkehrsnutzung FOREIGN KEY (art_der_verkehrsnutzung)
-		REFERENCES okstra.wlo_verkehrsteilnehmergruppe (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_verkehrsteilnehmergruppe (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.streckenobjekt);
+INHERITS (ukos_base.streckenobjekt);
 
-CREATE TABLE okstra.zustaendigkeit (
+CREATE TABLE ukos_okstra.zustaendigkeit (
 	art_zustaendigkeit character varying NOT NULL,
 	beginn_der_zustaendigkeit date,
 	ende_der_zustaendigkeit date,
@@ -4453,26 +4459,26 @@ CREATE TABLE okstra.zustaendigkeit (
 	unscharf boolean,
 	-- hat_dokument character varying, --Association (commented out, because it exists more than once (inherited from asb_objekt and flaechenbezugsobjekt)
 	CONSTRAINT fk_teilelement_art_der_erfassung FOREIGN KEY (art_der_erfassung)
-		REFERENCES okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_teilelement_art_der_erfassung_sonst FOREIGN KEY (art_der_erfassung_sonst)
-		REFERENCES okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_der_erfassung_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_teilelement_quelle_der_information FOREIGN KEY (quelle_der_information)
-		REFERENCES okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_teilelement_quelle_der_information_sonst FOREIGN KEY (quelle_der_information_sonst)
-		REFERENCES okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_quelle_der_information_sonst (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT fk_zustaendigkeit_art_zustaendigkeit FOREIGN KEY (art_zustaendigkeit)
-		REFERENCES okstra.wlo_art_zustaendigkeit (kennung) MATCH SIMPLE
+		REFERENCES ukos_okstra.wlo_art_zustaendigkeit (kennung) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-INHERITS (base.basisobjekt);
+INHERITS (ukos_base.basisobjekt);
 
 -- OKSTRA Zuordnungstables
 -- Is equivalent to associations zu_streckenobjekt / hat_strecke between querschnittstreifen and teilelement (inherited from streckenobjekt and verallgemeinerte_strecke)
-CREATE TABLE okstra.querschnittstreifen_to_teilelement (
+CREATE TABLE ukos_okstra.querschnittstreifen_to_teilelement (
 	querschnittstreifen_id character varying NOT NULL,
 	teilelement_id character varying NOT NULL
 );
@@ -4483,8 +4489,8 @@ CREATE TABLE okstra.querschnittstreifen_to_teilelement (
 -- CREATE CONCRETE OBJECTS
 ---------------------------------------------------------------
 ---------------------------------------------------------------
--- concrete objects inherit from abstract okstra tables, which in turn inherit from the base.basisobjekt
-CREATE TABLE doppik.lampe
+-- concrete objects inherit from abstract okstra tables, which in turn inherit from the ukos_base.basisobjekt
+CREATE TABLE ukos_doppik.lampe
 (
 	material character varying NOT NULL,
 	masttyp character varying,
@@ -4500,23 +4506,23 @@ CREATE TABLE doppik.lampe
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_lampe_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.lampe
+-- Trigger: tr_idents_add_ident on ukos_doppik.lampe
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.lampe
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.lampe
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.lampe
+-- Trigger: tr_idents_remove_ident on ukos_doppik.lampe
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.lampe
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.lampe
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.baum
+CREATE TABLE ukos_doppik.baum
 (
 	--lage character varying DEFAULT '99'::character varying,
 	--baumgattung character varying,
@@ -4533,29 +4539,29 @@ CREATE TABLE doppik.baum
 	--datum_der_faellung date,
 	--letzte_baumschau date,
 	--schiefstand numeric,
-	--zustandsbeurteilung character varying, -- already available in okstra.baum, will be inherited
+	--zustandsbeurteilung character varying, -- already available in ukos_okstra.baum, will be inherited
 	--lagebeschreibung character varying,
 	--detaillierungsgrad character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_baum_id PRIMARY KEY (id)
 )
-INHERITS(okstra.baum);
+INHERITS(ukos_okstra.baum);
 
--- Trigger: tr_idents_add_ident on doppik.baum
+-- Trigger: tr_idents_add_ident on ukos_doppik.baum
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.baum
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.baum
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.baum
+-- Trigger: tr_idents_remove_ident on ukos_doppik.baum
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.baum
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.baum
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.bewuchs
+CREATE TABLE ukos_doppik.bewuchs
 (
 	-- laenge numeric,
 	breite numeric,
@@ -4567,199 +4573,199 @@ CREATE TABLE doppik.bewuchs
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_bewuchs_id PRIMARY KEY (id)
 )
-INHERITS(okstra.bewuchs);
+INHERITS(ukos_okstra.bewuchs);
 
--- Trigger: tr_idents_add_ident on doppik.bewuchs
+-- Trigger: tr_idents_add_ident on ukos_doppik.bewuchs
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.bewuchs
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.bewuchs
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.bewuchs
+-- Trigger: tr_idents_remove_ident on ukos_doppik.bewuchs
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.bewuchs
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.bewuchs
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.blumenkuebel
+CREATE TABLE ukos_doppik.blumenkuebel
 (
 	material character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_blumenkuebel_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.blumenkuebel
+-- Trigger: tr_idents_add_ident on ukos_doppik.blumenkuebel
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.blumenkuebel
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.blumenkuebel
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.blumenkuebel
+-- Trigger: tr_idents_remove_ident on ukos_doppik.blumenkuebel
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.blumenkuebel
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.blumenkuebel
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.stationaere_geschwindigkeitsueberwachung
+CREATE TABLE ukos_doppik.stationaere_geschwindigkeitsueberwachung
 (
 	material character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_stationaere_geschwindigkeitsueberwachung_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.stationaere_geschwindigkeitsueberwachung
+-- Trigger: tr_idents_add_ident on ukos_doppik.stationaere_geschwindigkeitsueberwachung
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.stationaere_geschwindigkeitsueberwachung
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.stationaere_geschwindigkeitsueberwachung
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.stationaere_geschwindigkeitsueberwachung
+-- Trigger: tr_idents_remove_ident on ukos_doppik.stationaere_geschwindigkeitsueberwachung
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.stationaere_geschwindigkeitsueberwachung
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.stationaere_geschwindigkeitsueberwachung
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.verkehrsspiegel
+CREATE TABLE ukos_doppik.verkehrsspiegel
 (
 	material character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_verkehrsspiegel_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.verkehrsspiegel
+-- Trigger: tr_idents_add_ident on ukos_doppik.verkehrsspiegel
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.verkehrsspiegel
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.verkehrsspiegel
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.verkehrsspiegel
+-- Trigger: tr_idents_remove_ident on ukos_doppik.verkehrsspiegel
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.verkehrsspiegel
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.verkehrsspiegel
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.leitpfosten
+CREATE TABLE ukos_doppik.leitpfosten
 (
 	material character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_leitpfosten_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.leitpfosten
+-- Trigger: tr_idents_add_ident on ukos_doppik.leitpfosten
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.leitpfosten
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.leitpfosten
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.leitpfosten
+-- Trigger: tr_idents_remove_ident on ukos_doppik.leitpfosten
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.leitpfosten
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.leitpfosten
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.kilometerstein
+CREATE TABLE ukos_doppik.kilometerstein
 (
 	material character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_kilometerstein_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.kilometerstein
+-- Trigger: tr_idents_add_ident on ukos_doppik.kilometerstein
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.kilometerstein
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.kilometerstein
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.kilometerstein
+-- Trigger: tr_idents_remove_ident on ukos_doppik.kilometerstein
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.kilometerstein
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.kilometerstein
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.anleger
+CREATE TABLE ukos_doppik.anleger
 (
 	material character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_anleger_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.anleger
+-- Trigger: tr_idents_add_ident on ukos_doppik.anleger
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.anleger
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.anleger
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.anleger
+-- Trigger: tr_idents_remove_ident on ukos_doppik.anleger
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.anleger
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.anleger
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.anschlagsaeule
+CREATE TABLE ukos_doppik.anschlagsaeule
 (
 	material character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_anschlagsaeule_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.anschlagsaeule
+-- Trigger: tr_idents_add_ident on ukos_doppik.anschlagsaeule
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.anschlagsaeule
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.anschlagsaeule
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.anschlagsaeule
+-- Trigger: tr_idents_remove_ident on ukos_doppik.anschlagsaeule
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.anschlagsaeule
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.anschlagsaeule
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.bank
+CREATE TABLE ukos_doppik.bank
 (
 	material character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_bank_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.bank
+-- Trigger: tr_idents_add_ident on ukos_doppik.bank
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.bank
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.bank
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.bank
+-- Trigger: tr_idents_remove_ident on ukos_doppik.bank
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.bank
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.bank
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.bruecke
+CREATE TABLE ukos_doppik.bruecke
 (
 	material character varying,
 	laenge numeric,
@@ -4768,245 +4774,245 @@ CREATE TABLE doppik.bruecke
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_bruecke_id PRIMARY KEY (id)
 )
-INHERITS(okstra.bruecke);
+INHERITS(ukos_okstra.bruecke);
 
--- Trigger: tr_idents_add_ident on doppik.bruecke
+-- Trigger: tr_idents_add_ident on ukos_doppik.bruecke
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.bruecke
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.bruecke
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.bruecke
+-- Trigger: tr_idents_remove_ident on ukos_doppik.bruecke
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.bruecke
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.bruecke
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.dalben
+CREATE TABLE ukos_doppik.dalben
 (
 	material character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_dalben_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.dalben
+-- Trigger: tr_idents_add_ident on ukos_doppik.dalben
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.dalben
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.dalben
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.dalben
+-- Trigger: tr_idents_remove_ident on ukos_doppik.dalben
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.dalben
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.dalben
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.denkmal
+CREATE TABLE ukos_doppik.denkmal
 (
 	material character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_denkmale_id PRIMARY KEY (id)
 )
-INHERITS(okstra.teilbauwerk);
+INHERITS(ukos_okstra.teilbauwerk);
 
--- Trigger: tr_idents_add_ident on doppik.denkmal
+-- Trigger: tr_idents_add_ident on ukos_doppik.denkmal
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.denkmal
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.denkmal
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.denkmal
+-- Trigger: tr_idents_remove_ident on ukos_doppik.denkmal
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.denkmal
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.denkmal
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.fahne
+CREATE TABLE ukos_doppik.fahne
 (
 	material character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_fahne_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.fahne
+-- Trigger: tr_idents_add_ident on ukos_doppik.fahne
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.fahne
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.fahne
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.fahne
+-- Trigger: tr_idents_remove_ident on ukos_doppik.fahne
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.fahne
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.fahne
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.infoterminal
+CREATE TABLE ukos_doppik.infoterminal
 (
 	material character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_infoterminal_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.infoterminal
+-- Trigger: tr_idents_add_ident on ukos_doppik.infoterminal
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.infoterminal
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.infoterminal
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.infoterminal
+-- Trigger: tr_idents_remove_ident on ukos_doppik.infoterminal
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.infoterminal
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.infoterminal
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.kunstwerk
+CREATE TABLE ukos_doppik.kunstwerk
 (
 	material character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_kunstwerk_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.kunstwerk
+-- Trigger: tr_idents_add_ident on ukos_doppik.kunstwerk
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.kunstwerk
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.kunstwerk
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.kunstwerk
+-- Trigger: tr_idents_remove_ident on ukos_doppik.kunstwerk
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.kunstwerk
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.kunstwerk
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.schaukasten
+CREATE TABLE ukos_doppik.schaukasten
 (
 	material character varying,
 	standort character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_schaukasten_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.schaukasten
+-- Trigger: tr_idents_add_ident on ukos_doppik.schaukasten
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.schaukasten
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.schaukasten
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.schaukasten
+-- Trigger: tr_idents_remove_ident on ukos_doppik.schaukasten
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.schaukasten
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.schaukasten
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.spielgeraet
+CREATE TABLE ukos_doppik.spielgeraet
 (
 	material character varying,
 	standort character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_spielgeraet_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.spielgeraet
+-- Trigger: tr_idents_add_ident on ukos_doppik.spielgeraet
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.spielgeraet
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.spielgeraet
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.spielgeraet
+-- Trigger: tr_idents_remove_ident on ukos_doppik.spielgeraet
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.spielgeraet
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.spielgeraet
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.tunnel
+CREATE TABLE ukos_doppik.tunnel
 (
 	material character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_tunnel_id PRIMARY KEY (id)
 )
-INHERITS(okstra.tunnel_trogbauwerk);
+INHERITS(ukos_okstra.tunnel_trogbauwerk);
 
--- Trigger: tr_idents_add_ident on doppik.tunnel
+-- Trigger: tr_idents_add_ident on ukos_doppik.tunnel
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.tunnel
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.tunnel
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.tunnel
+-- Trigger: tr_idents_remove_ident on ukos_doppik.tunnel
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.tunnel
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.tunnel
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.uhr
+CREATE TABLE ukos_doppik.uhr
 (
 	material character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_uhr_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.uhr
+-- Trigger: tr_idents_add_ident on ukos_doppik.uhr
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.uhr
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.uhr
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.uhr
+-- Trigger: tr_idents_remove_ident on ukos_doppik.uhr
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.uhr
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.uhr
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.ampel
+CREATE TABLE ukos_doppik.ampel
 (
 	material character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_ampel_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.ampel
+-- Trigger: tr_idents_add_ident on ukos_doppik.ampel
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.ampel
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.ampel
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.ampel
+-- Trigger: tr_idents_remove_ident on ukos_doppik.ampel
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.ampel
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.ampel
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.fahrradstaender
+CREATE TABLE ukos_doppik.fahrradstaender
 (
 	material character varying,
 	anzahl_der_buegel integer,
@@ -5017,69 +5023,69 @@ CREATE TABLE doppik.fahrradstaender
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_fahrradstaender_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.fahrradstaender
+-- Trigger: tr_idents_add_ident on ukos_doppik.fahrradstaender
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.fahrradstaender
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.fahrradstaender
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.fahrradstaender
+-- Trigger: tr_idents_remove_ident on ukos_doppik.fahrradstaender
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.fahrradstaender
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.fahrradstaender
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.hinweistafel
+CREATE TABLE ukos_doppik.hinweistafel
 (
 	material character varying,
 	standort character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_hinweistafel_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.hinweistafel
+-- Trigger: tr_idents_add_ident on ukos_doppik.hinweistafel
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.hinweistafel
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.hinweistafel
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.hinweistafel
+-- Trigger: tr_idents_remove_ident on ukos_doppik.hinweistafel
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.hinweistafel
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.hinweistafel
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.parkscheinautomat
+CREATE TABLE ukos_doppik.parkscheinautomat
 (
 	material character varying,
 	standort character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_parkscheinautomat_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.parkscheinautomat
+-- Trigger: tr_idents_add_ident on ukos_doppik.parkscheinautomat
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.parkscheinautomat
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.parkscheinautomat
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.parkscheinautomat
+-- Trigger: tr_idents_remove_ident on ukos_doppik.parkscheinautomat
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.parkscheinautomat
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.parkscheinautomat
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.poller
+CREATE TABLE ukos_doppik.poller
 (
 	material character varying,
 	standort character varying,
@@ -5089,23 +5095,23 @@ CREATE TABLE doppik.poller
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_poller_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.poller
+-- Trigger: tr_idents_add_ident on ukos_doppik.poller
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.poller
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.poller
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.poller
+-- Trigger: tr_idents_remove_ident on ukos_doppik.poller
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.poller
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.poller
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.schranke
+CREATE TABLE ukos_doppik.schranke
 (
 	material character varying,
 	standort character varying,
@@ -5113,23 +5119,23 @@ CREATE TABLE doppik.schranke
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_schranke_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.schranke
+-- Trigger: tr_idents_add_ident on ukos_doppik.schranke
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.schranke
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.schranke
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.schranke
+-- Trigger: tr_idents_remove_ident on ukos_doppik.schranke
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.schranke
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.schranke
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.aufstellvorrichtung_schild
+CREATE TABLE ukos_doppik.aufstellvorrichtung_schild
 (
 	--material character varying,
 	--nummer_aufstellvorrichtung integer,
@@ -5145,46 +5151,46 @@ CREATE TABLE doppik.aufstellvorrichtung_schild
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_aufstellvorrichtung_schild_id PRIMARY KEY (id)
 )
-INHERITS(okstra.aufstellvorrichtung_schild);
+INHERITS(ukos_okstra.aufstellvorrichtung_schild);
 
--- Trigger: tr_idents_add_ident on doppik.aufstellvorrichtung_schild
+-- Trigger: tr_idents_add_ident on ukos_doppik.aufstellvorrichtung_schild
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.aufstellvorrichtung_schild
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.aufstellvorrichtung_schild
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.aufstellvorrichtung_schild
+-- Trigger: tr_idents_remove_ident on ukos_doppik.aufstellvorrichtung_schild
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.aufstellvorrichtung_schild
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.aufstellvorrichtung_schild
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.schild
+CREATE TABLE ukos_doppik.schild
 (
 	material character varying,
 	stvo_znr character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_schild_id PRIMARY KEY (id)
 )
-INHERITS(okstra.schild);
+INHERITS(ukos_okstra.schild);
 
--- Trigger: tr_idents_add_ident on doppik.schild
+-- Trigger: tr_idents_add_ident on ukos_doppik.schild
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.schild
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.schild
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.schild
+-- Trigger: tr_idents_remove_ident on ukos_doppik.schild
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.schild
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.schild
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.wartestelle
+CREATE TABLE ukos_doppik.wartestelle
 (
 	material character varying,
 	fahrtrichtung character varying,
@@ -5192,45 +5198,45 @@ CREATE TABLE doppik.wartestelle
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_wartestelle_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.wartestelle
+-- Trigger: tr_idents_add_ident on ukos_doppik.wartestelle
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.wartestelle
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.wartestelle
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.wartestelle
+-- Trigger: tr_idents_remove_ident on ukos_doppik.wartestelle
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.wartestelle
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.wartestelle
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.brunnen
+CREATE TABLE ukos_doppik.brunnen
 (
 	material character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_brunnen_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.brunnen
+-- Trigger: tr_idents_add_ident on ukos_doppik.brunnen
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.brunnen
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.brunnen
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.brunnen
+-- Trigger: tr_idents_remove_ident on ukos_doppik.brunnen
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.brunnen
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.brunnen
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.strassenablauf
+CREATE TABLE ukos_doppik.strassenablauf
 (
 	material character varying,
 	art_des_ablaufes character varying,
@@ -5238,23 +5244,23 @@ CREATE TABLE doppik.strassenablauf
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_strassenablauf_id PRIMARY KEY (id)
 )
-INHERITS(okstra.strassenablauf);
+INHERITS(ukos_okstra.strassenablauf);
 
--- Trigger: tr_idents_add_ident on doppik.strassenablauf
+-- Trigger: tr_idents_add_ident on ukos_doppik.strassenablauf
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.strassenablauf
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.strassenablauf
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.strassenablauf
+-- Trigger: tr_idents_remove_ident on ukos_doppik.strassenablauf
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.strassenablauf
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.strassenablauf
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.kabelkasten
+CREATE TABLE ukos_doppik.kabelkasten
 (
 	material character varying,
 	zugehoeriges_kabelnetz character varying,
@@ -5262,66 +5268,66 @@ CREATE TABLE doppik.kabelkasten
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_kabelkasten_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.kabelkasten
+-- Trigger: tr_idents_add_ident on ukos_doppik.kabelkasten
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.kabelkasten
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.kabelkasten
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.kabelkasten
+-- Trigger: tr_idents_remove_ident on ukos_doppik.kabelkasten
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.kabelkasten
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.kabelkasten
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.kabelschacht
+CREATE TABLE ukos_doppik.kabelschacht
 (
-    material character varying,
+		material character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_kabelschacht_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.kabelschacht
+-- Trigger: tr_idents_add_ident on ukos_doppik.kabelschacht
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.kabelschacht
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.kabelschacht
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.kabelschacht
+-- Trigger: tr_idents_remove_ident on ukos_doppik.kabelschacht
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.kabelschacht
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.kabelschacht
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.abfallbehaelter
+CREATE TABLE ukos_doppik.abfallbehaelter
 (
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_abfallbehaelter_id PRIMARY KEY (id)
 )
-INHERITS(okstra.abfallentsorgung);
+INHERITS(ukos_okstra.abfallentsorgung);
 
--- Trigger: tr_idents_add_ident on doppik.abfallbehaelter
+-- Trigger: tr_idents_add_ident on ukos_doppik.abfallbehaelter
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.abfallbehaelter
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.abfallbehaelter
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.abfallbehaelter
+-- Trigger: tr_idents_remove_ident on ukos_doppik.abfallbehaelter
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.abfallbehaelter
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.abfallbehaelter
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.schacht
+CREATE TABLE ukos_doppik.schacht
 (
 	material character varying,
 	medium character varying,
@@ -5331,91 +5337,91 @@ CREATE TABLE doppik.schacht
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_schacht_id PRIMARY KEY (id)
 )
-INHERITS(okstra.schacht);
+INHERITS(ukos_okstra.schacht);
 
--- Trigger: tr_idents_add_ident on doppik.schacht
+-- Trigger: tr_idents_add_ident on ukos_doppik.schacht
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.schacht
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.schacht
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.schacht
+-- Trigger: tr_idents_remove_ident on ukos_doppik.schacht
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.schacht
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.schacht
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.sonstiges_punktobjekt
+CREATE TABLE ukos_doppik.sonstiges_punktobjekt
 (
 	material character varying,
 	kurzbeschreibung_punktobjekt character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_sonstiges_punktobjekt_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.sonstiges_punktobjekt
+-- Trigger: tr_idents_add_ident on ukos_doppik.sonstiges_punktobjekt
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.sonstiges_punktobjekt
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.sonstiges_punktobjekt
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.sonstiges_punktobjekt
+-- Trigger: tr_idents_remove_ident on ukos_doppik.sonstiges_punktobjekt
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.sonstiges_punktobjekt
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.sonstiges_punktobjekt
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.durchlass
+CREATE TABLE ukos_doppik.durchlass
 (
 	material character varying,
 	pflasterflaeche numeric,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_durchlass_id PRIMARY KEY (id)
 )
-INHERITS(okstra.durchlass);
+INHERITS(ukos_okstra.durchlass);
 
--- Trigger: tr_idents_add_ident on doppik.durchlass
+-- Trigger: tr_idents_add_ident on ukos_doppik.durchlass
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.durchlass
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.durchlass
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.durchlass
+-- Trigger: tr_idents_remove_ident on ukos_doppik.durchlass
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.durchlass
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.durchlass
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.bord_strecke
+CREATE TABLE ukos_doppik.bord_strecke
 (
 	material character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_bord_strecke_id PRIMARY KEY (id)
 )
-INHERITS(okstra.strassenausstattung_strecke);
+INHERITS(ukos_okstra.strassenausstattung_strecke);
 
--- Trigger: tr_idents_add_ident on doppik.bord_strecke
+-- Trigger: tr_idents_add_ident on ukos_doppik.bord_strecke
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.bord_strecke
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.bord_strecke
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.bord_strecke
+-- Trigger: tr_idents_remove_ident on ukos_doppik.bord_strecke
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.bord_strecke
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.bord_strecke
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.gelaender
+CREATE TABLE ukos_doppik.gelaender
 (
 	material character varying,
 	breite numeric,
@@ -5424,23 +5430,23 @@ CREATE TABLE doppik.gelaender
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_gelaender_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_strecke);
+INHERITS (ukos_okstra.strassenausstattung_strecke);
 
--- Trigger: tr_idents_add_ident on doppik.gelaender
+-- Trigger: tr_idents_add_ident on ukos_doppik.gelaender
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.gelaender
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.gelaender
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.gelaender
+-- Trigger: tr_idents_remove_ident on ukos_doppik.gelaender
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.gelaender
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.gelaender
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.schutzplanke
+CREATE TABLE ukos_doppik.schutzplanke
 (
 	material character varying,
 	laenge numeric,
@@ -5449,45 +5455,45 @@ CREATE TABLE doppik.schutzplanke
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_schutzplanke_id PRIMARY KEY (id)
 )
-INHERITS(okstra.schutzeinrichtung_aus_stahl);
+INHERITS(ukos_okstra.schutzeinrichtung_aus_stahl);
 
--- Trigger: tr_idents_add_ident on doppik.schutzplanke
+-- Trigger: tr_idents_add_ident on ukos_doppik.schutzplanke
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.schutzplanke
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.schutzplanke
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.schutzplanke
+-- Trigger: tr_idents_remove_ident on ukos_doppik.schutzplanke
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.schutzplanke
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.schutzplanke
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.leitung
+CREATE TABLE ukos_doppik.leitung
 (
 	material character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_leitung_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_strecke);
+INHERITS (ukos_okstra.strassenausstattung_strecke);
 
--- Trigger: tr_idents_add_ident on doppik.leitung
+-- Trigger: tr_idents_add_ident on ukos_doppik.leitung
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.leitung
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.leitung
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.leitung
+-- Trigger: tr_idents_remove_ident on ukos_doppik.leitung
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.leitung
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.leitung
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.mauer
+CREATE TABLE ukos_doppik.mauer
 (
 	material character varying,
 	laenge numeric,
@@ -5496,23 +5502,23 @@ CREATE TABLE doppik.mauer
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_mauer_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_strecke);
+INHERITS (ukos_okstra.strassenausstattung_strecke);
 
--- Trigger: tr_idents_add_ident on doppik.mauer
+-- Trigger: tr_idents_add_ident on ukos_doppik.mauer
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.mauer
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.mauer
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.mauer
+-- Trigger: tr_idents_remove_ident on ukos_doppik.mauer
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.mauer
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.mauer
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.rinne
+CREATE TABLE ukos_doppik.rinne
 (
 	material character varying,
 	laenge numeric,
@@ -5520,23 +5526,23 @@ CREATE TABLE doppik.rinne
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_rinne_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_strecke);
+INHERITS (ukos_okstra.strassenausstattung_strecke);
 
--- Trigger: tr_idents_add_ident on doppik.rinne
+-- Trigger: tr_idents_add_ident on ukos_doppik.rinne
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.rinne
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.rinne
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.rinne
+-- Trigger: tr_idents_remove_ident on ukos_doppik.rinne
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.rinne
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.rinne
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.zaun
+CREATE TABLE ukos_doppik.zaun
 (
 	laenge numeric,
 	breite numeric,
@@ -5545,23 +5551,23 @@ CREATE TABLE doppik.zaun
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_zaun_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_strecke);
+INHERITS (ukos_okstra.strassenausstattung_strecke);
 
--- Trigger: tr_idents_add_ident on doppik.zaun
+-- Trigger: tr_idents_add_ident on ukos_doppik.zaun
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.zaun
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.zaun
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.zaun
+-- Trigger: tr_idents_remove_ident on ukos_doppik.zaun
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.zaun
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.zaun
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.sonstige_linie
+CREATE TABLE ukos_doppik.sonstige_linie
 (
 	material character varying,
 	laenge numeric,
@@ -5569,102 +5575,102 @@ CREATE TABLE doppik.sonstige_linie
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_sonstige_linie_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_strecke);
+INHERITS (ukos_okstra.strassenausstattung_strecke);
 
--- Trigger: tr_idents_add_ident on doppik.sonstige_linie
+-- Trigger: tr_idents_add_ident on ukos_doppik.sonstige_linie
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.sonstige_linie
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.sonstige_linie
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.sonstige_linie
+-- Trigger: tr_idents_remove_ident on ukos_doppik.sonstige_linie
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.sonstige_linie
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.sonstige_linie
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.bankett
+CREATE TABLE ukos_doppik.bankett
 (
-	-- streifenart okstra.wlo_streifenart NOT NULL default '301', --aready an attribute in querschnittstreifen, therefore setting the CONSTRAINT with an alter table
+	-- streifenart ukos_okstra.wlo_streifenart NOT NULL default '301', --aready an attribute in querschnittstreifen, therefore setting the CONSTRAINT with an alter table
 	flaeche numeric,
 	deckschicht character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_bankett_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
-ALTER TABLE doppik.bankett ALTER COLUMN streifenart SET NOT NULL;
-ALTER TABLE doppik.bankett ALTER COLUMN streifenart SET DEFAULT '301';
+INHERITS (ukos_okstra.querschnittstreifen);
+ALTER TABLE ukos_doppik.bankett ALTER COLUMN streifenart SET NOT NULL;
+ALTER TABLE ukos_doppik.bankett ALTER COLUMN streifenart SET DEFAULT '301';
 
--- Trigger: tr_idents_add_ident on doppik.bankett
+-- Trigger: tr_idents_add_ident on ukos_doppik.bankett
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.bankett
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.bankett
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.bankett
+-- Trigger: tr_idents_remove_ident on ukos_doppik.bankett
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.bankett
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.bankett
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.baumscheibe
+CREATE TABLE ukos_doppik.baumscheibe
 (
-	-- streifenart okstra.wlo_streifenart NOT NULL default '751', --aready an attribute in querschnittstreifen, therefore setting the CONSTRAINT with an alter table
+	-- streifenart ukos_okstra.wlo_streifenart NOT NULL default '751', --aready an attribute in querschnittstreifen, therefore setting the CONSTRAINT with an alter table
 	flaeche numeric,
 	deckschicht character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_baumscheibe_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
-ALTER TABLE doppik.baumscheibe ALTER COLUMN streifenart SET NOT NULL;
-ALTER TABLE doppik.baumscheibe ALTER COLUMN streifenart SET DEFAULT '751';
+INHERITS (ukos_okstra.querschnittstreifen);
+ALTER TABLE ukos_doppik.baumscheibe ALTER COLUMN streifenart SET NOT NULL;
+ALTER TABLE ukos_doppik.baumscheibe ALTER COLUMN streifenart SET DEFAULT '751';
 
--- Trigger: tr_idents_add_ident on doppik.baumscheibe
+-- Trigger: tr_idents_add_ident on ukos_doppik.baumscheibe
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.baumscheibe
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.baumscheibe
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.baumscheibe
+-- Trigger: tr_idents_remove_ident on ukos_doppik.baumscheibe
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.baumscheibe
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.baumscheibe
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.gehweg
+CREATE TABLE ukos_doppik.gehweg
 (
-	-- streifenart okstra.wlo_streifenart NOT NULL default '210', --aready an attribute in querschnittstreifen, therefore setting the CONSTRAINT with an alter table
+	-- streifenart ukos_okstra.wlo_streifenart NOT NULL default '210', --aready an attribute in querschnittstreifen, therefore setting the CONSTRAINT with an alter table
 	flaeche numeric,
 	deckschicht character varying,
 	bauklasse character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_gehweg_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
-ALTER TABLE doppik.gehweg ALTER COLUMN streifenart SET NOT NULL;
-ALTER TABLE doppik.gehweg ALTER COLUMN streifenart SET DEFAULT '210';
+INHERITS (ukos_okstra.querschnittstreifen);
+ALTER TABLE ukos_doppik.gehweg ALTER COLUMN streifenart SET NOT NULL;
+ALTER TABLE ukos_doppik.gehweg ALTER COLUMN streifenart SET DEFAULT '210';
 
--- Trigger: tr_idents_add_ident on doppik.gehweg
+-- Trigger: tr_idents_add_ident on ukos_doppik.gehweg
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.gehweg
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.gehweg
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.gehweg
+-- Trigger: tr_idents_remove_ident on ukos_doppik.gehweg
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.gehweg
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.gehweg
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.gruenflaeche
+CREATE TABLE ukos_doppik.gruenflaeche
 (
 	flaeche numeric,
 	deckschicht character varying,
@@ -5673,23 +5679,23 @@ CREATE TABLE doppik.gruenflaeche
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_gruenflaeche_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
+INHERITS (ukos_okstra.querschnittstreifen);
 
--- Trigger: tr_idents_add_ident on doppik.gruenflaeche
+-- Trigger: tr_idents_add_ident on ukos_doppik.gruenflaeche
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.gruenflaeche
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.gruenflaeche
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.gruenflaeche
+-- Trigger: tr_idents_remove_ident on ukos_doppik.gruenflaeche
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.gruenflaeche
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.gruenflaeche
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.hecke
+CREATE TABLE ukos_doppik.hecke
 (
 	flaeche numeric,
 	laenge numeric,
@@ -5698,23 +5704,23 @@ CREATE TABLE doppik.hecke
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_hecke_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
+INHERITS (ukos_okstra.querschnittstreifen);
 
--- Trigger: tr_idents_add_ident on doppik.hecke
+-- Trigger: tr_idents_add_ident on ukos_doppik.hecke
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.hecke
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.hecke
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.hecke
+-- Trigger: tr_idents_remove_ident on ukos_doppik.hecke
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.hecke
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.hecke
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.platz
+CREATE TABLE ukos_doppik.platz
 (
 	flaeche numeric,
 	deckschicht character varying,
@@ -5723,23 +5729,23 @@ CREATE TABLE doppik.platz
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_platz_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
+INHERITS (ukos_okstra.querschnittstreifen);
 
--- Trigger: tr_idents_add_ident on doppik.platz
+-- Trigger: tr_idents_add_ident on ukos_doppik.platz
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.platz
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.platz
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.platz
+-- Trigger: tr_idents_remove_ident on ukos_doppik.platz
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.platz
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.platz
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.parkplatz
+CREATE TABLE ukos_doppik.parkplatz
 (
 	flaeche numeric,
 	deckschicht character varying,
@@ -5748,23 +5754,23 @@ CREATE TABLE doppik.parkplatz
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_parkplatz_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
+INHERITS (ukos_okstra.querschnittstreifen);
 
--- Trigger: tr_idents_add_ident on doppik.parkplatz
+-- Trigger: tr_idents_add_ident on ukos_doppik.parkplatz
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.parkplatz
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.parkplatz
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.parkplatz
+-- Trigger: tr_idents_remove_ident on ukos_doppik.parkplatz
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.parkplatz
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.parkplatz
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.parkstreifen
+CREATE TABLE ukos_doppik.parkstreifen
 (
 	flaeche numeric,
 	deckschicht character varying,
@@ -5773,25 +5779,25 @@ CREATE TABLE doppik.parkstreifen
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_parkstreifen_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
+INHERITS (ukos_okstra.querschnittstreifen);
 
--- Trigger: tr_idents_add_ident on doppik.parkstreifen
+-- Trigger: tr_idents_add_ident on ukos_doppik.parkstreifen
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.parkstreifen
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.parkstreifen
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.parkstreifen
+-- Trigger: tr_idents_remove_ident on ukos_doppik.parkstreifen
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.parkstreifen
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.parkstreifen
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.rad_und_gehweg
+CREATE TABLE ukos_doppik.rad_und_gehweg
 (
-	-- streifenart okstra.wlo_streifenart NOT NULL default '210', --aready an attribute in querschnittstreifen, therefore setting the CONSTRAINT with an alter table
+	-- streifenart ukos_okstra.wlo_streifenart NOT NULL default '210', --aready an attribute in querschnittstreifen, therefore setting the CONSTRAINT with an alter table
 	flaeche numeric,
 	deckschicht character varying,
 	ausbauzustand character varying,
@@ -5799,27 +5805,27 @@ CREATE TABLE doppik.rad_und_gehweg
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_rad_und_gehweg_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
-ALTER TABLE doppik.rad_und_gehweg ALTER COLUMN streifenart SET NOT NULL;
-ALTER TABLE doppik.rad_und_gehweg ALTER COLUMN streifenart SET DEFAULT '210';
+INHERITS (ukos_okstra.querschnittstreifen);
+ALTER TABLE ukos_doppik.rad_und_gehweg ALTER COLUMN streifenart SET NOT NULL;
+ALTER TABLE ukos_doppik.rad_und_gehweg ALTER COLUMN streifenart SET DEFAULT '210';
 
--- Trigger: tr_idents_add_ident on doppik.rad_und_gehweg
+-- Trigger: tr_idents_add_ident on ukos_doppik.rad_und_gehweg
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.rad_und_gehweg
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.rad_und_gehweg
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.rad_und_gehweg
+-- Trigger: tr_idents_remove_ident on ukos_doppik.rad_und_gehweg
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.rad_und_gehweg
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.rad_und_gehweg
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.radweg
+CREATE TABLE ukos_doppik.radweg
 (
-	-- streifenart okstra.wlo_streifenart NOT NULL default '240',---aready an attribute in querschnittstreifen, therefore setting the CONSTRAINT with an alter table
+	-- streifenart ukos_okstra.wlo_streifenart NOT NULL default '240',---aready an attribute in querschnittstreifen, therefore setting the CONSTRAINT with an alter table
 	flaeche numeric,
 	deckschicht character varying,
 	ausbauzustand character varying,
@@ -5827,27 +5833,27 @@ CREATE TABLE doppik.radweg
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_radweg_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
-ALTER TABLE doppik.radweg ALTER COLUMN streifenart SET NOT NULL;
-ALTER TABLE doppik.radweg ALTER COLUMN streifenart SET DEFAULT '240';
+INHERITS (ukos_okstra.querschnittstreifen);
+ALTER TABLE ukos_doppik.radweg ALTER COLUMN streifenart SET NOT NULL;
+ALTER TABLE ukos_doppik.radweg ALTER COLUMN streifenart SET DEFAULT '240';
 
--- Trigger: tr_idents_add_ident on doppik.radweg
+-- Trigger: tr_idents_add_ident on ukos_doppik.radweg
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.radweg
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.radweg
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.radweg
+-- Trigger: tr_idents_remove_ident on ukos_doppik.radweg
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.radweg
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.radweg
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.fahrbahn
+CREATE TABLE ukos_doppik.fahrbahn
 (
-	-- streifenart okstra.wlo_streifenart NOT NULL default '100',--aready an attribute in querschnittstreifen, therefore setting the CONSTRAINT with an alter table
+	-- streifenart ukos_okstra.wlo_streifenart NOT NULL default '100',--aready an attribute in querschnittstreifen, therefore setting the CONSTRAINT with an alter table
 	flaeche numeric,
 	deckschicht character varying,
 	ausbauzustand character varying,
@@ -5859,27 +5865,27 @@ CREATE TABLE doppik.fahrbahn
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_fahrbahn_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
-ALTER TABLE doppik.fahrbahn ALTER COLUMN streifenart SET NOT NULL;
-ALTER TABLE doppik.fahrbahn ALTER COLUMN streifenart SET DEFAULT '100';
+INHERITS (ukos_okstra.querschnittstreifen);
+ALTER TABLE ukos_doppik.fahrbahn ALTER COLUMN streifenart SET NOT NULL;
+ALTER TABLE ukos_doppik.fahrbahn ALTER COLUMN streifenart SET DEFAULT '100';
 
--- Trigger: tr_idents_add_ident on doppik.fahrbahn
+-- Trigger: tr_idents_add_ident on ukos_doppik.fahrbahn
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.fahrbahn
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.fahrbahn
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.fahrbahn
+-- Trigger: tr_idents_remove_ident on ukos_doppik.fahrbahn
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.fahrbahn
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.fahrbahn
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.strassengraben
+CREATE TABLE ukos_doppik.strassengraben
 (
-	-- streifenart okstra.wlo_streifenart NOT NULL default '520',---aready an attribute in querschnittstreifen, therefore setting the CONSTRAINT with an alter table
+	-- streifenart ukos_okstra.wlo_streifenart NOT NULL default '520',---aready an attribute in querschnittstreifen, therefore setting the CONSTRAINT with an alter table
 	flaeche numeric,
 	deckschicht character varying,
 	ausbauzustand character varying,
@@ -5887,25 +5893,25 @@ CREATE TABLE doppik.strassengraben
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_strassengraben_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
-ALTER TABLE doppik.strassengraben ALTER COLUMN streifenart SET NOT NULL;
-ALTER TABLE doppik.strassengraben ALTER COLUMN streifenart SET DEFAULT '520';
+INHERITS (ukos_okstra.querschnittstreifen);
+ALTER TABLE ukos_doppik.strassengraben ALTER COLUMN streifenart SET NOT NULL;
+ALTER TABLE ukos_doppik.strassengraben ALTER COLUMN streifenart SET DEFAULT '520';
 
--- Trigger: tr_idents_add_ident on doppik.strassengraben
+-- Trigger: tr_idents_add_ident on ukos_doppik.strassengraben
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.strassengraben
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.strassengraben
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.strassengraben
+-- Trigger: tr_idents_remove_ident on ukos_doppik.strassengraben
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.strassengraben
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.strassengraben
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.ueberfahrt
+CREATE TABLE ukos_doppik.ueberfahrt
 (
 	flaeche numeric,
 	deckschicht character varying,
@@ -5914,25 +5920,25 @@ CREATE TABLE doppik.ueberfahrt
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_ueberfahrt_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
+INHERITS (ukos_okstra.querschnittstreifen);
 
--- Trigger: tr_idents_add_ident on doppik.ueberfahrt
+-- Trigger: tr_idents_add_ident on ukos_doppik.ueberfahrt
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.ueberfahrt
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.ueberfahrt
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.ueberfahrt
+-- Trigger: tr_idents_remove_ident on ukos_doppik.ueberfahrt
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.ueberfahrt
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.ueberfahrt
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.bord_flaeche
+CREATE TABLE ukos_doppik.bord_flaeche
 (
-	-- streifenart okstra.wlo_streifenart NOT NULL default '640',--aready an attribute in querschnittstreifen, therefore setting the CONSTRAINT with an alter table
+	-- streifenart ukos_okstra.wlo_streifenart NOT NULL default '640',--aready an attribute in querschnittstreifen, therefore setting the CONSTRAINT with an alter table
 	flaeche numeric,
 	deckschicht character varying,
 	ausbauzustand character varying,
@@ -5940,27 +5946,27 @@ CREATE TABLE doppik.bord_flaeche
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_bord_flaeche_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
-ALTER TABLE doppik.bord_flaeche ALTER COLUMN streifenart SET NOT NULL;
-ALTER TABLE doppik.bord_flaeche ALTER COLUMN streifenart SET DEFAULT '640';
+INHERITS (ukos_okstra.querschnittstreifen);
+ALTER TABLE ukos_doppik.bord_flaeche ALTER COLUMN streifenart SET NOT NULL;
+ALTER TABLE ukos_doppik.bord_flaeche ALTER COLUMN streifenart SET DEFAULT '640';
 
--- Trigger: tr_idents_add_ident on doppik.bord_flaeche
+-- Trigger: tr_idents_add_ident on ukos_doppik.bord_flaeche
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.bord_flaeche
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.bord_flaeche
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.bord_flaeche
+-- Trigger: tr_idents_remove_ident on ukos_doppik.bord_flaeche
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.bord_flaeche
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.bord_flaeche
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.dammschuettung
+CREATE TABLE ukos_doppik.dammschuettung
 (
-	-- streifenart okstra.wlo_streifenart NOT NULL default '700', --aready an attribute in querschnittstreifen, therefore setting the CONSTRAINT with an alter table
+	-- streifenart ukos_okstra.wlo_streifenart NOT NULL default '700', --aready an attribute in querschnittstreifen, therefore setting the CONSTRAINT with an alter table
 	standort character varying,
 	material character varying,
 	laenge numeric,
@@ -5971,25 +5977,25 @@ CREATE TABLE doppik.dammschuettung
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_dammschuettung_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
-ALTER TABLE doppik.dammschuettung ALTER COLUMN streifenart SET NOT NULL;
-ALTER TABLE doppik.dammschuettung ALTER COLUMN streifenart SET DEFAULT '700';
+INHERITS (ukos_okstra.querschnittstreifen);
+ALTER TABLE ukos_doppik.dammschuettung ALTER COLUMN streifenart SET NOT NULL;
+ALTER TABLE ukos_doppik.dammschuettung ALTER COLUMN streifenart SET DEFAULT '700';
 
--- Trigger: tr_idents_add_ident on doppik.dammschuettung
+-- Trigger: tr_idents_add_ident on ukos_doppik.dammschuettung
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.dammschuettung
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.dammschuettung
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.dammschuettung
+-- Trigger: tr_idents_remove_ident on ukos_doppik.dammschuettung
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.dammschuettung
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.dammschuettung
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.spielplatz
+CREATE TABLE ukos_doppik.spielplatz
 (
 	standort character varying,
 	material character varying,
@@ -5998,23 +6004,23 @@ CREATE TABLE doppik.spielplatz
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_spielplatz_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
+INHERITS (ukos_okstra.querschnittstreifen);
 
--- Trigger: tr_idents_add_ident on doppik.spielplatz
+-- Trigger: tr_idents_add_ident on ukos_doppik.spielplatz
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.spielplatz
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.spielplatz
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.spielplatz
+-- Trigger: tr_idents_remove_ident on ukos_doppik.spielplatz
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.spielplatz
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.spielplatz
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.sportplatz
+CREATE TABLE ukos_doppik.sportplatz
 (
 	standort character varying,
 	material character varying,
@@ -6023,25 +6029,25 @@ CREATE TABLE doppik.sportplatz
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_sportplatz_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
+INHERITS (ukos_okstra.querschnittstreifen);
 
--- Trigger: tr_idents_add_ident on doppik.sportplatz
+-- Trigger: tr_idents_add_ident on ukos_doppik.sportplatz
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.sportplatz
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.sportplatz
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.sportplatz
+-- Trigger: tr_idents_remove_ident on ukos_doppik.sportplatz
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.sportplatz
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.sportplatz
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.strasse
+CREATE TABLE ukos_doppik.strasse
 (
-	-- streifenart okstra.wlo_streifenart NOT NULL default '100',--aready an attribute in querschnittstreifen, therefore setting the CONSTRAINT with an alter table
+	-- streifenart ukos_okstra.wlo_streifenart NOT NULL default '100',--aready an attribute in querschnittstreifen, therefore setting the CONSTRAINT with an alter table
 	standort character varying,
 	material character varying,
 	zweck character varying,
@@ -6050,25 +6056,25 @@ CREATE TABLE doppik.strasse
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_strasse_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
-ALTER TABLE doppik.strasse ALTER COLUMN streifenart SET NOT NULL;
-ALTER TABLE doppik.strasse ALTER COLUMN streifenart SET DEFAULT '100';
+INHERITS (ukos_okstra.querschnittstreifen);
+ALTER TABLE ukos_doppik.strasse ALTER COLUMN streifenart SET NOT NULL;
+ALTER TABLE ukos_doppik.strasse ALTER COLUMN streifenart SET DEFAULT '100';
 
--- Trigger: tr_idents_add_ident on doppik.strasse
+-- Trigger: tr_idents_add_ident on ukos_doppik.strasse
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.strasse
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.strasse
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.strasse
+-- Trigger: tr_idents_remove_ident on ukos_doppik.strasse
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.strasse
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.strasse
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.sonstige_flaeche
+CREATE TABLE ukos_doppik.sonstige_flaeche
 (
 	flaeche numeric,
 	deckschicht character varying,
@@ -6077,71 +6083,71 @@ CREATE TABLE doppik.sonstige_flaeche
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_sonstige_flaeche_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
+INHERITS (ukos_okstra.querschnittstreifen);
 
--- Trigger: tr_idents_add_ident on doppik.sonstige_flaeche
+-- Trigger: tr_idents_add_ident on ukos_doppik.sonstige_flaeche
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.sonstige_flaeche
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.sonstige_flaeche
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.sonstige_flaeche
+-- Trigger: tr_idents_remove_ident on ukos_doppik.sonstige_flaeche
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.sonstige_flaeche
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.sonstige_flaeche
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.ueberwachungsanlage
+CREATE TABLE ukos_doppik.ueberwachungsanlage
 (
-    material character varying,
-    standort character varying,
+		material character varying,
+		standort character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_ueberwachungsanlage_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.ueberwachungsanlage
+-- Trigger: tr_idents_add_ident on ukos_doppik.ueberwachungsanlage
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.ueberwachungsanlage
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.ueberwachungsanlage
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.ueberwachungsanlage
+-- Trigger: tr_idents_remove_ident on ukos_doppik.ueberwachungsanlage
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.ueberwachungsanlage
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.ueberwachungsanlage
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.ueberweg
+CREATE TABLE ukos_doppik.ueberweg
 (
-    flaeche numeric,
-    deckschicht character varying,
-    ausbauzustand character varying,
-    bauklasse character varying,
-    ident character(6) NOT NULL,
+		flaeche numeric,
+		deckschicht character varying,
+		ausbauzustand character varying,
+		bauklasse character varying,
+		ident character(6) NOT NULL,
 	CONSTRAINT pk_ueberweg_id PRIMARY KEY (id)
 )
-INHERITS (okstra.querschnittstreifen);
+INHERITS (ukos_okstra.querschnittstreifen);
 
--- Trigger: tr_idents_add_ident on doppik.ueberweg
+-- Trigger: tr_idents_add_ident on ukos_doppik.ueberweg
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.ueberweg
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.ueberweg
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.ueberweg
+-- Trigger: tr_idents_remove_ident on ukos_doppik.ueberweg
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.ueberweg
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.ueberweg
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.verkehrszeichenbruecke
+CREATE TABLE ukos_doppik.verkehrszeichenbruecke
 (
 	material character varying,
 	durchfahrtsweite numeric,
@@ -6151,23 +6157,23 @@ CREATE TABLE doppik.verkehrszeichenbruecke
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_verkehrszeichenbruecke_id PRIMARY KEY (id)
 )
-INHERITS (okstra.verkehrszeichenbruecke);
+INHERITS (ukos_okstra.verkehrszeichenbruecke);
 
--- Trigger: tr_idents_add_ident on doppik.verkehrszeichenbruecke
+-- Trigger: tr_idents_add_ident on ukos_doppik.verkehrszeichenbruecke
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.verkehrszeichenbruecke
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.verkehrszeichenbruecke
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.verkehrszeichenbruecke
+-- Trigger: tr_idents_remove_ident on ukos_doppik.verkehrszeichenbruecke
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.verkehrszeichenbruecke
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.verkehrszeichenbruecke
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.vorwegweiser
+CREATE TABLE ukos_doppik.vorwegweiser
 (
 	breite_schild numeric,
 	material character varying,
@@ -6177,23 +6183,23 @@ CREATE TABLE doppik.vorwegweiser
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_vorwegweiser_id PRIMARY KEY (id)
 )
-INHERITS (okstra.verkehrszeichenbruecke);
+INHERITS (ukos_okstra.verkehrszeichenbruecke);
 
--- Trigger: tr_idents_add_ident on doppik.vorwegweiser
+-- Trigger: tr_idents_add_ident on ukos_doppik.vorwegweiser
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.vorwegweiser
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.vorwegweiser
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.vorwegweiser
+-- Trigger: tr_idents_remove_ident on ukos_doppik.vorwegweiser
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.vorwegweiser
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.vorwegweiser
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.ueberdachung_fahrradstaender
+CREATE TABLE ukos_doppik.ueberdachung_fahrradstaender
 (
 	material character varying,
 	standort character varying,
@@ -6202,23 +6208,23 @@ CREATE TABLE doppik.ueberdachung_fahrradstaender
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_ueberdachung_fahrradstaender_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.ueberdachung_fahrradstaender
+-- Trigger: tr_idents_add_ident on ukos_doppik.ueberdachung_fahrradstaender
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.ueberdachung_fahrradstaender
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.ueberdachung_fahrradstaender
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.ueberdachung_fahrradstaender
+-- Trigger: tr_idents_remove_ident on ukos_doppik.ueberdachung_fahrradstaender
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.ueberdachung_fahrradstaender
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.ueberdachung_fahrradstaender
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.stuetzbauwerk
+CREATE TABLE ukos_doppik.stuetzbauwerk
 (
 	material character varying,
 	standort character varying,
@@ -6229,23 +6235,23 @@ CREATE TABLE doppik.stuetzbauwerk
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_stuetzbauwerk_id PRIMARY KEY (id)
 )
-INHERITS(okstra.stuetzbauwerk);
+INHERITS(ukos_okstra.stuetzbauwerk);
 
--- Trigger: tr_idents_add_ident on doppik.stuetzbauwerk
+-- Trigger: tr_idents_add_ident on ukos_doppik.stuetzbauwerk
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.stuetzbauwerk
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.stuetzbauwerk
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.stuetzbauwerk
+-- Trigger: tr_idents_remove_ident on ukos_doppik.stuetzbauwerk
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.stuetzbauwerk
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.stuetzbauwerk
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.laermschutzbauwerk
+CREATE TABLE ukos_doppik.laermschutzbauwerk
 (
 	material character varying,
 	standort character varying,
@@ -6256,45 +6262,45 @@ CREATE TABLE doppik.laermschutzbauwerk
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_laermschutzbauwerk_id PRIMARY KEY (id)
 )
-INHERITS(okstra.laermschutzbauwerk);
+INHERITS(ukos_okstra.laermschutzbauwerk);
 
--- Trigger: tr_idents_add_ident on doppik.laermschutzbauwerk
+-- Trigger: tr_idents_add_ident on ukos_doppik.laermschutzbauwerk
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.laermschutzbauwerk
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.laermschutzbauwerk
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.laermschutzbauwerk
+-- Trigger: tr_idents_remove_ident on ukos_doppik.laermschutzbauwerk
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.laermschutzbauwerk
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.laermschutzbauwerk
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.hydrant
+CREATE TABLE ukos_doppik.hydrant
 (
 	material character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_hydrant_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.hydrant
+-- Trigger: tr_idents_add_ident on ukos_doppik.hydrant
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.hydrant
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.hydrant
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.hydrant
+-- Trigger: tr_idents_remove_ident on ukos_doppik.hydrant
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.hydrant
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.hydrant
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.loeschwasserentnahmestelle_saugstutzen
+CREATE TABLE ukos_doppik.loeschwasserentnahmestelle_saugstutzen
 (
 	material character varying,
 	dimension_saugstutzen character varying,
@@ -6302,111 +6308,111 @@ CREATE TABLE doppik.loeschwasserentnahmestelle_saugstutzen
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_loeschwasserentnahmestelle_saugstutzen_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.loeschwasserentnahmestelle_saugstutzen
+-- Trigger: tr_idents_add_ident on ukos_doppik.loeschwasserentnahmestelle_saugstutzen
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.loeschwasserentnahmestelle_saugstutzen
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.loeschwasserentnahmestelle_saugstutzen
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.loeschwasserentnahmestelle_saugstutzen
+-- Trigger: tr_idents_remove_ident on ukos_doppik.loeschwasserentnahmestelle_saugstutzen
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.loeschwasserentnahmestelle_saugstutzen
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.loeschwasserentnahmestelle_saugstutzen
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.auslauf
+CREATE TABLE ukos_doppik.auslauf
 (
 	material character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_auslauf_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.auslauf
+-- Trigger: tr_idents_add_ident on ukos_doppik.auslauf
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.auslauf
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.auslauf
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.auslauf
+-- Trigger: tr_idents_remove_ident on ukos_doppik.auslauf
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.auslauf
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.auslauf
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.dueker
+CREATE TABLE ukos_doppik.dueker
 (
 	material character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_dueker_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_strecke);
+INHERITS (ukos_okstra.strassenausstattung_strecke);
 
--- Trigger: tr_idents_add_ident on doppik.dueker
+-- Trigger: tr_idents_add_ident on ukos_doppik.dueker
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.dueker
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.dueker
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.dueker
+-- Trigger: tr_idents_remove_ident on ukos_doppik.dueker
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.dueker
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.dueker
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.einlauf
+CREATE TABLE ukos_doppik.einlauf
 (
 	material character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_einlauf_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.einlauf
+-- Trigger: tr_idents_add_ident on ukos_doppik.einlauf
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.einlauf
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.einlauf
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.einlauf
+-- Trigger: tr_idents_remove_ident on ukos_doppik.einlauf
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.einlauf
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.einlauf
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.klaeranlage
+CREATE TABLE ukos_doppik.klaeranlage
 (
 	material character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_klaeranlage_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.klaeranlage
+-- Trigger: tr_idents_add_ident on ukos_doppik.klaeranlage
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.klaeranlage
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.klaeranlage
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.klaeranlage
+-- Trigger: tr_idents_remove_ident on ukos_doppik.klaeranlage
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.klaeranlage
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.klaeranlage
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.leitplanke
+CREATE TABLE ukos_doppik.leitplanke
 (
 	laenge numeric,
 	breite numeric,
@@ -6415,240 +6421,240 @@ CREATE TABLE doppik.leitplanke
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_leitplanke_id PRIMARY KEY (id)
 )
-INHERITS(okstra.schutzeinrichtung_aus_stahl);
+INHERITS(ukos_okstra.schutzeinrichtung_aus_stahl);
 
--- Trigger: tr_idents_add_ident on doppik.leitplanke
+-- Trigger: tr_idents_add_ident on ukos_doppik.leitplanke
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.leitplanke
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.leitplanke
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.leitplanke
+-- Trigger: tr_idents_remove_ident on ukos_doppik.leitplanke
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.leitplanke
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.leitplanke
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.markierung
+CREATE TABLE ukos_doppik.markierung
 (
 	material character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_markierung_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.markierung
+-- Trigger: tr_idents_add_ident on ukos_doppik.markierung
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.markierung
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.markierung
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.markierung
+-- Trigger: tr_idents_remove_ident on ukos_doppik.markierung
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.markierung
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.markierung
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.mast
+CREATE TABLE ukos_doppik.mast
 (
 	material character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_mast_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.mast
+-- Trigger: tr_idents_add_ident on ukos_doppik.mast
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.mast
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.mast
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.mast
+-- Trigger: tr_idents_remove_ident on ukos_doppik.mast
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.mast
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.mast
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.medien
+CREATE TABLE ukos_doppik.medien
 (
 	material character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_medien_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.medien
+-- Trigger: tr_idents_add_ident on ukos_doppik.medien
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.medien
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.medien
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.medien
+-- Trigger: tr_idents_remove_ident on ukos_doppik.medien
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.medien
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.medien
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.papierkorb
+CREATE TABLE ukos_doppik.papierkorb
 (
 	material character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_papierkorb_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.papierkorb
+-- Trigger: tr_idents_add_ident on ukos_doppik.papierkorb
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.papierkorb
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.papierkorb
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.papierkorb
+-- Trigger: tr_idents_remove_ident on ukos_doppik.papierkorb
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.papierkorb
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.papierkorb
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.spundwand
+CREATE TABLE ukos_doppik.spundwand
 (
 	material character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_spundwand_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.spundwand
+-- Trigger: tr_idents_add_ident on ukos_doppik.spundwand
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.spundwand
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.spundwand
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.spundwand
+-- Trigger: tr_idents_remove_ident on ukos_doppik.spundwand
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.spundwand
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.spundwand
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.telefon
+CREATE TABLE ukos_doppik.telefon
 (
 	material character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_telefon_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.telefon
+-- Trigger: tr_idents_add_ident on ukos_doppik.telefon
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.telefon
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.telefon
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.telefon
+-- Trigger: tr_idents_remove_ident on ukos_doppik.telefon
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.telefon
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.telefon
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.tor
+CREATE TABLE ukos_doppik.tor
 (
 	material character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_tor_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.tor
+-- Trigger: tr_idents_add_ident on ukos_doppik.tor
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.tor
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.tor
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.tor
+-- Trigger: tr_idents_remove_ident on ukos_doppik.tor
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.tor
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.tor
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.turm
+CREATE TABLE ukos_doppik.turm
 (
 	material character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_turm_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.turm
+-- Trigger: tr_idents_add_ident on ukos_doppik.turm
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.turm
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.turm
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.turm
+-- Trigger: tr_idents_remove_ident on ukos_doppik.turm
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.turm
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.turm
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.haltestelle
+CREATE TABLE ukos_doppik.haltestelle
 (
 	material character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_haltestelle_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.haltestelle
+-- Trigger: tr_idents_add_ident on ukos_doppik.haltestelle
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.haltestelle
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.haltestelle
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.haltestelle
+-- Trigger: tr_idents_remove_ident on ukos_doppik.haltestelle
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.haltestelle
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.haltestelle
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
-CREATE TABLE doppik.wehr
+CREATE TABLE ukos_doppik.wehr
 (
 	material character varying,
 	ident character(6) NOT NULL,
 	CONSTRAINT pk_wehr_id PRIMARY KEY (id)
 )
-INHERITS (okstra.strassenausstattung_punkt);
+INHERITS (ukos_okstra.strassenausstattung_punkt);
 
--- Trigger: tr_idents_add_ident on doppik.wehr
+-- Trigger: tr_idents_add_ident on ukos_doppik.wehr
 CREATE TRIGGER tr_idents_add_ident
-    BEFORE INSERT
-    ON doppik.wehr
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.wehr
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 
--- Trigger: tr_idents_remove_ident on doppik.wehr
+-- Trigger: tr_idents_remove_ident on ukos_doppik.wehr
 CREATE TRIGGER tr_idents_remove_ident
-    AFTER DELETE
-    ON doppik.wehr
-    FOR EACH ROW
-    EXECUTE PROCEDURE base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.wehr
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
 COMMIT;

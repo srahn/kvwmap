@@ -42,13 +42,13 @@ class Menue extends MyObject {
 		);
 	}
 
-	public static	function find($gui, $where, $order = '') {
+	public static	function find($gui, $where, $order = '', $sort_direction = '') {
 		$menue = new Menue($gui);
-		return $menue->find_where($where, $order);
+		return $menue->find_where($where, $order, $sort_direction);
 	}
 
 	public static function loadMenue($gui, $type) {
-		switch ($type){
+		switch ($type) {
 			case 'button' : {		# es sollen nur die Button-Menüpunkte abgefragt werden
 				$button_where = " AND m.button_class != ''";
 			}break;
@@ -96,23 +96,39 @@ class Menue extends MyObject {
 	}
 	
 	public static function get_all_ober_menues($gui){
+		global $admin_stellen;
+		$more_from = '';
+		$more_where = '';
+
+		if ($gui->user->id > 0 AND !in_array($gui->Stelle->id, $admin_stellen)) {
+			# Frage nur die Nutzer ab, die der aktuellen Stelle zugeordnet sind
+			$more_from = "
+				JOIN u_menue2stelle ms ON m.id = ms.menue_id
+				JOIN rolle ra ON ms.stelle_id = ra.stelle_id
+				JOIN rolle rb ON ra.stelle_id = rb.stelle_id
+			";
+			$more_where = " AND rb.user_id = " . $gui->user->id;
+		}
+
 		$menue = new Menue($gui);
 		$menues = $menue->find_by_sql(
 			array(
-				'select' => "
-					id,".
-					($gui->user->rolle->language != 'german' ? "`name_" . $gui->user->rolle->language . "` AS" : "") . " name,
-					`order`,
-					menueebene
+				'select' => " DISTINCT
+					m.id,".
+					($gui->user->rolle->language != 'german' ? "m.`name_" . $gui->user->rolle->language . "` AS" : "") . " m.name,
+					m.`order`,
+					m.menueebene
 				",
 				'from' => "
-					u_menues
+					u_menues m" .
+					$more_from . "
 				",
 				'where' => "
-					menueebene = 1
+					m.menueebene = 1" .
+					$more_where . "
 				",
 				'order' => "
-					`order`
+					m.`order`
 				"
 			)
 		);
@@ -120,27 +136,44 @@ class Menue extends MyObject {
 	}
 	
 	public static function getsubmenues($gui, $menue_id){
+		global $admin_stellen;
+		$more_from = '';
+		$more_where = '';
+
+		if ($gui->user->id > 0 AND !in_array($gui->Stelle->id, $admin_stellen)) {
+			# Frage nur die Nutzer ab, die der aktuellen Stelle zugeordnet sind
+			$more_from = "
+				JOIN u_menue2stelle ms ON m.id = ms.menue_id
+				JOIN rolle rall ON ms.stelle_id = rall.stelle_id
+				JOIN rolle radm ON rall.stelle_id = radm.stelle_id
+			";
+			$more_where = " AND radm.user_id = " . $gui->user->id;
+		}
+
 		$menue = new Menue($gui);
 		$menues = $menue->find_by_sql(
 			array(
-				'select' => "
-					id,".
-					($gui->user->rolle->language != 'german' ? "`name_" . $gui->user->rolle->language . "` AS" : "") . " name,
-					`order`,
-					menueebene
+				'select' => " DISTINCT
+					m.id,".
+					($gui->user->rolle->language != 'german' ? "m.`name_" . $gui->user->rolle->language . "` AS" : "") . " m.name,
+					m.`order`,
+					m.menueebene
 				",
 				'from' => "
-					u_menues
+					u_menues m" .
+					$more_from . "
 				",
 				'where' => "
-					obermenue = ".$menue_id." AND menueebene = 2
+					m.obermenue = " . $menue_id . " AND
+					m.menueebene = 2" .
+					$more_where . "
 				",
 				'order' => "
-					`order`, name
+					m.`order`, name
 				"
 			)
 		);
-    return $menues;
+		return $menues;
 	}
 	/*
 	public function validate() {

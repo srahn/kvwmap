@@ -32,11 +32,11 @@
 		<td>
 			<table width="100%" border="0" cellspacing="0" cellpadding="2">
 				<tr>
-					<th><a href="index.php?go=Menues_Anzeigen&view_sort=id"><?php echo $this->strID; ?></a></th>
-					<th><a href="index.php?go=Menues_Anzeigen&view_sort=name"><?php echo $this->strName; ?></a></th>
-					<th><a href="index.php?go=Menues_Anzeigen&view_sort=menueebene">Ebene</th>
-					<th><a href="index.php?go=Menues_Anzeigen&view_sort=order">Order</a></th>
-					<th colspan="2"><a href="index.php?go=Menues_Anzeigen&view_sort=menueebene,order">Ebene und Order</a><br><a href="index.php?go=Menues_Anzeigen&view_sort=menueebene,name">Ebene und Name</a></td>
+					<th><a href="index.php?go=Menues_Anzeigen&view_sort=id&sort_direction=<?php echo $this->formvars['sort_direction']; ?>"><?php echo $this->strID; ?></a></th>
+					<th><a href="index.php?go=Menues_Anzeigen&view_sort=name&sort_direction=<?php echo $this->formvars['sort_direction']; ?>"><?php echo $this->strName; ?></a></th>
+					<th><a href="index.php?go=Menues_Anzeigen&view_sort=menueebene&sort_direction=<?php echo $this->formvars['sort_direction']; ?>">Ebene</th>
+					<th><a href="index.php?go=Menues_Anzeigen&view_sort=order&sort_direction=<?php echo $this->formvars['sort_direction']; ?>">Order</a></th>
+					<th colspan="2"><a href="index.php?go=Menues_Anzeigen&view_sort=menueebene,order&sort_direction=<?php echo $this->formvars['sort_direction']; ?>">Ebene und Order</a><br><a href="index.php?go=Menues_Anzeigen&view_sort=menueebene,name">Ebene und Name</a></td>
 				</tr><?php
 				for ($i = 0; $i < count($this->menuedaten); $i++) {
 					$font_size = ($this->menuedaten[$i]->get('menueebene') == '1' ? 16 : 12); ?>
