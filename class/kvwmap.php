@@ -7666,7 +7666,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		if($this->formvars['order'] == ''){
 			$this->formvars['order'] = 'Name';
 		}
-		$this->layerdaten = $mapDB->getall_Layer($this->formvars['order'], $this->Stelle->id, $this->user->id);
+		$this->layerdaten = $mapDB->getall_Layer($this->formvars['order'], false, $this->user->id, $this->Stelle->id);
 		$this->titel='Layerdaten';
 		$this->main='layerdaten.php';
 		$this->output();
@@ -17293,7 +17293,7 @@ class db_mapObj{
 		return $datatypes;
 	}
 
-	function getall_Layer($order, $only_listed = false) {
+	function getall_Layer($order, $only_listed = false, $user_id = NULL, $stelle_id = NULL) {
 		global $language;
 		global $admin_stellen;
 		$more_from = '';
@@ -17324,8 +17324,8 @@ class db_mapObj{
 		if ($only_listed) {
 			$where[] = "listed = 1";
 		}
-
-		if ($this->User_ID > 0 AND !in_array($this->Stelle_ID, $admin_stellen)) {
+		
+		if ($user_id != NULL AND !in_array($stelle_id, $admin_stellen)) {
 			$more_from = "
 				JOIN used_layer ul ON l.Layer_ID = ul.Layer_id
 				JOIN rolle rall ON ul.Stelle_ID = rall.stelle_id
