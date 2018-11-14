@@ -115,8 +115,11 @@ function clear(){
 	document.GUI.suchgemarkung.value = '';
 	document.GUI.suchflur.value = '';
 	document.GUI.suchstammnr.value = '';
+	document.GUI.suchstammnr2.value = '';
 	document.GUI.suchrissnummer.value = '';
+	document.GUI.suchrissnummer2.value = '';
 	document.GUI.suchfortfuehrung.value = '';
+	document.GUI.suchfortfuehrung2.value = '';
 	document.GUI.sdatum.value = '';
 	document.GUI.sdatum2.value = '';
 	document.GUI.sVermStelle.value = '';
@@ -183,8 +186,8 @@ else {
 		</td>
   </tr>
   <tr> 
-    <td rowspan="16">&nbsp;</td>
-    <td rowspan="16" valign="top" align="right" style="border-right: 1px solid #bbb"> 
+    <td rowspan="17">&nbsp;</td>
+    <td rowspan="17" valign="top" align="right" style="border-right: 1px solid #bbb"> 
       <?php
 				include(LAYOUTPATH.'snippets/SVG_polygon_box_query_area.php')
 			?>
@@ -382,6 +385,9 @@ else {
 			<span class="fett">Auswahl im Kartenausschnitt über Suchpolygon</span>
 		</td>
   </tr>
+	<tr>
+		<td colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" name="alle_der_messung" value="1" <? if($this->formvars['alle_der_messung'] == 1)echo 'checked'; ?>>&nbsp;alle der Messung</td>
+	</tr>	
   <tr> 
     <td valign="top" colspan="3">
 			<input type="radio" name="abfrageart" value="antr_nr" <?php if ($this->formvars['abfrageart']=='antr_nr') { ?> checked<?php } ?>>

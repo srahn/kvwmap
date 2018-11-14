@@ -1746,16 +1746,20 @@ class GUI {
             }
           }
         }
-				if ($layerset['Datentyp'] == 8) {
-					# Skalierung der Stylegröße when Type Chart
-					$style->setbinding(MS_STYLE_BINDING_SIZE, $dbStyle['size']);
-				}
-				else {
-					if($this->map_factor != '') {
-						$style->set('size', $dbStyle['size']*$this->map_factor/1.414);
+				if($dbStyle['size'] != ''){
+					if ($layerset['Datentyp'] == 8) {
+						# Skalierung der Stylegröße when Type Chart
+						$style->setbinding(MS_STYLE_BINDING_SIZE, $dbStyle['size']);
 					}
-					else{
-						$style->set('size', $dbStyle['size']);
+					else {
+						if($this->map_factor != '') {
+							if(is_numeric($dbStyle['size']))$style->set('size', $dbStyle['size']*$this->map_factor/1.414);
+							else $style->updateFromString("STYLE SIZE [".$dbStyle['size']."] END");
+						}
+						else{
+							if(is_numeric($dbStyle['size']))$style->set('size', $dbStyle['size']);
+							else $style->updateFromString("STYLE SIZE [".$dbStyle['size']."] END");
+						}
 					}
 				}
 
@@ -1817,10 +1821,7 @@ class GUI {
             $style->set('maxwidth',$dbStyle['maxwidth']);
           }
         }
-
-        if (MAPSERVERVERSION < 500 AND $dbStyle['sizeitem']!='') {
-          $style->set('sizeitem', $dbStyle['sizeitem']);
-        }
+				
         if ($dbStyle['color']!='') {
           $RGB=explode(" ",$dbStyle['color']);
           if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
@@ -5621,15 +5622,15 @@ class GUI {
     if($dbStyle['symbol']>0) {
       $style->set('symbol',$dbStyle['symbol']);
     }
-    $style->set('size', $dbStyle['size']);
+		if($dbStyle['size'] != ''){
+			if(is_numeric($dbStyle['size']))$style->set('size', $dbStyle['size']);
+			else $style->updateFromString("STYLE SIZE [".$dbStyle['size']."] END");
+		}
     if($dbStyle['width']!='') {
       $style->set('width', $dbStyle['width']);
     }
     if($dbStyle['angle']!='') {
       $style->set('angle', $dbStyle['angle']);
-    }
-    if (MAPSERVERVERSION < 500 AND $dbStyle['sizeitem']!='') {
-      $style->sizeitem = $dbStyle['sizeitem'];
     }
   	if(MAPSERVERVERSION >= 620) {
     	if($dbStyle['geomtransform'] != '') {
@@ -7665,7 +7666,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		if($this->formvars['order'] == ''){
 			$this->formvars['order'] = 'Name';
 		}
-		$this->layerdaten = $mapDB->getall_Layer($this->formvars['order'], $this->Stelle->id, $this->user->id);
+		$this->layerdaten = $mapDB->getall_Layer($this->formvars['order'], false, $this->user->id, $this->Stelle->id);
 		$this->titel='Layerdaten';
 		$this->main='layerdaten.php';
 		$this->output();
@@ -12168,7 +12169,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $where ="stelle_id='+this.form.Stelle_ID.value+' AND user_id=".$this->user->id;
     $StellenFormObj->addJavaScript(
 			"onchange",
-			"$('#sign_in_stelle').show(); " . (array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angemeldet'] === true ? "ahah('index.php','go=getRow&select=".urlencode($select)."&from=".$from."&where=".$where."',new Array(nZoomFactor,gui,mapsize,newExtent,epsg_code,fontsize_gle,highlighting,runningcoords,showmapfunctions,showlayeroptions,menu_auto_close,menue_buttons,hist_timestamp));" : "")
+			"$('#sign_in_stelle').show(); " . ((array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angemeldet'] === true) ? "ahah('index.php','go=getRow&select=".urlencode($select)."&from=".$from."&where=".$where."',new Array(nZoomFactor,gui,mapsize,newExtent,epsg_code,fontsize_gle,highlighting,runningcoords,showmapfunctions,showlayeroptions,menu_auto_close,menue_buttons,hist_timestamp));" : "")
 		);
     #echo URL.APPLVERSION."index.php?go=getRow&select=".urlencode($select)."&from=".$from."&where=stelle_id=3 AND user_id=7";
     $StellenFormObj->outputHTML();
@@ -16335,7 +16336,7 @@ class db_mapObj{
 				$dump_text .= "\n\n-- Class " . $classes['extra'][$j] . " des Layers " . $layer_ids[$i] . "\n" . $classes['insert'][$j];
 				$dump_text .= "\nSET @last_class_id=LAST_INSERT_ID();";
 
-				$styles = $database->create_insert_dump('styles', 'Style_ID', 'SELECT styles.Style_ID, `symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`,`sizeitem` FROM styles, u_styles2classes WHERE u_styles2classes.style_id = styles.Style_ID AND Class_ID='.$classes['extra'][$j].' ORDER BY drawingorder');
+				$styles = $database->create_insert_dump('styles', 'Style_ID', 'SELECT styles.Style_ID, `symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth` FROM styles, u_styles2classes WHERE u_styles2classes.style_id = styles.Style_ID AND Class_ID='.$classes['extra'][$j].' ORDER BY drawingorder');
 				for ($k = 0; $k < count($styles['insert']); $k++) {
 					$dump_text .= "\n\n-- Style " . $styles['extra'][$k] . " der Class " . $classes['extra'][$j];
 					$dump_text .= "\n" . $styles['insert'][$k] . "\nSET @last_style_id=LAST_INSERT_ID();";
@@ -17292,7 +17293,7 @@ class db_mapObj{
 		return $datatypes;
 	}
 
-	function getall_Layer($order, $only_listed = false) {
+	function getall_Layer($order, $only_listed = false, $user_id = NULL, $stelle_id = NULL) {
 		global $language;
 		global $admin_stellen;
 		$more_from = '';
@@ -17323,8 +17324,8 @@ class db_mapObj{
 		if ($only_listed) {
 			$where[] = "listed = 1";
 		}
-
-		if ($this->User_ID > 0 AND !in_array($this->Stelle_ID, $admin_stellen)) {
+		
+		if ($user_id != NULL AND !in_array($stelle_id, $admin_stellen)) {
 			$more_from = "
 				JOIN used_layer ul ON l.Layer_ID = ul.Layer_id
 				JOIN rolle rall ON ul.Stelle_ID = rall.stelle_id
@@ -17672,7 +17673,7 @@ class db_mapObj{
   }
 
 	function copyStyle($style_id){
-		$sql = "INSERT INTO styles (symbol,symbolname,size,color,backgroundcolor,outlinecolor,minsize,maxsize,angle,angleitem,antialias,width,minwidth,maxwidth,sizeitem,geomtransform) SELECT symbol,symbolname,size,color,backgroundcolor,outlinecolor,minsize,maxsize,angle,angleitem,antialias,width,minwidth,maxwidth,sizeitem,geomtransform FROM styles WHERE Style_ID = ".$style_id;
+		$sql = "INSERT INTO styles (symbol,symbolname,size,color,backgroundcolor,outlinecolor,minsize,maxsize,angle,angleitem,antialias,width,minwidth,maxwidth,geomtransform) SELECT symbol,symbolname,size,color,backgroundcolor,outlinecolor,minsize,maxsize,angle,angleitem,antialias,width,minwidth,maxwidth,geomtransform FROM styles WHERE Style_ID = ".$style_id;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->copyStyle - Kopieren eines Styles:<br>".$sql,4);
 		$query=mysql_query($sql);
     if ($query==0) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
@@ -17848,7 +17849,6 @@ class db_mapObj{
       if($style['width']){$sql.= ", width = '".$style['width']."'";}
       if($style['minwidth']){$sql.= ", minwidth = '".$style['minwidth']."'";}
       if($style['maxwidth']){$sql.= ", maxwidth = '".$style['maxwidth']."'";}
-			if($style['sizeitem']){$sql.= ", sizeitem = '".$style['sizeitem']."'";}
 			if($style['offsetx']){$sql.= ", offsetx = ".$style['offsetx'];}
 			if($style['offsety']){$sql.= ", offsety = ".$style['offsety'];}
 			if($style['polaroffset']){$sql.= ", polaroffset = '".$style['polaroffset']."'";}
@@ -18003,7 +18003,6 @@ class db_mapObj{
     if($formvars["width"] != ''){$sql.="width = '".$formvars["width"]."',";}else{$sql.="width = NULL,";}
     if($formvars["minwidth"] != ''){$sql.="minwidth = '".$formvars["minwidth"]."',";}else{$sql.="minwidth = NULL,";}
     if($formvars["maxwidth"] != ''){$sql.="maxwidth = '".$formvars["maxwidth"]."',";}else{$sql.="maxwidth = NULL,";}
-    $sql.="sizeitem = '".$formvars["sizeitem"]."',";
     if($formvars["offsetx"] != ''){$sql.="offsetx = '".$formvars["offsetx"]."',";}else{$sql.="offsetx = NULL,";}
     if($formvars["offsety"] != ''){$sql.="offsety = '".$formvars["offsety"]."',";}else{$sql.="offsety = NULL,";}
 		if($formvars["polaroffset"] != ''){$sql.="polaroffset = '".$formvars["polaroffset"]."',";}else{$sql.="polaroffset = NULL,";}

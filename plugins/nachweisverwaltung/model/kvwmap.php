@@ -179,48 +179,51 @@
       # Ausführen von Aktionen vor der Anzeige der Karte und der Zeichnung
 			$oldscale=round($GUI->map_scaledenom);  
 			if ($GUI->formvars['CMD']!='') {
+				$GUI->formvars['unterart'] = $GUI->formvars['unterart_'.$GUI->formvars['hauptart']];
 				$GUI->navMap($GUI->formvars['CMD']);
 				$GUI->user->rolle->saveDrawmode($GUI->formvars['always_draw']);
 			}
 			elseif($oldscale!=$GUI->formvars['nScale'] AND $GUI->formvars['nScale'] != '') {
 				$GUI->scaleMap($GUI->formvars['nScale']);
 			}
-      elseif($nachweis->document['wkt_umring'] != ''){
-				if($GUI->formvars['neuladen'] == ''){
-					# Zoom zum Polygon des Dokumentes
-					$GUI->zoomToNachweis($nachweis,10);
-					$GUI->user->rolle->saveSettings($GUI->map->extent);
-					$GUI->user->rolle->readSettings();
-				}
-        # Übernahme des Nachweisumrings aus der PostGIS-Datenbank
-        $GUI->formvars['newpath'] = transformCoordsSVG($nachweis->document['svg_umring']);
-        $GUI->formvars['newpathwkt'] = $nachweis->document['wkt_umring'];
-        $GUI->formvars['pathwkt'] = $GUI->formvars['newpathwkt'];
-				$GUI->formvars['firstpoly'] = 'true';
-				$GUI->geomload = true;			# Geometrie wird das erste Mal geladen, deshalb nicht in den Weiterzeichnenmodus gehen
-      }
       else{
-				$GUI->add_message('error', 'Achtung! Nachweis hat noch keine Geometrie!');
-      }
-      # Zuweisen der Werte des Dokumentes zum Formular
-      $GUI->formvars['flurid']=$nachweis->document['flurid'];
-      $GUI->formvars['stammnr']=$nachweis->document['stammnr'];
-      $GUI->formvars['hauptart']=$nachweis->document['art'];
-      $GUI->formvars['Blattnr']=$nachweis->document['blattnummer'];
-      $GUI->formvars['datum']=$nachweis->document['datum'];
-      $GUI->formvars['VermStelle']=$nachweis->document['vermstelle'];
-      $GUI->formvars['Blattformat']=$nachweis->document['format'];
-      $GUI->formvars['gueltigkeit']=$nachweis->document['gueltigkeit'];
-			$GUI->formvars['geprueft']=$nachweis->document['geprueft'];
-      $GUI->formvars['Gemeinde']=$nachweis->document['Gemeinde'];
-      $GUI->formvars['Gemarkung']=substr($GUI->formvars['flurid'],0,6);
-      $GUI->formvars['Flur']=intval(substr($GUI->formvars['flurid'],6,9));
-      $GUI->formvars['Bilddatei']=NACHWEISDOCPATH.$nachweis->document['link_datei'];
-      $GUI->formvars['unterart']=$nachweis->document['unterart'];
-      $GUI->formvars['rissnummer']=$nachweis->document['rissnummer'];
-      $GUI->formvars['fortfuehrung']=$nachweis->document['fortfuehrung'];
-      $GUI->formvars['bemerkungen']=$nachweis->document['bemerkungen'];
-			$GUI->formvars['bemerkungen_intern']=$nachweis->document['bemerkungen_intern'];
+	      # Zuweisen der Werte des Dokumentes zum Formular
+				$GUI->formvars['flurid']=$nachweis->document['flurid'];
+				$GUI->formvars['stammnr']=$nachweis->document['stammnr'];
+				$GUI->formvars['hauptart']=$nachweis->document['art'];
+				$GUI->formvars['Blattnr']=$nachweis->document['blattnummer'];
+				$GUI->formvars['datum']=$nachweis->document['datum'];
+				$GUI->formvars['VermStelle']=$nachweis->document['vermstelle'];
+				$GUI->formvars['Blattformat']=$nachweis->document['format'];
+				$GUI->formvars['gueltigkeit']=$nachweis->document['gueltigkeit'];
+				$GUI->formvars['geprueft']=$nachweis->document['geprueft'];
+				$GUI->formvars['Gemeinde']=$nachweis->document['Gemeinde'];
+				$GUI->formvars['Gemarkung']=substr($GUI->formvars['flurid'],0,6);
+				$GUI->formvars['Flur']=intval(substr($GUI->formvars['flurid'],6,9));
+				$GUI->formvars['Bilddatei']=NACHWEISDOCPATH.$nachweis->document['link_datei'];
+				$GUI->formvars['unterart']=$nachweis->document['unterart'];
+				$GUI->formvars['rissnummer']=$nachweis->document['rissnummer'];
+				$GUI->formvars['fortfuehrung']=$nachweis->document['fortfuehrung'];
+				$GUI->formvars['bemerkungen']=$nachweis->document['bemerkungen'];
+				$GUI->formvars['bemerkungen_intern']=$nachweis->document['bemerkungen_intern'];
+				if($nachweis->document['wkt_umring'] != ''){
+					if($GUI->formvars['neuladen'] == ''){
+						# Zoom zum Polygon des Dokumentes
+						$GUI->zoomToNachweis($nachweis,10);
+						$GUI->user->rolle->saveSettings($GUI->map->extent);
+						$GUI->user->rolle->readSettings();
+					}
+					# Übernahme des Nachweisumrings aus der PostGIS-Datenbank
+					$GUI->formvars['newpath'] = transformCoordsSVG($nachweis->document['svg_umring']);
+					$GUI->formvars['newpathwkt'] = $nachweis->document['wkt_umring'];
+					$GUI->formvars['pathwkt'] = $GUI->formvars['newpathwkt'];
+					$GUI->formvars['firstpoly'] = 'true';
+					$GUI->geomload = true;			# Geometrie wird das erste Mal geladen, deshalb nicht in den Weiterzeichnenmodus gehen
+				}
+				else{
+					$GUI->add_message('error', 'Achtung! Nachweis hat noch keine Geometrie!');
+				}
+			}
 
       # Abfragen der Gemarkungen
       # 2006-01-26 pk
@@ -336,7 +339,7 @@
     $GUI->nachweiseRecherchieren();
   };
 
-	$GUI->setNachweisSuchparameter = function($stelle_id, $user_id, $suchhauptart,$suchunterart,$abfrageart,$suchgemarkung,$suchflur,$stammnr,$stammnr2,$suchrissnummer,$suchrissnummer2,$suchfortfuehrung,$suchpolygon,$suchantrnr, $sdatum, $sdatum2, $svermstelle, $flur_thematisch) use ($GUI){
+	$GUI->setNachweisSuchparameter = function($stelle_id, $user_id, $suchhauptart,$suchunterart,$abfrageart,$suchgemarkung,$suchflur,$stammnr,$stammnr2,$suchrissnummer,$suchrissnummer2,$suchfortfuehrung,$suchpolygon,$suchantrnr, $sdatum, $sdatum2, $svermstelle, $flur_thematisch, $alle_der_messung) use ($GUI){
 		if($suchhauptart == NULL)$suchhauptart = array();
 		if($suchunterart == NULL)$suchunterart = array();
 		$sql ='UPDATE rolle_nachweise SET ';
@@ -357,6 +360,7 @@
 		$sql.='sdatum2="'.$sdatum2.'",';
 		if ($svermstelle!='') { $sql.='sVermStelle='.$svermstelle.','; }else{$sql.='sVermStelle= NULL,' ;}
 		$sql.='flur_thematisch="'.$flur_thematisch.'",';
+		$sql.='alle_der_messung="'.$alle_der_messung.'",';
 		$sql .= 'user_id = '.$user_id;
 		$sql.=' WHERE user_id='.$user_id.' AND stelle_id='.$stelle_id;
 		#echo $sql;
@@ -521,7 +525,7 @@
     if ($GUI->formvars['abfrageart']=='poly') {
       $GUI->formvars['suchpolygon'] = $GUI->formvars['newpathwkt'];
     }
-    $GUI->setNachweisSuchparameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars['suchhauptart'],$GUI->formvars['suchunterart'], $GUI->formvars['abfrageart'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchflur'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchstammnr2'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchrissnummer2'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['suchpolygon'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'],$GUI->formvars['sdatum2'], $GUI->formvars['sVermStelle'], $GUI->formvars['flur_thematisch']);
+    $GUI->setNachweisSuchparameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars['suchhauptart'],$GUI->formvars['suchunterart'], $GUI->formvars['abfrageart'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchflur'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchstammnr2'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchrissnummer2'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['suchpolygon'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'],$GUI->formvars['sdatum2'], $GUI->formvars['sVermStelle'], $GUI->formvars['flur_thematisch'], $GUI->formvars['alle_der_messung']);
     # Die Anzeigeparameter werden so gesetzt, daß genau das gezeigt wird, wonach auch gesucht wurde.
     # bzw. was als Suchparameter im Formular angegeben wurde.
     $GUI->setNachweisAnzeigeparameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars['suchhauptart'],$GUI->formvars['suchhauptart']);
@@ -532,7 +536,7 @@
 		$GUI->hauptdokumentarten = $GUI->nachweis->getHauptDokumentarten();
     # Suchparameter in Ordnung
     # Recherchieren nach den Nachweisen
-		$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['suchhauptart'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['suchunterart'], $GUI->formvars['suchbemerkung'], NULL, $GUI->formvars['suchstammnr2'], $GUI->formvars['suchrissnummer2'], $GUI->formvars['suchfortfuehrung2'], $GUI->formvars['geprueft']);
+		$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['suchhauptart'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['suchunterart'], $GUI->formvars['suchbemerkung'], NULL, $GUI->formvars['suchstammnr2'], $GUI->formvars['suchrissnummer2'], $GUI->formvars['suchfortfuehrung2'], $GUI->formvars['geprueft'], $GUI->formvars['alle_der_messung']);
     #$GUI->nachweis->getAnzahlNachweise($GUI->formvars['suchpolygon']);
     if($ret!=''){
       # Fehler bei der Recherche im Datenbestand
@@ -747,7 +751,8 @@
 			var nachweise = new Array();\n";
 			
 		for($i = 0; $i < count($GUI->nachweis->Dokumente); $i++){
-			$html.= "			nachweise.push(JSON.parse('".json_encode($GUI->nachweis->Dokumente[$i])."'));\n";
+			$json = str_replace('\\r', '\\\r', str_replace('\\n', '\\\n', json_encode($GUI->nachweis->Dokumente[$i])));
+			$html.= "			nachweise.push(JSON.parse('".$json."'));\n";
 		}	
 		
 		$html.= "
@@ -1158,7 +1163,8 @@
 	    }
 	  }
     $oldscale=round($GUI->map_scaledenom);  
-    if ($GUI->formvars['CMD']!='') {
+    if ($GUI->formvars['CMD']!=''){
+			$GUI->formvars['unterart'] = $GUI->formvars['unterart_'.$GUI->formvars['hauptart']];
       $GUI->navMap($GUI->formvars['CMD']);
       $GUI->user->rolle->saveDrawmode($GUI->formvars['always_draw']);
     }

@@ -152,6 +152,9 @@ else{
 
 include(WWWROOT . APPLVERSION . 'start.php');
 
+$GUI->go = $go;
+$GUI->requeststring = $QUERY_STRING;
+
 # Laden der Plugins index.phps
 for($i = 0; $i < count($kvwmap_plugins); $i++){
 	include(PLUGINS.$kvwmap_plugins[$i].'/control/index.php');
@@ -159,9 +162,6 @@ for($i = 0; $i < count($kvwmap_plugins); $i++){
 
 # Übergeben des Anwendungsfalles
 $debug->write("<br><b>Anwendungsfall go: " . $go . "</b>", 4);
-
-$GUI->go = $go;
-$GUI->requeststring = $QUERY_STRING;
 
 function go_switch($go, $exit = false) {
 	global $GUI;

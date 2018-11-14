@@ -37,15 +37,33 @@ include('funktionen/input_check_functions.php');
 	check_visibility = function(layer_id, object, dependents, k){
 		if(object == null)return;
 		dependents.forEach(function(dependent){
-			var operator = object.closest('table').querySelector('#vcheck_operator_'+dependent).value;
-			var value = object.closest('table').querySelector('#vcheck_value_'+dependent).value;
+			var scope = object.closest('table');		// zuerst in der gleichen Tabelle suchen
+			if(scope.querySelector('#vcheck_operator_'+dependent) == undefined){
+				scope = document;			// ansonsten global
+			}
+			var operator = scope.querySelector('#vcheck_operator_'+dependent).value;
+			var value = scope.querySelector('#vcheck_value_'+dependent).value;
 			if(operator == '=')operator = '==';
-			if(eval("'"+object.value+"' "+operator+" '"+value+"'"))
-				object.closest('table').querySelector('#tr_'+layer_id+'_'+dependent+'_'+k).style.display = '';
+			if(field_has_value(object, operator, value))
+				scope.querySelector('#tr_'+layer_id+'_'+dependent+'_'+k).style.display = '';
 			else
-				object.closest('table').querySelector('#tr_'+layer_id+'_'+dependent+'_'+k).style.display = 'none';
+				scope.querySelector('#tr_'+layer_id+'_'+dependent+'_'+k).style.display = 'none';
 		})
 	}
+	
+	field_has_value = function(field, operator, value){
+		if(field.type == 'checkbox'){
+			if((operator == '==' && value == 't' && field.checked) || 
+				 (operator == '==' && value == 'f' && !field.checked) ||
+				 (operator == '!=' && value == 't' && !field.checked) ||
+				 (operator == '!=' && value == 'f' && field.checked)
+				 )return true;
+			else return false;
+		}
+		else{
+			return eval("'"+field.value+"' "+operator+" '"+value+"'")
+		}
+	}	
 	
 	toggleGroup = function(groupname){			// fuer die spaltenweise Ansicht
 		var group_elements = document.querySelectorAll('.group_'+groupname);

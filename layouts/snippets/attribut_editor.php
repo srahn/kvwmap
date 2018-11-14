@@ -275,7 +275,7 @@ function alias_replace(name){
 							</td>
 
 							<td align="left" valign="top">
-								<input name="group_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo $this->attributes['group'][$i]; ?>">
+								<input name="group_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo htmlspecialchars($this->attributes['group'][$i]); ?>">
 							</td>
 							
 							<?php

@@ -128,7 +128,6 @@ function save_style(style_id){
 	data+= '&width='+document.GUI.style_width.value;
 	data+= '&minwidth='+document.GUI.style_minwidth.value;
 	data+= '&maxwidth='+document.GUI.style_maxwidth.value;
-	data+= '&sizeitem='+document.GUI.style_sizeitem.value;
 	data+= '&offsetx='+document.GUI.style_offsetx.value;
 	data+= '&offsety='+document.GUI.style_offsety.value;
 	data+= '&polaroffset='+document.GUI.style_polaroffset.value;

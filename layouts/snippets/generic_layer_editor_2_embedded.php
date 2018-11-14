@@ -20,8 +20,9 @@
 	  	$doit = true;
 	  }
 	  if($doit == true){
+			$table_id = rand(0, 100000);
 ?>
-<table border="0" cellspacing="0" cellpadding="2">
+<table id="<? echo $table_id; ?>" border="0" cellspacing="0" cellpadding="2">
 <?
 	$checkbox_names = '';
 	$columnname = '';
@@ -73,7 +74,7 @@
 						if($layer['attributes']['privileg'][$j] != '0' AND !$lock[$k])$this->editable = $layer['Layer_ID'];
 						if($layer['attributes']['alias'][$j] == '')$layer['attributes']['alias'][$j] = $layer['attributes']['name'][$j];
 						
-						if($layer['attributes']['arrangement'][$j] != 1)$datapart .= '<tr>';							# wenn Attribut nicht daneben -> neue Zeile beginnen
+						if($layer['attributes']['arrangement'][$j] != 1)$datapart .= '<tr id="tr_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k.'">';							# wenn Attribut nicht daneben -> neue Zeile beginnen
 						if($layer['attributes']['labeling'][$j] != 2){
 							$td = '	<td class="gle-attribute-name" '; if($layer['attributes']['labeling'][$j] == 1 AND $layer['attributes']['arrangement'][$j] == 1 AND $layer['attributes']['arrangement'][$j+1] != 1)$td .= 'colspan="20" ';if($layer['attributes']['group'][0] != '' AND $layer['attributes']['arrangement'][$j] != 1)$td .= 'width="1%">';else $td.='width="1%">';
 							$td.= 			attribute_name($layer['Layer_ID'], $layer['attributes'], $j, $k, $this->user->rolle->fontsize_gle, false);
@@ -175,6 +176,11 @@
 	}
 
 ?>
+
+<script type="text/javascript">
+	var vchangers = document.getElementById(<? echo $table_id; ?>).querySelectorAll('.visibility_changer');
+	[].forEach.call(vchangers, function(vchanger){vchanger.oninput();});
+</script>
 
 <input type="hidden" name="checkbox_names_<? echo $layer['Layer_ID']; ?>" value="<? echo $checkbox_name; ?>">
 <?

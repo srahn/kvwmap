@@ -880,16 +880,19 @@ class GUI {
             }
           }
         }
-				if ($layerset['Datentyp'] == 8) {
-					# Skalierung der Stylegröße when Type Chart
-					$style->setbinding(MS_STYLE_BINDING_SIZE, $dbStyle['size']);
-				}
-				else {
-					if($this->map_factor != '') {
-						$style->set('size', $dbStyle['size']*$this->map_factor/1.414);
+				if($dbStyle['size'] != ''){
+					if ($layerset['Datentyp'] == 8) {
+						# Skalierung der Stylegröße when Type Chart
+						$style->setbinding(MS_STYLE_BINDING_SIZE, $dbStyle['size']);
 					}
-					else{
-						$style->set('size', $dbStyle['size']);
+					else {
+						if($this->map_factor != '') {
+							$style->set('size', $dbStyle['size']*$this->map_factor/1.414);
+						}
+						else{
+							if(is_numeric($dbStyle['size']))$style->set('size', $dbStyle['size']);
+							else $style->updateFromString("STYLE SIZE [".$dbStyle['size']."] END");
+						}
 					}
 				}
 

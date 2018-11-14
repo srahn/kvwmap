@@ -36,6 +36,9 @@ define('KVWMAP_INIT_PASSWORD', (getenv('KVWMAP_INIT_PASSWORD') == '') ? 'KvwMapP
 output_header();
 
 if (!file_exists('config.php')) {
+	# Lade default Konfigurationsparameter
+	init_config();
+
 	if ($_REQUEST['go'] == 'Installation starten') {
 	  install();
 	}
@@ -50,7 +53,7 @@ function output_header() { ?>
   <head>
     <title>kvmwap Install</title>
     <meta http-equiv=Content-Type content="text/html; charset=UTF-8">
-    <link rel="stylesheet" href="layouts/main.css">
+    <link rel="stylesheet" href="layouts/main.css.php">
   </head>
   <body style="font-family: Arial, Verdana, Helvetica, sans-serif"><?php
 }
@@ -62,21 +65,14 @@ function output_footer() { ?>
 
 function install() {
   global $debug, $log_mysql, $log_postgres;
-  if (!file_exists('config.php')) {
-    install_config();
-  }
-  
-  include('config.php');
-  #show_constants();
 
-  include(CLASSPATH.'log.php');
-  if(DEBUG_LEVEL > 0) $debug = new Debugger(DEBUGFILE);
+  include(CLASSPATH . 'log.php');
+  if (DEBUG_LEVEL > 0) $debug = new Debugger(DEBUGFILE);
   if (LOG_LEVEL > 0) {
    $log_mysql = new LogFile(LOGFILE_MYSQL, 'text', 'Log-Datei MySQL' , '#------v: ' . date("Y:m:d H:i:s", time()));
    $log_postgres = new LogFile(LOGFILE_POSTGRES, 'text', 'Log-Datei-Postgres', '------v: ' . date("Y:m:d H:i:s", time()));
   } ?>
   <h1>Teste Verbindung zu MySQL mit Nutzer root</h1><?php
-  
   #
   # Teste ob MySQL-Server läuft
   #
@@ -84,7 +80,7 @@ function install() {
   $mysqlRootDb = new database;
   $mysqlRootDb->host = MYSQL_HOST;
   $mysqlRootDb->user = 'root';
-  $mysqlRootDb->passwd = getenv('MYSQL_ENV_MYSQL_ROOT_PASSWORD');
+  $mysqlRootDb->passwd = MYSQL_ROOT_PASSWORD;
   $mysqlRootDb->dbName = 'mysql'; ?>
   Verbindungsdaten für Zugang zu MySQL root Nutzer wie folgt gesetzt:<br>
   Host: <?php echo $mysqlRootDb->host; ?><br>
@@ -125,7 +121,6 @@ function install() {
   Datenbankname: <?php echo $mysqlKvwmapDb->dbName; ?><br>
   Debugfilename: <?php echo $mysqlKvwmapDb->debug->filename; ?><br>
   Logfilename: <?php echo $mysqlKvwmapDb->logfile->name; ?><br><?php
-
   if (kvwmapdb_exists($mysqlRootDb, $mysqlKvwmapDb)) { ?>
     kvwmap Datenbank <?php echo $mysqlKvwmapDb->dbName; ?> existiert schon auf MySQL-Server.<br><?php
     $kvwmapdb_installed = true;
@@ -144,7 +139,7 @@ function install() {
   $pgsqlPostgresDb = new pgdatabase();
   $pgsqlPostgresDb->host = POSTGRES_HOST;
   $pgsqlPostgresDb->user = 'postgres';
-  $pgsqlPostgresDb->passwd = getenv('PGSQL_ROOT_PASSWORD');
+  $pgsqlPostgresDb->passwd = POSTGRES_ROOT_PASSWORD;
   $pgsqlPostgresDb->dbName = 'postgres'; ?>
   Verbindungsdaten für Zugang zu PostgreSQL postgres Nutzer wie folgt gesetzt:<br>
   Host: <?php echo $pgsqlPostgresDb->host; ?><br>
@@ -165,7 +160,8 @@ function install() {
     <input type="button" value="Script neu starten" onclick="window.location.reload()">
     <?php
     return false;
-  } ?>
+  }
+	?>
 
   <h1>Teste Verbindung zu PostgreSQL mit Nutzer <?php echo POSTGRES_USER; ?></h1><?php
   #
@@ -248,7 +244,7 @@ function install() {
       WHERE
         srid = 31969;
 
-      INSERT INTO
+/*      INSERT INTO
         spatial_ref_sys (srid, auth_name, auth_srid, srtext, proj4text)
       VALUES (
         35833,
@@ -262,10 +258,10 @@ function install() {
         325833,
         'PROJCS[\"ETRS89/UTM 33N RW+3500000 Brandenburg\",GEOGCS[\"ETRS89\",DATUM[\"European_Terrestrial_Reference_System_1989\",SPHEROID[\"GRS 1980\",6378137,298.257222101,AUTHORITY[\"EPSG\",\"7019\"]],AUTHORITY[\"EPSG\",\"6258\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.01745329251994328,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4258\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",15],PARAMETER[\"scale_factor\",0.9996],PARAMETER[\"false_easting\",3500000],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AUTHORITY[\"EPSG\",\"325833\"]]',
         '+proj=tmerc +towgs84=0,0,0 +lat_0=0 +lon_0=15 +k=0.9996 +x_0=3500000 +y_0=0 +ellps=GRS80 +units=m +no_defs <>'
-        )
+        )*/
     ";
-    $pgsqlKvwmapDb->execSQL($sql, 0, 1); ?>
-    
+    $pgsqlKvwmapDb->execSQL($sql, 0, 1);?>
+
     <h1>Migrationen für kvwmap Schemas in MySQL und PostgreSQL ausführen</h1><?php
     #
     # Führe alle Migration aus und richte damit die aktuellen Datenbankschemas ein.
@@ -294,64 +290,32 @@ function install() {
   }
 }
 
-function install_config() {
-  $_SESSION['login_name'] = 'kvwmap';
-  $config = file_get_contents('config-default.php');
-  $cwd = getcwd();
-  $applversion = basename($cwd);
-  $rest = dirname($cwd);
-  $www = basename($rest);
-  $installpath = dirname($rest);
-  $config = str_replace("define('APPLVERSION','kvwmap/');", "define('APPLVERSION','".$applversion."/');", $config);
-  $config = str_replace("define('INSTALLPATH','/home/gisadmin/');", "define('INSTALLPATH','".$installpath."/');", $config);
-  $config = str_replace("define('WWWROOT',INSTALLPATH.'apps/');", "define('WWWROOT',INSTALLPATH.'".$www."/');", $config);
-  $config = str_replace(
-    "define('MYSQL_HOST', 'localhost');",
-    "define('MYSQL_HOST', 'mysql');",
-    $config
-  );
-  $config = str_replace("define('MYSQL_USER', '');", "define('MYSQL_USER', 'kvwmap');", $config);
-  $config = str_replace("define('MYSQL_PASSWORD', '');", "define('MYSQL_PASSWORD', '" . KVWMAP_INIT_PASSWORD . "');", $config);
-  $config = str_replace(
-    "define('MYSQLVERSION', '500');",
-    "define('MYSQLVERSION', '" . versionFormatter(getenv('MYSQL_ENV_MYSQL_MAJOR')) . "');",
-    $config
-  );
-  $config = str_replace(
-    "define('POSTGRES_HOST', 'localhost');",
-    "define('POSTGRES_HOST', 'pgsql');",
-    $config
-  );
-  $config = str_replace("define('POSTGRES_USER', '');", "define('POSTGRES_USER', 'kvwmap');", $config);
-  $config = str_replace("define('POSTGRES_PASSWORD', '');", "define('POSTGRES_PASSWORD', '" . KVWMAP_INIT_PASSWORD . "');", $config);
-  $config = str_replace(
-    "define('POSTGRESVERSION', '804');",
-    "define('POSTGRESVERSION', '" . versionFormatter(getenv('PGSQL_ENV_PG_MAJOR')) . "');",
-    $config
-  );
-  $config = str_replace(
-    "define('MAPSERVERVERSION', '620');",
-    "define('MAPSERVERVERSION', '" . versionFormatter(getMapServerVersion()) . "');",
-    $config
-  );
-  $config = str_replace(
-    "define('PHPVERSION', '450');",
-    "define('PHPVERSION', '" . versionFormatter(getPHPVersion()) . "');",
-    $config
-  );
-  $config = str_replace(
-    "define('URL','http://localhost/');",
-    "define('URL', 'http://" . $_SERVER['HTTP_HOST'] . "/');",
-    $config
-  );
-  
-  $config = str_replace(
-    "define('POSTGRESBINPATH', '/usr/lib/postgresql/9.1/bin/');",
-    "define('POSTGRESBINPATH', '/usr/bin/');",
-    $config
-  );
+function init_config() {
+	$cwd = getcwd();
+	$applversion = basename($cwd);
+	$rest = dirname($cwd);
+	$wwwpath = basename($rest) . '/';
+	$installpath = dirname($rest) . '/';
+	$formvars = $_REQUEST;
 
-  file_put_contents('config.php', $config);
+	define('MYSQL_HOST', ($formvars['MYSQL_HOST'] != '' ? $formvars['MYSQL_HOST'] : 'mysql'));
+	define('MYSQL_USER', ($formvars['MYSQL_USER'] != '' ? $formvars['MYSQL_USER'] : 'kvwmap'));
+	define('MYSQL_PASSWORD', ($formvars['MYSQL_PASSWORD'] != '' ? $formvars['MYSQL_PASSWORD'] : (getenv('KVWMAP_INIT_PASSWORD') == '' ? 'KvwMapPW1' : getenv('KVWMAP_INIT_PASSWORD'))));
+	define('MYSQL_DBNAME', ($formvars['MYSQL_DBNAME'] != '' ? $formvars['MYSQL_DBNAME'] : 'kvwmapdb'));
+	define('MYSQL_ROOT_PASSWORD', ($formvars['MYSQL_ROOT_PASSWORD'] != '' ? $formvars['MYSQL_ROOT_PASSWORD'] : getenv('MYSQL_ENV_MYSQL_ROOT_PASSWORD')));
+	define('POSTGRES_HOST', ($formvars['POSTGRES_HOST'] != '' ? $formvars['POSTGRES_HOST'] : 'pgsql'));
+	define('POSTGRES_USER', ($formvars['POSTGRES_USER'] != '' ? $formvars['POSTGRES_USER'] : 'kvwmap'));
+	define('POSTGRES_PASSWORD', ($formvars['POSTGRES_PASSWORD'] != '' ? $formvars['POSTGRES_PASSWORD'] : (getenv('KVWMAP_INIT_PASSWORD') == '' ? 'KvwMapPW1' : getenv('KVWMAP_INIT_PASSWORD'))));
+	define('POSTGRES_ROOT_PASSWORD', ($formvars['POSTGRES_ROOT_PASSWORD'] != '' ? $formvars['POSTGRES_ROOT_PASSWORD'] : getenv('PGSQL_ROOT_PASSWORD')));
+	define('POSTGRES_DBNAME', ($formvars['POSTGRES_DBNAME'] != '' ? $formvars['POSTGRES_DBNAME'] : 'kvwmapsp'));
+	define('CLASSPATH', 'class/');
+	define('LAYOUTPATH', 'layouts/');
+	define('LOG_LEVEL', 4);
+	define('LOGPATH', $installpath . 'logs/');
+	define('DEBUG_LEVEL', 1);
+	define('DEBUGFILE', LOGPATH . 'install.log');
+	define('LOGFILE_MYSQL', DEBUGFILE);
+	define('LOGFILE_POSTRGRES', DEBUGFILE);
 }
 
 function show_constants() { ?>
@@ -591,41 +555,57 @@ function install_admin_stelle($mysqlKvwmapDb) {
   return true;
 }
 
-function getMySQLVersion() {
-  return getVersionFromText(
-    shell_exec('mysql -V')
-  );
-}
-
-function getPostgreSQLVersion() { 
-  return getVersionFromText(
-    shell_exec('psql -h $PGSQL_PORT_5432_TCP_ADDR -V')
-  );
-}
-
-function getMapServerVersion() {
-  return getVersionFromText(
-    shell_exec('/usr/lib/cgi-bin/mapserv -v')
-  );
-}
-
-function getPHPVersion() {
-  return getVersionFromText(
-    shell_exec('php -v')
-  );
-}
-
-function getVersionFromText($text) {
-  preg_match('@[0-9]+\.[0-9]+\.[0-9]+@', $text, $version);
-  return $version[0];
-}
-
 function settings() { ?>
   <h1>Installation von kvwmap</h1>
-  Mit diesem Script wird die Konfigurationsdatei config.php, die Datenbanknutzer sowie die MySQL Nutzerdatenbank kvwmap und die PostgreSQL Geo-Datenbank kvwmapsp angelegt.<br>
-  Die Einrichtung erfolgt mit den in config-default.php eingestellten Zugangsdaten. Die Passwörter können nachträglich in der Datei config.php geändert werden.<br><br>
+  Mit diesem Script wird der Datenbanknutzer sowie die MySQL Nutzerdatenbank kvwmap und die PostgreSQL Geo-Datenbank kvwmapsp angelegt.<br>
+	Anschließend werden alle Migrationen ausgeführt.<br>
+  Die MySQL-Zugangsdaten können nachträglich in der Datei credentials.php geändert werden, und alle anderen Einstellungen in der Adminoberfläche bzw. der MySQL Nutzerdatenbank in der Tabelle config.<br><br>
   <form method="POST" target="install.php">
-    <input type="submit" name="go" value="Installation starten">
+		<table>
+			<tr>
+				<td>MYSQL_HOST:</td>
+				<td><input type="text" name="MYSQL_HOST" value="<?php echo MYSQL_HOST; ?>"></td>
+			</tr>
+			<tr>
+				<td>MYSQL_DBNAME:</td>
+				<td><input type="text" name="MYSQL_DBNAME" value="<?php echo MYSQL_DBNAME; ?>"></td>
+			</tr>
+			<tr>
+				<td>MYSQL_USER:</td>
+				<td><input type="text" name="MYSQL_USER" value="<?php echo MYSQL_USER; ?>"></td>
+			</tr>
+			<tr>
+				<td>MYSQL_PASSWORD:</td>
+				<td><input type="text" name="MYSQL_PASSWORD" value="<?php echo MYSQL_PASSWORD; ?>"></td>
+			</tr>
+			<tr>
+				<td>MYSQL_ROOT_PASSWORD:</td>
+				<td><input type="text" name="MYSQL_ROOT_PASSWORD" value="<?php echo MYSQL_ROOT_PASSWORD; ?>"></td>
+			</tr>
+			<tr>
+				<td>POSTGRES_HOST:</td>
+				<td><input type="text" name="POSTGRES_HOST" value="<?php echo POSTGRES_HOST; ?>"></td>
+			</tr>
+			<tr>
+				<td>POSTGRES_DBNAME:</td>
+				<td><input type="text" name="POSTGRES_DBNAME" value="<?php echo POSTGRES_DBNAME; ?>"></td>
+			</tr>
+			<tr>
+				<td>POSTGRES_USER:</td>
+				<td><input type="text" name="POSTGRES_USER" value="<?php echo POSTGRES_USER; ?>"></td>
+			</tr>
+			<tr>
+				<td>POSTGRES_PASSWORD:</td>
+				<td><input type="text" name="POSTGRES_PASSWORD" value="<?php echo POSTGRES_PASSWORD; ?>"></td>
+			</tr>
+			<tr>
+				<td>POSTGRES_ROOT_PASSWORD:</td>
+				<td><input type="text" name="POSTGRES_ROOT_PASSWORD" value="<?php echo POSTGRES_ROOT_PASSWORD; ?>"></td>
+			</tr>
+			<tr>
+				<td colspan="2" align="center"><input type="submit" name="go" value="Installation starten"></td>
+			</tr>
+		</table>
   </form>
   <?php
 }

@@ -151,7 +151,7 @@ class Nachweis {
         # Name der alten Dokumentendatei gefunden
         $doclocation=$ret[1];
         #echo '<br>Speicherort der alten Dokumentendatei: '.$doclocation.' abgefragt.';
-        if($formvars['Bilddatei'] != ''){
+        if($formvars['Bilddatei'] == ''){
           # Verwenden der vorhandenen Datei für die Bildung des neuen Dateinamens
           # unter dem die Datei nach der Sachdatenänderung gespeichert werden soll
           $formvars['Bilddatei_name']=$doclocation;
@@ -764,10 +764,14 @@ class Nachweis {
     return $errmsg;
   }
   
-  function getNachweise($id,$polygon,$gemarkung,$stammnr,$rissnr,$fortf,$hauptart,$richtung,$abfrage_art,$order,$antr_nr, $datum = NULL, $VermStelle = NULL, $gueltigkeit = NULL, $datum2 = NULL, $flur = NULL, $flur_thematisch = NULL, $unterart = NULL, $suchbemerkung = NULL, $blattnr = NULL, $stammnr2 = NULL, $rissnr2 = NULL, $fortf2 = NULL, $geprueft = NULL) {
+  function getNachweise($id,$polygon,$gemarkung,$stammnr,$rissnr,$fortf,$hauptart,$richtung,$abfrage_art,$order,$antr_nr, $datum = NULL, $VermStelle = NULL, $gueltigkeit = NULL, $datum2 = NULL, $flur = NULL, $flur_thematisch = NULL, $unterart = NULL, $suchbemerkung = NULL, $blattnr = NULL, $stammnr2 = NULL, $rissnr2 = NULL, $fortf2 = NULL, $geprueft = NULL, $alle_der_messung = NULL) {
 		$explosion = explode('~', $antr_nr);
 		$antr_nr = $explosion[0];
 		$stelle_id = $explosion[1];
+		$n = 'n';
+		if($order==''){
+			$order="flurid, stammnr, datum";
+		}
 		$order = str_replace('blattnummer', "NULLIF(regexp_replace(blattnummer, '\D', '', 'g'), '')::int", $order);		// nach Blattnummer nummerisch sortieren
     # Die Funktion liefert die Nachweise nach verschiedenen Suchverfahren.
     # Vor dem Suchen nach Nachweisen werden jeweils die Suchparameter überprüft    
@@ -899,9 +903,6 @@ class Nachweis {
 				if($suchbemerkung != ''){
           $sql.=" AND n.bemerkungen LIKE '%".$suchbemerkung."%'";
         }				
-        if ($order=='') {
-          $order="flurid, stammnr, datum";
-        }
         if ($richtung=='' OR $richtung=='ASC'){
           $richtung=="ASC";
           $this->richtung="DESC";
@@ -968,11 +969,13 @@ class Nachweis {
 					}
           if($stammnr!=''){
 						if($stammnr2!=''){
-							$sql.=" AND COALESCE(NULLIF(REGEXP_REPLACE(n.stammnr, '[^0-9]+' ,''), ''), '0')::integer between ".(int)$stammnr." AND ".(int)$stammnr2;
+							$sql.=" AND COALESCE(NULLIF(REGEXP_REPLACE(n.stammnr, '[^0-9]+' ,'', 'g'), ''), '0')::integer between 
+											COALESCE(NULLIF(REGEXP_REPLACE('".$stammnr."', '[^0-9]+' ,'', 'g'), ''), '0')::integer AND 
+											COALESCE(NULLIF(REGEXP_REPLACE('".$stammnr2."', '[^0-9]+' ,'', 'g'), ''), '0')::integer";
 						}
 						else{
 							if(is_numeric($stammnr)){
-								$sql.=" AND REGEXP_REPLACE(COALESCE(n.stammnr, ''), '[^0-9]+' ,'') = '".$stammnr."'";
+								$sql.=" AND REGEXP_REPLACE(COALESCE(n.stammnr, ''), '[^0-9]+' ,'', 'g') = '".$stammnr."'";
 							}
 							else{
 								$sql.=" AND lower(n.stammnr)='".mb_strtolower($stammnr)."'";
@@ -981,11 +984,13 @@ class Nachweis {
           }
 	        if($rissnr!=''){
 						if($rissnr2!=''){
-							$sql.=" AND COALESCE(NULLIF(REGEXP_REPLACE(n.rissnummer, '[^0-9]+' ,''), ''), '0')::integer between ".(int)$rissnr." AND ".(int)$rissnr2;
+							$sql.=" AND COALESCE(NULLIF(REGEXP_REPLACE(n.rissnummer, '[^0-9]+' ,'', 'g'), ''), '0')::integer between 
+											COALESCE(NULLIF(REGEXP_REPLACE('".$rissnr."', '[^0-9]+' ,'', 'g'), ''), '0')::integer AND 
+											COALESCE(NULLIF(REGEXP_REPLACE('".$rissnr2."', '[^0-9]+' ,'', 'g'), ''), '0')::integer";
 						}
 						else{
 							if(is_numeric($rissnr)){
-								$sql.=" AND REGEXP_REPLACE(COALESCE(n.rissnummer, ''), '[^0-9]+' ,'') = '".$rissnr."'";
+								$sql.=" AND REGEXP_REPLACE(COALESCE(n.rissnummer, ''), '[^0-9]+' ,'', 'g') = '".$rissnr."'";
 							}
 							else{
 								$sql.=" AND lower(n.rissnummer)='".mb_strtolower($rissnr)."'";
@@ -1026,9 +1031,6 @@ class Nachweis {
 					if($suchbemerkung != ''){
 						$sql.=" AND lower(n.bemerkungen) LIKE '%".mb_strtolower($suchbemerkung)."%'";
 					}
-          if ($order=='') {
-            $order="flurid, stammnr, datum";
-          }
           if ($richtung=='' OR $richtung=='ASC'){
             $richtung=="ASC";
             $this->richtung="DESC";
@@ -1062,27 +1064,28 @@ class Nachweis {
           # Suche mit Suchpolygon
           #echo '<br>Suche mit Suchpolygon.';
           $this->debug->write('Abfragen der Nachweise die das Polygon schneiden',4);
-          $sql ="SELECT n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS unterart, d.art AS unterart_name";
+          $sql ="SELECT distinct n.*, NULLIF(regexp_replace(blattnummer, '\D', '', 'g'), '')::int, st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS unterart, d.art AS unterart_name";
           $sql.=" FROM nachweisverwaltung.n_nachweise AS n";
 					$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
           $sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id"; 
-					$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n2d.dokumentart_id = d.id";					
+					$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n2d.dokumentart_id = d.id";
+					if($alle_der_messung){
+						$sql.=" LEFT JOIN nachweisverwaltung.n_nachweise AS n2 ON n.oid = n2.oid OR (n.flurid = n2.flurid AND n.".NACHWEIS_PRIMARY_ATTRIBUTE." = n2.".NACHWEIS_PRIMARY_ATTRIBUTE." ".((NACHWEIS_SECONDARY_ATTRIBUTE) ? "and n.".NACHWEIS_SECONDARY_ATTRIBUTE." = n2.".NACHWEIS_SECONDARY_ATTRIBUTE : "").")";
+						$n = 'n2';
+					}
  					$sql.=" WHERE 1=1";
-          $sql.=" AND st_intersects(st_transform(st_geometryfromtext('".$polygon."',".$this->client_epsg."), (select srid from geometry_columns where f_table_name = 'n_nachweise')),the_geom)";
-					if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
-					if($geprueft != NULL)$sql.=" AND geprueft = ".$geprueft;
+          $sql.=" AND st_intersects(st_transform(st_geometryfromtext('".$polygon."',".$this->client_epsg."), (select srid from geometry_columns where f_table_name = 'n_nachweise')), ".$n.".the_geom)";
+					if($gueltigkeit != NULL)$sql.=" AND ".$n.".gueltigkeit = ".$gueltigkeit;
+					if($geprueft != NULL)$sql.=" AND ".$n.".geprueft = ".$geprueft;
 					if(!empty($hauptart)){
 						if($hauptart[0] == '2222' AND $idselected[0] != ''){
-							$sql.=" AND n.id IN (".implode(',', $idselected).")";
+							$sql.=" AND ".$n.".id IN (".implode(',', $idselected).")";
 						}
 						else{
-							$sql.=" AND n.art IN (".implode(',', $hauptart).")";
+							$sql.=" AND ".$n.".art IN (".implode(',', $hauptart).")";
 						}
 					}
-					if(!empty($unterart))$sql.=" AND d.id IN (".implode(',', $unterart).")";
-          if ($order=='') {
-            $order="flurid, stammnr, datum";
-          }					
+					if(!empty($unterart))$sql.=" AND d.id IN (".implode(',', $unterart).")";					
           if ($richtung=='' OR $richtung=='ASC'){
             $richtung=="ASC";
             $this->richtung="DESC";
