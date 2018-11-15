@@ -45,7 +45,7 @@
 					<td align="center">
 						<table cellspacing="0" cellpadding="2" border="0">
 							<tr>
-								<td colspan="2" align="center">
+								<td colspan="2">
 									<div>
 										<? include(SNIPPETS.AGREEMENT_MESSAGE); ?>
 									</div>
