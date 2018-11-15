@@ -7666,7 +7666,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		if($this->formvars['order'] == ''){
 			$this->formvars['order'] = 'Name';
 		}
-		$this->layerdaten = $mapDB->getall_Layer($this->formvars['order'], $this->Stelle->id, $this->user->id);
+		$this->layerdaten = $mapDB->getall_Layer($this->formvars['order'], false, $this->user->id, $this->Stelle->id);
 		$this->titel='Layerdaten';
 		$this->main='layerdaten.php';
 		$this->output();
@@ -12169,7 +12169,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $where ="stelle_id='+this.form.Stelle_ID.value+' AND user_id=".$this->user->id;
     $StellenFormObj->addJavaScript(
 			"onchange",
-			"$('#sign_in_stelle').show(); " . (array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angemeldet'] === true ? "ahah('index.php','go=getRow&select=".urlencode($select)."&from=".$from."&where=".$where."',new Array(nZoomFactor,gui,mapsize,newExtent,epsg_code,fontsize_gle,highlighting,runningcoords,showmapfunctions,showlayeroptions,menu_auto_close,menue_buttons,hist_timestamp));" : "")
+			"$('#sign_in_stelle').show(); " . ((array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angemeldet'] === true) ? "ahah('index.php','go=getRow&select=".urlencode($select)."&from=".$from."&where=".$where."',new Array(nZoomFactor,gui,mapsize,newExtent,epsg_code,fontsize_gle,highlighting,runningcoords,showmapfunctions,showlayeroptions,menu_auto_close,menue_buttons,hist_timestamp));" : "")
 		);
     #echo URL.APPLVERSION."index.php?go=getRow&select=".urlencode($select)."&from=".$from."&where=stelle_id=3 AND user_id=7";
     $StellenFormObj->outputHTML();
@@ -17293,7 +17293,7 @@ class db_mapObj{
 		return $datatypes;
 	}
 
-	function getall_Layer($order, $only_listed = false) {
+	function getall_Layer($order, $only_listed = false, $user_id = NULL, $stelle_id = NULL) {
 		global $language;
 		global $admin_stellen;
 		$more_from = '';
@@ -17324,8 +17324,8 @@ class db_mapObj{
 		if ($only_listed) {
 			$where[] = "listed = 1";
 		}
-
-		if ($this->User_ID > 0 AND !in_array($this->Stelle_ID, $admin_stellen)) {
+		
+		if ($user_id != NULL AND !in_array($stelle_id, $admin_stellen)) {
 			$more_from = "
 				JOIN used_layer ul ON l.Layer_ID = ul.Layer_id
 				JOIN rolle rall ON ul.Stelle_ID = rall.stelle_id

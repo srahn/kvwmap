@@ -49,10 +49,12 @@ BEGIN;
 					RAISE EXCEPTION 'Punktgeometrie und Station sind leer. Ein Strassenelementpunkt muss entweder eine Punktgeometrie oder eine Stationierungsangabe haben!';
 				ELSE
 					RAISE NOTICE 'Berechne Punktgeometrie entlang des Strassenelementes: % aus Station: % und Abstand zur Bestandsachse: %', NEW.auf_strassenelement, NEW.station, NEW.abstand_zur_bestandsachse;
-					IF abs(NEW.abstand_zur_bestandsachse) <= tolerance THEN
+					IF abs(NEW.abstand_zur_bestandsachse) > 0 AND abs(NEW.abstand_zur_bestandsachse) <= tolerance THEN
 						RAISE NOTICE 'Reduziere den Abstand zur Linie: % auf 0', NEW.auf_strassenelement;
 						NEW.abstand_zur_bestandsachse = 0;
 					END IF;
+					NEW.station = round(NEW.station, decimals);
+					RAISE NOTICE 'Runde Station auf: %', NEW.station;
 					EXECUTE '
 						SELECT
 							gdi_LineInterpolatePointWithOffset(liniengeometrie, $1, $2)
@@ -63,7 +65,7 @@ BEGIN;
 					'
 					USING NEW.station, NEW.abstand_zur_bestandsachse, NEW.auf_strassenelement
 					INTO NEW.punktgeometrie;
-					RAISE NOTICE 'Korrigiere Punktgeometrie auf: %', ST_AsText(NEW.punktgeometrie);
+					RAISE NOTICE 'Verwende Punktgeometrie: % für Strassenelementpunkt.', ST_AsText(NEW.punktgeometrie);
 				END IF;
 			ELSE
 				RAISE NOTICE 'Punktgeometrie in Strassenelementpunkt vorhanden.';
@@ -92,7 +94,7 @@ BEGIN;
 					USING NEW.punktgeometrie, NEW.auf_strassenelement
 					INTO rec;
 
-					NEW.station = rec.ordinate;
+					NEW.station = round(rec.ordinate, decimals);
 					RAISE NOTICE 'Station auf: % gesetzt.', NEW.station;
 					IF abs(rec.abscissa) <= tolerance THEN
 						NEW.abstand_zur_bestandsachse = 0;
@@ -109,7 +111,6 @@ BEGIN;
 			-- Was machen mit Strassenelementpunkten, die negative Station oder Station länger als Strassenelement haben? Zulassen?
 
 			NEW.punktgeometrie = ST_SnapToGrid(NEW.punktgeometrie, accuracy);
-			NEW.station = round(NEW.station, decimals);
 			NEW.abstand_zur_bestandsachse = round(NEW.abstand_zur_bestandsachse, decimals);
 
 		RETURN NEW;

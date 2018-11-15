@@ -40,7 +40,7 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 	?>
 	<table cellspacing="0" cellpadding="2" id="gbb_grundbuchblatt">
 	  <tr>
-	    <th colspan="2"><h2><? echo $this->titel.' '.$this->buchungen[0]['bezirk'].'-'.$this->buchungen[0]['blatt']; ?></h2></th>
+	    <th colspan="2"><h2><? echo $this->titel.' '.$this->buchungen[0]['gbname'].' '.$this->buchungen[0]['bezirk'].'-'.$this->buchungen[0]['blatt']; ?></h2></th>
     </tr>
 		<tr>
 			<td style="padding-bottom: 6px;height:100%">
@@ -76,11 +76,19 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 						<? } ?>
 						<tr><td style="padding-bottom: 6px"><div id="gbb_grundstueck"><table style="padding: 7px">
 							<tr>
-								<td style="height: 50px" valign="top">
+								<td valign="top" class="fett">
 									Bestandsverzeichnisnummer: <? echo $this->buchungen[$i]['bvnr']; ?>
 								</td>
-								<td style="height: 50px" valign="top">
+								<td valign="top">
 									<? if($this->Stelle->funktionen['MV0600']['erlaubt']){ ?>&nbsp;<a href="index.php?go=ALKIS_Auszug&formnummer=MV0600&Buchungsstelle=<? echo $this->buchungen[$i]['gml_id'] ?>" target="_blank">Grundstücksnachweis</a>&nbsp;<? } ?>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<? if($this->buchungen[$i]['sondereigentum'] != ''){ ?>
+									verbunden mit Sondereigentum "<? echo $this->buchungen[$i]['sondereigentum']; ?>" Nr. "<? echo $this->buchungen[$i]['auftplannr']; ?>" laut Aufteilungsplan.
+									<? } ?>
+									<? if($this->buchungen[$i]['buchungstext'] != '')echo nl2br($this->buchungen[$i]['buchungstext']); ?>
 								</td>
 							</tr>
 							<tr>
@@ -90,7 +98,7 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 							<tr>
 								<td>
 									<a href="javascript:flurstanzeige('<?php echo $this->buchungen[$i]['flurstkennz']; ?>');" title="Flurstücksdaten anzeigen">
-								<? echo $this->buchungen[$i]['gemkgname'].', Flur '.$this->buchungen[$i]['flur'].', '.$this->buchungen[$i]['flurstuecksnr']; ?>
+								<? echo $this->buchungen[$i]['gemkgschl'].' '.$this->buchungen[$i]['gemkgname'].', Flur '.$this->buchungen[$i]['flur'].', '.$this->buchungen[$i]['flurstuecksnr']; ?>
 									</a>
 								<? echo '<br><br>'.$this->buchungen[$i]['buchungsart'].' - '.$this->buchungen[$i]['bezeichnung'] ?>
 								<? if($this->buchungen[$i]['anteil'] != ''){
@@ -132,11 +140,9 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
   else {?>
    <br><span class="fett" style="color:"#FF0000">Es wurden keine Daten gefunden.</span><br>
  <? }
-} 
+} ?>
 
-if(count($alle_flst) > 1){ ?><a href="javascript:flurstanzeige('<?php echo implode(';', $alle_flst); ?>');" title="Flurstücksdaten anzeigen">alle Flurstücke anzeigen</a><br><br><? } 
-
-?>
+<a href="javascript:flurstanzeige('<?php echo implode(';', $alle_flst); ?>');" title="Flurstücksdaten anzeigen">alle Flurstücke anzeigen</a><br><br>
 <a href="javascript:backto_gbbsearch();">zurück zur Grundbuchblattsuche</a>
 <br>
 <br>
