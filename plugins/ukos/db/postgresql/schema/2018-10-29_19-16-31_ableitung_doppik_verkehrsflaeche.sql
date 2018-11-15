@@ -1,8 +1,9 @@
 BEGIN;
 
+	ALTER TABLE ukos_okstra.verkehrsflaeche ADD COLUMN flaecheninhalt numeric;
+
 	DROP TABLE ukos_doppik.bankett;
 	CREATE TABLE ukos_doppik.bankett (
-		flaecheninhalt numeric,
 		deckschicht character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
 		CONSTRAINT pk_bankett_id PRIMARY KEY (id),
 		CONSTRAINT fk_bankett_deckschicht FOREIGN KEY (deckschicht)
@@ -14,19 +15,18 @@ BEGIN;
 		OIDS=TRUE
 	);
 	CREATE TRIGGER tr_idents_add_ident
-	  BEFORE INSERT
-	  ON ukos_doppik.bankett
-	  FOR EACH ROW
-	  EXECUTE PROCEDURE ukos_base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.bankett
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 	CREATE TRIGGER tr_idents_remove_ident
-	  AFTER DELETE
-	  ON ukos_doppik.bankett
-	  FOR EACH ROW
-	  EXECUTE PROCEDURE ukos_base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.bankett
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
 	DROP TABLE ukos_doppik.baumscheibe;
 	CREATE TABLE ukos_doppik.baumscheibe (
-		flaecheninhalt numeric,
 		deckschicht character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
 		CONSTRAINT pk_baumscheibe_id PRIMARY KEY (id),
 		CONSTRAINT fk_baumscheibe_deckschicht FOREIGN KEY (deckschicht)
@@ -38,19 +38,18 @@ BEGIN;
 		OIDS=TRUE
 	);
 	CREATE TRIGGER tr_idents_add_ident
-	  BEFORE INSERT
-	  ON ukos_doppik.baumscheibe
-	  FOR EACH ROW
-	  EXECUTE PROCEDURE ukos_base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.baumscheibe
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 	CREATE TRIGGER tr_idents_remove_ident
-	  AFTER DELETE
-	  ON ukos_doppik.baumscheibe
-	  FOR EACH ROW
-	  EXECUTE PROCEDURE ukos_base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.baumscheibe
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
 	DROP TABLE ukos_doppik.bord_flaeche;
 	CREATE TABLE ukos_doppik.bord_flaeche (
-		flaecheninhalt numeric,
 		deckschicht character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
 		ausbauzustand character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
 		bauklasse character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
@@ -70,19 +69,18 @@ BEGIN;
 		OIDS=TRUE
 	);
 	CREATE TRIGGER tr_idents_add_ident
-	  BEFORE INSERT
-	  ON ukos_doppik.bord_flaeche
-	  FOR EACH ROW
-	  EXECUTE PROCEDURE ukos_base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.bord_flaeche
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 	CREATE TRIGGER tr_idents_remove_ident
-	  AFTER DELETE
-	  ON ukos_doppik.bord_flaeche
-	  FOR EACH ROW
-	  EXECUTE PROCEDURE ukos_base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.bord_flaeche
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
 	DROP TABLE ukos_doppik.dammschuettung;
 	CREATE TABLE ukos_doppik.dammschuettung (
-		flaecheninhalt NUMERIC,
 		standort character varying,
 		material character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
 		laenge numeric,
@@ -101,19 +99,18 @@ BEGIN;
 		OIDS=TRUE
 	);
 	CREATE TRIGGER tr_idents_add_ident
-	  BEFORE INSERT
-	  ON ukos_doppik.dammschuettung
-	  FOR EACH ROW
-	  EXECUTE PROCEDURE ukos_base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.dammschuettung
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 	CREATE TRIGGER tr_idents_remove_ident
-	  AFTER DELETE
-	  ON ukos_doppik.dammschuettung
-	  FOR EACH ROW
-	  EXECUTE PROCEDURE ukos_base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.dammschuettung
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
 	DROP TABLE ukos_doppik.fahrbahn;
 	CREATE TABLE ukos_doppik.fahrbahn (
-		flaecheninhalt NUMERIC,
 		deckschicht character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
 		ausbauzustand character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
 		bauklasse character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
@@ -137,19 +134,18 @@ BEGIN;
 		OIDS=TRUE
 	);
 	CREATE TRIGGER tr_idents_add_ident
-	  BEFORE INSERT
-	  ON ukos_doppik.dammschuettung
-	  FOR EACH ROW
-	  EXECUTE PROCEDURE ukos_base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.fahrbahn
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 	CREATE TRIGGER tr_idents_remove_ident
-	  AFTER DELETE
-	  ON ukos_doppik.dammschuettung
-	  FOR EACH ROW
-	  EXECUTE PROCEDURE ukos_base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.fahrbahn
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
 	DROP TABLE ukos_doppik.gehweg;
 	CREATE TABLE ukos_doppik.gehweg (
-		flaecheninhalt numeric,
 		deckschicht character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
 		bauklasse character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
 		CONSTRAINT pk_gehweg_id PRIMARY KEY (id),
@@ -165,19 +161,49 @@ BEGIN;
 		OIDS=TRUE
 	);
 	CREATE TRIGGER tr_idents_add_ident
-	  BEFORE INSERT
-	  ON ukos_doppik.gehweg
-	  FOR EACH ROW
-	  EXECUTE PROCEDURE ukos_base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.gehweg
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 	CREATE TRIGGER tr_idents_remove_ident
-	  AFTER DELETE
-	  ON ukos_doppik.gehweg
-	  FOR EACH ROW
-	  EXECUTE PROCEDURE ukos_base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.gehweg
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
+
+	DROP TABLE ukos_doppik.gruenflaeche;
+	CREATE TABLE ukos_doppik.gruenflaeche (
+		deckschicht character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
+		ausbauzustand character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
+		bauklasse character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
+		CONSTRAINT pk_gruenflaeche_id PRIMARY KEY (id),
+		CONSTRAINT fk_gruenflaeche_ausbauzustand FOREIGN KEY (ausbauzustand)
+			REFERENCES ukos_base.wld_zustand (id) MATCH SIMPLE
+			ON UPDATE NO ACTION ON DELETE NO ACTION,
+		CONSTRAINT fk_gruenflaeche_bauklasse FOREIGN KEY (bauklasse)
+			REFERENCES ukos_base.wld_bauklasse (id) MATCH SIMPLE
+			ON UPDATE NO ACTION ON DELETE NO ACTION,
+		CONSTRAINT fk_gruenflaeche_deckschicht FOREIGN KEY (deckschicht)
+			REFERENCES ukos_base.wld_deckschicht (id) MATCH SIMPLE
+			ON UPDATE NO ACTION ON DELETE NO ACTION
+	)
+	INHERITS (ukos_okstra.verkehrsflaeche)
+	WITH (
+		OIDS=TRUE
+	);
+	CREATE TRIGGER tr_idents_add_ident
+		BEFORE INSERT
+		ON ukos_doppik.gruenflaeche
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
+	CREATE TRIGGER tr_idents_remove_ident
+		AFTER DELETE
+		ON ukos_doppik.gruenflaeche
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
 	DROP TABLE ukos_doppik.hecke;
 	CREATE TABLE ukos_doppik.hecke (
-		flaecheninhalt numeric,
 		laenge numeric,
 		breite numeric,
 		hoehe numeric,
@@ -188,19 +214,18 @@ BEGIN;
 		OIDS=TRUE
 	);
 	CREATE TRIGGER tr_idents_add_ident
-	  BEFORE INSERT
-	  ON ukos_doppik.hecke
-	  FOR EACH ROW
-	  EXECUTE PROCEDURE ukos_base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.hecke
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 	CREATE TRIGGER tr_idents_remove_ident
-	  AFTER DELETE
-	  ON ukos_doppik.hecke
-	  FOR EACH ROW
-	  EXECUTE PROCEDURE ukos_base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.hecke
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
 	DROP TABLE ukos_doppik.parkplatz;
 	CREATE TABLE ukos_doppik.parkplatz (
-		flaecheninhalt numeric,
 		deckschicht character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
 		ausbauzustand character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
 		bauklasse character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
@@ -220,19 +245,18 @@ BEGIN;
 		OIDS=TRUE
 	);
 	CREATE TRIGGER tr_idents_add_ident
-	  BEFORE INSERT
-	  ON ukos_doppik.parkplatz
-	  FOR EACH ROW
-	  EXECUTE PROCEDURE ukos_base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.parkplatz
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 	CREATE TRIGGER tr_idents_remove_ident
-	  AFTER DELETE
-	  ON ukos_doppik.parkplatz
-	  FOR EACH ROW
-	  EXECUTE PROCEDURE ukos_base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.parkplatz
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
 	DROP TABLE ukos_doppik.platz;
 	CREATE TABLE ukos_doppik.platz (
-		flaecheninhalt numeric,
 		deckschicht character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
 		ausbauzustand character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
 		bauklasse character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
@@ -252,19 +276,18 @@ BEGIN;
 		OIDS=TRUE
 	);
 	CREATE TRIGGER tr_idents_add_ident
-	  BEFORE INSERT
-	  ON ukos_doppik.platz
-	  FOR EACH ROW
-	  EXECUTE PROCEDURE ukos_base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.platz
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 	CREATE TRIGGER tr_idents_remove_ident
-	  AFTER DELETE
-	  ON ukos_doppik.platz
-	  FOR EACH ROW
-	  EXECUTE PROCEDURE ukos_base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.platz
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
 	DROP TABLE ukos_doppik.parkstreifen;
 	CREATE TABLE ukos_doppik.parkstreifen (
-		flaecheninhalt numeric,
 		deckschicht character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
 		ausbauzustand character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
 		bauklasse character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
@@ -284,19 +307,18 @@ BEGIN;
 		OIDS=TRUE
 	);
 	CREATE TRIGGER tr_idents_add_ident
-	  BEFORE INSERT
-	  ON ukos_doppik.parkstreifen
-	  FOR EACH ROW
-	  EXECUTE PROCEDURE ukos_base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.parkstreifen
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 	CREATE TRIGGER tr_idents_remove_ident
-	  AFTER DELETE
-	  ON ukos_doppik.parkstreifen
-	  FOR EACH ROW
-	  EXECUTE PROCEDURE ukos_base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.parkstreifen
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
 	DROP TABLE ukos_doppik.rad_und_gehweg;
 	CREATE TABLE ukos_doppik.rad_und_gehweg (
-		flaecheninhalt numeric,
 		deckschicht character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
 		ausbauzustand character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
 		bauklasse character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
@@ -316,19 +338,18 @@ BEGIN;
 		OIDS=TRUE
 	);
 	CREATE TRIGGER tr_idents_add_ident
-	  BEFORE INSERT
-	  ON ukos_doppik.rad_und_gehweg
-	  FOR EACH ROW
-	  EXECUTE PROCEDURE ukos_base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.rad_und_gehweg
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 	CREATE TRIGGER tr_idents_remove_ident
-	  AFTER DELETE
-	  ON ukos_doppik.rad_und_gehweg
-	  FOR EACH ROW
-	  EXECUTE PROCEDURE ukos_base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.rad_und_gehweg
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
 	DROP TABLE ukos_doppik.radweg;
 	CREATE TABLE ukos_doppik.radweg (
-		flaecheninhalt numeric,
 		deckschicht character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
 		ausbauzustand character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
 		bauklasse character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
@@ -348,19 +369,18 @@ BEGIN;
 		OIDS=TRUE
 	);
 	CREATE TRIGGER tr_idents_add_ident
-	  BEFORE INSERT
-	  ON ukos_doppik.radweg
-	  FOR EACH ROW
-	  EXECUTE PROCEDURE ukos_base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.radweg
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 	CREATE TRIGGER tr_idents_remove_ident
-	  AFTER DELETE
-	  ON ukos_doppik.radweg
-	  FOR EACH ROW
-	  EXECUTE PROCEDURE ukos_base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.radweg
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
 	DROP TABLE ukos_doppik.strassengraben;
 	CREATE TABLE ukos_doppik.strassengraben (
-		flaecheninhalt numeric,
 		deckschicht character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
 		ausbauzustand character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
 		bauklasse character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
@@ -380,19 +400,18 @@ BEGIN;
 		OIDS=TRUE
 	);
 	CREATE TRIGGER tr_idents_add_ident
-	  BEFORE INSERT
-	  ON ukos_doppik.strassengraben
-	  FOR EACH ROW
-	  EXECUTE PROCEDURE ukos_base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.strassengraben
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 	CREATE TRIGGER tr_idents_remove_ident
-	  AFTER DELETE
-	  ON ukos_doppik.strassengraben
-	  FOR EACH ROW
-	  EXECUTE PROCEDURE ukos_base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.strassengraben
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
 	DROP TABLE ukos_doppik.sonstige_flaeche;
 	CREATE TABLE ukos_doppik.sonstige_flaeche (
-		flaecheninhalt numeric,
 		deckschicht character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
 		ausbauzustand character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
 		bauklasse character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
@@ -412,19 +431,18 @@ BEGIN;
 		OIDS=TRUE
 	);
 	CREATE TRIGGER tr_idents_add_ident
-	  BEFORE INSERT
-	  ON ukos_doppik.sonstige_flaeche
-	  FOR EACH ROW
-	  EXECUTE PROCEDURE ukos_base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.sonstige_flaeche
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 	CREATE TRIGGER tr_idents_remove_ident
-	  AFTER DELETE
-	  ON ukos_doppik.sonstige_flaeche
-	  FOR EACH ROW
-	  EXECUTE PROCEDURE ukos_base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.sonstige_flaeche
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
 	DROP TABLE ukos_doppik.spielplatz;
 	CREATE TABLE ukos_doppik.spielplatz (
-		flaecheninhalt NUMERIC,
 		standort character varying,
 		material character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
 		zweck character varying,
@@ -442,19 +460,18 @@ BEGIN;
 		OIDS=TRUE
 	);
 	CREATE TRIGGER tr_idents_add_ident
-	  BEFORE INSERT
-	  ON ukos_doppik.spielplatz
-	  FOR EACH ROW
-	  EXECUTE PROCEDURE ukos_base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.spielplatz
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 	CREATE TRIGGER tr_idents_remove_ident
-	  AFTER DELETE
-	  ON ukos_doppik.spielplatz
-	  FOR EACH ROW
-	  EXECUTE PROCEDURE ukos_base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.spielplatz
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
 	DROP TABLE ukos_doppik.sportplatz;
 	CREATE TABLE ukos_doppik.sportplatz (
-		flaecheninhalt NUMERIC,
 		standort character varying,
 		material character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
 		zweck character varying,
@@ -472,19 +489,18 @@ BEGIN;
 		OIDS=TRUE
 	);
 	CREATE TRIGGER tr_idents_add_ident
-	  BEFORE INSERT
-	  ON ukos_doppik.sportplatz
-	  FOR EACH ROW
-	  EXECUTE PROCEDURE ukos_base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.sportplatz
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 	CREATE TRIGGER tr_idents_remove_ident
-	  AFTER DELETE
-	  ON ukos_doppik.sportplatz
-	  FOR EACH ROW
-	  EXECUTE PROCEDURE ukos_base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.sportplatz
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
 	DROP TABLE ukos_doppik.strasse;
 	CREATE TABLE ukos_doppik.strasse (
-		flaecheninhalt NUMERIC,
 		standort character varying,
 		material character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
 		zweck character varying,
@@ -506,19 +522,18 @@ BEGIN;
 		OIDS=TRUE
 	);
 	CREATE TRIGGER tr_idents_add_ident
-	  BEFORE INSERT
-	  ON ukos_doppik.strasse
-	  FOR EACH ROW
-	  EXECUTE PROCEDURE ukos_base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.strasse
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 	CREATE TRIGGER tr_idents_remove_ident
-	  AFTER DELETE
-	  ON ukos_doppik.strasse
-	  FOR EACH ROW
-	  EXECUTE PROCEDURE ukos_base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.strasse
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
 	DROP TABLE ukos_doppik.ueberfahrt;
 	CREATE TABLE ukos_doppik.ueberfahrt (
-		flaecheninhalt numeric,
 		deckschicht character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
 		ausbauzustand character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
 		bauklasse character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
@@ -538,19 +553,18 @@ BEGIN;
 		OIDS=TRUE
 	);
 	CREATE TRIGGER tr_idents_add_ident
-	  BEFORE INSERT
-	  ON ukos_doppik.ueberfahrt
-	  FOR EACH ROW
-	  EXECUTE PROCEDURE ukos_base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.ueberfahrt
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 	CREATE TRIGGER tr_idents_remove_ident
-	  AFTER DELETE
-	  ON ukos_doppik.ueberfahrt
-	  FOR EACH ROW
-	  EXECUTE PROCEDURE ukos_base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.ueberfahrt
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
 	DROP TABLE ukos_doppik.ueberweg;
 	CREATE TABLE ukos_doppik.ueberweg (
-		flaecheninhalt numeric,
 		deckschicht character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
 		ausbauzustand character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
 		bauklasse character varying NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::character varying,
@@ -570,14 +584,14 @@ BEGIN;
 		OIDS=TRUE
 	);
 	CREATE TRIGGER tr_idents_add_ident
-	  BEFORE INSERT
-	  ON ukos_doppik.ueberweg
-	  FOR EACH ROW
-	  EXECUTE PROCEDURE ukos_base.idents_add_ident();
+		BEFORE INSERT
+		ON ukos_doppik.ueberweg
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_add_ident();
 	CREATE TRIGGER tr_idents_remove_ident
-	  AFTER DELETE
-	  ON ukos_doppik.ueberweg
-	  FOR EACH ROW
-	  EXECUTE PROCEDURE ukos_base.idents_remove_ident();
+		AFTER DELETE
+		ON ukos_doppik.ueberweg
+		FOR EACH ROW
+		EXECUTE PROCEDURE ukos_base.idents_remove_ident();
 
 COMMIT;

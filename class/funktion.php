@@ -1,6 +1,6 @@
 <?php
 ###################################################################
-# kvwmap - Kartenserver für Kreisverwaltungen                     #
+# kvwmap - Kartenserver fÃ¼r Kreisverwaltungen                     #
 ###################################################################
 # Lizenz                                                          #
 #                                                                 #
@@ -42,13 +42,13 @@
 # class_user #
 class funktion {
 
-  function funktion($database) {
-    global $debug;
-    $this->debug=$debug;
-    $this->database=$database;
-  }
+	function funktion($database) {
+		global $debug;
+		$this->debug=$debug;
+		$this->database=$database;
+	}
   
-  function getFunktionen($id, $order, $stelle_id = 0, $admin_id = 0) {
+	function getFunktionen($id, $order, $stelle_id = 0, $admin_id = 0) {
 		global $admin_stellen;
 		$where = array();
 
@@ -74,55 +74,53 @@ class funktion {
 			FROM
 				u_funktionen f" .
 				$more_from .
-			(count($where) > 0 ? " WHERE " . implode(' AND ', $where) : "") .
+				(count($where) > 0 ? " WHERE " . implode(' AND ', $where) : "") .
 			$order . "
 		";
 		#echo '<br>sql: ' . $sql;
 
 		/*
-    $sql ='SELECT * FROM u_funktionen WHERE 1=1';
-    if ($id>0) {
-      $sql.=' AND id='.$id;
-    }
-    if ($order!='') {
-      $sql.=' ORDER BY ' . replace_semicolon($order);
-    }
+		$sql ='SELECT * FROM u_funktionen WHERE 1=1';
+		if ($id>0) {
+		$sql.=' AND id='.$id;
+		}
+		if ($order!='') {
+		$sql.=' ORDER BY ' . replace_semicolon($order);
+		}
 		*/
-    $this->debug->write("<p>file:users.php class:funktion->getFunktionen - Abfragen einer oder aller Funktionen:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    while ($rs=mysql_fetch_array($query)) {
-      $funktionen[]=$rs;
-    }
-    return $funktionen;
-  }
+		$this->debug->write("<p>file:users.php class:funktion->getFunktionen - Abfragen einer oder aller Funktionen:<br>".$sql,4);
+		$query=mysql_query($sql,$this->database->dbConn);
+		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+		while ($rs=mysql_fetch_array($query)) {
+			$funktionen[]=$rs;
+		}
+		return $funktionen;
+	}
   
-  function NeuAnlegen($formvars){
-  	$sql = "INSERT INTO u_funktionen SET ";
-  	if($formvars['id']){
-  		$sql.= "id = ".(int)$formvars['id']."," ;
-  	}
-  	$sql.= "bezeichnung = '".$formvars['bezeichnung']."'";
-  	$ret=$this->database->execSQL($sql,4, 1);
-  	$ret[1] = mysql_insert_id();
-  	return $ret;
-  }
+	function NeuAnlegen($formvars){
+		$sql = "INSERT INTO u_funktionen SET ";
+		if($formvars['id']){
+			$sql.= "id = ".(int)$formvars['id']."," ;
+		}
+		$sql.= "bezeichnung = '".$formvars['bezeichnung']."'";
+		$ret=$this->database->execSQL($sql,4, 1);
+		$ret[1] = mysql_insert_id();
+		return $ret;
+	}
   
-  function Aendern($formvars){
-  	$sql = "UPDATE u_funktionen SET id = ".(int)$formvars['id'].", bezeichnung = '".$formvars['bezeichnung']."' ";
-  	$sql.= "WHERE id = ".(int)$formvars['selected_function_id'];
-  	$ret=$this->database->execSQL($sql,4, 1);
-  }
+	function Aendern($formvars){
+		$sql = "UPDATE u_funktionen SET id = ".(int)$formvars['id'].", bezeichnung = '".$formvars['bezeichnung']."' ";
+		$sql.= "WHERE id = ".(int)$formvars['selected_function_id'];
+		$ret=$this->database->execSQL($sql,4, 1);
+	}
   
-  function Loeschen($formvars){
-  	$sql = "DELETE FROM u_funktionen ";
-  	$sql.= "WHERE id = ".(int)$formvars['selected_function_id'];
-  	$ret=$this->database->execSQL($sql,4, 1);
-  	$sql = "DELETE FROM u_funktion2stelle ";
-  	$sql.= "WHERE funktion_id = ".(int)$formvars['selected_function_id'];
-  	$ret=$this->database->execSQL($sql,4, 1);
-  }
-    
+	function Loeschen($formvars){
+		$sql = "DELETE FROM u_funktionen ";
+		$sql.= "WHERE id = ".(int)$formvars['selected_function_id'];
+		$ret=$this->database->execSQL($sql,4, 1);
+		$sql = "DELETE FROM u_funktion2stelle ";
+		$sql.= "WHERE funktion_id = ".(int)$formvars['selected_function_id'];
+		$ret=$this->database->execSQL($sql,4, 1);
+	}
 }
-
 ?>
