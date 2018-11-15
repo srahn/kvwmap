@@ -173,6 +173,7 @@ public static	function find_by_id($gui, $by, $id) {
 				$this->database->dbConn,
 				$sql
 			);
+			
 			return (pg_num_rows($result) == 0 ? array() : pg_fetch_all($result));
 		}
 	}
@@ -334,7 +335,7 @@ public static	function find_by_id($gui, $by, $id) {
 	function rewrite_gml_ids($rows) {
 		$this->debug->show('<br><b>gml_ids in Shape-Tabellen zurückschreiben.</b>' . $sql, Regel::$write_debug);
 
-		# Erzeugt Funktion, die eine Tabelle mit allen allen gml_id's und gid's der neu eingetragenen Objekte zurückliefert.
+		# Erzeugt Funktion, die eine Tabelle mit allen gml_id's und gid's der neu eingetragenen Objekte zurückliefert.
 		$sql = "
 			CREATE OR REPLACE FUNCTION gml_id_gid_table()
 				RETURNS TABLE (gml_id character varying, gid int) AS
@@ -429,9 +430,18 @@ public static	function find_by_id($gui, $by, $id) {
 					coalesce(bp.konvertierung_id, rp.konvertierung_id) AS konvertierung_id
 				FROM
 					xplankonverter.regeln r LEFT JOIN
-					xplan_gml.xp_bereich b ON r.bereich_gml_id = b.gml_id LEFT JOIN
-					xplan_gml.xp_plan bp ON bp.gml_id::text = b.gehoertzuplan LEFT JOIN
-					xplan_gml.xp_plan rp ON rp.konvertierung_id = r.konvertierung_id
+					xplan_gml.bp_bereich bb ON r.bereich_gml_id = bb.gml_id LEFT JOIN
+					xplan_gml.fp_bereich fb ON r.bereich_gml_id = fb.gml_id LEFT JOIN
+					xplan_gml.rp_bereich rb ON r.bereich_gml_id = rb.gml_id LEFT JOIN
+					xplan_gml.so_bereich sb ON r.bereich_gml_id = sb.gml_id LEFT JOIN
+					xplan_gml.bp_plan bp ON bp.gml_id::text = bb.gehoertzuplan LEFT JOIN
+					xplan_gml.fp_plan fp ON fp.gml_id::text = fb.gehoertzuplan LEFT JOIN
+					xplan_gml.rp_plan rp ON rp.gml_id::text = rb.gehoertzuplan LEFT JOIN
+					xplan_gml.so_plan sp ON sp.gml_id::text = sb.gehoertzuplan LEFT JOIN
+					xplan_gml.rp_plan bpp ON bpp.konvertierung_id = r.konvertierung_id LEFT JOIN
+					xplan_gml.rp_plan fpp ON fpp.konvertierung_id = r.konvertierung_id LEFT JOIN
+					xplan_gml.rp_plan rpp ON rpp.konvertierung_id = r.konvertierung_id LEFT JOIN
+					xplan_gml.rp_plan spp ON spp.konvertierung_id = r.konvertierung_id
 				WHERE
 					r.id = " . $this->get('id') . "
 			";

@@ -236,6 +236,7 @@ class Gml_builder {
 				# element anlegen und gml_id als attribut eintragen
 				$objekt_gml = "<{$xplan_ns_prefix}{$class_name} gml:id=\"GML_{$object_row['gml_id']}\">";
 
+
 				# alle uebrigen Attribute ausgeben
 				$objekt_gml .= $this->generateGmlForAttributes($object_row, $objekt_attribs, XPLAN_MAX_NESTING_DEPTH);
 				# close and write FeatureMember
@@ -243,7 +244,6 @@ class Gml_builder {
 
 				fwrite($this->tmpFile, "\n" . $this->formatXML($this->wrapWithFeatureMember($objekt_gml)));
 			}
-
 		}
 
 		# close XPlanAuszug

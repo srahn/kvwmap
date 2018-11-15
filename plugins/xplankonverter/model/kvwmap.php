@@ -202,7 +202,7 @@
 		return array('executed' => $executed, 'success' => $success);
 	};
 
-	$GUI->xplankonverter_is_case_forbidden = function() {
+	$GUI->xplankonverter_is_case_forbidden = function() use ($GUI){
 		$forbidden = false;
 		if ($GUI->formvars['konvertierung_id'] == '') {
 			#echo 'Diese Link kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';

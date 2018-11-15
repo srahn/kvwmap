@@ -1,43 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- HINWEISE: -->
-<!-- XPlan2INSPIRE für XPlan5.0 /INSPIRE PLU 4.0 fuer die Raumordnung-->
-<!-- Benötigt noch timeStamp Generierung, XSLT 2.0 erlaubt dies durch <xsl:value-of  select="current-dateTime()"/>, funktioniert aber mit vielen Online-Konvertern und EA nicht-->
-<!-- Geometrie-gml:ids sind direkt von XPlan übernommen. Es handelt sich um die exakt gleichen Geometrien -->
+<!-- DOCUMENTATION -->
+<!-- XPlan2INSPIRE for XPlanung 5.11 RP_Schema to INSPIRE PLU 4.0 -->
+<!-- BP, FP, LP and SO elements are currently not supported -->
 
-<!-- FIXES 2018-02-07:
-	- Übernahme des Mappings RP_Plan.rechtsstand -> SpatialPlan.processStepGeneral von Mapping XPlanungwiki
-	- Übernahme ExterneReferenz Hintergrundkarte (1040) -> backgroundMapvalue für SpatialPlan
+<!-- Still requires external timeStamp generation. XSLT 2.0 allows this through <xsl:value-of select="current-dateTime()"/>-->
+<!-- but the operation is not supported by many online-converters or EnterpriseArchitect-->
+<!-- Geometry Gml:ids are taken over directly from the Xplanung file as the geometries are the exact same geometries -->
+<!-- Several National Codelists will eventually be hosted on the GDI-DE registry, but are currently temporarily hosted elsewhere -->
+<!-- Once the GDI-DE registry hosts these codelists, the variables set on the template levels have to be adjusted -->
+<!-- Extent-Geometries currently only support multigeometries (INSPIRE is more restrictive than XPlanung here), -->
+<!-- other INSPIRE geometries in PLU are more permissive than XPlanung -->
+
+<!-- FIXES 208-10-05:
+- Update of all namespaces to version 5.1 (implicitly version 5.11)
+- Implementation of various changes specified by the XPlanung AG-Modellierung (see www.xplanungwiki.de for more details)
 -->
 
-<!-- TODO 2018-02-07:
-		- Alle Regeln aus AG Modellierung einbauen
-		- Links auf GDI-DE Registry einbauen
-		- Anpassung der Nationalen Codeliste mit "1_" am Anfang
-		- Überarbeitung der HSRCL, HILUCS-Zuordnung?
-		- Geometrie-Angleich für Extent, falls nur Surface (nicht MultiSurface) verwendet wird
-		- Optimierung durch multiple Templates
-		- Getrennte Haltung von Logik in Datenbank (programmatische Herleitung über Skript)
-		- Aufnahme von BP, FP nach Regeln aus AG Modellierung (auch für MV-BP Projekt)
-		- Update Schemata? 
-		- Zuordnung auf Codelisten getrennt halten und iterieren
-		- LocalID und Namespaces Update (falls eindeutige Regelung festgelegt ist/wird
-		- Tests und Validierungen (gegen XPlanung 5.01)
+<!-- TODO-List:
+- Adjust temporary national codelist to hold the values set at the xplanungwiki (e.g. start RP codes with 1_...)
+- Optimization through use of  multiple templates to improve performance and decouple transformation
+- Consider a (simple) geometry transformation for extent (multisurface wrappers), if xplanung uses surface
+- Consider automation of xslt creation by holding transformation logic in a database and 
 -->
 <xsl:stylesheet version="1.0"
-                xmlns="http://www.xplanung.de/xplangml/5/0"
-                xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-                xmlns:xplan="http://www.xplanung.de/xplangml/5/0"
-                xmlns:wfs="http://www.opengis.net/wfs/2.0"
-                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                xmlns:gml="http://www.opengis.net/gml/3.2"
-                xmlns:xlink="http://www.w3.org/1999/xlink"
-                xmlns:plu="http://inspire.ec.europa.eu/schemas/plu/4.0"
-                xmlns:base="http://inspire.ec.europa.eu/schemas/base/3.3"
-                xmlns:base2="http://inspire.ec.europa.eu/schemas/base2/1.0"
-                xsi:schemaLocation="http://www.xplanung.de/xplangml/5/0 http://www.xplanungwiki.de/upload/XPlanGML/5.0/Schema/XPlanung-Operationen.xsd
-                http://inspire.ec.europa.eu/schemas/plu/4.0 http://inspire.ec.europa.eu/schemas/plu/4.0/PlannedLandUse.xsd
-                http://www.opengis.net/wfs/2.0 http://schemas.opengis.net/wfs/2.0/wfs.xsd
-                http://inspire.ec.europa.eu/schemas/base/3.3 http://inspire.ec.europa.eu/schemas/base/3.3/BaseTypes.xsd"
+				xmlns="http://www.xplanung.de/xplangml/5/1"
+				xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+				xmlns:xplan="http://www.xplanung.de/xplangml/5/1"
+				xmlns:wfs="http://www.opengis.net/wfs/2.0"
+				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				xmlns:gml="http://www.opengis.net/gml/3.2"
+				xmlns:xlink="http://www.w3.org/1999/xlink"
+				xmlns:plu="http://inspire.ec.europa.eu/schemas/plu/4.0"
+				xmlns:base="http://inspire.ec.europa.eu/schemas/base/3.3"
+				xmlns:base2="http://inspire.ec.europa.eu/schemas/base2/1.0"
+				xsi:schemaLocation="http://www.xplanung.de/xplangml/5/1 http://www.xplanungwiki.de/upload/XPlanGML/5.1/Schema/XPlanung-Operationen.xsd
+				http://inspire.ec.europa.eu/schemas/plu/4.0 http://inspire.ec.europa.eu/schemas/plu/4.0/PlannedLandUse.xsd
+				http://www.opengis.net/wfs/2.0 http://schemas.opengis.net/wfs/2.0/wfs.xsd
+				http://inspire.ec.europa.eu/schemas/base/3.3 http://inspire.ec.europa.eu/schemas/base/3.3/BaseTypes.xsd"
     >
   <!-- xsl -->
   <xsl:output method="xml"
@@ -65,15 +64,15 @@
     <wfs:FeatureCollection>
       <!-- includes schemaLocations from xsl namespace-->
       <xsl:copy-of select="document('')/*/@xsi:schemaLocation"/>
-      <xsl:attribute name="timeStamp">2018-03-05T10:16:04+02:00</xsl:attribute>
+      <xsl:attribute name="timeStamp">2016-11-07T10:16:04+02:00</xsl:attribute>
       <!-- Funktion current-dateTime() funktioniert nur mit XSLT 2.0, für XSL 1.0 sind Erweiterungen notwendig-->
       <!-- Funktion lässt sich auch mit XSLT 2.0 nicht durch Konverter wie EA Processor oder Online-Konverter aufrufen -->
       <!-- Zählt Anzahl FeatureMember die Plan, TextAbschnitt oder Objekt in XPlanGML abbilden und auf INSPIRE PLU mappen-->
       <xsl:attribute name="numberMatched">
-        <xsl:value-of select="count(/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_TextAbschnitt|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Freiraum|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Bodenschutz|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_GruenzugGruenzaesur|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Hochwasserschutz|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_NaturLandschaft|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_NaturschutzrechtlichesSchutzgebiet|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Wasserschutz|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Gewaesser|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Klimaschutz|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Erholung|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_ErneuerbareEnergie|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Forstwirtschaft|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Kulturlandschaft|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Landwirtschaft|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_RadwegWanderweg|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Sportanlage|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstigerFreiraumschutz|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Rohstoff|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Energieversorgung|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Entsorgung|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Kommunikation|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_LaermschutzBauschutz|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_SozialeInfrastruktur|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Wasserwirtschaft|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstigeInfrastruktur|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Verkehr|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Strassenverkehr|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Schienenverkehr|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Luftverkehr|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Wasserverkehr|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstVerkehr|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Raumkategorie|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Sperrgebiet|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Achse|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_ZentralerOrt|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Funktionszuweisung|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Siedlung|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_WohnenSiedlung|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Einzelhandel|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_IndustrieGewerbe|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstigerSiedlungsbereich|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Grenze|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Planungsraum|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_GenerischesObjekt)" />
+        <xsl:value-of select="count(xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan | xplan:XPlanAuszug/gml:featureMember/xplan:RP_TextAbschnitt | xplan:XPlanAuszug/gml:featureMember/xplan:RP_Freiraum|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Bodenschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_GruenzugGruenzaesur|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Hochwasserschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_NaturLandschaft|xplan:XPlanAuszug/gml:featureMember/xplan:RP_NaturschutzrechtlichesSchutzgebiet|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Wasserschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Gewaesser|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Klimaschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Erholung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_ErneuerbareEnergie|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Forstwirtschaft|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Kulturlandschaft|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Landwirtschaft|xplan:XPlanAuszug/gml:featureMember/xplan:RP_RadwegWanderweg|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Sportanlage|xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstigerFreiraumschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Rohstoff|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Energieversorgung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Entsorgung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Kommunikation|xplan:XPlanAuszug/gml:featureMember/xplan:RP_LaermschutzBauschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_SozialeInfrastruktur|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Wasserwirtschaft|xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstigeInfrastruktur|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Verkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Strassenverkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Schienenverkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Luftverkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Wasserverkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstVerkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Raumkategorie|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Sperrgebiet|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Achse|xplan:XPlanAuszug/gml:featureMember/xplan:RP_ZentralerOrt|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Funktionszuweisung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Siedlung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_WohnenSiedlung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Einzelhandel|xplan:XPlanAuszug/gml:featureMember/xplan:RP_IndustrieGewerbe|xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstigerSiedlungsbereich|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Grenze|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Planungsraum|xplan:XPlanAuszug/gml:featureMember/xplan:RP_GenerischesObjekt)" />
       </xsl:attribute>
       <xsl:attribute name="numberReturned">
-        <xsl:value-of select="count(/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_TextAbschnitt|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Freiraum|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Bodenschutz|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_GruenzugGruenzaesur|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Hochwasserschutz|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_NaturLandschaft|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_NaturschutzrechtlichesSchutzgebiet|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Wasserschutz|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Gewaesser|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Klimaschutz|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Erholung|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_ErneuerbareEnergie|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Forstwirtschaft|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Kulturlandschaft|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Landwirtschaft|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_RadwegWanderweg|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Sportanlage|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstigerFreiraumschutz|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Rohstoff|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Energieversorgung|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Entsorgung|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Kommunikation|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_LaermschutzBauschutz|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_SozialeInfrastruktur|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Wasserwirtschaft|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstigeInfrastruktur|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Verkehr|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Strassenverkehr|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Schienenverkehr|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Luftverkehr|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Wasserverkehr|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstVerkehr|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Raumkategorie|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Sperrgebiet|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Achse|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_ZentralerOrt|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Funktionszuweisung|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Siedlung|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_WohnenSiedlung|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Einzelhandel|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_IndustrieGewerbe|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstigerSiedlungsbereich|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Grenze|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Planungsraum|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_GenerischesObjekt)" />
+        <xsl:value-of select="count(xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan | xplan:XPlanAuszug/gml:featureMember/xplan:RP_TextAbschnitt | xplan:XPlanAuszug/gml:featureMember/xplan:RP_Freiraum|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Bodenschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_GruenzugGruenzaesur|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Hochwasserschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_NaturLandschaft|xplan:XPlanAuszug/gml:featureMember/xplan:RP_NaturschutzrechtlichesSchutzgebiet|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Wasserschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Gewaesser|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Klimaschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Erholung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_ErneuerbareEnergie|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Forstwirtschaft|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Kulturlandschaft|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Landwirtschaft|xplan:XPlanAuszug/gml:featureMember/xplan:RP_RadwegWanderweg|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Sportanlage|xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstigerFreiraumschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Rohstoff|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Energieversorgung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Entsorgung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Kommunikation|xplan:XPlanAuszug/gml:featureMember/xplan:RP_LaermschutzBauschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_SozialeInfrastruktur|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Wasserwirtschaft|xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstigeInfrastruktur|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Verkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Strassenverkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Schienenverkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Luftverkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Wasserverkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstVerkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Raumkategorie|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Sperrgebiet|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Achse|xplan:XPlanAuszug/gml:featureMember/xplan:RP_ZentralerOrt|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Funktionszuweisung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Siedlung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_WohnenSiedlung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Einzelhandel|xplan:XPlanAuszug/gml:featureMember/xplan:RP_IndustrieGewerbe|xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstigerSiedlungsbereich|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Grenze|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Planungsraum|xplan:XPlanAuszug/gml:featureMember/xplan:RP_GenerischesObjekt)" />
       </xsl:attribute>
 
       <!-- SpatialPlan -->
@@ -85,8 +84,8 @@
               <!-- LocalId derzeit inspirelocalid_ + Feature-gml:id oder alternativ wird der Wert internalId aus XPlanung RP_Plan übernommen, falls dieser befüllt ist-->
               <base:localId>
                 <xsl:choose>
-                  <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:internalId">
-                    <xsl:value-of select="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:internalId"/>
+                  <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:internalId">
+                    <xsl:value-of select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:internalId"/>
                       </xsl:when>
                       <xsl:otherwise>
                         <xsl:value-of select="concat('inspirelocalid_' , generate-id(/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan))"/>
@@ -95,20 +94,20 @@
               </base:localId>
               <!--Namespace derzeit DE_ + bundesland ID von INSPIRE-->
               <base:namespace>
-                <xsl:value-of select="concat('DE_', /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland)"/>
+                <xsl:value-of select="concat('DE_', xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland)"/>
               </base:namespace>
               <base:versionId nilReason="unknown" xsi:nil="true" />
             </base:Identifier>
           </plu:inspireId>
           <plu:extent>
-            <xsl:copy-of select="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:raeumlicherGeltungsbereich/*"/> 
+            <xsl:copy-of select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:raeumlicherGeltungsbereich/*"/> 
           </plu:extent>
           <plu:beginLifespanVersion nilReason="unknown" xsi:nil="true" />
           <!-- officialTitle-->
           <xsl:choose> 
-            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:name">
+            <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:name">
               <plu:officialTitle>
-                <xsl:apply-templates select="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:name"/>
+                <xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:name"/>
               </plu:officialTitle>
             </xsl:when>
             <xsl:otherwise>
@@ -119,21 +118,21 @@
           </xsl:choose>
           <!-- levelOfSpatialPlan-->
           <xsl:choose>
-            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=1000 or 
-                            /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=2000">
+            <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=1000 or 
+                            xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=2000">
               <plu:levelOfSpatialPlan xlink:href="http://inspire.ec.europa.eu/codelist/LevelOfSpatialPlanValue/regional"/>
             </xsl:when>
-            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=2001 or
-                            /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=3000 or
-                            /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=4000">
+            <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=2001 or
+                            xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=3000 or
+                            xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=4000">
               <plu:levelOfSpatialPlan xlink:href="http://inspire.ec.europa.eu/codelist/LevelOfSpatialPlanValue/supraRegional"/>
             </xsl:when>
-            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=5000 or
-                            /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=5001">
+            <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=5000 or
+                            xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=5001">
               <plu:levelOfSpatialPlan xlink:href="http://inspire.ec.europa.eu/codelist/LevelOfSpatialPlanValue/national"/>
             </xsl:when>
-            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=6000 or
-                            /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=9999">
+            <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=6000 or
+                            xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=9999">
               <plu:levelOfSpatialPlan xlink:href="http://inspire.ec.europa.eu/codelist/LevelOfSpatialPlanValue/other"/>
             </xsl:when>
             <xsl:otherwise>
@@ -145,9 +144,9 @@
           <plu:endLifespanVersion nilReason="unknown" xsi:nil="true" />
           <!--validFrom-->
           <xsl:choose> 
-            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:datumDesInkrafttretens">
+            <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:datumDesInkrafttretens">
               <plu:validFrom>
-                <xsl:apply-templates select="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:datumDesInkrafttretens"/>
+                <xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:datumDesInkrafttretens"/>
               </plu:validFrom>
             </xsl:when>
             <xsl:otherwise>
@@ -156,9 +155,9 @@
           </xsl:choose>
           <!--validTo-->
           <xsl:choose> 
-            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:untergangsDatum">
+            <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:untergangsDatum">
               <plu:validTo>
-                <xsl:apply-templates select="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:untergangsDatum"/>
+                <xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:untergangsDatum"/>
               </plu:validTo>
             </xsl:when>
             <xsl:otherwise>
@@ -167,9 +166,9 @@
           </xsl:choose>
           <!-- AlternativeTitle-->
           <xsl:choose>
-            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:nummer">
+            <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:nummer">
               <plu:alternativeTitle>
-                <xsl:apply-templates select="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:nummer"/>
+                <xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:nummer"/>
               </plu:alternativeTitle>
             </xsl:when>
             <xsl:otherwise>
@@ -177,33 +176,33 @@
             </xsl:otherwise>
           </xsl:choose>
           <!-- planTypeName-->
-          <!-- Für planTypeName sobald Listen von GDI-De bereitgestellt werden Verweis auf diese (sollen auf nationaler Ebene festgelegt werden) -->
+          <!-- Für planTypeName sobald Listen von GDI-De bereitgestellt werden, Verweis auf diese (sollen auf nationaler Ebene festgelegt werden) -->
           <xsl:choose>
-            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=1000">
+            <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=1000">
               <plu:planTypeName xlink:href="Regionalplan"/>
             </xsl:when>
-            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=2000">
+            <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=2000">
               <plu:planTypeName xlink:href="SachlicherTeilplanRegionalebene"/>
             </xsl:when>
-            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=2001">
+            <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=2001">
               <plu:planTypeName xlink:href="SachlicherTeilplanLandesebene"/>
             </xsl:when>
-            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=3000">
+            <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=3000">
               <plu:planTypeName xlink:href="Braunkohlenplan"/>
             </xsl:when>
-            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=4000">
+            <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=4000">
               <plu:planTypeName xlink:href="LandesweiterRaumordnungsplan"/>
             </xsl:when>
-            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=5000">
+            <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=5000">
               <plu:planTypeName xlink:href="StandortkonzeptBund"/>
             </xsl:when>
-            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=5001">
+            <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=5001">
               <plu:planTypeName xlink:href="AWZPlan"/>
             </xsl:when>
-            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=6000">
+            <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=6000">
               <plu:planTypeName xlink:href="RaeumlicherTeilplan"/>
             </xsl:when>
-            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=9999">
+            <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=9999">
               <plu:planTypeName xlink:href="Sonstiges"/>
             </xsl:when>
             <xsl:otherwise>
@@ -214,53 +213,53 @@
           </xsl:choose>
           <!-- processStepGeneral-->
           <xsl:choose>
-            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=1000 or
-                            /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=2000 or
-                            /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=2001 or
-                            /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=2002 or
-                            /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=2004 or
-                            /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=5000">
+            <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=1000 or
+                            xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=2000 or
+                            xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=2001 or
+                            xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=2002 or
+                            xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=2004 or
+                            xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=5000">
               <plu:processStepGeneral xlink:href="http://inspire.ec.europa.eu/codelist/ProcessStepGeneralValue/elaboration"/>
             </xsl:when>
-            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=2003 or
-                            /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=6000 or 
-                            /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=7000">
+            <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=2003 or
+                            xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=6000 or 
+							xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=7000">
               <plu:processStepGeneral xlink:href="http://inspire.ec.europa.eu/codelist/ProcessStepGeneralValue/obsolete"/>
             </xsl:when>
-              <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=3000">
+			  <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=3000">
               <plu:processStepGeneral xlink:href="http://inspire.ec.europa.eu/codelist/ProcessStepGeneralValue/adoption"/>
             </xsl:when>
-            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=4000">
+            <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:rechtsstand=4000">
               <plu:processStepGeneral xlink:href="http://inspire.ec.europa.eu/codelist/ProcessStepGeneralValue/legalForce"/>
             </xsl:when>
             <xsl:otherwise>
               <plu:processStepGeneral nilReason="unknown" xsi:nil="true"/>
             </xsl:otherwise>
           </xsl:choose>
-          <xsl:choose>
-            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:ExterneReferenz/xplan:XP_SpezExterneReferenz/xplan:typ=1040 and
-                            /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:ExterneReferenz/xplan:XP_SpezExterneReferenz/xplan:datum and
-                            /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:ExterneReferenz/xplan:XP_SpezExterneReferenz/xplan:referenzName">
-              <plu:backroundMap>
-                <plu:BackgroundMapValue>
-                  <plu:backgroundMapDate>
-                    <xsl:apply-templates select="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:ExterneReferenz/xplan:XP_SpezExterneReferenz/xplan:datum"></xsl:apply-templates>T00:00:00
-                  </plu:backgroundMapDate>
-                  <plu:backgroundMapReference>
-                    <xsl:apply-templates select="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:ExterneReferenz/xplan:XP_SpezExterneReferenz/xplan:referenzName"></xsl:apply-templates>
-                  </plu:backgroundMapReference>
-                  <xsl:choose>
-                    <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:ExterneReferenz/xplan:XP_SpezExterneReferenz/xplan:referenzURL">
-                      <plu:backgroundMapURI>
-                        <xsl:apply-templates select="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:ExterneReferenz/xplan:XP_SpezExterneReferenz/xplan:referenzURL"></xsl:apply-templates>
-                      </plu:backgroundMapURI>
-                    </xsl:when>
-                    <xsl:otherwise>
-                      <plu:backgroundMapURI nilReason="unknown" xsi:nil="true" />
-                    </xsl:otherwise>
-                  </xsl:choose>
-                </plu:BackgroundMapValue>
-              </plu:backroundMap>
+		  <xsl:choose>
+        <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:ExterneReferenz/xplan:XP_SpezExterneReferenz/xplan:typ=1040 and
+                        xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:ExterneReferenz/xplan:XP_SpezExterneReferenz/xplan:datum and
+                        xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:ExterneReferenz/xplan:XP_SpezExterneReferenz/xplan:referenzName">
+			  <plu:backroundMap>
+			  	<plu:BackgroundMapValue>
+				  <plu:backgroundMapDate>
+				    <xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:ExterneReferenz/xplan:XP_SpezExterneReferenz/xplan:datum"></xsl:apply-templates>T00:00:00
+			      </plu:backgroundMapDate>
+				  <plu:backgroundMapReference>
+				    <xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:ExterneReferenz/xplan:XP_SpezExterneReferenz/xplan:referenzName"></xsl:apply-templates>
+			      </plu:backgroundMapReference>
+				  <xsl:choose>
+				    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:ExterneReferenz/xplan:XP_SpezExterneReferenz/xplan:referenzURL">
+				      <plu:backgroundMapURI>
+					    <xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:ExterneReferenz/xplan:XP_SpezExterneReferenz/xplan:referenzURL"></xsl:apply-templates>
+				      </plu:backgroundMapURI>
+				    </xsl:when>
+				    <xsl:otherwise>
+				      <plu:backgroundMapURI nilReason="unknown" xsi:nil="true" />
+				    </xsl:otherwise>
+				  </xsl:choose>
+				</plu:BackgroundMapValue>
+			  </plu:backroundMap>
             </xsl:when>
 	        <xsl:otherwise>
 			  <plu:backgroundMap nilReason="unknown" xsi:nil="true" />
@@ -268,114 +267,114 @@
 		  </xsl:choose>
           <!-- ordinance -->
 			<xsl:choose>
-			<xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:technHerstellDatum">
+			<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:technHerstellDatum">
 				<plu:ordinance>
 					<plu:OrdinanceValue>
-						<plu:ordinanceDate><xsl:apply-templates select="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:technHerstellDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
+						<plu:ordinanceDate><xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:technHerstellDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
 						<plu:ordinanceReference>technHerstellDatum</plu:ordinanceReference>
 					</plu:OrdinanceValue>
 				</plu:ordinance>
 			</xsl:when>
 			</xsl:choose>
 			<xsl:choose>
-			<xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:genehmigungsDatum">
+			<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:genehmigungsDatum">
 				<plu:ordinance>
 					<plu:OrdinanceValue>
-						<plu:ordinanceDate><xsl:apply-templates select="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:genehmigungsDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
+						<plu:ordinanceDate><xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:genehmigungsDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
 						<plu:ordinanceReference>genehmigungsDatum</plu:ordinanceReference>
 					</plu:OrdinanceValue>
 				</plu:ordinance>
 			</xsl:when>
 			</xsl:choose>
 			<xsl:choose>
-			<xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:aufstellungsbeschlussDatum">
+			<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:aufstellungsbeschlussDatum">
 				<plu:ordinance>
 					<plu:OrdinanceValue>
-						<plu:ordinanceDate><xsl:apply-templates select="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:aufstellungsbeschlussDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
+						<plu:ordinanceDate><xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:aufstellungsbeschlussDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
 						<plu:ordinanceReference>aufstellungsbeschlussDatum</plu:ordinanceReference>
 					</plu:OrdinanceValue>
 				</plu:ordinance>
 			</xsl:when>
 			</xsl:choose>
 			<xsl:choose>
-			<xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:auslegungStartDatum">
+			<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:auslegungStartDatum">
 				<plu:ordinance>
 					<plu:OrdinanceValue>
-						<plu:ordinanceDate><xsl:apply-templates select="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:auslegungStartDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
+						<plu:ordinanceDate><xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:auslegungStartDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
 						<plu:ordinanceReference>auslegungStartDatum</plu:ordinanceReference>
 					</plu:OrdinanceValue>
 				</plu:ordinance>
 			</xsl:when>
 			</xsl:choose>
 			<xsl:choose>
-			<xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:auslegungEndDatum">
+			<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:auslegungEndDatum">
 				<plu:ordinance>
 					<plu:OrdinanceValue>
-						<plu:ordinanceDate><xsl:apply-templates select="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:auslegungEndDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
+						<plu:ordinanceDate><xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:auslegungEndDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
 						<plu:ordinanceReference>auslegungEndDatum</plu:ordinanceReference>
 					</plu:OrdinanceValue>
 				</plu:ordinance>
 			</xsl:when>
 			</xsl:choose>
 			<xsl:choose>
-			<xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:traegerbeteiligungsStartDatum">
+			<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:traegerbeteiligungsStartDatum">
 				<plu:ordinance>
 					<plu:OrdinanceValue>
-						<plu:ordinanceDate><xsl:apply-templates select="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:traegerbeteiligungsStartDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
+						<plu:ordinanceDate><xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:traegerbeteiligungsStartDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
 						<plu:ordinanceReference>traegerbeteiligungsStartDatum</plu:ordinanceReference>
 					</plu:OrdinanceValue>
 				</plu:ordinance>
 			</xsl:when>
 			</xsl:choose>
 			<xsl:choose>
-			<xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:traegerbeteiligungsEndDatum">
+			<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:traegerbeteiligungsEndDatum">
 				<plu:ordinance>
 					<plu:OrdinanceValue>
-						<plu:ordinanceDate><xsl:apply-templates select="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:traegerbeteiligungsEndDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
+						<plu:ordinanceDate><xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:traegerbeteiligungsEndDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
 						<plu:ordinanceReference>traegerbeteiligungsEndDatum</plu:ordinanceReference>
 					</plu:OrdinanceValue>
 				</plu:ordinance>
 			</xsl:when>
 			</xsl:choose>
 			<xsl:choose>
-			<xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:aenderungenBisDatum">
+			<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:aenderungenBisDatum">
 				<plu:ordinance>
 					<plu:OrdinanceValue>
-						<plu:ordinanceDate><xsl:apply-templates select="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:aenderungenBisDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
+						<plu:ordinanceDate><xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:aenderungenBisDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
 						<plu:ordinanceReference>traegerbeteiligungsEndDatum</plu:ordinanceReference>
 					</plu:OrdinanceValue>
 				</plu:ordinance>
 			</xsl:when>
 			</xsl:choose>
 			<xsl:choose>
-			<xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:entwurfsbeschlussDatum">
+			<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:entwurfsbeschlussDatum">
 				<plu:ordinance>
 					<plu:OrdinanceValue>
-						<plu:ordinanceDate><xsl:apply-templates select="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:entwurfsbeschlussDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
+						<plu:ordinanceDate><xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:entwurfsbeschlussDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
 						<plu:ordinanceReference>entwurfsbeschlussDatum</plu:ordinanceReference>
 					</plu:OrdinanceValue>
 				</plu:ordinance>
 			</xsl:when>
 			</xsl:choose>
 			<xsl:choose>
-			<xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planbeschlussDatum">
+			<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planbeschlussDatum">
 				<plu:ordinance>
 					<plu:OrdinanceValue>
-						<plu:ordinanceDate><xsl:apply-templates select="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planbeschlussDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
+						<plu:ordinanceDate><xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planbeschlussDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
 						<plu:ordinanceReference>planbeschlussDatum</plu:ordinanceReference>
 					</plu:OrdinanceValue>
 				</plu:ordinance>
 			</xsl:when>
 			</xsl:choose>
 			<xsl:choose>
-				<xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:hatGenerAttribut/xplan:XP_DatumAttribut">
+				<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:hatGenerAttribut/xplan:XP_DatumAttribut">
 					<plu:ordinance>
 						<plu:OrdinanceValue>
 							<plu:ordinanceDate>
-								<xsl:apply-templates select="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:hatGenerAttribut/xplan:XP_DatumAttribut/wert"></xsl:apply-templates>
+								<xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:hatGenerAttribut/xplan:XP_DatumAttribut/wert"></xsl:apply-templates>
 							</plu:ordinanceDate>
 							<plu:ordinanceReference>
-								<xsl:apply-templates select="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:hatGenerAttribut/xplan:XP_DatumAttribut/name"></xsl:apply-templates>
+								<xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:hatGenerAttribut/xplan:XP_DatumAttribut/name"></xsl:apply-templates>
 							</plu:ordinanceReference>
 						</plu:OrdinanceValue>
 					</plu:ordinance>
@@ -383,21 +382,21 @@
 			</xsl:choose>
           <!-- Association SpatialPlan zu OfficialDocumentation-->
           <!-- Setzt Verknüpfung für jedes existierende RP_TextAbschnitt-Element, für welches auf RP_Plan eine Relation über +texte besteht. Setzt nilReason falls keine Relation vorhanden ist-->
-          <xsl:for-each select="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:texte">
+          <xsl:for-each select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:texte">
             <plu:officialDocument xlink:href="{concat('#', 'GML_' , generate-id(.))}"/>
           </xsl:for-each>
-          <xsl:if test="not(/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:texte)">
+          <xsl:if test="not(xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:texte)">
             <plu:officialDocument nilReason="unknown" xsi:nil="true" />
           </xsl:if>
           <!--Association SpatialPlan zu ZoningElement-->
           <!-- muss doppelt stattfinden, um Ordnung für XSLT zu behalten-->
-          <xsl:for-each select="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Freiraum|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Bodenschutz|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_GruenzugGruenzaesur|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Hochwasserschutz|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_NaturLandschaft|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_NaturschutzrechtlichesSchutzgebiet|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Wasserschutz|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Gewaesser|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Klimaschutz|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Erholung|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_ErneuerbareEnergie|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Forstwirtschaft|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Kulturlandschaft|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Landwirtschaft|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_RadwegWanderweg|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Sportanlage|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstigerFreiraumschutz|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Rohstoff|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Energieversorgung|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Entsorgung|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Kommunikation|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_LaermschutzBauschutz|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_SozialeInfrastruktur|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Wasserwirtschaft|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstigeInfrastruktur|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Verkehr|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Strassenverkehr|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Schienenverkehr|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Luftverkehr|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Wasserverkehr|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstVerkehr|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Raumkategorie|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Sperrgebiet|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Achse|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_ZentralerOrt|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Funktionszuweisung|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Siedlung|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_WohnenSiedlung|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Einzelhandel|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_IndustrieGewerbe|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstigerSiedlungsbereich|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Grenze|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Planungsraum|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_GenerischesObjekt">
+          <xsl:for-each select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Freiraum|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Bodenschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_GruenzugGruenzaesur|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Hochwasserschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_NaturLandschaft|xplan:XPlanAuszug/gml:featureMember/xplan:RP_NaturschutzrechtlichesSchutzgebiet|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Wasserschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Gewaesser|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Klimaschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Erholung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_ErneuerbareEnergie|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Forstwirtschaft|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Kulturlandschaft|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Landwirtschaft|xplan:XPlanAuszug/gml:featureMember/xplan:RP_RadwegWanderweg|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Sportanlage|xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstigerFreiraumschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Rohstoff|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Energieversorgung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Entsorgung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Kommunikation|xplan:XPlanAuszug/gml:featureMember/xplan:RP_LaermschutzBauschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_SozialeInfrastruktur|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Wasserwirtschaft|xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstigeInfrastruktur|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Verkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Strassenverkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Schienenverkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Luftverkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Wasserverkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstVerkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Raumkategorie|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Sperrgebiet|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Achse|xplan:XPlanAuszug/gml:featureMember/xplan:RP_ZentralerOrt|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Funktionszuweisung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Siedlung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_WohnenSiedlung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Einzelhandel|xplan:XPlanAuszug/gml:featureMember/xplan:RP_IndustrieGewerbe|xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstigerSiedlungsbereich|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Grenze|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Planungsraum|xplan:XPlanAuszug/gml:featureMember/xplan:RP_GenerischesObjekt">
             <xsl:if test="child::xplan:flaechenschluss='true'">
               <plu:member xlink:href="{concat('#', 'GML_' , generate-id(.))}"/>
             </xsl:if>
           </xsl:for-each>
           <!-- Association SpatialPlan zu SupplementaryRegulation (assoziiert mit allen existierenden SRs)-->
-          <xsl:for-each select="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Freiraum|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Bodenschutz|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_GruenzugGruenzaesur|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Hochwasserschutz|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_NaturLandschaft|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_NaturschutzrechtlichesSchutzgebiet|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Wasserschutz|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Gewaesser|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Klimaschutz|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Erholung|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_ErneuerbareEnergie|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Forstwirtschaft|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Kulturlandschaft|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Landwirtschaft|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_RadwegWanderweg|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Sportanlage|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstigerFreiraumschutz|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Rohstoff|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Energieversorgung|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Entsorgung|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Kommunikation|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_LaermschutzBauschutz|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_SozialeInfrastruktur|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Wasserwirtschaft|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstigeInfrastruktur|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Verkehr|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Strassenverkehr|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Schienenverkehr|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Luftverkehr|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Wasserverkehr|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstVerkehr|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Raumkategorie|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Sperrgebiet|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Achse|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_ZentralerOrt|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Funktionszuweisung|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Siedlung|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_WohnenSiedlung|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Einzelhandel|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_IndustrieGewerbe|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstigerSiedlungsbereich|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Grenze|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Planungsraum|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_GenerischesObjekt">
+          <xsl:for-each select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Freiraum|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Bodenschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_GruenzugGruenzaesur|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Hochwasserschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_NaturLandschaft|xplan:XPlanAuszug/gml:featureMember/xplan:RP_NaturschutzrechtlichesSchutzgebiet|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Wasserschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Gewaesser|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Klimaschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Erholung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_ErneuerbareEnergie|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Forstwirtschaft|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Kulturlandschaft|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Landwirtschaft|xplan:XPlanAuszug/gml:featureMember/xplan:RP_RadwegWanderweg|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Sportanlage|xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstigerFreiraumschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Rohstoff|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Energieversorgung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Entsorgung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Kommunikation|xplan:XPlanAuszug/gml:featureMember/xplan:RP_LaermschutzBauschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_SozialeInfrastruktur|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Wasserwirtschaft|xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstigeInfrastruktur|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Verkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Strassenverkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Schienenverkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Luftverkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Wasserverkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstVerkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Raumkategorie|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Sperrgebiet|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Achse|xplan:XPlanAuszug/gml:featureMember/xplan:RP_ZentralerOrt|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Funktionszuweisung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Siedlung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_WohnenSiedlung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Einzelhandel|xplan:XPlanAuszug/gml:featureMember/xplan:RP_IndustrieGewerbe|xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstigerSiedlungsbereich|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Grenze|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Planungsraum|xplan:XPlanAuszug/gml:featureMember/xplan:RP_GenerischesObjekt">
             <xsl:if test="not(child::xplan:flaechenschluss='true')">
               <plu:restriction xlink:href="{concat('#', 'GML_' , generate-id(.))}"/>
             </xsl:if>
@@ -451,11 +450,11 @@
             </plu:inspireId>
             <!--plu:legislationCitation-->
             <xsl:choose> 
-              <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/RP_TextAbschnitt/xplan:refText/xplan:XP_ExterneReferenz/xplan:referenzName">
+              <xsl:when test="xplan:XPlanAuszug/gml:featureMember/RP_TextAbschnitt/xplan:refText/xplan:XP_ExterneReferenz/xplan:referenzName">
                 <plu:legislationCitation>
 									<base2:LegislationCitation>
 										<base2:name>
-											<xsl:apply-templates select="/xplan:XPlanAuszug/gml:featureMember/RP_TextAbschnitt/xplan:refText/xplan:XP_ExterneReferenz/xplan:referenzName"/>
+											<xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/RP_TextAbschnitt/xplan:refText/xplan:XP_ExterneReferenz/xplan:referenzName"/>
 										</base2:name>
 										<base2:date nilReason="unknown" xsi:nil="true" /> <!-- Keine zuordbare Entsprechung in XPlanung-->
 										<base2:link nilReason="unknown" xsi:nil="true" /> <!-- Hier koennte ggf. noch ein Mapping auf ExterneReferenz URL stattfinden, falls diese vorhanden ist?-->
@@ -469,9 +468,9 @@
             </xsl:choose>
             <!--plu:regulationText-->
             <xsl:choose> 
-              <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/RP_TextAbschnitt/xplan:text">
+              <xsl:when test="xplan:XPlanAuszug/gml:featureMember/RP_TextAbschnitt/xplan:text">
                 <plu:regulationText>
-                  <xsl:apply-templates select="/xplan:XPlanAuszug/gml:featureMember/RP_TextAbschnitt/xplan:text"/>
+                  <xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/RP_TextAbschnitt/xplan:text"/>
                 </plu:regulationText>
               </xsl:when>
               <xsl:otherwise>
@@ -484,7 +483,7 @@
       </xsl:for-each>
 
       <!-- SupplementaryRegulation und ZoningElement-->
-      <xsl:for-each select="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Freiraum|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Bodenschutz|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_GruenzugGruenzaesur|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Hochwasserschutz|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_NaturLandschaft|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_NaturschutzrechtlichesSchutzgebiet|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Wasserschutz|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Gewaesser|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Klimaschutz|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Erholung|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_ErneuerbareEnergie|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Forstwirtschaft|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Kulturlandschaft|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Landwirtschaft|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_RadwegWanderweg|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Sportanlage|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstigerFreiraumschutz|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Rohstoff|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Energieversorgung|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Entsorgung|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Kommunikation|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_LaermschutzBauschutz|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_SozialeInfrastruktur|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Wasserwirtschaft|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstigeInfrastruktur|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Verkehr|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Strassenverkehr|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Schienenverkehr|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Luftverkehr|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Wasserverkehr|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstVerkehr|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Raumkategorie|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Sperrgebiet|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Achse|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_ZentralerOrt|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Funktionszuweisung|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Siedlung|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_WohnenSiedlung|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Einzelhandel|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_IndustrieGewerbe|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstigerSiedlungsbereich|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Grenze|/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Planungsraum|xplan:XPlanAuszug/gml:featureMember/xplan:RP_GenerischesObjekt">
+      <xsl:for-each select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Freiraum|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Bodenschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_GruenzugGruenzaesur|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Hochwasserschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_NaturLandschaft|xplan:XPlanAuszug/gml:featureMember/xplan:RP_NaturschutzrechtlichesSchutzgebiet|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Wasserschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Gewaesser|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Klimaschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Erholung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_ErneuerbareEnergie|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Forstwirtschaft|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Kulturlandschaft|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Landwirtschaft|xplan:XPlanAuszug/gml:featureMember/xplan:RP_RadwegWanderweg|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Sportanlage|xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstigerFreiraumschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Rohstoff|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Energieversorgung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Entsorgung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Kommunikation|xplan:XPlanAuszug/gml:featureMember/xplan:RP_LaermschutzBauschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_SozialeInfrastruktur|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Wasserwirtschaft|xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstigeInfrastruktur|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Verkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Strassenverkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Schienenverkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Luftverkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Wasserverkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstVerkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Raumkategorie|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Sperrgebiet|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Achse|xplan:XPlanAuszug/gml:featureMember/xplan:RP_ZentralerOrt|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Funktionszuweisung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Siedlung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_WohnenSiedlung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Einzelhandel|xplan:XPlanAuszug/gml:featureMember/xplan:RP_IndustrieGewerbe|xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstigerSiedlungsbereich|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Grenze|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Planungsraum|xplan:XPlanAuszug/gml:featureMember/xplan:RP_GenerischesObjekt">
         <!-- Wählt ZoningElement oder SupplementaryRegulation aus-->
         <xsl:choose>
           <xsl:when test="child::xplan:flaechenschluss='true'">
@@ -874,29 +873,29 @@
             <!-- SUPPLEMENTARY REGULATION -->
             <wfs:member>
               <plu:SupplementaryRegulation gml:id="{concat('GML_' , generate-id(.))}">
-                <xsl:choose>
-                  <xsl:when test="child::xplan:startBedingung/xplan:XP_WirksamkeitBedingung/xplan:datumAbsolut">
-                    <plu:validFrom>
-                      <xsl:apply-templates select="child::xplan:startBedingung/xplan:XP_WirksamkeitBedingung/xplan:datumAbsolut"/>
-                    </plu:validFrom>
-                  </xsl:when>
-                  <xsl:otherwise>
-                    <plu:validFrom nilReason="unknown" xsi:nil="true" />
-                  </xsl:otherwise>
-                </xsl:choose>
-                <xsl:choose>
-                  <xsl:when test="child::xplan:endeBedingung/xplan:XP_WirksamkeitBedingung/xplan:datumAbsolut">
-                    <plu:validTo>
-                      <xsl:apply-templates select="child::xplan:endeBedingung/xplan:XP_WirksamkeitBedingung/xplan:datumAbsolut"/>
-                    </plu:validTo>
-                  </xsl:when>
-                  <xsl:otherwise>
-                    <plu:validTo nilReason="unknown" xsi:nil="true" />
-                  </xsl:otherwise>
-                </xsl:choose>
+			    <xsl:choose>
+				  <xsl:when test="child::xplan:startBedingung/xplan:XP_WirksamkeitBedingung/xplan:datumAbsolut">
+					<plu:validFrom>
+					  <xsl:apply-templates select="child::xplan:startBedingung/xplan:XP_WirksamkeitBedingung/xplan:datumAbsolut"/>
+					</plu:validFrom>
+				  </xsl:when>
+				  <xsl:otherwise>
+					<plu:validFrom nilReason="unknown" xsi:nil="true" />
+				  </xsl:otherwise>
+				</xsl:choose>
+				<xsl:choose>
+				  <xsl:when test="child::xplan:endeBedingung/xplan:XP_WirksamkeitBedingung/xplan:datumAbsolut">
+					<plu:validTo>
+					  <xsl:apply-templates select="child::xplan:endeBedingung/xplan:XP_WirksamkeitBedingung/xplan:datumAbsolut"/>
+					</plu:validTo>
+				  </xsl:when>
+				  <xsl:otherwise>
+					<plu:validTo nilReason="unknown" xsi:nil="true" />
+				  </xsl:otherwise>
+				</xsl:choose>
 
                 <!-- Anfang Nationale Codeliste Zuordnung -->
-                <!-- Hier choose für Featuretypes, da diese eindeutig sind und if für Attribute, da mehrere zulässig sind-->
+                <!--Hier choose für Featuretypes, da diese eindeutig sind und if für Attribute, da mehrere zulässig sind-->
                 <!-- Choose When ist dabei performanter, aber ist für Mehrfachzuordnungen nicht geeignet-->
                 <xsl:choose>
                   <xsl:when test="self::xplan:RP_ErneuerbareEnergie">
@@ -973,8 +972,11 @@
                     <xsl:if test="child::xplan:typ=3000">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_3_Erosionsschutz')}"/>
                     </xsl:if>
+										<xsl:if test="child::xplan:typ=4000">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_4_Torferhalt')}"/>
+                    </xsl:if>
                     <xsl:if test="child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_4_SonstigerBodenschutz')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_5_SonstigerBodenschutz')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typ)">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_Bodenschutz')}"/>
@@ -1113,7 +1115,7 @@
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_3_3_Gewinnung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:bergbauplanungTyp=1300">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_3_4_Abbaubereich')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_3_4_Abbau')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:bergbauplanungTyp=1400">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_3_5_Sicherheitszone')}"/>
@@ -1352,8 +1354,20 @@
                     <xsl:if test="child::xplan:rohstoffTyp=7100">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_62_Werkstein')}"/>
                     </xsl:if>
+										<xsl:if test="child::xplan:rohstoffTyp=7200">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_63_Andesit')}"/>
+                    </xsl:if>
+										<xsl:if test="child::xplan:rohstoffTyp=7300">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_64_Formsand')}"/>
+                    </xsl:if>
+										<xsl:if test="child::xplan:rohstoffTyp=7400">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_65_Gabbro')}"/>
+                    </xsl:if>
+										<xsl:if test="child::xplan:rohstoffTyp=7500">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_66_MikrodioritAndesit')}"/>
+                    </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_63_SonstigerRohstoff')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_67_SonstigerRohstoff')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:rohstoffTyp or child::xplan:tiefe or child::xplan:zeitstufe or child::xplan:folgenutzung or child::xplan:bergbauplanungTyp)">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_Rohstoff')}"/>
@@ -1610,8 +1624,11 @@
                     <xsl:if test="child::xplan:typ=2000">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_8_2_Frischluft')}"/>
                     </xsl:if>
-                    <xsl:if test="child::xplan:typ=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_8_3_SonstigeLuftTypen')}"/>
+										<xsl:if test="child::xplan:typ=3000">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_8_3_BesondereKlimaschutzfunktion')}"/>
+                    </xsl:if>
+                    <xsl:if test="child::xplan:typ=4000">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_8_4_SonstigeLuftTypen')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typ)">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_8_Klimaschutz')}"/>
@@ -1636,8 +1653,14 @@
                     <xsl:if test="child::xplan:typErholung=2000">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_9_2_RuhigeErholungInNaturUndLandschaft')}"/>
                     </xsl:if>
+										<xsl:if test="child::xplan:typErholung=2001">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_9_2_LandschaftsbezogeneErholung')}"/><!-- Hier selbe Nummer da mittelfristig ein Wert abfallen wird -->
+                    </xsl:if>
                     <xsl:if test="child::xplan:typErholung=3000">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_9_3_ErholungMitStarkerInanspruchnahmeDurchBevoelkerung')}"/>
+                    </xsl:if>
+										<xsl:if test="child::xplan:typErholung=3001">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_9_3_InfrastrukturelleErholung')}"/><!-- Hier selbe Nummer da mittelfristig ein Wert abfallen wird -->
                     </xsl:if>
                     <xsl:if test="child::xplan:typErholung=4000">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_9_4_Erholungswald')}"/>
@@ -1686,8 +1709,11 @@
                     <xsl:if test="child::xplan:typ=7000">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_1_1_14_Leitungsabbau')}"/>
                     </xsl:if>
+										<xsl:if test="child::xplan:typ=8000">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_1_1_15_Korridor')}"/>
+                    </xsl:if>
                     <xsl:if test="child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_1_1_15_SonstigeEnergieversorgung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_1_1_16_SonstigeEnergieversorgung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1000">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_1_1_1_Leitungstrasse')}"/>
@@ -2219,8 +2245,11 @@
                     <xsl:if test="child::xplan:typ=2000">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_5_11_NeueVerkehrstechniken')}"/>
                     </xsl:if>
+										<xsl:if test="child::xplan:typ=2001">
+											<plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_5_12_Teststrecke')}"/>
+										</xsl:if>
                     <xsl:if test="child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_5_12_SonstigerVerkehr')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_5_13_SonstigerVerkehr')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1000">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_5_1_Verkehrsanlage')}"/>
@@ -2529,6 +2558,15 @@
                     <xsl:if test="child::xplan:sonstigerTyp=2000">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_32_MoeglichesZentrum')}"/>
                     </xsl:if>
+										<xsl:if test="child::xplan:sonstigerTyp=2100">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_33_FunktionsraumEindeutigeAusrichtung')}"/>
+                    </xsl:if>
+										<xsl:if test="child::xplan:sonstigerTyp=2101">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_34_FunktionsraumBilateraleAusrichtung')}"/>
+                    </xsl:if>
+										<xsl:if test="child::xplan:sonstigerTyp=2200">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_35_Kongruenzraum')}"/>
+                    </xsl:if>
                     <xsl:if test="child::xplan:typ=1500">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_3_Oberbereich')}"/>
                     </xsl:if>
@@ -2579,8 +2617,11 @@
                     <xsl:if test="child::xplan:typ=8000">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_5_8_UeberoertlicheVersorgungsfunktionLaendlicherRaum')}"/>
                     </xsl:if>
+										<xsl:if test="child::xplan:typ=9000">
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_5_9_LaendlicheSiedlung')}"/>
+                    </xsl:if>
                     <xsl:if test="child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_5_9_SonstigeFunktion')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_5_10_SonstigeFunktion')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typ)">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_5_Funktionszuweisung')}"/>
@@ -2854,7 +2895,7 @@
                   <xsl:when test="xplan:rechtscharakter=8000"><plu:specificRegulationNature>Ziel und Grundsatz</plu:specificRegulationNature></xsl:when>
                   <xsl:when test="xplan:rechtscharakter=9000"><plu:specificRegulationNature>Vorschlag</plu:specificRegulationNature></xsl:when>
                   <xsl:when test="xplan:rechtscharakter=9998"><plu:specificRegulationNature>Unbekannt</plu:specificRegulationNature></xsl:when>
-                  <xsl:otherwise><plu:specificRegulationNature nilReason="unknown" xsi:nil="true" /></xsl:otherwise>
+				  <xsl:otherwise><plu:specificRegulationNature nilReason="unknown" xsi:nil="true" /></xsl:otherwise>
                 </xsl:choose>
                 <plu:name>
                   <!-- Wird aus Name des FeatureTypes hergeleitet, schneidet xplan:RP_ ab-->
@@ -2863,19 +2904,19 @@
                 <!--plu:regulationNature-->
                 <xsl:choose>
                   <xsl:when test="xplan:rechtscharakter=1000 or
-                                  xplan:rechtscharakter=2000 or
+								  xplan:rechtscharakter=2000 or
                                   xplan:rechtscharakter=7000 or
                                   xplan:rechtscharakter=8000">
                     <plu:regulationNature xlink:href="http://inspire.ec.europa.eu/codelist/RegulationNatureValue/generallyBinding"/>
                   </xsl:when>
-                  <xsl:when test="xplan:rechtscharakter=3000 or
+				  <xsl:when test="xplan:rechtscharakter=3000 or
                                   xplan:rechtscharakter=4000 or
                                   xplan:rechtscharakter=5000">
                     <plu:regulationNature xlink:href="http://inspire.ec.europa.eu/codelist/RegulationNatureValue/bindingForDevelopers"/>
                   </xsl:when>
                   <xsl:when test="xplan:rechtscharakter=6000 or
                                   xplan:rechtscharakter=9000 or
-                                  xplan:rechtscharakter=9998">
+																						xplan:rechtscharakter=9998">
                     <plu:regulationNature xlink:href="http://inspire.ec.europa.eu/codelist/RegulationNatureValue/nonBinding"/>
                   </xsl:when>
                   <xsl:otherwise>
@@ -2899,11 +2940,14 @@
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_Bodenschutz">
                     <xsl:choose>
-                      <xsl:when test="child::xplan:typ=1000 or child::xplan:typ=2000">
-                        <plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_2_8_Recultivation')}"/>
+                      <xsl:when test="child::xplan:typ=2000">
+                        <plu:supplementaryRegulation xlink:href="{concat($hsrcl,'2_2_3_BrownfieldLand')}"/>
+                      </xsl:when>
+                      <xsl:when test="child::xplan:typ=3000">
+                        <plu:supplementaryRegulation xlink:href="{concat($hsrcl,'2_4_Erosion')}"/>
                       </xsl:when>
                       <xsl:otherwise>
-                        <plu:supplementaryRegulation xlink:href="{concat($hsrcl,'2_4_Erosion')}"/>
+                        <plu:supplementaryRegulation xlink:href="{concat($hsrcl,'2_RiskExposure')}"/>
                       </xsl:otherwise>
                     </xsl:choose>
                   </xsl:when>
@@ -2970,7 +3014,7 @@
                     <plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_2_9_Water')}"/>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_Grenze">
-                    <plu:supplementaryRegulation xlink:href="{concat($hsrcl,'6_2_BoundaryLine')}"/>
+                    <plu:supplementaryRegulation xlink:href="{concat($hsrcl,'10_OtherSupplementaryRegulation')}"/>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_GruenzugGruenzaesur">
                     <xsl:choose>
@@ -3240,11 +3284,11 @@
                   <xsl:when test="self::xplan:RP_Wasserverkehr">
                     <xsl:choose>
                       <xsl:when test="child::xplan:typ=1000 or
-                                      child::xplan:typ=1001 or
-                                      child::xplan:typ=1002 or
-                                      child::xplan:typ=1003 or
-                                      child::xplan:typ=1004 or
-                                      child::xplan:typ=2000">
+                                                  child::xplan:typ=1001 or
+                                                  child::xplan:typ=1002 or
+                                                  child::xplan:typ=1003 or
+                                                  child::xplan:typ=1004 or
+                                                  child::xplan:typ=2000">
                         <plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_1_3_9_HarborActivities')}"/>
                       </xsl:when>
                       <xsl:when test="child::xplan:typ=3000 or

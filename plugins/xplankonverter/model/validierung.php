@@ -149,7 +149,7 @@ class Validierung extends PgObject {
 		# (position as the default geometry of all objects inheriting from xp_objekt in gmlas
 		$gid_or_oid = ($sourcetype == 'gmlas') ? 'ogc_fid' : 'gid';
 		$geometry_col = ($sourcetype == 'gmlas') ? 'position' : 'the_geom';
-		$search_path  = ($sourcetype == 'gmlas') ? "xplan_gmlas_{$this->gui->user->id}" : "xplan_shapes_{$this_konvertierung_id}";
+		$search_path  = ($sourcetype == 'gmlas') ? "xplan_gmlas_{$this->gui->user->id}" : "xplan_shapes_{$this->konvertierung_id}";
 
 		# Frage gid mit ab
 		$sql = str_ireplace(
@@ -338,14 +338,15 @@ class Validierung extends PgObject {
 
 		# Selektiere gid zur eindeutigen Identifizierung des Datensatzes und within und distance
 		#if for gid (shape) or no gid (gmlas)
-		# changed to 25833 as otherwise thered be mixed geometry errors
+		# changed to 25832 as otherwise thered be mixed geometry errors
+		# TODO Get the Epsg code from $konvertierung
 		if($sourcetype != 'gmlas') {
 			$sql = str_ireplace(
 				'select',
 				"select
 					gid,
 					NOT st_within(" . $geometry_col . ", " . $plantype . ".raeumlichergeltungsbereich) AS ausserhalb,
-					st_distance(ST_Transform(" . $geometry_col . ", 25833), " . $plantype . ".raeumlichergeltungsbereich)/1000 AS distance,
+					st_distance(ST_Transform(" . $geometry_col . ", " . $konvertierung->get('input_epsg') ."), " . $plantype . ".raeumlichergeltungsbereich)/1000 AS distance,
 				",
 				$sql
 			);
@@ -355,7 +356,7 @@ class Validierung extends PgObject {
 				'select',
 				"select
 					NOT st_within(" . $geometry_col . ", " . $plantype . ".raeumlichergeltungsbereich) AS ausserhalb,
-					st_distance(ST_Transform(" . $geometry_col . ", 25833), " . $plantype . ".raeumlichergeltungsbereich)/1000 AS distance,
+					st_distance(ST_Transform(" . $geometry_col . ", " . $konvertierung->get('input_epsg') ."), " . $plantype . ".raeumlichergeltungsbereich)/1000 AS distance,
 				",
 				$sql
 			);
