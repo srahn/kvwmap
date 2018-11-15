@@ -33,7 +33,7 @@ function update_selection(selection){
 		}break;
 		default: {				// nach Dokumentart
 			checked = selection.checked;
-			condition = 'selection.value == nachweis.art';
+			condition = 'selection.value == nachweis.hauptart';
 			selections[0].checked = false;
 			selections[1].checked = false;
 			selections[2].checked = false;
