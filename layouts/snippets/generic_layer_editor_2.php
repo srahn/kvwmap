@@ -49,8 +49,9 @@
 <? }
 
   if($doit == true){
+		$table_id = rand(0, 100000);
 ?>
-<table border="0" cellspacing="0" cellpadding="2">
+<table id="<? echo $table_id; ?>" border="0" cellspacing="0" cellpadding="2">
 <?
 	for ($k=0;$k<$anzObj;$k++) {
 		$datapart = '';
@@ -410,6 +411,11 @@
 	}
 	
 ?>
+
+<script type="text/javascript">
+	var vchangers = document.getElementById(<? echo $table_id; ?>).querySelectorAll('.visibility_changer');
+	[].forEach.call(vchangers, function(vchanger){vchanger.oninput();});
+</script>
 
 <input type="hidden" name="checkbox_names_<? echo $layer['Layer_ID']; ?>" value="<? echo $checkbox_names; ?>">
 <input type="hidden" name="orderby<? echo $layer['Layer_ID']; ?>" id="orderby<? echo $layer['Layer_ID']; ?>" value="<? echo $this->formvars['orderby'.$layer['Layer_ID']]; ?>">
