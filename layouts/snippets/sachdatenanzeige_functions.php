@@ -36,6 +36,7 @@ include('funktionen/input_check_functions.php');
 	
 	check_visibility = function(layer_id, object, dependents, k){
 		if(object == null)return;
+		var group_display;
 		dependents.forEach(function(dependent){
 			var scope = object.closest('table');		// zuerst in der gleichen Tabelle suchen
 			if(scope.querySelector('#vcheck_operator_'+dependent) == undefined){
@@ -44,10 +45,23 @@ include('funktionen/input_check_functions.php');
 			var operator = scope.querySelector('#vcheck_operator_'+dependent).value;
 			var value = scope.querySelector('#vcheck_value_'+dependent).value;
 			if(operator == '=')operator = '==';
-			if(field_has_value(object, operator, value))
-				scope.querySelector('#tr_'+layer_id+'_'+dependent+'_'+k).style.display = '';
-			else
-				scope.querySelector('#tr_'+layer_id+'_'+dependent+'_'+k).style.display = 'none';
+			var tr_dependent = scope.querySelector('#tr_'+layer_id+'_'+dependent+'_'+k);
+			if(field_has_value(object, operator, value)){
+				tr_dependent.style.display = '';
+			}
+			else{
+				tr_dependent.style.display = 'none';
+			}
+			// Gruppe auch ein/ausblenden
+			all_trs = [].slice.call(tr_dependent.closest('table').firstChild.children);		// alle trs in der Gruppe
+			group_display = 'none';
+			all_trs.forEach(function(tr){
+				if(tr.id != '' && tr.style.display != 'none'){
+					console.log(tr);
+					group_display = '';
+				}
+			})
+			tr_dependent.closest('table').style.display = group_display;
 		})
 	}
 	
