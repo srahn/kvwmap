@@ -162,7 +162,7 @@ function delete_dokauswahl(){
 function scrollToSelected(select){
   for(var i = 0; i < select.options.length; i++){
 		if(select.options[i].selected){
-			select.scrollTop = i * select.options[i].offsetHeight;
+			select.scrollTop = i * 18;
 		}
 	}
 }
@@ -434,3 +434,10 @@ else {
     <input type="hidden" name="art_markieren" value="111" >
     <input type="hidden" name="go" value="Nachweisrechercheformular" >
     <input type="hidden" name="go_plus" value="" >
+		
+<script type="text/javascript">
+	var alle_unterarten = document.getElementsByName('suchunterart[]');
+	[].forEach.call(alle_unterarten, function (unterarten){
+    scrollToSelected(unterarten);
+  });
+</script>
