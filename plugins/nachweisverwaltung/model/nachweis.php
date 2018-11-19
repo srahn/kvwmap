@@ -801,8 +801,10 @@ class Nachweis {
       } break;
       
       case "MergeIDs" : {
-        $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring, st_assvg(st_transform(n.the_geom, ".$this->client_epsg.")) AS svg_umring,v.name AS vermst, n.art as unterart FROM nachweisverwaltung.n_nachweise AS n";
+        $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring, st_assvg(st_transform(n.the_geom, ".$this->client_epsg.")) AS svg_umring,v.name AS vermst, h.id as hauptart, n.art as unterart FROM nachweisverwaltung.n_nachweise AS n";
 				$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
+				$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id";
+				$sql.=" LEFT JOIN nachweisverwaltung.n_hauptdokumentarten h ON h.id = d.hauptart";
         $sql.=" WHERE n.id=".(int)$idselected[0];
 				if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
 				if($geprueft != NULL)$sql.=" AND geprueft = ".$geprueft;
