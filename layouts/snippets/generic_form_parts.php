@@ -222,7 +222,7 @@
 						$datapart .= ' readonly style="display: none"';
 					}
 					else{
-						$datapart .= ' tabindex="1" style="font-size: '.$fontsize.'px"';
+						$datapart .= ' tabindex="1" style="width: 100%;font-size: '.$fontsize.'px"';
 					}
 					$datapart .= ' rows="3" name="'.$fieldname.'">'.$value.'</textarea>';
 					if($attribute_privileg > '0' AND $attributes['options'][$j] != ''){
