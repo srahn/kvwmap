@@ -460,7 +460,7 @@
 		$sql.='"'.$formvars['suchantrnr'].'", ';
 		$sql.=$stelle_id.', ';
 		$sql.='"'.date('Y-m-d H:i:s',time()).'", ';
-		$sql.='`suchhauptart`, `suchunterart`, `suchgn`, `suchan`, `abfrageart`, `suchgemarkung`, `suchflur`, `suchstammnr`, `suchstammnr2`, `suchrissnummer`, `suchrissnummer2`, `suchfortfuehrung`, `suchpolygon`, `suchantrnr`, `sdatum`, `sdatum2`, `sVermStelle`,';
+		$sql.='`suchhauptart`, `suchunterart`, `abfrageart`, `suchgemarkung`, `suchflur`, `suchstammnr`, `suchstammnr2`, `suchrissnummer`, `suchrissnummer2`, `suchfortfuehrung`, `suchpolygon`, `suchantrnr`, `sdatum`, `sdatum2`, `sVermStelle`,';
 		if($formvars['flur_thematisch']!='') { $sql.='"'.$formvars['flur_thematisch'].'"'; }else{$sql.='"0"';}
 		$sql.=' FROM rolle_nachweise';
 		$sql.=' WHERE user_id='.$user_id.' AND stelle_id='.$stelle_id;

@@ -150,7 +150,7 @@ class antrag {
       $quellpfad=NACHWEISDOCPATH.$flurid.'/'.$nr.'/';
       $quelle=$quellpfad.$nachweis->Dokumente[$i]['link_datei'];
       # Pfad zum Ziel erstellen
-      $ziel=$auftragspfad.$flurid.'/'.$nr.'/'.$nachweis->Dokumente[$i]['link_datei'];
+			$ziel = $zielpfad.basename($nachweis->Dokumente[$i]['link_datei']);
       #echo '<br>von:'.$quelle.' nach:'.$ziel;
 			$dateinamensteil = explode('.', $nachweis->Dokumente[$i]['link_datei']);
       if (!file_exists($quelle)) {
