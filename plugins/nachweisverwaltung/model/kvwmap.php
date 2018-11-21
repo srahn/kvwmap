@@ -1162,8 +1162,8 @@
 	    }
 	  }
     $oldscale=round($GUI->map_scaledenom);  
-    if ($GUI->formvars['CMD']!=''){
-			$GUI->formvars['unterart'] = $GUI->formvars['unterart_'.$GUI->formvars['hauptart']];
+		$GUI->formvars['unterart'] = $GUI->formvars['unterart_'.$GUI->formvars['hauptart']];
+    if ($GUI->formvars['CMD']!=''){			
       $GUI->navMap($GUI->formvars['CMD']);
       $GUI->user->rolle->saveDrawmode($GUI->formvars['always_draw']);
     }
