@@ -348,7 +348,7 @@ class synchro {
 				);
 			";
 
-			# Trage gepushte Datensätze ein
+			# Trage gepushte Datensätze ein falls rows vorhanden sind
 			$sql .= implode(
 				'; ',
 				array_map(
