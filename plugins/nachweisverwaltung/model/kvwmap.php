@@ -1100,7 +1100,7 @@
     $GUI->formvars['stammnr']=$nachweis->document['stammnr'];
     $GUI->formvars['rissnummer']=$nachweis->document['rissnummer'];
     $GUI->formvars['hauptart']=$nachweis->document['hauptart'];
-    $GUI->formvars['unterart']=$nachweis->document['unterart'];		
+		$GUI->formvars['unterart_'.$GUI->formvars['hauptart']] = $nachweis->document['unterart'];
     $GUI->formvars['Blattnr']=$nachweis->document['blattnummer'];
     $GUI->formvars['datum']=$nachweis->document['datum'];
     $GUI->formvars['VermStelle']=$nachweis->document['vermstelle'];
