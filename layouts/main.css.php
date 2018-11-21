@@ -907,7 +907,7 @@ a.menuered:hover {
 	margin: 3 0 0 15;
 	padding: 2 2 2 3;
 	height: 16px;
-	width: 177px;
+	min-width: 177px;
 	border: 1px solid grey;
 	cursor: pointer;
 }
@@ -1544,7 +1544,7 @@ tbody.gle tr:hover {
 }
 
 .layerOptions, #legendOptions{
-	width: 220px;
+	min-width: 220px;
 	border: 1px solid #cccccc;
 	background: #EDEFEF;
 	padding:0px;

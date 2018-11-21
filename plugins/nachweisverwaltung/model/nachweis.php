@@ -855,7 +855,7 @@ class Nachweis {
           }
           $sql.=")";
         }
-				if($flur_thematisch != ''){
+				if($flur_thematisch != 0){
 					if($flur == '')	$sql.=" AND substr(n.flurid::text, 1, 6) = '".$gemarkung."'";
 					else $sql.=" AND n.flurid='".$gemarkung.str_pad($flur,3,'0',STR_PAD_LEFT)."'";
 				}				
@@ -921,7 +921,7 @@ class Nachweis {
           #echo '<br>Suche nach individueller Nummer.';
           $sql ="SELECT n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
           $sql.=" FROM ";
-					if($gemarkung != '' AND $flur_thematisch == ''){
+					if($gemarkung != '' AND $flur_thematisch == 0){
 						$sql.=" alkis.pp_flur as flur, ";
 					}
 					$sql.=" nachweisverwaltung.n_nachweise AS n";
@@ -938,7 +938,7 @@ class Nachweis {
             }
             $sql.=")";
           }
-					if($flur_thematisch != ''){
+					if($flur_thematisch != 0){
 						if($flur == '')	$sql.=" AND substr(n.flurid::text, 1, 6) = '".$gemarkung."'";
 						else $sql.=" AND n.flurid='".$gemarkung.str_pad($flur,3,'0',STR_PAD_LEFT)."'";
           }

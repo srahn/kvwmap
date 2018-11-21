@@ -732,10 +732,10 @@ function handleDragEnd(e){
 
 <?
 	if($this->user->rolle->legendtype == 1){ # alphabetisch sortierte Legende
-		echo 'layernames = new Array();';
+		echo "layernames = new Array();\n";
 		$layercount = count($this->sorted_layerset);
 		for($j = 0; $j < $layercount; $j++){
-			echo 'layernames['.$j.'] = \''.$this->sorted_layerset[$j]['alias'].'\';';
+			echo 'layernames['.$j.'] = \''.str_replace('"', '', str_replace("'", '', $this->sorted_layerset[$j]['alias']))."';\n";
 		}
 ?>
 		function jumpToLayer(searchtext){
