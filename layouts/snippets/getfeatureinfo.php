@@ -17,9 +17,9 @@
 	
 <? }else{																																								# sie haben unterschiedliche Protokolle und daher kann kein Iframe verwendet werden -> direkte Einbindung ins html
 
-		if (substr($this->qlayerset[$i][GetFeatureInfoRequest],0,7) != 'http://'){
-		$this->qlayerset[$i][GetFeatureInfoRequest] = 'http://'.$this->qlayerset[$i][GetFeatureInfoRequest];
-		}
+		// if (substr($this->qlayerset[$i][GetFeatureInfoRequest],0,7) != 'http://'){			// kann weg?
+		// $this->qlayerset[$i][GetFeatureInfoRequest] = 'http://'.$this->qlayerset[$i][GetFeatureInfoRequest];
+		// }
 
 		$response = url_get_contents($this->qlayerset[$i][GetFeatureInfoRequest]);		
 		
