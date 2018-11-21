@@ -209,8 +209,6 @@ function onload_functions(){
 	<? if($this->user->rolle->auto_map_resize){ ?>
 	window.onresize = function(){clearTimeout(doit);doit = setTimeout(resizemap2window, 200);};
 	<? } ?>
-	var vchangers = document.getElementsByClassName('visibility_changer');
-	[].forEach.call(vchangers, function(vchanger){vchanger.oninput();});
 	document.fullyLoaded = true;
 }
 
@@ -734,10 +732,10 @@ function handleDragEnd(e){
 
 <?
 	if($this->user->rolle->legendtype == 1){ # alphabetisch sortierte Legende
-		echo 'layernames = new Array();';
+		echo "layernames = new Array();\n";
 		$layercount = count($this->sorted_layerset);
 		for($j = 0; $j < $layercount; $j++){
-			echo 'layernames['.$j.'] = \''.$this->sorted_layerset[$j]['alias'].'\';';
+			echo 'layernames['.$j.'] = \''.str_replace('"', '', str_replace("'", '', $this->sorted_layerset[$j]['alias']))."';\n";
 		}
 ?>
 		function jumpToLayer(searchtext){

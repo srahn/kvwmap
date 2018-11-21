@@ -222,7 +222,7 @@
 						$datapart .= ' readonly style="display: none"';
 					}
 					else{
-						$datapart .= ' tabindex="1" style="font-size: '.$fontsize.'px"';
+						$datapart .= ' tabindex="1" style="width: 100%;font-size: '.$fontsize.'px"';
 					}
 					$datapart .= ' rows="3" name="'.$fieldname.'">'.$value.'</textarea>';
 					if($attribute_privileg > '0' AND $attributes['options'][$j] != ''){
@@ -254,7 +254,8 @@
 						$enum_value = $attributes['enum_value'][$j];
 						$enum_output = $attributes['enum_output'][$j];
 					}
-					if($attributes['nullable'][$j] != '0' OR $gui->new_entry == true)$strPleaseSelect = $gui->strPleaseSelect;
+					if($attributes['nullable'][$j] != '0')$strPleaseSelect = '-';
+					if($gui->new_entry == true)$strPleaseSelect = '-- '.$gui->strPleaseSelect.' --';
 					$datapart .= Auswahlfeld($layer_id, $name, $j, $alias, $fieldname, $value, $enum_value, $enum_output, $attributes['req_by'][$j], $attributes['req'][$j], $attributes['name'], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $select_width, $fontsize, $strPleaseSelect, $change_all, $onchange, $field_class);
 				}break;
 				
@@ -761,6 +762,7 @@
 				}
 			}
 			$datapart .= '<input readonly id="'.$layer_id.'_'.$name.'_'.$k.'" style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;" size="'.$auswahlfeld_output_laenge.'" type="text" name="'.$fieldname.'" value="'.$auswahlfeld_output.'">';
+			$datapart .= '<input type="hidden" class="'.$field_class.'" onchange="'.$onchange.'" value="'.$value.'">';		// falls das Attribut ein visibility-changer ist
 			$auswahlfeld_output = '';
 			$auswahlfeld_output_laenge = '';
 		}
@@ -774,7 +776,7 @@
 			}
 			$datapart .= ' onchange="'.$onchange.'" ';
 			$datapart .= 'id="'.$layer_id.'_'.$name.'_'.$k.'" name="'.$fieldname.'">';
-			if($strPleaseSelect)$datapart .= '<option value="">-- '.$strPleaseSelect.' --</option>';
+			if($strPleaseSelect)$datapart .= '<option value="">'.$strPleaseSelect.'</option>';
 			for($e = 0; $e < count($enum_value); $e++){
 				$datapart .= '<option ';
 				if($enum_value[$e] == $value){

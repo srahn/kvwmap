@@ -677,7 +677,7 @@ class GUI {
 				}
 				else
 					$legend .= ' class="visiblelayerlink boldhover" href="javascript:void(0)">';
-				$legend .= '<span id="'.str_replace('-', '_', $layer['alias']).'"';
+				$legend .= '<span id="'.str_replace('"', '', str_replace("'", '', str_replace('-', '_', $layer['alias']))).'"';
 				if($layer['minscale'] != -1 AND $layer['maxscale'] > 0){
 					$legend .= ' title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
 				}

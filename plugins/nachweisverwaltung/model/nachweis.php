@@ -50,7 +50,7 @@ class Nachweis {
 	function check_documentpath($old_dataset){		
 		$ret=$this->getNachweise($old_dataset['id'],'','','','','','','','bySingleID','','');
 		if ($ret=='') {
-			$this->Dokumente[0]['artname'] = strtolower($this->hauptarten[$this->Dokumente[0]['art']]['abkuerzung']);
+			$this->Dokumente[0]['artname'] = strtolower($this->hauptarten[$this->Dokumente[0]['hauptart']]['abkuerzung']);
 			$this->Dokumente[0]['Bilddatei_name'] = $this->Dokumente[0]['link_datei'];
 			$this->Dokumente[0]['Blattnr'] = $this->Dokumente[0]['blattnummer'];
 			$formvars['zieldateiname']=$this->getZielDateiName($this->Dokumente[0]);
@@ -60,7 +60,7 @@ class Nachweis {
 			#echo $newpath.'<br>';
 			if($oldpath != $newpath){
 				$this->adjust_documentpath($oldpath, $newpath);
-				$this->aktualisierenDokument($old_dataset['id'],NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,$this->Dokumente[0]['artname'].'/'.$formvars['zieldateiname'],NULL);
+				$this->aktualisierenDokument($old_dataset['id'],NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,$this->Dokumente[0]['artname'].'/'.$formvars['zieldateiname'],NULL);
 			}
 		}
 	}
@@ -80,10 +80,9 @@ class Nachweis {
 		include_(CLASSPATH.'data_import_export.php');
     $io = new data_import_export();
 		$sql = "SELECT st_multi(st_union(n.the_geom)) as the_geom FROM nachweisverwaltung.n_nachweise n ";
-		$sql.= "LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id "; 
-		$sql.= "LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n2d.dokumentart_id = d.id ";
+		$sql.= "LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id ";
 		$sql.= "WHERE n.id IN (".implode(',', $this->nachweise_id).") ";
-		$sql.= "AND n.art < '111' OR d.geometrie_relevant";
+		$sql.= "AND d.geometrie_relevant";
 		# temp. Tabelle erzeugen für den Export
 		$temp_table = 'nwv_'.rand(1, 10000);
     $sql = 'CREATE TABLE public.'.$temp_table.' AS '.$sql;
@@ -102,8 +101,7 @@ class Nachweis {
 	function writeIgnoredDokumentarten($pfad){
 		# Readme-Datei mit ignorierten Dokumentarten schreiben
 		$sql = "SELECT d.art FROM nachweisverwaltung.n_nachweise n ";
-		$sql.= "LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id "; 
-		$sql.= "LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n2d.dokumentart_id = d.id ";
+		$sql.= "LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id ";
 		$sql.= "WHERE n.id IN (".implode(',', $this->nachweise_id).") ";
 		$sql.= "AND NOT d.geometrie_relevant";
 		$ret = $this->database->execSQL($sql,4, 0);
@@ -161,7 +159,7 @@ class Nachweis {
 				$zieldatei=NACHWEISDOCPATH.$formvars['flurid'].'/'.$this->buildNachweisNr($formvars[NACHWEIS_PRIMARY_ATTRIBUTE], $formvars[NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$formvars['artname'].'/'.$formvars['zieldateiname'];
 
         # 4. Ändern der Eintragung in der Datenbank
-        $ret=$this->aktualisierenDokument($formvars['id'],$formvars['datum'],$formvars['flurid'],$formvars['VermStelle'],$formvars['hauptart'],$formvars['unterart_'.$formvars['hauptart']],$formvars['gueltigkeit'],$formvars['geprueft'],$formvars['stammnr'],$formvars['Blattformat'],$formvars['Blattnr'],$formvars['rissnummer'],$formvars['fortfuehrung'],$formvars['bemerkungen'],$formvars['bemerkungen_intern'],$formvars['umring'],$formvars['artname'].'/'.$formvars['zieldateiname'], $user);
+        $ret=$this->aktualisierenDokument($formvars['id'],$formvars['datum'],$formvars['flurid'],$formvars['VermStelle'],$formvars['unterart_'.$formvars['hauptart']],$formvars['gueltigkeit'],$formvars['geprueft'],$formvars['stammnr'],$formvars['Blattformat'],$formvars['Blattnr'],$formvars['rissnummer'],$formvars['fortfuehrung'],$formvars['bemerkungen'],$formvars['bemerkungen_intern'],$formvars['umring'],$formvars['artname'].'/'.$formvars['zieldateiname'], $user);
         if ($ret[0]) {
           # Aktualisierungsvorgang in der Datenbank nicht erfolgreich
           $errmsg=$ret[1];
@@ -588,8 +586,7 @@ class Nachweis {
       }
       # Wenn keine Fehler aufgetreten sind, löschen des Datenbankeintrages des Nachweises.
       if ($errmsg=='') {
-      	$sql="DELETE FROM nachweisverwaltung.n_nachweise2dokumentarten WHERE nachweis_id = ".$idListe[$i].";";
-        $sql.="DELETE FROM nachweisverwaltung.n_nachweise WHERE id=".(int)$idListe[$i];
+        $sql ="DELETE FROM nachweisverwaltung.n_nachweise WHERE id=".(int)$idListe[$i];
         $ret=$this->database->execSQL($sql,4, 1);
         if ($ret[0]==0) {
           # Datensatz erfolgreich gelöscht
@@ -615,22 +612,16 @@ class Nachweis {
     return $ret;
   }
   
-  function eintragenNeuesDokument($datum,$flurid,$VermStelle,$hauptart,$unterart,$gueltigkeit,$geprueft,$stammnr,$blattformat,$blattnr,$rissnummer,$fortf,$bemerkungen,$bemerkungen_intern,$zieldatei,$umring,$user) {
+  function eintragenNeuesDokument($datum,$flurid,$VermStelle,$unterart,$gueltigkeit,$geprueft,$stammnr,$blattformat,$blattnr,$rissnummer,$fortf,$bemerkungen,$bemerkungen_intern,$zieldatei,$umring,$user) {
     #2005-11-24_pk
     if($fortf == '')$fortf = 'NULL';
     $this->debug->write('Einfügen der Metadaten zum neuen Nachweisdokument in die Sachdatenbank',4);
     $sql ="INSERT INTO nachweisverwaltung.n_nachweise (flurid,stammnr,art,blattnummer,datum,vermstelle,gueltigkeit,geprueft,format,link_datei,the_geom,fortfuehrung,rissnummer,bemerkungen,bemerkungen_intern,bearbeiter,zeit,erstellungszeit)";
-    $sql.=" VALUES (".$flurid.",'".trim($stammnr)."',".$hauptart.",'".trim($blattnr)."','".$datum."'";
+    $sql.=" VALUES (".$flurid.",'".trim($stammnr)."',".$unterart.",'".trim($blattnr)."','".$datum."'";
     $sql.=",'".$VermStelle."','".$gueltigkeit."','".$geprueft."','".$blattformat."','".$zieldatei."',st_transform(st_geometryfromtext('".$umring."', ".$this->client_epsg."), (select srid from geometry_columns where f_table_name = 'n_nachweise'))";
     $sql.=",".$fortf.",'".$rissnummer."','".$bemerkungen."','".$bemerkungen_intern."','".$user->Vorname." ".$user->Name."', '".date('Y-m-d G:i:s')."', '".date('Y-m-d G:i:s')."')";
 		#echo '<br>Polygon-SQL: '.$sql;
     $ret=$this->database->execSQL($sql,4, 1);
-    if($unterart != ''){
-    	$sql = "INSERT INTO nachweisverwaltung.n_nachweise2dokumentarten";
-    	$sql .= " SELECT id, ".$unterart." FROM nachweisverwaltung.n_nachweise WHERE oid = ".pg_last_oid($ret[1]);
-    	#echo $sql;
-    	$ret=$this->database->execSQL($sql,4, 1);	
-    }
     if ($ret[0]) {
       # Fehler beim Eintragen in Datenbank
       $ret[1]='Auf Grund eines Datenbankfehlers konnte das Dokument nicht eingetragen werden!'.$ret[1];
@@ -638,7 +629,7 @@ class Nachweis {
     return $ret;
   }
   
-  function aktualisierenDokument($id,$datum,$flurid,$VermStelle,$hauptart,$unterart,$gueltigkeit,$geprueft,$stammnr,$Blattformat,$Blattnr,$rissnr,$fortf,$bemerkungen,$bemerkungen_intern,$umring,$zieldateiname,$user){
+  function aktualisierenDokument($id,$datum,$flurid,$VermStelle,$unterart,$gueltigkeit,$geprueft,$stammnr,$Blattformat,$Blattnr,$rissnr,$fortf,$bemerkungen,$bemerkungen_intern,$umring,$zieldateiname,$user){
     $this->debug->write('Aktualisieren der Metadaten zu einem bestehenden Nachweisdokument',4);
     $sql="UPDATE nachweisverwaltung.n_nachweise SET ";
 		if($flurid != NULL)$sql.="flurid='".$flurid."', ";
@@ -646,7 +637,7 @@ class Nachweis {
 			if($stammnr === '')$sql.="stammnr=NULL, ";
 			else $sql.="stammnr='".trim($stammnr)."', ";
 		}
-		if($hauptart != NULL)$sql.="art=".$hauptart;
+		if($unterart != NULL)$sql.="art=".$unterart;
     if($Blattnr != NULL)$sql.=",blattnummer='".trim($Blattnr)."', ";
 		if($datum != NULL)$sql.="datum='".$datum."', ";
 		if($VermStelle != NULL)$sql.="vermstelle='".$VermStelle."', ";
@@ -669,14 +660,6 @@ class Nachweis {
     $sql.=" WHERE id = ".$id;
     #echo $sql;
     $ret=$this->database->execSQL($sql,4, 1);
-		$sql = "DELETE FROM nachweisverwaltung.n_nachweise2dokumentarten WHERE nachweis_id = ".$id;
-		#echo $sql;
-		$ret=$this->database->execSQL($sql,4, 1);	
-		if($unterart != ''){
-			$sql = "INSERT INTO nachweisverwaltung.n_nachweise2dokumentarten VALUES (".$id.", ".$unterart.")";
-			#echo $sql;
-			$ret=$this->database->execSQL($sql,4, 1);	
-		}
 		if ($ret[0]){
 			# Fehler beim Eintragen in Datenbank
 			$ret[1]='Auf Grund eines Datenbankfehlers konnte das Dokument nicht aktualisiert werden!'.$ret[1];
@@ -772,7 +755,7 @@ class Nachweis {
 		if($order==''){
 			$order="flurid, stammnr, datum";
 		}
-		$order = str_replace('blattnummer', "NULLIF(regexp_replace(blattnummer, '\D', '', 'g'), '')::int", $order);		// nach Blattnummer nummerisch sortieren
+		$order = str_replace('blattnummer', "NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::int", $order);		// nach Blattnummer nummerisch sortieren
     # Die Funktion liefert die Nachweise nach verschiedenen Suchverfahren.
     # Vor dem Suchen nach Nachweisen werden jeweils die Suchparameter überprüft    
     if (is_array($id)) { $idListe=$id; } else { $idListe=array($id); }
@@ -792,9 +775,10 @@ class Nachweis {
         else {
           # Suche nach einer einzelnen Nachweis_id
           # echo '<br>Suche nach einer einzelnen ID.';
-          $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring, st_assvg(st_transform(n.the_geom, ".$this->client_epsg.")) AS svg_umring,v.name AS vermst,n2d.dokumentart_id as unterart FROM nachweisverwaltung.n_nachweise AS n";
-					$sql.= " LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
-          $sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id";
+          $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring, st_assvg(st_transform(n.the_geom, ".$this->client_epsg.")) AS svg_umring,v.name AS vermst, h.id as hauptart, n.art as unterart FROM nachweisverwaltung.n_nachweise AS n";
+					$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
+					$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id";
+					$sql.=" LEFT JOIN nachweisverwaltung.n_hauptdokumentarten h ON h.id = d.hauptart";
           $sql.=" WHERE n.id=".(int)$id;
 					if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
 					if($geprueft != NULL)$sql.=" AND geprueft = ".$geprueft;
@@ -817,9 +801,10 @@ class Nachweis {
       } break;
       
       case "MergeIDs" : {
-        $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring, st_assvg(st_transform(n.the_geom, ".$this->client_epsg.")) AS svg_umring,v.name AS vermst,n2d.dokumentart_id as unterart FROM nachweisverwaltung.n_nachweise AS n";
+        $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring, st_assvg(st_transform(n.the_geom, ".$this->client_epsg.")) AS svg_umring,v.name AS vermst, h.id as hauptart, n.art as unterart FROM nachweisverwaltung.n_nachweise AS n";
 				$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
-        $sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id";
+				$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id";
+				$sql.=" LEFT JOIN nachweisverwaltung.n_hauptdokumentarten h ON h.id = d.hauptart";
         $sql.=" WHERE n.id=".(int)$idselected[0];
 				if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
 				if($geprueft != NULL)$sql.=" AND geprueft = ".$geprueft;
@@ -859,12 +844,11 @@ class Nachweis {
       } break;
 
       case "multibleIDs" : {
-				$sql ="SELECT distinct n.*,st_astext(st_multi(st_transform(n.the_geom, ".$this->client_epsg."))) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS unterart, d.art AS unterart_name, h.art as art_name"; 
+				$sql ="SELECT distinct n.*,st_astext(st_multi(st_transform(n.the_geom, ".$this->client_epsg."))) AS wkt_umring,v.name AS vermst, h.id as hauptart, n.art AS unterart, d.art AS unterart_name, h.art as art_name"; 
 				$sql.=" FROM nachweisverwaltung.n_nachweise AS n";
 				$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
-				$sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id"; 
-				$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n2d.dokumentart_id = d.id";
-				$sql.=" LEFT JOIN nachweisverwaltung.n_hauptdokumentarten h ON h.id = n.art";
+				$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id";
+				$sql.=" LEFT JOIN nachweisverwaltung.n_hauptdokumentarten h ON h.id = d.hauptart";
         $sql.=" WHERE true ";
 				if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit." AND ";
 				if($geprueft != NULL)$sql.=" AND geprueft = ".$geprueft;
@@ -875,7 +859,7 @@ class Nachweis {
           }
           $sql.=")";
         }
-				if($flur_thematisch != ''){
+				if($flur_thematisch != 0){
 					if($flur == '')	$sql.=" AND substr(n.flurid::text, 1, 6) = '".$gemarkung."'";
 					else $sql.=" AND n.flurid='".$gemarkung.str_pad($flur,3,'0',STR_PAD_LEFT)."'";
 				}				
@@ -896,10 +880,10 @@ class Nachweis {
 						$sql.=" AND n.id IN (".implode(',', $idselected).")";
 					}
 					else{
-						$sql.=" AND n.art IN (".implode(',', $hauptart).")";
+						$sql.=" AND h.id IN (".implode(',', $hauptart).")";
 					}
 				}
-				if(!empty($unterart))$sql.=" AND d.id IN (".implode(',', $unterart).")";
+				if(!empty($unterart))$sql.=" AND ((n.art IN (".implode(',', $unterart).")) OR (d.hauptart NOT IN (select distinct hauptart from nachweisverwaltung.n_dokumentarten where id IN (".implode(',', $unterart)."))))";				
 				if($suchbemerkung != ''){
           $sql.=" AND n.bemerkungen LIKE '%".$suchbemerkung."%'";
         }				
@@ -936,15 +920,15 @@ class Nachweis {
           # Suchparameter sind gültig
           # Suche nach individueller Nummer
           #echo '<br>Suche nach individueller Nummer.';
-          $sql ="SELECT n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS unterart, d.art AS unterart_name";
+          $sql ="SELECT n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
           $sql.=" FROM ";
-					if($gemarkung != '' AND $flur_thematisch == ''){
+					if($gemarkung != '' AND $flur_thematisch == 0){
 						$sql.=" alkis.pp_flur as flur, ";
 					}
 					$sql.=" nachweisverwaltung.n_nachweise AS n";
 					$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
-          $sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id"; 
-					$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n2d.dokumentart_id = d.id";
+					$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id";
+					$sql.=" LEFT JOIN nachweisverwaltung.n_hauptdokumentarten h ON h.id = d.hauptart";
           $sql.=" WHERE 1=1 ";
 					if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
 					if($geprueft != NULL)$sql.=" AND geprueft = ".$geprueft;
@@ -955,7 +939,7 @@ class Nachweis {
             }
             $sql.=")";
           }
-					if($flur_thematisch != ''){
+					if($flur_thematisch != 0){
 						if($flur == '')	$sql.=" AND substr(n.flurid::text, 1, 6) = '".$gemarkung."'";
 						else $sql.=" AND n.flurid='".$gemarkung.str_pad($flur,3,'0',STR_PAD_LEFT)."'";
           }
@@ -1024,10 +1008,10 @@ class Nachweis {
 							$sql.=" AND n.id IN (".implode(',', $idselected).")";
 						}
 						else{
-							$sql.=" AND n.art IN (".implode(',', $hauptart).")";
+							$sql.=" AND h.id IN (".implode(',', $hauptart).")";
 						}
 					}
-					if(!empty($unterart))$sql.=" AND d.id IN (".implode(',', $unterart).")";
+					if(!empty($unterart))$sql.=" AND ((n.art IN (".implode(',', $unterart).")) OR (d.hauptart NOT IN (select distinct hauptart from nachweisverwaltung.n_dokumentarten where id IN (".implode(',', $unterart)."))))";					
 					if($suchbemerkung != ''){
 						$sql.=" AND lower(n.bemerkungen) LIKE '%".mb_strtolower($suchbemerkung)."%'";
 					}
@@ -1064,11 +1048,11 @@ class Nachweis {
           # Suche mit Suchpolygon
           #echo '<br>Suche mit Suchpolygon.';
           $this->debug->write('Abfragen der Nachweise die das Polygon schneiden',4);
-          $sql ="SELECT distinct n.*, NULLIF(regexp_replace(blattnummer, '\D', '', 'g'), '')::int, st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS unterart, d.art AS unterart_name";
+					$sql ="SELECT distinct n.*, NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::int, st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
           $sql.=" FROM nachweisverwaltung.n_nachweise AS n";
 					$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
-          $sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id"; 
-					$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n2d.dokumentart_id = d.id";
+          $sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id";					
+					$sql.=" LEFT JOIN nachweisverwaltung.n_hauptdokumentarten h ON h.id = d.hauptart";
 					if($alle_der_messung){
 						$sql.=" LEFT JOIN nachweisverwaltung.n_nachweise AS n2 ON n.oid = n2.oid OR (n.flurid = n2.flurid AND n.".NACHWEIS_PRIMARY_ATTRIBUTE." = n2.".NACHWEIS_PRIMARY_ATTRIBUTE." ".((NACHWEIS_SECONDARY_ATTRIBUTE) ? "and n.".NACHWEIS_SECONDARY_ATTRIBUTE." = n2.".NACHWEIS_SECONDARY_ATTRIBUTE : "").")";
 						$n = 'n2';
@@ -1082,10 +1066,10 @@ class Nachweis {
 							$sql.=" AND ".$n.".id IN (".implode(',', $idselected).")";
 						}
 						else{
-							$sql.=" AND ".$n.".art IN (".implode(',', $hauptart).")";
+							$sql.=" AND h.id IN (".implode(',', $hauptart).")";
 						}
 					}
-					if(!empty($unterart))$sql.=" AND d.id IN (".implode(',', $unterart).")";					
+					if(!empty($unterart))$sql.=" AND ((".$n.".art IN (".implode(',', $unterart).")) OR (d.hauptart NOT IN (select distinct hauptart from nachweisverwaltung.n_dokumentarten where id IN (".implode(',', $unterart)."))))";				
           if ($richtung=='' OR $richtung=='ASC'){
             $richtung=="ASC";
             $this->richtung="DESC";
@@ -1110,11 +1094,11 @@ class Nachweis {
         # Suche nach Antragsnummer
         # echo '<br>Suche nach Antragsnummer.';
         $this->debug->write('Abfragen der Nachweise die zum Antrag gehören',4);
-				$sql ="SELECT distinct n.*,v.name AS vermst, n2d.dokumentart_id AS unterart, d.art AS unterart_name";
+				$sql ="SELECT distinct n.*,v.name AS vermst, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
         $sql.=" FROM nachweisverwaltung.n_nachweise2antraege AS n2a, nachweisverwaltung.n_nachweise AS n";
 				$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
-        $sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id"; 
-				$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n2d.dokumentart_id = d.id";
+				$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id";
+				$sql.=" LEFT JOIN nachweisverwaltung.n_hauptdokumentarten h ON h.id = d.hauptart";				
         $sql.=" WHERE n.id=n2a.nachweis_id";
         $sql.=" AND n2a.antrag_id='".$antr_nr."'";				
 				if($stelle_id == '')$sql.=" AND stelle_id IS NULL";
@@ -1126,10 +1110,10 @@ class Nachweis {
 						$sql.=" AND n.id IN (".implode(',', $idselected).")";
 					}
 					else{
-						$sql.=" AND n.art IN (".implode(',', $hauptart).")";
+						$sql.=" AND h.id IN (".implode(',', $hauptart).")";
 					}
 				}
-				if(!empty($unterart))$sql.=" AND d.id IN (".implode(',', $unterart).")";
+				if(!empty($unterart))$sql.=" AND ((n.art IN (".implode(',', $unterart).")) OR (d.hauptart NOT IN (select distinct hauptart from nachweisverwaltung.n_dokumentarten where id IN (".implode(',', $unterart)."))))";				
         if ($order=='') {
           $order="flurid, stammnr, datum";
         }

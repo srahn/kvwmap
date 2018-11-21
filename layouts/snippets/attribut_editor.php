@@ -258,14 +258,14 @@ function alias_replace(name){
 						  </td>
 
 						  <td align="left" valign="top">
-						  	<input name="alias_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo $this->attributes['alias'][$i]; ?>">
+						  	<input name="alias_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo htmlspecialchars($this->attributes['alias'][$i]); ?>">
 						  </td>
 							
 							<?php
 							foreach ($supportedLanguages as $language){
 								if($language != 'german') { ?>
 									<td align="left" valign="top">
-										<input name="alias_<?php echo $language; ?>_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo $this->attributes['alias_' . $language][$i]; ?>">
+										<input name="alias_<?php echo $language; ?>_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo htmlspecialchars($this->attributes['alias_' . $language][$i]); ?>">
 									</td><?php
 								}
 							} ?>

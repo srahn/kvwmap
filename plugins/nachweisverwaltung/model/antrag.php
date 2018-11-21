@@ -140,7 +140,7 @@ class antrag {
         mkdir ($zielpfad, 0777);
       }
       # Erzeuge ein Unterverzeichnis für die Dokumentenart, wenn noch nicht vorhanden
-      $artname = strtolower($nachweis->hauptdokumentarten[$nachweis->Dokumente[$i]['art']]['abkuerzung']);
+      $artname = strtolower($nachweis->hauptdokumentarten[$nachweis->Dokumente[$i]['hauptart']]['abkuerzung']);
       $zielpfad.=$artname.'/';
       if (!is_dir($zielpfad)) {
         mkdir ($zielpfad, 0777);
@@ -150,7 +150,7 @@ class antrag {
       $quellpfad=NACHWEISDOCPATH.$flurid.'/'.$nr.'/';
       $quelle=$quellpfad.$nachweis->Dokumente[$i]['link_datei'];
       # Pfad zum Ziel erstellen
-      $ziel=$auftragspfad.$flurid.'/'.$nr.'/'.$nachweis->Dokumente[$i]['link_datei'];
+			$ziel = $zielpfad.basename($nachweis->Dokumente[$i]['link_datei']);
       #echo '<br>von:'.$quelle.' nach:'.$ziel;
 			$dateinamensteil = explode('.', $nachweis->Dokumente[$i]['link_datei']);
       if (!file_exists($quelle)) {
@@ -349,8 +349,7 @@ class antrag {
 		$sql.=" (SELECT n.flurid, n.stammnr, n.art, n.blattnummer, n.rissnummer, n.the_geom";
 		if(NACHWEIS_SECONDARY_ATTRIBUTE != '')$sql.=", n.".NACHWEIS_SECONDARY_ATTRIBUTE;		
 		$sql.=" FROM nachweisverwaltung.n_nachweise2antraege AS n2a, nachweisverwaltung.n_nachweise AS n";
-		$sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id";
-		$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n2d.dokumentart_id = d.id";
+		$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id";
 		$sql.=" WHERE  n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
 		if($this->stelle_id == '')$sql.=" AND stelle_id IS NULL";
 		else $sql.=" AND stelle_id=".$this->stelle_id;    

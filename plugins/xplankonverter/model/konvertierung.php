@@ -247,7 +247,9 @@ class Konvertierung extends PgObject {
 		foreach($this->get_bereiche($plan->get('gml_id')) AS $bereich) {
 			$regeln_mit_bereich = $regel->find_where("bereich_gml_id = '{$bereich->get('gml_id')}'");
 			$this->debug->show(count($regeln_mit_bereich) . ' Regeln mit Bereich gefunden.', Konvertierung::$write_debug);
+			// needs to be merged with regeln to merge multiple bereiche
 			$regeln = array_merge(
+				$regeln,
 				$regeln_ohne_bereich,
 				$regeln_mit_bereich
 			);
@@ -489,11 +491,12 @@ class Konvertierung extends PgObject {
 					}
 					else {
 						$result = $regel->convert($this);
-						if (!empty($result)) {
+						// TODO: Fix this, currently no gids break the result
+						/*if (!empty($result)) {
 							if($regel->is_source_shape_or_gmlas($regel) != 'gmlas') {
 								$regel->rewrite_gml_ids($result);
 							}
-						}
+						}*/
 					}
 				}
 				$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'alle_sql_ausfuehrbar');

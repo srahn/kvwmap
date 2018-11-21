@@ -5,7 +5,7 @@ var nachweise = new Array();
 
 <?
 	for($i = 0; $i < count($this->nachweis->Dokumente); $i++){
-		$json = str_replace('\\r', '\\\r', str_replace('\\n', '\\\n', json_encode($this->nachweis->Dokumente[$i])));
+		$json = str_replace("'", "\'", str_replace('\\r', '\\\r', str_replace('\\n', '\\\n', json_encode($this->nachweis->Dokumente[$i]))));
 		echo "nachweise.push(JSON.parse('".$json."'));\n";
 	}
 ?>
@@ -33,7 +33,7 @@ function update_selection(selection){
 		}break;
 		default: {				// nach Dokumentart
 			checked = selection.checked;
-			condition = 'selection.value == nachweis.art';
+			condition = 'selection.value == nachweis.hauptart';
 			selections[0].checked = false;
 			selections[1].checked = false;
 			selections[2].checked = false;
