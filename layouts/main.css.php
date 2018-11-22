@@ -1609,6 +1609,10 @@ tbody.gle tr:hover {
 	color: #252525;
 }
 
+.layerOptions input[type="text"]{
+	width: 195px;
+}
+
 #legendOptions label{
 	margin-left: 12px;
 }

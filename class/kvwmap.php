@@ -256,6 +256,9 @@ class GUI {
 				<tr>
 					<td>
 						<ul>';
+						if($this->formvars['layer_id'] < 0){
+							echo '<li><span>'.$this->strName.':</span> <input type="text" name="layer_options_name" value="'.$layer[0]['Name'].'"></li>';
+						}
 						if($layer[0]['connectiontype']==6){
 							echo '<li><a href="javascript:zoomToMaxLayerExtent('.$this->formvars['layer_id'].')">'.$this->FullLayerExtent.'</a></li>';
 							if($layer[0]['queryable']){
@@ -381,7 +384,9 @@ class GUI {
 	function saveLayerOptions(){
 		$this->user->rolle->setTransparency($this->formvars);
 		$this->user->rolle->setLabelitem($this->formvars);
-		if($this->formvars['layer_options_open'] < 0){		# für Rollenlayer Label anlegen
+		if($this->formvars['layer_options_open'] < 0){		# Rollenlayer 
+			$this->user->rolle->setRollenLayerName($this->formvars);
+			# bei Bedarf Label anlegen
 			$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 			$classes = $mapDB->read_Classes($this->formvars['layer_options_open']);
 			if($classes[0]['Label'] == NULL){

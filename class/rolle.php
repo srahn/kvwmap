@@ -1032,6 +1032,14 @@ class rolle {
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
 	
+	function setRollenLayerName($formvars){
+		$sql ='UPDATE rollenlayer set Name = \''.$formvars['layer_options_name'].'\'';
+		$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+		$sql.=' AND id= -1*'.$formvars['layer_options_open'];
+		$this->debug->write("<p>file:rolle.php class:rolle->setRollenLayerName:",4);
+		$this->database->execSQL($sql,4, $this->loglevel);
+	}
+	
 	function setLabelitem($formvars){
 		if(isset($formvars['layer_options_labelitem'])){
 			if($formvars['layer_options_open'] > 0){		# normaler Layer
