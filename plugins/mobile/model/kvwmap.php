@@ -209,7 +209,7 @@
 					}
 				}
 				else {
-					$err_msg[] = 'Anzahl der rows im Objekt der Deltas ist 0.' . print_r($rows, true);
+					# Wenn Anzahl rows 0 ist, ist das kein Fehler, weil ja ein Client vielleicht nur neue Daten holen will aber nichts schickt.
 				}
 			}
 			else {
