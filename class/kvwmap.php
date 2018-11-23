@@ -5952,11 +5952,11 @@ class GUI {
     } # ende Abfrage war erfolgreich
   }
 
-	function deleteDokument($path, $doc_path, $doc_url){
+	function deleteDokument($path, $doc_path, $doc_url, $only_thumb = false){
 		if($doc_url != '')$path = url2filepath($path, $doc_path, $doc_url);			# Dokument mit URL
 		else $path = array_shift(explode('&original_name', $path));
 		$dateinamensteil = explode('.', $path);
-		if(file_exists($path))unlink($path);
+		if(!$only_thumb AND file_exists($path))unlink($path);
 		if(file_exists($dateinamensteil[0].'_thumb.jpg'))unlink($dateinamensteil[0].'_thumb.jpg');
 	}
 
@@ -12551,8 +12551,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			if($this->formvars[$input_name] == 'delete')$db_input = '';
 			# Bild in das Datenverzeichnis kopieren
 			if(move_uploaded_file($_files[$input_name]['tmp_name'],$nachDatei) OR $this->formvars[$input_name] == 'delete'){
+				# bei dynamischem Dateipfad das Vorschaubild löschen
+				if(strtolower(substr($options, 0, 6)) == 'select')$this->deleteDokument($old, $doc_path, $doc_url, true);
 				# Wenn eine alte Datei existiert, die nicht so heißt wie die neue --> löschen
-				$old = $this->formvars[$input_name.'_alt'];
+				$old = $this->formvars[str_replace(';Dokument;', ';Dokument_alt;', $input_name)];
 				if ($old != '' AND $old != $db_input) {
 					$this->deleteDokument($old, $doc_path, $doc_url);
 				}
