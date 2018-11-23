@@ -75,6 +75,8 @@
 ?>
 <table border="0" cellspacing="0" cellpadding="2">
 	<tr>
+		<td>
+			<div style="display: flex; flex-wrap: wrap">
 <?
 	$hover_preview = true;
 	$checkbox_names = '';
@@ -86,15 +88,8 @@
 	if($this->formvars['embedded_subformPK'] == '')$records_per_row = 5;
 	else $records_per_row = 3;
 	for ($k=0;$k<$anzObj;$k++) {
-		$checkbox_names .= 'check;'.$layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].'|';
-		if($k%$records_per_row == 0){
-?>
-	</tr>
-</table>
-<table>		
-	<tr>
-<? } ?>
-		<td valign="top">
+		$checkbox_names .= 'check;'.$layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].'|'; ?>
+		
 		<div <? if($this->new_entry != true)echo 'class="raster_record" onclick="open_record(event, this)"'; ?> id="record_<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>" <? if($k%5==0)echo 'style="clear: both;"'?>>
 			<? if($this->new_entry != true){ ?>
 			<div style="position: absolute;top: 1px;right: 1px"><a href="javascript:close_record('record_<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>');" title="Schlie&szlig;en"><img style="border:none" src="<? echo GRAPHICSPATH."exit2.png"; ?>"></img></a></div>
@@ -331,6 +326,8 @@
 <?
 	}
 ?>
+			</div>
+		</td>
 	</tr>
 	
 <?	if($this->formvars['embedded_subformPK'] == '' AND $this->formvars['printversion'] == ''){?>
