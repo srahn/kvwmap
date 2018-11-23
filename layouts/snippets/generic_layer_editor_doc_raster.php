@@ -76,7 +76,7 @@
 <table border="0" cellspacing="0" cellpadding="2">
 	<tr>
 		<td>
-			<div style="display: flex; flex-wrap: wrap">
+			<div style="display: flex; flex-wrap: wrap; align-items: flex-start">
 <?
 	$hover_preview = true;
 	$checkbox_names = '';
