@@ -8582,7 +8582,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		# Dokumente speichern
 		if(count($document_attributes)> 0){
 			foreach($document_attributes as $i => $document_attribute){
-				$options = $attributes['options'][$attribute_name];
+				$options = $attributes['options'][$document_attribute['attributename']];
 				if(substr($attr_oid['datatype'], 0, 1) == '_'){
 					// ein Array aus Dokumenten, hier enthält der JSON-String eine Mischung aus bereits vorhandenen,
 					// nicht geänderten Datei-Pfaden und File-input-Feldnamen, die noch verarbeitet werden müssen
