@@ -313,7 +313,7 @@ $legendheight = $this->map->height + 20;
 					</div>
 				</div>
 				<div id="dokein-backtolist">
-					<?php if ($this->formvars[NACHWEIS_PRIMARY_ATTRIBUTE]!='') { ?><a href="index.php?go=Nachweisanzeige&order=<? echo $this->formvars['order']; ?>&richtung=<? echo $this->formvars['richtung']; ?>&suchunterart=<? echo $this->formvars['suchunterart'].'#'.$this->formvars['id']; ?>">&lt;&lt;&nbsp;zur&uuml;ck&nbsp;zum&nbsp;Rechercheergebnis</a><?php } ?>
+					<?php if ($this->formvars[NACHWEIS_PRIMARY_ATTRIBUTE]!='') { ?><a href="index.php?go=Nachweisanzeige&order=<? echo $this->formvars['order']; ?>&richtung=<? echo $this->formvars['richtung'].'#'.$this->formvars['id']; ?>">&lt;&lt;&nbsp;zur&uuml;ck&nbsp;zum&nbsp;Rechercheergebnis</a><?php } ?>
 				</div>
 			</div>
 			</div>
