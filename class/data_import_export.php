@@ -801,7 +801,12 @@ class data_import_export {
 		if($layerdb->port != '')$command.=' port='.$layerdb->port;
 		if($layerdb->host != '')$command .= ' host=' . $layerdb->host;
 		if($layerdb->schema != '')$command .= ' active_schema='.$layerdb->schema;
-		exec($command.'"');
+		$errorfile = rand(0, 1000000);
+		$command .= '" 2> '.IMAGEPATH.$errorfile.'.err';
+		$output = array();
+		exec($command, $output, $ret);
+		if($ret != 0)$ret = 'Fehler beim Exportieren !<br><br>Befehl:<div class="code">'.$command.'</div><a href="' . IMAGEURL . $errorfile . '.err" target="_blank">Fehlerprotokoll</a>';
+		return $ret;
 	}
 
 	function ogr2ogr_import($schema, $tablename, $epsg, $importfile, $database, $layer, $sql = NULL, $options = NULL, $encoding = 'LATIN1') {
@@ -1100,7 +1105,7 @@ class data_import_export {
 			$exportfile = IMAGEPATH.$folder.'/'.$this->formvars['layer_name'];
 			switch($this->formvars['export_format']){
 				case 'Shape' : {
-					$this->ogr2ogr_export($sql, '"ESRI Shapefile"', $exportfile.'.shp', $layerdb);
+					$err = $this->ogr2ogr_export($sql, '"ESRI Shapefile"', $exportfile.'.shp', $layerdb);
 					if(!file_exists($exportfile.'.cpg')){		// ältere ogr-Versionen erzeugen die cpg-Datei nicht
 						$fp = fopen($exportfile.'.cpg', 'w');
 						fwrite($fp, 'UTF-8');
@@ -1111,23 +1116,23 @@ class data_import_export {
 
 				case 'DXF' : {
 					$exportfile = $exportfile.'.dxf';
-					$this->ogr2ogr_export($sql, 'DXF', $exportfile, $layerdb);
+					$err = $this->ogr2ogr_export($sql, 'DXF', $exportfile, $layerdb);
 				}break;
 
 				case 'GML' : {
-					$this->ogr2ogr_export($sql, 'GML', $exportfile.'.xml', $layerdb);
+					$err = $this->ogr2ogr_export($sql, 'GML', $exportfile.'.xml', $layerdb);
 					$zip = true;
 				}break;
 
 				case 'KML' : {
 					$exportfile = $exportfile.'.kml';
-					$this->ogr2ogr_export($sql, 'KML', $exportfile, $layerdb);
+					$err = $this->ogr2ogr_export($sql, 'KML', $exportfile, $layerdb);
 					$contenttype = 'application/vnd.google-earth.kml+xml';
 				}break;
 
 				case 'GeoJSON' : {
 					$exportfile = $exportfile.'.json';
-					$this->ogr2ogr_export($sql, 'GeoJSON', $exportfile, $layerdb);
+					$err = $this->ogr2ogr_export($sql, 'GeoJSON', $exportfile, $layerdb);
 				}break;
 
 				case 'GeoJSONPlus': {
@@ -1135,7 +1140,7 @@ class data_import_export {
 					if (in_array('mobile', $kvwmap_plugins)) {
 						$sql = str_replace('version FROM ', '(SELECT coalesce(max(version), 1) FROM ' . $layerset[0]['schema'] . '.' . $layerset[0]['maintable'] . '_deltas) AS version FROM ', $sql);
 					}
-					$this->ogr2ogr_export($sql, 'GeoJSON', $exportfile, $layerdb);
+					$err = $this->ogr2ogr_export($sql, 'GeoJSON', $exportfile, $layerdb);
 				} break;
 
 				case 'CSV' : {
@@ -1211,44 +1216,48 @@ class data_import_export {
 			// $ret = $layerdb->execSQL($sql,4, 0);
 			// if($this->formvars['export_format'] != 'CSV')$user->rolle->setConsumeShape($currenttime,$this->formvars['selected_layer_id'],$count);
 
-			ob_end_clean();
-			header('Content-type: '.$contenttype);
-			header("Content-disposition:	attachment; filename=".basename($exportfile));
-			header("Content-Length: ".filesize($exportfile));
-			header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-			header('Pragma: public');
-			readfile($exportfile);
+			if($err != ''){
+				$GUI->add_message('error', $err);
+			}
+			else{
+				ob_end_clean();
+				header('Content-type: '.$contenttype);
+				header("Content-disposition:	attachment; filename=".basename($exportfile));
+				header("Content-Length: ".filesize($exportfile));
+				header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+				header('Pragma: public');
+				readfile($exportfile);
 
-			// Update timestamp formular_element_types having option export
-			$time_attributes = array();
-			foreach($this->attributes['name'] AS $key => $value) {
-				if (
-					$this->attributes['form_element_type'][$value] == 'Time' AND
-					trim(strtolower($this->attributes['options'][$value])) == 'export'
-				) {
-					$time_attributes[] = $value . " = '" . $currenttime . "'";
-				}
-			};
+				// Update timestamp formular_element_types having option export
+				$time_attributes = array();
+				foreach($this->attributes['name'] AS $key => $value) {
+					if (
+						$this->attributes['form_element_type'][$value] == 'Time' AND
+						trim(strtolower($this->attributes['options'][$value])) == 'export'
+					) {
+						$time_attributes[] = $value . " = '" . $currenttime . "'";
+					}
+				};
 
-			if (!$layerset[0]['maintable_is_view'] AND count($time_attributes) > 0) {
-				$update_table = $layerset[0]['schema'] . '.' . $layerset[0]['maintable'];
-				$sql = "
-					UPDATE
-						" . $update_table . " AS update_table
-					SET
-						" . implode(", ", $time_attributes) . "
-					FROM
-						(" . $data_sql . ") AS data_table
-					WHERE
-						update_table.oid = data_table." . $layerset[0]['maintable'] . "_oid
-				";
-				#echo '<br>sql: ' . $sql;
-				$ret = $layerdb->execSQL($sql, 4, 0);
-				if ($ret[0]) {
-					$GUI->add_message('error', 'Speicherung der Zeitstempel ' . implode(", ", $time_attributes) . ' fehlgeschlagen.<br>' . $ret[1]);
+				if (!$layerset[0]['maintable_is_view'] AND count($time_attributes) > 0) {
+					$update_table = $layerset[0]['schema'] . '.' . $layerset[0]['maintable'];
+					$sql = "
+						UPDATE
+							" . $update_table . " AS update_table
+						SET
+							" . implode(", ", $time_attributes) . "
+						FROM
+							(" . $data_sql . ") AS data_table
+						WHERE
+							update_table.oid = data_table." . $layerset[0]['maintable'] . "_oid
+					";
+					#echo '<br>sql: ' . $sql;
+					$ret = $layerdb->execSQL($sql, 4, 0);
+					if ($ret[0]) {
+						$GUI->add_message('error', 'Speicherung der Zeitstempel ' . implode(", ", $time_attributes) . ' fehlgeschlagen.<br>' . $ret[1]);
+					}
 				}
 			}
-
 		}
 		else{
 			$GUI->add_message('error', 'Abfrage fehlgeschlagen!');

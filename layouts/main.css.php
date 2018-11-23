@@ -352,6 +352,13 @@ a.invisiblelayerlink:hover{
 	color: gray;
 }
 
+.code{
+	text-align: left;
+	font-family: courier;
+	font-size: 12px;
+	line-height: 17px;
+}
+
 #login_table{
 	margin-top: 20px; 
 	background-color: <? echo BG_DEFAULT; ?>;
