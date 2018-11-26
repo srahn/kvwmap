@@ -60,7 +60,7 @@ class Nachweis {
 			#echo $newpath.'<br>';
 			if($oldpath != $newpath){
 				$this->adjust_documentpath($oldpath, $newpath);
-				$this->aktualisierenDokument($old_dataset['id'],NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,$this->Dokumente[0]['artname'].'/'.$formvars['zieldateiname'],NULL);
+				$this->aktualisierenDokument($old_dataset['id'],NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,$this->Dokumente[0]['artname'].'/'.$formvars['zieldateiname'],NULL);
 			}
 		}
 	}
