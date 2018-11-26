@@ -798,9 +798,9 @@ INSERT INTO u_styles2classes (
 	* dieses Feld wird jedoch auch mit abgefragt und separat zurückgeliefert
 	*/
 	function create_insert_dump($table, $extra, $sql){
-		#echo '<br>Create_insert_dump for table: ' . $table;
-		#echo '<br>sql: ' . $sql;
-		#echo '<br>extra: ' . $extra;
+		echo '<br>Create_insert_dump for table: ' . $table;
+		echo '<br>sql: ' . $sql;
+		echo '<br>extra: ' . $extra;
 		$this->debug->write("<p>file:kvwmap class:database->create_insert_dump :<br>".$sql,4);
 		$query = mysql_query($sql);
 		if ($query==0) {
