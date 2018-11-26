@@ -250,13 +250,13 @@ class data_import_export {
 			if($ret == 1){	# bei Fehlschlag, das andere Encoding probieren
 				if($encoding == 'UTF-8')$new_encoding = 'LATIN1';
 				else $new_encoding = 'UTF-8';
-				$command = str_replace($encoding, $new_encoding, $command);
+				$command2 = str_replace($encoding, $new_encoding, $command);
 				$errorfile = rand(0, 1000000);
-				$command .= ' 2> '.IMAGEPATH.$errorfile.'.err';
-				exec($command, $output, $ret);
+				$command2 .= ' 2> '.IMAGEPATH.$errorfile.'.err';
+				exec($command2, $output, $ret);
 			}
 			if($ret != 0){
-				$custom_table['error'] = 'Fehler beim Exportieren !<br><br>Befehl:<div class="code">'.$command.'</div><a href="' . IMAGEURL . $errorfile . '.err" target="_blank">Fehlerprotokoll</a>';
+				$custom_table['error'] = 'Fehler beim Importieren !<br><br>Befehl:<div class="code">'.$command.'</div><a href="' . IMAGEURL . $errorfile . '.err" target="_blank">Fehlerprotokoll</a>';
 				return array($custom_table);
 			}
 			else{
