@@ -71,17 +71,22 @@ class data_import_export {
 			} break;
 		}
 		if($custom_tables != NULL){
-			foreach($custom_tables as $custom_table){				# ------ Rollenlayer erzeugen ------- #
-				$layer_id = $this->create_rollenlayer(
-					$pgdatabase,
-					$stelle,
-					$user,
-					basename($filename) . " (".date('d.m. H:i',time()).")".str_repeat(' ', $custom_table['datatype']),
-					$custom_table,
-					$epsg
-				);
+			if($custom_tables[0]['error'] != ''){
+				echo $custom_tables[0]['error'];
 			}
-			return -$layer_id;
+			else{
+				foreach($custom_tables as $custom_table){				# ------ Rollenlayer erzeugen ------- #
+					$layer_id = $this->create_rollenlayer(
+						$pgdatabase,
+						$stelle,
+						$user,
+						basename($filename) . " (".date('d.m. H:i',time()).")".str_repeat(' ', $custom_table['datatype']),
+						$custom_table,
+						$epsg
+					);
+				}
+				return -$layer_id;
+			}
 		}
 		else {
 			if ($this->ask_epsg) $this->create_epsg_form($upload_id, $file_number, basename($filename));
@@ -246,27 +251,35 @@ class data_import_export {
 				if($encoding == 'UTF-8')$new_encoding = 'LATIN1';
 				else $new_encoding = 'UTF-8';
 				$command = str_replace($encoding, $new_encoding, $command);
+				$errorfile = rand(0, 1000000);
+				$command .= ' 2> '.IMAGEPATH.$errorfile.'.err';
 				exec($command, $output, $ret);
 			}
-	   	#echo $command;
-			$command = POSTGRESBINPATH .
-				'psql' .
-				' -h ' . $pgdatabase->host .
-				' -f "' . $uploadpath . $file . '.sql"' .
-				' ' . $pgdatabase->dbName . ' ' . $pgdatabase->user;
-			if ($pgdatabase->passwd != '')
-				$command = 'export PGPASSWORD="' . $pgdatabase->passwd . '"; ' . $command;
-	    exec($command);
-	   	#echo $command;
-	    $sql = 'ALTER TABLE '.$schemaname.'.'.$tablename.' SET WITH OIDS;
-			'.$this->rename_reserved_attribute_names($schemaname, $tablename).'
-	      SELECT geometrytype(the_geom) AS geometrytype FROM '.$schemaname.'.'.$tablename.' LIMIT 1;';
-	    $ret = $pgdatabase->execSQL($sql,4, 0);
-			if (!$ret[0]) {
-				$rs = pg_fetch_assoc($ret[1]);
-				$custom_table['datatype'] = geometrytype_to_datatype($rs['geometrytype']);
-				$custom_table['tablename'] = $tablename;
+			if($ret != 0){
+				$custom_table['error'] = 'Fehler beim Exportieren !<br><br>Befehl:<div class="code">'.$command.'</div><a href="' . IMAGEURL . $errorfile . '.err" target="_blank">Fehlerprotokoll</a>';
 				return array($custom_table);
+			}
+			else{
+				#echo $command;
+				$command = POSTGRESBINPATH .
+					'psql' .
+					' -h ' . $pgdatabase->host .
+					' -f "' . $uploadpath . $file . '.sql"' .
+					' ' . $pgdatabase->dbName . ' ' . $pgdatabase->user;
+				if ($pgdatabase->passwd != '')
+					$command = 'export PGPASSWORD="' . $pgdatabase->passwd . '"; ' . $command;
+				exec($command);
+				#echo $command;
+				$sql = 'ALTER TABLE '.$schemaname.'.'.$tablename.' SET WITH OIDS;
+				'.$this->rename_reserved_attribute_names($schemaname, $tablename).'
+					SELECT geometrytype(the_geom) AS geometrytype FROM '.$schemaname.'.'.$tablename.' LIMIT 1;';
+				$ret = $pgdatabase->execSQL($sql,4, 0);
+				if (!$ret[0]) {
+					$rs = pg_fetch_assoc($ret[1]);
+					$custom_table['datatype'] = geometrytype_to_datatype($rs['geometrytype']);
+					$custom_table['tablename'] = $tablename;
+					return array($custom_table);
+				}
 			}
 		}
 	}
