@@ -62,10 +62,14 @@ class data_import_export {
 			case 'dxf' : {
 				$custom_tables = $this->import_custom_dxf($filename, $pgdatabase, $epsg);
 			} break;
-			case 'json' : case 'geojson' : {		# (GeoJSON)
+			case 'json' : case 'geojson' : {
 				$custom_tables = $this->import_custom_geojson($filename, $pgdatabase, $epsg);
 				$epsg = $custom_tables[0]['epsg'];
 			} break;
+			case 'geotif' : case 'tiff' : case 'tif' : {
+				$custom_tables = $this->import_custom_geotif($filename, $pgdatabase, $epsg);
+				$epsg = $custom_tables[0]['epsg'];
+			} break;			
 			case 'point' : {
 				$custom_tables = $this->import_custom_pointlist($formvars, $pgdatabase);
 			} break;
@@ -134,105 +138,129 @@ class data_import_export {
 		$this->formvars['Gruppe'] = $groupid;
 		$this->formvars['Typ'] = 'import';
 		$this->formvars['Datentyp'] = $custom_table['datatype'];
-		$select = 'oid, *';
-		$this->formvars['Data'] = 'the_geom from (SELECT ' . $select . ' FROM ' . CUSTOM_SHAPE_SCHEMA . '.' . $custom_table['tablename'] . ' WHERE 1=1 ' . $custom_table['where'] . ')as foo using unique oid using srid=' . $epsg;
-		$this->formvars['query'] = 'SELECT * FROM ' . $custom_table['tablename'] . ' WHERE 1=1' . $custom_table['where'];
-		$this->formvars['connection'] =
-			'dbname=' . $pgdatabase->dbName .
-			' user=' . $pgdatabase->user .
-			($pgdatabase->host != 'localhost' ? ' host=' . $pgdatabase->host : '') .
-			($pgdatabase->passwd != ''        ? ' password=' . $pgdatabase->passwd : '');
-		$this->formvars['connectiontype'] = 6;
 		$this->formvars['epsg_code'] = $epsg;
-		$this->formvars['transparency'] = 65;
-		if ($custom_table['labelitem'] != '') $this->formvars['labelitem'] = $custom_table['labelitem'];
-		$layer_id = $dbmap->newRollenLayer($this->formvars);
-		$layerdb = $dbmap->getlayerdatabase(-$layer_id, $this->Stelle->pgdbhost);
-		$layerdb->setClientEncoding();
-		$path = $this->formvars['query'];
-		$attributes = $dbmap->load_attributes($layerdb, $path);
-		$dbmap->save_postgis_attributes(-$layer_id, $attributes, '', '');
-		$attrib['name'] = ' ';
-		$attrib['layer_id'] = -$layer_id;
-		$attrib['expression'] = '';
-		$attrib['order'] = 0;
-		$class_id = $dbmap->new_Class($attrib);
-		$this->formvars['class'] = $class_id;
-		$color = $user->rolle->readcolor();
-		$style['colorred'] = $color['red'];
-		$style['colorgreen'] = $color['green'];
-		$style['colorblue'] = $color['blue'];
-		$style['outlinecolorred'] = 0;
-		$style['outlinecolorgreen'] = 0;
-		$style['outlinecolorblue'] = 0;
-		switch ($custom_table['datatype']) {
-			case 0 : {
-				$style['size'] = 8;
-				$style['maxsize'] = 8;
-				$style['symbolname'] = 'circle';
-			} break;
-			case 1 : {
-				$style['width'] = 2;
-				$style['minwidth'] = 1;
-				$style['maxwidth'] = 3;
-				$style['symbolname'] = NULL;
-			} break;
-			case 2 :{
-				$style['size'] = 1;
-				$style['maxsize'] = 2;
-				$style['symbolname'] = NULL;
-			}
+		if($custom_table['datatype'] == 3){	# Raster
+			$this->formvars['Data'] = $custom_table['data'];
+			$this->formvars['transparency'] = 100;
 		}
-		$style['backgroundcolor'] = NULL;
-		$style['minsize'] = NULL;
-		$style['angle'] = 360;
-		$style_id = $dbmap->new_Style($style);
-		$dbmap->addStyle2Class($class_id, $style_id, 0); # den Style der Klasse zuordnen
-		if($custom_table['labelitem'] != '') {
-			$label['font'] = 'arial';
-			$label['color'] = '0 0 0';
-			$label['outlinecolor'] = '255 255 255';
-			$label['size'] = 8;
-			$label['minsize'] = 6;
-			$label['maxsize'] = 10;
-			$label['position'] = 9;
-			$new_label_id = $dbmap->new_Label($label);
-			$dbmap->addLabel2Class($class_id, $new_label_id, 0);
+		else{
+			$select = 'oid, *';
+			$this->formvars['Data'] = 'the_geom from (SELECT ' . $select . ' FROM ' . CUSTOM_SHAPE_SCHEMA . '.' . $custom_table['tablename'] . ' WHERE 1=1 ' . $custom_table['where'] . ')as foo using unique oid using srid=' . $epsg;
+			$this->formvars['query'] = 'SELECT * FROM ' . $custom_table['tablename'] . ' WHERE 1=1' . $custom_table['where'];
+			$this->formvars['connection'] =
+				'dbname=' . $pgdatabase->dbName .
+				' user=' . $pgdatabase->user .
+				($pgdatabase->host != 'localhost' ? ' host=' . $pgdatabase->host : '') .
+				($pgdatabase->passwd != ''        ? ' password=' . $pgdatabase->passwd : '');
+			$this->formvars['connectiontype'] = 6;
+			$this->formvars['transparency'] = 65;
+			if($custom_table['labelitem'] != '')$this->formvars['labelitem'] = $custom_table['labelitem'];
+		}
+		$layer_id = $dbmap->newRollenLayer($this->formvars);
+		
+		if($custom_table['datatype'] != 3){	# kein Raster
+			$layerdb = $dbmap->getlayerdatabase(-$layer_id, $this->Stelle->pgdbhost);
+			$layerdb->setClientEncoding();
+			$path = $this->formvars['query'];
+			$attributes = $dbmap->load_attributes($layerdb, $path);
+			$dbmap->save_postgis_attributes(-$layer_id, $attributes, '', '');
+			$attrib['name'] = ' ';
+			$attrib['layer_id'] = -$layer_id;
+			$attrib['expression'] = '';
+			$attrib['order'] = 0;
+			$class_id = $dbmap->new_Class($attrib);
+			$this->formvars['class'] = $class_id;
+			$color = $user->rolle->readcolor();
+			$style['colorred'] = $color['red'];
+			$style['colorgreen'] = $color['green'];
+			$style['colorblue'] = $color['blue'];
+			$style['outlinecolorred'] = 0;
+			$style['outlinecolorgreen'] = 0;
+			$style['outlinecolorblue'] = 0;
+			switch ($custom_table['datatype']) {
+				case 0 : {
+					$style['size'] = 8;
+					$style['maxsize'] = 8;
+					$style['symbolname'] = 'circle';
+				} break;
+				case 1 : {
+					$style['width'] = 2;
+					$style['minwidth'] = 1;
+					$style['maxwidth'] = 3;
+					$style['symbolname'] = NULL;
+				} break;
+				case 2 :{
+					$style['size'] = 1;
+					$style['maxsize'] = 2;
+					$style['symbolname'] = NULL;
+				}
+			}
+			$style['backgroundcolor'] = NULL;
+			$style['minsize'] = NULL;
+			$style['angle'] = 360;
+			$style_id = $dbmap->new_Style($style);
+			$dbmap->addStyle2Class($class_id, $style_id, 0); # den Style der Klasse zuordnen
+			if($custom_table['labelitem'] != '') {
+				$label['font'] = 'arial';
+				$label['color'] = '0 0 0';
+				$label['outlinecolor'] = '255 255 255';
+				$label['size'] = 8;
+				$label['minsize'] = 6;
+				$label['maxsize'] = 10;
+				$label['position'] = 9;
+				$new_label_id = $dbmap->new_Label($label);
+				$dbmap->addLabel2Class($class_id, $new_label_id, 0);
+			}
 		}
     return $layer_id;
 	}
 
 	function get_shp_epsg($file, $pgdatabase){
-		global $supportedSRIDs;
 		if(file_exists($file.'.prj')){
 			$prj = file_get_contents($file.'.prj');
-			# 1. Versuch: Suche nach AUTHORITY
-			for($i = 0; $i < count($supportedSRIDs); $i++){
-				if(strpos($prj, 'AUTHORITY["EPSG","'.$supportedSRIDs[$i].'"]') > 0)return $supportedSRIDs[$i];
-			}
-			# 2. Versuch: Abgleich bestimmter Parameter im prj-String mit spatial_ref_sys_alias
-			$datum = get_first_word_after($prj, 'DATUM[', '"', '"');
-			$projection = get_first_word_after($prj, 'PROJECTION[', '"', '"');
-			if($projection == '')$projection_sql = 'AND projection IS NULL'; else $projection_sql = "AND '".$projection."' = ANY(projection)";
-			$false_easting = get_first_word_after($prj, 'False_Easting"', ',', ']');
-			if($false_easting == '')$false_easting_sql = 'AND false_easting IS NULL'; else $false_easting_sql = "AND false_easting = ".$false_easting;
-			$central_meridian = get_first_word_after($prj, 'Central_Meridian"', ',', ']');
-			if($central_meridian == '')$central_meridian_sql = 'AND central_meridian IS NULL'; else $central_meridian_sql = "AND central_meridian = ".$central_meridian;
-			$scale_factor = get_first_word_after($prj, 'Scale_Factor"', ',', ']');
-			if($scale_factor == '')$scale_factor_sql = 'AND scale_factor IS NULL'; else $scale_factor_sql = "AND scale_factor = ".$scale_factor;
-			$unit = get_first_word_after($prj, 'UNIT[', '"', '"', true);
-			$sql = "SELECT srid FROM spatial_ref_sys_alias
-							WHERE '".$datum."' = ANY(datum)
-							".$projection_sql."
-							".$false_easting_sql."
-							".$central_meridian_sql."
-							".$scale_factor_sql."
-							AND '".$unit."' = ANY(unit)";
-			$ret = $pgdatabase->execSQL($sql,4, 0);
-			if(!$ret[0])$result = pg_fetch_row($ret[1]);
-			return $result[0];
+			return $this->get_epsg_from_wkt($prj, $pgdatabase);
 		}
 		else return false;
+	}
+	
+	function get_gdal_epsg($raster_file, $pgdatabase){
+		if(file_exists($raster_file)){
+			$output = rand(0, 100000);
+			$command = OGR_BINPATH.'gdalsrsinfo -o wkt '.$raster_file.' > '.IMAGEPATH.$output.'.info';
+			exec($command);
+			$wkt = file_get_contents(IMAGEPATH.$output.'.info');
+			return $this->get_epsg_from_wkt($wkt, $pgdatabase);
+		}
+		else return false;
+	}	
+	
+	function get_epsg_from_wkt($wkt, $pgdatabase){
+		global $supportedSRIDs;
+		# 1. Versuch: Suche nach AUTHORITY
+		for($i = 0; $i < count($supportedSRIDs); $i++){
+			if(strpos($wkt, 'AUTHORITY["EPSG","'.$supportedSRIDs[$i].'"]') > 0)return $supportedSRIDs[$i];
+		}
+		# 2. Versuch: Abgleich bestimmter Parameter im prj-String mit spatial_ref_sys_alias
+		$datum = get_first_word_after($wkt, 'DATUM[', '"', '"');
+		$projection = get_first_word_after($wkt, 'PROJECTION[', '"', '"');
+		if($projection == '')$projection_sql = 'AND projection IS NULL'; else $projection_sql = "AND '".$projection."' = ANY(projection)";
+		$false_easting = get_first_word_after($wkt, 'False_Easting"', ',', ']');
+		if($false_easting == '')$false_easting_sql = 'AND false_easting IS NULL'; else $false_easting_sql = "AND false_easting = ".$false_easting;
+		$central_meridian = get_first_word_after($wkt, 'Central_Meridian"', ',', ']');
+		if($central_meridian == '')$central_meridian_sql = 'AND central_meridian IS NULL'; else $central_meridian_sql = "AND central_meridian = ".$central_meridian;
+		$scale_factor = get_first_word_after($wkt, 'Scale_Factor"', ',', ']');
+		if($scale_factor == '')$scale_factor_sql = 'AND scale_factor IS NULL'; else $scale_factor_sql = "AND scale_factor = ".$scale_factor;
+		$unit = get_first_word_after($wkt, 'UNIT[', '"', '"', true);
+		$sql = "SELECT srid FROM spatial_ref_sys_alias
+						WHERE '".$datum."' = ANY(datum)
+						".$projection_sql."
+						".$false_easting_sql."
+						".$central_meridian_sql."
+						".$scale_factor_sql."
+						AND '".$unit."' = ANY(unit)";
+		$ret = $pgdatabase->execSQL($sql,4, 0);
+		if(!$ret[0])$result = pg_fetch_row($ret[1]);
+		return $result[0];
 	}
 
 	function load_shp_into_pgsql($pgdatabase, $uploadpath, $file, $epsg, $schemaname, $tablename, $encoding = 'LATIN1') {
@@ -291,6 +319,21 @@ class data_import_export {
 			";
 		}
 		return $sql;
+	}
+	
+	function import_custom_geotif($filename, $pgdatabase, $epsg){
+		$custom_rasterfile = CUSTOM_RASTER.basename($filename);
+		if(copy($filename, $custom_rasterfile)){
+			if($epsg == NULL)$epsg = $this->get_gdal_epsg($custom_rasterfile, $pgdatabase);
+			if($epsg == NULL){
+				$this->ask_epsg = true;		# EPSG-Code konnte nicht ermittelt werden => nachfragen
+				return;
+			}
+			$custom_table[0]['epsg'] = $epsg;
+			$custom_table[0]['datatype'] = 3;
+			$custom_table[0]['data'] = basename(CUSTOM_RASTER).'/'.basename($filename);
+			return $custom_table;
+		}
 	}
 	
 	function import_custom_shape($filenameparts, $user, $pgdatabase, $epsg){

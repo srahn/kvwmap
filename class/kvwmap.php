@@ -10070,8 +10070,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->data_import_export = new data_import_export();
 		$user_upload_folder = UPLOADPATH . $this->user->id.'/';
 		$layer_id = $this->data_import_export->process_import_file($upload_id, $file_number, $user_upload_folder.$filename, $this->Stelle, $this->user, $this->pgdatabase, $epsg);
-		if ($layer_id != NULL) {
-			echo $filename.' importiert&nbsp;=>&nbsp;<a href="index.php?go=zoomToMaxLayerExtent&layer_id='.$layer_id.'">Zoom auf Layer</a>';
+		$filetype = array_pop(explode('.', $filename));
+		if($layer_id != NULL){
+			echo $filename.' importiert';
+			if(!in_array($filetype, array('tiff', 'tif', 'geotif')))echo '&nbsp;=>&nbsp;<a href="index.php?go=zoomToMaxLayerExtent&layer_id='.$layer_id.'">Zoom auf Layer</a>';
 		}
 	}
 
@@ -16438,11 +16440,11 @@ class db_mapObj{
   }
 
   function deleteRollenLayer($id){
-  	$sql = 'SELECT Typ, Data FROM rollenlayer WHERE id = '.$id;
+  	$sql = 'SELECT Typ, Data, Datentyp FROM rollenlayer WHERE id = '.$id;
   	$query=mysql_query($sql);
 		if ($query==0) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
     $rs=mysql_fetch_array($query);
-    if($rs['Typ'] == 'import'){		# beim Shape-Import-Layern die Tabelle löschen
+    if($rs['Datentyp'] != 3 AND $rs['Typ'] == 'import'){		# beim Shape-Import-Layern die Tabelle löschen
     	$explosion = explode(CUSTOM_SHAPE_SCHEMA.'.', $rs['Data']);
 			$explosion = explode(' ', $explosion[1]);
 			$sql = "SELECT count(id) FROM rollenlayer WHERE Data like '%".$explosion[0]."%'";
