@@ -80,7 +80,7 @@
 								if($explosion[1] != '')$collapsed = true;else $collapsed = false;
 								if($j > 0){
 									echo $colspan.'" data-colspan="'.$colspan.'">';
-									echo '&nbsp;<a href="javascript:void(0);" onclick="toggleGroup(\''.$layer['attributes']['group'][$j].'\')"><img id="img_'.$layer['attributes']['group'][$j].'" border="0" src="graphics/'.($collapsed ? 'plus' : 'minus').'.gif"></a>&nbsp;'.$layer['attributes']['group'][$j].'</td><td style="border:none;background: url(graphics/bg.gif);"></td>';
+									echo '&nbsp;<a href="javascript:void(0);" onclick="toggleGroup(\''.$layer['attributes']['group'][$j].'\')"><img id="img_'.$layer['attributes']['group'][$j].'" border="0" src="graphics/'.($collapsed ? 'plus' : 'minus').'.gif"></a>&nbsp;<span>'.$layer['attributes']['group'][$j].'</span></td><td style="border:none;background: url(graphics/bg.gif);"></td>';
 									$colspan = 0;
 								}
 								else $colspan = 1;
