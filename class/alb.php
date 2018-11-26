@@ -2022,8 +2022,8 @@ class ALB {
 #            elseif($buchungen[$b]['buchungsart'] != 'N'){
             elseif($buchungen[$b]['buchungsart'] != '2101'){
               $pdf->addText($col10,$row-=12,$fontSize, utf8_decode($buchungen[$b]['bezeichnung']).' an');
-              $row = $row-12;
             }
+						$row-=12;
           }
           else{
             $row = $row-12;
@@ -2105,9 +2105,10 @@ class ALB {
             if($buchungen[$b]['buchungsart'] == '2103'){
               $pdf->addText($col6,$row-=12,$fontSize, 'belastet mit Nutzungsrecht');
             }
+						$row-=12;
           }
+					
 #30.11.2006 H.Riedel, Zeile zur Trennung zw. den Flst.
-          $row-=12;
         } # ende Schleife Bestand
 #        $pdf->addText($col7+10,$row-=12,$fontSize,str_repeat("-",29));
         $pdf->addText($col44,$row-=12,$fontSize,str_repeat("-",29));
@@ -2182,7 +2183,7 @@ class ALB {
             $nennerausgabe= '';
           }
           if($buchungen[$b-1]['bvnr'] != $buchungen[$b]['bvnr']){
-            $pdf->addText($col1,$row-=12,$fontSize,str_pad(intval($buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT).' ('.utf8_decode($buchungen[$b]['bezeichnung']).') ');
+            $pdf->addText($col1,$row-=12,$fontSize,$buchungen[$b]['buchungsart'].' '.str_pad(intval($buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT).' ('.utf8_decode($buchungen[$b]['bezeichnung']).') ');
             if($buchungen[$b]['anteil'] != ''){
 #              if($buchungen[$b]['buchungsart'] == 'N' OR $buchungen[$b]['buchungsart'] == 'W'){
               if($buchungen[$b]['buchungsart'] == '1101' OR $buchungen[$b]['buchungsart'] == '1102' OR $buchungen[$b]['buchungsart'] == '1301' OR $buchungen[$b]['buchungsart'] == '1302'){
@@ -2197,8 +2198,8 @@ class ALB {
  #           elseif($buchungen[$b]['buchungsart'] != 'N'){
             elseif($buchungen[$b]['buchungsart'] != '2101'){
               $pdf->addText($col10,$row-=12,$fontSize, utf8_decode($buchungen[$b]['bezeichnung']).' an');
-              $row = $row-12;
-            }
+						}
+            $row = $row-12;
           }
           else{
             $row = $row-12;
