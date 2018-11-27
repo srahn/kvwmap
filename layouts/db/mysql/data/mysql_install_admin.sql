@@ -81,7 +81,7 @@ INSERT INTO `u_funktionen` (`id`, `bezeichnung`, `link`) VALUES
 (20, 'Nachweise_bearbeiten', NULL),
 (21, 'ALB-Auszug 30', NULL),
 (22, 'Kolibristart', NULL);
-
+(23, 'Administratorfunktionen', NULL);
 
 ####################################################################################
 # Eintragen von Berechtigungen für einen Administrator zum Ausführen von Funktionen
@@ -110,6 +110,7 @@ INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (19,@stelle_i
 INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (20,@stelle_id);
 INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (21,@stelle_id);
 INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (22,@stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (23,@stelle_id);
 
 ###########################
 # Einträge der Menüpunkte #
@@ -185,12 +186,17 @@ SET @last_menue_id=LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,16);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
 
+#### Programmverwaltung
+INSERT INTO u_menues (name, links, obermenue, menueebene, target, `order`, `title`) VALUES ('Programmverwaltung', 'index.php?go=changemenue', 0, 1, NULL, 10, 'Programmverwaltung');
+SET @last_level1menue_id = LAST_INSERT_ID();
+INSERT INTO u_menue2stelle (stelle_id, menue_id, menue_order) VALUES (@stelle_id, @last_level1menue_id, 50);
+INSERT INTO u_menue2rolle (user_id, stelle_id, menue_id,status) VALUES (@user_id, @stelle_id,@last_level1menue_id, 0);
 
-#### Stellenverwaltung
-INSERT INTO u_menues (name, links, obermenue, menueebene, target, `order`, `title`) VALUES ('Stellenverwaltung', 'index.php?go=changemenue', 0, 1, NULL, 10, 'Alle Stellen anzeigen');
-SET @last_level1menue_id=LAST_INSERT_ID();
-INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_level1menue_id,60);
-INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_level1menue_id,0);
+# Update und Config
+INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Update und Config', 'index.php?go=Administratorfunktionen', @last_level1menue_id, 2, NULL);
+SET @last_menue_id = LAST_INSERT_ID();
+INSERT INTO u_menue2stelle (stelle_id, menue_id, menue_order) VALUES (@stelle_id, @last_menue_id, 51);
+INSERT INTO u_menue2rolle (user_id, stelle_id, menue_id,status) VALUES (@user_id, @stelle_id, @last_menue_id, 0);
 
 # Stellen anlegen
 INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Stellen anlegen', 'index.php?go=Stelleneditor', @last_level1menue_id, 2, NULL);
@@ -391,7 +397,6 @@ INSERT INTO `u_menue2stelle` ( `stelle_id` , `menue_id` , `menue_order` )
 VALUES (@stelle_id, @last_menue_id, '91');
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
 
-
 ## Metadaten
 INSERT INTO u_menues (name, links, obermenue, menueebene, target, `order`) VALUES ('Metadaten', 'index.php?go=changemenue', 0, 1, NULL, 100);
 SET @last_level1menue_id=LAST_INSERT_ID();
@@ -407,7 +412,6 @@ INSERT INTO u_menues (name, links, obermenue, menueebene, target, `order`) VALUE
 SET @last_menue_id=LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id, menue_id, menue_order) VALUES (@stelle_id, @last_menue_id, 120);
 INSERT INTO u_menue2rolle (user_id, stelle_id, menue_id, status) VALUES (@user_id, @stelle_id, @last_menue_id, 0);
-
 
 # Layer-Gruppen anlegen
 INSERT INTO `u_groups` (`id`, `Gruppenname`, `order`) VALUES (1, 'Hintergrundkarten', 1000);

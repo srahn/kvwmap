@@ -14,6 +14,7 @@ error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT & ~E_NOTICE);
 #																																																																																			 #
 ########################################################################################################################################################################
 
+$credentials = '../credentials.php';		# Pfad zur credentials.php (von tools aus kann er so bleiben)
 $config = '../config.php';		# Pfad zur config.php (von tools aus kann er so bleiben)
 $bbox = array("left" => 11.85321, "bottom" => 53.96559, "right" => 11.93711, "top" => 54.01517);		# BBox, mit der die Test-Requests gemacht werden
 
@@ -105,6 +106,7 @@ function getExceptionCode($data){
 
 
 include($config);
+include($credentials);
 include(CLASSPATH.'log.php');
 include(CLASSPATH.'mysql.php');
 $debug=new Debugger(DEBUGFILE);	# öffnen der Debug-log-datei

@@ -352,6 +352,13 @@ a.invisiblelayerlink:hover{
 	color: gray;
 }
 
+.code{
+	text-align: left;
+	font-family: courier;
+	font-size: 12px;
+	line-height: 17px;
+}
+
 #login_table{
 	margin-top: 20px; 
 	background-color: <? echo BG_DEFAULT; ?>;
@@ -810,6 +817,21 @@ a.menuered:hover {
 
 #map{
 	transform: translate(0, 0);		/* ansonsten wird das SVG unscharf */
+}
+
+#mapimage{
+	position: relative;
+}
+
+#showcoords{
+	position: absolute; 
+	bottom: 0px;
+	text-align: left;
+	border-top: 1px solid #aaaaaa;
+	border-right: 1px solid #aaaaaa;
+	padding: 5 0 5 5; 
+	background-color: <? echo BG_MENUETOP; ?>;
+	box-shadow: 3px 0px 4px #bbb;
 }
 
 #scale_bar {
@@ -1607,6 +1629,10 @@ tbody.gle tr:hover {
 
 .layerOptions span, #legendOptions span, label{
 	color: #252525;
+}
+
+.layerOptions input[type="text"]{
+	width: 195px;
 }
 
 #legendOptions label{

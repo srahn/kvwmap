@@ -256,6 +256,9 @@ class GUI {
 				<tr>
 					<td>
 						<ul>';
+						if($this->formvars['layer_id'] < 0){
+							echo '<li><span>'.$this->strName.':</span> <input type="text" name="layer_options_name" value="'.$layer[0]['Name'].'"></li>';
+						}
 						if($layer[0]['connectiontype']==6){
 							echo '<li><a href="javascript:zoomToMaxLayerExtent('.$this->formvars['layer_id'].')">'.$this->FullLayerExtent.'</a></li>';
 							if($layer[0]['queryable']){
@@ -381,7 +384,9 @@ class GUI {
 	function saveLayerOptions(){
 		$this->user->rolle->setTransparency($this->formvars);
 		$this->user->rolle->setLabelitem($this->formvars);
-		if($this->formvars['layer_options_open'] < 0){		# für Rollenlayer Label anlegen
+		if($this->formvars['layer_options_open'] < 0){		# Rollenlayer 
+			$this->user->rolle->setRollenLayerName($this->formvars);
+			# bei Bedarf Label anlegen
 			$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 			$classes = $mapDB->read_Classes($this->formvars['layer_options_open']);
 			if($classes[0]['Label'] == NULL){
@@ -6133,11 +6138,11 @@ class GUI {
     } # ende Abfrage war erfolgreich
   }
 
-	function deleteDokument($path, $doc_path, $doc_url){
+	function deleteDokument($path, $doc_path, $doc_url, $only_thumb = false){
 		if($doc_url != '')$path = url2filepath($path, $doc_path, $doc_url);			# Dokument mit URL
 		else $path = array_shift(explode('&original_name', $path));
 		$dateinamensteil = explode('.', $path);
-		if(file_exists($path))unlink($path);
+		if(!$only_thumb AND file_exists($path))unlink($path);
 		if(file_exists($dateinamensteil[0].'_thumb.jpg'))unlink($dateinamensteil[0].'_thumb.jpg');
 	}
 
@@ -8770,7 +8775,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		# Dokumente speichern
 		if(count($document_attributes)> 0){
 			foreach($document_attributes as $i => $document_attribute){
-				$options = $attributes['options'][$attribute_name];
+				$options = $attributes['options'][$document_attribute['attributename']];
 				if(substr($attr_oid['datatype'], 0, 1) == '_'){
 					// ein Array aus Dokumenten, hier enthält der JSON-String eine Mischung aus bereits vorhandenen,
 					// nicht geänderten Datei-Pfaden und File-input-Feldnamen, die noch verarbeitet werden müssen
@@ -10065,8 +10070,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->data_import_export = new data_import_export();
 		$user_upload_folder = UPLOADPATH . $this->user->id.'/';
 		$layer_id = $this->data_import_export->process_import_file($upload_id, $file_number, $user_upload_folder.$filename, $this->Stelle, $this->user, $this->pgdatabase, $epsg);
-		if ($layer_id != NULL) {
-			echo $filename.' importiert&nbsp;=>&nbsp;<a href="index.php?go=zoomToMaxLayerExtent&layer_id='.$layer_id.'">Zoom auf Layer</a>';
+		$filetype = array_pop(explode('.', $filename));
+		if($layer_id != NULL){
+			echo $filename.' importiert';
+			if(!in_array($filetype, array('tiff', 'tif', 'geotif')))echo '&nbsp;=>&nbsp;<a href="index.php?go=zoomToMaxLayerExtent&layer_id='.$layer_id.'">Zoom auf Layer</a>';
 		}
 	}
 
@@ -12723,8 +12730,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			if($this->formvars[$input_name] == 'delete')$db_input = '';
 			# Bild in das Datenverzeichnis kopieren
 			if(move_uploaded_file($_files[$input_name]['tmp_name'],$nachDatei) OR $this->formvars[$input_name] == 'delete'){
+				# bei dynamischem Dateipfad das Vorschaubild löschen
+				if(strtolower(substr($options, 0, 6)) == 'select')$this->deleteDokument($old, $doc_path, $doc_url, true);
 				# Wenn eine alte Datei existiert, die nicht so heißt wie die neue --> löschen
-				$old = $this->formvars[$input_name.'_alt'];
+				$old = $this->formvars[str_replace(';Dokument;', ';Dokument_alt;', $input_name)];
 				if ($old != '' AND $old != $db_input) {
 					$this->deleteDokument($old, $doc_path, $doc_url);
 				}
@@ -16299,7 +16308,7 @@ class db_mapObj{
 				}
 			}
 
-			$layer_attributes = $database->create_insert_dump('layer_attributes', 'layer_attribut_id', 'SELECT `name` AS layer_attribut_id, \''.$last_layer_id.'\' AS `layer_id`, `name`, real_name, tablename, table_alias_name, `type`, geometrytype, constraints, nullable, length, decimal_length, `default`, form_element_type, options, alias, `alias_low-german`, alias_english, alias_polish, alias_vietnamese, tooltip, `group`, `raster_visibility`, `mandatory`, `order`, `privileg`, query_tooltip FROM layer_attributes WHERE layer_id = ' . $layer_ids[$i]);
+			$layer_attributes = $database->create_insert_dump('layer_attributes', 'layer_attribut_id', 'SELECT `name` AS layer_attribut_id, \''.$last_layer_id.'\' AS `layer_id`, `name`, `real_name`, `tablename`, `table_alias_name`, `type`, `geometrytype`, `constraints`, `nullable`, `length`, `decimal_length`, `default`, `form_element_type`, `options`, `alias`, `alias_low-german`, `alias_english`, `alias_polish`, `alias_vietnamese`, `tooltip`, `group`, `arrangement`, `labeling`, `raster_visibility`, `dont_use_for_new`, `mandatory`, `quicksearch`, `visible`, `vcheck_attribute`, `vcheck_operator`, `vcheck_value`, `order`, `privileg`, `query_tooltip` FROM layer_attributes WHERE layer_id = ' . $layer_ids[$i]);
 			for($j = 0; $j < count($layer_attributes['insert']); $j++){
 				# Attribut des Layers
 				$dump_text .= "\n\n-- Attribut " . $layer_attributes['extra'][$j] . " des Layers " . $layer_ids[$i] . "\n" . $layer_attributes['insert'][$j];
@@ -16431,11 +16440,11 @@ class db_mapObj{
   }
 
   function deleteRollenLayer($id){
-  	$sql = 'SELECT Typ, Data FROM rollenlayer WHERE id = '.$id;
+  	$sql = 'SELECT Typ, Data, Datentyp FROM rollenlayer WHERE id = '.$id;
   	$query=mysql_query($sql);
 		if ($query==0) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
     $rs=mysql_fetch_array($query);
-    if($rs['Typ'] == 'import'){		# beim Shape-Import-Layern die Tabelle löschen
+    if($rs['Datentyp'] != 3 AND $rs['Typ'] == 'import'){		# beim Shape-Import-Layern die Tabelle löschen
     	$explosion = explode(CUSTOM_SHAPE_SCHEMA.'.', $rs['Data']);
 			$explosion = explode(' ', $explosion[1]);
 			$sql = "SELECT count(id) FROM rollenlayer WHERE Data like '%".$explosion[0]."%'";

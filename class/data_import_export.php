@@ -62,26 +62,35 @@ class data_import_export {
 			case 'dxf' : {
 				$custom_tables = $this->import_custom_dxf($filename, $pgdatabase, $epsg);
 			} break;
-			case 'json' : case 'geojson' : {		# (GeoJSON)
+			case 'json' : case 'geojson' : {
 				$custom_tables = $this->import_custom_geojson($filename, $pgdatabase, $epsg);
 				$epsg = $custom_tables[0]['epsg'];
 			} break;
+			case 'geotif' : case 'tiff' : case 'tif' : {
+				$custom_tables = $this->import_custom_geotif($filename, $pgdatabase, $epsg);
+				$epsg = $custom_tables[0]['epsg'];
+			} break;			
 			case 'point' : {
 				$custom_tables = $this->import_custom_pointlist($formvars, $pgdatabase);
 			} break;
 		}
 		if($custom_tables != NULL){
-			foreach($custom_tables as $custom_table){				# ------ Rollenlayer erzeugen ------- #
-				$layer_id = $this->create_rollenlayer(
-					$pgdatabase,
-					$stelle,
-					$user,
-					basename($filename) . " (".date('d.m. H:i',time()).")".str_repeat(' ', $custom_table['datatype']),
-					$custom_table,
-					$epsg
-				);
+			if($custom_tables[0]['error'] != ''){
+				echo $custom_tables[0]['error'];
 			}
-			return -$layer_id;
+			else{
+				foreach($custom_tables as $custom_table){				# ------ Rollenlayer erzeugen ------- #
+					$layer_id = $this->create_rollenlayer(
+						$pgdatabase,
+						$stelle,
+						$user,
+						basename($filename) . " (".date('d.m. H:i',time()).")".str_repeat(' ', $custom_table['datatype']),
+						$custom_table,
+						$epsg
+					);
+				}
+				return -$layer_id;
+			}
 		}
 		else {
 			if ($this->ask_epsg) $this->create_epsg_form($upload_id, $file_number, basename($filename));
@@ -129,106 +138,129 @@ class data_import_export {
 		$this->formvars['Gruppe'] = $groupid;
 		$this->formvars['Typ'] = 'import';
 		$this->formvars['Datentyp'] = $custom_table['datatype'];
-		$select = 'oid, the_geom';
-		if ($custom_table['labelitem'] != '') $select .= ', ' . $custom_table['labelitem'];
-		$this->formvars['Data'] = 'the_geom from (SELECT ' . $select . ' FROM ' . CUSTOM_SHAPE_SCHEMA . '.' . $custom_table['tablename'] . ' WHERE 1=1 ' . $custom_table['where'] . ')as foo using unique oid using srid=' . $epsg;
-		$this->formvars['query'] = 'SELECT * FROM ' . $custom_table['tablename'] . ' WHERE 1=1' . $custom_table['where'];
-		$this->formvars['connection'] =
-			'dbname=' . $pgdatabase->dbName .
-			' user=' . $pgdatabase->user .
-			($pgdatabase->host != 'localhost' ? ' host=' . $pgdatabase->host : '') .
-			($pgdatabase->passwd != ''        ? ' password=' . $pgdatabase->passwd : '');
-		$this->formvars['connectiontype'] = 6;
 		$this->formvars['epsg_code'] = $epsg;
-		$this->formvars['transparency'] = 65;
-		if ($custom_table['labelitem'] != '') $this->formvars['labelitem'] = $custom_table['labelitem'];
-		$layer_id = $dbmap->newRollenLayer($this->formvars);
-		$layerdb = $dbmap->getlayerdatabase(-$layer_id, $this->Stelle->pgdbhost);
-		$layerdb->setClientEncoding();
-		$path = $this->formvars['query'];
-		$attributes = $dbmap->load_attributes($layerdb, $path);
-		$dbmap->save_postgis_attributes(-$layer_id, $attributes, '', '');
-		$attrib['name'] = ' ';
-		$attrib['layer_id'] = -$layer_id;
-		$attrib['expression'] = '';
-		$attrib['order'] = 0;
-		$class_id = $dbmap->new_Class($attrib);
-		$this->formvars['class'] = $class_id;
-		$color = $user->rolle->readcolor();
-		$style['colorred'] = $color['red'];
-		$style['colorgreen'] = $color['green'];
-		$style['colorblue'] = $color['blue'];
-		$style['outlinecolorred'] = 0;
-		$style['outlinecolorgreen'] = 0;
-		$style['outlinecolorblue'] = 0;
-		switch ($custom_table['datatype']) {
-			case 0 : {
-				$style['size'] = 8;
-				$style['maxsize'] = 8;
-				$style['symbolname'] = 'circle';
-			} break;
-			case 1 : {
-				$style['width'] = 2;
-				$style['minwidth'] = 1;
-				$style['maxwidth'] = 3;
-				$style['symbolname'] = NULL;
-			} break;
-			case 2 :{
-				$style['size'] = 1;
-				$style['maxsize'] = 2;
-				$style['symbolname'] = NULL;
-			}
+		if($custom_table['datatype'] == 3){	# Raster
+			$this->formvars['Data'] = $custom_table['data'];
+			$this->formvars['transparency'] = 100;
 		}
-		$style['backgroundcolor'] = NULL;
-		$style['minsize'] = NULL;
-		$style['angle'] = 360;
-		$style_id = $dbmap->new_Style($style);
-		$dbmap->addStyle2Class($class_id, $style_id, 0); # den Style der Klasse zuordnen
-		if($custom_table['labelitem'] != '') {
-			$label['font'] = 'arial';
-			$label['color'] = '0 0 0';
-			$label['outlinecolor'] = '255 255 255';
-			$label['size'] = 8;
-			$label['minsize'] = 6;
-			$label['maxsize'] = 10;
-			$label['position'] = 9;
-			$new_label_id = $dbmap->new_Label($label);
-			$dbmap->addLabel2Class($class_id, $new_label_id, 0);
+		else{
+			$select = 'oid, *';
+			$this->formvars['Data'] = 'the_geom from (SELECT ' . $select . ' FROM ' . CUSTOM_SHAPE_SCHEMA . '.' . $custom_table['tablename'] . ' WHERE 1=1 ' . $custom_table['where'] . ')as foo using unique oid using srid=' . $epsg;
+			$this->formvars['query'] = 'SELECT * FROM ' . $custom_table['tablename'] . ' WHERE 1=1' . $custom_table['where'];
+			$this->formvars['connection'] =
+				'dbname=' . $pgdatabase->dbName .
+				' user=' . $pgdatabase->user .
+				($pgdatabase->host != 'localhost' ? ' host=' . $pgdatabase->host : '') .
+				($pgdatabase->passwd != ''        ? ' password=' . $pgdatabase->passwd : '');
+			$this->formvars['connectiontype'] = 6;
+			$this->formvars['transparency'] = 65;
+			if($custom_table['labelitem'] != '')$this->formvars['labelitem'] = $custom_table['labelitem'];
+		}
+		$layer_id = $dbmap->newRollenLayer($this->formvars);
+		
+		if($custom_table['datatype'] != 3){	# kein Raster
+			$layerdb = $dbmap->getlayerdatabase(-$layer_id, $this->Stelle->pgdbhost);
+			$layerdb->setClientEncoding();
+			$path = $this->formvars['query'];
+			$attributes = $dbmap->load_attributes($layerdb, $path);
+			$dbmap->save_postgis_attributes(-$layer_id, $attributes, '', '');
+			$attrib['name'] = ' ';
+			$attrib['layer_id'] = -$layer_id;
+			$attrib['expression'] = '';
+			$attrib['order'] = 0;
+			$class_id = $dbmap->new_Class($attrib);
+			$this->formvars['class'] = $class_id;
+			$color = $user->rolle->readcolor();
+			$style['colorred'] = $color['red'];
+			$style['colorgreen'] = $color['green'];
+			$style['colorblue'] = $color['blue'];
+			$style['outlinecolorred'] = 0;
+			$style['outlinecolorgreen'] = 0;
+			$style['outlinecolorblue'] = 0;
+			switch ($custom_table['datatype']) {
+				case 0 : {
+					$style['size'] = 8;
+					$style['maxsize'] = 8;
+					$style['symbolname'] = 'circle';
+				} break;
+				case 1 : {
+					$style['width'] = 2;
+					$style['minwidth'] = 1;
+					$style['maxwidth'] = 3;
+					$style['symbolname'] = NULL;
+				} break;
+				case 2 :{
+					$style['size'] = 1;
+					$style['maxsize'] = 2;
+					$style['symbolname'] = NULL;
+				}
+			}
+			$style['backgroundcolor'] = NULL;
+			$style['minsize'] = NULL;
+			$style['angle'] = 360;
+			$style_id = $dbmap->new_Style($style);
+			$dbmap->addStyle2Class($class_id, $style_id, 0); # den Style der Klasse zuordnen
+			if($custom_table['labelitem'] != '') {
+				$label['font'] = 'arial';
+				$label['color'] = '0 0 0';
+				$label['outlinecolor'] = '255 255 255';
+				$label['size'] = 8;
+				$label['minsize'] = 6;
+				$label['maxsize'] = 10;
+				$label['position'] = 9;
+				$new_label_id = $dbmap->new_Label($label);
+				$dbmap->addLabel2Class($class_id, $new_label_id, 0);
+			}
 		}
     return $layer_id;
 	}
 
 	function get_shp_epsg($file, $pgdatabase){
-		global $supportedSRIDs;
 		if(file_exists($file.'.prj')){
 			$prj = file_get_contents($file.'.prj');
-			# 1. Versuch: Suche nach AUTHORITY
-			for($i = 0; $i < count($supportedSRIDs); $i++){
-				if(strpos($prj, 'AUTHORITY["EPSG","'.$supportedSRIDs[$i].'"]') > 0)return $supportedSRIDs[$i];
-			}
-			# 2. Versuch: Abgleich bestimmter Parameter im prj-String mit spatial_ref_sys_alias
-			$datum = get_first_word_after($prj, 'DATUM[', '"', '"');
-			$projection = get_first_word_after($prj, 'PROJECTION[', '"', '"');
-			if($projection == '')$projection_sql = 'AND projection IS NULL'; else $projection_sql = "AND '".$projection."' = ANY(projection)";
-			$false_easting = get_first_word_after($prj, 'False_Easting"', ',', ']');
-			if($false_easting == '')$false_easting_sql = 'AND false_easting IS NULL'; else $false_easting_sql = "AND false_easting = ".$false_easting;
-			$central_meridian = get_first_word_after($prj, 'Central_Meridian"', ',', ']');
-			if($central_meridian == '')$central_meridian_sql = 'AND central_meridian IS NULL'; else $central_meridian_sql = "AND central_meridian = ".$central_meridian;
-			$scale_factor = get_first_word_after($prj, 'Scale_Factor"', ',', ']');
-			if($scale_factor == '')$scale_factor_sql = 'AND scale_factor IS NULL'; else $scale_factor_sql = "AND scale_factor = ".$scale_factor;
-			$unit = get_first_word_after($prj, 'UNIT[', '"', '"', true);
-			$sql = "SELECT srid FROM spatial_ref_sys_alias
-							WHERE '".$datum."' = ANY(datum)
-							".$projection_sql."
-							".$false_easting_sql."
-							".$central_meridian_sql."
-							".$scale_factor_sql."
-							AND '".$unit."' = ANY(unit)";
-			$ret = $pgdatabase->execSQL($sql,4, 0);
-			if(!$ret[0])$result = pg_fetch_row($ret[1]);
-			return $result[0];
+			return $this->get_epsg_from_wkt($prj, $pgdatabase);
 		}
 		else return false;
+	}
+	
+	function get_gdal_epsg($raster_file, $pgdatabase){
+		if(file_exists($raster_file)){
+			$output = rand(0, 100000);
+			$command = OGR_BINPATH.'gdalsrsinfo -o wkt '.$raster_file.' > '.IMAGEPATH.$output.'.info';
+			exec($command);
+			$wkt = file_get_contents(IMAGEPATH.$output.'.info');
+			return $this->get_epsg_from_wkt($wkt, $pgdatabase);
+		}
+		else return false;
+	}	
+	
+	function get_epsg_from_wkt($wkt, $pgdatabase){
+		global $supportedSRIDs;
+		# 1. Versuch: Suche nach AUTHORITY
+		for($i = 0; $i < count($supportedSRIDs); $i++){
+			if(strpos($wkt, 'AUTHORITY["EPSG","'.$supportedSRIDs[$i].'"]') > 0)return $supportedSRIDs[$i];
+		}
+		# 2. Versuch: Abgleich bestimmter Parameter im prj-String mit spatial_ref_sys_alias
+		$datum = get_first_word_after($wkt, 'DATUM[', '"', '"');
+		$projection = get_first_word_after($wkt, 'PROJECTION[', '"', '"');
+		if($projection == '')$projection_sql = 'AND projection IS NULL'; else $projection_sql = "AND '".$projection."' = ANY(projection)";
+		$false_easting = get_first_word_after($wkt, 'False_Easting"', ',', ']');
+		if($false_easting == '')$false_easting_sql = 'AND false_easting IS NULL'; else $false_easting_sql = "AND false_easting = ".$false_easting;
+		$central_meridian = get_first_word_after($wkt, 'Central_Meridian"', ',', ']');
+		if($central_meridian == '')$central_meridian_sql = 'AND central_meridian IS NULL'; else $central_meridian_sql = "AND central_meridian = ".$central_meridian;
+		$scale_factor = get_first_word_after($wkt, 'Scale_Factor"', ',', ']');
+		if($scale_factor == '')$scale_factor_sql = 'AND scale_factor IS NULL'; else $scale_factor_sql = "AND scale_factor = ".$scale_factor;
+		$unit = get_first_word_after($wkt, 'UNIT[', '"', '"', true);
+		$sql = "SELECT srid FROM spatial_ref_sys_alias
+						WHERE '".$datum."' = ANY(datum)
+						".$projection_sql."
+						".$false_easting_sql."
+						".$central_meridian_sql."
+						".$scale_factor_sql."
+						AND '".$unit."' = ANY(unit)";
+		$ret = $pgdatabase->execSQL($sql,4, 0);
+		if(!$ret[0])$result = pg_fetch_row($ret[1]);
+		return $result[0];
 	}
 
 	function load_shp_into_pgsql($pgdatabase, $uploadpath, $file, $epsg, $schemaname, $tablename, $encoding = 'LATIN1') {
@@ -246,28 +278,36 @@ class data_import_export {
 			if($ret == 1){	# bei Fehlschlag, das andere Encoding probieren
 				if($encoding == 'UTF-8')$new_encoding = 'LATIN1';
 				else $new_encoding = 'UTF-8';
-				$command = str_replace($encoding, $new_encoding, $command);
-				exec($command, $output, $ret);
+				$command2 = str_replace($encoding, $new_encoding, $command);
+				$errorfile = rand(0, 1000000);
+				$command2 .= ' 2> '.IMAGEPATH.$errorfile.'.err';
+				exec($command2, $output, $ret);
 			}
-	   	#echo $command;
-			$command = POSTGRESBINPATH .
-				'psql' .
-				' -h ' . $pgdatabase->host .
-				' -f "' . $uploadpath . $file . '.sql"' .
-				' ' . $pgdatabase->dbName . ' ' . $pgdatabase->user;
-			if ($pgdatabase->passwd != '')
-				$command = 'export PGPASSWORD="' . $pgdatabase->passwd . '"; ' . $command;
-	    exec($command);
-	   	#echo $command;
-	    $sql = 'ALTER TABLE '.$schemaname.'.'.$tablename.' SET WITH OIDS;
-			'.$this->rename_reserved_attribute_names($schemaname, $tablename).'
-	      SELECT geometrytype(the_geom) AS geometrytype FROM '.$schemaname.'.'.$tablename.' LIMIT 1;';
-	    $ret = $pgdatabase->execSQL($sql,4, 0);
-			if (!$ret[0]) {
-				$rs = pg_fetch_assoc($ret[1]);
-				$custom_table['datatype'] = geometrytype_to_datatype($rs['geometrytype']);
-				$custom_table['tablename'] = $tablename;
+			if($ret != 0){
+				$custom_table['error'] = 'Fehler beim Importieren !<br><br>Befehl:<div class="code">'.$command.'</div><a href="' . IMAGEURL . $errorfile . '.err" target="_blank">Fehlerprotokoll</a>';
 				return array($custom_table);
+			}
+			else{
+				#echo $command;
+				$command = POSTGRESBINPATH .
+					'psql' .
+					' -h ' . $pgdatabase->host .
+					' -f "' . $uploadpath . $file . '.sql"' .
+					' ' . $pgdatabase->dbName . ' ' . $pgdatabase->user;
+				if ($pgdatabase->passwd != '')
+					$command = 'export PGPASSWORD="' . $pgdatabase->passwd . '"; ' . $command;
+				exec($command);
+				#echo $command;
+				$sql = 'ALTER TABLE '.$schemaname.'.'.$tablename.' SET WITH OIDS;
+				'.$this->rename_reserved_attribute_names($schemaname, $tablename).'
+					SELECT geometrytype(the_geom) AS geometrytype FROM '.$schemaname.'.'.$tablename.' LIMIT 1;';
+				$ret = $pgdatabase->execSQL($sql,4, 0);
+				if (!$ret[0]) {
+					$rs = pg_fetch_assoc($ret[1]);
+					$custom_table['datatype'] = geometrytype_to_datatype($rs['geometrytype']);
+					$custom_table['tablename'] = $tablename;
+					return array($custom_table);
+				}
 			}
 		}
 	}
@@ -279,6 +319,21 @@ class data_import_export {
 			";
 		}
 		return $sql;
+	}
+	
+	function import_custom_geotif($filename, $pgdatabase, $epsg){
+		$custom_rasterfile = CUSTOM_RASTER.basename($filename);
+		if(copy($filename, $custom_rasterfile)){
+			if($epsg == NULL)$epsg = $this->get_gdal_epsg($custom_rasterfile, $pgdatabase);
+			if($epsg == NULL){
+				$this->ask_epsg = true;		# EPSG-Code konnte nicht ermittelt werden => nachfragen
+				return;
+			}
+			$custom_table[0]['epsg'] = $epsg;
+			$custom_table[0]['datatype'] = 3;
+			$custom_table[0]['data'] = basename(CUSTOM_RASTER).'/'.basename($filename);
+			return $custom_table;
+		}
 	}
 	
 	function import_custom_shape($filenameparts, $user, $pgdatabase, $epsg){
@@ -801,7 +856,12 @@ class data_import_export {
 		if($layerdb->port != '')$command.=' port='.$layerdb->port;
 		if($layerdb->host != '')$command .= ' host=' . $layerdb->host;
 		if($layerdb->schema != '')$command .= ' active_schema='.$layerdb->schema;
-		exec($command.'"');
+		$errorfile = rand(0, 1000000);
+		$command .= '" 2> '.IMAGEPATH.$errorfile.'.err';
+		$output = array();
+		exec($command, $output, $ret);
+		if($ret != 0)$ret = 'Fehler beim Exportieren !<br><br>Befehl:<div class="code">'.$command.'</div><a href="' . IMAGEURL . $errorfile . '.err" target="_blank">Fehlerprotokoll</a>';
+		return $ret;
 	}
 
 	function ogr2ogr_import($schema, $tablename, $epsg, $importfile, $database, $layer, $sql = NULL, $options = NULL, $encoding = 'LATIN1') {
@@ -1100,7 +1160,7 @@ class data_import_export {
 			$exportfile = IMAGEPATH.$folder.'/'.$this->formvars['layer_name'];
 			switch($this->formvars['export_format']){
 				case 'Shape' : {
-					$this->ogr2ogr_export($sql, '"ESRI Shapefile"', $exportfile.'.shp', $layerdb);
+					$err = $this->ogr2ogr_export($sql, '"ESRI Shapefile"', $exportfile.'.shp', $layerdb);
 					if(!file_exists($exportfile.'.cpg')){		// ältere ogr-Versionen erzeugen die cpg-Datei nicht
 						$fp = fopen($exportfile.'.cpg', 'w');
 						fwrite($fp, 'UTF-8');
@@ -1111,23 +1171,23 @@ class data_import_export {
 
 				case 'DXF' : {
 					$exportfile = $exportfile.'.dxf';
-					$this->ogr2ogr_export($sql, 'DXF', $exportfile, $layerdb);
+					$err = $this->ogr2ogr_export($sql, 'DXF', $exportfile, $layerdb);
 				}break;
 
 				case 'GML' : {
-					$this->ogr2ogr_export($sql, 'GML', $exportfile.'.xml', $layerdb);
+					$err = $this->ogr2ogr_export($sql, 'GML', $exportfile.'.xml', $layerdb);
 					$zip = true;
 				}break;
 
 				case 'KML' : {
 					$exportfile = $exportfile.'.kml';
-					$this->ogr2ogr_export($sql, 'KML', $exportfile, $layerdb);
+					$err = $this->ogr2ogr_export($sql, 'KML', $exportfile, $layerdb);
 					$contenttype = 'application/vnd.google-earth.kml+xml';
 				}break;
 
 				case 'GeoJSON' : {
 					$exportfile = $exportfile.'.json';
-					$this->ogr2ogr_export($sql, 'GeoJSON', $exportfile, $layerdb);
+					$err = $this->ogr2ogr_export($sql, 'GeoJSON', $exportfile, $layerdb);
 				}break;
 
 				case 'GeoJSONPlus': {
@@ -1135,7 +1195,7 @@ class data_import_export {
 					if (in_array('mobile', $kvwmap_plugins)) {
 						$sql = str_replace('version FROM ', '(SELECT coalesce(max(version), 1) FROM ' . $layerset[0]['schema'] . '.' . $layerset[0]['maintable'] . '_deltas) AS version FROM ', $sql);
 					}
-					$this->ogr2ogr_export($sql, 'GeoJSON', $exportfile, $layerdb);
+					$err = $this->ogr2ogr_export($sql, 'GeoJSON', $exportfile, $layerdb);
 				} break;
 
 				case 'CSV' : {
@@ -1211,44 +1271,48 @@ class data_import_export {
 			// $ret = $layerdb->execSQL($sql,4, 0);
 			// if($this->formvars['export_format'] != 'CSV')$user->rolle->setConsumeShape($currenttime,$this->formvars['selected_layer_id'],$count);
 
-			ob_end_clean();
-			header('Content-type: '.$contenttype);
-			header("Content-disposition:	attachment; filename=".basename($exportfile));
-			header("Content-Length: ".filesize($exportfile));
-			header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-			header('Pragma: public');
-			readfile($exportfile);
+			if($err != ''){
+				$GUI->add_message('error', $err);
+			}
+			else{
+				ob_end_clean();
+				header('Content-type: '.$contenttype);
+				header("Content-disposition:	attachment; filename=".basename($exportfile));
+				header("Content-Length: ".filesize($exportfile));
+				header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+				header('Pragma: public');
+				readfile($exportfile);
 
-			// Update timestamp formular_element_types having option export
-			$time_attributes = array();
-			foreach($this->attributes['name'] AS $key => $value) {
-				if (
-					$this->attributes['form_element_type'][$value] == 'Time' AND
-					trim(strtolower($this->attributes['options'][$value])) == 'export'
-				) {
-					$time_attributes[] = $value . " = '" . $currenttime . "'";
-				}
-			};
+				// Update timestamp formular_element_types having option export
+				$time_attributes = array();
+				foreach($this->attributes['name'] AS $key => $value) {
+					if (
+						$this->attributes['form_element_type'][$value] == 'Time' AND
+						trim(strtolower($this->attributes['options'][$value])) == 'export'
+					) {
+						$time_attributes[] = $value . " = '" . $currenttime . "'";
+					}
+				};
 
-			if (!$layerset[0]['maintable_is_view'] AND count($time_attributes) > 0) {
-				$update_table = $layerset[0]['schema'] . '.' . $layerset[0]['maintable'];
-				$sql = "
-					UPDATE
-						" . $update_table . " AS update_table
-					SET
-						" . implode(", ", $time_attributes) . "
-					FROM
-						(" . $data_sql . ") AS data_table
-					WHERE
-						update_table.oid = data_table." . $layerset[0]['maintable'] . "_oid
-				";
-				#echo '<br>sql: ' . $sql;
-				$ret = $layerdb->execSQL($sql, 4, 0);
-				if ($ret[0]) {
-					$GUI->add_message('error', 'Speicherung der Zeitstempel ' . implode(", ", $time_attributes) . ' fehlgeschlagen.<br>' . $ret[1]);
+				if (!$layerset[0]['maintable_is_view'] AND count($time_attributes) > 0) {
+					$update_table = $layerset[0]['schema'] . '.' . $layerset[0]['maintable'];
+					$sql = "
+						UPDATE
+							" . $update_table . " AS update_table
+						SET
+							" . implode(", ", $time_attributes) . "
+						FROM
+							(" . $data_sql . ") AS data_table
+						WHERE
+							update_table.oid = data_table." . $layerset[0]['maintable'] . "_oid
+					";
+					#echo '<br>sql: ' . $sql;
+					$ret = $layerdb->execSQL($sql, 4, 0);
+					if ($ret[0]) {
+						$GUI->add_message('error', 'Speicherung der Zeitstempel ' . implode(", ", $time_attributes) . ' fehlgeschlagen.<br>' . $ret[1]);
+					}
 				}
 			}
-
 		}
 		else{
 			$GUI->add_message('error', 'Abfrage fehlgeschlagen!');

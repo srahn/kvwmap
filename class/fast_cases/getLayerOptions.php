@@ -122,6 +122,9 @@ class GUI {
 				<tr>
 					<td>
 						<ul>';
+						if($this->formvars['layer_id'] < 0){
+							echo '<li><span>'.$this->strName.':</span> <input type="text" name="layer_options_name" value="'.$layer[0]['Name'].'"></li>';
+						}						
 						if($layer[0]['connectiontype']==6){
 							echo '<li><a href="javascript:zoomToMaxLayerExtent('.$this->formvars['layer_id'].')">'.$this->FullLayerExtent.'</a></li>';
 							if($layer[0]['queryable']){
