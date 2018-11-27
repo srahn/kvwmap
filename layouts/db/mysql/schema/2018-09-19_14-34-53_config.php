@@ -575,7 +575,7 @@ der Seite immer in den Modus "Polygon zeichnen" wechselt
   array (
     'name' => 'admin_stellen',
     'value' => '[
-    3
+    1
 ]',
     'prefix' => '',
     'type' => 'array',
