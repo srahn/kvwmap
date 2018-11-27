@@ -198,6 +198,12 @@ SET @last_menue_id = LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id, menue_id, menue_order) VALUES (@stelle_id, @last_menue_id, 51);
 INSERT INTO u_menue2rolle (user_id, stelle_id, menue_id,status) VALUES (@user_id, @stelle_id, @last_menue_id, 0);
 
+#### Stellenverwaltung
+INSERT INTO u_menues (name, links, obermenue, menueebene, target, `order`, `title`) VALUES ('Stellenverwaltung', 'index.php?go=changemenue', 0, 1, NULL, 10, 'Stellenverwaltung');
+SET @last_level1menue_id = LAST_INSERT_ID();
+INSERT INTO u_menue2stelle (stelle_id, menue_id, menue_order) VALUES (@stelle_id, @last_level1menue_id, 60);
+INSERT INTO u_menue2rolle (user_id, stelle_id, menue_id,status) VALUES (@user_id, @stelle_id,@last_level1menue_id, 0);
+
 # Stellen anlegen
 INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Stellen anlegen', 'index.php?go=Stelleneditor', @last_level1menue_id, 2, NULL);
 SET @last_menue_id=LAST_INSERT_ID();
