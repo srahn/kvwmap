@@ -819,6 +819,21 @@ a.menuered:hover {
 	transform: translate(0, 0);		/* ansonsten wird das SVG unscharf */
 }
 
+#mapimage{
+	position: relative;
+}
+
+#showcoords{
+	position: absolute; 
+	bottom: 0px;
+	text-align: left;
+	border-top: 1px solid #aaaaaa;
+	border-right: 1px solid #aaaaaa;
+	padding: 5 0 5 5; 
+	background-color: <? echo BG_MENUETOP; ?>;
+	box-shadow: 3px 0px 4px #bbb;
+}
+
 #scale_bar {
 	background: <? echo BG_MENUETOP; ?>;
 	border-top: 1px solid #aaaaaa;

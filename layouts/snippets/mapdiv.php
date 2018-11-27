@@ -37,6 +37,22 @@
 			<?php
 				include(LAYOUTPATH.'snippets/SVG_map.php');
 			?>
+			
+		<div id="showcoords" style="display:none;">
+			<i class="fa fa-close" style="cursor: pointer; float: right; margin: 0 5px 0 5px;" onclick="$('#showcoords').hide();"></i>
+			<span class="fett"><?php echo $strShowCoordinates; ?></span>
+			&nbsp;
+			EPSG-Code <?php echo $this->user->rolle->epsg_code;?>:
+			&nbsp;
+			<input type="text" style="width: 150px" name="firstcoords" value=""><?
+			if ($this->user->rolle->epsg_code2 != '') { ?>
+				&nbsp;
+				EPSG-Code <?php echo $this->user->rolle->epsg_code2; ?>:
+				&nbsp;
+				<input type="text" style="width: 150px" name="secondcoords" value=""><?
+			} ?>
+		</div>			
+			
 		</div>
 	
 		<div id="scale_bar">
@@ -89,22 +105,8 @@
 				<span class="fett">Flur:</span>&nbsp;<?php echo $this->Lagebezeichung['flur']; ?>
 			</div>
 		</div>
-		<? } ?>
-					
-		<div id="showcoords" style="text-align: left;border-top: 1px solid #aaaaaa;height: 30px; padding: 5 0 0 5; background-color: <? echo BG_MENUETOP; ?>; display:none">
-			<i class="fa fa-close" style="cursor: pointer; float: right; margin-right: 5px;" onclick="$('#showcoords').hide();"></i>
-			<span class="fett">&nbsp;&nbsp;<?php echo $strShowCoordinates; ?></span>
-			&nbsp;
-			EPSG-Code <?php echo $this->user->rolle->epsg_code;?>:
-			&nbsp;
-			<input type="text" style="width: 150px" name="firstcoords" value=""><?
-			if ($this->user->rolle->epsg_code2 != '') { ?>
-				&nbsp;
-				EPSG-Code <?php echo $this->user->rolle->epsg_code2; ?>:
-				&nbsp;
-				<input type="text" style="width: 150px" name="secondcoords" value=""><?
-			} ?>
-		</div><?
+		<? } 
+		
 		if ($this->user->rolle->showmapfunctions) { ?>
 			<div id="map_functions_bar">
 				<div id="mapbuttons">
