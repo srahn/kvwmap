@@ -2,7 +2,7 @@
   
   $strTel="Tel.";
   $strEMail="E-Mail";
-  $strTitle="User's data"
+  $strTitle="Users data";
 	$strIntervall="Period";
  
 ?>
