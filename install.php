@@ -303,6 +303,7 @@ function init_config() {
 	define('MYSQL_PASSWORD', ($formvars['MYSQL_PASSWORD'] != '' ? $formvars['MYSQL_PASSWORD'] : (getenv('KVWMAP_INIT_PASSWORD') == '' ? 'KvwMapPW1' : getenv('KVWMAP_INIT_PASSWORD'))));
 	define('MYSQL_DBNAME', ($formvars['MYSQL_DBNAME'] != '' ? $formvars['MYSQL_DBNAME'] : 'kvwmapdb'));
 	define('MYSQL_ROOT_PASSWORD', ($formvars['MYSQL_ROOT_PASSWORD'] != '' ? $formvars['MYSQL_ROOT_PASSWORD'] : getenv('MYSQL_ENV_MYSQL_ROOT_PASSWORD')));
+	define('MYSQL_HOSTS_ALLOWED', '172.17.%');
 	define('POSTGRES_HOST', ($formvars['POSTGRES_HOST'] != '' ? $formvars['POSTGRES_HOST'] : 'pgsql'));
 	define('POSTGRES_USER', ($formvars['POSTGRES_USER'] != '' ? $formvars['POSTGRES_USER'] : 'kvwmap'));
 	define('POSTGRES_PASSWORD', ($formvars['POSTGRES_PASSWORD'] != '' ? $formvars['POSTGRES_PASSWORD'] : (getenv('KVWMAP_INIT_PASSWORD') == '' ? 'KvwMapPW1' : getenv('KVWMAP_INIT_PASSWORD'))));
