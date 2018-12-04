@@ -11,7 +11,7 @@ Text[1]=["Hilfe:","Auf dieser Seite können Sie festlegen, welche Rechte eine St
 function set_all(attribute_names, stelle, value){
 	names = attribute_names.split('|');
 	for(i = 0; i < names.length; i++){
-		element = document.getElementsByName('privileg_'+names[i]+stelle);
+		element = document.getElementsByName('privileg_'+names[i]+'_'+stelle);
 		element[0].value = value;
 	}
 }

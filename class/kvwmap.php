@@ -6149,7 +6149,7 @@ class GUI {
   function get_dokument_vorschau($dateinamensteil){
 		$type = strtolower($dateinamensteil[1]);
   	$dokument = $dateinamensteil[0].'.'.$dateinamensteil[1];
-		if(in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf')) ){			// für Bilder und PDFs werden automatisch Thumbnails erzeugt
+		if(in_array(strtolower($type), array('jpg', 'png', 'gif', 'tif', 'pdf')) ){			// für Bilder und PDFs werden automatisch Thumbnails erzeugt
 			$thumbname = $dateinamensteil[0].'_thumb.jpg';
 			if(!file_exists($thumbname)){
 				exec(IMAGEMAGICKPATH.'convert -filter Hanning '.$dokument.'[0] -quality 75 -background white -flatten -resize '.PREVIEW_IMAGE_WIDTH.'x1000\> '.$thumbname);
@@ -17518,13 +17518,13 @@ class db_mapObj{
 
 	function set_default_layer_privileges($formvars, $attributes){
 		for ($i = 0; $i < count($attributes['type']); $i++) {
-			if ($formvars['privileg_'.$attributes['name'][$i]] == '') $formvars['privileg_'.$attributes['name'][$i]] = 'NULL';
+			if ($formvars['privileg_'.$attributes['name'][$i].'_'] == '') $formvars['privileg_'.$attributes['name'][$i].'_'] = 'NULL';
 			$sql = "
 				UPDATE
 					`layer_attributes`
 				SET
-					`privileg` = " . $formvars['privileg_' . $attributes['name'][$i]] . ",
-					`query_tooltip` = " . ($formvars['tooltip_' . $attributes['name'][$i]] == 'on' ? "1" : "0") ."
+					`privileg` = " . $formvars['privileg_' . $attributes['name'][$i].'_'] . ",
+					`query_tooltip` = " . ($formvars['tooltip_' . $attributes['name'][$i].'_'] == 'on' ? "1" : "0") ."
 				WHERE
 					`layer_id` = " . $formvars['selected_layer_id'] . " AND
 					`name` = '" . $attributes['name'][$i] . "'

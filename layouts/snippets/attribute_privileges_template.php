@@ -106,7 +106,7 @@
 									)
 								);
 
-							  echo '<select style="width:100px" name="privileg_'.$this->attributes['name'][$i].$this->stelle->id.'">';
+							  echo '<select style="width:100px" name="privileg_'.$this->attributes['name'][$i].'_'.$this->stelle->id.'">';
 								foreach($privilege_options AS $option) {
 									$selected = ($this->attributes_privileges[$this->attributes['name'][$i]] == $option['value'] ? ' selected' : '');
 									echo '<option value="' . $option['value'] . '"' . $selected . '>' . $option['output'] . '</option>';
@@ -114,7 +114,7 @@
 								echo '</select>
 							  </td>
 							  <td>&nbsp;</td>
-							  <td align="center"><input type="checkbox" name="tooltip_'.$this->attributes['name'][$i].$this->stelle->id.'" ';
+							  <td align="center"><input type="checkbox" name="tooltip_'.$this->attributes['name'][$i].'_'.$this->stelle->id.'" ';
 							  if($this->attributes_privileges['tooltip_'.$this->attributes['name'][$i]] == 1){
 							  	echo 'checked';
 							  }
