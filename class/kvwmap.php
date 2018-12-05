@@ -12933,23 +12933,23 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 										}
 									}
 								}*/
-							}
 
-							# order by
-							if($this->formvars['orderby'.$layerset[$i]['Layer_ID']] != ''){									# Fall 1: im GLE soll nach einem Attribut sortiert werden
-								$sql_order = ' ORDER BY ' . replace_semicolon($this->formvars['orderby'.$layerset[$i]['Layer_ID']]);
-							}
-							elseif($layerset[$i]['attributes']['orderby'] != ''){														# Fall 2: der Layer hat im Pfad ein ORDER BY
-								$sql_order = $layerset[$i]['attributes']['orderby'];
-							}
-							if($layerset[$i]['template'] == ''){																				# standardmäßig wird nach der oid sortiert
-								$j = 0;
-								foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
-									if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['attributes']['oids'][$j]){      # hat die Haupttabelle oids, dann wird immer ein order by oid gemacht, sonst ist die Sortierung nicht eindeutig
-										if($sql_order == '')$sql_order = ' ORDER BY ' . replace_semicolon($layerset[$i]['maintable']) . '_oid ';
-										else $sql_order .= ', '.$layerset[$i]['maintable'].'_oid ';
+								# order by
+								if($this->formvars['orderby'.$layerset[$i]['Layer_ID']] != ''){									# Fall 1: im GLE soll nach einem Attribut sortiert werden
+									$sql_order = ' ORDER BY ' . replace_semicolon($this->formvars['orderby'.$layerset[$i]['Layer_ID']]);
+								}
+								elseif($layerset[$i]['attributes']['orderby'] != ''){														# Fall 2: der Layer hat im Pfad ein ORDER BY
+									$sql_order = $layerset[$i]['attributes']['orderby'];
+								}
+								if($layerset[$i]['template'] == ''){																				# standardmäßig wird nach der oid sortiert
+									$j = 0;
+									foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
+										if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['attributes']['oids'][$j]){      # hat die Haupttabelle oids, dann wird immer ein order by oid gemacht, sonst ist die Sortierung nicht eindeutig
+											if($sql_order == '')$sql_order = ' ORDER BY ' . replace_semicolon($layerset[$i]['maintable']) . '_oid ';
+											else $sql_order .= ', '.$layerset[$i]['maintable'].'_oid ';
+										}
+										$j++;
 									}
-									$j++;
 								}
 							}
 							if($this->last_query != '' AND $this->last_query[$layerset[$i]['Layer_ID']]['sql'] != ''){
