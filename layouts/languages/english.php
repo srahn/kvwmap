@@ -44,5 +44,6 @@
 	$this->strExceeded = "exceeded";
 	$this->transparency = "Transparency";
 	$this->label = "Label";
+	$this->newDataset="new record";
 ?>
 	

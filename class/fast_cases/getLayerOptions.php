@@ -130,6 +130,9 @@ class GUI {
 							if($layer[0]['queryable']){
 								echo '<li><a href="index.php?go=Layer-Suche&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->strSearch.'</a></li>';
 							}
+							if($layer[0]['privileg'] > 0){
+								echo '<li><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->newDataset.'</a></li>';
+							}
 						}
 						if($layer[0]['Class'][0]['Name'] != ''){
 							if($layer[0]['showclasses'] != ''){
