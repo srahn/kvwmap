@@ -1,4 +1,6 @@
-
+<? 
+	include(LAYOUTPATH.'languages/attribut_privileges_form_'.$this->user->rolle->language.'.php');
+?>
 <SCRIPT src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></SCRIPT>
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
@@ -56,7 +58,7 @@ function save(stelle){
 
 <table border="0" cellpadding="5" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
-    <td colspan="4"><h2><?php echo $this->titel; ?></h2></td>
+    <td colspan="4"><h2><?php echo $strTitle; ?></h2></td>
   </tr>
   <tr>
   	<td>&nbsp;</td>
@@ -70,7 +72,7 @@ function save(stelle){
 				<tr>
 					<td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3"> 
 			      <select style="width:250px" size="1"  name="selected_layer_id" onchange="document.GUI.scrollposition.value=0;document.GUI.submit();">
-			      	<option value="">----------- Bitte wählen -----------</option>
+			      	<option value="">----------- <? echo $this->strPleaseSelect; ?> -----------</option>
 			        <?
 			    		for($i = 0; $i < count($this->layerdaten['ID']); $i++){
 			    			echo '<option';
@@ -150,7 +152,7 @@ function save(stelle){
   </tr>
 	<tr>
   	<td align="center">
-  		<input type="button" name="dummy" onclick="location.href='index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>#stellenzuweisung'" value="zur Stellenzuweisung">
+  		<input type="button" name="dummy" onclick="location.href='index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>#stellenzuweisung'" value="<? echo $strToTaskAssignment; ?>">
   	</td>
   </tr>
   <tr> 

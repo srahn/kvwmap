@@ -107,7 +107,7 @@ for($i=0;$i<$anzLayer;$i++){
 		<? } ?>
 
 
-			<a href="javascript:scrolltop();"><img class="hover-border" title="nach oben" src="<? echo GRAPHICSPATH; ?>pfeil2.gif" width="11" height="11" border="0"></a>&nbsp;&nbsp;&nbsp;
+			<a href="javascript:scrolltop();"><img class="hover-border" title="<? echo $strToTop; ?>" src="<? echo GRAPHICSPATH; ?>pfeil2.gif" width="11" height="11" border="0"></a>&nbsp;&nbsp;&nbsp;
 		</td>
 	</tr>
 </table>

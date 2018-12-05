@@ -8575,7 +8575,18 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	}
 
 	function Zwischenablage(){
-		$sql = "SELECT count(z.layer_id) as count, z.layer_id, layer.Name FROM zwischenablage as z, layer WHERE z.layer_id = layer.Layer_ID AND user_id = ".$this->user->id." AND stelle_id = ".$this->Stelle->id." GROUP BY z.layer_id, Name";
+		global $language;
+		if($language != 'german') {
+			$name_column = "
+			CASE
+				WHEN l.`Name_" . $language . "` != \"\" THEN l.`Name_" . $language . "`
+				ELSE l.`Name`
+			END AS Name";
+		}
+		else{
+			$name_column = "l.Name";
+		}
+		$sql = "SELECT count(z.layer_id) as count, z.layer_id, ".$name_column." FROM zwischenablage as z, layer as l WHERE z.layer_id = l.Layer_ID AND user_id = ".$this->user->id." AND stelle_id = ".$this->Stelle->id." GROUP BY z.layer_id, l.Name";
 		#echo $sql.'<br>';
 		$ret = $this->database->execSQL($sql,4, 1);
     $this->num_rows=mysql_num_rows($ret[1]);

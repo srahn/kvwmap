@@ -66,9 +66,9 @@ class rolle {
 		if($language != 'german') {
 			$name_column = "
 			CASE
-				WHEN `l.Name_" . $language . "` != \"\" THEN `l.Name_" . $language . "`
-				ELSE `l.Name`
-			END AS l.Name";
+				WHEN l.`Name_" . $language . "` != \"\" THEN l.`Name_" . $language . "`
+				ELSE l.`Name`
+			END AS Name";
 		}
 		else
 			$name_column = "l.Name";
@@ -121,7 +121,7 @@ class rolle {
 			ORDER BY
 				ul.drawingorder desc
 		";
-#		echo $sql.'<br>';
+		#echo $sql.'<br>';
     $this->debug->write("<p>file:rolle.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);
     if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }

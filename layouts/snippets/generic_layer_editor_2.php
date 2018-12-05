@@ -41,7 +41,7 @@
 				<? } ?>
 			</td>
 			<td align="right" class="layer_header">			
-				<a href="javascript:scrollbottom();"><img class="hover-border" title="nach unten" src="<? echo GRAPHICSPATH; ?>pfeil.gif" width="11" height="11" border="0"></a>&nbsp;
+				<a href="javascript:scrollbottom();"><img class="hover-border" title="<? echo $strToBottom; ?>" src="<? echo GRAPHICSPATH; ?>pfeil.gif" width="11" height="11" border="0"></a>&nbsp;
 			</td>
 		<? } ?>
 	</tr>

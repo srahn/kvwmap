@@ -551,9 +551,9 @@ class rolle {
 		if($language != 'german') {
 			$name_column = "
 			CASE
-				WHEN `l.Name_" . $language . "` != \"\" THEN `l.Name_" . $language . "`
-				ELSE `l.Name`
-			END AS l.Name";
+				WHEN l.`Name_" . $language . "` != \"\" THEN l.`Name_" . $language . "`
+				ELSE l.`Name`
+			END AS Name";
 		}
 		else
 			$name_column = "l.Name";

@@ -765,7 +765,7 @@
 			</tr>
 			<? } ?>
 			<tr>
-				<td colspan="10"><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>">Styles und Labels bearbeiten</a></td>
+				<td colspan="10"><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><? echo $strStylesLabels; ?></a></td>
 			</tr>
 		</table>
 		<?}?>

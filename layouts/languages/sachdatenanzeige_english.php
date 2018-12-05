@@ -12,4 +12,5 @@ $strLastDatasets="end";
 $strFirstDatasets="start";
 $strbackToSearch="back to search";
 $strLimit="Limit Resultcount:";
+$strToTop="to top";
 ?>
