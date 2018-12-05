@@ -11,7 +11,7 @@
 	# Variablensubstitution
 	$layer = $this->qlayerset[$i];
 	$size = 12;
-	$select_width = 'width: 100px;'; 
+	$select_width = 'width: 100%;'; 
 	if($layer['alias'] != '' AND $this->Stelle->useLayerAliases){
 		$layer['Name'] = $layer['alias'];
 	}
