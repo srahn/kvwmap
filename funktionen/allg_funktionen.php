@@ -17,6 +17,23 @@ function MapserverErrorHandler($errno, $errstr, $errfile, $errline){
 	return true;
 }
 
+function versionFormatter($version) {
+  return substr(
+    str_pad(
+      str_replace(
+        '.', 
+        '',
+        $version
+      ),
+      3,
+      '0',
+      STR_PAD_RIGHT
+    ),
+    0,
+    3
+  );
+}
+
 function url2filepath($url, $doc_path, $doc_url){
 	if($doc_path == '')$doc_path = CUSTOM_IMAGE_PATH;
 	$url_parts = explode($doc_url, $url);
